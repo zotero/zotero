@@ -462,9 +462,9 @@ Zotero.Library.prototype.save = Zotero.Promise.coroutine(function* (options) {
 		
 		// Create transaction
 		if (env.options.tx) {
-			return Zotero.DB.executeTransaction(function* () {
-				yield this._saveData(env);
-				yield this._finalizeSave(env);
+			return Zotero.DB.executeTransaction(async function () {
+				await this._saveData(env);
+				await this._finalizeSave(env);
 			}.bind(this), env.transactionOptions);
 		}
 		// Use existing transaction
@@ -598,9 +598,9 @@ Zotero.Library.prototype.erase = Zotero.Promise.coroutine(function* (options) {
 		env.notifierData = {};
 		
 		if (env.options.tx) {
-			yield Zotero.DB.executeTransaction(function* () {
-				yield this._eraseData(env);
-				yield this._finalizeErase(env);
+			yield Zotero.DB.executeTransaction(async function () {
+				await this._eraseData(env);
+				await this._finalizeErase(env);
 			}.bind(this), env.transactionOptions);
 		} else {
 			Zotero.DB.requireTransaction();

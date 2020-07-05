@@ -815,15 +815,15 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 	 */
 	_updateItemFileInfo: Zotero.Promise.coroutine(function* (item, params) {
 		// Mark as in-sync
-		yield Zotero.DB.executeTransaction(function* () {
+		yield Zotero.DB.executeTransaction(async function () {
 				// Store file mod time and hash
 			item.attachmentSyncedModificationTime = params.mtime;
 			item.attachmentSyncedHash = params.md5;
 			item.attachmentSyncState = "in_sync";
-			yield item.save({ skipAll: true });
+			await item.save({ skipAll: true });
 			
 			// Update sync cache with new file metadata and version from server
-			var json = yield Zotero.Sync.Data.Local.getCacheObject(
+			var json = await Zotero.Sync.Data.Local.getCacheObject(
 				'item', item.libraryID, item.key, item.version
 			);
 			if (json) {
@@ -831,10 +831,10 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 				json.data.version = params.version;
 				json.data.mtime = params.mtime;
 				json.data.md5 = params.md5;
-				yield Zotero.Sync.Data.Local.saveCacheObject('item', item.libraryID, json);
+				await Zotero.Sync.Data.Local.saveCacheObject('item', item.libraryID, json);
 			}
 			// Update item with new version from server
-			yield Zotero.Items.updateVersion([item.id], params.version);
+			await Zotero.Items.updateVersion([item.id], params.version);
 			
 			// TODO: Can filename, contentType, and charset change the attachment item?
 		});
@@ -1001,9 +1001,9 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 				}
 				
 				if (same) {
-					yield Zotero.DB.executeTransaction(function* () {
-						yield Zotero.Sync.Storage.setSyncedModificationTime(item.id, fmtime);
-						yield Zotero.Sync.Storage.setSyncState(
+					yield Zotero.DB.executeTransaction(async function () {
+						await Zotero.Sync.Storage.setSyncedModificationTime(item.id, fmtime);
+						await Zotero.Sync.Storage.setSyncState(
 							item.id, Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC
 						);
 					});

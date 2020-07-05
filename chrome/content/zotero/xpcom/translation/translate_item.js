@@ -407,7 +407,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		var parentIDs = collections.map(c => null);
 		var topLevelCollections = [];
 
-		yield Zotero.DB.executeTransaction(function* () {
+		yield Zotero.DB.executeTransaction(async function () {
 			while(collectionsToProcess.length) {
 				var collection = collectionsToProcess.shift();
 				var parentID = parentIDs.shift();
@@ -422,7 +422,7 @@ Zotero.Translate.ItemSaver.prototype = {
 					newCollection.parentID = rootCollectionID;
 					topLevelCollections.push(newCollection)
 				}
-				yield newCollection.save(this._saveOptions);
+				await newCollection.save(this._saveOptions);
 
 				var toAdd = [];
 
@@ -444,7 +444,7 @@ Zotero.Translate.ItemSaver.prototype = {
 
 				if(toAdd.length) {
 					Zotero.debug("Translate: Adding " + toAdd, 5);
-					yield newCollection.addItems(toAdd);
+					await newCollection.addItems(toAdd);
 				}
 			}
 		}.bind(this));

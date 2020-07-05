@@ -363,11 +363,11 @@ describe("Zotero.CollectionTree", function() {
 		
 		it("should add multiple collections", function* () {
 			var col1, col2;
-			yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.DB.executeTransaction(async function () {
 				col1 = createUnsavedDataObject('collection');
 				col2 = createUnsavedDataObject('collection');
-				yield col1.save();
-				yield col2.save();
+				await col1.save();
+				await col2.save();
 			});
 			
 			var aRow = cv.getRowIndexByID("C" + col1.id);

@@ -850,7 +850,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 			Object.keys(newAttachmentPaths),
 			100,
 			function (chunk) {
-				return Zotero.DB.executeTransaction(function* () {
+				return Zotero.DB.executeTransaction(async function () {
 					for (let id of chunk) {
 						let attachment = Zotero.Items.get(id);
 						if (newAttachmentPaths[id]) {
@@ -859,7 +859,7 @@ Zotero_Preferences.Attachment_Base_Directory = {
 						else {
 							attachment.attachmentPath = attachment.getFilePath();
 						}
-						yield attachment.save({
+						await attachment.save({
 							skipDateModifiedUpdate: true
 						});
 					}
@@ -927,11 +927,11 @@ Zotero_Preferences.Attachment_Base_Directory = {
 			relativeAttachmentIDs,
 			100,
 			function (chunk) {
-				return Zotero.DB.executeTransaction(function* () {
+				return Zotero.DB.executeTransaction(async function () {
 					for (let id of chunk) {
-						let attachment = yield Zotero.Items.getAsync(id);
+						let attachment = await Zotero.Items.getAsync(id);
 						attachment.attachmentPath = attachment.getFilePath();
-						yield attachment.save({
+						await attachment.save({
 							skipDateModifiedUpdate: true
 						});
 					}

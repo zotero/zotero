@@ -973,16 +973,16 @@ var ZoteroPane = new function()
 		}
 		
 		let itemID;
-		yield Zotero.DB.executeTransaction(function* () {
+		yield Zotero.DB.executeTransaction(async function () {
 			var item = new Zotero.Item(typeID);
 			item.libraryID = libraryID;
 			for (var i in data) {
 				item.setField(i, data[i]);
 			}
-			itemID = yield item.save();
+			itemID = await item.save();
 			
 			if (collectionTreeRow && collectionTreeRow.isCollection()) {
-				yield collectionTreeRow.ref.addItem(itemID);
+				await collectionTreeRow.ref.addItem(itemID);
 			}
 		});
 		
@@ -1757,21 +1757,21 @@ var ZoteroPane = new function()
 		
 		var newItem;
 		
-		yield Zotero.DB.executeTransaction(function* () {
+		yield Zotero.DB.executeTransaction(async function () {
 			newItem = item.clone();
 			// If in a collection, add new item to it
 			if (self.getCollectionTreeRow().isCollection() && newItem.isTopLevelItem()) {
 				newItem.setCollections([self.getCollectionTreeRow().ref.id]);
 			}
-			yield newItem.save();
+			await newItem.save();
 			if (item.isNote() && Zotero.Libraries.get(newItem.libraryID).filesEditable) {
-				yield Zotero.Notes.copyEmbeddedImages(item, newItem);
+				await Zotero.Notes.copyEmbeddedImages(item, newItem);
 			}
 			for (let relItemKey of item.relatedItems) {
 				try {
-					let relItem = yield Zotero.Items.getByLibraryAndKeyAsync(item.libraryID, relItemKey);
+					let relItem = await Zotero.Items.getByLibraryAndKeyAsync(item.libraryID, relItemKey);
 					if (relItem.addRelatedItem(newItem)) {
-						yield relItem.save({
+						await relItem.save({
 							skipDateModifiedUpdate: true
 						});
 					}

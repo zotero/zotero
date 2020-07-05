@@ -1709,13 +1709,13 @@ describe("Zotero.Translate.ItemGetter", function() {
 			let getter = new Zotero.Translate.ItemGetter();
 			let items, itemIDs, itemURIs;
 
-			yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.DB.executeTransaction(async function () {
 				items = [
-					yield new Zotero.Item('journalArticle'),
-					yield new Zotero.Item('book')
+					await new Zotero.Item('journalArticle'),
+					await new Zotero.Item('book')
 				];
 				
-				itemIDs = [ yield items[0].save(), yield items[1].save() ];
+				itemIDs = [ await items[0].save(), await items[1].save() ];
 				itemURIs = items.map(i => Zotero.URI.getItemURI(i));
 			});
 			
@@ -1729,19 +1729,19 @@ describe("Zotero.Translate.ItemGetter", function() {
 			let getter = new Zotero.Translate.ItemGetter();
 			let itemWithAutomaticTag, itemWithManualTag, itemWithMultipleTags
 			
-			yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.DB.executeTransaction(async function () {
 				itemWithAutomaticTag = new Zotero.Item('journalArticle');
 				itemWithAutomaticTag.addTag('automatic tag', 0);
-				yield itemWithAutomaticTag.save();
+				await itemWithAutomaticTag.save();
 				
 				itemWithManualTag = new Zotero.Item('journalArticle');
 				itemWithManualTag.addTag('manual tag', 1);
-				yield itemWithManualTag.save();
+				await itemWithManualTag.save();
 				
 				itemWithMultipleTags = new Zotero.Item('journalArticle');
 				itemWithMultipleTags.addTag('tag1', 0);
 				itemWithMultipleTags.addTag('tag2', 1);
-				yield itemWithMultipleTags.save();
+				await itemWithMultipleTags.save();
 			});
 			
 			let legacyMode = [false, true];
@@ -1778,14 +1778,14 @@ describe("Zotero.Translate.ItemGetter", function() {
 			let getter = new Zotero.Translate.ItemGetter();
 			let items, collections;
 			
-			yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.DB.executeTransaction(async function () {
 				items = getter._itemsLeft = [
 					new Zotero.Item('journalArticle'), // Not in collection
 					new Zotero.Item('journalArticle'), // In a single collection
 					new Zotero.Item('journalArticle'), //In two collections
 					new Zotero.Item('journalArticle') // In a nested collection
 				];
-				yield Zotero.Promise.all(items.map(item => item.save()));
+				await Zotero.Promise.all(items.map(item => item.save()));
 				
 				collections = [
 					new Zotero.Collection,
@@ -1797,16 +1797,16 @@ describe("Zotero.Translate.ItemGetter", function() {
 				collections[1].name = "test2";
 				collections[2].name = "subTest1";
 				collections[3].name = "subTest2";
-				yield collections[0].save();
-				yield collections[1].save();
+				await collections[0].save();
+				await collections[1].save();
 				collections[2].parentID = collections[0].id;
 				collections[3].parentID = collections[1].id;
-				yield collections[2].save();
-				yield collections[3].save();
+				await collections[2].save();
+				await collections[3].save();
 				
-				yield collections[0].addItems([items[1].id, items[2].id]);
-				yield collections[1].addItem(items[2].id);
-				yield collections[2].addItem(items[3].id);
+				await collections[0].addItems([items[1].id, items[2].id]);
+				await collections[1].addItem(items[2].id);
+				await collections[2].addItem(items[3].id);
 			});
 			
 			let translatorItem = getter.nextItem();
@@ -1837,7 +1837,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 			let getter = new Zotero.Translate.ItemGetter();
 			let items;
 			
-			yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.DB.executeTransaction(async function () {
 					items = [
 						new Zotero.Item('journalArticle'), // Item with no relations
 						
@@ -1848,15 +1848,15 @@ describe("Zotero.Translate.ItemGetter", function() {
 						new Zotero.Item('journalArticle'), // But this item is not related to the item below
 						new Zotero.Item('journalArticle')
 					];
-					yield Zotero.Promise.all(items.map(item => item.save()));
+					await Zotero.Promise.all(items.map(item => item.save()));
 					
-					yield items[1].addRelatedItem(items[2]);
-					yield items[2].addRelatedItem(items[1]);
+					await items[1].addRelatedItem(items[2]);
+					await items[2].addRelatedItem(items[1]);
 					
-					yield items[3].addRelatedItem(items[4]);
-					yield items[4].addRelatedItem(items[3]);
-					yield items[3].addRelatedItem(items[5]);
-					yield items[5].addRelatedItem(items[3]);
+					await items[3].addRelatedItem(items[4]);
+					await items[4].addRelatedItem(items[3]);
+					await items[3].addRelatedItem(items[5]);
+					await items[5].addRelatedItem(items[3]);
 			});
 			
 			getter._itemsLeft = items.slice();
@@ -1902,24 +1902,24 @@ describe("Zotero.Translate.ItemGetter", function() {
 		it('should return standalone note in expected format', Zotero.Promise.coroutine(function* () {
 			let relatedItem, note, collection;
 			
-			yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.DB.executeTransaction(async function () {
 				relatedItem = new Zotero.Item('journalArticle');
-				yield relatedItem.save();
+				await relatedItem.save();
 
 				note = new Zotero.Item('note');
 				note.setNote('Note');
 				note.addTag('automaticTag', 0);
 				note.addTag('manualTag', 1);
 				note.addRelatedItem(relatedItem);
-				yield note.save();
+				await note.save();
 				
 				relatedItem.addRelatedItem(note);
-				yield relatedItem.save();
+				await relatedItem.save();
 				
 				collection = new Zotero.Collection;
 				collection.name = 'test';
-				yield collection.save();
-				yield collection.addItem(note.id);
+				await collection.save();
+				await collection.addItem(note.id);
 			});
 			
 			let legacyMode = [false, true];
@@ -1985,32 +1985,32 @@ describe("Zotero.Translate.ItemGetter", function() {
 		}));
 		it('should return attached note in expected format', Zotero.Promise.coroutine(function* () {
 			let relatedItem, items, collection, note;
-			yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.DB.executeTransaction(async function () {
 				relatedItem = new Zotero.Item('journalArticle');
-				yield relatedItem.save();
+				await relatedItem.save();
 				
 				items = [
 					new Zotero.Item('journalArticle'),
 					new Zotero.Item('journalArticle')
 				];
-				yield Zotero.Promise.all(items.map(item => item.save()));
+				await Zotero.Promise.all(items.map(item => item.save()));
 				
 				collection = new Zotero.Collection;
 				collection.name = 'test';
-				yield collection.save();
-				yield collection.addItem(items[0].id);
-				yield collection.addItem(items[1].id);
+				await collection.save();
+				await collection.addItem(items[0].id);
+				await collection.addItem(items[1].id);
 				
 				note = new Zotero.Item('note');
 				note.setNote('Note');
 				note.addTag('automaticTag', 0);
 				note.addTag('manualTag', 1);
-				yield note.save();
+				await note.save();
 				
 				note.addRelatedItem(relatedItem);
 				relatedItem.addRelatedItem(note);
-				yield note.save();
-				yield relatedItem.save();
+				await note.save();
+				await relatedItem.save();
 			});
 			
 			let legacyMode = [false, true];
@@ -2094,11 +2094,11 @@ describe("Zotero.Translate.ItemGetter", function() {
 			let file = getTestPDF();
 			let item, relatedItem;
 			
-			yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.DB.executeTransaction(async function () {
 				item = new Zotero.Item('journalArticle');
-				yield item.save();
+				await item.save();
 				relatedItem = new Zotero.Item('journalArticle');
-				yield relatedItem.save();
+				await relatedItem.save();
 			});
 
 			// Attachment items
@@ -2110,7 +2110,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 				yield Zotero.Attachments.linkFromURL({"url":'http://example.com', "parentItemID":item.id, "contentType":'application/pdf', "title":'empty.pdf'}) // Attached link to URL
 			];
 			
-			yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.DB.executeTransaction(async function () {
 				// Make sure all fields are populated
 				for (let i=0; i<attachments.length; i++) {
 					let attachment = attachments[i];
@@ -2124,12 +2124,12 @@ describe("Zotero.Translate.ItemGetter", function() {
 					
 					attachment.addRelatedItem(relatedItem);
 					
-					yield attachment.save();
+					await attachment.save();
 					
 					relatedItem.addRelatedItem(attachment);
 				}
 				
-				yield relatedItem.save();
+				await relatedItem.save();
 			});
 			
 			let items = [ attachments[0], attachments[1], item ]; // Standalone attachments and item with child attachments

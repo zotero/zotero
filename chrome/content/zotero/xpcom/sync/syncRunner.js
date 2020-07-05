@@ -1238,16 +1238,16 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 									case 'split':
 										for (let libraryID of editableLibraries) {
 											let itemIDs = yield Zotero.Tags.getTagItems(libraryID, oldTagID);
-											yield Zotero.DB.executeTransaction(function* () {
+											yield Zotero.DB.executeTransaction(async function () {
 												for (let itemID of itemIDs) {
-													let item = yield Zotero.Items.getAsync(itemID);
+													let item = await Zotero.Items.getAsync(itemID);
 													for (let tag of dataOut.result.tags) {
 														item.addTag(tag);
 													}
 													item.removeTag(oldTag);
-													yield item.save();
+													await item.save();
 												}
-												yield Zotero.Tags.purge(oldTagID);
+												await Zotero.Tags.purge(oldTagID);
 											});
 										}
 										break;
@@ -1255,11 +1255,11 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 									case 'edit':
 										for (let libraryID of editableLibraries) {
 											let itemIDs = yield Zotero.Tags.getTagItems(libraryID, oldTagID);
-											yield Zotero.DB.executeTransaction(function* () {
+											yield Zotero.DB.executeTransaction(async function () {
 												for (let itemID of itemIDs) {
-													let item = yield Zotero.Items.getAsync(itemID);
+													let item = await Zotero.Items.getAsync(itemID);
 													item.replaceTag(oldTag, dataOut.result.tag);
-													yield item.save();
+													await item.save();
 												}
 											});
 										}

@@ -145,10 +145,10 @@ describe("Tag Selector", function () {
 				}
 			]);
 			var promise = waitForTagSelector(win);
-			yield Zotero.DB.executeTransaction(function* () {
-				yield item1.save();
-				yield item2.save();
-				yield item3.save();
+			yield Zotero.DB.executeTransaction(async function () {
+				await item1.save();
+				await item2.save();
+				await item3.save();
 			});
 			yield promise;
 			
@@ -177,10 +177,10 @@ describe("Tag Selector", function () {
 			var item3 = createUnsavedDataObject('item', { collections: [collection.id] });
 			item3.setTags([tag3]);
 			var promise = waitForTagSelector(win);
-			yield Zotero.DB.executeTransaction(function* () {
-				yield item1.save();
-				yield item2.save();
-				yield item3.save();
+			yield Zotero.DB.executeTransaction(async function () {
+				await item1.save();
+				await item2.save();
+				await item3.save();
 			});
 			yield promise;
 			

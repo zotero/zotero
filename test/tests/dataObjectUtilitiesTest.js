@@ -71,13 +71,13 @@ describe("Zotero.DataObjectUtilities", function() {
 			describe("fields", function () {
 				it("should not show empty items as different", function* () {
 					var id1, id2, json1, json2;
-					yield Zotero.DB.executeTransaction(function* () {
+					yield Zotero.DB.executeTransaction(async function () {
 						var item = new Zotero.Item('book');
-						id1 = yield item.save();
+						id1 = await item.save();
 						json1 = item.toJSON();
 						
 						var item = new Zotero.Item('book');
-						id2 = yield item.save();
+						id2 = await item.save();
 						json2 = item.toJSON();
 					});
 					

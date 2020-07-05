@@ -388,16 +388,16 @@ Zotero.Proxy.prototype.save = Zotero.Promise.coroutine(function* (transparent) {
 	this.compileRegexp();
 	
 	if(transparent) {
-		yield Zotero.DB.executeTransaction(function* () {
+		yield Zotero.DB.executeTransaction(async function () {
 			if(this.proxyID) {
-				yield Zotero.DB.queryAsync(
+				await Zotero.DB.queryAsync(
 					"UPDATE proxies SET multiHost = ?, autoAssociate = ?, scheme = ? WHERE proxyID = ?",
 					[this.multiHost ? 1 : 0, this.autoAssociate ? 1 : 0, this.scheme, this.proxyID]
 				);
-				yield Zotero.DB.queryAsync("DELETE FROM proxyHosts WHERE proxyID = ?", [this.proxyID]);
+				await Zotero.DB.queryAsync("DELETE FROM proxyHosts WHERE proxyID = ?", [this.proxyID]);
 			} else {
 				let id = Zotero.ID.get('proxies');
-				yield Zotero.DB.queryAsync(
+				await Zotero.DB.queryAsync(
 					"INSERT INTO proxies (proxyID, multiHost, autoAssociate, scheme) VALUES (?, ?, ?, ?)",
 					[id, this.multiHost ? 1 : 0, this.autoAssociate ? 1 : 0, this.scheme]
 				);
@@ -408,7 +408,7 @@ Zotero.Proxy.prototype.save = Zotero.Promise.coroutine(function* (transparent) {
 			var host;
 			for(var i in this.hosts) {
 				host = this.hosts[i] = this.hosts[i].toLowerCase();
-				yield Zotero.DB.queryAsync(
+				await Zotero.DB.queryAsync(
 					"INSERT INTO proxyHosts (proxyID, hostname) VALUES (?, ?)",
 					[this.proxyID, host]
 				);
@@ -441,9 +441,9 @@ Zotero.Proxy.prototype.erase = Zotero.Promise.coroutine(function* () {
 	Zotero.Proxies.remove(this);
 	
 	if(this.proxyID) {
-		yield Zotero.DB.executeTransaction(function* () {
-			yield Zotero.DB.queryAsync("DELETE FROM proxyHosts WHERE proxyID = ?", [this.proxyID]);
-			yield Zotero.DB.queryAsync("DELETE FROM proxies WHERE proxyID = ?", [this.proxyID]);
+		yield Zotero.DB.executeTransaction(async function () {
+			await Zotero.DB.queryAsync("DELETE FROM proxyHosts WHERE proxyID = ?", [this.proxyID]);
+			await Zotero.DB.queryAsync("DELETE FROM proxies WHERE proxyID = ?", [this.proxyID]);
 		}.bind(this));
 	}
 });

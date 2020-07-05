@@ -145,9 +145,9 @@ Zotero.Feeds = new function() {
 			newFeeds.push(feed);
 		}
 		// This could potentially be a massive list, so we save in a transaction.
-		yield Zotero.DB.executeTransaction(function* () {
+		yield Zotero.DB.executeTransaction(async function () {
 			for (let feed of newFeeds) {
-				yield feed.save({
+				await feed.save({
 					skipSelect: true
 				});
 			}

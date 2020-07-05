@@ -952,7 +952,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 				toPurge,
 				Zotero.DB.MAX_BOUND_PARAMETERS - 1,
 				function (chunk) {
-					return Zotero.DB.executeTransaction(function* () {
+					return Zotero.DB.executeTransaction(async function () {
 						var sql = "DELETE FROM storageDeleteLog WHERE libraryID=? AND key IN ("
 							+ chunk.map(() => '?').join() + ")";
 						return Zotero.DB.queryAsync(sql, [libraryID].concat(chunk));

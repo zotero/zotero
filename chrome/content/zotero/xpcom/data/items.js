@@ -460,11 +460,11 @@ Zotero.Items = function() {
 		);
 		
 		if (notesToUpdate.length) {
-			yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.DB.executeTransaction(async function () {
 				for (let i = 0; i < notesToUpdate.length; i++) {
 					let row = notesToUpdate[i];
 					let sql = "UPDATE itemNotes SET note=? WHERE itemID=?";
-					yield Zotero.DB.queryAsync(sql, [row[1], row[0]]);
+					await Zotero.DB.queryAsync(sql, [row[1], row[0]]);
 				}
 			}.bind(this));
 		}
@@ -947,16 +947,16 @@ Zotero.Items = function() {
 	this.merge = function (item, otherItems) {
 		Zotero.debug("Merging items");
 
-		return Zotero.DB.executeTransaction(function* () {
+		return Zotero.DB.executeTransaction(async function () {
 			var replPred = Zotero.Relations.replacedItemPredicate;
 			var toSave = {};
 			toSave[item.id] = item;
 			
 			var earliestDateAdded = item.dateAdded;
 
-			let remapAttachmentKeys = yield this._mergePDFAttachments(item, otherItems);
-			yield this._mergeWebAttachments(item, otherItems);
-			yield this._mergeOtherAttachments(item, otherItems);
+			let remapAttachmentKeys = await this._mergePDFAttachments(item, otherItems);
+			await this._mergeWebAttachments(item, otherItems);
+			await this._mergeOtherAttachments(item, otherItems);
 			
 			for (let otherItem of otherItems) {
 				if (otherItem.libraryID !== item.libraryID) {
@@ -971,7 +971,7 @@ Zotero.Items = function() {
 				// Move notes to master
 				var noteIDs = otherItem.getNotes(true);
 				for (let id of noteIDs) {
-					var note = yield this.getAsync(id);
+					var note = await this.getAsync(id);
 					note.parentItemID = item.id;
 					Zotero.Notes.replaceItemKey(note, otherItem.key, item.key);
 					Zotero.Notes.replaceAllItemKeys(note, remapAttachmentKeys);
@@ -979,9 +979,8 @@ Zotero.Items = function() {
 				}
 				
 				// Move relations to master
-				yield this._moveRelations(otherItem, item);
+				await this._moveRelations(otherItem, item);
 				
-				// All other operations are additive only and do not affect the
 				// old item, which will be put in the trash
 				
 				// Add collections to master
@@ -1016,10 +1015,10 @@ Zotero.Items = function() {
 
 			// Hack to remove master item from duplicates view without recalculating duplicates
 			// Pass force = true so observers will be notified before this transaction is committed
-			yield Zotero.Notifier.trigger('removeDuplicatesMaster', 'item', item.id, null, true);
+			await Zotero.Notifier.trigger('removeDuplicatesMaster', 'item', item.id, null, true);
 			
 			for (let i in toSave) {
-				yield toSave[i].save();
+				await toSave[i].save();
 			}
 		}.bind(this));
 	};
@@ -1416,7 +1415,7 @@ Zotero.Items = function() {
 	
 	
 	this.trashTx = function (ids) {
-		return Zotero.DB.executeTransaction(function* () {
+		return Zotero.DB.executeTransaction(async function () {
 			return this.trash(ids);
 		}.bind(this));
 	}
@@ -1542,7 +1541,7 @@ Zotero.Items = function() {
 	this.addToPublications = function (items, options = {}) {
 		if (!items.length) return;
 		
-		return Zotero.DB.executeTransaction(function* () {
+		return Zotero.DB.executeTransaction(async function () {
 			var timestamp = Zotero.DB.transactionTimestamp;
 			
 			var allItems = [...items];
@@ -1586,7 +1585,7 @@ Zotero.Items = function() {
 				}
 			}
 			
-			yield Zotero.Utilities.Internal.forEachChunkAsync(allItems, 250, Zotero.Promise.coroutine(function* (chunk) {
+			await Zotero.Utilities.Internal.forEachChunkAsync(allItems, 250, Zotero.Promise.coroutine(function* (chunk) {
 				for (let item of chunk) {
 					item.setPublications(true);
 					item.synced = false;
@@ -1606,7 +1605,7 @@ Zotero.Items = function() {
 	
 	
 	this.removeFromPublications = function (items) {
-		return Zotero.DB.executeTransaction(function* () {
+		return Zotero.DB.executeTransaction(async function () {
 			let allItems = [];
 			for (let item of items) {
 				if (!item.inPublications) {
@@ -1627,7 +1626,7 @@ Zotero.Items = function() {
 			});
 			
 			var timestamp = Zotero.DB.transactionTimestamp;
-			yield Zotero.Utilities.Internal.forEachChunkAsync(allItems, 250, Zotero.Promise.coroutine(function* (chunk) {
+			await Zotero.Utilities.Internal.forEachChunkAsync(allItems, 250, Zotero.Promise.coroutine(function* (chunk) {
 				let idStr = chunk.map(item => item.id).join(", ");
 				yield Zotero.DB.queryAsync(
 					`UPDATE items SET synced=0, clientDateModified=? WHERE itemID IN (${idStr})`,

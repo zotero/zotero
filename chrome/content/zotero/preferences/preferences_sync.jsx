@@ -722,10 +722,10 @@ Zotero_Preferences.Sync = {
 				switch (index) {
 				case 0:
 					let libraries = Zotero.Libraries.getAll().filter(library => library.syncable);
-					await Zotero.DB.executeTransaction(function* () {
+					await Zotero.DB.executeTransaction(async function () {
 						for (let library of libraries) {
 							library.libraryVersion = -1;
-							yield library.save();
+							await library.save();
 						}
 					});
 					break;

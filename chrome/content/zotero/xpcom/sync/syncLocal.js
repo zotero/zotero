@@ -898,8 +898,8 @@ Zotero.Sync.Data.Local = {
 				// Errors have to be thrown in order to roll back the transaction, so catch those here
 				// and continue
 				try {
-					yield Zotero.DB.executeTransaction(function* () {
-						let obj = yield objectsClass.getByLibraryAndKeyAsync(
+					yield Zotero.DB.executeTransaction(async function () {
+						let obj = await objectsClass.getByLibraryAndKeyAsync(
 							libraryID, objectKey, { noCache: true }
 						);
 						let restored = false;
@@ -923,7 +923,7 @@ Zotero.Sync.Data.Local = {
 								Zotero.debug("Local " + objectType + " " + obj.libraryKey
 										+ " has been modified since last sync", 4);
 								
-								let cachedJSON = yield this.getCacheObject(
+								let cachedJSON = await this.getCacheObject(
 									objectType, obj.libraryID, obj.key, obj.version
 								);
 								let result = this._reconcileChanges(
@@ -947,7 +947,7 @@ Zotero.Sync.Data.Local = {
 									if (result.localChanged) {
 										saveOptions.saveAsUnsynced = true;
 									}
-									let saveResults = yield this._saveObjectFromJSON(
+									let saveResults = await this._saveObjectFromJSON(
 										obj,
 										jsonObject,
 										saveOptions
@@ -1028,7 +1028,7 @@ Zotero.Sync.Data.Local = {
 							saveOptions.isNewObject = true;
 							
 							// Check if object has been deleted locally
-							let dateDeleted = yield this.getDateDeleted(
+							let dateDeleted = await this.getDateDeleted(
 								objectType, libraryID, objectKey
 							);
 							if (dateDeleted) {
@@ -1064,7 +1064,7 @@ Zotero.Sync.Data.Local = {
 								case 'search':
 									Zotero.debug(`${ObjectType} ${objectKey} was modified remotely `
 										+ '-- restoring');
-									yield this.removeObjectsFromDeleteLog(
+									await this.removeObjectsFromDeleteLog(
 										objectType,
 										libraryID,
 										[objectKey]
@@ -1081,13 +1081,13 @@ Zotero.Sync.Data.Local = {
 							obj = new Zotero[ObjectType];
 							obj.libraryID = libraryID;
 							obj.key = objectKey;
-							yield obj.loadPrimaryData();
+							await obj.loadPrimaryData();
 							
 							// Don't cache new items immediately, which skips reloading after save
 							saveOptions.skipCache = true;
 						}
 						
-						let saveResults = yield this._saveObjectFromJSON(obj, jsonObject, saveOptions);
+						let saveResults = await this._saveObjectFromJSON(obj, jsonObject, saveOptions);
 						if (restored) {
 							saveResults.restored = true;
 						}
@@ -1341,8 +1341,8 @@ Zotero.Sync.Data.Local = {
 				// Errors have to be thrown in order to roll back the transaction, so catch
 				// those here and continue
 				try {
-					yield Zotero.DB.executeTransaction(function* () {
-						let obj = yield objectsClass.getByLibraryAndKeyAsync(
+					yield Zotero.DB.executeTransaction(async function () {
+						let obj = await objectsClass.getByLibraryAndKeyAsync(
 							libraryID, json.key, { noCache: true }
 						);
 						// Update object with merge data
@@ -1350,7 +1350,7 @@ Zotero.Sync.Data.Local = {
 							// Delete local object
 							if (json.deleted) {
 								try {
-									yield obj.erase({
+									await obj.erase({
 										notifierQueue
 									});
 								}
@@ -1385,14 +1385,14 @@ Zotero.Sync.Data.Local = {
 							obj = new Zotero[ObjectType];
 							obj.libraryID = libraryID;
 							obj.key = json.key;
-							yield obj.loadPrimaryData();
+							await obj.loadPrimaryData();
 							
 							// Don't cache new items immediately,
 							// which skips reloading after save
 							saveOptions.skipCache = true;
 						}
 						
-						let saveResults = yield this._saveObjectFromJSON(obj, json, saveOptions);
+						let saveResults = await this._saveObjectFromJSON(obj, json, saveOptions);
 						results.push(saveResults);
 						if (!saveResults.processed) {
 							throw saveResults.error;

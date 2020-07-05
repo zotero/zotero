@@ -301,9 +301,9 @@ Zotero.Sync.Storage.Local = {
 		}
 		// Update sync states in bulk
 		if (changed) {
-			yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.DB.executeTransaction(async function () {
 				for (let state in statesToSet) {
-					yield this.updateSyncStates(statesToSet[state], parseInt(state));
+					await this.updateSyncStates(statesToSet[state], parseInt(state));
 				}
 			}.bind(this));
 		}
@@ -1052,7 +1052,7 @@ Zotero.Sync.Storage.Local = {
 			return false;
 		}
 		
-		yield Zotero.DB.executeTransaction(function* () {
+		yield Zotero.DB.executeTransaction(async function () {
 			for (let i = 0; i < conflicts.length; i++) {
 				let conflict = conflicts[i];
 				// TEMP
@@ -1080,7 +1080,7 @@ Zotero.Sync.Storage.Local = {
 					syncState = this.SYNC_STATE_FORCE_DOWNLOAD;
 				}
 				item.attachmentSyncState = syncState;
-				yield item.save({ skipAll: true });
+				await item.save({ skipAll: true });
 			}
 		}.bind(this));
 		return true;

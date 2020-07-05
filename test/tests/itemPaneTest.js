@@ -139,19 +139,19 @@ describe("Item pane", function () {
 			var item;
 			var note1;
 			var note2;
-			yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.DB.executeTransaction(async function () {
 				item = createUnsavedDataObject('item');
-				yield item.save();
+				await item.save();
 				
 				note1 = new Zotero.Item('note');
 				note1.parentID = item.id;
 				note1.setNote('A');
-				yield note1.save();
+				await note1.save();
 				
 				note2 = new Zotero.Item('note');
 				note2.parentID = item.id;
 				note2.setNote('B');
-				yield note2.save();
+				await note2.save();
 			});
 			
 			var tabs = doc.getElementById('zotero-editpane-tabs');
@@ -179,19 +179,19 @@ describe("Item pane", function () {
 			var item;
 			var note1;
 			var note2;
-			yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.DB.executeTransaction(async function () {
 				item = createUnsavedDataObject('item');
-				yield item.save();
+				await item.save();
 				
 				note1 = new Zotero.Item('note');
 				note1.parentID = item.id;
 				note1.setNote('A');
-				yield note1.save();
+				await note1.save();
 				
 				note2 = new Zotero.Item('note');
 				note2.parentID = item.id;
 				note2.setNote('B');
-				yield note2.save();
+				await note2.save();
 			});
 			
 			var tabs = doc.getElementById('zotero-editpane-tabs');
@@ -220,19 +220,19 @@ describe("Item pane", function () {
 			var item;
 			var note1;
 			var note2;
-			yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.DB.executeTransaction(async function () {
 				item = createUnsavedDataObject('item');
-				yield item.save();
+				await item.save();
 				
 				note1 = new Zotero.Item('note');
 				note1.parentID = item.id;
 				note1.setNote('A');
-				yield note1.save();
+				await note1.save();
 				
 				note2 = new Zotero.Item('note');
 				note2.parentID = item.id;
 				note2.setNote('B');
-				yield note2.save();
+				await note2.save();
 			});
 			
 			var tabs = doc.getElementById('zotero-editpane-tabs');

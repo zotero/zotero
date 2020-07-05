@@ -756,12 +756,12 @@ function generateAllTypesAndFieldsData() {
  * The field values should be in the form exactly as they would appear in Zotero
  */
 function populateDBWithSampleData(data) {
-	return Zotero.DB.executeTransaction(function* () {
+	return Zotero.DB.executeTransaction(async function () {
 		for (let itemName in data) {
 			let item = data[itemName];
 			let zItem = new Zotero.Item;
 			zItem.fromJSON(item);
-			item.id = yield zItem.save();
+			item.id = await zItem.save();
 		}
 
 		return data;

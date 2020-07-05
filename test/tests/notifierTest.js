@@ -15,12 +15,12 @@ describe("Zotero.Notifier", function () {
 			};
 			var id = Zotero.Notifier.registerObserver(observer, null, 'test_trigger');
 			
-			yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.DB.executeTransaction(async function () {
 				var item = new Zotero.Item('book');
 				item.setField('title', 'A');
-				yield item.save();
+				await item.save();
 				item.setField('title', 'B');
-				yield item.save();
+				await item.save();
 				
 				Zotero.Notifier.queue('unknown', 'item', item.id);
 			});

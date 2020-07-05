@@ -936,10 +936,10 @@ Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options =
 		// Create transaction
 		let result
 		if (env.options.tx) {
-			result = yield Zotero.DB.executeTransaction(function* () {
+			result = yield Zotero.DB.executeTransaction(async function () {
 				Zotero.DataObject.prototype._saveData.call(this, env);
-				yield this._saveData(env);
-				yield Zotero.DataObject.prototype._finalizeSave.call(this, env);
+				await this._saveData(env);
+				await Zotero.DataObject.prototype._finalizeSave.call(this, env);
 				return this._finalizeSave(env);
 			}.bind(this), env.transactionOptions);
 		}
@@ -1261,9 +1261,9 @@ Zotero.DataObject.prototype.erase = Zotero.Promise.coroutine(function* (options 
 	Zotero.debug('Deleting ' + this.objectType + ' ' + this.id);
 	
 	if (env.options.tx) {
-		return Zotero.DB.executeTransaction(function* () {
-			yield this._eraseData(env);
-			yield this._finalizeErase(env);
+		return Zotero.DB.executeTransaction(async function () {
+			await this._eraseData(env);
+			await this._finalizeErase(env);
 		}.bind(this))
 	}
 	else {

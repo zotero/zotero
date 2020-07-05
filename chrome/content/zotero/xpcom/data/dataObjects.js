@@ -1110,13 +1110,13 @@ Zotero.DataObjects.prototype.getPrimaryDataSQLPart = function (part) {
  */
 Zotero.DataObjects.prototype.erase = Zotero.Promise.coroutine(function* (ids, options = {}) {
 	ids = Zotero.flattenArguments(ids);
-	yield Zotero.DB.executeTransaction(function* () {
+	yield Zotero.DB.executeTransaction(async function () {
 		for (let i = 0; i < ids.length; i++) {
-			let obj = yield this.getAsync(ids[i]);
+			let obj = await this.getAsync(ids[i]);
 			if (!obj) {
 				continue;
 			}
-			yield obj.erase(options);
+			await obj.erase(options);
 			if (options.onProgress) {
 				options.onProgress(i + 1, ids.length);
 			}

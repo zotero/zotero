@@ -223,15 +223,15 @@
 							ps.alert(null, "", "You cannot relate items in different libraries.");
 							return;
 						}
-						yield Zotero.DB.executeTransaction(function* () {
+						yield Zotero.DB.executeTransaction(async function () {
 							for (let relItem of relItems) {
 								if (this.item.addRelatedItem(relItem)) {
-									yield this.item.save({
+									await this.item.save({
 										skipDateModifiedUpdate: true
 									});
 								}
 								if (relItem.addRelatedItem(this.item)) {
-									yield relItem.save({
+									await relItem.save({
 										skipDateModifiedUpdate: true
 									});
 								}
@@ -246,14 +246,14 @@
 					return Zotero.spawn(function* () {
 						var item = yield Zotero.Items.getAsync(id);
 						if (item) {
-							yield Zotero.DB.executeTransaction(function* () {
+							yield Zotero.DB.executeTransaction(async function () {
 								if (this.item.removeRelatedItem(item)) {
-									yield this.item.save({
+									await this.item.save({
 										skipDateModifiedUpdate: true
 									});
 								}
 								if (item.removeRelatedItem(this.item)) {
-									yield item.save({
+									await item.save({
 										skipDateModifiedUpdate: true
 									});
 								}

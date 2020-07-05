@@ -76,12 +76,12 @@ Zotero.Sync.EventListeners.ChangeListener = new function () {
 					});
 				
 				if (storageSets.length) {
-					return Zotero.DB.executeTransaction(function* () {
-						yield Zotero.DB.queryAsync(
+					return Zotero.DB.executeTransaction(async function () {
+						await Zotero.DB.queryAsync(
 							syncSQL + Array(syncSets.length / 3).fill('(?, ?, ?)').join(', '),
 							syncSets
 						);
-						yield Zotero.DB.queryAsync(
+						await Zotero.DB.queryAsync(
 							storageSQL + Array(storageSets.length / 2).fill('(?, ?)').join(', '),
 							storageSets
 						);

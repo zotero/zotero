@@ -247,11 +247,11 @@ Zotero.Tags = new function() {
 		// we can assign it to the new name
 		var oldColorData = this.getColor(libraryID, oldName);
 		
-		yield Zotero.DB.executeTransaction(function* () {
-			var oldItemIDs = yield this.getTagItems(libraryID, oldTagID);
-			var newTagID = yield this.create(newName);
+		yield Zotero.DB.executeTransaction(async function () {
+			var oldItemIDs = await this.getTagItems(libraryID, oldTagID);
+			var newTagID = await this.create(newName);
 			
-			yield Zotero.Utilities.Internal.forEachChunkAsync(
+			await Zotero.Utilities.Internal.forEachChunkAsync(
 				oldItemIDs,
 				Zotero.DB.MAX_BOUND_PARAMETERS - 2,
 				Zotero.Promise.coroutine(function* (chunk) {
@@ -291,16 +291,16 @@ Zotero.Tags = new function() {
 				notifierData
 			);
 			
-			yield this.purge(oldTagID);
+			await this.purge(oldTagID);
 		}.bind(this));
 		
 		if (oldColorData) {
-			yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.DB.executeTransaction(async function () {
 				// Remove color from old tag
-				yield this.setColor(libraryID, oldName);
+				await this.setColor(libraryID, oldName);
 				
 				// Add color to new tag
-				yield this.setColor(
+				await this.setColor(
 					libraryID,
 					newName,
 					oldColorData.color,
@@ -335,7 +335,7 @@ Zotero.Tags = new function() {
 			tagIDs,
 			100,
 			async function (chunk) {
-				await Zotero.DB.executeTransaction(function* () {
+				await Zotero.DB.executeTransaction(async function () {
 					var rowIDs = [];
 					var itemIDs = [];
 					var uniqueTags = new Set();
@@ -351,7 +351,7 @@ Zotero.Tags = new function() {
 						sql += 'AND type IN (' + types.join(', ') + ') ';
 					}
 					sql += 'ORDER BY tagID, type';
-					var rows = yield Zotero.DB.queryAsync(sql, [libraryID, ...chunk]);
+					var rows = await Zotero.DB.queryAsync(sql, [libraryID, ...chunk]);
 					for (let { rowID, tagID, itemID, type } of rows) {
 						uniqueTags.add(tagID);
 						
@@ -374,7 +374,7 @@ Zotero.Tags = new function() {
 						// If we're deleting the tag and not just a specific type, also clear any
 						// tag color
 						if (colors.has(name) && !types) {
-							yield this.setColor(libraryID, name, false);
+							await this.setColor(libraryID, name, false);
 						}
 					}
 					if (itemIDs.length) {
@@ -382,12 +382,12 @@ Zotero.Tags = new function() {
 					}
 					
 					sql = "DELETE FROM itemTags WHERE ROWID IN (" + rowIDs.join(", ") + ")";
-					yield Zotero.DB.queryAsync(sql, false, { noCache: true });
+					await Zotero.DB.queryAsync(sql, false, { noCache: true });
 					
-					yield this.purge(chunk);
+					await this.purge(chunk);
 					
 					// Update internal timestamps on all items that had these tags
-					yield Zotero.Utilities.Internal.forEachChunkAsync(
+					await Zotero.Utilities.Internal.forEachChunkAsync(
 						Zotero.Utilities.arrayUnique(itemIDs),
 						Zotero.DB.MAX_BOUND_PARAMETERS - 1,
 						async function (chunk) {

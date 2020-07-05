@@ -84,7 +84,7 @@ Zotero.Attachments = new function(){
 		
 		var attachmentItem, itemID, newFile, contentType, destDir;
 		try {
-			yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.DB.executeTransaction(async function () {
 				// Create a new attachment
 				attachmentItem = new Zotero.Item('attachment');
 				if (parentItemID) {
@@ -101,34 +101,34 @@ Zotero.Attachments = new function(){
 				if (collections) {
 					attachmentItem.setCollections(collections);
 				}
-				yield attachmentItem.save(saveOptions);
+				await attachmentItem.save(saveOptions);
 				
 				// Create directory for attachment files within storage directory
-				destDir = yield this.createDirectoryForItem(attachmentItem);
+				destDir = await this.createDirectoryForItem(attachmentItem);
 				
 				// Point to copied file
 				newFile = OS.Path.join(destDir, newName);
 				
 				// Copy or move file to unique filename, which automatically shortens long filenames
 				if (options.moveFile) {
-					const newFilePath = yield Zotero.File.moveToUnique(file.path, newFile);
+					const newFilePath = await Zotero.File.moveToUnique(file.path, newFile);
 					newFile = Zotero.File.pathToFile(newFilePath);
 				}
 				else {
 					newFile = Zotero.File.copyToUnique(file, newFile);
 				}
 				
-				yield Zotero.File.setNormalFilePermissions(newFile.path);
+				await Zotero.File.setNormalFilePermissions(newFile.path);
 				
 				if (!contentType) {
-					contentType = yield Zotero.MIME.getMIMETypeFromFile(newFile);
+					contentType = await Zotero.MIME.getMIMETypeFromFile(newFile);
 				}
 				attachmentItem.attachmentContentType = contentType;
 				if (charset) {
 					attachmentItem.attachmentCharset = charset;
 				}
 				attachmentItem.attachmentPath = newFile.path;
-				yield attachmentItem.save(saveOptions);
+				await attachmentItem.save(saveOptions);
 			}.bind(this));
 			try {
 				yield _postProcessFile(attachmentItem, newFile, contentType);
@@ -296,7 +296,7 @@ Zotero.Attachments = new function(){
 		
 		var attachmentItem, itemID, destDir, newPath;
 		try {
-			yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.DB.executeTransaction(async function () {
 				// Create a new attachment
 				attachmentItem = new Zotero.Item('attachment');
 				let {libraryID, key: parentKey} = Zotero.Items.getLibraryAndKeyFromID(parentItemID);
@@ -312,20 +312,20 @@ Zotero.Attachments = new function(){
 				// DEBUG: this should probably insert access date too so as to
 				// create a proper item, but at the moment this is only called by
 				// translate.js, which sets the metadata fields itself
-				itemID = yield attachmentItem.save(saveOptions);
+				itemID = await attachmentItem.save(saveOptions);
 				
 				var storageDir = Zotero.getStorageDirectory();
 				destDir = this.getStorageDirectory(attachmentItem);
-				yield OS.File.removeDir(destDir.path);
+				await OS.File.removeDir(destDir.path);
 				newPath = OS.Path.join(destDir.path, fileName);
 				// Copy single file to new directory
 				if (options.singleFile) {
-					yield this.createDirectoryForItem(attachmentItem);
+					await this.createDirectoryForItem(attachmentItem);
 					if (options.moveFile) {
-						yield OS.File.move(file.path, newPath);
+						await OS.File.move(file.path, newPath);
 					}
 					else {
-						yield OS.File.copy(file.path, newPath);
+						await OS.File.copy(file.path, newPath);
 					}
 				}
 				// Copy entire parent directory (for HTML snapshots)
@@ -928,7 +928,7 @@ Zotero.Attachments = new function(){
 			
 			var attachmentItem;
 			var destDir;
-			yield Zotero.DB.executeTransaction(function* () {
+			yield Zotero.DB.executeTransaction(async function () {
 				// Create a new attachment
 				attachmentItem = new Zotero.Item('attachment');
 				if (libraryID) {
@@ -950,12 +950,12 @@ Zotero.Attachments = new function(){
 					attachmentItem.setCollections(collections);
 				}
 				attachmentItem.attachmentPath = 'storage:' + fileName;
-				var itemID = yield attachmentItem.save(saveOptions);
+				var itemID = await attachmentItem.save(saveOptions);
 				
 				Zotero.Fulltext.queueItem(attachmentItem);
 				
 				destDir = this.getStorageDirectory(attachmentItem).path;
-				yield OS.File.move(tmpDir, destDir);
+				await OS.File.move(tmpDir, destDir);
 			}.bind(this));
 		}
 		catch (e) {
@@ -2876,7 +2876,7 @@ Zotero.Attachments = new function(){
 		var collections = options.collections;
 		var saveOptions = options.saveOptions;
 		
-		return Zotero.DB.executeTransaction(function* () {
+		return Zotero.DB.executeTransaction(async function () {
 			var attachmentItem = new Zotero.Item('attachment');
 			if (parentItemID) {
 				let {libraryID: parentLibraryID, key: parentKey} =
@@ -2904,7 +2904,7 @@ Zotero.Attachments = new function(){
 			if (collections) {
 				attachmentItem.setCollections(collections);
 			}
-			yield attachmentItem.save(saveOptions);
+			await attachmentItem.save(saveOptions);
 			
 			return attachmentItem;
 		}.bind(this));

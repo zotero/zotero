@@ -281,9 +281,9 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			yield Zotero.DB.waitForTransaction('indexString()');
 		}
 		
-		yield Zotero.DB.executeTransaction(function* () {
+		yield Zotero.DB.executeTransaction(async function () {
 			this.clearItemWords(itemID, true);
-			yield indexWords(itemID, words, stats, version, synced);
+			await indexWords(itemID, words, stats, version, synced);
 			
 			/*
 			var sql = "REPLACE INTO fulltextContent (itemID, textContent) VALUES (?,?)";
@@ -698,8 +698,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 					+ `${libraryKey} (contentType: ${contentType})`, 2);
 				
 				// Delete rows for items that weren't supposed to be indexed
-				yield Zotero.DB.executeTransaction(function* () {
-					yield this.clearItemWords(itemID);
+				yield Zotero.DB.executeTransaction(async function () {
+					await this.clearItemWords(itemID);
 				}.bind(this));
 				continue;
 			}

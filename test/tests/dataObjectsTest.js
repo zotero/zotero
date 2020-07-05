@@ -22,9 +22,9 @@ describe("Zotero.DataObjects", function () {
 		it("should return a libraryID and key within a transaction", function* () {
 			for (let type of types) {
 				let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
-				yield Zotero.DB.executeTransaction(function* () {
+				yield Zotero.DB.executeTransaction(async function () {
 					let obj = createUnsavedDataObject(type);
-					yield obj.save();
+					await obj.save();
 					
 					var {libraryID, key} = objectsClass.getLibraryAndKeyFromID(obj.id);
 					assert.equal(libraryID, Zotero.Libraries.userLibraryID);
@@ -32,7 +32,7 @@ describe("Zotero.DataObjects", function () {
 					assert.typeOf(key, 'string');
 					assert.equal(key, obj.key);
 					
-					yield obj.erase();
+					await obj.erase();
 				});
 			}
 		});
@@ -42,9 +42,9 @@ describe("Zotero.DataObjects", function () {
 				let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
 				var obj;
 				try {
-					yield Zotero.DB.executeTransaction(function* () {
+					yield Zotero.DB.executeTransaction(async function () {
 						obj = createUnsavedDataObject(type);
-						yield obj.save();
+						await obj.save();
 						throw 'Aborting transaction -- ignore';
 					});
 				}

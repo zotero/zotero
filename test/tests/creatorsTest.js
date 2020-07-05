@@ -8,8 +8,8 @@ describe("Zotero.Creators", function() {
 				lastName: "Last"
 			};
 			var creatorID;
-			yield Zotero.DB.executeTransaction(function* () {
-				creatorID = yield Zotero.Creators.getIDFromData(data1, true);
+			yield Zotero.DB.executeTransaction(async function () {
+				creatorID = await Zotero.Creators.getIDFromData(data1, true);
 			});
 			assert.typeOf(creatorID, 'number');
 			var data2 = Zotero.Creators.get(creatorID);

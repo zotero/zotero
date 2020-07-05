@@ -2237,13 +2237,13 @@ describe("Zotero.Item", function () {
 				var item4 = yield createDataObject('item');
 				
 				var relateItems = Zotero.Promise.coroutine(function* (i1, i2) {
-					yield Zotero.DB.executeTransaction(function* () {
+					yield Zotero.DB.executeTransaction(async function () {
 						i1.addRelatedItem(i2);
-						yield i1.save({
+						await i1.save({
 							skipDateModifiedUpdate: true
 						});
 						i2.addRelatedItem(i1);
-						yield i2.save({
+						await i2.save({
 							skipDateModifiedUpdate: true
 						});
 					});

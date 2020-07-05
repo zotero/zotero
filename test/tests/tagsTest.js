@@ -142,8 +142,8 @@ describe("Zotero.Tags", function () {
 			
 			assert.equal(Zotero.Tags.getName(tagID), tagName);
 			
-			yield Zotero.DB.executeTransaction(function* () {
-				yield Zotero.Tags.purge();
+			yield Zotero.DB.executeTransaction(async function () {
+				await Zotero.Tags.purge();
 			});
 			
 			assert.isFalse(Zotero.Tags.getName(tagID));
