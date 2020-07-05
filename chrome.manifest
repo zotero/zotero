@@ -64,10 +64,6 @@ locale	zotero	zh-TW		chrome/locale/zh-TW/zotero/
 
 skin		zotero	default		chrome/skin/default/zotero/
 
-overlay	chrome://browser/content/browser.xul	chrome://zotero/content/overlay.xul
-
-style	chrome://browser/content/browser.xul	chrome://zotero/skin/zotero.css
-
 component	{e4c61080-ec2d-11da-8ad9-0800200c9a66}			components/zotero-service.js
 component	{531828f8-a16c-46be-b9aa-14845c3b010f}			components/zotero-service.js
 contract	@zotero.org/Zotero;1 							{e4c61080-ec2d-11da-8ad9-0800200c9a66}
