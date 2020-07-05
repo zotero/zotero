@@ -136,7 +136,7 @@ pref("extensions.zotero.integration.keepAddCitationDialogRaised", false);
 pref("extensions.zotero.integration.upgradeTemplateDelayedOn", 0);
 
 // Connector settings
-pref("extensions.zotero.httpServer.enabled", false);	// TODO enabled for testing only
+pref("extensions.zotero.httpServer.enabled", true);
 pref("extensions.zotero.httpServer.port", 23119);	// ascii "ZO"
 
 // Zeroconf
