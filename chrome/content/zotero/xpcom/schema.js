@@ -931,7 +931,7 @@ Zotero.Schema = new function(){
 				var installLocation = Components.classes["@mozilla.org/file/directory_service;1"]
 					.getService(Components.interfaces.nsIProperties)
 					.get("AChrom", Components.interfaces.nsIFile).parent;
-				installLocation.append("zotero.jar");
+				installLocation.append("omni.ja");
 			}
 			// Asynchronous in Firefox
 			else {
