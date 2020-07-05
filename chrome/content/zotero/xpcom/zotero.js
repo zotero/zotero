@@ -380,10 +380,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		
 		// Get startup errors
 		try {
-			var messages = {};
-			Services.console.getMessageArray(messages, {});
-			_startupErrors = Object.keys(messages.value).map(i => messages[i])
-				.filter(msg => _shouldKeepError(msg));
+			let messages = Services.console.getMessageArray();
+			_startupErrors = messages.filter(msg => _shouldKeepError(msg));
 		} catch(e) {
 			Zotero.logError(e);
 		}
