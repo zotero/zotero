@@ -34,6 +34,8 @@
 <?xml-stylesheet href="chrome://zotero-platform-version/content/style.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/itemPane.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/itemPane.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/bindings/itembox.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/itembox.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
 
 <!DOCTYPE window [

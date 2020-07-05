@@ -32,11 +32,6 @@
 		  xmlns:html="http://www.w3.org/1999/xhtml">
 	
 	<binding id="item-box">
-		<resources>
-			<stylesheet src="chrome://zotero/skin/bindings/itembox.css"/>
-			<stylesheet src="chrome://zotero-platform/content/itembox.css"/>
-		</resources>
-		
 		<implementation>
 			<!--
 				Public properties
