@@ -67,8 +67,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		yield Zotero.DB.queryAsync("ATTACH ':memory:' AS 'indexing'");
 		yield Zotero.DB.queryAsync('CREATE TABLE indexing.fulltextWords (word NOT NULL)');
 		
-		this.decoder = Components.classes["@mozilla.org/intl/utf8converterservice;1"].
-			getService(Components.interfaces.nsIUTF8ConverterService);
+		this.unicodeConverter = Cc["@mozilla.org/intl/scriptableunicodeconverter"]
+			.createInstance(Ci.nsIScriptableUnicodeConverter);
 		
 		let pdfConverterFileName = "pdftotext";
 		let pdfInfoFileName = "pdfinfo";
@@ -1675,7 +1675,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		
 		try {
 			if (charset && charset != 'utf-8') {
-				text = this.decoder.convertStringToUTF8(text, charset, true);
+				this.converter.charset = charset;
+				text = this.converter.ConvertToUnicode(text);
 			}
 		} catch (err) {
 			Zotero.debug("Error converting from charset " + charset, 1);
