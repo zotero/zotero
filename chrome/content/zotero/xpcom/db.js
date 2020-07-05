@@ -466,6 +466,12 @@ Zotero.DBConnection.prototype.executeTransaction = async function (func, options
 		}
 		
 		var conn = this._getConnection(options) || (await this._getConnectionAsync(options));
+		
+		if (func.constructor.name == 'GeneratorFunction') {
+			throw new Error("Zotero.DB.executeTransaction() no longer takes a generator function "
+				+ "-- pass an async function instead");
+		}
+		
 		var result = await conn.executeTransaction(func);
 		Zotero.debug(`Committed DB transaction ${id}`, 4);
 		
