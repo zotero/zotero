@@ -790,8 +790,14 @@
 					
 					this._iframe.addEventListener("DOMContentLoaded", listener, false);
 					
-					this._iframe.webNavigation.loadURI(uri.spec,
-						Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY, null, null, null);
+					let loadURIOptions = {
+						triggeringPrincipal: null,
+						csp: null,
+						loadFlags: Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY,
+						referrerInfo: null,
+						postData: null,
+					};
+					this._iframe.webNavigation.loadURI(uri.spec, loadURIOptions);
 				]]>
 				</body>
 			</method>
