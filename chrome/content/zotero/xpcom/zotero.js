@@ -2052,10 +2052,9 @@ Zotero.DragDrop = {
 		if (target.tagName == 'treechildren') {
 			var tree = target.parentNode;
 			if (tree.id == 'zotero-collections-tree') {
-				let row = {}, col = {}, obj = {};
-				tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
+				let { row } = tree.getCellAt(event.clientX, event.clientY);
 				let win = tree.ownerDocument.defaultView;
-				return win.ZoteroPane.collectionsView.getRow(row.value);
+				return win.ZoteroPane.collectionsView.getRow(row);
 			}
 		}
 		return false;
