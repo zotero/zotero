@@ -62,8 +62,8 @@ Zotero.Intl = new function () {
 		setOrClearIntlPref('intl.accept_languages', 'string');
 
 		Zotero.locale = Zotero.Utilities.Internal.resolveLocale(
-			Services.locale.getRequestedLocale(),
-			Services.locale.getAvailableLocales()
+			Services.locale.requestedLocale,
+			Services.locale.availableLocales
 		);
 
 		// Also load the brand as appName
@@ -207,34 +207,7 @@ Zotero.Intl = new function () {
 		try {
 			// DEBUG: Is this necessary, or will Intl.Collator just default to the same locales we're
 			// passing manually?
-
-			let locales;
-			// Fx55+
-			if (Services.locale.getAppLocalesAsBCP47) {
-				locales = Services.locale.getAppLocalesAsBCP47();
-			}
-			else {
-				let locale;
-				// Fx54
-				if (Services.locale.getAppLocale) {
-					locale = Services.locale.getAppLocale();
-				}
-				// Fx <=53
-				else {
-					locale = Services.locale.getApplicationLocale();
-					locale = locale.getCategory('NSILOCALE_COLLATE');
-				}
-
-				// Extract a valid language tag
-				try {
-					locale = locale.match(/^[a-z]{2}(\-[A-Z]{2})?/)[0];
-				}
-				catch (e) {
-					throw new Error(`Error parsing locale ${locale}`);
-				}
-				locales = [locale];
-			}
-
+			let locales = Services.locale.appLocalesAsBCP47;
 			var collator = new Intl.Collator(locales, {
 				numeric: true,
 				sensitivity: 'base'
