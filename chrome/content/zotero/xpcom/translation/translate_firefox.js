@@ -384,8 +384,7 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 			FIRST_ORDERED_NODE_TYPE: 9
 		},
 		DOMParser: function() {
-			return Components.classes["@mozilla.org/xmlextras/domparser;1"]
-				.createInstance(Components.interfaces.nsIDOMParser);
+			return new DOMParser();
 		},
 		XMLSerializer: function() {
 			return Components.classes["@mozilla.org/xmlextras/xmlserializer;1"]

@@ -1168,8 +1168,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		}
 		
 		var seconds = false;
-		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-			.createInstance(Components.interfaces.nsIDOMParser);
+		var parser = new DOMParser();
 		try {
 			var xml = parser.parseFromString(req.responseText, "text/xml");
 		}

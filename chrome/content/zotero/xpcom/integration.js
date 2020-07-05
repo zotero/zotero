@@ -2459,8 +2459,7 @@ Zotero.Integration.DocumentData.prototype.serialize = function() {
  * Unserializes document-specific XML
  */
 Zotero.Integration.DocumentData.prototype.unserializeXML = function(xmlData) {
-	var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-			.createInstance(Components.interfaces.nsIDOMParser),
+	var parser = new DOMParser(),
 		doc = parser.parseFromString(xmlData, "application/xml");
 	
 	this.sessionID = Zotero.Utilities.xpathText(doc, '/data/session[1]/@id');

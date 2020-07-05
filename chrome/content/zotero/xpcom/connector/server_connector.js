@@ -493,8 +493,7 @@ Zotero.Server.Connector.Detect.prototype = {
 			)
 			: null;
 		
-		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-			.createInstance(Components.interfaces.nsIDOMParser);
+		var parser = new DOMParser();
 		var doc = parser.parseFromString(`<html>${data.html}</html>`, 'text/html');
 		doc = Zotero.HTTP.wrapDocument(doc, data.uri);
 		
@@ -1186,8 +1185,7 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 			return item;
 		}
 		
-		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-			.createInstance(Components.interfaces.nsIDOMParser);
+		var parser = new DOMParser();
 		parser.init(null, Services.io.newURI(data.url));
 		var doc = parser.parseFromString(`<html>${data.html}</html>`, 'text/html');
 		doc = Zotero.HTTP.wrapDocument(doc, data.url);

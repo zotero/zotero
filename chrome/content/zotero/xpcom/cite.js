@@ -180,8 +180,7 @@ Zotero.Cite = {
 			if(lineSpacing == NaN) throw new Error("Invalid linespacing");
 			
 			var str;
-			var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-					.createInstance(Components.interfaces.nsIDOMParser),
+			var parser = new DOMParser(),
 				doc = parser.parseFromString("<!DOCTYPE html><html><body></body></html>", "text/html");
 			doc.body.insertAdjacentHTML("afterbegin", html);
 			var div = doc.body.firstChild,

@@ -301,8 +301,7 @@ Zotero.LocateManager = new function() {
 			  "http://a9.com/-/spec/opensearchdescription/1.0/"
 			];
 			
-			var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-					.createInstance(Components.interfaces.nsIDOMParser),
+			var parser = new DOMParser(),
 				doc = parser.parseFromString(xmlStr, "application/xml"),
 				docEl = doc.documentElement,
 				ns = docEl.namespaceURI,

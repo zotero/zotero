@@ -336,8 +336,7 @@ Zotero.Styles = new function() {
 		var existingFile, destFile, source;
 		
 		// First, parse style and make sure it's valid XML
-		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-				.createInstance(Components.interfaces.nsIDOMParser),
+		var parser = new DOMParser(),
 			doc = parser.parseFromString(style, "application/xml");
 		
 		var styleID = Zotero.Utilities.xpathText(doc, '/csl:style/csl:info[1]/csl:id[1]',
@@ -626,8 +625,7 @@ Zotero.Style = function (style, path) {
 	
 	this.type = "csl";
 	
-	var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-			.createInstance(Components.interfaces.nsIDOMParser),
+	var parser = new DOMParser(),
 		doc = parser.parseFromString(style, "application/xml");
 	if(doc.documentElement.localName === "parsererror") {
 		throw new Error("File is not valid XML");
@@ -737,8 +735,7 @@ Zotero.Style.prototype.getCiteProc = function(locale, format, automaticJournalAb
 		// get XSLT processor from updateCSL.xsl file
 		if(!Zotero.Styles.xsltProcessor) {
 			let xsl = Zotero.File.getContentsFromURL("chrome://zotero/content/updateCSL.xsl");
-			let updateXSLT = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-				.createInstance(Components.interfaces.nsIDOMParser)
+			let updateXSLT = new DOMParser()
 				.parseFromString(xsl, "application/xml");
 			
 			// XSLTProcessor is no longer available in XPCOM, so get from hidden window
@@ -750,8 +747,7 @@ Zotero.Style.prototype.getCiteProc = function(locale, format, automaticJournalAb
 		}
 		
 		// read style file as DOM XML
-		let styleDOMXML = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-			.createInstance(Components.interfaces.nsIDOMParser)
+		let styleDOMXML = new DOMParser()
 			.parseFromString(this.getXML(), "text/xml");
 		
 		// apply XSLT and serialize output

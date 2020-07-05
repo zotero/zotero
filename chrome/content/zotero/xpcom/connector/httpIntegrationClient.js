@@ -183,8 +183,7 @@ Zotero.HTTPIntegrationClient.Field.prototype.getText = async function() {
 Zotero.HTTPIntegrationClient.Field.prototype.setText = async function(text, isRich) {
 	// The HTML will be stripped by Google Docs and and since we're 
 	// caching this value, we need to strip it ourselves
-	var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-             .createInstance(Components.interfaces.nsIDOMParser);
+	var parser = new DOMParser();
 	var doc = parser.parseFromString(text, "text/html");
 	this._text = doc.documentElement.textContent;
 	return Zotero.HTTPIntegrationClient.sendCommand("Field.setText", [this._documentID, this._id, text, true]);

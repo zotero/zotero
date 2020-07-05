@@ -118,8 +118,7 @@ Zotero.Feeds = new function() {
 	}
 
 	this.importFromOPML = Zotero.Promise.coroutine(function* (opmlString) {
-		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-			.createInstance(Components.interfaces.nsIDOMParser);
+		var parser = new DOMParser();
 		var doc = parser.parseFromString(opmlString, "application/xml");
 		// Per some random spec (https://developer.mozilla.org/en-US/docs/Web/API/DOMParser), 
 		// DOMParser returns a special type of xml document on error, so we do some magic checking here.

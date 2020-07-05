@@ -420,8 +420,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 					req.respond(201, { "Fake-Server-Match": 1 }, "");
 				}
 				else if (req.method == "PUT" && req.url == `${davURL}zotero/${item.key}.prop`) {
-					var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-						.createInstance(Components.interfaces.nsIDOMParser);
+					var parser = new DOMParser();
 					var doc = parser.parseFromString(req.requestBody, "text/xml");
 					assert.equal(
 						doc.documentElement.getElementsByTagName('mtime')[0].textContent, mtime

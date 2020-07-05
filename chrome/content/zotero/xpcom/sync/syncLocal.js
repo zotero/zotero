@@ -1762,8 +1762,7 @@ Zotero.Sync.Data.Local = {
 		
 		var localChanged = false;
 		var normalizeHTML = (str) => {
-			let parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-				.createInstance(Components.interfaces.nsIDOMParser);
+			let parser = new DOMParser();
 			str = parser.parseFromString(str, 'text/html');
 			str = str.body.textContent;
 			// Normalize internal spaces

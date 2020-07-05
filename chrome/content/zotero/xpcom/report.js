@@ -27,8 +27,7 @@
 Zotero.Report = {};
 
 Zotero.Report.HTML = new function () {
-	let domParser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-		.createInstance(Components.interfaces.nsIDOMParser);
+	let domParser = new DOMParser();
 	
 	this.listGenerator = function* (items, combineChildItems, libraryID) {
 		yield '<!DOCTYPE html>\n'

@@ -795,8 +795,7 @@ Zotero.Utilities.Internal = {
 	 * Returns a DOMDocument object not attached to any window
 	 */
 	"getDOMDocument": function() {
-		return Components.classes["@mozilla.org/xmlextras/domparser;1"]
-			.createInstance(Components.interfaces.nsIDOMParser)
+		return new DOMParser()
 			.parseFromString("<!DOCTYPE html><html></html>", "text/html");
 	},
 	

@@ -2449,8 +2449,7 @@ describe("Connector Server", function () {
 		
 		it('should import a style with application/vnd.citationstyles.style+xml content-type', function* () {
 			sinon.stub(Zotero.Styles, 'install').callsFake(function(style) {
-				var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-					.createInstance(Components.interfaces.nsIDOMParser),
+				var parser = new DOMParser(),
 				doc = parser.parseFromString(style, "application/xml");
 				
 				return Zotero.Promise.resolve({
@@ -2478,8 +2477,7 @@ describe("Connector Server", function () {
 		
 		it('should accept text/plain request with X-Zotero-Connector-API-Version or Zotero-Allowed-Request', async function () {
 			sinon.stub(Zotero.Styles, 'install').callsFake(function(style) {
-				var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-					.createInstance(Components.interfaces.nsIDOMParser),
+				var parser = new DOMParser(),
 				doc = parser.parseFromString(style, "application/xml");
 				
 				return Zotero.Promise.resolve({
