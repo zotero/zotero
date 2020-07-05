@@ -710,7 +710,7 @@ var ZoteroPane = new function()
 		
 		try {
 			// Ignore keystrokes outside of Zotero pane
-			if (!(event.originalTarget.ownerDocument instanceof XULDocument)) {
+			if (!(event.originalTarget.ownerDocument instanceof XMLDocument)) {
 				return;
 			}
 		}
