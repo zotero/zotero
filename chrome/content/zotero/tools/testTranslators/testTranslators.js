@@ -35,6 +35,7 @@ var translatorTables = {},
 	outputBox,
 	allOutputView,
 	currentOutputView,
+	seleniumOutput = {},
 	viewerMode = true;
 
 /**
@@ -123,7 +124,7 @@ OutputView.prototype.getOutput = function() {
  * Encapsulates a set of tests for a specific translator and type
  * @constructor
  */
-var TranslatorTestView = function(translator, type) {
+var TranslatorTestView = function() {
 	var row = this._row = document.createElement("tr");
 	
 	// Translator
@@ -163,6 +164,12 @@ var TranslatorTestView = function(translator, type) {
 	this._debug = function(obj, msg, level) {
 		outputView.addOutput(msg, level);
 		allOutputView.addOutput(msg, level);
+		
+		const translatorID = obj.translator.translatorID;
+		if (!seleniumOutput[translatorID]) {
+			seleniumOutput[translatorID] = { label: obj.translator.label, message: "" };
+		}
+		seleniumOutput[translatorID].message += msg + "\n";
 	}
 	
 	// put click handler on row to allow display of debug output
@@ -381,8 +388,8 @@ function load(event) {
 		// initialize injection
 		Zotero.initInject();
 		// make sure that connector is online
-		Zotero.Connector.checkIsOnline(function(status) {
-			if(status) {
+		Zotero.Connector.checkIsOnline(function (status) {
+			if (status || Zotero.allowRepoTranslatorTester) {
 				init();
 			} else {
 				document.body.textContent = "To avoid excessive repo requests, the translator tester may only be used when Zotero Standalone is running.";
@@ -396,7 +403,7 @@ function load(event) {
 /**
  * Builds translator display and retrieves translators
  */
-function init() {
+async function init() {
 	// create translator box
 	translatorBox = document.createElement("div");
 	translatorBox.id = "translator-box";
@@ -418,9 +425,8 @@ function init() {
 	allOutputView = new OutputView();
 	allOutputView.setDisplayed(true);
 
-	for(var i in TRANSLATOR_TYPES) {
-		var displayType = TRANSLATOR_TYPES[i];
-		var translatorType = displayType.toLowerCase();
+	await Promise.all(TRANSLATOR_TYPES.map(async displayType => {
+		let translatorType = displayType.toLowerCase();
 		
 		translatorTestViews[translatorType] = [];
 		
@@ -467,15 +473,10 @@ function init() {
 		
 		// get translators, with code for unsupported translators
 		if(!viewerMode) {
-			Zotero.Translators.getAllForType(translatorType, true).
-			then(new function() {
-				var type = translatorType;
-				return function(translators) {
-					haveTranslators(translators, type);
-				}
-			});
+			let translators = await Zotero.Translators.getAllForType(translatorType, true);
+			haveTranslators(translators, translatorType);
 		}
-	}
+	}));
 	
 	if(viewerMode) {
 		// if no Zotero object, try to unserialize data
@@ -528,6 +529,9 @@ function init() {
 		serialize.addEventListener("click", serializeToDownload, false);
 		lastP.appendChild(serialize);
 		translatorBox.appendChild(lastP);
+		
+		// Run translators specified in the hash params if any
+		runURLSpecifiedTranslators();
 	}
 }
 
@@ -571,6 +575,30 @@ function haveTranslators(translators, type) {
 		ev.initEvent('ZoteroHaveTranslators-'+type, true, true);
 		document.dispatchEvent(ev);	
 	});
+}
+
+async function runURLSpecifiedTranslators() {
+	const href = document.location.href;
+	let hashParams = href.split('#')[1];
+	if (!hashParams) return;
+	
+	let translatorIDs = new Set(hashParams.split('translators=')[1].split(',').map(decodeURI));
+	let translatorTestViews = [];
+	for (let type in translatorTestViewsToRun) {
+		for (const translatorTestView of translatorTestViewsToRun[type]) {
+			if (translatorIDs.has(translatorTestView._translatorTester.translator.translatorID)) {
+				translatorTestViews.push(translatorTestView);
+			}
+		}
+	}
+	for (const translatorTestView of translatorTestViews) {
+		await new Promise((resolve) => {
+			translatorTestView.runTests(resolve);
+		});
+	}
+	var elem = document.createElement('p');
+	elem.setAttribute('id', 'translator-tests-complete');
+	document.body.appendChild(elem);
 }
 
 /**
