@@ -24,7 +24,8 @@
 	},
 	"extends": [
 		"@zotero",
-		"plugin:react/recommended"
+		"plugin:react/recommended",
+		"plugin:react-hooks/recommended"
 	],
 	"parser": "@babel/eslint-parser",
 	"parserOptions": {
