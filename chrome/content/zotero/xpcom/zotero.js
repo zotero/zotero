@@ -1368,6 +1368,13 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.randomString = function(len, chars) {
 		return Zotero.Utilities.randomString(len, chars);
 	}
+
+	this.nextHtmlId = (prefix = 'id-') => {
+		if (!this._htmlId) {
+			this._htmlId = 1;
+		}
+		return prefix + this._htmlId++;
+	}
 	
 	
 	this.moveToUnique = function (file, newFile) {
