@@ -1,25 +1,45 @@
-import React, { memo, useCallback, useState } from 'react';
-import { Button } from './button';
+import React, { forwardRef, memo, useCallback, useEffect, useState, useImperativeHandle } from 'react';
+import PropTypes from 'prop-types';
+import cx from 'classnames';
+import { usePrevious } from '../hooks/use-previous';
 
-const Wizard = memo(({ children, label, onClose }) => {
+const Wizard = ({ canAdvance = true, canRewind = true, canCancel = true, className, children, onClose }, ref) => {
 	const [currentId, setCurrentId] = useState(null);
+	const [hasFocus, setHasFocus] = useState(true); // assumes modal is active when opened
+	const previousId = usePrevious(currentId);
 	const pages = React.Children.toArray(children);
 	const currentIndex = currentId ? pages.findIndex(p => p.props.pageId === currentId) : 0;
 	const currentPage = pages[currentIndex];
-	const canAdvance = currentIndex < pages.length - 1;
-	const canRewind = currentIndex > 0;
+	const isLastPage = currentIndex === pages.length - 1;
+	canAdvance = canAdvance && currentIndex < pages.length - 1;
+	canRewind = canRewind && currentIndex > 0;
+
+	useImperativeHandle(ref, () => ({
+		goTo: (pageId) => {
+			if (!pages.some(p => p.props.pageId === pageId)) {
+				throw new Error(`Invalid wizard page id "${pageId}"`);
+			}
+			setCurrentId(pageId);
+		},
+		advance: handleContinue
+	}));
 
 	const handleCancel = useCallback(() => {
 		onClose();
-	}, []);
+	}, [onClose]);
 
 	const handleGoBack = useCallback(() => {
-		if (canRewind) {
+		const shouldContinue = 'onPageRewound' in currentPage.props ? currentPage.props.onPageRewound() : true;
+		if (canRewind && shouldContinue) {
 			setCurrentId(pages[currentIndex - 1].props.pageId);
 		}
-	}, [canRewind, currentIndex, pages]);
+	}, [canRewind, currentIndex, currentPage, pages]);
 
 	const handleContinue = useCallback(() => {
+		const shouldContinue = 'onPageAdvance' in currentPage.props ? currentPage.props.onPageAdvance() : true;
+		if (!shouldContinue) {
+			return;
+		}
 		if (currentPage.props.nextId) {
 			setCurrentId(currentPage.props.nextId);
 		}
@@ -28,37 +48,93 @@ const Wizard = memo(({ children, label, onClose }) => {
 		}
 	}, [canAdvance, currentIndex, currentPage, pages]);
 
+	const handleActivate = useCallback(() => {
+		setHasFocus(true);
+	}, []);
+
+	const handleDeactivate = useCallback(() => {
+		setHasFocus(false);
+	}, []);
+
+	const handleDone = useCallback(() => {
+		window.close();
+	}, []);
+
+	useEffect(() => {
+		if (currentId !== previousId && 'onPageShow' in currentPage.props) {
+			currentPage.props.onPageShow();
+		}
+	}, [currentId, previousId, currentPage]);
+
+	// @NOTE: window management, XUL only
+	useEffect(() => {
+		window.addEventListener("activate", handleActivate);
+		return () => {
+			document.removeEventListener('activate', handleActivate);
+		};
+	}, [handleActivate]);
+
+	useEffect(() => {
+		window.addEventListener("deactivate", handleDeactivate);
+		return () => {
+			document.removeEventListener('deactivate', handleDeactivate);
+		};
+	}, [handleDeactivate]);
+
+
 	return (
-		<div className="wizard">
-			<h1 className="wizard-header">
-				{ label }
-			</h1>
+		<div className={ cx('wizard', className, { focused: hasFocus }) }>
 			<div className="wizard-body">
 				{ currentPage }
 			</div>
 			<div className="wizard-controls">
-				<Button
-					onClick={ handleCancel }
-					text="zotero.wizard.actions.cancel"
-					title="zotero.wizard.actions.cancel"
-				/>
-				<Button
-					disabled={ !canRewind }
-					onClick={ handleGoBack }
-					text="zotero.wizard.actions.goback"
-					title="zotero.wizard.actions.goback"
-				/>
-				<Button
-					disabled={ !canAdvance }
-					onClick={ handleContinue }
-					text="zotero.wizard.actions.continue"
-					title="zotero.wizard.actions.continue"
-				/>
+				<div className="left">
+					<button
+						disabled={ !canCancel }
+						onClick={ handleCancel }
+						title={ Zotero.getString('general.cancel') }
+					>
+						{ Zotero.getString('general.cancel') }
+					</button>
+				</div>
+				<div className="right">
+					<button
+						disabled={ !canRewind }
+						onClick={ handleGoBack }
+						title={ Zotero.getString('general.goBack') }
+					>
+						{ Zotero.getString('general.goBack') }
+					</button>
+					{ !isLastPage && (
+						<button
+							disabled={ !canAdvance }
+							onClick={ handleContinue }
+							title={ Zotero.getString('general.continue') }
+						>
+							{ Zotero.getString('general.continue') }
+						</button>
+					) }
+					{ isLastPage && (
+						<button
+							onClick={ handleDone }
+							title={ Zotero.getString('general.done') }
+						>
+							{ Zotero.getString('general.done') }
+						</button>
+					) }
+				</div>
 			</div>
 		</div>
 	);
-});
+};
 
-Wizard.displayName = 'Wizard';
+Wizard.propTypes = {
+	canAdvance: PropTypes.bool,
+	canCancel: PropTypes.bool,
+	canRewind: PropTypes.bool,
+	children: PropTypes.oneOfType([PropTypes.element, PropTypes.array]),
+	className: PropTypes.string,
+	onClose: PropTypes.func,
+};
 
-export default Wizard;
+export default memo(forwardRef(Wizard));
