@@ -27,6 +27,7 @@
 
 const noop = () => {};
 
+
 function getDragTargetOrient(event, target) {
 	const elem = target || event.target;
 	const {y, height} = elem.getBoundingClientRect();
@@ -75,6 +76,10 @@ function createDragHandler({ handleDrag, handleDragStop }) {
 	}
 }
 
+var _htmlId = 1;
+
+const nextHtmlId = (prefix = 'id-') => prefix + _htmlId++;
+
 export {
-	noop, getDragTargetOrient, createDragHandler
+	nextHtmlId, noop, getDragTargetOrient, createDragHandler
 };
