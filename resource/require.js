@@ -103,6 +103,7 @@ var require = (function() {
 			'': 'resource://zotero/',
 			'containers/': 'chrome://zotero/content/containers/',
 			'components/': 'chrome://zotero/content/components/',
+			'hooks/': 'chrome://zotero/content/hooks/',
 			'zotero/': 'chrome://zotero/content/',
 			// TEMP until plugins updated
 			// TODO: Possible to show a deprecation warning?

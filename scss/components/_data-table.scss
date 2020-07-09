@@ -1,0 +1,55 @@
+.data-table {
+	.cell {
+		padding: 2px 4px;
+	}
+
+	.header {
+		align-items: center;
+		background: $shade-0;
+		border-bottom: $border-width solid $shade-2;
+		display: flex;
+		flex-direction: row;
+		height: 20px;
+
+		.cell + .cell {
+			&::after {
+				background: $shade-3;
+				bottom: 2px;
+				content: "";
+				left: 0;
+				position: absolute;
+				top: 2px;
+				width: 1px;
+			}
+		}
+	}
+
+	.body {
+		overflow-y: scroll;
+		height: calc(100% - 20px);
+		position: relative;
+
+		.row {
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			user-select: none;
+			width: 100%;
+
+			&.selected {
+				background-color: $shade-3;
+			}
+		}
+	}
+
+	.focused & {
+		.header {
+			background: $shade-1;
+		}
+
+		.body .row.selected {
+			background-color: highlight;
+			color: highlighttext;
+		}
+	}
+}
