@@ -1552,7 +1552,7 @@ Zotero.Schema = new function(){
 			var styles = Zotero.Styles.getAll();
 			var styleTimestamps = [];
 			for (let id in styles) {
-				let styleUpdated = Zotero.Date.sqlToDate(styles[id].updated);
+				let styleUpdated = Zotero.Date.sqlToDate(styles[id].updated, true);
 				styleUpdated = styleUpdated ? styleUpdated.getTime() / 1000 : 0;
 				var selfLink = styles[id].url;
 				var data = {
