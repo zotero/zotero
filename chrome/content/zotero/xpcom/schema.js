@@ -575,6 +575,10 @@ Zotero.Schema = new function(){
 		Zotero.Schema.globalSchemaLocale = data.locales[locale];
 		Zotero.Schema.globalSchemaMeta = data.meta;
 		
+		//
+		// Keep in sync with the connector's gulpfile.js
+		//
+		
 		// CSL mappings
 		Zotero.Schema.CSL_TYPE_MAPPINGS = {};
 		Zotero.Schema.CSL_TYPE_MAPPINGS_REVERSE = {};
