@@ -256,6 +256,8 @@ Zotero_TranslatorTester._sanitizeItem = function(item, testItem, keepValidFields
 			var attachment = item.attachments[i];
 			if(attachment.document) {
 				delete attachment.document;
+				// Mirror connector/server itemDone() behavior from translate.js
+				attachment.mimeType = 'text/html';
 			}
 			
 			if(attachment.url) {
