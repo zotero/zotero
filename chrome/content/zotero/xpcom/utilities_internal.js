@@ -361,6 +361,35 @@ Zotero.Utilities.Internal = {
 	
 	
 	/**
+	 * Decode a binary string into a typed Uint8Array
+	 *
+	 * @param {String} data - Binary string to decode
+	 * @return {Uint8Array} Typed array holding data
+	 */
+	_decodeToUint8Array: function (data) {
+		var buf = new ArrayBuffer(data.length);
+		var bufView = new Uint8Array(buf);
+		for (let i = 0; i < data.length; i++) {
+			bufView[i] = data.charCodeAt(i);
+		}
+		return bufView;
+	},
+	
+	
+	/**
+	 * Decode a binary string to UTF-8 string
+	 *
+	 * @param {String} data - Binary string to decode
+	 * @return {String} UTF-8 encoded string
+	 */
+	decodeUTF8: function (data) {
+		var bufView = Zotero.Utilities.Internal._decodeToUint8Array(data);
+		var decoder = new TextDecoder();
+		return decoder.decode(bufView);
+	},
+	
+	
+	/**
 	 * Return the byte length of a UTF-8 string
 	 *
 	 * http://stackoverflow.com/a/23329386
@@ -518,6 +547,311 @@ Zotero.Utilities.Internal = {
 		deferred.promise.then(() => clearTimeout(timeoutID));
 		
 		return deferred.promise;
+	},
+
+
+	/**
+	 * Takes in a document, creates a JS Sandbox and executes the SingleFile
+	 * extension to save the page as one single file without JavaScript.
+	 *
+	 * @param {Object} document
+	 * @param {String} destFile - Path for file to write to
+	 */
+	saveHTMLDocument: async function (document, destFile) {
+		// Create sandbox for SingleFile
+		var view = document.defaultView;
+		var sandbox = new Components.utils.Sandbox(view, { wantGlobalProperties: ["XMLHttpRequest", "fetch"] });
+		sandbox.window = view.window;
+		sandbox.document = sandbox.window.document;
+		sandbox.browser = false;
+		sandbox.__proto__ = sandbox.window;
+
+		sandbox.Zotero = Components.utils.cloneInto({ HTTP: {} }, sandbox);
+		sandbox.Zotero.debug = Components.utils.exportFunction(Zotero.debug, sandbox);
+		// Mostly copied from:
+		// resources/SingleFileZ/extension/lib/single-file/fetch/bg/fetch.js::fetchResource
+		sandbox.coFetch = Components.utils.exportFunction(
+			function (url, onDone) {
+				const xhrRequest = new XMLHttpRequest();
+				xhrRequest.withCredentials = true;
+				xhrRequest.responseType = "arraybuffer";
+				xhrRequest.onerror = (e) => {
+					let error = new Error(e.detail);
+					onDone(Components.utils.cloneInto(error, sandbox));
+				};
+				xhrRequest.onreadystatechange = () => {
+					if (xhrRequest.readyState == XMLHttpRequest.DONE) {
+						if (xhrRequest.status || xhrRequest.response.byteLength) {
+							let res = {
+								array: new Uint8Array(xhrRequest.response),
+								headers: { "content-type": xhrRequest.getResponseHeader("Content-Type") },
+								status: xhrRequest.status
+							};
+							// Ensure sandbox will have access to response by cloning
+							onDone(Components.utils.cloneInto(res, sandbox));
+						}
+						else {
+							let error = new Error('Bad Status or Length');
+							onDone(Components.utils.cloneInto(error, sandbox));
+						}
+					}
+				};
+				xhrRequest.open("GET", url, true);
+				xhrRequest.send();
+			},
+			sandbox
+		);
+
+		// First we try regular fetch, then proceed with fetch outside sandbox to evade CORS
+		// restrictions, partly from:
+		// resources/SingleFileZ/extension/lib/single-file/fetch/content/content-fetch.js::fetch
+		Components.utils.evalInSandbox(
+			`
+			ZoteroFetch = async function (url) {
+				try {
+					let response = await fetch(url, { cache: "force-cache" });
+					return response;
+				}
+				catch (error) {
+					let response = await new Promise((resolve, reject) => {
+						coFetch(url, (response) => {
+							if (response.status) {
+								resolve(response);
+							}
+							else {
+								Zotero.debug("Error retrieving url: " + url);
+								Zotero.debug(response.message);
+								reject();
+							}
+						});
+					});
+
+					return {
+						status: response.status,
+						headers: { get: headerName => response.headers[headerName] },
+						arrayBuffer: async () => response.array.buffer
+					};
+				}
+			};`,
+			sandbox
+		);
+		
+		const SCRIPTS = [
+			// This first script replace in the INDEX_SCRIPTS from the single file cli loader
+			"lib/single-file/index.js",
+
+			// Rest of the scripts (does not include WEB_SCRIPTS, those are handled in build process)
+			"lib/single-file/processors/hooks/content/content-hooks.js",
+			"lib/single-file/processors/hooks/content/content-hooks-frames.js",
+			"lib/single-file/processors/frame-tree/content/content-frame-tree.js",
+			"lib/single-file/processors/lazy/content/content-lazy-loader.js",
+			"lib/single-file/single-file-util.js",
+			"lib/single-file/single-file-helper.js",
+			"lib/single-file/vendor/css-tree.js",
+			"lib/single-file/vendor/html-srcset-parser.js",
+			"lib/single-file/vendor/css-minifier.js",
+			"lib/single-file/vendor/css-font-property-parser.js",
+			"lib/single-file/vendor/css-unescape.js",
+			"lib/single-file/vendor/css-media-query-parser.js",
+			"lib/single-file/modules/html-minifier.js",
+			"lib/single-file/modules/css-fonts-minifier.js",
+			"lib/single-file/modules/css-fonts-alt-minifier.js",
+			"lib/single-file/modules/css-matched-rules.js",
+			"lib/single-file/modules/css-medias-alt-minifier.js",
+			"lib/single-file/modules/css-rules-minifier.js",
+			"lib/single-file/modules/html-images-alt-minifier.js",
+			"lib/single-file/modules/html-serializer.js",
+			"lib/single-file/single-file-core.js",
+			"lib/single-file/single-file.js",
+
+			// Web SCRIPTS
+			"lib/single-file/processors/hooks/content/content-hooks-frames-web.js",
+			"lib/single-file/processors/hooks/content/content-hooks-web.js",
+		];
+
+		const { loadSubScript } = Components.classes['@mozilla.org/moz/jssubscript-loader;1']
+			.getService(Ci.mozIJSSubScriptLoader);
+
+		Zotero.debug('Injecting single file scripts');
+		// Run all the scripts of SingleFile scripts in Sandbox
+		SCRIPTS.forEach(
+			script => loadSubScript('resource://zotero/SingleFileZ/' + script, sandbox)
+		);
+		
+		await Zotero.Promise.delay(1500);
+		
+		// Use SingleFile to retrieve the html
+		// These are defaults from SingleFileZ
+		// Located in: resources/SingleFileZ/extension/core/bg/config.js
+		// Only change is removeFrames to true (often ads that take a long time)
+		const pageData = await Components.utils.evalInSandbox(
+			`this.singlefile.lib.getPageData({
+				removeHiddenElements: true,
+				removeUnusedStyles: true,
+				removeUnusedFonts: true,
+				removeFrames: true,
+				removeImports: true,
+				removeScripts: true,
+				compressHTML: true,
+				compressCSS: false,
+				loadDeferredImages: true,
+				loadDeferredImagesMaxIdleTime: 1500,
+				loadDeferredImagesBlockCookies: false,
+				loadDeferredImagesBlockStorage: false,
+				loadDeferredImagesKeepZoomLevel: true,
+				filenameTemplate: "{page-title} ({date-iso} {time-locale}).html",
+				infobarTemplate: "",
+				includeInfobar: false,
+				confirmInfobarContent: false,
+				autoClose: false,
+				confirmFilename: false,
+				filenameConflictAction: "uniquify",
+				filenameMaxLength: 192,
+				filenameReplacementCharacter: "_",
+				contextMenuEnabled: true,
+				tabMenuEnabled: true,
+				browserActionMenuEnabled: true,
+				shadowEnabled: true,
+				logsEnabled: true,
+				progressBarEnabled: true,
+				maxResourceSizeEnabled: false,
+				maxResourceSize: 10,
+				removeAudioSrc: true,
+				removeVideoSrc: true,
+				displayInfobar: true,
+				displayStats: false,
+				backgroundSave: true,
+				autoSaveDelay: 1,
+				autoSaveLoad: false,
+				autoSaveUnload: false,
+				autoSaveLoadOrUnload: true,
+				autoSaveRepeat: false,
+				autoSaveRepeatDelay: 10,
+				removeAlternativeFonts: true,
+				removeAlternativeMedias: true,
+				removeAlternativeImages: true,
+				saveRawPage: false,
+				saveToGDrive: false,
+				forceWebAuthFlow: false,
+				extractAuthCode: true,
+				insertTextBody: true,
+				resolveFragmentIdentifierURLs: false,
+				userScriptEnabled: false,
+				saveCreatedBookmarks: false,
+				ignoredBookmarkFolders: [],
+				replaceBookmarkURL: true,
+				saveFavicon: true,
+				includeBOM: false
+				},
+				{ fetch: ZoteroFetch }
+			)`,
+			sandbox
+		);
+
+		// Write main HTML file to disk
+		await Zotero.File.putContentsAsync(destFile, pageData.content);
+
+		// Write resources to disk
+		let tmpDirectory = OS.Path.dirname(destFile);
+		await this.saveSingleFileResources(tmpDirectory, pageData.resources, "");
+
+		Components.utils.nukeSandbox(sandbox);
+	},
+
+
+	/**
+	 * Save all resources to support SingleFile webpage
+	 *
+	 * @param {String} tmpDirectory - Path to location of attachment root
+	 * @param {Object} resources - Resources from SingleFile pageData object
+	 * @param {String} prefix - Recursive structure that is initially blank
+	 */
+	saveSingleFileResources: async function (tmpDirectory, resources, prefix) {
+		// This looping/recursion structure comes from:
+		// SingleFileZ/extension/core/bg/compression.js::addPageResources
+		await Zotero.Promise.all(Object.keys(resources).map(
+			(resourceType) => {
+				return Zotero.Promise.all(resources[resourceType].map(
+					async (data) => {
+						// Frames have whole new set of resources
+						// We handle these by recursion
+						if (resourceType === "frames") {
+							// Save frame HTML
+							await Zotero.Utilities.Internal._saveSingleFileResource(
+								data.content,
+								tmpDirectory,
+								prefix + data.name + "index.html",
+								data.binary
+							);
+							// Save frame resources
+							return Zotero.Utilities.Internal.saveSingleFileResources(tmpDirectory, data.resources, prefix + data.name);
+						}
+						return Zotero.Utilities.Internal._saveSingleFileResource(
+							data.content,
+							tmpDirectory,
+							prefix + data.name,
+							data.binary
+						);
+					}
+				));
+			}
+		));
+	},
+
+
+	/**
+	 * Save a individual resource from a SingleFile attachment
+	 *
+	 * @param {String} resource - The actual content to save to file
+	 * @param {String} tmpDirectory - Path to location of attachment root
+	 * @param {String} fileName - Filename for the piece to save under
+	 * @param {Boolean} binary - Whether the resource string is binary or not
+	 */
+	_saveSingleFileResource: async (resource, tmpDirectory, fileName, binary) => {
+		Zotero.debug('Saving resource: ' + fileName);
+		// This seems weird, but it is because SingleFileZ gives us path filenames
+		// (e.g. images/0.png). We want to know if the directory 'images' exists.
+		let filePath = OS.Path.join(tmpDirectory, fileName);
+		let fileDirectory = OS.Path.dirname(filePath);
+
+		// If the directory doesn't exist, make it
+		await OS.File.makeDir(fileDirectory, {
+			unixMode: 0o755,
+			from: tmpDirectory
+		});
+
+		// Binary string from Connector
+		if (typeof resource === "string" && binary) {
+			Components.utils.importGlobalProperties(["Blob"]);
+			let resourceBlob = new Blob([Zotero.Utilities.Internal._decodeToUint8Array(resource)]);
+			await Zotero.File.putContentsAsync(
+				filePath,
+				resourceBlob
+			);
+		}
+		// Uint8Array from hidden browser sandbox
+		else if (Object.prototype.toString.call(resource) === "[object Uint8Array]") {
+			let data = Components.utils.waiveXrays(resource);
+			// Write to disk
+			let is = Components.classes["@mozilla.org/io/arraybuffer-input-stream;1"]
+				.createInstance(Components.interfaces.nsIArrayBufferInputStream);
+			is.setData(data.buffer, 0, data.byteLength);
+			// Write to disk
+			await Zotero.File.putContentsAsync(
+				filePath,
+				is
+			);
+		}
+		else if (resource === undefined) {
+			Zotero.debug('Error saving resource: ' + fileName);
+		}
+		else {
+			// Otherwise a normal string
+			await Zotero.File.putContentsAsync(
+				filePath,
+				resource
+			);
+		}
 	},
 	
 	

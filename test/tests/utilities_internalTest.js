@@ -59,6 +59,15 @@ describe("Zotero.Utilities.Internal", function () {
 	});
 	
 	
+	describe("#decodeUTF8()", function () {
+		it("should properly decode binary string", async function () {
+			let text = String.fromCharCode.apply(null, new Uint8Array([226, 130, 172]));
+			let utf8 = Zotero.Utilities.Internal.decodeUTF8(text);
+			assert.equal(utf8, "€");
+		});
+	});
+	
+	
 	describe("#delayGenerator", function () {
 		var spy;
 		
