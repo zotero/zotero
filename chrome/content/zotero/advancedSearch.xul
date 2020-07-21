@@ -3,6 +3,7 @@
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/overlay.css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
 
 <!DOCTYPE window [
 	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd">
@@ -19,20 +20,18 @@
 	onload="ZoteroAdvancedSearch.onLoad()"
 	onunload="ZoteroAdvancedSearch.onUnload()"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
 	windowtype="zotero:search">
 	
 	<script src="include.js"/>
+	<script src="search/zoteroSearch.js"/>
 	<script src="advancedSearch.js"/>
 	
 	<vbox id="zotero-search-box-container" flex="1">
 		<vbox id="zotero-search-box-controls">
-			<zoterosearch id="zotero-search-box" oncommand="if (this.active) { ZoteroAdvancedSearch.search(); }" flex="1"/>
+			<html:div id="zotero-search-box" />
 			
-			<hbox id="zotero-search-buttons">
-				<button label="&zotero.search.search;" default="true" oncommand="ZoteroAdvancedSearch.search()"/>
-				<button label="&zotero.search.clear;" oncommand="ZoteroAdvancedSearch.clear()"/>
-				<button id="zotero-search-save" label="&zotero.search.saveSearch;" oncommand="ZoteroAdvancedSearch.save()"/>
-			</hbox>
+			<html:div id="zotero-search-buttons" />
 		</vbox>
 		
 		<tree id="zotero-items-tree" flex="1" hidecolumnpicker="true" seltype="multiple"

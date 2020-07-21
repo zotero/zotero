@@ -1,0 +1,32 @@
+
+.search-box {
+	flex: 1;
+	margin-left: 6px;
+}
+
+.flex-row-center {
+	display: flex;
+	align-items: center;
+}
+
+.flex-1 {
+	flex: 1;
+}
+
+.search-box > div {
+	line-height: 28px;
+}
+
+.search-condition-textbox {
+	display: inline-block;
+}
+
+.search-conditions {
+	-moz-appearance: groupbox;
+	padding: 8px 8px 3px;
+	margin: 0;
+}
+
+.zotero-clicky-minus[disabled="true"], .zotero-clicky-plus[disabled="true"] {
+	opacity: .5;
+}

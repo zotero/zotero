@@ -2,6 +2,7 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
 
 <!DOCTYPE bindings SYSTEM "chrome://zotero/locale/searchbox.dtd">
 
@@ -14,9 +15,11 @@
 	onload="doLoad();"
 	onunload="doUnload();"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
 	style="padding:2em">
 	
 	<script src="include.js"/>
+	<script src="search/zoteroSearch.js"/>
 	<script src="searchDialog.js"/>
 	
 	<vbox id="zotero-search-box-container" flex="1">
@@ -24,6 +27,6 @@
 			<label value="&zotero.search.name;"/>
 			<textbox id="search-name" width="275" maxlength="80"/>
 		</hbox>
-		<zoterosearch id="search-box" flex="1"/>
+		<html:div id="search-box" />
 	</vbox>
 </dialog>
