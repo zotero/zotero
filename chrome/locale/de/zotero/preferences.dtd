@@ -117,8 +117,8 @@
 <!ENTITY zotero.preferences.cite.styles "Stile">
 <!ENTITY zotero.preferences.cite.wordProcessors "Textverarbeitungsprogramme">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Klassische Ansicht beim Zitations-Dialog nutzen">
-<!ENTITY zotero.preferences.styleEditor "Zitierstil Editor">
-<!ENTITY zotero.preferences.stylePreview "Zitierstil Vorschau">
+<!ENTITY zotero.preferences.styleEditor "Zitierstil-Editor">
+<!ENTITY zotero.preferences.stylePreview "Zitierstil-Vorschau">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Stil Manager">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titel">

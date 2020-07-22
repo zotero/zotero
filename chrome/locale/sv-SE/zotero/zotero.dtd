@@ -92,7 +92,7 @@
 <!ENTITY zotero.items.menu.attach.note "Lägg till anteckning">
 <!ENTITY zotero.items.menu.attach "Lägg till bilaga">
 <!ENTITY zotero.items.menu.attach.link.uri "Bifoga länk till URI...">
-<!ENTITY zotero.items.menu.attach.file "Bifoga sparad kopia av filen...">
+<!ENTITY zotero.items.menu.attach.file "Bifoga Lagrad kopia av filen...">
 <!ENTITY zotero.items.menu.attach.fileLink "Bifoga länk till fil...">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Återställ till bibliotek">
@@ -120,7 +120,7 @@
 <!ENTITY zotero.toolbar.import.label "Importera...">
 <!ENTITY zotero.toolbar.importFromClipboard "Importera från urklipp">
 <!ENTITY zotero.toolbar.export.label "Exportera bibliotek...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF skanning">
 <!ENTITY zotero.toolbar.timeline.label "Skapa tidslinje">
 <!ENTITY zotero.toolbar.preferences.label "Inställningar...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Hjälp och dokumentation">

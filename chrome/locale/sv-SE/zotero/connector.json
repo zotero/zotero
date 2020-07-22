@@ -14,6 +14,9 @@
   "general_cancel": {
     "message": "Avbryt"
   },
+  "general_pleaseWait": {
+    "message": "Vänta…"
+  },
   "progressWindow_savingTo": {
     "message": "Spara till"
   },
@@ -54,10 +57,10 @@
     "message": "Aktivera spara i onlinebibliotek"
   },
   "integration_error_clientUpgrade": {
-    "message": "Webbaserad citering kräver $1 eller senare."
+    "message": "Webbaserad referenstagning kräver $1 eller senare."
   },
   "integration_error_connection": {
-    "message": "$1kunde inte kommunicera med $2 programmet. $2 måste vara igång för att möjliggöra webbaserad citering."
+    "message": "$1kunde inte kommunicera med $2 programmet. $2 måste vara igång för att möjliggöra webbaserad referenstagning."
   },
   "integration_googleDocs_unlinkBeforeSaving_warning": {
     "message": "Detta dokument har aktiva Zotero-referenser som visas som zotero.org-länkar i en nedladdad kopia."
@@ -67,6 +70,12 @@
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Ladda hem länkad version ändå"
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1 uppdaterar ditt dokument."
+  },
+  "integration_googleDocs_docxAlert": {
+    "message": "$1 integreringen är inte tillgänglig när du redigerar Microsoft Word .docx files direkt i Google Docs. Välj Arkiv → Spara som Google Docs för att aktivera denna funktionalitet.<br/><br/>Om du vill föra över ett Word-dokument med $1 referenser till Google Docs, se <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Flytta dokument mellan ordbehandlare</a>."
   },
   "general_saveTo": {
     "message": "Spara till $1"

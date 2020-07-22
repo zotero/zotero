@@ -65,8 +65,17 @@
   "integration_googleDocs_unlinkBeforeSaving_warning": {
     "message": "Ten dokument zawiera aktywne cytowania Zotero, które pojawią się w pobranej kopii jako odsyłacze zotero.org."
   },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Aby utworzyć wersję możliwą do współdzielenia, wybierz <b>Zapisz kopię…</b> z menu Plik, wybierz <b>Unlink Citations</b> z menu Zotero w nowym dokumencie, a nastepnie pobierz wersję dokumentu z odłączonymi cytowaniami. Zachowaj jednak oryginalny dokument z powiązanymi cytowaniami, w razie potrzeby dokonania w nim zmian w przyszłości."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Pobierz wersję z powiązanymi cytowaniami"
+  },
   "integration_googleDocs_updating": {
     "message": "$1 uaktualnia twój dokument."
+  },
+  "integration_googleDocs_docxAlert": {
+    "message": "Integracja z $1 nie jest dostępna podczas edycji plików .docx Microsoft Word bezpośrednio w Dokumentach Google. Wybierz Plik → Zapisz jako plik Dokumentów Google, aby włączyć tę funkcję.<br/><br/> Jeśli chcesz przesłać dokument Word z cytowaniami $1 do Dokumentów Google, zobacz intrukcję <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Moving Documents Between Word Processors</a>."
   },
   "general_saveTo": {
     "message": "Zapisz w $1"
