@@ -37,7 +37,10 @@ Zotero.DBConnection = function(dbNameOrPath) {
 	}
 	
 	this.MAX_BOUND_PARAMETERS = 999;
-	this.DB_CORRUPTION_STRING = "database disk image is malformed";
+	this.DB_CORRUPTION_STRINGS = [
+		"database disk image is malformed",
+		"2152857611"
+	];
 	
 	Components.utils.import("resource://gre/modules/Sqlite.jsm", this);
 	
@@ -870,7 +873,7 @@ Zotero.DBConnection.prototype.integrityCheck = Zotero.Promise.coroutine(function
 
 
 Zotero.DBConnection.prototype.isCorruptionError = function (e) {
-	return e.message.includes(this.DB_CORRUPTION_STRING);
+	return this.DB_CORRUPTION_STRINGS.some(x => e.message.includes(x));
 };
 
 
@@ -1120,7 +1123,7 @@ Zotero.DBConnection.prototype._getConnectionAsync = async function (options) {
 	
 	try {
 		if (await OS.File.exists(corruptMarker)) {
-			throw new Error(this.DB_CORRUPTION_STRING);
+			throw new Error(this.DB_CORRUPTION_STRINGS[0]);
 		}
 		this._connection = await Zotero.Promise.resolve(this.Sqlite.openConnection({
 			path: file
@@ -1134,7 +1137,7 @@ Zotero.DBConnection.prototype._getConnectionAsync = async function (options) {
 		
 		Zotero.logError(e);
 		
-		if (e.message.includes(this.DB_CORRUPTION_STRING)) {
+		if (this.DB_CORRUPTION_STRINGS.some(x => e.message.includes(x))) {
 			await this._handleCorruptionMarker();
 		}
 		else {
