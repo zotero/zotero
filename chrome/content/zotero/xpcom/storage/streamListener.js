@@ -42,25 +42,25 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 	_channel: null,
 	
 	// nsIProgressEventSink
-	onProgress: function (request, context, progress, progressMax) {
+	onProgress: function (request, progress, progressMax) {
 		Zotero.debug("onProgress with " + progress + "/" + progressMax);
 		this._onProgress(request, progress, progressMax);
 	},
 	
-	onStatus: function (request, context, status, statusArg) {
+	onStatus: function (request, status, statusArg) {
 		Zotero.debug('onStatus with ' + status);
 	},
 	
 	// nsIRequestObserver
 	// Note: For uploads, this isn't called until data is done uploading
-	onStartRequest: function (request, context) {
+	onStartRequest: function (request) {
 		Zotero.debug('onStartRequest');
 		this._response = "";
 		
 		this._onStart(request);
 	},
 	
-	onStopRequest: function (request, context, status) {
+	onStopRequest: function (request, status) {
 		Zotero.debug('onStopRequest with ' + status);
 		
 		// Some errors from https://developer.mozilla.org/en-US/docs/Table_Of_Errors
@@ -132,7 +132,7 @@ Zotero.Sync.Storage.StreamListener.prototype = {
 	},
 	
 	// nsIStreamListener
-	onDataAvailable: function (request, context, stream, sourceOffset, length) {
+	onDataAvailable: function (request, stream, sourceOffset, length) {
 		Zotero.debug('onDataAvailable');
 		var scriptableInputStream = 
 			Components.classes["@mozilla.org/scriptableinputstream;1"]

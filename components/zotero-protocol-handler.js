@@ -971,11 +971,11 @@ function ZoteroProtocolHandler() {
 	ConnectorChannel.prototype.__defineGetter__("originalURI", function() { return this.URI });
 	ConnectorChannel.prototype.__defineSetter__("originalURI", function() { });
 	
-	ConnectorChannel.prototype.asyncOpen = function(streamListener, context) {
+	ConnectorChannel.prototype.asyncOpen = function(streamListener) {
 		if(this.loadGroup) this.loadGroup.addRequest(this, null);
-		streamListener.onStartRequest(this, context);
-		streamListener.onDataAvailable(this, context, this._stream, 0, this.contentLength);
-		streamListener.onStopRequest(this, context, this.status);
+		streamListener.onStartRequest(this);
+		streamListener.onDataAvailable(this, this._stream, 0, this.contentLength);
+		streamListener.onStopRequest(this, this.status);
 		this._isPending = false;
 		if(this.loadGroup) this.loadGroup.removeRequest(this, null, 0);
 	}
@@ -1360,7 +1360,7 @@ function AsyncChannel(uri, gen) {
 }
 
 AsyncChannel.prototype = {
-	asyncOpen: Zotero.Promise.coroutine(function* (streamListener, context) {
+	asyncOpen: Zotero.Promise.coroutine(function* (streamListener) {
 		if (this.loadGroup) this.loadGroup.addRequest(this, null);
 		
 		var channel = this;
@@ -1373,17 +1373,17 @@ AsyncChannel.prototype = {
 		});
 		
 		var listenerWrapper = {
-			onStartRequest: function (request, context) {
+			onStartRequest: function (request) {
 				//Zotero.debug("Starting request");
-				streamListener.onStartRequest(channel, context);
+				streamListener.onStartRequest(channel);
 			},
-			onDataAvailable: function (request, context, inputStream, offset, count) {
+			onDataAvailable: function (request, inputStream, offset, count) {
 				//Zotero.debug("onDataAvailable");
-				streamListener.onDataAvailable(channel, context, inputStream, offset, count);
+				streamListener.onDataAvailable(channel, inputStream, offset, count);
 			},
-			onStopRequest: function (request, context, status) {
+			onStopRequest: function (request, status) {
 				//Zotero.debug("Stopping request");
-				streamListener.onStopRequest(channel, context, status);
+				streamListener.onStopRequest(channel, status);
 				channel._isPending = false;
 				if (status == 0) {
 					resolve();
@@ -1405,15 +1405,15 @@ AsyncChannel.prototype = {
 			if (typeof data == 'string') {
 				//Zotero.debug("AsyncChannel: Got string from generator");
 				
-				listenerWrapper.onStartRequest(this, context);
+				listenerWrapper.onStartRequest(this);
 				
 				let converter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"]
 					.createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
 				converter.charset = "UTF-8";
 				let inputStream = converter.convertToInputStream(data);
-				listenerWrapper.onDataAvailable(this, context, inputStream, 0, inputStream.available());
+				listenerWrapper.onDataAvailable(this, inputStream, 0, inputStream.available());
 				
-				listenerWrapper.onStopRequest(this, context, this.status);
+				listenerWrapper.onStopRequest(this, this.status);
 			}
 			// If an async input stream is given, pass the data asynchronously to the stream listener
 			else if (data instanceof Ci.nsIAsyncInputStream) {
@@ -1426,7 +1426,7 @@ AsyncChannel.prototype = {
 				catch (e) {
 					pump.init(data, -1, -1, 0, 0, true);
 				}
-				pump.asyncRead(listenerWrapper, context);
+				pump.asyncRead(listenerWrapper, null);
 			}
 			else if (data instanceof Ci.nsIFile || data instanceof Ci.nsIURI) {
 				if (data instanceof Ci.nsIFile) {
@@ -1452,14 +1452,14 @@ AsyncChannel.prototype = {
 						return;
 					}
 					
-					listenerWrapper.onStartRequest(channel, context);
+					listenerWrapper.onStartRequest(channel);
 					try {
-						listenerWrapper.onDataAvailable(channel, context, inputStream, 0, inputStream.available());
+						listenerWrapper.onDataAvailable(channel, inputStream, 0, inputStream.available());
 					}
 					catch (e) {
 						reject(e);
 					}
-					listenerWrapper.onStopRequest(channel, context, status);
+					listenerWrapper.onStopRequest(channel, status);
 				});
 			}
 			else if (data === undefined) {
@@ -1478,7 +1478,7 @@ AsyncChannel.prototype = {
 		} catch (e) {
 			Zotero.debug(e, 1);
 			if (channel._isPending) {
-				streamListener.onStopRequest(channel, context, Components.results.NS_ERROR_FAILURE);
+				streamListener.onStopRequest(channel, Components.results.NS_ERROR_FAILURE);
 				channel._isPending = false;
 			}
 			throw e;

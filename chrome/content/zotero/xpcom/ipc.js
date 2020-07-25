@@ -431,7 +431,7 @@ Zotero.IPC.Pipe.DeferredOpen = function(file, callback) {
 Zotero.IPC.Pipe.DeferredOpen.prototype = {
 	"onStartRequest":function() {},
 	"onStopRequest":function() {},
-	"onDataAvailable":function(request, context, inputStream, offset, count) {
+	onDataAvailable: function (request, inputStream, offset, count) {
 		// read from pipe
 		var converterInputStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
 			.createInstance(Components.interfaces.nsIConverterInputStream);

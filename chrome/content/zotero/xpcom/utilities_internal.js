@@ -251,16 +251,16 @@ Zotero.Utilities.Internal = {
 				size: 0,
 				data: '',
 				
-				onStartRequest: function (request, context) {},
+				onStartRequest: function (request) {},
 				
-				onStopRequest: function (request, context, status) {
+				onStopRequest: function (request, status) {
 					this.binaryInputStream.close();
 					delete this.binaryInputStream;
 					
 					deferred.resolve(this.data);
 				},
 				
-				onDataAvailable: function (request, context, inputStream, offset, count) {
+				onDataAvailable: function (request, inputStream, offset, count) {
 					this.size += count;
 					
 					this.binaryInputStream = Components.classes["@mozilla.org/binaryinputstream;1"]
@@ -317,13 +317,13 @@ Zotero.Utilities.Internal = {
 			{
 				data: '',
 				
-				onStartRequest: function (request, context) {},
+				onStartRequest: function (request) {},
 				
-				onStopRequest: function (request, context, status) {
+				onStopRequest: function (request, status) {
 					deferred.resolve(this.data);
 				},
 				
-				onDataAvailable: function (request, context, inputStream, offset, count) {
+				onDataAvailable: function (request, inputStream, offset, count) {
 					this.data += NetUtil.readInputStreamToString(
 						inputStream,
 						inputStream.available(),

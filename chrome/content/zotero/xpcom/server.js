@@ -175,12 +175,12 @@ Zotero.Server.DataListener = function(iStream, oStream) {
  * called when a request begins (although the request should have begun before
  * the DataListener was generated)
  */
-Zotero.Server.DataListener.prototype.onStartRequest = function(request, context) {}
+Zotero.Server.DataListener.prototype.onStartRequest = function(request) {}
 
 /*
  * called when a request stops
  */
-Zotero.Server.DataListener.prototype.onStopRequest = function(request, context, status) {
+Zotero.Server.DataListener.prototype.onStopRequest = function(request, status) {
 	this.iStream.close();
 	this.oStream.close();
 }
@@ -188,8 +188,7 @@ Zotero.Server.DataListener.prototype.onStopRequest = function(request, context, 
 /*
  * called when new data is available
  */
-Zotero.Server.DataListener.prototype.onDataAvailable = function(request, context,
-                                                             inputStream, offset, count) {
+Zotero.Server.DataListener.prototype.onDataAvailable = function (request, inputStream, offset, count) {
 	var readData = NetUtil.readInputStreamToString(inputStream, count);
 	
 	if(this.headerFinished) {	// reading body

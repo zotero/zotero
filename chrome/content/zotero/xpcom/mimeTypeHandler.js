@@ -216,14 +216,14 @@ Zotero.MIMETypeHandler = new function () {
 	/**
 	 * Called when the request is started; we ignore this
 	 */
-	_StreamListener.prototype.onStartRequest = function(channel, context) {}
+	_StreamListener.prototype.onStartRequest = function(channel) {}
 	
 
 	/**
 	 * Called when there's data available; we collect this data and keep it until the request is
 	 * done
 	 */
-	_StreamListener.prototype.onDataAvailable = function(request, context, inputStream, offset, count) {
+	_StreamListener.prototype.onDataAvailable = function(request, inputStream, offset, count) {
 		Zotero.debug(count + " bytes available");
 		
 		if (!this._storageStream) {
@@ -244,7 +244,7 @@ Zotero.MIMETypeHandler = new function () {
 	/**
 	 * Called when the request is done
 	 */
-	_StreamListener.prototype.onStopRequest = async function (channel, context, status) {
+	_StreamListener.prototype.onStopRequest = async function (channel, status) {
 		Zotero.debug("charset is " + channel.contentCharset);
 		
 		var inputStream = this._storageStream.newInputStream(0);
@@ -289,11 +289,11 @@ Zotero.MIMETypeHandler = new function () {
 				this._contentType, this._request, frontWindow, null
 			);
 			if (streamListener) {
-				streamListener.onStartRequest(channel, context);
+				streamListener.onStartRequest(channel);
 				streamListener.onDataAvailable(
-					this._request, context, inputStream, 0, this._storageStream.length
+					this._request, inputStream, 0, this._storageStream.length
 				);
-				streamListener.onStopRequest(channel, context, status);
+				streamListener.onStopRequest(channel, status);
 			}
 		}
 		

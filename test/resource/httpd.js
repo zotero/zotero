@@ -4081,12 +4081,12 @@ Response.prototype =
     var response = this;
     var copyObserver =
       {
-        onStartRequest: function(request, cx)
+        onStartRequest: function(request)
         {
           dumpn("*** preamble copying started");
         },
 
-        onStopRequest: function(request, cx, statusCode)
+        onStopRequest: function(request, statusCode)
         {
           dumpn("*** preamble copying complete " +
                 "[status=0x" + statusCode.toString(16) + "]");
@@ -4145,12 +4145,12 @@ Response.prototype =
     var response = this;
     var copyObserver =
       {
-        onStartRequest: function(request, context)
+        onStartRequest: function(request)
         {
           dumpn("*** onStartRequest");
         },
 
-        onStopRequest: function(request, cx, statusCode)
+        onStopRequest: function(request, statusCode)
         {
           dumpn("*** onStopRequest [status=0x" + statusCode.toString(16) + "]");
 
@@ -4275,7 +4275,7 @@ function WriteThroughCopier(source, sink, observer, context)
   // start copying
   try
   {
-    observer.onStartRequest(this, context);
+    observer.onStartRequest(this);
     this._waitToReadData();
     this._waitForSinkClosure();
   }
@@ -4688,7 +4688,7 @@ WriteThroughCopier.prototype =
           self._completed = true;
           try
           {
-            self._observer.onStopRequest(self, self._context, self.status);
+            self._observer.onStopRequest(self, self.status);
           }
           catch (e)
           {
