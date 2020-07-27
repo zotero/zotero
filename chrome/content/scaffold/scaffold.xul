@@ -26,6 +26,7 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://scaffold/skin/scaffold.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform-version/content/style.css"?>
 
 <!DOCTYPE window SYSTEM "chrome://scaffold/locale/scaffold.dtd">
 

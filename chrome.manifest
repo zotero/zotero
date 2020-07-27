@@ -6,6 +6,11 @@ content	zotero-platform		chrome/content/zotero-platform/unix/      os=SunOS
 content	zotero-platform		chrome/content/zotero-platform/unix/      os=FreeBSD
 content	zotero-platform		chrome/content/zotero-platform/unix/      os=OpenBSD
 
+content	zotero-platform-version chrome/content/zotero-platform/default-version/
+# Big Sur shows up as 10.0
+content	zotero-platform-version chrome/content/zotero-platform/mac-big-sur/ os=Darwin osversion=10.0
+#content	zotero-platform-version chrome/content/zotero-platform/mac-big-sur/ os=Darwin
+
 resource zotero				resource/
 
 # Keep in sync with locale.js and zotero-standalone-build:assets/multilocale.txt

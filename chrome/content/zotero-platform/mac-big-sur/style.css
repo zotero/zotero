@@ -1,0 +1,12 @@
+/* Use standard tab appearance for item pane tabs */
+#zotero-pane #zotero-view-tabbox > tabs > tab {
+	-moz-appearance: tab;
+}
+
+/* Active tab label color in item pane and elsewhere */
+#zotero-pane tabs#zotero-editpane-tabs > tab[visuallyselected="true"][selected="true"] hbox > .tab-text,
+#zotero-prefs tab[visuallyselected="true"]:not(:-moz-window-inactive),
+tabs > tab[visuallyselected="true"] hbox > .tab-text {
+	color: black !important;
+	text-shadow: none;
+}
