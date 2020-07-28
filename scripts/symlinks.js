@@ -38,7 +38,7 @@ async function getSymlinks(source, options, signatures) {
 		const dest = path.join('build', f);
 		try {
 			if (isWindows) {
-				await fs.copy(f, dest);
+				await fs.copy(f, dest, { dereference: true });
 			} else {
 				await fs.ensureSymlink(f, dest);
 			}
