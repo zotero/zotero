@@ -111,16 +111,22 @@ const formatDirsForMatcher = dirs => {
 	return dirs.length > 1 ? `{${dirs.join(',')}}` : dirs[0];
 };
 
+function comparePaths(actualPath, testedPath) {
+	// compare paths after normalizing os-specific path separator
+	return path.normalize(actualPath) === path.normalize(testedPath);
+}
+
 module.exports = {
+	cleanUp,
+	comparePaths,
+	compareSignatures,
+	formatDirsForMatcher,
+	getFileSignature,
+	getPathRelativeTo,
+	getSignatures,
 	isWindows,
 	onError,
 	onProgress,
 	onSuccess,
-	cleanUp,
-	getSignatures,
-	getFileSignature,
-	compareSignatures,
 	writeSignatures,
-	getPathRelativeTo,
-	formatDirsForMatcher
 };
