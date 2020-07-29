@@ -108,42 +108,46 @@ const Wizard = ({ canAdvance = true, canRewind = true, canCancel = true, classNa
 
 	return (
 		<div className={ cx('wizard', className, { focused: hasFocus }) }>
-			<div className="wizard-body">
 				{ currentPage }
-			</div>
 			<div className="wizard-controls">
-				<div className="left">
+				<div className="cancel-controls">
 					<button
+						className="cancel-button"
 						disabled={ !canCancel }
 						onClick={ handleCancel }
 						title={ Zotero.getString('general.cancel') }
 					>
-						{ Zotero.getString('general.cancel') }
+						<span>{ Zotero.getString('general.cancel') }</span>
 					</button>
 				</div>
-				<div className="right">
-					<button
-						disabled={ !canRewind }
-						onClick={ handleGoBack }
-						title={ Zotero.getString('general.goBack') }
-					>
-						{ Zotero.getString('general.goBack') }
-					</button>
+				<div className="next-back-controls">
+					{ !Zotero.isLinux && (
+						<button
+							className="back-button"
+							disabled={ !canRewind }
+							onClick={ handleGoBack }
+							title={ Zotero.isMac ? Zotero.getString('general.goBack') : Zotero.getString('general.back') }
+						>
+							<span>{ Zotero.isMac ? Zotero.getString('general.goBack') : Zotero.getString('general.back') }</span>
+						</button>
+					) }
 					{ !isLastPage && (
 						<button
+							className="continue-button"
 							disabled={ !canAdvance }
 							onClick={ handleContinue }
-							title={ Zotero.getString('general.continue') }
+							title={ Zotero.isMac ? Zotero.getString('general.continue') : Zotero.getString('general.next') }
 						>
-							{ Zotero.getString('general.continue') }
+							<span>{ Zotero.isMac ? Zotero.getString('general.continue') : Zotero.getString('general.next') }</span>
 						</button>
 					) }
 					{ isLastPage && (
 						<button
+							className="done-button"
 							onClick={ handleDone }
-							title={ Zotero.getString('general.done') }
+							title={ Zotero.isMac ? Zotero.getString('general.done') : Zotero.getString('general.finish') }
 						>
-							{ Zotero.getString('general.done') }
+							<span>{ Zotero.isMac ? Zotero.getString('general.done') : Zotero.getString('general.finish') }</span>
 						</button>
 					) }
 				</div>

@@ -1,10 +1,10 @@
 .wizard {
+	padding: 0;
 	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
 	height: 100%;
 	justify-content: space-between;
-	padding: 32px;
 	width: 100%;
 
 	button {
@@ -12,24 +12,35 @@
 	}
 }
 
+.wizard-header {
+	box-sizing: border-box;
+	display: flex;
+	height: 56px;
+	padding: 0 32px;
+	flex-direction: column;
+}
+
+.wizard-header-label {
+	margin: auto 0 0;
+	font-size: 16px;
+	font-weight: bold;
+}
+
 .wizard-body {
 	flex: 1 1 auto;
+	padding: 12px 32px;
 }
 
 .wizard-controls {
 	flex: 0 0 24px;
+	padding: 16px 32px 16px;
 	display: flex;
 
-	.left, .right {
+	.cancel-controls, .next-back-controls {
 		flex: 1 1 50%;
 	}
 
-	.right {
+	.next-back-controls {
 		text-align: right;
 	}
-}
-
-.wizard-header-label {
-	font-size: 16px;
-	font-weight: bold;
 }

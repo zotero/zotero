@@ -1,0 +1,46 @@
+.wizard {
+	button {
+		box-sizing: border-box;
+		min-width: 72px;
+	}
+}
+
+.wizard-header {
+	padding: 8px;
+	height: 68px;
+	background: $wizard-header-bg;
+	border-bottom: 1px solid #9e9e9e;
+	box-shadow: 0px 1px 0px #f9f9f9;
+}
+
+.wizard-controls {
+	border-top: 1px solid #9e9e9e;
+	box-shadow: 0px 1px 0px #f9f9f9 inset;
+
+	flex-direction: row-reverse;
+
+	.cancel-controls {
+		flex: 1 1 100px;
+		text-align: right;
+	}
+
+	.next-back-controls {
+		flex: 1 1 calc(100% - 100px);
+	}
+
+	.continue-button > span {
+		&::after {
+			content: " >";
+			font-size: .75em;
+			vertical-align: .25em;
+		}
+	}
+
+	.back-button > span {
+		&::before {
+			content: "< ";
+			font-size: .75em;
+			vertical-align: .25em;
+		}
+	}
+}
