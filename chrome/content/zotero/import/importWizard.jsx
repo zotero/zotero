@@ -121,7 +121,7 @@ const ImportWizard = memo(({ libraryID }) => {
 		wizardRef.current.advance();
 	}, []);
 
-	const skipToDonePage = useCallback((label, description, showReportErrorButton) => {
+	const skipToDonePage = useCallback((label, description, showReportErrorButton = false) => {
 		setDoneLabel(label);
 		setShouldShowErrorButton(showReportErrorButton);
 		setDoneDescription(description);

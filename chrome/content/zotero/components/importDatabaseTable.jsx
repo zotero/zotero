@@ -118,6 +118,7 @@ const ImportDatabaseTable = ({ files, onChange }, ref) => {
 						data-key={ index }
 						key={ index }
 						onClick={ handleClick }
+						role="row"
 					>
 						<div
 							style={ { width: '60%' } }
