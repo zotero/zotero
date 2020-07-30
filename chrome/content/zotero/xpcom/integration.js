@@ -211,7 +211,7 @@ Zotero.Integration = new function() {
 					await document.setDocumentData(session.data.serialize());
 					// And any citations marked for processing (like retraction warning ignore flag changes)
 					if (Object.keys(session.processIndices).length) {
-						session.fields.updateDocument(FORCE_CITATIONS_FALSE, false, false);
+						session.updateDocument(FORCE_CITATIONS_FALSE, false, false);
 					}
 				}
 			}
@@ -422,9 +422,13 @@ Zotero.Integration = new function() {
 			session.agent = agent;
 			session._doc = doc;
 			session.progressBar = progressBar;
-			// TODO: this is a pretty awful circular dependence
-			session.fields = new Zotero.Integration.Fields(session, doc);
-			
+			session._fields = null;
+			session.ignoreEmptyBibliography = true;
+			session.progressCallback = null;
+			session._removeCodeFields = {};
+			session._deleteFields = {};
+			session._bibliographyFields = [];
+
 			if (dataString == EXPORTED_DOCUMENT_MARKER) {
 				Zotero.Integration.currentSession = session;
 				data = await session.importDocument();
@@ -548,13 +552,13 @@ Zotero.Integration.Interface = function(app, doc, session) {
 Zotero.Integration.Interface.prototype.addCitation = Zotero.Promise.coroutine(function* () {
 	yield this._session.init(false, false);
 	
-	let [idx, field, citation] = yield this._session.fields.addEditCitation(null);
+	let [idx, field, citation] = yield this._session.cite(null);
 	yield this._session.addCitation(idx, yield field.getNoteIndex(), citation);
 	
 	if (this._session.data.prefs.delayCitationUpdates) {
 		return this._session.writeDelayedCitation(field, citation);
 	} else {
-		return this._session.fields.updateDocument(FORCE_CITATIONS_FALSE, false, false);
+		return this._session.updateDocument(FORCE_CITATIONS_FALSE, false, false);
 	}
 });
 
@@ -580,12 +584,12 @@ Zotero.Integration.Interface.prototype.addEditCitation = async function (docFiel
 	await this._session.init(false, false);
 	docField = docField || await this._doc.cursorInField(this._session.data.prefs['fieldType']);
 
-	let [idx, field, citation] = await this._session.fields.addEditCitation(docField);
+	let [idx, field, citation] = await this._session.cite(docField);
 	await this._session.addCitation(idx, await field.getNoteIndex(), citation);
 	if (this._session.data.prefs.delayCitationUpdates) {
 		return this._session.writeDelayedCitation(field, citation);
 	} else {
-		return this._session.fields.updateDocument(FORCE_CITATIONS_FALSE, false, false);
+		return this._session.updateDocument(FORCE_CITATIONS_FALSE, false, false);
 	}
 };
 
@@ -602,7 +606,7 @@ Zotero.Integration.Interface.prototype.addBibliography = Zotero.Promise.coroutin
 			"integration.error.title");
 	}
 	
-	let field = new Zotero.Integration.BibliographyField(yield this._session.fields.addField());
+	let field = new Zotero.Integration.BibliographyField(yield this._session.addField());
 	var citationsMode = FORCE_CITATIONS_FALSE;
 	yield field.clearCode();
 	if(this._session.data.prefs.delayCitationUpdates) {
@@ -610,8 +614,8 @@ Zotero.Integration.Interface.prototype.addBibliography = Zotero.Promise.coroutin
 		this._session.reload = true;
 		citationsMode = FORCE_CITATIONS_REGENERATE;
 	}
-	yield this._session.fields.updateSession(citationsMode);
-	yield this._session.fields.updateDocument(citationsMode, true, false);
+	yield this._session.updateFromDocument(citationsMode);
+	yield this._session.updateDocument(citationsMode, true, false);
 })
 
 /**
@@ -621,7 +625,7 @@ Zotero.Integration.Interface.prototype.addBibliography = Zotero.Promise.coroutin
 Zotero.Integration.Interface.prototype.editBibliography = Zotero.Promise.coroutine(function*() {
 	// Make sure we have a bibliography
 	yield this._session.init(true, false);
-	var fields = yield this._session.fields.get();
+	var fields = yield this._session.getFields();
 	
 	var bibliographyField;
 	for (let i = fields.length-1; i >= 0; i--) {
@@ -643,9 +647,9 @@ Zotero.Integration.Interface.prototype.editBibliography = Zotero.Promise.corouti
 		this._session.reload = true;
 		citationsMode = FORCE_CITATIONS_REGENERATE;
 	}
-	yield this._session.fields.updateSession(citationsMode);
+	yield this._session.updateFromDocument(citationsMode);
 	yield this._session.editBibliography(bibliography);
-	yield this._session.fields.updateDocument(citationsMode, true, false);
+	yield this._session.updateDocument(citationsMode, true, false);
 });
 
 
@@ -658,7 +662,7 @@ Zotero.Integration.Interface.prototype.addEditBibliography = Zotero.Promise.coro
 			"integration.error.title");
 	}
 	
-	var fields = yield this._session.fields.get();
+	var fields = yield this._session.getFields();
 	
 	var bibliographyField;
 	for (let i = fields.length-1; i >= 0; i--) {
@@ -671,7 +675,7 @@ Zotero.Integration.Interface.prototype.addEditBibliography = Zotero.Promise.coro
 	
 	var newBibliography = !bibliographyField;
 	if (!bibliographyField) {
-		bibliographyField = new Zotero.Integration.BibliographyField(yield this._session.fields.addField());
+		bibliographyField = new Zotero.Integration.BibliographyField(yield this._session.addField());
 		yield bibliographyField.clearCode();
 	}
 	
@@ -682,9 +686,9 @@ Zotero.Integration.Interface.prototype.addEditBibliography = Zotero.Promise.coro
 		this._session.reload = true;
 		citationsMode = FORCE_CITATIONS_REGENERATE;
 	}
-	yield this._session.fields.updateSession(citationsMode);
+	yield this._session.updateFromDocument(citationsMode);
 	if (!newBibliography) yield this._session.editBibliography(bibliography);
-	yield this._session.fields.updateDocument(citationsMode, true, false);
+	yield this._session.updateDocument(citationsMode, true, false);
 });
 
 /**
@@ -695,8 +699,8 @@ Zotero.Integration.Interface.prototype.refresh = async function() {
 	await this._session.init(true, false)
 	
 	this._session.reload = this._session.reload || this._session.data.prefs.delayCitationUpdates;
-	await this._session.fields.updateSession(FORCE_CITATIONS_REGENERATE)
-	await this._session.fields.updateDocument(FORCE_CITATIONS_REGENERATE, true, false);
+	await this._session.updateFromDocument(FORCE_CITATIONS_REGENERATE);
+	await this._session.updateDocument(FORCE_CITATIONS_REGENERATE, true, false);
 }
 
 /**
@@ -704,10 +708,9 @@ Zotero.Integration.Interface.prototype.refresh = async function() {
  * @return {Promise}
  */
 Zotero.Integration.Interface.prototype.removeCodes = Zotero.Promise.coroutine(function* () {
-	var me = this;
 	yield this._session.init(true, false)
-	let fields = yield this._session.fields.get()
-	var result = yield me._doc.displayAlert(Zotero.getString("integration.removeCodesWarning"),
+	let fields = yield this._session.getFields()
+	var result = yield this._doc.displayAlert(Zotero.getString("integration.removeCodesWarning"),
 				DIALOG_ICON_WARNING, DIALOG_BUTTONS_OK_CANCEL);
 	if (result) {
 		for(var i=fields.length-1; i>=0; i--) {
@@ -730,7 +733,7 @@ Zotero.Integration.Interface.prototype.setDocPrefs = Zotero.Promise.coroutine(fu
 	} else {
 		// Can get fields while dialog is open
 		oldData = yield Zotero.Promise.all([
-			this._session.fields.get(),
+			this._session.getFields(),
 			this._session.setDocPrefs(true)
 		]).spread(function (fields, setDocPrefs) {
 			// Only return value from setDocPrefs
@@ -743,7 +746,7 @@ Zotero.Integration.Interface.prototype.setDocPrefs = Zotero.Promise.coroutine(fu
 	if (!oldData) return false;
 
 	// Perform noteType or fieldType conversion
-	let fields = yield this._session.fields.get();
+	let fields = yield this._session.getFields();
 	
 	var convertBibliographies = oldData.prefs.fieldType != this._session.data.prefs.fieldType;
 	var convertItems = convertBibliographies
@@ -773,14 +776,14 @@ Zotero.Integration.Interface.prototype.setDocPrefs = Zotero.Promise.coroutine(fu
 			fieldNoteTypes.length);
 	}
 	
-	// Refresh contents
-	this._session.fields = new Zotero.Integration.Fields(this._session, this._doc);
-	this._session.fields.ignoreEmptyBibliography = false;
-	
+	// Refresh field info
+	this._session._fields = null;
+	this._session.ignoreEmptyBibliography = true;
+
 	if (this._session.data.prefs.delayCitationUpdates && !fieldsToConvert.length) return;
 	
-	yield this._session.fields.updateSession(FORCE_CITATIONS_RESET_TEXT);
-	return this._session.fields.updateDocument(FORCE_CITATIONS_RESET_TEXT, true, true);
+	yield this._session.updateFromDocument(FORCE_CITATIONS_RESET_TEXT);
+	return this._session.updateDocument(FORCE_CITATIONS_RESET_TEXT, true, true);
 });
 
 /**
@@ -808,37 +811,48 @@ Zotero.Integration.JSEnumerator.prototype.getNext = function() {
 }
 
 /**
- * Methods for retrieving fields from a document
- * @constructor
+ * Keeps track of all session-specific variables
  */
-Zotero.Integration.Fields = function(session, doc) {
+Zotero.Integration.Session = function(doc, app) {
+	this.embeddedItems = {};
+	this.embeddedZoteroItems = {};
+	this.embeddedItemsByURI = {};
+	this.citationsByIndex = {};
+	this.resetRequest(doc);
+	this.primaryFieldType = app.primaryFieldType;
+	this.secondaryFieldType = app.secondaryFieldType;
+	this.outputFormat = app.outputFormat || 'rtf';
+	this._sessionUpToDate = false;
+	this._app = app;
+
+	this._fields = null;
 	this.ignoreEmptyBibliography = true;
 
 	// Callback called while retrieving fields with the percentage complete.
 	this.progressCallback = null;
 
-	this._session = session;
-	this._doc = doc;
-
 	this._removeCodeFields = {};
 	this._deleteFields = {};
 	this._bibliographyFields = [];
+
+	this.sessionID = Zotero.randomString();
+	Zotero.Integration.sessions[this.sessionID] = this;
 }
 
 /**
  * Checks that it is appropriate to add fields to the current document at the current
  * position, then adds one.
  */
-Zotero.Integration.Fields.prototype.addField = async function(note) {
+Zotero.Integration.Session.prototype.addField = async function(note) {
 	// Get citation types if necessary
-	if (!await this._doc.canInsertField(this._session.data.prefs['fieldType'])) {
+	if (!await this._doc.canInsertField(this.data.prefs['fieldType'])) {
 		return Zotero.Promise.reject(new Zotero.Exception.Alert("integration.error.cannotInsertHere",
 		[], "integration.error.title"));
 	}
 	
-	var field = await this._doc.cursorInField(this._session.data.prefs['fieldType']);
+	var field = await this._doc.cursorInField(this.data.prefs['fieldType']);
 	if (field) {
-		if (!await this._session.displayAlert(Zotero.getString("integration.replace"),
+		if (!await this.displayAlert(Zotero.getString("integration.replace"),
 				DIALOG_ICON_STOP,
 				DIALOG_BUTTONS_OK_CANCEL)) {
 			return Zotero.Promise.reject(new Zotero.Exception.UserCancelled("inserting citation"));
@@ -846,13 +860,13 @@ Zotero.Integration.Fields.prototype.addField = async function(note) {
 	}
 	
 	if (!field) {
-		field = await this._doc.insertField(this._session.data.prefs['fieldType'],
-			(note ? this._session.data.prefs["noteType"] : 0));
+		field = await this._doc.insertField(this.data.prefs['fieldType'],
+			(note ? this.data.prefs["noteType"] : 0));
 		// Older doc plugins do not initialize the field code to anything meaningful
 		// so we ensure it here manually
 		field.setCode('TEMP');
 	}
-	// If fields already retrieved, further this.get() calls will returned the cached version
+	// If fields already retrieved, further this.getFields() calls will returned the cached version
 	// So we append this field to that list
 	if (this._fields) {
 		this._fields.push(field);
@@ -865,7 +879,7 @@ Zotero.Integration.Fields.prototype.addField = async function(note) {
  * Gets all fields for a document
  * @return {Promise} Promise resolved with field list.
  */
-Zotero.Integration.Fields.prototype.get = new function() {
+Zotero.Integration.Session.prototype.getFields = new function() {
 	var deferred;
 	return async function(force=false) {
 		// If we already have fields, just return them
@@ -882,12 +896,12 @@ Zotero.Integration.Fields.prototype.get = new function() {
 		// Otherwise, start getting fields
 		var timer = new Zotero.Integration.Timer();
 		timer.start();
-		this._session.progressBar.start();
+		this.progressBar.start();
 		try {
-			var fields = this._fields = Array.from(await this._doc.getFields(this._session.data.prefs['fieldType']));
+			var fields = this._fields = Array.from(await this._doc.getFields(this.data.prefs['fieldType']));
 			
 			var retrieveTime = timer.stop();
-			this._session.progressBar.finishSegment();
+			this.progressBar.finishSegment();
 			Zotero.debug("Integration: Retrieved " + fields.length + " fields in " +
 				retrieveTime + "; " + fields.length/retrieveTime + " fields/second");
 			deferred.resolve(fields);
@@ -901,11 +915,11 @@ Zotero.Integration.Fields.prototype.get = new function() {
 }
 
 /**
- * Updates Zotero.Integration.Session attached to Zotero.Integration.Fields in line with document
+ * Updates Zotero.Integration.Session citations from the session document
  */
-Zotero.Integration.Fields.prototype.updateSession = Zotero.Promise.coroutine(function* (forceCitations) {
-	yield this.get();
-	this._session.resetRequest(this._doc);
+Zotero.Integration.Session.prototype.updateFromDocument = Zotero.Promise.coroutine(function* (forceCitations) {
+	yield this.getFields();
+	this.resetRequest(this._doc);
 	
 	this._removeCodeFields = {};
 	this._deleteFields = {};
@@ -913,50 +927,50 @@ Zotero.Integration.Fields.prototype.updateSession = Zotero.Promise.coroutine(fun
 	
 	var timer = new Zotero.Integration.Timer();
 	timer.start();
-	this._session.progressBar.start();
+	this.progressBar.start();
 	if (forceCitations) {
-		this._session.regenAll = true;
+		this.regenAll = true;
 	}
 	yield this._processFields();
 	try {
-		yield this._session.handleRetractedItems();
+		yield this.handleRetractedItems();
 	}
 	catch (e) {
 		Zotero.debug('Retracted item handling failed', 2);
 		Zotero.logError(e);
 	}
-	this._session.regenAll = false;
+	this.regenAll = false;
 
 	var updateTime = timer.stop();
-	this._session.progressBar.finishSegment();
+	this.progressBar.finishSegment();
 	Zotero.debug("Integration: Updated session data for " + this._fields.length + " fields in "
 		+ updateTime + "; " + this._fields.length/updateTime + " fields/second");
 	
-	if (this._session.reload) {
-		this._session.restoreProcessorState();
-		delete this._session.reload;
+	if (this.reload) {
+		this.restoreProcessorState();
+		delete this.reload;
 	}
-	this._session._sessionUpToDate = true;
+	this._sessionUpToDate = true;
 });
 
 /**
  * Keep processing fields until all have been processed
  */
-Zotero.Integration.Fields.prototype._processFields = Zotero.Promise.coroutine(function* () {
+Zotero.Integration.Session.prototype._processFields = async function () {
 	if (!this._fields) {
 		throw new Error("_processFields called without fetching fields first");
 	}
 	
 	for (var i = 0; i < this._fields.length; i++) {
-		let field = yield Zotero.Integration.Field.loadExisting(this._fields[i]);
+		let field = await Zotero.Integration.Field.loadExisting(this._fields[i]);
 		if (field.type === INTEGRATION_TYPE_ITEM) {
-			var noteIndex = yield field.getNoteIndex(),
-				data = yield field.unserialize(),
+			var noteIndex = await field.getNoteIndex(),
+				data = await field.unserialize(),
 				citation = new Zotero.Integration.Citation(field, data, noteIndex);
 			
-			yield this._session.addCitation(i, noteIndex, citation);
+			await this.addCitation(i, noteIndex, citation);
 		} else if (field.type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
-			if (this.ignoreEmptyBibliography && (yield field.getText()).trim() === "") {
+			if (this.ignoreEmptyBibliography && (await field.getText()).trim() === "") {
 				this._removeCodeFields[i] = true;
 			} else {
 				field.index = i;
@@ -965,15 +979,15 @@ Zotero.Integration.Fields.prototype._processFields = Zotero.Promise.coroutine(fu
 		}
 	}
 	if (this._bibliographyFields.length) {
-		var data = yield this._bibliographyFields[0].unserialize()
-		this._session.bibliography = new Zotero.Integration.Bibliography(this._bibliographyFields[0], data);
-		yield this._session.bibliography.loadItemData();
+		var data = await this._bibliographyFields[0].unserialize()
+		this.bibliography = new Zotero.Integration.Bibliography(this._bibliographyFields[0], data);
+		await this.bibliography.loadItemData();
 	} else {
-		delete this._session.bibliography;
+		delete this.bibliography;
 	}
 	// TODO: figure this out
 	// Zotero.Notifier.trigger('add', 'collection', 'document');
-});
+};
 
 /**
  * Updates bibliographies and fields within a document
@@ -983,31 +997,31 @@ Zotero.Integration.Fields.prototype._processFields = Zotero.Promise.coroutine(fu
  *	   modified since they were created, instead of showing a warning
  * @return {Promise} A promise resolved when the document is updated
  */
-Zotero.Integration.Fields.prototype.updateDocument = Zotero.Promise.coroutine(function* (forceCitations, forceBibliography,
+Zotero.Integration.Session.prototype.updateDocument = Zotero.Promise.coroutine(function* (forceCitations, forceBibliography,
 		ignoreCitationChanges) {
-	this._session.timer = new Zotero.Integration.Timer();
-	this._session.timer.start();
+	this.timer = new Zotero.Integration.Timer();
+	this.timer.start();
 	
-	this._session.progressBar.start();
-	yield this._session._updateCitations()
-	this._session.progressBar.finishSegment();
-	this._session.progressBar.start();
+	this.progressBar.start();
+	yield this._updateCitations();
+	this.progressBar.finishSegment();
+	this.progressBar.start();
 	yield this._updateDocument(forceCitations, forceBibliography, ignoreCitationChanges)
-	this._session.progressBar.finishSegment();
+	this.progressBar.finishSegment();
 
-	var diff = this._session.timer.stop();
-	this._session.timer = null;
+	var diff = this.timer.stop();
+	this.timer = null;
 	Zotero.debug(`Integration: updateDocument complete in ${diff}s`)
 	// If the update takes longer than 5s suggest delaying citation updates
-	if (diff > DELAY_CITATIONS_PROMPT_TIMEOUT && !this._session.data.prefs.dontAskDelayCitationUpdates && !this._session.data.prefs.delayCitationUpdates) {
+	if (diff > DELAY_CITATIONS_PROMPT_TIMEOUT && !this.data.prefs.dontAskDelayCitationUpdates && !this._session.data.prefs.delayCitationUpdates) {
 		yield this._doc.activate();
 		
 		var interfaceType = 'tab';
-		if (['MacWord2008', 'OpenOffice'].includes(this._session.agent)) {
+		if (['MacWord2008', 'OpenOffice'].includes(this.agent)) {
 			interfaceType = 'toolbar';
 		}
 		
-		var result = yield this._session.displayAlert(
+		var result = yield this.displayAlert(
 				Zotero.getString('integration.delayCitationUpdates.alert.text1')
 					+ "\n\n"
 					+ Zotero.getString(`integration.delayCitationUpdates.alert.text2.${interfaceType}`)
@@ -1017,11 +1031,11 @@ Zotero.Integration.Fields.prototype.updateDocument = Zotero.Promise.coroutine(fu
 				DIALOG_BUTTONS_YES_NO_CANCEL
 		);
 		if (result == 2) {
-			this._session.data.prefs.delayCitationUpdates = true;
+			this.data.prefs.delayCitationUpdates = true;
 		}
 		if (result) {
-			this._session.data.prefs.dontAskDelayCitationUpdates = true;
-			// yield this._session.setDocPrefs(true);
+			this.data.prefs.dontAskDelayCitationUpdates = true;
+			// yield this.setDocPrefs(true);
 		}
 	}
 });
@@ -1033,11 +1047,11 @@ Zotero.Integration.Fields.prototype.updateDocument = Zotero.Promise.coroutine(fu
  * @param {Boolean} [ignoreCitationChanges] Whether to ignore changes to citations that have been 
  *	modified since they were created, instead of showing a warning
  */
-Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitations, forceBibliography,
+Zotero.Integration.Session.prototype._updateDocument = async function(forceCitations, forceBibliography,
 		ignoreCitationChanges) {
 	if(this.progressCallback) {
-		var nFieldUpdates = Object.keys(this._session.processIndices).length;
-		if(this._session.bibliographyHasChanged || forceBibliography) {
+		var nFieldUpdates = Object.keys(this.processIndices).length;
+		if(this.bibliographyHasChanged || forceBibliography) {
 			nFieldUpdates += this._bibliographyFields.length*5;
 		}
 	}
@@ -1064,12 +1078,12 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 	// Although at least for macword you don't get to interact with the document
 	// while a prompt is being displayed, so the order of these prompts is to a large
 	// degree a minor issue.
-	var indicesToUpdate = Object.keys(this._session.processIndices);
+	var indicesToUpdate = Object.keys(this.processIndices);
 	
 	// Add bibliography indices to the above indices
-	if (this._session.bibliography	 				// if bibliography exists
-			&& Object.keys(this._session.citationsByIndex).length // and doc has citations
-			&& (this._session.bibliographyHasChanged	// and bibliography changed
+	if (this.bibliography	 				// if bibliography exists
+			&& Object.keys(this.citationsByIndex).length // and doc has citations
+			&& (this.bibliographyHasChanged	// and bibliography changed
 			|| forceBibliography)) {					// or if we should generate regardless of
 														// changes
 		for (let field of this._bibliographyFields) {
@@ -1092,7 +1106,7 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 		// Jump to next event loop step for UI updates
 		await Zotero.Promise.delay();
 		
-		var citation = this._session.citationsByIndex[i];
+		var citation = this.citationsByIndex[i];
 		if (citation) {
 			let citationField = citation._field;
 			
@@ -1111,7 +1125,7 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 						+ "Current:  " + plainCitation
 					);
 					await citationField.select();
-					var result = await this._session.displayAlert(
+					var result = await this.displayAlert(
 						Zotero.getString("integration.citationChanged")+"\n\n"
 							+ Zotero.getString("integration.citationChanged.description")+"\n\n"
 							+ Zotero.getString("integration.citationChanged.original", citation.properties.plainCitation)+"\n"
@@ -1121,7 +1135,7 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 						citation.properties.dontUpdate = true;
 						// Sigh. This hurts. setCode in LO forces a text reset. If the formattedText is rtf
 						// it is reinserted, however that breaks what properties.dontUpdate should do
-						if (this._session.primaryFieldType == "ReferenceMark"
+						if (this.primaryFieldType == "ReferenceMark"
 							&& citation.properties.formattedCitation.includes('\\')) {
 							citation.properties.formattedCitation = citation.properties.plainCitation;
 						}
@@ -1141,7 +1155,7 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 					// for citations that were inserted with delay styling
 					var wasDelayed = citation.properties.formattedCitation
 						&& citation.properties.formattedCitation.includes(DELAYED_CITATION_RTF_STYLING);
-					if (this._session.outputFormat == 'rtf' && wasDelayed) {
+					if (this.outputFormat == 'rtf' && wasDelayed) {
 						isRich = await citationField.setText(`${DELAYED_CITATION_RTF_STYLING_CLEAR}{${formattedCitation}}`);
 					} else {
 						isRich = await citationField.setText(formattedCitation);
@@ -1170,24 +1184,24 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 				throw new Error(`Attempting to update field ${i} which does not exist`);
 			}
 			
-			if (forceBibliography || this._session.bibliographyDataHasChanged) {
-				let code = this._session.bibliography.serialize();
+			if (forceBibliography || this.bibliographyDataHasChanged) {
+				let code = this.bibliography.serialize();
 				await bibliographyField.setCode(code);
 			}
 			
 			// get bibliography and format as RTF
-			var bib = this._session.bibliography.getCiteprocBibliography(this._session.style);
+			var bib = this.bibliography.getCiteprocBibliography(this.style);
 			
 			var bibliographyText = "";
 			if (bib) {
-				if (this._session.outputFormat == 'rtf') {
+				if (this.outputFormat == 'rtf') {
 					bibliographyText = bib[0].bibstart+bib[1].join("\\\r\n")+"\\\r\n"+bib[0].bibend;
 				} else {
 					bibliographyText = bib[0].bibstart+bib[1].join("")+bib[0].bibend;
 				}
 				
 				// if bibliography style not set, set it
-				if(!this._session.data.style.bibliographyStyleHasBeenSet) {
+				if(!this.data.style.bibliographyStyleHasBeenSet) {
 					var bibStyle = Zotero.Cite.getBibliographyFormatParameters(bib);
 					
 					// set bibliography style
@@ -1195,7 +1209,7 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 						bibStyle.lineSpacing, bibStyle.entrySpacing, bibStyle.tabStops, bibStyle.tabStops.length);
 					
 					// set bibliographyStyleHasBeenSet parameter to prevent further changes	
-					this._session.data.style.bibliographyStyleHasBeenSet = true;
+					this.data.style.bibliographyStyleHasBeenSet = true;
 				}
 			}
 			
@@ -1231,13 +1245,15 @@ Zotero.Integration.Fields.prototype._updateDocument = async function(forceCitati
 	for (var i=(deleteFields.length-1); i>=0; i--) {
 		this._fields[deleteFields[i]].delete();
 	}
-	this._session.processIndices = {}
+	this.processIndices = {}
 }
 
 /**
- * Brings up the addCitationDialog, prepopulated if a citation is provided
+ * Insert a citation at cursor location or edit the existing one,
+ * display the citation dialog and perform any field/text inserts after
+ * the dialog edits are accepted
  */
-Zotero.Integration.Fields.prototype.addEditCitation = async function (field) {
+Zotero.Integration.Session.prototype.cite = async function (field) {
 	var newField;
 	var citation;
 	
@@ -1260,10 +1276,10 @@ Zotero.Integration.Fields.prototype.addEditCitation = async function (field) {
 	// Preparing data to pass into CitationEditInterface
 	
 	var fieldIndexPromise, citationsByItemIDPromise;
-	if (!this._session.data.prefs.delayCitationUpdates
-		|| !Object.keys(this._session.citationsByItemID).length
-		|| this._session._sessionUpToDate) {
-		fieldIndexPromise = this.get().then(async function (fields) {
+	if (!this.data.prefs.delayCitationUpdates
+		|| !Object.keys(this.citationsByItemID).length
+		|| this._sessionUpToDate) {
+		fieldIndexPromise = this.getFields().then(async function (fields) {
 			for (var i = 0, n = fields.length; i < n; i++) {
 				if (await fields[i].equals(field._field)) {
 					// This is needed, because LibreOffice integration plugin caches the field code instead of asking
@@ -1274,20 +1290,20 @@ Zotero.Integration.Fields.prototype.addEditCitation = async function (field) {
 			}
 			return -1;
 		});
-		citationsByItemIDPromise = this.updateSession(FORCE_CITATIONS_FALSE).then(function() {
-			return this._session.citationsByItemID;
+		citationsByItemIDPromise = this.updateFromDocument(FORCE_CITATIONS_FALSE).then(function() {
+			return this.citationsByItemID;
 		}.bind(this));
 	}
 	else {
 		fieldIndexPromise = Zotero.Promise.resolve(-1);
-		citationsByItemIDPromise = Zotero.Promise.resolve(this._session.citationsByItemID);
+		citationsByItemIDPromise = Zotero.Promise.resolve(this.citationsByItemID);
 	}
 
 	var previewFn = async function (citation) {
 		let idx = await fieldIndexPromise;
 		await citationsByItemIDPromise;
 
-		var [citations, fieldToCitationIdxMapping, citationToFieldIdxMapping] = this._session.getCiteprocLists();
+		var [citations, fieldToCitationIdxMapping, citationToFieldIdxMapping] = this.getCiteprocLists();
 		for (var prevIdx = idx-1; prevIdx >= 0; prevIdx--) {
 			if (prevIdx in fieldToCitationIdxMapping) break;
 		}
@@ -1299,7 +1315,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = async function (field) {
 		let citationsPost = citations.slice(sliceIdx);
 		let citationID = citation.citationID;
 		try {
-			var result = this._session.style.previewCitationCluster(citation, citationsPre, citationsPost, "rtf");
+			var result = this.style.previewCitationCluster(citation, citationsPre, citationsPost, "rtf");
 		} catch(e) {
 			throw e;
 		} finally {
@@ -1311,7 +1327,7 @@ Zotero.Integration.Fields.prototype.addEditCitation = async function (field) {
 	}.bind(this);
 		
 	var io = new Zotero.Integration.CitationEditInterface(
-		citation, this._session.style.opt.sort_citations,
+		citation, this.style.opt.sort_citations,
 		fieldIndexPromise, citationsByItemIDPromise, previewFn
 	);
 	Zotero.debug(`Editing citation:`);
@@ -1426,25 +1442,6 @@ Zotero.Integration.CitationEditInterface.prototype = {
 }
 
 /**
- * Keeps track of all session-specific variables
- */
-Zotero.Integration.Session = function(doc, app) {
-	this.embeddedItems = {};
-	this.embeddedZoteroItems = {};
-	this.embeddedItemsByURI = {};
-	this.citationsByIndex = {};
-	this.resetRequest(doc);
-	this.primaryFieldType = app.primaryFieldType;
-	this.secondaryFieldType = app.secondaryFieldType;
-	this.outputFormat = app.outputFormat || 'rtf';
-	this._sessionUpToDate = false;
-	this._app = app;
-	
-	this.sessionID = Zotero.randomString();
-	Zotero.Integration.sessions[this.sessionID] = this;
-}
-
-/**
  * Resets per-request variables in the CitationSet
  */
 Zotero.Integration.Session.prototype.resetRequest = function(doc) {
@@ -1459,7 +1456,7 @@ Zotero.Integration.Session.prototype.resetRequest = function(doc) {
 	this.oldCitations = new Set();
 	for (let i in this.citationsByIndex) {
 		// But ignore indices from this.newIndices. If any are present it means that the last
-		// call to this.updateSession() was never followed up with this.updateDocument()
+		// call to this.updateFromDocument() was never followed up with this.updateDocument()
 		// i.e. the operation was user cancelled
 		if (i in this.newIndices) continue;
 		this.oldCitations.add(this.citationsByIndex[i].citationID);
@@ -1579,7 +1576,7 @@ Zotero.Integration.Session.prototype.setData = async function (data, resetStyle)
  *    if there wasn't, or rejected with Zotero.Exception.UserCancelled if the dialog was
  *    cancelled.
  */
-Zotero.Integration.Session.prototype.setDocPrefs = Zotero.Promise.coroutine(function* (showImportExport=false) {
+Zotero.Integration.Session.prototype.setDocPrefs = async function (showImportExport=false) {
 	var io = new function() { this.wrappedJSObject = this; };
 	io.primaryFieldType = this.primaryFieldType;
 	io.secondaryFieldType = this.secondaryFieldType;
@@ -1599,8 +1596,8 @@ Zotero.Integration.Session.prototype.setDocPrefs = Zotero.Promise.coroutine(func
 	}
 	
 	// Make sure styles are initialized for new docs
-	yield Zotero.Styles.init();
-	yield Zotero.Integration.displayDialog('chrome://zotero/content/integration/integrationDocPrefs.xul', '', io);
+	await Zotero.Styles.init();
+	await Zotero.Integration.displayDialog('chrome://zotero/content/integration/integrationDocPrefs.xul', '', io);
 
 	if (io.exportDocument) {
 		return this.exportDocument();
@@ -1628,7 +1625,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = Zotero.Promise.coroutine(func
 			oldData.prefs.automaticJournalAbbreviations != data.prefs.automaticJournalAbbreviations
 			|| oldData.style.locale != io.locale
 		);
-	yield this.setData(data, forceStyleReset);
+	await this.setData(data, forceStyleReset);
 
 	// need to do this after setting the data so that we know if it's a note style
 	this.data.prefs.noteType = this.style && this.styleClass == "note" ? io.useEndnotes+1 : 0;
@@ -1644,7 +1641,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = Zotero.Promise.coroutine(func
 	}
 	
 	return oldData || null;
-})
+}
 
 Zotero.Integration.Session.prototype.exportDocument = async function() {
 	Zotero.debug("Integration: Exporting the document");
@@ -1704,13 +1701,13 @@ Zotero.Integration.Session.prototype.importDocument = async function() {
 		var data = new Zotero.Integration.DocumentData(await this._doc.getDocumentData());
 		data.prefs.fieldType = this._app.primaryFieldType;
 		await this.setData(data, true);
-		await this.fields.get(true);
-		await this.fields.updateSession(FORCE_CITATIONS_RESET_TEXT);
+		await this.getFields(true);
+		await this.updateFromDocument(FORCE_CITATIONS_RESET_TEXT);
 		// Make sure we ignore the dont update flags since we do not know what the original text was
 		for (let index in this.citationsByIndex) {
 			delete this.citationsByIndex[index].properties.dontUpdate;
 		}
-		await this.fields.updateDocument(FORCE_CITATIONS_RESET_TEXT, true, true);
+		await this.updateDocument(FORCE_CITATIONS_RESET_TEXT, true, true);
 	} finally {
 		Zotero.debug(`Integration: Import finished in ${timer.stop()}`);
 	}
@@ -1727,18 +1724,18 @@ Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(func
 	
 	if (action == Zotero.Integration.REMOVE_CODE) {
 		// Mark for removal and return
-		this.fields._removeCodeFields[index] = true;
+		this._removeCodeFields[index] = true;
 		return;
 	} else if (action == Zotero.Integration.DELETE) {
 		// Mark for deletion and return
-		this.fields._deleteFields[index] = true;
+		this._deleteFields[index] = true;
 		return;
 	} else if (action == Zotero.Integration.UPDATE) {
 		this.updateIndices[index] = true;
 	}
 	// All new fields will initially be marked for deletion because they contain no
 	// citationItems
-	delete this.fields._deleteFields[index];
+	delete this._deleteFields[index];
 
 	citation.properties.zoteroIndex = index;
 	citation.properties.noteIndex = noteIndex;
@@ -1773,10 +1770,8 @@ Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(func
 			// and either one may need to be updated
 			this.newIndices[duplicateIndex] = true;
 		}
-		if (needNewID) {
-			Zotero.debug("Integration: "+citation.citationID+" ("+index+") needs new citationID");
-			citation.citationID = Zotero.Utilities.randomString();
-		}
+		Zotero.debug("Integration: "+citation.citationID+" ("+index+") needs new citationID");
+		citation.citationID = Zotero.Utilities.randomString();
 		this.newIndices[index] = true;
 	}
 	// Deal with citations that are copied into the document from somewhere else
@@ -1859,7 +1854,7 @@ Zotero.Integration.Session.prototype._updateCitations = async function () {
  * Restores processor state from document, without requesting citation updates
  */
 Zotero.Integration.Session.prototype.restoreProcessorState = function() {
-	if (this.fields._bibliographyFields.length && !this.bibliography) {
+	if (this._bibliographyFields.length && !this.bibliography) {
 		throw new Error ("Attempting to restore processor state without loading bibliography");
 	}
 	let uncited = [];
@@ -1915,7 +1910,7 @@ Zotero.Integration.Session.prototype.writeDelayedCitation = Zotero.Promise.corou
 	// Note: fields._fields will only contain items upon first delayed insert
 	// after a full update
 	if (this._sessionUpToDate) {
-		var fields = yield this.fields.get();
+		var fields = yield this.getFields();
 		for (let i = fields.length - 1; i >= 0; i--) {
 			let field = yield Zotero.Integration.Field.loadExisting(fields[i]);
 			if (field.type == INTEGRATION_TYPE_BIBLIOGRAPHY) {
@@ -2573,9 +2568,6 @@ Zotero.Integration.CitationField = class extends Zotero.Integration.Field {
 		} else if (result == 1) {		// No
 			return false;
 		} else { // Yes
-			var fieldGetter = Zotero.Integration.currentSession.fields,
-				oldWindow = Zotero.Integration.currentWindow,
-				oldProgressCallback = this.progressCallback;
 			// Clear current code and subsequent addEditCitation dialog will be the reselection
 			await this.clearCode();
 			return this.unserialize();

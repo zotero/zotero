@@ -692,12 +692,12 @@ describe("Zotero.Integration", function () {
 					doc.fields[1].code = doc.fields[0].code;
 					doc.fields[1].text = doc.fields[0].text;
 					
-					var originalUpdateDocument = Zotero.Integration.Fields.prototype.updateDocument;
-					var stubUpdateDocument = sinon.stub(Zotero.Integration.Fields.prototype, 'updateDocument');
+					var originalUpdateDocument = Zotero.Integration.Session.prototype.updateDocument;
+					var stubUpdateDocument = sinon.stub(Zotero.Integration.Session.prototype, 'updateDocument');
 					try {
 						var indicesLength;
 						stubUpdateDocument.callsFake(function() {
-							indicesLength = Object.keys(Zotero.Integration.currentSession.newIndices).length;
+							indicesLength = Object.keys(this.newIndices).length;
 							return originalUpdateDocument.apply(this, arguments);
 						});
 
@@ -726,12 +726,12 @@ describe("Zotero.Integration", function () {
 						`"citationID":"${newCitationID}"`);
 					doc.fields[1].text = doc.fields[0].text;
 					
-					var originalUpdateDocument = Zotero.Integration.Fields.prototype.updateDocument;
-					var stubUpdateDocument = sinon.stub(Zotero.Integration.Fields.prototype, 'updateDocument');
+					var originalUpdateDocument = Zotero.Integration.Session.prototype.updateDocument;
+					var stubUpdateDocument = sinon.stub(Zotero.Integration.Session.prototype, 'updateDocument');
 					try {
 						var indices;
 						stubUpdateDocument.callsFake(function() {
-							indices = Object.keys(Zotero.Integration.currentSession.newIndices);
+							indices = Object.keys(this.newIndices);
 							return originalUpdateDocument.apply(this, arguments);
 						});
 
