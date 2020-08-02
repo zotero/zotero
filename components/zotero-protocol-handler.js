@@ -34,8 +34,8 @@ const ZOTERO_PROTOCOL_NAME = "Zotero Chrome Extension Protocol";
 
 Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/NetUtil.jsm");
 Components.utils.import("resource://gre/modules/osfile.jsm")
+const { NetUtil } = ChromeUtils.import("resource://gre/modules/NetUtil.jsm");
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -131,11 +131,11 @@ function ZoteroProtocolHandler() {
 	var DataExtension = {
 		loadAsChrome: false,
 		
-		newChannel: function (uri) {
-			return new AsyncChannel(uri, function* () {
+		newChannel: function (uri, loadInfo) {
+			return new AsyncChannel(uri, loadInfo, function* () {
 				this.contentType = 'text/plain';
 				
-				path = uri.spec.match(/zotero:\/\/[^/]+(.*)/)[1];
+				var path = uri.spec.match(/zotero:\/\/[^/]+(.*)/)[1];
 				
 				try {
 					return Zotero.Utilities.Internal.getAsyncInputStream(
@@ -158,8 +158,8 @@ function ZoteroProtocolHandler() {
 	var ReportExtension = {
 		loadAsChrome: false,
 		
-		newChannel: function (uri) {
-			return new AsyncChannel(uri, function* () {
+		newChannel: function (uri, loadInfo) {
+			return new AsyncChannel(uri, loadInfo, function* () {
 				var userLibraryID = Zotero.Libraries.userLibraryID;
 				
 				var path = uri.pathQueryRef;
@@ -539,8 +539,8 @@ function ZoteroProtocolHandler() {
 	var TimelineExtension = {
 		loadAsChrome: true,
 		
-		newChannel: function (uri) {
-			return new AsyncChannel(uri, function* () {
+		newChannel: function (uri, loadInfo) {
+			return new AsyncChannel(uri, loadInfo, function* () {
 				var userLibraryID = Zotero.Libraries.userLibraryID;
 				
 				var path = uri.spec.match(/zotero:\/\/[^/]+(.*)/)[1];
@@ -929,8 +929,8 @@ function ZoteroProtocolHandler() {
 	var DebugExtension = {
 		loadAsChrome: false,
 		
-		newChannel: function (uri) {
-			return new AsyncChannel(uri, function* () {
+		newChannel: function (uri, loadInfo) {
+			return new AsyncChannel(uri, loadInfo, function* () {
 				this.contentType = "text/plain";
 				
 				try {
@@ -1225,21 +1225,27 @@ function ZoteroProtocolHandler() {
  * Implements nsIProtocolHandler
  */
 ZoteroProtocolHandler.prototype = {
-	scheme: ZOTERO_SCHEME,
-	
-	defaultPort : -1,
-	
-	protocolFlags :
-		Components.interfaces.nsIProtocolHandler.URI_NORELATIVE |
+	get scheme() {
+		return PROTOCOL_SCHEME;
+	},
+	get protocolFlags() {
+		/*Components.interfaces.nsIProtocolHandler.URI_NORELATIVE |
 		Components.interfaces.nsIProtocolHandler.URI_NOAUTH |
 		// DEBUG: This should be URI_IS_LOCAL_FILE, and MUST be if any
 		// extensions that modify data are added
 		//  - https://www.zotero.org/trac/ticket/1156
 		//
 		Components.interfaces.nsIProtocolHandler.URI_IS_LOCAL_FILE,
-		//Components.interfaces.nsIProtocolHandler.URI_LOADABLE_BY_ANYONE,
+		//Components.interfaces.nsIProtocolHandler.URI_LOADABLE_BY_ANYONE,*/
 		
-	allowPort : function(port, scheme) {
+		return Ci.nsIProtocolHandler.URI_NORELATIVE
+			| Ci.nsIProtocolHandler.URI_IS_LOCAL_RESOURCE
+			| Ci.nsIProtocolHandler.URI_DANGEROUS_TO_LOAD;
+	},
+	get defaultPort() {
+		return -1;
+	},
+	allowPort: function allowPort() {
 		return false;
 	},
 	
@@ -1276,37 +1282,23 @@ ZoteroProtocolHandler.prototype = {
 			.finalize();
 	},
 	
-	newChannel : function(uri) {
-		var chromeService = Components.classes["@mozilla.org/network/protocol;1?name=chrome"]
-			.getService(Components.interfaces.nsIProtocolHandler);
-		
-		var newChannel = null;
-		
+	newChannel: function (uri, loadInfo) {
 		try {
 			let ext = this.getExtension(uri);
 			
+			// Return cancelled channel for unknown paths
 			if (!ext) {
-				// Return cancelled channel for unknown paths
-				//
-				// These can be in the form zotero://example.com/... -- maybe for "//example.com" URLs?
-				var chromeURI = chromeService.newURI(DUMMY_CHROME_URL, null, null);
-				var extChannel = chromeService.newChannel(chromeURI);
-				var chromeRequest = extChannel.QueryInterface(Components.interfaces.nsIRequest);
-				chromeRequest.cancel(0x804b0002); // BINDING_ABORTED
-				return extChannel;
+				return this._getCancelledChannel();
 			}
 			
 			if (!this._principal && ext.loadAsChrome) {
 				this._principal = Services.scriptSecurityManager.getSystemPrincipal();
 			}
 			
-			var extChannel = ext.newChannel(uri);
+			var extChannel = ext.newChannel(uri, loadInfo);
 			// Extension returned null, so cancel request
 			if (!extChannel) {
-				var chromeURI = chromeService.newURI(DUMMY_CHROME_URL, null, null);
-				var extChannel = chromeService.newChannel(chromeURI);
-				var chromeRequest = extChannel.QueryInterface(Components.interfaces.nsIRequest);
-				chromeRequest.cancel(0x804b0002); // BINDING_ABORTED
+				return this._getCancelledChannel();
 			}
 			
 			// Apply cached principal to extension channel
@@ -1314,7 +1306,7 @@ ZoteroProtocolHandler.prototype = {
 				extChannel.owner = this._principal;
 			}
 			
-			if(!extChannel.originalURI) extChannel.originalURI = uri;
+			//if(!extChannel.originalURI) extChannel.originalURI = uri;
 			
 			return extChannel;
 		}
@@ -1324,13 +1316,24 @@ ZoteroProtocolHandler.prototype = {
 			throw Components.results.NS_ERROR_FAILURE;
 		}
 		
-		return newChannel;
+		return null;
+	},
+	
+	_getCancelledChannel: function () {
+		var channel = NetUtil.newChannel({
+			uri: DUMMY_CHROME_URL,
+			loadUsingSystemPrincipal: true,
+		})
+		var req = channel.QueryInterface(Components.interfaces.nsIRequest);
+		req.cancel(0x804b0002); // BINDING_ABORTED
+		return channel;
 	},
 	
 	contractID: ZOTERO_PROTOCOL_CONTRACTID,
 	classDescription: ZOTERO_PROTOCOL_NAME,
 	classID: ZOTERO_PROTOCOL_CID,
-	QueryInterface: ChromeUtils.generateQI([Components.interfaces.nsIProtocolHandler])
+	//QueryInterface: ChromeUtils.generateQI([Components.interfaces.nsIProtocolHandler])
+	QueryInterface: ChromeUtils.generateQI([Ci.nsISupportsWeakReference, Ci.nsIProtocolHandler]),
 };
 
 
@@ -1338,7 +1341,10 @@ ZoteroProtocolHandler.prototype = {
  * nsIChannel implementation that takes a promise-yielding generator that returns a
  * string, nsIAsyncInputStream, or file
  */
-function AsyncChannel(uri, gen) {
+function AsyncChannel(uri, loadInfo, gen) {
+	this.URI = this.originalURI = uri;
+	this.loadInfo = loadInfo;
+	
 	this._generator = gen;
 	this._isPending = true;
 	
@@ -1355,6 +1361,7 @@ function AsyncChannel(uri, gen) {
 	this.URI = uri;
 	this.originalURI = uri;
 	this.owner = null;
+	
 	this.notificationCallbacks = null;
 	this.securityInfo = null;
 }
@@ -1385,7 +1392,7 @@ AsyncChannel.prototype = {
 				//Zotero.debug("Stopping request");
 				streamListener.onStopRequest(channel, status);
 				channel._isPending = false;
-				if (status == 0) {
+				if (status === Cr.NS_OK) {
 					resolve();
 				}
 				else {
@@ -1507,26 +1514,18 @@ AsyncChannel.prototype = {
 	},
 	
 	// nsIWritablePropertyBag
-	setProperty: function (prop, val) {
+	/*setProperty: function (prop, val) {
 		this[prop] = val;
 	},
 	
 	
 	deleteProperty: function (prop) {
 		delete this[prop];
-	},
+	},*/
 	
-	
-	QueryInterface: function (iid) {
-		if (iid.equals(Components.interfaces.nsISupports)
-				|| iid.equals(Components.interfaces.nsIRequest)
-				|| iid.equals(Components.interfaces.nsIChannel)
-				// pdf.js wants this
-				|| iid.equals(Components.interfaces.nsIWritablePropertyBag)) {
-			return this;
-		}
-		throw Components.results.NS_ERROR_NO_INTERFACE;
-	}
+	QueryInterface: ChromeUtils.generateQI([Ci.nsIChannel, Ci.nsIRequest]),
+				/*pdf.js wants this
+				|| iid.equals(Components.interfaces.nsIWritablePropertyBag)) {*/
 };
 
 
