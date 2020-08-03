@@ -1309,33 +1309,30 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	/**
 	 * @return {Promise<String[]>} - Promise for an array of extension names and versions
 	 */
-	this.getInstalledExtensions = Zotero.Promise.method(function () {
-		var deferred = Zotero.Promise.defer();
-		function onHaveInstalledAddons(installed) {
-			installed.sort(function(a, b) {
-				return ((a.appDisabled || a.userDisabled) ? 1 : 0) -
-					((b.appDisabled || b.userDisabled) ? 1 : 0);
-			});
-			var addons = [];
-			for (let addon of installed) {
-				switch (addon.id) {
-					case "zotero@chnm.gmu.edu":
-					case "{972ce4c6-7e08-4474-a285-3208198ce6fd}": // Default theme
-						continue;
-				}
-				
-				addons.push(addon.name + " (" + addon.version
-					+ (addon.type != 2 ? ", " + addon.type : "")
-					+ ((addon.appDisabled || addon.userDisabled) ? ", disabled" : "")
-					+ ")");
+	this.getInstalledExtensions = async function () {
+		var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+		var installed = await AddonManager.getAllAddons();
+	
+		installed.sort(function(a, b) {
+			return ((a.appDisabled || a.userDisabled) ? 1 : 0) -
+				((b.appDisabled || b.userDisabled) ? 1 : 0);
+		});
+		var addons = [];
+		for (let addon of installed) {
+			switch (addon.id) {
+				case "zotero@chnm.gmu.edu":
+				case "{972ce4c6-7e08-4474-a285-3208198ce6fd}": // Default theme
+					continue;
 			}
-			deferred.resolve(addons);
+			
+			addons.push(addon.name + " (" + addon.version
+				+ (addon.type != 2 ? ", " + addon.type : "")
+				+ ((addon.appDisabled || addon.userDisabled) ? ", disabled" : "")
+				+ ")");
 		}
 		
-		Components.utils.import("resource://gre/modules/AddonManager.jsm");
-		AddonManager.getAllAddons(onHaveInstalledAddons);
-		return deferred.promise;
-	});
+		return addons;
+	};
 	
 	this.getString = function (name, params, num) {
 		return Zotero.Intl.getString(...arguments);

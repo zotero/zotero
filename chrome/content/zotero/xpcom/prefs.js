@@ -373,118 +373,113 @@ Zotero.Prefs = new function(){
 	async function loadExtensionDefaults() {
 		var defaultBranch = Services.prefs.getDefaultBranch("");
 		
-		return new Zotero.Promise(function (resolve) {
-			Cu.import("resource://gre/modules/AddonManager.jsm");
-			
-			// Lines are in format `pref("[key]", [val]);`, so define a function to be called that
-			// sets the defaults
-			function pref(key, value) {
-				switch (typeof value) {
-					case "boolean":
-						defaultBranch.setBoolPref(key, value);
-						break;
-					case "number":
-						defaultBranch.setIntPref(key, value);
-						break;
-					case "string":
-						defaultBranch.setStringPref(key, value);
-						break;
+		Cu.import("resource://gre/modules/AddonManager.jsm");
+		
+		// Lines are in format `pref("[key]", [val]);`, so define a function to be called that
+		// sets the defaults
+		function pref(key, value) {
+			switch (typeof value) {
+				case "boolean":
+					defaultBranch.setBoolPref(key, value);
+					break;
+				case "number":
+					defaultBranch.setIntPref(key, value);
+					break;
+				case "string":
+					defaultBranch.setStringPref(key, value);
+					break;
+			}
+		}
+		
+		function readDefaults(contents) {
+			let re = /^\s*pref\s*\(\s*['"]([a-zA-Z0-9_\-.]+)['"]\s*,\s*["']?.*["']?\s*\)\s*;\s*$/;
+			let lines = contents.split(/\n/g).filter(line => re.test(line));
+			for (let line of lines) {
+				try {
+					eval(line);
+				}
+				catch (e) {
+					dump(e + "\n\n");
+					Components.utils.reportError(e);
 				}
 			}
-			
-			function readDefaults(contents) {
-				let re = /^\s*pref\s*\(\s*['"]([a-zA-Z0-9_\-.]+)['"]\s*,\s*["']?.*["']?\s*\)\s*;\s*$/;
-				let lines = contents.split(/\n/g).filter(line => re.test(line));
-				for (let line of lines) {
-					try {
-						eval(line);
-					}
-					catch (e) {
-						dump(e + "\n\n");
-						Components.utils.reportError(e);
-					}
-				}
+		}
+		
+		let addons = await AddonManager.getAllAddons();
+		var reusableStreamInstance = Cc['@mozilla.org/scriptableinputstream;1']
+			.createInstance(Ci.nsIScriptableInputStream);
+		
+		for (let addon of addons) {
+			if (!addon.isActive) {
+				continue;
 			}
 			
-			AddonManager.getAllAddons(async function(addons) {
-				var reusableStreamInstance = Cc['@mozilla.org/scriptableinputstream;1']
-					.createInstance(Ci.nsIScriptableInputStream);
+			try {
+				let path = OS.Path.fromFileURI(addon.getResourceURI().spec);
 				
-				for (let addon of addons) {
-					if (!addon.isActive) {
-						continue;
-					}
-					
-					try {
-						let path = OS.Path.fromFileURI(addon.getResourceURI().spec);
-						
-						// Hack to delete extensions.json for Mac users who first ran Zotero from the
-						// disk image and ended up with invalid integration plugin paths in
-						// extensions.json
-						try {
-							if (Zotero.isMac && path.includes('AppTranslocation')) {
-								await OS.File.remove(
-									OS.Path.join(Zotero.Profile.dir, 'extensions.json'),
-									{
-										ignoreAbsent: true
-									}
-								);
+				// Hack to delete extensions.json for Mac users who first ran Zotero from the
+				// disk image and ended up with invalid integration plugin paths in
+				// extensions.json
+				try {
+					if (Zotero.isMac && path.includes('AppTranslocation')) {
+						await OS.File.remove(
+							OS.Path.join(Zotero.Profile.dir, 'extensions.json'),
+							{
+								ignoreAbsent: true
 							}
+						);
+					}
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+				
+				// Directory
+				if ((await OS.File.stat(path)).isDir) {
+					let dir = OS.Path.join(path, 'defaults', 'preferences');
+					if (await OS.File.exists(dir)) {
+						await Zotero.File.iterateDirectory(dir, async function (entry) {
+							if (!entry.name.endsWith('.js')) return;
+							readDefaults(Zotero.File.getContents(entry.path));
+						});
+					}
+				}
+				// XPI
+				else {
+					let file = Zotero.File.pathToFile(path);
+					let zipReader = Components.classes["@mozilla.org/libjar/zip-reader;1"].
+						createInstance(Components.interfaces.nsIZipReader);
+					try {
+						try {
+							zipReader.open(file);
+							zipReader.test(null);
 						}
 						catch (e) {
-							Zotero.logError(e);
+							Zotero.logError(path + " is not a valid ZIP file");
+							continue;
 						}
 						
-						// Directory
-						if ((await OS.File.stat(path)).isDir) {
-							let dir = OS.Path.join(path, 'defaults', 'preferences');
-							if (await OS.File.exists(dir)) {
-								await Zotero.File.iterateDirectory(dir, async function (entry) {
-									if (!entry.name.endsWith('.js')) return;
-									readDefaults(Zotero.File.getContents(entry.path));
-								});
-							}
-						}
-						// XPI
-						else {
-							let file = Zotero.File.pathToFile(path);
-							let zipReader = Components.classes["@mozilla.org/libjar/zip-reader;1"].
-								createInstance(Components.interfaces.nsIZipReader);
-							try {
-								try {
-									zipReader.open(file);
-									zipReader.test(null);
-								}
-								catch (e) {
-									Zotero.logError(path + " is not a valid ZIP file");
-									continue;
-								}
-								
-								let entries = zipReader.findEntries('defaults/preferences/*.js');
-								while (entries.hasMore()) {
-									let entryName = entries.getNext();
-									let entry = zipReader.getEntry(entryName);
-									
-									if (!entry.isDirectory) {
-										let inputStream = zipReader.getInputStream(entryName);
-										reusableStreamInstance.init(inputStream);
-										readDefaults(reusableStreamInstance.read(entry.realSize));
-									}
-								}
-							}
-							finally {
-								zipReader.close();
+						let entries = zipReader.findEntries('defaults/preferences/*.js');
+						while (entries.hasMore()) {
+							let entryName = entries.getNext();
+							let entry = zipReader.getEntry(entryName);
+							
+							if (!entry.isDirectory) {
+								let inputStream = zipReader.getInputStream(entryName);
+								reusableStreamInstance.init(inputStream);
+								readDefaults(reusableStreamInstance.read(entry.realSize));
 							}
 						}
 					}
-					catch (e) {
-						Zotero.logError(e);
+					finally {
+						zipReader.close();
 					}
 				}
-				
-				resolve();
-			});
-		});
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
 	}
 	
 	this.getVirtualCollectionState = function (type) {
