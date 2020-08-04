@@ -1237,7 +1237,14 @@ Zotero.HTTP = new function() {
 				currentURL++;
 				try {
 					Zotero.debug("Zotero.HTTP.loadDocuments: Loading " + url);
-					hiddenBrowser.loadURI(url);
+					let loadURIOptions = {
+						triggeringPrincipal: null,
+						csp: null,
+						loadFlags: Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY,
+						referrerInfo: null,
+						postData: null,
+					};
+					hiddenBrowser.loadURI(url, loadURIOptions);
 				} catch(e) {
 					if (onError) {
 						onError(e);
