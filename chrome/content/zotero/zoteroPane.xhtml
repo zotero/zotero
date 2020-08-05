@@ -34,8 +34,6 @@
 <?xml-stylesheet href="chrome://zotero-platform-version/content/style.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/itemPane.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/itemPane.css" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero/skin/bindings/itembox.css" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero-platform/content/itembox.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
 
 <!DOCTYPE window [
@@ -64,6 +62,12 @@
 	<!--<html:script src="chrome://global/content/inlineSpellCheckUI.js"></html:script>-->
 	
 	<html:script src="overlay.js"></html:script>
+	
+	<!-- Custom elements -->
+	<html:script src="chrome://global/content/customElements.js"></html:script>
+	<html:script src="elements/menulistItemTypes.js"></html:script>
+	<html:script src="elements/itemBox.js"></html:script>
+	
 	<html:script src="tabs.js"></html:script>
 	<html:script src="zoteroPane.js"></html:script>
 	<html:script src="itemPane.js"></html:script>
@@ -1059,9 +1063,7 @@
 													<tab id="zotero-editpane-related-tab" label="&zotero.tabs.related.label;"/>
 												</tabs>
 												<tabpanels id="zotero-view-item" class="zotero-view-item" flex="1">
-													<tabpanel flex="1">
-														<zoteroitembox id="zotero-editpane-item-box" class="zotero-editpane-item-box" flex="1"/>
-													</tabpanel>
+													<tabpanel id="item-box-container"/>
 													
 													<tabpanel flex="1" orient="vertical">
 														<vbox flex="1" id="zotero-editpane-notes" class="zotero-box">

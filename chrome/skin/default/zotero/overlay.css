@@ -635,6 +635,10 @@
 	margin-left: 3px !important;
 }
 
+#item-box-container {
+	display: flex;
+}
+
 #retracted-items-banner, #sync-reminder-banner {
 	display: flex;
 	justify-content: center;

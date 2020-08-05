@@ -243,7 +243,7 @@ const ZoteroStandalone = new function() {
 			});
 			
 			for (var i = 0; i<itemTypes.length; i++) {
-				var menuitem = document.createElement("menuitem");
+				var menuitem = document.createXULElement("menuitem");
 				menuitem.setAttribute("label", itemTypes[i].localized);
 				menuitem.setAttribute("tooltiptext", "");
 				let type = itemTypes[i].id;
@@ -256,7 +256,7 @@ const ZoteroStandalone = new function() {
 			
 			// add separator between sets
 			if(j !== typeSets.length-1) {
-				addMenu.appendChild(document.createElement("menuseparator"));
+				addMenu.appendChild(document.createXULElement("menuseparator"));
 			}
 		}
 	}

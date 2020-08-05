@@ -1,0 +1,231 @@
+#item-box {
+	display: flex;
+	/*overflow: auto;*/
+	margin-top: 8px;
+}
+
+th, td {
+	min-height: 1em;
+}
+
+td {
+	display: flex;
+}
+
+th > label, td > [fieldname] {
+	margin-top: 1px !important;
+	margin-bottom: 1px !important;
+	-moz-box-pack: start;
+	-moz-margin-start: 1px !important;
+	-moz-margin-end: 5px !important;
+	padding: 0 2px 0 2px;
+}
+
+td > [fieldname] {
+  width: 100%;
+}
+
+/*td > vbox > description
+{
+	margin: 0 !important;
+}*/
+
+#item-type-menu {
+	-moz-appearance: none;
+	height: 1.5em !important;
+	min-height: 1.5em !important;
+	padding: 0 0 0 2px !important;
+	margin: 1px 5px 0 1px !important;
+	max-height: 1.5em !important;
+	border: 1px solid transparent;	
+	background-color: transparent;
+}
+
+#item-type-menu > .menulist-label-box {
+	-moz-box-flex: 0 !important;
+}
+
+#item-type-menu > .menulist-label-box, #item-type-menu > .menulist-label-box > .menulist-label {
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+#item-type-menu > .menulist-dropmarker {
+	display: none;
+}
+
+/* DEBUG: this doesn't seem to work, unfortunately
+label[singleField=false]:after
+{
+	content:",";
+}
+*/
+
+/*textbox .textbox-input-box
+{
+	margin: 0;
+}*/
+
+/* metadata field names */
+th, .creator-type-label {
+	font-weight: normal;
+	text-align: right;
+	margin-left: 5px !important;
+	margin-right: 2px !important;
+}
+
+#more-creators-label
+{
+	font-weight: bold;
+}
+
+/*row > label
+{
+	border: 1px solid transparent;
+}
+
+row label
+{
+	-moz-user-focus: ignore;
+}*/
+
+.pointer:hover {
+	cursor: pointer !important;
+}
+
+/* creator type menu */
+
+.creator-type-label, .creator-type-value {
+	-moz-box-align: center;
+	-moz-box-pack: end;
+}
+
+.creator-name-box {
+	display: flex;
+	flex: 1;
+}
+
+.creator-type-label > label
+{
+	margin: 1px 0 1px 0 !important;
+	padding-right: 2px !important;
+}
+ 
+.creator-type-dropmarker {
+	margin: 0 1em 1px;
+	background-image: url('chrome://zotero/skin/arrow-down.gif');
+	width: 11px;
+	height: 6px;
+}
+
+.creator-name-box, .date-box > span {
+	margin: 1px 0 1px 0;
+}
+
+.comma {
+	margin: 1px 3px 1px 0 !important;
+}
+
+#zotero-date-field-status
+{
+	color: #666;
+	padding: 0 10px 0 1px !important;
+	white-space: nowrap;
+}
+
+.zotero-field-toggle
+{
+	width: 27px !important;
+	max-width: 27px !important;
+	min-width: 27px !important;
+	height: 14px;
+	margin: 0 5px 0 0 !important;
+	background-repeat: no-repeat !important;
+	background-position: center !important;
+	border-width: 0 !important;
+	border-radius: 4px !important;
+}
+
+/* Merge pane in duplicates view */
+.zotero-field-version-button {
+	margin: 0;
+	padding: 0;
+}
+
+/*
+ * Retraction box
+ */
+#retraction-box {
+	cursor: default;
+}
+
+#retraction-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 1.5em 1em;
+	background: #d93425;
+	color: white;
+	font-weight: bold;
+}
+
+#retraction-details {
+	background: #fbf0f0;
+	padding: .5em 1.5em;
+	margin-top: 0;
+	margin-bottom: 1em;
+	cursor: text;
+	-moz-user-select: text;
+}
+
+#retraction-details dt {
+	font-weight: bold;
+}
+
+#retraction-details dt:not(:first-child) {
+	margin-top: .5em;
+}
+
+#retraction-details dd {
+	margin-left: 2em;
+}
+
+#retraction-details a {
+	text-decoration: underline;
+}
+
+#retraction-links ul {
+	padding-left: 0;
+}
+
+#retraction-links li {
+	list-style: none;
+}
+
+#retraction-links li:not(:first-child) {
+	margin-top: .75em;
+}
+
+#retraction-credit {
+	text-align: right;
+	margin-top: 1.5em;
+	margin-right: -.9em;
+	margin-bottom: .2em;
+}
+
+#retraction-hide {
+	text-align: right;
+	margin-top: .3em;
+	margin-right: -1.2em;
+	margin-bottom: .3em;
+}
+
+#retraction-hide button {
+	background: none;
+	margin: 0;
+	padding: 0;
+	cursor: pointer;
+	display: inline;
+	text-decoration: underline;
+	border-style: none;
+}

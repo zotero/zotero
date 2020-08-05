@@ -97,10 +97,6 @@ zoterosearchagefield
 	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-in-the-last');
 }
 
-zoteroitembox {
-	-moz-binding: url('chrome://zotero/content/bindings/itembox.xml#item-box');
-}
-
 zoteromergegroup {
 	-moz-binding: url('chrome://zotero/content/bindings/merge.xml#merge-group');
 }

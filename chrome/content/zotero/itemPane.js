@@ -45,7 +45,6 @@ var ZoteroItemPane = new function() {
 			return;
 		}
 		
-		_itemBox = document.getElementById('zotero-editpane-item-box');
 		_notesLabel = document.getElementById('zotero-editpane-notes-label');
 		_notesButton = document.getElementById('zotero-editpane-notes-add');
 		_notesList = document.getElementById('zotero-editpane-dynamic-notes');
@@ -75,9 +74,15 @@ var ZoteroItemPane = new function() {
 		Zotero.debug('Viewing item in pane ' + index);
 		
 		switch (index) {
-			case 0:
+			case 0: {
+				if (!_itemBox) {
+					_itemBox = new (customElements.get('item-box'));
+					_itemBox.id = 'zotero-editpane-item-box';
+					document.getElementById('item-box-container').appendChild(_itemBox);
+				}
 				var box = _itemBox;
 				break;
+			}
 			
 			case 3:
 				var box = _relatedBox;
@@ -89,13 +94,15 @@ var ZoteroItemPane = new function() {
 		if (_lastItem && _lastItem != item) {
 			switch (index) {
 				case 0:
-					yield box.blurOpenField();
+					// TEMP
+					//yield box.blurOpenField();
 					// DEBUG: Currently broken
 					//box.scrollToTop();
 					break;
 				
 				case 2:
-					_tagsBox.current.blurOpenField();
+					// TEMP
+					//_tagsBox.current.blurOpenField();
 					break;
 			}
 		}

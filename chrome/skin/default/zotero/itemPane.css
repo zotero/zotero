@@ -49,6 +49,7 @@
 	margin-left: 5px;
 }
 
+/* Context pane */
 .zotero-context-pane-pinned-note {
 	border-top: 1px solid #d9d9d9;
 }
@@ -56,81 +57,6 @@
 /*.zotero-editpane-tabs {*/
 /*	background: #ececec;*/
 /*}*/
-
-#retraction-box {
-	cursor: default;
-}
-
-#retraction-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 1.5em 1em;
-	background: #d93425;
-	color: white;
-	font-weight: bold;
-}
-
-#retraction-details {
-	background: #fbf0f0;
-	padding: .5em 1.5em;
-	margin-top: 0;
-	margin-bottom: 1em;
-	cursor: text;
-	-moz-user-select: text;
-}
-
-#retraction-details dt {
-	font-weight: bold;
-}
-
-#retraction-details dt:not(:first-child) {
-	margin-top: .5em;
-}
-
-#retraction-details dd {
-	margin-left: 2em;
-}
-
-#retraction-details a {
-	text-decoration: underline;
-}
-
-#retraction-links ul {
-	padding-left: 0;
-}
-
-#retraction-links li {
-	list-style: none;
-}
-
-#retraction-links li:not(:first-child) {
-	margin-top: .75em;
-}
-
-#retraction-credit {
-	text-align: right;
-	margin-top: 1.5em;
-	margin-right: -.9em;
-	margin-bottom: .2em;
-}
-
-#retraction-hide {
-	text-align: right;
-	margin-top: .3em;
-	margin-right: -1.2em;
-	margin-bottom: .3em;
-}
-
-#retraction-hide button {
-	background: none;
-	margin: 0;
-	padding: 0;
-	cursor: pointer;
-	display: inline;
-	text-decoration: underline;
-	border-style: none;
-}
 
 /* Buttons in trash and feed views */
 .zotero-item-pane-top-buttons {

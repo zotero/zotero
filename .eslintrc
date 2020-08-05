@@ -14,10 +14,12 @@
 		"ConcurrentCaller": false,
 		"ctypes": false,
 		"OS": false,
+		"MozXULElement": false,
 		"PluralForm": false,
 		"Services": false,
 		"XPCOMUtils": false,
-		"XRegExp": false
+		"XRegExp": false,
+		"XULElement": false
 	},
 	"extends": [
 		"@zotero",
