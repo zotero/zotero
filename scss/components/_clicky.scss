@@ -1,0 +1,47 @@
+.zotero-clicky {
+	border-radius: 6px;
+	border: 1px solid transparent;
+}
+
+/* Minus and plus buttons with clicky glow effect */
+.zotero-clicky-minus, .zotero-clicky-plus {
+	color: transparent !important;
+	padding: 0 !important;
+	margin: 0 5px 0 0 !important;
+	width: 18px;
+	height: 18px;
+}
+
+.zotero-clicky-minus {
+	background: url(chrome://zotero/skin/minus.png) center/auto 18px no-repeat !important;
+	border: 0px !important;
+}
+
+.zotero-clicky-plus {
+	background: url(chrome://zotero/skin/plus.png) center/auto 18px no-repeat !important;
+	border: 0px !important;
+}
+
+.zotero-clicky-minus[disabled=true], .zotero-clicky-plus[disabled=true] {
+	opacity: .5;
+}
+
+.zotero-clicky-minus:not([disabled=true]):active {
+	background-image: url('chrome://zotero/skin/minus-active.png') !important;
+}
+
+.zotero-clicky-plus:not([disabled=true]):active {
+	background-image: url('chrome://zotero/skin/plus-active.png') !important;
+}
+
+.zotero-clicky:not([disabled=true]):not(.disabled):hover {
+	background: rgb(187, 206, 241);
+	border: 1px solid rgb(109, 149, 224);
+}
+
+.zotero-clicky:not([disabled=true]):not(.disabled):active,
+.zotero-clicky[selected="true"],
+.zotero-clicky.selected {
+	color: white;
+	background: rgb(89, 139, 236);
+}
