@@ -239,6 +239,38 @@ describe("Zotero.File", function () {
 		})
 	})
 	
+	describe("#createDirectoryIfMissing()", function () {
+		it("should throw error on broken symlink", async function () {
+			if (Zotero.isWin) {
+				this.skip();
+			};
+			
+			var tmpPath = await getTempDirectory();
+			var destPath = OS.Path.join(tmpPath, 'missing');
+			var linkPath = OS.Path.join(tmpPath, 'link');
+			await OS.File.unixSymLink(destPath, linkPath);
+			
+			assert.throws(() => Zotero.File.createDirectoryIfMissing(linkPath), /^Broken symlink/);
+		});
+	});
+	
+	describe("#createDirectoryIfMissingAsync()", function () {
+		it("should throw error on broken symlink", async function () {
+			if (Zotero.isWin) {
+				this.skip();
+			};
+			
+			var tmpPath = await getTempDirectory();
+			var destPath = OS.Path.join(tmpPath, 'missing');
+			var linkPath = OS.Path.join(tmpPath, 'link');
+			await OS.File.unixSymLink(destPath, linkPath);
+			
+			var e = await getPromiseError(Zotero.File.createDirectoryIfMissingAsync(linkPath));
+			assert.ok(e);
+			assert.match(e.message, /^Broken symlink/);
+		});
+	});
+	
 	describe("#zipDirectory()", function () {
 		it("should compress a directory recursively", function* () {
 			var tmpPath = Zotero.getTempDirectory().path;

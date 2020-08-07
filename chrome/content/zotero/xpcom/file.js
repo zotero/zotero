@@ -984,24 +984,59 @@ Zotero.File = new function(){
 	this.createDirectoryIfMissing = function (dir) {
 		dir = this.pathToFile(dir);
 		if (!dir.exists() || !dir.isDirectory()) {
-			if (dir.exists() && !dir.isDirectory()) {
-				dir.remove(null);
+			if (dir.exists()) {
+				if (!dir.isDirectory()) {
+					dir.remove(null);
+				}
+			}
+			else {
+				let isSymlink = false;
+				// isSymlink() fails if the directory doesn't exist, but is true if it's a broken
+				// symlink, in which case exists() returns false
+				try {
+					isSymlink = dir.isSymlink();
+				}
+				catch (e) {}
+				if (isSymlink) {
+					throw new Error(`Broken symlink at ${dir.path}`);
+				}
 			}
 			dir.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0o755);
 		}
 	}
 	
 	
-	this.createDirectoryIfMissingAsync = function (path) {
-		return Zotero.Promise.resolve(
-			OS.File.makeDir(
+	this.createDirectoryIfMissingAsync = async function (path) {
+		try {
+			await OS.File.makeDir(
 				path,
 				{
-					ignoreExisting: true,
+					ignoreExisting: false,
 					unixMode: 0o755
 				}
 			)
-		);
+		}
+		catch (e) {
+			// If there's a broken symlink at the given path, makeDir() will throw becauseExists,
+			// but exists() will return false
+			if (e.becauseExists) {
+				if (await OS.File.exists(path)) {
+					return;
+				}
+				let isSymlink = false;
+				// Confirm with nsIFile that it's a symlink
+				try {
+					isSymlink = this.pathToFile(path).isSymlink();
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+				if (isSymlink) {
+					throw new Error(`Broken symlink at ${path}`);
+				}
+			}
+			throw e;
+		}
 	}
 	
 	
