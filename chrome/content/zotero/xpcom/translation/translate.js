@@ -1395,22 +1395,14 @@ Zotero.Translate.Base.prototype = {
 		var m = url.match(hostPortRe),
 			resolved;
 		if (!m) {
-			// Convert relative URLs to absolute
-			if(Zotero.isFx && this.location) {
-				resolved = Components.classes["@mozilla.org/network/io-service;1"].
-					getService(Components.interfaces.nsIIOService).
-					newURI(this.location, "", null).resolve(url);
-			} else if(Zotero.isNode && this.location) {
-				resolved = require('url').resolve(this.location, url);
-			} else if (this.document) {
-				var a = this.document.createElement('a');
-				a.href = url;
-				resolved = a.href;
-			} else if (url.indexOf('//') == 0) {
-				// Protocol-relative URL with no associated web page
-				// Use HTTP by default
-				resolved = 'http:' + url;
-			} else {
+			if (this.location) {
+				resolved = new URL(url, this.location).toString();
+			}
+			else if (url.startsWith('//')) {
+				// Use HTTPS by default for protocol-relative URL with no associated web page
+				resolved = 'https:' + url;
+			}
+			else {
 				throw new Error('Cannot resolve relative URL without an associated web page: ' + url);
 			}
 		} else if (allowedSchemes.indexOf(m[1].toLowerCase()) == -1) {
