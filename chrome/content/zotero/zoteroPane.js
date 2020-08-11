@@ -4183,7 +4183,7 @@ var ZoteroPane = new function()
 			}
 		}
 		io.hasRights = allItemsHaveRights ? 'all' : (noItemsHaveRights ? 'none' : 'some');
-		window.openDialog('chrome://zotero/content/publicationsDialog.xul','','chrome,modal', io);
+		window.openDialog('chrome://zotero/content/publications/publicationsDialog.xul','','chrome,modal', io);
 		return io.license ? io : false;
 	};
 	

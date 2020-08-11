@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
+
+<!DOCTYPE window [
+	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
+	<!ENTITY % publicationsDTD SYSTEM "chrome://zotero/locale/publications.dtd"> %publicationsDTD;
+]>
+
+<window id="zotero-publications-wizard"
+		width="600"
+		height="550"
+		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		xmlns:html="http://www.w3.org/1999/xhtml"
+		title="&zotero.publications.my_publications;"
+		onload="Zotero.PublicationsDialog.init(document.getElementById('publications-dialog'), window.arguments[0].wrappedJSObject)"
+>	
+		<html:div style="-moz-box-flex: 1; display: flex; height: 100%;" id="publications-dialog"></html:div>	
+	<script src="chrome://zotero/content/include.js"/>
+	<script src="../fileInterface.js"/>
+	<script src="publicationsDialog.js"/>
+</window>
