@@ -30,6 +30,7 @@ import ReactDom from 'react-dom';
 import Wizard from './components/wizard';
 import WizardPage from './components/wizardPage';
 import RadioSet from './components/radioSet';
+import LicenseInfo from './components/licenseInfo';
 import { nextHtmlId } from './components/utils';
 
 const importSourceOptions = [
@@ -49,14 +50,48 @@ const commercialOptions = [
 	{ label: Zotero.getString('general.yes'), value: 'yes' },
 ];
 
+/**
+ * Update the calculated license and image
+ *
+ * Possible licenses:
+ *
+ * 'cc-by'
+ * 'cc-by-sa'
+ * 'cc-by-nd'
+ * 'cc-by-nc'
+ * 'cc-by-nc-sa'
+ * 'cc-by-nc-nd'
+ * 'cc0'
+ * 'reserved'
+ */
+function getLicense(sharing, adaptations, commercial) {
+	if (sharing == 'cc0' || sharing == 'reserved') {
+		return sharing;
+	}
+	else {
+		let license = 'cc-by';
+		if (commercial === 'no') {
+			license += '-nc';
+		}
+		if (adaptations === 'no') {
+			license += '-nd';
+		}
+		else if (adaptations == 'sharealike') {
+			license += '-sa';
+		}
+		return license;
+	}
+}
+
 const PublicationsDialog = memo(() => {
 	const id = useRef(nextHtmlId());
 	const [shouldIncludeFiles, setShouldIncludeFiles] = useState(false);
 	const [shouldIncludeNotes, setShouldIncludeNotes] = useState(false);
 	const [authorship, setAuthorship] = useState(false);
 	const [sharing, setSharing] = useState('reserved');
-	const [adaptation, setAdaptation] = useState('no');
+	const [adaptations, setAdaptations] = useState('no');
 	const [commercial, setCommercial] = useState('no');
+	const license = getLicense(sharing, adaptations, commercial);
 
 	const handleShouldIncludeFilesChange = useCallback((ev) => {
 		setShouldIncludeFiles(ev.currentTarget.checked);
@@ -74,8 +109,8 @@ const PublicationsDialog = memo(() => {
 		setSharing(newSharing);
 	}, []);
 
-	const handleAdaptationsChange = useCallback((newAdaptation) => {
-		setAdaptation(newAdaptation);
+	const handleAdaptationsChange = useCallback((newAdaptations) => {
+		setAdaptations(newAdaptations);
 	}, []);
 
 	const handleCommercialChange = useCallback((newCommercial) => {
@@ -87,7 +122,7 @@ const PublicationsDialog = memo(() => {
 			className="publications-dialog"
 		>
 			<WizardPage
-				pageid="intro"
+				pageId="intro"
 				label={ Zotero.getString('publications.my_publications') }
 			>
 				<p className="description">
@@ -130,7 +165,7 @@ const PublicationsDialog = memo(() => {
 				</div>
 			</WizardPage>
 			<WizardPage
-				pageid="choose-sharing"
+				pageId="choose-sharing"
 				label={ Zotero.getString('publications.sharing.title') }
 			>
 				<p className="description">
@@ -144,10 +179,10 @@ const PublicationsDialog = memo(() => {
 					options={ importSourceOptions }
 					value={ sharing }
 				/>
-				<div className="license-info"></div>
+				<LicenseInfo license={ license } />
 			</WizardPage>
 			<WizardPage
-				pageid="choose-license"
+				pageId="choose-license"
 				label={ Zotero.getString('publications.chooseLicense.title') }
 			>
 				<p className="description">
@@ -159,7 +194,7 @@ const PublicationsDialog = memo(() => {
 				<RadioSet
 					onChange={ handleAdaptationsChange }
 					options={ adaptationsOptions }
-					value={ adaptation }
+					value={ adaptations }
 				/>
 				<h2>
 					{ Zotero.getString('publications.chooseLicense.commercial.prompt') }
@@ -169,7 +204,7 @@ const PublicationsDialog = memo(() => {
 					options={ commercialOptions }
 					value={ commercial }
 				/>
-				<div className="license-info"></div>
+				<LicenseInfo license={ license } />
 			</WizardPage>
 		</Wizard>
 	);
