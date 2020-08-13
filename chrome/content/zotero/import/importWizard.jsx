@@ -233,7 +233,7 @@ const ImportWizard = memo(({ libraryID }) => {
 	}, []);
 
 	const handleUrlClick = useCallback((ev) => {
-		Zotero.openInViewer(ev.currentTarget.href);
+		Zotero.launchURL(ev.currentTarget.href);
 		window.close();
 		ev.preventDefault();
 	}, []);
