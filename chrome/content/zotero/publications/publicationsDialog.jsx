@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-import React, { memo, useCallback, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
 import ReactDom from 'react-dom';
@@ -31,7 +31,7 @@ import Wizard from './components/wizard';
 import WizardPage from './components/wizardPage';
 import RadioSet from './components/radioSet';
 import LicenseInfo from './components/licenseInfo';
-import { nextHtmlId } from './components/utils';
+import { getLicenseData, nextHtmlId } from './components/utils';
 
 const importSourceOptions = [
 	{ label: Zotero.getString('publications.sharing.reserved'), value: 'reserved' },
@@ -64,26 +64,28 @@ const commercialOptions = [
  * 'cc0'
  * 'reserved'
  */
-function getLicense(sharing, adaptations, commercial) {
+function getLicense(sharing, adaptations, commercial, currentPage) {
 	if (sharing == 'cc0' || sharing == 'reserved') {
 		return sharing;
 	}
-	else {
-		let license = 'cc-by';
-		if (commercial === 'no') {
-			license += '-nc';
-		}
-		if (adaptations === 'no') {
-			license += '-nd';
-		}
-		else if (adaptations == 'sharealike') {
-			license += '-sa';
-		}
-		return license;
+	if (currentPage !== 'choose-license') {
+		return 'cc';
 	}
+
+	let license = 'cc-by';
+	if (commercial === 'no') {
+		license += '-nc';
+	}
+	if (adaptations === 'no') {
+		license += '-nd';
+	}
+	else if (adaptations == 'sharealike') {
+		license += '-sa';
+	}
+	return license;
 }
 
-const PublicationsDialog = memo(() => {
+const PublicationsDialog = memo(({ io }) => {
 	const id = useRef(nextHtmlId());
 	const [shouldIncludeFiles, setShouldIncludeFiles] = useState(false);
 	const [shouldIncludeNotes, setShouldIncludeNotes] = useState(false);
@@ -91,7 +93,27 @@ const PublicationsDialog = memo(() => {
 	const [sharing, setSharing] = useState('reserved');
 	const [adaptations, setAdaptations] = useState('no');
 	const [commercial, setCommercial] = useState('no');
-	const license = getLicense(sharing, adaptations, commercial);
+	const [canAdvance, setCanAdvance] = useState(false);
+	const [currentPage, setCurrentPage] = useState('intro');
+	const [hasFiles, setHasFiles] = useState(false);
+	const [hasNotes, setHasNotes] = useState(false);
+	const [hasRights, setHasRights] = useState(false);
+	const [keepRights, setKeepRights] = useState(true);
+	const license = getLicense(sharing, adaptations, commercial, currentPage);
+	const nextPageId = useMemo(() => {
+		return currentPage === 'intro'
+			? shouldIncludeFiles
+				? 'choose-sharing'
+				: null
+			: currentPage === 'choose-sharing'
+				? license === 'cc'
+					? 'choose-license'
+					: null
+				: null;
+	}, [currentPage, license, shouldIncludeFiles]);
+	const nextLabel = nextPageId
+		? Zotero.getString('publications.buttons.next', Zotero.getString('publications.buttons.' + nextPageId))
+		: Zotero.getString('publications.buttons.addToMyPublications');
 
 	const handleShouldIncludeFilesChange = useCallback((ev) => {
 		setShouldIncludeFiles(ev.currentTarget.checked);
@@ -117,13 +139,66 @@ const PublicationsDialog = memo(() => {
 		setCommercial(newCommercial);
 	}, []);
 
+	const handleKeepRightsChange = useCallback((ev) => {
+		setKeepRights(ev.currentTarget.checked);
+	}, []);
+
+	const handlePageShown = useCallback((pageId) => {
+		setCurrentPage(pageId);
+	}, []);
+
+	const handleFinish = useCallback(() => {
+		const { name } = getLicenseData(license);
+		io.includeFiles = shouldIncludeFiles;
+		io.includeNotes = shouldIncludeNotes;
+		io.keepRights = keepRights;
+		io.license = license;
+		io.licenseName = name;
+	}, [io, keepRights, shouldIncludeFiles, shouldIncludeNotes, license]);
+
+	const handlePageAdvance = useCallback(() => {
+		if (nextPageId === null) {
+			handleFinish();
+			window.close();
+			return false;
+		}
+		return true;
+	}, [handleFinish, nextPageId]);
+
+	const handleClose = useCallback(() => {
+		window.close();
+	}, []);
+
+	useEffect(() => {
+		setCanAdvance(authorship);
+	}, [authorship]);
+
+	useEffect(() => {
+		setHasFiles(io.hasFiles);
+		setHasNotes(io.hasNotes);
+		setHasRights(io.hasRights);
+		if (io.hasRights === 'none') {
+			setKeepRights(false);
+		}
+		delete io.hasFiles;
+		delete io.hasNotes;
+		delete io.hasRights;
+	}, [io]);
+
 	return (
 		<Wizard
+			canAdvance={ canAdvance }
 			className="publications-dialog"
+			nextLabel={ nextLabel }
+			doneLabel={ Zotero.getString('publications.buttons.addToMyPublications') }
+			onFinish={ handleFinish }
+			onClose={ handleClose }
 		>
 			<WizardPage
 				pageId="intro"
 				label={ Zotero.getString('publications.my_publications') }
+				onPageShow={ handlePageShown }
+				onPageAdvance={ handlePageAdvance }
 			>
 				<p className="description">
 					{ Zotero.getString('publications.intro') }
@@ -131,18 +206,20 @@ const PublicationsDialog = memo(() => {
 				<div className="include-files-container">
 					<input
 						checked={ shouldIncludeFiles }
+						disabled={ !hasFiles }
 						id={ id.current + '-include-files-checkbox' }
 						label={ Zotero.getString('publications.include.checkbox.files') }
 						onChange={ handleShouldIncludeFilesChange }
 						type="checkbox"
 					/>
-					<label htmlFor={ id.current + '-create-collection-checkbox' }>
+					<label htmlFor={ id.current + '-include-files-checkbox' }>
 						{ Zotero.getString('publications.include.checkbox.files') }
 					</label>
 				</div>
 				<div className="include-notes-container">
 					<input
 						checked={ shouldIncludeNotes }
+						disabled={ !hasNotes }
 						id={ id.current + '-include-notes-checkbox' }
 						label={ Zotero.getString('publications.include.checkbox.notes') }
 						onChange={ handleShouldIncludeNotesChange }
@@ -162,28 +239,54 @@ const PublicationsDialog = memo(() => {
 						onChange={ handleAutorshipChange }
 						type="checkbox"
 					/>
+					<label htmlFor={ id.current + '-authorship-checkbox' }>
+						{ Zotero.getString('publications.intro.authorship' + (shouldIncludeFiles ? '.files' : '')) }
+					</label>
 				</div>
 			</WizardPage>
 			<WizardPage
 				pageId="choose-sharing"
 				label={ Zotero.getString('publications.sharing.title') }
+				onPageShow={ handlePageShown }
+				onPageAdvance={ handlePageAdvance }
 			>
-				<p className="description">
-					{ Zotero.getString('publications.sharing.text') }
-				</p>
-				<p className="description">
-					{ Zotero.getString('publications.sharing.prompt') }
-				</p>
-				<RadioSet
-					onChange={ handleSharingChange }
-					options={ importSourceOptions }
-					value={ sharing }
-				/>
-				<LicenseInfo license={ license } />
+				{ hasRights !== 'none' && (
+					<div className="keep-rights">
+						<input
+							checked={ keepRights }
+							id={ id.current + '-keeprights-checkbox' }
+							onChange={ handleKeepRightsChange }
+							type="checkbox"
+						/>
+						<label htmlFor={ id.current + '-keeprights-checkbox' }>
+							{ Zotero.getString(
+								'publications.sharing.keepRightsField' + (hasRights === 'some' ? 'WhereAvailable' : '')
+							) }
+						</label>
+					</div>
+				) }
+				{ (hasRights !== 'all' || !keepRights) && (
+					<div className="choose-sharing-options">
+						<p className="description">
+							{ Zotero.getString('publications.sharing.text') }
+						</p>
+						<p className="description">
+							{ Zotero.getString('publications.sharing.prompt') }
+						</p>
+						<RadioSet
+							onChange={ handleSharingChange }
+							options={ importSourceOptions }
+							value={ sharing }
+						/>
+						<LicenseInfo license={ license } />
+					</div>
+				) }
 			</WizardPage>
 			<WizardPage
 				pageId="choose-license"
 				label={ Zotero.getString('publications.chooseLicense.title') }
+				onPageShow={ handlePageShown }
+				onPageAdvance={ handlePageAdvance }
 			>
 				<p className="description">
 					{ Zotero.getString('publications.chooseLicense.text') }
@@ -210,8 +313,8 @@ const PublicationsDialog = memo(() => {
 	);
 });
 
-PublicationsDialog.init = (domEl, props) => {
-	ReactDom.render(<PublicationsDialog { ...props } />, domEl);
+PublicationsDialog.init = (domEl, io) => {
+	ReactDom.render(<PublicationsDialog io={ io } />, domEl);
 };
 
 PublicationsDialog.propTypes = {

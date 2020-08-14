@@ -27,7 +27,7 @@ import PropTypes from 'prop-types';
 import cx from 'classnames';
 import { usePrevious } from '../hooks/use-previous';
 
-const Wizard = ({ canAdvance = true, canRewind = true, canCancel = true, className, children, onClose, ...props }, ref) => {
+const Wizard = ({ canAdvance = true, canRewind = true, canCancel = true, className, children, onClose, onFinish, ...props }, ref) => {
 	const [currentId, setCurrentId] = useState(null);
 	const [hasFocus, setHasFocus] = useState(true); // assumes modal is active when opened
 	const previousId = usePrevious(currentId);
@@ -90,12 +90,15 @@ const Wizard = ({ canAdvance = true, canRewind = true, canCancel = true, classNa
 	}, []);
 
 	const handleDone = useCallback(() => {
+		if (onFinish) {
+			onFinish();
+		}
 		window.close();
-	}, []);
+	}, [onFinish]);
 
 	useEffect(() => {
 		if (currentId !== previousId && 'onPageShow' in currentPage.props) {
-			currentPage.props.onPageShow();
+			currentPage.props.onPageShow(currentPage.props.pageId);
 		}
 	}, [currentId, previousId, currentPage]);
 
@@ -176,6 +179,7 @@ Wizard.propTypes = {
 	doneLabel: PropTypes.string,
 	nextLabel: PropTypes.string,
 	onClose: PropTypes.func,
+	onFinish: PropTypes.func,
 };
 
 export default memo(forwardRef(Wizard));
