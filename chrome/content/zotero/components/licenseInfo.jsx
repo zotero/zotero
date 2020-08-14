@@ -23,49 +23,31 @@
     ***** END LICENSE BLOCK *****
 */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import { getLicenseData } from './utils';
 
 const LicenseInfo = ({ license }) => {
-	var name, img, url;
+	const { name, img, url } = getLicenseData(license);
+	const handleUrlClick = useCallback((ev) => {
+		Zotero.launchURL(ev.currentTarget.href);
+		ev.preventDefault();
+	}, []);
 
-	switch (license) {
-		case 'reserved':
-			url = "";
-			name = 'All rights reserved';
-			img = 'chrome://zotero/skin/licenses/reserved.png';
-			break;
-		case 'cc':
-			url = 'https://creativecommons.org/';
-			name = Zotero.getString('licenses.' + license) + ' (' + license.toUpperCase() + ')';
-			img = 'chrome://zotero/skin/licenses/cc-srr.png';
-			break;
-		
-		case 'cc0':
-			url = "https://creativecommons.org/publicdomain/zero/1.0/";
-			name = 'CC0 1.0 Universal Public Domain Dedication';
-			img = 'chrome://zotero/skin/licenses/' + license + ".svg";
-			break;
-		
-		default:
-			url = 'https://creativecommons.org/licenses/' + license.replace(/^cc-/, '') + '/4.0/';
-			name = Zotero.getString('licenses.' + license) + ' (' + license.toUpperCase() + ')';
-			img = 'chrome://zotero/skin/licenses/' + license + ".svg";
-			break;
-	}
-
-	return (
-		<div className="license-info">
+	const licenseInfo = (
+		<React.Fragment>
 			<img
 				title={ url }
 				src={ img }
 				className="license-icon"
-			>
-			</img>
-			{ license === 'reserved'
-				? name
-				: (<a href={ url }>{ name }</a>)
-			}
+			></img>
+			{ name }
+		</React.Fragment>
+	);
+
+	return (
+		<div className="license-info">
+			{ url ? <a href={ url } onClick={ handleUrlClick } >{ licenseInfo }</a> : licenseInfo }
 		</div>
 	);
 };
