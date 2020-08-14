@@ -27,7 +27,7 @@ import PropTypes from 'prop-types';
 import cx from 'classnames';
 import { usePrevious } from '../hooks/use-previous';
 
-const Wizard = ({ canAdvance = true, canRewind = true, canCancel = true, className, children, onClose }, ref) => {
+const Wizard = ({ canAdvance = true, canRewind = true, canCancel = true, className, children, onClose, ...props }, ref) => {
 	const [currentId, setCurrentId] = useState(null);
 	const [hasFocus, setHasFocus] = useState(true); // assumes modal is active when opened
 	const previousId = usePrevious(currentId);
@@ -35,6 +35,15 @@ const Wizard = ({ canAdvance = true, canRewind = true, canCancel = true, classNa
 	const currentIndex = currentId ? pages.findIndex(p => p.props.pageId === currentId) : 0;
 	const currentPage = pages[currentIndex];
 	const isLastPage = currentIndex === pages.length - 1;
+	const cancelLabel = props.cancelLabel || Zotero.getString('general.cancel');
+	const backLabel = props.backLabel
+		|| (Zotero.isMac ? Zotero.getString('general.goBack') : Zotero.getString('general.back'));
+	const nextLabel = props.nextLabel
+		|| (Zotero.isMac ? Zotero.getString('general.continue') : Zotero.getString('general.next'));
+	const doneLabel = props.doneLabel
+		|| (Zotero.isMac ? Zotero.getString('general.done') : Zotero.getString('general.finish'));
+
+
 	canAdvance = canAdvance && currentIndex < pages.length - 1;
 	canRewind = canRewind && currentIndex > 0;
 
@@ -108,16 +117,16 @@ const Wizard = ({ canAdvance = true, canRewind = true, canCancel = true, classNa
 
 	return (
 		<div className={ cx('wizard', className, { focused: hasFocus }) }>
-				{ currentPage }
+			{ currentPage }
 			<div className="wizard-controls">
 				<div className="cancel-controls">
 					<button
 						className="cancel-button"
 						disabled={ !canCancel }
 						onClick={ handleCancel }
-						title={ Zotero.getString('general.cancel') }
+						title={ cancelLabel }
 					>
-						<span>{ Zotero.getString('general.cancel') }</span>
+						<span>{ cancelLabel }</span>
 					</button>
 				</div>
 				<div className="next-back-controls">
@@ -126,9 +135,9 @@ const Wizard = ({ canAdvance = true, canRewind = true, canCancel = true, classNa
 							className="back-button"
 							disabled={ !canRewind }
 							onClick={ handleGoBack }
-							title={ Zotero.isMac ? Zotero.getString('general.goBack') : Zotero.getString('general.back') }
+							title={ backLabel }
 						>
-							<span>{ Zotero.isMac ? Zotero.getString('general.goBack') : Zotero.getString('general.back') }</span>
+							<span>{ backLabel }</span>
 						</button>
 					) }
 					{ !isLastPage && (
@@ -136,18 +145,18 @@ const Wizard = ({ canAdvance = true, canRewind = true, canCancel = true, classNa
 							className="continue-button"
 							disabled={ !canAdvance }
 							onClick={ handleContinue }
-							title={ Zotero.isMac ? Zotero.getString('general.continue') : Zotero.getString('general.next') }
+							title={ nextLabel }
 						>
-							<span>{ Zotero.isMac ? Zotero.getString('general.continue') : Zotero.getString('general.next') }</span>
+							<span>{ nextLabel }</span>
 						</button>
 					) }
 					{ isLastPage && (
 						<button
 							className="done-button"
 							onClick={ handleDone }
-							title={ Zotero.isMac ? Zotero.getString('general.done') : Zotero.getString('general.finish') }
+							title={ doneLabel }
 						>
-							<span>{ Zotero.isMac ? Zotero.getString('general.done') : Zotero.getString('general.finish') }</span>
+							<span>{ doneLabel }</span>
 						</button>
 					) }
 				</div>
@@ -157,11 +166,15 @@ const Wizard = ({ canAdvance = true, canRewind = true, canCancel = true, classNa
 };
 
 Wizard.propTypes = {
+	backLabel: PropTypes.string,
 	canAdvance: PropTypes.bool,
 	canCancel: PropTypes.bool,
+	cancelLabel: PropTypes.string,
 	canRewind: PropTypes.bool,
 	children: PropTypes.oneOfType([PropTypes.element, PropTypes.array]),
 	className: PropTypes.string,
+	doneLabel: PropTypes.string,
+	nextLabel: PropTypes.string,
 	onClose: PropTypes.func,
 };
 
