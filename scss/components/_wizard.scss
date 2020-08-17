@@ -6,6 +6,7 @@
 	height: 100%;
 	justify-content: space-between;
 	width: 100%;
+	font-size: 13px;
 
 	button {
 		padding: 2px 8px;
@@ -32,9 +33,11 @@
 }
 
 .wizard-controls {
+	box-sizing: border-box;
+	display: flex;
 	flex: 0 0 24px;
 	padding: 16px 32px 16px;
-	display: flex;
+	width: 100%;
 
 	.cancel-controls, .next-back-controls {
 		flex: 1 1 50%;
