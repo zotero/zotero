@@ -10,11 +10,12 @@
 
 	.cancel-controls {
 		text-align: right;
-		flex: 1 1 calc(100% - 100px);
+		flex: 1 1 auto;
 	}
 
 	.next-back-controls {
-		flex: 1 1 100px;
+		flex: 0 1 auto;
+		padding-left: 16px;
 		text-align: right;
 	}
 }

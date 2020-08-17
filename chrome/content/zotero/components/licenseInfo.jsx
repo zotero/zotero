@@ -27,8 +27,14 @@ import React, { memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { getLicenseData } from './utils';
 
+const links = {
+	cc: 'https://wiki.creativecommons.org/Considerations_for_licensors_and_licensees',
+	cc0: 'https://wiki.creativecommons.org/CC0_FAQ'
+};
+
 const LicenseInfo = ({ license }) => {
 	const { name, img, url } = getLicenseData(license);
+	
 	const handleUrlClick = useCallback((ev) => {
 		Zotero.launchURL(ev.currentTarget.href);
 		ev.preventDefault();
@@ -36,19 +42,42 @@ const LicenseInfo = ({ license }) => {
 
 	const licenseInfo = (
 		<React.Fragment>
-			<img
-				title={ url }
-				src={ img }
-				className="license-icon"
-			></img>
-			{ name }
+			<div>
+				<img
+					title={ url }
+					src={ img }
+					className="license-icon"
+				></img>
+			</div>
+			<div>{ name }</div>
 		</React.Fragment>
 	);
 
+	const needsMoreInfo = license.startsWith('cc') && license !== 'cc';
+	const ccType = license === 'cc0' ? 'cc0' : 'cc';
+	const moreInfo = Zotero.getString('publications.' + ccType + '.moreInfo.text').split('%S');
+		
 	return (
-		<div className="license-info">
-			{ url ? <a href={ url } onClick={ handleUrlClick } >{ licenseInfo }</a> : licenseInfo }
-		</div>
+		<React.Fragment>
+			{ url ? (
+				<a className="license-info" href={ url } onClick={ handleUrlClick } >
+					{ licenseInfo }
+				</a>
+			) : (
+				<div className="license-info">
+					{ licenseInfo }
+				</div>
+			) }
+			{ needsMoreInfo && (
+				<div className="license-more-info">
+					{ moreInfo[0] }
+					<a href={ links[ccType] } onClick={ handleUrlClick } >
+						{ Zotero.getString('publications.' + ccType + '.moreInfo.linkText') }
+					</a>
+					{ moreInfo[1] }
+				</div>
+			) }
+		</React.Fragment>
 	);
 };
 
