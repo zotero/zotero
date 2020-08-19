@@ -121,7 +121,7 @@ const Wizard = ({ canAdvance = true, canRewind = true, canCancel = true, classNa
 					</button>
 				</div>
 				<div className="next-back-controls">
-					{ !Zotero.isLinux && (
+					{ (!Zotero.isLinux || (Zotero.isLinux && canRewind)) && (
 						<button
 							className="back-button"
 							disabled={ !canRewind }
