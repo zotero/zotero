@@ -28,14 +28,16 @@ import PropTypes from 'prop-types';
 function WizardPage({ children, label }) {
 	return (
 		<div className="wizard-page">
-            <div className="wizard-header">
-    			<h1 className="wizard-header-label">
-    				{ label }
-    			</h1>
-            </div>
-            <div className="wizard-body">
-                { children }
-            </div>
+			{ (label && typeof label === 'string' && label.length > 0) && (
+				<div className="wizard-header">
+					<h1 className="wizard-header-label">
+						{ label }
+					</h1>
+				</div>
+			) }
+			<div className="wizard-body">
+				{ children }
+			</div>
 		</div>
 	);
 }

@@ -54,7 +54,8 @@ const Wizard = ({ canAdvance = true, canRewind = true, canCancel = true, classNa
 			}
 			setCurrentId(pageId);
 		},
-		advance: handleContinue
+		advance: handleContinue,
+		rewind: handleGoBack
 	}));
 
 	const handleCancel = useCallback(() => {
