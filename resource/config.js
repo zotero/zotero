@@ -31,8 +31,9 @@ var ZOTERO_CONFIG = {
 	DICTIONARIES_URL: 'https://download.zotero.org/dictionaries/',
 };
 
-if (typeof process === 'object' && process + '' === '[object process]'){
+if (typeof exports === 'object' && typeof module !== 'undefined') {
 	module.exports = ZOTERO_CONFIG;
-} else {
+}
+else {
 	var EXPORTED_SYMBOLS = ["ZOTERO_CONFIG"];
 }
