@@ -1,0 +1,29 @@
+.error-report {
+	.wizard-body {
+		display: flex;
+		flex-direction: column;
+		font-size: 11px;
+		padding-top: 2.5em;
+
+		textarea {
+			flex: 1 1 auto;
+			font-family: inherit;
+			font-size: 11px;
+			padding: 5px;
+			border: none;
+		}
+
+		.advance-message {
+			margin: .5em 0;
+		}
+
+		.report-id {
+			background: transparent;
+			border: none;
+			color: red;
+			font-size: 11px;
+			font-weight: bold;
+			margin-left: 2px;
+		}
+	}
+}

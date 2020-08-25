@@ -133,25 +133,28 @@ const ErrorReport = memo(({ io }) => {
 		>
 			<WizardPage pageId="error-intro">
 				<p className="description">{ msg }</p>
-				<textarea value={ logText }></textarea>
-				<p className="description">
+				<textarea readOnly={ true } value={ logText }></textarea>
+				<p className="description advance-message">
 					{ Zotero.getString('errorReport.advanceMessage', nextLabel) }
 				</p>
 			</WizardPage>
 			<WizardPage pageId="error-progress" onPageShow={ handleSubmit }>
-				{ Zotero.getString('errorReport.submissionInProgress') }
+				<p className="description">
+					{ Zotero.getString('errorReport.submissionInProgress') }
+				</p>
 			</WizardPage>
 			<WizardPage pageId="error-summary">
 				<p className="description">
 					{ Zotero.getString('errorReport.submitted') }
 				</p>
 				<div className="report-result">
-					<label htmlFor={ id + '-report-result' }>
+					<label htmlFor={ id.current + '-report-result' }>
 						{ Zotero.getString('errorReport.reportID') }
 					</label>
 					<input
-						readOnly={ true }
+						className="report-id"
 						id={ id + '-report-result' }
+						readOnly={ true }
 						value={ reportID }
 					/>
 				</div>
