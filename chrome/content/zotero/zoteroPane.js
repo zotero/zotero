@@ -3490,7 +3490,7 @@ var ZoteroPane = new function()
 		var items = this.getSelectedItems();
 		
 		if (this.itemsView.selection.count == 1 && items[0] && items[0].isNote()) {
-			var note = items[0].getNote()
+			var note = items[0].note;
 			
 			items[0].setNote(note + text);
 			yield items[0].saveTx();

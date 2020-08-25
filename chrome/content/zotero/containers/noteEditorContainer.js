@@ -31,7 +31,7 @@ class NoteEditor {
 
 		this.window.addEventListener('message', this.listener);
 		this.quickFormatWindow = null;
-		let data = this.state ? { state: this.state } : { html: this.item.getNote() };
+		let data = this.state ? { state: this.state } : { html: this.item.note };
 		this.postMessage({
 			op: 'init', ...data,
 			libraryId: this.item.libraryID,

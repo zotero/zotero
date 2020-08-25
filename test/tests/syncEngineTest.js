@@ -339,7 +339,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			yield assertInCache(obj);
 			
 			obj = yield Zotero.Items.getByLibraryAndKeyAsync(userLibraryID, "BBBBBBBB");
-			assert.equal(obj.getNote(), 'This is a note.');
+			assert.equal(obj.note, 'This is a note.');
 			assert.equal(obj.parentItemID, parentItemID);
 			assert.equal(obj.version, 3);
 			assert.isTrue(obj.synced);
@@ -513,7 +513,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			yield assertInCache(obj);
 			
 			obj = Zotero.Items.getByLibraryAndKey(libraryID, "BBBBBBBB");
-			assert.equal(obj.getNote(), 'This is a note.');
+			assert.equal(obj.note, 'This is a note.');
 			assert.equal(obj.parentItemID, parentItemID);
 			assert.equal(obj.version, 3);
 			assert.isTrue(obj.synced);
@@ -3487,7 +3487,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 				await obj.saveTx({
 					skipDateModifiedUpdate: true
 				});
-				values[i].left.note = obj.getNote();
+				values[i].left.note = obj.note;
 				values[i].left.version = obj.getField('version');
 			}
 			
@@ -3529,8 +3529,8 @@ describe("Zotero.Sync.Data.Engine", function () {
 			await engine._downloadObjects('item', objects.map(o => o.key));
 			await crPromise;
 			
-			assert.equal(objects[0].getNote(), values[0].right.note);
-			assert.equal(objects[1].getNote(), values[1].left.note);
+			assert.equal(objects[0].note, values[0].right.note);
+			assert.equal(objects[1].note, values[1].left.note);
 			assert.equal(objects[0].version, values[0].right.version);
 			assert.equal(objects[1].version, values[1].right.version);
 			assert.isTrue(objects[0].synced);

@@ -3509,7 +3509,7 @@ Zotero.ItemTreeRow.prototype.numNotes = function() {
 		return 0;
 	}
 	if (this.ref.isAttachment()) {
-		return this.ref.getNote() !== '' ? 1 : 0;
+		return this.ref.note !== '' ? 1 : 0;
 	}
 	return this.ref.numNotes(false, true) || 0;
 }

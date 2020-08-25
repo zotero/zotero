@@ -101,12 +101,12 @@
 								}
 							}
 							else {
-								let curValue = this.item.getNote();
+								let curValue = this.item.note;
 								if (curValue !== this._lastHtmlValue) {
 									this.initEditor();
 								}
 							}
-							this._lastHtmlValue = this.item.getNote();
+							this._lastHtmlValue = this.item.note;
 						}
 
 						this._id('links-container').hidden = !(this.displayTags && this.displayRelated);
@@ -192,7 +192,7 @@
 							if (!val) this._item = null;
 							if (this._item && this._item.id === val.id) return;
 
-							this._lastHtmlValue = val.getNote();
+							this._lastHtmlValue = val.note;
 
 							this._editor = new Zotero.NoteEditor();
 							this._editor.init({

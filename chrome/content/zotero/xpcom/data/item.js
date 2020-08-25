@@ -2019,7 +2019,7 @@ Zotero.Item.prototype.numNotes = function(includeTrashed, includeEmbedded) {
 	if (includeEmbedded) {
 		// Include embedded attachment notes that aren't empty
 		num += Zotero.Items.get(this.getAttachments(includeTrashed))
-			.filter(x => x.getNote() !== '').length;
+			.filter(x => x.note !== '').length;
 	}
 	return num;
 }
@@ -2073,7 +2073,7 @@ Zotero.Item.prototype.hasNote = Zotero.Promise.coroutine(function* () {
 Zotero.defineProperty(Zotero.Item.prototype, 'note', {
 	get: function () {
 		if (!this.isNote() && !this.isAttachment()) {
-			throw new Error("getNote() can only be called on notes and attachments "
+			throw new Error(".note can only be accessed on notes and attachments "
 				+ `(${this.libraryID}/${this.key} is a ${Zotero.ItemTypes.getName(this.itemTypeID)})`);
 		}
 		

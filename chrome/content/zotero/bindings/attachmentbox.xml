@@ -362,7 +362,7 @@
 					
 					// Note editor
 					var noteEditor = this._id('attachment-note-editor');
-					if (this.displayNote && (this.displayNoteIfEmpty || this.item.getNote() != '')) {
+					if (this.displayNote && (this.displayNoteIfEmpty || this.item.note != '')) {
 						noteEditor.linksOnTop = true;
 						noteEditor.hidden = false;
 						

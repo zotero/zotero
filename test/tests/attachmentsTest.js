@@ -1327,7 +1327,7 @@ describe("Zotero.Attachments", function() {
 			assert.equal(newAttachment.attachmentContentType, 'application/pdf');
 			assert.isTrue(await newAttachment.fileExists());
 			assert.equal(newAttachment.getField('title'), 'Title');
-			assert.equal(newAttachment.getNote(), 'Note');
+			assert.equal(newAttachment.note, 'Note');
 			assert.sameDeepMembers(newAttachment.getTags(), [{ tag: 'Tag' }]);
 			assert.sameMembers(newAttachment.relatedItems, [relatedItem.key]);
 			assert.sameMembers(relatedItem.relatedItems, [newAttachment.key]);

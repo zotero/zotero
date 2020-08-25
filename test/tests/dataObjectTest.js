@@ -227,21 +227,21 @@ describe("Zotero.DataObject", function() {
 			var item = new Zotero.Item('book');
 			var id = yield item.saveTx();
 			yield item.loadAllData();
-			assert.throws(item.getNote.bind(item), 'getNote() can only be called on notes and attachments');
+			assert.throws(item.getNote.bind(item), 'note can only be called on notes and attachments');
 		})
 		
 		it("should load data on an attachment item", function* () {
 			var item = new Zotero.Item('attachment');
 			var id = yield item.saveTx();
 			yield item.loadAllData();
-			assert.equal(item.getNote(), '');
+			assert.equal(item.note, '');
 		})
 		
 		it("should load data on a note item", function* () {
 			var item = new Zotero.Item('note');
 			var id = yield item.saveTx();
 			yield item.loadAllData();
-			assert.equal(item.getNote(), '');
+			assert.equal(item.note, '');
 		})
 	})
 	

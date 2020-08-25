@@ -80,7 +80,7 @@ Zotero.Notes = new function() {
 	 * @returns {Promise}
 	 */
 	this.updateURIs = async (item) => {
-		let html = item.getNote();
+		let html = item.note;
 		let num = 0;
 		// "uri":"http://zotero.org/users/local/(.+?)/items/(.+?)"
 		let regex = new RegExp(/%22uri%22%3A%22http%3A%2F%2Fzotero.org%2Fusers%2Flocal%2F(.+?)%2Fitems%2F(.+?)%22/g);
