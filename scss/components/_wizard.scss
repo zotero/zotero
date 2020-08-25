@@ -4,13 +4,18 @@
 	display: flex;
 	flex-direction: column;
 	height: 100%;
-	justify-content: space-between;
 	width: 100%;
 	font-size: 13px;
 
 	button {
 		padding: 2px 8px;
 	}
+}
+
+.wizard-page {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
 }
 
 .wizard-header {
