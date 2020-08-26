@@ -53,25 +53,38 @@
 
 			<constructor><![CDATA[
 					this._noteEditorID = Zotero.Utilities.randomString();
-					this._iframe = document.getAnonymousElementByAttribute(this, "anonid", "rt-view1");
+					this._iframe = document.getAnonymousElementByAttribute(this, 'anonid', 'editor-view');
 					this._iframe.addEventListener('DOMContentLoaded', (e) => {
 						this._initialized = true;
 					});
+					
+					window.fillTooltip = (tooltip) => {
+						let node = window.document.tooltipNode.closest('*[title]');
+						if (!node) {
+							return false;
+						}
 
-					this.getNoteDataSync = () => {
-						return this._editor.getNoteDataSync();
+						tooltip.setAttribute('label', node.getAttribute('title'));
+						return true;
+					}
+
+					this.saveSync = () => {
+						if (this._editorInstance) {
+							this._editorInstance.saveSync();
+						}
 					}
 
 					this.initEditor = async (state) => {
-						if (this._editor) {
-							this._editor.uninit();
+						if (this._editorInstance) {
+							this._editorInstance.uninit();
 						}
-						this._editor = new Zotero.NoteEditor();
-						await this._editor.init({
+						this._editorInstance = new Zotero.EditorInstance();
+						await this._editorInstance.init({
 							state,
 							item: this._item,
-							window: document.getAnonymousElementByAttribute(this, "anonid", "rt-view1").contentWindow,
-							onNavigate: this._navigateHandler,
+							iframeWindow: document.getAnonymousElementByAttribute(this, 'anonid', 'editor-view').contentWindow,
+							popup: document.getAnonymousElementByAttribute(this, 'anonid', 'editor-menu'),
+							onNavigate: this._navigateHandler
 						});
 					}
 
@@ -86,8 +99,8 @@
 							}
 						}
 
-						if (this._editor) {
-							await this._editor.updateCitationsForURIs(uris);
+						if (this._editorInstance) {
+							await this._editorInstance.updateCitationsForURIs(uris);
 						}
 
 						if (!this.item) return;
@@ -96,7 +109,7 @@
 						if (ids.includes(id)) {
 							let state = extraData && extraData[id] && extraData[id].state;
 							if (state) {
-								if (extraData[id].noteEditorID !== this._editor.instanceID) {
+								if (extraData[id].noteEditorID !== this._editorInstance.instanceID) {
 									this.initEditor(state);
 								}
 							}
@@ -116,6 +129,7 @@
 					this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'noteeditor');
 				]]></constructor>
 
+			<property name="editorInstance" onget="return this._editorInstance"/>
 
 			<!-- Modes are predefined settings groups for particular tasks -->
 			<field name="_mode">"view"</field>
@@ -194,10 +208,11 @@
 
 							this._lastHtmlValue = val.note;
 
-							this._editor = new Zotero.NoteEditor();
-							this._editor.init({
+							this._editorInstance = new Zotero.EditorInstance();
+							this._editorInstance.init({
 								item: val,
-								window: document.getAnonymousElementByAttribute(this, "anonid", "rt-view1").contentWindow,
+								iframeWindow: document.getAnonymousElementByAttribute(this, "anonid", "editor-view").contentWindow,
+								popup: document.getAnonymousElementByAttribute(this, "anonid", "editor-menu"),
 								readOnly: !this.editable,
 								onNavigate: this._navigateHandler
 							});
@@ -233,8 +248,8 @@
 			<property name="navigateHandler">
 				<setter>
 					<![CDATA[
-						if (this._editor) {
-							this._editor.onNavigate = val;
+						if (this._editorInstance) {
+							this._editorInstance.onNavigate = val;
 						}
 						this._navigateHandler = val;
 					]]>
@@ -246,6 +261,9 @@
 			<destructor>
 				<![CDATA[
 				Zotero.Notifier.unregisterObserver(this._notifierID);
+				if (this._editorInstance) {
+					this._editorInstance.uninit();
+				}
 				this._destroyed = true;
 			]]>
 			</destructor>
@@ -258,44 +276,13 @@
 					]]></body>
 			</method>
 
-			<!-- Used to insert a tab manually -->
-			<method name="handleKeyDown">
-				<parameter name="event"/>
-				<body>
-				<![CDATA[
-						// var noteField = this._id('noteField');
-						//
-						// switch (event.keyCode) {
-						// 	case 9:
-						// 		// On Shift-Tab, if focus was moved out of the note, focus the element
-						// 		// specified in the 'previousfocus' attribute. We check for focus
-						// 		// because Shift-Tab doesn't and shouldn't move focus out of the note if
-						// 		// the cursor is in a list.
-						// 		if (event.shiftKey) {
-						// 			let id = this.getAttribute('previousfocus');
-						// 			if (id) {
-						// 				setTimeout(() => {
-						// 					if (!noteField.hasFocus()) {
-						// 						document.getElementById(id).focus();
-						// 					}
-						// 				}, 0);
-						// 			}
-						// 			return;
-						// 		}
-						//
-						// 		break;
-						// }
-					]]>
-				</body>
-			</method>
-
 			<method name="focus">
 				<body>
 					<![CDATA[
 						setTimeout(() => {
 							if (this._iframe && this._iframe.contentWindow) {
 								this._iframe.focus();
-								this._editor.focus();
+								this._editorInstance.focus();
 							}
 
 						}, 500);
@@ -315,13 +302,14 @@
 
 		<content>
 			<xul:vbox xbl:inherits="flex">
-				<xul:iframe anonid="rt-view1" flex="1" overflow="auto" style="width: 100%;margin-right: 5px;border: 0"
+				<xul:iframe tooltip="editor-tooltip" anonid="editor-view" flex="1" overflow="auto" style="width: 100%;margin-right: 5px;border: 0"
 							frameBorder="0" src="resource://zotero/zotero-note-editor/editor.html" type="content"/>
 				<xul:hbox id="links-container" hidden="true">
 					<xul:linksbox id="links-box" flex="1" xbl:inherits="notitle"/>
 				</xul:hbox>
 
 				<xul:popupset>
+					<xul:tooltip id="editor-tooltip" onpopupshowing="return fillTooltip(this);"/>
 					<xul:menupopup anonid="editor-menu" id="editor-menu" flex="1">
 					</xul:menupopup>
 				</xul:popupset>

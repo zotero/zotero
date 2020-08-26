@@ -3544,24 +3544,42 @@ var ZoteroPane = new function()
 	};
 	
 	
-	this.onNoteWindowClosed = async function (itemID, noteData) {
-		var item = Zotero.Items.get(itemID);
-		
-		if (noteData) {
-			let changed = item.setNote(noteData.html);
-			if (changed) {
-				await item.saveTx({
-					notifierData: {
-						state: noteData.state
-					}
-				});
-			}
+	this.openBackupNoteWindow = function (itemID) {
+		if (!this.canEdit()) {
+			this.displayCannotEditLibraryMessage();
+			return;
 		}
 		
-		// If note is still selected, show the editor again when the note window closes
-		var selectedItems = this.getSelectedItems(true);
-		if (selectedItems.length == 1 && itemID == selectedItems[0]) {
-			ZoteroItemPane.onNoteSelected(item, this.collectionsView.editable);
+		var name = null;
+		
+		if (itemID) {
+			let w = this.findBackupNoteWindow(itemID);
+			if (w) {
+				w.focus();
+				return;
+			}
+			
+			// Create a name for this window so we can focus it later
+			//
+			// Collection is only used on new notes, so we don't need to
+			// include it in the name
+			name = 'zotero-backup-note-' + itemID;
+		}
+		
+		var io = { itemID: itemID };
+		window.openDialog('chrome://zotero/content/noteBackup.xul', name, 'chrome,resizable,centerscreen,dialog=false', io);
+	}
+	
+	
+	this.findBackupNoteWindow = function (itemID) {
+		var name = 'zotero-backup-note-' + itemID;
+		var wm = Services.wm;
+		var e = wm.getEnumerator('zotero:note');
+		while (e.hasMoreElements()) {
+			var w = e.getNext();
+			if (w.name == name) {
+				return w;
+			}
 		}
 	};
 	

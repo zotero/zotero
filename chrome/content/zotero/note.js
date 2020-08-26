@@ -77,15 +77,7 @@ function onError() {
 
 function onUnload() {
 	Zotero.Notifier.unregisterObserver(notifierUnregisterID);
-	
-	if (noteEditor.item) {
-		// noteData will be null if noteEditor current editor instance
-		// has disabled saving, which might happen at the time of the initial sync
-		let noteData = JSON.parse(JSON.stringify(noteEditor.getNoteDataSync()));
-		if (noteData) {
-			window.opener.ZoteroPane.onNoteWindowClosed(noteEditor.item.id, noteData);
-		}
-	}
+	noteEditor.saveSync();
 }
 
 var NotifyCallback = {
