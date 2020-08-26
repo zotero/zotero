@@ -1,0 +1,578 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2009 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+-->
+
+<bindings 	xmlns="http://www.mozilla.org/xbl"
+			xmlns:xbl="http://www.mozilla.org/xbl"
+			xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	
+	<binding id="note-editor">
+		<resources>
+			<stylesheet src="chrome://zotero/skin/bindings/noteeditor.css"/>
+			<stylesheet src="chrome://zotero-platform/content/noteeditor.css"/>
+		</resources>
+		
+		<implementation>
+			<!--
+				Public properties
+			-->
+			<field name="editable">false</field>
+			<field name="saveOnEdit">false</field>
+			<field name="displayTags">false</field>
+			<field name="displayRelated">false</field>
+			<field name="displayButton">false</field>
+			
+			<field name="buttonCaption"/>
+			<field name="parentClickHandler"/>
+			<field name="keyDownHandler"/>
+			<field name="commandHandler"/>
+			<field name="clickHandler"/>
+			
+			<!-- Modes are predefined settings groups for particular tasks -->
+			<field name="_mode">"view"</field>
+			<property name="mode" onget="return this._mode;">
+				<setter>
+				<![CDATA[
+					// Duplicate default property settings here
+					this.editable = false;
+					this.saveOnEdit = false;
+					this.displayTags = false;
+					this.displayRelated = false;
+					this.displayButton = false;
+					
+					switch (val) {
+						case 'view':
+						case 'merge':
+							if (this.noteField) {
+								this.noteField.onInit(ed => ed.setMode('readonly'));
+							}
+							break;
+						
+						case 'edit':
+							if (this.noteField) {
+								this.noteField.onInit(ed => ed.setMode('design'));
+							}
+							this.editable = true;
+							this.saveOnEdit = true;
+							this.parentClickHandler = this.selectParent;
+							this.keyDownHandler = this.handleKeyDown;
+							this.commandHandler = this.save;
+							this.displayTags = true;
+							this.displayRelated = true;
+							break;
+						
+						default:
+							throw ("Invalid mode '" + val + "' in noteeditor.xml");
+					}
+					
+					this._mode = val;
+					document.getAnonymousNodes(this)[0].setAttribute('mode', val);
+					this._id('links-box').mode = val;
+				]]>
+				</setter>
+			</property>
+			
+			<field name="_parentItem"/>
+			<property name="parentItem" onget="return this._parentItem;">
+				<setter>
+					<![CDATA[
+						this._parentItem = this._id('links-box').parentItem = val;
+					]]>
+				</setter>
+			</property>
+			
+			<field name="_mtime"/>
+			
+			<field name="_item"/>
+			<property name="item" onget="return this._item;">
+				<setter><![CDATA[
+					this._item = val;
+					// TODO: use clientDateModified instead
+					this._mtime = val.getField('dateModified');
+					
+					var parentKey = this.item.parentKey;
+					if (parentKey) {
+						this.parentItem = Zotero.Items.getByLibraryAndKey(this.item.libraryID, parentKey);
+					}
+					
+					this._id('links-box').item = this.item;
+					
+					this.refresh();
+				]]></setter>
+			</property>
+			
+			<property name="linksOnTop">
+				<setter>
+					<![CDATA[
+						if(val) {
+							var container = this._id('links-container');
+							var parent = container.parentNode;
+							var sib = container.nextSibling;
+							while (parent.firstChild !== container) {
+								parent.insertBefore(parent.removeChild(parent.firstChild), sib);
+							}
+						}
+					]]>
+				</setter>
+			</property>
+			
+			<property name="note"
+				onget="Zotero.debug('Getting note with .note deprecated -- use .item in zoteronoteeditor'); return this._item"
+				onset="Zotero.debug('Setting note with .note deprecated -- use .item in zoteronoteeditor'); this.item = val"/>
+			<property name="ref" onget="return this._item" onset="this.item = val"/>
+			
+			<field name="collection"/>
+			
+			<property name="noteField" onget="return this._id('noteField')" readonly="true"/>
+			<property name="value" onget="return this._id('noteField').value;" onset="this._id('noteField').value = val;"/>
+			
+			<constructor>
+			<![CDATA[
+				this.instanceID = Zotero.Utilities.randomString();
+				this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'noteeditor');
+			]]>
+			</constructor>
+			
+			<destructor>
+			<![CDATA[
+				Zotero.Notifier.unregisterObserver(this._notifierID);
+			]]>
+			</destructor>
+			
+			<method name="notify">
+				<parameter name="event"/>
+				<parameter name="type"/>
+				<parameter name="ids"/>
+				<parameter name="extraData"/>
+				<body><![CDATA[
+					if (event != 'modify' || !this.item || !this.item.id) return;
+					for (let i = 0; i < ids.length; i++) {
+						let id = ids[i];
+						if (id != this.item.id) {
+							continue;
+						}
+						if (extraData && extraData[id] && extraData[id].noteEditorID == this.instanceID) {
+							//Zotero.debug("Skipping notification from current note field");
+							continue;
+						}
+						if (this.noteField.changed) {
+							//Zotero.debug("Note has changed since last save -- skipping refresh");
+							return;
+						}
+						this.refresh();
+						break;
+					}
+				]]></body>
+			</method>
+			
+			<method name="refresh">
+				<body><![CDATA[
+					Zotero.debug('Refreshing note editor');
+					
+					var textbox = this.noteField;
+					var textboxReadOnly = this._id('noteFieldReadOnly');
+					var button = this._id('goButton');
+					
+					if (this.editable) {
+						textbox.hidden = false;
+						textboxReadOnly.hidden = true;
+					}
+					else {
+						textbox.hidden = true;
+						textboxReadOnly.hidden = false;
+						textbox = textboxReadOnly;
+					}
+					
+					//var scrollPos = textbox.inputField.scrollTop;
+					if (this.item) {
+						// For sanity check in save()
+						textbox.setAttribute('itemID', this.item.id);
+						textbox.value = this.item.getNote();
+					}
+					else {
+						textbox.value = '';
+						textbox.removeAttribute('itemID');
+					}
+					//textbox.inputField.scrollTop = scrollPos;
+					
+					this._id('links-container').hidden = !(this.displayTags && this.displayRelated);
+					this._id('links-box').refresh();
+					
+					if (this.keyDownHandler) {
+						textbox.setAttribute('onkeydown',
+							'document.getBindingParent(this).handleKeyDown(event)');
+					}
+					else {
+						textbox.removeAttribute('onkeydown');
+					}
+					
+					if (this.commandHandler) {
+						textbox.setAttribute('oncommand',
+							'document.getBindingParent(this).commandHandler()');
+					}
+					else {
+						textbox.removeAttribute('oncommand');
+					}
+					
+					if (this.displayButton) {
+						button.label = this.buttonCaption;
+						button.hidden = false;
+						button.setAttribute('oncommand',
+							'document.getBindingParent(this).clickHandler(this)');
+					}
+					else {
+						button.hidden = true;
+					}
+				]]></body>
+			</method>
+			
+			<method name="save">
+				<body><![CDATA[
+					return Zotero.spawn(function* () {
+						try {
+							if (this._mode == 'view') {
+								Zotero.debug("Not saving read-only note");
+								return;
+							}
+							
+							var noteField = this._id('noteField');
+							var value = noteField.value;
+							if (value === null) {
+								Zotero.debug("Note value not available -- not saving", 2);
+								return;
+							}
+							
+							// Update note
+							if (this.item) {
+								// If note field doesn't match item, abort save and run error handler
+								if (noteField.getAttribute('itemID') != this.item.id) {
+									throw new Error("Note field doesn't match current item");
+								}
+								
+								let changed = this.item.setNote(value);
+								if (changed && this.saveOnEdit) {
+									this.noteField.changed = false;
+									yield this.item.saveTx({
+										notifierData: {
+											noteEditorID: this.instanceID
+										}
+									});
+								}
+								return;
+							}
+							
+							// Create new note
+							var item = new Zotero.Item('note');
+							if (this.parentItem) {
+								item.libraryID = this.parentItem.libraryID;
+							}
+							item.setNote(value);
+							if (this.parentItem) {
+								item.parentKey = this.parentItem.key;
+							}
+							if (this.saveOnEdit) {
+								var id = yield item.saveTx();
+								
+								if (!this.parentItem && this.collection) {
+									this.collection.addItem(id);
+								}
+							}
+							
+							this.item = item;
+						}
+						catch (e) {
+							Zotero.logError(e);
+							
+							if (this.hasAttribute('onerror')) {
+								let fn = new Function("", this.getAttribute('onerror'));
+								fn.call(this)
+							}
+							if (this.onError) {
+								this.onError(e);
+							}
+						}
+					}.bind(this));
+				]]></body>
+			</method>
+			
+			<!-- Used to insert a tab manually -->
+			<method name="handleKeyDown">
+				<parameter name="event"/>
+				<body>
+				<![CDATA[
+					var noteField = this._id('noteField');
+					
+					switch (event.keyCode) {
+						case 9:
+							// On Shift-Tab, if focus was moved out of the note, focus the element
+							// specified in the 'previousfocus' attribute. We check for focus
+							// because Shift-Tab doesn't and shouldn't move focus out of the note if
+							// the cursor is in a list.
+							if (event.shiftKey) {
+								let id = this.getAttribute('previousfocus');
+								if (id) {
+									setTimeout(() => {
+										if (!noteField.hasFocus()) {
+											document.getElementById(id).focus();
+										}
+									}, 0);
+								}
+								return;
+							}
+							
+							break;
+					}
+				]]>
+				</body>
+			</method>
+			
+			<method name="focus">
+				<body>
+					<![CDATA[
+						this._id('noteField').focus();
+					]]>
+				</body>
+			</method>
+			
+			<method name="clearUndo">
+				<body>
+				<![CDATA[
+					this._id('noteField').clearUndo();
+				]]>
+				</body>
+			</method>
+			
+			<method name="_id">
+				<parameter name="id"/>
+				<body>
+					<![CDATA[
+						return document.getAnonymousNodes(this)[0].getElementsByAttribute('id',id)[0];
+					]]>
+				</body>
+			</method>
+		</implementation>
+		
+		<content>
+			<xul:vbox xbl:inherits="flex">
+				<xul:textbox id="noteField" type="styled" mode="note"
+					timeout="1000" flex="1" hidden="true"/>
+				<xul:textbox id="noteFieldReadOnly" type="styled" mode="note"
+					readonly="true" flex="1" hidden="true"/>
+				<xul:hbox id="links-container" hidden="true">
+					<xul:linksbox id="links-box" flex="1" xbl:inherits="notitle"/>
+				</xul:hbox>
+				<xul:button id="goButton" hidden="true"/>
+			</xul:vbox>
+		</content>
+	</binding>
+	
+	
+	<binding id="links-box">
+		<implementation> 
+			<field name="itemRef"/>
+			<property name="item" onget="return this.itemRef;">
+				<setter>
+					<![CDATA[
+						this.itemRef = val;
+						
+						this.id('tags').item = this.item;
+						this.id('related').item = this.item;
+						this.refresh();
+					]]>
+				</setter>
+			</property>
+			<property name="mode">
+				<setter>
+				<![CDATA[
+					this.id('related').mode = val;
+					this.id('tags').mode = val;
+				]]>
+				</setter>
+			</property>
+			<field name="_parentItem"/>
+			<property name="parentItem" onget="return this._parentItem;">
+				<setter>
+				<![CDATA[
+					this._parentItem = val;
+					
+					var parentText = this.id('parentText');
+					if (parentText.firstChild) {
+						parentText.removeChild(parentText.firstChild);
+					}
+					
+					if (this._parentItem && this.getAttribute('notitle') != '1') {
+						this.id('parent-row').hidden = undefined;
+						this.id('parentLabel').value = Zotero.getString('pane.item.parentItem');
+						parentText.appendChild(document.createTextNode(this._parentItem.getDisplayTitle(true)));
+					}
+				]]>
+				</setter>
+			</property>
+			<method name="tagsClick">
+				<body><![CDATA[
+					this.id('tags').reload();
+					var x = this.boxObject.screenX;
+					var y = this.boxObject.screenY;
+					this.id('tagsPopup').openPopupAtScreen(x, y, false);
+					
+					// If editable and no existing tags, open new empty row
+					var tagsBox = this.id('tags');
+					if (tagsBox.mode == 'edit' && tagsBox.count == 0) {
+						this.id('tags').newTag();
+					}
+				]]></body>
+			</method>
+			
+			<method name="refresh">
+				<body><![CDATA[
+					this.updateTagsSummary();
+					this.updateRelatedSummary();
+				]]></body>
+			</method>
+			
+			<method name="updateTagsSummary">
+				<body><![CDATA[
+					var v = this.id('tags').summary;
+					
+					if (!v || v == "") {
+						v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
+					}
+					
+					this.id('tagsLabel').value = Zotero.getString('itemFields.tags')
+						+ Zotero.getString('punctuation.colon');
+					this.id('tagsClick').value = v;
+				]]></body>
+			</method>
+			<method name="relatedClick">
+				<body><![CDATA[
+					var relatedList = this.item.relatedItems;
+					if (relatedList.length > 0) {
+						var x = this.boxObject.screenX;
+						var y = this.boxObject.screenY;
+						this.id('relatedPopup').openPopupAtScreen(x, y, false);
+					}
+					else {
+						this.id('related').add();
+					}
+				]]></body>
+			</method>
+			<method name="updateRelatedSummary">
+				<body><![CDATA[
+					var v = this.id('related').summary;
+					
+					if (!v || v == "") {
+						v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
+					}
+					
+					this.id('relatedLabel').value = Zotero.getString('itemFields.related')
+						+ Zotero.getString('punctuation.colon');
+					this.id('relatedClick').value = v;
+				]]></body>
+			</method>
+			<method name="parentClick">
+				<body>
+				<![CDATA[
+					if (!this.item || !this.item.id) {
+						return;
+					}
+					
+					if (document.getElementById('zotero-pane')) {
+						var zp = ZoteroPane;
+					}
+					else {
+						var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+									   .getService(Components.interfaces.nsIWindowMediator);
+						
+						var lastWin = wm.getMostRecentWindow("navigator:browser");
+						
+						if (!lastWin) {
+							var lastWin = window.open();
+						}
+						
+						var zp = lastWin.ZoteroPane;
+					}
+					
+					Zotero.spawn(function* () {
+						var parentID = this.item.parentID;
+						yield zp.clearQuicksearch();
+						zp.selectItem(parentID);
+					}, this);
+				]]>
+				</body>
+			</method>
+			<method name="id">
+				<parameter name="id"/>
+				<body>
+					<![CDATA[
+						return document.getAnonymousNodes(this)[0].getElementsByAttribute('id',id)[0];
+					]]>
+				</body>
+			</method>
+		</implementation>
+		<content>
+			<xul:vbox xbl:inherits="flex">
+				<xul:grid>
+					<xul:columns>
+						<xul:column/>
+						<xul:column flex="1"/>
+					</xul:columns>
+					<xul:rows>
+						<xul:row id="parent-row" hidden="true">
+							<xul:label id="parentLabel"/>
+							<xul:label id="parentText" class="zotero-clicky" crop="end" onclick="document.getBindingParent(this).parentClick();"/>
+						</xul:row>
+						<xul:row>
+							<xul:label id="relatedLabel"/>
+							<xul:label id="relatedClick" class="zotero-clicky" crop="end" onclick="document.getBindingParent(this).relatedClick();"/>
+						</xul:row>
+						<xul:row>
+							<xul:label id="tagsLabel"/>
+							<xul:label id="tagsClick" class="zotero-clicky" crop="end" onclick="document.getBindingParent(this).tagsClick();"/>
+						</xul:row>
+					</xul:rows>
+				</xul:grid>
+				<xul:popupset>
+					<xul:menupopup id="relatedPopup" width="300" onpopupshowing="this.firstChild.refresh();">
+						<xul:relatedbox id="related" flex="1"/>
+					</xul:menupopup>
+					<!-- The onpopup* stuff is an ugly hack to keep track of when the
+					popup is open (and not the descendent autocomplete popup, which also
+					seems to get triggered by these events for reasons that are less than
+					clear) so that we can manually refresh the popup if it's open after
+					autocomplete is used to prevent it from becoming unresponsive
+					
+					Note: Code in tagsbox.xml is dependent on the DOM path between the
+					tagsbox and tagsLabel above, so be sure to update fixPopup() if it changes
+					-->
+					<xul:menupopup id="tagsPopup" ignorekeys="true"
+							onpopupshown="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='xul:label'){ /* DEBUG: it would be nice to make this work -- if (this.firstChild.count==0){ this.firstChild.newTag(); } */ this.setAttribute('showing', 'true'); }"
+							onpopuphidden="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='xul:label'){ this.setAttribute('showing', 'false'); }">
+						<xul:tagsbox id="tags" flex="1" mode="edit"/>
+					</xul:menupopup>
+				</xul:popupset>
+			</xul:vbox>
+		</content>
+	</binding>
+</bindings>

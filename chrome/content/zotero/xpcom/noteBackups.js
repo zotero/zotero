@@ -1,10 +1,9 @@
-<?xml version="1.0"?>
-<!--
+/*
     ***** BEGIN LICENSE BLOCK *****
     
-    Copyright © 2017 Center for History and New Media
-                     George Mason University, Fairfax, Virginia, USA
-                     http://zotero.org
+    Copyright © 2020 Corporation for Digital Scholarship
+                     Vienna, Virginia, USA
+                     http://digitalscholar.org/
     
     This file is part of Zotero.
     
@@ -22,14 +21,20 @@
     along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
     
     ***** END LICENSE BLOCK *****
--->
-<!DOCTYPE overlay [
-		<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
-		<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
-		]>
+*/
 
-<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<popupset>
-		<menupopup anonid="editor-menu" id="editor-menu" flex="1"/>
-	</popupset>
-</overlay>
+Zotero.NoteBackups = {
+	init: async function () {
+		await Zotero.DB.queryAsync("CREATE TABLE IF NOT EXISTS noteBackups (\n	itemID INTEGER PRIMARY KEY,\n	note TEXT,\n	FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE\n);");
+	},
+	
+	getNote: async function(itemID) {
+		return Zotero.DB.valueQueryAsync("SELECT note FROM noteBackups WHERE itemID=?", [itemID]);
+	},
+	
+	ensureBackup: async function(item) {
+		if (item.noteSchemaVersion === 0) {
+			await Zotero.DB.queryAsync("INSERT OR IGNORE INTO noteBackups VALUES (?, ?)", [item.id, item.note]);
+		}
+	},
+};

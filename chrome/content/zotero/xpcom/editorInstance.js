@@ -347,6 +347,7 @@ class EditorInstance {
 			}
 			// Update note
 			if (this._item) {
+				await Zotero.NoteBackups.ensureBackup(this._item);
 				await Zotero.DB.executeTransaction(async () => {
 					let changed = this._item.setNote(html, schemaVersion);
 					if (changed && this._saveOnEdit) {
