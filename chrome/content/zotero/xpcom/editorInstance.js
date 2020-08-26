@@ -347,19 +347,21 @@ class EditorInstance {
 			}
 			// Update note
 			if (this._item) {
-				let changed = this._item.setNote(html, schemaVersion);
-				if (changed && this._saveOnEdit) {
-					// Make sure saving is not disabled
-					if (this._disableSaving) {
-						return;
-					}
-					await this._item.saveTx({
-						notifierData: {
-							noteEditorID: this.instanceID,
-							state
+				await Zotero.DB.executeTransaction(async () => {
+					let changed = this._item.setNote(html, schemaVersion);
+					if (changed && this._saveOnEdit) {
+						// Make sure saving is not disabled
+						if (this._disableSaving) {
+							return;
 						}
-					});
-				}
+						await this._item.save({
+							notifierData: {
+								noteEditorID: this.instanceID,
+								state
+							}
+						});
+					}
+				});
 			}
 			// Create a new note
 			else {

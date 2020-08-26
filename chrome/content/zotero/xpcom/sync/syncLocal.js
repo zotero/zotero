@@ -175,6 +175,7 @@ Zotero.Sync.Data.Local = {
 				// Replace local user key with libraryID, in case duplicates were merged before the
 				// first sync
 				yield Zotero.Relations.updateUser(null, userID);
+				yield Zotero.Notes.updateUser(null, userID);
 			}
 		});
 		

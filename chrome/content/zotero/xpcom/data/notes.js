@@ -25,10 +25,7 @@
 
 
 Zotero.Notes = new function() {
-	this.noteToTitle = noteToTitle;
-	// Currently active editor instances
-	this.editorInstances = [];
-	
+	this._editorInstances = [];
 	
 	this.__defineGetter__("MAX_TITLE_LENGTH", function() { return 120; });
 	this.__defineGetter__("defaultNote", function () { return '<div class="zotero-note znv1"></div>'; });
@@ -43,7 +40,7 @@ Zotero.Notes = new function() {
 	/**
 	* Return first line (or first MAX_LENGTH characters) of note content
 	**/
-	function noteToTitle(text) {
+	this.noteToTitle = function(text) {
 		var origText = text;
 		text = text.trim();
 		text = Zotero.Utilities.unescapeHTML(text);
@@ -67,49 +64,69 @@ Zotero.Notes = new function() {
 			t = t.substring(0, ln);
 		}
 		return t;
-	}
+	};
 	
-	/**
-	 * 	Replaces local URIs for citation and highlight nodes
-	 *
-	 * 	Must be called just before the initial sync,
-	 * 	if called later the item version will be increased,
-	 * 	which might be incovenient for the future (better) notes sync
-	 *
-	 * @param item Note item
-	 * @returns {Promise}
-	 */
-	this.updateURIs = async (item) => {
-		let html = item.note;
-		let num = 0;
-		// "uri":"http://zotero.org/users/local/(.+?)/items/(.+?)"
-		let regex = new RegExp(/%22uri%22%3A%22http%3A%2F%2Fzotero.org%2Fusers%2Flocal%2F(.+?)%2Fitems%2F(.+?)%22/g);
-		html = html.replace(regex, function (m, g1, g2) {
-			num++;
-			let libraryID = Zotero.URI.getURILibrary('http://zotero.org/users/local/' + g1);
-			let libraryURI = Zotero.URI.getLibraryURI(libraryID);
-			return encodeURIComponent('"uri":"' + libraryURI + '/items/' + g2 + '"');
+	this.registerEditorInstance = function(instance) {
+		this._editorInstances.push(instance);
+	};
+	
+	this.unregisterEditorInstance = async function(instance) {
+		// Make sure the editor instance is not unregistered while
+		// Zotero.Notes.updateUser is in progress, otherwise the
+		// instance might not get the`disableSaving` flag set
+		await Zotero.DB.executeTransaction(async () => {
+			let index = this._editorInstances.indexOf(instance);
+			if (index >= 0) {
+				this._editorInstances.splice(index, 1);
+			}
 		});
-		if (num) {
-			item.setNote(html);
-			// Cut off saving for each editor instance for this item,
-			// to make sure none of the editor instances will concurrently
-			// overwrite our changes
-			this.editorInstances.forEach(editorInstance => {
-				if (editorInstance.item.id === item.id) {
-					editorInstance.disableSaving = true;
-				}
-			});
-			// Although, theoretically, a new editor instance with the old data can still
-			// be created while asynchronous `item.saveTx` is in progress, but really unlikely
+	};
 
-			// Observer notification will automatically recreate the affected editor instances
-			await item.saveTx();
-			Zotero.debug(`Updated URIs for item ${item.id}: ${num}`);
+	/**
+	 * Replace local URIs for citations and highlights
+	 * in all notes. Cut-off note saving for the opened
+	 * notes and then trigger notification to refresh
+	 *
+	 * @param {Number} fromUserID
+	 * @param {Number} toUserID
+	 * @returns {Promise<void>}
+	 */
+	this.updateUser = async function (fromUserID, toUserID) {
+		if (!fromUserID) {
+			fromUserID = 'local%2F' + Zotero.Users.getLocalUserKey();
 		}
-	}
-}
+		if (!toUserID) {
+			throw new Error('Invalid target userID ' + toUserID);
+		}
+		Zotero.DB.requireTransaction();
 
-if (typeof process === 'object' && process + '' === '[object process]'){
-    module.exports = Zotero.Notes;
+		// `"uri":"http://zotero.org/users/${fromUserID}/items/"`
+		let from = `%22uri%22%3A%22http%3A%2F%2Fzotero.org%2Fusers%2F${fromUserID}%2Fitems%2F`;
+		// `"uri":"http://zotero.org/users/${toUserId}/items/"`
+		let to = `%22uri%22%3A%22http%3A%2F%2Fzotero.org%2Fusers%2F${toUserID}%2Fitems%2F`;
+		let sql = `UPDATE itemNotes SET note=REPLACE(note, '${from}', '${to}')`;
+		await Zotero.DB.queryAsync(sql);
+
+		// Disable saving for each editor instance to make sure none
+		// of the instances can overwrite our changes
+		this._editorInstances.forEach(x => x.disableSaving = true);
+
+		let idsToRefresh = [];
+		let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType('item');
+		let loadedObjects = objectsClass.getLoaded();
+		for (let object of loadedObjects) {
+			if (object.isNote()) {
+				idsToRefresh.push(object.id);
+				await object.reload(['note'], true);
+			}
+		}
+
+		Zotero.DB.addCurrentCallback('commit', async () => {
+			await Zotero.Notifier.trigger('refresh', 'item', idsToRefresh);
+		});
+	};
+};
+
+if (typeof process === 'object' && process + '' === '[object process]') {
+	module.exports = Zotero.Notes;
 }
