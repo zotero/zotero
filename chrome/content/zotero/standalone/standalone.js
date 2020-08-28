@@ -422,7 +422,6 @@ const ZoteroStandalone = new function() {
 	this.updateNoteFontSize = function (event) {
 		var size = event.originalTarget.getAttribute('label');
 		Zotero.Prefs.set('note.fontSize', size);
-		this.promptForRestart();
 	};
 	
 	

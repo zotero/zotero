@@ -39,7 +39,6 @@
 				Public properties
 			-->
 			<field name="editable">false</field>
-			<field name="saveOnEdit">false</field>
 			<field name="displayTags">false</field>
 			<field name="displayRelated">false</field>
 			<field name="displayButton">false</field>
@@ -55,15 +54,25 @@
 					this._noteEditorID = Zotero.Utilities.randomString();
 					this._iframe = document.getAnonymousElementByAttribute(this, 'anonid', 'editor-view');
 					this._iframe.addEventListener('DOMContentLoaded', (e) => {
+						// For iframes without chrome priviledges, for unknown reasons,
+						// dataTransfer.getData() returns empty value for `drop` event 
+						// when dragging something from the outside of Zotero
+						this._iframe.contentWindow.addEventListener('drop', (event) => {
+							this._iframe.contentWindow.wrappedJSObject.droppedData = Components.utils.cloneInto({
+								'text/plain': event.dataTransfer.getData('text/plain'),
+								'text/html': event.dataTransfer.getData('text/html'),
+								'zotero/annotation': event.dataTransfer.getData('zotero/annotation'),
+								'zotero/item': event.dataTransfer.getData('zotero/item')
+							}, this._iframe.contentWindow);
+						}, true);
 						this._initialized = true;
 					});
 					
 					window.fillTooltip = (tooltip) => {
 						let node = window.document.tooltipNode.closest('*[title]');
-						if (!node) {
+						if (!node || !node.getAttribute('title')) {
 							return false;
 						}
-
 						tooltip.setAttribute('label', node.getAttribute('title'));
 						return true;
 					}
@@ -84,7 +93,8 @@
 							item: this._item,
 							iframeWindow: document.getAnonymousElementByAttribute(this, 'anonid', 'editor-view').contentWindow,
 							popup: document.getAnonymousElementByAttribute(this, 'anonid', 'editor-menu'),
-							onNavigate: this._navigateHandler
+							onNavigate: this._navigateHandler,
+							readOnly: !this.editable
 						});
 					}
 
@@ -138,7 +148,6 @@
 				<![CDATA[
 						// Duplicate default property settings here
 						this.editable = false;
-						this.saveOnEdit = false;
 						this.displayTags = false;
 						this.displayRelated = false;
 						this.displayButton = false;
@@ -151,7 +160,6 @@
 
 							case 'edit':
 								this.editable = true;
-								this.saveOnEdit = true;
 								this.parentClickHandler = this.selectParent;
 								this.keyDownHandler = this.handleKeyDown;
 								this.commandHandler = this.save;
@@ -186,8 +194,8 @@
 				<setter><![CDATA[
 						return (async () => {
 							// `item` field can be set before the constructor is called
-							// (which happens in the merge dialog i.e.), therefore we wait for
-							// the initialization
+							// or noteditor is attached to dom (which happens in the
+							// merge dialog i.e.), therefore we wait for the initialization
 							let n = 0;
 							while (!this._initialized && !this._destroyed) {
 								if (n >= 1000) {
@@ -197,8 +205,8 @@
 								n++;
 							}
 
-							// The binding can also be immediately destrcutred
-							// (which also happens in the marge dialog)
+							// The binding can also be immediately destructed
+							// (which also happens in the merge dialog)
 							if (this._destroyed) {
 								return;
 							}
@@ -207,17 +215,10 @@
 							if (this._item && this._item.id === val.id) return;
 
 							this._lastHtmlValue = val.note;
-
-							this._editorInstance = new Zotero.EditorInstance();
-							this._editorInstance.init({
-								item: val,
-								iframeWindow: document.getAnonymousElementByAttribute(this, "anonid", "editor-view").contentWindow,
-								popup: document.getAnonymousElementByAttribute(this, "anonid", "editor-menu"),
-								readOnly: !this.editable,
-								onNavigate: this._navigateHandler
-							});
-
+							
 							this._item = val;
+							
+							this.initEditor();
 
 							var parentKey = this._item.parentKey;
 							if (parentKey) {

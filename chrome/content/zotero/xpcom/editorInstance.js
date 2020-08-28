@@ -27,7 +27,6 @@ class EditorInstance {
 	constructor() {
 		this.instanceID = Zotero.Utilities.randomString();
 		Zotero.Notes.registerEditorInstance(this);
-		Zotero.debug('Creating a new editor instance');
 	}
 
 	async init(options) {
@@ -37,13 +36,16 @@ class EditorInstance {
 		this._iframeWindow = options.iframeWindow;
 		this._popup = options.popup;
 		this._state = options.state;
-		this._saveOnEdit = true;
 		this._disableSaving = false;
 		this._subscriptions = [];
+		this._deletedImages = {};
 		this._quickFormatWindow = null;
-
-		await this._waitForEditor();
-
+		this._isAttachment = this._item.isAttachment();
+		this._prefObserverIDs = [
+			Zotero.Prefs.registerObserver('note.fontSize', this._handleFontChange),
+			Zotero.Prefs.registerObserver('note.fontFamily', this._handleFontChange)
+		];
+		
 		// Run Cut/Copy/Paste with chrome privileges
 		this._iframeWindow.wrappedJSObject.zoteroExecCommand = function (doc, command, ui, value) {
 			// Is that safe enough?
@@ -53,19 +55,40 @@ class EditorInstance {
 			return doc.execCommand(command, ui, value);
 		};
 
-		this._iframeWindow.addEventListener('message', this._listener);
+		this._iframeWindow.addEventListener('message', this._messageHandler);
+		
+		let note = this._item.note;
 
 		this._postMessage({
 			action: 'init',
 			value: this._state || this._item.note,
-			schemaVersion: this._item.noteSchemaVersion,
-			readOnly: this._readOnly
+			readOnly: this._readOnly,
+			dir: Zotero.dir,
+			font: this._getFont(),
+			// TODO: We should avoid hitting `data-schema-version` in note text
+			hasBackup: note && note.toLowerCase().indexOf('data-schema-version') < 0
+				|| !!await Zotero.NoteBackups.getNote(this._item.id)
 		});
 	}
 
 	uninit() {
-		this._iframeWindow.removeEventListener('message', this._listener);
+		this._prefObserverIDs.forEach(id => Zotero.Prefs.unregisterObserver(id));
+		
+		if (this._quickFormatWindow) {
+			this._quickFormatWindow.close();
+			this._quickFormatWindow = null;
+		}
+		// TODO: Allow editor instance to finish its work before
+		//  the uninitialization. I.e. to finish image importing
+
+		// As long as the message listeners are attached on
+		// both sides, editor instance can continue its work
+		// in the backstage. Although the danger here is that
+		// multiple editor instances of the same note can start
+		// compeating
+		this._iframeWindow.removeEventListener('message', this._messageHandler);
 		Zotero.Notes.unregisterEditorInstance(this);
+		this.saveSync();
 	}
 
 	focus() {
@@ -84,27 +107,32 @@ class EditorInstance {
 	saveSync() {
 		if (!this._readOnly && !this._disableSaving && this._iframeWindow) {
 			let noteData = this._iframeWindow.wrappedJSObject.getDataSync();
-			noteData = JSON.parse(JSON.stringify(noteData));
+			if (noteData) {
+				noteData = JSON.parse(JSON.stringify(noteData));
+			}
 			this._save(noteData);
 		}
 	}
-
-	async _waitForEditor() {
-		let n = 0;
-		while (!this._iframeWindow) {
-			if (n >= 1000) {
-				throw new Error('Waiting for editor failed');
-			}
-			await Zotero.Promise.delay(10);
-			n++;
-		}
-	}
-
+	
 	_postMessage(message) {
 		this._iframeWindow.postMessage({ instanceId: this.instanceID, message }, '*');
 	}
 
-	_listener = async (e) => {
+	_getFont() {
+		let fontSize = Zotero.Prefs.get('note.fontSize');
+		// Fix empty old font prefs before a value was enforced
+		if (fontSize < 6) {
+			fontSize = 11;
+		}
+		let fontFamily = Zotero.Prefs.get('note.fontFamily');
+		return { fontSize, fontFamily };
+	}
+	
+	_handleFontChange = () => {
+		this._postMessage({ action: 'updateFont', font: this._getFont() });
+	}
+
+	_messageHandler = async (e) => {
 		if (e.data.instanceId !== this.instanceID) {
 			return;
 		}
@@ -202,8 +230,7 @@ class EditorInstance {
 				return;
 			}
 			case 'subscribeProvider': {
-				let { id, type, data } = message;
-				let subscription = { id, type, data };
+				let { subscription } = message;
 				this._subscriptions.push(subscription);
 				await this._feedSubscription(subscription);
 				return;
@@ -230,32 +257,44 @@ class EditorInstance {
 			}
 			case 'importImages': {
 				let { images } = message;
+				if (this._isAttachment) {
+					return;
+				}
 				for (let image of images) {
 					let { nodeId, src } = image;
 					let attachmentKey = await this._importImage(src);
+					// TODO: Inform editor about the failed to import images
 					this._postMessage({ action: 'attachImportedImage', nodeId, attachmentKey });
 				}
 				return;
 			}
 			case 'syncAttachmentKeys': {
 				let { attachmentKeys } = message;
+				if (this._isAttachment) {
+					return;
+				}
+				// TODO: Remove when fixed
+				this._item._loaded.childItems = true;
 				let attachmentItems = this._item.getAttachments().map(id => Zotero.Items.get(id));
 				let abandonedItems = attachmentItems.filter(item => !attachmentKeys.includes(item.key));
 				for (let item of abandonedItems) {
+					// Store image data in case it will be necessary for undo,
+					// which is not ideal
+					this._deletedImages[item.key] = await this._getDataURL(item);
 					await item.eraseTx();
 				}
 				return;
 			}
-			case 'popup': {
-				let { x, y, pos, items } = message;
-				this._openPopup(x, y, pos, items);
+			case 'openContextMenu': {
+				let { x, y, pos, itemGroups } = message;
+				this._openPopup(x, y, pos, itemGroups);
 				return;
 			}
 		}
 	}
 
 	async _feedSubscription(subscription) {
-		let { id, type, data } = subscription;
+		let { id, type, nodeId, data } = subscription;
 		if (type === 'citation') {
 			let formattedCitation = await this._getFormattedCitation(data.citation);
 			this._postMessage({ action: 'notifyProvider', id, type, data: { formattedCitation } });
@@ -263,11 +302,22 @@ class EditorInstance {
 		else if (type === 'image') {
 			let { attachmentKey } = data;
 			let item = Zotero.Items.getByLibraryAndKey(this._item.libraryID, attachmentKey);
-			if (!item) return;
-			let path = await item.getFilePathAsync();
-			let buf = await OS.File.read(path, {});
-			buf = new Uint8Array(buf).buffer;
-			let src = 'data:' + item.attachmentContentType + ';base64,' + this._arrayBufferToBase64(buf);
+			if (!item) {
+				// TODO: Find a better way to undo image deletion,
+				//  probably just keep it in a trash until the note is closed
+				// This recreates the attachment as a completely new item
+				let dataURL = this._deletedImages[attachmentKey];
+				if (dataURL) {
+					// delete this._deletedImages[attachmentKey];
+					// TODO: Fix every repeated undo-redo cycle caching a
+					//  new image copy in memory
+					let newAttachmentKey = await this._importImage(dataURL);
+					// TODO: Inform editor about the failed to import images
+					this._postMessage({ action: 'attachImportedImage', nodeId, attachmentKey: newAttachmentKey });
+				}
+				return;
+			}
+			let src = await this._getDataURL(item);
 			this._postMessage({ action: 'notifyProvider', id, type, data: { src } });
 		}
 	}
@@ -303,25 +353,35 @@ class EditorInstance {
 		return attachment.key;
 	}
 
-	_openPopup(x, y, pos, items) {
+	_openPopup(x, y, pos, itemGroups) {
 		this._popup.hidePopup();
 
 		while (this._popup.firstChild) {
 			this._popup.removeChild(this._popup.firstChild);
 		}
 
-		for (let item of items) {
-			let menuitem = this._popup.ownerDocument.createElement('menuitem');
-			menuitem.setAttribute('value', item[0]);
-			menuitem.setAttribute('label', item[1]);
-			menuitem.addEventListener('command', () => {
-				this._postMessage({
-					action: 'contextMenuAction',
-					ctxAction: item[0],
-					pos
+		for (let itemGroup of itemGroups) {
+			for (let item of itemGroup) {
+				let menuitem = this._popup.ownerDocument.createElement('menuitem');
+				menuitem.setAttribute('value', item.name);
+				menuitem.setAttribute('label', item.label);
+				if (!item.enabled) {
+					menuitem.setAttribute('disabled', true);
+				}
+				menuitem.addEventListener('command', () => {
+					this._postMessage({
+						action: 'contextMenuAction',
+						ctxAction: item.name,
+						pos
+					});
 				});
-			});
-			this._popup.appendChild(menuitem);
+				this._popup.appendChild(menuitem);
+			}
+			
+			if (itemGroups.indexOf(itemGroup) !== itemGroups.length - 1) {
+				let separator = this._popup.ownerDocument.createElement('menuseparator');
+				this._popup.appendChild(separator);
+			}
 		}
 
 		this._popup.openPopupAtScreen(x, y, true);
@@ -329,7 +389,7 @@ class EditorInstance {
 
 	async _save(noteData) {
 		if (!noteData) return;
-		let { schemaVersion, state, html } = noteData;
+		let { state, html } = noteData;
 		if (html === undefined) return;
 		try {
 			if (this._disableSaving) {
@@ -349,12 +409,8 @@ class EditorInstance {
 			if (this._item) {
 				await Zotero.NoteBackups.ensureBackup(this._item);
 				await Zotero.DB.executeTransaction(async () => {
-					let changed = this._item.setNote(html, schemaVersion);
-					if (changed && this._saveOnEdit) {
-						// Make sure saving is not disabled
-						if (this._disableSaving) {
-							return;
-						}
+					let changed = this._item.setNote(html);
+					if (changed && !this._disableSaving) {
 						await this._item.save({
 							notifierData: {
 								noteEditorID: this.instanceID,
@@ -370,11 +426,11 @@ class EditorInstance {
 				if (this.parentItem) {
 					item.libraryID = this.parentItem.libraryID;
 				}
-				item.setNote(html, schemaVersion);
+				item.setNote(html);
 				if (this.parentItem) {
 					item.parentKey = this.parentItem.key;
 				}
-				if (this._saveOnEdit) {
+				if (!this._disableSaving) {
 					var id = await item.saveTx();
 
 					if (!this.parentItem && this.collection) {
@@ -463,7 +519,7 @@ class EditorInstance {
 		for (var i = 0; i < len; i++) {
 			binary += String.fromCharCode(bytes[i]);
 		}
-		return this._iframeWindow.btoa(binary);
+		return btoa(binary);
 	}
 
 	_dataURLtoBlob(dataurl) {
@@ -482,7 +538,15 @@ class EditorInstance {
 		return null;
 	}
 
-	_openQuickFormatDialog(nodeId, citationData, filterLibraryIDs) {
+	async _getDataURL(item) {
+		let path = await item.getFilePathAsync();
+		let buf = await OS.File.read(path, {});
+		buf = new Uint8Array(buf).buffer;
+		return 'data:' + item.attachmentContentType + ';base64,' + this._arrayBufferToBase64(buf);
+	}
+
+	async _openQuickFormatDialog(nodeId, citationData, filterLibraryIDs) {
+		await Zotero.Styles.init();
 		let that = this;
 		let win;
 		/**
@@ -500,18 +564,16 @@ class EditorInstance {
 			 * Execute a callback with a preview of the given citation
 			 * @return {Promise} A promise resolved with the previewed citation string
 			 */
-			preview: function () {
-				Zotero.debug('CI: preview');
+			preview: async function () {
+				// Zotero.debug('CI: preview');
 			},
 
 			/**
 			 * Sort the citationItems within citation (depends on this.citation.properties.unsorted)
 			 * @return {Promise} A promise resolved with the previewed citation string
 			 */
-			sort: function () {
-				Zotero.debug('CI: sort');
-				return async function () {
-				};
+			sort: async function () {
+				// Zotero.debug('CI: sort');
 			},
 
 			/**
@@ -520,7 +582,7 @@ class EditorInstance {
 			 *     Receives a number from 0 to 100 indicating current status.
 			 */
 			accept: async function (progressCallback) {
-				Zotero.debug('CI: accept');
+				// Zotero.debug('CI: accept');
 				if (progressCallback) progressCallback(100);
 
 				if (win) {
@@ -533,13 +595,13 @@ class EditorInstance {
 				}
 
 				for (let citationItem of citation.citationItems) {
-					let itm = await Zotero.Items.getAsync(citationItem.id);
+					let itm = await Zotero.Items.getAsync(parseInt(citationItem.id));
 					delete citationItem.id;
 					citationItem.uri = Zotero.URI.getItemURI(itm);
 					citationItem.backupText = that._getBackupStr(itm);
 				}
 
-				if (this.citation.citationItems.length) {
+				if (progressCallback || !citationData.citationItems.length) {
 					that._postMessage({ action: 'setCitation', nodeId, citation });
 				}
 			},
@@ -549,7 +611,7 @@ class EditorInstance {
 			 * @return {Promise} A promise resolved by the items
 			 */
 			getItems: async function () {
-				Zotero.debug('CI: getItems');
+				// Zotero.debug('CI: getItems');
 				return [];
 			}
 		}
@@ -578,19 +640,19 @@ class EditorInstance {
 			 * 	- Zotero.Integration.DELETE
 			 */
 			loadItemData() {
-				Zotero.debug('Citation: loadItemData');
+				// Zotero.debug('Citation: loadItemData');
 			}
 
 			async handleMissingItem(idx) {
-				Zotero.debug('Citation: handleMissingItem');
+				// Zotero.debug('Citation: handleMissingItem');
 			}
 
 			async prepareForEditing() {
-				Zotero.debug('Citation: prepareForEditing');
+				// Zotero.debug('Citation: prepareForEditing');
 			}
 
 			toJSON() {
-				Zotero.debug('Citation: toJSON');
+				// Zotero.debug('Citation: toJSON');
 			}
 
 			/**
@@ -598,13 +660,13 @@ class EditorInstance {
 			 * @returns {string}
 			 */
 			serialize() {
-				Zotero.debug('Citation: serialize');
+				// Zotero.debug('Citation: serialize');
 			}
 		};
 
-		if (that.quickFormatWindow) {
-			that.quickFormatWindow.close();
-			that.quickFormatWindow = null;
+		if (that._quickFormatWindow) {
+			that._quickFormatWindow.close();
+			that._quickFormatWindow = null;
 		}
 
 		let citation = new Citation();
@@ -624,7 +686,7 @@ class EditorInstance {
 		var mode = (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')
 			? 'popup' : 'alwaysRaised') + ',resizable=false,centerscreen';
 
-		win = that.quickFormatWindow = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
+		win = that._quickFormatWindow = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
 		.getService(Components.interfaces.nsIWindowWatcher)
 		.openWindow(null, 'chrome://zotero/content/integration/quickFormat.xul', '', mode, {
 			wrappedJSObject: io
