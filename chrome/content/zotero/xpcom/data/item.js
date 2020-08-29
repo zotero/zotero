@@ -760,7 +760,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 	}
 	
 	if (loadIn && this.isNote() && field == Zotero.ItemFields.getID('title')) {
-		this._noteTitle = value ? value : "";
+		this._note.title = value ? value : "";
 		return true;
 	}
 	
