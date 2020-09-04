@@ -1223,7 +1223,7 @@ describe("Zotero.Item", function () {
 				annotation.parentID = attachment.id;
 				annotation.annotationType = 'highlight';
 				annotation.annotationText = "This is highlighted text.";
-				annotation.annotationSortIndex = '000015|0002431|000000.000';
+				annotation.annotationSortIndex = '00015|002431|00000.000';
 				annotation.annotationPosition = {
 					pageIndex: 123,
 					rects: [
@@ -1238,7 +1238,7 @@ describe("Zotero.Item", function () {
 				annotation.parentID = attachment.id;
 				annotation.annotationType = 'note';
 				annotation.annotationComment = "This is a comment.";
-				annotation.annotationSortIndex = '000015|0002431|000000.000';
+				annotation.annotationSortIndex = '00015|002431|00000.000';
 				annotation.annotationPosition = {
 					pageIndex: 123,
 					rects: [
@@ -1260,7 +1260,7 @@ describe("Zotero.Item", function () {
 				var annotation = new Zotero.Item('annotation');
 				annotation.parentID = attachment.id;
 				annotation.annotationType = 'image';
-				annotation.annotationSortIndex = '000015|0002431|000000.000';
+				annotation.annotationSortIndex = '00015|002431|00000.000';
 				annotation.annotationPosition = {
 					pageIndex: 123,
 					rects: [
