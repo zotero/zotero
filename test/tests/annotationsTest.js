@@ -47,9 +47,9 @@ describe("Zotero.Annotations", function() {
 		"dateModified": "2019-05-14 06:50:54"
 	};
 	
-	var exampleArea = {
+	var exampleImage = {
 		"key": "QD32MQJF",
-		"type": "area",
+		"type": "image",
 		"isAuthor": true,
 		"imageURL": "zotero://attachment/library/items/LB417FR4",
 		"comment": "This is a comment",
@@ -162,16 +162,16 @@ describe("Zotero.Annotations", function() {
 			await annotation.eraseTx();
 		});
 		
-		it("should generate an object for an area", async function () {
+		it("should generate an object for an image", async function () {
 			var annotation = new Zotero.Item('annotation');
 			annotation.libraryID = attachment.libraryID;
-			annotation.key = exampleArea.key;
+			annotation.key = exampleImage.key;
 			await annotation.loadPrimaryData();
 			annotation.parentID = attachment.id;
-			annotation.annotationType = 'area';
+			annotation.annotationType = 'image';
 			for (let prop of ['comment', 'color', 'pageLabel', 'sortIndex', 'position']) {
 				let itemProp = 'annotation' + prop[0].toUpperCase() + prop.substr(1);
-				annotation[itemProp] = exampleArea[prop];
+				annotation[itemProp] = exampleImage[prop];
 			}
 			await annotation.saveTx();
 			
@@ -189,13 +189,13 @@ describe("Zotero.Annotations", function() {
 			
 			var json = Zotero.Annotations.toJSON(annotation);
 			
-			assert.sameMembers(Object.keys(json), Object.keys(exampleArea));
-			for (let prop of Object.keys(exampleArea)) {
+			assert.sameMembers(Object.keys(json), Object.keys(exampleImage));
+			for (let prop of Object.keys(exampleImage)) {
 				if (prop == 'imageURL'
 						|| prop == 'dateModified') {
 					continue;
 				}
-				assert.deepEqual(json[prop], exampleArea[prop], `'${prop}' doesn't match`);
+				assert.deepEqual(json[prop], exampleImage[prop], `'${prop}' doesn't match`);
 			}
 			assert.equal(json.imageURL, `zotero://attachment/library/items/${imageAttachment.key}`);
 			
@@ -251,15 +251,15 @@ describe("Zotero.Annotations", function() {
 			}
 		});
 		
-		it("should create an item from an area", async function () {
-			var annotation = await Zotero.Annotations.saveFromJSON(attachment, exampleArea);
+		it("should create an item from an image", async function () {
+			var annotation = await Zotero.Annotations.saveFromJSON(attachment, exampleImage);
 			
 			// Note: Image is created separately using Zotero.Attachments.importEmbeddedImage()
 			
-			assert.equal(annotation.key, exampleArea.key);
+			assert.equal(annotation.key, exampleImage.key);
 			for (let prop of ['comment', 'color', 'pageLabel', 'sortIndex', 'position']) {
 				let itemProp = 'annotation' + prop[0].toUpperCase() + prop.substr(1);
-				assert.deepEqual(annotation[itemProp], exampleArea[prop], `'${prop}' doesn't match`);
+				assert.deepEqual(annotation[itemProp], exampleImage[prop], `'${prop}' doesn't match`);
 			}
 		});
 	});

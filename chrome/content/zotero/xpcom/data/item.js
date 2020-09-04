@@ -3519,7 +3519,7 @@ for (let name of ['type', 'text', 'comment', 'color', 'pageLabel', 'sortIndex'])
 					if (currentType && currentType != value) {
 						throw new Error("Cannot change annotation type");
 					}
-					if (!['highlight', 'note', 'area'].includes(value)) {
+					if (!['highlight', 'note', 'image'].includes(value)) {
 						throw new Error(`Invalid annotation type '${value}'`);
 					}
 					break;
@@ -3569,12 +3569,12 @@ for (let name of ['position']) {
  */
 Zotero.defineProperty(Zotero.Item.prototype, 'annotationImageAttachment', {
 	get: function () {
-		if (!this.isAreaAnnotation()) {
-			throw new Error("'annotationImageAttachment' is only valid for area annotations");
+		if (!this.isImageAnnotation()) {
+			throw new Error("'annotationImageAttachment' is only valid for image annotations");
 		}
 		var attachments = this.getAttachments();
 		if (!attachments.length) {
-			throw new Error("No attachments found for area annotation");
+			throw new Error("No attachments found for image annotation");
 		}
 		return Zotero.Items.get(attachments[0]);
 	}
@@ -3586,12 +3586,12 @@ Zotero.defineProperty(Zotero.Item.prototype, 'annotationImageAttachment', {
  */
 Zotero.defineProperty(Zotero.Item.prototype, 'annotationImageURL', {
 	get: function () {
-		if (!this.isAreaAnnotation()) {
-			throw new Error("'annotationImageURL' is only valid for area annotations");
+		if (!this.isImageAnnotation()) {
+			throw new Error("'annotationImageURL' is only valid for image annotations");
 		}
 		var attachments = this.getAttachments();
 		if (!attachments.length) {
-			throw new Error("No attachments found for area annotation");
+			throw new Error("No attachments found for image annotation");
 		}
 		
 		var { libraryID, key } = Zotero.Items.getLibraryAndKeyFromID(attachments[0]);
@@ -3624,8 +3624,8 @@ Zotero.Item.prototype.isAnnotation = function() {
  *
  * @return {Boolean}
  **/
-Zotero.Item.prototype.isAreaAnnotation = function() {
-	return this.isAnnotation() && this._getLatestField('annotationType') == 'area';
+Zotero.Item.prototype.isImageAnnotation = function() {
+	return this.isAnnotation() && this._getLatestField('annotationType') == 'image';
 }
 
 

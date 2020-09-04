@@ -1212,7 +1212,7 @@ describe("Zotero.Item", function () {
 				assert.throws(() => a.annotationText = "This is highlighted text.");
 				
 				a = new Zotero.Item('annotation');
-				a.annotationType = 'area';
+				a.annotationType = 'image';
 				assert.throws(() => a.annotationText = "This is highlighted text.");
 			});
 		});
@@ -1248,7 +1248,7 @@ describe("Zotero.Item", function () {
 				await annotation.saveTx();
 			});
 			
-			it("should save an area annotation", async function () {
+			it("should save an image annotation", async function () {
 				// Create a Blob from a PNG
 				var path = OS.Path.join(getTestDataDirectory().path, 'test.png');
 				var imageData = await Zotero.File.getBinaryContentsAsync(path);
@@ -1259,7 +1259,7 @@ describe("Zotero.Item", function () {
 				
 				var annotation = new Zotero.Item('annotation');
 				annotation.parentID = attachment.id;
-				annotation.annotationType = 'area';
+				annotation.annotationType = 'image';
 				annotation.annotationSortIndex = '000015|0002431|000000.000';
 				annotation.annotationPosition = {
 					pageIndex: 123,

@@ -527,8 +527,8 @@ Zotero.Items = function() {
 							type = 'note';
 							break;
 						
-						case Zotero.Annotations.ANNOTATION_TYPE_AREA:
-							type = 'area';
+						case Zotero.Annotations.ANNOTATION_TYPE_IMAGE:
+							type = 'image';
 							break;
 						
 						default:

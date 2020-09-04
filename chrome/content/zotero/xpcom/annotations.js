@@ -29,7 +29,7 @@ Zotero.Annotations = new function () {
 	// Keep in sync with items.js::loadAnnotations()
 	Zotero.defineProperty(this, 'ANNOTATION_TYPE_HIGHLIGHT', { value: 1 });
 	Zotero.defineProperty(this, 'ANNOTATION_TYPE_NOTE', { value: 2 });
-	Zotero.defineProperty(this, 'ANNOTATION_TYPE_AREA', { value: 3 });
+	Zotero.defineProperty(this, 'ANNOTATION_TYPE_IMAGE', { value: 3 });
 	
 	
 	this.toJSON = function (item) {
@@ -43,7 +43,7 @@ Zotero.Annotations = new function () {
 		if (o.type == 'highlight') {
 			o.text = item.annotationText;
 		}
-		else if (o.type == 'area') {
+		else if (o.type == 'image') {
 			o.imageURL = item.annotationImageURL;
 		}
 		o.comment = item.annotationComment;

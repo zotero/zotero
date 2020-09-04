@@ -354,7 +354,7 @@ Zotero.Attachments = new function(){
 
 
 	/**
-	 * Saves an image for a parent note or area annotation
+	 * Saves an image for a parent note or image annotation
 	 *
 	 * @param {Object} params
 	 * @param {Blob} params.blob - Image to save
