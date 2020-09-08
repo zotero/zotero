@@ -556,12 +556,12 @@ Zotero.Sync.Data.Local = {
 		// Sort descendent collections last
 		if (objectType == 'collection') {
 			try {
-				ids = Zotero.Collections.sortByLevel(ids);
+				ids = Zotero.Collections.sortByLevel(ids.map(id => Zotero.Collections.get(id))).map(o => o.id);
 			}
 			catch (e) {
 				Zotero.logError(e);
 				// If collections were incorrectly nested, fix and try again
-				if (e instanceof Zotero.Error && e.error == Zotero.Error.ERROR_INVALID_COLLECTION_NESTING) {
+				if (e instanceof Zotero.Error && e.error == Zotero.Error.ERROR_INVALID_OBJECT_NESTING) {
 					let c = Zotero.Collections.get(e.collectionID);
 					Zotero.debug(`Removing parent collection ${c.parentKey} from collection ${c.key}`);
 					c.parentID = null;
@@ -572,6 +572,9 @@ Zotero.Sync.Data.Local = {
 					throw e;
 				}
 			}
+		}
+		else if (objectType == 'item') {
+			ids = Zotero.Items.sortByParent(ids.map(id => Zotero.Items.get(id))).map(o => o.id);
 		}
 		
 		return ids;

@@ -907,7 +907,8 @@ function importFileAttachment(filename, options = {}) {
 	filename.split('/').forEach((part) => file.append(part));
 	let importOptions = {
 		file,
-		parentItemID: options.parentID
+		parentItemID: options.parentID,
+		title: options.title
 	};
 	Object.assign(importOptions, options);
 	return Zotero.Attachments.importFromFile(importOptions);
@@ -924,7 +925,20 @@ function importHTMLAttachment() {
 }
 
 
-async function createAnnotation(type, parentItem) {
+async function importPDFAttachment(parentItem, options = {}) {
+	var attachment = await importFileAttachment(
+		'test.pdf',
+		{
+			contentType: 'application/pdf',
+			parentID: parentItem ? parentItem.id : null,
+			title: options.title
+		}
+	);
+	return attachment;
+}
+
+
+async function createAnnotation(type, parentItem, options = {}) {
 	var annotation = new Zotero.Item('annotation');
 	annotation.parentID = parentItem.id;
 	annotation.annotationType = type;
@@ -941,8 +955,26 @@ async function createAnnotation(type, parentItem) {
 			[314.4, 412.8, 556.2, 609.6]
 		]
 	};
+	if (options.tags) {
+		annotation.setTags(options.tags);
+	}
 	await annotation.saveTx();
 	return annotation;
+}
+
+
+async function createEmbeddedImage(parentItem, options = {}) {
+	var attachment = await Zotero.Attachments.importEmbeddedImage({
+		blob: await File.createFromFileName(
+			OS.Path.join(getTestDataDirectory().path, 'test.png')
+		),
+		parentItemID: parentItem.id
+	});
+	if (options.tags) {
+		attachment.setTags(options.tags);
+		await attachment.saveTx();
+	}
+	return attachment;
 }
 
 

@@ -746,35 +746,58 @@ describe("Zotero.Sync.Data.Engine", function () {
 		})
 		
 		
-		it("should upload child item after parent item", function* () {
-			({ engine, client, caller } = yield setup());
+		it("should upload child items after parent items", async function () {
+			({ engine, client, caller } = await setup());
 			
 			var library = Zotero.Libraries.userLibrary;
 			var lastLibraryVersion = 5;
 			library.libraryVersion = lastLibraryVersion;
-			yield library.saveTx();
+			await library.saveTx();
 			
-			// Create top-level note, book, and child note
-			var item1 = new Zotero.Item('note');
-			item1.setNote('A');
-			yield item1.saveTx();
-			var item2 = yield createDataObject('item');
-			var item3 = new Zotero.Item('note');
-			item3.parentItemID = item2.id;
-			item3.setNote('B');
-			yield item3.saveTx();
+			// Create top-level note, embedded-image attachment, book, and child note
+			var note1 = await createDataObject('item', { itemType: 'note', note: 'A' });
+			var attachment = await Zotero.Attachments.importEmbeddedImage({
+				blob: await File.createFromFileName(
+					OS.Path.join(getTestDataDirectory().path, 'test.png')
+				),
+				parentItemID: note1.id
+			});
+			var item = await createDataObject('item');
+			var note2 = await createDataObject('item', { itemType: 'note', parentID: item.id, note: 'B' });
 			// Move note under parent
-			item1.parentItemID = item2.id;
-			yield item1.saveTx();
+			note1.parentItemID = item.id;
+			await note1.saveTx();
 			var handled = false;
 			
 			server.respond(function (req) {
 				if (req.method == "POST" && req.url == baseURL + "users/1/items") {
 					let json = JSON.parse(req.requestBody);
-					assert.lengthOf(json, 3);
-					assert.equal(json[0].key, item2.key);
-					assert.equal(json[1].key, item1.key);
-					assert.equal(json[2].key, item3.key);
+					assert.lengthOf(json, 4);
+					assert.equal(json[0].key, item.key);
+					assert.oneOf(
+						[json[1].key, json[2].key, json[3].key].join(''),
+						[
+							[note1.key, attachment.key, note2.key].join(''),
+							[note2.key, note1.key, attachment.key].join(''),
+						]
+					);
+					let successful;
+					if (json[1].key == note1.key) {
+						successful = {
+							"0": item.toResponseJSON({ version: lastLibraryVersion }),
+							"1": note1.toResponseJSON({ version: lastLibraryVersion }),
+							"2": attachment.toResponseJSON({ version: lastLibraryVersion }),
+							"3": note2.toResponseJSON({ version: lastLibraryVersion }),
+						};
+					}
+					else {
+						successful = {
+							"0": item.toResponseJSON({ version: lastLibraryVersion }),
+							"1": note2.toResponseJSON({ version: lastLibraryVersion }),
+							"2": note1.toResponseJSON({ version: lastLibraryVersion }),
+							"3": attachment.toResponseJSON({ version: lastLibraryVersion }),
+						};
+					}
 					handled = true;
 					req.respond(
 						200,
@@ -783,11 +806,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 							"Last-Modified-Version": ++lastLibraryVersion
 						},
 						JSON.stringify({
-							successful: {
-								"0": item2.toResponseJSON({ version: lastLibraryVersion }),
-								"1": item1.toResponseJSON({ version: lastLibraryVersion }),
-								"2": item3.toResponseJSON({ version: lastLibraryVersion })
-							},
+							successful,
 							unchanged: {},
 							failed: {}
 						})
@@ -796,7 +815,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 				}
 			});
 			
-			yield engine.start();
+			await engine.start();
 			assert.isTrue(handled);
 		});
 		
@@ -4633,29 +4652,32 @@ describe("Zotero.Sync.Data.Engine", function () {
 					);
 					let version = data.expectedVersion + 1;
 					let json = JSON.parse(req.requestBody);
+					
 					let o1 = json.find(o => o.key == objectJSON[type][1].key);
 					assert.notProperty(o1, 'version');
 					let o2 = json.find(o => o.key == objectJSON[type][2].key);
 					assert.notProperty(o2, 'version');
 					let o3 = json.find(o => o.key == objectJSON[type][3].key);
 					assert.notProperty(o3, 'version');
-					let response = {
-						successful: {
-							"0": Object.assign(objectJSON[type][1], { version }),
-							"1": Object.assign(objectJSON[type][2], { version }),
-							"2": Object.assign(objectJSON[type][3], { version })
-						},
-						unchanged: {},
-						failed: {}
-					};
 					if (type == 'item') {
 						let o = json.find(o => o.key == objectJSON.item[4].key);
 						assert.notProperty(o, 'version');
 						// Attachment items should include storage properties
 						assert.propertyVal(o, 'mtime', objects.item[4].attachmentSyncedModificationTime);
 						assert.propertyVal(o, 'md5', objects.item[4].attachmentSyncedHash);
-						response.successful["3"] = Object.assign(objectJSON[type][4], { version })
 					}
+					let response = {
+						successful: {},
+						unchanged: {},
+						failed: {}
+					};
+					// Return objects in the order provided
+					json.map(x => x.key).forEach((key, index) => {
+						response.successful[index] = Object.assign(
+							objectJSON[type].find(x => x.key == key),
+							{ version }
+						);
+					});
 					req.respond(
 						200,
 						{
