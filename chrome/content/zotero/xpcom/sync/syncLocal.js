@@ -546,10 +546,6 @@ Zotero.Sync.Data.Local = {
 				+ "LEFT JOIN itemNotes INo ON (O.itemID=INo.itemID) ";
 		}
 		sql += " WHERE libraryID=? AND synced=0";
-		// Sort child items last
-		if (objectType == 'item') {
-			sql += " ORDER BY COALESCE(IA.parentItemID, INo.parentItemID)";
-		}
 		
 		var ids = yield Zotero.DB.columnQueryAsync(sql, [libraryID]);
 		
