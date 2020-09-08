@@ -2222,7 +2222,6 @@ Zotero.Item.prototype.isAttachment = function() {
 	return Zotero.ItemTypes.getName(this.itemTypeID) == 'attachment';
 }
 
-
 /**
  * @return {Promise<Boolean>}
  */
@@ -2240,7 +2239,6 @@ Zotero.Item.prototype.isImportedAttachment = function() {
 	return false;
 }
 
-
 /**
  * @return {Promise<Boolean>}
  */
@@ -2255,7 +2253,6 @@ Zotero.Item.prototype.isWebAttachment = function() {
 	return true;
 }
 
-
 /**
  * @return {Boolean}
  */
@@ -2266,12 +2263,18 @@ Zotero.Item.prototype.isFileAttachment = function() {
 	return this.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL;
 }
 
-
 /**
  * @return {Boolean}
  */
 Zotero.Item.prototype.isLinkedFileAttachment = function() {
 	return this.isAttachment() && this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE;
+}
+
+/**
+ * @return {Boolean}
+ */
+Zotero.Item.prototype.isEmbeddedImageAttachment = function() {
+	return this.isAttachment() && this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_EMBEDDED_IMAGE;
 }
 
 
@@ -3513,6 +3516,10 @@ for (let name of ['type', 'text', 'comment', 'color', 'pageLabel', 'sortIndex'])
 				return;
 			}
 			
+			if (name != 'type' && !this._getLatestField('annotationType')) {
+				throw new Error("annotationType must be set before other annotation properties");
+			}
+			
 			switch (name) {
 				case 'type': {
 					let currentType = this._getLatestField('annotationType');
@@ -4592,12 +4599,15 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 		case 'key':
 		case 'version':
 		case 'itemType':
-		case 'note':
-		case 'noteSchemaVersion':
 		// Use?
 		case 'md5':
 		case 'mtime':
+		
+		//
 		// Handled below
+		//
+		case 'note':
+		case 'noteSchemaVersion':
 		case 'collections':
 		case 'parentItem':
 		case 'deleted':
@@ -4676,6 +4686,20 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 		
 		case 'path':
 			this.attachmentPath = val;
+			break;
+		
+		//
+		// Annotation fields
+		//
+		case 'annotationType':
+		case 'annotationType':
+		case 'annotationText':
+		case 'annotationComment':
+		case 'annotationColor':
+		case 'annotationPageLabel':
+		case 'annotationSortIndex':
+		case 'annotationPosition':
+			this[field] = val;
 			break;
 		
 		// Item fields
@@ -4872,6 +4896,8 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 	obj.version = this.version;
 	obj.itemType = Zotero.ItemTypes.getName(this.itemTypeID);
 	
+	var embeddedImage = this.isEmbeddedImageAttachment();
+	
 	// Fields
 	for (let i in this._itemData) {
 		let val = this.getField(i) + '';
@@ -4896,7 +4922,9 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 			obj.linkMode = Zotero.Attachments.linkModeToName(linkMode);
 			
 			obj.contentType = this.attachmentContentType;
-			obj.charset = this.attachmentCharset;
+			if (!embeddedImage) {
+				obj.charset = this.attachmentCharset;
+			}
 			
 			if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
 				obj.path = this.attachmentPath;
@@ -4929,29 +4957,49 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 		}
 		
 		// Notes and embedded attachment notes
-		let note = this.note;
-		if (note !== "" || mode == 'full' || (mode == 'new' && this.isNote())) {
-			obj.note = note;
-			obj.noteSchemaVersion = this.noteSchemaVersion || 0;
+		if (this.isAttachment() || this.isNote()) {
+			let note = this.note;
+			if (note !== "" || mode == 'full' || (mode == 'new' && this.isNote())) {
+				obj.note = note;
+				obj.noteSchemaVersion = this.noteSchemaVersion || 0;
+			}
+		}
+		
+		if (this.isAnnotation()) {
+			let type = this.annotationType;
+			obj.annotationType = type;
+			if (type == 'highlight') {
+				obj.annotationText = this.annotationText || '';
+			}
+			obj.annotationComment = this.annotationComment || '';
+			obj.annotationColor = this.annotationColor || '';
+			obj.annotationPageLabel = this.annotationPageLabel || '';
+			obj.annotationSortIndex = this.annotationSortIndex || '';
+			obj.annotationPosition = JSON.stringify(this.annotationPosition) || '';
 		}
 	}
 	
-	// Tags
-	obj.tags = [];
-	var tags = this.getTags();
-	for (let i=0; i<tags.length; i++) {
-		obj.tags.push(tags[i]);
-	}
-	
-	// Collections
-	if (this.isTopLevelItem()) {
-		obj.collections = this.getCollections().map(function (id) {
-			var { libraryID, key } = this.ContainerObjectsClass.getLibraryAndKeyFromID(id);
-			if (!key) {
-				throw new Error("Collection " + id + " not found for item " + this.libraryKey);
-			}
-			return key;
-		}.bind(this));
+	if (!embeddedImage) {
+		// Tags
+		obj.tags = [];
+		var tags = this.getTags();
+		for (let i=0; i<tags.length; i++) {
+			obj.tags.push(tags[i]);
+		}
+		
+		// Collections
+		if (this.isTopLevelItem()) {
+			obj.collections = this.getCollections().map(function (id) {
+				var { libraryID, key } = this.ContainerObjectsClass.getLibraryAndKeyFromID(id);
+				if (!key) {
+					throw new Error("Collection " + id + " not found for item " + this.libraryKey);
+				}
+				return key;
+			}.bind(this));
+		}
+		
+		// Relations
+		obj.relations = this.getRelations();
 	}
 	
 	// My Publications
@@ -4960,9 +5008,6 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 			|| (mode == 'full' && this.library && this.library.libraryType == 'user')) {
 		obj.inPublications = this._inPublications;
 	}
-	
-	// Relations
-	obj.relations = this.getRelations();
 	
 	if (obj.accessDate) obj.accessDate = Zotero.Date.sqlToISO8601(obj.accessDate);
 	
@@ -4974,6 +5019,10 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 	}
 	
 	var json = this._postToJSON(env);
+	
+	if (this.isAnnotation()) {
+		delete json.relations;
+	}
 	
 	// TODO: Remove once we stop clearing props from the cached JSON in patch mode
 	if (options.skipStorageProperties) {

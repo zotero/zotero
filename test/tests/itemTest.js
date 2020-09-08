@@ -1670,82 +1670,140 @@ describe("Zotero.Item", function () {
 				assert.isUndefined(json.numPages);
 			})
 			
-			it.skip("should output attachment fields from file", function* () {
-				var file = getTestDataDirectory();
-				file.append('test.png');
-				var item = yield Zotero.Attachments.importFromFile({ file });
+			describe("Attachments", function () {
+				it.skip("should output attachment fields from file", function* () {
+					var file = getTestDataDirectory();
+					file.append('test.png');
+					var item = yield Zotero.Attachments.importFromFile({ file });
+					
+					yield Zotero.DB.executeTransaction(function* () {
+						yield Zotero.Sync.Storage.Local.setSyncedModificationTime(
+							item.id, new Date().getTime()
+						);
+						yield Zotero.Sync.Storage.Local.setSyncedHash(
+							item.id, 'b32e33f529942d73bea4ed112310f804'
+						);
+					});
+					
+					var json = item.toJSON();
+					assert.equal(json.linkMode, 'imported_file');
+					assert.equal(json.filename, 'test.png');
+					assert.isUndefined(json.path);
+					assert.equal(json.mtime, (yield item.attachmentModificationTime));
+					assert.equal(json.md5, (yield item.attachmentHash));
+				})
 				
-				yield Zotero.DB.executeTransaction(function* () {
-					yield Zotero.Sync.Storage.Local.setSyncedModificationTime(
-						item.id, new Date().getTime()
-					);
-					yield Zotero.Sync.Storage.Local.setSyncedHash(
-						item.id, 'b32e33f529942d73bea4ed112310f804'
-					);
+				it("should omit storage values with .skipStorageProperties", function* () {
+					var file = getTestDataDirectory();
+					file.append('test.png');
+					var item = yield Zotero.Attachments.importFromFile({ file });
+					
+					item.attachmentSyncedModificationTime = new Date().getTime();
+					item.attachmentSyncedHash = 'b32e33f529942d73bea4ed112310f804';
+					yield item.saveTx({ skipAll: true });
+					
+					var json = item.toJSON({
+						skipStorageProperties: true
+					});
+					assert.isUndefined(json.mtime);
+					assert.isUndefined(json.md5);
 				});
 				
-				var json = item.toJSON();
-				assert.equal(json.linkMode, 'imported_file');
-				assert.equal(json.filename, 'test.png');
-				assert.isUndefined(json.path);
-				assert.equal(json.mtime, (yield item.attachmentModificationTime));
-				assert.equal(json.md5, (yield item.attachmentHash));
-			})
-			
-			it("should omit storage values with .skipStorageProperties", function* () {
-				var file = getTestDataDirectory();
-				file.append('test.png');
-				var item = yield Zotero.Attachments.importFromFile({ file });
+				it("should output synced storage values with .syncedStorageProperties", function* () {
+					var item = new Zotero.Item('attachment');
+					item.attachmentLinkMode = 'imported_file';
+					item.fileName = 'test.txt';
+					yield item.saveTx();
+					
+					var mtime = new Date().getTime();
+					var md5 = 'b32e33f529942d73bea4ed112310f804';
+					
+					item.attachmentSyncedModificationTime = mtime;
+					item.attachmentSyncedHash = md5;
+					yield item.saveTx({ skipAll: true });
+					
+					var json = item.toJSON({
+						syncedStorageProperties: true
+					});
+					assert.equal(json.mtime, mtime);
+					assert.equal(json.md5, md5);
+				})
 				
-				item.attachmentSyncedModificationTime = new Date().getTime();
-				item.attachmentSyncedHash = 'b32e33f529942d73bea4ed112310f804';
-				yield item.saveTx({ skipAll: true });
+				it.skip("should output unset storage properties as null", function* () {
+					var item = new Zotero.Item('attachment');
+					item.attachmentLinkMode = 'imported_file';
+					item.fileName = 'test.txt';
+					var id = yield item.saveTx();
+					var json = item.toJSON();
+					
+					assert.isNull(json.mtime);
+					assert.isNull(json.md5);
+				})
 				
-				var json = item.toJSON({
-					skipStorageProperties: true
+				it("shouldn't include filename or path for linked_url attachments", function* () {
+					var item = new Zotero.Item('attachment');
+					item.attachmentLinkMode = 'linked_url';
+					item.url = "https://www.zotero.org/";
+					var json = item.toJSON();
+					assert.notProperty(json, "filename");
+					assert.notProperty(json, "path");
 				});
-				assert.isUndefined(json.mtime);
-				assert.isUndefined(json.md5);
+				
+				it("shouldn't include various properties on embedded-image attachments", async function () {
+					var item = await createDataObject('item', { itemType: 'note' });
+					var attachment = await createEmbeddedImage(item);
+					var json = attachment.toJSON();
+					assert.notProperty(json, 'title');
+					assert.notProperty(json, 'url');
+					assert.notProperty(json, 'accessDate');
+					assert.notProperty(json, 'tags');
+					assert.notProperty(json, 'collections');
+					assert.notProperty(json, 'relations');
+					assert.notProperty(json, 'note');
+					assert.notProperty(json, 'charset');
+					assert.notProperty(json, 'path');
+				});
 			});
 			
-			it("should output synced storage values with .syncedStorageProperties", function* () {
-				var item = new Zotero.Item('attachment');
-				item.attachmentLinkMode = 'imported_file';
-				item.fileName = 'test.txt';
-				yield item.saveTx();
+			describe("Annotations", function () {
+				var attachment;
 				
-				var mtime = new Date().getTime();
-				var md5 = 'b32e33f529942d73bea4ed112310f804';
-				
-				item.attachmentSyncedModificationTime = mtime;
-				item.attachmentSyncedHash = md5;
-				yield item.saveTx({ skipAll: true });
-				
-				var json = item.toJSON({
-					syncedStorageProperties: true
+				before(async function () {
+					attachment = await importFileAttachment('test.pdf');
 				});
-				assert.equal(json.mtime, mtime);
-				assert.equal(json.md5, md5);
-			})
-			
-			it.skip("should output unset storage properties as null", function* () {
-				var item = new Zotero.Item('attachment');
-				item.attachmentLinkMode = 'imported_file';
-				item.fileName = 'test.txt';
-				var id = yield item.saveTx();
-				var json = item.toJSON();
 				
-				assert.isNull(json.mtime);
-				assert.isNull(json.md5);
-			})
-			
-			it("shouldn't include filename or path for linked_url attachments", function* () {
-				var item = new Zotero.Item('attachment');
-				item.attachmentLinkMode = 'linked_url';
-				item.url = "https://www.zotero.org/";
-				var json = item.toJSON();
-				assert.notProperty(json, "filename");
-				assert.notProperty(json, "path");
+				it("should output highlight annotation", async function () {
+					var item = createUnsavedDataObject(
+						'item', { itemType: 'annotation', parentKey: attachment.key }
+					);
+					item.annotationType = 'highlight';
+					item.annotationText = "This is an <b>extracted</b> text with rich-text\nAnd a new line";
+					item.annotationComment = "This is a comment with <i>rich-text</i>\nAnd a new line";
+					item.annotationColor = "#ffec00";
+					item.annotationPageLabel = "15";
+					item.annotationSortIndex = "00015|002431|00000.000";
+					item.annotationPosition = {
+						"pageIndex": 1,
+						"rects": [
+							[231.284, 402.126, 293.107, 410.142],
+							[54.222, 392.164, 293.107, 400.18],
+							[54.222, 382.201, 293.107, 390.217],
+							[54.222, 372.238, 293.107, 380.254],
+							[54.222, 362.276, 273.955, 370.292]
+						]
+					};
+					var json = item.toJSON();
+					
+					Zotero.debug(json);
+					
+					for (let prop of ['Type', 'Text', 'Comment', 'Color', 'PageLabel', 'SortIndex']) {
+						let name = 'annotation' + prop;
+						assert.propertyVal(json, name, item[name]);
+					}
+					assert.deepEqual(JSON.parse(json.annotationPosition), item.annotationPosition);
+					assert.notProperty(json, 'collections');
+					assert.notProperty(json, 'relations');
+				});
 			});
 			
 			it("should include inPublications=true for items in My Publications", function* () {
@@ -2324,14 +2382,46 @@ describe("Zotero.Item", function () {
 			assert.equal(item.getField("bookTitle"), "Publication Title");
 		});
 		
-		it("should set noteSchemaField", function () {
+		it("should set note and noteSchemaField", function () {
 			var item = new Zotero.Item;
 			item.fromJSON({
 				itemType: "note",
 				note: "<p>Foo</p>",
 				noteSchemaVersion: 3
 			});
+			assert.equal(item.note, "<p>Foo</p>");
 			assert.equal(item.noteSchemaVersion, 3);
+		});
+		
+		it("should import annotation fields", function () {
+			var item = new Zotero.Item();
+			var json = {
+				itemType: "annotation",
+				annotationType: 'highlight',
+				annotationText: "This is highlighted text.",
+				annotationComment: "This is a comment with <i>rich-text</i>\nAnd a new line",
+				annotationSortIndex: '00015|002431|00000.000',
+				annotationPosition: JSON.stringify({
+					pageIndex: 123,
+					rects: [
+						[314.4, 412.8, 556.2, 609.6]
+					]
+				}),
+				tags: [
+					{
+						tag: "tagA"
+					}
+				]
+			};
+			item.fromJSON(json, { strict: true });
+			for (let i in json) {
+				if (i == 'tags') {
+					assert.deepEqual(item.getTags(), json[i]);
+				}
+				else {
+					assert.equal(item[i], json[i]);
+				}
+			}
 		});
 	});
 });
