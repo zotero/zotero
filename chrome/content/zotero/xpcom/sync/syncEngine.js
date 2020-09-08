@@ -149,6 +149,7 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 				throw e;
 			}
 			Zotero.debug("Upload failed -- performing download", 2);
+			Zotero.debug(e, 1);
 			downloadResult = yield this._startDownload();
 			Zotero.debug("Download result is " + downloadResult, 4);
 			throw e;
