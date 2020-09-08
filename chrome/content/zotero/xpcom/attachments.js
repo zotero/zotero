@@ -358,12 +358,16 @@ Zotero.Attachments = new function(){
 	 *
 	 * @param {Object} params
 	 * @param {Blob} params.blob - Image to save
-	 * @param {Integer} params.parentItemID - Annotation item to add item to
+	 * @param {Integer} params.parentItemID - Note or annotation item to add item to
 	 * @param {Object} [params.saveOptions] - Options to pass to Zotero.Item::save()
 	 * @return {Promise<Zotero.Item>}
 	 */
 	this.importEmbeddedImage = async function ({ blob, parentItemID, saveOptions }) {
 		Zotero.debug('Importing note or annotation image');
+		
+		if (!parentItemID) {
+			throw new Error("parentItemID must be provided");
+		}
 		
 		var contentType = blob.type;
 		var fileExt;
@@ -379,7 +383,7 @@ Zotero.Attachments = new function(){
 				break;
 			
 			default:
-				throw new Error(`Unsupported embedded image content type '${contentType}`);
+				throw new Error(`Unsupported embedded image content type '${contentType}'`);
 		}
 		var filename = 'image.' + fileExt;
 		
