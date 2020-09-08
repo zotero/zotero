@@ -3332,6 +3332,31 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentText', {
 });
 
 
+/**
+ * Return dataURI of attachment content
+ *
+ * @return {Promise<String>} - A promise for attachment dataURI or empty string if unavailable
+ */
+Zotero.defineProperty(Zotero.Item.prototype, 'attachmentDataURI', {
+	get: async function () {
+		if (!this.isAttachment()) {
+			throw new Error("'attachmentDataURI' is only valid for attachments");
+		}
+		let path = await this.getFilePathAsync();
+		if (!path || !(await OS.File.exists(path))) {
+			return '';
+		}
+		let buf = await OS.File.read(path, {});
+		let bytes = new Uint8Array(buf);
+		let binary = '';
+		let len = bytes.byteLength;
+		for (let i = 0; i < len; i++) {
+			binary += String.fromCharCode(bytes[i]);
+		}
+		return 'data:' + this.attachmentContentType + ';base64,' + btoa(binary);
+	}
+});
+
 
 /**
  * Returns child attachments of this item
@@ -3545,34 +3570,6 @@ Zotero.defineProperty(Zotero.Item.prototype, 'annotationImageAttachment', {
 			throw new Error("No attachments found for image annotation");
 		}
 		return Zotero.Items.get(attachments[0]);
-	}
-});
-
-
-/**
- * @property {String} annotationImageURL
- */
-Zotero.defineProperty(Zotero.Item.prototype, 'annotationImageURL', {
-	get: function () {
-		if (!this.isImageAnnotation()) {
-			throw new Error("'annotationImageURL' is only valid for image annotations");
-		}
-		var attachments = this.getAttachments();
-		if (!attachments.length) {
-			throw new Error("No attachments found for image annotation");
-		}
-		
-		var { libraryID, key } = Zotero.Items.getLibraryAndKeyFromID(attachments[0]);
-		var url = 'zotero://attachment/';
-		if (libraryID == Zotero.Libraries.userLibraryID) {
-			url += 'library';
-		}
-		else {
-			url += Zotero.URI.getLibraryPath(libraryID);
-		}
-		url += '/items/' + key;
-		
-		return url;
 	}
 });
 

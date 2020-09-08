@@ -1,5 +1,5 @@
 
-const CMAPS_URL = 'resource://zotero/pdf.js/cmaps/';
+const CMAPS_URL = 'resource://zotero/pdf-reader/cmaps/';
 
 class PDFWorker {
 	constructor() {

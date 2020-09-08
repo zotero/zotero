@@ -11,13 +11,17 @@
 		]>
 
 <window
-		windowtype="zotero:viewer"
+		id="pdf-reader"
+		windowtype="zotero:reader"
 		orient="vertical"
 		width="1300"
 		height="800"
 		persist="screenX screenY width height"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 >
+	<script type="application/javascript">
+		Components.utils.import('resource://gre/modules/Services.jsm');
+	</script>
 	<!-- TODO: Localize -->
 	<menubar>
 		<menu label="File">
@@ -56,11 +60,16 @@
 	</menubar>
 
 	<hbox flex="1">
-		<vbox id="zotero-viewer" flex="3">
-			<browser tooltip="viewerTooltip" type="content" primary="true" transparent="transparent" src="" id="viewer"
+		<vbox id="zotero-reader" flex="3">
+			<browser id="reader"
+					 tooltip="readerTooltip"
+					 type="content"
+					 primary="true"
+					 transparent="transparent"
+					 src="resource://zotero/pdf-reader/viewer.html"
 					 flex="1"/>
 			<popupset>
-				<tooltip id="viewerTooltip" onpopupshowing="return fillTooltip(this);"/>
+				<tooltip id="readerTooltip" onpopupshowing="return fillTooltip(this);"/>
 				<menupopup id="tagsPopup" ignorekeys="true"
 						   style="min-width: 300px;"
 						   onpopupshown="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='xul:label'){ this.setAttribute('showing', 'true'); }"
@@ -71,28 +80,27 @@
 				<menupopup id="colorPopup"/>
 			</popupset>
 		</vbox>
-		<splitter id="zotero-viewer-splitter"
+		<splitter id="zotero-reader-splitter"
 				  hidden="true"
 				  resizebefore="closest"
 				  resizeafter="closest"
 				  collapse="after"
 				  orient="horizontal"
 				  zotero-persist="state orient" />
-		<vbox flex="0" id="zotero-viewer-note-sidebar" width="350" hidden="true">
-			<vbox id="zotero-viewer-sidebar-cover" flex="1">
+		<vbox flex="0" id="zotero-reader-note-sidebar" width="350" hidden="true">
+			<vbox id="zotero-reader-sidebar-cover" flex="1">
 				<label>Drag a note here…</label>
 			</vbox>
-			<vbox id="zotero-viewer-sidebar-container" flex="1" style="overflow:auto;" hidden="true">
-				<zoteronoteeditor id="zotero-viewer-editor" flex="1" notitle="1"
+			<vbox id="zotero-reader-sidebar-container" flex="1" style="overflow:auto;" hidden="true">
+				<zoteronoteeditor id="zotero-reader-editor" flex="1" notitle="1"
 								   previousfocus="zotero-items-tree"
 								   onerror="/*this.mode = 'view'*/"
 				/>
 
 				<button id="zotero-view-note-button" label="Close"
-						oncommand="document.getElementById('zotero-viewer-sidebar-container').hidden = true;document.getElementById('zotero-viewer-sidebar-cover').hidden = false;"/>
+						oncommand="document.getElementById('zotero-reader-sidebar-container').hidden = true;document.getElementById('zotero-reader-sidebar-cover').hidden = false;"/>
 			</vbox>
 		</vbox>
 	</hbox>
 	<script src="include.js"/>
-	<script src="viewer.js"/>
 </window>

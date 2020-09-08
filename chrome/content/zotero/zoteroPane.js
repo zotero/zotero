@@ -4232,7 +4232,7 @@ var ZoteroPane = new function()
 	});
 	
 	this.viewPDF = function (itemID) {
-		Zotero.Viewer.open(itemID);
+		Zotero.Reader.open(itemID);
 	};
 	
 	

@@ -108,7 +108,7 @@ const xpcomFilesLocal = [
 	'noteBackups',
 	'notifier',
 	'openPDF',
-	'viewer',
+	'reader',
 	'progressQueue',
 	'progressQueueDialog',
 	'quickCopy',

@@ -30,7 +30,7 @@ async function getPDFReader(signatures) {
 	}
 
 	if (updated) {
-		await fs.copy('./pdf-reader/build/zotero', './build/resource/pdf.js');
+		await fs.copy('./pdf-reader/build/zotero', './build/resource/pdf-reader');
 	}
 
 	const t2 = Date.now();

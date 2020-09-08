@@ -190,7 +190,7 @@ class EditorInstance {
 					this.onNavigate(uri, { position });
 				}
 				else {
-					await Zotero.Viewer.openURI(uri, { position });
+					await Zotero.Reader.openURI(uri, { position });
 				}
 				return;
 			}

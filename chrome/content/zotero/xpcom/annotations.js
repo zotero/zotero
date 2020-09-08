@@ -32,7 +32,7 @@ Zotero.Annotations = new function () {
 	Zotero.defineProperty(this, 'ANNOTATION_TYPE_IMAGE', { value: 3 });
 	
 	
-	this.toJSON = function (item) {
+	this.toJSON = async function (item) {
 		var o = {};
 		o.key = item.key;
 		o.type = item.annotationType;
@@ -44,7 +44,13 @@ Zotero.Annotations = new function () {
 			o.text = item.annotationText;
 		}
 		else if (o.type == 'image') {
-			o.imageURL = item.annotationImageURL;
+			var attachments = item.getAttachments();
+			if (attachments.length) {
+				let imageAttachment = Zotero.Items.get(attachments[0]);
+				if (imageAttachment) {
+					o.image = await imageAttachment.attachmentDataURI;
+				}
+			}
 		}
 		o.comment = item.annotationComment;
 		o.pageLabel = item.annotationPageLabel;
