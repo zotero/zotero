@@ -7,7 +7,7 @@ describe("Zotero.Annotations", function() {
 		"comment": "This is a comment with <i>rich-text</i>\nAnd a new line",
 		"color": "#ffec00",
 		"pageLabel": "15",
-		"sortIndex": "00015|002431|00000.000",
+		"sortIndex": "00015|002431|00000",
 		"position": {
 			"pageIndex": 1,
 			"rects": [
@@ -37,7 +37,7 @@ describe("Zotero.Annotations", function() {
 		"comment": "This is a note",
 		"color": "#ffec00",
 		"pageLabel": "14",
-		"sortIndex": "00014|001491|00283.000",
+		"sortIndex": "00014|001491|00283",
 		"position": {
 			"pageIndex": 0,
 			"rects": [
@@ -55,7 +55,7 @@ describe("Zotero.Annotations", function() {
 		"comment": "This is a comment",
 		"color": "#ffec00",
 		"pageLabel": "XVI",
-		"sortIndex": "00016|003491|00683.000",
+		"sortIndex": "00016|003491|00683",
 		"position": {
 			"pageIndex": 123,
 			"rects": [
@@ -76,7 +76,7 @@ describe("Zotero.Annotations", function() {
 		"comment": "This is a comment with <i>rich-text</i>\nAnd a new line",
 		"color": "#ffec00",
 		"pageLabel": "15",
-		"sortIndex": "00015|002431|00000.000",
+		"sortIndex": "00015|002431|00000",
 		"position": {
 			"pageIndex": 1,
 			"rects": [
