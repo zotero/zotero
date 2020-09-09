@@ -1824,6 +1824,8 @@
 					var elem;
 					var [field, creatorIndex, creatorField] = fieldName.split('-');
 					var newVal;
+
+					creatorIndex = parseInt(creatorIndex);
 					
 					// Creator fields
 					if (field == 'creator') {
