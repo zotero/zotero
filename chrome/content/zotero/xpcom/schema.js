@@ -46,7 +46,7 @@ Zotero.Schema = new function(){
 	var _dbVersions = [];
 	var _schemaVersions = [];
 	// Update when adding _updateCompatibility() line to schema update step
-	var _maxCompatibility = 6;
+	var _maxCompatibility = 7;
 	
 	var _repositoryTimerID;
 	var _repositoryNotificationTimerID;
@@ -3228,6 +3228,8 @@ Zotero.Schema = new function(){
 			}
 			
 			else if (i == 112) {
+				yield _updateCompatibility(7);
+				
 				yield Zotero.DB.queryAsync("DROP TABLE IF EXISTS annotations");
 				yield Zotero.DB.queryAsync("DROP TABLE IF EXISTS highlights");
 				
