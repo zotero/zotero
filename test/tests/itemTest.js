@@ -2393,10 +2393,14 @@ describe("Zotero.Item", function () {
 			assert.equal(item.noteSchemaVersion, 3);
 		});
 		
-		it("should import annotation fields", function () {
+		it("should import annotation fields", async function () {
+			var attachment = await importPDFAttachment();
+			
 			var item = new Zotero.Item();
+			item.libraryID = attachment.libraryID;
 			var json = {
 				itemType: "annotation",
+				parentItem: attachment.key,
 				annotationType: 'highlight',
 				annotationText: "This is highlighted text.",
 				annotationComment: "This is a comment with <i>rich-text</i>\nAnd a new line",
@@ -2417,6 +2421,9 @@ describe("Zotero.Item", function () {
 			for (let i in json) {
 				if (i == 'tags') {
 					assert.deepEqual(item.getTags(), json[i]);
+				}
+				else if (i == 'parentItem') {
+					assert.equal(item.parentKey, json[i]);
 				}
 				else {
 					assert.equal(item[i], json[i]);

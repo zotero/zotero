@@ -4871,12 +4871,14 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 	}
 	
 	// Both notes and attachments might have parents and notes
-	if (this.isNote() || this.isAttachment()) {
+	if (this.isNote() || this.isAttachment() || this.isAnnotation()) {
 		let parentKey = json.parentItem;
 		this.parentKey = parentKey ? parentKey : false;
 		
-		let note = json.note;
-		this.setNote(note !== undefined ? note : "", json.noteSchemaVersion);
+		if (!this.isAnnotation()) {
+			let note = json.note;
+			this.setNote(note !== undefined ? note : "", json.noteSchemaVersion);
+		}
 	}
 	
 	// Update boolean fields that might not be present in JSON
