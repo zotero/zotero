@@ -143,6 +143,12 @@ describe("Zotero.Date", function() {
 			var date = "2016-02-27 22:00:00";
 			date = Zotero.Date.sqlToDate(date, true);
 			assert.equal(date.getTime(), 1456610400000);
+		});
+		
+		it("should convert an SQL UTC date without seconds into a JS Date object", function () {
+			var date = "2016-02-27 22:00";
+			date = Zotero.Date.sqlToDate(date, true);
+			assert.equal(date.getTime(), 1456610400000);
 		})
 	})
 	
@@ -151,6 +157,7 @@ describe("Zotero.Date", function() {
 			assert.ok(Zotero.Date.isISODate("2015"));
 			assert.ok(Zotero.Date.isISODate("2015-04"));
 			assert.ok(Zotero.Date.isISODate("2015-04-29"));
+			assert.ok(Zotero.Date.isISODate("2015-04-29T17:28"));
 			assert.ok(Zotero.Date.isISODate("2015-04-29T17:28Z"));
 			assert.isFalse(Zotero.Date.isISODate("2015-04-29 17:28"));
 		})
