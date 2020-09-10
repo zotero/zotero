@@ -380,6 +380,11 @@ Zotero.DataObjectUtilities = {
 				continue;
 			}
 			
+			// Ignore noteSchemaVersion: 0 if no local note
+			if (field == 'noteSchemaVersion' && val === 0) {
+				continue;
+			}
+			
 			changeset.push({
 				field: field,
 				op: "add",
