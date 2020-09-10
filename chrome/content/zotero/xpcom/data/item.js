@@ -2233,10 +2233,19 @@ Zotero.Item.prototype.isImportedAttachment = function() {
 	switch (linkMode) {
 		case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
 		case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
-		case Zotero.Attachments.LINK_MODE_EMBEDDED_IMAGE:
 			return true;
 	}
 	return false;
+}
+
+/**
+ * @return {Promise<Boolean>}
+ */
+Zotero.Item.prototype.isStoredFileAttachment = function() {
+	if (!this.isAttachment()) {
+		return false;
+	}
+	return this.isImportedAttachment() || this.isEmbeddedImageAttachment();
 }
 
 /**
@@ -2443,7 +2452,7 @@ Zotero.Item.prototype.getFilePathAsync = Zotero.Promise.coroutine(function* () {
 	}
 	
 	// Imported file with relative path
-	if (this.isImportedAttachment()) {
+	if (this.isStoredFileAttachment()) {
 		if (!path.includes("storage:")) {
 			Zotero.logError("Invalid attachment path '" + path + "'");
 			this._updateAttachmentStates(false);
@@ -2628,7 +2637,7 @@ Zotero.Item.prototype.renameAttachmentFile = async function (newName, overwrite 
 	
 	try {
 		let origName = OS.Path.basename(origPath);
-		if (this.isImportedAttachment()) {
+		if (this.isStoredFileAttachment()) {
 			var origModDate = (await OS.File.stat(origPath)).lastModificationDate;
 		}
 		
@@ -2641,7 +2650,7 @@ Zotero.Item.prototype.renameAttachmentFile = async function (newName, overwrite 
 		// Update mod time and clear hash so the file syncs
 		// TODO: use an integer counter instead of mod time for change detection
 		// Update mod time first, because it may fail for read-only files on Windows
-		if (this.isImportedAttachment()) {
+		if (this.isStoredFileAttachment()) {
 			await OS.File.setDates(origPath, null, null);
 		}
 		
@@ -2657,7 +2666,7 @@ Zotero.Item.prototype.renameAttachmentFile = async function (newName, overwrite 
 		
 		await this.relinkAttachmentFile(destPath);
 		
-		if (this.isImportedAttachment()) {
+		if (this.isStoredFileAttachment()) {
 			this.attachmentSyncedHash = null;
 			this.attachmentSyncState = "to_upload";
 			await this.saveTx({ skipAll: true });
@@ -2669,7 +2678,7 @@ Zotero.Item.prototype.renameAttachmentFile = async function (newName, overwrite 
 		Zotero.logError(e);
 		
 		// Restore original modification date in case we managed to change it
-		if (this.isImportedAttachment()) {
+		if (this.isStoredFileAttachment()) {
 			try {
 				OS.File.setDates(origPath, null, origModDate);
 			} catch (e) {
@@ -2714,7 +2723,7 @@ Zotero.Item.prototype.relinkAttachmentFile = Zotero.Promise.coroutine(function* 
 	// If selected file isn't in the attachment's storage directory,
 	// copy it in and use that one instead
 	var storageDir = Zotero.Attachments.getStorageDirectory(this).path;
-	if (this.isImportedAttachment() && OS.Path.dirname(path) != storageDir) {
+	if (this.isStoredFileAttachment() && OS.Path.dirname(path) != storageDir) {
 		newPath = OS.Path.join(storageDir, newName);
 		
 		// If file with same name already exists in the storage directory,
@@ -3105,13 +3114,8 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentSyncState', {
 			val = Zotero.Sync.Storage.Local["SYNC_STATE_" + val.toUpperCase()];
 		}
 		
-		switch (this.attachmentLinkMode) {
-			case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
-			case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
-				break;
-				
-			default:
-				throw new Error("attachmentSyncState can only be set for stored files");
+		if (!this.isStoredFileAttachment()) {
+			throw new Error("attachmentSyncState can only be set for stored files");
 		}
 		
 		switch (val) {
@@ -4493,7 +4497,7 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 		}
 		
 		// Zotero.Sync.EventListeners.ChangeListener needs to know if this was a storage file
-		env.notifierData[this.id].storageDeleteLog = this.isImportedAttachment();
+		env.notifierData[this.id].storageDeleteLog = this.isStoredFileAttachment();
 	}
 	// Regular item
 	else {
@@ -4933,7 +4937,7 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 				obj.filename = this.attachmentFilename;
 			}
 			
-			if (this.isImportedAttachment() && !options.skipStorageProperties) {
+			if (this.isStoredFileAttachment() && !options.skipStorageProperties) {
 				if (options.syncedStorageProperties) {
 					let mtime = this.attachmentSyncedModificationTime;
 					// There's never a reason to include these if they're null. This can happen if

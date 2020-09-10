@@ -4089,7 +4089,7 @@ var ZoteroPane = new function()
 				continue;
 			}
 			
-			let isLinkedFile = !item.isImportedAttachment();
+			let isLinkedFile = !item.isStoredFileAttachment();
 			let path = item.getFilePath();
 			if (!path) {
 				ZoteroPane_Local.showAttachmentNotFoundDialog(
@@ -4265,7 +4265,7 @@ var ZoteroPane = new function()
 		var fileExists = await OS.File.exists(path);
 		
 		// If file doesn't exist but an evicted iCloud Drive file does, reveal that instead
-		if (!fileExists && Zotero.isMac && !attachment.isImportedAttachment()) {
+		if (!fileExists && Zotero.isMac && !attachment.isStoredFileAttachment()) {
 			let iCloudPath = Zotero.File.getEvictedICloudPath(path);
 			if (await OS.File.exists(iCloudPath)) {
 				path = iCloudPath;

@@ -2447,7 +2447,7 @@ Zotero.Attachments = new function(){
 		Zotero.DB.requireTransaction();
 		
 		var newAttachment = attachment.clone(libraryID);
-		if (attachment.isImportedAttachment()) {
+		if (attachment.isStoredFileAttachment()) {
 			// Attachment path isn't copied over by clone() if libraryID is different
 			newAttachment.attachmentPath = attachment.attachmentPath;
 		}
@@ -2459,7 +2459,7 @@ Zotero.Attachments = new function(){
 		// Move files over if they exist
 		var oldDir;
 		var newDir;
-		if (newAttachment.isImportedAttachment()) {
+		if (newAttachment.isStoredFileAttachment()) {
 			oldDir = this.getStorageDirectory(attachment).path;
 			if (await OS.File.exists(oldDir)) {
 				newDir = this.getStorageDirectory(newAttachment).path;
@@ -2485,7 +2485,7 @@ Zotero.Attachments = new function(){
 		}
 		catch (e) {
 			// Move files back if old item can't be deleted
-			if (newAttachment.isImportedAttachment()) {
+			if (newAttachment.isStoredFileAttachment()) {
 				try {
 					await OS.File.move(newDir, oldDir);
 				}
@@ -2511,7 +2511,7 @@ Zotero.Attachments = new function(){
 		Zotero.DB.requireTransaction();
 		
 		var newAttachment = attachment.clone(libraryID);
-		if (attachment.isImportedAttachment()) {
+		if (attachment.isStoredFileAttachment()) {
 			// Attachment path isn't copied over by clone() if libraryID is different
 			newAttachment.attachmentPath = attachment.attachmentPath;
 		}
@@ -2521,7 +2521,7 @@ Zotero.Attachments = new function(){
 		yield newAttachment.save();
 		
 		// Copy over files if they exist
-		if (newAttachment.isImportedAttachment() && (yield attachment.fileExists())) {
+		if (newAttachment.isStoredFileAttachment() && (yield attachment.fileExists())) {
 			let dir = Zotero.Attachments.getStorageDirectory(attachment);
 			let newDir = yield Zotero.Attachments.createDirectoryForItem(newAttachment);
 			yield Zotero.File.copyDirectory(dir, newDir);

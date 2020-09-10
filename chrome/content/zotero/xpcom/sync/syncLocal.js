@@ -883,7 +883,7 @@ Zotero.Sync.Data.Local = {
 							// For items, check if mtime or file hash changed in metadata,
 							// which would indicate that a remote storage sync took place and
 							// a download is needed
-							if (objectType == 'item' && obj.isImportedAttachment()) {
+							if (objectType == 'item' && obj.isStoredFileAttachment()) {
 								if (jsonDataLocal.mtime != jsonData.mtime
 										|| jsonDataLocal.md5 != jsonData.md5) {
 									saveOptions.storageDetailsChanged = true;
@@ -1473,7 +1473,7 @@ Zotero.Sync.Data.Local = {
 					}
 				}
 				
-				if (obj.isImportedAttachment()) {
+				if (obj.isStoredFileAttachment()) {
 					yield this._checkAttachmentForDownload(obj, json.data.mtime, options.isNewObject);
 				}
 			}
@@ -1508,7 +1508,7 @@ Zotero.Sync.Data.Local = {
 			yield this._removeObjectFromSyncQueue(obj.objectType, obj.libraryID, json.key);
 			
 			// Mark updated attachments for download
-			if (obj.objectType == 'item' && obj.isImportedAttachment()) {
+			if (obj.objectType == 'item' && obj.isStoredFileAttachment()) {
 				// If storage changes were made (attachment mtime or hash), mark
 				// library as requiring download
 				if (options.isNewObject || options.storageDetailsChanged) {
