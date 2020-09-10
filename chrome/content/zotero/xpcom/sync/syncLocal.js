@@ -401,11 +401,12 @@ Zotero.Sync.Data.Local = {
 		}
 		catch (e) {
 			Zotero.logError(e);
-			var msg = Zotero.getString('sync.error.loginManagerCorrupted1', Zotero.appName) + "\n\n"
-				+ Zotero.getString('sync.error.loginManagerCorrupted2', Zotero.appName);
-			var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-				.getService(Components.interfaces.nsIPromptService);
-			ps.alert(null, Zotero.getString('general.error'), msg);
+			if (this._lastLoginManagerErrorTime > Date.now() - 60000) {
+				let msg = Zotero.getString('sync.error.loginManagerCorrupted1', Zotero.appName) + "\n\n"
+					+ Zotero.getString('sync.error.loginManagerCorrupted2', Zotero.appName);
+				Zotero.alert(null, Zotero.getString('general.error'), msg);
+				this._lastLoginManagerErrorTime = Date.now();
+			}
 			return false;
 		}
 		
