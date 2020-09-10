@@ -1223,13 +1223,13 @@ describe("Zotero.Item", function () {
 				annotation.parentID = attachment.id;
 				annotation.annotationType = 'highlight';
 				annotation.annotationText = "This is highlighted text.";
-				annotation.annotationSortIndex = '00015|002431|00000.000';
-				annotation.annotationPosition = {
+				annotation.annotationSortIndex = '00015|002431|00000';
+				annotation.annotationPosition = JSON.stringify({
 					pageIndex: 123,
 					rects: [
 						[314.4, 412.8, 556.2, 609.6]
 					]
-				};
+				});
 				await annotation.saveTx();
 			});
 			
@@ -1238,13 +1238,13 @@ describe("Zotero.Item", function () {
 				annotation.parentID = attachment.id;
 				annotation.annotationType = 'note';
 				annotation.annotationComment = "This is a comment.";
-				annotation.annotationSortIndex = '00015|002431|00000.000';
-				annotation.annotationPosition = {
+				annotation.annotationSortIndex = '00015|002431|00000';
+				annotation.annotationPosition = JSON.stringify({
 					pageIndex: 123,
 					rects: [
 						[314.4, 412.8, 556.2, 609.6]
 					]
-				};
+				});
 				await annotation.saveTx();
 			});
 			
@@ -1260,15 +1260,15 @@ describe("Zotero.Item", function () {
 				var annotation = new Zotero.Item('annotation');
 				annotation.parentID = attachment.id;
 				annotation.annotationType = 'image';
-				annotation.annotationSortIndex = '00015|002431|00000.000';
-				annotation.annotationPosition = {
+				annotation.annotationSortIndex = '00015|002431|00000';
+				annotation.annotationPosition = JSON.stringify({
 					pageIndex: 123,
 					rects: [
 						[314.4, 412.8, 556.2, 609.6]
 					],
 					width: 1,
 					height: 1
-				};
+				});
 				await annotation.saveTx();
 				
 				await Zotero.Attachments.importEmbeddedImage({
@@ -1781,8 +1781,8 @@ describe("Zotero.Item", function () {
 					item.annotationComment = "This is a comment with <i>rich-text</i>\nAnd a new line";
 					item.annotationColor = "#ffec00";
 					item.annotationPageLabel = "15";
-					item.annotationSortIndex = "00015|002431|00000.000";
-					item.annotationPosition = {
+					item.annotationSortIndex = "00015|002431|00000";
+					item.annotationPosition = JSON.stringify({
 						"pageIndex": 1,
 						"rects": [
 							[231.284, 402.126, 293.107, 410.142],
@@ -1791,16 +1791,14 @@ describe("Zotero.Item", function () {
 							[54.222, 372.238, 293.107, 380.254],
 							[54.222, 362.276, 273.955, 370.292]
 						]
-					};
+					});
 					var json = item.toJSON();
-					
-					Zotero.debug(json);
 					
 					for (let prop of ['Type', 'Text', 'Comment', 'Color', 'PageLabel', 'SortIndex']) {
 						let name = 'annotation' + prop;
 						assert.propertyVal(json, name, item[name]);
 					}
-					assert.deepEqual(JSON.parse(json.annotationPosition), item.annotationPosition);
+					assert.deepEqual(json.annotationPosition, item.annotationPosition);
 					assert.notProperty(json, 'collections');
 					assert.notProperty(json, 'relations');
 				});

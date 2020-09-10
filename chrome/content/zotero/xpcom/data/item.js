@@ -1801,10 +1801,6 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		let pageLabel = this._getLatestField('annotationPageLabel');
 		let sortIndex = this._getLatestField('annotationSortIndex');
 		let position = this._getLatestField('annotationPosition');
-		// This gets stringified, so make sure it's not null
-		if (!position) {
-			throw new Error("Annotation position not set");
-		}
 		
 		let sql = "REPLACE INTO itemAnnotations "
 			+ "(itemID, parentItemID, type, text, comment, color, pageLabel, sortIndex, position) "
@@ -1820,7 +1816,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 				color || null,
 				pageLabel || null,
 				sortIndex,
-				JSON.stringify(position)
+				position
 			]
 		);
 		
@@ -3565,6 +3561,11 @@ for (let name of ['position']) {
 		},
 		set: function (value) {
 			this._requireData('annotationDeferred');
+			
+			if (typeof value != 'string') {
+				throw new Error(`${field} must be a string`);
+			}
+			
 			if (this._getLatestField(field) === value) {
 				return;
 			}
@@ -4981,7 +4982,7 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 			obj.annotationColor = this.annotationColor || '';
 			obj.annotationPageLabel = this.annotationPageLabel || '';
 			obj.annotationSortIndex = this.annotationSortIndex || '';
-			obj.annotationPosition = JSON.stringify(this.annotationPosition) || '';
+			obj.annotationPosition = this.annotationPosition || '';
 		}
 	}
 	

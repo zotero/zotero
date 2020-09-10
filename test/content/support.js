@@ -948,13 +948,13 @@ async function createAnnotation(type, parentItem, options = {}) {
 	annotation.annotationComment = Zotero.Utilities.randomString();
 	var page = Zotero.Utilities.rand(1, 100).toString().padStart(5, '0');
 	var pos = Zotero.Utilities.rand(1, 10000).toString().padStart(6, '0');
-	annotation.annotationSortIndex = `${page}|${pos}|00000.000`;
-	annotation.annotationPosition = {
+	annotation.annotationSortIndex = `${page}|${pos}|00000`;
+	annotation.annotationPosition = JSON.stringify({
 		pageIndex: 123,
 		rects: [
 			[314.4, 412.8, 556.2, 609.6]
 		]
-	};
+	});
 	if (options.tags) {
 		annotation.setTags(options.tags);
 	}

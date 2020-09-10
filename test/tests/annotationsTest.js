@@ -29,6 +29,7 @@ describe("Zotero.Annotations", function() {
 		],
 		"dateModified": "2019-05-14 06:50:40"
 	};
+	var exampleHighlightAlt = jsonPositionToString(exampleHighlight);
 	
 	var exampleNote = {
 		"key": "5TKU34XX",
@@ -46,6 +47,7 @@ describe("Zotero.Annotations", function() {
 		},
 		"dateModified": "2019-05-14 06:50:54"
 	};
+	var exampleNoteAlt = jsonPositionToString(exampleNote);
 	
 	var exampleImage = {
 		"key": "QD32MQJF",
@@ -66,6 +68,7 @@ describe("Zotero.Annotations", function() {
 		},
 		"dateModified": "2019-05-14 06:51:22"
 	};
+	var exampleImageAlt = jsonPositionToString(exampleImage);
 	
 	var exampleGroupHighlight = {
 		"key": "PE57YAYH",
@@ -89,6 +92,15 @@ describe("Zotero.Annotations", function() {
 		},
 		"dateModified": "2019-05-14 06:50:40"
 	};
+	var exampleGroupHighlightAlt = jsonPositionToString(exampleGroupHighlight);
+	
+	// Item.position is a string, so when using the annotation JSON as input or when comparing we
+	// have to use a version where 'position' has been stringified
+	function jsonPositionToString(json) {
+		var o = Object.assign({}, json);
+		o.position = JSON.stringify(o.position);
+		return o;
+	}
 	
 	var item;
 	var attachment;
@@ -118,7 +130,7 @@ describe("Zotero.Annotations", function() {
 			annotation.annotationType = 'highlight';
 			for (let prop of ['text', 'comment', 'color', 'pageLabel', 'sortIndex', 'position']) {
 				let itemProp = 'annotation' + prop[0].toUpperCase() + prop.substr(1);
-				annotation[itemProp] = exampleHighlight[prop];
+				annotation[itemProp] = exampleHighlightAlt[prop];
 			}
 			annotation.addTag("math");
 			annotation.addTag("chemistry");
@@ -131,7 +143,7 @@ describe("Zotero.Annotations", function() {
 				if (prop == 'dateModified') {
 					continue;
 				}
-				assert.deepEqual(json[prop], exampleHighlight[prop], `'${prop}' doesn't match`);
+				assert.deepEqual(json[prop], exampleHighlightAlt[prop], `'${prop}' doesn't match`);
 			}
 			
 			await annotation.eraseTx();
@@ -146,7 +158,7 @@ describe("Zotero.Annotations", function() {
 			annotation.annotationType = 'note';
 			for (let prop of ['comment', 'color', 'pageLabel', 'sortIndex', 'position']) {
 				let itemProp = 'annotation' + prop[0].toUpperCase() + prop.substr(1);
-				annotation[itemProp] = exampleNote[prop];
+				annotation[itemProp] = exampleNoteAlt[prop];
 			}
 			await annotation.saveTx();
 			var json = Zotero.Annotations.toJSON(annotation);
@@ -156,7 +168,7 @@ describe("Zotero.Annotations", function() {
 				if (prop == 'dateModified') {
 					continue;
 				}
-				assert.deepEqual(json[prop], exampleNote[prop], `'${prop}' doesn't match`);
+				assert.deepEqual(json[prop], exampleNoteAlt[prop], `'${prop}' doesn't match`);
 			}
 			
 			await annotation.eraseTx();
@@ -171,7 +183,7 @@ describe("Zotero.Annotations", function() {
 			annotation.annotationType = 'image';
 			for (let prop of ['comment', 'color', 'pageLabel', 'sortIndex', 'position']) {
 				let itemProp = 'annotation' + prop[0].toUpperCase() + prop.substr(1);
-				annotation[itemProp] = exampleImage[prop];
+				annotation[itemProp] = exampleImageAlt[prop];
 			}
 			await annotation.saveTx();
 			
@@ -195,7 +207,7 @@ describe("Zotero.Annotations", function() {
 						|| prop == 'dateModified') {
 					continue;
 				}
-				assert.deepEqual(json[prop], exampleImage[prop], `'${prop}' doesn't match`);
+				assert.deepEqual(json[prop], exampleImageAlt[prop], `'${prop}' doesn't match`);
 			}
 			assert.equal(json.imageURL, `zotero://attachment/library/items/${imageAttachment.key}`);
 			
@@ -214,7 +226,7 @@ describe("Zotero.Annotations", function() {
 			annotation.annotationType = 'highlight';
 			for (let prop of ['text', 'comment', 'color', 'pageLabel', 'sortIndex', 'position']) {
 				let itemProp = 'annotation' + prop[0].toUpperCase() + prop.substr(1);
-				annotation[itemProp] = exampleGroupHighlight[prop];
+				annotation[itemProp] = exampleGroupHighlightAlt[prop];
 			}
 			await annotation.saveTx();
 			var json = Zotero.Annotations.toJSON(annotation);
@@ -234,7 +246,7 @@ describe("Zotero.Annotations", function() {
 			assert.equal(annotation.key, exampleHighlight.key);
 			for (let prop of ['text', 'comment', 'color', 'pageLabel', 'sortIndex', 'position']) {
 				let itemProp = 'annotation' + prop[0].toUpperCase() + prop.substr(1);
-				assert.deepEqual(annotation[itemProp], exampleHighlight[prop], `'${prop}' doesn't match`);
+				assert.deepEqual(annotation[itemProp], exampleHighlightAlt[prop], `'${prop}' doesn't match`);
 			}
 			var itemTags = annotation.getTags().map(t => t.tag);
 			var jsonTags = exampleHighlight.tags.map(t => t.name);
@@ -247,7 +259,7 @@ describe("Zotero.Annotations", function() {
 			assert.equal(annotation.key, exampleNote.key);
 			for (let prop of ['comment', 'color', 'pageLabel', 'sortIndex', 'position']) {
 				let itemProp = 'annotation' + prop[0].toUpperCase() + prop.substr(1);
-				assert.deepEqual(annotation[itemProp], exampleNote[prop], `'${prop}' doesn't match`);
+				assert.deepEqual(annotation[itemProp], exampleNoteAlt[prop], `'${prop}' doesn't match`);
 			}
 		});
 		
@@ -259,7 +271,7 @@ describe("Zotero.Annotations", function() {
 			assert.equal(annotation.key, exampleImage.key);
 			for (let prop of ['comment', 'color', 'pageLabel', 'sortIndex', 'position']) {
 				let itemProp = 'annotation' + prop[0].toUpperCase() + prop.substr(1);
-				assert.deepEqual(annotation[itemProp], exampleImage[prop], `'${prop}' doesn't match`);
+				assert.deepEqual(annotation[itemProp], exampleImageAlt[prop], `'${prop}' doesn't match`);
 			}
 		});
 	});

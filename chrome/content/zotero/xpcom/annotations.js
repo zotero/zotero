@@ -118,7 +118,7 @@ Zotero.Annotations = new function () {
 		item.annotationColor = json.color;
 		item.annotationPageLabel = json.pageLabel;
 		item.annotationSortIndex = json.sortIndex;
-		item.annotationPosition = Object.assign({}, json.position);
+		item.annotationPosition = JSON.stringify(Object.assign({}, json.position));
 		// TODO: Can colors be set?
 		item.setTags((json.tags || []).map(t => ({ tag: t.name })));
 		
