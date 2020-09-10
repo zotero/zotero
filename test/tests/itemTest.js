@@ -2404,7 +2404,7 @@ describe("Zotero.Item", function () {
 				annotationType: 'highlight',
 				annotationText: "This is highlighted text.",
 				annotationComment: "This is a comment with <i>rich-text</i>\nAnd a new line",
-				annotationSortIndex: '00015|002431|00000.000',
+				annotationSortIndex: '00015|002431|00000',
 				annotationPosition: JSON.stringify({
 					pageIndex: 123,
 					rects: [
