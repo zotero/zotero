@@ -73,6 +73,17 @@ describe("Zotero.QuickCopy", function() {
 			assert.isTrue(worked);
 			assert.isTrue(content.trim().startsWith('@'));
 		});
+		
+		it("should copy note content", async function () {
+			var item = await createDataObject('item', { itemType: 'note', note: '<p>Foo</p>' });
+			
+			var format = 'bibliography=http://www.zotero.org/styles/apa';
+			Zotero.Prefs.set(prefName, format);
+			
+			var content = Zotero.QuickCopy.getContentFromItems([item], format);
+			assert.propertyVal(content, 'text', 'Foo');
+			assert.propertyVal(content, 'html', '<div class=\"zotero-notes\"><div class=\"zotero-note\"><p>Foo</p></div></div>');
+		});
 	});
 	
 	it("should generate bibliography in default locale if Quick Copy locale not set", async function () {
