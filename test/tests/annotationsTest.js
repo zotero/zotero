@@ -143,7 +143,7 @@ describe("Zotero.Annotations", function() {
 				if (prop == 'dateModified') {
 					continue;
 				}
-				assert.deepEqual(json[prop], exampleHighlightAlt[prop], `'${prop}' doesn't match`);
+				assert.deepEqual(json[prop], exampleHighlight[prop], `'${prop}' doesn't match`);
 			}
 			
 			await annotation.eraseTx();
@@ -168,7 +168,7 @@ describe("Zotero.Annotations", function() {
 				if (prop == 'dateModified') {
 					continue;
 				}
-				assert.deepEqual(json[prop], exampleNoteAlt[prop], `'${prop}' doesn't match`);
+				assert.deepEqual(json[prop], exampleNote[prop], `'${prop}' doesn't match`);
 			}
 			
 			await annotation.eraseTx();
@@ -207,7 +207,7 @@ describe("Zotero.Annotations", function() {
 						|| prop == 'dateModified') {
 					continue;
 				}
-				assert.deepEqual(json[prop], exampleImageAlt[prop], `'${prop}' doesn't match`);
+				assert.deepEqual(json[prop], exampleImage[prop], `'${prop}' doesn't match`);
 			}
 			assert.equal(json.imageURL, `zotero://attachment/library/items/${imageAttachment.key}`);
 			

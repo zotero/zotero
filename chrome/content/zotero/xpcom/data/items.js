@@ -566,13 +566,7 @@ Zotero.Items = function() {
 						throw new Error("Item " + itemID + " not found");
 					}
 					
-					try {
-						item._annotationPosition = JSON.parse(row.getResultByIndex(1));
-					}
-					catch (e) {
-						Zotero.logError(`Error parsing 'position' for item ${item.libraryKey}`);
-						item._annotationPosition = {};
-					}
+					item._annotationPosition = row.getResultByIndex(1);
 					item._annotationPageLabel = row.getResultByIndex(2);
 					
 					item._loaded.annotationDeferred = true;

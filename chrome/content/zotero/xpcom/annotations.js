@@ -50,7 +50,8 @@ Zotero.Annotations = new function () {
 		o.pageLabel = item.annotationPageLabel;
 		o.color = item.annotationColor;
 		o.sortIndex = item.annotationSortIndex;
-		o.position = item.annotationPosition;
+		// annotationPosition is a JSON string, but we want to pass the raw object to the reader
+		o.position = JSON.parse(item.annotationPosition);
 		
 		// Add tags and tag colors
 		var tagColors = Zotero.Tags.getColors(item.libraryID);
