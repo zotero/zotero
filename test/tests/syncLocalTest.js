@@ -2560,29 +2560,6 @@ describe("Zotero.Sync.Data.Local", function() {
 			assert.lengthOf(result.conflicts, 1);
 		});
 		
-		it("should ignore noteSchemaVersion=0 if no note", function () {
-			var json1 = {
-				key: "AAAAAAAA",
-				version: 1234,
-				title: "Link",
-				dateModified: "2017-04-02 12:34:56"
-			};
-			var json2 = {
-				key: "AAAAAAAA",
-				version: 1235,
-				title: "Link",
-				note: "",
-				noteSchemaVersion: 0,
-				dateModified: "2017-04-02 12:34:56"
-			};
-			var ignoreFields = ['dateAdded', 'dateModified'];
-			var result = Zotero.Sync.Data.Local._reconcileChangesWithoutCache(
-				'item', json1, json2, ignoreFields
-			);
-			assert.lengthOf(result.changes, 0);
-			assert.lengthOf(result.conflicts, 0);
-		});
-		
 		it("should automatically use remote version for conflicting fields when both sides are in trash", function () {
 			var json1 = {
 				key: "AAAAAAAA",

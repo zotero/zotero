@@ -32,11 +32,6 @@ Zotero.Notes = new function() {
 	this.__defineGetter__("notePrefix", function () { return '<div class="zotero-note znv1">'; });
 	this.__defineGetter__("noteSuffix", function () { return '</div>'; });
 	
-	Zotero.defineProperty(this, 'schemaVersion', {
-		value: 1,
-		writable: false
-	});
-	
 	/**
 	* Return first line (or first MAX_LENGTH characters) of note content
 	**/

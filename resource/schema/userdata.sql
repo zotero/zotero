@@ -88,7 +88,6 @@ CREATE TABLE itemNotes (
     parentItemID INT,
     note TEXT,
     title TEXT,
-    schemaVersion INT NOT NULL DEFAULT 0,
     FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,
     FOREIGN KEY (parentItemID) REFERENCES items(itemID) ON DELETE CASCADE
 );

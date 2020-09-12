@@ -763,7 +763,7 @@ Zotero.DataObject.prototype._getLatestField = function (field) {
  */
 Zotero.DataObject.prototype._markFieldChange = function (field, value) {
 	// New method (changedData)
-	if (['deleted', 'tags', 'note'].includes(field) || field.startsWith('annotation')) {
+	if (['deleted', 'tags'].includes(field) || field.startsWith('annotation')) {
 		if (Array.isArray(value)) {
 			this._changedData[field] = [...value];
 		}

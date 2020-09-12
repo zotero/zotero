@@ -56,18 +56,13 @@ Zotero.Item = function(itemTypeOrID) {
 	
 	// loadItemData
 	this._itemData = null;
+	this._noteTitle = null;
+	this._noteText = null;
 	this._displayTitle = null;
-	
-	this._note = {
-		data: null,
-		title: null,
-		schemaVersion: Zotero.Notes.schemaVersion
-	};
 	
 	// loadChildItems
 	this._attachments = null;
 	this._notes = null;
-	this._annotations = null;
 	
 	// loadAnnotation
 	this._annotationType = null;
@@ -760,7 +755,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 	}
 	
 	if (loadIn && this.isNote() && field == Zotero.ItemFields.getID('title')) {
-		this._note.title = value ? value : "";
+		this._noteTitle = value ? value : "";
 		return true;
 	}
 	
@@ -1678,44 +1673,34 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	}
 	
 	// Note
-	if ((isNew && this.isNote()) || this._hasFieldChanged('note')) {
-		let note = this._getLatestField('note');
-		
-		// Since we override change detection for new notes and always save data, we have to mark
-		// the data type as loaded so it gets reloaded by Zotero.DataObject.reload()
-		if (isNew) {
-			this._loaded.note = true;
-		}
-		else {
-			if (note.data === null || note.title === null) {
-				throw new Error("Note marked as changed with cached values not set");
+	if ((isNew && this.isNote()) || this._changed.note) {
+		if (!isNew) {
+			if (this._noteText === null || this._noteTitle === null) {
+				throw new Error("Cached note values not set with "
+					+ "this._changed.note set to true");
 			}
 		}
 		
 		let parent = this.isNote() ? this.parentID : null;
-		let noteData = note.data || '';
+		let noteText = this._noteText ? this._noteText : '';
 		// Add <div> wrapper if not present
-		if (!noteData.match(/^<div class="zotero-note znv[0-9]+">[\s\S]*<\/div>$/)) {
-			noteData = Zotero.Notes.notePrefix + noteData + Zotero.Notes.noteSuffix;
+		if (!noteText.match(/^<div class="zotero-note znv[0-9]+">[\s\S]*<\/div>$/)) {
+			noteText = Zotero.Notes.notePrefix + noteText + Zotero.Notes.noteSuffix;
 		}
 		
 		let params = [
 			parent ? parent : null,
-			noteData,
-			note.title || '',
-			note.schemaVersion
+			noteText,
+			this._noteTitle ? this._noteTitle : ''
 		];
-		this._clearChanged('note');
-		this._markForReload('note');
-		
 		let sql = "SELECT COUNT(*) FROM itemNotes WHERE itemID=?";
 		if (yield Zotero.DB.valueQueryAsync(sql, itemID)) {
-			sql = "UPDATE itemNotes SET parentItemID=?, note=?, title=?, schemaVersion=? WHERE itemID=?";
+			sql = "UPDATE itemNotes SET parentItemID=?, note=?, title=? WHERE itemID=?";
 			params.push(itemID);
 		}
 		else {
 			sql = "INSERT INTO itemNotes "
-					+ "(itemID, parentItemID, note, title, schemaVersion) VALUES (?,?,?,?,?)";
+					+ "(itemID, parentItemID, note, title) VALUES (?,?,?,?)";
 			params.unshift(itemID);
 		}
 		yield Zotero.DB.queryAsync(sql, params);
@@ -2028,16 +2013,10 @@ Zotero.Item.prototype.numNotes = function(includeTrashed, includeEmbedded) {
  */
 Zotero.Item.prototype.getNoteTitle = function() {
 	if (!this.isNote() && !this.isAttachment()) {
-		throw new Error("getNoteTitle() can only be called on notes and attachments");
+		throw ("getNoteTitle() can only be called on notes and attachments");
 	}
-	
-	var note = this._getLatestField('note');
-	if (note.title !== null) {
-		return note.title;
-	}
-	if (note.data !== null) {
-		note.title = Zotero.Notes.noteToTitle(note.data);
-		return note.title;
+	if (this._noteTitle !== null) {
+		return this._noteTitle;
 	}
 	this._requireData('itemData');
 	return "";
@@ -2068,89 +2047,66 @@ Zotero.Item.prototype.hasNote = Zotero.Promise.coroutine(function* () {
 
 Zotero.defineProperty(Zotero.Item.prototype, 'note', {
 	get: function () {
-		if (!this.isNote() && !this.isAttachment()) {
-			throw new Error(".note can only be accessed on notes and attachments "
-				+ `(${this.libraryID}/${this.key} is a ${Zotero.ItemTypes.getName(this.itemTypeID)})`);
-		}
-		
-		// Store access time for later garbage collection
-		this._noteAccessTime = new Date();
-		
-		var note = this._getLatestField('note');
-		
-		if (note.data !== null) {
-			return note.data;
-		}
-		
-		this._requireData('note');
-		return "";
+		return this.getNote();
 	}
 });
 
 
 /**
- * Get the contents of an item note
+ * Get the text of an item note
  **/
 Zotero.Item.prototype.getNote = function() {
-	Zotero.warn("Zotero.Item::getNote() is deprecated -- use .note");
-	return this.note;
+	if (!this.isNote() && !this.isAttachment()) {
+		throw new Error("getNote() can only be called on notes and attachments "
+			+ `(${this.libraryID}/${this.key} is a ${Zotero.ItemTypes.getName(this.itemTypeID)})`);
+	}
+	
+	// Store access time for later garbage collection
+	this._noteAccessTime = new Date();
+	
+	if (this._noteText !== null) {
+		return this._noteText;
+	}
+	
+	this._requireData('note');
+	return "";
 }
 
 
-Zotero.defineProperty(Zotero.Item.prototype, 'noteSchemaVersion', {
-	get: function() {
-		if (!this.isNote() && !this.isAttachment()) {
-			return undefined;
-		}
-		return this._getLatestField('note').schemaVersion;
-	}
-});
-
-
 /**
- * Set an item note
- *
- * Note: This can only be called on notes and attachments
- *
- * @param {String} data - Note contents
- * @param {Number} [schemaVersion = Zotero.Notes.schemaVersion]
- */
-Zotero.Item.prototype.setNote = function (data, schemaVersion) {
+* Set an item note
+*
+* Note: This can only be called on notes and attachments
+**/
+Zotero.Item.prototype.setNote = function(text) {
 	if (!this.isNote() && !this.isAttachment()) {
 		throw ("updateNote() can only be called on notes and attachments");
 	}
 	
-	if (typeof data != 'string') {
-		throw new Error("data must be a string (was " + typeof data + ")");
+	if (typeof text != 'string') {
+		throw ("text must be a string in Zotero.Item.setNote() (was " + typeof text + ")");
 	}
 	
-	if (schemaVersion === undefined) {
-		schemaVersion = Zotero.Notes.schemaVersion;
-	}
-	if (typeof schemaVersion != 'number' || schemaVersion != parseInt(schemaVersion)) {
-		throw new Error(`schemaVersion must be an integer (was ${JSON.stringify(schemaVersion)})`);
-	}
-	
-	data = data
+	text = text
 		// Strip control characters
 		.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
 		.trim();
 	
-	var { data: oldData, schemaVersion: oldSchemaVersion } = this._getLatestField('note');
-	if (data === oldData && schemaVersion === oldSchemaVersion) {
+	var oldText = this.getNote();
+	if (text === oldText) {
 		Zotero.debug("Note hasn't changed", 4);
 		return false;
 	}
 	
-	this._hasNote = data !== '';
-	var title = Zotero.Notes.noteToTitle(data);
-	
-	// This isn't quite correct because the save could fail
+	this._hasNote = text !== '';
+	this._noteText = text;
+	this._noteTitle = Zotero.Notes.noteToTitle(text);
 	if (this.isNote()) {
-		this._displayTitle = title;
+		this._displayTitle = this._noteTitle;
 	}
 	
-	this._markFieldChange('note', { data, title, schemaVersion });
+	this._markFieldChange('note', oldText);
+	this._changed.note = true;
 	
 	return true;
 }
@@ -4316,7 +4272,7 @@ Zotero.Item.prototype.clone = function (libraryID, options = {}) {
 		newItem.setCreators(this.getCreators());
 	}
 	else {
-		newItem.setNote(this.note, this.noteSchemaVersion);
+		newItem.setNote(this.getNote());
 		if (sameLibrary) {
 			var parent = this.parentKey;
 			if (parent) {
@@ -4604,6 +4560,7 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 		case 'key':
 		case 'version':
 		case 'itemType':
+		case 'note':
 		// Use?
 		case 'md5':
 		case 'mtime':
@@ -4612,7 +4569,6 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 		// Handled below
 		//
 		case 'note':
-		case 'noteSchemaVersion':
 		case 'collections':
 		case 'parentItem':
 		case 'deleted':
@@ -4878,7 +4834,7 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 		
 		if (!this.isAnnotation()) {
 			let note = json.note;
-			this.setNote(note !== undefined ? note : "", json.noteSchemaVersion);
+			this.setNote(note !== undefined ? note : "");
 		}
 	}
 	
@@ -4965,10 +4921,9 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 		
 		// Notes and embedded attachment notes
 		if (this.isAttachment() || this.isNote()) {
-			let note = this.note;
+			let note = this.getNote();
 			if (note !== "" || mode == 'full' || (mode == 'new' && this.isNote())) {
 				obj.note = note;
-				obj.noteSchemaVersion = this.noteSchemaVersion || 0;
 			}
 		}
 		

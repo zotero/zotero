@@ -854,30 +854,6 @@ describe("Zotero.Item", function () {
 		});
 	})
 	
-	describe("#noteSchemaVersion", function () {
-		it("should be set to current schema version", async function () {
-			var note = await createDataObject('item', { itemType: 'note' });
-			assert.equal(note.noteSchemaVersion, Zotero.Notes.schemaVersion);
-		});
-		
-		it("should be set to an explicit value with setNote()", async function () {
-			var note = createUnsavedDataObject('item', { itemType: 'note' });
-			note.setNote('<div>Foo</div>', 2);
-			await note.saveTx();
-			assert.equal(note.noteSchemaVersion, 2);
-		});
-		
-		it("shouldn't be settable to null", async function () {
-			var note = createUnsavedDataObject('item', { itemType: 'note' });
-			assert.throws(() => note.setNote('<div>Foo</div>', null));
-		});
-		
-		it("shouldn't be settable to a numeric string", async function () {
-			var note = createUnsavedDataObject('item', { itemType: 'note' });
-			assert.throws(() => note.setNote('<div>Foo</div>', "2"));
-		});
-	});
-	
 	describe("#attachmentCharset", function () {
 		it("should get and set a value", function* () {
 			var charset = 'utf-8';
@@ -1583,13 +1559,6 @@ describe("Zotero.Item", function () {
 			var newItem = item.clone();
 			assert.isEmpty(Object.keys(newItem.toJSON().relations));
 		});
-		
-		it("should preserve noteSchemaVersion when set to a different version from the current version", async function () {
-			var oldVersion = Zotero.Notes.schemaVersion - 1;
-			var note = await createDataObject('item', { itemType: 'note', noteSchemaVersion: oldVersion });
-			var newNote = note.clone();
-			assert.equal(newNote.noteSchemaVersion, oldVersion);
-		});
 	})
 	
 	describe("#moveToLibrary()", function () {
@@ -1828,12 +1797,6 @@ describe("Zotero.Item", function () {
 				var item = createUnsavedDataObject('item', { libraryID: group.libraryID });
 				var json = item.toJSON({ mode: 'full' });
 				assert.notProperty(json, "inPublications");
-			});
-			
-			it("should include noteSchemaVersion", function () {
-				var note = createUnsavedDataObject('item', { itemType: 'note', noteSchemaVersion: 3 });
-				var json = note.toJSON();
-				assert.propertyVal(json, 'noteSchemaVersion', 3);
 			});
 		})
 		
@@ -2378,17 +2341,6 @@ describe("Zotero.Item", function () {
 				"publicationTitle":"Publication Title"
 			});
 			assert.equal(item.getField("bookTitle"), "Publication Title");
-		});
-		
-		it("should set note and noteSchemaField", function () {
-			var item = new Zotero.Item;
-			item.fromJSON({
-				itemType: "note",
-				note: "<p>Foo</p>",
-				noteSchemaVersion: 3
-			});
-			assert.equal(item.note, "<p>Foo</p>");
-			assert.equal(item.noteSchemaVersion, 3);
 		});
 		
 		it("should import annotation fields", async function () {

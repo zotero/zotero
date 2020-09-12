@@ -404,7 +404,7 @@ Zotero.Items = function() {
 	this._loadNotes = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
 		var notesToUpdate = [];
 		
-		var sql = "SELECT itemID, note, schemaVersion FROM items "
+		var sql = "SELECT itemID, note FROM items "
 			+ "JOIN itemNotes USING (itemID) "
 			+ "WHERE libraryID=?" + idSQL;
 		var params = [libraryID];
@@ -420,7 +420,6 @@ Zotero.Items = function() {
 						throw new Error("Item " + itemID + " not found");
 					}
 					let note = row.getResultByIndex(1);
-					let schemaVersion = row.getResultByIndex(2);
 					
 					// Convert non-HTML notes on-the-fly
 					if (note !== "") {
@@ -451,10 +450,7 @@ Zotero.Items = function() {
 						}
 					}
 					
-					item._note.data = note || '';
-					item._note.schemaVersion = schemaVersion;
-					// Lazily loaded
-					item._note.title = null;
+					item._noteText = note ? note : '';
 					item._loaded.note = true;
 					item._clearChanged('note');
 				}.bind(this)
@@ -487,8 +483,7 @@ Zotero.Items = function() {
 						throw new Error("Item " + itemID + " not loaded");
 					}
 					
-					item._note.data = '';
-					item._note.schemaVersion = 0;
+					item._noteText = '';
 					item._loaded.note = true;
 					item._clearChanged('note');
 				}.bind(this)
@@ -747,9 +742,7 @@ Zotero.Items = function() {
 		
 		// Mark all top-level items as having child items loaded
 		sql = "SELECT itemID FROM items I WHERE libraryID=?" + idSQL + " AND itemID NOT IN "
-			+ "(SELECT itemID FROM itemAttachments "
-			+ "UNION SELECT itemID FROM itemNotes "
-			+ "UNION SELECT itemID FROM itemAnnotations)";
+			+ "(SELECT itemID FROM itemAttachments UNION SELECT itemID FROM itemNotes)";
 		yield Zotero.DB.queryAsync(
 			sql,
 			params,

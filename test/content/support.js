@@ -468,10 +468,7 @@ function createUnsavedDataObject(objectType, params = {}) {
 			obj.setTags(params.tags);
 		}
 		if (params.note !== undefined) {
-			obj.setNote(params.note, params.noteSchemaVersion);
-		}
-		else if (itemType == 'note') {
-			obj.setNote(`<p>${Zotero.Utilities.randomString()}</p>`, params.noteSchemaVersion);
+			obj.setNote(params.note);
 		}
 		break;
 	
