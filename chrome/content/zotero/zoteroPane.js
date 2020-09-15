@@ -144,6 +144,7 @@ var ZoteroPane = new function()
 		Zotero.hiDPI = window.devicePixelRatio > 1;
 		Zotero.hiDPISuffix = Zotero.hiDPI ? "@2x" : "";
 		
+		Zotero_Tabs.init();
 		ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
 		
 		// Add a default progress window
@@ -1165,6 +1166,10 @@ var ZoteroPane = new function()
 			if (this.collectionsView.selection.count != 1) {
 				return;
 			}
+			
+			// Rename tab
+			// TODO: What if PDF is in front?
+			Zotero_Tabs.rename(collectionTreeRow.getName());
 			
 			// Clear quick search and tag selector when switching views
 			document.getElementById('zotero-tb-search').value = "";

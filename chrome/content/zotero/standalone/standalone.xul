@@ -43,9 +43,13 @@
 
 <window id="main-window"
 				xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+				xmlns:html="http://www.w3.org/1999/xhtml"
 				windowtype="navigator:browser" 
 				title="&brandShortName;"
 				width="1000" height="600"
+				drawintitlebar="true"
+				tabsintitlebar="true"
+				chromemargin="0,-1,-1,-1"
 				persist="screenX screenY width height sizemode">
 	<script type="application/javascript" src="resource://zotero/require.js"/>
 	<script type="application/javascript" src="standalone.js"/>
@@ -111,7 +115,16 @@
 				accesskey="&selectAllCmd.accesskey;"
 				command="cmd_selectAll"/>
 	</menupopup>
-	
+	<vbox id="titlebar">
+		<hbox id="titlebar-buttonbox-container" skipintoolbarset="true">
+			<hbox id="titlebar-buttonbox">
+				<toolbarbutton class="titlebar-button titlebar-min" oncommand="window.minimize();"/>
+				<toolbarbutton class="titlebar-button titlebar-max" oncommand="onTitlebarMaxClick();"/>
+				<toolbarbutton class="titlebar-button titlebar-close" command="cmd_closeWindow"/>
+			</hbox>
+		</hbox>
+	</vbox>
+	<vbox id="tab-bar-container" style="-moz-window-dragging: drag"/>
 	<toolbox id="navigator-toolbox" class="toolbox-top" mode="icons" defaultmode="icons">
 		<!-- Menu -->
 		<toolbar type="menubar" id="toolbar-menubar" class="chromeclass-menubar" customizable="true"
