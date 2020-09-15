@@ -4778,8 +4778,12 @@ Zotero.Item.prototype.migrateExtraFields = function () {
  *
  * @return {Promise<Zotero.Item>}
  */
-Zotero.Item.prototype.getLinkedItem = function (libraryID, bidirectional) {
-	return this._getLinkedObject(libraryID, bidirectional);
+Zotero.Item.prototype.getLinkedItem = async function (libraryID, bidirectional) {
+	var item = await this._getLinkedObject(libraryID, bidirectional);
+	if (item) {
+		await item.loadAllData();
+	}
+	return item;
 };
 
 
