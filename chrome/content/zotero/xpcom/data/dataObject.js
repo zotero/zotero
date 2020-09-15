@@ -495,7 +495,7 @@ Zotero.DataObject.prototype._getLinkedObject = Zotero.Promise.coroutine(function
 	// Then try relations with this as an object
 	if (bidirectional) {
 		var thisURI = Zotero.URI['get' + this._ObjectType + 'URI'](this);
-		var objects = Zotero.Relations.getByPredicateAndObject(
+		let objects = yield Zotero.Relations.getByPredicateAndObject(
 			this._objectType, predicate, thisURI
 		);
 		for (let i = 0; i < objects.length; i++) {

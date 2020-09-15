@@ -1517,7 +1517,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			// If undeleting, remove any merge-tracking relations
 			let predicate = Zotero.Relations.replacedItemPredicate;
 			let thisURI = Zotero.URI.getItemURI(this);
-			let mergeItems = Zotero.Relations.getByPredicateAndObject(
+			let mergeItems = yield Zotero.Relations.getByPredicateAndObject(
 				'item', predicate, thisURI
 			);
 			for (let mergeItem of mergeItems) {
@@ -4172,12 +4172,12 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 	}
 	
 	// Remove related-item relations pointing to this item
-	var relatedItems = Zotero.Relations.getByPredicateAndObject(
+	var relatedItems = yield Zotero.Relations.getByPredicateAndObject(
 		'item', Zotero.Relations.relatedItemPredicate, Zotero.URI.getItemURI(this)
 	);
 	for (let relatedItem of relatedItems) {
 		relatedItem.removeRelatedItem(this);
-		relatedItem.save({
+		yield relatedItem.save({
 			skipDateModifiedUpdate: true,
 			skipEditCheck: env.options.skipEditCheck
 		});

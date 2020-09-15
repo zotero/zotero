@@ -2307,7 +2307,7 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = Zotero.Promise.corout
 		} catch(e) {}
 		
 		// Try merged item mapping
-		var replacer = Zotero.Relations.getByPredicateAndObject(
+		var replacer = yield Zotero.Relations.getByPredicateAndObject(
 			'item', Zotero.Relations.replacedItemPredicate, uri
 		);
 		if (replacer.length && !replacer[0].deleted) {

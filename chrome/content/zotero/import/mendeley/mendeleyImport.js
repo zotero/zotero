@@ -271,7 +271,7 @@ Zotero_Import_Mendeley.prototype._saveCollections = async function (libraryID, j
 		let collectionJSON = json[i];
 		
 		// Check if the collection was previously imported
-		let collection = this._findExistingCollection(
+		let collection = await this._findExistingCollection(
 			libraryID,
 			collectionJSON,
 			collectionJSON.parentCollection ? keyMap.get(collectionJSON.parentCollection) : null
@@ -305,7 +305,7 @@ Zotero_Import_Mendeley.prototype._saveCollections = async function (libraryID, j
 };
 
 
-Zotero_Import_Mendeley.prototype._findExistingCollection = function (libraryID, collectionJSON, parentCollection) {
+Zotero_Import_Mendeley.prototype._findExistingCollection = async function (libraryID, collectionJSON, parentCollection) {
 	// Don't use existing collections if the import is creating a top-level collection
 	if (this.createNewCollection || !collectionJSON.relations) {
 		return false;
@@ -314,7 +314,7 @@ Zotero_Import_Mendeley.prototype._findExistingCollection = function (libraryID, 
 	var predicate = 'mendeleyDB:remoteFolderUUID';
 	var uuid = collectionJSON.relations[predicate];
 	
-	var collections = Zotero.Relations.getByPredicateAndObject('collection', predicate, uuid)
+	var collections = await Zotero.Relations.getByPredicateAndObject('collection', predicate, uuid)
 		.filter((c) => {
 			if (c.libraryID != libraryID) {
 				return false;
@@ -829,7 +829,7 @@ Zotero_Import_Mendeley.prototype._saveItems = async function (libraryID, json) {
 		let itemJSON = json[i];
 		
 		// Check if the item has been previously imported
-		let item = this._findExistingItem(libraryID, itemJSON, lastExistingParentItem);
+		let item = await this._findExistingItem(libraryID, itemJSON, lastExistingParentItem);
 		if (item) {
 			if (item.isRegularItem()) {
 				lastExistingParentItem = item;
@@ -872,7 +872,7 @@ Zotero_Import_Mendeley.prototype._saveItems = async function (libraryID, json) {
 };
 
 
-Zotero_Import_Mendeley.prototype._findExistingItem = function (libraryID, itemJSON, existingParentItem) {
+Zotero_Import_Mendeley.prototype._findExistingItem = async function (libraryID, itemJSON, existingParentItem) {
 	var predicate;
 	
 	//
@@ -936,7 +936,7 @@ Zotero_Import_Mendeley.prototype._findExistingItem = function (libraryID, itemJS
 	var existingItem;
 	predicate = 'mendeleyDB:documentUUID';
 	if (itemJSON.relations[predicate]) {
-		existingItem = this._getItemByRelation(
+		existingItem = await this._getItemByRelation(
 			libraryID,
 			predicate,
 			itemJSON.relations[predicate]
@@ -945,7 +945,7 @@ Zotero_Import_Mendeley.prototype._findExistingItem = function (libraryID, itemJS
 	if (!existingItem) {
 		predicate = 'mendeleyDB:remoteDocumentUUID';
 		if (itemJSON.relations[predicate]) {
-			existingItem = this._getItemByRelation(
+			existingItem = await this._getItemByRelation(
 				libraryID,
 				predicate,
 				itemJSON.relations[predicate]
@@ -962,8 +962,8 @@ Zotero_Import_Mendeley.prototype._findExistingItem = function (libraryID, itemJS
 }
 
 
-Zotero_Import_Mendeley.prototype._getItemByRelation = function (libraryID, predicate, object) {
-	var items = Zotero.Relations.getByPredicateAndObject('item', predicate, object)
+Zotero_Import_Mendeley.prototype._getItemByRelation = async function (libraryID, predicate, object) {
+	var items = await Zotero.Relations.getByPredicateAndObject('item', predicate, object)
 		.filter(item => item.libraryID == libraryID && !item.deleted);
 	if (!items.length) {
 		return false;
