@@ -63,7 +63,7 @@ const TabBar = forwardRef(function (props, ref) {
 		var newTabs = [...tabs];
 		newTabs.splice(index, 1);
 		setTabs(newTabs);
-		setSelectedIndex(selectedIndex - 1);
+		setSelectedIndex(Math.min(selectedIndex, newTabs.length - 1));
 		if (props.onTabClosed) {
 			props.onTabClosed(index);
 		}
