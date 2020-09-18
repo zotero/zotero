@@ -7,7 +7,7 @@
 }
 
 .tab {
-	-moz-appearance: toolbar;
+	-moz-appearance: none;
 	width: 200px;
 	height: 30px;
 	line-height: 30px;
@@ -16,12 +16,19 @@
 	align-content: center;
 	position: relative;
 	background: #f9f9f9;
-	border: 1px solid black;
-	margin-right: -1px;
+	border-top: 2px solid transparent;
+	border-left: 1px solid lightgray;
+	border-right: 1px solid lightgray;
 	border-bottom: 1px solid transparent;
+	margin-right: -1px;
 	color: #000;
 	
+	&.selected {
+		border-top: 2px solid #CC2936;
+	}
+	
 	.tab-name {
+		margin-top: -2px;
 		line-height: 30px;
 	}
 	
@@ -33,6 +40,8 @@
 		height: 16px;
 		text-align: center;
 		line-height: 16px;
+		font-size: 14px;
+		margin-top: -2px;
 		display: none;
 	}
 	
