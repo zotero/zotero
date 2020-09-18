@@ -44,6 +44,7 @@ var Zotero_Tabs = new function () {
 			type: 'library'
 		}
 	];
+	this._selectedIndex = 0;
 	
 	this.init = function () {
 		ReactDOM.render(
@@ -57,6 +58,21 @@ var Zotero_Tabs = new function () {
 		);
 		
 	};
+	
+	
+	this.selectLeft = function () {
+		this._tabBarRef.current.selectLeft();
+	};
+	
+	
+	this.selectRight = function () {
+		this._tabBarRef.current.selectRight();
+	};
+	
+	
+	this.select = function (index) {
+		this._tabBarRef.current.select(index);
+	},
 	
 	
 	/**
@@ -85,7 +101,7 @@ var Zotero_Tabs = new function () {
 	
 	this.rename = function (title, index) {
 		if (index === undefined) {
-			index = this.deck.selectedIndex;
+			index = this._selectedIndex;
 		}
 		this._tabs[index].title = title;
 		this._tabBarRef.current.renameTab(title, index);
@@ -93,6 +109,7 @@ var Zotero_Tabs = new function () {
 	
 	
 	this._onTabSelected = function (index) {
+		this._selectedIndex = index;
 		this.deck.selectedIndex = index;
 	};
 	

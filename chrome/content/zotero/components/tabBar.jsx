@@ -33,6 +33,33 @@ const TabBar = forwardRef(function (props, ref) {
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	
 	useImperativeHandle(ref, () => ({
+		get selectedIndex() {
+			return selectedIndex;
+		},
+		
+		selectLeft() {
+			var newIndex = selectedIndex - 1;
+			if (newIndex < 0) {
+				newIndex = tabs.length + newIndex;
+			}
+			setSelectedIndex(newIndex);
+		},
+		
+		selectRight() {
+			var newIndex = selectedIndex + 1;
+			if (newIndex >= tabs.length) {
+				newIndex = newIndex - tabs.length;
+			}
+			setSelectedIndex(newIndex);
+		},
+		
+		select(index) {
+			if (index > tabs.length - 1) {
+				throw new Error("Tab index out of bounds");
+			}
+			setSelectedIndex(index);
+		},
+		
 		addTab({ title, type }) {
 			var newTabs = [...tabs];
 			newTabs.push({ title, type });
@@ -49,7 +76,7 @@ const TabBar = forwardRef(function (props, ref) {
 				return newTab;
 			});
 			setTabs(newTabs);
-		}
+		},
 	}));
 	
 	useEffect(() => {

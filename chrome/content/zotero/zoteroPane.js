@@ -628,6 +628,18 @@ var ZoteroPane = new function()
 		
 		var command = Zotero.Keys.getCommand(event.key);
 		
+		let ctrlOnly = event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey;
+		if (ctrlOnly) {
+			if (event.key == 'PageUp') {
+				Zotero_Tabs.selectLeft();
+			}
+			else if (event.key == 'PageDown') {
+				Zotero_Tabs.selectRight();
+			}
+			event.preventDefault();
+			return;
+		}
+		
 		if (from == 'zotero-collections-tree') {
 			if ((event.keyCode == event.DOM_VK_BACK_SPACE && Zotero.isMac) ||
 					event.keyCode == event.DOM_VK_DELETE) {
