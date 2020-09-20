@@ -628,6 +628,8 @@ var ZoteroPane = new function()
 		
 		var command = Zotero.Keys.getCommand(event.key);
 		
+		// Tab navigation
+		// TODO: Select across tabs without selecting with Ctrl-Shift, as in Firefox?
 		let ctrlOnly = event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey;
 		if (ctrlOnly) {
 			if (event.key == 'PageUp') {
