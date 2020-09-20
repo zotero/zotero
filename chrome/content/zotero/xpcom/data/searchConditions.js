@@ -490,13 +490,23 @@ Zotero.SearchConditions = new function(){
 			},
 			
 			{
-				name: 'annotation',
+				name: 'annotationText',
 				operators: {
 					contains: true,
 					doesNotContain: true
 				},
-				table: 'annotations',
-				field: 'text'
+				table: 'itemAnnotations',
+				field: 'text',
+			},
+			
+			{
+				name: 'annotationComment',
+				operators: {
+					contains: true,
+					doesNotContain: true
+				},
+				table: 'itemAnnotations',
+				field: 'comment',
 			},
 			
 			{
