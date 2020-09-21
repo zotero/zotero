@@ -6,6 +6,7 @@ Zotero.PDF = {
 
 class ReaderWindow {
 	constructor() {
+		this.pdfStateFileName = '.zotero-pdf-state';
 		this.annotationItemIDs = [];
 		this._instanceID = Zotero.Utilities.randomString();
 		this._window = null;
@@ -109,8 +110,8 @@ class ReaderWindow {
 		item._loaded.childItems = true;
 		let ids = item.getAnnotations();
 		let annotations = (await Promise.all(ids.map(id => this._getAnnotation(id)))).filter(x => x);
-		this.annotationItemIds = ids;
-		state = state || PDFStates[this._itemID];
+		this.annotationItemIDs = ids;
+		state = state || await this._loadState();
 		this._state = state;
 		this._postMessage({
 			action: 'open',
@@ -167,6 +168,30 @@ class ReaderWindow {
 
 	close() {
 		this._window.close();
+	}
+
+	async _saveState(state) {
+		let item = Zotero.Items.get(this._itemID);
+		let file = Zotero.Attachments.getStorageDirectory(item);
+		file.append(this.pdfStateFileName);
+		await Zotero.File.putContentsAsync(file, JSON.stringify(state));
+	}
+	
+	async _loadState() {
+		// TODO: Validate data to make sure the older format doesn't crash the future pdf-reader
+		let item = Zotero.Items.get(this._itemID);
+		let file = Zotero.Attachments.getStorageDirectory(item);
+		file.append(this.pdfStateFileName);
+		file = file.path;
+		try {
+			if (await OS.File.exists(file)) {
+				let state = JSON.parse(await Zotero.File.getContentsAsync(file));
+				return state;
+			}
+		} catch (e) {
+			Zotero.logError(e);
+		}
+		return null;
 	}
 
 	_dataURLtoBlob(dataurl) {
@@ -354,7 +379,7 @@ class ReaderWindow {
 				}
 				case 'setState': {
 					let { state } = message;
-					PDFStates[this._itemID] = state;
+					this._saveState(state);
 					this._state = state;
 					return;
 				}
