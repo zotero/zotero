@@ -1,8 +1,12 @@
-let PDFStates = {};
+// Temporary stuff
+Zotero.PDF = {
+	dateChecked: {},
+	hasUnmachedAnnotations: {}
+};
 
 class ReaderWindow {
 	constructor() {
-		this.annotationItemIds = [];
+		this.annotationItemIDs = [];
 		this._instanceID = Zotero.Utilities.randomString();
 		this._window = null;
 		this._iframeWindow = null;
@@ -115,7 +119,8 @@ class ReaderWindow {
 			state,
 			location,
 			enablePrev: !!this._prevHistory.length,
-			enableNext: !!this._nextHistory.length
+			enableNext: !!this._nextHistory.length,
+			promptImport: !!Zotero.PDF.hasUnmachedAnnotations[this._itemID]
 		}, [buf]);
 		return true;
 	}
@@ -154,6 +159,10 @@ class ReaderWindow {
 
 	async navigate(location) {
 		this._postMessage({ action: 'navigate', location });
+	}
+
+	toggleImportPrompt(enable) {
+		this._postMessage({ action: 'toggleImportPrompt', enable });
 	}
 
 	close() {
@@ -337,7 +346,7 @@ class ReaderWindow {
 						let annotation = Zotero.Items.getByLibraryAndKey(libraryID, key);
 						// A small check, as we are receiving a list of item keys from a less secure code
 						if (annotation && annotation.isAnnotation() && annotation.parentID === this._itemID) {
-							this.annotationItemIds = this.annotationItemIds.filter(id => id !== annotation.id);
+							this.annotationItemIDs = this.annotationItemIDs.filter(id => id !== annotation.id);
 							await annotation.eraseTx();
 						}
 					}
@@ -380,8 +389,7 @@ class ReaderWindow {
 				}
 				case 'import': {
 					Zotero.debug('Importing PDF annotations');
-					let item = Zotero.Items.get(this._itemID);
-					Zotero.PDFImport.import(item);
+					Zotero.PDFWorker.import(this._itemID, true, true);
 					return;
 				}
 				case 'importDismiss': {
@@ -534,7 +542,7 @@ class Reader {
 		// Listen for the parent item, PDF attachment and its annotation items updates
 		for (let readerWindow of this._readerWindows) {
 			if (event === 'delete') {
-				let disappearedIds = readerWindow.annotationItemIds.filter(x => ids.includes(x));
+				let disappearedIds = readerWindow.annotationItemIDs.filter(x => ids.includes(x));
 				if (disappearedIds.length) {
 					let keys = disappearedIds.map(id => extraData[id].key);
 					readerWindow.unsetAnnotations(keys);
@@ -547,9 +555,9 @@ class Reader {
 				let item = Zotero.Items.get(readerWindow._itemID);
 				// TODO: Remove when fixed
 				item._loaded.childItems = true;
-				let annotationItemIds = item.getAnnotations();
-				readerWindow.annotationItemIds = annotationItemIds;
-				let affectedAnnotationIds = annotationItemIds.filter(annotationID => {
+				let annotationItemIDs = item.getAnnotations();
+				readerWindow.annotationItemIDs = annotationItemIDs;
+				let affectedAnnotationIds = annotationItemIDs.filter(annotationID => {
 					let annotation = Zotero.Items.get(annotationID);
 					let imageAttachmentID = null;
 					annotation._loaded.childItems = true;
@@ -586,6 +594,7 @@ class Reader {
 	}
 
 	async open(itemID, location) {
+		this.triggerAnnotationsImportCheck(itemID);
 		let reader = this._getReaderWindow(itemID);
 		if (reader) {
 			if (location) {
@@ -604,6 +613,15 @@ class Reader {
 			});
 		}
 		reader._window.focus();
+	}
+
+	async triggerAnnotationsImportCheck(itemID) {
+		let item = await Zotero.Items.getAsync(itemID);
+		let mtime = await item.attachmentModificationTime;
+		let dateModified = Zotero.Date.dateToISO(new Date(mtime));
+		if (!Zotero.PDF.dateChecked[itemID] || Zotero.PDF.dateChecked[itemID] < dateModified) {
+			await Zotero.PDFWorker.import(itemID, false);
+		}
 	}
 }
 

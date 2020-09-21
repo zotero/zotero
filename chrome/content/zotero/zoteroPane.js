@@ -2746,8 +2746,7 @@ var ZoteroPane = new function()
 			'createParent',
 			'renameAttachments',
 			'reindexItem',
-			'importAnnotations',
-			'exportAnnotations'
+			'importAnnotations'
 		];
 		
 		var m = {};
@@ -2795,8 +2794,7 @@ var ZoteroPane = new function()
 					canRecognize = true,
 					canUnrecognize = true,
 					canRename = true,
-					canImportAnnotations = true,
-					canExportAnnotations = true;
+					canImportAnnotations = true;
 				var canMarkRead = collectionTreeRow.isFeed();
 				var markUnread = true;
 				
@@ -2818,12 +2816,8 @@ var ZoteroPane = new function()
 						canUnrecognize = false;
 					}
 					
-					if (canImportAnnotations && !Zotero.PDFImport.canImport(item)) {
+					if (canImportAnnotations && !Zotero.PDFWorker.canImport(item)) {
 						canImportAnnotations = false;
-					}
-					
-					if (canExportAnnotations && !Zotero.PDFExport.canExport(item)) {
-						canExportAnnotations = false;
 					}
 					
 					// Show rename option only if all items are child attachments
@@ -2908,10 +2902,6 @@ var ZoteroPane = new function()
 				if (canImportAnnotations) {
 					show.push(m.importAnnotations);
 				}
-				
-				if (canExportAnnotations) {
-					show.push(m.exportAnnotations);
-				}
 			}
 			
 			// Single item selected
@@ -2981,12 +2971,8 @@ var ZoteroPane = new function()
 						show.push(m.duplicateItem);
 					}
 					
-					if (Zotero.PDFImport.canImport(item)) {
+					if (Zotero.PDFWorker.canImport(item)) {
 						show.push(m.importAnnotations);
-					}
-					
-					if (Zotero.PDFExport.canExport(item)) {
-						show.push(m.exportAnnotations);
 					}
 				}
 				
@@ -4578,16 +4564,16 @@ var ZoteroPane = new function()
 		}
 	};
 	
-	this.exportAnnotationsForSelected = async function () {
-		var items = ZoteroPane.getSelectedItems();
-		Zotero.PDFExport.export(items);
-		Zotero.ProgressQueues.get('pdf-export').getDialog().open();
-	};
-	
 	this.importAnnotationsForSelected = async function () {
-		var items = ZoteroPane.getSelectedItems();
-		Zotero.PDFImport.import(items);
-		Zotero.ProgressQueues.get('pdf-import').getDialog().open();
+		let items = ZoteroPane.getSelectedItems();
+		for (let item of items) {
+			if (item.isRegularItem()) {
+				Zotero.PDFWorker.importParent(item);
+			}
+			else if (item.isAttachment()) {
+				Zotero.PDFWorker.import(item.id, true);
+			}
+		}
 	};
 	
 	this.reportMetadataForSelected = async function () {
@@ -4709,7 +4695,7 @@ var ZoteroPane = new function()
 		var rv = await fp.show();
 		if (rv === fp.returnOK || rv === fp.returnReplace) {
 			let outputFile = fp.file;
-			Zotero.PDFExport.exportToPath(item, outputFile, true);
+			await Zotero.PDFWorker.export(item.id, outputFile, true);
 		}
 	};
 	
