@@ -28,7 +28,7 @@
 	}
 	
 	&.selected {
-		border-top: 2px solid #CC2936;
+		border-top: 2px solid $tab-background-color-selected;
 	}
 	
 	.tab-name {
