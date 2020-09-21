@@ -128,7 +128,7 @@ const TabBar = forwardRef(function (props, ref) {
 					className="tab-close"
 					onClick={(event) => handleTabClose(event, index)}
 				>
-					X
+					x
 				</div>
 			</div>
 		);
@@ -136,7 +136,11 @@ const TabBar = forwardRef(function (props, ref) {
 	
 	return (
 		<div className="tabs">
-			{ tabs.map((tab, index) => renderTab(tab, index)) }
+			<div className="tabs-spacer-before"/>
+			<div className="tabs-holder">
+				{ tabs.map((tab, index) => renderTab(tab, index)) }
+			</div>
+			<div className="tabs-spacer-after"/>
         </div>
 	);
 });

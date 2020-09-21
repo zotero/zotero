@@ -6,6 +6,10 @@
 	display: flex;
 }
 
+.tabs-holder {
+	display: flex;
+}
+
 .tab {
 	-moz-appearance: none;
 	width: 200px;
@@ -17,11 +21,11 @@
 	position: relative;
 	background: #f9f9f9;
 	border-top: 2px solid transparent;
-	border-left: 1px solid lightgray;
-	border-right: 1px solid lightgray;
-	border-bottom: 1px solid transparent;
-	margin-right: -1px;
 	color: #000;
+	
+	&:not(:last-child) {
+		border-right: $tab-border;
+	}
 	
 	&.selected {
 		border-top: 2px solid #CC2936;
