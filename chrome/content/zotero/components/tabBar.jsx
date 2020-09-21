@@ -60,14 +60,14 @@ const TabBar = forwardRef(function (props, ref) {
 			setSelectedIndex(index);
 		},
 		
-		addTab({ title, type }) {
+		add({ title, type }) {
 			var newTabs = [...tabs];
 			newTabs.push({ title, type });
 			setTabs(newTabs);
 			setSelectedIndex(newTabs.length - 1);
 		},
 		
-		renameTab(title, index) {
+		rename(title, index) {
 			var newTabs = tabs.map((tab, currentIndex) => {
 				let newTab = Object.assign({}, tab);
 				if (index == currentIndex) {
@@ -77,6 +77,13 @@ const TabBar = forwardRef(function (props, ref) {
 			});
 			setTabs(newTabs);
 		},
+		
+		close(index) {
+			if (index == 0) {
+				return;
+			}
+			removeTab(index);
+		}
 	}));
 	
 	useEffect(() => {

@@ -33,6 +33,10 @@ import TabBar from 'components/tabBar';
 var Zotero_Tabs = new function () {
 	const HTML_NS = 'http://www.w3.org/1999/xhtml';
 	
+	Object.defineProperty(this, 'selectedIndex', {
+		get: () => this._selectedIndex
+	});
+	
 	Object.defineProperty(this, 'deck', {
 		get: () => document.getElementById('tabs-deck')
 	});
@@ -79,7 +83,7 @@ var Zotero_Tabs = new function () {
 	 * @return {Element} - The element created in the deck
 	 */
 	this.add = function ({ title, type, url, index }) {
-		this._tabBarRef.current.addTab({ title, type });
+		this._tabBarRef.current.add({ title, type });
 		
 		var elem;
 		if (url) {
@@ -104,7 +108,15 @@ var Zotero_Tabs = new function () {
 			index = this._selectedIndex;
 		}
 		this._tabs[index].title = title;
-		this._tabBarRef.current.renameTab(title, index);
+		this._tabBarRef.current.rename(title, index);
+	};
+	
+	
+	this.close = function (index) {
+		if (index === undefined) {
+			index = this._selectedIndex;
+		}
+		this._tabBarRef.current.close(index);
 	};
 	
 	

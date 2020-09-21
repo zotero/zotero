@@ -542,6 +542,35 @@ var ZoteroPane = new function()
 		}
 		
 		if (from == 'zotero-pane') {
+			// Tab navigation
+			// TODO: Select across tabs without selecting with Ctrl-Shift, as in Firefox?
+			let ctrlOnly = event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey;
+			if (ctrlOnly) {
+				if (event.key == 'PageUp') {
+					Zotero_Tabs.selectLeft();
+				}
+				else if (event.key == 'PageDown') {
+					Zotero_Tabs.selectRight();
+				}
+				event.preventDefault();
+				return;
+			}
+			
+			// Close current tab
+			if (event.key == 'w') {
+				let close = Zotero.isMac
+					? (event.metaKey && !event.shiftKey && !event.ctrlKey && !event.altKey)
+					: (event.ctrlKey && !event.shiftKey && !event.altKey);
+				if (close) {
+					if (Zotero_Tabs.selectedIndex > 0) {
+						Zotero_Tabs.close();
+						event.preventDefault();
+						event.stopPropagation();
+					}
+					return;
+				}
+			}
+			
 			// Highlight collections containing selected items
 			//
 			// We use Control (17) on Windows because Alt triggers the menubar;
@@ -627,20 +656,6 @@ var ZoteroPane = new function()
 		}
 		
 		var command = Zotero.Keys.getCommand(event.key);
-		
-		// Tab navigation
-		// TODO: Select across tabs without selecting with Ctrl-Shift, as in Firefox?
-		let ctrlOnly = event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey;
-		if (ctrlOnly) {
-			if (event.key == 'PageUp') {
-				Zotero_Tabs.selectLeft();
-			}
-			else if (event.key == 'PageDown') {
-				Zotero_Tabs.selectRight();
-			}
-			event.preventDefault();
-			return;
-		}
 		
 		if (from == 'zotero-collections-tree') {
 			if ((event.keyCode == event.DOM_VK_BACK_SPACE && Zotero.isMac) ||
