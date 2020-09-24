@@ -258,6 +258,17 @@ describe("Retractions", function() {
 			var indexes = await Zotero.Retractions.getRetractionsFromJSON(json);
 			assert.sameMembers(indexes, [0]);
 		});
+		
+		it("should identify object with retracted DOI on subsequent line in Extra", async function () {
+			var json = [
+				{
+					extra: `Foo: Bar\nDOI: ${retractedDOI}`
+				}
+			];
+			
+			var indexes = await Zotero.Retractions.getRetractionsFromJSON(json);
+			assert.sameMembers(indexes, [0]);
+		});
 	});
 	
 	
