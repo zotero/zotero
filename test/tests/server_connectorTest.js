@@ -746,12 +746,231 @@ describe("Connector Server", function () {
 			});
 		});
 	});
-	
+
+	describe("/connector/saveSingleFile", function () {
+		it("should save a webpage item with /saveSnapshot", async function () {
+			var collection = await createDataObject('collection');
+			await waitForItemsLoad(win);
+
+			// Promise for item save
+			let promise = waitForItemEvent('add');
+
+			let testDataDirectory = getTestDataDirectory().path;
+			let indexPath = OS.Path.join(testDataDirectory, 'snapshot', 'index.html');
+
+			let title = Zotero.Utilities.randomString();
+			let sessionID = Zotero.Utilities.randomString();
+			let payload = {
+				sessionID,
+				url: "http://example.com/test",
+				title,
+				singleFile: true
+			};
+
+			await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveSnapshot",
+				{
+					headers: {
+						"Content-Type": "application/json",
+						"zotero-allowed-request": "true"
+					},
+					body: JSON.stringify(payload)
+				}
+			);
+
+			// Await item save
+			let parentIDs = await promise;
+
+			// Check parent item
+			assert.lengthOf(parentIDs, 1);
+			var item = Zotero.Items.get(parentIDs[0]);
+			assert.equal(Zotero.ItemTypes.getName(item.itemTypeID), 'webpage');
+			assert.isTrue(collection.hasItem(item.id));
+			assert.equal(item.getField('title'), title);
+
+			// Promise for attachment save
+			promise = waitForItemEvent('add');
+
+			let body = new FormData();
+			let uuid = 'binary-' + Zotero.Utilities.randomString();
+			body.append("payload", JSON.stringify(Object.assign(payload, {
+				pageData: {
+					content: await Zotero.File.getContentsAsync(indexPath),
+					resources: {
+						images: [
+							{
+								name: "img.gif",
+								content: uuid,
+								binary: true
+							}
+						]
+					}
+				}
+			})));
+
+			let imagePath = OS.Path.join(testDataDirectory, 'snapshot', 'img.gif');
+			body.append(uuid, await File.createFromFileName(imagePath));
+
+			await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveSingleFile",
+				{
+					headers: {
+						"Content-Type": "multipart/form-data",
+						"zotero-allowed-request": "true"
+					},
+					body
+				}
+			);
+
+			// Await attachment save
+			let attachmentIDs = await promise;
+
+			// Check attachment
+			assert.lengthOf(attachmentIDs, 1);
+			item = Zotero.Items.get(attachmentIDs[0]);
+			assert.isTrue(item.isImportedAttachment());
+			assert.equal(item.getField('title'), title);
+
+			// Check attachment html file
+			let attachmentDirectory = Zotero.Attachments.getStorageDirectory(item).path;
+			let path = OS.Path.join(attachmentDirectory, 'test.html');
+			assert.isTrue(await OS.File.exists(path));
+			let contents = await Zotero.File.getContentsAsync(path);
+			let expectedContents = await Zotero.File.getContentsAsync(indexPath);
+			assert.equal(contents, expectedContents);
+
+			// Check attachment binary file
+			path = OS.Path.join(attachmentDirectory, 'img.gif');
+			assert.isTrue(await OS.File.exists(path));
+			contents = await Zotero.File.getBinaryContentsAsync(path);
+			expectedContents = await Zotero.File.getBinaryContentsAsync(imagePath);
+			assert.equal(contents, expectedContents);
+		});
+
+		it("should save a webpage item with /saveItems", async function () {
+			let collection = await createDataObject('collection');
+			await waitForItemsLoad(win);
+
+			let title = Zotero.Utilities.randomString();
+			let sessionID = Zotero.Utilities.randomString();
+			let payload = {
+				sessionID: sessionID,
+				items: [
+					{
+						itemType: "newspaperArticle",
+						title: title,
+						creators: [
+							{
+								firstName: "First",
+								lastName: "Last",
+								creatorType: "author"
+							}
+						],
+						attachments: [
+							{
+								title: "Snapshot",
+								url: `${testServerPath}/attachment`,
+								mimeType: "text/html",
+								singleFile: true
+							}
+						]
+					}
+				],
+				uri: "http://example.com"
+			};
+
+			let promise = waitForItemEvent('add');
+			let req = await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(payload)
+				}
+			);
+			assert.equal(req.status, 201);
+
+			// Check parent item
+			let itemIDs = await promise;
+			assert.lengthOf(itemIDs, 1);
+			let item = Zotero.Items.get(itemIDs[0]);
+			assert.equal(Zotero.ItemTypes.getName(item.itemTypeID), 'newspaperArticle');
+			assert.isTrue(collection.hasItem(item.id));
+
+			// Promise for attachment save
+			promise = waitForItemEvent('add');
+
+			let testDataDirectory = getTestDataDirectory().path;
+			let indexPath = OS.Path.join(testDataDirectory, 'snapshot', 'index.html');
+
+			let body = new FormData();
+			let uuid = 'binary-' + Zotero.Utilities.randomString();
+			body.append("payload", JSON.stringify(Object.assign(payload, {
+				pageData: {
+					content: await Zotero.File.getContentsAsync(indexPath),
+					resources: {
+						images: [
+							{
+								name: "img.gif",
+								content: uuid,
+								binary: true
+							}
+						]
+					}
+				}
+			})));
+
+			let imagePath = OS.Path.join(testDataDirectory, 'snapshot', 'img.gif');
+			body.append(uuid, await File.createFromFileName(imagePath));
+
+			req = await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveSingleFile",
+				{
+					headers: {
+						"Content-Type": "multipart/form-data",
+						"zotero-allowed-request": "true"
+					},
+					body
+				}
+			);
+			assert.equal(req.status, 201);
+
+			// Await attachment save
+			let attachmentIDs = await promise;
+
+			// Check attachment
+			assert.lengthOf(attachmentIDs, 1);
+			item = Zotero.Items.get(attachmentIDs[0]);
+			assert.isTrue(item.isImportedAttachment());
+			assert.equal(item.getField('title'), 'Snapshot');
+
+			// Check attachment html file
+			let attachmentDirectory = Zotero.Attachments.getStorageDirectory(item).path;
+			let path = OS.Path.join(attachmentDirectory, 'attachment.html');
+			assert.isTrue(await OS.File.exists(path));
+			let contents = await Zotero.File.getContentsAsync(path);
+			let expectedContents = await Zotero.File.getContentsAsync(indexPath);
+			assert.equal(contents, expectedContents);
+
+			// Check attachment binary file
+			path = OS.Path.join(attachmentDirectory, 'img.gif');
+			assert.isTrue(await OS.File.exists(path));
+			contents = await Zotero.File.getBinaryContentsAsync(path);
+			expectedContents = await Zotero.File.getBinaryContentsAsync(imagePath);
+			assert.equal(contents, expectedContents);
+		});
+	});
+
 	describe("/connector/saveSnapshot", function () {
 		it("should save a webpage item and snapshot to the current selected collection", function* () {
 			var collection = yield createDataObject('collection');
 			yield waitForItemsLoad(win);
-			
+
 			// saveSnapshot saves parent and child before returning
 			var ids1, ids2;
 			var promise = waitForItemEvent('add').then(function (ids) {
@@ -760,6 +979,12 @@ describe("Connector Server", function () {
 					ids2 = ids;
 				});
 			});
+
+			var file = getTestDataDirectory();
+			file.append('snapshot');
+			file.append('index.html');
+			httpd.registerFile("/test", file);
+
 			yield Zotero.HTTP.request(
 				'POST',
 				connectorServerPath + "/connector/saveSnapshot",
@@ -768,21 +993,21 @@ describe("Connector Server", function () {
 						"Content-Type": "application/json"
 					},
 					body: JSON.stringify({
-						url: "http://example.com",
+						url: `${testServerPath}/test`,
 						html: "<html><head><title>Title</title><body>Body</body></html>"
 					})
 				}
 			);
-			
+
 			assert.isTrue(promise.isFulfilled());
-			
+
 			// Check parent item
 			assert.lengthOf(ids1, 1);
 			var item = Zotero.Items.get(ids1[0]);
 			assert.equal(Zotero.ItemTypes.getName(item.itemTypeID), 'webpage');
 			assert.isTrue(collection.hasItem(item.id));
 			assert.equal(item.getField('title'), 'Title');
-			
+
 			// Check attachment
 			assert.lengthOf(ids2, 1);
 			item = Zotero.Items.get(ids2[0]);
@@ -1318,6 +1543,568 @@ describe("Connector Server", function () {
 			assert.isFalse(Zotero.Items.exists(item2.id));
 			assert.equal(item3.libraryID, Zotero.Libraries.userLibraryID);
 			assert.equal(item3.numAttachments(), 1);
+		});
+
+		it("should save item saved via /saveSnapshot and /saveSingleFile to another library", async function () {
+			let group = await createGroup({ editable: true, filesEditable: false });
+			await selectLibrary(win);
+			await waitForItemsLoad(win);
+			let sessionID = Zotero.Utilities.randomString();
+
+			// Wait for /saveSnapshot and /saveSingleFile to items
+			let ids1, ids2;
+			let promise = waitForItemEvent('add').then(function (ids) {
+				ids1 = ids;
+				return waitForItemEvent('add').then(function (ids) {
+					ids2 = ids;
+				});
+			});
+
+			let title = Zotero.Utilities.randomString();
+			let payload = {
+				sessionID,
+				url: "http://example.com/test",
+				title,
+				singleFile: true
+			};
+
+			await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveSnapshot",
+				{
+					headers: {
+						"Content-Type": "application/json",
+						"zotero-allowed-request": "true"
+					},
+					body: JSON.stringify(payload)
+				}
+			);
+
+			let body = new FormData();
+			body.append("payload", JSON.stringify(Object.assign(payload, {
+				pageData: {
+					content: '<html><head><title>Title</title><body>Body',
+					resources: {}
+				}
+			})));
+
+			let req = await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveSingleFile",
+				{
+					headers: {
+						"Content-Type": "multipart/form-data",
+						"zotero-allowed-request": "true"
+					},
+					body
+				}
+			);
+
+			// Check an item exists
+			await promise;
+			assert.equal(req.status, 201);
+			let item1 = Zotero.Items.get(ids1[0]);
+			assert.equal(item1.numAttachments(), 1);
+
+			// Check attachment item
+			let item2 = Zotero.Items.get(ids2[0]);
+			assert.equal(item2.libraryID, Zotero.Libraries.userLibraryID);
+			assert.equal(item2.parentItemID, item1.id);
+
+			// Move item to group without file attachment
+			promise = waitForItemEvent('add');
+			req = await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/updateSession",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						target: group.treeViewID
+					})
+				}
+			);
+
+			// Old items are gone
+			let ids3 = await promise;
+			assert.equal(req.status, 200);
+			assert.isFalse(Zotero.Items.exists(item2.id));
+			assert.isFalse(Zotero.Items.exists(item1.id));
+
+			// New item exists
+			let item3 = Zotero.Items.get(ids3[0]);
+			assert.equal(item3.libraryID, group.libraryID);
+			assert.equal(item3.numAttachments(), 0);
+
+			// Move back to My Library and resave attachment
+			let ids4, ids5;
+			promise = waitForItemEvent('add').then(function (ids) {
+				ids4 = ids;
+				return waitForItemEvent('add').then(function (ids) {
+					ids5 = ids;
+				});
+			});
+			req = await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/updateSession",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						target: Zotero.Libraries.userLibrary.treeViewID
+					})
+				}
+			);
+
+			await promise;
+			let item4 = Zotero.Items.get(ids4[0]);
+			let item5 = Zotero.Items.get(ids5[0]);
+
+			// Check item
+			assert.equal(req.status, 200);
+			assert.isFalse(Zotero.Items.exists(item3.id));
+			assert.equal(item4.libraryID, Zotero.Libraries.userLibraryID);
+			assert.equal(item5.libraryID, Zotero.Libraries.userLibraryID);
+			assert.equal(item4.numAttachments(), 1);
+
+			// Check attachment html file
+			let attachmentDirectory = Zotero.Attachments.getStorageDirectory(item5).path;
+			let path = OS.Path.join(attachmentDirectory, 'test.html');
+			assert.isTrue(await OS.File.exists(path));
+			let contents = await Zotero.File.getContentsAsync(path);
+			assert.equal(contents, '<html><head><title>Title</title><body>Body');
+		});
+
+		it("should resave item saved via /saveSnapshot and /saveSingleFile when moved to filesEditable library", async function () {
+			let group = await createGroup({ editable: true, filesEditable: false });
+			await selectLibrary(win);
+			await waitForItemsLoad(win);
+			let sessionID = Zotero.Utilities.randomString();
+
+			// Wait for /saveSnapshot to save parent item
+			let promise = waitForItemEvent('add');
+
+			let title = Zotero.Utilities.randomString();
+			let payload = {
+				sessionID,
+				url: "http://example.com/test",
+				title,
+				singleFile: true
+			};
+
+			await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveSnapshot",
+				{
+					headers: {
+						"Content-Type": "application/json",
+						"zotero-allowed-request": "true"
+					},
+					body: JSON.stringify(payload)
+				}
+			);
+
+			// Check an item exists
+			let ids1 = await promise;
+			let item1 = Zotero.Items.get(ids1[0]);
+
+			// Move item to group without file attachment
+			promise = waitForItemEvent('add');
+			let reqPromise = Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/updateSession",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						target: group.treeViewID
+					})
+				}
+			);
+
+			let req = await reqPromise;
+			assert.equal(req.status, 200);
+			// Assert original item no longer exists
+			assert.isFalse(Zotero.Items.exists(item1.id));
+
+			// Get new item
+			let ids2 = await promise;
+			let item2 = Zotero.Items.get(ids2[0]);
+			assert.equal(item2.libraryID, group.libraryID);
+			assert.equal(item2.numAttachments(), 0);
+
+			let body = new FormData();
+			body.append("payload", JSON.stringify(Object.assign(payload, {
+				pageData: {
+					content: '<html><head><title>Title</title><body>Body',
+					resources: {}
+				}
+			})));
+
+			req = await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveSingleFile",
+				{
+					headers: {
+						"Content-Type": "multipart/form-data",
+						"zotero-allowed-request": "true"
+					},
+					body
+				}
+			);
+
+			// Check the attachment was not saved
+			assert.equal(req.status, 200);
+			assert.equal(item2.numAttachments(), 0);
+
+			// Move back to My Library and resave attachment
+			let ids3, ids4;
+			promise = waitForItemEvent('add').then(function (ids) {
+				ids3 = ids;
+				return waitForItemEvent('add').then(function (ids) {
+					ids4 = ids;
+				});
+			});
+			req = await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/updateSession",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						target: Zotero.Libraries.userLibrary.treeViewID
+					})
+				}
+			);
+
+			// Wait for item add and then attachment add
+			await promise;
+			let item3 = Zotero.Items.get(ids3[0]);
+			let item4 = Zotero.Items.get(ids4[0]);
+
+			// Check item
+			assert.equal(req.status, 200);
+			assert.isFalse(Zotero.Items.exists(item2.id));
+			assert.equal(item3.libraryID, Zotero.Libraries.userLibraryID);
+			assert.equal(item3.numAttachments(), 1);
+
+			// Check attachment
+			assert.equal(item4.libraryID, Zotero.Libraries.userLibraryID);
+			assert.equal(item4.parentItemID, item3.id);
+			// Check attachment html file
+			let attachmentDirectory = Zotero.Attachments.getStorageDirectory(item4).path;
+			let path = OS.Path.join(attachmentDirectory, 'test.html');
+			assert.isTrue(await OS.File.exists(path));
+			let contents = await Zotero.File.getContentsAsync(path);
+			assert.equal(contents, '<html><head><title>Title</title><body>Body');
+		});
+
+		it("should save item saved via /saveItems and /saveSingleFile to another library", async function () {
+			let group = await createGroup({ editable: true, filesEditable: false });
+			await selectLibrary(win);
+			await waitForItemsLoad(win);
+			let sessionID = Zotero.Utilities.randomString();
+
+			// Wait for /saveItems and /saveSingleFile to items
+			let ids1, ids2;
+			let promise = waitForItemEvent('add').then(function (ids) {
+				ids1 = ids;
+				return waitForItemEvent('add').then(function (ids) {
+					ids2 = ids;
+				});
+			});
+
+			let title = Zotero.Utilities.randomString();
+			let payload = {
+				sessionID: sessionID,
+				items: [
+					{
+						itemType: "newspaperArticle",
+						title: title,
+						creators: [
+							{
+								firstName: "First",
+								lastName: "Last",
+								creatorType: "author"
+							}
+						],
+						attachments: [
+							{
+								title: "Snapshot",
+								url: `https://example.com/attachment`,
+								mimeType: "text/html",
+								singleFile: true
+							}
+						]
+					}
+				],
+				uri: "http://example.com"
+			};
+
+			await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveItems",
+				{
+					headers: {
+						"Content-Type": "application/json",
+						"zotero-allowed-request": "true"
+					},
+					body: JSON.stringify(payload)
+				}
+			);
+
+			let body = new FormData();
+			body.append("payload", JSON.stringify(Object.assign(payload, {
+				pageData: {
+					content: '<html><head><title>Title</title><body>Body',
+					resources: {}
+				}
+			})));
+
+			let req = await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveSingleFile",
+				{
+					headers: {
+						"Content-Type": "multipart/form-data",
+						"zotero-allowed-request": "true"
+					},
+					body
+				}
+			);
+
+			// Check an item exists
+			await promise;
+			assert.equal(req.status, 201);
+			let item1 = Zotero.Items.get(ids1[0]);
+			assert.equal(item1.numAttachments(), 1);
+
+			// Check attachment item
+			let item2 = Zotero.Items.get(ids2[0]);
+			assert.equal(item2.libraryID, Zotero.Libraries.userLibraryID);
+			assert.equal(item2.parentItemID, item1.id);
+
+			// Move item to group without file attachment
+			promise = waitForItemEvent('add');
+			req = await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/updateSession",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						target: group.treeViewID
+					})
+				}
+			);
+
+			// Old items are gone
+			let ids3 = await promise;
+			assert.equal(req.status, 200);
+			assert.isFalse(Zotero.Items.exists(item2.id));
+			assert.isFalse(Zotero.Items.exists(item1.id));
+
+			// New item exists
+			let item3 = Zotero.Items.get(ids3[0]);
+			assert.equal(item3.libraryID, group.libraryID);
+			assert.equal(item3.numAttachments(), 0);
+
+			// Move back to My Library and resave attachment
+			let ids4, ids5;
+			promise = waitForItemEvent('add').then(function (ids) {
+				ids4 = ids;
+				return waitForItemEvent('add').then(function (ids) {
+					ids5 = ids;
+				});
+			});
+			req = await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/updateSession",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						target: Zotero.Libraries.userLibrary.treeViewID
+					})
+				}
+			);
+
+			await promise;
+			let item4 = Zotero.Items.get(ids4[0]);
+			let item5 = Zotero.Items.get(ids5[0]);
+
+			// Check item
+			assert.equal(req.status, 200);
+			assert.isFalse(Zotero.Items.exists(item3.id));
+			assert.equal(item4.libraryID, Zotero.Libraries.userLibraryID);
+			assert.equal(item5.libraryID, Zotero.Libraries.userLibraryID);
+			assert.equal(item4.numAttachments(), 1);
+
+			// Check attachment html file
+			let attachmentDirectory = Zotero.Attachments.getStorageDirectory(item5).path;
+			let path = OS.Path.join(attachmentDirectory, 'attachment.html');
+			assert.isTrue(await OS.File.exists(path));
+			let contents = await Zotero.File.getContentsAsync(path);
+			assert.equal(contents, '<html><head><title>Title</title><body>Body');
+		});
+
+		it("should save item saved via /saveItems and /saveSingleFile when moved to filesEditable library", async function () {
+			let group = await createGroup({ editable: true, filesEditable: false });
+			await selectLibrary(win);
+			await waitForItemsLoad(win);
+			let sessionID = Zotero.Utilities.randomString();
+
+			// Wait for /saveItems to save parent item
+			let promise = waitForItemEvent('add');
+
+			let title = Zotero.Utilities.randomString();
+			let payload = {
+				sessionID: sessionID,
+				items: [
+					{
+						itemType: "newspaperArticle",
+						title: title,
+						creators: [
+							{
+								firstName: "First",
+								lastName: "Last",
+								creatorType: "author"
+							}
+						],
+						attachments: [
+							{
+								title: "Snapshot",
+								url: `https://example.com/attachment`,
+								mimeType: "text/html",
+								singleFile: true
+							}
+						]
+					}
+				],
+				uri: "http://example.com"
+			};
+
+			await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveItems",
+				{
+					headers: {
+						"Content-Type": "application/json",
+						"zotero-allowed-request": "true"
+					},
+					body: JSON.stringify(payload)
+				}
+			);
+
+			// Check an item exists
+			let ids1 = await promise;
+			let item1 = Zotero.Items.get(ids1[0]);
+
+			// Move item to group without file attachment
+			promise = waitForItemEvent('add');
+			let reqPromise = Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/updateSession",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						target: group.treeViewID
+					})
+				}
+			);
+
+			let req = await reqPromise;
+			assert.equal(req.status, 200);
+			// Assert original item no longer exists
+			assert.isFalse(Zotero.Items.exists(item1.id));
+
+			// Get new item
+			let ids2 = await promise;
+			let item2 = Zotero.Items.get(ids2[0]);
+			assert.equal(item2.libraryID, group.libraryID);
+			assert.equal(item2.numAttachments(), 0);
+
+			let body = new FormData();
+			body.append("payload", JSON.stringify(Object.assign(payload, {
+				pageData: {
+					content: '<html><head><title>Title</title><body>Body',
+					resources: {}
+				}
+			})));
+
+			req = await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveSingleFile",
+				{
+					headers: {
+						"Content-Type": "multipart/form-data",
+						"zotero-allowed-request": "true"
+					},
+					body
+				}
+			);
+
+			// Check the attachment was not saved
+			assert.equal(req.status, 200);
+			assert.equal(item2.numAttachments(), 0);
+
+			// Move back to My Library and resave attachment
+			let ids3, ids4;
+			promise = waitForItemEvent('add').then(function (ids) {
+				ids3 = ids;
+				return waitForItemEvent('add').then(function (ids) {
+					ids4 = ids;
+				});
+			});
+			req = await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/updateSession",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify({
+						sessionID,
+						target: Zotero.Libraries.userLibrary.treeViewID
+					})
+				}
+			);
+
+			// Wait for item add and then attachment add
+			await promise;
+			let item3 = Zotero.Items.get(ids3[0]);
+			let item4 = Zotero.Items.get(ids4[0]);
+
+			// Check item
+			assert.equal(req.status, 200);
+			assert.isFalse(Zotero.Items.exists(item2.id));
+			assert.equal(item3.libraryID, Zotero.Libraries.userLibraryID);
+			assert.equal(item3.numAttachments(), 1);
+
+			// Check attachment
+			assert.equal(item4.libraryID, Zotero.Libraries.userLibraryID);
+			assert.equal(item4.parentItemID, item3.id);
+			// Check attachment html file
+			let attachmentDirectory = Zotero.Attachments.getStorageDirectory(item4).path;
+			let path = OS.Path.join(attachmentDirectory, 'attachment.html');
+			assert.isTrue(await OS.File.exists(path));
+			let contents = await Zotero.File.getContentsAsync(path);
+			assert.equal(contents, '<html><head><title>Title</title><body>Body');
 		});
 	});
 	

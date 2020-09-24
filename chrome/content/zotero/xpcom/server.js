@@ -158,6 +158,7 @@ Zotero.Server.SocketListener = new function() {
  * handles the actual acquisition of data
  */
 Zotero.Server.DataListener = function(iStream, oStream) {
+	Components.utils.import("resource://gre/modules/NetUtil.jsm");
 	this.header = "";
 	this.headerFinished = false;
 	
@@ -166,9 +167,6 @@ Zotero.Server.DataListener = function(iStream, oStream) {
 	
 	this.iStream = iStream;
 	this.oStream = oStream;
-	this.sStream = Components.classes["@mozilla.org/scriptableinputstream;1"]
-	                         .createInstance(Components.interfaces.nsIScriptableInputStream);
-	this.sStream.init(iStream);
 	
 	this.foundReturn = false;
 }
@@ -192,7 +190,7 @@ Zotero.Server.DataListener.prototype.onStopRequest = function(request, context, 
  */
 Zotero.Server.DataListener.prototype.onDataAvailable = function(request, context,
                                                              inputStream, offset, count) {
-	var readData = this.sStream.read(count);
+	var readData = NetUtil.readInputStreamToString(inputStream, count);
 	
 	if(this.headerFinished) {	// reading body
 		this.body += readData;
@@ -325,26 +323,12 @@ Zotero.Server.DataListener.prototype._headerFinished = function() {
  */
 Zotero.Server.DataListener.prototype._bodyData = function() {
 	if(this.body.length >= this.bodyLength) {
-		// convert to UTF-8
-		var dataStream = Components.classes["@mozilla.org/io/string-input-stream;1"]
-		                           .createInstance(Components.interfaces.nsIStringInputStream);
-		dataStream.setData(this.body, this.bodyLength);
-		
-		var utf8Stream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
-		                           .createInstance(Components.interfaces.nsIConverterInputStream);
-		utf8Stream.init(dataStream, "UTF-8", 4096, "?");
-		
-		this.body = "";
-		var string = {};
-		while(utf8Stream.readString(this.bodyLength, string)) {
-			this.body += string.value;
-		}		
-		
 		// handle envelope
 		this._processEndpoint("POST", this.body); // async
 	}
 }
-	
+
+
 /**
  * Generates the response to an HTTP request
  */
@@ -400,6 +384,8 @@ Zotero.Server.DataListener.prototype._generateResponse = function (status, conte
 
 /**
  * Generates a response based on calling the function associated with the endpoint
+ *
+ * Note: postData contains raw bytes and should be decoded before use
  */
 Zotero.Server.DataListener.prototype._processEndpoint = Zotero.Promise.coroutine(function* (method, postData) {
 	try {
@@ -468,12 +454,14 @@ Zotero.Server.DataListener.prototype._processEndpoint = Zotero.Promise.coroutine
 			// decode content-type post data
 			if(this.contentType === "application/json") {
 				try {
+					postData = Zotero.Utilities.Internal.decodeUTF8(postData);
 					decodedData = JSON.parse(postData);
 				} catch(e) {
 					this._requestFinished(this._generateResponse(400, "text/plain", "Invalid JSON provided\n"));
 					return;
 				}
 			} else if(this.contentType === "application/x-www-form-urlencoded") {				
+				postData = Zotero.Utilities.Internal.decodeUTF8(postData);
 				decodedData = Zotero.Server.decodeQueryString(postData);
 			} else if(this.contentType === "multipart/form-data") {
 				let boundary = /boundary=([^\s]*)/i.exec(this.header);
@@ -487,6 +475,7 @@ Zotero.Server.DataListener.prototype._processEndpoint = Zotero.Promise.coroutine
 					return this._requestFinished(this._generateResponse(400, "text/plain", "Invalid multipart/form-data provided\n"));
 				}
 			} else {
+				postData = Zotero.Utilities.Internal.decodeUTF8(postData);
 				decodedData = postData;
 			}
 		}
@@ -606,6 +595,8 @@ Zotero.Server.DataListener.prototype._requestFinished = function (response, opti
 
 Zotero.Server.DataListener.prototype._decodeMultipartData = function(data, boundary) {
 	var contentDispositionRe = /^Content-Disposition:\s*(.*)$/i;
+	let contentTypeRe = /^Content-Type:\s*(.*)$/i
+
 	var results = [];
 	data = data.split(boundary);
 	// Ignore pre first boundary and post last boundary
@@ -626,11 +617,37 @@ Zotero.Server.DataListener.prototype._decodeMultipartData = function(data, bound
 			throw new Error('Malformed multipart/form-data body');
 		}
 		
-		let contentDisposition = contentDispositionRe.exec(fieldData.header);
-		if (contentDisposition) {
-			for (let nameVal of contentDisposition[1].split(';')) {
-				nameVal.split('=');
-				fieldData[nameVal[0]] = nameVal.length > 1 ? nameVal[1] : null;
+		fieldData.params = {};
+		let headers = [];
+		if (fieldData.header.indexOf("\r\n") > -1) {
+			headers = fieldData.header.split("\r\n");
+		}
+		else if (fieldData.header.indexOf("\n\n") > -1) {
+			headers = fieldData.header.split("\n\n");
+		}
+		else {
+			headers = [fieldData.header];
+		}
+		for (const header of headers) {
+			if (contentDispositionRe.test(header)) {
+				// Example:
+				// Content-Disposition: form-data; name="fieldName"; filename="filename.jpg"
+				let contentDisposition = header.split(';');
+				if (contentDisposition.length > 1) {
+					contentDisposition.shift();
+					for (let param of contentDisposition) {
+						let nameVal = param.trim().split('=');
+						fieldData.params[nameVal[0]] = nameVal[1].trim().slice(1, -1);
+					}
+				}
+			}
+			else if (contentTypeRe.test(header)) {
+				// Example:
+				// Content-Type: image/png
+				let contentType = header.split(':');
+				if (contentType.length > 1) {
+					fieldData.params.contentType = contentType[1].trim();
+				}
 			}
 		}
 		results.push(fieldData);

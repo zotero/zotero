@@ -762,8 +762,16 @@ Zotero.Attachments = new function(){
 			if ((contentType === 'text/html' || contentType === 'application/xhtml+xml')
 					// Documents from XHR don't work here
 					&& Zotero.Translate.DOMWrapper.unwrap(document) instanceof Ci.nsIDOMDocument) {
-				Zotero.debug('Saving document with saveDocument()');
-				yield Zotero.Utilities.Internal.saveDocument(document, tmpFile);
+				if (document.defaultView.window) {
+					// If we have a full hidden browser, use SingleFile
+					Zotero.debug('Saving document with saveHTMLDocument()');
+					yield Zotero.Utilities.Internal.saveHTMLDocument(document, tmpFile);
+				}
+				else {
+					// Fallback to nsIWebBrowserPersist
+					Zotero.debug('Saving document with saveDocument()');
+					yield Zotero.Utilities.Internal.saveDocument(document, tmpFile);
+				}
 			}
 			else {
 				Zotero.debug("Saving file with saveURI()");
@@ -837,6 +845,95 @@ Zotero.Attachments = new function(){
 	});
 	
 	
+	/**
+	 * Save a snapshot from a page data given by SingleFileZ
+	 *
+	 * @param {Object} options
+	 * @param {String} options.url
+	 * @param {Object} options.pageData - PageData object from SingleFileZ
+	 * @param {Integer} [options.parentItemID]
+	 * @param {Integer[]} [options.collections]
+	 * @param {String} [options.title]
+	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
+	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
+	 */
+	this.importFromPageData = async (options) => {
+		Zotero.debug("Importing attachment item from PageData");
+
+		let url = options.url;
+		let pageData = options.pageData;
+		let parentItemID = options.parentItemID;
+		let collections = options.collections;
+		let title = options.title;
+		let saveOptions = options.saveOptions;
+
+		let contentType = "text/html";
+
+		if (parentItemID && collections) {
+			throw new Error("parentItemID and parentCollectionIDs cannot both be provided");
+		}
+		
+		let tmpDirectory = (await this.createTemporaryStorageDirectory()).path;
+		let destDirectory;
+		let attachmentItem;
+		try {
+			let fileName = Zotero.File.truncateFileName(this._getFileNameFromURL(url, contentType), 100);
+			let tmpFile = OS.Path.join(tmpDirectory, fileName);
+			await Zotero.File.putContentsAsync(tmpFile, pageData.content);
+			
+			await Zotero.Utilities.Internal.saveSingleFileResources(tmpDirectory, pageData.resources, "");
+
+			// If we're using the title from the document, make some adjustments
+			// Remove e.g. " - Scaled (-17%)" from end of images saved from links,
+			// though I'm not sure why it's getting added to begin with
+			if (contentType.indexOf('image/') === 0) {
+				title = title.replace(/(.+ \([^,]+, [0-9]+x[0-9]+[^\)]+\)) - .+/, "$1" );
+			}
+			// If not native type, strip mime type data in parens
+			else if (!Zotero.MIME.hasNativeHandler(contentType, this._getExtensionFromURL(url))) {
+				title = title.replace(/(.+) \([a-z]+\/[^\)]+\)/, "$1" );
+			}
+
+			attachmentItem = await _addToDB({
+				file: 'storage:' + fileName,
+				title,
+				url,
+				linkMode: Zotero.Attachments.LINK_MODE_IMPORTED_URL,
+				parentItemID,
+				charset: 'utf-8',
+				contentType,
+				collections,
+				saveOptions
+			});
+
+			Zotero.Fulltext.queueItem(attachmentItem);
+
+			destDirectory = this.getStorageDirectory(attachmentItem).path;
+			await OS.File.move(tmpDirectory, destDirectory);
+		}
+		catch (e) {
+			Zotero.debug(e, 1);
+			
+			// Clean up
+			try {
+				if (tmpDirectory) {
+					await OS.File.removeDir(tmpDirectory, { ignoreAbsent: true });
+				}
+				if (destDirectory) {
+					await OS.File.removeDir(destDirectory, { ignoreAbsent: true });
+				}
+			}
+			catch (e) {
+				Zotero.debug(e, 1);
+			}
+			
+			throw e;
+		}
+		
+		return attachmentItem;
+	};
+
+
 	/**
 	 * @param {String} url
 	 * @param {String} path

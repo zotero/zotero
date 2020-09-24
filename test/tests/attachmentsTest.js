@@ -306,23 +306,47 @@ describe("Zotero.Attachments", function() {
 	})
 	
 	describe("#importFromDocument()", function () {
+		Components.utils.import("resource://gre/modules/FileUtils.jsm");
+		Components.utils.import("resource://zotero-unit/httpd.js");
+		var testServerPath, httpd;
+		var testServerPort = 16213;
+
+		before(async function () {
+			this.timeout(20000);
+			Zotero.Prefs.set("httpServer.enabled", true);
+		});
+
+		beforeEach(function () {
+			// Alternate ports to prevent exceptions not catchable in JS
+			testServerPort += (testServerPort & 1) ? 1 : -1;
+			testServerPath = 'http://127.0.0.1:' + testServerPort;
+			httpd = new HttpServer();
+			httpd.start(testServerPort);
+		});
+
+		afterEach(async function () {
+			var defer = new Zotero.Promise.defer();
+			httpd.stop(() => defer.resolve());
+			await defer.promise;
+		});
+
 		it("should save a document with embedded files", function* () {
 			var item = yield createDataObject('item');
+
+			var uri = OS.Path.join(getTestDataDirectory().path, "snapshot");
+			httpd.registerDirectory("/", new FileUtils.File(uri));
 			
-			var uri = OS.Path.join(getTestDataDirectory().path, "snapshot", "index.html");
 			var deferred = Zotero.Promise.defer();
 			win.addEventListener('pageshow', () => deferred.resolve());
-			win.loadURI(uri);
+			win.loadURI(testServerPath + "/index.html");
 			yield deferred.promise;
 			
-			var file = getTestDataDirectory();
-			file.append('test.png');
 			var attachment = yield Zotero.Attachments.importFromDocument({
 				document: win.content.document,
 				parentItemID: item.id
 			});
 			
-			assert.equal(attachment.getField('url'), "file://" + uri);
+			assert.equal(attachment.getField('url'), testServerPath + "/index.html");
 			
 			// Check indexing
 			var matches = yield Zotero.Fulltext.findTextInItems([attachment.id], 'share your research');
@@ -333,7 +357,133 @@ describe("Zotero.Attachments", function() {
 			var storageDir = Zotero.Attachments.getStorageDirectory(attachment).path;
 			var file = yield attachment.getFilePathAsync();
 			assert.equal(OS.Path.basename(file), 'index.html');
-			assert.isTrue(yield OS.File.exists(OS.Path.join(storageDir, 'img.gif')));
+			assert.isTrue(yield OS.File.exists(OS.Path.join(storageDir, 'images', '2.gif')));
+			
+			// Check attachment html file contents
+			let path = OS.Path.join(storageDir, 'index.html');
+			assert.isTrue(yield OS.File.exists(path));
+			let contents = yield Zotero.File.getContentsAsync(path);
+			assert.isTrue(contents.startsWith("<html><!--\n Page saved with SingleFileZ"));
+			
+			// Check attachment binary file contents
+			path = OS.Path.join(storageDir, 'images', '2.gif');
+			assert.isTrue(yield OS.File.exists(path));
+			contents = yield Zotero.File.getBinaryContentsAsync(path);
+			let expectedPath = getTestDataDirectory();
+			expectedPath.append('snapshot');
+			expectedPath.append('img.gif');
+			let expectedContents = yield Zotero.File.getBinaryContentsAsync(expectedPath);
+			assert.equal(contents, expectedContents);
+		});
+
+		it("should save a document with embedded files restricted by CORS", async function () {
+			var item = await createDataObject('item');
+
+			var url = "file://" + OS.Path.join(getTestDataDirectory().path, "snapshot", "img.gif");
+			httpd.registerPathHandler(
+				'/index.html',
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 200, "OK");
+						response.write(`<html><head><title>Test</title></head><body><img src="${url}"/>`);
+					}
+				}
+			);
+
+			var deferred = Zotero.Promise.defer();
+			win.addEventListener('pageshow', () => deferred.resolve());
+			win.loadURI(testServerPath + "/index.html");
+			await deferred.promise;
+
+			var attachment = await Zotero.Attachments.importFromDocument({
+				document: win.content.document,
+				parentItemID: item.id
+			});
+
+			assert.equal(attachment.getField('url'), testServerPath + "/index.html");
+
+			// Check for embedded files
+			var storageDir = Zotero.Attachments.getStorageDirectory(attachment).path;
+			var file = await attachment.getFilePathAsync();
+			assert.equal(OS.Path.basename(file), 'index.html');
+			assert.isTrue(await OS.File.exists(OS.Path.join(storageDir, 'images', '1.gif')));
+
+			// Check attachment html file contents
+			let path = OS.Path.join(storageDir, 'index.html');
+			assert.isTrue(await OS.File.exists(path));
+			let contents = await Zotero.File.getContentsAsync(path);
+			assert.isTrue(contents.startsWith("<html><!--\n Page saved with SingleFileZ"));
+
+			// Check attachment binary file contents
+			path = OS.Path.join(storageDir, 'images', '1.gif');
+			assert.isTrue(await OS.File.exists(path));
+			contents = await Zotero.File.getBinaryContentsAsync(path);
+			let expectedPath = getTestDataDirectory();
+			expectedPath.append('snapshot');
+			expectedPath.append('img.gif');
+			let expectedContents = await Zotero.File.getBinaryContentsAsync(expectedPath);
+			assert.equal(contents, expectedContents);
+		});
+	});
+	
+	describe("#importFromPageData()", function () {
+		it("should save a SingleFileZ PageData object", async function () {
+			let item = await createDataObject('item');
+			
+			let content = getTestDataDirectory();
+			content.append('snapshot');
+			content.append('index.html');
+			
+			let image = getTestDataDirectory();
+			image.append('snapshot');
+			image.append('img.gif');
+			
+			let pageData = {
+				content: await Zotero.File.getContentsAsync(content),
+				resources: {
+					images: [
+						{
+							name: "img.gif",
+							content: await Zotero.File.getBinaryContentsAsync(image),
+							binary: true
+						}
+					]
+				}
+			};
+			
+			let attachment = await Zotero.Attachments.importFromPageData({
+				parentItemID: item.id,
+				url: "https://example.com/test.html",
+				title: "Testing Title",
+				pageData
+			});
+			
+			assert.equal(attachment.getField('url'), "https://example.com/test.html");
+			
+			// Check indexing
+			let matches = await Zotero.Fulltext.findTextInItems([attachment.id], 'share your research');
+			assert.lengthOf(matches, 1);
+			assert.propertyVal(matches[0], 'id', attachment.id);
+			
+			// Check for embedded files
+			let storageDir = Zotero.Attachments.getStorageDirectory(attachment).path;
+			let file = await attachment.getFilePathAsync();
+			assert.equal(OS.Path.basename(file), 'test.html');
+			assert.isTrue(await OS.File.exists(OS.Path.join(storageDir, 'img.gif')));
+			
+			// Check attachment html file contents
+			let path = OS.Path.join(storageDir, 'test.html');
+			assert.isTrue(await OS.File.exists(path));
+			let contents = await Zotero.File.getContentsAsync(path);
+			let expectedContents = await Zotero.File.getContentsAsync(file);
+			assert.equal(contents, expectedContents);
+			
+			// Check attachment binary file contents
+			path = OS.Path.join(storageDir, 'img.gif');
+			assert.isTrue(await OS.File.exists(path));
+			contents = await Zotero.File.getBinaryContentsAsync(path);
+			expectedContents = await Zotero.File.getBinaryContentsAsync(image);
+			assert.equal(contents, expectedContents);
 		});
 	});
 	
