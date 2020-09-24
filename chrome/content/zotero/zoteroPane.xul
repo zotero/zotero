@@ -231,6 +231,8 @@
 				</vbox>
 				
 				<popupset>
+					<!-- Allows iframes to show a tooltip popup for nodes with titles. `tooltip="iframeTooltip"` attribute has to be set for the iframe -->
+					<tooltip id="iframeTooltip" onpopupshowing="if (tooltipTitleNode = document.tooltipNode.closest('*[title]')) {this.setAttribute('label', tooltipTitleNode.getAttribute('title')); return true; } return false"/>
 					<menupopup id="zotero-collectionmenu"
 							oncommand="ZoteroPane.onCollectionContextMenuSelect(event)">
 						<!-- Keep order in sync with buildCollectionContextMenu, which adds additional attributes -->

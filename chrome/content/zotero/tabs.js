@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-"use strict";
+'use strict';
 
 // Using 'import' breaks hooks
 var React = require('react');
@@ -31,104 +31,185 @@ var ReactDOM = require('react-dom');
 import TabBar from 'components/tabBar';
 
 var Zotero_Tabs = new function () {
-	const HTML_NS = 'http://www.w3.org/1999/xhtml';
-	
-	Object.defineProperty(this, 'selectedIndex', {
-		get: () => this._selectedIndex
+	Object.defineProperty(this, 'selectedID', {
+		get: () => this._selectedID
 	});
-	
+
+	Object.defineProperty(this, 'selectedIndex', {
+		get: () => this._getTab(this._selectedID).tabIndex
+	});
+
 	Object.defineProperty(this, 'deck', {
 		get: () => document.getElementById('tabs-deck')
 	});
-	
-	this._tabBarRef = {};
-	this._tabs = [
-		{
-			title: "",
-			type: 'library'
-		}
-	];
-	this._selectedIndex = 0;
-	
+
+	this._tabBarRef = React.createRef();
+	this._tabs = [{
+		id: 'zotero-pane',
+		type: 'library',
+		title: ''
+	}];
+	this._selectedID = 'zotero-pane';
+
+	this._getTab = function (id) {
+		var tabIndex = this._tabs.findIndex(tab => tab.id == id);
+		return { tab: this._tabs[tabIndex], tabIndex };
+	};
+
+	this._update = function () {
+		this._tabBarRef.current.setTabs(this._tabs.map(tab => ({
+			id: tab.id,
+			type: tab.type,
+			title: tab.title,
+			selected: tab.id == this._selectedID
+		})));
+	};
+
 	this.init = function () {
 		ReactDOM.render(
 			<TabBar
 				ref={this._tabBarRef}
-				initialTabs={this._tabs}
-				onTabSelected={this._onTabSelected.bind(this)}
-				onTabClosed={this._onTabClosed.bind(this)}
+				onTabSelect={this.select.bind(this)}
+				onTabMove={this.move.bind(this)}
+				onTabClose={this.close.bind(this)}
 			/>,
-			document.getElementById('tab-bar-container')
+			document.getElementById('tab-bar-container'),
+			() => {
+				this._update();
+			}
 		);
-		
 	};
-	
-	
-	this.selectLeft = function () {
-		this._tabBarRef.current.selectLeft();
-	};
-	
-	
-	this.selectRight = function () {
-		this._tabBarRef.current.selectRight();
-	};
-	
-	
-	this.select = function (index) {
-		this._tabBarRef.current.select(index);
-	},
-	
-	
+
 	/**
-	 * @return {Element} - The element created in the deck
+	 * Add a new tab
+	 *
+	 * @param {String} type
+	 * @param {String} title
+	 * @param {Integer} index
+	 * @param {Boolean} select
+	 * @param {Function} onClose
+	 * @return {{ id: string, container: XULElement}} id - tab id, container - a new tab container created in the deck
 	 */
-	this.add = function ({ title, type, url, index }) {
-		this._tabBarRef.current.add({ title, type });
-		
-		var elem;
-		if (url) {
-			elem = document.createElement('iframe');
-			elem.setAttribute('type', 'content');
-			elem.setAttribute('src', url);
+	this.add = function ({ type, title, index, select, onClose }) {
+		if (typeof type != 'string') {
+			throw new Error(`'type' should be a string (was ${typeof type})`);
 		}
-		else {
-			elem = document.createElementNS(HTML_NS, 'div');
-			elem.textContent = title;
+		if (typeof title != 'string') {
+			throw new Error(`'title' should be a string (was ${typeof title})`);
 		}
-		
-		var deck = this.deck;
-		deck.insertBefore(elem, index === undefined ? null : deck.childNodes[index]);
-		
-		return elem;
-	};
-	
-	
-	this.rename = function (title, index) {
-		if (index === undefined) {
-			index = this._selectedIndex;
+		if (index !== undefined && (!Number.isInteger(index) || index < 1)) {
+			throw new Error(`'index' should be an integer > 0 (was ${index} (${typeof index})`);
 		}
-		this._tabs[index].title = title;
-		this._tabBarRef.current.rename(title, index);
-	};
-	
-	
-	this.close = function (index) {
-		if (index === undefined) {
-			index = this._selectedIndex;
+		if (onClose !== undefined && typeof onClose != 'function') {
+			throw new Error(`'onClose' should be a function (was ${typeof onClose})`);
 		}
-		this._tabBarRef.current.close(index);
+		var id = 'tab-' + Zotero.Utilities.randomString();
+		var container = document.createElement('vbox');
+		container.id = id;
+		this.deck.appendChild(container);
+		var tab = { id, type, title, onClose };
+		index = index || this._tabs.length;
+		this._tabs.splice(index, 0, tab);
+		this._update();
+		if (select) {
+			this.select(id);
+		}
+		return { id, container };
 	};
-	
-	
-	this._onTabSelected = function (index) {
-		this._selectedIndex = index;
-		this.deck.selectedIndex = index;
+
+	/**
+	 * Set a new tab title
+	 *
+	 * @param {String} id
+	 * @param {String} title
+	 */
+	this.rename = function (id, title) {
+		if (typeof title != 'string') {
+			throw new Error(`'title' should be a string (was ${typeof title})`);
+		}
+		var { tab } = this._getTab(id);
+		if (!tab) {
+			return;
+		}
+		tab.title = title;
+		this._update();
 	};
-	
-	
-	this._onTabClosed = function (index) {
-		this._tabs.splice(index, 1);
-		var deck = this.deck;
-		deck.removeChild(deck.childNodes[index]);
+
+	/**
+	 * Close a tab
+	 *
+	 * @param {String} id
+	 */
+	this.close = function (id) {
+		var { tab, tabIndex } = this._getTab(id || this._selectedID);
+		if (tabIndex == 0) {
+			throw new Error('Library tab cannot be closed');
+		}
+		if (!tab) {
+			return;
+		}
+		this.select((this._tabs[tabIndex + 1] || this._tabs[tabIndex - 1]).id);
+		this._tabs.splice(tabIndex, 1);
+		document.getElementById(tab.id).remove();
+		if (tab.onClose) {
+			tab.onClose();
+		}
+		this._update();
+	};
+
+	/**
+	 * Move a tab to the specified index
+	 *
+	 * @param {String} id
+	 * @param {Integer} newIndex
+	 */
+	this.move = function (id, newIndex) {
+		if (!Number.isInteger(newIndex) || newIndex < 1) {
+			throw new Error(`'newIndex' should be an interger > 0 (was ${newIndex} (${typeof newIndex})`);
+		}
+		var { tab, tabIndex } = this._getTab(id);
+		if (tabIndex == 0) {
+			throw new Error('Library tab cannot be moved');
+		}
+		if (!tab || tabIndex == newIndex) {
+			return;
+		}
+		if (newIndex > tabIndex) {
+			newIndex--;
+		}
+		this._tabs.splice(tabIndex, 1);
+		this._tabs.splice(newIndex, 0, tab);
+		this._update();
+	};
+
+	/**
+	 * Select a tab
+	 *
+	 * @param {String} id
+	 */
+	this.select = function (id) {
+		var { tab } = this._getTab(id);
+		if (!tab) {
+			return;
+		}
+		this._selectedID = id;
+		this.deck.selectedIndex = Array.from(this.deck.children).findIndex(x => x.id == id);
+		this._update();
+	};
+
+	/**
+	 * Select the previous tab (closer to the library tab)
+	 */
+	this.selectPrev = function () {
+		var { tabIndex } = this._getTab(this._selectedID);
+		this.select((this._tabs[tabIndex - 1] || this._tabs[this._tabs.length - 1]).id);
+	};
+
+	/**
+	 * Select the next tab (farther to the library tab)
+	 */
+	this.selectNext = function () {
+		var { tabIndex } = this._getTab(this._selectedID);
+		this.select((this._tabs[tabIndex + 1] || this._tabs[0]).id);
 	};
 };

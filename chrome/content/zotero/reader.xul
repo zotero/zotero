@@ -23,6 +23,7 @@
 		Components.utils.import('resource://gre/modules/Services.jsm');
 	</script>
 	<!-- TODO: Localize -->
+	<tooltip id="iframeTooltip" onpopupshowing="if (tooltipTitleNode = document.tooltipNode.closest('*[title]')) {this.setAttribute('label', tooltipTitleNode.getAttribute('title')); return true; } return false"/>
 	<menubar>
 		<menu label="File">
 			<menupopup>
@@ -62,22 +63,13 @@
 	<hbox flex="1">
 		<vbox id="zotero-reader" flex="3">
 			<browser id="reader"
-					 tooltip="readerTooltip"
+					 tooltip="iframeTooltip"
 					 type="content"
 					 primary="true"
 					 transparent="transparent"
 					 src="resource://zotero/pdf-reader/viewer.html"
 					 flex="1"/>
-			<popupset>
-				<tooltip id="readerTooltip" onpopupshowing="return fillTooltip(this);"/>
-				<menupopup id="tagsPopup" ignorekeys="true"
-						   style="min-width: 300px;"
-						   onpopupshown="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='xul:label'){ this.setAttribute('showing', 'true'); }"
-						   onpopuphidden="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='xul:label'){ this.setAttribute('showing', 'false'); }">
-					<tagsbox id="tags" flex="1" mode="edit"/>
-				</menupopup>
-				<menupopup id="annotationPopup"/>
-				<menupopup id="colorPopup"/>
+			<popupset id="zotero-reader-popupset">
 			</popupset>
 		</vbox>
 		<splitter id="zotero-reader-splitter"

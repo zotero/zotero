@@ -12,16 +12,16 @@
 
 .tab {
 	-moz-appearance: none;
-	width: 200px;
+	max-width: 200px;
+	flex: 1;
 	height: 30px;
 	line-height: 30px;
-	display: flex;
-	justify-content: center;
-	align-content: center;
 	position: relative;
 	background: #f9f9f9;
 	border-top: 2px solid transparent;
 	color: #000;
+	text-align: center;
+	padding: 0 30px;
 	
 	&:not(:last-child) {
 		border-right: $tab-border;
@@ -32,8 +32,12 @@
 	}
 	
 	.tab-name {
-		margin-top: -2px;
 		line-height: 30px;
+		overflow-x: hidden;
+		text-overflow: ellipsis;
+		display: -moz-box;
+		position: relative;
+		top: -2px;
 	}
 	
 	.tab-close {

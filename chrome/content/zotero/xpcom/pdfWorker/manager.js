@@ -249,9 +249,9 @@ class PDFWorker {
 			else {
 				Zotero.PDF.hasUnmachedAnnotations[itemID] = !!annotations.length;
 			}
-			for (let readerWindow of Zotero.Reader._readerWindows) {
-				if (readerWindow._itemID === itemID) {
-					readerWindow.toggleImportPrompt(!!Zotero.PDF.hasUnmachedAnnotations[itemID]);
+			for (let reader of Zotero.Reader._readers) {
+				if (reader._itemID === itemID) {
+					reader.toggleImportPrompt(!!Zotero.PDF.hasUnmachedAnnotations[itemID]);
 				}
 			}
 			Zotero.PDF.dateChecked[itemID] = Zotero.Date.dateToISO(new Date());

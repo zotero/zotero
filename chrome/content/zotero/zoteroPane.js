@@ -526,6 +526,21 @@ var ZoteroPane = new function()
 	 * Trigger actions based on keyboard shortcuts
 	 */
 	function handleKeyDown(event, from) {
+		// Close current tab
+		if (event.key == 'w') {
+			let close = Zotero.isMac
+				? (event.metaKey && !event.shiftKey && !event.ctrlKey && !event.altKey)
+				: (event.ctrlKey && !event.shiftKey && !event.altKey);
+			if (close) {
+				if (Zotero_Tabs.selectedIndex > 0) {
+					Zotero_Tabs.close();
+					event.preventDefault();
+					event.stopPropagation();
+				}
+				return;
+			}
+		}
+	
 		try {
 			// Ignore keystrokes outside of Zotero pane
 			if (!(event.originalTarget.ownerDocument instanceof XULDocument)) {
@@ -547,28 +562,13 @@ var ZoteroPane = new function()
 			let ctrlOnly = event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey;
 			if (ctrlOnly) {
 				if (event.key == 'PageUp') {
-					Zotero_Tabs.selectLeft();
+					Zotero_Tabs.selectPrev();
 				}
 				else if (event.key == 'PageDown') {
-					Zotero_Tabs.selectRight();
+					Zotero_Tabs.selectNext();
 				}
 				event.preventDefault();
 				return;
-			}
-			
-			// Close current tab
-			if (event.key == 'w') {
-				let close = Zotero.isMac
-					? (event.metaKey && !event.shiftKey && !event.ctrlKey && !event.altKey)
-					: (event.ctrlKey && !event.shiftKey && !event.altKey);
-				if (close) {
-					if (Zotero_Tabs.selectedIndex > 0) {
-						Zotero_Tabs.close();
-						event.preventDefault();
-						event.stopPropagation();
-					}
-					return;
-				}
 			}
 			
 			// Highlight collections containing selected items
@@ -1197,8 +1197,7 @@ var ZoteroPane = new function()
 			}
 			
 			// Rename tab
-			// TODO: What if PDF is in front?
-			Zotero_Tabs.rename(collectionTreeRow.getName());
+			Zotero_Tabs.rename('zotero-pane', collectionTreeRow.getName());
 			
 			// Clear quick search and tag selector when switching views
 			document.getElementById('zotero-tb-search').value = "";
@@ -4078,8 +4077,7 @@ var ZoteroPane = new function()
 		var launchFile = async (path, contentType, itemID) => {
 			// Custom PDF handler
 			if (contentType === 'application/pdf') {
-				this.viewPDF(itemID);
-				// TODO: Still leave an option to use an external PDF viewer
+				this.viewPDF(itemID, event.shiftKey);
 				return;
 				let pdfHandler  = Zotero.Prefs.get("fileHandler.pdf");
 				if (pdfHandler) {
@@ -4246,8 +4244,8 @@ var ZoteroPane = new function()
 		}
 	});
 	
-	this.viewPDF = function (itemID) {
-		Zotero.Reader.open(itemID);
+	this.viewPDF = function (itemID, openWindow) {
+		Zotero.Reader.open(itemID, null, openWindow);
 	};
 	
 	

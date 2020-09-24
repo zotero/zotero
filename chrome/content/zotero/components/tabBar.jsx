@@ -23,125 +23,106 @@
     ***** END LICENSE BLOCK *****
 */
 
-"use strict";
+'use strict';
 
-import React, { forwardRef, useState, useImperativeHandle, useEffect } from 'react';
+import React, { forwardRef, useState, useRef, useImperativeHandle, useEffect } from 'react';
 import cx from 'classnames';
 
 const TabBar = forwardRef(function (props, ref) {
-	const [tabs, setTabs] = useState(props.initialTabs);
-	const [selectedIndex, setSelectedIndex] = useState(0);
-	
-	useImperativeHandle(ref, () => ({
-		get selectedIndex() {
-			return selectedIndex;
-		},
-		
-		selectLeft() {
-			var newIndex = selectedIndex - 1;
-			if (newIndex < 0) {
-				newIndex = tabs.length + newIndex;
-			}
-			setSelectedIndex(newIndex);
-		},
-		
-		selectRight() {
-			var newIndex = selectedIndex + 1;
-			if (newIndex >= tabs.length) {
-				newIndex = newIndex - tabs.length;
-			}
-			setSelectedIndex(newIndex);
-		},
-		
-		select(index) {
-			if (index > tabs.length - 1) {
-				throw new Error("Tab index out of bounds");
-			}
-			setSelectedIndex(index);
-		},
-		
-		add({ title, type }) {
-			var newTabs = [...tabs];
-			newTabs.push({ title, type });
-			setTabs(newTabs);
-			setSelectedIndex(newTabs.length - 1);
-		},
-		
-		rename(title, index) {
-			var newTabs = tabs.map((tab, currentIndex) => {
-				let newTab = Object.assign({}, tab);
-				if (index == currentIndex) {
-					newTab.title = title;
-				}
-				return newTab;
-			});
-			setTabs(newTabs);
-		},
-		
-		close(index) {
-			if (index == 0) {
-				return;
-			}
-			removeTab(index);
-		}
-	}));
-	
+	const [tabs, setTabs] = useState([]);
+	const draggingID = useRef(null);
+	const tabsHolderRef = useRef();
+	const mouseMoveWaitUntil = useRef(0);
+
 	useEffect(() => {
-		if (props.onTabSelected) {
-			props.onTabSelected(selectedIndex);
+		window.addEventListener('mouseup', handleMouseUp);
+		return () => {
+			window.removeEventListener('mouseup', handleMouseUp);
+		};
+	}, []);
+
+	useImperativeHandle(ref, () => ({ setTabs }));
+
+	function handleMouseDown(event, id, index) {
+		if (index != 0) {
+			draggingID.current = id;
 		}
-	}, [selectedIndex]);
-	
-	
-	function removeTab(index) {
-		var newTabs = [...tabs];
-		newTabs.splice(index, 1);
-		setTabs(newTabs);
-		setSelectedIndex(Math.min(selectedIndex, newTabs.length - 1));
-		if (props.onTabClosed) {
-			props.onTabClosed(index);
-		}
-	}
-	
-	function handleTabClick(event, index) {
-		setSelectedIndex(index);
+		props.onTabSelect(id);
 		event.stopPropagation();
 	}
-	
-	function handleTabClose(event, index) {
-		removeTab(index);
-		if (props.onTabClose) {
-			props.onTabClose(index);
+
+	function handleMouseMove(event) {
+		if (!draggingID.current || mouseMoveWaitUntil.current > Date.now()) {
+			return;
 		}
+		let points = Array.from(tabsHolderRef.current.children).map((child) => {
+			let rect = child.getBoundingClientRect();
+			return rect.left + rect.width / 2;
+		});
+		let index = null;
+		for (let i = 0; i < points.length - 1; i++) {
+			let point1 = points[i];
+			let point2 = points[i + 1];
+			if (event.clientX > Math.min(point1, point2)
+				&& event.clientX < Math.max(point1, point2)) {
+				index = i + 1;
+				break;
+			}
+		}
+		if (index === null) {
+			let point1 = points[0];
+			let point2 = points[points.length - 1];
+			if ((point1 < point2 && event.clientX < point1
+				|| point1 > point2 && event.clientX > point1)) {
+				index = 0;
+			}
+			else {
+				index = points.length;
+			}
+		}
+		if (index == 0) {
+			index = 1;
+		}
+		props.onTabMove(draggingID.current, index);
+		mouseMoveWaitUntil.current = Date.now() + 100;
+	}
+
+	function handleMouseUp(event) {
+		draggingID.current = null;
 		event.stopPropagation();
 	}
-	
-	function renderTab(tab, index) {
+
+	function handleTabClose(event, id) {
+		props.onTabClose(id);
+		event.stopPropagation();
+	}
+
+	function renderTab({ id, title, selected }, index) {
 		return (
 			<div
-				key={index}
-				className={cx("tab", { selected: index == selectedIndex })}
-				onClick={(event) => handleTabClick(event, index)}
+				key={id}
+				className={cx('tab', { selected })}
+				onMouseDown={(event) => handleMouseDown(event, id, index)}
 			>
-				<div className="tab-name">{tab.title}</div>
+				<div className="tab-name">{title}</div>
 				<div
 					className="tab-close"
-					onClick={(event) => handleTabClose(event, index)}
+					onClick={(event) => handleTabClose(event, id)}
 				>
 					x
 				</div>
 			</div>
 		);
 	}
-	
+
 	return (
-		<div className="tabs">
+		<div className="tabs" onMouseMove={handleMouseMove}>
 			<div className="tabs-spacer-before"/>
-			<div className="tabs-holder">
-				{ tabs.map((tab, index) => renderTab(tab, index)) }
+			<div className="tabs-holder" ref={tabsHolderRef}>
+				{tabs.map((tab, index) => renderTab(tab, index))}
 			</div>
 			<div className="tabs-spacer-after"/>
-        </div>
+		</div>
 	);
 });
 
