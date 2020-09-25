@@ -311,12 +311,16 @@ var Zotero_QuickFormat = new function () {
 				// Exclude feeds
 				Zotero.Feeds.getAll()
 					.forEach(feed => s.addCondition("libraryID", "isNot", feed.libraryID));
-				s.addCondition("quicksearch-titleCreatorYear", "contains", str);
-				s.addCondition("itemType", "isNot", "attachment");
-				if (io.filterLibraryIDs) {
-					io.filterLibraryIDs.forEach(id => s.addCondition("libraryID", "is", id));
+				if (io.allowCitingNotes) {
+					s.addCondition("quicksearch-titleCreatorYearNote", "contains", str);
 				}
-				
+				else {
+					s.addCondition("quicksearch-titleCreatorYear", "contains", str);
+					s.addCondition("itemType", "isNot", "attachment");
+					if (io.filterLibraryIDs) {
+						io.filterLibraryIDs.forEach(id => s.addCondition("libraryID", "is", id));
+					}
+				}
 				haveConditions = true;
 			}
 		}
@@ -671,8 +675,12 @@ var Zotero_QuickFormat = new function () {
 		var str = item.getField("firstCreator");
 		
 		// Title, if no creator (getDisplayTitle in order to get case, e-mail, statute which don't have a title field)
- 		if(!str) {
-			str = Zotero.getString("punctuation.openingQMark") + item.getDisplayTitle() + Zotero.getString("punctuation.closingQMark");
+		title = item.getDisplayTitle();
+		if (item.isNote()) {
+			title = title.substr(0, 24) + '…';
+		}
+ 		if (!str) {
+			str = Zotero.getString("punctuation.openingQMark") + title + Zotero.getString("punctuation.closingQMark");
 		}
 		
 		// Date
@@ -754,10 +762,27 @@ var Zotero_QuickFormat = new function () {
 	 */
 	var _bubbleizeSelected = Zotero.Promise.coroutine(function* () {
 		if(!referenceBox.hasChildNodes() || !referenceBox.selectedItem) return false;
-		
+
+		var ps = Services.prompt;
 		var citationItem = {"id":referenceBox.selectedItem.getAttribute("zotero-item")};
+		var item = Zotero.Cite.getItem(citationItem.id);
+		var nodes = Array.from(qfe.childNodes).filter(node => node.tagName == 'span');
+		if (nodes[0] && nodes[0].dataset && JSON.parse(nodes[0].dataset.citationItem).isNote) {
+			ps.alert(null,
+				Zotero.getString('general.warning'),
+				Zotero.getString('integration.cannotInsertItemWithNote'));
+			return false;
+		}
+		if (item && item.isNote() && nodes.length) {
+			if (!ps.confirm(null,
+					Zotero.getString('general.warning'),
+					Zotero.getString('integration.noteCiteItemsRemoved'))) {
+				return false;
+			}
+			_clearCitation();
+			citationItem.isNote = true;
+		}
 		if (typeof citationItem.id === "string" && citationItem.id.indexOf("/") !== -1) {
-			var item = Zotero.Cite.getItem(citationItem.id);
 			citationItem.uris = item.cslURIs;
 			citationItem.itemData = item.cslItemData;
 		}

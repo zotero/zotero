@@ -313,12 +313,16 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 				this.addCondition('key', 'is', part.text, false);
 			}
 			
-			if (condition == 'quicksearch-titleCreatorYear') {
+			if (condition.startsWith('quicksearch-titleCreatorYear')) {
 				this.addCondition('title', operator, part.text, false);
 				this.addCondition('publicationTitle', operator, part.text, false);
 				this.addCondition('shortTitle', operator, part.text, false);
 				this.addCondition('court', operator, part.text, false);
 				this.addCondition('year', operator, part.text, false);
+
+				if (condition == 'quicksearch-titleCreatorYearNote') {
+					this.addCondition('note', operator, part.text, false);
+				}
 			}
 			else {
 				this.addCondition('field', operator, part.text, false);

@@ -61,6 +61,8 @@ const DELAYED_CITATION_HTML_STYLING_END = "</div>"
 
 const EXPORTED_DOCUMENT_MARKER = "ZOTERO_TRANSFER_DOCUMENT";
 
+const NOTE_CITATION_PLACEHOLDER_LINK = 'https://www.zotero.org/?';
+
 
 Zotero.Integration = new function() {
 	Components.utils.import("resource://gre/modules/Services.jsm");
@@ -584,10 +586,14 @@ Zotero.Integration.Interface.prototype.addEditCitation = async function (docFiel
 	await this._session.init(false, false);
 	docField = docField || await this._doc.cursorInField(this._session.data.prefs['fieldType']);
 
-	let [idx, field, citation] = await this._session.cite(docField);
-	await this._session.addCitation(idx, await field.getNoteIndex(), citation);
+	let citations = await this._session.cite(docField);
+	for (let citation of citations) {
+		await this._session.addCitation(citation._fieldIndex, await citation._field.getNoteIndex(), citation);
+	}
 	if (this._session.data.prefs.delayCitationUpdates) {
-		return this._session.writeDelayedCitation(field, citation);
+		for (let citation of citations) {
+			await this._session.writeDelayedCitation(citation._field, citation);
+		}
 	} else {
 		return this._session.updateDocument(FORCE_CITATIONS_FALSE, false, false);
 	}
@@ -843,7 +849,7 @@ Zotero.Integration.Session = function(doc, app) {
  * Checks that it is appropriate to add fields to the current document at the current
  * position, then adds one.
  */
-Zotero.Integration.Session.prototype.addField = async function(note) {
+Zotero.Integration.Session.prototype.addField = async function(note, fieldIndex=-1) {
 	// Get citation types if necessary
 	if (!await this._doc.canInsertField(this.data.prefs['fieldType'])) {
 		return Zotero.Promise.reject(new Zotero.Exception.Alert("integration.error.cannotInsertHere",
@@ -867,12 +873,17 @@ Zotero.Integration.Session.prototype.addField = async function(note) {
 		field.setCode('TEMP');
 	}
 	// If fields already retrieved, further this.getFields() calls will returned the cached version
-	// So we append this field to that list
+	// So add this field to the cache
 	if (this._fields) {
-		this._fields.push(field);
+		if (fieldIndex == -1) {
+			this._fields.push(field);
+		}
+		else {
+			this._fields.splice(fieldIndex, 0, field);
+		}
 	}
 	
-	return Zotero.Promise.resolve(field);
+	return field;
 }
 
 /**
@@ -1241,9 +1252,9 @@ Zotero.Integration.Session.prototype._updateDocument = async function(forceCitat
 		await this._fields[removeCodeFields[i]].removeCode();
 	}
 	
-	var deleteFields = Object.keys(this._deleteFields).sort();
-	for (var i=(deleteFields.length-1); i>=0; i--) {
-		this._fields[deleteFields[i]].delete();
+	var deleteFields = Object.keys(this._deleteFields).sort((a, b) => b - a);
+	for (let fieldIndex of deleteFields) {
+		this._fields[fieldIndex].delete();
 	}
 	this.processIndices = {}
 }
@@ -1328,7 +1339,8 @@ Zotero.Integration.Session.prototype.cite = async function (field) {
 		
 	var io = new Zotero.Integration.CitationEditInterface(
 		citation, this.style.opt.sort_citations,
-		fieldIndexPromise, citationsByItemIDPromise, previewFn
+		fieldIndexPromise, citationsByItemIDPromise, previewFn,
+		this._app.supportsTextInsertion
 	);
 	Zotero.debug(`Editing citation:`);
 	Zotero.debug(JSON.stringify(citation.toJSON()));
@@ -1360,18 +1372,127 @@ Zotero.Integration.Session.prototype.cite = async function (field) {
 	var fieldIndex = await fieldIndexPromise;
 	// Make sure session is updated
 	await citationsByItemIDPromise;
-	return [fieldIndex, field, io.citation];
+	
+	let citations = await this._insertCitingResult(fieldIndex, field, io.citation);
+	// We need to re-update from document because we've inserted multiple fields.
+	// Don't worry, the field list and info is cached so this triggers no calls to the doc.
+	await this.updateFromDocument(FORCE_CITATIONS_FALSE);
+	for (let citation of citations) {
+		await this.addCitation(citation._fieldIndex, await citation._field.getNoteIndex(), citation);
+	}
+	return citations;
+};
+
+/**
+ * Inserts a citing result, where a citing result is either multiple Items or a Note item.
+ * Notes may contain Items in them, which means that
+ * a single citing result insert can produce multiple Citations.
+ *
+ * Returns an array of Citation objects which correspond to inserted citations. At least 1 Citation
+ * is always returned.
+ *
+ * @param fieldIndex
+ * @param field
+ * @param citation
+ * @returns {Promise<[]>}
+ * @private
+ */
+Zotero.Integration.Session.prototype._insertCitingResult = async function (fieldIndex, field, citation) {
+	await citation.loadItemData();
+	
+	let firstItem = Zotero.Cite.getItem(citation.citationItems[0].id);
+	if (firstItem && firstItem.isNote()) {
+		return this._insertNoteIntoDocument(fieldIndex, field, firstItem);
+	}
+	else {
+		return [await this._insertItemsIntoDocument(fieldIndex++, field, citation)];
+	}
+};
+
+/**
+ * Splits out cited items from the note text and converts them to placeholder links.
+ *
+ * Returns the modified note text and an array of citation objects and their corresponding
+ * placeholder IDs
+ * @param item {Zotero.Item}
+ */
+Zotero.Integration.Session.prototype._processNote = function (item) {
+	let text = item.getNote();
+	let parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+		.createInstance(Components.interfaces.nsIDOMParser);
+	let doc = parser.parseFromString(text, "text/html");
+	let citationsElems = doc.querySelectorAll('.citation[data-citation]');
+	let citations = [];
+	let placeholderIDs = [];
+	for (let citationElem of citationsElems) {
+		try {
+			// Add the citation code object to citations array
+			let citation = JSON.parse(decodeURIComponent(citationElem.dataset.citation));
+			delete citation.properties;
+			citations.push(citation);
+			let placeholderID = Zotero.Utilities.randomString(6);
+			// Add the placeholder we'll be using for the link to placeholder array
+			placeholderIDs.push(placeholderID);
+			let placeholderURL = NOTE_CITATION_PLACEHOLDER_LINK + placeholderID;
+			// Split out the citation element and replace with a placeholder link
+			text = text.split(citationElem.outerHTML)
+				.join(`<a href="${placeholderURL}">${citationElem.textContent}</a>`);
+		}
+		catch (e) {
+			e.message = `Failed to parse a citation from a note: ${decodeURIComponent(citationElem.dataset.citation)}`;
+			Zotero.debug(e, 1);
+			Zotero.logError(e);
+		}
+	}
+	// TODO: Later we'll need to convert note HTML to RDF.
+	// if (Zotero.Integration.currentSession._app.outputFormat == 'rtf') {
+	// 		text = return Zotero.RTFConverter.HTMLToRTF(text);
+	// 	});
+	// }
+	return [text, citations, placeholderIDs];
+};
+
+Zotero.Integration.Session.prototype._insertNoteIntoDocument = async function (fieldIndex, field, noteItem) {
+	let [text, citations, placeholderIDs] = this._processNote(noteItem);
+	await field.delete();
+	await this._doc.insertText(text);
+	if (!citations.length) return [];
+	
+	// Do these in reverse order to ensure we don't get messy document edits
+	citations.reverse();
+	placeholderIDs.reverse();
+	let fields = await this._doc.convertPlaceholdersToFields(citations.map(() => 'TEMP'),
+		placeholderIDs, this.data.prefs.noteType);
+	
+	let insertedCitations = await Promise.all(fields.map(async (field, index) => {
+		let citation = new Zotero.Integration.Citation(new Zotero.Integration.CitationField(field, 'TEMP'),
+			citations[index]);
+		citation._fieldIndex = fieldIndex + fields.length - 1 - index;
+		return citation;
+	}));
+	return insertedCitations;
+};
+
+Zotero.Integration.Session.prototype._insertItemsIntoDocument = async function (fieldIndex, field, citation) {
+	if (!field) {
+		field = new Zotero.Integration.CitationField(await this.addField(true, fieldIndex));
+	}
+	citation._field = field;
+	citation._fieldIndex = fieldIndex;
+	return citation;
 };
 
 /**
  * Citation editing functions and propertiesaccessible to quickFormat.js and addCitationDialog.js
  */
-Zotero.Integration.CitationEditInterface = function(citation, sortable, fieldIndexPromise, citationsByItemIDPromise, previewFn) {
-	this.citation = citation;
+Zotero.Integration.CitationEditInterface = function(items, sortable, fieldIndexPromise,
+		citationsByItemIDPromise, previewFn, allowCitingNotes=false){
+	this.citation = items;
 	this.sortable = sortable;
 	this.previewFn = previewFn;
 	this._fieldIndexPromise = fieldIndexPromise;
 	this._citationsByItemIDPromise = citationsByItemIDPromise;
+	this.allowCitingNotes = allowCitingNotes;
 	
 	// Not available in quickFormat.js if this unspecified
 	this.wrappedJSObject = this;
@@ -1717,10 +1838,10 @@ Zotero.Integration.Session.prototype.importDocument = async function() {
 /**
  * Adds a citation to the arrays representing the document
  */
-Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(function* (index, noteIndex, citation) {
-	var index = parseInt(index, 10);
+Zotero.Integration.Session.prototype.addCitation = async function (index, noteIndex, citation) {
+	index = parseInt(index, 10);
 	
-	var action = yield citation.loadItemData();
+	var action = await citation.loadItemData();
 	
 	if (action == Zotero.Integration.REMOVE_CODE) {
 		// Mark for removal and return
@@ -1784,7 +1905,7 @@ Zotero.Integration.Session.prototype.addCitation = Zotero.Promise.coroutine(func
 	}
 	Zotero.debug("Integration: Adding citationID "+citation.citationID);
 	this.documentCitationIDs[citation.citationID] = index;
-});
+};
 
 Zotero.Integration.Session.prototype.getCiteprocLists = function() {
 	var citations = [];
@@ -2340,7 +2461,7 @@ Zotero.Integration.Field = class {
 		}
 		this._field = field;
 		this._code = rawCode;
-		this.type = INTEGRATION_TYPE_TEMP;	
+		this.type = INTEGRATION_TYPE_TEMP;
 	}
 	
 	async setCode(code) {
@@ -2369,8 +2490,17 @@ Zotero.Integration.Field = class {
 	async clearCode() {
 		return await this.setCode('{}');
 	}
+	
+	async getText() {
+		if (this._text) {
+			return this._text;
+		}
+		this._text = await this._field.getText();
+		return this._text;
+	}
 		
 	async setText(text) {
+		this._text = null;
 		var isRich = false;
 		// If RTF wrap with RTF tags
 		if (Zotero.Integration.currentSession.outputFormat == "rtf" && text.includes("\\")) {
@@ -2606,9 +2736,7 @@ Zotero.Integration.BibliographyField = class extends Zotero.Integration.Field {
 
 Zotero.Integration.Citation = class {
 	constructor(citationField, data, noteIndex) {
-		if (!data) {
-			data = {citationItems: [], properties: {}};
-		}
+		data = Object.assign({ citationItems: [], properties: {} }, data)
 		this.citationID = data.citationID;
 		this.citationItems = data.citationItems;
 		this.properties = data.properties;
@@ -2626,102 +2754,100 @@ Zotero.Integration.Citation = class {
 	 * 	- Zotero.Integration.REMOVE_CODE
 	 * 	- Zotero.Integration.DELETE
 	 */
-	loadItemData() {
-		return Zotero.Promise.coroutine(function *(promptToReselect=true){
-			let items = [];
-			var needUpdate = false;
+	async loadItemData(promptToReselect=true) {
+		let items = [];
+		var needUpdate = false;
+		
+		if (!this.citationItems.length) {
+			return Zotero.Integration.DELETE;
+		}
+		for (var i=0, n=this.citationItems.length; i<n; i++) {
+			var citationItem = this.citationItems[i];
 			
-			if (!this.citationItems.length) {
-				return Zotero.Integration.DELETE;
-			}
-			for (var i=0, n=this.citationItems.length; i<n; i++) {
-				var citationItem = this.citationItems[i];
+			// get Zotero item
+			var zoteroItem = false;
+			if (citationItem.uris) {
+				let itemNeedsUpdate;
+				[zoteroItem, itemNeedsUpdate] = await Zotero.Integration.currentSession.uriMap.getZoteroItemForURIs(citationItem.uris);
+				needUpdate = needUpdate || itemNeedsUpdate;
 				
-				// get Zotero item
-				var zoteroItem = false;
-				if (citationItem.uris) {
-					let itemNeedsUpdate;
-					[zoteroItem, itemNeedsUpdate] = yield Zotero.Integration.currentSession.uriMap.getZoteroItemForURIs(citationItem.uris);
-					needUpdate = needUpdate || itemNeedsUpdate;
+				// Unfortunately, people do weird things with their documents. One weird thing people
+				// apparently like to do (http://forums.zotero.org/discussion/22262/) is to copy and
+				// paste citations from other documents created with earlier versions of Zotero into
+				// their documents and then not refresh the document. Usually, this isn't a problem. If
+				// document is edited by the same user, it will work without incident. If the first
+				// citation of a given item doesn't contain itemData, the user will get a
+				// MissingItemException. However, it may also happen that the first citation contains
+				// itemData, but later citations don't, because the user inserted the item properly and
+				// then copied and pasted the same citation from another document. We check for that
+				// possibility here.
+				if (zoteroItem.cslItemData && !citationItem.itemData) {
+					citationItem.itemData = zoteroItem.cslItemData;
+					needUpdate = true;
+				}
+			} else {
+				if (citationItem.key && citationItem.libraryID) {
+					// DEBUG: why no library id?
+					zoteroItem = Zotero.Items.getByLibraryAndKey(citationItem.libraryID, citationItem.key);
+				} else if (citationItem.itemID) {
+					zoteroItem = Zotero.Items.get(citationItem.itemID);
+				} else if (citationItem.id) {
+					zoteroItem = Zotero.Items.get(citationItem.id);
+				}
+				if (zoteroItem) needUpdate = true;
+			}
+			
+			// Item no longer in library
+			if (!zoteroItem) {
+				// Use embedded item
+				if (citationItem.itemData) {
+					Zotero.debug(`Item ${JSON.stringify(citationItem.uris)} not in library. Using embedded data`);
+					// add new embedded item
+					var itemData = Zotero.Utilities.deepCopy(citationItem.itemData);
 					
-					// Unfortunately, people do weird things with their documents. One weird thing people
-					// apparently like to do (http://forums.zotero.org/discussion/22262/) is to copy and
-					// paste citations from other documents created with earlier versions of Zotero into
-					// their documents and then not refresh the document. Usually, this isn't a problem. If
-					// document is edited by the same user, it will work without incident. If the first
-					// citation of a given item doesn't contain itemData, the user will get a
-					// MissingItemException. However, it may also happen that the first citation contains
-					// itemData, but later citations don't, because the user inserted the item properly and
-					// then copied and pasted the same citation from another document. We check for that
-					// possibility here.
-					if (zoteroItem.cslItemData && !citationItem.itemData) {
-						citationItem.itemData = zoteroItem.cslItemData;
-						needUpdate = true;
+					// assign a random string as an item ID
+					var anonymousID = Zotero.randomString();
+					var globalID = itemData.id = citationItem.id = Zotero.Integration.currentSession.data.sessionID+"/"+anonymousID;
+					Zotero.Integration.currentSession.embeddedItems[anonymousID] = itemData;
+					
+					// assign a Zotero item
+					var surrogateItem = Zotero.Integration.currentSession.embeddedZoteroItems[anonymousID] = new Zotero.Item();
+					Zotero.Utilities.itemFromCSLJSON(surrogateItem, itemData);
+					surrogateItem.cslItemID = globalID;
+					surrogateItem.cslURIs = citationItem.uris;
+					surrogateItem.cslItemData = itemData;
+					
+					for(var j=0, m=citationItem.uris.length; j<m; j++) {
+						Zotero.Integration.currentSession.embeddedItemsByURI[citationItem.uris[j]] = surrogateItem;
 					}
-				} else {
-					if (citationItem.key && citationItem.libraryID) {
-						// DEBUG: why no library id?
-						zoteroItem = Zotero.Items.getByLibraryAndKey(citationItem.libraryID, citationItem.key);
-					} else if (citationItem.itemID) {
-						zoteroItem = Zotero.Items.get(citationItem.itemID);
-					} else if (citationItem.id) {
-						zoteroItem = Zotero.Items.get(citationItem.id);
-					}
+				} else if (promptToReselect) {
+					zoteroItem = await this.handleMissingItem(i);
 					if (zoteroItem) needUpdate = true;
-				}
-				
-				// Item no longer in library
-				if (!zoteroItem) {
-					// Use embedded item
-					if (citationItem.itemData) {
-						Zotero.debug(`Item ${JSON.stringify(citationItem.uris)} not in library. Using embedded data`);
-						// add new embedded item
-						var itemData = Zotero.Utilities.deepCopy(citationItem.itemData);
-						
-						// assign a random string as an item ID
-						var anonymousID = Zotero.randomString();
-						var globalID = itemData.id = citationItem.id = Zotero.Integration.currentSession.data.sessionID+"/"+anonymousID;
-						Zotero.Integration.currentSession.embeddedItems[anonymousID] = itemData;
-						
-						// assign a Zotero item
-						var surrogateItem = Zotero.Integration.currentSession.embeddedZoteroItems[anonymousID] = new Zotero.Item();
-						Zotero.Utilities.itemFromCSLJSON(surrogateItem, itemData);
-						surrogateItem.cslItemID = globalID;
-						surrogateItem.cslURIs = citationItem.uris;
-						surrogateItem.cslItemData = itemData;
-						
-						for(var j=0, m=citationItem.uris.length; j<m; j++) {
-							Zotero.Integration.currentSession.embeddedItemsByURI[citationItem.uris[j]] = surrogateItem;
-						}
-					} else if (promptToReselect) {
-						zoteroItem = yield this.handleMissingItem(i);
-						if (zoteroItem) needUpdate = true;
-						else return Zotero.Integration.REMOVE_CODE;
-					} else {
-						// throw a MissingItemException
-						throw (new Zotero.Integration.MissingItemException(this, this.citationItems[i]));
-					}
-				}
-				
-				if (zoteroItem) {
-					if (zoteroItem.cslItemID) {
-						citationItem.id = zoteroItem.cslItemID;
-					}
-					else {
-						citationItem.id = zoteroItem.id;
-						items.push(zoteroItem);
-					}
+					else return Zotero.Integration.REMOVE_CODE;
+				} else {
+					// throw a MissingItemException
+					throw (new Zotero.Integration.MissingItemException(this, this.citationItems[i]));
 				}
 			}
 			
-			// Items may be in libraries that haven't been loaded, and retrieveItem() is synchronous, so load
-			// all data (as required by toJSON(), which is used by itemToExportFormat(), which is used by
-			// itemToCSLJSON()) now
-			if (items.length) {
-				yield Zotero.Items.loadDataTypes(items);
+			if (zoteroItem) {
+				if (zoteroItem.cslItemID) {
+					citationItem.id = zoteroItem.cslItemID;
+				}
+				else {
+					citationItem.id = zoteroItem.id;
+					items.push(zoteroItem);
+				}
 			}
-			return needUpdate ? Zotero.Integration.UPDATE : Zotero.Integration.NO_ACTION;
-		}).apply(this, arguments);
+		}
+		
+		// Items may be in libraries that haven't been loaded, and retrieveItem() is synchronous, so load
+		// all data (as required by toJSON(), which is used by itemToExportFormat(), which is used by
+		// itemToCSLJSON()) now
+		if (items.length) {
+			await Zotero.Items.loadDataTypes(items);
+		}
+		return needUpdate ? Zotero.Integration.UPDATE : Zotero.Integration.NO_ACTION;
 	}
 		
 	async handleMissingItem(idx) {

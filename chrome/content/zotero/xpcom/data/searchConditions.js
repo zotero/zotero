@@ -169,6 +169,17 @@ Zotero.SearchConditions = new function(){
 			},
 			
 			{
+				name: 'quicksearch-titleCreatorYearNote',
+				operators: {
+					is: true,
+					isNot: true,
+					contains: true,
+					doesNotContain: true
+				},
+				noLoad: true
+			},
+			
+			{
 				name: 'quicksearch-fields',
 				operators: {
 					is: true,
