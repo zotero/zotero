@@ -197,6 +197,9 @@ var Zotero_Tabs = new function () {
 		this._selectedID = id;
 		this.deck.selectedIndex = Array.from(this.deck.children).findIndex(x => x.id == id);
 		this._update();
+		if (this.onTabSelect) {
+			this.onTabSelect(tab.type);
+		}
 	};
 
 	/**

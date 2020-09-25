@@ -131,6 +131,29 @@ var ZoteroPane = new function()
 		
 		// continue loading pane
 		_loadPane();
+		
+		Zotero_Tabs.onTabSelect = (type) => {
+			let toolbar = document.getElementById('zotero-pane-horizontal-space');
+			let extendedToolbar = document.getElementById('zotero-reader-toolbar-extension');
+			let itemPane = document.getElementById('zotero-item-pane');
+			if (type == 'library') {
+				toolbar.hidden = false;
+				extendedToolbar.hidden = true;
+				itemPane.hidden = false;
+			}
+			else {
+				toolbar.hidden = true;
+				extendedToolbar.hidden = false;
+				let items = ZoteroPane_Local.itemsView.getSelectedItems();
+				
+				if (items.length == 1 && items[0].isNote()) {
+					itemPane.hidden = false;
+				}
+				else {
+				itemPane.hidden = true;
+				}
+			}
+		}
 	};
 	
 	/**

@@ -481,6 +481,22 @@ class ReaderTab extends ReaderInstance {
 		}
 	}
 	
+	_toggleNoteSidebar(isToggled) {
+		let itemPane = this._window.document.getElementById('zotero-item-pane');
+		var noteEditor = this._window.document.getElementById('zotero-note-editor');
+		let item = noteEditor.item;
+		let zp = Zotero.getActiveZoteroPane();
+		if (itemPane.hidden) {
+			if (item) {
+				zp.selectItem(item.id);
+				itemPane.hidden = false;
+			}
+		}
+		else {
+			itemPane.hidden = true;
+		}
+	}
+	
 	_setTitleValue(title) {
 		this._window.Zotero_Tabs.rename(this.tabID, title);
 	}
