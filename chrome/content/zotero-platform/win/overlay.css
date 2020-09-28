@@ -154,7 +154,7 @@ tree {
 	border-color: var(--theme-border-color);
 }
 
-#zotero-view-tabbox > tabs {
+#zotero-editpane-tabs {
 	margin-top: 2px;
 }
 

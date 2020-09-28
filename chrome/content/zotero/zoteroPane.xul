@@ -580,7 +580,7 @@
 				<vbox>
 					<hbox id="zotero-reader-toolbar-extension" height="32" hidden="true"></hbox>
 					<!-- itemPane.xul -->
-					<vbox id="zotero-item-pane"/>
+					<vbox id="zotero-item-pane" flex="1"/>
 				</vbox>
 			</hbox>
 		</vbox>
