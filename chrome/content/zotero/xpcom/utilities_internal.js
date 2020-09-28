@@ -576,7 +576,7 @@ Zotero.Utilities.Internal = {
 				xhrRequest.withCredentials = true;
 				xhrRequest.responseType = "arraybuffer";
 				xhrRequest.onerror = (e) => {
-					let error = new Error(e.detail);
+					let error = e.detail;
 					onDone(Components.utils.cloneInto(error, sandbox));
 				};
 				xhrRequest.onreadystatechange = () => {
@@ -591,7 +591,7 @@ Zotero.Utilities.Internal = {
 							onDone(Components.utils.cloneInto(res, sandbox));
 						}
 						else {
-							let error = new Error('Bad Status or Length');
+							let error = 'Bad Status or Length';
 							onDone(Components.utils.cloneInto(error, sandbox));
 						}
 					}
@@ -615,13 +615,13 @@ Zotero.Utilities.Internal = {
 				catch (error) {
 					let response = await new Promise((resolve, reject) => {
 						coFetch(url, (response) => {
-							if (response.status) {
+							if (typeof response === 'object') {
 								resolve(response);
 							}
 							else {
 								Zotero.debug("Error retrieving url: " + url);
-								Zotero.debug(response.message);
-								reject();
+								Zotero.debug(response);
+								reject(new Error(response));
 							}
 						});
 					});

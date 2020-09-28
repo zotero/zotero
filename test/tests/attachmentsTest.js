@@ -424,6 +424,45 @@ describe("Zotero.Attachments", function() {
 			let expectedContents = await Zotero.File.getBinaryContentsAsync(expectedPath);
 			assert.equal(contents, expectedContents);
 		});
+
+		it("should save a document with embedded files that throw errors", async function () {
+			var item = await createDataObject('item');
+
+			var url = "file://" + OS.Path.join(getTestDataDirectory().path, "snapshot", "foobar.gif");
+			httpd.registerPathHandler(
+				'/index.html',
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 200, "OK");
+						response.write(`<html><head><title>Test</title></head><body><img src="${url}"/>`);
+					}
+				}
+			);
+
+			var deferred = Zotero.Promise.defer();
+			win.addEventListener('pageshow', () => deferred.resolve());
+			win.loadURI(testServerPath + "/index.html");
+			await deferred.promise;
+
+			var attachment = await Zotero.Attachments.importFromDocument({
+				document: win.content.document,
+				parentItemID: item.id
+			});
+
+			assert.equal(attachment.getField('url'), testServerPath + "/index.html");
+
+			// Check for embedded files
+			var storageDir = Zotero.Attachments.getStorageDirectory(attachment).path;
+			var file = await attachment.getFilePathAsync();
+			assert.equal(OS.Path.basename(file), 'index.html');
+			assert.isFalse(await OS.File.exists(OS.Path.join(storageDir, 'images', '1.gif')));
+
+			// Check attachment html file contents
+			let path = OS.Path.join(storageDir, 'index.html');
+			assert.isTrue(await OS.File.exists(path));
+			let contents = await Zotero.File.getContentsAsync(path);
+			assert.isTrue(contents.startsWith("<html><!--\n Page saved with SingleFileZ"));
+		});
 	});
 	
 	describe("#importFromPageData()", function () {
