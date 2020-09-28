@@ -1247,9 +1247,9 @@ Zotero.Integration.Session.prototype._updateDocument = async function(forceCitat
 	}
 	
 	// Do these operations in reverse in case plug-ins care about order
-	var removeCodeFields = Object.keys(this._removeCodeFields).sort();
-	for (var i=(removeCodeFields.length-1); i>=0; i--) {
-		await this._fields[removeCodeFields[i]].removeCode();
+	var removeCodeFields = Object.keys(this._removeCodeFields).sort((a, b) => b - a);
+	for (let fieldIndex of removeCodeFields) {
+		await this._fields[fieldIndex].removeCode();
 	}
 	
 	var deleteFields = Object.keys(this._deleteFields).sort((a, b) => b - a);
@@ -2766,6 +2766,9 @@ Zotero.Integration.Citation = class {
 			
 			// get Zotero item
 			var zoteroItem = false;
+			if ('uri' in citationItem && !('uris' in citationItem)) {
+				citationItem.uris = [citationItem.uri];
+			}
 			if (citationItem.uris) {
 				let itemNeedsUpdate;
 				[zoteroItem, itemNeedsUpdate] = await Zotero.Integration.currentSession.uriMap.getZoteroItemForURIs(citationItem.uris);
