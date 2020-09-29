@@ -352,6 +352,10 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 		if (condition == 'quicksearch-titleCreatorYear') {
 			this.addCondition('noChildren', 'true');
 		}
+		else if (condition == 'quicksearch-titleCreatorYearNote') {
+			this.addCondition('itemType', 'isNot', 'attachment');
+			this.addCondition('itemType', 'isNot', 'annotation');
+		}
 		
 		return false;
 	}
