@@ -1435,8 +1435,11 @@ Zotero.Integration.Session.prototype._processNote = function (item) {
 			placeholderIDs.push(placeholderID);
 			let placeholderURL = NOTE_CITATION_PLACEHOLDER_LINK + placeholderID;
 			// Split out the citation element and replace with a placeholder link
-			text = text.split(citationElem.outerHTML)
-				.join(`<a href="${placeholderURL}">${citationElem.textContent}</a>`);
+			let startIndex = text.indexOf(citationElem.outerHTML);
+			let endIndex = startIndex + citationElem.outerHTML.length;
+			text = text.slice(0, startIndex)
+				+ `<a href="${placeholderURL}">${citationElem.textContent}</a>`
+				+ text.slice(endIndex);
 		}
 		catch (e) {
 			e.message = `Failed to parse a citation from a note: ${decodeURIComponent(citationElem.dataset.citation)}`;
