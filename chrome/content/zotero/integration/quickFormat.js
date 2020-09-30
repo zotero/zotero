@@ -773,14 +773,17 @@ var Zotero_QuickFormat = new function () {
 				Zotero.getString('integration.cannotInsertItemWithNote'));
 			return false;
 		}
-		if (item && item.isNote() && nodes.length) {
-			if (!ps.confirm(null,
+		if (item && item.isNote()) {
+			document.getElementById('classic-view').hidden = true;
+			if (nodes.length) {
+				if (!ps.confirm(null,
 					Zotero.getString('general.warning'),
 					Zotero.getString('integration.noteCiteItemsRemoved'))) {
-				return false;
+					return false;
+				}
+				_clearCitation();
+				citationItem.isNote = true;
 			}
-			_clearCitation();
-			citationItem.isNote = true;
 		}
 		if (typeof citationItem.id === "string" && citationItem.id.indexOf("/") !== -1) {
 			citationItem.uris = item.cslURIs;
@@ -1122,14 +1125,19 @@ var Zotero_QuickFormat = new function () {
 	/**
 	 * Handle escape for entire window
 	 */
-	this.onKeyPress = function(event) {
+	this.onKeyPress = function (event) {
 		var keyCode = event.keyCode;
-		if(keyCode === event.DOM_VK_ESCAPE && !accepted) {
+		if (keyCode === event.DOM_VK_ESCAPE && !accepted) {
 			accepted = true;
 			io.citation.citationItems = [];
 			io.accept();
 		}
-	}
+		else if (['Backspace', 'Delete'].includes(event.key)) {
+			var nodes = Array.from(qfe.childNodes).filter(node => node.tagName == 'span');
+			document.getElementById('classic-view').hidden =
+				nodes[0] && nodes[0].dataset && JSON.parse(nodes[0].dataset.citationItem).isNote;
+		}
+	};
 
 	/**
 	 * Get bubbles within the current selection
