@@ -48,14 +48,14 @@ var Zotero_Tag_Color_Chooser = new function() {
 			var colorPicker = document.getElementById('color-picker');
 			var tagPosition = document.getElementById('tag-position');
 			
-			colorPicker.setAttribute('cols', 3);
+			//colorPicker.setAttribute('cols', 3);
 			colorPicker.setAttribute('tileWidth', 24);
 			colorPicker.setAttribute('tileHeight', 24);
-			colorPicker.colors = [
-				'#FF6666', '#FF8C19', '#999999',
-				'#5FB236', '#009980', '#2EA8E5',
-				'#576DD9', '#A28AE5', '#A6507B'
-			];
+			//colorPicker.colors = [
+			//	'#FF6666', '#FF8C19', '#999999',
+			//	'#5FB236', '#009980', '#2EA8E5',
+			//	'#576DD9', '#A28AE5', '#A6507B'
+			//];
 			
 			var maxTags = document.getElementById('max-tags');
 			maxTags.value = Zotero.getString('tagColorChooser.maxTags', Zotero.Tags.MAX_COLORED_TAGS);
