@@ -682,11 +682,8 @@ describe("ZoteroPane", function() {
 		it("should edit a saved search", function* () {
 			var search = yield createDataObject('search');
 			var promise = waitForWindow('chrome://zotero/content/searchDialog.xul', function (win) {
-				let searchBox = win.document.getElementById('search-box');
-				var c = searchBox.search.getCondition(
-					searchBox.search.addCondition("title", "contains", "foo")
-				);
-				searchBox.addCondition(c);
+				let searchObject = win.io.dataIn.search;
+				searchObject.addCondition("title", "contains", "foo");
 				win.document.documentElement.acceptDialog();
 			});
 			yield zp.editSelectedCollection();
@@ -699,11 +696,8 @@ describe("ZoteroPane", function() {
 			var group = yield getGroup();
 			var search = yield createDataObject('search', { libraryID: group.libraryID });
 			var promise = waitForWindow('chrome://zotero/content/searchDialog.xul', function (win) {
-				let searchBox = win.document.getElementById('search-box');
-				var c = searchBox.search.getCondition(
-					searchBox.search.addCondition("title", "contains", "foo")
-				);
-				searchBox.addCondition(c);
+				let searchObject = win.io.dataIn.search;
+				searchObject.addCondition("title", "contains", "foo");
 				win.document.documentElement.acceptDialog();
 			});
 			yield zp.editSelectedCollection();
