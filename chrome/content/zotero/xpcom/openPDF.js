@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+/* eslint-disable array-element-newline */
+
 Zotero.OpenPDF = {
 	openToPage: async function (path, page) {
 		var handler = Zotero.Prefs.get("fileHandler.pdf");
@@ -193,7 +195,7 @@ Zotero.OpenPDF = {
 	},
 	
 	_openWithPDFExpert: async function (appPath, filePath, page) {
-		await Zotero.Utilities.Internal.exec('/usr/bin/open', ['-a', handlers, filePath]);
+		await Zotero.Utilities.Internal.exec('/usr/bin/open', ['-a', appPath, filePath]);
 		// Go to page using AppleScript (same as Preview)
 		let args = [
 			'-e', `tell app "${appPath}" to activate`,
