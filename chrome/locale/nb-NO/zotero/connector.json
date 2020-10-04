@@ -54,7 +54,7 @@
     "message": "Du kan <a href=\"$1\"> laste ned $2</a> eller <a href=\"$3\"> feilsøke forbindelsen </a> om nødvendig."
   },
   "error_connection_enableSavingToOnlineLibrary": {
-    "message": "Aktiver Lagre til nettbibliotek"
+    "message": "Aktiver Lagre til nettbiblioteket"
   },
   "integration_error_clientUpgrade": {
     "message": "Web-basert henvisning krever $1 eller senere."
@@ -78,6 +78,6 @@
     "message": "$1 integrasjon er ikke tilgjengelig når du redigerer Microsoft Word .docx filer direkte i Google Docs. Velg Fil → Lagres som Google Docs for å aktivere denne funksjonaliteten..<br/><br/>Hvis du ønsker å flytte et Word dokument med $1 henvisninger til Google Docs, se <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Flytte dokumenter mellom tekstbehandlere</a>."
   },
   "general_saveTo": {
-    "message": "Lagre till$1"
+    "message": "Lagre til $1"
   }
 }

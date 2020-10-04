@@ -57,16 +57,16 @@
     "message": "Çevrimiçi Kitaplığa Kaydetmeyi Etkinleştir"
   },
   "integration_error_clientUpgrade": {
-    "message": "Web bazlı gönderme yapmak için $1 veya yenisi gerekmektedir."
+    "message": "Web bazlı alıntı yapmak için $1 veya yenisi gerekmektedir."
   },
   "integration_error_connection": {
-    "message": "$1, $2 masaüstü uygulamasıyla iletişim kuramamaktadır. Web bazlı gönderme yapabilmek için $2 açık olmalıdır."
+    "message": "$1, $2 masaüstü uygulamasıyla iletişim kuramamaktadır. Web bazlı alıntı yapabilmek için $2 açık olmalıdır."
   },
   "integration_googleDocs_unlinkBeforeSaving_warning": {
-    "message": "Bu belge aktif Zotero göndermeleri içermektedir ve bu göndermeler belgenin indirilmiş kopyalarında zotero.org bağlantıları olarak görüneceklerdir."
+    "message": "Bu belge aktif Zotero alıntıları içermektedir ve bu alıntılar belgenin indirilmiş kopyalarında zotero.org bağlantıları olarak görüneceklerdir."
   },
   "integration_googleDocs_unlinkBeforeSaving_instructions": {
-    "message": "Paylaşılmaya uygun bir versiyon üretmek için, önce <b>Kopya yarat...</b>seçeneğini, sonra da <b>Göndermeleri Bağlantısızlaştır</b> seçeneğini seçiniz ve sonra bağlantısızlaştırılmış versiyonu indiriniz. Belgenizin bağlantıları içeren asıl versiyonunu, gelecekte değişiklikler yapabilmek için tutunuz."
+    "message": "Paylaşılmaya uygun bir versiyon üretmek için, önce <b>Kopya yarat...</b>seçeneğini, sonra da <b>Alıntıları Bağlantısızlaştır</b> seçeneğini seçiniz ve sonra bağlantısızlaştırılmış versiyonu indiriniz. Belgenizin bağlantıları içeren asıl versiyonunu, gelecekte değişiklikler yapabilmek için tutunuz."
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Yine de Bağlantılı Versiyonu İndir"
@@ -75,7 +75,7 @@
     "message": "$1 belgenizi güncelliyor."
   },
   "integration_googleDocs_docxAlert": {
-    "message": "$1 ile birleştirme, Microsoft Word .docx dosyalarını Google Docs içinde düzenlerken kullanılamamaktadır. Dosya Seçiniz → Google Docs dosyası olarak kaydediniz seçenekleri ile bu fonksiyonu etkinleştirebilirsiniz.<br/><br/> $1 göndermesi içeren bir Word belgesini Google Docs uygulamasına aktarmak için, <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Moving Documents Between Word Processors</a> sayfasına bakınız."
+    "message": "$1 ile birleştirme, Microsoft Word .docx dosyalarını Google Docs içinde düzenlerken kullanılamamaktadır. Dosya Seçiniz → Google Docs dosyası olarak kaydediniz seçenekleri ile bu fonksiyonu etkinleştirebilirsiniz.<br/><br/> $1 alıntısı içeren bir Word belgesini Google Docs uygulamasına aktarmak için, <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Moving Documents Between Word Processors</a> sayfasına bakınız."
   },
   "general_saveTo": {
     "message": "$1'ya Kaydet"

@@ -50,6 +50,9 @@
   "integration_error_clientUpgrade": {
     "message": "A webalapú hivatkozáshoz szükség van $1 vagy későbbire."
   },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Ez a dokumentum aktív Zotero-hivatkozásokat tartalmaz, amelyek zotero.org linkként jelennek meg egy letöltött példányban."
+  },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Mindenképpen töltse le a hivatkozott verziót"
   },

@@ -53,7 +53,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Mostrar os duplicados">
 <!ENTITY zotero.collections.showUnfiledItems "Mostrar os elementos sen cubrir">
-<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
+<!ENTITY zotero.collections.showRetractedItems "Mostrar elementos descartados">
 
 <!ENTITY zotero.items.itemType "Tipo de elemento">
 <!ENTITY zotero.items.type_column "Tipo de elemento">
@@ -120,7 +120,7 @@
 <!ENTITY zotero.toolbar.import.label "Importar...">
 <!ENTITY zotero.toolbar.importFromClipboard "Importar do portaretallos">
 <!ENTITY zotero.toolbar.export.label "Exportar a biblioteca...">
-<!ENTITY zotero.toolbar.rtfScan.label "Escaneo RTF">
+<!ENTITY zotero.toolbar.rtfScan.label "Esculcar RTF">
 <!ENTITY zotero.toolbar.timeline.label "Crear un cronograma">
 <!ENTITY zotero.toolbar.preferences.label "Preferencias...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Axuda e documentación">
@@ -294,7 +294,7 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Borrar os elementos sen ler despois de">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "día(s)">
 
-<!ENTITY zotero.rtfScan.title "Analizador de RTF">
+<!ENTITY zotero.rtfScan.title "Esculcar RTF">
 <!ENTITY zotero.rtfScan.cancel.label "Cancelar">
 <!ENTITY zotero.rtfScan.citation.label "Cita">
 <!ENTITY zotero.rtfScan.itemName.label "Nome do elemento">
@@ -302,16 +302,16 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Citas ambiguas">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Citas cotexadas">
 <!ENTITY zotero.rtfScan.introPage.label "Introdución">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero pode extraer e reformatear automaticamente citas e inserir a bibliografía en ficheiros RTF. O analizador de RTFs soporta as citas con variacións nos seguintes formatos:">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero pode extraer e darlle automaticamente novo formato ás citas e inserir a bibliografía en ficheiros RTF. O esculcador de RTFs acepta as citas con variacións nos seguintes formatos:">
 <!ENTITY zotero.rtfScan.introPage.description2 "Para comezar escolla abaixo un ficheiro RTF de entrada e un ficheiro de saída:">
 <!ENTITY zotero.rtfScan.scanPage.label "Esculcando as citas">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero está esculdando as citas dos seus documentos. Agarda.">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero está esculcando as citas dos seus documentos. Agarda.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Comproba os elementos citados">
 <!ENTITY zotero.rtfScan.citationsPage.description "Revisa a lista de citas recoñecidas de abaixo para asegurarse de que se escolleron os elementos correctos. As citas non cotexadas ou ambiguas deben ser resoltas antes de continuar co seguinte paso.">
 <!ENTITY zotero.rtfScan.stylePage.label "Formato de documentos">
 <!ENTITY zotero.rtfScan.formatPage.label "Formato de citas">
 <!ENTITY zotero.rtfScan.formatPage.description "Zotero está procesando e dando formato ao arquivo RTF. Agarde.">
-<!ENTITY zotero.rtfScan.completePage.label "Esculca completa do RTF">
+<!ENTITY zotero.rtfScan.completePage.label "Esculcado completo do RTF">
 <!ENTITY zotero.rtfScan.completePage.description "O seu documento xa foi esculcado e procesado. Asegúrate de que o formato é correcto.">
 <!ENTITY zotero.rtfScan.inputFile.label "Ficheiro de entrada">
 <!ENTITY zotero.rtfScan.outputFile.label "Ficheiro de saída">

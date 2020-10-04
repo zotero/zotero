@@ -14,6 +14,9 @@
   "general_cancel": {
     "message": "Atsisakyti"
   },
+  "general_pleaseWait": {
+    "message": "Palaukite..."
+  },
   "progressWindow_savingTo": {
     "message": "Įrašoma į"
   },
@@ -64,6 +67,9 @@
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Vis tiek parsisiųsti susietą versiją"
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1 atnaujina jūsų dokumentą."
   },
   "general_saveTo": {
     "message": "Įrašyti į „$1“"

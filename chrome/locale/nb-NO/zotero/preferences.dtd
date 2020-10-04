@@ -75,10 +75,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 " for mer informasjon.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Tilbakestill synkroniseringshistorikk for data">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Slå sammen lokale data med eksterne data og ignorer synkroniseringshistorikk">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Gjenopprett fra nettbibliotek">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Gjenopprett fra nettbiblioteket">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Skriv over lokale Zotero data med data fra nettbiblioteket">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Erstatt nettbibliotek">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overskriv nettbibliotek med lokale Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Erstatt nettbiblioteket">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overskriv nettbiblioteket med lokale Zotero data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Tilbakestill filsynkroniseringshistorikk">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Sammenlign alle vedlegg med lagringstjeneste">
 <!ENTITY zotero.preferences.sync.reset "Tilbakestill">

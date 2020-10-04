@@ -76,9 +76,9 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reiniciar o historial de sincronización de datos">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Xunguir os datos locais cos datos do servidor, esquecéndose do historial de sincronización.">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restaurar a partir da librería en liña">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Sobreescribir a librería local de Zotero cos datos da libraría en liña.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Sobreescribir a librería en liña cos datos locais de Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Sobrescribir a librería local de Zotero cos datos da libraría en liña.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Substituír a librería en liña">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Sobrescribir a librería en liña cos datos locais de Zotero">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reiniciar o historial de sincronización de ficheiros">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Comparar todos os ficheiros anexos co servizo de almacenamento">
 <!ENTITY zotero.preferences.sync.reset "Reiniciar">
@@ -163,7 +163,7 @@
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Calquera cadea">
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avanzado">
-<!ENTITY zotero.preferences.advanced.filesAndFolders "Ficheiros e cartafois">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Ficheiros e cartafoles">
 <!ENTITY zotero.preferences.advanced.keys "Atallos">
 
 <!ENTITY zotero.preferences.advanced.advancedConfiguration "Configuración avanzada">

@@ -48,7 +48,7 @@
 <!ENTITY layout.label "Interface">
 <!ENTITY standardView.label "Interface estándar">
 <!ENTITY stackedView.label "Interface agrupada">
-<!ENTITY collectionsPane.label "Panel de colecións">
+<!ENTITY collectionsPane.label "Panel de coleccións">
 <!ENTITY itemPane.label "Panel de elementos">
 <!ENTITY tagSelector.label "Selector de etiquetas">
 <!ENTITY recursiveCollections.label "Amosar os elementos das subcolecións">
@@ -90,7 +90,7 @@
 <!ENTITY helpReportErrors.label "Informar de erros...">
 <!ENTITY helpReportErrors.accesskey "E">
 
-<!ENTITY debugOutputLogging.label "Saída de depuración do logging">
+<!ENTITY debugOutputLogging.label "Saída de depuración do rexistro de saída">
 <!ENTITY debugOutputLogging.accesskey "L">
 <!ENTITY debugOutputLogging.submit "Enviar a saída">
 <!ENTITY debugOutputLogging.view "Ver a saída">

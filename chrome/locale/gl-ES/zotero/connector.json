@@ -63,10 +63,10 @@
     "message": "O $1 non deu conectado coa aplicación de escritorio $2. $2 ten que abrirse para poder usar a citación baseada na web."
   },
   "integration_googleDocs_unlinkBeforeSaving_warning": {
-    "message": "Este documento contén citas activas de Zotero, que aparecerán como ligazóns a zotero.org cando se descargen copias."
+    "message": "Este documento contén citas activas de Zotero, que aparecerán como ligazóns a zotero.org cando se descarguen copias."
   },
   "integration_googleDocs_unlinkBeforeSaving_instructions": {
-    "message": "Para xerar unha versión axeitada para compartir primeiro prema en <b>Facer unha copia...</b>do menú Ficheiro, escolla <b>Desligar citas</b>do menú de Zotero no novo documeno e logo descargue a vesión sen ligazóns. Conserva o documento orixinal coas ligazóns por se é o caso que as precisa máis adiante."
+    "message": "Para xerar unha versión axeitada para compartir primeiro preme en <b>Fai unha copia...</b>do menú Ficheiro, escolle <b>Desligar citas</b>do menú de Zotero no novo documento e logo descarga a versión sen ligazóns. Conserva o documento orixinal coas ligazóns por se é o caso que as precisas máis adiante."
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Descargar a versión con ligazóns igualmente"

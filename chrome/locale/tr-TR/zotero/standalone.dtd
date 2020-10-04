@@ -34,7 +34,7 @@
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY copyCitationCmd.label "Gönderme Kopyala">
+<!ENTITY copyCitationCmd.label "Alıntı Kopyala">
 <!ENTITY copyBibliographyCmd.label "Kaynakça Kopyala">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Sayfa Yönünü Değiştir">
