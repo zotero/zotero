@@ -63,6 +63,7 @@ class EditorInstance {
 			action: 'init',
 			value: this._state || this._item.note,
 			readOnly: this._readOnly,
+			placeholder: options.placeholder,
 			dir: Zotero.dir,
 			font: this._getFont(),
 			// TODO: We should avoid hitting `data-schema-version` in note text
@@ -98,7 +99,7 @@ class EditorInstance {
 	async updateCitationsForURIs(uris) {
 		let subscriptions = this._subscriptions
 		.filter(s => s.data.citation && s.data.citation.citationItems
-		.some(citationItem => uris.includes(citationItem.uri)));
+		.some(citationItem => uris.some(uri => citationItem.uris.includes(uri))));
 		for (let subscription of subscriptions) {
 			await this._feedSubscription(subscription);
 		}
@@ -111,6 +112,13 @@ class EditorInstance {
 				noteData = JSON.parse(JSON.stringify(noteData));
 			}
 			this._save(noteData);
+		}
+	}
+
+	async insertAnnotations(annotations) {
+		let list = await this._annotationsToInsertionList(annotations);
+		if (list.length) {
+			this._postMessage({ action: 'insertAnnotationsAndCitations', list, pos: -1 });
 		}
 	}
 	
@@ -132,6 +140,36 @@ class EditorInstance {
 		this._postMessage({ action: 'updateFont', font: this._getFont() });
 	}
 
+	async _annotationsToInsertionList(annotations) {
+		let list = [];
+		for (let annotation of annotations) {
+			let attachmentItem = await Zotero.Items.getAsync(annotation.itemId);
+			if (!attachmentItem) {
+				continue;
+			}
+			let item = attachmentItem.parentID && await Zotero.Items.getAsync(attachmentItem.parentID) || attachmentItem;
+			if (item !== attachmentItem) {
+				annotation.parentURI = Zotero.URI.getItemURI(item);
+			}
+			annotation.uri = Zotero.URI.getItemURI(attachmentItem);
+
+			let citationItem = {
+				uris: [Zotero.URI.getItemURI(item)],
+				itemData: Zotero.Cite.System.prototype.retrieveItem(item),
+				locator: annotation.pageLabel
+			};
+			
+			annotation.citationItem = citationItem;
+
+			let citation = {
+				citationItems: [citationItem],
+				properties: {}
+			};
+			list.push({ annotation, citation });
+		}
+		return list;
+	}
+
 	_messageHandler = async (e) => {
 		if (e.data.instanceId !== this.instanceID) {
 			return;
@@ -148,11 +186,12 @@ class EditorInstance {
 						if (!item) {
 							continue;
 						}
+						
 						list.push({
 							citation: {
 								citationItems: [{
-									uri: Zotero.URI.getItemURI(item),
-									backupText: this._getBackupStr(item)
+									uris: [Zotero.URI.getItemURI(item)],
+									itemData: Zotero.Cite.System.prototype.retrieveItem(item),
 								}],
 								properties: {}
 							}
@@ -161,23 +200,7 @@ class EditorInstance {
 				}
 				else if (type === 'zotero/annotation') {
 					let annotations = JSON.parse(data);
-					for (let annotation of annotations) {
-						let attachmentItem = await Zotero.Items.getAsync(annotation.itemId);
-						if (!attachmentItem) {
-							continue;
-						}
-						let citationItem = attachmentItem.parentID && await Zotero.Items.getAsync(attachmentItem.parentID) || attachmentItem;
-						annotation.uri = Zotero.URI.getItemURI(attachmentItem);
-						let citation = {
-							citationItems: [{
-								uri: Zotero.URI.getItemURI(citationItem),
-								backupText: this._getBackupStr(citationItem),
-								locator: annotation.pageLabel
-							}],
-							properties: {}
-						};
-						list.push({ annotation, citation });
-					}
+					list = await this._annotationsToInsertionList(annotations);
 				}
 				if (list.length) {
 					this._postMessage({ action: 'insertAnnotationsAndCitations', list, pos });
@@ -191,6 +214,26 @@ class EditorInstance {
 				}
 				else {
 					await Zotero.Reader.openURI(uri, { position });
+				}
+				return;
+			}
+			case 'openCitation': {
+				let { citation } = message;
+				let items = [];
+				for (let citationItem of citation.citationItems) {
+					let item = await this._getItemFromURIs(citationItem.uris);
+					if (item) {
+						items.push(item);
+					}
+				}
+				let zp = Zotero.getActiveZoteroPane();
+				if (zp && items.length) {
+					zp.selectItems(items.map(item => item.id));
+					let win = Zotero.getMainWindow();
+					if (win) {
+						win.focus();
+						win.Zotero_Tabs.select('zotero-pane');
+					}
 				}
 				return;
 			}
@@ -245,7 +288,7 @@ class EditorInstance {
 				citation = JSON.parse(JSON.stringify(citation));
 				let availableCitationItems = [];
 				for (let citationItem of citation.citationItems) {
-					let item = await Zotero.URI.getURIItem(citationItem.uri);
+					let item = await this._getItemFromURIs(citationItem.uris);
 					if (item) {
 						availableCitationItems.push({ ...citationItem, id: item.id });
 					}
@@ -444,6 +487,31 @@ class EditorInstance {
 		}
 	}
 
+	async _getItemFromURIs(uris) {
+		for (let uri of uris) {
+			// Try getting URI directly
+			try {
+				let item = await Zotero.URI.getURIItem(uri);
+				if (item) {
+					// Ignore items in the trash
+					if (!item.deleted) {
+						return item;
+					}
+				}
+			}
+			catch (e) {
+			}
+
+			// Try merged item mapping
+			var replacer = await Zotero.Relations.getByPredicateAndObject(
+				'item', Zotero.Relations.replacedItemPredicate, uri
+			);
+			if (replacer.length && !replacer[0].deleted) {
+				return replacer[0];
+			}
+		}
+	}
+
 	/**
 	 * Builds the string to go inside a bubble
 	 */
@@ -483,15 +551,19 @@ class EditorInstance {
 	async _getFormattedCitation(citation) {
 		let formattedItems = [];
 		for (let citationItem of citation.citationItems) {
-			let item = await Zotero.URI.getURIItem(citationItem.uri);
-			if (item && !item.deleted) {
+			let item = await this._getItemFromURIs(citationItem.uris);
+			if (!item && citationItem.itemData) {
+				item = new Zotero.Item();
+				Zotero.Utilities.itemFromCSLJSON(item, citationItem.itemData);
+			}
+			if (item) {
 				formattedItems.push(this._buildBubbleString(citationItem, this._getBackupStr(item)));
 			}
-			else {
-				let formattedItem = this._buildBubbleString(citationItem, citationItem.backupText);
-				formattedItem = `<span style="color: red;">${formattedItem}</span>`;
-				formattedItems.push(formattedItem);
-			}
+			// else {
+			// 	let formattedItem = this._buildBubbleString(citationItem, citationItem.backupText);
+			// 	formattedItem = `<span style="color: red;">${formattedItem}</span>`;
+			// 	formattedItems.push(formattedItem);
+			// }
 		}
 		return formattedItems.join(';');
 	}
@@ -595,10 +667,10 @@ class EditorInstance {
 				}
 
 				for (let citationItem of citation.citationItems) {
-					let itm = await Zotero.Items.getAsync(parseInt(citationItem.id));
+					let item = await Zotero.Items.getAsync(parseInt(citationItem.id));
 					delete citationItem.id;
-					citationItem.uri = Zotero.URI.getItemURI(itm);
-					citationItem.backupText = that._getBackupStr(itm);
+					citationItem.uris = [Zotero.URI.getItemURI(item)];
+					citationItem.itemData = Zotero.Cite.System.prototype.retrieveItem(item);
 				}
 
 				if (progressCallback || !citationData.citationItems.length) {

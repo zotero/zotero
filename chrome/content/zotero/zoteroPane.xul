@@ -214,6 +214,7 @@
 								<div xmlns="http://www.w3.org/1999/xhtml" class="sync-button-tooltip-messages"/>
 							</tooltip>
 						</toolbarbutton>
+						<button id="temp-toggle-1">(Slider)_______</button>
 					</hbox>
 				</toolbar>
 						
@@ -576,12 +577,9 @@
 					oncommand="ZoteroPane.updateToolbarPosition(); ZoteroPane.updateTagsBoxSize()">
 					<grippy id="zotero-items-grippy"/>
 				</splitter>
-		
-				<vbox>
-					<hbox id="zotero-reader-toolbar-extension" height="32" hidden="true"></hbox>
-					<!-- itemPane.xul -->
-					<vbox id="zotero-item-pane" flex="1"/>
-				</vbox>
+				
+				<!-- itemPane.xul -->
+				<vbox id="zotero-item-pane" flex="1"/>
 			</hbox>
 		</vbox>
 

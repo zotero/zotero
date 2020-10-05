@@ -92,7 +92,7 @@ var Zotero_Tabs = new function () {
 	 * @param {Function} onClose
 	 * @return {{ id: string, container: XULElement}} id - tab id, container - a new tab container created in the deck
 	 */
-	this.add = function ({ type, title, index, select, onClose }) {
+	this.add = function ({ type, title, index, select, onClose, notifierData }) {
 		if (typeof type != 'string') {
 			throw new Error(`'type' should be a string (was ${typeof type})`);
 		}
@@ -116,6 +116,7 @@ var Zotero_Tabs = new function () {
 		if (select) {
 			this.select(id);
 		}
+		Zotero.Notifier.trigger('add', 'tab', id, notifierData);
 		return { id, container };
 	};
 
@@ -156,6 +157,7 @@ var Zotero_Tabs = new function () {
 		if (tab.onClose) {
 			tab.onClose();
 		}
+		Zotero.Notifier.trigger('close', 'tab', tab.id);
 		this._update();
 	};
 
@@ -197,9 +199,7 @@ var Zotero_Tabs = new function () {
 		this._selectedID = id;
 		this.deck.selectedIndex = Array.from(this.deck.children).findIndex(x => x.id == id);
 		this._update();
-		if (this.onTabSelect) {
-			this.onTabSelect(tab.type);
-		}
+		Zotero.Notifier.trigger('select', 'tab', tab.id, { type: tab.type });
 	};
 
 	/**

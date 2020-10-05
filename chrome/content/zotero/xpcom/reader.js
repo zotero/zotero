@@ -34,9 +34,9 @@ class ReaderInstance {
 			this._nextHistory = [];
 		}
 		this._itemID = item.id;
-		this.updateTitle();
 		let path = await item.getFilePathAsync();
 		let buf = await OS.File.read(path, {});
+		this.updateTitle();
 		buf = new Uint8Array(buf).buffer;
 		// TODO: Remove when fixed
 		item._loaded.childItems = true;
@@ -176,18 +176,21 @@ class ReaderInstance {
 		popup.addEventListener('popuphidden', function () {
 			popup.remove();
 		});
+		// Add to note
 		let menuitem = this._window.document.createElement('menuitem');
-		menuitem.setAttribute('label', 'Delete');
+		menuitem.setAttribute('label', 'Add to Note');
 		menuitem.addEventListener('command', () => {
 			let data = {
 				action: 'popupCmd',
-				cmd: 'deleteAnnotation',
+				cmd: 'addToNote',
 				id: annotationId
 			};
 			this._postMessage(data);
 		});
 		popup.appendChild(menuitem);
+		// Separator
 		popup.appendChild(this._window.document.createElement('menuseparator'));
+		// Colors
 		for (let color of colors) {
 			menuitem = this._window.document.createElement('menuitem');
 			menuitem.setAttribute('label', color[0]);
@@ -204,6 +207,20 @@ class ReaderInstance {
 			});
 			popup.appendChild(menuitem);
 		}
+		// Separator
+		popup.appendChild(this._window.document.createElement('menuseparator'));
+		// Delete
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', 'Delete');
+		menuitem.addEventListener('command', () => {
+			let data = {
+				action: 'popupCmd',
+				cmd: 'deleteAnnotation',
+				id: annotationId
+			};
+			this._postMessage(data);
+		});
+		popup.appendChild(menuitem);
 		popup.openPopupAtScreen(x, y, true);
 	}
 
@@ -362,6 +379,11 @@ class ReaderInstance {
 					Zotero.debug('Dismiss PDF annotations');
 					return;
 				}
+				case 'addToNote': {
+					let { annotations } = message;
+					this._addToNote(annotations);
+					return;
+				}
 				case 'save': {
 					Zotero.debug('Exporting PDF');
 					let zp = Zotero.getActiveZoteroPane();
@@ -437,7 +459,7 @@ class ReaderInstance {
 }
 
 class ReaderTab extends ReaderInstance {
-	constructor() {
+	constructor(itemID) {
 		super();
 		this._window = Services.wm.getMostRecentWindow('navigator:browser');
 		let { id, container } = this._window.Zotero_Tabs.add({
@@ -447,6 +469,9 @@ class ReaderTab extends ReaderInstance {
 			onClose: () => {
 				this.tabID = null;
 				this.close();
+			},
+			notifierData: {
+				itemID
 			}
 		});
 		this.tabID = id;
@@ -499,6 +524,18 @@ class ReaderTab extends ReaderInstance {
 	
 	_setTitleValue(title) {
 		this._window.Zotero_Tabs.rename(this.tabID, title);
+	}
+
+	_addToNote(annotations) {
+		let noteEditor = this._window.ZoteroItemPane.getActiveNote();
+		if (!noteEditor) {
+			return;
+		}
+		let editorInstance = noteEditor.getCurrentInstance();
+		if (editorInstance) {
+			editorInstance.focus();
+			editorInstance.insertAnnotations(annotations);
+		}
 	}
 }
 
@@ -570,16 +607,7 @@ class ReaderWindow extends ReaderInstance {
 		this._window.close();
 	}
 
-	updateTitle() {
-		let item = Zotero.Items.get(this._itemID);
-		let title = item.getField('title');
-		let parentItemID = item.parentItemID;
-		if (parentItemID) {
-			let parentItem = Zotero.Items.get(parentItemID);
-			if (parentItem) {
-				title = parentItem.getField('title');
-			}
-		}
+	_setTitleValue(title) {
 		this._window.document.title = title;
 	}
 
@@ -733,7 +761,7 @@ class Reader {
 			});
 		}
 		else {
-			reader = new ReaderTab();
+			reader = new ReaderTab(itemID);
 			if (!(await reader.open({ itemID, location }))) {
 				return;
 			}

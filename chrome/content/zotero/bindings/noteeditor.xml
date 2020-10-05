@@ -82,6 +82,10 @@
 							this._editorInstance.saveSync();
 						}
 					}
+					
+					this.getCurrentInstance = () => {
+						return this._editorInstance;
+					}
 
 					this.initEditor = async (state) => {
 						if (this._editorInstance) {
@@ -94,7 +98,8 @@
 							iframeWindow: document.getAnonymousElementByAttribute(this, 'anonid', 'editor-view').contentWindow,
 							popup: document.getAnonymousElementByAttribute(this, 'anonid', 'editor-menu'),
 							onNavigate: this._navigateHandler,
-							readOnly: !this.editable
+							readOnly: !this.editable,
+							placeholder: this.placeholder
 						});
 					}
 
@@ -220,10 +225,10 @@
 							
 							this.initEditor();
 
-							var parentKey = this._item.parentKey;
-							if (parentKey) {
-								this.parentItem = Zotero.Items.getByLibraryAndKey(this._item.libraryID, parentKey);
-							}
+							// var parentKey = this._item.parentKey;
+							// if (parentKey) {
+							// 	this.parentItem = Zotero.Items.getByLibraryAndKey(this._item.libraryID, parentKey);
+							// }
 
 							this._id('links-box').item = this._item;
 						})();

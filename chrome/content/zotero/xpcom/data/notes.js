@@ -95,10 +95,10 @@ Zotero.Notes = new function() {
 		}
 		Zotero.DB.requireTransaction();
 
-		// `"uri":"http://zotero.org/users/${fromUserID}/items/"`
-		let from = `%22uri%22%3A%22http%3A%2F%2Fzotero.org%2Fusers%2F${fromUserID}%2Fitems%2F`;
-		// `"uri":"http://zotero.org/users/${toUserId}/items/"`
-		let to = `%22uri%22%3A%22http%3A%2F%2Fzotero.org%2Fusers%2F${toUserID}%2Fitems%2F`;
+		// `"http://zotero.org/users/${fromUserID}/items/`
+		let from = `%22http%3A%2F%2Fzotero.org%2Fusers%2F${fromUserID}%2Fitems%2F`;
+		// `"http://zotero.org/users/${toUserId}/items/`
+		let to = `%22http%3A%2F%2Fzotero.org%2Fusers%2F${toUserID}%2Fitems%2F`;
 		let sql = `UPDATE itemNotes SET note=REPLACE(note, '${from}', '${to}')`;
 		await Zotero.DB.queryAsync(sql);
 

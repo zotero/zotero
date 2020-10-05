@@ -132,9 +132,9 @@ var ZoteroPane = new function()
 		// continue loading pane
 		_loadPane();
 		
-		Zotero_Tabs.onTabSelect = (type) => {
+		Zotero_Tabs.onTabSelect = (id, type) => {
 			let toolbar = document.getElementById('zotero-pane-horizontal-space');
-			let extendedToolbar = document.getElementById('zotero-reader-toolbar-extension');
+			let extendedToolbar = document.getElementById('zotero-item-pane-padding-top');
 			let itemPane = document.getElementById('zotero-item-pane');
 			if (type == 'library') {
 				toolbar.hidden = false;
@@ -150,7 +150,7 @@ var ZoteroPane = new function()
 					itemPane.hidden = false;
 				}
 				else {
-				itemPane.hidden = true;
+					itemPane.hidden = true;
 				}
 			}
 		}
@@ -1420,6 +1420,8 @@ var ZoteroPane = new function()
 				return false;
 			}
 			_lastSelectedItems = ids;
+			
+			ZoteroItemPane.togglePane(true);
 			
 			var tabs = document.getElementById('zotero-view-tabbox');
 			
@@ -4072,7 +4074,8 @@ var ZoteroPane = new function()
 				if (!this.collectionsView.editable) {
 					continue;
 				}
-				document.getElementById('zotero-view-note-button').doCommand();
+				ZoteroItemPane.pinNote(item.id);
+				// document.getElementById('zotero-view-note-button').doCommand();
 			}
 			else if (item.isAttachment()) {
 				yield this.viewAttachment(item.id, event);
@@ -5216,7 +5219,7 @@ var ZoteroPane = new function()
 		
 		// Allow item pane to shrink to available height in stacked mode, but don't expand to be too
 		// wide when there's no persisted width in non-stacked mode
-		//itemPane.setAttribute("flex", stackedLayout ? 1 : 0);
+		itemPane.setAttribute("flex", stackedLayout ? 1 : 0);
 		
 		this.handleTagSelectorResize();
 	}
