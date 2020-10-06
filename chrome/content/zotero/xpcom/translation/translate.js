@@ -1871,7 +1871,8 @@ Zotero.Translate.Base.prototype = {
 		var elem = index
 			? docOrElem.querySelectorAll(selector).item(index)
 			: docOrElem.querySelector(selector);
-		return (elem ? elem.getAttribute(attr) : "").trim();
+		if (!elem) return "";
+		return (elem.hasAttribute(attr) ? elem.getAttribute(attr) : "").trim();
 	},
 	
 	/**
