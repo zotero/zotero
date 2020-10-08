@@ -809,6 +809,10 @@ Zotero.Utilities.Internal = {
 	 */
 	_saveSingleFileResource: async (resource, tmpDirectory, fileName, binary) => {
 		Zotero.debug('Saving resource: ' + fileName);
+		
+		// Fix slashes on Windows
+		fileName = OS.Path.join(...fileName.split('/'));
+		
 		// This seems weird, but it is because SingleFileZ gives us path filenames
 		// (e.g. images/0.png). We want to know if the directory 'images' exists.
 		let filePath = OS.Path.join(tmpDirectory, fileName);
