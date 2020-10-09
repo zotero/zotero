@@ -67,5 +67,19 @@
 			"z": "http://www.zotero.org/namespaces/openSearch#"
 		},
 		"_iconSourceURI": "http://login.webofknowledge.com/error/WOK5/images/wok_favicon.ico"
+	},
+        {
+		"_name": "ScienceDirect",
+		"_alias": "SDS",
+		"_description": "ScienceDirect Search",
+		"_icon": "https://www.sciencedirect.com/favicon.ico",
+		"_hidden": false,
+		"_urlTemplate": "https://www.sciencedirect.com/search?qs={z:title}",
+		"_urlParams": [],
+		"_urlNamespaces": {
+			"rft": "info:ofi/fmt:kev:mtx:journal",
+			"z": "http://www.zotero.org/namespaces/openSearch#"
+		},
+		"_iconSourceURI": "https://www.sciencedirect.com/favicon.ico"
 	}
 ]
