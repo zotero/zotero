@@ -68,7 +68,7 @@
 		},
 		"_iconSourceURI": "http://login.webofknowledge.com/error/WOK5/images/wok_favicon.ico"
 	},
-        {
+	{
 		"_name": "ScienceDirect",
 		"_alias": "SDS",
 		"_description": "ScienceDirect Search",
