@@ -28,10 +28,13 @@
  * @namespace
  */
 var Zotero_Lookup = new function () {
+	// If we are creating a parent item, store what will be the child here
+	this.childItem = false;
+
 	/**
 	 * Performs a lookup by DOI, PMID, or ISBN
 	 */
-	this.accept = Zotero.Promise.coroutine(function* (textBox) {
+	this.accept = Zotero.Promise.coroutine(function* (textBox, childItem) {
 		var identifiers = Zotero.Utilities.Internal.extractIdentifiers(textBox.value);
 		if (!identifiers.length) {
 			Zotero.alert(
@@ -41,14 +44,31 @@ var Zotero_Lookup = new function () {
 			);
 			return false;
 		}
+		else if (childItem && identifiers.length > 1) {
+			// Only allow one identifier when creating a parent for a child
+			Zotero.alert(
+				window,
+				Zotero.getString("lookup.failure.title"),
+				Zotero.getString("lookup.failureTooMany.description")
+			);
+			return false;
+		}
 
 		var libraryID = false;
 		var collection = false;
-		try {
-			libraryID = ZoteroPane_Local.getSelectedLibraryID();
-			collection = ZoteroPane_Local.getSelectedCollection();
-		} catch(e) {
-			/** TODO: handle this **/
+		if (childItem) {
+			libraryID = childItem.libraryID;
+			collection = childItem.collections;
+		}
+		else {
+			try {
+				libraryID = ZoteroPane_Local.getSelectedLibraryID();
+				collection = ZoteroPane_Local.getSelectedCollection();
+				collection = collection ? [collection.id] : false;
+			}
+			catch (e) {
+				/** TODO: handle this **/
+			}
 		}
 
 		var successful = 0;					//counter for successful retrievals
@@ -66,8 +86,16 @@ var Zotero_Lookup = new function () {
 			try {
 				let newItems = yield translate.translate({
 					libraryID,
-					collections: collection ? [collection.id] : false
+					collections: collection,
+					saveAttachments: !childItem
 				});
+				if (childItem && newItems.length > 0) {
+					yield Zotero.DB.executeTransaction(function* () {
+						let item = yield Zotero.Items.getAsync(childItem.id);
+						item.parentID = newItems[0].id;
+						yield item.save();
+					});
+				}
 				successful++;
 			}
 			// Continue with other ids on failure
@@ -91,14 +119,33 @@ var Zotero_Lookup = new function () {
 		
 		return false;
 	});
-	
-	
+
+
+	/**
+	 * Show the lookup panel at the given anchor
+	 *
+	 * @param button
+	 */
 	this.showPanel = function (button) {
 		var panel = document.getElementById('zotero-lookup-panel');
 		panel.openPopup(button, "after_start", 16, -2, false, false);
-	}
+	};
+
+
+	/**
+	 * Show the panel at a particular X,Y location instead of on an anchor element
+	 *
+	 * @param x
+	 * @param y
+	 * @param childItem - Optionally pass a childItem to put under the new items
+	 */
+	this.showPanelXY = function (x, y, childItem = false) {
+		this.childItem = childItem;
+		var panel = document.getElementById('zotero-lookup-panel');
+		panel.openPopup(null, null, x + 16, y + -2, false, false);
+	};
 	
-	
+
 	/**
 	 * Focuses the field
 	 */
@@ -131,6 +178,7 @@ var Zotero_Lookup = new function () {
 		
 		// Revert to single-line when closing
 		this.toggleMultiline(false);
+		this.childItem = false;
 	}
 	
 	
@@ -151,7 +199,9 @@ var Zotero_Lookup = new function () {
 		var search = multiline ? event.shiftKey : !event.shiftKey;
 		if(keyCode === 13 || keyCode === 14) {
 			if(search) {
-				Zotero_Lookup.accept(textBox);
+				// Copy the child item in case the user clicks focus away and wants
+				// to move on to a new item
+				Zotero_Lookup.accept(textBox, this.childItem ? { ...this.childItem } : false);
 				event.stopImmediatePropagation();
 			} else if(!multiline) {	//switch to multiline
 				var mlTextbox = Zotero_Lookup.toggleMultiline(true);
@@ -188,6 +238,10 @@ var Zotero_Lookup = new function () {
 	 * Performs the switch to multiline textbox and returns that textbox
 	 */
 	this.toggleMultiline = function(on) {
+		// Do not enable multiline when creating a parent item
+		if (on && this.childItem) {
+			return false;
+		}
 		var mlPanel = document.getElementById("zotero-lookup-multiline");
 		var mlTxtBox = document.getElementById("zotero-lookup-multiline-textbox");
 		var slPanel = document.getElementById("zotero-lookup-singleLine");

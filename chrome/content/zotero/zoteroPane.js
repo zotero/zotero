@@ -2708,6 +2708,7 @@ var ZoteroPane = new function()
 			'unrecognize',
 			'reportMetadata',
 			'createParent',
+			'createParentFromIdentifier',
 			'renameAttachments',
 			'reindexItem',
 		];
@@ -2894,6 +2895,7 @@ var ZoteroPane = new function()
 						// Allow parent item creation for standalone attachments
 						if (item.isTopLevelItem()) {
 							show.push(m.createParent);
+							show.push(m.createParentFromIdentifier);
 							showSep5 = true;
 						}
 						
@@ -4550,6 +4552,28 @@ var ZoteroPane = new function()
 			});
 		}
 	});
+
+	this.createParentItemFromIdentifier = async function (node) {
+		if (!this.canEdit()) {
+			this.displayCannotEditLibraryMessage();
+			return;
+		}
+
+		let items = this.getSelectedItems();
+		for (let item of items) {
+			if (!item.isTopLevelItem() || item.isRegularItem()) {
+				throw new Error('Item ' + item.itemID + ' is not a top-level attachment or note in ZoteroPane_Local.createParentItemFromIdentifier()');
+			}
+
+			Zotero_Lookup.showPanelXY(node.popupBoxObject.x, node.popupBoxObject.y, {
+				libraryID: item.libraryID,
+				collections: item.getCollections(),
+				id: item.id
+			});
+			// We should not be able to select more than one item, but just in case
+			break;
+		}
+	};
 	
 	
 	this.renameSelectedAttachmentsFromParents = Zotero.Promise.coroutine(function* () {
