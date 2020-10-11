@@ -78,11 +78,30 @@ Zotero.SingleFile = {
 		extractAuthCode: true,
 		insertTextBody: true,
 		resolveFragmentIdentifierURLs: false,
-		userScriptEnabled: false,
+		userScriptEnabled: true,
 		saveCreatedBookmarks: false,
 		ignoredBookmarkFolders: [],
 		replaceBookmarkURL: true,
 		saveFavicon: true,
 		includeBOM: false
+	},
+
+	runUserScripts: function () {
+		let modifiedElements = [];
+		window.dispatchEvent(new CustomEvent('single-filez-user-script-init'));
+
+		window.addEventListener('single-filez-on-before-capture-request', () => {
+			const elements = document.querySelectorAll("img[crossorigin], link[crossorigin]");
+			elements.forEach((element) => {
+				modifiedElements.push([element, element.getAttribute('crossorigin')]);
+				element.removeAttribute('crossorigin');
+			});
+		});
+
+		window.addEventListener('single-filez-on-after-capture-request', () => {
+			modifiedElements.forEach(([element, attribute]) => {
+				element.setAttribute('crossorigin', attribute);
+			});
+		});
 	}
 };
