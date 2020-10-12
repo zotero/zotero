@@ -466,6 +466,7 @@ Zotero.Server.DataListener.prototype._processEndpoint = Zotero.Promise.coroutine
 			} else if(this.contentType === "multipart/form-data") {
 				let boundary = /boundary=([^\s]*)/i.exec(this.header);
 				if (!boundary) {
+					Zotero.debug('Invalid boundary: ' + this.header, 1);
 					return this._requestFinished(this._generateResponse(400, "text/plain", "Invalid multipart/form-data provided\n"));
 				}
 				boundary = '--' + boundary[1];
@@ -603,17 +604,18 @@ Zotero.Server.DataListener.prototype._decodeMultipartData = function(data, bound
 	data = data.slice(1, data.length-1);
 	for (let field of data) {
 		let fieldData = {};
-		field = field.trim();
 		// Split header and body
 		let unixHeaderBoundary = field.indexOf("\n\n");
 		let windowsHeaderBoundary = field.indexOf("\r\n\r\n");
 		if (unixHeaderBoundary < windowsHeaderBoundary && unixHeaderBoundary != -1) {
-			fieldData.header = field.slice(0, unixHeaderBoundary);
-			fieldData.body = field.slice(unixHeaderBoundary+2);
+			fieldData.header = field.slice(0, unixHeaderBoundary).trim();
+			fieldData.body = field.slice(unixHeaderBoundary+2).trim();
 		} else if (windowsHeaderBoundary != -1) {
-			fieldData.header = field.slice(0, windowsHeaderBoundary);
-			fieldData.body = field.slice(windowsHeaderBoundary+4);
+			fieldData.header = field.slice(0, windowsHeaderBoundary).trim();
+			fieldData.body = field.slice(windowsHeaderBoundary+4).trim();
 		} else {
+			// Only log first 200 characters in case the part is large
+			Zotero.debug('Malformed multipart/form-data body: ' + field.substr(0, 200), 1);
 			throw new Error('Malformed multipart/form-data body');
 		}
 		
