@@ -240,6 +240,53 @@ describe("Zotero.Server", function () {
 					assert.ok(called);
 					assert.equal(req.status, 204);
 				});
+
+				it("should support an empty body", async function () {
+					var called = false;
+					var endpoint = "/test/" + Zotero.Utilities.randomString();
+
+					Zotero.Server.Endpoints[endpoint] = function () {};
+					Zotero.Server.Endpoints[endpoint].prototype = {
+						supportedMethods: ["POST"],
+						supportedDataTypes: ["multipart/form-data"],
+
+						init: function (options) {
+							called = true;
+							assert.isObject(options);
+							assert.property(options.headers, "Content-Type");
+							assert(options.headers["Content-Type"].startsWith("multipart/form-data; boundary="));
+							assert.isArray(options.data);
+							assert.equal(options.data.length, 1);
+
+							let expected = {
+								header: "Content-Disposition: form-data; name=\"foo\"",
+								body: "",
+								params: {
+									name: "foo"
+								}
+							};
+							assert.deepEqual(options.data[0], expected);
+							return 204;
+						}
+					};
+
+					let formData = new FormData();
+					formData.append("foo", "");
+
+					let req = await Zotero.HTTP.request(
+						"POST",
+						serverPath + endpoint,
+						{
+							headers: {
+								"Content-Type": "multipart/form-data"
+							},
+							body: formData
+						}
+					);
+
+					assert.ok(called);
+					assert.equal(req.status, 204);
+				});
 			});
 		});
 	})
