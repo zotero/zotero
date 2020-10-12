@@ -586,10 +586,7 @@ Zotero.Integration.Interface.prototype.addEditCitation = async function (docFiel
 	await this._session.init(false, false);
 	docField = docField || await this._doc.cursorInField(this._session.data.prefs['fieldType']);
 
-	let citations = await this._session.cite(docField);
-	for (let citation of citations) {
-		await this._session.addCitation(citation._fieldIndex, await citation._field.getNoteIndex(), citation);
-	}
+	await this._session.cite(docField);
 	if (this._session.data.prefs.delayCitationUpdates) {
 		for (let citation of citations) {
 			await this._session.writeDelayedCitation(citation._field, citation);
@@ -1447,11 +1444,9 @@ Zotero.Integration.Session.prototype._processNote = function (item) {
 			Zotero.logError(e);
 		}
 	}
-	// TODO: Later we'll need to convert note HTML to RDF.
-	// if (Zotero.Integration.currentSession._app.outputFormat == 'rtf') {
-	// 		text = return Zotero.RTFConverter.HTMLToRTF(text);
-	// 	});
-	// }
+	text = text.replace(/[\u00A0-\u9999\&]/gim, function(i) {
+		return '&#'+i.charCodeAt(0)+';';
+	});
 	return [text, citations, placeholderIDs];
 };
 
@@ -1465,7 +1460,7 @@ Zotero.Integration.Session.prototype._insertNoteIntoDocument = async function (f
 	citations.reverse();
 	placeholderIDs.reverse();
 	let fields = await this._doc.convertPlaceholdersToFields(citations.map(() => 'TEMP'),
-		placeholderIDs, this.data.prefs.noteType);
+		placeholderIDs, this.data.prefs.noteType, this.data.prefs.fieldType);
 	
 	let insertedCitations = await Promise.all(fields.map(async (field, index) => {
 		let citation = new Zotero.Integration.Citation(new Zotero.Integration.CitationField(field, 'TEMP'),
