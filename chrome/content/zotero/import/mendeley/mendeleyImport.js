@@ -314,7 +314,7 @@ Zotero_Import_Mendeley.prototype._findExistingCollection = async function (libra
 	var predicate = 'mendeleyDB:remoteFolderUUID';
 	var uuid = collectionJSON.relations[predicate];
 	
-	var collections = await Zotero.Relations.getByPredicateAndObject('collection', predicate, uuid)
+	var collections = (await Zotero.Relations.getByPredicateAndObject('collection', predicate, uuid))
 		.filter((c) => {
 			if (c.libraryID != libraryID) {
 				return false;
@@ -963,7 +963,7 @@ Zotero_Import_Mendeley.prototype._findExistingItem = async function (libraryID, 
 
 
 Zotero_Import_Mendeley.prototype._getItemByRelation = async function (libraryID, predicate, object) {
-	var items = await Zotero.Relations.getByPredicateAndObject('item', predicate, object)
+	var items = (await Zotero.Relations.getByPredicateAndObject('item', predicate, object))
 		.filter(item => item.libraryID == libraryID && !item.deleted);
 	if (!items.length) {
 		return false;
