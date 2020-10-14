@@ -3069,6 +3069,11 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("CREATE TABLE dbDebug1 (\n    a INTEGER PRIMARY KEY\n)");
 			}
 			
+			else if (i == 110) {
+				yield Zotero.DB.queryAsync("UPDATE itemAttachments SET parentItemID=NULL WHERE itemID=parentItemID");
+				yield Zotero.DB.queryAsync("UPDATE itemNotes SET parentItemID=NULL WHERE itemID=parentItemID");
+			}
+			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
 		}
 		

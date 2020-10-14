@@ -1387,6 +1387,10 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		: null;
 	if (this._changed.parentKey) {
 		if (isNew) {
+			if (parentItemKey == this.key) {
+				throw new Error("Item cannot be set as parent of itself");
+			}
+			
 			if (!parentItemID) {
 				// TODO: clear caches?
 				let msg = "Parent item " + this.libraryID + "/" + parentItemKey + " not found";
@@ -1412,6 +1416,10 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		}
 		else {
 			if (parentItemKey) {
+				if (parentItemKey == this.key) {
+					throw new Error("Item cannot be set as parent of itself");
+				}
+				
 				if (!parentItemID) {
 					// TODO: clear caches
 					let msg = "Parent item " + this.libraryID + "/" + parentItemKey + " not found";

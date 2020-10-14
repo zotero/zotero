@@ -407,6 +407,14 @@ describe("Zotero.Item", function () {
 			assert.ok(item.parentID);
 			assert.equal(item.parentID, parentItemID);
 		});
+		
+		it("should not be settable to item itself", async function () {
+			var item = await createDataObject('item', { itemType: 'note' });
+			item.parentID = item.id;
+			var e = await getPromiseError(item.saveTx());
+			assert.ok(e);
+			assert.equal(e.message, "Item cannot be set as parent of itself");
+		});
 	});
 	
 	describe("#parentKey", function () {
@@ -485,6 +493,16 @@ describe("Zotero.Item", function () {
 			
 			assert.isFalse(noteItem.isTopLevelItem());
 		})
+		
+		it("should not be settable to item itself", async function () {
+			var item = new Zotero.Item('note');
+			item.libraryID = Zotero.Libraries.userLibraryID;
+			item.key = Zotero.DataObjectUtilities.generateKey();
+			item.parentKey = item.key;
+			var e = await getPromiseError(item.saveTx());
+			assert.ok(e);
+			assert.equal(e.message, "Item cannot be set as parent of itself");
+		});
 	});
 	
 	describe("#getCreators()", function () {
