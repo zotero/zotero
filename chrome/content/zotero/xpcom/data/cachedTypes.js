@@ -372,6 +372,7 @@ Zotero.ItemTypes = new function() {
 		// Secondary types
 		_secondaryTypes = yield this._getTypesFromDB(
 			`WHERE display != 0 AND display NOT IN ('${_primaryTypeNames.join("', '")}')`
+			+ " AND name != 'webpage'"
 		);
 		
 		// Hidden types
