@@ -7,8 +7,8 @@ content	zotero-platform		chrome/content/zotero-platform/unix/      os=FreeBSD
 content	zotero-platform		chrome/content/zotero-platform/unix/      os=OpenBSD
 
 content	zotero-platform-version chrome/content/zotero-platform/default-version/
-# Big Sur shows up as 10.0
-content	zotero-platform-version chrome/content/zotero-platform/mac-big-sur/ os=Darwin osversion=10.0
+# Big Sur shows up as 10.16 when linked against 10.11
+content	zotero-platform-version chrome/content/zotero-platform/mac-big-sur/ os=Darwin osversion=10.16
 #content	zotero-platform-version chrome/content/zotero-platform/mac-big-sur/ os=Darwin
 
 resource zotero				resource/
