@@ -163,8 +163,8 @@ Zotero.Server.Connector.SaveSession = function (id, action, requestData) {
 };
 
 
-Zotero.Server.Connector.SaveSession.prototype.addPageData = function (pageData) {
-	this._requestData.data.pageData = pageData;
+Zotero.Server.Connector.SaveSession.prototype.addSnapshotContent = function (snapshotContent) {
+	this._requestData.data.snapshotContent = snapshotContent;
 };
 
 
@@ -394,41 +394,6 @@ Zotero.Server.Connector.SaveSession.prototype._updateRecents = function () {
 	catch (e) {
 		Zotero.logError(e);
 		Zotero.Prefs.clear('recentSaveTargets');
-	}
-};
-
-
-Zotero.Server.Connector.Utilities = {
-
-	/**
-	 * Helper function to insert form data back into SingleFileZ pageData object
-	 *
-	 * SingleFileZ creates a single object containing all page data including all
-	 * resource files. We turn that into a multipart/form-data request for upload
-	 * and here we insert the form resources back into the SingleFileZ object.
-	 *
-	 * @param {Object} resources - Resources object inside SingleFileZ pageData object
-	 * @param {Object} formData - Multipart form data as a keyed object
-	 */
-	insertSnapshotResources: function (resources, formData) {
-		for (let resourceType in resources) {
-			for (let resource of resources[resourceType]) {
-				// Frames have whole new set of resources
-				// We handle these by recursion
-				if (resourceType === "frames") {
-					Zotero.Server.Connector.Utilities.insertSnapshotResources(resource.resources, formData);
-					return;
-				}
-				// UUIDs are marked by a prefix
-				if (resource.content.startsWith('binary-')) {
-					// Replace content with actual content indexed in formData
-					// by the UUID stored in the content
-					resource.content = formData.find(
-						element => element.params.name === resource.content
-					).body;
-				}
-			}
-		}
 	}
 };
 
@@ -901,12 +866,12 @@ Zotero.Server.Connector.SaveItems.prototype = {
 			}
 		);
 		if (session.pendingAttachments.length > 0) {
-			// If the session has pageData already (from switching to a `filesEditable` library
+			// If the session has snapshotContent already (from switching to a `filesEditable` library
 			// then we can save `pendingAttachments` now
-			if (data.pageData) {
+			if (data.snapshotContent) {
 				await itemSaver.saveSnapshotAttachments(
 					session.pendingAttachments,
-					data.pageData,
+					data.snapshotContent,
 					function (attachment, progress, error) {
 						session.onProgress(attachment, progress, error);
 					},
@@ -943,7 +908,7 @@ Zotero.Server.Connector.SaveSingleFile = function () {};
 Zotero.Server.Endpoints["/connector/saveSingleFile"] = Zotero.Server.Connector.SaveSingleFile;
 Zotero.Server.Connector.SaveSingleFile.prototype = {
 	supportedMethods: ["POST"],
-	supportedDataTypes: ["multipart/form-data"],
+	supportedDataTypes: ["application/json", "multipart/form-data"],
 	permitBookmarklet: true,
 
 	/**
@@ -951,9 +916,22 @@ Zotero.Server.Connector.SaveSingleFile.prototype = {
 	 */
 	init: async function (requestData) {
 		// Retrieve payload
-		let data = JSON.parse(Zotero.Utilities.Internal.decodeUTF8(
-			requestData.data.find(e => e.params.name === "payload").body
-		));
+		let data = requestData.data;
+
+		// For a brief while the connector used SingleFileZ to save web pages, but we
+		// switched to using SingleFile. If the user is using that connector, the request
+		// will be multipart, which results in an array being passed in. In that case we
+		// want to mark this a legacySnapshot so we can ignore the snapshot content we have
+		// been given and save our own. This results in a double save, which takes a long
+		// time and is not ideal, but hopefully with auto-update of extensions it will be
+		// not be in use for many people for long.
+		let legacySnapshot = false;
+		if (Array.isArray(data)) {
+			legacySnapshot = true;
+			data = JSON.parse(Zotero.Utilities.Internal.decodeUTF8(
+				requestData.data.find(e => e.params.name === "payload").body
+			));
+		}
 
 		if (!data.sessionID) {
 			return [400, "application/json", JSON.stringify({ error: "SESSION_ID_NOT_PROVIDED" })];
@@ -965,7 +943,57 @@ Zotero.Server.Connector.SaveSingleFile.prototype = {
 			return [400, "application/json", JSON.stringify({ error: "SESSION_NOT_FOUND" })];
 		}
 
-		if (!data.pageData) {
+		let snapshotContent;
+		if (legacySnapshot) {
+			// Retrieve our snapshot content inside a hidden browser
+			let cookieSandbox = data.uri
+				? new Zotero.CookieSandbox(
+					null,
+					data.uri,
+					data.detailedCookies ? "" : data.cookie || "",
+					requestData.headers["User-Agent"]
+				)
+				: null;
+			if (cookieSandbox && data.detailedCookies) {
+				cookieSandbox.addCookiesFromHeader(data.detailedCookies);
+			}
+
+			// Get the URL from the first pending attachment
+			if (!session.pendingAttachments.length) {
+				session.savingDone = true;
+
+				return [200, 'text/plain', 'Legacy snapshot has no pending attachments.'];
+			}
+
+			let url = session.pendingAttachments[0][1].url;
+
+			snapshotContent = await new Zotero.Promise(function (resolve, reject) {
+				var browser = Zotero.HTTP.loadDocuments(
+					url,
+					Zotero.Promise.coroutine(function* () {
+						try {
+							resolve(yield Zotero.Utilities.Internal.snapshotDocument(browser.contentDocument));
+						}
+						catch (e) {
+							Zotero.logError(e);
+							reject(e);
+						}
+						finally {
+							Zotero.Browser.deleteHiddenBrowser(browser);
+						}
+					}),
+					undefined,
+					undefined,
+					true,
+					cookieSandbox
+				);
+			});
+		}
+		else {
+			snapshotContent = data.snapshotContent;
+		}
+
+		if (!snapshotContent) {
 			// Connector SingleFile has failed so if we re-save attachments (via
 			// updateSession) then we want to inform saveItems and saveSnapshot that they
 			// do not need to use pendingAttachments because those have failed.
@@ -977,36 +1005,30 @@ Zotero.Server.Connector.SaveSingleFile.prototype = {
 
 			session.savingDone = true;
 
-			return 200;
+			return [200, 'text/plain', 'No snapshot content attached.'];
 		}
 
-		// Rebuild SingleFile object from multipart/form-data
-		Zotero.Server.Connector.Utilities.insertSnapshotResources(
-			data.pageData.resources,
-			requestData.data
-		);
-
 		// Add to session data, in case `saveSnapshot` is called again by the session
-		session.addPageData(data.pageData);
+		session.addSnapshotContent(snapshotContent);
 
 		// We do this after adding to session because if we switch to a `filesEditable`
-		// library we need to have access to the pageData.
+		// library we need to have access to the snapshotContent.
 		let { library, collection } = Zotero.Server.Connector.getSaveTarget();
 		if (!library.filesEditable) {
 			session.savingDone = true;
 
-			return 200;
+			return [200, 'text/plain', 'Library is not editable.'];
 		}
 
 		// Retrieve all items in the session that need a snapshot
 		if (session._action === 'saveSnapshot') {
 			await Zotero.Promise.all(
 				session.pendingAttachments.map((pendingAttachment) => {
-					return Zotero.Attachments.importFromPageData({
+					return Zotero.Attachments.importFromSnapshotContent({
 						title: data.title,
 						url: data.url,
 						parentItemID: pendingAttachment[0],
-						pageData: data.pageData
+						snapshotContent
 					});
 				})
 			);
@@ -1038,7 +1060,7 @@ Zotero.Server.Connector.SaveSingleFile.prototype = {
 
 			await itemSaver.saveSnapshotAttachments(
 				session.pendingAttachments,
-				data.pageData,
+				snapshotContent,
 				function (attachment, progress, error) {
 					session.onProgress(attachment, progress, error);
 				},
@@ -1171,12 +1193,12 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 		// Save snapshot
 		if (!data.skipSnapshot) {
 			// If called from session update, requestData may already have SingleFile data
-			if (library.filesEditable && data.pageData) {
-				await Zotero.Attachments.importFromPageData({
+			if (library.filesEditable && data.snapshotContent) {
+				await Zotero.Attachments.importFromSnapshotContent({
 					title: data.title,
 					url: data.url,
 					parentItemID: itemID,
-					pageData: data.pageData
+					snapshotContent: data.snapshotContent
 				});
 			}
 			// Otherwise, connector will POST SingleFile data at later time
