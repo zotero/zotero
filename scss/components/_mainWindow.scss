@@ -90,6 +90,10 @@ toolbarpaletteitem {
 
 /* ::::: Tabs in Titlebar :::::: */
 
+#main-window:not([chromemargin]) > #titlebar {
+  display: none;
+}
+
 /**
  * For tabs in titlebar on OS X, we stretch the titlebar down so that the
  * tabstrip can overlap it.

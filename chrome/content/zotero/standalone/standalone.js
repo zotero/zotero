@@ -41,6 +41,12 @@ const ZoteroStandalone = new function() {
 		if (Zotero.isMac && window.document.documentElement.getAttribute('sizemode') == 'fullscreen') {
 			window.document.documentElement.setAttribute('sizemode', 'normal');
 		}
+
+		if (Zotero.isMac) {
+			document.documentElement.setAttribute('drawintitlebar', true);
+			document.documentElement.setAttribute('tabsintitlebar', true);
+			document.documentElement.setAttribute('chromemargin', '0,-1,-1,-1');
+		}
 		
 		Zotero.Promise.try(function () {
 			if(!Zotero) {

@@ -31,7 +31,7 @@ import cx from 'classnames';
 const TabBar = forwardRef(function (props, ref) {
 	const [tabs, setTabs] = useState([]);
 	const draggingID = useRef(null);
-	const tabsHolderRef = useRef();
+	const tabsRef = useRef();
 	const mouseMoveWaitUntil = useRef(0);
 
 	useEffect(() => {
@@ -55,7 +55,7 @@ const TabBar = forwardRef(function (props, ref) {
 		if (!draggingID.current || mouseMoveWaitUntil.current > Date.now()) {
 			return;
 		}
-		let points = Array.from(tabsHolderRef.current.children).map((child) => {
+		let points = Array.from(tabsRef.current.children).map((child) => {
 			let rect = child.getBoundingClientRect();
 			return rect.left + rect.width / 2;
 		});
@@ -116,12 +116,8 @@ const TabBar = forwardRef(function (props, ref) {
 	}
 
 	return (
-		<div className="tabs" onMouseMove={handleMouseMove}>
-			<div className="tabs-spacer-before"/>
-			<div className="tabs-holder" ref={tabsHolderRef}>
-				{tabs.map((tab, index) => renderTab(tab, index))}
-			</div>
-			<div className="tabs-spacer-after"/>
+		<div className="tabs" ref={tabsRef} onMouseMove={handleMouseMove}>
+			{tabs.map((tab, index) => renderTab(tab, index))}
 		</div>
 	);
 });

@@ -63,6 +63,8 @@ var Zotero_Tabs = new function () {
 			title: tab.title,
 			selected: tab.id == this._selectedID
 		})));
+		var { tab } = this._getTab(this._selectedID);
+		document.title = (tab.title.length ? tab.title + ' - ' : '') + 'Zotero';
 	};
 
 	this.init = function () {

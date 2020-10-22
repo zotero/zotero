@@ -4,16 +4,29 @@
 
 .tabs {
 	display: flex;
-}
 
-.tabs-holder {
-	display: flex;
+	&:before {
+		content: "";
+		width: 0px;
+		min-width: 0px;
+		border-bottom: $tab-border;
+		border-inline-end: $tab-border;
+	}
+
+	&:after {
+		content: "";
+		flex: 1 0 0%;
+		width: 100%;
+		min-width: 0px;
+		border-bottom: $tab-border;
+		border-inline-start: $tab-border;
+	}
 }
 
 .tab {
 	-moz-appearance: none;
 	max-width: 200px;
-	flex: 1;
+	flex: 1 1 200px;
 	height: 30px;
 	line-height: 30px;
 	position: relative;
@@ -24,7 +37,7 @@
 	padding: 0 30px;
 	
 	&:not(:last-child) {
-		border-right: $tab-border;
+		border-inline-end: $tab-border;
 	}
 	
 	&.selected {
@@ -55,5 +68,9 @@
 	
 	&:hover:not(:first-child) .tab-close {
 		display: block;
+	}
+
+	&:not(.selected) {
+		border-bottom: $tab-border;
 	}
 }

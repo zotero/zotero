@@ -2,30 +2,17 @@
 	-moz-window-dragging: drag;
 }
 
-.tabs-spacer-before {
-	width: 78px;
-	border-bottom: $tab-border;
-	border-inline-end: $tab-border;
-}
-
-.tabs-spacer-after {
-	flex: 1;
-	border-inline-start: $tab-border;
-	border-bottom: $tab-border;
-}
-
 .tab {
 	-moz-window-dragging: no-drag;
 }
 
-.tab:not(.selected) {
-	border-bottom: $tab-border;
-}
+.tabs {
+	&:before {
+		width: 78px;
+		min-width: 78px;
+	}
 
-.tab:first-child {
-	border-left: 0;
-}
-
-.tab:last-child {
-	border-right: 0;
+	&:after {
+		min-width: 20px;
+	}
 }

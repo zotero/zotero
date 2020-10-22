@@ -47,9 +47,6 @@
 				windowtype="navigator:browser" 
 				title="&brandShortName;"
 				width="1000" height="600"
-				drawintitlebar="true"
-				tabsintitlebar="true"
-				chromemargin="0,-1,-1,-1"
 				persist="screenX screenY width height sizemode">
 	<script type="application/javascript" src="resource://zotero/require.js"/>
 	<script type="application/javascript" src="standalone.js"/>
@@ -124,7 +121,6 @@
 			</hbox>
 		</hbox>
 	</vbox>
-	<vbox id="tab-bar-container"/>
 	<toolbox id="navigator-toolbox" class="toolbox-top" mode="icons" defaultmode="icons">
 		<!-- Menu -->
 		<toolbar type="menubar" id="toolbar-menubar" class="chromeclass-menubar" customizable="true"
@@ -385,6 +381,7 @@
 			</toolbaritem>
 		</toolbar>
 	</toolbox>
+	<vbox id="tab-bar-container"/>
 	<!--<toolbarpalette/>
 
 	<toolbar id="nav-bar" class="toolbar-primary chromeclass-toolbar"
