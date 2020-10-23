@@ -555,9 +555,9 @@ Zotero.Utilities.Internal = {
 	 * extension to save the page as one single file without JavaScript.
 	 *
 	 * @param {Object} document
-	 * @param {String} destFile - Path for file to write to
+	 * @return {String} Snapshot of the page as a single file
 	 */
-	saveHTMLDocument: async function (document, destFile) {
+	snapshotDocument: async function (document) {
 		// Create sandbox for SingleFile
 		var view = document.defaultView;
 		var sandbox = new Components.utils.Sandbox(view, { wantGlobalProperties: ["XMLHttpRequest", "fetch"] });
@@ -569,7 +569,7 @@ Zotero.Utilities.Internal = {
 		sandbox.Zotero = Components.utils.cloneInto({ HTTP: {} }, sandbox);
 		sandbox.Zotero.debug = Components.utils.exportFunction(Zotero.debug, sandbox);
 		// Mostly copied from:
-		// resources/SingleFileZ/extension/lib/single-file/fetch/bg/fetch.js::fetchResource
+		// resources/SingleFile/extension/lib/single-file/fetch/bg/fetch.js::fetchResource
 		sandbox.coFetch = Components.utils.exportFunction(
 			function (url, onDone) {
 				const xhrRequest = new XMLHttpRequest();
@@ -604,7 +604,7 @@ Zotero.Utilities.Internal = {
 
 		// First we try regular fetch, then proceed with fetch outside sandbox to evade CORS
 		// restrictions, partly from:
-		// resources/SingleFileZ/extension/lib/single-file/fetch/content/content-fetch.js::fetch
+		// resources/SingleFile/extension/lib/single-file/fetch/content/content-fetch.js::fetch
 		Components.utils.evalInSandbox(
 			`
 			ZoteroFetch = async function (url) {
@@ -675,9 +675,9 @@ Zotero.Utilities.Internal = {
 		Zotero.debug('Injecting single file scripts');
 		// Run all the scripts of SingleFile scripts in Sandbox
 		SCRIPTS.forEach(
-			script => loadSubScript('resource://zotero/SingleFileZ/' + script, sandbox)
+			script => loadSubScript('resource://zotero/SingleFile/' + script, sandbox)
 		);
-		// Import config and user scripts
+		// Import config
 		loadSubScript('chrome://zotero/content/xpcom/singlefile.js', sandbox);
 
 		// In the client we turn off this auto-zooming feature because it does not work
@@ -691,122 +691,18 @@ Zotero.Utilities.Internal = {
 		
 		// Use SingleFile to retrieve the html
 		const pageData = await Components.utils.evalInSandbox(
-			`Zotero.SingleFile.runUserScripts();
-			this.singlefile.lib.getPageData(
+			`this.singlefile.lib.getPageData(
 				Zotero.SingleFile.CONFIG,
 				{ fetch: ZoteroFetch }
 			);`,
 			sandbox
 		);
-
-		// Write main HTML file to disk
-		await Zotero.File.putContentsAsync(destFile, pageData.content);
-
-		// Write resources to disk
-		let tmpDirectory = OS.Path.dirname(destFile);
-		await this.saveSingleFileResources(tmpDirectory, pageData.resources, "");
-
+		
+		// Clone so we can nuke the sandbox
+		let content = pageData.content;
 		Components.utils.nukeSandbox(sandbox);
-	},
 
-
-	/**
-	 * Save all resources to support SingleFile webpage
-	 *
-	 * @param {String} tmpDirectory - Path to location of attachment root
-	 * @param {Object} resources - Resources from SingleFile pageData object
-	 * @param {String} prefix - Recursive structure that is initially blank
-	 */
-	saveSingleFileResources: async function (tmpDirectory, resources, prefix) {
-		// This looping/recursion structure comes from:
-		// SingleFileZ/extension/core/bg/compression.js::addPageResources
-		await Zotero.Promise.all(Object.keys(resources).map(
-			(resourceType) => {
-				return Zotero.Promise.all(resources[resourceType].map(
-					async (data) => {
-						// Frames have whole new set of resources
-						// We handle these by recursion
-						if (resourceType === "frames") {
-							// Save frame HTML
-							await Zotero.Utilities.Internal._saveSingleFileResource(
-								data.content,
-								tmpDirectory,
-								prefix + data.name + "index.html",
-								data.binary
-							);
-							// Save frame resources
-							return Zotero.Utilities.Internal.saveSingleFileResources(tmpDirectory, data.resources, prefix + data.name);
-						}
-						return Zotero.Utilities.Internal._saveSingleFileResource(
-							data.content,
-							tmpDirectory,
-							prefix + data.name,
-							data.binary
-						);
-					}
-				));
-			}
-		));
-	},
-
-
-	/**
-	 * Save a individual resource from a SingleFile attachment
-	 *
-	 * @param {String} resource - The actual content to save to file
-	 * @param {String} tmpDirectory - Path to location of attachment root
-	 * @param {String} fileName - Filename for the piece to save under
-	 * @param {Boolean} binary - Whether the resource string is binary or not
-	 */
-	_saveSingleFileResource: async (resource, tmpDirectory, fileName, binary) => {
-		Zotero.debug('Saving resource: ' + fileName);
-		
-		// Fix slashes on Windows
-		fileName = OS.Path.join(...fileName.split('/'));
-		
-		// This seems weird, but it is because SingleFileZ gives us path filenames
-		// (e.g. images/0.png). We want to know if the directory 'images' exists.
-		let filePath = OS.Path.join(tmpDirectory, fileName);
-		let fileDirectory = OS.Path.dirname(filePath);
-
-		// If the directory doesn't exist, make it
-		await OS.File.makeDir(fileDirectory, {
-			unixMode: 0o755,
-			from: tmpDirectory
-		});
-
-		// Binary string from Connector
-		if (typeof resource === "string" && binary) {
-			Components.utils.importGlobalProperties(["Blob"]);
-			let resourceBlob = new Blob([Zotero.Utilities.Internal._decodeToUint8Array(resource)]);
-			await Zotero.File.putContentsAsync(
-				filePath,
-				resourceBlob
-			);
-		}
-		// Uint8Array from hidden browser sandbox
-		else if (Object.prototype.toString.call(resource) === "[object Uint8Array]") {
-			let data = Components.utils.waiveXrays(resource);
-			// Write to disk
-			let is = Components.classes["@mozilla.org/io/arraybuffer-input-stream;1"]
-				.createInstance(Components.interfaces.nsIArrayBufferInputStream);
-			is.setData(data.buffer, 0, data.byteLength);
-			// Write to disk
-			await Zotero.File.putContentsAsync(
-				filePath,
-				is
-			);
-		}
-		else if (resource === undefined) {
-			Zotero.debug('Error saving resource: ' + fileName);
-		}
-		else {
-			// Otherwise a normal string
-			await Zotero.File.putContentsAsync(
-				filePath,
-				resource
-			);
-		}
+		return content;
 	},
 	
 	

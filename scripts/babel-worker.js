@@ -48,52 +48,27 @@ async function babelWorker(ev) {
 				.replace('document.body.removeChild(scrollDiv)', 'document.documentElement.removeChild(scrollDiv)');
 		}
 
-		// Note about Single File helper and util patching:
-		// I think this has something to do with the hidden browser being an older version or possibly
-		// it is an issue with the sandbox, but it fails to find addEventListener and the fetch does
-		// not work even if replace it properly in initOptions.
-
-		// Patch single-file-helper
-		else if (sourcefile === 'resource/SingleFileZ/lib/single-file/single-file-helper.js') {
+		// Patch content-frame-tree
+		// In Chrome sometimes frames would not have access to the browser object. I could
+		// not replicate this in firefox so is possibly a bug with injected content_scripts
+		// in Chrome that was easier to work around than track down. SingleFile has this
+		// backup mechanism for message so we simply remove the check that implies that if
+		// the top window has the browser object the frame will as well.
+		else if (sourcefile === 'resource/SingleFile/lib/single-file/processors/frame-tree/content/content-frame-tree.js') {
 			transformed = contents
-				.replace('dispatchEvent(', 'window.dispatchEvent(')
-				.replace(/addEventListener\(/g, 'window.addEventListener(');
-		}
-		
-		// Patch index.js - This is a SingleFileZ issue. SingleFileZ does not typically use
-		// use this code from SingleFile so the namespace is screwed up.
-		else if (sourcefile === 'resource/SingleFileZ/lib/single-file/index.js') {
-			transformed = contents
-					.replace('this.frameTree.content.frames.getAsync',
-						'this.processors.frameTree.content.frames.getAsync')
-					.replace('this.lazy.content.loader.process',
-						'this.processors.lazy.content.loader.process');
-		}
-
-		// Patch single-file-core
-		// This style element trick was not working in the hidden browser, so we ignore it
-		else if (sourcefile === 'resource/SingleFileZ/lib/single-file/single-file-core.js') {
-			transformed = contents.replace('if (workStylesheet.sheet.cssRules.length) {', 'if (true) {');
-		}
-		
-		// Patch content-lazy-loader
-		else if (sourcefile === 'resource/SingleFileZ/lib/single-file/processors/lazy/content/content-lazy-loader.js') {
-			transformed = contents
-				.replace(
-					'if (scrollY <= maxScrollY && scrollX <= maxScrollX)',
-					'if (window.scrollY <= maxScrollY && window.scrollX <= maxScrollX)'
-				);
+				.replace('} else if ((!browser || !browser.runtime) && message.method == INIT_RESPONSE_MESSAGE) {',
+					'} else if (message.method == INIT_RESPONSE_MESSAGE) {');
 		}
 
 		// Patch single-file
-		else if (sourcefile === 'resource/SingleFileZ/lib/single-file/single-file.js') {
+		else if (sourcefile === 'resource/SingleFile/lib/single-file/single-file.js') {
 			// We need to add this bit that is done for the cli implementation of singleFile
 			// See resource/SingleFile/cli/back-ends/common/scripts.js
 			const WEB_SCRIPTS = [
 				"lib/single-file/processors/hooks/content/content-hooks-web.js",
 				"lib/single-file/processors/hooks/content/content-hooks-frames-web.js"
 			];
-			let basePath = 'resource/SingleFileZ/';
+			let basePath = 'resource/SingleFile/';
 		
 			function readScriptFile(path, basePath) {
 				return new Promise((resolve, reject) =>

@@ -1211,6 +1211,21 @@ Zotero.HTTP = new function() {
 			Zotero.debug("Zotero.HTTP.loadDocuments: " + url + " loaded");
 			hiddenBrowser.removeEventListener("load", onLoad, true);
 			hiddenBrowser.zotero_loaded = true;
+
+			let channel = hiddenBrowser.docShell.currentDocumentChannel;
+			if (channel && (channel instanceof Components.interfaces.nsIHttpChannel)) {
+				if (channel.responseStatus < 200 || channel.responseStatus >= 400) {
+					let e = new Error("Invalid response " + channel.responseStatus + " "
+						+ channel.responseStatusText + " for '" + url + "'");
+					if (onError) {
+						onError(e);
+					}
+					else {
+						throw e;
+					}
+					return;
+				}
+			}
 			
 			var maybePromise;
 			var error;

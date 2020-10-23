@@ -349,8 +349,8 @@ Zotero.Attachments = new function(){
 		}
 		return attachmentItem;
 	});
-	
-	
+
+
 	/**
 	 * @param {Object} options
 	 * @param {Integer} options.libraryID
@@ -400,14 +400,6 @@ Zotero.Attachments = new function(){
 				var browser = Zotero.HTTP.loadDocuments(
 					url,
 					Zotero.Promise.coroutine(function* () {
-						let channel = browser.docShell.currentDocumentChannel;
-						if (channel && (channel instanceof Components.interfaces.nsIHttpChannel)) {
-							if (channel.responseStatus < 200 || channel.responseStatus >= 400) {
-								reject(new Error("Invalid response " + channel.responseStatus + " "
-									+ channel.responseStatusText + " for '" + url + "'"));
-								return false;
-							}
-						}
 						try {
 							let attachmentItem = yield Zotero.Attachments.importFromDocument({
 								libraryID,
@@ -428,7 +420,9 @@ Zotero.Attachments = new function(){
 						}
 					}),
 					undefined,
-					undefined,
+					(e) => {
+						reject(e);
+					},
 					true,
 					cookieSandbox
 				);
@@ -764,8 +758,11 @@ Zotero.Attachments = new function(){
 					&& Zotero.Translate.DOMWrapper.unwrap(document) instanceof Ci.nsIDOMDocument) {
 				if (document.defaultView.window) {
 					// If we have a full hidden browser, use SingleFile
-					Zotero.debug('Saving document with saveHTMLDocument()');
-					yield Zotero.Utilities.Internal.saveHTMLDocument(document, tmpFile);
+					Zotero.debug('Getting snapshot with snapshotDocument()');
+					let snapshotContent = yield Zotero.Utilities.Internal.snapshotDocument(document);
+
+					// Write main HTML file to disk
+					yield Zotero.File.putContentsAsync(tmpFile, snapshotContent);
 				}
 				else {
 					// Fallback to nsIWebBrowserPersist
@@ -846,22 +843,22 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
-	 * Save a snapshot from a page data given by SingleFileZ
+	 * Save a snapshot from HTML page content given by SingleFile
 	 *
 	 * @param {Object} options
 	 * @param {String} options.url
-	 * @param {Object} options.pageData - PageData object from SingleFileZ
+	 * @param {Object} options.snapshotContent - HTML content from SingleFile
 	 * @param {Integer} [options.parentItemID]
 	 * @param {Integer[]} [options.collections]
 	 * @param {String} [options.title]
 	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
 	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
 	 */
-	this.importFromPageData = async (options) => {
-		Zotero.debug("Importing attachment item from PageData");
+	this.importFromSnapshotContent = async (options) => {
+		Zotero.debug("Importing attachment item from Snapshot Content");
 
 		let url = options.url;
-		let pageData = options.pageData;
+		let snapshotContent = options.snapshotContent;
 		let parentItemID = options.parentItemID;
 		let collections = options.collections;
 		let title = options.title;
@@ -879,9 +876,7 @@ Zotero.Attachments = new function(){
 		try {
 			let fileName = Zotero.File.truncateFileName(this._getFileNameFromURL(url, contentType), 100);
 			let tmpFile = OS.Path.join(tmpDirectory, fileName);
-			await Zotero.File.putContentsAsync(tmpFile, pageData.content);
-			
-			await Zotero.Utilities.Internal.saveSingleFileResources(tmpDirectory, pageData.resources, "");
+			await Zotero.File.putContentsAsync(tmpFile, snapshotContent);
 
 			// If we're using the title from the document, make some adjustments
 			// Remove e.g. " - Scaled (-17%)" from end of images saved from links,
