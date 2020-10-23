@@ -420,7 +420,9 @@ Zotero.Attachments = new function(){
 						}
 					}),
 					undefined,
-					undefined,
+					(e) => {
+						reject(e);
+					},
 					true,
 					cookieSandbox
 				);
