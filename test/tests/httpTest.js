@@ -302,5 +302,17 @@ describe("Zotero.HTTP", function () {
 			});
 			assert.isTrue(called);
 		});
+		
+		it("should fail on non-2xx response", async function () {
+			var e = await getPromiseError(new Zotero.Promise((resolve, reject) => {
+				Zotero.HTTP.loadDocuments(
+					baseURL + "nonexistent",
+					() => {},
+					resolve,
+					reject
+				);
+			}));
+			assert.instanceOf(e, Zotero.HTTP.UnexpectedStatusException);
+		});
 	});
 });
