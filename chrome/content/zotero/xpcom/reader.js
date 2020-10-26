@@ -506,6 +506,19 @@ class ReaderTab extends ReaderInstance {
 		}
 	}
 	
+	menuCmd(cmd) {
+		if (cmd === 'export') {
+			let zp = Zotero.getActiveZoteroPane();
+			zp.exportPDF(this._itemID);
+			return;
+		}
+		let data = {
+			action: 'menuCmd',
+			cmd
+		};
+		this._postMessage(data);
+	}
+	
 	_toggleNoteSidebar(isToggled) {
 		let itemPane = this._window.document.getElementById('zotero-item-pane');
 		var noteEditor = this._window.document.getElementById('zotero-note-editor');
@@ -726,6 +739,10 @@ class Reader {
 				}
 			}
 		}
+	}
+	
+	getByTabID(tabID) {
+		return this._readers.find(r => (r instanceof ReaderTab) && r.tabID === tabID);
 	}
 
 	async openURI(itemURI, location, openWindow) {

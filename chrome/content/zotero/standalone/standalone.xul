@@ -128,28 +128,38 @@
 				mode="icons" iconsize="small" defaulticonsize="small"
 				context="toolbar-context-menu">
 			<toolbaritem id="menubar-items" align="center">
+				<!-- TODO: Localize labels -->
+				<!--
+					On macOS the document's top-most menubar node is used and
+					there is no way to change it after the initialization, only
+					the children can be modified. All non-menu nodes are ignored
+				-->
 				<menubar id="main-menubar"
 				style="border:0px;padding:0px;margin:0px;-moz-appearance:none">
 					<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;"
 							onpopupshowing="ZoteroStandalone.onFileMenuOpen()">
 						<menupopup id="menu_FilePopup">
-							<menu id="menu_newItem" label="&zotero.toolbar.newItem.label;">
+							<menu id="menu_newItem" class="menu-type-library" label="&zotero.toolbar.newItem.label;">
 								<menupopup id="menu_NewItemPopup"
 										onpopupshowing="ZoteroStandalone.buildNewItemMenu()"/>
 							</menu>
-							<menuitem id="menu_newNote" label="&zotero.toolbar.newNote;"
+							<menuitem id="menu_newNote" class="menu-type-library" label="&zotero.toolbar.newNote;"
 									command="cmd_zotero_newStandaloneNote"/>
-							<menuitem id="menu_newCollection" label="&zotero.toolbar.newCollection.label;"
+							<menuitem id="menu_newCollection" class="menu-type-library" label="&zotero.toolbar.newCollection.label;"
 									command="cmd_zotero_newCollection"/>
+							<menuitem label="Save As" class="menu-type-reader" oncommand="ZoteroStandalone.onReaderCmd('export')"/>
+							<menuitem label="Print" class="menu-type-reader" oncommand="ZoteroStandalone.onReaderCmd('print')"/>
 							<menuseparator/>
-							<menuitem id="menu_close" label="&closeCmd.label;" key="key_close"
+							<menuitem id="menu_close" class="menu-type-library" label="&closeCmd.label;" key="key_close"
 									accesskey="&closeCmd.accesskey;" command="cmd_close"/>
-							<menuseparator/>
-							<menuitem id="menu_import" label="&importCmd.label;"
+							<menuitem id="menu_close_tab" class="menu-type-reader" label="&closeCmd.label;" key="key_close"
+									accesskey="&closeCmd.accesskey;" oncommand="Zotero_Tabs.close()"/>
+							<menuseparator class="menu-type-library"/>
+							<menuitem id="menu_import" class="menu-type-library" label="&importCmd.label;"
 									command="cmd_zotero_import" key="key_import"/>
-							<menuitem id="menu_importFromClipboard" label="&importFromClipboardCmd.label;"
+							<menuitem id="menu_importFromClipboard" class="menu-type-library" label="&importFromClipboardCmd.label;"
 									command="cmd_zotero_importFromClipboard" key="key_importFromClipboard"/>
-							<menuitem id="menu_exportLibrary" label="&zotero.toolbar.export.label;"
+							<menuitem id="menu_exportLibrary" class="menu-type-library" label="&zotero.toolbar.export.label;"
 									command="cmd_zotero_exportLibrary"/>
 						</menupopup>
 					</menu>
@@ -163,29 +173,33 @@
 							<menuitem id="menu_cut"/>
 							<menuitem id="menu_copy"/>
 							<menuitem id="menu_copyCitation"
+									class="menu-type-library"
 									label="&copyCitationCmd.label;"
 									command="cmd_zotero_copyCitation"
 									key="key_copyCitation"
 									hidden="true"/>
 							<menuitem id="menu_copyBibliography"
+									class="menu-type-library"
 									label="&copyBibliographyCmd.label;"
 									command="cmd_zotero_copyBibliography"
 									key="key_copyBibliography"
 									hidden="true"/>
 							<menuitem id="menu_copyExport"
+									class="menu-type-library"
 									key="key_copyBibliography"
 									command="cmd_zotero_copyBibliography"
 									hidden="true"/>
 							<menuitem id="menu_paste"/>
 							<menuitem id="menu_delete"/>
-							<menuseparator/>
-							<menuitem id="menu_selectAll"/>
-							<menuseparator/>
-							<menuitem id="menu_find"/>
+							<menuseparator class="menu-type-library"/>
+							<menuitem id="menu_selectAll" class="menu-type-library"/>
+							<menuseparator class="menu-type-library"/>
+							<menuitem id="menu_find" class="menu-type-library"/>
 							<menuitem id="menu_advancedSearch"
+									class="menu-type-library"
 									label="&zotero.toolbar.advancedSearch;"
 									command="cmd_zotero_advancedSearch"/>
-							<menuseparator hidden="true" id="textfieldDirection-separator"/>
+							<menuseparator class="menu-type-library" hidden="true" id="textfieldDirection-separator"/>
 							<menuitem id="textfieldDirection-swap"
 									command="cmd_switchTextDirection"
 									key="key_switchTextDirection"
@@ -199,7 +213,28 @@
 							label="&viewMenu.label;"
 							onpopupshowing="ZoteroStandalone.onViewMenuOpen()">
 						<menupopup id="menu_viewPopup">
+<!--							<menuitem class="menu-type-reader" label="Switch to Presentation Mode" oncommand="ZoteroStandalone.onReaderCmd('presentationmode')"/>-->
+<!--							<menuseparator class="menu-type-reader"/>-->
+							<menuitem class="menu-type-reader" label="Go to First Page" oncommand="ZoteroStandalone.onReaderCmd('firstpage')"/>
+							<menuitem class="menu-type-reader" label="Go to Last Page" oncommand="ZoteroStandalone.onReaderCmd('lastpage')"/>
+							<menuseparator class="menu-type-reader"/>
+							<menuitem class="menu-type-reader" label="Rotate Clockwise" oncommand="ZoteroStandalone.onReaderCmd('rotatecw')"/>
+							<menuitem class="menu-type-reader" label="Rotate Counterclockwise" oncommand="ZoteroStandalone.onReaderCmd('rotateccw')"/>
+							<menuseparator class="menu-type-reader"/>
+							<menuitem class="menu-type-reader" label="Text Selection Tool" oncommand="ZoteroStandalone.onReaderCmd('switchcursortool_select')"/>
+							<menuitem class="menu-type-reader" label="Hand Tool" oncommand="ZoteroStandalone.onReaderCmd('switchcursortool_hand')"/>
+							<menuseparator class="menu-type-reader"/>
+							<menuitem class="menu-type-reader" label="Vertical Scrolling" oncommand="ZoteroStandalone.onReaderCmd('switchscrollmode_vertical')"/>
+							<menuitem class="menu-type-reader" label="Horizontal Scrolling" oncommand="ZoteroStandalone.onReaderCmd('switchscrollmode_horizontal')"/>
+							<menuitem class="menu-type-reader" label="Wrapped Scrolling" oncommand="ZoteroStandalone.onReaderCmd('switchscrollmode_wrapped')"/>
+							<menuseparator class="menu-type-reader"/>
+							<menuitem class="menu-type-reader" label="No Spreads" oncommand="ZoteroStandalone.onReaderCmd('switchspreadmode_none')"/>
+							<menuitem class="menu-type-reader" label="Odd Spreads" oncommand="ZoteroStandalone.onReaderCmd('switchspreadmode_odd')"/>
+							<menuitem class="menu-type-reader" label="Even Spreads" oncommand="ZoteroStandalone.onReaderCmd('switchspreadmode_even')"/>
+							<menuseparator class="menu-type-reader"/>
+
 							<menu id="layout-menu"
+									class="menu-type-library"
 									label="&layout.label;">
 								<menupopup oncommand="ZoteroStandalone.onViewMenuItemClick(event)">
 									<menuitem
@@ -268,6 +303,7 @@
 							</menu>
 							<menuseparator/>
 							<menuitem id="view-menuitem-recursive-collections"
+								class="menu-type-library"
 								label="&recursiveCollections.label;"
 								oncommand="ZoteroStandalone.onViewMenuItemClick(event)"
 								type="checkbox"
@@ -277,16 +313,17 @@
 					
 					<menu id="toolsMenu" label="&toolsMenu.label;" accesskey="&toolsMenu.accesskey;">
 						<menupopup id="menu_ToolsPopup">
-							<menuitem id="menu_createTimeline" label="&zotero.toolbar.timeline.label;"
+							<menuitem id="menu_createTimeline" class="menu-type-library" label="&zotero.toolbar.timeline.label;"
 									command="cmd_zotero_createTimeline"/>
-							<menuitem id="menu_rtfScan" label="&zotero.toolbar.rtfScan.label;"
+							<menuitem id="menu_rtfScan" class="menu-type-library" label="&zotero.toolbar.rtfScan.label;"
 									command="cmd_zotero_rtfScan"/>
 							<menuseparator/>
 							<menuitem id="installConnector"
+									class="menu-type-library"
 									accessKey="&installConnector.accesskey;"
 									label="&installConnector.label;"
 									oncommand="ZoteroStandalone.openHelp('connectors');"/>
-							<menuitem id="menu_addons" label="&addons.label;"
+							<menuitem id="menu_addons" class="menu-type-library" label="&addons.label;"
 									oncommand="Zotero.openInViewer('chrome://mozapps/content/extensions/extensions.xul', ZoteroStandalone.updateAddonsPane)"/>
 							<menu id="developer-menu"
 									label="&developer.label;">
@@ -298,7 +335,7 @@
 								</menupopup>
 							</menu>
 							<menuseparator/>
-							<menu id="manage-attachments-menu" label="&manageAttachments.label;"
+							<menu id="manage-attachments-menu" class="menu-type-library" label="&manageAttachments.label;"
 									onpopupshowing="ZoteroStandalone.onManageAttachmentsMenuOpen()"
 									oncommand="ZoteroStandalone.onManageAttachmentsMenuItemClick(event)">
 								<menupopup id="manage-attachments-menupopup">

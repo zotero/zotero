@@ -47,6 +47,20 @@ const ZoteroStandalone = new function() {
 			document.documentElement.setAttribute('tabsintitlebar', true);
 			document.documentElement.setAttribute('chromemargin', '0,-1,-1,-1');
 		}
+
+		this.switchMenuType('library');
+		Zotero.Notifier.registerObserver(
+			{
+				notify: async (action, type, ids, extraData) => {
+					if (action == 'select') {
+						// "library" or "reader"
+						this.switchMenuType(extraData.type);
+					}
+				}
+			},
+			['tab'],
+			'tab'
+		);
 		
 		Zotero.Promise.try(function () {
 			if(!Zotero) {
@@ -96,7 +110,16 @@ const ZoteroStandalone = new function() {
 			return;
 		});
 	}
-	
+
+	this.switchMenuType = function (type) {
+		document.querySelectorAll('.menu-type-library, .menu-type-reader').forEach(el => el.collapsed = true);
+		document.querySelectorAll('.menu-type-' + type).forEach(el => el.collapsed = false);
+	};
+
+	this.onReaderCmd = function (cmd) {
+		let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+		reader.menuCmd(cmd);
+	};
 	
 	this.onFileMenuOpen = function () {
 		var active = false;
