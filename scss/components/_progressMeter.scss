@@ -1,0 +1,72 @@
+// From https://dxr.mozilla.org/mozilla-esr60/source/browser/themes/shared/downloads/progressmeter.inc.css
+
+/*** Common-styled progressmeter ***/
+.downloadProgress {
+  height: 8px;
+  border-radius: 1px;
+  margin: 4px 0 0;
+  margin-inline-end: 12px;
+
+  /* for overriding rules in progressmeter.css */
+  -moz-appearance: none;
+  border-style: none;
+  background-color: transparent;
+  min-width: initial;
+  min-height: initial;
+}
+
+.downloadProgress[mode="undetermined"] {
+  /* for overriding rules on global.css in Linux. */
+  -moz-binding: url("chrome://global/content/bindings/progressmeter.xml#progressmeter");
+}
+
+.downloadProgress > .progress-bar {
+  background-color: Highlight;
+
+  /* for overriding rules in progressmeter.css */
+  -moz-appearance: none;
+}
+
+.downloadProgress[paused="true"] > .progress-bar {
+  background-color: GrayText;
+}
+
+.downloadProgress[mode="undetermined"] > .progress-bar {
+  /* Make a white reflecting animation.
+     Create a gradient with 2 identical pattern, and enlarge the size to 200%.
+     This allows us to animate background-position with percentage. */
+  background-image: linear-gradient(90deg, transparent 0%,
+          rgba(255,255,255,0.5) 25%,
+          transparent 50%,
+          rgba(255,255,255,0.5) 75%,
+          transparent 100%);
+  background-blend-mode: lighten;
+  background-size: 200% 100%;
+  animation: downloadProgressSlideX 1.5s linear infinite;
+}
+
+.downloadProgress > .progress-remainder {
+  border: solid ButtonShadow;
+  border-block-start-width: 1px;
+  border-block-end-width: 1px;
+  border-inline-start-width: 0;
+  border-inline-end-width: 1px;
+  background-color: ButtonFace;
+}
+
+.downloadProgress[value="0"] > .progress-remainder {
+  border-width: 1px;
+}
+
+.downloadProgress > .progress-remainder[mode="undetermined"] {
+  border: none;
+}
+
+@keyframes downloadProgressSlideX {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
