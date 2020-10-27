@@ -560,11 +560,112 @@ Zotero.Utilities.Internal = {
 	snapshotDocument: async function (document) {
 		// Create sandbox for SingleFile
 		var view = document.defaultView;
-		var sandbox = new Components.utils.Sandbox(view, { wantGlobalProperties: ["XMLHttpRequest", "fetch"] });
+		let sandbox = Zotero.Utilities.Internal.createSnapshotSandbox(view);
+
+		const SCRIPTS = [
+			// This first script replace in the INDEX_SCRIPTS from the single file cli loader
+			"lib/single-file/index.js",
+
+			// Rest of the scripts (does not include WEB_SCRIPTS, those are handled in build process)
+			"lib/single-file/processors/hooks/content/content-hooks.js",
+			"lib/single-file/processors/hooks/content/content-hooks-frames.js",
+			"lib/single-file/processors/frame-tree/content/content-frame-tree.js",
+			"lib/single-file/processors/lazy/content/content-lazy-loader.js",
+			"lib/single-file/single-file-util.js",
+			"lib/single-file/single-file-helper.js",
+			"lib/single-file/vendor/css-tree.js",
+			"lib/single-file/vendor/html-srcset-parser.js",
+			"lib/single-file/vendor/css-minifier.js",
+			"lib/single-file/vendor/css-font-property-parser.js",
+			"lib/single-file/vendor/css-unescape.js",
+			"lib/single-file/vendor/css-media-query-parser.js",
+			"lib/single-file/modules/html-minifier.js",
+			"lib/single-file/modules/css-fonts-minifier.js",
+			"lib/single-file/modules/css-fonts-alt-minifier.js",
+			"lib/single-file/modules/css-matched-rules.js",
+			"lib/single-file/modules/css-medias-alt-minifier.js",
+			"lib/single-file/modules/css-rules-minifier.js",
+			"lib/single-file/modules/html-images-alt-minifier.js",
+			"lib/single-file/modules/html-serializer.js",
+			"lib/single-file/single-file-core.js",
+			"lib/single-file/single-file.js",
+
+			// Web SCRIPTS
+			"lib/single-file/processors/hooks/content/content-hooks-frames-web.js",
+			"lib/single-file/processors/hooks/content/content-hooks-web.js",
+		];
+
+		const { loadSubScript } = Components.classes['@mozilla.org/moz/jssubscript-loader;1']
+			.getService(Ci.mozIJSSubScriptLoader);
+
+		Zotero.debug('Injecting single file scripts');
+		// Run all the scripts of SingleFile scripts in Sandbox
+		SCRIPTS.forEach(
+			script => loadSubScript('resource://zotero/SingleFile/' + script, sandbox)
+		);
+		// Import config
+		loadSubScript('chrome://zotero/content/xpcom/singlefile.js', sandbox);
+
+		// In the client we turn off this auto-zooming feature because it does not work
+		// since the hidden browser does not have a clientHeight.
+		Components.utils.evalInSandbox(
+			'Zotero.SingleFile.CONFIG.loadDeferredImagesKeepZoomLevel = true;',
+			sandbox
+		);
+
+		Zotero.debug('Injecting single file scripts into frames');
+
+		// List of scripts from:
+		// resource/SingleFile/extension/lib/single-file/core/bg/scripts.js
+		const frameScripts = [
+			"lib/single-file/index.js",
+			"lib/single-file/single-file-helper.js",
+			"lib/single-file/vendor/css-unescape.js",
+			"lib/single-file/processors/hooks/content/content-hooks-frames.js",
+			"lib/single-file/processors/frame-tree/content/content-frame-tree.js",
+		];
+
+		// Create sandboxes for all the frames we find
+		const frameSandboxes = [];
+		for (let i = 0; i < sandbox.window.frames.length; ++i) {
+			let frameSandbox = Zotero.Utilities.Internal.createSnapshotSandbox(sandbox.window.frames[i]);
+
+			// Run all the scripts of SingleFile scripts in Sandbox
+			frameScripts.forEach(
+				script => loadSubScript('resource://zotero/SingleFile/' + script, frameSandbox)
+			);
+
+			frameSandboxes.push(frameSandbox);
+		}
+
+		// Use SingleFile to retrieve the html
+		const pageData = await Components.utils.evalInSandbox(
+			`this.singlefile.lib.getPageData(
+				Zotero.SingleFile.CONFIG,
+				{ fetch: ZoteroFetch }
+			);`,
+			sandbox
+		);
+
+		// Clone so we can nuke the sandbox
+		let content = pageData.content;
+
+		// Nuke frames and then main sandbox
+		frameSandboxes.forEach(frameSandbox => Components.utils.nukeSandbox(frameSandbox));
+		Components.utils.nukeSandbox(sandbox);
+
+		return content;
+	},
+
+
+	createSnapshotSandbox: function (view) {
+		let sandbox = new Components.utils.Sandbox(view, {
+			wantGlobalProperties: ["XMLHttpRequest", "fetch"],
+			sandboxPrototype: view
+		});
 		sandbox.window = view.window;
 		sandbox.document = sandbox.window.document;
 		sandbox.browser = false;
-		sandbox.__proto__ = sandbox.window;
 
 		sandbox.Zotero = Components.utils.cloneInto({ HTTP: {} }, sandbox);
 		sandbox.Zotero.debug = Components.utils.exportFunction(Zotero.debug, sandbox);
@@ -635,74 +736,8 @@ Zotero.Utilities.Internal = {
 			};`,
 			sandbox
 		);
-		
-		const SCRIPTS = [
-			// This first script replace in the INDEX_SCRIPTS from the single file cli loader
-			"lib/single-file/index.js",
 
-			// Rest of the scripts (does not include WEB_SCRIPTS, those are handled in build process)
-			"lib/single-file/processors/hooks/content/content-hooks.js",
-			"lib/single-file/processors/hooks/content/content-hooks-frames.js",
-			"lib/single-file/processors/frame-tree/content/content-frame-tree.js",
-			"lib/single-file/processors/lazy/content/content-lazy-loader.js",
-			"lib/single-file/single-file-util.js",
-			"lib/single-file/single-file-helper.js",
-			"lib/single-file/vendor/css-tree.js",
-			"lib/single-file/vendor/html-srcset-parser.js",
-			"lib/single-file/vendor/css-minifier.js",
-			"lib/single-file/vendor/css-font-property-parser.js",
-			"lib/single-file/vendor/css-unescape.js",
-			"lib/single-file/vendor/css-media-query-parser.js",
-			"lib/single-file/modules/html-minifier.js",
-			"lib/single-file/modules/css-fonts-minifier.js",
-			"lib/single-file/modules/css-fonts-alt-minifier.js",
-			"lib/single-file/modules/css-matched-rules.js",
-			"lib/single-file/modules/css-medias-alt-minifier.js",
-			"lib/single-file/modules/css-rules-minifier.js",
-			"lib/single-file/modules/html-images-alt-minifier.js",
-			"lib/single-file/modules/html-serializer.js",
-			"lib/single-file/single-file-core.js",
-			"lib/single-file/single-file.js",
-
-			// Web SCRIPTS
-			"lib/single-file/processors/hooks/content/content-hooks-frames-web.js",
-			"lib/single-file/processors/hooks/content/content-hooks-web.js",
-		];
-
-		const { loadSubScript } = Components.classes['@mozilla.org/moz/jssubscript-loader;1']
-			.getService(Ci.mozIJSSubScriptLoader);
-
-		Zotero.debug('Injecting single file scripts');
-		// Run all the scripts of SingleFile scripts in Sandbox
-		SCRIPTS.forEach(
-			script => loadSubScript('resource://zotero/SingleFile/' + script, sandbox)
-		);
-		// Import config
-		loadSubScript('chrome://zotero/content/xpcom/singlefile.js', sandbox);
-
-		// In the client we turn off this auto-zooming feature because it does not work
-		// since the hidden browser does not have a clientHeight.
-		Components.utils.evalInSandbox(
-			'Zotero.SingleFile.CONFIG.loadDeferredImagesKeepZoomLevel = true;',
-			sandbox
-		);
-		
-		await Zotero.Promise.delay(1500);
-		
-		// Use SingleFile to retrieve the html
-		const pageData = await Components.utils.evalInSandbox(
-			`this.singlefile.lib.getPageData(
-				Zotero.SingleFile.CONFIG,
-				{ fetch: ZoteroFetch }
-			);`,
-			sandbox
-		);
-		
-		// Clone so we can nuke the sandbox
-		let content = pageData.content;
-		Components.utils.nukeSandbox(sandbox);
-
-		return content;
+		return sandbox;
 	},
 	
 	

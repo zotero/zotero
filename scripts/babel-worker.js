@@ -48,18 +48,6 @@ async function babelWorker(ev) {
 				.replace('document.body.removeChild(scrollDiv)', 'document.documentElement.removeChild(scrollDiv)');
 		}
 
-		// Patch content-frame-tree
-		// In Chrome sometimes frames would not have access to the browser object. I could
-		// not replicate this in firefox so is possibly a bug with injected content_scripts
-		// in Chrome that was easier to work around than track down. SingleFile has this
-		// backup mechanism for message so we simply remove the check that implies that if
-		// the top window has the browser object the frame will as well.
-		else if (sourcefile === 'resource/SingleFile/lib/single-file/processors/frame-tree/content/content-frame-tree.js') {
-			transformed = contents
-				.replace('} else if ((!browser || !browser.runtime) && message.method == INIT_RESPONSE_MESSAGE) {',
-					'} else if (message.method == INIT_RESPONSE_MESSAGE) {');
-		}
-
 		// Patch single-file
 		else if (sourcefile === 'resource/SingleFile/lib/single-file/single-file.js') {
 			// We need to add this bit that is done for the cli implementation of singleFile
