@@ -35,7 +35,9 @@
 	<script src="itemPane.js"></script>
 	
 	<vbox id="zotero-item-pane" zotero-persist="width height">
-		<hbox id="zotero-item-pane-padding-top" height="32" hidden="true" align="right"><button id="temp-toggle-2">(Slider)_______</button></hbox>
+		<hbox id="zotero-item-pane-padding-top" height="32" hidden="true" align="right">
+			<button id="temp-toggle-2" style="min-width: 37px; font-size: 16px;">■ □</button>
+		</hbox>
 
 		<deck id="zotero-item-pane-main-deck" flex="1" selectedIndex="0">
 			<deck id="zotero-item-pane-contextual-deck" selectedIndex="0">

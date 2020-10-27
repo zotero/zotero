@@ -502,12 +502,12 @@ var ZoteroItemPane = new function() {
 		document.getElementById('temp-toggle-1').firstChild.remove();
 		document.getElementById('temp-toggle-2').firstChild.remove();
 		if (value == 0) {
-			document.getElementById('temp-toggle-1').append('(Slider)__________');
-			document.getElementById('temp-toggle-2').append('(Slider)__________');
+			document.getElementById('temp-toggle-1').append('■ □');
+			document.getElementById('temp-toggle-2').append('■ □');
 		}
 		else {
-			document.getElementById('temp-toggle-1').append('__________(Slider)');
-			document.getElementById('temp-toggle-2').append('__________(Slider)');
+			document.getElementById('temp-toggle-1').append('□ ■');
+			document.getElementById('temp-toggle-2').append('□ ■');
 		}
 		
 		mainDeck.selectedIndex = value;
