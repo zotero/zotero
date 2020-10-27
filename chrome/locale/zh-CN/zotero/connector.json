@@ -14,6 +14,9 @@
   "general_cancel": {
     "message": "取消"
   },
+  "general_pleaseWait": {
+    "message": "请稍等……"
+  },
   "progressWindow_savingTo": {
     "message": "保存到"
   },
@@ -67,6 +70,12 @@
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "无论何时下载已链接版本"
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1正在更新您的文件。"
+  },
+  "integration_googleDocs_docxAlert": {
+    "message": "当在 Google Docs 中直接编辑 Microsoft Word .docx 文件时，$1整合无法使用。选择文件 → 储存为 Google Docs 来允许该功能。<br/><br/>如果你想把有$1引用的 Word 文档转换为Google Docs 时，请查阅<a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">在文档编辑器间移动文档</a>。"
   },
   "general_saveTo": {
     "message": "保存到 $1"
