@@ -704,12 +704,15 @@ Zotero.Translate.Sandbox = {
 						delete attachment.path;
 					}
 					
-					if (attachment.url && attachment.proxy !== false) {
+					if (attachment.url) {
 						// Remap attachment (but not link) URLs
 						// TODO: provide both proxied and un-proxied URLs (also for documents)
 						//   because whether the attachment is attached as link or file
 						//   depends on Zotero preferences as well.
-						attachment.url = translate.resolveURL(attachment.url, attachment.snapshot === false);
+						attachment.url = translate.resolveURL(
+							attachment.url,
+							attachment.proxy === false || attachment.snapshot === false
+						);
 					}
 				}
 			}
