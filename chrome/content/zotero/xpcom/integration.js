@@ -1444,9 +1444,13 @@ Zotero.Integration.Session.prototype._processNote = function (item) {
 			Zotero.logError(e);
 		}
 	}
-	text = text.replace(/[\u00A0-\u9999\&]/gim, function(i) {
+	// Encode unicode chars
+	text = text.replace(/[\u00A0-\u9999\&]/gim, function (i) {
 		return '&#'+i.charCodeAt(0)+';';
 	});
+	if (!text.startsWith('<html>')) {
+		text = `<html><body>${text}</body></html>`;
+	}
 	return [text, citations, placeholderIDs];
 };
 
