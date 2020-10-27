@@ -4511,8 +4511,8 @@ var ZoteroPane = new function()
 		}
 		
 		let item = this.getSelectedItems()[0];
-		if (!item.isTopLevelItem() || item.isRegularItem()) {
-			throw('Item ' + itemID + ' is not a top-level attachment or note in ZoteroPane_Local.createParentItemsFromSelected()');
+		if (!item.isAttachment() || !item.isTopLevelItem()) {
+			throw('Item ' + itemID + ' is not a top-level attachment');
 		}
 
 		let io = { dataIn: { item }, dataOut: null };
