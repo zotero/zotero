@@ -1363,6 +1363,7 @@ Zotero.Translate.Base.prototype = {
 				if (maybePromise) {
 					maybePromise
 						.then(() => this.decrementAsyncProcesses("Zotero.Translate#translate()"))
+						.catch(e => this.complete(false, e));
 					return;
 				}
 			} catch (e) {
