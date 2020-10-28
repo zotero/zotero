@@ -364,6 +364,7 @@ Zotero.Translate.ItemSaver.prototype = {
 	 */
 	saveSnapshotAttachments: Zotero.Promise.coroutine(function* (pendingAttachments, snapshotContent, attachmentCallback) {
 		for (let [parentItemID, attachment] of pendingAttachments) {
+			Zotero.debug('Saving pending attachment: ' + JSON.stringify(attachment));
 			if (snapshotContent) {
 				attachment.snapshotContent = snapshotContent;
 			}

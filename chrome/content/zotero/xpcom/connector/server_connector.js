@@ -855,17 +855,30 @@ Zotero.Server.Connector.SaveItems.prototype = {
 			cookieSandbox,
 			proxy
 		});
+		// This is a bit tricky. When saving items, the call back`onTopLevelItemsDone` will
+		// return the HTTP request to the connector. Then it may spend some time fetching
+		// PDFs. In the meantime, the connector will create a snapshot and send it along to
+		// the `saveSingleFile` endpoint, which quickly adds the data to the session and
+		// then saves the pending attachments, without removing them (we need them in case
+		// the session switches libraries and we need to save again). So the pending
+		// attachments exist and have already been saved by the time this `saveItems`
+		// promise resolves and we continue executing. So we save the number of existing
+		// attachments before that so prevent double saving.
+		let hasPendingAttachments;
 		let items = await itemSaver.saveItems(
 			data.items,
 			function (attachment, progress, error) {
 				session.onProgress(attachment, progress, error);
 			},
-			onTopLevelItemsDone,
+			(...args) => {
+				hasPendingAttachments = session.pendingAttachments.length > 0;
+				if (onTopLevelItemsDone) onTopLevelItemsDone(...args);
+			},
 			function (parentItemID, attachment) {
 				session.pendingAttachments.push([parentItemID, attachment]);
 			}
 		);
-		if (session.pendingAttachments.length > 0) {
+		if (hasPendingAttachments) {
 			// If the session has snapshotContent already (from switching to a `filesEditable` library
 			// then we can save `pendingAttachments` now
 			if (data.snapshotContent) {
