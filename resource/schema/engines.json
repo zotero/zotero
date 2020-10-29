@@ -42,17 +42,32 @@
 		"_iconSourceURI": "https://www.cnki.net/favicon.ico"
 	},
 	{
+    		"_name": "CNKI Oversea Search",
+	    	"_alias": "CNKI Oversea",
+	    	"_description": "CNKI Oversea",
+	    	"_icon": "https://www.cnki.net/favicon.ico",
+	    	"_hidden": false,
+    		"_urlTemplate": "https://chn.oversea.cnki.net/kns/defaultresult/index?korder=TI&kw={z:title}",
+    		"_urlParams": [],
+	    	"_urlNamespaces": {
+			"rft": "info:ofi/fmt:kev:mtx:journal",
+			"z": "http://www.zotero.org/namespaces/openSearch#",
+			"": "http://a9.com/-/spec/opensearch/1.1/"
+	    	},
+   	 	"_iconSourceURI": "https://www.cnki.net/favicon.ico"
+	},
+	{
 		"_name": "Sci-Hub DOI Search",
 		"_alias": "Sci-Hub DOI",
 		"_description": "SciHub Lookup Lookup",
-		"_icon": "http://sci-hub.tw/favicon.ico",
+		"_icon": "http://sci-hub.se/favicon.ico",
 		"_hidden": false,
-		"_urlTemplate": "http://sci-hub.tw/{z:DOI}",
+		"_urlTemplate": "http://sci-hub.se/{z:DOI}",
 		"_urlParams": [],
 		"_urlNamespaces": {
 			"z": "http://www.zotero.org/namespaces/openSearch#"
 		},
-		"_iconSourceURI": "http://sci-hub.tw/favicon.ico"
+		"_iconSourceURI": "http://sci-hub.se/favicon.ico"
 	},
 	{
 		"_name": "Web of Science Search",
