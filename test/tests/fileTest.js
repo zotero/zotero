@@ -237,6 +237,30 @@ describe("Zotero.File", function () {
 				"Test 2"
 			);
 		})
+		
+		it("should copy subfolders", async function () {
+			// file1
+			// subdir/file2
+			var tmpDir = await getTempDirectory()
+			var source = OS.Path.join(tmpDir, "1");
+			await OS.File.makeDir(OS.Path.join(source, 'subdir'), {
+				from: tmpDir
+			});
+			Zotero.File.putContents(Zotero.File.pathToFile(OS.Path.join(source, 'file1')), 'abc');
+			Zotero.File.putContents(Zotero.File.pathToFile(OS.Path.join(source, 'subdir', 'file2')), 'def');
+			
+			var target = OS.Path.join(tmpDir, "2");
+			await OS.File.makeDir(target);
+			
+			await Zotero.File.copyDirectory(source, target);
+			
+			var targetFile1 = OS.Path.join(target, 'file1');
+			var targetFile2 = OS.Path.join(target, 'subdir', 'file2');
+			assert.isTrue(await OS.File.exists(targetFile1));
+			assert.isTrue(await OS.File.exists(targetFile2));
+			assert.equal(Zotero.File.getContents(targetFile1), 'abc');
+			assert.equal(Zotero.File.getContents(targetFile2), 'def');
+		});
 	})
 	
 	describe("#createDirectoryIfMissing()", function () {
