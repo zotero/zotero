@@ -113,10 +113,10 @@ var Zotero_Tabs = new function () {
 		index = index || this._tabs.length;
 		this._tabs.splice(index, 0, tab);
 		this._update();
+		Zotero.Notifier.trigger('add', 'tab', id, notifierData);
 		if (select) {
 			this.select(id);
 		}
-		Zotero.Notifier.trigger('add', 'tab', id, notifierData);
 		return { id, container };
 	};
 

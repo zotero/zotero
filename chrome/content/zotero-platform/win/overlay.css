@@ -49,7 +49,7 @@
 	padding-top: 4px;
 }
 
-#zotero-view-tabbox tab {
+.zotero-view-tabbox tab {
 	padding-left: .7em;
 	padding-right: .7em;
 }
@@ -99,7 +99,7 @@
 	display: none;
 }
 
-#zotero-collections-tree, #zotero-items-tree, #zotero-view-item {
+#zotero-collections-tree, #zotero-items-tree, .zotero-view-item {
 	-moz-appearance: none;
 	border-style: solid;
 	border-color: #818790;
@@ -142,11 +142,11 @@ tree {
 	margin: .04em 0 0 .15em !important;
 }
 
-#zotero-editpane-tabs spacer {
+.zotero-editpane-tabs spacer {
 	border: 0;
 }
 
-#zotero-view-item {
+.zotero-view-item {
 	padding: 0 !important;
 	-moz-appearance: none;
 	background-color: -moz-field;
@@ -154,7 +154,7 @@ tree {
 	border-color: var(--theme-border-color);
 }
 
-#zotero-editpane-tabs {
+.zotero-editpane-tabs {
 	margin-top: 2px;
 }
 
@@ -163,8 +163,8 @@ tree {
 	border-width: 0;
 }
 
-#zotero-editpane-item-box > scrollbox, #zotero-view-item > tabpanel > vbox, 
-#zotero-editpane-tags > scrollbox, #zotero-editpane-related {
+.zotero-editpane-item-box > scrollbox, .zotero-view-item > tabpanel > vbox, 
+#zotero-editpane-tags > scrollbox, .zotero-editpane-related {
 	padding-top: 5px;
 }
 
@@ -172,6 +172,6 @@ tree {
 	padding-left: 5px;
 }
 
-#zotero-view-item > tabpanel > vbox {
+.zotero-view-item > tabpanel > vbox {
 	padding-left: 5px;
 }

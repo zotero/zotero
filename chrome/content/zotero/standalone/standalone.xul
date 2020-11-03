@@ -233,9 +233,7 @@
 							<menuitem class="menu-type-reader" label="Even Spreads" oncommand="ZoteroStandalone.onReaderCmd('switchspreadmode_even')"/>
 							<menuseparator class="menu-type-reader"/>
 
-							<menu id="layout-menu"
-									class="menu-type-library"
-									label="&layout.label;">
+							<menu id="layout-menu" label="&layout.label;">
 								<menupopup oncommand="ZoteroStandalone.onViewMenuItemClick(event)">
 									<menuitem
 										id="view-menuitem-standard"

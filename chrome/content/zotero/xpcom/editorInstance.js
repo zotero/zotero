@@ -165,7 +165,8 @@ class EditorInstance {
 				citationItems: [citationItem],
 				properties: {}
 			};
-			list.push({ annotation, citation });
+			let formattedCitation = (await this._getFormattedCitationParts(citation)).join(';');
+			list.push({ annotation, citation, formattedCitation });
 		}
 		return list;
 	}
@@ -186,16 +187,18 @@ class EditorInstance {
 						if (!item) {
 							continue;
 						}
-						
-						list.push({
-							citation: {
-								citationItems: [{
-									uris: [Zotero.URI.getItemURI(item)],
-									itemData: Zotero.Cite.System.prototype.retrieveItem(item),
-								}],
-								properties: {}
-							}
-						});
+	
+						let citation = {
+							citationItems: [{
+								uris: [Zotero.URI.getItemURI(item)],
+								itemData: Zotero.Cite.System.prototype.retrieveItem(item)
+							}],
+							properties: {}
+						};
+
+						let formattedCitation = (await this._getFormattedCitationParts(citation)).join(';');
+
+						list.push({ citation, formattedCitation });
 					}
 				}
 				else if (type === 'zotero/annotation') {
@@ -272,6 +275,13 @@ class EditorInstance {
 				this._save(noteData);
 				return;
 			}
+			case 'generateCitation': {
+				let { citation, pos } = message;
+				let formattedCitation = (await this._getFormattedCitationParts(citation)).join(';');
+				let list = [{ citation, formattedCitation }];
+				this._postMessage({ action: 'insertAnnotationsAndCitations', list, pos });
+				return;
+			}
 			case 'subscribeProvider': {
 				let { subscription } = message;
 				this._subscriptions.push(subscription);
@@ -339,8 +349,8 @@ class EditorInstance {
 	async _feedSubscription(subscription) {
 		let { id, type, nodeId, data } = subscription;
 		if (type === 'citation') {
-			let formattedCitation = await this._getFormattedCitation(data.citation);
-			this._postMessage({ action: 'notifyProvider', id, type, data: { formattedCitation } });
+			let parts = await this._getFormattedCitationParts(data.citation);
+			this._postMessage({ action: 'notifyProvider', id, type, data: { formattedCitation: parts.join(';') } });
 		}
 		else if (type === 'image') {
 			let { attachmentKey } = data;
@@ -548,7 +558,7 @@ class EditorInstance {
 		return str;
 	}
 
-	async _getFormattedCitation(citation) {
+	async _getFormattedCitationParts(citation) {
 		let formattedItems = [];
 		for (let citationItem of citation.citationItems) {
 			let item = await this._getItemFromURIs(citationItem.uris);
@@ -565,7 +575,7 @@ class EditorInstance {
 			// 	formattedItems.push(formattedItem);
 			// }
 		}
-		return formattedItems.join(';');
+		return formattedItems;
 	}
 
 	_getBackupStr(item) {
@@ -672,9 +682,11 @@ class EditorInstance {
 					citationItem.uris = [Zotero.URI.getItemURI(item)];
 					citationItem.itemData = Zotero.Cite.System.prototype.retrieveItem(item);
 				}
+				
+				let formattedCitation = (await that._getFormattedCitationParts(citation)).join(';');
 
 				if (progressCallback || !citationData.citationItems.length) {
-					that._postMessage({ action: 'setCitation', nodeId, citation });
+					that._postMessage({ action: 'setCitation', nodeId, citation, formattedCitation });
 				}
 			},
 

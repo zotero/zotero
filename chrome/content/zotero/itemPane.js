@@ -26,13 +26,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import TagsBoxContainer from 'containers/tagsBoxContainer';
+import NotesList from 'components/itemPane/notesList';
 
 var ZoteroItemPane = new function() {
 	var _lastItem, _itemBox, _notesLabel, _notesButton, _notesList, _tagsBox, _relatedBox;
 	var _selectedNoteID;
 	var _translationTarget;
 	var _noteIDs;
-	var _recentlyPinned = [];
+	var _contextNoteUpdaters = [];
+	let _pdfTabHidden = false;
 	
 	this.onLoad = function () {
 		if (!Zotero) {
@@ -64,7 +66,7 @@ var ZoteroItemPane = new function() {
 		document.getElementById('temp-toggle-2').addEventListener('click', () => {
 			this.togglePane();
 		});
-		this.initPinnedView();
+		this.initStandaloneNotesView();
 	}
 	
 	
@@ -234,6 +236,10 @@ var ZoteroItemPane = new function() {
 					yield this.viewItem(_lastItem, null, 1);
 				}
 			}
+			this.updateStandaloneNotesList();
+			for (let updater of _contextNoteUpdaters) {
+				updater.callback();
+			}
 		}
 		else if (type == 'tab') {
 			if (action == 'add') {
@@ -301,6 +307,7 @@ var ZoteroItemPane = new function() {
 		// 	noteEditor.clearUndo();
 		// }
 		
+		document.getElementById('zotero-view-note-sidebar-button').hidden = !!item.parentID;
 		document.getElementById('zotero-view-note-button').hidden = !editable;
 		document.getElementById('zotero-item-pane-content').selectedIndex = 2;
 	};
@@ -310,6 +317,17 @@ var ZoteroItemPane = new function() {
 		// ZoteroPane.setItemPaneMessage(Zotero.getString('pane.item.notes.editingInWindow'));
 	};
 	
+	this.openNoteSidebar = async function () {
+		var selectedNote = Zotero.Items.get(_selectedNoteID);
+
+		if (!selectedNote.parentID) {
+			let editor = document.getElementById('zotero-item-pane-pinned-note');
+			editor.mode = 'edit';
+			editor.item = selectedNote;
+			document.getElementById('zotero-item-pane-pin-deck2').setAttribute('selectedIndex', 1);
+			this.togglePane(false);
+		}
+	}
 	
 	/**
 	 * Select the parent item and open the note editor
@@ -457,7 +475,27 @@ var ZoteroItemPane = new function() {
 		elem.setAttribute('tooltiptext', tooltip);
 	};
 	
-	this.getActiveNote = function() {
+	
+	function _updateNoteCount() {
+		var c = _notesList.childNodes.length;
+		
+		var str = 'pane.item.notes.count.';
+		switch (c){
+		case 0:
+			str += 'zero';
+			break;
+		case 1:
+			str += 'singular';
+			break;
+		default:
+			str += 'plural';
+			break;
+		}
+		
+		_notesLabel.value = Zotero.getString(str, [c]);
+	}
+
+	this.getActiveNote = function () {
 		let mainDeck = document.getElementById('zotero-item-pane-main-deck');
 		if (mainDeck.selectedIndex == 0) {
 			let contextualDeck = document.getElementById('zotero-item-pane-contextual-deck');
@@ -476,20 +514,8 @@ var ZoteroItemPane = new function() {
 		}
 		return null;
 	}
-	
-	window.addEventListener('mousedown', () => {
-		Zotero.debug('active note')
-		Zotero.debug(this.getActiveNote())
-	});
-	
-	this.pinNote = function(itemID) {
-		_recentlyPinned.unshift(itemID);
-		_recentlyPinned = _recentlyPinned.slice(0, 10);
-		this._setPinnedNote(itemID);
-		this._updatePinnedList();
-	}
-	
-	this.togglePane = function(forceItem) {
+
+	this.togglePane = function (forceItem) {
 		let mainDeck = document.getElementById('zotero-item-pane-main-deck');
 		let value;
 		if (forceItem !== undefined) {
@@ -509,15 +535,16 @@ var ZoteroItemPane = new function() {
 			document.getElementById('temp-toggle-1').append('□ ■');
 			document.getElementById('temp-toggle-2').append('□ ■');
 		}
-		
-		mainDeck.selectedIndex = value;
-	}
-	
-	this.initPinnedView = async function () {
 
-		
+		mainDeck.selectedIndex = value;
+
+		let contextualDeck = document.getElementById('zotero-item-pane-contextual-deck');
+		contextualDeck.children[contextualDeck.selectedIndex].setAttribute('state', value);
+	}
+
+	this.initStandaloneNotesView = async function () {
 		let container = document.getElementById('zotero-item-pane-pin-deck');
-		
+
 		let bar = document.createElement('hbox');
 		container.appendChild(bar);
 		let inner = document.createElement('deck');
@@ -525,109 +552,145 @@ var ZoteroItemPane = new function() {
 		inner.style.backgroundColor = 'white';
 		inner.setAttribute('flex', 1);
 		container.appendChild(inner);
-		
+
 		let returnButton = document.createElement('toolbarbutton');
 		returnButton.className = 'zotero-tb-button';
 		returnButton.id = 'zotero-tb-return';
-		returnButton.style.listStyleImage = "url('chrome://zotero/skin/citation-delete.png')"
+		returnButton.style.listStyleImage = 'url(\'chrome://zotero/skin/citation-delete.png\')'
 		returnButton.addEventListener('click', () => {
 			inner.setAttribute('selectedIndex', 0);
 		});
 
-		
-		bar.append(returnButton, 'Pinned note');
+
+		bar.append(returnButton, 'Standalone Notes');
 		bar.style.overflowX = 'hidden';
 		bar.style.textOverflow = 'ellipsis';
 		bar.style.fontWeight = 'bold';
-		
-		
-		
+
+
 		let list = document.createElement('vbox');
 		list.setAttribute('flex', 1);
 		list.className = 'zotero-box';
-		
-		
-		
-		
+
+
 		let note = document.createElement('zoteronoteeditor');
 		note.id = 'zotero-item-pane-pinned-note';
 		note.setAttribute('flex', 1);
 		inner.appendChild(list);
 		inner.appendChild(note);
-		
+
 		inner.setAttribute('selectedIndex', 0);
-		
-		
+
+
 		let head = document.createElement('hbox');
-		head.setAttribute('align', 'center');
 		let label = document.createElement('label');
 		let button = document.createElement('button');
-		button.setAttribute('label', 'Add');
+		button.setAttribute('label', Zotero.Intl.strings['zotero.item.add']);
 		button.addEventListener('click', async () => {
 			inner.setAttribute('selectedIndex', 1);
 			let item = new Zotero.Item('note');
-			item.libraryID = parentItem.libraryID;
-			item.parentKey = parentItem.key;
+			item.libraryID = ZoteroPane_Local.getSelectedLibraryID();
+			// item.parentKey = parentItem.key;
 			note.mode = 'edit';
 			note.item = item;
 			note.parentItem = null;
+			note.focus();
 		});
-		head.append(label, button);
 		
-		let grid = document.createElement('grid');
-		grid.setAttribute('flex', 1);
-		grid.style.overflowY = 'scroll';
-		let columns = document.createElement('columns');
-		let column1 = document.createElement('column');
-		column1.setAttribute('flex', 1);
-		let column2 = document.createElement('column');
-		columns.append(column1, column2);
-		grid.append(columns);
-		let rows = document.createElement('rows');
-		rows.setAttribute('flex', 1);
-		rows.id = 'zotero-item-pane-pinned-list';
-		grid.append(rows);
+		head.style.paddingRight = '10px';
 
-		list.append(head, grid);
 
-		this._updatePinnedList();
-	}
-	
-	this._updatePinnedList = async function() {
-		let rows = document.getElementById('zotero-item-pane-pinned-list');
-		while (rows.hasChildNodes()) {
-			rows.removeChild(rows.firstChild);
+		let input = document.createElement('textbox');
+		input.setAttribute('type', 'search');
+		input.setAttribute('timeout', '250');
+		
+		input.addEventListener('command', (event) => {
+			_updateStandaloneNotesList();
+		})
+
+
+		let vbox1 = document.createElement('vbox');
+		vbox1.append(label, button);
+
+		let vbox2 = document.createElement('vbox');
+		vbox2.append(input);
+
+		head.append(vbox2, vbox1);
+
+		head.style.display = 'flex';
+		vbox2.style.flex = '1';
+		
+		
+		let listBox = document.createElement('vbox');
+		listBox.style.display = 'flex';
+		listBox.setAttribute('flex', '1')
+
+		const HTML_NS = 'http://www.w3.org/1999/xhtml';
+		var listInner = document.createElementNS(HTML_NS, 'div');
+		listInner.className = 'notes-list-container';
+		list.append(head, listBox);
+		
+		listBox.append(listInner);
+		
+		let noteListRef = React.createRef();
+		
+		let _updateStandaloneNotesList = async (reset) => {
+			if (reset) {
+				input.value = '';
+				inner.setAttribute('selectedIndex', 0);
+			}
+			let text = input.value;
+
+			await Zotero.Schema.schemaUpdatePromise;
+			var s = new Zotero.Search();
+			s.addCondition('libraryID', 'is', ZoteroPane_Local.getSelectedLibraryID());
+			s.addCondition('itemType', 'is', 'note');
+			s.addCondition('noChildren', 'true');
+			if (text) {
+				s.addCondition('note', 'contains', text, true);
+			}
+			let notes = await s.search();
+			notes = Zotero.Items.get(notes);
+			notes.sort((a, b) => {
+				a = a.getField('dateModified');
+				b = b.getField('dateModified');
+				return b.localeCompare(a);
+			});
+			
+			noteListRef.current.setNotes(notes.map(note => {
+				let text2 = note.note;
+				text2 = text2.trim();
+				// TODO: Fix a potential performance issuse
+				text2 = Zotero.Utilities.unescapeHTML(text2);
+				let parts = text2.split('\n').map(x => x.trim()).filter(x => x.length);
+				return {
+					id: note.id,
+					title: parts[0] || Zotero.getString('pane.item.notes.untitled'),
+					body: parts[1] || '',
+					date: (new Date(note.dateModified).toLocaleDateString(Zotero.locale))
+				};
+			}));
+
+			var c = notes.length;
+			var str = 'pane.item.notes.count.' + (c == 0 && 'zero' || c == 1 && 'singular' || 'plural');
+			label.value = Zotero.getString(str, [c]);
 		}
-		
-		await Zotero.Schema.schemaUpdatePromise;
-		var s = new Zotero.Search();
-		s.addCondition('libraryID', 'is', 1);
-		s.addCondition('itemType', 'is', 'note');
-		s.addCondition('noChildren', 'true');
-		let notes = await s.search();
-		notes = Zotero.Items.get(notes);
-		notes.sort((a, b) => {
-			a = a.getField('dateModified');
-			b = b.getField('dateModified');
-			return b.localeCompare(a);
-		});
-		
-		var row = document.createElement('row');
-		row.style.fontWeight = 'bold';
-		row.appendChild(document.createTextNode('Recently pinned notes'));
-		rows.append(row);
-		this._appendNoteRows(Zotero.Items.get(_recentlyPinned), rows, false, (id) => {
-			this._setPinnedNote(id);
-		});
-		
-		row = document.createElement('row');
-		row.style.fontWeight = 'bold';
-		row.appendChild(document.createTextNode('Recently edited standalone notes'));
-		rows.append(row);
 
-		this._appendNoteRows(notes, rows, false, (id) => {
-			this._setPinnedNote(id);
-		});
+		ReactDOM.render(
+			<NotesList
+				ref={noteListRef}
+				onClick={(id) => {
+					this._setPinnedNote(id);
+				}}
+			/>,
+			listInner,
+			() => {
+				_updateStandaloneNotesList();
+			}
+		);
+
+
+		this.updateStandaloneNotesList = _updateStandaloneNotesList;
 	}
 
 	this._setPinnedNote = function (itemID) {
@@ -683,132 +746,25 @@ var ZoteroItemPane = new function() {
 			list.appendChild(row);
 		}
 	}
-	
-	this.addPDFTabContext = function(tabID, itemID) {
-		let contextualDeck = document.getElementById('zotero-item-pane-contextual-deck');
-		
-		let container = document.createElement('vbox');
-		container.id = tabID + '-context';
-		
-		let bar = document.createElement('hbox');
-		container.appendChild(bar);
-		let inner = document.createElement('deck');
-		inner.style.backgroundColor = 'white';
-		inner.setAttribute('flex', 1);
-		container.appendChild(inner);
-		
-		contextualDeck.appendChild(container);
-		
-		let item = Zotero.Items.get(itemID);
-		if (!item.parentID) {
-			inner.append("The PDF doesn't have a parent");
-			return;
-		}
-		
-		let parentItem = Zotero.Items.get(item.parentID);
-		let returnButton = document.createElement('toolbarbutton');
-		returnButton.className = 'zotero-tb-button';
-		returnButton.id = 'zotero-tb-return';
-		returnButton.style.listStyleImage = "url('chrome://zotero/skin/citation-delete.png')"
-		returnButton.addEventListener('click', () => {
-			inner.setAttribute('selectedIndex', 0);
-		});
-		
-		bar.append(returnButton, parentItem.getField('title'));
-		bar.style.overflowX = 'hidden';
-		bar.style.textOverflow = 'ellipsis';
-		bar.style.fontWeight = 'bold';
-		
-		let list = document.createElement('vbox');
-		list.setAttribute('flex', 1);
-		list.className = 'zotero-box';
-		
-		let note = document.createElement('zoteronoteeditor');
-		note.setAttribute('flex', 1);
-		inner.appendChild(list);
-		inner.appendChild(note);
-		inner.setAttribute('selectedIndex', 0);
-		
-		note.placeholder = 'Drag annotations and write item-specific notes';
-		
-		let head = document.createElement('hbox');
-		head.setAttribute('align', 'center');
-		let label = document.createElement('label');
-		let button = document.createElement('button');
-		button.setAttribute('label', 'Add');
-		button.addEventListener('click', async () => {
-			inner.setAttribute('selectedIndex', 1);
-			let item = new Zotero.Item('note');
-			item.libraryID = parentItem.libraryID;
-			item.parentKey = parentItem.key;
-			await item.saveTx();
-			note.mode = 'edit';
-			note.item = item;
-			note.parentItem = null;
-			_updateList();
-		});
-		head.append(label, button);
-		
-		let grid = document.createElement('grid');
-		grid.setAttribute('flex', 1);
-		let columns = document.createElement('columns');
-		let column1 = document.createElement('column');
-		column1.setAttribute('flex', 1);
-		let column2 = document.createElement('column');
-		columns.append(column1, column2);
-		grid.append(columns);
-		let rows = document.createElement('rows');
-		rows.setAttribute('flex', 1);
-		grid.append(rows);
-		
-		list.append(head, grid);
-		
-		let parentNotes = parentItem.getNotes();
-		if (parentNotes.length == 0) {
-			inner.setAttribute('selectedIndex', 1);
-			let item = new Zotero.Item('note');
-			item.libraryID = parentItem.libraryID;
-			item.parentKey = parentItem.key;
-			note.mode = 'edit';
-			note.item = item;
-			note.parentItem = null;
-		}
-		else if (parentNotes.length == 1) {
-			inner.setAttribute('selectedIndex', 1);
-			note.mode = 'edit';
-			note.item = Zotero.Items.get(parentNotes[0]);
-			note.parentItem = null;
-		}
-		
-		let _updateList = () => {
-			while (rows.hasChildNodes()) {
-				rows.removeChild(rows.firstChild);
-			}
-			let parentNotes = Zotero.Items.get(parentItem.getNotes());
-			this._appendNoteRows(parentNotes, rows, true, (id) => {
-				inner.setAttribute('selectedIndex', 1);
-				note.mode = 'edit';
-				note.item = Zotero.Items.get(id);
-				note.parentItem = null;
-			}, (id) => {
-				ZoteroItemPane.removeNote(id);
-			});
-		}
-		
-		_updateList();
-	}
-	
-	this.removeTabContext = function(tabID) {
+
+	this.removeTabContext = function (tabID) {
 		document.getElementById(tabID + '-context').remove();
+		_contextNoteUpdaters = _contextNoteUpdaters.filter(x => x.tabID != tabID);
 	};
 	
-	this.selectTabContext = function(tabID, type) {
+	this.selectTabContext = function (tabID, type) {
 		let contextualDeck = document.getElementById('zotero-item-pane-contextual-deck');
+		let prevIndex = contextualDeck.selectedIndex;
 		contextualDeck.selectedIndex = Array.from(contextualDeck.children).findIndex(x => x.id == tabID + '-context');
 
 		let toolbar = document.getElementById('zotero-pane-horizontal-space');
 		let extendedToolbar = document.getElementById('zotero-item-pane-padding-top');
 		let itemPane = document.getElementById('zotero-item-pane');
+
+		if (prevIndex != 0) {
+			_pdfTabHidden = itemPane.hidden;
+		}
+
 		if (type == 'library') {
 			toolbar.hidden = false;
 			extendedToolbar.hidden = true;
@@ -817,27 +773,235 @@ var ZoteroItemPane = new function() {
 		else {
 			toolbar.hidden = true;
 			extendedToolbar.hidden = false;
+			itemPane.hidden = _pdfTabHidden;
+		}
+
+		let state = contextualDeck.children[contextualDeck.selectedIndex].getAttribute('state');
+		let mainDeck = document.getElementById('zotero-item-pane-main-deck');
+		document.getElementById('temp-toggle-1').firstChild.remove();
+		document.getElementById('temp-toggle-2').firstChild.remove();
+		if (state == 0) {
+			document.getElementById('temp-toggle-1').append('■ □');
+			document.getElementById('temp-toggle-2').append('■ □');
+			mainDeck.selectedIndex = state;
+		}
+		else if (state == 1) {
+			document.getElementById('temp-toggle-1').append('□ ■');
+			document.getElementById('temp-toggle-2').append('□ ■');
+			mainDeck.selectedIndex = state;
 		}
 	};
-	
-	
-	function _updateNoteCount() {
-		var c = _notesList.childNodes.length;
-		
-		var str = 'pane.item.notes.count.';
-		switch (c){
-		case 0:
-			str += 'zero';
-			break;
-		case 1:
-			str += 'singular';
-			break;
-		default:
-			str += 'plural';
-			break;
+
+
+	this.addPDFTabContext = function (tabID, itemID) {
+		let contextualDeck = document.getElementById('zotero-item-pane-contextual-deck');
+
+		let container = document.createElement('vbox');
+		container.id = tabID + '-context';
+		container.className = 'zotero-item-pane-content';
+		contextualDeck.appendChild(container);
+
+		var item = Zotero.Items.get(itemID);
+		if (!item.parentID) {
+			container.append('The PDF doesn\'t have a parent');
+			return;
 		}
-		
-		_notesLabel.value = Zotero.getString(str, [c]);
+
+		let parentID = item.parentID;
+
+		let mainDeck = document.getElementById('zotero-item-pane-main-deck');
+		let pinDeck = document.getElementById('zotero-item-pane-pin-deck2');
+		container.setAttribute('state', (mainDeck.selectedIndex == 1 && pinDeck.selectedIndex == 1) ? 1 : 0)
+
+
+		let parentItem = Zotero.Items.get(parentID);
+
+		let tabbox = document.createElement('tabbox');
+		tabbox.setAttribute('flex', '1');
+		tabbox.className = 'zotero-view-tabbox';
+		let tabs = document.createElement('tabs');
+		tabs.className = 'zotero-editpane-tabs';
+
+		container.append(tabbox);
+
+
+		let tabInfo = document.createElement('tab');
+		tabInfo.setAttribute('label', Zotero.Intl.strings['zotero.tabs.info.label']);
+		let tabNotes = document.createElement('tab');
+		tabNotes.setAttribute('label', Zotero.Intl.strings['zotero.tabs.notes.label']);
+		let tabTags = document.createElement('tab');
+		tabTags.setAttribute('label', Zotero.Intl.strings['zotero.tabs.tags.label']);
+		let tabRelated = document.createElement('tab');
+		tabRelated.setAttribute('label', Zotero.Intl.strings['zotero.tabs.related.label']);
+		tabs.append(tabInfo, tabNotes, tabTags, tabRelated);
+
+		let tabpanels = document.createElement('tabpanels');
+		tabpanels.setAttribute('flex', '1');
+		tabpanels.className = 'zotero-view-item';
+
+		tabbox.append(tabs, tabpanels);
+
+		let panelInfo = document.createElement('tabpanel');
+		panelInfo.setAttribute('flex', '1')
+		panelInfo.className = 'zotero-editpane-item-box';
+		let itemBox = document.createElement('zoteroitembox');
+		itemBox.setAttribute('flex', '1');
+		panelInfo.append(itemBox);
+
+		let panelNotes = document.createElement('tabpanel');
+		panelNotes.setAttribute('flex', '1');
+		panelNotes.setAttribute('orient', 'vertical');
+
+		var deck = document.createElement('deck');
+		deck.setAttribute('flex', '1');
+
+		panelNotes.append(deck);
+
+		var vbox2 = document.createElement('vbox');
+
+
+		let returnButton = document.createElement('toolbarbutton');
+		returnButton.className = 'zotero-tb-button';
+		returnButton.id = 'zotero-tb-return';
+		returnButton.style.listStyleImage = 'url(\'chrome://zotero/skin/citation-delete.png\')'
+		returnButton.addEventListener('click', () => {
+			deck.setAttribute('selectedIndex', 0);
+		});
+
+		var bar = document.createElement('hbox')
+		bar.append(returnButton, 'Child Notes');
+		bar.style.overflowX = 'hidden';
+		bar.style.textOverflow = 'ellipsis';
+		bar.style.fontWeight = 'bold';
+
+		let note = document.createElement('zoteronoteeditor');
+
+		note.setAttribute('flex', 1);
+
+		vbox2.append(bar, note);
+
+
+		var vbox = document.createElement('vbox');
+		vbox.setAttribute('flex', '1');
+		vbox.setAttribute('class', 'zotero-box');
+		panelNotes.append(vbox);
+
+		var hbox = document.createElement('hbox');
+		hbox.setAttribute('align', 'center');
+
+		var label = document.createElement('label');
+		var button = document.createElement('button');
+		button.setAttribute('label', Zotero.Intl.strings['zotero.item.add']);
+		button.addEventListener('click', () => {
+			deck.setAttribute('selectedIndex', 1);
+			let item = new Zotero.Item('note');
+			item.libraryID = parentItem.libraryID;
+			item.parentItemID = parentItem.id;
+			note.mode = 'edit';
+			note.item = item;
+			note.focus();
+		});
+		hbox.append(label, button);
+
+		var grid = document.createElement('grid');
+		grid.setAttribute('flex', 1);
+		var columns = document.createElement('columns');
+		var column = document.createElement('column');
+		column.setAttribute('flex', 1);
+		columns.append(column);
+		var column = document.createElement('column');
+		columns.append(column);
+		grid.append(columns);
+		var rows = document.createElement('rows');
+		rows.setAttribute('flex', 1);
+		grid.append(rows);
+
+		vbox.append(hbox, grid);
+
+		deck.append(vbox, vbox2);
+
+		deck.setAttribute('selectedIndex', 0);
+		deck.className = 'zotero-item-pane-content';
+
+
+		let panelTags = document.createElement('tabpanel');
+		panelTags.setAttribute('orient', 'vertical');
+		panelTags.setAttribute('context', 'tags-context-menu');
+		panelTags.className = 'tags-pane';
+		panelTags.style.display = 'flex';
+		const HTML_NS = 'http://www.w3.org/1999/xhtml';
+		var div = document.createElementNS(HTML_NS, 'div');
+		div.className = 'tags-box-container';
+		div.style.display = 'flex';
+		div.style.flexGrow = '1';
+		panelTags.append(div);
+
+		let panelRelated = document.createElement('tabpanel');
+		let relatedBox = document.createElement('relatedbox');
+		relatedBox.setAttribute('flex', '1');
+		relatedBox.className = 'zotero-editpane-related';
+		panelRelated.append(relatedBox);
+
+		tabpanels.append(panelInfo, panelNotes, panelTags, panelRelated);
+
+		itemBox.mode = 'edit';
+		itemBox.item = Zotero.Items.get(parentID);
+
+		relatedBox.mode = 'edit';
+		relatedBox.item = parentItem;
+
+		panelRelated.addEventListener('click', (event) => {
+			if (event.originalTarget.closest('.zotero-clicky')) {
+				Zotero_Tabs.select('zotero-pane');
+			}
+		});
+
+		let _renderNotesPanel = () => {
+			while (rows.firstChild) {
+				rows.firstChild.remove();
+			}
+
+			let parentNotes = Zotero.Items.get(parentItem.getNotes());
+			this._appendNoteRows(parentNotes, rows, true, (id) => {
+				deck.setAttribute('selectedIndex', 1);
+				note.mode = 'edit';
+				note.item = Zotero.Items.get(id);
+				note.parentItem = null;
+			}, (id) => {
+				ZoteroItemPane.removeNote(id);
+			});
+
+			var c = parentNotes.length;
+			var str = 'pane.item.notes.count.' + (c == 0 && 'zero' || c == 1 && 'singular' || 'plural');
+			label.value = Zotero.getString(str, [c]);
+		}
+
+		_contextNoteUpdaters.push({
+			tabID,
+			callback: _renderNotesPanel
+		});
+
+		_renderNotesPanel();
+
+		let mode = 'edit';
+
+		let _tagsBox = { current: null };
+		let focusItemsList = false;
+
+		let _renderTagsPanel = () => {
+			ReactDOM.render(
+				<TagsBoxContainer
+					key={'tagsBox-' + parentItem.id}
+					item={parentItem}
+					editable={mode != 'view'}
+					ref={_tagsBox}
+					onResetSelection={focusItemsList}
+				/>,
+				div
+			);
+		}
+
+		_renderTagsPanel();
 	}
 }   
 

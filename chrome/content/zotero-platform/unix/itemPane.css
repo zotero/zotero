@@ -11,20 +11,20 @@
 	visibility: visible;
 }
 
-#zotero-item-pane-content {
+.zotero-item-pane-content {
 	margin-right: 6px;
 }
 
 /* Make the item pane appear white (same colour as treeview), making the UI more consistent */
-#zotero-item-pane-content tab, #zotero-item-pane-content tabpanels {
+.zotero-item-pane-content tab, .zotero-item-pane-content tabpanels {
 	background-color: -moz-Field; /* Same as background colour for treeview */
 }
 
 /* Possibly irrelevant if mozilla fixes https://bugzilla.mozilla.org/show_bug.cgi?id=1306425 */
-#zotero-view-tabbox tabs tab[visuallyselected=true] {
+.zotero-view-tabbox tabs tab[visuallyselected=true] {
 	margin-top: 0px !important; /* Importanter than ./itemPane.css:20 */
 	margin-bottom: -2px !important; /* Importanter than skin/itemPane.css:12 */
 }
-#zotero-view-tabbox tabs tab {
+.zotero-view-tabbox tabs tab {
 	margin-top: 2px !important; /* Importanter than skin/itemPane.css:11 */
 }
