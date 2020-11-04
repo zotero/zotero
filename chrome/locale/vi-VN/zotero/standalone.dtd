@@ -23,8 +23,8 @@
 <!ENTITY closeCmd.label "Đóng">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
+<!ENTITY manageAttachments.label "Quản lý tập tin đính kèm">
+<!ENTITY convertToStored.label "Chuyển đổi các tập tin liên kết thành tập tin được lưu...">
 <!ENTITY importCmd.label "Nhập khẩu...">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Nhập khẩu từ clipboard">
@@ -44,16 +44,16 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY viewMenu.label "Cách xem">
+<!ENTITY layout.label "Bố trí">
+<!ENTITY standardView.label "Cách xem chuẩn">
+<!ENTITY stackedView.label "Cách xem chồng lên nhau">
+<!ENTITY collectionsPane.label "Khung bộ sựu tập">
+<!ENTITY itemPane.label "Khung mục">
+<!ENTITY tagSelector.label "Bộ chọn thẻ">
+<!ENTITY recursiveCollections.label "Hiển thị các mục trong các bộ sưu tập con">
+<!ENTITY fontSize.label "Cỡ chữ">
+<!ENTITY noteFontSize.label "Cỡ chữ ghi chú">
 
 
 <!ENTITY toolsMenu.label "Các công cụ">
@@ -61,7 +61,7 @@
 <!ENTITY installConnector.label "Cài bộ kết nối trình duyệt">
 <!ENTITY installConnector.accesskey "K">
 <!ENTITY addons.label "Add-ons">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "Nhà phát triển">
 
 
 <!ENTITY minimizeWindow.key "m">

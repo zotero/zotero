@@ -8,8 +8,14 @@
   "general_tryAgain": {
     "message": "Thử lại"
   },
+  "general_warning": {
+    "message": "Cảnh báo"
+  },
   "general_cancel": {
     "message": "Hủy"
+  },
+  "general_pleaseWait": {
+    "message": "Xin chờ..."
   },
   "progressWindow_savingTo": {
     "message": "Lưu vào"
@@ -55,6 +61,9 @@
   },
   "integration_error_connection": {
     "message": "$1 không thể kết nối với $2. $2 phải chạy để có thể dùng trích dẫn web."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Tài liệu này có chứa trích dẫn Zotero mà sẽ hiển thị là các liên kết zotero.org trong bản sao đã tải xuống"
   },
   "general_saveTo": {
     "message": "Lưu vào $1"
