@@ -115,11 +115,11 @@ describe("Zotero.Attachments", function() {
 	
 	describe("#linkFromFileWithRelativePath()", function () {
 		afterEach(function () {
-			Zotero.Prefs.clear('baseAttachmentPath');
+			Zotero.Prefs.clear('libraryAttachmentBaseDirs');
 		});
 		
 		it("should link to a file using a relative path with no base directory set", async function () {
-			Zotero.Prefs.clear('baseAttachmentPath');
+			Zotero.Prefs.clear('libraryAttachmentBaseDirs');
 			
 			var item = await createDataObject('item');
 			var spy = sinon.spy(Zotero.Fulltext, 'indexPDF');
@@ -143,8 +143,8 @@ describe("Zotero.Attachments", function() {
 		
 		it("should link to a file using a relative path within the base directory", async function () {
 			var baseDir = await getTempDirectory();
-			Zotero.Prefs.set('baseAttachmentPath', baseDir);
-			Zotero.Prefs.set('saveRelativeAttachmentPath', true);
+			Zotero.Attachments.setBaseDirByLibrary(Zotero.Libraries.userLibraryID, baseDir);
+			Zotero.Attachments.setSaveRelativePathByLibrary(Zotero.Libraries.userLibraryID, true);
 			
 			var subDir = OS.Path.join(baseDir, 'foo');
 			await OS.File.makeDir(subDir);
@@ -176,8 +176,8 @@ describe("Zotero.Attachments", function() {
 		
 		it("should link to a nonexistent file using a relative path within the base directory", async function () {
 			var baseDir = await getTempDirectory();
-			Zotero.Prefs.set('baseAttachmentPath', baseDir);
-			Zotero.Prefs.set('saveRelativeAttachmentPath', true);
+			Zotero.Attachments.setBaseDirByLibrary(Zotero.Libraries.userLibraryID, baseDir);
+			Zotero.Attachments.setSaveRelativePathByLibrary(Zotero.Libraries.userLibraryID, true);
 			
 			var subDir = OS.Path.join(baseDir, 'foo');
 			await OS.File.makeDir(subDir);
@@ -1146,14 +1146,14 @@ describe("Zotero.Attachments", function() {
 	
 	describe("#getBaseDirectoryRelativePath()", function () {
 		it("should handle base directory at Windows drive root", function () {
-			Zotero.Prefs.set('baseAttachmentPath', "C:\\");
-			var path = Zotero.Attachments.getBaseDirectoryRelativePath("C:\\file.txt");
+			Zotero.Attachments.setBaseDirByLibrary(Zotero.Libraries.userLibraryID, "C:\\");
+			var path = Zotero.Attachments.getBaseDirectoryRelativePath(Zotero.Libraries.userLibraryID, "C:\\file.txt");
 			assert.equal(path, Zotero.Attachments.BASE_PATH_PLACEHOLDER + "file.txt");
 		});
 		
 		it("should convert backslashes to forward slashes", function () {
-			Zotero.Prefs.set('baseAttachmentPath', "C:\\foo\\bar");
-			var path = Zotero.Attachments.getBaseDirectoryRelativePath("C:\\foo\\bar\\test\\file.txt");
+			Zotero.Attachments.setBaseDirByLibrary(Zotero.Libraries.userLibraryID, "C:\\foo\\bar");
+			var path = Zotero.Attachments.getBaseDirectoryRelativePath(Zotero.Libraries.userLibraryID, "C:\\foo\\bar\\test\\file.txt");
 			assert.equal(path, Zotero.Attachments.BASE_PATH_PLACEHOLDER + "test/file.txt");
 		});
 	});

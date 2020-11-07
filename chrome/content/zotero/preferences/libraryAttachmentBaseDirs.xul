@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+
+    Copyright © 2007 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+
+    This file is part of Zotero.
+
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+
+    ***** END LICENSE BLOCK *****
+-->
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/preferences.css"?>
+
+
+<!DOCTYPE window [
+  <!ENTITY % prefWindow SYSTEM "chrome://zotero/locale/preferences.dtd">
+  %prefWindow;
+  <!ENTITY % common SYSTEM "chrome://zotero/locale/zotero.dtd">
+  %common;
+]>
+
+<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	title="" buttons="accept"
+	id="zotero-libraryAttachmentBaseDirs"
+	onload="Zotero_Preferences.Attachment_Base_Directory.initLibraryAttachmentBaseDirs(); sizeToContent()" >
+
+	<script src="chrome://zotero/content/include.js"/>
+	<script src="preferences.js"/>
+	<script src="preferences_advanced.js"/>
+
+	<groupbox>
+		<caption label="Library Attachment Base Directories"/>
+
+		<tree id="library-attachment-base-dirs-tree" flex="1" width="515" hidecolumnpicker="true" rows="10" seltype="single" editable="true"
+			ondblclick="Zotero_Preferences.Attachment_Base_Directory.dblClickLibraryAttachmentBaseDir(event);"
+            onclick="Zotero_Preferences.Attachment_Base_Directory.clickLibraryAttachmentBaseDir(event);">
+            <treecols>
+                <treecol editable="true" type="checkbox" id="library-attachment-base-dirs-checked" label="Enable"/>
+                <treecol editable="false" id="library-attachment-base-dirs-name" flex="1" label="&zotero.preferences.sync.librariesToSync.library;"/>
+                <treecol editable="false" id="library-attachment-base-dirs-path" flex="5" label="Base Directory"/>
+            </treecols>
+			<treechildren id="library-attachment-base-dirs-rows"/>
+		</tree>
+	</groupbox>
+
+	<script>
+	<![CDATA[
+		var io = window.arguments[0];
+	]]>
+	</script>
+</dialog>

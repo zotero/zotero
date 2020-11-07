@@ -23,7 +23,7 @@
  ***** END LICENSE BLOCK *****
 */
 
-Zotero.Attachments = new function(){
+Zotero.Attachments = new function () {
 	// Keep in sync with Zotero.Schema.integrityCheck()
 	this.LINK_MODE_IMPORTED_FILE = 0;
 	this.LINK_MODE_IMPORTED_URL = 1;
@@ -53,10 +53,10 @@ Zotero.Attachments = new function(){
 	this.importFromFile = Zotero.Promise.coroutine(function* (options) {
 		Zotero.debug('Importing attachment from file');
 		
-		var libraryID = options.libraryID;
 		var file = Zotero.File.pathToFile(options.file);
 		var path = file.path;
 		var leafName = file.leafName;
+		var libraryID = options.libraryID;
 		var parentItemID = options.parentItemID;
 		var title = options.title;
 		var collections = options.collections;
@@ -85,13 +85,18 @@ Zotero.Attachments = new function(){
 			yield Zotero.DB.executeTransaction(function* () {
 				// Create a new attachment
 				attachmentItem = new Zotero.Item('attachment');
-				if (parentItemID) {
+				if (libraryID) {
+					attachmentItem.libraryID = libraryID;
+				}
+				else if (parentItemID) {
 					let {libraryID: parentLibraryID, key: parentKey} =
 						Zotero.Items.getLibraryAndKeyFromID(parentItemID);
-					attachmentItem.libraryID = parentLibraryID;
-				}
-				else if (libraryID) {
-					attachmentItem.libraryID = libraryID;
+					if (parentLibraryID) {
+						attachmentItem.libraryID = parentLibraryID;
+					}
+					else {
+						Zotero.debug(`parentItemID '${parentItemID}' does not have a libraryID`);
+					}
 				}
 				attachmentItem.setField('title', title != undefined ? title : newName);
 				attachmentItem.parentID = parentItemID;
@@ -151,7 +156,9 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
+	 * @param {Object} options
 	 * @param {nsIFile|String} options.file - File to add
+	 * @param {Integer} [options.libraryID] - Library ID to add item to
 	 * @param {Integer[]|String[]} [options.parentItemID] - Parent item to add item to
 	 * @param {String} [options.title]
 	 * @param {Integer[]} [options.collections] - Collection keys or ids to add new item to
@@ -164,6 +171,7 @@ Zotero.Attachments = new function(){
 		Zotero.debug('Linking attachment from file');
 		
 		var file = Zotero.File.pathToFile(options.file);
+		var libraryID = options.libraryID;
 		var parentItemID = options.parentItemID;
 		var title = options.title;
 		var collections = options.collections;
@@ -177,13 +185,14 @@ Zotero.Attachments = new function(){
 		
 		var item = yield _addToDB({
 			file,
+			libraryID,
 			title: title != undefined ? title : file.leafName,
 			linkMode: this.LINK_MODE_LINKED_FILE,
 			contentType,
 			charset,
 			parentItemID,
 			collections,
-			saveOptions
+			saveOptions,
 		});
 		try {
 			yield _postProcessFile(item, file, contentType);
@@ -196,7 +205,9 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
+	 * @param {Object} options
 	 * @param {String} options.path - Relative path to file
+	 * @param {Integer} options.libraryID
 	 * @param {String} options.title
 	 * @param {String} options.contentType
 	 * @param {Integer[]|String[]} [options.parentItemID] - Parent item to add item to
@@ -208,6 +219,7 @@ Zotero.Attachments = new function(){
 		Zotero.debug('Linking attachment from file in base directory');
 		
 		var path = options.path;
+		var libraryID = options.libraryID;
 		var title = options.title;
 		var contentType = options.contentType;
 		var parentItemID = options.parentItemID;
@@ -237,6 +249,7 @@ Zotero.Attachments = new function(){
 		path = Zotero.Attachments.BASE_PATH_PLACEHOLDER + path;
 		var item = await _addToDB({
 			file: path,
+			libraryID,
 			title,
 			linkMode: this.LINK_MODE_LINKED_FILE,
 			contentType,
@@ -245,9 +258,10 @@ Zotero.Attachments = new function(){
 			saveOptions
 		});
 		
+		// At this point, item is guaranteed to have a libraryID because .save() was called on it
 		// If the file is found (which requires a base directory being set and the file existing),
 		// index it
-		var file = this.resolveRelativePath(path);
+		var file = this.resolveRelativePath(item.libraryID, path);
 		if (file && await OS.File.exists(file)) {
 			try {
 				await _postProcessFile(item, file, contentType);
@@ -264,6 +278,13 @@ Zotero.Attachments = new function(){
 	/**
 	 * @param {Object} options - 'file', 'url', 'title', 'contentType', 'charset', 'parentItemID', 'singleFile'
 	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
+	 * @param {String} options.file
+	 * @param {String} options.url
+	 * @param {String} options.title
+	 * @param {String} options.contentType
+	 * @param {String} options.charset
+	 * @param {Integer[]|String[]} [options.parentItemID] - Parent item to add item to
+	 * @param {Boolean} options.singleFile
 	 * @return {Promise<Zotero.Item>}
 	 */
 	this.importSnapshotFromFile = Zotero.Promise.coroutine(function* (options) {
@@ -292,7 +313,12 @@ Zotero.Attachments = new function(){
 				// Create a new attachment
 				attachmentItem = new Zotero.Item('attachment');
 				let {libraryID, key: parentKey} = Zotero.Items.getLibraryAndKeyFromID(parentItemID);
-				attachmentItem.libraryID = libraryID;
+				if (libraryID) {
+					attachmentItem.libraryID = libraryID;
+				}
+				else {
+					Zotero.debug(`parentItemID '${parentItemID}' does not have a libraryID`);
+				}
 				attachmentItem.setField('title', title);
 				attachmentItem.setField('url', url);
 				attachmentItem.parentID = parentItemID;
@@ -520,7 +546,7 @@ Zotero.Attachments = new function(){
 	 *
 	 * @param {Object} options
 	 * @param {String} options.directory
-	 * @param {Number} options.libraryID
+	 * @param {Integer} options.libraryID
 	 * @param {String} options.filename
 	 * @param {String} options.url
 	 * @param {Number} [options.parentItemID]
@@ -548,7 +574,12 @@ Zotero.Attachments = new function(){
 			else if (options.parentItemID) {
 				let {libraryID: parentLibraryID, key: parentKey} =
 					Zotero.Items.getLibraryAndKeyFromID(options.parentItemID);
-				attachmentItem.libraryID = parentLibraryID;
+				if (parentLibraryID) {
+					attachmentItem.libraryID = parentLibraryID;
+				}
+				else {
+					Zotero.debug(`parentItemID '${options.parentItemID}' does not have a libraryID`);
+				}
 			}
 			attachmentItem.setField('title', options.title != undefined ? options.title : options.filename);
 			attachmentItem.setField('url', options.url);
@@ -592,6 +623,12 @@ Zotero.Attachments = new function(){
 	 *
 	 * @param {Object} options - 'url', 'parentItemID', 'contentType', 'title', 'collections'
 	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
+	 * @param {Object} options
+	 * @param {String} options.url
+	 * @param {Number} options.parentItemID
+	 * @param {String} options.contentType
+	 * @param {String} options.title
+	 * @param {String[]} options.collections
 	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
 	 */
 	this.linkFromURL = Zotero.Promise.coroutine(function* (options) {
@@ -603,6 +640,10 @@ Zotero.Attachments = new function(){
 		var title = options.title;
 		var collections = options.collections;
 		var saveOptions = options.saveOptions;
+
+		if (parentItemID && collections) {
+			throw new Error("parentItemID and collections cannot both be provided");
+		}
 		
 		var schemeRE = /^([a-z][a-z0-9+.-]+):/;
 		var matches = url.match(schemeRE);
@@ -798,7 +839,12 @@ Zotero.Attachments = new function(){
 				else if (parentItemID) {
 					let {libraryID: parentLibraryID, key: parentKey} =
 						Zotero.Items.getLibraryAndKeyFromID(parentItemID);
-					attachmentItem.libraryID = parentLibraryID;
+					if (parentLibraryID) {
+						attachmentItem.libraryID = parentLibraryID;
+					}
+					else {
+						Zotero.debug(`parentItemID '${parentItemID}' does not have a libraryID`);
+					}
 				}
 				attachmentItem.setField('title', title);
 				attachmentItem.setField('url', url);
@@ -1926,9 +1972,9 @@ Zotero.Attachments = new function(){
 		Zotero.debug("Zotero.Attachments.cleanAttachmentURI() is deprecated -- use Zotero.Utilities.cleanURL");
 		return Zotero.Utilities.cleanURL(uri, tryHttp);
 	}
-	
-	
-	/*
+
+
+	/**
 	 * Returns a formatted string to use as the basename of an attachment
 	 * based on the metadata of the specified item and a format string
 	 *
@@ -2130,60 +2176,176 @@ Zotero.Attachments = new function(){
 		});
 		return tmpDir;
 	});
-	
-	
+
+
 	/**
-	 * If path is within the attachment base directory, return a relative
-	 * path prefixed by BASE_PATH_PLACEHOLDER. Otherwise, return unchanged.
+	 * If ``path`` is within the attachment base directory, return a relative path
+	 * prefixed by *BASE_PATH_PLACEHOLDER*. Otherwise, return ``path`` unchanged.
+	 *
+	 * @param {Integer} libraryID
+	 * @param {String} path
+	 * @return {String}
 	 */
-	this.getBaseDirectoryRelativePath = function (path) {
+	this.getBaseDirectoryRelativePath = function (libraryID, path) {
 		if (!path || path.startsWith(this.BASE_PATH_PLACEHOLDER)) {
 			return path;
 		}
-		
-		var basePath = Zotero.Prefs.get('baseAttachmentPath');
-		if (!basePath) {
+
+		var baseDir = Zotero.Attachments.getBaseDirByLibrary(libraryID);
+		if (!baseDir) {
 			return path;
 		}
-		
-		if (Zotero.File.directoryContains(basePath, path)) {
+
+		if (Zotero.File.directoryContains(baseDir, path)) {
 			// Since stored paths can be synced to other platforms, use forward slashes for consistency.
 			// resolveRelativePath() will convert to the appropriate platform-specific slash on use.
-			basePath = OS.Path.normalize(basePath).replace(/\\/g, "/");
+			baseDir = baseDir.replace(/\\/g, "/");
 			path = OS.Path.normalize(path).replace(/\\/g, "/");
 			// Normalize D:\ vs. D:\foo
-			if (!basePath.endsWith('/')) {
-				basePath += '/';
+			if (!baseDir.endsWith('/')) {
+				baseDir += '/';
 			}
-			path = this.BASE_PATH_PLACEHOLDER + path.substr(basePath.length)
+			path = this.BASE_PATH_PLACEHOLDER + path.substr(baseDir.length)
 		}
-		
+
 		return path;
 	};
-	
-	
+
+
 	/**
-	 * Get an absolute path from this base-dir relative path, if we can
+	 * Get an absolute path from this base directory relative ``path``, if we can
 	 *
-	 * @param {String} path - Absolute path or relative path prefixed by BASE_PATH_PLACEHOLDER
-	 * @return {String|false} - Absolute path, or FALSE if no path
+	 * @param {Integer} libraryID
+	 * @param {String} path - Absolute path or relative path prefixed by *BASE_PATH_PLACEHOLDER*
+	 * @return {String|false} Absolute path, or FALSE if no path
 	 */
-	this.resolveRelativePath = function (path) {
+	this.resolveRelativePath = function (libraryID, path) {
 		if (!path.startsWith(Zotero.Attachments.BASE_PATH_PLACEHOLDER)) {
 			return false;
 		}
-		
-		var basePath = Zotero.Prefs.get('baseAttachmentPath');
-		if (!basePath) {
-			Zotero.debug("No base attachment path set -- can't resolve '" + path + "'", 2);
+
+		var baseDir = Zotero.Attachments.getBaseDirByLibrary(libraryID, path);
+		if (!baseDir) {
+			Zotero.debug(`No attachment base directory set -- can't resolve '${path}' in library '${libraryID}'`, 2);
 			return false;
 		}
-		
+
 		return this.fixPathSlashes(OS.Path.join(
-			OS.Path.normalize(basePath),
-			path.substr(Zotero.Attachments.BASE_PATH_PLACEHOLDER.length)
+			baseDir, path.substr(Zotero.Attachments.BASE_PATH_PLACEHOLDER.length)
 		));
-	}
+	};
+
+
+	/**
+	 * Get the attachment base directory for ``libraryID``, if its set
+	 *
+	 * @param {Integer} libraryID
+	 * @return {String|false} Normalized attachment base directory, or FALSE if no path is found for ``libraryID``
+	 */
+	this.getBaseDirByLibrary = function (libraryID) {
+		// Upgrade and clear out the old preference first
+		var prefValue = Zotero.Prefs.get("baseAttachmentPath");
+		if (prefValue) {
+			Zotero.debug(`Upgrading old user library attachment base directory preference: '${prefValue}'`);
+			this.setBaseDirByLibrary(Zotero.Libraries.userLibraryID, prefValue);
+			Zotero.Prefs.clear("baseAttachmentPath");
+		}
+
+		prefValue = JSON.parse(Zotero.Prefs.get("libraryAttachmentBaseDirs") || "{}");
+		if (libraryID in prefValue) {
+			var baseDir = prefValue[libraryID];
+			if (baseDir) {
+				try {
+					baseDir = OS.Path.normalize(baseDir);
+					Zotero.debug(`Attachment base directory found for library '${libraryID}': '${baseDir}'`);
+					return baseDir;
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+			}
+		}
+
+		Zotero.debug(`Attachment base directory not found for library '${libraryID}'`);
+		return false
+	};
+
+
+	/**
+	 * Set the attachment base directory for ``libraryID``.  ``libraryID``s attachment
+	 * base directory can be cleared by passing a falsy value for ``newBaseDir``.
+	 *
+	 * @param {Integer} libraryID
+	 * @param {String|false} newBaseDir - New attachment base directory for ``libraryID`` or clear it if falsy
+	 * @return {Boolean}
+	 */
+	this.setBaseDirByLibrary = function(libraryID, newBaseDir) {
+		var prefValue = JSON.parse(Zotero.Prefs.get("libraryAttachmentBaseDirs") || "{}");
+		if (newBaseDir) {
+			Zotero.debug(`Setting attachment base directory for library '${libraryID}': '${newBaseDir}'`);
+			prefValue[libraryID] = newBaseDir;
+		}
+		else {
+			Zotero.debug(`Clearing attachment base directory for library '${libraryID}'`);
+			delete prefValue[libraryID];
+		}
+
+		Zotero.Prefs.set("libraryAttachmentBaseDirs", JSON.stringify(prefValue));
+		return true;
+	};
+
+
+	/**
+	 * Get whether attachments within ``libraryID``'s attachment base directory
+	 * should be saved as relative paths.
+	 *
+	 * @param {Integer} libraryID
+	 * @return {String|false}
+	 */
+	this.getSaveRelativePathByLibrary = function (libraryID) {
+		// Upgrade and clear out the old preference first
+		var prefValue = Zotero.Prefs.get("saveRelativeAttachmentPath");
+		if (prefValue) {
+			Zotero.debug(`Upgrading old user library relative path preference: '${prefValue}'`);
+			this.setSaveRelativePathByLibrary(Zotero.Libraries.userLibraryID, prefValue);
+			Zotero.Prefs.clear("saveRelativeAttachmentPath");
+		}
+
+		prefValue = JSON.parse(Zotero.Prefs.get("librarySaveRelativeAttachmentPaths") || "{}");
+		if (libraryID in prefValue) {
+			var saveRelative = prefValue[libraryID];
+			Zotero.debug(`Save relative path preference found for library '${libraryID}': '${saveRelative}'`);
+			return saveRelative;
+		}
+
+		Zotero.debug(`Save relative path preference not found for library '${libraryID}'`);
+		return false;
+	};
+
+
+	/**
+	 * Set whether attachments within ``libraryID``'s attachment base directory
+	 * should be saved as relative paths.  ``libraryID`` can be cleared by passing
+	 * a falsy value for ``saveRelative``.
+	 *
+	 * @param {Integer} libraryID
+	 * @param {String|false} saveRelative - New attachment base directory for ``libraryID`` or clear it if falsy
+	 * @return {Boolean}
+	 */
+	this.setSaveRelativePathByLibrary = function (libraryID, saveRelative) {
+		var prefValue = JSON.parse(Zotero.Prefs.get("librarySaveRelativeAttachmentPaths") || "{}");
+		if (saveRelative) {
+			Zotero.debug(`Setting save relative path for library '${libraryID}': '${saveRelative}'`);
+			prefValue[libraryID] = saveRelative;
+		}
+		else {
+			Zotero.debug(`Clearing save relative path for library '${libraryID}'`);
+			delete prefValue[libraryID];
+		}
+
+		Zotero.Prefs.set("librarySaveRelativeAttachmentPaths", JSON.stringify(prefValue));
+		return true;
+	};
 	
 	
 	this.fixPathSlashes = function (path) {
@@ -2580,6 +2742,7 @@ Zotero.Attachments = new function(){
 	 * @param {Object} options
 	 * @param {nsIFile|String} [file]
 	 * @param {String} [url]
+	 * @param {Integer} [libraryID]
 	 * @param {String} title
 	 * @param {Number} linkMode
 	 * @param {String} contentType
@@ -2592,6 +2755,7 @@ Zotero.Attachments = new function(){
 	function _addToDB(options) {
 		var file = options.file;
 		var url = options.url;
+		var libraryID = options.libraryID;
 		var title = options.title;
 		var linkMode = options.linkMode;
 		var contentType = options.contentType;
@@ -2601,15 +2765,28 @@ Zotero.Attachments = new function(){
 		var saveOptions = options.saveOptions;
 		
 		return Zotero.DB.executeTransaction(function* () {
+			// Create a new attachment
 			var attachmentItem = new Zotero.Item('attachment');
-			if (parentItemID) {
-				let {libraryID: parentLibraryID, key: parentKey} =
-					Zotero.Items.getLibraryAndKeyFromID(parentItemID);
-				if (parentLibraryID != Zotero.Libraries.userLibraryID
+			if (libraryID) {
+				if (libraryID != Zotero.Libraries.userLibraryID
 						&& linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
 					throw new Error("Cannot save linked file in non-local library");
 				}
-				attachmentItem.libraryID = parentLibraryID;
+				attachmentItem.libraryID = libraryID;
+			}
+			else if (parentItemID) {
+				let {libraryID: parentLibraryID, key: parentKey} =
+					Zotero.Items.getLibraryAndKeyFromID(parentItemID);
+				if (parentLibraryID) {
+					if (parentLibraryID != Zotero.Libraries.userLibraryID
+							&& linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+						throw new Error("Cannot save linked file in non-local library");
+					}
+					attachmentItem.libraryID = parentLibraryID;
+				}
+				else {
+					Zotero.debug(`parentItemID '${parentItemID}' does not have a libraryID`);
+				}
 			}
 			attachmentItem.setField('title', title);
 			if (linkMode == self.LINK_MODE_IMPORTED_URL || linkMode == self.LINK_MODE_LINKED_URL) {
@@ -2621,12 +2798,13 @@ Zotero.Attachments = new function(){
 			attachmentItem.attachmentLinkMode = linkMode;
 			attachmentItem.attachmentContentType = contentType;
 			attachmentItem.attachmentCharset = charset;
-			if (file) {
-				attachmentItem.attachmentPath = typeof file == 'string' ? file : file.path;
-			}
 			
 			if (collections) {
 				attachmentItem.setCollections(collections);
+			}
+
+			if (file) {
+				attachmentItem.attachmentPath = typeof file == 'string' ? file : file.path;
 			}
 			yield attachmentItem.save(saveOptions);
 			

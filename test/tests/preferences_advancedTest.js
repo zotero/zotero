@@ -63,7 +63,7 @@ describe("Advanced Preferences", function () {
 	
 	describe("Files & Folders", function () {
 		describe("Linked Attachment Base Directory", function () {
-			var setBaseDirectory = Zotero.Promise.coroutine(function* (basePath) {
+			var setBaseDirectory = Zotero.Promise.coroutine(function* (baseDir) {
 				var win = yield loadWindow("chrome://zotero/content/preferences/preferences.xul", {
 					pane: 'zotero-prefpane-advanced',
 					tabIndex: 1
@@ -82,13 +82,13 @@ describe("Advanced Preferences", function () {
 				}
 				
 				var promise = waitForDialog();
-				yield win.Zotero_Preferences.Attachment_Base_Directory.changePath(basePath);
+				yield win.Zotero_Preferences.Attachment_Base_Directory.changeBaseDirByLibrary(Zotero.Libraries.userLibraryID, baseDir);
 				yield promise;
 				
 				win.close();
 			});
 			
-			var clearBaseDirectory = Zotero.Promise.coroutine(function* (basePath) {
+			var clearBaseDirectory = Zotero.Promise.coroutine(function* (baseDir) {
 				var win = yield loadWindow("chrome://zotero/content/preferences/preferences.xul", {
 					pane: 'zotero-prefpane-advanced',
 					tabIndex: 1
@@ -105,54 +105,54 @@ describe("Advanced Preferences", function () {
 					})
 					yield defer.promise;
 				}
-				
+
 				var promise = waitForDialog();
-				yield win.Zotero_Preferences.Attachment_Base_Directory.clearPath();
+				yield win.Zotero_Preferences.Attachment_Base_Directory.clearBaseDirByLibrary(Zotero.Libraries.userLibraryID);
 				yield promise;
-				
+
 				win.close();
 			});
-			
+
 			beforeEach(function () {
-				Zotero.Prefs.clear('baseAttachmentPath');
-				Zotero.Prefs.clear('saveRelativeAttachmentPath');
+				Zotero.Prefs.clear('libraryAttachmentBaseDirs');
+				Zotero.Prefs.clear('librarySaveRelativeAttachmentPaths');
 			});
-			
+
 			it("should set new base directory", function* () {
-				var basePath = getTestDataDirectory().path;
-				yield setBaseDirectory(basePath);
-				assert.equal(Zotero.Prefs.get('baseAttachmentPath'), basePath);
-				assert.isTrue(Zotero.Prefs.get('saveRelativeAttachmentPath'));
+				var baseDir = getTestDataDirectory().path;
+				yield setBaseDirectory(baseDir);
+				assert.equal(Zotero.Attachments.getBaseDirByLibrary(Zotero.Libraries.userLibraryID), baseDir);
+				assert.isTrue(Zotero.Attachments.getSaveRelativePathByLibrary(Zotero.Libraries.userLibraryID));
 			})
-			
+
 			it("should clear base directory", function* () {
-				var basePath = getTestDataDirectory().path;
-				yield setBaseDirectory(basePath);
+				var baseDir = getTestDataDirectory().path;
+				yield setBaseDirectory(baseDir);
 				yield clearBaseDirectory();
-				
-				assert.equal(Zotero.Prefs.get('baseAttachmentPath'), '');
-				assert.isFalse(Zotero.Prefs.get('saveRelativeAttachmentPath'));
+
+				assert.equal(Zotero.Attachments.getBaseDirByLibrary(Zotero.Libraries.userLibraryID), '');
+				assert.isFalse(Zotero.Attachments.getSaveRelativePathByLibrary(Zotero.Libraries.userLibraryID));
 			})
-			
+
 			it("should change absolute path of linked attachment under new base dir to prefixed path", function* () {
 				var file = getTestDataDirectory();
 				file.append('test.png');
 				var attachment = yield Zotero.Attachments.linkFromFile({ file });
 				assert.equal(attachment.attachmentPath, file.path);
-				
-				var basePath = getTestDataDirectory().path;
-				yield setBaseDirectory(basePath);
-				
+
+				var baseDir = getTestDataDirectory().path;
+				yield setBaseDirectory(baseDir);
+
 				assert.equal(
 					attachment.attachmentPath,
 					Zotero.Attachments.BASE_PATH_PLACEHOLDER + 'test.png'
 				);
 			})
-			
+
 			it("should change prefixed path to absolute when changing base directory", function* () {
-				var basePath = getTestDataDirectory().path;
-				yield setBaseDirectory(basePath);
-				
+				var baseDir = getTestDataDirectory().path;
+				yield setBaseDirectory(baseDir);
+
 				var file = getTestDataDirectory();
 				file.append('test.png');
 				var attachment = yield Zotero.Attachments.linkFromFile({ file });
@@ -161,17 +161,17 @@ describe("Advanced Preferences", function () {
 					Zotero.Attachments.BASE_PATH_PLACEHOLDER + 'test.png'
 				);
 				
-				// Choose a nonexistent directory for the base path
-				var otherPath = OS.Path.join(OS.Path.dirname(basePath), 'foobar');
-				yield setBaseDirectory(otherPath);
+				// Choose a nonexistent directory for the base directory
+				var baseDir = OS.Path.join(OS.Path.dirname(baseDir), 'foobar');
+				yield setBaseDirectory(baseDir);
 				
 				assert.equal(attachment.attachmentPath, file.path);
 			})
-			
+
 			it("should change prefixed path to absolute when clearing base directory", function* () {
-				var basePath = getTestDataDirectory().path;
-				yield setBaseDirectory(basePath);
-				
+				var baseDir = getTestDataDirectory().path;
+				yield setBaseDirectory(baseDir);
+
 				var file = getTestDataDirectory();
 				file.append('test.png');
 				var attachment = yield Zotero.Attachments.linkFromFile({ file });
@@ -179,12 +179,12 @@ describe("Advanced Preferences", function () {
 					attachment.attachmentPath,
 					Zotero.Attachments.BASE_PATH_PLACEHOLDER + 'test.png'
 				);
-				
+
 				yield clearBaseDirectory();
-				
-				assert.equal(Zotero.Prefs.get('baseAttachmentPath'), '');
-				assert.isFalse(Zotero.Prefs.get('saveRelativeAttachmentPath'));
-				
+
+				assert.equal(Zotero.Attachments.getBaseDirByLibrary(Zotero.Libraries.userLibraryID), '');
+				assert.isFalse(Zotero.Attachments.getSaveRelativePathByLibrary(Zotero.Libraries.userLibraryID));
+
 				assert.equal(attachment.attachmentPath, file.path);
 			})
 		})
