@@ -42,15 +42,19 @@
 			<field name="displayTags">false</field>
 			<field name="displayRelated">false</field>
 			<field name="displayButton">false</field>
-
+			<field name="hideLinksContainer"/>
+			
 			<field name="buttonCaption"/>
 			<field name="parentClickHandler"/>
 			<field name="keyDownHandler"/>
 			<field name="commandHandler"/>
 			<field name="clickHandler"/>
 			<field name="navigateHandler"/>
+			
+			<field name="returnHandler"/>
 
 			<constructor><![CDATA[
+					this._destroyed = false;
 					this._noteEditorID = Zotero.Utilities.randomString();
 					this._iframe = document.getAnonymousElementByAttribute(this, 'anonid', 'editor-view');
 					this._iframe.addEventListener('DOMContentLoaded', (e) => {
@@ -99,6 +103,7 @@
 							popup: document.getAnonymousElementByAttribute(this, 'anonid', 'editor-menu'),
 							onNavigate: this._navigateHandler,
 							readOnly: !this.editable,
+							onReturn: this._returnHandler,
 							placeholder: this.placeholder
 						});
 					}
@@ -137,7 +142,7 @@
 							this._lastHtmlValue = this.item.note;
 						}
 
-						this._id('links-container').hidden = !(this.displayTags && this.displayRelated);
+						this._id('links-container').hidden = !(this.displayTags && this.displayRelated) || this._hideLinksContainer;
 						this._id('links-box').refresh();
 					}
 
@@ -179,8 +184,17 @@
 						this._mode = val;
 						document.getAnonymousNodes(this)[0].setAttribute('mode', val);
 						this._id('links-box').mode = val;
-						this._id('links-container').hidden = !(this.displayTags && this.displayRelated);
+						this._id('links-container').hidden = !(this.displayTags && this.displayRelated) || this._hideLinksContainer;
 						this._id('links-box').refresh();
+					]]>
+				</setter>
+			</property>
+
+			<field name="returnHandler"/>
+			<property name="returnHandler" onget="return this._returnHandler;">
+				<setter>
+					<![CDATA[
+						this._returnHandler = val;
 					]]>
 				</setter>
 			</property>
@@ -261,6 +275,15 @@
 					]]>
 				</setter>
 			</property>
+			
+			<property name="hideLinksContainer">
+				<setter>
+					<![CDATA[
+						this._hideLinksContainer = val;
+						this._id('links-container').hidden = val;
+					]]>
+				</setter>
+			</property>
 
 			<field name="collection"/>
 
@@ -271,6 +294,8 @@
 					this._editorInstance.uninit();
 				}
 				this._destroyed = true;
+				this._initialized = false;
+				this._editorInstance = null;
 			]]>
 			</destructor>
 
@@ -307,8 +332,8 @@
 		</implementation>
 
 		<content>
-			<xul:vbox xbl:inherits="flex">
-				<xul:iframe tooltip="editor-tooltip" anonid="editor-view" flex="1" overflow="auto" style="width: 100%;margin-right: 5px;border: 0"
+			<xul:vbox xbl:inherits="flex" style="display: flex;flex-direction: column;flex-grow: 1;">
+				<xul:iframe tooltip="editor-tooltip" anonid="editor-view" flex="1" overflow="auto" style="width: 100%;margin-right: 5px;border: 0;width: 100%;margin-right: 5px;border: 0;flex-grow: 1;"
 							frameBorder="0" src="resource://zotero/zotero-note-editor/editor.html" type="content"/>
 				<xul:hbox id="links-container" hidden="true">
 					<xul:linksbox id="links-box" flex="1" xbl:inherits="notitle"/>
@@ -512,7 +537,7 @@
 					<xul:menupopup id="tagsPopup" ignorekeys="true"
 								   onpopupshown="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='xul:label'){ /* DEBUG: it would be nice to make this work -- if (this.firstChild.count==0){ this.firstChild.newTag(); } */ this.setAttribute('showing', 'true'); }"
 								   onpopuphidden="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='xul:label'){ this.setAttribute('showing', 'false'); }">
-						<xul:tagsbox id="tags" flex="1" mode="edit"/>
+						<xul:tagsbox id="tags" flex="1" mode="edit" style="display: flex"/>
 					</xul:menupopup>
 				</xul:popupset>
 			</xul:vbox>

@@ -33,6 +33,7 @@ class EditorInstance {
 		this.onNavigate = options.onNavigate;
 		this._item = options.item;
 		this._readOnly = options.readOnly;
+		this._onReturn = options.onReturn;
 		this._iframeWindow = options.iframeWindow;
 		this._popup = options.popup;
 		this._state = options.state;
@@ -63,6 +64,7 @@ class EditorInstance {
 			action: 'init',
 			value: this._state || this._item.note,
 			readOnly: this._readOnly,
+			enableReturnButton: !!this._onReturn,
 			placeholder: options.placeholder,
 			dir: Zotero.dir,
 			font: this._getFont(),
@@ -139,6 +141,30 @@ class EditorInstance {
 	_handleFontChange = () => {
 		this._postMessage({ action: 'updateFont', font: this._getFont() });
 	}
+	
+	async _digestExternalNote(itemID) {
+		let item = await Zotero.Items.getAsync(itemID);
+		item._loaded.childItems = true;
+		let note = item.note;
+		let attachments = await Zotero.Items.getAsync(item.getAttachments());
+		for (let attachment of attachments) {
+			let path = await attachment.getFilePathAsync();
+			let buf = await OS.File.read(path, {});
+			buf = new Uint8Array(buf).buffer;
+			let blob = new this._iframeWindow.Blob([buf], { type: attachment.attachmentContentType });
+			let clonedAttachment = await Zotero.Attachments.importEmbeddedImage({
+				blob,
+				parentItemID: this._item.id,
+				saveOptions: {
+					notifierData: {
+						noteEditorID: this.instanceID
+					}
+				}
+			});
+			note = note.replace(attachment.key, clonedAttachment.key);
+		}
+		return note;
+	}
 
 	async _annotationsToInsertionList(annotations) {
 		let list = [];
@@ -148,25 +174,28 @@ class EditorInstance {
 				continue;
 			}
 			let item = attachmentItem.parentID && await Zotero.Items.getAsync(attachmentItem.parentID) || attachmentItem;
+			annotation.uri = Zotero.URI.getItemURI(attachmentItem);
 			if (item !== attachmentItem) {
 				annotation.parentURI = Zotero.URI.getItemURI(item);
+
+				let citationItem = {
+					uris: [Zotero.URI.getItemURI(item)],
+					itemData: Zotero.Cite.System.prototype.retrieveItem(item),
+					locator: annotation.pageLabel
+				};
+
+				annotation.citationItem = citationItem;
+
+				let citation = {
+					citationItems: [citationItem],
+					properties: {}
+				};
+				let formattedCitation = (await this._getFormattedCitationParts(citation)).join(';');
+				list.push({ annotation, citation, formattedCitation });
 			}
-			annotation.uri = Zotero.URI.getItemURI(attachmentItem);
-
-			let citationItem = {
-				uris: [Zotero.URI.getItemURI(item)],
-				itemData: Zotero.Cite.System.prototype.retrieveItem(item),
-				locator: annotation.pageLabel
-			};
-			
-			annotation.citationItem = citationItem;
-
-			let citation = {
-				citationItems: [citationItem],
-				properties: {}
-			};
-			let formattedCitation = (await this._getFormattedCitationParts(citation)).join(';');
-			list.push({ annotation, citation, formattedCitation });
+			else {
+				list.push({ annotation });
+			}
 		}
 		return list;
 	}
@@ -187,18 +216,24 @@ class EditorInstance {
 						if (!item) {
 							continue;
 						}
-	
-						let citation = {
-							citationItems: [{
-								uris: [Zotero.URI.getItemURI(item)],
-								itemData: Zotero.Cite.System.prototype.retrieveItem(item)
-							}],
-							properties: {}
-						};
+						
+						if (item.isRegularItem()) {
+							let citation = {
+								citationItems: [{
+									uris: [Zotero.URI.getItemURI(item)],
+									itemData: Zotero.Cite.System.prototype.retrieveItem(item)
+								}],
+								properties: {}
+							};
 
-						let formattedCitation = (await this._getFormattedCitationParts(citation)).join(';');
+							let formattedCitation = (await this._getFormattedCitationParts(citation)).join(';');
 
-						list.push({ citation, formattedCitation });
+							list.push({ citation, formattedCitation });
+						}
+						else if (item.isNote()) {
+							let note = await this._digestExternalNote(item.id);
+							list.push({ note });
+						}
 					}
 				}
 				else if (type === 'zotero/annotation') {
@@ -341,6 +376,10 @@ class EditorInstance {
 			case 'openContextMenu': {
 				let { x, y, pos, itemGroups } = message;
 				this._openPopup(x, y, pos, itemGroups);
+				return;
+			}
+			case 'return': {
+				this._onReturn();
 				return;
 			}
 		}

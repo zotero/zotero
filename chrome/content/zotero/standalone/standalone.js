@@ -54,7 +54,8 @@ const ZoteroStandalone = new function() {
 				notify: async (action, type, ids, extraData) => {
 					if (action == 'select') {
 						// "library" or "reader"
-						this.switchMenuType(extraData.type);
+						this.switchMenuType(extraData[ids[0]].type);
+						setTimeout(() => ZoteroPane.updateToolbarPosition(), 0);
 					}
 				}
 			},

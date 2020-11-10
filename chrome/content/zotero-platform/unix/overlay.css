@@ -76,3 +76,9 @@ tab {
 	background-color: transparent;
 	background-image: none;
 }
+
+#zotero-context-splitter-stacked {
+	-moz-appearance: none;
+	background-color: #ececec;
+	border-top: 1px solid hsla(0, 0%, 0%, 0.2);
+}

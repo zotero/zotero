@@ -24,9 +24,10 @@
 	<script type="application/javascript">
 		Components.utils.import('resource://gre/modules/Services.jsm');
 	</script>
-		<script type="application/javascript" src="chrome://global/content/globalOverlay.js"/>
+	<script type="application/javascript" src="chrome://global/content/globalOverlay.js"/>
 	<script type="application/javascript" src="chrome://global/content/contentAreaUtils.js"/>
 	<script type="application/javascript" src="chrome://global/content/inlineSpellCheckUI.js"/>
+	<script src="include.js"/>
 	<commandset id="mainCommandSet">
 		<!--FILE-->
 		<command id="cmd_quitApplication" oncommand="goQuitApplication();"/>
@@ -115,27 +116,5 @@
 			<popupset id="zotero-reader-popupset">
 			</popupset>
 		</vbox>
-		<splitter id="zotero-reader-splitter"
-				  hidden="true"
-				  resizebefore="closest"
-				  resizeafter="closest"
-				  collapse="after"
-				  orient="horizontal"
-				  zotero-persist="state orient" />
-		<vbox flex="0" id="zotero-reader-note-sidebar" width="350" hidden="true">
-			<vbox id="zotero-reader-sidebar-cover" flex="1">
-				<label>Drag a note here…</label>
-			</vbox>
-			<vbox id="zotero-reader-sidebar-container" flex="1" style="overflow:auto;" hidden="true">
-				<zoteronoteeditor id="zotero-reader-editor" flex="1" notitle="1"
-								   previousfocus="zotero-items-tree"
-								   onerror="/*this.mode = 'view'*/"
-				/>
-
-				<button id="zotero-view-note-button" label="Close"
-						oncommand="document.getElementById('zotero-reader-sidebar-container').hidden = true;document.getElementById('zotero-reader-sidebar-cover').hidden = false;"/>
-			</vbox>
-		</vbox>
 	</hbox>
-	<script src="include.js"/>
 </window>

@@ -708,9 +708,23 @@
 	display: inherit !important;
 }
 
+#zotero-tab-cover {
+	z-index: 2;
+	left: 0;
+	right: 0;
+	background-color: #ececec;
+	position: fixed;
+	height: 100%;
+}
+
+#zotero-tab-cover label {
+	padding-top: 30px;
+	display: flex;
+	text-align: center;
+}
 
 .zotero-box {
-	/*margin-left: 5px;*/
+	margin-left: 5px;
 }
 
 .zotero-box-icon {

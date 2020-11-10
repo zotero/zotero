@@ -1199,8 +1199,6 @@ var ZoteroPane = new function()
 			// Rename tab
 			Zotero_Tabs.rename('zotero-pane', collectionTreeRow.getName());
 			
-			ZoteroItemPane.updateStandaloneNotesList(true);
-			
 			// Clear quick search and tag selector when switching views
 			document.getElementById('zotero-tb-search').value = "";
 			if (ZoteroPane.tagSelector) {
@@ -5060,6 +5058,7 @@ var ZoteroPane = new function()
 
 		this.updateToolbarPosition();
 		this.updateTagsBoxSize();
+		ZoteroContextPane.update();
 	}
 	
 	
@@ -5195,8 +5194,6 @@ var ZoteroPane = new function()
 		
 		// Allow item pane to shrink to available height in stacked mode, but don't expand to be too
 		// wide when there's no persisted width in non-stacked mode
-		
-		// TODO: Fix this together with stacked view
 		itemPane.setAttribute("flex", stackedLayout ? 1 : 0);
 		
 		this.handleTagSelectorResize();

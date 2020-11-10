@@ -24,7 +24,29 @@
 	}
 	
 	.inner {
+		> *:not(:first-child) {
+			margin-top: 3px;
+		}
+		
 		.first-line {
+			display: flex;
+
+			.icon {
+				display: flex;
+				align-items: center;
+			}
+
+			.title {
+				flex-grow: 1;
+				width: 0;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				margin-left: 8px;
+			}
+		}
+		
+		.second-line {
 			display: flex;
 
 			.title {
@@ -37,10 +59,11 @@
 			}
 		}
 
-		.second-line {
+		.third-line {
 			display: flex;
 
 			.date {
+				color: $shade-6;
 			}
 
 			.body {
