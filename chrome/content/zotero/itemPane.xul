@@ -34,11 +34,17 @@
 	<script src="include.js"/>
 	<script src="itemPane.js"></script>
 	
-	<vbox id="zotero-item-pane" zotero-persist="width height">
+	<vbox id="zotero-item-pane"
+			zotero-persist="width height"
+			data-type="library"
+			data-mode="item"
+	>
 		<hbox id="zotero-item-pane-padding-top" height="32" hidden="true" align="right">
-			<button id="temp-toggle-2" style="min-width: 37px; font-size: 16px;">■ □</button>
+			<button id="temp-toggle-2" style="min-width: 37px; padding: 2px; font-size: 13px;">[&#128196;] &#128210;</button>
 		</hbox>
-
+		
+		<html:div id="item-pane-title"/>
+		
 		<deck id="zotero-item-pane-main-deck" flex="1" selectedIndex="0">
 			<deck id="zotero-item-pane-contextual-deck" selectedIndex="0">
 				<vbox id="zotero-pane-context">

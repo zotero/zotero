@@ -29,6 +29,8 @@ import TagsBoxContainer from 'containers/tagsBoxContainer';
 import NotesList from 'components/itemPane/notesList';
 
 var ZoteroItemPane = new function() {
+	const HTML_NS = 'http://www.w3.org/1999/xhtml';
+	
 	var _lastItem, _itemBox, _notesLabel, _notesButton, _notesList, _tagsBox, _relatedBox;
 	var _selectedNoteID;
 	var _translationTarget;
@@ -112,6 +114,8 @@ var ZoteroItemPane = new function() {
 		}
 		
 		_lastItem = item;
+		
+		_updateTitle();
 		
 		var viewBox = document.getElementById('zotero-view-item');
 		viewBox.classList.remove('no-tabs');
@@ -476,6 +480,11 @@ var ZoteroItemPane = new function() {
 	};
 	
 	
+	function _updateTitle() {
+		document.getElementById('item-pane-title').textContent = _lastItem.getDisplayTitle();
+	}
+	
+	
 	function _updateNoteCount() {
 		var c = _notesList.childNodes.length;
 		
@@ -516,6 +525,7 @@ var ZoteroItemPane = new function() {
 	}
 
 	this.togglePane = function (forceItem) {
+		var pane = document.getElementById('zotero-item-pane');
 		let mainDeck = document.getElementById('zotero-item-pane-main-deck');
 		let value;
 		if (forceItem !== undefined) {
@@ -525,15 +535,15 @@ var ZoteroItemPane = new function() {
 			value = mainDeck.selectedIndex == 0 ? 1 : 0;
 		}
 
-		document.getElementById('temp-toggle-1').firstChild.remove();
-		document.getElementById('temp-toggle-2').firstChild.remove();
 		if (value == 0) {
-			document.getElementById('temp-toggle-1').append('■ □');
-			document.getElementById('temp-toggle-2').append('■ □');
+			pane.setAttribute('data-mode', 'item');
+			document.getElementById('temp-toggle-1').innerHTML = '[&#128196;] &#128210;';
+			document.getElementById('temp-toggle-2').innerHTML = '[&#128196;] &#128210;';
 		}
 		else {
-			document.getElementById('temp-toggle-1').append('□ ■');
-			document.getElementById('temp-toggle-2').append('□ ■');
+			pane.setAttribute('data-mode', 'notes');
+			document.getElementById('temp-toggle-1').innerHTML = '&#128196; [&#128210;]';
+			document.getElementById('temp-toggle-2').innerHTML = '&#128196; [&#128210;]';
 		}
 
 		mainDeck.selectedIndex = value;
@@ -552,36 +562,34 @@ var ZoteroItemPane = new function() {
 		inner.style.backgroundColor = 'white';
 		inner.setAttribute('flex', 1);
 		container.appendChild(inner);
-
-		let returnButton = document.createElement('toolbarbutton');
-		returnButton.className = 'zotero-tb-button';
-		returnButton.id = 'zotero-tb-return';
-		returnButton.style.listStyleImage = 'url(\'chrome://zotero/skin/citation-delete.png\')'
-		returnButton.addEventListener('click', () => {
-			inner.setAttribute('selectedIndex', 0);
-		});
-
-
-		bar.append(returnButton, 'Standalone Notes');
-		bar.style.overflowX = 'hidden';
-		bar.style.textOverflow = 'ellipsis';
-		bar.style.fontWeight = 'bold';
-
-
+		
+		var listLabel = document.createElementNS(HTML_NS, 'div');
+		listLabel.className = 'notes-list-label';
+		listLabel.textContent = Zotero.getString('pane.item.notes.allNotes');
+		
 		let list = document.createElement('vbox');
 		list.setAttribute('flex', 1);
 		list.className = 'zotero-box';
-
-
+		
+		list.appendChild(listLabel);
+		
+		var noteContainer = document.createElement('vbox');
+		var backButton = document.createElementNS(HTML_NS, 'div');
+		backButton.className = 'item-pane-back-button';
+		backButton.textContent = (Zotero.dir == 'ltr' ? '←' : '→') + ' '
+			+ Zotero.getString('general.back');
+		backButton.addEventListener('click', () => {
+			inner.setAttribute('selectedIndex', 0);
+		});
 		let note = document.createElement('zoteronoteeditor');
 		note.id = 'zotero-item-pane-pinned-note';
 		note.setAttribute('flex', 1);
-		inner.appendChild(list);
-		inner.appendChild(note);
-
+		noteContainer.appendChild(backButton);
+		noteContainer.appendChild(note);
+		
+		inner.append(list, noteContainer);
 		inner.setAttribute('selectedIndex', 0);
-
-
+		
 		let head = document.createElement('hbox');
 		let label = document.createElement('label');
 		let button = document.createElement('button');
@@ -625,7 +633,6 @@ var ZoteroItemPane = new function() {
 		listBox.style.display = 'flex';
 		listBox.setAttribute('flex', '1')
 
-		const HTML_NS = 'http://www.w3.org/1999/xhtml';
 		var listInner = document.createElementNS(HTML_NS, 'div');
 		listInner.className = 'notes-list-container';
 		list.append(head, listBox);
@@ -753,6 +760,9 @@ var ZoteroItemPane = new function() {
 	};
 	
 	this.selectTabContext = function (tabID, type) {
+		var pane = document.getElementById('zotero-item-pane');
+		pane.setAttribute('data-type', type);
+		
 		let contextualDeck = document.getElementById('zotero-item-pane-contextual-deck');
 		let prevIndex = contextualDeck.selectedIndex;
 		contextualDeck.selectedIndex = Array.from(contextualDeck.children).findIndex(x => x.id == tabID + '-context');
@@ -775,19 +785,19 @@ var ZoteroItemPane = new function() {
 			extendedToolbar.hidden = false;
 			itemPane.hidden = _pdfTabHidden;
 		}
-
+		
 		let state = contextualDeck.children[contextualDeck.selectedIndex].getAttribute('state');
 		let mainDeck = document.getElementById('zotero-item-pane-main-deck');
-		document.getElementById('temp-toggle-1').firstChild.remove();
-		document.getElementById('temp-toggle-2').firstChild.remove();
 		if (state == 0) {
-			document.getElementById('temp-toggle-1').append('■ □');
-			document.getElementById('temp-toggle-2').append('■ □');
+			pane.setAttribute('data-mode', 'item');
+			document.getElementById('temp-toggle-1').innerHTML = '[&#128196;] &#128210;';
+			document.getElementById('temp-toggle-2').innerHTML = '[&#128196;] &#128210;';
 			mainDeck.selectedIndex = state;
 		}
 		else if (state == 1) {
-			document.getElementById('temp-toggle-1').append('□ ■');
-			document.getElementById('temp-toggle-2').append('□ ■');
+			pane.setAttribute('data-mode', 'notes');
+			document.getElementById('temp-toggle-1').innerHTML = '&#128196; [&#128210;]';
+			document.getElementById('temp-toggle-2').innerHTML = '&#128196; [&#128210;]';
 			mainDeck.selectedIndex = state;
 		}
 	};
@@ -859,26 +869,18 @@ var ZoteroItemPane = new function() {
 
 		var vbox2 = document.createElement('vbox');
 
-
-		let returnButton = document.createElement('toolbarbutton');
-		returnButton.className = 'zotero-tb-button';
-		returnButton.id = 'zotero-tb-return';
-		returnButton.style.listStyleImage = 'url(\'chrome://zotero/skin/citation-delete.png\')'
-		returnButton.addEventListener('click', () => {
+		var backButton = document.createElementNS(HTML_NS, 'div');
+		backButton.className = 'item-pane-back-button';
+		backButton.textContent = (Zotero.dir == 'ltr' ? '←' : '→') + ' '
+			+ Zotero.getString('general.back');
+		backButton.addEventListener('click', () => {
 			deck.setAttribute('selectedIndex', 0);
 		});
-
-		var bar = document.createElement('hbox')
-		bar.append(returnButton, 'Child Notes');
-		bar.style.overflowX = 'hidden';
-		bar.style.textOverflow = 'ellipsis';
-		bar.style.fontWeight = 'bold';
-
+		
 		let note = document.createElement('zoteronoteeditor');
-
 		note.setAttribute('flex', 1);
-
-		vbox2.append(bar, note);
+		
+		vbox2.append(backButton, note);
 
 
 		var vbox = document.createElement('vbox');
@@ -929,7 +931,7 @@ var ZoteroItemPane = new function() {
 		panelTags.setAttribute('context', 'tags-context-menu');
 		panelTags.className = 'tags-pane';
 		panelTags.style.display = 'flex';
-		const HTML_NS = 'http://www.w3.org/1999/xhtml';
+		
 		var div = document.createElementNS(HTML_NS, 'div');
 		div.className = 'tags-box-container';
 		div.style.display = 'flex';

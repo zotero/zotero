@@ -214,7 +214,7 @@
 								<div xmlns="http://www.w3.org/1999/xhtml" class="sync-button-tooltip-messages"/>
 							</tooltip>
 						</toolbarbutton>
-						<button id="temp-toggle-1" style="min-width: 37px; font-size: 16px;">■ □</button>
+						<button id="temp-toggle-1" style="min-width: 37px; padding: 2px; font-size: 13px;">[&#128196;] &#128210;</button>
 					</hbox>
 				</toolbar>
 						

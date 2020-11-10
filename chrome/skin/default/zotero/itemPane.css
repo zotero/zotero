@@ -45,6 +45,52 @@
 	margin-left: 5px;
 }
 
+#zotero-item-pane[data-type='library'] #item-pane-title,
+#zotero-item-pane[data-mode='notes'] #item-pane-title {
+	display: none;
+}
+
+#item-pane-title {
+	font-size: 16px;
+	padding: 0 10px 6px;
+}
+
+#zotero-item-pane-contextual-deck .item-pane-back-button {
+	font-size: 12px;
+	margin: 4px 5px 5px;
+}
+
+#zotero-item-pane-pin-deck .item-pane-back-button {
+	font-size: 12px;
+	margin: 7px 6px;
+}
+
+#zotero-item-pane-padding-top {
+	/*border-bottom: 1px solid lightgray;*/
+}
+
+#zotero-item-pane-pinned-note {
+	border-top: 1px solid #d9d9d9;
+}
+
+.zotero-editpane-tabs {
+	background: #ececec;
+}
+
+#temp-toggle-1.mode-item, #temp-toggle-2.mode-item {
+	list-style-image: url(chrome://zotero/skin/treeitem.png);
+}
+
+#temp-toggle-1.mode-notes, #temp-toggle-2.mode-notes {
+	list-style-image: url(chrome://zotero/skin/treeitem-note.png);
+}
+
+.notes-list-label {
+	font-size: 16px;
+	font-weight: bold;
+	padding: 8px 10px 5px;
+}
+
 #retraction-box {
 	cursor: default;
 }

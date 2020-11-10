@@ -13,12 +13,16 @@
 }
 
 .note-row {
-	padding: 8px 0;
+	padding: 8px 12px;
 
 	&:not(:last-child) {
 		border-bottom: 1px solid $shade-3;
 	}
-
+	
+	&:active {
+		background: #e2e2e2;
+	}
+	
 	.inner {
 		.first-line {
 			display: flex;
