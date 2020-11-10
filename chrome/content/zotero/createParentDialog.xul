@@ -4,15 +4,15 @@
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
 
-<!DOCTYPE bindings SYSTEM "chrome://zotero/locale/searchbox.dtd">
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <dialog
 	id="zotero-parent-dialog"
-	title="Create Parent Item"
+	title="&zotero.createParent.title;"
 	orient="vertical"
 	buttons="cancel,accept,extra2"
-	buttonlabelextra2="Create Empty Parent"
-	buttonlabelaccept="Create Parent Item"
+	buttonlabelextra2="&zotero.createParent.button.empty;"
+	buttonlabelaccept="&zotero.createParent.title;"
 	ondialogaccept="doAccept();return false;"
 	ondialogextra2="doManualEntry();"
 	onload="doLoad();"
@@ -20,12 +20,12 @@
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	style="padding:2em">
-	
+
 	<script src="include.js"/>
 	<script src="lookup.js"/>
 	<script src="createParentDialog.js"/>
 	<script src="containers/createParentContainer.js"/>
-	
+
 	<vbox id="zotero-create-parent-container" flex="1">
 		<html:div id="create-parent" />
 	</vbox>

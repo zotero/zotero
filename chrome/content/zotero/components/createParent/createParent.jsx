@@ -25,57 +25,31 @@
 
 'use strict';
 
-import React, { memo, useState } from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
+import cx from 'classnames';
+const { FormattedMessage } = require('react-intl');
 
 function CreateParent({ loading, item }) {
 	return (
-		<div
-			style={{
-				paddingLeft: '1em',
-				paddingBottom: '0.5em',
-				minWidth: '400px'
-			}}
-		>
-			<span
-				style={{ fontSize: '1.4em' }}
-			>
-				Create parent item for: <strong>{ item.getField('title') }</strong>
+		<div className="create-parent-container">
+			<span className="title">
+				<FormattedMessage id="zotero.createParent.prompt.title" />
+				&nbsp;
+				<strong>{ item.getField('title') }</strong>
 			</span>
-			<div
-				style={{
-					margin: '1em 0',
-					position: 'relative'
-				}}
-			>
+			<div className="body">
 				<input
 					id="parent-item-identifier"
-					placeholder="Enter an ISBN, DOI, PMID, or arXiv ID to identify this item:"
+					placeholder={ Zotero.getString('createParent.prompt') }
 					size="50"
 					disabled={ loading }
-					style={{
-						width: '100%'
-					}}
 				/>
 				<div
-					className="downloadProgress"
 					mode="undetermined"
-					style={{
-						display: loading ? '' : 'none',
-						position: 'absolute',
-						top: '3px',
-						left: '2px',
-						right: '-1.5em'
-					}}
+					className={ cx('downloadProgress', { hidden: !loading }) }
 				>
-					<div
-						className="progress-bar"
-						style={{
-							width: '100%',
-							height: '100%',
-							opacity: 0.5
-						}}
-					></div>
+					<div className="progress-bar"></div>
 				</div>
 			</div>
 		</div>

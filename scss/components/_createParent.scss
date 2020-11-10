@@ -1,0 +1,35 @@
+.create-parent-container {
+	padding-left: 1em;
+	padding-bottom: 0.5em;
+	min-width: 400px;
+
+	.title {
+		font-size: 1.4em;
+	}
+
+	.body {
+		margin: 1em 0;
+		position: relative;
+
+		input {
+			width: 100%;
+		}
+		
+		.downloadProgress {
+			position: absolute;
+			top: 3px;
+			left: 2px;
+			right: -1.5em;
+			
+			&.hidden {
+				display: none;
+			}
+			
+			.progress-bar {
+				width: 100%;
+				height: 100%;
+				opacity: 0.5;
+			}
+		}
+	}
+}
