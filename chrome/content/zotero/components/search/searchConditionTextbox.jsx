@@ -28,13 +28,16 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import Input from "../form/input";
+import { Cc, Ci } from 'chrome';
+
+var search = Cc["@mozilla.org/autocomplete/search;1?name=zotero"]
+	.createInstance(Ci.nsIAutoCompleteSearch);
 
 function SearchConditionTextbox({ condition, onModeChange, onValueChange }) {
 	const intl = useIntl();
 
-	const handleValueChange = (e) => {
-		let value = e.target.value;
-
+	const handleValueChange = (value) => {
 		// Convert datetimes to UTC before saving
 		switch (condition.condition) {
 			case 'accessDate':
@@ -55,6 +58,49 @@ function SearchConditionTextbox({ condition, onModeChange, onValueChange }) {
 			&& Zotero.Date.isSQLDateTime(condition.value)) {
 		condition.value = Zotero.Date.dateToSQL(Zotero.Date.sqlToDate(condition.value, true));
 	}
+
+	const getSuggestions = async (value) => {
+		let i = 0;
+
+		return new Zotero.Promise(function (resolve, reject) {
+			let results = [];
+
+			let params = {
+				fieldName: condition.condition
+			};
+			if (condition.condition === 'creator') {
+				params.fieldMode = 2;
+			}
+
+			search.startSearch(
+				value,
+				JSON.stringify(params),
+				[],
+				{
+					onSearchResult: function (search, result) {
+						if (result.searchResult == result.RESULT_IGNORED
+							|| result.searchResult == result.RESULT_FAILURE) {
+							reject(result.errorDescription);
+							return;
+						}
+						if (result.searchResult == result.RESULT_SUCCESS
+							|| result.searchResult == result.RESULT_SUCCESS_ONGOING) {
+							// Pick up where we left off
+							for (; i < result.matchCount; i++) {
+								results.push(result.getValueAt(i));
+							}
+						}
+						if (result.searchResult != result.RESULT_SUCCESS_ONGOING
+							&& result.searchResult != result.RESULT_NOMATCH_ONGOING) {
+							resolve(results);
+						}
+					}
+				}
+			);
+		});
+	};
+
+	const useAutoComplete = !['date', 'note', 'extra'].includes(condition.condition);
 
 	return (
 		<div className="flex-1 flex-row-center">
@@ -80,11 +126,15 @@ function SearchConditionTextbox({ condition, onModeChange, onValueChange }) {
 				</select>
 				: ''
 			}
-			<input
+			<Input
+				autoComplete={ useAutoComplete }
+				autoFocus
 				className="flex-1"
-				type="text"
-				value={ condition.value }
+				inputGroupClassName="flex-1"
+				getSuggestions={ getSuggestions }
 				onChange={ handleValueChange }
+				value={ condition.value }
+				alwaysRenderSuggestions={ true }
 			/>
 		</div>
 	);

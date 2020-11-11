@@ -299,8 +299,7 @@ function SearchBox({ searchObject, onLibraryChange, refresh, onCommand }) {
 						return (
 							<div
 								key={ conditionID }
-								id="search-condition"
-								className="flex-row-center"
+								className="search-condition flex-row-center"
 							>
 								<select
 									id="conditionsmenu"

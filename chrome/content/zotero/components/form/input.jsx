@@ -69,7 +69,12 @@ class Input extends React.PureComponent {
 	}
 
 	handleChange({ target }, options) {
-		var newValue = options.newValue || target.value;
+		var newValue;
+		if (options && options.newValue) {
+			newValue = options.newValue;
+		} else {
+			newValue = target.value;
+		}
 		this.setState({
 			value: newValue,
 		});
@@ -220,6 +225,7 @@ class Input extends React.PureComponent {
 		const className = cx({
 			'input-group': true,
 			'input': true,
+			'autocomplete': this.props.autoComplete,
 			'busy': this.props.isBusy
 		}, this.props.inputGroupClassName);
 		return (
