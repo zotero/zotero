@@ -683,6 +683,7 @@ Zotero.Sync.Storage.Local = {
 		item.attachmentSyncedModificationTime = mtime;
 		item.attachmentSyncedHash = md5;
 		item.attachmentSyncState = "in_sync";
+		item.attachmentLastAccessed = Date.now();
 		yield item.saveTx({ skipAll: true });
 		
 		return new Zotero.Sync.Storage.Result({

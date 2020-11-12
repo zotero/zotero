@@ -3267,6 +3267,11 @@ Zotero.Schema = new function(){
 				}
 				yield Zotero.DB.queryAsync("DELETE FROM items WHERE itemTypeID=? AND itemID NOT IN (SELECT itemID FROM itemAnnotations)", annotationID);
 			}
+
+			else if (i == 114) {
+				yield Zotero.DB.queryAsync("ALTER TABLE itemAttachments ADD COLUMN lastAccessed INT");
+				yield Zotero.DB.queryAsync("CREATE INDEX itemAttachments_lastAccessed ON itemAttachments(lastAccessed)");
+			}
 			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
 		}
