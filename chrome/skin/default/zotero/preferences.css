@@ -131,6 +131,10 @@ grid row hbox:first-child
 	margin-left: 40px;
 }
 
+.storage-settings-limit-note {
+	font-style: italic;
+}
+
 #storage-verify, #storage-abort, #storage-clean
 {
 	margin-left: 0;

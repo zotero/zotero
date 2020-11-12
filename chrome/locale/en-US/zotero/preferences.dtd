@@ -66,6 +66,9 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.verifyServer         "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1					"By using Zotero storage, you agree to become bound by its">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2					"terms and conditions">
+<!ENTITY zotero.preferences.sync.fileSyncing.limit					"Limit downloaded cache to:">
+<!ENTITY zotero.preferences.sync.fileSyncing.limit.units			"MB(s)">
+<!ENTITY zotero.preferences.sync.fileSyncing.limit.note				"(0 is unlimited)">
 <!ENTITY zotero.preferences.sync.librariesToSync					"Libraries to Sync">
 <!ENTITY zotero.preferences.sync.librariesToSync.button				"Choose Libraries…">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync				"Sync">
