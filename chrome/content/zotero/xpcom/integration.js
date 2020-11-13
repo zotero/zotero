@@ -1470,6 +1470,7 @@ Zotero.Integration.Session.prototype._insertNoteIntoDocument = async function (f
 	
 	// Do these in reverse order to ensure we don't get messy document edits
 	placeholderIDs.reverse();
+	citations.reverse();
 	let fields = await this._doc.convertPlaceholdersToFields(placeholderIDs, this.data.prefs.noteType, this.data.prefs.fieldType);
 	
 	let insertedCitations = await Promise.all(fields.map(async (field, index) => {
