@@ -1371,10 +1371,18 @@ Zotero.Integration.Session.prototype.cite = async function (field) {
 	await citationsByItemIDPromise;
 	
 	let citations = await this._insertCitingResult(fieldIndex, field, io.citation);
-	// We need to re-update from document because we've inserted multiple fields.
-	// Don't worry, the field list and info is cached so this triggers no calls to the doc.
+	if (citations.length > 1) {
+		// We need to refetch fields because we've inserted multiple.
+		// This is not super optimal, but you're inserting 2+ citations at the time,
+		// so that sets it off
+		var fields = await this.getFields(true);
+	}
+	// And resync citations with ones in the doc
 	await this.updateFromDocument(FORCE_CITATIONS_FALSE);
 	for (let citation of citations) {
+		if (fields) {
+			citation._field = new Zotero.Integration.CitationField(fields[citation._fieldIndex]);
+		}
 		await this.addCitation(citation._fieldIndex, await citation._field.getNoteIndex(), citation);
 	}
 	return citations;
