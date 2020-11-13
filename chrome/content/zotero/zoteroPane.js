@@ -2763,6 +2763,7 @@ var ZoteroPane = new function()
 			'createParent',
 			'renameAttachments',
 			'reindexItem',
+			'removeCache'
 		];
 		
 		var m = {};
@@ -2981,6 +2982,14 @@ var ZoteroPane = new function()
 						// Attachment rename option
 						if (!item.isTopLevelItem() && item.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_URL) {
 							show.push(m.renameAttachments);
+							showSep5 = true;
+						}
+
+						// Remove attachment cache option
+						if (item.isAttachment()
+							&& (item.attachmentLinkMode === Zotero.Attachments.LINK_MODE_IMPORTED_FILE
+							|| item.attachmentLinkMode === Zotero.Attachments.LINK_MODE_IMPORTED_URL)) {
+							show.push(m.removeCache);
 							showSep5 = true;
 						}
 						
@@ -4824,6 +4833,12 @@ var ZoteroPane = new function()
 		}
 	};
 	
+
+	this.removeCacheForSelected = async function () {
+		let items = this.getSelectedItems();
+		Zotero.Sync.Storage.Cache.free(items);
+	};
+
 	
 	this.renameSelectedAttachmentsFromParents = Zotero.Promise.coroutine(function* () {
 		// TEMP: fix
