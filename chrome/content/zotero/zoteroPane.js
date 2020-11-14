@@ -4836,7 +4836,8 @@ var ZoteroPane = new function()
 
 	this.removeCacheForSelected = async function () {
 		let items = this.getSelectedItems();
-		Zotero.Sync.Storage.Cache.free(items);
+		//Zotero.Sync.Storage.Cache.free(items);
+		Zotero.Sync.Storage.Cache.identifyItemsToFree(items[0].libraryID);
 	};
 
 	

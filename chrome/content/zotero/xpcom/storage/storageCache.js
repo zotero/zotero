@@ -27,74 +27,244 @@
  * Responsible for management and processing of local files to maintain proper cache size.
  *
  * @function free - Add item ID to queue to be freed
+ * @function identifyItemsToFree - Identify cache items to free
  */
 Zotero.Sync.Storage.Cache = {
-	// A list of items whose files we should delete locally
-	_itemsToFree: [],
-	// Flag to indicate if we are already processing the above list
+	// Flag to indicate if we are already processing
 	_freeingCache: false,
 
 	/**
-	 * Add an attachment item to the queue to delete it's local files
+	 * Identify items with files currently downloaded that we should delete to limit cache
 	 *
-	 * @param items {Array<Zotero.Item>|Zotero.Item} - Attachment Item(s) to remove from cache
+	 * Called when the limit cache preference is turned on or when a new item is downloaded or
+	 * added.
+	 *
+	 * @param forGroups {boolean} - Are we identifying in group libraries or the user library
+	 * @param fullSearch {boolean} - If true, search the full library, otherwise, optimize
 	 *
 	 * @returns {Promise<void>}
 	 */
-	free: async function (items) {
-		// TODO: This will break if items is large so do something better
-		Array.prototype.push.apply(this._itemsToFree, items);
-
-		// If we are already processing, start
-		if (!this._freeingCache) {
-			this._processItem();
+	identifyItemsToFree: async function (forGroups, fullSearch) {
+		this._freeingCache = true;
+		let promises = [];
+		try {
+			if (forGroups) {
+				Zotero.Libraries.getAll().forEach((library) => {
+					if (library.libraryID !== Zotero.Libraries.userLibraryID) {
+						this.promises.push(
+							this._identifyItemsToFreeForLibrary(library.libraryID, fullSearch)
+						);
+					}
+				});
+			}
+			else {
+				this.promises.push(
+					this._identifyItemsToFreeForLibrary(Zotero.Libraries.userLibraryID, fullSearch)
+				);
+			}
+	
+			await Zotero.Promise.all(promises);
+		}
+		catch (e) {
+			throw e;
+		}
+		finally {
+			this._freeingCache = false;
 		}
 	},
 
 	/**
-	 * Process one item from the list of cached items to remove
+	 * Identify items with files currently downloaded that we should delete to limit cache
+	 *
+	 * Called when the limit cache preference is turned on or when a new item is downloaded or
+	 * added.
+	 *
+	 * @param libraryID {integer} - Library ID to search for items to free
+	 * @param fullSearch {boolean} - If true, search the full library, otherwise, optimize
 	 *
 	 * @returns {Promise<void>}
 	 */
-	_processItem: async function () {
-		if (!this._itemsToFree.length) {
-			// No more items to process
-			Zotero.debug('Finished processing items to remove from cache.');
+	_identifyItemsToFreeForLibrary: async function (libraryID, fullSearch) {
+		// Check library has storage
+		if (!Zotero.Sync.Storage.Local.getEnabledForLibrary(libraryID)) {
+			Zotero.debug('Zotero.Sync.Storage.Cache ('
+				+ libraryID + ') exiting because it is not storage enabled ('
+				+ Zotero.Libraries.get(libraryID).libraryType + ').');
 			return;
 		}
 
-		let item = this._itemsToFree[0];
-
-		// We can only remove files for attachment items
-		if (!item.isAttachment()) {
-			Zotero.debug('Cannot free item (' + item.id + ') because it is not an attachment.');
-			this._processItem();
+		// Check this library is on demand
+		if (!Zotero.Sync.Storage.Local.downloadAsNeeded(libraryID)) {
+			Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID
+				+ ') exiting because it is not download as-needed.');
+			return;
+		}
+		
+		let cacheLimit = Zotero.Prefs.get(this._getCacheLimitPrefFromLibrary(libraryID));
+		if (cacheLimit === 0) {
+			Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID
+				+ ') exiting because cache limit is unlimited.');
 			return;
 		}
 
-		// Only remove files if we are downloading as needed
-		if (!Zotero.Sync.Storage.Local.downloadAsNeeded(item.libraryID)) {
-			Zotero.debug('Cannot free item (' + item.id + ') because download as needed is not enabled.');
-			this._processItem();
-			return;
+		Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID
+			+ ') checking if cache exceeds preference of ' + cacheLimit + 'MB');
+
+		// Turn cache limit into bytes
+		cacheLimit = cacheLimit * 1024 * 1024;
+
+		// Keep track of offset into table
+		let offset = 0;
+		// Keep track of how many bytes of files we have seen so far
+		let bytesSoFar = 0;
+
+		// Sum attachment sizes ordered by lastAccessed until we hit storage size limit
+		let i, storageSize;
+		while (true) {
+			let sql = "SELECT itemID, storageSize FROM itemAttachments JOIN items USING (itemID) "
+				+ "WHERE libraryID=? AND linkMode IN (?,?) AND syncState IN (?) "
+				+ "ORDER BY lastAccessed DESC, dateModified DESC LIMIT ?,1000";
+			let params = [
+				libraryID,
+				Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
+				Zotero.Attachments.LINK_MODE_IMPORTED_URL,
+				Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC,
+				offset
+			];
+			let rows = await Zotero.DB.queryAsync(sql, params);
+
+			for (i = 0; i < rows.length; i++) {
+				storageSize = rows[i].storageSize;
+				if (!storageSize) {
+					// No storage size in DB means we need to update the DB from
+					// the filesystem
+					
+					// TODO: This seems like an unnecessary amount of work on
+					// the DB, but I didn't want to replicate a ton of code
+					// contained in these functions.
+					// Another option instead of loading them one at a time
+					// would be to wait and load all items after this loop
+					let item = await Zotero.Items.getAsync(rows[i].itemID);
+					storageSize = await Zotero.Attachments.getTotalFileSize(item, true);
+					
+					// Insert back into DB
+					item.attachmentStorageSize = storageSize;
+					await item.saveTx({ skipAll: true });
+				}
+
+				bytesSoFar += storageSize;
+
+				// We've reached the tipping point so this item and everything after
+				// it needs to be removed
+				if (bytesSoFar > cacheLimit) {
+					offset += i;
+					break;
+				}
+			}
+
+			if (bytesSoFar > cacheLimit) {
+				Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID + ') '
+					+ offset + ' records fit inside cache limit');
+				break;
+			}
+
+			// No more rows means we are inside total cache size
+			if (!rows.length || rows.length < 1000) {
+				Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID
+					+ ') exiting because cache size (' + bytesSoFar
+					+ ') is inside limit (' + cacheLimit + ').');
+				return;
+			}
+
+			offset += 1000;
+			Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID + ') processed '
+				+ offset + ' records, still looking for limit.');
 		}
 
+		// Start from first removal offset and remove until we don't find a file any more
+		// TODO: We could also stop when we encounter a TO_DOWNLOAD sync state
+		let recordsFreed = 0, quit = false;
+		while (true) {
+			let sql = "SELECT itemID, storageSize FROM itemAttachments JOIN items USING (itemID) "
+				+ "WHERE libraryID=? AND linkMode IN (?,?) AND syncState IN (?) "
+				+ "ORDER BY lastAccessed DESC, dateModified DESC LIMIT ?,1000";
+			let params = [
+				libraryID,
+				Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
+				Zotero.Attachments.LINK_MODE_IMPORTED_URL,
+				Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC,
+				offset
+			];
+			let rows = await Zotero.DB.queryAsync(sql, params);
+
+			for (i = 0; i < rows.length; i++) {
+				let item = await Zotero.Items.getAsync(rows[i].itemID);
+
+				Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID
+					+ ') freeing storage for item (' + item.id + ').');
+				let deleted = await this._deleteItemFiles(item);
+				if (!deleted && !fullSearch) {
+					// If we found no files to delete and are not doing
+					// a full search then call if quits here
+					quit = true;
+					break;
+				}
+
+				// Slow down so we don't bog the system down
+				await Zotero.Promise.delay(1000);
+			}
+			
+			if (quit) {
+				Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID + ') is not '
+					+ ' performing full search and found no files to delete.');
+				return;
+			}
+
+			// No more rows means we've reached the end
+			if (!rows.length || rows.length < 1000) {
+				Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID
+					+ ') exiting because no items are left.');
+				return;
+			}
+
+			recordsFreed += rows.length;
+			offset += 1000;
+			Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID + ') freed '
+				+ recordsFreed + ' records, looking for more.');
+		}
+	},
+
+	_getCacheLimitPrefFromLibrary: function (libraryID) {
+		if (libraryID === Zotero.Libraries.userLibraryID) {
+			return 'sync.storage.cacheLimit.personal';
+		}
+
+		// Group library
+		return 'sync.storage.cacheLimit.groups';
+	},
+
+	/**
+	 * Delete files for the given item
+	 *
+	 * Note: This will also update the sync state to for affected items to:
+	 * Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD
+	 *
+	 * @param item {Zotero.Item} - Item to delete attachment files for
+	 *
+	 * @returns {Promise<boolean>} - True if we found files to delete
+	 */
+	_deleteItemFiles: async function (item) {
 		// TODO: Check if item exists on server before deleting
 
 		// Delete files and update sync status
 		let attachmentDirectory = Zotero.Attachments.getStorageDirectory(item).path;
 		let iterator = new OS.File.DirectoryIterator(attachmentDirectory);
-		Zotero.debug(attachmentDirectory);
 
 		// Iterate through the directory and delete files/folders
+		let deletes = [];
 		try {
-			let deletes = [];
 			await iterator.forEach(
 				(entry) => {
-					Zotero.debug(entry);
-					Zotero.debug(entry.isDir);
-					Zotero.debug(entry.name);
-					Zotero.debug(entry.path);
 					if (entry.isDir) {
 						deletes.push(OS.File.removeDir(entry.path));
 					}
@@ -103,6 +273,7 @@ Zotero.Sync.Storage.Cache = {
 					}
 				}
 			);
+
 			await Zotero.Promise.all(deletes);
 		}
 		catch (e) {
@@ -114,11 +285,17 @@ Zotero.Sync.Storage.Cache = {
 			iterator.close();
 		}
 
-		// TODO: Update sync status?
+		// Mark item to be downloaded again. Since we are in as-needed mode this won't cause
+		// it to immediately download again.
+		item.attachmentSyncState = Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD;
+		await item.saveTx({ skipAll: true });
 
-		Zotero.debug('Removed files for item (' + item.id + ').');
-		this._itemsToFree.shift();
-		await Zotero.Promise.delay(1000);
-		this._processItem();
+		if (deletes.length > 0) {
+			Zotero.debug('Removed files for item (' + item.id + ').');
+			return true;
+		}
+
+		Zotero.debug('No files to remove for item (' + item.id + ').');
+		return false;
 	}
 };
