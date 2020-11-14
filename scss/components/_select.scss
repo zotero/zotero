@@ -1,0 +1,37 @@
+select {
+	max-height: 20px;
+}
+
+option {
+  padding: 0 21px 2px;
+	background-color: -moz-mac-menuitem;
+}
+
+option:first-child {
+	padding: 2px 0;
+}
+
+option[data-selected="true"]::before {
+  content: '\2713'; /* a checkmark */
+  display: inline-block;
+  width: 15px;
+  margin-inline-start: -15px;
+}
+
+// New select
+
+.menulist {
+	-moz-appearance: menulist;
+}
+
+.menupopup {
+	-moz-appearance: menupopup;
+}
+
+.menupopup .hidden {
+	display: none;
+}
+
+.menuitem {
+	-moz-appearance: menuitem;
+}

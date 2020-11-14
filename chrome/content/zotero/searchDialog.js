@@ -37,25 +37,24 @@ function doLoad()
 	
 	io = window.arguments[0];
 	
-	var searchBox = document.getElementById('search-box');
-	searchBox.groups = io.dataIn.groups;
-	searchBox.search = io.dataIn.search;
+	let searchBox = document.getElementById('search-box');
+	Zotero.ZoteroSearch.render(searchBox, { searchObject: io.dataIn.search });
+
 	document.getElementById('search-name').value = io.dataIn.name;
 }
 
 function doUnload()
 {
-
+	let searchBox = document.getElementById('search-box');
+	Zotero.ZoteroSearch.destroy(searchBox);
 }
 
 function doAccept()
 {
-	document.getElementById('search-box').search.name = document.getElementById('search-name').value;
+	io.dataIn.search.name = document.getElementById('search-name').value;
 	try {
-		let searchBox = document.getElementById('search-box');
-		searchBox.updateSearch();
 		io.dataOut = {
-			json: searchBox.search.toJSON()
+			json: io.dataIn.search.toJSON()
 		};
 	}
 	catch (e) {

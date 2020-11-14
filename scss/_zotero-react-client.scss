@@ -1,7 +1,7 @@
 //
 // Zotero React Client
 // --------------------------------------------------
-
+@namespace html url("http://www.w3.org/1999/xhtml");
 
 // Abstracts
 // --------------------------------------------------
@@ -24,6 +24,9 @@
 @import "components/button";
 @import "components/editable";
 @import "components/icons";
+@import "components/label";
 @import "components/search";
+@import "components/select";
 @import "components/tagsBox";
 @import "components/tagSelector";
+@import "components/zoteroSearch";
