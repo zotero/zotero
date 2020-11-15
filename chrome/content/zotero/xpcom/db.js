@@ -799,6 +799,14 @@ Zotero.DBConnection.prototype.tableExists = Zotero.Promise.coroutine(function* (
 });
 
 
+Zotero.DBConnection.prototype.columnExists = async function (table, column) {
+	await this._getConnectionAsync();
+	var sql = `SELECT COUNT(*) FROM pragma_table_info(?) WHERE name=?`;
+	var count = await this.valueQueryAsync(sql, [table, column]);
+	return !!count;
+};
+
+
 /**
  * Parse SQL string and execute transaction with all statements
  *

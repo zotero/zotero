@@ -341,4 +341,19 @@ describe("Zotero.DB", function() {
 			assert.ok(callback2Ran);
 		});
 	})
+	
+	
+	describe("#columnExists()", function () {
+		it("should return true if a column exists", async function () {
+			assert.isTrue(await Zotero.DB.columnExists('items', 'itemID'));
+		});
+		
+		it("should return false if a column doesn't exists", async function () {
+			assert.isFalse(await Zotero.DB.columnExists('items', 'foo'));
+		});
+		
+		it("should return false if a table doesn't exists", async function () {
+			assert.isFalse(await Zotero.DB.columnExists('foo', 'itemID'));
+		});
+	});
 });
