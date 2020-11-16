@@ -194,6 +194,7 @@ Zotero.Schema = new function(){
 				// Auto-repair databases flagged for repair or coming from the DB Repair Tool
 				if (integrityCheck) {
 					await this.integrityCheck(true);
+					options.skipIntegrityCheck = true;
 				}
 				
 				updated = await _migrateUserDataSchema(userdata, options);
@@ -1740,25 +1741,8 @@ Zotero.Schema = new function(){
 		// so that we don't try to wipe out all data
 		if (!(yield Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM fieldsCombined"))
 				|| !(yield Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM itemTypeFieldsCombined"))) {
+			Zotero.logError("Combined field tables are empty -- skipping integrity check");
 			return false;
-		}
-		
-		// Check foreign keys
-		var rows = yield Zotero.DB.queryAsync("PRAGMA foreign_key_check");
-		if (rows.length && !fix) {
-			let suffix1 = rows.length == 1 ? '' : 's';
-			let suffix2 = rows.length == 1 ? 's' : '';
-			Zotero.debug(`Found ${rows.length} row${suffix1} that violate${suffix2} foreign key constraints`, 1);
-			return false;
-		}
-		// If fixing, delete rows that violate FK constraints
-		for (let row of rows) {
-			try {
-				yield Zotero.DB.queryAsync(`DELETE FROM ${row.table} WHERE ROWID=?`, row.rowid);
-			}
-			catch (e) {
-				Zotero.logError(e);
-			}
 		}
 		
 		var attachmentID = parseInt(yield Zotero.DB.valueQueryAsync(
@@ -1768,14 +1752,104 @@ Zotero.Schema = new function(){
 			"SELECT itemTypeID FROM itemTypes WHERE typeName='note'"
 		));
 		
-		
-		// Non-foreign key checks
-		//
 		// The first position is for testing and the second is for repairing. Can be either SQL
-		// statements or promise-returning functions. For statements, the repair entry can be either a
-		// string or an array with multiple statements. Functions should avoid assuming any global state
-		// (e.g., loaded data).
+		// statements or promise-returning functions. For statements, the repair entry can be either
+		// a string or an array with multiple statements. Check functions should return false if no
+		// error, and either true or data to pass to the repair function on error. Functions should
+		// avoid assuming any global state (e.g., loaded data).
 		var checks = [
+			// Create any tables or indexes that are missing and delete any tables or triggers that
+			// still exist but should have been deleted
+			[
+				async function () {
+					var statementsToRun = [];
+					
+					// Get all existing tables, indexes, and triggers
+					var sql = "SELECT "
+						+ "CASE type "
+						+ "WHEN 'table' THEN 'table:' || tbl_name "
+						+ "WHEN 'index' THEN 'index:' || name "
+						+ "WHEN 'trigger' THEN 'trigger:' || name "
+						+ "END "
+						+ "FROM sqlite_master WHERE type IN ('table', 'index', 'trigger')";
+					var schema = new Set(await Zotero.DB.columnQueryAsync(sql));
+					
+					// Check for deleted tables and triggers that still exist
+					var deletedTables = [
+						"transactionSets",
+						"transactions",
+						"transactionLog",
+					];
+					var deletedTriggers = [
+						"insert_date_field",
+						"update_date_field",
+						"fki_itemAttachments",
+						"fku_itemAttachments",
+						"fki_itemNotes",
+						"fku_itemNotes",
+					];
+					for (let table of deletedTables) {
+						if (schema.has('table:' + table)) {
+							statementsToRun.push("DROP TABLE " + table);
+						}
+					}
+					for (let trigger of deletedTriggers) {
+						if (schema.has('trigger:' + trigger)) {
+							statementsToRun.push("DROP TRIGGER " + trigger);
+						}
+					}
+					
+					// Check for missing tables and indexes
+					var statements = await Zotero.DB.parseSQLFile(await _getSchemaSQL('userdata'));
+					for (let statement of statements) {
+						var matches = statement.match(/^CREATE TABLE\s+([^\s]+)/);
+						if (matches) {
+							let table = matches[1];
+							if (!schema.has('table:' + table)) {
+								Zotero.debug(`Table ${table} is missing`, 2);
+								statementsToRun.push(statement);
+							}
+							continue;
+						}
+						
+						matches = statement.match(/^CREATE INDEX\s+([^\s]+)/);
+						if (matches) {
+							let index = matches[1];
+							if (!schema.has('index:' + index)) {
+								Zotero.debug(`Index ${index} is missing`, 2);
+								statementsToRun.push(statement);
+							}
+							continue;
+						}
+					}
+					
+					return statementsToRun.length ? statementsToRun : false;
+				},
+				async function (statements) {
+					for (let statement of statements) {
+						await Zotero.DB.queryAsync(statement);
+					}
+				}
+			],
+			
+			// Foreign key checks
+			[
+				async function () {
+					var rows = await Zotero.DB.queryAsync("PRAGMA foreign_key_check");
+					if (!rows.length) return false;
+					var suffix1 = rows.length == 1 ? '' : 's';
+					var suffix2 = rows.length == 1 ? 's' : '';
+					Zotero.debug(`Found ${rows.length} row${suffix1} that violate${suffix2} foreign key constraints`, 1);
+					return rows;
+				},
+				// If fixing, delete rows that violate FK constraints
+				async function (rows) {
+					for (let row of rows) {
+						await Zotero.DB.queryAsync(`DELETE FROM ${row.table} WHERE ROWID=?`, row.rowid);
+					}
+				}
+			],
+			
 			// Can't be a FK with itemTypesCombined
 			[
 				"SELECT COUNT(*) > 0 FROM items WHERE itemTypeID IS NULL",
@@ -1957,7 +2031,9 @@ Zotero.Schema = new function(){
 					}
 					// Function
 					else {
-						yield check[1]();
+						// If data was provided by the check function, pass that to the fix function
+						let checkData = typeof errorsFound != 'boolean' ? errorsFound : null;
+						yield check[1](checkData);
 					}
 					continue;
 				}
@@ -2417,6 +2493,10 @@ Zotero.Schema = new function(){
 		
 		if (fromVersion >= toVersion) {
 			return false;
+		}
+		
+		if (!options.skipIntegrityCheck) {
+			yield Zotero.Schema.integrityCheck(true);
 		}
 		
 		Zotero.debug('Updating user data tables from version ' + fromVersion + ' to ' + toVersion);
@@ -3029,7 +3109,6 @@ Zotero.Schema = new function(){
 				}
 			}
 			
-			// Duplicated in retractions.js::init() due to undiagnosed schema update bug
 			else if (i == 105) {
 				// This was originally in 103 and then 104, but some schema update steps are being
 				// missed for some people, so run again with IF NOT EXISTS until we figure out

@@ -248,6 +248,14 @@ describe("Zotero.Schema", function() {
 			});
 		})
 		
+		it("should repair a missing userdata table", async function () {
+			await Zotero.DB.queryAsync("DROP TABLE retractedItems");
+			assert.isFalse(await Zotero.DB.tableExists('retractedItems'));
+			assert.isFalse(await Zotero.Schema.integrityCheck());
+			assert.isTrue(await Zotero.Schema.integrityCheck(true));
+			assert.isTrue(await Zotero.DB.tableExists('retractedItems'));
+		});
+		
 		it("should repair a foreign key violation", function* () {
 			yield assert.eventually.isTrue(Zotero.Schema.integrityCheck());
 			

@@ -807,12 +807,15 @@ Zotero.DBConnection.prototype.columnExists = async function (table, column) {
 };
 
 
-/**
- * Parse SQL string and execute transaction with all statements
- *
- * @return {Promise}
- */
-Zotero.DBConnection.prototype.executeSQLFile = Zotero.Promise.coroutine(function* (sql) {
+Zotero.DBConnection.prototype.indexExists = async function (index, db) {
+	await this._getConnectionAsync();
+	var prefix = db ? db + '.' : '';
+	var sql = `SELECT COUNT(*) FROM ${prefix}sqlite_master WHERE type='index' AND name=?`;
+	return !!await this.valueQueryAsync(sql, [index]);
+};
+
+
+Zotero.DBConnection.prototype.parseSQLFile = function (sql) {
 	var nonCommentRE = /^[^-]/;
 	var trailingCommentRE = /^(.*?)(?:--.+)?$/;
 	
@@ -830,13 +833,23 @@ Zotero.DBConnection.prototype.executeSQLFile = Zotero.Promise.coroutine(function
 	var statements = sql.split(";")
 		.map(x => x.replace(/TEMPSEMI/g, ";"));
 	
+	return statements;
+};
+
+
+/**
+ * Parse SQL string and execute transaction with all statements
+ *
+ * @return {Promise}
+ */
+Zotero.DBConnection.prototype.executeSQLFile = async function (sql) {
 	this.requireTransaction();
-	
+	var statements = this.parseSQLFile(sql);
 	var statement;
 	while (statement = statements.shift()) {
-		yield this.queryAsync(statement);
+		await this.queryAsync(statement);
 	}
-});
+};
 
 
 /*

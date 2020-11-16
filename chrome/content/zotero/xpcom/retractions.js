@@ -48,14 +48,6 @@ Zotero.Retractions = {
 			return;
 		}
 		
-		// TEMP: Until we can figure out why some schema updates aren't going through despite the
-		// version number being incremented, create table here if it's missing
-		await Zotero.DB.queryAsync("CREATE TABLE IF NOT EXISTS retractedItems (\n	itemID INTEGER PRIMARY KEY,\n	data TEXT,\n	FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE\n);");
-		try {
-			await Zotero.DB.queryAsync("ALTER TABLE retractedItems ADD COLUMN flag INT DEFAULT 0");
-		}
-		catch (e) {}
-		
 		// Load mappings of keys (DOI hashes and PMIDs) to items and vice versa and register for
 		// item changes so they can be kept up to date in notify().
 		await this._cacheKeyMappings();

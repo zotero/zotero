@@ -356,4 +356,24 @@ describe("Zotero.DB", function() {
 			assert.isFalse(await Zotero.DB.columnExists('foo', 'itemID'));
 		});
 	});
+	
+	
+	describe("#indexExists()", function () {
+		it("should return true if an index exists", async function () {
+			assert.isTrue(await Zotero.DB.indexExists('items_synced'));
+		});
+		
+		it("should return false if an index doesn't exists", async function () {
+			assert.isFalse(await Zotero.DB.indexExists('foo'));
+		});
+	});
+	
+	
+	describe("#parseSQLFile", function () {
+		it("should extract tables and indexes from userdata SQL file", async function () {
+			var sql = Zotero.File.getResource(`resource://zotero/schema/userdata.sql`);
+			var statements = await Zotero.DB.parseSQLFile(sql);
+			assert.isTrue(statements.some(x => x.startsWith('CREATE TABLE items')));
+		});
+	});
 });
