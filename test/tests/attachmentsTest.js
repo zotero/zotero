@@ -408,7 +408,7 @@ describe("Zotero.Attachments", function() {
 			let path = OS.Path.join(storageDir, 'index.html');
 			assert.isTrue(await OS.File.exists(path));
 			let contents = await Zotero.File.getContentsAsync(path);
-			assert.isTrue(contents.startsWith("<html><!--\n Page saved with SingleFile"));
+			assert.include(contents, "<html><!--\n Page saved with SingleFile");
 
 			// Check attachment base64 contents
 			let expectedPath = getTestDataDirectory();
@@ -421,7 +421,7 @@ describe("Zotero.Attachments", function() {
 			// test is much less useful.
 			// let needle = await Zotero.File.getBinaryContentsAsync(expectedPath);
 			// needle = '<img src=data:image/gif;base64,' + btoa(needle) + '>';
-			// assert.includes(contents, needle);
+			// assert.include(contents, needle);
 		});
 
 		it("should save a document with embedded files that throw errors", async function () {
@@ -460,7 +460,58 @@ describe("Zotero.Attachments", function() {
 			let path = OS.Path.join(storageDir, 'index.html');
 			assert.isTrue(await OS.File.exists(path));
 			let contents = await Zotero.File.getContentsAsync(path);
-			assert.isTrue(contents.startsWith("<html><!--\n Page saved with SingleFile"));
+			assert.include(contents, "<html><!--\n Page saved with SingleFile");
+		});
+
+		it("should save a document but not save the iframe", async function () {
+			let item = await createDataObject('item');
+
+			let content = `<html><head><title>Test</title></head><body><iframe src="${testServerPath + "/iframe.html"}"/>`;
+			httpd.registerPathHandler(
+				'/' + prefix + '/index.html',
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 200, "OK");
+						response.write(content);
+					}
+				}
+			);
+
+			let url = "file://" + OS.Path.join(getTestDataDirectory().path, "snapshot", "img.gif");
+			httpd.registerPathHandler(
+				'/' + prefix + '/iframe.html',
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 200, "OK");
+						response.write(`<html><head><title>Test</title></head><body><img src="${url}"/>`);
+					}
+				}
+			);
+
+			let deferred = Zotero.Promise.defer();
+			win.addEventListener('pageshow', () => deferred.resolve());
+			win.loadURI(testServerPath + "/index.html");
+			await deferred.promise;
+
+			let attachment = await Zotero.Attachments.importFromDocument({
+				document: win.content.document,
+				parentItemID: item.id
+			});
+
+			assert.equal(attachment.getField('url'), testServerPath + "/index.html");
+
+			// Check for embedded files
+			var storageDir = Zotero.Attachments.getStorageDirectory(attachment).path;
+			var file = await attachment.getFilePathAsync();
+			assert.equal(OS.Path.basename(file), 'index.html');
+			assert.isFalse(await OS.File.exists(OS.Path.join(storageDir, 'images', '1.gif')));
+
+			// Check attachment html file contents
+			let path = OS.Path.join(storageDir, 'index.html');
+			assert.isTrue(await OS.File.exists(path));
+			let contents = await Zotero.File.getContentsAsync(path);
+			assert.include(contents, "><!--\n Page saved with SingleFile");
+			assert.notInclude(contents, "<img src=\"data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==\">'></iframe>");
 		});
 	});
 	

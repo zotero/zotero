@@ -869,6 +869,15 @@ Zotero.Attachments = new function(){
 		if (parentItemID && collections) {
 			throw new Error("parentItemID and parentCollectionIDs cannot both be provided");
 		}
+
+		// If no title was provided, pull it from the document
+		if (!title) {
+			let parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+				.createInstance(Components.interfaces.nsIDOMParser);
+			parser.init(null, Services.io.newURI(url));
+			let doc = parser.parseFromString(snapshotContent, 'text/html');
+			title = doc.title;
+		}
 		
 		let tmpDirectory = (await this.createTemporaryStorageDirectory()).path;
 		let destDirectory;
