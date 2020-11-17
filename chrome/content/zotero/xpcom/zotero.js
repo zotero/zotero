@@ -1216,6 +1216,9 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.crash = function (popup) {
 		this.crashed = true;
 		
+		// Check the database after restart
+		Zotero.Schema.setIntegrityCheckRequired(true).catch(e => this.logError(e));
+		
 		var reportErrorsStr = Zotero.getString('errorReport.reportErrors');
 		var reportInstructions = Zotero.getString('errorReport.reportInstructions', reportErrorsStr);
 		
