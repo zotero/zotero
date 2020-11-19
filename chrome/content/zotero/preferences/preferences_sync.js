@@ -410,6 +410,13 @@ Zotero_Preferences.Sync = {
 		
 		terms.hidden = !((libraryEnabled && storageProtocol == 'zotero') || groupsEnabled);
 	},
+
+
+	viewStorageBreakdown: function () {
+		var io = {};
+		window.openDialog('chrome://zotero/content/preferences/storageBreakdown.xul',
+			"zotero-preferences-viewStorageBreakdown", "chrome,centerscreen", io);
+	},
 	
 	
 	onStorageSettingsKeyPress: Zotero.Promise.coroutine(function* (event) {

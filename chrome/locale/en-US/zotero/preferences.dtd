@@ -69,6 +69,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.limit					"Limit downloaded cache to:">
 <!ENTITY zotero.preferences.sync.fileSyncing.limit.units			"MB(s)">
 <!ENTITY zotero.preferences.sync.fileSyncing.limit.note				"(0 is unlimited)">
+<!ENTITY zotero.preferences.sync.fileSyncing.viewBreakdown			"View Storage Breakdown">
 <!ENTITY zotero.preferences.sync.librariesToSync					"Libraries to Sync">
 <!ENTITY zotero.preferences.sync.librariesToSync.button				"Choose Libraries…">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync				"Sync">

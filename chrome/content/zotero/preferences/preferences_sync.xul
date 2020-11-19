@@ -305,6 +305,16 @@
 									<label>&zotero.preferences.period;</label>
 								</hbox>
 							</vbox>
+
+							<separator class="thin"/>
+
+							<hbox align="right">
+								<button
+										label="&zotero.preferences.sync.fileSyncing.viewBreakdown;"
+										oncommand="Zotero_Preferences.Sync.viewStorageBreakdown()"
+								/>
+							</hbox>
+
 						</groupbox>
 					</vbox>
 				</tabpanel>
