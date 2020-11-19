@@ -1,25 +1,25 @@
 .create-parent-container {
-	padding-left: 1em;
-	padding-bottom: 0.5em;
-	min-width: 400px;
-
 	.title {
 		font-size: 1.4em;
+		font-weight: 700;
 	}
 
 	.body {
 		margin: 1em 0;
 		position: relative;
+		display: flex;
 
 		input {
-			width: 100%;
+			flex: 1;
+			font-size: 14px;
 		}
 		
 		.downloadProgress {
 			position: absolute;
-			top: 3px;
-			left: 2px;
-			right: -1.5em;
+			top: 50%;
+			left: 0;
+			right: -1em;
+			transform: translateY(-100%);
 			
 			&.hidden {
 				display: none;

@@ -176,8 +176,7 @@
 <!ENTITY zotero.lookup.button.search				"Search">
 
 <!ENTITY zotero.createParent.title				"Create Parent Item">
-<!ENTITY zotero.createParent.button.empty		"Create Empty Parent">
-<!ENTITY zotero.createParent.prompt.title		"Create parent item for:">
+<!ENTITY zotero.createParent.button.manual		"Manual Entry">
 
 <!ENTITY zotero.selectitems.title						"Select Items">
 <!ENTITY zotero.selectitems.intro.label				"Select which items you'd like to add to your library">

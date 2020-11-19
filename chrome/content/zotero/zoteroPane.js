@@ -4512,11 +4512,11 @@ var ZoteroPane = new function()
 		
 		let item = this.getSelectedItems()[0];
 		if (!item.isAttachment() || !item.isTopLevelItem()) {
-			throw('Item ' + itemID + ' is not a top-level attachment');
+			throw new Error('Item ' + itemID + ' is not a top-level attachment');
 		}
 
 		let io = { dataIn: { item }, dataOut: null };
-		window.openDialog('chrome://zotero/content/createParentDialog.xul', '', 'chrome,modal', io);
+		window.openDialog('chrome://zotero/content/createParentDialog.xul', '', 'chrome,modal,centerscreen', io);
 		if (!io.dataOut) {
 			return false;
 		}

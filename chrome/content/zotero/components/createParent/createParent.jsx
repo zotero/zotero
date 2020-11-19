@@ -26,33 +26,37 @@
 'use strict';
 
 import React, { memo } from 'react';
+import ReactDom from "react-dom";
 import PropTypes from 'prop-types';
 import cx from 'classnames';
-const { FormattedMessage } = require('react-intl');
+import { IntlProvider } from "react-intl";
 
 function CreateParent({ loading, item }) {
 	return (
-		<div className="create-parent-container">
-			<span className="title">
-				<FormattedMessage id="zotero.createParent.prompt.title" />
-				&nbsp;
-				<strong>{ item.getField('title') }</strong>
-			</span>
-			<div className="body">
-				<input
-					id="parent-item-identifier"
-					placeholder={ Zotero.getString('createParent.prompt') }
-					size="50"
-					disabled={ loading }
-				/>
-				<div
-					mode="undetermined"
-					className={ cx('downloadProgress', { hidden: !loading }) }
-				>
-					<div className="progress-bar"></div>
+		<IntlProvider
+			locale={ Zotero.locale }
+			messages={ Zotero.Intl.strings }
+		>
+			<div className="create-parent-container">
+				<span className="title">
+					{ item.getField('title') }
+				</span>
+				<div className="body">
+					<input
+						id="parent-item-identifier"
+						placeholder={ Zotero.getString('createParent.prompt') }
+						size="50"
+						disabled={ loading }
+					/>
+					<div
+						mode="undetermined"
+						className={ cx('downloadProgress', { hidden: !loading }) }
+					>
+						<div className="progress-bar"></div>
+					</div>
 				</div>
 			</div>
-		</div>
+		</IntlProvider>
 	);
 }
 
@@ -62,5 +66,14 @@ CreateParent.propTypes = {
 	item: PropTypes.object,
 };
 
+Zotero.CreateParent = memo(CreateParent);
 
-export default memo(CreateParent);
+
+Zotero.CreateParent.destroy = (domEl) => {
+	ReactDom.unmountComponentAtNode(domEl);
+};
+
+
+Zotero.CreateParent.render = (domEl, props) => {
+	ReactDom.render(<CreateParent { ...props } />, domEl);
+};

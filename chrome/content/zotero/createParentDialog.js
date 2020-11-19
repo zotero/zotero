@@ -26,6 +26,7 @@
 "use strict";
 
 var io;
+let createParent;
 
 function doLoad() {
 	// Set font size from pref
@@ -34,13 +35,12 @@ function doLoad() {
 
 	io = window.arguments[0];
 
-	let createParent = document.getElementById('create-parent');
-	Zotero.CreateParentContainer.render(createParent, { loading: false, item: io.dataIn.item });
+	createParent = document.getElementById('create-parent');
+	Zotero.CreateParent.render(createParent, { loading: false, item: io.dataIn.item });
 }
 
 function doUnload() {
-	let createParent = document.getElementById('create-parent');
-	Zotero.CreateParentContainer.destroy(createParent);
+	Zotero.CreateParent.destroy(createParent);
 }
 
 async function doAccept() {
@@ -51,8 +51,7 @@ async function doAccept() {
 		childItem,
 		(on) => {
 			// Render react again with correct loading value
-			let createParent = document.getElementById('create-parent');
-			Zotero.CreateParentContainer.render(createParent, { loading: on, item: childItem });
+			Zotero.CreateParent.render(createParent, { loading: on, item: childItem });
 		}
 	);
 

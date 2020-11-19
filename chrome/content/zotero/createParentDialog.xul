@@ -2,6 +2,7 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
 
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
@@ -11,7 +12,7 @@
 	title="&zotero.createParent.title;"
 	orient="vertical"
 	buttons="cancel,accept,extra2"
-	buttonlabelextra2="&zotero.createParent.button.empty;"
+	buttonlabelextra2="&zotero.createParent.button.manual;"
 	buttonlabelaccept="&zotero.createParent.title;"
 	ondialogaccept="doAccept();return false;"
 	ondialogextra2="doManualEntry();"
@@ -19,12 +20,12 @@
 	onunload="doUnload();"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
-	style="padding:2em">
+	style="padding:2em;width:400px;">
 
 	<script src="include.js"/>
 	<script src="lookup.js"/>
 	<script src="createParentDialog.js"/>
-	<script src="containers/createParentContainer.js"/>
+	<script src="components/createParent/createParent.js"/>
 
 	<vbox id="zotero-create-parent-container" flex="1">
 		<html:div id="create-parent" />
