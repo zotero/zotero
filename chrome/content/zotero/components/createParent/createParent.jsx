@@ -26,7 +26,7 @@
 'use strict';
 
 import React, { memo } from 'react';
-import ReactDom from "react-dom";
+import ReactDOM from "react-dom";
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 import { IntlProvider } from "react-intl";
@@ -70,10 +70,10 @@ Zotero.CreateParent = memo(CreateParent);
 
 
 Zotero.CreateParent.destroy = (domEl) => {
-	ReactDom.unmountComponentAtNode(domEl);
+	ReactDOM.unmountComponentAtNode(domEl);
 };
 
 
 Zotero.CreateParent.render = (domEl, props) => {
-	ReactDom.render(<CreateParent { ...props } />, domEl);
+	ReactDOM.render(<CreateParent { ...props } />, domEl);
 };
