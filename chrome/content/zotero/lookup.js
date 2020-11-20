@@ -29,9 +29,19 @@
  */
 var Zotero_Lookup = new function () {
 	/**
-	 * Performs a lookup by DOI, PMID, or ISBN
+	 * Performs a lookup by DOI, PMID, or ISBN on the given textBox value
+	 * and adds any items it can.
+	 *
+	 * If a childItem is passed, then only one identifier is allowed, the
+	 * child's library/collection information is used and no attachments are
+	 * saved for the parent.
+	 *
+	 * @param textBox {HTMLElement} - Textbox containing identifiers
+	 * @param childItem {Zotero.Item|false} - Child item (optional)
+	 * @param toggleProgress {function} - Callback to toggle progress on/off
+	 * @returns {Promise<boolean>}
 	 */
-	this.accept = Zotero.Promise.coroutine(function* (textBox) {
+	this.addItemsFromIdentifier = async function (textBox, childItem, toggleProgress) {
 		var identifiers = Zotero.Utilities.Internal.extractIdentifiers(textBox.value);
 		if (!identifiers.length) {
 			Zotero.alert(
@@ -41,58 +51,87 @@ var Zotero_Lookup = new function () {
 			);
 			return false;
 		}
-
-		var libraryID = false;
-		var collection = false;
-		try {
-			libraryID = ZoteroPane_Local.getSelectedLibraryID();
-			collection = ZoteroPane_Local.getSelectedCollection();
-		} catch(e) {
-			/** TODO: handle this **/
+		else if (childItem && identifiers.length > 1) {
+			// Only allow one identifier when creating a parent for a child
+			Zotero.alert(
+				window,
+				Zotero.getString("lookup.failure.title"),
+				Zotero.getString("lookup.failureTooMany.description")
+			);
+			return false;
 		}
 
-		var successful = 0;					//counter for successful retrievals
+		var libraryID = false;
+		var collections = false;
+		if (childItem) {
+			libraryID = childItem.libraryID;
+			collections = childItem.collections;
+		}
+		else {
+			try {
+				libraryID = ZoteroPane.getSelectedLibraryID();
+				let collection = ZoteroPane.getSelectedCollection();
+				collections = collection ? [collection.id] : false;
+			}
+			catch (e) {
+				/** TODO: handle this **/
+			}
+		}
 
-		Zotero_Lookup.toggleProgress(true);
+		let newItems = false;
+		toggleProgress(true);
 
-		for (let identifier of identifiers) {
+		await Zotero.Promise.all(identifiers.map(async (identifier) => {
 			var translate = new Zotero.Translate.Search();
 			translate.setIdentifier(identifier);
 
 			// be lenient about translators
-			let translators = yield translate.getTranslators();
+			let translators = await translate.getTranslators();
 			translate.setTranslator(translators);
 
 			try {
-				let newItems = yield translate.translate({
+				newItems = await translate.translate({
 					libraryID,
-					collections: collection ? [collection.id] : false
+					collections,
+					saveAttachments: !childItem
 				});
-				successful++;
 			}
 			// Continue with other ids on failure
 			catch (e) {
 				Zotero.logError(e);
 			}
-		}
-		
-		Zotero_Lookup.toggleProgress(false);
-		// TODO: Give indication if some failed
-		if (successful) {
-			document.getElementById("zotero-lookup-panel").hidePopup();
-		}
-		else {
+		}));
+
+		toggleProgress(false);
+		if (!newItems) {
 			Zotero.alert(
 				window,
 				Zotero.getString("lookup.failure.title"),
 				Zotero.getString("lookup.failure.description")
 			);
 		}
-		
+		// TODO: Give indication if some, but not all failed
+
+		return newItems;
+	};
+
+	/**
+	 * Try a lookup and hide popup if successful
+	 */
+	this.accept = async function (textBox) {
+		let newItems = await Zotero_Lookup.addItemsFromIdentifier(
+			textBox,
+			false,
+			on => Zotero_Lookup.toggleProgress(on)
+		);
+
+		if (newItems) {
+			document.getElementById("zotero-lookup-panel").hidePopup();
+		}
 		return false;
-	});
-	
-	
+	};
+
+
 	this.showPanel = function (button) {
 		var panel = document.getElementById('zotero-lookup-panel');
 		panel.openPopup(button, "after_start", 16, -2, false, false);
