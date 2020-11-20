@@ -49,7 +49,7 @@ function CreateParent({ loading, item, toggleAccept }) {
 		>
 			<div className="create-parent-container">
 				<span className="title">
-					{ item.getField('title') }
+					{ item.attachmentFilename }
 				</span>
 				<div className="body">
 					<input
