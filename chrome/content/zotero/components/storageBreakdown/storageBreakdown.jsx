@@ -25,10 +25,12 @@
 'use strict';
 
 import React, { memo } from 'react';
+import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
+import { IntlProvider } from "react-intl";
 
-function StorageBreakdown({ loading, partitions }) {
+const StorageBreakdown = memo(({ loading, partitions }) => {
 	const partitionSum = partitions.reduce((sum, partition) => sum + partition.size, 0);
 	const countSum = partitions.reduce((sum, partition) => sum + partition.count, 0);
 
@@ -44,50 +46,55 @@ function StorageBreakdown({ loading, partitions }) {
 
 	let partitionLeft = 0;
 	return (
-		<div className="storage-breakdown">
-			<div className="title">
-				{ loading > 0 && 'Calculating your storage...'}
-			</div>
-			<div className="title">
-				{ detail }
-			</div>
-			<div
-				mode="undetermined"
-				className={ cx('downloadProgress', { hidden: !loading }) }
-			>
-				<div className="progress-bar"></div>
-			</div>
-			<div className="partitions">
-				{ partitions.map((partition, index) => {
-					// Save the current value before we add to it
-					let myLeft = partitionLeft;
-
-					// Get width and add that to get the next element's left value
-					// 300px is the width of the partitions div in pixels
-					let width = Math.floor(partition.size / partitionSum * 300);
-					partitionLeft += width;
-
-					return (
-						<div
-							key={ index }
-							className={ cx('partition', 'p' + (index % 2)) }
-							style={{
-								left: myLeft + 'px',
-								width: width + 'px'
-							}}
-						>
-							<div className="tooltip-container">
-								<span className="tooltip">
-									{ partition.name }
-								</span>
+		<IntlProvider
+			locale={Zotero.locale}
+			messages={Zotero.Intl.strings}
+		>
+			<div className="storage-breakdown">
+				<div className="title">
+					{ loading > 0 && 'Calculating your storage...'}
+				</div>
+				<div className="title">
+					{ detail }
+				</div>
+				<div
+					mode="undetermined"
+					className={ cx('downloadProgress', { hidden: !loading }) }
+				>
+					<div className="progress-bar"></div>
+				</div>
+				<div className="partitions">
+					{ partitions.map((partition, index) => {
+						// Save the current value before we add to it
+						let myLeft = partitionLeft;
+	
+						// Get width and add that to get the next element's left value
+						// 300px is the width of the partitions div in pixels
+						let width = Math.floor(partition.size / partitionSum * 300);
+						partitionLeft += width;
+	
+						return (
+							<div
+								key={ index }
+								className={ cx('partition', 'p' + (index % 2)) }
+								style={{
+									left: myLeft + 'px',
+									width: width + 'px'
+								}}
+							>
+								<div className="tooltip-container">
+									<span className="tooltip">
+										{ partition.name }
+									</span>
+								</div>
 							</div>
-						</div>
-					);
-				}) }
+						);
+					}) }
+				</div>
 			</div>
-		</div>
+		</IntlProvider>
 	);
-}
+});
 
 
 StorageBreakdown.propTypes = {
@@ -96,4 +103,11 @@ StorageBreakdown.propTypes = {
 };
 
 
-export default memo(StorageBreakdown);
+StorageBreakdown.destroy = (domEl) => {
+	ReactDOM.unmountComponentAtNode(domEl);
+};
+
+
+StorageBreakdown.render = (domEl, props) => {
+	ReactDOM.render(<StorageBreakdown { ...props } />, domEl);
+};

@@ -47,7 +47,7 @@
 	style="padding: 2em;">
 
 	<script src="chrome://zotero/content/include.js"/>
-	<script src="../containers/storageBreakdownContainer.js"/>
+	<script src="../components/storageBreakdown/storageBreakdown.js"/>
 	<script src="storageBreakdown.js"/>
 
 	<vbox>

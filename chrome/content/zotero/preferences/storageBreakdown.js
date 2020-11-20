@@ -40,12 +40,12 @@ function doLoad() {
 
 function doUnload() {
 	let storageBreakdown = document.getElementById('storage-breakdown');
-	StorageBreakdownContainer.destroy(storageBreakdown);
+	StorageBreakdown.destroy(storageBreakdown);
 }
 
 async function updateView(loading, partitions) {
 	let storageBreakdown = document.getElementById('storage-breakdown');
-	StorageBreakdownContainer.render(storageBreakdown, { loading, partitions });
+	StorageBreakdown.render(storageBreakdown, { loading, partitions });
 }
 
 async function calculateStorage() {
