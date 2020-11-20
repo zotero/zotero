@@ -29,20 +29,13 @@ import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 import { IntlProvider } from "react-intl";
+import { humanReadableSize } from 'components/utils';
 
 const StorageBreakdown = memo(({ loading, partitions }) => {
 	const partitionSum = partitions.reduce((sum, partition) => sum + partition.size, 0);
 	const countSum = partitions.reduce((sum, partition) => sum + partition.count, 0);
 
-	let total = partitionSum;
-	let unitsIndex = 0;
-	while (total > 1023 && unitsIndex < 5) {
-		total = Math.floor(total / 1024);
-		unitsIndex += 1;
-	}
-	const units = ['bytes', 'KB', 'MB', 'GB', 'TB'];
-
-	const detail = countSum + ' items totaling ' + total + ' ' + units[unitsIndex];
+	const detail = countSum + ' items totaling ' + humanReadableSize(partitionSum);
 
 	let partitionLeft = 0;
 	return (
@@ -63,30 +56,41 @@ const StorageBreakdown = memo(({ loading, partitions }) => {
 				>
 					<div className="progress-bar"></div>
 				</div>
-				<div className="partitions">
+				{/*<div className="partitions">*/}
+				{/*	{ partitions.map((partition, index) => {*/}
+				{/*		// Save the current value before we add to it*/}
+				{/*		let myLeft = partitionLeft;*/}
+				
+				{/*		// Get width and add that to get the next element's left value*/}
+				{/*		// 300px is the width of the partitions div in pixels*/}
+				{/*		let width = Math.floor(partition.size / partitionSum * 300);*/}
+				{/*		partitionLeft += width;*/}
+				
+				{/*		return (*/}
+				{/*			<div*/}
+				{/*				key={ index }*/}
+				{/*				className={ cx('partition', 'p' + (index % 2)) }*/}
+				{/*				style={{*/}
+				{/*					left: myLeft + 'px',*/}
+				{/*					width: width + 'px'*/}
+				{/*				}}*/}
+				{/*			>*/}
+				{/*				<div className="tooltip-container">*/}
+				{/*					<span className="tooltip">*/}
+				{/*						{ partition.name }*/}
+				{/*					</span>*/}
+				{/*				</div>*/}
+				{/*			</div>*/}
+				{/*		);*/}
+				{/*	}) }*/}
+				{/*</div>*/}
+				<div>
 					{ partitions.map((partition, index) => {
-						// Save the current value before we add to it
-						let myLeft = partitionLeft;
-	
-						// Get width and add that to get the next element's left value
-						// 300px is the width of the partitions div in pixels
-						let width = Math.floor(partition.size / partitionSum * 300);
-						partitionLeft += width;
-	
 						return (
 							<div
 								key={ index }
-								className={ cx('partition', 'p' + (index % 2)) }
-								style={{
-									left: myLeft + 'px',
-									width: width + 'px'
-								}}
 							>
-								<div className="tooltip-container">
-									<span className="tooltip">
-										{ partition.name }
-									</span>
-								</div>
+								{ partition.name } - { humanReadableSize(partition.size) }
 							</div>
 						);
 					}) }

@@ -2763,7 +2763,11 @@ var ZoteroPane = new function()
 			'createParent',
 			'renameAttachments',
 			'reindexItem',
-			'removeCache'
+			'sep6',
+			'removeCache',
+			'cacheItem',
+			'cacheAttachmentItem',
+			'cacheItemRemove'
 		];
 		
 		var m = {};
@@ -2985,14 +2989,6 @@ var ZoteroPane = new function()
 							showSep5 = true;
 						}
 
-						// Remove attachment cache option
-						if (item.isAttachment()
-							&& (item.attachmentLinkMode === Zotero.Attachments.LINK_MODE_IMPORTED_FILE
-							|| item.attachmentLinkMode === Zotero.Attachments.LINK_MODE_IMPORTED_URL)) {
-							show.push(m.removeCache);
-							showSep5 = true;
-						}
-						
 						// If not linked URL, show reindex line
 						if (yield Zotero.Fulltext.canReindex(item)) {
 							show.push(m.reindexItem);
@@ -3001,6 +2997,26 @@ var ZoteroPane = new function()
 						
 						if (showSep5) {
 							show.push(m.sep5);
+						}
+						
+						if (item.isImportedAttachment()) {
+							let showSep6;
+							
+							if (item.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD) {
+								show.push(m.cacheAttachmentItem);
+								showSep6 = true;
+							}
+
+							Zotero.debug(item.attachmentSyncState);
+							Zotero.debug(item.attachmentManualCache);
+							if (item.attachmentManualCache === Zotero.Sync.Storage.Cache.MANUAL_CACHE_TRUE) {
+								show.push(m.cacheItemRemove);
+								showSep6 = true;
+							}
+							
+							if (showSep6) {
+								show.push(m.sep6);
+							}
 						}
 					}
 					else if (item.isFeedItem) {
@@ -3013,6 +3029,25 @@ var ZoteroPane = new function()
 					}
 					else if (!collectionTreeRow.isPublications()) {
 						show.push(m.duplicateItem);
+
+						let showSep6 = true;
+						// TODO: This is a temp context menu item, remove and change showSep6 = false
+						show.push(m.removeCache);
+
+						let childAttachments = Zotero.Items.get(item.getAttachments());
+						if (childAttachments.find(attachment => attachment.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD)) {
+							show.push(m.cacheItem);
+							showSep6 = true;
+						}
+
+						if (childAttachments.find(attachment => attachment.attachmentManualCache === Zotero.Sync.Storage.Cache.MANUAL_CACHE_TRUE)) {
+							show.push(m.cacheItemRemove);
+							showSep6 = true;
+						}
+
+						if (showSep6) {
+							show.push(m.sep6);
+						}
 					}
 				}
 				
@@ -4834,10 +4869,56 @@ var ZoteroPane = new function()
 	};
 	
 
+	/**
+	 * Testing context menu item to kick off free cache process (will be removed)
+	 *
+	 * @returns {Promise<void>}
+	 */
 	this.removeCacheForSelected = async function () {
 		let items = this.getSelectedItems();
-		//Zotero.Sync.Storage.Cache.free(items);
 		Zotero.Sync.Storage.Cache.identifyItemsToFree(items[0].libraryID);
+	};
+
+
+	/**
+	 * Downloads and caches all attachments for the selected items. This will prevent them from
+	 * being removed to free up storage in the automatic cache.
+	 *
+	 * @returns {Promise<void>}
+	 */
+	this.cacheItems = async function () {
+		let items = this.getSelectedItems();
+		let itemAttachments = [];
+		for (let item of items) {
+			itemAttachments = itemAttachments.concat(
+				await Zotero.Items.getAsync(item.getAttachments())
+			);
+		}
+
+		Zotero.Sync.Storage.Cache.cacheItemAttachments(itemAttachments);
+	};
+
+
+	/**
+	 * Downloads and caches the given attachments. This will prevent them from being removed to
+	 * free up storage in the automatic cache.
+	 *
+	 * @returns {Promise<void>}
+	 */
+	this.cacheAttachmentItems = async function () {
+		let items = this.getSelectedItems();
+		Zotero.Sync.Storage.Cache.cacheItemAttachments(items);
+	};
+
+
+	/**
+	 * Removes any manually cached files for the given items or item attachments.
+	 *
+	 * @returns {Promise<void>}
+	 */
+	this.removeCacheItems = async function () {
+		let items = this.getSelectedItems();
+		Zotero.Sync.Storage.Cache.removeAttachmentFilesForItems(items);
 	};
 
 	

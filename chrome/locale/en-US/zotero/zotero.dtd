@@ -102,7 +102,10 @@
 <!ENTITY zotero.items.menu.mergeItems					"Merge Items…">
 <!ENTITY zotero.items.menu.unrecognize                "Undo Retrieve Metadata">
 <!ENTITY zotero.items.menu.reportMetadata             "Report Incorrect Metadata">
-<!ENTITY zotero.items.menu.removeCache					"Remove Cached Files">
+<!ENTITY zotero.items.menu.removeCache					"Identify and Remove Oldest Cached Files">
+<!ENTITY zotero.items.menu.cacheItem					"Download Attachment(s)">
+<!ENTITY zotero.items.menu.cacheItem.attachment			"Download Attachment">
+<!ENTITY zotero.items.menu.cacheItem.remove				"Remove Download from Cache">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect			"Choose the version of the item to use as the master item:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect				"Select fields to keep from other versions of the item:">

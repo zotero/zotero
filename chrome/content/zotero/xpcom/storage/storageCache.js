@@ -30,8 +30,86 @@
  * @function identifyItemsToFree - Identify cache items to free
  */
 Zotero.Sync.Storage.Cache = {
+	// When an item attachment is manully cached, this flag is true
+	MANUAL_CACHE_FALSE: 0,
+	MANUAL_CACHE_TRUE: 1,
+
 	// Flag to indicate if we are already processing
 	_freeingCache: false,
+
+	/**
+	 * Remove all attachment files for the given item/items and mark them as no longer cached
+	 *
+	 * @param items
+	 * @returns {Promise<void>}
+	 */
+	removeAttachmentFilesForItems: async function (items) {
+		// If an item is top-level grab all the attachment items for it
+		let attachmentItems = [];
+		for (let item of items) {
+			if (item.isAttachment()) {
+				attachmentItems.push(item);
+			}
+			else {
+				let attachments = await Zotero.Items.getAsync(item.getAttachments());
+				for (let attachment of attachments) {
+					attachmentItems.push(attachment);
+				}
+			}
+		}
+
+		// Delete all files (will update the DB as well)
+		await Zotero.Promise.all(
+			attachmentItems.map(attachmentItem => this._deleteItemFiles(attachmentItem))
+		);
+	},
+
+	/**
+	 * Manually cache the given item attachments
+	 *
+	 * @param items {Array} - List of items that are attachments
+	 *
+	 * @returns {Promise<void>}
+	 */
+	cacheItemAttachments: async function (items) {
+		let failed = [];
+		await Zotero.Promise.all(items.map(async (item) => {
+			let path = item.getFilePath();
+			let fileExists = await OS.File.exists(path);
+
+			// TEMP: If file is queued for download, download first. Starting in 5.0.85, files
+			// modified remotely get marked as SYNC_STATE_FORCE_DOWNLOAD, causing them to get
+			// downloaded at sync time even in download-as-needed mode, but this causes files
+			// modified previously to be downloaded on open.
+			if (fileExists
+				&& (item.attachmentSyncState !== Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD)) {
+				return;
+			}
+
+			// TODO: Be wary of force download and modified items
+			// Download item
+			let results = await Zotero.Sync.Runner.downloadFile(item);
+			if (!results || !results.localChanges) {
+				failed.push(item);
+				Zotero.debug("Manual download failed -- skipping");
+			}
+			else {
+				// Mark successful downloads in the database
+				item.attachmentManualCache = Zotero.Sync.Storage.Cache.MANUAL_CACHE_TRUE;
+				await item.saveTx({ skipAll: true });
+			}
+		}));
+		
+		Zotero.debug('Finished caching items');
+
+		if (failed.length) {
+			Zotero.alert(
+				window,
+				'Download Failure',
+				'Some attachments failed to download: ' + failed.join(', ')
+			);
+		}
+	},
 
 	/**
 	 * Identify items with files currently downloaded that we should delete to limit cache
@@ -51,14 +129,14 @@ Zotero.Sync.Storage.Cache = {
 			if (forGroups) {
 				Zotero.Libraries.getAll().forEach((library) => {
 					if (library.libraryID !== Zotero.Libraries.userLibraryID) {
-						this.promises.push(
+						promises.push(
 							this._identifyItemsToFreeForLibrary(library.libraryID, fullSearch)
 						);
 					}
 				});
 			}
 			else {
-				this.promises.push(
+				promises.push(
 					this._identifyItemsToFreeForLibrary(Zotero.Libraries.userLibraryID, fullSearch)
 				);
 			}
@@ -122,7 +200,7 @@ Zotero.Sync.Storage.Cache = {
 		let i, storageSize;
 		while (true) {
 			let sql = "SELECT itemID, storageSize FROM itemAttachments JOIN items USING (itemID) "
-				+ "WHERE libraryID=? AND linkMode IN (?,?) AND syncState IN (?) "
+				+ "WHERE libraryID=? AND linkMode IN (?,?) AND syncState IN (?)"
 				+ "ORDER BY lastAccessed DESC, dateModified DESC LIMIT ?,1000";
 			let params = [
 				libraryID,
@@ -285,6 +363,7 @@ Zotero.Sync.Storage.Cache = {
 			iterator.close();
 		}
 
+		// TODO: Need to be careful about not overriding a sync state like to-upload or something
 		// Mark item to be downloaded again. Since we are in as-needed mode this won't cause
 		// it to immediately download again.
 		item.attachmentSyncState = Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD;

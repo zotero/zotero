@@ -59,8 +59,33 @@ async function calculateStorage() {
 			name: 'Attachment Files',
 			size: 0,
 			count: 0
+		},
+		{
+			name: 'Manually Cached Attachments',
+			size: 0,
+			count: 0
 		}
 	];
+	
+	let manualCacheKeys = {};
+
+	// TODO: What are the limits on result set size??
+	// We are probably fine here because you have to manually cache these, but people may try
+	// to do that for everything unless we limit the number of items selected for context menu
+	// option to appear
+	let sql = "SELECT key FROM items JOIN itemAttachments USING (itemID) "
+		+ "WHERE linkMode IN (?,?) AND syncState IN (?) AND manualCache = ?";
+	let params = [
+		Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
+		Zotero.Attachments.LINK_MODE_IMPORTED_URL,
+		Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC,
+		Zotero.Sync.Storage.Cache.MANUAL_CACHE_TRUE
+	];
+	let rows = await Zotero.DB.queryAsync(sql, params);
+	
+	for (let row of rows) {
+		manualCacheKeys[row.key] = true;
+	}
 
 	await Zotero.File.iterateDirectory(Zotero.DataDirectory.dir, (entry) => {
 		// Ignore storage directory
@@ -95,13 +120,17 @@ async function calculateStorage() {
 		if (!entry.isDir) {
 			return;
 		}
-
+		
 		await Zotero.File.iterateDirectory(entry.path, (attachmentFile) => {
 			Zotero.File.getFileSize(attachmentFile.path)
 				.then((size) => {
 					if (entry.name.startsWith('.')) {
 						partitions[0].count += 1;
 						partitions[0].size += size;
+					}
+					else if (manualCacheKeys[entry.name] === true) {
+						partitions[2].count += 1;
+						partitions[2].size += size;
 					}
 					else {
 						partitions[1].count += 1;
@@ -119,6 +148,9 @@ async function calculateStorage() {
 			update += 1;
 		}
 	});
+	
+	Zotero.debug(manualCacheKeys);
+	Zotero.debug(partitions);
 
 	updateView(0, partitions);
 }
