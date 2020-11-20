@@ -175,6 +175,9 @@
 <!ENTITY zotero.lookup.description "Skriv inn ISBN, DOI, PMID eller arXiv ID-er for elementer du vil legge til biblioteket ditt:">
 <!ENTITY zotero.lookup.button.search "Søk">
 
+<!ENTITY zotero.createParent.title "Create Parent Item">
+<!ENTITY zotero.createParent.button.manual "Manual Entry">
+
 <!ENTITY zotero.selectitems.title "Velg elementer">
 <!ENTITY zotero.selectitems.intro.label "Velg hvilke elementer du vil legge til biblioteket ditt">
 <!ENTITY zotero.selectitems.cancel.label "Avbryt">

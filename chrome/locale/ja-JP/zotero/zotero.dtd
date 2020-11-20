@@ -175,6 +175,9 @@
 <!ENTITY zotero.lookup.description "ライブラリに追加するためには ISBN, DOI, PMID, または arXiv ID (複数可) を入力してください。">
 <!ENTITY zotero.lookup.button.search "検索">
 
+<!ENTITY zotero.createParent.title "Create Parent Item">
+<!ENTITY zotero.createParent.button.manual "Manual Entry">
+
 <!ENTITY zotero.selectitems.title "アイテムを選択">
 <!ENTITY zotero.selectitems.intro.label "ライブラリに追加したいアイテムを選択してください">
 <!ENTITY zotero.selectitems.cancel.label "キャンセル">

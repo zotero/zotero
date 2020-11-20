@@ -175,6 +175,9 @@
 <!ENTITY zotero.lookup.description "Įveskite ISBN, DOI, PMID ar arXiv identifikatorius, kuriuos norite įtraukti į biblioteką:">
 <!ENTITY zotero.lookup.button.search "Ieškoti">
 
+<!ENTITY zotero.createParent.title "Create Parent Item">
+<!ENTITY zotero.createParent.button.manual "Manual Entry">
+
 <!ENTITY zotero.selectitems.title "Pasirinkti įrašus">
 <!ENTITY zotero.selectitems.intro.label "Pasirinkite norimus įtraukti į bilioteką įrašus">
 <!ENTITY zotero.selectitems.cancel.label "Atšaukti">

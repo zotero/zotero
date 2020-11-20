@@ -175,6 +175,9 @@
 <!ENTITY zotero.lookup.description "Nhập ISBN, DOI, PMID hoặc arXiv ID để thêm vào thư viện của bạn:">
 <!ENTITY zotero.lookup.button.search "Tìm">
 
+<!ENTITY zotero.createParent.title "Create Parent Item">
+<!ENTITY zotero.createParent.button.manual "Manual Entry">
+
 <!ENTITY zotero.selectitems.title "Chọn các Biểu ghi">
 <!ENTITY zotero.selectitems.intro.label "Chọn những biểu ghi bạn muốn thêm vào thư viện của bạn">
 <!ENTITY zotero.selectitems.cancel.label "Ngừng">

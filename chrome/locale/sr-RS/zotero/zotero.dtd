@@ -175,6 +175,9 @@
 <!ENTITY zotero.lookup.description "Унесите ИСБН, ДОИ, ПМИД или арХив идентификације за додавање у вашу библиотеку:">
 <!ENTITY zotero.lookup.button.search "Претрага">
 
+<!ENTITY zotero.createParent.title "Create Parent Item">
+<!ENTITY zotero.createParent.button.manual "Manual Entry">
+
 <!ENTITY zotero.selectitems.title "Изабери ставке">
 <!ENTITY zotero.selectitems.intro.label "Изаберите које ставке желите да додате у вашу библиотеку">
 <!ENTITY zotero.selectitems.cancel.label "Откажи">

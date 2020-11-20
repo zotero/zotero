@@ -175,6 +175,9 @@
 <!ENTITY zotero.lookup.description "Pro přidání do knihovny zadejte ISBN, DOI, PMID či arXiv IDs:">
 <!ENTITY zotero.lookup.button.search "Hledat">
 
+<!ENTITY zotero.createParent.title "Create Parent Item">
+<!ENTITY zotero.createParent.button.manual "Manual Entry">
+
 <!ENTITY zotero.selectitems.title "Označit položky">
 <!ENTITY zotero.selectitems.intro.label "Označte položky, které byste rádi přidali do Vaší knihovny">
 <!ENTITY zotero.selectitems.cancel.label "Zrušit">

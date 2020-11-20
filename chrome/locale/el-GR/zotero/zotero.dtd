@@ -175,6 +175,9 @@
 <!ENTITY zotero.lookup.description "Εισαγωγή ISBNs, DOIs, PMIDs, ή arXiv IDs για να το προσθέσετε στην βιβλιοθήκη σας:">
 <!ENTITY zotero.lookup.button.search "Αναζήτηση">
 
+<!ENTITY zotero.createParent.title "Create Parent Item">
+<!ENTITY zotero.createParent.button.manual "Manual Entry">
+
 <!ENTITY zotero.selectitems.title "Επιλέξτε στοιχεία">
 <!ENTITY zotero.selectitems.intro.label "Επιλέξτε ποια στοιχεία θέλετε να προσθέσετε στην βιβλιοθήκη σας">
 <!ENTITY zotero.selectitems.cancel.label "Άκυρο">

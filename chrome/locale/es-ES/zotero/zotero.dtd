@@ -175,6 +175,9 @@
 <!ENTITY zotero.lookup.description "Introduzca los ISBNs, DOIs, PMIDs o arXiv IDs a añadir a su biblioteca:">
 <!ENTITY zotero.lookup.button.search "Buscar">
 
+<!ENTITY zotero.createParent.title "Create Parent Item">
+<!ENTITY zotero.createParent.button.manual "Manual Entry">
+
 <!ENTITY zotero.selectitems.title "Seleccionar elementos">
 <!ENTITY zotero.selectitems.intro.label "Seleccione los elementos que desea añadir a su biblioteca">
 <!ENTITY zotero.selectitems.cancel.label "Cancelar">

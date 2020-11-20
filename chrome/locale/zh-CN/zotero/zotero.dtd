@@ -175,6 +175,9 @@
 <!ENTITY zotero.lookup.description "输入 ISBN，DOI，PMID 或 arXiv ID 以 添加到您的文献库：">
 <!ENTITY zotero.lookup.button.search "搜索">
 
+<!ENTITY zotero.createParent.title "Create Parent Item">
+<!ENTITY zotero.createParent.button.manual "Manual Entry">
+
 <!ENTITY zotero.selectitems.title "选择条目">
 <!ENTITY zotero.selectitems.intro.label "选择您要添加到文献库的条目">
 <!ENTITY zotero.selectitems.cancel.label "取消">

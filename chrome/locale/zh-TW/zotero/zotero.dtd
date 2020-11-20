@@ -175,6 +175,9 @@
 <!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "搜尋">
 
+<!ENTITY zotero.createParent.title "Create Parent Item">
+<!ENTITY zotero.createParent.button.manual "Manual Entry">
+
 <!ENTITY zotero.selectitems.title "選取項目">
 <!ENTITY zotero.selectitems.intro.label "選取要加到您的文獻庫的項目">
 <!ENTITY zotero.selectitems.cancel.label "取消">

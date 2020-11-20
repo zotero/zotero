@@ -175,6 +175,9 @@
 <!ENTITY zotero.lookup.description "ISBN, DOI, PMID, vagy arXiv ID hozzáadása a könyvtárhoz:">
 <!ENTITY zotero.lookup.button.search "Keresés">
 
+<!ENTITY zotero.createParent.title "Create Parent Item">
+<!ENTITY zotero.createParent.button.manual "Manual Entry">
+
 <!ENTITY zotero.selectitems.title "Elemek kiválasztása">
 <!ENTITY zotero.selectitems.intro.label "A könyvtárhoz hozzáadni kíván elemek kiválasztása">
 <!ENTITY zotero.selectitems.cancel.label "Mégse">
