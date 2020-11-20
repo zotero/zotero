@@ -28,6 +28,10 @@
 var io;
 let createParent;
 
+function toggleAccept(enabled) {
+	document.documentElement.getButton("accept").disabled = !enabled;
+}
+
 function doLoad() {
 	// Set font size from pref
 	let sbc = document.getElementById('zotero-create-parent-container');
@@ -36,7 +40,11 @@ function doLoad() {
 	io = window.arguments[0];
 
 	createParent = document.getElementById('create-parent');
-	Zotero.CreateParent.render(createParent, { loading: false, item: io.dataIn.item });
+	Zotero.CreateParent.render(createParent, {
+		loading: false,
+		item: io.dataIn.item,
+		toggleAccept
+	});
 }
 
 function doUnload() {
@@ -51,7 +59,11 @@ async function doAccept() {
 		childItem,
 		(on) => {
 			// Render react again with correct loading value
-			Zotero.CreateParent.render(createParent, { loading: on, item: childItem });
+			Zotero.CreateParent.render(createParent, {
+				loading: on,
+				item: childItem,
+				toggleAccept
+			});
 		}
 	);
 

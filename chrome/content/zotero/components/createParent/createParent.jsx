@@ -31,7 +31,17 @@ import PropTypes from 'prop-types';
 import cx from 'classnames';
 import { IntlProvider } from "react-intl";
 
-function CreateParent({ loading, item }) {
+function CreateParent({ loading, item, toggleAccept }) {
+	// When the input has/does not have characters toggle the accept button on the dialog
+	const handleInput = (e) => {
+		if (e.target.value.trim() !== '') {
+			toggleAccept(true);
+		}
+		else {
+			toggleAccept(false);
+		}
+	};
+
 	return (
 		<IntlProvider
 			locale={ Zotero.locale }
@@ -47,6 +57,7 @@ function CreateParent({ loading, item }) {
 						placeholder={ Zotero.getString('createParent.prompt') }
 						size="50"
 						disabled={ loading }
+						onChange={ handleInput }
 					/>
 					<div
 						mode="undetermined"
@@ -64,6 +75,7 @@ function CreateParent({ loading, item }) {
 CreateParent.propTypes = {
 	loading: PropTypes.bool,
 	item: PropTypes.object,
+	toggleAccept: PropTypes.func
 };
 
 Zotero.CreateParent = memo(CreateParent);
