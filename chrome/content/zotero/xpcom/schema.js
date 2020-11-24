@@ -2496,7 +2496,8 @@ Zotero.Schema = new function(){
 		}
 		
 		if (!options.skipIntegrityCheck) {
-			yield Zotero.Schema.integrityCheck(true);
+			// TEMP: Disabled
+			//yield Zotero.Schema.integrityCheck(true);
 		}
 		
 		Zotero.debug('Updating user data tables from version ' + fromVersion + ' to ' + toVersion);
@@ -3115,7 +3116,10 @@ Zotero.Schema = new function(){
 				// what's going on.
 				yield Zotero.DB.queryAsync("CREATE TABLE IF NOT EXISTS retractedItems (\n	itemID INTEGER PRIMARY KEY,\n	data TEXT,\n	FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE\n);");
 				
-				yield Zotero.DB.queryAsync("ALTER TABLE retractedItems ADD COLUMN flag INT DEFAULT 0");
+				try {
+					yield Zotero.DB.queryAsync("ALTER TABLE retractedItems ADD COLUMN flag INT DEFAULT 0");
+				}
+				catch (e) {}
 			}
 			
 			else if (i == 106) {
@@ -3145,7 +3149,7 @@ Zotero.Schema = new function(){
 			}
 			
 			else if (i == 109) {
-				yield Zotero.DB.queryAsync("CREATE TABLE dbDebug1 (\n    a INTEGER PRIMARY KEY\n)");
+				yield Zotero.DB.queryAsync("CREATE TABLE IF NOT EXISTS dbDebug1 (\n    a INTEGER PRIMARY KEY\n)");
 			}
 			
 			else if (i == 110) {
