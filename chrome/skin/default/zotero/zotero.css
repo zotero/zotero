@@ -333,6 +333,16 @@ zoterosearch .menulist-icon {
 	-moz-box-pack: end;
 }
 
+#zotero-feed-settings .html-input {
+	width: 50px;
+	text-align: right;
+}
+
+#zotero-feed-settings #advanced-options-togglable hbox {
+	display: flex;
+	align-items: center;
+}
+
 .zotero-spinner-14 {
 	list-style-image: url(chrome://zotero/skin/spinner-14px.png);
 	height: 14px;

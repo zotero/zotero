@@ -150,9 +150,12 @@ var Zotero_Feed_Settings = new function() {
 	this.accept = function() {
 		data.url = document.getElementById('feed-url').value;
 		data.title = document.getElementById('feed-title').value;
-		data.ttl = document.getElementById('feed-ttl').value * 60;
-		data.cleanupReadAfter = document.getElementById('feed-cleanupReadAfter').value * 1;
-		data.cleanupUnreadAfter = document.getElementById('feed-cleanupUnreadAfter').value * 1;
+		data.ttl = parseInt(document.getElementById('feed-ttl').value);
+		data.ttl = (isNaN(data.ttl) ? Zotero.Prefs.get('feeds.defaultTTL') : data.ttl) * 60;
+		data.cleanupReadAfter = parseInt(document.getElementById('feed-cleanupReadAfter').value);
+		data.cleanupReadAfter = isNaN(data.cleanupReadAfter) ? Zotero.Prefs.get('feeds.defaultCleanupReadAfter') : data.cleanupReadAfter;
+		data.cleanupUnreadAfter = parseInt(document.getElementById('feed-cleanupUnreadAfter').value);
+		data.cleanupUnreadAfter = isNaN(data.cleanupUnreadAfter) ? Zotero.Prefs.get('feeds.defaultCleanupUnreadAfter') : data.cleanupUnreadAfter;
 		return true;
 	};
 	

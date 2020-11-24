@@ -6,6 +6,7 @@
 	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd" > %zoteroDTD;
 ]>
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
 	title="&zotero.feedSettings.title;" buttons="cancel,accept"
 	buttonlabelaccept="&zotero.feedSettings.saveButton.label;"
 	ondialogaccept="return Zotero_Feed_Settings.accept()"
@@ -50,17 +51,17 @@
 		<vbox id="advanced-options-togglable">
 			<hbox align="center">
 				<label value="&zotero.feedSettings.refresh.label1;" control="feed-ttl"/>
-				<textbox id="feed-ttl" type="number" min="1" increment="1" size="3"/>
+				<html:input class="html-input" id="feed-ttl" type="number" min="1" step="1"/>
 				<label value="&zotero.feedSettings.refresh.label2;" control="feed-ttl"/>
 			</hbox>
 			<hbox align="center">
 				<label value="&zotero.feedSettings.cleanupReadAfter.label1;" control="feed-cleanupReadAfter"/>
-				<textbox id="feed-cleanupReadAfter" type="number" min="1" increment="1" size="2"/>
+				<html:input class="html-input" id="feed-cleanupReadAfter" type="number" min="1" step="1"/>
 				<label value="&zotero.feedSettings.cleanupReadAfter.label2;" control="feed-cleanupReadAfter"/>
 			</hbox>
 			<hbox align="center">
 				<label value="&zotero.feedSettings.cleanupUnreadAfter.label1;" control="feed-cleanupUnreadAfter"/>
-				<textbox id="feed-cleanupUnreadAfter" type="number" min="1" increment="1" size="2"/>
+				<html:input class="html-input" id="feed-cleanupUnreadAfter" type="number" min="1" step="1"/>
 				<label value="&zotero.feedSettings.cleanupUnreadAfter.label2;" control="feed-cleanupUnreadAfter"/>
 			</hbox>
 		</vbox>
