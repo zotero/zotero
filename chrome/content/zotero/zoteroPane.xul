@@ -251,6 +251,7 @@
 								oncommand="ZoteroPane.onCollectionContextMenuSelect(event)">
 							<!-- Keep order in sync with buildCollectionContextMenu, which adds additional attributes -->
 							<menuitem class="zotero-menuitem-sync"/>
+							<menuitem class="zotero-menuitem-clean-cache" label="&zotero.items.menu.cleanCache;"/>
 							<menuseparator/>
 							<menuitem class="zotero-menuitem-new-collection" label="&zotero.toolbar.newCollection.label;"/>
 							<menuitem class="zotero-menuitem-new-saved-search" label="&zotero.toolbar.newSavedSearch.label;"/>
@@ -318,7 +319,6 @@
 							<menuitem class="menuitem-iconic zotero-menuitem-rename-from-parent" oncommand="ZoteroPane_Local.renameSelectedAttachmentsFromParents()"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-reindex" oncommand="ZoteroPane_Local.reindexItem();"/>
 							<menuseparator/>
-							<menuitem class="menuitem-iconic zotero-menuitem-remove-cache" label="&zotero.items.menu.removeCache;" oncommand="ZoteroPane.removeCacheForSelected()"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-cache-item" label="&zotero.items.menu.cacheItem;" oncommand="ZoteroPane.cacheItems()"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-cache-attachment-item" label="&zotero.items.menu.cacheItem.attachment;" oncommand="ZoteroPane.cacheAttachmentItems()"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-cache-item-remove" label="&zotero.items.menu.cacheItem.remove;" oncommand="ZoteroPane.removeCacheItems()"/>

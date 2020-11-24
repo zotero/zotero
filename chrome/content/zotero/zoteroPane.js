@@ -2404,6 +2404,12 @@ var ZoteroPane = new function()
 			}
 		},
 		{
+			id: "cleanCache",
+			oncommand: () => {
+				Zotero.Sync.Storage.Cache.identifyItemsToFreeForLibrary(this.getSelectedLibraryID());
+			}
+		},
+		{
 			id: "sep1",
 		},
 		{
@@ -2654,6 +2660,7 @@ var ZoteroPane = new function()
 			if (!library.archived) {
 				show.push(
 					'sync',
+					'cleanCache',
 					'sep1',
 					'newCollection',
 					'newSavedSearch'
@@ -2764,7 +2771,6 @@ var ZoteroPane = new function()
 			'renameAttachments',
 			'reindexItem',
 			'sep6',
-			'removeCache',
 			'cacheItem',
 			'cacheAttachmentItem',
 			'cacheItemRemove'
@@ -3007,8 +3013,6 @@ var ZoteroPane = new function()
 								showSep6 = true;
 							}
 
-							Zotero.debug(item.attachmentSyncState);
-							Zotero.debug(item.attachmentManualCache);
 							if (item.attachmentManualCache === Zotero.Sync.Storage.Cache.MANUAL_CACHE_TRUE) {
 								show.push(m.cacheItemRemove);
 								showSep6 = true;
@@ -3030,9 +3034,7 @@ var ZoteroPane = new function()
 					else if (!collectionTreeRow.isPublications()) {
 						show.push(m.duplicateItem);
 
-						let showSep6 = true;
-						// TODO: This is a temp context menu item, remove and change showSep6 = false
-						show.push(m.removeCache);
+						let showSep6 = false;
 
 						let childAttachments = Zotero.Items.get(item.getAttachments());
 						if (childAttachments.find(attachment => attachment.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD)) {
@@ -4868,17 +4870,6 @@ var ZoteroPane = new function()
 		}
 	};
 	
-
-	/**
-	 * Testing context menu item to kick off free cache process (will be removed)
-	 *
-	 * @returns {Promise<void>}
-	 */
-	this.removeCacheForSelected = async function () {
-		let items = this.getSelectedItems();
-		Zotero.Sync.Storage.Cache.identifyItemsToFree(items[0].libraryID);
-	};
-
 
 	/**
 	 * Downloads and caches all attachments for the selected items. This will prevent them from

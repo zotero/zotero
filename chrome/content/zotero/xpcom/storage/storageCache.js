@@ -62,6 +62,9 @@ Zotero.Sync.Storage.Cache = {
 		await Zotero.Promise.all(
 			attachmentItems.map(attachmentItem => this._deleteItemFiles(attachmentItem))
 		);
+		
+		// TODO: There seems to be a lag compared to download file of how long it takes the
+		// item pane to update
 	},
 
 	/**
@@ -86,7 +89,6 @@ Zotero.Sync.Storage.Cache = {
 				return;
 			}
 
-			// TODO: Be wary of force download and modified items
 			// Download item
 			let results = await Zotero.Sync.Runner.downloadFile(item);
 			if (!results || !results.localChanges) {
@@ -130,14 +132,14 @@ Zotero.Sync.Storage.Cache = {
 				Zotero.Libraries.getAll().forEach((library) => {
 					if (library.libraryID !== Zotero.Libraries.userLibraryID) {
 						promises.push(
-							this._identifyItemsToFreeForLibrary(library.libraryID, fullSearch)
+							this.identifyItemsToFreeForLibrary(library.libraryID, fullSearch)
 						);
 					}
 				});
 			}
 			else {
 				promises.push(
-					this._identifyItemsToFreeForLibrary(Zotero.Libraries.userLibraryID, fullSearch)
+					this.identifyItemsToFreeForLibrary(Zotero.Libraries.userLibraryID, fullSearch)
 				);
 			}
 	
@@ -162,7 +164,7 @@ Zotero.Sync.Storage.Cache = {
 	 *
 	 * @returns {Promise<void>}
 	 */
-	_identifyItemsToFreeForLibrary: async function (libraryID, fullSearch) {
+	identifyItemsToFreeForLibrary: async function (libraryID, fullSearch) {
 		// Check library has storage
 		if (!Zotero.Sync.Storage.Local.getEnabledForLibrary(libraryID)) {
 			Zotero.debug('Zotero.Sync.Storage.Cache ('
