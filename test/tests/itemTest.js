@@ -1883,6 +1883,19 @@ describe("Zotero.Item", function () {
 			assert.equal(item.getField('extra'), `doi: ${doi2}`);
 		});*/
 		
+		it("should use valid CSL type from Extra", function () {
+			var json = {
+				itemType: "journalArticle",
+				pages: "123",
+				extra: "Type: song"
+			};
+			var item = new Zotero.Item;
+			item.fromJSON(json);
+			assert.equal(item.itemTypeID, Zotero.ItemTypes.getID('audioRecording'));
+			// A field valid for the old item type should be moved to Extra
+			assert.equal(item.getField('extra'), 'Pages: 123');
+		});
+		
 		it("should ignore creator field in Extra", async function () {
 			var json = {
 				itemType: "journalArticle",

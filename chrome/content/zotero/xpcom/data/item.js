@@ -4239,13 +4239,18 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 	
 	var isValidForType = {};
 	var setFields = new Set();
-	var { fields: extraFields, creators: extraCreators, extra } = Zotero.Utilities.Internal.extractExtraFields(
-		json.extra || '',
-		this,
-		Object.keys(json)
-			// TEMP until we move creator lines to real creators
-			.concat('creators')
-	);
+	var { itemType, fields: extraFields, creators: extraCreators, extra } =
+		Zotero.Utilities.Internal.extractExtraFields(
+			json.extra || '',
+			this,
+			Object.keys(json)
+				// TEMP until we move creator lines to real creators
+				.concat('creators')
+		);
+	if (json.itemType != itemType) {
+		itemTypeID = Zotero.ItemTypes.getID(itemType);
+		this.setType(itemTypeID);
+	}
 	var invalidFieldLogLines = new Map();
 	
 	// Transfer valid fields from Extra to regular fields
