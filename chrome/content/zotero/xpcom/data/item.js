@@ -4247,7 +4247,8 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 				// TEMP until we move creator lines to real creators
 				.concat('creators')
 		);
-	if (json.itemType != itemType) {
+	// If a different item type was parsed out of Extra, use that instead
+	if (itemType && json.itemType != itemType) {
 		itemTypeID = Zotero.ItemTypes.getID(itemType);
 		this.setType(itemTypeID);
 	}
