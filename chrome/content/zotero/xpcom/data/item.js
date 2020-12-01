@@ -49,6 +49,8 @@ Zotero.Item = function(itemTypeOrID) {
 	this._attachmentSyncState = 0;
 	this._attachmentSyncedModificationTime = null;
 	this._attachmentSyncedHash = null;
+	this._attachmentLastProcessedModificationTime = null;
+	this._attachmentPageIndex = null;
 	
 	// loadCreators
 	this._creators = [];
@@ -336,8 +338,10 @@ Zotero.Item.prototype._parseRowData = function(row) {
 			case 'libraryID':
 			case 'itemTypeID':
 			case 'attachmentSyncState':
-			case 'attachmentSyncedHash':
 			case 'attachmentSyncedModificationTime':
+			case 'attachmentSyncedHash':
+			case 'attachmentLastProcessedModificationTime':
+			case 'attachmentPageIndex':
 			case 'createdByUserID':
 			case 'lastModifiedByUserID':
 				break;
@@ -1722,8 +1726,9 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	if (this._changed.attachmentData) {
 		let sql = "REPLACE INTO itemAttachments "
 			+ "(itemID, parentItemID, linkMode, contentType, charsetID, path, "
-				+ "syncState, storageModTime, storageHash) "
-			+ "VALUES (?,?,?,?,?,?,?,?,?)";
+				+ "syncState, storageModTime, storageHash, "
+				+ "lastProcessedModificationTime, pageIndex) "
+			+ "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 		let linkMode = this.attachmentLinkMode;
 		let contentType = this.attachmentContentType;
 		let charsetID = this.attachmentCharset
@@ -1733,6 +1738,8 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		let syncState = this.attachmentSyncState;
 		let storageModTime = this.attachmentSyncedModificationTime;
 		let storageHash = this.attachmentSyncedHash;
+		let lastProcessedModificationTime = this.attachmentLastProcessedModificationTime;
+		let pageIndex = this.attachmentPageIndex;
 		
 		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE && libraryType != 'user') {
 			throw new Error("Linked files can only be added to user library");
@@ -1747,7 +1754,9 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			path ? { string: path } : null,
 			syncState !== undefined ? syncState : 0,
 			storageModTime !== undefined ? storageModTime : null,
-			storageHash || null
+			storageHash || null,
+			lastProcessedModificationTime || null,
+			typeof pageIndex === 'number' ? pageIndex : null
 		];
 		yield Zotero.DB.queryAsync(sql, params);
 		
@@ -3181,6 +3190,66 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentSyncedHash', {
 });
 
 
+//
+// PDF attachment properties
+//
+for (let name of ['lastProcessedModificationTime', 'pageIndex']) {
+	let prop = 'attachment' + Zotero.Utilities.capitalize(name);
+	
+	Zotero.defineProperty(Zotero.Item.prototype, prop, {
+		get: function () {
+			if (!this.isFileAttachment()) {
+				return undefined;
+			}
+			return this['_' + prop];
+		},
+		set: function (val) {
+			if (!this.isFileAttachment()) {
+				throw new Error(`${prop} can only be set for file attachments`);
+			}
+			
+			if (this.isEmbeddedImageAttachment()) {
+				throw new Error(`${prop} cannot be set for embedded-image attachments`);
+			}
+			
+			switch (name) {
+				case 'lastProcessedModificationTime':
+					if (typeof val != 'number') {
+						Zotero.debug(val, 2);
+						throw new Error(`${prop} must be a number`);
+					}
+					if (parseInt(val) != val || val < 0) {
+						Zotero.debug(val, 2);
+						throw new Error(`${prop} must be a timestamp in milliseconds`);
+					}
+					if (val < 10000000000) {
+						Zotero.logError("attachmentlastProcesedModificationTime should be a timestamp in milliseconds "
+							+ "-- " + val + " given");
+					}
+					break;
+				
+				case 'pageIndex':
+					if (typeof val != 'number') {
+						Zotero.debug(val, 2);
+						throw new Error(`${prop} must be a number`);
+					}
+					break;
+			}
+			
+			if (val == this['_' + prop]) {
+				return;
+			}
+			
+			if (!this._changed.attachmentData) {
+				this._changed.attachmentData = {};
+			}
+			this._changed.attachmentData[name] = true;
+			this['_' + prop] = val;
+		}
+	});
+}
+
+
 /**
  * Modification time of an attachment file
  *
@@ -3243,7 +3312,6 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentHash', {
 		return Zotero.Utilities.Internal.md5Async(path);
 	})
 });
-
 
 
 /**
@@ -3563,7 +3631,7 @@ for (let name of ['position']) {
 Zotero.defineProperty(Zotero.Item.prototype, 'annotationImageAttachment', {
 	get: function () {
 		if (!this.isImageAnnotation()) {
-			throw new Error("'annotationImageAttachment' is only valid for image annotations");
+			return undefined;
 		}
 		var attachments = this.getAttachments();
 		if (!attachments.length) {
@@ -4625,14 +4693,6 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 			this.attachmentLinkMode = linkMode;
 			break;
 		
-		case 'contentType':
-			this.attachmentContentType = val;
-			break;
-		
-		case 'charset':
-			this.attachmentCharset = val;
-			break;
-		
 		case 'filename':
 			if (val === "") {
 				Zotero.logError("Ignoring empty attachment filename in JSON for item " + this.libraryKey);
@@ -4642,8 +4702,14 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 			}
 			break;
 		
+		case 'contentType':
+		case 'charset':
 		case 'path':
-			this.attachmentPath = val;
+			this['attachment' + field[0].toUpperCase() + field.substr(1)] = val;
+			break;
+			
+		case 'attachmentPageIndex':
+			this[field] = val;
 			break;
 		
 		//
@@ -4912,6 +4978,18 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 					// TEMP
 					//obj.mtime = (yield this.attachmentModificationTime) || null;
 					//obj.md5 = (yield this.attachmentHash) || null;
+				}
+			}
+			
+			// PDF attachment properties
+			if (this.isFileAttachment()) {
+				let props = ['pageIndex'];
+				for (let prop of props) {
+					let fullProp = 'attachment' + Zotero.Utilities.capitalize(prop);
+					let val = this[fullProp];
+					if (val !== null && val !== undefined) {
+						obj[fullProp] = val;
+					}
 				}
 			}
 		}

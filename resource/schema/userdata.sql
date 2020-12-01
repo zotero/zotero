@@ -104,6 +104,8 @@ CREATE TABLE itemAttachments (
     syncState INT DEFAULT 0,
     storageModTime INT,
     storageHash TEXT,
+    lastProcessedModificationTime INT,
+    pageIndex INT,
     FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,
     FOREIGN KEY (parentItemID) REFERENCES items(itemID) ON DELETE CASCADE,
     FOREIGN KEY (charsetID) REFERENCES charsets(charsetID) ON DELETE SET NULL
@@ -112,6 +114,7 @@ CREATE INDEX itemAttachments_parentItemID ON itemAttachments(parentItemID);
 CREATE INDEX itemAttachments_charsetID ON itemAttachments(charsetID);
 CREATE INDEX itemAttachments_contentType ON itemAttachments(contentType);
 CREATE INDEX itemAttachments_syncState ON itemAttachments(syncState);
+CREATE INDEX itemAttachments_lastProcessedModificationTime ON itemAttachments(lastProcessedModificationTime);
 
 CREATE TABLE itemAnnotations (
     itemID INTEGER PRIMARY KEY,

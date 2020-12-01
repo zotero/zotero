@@ -1159,6 +1159,25 @@ describe("Zotero.Item", function () {
 	});
 	
 	
+	describe("#attachmentLastProcessedModificationTime", function () {
+		it("should save time in milliseconds", async function () {
+			var item = await createDataObject('item');
+			var attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+			
+			var mtime = Date.now();
+			attachment.attachmentLastProcessedModificationTime = mtime;
+			await attachment.saveTx();
+			
+			assert.equal(attachment.attachmentLastProcessedModificationTime, mtime);
+			
+			var sql = "SELECT lastProcessedModificationTime FROM itemAttachments WHERE itemID=?";
+			var dbmtime = await Zotero.DB.valueQueryAsync(sql, attachment.id);
+			
+			assert.equal(mtime, dbmtime);
+		});
+	});
+	
+	
 	describe("Annotations", function () {
 		var item;
 		var attachment;
@@ -1709,13 +1728,21 @@ describe("Zotero.Item", function () {
 					assert.isNull(json.md5);
 				})
 				
-				it("shouldn't include filename or path for linked_url attachments", function* () {
+				it("should include PDF properties", async function () {
+					var item = await importPDFAttachment();
+					item.attachmentPageIndex = 4;
+					var json = item.toJSON();
+					assert.propertyVal(json, 'attachmentPageIndex', 4);
+				});
+				
+				it("shouldn't include filename, path, or PDF properties for linked_url attachments", function* () {
 					var item = new Zotero.Item('attachment');
 					item.attachmentLinkMode = 'linked_url';
 					item.url = "https://www.zotero.org/";
 					var json = item.toJSON();
 					assert.notProperty(json, "filename");
 					assert.notProperty(json, "path");
+					assert.notProperty(json, 'attachmentPageIndex');
 				});
 				
 				it("shouldn't include various properties on embedded-image attachments", async function () {
@@ -1731,6 +1758,7 @@ describe("Zotero.Item", function () {
 					assert.notProperty(json, 'note');
 					assert.notProperty(json, 'charset');
 					assert.notProperty(json, 'path');
+					assert.notProperty(json, 'attachmentPageIndex');
 				});
 			});
 			
@@ -2341,6 +2369,55 @@ describe("Zotero.Item", function () {
 				"publicationTitle":"Publication Title"
 			});
 			assert.equal(item.getField("bookTitle"), "Publication Title");
+		});
+		
+		it("should import attachment content type and path", async function () {
+			var contentType = 'application/pdf';
+			var path = OS.Path.join(getTestDataDirectory().path, 'test.pdf');
+			var json = {
+				itemType: 'attachment',
+				linkMode: 'linked_file',
+				contentType,
+				path
+			};
+			var item = new Zotero.Item();
+			item.libraryID = Zotero.Libraries.userLibraryID;
+			item.fromJSON(json, { strict: true });
+			assert.propertyVal(item, 'attachmentContentType', contentType);
+			assert.propertyVal(item, 'attachmentPath', path);
+		});
+		
+		it("should import other attachment fields", async function () {
+			var contentType = 'application/pdf';
+			var json = {
+				itemType: 'attachment',
+				linkMode: 'linked_file',
+				contentType: 'text/plain',
+				charset: 'utf-8',
+				path: 'attachments:test.txt'
+			};
+			var item = new Zotero.Item();
+			item.libraryID = Zotero.Libraries.userLibraryID;
+			item.fromJSON(json, { strict: true });
+			assert.propertyVal(item, 'attachmentCharset', 'utf-8');
+		});
+		
+		it("should import PDF fields", async function () {
+			var attachment = await importPDFAttachment();
+			var json = attachment.toJSON();
+			
+			var item = new Zotero.Item();
+			item.libraryID = attachment.libraryID;
+			item.fromJSON(json, { strict: true });
+			assert.propertyVal(item, 'attachmentPageIndex', null);
+			
+			json.attachmentPageIndex = 4;
+			
+			item = new Zotero.Item();
+			item.libraryID = attachment.libraryID;
+			item.fromJSON(json, { strict: true });
+			
+			assert.propertyVal(item, 'attachmentPageIndex', json.attachmentPageIndex);
 		});
 		
 		it("should import annotation fields", async function () {
