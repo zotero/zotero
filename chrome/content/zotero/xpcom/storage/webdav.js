@@ -592,6 +592,17 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		request.setChannel(false);
 		return this._onUploadComplete(req, request, item, params);
 	}),
+
+
+	/**
+	 * Check if the given item is up to date on the remote server
+	 *
+	 * @param {Zotero.Sync.Storage.Request} request
+	 * @return {boolean} True if the remote server has an up to date copy of the file
+	 */
+	checkFileExists: function (request) {
+		return false;
+	},
 	
 	
 	/**

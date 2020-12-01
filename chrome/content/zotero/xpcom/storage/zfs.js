@@ -340,6 +340,52 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		var sql = "DELETE FROM settings WHERE setting=? AND key=?";
 		yield Zotero.DB.queryAsync(sql, ['storage', 'zfsPurge']);
 	}),
+
+
+	/**
+	 * Check if the given file exists on the server
+	 *
+	 * @param {Zotero.Sync.Storage.Request} request
+	 * @returns {Promise<Zotero.Sync.Storage.Result>}
+	 */
+	checkFileExists: async function (request) {
+		let funcName = "Zotero.Sync.Storage.ZFS.checkFileExists()";
+		let item = Zotero.Sync.Storage.Utilities.getItemFromRequest(request);
+
+		let params = this._getRequestParams(item.libraryID, `items/${item.key}/file`);
+		// Request file info
+		params.info = true;
+		let uri = this.apiClient.buildRequestURI(params);
+
+		let req;
+		try {
+			req = await this.apiClient.makeRequest(
+				'GET',
+				uri,
+				{
+					successCodes: [200, 404],
+					debug: true
+				}
+			);
+		}
+		catch (e) {
+			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+				let msg = "Unexpected status code " + e.status + " in " + funcName
+					+ " (" + item.libraryKey + ")";
+				Zotero.logError(msg);
+				Zotero.debug(e.xmlhttp.getAllResponseHeaders());
+				throw new Error(Zotero.Sync.Storage.defaultError);
+			}
+			throw e;
+		}
+
+		if (req.status === 200) {
+			return true;
+		}
+
+		// TODO: Add in retry on other status codes besides 404
+		return false;
+	},
 	
 	
 	//

@@ -335,6 +335,10 @@ Zotero.Sync.Storage.Cache = {
 	 */
 	_deleteItemFiles: async function (item) {
 		// TODO: Check if item exists on server before deleting
+		let fileExistsOnServer = await Zotero.Sync.Runner.checkFileExists(item);
+		if (!fileExistsOnServer) {
+			return false;
+		}
 
 		// Delete files and update sync status
 		let attachmentDirectory = Zotero.Attachments.getStorageDirectory(item).path;
