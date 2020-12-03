@@ -35,7 +35,7 @@ const StorageBreakdown = memo(({ loading, partitions }) => {
 	const partitionSum = partitions.reduce((sum, partition) => sum + partition.size, 0);
 	const countSum = partitions.reduce((sum, partition) => sum + partition.count, 0);
 
-	const detail = countSum + ' items totaling ' + humanReadableSize(partitionSum);
+	const detail = countSum + ' attachments totaling ' + humanReadableSize(partitionSum, 1);
 
 	let partitionLeft = 0;
 	return (
@@ -90,7 +90,7 @@ const StorageBreakdown = memo(({ loading, partitions }) => {
 							<div
 								key={ index }
 							>
-								{ partition.name } - { humanReadableSize(partition.size) }
+								{ partition.name } - { partition.count } attachments totaling { humanReadableSize(partition.size, 1) }
 							</div>
 						);
 					}) }

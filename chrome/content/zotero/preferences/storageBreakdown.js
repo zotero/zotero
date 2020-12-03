@@ -44,101 +44,56 @@ function doUnload() {
 }
 
 async function updateView(loading, partitions) {
+	Zotero.debug('Updating view....' + loading);
 	let storageBreakdown = document.getElementById('storage-breakdown');
 	StorageBreakdown.render(storageBreakdown, { loading, partitions });
 }
 
 async function calculateStorage() {
-	let partitions = [
-		{
-			name: 'Zotero Data',
+	let partitions = Zotero.Libraries.getAll().map((library) => {
+		return {
+			libraryID: library.libraryID,
+			name: library.name,
 			size: 0,
 			count: 0
-		},
-		{
-			name: 'Attachment Files',
-			size: 0,
-			count: 0
-		},
-		{
-			name: 'Manually Cached Attachments',
-			size: 0,
-			count: 0
-		}
-	];
-	
-	// TODO: What are the limits on result set size??
-	// We are probably fine here because you have to manually cache these, but people may try
-	// to do that for everything unless we limit the number of items selected for context menu
-	// option to appear
-	let sql = "SELECT key FROM items JOIN itemAttachments USING (itemID) "
-		+ "WHERE linkMode IN (?,?) AND syncState IN (?)";
-	let params = [
-		Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
-		Zotero.Attachments.LINK_MODE_IMPORTED_URL,
-		Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC
-	];
-	let rows = await Zotero.DB.queryAsync(sql, params);
-	
-	await Zotero.File.iterateDirectory(Zotero.DataDirectory.dir, (entry) => {
-		// Ignore storage directory
-		if (entry.path === Zotero.getStorageDirectory().path) {
-			return;
-		}
-
-		if (!entry.isDir) {
-			Zotero.File.getFileSize(entry.path)
-				.then(size => {
-					partitions[0].count += 1;
-					partitions[0].size += size;
-				});
-			return;
-		}
-
-		Zotero.File.iterateDirectory(entry.path, (attachmentFile) => {
-			Zotero.File.getFileSize(attachmentFile.path)
-				.then((size) => {
-					partitions[0].count += 1;
-					partitions[0].size += size;
-				});
-		});
+		};
 	});
 
-	updateView(2, partitions);
-
-	let loading = 3;
+	let loading = 2;
 	let update = 0;
+	
+	await Zotero.Promise.all(partitions.map(async (partition, index) => {
+		let items = await Zotero.Items.getAll(partition.libraryID);
 
-	await Zotero.File.iterateDirectory(Zotero.getStorageDirectory().path, async (entry) => {
-		if (!entry.isDir) {
-			return;
-		}
-		
-		await Zotero.File.iterateDirectory(entry.path, (attachmentFile) => {
+		const getFileSize = (attachmentFile) => {
 			Zotero.File.getFileSize(attachmentFile.path)
 				.then((size) => {
-					if (entry.name.startsWith('.')) {
-						partitions[0].count += 1;
-						partitions[0].size += size;
-					}
-					else {
-						partitions[1].count += 1;
-						partitions[1].size += size;
+					if (!attachmentFile.name.startsWith('.')) {
+						partitions[index].size += size;
 					}
 				});
-		});
+		};
 
-		if (update > 30) {
-			updateView(loading, partitions);
-			loading += 1;
-			update = 0;
-		}
-		else {
-			update += 1;
-		}
-	});
-	
-	Zotero.debug(partitions);
+		await Zotero.Promise.all(items.map(async (item) => {
+			if (item.isImportedAttachment() && await item.fileExists()) {
+				partitions[index].count += 1;
+
+				await Zotero.File.iterateDirectory(
+					Zotero.Attachments.getStorageDirectory(item).path,
+					getFileSize
+				);
+			}
+
+			if (update > 100) {
+				updateView(loading, partitions);
+				loading += 1;
+				update = 0;
+			}
+			else {
+				update += 1;
+			}
+		}));
+	}));
 
 	updateView(0, partitions);
 }
