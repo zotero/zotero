@@ -2893,6 +2893,14 @@ Zotero.Integration.BibliographyField = class extends Zotero.Integration.Field {
 };
 
 Zotero.Integration.Citation = class {
+	static refreshEmbeddedData(itemData) {
+		if (itemData.shortTitle) {
+			itemData['title-short'] = itemData.shortTitle;
+			delete itemData.shortTitle;
+		}
+		return itemData;
+	}
+
 	constructor(citationField, data, noteIndex) {
 		data = Object.assign({ citationItems: [], properties: {} }, data)
 		this.citationID = data.citationID;
@@ -2963,6 +2971,7 @@ Zotero.Integration.Citation = class {
 				// Use embedded item
 				if (citationItem.itemData) {
 					Zotero.debug(`Item ${JSON.stringify(citationItem.uris)} not in library. Using embedded data`);
+					citationItem.itemData = Zotero.Integration.Citation.refreshEmbeddedData(citationItem.itemData);
 					// add new embedded item
 					var itemData = Zotero.Utilities.deepCopy(citationItem.itemData);
 					
@@ -3066,7 +3075,7 @@ Zotero.Integration.Citation = class {
 		// make sure it's going to get updated
 		delete this.properties["formattedCitation"];
 		delete this.properties["plainCitation"];
-		delete this.properties["dontUpdate"];	
+		delete this.properties["dontUpdate"];
 		
 		// Load items to be displayed in edit dialog
 		await this.loadItemData();
@@ -3098,17 +3107,11 @@ Zotero.Integration.Citation = class {
 				serializeCitationItem.id = citationItem.id;
 				serializeCitationItem.uris = citationItem.uris;
 				
-				// XXX For compatibility with Zotero 2.0; to be removed at a later date
-				serializeCitationItem.uri = serializeCitationItem.uris;
-				
 				// always store itemData, since we have no way to get it back otherwise
 				serializeCitationItem.itemData = citationItem.itemData;
 			} else {
 				serializeCitationItem.id = citationItem.id;
 				serializeCitationItem.uris = Zotero.Integration.currentSession.uriMap.getURIsForItemID(citationItem.id);
-				
-				// XXX For compatibility with Zotero 2.0; to be removed at a later date
-				serializeCitationItem.uri = serializeCitationItem.uris;
 			
 				serializeCitationItem.itemData = Zotero.Integration.currentSession.style.sys.retrieveItem(citationItem.id);
 			}
