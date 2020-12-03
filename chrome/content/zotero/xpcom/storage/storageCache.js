@@ -111,11 +111,10 @@ Zotero.Sync.Storage.Cache = {
 	 * added.
 	 *
 	 * @param forGroups {boolean} - Are we identifying in group libraries or the user library
-	 * @param fullSearch {boolean} - If true, search the full library, otherwise, optimize
 	 *
 	 * @returns {Promise<void>}
 	 */
-	identifyItemsToFree: async function (forGroups, fullSearch) {
+	identifyItemsToFree: async function (forGroups) {
 		this._freeingCache = true;
 		let promises = [];
 		try {
@@ -123,14 +122,14 @@ Zotero.Sync.Storage.Cache = {
 				Zotero.Libraries.getAll().forEach((library) => {
 					if (library.libraryID !== Zotero.Libraries.userLibraryID) {
 						promises.push(
-							this.identifyItemsToFreeForLibrary(library.libraryID, fullSearch)
+							this.identifyItemsToFreeForLibrary(library.libraryID)
 						);
 					}
 				});
 			}
 			else {
 				promises.push(
-					this.identifyItemsToFreeForLibrary(Zotero.Libraries.userLibraryID, fullSearch)
+					this.identifyItemsToFreeForLibrary(Zotero.Libraries.userLibraryID)
 				);
 			}
 	
@@ -151,11 +150,10 @@ Zotero.Sync.Storage.Cache = {
 	 * added.
 	 *
 	 * @param libraryID {integer} - Library ID to search for items to free
-	 * @param fullSearch {boolean} - If true, search the full library, otherwise, optimize
 	 *
 	 * @returns {Promise<void>}
 	 */
-	identifyItemsToFreeForLibrary: async function (libraryID, fullSearch) {
+	identifyItemsToFreeForLibrary: async function (libraryID) {
 		// Check library has storage
 		if (!Zotero.Sync.Storage.Local.getEnabledForLibrary(libraryID)) {
 			Zotero.debug('Zotero.Sync.Storage.Cache ('
@@ -171,99 +169,43 @@ Zotero.Sync.Storage.Cache = {
 			return;
 		}
 		
-		let cacheLimit = Zotero.Prefs.get(this._getCacheLimitPrefFromLibrary(libraryID));
-		if (cacheLimit === 0) {
+		let cacheTime = Zotero.Prefs.get(this._getCacheLimitPrefFromLibrary(libraryID));
+		if (cacheTime === 0) {
 			Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID
-				+ ') exiting because cache limit is unlimited.');
+				+ ') exiting because cache time is unlimited.');
 			return;
 		}
 
 		Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID
-			+ ') checking if cache exceeds preference of ' + cacheLimit + 'MB');
+			+ ') checking if cached files exceeds preference of ' + cacheTime + ' days.');
 
-		// Turn cache limit into bytes
-		cacheLimit = cacheLimit * 1024 * 1024;
+		// Turn cache limit into seconds for timestamp
+		cacheTime = cacheTime * 24 * 60 * 60;
 
 		// Keep track of offset into table
 		let offset = 0;
-		// Keep track of how many bytes of files we have seen so far
-		let bytesSoFar = 0;
 
-		// Sum attachment sizes ordered by lastAccessed until we hit storage size limit
-		let i, storageSize;
+		// Delete files older than the cache limit
+		let lastAccessedIsNull = false, i, recordsFreed = 0;
 		while (true) {
-			let sql = "SELECT itemID, storageSize FROM itemAttachments JOIN items USING (itemID) "
-				+ "WHERE libraryID=? AND linkMode IN (?,?) AND syncState IN (?)"
-				+ "ORDER BY lastAccessed DESC, dateModified DESC LIMIT ?,1000";
+			let sql = "SELECT itemID FROM itemAttachments JOIN items USING (itemID) "
+				+ " WHERE libraryID=? AND linkMode IN (?,?) AND syncState IN (?)";
+			
+			// If we have no last accessed data in DB then compare with dateModified
+			if (lastAccessedIsNull) {
+				sql += " AND lastAccessed IS NULL AND dateModified < ?";
+			}
+			else {
+				sql += " AND lastAccessed IS NOT NULL AND lastAccessed > ?";
+			}
+			
+			sql += " ORDER BY lastAccessed DESC, dateModified DESC LIMIT ?,1000";
 			let params = [
 				libraryID,
 				Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
 				Zotero.Attachments.LINK_MODE_IMPORTED_URL,
 				Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC,
-				offset
-			];
-			let rows = await Zotero.DB.queryAsync(sql, params);
-
-			for (i = 0; i < rows.length; i++) {
-				storageSize = rows[i].storageSize;
-				if (!storageSize) {
-					// No storage size in DB means we need to update the DB from
-					// the filesystem
-					
-					// TODO: This seems like an unnecessary amount of work on
-					// the DB, but I didn't want to replicate a ton of code
-					// contained in these functions.
-					// Another option instead of loading them one at a time
-					// would be to wait and load all items after this loop
-					let item = await Zotero.Items.getAsync(rows[i].itemID);
-					storageSize = await Zotero.Attachments.getTotalFileSize(item, true);
-					
-					// Insert back into DB
-					item.attachmentStorageSize = storageSize;
-					await item.saveTx({ skipAll: true });
-				}
-
-				bytesSoFar += storageSize;
-
-				// We've reached the tipping point so this item and everything after
-				// it needs to be removed
-				if (bytesSoFar > cacheLimit) {
-					offset += i;
-					break;
-				}
-			}
-
-			if (bytesSoFar > cacheLimit) {
-				Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID + ') '
-					+ offset + ' records fit inside cache limit');
-				break;
-			}
-
-			// No more rows means we are inside total cache size
-			if (!rows.length || rows.length < 1000) {
-				Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID
-					+ ') exiting because cache size (' + bytesSoFar
-					+ ') is inside limit (' + cacheLimit + ').');
-				return;
-			}
-
-			offset += 1000;
-			Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID + ') processed '
-				+ offset + ' records, still looking for limit.');
-		}
-
-		// Start from first removal offset and remove until we don't find a file any more
-		// TODO: We could also stop when we encounter a TO_DOWNLOAD sync state
-		let recordsFreed = 0, quit = false;
-		while (true) {
-			let sql = "SELECT itemID, storageSize FROM itemAttachments JOIN items USING (itemID) "
-				+ "WHERE libraryID=? AND linkMode IN (?,?) AND syncState IN (?) "
-				+ "ORDER BY lastAccessed DESC, dateModified DESC LIMIT ?,1000";
-			let params = [
-				libraryID,
-				Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
-				Zotero.Attachments.LINK_MODE_IMPORTED_URL,
-				Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC,
+				cacheTime,
 				offset
 			];
 			let rows = await Zotero.DB.queryAsync(sql, params);
@@ -273,36 +215,34 @@ Zotero.Sync.Storage.Cache = {
 
 				Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID
 					+ ') freeing storage for item (' + item.id + ').');
-				let deleted = await this._deleteItemFiles(item);
-				if (!deleted && !fullSearch) {
-					// If we found no files to delete and are not doing
-					// a full search then call if quits here
-					quit = true;
-					break;
-				}
+				await this._deleteItemFiles(item);
 
 				// Slow down so we don't bog the system down
-				await Zotero.Promise.delay(1000);
-			}
-			
-			if (quit) {
-				Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID + ') is not '
-					+ ' performing full search and found no files to delete.');
-				return;
+				await Zotero.Promise.delay(500);
 			}
 
-			// No more rows means we've reached the end
-			if (!rows.length || rows.length < 1000) {
-				Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID
-					+ ') exiting because no items are left.');
-				return;
-			}
-
-			recordsFreed += rows.length;
 			offset += 1000;
-			Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID + ') freed '
-				+ recordsFreed + ' records, looking for more.');
+			recordsFreed += rows.length;
+			Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID + ') processed '
+				+ recordsFreed + ' records.');
+
+			// Check if we need to break out of the loop
+			if (rows.length === 0 || rows.length < 1000) {
+				if (!lastAccessedIsNull) {
+					// Now let's process records that don't have a last accessed
+					lastAccessedIsNull = true;
+
+					offset = 0;
+				}
+				else {
+					// All done
+					break;
+				}
+			}
 		}
+
+		Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID + ') freed '
+			+ recordsFreed + ' records.');
 	},
 
 	_getCacheLimitPrefFromLibrary: function (libraryID) {
@@ -325,7 +265,6 @@ Zotero.Sync.Storage.Cache = {
 	 * @returns {Promise<boolean>} - True if we found files to delete
 	 */
 	_deleteItemFiles: async function (item) {
-		// TODO: Check if item exists on server before deleting
 		let fileExistsOnServer = await Zotero.Sync.Runner.checkFileExists(item);
 		if (!fileExistsOnServer) {
 			return false;
