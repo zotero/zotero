@@ -3276,13 +3276,6 @@ Zotero.Schema = new function(){
 			else if (i == 115) {
 				yield Zotero.DB.queryAsync("ALTER TABLE itemAttachments ADD COLUMN storageSize INT");
 			}
-
-			else if (i == 116) {
-				yield Zotero.DB.queryAsync("ALTER TABLE itemAttachments ADD COLUMN manualCache INT");
-				yield Zotero.DB.queryAsync("CREATE INDEX itemAttachments_manualCache ON itemAttachments(manualCache)");
-			}
-
-
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
 		}
 		

@@ -30,10 +30,6 @@
  * @function identifyItemsToFree - Identify cache items to free
  */
 Zotero.Sync.Storage.Cache = {
-	// When an item attachment is manully cached, this flag is true
-	MANUAL_CACHE_FALSE: 0,
-	MANUAL_CACHE_TRUE: 1,
-
 	// Flag to indicate if we are already processing
 	_freeingCache: false,
 
@@ -68,7 +64,7 @@ Zotero.Sync.Storage.Cache = {
 	},
 
 	/**
-	 * Manually cache the given item attachments
+	 * Cache the given item attachments
 	 *
 	 * @param items {Array} - List of items that are attachments
 	 *
@@ -93,12 +89,7 @@ Zotero.Sync.Storage.Cache = {
 			let results = await Zotero.Sync.Runner.downloadFile(item);
 			if (!results || !results.localChanges) {
 				failed.push(item);
-				Zotero.debug("Manual download failed -- skipping");
-			}
-			else {
-				// Mark successful downloads in the database
-				item.attachmentManualCache = Zotero.Sync.Storage.Cache.MANUAL_CACHE_TRUE;
-				await item.saveTx({ skipAll: true });
+				Zotero.debug("Attachment download failed -- skipping");
 			}
 		}));
 		

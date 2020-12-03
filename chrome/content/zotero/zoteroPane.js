@@ -3013,7 +3013,7 @@ var ZoteroPane = new function()
 								showSep6 = true;
 							}
 
-							if (item.attachmentManualCache === Zotero.Sync.Storage.Cache.MANUAL_CACHE_TRUE) {
+							if (yield item.fileExists()) {
 								show.push(m.cacheItemRemove);
 								showSep6 = true;
 							}
@@ -3042,7 +3042,7 @@ var ZoteroPane = new function()
 							showSep6 = true;
 						}
 
-						if (childAttachments.find(attachment => attachment.attachmentManualCache === Zotero.Sync.Storage.Cache.MANUAL_CACHE_TRUE)) {
+						if (childAttachments.find(attachment => attachment.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC)) {
 							show.push(m.cacheItemRemove);
 							showSep6 = true;
 						}
