@@ -82,6 +82,9 @@ Zotero.Sync.Storage.Cache = {
 			// modified previously to be downloaded on open.
 			if (fileExists
 				&& (item.attachmentSyncState !== Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD)) {
+				// We are not downloading, but still touch last accessed
+				item.attachmentLastAccessed = Date.now();
+				await item.saveTx({ skipAll: true });
 				return;
 			}
 
