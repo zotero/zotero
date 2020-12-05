@@ -51,7 +51,6 @@ Zotero.Item = function(itemTypeOrID) {
 	this._attachmentSyncedHash = null;
 	this._attachmentLastProcessedModificationTime = null;
 	this._attachmentLastAccessed = null;
-	this._attachmentStorageSize = null;
 	
 	// loadCreators
 	this._creators = [];
@@ -346,7 +345,6 @@ Zotero.Item.prototype._parseRowData = function(row) {
 			case 'createdByUserID':
 			case 'lastModifiedByUserID':
 			case 'attachmentLastAccessed':
-			case 'attachmentStorageSize':
 				break;
 			
 			case 'itemID':
@@ -1764,14 +1762,13 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		let sql = "";
 		let cols = [
 			'parentItemID', 'linkMode', 'contentType', 'charsetID', 'path', 'syncState',
-			'storageModTime', 'storageHash', 'lastProcessedModificationTime', 'lastAccessed',
-			'storageSize'
+			'storageModTime', 'storageHash', 'lastProcessedModificationTime', 'lastAccessed'
 		];
 		// TODO: Replace with UPSERT after SQLite 3.24.0
 		if (isNew) {
 			sql = "INSERT INTO itemAttachments "
 				+ "(itemID, " + cols.join(", ") + ") "
-				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 		}
 		else {
 			sql = "UPDATE itemAttachments SET " + cols.join("=?, ") + "=? WHERE itemID=?";
@@ -1787,7 +1784,6 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		let storageHash = this.attachmentSyncedHash;
 		let lastProcessedModificationTime = this.attachmentLastProcessedModificationTime;
 		let lastAccessed = this.attachmentLastAccessed;
-		let storageSize = this.attachmentStorageSize;
 		
 		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE && libraryType != 'user') {
 			throw new Error("Linked files can only be added to user library");
@@ -1803,8 +1799,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			storageModTime !== undefined ? storageModTime : null,
 			storageHash || null,
 			lastProcessedModificationTime || null,
-			lastAccessed !== undefined ? lastAccessed : null,
-			storageSize !== undefined ? storageSize : null
+			lastAccessed !== undefined ? lastAccessed : null
 		];
 		if (isNew) {
 			params.unshift(itemID);
@@ -3411,49 +3406,6 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentLastAccessed', {
 		}
 		this._changed.attachmentData.lastAccessed = true;
 		this._attachmentLastAccessed = val;
-	}
-});
-
-
-Zotero.defineProperty(Zotero.Item.prototype, 'attachmentStorageSize', {
-	get: function () {
-		if (!this.isFileAttachment()) {
-			return undefined;
-		}
-		return this._attachmentStorageSize;
-	},
-	set: function (val) {
-		if (!this.isAttachment()) {
-			throw new Error("attachmentStorageSize can only be set for attachment items");
-		}
-
-		switch (this.attachmentLinkMode) {
-			case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
-			case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
-				break;
-
-			default:
-				throw new Error("attachmentStorageSize can only be set for stored files");
-		}
-
-		if (typeof val != 'number') {
-			Zotero.debug(val, 2);
-			throw new Error("attachmentStorageSize must be a number");
-		}
-		if (parseInt(val) != val || val < 0) {
-			Zotero.debug(val, 2);
-			throw new Error("attachmentStorageSize must be a positive integer");
-		}
-
-		if (val == this.attachmentStorageSize) {
-			return;
-		}
-
-		if (!this._changed.attachmentData) {
-			this._changed.attachmentData = {};
-		}
-		this._changed.attachmentData.StorageSize = true;
-		this._attachmentStorageSize = val;
 	}
 });
 
@@ -5256,10 +5208,6 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 					let lastAccessed = this.attachmentLastAccessed;
 					if (lastAccessed !== null) {
 						obj.lastAccessed = lastAccessed;
-					}
-					let storageSize = this.attachmentStorageSize;
-					if (storageSize !== null) {
-						obj.size = storageSize;
 					}
 				}
 				else {

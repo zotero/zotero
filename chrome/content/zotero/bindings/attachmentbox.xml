@@ -282,10 +282,6 @@
 						accessed.hidden = true;
 					}
 
-					this._id("size-label").value = Zotero.getString('itemFields.size')
-							+ Zotero.getString('punctuation.colon');
-					this._id("size").value = this.item.attachmentStorageSize;
-					
 					if (this.item.attachmentLinkMode
 								!= Zotero.Attachments.LINK_MODE_LINKED_URL
 							&& this.displayFileName) {
@@ -619,10 +615,6 @@
 							<row id="accessedRow">
 								<label id="accessed-label"/>
 								<label id="accessed"/>
-							</row>
-							<row id="sizeRow">
-								<label id="size-label"/>
-								<label id="size"/>
 							</row>
 							<row id="pagesRow">
 								<label id="pages-label"/>

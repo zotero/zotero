@@ -3272,10 +3272,6 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("ALTER TABLE itemAttachments ADD COLUMN lastAccessed INT");
 				yield Zotero.DB.queryAsync("CREATE INDEX itemAttachments_lastAccessed ON itemAttachments(lastAccessed)");
 			}
-
-			else if (i == 115) {
-				yield Zotero.DB.queryAsync("ALTER TABLE itemAttachments ADD COLUMN storageSize INT");
-			}
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
 		}
 		
