@@ -514,6 +514,13 @@ var Scaffold = new function() {
 				return;
 			}
 			translate.setDocument(input);
+			
+			// Use cookies from browser pane
+			translate.setCookieSandbox(new Zotero.CookieSandbox(
+				null,
+				_getDocumentURL(input),
+				input.cookie
+			));
 		} else if (functionToRun == "detectImport" || functionToRun == "doImport") {
 			var translate = new Zotero.Translate.Import();
 			translate.setString(input);
