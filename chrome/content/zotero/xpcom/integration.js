@@ -551,18 +551,19 @@ Zotero.Integration.Interface = function(app, doc, session) {
  * Adds a citation to the current document.
  * @return {Promise}
  */
-Zotero.Integration.Interface.prototype.addCitation = Zotero.Promise.coroutine(function* () {
-	yield this._session.init(false, false);
+Zotero.Integration.Interface.prototype.addCitation = async function () {
+	await this._session.init(false, false);
 	
-	let [idx, field, citation] = yield this._session.cite(null);
-	yield this._session.addCitation(idx, yield field.getNoteIndex(), citation);
-	
+	let citations = await this._session.cite(null);
 	if (this._session.data.prefs.delayCitationUpdates) {
-		return this._session.writeDelayedCitation(field, citation);
-	} else {
+		for (let citation of citations) {
+			await this._session.writeDelayedCitation(citation._field, citation);
+		}
+	}
+	else {
 		return this._session.updateDocument(FORCE_CITATIONS_FALSE, false, false);
 	}
-});
+};
 
 /**
  * Edits the citation at the cursor position.
@@ -586,7 +587,7 @@ Zotero.Integration.Interface.prototype.addEditCitation = async function (docFiel
 	await this._session.init(false, false);
 	docField = docField || await this._doc.cursorInField(this._session.data.prefs['fieldType']);
 
-	await this._session.cite(docField);
+	let citations = await this._session.cite(docField);
 	if (this._session.data.prefs.delayCitationUpdates) {
 		for (let citation of citations) {
 			await this._session.writeDelayedCitation(citation._field, citation);
@@ -1371,14 +1372,16 @@ Zotero.Integration.Session.prototype.cite = async function (field) {
 	await citationsByItemIDPromise;
 	
 	let citations = await this._insertCitingResult(fieldIndex, field, io.citation);
-	if (citations.length > 1) {
-		// We need to refetch fields because we've inserted multiple.
-		// This is not super optimal, but you're inserting 2+ citations at the time,
-		// so that sets it off
-		var fields = await this.getFields(true);
+	if (!this.data.prefs.delayCitationUpdates) {
+		if (citations.length > 1) {
+			// We need to refetch fields because we've inserted multiple.
+			// This is not super optimal, but you're inserting 2+ citations at the time,
+			// so that sets it off
+			var fields = await this.getFields(true);
+		}
+		// And resync citations with ones in the doc
+		await this.updateFromDocument(FORCE_CITATIONS_FALSE);
 	}
-	// And resync citations with ones in the doc
-	await this.updateFromDocument(FORCE_CITATIONS_FALSE);
 	for (let citation of citations) {
 		if (fields) {
 			citation._field = new Zotero.Integration.CitationField(fields[citation._fieldIndex]);
