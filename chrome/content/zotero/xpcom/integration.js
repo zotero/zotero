@@ -263,7 +263,7 @@ Zotero.Integration = new function() {
 		}
 		catch (e) {
 			if (!(e instanceof Zotero.Exception.UserCancelled)) {
-				Zotero.Integration._handleCommandError(document, e);
+				Zotero.Integration._handleCommandError(document, session, e);
 			}
 			else {
 				if (session) {
@@ -318,7 +318,7 @@ Zotero.Integration = new function() {
 		}
 	};
 	
-	this._handleCommandError = async function (document, e) {
+	this._handleCommandError = async function (document, session, e) {
 		try {
 			const supportURL = "https://www.zotero.org/support/kb/debugging_broken_documents";
 			var displayError;
@@ -369,6 +369,12 @@ Zotero.Integration = new function() {
 			let index = ps.confirm(null, Zotero.getString('integration.error.title'), displayError);
 			if (index == 1) {
 				Zotero.launchURL(supportURL);
+			}
+			
+			// If the driver panicked we cannot reuse it
+			if (e instanceof Zotero.CiteprocRs.CiteprocRsDriverError) {
+				session.style.free(true);
+				delete Zotero.Integration.sessions[session.id];
 			}
 		}
 		finally {
@@ -1782,6 +1788,9 @@ Zotero.Integration.Session.prototype.setData = async function (data, resetStyle)
 			await Zotero.Styles.init();
 			var getStyle = Zotero.Styles.get(data.style.styleID);
 			data.style.hasBibliography = getStyle.hasBibliography;
+			if (this.style && this.style.free) {
+				this.style.free();
+			}
 			this.style = getStyle.getCiteProc(data.style.locale, data.prefs.automaticJournalAbbreviations);
 			this.style.setOutputFormat(this.outputFormat);
 			this.styleClass = getStyle.class;

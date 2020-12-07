@@ -231,7 +231,7 @@ var Zotero_CSL_Editor = new function() {
 				iframe.contentDocument.documentElement.innerHTML = '<div>' + Zotero.getString('styles.editor.warning.renderError') + '</div><div>'+e+'</div>';
 				throw e;
 		}
-		editor.styleEngine = styleEngine;
+		styleEngine.free();
 	}
 	
 	

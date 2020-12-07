@@ -109,6 +109,8 @@ var Zotero_CSL_Preview = new function() {
 			bibliography = Zotero.Cite.makeFormattedBibliography(styleEngine, "html");
 		}
 		
+		styleEngine.free();
+		
 		return '<p>' + citations + '</p>' + bibliography;
 	}
 	

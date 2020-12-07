@@ -686,11 +686,13 @@ var Zotero_File_Interface = new function() {
 			else {
 				// Generate engine again to work around citeproc-js problem:
 				// https://github.com/zotero/zotero/commit/4a475ff3
+				cslEngine.free();
 				cslEngine = style.getCiteProc(locale);
 				output = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "text");
 			}
 		}
-		
+		cslEngine.free();
+
 		var str = Components.classes["@mozilla.org/supports-string;1"].
 				  createInstance(Components.interfaces.nsISupportsString);
 		str.data = output;

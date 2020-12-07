@@ -563,6 +563,8 @@ var Zotero_RTFScan = new function() {
 				}
 			}
 		}
+
+		cslEngine.free();
 		
 		Zotero.File.putContents(outputFile, contents);
 		
