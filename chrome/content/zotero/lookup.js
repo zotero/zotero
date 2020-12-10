@@ -79,6 +79,7 @@ var Zotero_Lookup = new function () {
 		}
 
 		let newItems = false;
+		let failedIDs = [];
 		toggleProgress(true);
 
 		await Zotero.Promise.all(identifiers.map(async (identifier) => {
@@ -98,19 +99,36 @@ var Zotero_Lookup = new function () {
 			}
 			// Continue with other ids on failure
 			catch (e) {
+				let service = Object.keys(identifier)[0];
+				failedIDs.push(service + ': ' + identifier[service]);
 				Zotero.logError(e);
 			}
 		}));
 
 		toggleProgress(false);
 		if (!newItems) {
+			if (identifiers.length === 1) {
+				Zotero.alert(
+					window,
+					Zotero.getString("lookup.failure.title"),
+					Zotero.getString("lookup.failure.description")
+				);
+			}
+			else {
+				Zotero.alert(
+					window,
+					Zotero.getString("lookup.failure.title"),
+					Zotero.getString("lookup.failureMultiple.description", failedIDs.join('\n'))
+				);
+			}
+		}
+		else if (failedIDs) {
 			Zotero.alert(
 				window,
 				Zotero.getString("lookup.failure.title"),
-				Zotero.getString("lookup.failure.description")
+				Zotero.getString("lookup.failureMultiple.description", failedIDs.join('\n'))
 			);
 		}
-		// TODO: Give indication if some, but not all failed
 
 		return newItems;
 	};
