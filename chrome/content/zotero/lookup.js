@@ -99,34 +99,30 @@ var Zotero_Lookup = new function () {
 			}
 			// Continue with other ids on failure
 			catch (e) {
-				let service = Object.keys(identifier)[0];
-				failedIDs.push(service + ': ' + identifier[service]);
+				failedIDs.push(identifier[Object.keys(identifier)[0]]);
 				Zotero.logError(e);
 			}
 		}));
 
 		toggleProgress(false);
-		if (!newItems) {
-			if (identifiers.length === 1) {
-				Zotero.alert(
-					window,
-					Zotero.getString("lookup.failure.title"),
-					Zotero.getString("lookup.failure.description")
-				);
-			}
-			else {
-				Zotero.alert(
-					window,
-					Zotero.getString("lookup.failure.title"),
-					Zotero.getString("lookup.failureMultiple.description", failedIDs.join('\n'))
-				);
-			}
-		}
-		else if (failedIDs) {
+		if (!newItems && identifiers.length === 1) {
 			Zotero.alert(
 				window,
 				Zotero.getString("lookup.failure.title"),
-				Zotero.getString("lookup.failureMultiple.description", failedIDs.join('\n'))
+				Zotero.getString("lookup.failure.description")
+			);
+		}
+		else if (failedIDs.length) {
+			let errors = '\n\n' + failedIDs.slice(0, 10).join('\n');
+			if (failedIDs.length > 10) {
+				errors += '\n...';
+			}
+			Zotero.alert(
+				window,
+				Zotero.getString("lookup.failure.title"),
+				Zotero.getString("lookup.failureMultiple.description")
+					+ errors + '\n\n'
+					+ Zotero.getString("lookup.failureMultiple.prompt")
 			);
 		}
 
