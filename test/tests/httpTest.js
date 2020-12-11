@@ -157,13 +157,16 @@ describe("Zotero.HTTP", function () {
 						"GET",
 						baseURL + "error",
 						{
-							errorDelayIntervals: [10, 20],
-							errorDelayMax: 25
+							errorDelayIntervals: [10, 20, 100],
+							errorDelayMax: 35
 						}
 					)
 				);
 				assert.instanceOf(e, Zotero.HTTP.UnexpectedStatusException);
-				assert.isTrue(spy.calledTwice);
+				assert.isTrue(spy.calledThrice);
+				assert.isTrue(delayStub.calledTwice);
+				assert.equal(delayStub.args[0][0], 10);
+				assert.equal(delayStub.args[1][0], 20);
 			});
 			
 			it("should provide cancellerReceiver a callback to cancel while waiting to retry a 5xx error", async function () {
