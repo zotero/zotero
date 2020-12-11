@@ -144,9 +144,9 @@ Zotero.Sync.Data.Local = {
 			if (io.accept) {
 				var resetDataDirFile = OS.Path.join(Zotero.DataDirectory.dir, 'reset-data-directory');
 				yield Zotero.File.putContentsAsync(resetDataDirFile, '');
-				
+
+				Zotero.Prefs.resetBranch([], 'extensions.zotero.sync.storage.groups.');
 				Zotero.Prefs.clear('sync.storage.downloadMode.groups');
-				Zotero.Prefs.clear('sync.storage.groups.enabled');
 				Zotero.Prefs.clear('sync.storage.downloadMode.personal');
 				Zotero.Prefs.clear('sync.storage.username');
 				Zotero.Prefs.clear('sync.storage.url');

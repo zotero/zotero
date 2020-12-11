@@ -1,0 +1,98 @@
+.group-files-sync-container {
+	height: 500px;
+	width: 500px;
+	font-size: 13px;
+	margin: 1em;
+
+	select {
+		margin-left: 0.25em;
+		margin-right: 0.25em;
+	}
+
+	input[type='checkbox'] {
+		height: 15px;
+		width: 15px;
+	}
+
+	input[type='checkbox'] {
+		margin-left: 0;
+	}
+
+	.global-settings-label {
+		padding-bottom: 0.5em;
+		padding-left: 0.5em;
+	}
+
+	.global-settings {
+		background-color: $shade-2;
+		border-radius: 5px;
+		border: solid 1px $shade-3;
+		padding: 0.75em;
+
+		.reset-container {
+			margin-top: 0.75em;
+			display: flex;
+			justify-content: flex-end;
+		}
+	}
+
+	.setting-enabled {
+		margin-bottom: 0.75em;
+	}
+
+	.setting-downloadMode-box {
+		margin-left: 1.5em;
+		margin-bottom: 0.5em;
+		display: flex;
+		align-items: center;
+	}
+
+	.setting-ttl-box {
+		margin-left: 1.5em;
+		display: flex;
+		align-items: center;
+	}
+
+	.groups-file-sync-groups {
+		max-height: 250px;
+		height: 250px;
+		overflow-y: scroll;
+		overflow-x: visible;
+		background-color: white;
+		margin: 1em 0;
+		padding: 1.5em;
+
+		.group
+		{
+			padding-bottom: 1em;
+			margin-bottom: 1em;
+			border-bottom: solid 1px #ccc;
+		}
+
+		.group:last-child {
+			border-bottom: none;
+			margin-bottom: 0;
+		}
+
+		.group-header {
+			display: flex;
+			align-items: center;
+			margin-bottom: 0.5em;
+		}
+
+		.group-header-label {
+			flex: 1;
+		}
+
+		.group-settings {
+			padding: 1em;
+			background-color: $shade-1;
+			border: solid 1px $shade-2;
+		}
+	}
+
+	.dialog-buttons {
+		display: flex;
+		justify-content: flex-end;
+	}
+}

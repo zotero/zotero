@@ -380,20 +380,47 @@ Zotero_Preferences.Sync = {
 		}
 		
 		document.getElementById('storage-user-download-mode').disabled = !enabled;
+		document.getElementById('storage-user-download-ttl').disabled = !enabled;
+		document.getElementById('storage-user-download-ttl-value').disabled
+			= !(enabled && document.getElementById('storage-user-download-ttl').checked);
 		this.updateStorageTerms();
 		
 		window.sizeToContent();
 	}),
 	
 	
+	updateStorageSettingsTTLUI: function () {
+		document.getElementById('storage-user-download-ttl-box').hidden
+			= document.getElementById('storage-user-download-mode').value !== 'on-demand';
+	},
+
+
 	updateStorageSettingsGroupsUI: function () {
 		setTimeout(() => {
 			var enabled = document.getElementById('pref-storage-groups-enabled').value;
 			document.getElementById('storage-groups-download-mode').disabled = !enabled;
+			document.getElementById('storage-groups-download-ttl-box').hidden
+				= document.getElementById('storage-groups-download-mode').value !== 'on-demand';
+			document.getElementById('storage-groups-download-ttl').disabled = !enabled;
+			document.getElementById('storage-groups-download-ttl-value').disabled
+				= !(enabled && document.getElementById('storage-groups-download-ttl').checked);
 			this.updateStorageTerms();
 		});
 	},
+
+	updatePersonalTTLUI: function (event) {
+		document.getElementById('storage-user-download-ttl-value').disabled = !event.target.checked;
+	},
 	
+	updateGroupsTTLUI: function (event) {
+		document.getElementById('storage-groups-download-ttl-value').disabled = !event.target.checked;
+	},
+
+	customizeGroups: function () {
+		var io = {};
+		window.openDialog('chrome://zotero/content/preferences/groupFilesToSync.html',
+			"zotero-preferences-groupFilesToSyncDialog", "chrome,modal,centerscreen", io);
+	},
 	
 	updateStorageTerms: function () {
 		var terms = document.getElementById('storage-terms');

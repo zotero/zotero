@@ -49,6 +49,12 @@ Zotero.Sync.Storage.Local = {
 			return true;
 		
 		case 'group':
+			// Check for custom group settings first
+			if (Zotero.Prefs.get('sync.storage.groups.' + libraryID + '.custom')) {
+				return Zotero.Prefs.get('sync.storage.groups.' + libraryID + '.sync');
+			}
+
+			// Fall back to global settings
 			return Zotero.Prefs.get("sync.storage.groups.enabled");
 		
 		case 'feed':
@@ -138,9 +144,13 @@ Zotero.Sync.Storage.Local = {
 		if (libraryID == Zotero.Libraries.userLibraryID) {
 			return 'sync.storage.downloadMode.personal';
 		}
-		// TODO: Library-specific settings
 		
-		// Group library
+		// Group library custom settings, if enabled
+		if (Zotero.Prefs.get('sync.storage.groups.' + libraryID + '.custom')) {
+			return 'sync.storage.groups.' + libraryID + '.downloadMode';
+		}
+
+		// Fall back to global group settings
 		return 'sync.storage.downloadMode.groups';
 	},
 	
