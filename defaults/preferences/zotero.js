@@ -162,6 +162,10 @@ pref("extensions.zotero.sync.storage.downloadMode.groups", "on-sync");
 pref("extensions.zotero.sync.storage.cacheLimit.personal", 0);
 pref("extensions.zotero.sync.storage.cacheLimit.groups", 0);
 pref("extensions.zotero.sync.fulltext.enabled", true);
+pref("extensions.zotero.sync.storage.personal.ttl", false);
+pref("extensions.zotero.sync.storage.personal.ttl.value", 30);
+pref("extensions.zotero.sync.storage.groups.ttl", false);
+pref("extensions.zotero.sync.storage.groups.ttl.value", 30);
 
 // Proxy
 pref("extensions.zotero.proxies.autoRecognize", true);

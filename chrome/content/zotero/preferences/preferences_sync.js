@@ -33,6 +33,8 @@ Zotero_Preferences.Sync = {
 	noChar: '\uD83D\uDEAB',
 	
 	init: Zotero.Promise.coroutine(function* () {
+		this.checkCustomTTL(false);
+		this.checkCustomTTL(true);
 		this.updateStorageSettingsUI();
 		this.updateStorageSettingsGroupsUI();
 
@@ -71,6 +73,30 @@ Zotero_Preferences.Sync = {
 		
 		this.initResetPane();
 	}),
+
+	checkCustomTTL: function (groups) {
+		let id = groups ? 'storage-groups-download-ttl-custom' : 'storage-user-download-ttl-custom';
+		let value = Zotero.Prefs.get(
+			groups ? 'sync.storage.groups.ttl.value' : 'sync.storage.personal.ttl.value'
+		);
+
+		let customItem = document.getElementById(id);
+		if (![1, 7, 30, 90].includes(value)) {
+			customItem.setAttribute('label',
+				Zotero.getString(
+					'zotero.preferences.sync.fileSyncing.ttl.custom',
+					value,
+					value
+				)
+			);
+			customItem.value = value;
+			customItem.hidden = false;
+			customItem.parentNode.parentNode.selectedIndex = 0;
+		}
+		else {
+			customItem.hidden = true;
+		}
+	},
 	
 	displayFields: function (username) {
 		document.getElementById('sync-unauthorized').hidden = !!username;
@@ -379,27 +405,50 @@ Zotero_Preferences.Sync = {
 			sep.hidden = true;
 		}
 		
-		let downloadMode = document.getElementById('storage-user-download-mode');
-		downloadMode.disabled = !enabled;
-		document.getElementById('storage-personal-cache-limit').disabled = !enabled;
-		document.getElementById('storage-settings-limit-personal').hidden = (downloadMode.value !== 'on-demand');
+		document.getElementById('storage-user-download-mode').disabled = !enabled;
+		document.getElementById('storage-user-download-ttl').disabled = !enabled;
+		document.getElementById('storage-user-download-ttl-value').disabled
+			= !(enabled && document.getElementById('storage-user-download-ttl').checked);
 		this.updateStorageTerms();
 		
 		window.sizeToContent();
 	}),
 	
 	
+	updateStorageSettingsTTLUI: function () {
+		document.getElementById('storage-user-download-ttl-box').hidden
+			= document.getElementById('storage-user-download-mode').value !== 'on-demand';
+	},
+
+
 	updateStorageSettingsGroupsUI: function () {
 		setTimeout(() => {
 			var enabled = document.getElementById('pref-storage-groups-enabled').value;
-			let downloadMode = document.getElementById('storage-groups-download-mode');
-			downloadMode.disabled = !enabled;
-			document.getElementById('storage-groups-cache-limit').disabled = !enabled;
-			document.getElementById('storage-settings-limit-groups').hidden = (downloadMode.value !== 'on-demand');
+			document.getElementById('storage-groups-download-mode').disabled = !enabled;
+			document.getElementById('storage-groups-download-ttl-box').hidden
+				= document.getElementById('storage-groups-download-mode').value !== 'on-demand';
+			document.getElementById('storage-groups-download-ttl').disabled = !enabled;
+			document.getElementById('storage-groups-download-ttl-value').disabled
+				= !(enabled && document.getElementById('storage-groups-download-ttl').checked);
 			this.updateStorageTerms();
 		});
 	},
+
+	updatePersonalTTLUI: function (event) {
+		document.getElementById('storage-user-download-ttl-value').disabled = !event.target.checked;
+	},
 	
+	updateGroupsTTLUI: function (event) {
+		document.getElementById('storage-groups-download-ttl-value').disabled = !event.target.checked;
+	},
+
+	customizeGroups: function () {
+		var io = {};
+		window.openDialog('chrome://zotero/content/preferences/groupFilesToSync.html',
+			"zotero-preferences-groupFilesToSyncDialog", "chrome,modal,centerscreen", io);
+		// Group preferences may have changed so run our updates
+		this.updateStorageSettingsGroupsUI();
+	},
 	
 	updateStorageTerms: function () {
 		var terms = document.getElementById('storage-terms');

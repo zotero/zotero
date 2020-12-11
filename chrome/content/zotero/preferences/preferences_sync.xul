@@ -43,6 +43,10 @@
 			<preference id="pref-storage-cacheLimit-personal" name="extensions.zotero.sync.storage.cacheLimit.personal" type="int"/>
 			<preference id="pref-storage-cacheLimit-groups" name="extensions.zotero.sync.storage.cacheLimit.groups" type="int"/>
 			<preference id="pref-storage-groups-enabled" name="extensions.zotero.sync.storage.groups.enabled" type="bool"/>
+			<preference id="pref-storage-personal-TTL" name="extensions.zotero.sync.storage.personal.ttl" type="bool"/>
+			<preference id="pref-storage-personal-TTL-value" name="extensions.zotero.sync.storage.personal.ttl.value" type="int"/>
+			<preference id="pref-storage-groups-TTL" name="extensions.zotero.sync.storage.groups.ttl" type="bool"/>
+			<preference id="pref-storage-groups-TTL-value" name="extensions.zotero.sync.storage.groups.ttl.value" type="int"/>
 		</preferences>
 		
 		<tabbox>
@@ -239,8 +243,8 @@
 									<menulist id="storage-user-download-mode"
 											class="storage-mode"
 											preference="pref-storage-downloadMode-personal"
-											style="margin-left: 0"
-											oncommand="Zotero_Preferences.Sync.updateStorageSettingsUI()">
+											oncommand="Zotero_Preferences.Sync.updateStorageSettingsTTLUI();"
+											style="margin-left: 0">
 										<menupopup>
 											<menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
 											<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
@@ -248,16 +252,26 @@
 									</menulist>
 								</hbox>
 
-								<hbox id="storage-settings-limit-personal" align="center">
-									<label value="&zotero.preferences.sync.fileSyncing.limit;"/>
-									<textbox id="storage-personal-cache-limit"
-											 type="number"
-											 min="0"
-											 increment="10"
-											 size="6"
-											 preference="pref-storage-cacheLimit-personal"/>
-									<label value="&zotero.preferences.sync.fileSyncing.limit.units;"/>
-									<label class="storage-settings-limit-note" value="&zotero.preferences.sync.fileSyncing.limit.note;"/>
+								<hbox id="storage-user-download-ttl-box"
+									  align="center">
+									<checkbox
+										id="storage-user-download-ttl"
+										label="&zotero.preferences.sync.fileSyncing.remove;"
+										preference="pref-storage-personal-TTL"
+										oncommand="Zotero_Preferences.Sync.updatePersonalTTLUI(event)"
+									/>
+									<menulist id="storage-user-download-ttl-value"
+											  class="storage-mode"
+											  preference="pref-storage-personal-TTL-value"
+											  style="margin-left: 0">
+										<menupopup>
+											<menuitem id="storage-user-download-ttl-custom" value="0" hidden="true"/>
+											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.oneDay;" value="1"/>
+											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.oneWeek;" value="7"/>
+											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.oneMonth;" value="30"/>
+											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.threeMonths;" value="90"/>
+										</menupopup>
+									</menulist>
 								</hbox>
 							</vbox>
 
@@ -274,8 +288,8 @@
 									<menulist id="storage-groups-download-mode"
 											class="storage-mode"
 											preference="pref-storage-downloadMode-groups"
-											style="margin-left: 0"
-											oncommand="Zotero_Preferences.Sync.updateStorageSettingsGroupsUI()">
+											oncommand="Zotero_Preferences.Sync.updateStorageSettingsGroupsUI()"
+											style="margin-left: 0">
 										<menupopup>
 											<menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
 											<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
@@ -283,17 +297,34 @@
 									</menulist>
 								</hbox>
 
-								<hbox id="storage-settings-limit-groups" align="center">
-									<label value="&zotero.preferences.sync.fileSyncing.limit;"/>
-									<textbox id="storage-groups-cache-limit"
-											type="number"
-											min="0"
-											increment="10"
-											size="6"
-											preference="pref-storage-cacheLimit-groups"/>
-									<label value="&zotero.preferences.sync.fileSyncing.limit.units;"/>
-									<label class="storage-settings-limit-note" value="&zotero.preferences.sync.fileSyncing.limit.note;"/>
+								<hbox id="storage-groups-download-ttl-box"
+									  align="center">
+									<checkbox
+										id="storage-groups-download-ttl"
+										label="&zotero.preferences.sync.fileSyncing.remove;"
+										preference="pref-storage-groups-TTL"
+										oncommand="Zotero_Preferences.Sync.updateGroupsTTLUI(event)"
+									/>
+									<menulist id="storage-groups-download-ttl-value"
+											  class="storage-mode"
+											  preference="pref-storage-groups-TTL-value"
+											  style="margin-left: 0">
+										<menupopup>
+											<menuitem id="storage-groups-download-ttl-custom" value="0" hidden="true"/>
+											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.oneDay;" value="1"/>
+											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.oneWeek;" value="7"/>
+											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.oneMonth;" value="30"/>
+											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.threeMonths;" value="90"/>
+										</menupopup>
+									</menulist>
 								</hbox>
+
+								<box>
+									<button
+										label="&zotero.preferences.sync.fileSyncing.groups.customize;"
+										oncommand="Zotero_Preferences.Sync.customizeGroups()"
+									/>
+								</box>
 							</vbox>
 
 							<separator class="thin"/>
