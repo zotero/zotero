@@ -115,9 +115,14 @@ describe("Zotero.Sync.APIClient", function () {
 	describe("Retries", function () {
 		var spy;
 		var delayStub;
+		var delayDelay = 100;
 		
 		before(function () {
-			delayStub = sinon.stub(Zotero.Promise, "delay").returns(Zotero.Promise.resolve());
+			delayStub = sinon.stub(Zotero.Promise, "delay").callsFake(() => {
+				return new Zotero.Promise((resolve) => {
+					setTimeout(resolve, delayDelay);
+				});
+			});
 		});
 		
 		beforeEach(function () {
@@ -136,7 +141,7 @@ describe("Zotero.Sync.APIClient", function () {
 		});
 		
 		
-		it("should retry on 429 error", function* () {
+		it("should retry on 429 error", async function () {
 			var called = 0;
 			server.respond(function (req) {
 				if (req.method == "GET" && req.url == baseURL + "error") {
@@ -158,11 +163,16 @@ describe("Zotero.Sync.APIClient", function () {
 				called++;
 			});
 			spy = sinon.spy(Zotero.HTTP, "request");
-			yield client.makeRequest("GET", baseURL + "error");
+			var d = new Date();
+			await client.makeRequest("GET", baseURL + "error");
+			// Make sure we've paused for the expected delay twice
+			assert.isAbove(new Date() - d, delayDelay * 2);
 			assert.isTrue(spy.calledThrice);
-			// DEBUG: Why are these slightly off?
-			assert.approximately(delayStub.args[0][0], 15 * 1000, 5);
-			assert.approximately(delayStub.args[1][0], 25 * 1000, 5);
+			assert.equal(called, 3);
+			// Slightly off because concurrentCaller sets the delay to the time remaining until the
+			// previously set `pauseUntil` time, and a few milliseconds might have gone by
+			assert.approximately(delayStub.args[0][0], 15 * 1000, 10);
+			assert.approximately(delayStub.args[1][0], 25 * 1000, 10);
 		});
 	});
 })
