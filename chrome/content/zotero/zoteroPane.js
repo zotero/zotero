@@ -4075,9 +4075,21 @@ var ZoteroPane = new function()
 		}
 		
 		var launchFile = async (path, contentType, itemID) => {
+			// Fix blank PDF attachment MIME type
+			if (!contentType) {
+				let item = await Zotero.Items.getAsync(itemID);
+				let path = await item.getFilePathAsync();
+				let type = 'application/pdf';
+				if (Zotero.MIME.sniffForMIMEType(await Zotero.File.getSample(path)) == type) {
+					contentType = type;
+					item.attachmentContentType = type;
+					await item.saveTx();
+				}
+			}
 			// Custom PDF handler
 			if (contentType === 'application/pdf') {
 				this.viewPDF(itemID, event.shiftKey);
+				// TODO: Still leave an option to use an external PDF viewer
 				return;
 				let pdfHandler  = Zotero.Prefs.get("fileHandler.pdf");
 				if (pdfHandler) {
