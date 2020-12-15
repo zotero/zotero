@@ -1,0 +1,44 @@
+.set-identifier-box {
+	display: flex;
+	cursor: pointer;
+	margin-bottom: 1em;
+	background: $clicky-hover-bg-color;
+	border: 1px solid $clicky-border-color;
+	
+	button {
+		font-family: Lucida Grande, Lucida Sans Unicode, Lucida Sans, Geneva, -apple-system, sans-serif !important;
+	}
+
+	.text {
+		cursor: pointer;
+		background: none;
+		border: none;
+		text-align: left;
+		padding: 3px 0.5em;
+		flex: 1;
+	}
+
+	.close {
+		cursor: pointer;
+		background: none;
+		border: none;
+		padding: 3px 1.5em 3px 1.5em;
+		position: relative;
+		
+		.close-x {
+			position: absolute;
+			cursor: pointer;
+			top: -2px;
+			right: 10px;
+			font-size: 18px;
+		}
+	}
+
+	.text, .close {
+		&:hover {
+			cursor: pointer;
+			color: white;
+			background: $blue;
+		}
+	}
+}
