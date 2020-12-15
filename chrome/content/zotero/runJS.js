@@ -10,7 +10,7 @@ async function run() {
 	if (!win) {
 		return;
 	}
-	var code = document.getElementById('code').value;
+	var code = codeEditor.getSession().getValue();
 	var isAsync = document.getElementById('run-as-async').checked;
 	var result;
 	var resultTextbox = document.getElementById('result');
@@ -42,7 +42,7 @@ function handleInput() { // eslint-disable-line no-unused-vars
 	if (isAsync) {
 		return;
 	}
-	var code = document.getElementById('code').value;
+	var code = codeEditor.getSession().getValue();
 	// If `await` is used, switch to async mode
 	if (/[^=([]\s*await\s/m.test(code)) {
 		checkbox.checked = true;
@@ -77,3 +77,16 @@ var shortcut = Zotero.isMac ? 'Cmd-R' : 'Ctrl+R';
 document.getElementById('run-label').textContent = `(${shortcut})`;
 
 update();
+
+var codeWin, codeEditor;
+window.addEventListener("load", function (e) {
+	if (e.target !== document) {
+		return;
+	}
+
+	codeWin = document.getElementById("editor-code").contentWindow;
+	codeEditor = codeWin.editor;
+	codeEditor.getSession().setMode(new codeWin.JavaScriptMode);
+	codeEditor.getSession().setUseSoftTabs(false);
+	codeEditor.on('input', handleInput);
+}, false);

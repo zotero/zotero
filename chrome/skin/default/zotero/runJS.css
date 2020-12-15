@@ -71,3 +71,7 @@ textarea {
 textarea.error {
 	color: red;
 }
+
+.editor-code {
+	flex: 1;
+}
