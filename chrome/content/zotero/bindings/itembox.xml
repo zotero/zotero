@@ -292,6 +292,17 @@
 					}
 					
 					this.updateRetracted();
+
+					// Hide the set identifier button
+					document.getElementById('set-identifier-box').style.display = 'none	';
+					// If the appropriate conditions are met, show it
+					if (!(this.item instanceof Zotero.FeedItem) && this.item.itemTypeID === 12) {
+						let timeAdded = Zotero.Date.sqlToDate(this.item.dateAdded, true).getTime();
+						let timeModified = Zotero.Date.sqlToDate(this.item.dateModified, true).getTime();
+						if (Math.abs(timeAdded - timeModified) < 2) {
+							document.getElementById('set-identifier-box').style.display = 'flex';
+						}
+					}
 					
 					if (this.clickByItem) {
 						var itemBox = document.getAnonymousNodes(this)[0];
@@ -1099,6 +1110,25 @@
 				<![CDATA[
 					var sbo = document.getAnonymousNodes(this)[0].boxObject;
 					sbo.ensureElementIsVisible(elem);
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="openIdentifierWindow">
+				<parameter name="e"/>
+				<body>
+				<![CDATA[
+						if (!ZoteroPane.canEdit()) {
+							ZoteroPane.displayCannotEditLibraryMessage();
+							return;
+						}
+
+						let io = { dataIn: { item: this.item }, dataOut: null };
+						window.openDialog('chrome://zotero/content/identifyItemDialog.xul', '', 'chrome,modal,centerscreen', io);
+						if (!io.dataOut) {
+							return;
+						}
 				]]>
 				</body>
 			</method>
@@ -2662,6 +2692,18 @@
 						<p id="retraction-credit"/>
 						<div id="retraction-hide"><button/></div>
 					</div>
+				</div>
+				<div xmlns="http://www.w3.org/1999/xhtml"
+					 id="set-identifier-box"
+					 class="set-identifier-box">
+					<button class="text"
+							onclick="document.getBindingParent(this).openIdentifierWindow();">
+						Retrieve Metadata from Identifier
+					</button>
+					<button class="close"
+							onclick="document.getElementById('set-identifier-box').style.display = 'none';">
+						<span class="close-x">x</span>
+					</button>
 				</div>
 				<grid flex="1">
 					<columns>
