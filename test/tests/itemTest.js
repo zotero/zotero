@@ -1266,8 +1266,9 @@ describe("Zotero.Item", function () {
 				});
 				await annotation.saveTx();
 				
+				var blob = new Blob([array], { type: 'image/png' });
 				await Zotero.Attachments.importEmbeddedImage({
-					blob: new Blob([array], { type: 'image/png' }),
+					blob,
 					parentItemID: annotation.id
 				});
 				
@@ -1283,9 +1284,17 @@ describe("Zotero.Item", function () {
 				);
 				assert.equal(imageAttachment.attachmentContentType, 'image/png');
 				
+				var blob2 = await new Zotero.Promise((resolve) => {
+					var reader = new FileReader();
+					reader.addEventListener("load", function () {
+						resolve(reader.result);
+					}, false);
+					reader.readAsDataURL(blob);
+				});
+				
 				assert.equal(
-					annotation.annotationImageURL,
-					`zotero://attachment/library/items/${imageAttachment.key}`
+					await imageAttachment.attachmentDataURI,
+					blob2
 				);
 			});
 		});
