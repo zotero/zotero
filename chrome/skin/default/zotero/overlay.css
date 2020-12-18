@@ -533,11 +533,11 @@
 }
 
 /* Sync error panel */
-#zotero-sync-error-panel {
+#zotero-sync-error-panel, #zotero-sync-reminder-panel {
 	margin-right: 0;
 }
 
-#zotero-sync-error-panel .error-header {
+#zotero-sync-error-panel .error-header, #zotero-sync-reminder-panel .header {
 	font-size: 14px;
 	font-weight: bold;
 	margin-bottom: 1em;
@@ -552,7 +552,7 @@
 	margin-bottom: 1.1em;
 }
 
-#zotero-sync-error-panel description {
+#zotero-sync-error-panel description, #zotero-sync-reminder-panel description {
 	width: 370px;
 	white-space: pre-wrap;
 }
@@ -635,7 +635,7 @@
 	margin-left: 3px !important;
 }
 
-#retracted-items-banner {
+#retracted-items-banner, #sync-reminder-banner {
 	display: flex;
 	justify-content: center;
 	background: #d93425;
@@ -648,8 +648,16 @@
 	position: relative;
 }
 
-#retracted-items-message {
+#sync-reminder-banner {
+	background: rgb(89, 139, 236);
+}
+
+#retracted-items-message, #sync-reminder-message {
 	margin-right: .8em;
+}
+
+#sync-reminder-spacer {
+	flex: 1;
 }
 
 #retracted-items-link {
@@ -658,11 +666,18 @@
 	cursor: pointer;
 }
 
-#retracted-items-link:active {
+.sync-reminder-link {
+	text-decoration: underline;
+	cursor: pointer;
+	padding-left: 0.5em;
+	padding-right: 0.5em;
+}
+
+#retracted-items-link:active, .sync-reminder-link:active {
 	color: #f9e8e2;
 }
 
-#retracted-items-close {
+#retracted-items-close, #sync-reminder-close {
 	position: absolute;
 	cursor: pointer;
 	top: -2px;

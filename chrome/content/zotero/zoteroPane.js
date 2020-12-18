@@ -229,6 +229,7 @@ var ZoteroPane = new function()
 		
 		setTimeout(function () {
 			ZoteroPane.showRetractionBanner();
+			ZoteroPane.setupSyncReminders(true);
 		});
 		
 		// TEMP: Clean up extra files from Mendeley imports <5.0.51
@@ -355,6 +356,9 @@ var ZoteroPane = new function()
 
 		if(this.collectionsView) this.collectionsView.unregister();
 		if(this.itemsView) this.itemsView.unregister();
+		if (this._syncRemindersObserverID) {
+			Zotero.Notifier.unregisterObserver(this._syncRemindersObserverID);
+		}
 		
 		this.uninitContainers();
 		
@@ -2249,6 +2253,173 @@ var ZoteroPane = new function()
 	});
 	
 	
+	this.sync = function () {
+		let syncReminder = document.getElementById('sync-reminder-container');
+		if (!syncReminder.collapsed) {
+			syncReminder.collapsed = true;
+		}
+
+		Zotero.Sync.Server.canAutoResetClient = true;
+		Zotero.Sync.Server.manualSyncRequired = false;
+		Zotero.Sync.Runner.sync();
+	};
+
+
+	this._syncRemindersObserverID = null;
+	this.setupSyncReminders = function (startup) {
+		if (startup) {
+			Zotero.Notifier.registerObserver(
+				{ notify: (event) => {
+					// When the API Key is deleted we need to add an observer
+					if (event === 'delete') {
+						Zotero.Prefs.set('sync.reminder.setup.enabled', true);
+						Zotero.Prefs.set('sync.reminder.setup.lastDisplayed', String(Date.now()));
+						ZoteroPane.setupSyncReminders(false);
+					}
+					// When API Key is added we can remove the observer
+					else if (event === 'add') {
+						ZoteroPane.setupSyncReminders(false);
+					}
+				} },
+				'api-key');
+		}
+
+		// If both reminders are disabled, we don't need an observer
+		if (!Zotero.Prefs.get('sync.reminder.setup.enabled')
+			&& !Zotero.Prefs.get('sync.reminder.autoSync.enabled')) {
+			if (this._syncRemindersObserverID) {
+				Zotero.Notifier.unregisterObserver(this._syncRemindersObserverID);
+				this._syncRemindersObserverID = null;
+			}
+			return;
+		}
+
+		// If we are syncing and auto-syncing then no need for observer
+		if (Zotero.Sync.Runner.enabled && Zotero.Prefs.get('sync.autoSync')) {
+			if (this._syncRemindersObserverID) {
+				Zotero.Notifier.unregisterObserver(this._syncRemindersObserverID);
+				this._syncRemindersObserverID = null;
+			}
+			return;
+		}
+
+		// If we already have an observer don't add another one
+		if (this._syncRemindersObserverID) {
+			return;
+		}
+
+		const eventTypes = ['add', 'modify', 'delete'];
+		this._syncRemindersObserverID = Zotero.Notifier.registerObserver(
+			{ notify: (event) => {
+				if (!eventTypes.includes(event)) {
+					return;
+				}
+				setTimeout(() => {
+					this.showSetupSyncReminder();
+					this.showAutoSyncOffReminder();
+				}, 5000);
+			} },
+			'item',
+			'syncReminder');
+	};
+
+
+	this.showAutoSyncOffReminder = function () {
+		// Reasons not to show reminder:
+		// - User turned reminder off
+		// - Sync is not enabled
+		// - Auto-Sync is enabled
+		// - Last sync for all libraries was within 30 days
+		if (!Zotero.Prefs.get('sync.reminder.autoSync.enabled')
+			|| !Zotero.Sync.Runner.enabled
+			|| Zotero.Prefs.get('sync.autoSync')
+			|| !Zotero.Libraries.getAll()
+				.find(library => library.lastSync.getTime() < (Date.now() - 2592000000))) {
+			return;
+		}
+
+		// Check lastDisplayed was 30+ days ago
+		let lastDisplayed = parseInt(Zotero.Prefs.get(`sync.reminder.autoSync.lastDisplayed`));
+		if (lastDisplayed > (Date.now() - 2592000000)) {
+			return;
+		}
+
+		this.showSyncReminder('autoSync', false);
+	};
+
+
+	this.showSetupSyncReminder = function () {
+		// Reasons not to show reminder:
+		// - User turned reminder off
+		// - Sync is enabled
+		if (!Zotero.Prefs.get('sync.reminder.setup.enabled')
+			|| Zotero.Sync.Runner.enabled) {
+			return;
+		}
+
+		// Check lastDisplayed was 7+ days ago
+		let lastDisplayed = parseInt(Zotero.Prefs.get(`sync.reminder.setup.lastDisplayed`));
+		if (lastDisplayed > (Date.now() - 604800000)) {
+			return;
+		}
+
+		// When we have not seen the first warning, hide the checkbox
+		this.showSyncReminder('setup', lastDisplayed === 0);
+	};
+
+
+	/**
+	 * Configure the UI and show the sync reminder panel for a given type of reminder
+	 *
+	 * @param reminderType - Possible values: 'setup' or 'autoSync'
+	 * @param hideDisable - True if the 'Don't show again' link is hidden
+	 */
+	this.showSyncReminder = function (reminderType, hideDisable) {
+		let panel = document.getElementById('sync-reminder-container');
+		const closePanel = function () {
+			panel.setAttribute('collapsed', true);
+			Zotero.Prefs.set(`sync.reminder.${reminderType}.lastDisplayed`, String(Date.now()));
+		};
+
+		let message = document.getElementById('sync-reminder-message');
+		message.textContent = Zotero.getString(`sync.reminder.${reminderType}.message`);
+		message.onclick = function () {
+			closePanel();
+			Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
+		};
+
+		let actionLink = document.getElementById('sync-reminder-action');
+		actionLink.textContent = Zotero.getString(`sync.reminder.${reminderType}.action`);
+		actionLink.onclick = function () {
+			closePanel();
+			Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
+		};
+
+		let dontShowAgainLink = document.getElementById('sync-reminder-disable');
+		dontShowAgainLink.textContent = Zotero.getString('general.dontAskMeAgain');
+		dontShowAgainLink.hidden = hideDisable;
+		dontShowAgainLink.onclick = function () {
+			closePanel();
+			Zotero.Prefs.set(`sync.reminder.${reminderType}.enabled`, false);
+			// Check if we no longer need to observe item modifications
+			ZoteroPane.setupSyncReminders(false);
+		};
+
+		let remindMeLink = document.getElementById('sync-reminder-remind');
+		remindMeLink.textContent = Zotero.getString('sync.reminder.remindMeLater');
+		remindMeLink.onclick = function () {
+			closePanel();
+		};
+
+		let closeButton = document.getElementById('sync-reminder-close');
+		closeButton.onclick = function () {
+			closePanel();
+		};
+
+		panel.removeAttribute('collapsed');
+	};
+
+
 	this.selectItem = async function (itemID, inLibraryRoot) {
 		if (!itemID) {
 			return false;
