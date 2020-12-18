@@ -3159,13 +3159,8 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentSyncedHash', {
 			throw ("attachmentSyncedHash can only be set for attachment items");
 		}
 		
-		switch (this.attachmentLinkMode) {
-			case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
-			case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
-				break;
-				
-			default:
-				throw new Error("attachmentSyncedHash can only be set for stored files");
+		if (!this.isStoredFileAttachment()) {
+			throw new Error("attachmentSyncedHash can only be set for stored files");
 		}
 		
 		if (val !== null && val.length != 32) {
