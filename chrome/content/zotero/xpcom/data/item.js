@@ -3117,13 +3117,8 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentSyncedModificationTime',
 			throw new Error("attachmentSyncedModificationTime can only be set for attachment items");
 		}
 		
-		switch (this.attachmentLinkMode) {
-			case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
-			case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
-				break;
-				
-			default:
-				throw new Error("attachmentSyncedModificationTime can only be set for stored files");
+		if (!this.isStoredFileAttachment()) {
+			throw new Error("attachmentSyncedModificationTime can only be set for stored files");
 		}
 		
 		if (typeof val != 'number') {
