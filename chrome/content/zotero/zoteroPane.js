@@ -229,6 +229,7 @@ var ZoteroPane = new function()
 		
 		setTimeout(function () {
 			ZoteroPane.showRetractionBanner();
+			ZoteroPane.setupSyncReminders(true);
 		});
 		
 		// TEMP: Clean up extra files from Mendeley imports <5.0.51
@@ -355,6 +356,9 @@ var ZoteroPane = new function()
 
 		if(this.collectionsView) this.collectionsView.unregister();
 		if(this.itemsView) this.itemsView.unregister();
+		if (this._syncRemindersObserverID) {
+			Zotero.Notifier.unregisterObserver(this._syncRemindersObserverID);
+		}
 		
 		this.uninitContainers();
 		
@@ -2187,6 +2191,173 @@ var ZoteroPane = new function()
 	});
 	
 	
+	this.sync = function () {
+		let syncReminder = document.getElementById('zotero-sync-reminder-panel');
+		if (syncReminder.state !== 'closed') {
+			syncReminder.hidePopup();
+		}
+
+		Zotero.Sync.Server.canAutoResetClient = true;
+		Zotero.Sync.Server.manualSyncRequired = false;
+		Zotero.Sync.Runner.sync();
+	};
+
+
+	this._syncRemindersObserverID = null;
+	this.setupSyncReminders = function (startup) {
+		if (startup) {
+			Zotero.Notifier.registerObserver(
+				{ notify: (event) => {
+					// When the API Key is deleted we need to add an observer
+					if (event === 'delete') {
+						Zotero.debug(`Sync Reminder: Account has been unlinked`);
+						ZoteroPane.setupSyncReminders(false);
+					}
+					// When API Key is added we can remove the observer
+					else if (event === 'add') {
+						ZoteroPane.setupSyncReminders(false);
+					}
+				} },
+				'api-key');
+		}
+
+		// If both reminders are disabled, we don't need an observer
+		if (!Zotero.Prefs.get('sync.reminder.setup.enabled')
+			&& !Zotero.Prefs.get('sync.reminder.autoSync.enabled')) {
+			if (this._syncRemindersObserverID) {
+				Zotero.Notifier.unregisterObserver(this._syncRemindersObserverID);
+				this._syncRemindersObserverID = null;
+			}
+			return;
+		}
+
+		// If we are syncing and auto-syncing then no need for observer
+		if (Zotero.Sync.Runner.enabled && Zotero.Prefs.get('sync.autoSync')) {
+			if (this._syncRemindersObserverID) {
+				Zotero.Notifier.unregisterObserver(this._syncRemindersObserverID);
+				this._syncRemindersObserverID = null;
+			}
+			return;
+		}
+
+		// If we already have an observer don't add another one
+		if (this._syncRemindersObserverID) {
+			return;
+		}
+
+		const eventTypes = ['add', 'modify', 'delete'];
+		this._syncRemindersObserverID = Zotero.Notifier.registerObserver(
+			{ notify: (event) => {
+				if (!eventTypes.includes(event)) {
+					return;
+				}
+				setTimeout(() => {
+					this.showSetupSyncReminder();
+					this.showAutoSyncOffReminder();
+				}, 5000);
+			} },
+			'item',
+			'syncReminder');
+	};
+
+
+	this.showAutoSyncOffReminder = function () {
+		// Reasons not to show reminder:
+		// - User turned reminder off
+		// - Sync is not enabled
+		// - Auto-Sync is enabled
+		// - Last sync for all libraries was within 30 days
+		if (!Zotero.Prefs.get('sync.reminder.autoSync.enabled')
+			|| !Zotero.Sync.Runner.enabled
+			|| Zotero.Prefs.get('sync.autoSync')
+			|| !Zotero.Libraries.getAll()
+				.find(library => library.lastSync.getTime() < (Date.now() - 2592000000))) {
+			return;
+		}
+
+		this.showSyncReminder('autoSync', false);
+	};
+
+
+	this.showSetupSyncReminder = function () {
+		// Reasons not to show reminder:
+		// - User turned reminder off
+		// - Sync is enabled
+		if (!Zotero.Prefs.get('sync.reminder.setup.enabled')
+			|| Zotero.Sync.Runner.enabled) {
+			return;
+		}
+
+		let firstWarningShown = parseInt(Zotero.Prefs.get('sync.reminder.setup.lastDisplayed')) > 0;
+		// When we have not seen the first warning, hide the checkbox
+		this.showSyncReminder('setup', !firstWarningShown);
+	};
+
+
+	/**
+	 * Configure the UI and show the sync reminder panel for a given type of reminder
+	 *
+	 * @param reminderType - Possible values: 'setup' or 'autoSync'
+	 * @param hideCheckbox - True if the 'Don't show again' checkbox is hidden
+	 */
+	this.showSyncReminder = function (reminderType, hideCheckbox) {
+		let lastDisplayed = parseInt(Zotero.Prefs.get(`sync.reminder.${reminderType}.lastDisplayed`));
+
+		// Check lastDisplayed was 30+ days ago
+		if (lastDisplayed > (Date.now() - 2592000000)) {
+			return;
+		}
+
+		let panel = document.getElementById('zotero-sync-reminder-panel');
+
+		let header = document.getElementById('zotero-sync-reminder-header');
+		header.setAttribute('value', Zotero.getString(`sync.reminder.${reminderType}.header`));
+
+		let description = document.getElementById('zotero-sync-reminder-description');
+		description.textContent = Zotero.getString(`sync.reminder.${reminderType}.description`);
+
+		let checkbox = document.getElementById('zotero-sync-reminder-show-again');
+		checkbox.setAttribute('label', Zotero.getString('general.dontShowReminderAgain'));
+		// This panel can hold an old value and when the user hits remind me it will use
+		// that value below, but we don't want that.
+		checkbox.checked = false;
+		// Hide if requested: sometimes we want to remind them twice before they have the
+		// option of never seeing it again
+		checkbox.hidden = hideCheckbox;
+
+		let remindMeButton = document.getElementById('zotero-sync-reminder-remind-me');
+		remindMeButton.setAttribute('label', Zotero.getString('sync.reminder.remindMeLater'));
+		remindMeButton.onclick = function () {
+			// User has asked to never see this reminder again
+			if (checkbox.checked) {
+				Zotero.Prefs.set(`sync.reminder.${reminderType}.enabled`, false);
+				// Check if we no longer need to observe item modifications
+				ZoteroPane.setupSyncReminders(false);
+			}
+			panel.hidePopup();
+		};
+
+		checkbox.onclick = function (event) {
+			let label = event.target.checked
+				? Zotero.getString('general.close')
+				: Zotero.getString('sync.reminder.remindMeLater');
+			remindMeButton.setAttribute('label', label);
+		};
+
+		let openButton = document.getElementById('zotero-sync-reminder-open');
+		openButton.setAttribute('label', Zotero.getString('sync.openSyncPreferences'));
+		openButton.onclick = function () {
+			panel.hidePopup();
+			Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
+		};
+
+		Zotero.Prefs.set(`sync.reminder.${reminderType}.lastDisplayed`, String(Date.now()));
+
+		let syncToolbarButton = document.getElementById('zotero-tb-sync');
+		panel.openPopup(syncToolbarButton, "after_end", 6, 0, false, false);
+	};
+
+
 	this.selectItem = async function (itemID, inLibraryRoot) {
 		if (!itemID) {
 			return false;

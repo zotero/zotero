@@ -221,7 +221,7 @@
 							<panel id="zotero-sync-error-panel" type="arrow"/>
 							
 							<toolbarbutton id="zotero-tb-sync" class="zotero-tb-button" tooltip="_child"
-									oncommand="Zotero.Sync.Server.canAutoResetClient = true; Zotero.Sync.Server.manualSyncRequired = false; Zotero.Sync.Runner.sync()">
+									oncommand="ZoteroPane.sync()">
 								<tooltip
 										id="zotero-tb-sync-tooltip"
 										onpopupshowing="Zotero.Sync.Runner.registerSyncStatus(this)"
@@ -233,6 +233,23 @@
 									<div xmlns="http://www.w3.org/1999/xhtml" class="sync-button-tooltip-messages"/>
 								</tooltip>
 							</toolbarbutton>
+
+							<panel id="zotero-sync-reminder-panel" type="arrow" noautohide="true">
+								<vbox>
+									<label id="zotero-sync-reminder-header" class="header"/>
+
+									<description id="zotero-sync-reminder-description"/>
+									<hbox pack="end">
+										<label class="zotero-text-link" value="Learn more" href="http://www.zotero.org/support/sync"/>
+									</hbox>
+
+									<checkbox id="zotero-sync-reminder-show-again"/>
+									<hbox pack="end">
+										<button id="zotero-sync-reminder-remind-me"/>
+										<button default="true" id="zotero-sync-reminder-open"/>
+									</hbox>
+								</vbox>
+							</panel>
 						</hbox>
 					</toolbar>
 					

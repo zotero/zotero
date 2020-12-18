@@ -533,11 +533,11 @@
 }
 
 /* Sync error panel */
-#zotero-sync-error-panel {
+#zotero-sync-error-panel, #zotero-sync-reminder-panel {
 	margin-right: 0;
 }
 
-#zotero-sync-error-panel .error-header {
+#zotero-sync-error-panel .error-header, #zotero-sync-reminder-panel .header {
 	font-size: 14px;
 	font-weight: bold;
 	margin-bottom: 1em;
@@ -552,7 +552,7 @@
 	margin-bottom: 1.1em;
 }
 
-#zotero-sync-error-panel description {
+#zotero-sync-error-panel description, #zotero-sync-reminder-panel description {
 	width: 370px;
 	white-space: pre-wrap;
 }
