@@ -28,6 +28,7 @@
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/integration.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/integration.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform-version/content/style.css" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <window

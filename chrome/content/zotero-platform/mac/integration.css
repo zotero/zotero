@@ -36,7 +36,7 @@ body[multiline="true"] {
 }
 
 #quick-format-search:not([multiline="true"]) {
-	padding-top: 4.5px;
+	padding-top: 3.5px;
 	height: 37px !important;
 }
 
@@ -46,7 +46,7 @@ body[multiline="true"] {
 }
 
 #zotero-icon {
-	margin: -2.5px 0 3px -6px;
+	margin: -2px 0 3px -6px;
 }
 
 #quick-format-search[multiline="true"] #zotero-icon {
@@ -107,5 +107,6 @@ panel button:-moz-focusring {
 }
 
 .quick-format-bubble {
+	margin-top: 0;
 	padding: 1px 6px 1px 6px;
 }

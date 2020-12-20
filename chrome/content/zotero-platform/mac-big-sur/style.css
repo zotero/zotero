@@ -10,3 +10,12 @@ tabs > tab[visuallyselected="true"] hbox > .tab-text {
 	color: black !important;
 	text-shadow: none;
 }
+
+/* Quick Format dialog, which is based on window corners, which are different on Big Sur */
+#quick-format-dialog #zotero-icon {
+	margin-top: 2px;
+}
+
+#quick-format-iframe {
+	margin-top: 2px;
+}

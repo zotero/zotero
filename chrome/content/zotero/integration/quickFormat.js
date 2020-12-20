@@ -88,7 +88,7 @@ var Zotero_QuickFormat = new function () {
 			// With fx60 and drawintitlebar=true Firefox calculates the minHeight
 			// as titlebar+maincontent, so we have hack around that here.
 			if (Zotero.isMac && Zotero.platformMajorVersion >= 60) {
-				qfb.style.marginBottom = "-22px";
+				qfb.style.marginBottom = "-28px";
 			}
 			
 			// add labels to popup
