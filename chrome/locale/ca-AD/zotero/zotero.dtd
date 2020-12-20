@@ -175,8 +175,8 @@
 <!ENTITY zotero.lookup.description "Introduïu un ISBN, DOI, PMID o ID d'arXiv per afegir a la vostra biblioteca:">
 <!ENTITY zotero.lookup.button.search "Cerca">
 
-<!ENTITY zotero.createParent.title "Create Parent Item">
-<!ENTITY zotero.createParent.button.manual "Manual Entry">
+<!ENTITY zotero.createParent.title "Crea un element pare">
+<!ENTITY zotero.createParent.button.manual "Entrada manual">
 
 <!ENTITY zotero.selectitems.title "Selecciona elements">
 <!ENTITY zotero.selectitems.intro.label "Seleccioneu els elements que voleu afegir a la biblioteca">

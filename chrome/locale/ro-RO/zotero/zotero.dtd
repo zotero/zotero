@@ -175,8 +175,8 @@
 <!ENTITY zotero.lookup.description "Introdu ISBN-urile, DOI-urile, PMID-urile sau ID-urile arXiv pentru a adăuga în biblioteca ta:">
 <!ENTITY zotero.lookup.button.search "Caută">
 
-<!ENTITY zotero.createParent.title "Create Parent Item">
-<!ENTITY zotero.createParent.button.manual "Manual Entry">
+<!ENTITY zotero.createParent.title "Creează înregistrare părinte">
+<!ENTITY zotero.createParent.button.manual "Introducere manuală">
 
 <!ENTITY zotero.selectitems.title "Selectează înregistrări">
 <!ENTITY zotero.selectitems.intro.label "Selectează înregistrările pe care ai vrea să le adaugi în biblioteca ta">

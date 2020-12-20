@@ -175,8 +175,8 @@
 <!ENTITY zotero.lookup.description "Ebarzhiñ anaouadurioù ISBN, PMID, pe arXiv da ouzhpennañ d'ho levraoueg:">
 <!ENTITY zotero.lookup.button.search "Klask">
 
-<!ENTITY zotero.createParent.title "Create Parent Item">
-<!ENTITY zotero.createParent.button.manual "Manual Entry">
+<!ENTITY zotero.createParent.title "Krouiñ un elfenn kar">
+<!ENTITY zotero.createParent.button.manual "Enmont an Dornlevr">
 
 <!ENTITY zotero.selectitems.title "Diuzañ elfennoù">
 <!ENTITY zotero.selectitems.intro.label "Diuzit peseurt elfennoù ho peus c'hoant ouzhpennañ d'ho levraoueg">

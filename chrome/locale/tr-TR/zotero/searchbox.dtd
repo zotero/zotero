@@ -9,7 +9,7 @@
 
 <!ENTITY zotero.search.recursive.label "Alt dermeleri araştır">
 <!ENTITY zotero.search.noChildren "Yalnızca üst-seviye eserleri göster">
-<!ENTITY zotero.search.includeParentsAndChildren "Uyan eserlerin üst ve alt eserlerini de dahil et">
+<!ENTITY zotero.search.includeParentsAndChildren "Uyan eserlerin ana ve alt eserlerini de dahil et">
 
 <!ENTITY zotero.search.textModes.phrase "Sözcük öbeği">
 <!ENTITY zotero.search.textModes.phraseBinary "Sözcük öbeği (ikili dosyalar içerir)">
