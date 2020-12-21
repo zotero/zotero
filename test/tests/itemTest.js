@@ -1896,6 +1896,17 @@ describe("Zotero.Item", function () {
 			assert.equal(item.getField('extra'), 'Pages: 123');
 		});
 		
+		it("shouldn't convert 'Type: article' from Extra into Document item", function () {
+			var json = {
+				itemType: "report",
+				extra: "Type: article"
+			};
+			var item = new Zotero.Item;
+			item.fromJSON(json);
+			assert.equal(Zotero.ItemTypes.getName(item.itemTypeID), 'report');
+			assert.equal(item.getField('extra'), 'Type: article');
+		});
+		
 		it("should ignore creator field in Extra", async function () {
 			var json = {
 				itemType: "journalArticle",
