@@ -5,6 +5,8 @@
 <link type="text/css" rel="stylesheet" href="css/note-ui.css"/>
 <script type="text/javascript" src="tinymce.min.js"></script>
 <script type="text/javascript" src="locale.js"></script>
+<link type="text/css" rel="stylesheet" href="plugins/katex_for_zotero/katex.min.css" />
+<script type="text/javascript" src="plugins/katex_for_zotero/katex.min.js"></script>
 <script type="text/javascript">
 	tinymce.init({
 		body_id: "zotero-tinymce-note",
@@ -17,7 +19,7 @@
 		paste_retain_style_properties: 'all',
 		paste_data_images: true,
 		
-		plugins: "autolink,code,contextmenu,directionality,link,lists,nonbreaking,paste,searchreplace,textcolor",
+		plugins: "katex_for_zotero,autolink,code,contextmenu,directionality,link,lists,nonbreaking,paste,searchreplace,textcolor",
 		
 		toolbar1: "bold italic underline strikethrough | subscript superscript | forecolor backcolor | removeformat | blockquote link",
 		toolbar2: "formatselect | alignleft aligncenter alignright | bullist numlist outdent indent | %DIR% | searchreplace",
