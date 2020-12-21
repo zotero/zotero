@@ -248,7 +248,7 @@ describe("Zotero.Schema", function() {
 			});
 		})
 		
-		it("should repair a missing userdata table", async function () {
+		it.skip("should repair a missing userdata table", async function () {
 			await Zotero.DB.queryAsync("DROP TABLE retractedItems");
 			assert.isFalse(await Zotero.DB.tableExists('retractedItems'));
 			assert.isFalse(await Zotero.Schema.integrityCheck());

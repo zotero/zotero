@@ -1758,6 +1758,12 @@ Zotero.Schema = new function(){
 		// error, and either true or data to pass to the repair function on error. Functions should
 		// avoid assuming any global state (e.g., loaded data).
 		var checks = [
+			/*
+			Currently disabled, because it can cause problems with schema update steps that don't
+			expect tables to exist.
+			
+			The test "should repair a missing userdata table" is also disabled.
+			
 			// Create any tables or indexes that are missing and delete any tables or triggers that
 			// still exist but should have been deleted
 			[
@@ -1831,6 +1837,7 @@ Zotero.Schema = new function(){
 					}
 				}
 			],
+			*/
 			
 			// Foreign key checks
 			[
