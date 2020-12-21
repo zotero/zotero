@@ -1,0 +1,14 @@
+/****************** katex*******************/
+
+.katexCode {
+    background-color: rgb(214, 214, 214);
+    font-style: italic;
+    font-family: Courier New, monospace;
+}
+
+
+.katexRenderer {
+    background-color: rgb(100, 100, 100);
+    /* display: none; */
+    /* font-size: smaller; */
+}
