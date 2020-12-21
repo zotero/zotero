@@ -31,7 +31,8 @@
 ]>
 
 <overlay id="zotero-prefpane-advanced-overlay"
-		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		xmlns:html="http://www.w3.org/1999/xhtml">
 	
 	<prefpane id="zotero-prefpane-advanced"
 			onpaneload="Zotero_Preferences.Advanced.init()"
@@ -59,9 +60,6 @@
 			<preference id="pref-keys-copySelectedItemsToClipboard" name="extensions.zotero.keys.copySelectedItemsToClipboard" type="string"/>
 
 			<preference id="pref-feeds-sortAscending" name="extensions.zotero.feeds.sortAscending" type="bool"/>
-			<preference id="pref-feeds-defaultTTL" name="extensions.zotero.feeds.defaultTTL" type="int"/>
-			<preference id="pref-feeds-defaultCleanupUnreadAfter" name="extensions.zotero.feeds.defaultCleanupUnreadAfter" type="int"/>
-			<preference id="pref-feeds-defaultCleanupReadAfter" name="extensions.zotero.feeds.defaultCleanupReadAfter" type="int"/>
 		</preferences>
 		
 		<tabbox id="zotero-prefpane-advanced-tabs">
@@ -307,26 +305,26 @@
 						</hbox>
 					</groupbox>
 					
-					<groupbox>
+					<groupbox id="zotero-prefpane-advanced-feeds-feedDefaults">
 						<caption label="&zotero.preferences.feeds.feedDefaults;"/>
 						<hbox>
 							<hbox align="center">
 								<label value="&zotero.feedSettings.refresh.label1;"/>
-								<textbox type="number" min="1" increment="1" size="3" preference="pref-feeds-defaultTTL"/>
+								<html:input class="html-input" type="number" min="1" step="1" size="3" data-preference="feeds.defaultTTL"/>
 								<label value="&zotero.feedSettings.refresh.label2;"/>
 							</hbox>
 						</hbox>
 						<hbox>
 							<hbox align="center">
 								<label value="&zotero.feedSettings.cleanupReadAfter.label1;"/>
-								<textbox type="number" min="1" increment="1" size="2" preference="pref-feeds-defaultCleanupReadAfter"/>
+								<html:input class="html-input" type="number" min="1" step="1" size="2" data-preference="feeds.defaultCleanupUnreadAfter"/>
 								<label value="&zotero.feedSettings.cleanupReadAfter.label2;"/>
 							</hbox>
 						</hbox>
 						<hbox>
 							<hbox align="center">
 								<label value="&zotero.feedSettings.cleanupUnreadAfter.label1;"/>
-								<textbox type="number" min="1" increment="1" size="2" preference="pref-feeds-defaultCleanupUnreadAfter"/>
+								<html:input class="html-input" type="number" min="1" step="1" size="2" data-preference="feeds.defaultCleanupReadAfter"/>
 								<label value="&zotero.feedSettings.cleanupUnreadAfter.label2;"/>
 							</hbox>
 						</hbox>

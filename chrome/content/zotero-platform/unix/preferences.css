@@ -105,3 +105,7 @@ radio[pane][selected="true"] {
 	background-color: Highlight;
 	color: HighlightText;
 }
+
+#sync-reset-library-menu {
+	height: initial !important;
+}

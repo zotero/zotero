@@ -37,6 +37,18 @@ Zotero_Preferences.Advanced = {
 		if (Zotero.Prefs.get('debug.memoryInfo')) {
 			document.getElementById('memory-info').hidden = false;
 		}
+
+		// This might not work for checkboxes if we later need to create them
+		// with html
+		var inputs = document.querySelectorAll('input[data-preference]');
+		for (let input of inputs) {
+			let preferenceName = input.dataset.preference;
+			input.addEventListener('change', function () {
+				let value = input.value;
+				Zotero.Prefs.set(preferenceName, value);
+			});
+			input.value = Zotero.Prefs.get(preferenceName);
+		}
 		
 		this.onDataDirLoad();
 		this.refreshLocale();

@@ -317,6 +317,16 @@ treechildren::-moz-tree-checkbox(checked){
 	padding-bottom: .4em;
 }
 
+#zotero-prefpane-advanced-feeds-feedDefaults .html-input {
+	width: 50px;
+	text-align: right;
+}
+
+#zotero-prefpane-advanced-feeds-feedDefaults hbox {
+	display: flex;
+	align-items: center;
+}
+
 
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
 @media (min-resolution: 1.25dppx) {
