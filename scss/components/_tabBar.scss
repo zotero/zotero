@@ -24,6 +24,7 @@
 }
 
 .tab {
+	box-sizing: border-box;
 	-moz-appearance: none;
 	max-width: 200px;
 	flex: 1 1 200px;
@@ -51,23 +52,30 @@
 		display: -moz-box;
 		position: relative;
 		top: -2px;
+		overflow-y: hidden;
 	}
-	
+
 	.tab-close {
 		position: absolute;
-		left: 6px;
-		top: 7px;
+		right: 6px;
+		top: 6px;
 		width: 16px;
 		height: 16px;
 		text-align: center;
 		line-height: 16px;
-		font-size: 14px;
-		margin-top: -2px;
-		display: none;
+		border-radius: 3px;
+		
+		&:hover {
+			background-color: rgba(0, 0, 0, 0.08);
+		}
+		
+		&:active {
+			background-color: rgba(0, 0, 0, 0.16);
+		}
 	}
 	
-	&:hover:not(:first-child) .tab-close {
-		display: block;
+	&:first-child .tab-close {
+		display: none;
 	}
 
 	&:not(.selected) {

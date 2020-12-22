@@ -416,7 +416,7 @@
 			</toolbaritem>
 		</toolbar>
 	</toolbox>
-	<vbox id="tab-bar-container"/>
+	<div xmlns="http://www.w3.org/1999/xhtml" id="tab-bar-container"/>
 	<!--<toolbarpalette/>
 
 	<toolbar id="nav-bar" class="toolbar-primary chromeclass-toolbar"

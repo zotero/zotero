@@ -27,6 +27,7 @@
 
 import React, { forwardRef, useState, useRef, useImperativeHandle, useEffect } from 'react';
 import cx from 'classnames';
+const { IconXmark } = require('./icons');
 
 const TabBar = forwardRef(function (props, ref) {
 	const [tabs, setTabs] = useState([]);
@@ -44,6 +45,9 @@ const TabBar = forwardRef(function (props, ref) {
 	useImperativeHandle(ref, () => ({ setTabs }));
 
 	function handleMouseDown(event, id, index) {
+		if (event.target.closest('.tab-close')) {
+			return;
+		}
 		if (index != 0) {
 			draggingID.current = id;
 		}
@@ -109,7 +113,7 @@ const TabBar = forwardRef(function (props, ref) {
 					className="tab-close"
 					onClick={(event) => handleTabClose(event, id)}
 				>
-					x
+					<IconXmark/>
 				</div>
 			</div>
 		);
