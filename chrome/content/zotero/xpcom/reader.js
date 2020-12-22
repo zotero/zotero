@@ -755,6 +755,10 @@ class Reader {
 		}
 
 		if (reader) {
+			if (reader instanceof ReaderTab) {
+				reader._window.Zotero_Tabs.select(reader.tabID);
+			}
+			
 			if (location) {
 				reader.navigate(location);
 			}
@@ -805,9 +809,6 @@ class Reader {
 
 		if (reader instanceof ReaderWindow) {
 			reader._window.focus();
-		}
-		else {
-			reader._window.Zotero_Tabs.select(reader.tabID);
 		}
 	}
 

@@ -101,10 +101,27 @@ class EditorInstance {
 	async updateCitationsForURIs(uris) {
 		let subscriptions = this._subscriptions
 		.filter(s => s.data.citation && s.data.citation.citationItems
-		.some(citationItem => uris.some(uri => citationItem.uris.includes(uri))));
+		.some(citationItem => citationItem.uris && uris.some(uri => citationItem.uris.includes(uri))));
 		for (let subscription of subscriptions) {
 			await this._feedSubscription(subscription);
 		}
+	}
+	
+	async notify(ids) {
+		let items = await Zotero.Items.getAsync(ids);
+
+		// Update attachments
+		let keys = items.map(item => item.key);
+		this._subscriptions
+		.filter(s => keys.includes(s.data.attachmentKey))
+		.forEach(s => this._feedSubscription(s));
+
+		// Update citations
+		let uris = items.map(x => Zotero.URI.getItemURI(x)).filter(x => x);
+		this._subscriptions
+		.filter(s => s.data.citation && s.data.citation.citationItems
+		.some(citationItem => citationItem.uris && uris.some(uri => citationItem.uris.includes(uri))))
+		.forEach(s => this._feedSubscription(s));
 	}
 
 	saveSync() {
@@ -600,6 +617,9 @@ class EditorInstance {
 	async _getFormattedCitationParts(citation) {
 		let formattedItems = [];
 		for (let citationItem of citation.citationItems) {
+			if (!Array.isArray(citationItem.uris)) {
+				continue;
+			}
 			let item = await this._getItemFromURIs(citationItem.uris);
 			if (!item && citationItem.itemData) {
 				item = new Zotero.Item();

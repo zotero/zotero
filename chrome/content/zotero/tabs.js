@@ -113,7 +113,7 @@ var Zotero_Tabs = new function () {
 		index = index || this._tabs.length;
 		this._tabs.splice(index, 0, tab);
 		this._update();
-		Zotero.Notifier.trigger('add', 'tab', [id], { [id]: notifierData });
+		Zotero.Notifier.trigger('add', 'tab', [id], { [id]: notifierData }, true);
 		if (select) {
 			this.select(id);
 		}
@@ -157,7 +157,7 @@ var Zotero_Tabs = new function () {
 		if (tab.onClose) {
 			tab.onClose();
 		}
-		Zotero.Notifier.trigger('close', 'tab', [tab.id]);
+		Zotero.Notifier.trigger('close', 'tab', [tab.id], true);
 		this._update();
 	};
 
@@ -199,7 +199,7 @@ var Zotero_Tabs = new function () {
 		this._selectedID = id;
 		this.deck.selectedIndex = Array.from(this.deck.children).findIndex(x => x.id == id);
 		this._update();
-		Zotero.Notifier.trigger('select', 'tab', [tab.id], { [tab.id]: { type: tab.type } });
+		Zotero.Notifier.trigger('select', 'tab', [tab.id], { [tab.id]: { type: tab.type } }, true);
 	};
 
 	/**

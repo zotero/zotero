@@ -109,18 +109,8 @@
 					}
 
 					this.notify = async (event, type, ids, extraData) => {
-						// Update citations
-						let uris = [];
-						let items = await Zotero.Items.getAsync(ids);
-						for (let item of items) {
-							let uri = Zotero.URI.getItemURI(item);
-							if (uri) {
-								uris.push(uri)
-							}
-						}
-
 						if (this._editorInstance) {
-							await this._editorInstance.updateCitationsForURIs(uris);
+							await this._editorInstance.notify(ids);
 						}
 
 						if (!this.item) return;
@@ -252,15 +242,14 @@
 			<property name="linksOnTop">
 				<setter>
 					<![CDATA[
-						return;
-						if (val) {
-							var container = this._id('links-container');
-							var parent = container.parentNode;
-							var sib = container.nextSibling;
-							while (parent.firstChild !== container) {
-								parent.insertBefore(parent.removeChild(parent.firstChild), sib);
-							}
-						}
+						// if (val) {
+						// 	var container = this._id('links-container');
+						// 	var parent = container.parentNode;
+						// 	var sib = container.nextSibling;
+						// 	while (parent.firstChild !== container) {
+						// 		parent.insertBefore(parent.removeChild(parent.firstChild), sib);
+						// 	}
+						// }
 					]]>
 				</setter>
 			</property>

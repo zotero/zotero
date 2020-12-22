@@ -25,18 +25,14 @@
 
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
 
-const NoteRow = ({ parentTitle, parentImageSrc, title, body, date, onClick }) => {
+const NoteRow = ({ title, body, date, onClick }) => {
 	return (
 		<div className="note-row" onClick={onClick}>
 			<div className="inner">
-				{parentTitle !== null && <div className="first-line">
-					<div className="icon"><img src={parentImageSrc}/></div>
-					<div className="title">{parentTitle}</div>
-				</div>}
-				<div className="second-line">
+				<div className="first-line">
 					<div className="title">{title}</div>
 				</div>
-				<div className="third-line">
+				<div className="second-line">
 					<div className="date">{date}</div>
 					<div className="body">{body}</div>
 				</div>

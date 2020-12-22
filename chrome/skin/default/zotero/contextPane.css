@@ -3,7 +3,7 @@
 }
 
 #zotero-context-pane {
-    min-width: 300px;
+    min-width: 360px;
 }
 
 #zotero-context-pane.stacked {
@@ -49,7 +49,7 @@
     right: 0;
     height: 32px;
     -moz-appearance: none;
-    background: linear-gradient(to top, #aeaeae 0, #aeaeae 1px, #d3d3d3 1px, #e3e3e3 100%);
+    background: linear-gradient(to top, #a9a9a9 0, #a9a9a9 1px, #f6f6f6 1px, #f6f6f6 100%);
 }
 
 #zotero-tab-toolbar-container #zotero-tb-locate,
@@ -63,7 +63,7 @@
     opacity: 0.99;
     width: 100%;
     margin-inline-start: -5px;
-    background: linear-gradient(to top, #aeaeae 0, #aeaeae 1px, #d3d3d3 1px, #e3e3e3 100%);
+    background: linear-gradient(to top, #a9a9a9 0, #a9a9a9 1px, #f6f6f6 1px, #f6f6f6 100%);
 }
 
 .zotero-context-notes-list {
