@@ -46,43 +46,6 @@ Zotero.Sync.Storage = new function () {
 	}
 	
 	
-	/**
-	 * Check if modification time of file on disk matches the mod time
-	 * in the database
-	 *
-	 * @param	{Integer}	itemID
-	 * @return	{Boolean}
-	 */
-	this.isFileModified = function (itemID) {
-		var item = Zotero.Items.get(itemID);
-		var file = item.getFile();
-		if (!file) {
-			return false;
-		}
-		
-		var fileModTime = item.attachmentModificationTime;
-		if (!fileModTime) {
-			return false;
-		}
-		
-		var syncModTime = item.attachmentSyncedModificationTime;
-		if (fileModTime != syncModTime) {
-			var syncHash = item.attachmentSyncedHash;
-			if (syncHash) {
-				var fileHash = item.attachmentHash;
-				if (fileHash && fileHash == syncHash) {
-					Zotero.debug("Mod time didn't match (" + fileModTime + "!=" + syncModTime + ") "
-						+ "but hash did for " + file.leafName + " -- ignoring");
-					return false;
-				}
-			}
-			return true;
-		}
-		
-		return false;
-	}
-	
-	
 	this.getItemDownloadImageNumber = function (item) {
 		var numImages = 64;
 		
