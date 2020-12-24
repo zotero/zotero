@@ -44,7 +44,7 @@ function handleInput() { // eslint-disable-line no-unused-vars
 	}
 	var code = codeEditor.getSession().getValue();
 	// If `await` is used, switch to async mode
-	if (/[^=([]\s*await\s/m.test(code)) {
+	if (/(^|[^=([]\s*)await\s/m.test(code)) {
 		checkbox.checked = true;
 		update();
 	}
