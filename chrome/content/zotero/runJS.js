@@ -78,15 +78,23 @@ document.getElementById('run-label').textContent = `(${shortcut})`;
 
 update();
 
-var codeWin, codeEditor;
+var codeEditor;
 window.addEventListener("load", function (e) {
 	if (e.target !== document) {
 		return;
 	}
 
-	codeWin = document.getElementById("editor-code").contentWindow;
+	var codeWin = document.getElementById("editor-code").contentWindow;
 	codeEditor = codeWin.editor;
-	codeEditor.getSession().setMode(new codeWin.JavaScriptMode);
-	codeEditor.getSession().setUseSoftTabs(false);
+	var session = codeEditor.getSession();
+	session.setMode(new codeWin.JavaScriptMode);
+	codeEditor.setOptions({
+		// TODO: Enable if we modify to autocomplete from the Zotero API
+		//enableLiveAutocompletion: true,
+		highlightActiveLine: false,
+		showGutter: false,
+		theme: "ace/theme/chrome",
+	});
 	codeEditor.on('input', handleInput);
+	codeEditor.focus();
 }, false);

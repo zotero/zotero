@@ -45,6 +45,7 @@ const symlinkFiles = [
 	'resource/ace/keybinding-emacs.js',
 	'resource/ace/keybinding-vim.js',
 	'resource/ace/mode-javascript.js',
+	'resource/ace/theme-chrome.js',
 	'resource/ace/theme-monokai.js',
 	'resource/ace/worker-javascript.js',
 	'update.rdf'

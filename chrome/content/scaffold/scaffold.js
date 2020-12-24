@@ -98,7 +98,11 @@ var Scaffold = new function() {
 		_editors.import = importWin.editor;
 		_editors.code = codeWin.editor;
 		_editors.tests = testsWin.editor;
-
+		
+		for (let i in _editors) {
+			_editors[i].setTheme('ace/theme/monokai');
+		}
+		
 		_editors.code.getSession().setMode(new codeWin.JavaScriptMode);
 		_editors.code.getSession().setUseSoftTabs(false);
 		// The first code line is preceeded by some metadata lines, such that
