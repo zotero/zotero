@@ -428,7 +428,19 @@ var Scaffold = new function() {
 			yield Zotero.Translators.reinit();
 		}
 	});
-
+	
+	this.handleTabSelect = function (event) {
+		// Focus editor when switching to tab
+		var tab = event.target.selectedItem.id.match(/^tab-(.+)$/)[1];
+		switch (tab) {
+			case 'import':
+			case 'code':
+			case 'tests':
+				_editors[tab].focus();
+				break;
+		}
+	};
+	
 	/*
 	 * add template code
 	 */
