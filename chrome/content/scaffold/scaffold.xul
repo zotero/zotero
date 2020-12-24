@@ -97,7 +97,7 @@
 		</toolbar>
 		<hbox flex="1">
 			<tabbox id="left-tabbox" flex="1" width="300">
-				<tabs id="tabs">
+				<tabs id="tabs" onselect="Scaffold.handleTabSelect(event)">
 					<tab id="tab-metadata" label="&scaffold.tabs.metadata.label;"/>
 					<tab id="tab-code" label="&scaffold.tabs.code.label;"/>
 					<tab id="tab-import" label="&scaffold.tabs.import.label;"/>
@@ -191,7 +191,7 @@
 								</menupopup>
 							</toolbarbutton>
 						</hbox>
-						<iframe src="chrome://scaffold/content/ace/ace.html" id="editor-code" flex="1"/>
+						<iframe src="chrome://zotero/content/ace/ace.html" id="editor-code" flex="1"/>
 						<hbox id="editor-external-box" align="center">
 							<checkbox id="checkbox-editor-external"/>
 							<label class="label-metadata" value="&scaffold.editor.external.label;" control="checkbox-editor-external"/>
@@ -199,10 +199,10 @@
 						</vbox>
 					</tabpanel>
 					<tabpanel flex="1" id="tabpanel-import">
-						<iframe src="chrome://scaffold/content/ace/ace.html" id="editor-import" flex="1"/>
+						<iframe src="chrome://zotero/content/ace/ace.html" id="editor-import" flex="1"/>
 					</tabpanel>
 					<tabpanel flex="1" id="tabpanel-tests">
-						<iframe src="chrome://scaffold/content/ace/ace.html" id="editor-tests" flex="1"/>
+						<iframe src="chrome://zotero/content/ace/ace.html" id="editor-tests" flex="1"/>
 					</tabpanel>
 					<tabpanel flex="1" id="tabpanel-testing">
 						<vbox flex="1"><hbox><description>&scaffold.testing.description;</description></hbox>

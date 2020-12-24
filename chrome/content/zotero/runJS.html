@@ -13,13 +13,17 @@
 		<main>
 			<div class="textbox-container">
 				<div class="textbox-header">
-					<label class="textbox-label" for="code">Code:</label>
+					<label class="textbox-label" for="editor-code">Code:</label>
 					<label id="run-as-async-label" for="run-as-async">
 						<input id="run-as-async" type="checkbox" onclick="update()">
 						Run as async function
 					</label>
 				</div>
-				<textarea id="code" oninput="handleInput()"></textarea>
+				<iframe
+						src="chrome://zotero/content/ace/ace.html"
+						id="editor-code"
+						class="editor-code"
+				></iframe>
 			</div>
 			
 			<div class="textbox-container">

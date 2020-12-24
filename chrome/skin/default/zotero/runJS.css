@@ -60,7 +60,11 @@ input[type=checkbox] {
 	margin-bottom: 0;
 }
 
-textarea {
+iframe {
+	border: 1px solid gray;
+}
+
+iframe, textarea {
 	flex-grow: 1;
 	margin: 5px 0;
 	font-family: Monaco, Consolas, Inconsolata, monospace;
@@ -70,4 +74,8 @@ textarea {
 
 textarea.error {
 	color: red;
+}
+
+.editor-code {
+	flex: 1;
 }

@@ -38,6 +38,18 @@ const symlinkFiles = [
 	'resource/SingleFile/lib/**/*',
 	'resource/SingleFile/extension/lib/single-file/fetch/content/content-fetch.js',
 	'!resource/SingleFile/lib/single-file/single-file.js',
+	// We only need a couple Ace Editor files
+	'!resource/ace/**/*',
+	'resource/ace/ace.js',
+	// Enable for autocomplete
+	//'resource/ace/ext-language_tools.js',
+	'resource/ace/ext-searchbox.js',
+	'resource/ace/keybinding-emacs.js',
+	'resource/ace/keybinding-vim.js',
+	'resource/ace/mode-javascript.js',
+	'resource/ace/theme-chrome.js',
+	'resource/ace/theme-monokai.js',
+	'resource/ace/worker-javascript.js',
 	'update.rdf'
 ];
 

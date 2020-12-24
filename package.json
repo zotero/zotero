@@ -15,6 +15,7 @@
   },
   "license": "",
   "dependencies": {
+    "ace-builds": "^1.4.12",
     "bluebird": "^3.5.1",
     "classnames": "^2.2.6",
     "prop-types": "^15.7.2",

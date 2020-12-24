@@ -38,5 +38,4 @@ window.addEventListener("DOMContentLoaded", function(e) {
 	TextMode = require("ace/mode/text").Mode;
 	EditSession = require("ace/edit_session").EditSession;
 	editor = ace.edit('ace-div');
-	editor.setTheme("ace/theme/monokai");
 }, false);
