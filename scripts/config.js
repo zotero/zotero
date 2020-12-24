@@ -41,6 +41,8 @@ const symlinkFiles = [
 	// We only need a couple Ace Editor files
 	'!resource/ace/**/*',
 	'resource/ace/ace.js',
+	// Enable for autocomplete
+	//'resource/ace/ext-language_tools.js',
 	'resource/ace/ext-searchbox.js',
 	'resource/ace/keybinding-emacs.js',
 	'resource/ace/keybinding-vim.js',
