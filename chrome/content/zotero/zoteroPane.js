@@ -2820,13 +2820,25 @@ var ZoteroPane = new function()
 						&& items.some(item => item.isRegularItem())) {
 					show.push(m.findPDF, m.sep3);
 				}
+
+				let canCreateParent = true;
+				for (let i = 0; i < items.length; i++) {
+					let item = items[i];
+					if (!item.isTopLevelItem() || !item.isAttachment() || item.isFeedItem) {
+						canCreateParent = false;
+						break;
+					}
+				}
+				if (canCreateParent) {
+					show.push(m.createParent);
+				}
 				
 				if (canRename) {
 					show.push(m.renameAttachments);
 				}
 				
 				// Add in attachment separator
-				if (canRecognize || canUnrecognize || canRename || canIndex) {
+				if (canCreateParent || canRecognize || canUnrecognize || canRename || canIndex) {
 					show.push(m.sep5);
 				}
 				
@@ -2837,6 +2849,7 @@ var ZoteroPane = new function()
 						if (item.isFileAttachment()) {
 							disable.push(
 								m.moveToTrash,
+								m.createParent,
 								m.renameAttachments
 							);
 							break;
@@ -2985,7 +2998,7 @@ var ZoteroPane = new function()
 		menu.childNodes[m.exportItems].setAttribute('label', Zotero.getString('pane.items.menu.export' + multiple));
 		menu.childNodes[m.createBib].setAttribute('label', Zotero.getString('pane.items.menu.createBib' + multiple));
 		menu.childNodes[m.loadReport].setAttribute('label', Zotero.getString('pane.items.menu.generateReport' + multiple));
-		menu.childNodes[m.createParent].setAttribute('label', Zotero.getString('pane.items.menu.createParent'));
+		menu.childNodes[m.createParent].setAttribute('label', Zotero.getString('pane.items.menu.createParent' + multiple));
 		menu.childNodes[m.recognizePDF].setAttribute('label', Zotero.getString('pane.items.menu.recognizePDF' + multiple));
 		menu.childNodes[m.renameAttachments].setAttribute('label', Zotero.getString('pane.items.menu.renameAttachments' + multiple));
 		menu.childNodes[m.reindexItem].setAttribute('label', Zotero.getString('pane.items.menu.reindexItem' + multiple));
@@ -4510,45 +4523,65 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		let item = this.getSelectedItems()[0];
-		if (!item.isAttachment() || !item.isTopLevelItem()) {
-			throw new Error('Item ' + itemID + ' is not a top-level attachment');
-		}
+		let items = this.getSelectedItems();
 
-		let io = { dataIn: { item }, dataOut: null };
-		window.openDialog('chrome://zotero/content/createParentDialog.xul', '', 'chrome,modal,centerscreen', io);
-		if (!io.dataOut) {
-			return false;
-		}
+		if (items.length > 1) {
+			for (let i = 0; i < items.length; i++) {
+				let item = items[i];
+				if (!item.isTopLevelItem() || item.isRegularItem()) {
+					throw new Error('Item ' + item.id + ' is not a top-level attachment');
+				}
 
-		// If we made a parent, attach the child
-		if (io.dataOut.parent) {
-			await Zotero.DB.executeTransaction(function* () {
-				item.parentID = io.dataOut.parent.id;
-				yield item.save();
-			});
+				await this.createEmptyParent(item);
+			}
 		}
-		// If they clicked manual entry then make a dummy parent
 		else {
-			await Zotero.DB.executeTransaction(function* () {
-				// TODO: remove once there are no top-level web attachments
-				if (item.isWebAttachment()) {
-					var parent = new Zotero.Item('webpage');
-				}
-				else {
-					var parent = new Zotero.Item('document');
-				}
-				parent.libraryID = item.libraryID;
-				parent.setField('title', item.getField('title'));
-				if (item.isWebAttachment()) {
-					parent.setField('accessDate', item.getField('accessDate'));
-					parent.setField('url', item.getField('url'));
-				}
-				var itemID = yield parent.save();
-				item.parentID = itemID;
-				yield item.save();
-			});
+			// Ask for an identifier if there is only one item
+			let item = items[0];
+			if (!item.isAttachment() || !item.isTopLevelItem()) {
+				throw new Error('Item ' + item.id + ' is not a top-level attachment');
+			}
+
+			let io = { dataIn: { item }, dataOut: null };
+			window.openDialog('chrome://zotero/content/createParentDialog.xul', '', 'chrome,modal,centerscreen', io);
+			if (!io.dataOut) {
+				return false;
+			}
+
+			// If we made a parent, attach the child
+			if (io.dataOut.parent) {
+				await Zotero.DB.executeTransaction(async function () {
+					item.parentID = io.dataOut.parent.id;
+					await item.save();
+				});
+			}
+			// If they clicked manual entry then make a dummy parent
+			else {
+				this.createEmptyParent(item);
+			}
 		}
+	};
+
+
+	this.createEmptyParent = async function (item) {
+		await Zotero.DB.executeTransaction(async function () {
+			// TODO: remove once there are no top-level web attachments
+			if (item.isWebAttachment()) {
+				var parent = new Zotero.Item('webpage');
+			}
+			else {
+				var parent = new Zotero.Item('document');
+			}
+			parent.libraryID = item.libraryID;
+			parent.setField('title', item.getField('title'));
+			if (item.isWebAttachment()) {
+				parent.setField('accessDate', item.getField('accessDate'));
+				parent.setField('url', item.getField('url'));
+			}
+			let itemID = await parent.save();
+			item.parentID = itemID;
+			await item.save();
+		});
 	};
 
 	
