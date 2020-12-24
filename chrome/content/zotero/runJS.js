@@ -32,6 +32,7 @@ async function run() {
 	resultTextbox.textContent = typeof result == 'string' ? result : Zotero.Utilities.varDump(result);
 }
 
+// eslint-disable-next-line no-unused-vars
 function openHelp() {
 	Zotero.launchURL("https://www.zotero.org/support/dev/client_coding/javascript_api");
 }
