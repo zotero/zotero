@@ -2291,6 +2291,9 @@ Zotero.Attachments = new function(){
 			case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
 				break;
 			
+			case Zotero.Attachments.LINK_MODE_EMBEDDED_IMAGE:
+				return false;
+			
 			default:
 				throw new Error("Invalid attachment link mode");
 		}

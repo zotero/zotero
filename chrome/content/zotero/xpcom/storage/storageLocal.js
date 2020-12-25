@@ -502,13 +502,14 @@ Zotero.Sync.Storage.Local = {
 	 */
 	getFilesToUpload: function (libraryID) {
 		var sql = "SELECT itemID FROM itemAttachments JOIN items USING (itemID) "
-			+ "WHERE libraryID=? AND syncState IN (?,?) AND linkMode IN (?,?)";
+			+ "WHERE libraryID=? AND syncState IN (?,?) AND linkMode IN (?,?,?)";
 		var params = [
 			libraryID,
 			this.SYNC_STATE_TO_UPLOAD,
 			this.SYNC_STATE_FORCE_UPLOAD,
 			Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
-			Zotero.Attachments.LINK_MODE_IMPORTED_URL
+			Zotero.Attachments.LINK_MODE_IMPORTED_URL,
+			Zotero.Attachments.LINK_MODE_EMBEDDED_IMAGE,
 		];
 		return Zotero.DB.columnQueryAsync(sql, params);
 	},
@@ -566,12 +567,13 @@ Zotero.Sync.Storage.Local = {
 		
 		return Zotero.DB.executeTransaction(async function () {
 			var sql = "SELECT itemID FROM items JOIN itemAttachments USING (itemID) "
-				+ "WHERE libraryID=? AND itemTypeID=? AND linkMode IN (?, ?)";
+				+ "WHERE libraryID=? AND itemTypeID=? AND linkMode IN (?, ?, ?)";
 			var params = [
 				libraryID,
 				Zotero.ItemTypes.getID('attachment'),
 				Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
 				Zotero.Attachments.LINK_MODE_IMPORTED_URL,
+				Zotero.Attachments.LINK_MODE_EMBEDDED_IMAGE,
 			];
 			var itemIDs = await Zotero.DB.columnQueryAsync(sql, params);
 			for (let itemID of itemIDs) {

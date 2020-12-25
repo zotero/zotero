@@ -854,6 +854,33 @@ describe("Zotero.Item", function () {
 		});
 	})
 	
+	
+	describe("#getFilePath()", function () {
+		it("should return the absolute path for an embedded image", async function () {
+			var note = await createDataObject('item', { itemType: 'note' });
+			
+			var path = OS.Path.join(getTestDataDirectory().path, 'test.png');
+			var imageData = await Zotero.File.getBinaryContentsAsync(path);
+			var array = new Uint8Array(imageData.length);
+			for (let i = 0; i < imageData.length; i++) {
+				array[i] = imageData.charCodeAt(i);
+			}
+			
+			var blob = new Blob([array], { type: 'image/png' });
+			var attachment = await Zotero.Attachments.importEmbeddedImage({
+				blob,
+				parentItemID: note.id
+			});
+			
+			var storageDir = Zotero.getStorageDirectory().path;
+			assert.equal(
+				OS.Path.join(storageDir, attachment.key, 'image.png'),
+				attachment.getFilePath()
+			);
+		});
+	});
+	
+	
 	describe("#attachmentCharset", function () {
 		it("should get and set a value", function* () {
 			var charset = 'utf-8';

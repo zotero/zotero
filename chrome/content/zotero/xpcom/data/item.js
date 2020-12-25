@@ -2319,8 +2319,7 @@ Zotero.Item.prototype.getFilePath = function () {
 	}
 	
 	// Imported file with relative path
-	if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
-			linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
+	if (this.isStoredFileAttachment()) {
 		if (!path.includes("storage:")) {
 			Zotero.logError("Invalid attachment path '" + path + "'");
 			this._updateAttachmentStates(false);
@@ -3035,8 +3034,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentPath', {
 				val = Zotero.Attachments.resolveRelativePath(val) || val;
 			}
 		}
-		else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
-				linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
+		else if (this.isStoredFileAttachment()) {
 			if (val && !val.startsWith('storage:')) {
 				let storagePath = Zotero.Attachments.getStorageDirectory(this).path;
 				if (!val.startsWith(storagePath)) {
