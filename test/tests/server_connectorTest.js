@@ -1118,6 +1118,165 @@ describe("Connector Server", function () {
 			let contents = await Zotero.File.getContentsAsync(path);
 			assert.match(contents, /^<html style><!--\n Page saved with SingleFile \n url:/);
 		});
+
+		it("should handle race condition with /saveItems", async function () {
+			let collection = await createDataObject('collection');
+			await waitForItemsLoad(win);
+
+			let pdfURL = testServerPath + '/pdf';
+			let nonOADOI = '10.2222/bcde';
+
+			// Promise for item saving
+			let parentIDs, attachmentIDs1, attachmentIDs2;
+			let promise = waitForItemEvent('add').then(function (ids) {
+				parentIDs = ids;
+				return waitForItemEvent('add').then(function (ids) {
+					attachmentIDs1 = ids;
+					return waitForItemEvent('add').then(function (ids) {
+						attachmentIDs2 = ids;
+					});
+				});
+			});
+
+			// Promise for snapshot having been saved
+			let singleFileDone = Zotero.Promise.defer();
+
+			// Special handler to delay writing of file response for 5 seconds to allow
+			// `saveSingleFile` request to finish first before getting PDF
+			httpd.registerPathHandler(
+				'/pdf',
+				{
+					handle: async function (request, response) {
+						response.setStatusLine(null, 200, "OK");
+						let file = Zotero.File.pathToFile(OS.Path.join(getTestDataDirectory().path, 'test.pdf'));
+						response.processAsync();
+						// Delay the PDF processing (simulates a long network request) so that
+						// the SingleFile request below completes first.
+						await singleFileDone.promise;
+						httpd._handler._writeFileResponse(request, file, response, 0, file.fileSize);
+					}
+				}
+			);
+
+			// Setup our `saveItems` and payload and call connector server
+			let title = Zotero.Utilities.randomString();
+			let sessionID = Zotero.Utilities.randomString();
+			let payload = {
+				sessionID,
+				items: [
+					{
+						itemType: 'journalArticle',
+						title: title,
+						DOI: nonOADOI,
+						attachments: [
+							{
+								title: "PDF",
+								url: pdfURL,
+								mimeType: 'application/pdf'
+							},
+							{
+								title: "Snapshot",
+								url: `${testServerPath}/attachment`,
+								mimeType: "text/html",
+								singleFile: true
+							}
+						]
+					}
+				],
+				uri: "http://example.com"
+			};
+
+			let req = await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveItems",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body: JSON.stringify(payload)
+				}
+			);
+			assert.equal(req.status, 201);
+
+			// Now setup and call our `saveSingleFile` to save snapshot attachment
+			let testDataDirectory = getTestDataDirectory().path;
+			let indexPath = OS.Path.join(testDataDirectory, 'snapshot', 'index.html');
+
+			let body = JSON.stringify(Object.assign(payload, {
+				snapshotContent: await Zotero.File.getContentsAsync(indexPath)
+			}));
+
+			req = await Zotero.HTTP.request(
+				'POST',
+				connectorServerPath + "/connector/saveSingleFile",
+				{
+					headers: {
+						"Content-Type": "application/json"
+					},
+					body
+				}
+			);
+			assert.equal(req.status, 201);
+
+			// Trigger PDF saving to complete now that SingleFile is done.
+			singleFileDone.resolve();
+
+			// Await all item saves
+			await promise;
+
+			// Once the PDF is saved, if the bug exists, the snapshot will saved again.
+			// Once that is completed, then the session will be marked as done so we
+			// wait for that to occur here. Then we can proceed to ensure we have the
+			// proper number of items.
+			let savingDone = false;
+			while (!savingDone) {
+				// eslint-disable-next-line no-await-in-loop
+				req = await Zotero.HTTP.request(
+					'POST',
+					connectorServerPath + "/connector/sessionProgress",
+					{
+						headers: {
+							"Content-Type": "application/json"
+						},
+						body: JSON.stringify({ sessionID })
+					}
+				);
+				savingDone = JSON.parse(req.response).done;
+				if (!savingDone) {
+					// eslint-disable-next-line no-await-in-loop
+					await Zotero.Promise.delay(1000);
+				}
+			}
+
+			// Check parent item
+			assert.lengthOf(parentIDs, 1);
+			let item = Zotero.Items.get(parentIDs[0]);
+			assert.equal(Zotero.ItemTypes.getName(item.itemTypeID), 'journalArticle');
+			assert.isTrue(collection.hasItem(item.id));
+
+			// Ensure we only have one snapshot and one PDF - this is the critical test
+			assert.equal(item.numChildren(), 2);
+
+			// Snapshot is saved first
+			assert.lengthOf(attachmentIDs1, 1);
+			item = Zotero.Items.get(attachmentIDs1[0]);
+			assert.isTrue(item.isImportedAttachment());
+			assert.equal(item.getField('title'), 'Snapshot');
+
+			// Double check snapshot html file has content
+			let attachmentDirectory = Zotero.Attachments.getStorageDirectory(item).path;
+			let path = OS.Path.join(attachmentDirectory, 'attachment.html');
+			assert.isTrue(await OS.File.exists(path));
+			let contents = await Zotero.File.getContentsAsync(path);
+			let expectedContents = await Zotero.File.getContentsAsync(indexPath);
+			assert.equal(contents, expectedContents);
+
+			// Then PDF is saved second
+			assert.lengthOf(attachmentIDs2, 1);
+			item = Zotero.Items.get(attachmentIDs2[0]);
+			assert.isTrue(item.isImportedAttachment());
+			assert.equal(item.getField('title'), 'PDF');
+		});
 	});
 
 	describe("/connector/saveSnapshot", function () {
