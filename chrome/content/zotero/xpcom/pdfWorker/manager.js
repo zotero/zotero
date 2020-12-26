@@ -157,10 +157,9 @@ class PDFWorker {
 			if (!this.isPDFAttachment(attachment)) {
 				throw new Error('not a valid attachment');
 			}
-			let ids = attachment.getAnnotations();
+			let items = attachment.getAnnotations();
 			let annotations = [];
-			for (let id of ids) {
-				let item = await Zotero.Items.getAsync(id);
+			for (let item of items) {
 				annotations.push({
 					id: item.key,
 					type: item.annotationType,
@@ -222,10 +221,9 @@ class PDFWorker {
 			}
 			// TODO: Remove when fixed
 			attachment._loaded.childItems = true;
-			let ids = attachment.getAnnotations();
+			let items = attachment.getAnnotations();
 			let existingAnnotations = [];
-			for (let id of ids) {
-				let item = await Zotero.Items.getAsync(id);
+			for (let item of items) {
 				existingAnnotations.push({
 					id: item.key,
 					type: item.annotationType,

@@ -37,9 +37,9 @@ class ReaderInstance {
 		buf = new Uint8Array(buf).buffer;
 		// TODO: Remove when fixed
 		item._loaded.childItems = true;
-		let ids = item.getAnnotations();
-		let annotations = (await Promise.all(ids.map(id => this._getAnnotation(id)))).filter(x => x);
-		this.annotationItemIDs = ids;
+		let annotationItems = item.getAnnotations();
+		let annotations = (await Promise.all(annotationItems.map(x => this._getAnnotation(x)))).filter(x => x);
+		this.annotationItemIDs = annotationItems.map(x => x.id);
 		state = state || await this._loadState();
 		this._state = state;
 		this._postMessage({
@@ -439,9 +439,8 @@ class ReaderInstance {
 	 * @param itemID
 	 * @returns {Object|null}
 	 */
-	async _getAnnotation(itemID) {
+	async _getAnnotation(item) {
 		try {
-			let item = Zotero.Items.get(itemID);
 			if (!item || !item.isAnnotation()) {
 				return null;
 			}
@@ -704,10 +703,10 @@ class Reader {
 				let item = Zotero.Items.get(readerWindow._itemID);
 				// TODO: Remove when fixed
 				item._loaded.childItems = true;
-				let annotationItemIDs = item.getAnnotations();
-				readerWindow.annotationItemIDs = annotationItemIDs;
-				let affectedAnnotationIds = annotationItemIDs.filter(annotationID => {
-					let annotation = Zotero.Items.get(annotationID);
+				let annotationItems = item.getAnnotations();
+				readerWindow.annotationItemIDs = annotationItems.map(x => x.id);
+				let affectedAnnotationIds = annotationItems.filter(annotation => {
+					let annotationID = annotation.id;
 					let imageAttachmentID = null;
 					annotation._loaded.childItems = true;
 					let annotationAttachments = annotation.getAttachments();

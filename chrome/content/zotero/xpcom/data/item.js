@@ -3670,7 +3670,7 @@ Zotero.Item.prototype.getAnnotations = function (includeTrashed) {
 	var cacheKey = 'with' + (includeTrashed ? '' : 'out') + 'Trashed';
 	
 	if (this._annotations[cacheKey]) {
-		return [...this._annotations[cacheKey]];
+		return Zotero.Items.get([...this._annotations[cacheKey]]);
 	}
 	
 	var rows = this._annotations.rows.concat();
@@ -3680,7 +3680,7 @@ Zotero.Item.prototype.getAnnotations = function (includeTrashed) {
 	}
 	var ids = rows.map(row => row.itemID);
 	this._annotations[cacheKey] = ids;
-	return ids;
+	return Zotero.Items.get(ids);
 };
 
 

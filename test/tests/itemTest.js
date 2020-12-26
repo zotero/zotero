@@ -1341,14 +1341,14 @@ describe("Zotero.Item", function () {
 				await annotation2.saveTx();
 			});
 			
-			it("should return ids of annotations not in trash", async function () {
-				var ids = attachment.getAnnotations();
-				assert.sameMembers(ids, [annotation1.id]);
+			it("should return annotations not in trash", async function () {
+				var items = attachment.getAnnotations();
+				assert.sameMembers(items, [annotation1]);
 			});
 			
-			it("should return ids of annotations in trash if includeTrashed=true", async function () {
-				var ids = attachment.getAnnotations(true);
-				assert.sameMembers(ids, [annotation1.id, annotation2.id]);
+			it("should return annotations in trash if includeTrashed=true", async function () {
+				var items = attachment.getAnnotations(true);
+				assert.sameMembers(items, [annotation1, annotation2]);
 			});
 		});
 	});
