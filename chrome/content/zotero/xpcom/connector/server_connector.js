@@ -853,7 +853,7 @@ Zotero.Server.Connector.SaveItems.prototype = {
 			cookieSandbox,
 			proxy
 		});
-		// This is a bit tricky. When saving items, the call back `onTopLevelItemsDone` will
+		// This is a bit tricky. When saving items, the callback `onTopLevelItemsDone` will
 		// return the HTTP request to the connector. Then it may spend some time fetching
 		// PDFs. In the meantime, the connector will create a snapshot and send it along to
 		// the `saveSingleFile` endpoint, which quickly adds the data to the session and

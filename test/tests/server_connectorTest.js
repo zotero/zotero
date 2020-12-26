@@ -1139,7 +1139,10 @@ describe("Connector Server", function () {
 			});
 
 			// Promise for snapshot having been saved
-			let singleFileDone = Zotero.Promise.defer();
+			let singleFileResolve;
+			let singleFileDone = new Zotero.Promise(function (resolve, reject) {
+				singleFileResolve = resolve;
+			});
 
 			// Special handler to delay writing of file response for 5 seconds to allow
 			// `saveSingleFile` request to finish first before getting PDF
@@ -1152,7 +1155,7 @@ describe("Connector Server", function () {
 						response.processAsync();
 						// Delay the PDF processing (simulates a long network request) so that
 						// the SingleFile request below completes first.
-						await singleFileDone.promise;
+						await singleFileDone;
 						httpd._handler._writeFileResponse(request, file, response, 0, file.fileSize);
 					}
 				}
@@ -1219,7 +1222,7 @@ describe("Connector Server", function () {
 			assert.equal(req.status, 201);
 
 			// Trigger PDF saving to complete now that SingleFile is done.
-			singleFileDone.resolve();
+			singleFileResolve();
 
 			// Await all item saves
 			await promise;
