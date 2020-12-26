@@ -562,8 +562,8 @@ Zotero.Attachments = new function(){
 			attachmentItem.attachmentPath = 'storage:' + options.filename;
 			await attachmentItem.saveTx(
 				Object.assign(
-					options.saveOptions || {},
-					{ notifierQueue }
+					{ notifierQueue },
+					options.saveOptions || {}
 				)
 			);
 			
