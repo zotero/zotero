@@ -274,5 +274,16 @@ describe("Zotero.Annotations", function() {
 				assert.deepEqual(annotation[itemProp], exampleImageAlt[prop], `'${prop}' doesn't match`);
 			}
 		});
+		
+		it("should remove empty fields", async function () {
+			var annotation = await Zotero.Annotations.saveFromJSON(attachment, exampleHighlight);
+			var json = Object.assign({}, exampleHighlight);
+			json.comment = '';
+			json.pageLabel = '';
+			await Zotero.Annotations.saveFromJSON(attachment, json);
+			
+			assert.equal(annotation.annotationComment, '');
+			assert.equal(annotation.annotationPageLabel, '');
+		});
 	});
 })

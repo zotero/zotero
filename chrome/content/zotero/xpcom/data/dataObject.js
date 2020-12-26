@@ -746,7 +746,7 @@ Zotero.DataObject.prototype._getChangedField = function (field) {
  * Get either the unsaved value of a field or the saved value if unchanged since the last save
  */
 Zotero.DataObject.prototype._getLatestField = function (field) {
-	return this._changedData[field] || this['_' + field];
+	return this._changedData[field] !== undefined ? this._changedData[field] : this['_' + field];
 };
 
 /**
