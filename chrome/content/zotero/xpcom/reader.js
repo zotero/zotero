@@ -446,15 +446,14 @@ class ReaderInstance {
 			}
 			// TODO: Remve when fixed
 			item._loaded.childItems = true;
-			item = await Zotero.Annotations.toJSON(item);
-			item.id = item.key;
-			item.image = item.image;
-			delete item.key;
-			for (let key in item) {
-				item[key] = item[key] || '';
+			let json = await Zotero.Annotations.toJSON(item);
+			json.id = item.key;
+			delete json.key;
+			for (let key in json) {
+				json[key] = json[key] || '';
 			}
-			item.tags = item.tags || [];
-			return item;
+			json.tags = json.tags || [];
+			return json;
 		}
 		catch (e) {
 			Zotero.logError(e);
