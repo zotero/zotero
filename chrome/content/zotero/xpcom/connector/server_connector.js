@@ -270,8 +270,6 @@ Zotero.Server.Connector.SaveSession.prototype.update = async function (targetID,
 				for (let item of this._items) {
 					await item.eraseTx();
 				}
-				// Remove pending attachments (will be recreated by calling `save...` below)
-				this.pendingAttachments = [];
 				let actionUC = Zotero.Utilities.capitalize(this._action);
 				// saveItems has a different signature with the session as the first argument
 				let params = [targetID, this._requestData];
@@ -855,7 +853,7 @@ Zotero.Server.Connector.SaveItems.prototype = {
 			cookieSandbox,
 			proxy
 		});
-		// This is a bit tricky. When saving items, the call back`onTopLevelItemsDone` will
+		// This is a bit tricky. When saving items, the callback `onTopLevelItemsDone` will
 		// return the HTTP request to the connector. Then it may spend some time fetching
 		// PDFs. In the meantime, the connector will create a snapshot and send it along to
 		// the `saveSingleFile` endpoint, which quickly adds the data to the session and
@@ -863,22 +861,27 @@ Zotero.Server.Connector.SaveItems.prototype = {
 		// the session switches libraries and we need to save again). So the pending
 		// attachments exist and have already been saved by the time this `saveItems`
 		// promise resolves and we continue executing. So we save the number of existing
-		// attachments before that so prevent double saving.
-		let hasPendingAttachments;
+		// attachments before that to prevent double saving.
+		let hadPendingAttachments = session.pendingAttachments.length > 0;
+		if (hadPendingAttachments) {
+			// If we have pending attachments then we are saving again by switching to
+			// a `filesEditable` library. So we clear the pendingAttachments since they
+			// get added again right below here in `saveItems`
+			session.pendingAttachments = [];
+		}
 		let items = await itemSaver.saveItems(
 			data.items,
 			function (attachment, progress, error) {
 				session.onProgress(attachment, progress, error);
 			},
 			(...args) => {
-				hasPendingAttachments = session.pendingAttachments.length > 0;
 				if (onTopLevelItemsDone) onTopLevelItemsDone(...args);
 			},
 			function (parentItemID, attachment) {
 				session.pendingAttachments.push([parentItemID, attachment]);
 			}
 		);
-		if (hasPendingAttachments) {
+		if (hadPendingAttachments) {
 			// If the session has snapshotContent already (from switching to a `filesEditable` library
 			// then we can save `pendingAttachments` now
 			if (data.snapshotContent) {
@@ -1220,7 +1223,9 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 			// pending attachment
 			else if (data.hasOwnProperty('singleFile')) {
 				let session = Zotero.Server.Connector.SessionManager.get(data.sessionID);
-				session.pendingAttachments.push([itemID, { title: data.title, url: data.url }]);
+				session.pendingAttachments = [
+					[itemID, { title: data.title, url: data.url }]
+				];
 			}
 			else if (library.filesEditable) {
 				// Old connector will not use SingleFile so importFromURL now
