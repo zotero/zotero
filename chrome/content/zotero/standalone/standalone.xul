@@ -416,6 +416,7 @@
 			</toolbaritem>
 		</toolbar>
 	</toolbox>
+	<!-- Keep in sync with Zotero.test conditional block in overlay.js -->
 	<div xmlns="http://www.w3.org/1999/xhtml" id="tab-bar-container"/>
 	<!--<toolbarpalette/>
 

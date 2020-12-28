@@ -41,6 +41,15 @@ var ZoteroOverlay = new function () {
 				throw new Error("Skipping loading");
 			}
 			
+			// Keep in sync with standalone.xul
+			if (Zotero.test) {
+				let ns = 'http://www.w3.org/1999/xhtml';
+				let div = document.createElementNS(ns, 'div');
+				let beforeNode = document.getElementById('browser');
+				div.id = 'tab-bar-container';
+				beforeNode.parentNode.insertBefore(div, beforeNode);
+			}
+			
 			ZoteroPane.init();
 		}
 		catch (e) {
