@@ -2249,6 +2249,14 @@ Zotero.Item.prototype.isEmbeddedImageAttachment = function() {
 
 
 /**
+ * @return {Boolean} - Returns true if item is a stored or linked PDF attachment
+ */
+Zotero.Item.prototype.isPDFAttachment = function () {
+	return this.isAttachment() && this.attachmentContentType == 'application/pdf';
+};
+
+
+/**
  * Returns number of child attachments of item
  *
  * @param	{Boolean}	includeTrashed		Include trashed child items in count
