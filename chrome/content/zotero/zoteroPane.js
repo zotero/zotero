@@ -4206,7 +4206,7 @@ var ZoteroPane = new function()
 			if (fileExists && !redownload) {
 				Zotero.debug("Opening " + path);
 				Zotero.Notifier.trigger('open', 'file', item.id);
-				launchFile(path, item.attachmentContentType, item.id);
+				await launchFile(path, item.attachmentContentType, item.id);
 				continue;
 			}
 			
@@ -4252,7 +4252,7 @@ var ZoteroPane = new function()
 			
 			Zotero.debug("Opening " + path);
 			Zotero.Notifier.trigger('open', 'file', item.id);
-			launchFile(path, item.attachmentContentType, item.id);
+			await launchFile(path, item.attachmentContentType, item.id);
 		}
 	});
 	
