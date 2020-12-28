@@ -594,6 +594,9 @@ Zotero.Items = function() {
 			});
 		};
 		
+		//
+		// Attachments
+		//
 		var sql = "SELECT parentItemID, A.itemID, value AS title, "
 			+ "CASE WHEN DI.itemID IS NULL THEN 0 ELSE 1 END AS trashed "
 			+ "FROM itemAttachments A "
@@ -742,9 +745,11 @@ Zotero.Items = function() {
 			ids.forEach(id => setAnnotationItem(id, []));
 		}
 		
-		// Mark all top-level items as having child items loaded
-		sql = "SELECT itemID FROM items I WHERE libraryID=?" + idSQL + " AND itemID NOT IN "
-			+ "(SELECT itemID FROM itemAttachments UNION SELECT itemID FROM itemNotes)";
+		// Mark either all passed items or all items as having child items loaded
+		sql = "SELECT itemID FROM items I WHERE libraryID=?";
+		if (idSQL) {
+			sql += idSQL;
+		}
 		yield Zotero.DB.queryAsync(
 			sql,
 			params,
