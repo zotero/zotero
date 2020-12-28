@@ -2541,8 +2541,14 @@ Zotero.Translate.Export.prototype._prepareTranslation = Zotero.Promise.method(fu
 	
 	function rest() {
 		// export file data, if requested
-		if(this._displayOptions["exportFileData"]) {
-			this.location = this._itemGetter.exportFiles(this.location, this.translator[0].target);
+		if (this._displayOptions.exportFileData) {
+			this.location = this._itemGetter.exportFiles(
+				this.location,
+				this.translator[0].target,
+				{
+					includeAnnotations: this._displayOptions.includeAnnotations
+				}
+			);
 		}
 
 		// initialize IO

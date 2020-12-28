@@ -2059,7 +2059,7 @@ describe("Zotero.Translate.ItemGetter", function() {
 						
 						// saveFile function
 						assert.isFunction(attachment.saveFile, prefix + 'has saveFile function' + suffix);
-						attachment.saveFile(attachment.defaultPath);
+						yield attachment.saveFile(attachment.defaultPath);
 						assert.equal(attachment.path, OS.Path.join(exportDir, OS.Path.normalize(attachment.defaultPath)), prefix + 'path is set correctly after saveFile call' + suffix);
 						
 						let fileExists = yield OS.File.exists(attachment.path);
@@ -2067,8 +2067,11 @@ describe("Zotero.Translate.ItemGetter", function() {
 						fileExists = yield OS.File.exists(attachment.localPath);
 						assert.isTrue(fileExists, prefix + 'file was not removed from original location' + suffix);
 						
-						assert.throws(attachment.saveFile.bind(attachment, attachment.defaultPath), /^ERROR_FILE_EXISTS /, prefix + 'saveFile does not overwrite existing file by default' + suffix);
-						assert.throws(attachment.saveFile.bind(attachment, 'file/../../'), /./, prefix + 'saveFile does not allow exporting outside export directory' + suffix);
+						let e;
+						e = yield getPromiseError(attachment.saveFile(attachment.defaultPath));
+						assert.match(e.message, /^ERROR_FILE_EXISTS /, prefix + 'saveFile does not overwrite existing file by default' + suffix);
+						e = yield getPromiseError(attachment.saveFile('file/../../'));
+						assert.match(e.message, /./, prefix + 'saveFile does not allow exporting outside export directory' + suffix);
 						/** TODO: check if overwriting existing file works **/
 					}
 					

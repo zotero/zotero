@@ -34,8 +34,6 @@ const OPTION_PREFIX = "export-option-";
 // Class to provide options for export
 
 var Zotero_File_Interface_Export = new function() {
-	this.init = init;
-	this.updateOptions = updateOptions;
 	this.accept = accept;
 	this.cancel = cancel;
 	
@@ -44,7 +42,7 @@ var Zotero_File_Interface_Export = new function() {
 	/*
 	 * add options to export
 	 */
-	function init() {
+	this.init = function () {
 		// Set font size from pref
 		var sbc = document.getElementById('zotero-export-options-container');
 		Zotero.setFontSize(sbc);
@@ -82,10 +80,25 @@ var Zotero_File_Interface_Export = new function() {
 					// right now, option interface supports only boolean values, which
 					// it interprets as checkboxes
 					if(typeof(translators[i].displayOptions[option]) == "boolean") {
-						var checkbox = document.createElement("checkbox");
+						let checkbox = document.createElement("checkbox");
 						checkbox.setAttribute("id", OPTION_PREFIX+option);
 						checkbox.setAttribute("label", optionLabel);
 						optionsBox.insertBefore(checkbox, charsetBox);
+						
+						// Add "Include Annotations" after "Export Files"
+						if (option == 'exportFileData') {
+							checkbox.onclick = () => {
+								setTimeout(() => this.updateAnnotationsCheckbox());
+							};
+							
+							checkbox = document.createElement("checkbox");
+							checkbox.setAttribute("id", OPTION_PREFIX + 'includeAnnotations');
+							checkbox.setAttribute(
+								"label",
+								Zotero.getString('exportOptions.includeAnnotations')
+							);
+							optionsBox.insertBefore(checkbox, charsetBox);
+						}
 					}
 					
 					addedOptions[option] = true;
@@ -108,13 +121,13 @@ var Zotero_File_Interface_Export = new function() {
 			_charsets = Zotero_Charset_Menu.populate(document.getElementById(OPTION_PREFIX+"exportCharset"), true);
 		}
 		
-		updateOptions(Zotero.Prefs.get("export.translatorSettings"));
+		this.updateOptions(Zotero.Prefs.get("export.translatorSettings"));
 	}
 	
 	/*
 	 * update translator-specific options
 	 */
-	function updateOptions(optionString) {
+	this.updateOptions = function (optionString) {
 		// get selected translator
 		var index = document.getElementById("format-menu").selectedIndex;
 		var translatorOptions = window.arguments[0].translators[index].displayOptions;
@@ -133,7 +146,9 @@ var Zotero_File_Interface_Export = new function() {
 			var node = optionsBox.childNodes[i];
 			// skip non-options
 			if(node.id.length <= OPTION_PREFIX.length
-					|| node.id.substr(0, OPTION_PREFIX.length) != OPTION_PREFIX) {
+					|| node.id.substr(0, OPTION_PREFIX.length) != OPTION_PREFIX
+					// Handled separately by updateAnnotationsCheckbox()
+					|| node.id == 'export-option-includeAnnotations') {
 				continue;
 			}
 			
@@ -161,6 +176,10 @@ var Zotero_File_Interface_Export = new function() {
 			}
 		}
 		
+		this.updateAnnotationsCheckbox(
+			(options && options.includeAnnotations) ? options.includeAnnotations : false
+		);
+		
 		// handle charset popup
 		if(_charsets && translatorOptions && translatorOptions.exportCharset) {
 			optionsBox.hidden = undefined;
@@ -180,6 +199,21 @@ var Zotero_File_Interface_Export = new function() {
 		
 		window.sizeToContent();
 	}
+	
+	this.updateAnnotationsCheckbox = function (defaultValue) {
+		var filesCheckbox = document.getElementById(OPTION_PREFIX + 'exportFileData');
+		var annotationsCheckbox = document.getElementById(OPTION_PREFIX + 'includeAnnotations');
+		if (filesCheckbox.hidden) {
+			annotationsCheckbox.hidden = true;
+			annotationsCheckbox.checked = false;
+			return;
+		}
+		annotationsCheckbox.hidden = false;
+		annotationsCheckbox.disabled = !filesCheckbox.checked;
+		if (defaultValue !== undefined) {
+			annotationsCheckbox.checked = defaultValue;
+		}
+	};
 	
 	/*
 	 * make option array reflect status
@@ -208,6 +242,13 @@ var Zotero_File_Interface_Export = new function() {
 			} else if(typeof(defValue) == "boolean") {
 				displayOptions[option] = !!element.checked;
 			}
+		}
+		
+		// If "Export Files" is shown, add "Include Annotations" checkbox value
+		if (optionsAvailable && optionsAvailable.exportFileData !== undefined) {
+			let elem1 = document.getElementById(OPTION_PREFIX + 'exportFileData');
+			let elem2 = document.getElementById(OPTION_PREFIX + 'includeAnnotations');
+			displayOptions.includeAnnotations = elem1.checked && elem2.checked;
 		}
 		
 		// save options
