@@ -53,7 +53,7 @@ describe("Zotero.Annotations", function() {
 		"key": "QD32MQJF",
 		"type": "image",
 		"isAuthor": true,
-		"imageURL": "zotero://attachment/library/items/LB417FR4",
+		"image": "zotero://attachment/library/items/LB417FR4",
 		"comment": "This is a comment",
 		"color": "#ffec00",
 		"pageLabel": "XVI",
@@ -136,7 +136,7 @@ describe("Zotero.Annotations", function() {
 			annotation.addTag("chemistry");
 			await annotation.saveTx();
 			await Zotero.Tags.setColor(annotation.libraryID, "math", "#ff0000", 0);
-			var json = Zotero.Annotations.toJSON(annotation);
+			var json = await Zotero.Annotations.toJSON(annotation);
 			
 			assert.sameMembers(Object.keys(json), Object.keys(exampleHighlight));
 			for (let prop of Object.keys(exampleHighlight)) {
@@ -161,7 +161,7 @@ describe("Zotero.Annotations", function() {
 				annotation[itemProp] = exampleNoteAlt[prop];
 			}
 			await annotation.saveTx();
-			var json = Zotero.Annotations.toJSON(annotation);
+			var json = await Zotero.Annotations.toJSON(annotation);
 			
 			assert.sameMembers(Object.keys(json), Object.keys(exampleNote));
 			for (let prop of Object.keys(exampleNote)) {
@@ -194,22 +194,31 @@ describe("Zotero.Annotations", function() {
 			for (let i = 0; i < imageData.length; i++) {
 				array[i] = imageData.charCodeAt(i);
 			}
+			var blob = new Blob([array], { type: 'image/png' });
 			var imageAttachment = await Zotero.Attachments.importEmbeddedImage({
-				blob: new Blob([array], { type: 'image/png' }),
+				blob,
 				parentItemID: annotation.id
 			});
 			
-			var json = Zotero.Annotations.toJSON(annotation);
+			var json = await Zotero.Annotations.toJSON(annotation);
 			
 			assert.sameMembers(Object.keys(json), Object.keys(exampleImage));
 			for (let prop of Object.keys(exampleImage)) {
-				if (prop == 'imageURL'
+				if (prop == 'image'
 						|| prop == 'dateModified') {
 					continue;
 				}
 				assert.deepEqual(json[prop], exampleImage[prop], `'${prop}' doesn't match`);
 			}
-			assert.equal(json.imageURL, `zotero://attachment/library/items/${imageAttachment.key}`);
+			
+			var imageVal = await new Zotero.Promise((resolve) => {
+				var reader = new FileReader();
+				reader.readAsDataURL(blob);
+				reader.onloadend = function() {
+					resolve(reader.result);
+				}
+			});
+			assert.equal(json.image, imageVal);
 			
 			await annotation.eraseTx();
 		});
@@ -229,7 +238,7 @@ describe("Zotero.Annotations", function() {
 				annotation[itemProp] = exampleGroupHighlightAlt[prop];
 			}
 			await annotation.saveTx();
-			var json = Zotero.Annotations.toJSON(annotation);
+			var json = await Zotero.Annotations.toJSON(annotation);
 			
 			assert.isFalse(json.isAuthor);
 			assert.equal(json.authorName, 'Kate Smith');
