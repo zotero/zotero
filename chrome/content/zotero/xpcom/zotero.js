@@ -934,6 +934,10 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.removeTempDirectory = function () {
 		return Zotero.DataDirectory.removeSubdirectory('tmp');
 	}
+
+	this.getScriptsDirectory = function () {
+		return Zotero.File.pathToFile(Zotero.DataDirectory.getSubdirectory('scripts', true));
+	};
 	
 	
 	this.openMainWindow = function () {

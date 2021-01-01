@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+
+    Copyright © 2021 Corporation for Digital Scholarship
+                     Vienna, Virginia, USA
+                     https://www.zotero.org
+
+    This file is part of Zotero.
+
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+
+    ***** END LICENSE BLOCK *****
+-->
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		title="Save As"
+		width="400"
+		buttons="cancel,accept"
+		buttondisabledaccept="true"
+		ondialogaccept="accept(); return false;"
+		onload="onLoad()">
+
+	<script src="chrome://zotero/content/include.js"/>
+	<script src="saveJS.js"/>
+
+	<hbox align="center">
+		<label for="save-as">Save as:</label>
+		<textbox
+			id="save-as"
+			onkeypress="onKeyPress(event, this)"
+			flex="1"
+			maxlength="50"
+		/>
+	</hbox>
+	<vbox id="error-section" hidden="true">
+		<label style="color: red; margin-top: 1em;">File already exists.</label>
+		<checkbox
+			id="force-write"
+			label="Overwrite with new contents"
+		/>
+	</vbox>
+
+</dialog>

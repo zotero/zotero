@@ -1,0 +1,90 @@
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+
+    Copyright © 2021 Corporation for Digital Scholarship
+                     Vienna, Virginia, USA
+                     https://www.zotero.org
+
+    This file is part of Zotero.
+
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+
+    ***** END LICENSE BLOCK *****
+-->
+
+<html>
+	<head>
+		<title>Run JavaScript - Untitled*</title>
+		<link href="chrome://zotero/skin/runJS.css" rel="stylesheet"/>
+	</head>
+	<body>
+		<nav>
+			<button id="load" onclick="load()">
+				<img src="chrome://scaffold/skin/load.png">
+				Open
+			</button>
+
+			<button id="save" onclick="save()" class="disabled">
+				<img src="chrome://scaffold/skin/save.png">
+				Save
+			</button>
+
+			<button id="save-as" onclick="saveAs()">
+				<img src="chrome://scaffold/skin/saveToZotero.png">
+				Save As
+			</button>
+
+			<div class="toolbar-spacer"></div>
+
+			<button id="run" onclick="run()">
+				<img src="chrome://scaffold/skin/doWeb.png">
+				Run
+			</button>
+
+			<div style="flex: 1;"></div>
+
+			<button id="help-button" onclick="openHelp()">
+				<img src="chrome://zotero/skin/lifebuoy.png">
+				Help
+			</button>
+		</nav>
+		
+		<main>
+			<div class="textbox-container">
+				<div class="textbox-header">
+					<label class="textbox-label" for="editor-code">Code:</label>
+					<label id="run-as-async-label" for="run-as-async">
+						<input id="run-as-async" type="checkbox" onclick="update()">
+						Run as async function
+					</label>
+				</div>
+				<iframe
+						src="chrome://zotero/content/ace/ace.html"
+						id="editor-code"
+						class="editor-code"
+				></iframe>
+			</div>
+			
+			<div class="textbox-container">
+				<div class="textbox-header">
+					<label id="result-label" class="textbox-label" for="result"/>
+				</div>
+				<textarea id="result" readonly></textarea>
+			</div>
+		</main>
+		
+		<script src="../../include.js"></script>
+		<script src="runJS.js"></script>
+	</body>
+</html>
