@@ -31,6 +31,7 @@ Zotero.Debug = new function () {
 	var _consoleViewer = false;
 	var _consoleViewerQueue = [];
 	var _consoleViewerListener;
+	var _listeners = [];
 	
 	/**
 	 * Initialize debug logging
@@ -142,22 +143,23 @@ Zotero.Debug = new function () {
 			message += '\n' + this.stackToString(stack);
 		}
 		
-		if (_console || _consoleViewer) {
+		if (_console || _consoleViewer || _listeners.length) {
 			var output = '(' + level + ')' + deltaStr + ': ' + message;
 			if (Zotero.isFx && !Zotero.isBookmarklet) {
 				// Text console
 				if (_console) {
 					dump("zotero" + output + "\n\n");
 				}
+				
+				// Remove ANSI color codes for the viewer and listeners. We could replace this with
+				// HTML for the viewer, but it's probably unnecessarily distracting/alarming to show
+				// the red. Devs who care about times should just use a terminal.
+				if (slowPrefix) {
+					output = output.replace(slowPrefix, '').replace(slowSuffix, '');
+				}
+				
 				// Console window
 				if (_consoleViewer) {
-					// Remove ANSI color codes. We could replace this with HTML, but it's probably
-					// unnecessarily distracting/alarming to show the red in the viewer. Devs who care
-					// about times should just use a terminal.
-					if (slowPrefix) {
-						output = output.replace(slowPrefix, '').replace(slowSuffix, '');
-					}
-					
 					// If there's a listener, pass line immediately
 					if (_consoleViewerListener) {
 						_consoleViewerListener(output);
@@ -165,6 +167,13 @@ Zotero.Debug = new function () {
 					// Otherwise add to queue
 					else {
 						_consoleViewerQueue.push(output);
+					}
+				}
+				
+				// Other listeners
+				if (_listeners.length) {
+					for (let listener of _listeners) {
+						listener(output);
 					}
 				}
 			} else if(window.console) {
@@ -230,6 +239,21 @@ Zotero.Debug = new function () {
 	});
 	
 	
+	this.addListener = function (listener) {
+		this.enabled = true;
+		_listeners.push(listener);
+	};
+	
+	
+	this.removeListener = function (listener) {
+		var pos = _listeners.indexOf(listener);
+		if (pos != -1) {
+			_listeners.splice(pos, 1);
+		}
+		this.updateEnabled();
+	};
+	
+	
 	this.getConsoleViewerOutput = function () {
 		var queue = _output.concat(_consoleViewerQueue);
 		_consoleViewerQueue = [];
@@ -262,7 +286,7 @@ Zotero.Debug = new function () {
 	
 	
 	this.updateEnabled = function () {
-		this.enabled = _console || _consoleViewer || _store;
+		this.enabled = _console || _consoleViewer || _store || _listeners.length;
 	};
 	
 	
