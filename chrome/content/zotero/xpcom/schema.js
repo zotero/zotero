@@ -160,6 +160,13 @@ Zotero.Schema = new function(){
 			await Zotero.DB.backupDatabase(false, true);
 		}
 		
+		var logLines = [];
+		var listener = function (line) {
+			logLines.push(line);
+		}
+		Zotero.Debug.addListener(listener);
+		
+		var updated;
 		await Zotero.DB.queryAsync("PRAGMA foreign_keys = false");
 		try {
 			// If bundled global schema file is newer than DB, apply it
@@ -182,7 +189,7 @@ Zotero.Schema = new function(){
 				await _loadGlobalSchema(data, bundledGlobalSchema.version);
 			}
 			
-			var updated = await Zotero.DB.executeTransaction(async function (conn) {
+			updated = await Zotero.DB.executeTransaction(async function (conn) {
 				var updated = await _updateSchema('system');
 				
 				// Update custom tables if they exist so that changes are in
@@ -210,6 +217,28 @@ Zotero.Schema = new function(){
 		}
 		finally {
 			await Zotero.DB.queryAsync("PRAGMA foreign_keys = true");
+			
+			Zotero.Debug.removeListener(listener);
+			
+			// If upgrade succeeded or failed (but not if there was nothing to do), save a log file
+			// in logs/upgrade.log in the data directory
+			if (updated || updated === undefined) {
+				Zotero.getSystemInfo()
+					.then(async function (sysInfo) {
+						var logDir = OS.Path.join(Zotero.DataDirectory.dir, 'logs');
+						Zotero.File.createDirectoryIfMissing(logDir)
+						
+						await OS.Path
+						var output = Zotero.getErrors(true).join('\n\n')
+							+ "\n\n" + sysInfo + "\n\n"
+							+ "=========================================================\n\n"
+							+ logLines.join('\n\n');
+						return Zotero.File.putContentsAsync(
+							OS.Path.join(logDir, 'upgrade.log'),
+							output
+						);
+					});
+			}
 		}
 		
 		if (updated) {
