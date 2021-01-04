@@ -225,7 +225,8 @@ input {
 	margin-inline-end: -4px;
 	width: 5px !important;
 	min-width: 5px;
-	position: relative;
+	/* Create a separate stacking context to be on top */
+	opacity: 0.99;
 	background-image: none;
 }
 
