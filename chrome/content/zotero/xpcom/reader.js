@@ -46,7 +46,7 @@ class ReaderInstance {
 			annotations,
 			state,
 			location,
-			promptImport: !!Zotero.PDF.hasUnmachedAnnotations[this._itemID],
+			promptImport: item.attachmentHasUnimportedAnnotations,
 			showItemPaneToggle: this._showItemPaneToggle,
 			sidebarWidth: this._sidebarWidth,
 			sidebarOpen: this._sidebarOpen,
@@ -811,8 +811,7 @@ class Reader {
 	async triggerAnnotationsImportCheck(itemID) {
 		let item = await Zotero.Items.getAsync(itemID);
 		let mtime = await item.attachmentModificationTime;
-		let dateModified = Zotero.Date.dateToISO(new Date(mtime));
-		if (!Zotero.PDF.dateChecked[itemID] || Zotero.PDF.dateChecked[itemID] < dateModified) {
+		if (item.attachmentLastProcessedModificationTime < mtime) {
 			await Zotero.PDFWorker.import(itemID, false);
 		}
 	}

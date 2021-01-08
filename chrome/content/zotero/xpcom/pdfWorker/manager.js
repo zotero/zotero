@@ -242,23 +242,24 @@ class PDFWorker {
 					annotation.key = Zotero.DataObjectUtilities.generateKey();
 					await Zotero.Annotations.saveFromJSON(attachment, annotation);
 				}
-				Zotero.PDF.hasUnmachedAnnotations[itemID] = false;
+				attachment.attachmentHasUnimportedAnnotations = false;
 			}
 			else {
-				Zotero.PDF.hasUnmachedAnnotations[itemID] = !!annotations.length;
+				attachment.attachmentHasUnimportedAnnotations = !!annotations.length;
 			}
 			for (let reader of Zotero.Reader._readers) {
 				if (reader._itemID === itemID) {
-					reader.toggleImportPrompt(!!Zotero.PDF.hasUnmachedAnnotations[itemID]);
+					reader.toggleImportPrompt(attachment.attachmentHasUnimportedAnnotations);
 				}
 			}
-			Zotero.PDF.dateChecked[itemID] = Zotero.Date.dateToISO(new Date());
+			attachment.attachmentLastProcessedModificationTime = await attachment.attachmentModificationTime;
+			await attachment.saveTx();
 			return annotations.length;
 		});
 	}
 	
 	/**
-	 * Import children PDF attachment annotations
+	 * Import annotations for each PDF attachment of parent item
 	 *
 	 * @param {Zotero.Item} item
 	 */
