@@ -216,8 +216,10 @@ Zotero.Streamer_Module.prototype = {
 						let library = Zotero.URI.getPathLibrary(data.topic);
 						if (library) {
 							// Ignore if skipped library
-							let skipped = Zotero.Sync.Data.Local.getSkippedLibraries();
-							if (skipped.includes(library.libraryID)) return;
+							if (!Zotero.Sync.Data.Local.filterSkippedLibraries([library]).length) {
+								Zotero.debug("Library not selected for syncing -- skipping");
+								return;
+							}
 							
 							if (data.version && data.version == library.libraryVersion) {
 								Zotero.debug("Library is already up to date");
