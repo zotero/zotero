@@ -1,12 +1,12 @@
 <!ENTITY preferencesCmdMac.label "تنظیمات">
 <!ENTITY preferencesCmdMac.commandkey ",">
-<!ENTITY servicesMenuMac.label "Services">
+<!ENTITY servicesMenuMac.label "خدمات">
 <!ENTITY hideThisAppCmdMac.label "Hide &brandShortName;">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
 <!ENTITY hideOtherAppsCmdMac.label "Hide Others">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "نمایش همه">
-<!ENTITY quitApplicationCmdMac.label "Quit Zotero">
+<!ENTITY quitApplicationCmdMac.label "بستن زوترو">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 
@@ -15,7 +15,7 @@
 <!ENTITY saveCmd.label "ذخیره...">
 <!ENTITY saveCmd.key "S">
 <!ENTITY saveCmd.accesskey "S">
-<!ENTITY pageSetupCmd.label "Page Setup…">
+<!ENTITY pageSetupCmd.label "تنظیم صفحه">
 <!ENTITY pageSetupCmd.accesskey "U">
 <!ENTITY printCmd.label "پرینت">
 <!ENTITY printCmd.key "P">
@@ -23,19 +23,19 @@
 <!ENTITY closeCmd.label "بستن">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
+<!ENTITY manageAttachments.label "مدیریت پیوست‌ها">
 <!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
-<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.label "وارد کردن">
 <!ENTITY importCmd.key "I">
-<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
+<!ENTITY importFromClipboardCmd.label "وارد کردن از حافظه">
 <!ENTITY quitApplicationCmdWin.label "خروج">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "خروج">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY copyCitationCmd.label "Copy Citation">
-<!ENTITY copyBibliographyCmd.label "Copy Bibliography">
+<!ENTITY copyCitationCmd.label "کپی ارجاع‌دهی">
+<!ENTITY copyBibliographyCmd.label "کپی کتاب‌شناسی">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Switch Page Direction">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
@@ -44,24 +44,24 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
+<!ENTITY viewMenu.label "نمایش">
+<!ENTITY layout.label "چیدمان">
+<!ENTITY standardView.label "استاندارد">
+<!ENTITY stackedView.label "انباشت">
 <!ENTITY collectionsPane.label "Collections Pane">
 <!ENTITY itemPane.label "Item Pane">
 <!ENTITY tagSelector.label "Tag Selector">
 <!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY fontSize.label "سایز فونت">
+<!ENTITY noteFontSize.label "سایز فونت یادداشت‌ها">
 
 
 <!ENTITY toolsMenu.label "ابزارها">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector">
+<!ENTITY installConnector.label "نصب متصل‌کننده مرورگر">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "افزودنی‌ها">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "توسعه‌دهنده">
 
 
 <!ENTITY minimizeWindow.key "m">
@@ -80,14 +80,14 @@
 <!ENTITY helpMac.commandkey "؟">
 <!ENTITY aboutProduct.label "درباره زوترو">
 <!ENTITY aboutProduct.accesskey "A">
-<!ENTITY productHelp.label "Support and Documentation">
+<!ENTITY productHelp.label "پشتیبانی و مستندات">
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "اطلاعات عیب‌یابی">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "انجمن گفتگو">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
+<!ENTITY helpReportErrors.label "گزارش خطاها">
 <!ENTITY helpReportErrors.accesskey "R">
 
 <!ENTITY debugOutputLogging.label "Debug Output Logging">
