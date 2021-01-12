@@ -708,18 +708,25 @@ Zotero.DataObject.prototype._markAllDataTypeLoadStates = function (loaded) {
 }
 
 /**
+ * Get either the unsaved value of a field or the saved value if unchanged since the last save
+ */
+Zotero.DataObject.prototype._getLatestField = function (field) {
+        return this._changedData[field] !== undefined ? this._changedData[field] : this['_' + field];
+};
+
+/**
  * Save old version of data that's being changed, to pass to the notifier
  * @param {String} field
- * @param {} oldValue
+ * @param {} value - Old value for old-style 'changed' fields, and new value for 'changedData' fields
  */
-Zotero.DataObject.prototype._markFieldChange = function (field, oldValue) {
+Zotero.DataObject.prototype._markFieldChange = function (field, value) {
 	// New method (changedData)
 	if (field == 'tags') {
-		if (Array.isArray(oldValue)) {
-			this._changedData[field] = [...oldValue];
+		if (Array.isArray(value)) {
+			this._changedData[field] = [...value];
 		}
 		else {
-			this._changedData[field] = oldValue;
+			this._changedData[field] = value;
 		}
 		return;
 	}
@@ -728,21 +735,19 @@ Zotero.DataObject.prototype._markFieldChange = function (field, oldValue) {
 	if (!this.id || this._previousData[field] !== undefined) {
 		return;
 	}
-	if (Array.isArray(oldValue)) {
+	if (Array.isArray(value)) {
 		this._previousData[field] = [];
-		Object.assign(this._previousData[field], oldValue)
+		Object.assign(this._previousData[field], value)
 	}
 	else {
-		this._previousData[field] = oldValue;
+		this._previousData[field] = value;
 	}
 }
 
 
 Zotero.DataObject.prototype.hasChanged = function() {
 	var changed = Object.keys(this._changed).filter(dataType => this._changed[dataType])
-		.concat(
-			Object.keys(this._changedData).filter(dataType => this._changedData[dataType])
-		);
+		.concat(Object.keys(this._changedData));
 	if (changed.length == 1
 			&& changed[0] == 'primaryData'
 			&& Object.keys(this._changed.primaryData).length == 1
