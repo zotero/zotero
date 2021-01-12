@@ -2745,7 +2745,8 @@ var ZoteroPane = new function()
 			'createParent',
 			'renameAttachments',
 			'reindexItem',
-			'importAnnotations'
+			'importAnnotations',
+			'createNoteFromAnnotations'
 		];
 		
 		var m = {};
@@ -2972,6 +2973,10 @@ var ZoteroPane = new function()
 					
 					if (Zotero.PDFWorker.canImport(item)) {
 						show.push(m.importAnnotations);
+					}
+					
+					if (Zotero.EditorInstance.canCreateNoteFromAnnotations(item)) {
+						show.push(m.createNoteFromAnnotations);
 					}
 				}
 				
@@ -4666,7 +4671,16 @@ var ZoteroPane = new function()
 			}
 		}
 	};
-	
+
+	this.createNoteFromSelected = function () {
+		if (!this.canEdit()) {
+			this.displayCannotEditLibraryMessage();
+			return;
+		}
+
+		let item = this.getSelectedItems()[0];
+		Zotero.EditorInstance.createNoteFromAnnotations(item);
+	};
 	
 	this.createEmptyParent = async function (item) {
 		await Zotero.DB.executeTransaction(async function () {

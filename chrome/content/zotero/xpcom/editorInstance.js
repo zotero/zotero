@@ -26,10 +26,10 @@
 class EditorInstance {
 	constructor() {
 		this.instanceID = Zotero.Utilities.randomString();
-		Zotero.Notes.registerEditorInstance(this);
 	}
 
 	async init(options) {
+		Zotero.Notes.registerEditorInstance(this);
 		this.onNavigate = options.onNavigate;
 		this._item = options.item;
 		this._readOnly = options.readOnly;
@@ -135,9 +135,9 @@ class EditorInstance {
 	}
 
 	async insertAnnotations(annotations) {
-		let list = await this._annotationsToInsertionList(annotations);
-		if (list.length) {
-			this._postMessage({ action: 'insertAnnotationsAndCitations', list, pos: -1 });
+		let html = await this._digestAnnotations(annotations);
+		if (html) {
+			this._postMessage({ action: 'insertHtml', pos: -1, html });
 		}
 	}
 	
@@ -158,63 +158,125 @@ class EditorInstance {
 	_handleFontChange = () => {
 		this._postMessage({ action: 'updateFont', font: this._getFont() });
 	}
-	
-	async _digestExternalNote(itemID) {
-		let item = await Zotero.Items.getAsync(itemID);
-		item._loaded.childItems = true;
-		let note = item.note;
-		let attachments = await Zotero.Items.getAsync(item.getAttachments());
-		for (let attachment of attachments) {
-			let path = await attachment.getFilePathAsync();
-			let buf = await OS.File.read(path, {});
-			buf = new Uint8Array(buf).buffer;
-			let blob = new this._iframeWindow.Blob([buf], { type: attachment.attachmentContentType });
-			let clonedAttachment = await Zotero.Attachments.importEmbeddedImage({
-				blob,
-				parentItemID: this._item.id,
-				saveOptions: {
-					notifierData: {
-						noteEditorID: this.instanceID
-					}
-				}
-			});
-			note = note.replace(attachment.key, clonedAttachment.key);
-		}
-		return note;
-	}
 
-	async _annotationsToInsertionList(annotations) {
-		let list = [];
+	async _digestAnnotations(annotations) {
+		let html = '';
 		for (let annotation of annotations) {
 			let attachmentItem = await Zotero.Items.getAsync(annotation.itemId);
 			if (!attachmentItem) {
 				continue;
 			}
-			let item = attachmentItem.parentID && await Zotero.Items.getAsync(attachmentItem.parentID) || attachmentItem;
+			
+			let citationHTML = '';
+			let imageHTML = '';
+			let highlightHTML = '';
+			let commentHTML = '';
+			
 			annotation.uri = Zotero.URI.getItemURI(attachmentItem);
-			if (item !== attachmentItem) {
-				annotation.parentURI = Zotero.URI.getItemURI(item);
-
+			
+			// Citation
+			let parentItem = attachmentItem.parentID && await Zotero.Items.getAsync(attachmentItem.parentID) || attachmentItem;
+			if (parentItem) {
+				annotation.parentURI = Zotero.URI.getItemURI(parentItem);
 				let citationItem = {
-					uris: [Zotero.URI.getItemURI(item)],
-					itemData: Zotero.Cite.System.prototype.retrieveItem(item),
+					uris: [Zotero.URI.getItemURI(parentItem)],
+					// TODO: Find a more elegant way to call this method
+					itemData: Zotero.Cite.System.prototype.retrieveItem(parentItem),
 					locator: annotation.pageLabel
 				};
-
 				annotation.citationItem = citationItem;
-
 				let citation = {
 					citationItems: [citationItem],
 					properties: {}
 				};
-				let formattedCitation = (await this._getFormattedCitationParts(citation)).join(';');
-				list.push({ annotation, citation, formattedCitation });
+				let formatted = (await this._getFormattedCitationParts(citation)).join(';');
+				citationHTML = `<span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">(${formatted})</span>`;
 			}
-			else {
-				list.push({ annotation });
+			
+			// Image
+			if (annotation.image) {
+				let blob = this._dataURLtoBlob(annotation.image);
+				delete annotation.image;
+				let imageAttachment = await Zotero.Attachments.importEmbeddedImage({
+					blob,
+					parentItemID: this._item.id,
+					saveOptions: {
+						notifierData: {
+							noteEditorID: this.instanceID
+						}
+					}
+				});
+
+				// Normalize image dimensions to 1.25 of the print size
+				let rect = annotation.position.rects[0];
+				let rectWidth = rect[2] - rect[0];
+				let rectHeight = rect[3] - rect[1];
+				// Constants from pdf.js
+				const CSS_UNITS = 96.0 / 72.0;
+				const PDFJS_DEFAULT_SCALE = 1.25;
+				let width = Math.round(rectWidth * CSS_UNITS * PDFJS_DEFAULT_SCALE);
+				let height = Math.round(rectHeight * width / rectWidth);
+				imageHTML = `<img data-attachment-key="${imageAttachment.key}" width="${width}" height="${height}" data-annotation="${encodeURIComponent(JSON.stringify(annotation))}"/>`;
+			}
+
+			// Text
+			if (annotation.text) {
+				highlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(annotation))}">"${annotation.text}"</span>`;
+			}
+			
+			// Note
+			if (annotation.comment) {
+				commentHTML = ' ' + annotation.comment;
+			}
+			
+			html += '<p>' + imageHTML + [highlightHTML, citationHTML, commentHTML].filter(x => x).join(' ') + '</p>\n';
+		}
+		return html;
+	}
+
+	async _digestItems(ids) {
+		let html = '';
+		for (let id of ids) {
+			let item = await Zotero.Items.getAsync(id);
+			if (!item) {
+				continue;
+			}
+			if (item.isRegularItem()) {
+				let citation = {
+					citationItems: [{
+						uris: [Zotero.URI.getItemURI(item)],
+						itemData: Zotero.Cite.System.prototype.retrieveItem(item)
+					}],
+					properties: {}
+				};
+				let formatted = (await this._getFormattedCitationParts(citation)).join(';');
+				html += `<p><span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">(${formatted})</span></p>`;
+			}
+			else if (item.isNote()) {
+				// TODO: Remove when fixed
+				item._loaded.childItems = true;
+				let note = item.note;
+				let attachments = await Zotero.Items.getAsync(item.getAttachments());
+				for (let attachment of attachments) {
+					let path = await attachment.getFilePathAsync();
+					let buf = await OS.File.read(path, {});
+					buf = new Uint8Array(buf).buffer;
+					let blob = new (Zotero.getMainWindow()).Blob([buf], { type: attachment.attachmentContentType });
+					let clonedAttachment = await Zotero.Attachments.importEmbeddedImage({
+						blob,
+						parentItemID: this._item.id,
+						saveOptions: {
+							notifierData: {
+								noteEditorID: this.instanceID
+							}
+						}
+					});
+					note = note.replace(attachment.key, clonedAttachment.key);
+				}
+				html += `<p></p>${note}<p></p>`;
 			}
 		}
-		return list;
+		return html;
 	}
 
 	_messageHandler = async (e) => {
@@ -225,40 +287,17 @@ class EditorInstance {
 		switch (message.action) {
 			case 'insertObject': {
 				let { type, data, pos } = message;
-				let list = [];
+				let html = '';
 				if (type === 'zotero/item') {
 					let ids = data.split(',').map(id => parseInt(id));
-					for (let id of ids) {
-						let item = await Zotero.Items.getAsync(id);
-						if (!item) {
-							continue;
-						}
-						
-						if (item.isRegularItem()) {
-							let citation = {
-								citationItems: [{
-									uris: [Zotero.URI.getItemURI(item)],
-									itemData: Zotero.Cite.System.prototype.retrieveItem(item)
-								}],
-								properties: {}
-							};
-
-							let formattedCitation = (await this._getFormattedCitationParts(citation)).join(';');
-
-							list.push({ citation, formattedCitation });
-						}
-						else if (item.isNote()) {
-							let note = await this._digestExternalNote(item.id);
-							list.push({ note });
-						}
-					}
+					html = await this._digestItems(ids);
 				}
 				else if (type === 'zotero/annotation') {
 					let annotations = JSON.parse(data);
-					list = await this._annotationsToInsertionList(annotations);
+					html = await this._digestAnnotations(annotations);
 				}
-				if (list.length) {
-					this._postMessage({ action: 'insertAnnotationsAndCitations', list, pos });
+				if (html) {
+					this._postMessage({ action: 'insertHtml', pos, html });
 				}
 				return;
 			}
@@ -329,9 +368,9 @@ class EditorInstance {
 			}
 			case 'generateCitation': {
 				let { citation, pos } = message;
-				let formattedCitation = (await this._getFormattedCitationParts(citation)).join(';');
-				let list = [{ citation, formattedCitation }];
-				this._postMessage({ action: 'insertAnnotationsAndCitations', list, pos });
+				let formatted = (await this._getFormattedCitationParts(citation)).join(';');
+				let html = `<span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">(${formatted})</span>`;
+				this._postMessage({ action: 'insertHtml', pos, html });
 				return;
 			}
 			case 'subscribeProvider': {
@@ -674,7 +713,7 @@ class EditorInstance {
 				u8arr[n] = bstr.charCodeAt(n);
 			}
 
-			return new this._iframeWindow.Blob([u8arr], { type: mime });
+			return new (Zotero.getMainWindow()).Blob([u8arr], { type: mime });
 		}
 		return null;
 	}
@@ -834,6 +873,37 @@ class EditorInstance {
 		.openWindow(null, 'chrome://zotero/content/integration/quickFormat.xul', '', mode, {
 			wrappedJSObject: io
 		});
+	}
+	
+	static canCreateNoteFromAnnotations(item) {
+		return item.parentID && item.isAttachment() && item.attachmentContentType === 'application/pdf';
+	}
+
+	static async createNoteFromAnnotations(attachmentItem) {
+		if (!this.canCreateNoteFromAnnotations(attachmentItem)) {
+			return;
+		}
+		let annotations = attachmentItem.getAnnotations();
+		if (!annotations.length) {
+			return;
+		}
+		let note = new Zotero.Item('note');
+		note.libraryID = attachmentItem.libraryID;
+		note.parentID = attachmentItem.parentID;
+		await note.saveTx();
+		let editorInstance = new EditorInstance();
+		editorInstance._item = note;
+		let jsonAnnotations = [];
+		for (let annotation of annotations) {
+			annotation._loaded.childItems = true;
+			let jsonAnnotation = await Zotero.Annotations.toJSON(annotation);
+			jsonAnnotation.itemId = attachmentItem.id;
+			jsonAnnotations.push(jsonAnnotation);
+		}
+		let html = `<p>(${(new Date()).toLocaleString()})</p>\n`;
+		html += await editorInstance._digestAnnotations(jsonAnnotations);
+		note.setNote(html);
+		await note.saveTx();
 	}
 }
 

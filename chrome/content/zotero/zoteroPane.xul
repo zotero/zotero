@@ -312,6 +312,7 @@
 							<menuitem class="menuitem-iconic zotero-menuitem-import-annotations" label="Import annotations" oncommand="ZoteroPane.importAnnotationsForSelected()"/>
 		<!--					<menuitem class="menuitem-iconic zotero-menuitem-export-annotations" label="&zotero.items.menu.exportAnnotations;" oncommand="ZoteroPane.exportAnnotationsForSelected()"/>-->
 							<menuitem class="menuitem-iconic zotero-menuitem-export-annotations" label="Export Annotations" oncommand="ZoteroPane.exportAnnotationsForSelected()"/>
+							<menuitem class="menuitem-iconic zotero-menuitem-create-note-from-annotations" label="&zotero.items.menu.createNoteFromAnnotations;" oncommand="ZoteroPane.createNoteFromSelected()"/>
 						</menupopup>
 						
 						<tooltip id="fake-tooltip"/>
