@@ -553,98 +553,21 @@ ZoteroStandalone.DebugOutput = {
 	
 	
 	submit: function () {
-		// 'Zotero' isn't defined yet when this function is created, so do it inline
 		return Zotero.Promise.coroutine(function* () {
-			Zotero.debug("Submitting debug output");
-			
-			Components.utils.import("resource://zotero/config.js");
-			
-			var url = ZOTERO_CONFIG.REPOSITORY_URL + "report?debug=1";
-			var output = yield Zotero.Debug.get(
-				Zotero.Prefs.get('debug.store.submitSize'),
-				Zotero.Prefs.get('debug.store.submitLineLength')
-			);
-			Zotero.Debug.setStore(false);
-			
 			var ps = Services.prompt;
 			try {
-				var xmlhttp = yield Zotero.HTTP.request(
-					"POST",
-					url,
-					{
-						compressBody: true,
-						body: output,
-						logBodyLength: 30,
-						timeout: 15000,
-						requestObserver: function (req) {
-							// Don't fail during tests, with fake XHR
-							if (!req.channel) {
-								return;
-							}
-							req.channel.notificationCallbacks = {
-								onProgress: function (request, context, progress, progressMax) {},
-								
-								// nsIInterfaceRequestor
-								getInterface: function (iid) {
-									try {
-										return this.QueryInterface(iid);
-									}
-									catch (e) {
-										throw Components.results.NS_NOINTERFACE;
-									}
-								},
-								
-								QueryInterface: function(iid) {
-									if (iid.equals(Components.interfaces.nsISupports) ||
-											iid.equals(Components.interfaces.nsIInterfaceRequestor) ||
-											iid.equals(Components.interfaces.nsIProgressEventSink)) {
-										return this;
-									}
-									throw Components.results.NS_NOINTERFACE;
-								},
-				
-							}
-						}
-					}
-				);
-			}
-			catch (e) {
-				Zotero.logError(e);
-				let title = Zotero.getString('general.error');
-				let msg;
-				if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
-					msg = Zotero.getString('general.invalidResponseServer');
-				}
-				else if (e instanceof Zotero.HTTP.BrowserOfflineException) {
-					msg = Zotero.getString('general.browserIsOffline', Zotero.appName);
-				}
-				else {
-					msg = Zotero.getString('zotero.debugOutputLogging.dialog.error');
-				}
-				ps.alert(null, title, msg);
+				var debugID = yield Zotero.Debug.submitToZotero();
+			} catch (e) {
+				ps.alert(null, Zotero.getString('general.error'), e.message);
 				return false;
 			}
-			
-			Zotero.debug(xmlhttp.responseText);
-			
-			var reported = xmlhttp.responseXML.getElementsByTagName('reported');
-			if (reported.length != 1) {
-				ps.alert(
-					null,
-					Zotero.getString('general.error'),
-					Zotero.getString('general.serverError')
-				);
-				return false;
-			}
-			
-			var reportID = reported[0].getAttribute('reportID');
 			
 			var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
 			var index = ps.confirmEx(
 				null,
 				Zotero.getString('zotero.debugOutputLogging.dialog.title'),
-				Zotero.getString('zotero.debugOutputLogging.dialog.sent', [ZOTERO_CONFIG.DOMAIN_NAME, reportID]),
+				Zotero.getString('zotero.debugOutputLogging.dialog.sent', [ZOTERO_CONFIG.DOMAIN_NAME, debugID.substr(1)]),
 				buttonFlags,
 				Zotero.getString('general.copyToClipboard'),
 				null, null, null, {}
@@ -652,12 +575,10 @@ ZoteroStandalone.DebugOutput = {
 			if (index == 0) {
 				const helper = Components.classes["@mozilla.org/widget/clipboardhelper;1"]
 					.getService(Components.interfaces.nsIClipboardHelper);
-				helper.copyString("D" + reportID);
+				helper.copyString(debugID);
 			}
-			
-			Zotero.Debug.clear();
 			return true;
-		}.bind(this))();
+		}).apply(this, arguments);
 	},
 	
 	
@@ -668,13 +589,13 @@ ZoteroStandalone.DebugOutput = {
 				submitted = true;
 			});
 			doc.querySelector('#clear-button').addEventListener('click', function (event) {
-				Zotero.Debug.clear();
+				Zotero.Debug.clear(true);
 			});
 			// If output has been submitted, disable logging when window is closed
 			doc.defaultView.addEventListener('unload', function (event) {
 				if (submitted) {
 					Zotero.Debug.setStore(false);
-					Zotero.Debug.clear();
+					Zotero.Debug.clear(true);
 				}
 			});
 		});
@@ -682,7 +603,7 @@ ZoteroStandalone.DebugOutput = {
 	
 	
 	clear: function () {
-		Zotero.Debug.clear();
+		Zotero.Debug.clear(true);
 	},
 	
 	

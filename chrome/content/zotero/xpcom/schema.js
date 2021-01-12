@@ -1617,6 +1617,11 @@ Zotero.Schema = new function(){
 			}
 			_remoteUpdateInProgress = false;
 		}
+
+		if (updated) {
+			Zotero.Notifier.trigger('modify', 'styles', []);
+			Zotero.Notifier.trigger('modify', 'translators', []);
+		}
 		
 		return updated;
 	});

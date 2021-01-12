@@ -39,7 +39,6 @@ const xpcomFilesAll = [
 	'prefs',
 	'dataDirectory',
 	'date',
-	'debug',
 	'error',
 	'utilities',
 	'utilities_internal',
@@ -51,6 +50,7 @@ const xpcomFilesAll = [
 	'profile',
 	'progressWindow',
 	'proxy',
+	'reports',
 	'translation/translate',
 	'translation/translate_firefox',
 	'translation/translator',
@@ -141,9 +141,12 @@ const xpcomFilesLocal = [
 	'translation/translate_item',
 	'translation/translators',
 	'connector/httpIntegrationClient',
+	'connector/connectorNotifier',
 	'connector/server_connector',
 	'connector/server_connectorIntegration',
+	'connector/server_connectorSSE',
 ];
+
 
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 Components.utils.import("resource://gre/modules/Services.jsm");

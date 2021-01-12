@@ -301,6 +301,47 @@ Zotero.Server.Connector.SaveSession.prototype.update = async function (targetID,
 	}
 };
 
+
+Zotero.Server.Connector.Reports = function() {};
+Zotero.Server.Connector.Reports.reports = [];
+Zotero.Server.Endpoints["/connector/reports"] = Zotero.Server.Connector.Reports;
+Zotero.Server.Connector.Reports.prototype = {
+	supportedMethods: ["POST"],
+	supportedDataTypes: ["application/json"],
+	permitBookmarklet: true,
+	
+	/**
+	 * An endpoint to manage error/debug logging and reporting
+	 */
+	init: async function(options) {
+		let data = options.data;
+		if ('errors' in data && 'get' in data.errors) {
+			let sysInfo = await Zotero.getSystemInfo();
+			let errors = Zotero.Errors.getErrors();
+			return [200, "text/plain", `${sysInfo}\n\n${errors.join('\n\n')}`]
+		}
+		else if ('debug' in data) {
+			if ('get' in data.debug) {
+				let debug = await Zotero.Debug.get();
+				return [200, "text/plain", debug]
+			}
+			else if ('store' in data.debug) {
+				Zotero.Debug.setStore(data.debug.store);
+			}
+			else if ('clear' in data.debug) {
+				Zotero.Debug.clear(false);
+			}
+			return 200;
+		} else if ('report' in data) {
+			Zotero.Server.Connector.Reports.reports.push(data.report);
+			return 200;
+		}
+
+		return 400;
+	}
+};
+
+
 /**
  * Update the passed items with the current target and tags
  */
@@ -1245,6 +1286,92 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 };
 
 /**
+ * Attaches a snapshot to the currently selected item
+ *
+ * Accepts:
+ *		uri - The URI of the page to be saved
+ *		cookie - document.cookie or equivalent
+ * Returns:
+ *		Nothing (200 OK response)
+ */
+Zotero.Server.Connector.AttachSnapshot = function() {};
+Zotero.Server.Endpoints["/connector/attachSnapshot"] = Zotero.Server.Connector.AttachSnapshot;
+Zotero.Server.Connector.AttachSnapshot.prototype = {
+	supportedMethods: ["POST"],
+	supportedDataTypes: ["application/json"],
+	permitBookmarklet: true,
+
+	/**
+	 * Attach snapshot
+	 */
+	init: async function (requestData) {
+		var data = requestData.data;
+
+		var { library, collection } = Zotero.Server.Connector.getSaveTarget();
+
+		// Shouldn't happen as long as My Library exists
+		if (!library.editable && !library.filesEditable) {
+			Zotero.logError("Can't add item to read-only library " + library.name);
+			return [500, "application/json", JSON.stringify({ libraryEditable: false })];
+		}
+
+		const zp = Zotero.getActiveZoteroPane();
+		let items = zp.getSelectedItems();
+		if (items.length != 1) {
+			return [500, "application/json", JSON.stringify({ itemsSelected: items.length })];
+		}
+		var item = items[0];
+
+		try {
+			await this.attachSnapshot(library.libraryID, item, requestData);
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return 500;
+		}
+
+		return 201;
+	},
+
+	attachSnapshot: async function (libraryID, item, requestData) {
+		var data = requestData.data;
+
+		var cookieSandbox = data.url
+			? new Zotero.CookieSandbox(
+				null,
+				data.url,
+				data.detailedCookies ? "" : data.cookie || "",
+				requestData.headers["User-Agent"]
+			)
+			: null;
+		if (cookieSandbox && data.detailedCookies) {
+			cookieSandbox.addCookiesFromHeader(data.detailedCookies);
+		}
+
+		if (data.pdf) {
+			return Zotero.Attachments.importFromURL({
+				libraryID,
+				url: data.url,
+				contentType: "application/pdf",
+				parentItemID: item.itemID,
+				cookieSandbox
+			});
+		}
+
+		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+			.createInstance(Components.interfaces.nsIDOMParser);
+		parser.init(null, Services.io.newURI(data.url));
+		var doc = parser.parseFromString(`<html>${data.html}</html>`, 'text/html');
+		doc = Zotero.HTTP.wrapDocument(doc, data.url);
+
+		return Zotero.Attachments.importFromDocument({
+			document: doc,
+			parentItemID: item.itemID,
+		});
+	},
+}
+
+/**
  * 
  *
  * Accepts:
@@ -1511,6 +1638,85 @@ Zotero.Server.Connector.GetTranslatorCode.prototype = {
 }
 
 /**
+ * Get a list of viable selection targets
+ */
+Zotero.Server.Connector.GetSaveTargets = function () {};
+Zotero.Server.Endpoints["/connector/getSaveTargets"] = Zotero.Server.Connector.GetSaveTargets;
+Zotero.Server.Connector.GetSaveTargets.prototype = {
+	supportedMethods: ["POST"],
+	supportedDataTypes: ["application/json"],
+	permitBookmarklet: true,
+
+	/**
+	 * Returns a 200 response to say the server is alive
+	 * @param {String} data POST data or GET query string
+	 * @param {Function} sendResponseCallback function to send HTTP response
+	 */
+	init: function (postData, sendResponseCallback) {
+		var targets = this.getSaveTargets();
+		// Mark recent targets
+		try {
+			let recents = Zotero.Prefs.get('recentSaveTargets');
+			if (recents) {
+				recents = new Set(JSON.parse(recents).map(o => o.id));
+				for (let target of targets) {
+					if (recents.has(target.id)) {
+						target.recent = true;
+					}
+				}
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+			Zotero.Prefs.clear('recentSaveTargets');
+		}
+
+		sendResponseCallback(
+			200,
+			"application/json",
+			JSON.stringify(targets),
+			{
+				// Filter out collection names in debug output
+				logFilter: function (str) {
+					try {
+						let json = JSON.parse(str.match(/^{"libraryID"[^]+/m)[0]);
+						json.targets.forEach(t => t.name = "\u2026");
+						return JSON.stringify(json);
+					}
+					catch (e) {
+						return str;
+					}
+				}
+			}
+		);
+	},
+	
+	getSaveTargets: function () {
+		// Get list of editable libraries and collections
+		var collections = [];
+		for (let library of Zotero.Libraries.getAll()) {
+			if (!library.editable) continue;
+
+			// Add recent: true for recent targets
+
+			collections.push(
+				{
+					id: library.treeViewID,
+					name: library.name,
+					level: 0
+				},
+				...Zotero.Collections.getByLibrary(library.libraryID, true).map(c => ({
+					id: c.treeViewID,
+					name: c.name,
+					level: c.level + 1 || 1 // Added by Zotero.Collections._getByContainer()
+				}))
+			);
+		}
+		return collections;
+	}
+}
+
+/**
  * Get selected collection
  *
  * Accepts:
@@ -1550,28 +1756,7 @@ Zotero.Server.Connector.GetSelectedCollection.prototype = {
 			response.name = response.libraryName;
 		}
 		
-		// Get list of editable libraries and collections
-		var collections = [];
-		var originalLibraryID = library.libraryID;
-		for (let library of Zotero.Libraries.getAll()) {
-			if (!library.editable) continue;
-			
-			// Add recent: true for recent targets
-			
-			collections.push(
-				{
-					id: library.treeViewID,
-					name: library.name,
-					level: 0
-				},
-				...Zotero.Collections.getByLibrary(library.libraryID, true).map(c => ({
-					id: c.treeViewID,
-					name: c.name,
-					level: c.level + 1 || 1 // Added by Zotero.Collections._getByContainer()
-				}))
-			);
-		}
-		response.targets = collections;
+		response.targets = Zotero.Server.Connector.GetSaveTargets.prototype.getSaveTargets();
 		
 		// Mark recent targets
 		try {
