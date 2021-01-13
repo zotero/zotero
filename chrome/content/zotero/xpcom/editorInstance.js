@@ -126,7 +126,7 @@ class EditorInstance {
 
 	saveSync() {
 		if (!this._readOnly && !this._disableSaving && this._iframeWindow) {
-			let noteData = this._iframeWindow.wrappedJSObject.getDataSync();
+			let noteData = this._iframeWindow.wrappedJSObject.getDataSync(true);
 			if (noteData) {
 				noteData = JSON.parse(JSON.stringify(noteData));
 			}

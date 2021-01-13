@@ -106,6 +106,16 @@
 							onReturn: this._returnHandler,
 							placeholder: this.placeholder
 						});
+						if (this._onInitCallback) {
+							this._onInitCallback();
+						}
+					}
+					
+					this.onInit = (callback) => {
+						if (this._editorInstance) {
+							return callback();
+						}
+						this._onInitCallback = callback;
 					}
 
 					this.notify = async (event, type, ids, extraData) => {
