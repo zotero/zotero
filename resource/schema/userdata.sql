@@ -1,4 +1,4 @@
--- 110
+-- 111
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -241,12 +241,26 @@ CREATE TABLE savedSearchConditions (
     FOREIGN KEY (savedSearchID) REFERENCES savedSearches(savedSearchID) ON DELETE CASCADE
 );
 
+CREATE TABLE deletedCollections (
+    collectionID INTEGER PRIMARY KEY,
+    dateDeleted DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY (collectionID) REFERENCES collections(collectionID) ON DELETE CASCADE
+);
+CREATE INDEX deletedCollections_dateDeleted ON deletedCollections(dateDeleted);
+
 CREATE TABLE deletedItems (
     itemID INTEGER PRIMARY KEY,
     dateDeleted DEFAULT CURRENT_TIMESTAMP NOT NULL,
     FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE
 );
 CREATE INDEX deletedItems_dateDeleted ON deletedItems(dateDeleted);
+
+CREATE TABLE deletedSearches (
+    savedSearchID INTEGER PRIMARY KEY,
+    dateDeleted DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY (savedSearchID) REFERENCES savedSearches(savedSearchID) ON DELETE CASCADE
+);
+CREATE INDEX deletedSearches_dateDeleted ON deletedItems(dateDeleted);
 
 CREATE TABLE libraries (
     libraryID INTEGER PRIMARY KEY,

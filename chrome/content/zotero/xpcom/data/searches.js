@@ -36,10 +36,12 @@ Zotero.Searches = function() {
 		libraryID: "O.libraryID",
 		key: "O.key",
 		version: "O.version",
-		synced: "O.synced"
+		synced: "O.synced",
+		deleted: "DS.savedSearchID IS NOT NULL AS deleted",
 	}
 	
-	this._primaryDataSQLFrom = "FROM savedSearches O";
+	this._primaryDataSQLFrom = "FROM savedSearches O "
+		+ "LEFT JOIN deletedSearches DS ON (O.savedSearchID=DS.savedSearchID)";
 	
 	this.init = Zotero.Promise.coroutine(function* () {
 		yield Zotero.DataObjects.prototype.init.apply(this);

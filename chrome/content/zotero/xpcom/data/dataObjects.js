@@ -231,6 +231,40 @@ Zotero.DataObjects.prototype.getLoaded = function () {
 }
 
 
+/**
+ * Return objects in the trash
+ *
+ * @param {Integer} libraryID - Library to search
+ * @param {Boolean} [asIDs] - Return object ids instead of objects
+ * @param {Integer} [days]
+ * @param {Integer} [limit]
+ * @return {Promise<Zotero.DataObject[]|Integer[]>}
+ */
+Zotero.DataObjects.prototype.getDeleted = async function (libraryID, asIDs, days, limit) {
+	var sql = `SELECT ${this._ZDO_id} FROM ${this._ZDO_table} `
+		+ `JOIN deleted${this._ZDO_Objects} USING (${this._ZDO_id}) `
+		+ "WHERE libraryID=?";
+	var params = [libraryID];
+	if (days) {
+		sql += " AND dateDeleted <= DATE('NOW', '-" + parseInt(days) + " DAYS')";
+	}
+	if (limit) {
+		sql += " LIMIT ?";
+		params.push(limit);
+	}
+	var ids = await Zotero.DB.columnQueryAsync(sql, params);
+	if (!ids.length) {
+		return [];
+	}
+	if (asIDs) {
+		return ids;
+	}
+	return this.getAsync(ids);
+};
+
+
+
+
 Zotero.DataObjects.prototype.getAllIDs = function (libraryID) {
 	var sql = `SELECT ${this._ZDO_id} FROM ${this._ZDO_table} WHERE libraryID=?`;
 	return Zotero.DB.columnQueryAsync(sql, [libraryID]);

@@ -136,6 +136,7 @@ Zotero.Search.prototype.loadFromRow = function (row) {
 		
 		// Boolean
 		case 'synced':
+		case 'deleted':
 			val = !!val;
 			break;
 		
@@ -218,6 +219,20 @@ Zotero.Search.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			yield Zotero.DB.queryAsync(sql, sqlParams);
 			i++;
 		}
+	}
+	
+	// Trashed status
+	if (this._changedData.deleted !== undefined) {
+		if (this._changedData.deleted) {
+			sql = "INSERT OR IGNORE INTO deletedSearches (savedSearchID) VALUES (?)";
+		}
+		else {
+			sql = "DELETE FROM deletedSearches WHERE savedSearchID=?";
+		}
+		yield Zotero.DB.queryAsync(sql, searchID);
+		
+		this._clearChanged('deleted');
+		this._markForReload('primaryData');
 	}
 });
 
@@ -843,6 +858,10 @@ Zotero.Search.prototype.fromJSON = function (json, options = {}) {
 			condition.operator,
 			condition.value
 		);
+	}
+	
+	if (json.deleted || this.deleted) {
+		this.deleted = !!json.deleted;
 	}
 }
 

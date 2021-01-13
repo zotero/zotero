@@ -431,12 +431,12 @@ function createUnsavedDataObject(objectType, params = {}) {
 		throw new Error("Object type not provided");
 	}
 	
-	var allowedParams = ['libraryID', 'parentID', 'parentKey', 'synced', 'version'];
+	var allowedParams = ['libraryID', 'parentID', 'parentKey', 'synced', 'version', 'deleted'];
 	
 	var itemType;
 	if (objectType == 'item' || objectType == 'feedItem') {
 		itemType = params.itemType || 'book';
-		allowedParams.push('deleted', 'dateAdded', 'dateModified');
+		allowedParams.push('dateAdded', 'dateModified');
 	}
 	if (objectType == 'item') {
 		allowedParams.push('inPublications');

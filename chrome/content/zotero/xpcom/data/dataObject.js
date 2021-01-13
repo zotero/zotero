@@ -49,6 +49,7 @@ Zotero.DataObject = function () {
 	this._identified = false;
 	this._parentID = null;
 	this._parentKey = null;
+	this._deleted = null;
 	
 	this._relations = [];
 	
@@ -97,6 +98,33 @@ Zotero.defineProperty(Zotero.DataObject.prototype, 'parentID', {
 Zotero.defineProperty(Zotero.DataObject.prototype, '_canHaveParent', {
 	value: true
 });
+
+// Define boolean properties
+for (let name of ['deleted']) {
+	let prop = '_' + name;
+	Zotero.defineProperty(Zotero.DataObject.prototype, name, {
+			get: function() {
+				if (!this.id) {
+					return false;
+				}
+				var val = this._getLatestField(name);
+				if (this[prop] !== null) {
+					return this[prop];
+				}
+				this._requireData('primaryData');
+			},
+			set: function(val) {
+				val = !!val;
+				var oldVal = this._getLatestField(name);
+				if (oldVal == val) {
+					Zotero.debug(Zotero.Utilities.capitalize(name)
+						+ ` state hasn't changed for ${this._objectType} ${this.id}`);
+					return;
+				}
+				this._markFieldChange(name, val);
+			}
+	});
+}
 
 Zotero.defineProperty(Zotero.DataObject.prototype, 'ObjectsClass', {
 	get: function() { return this._ObjectsClass; }
@@ -721,7 +749,7 @@ Zotero.DataObject.prototype._getLatestField = function (field) {
  */
 Zotero.DataObject.prototype._markFieldChange = function (field, value) {
 	// New method (changedData)
-	if (field == 'tags') {
+	if (['deleted', 'tags'].includes(field)) {
 		if (Array.isArray(value)) {
 			this._changedData[field] = [...value];
 		}
@@ -1008,6 +1036,13 @@ Zotero.DataObject.prototype._saveData = function (env) {
 		env.sqlColumns.push('clientDateModified');
 		env.sqlValues.push(Zotero.DB.transactionDateTime);
 	}
+	
+	if (!env.options.skipNotifier && this._changedData.deleted !== undefined) {
+		Zotero.Notifier.queue('refresh', 'trash', this.libraryID, {}, env.options.notifierQueue);
+		if (!env.isNew && this._changedData.deleted) {
+			Zotero.Notifier.queue('trash', this._objectType, this.id, {}, env.options.notifierQueue);
+		}
+	}
 };
 
 Zotero.DataObject.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env) {
@@ -1291,6 +1326,11 @@ Zotero.DataObject.prototype._preToJSON = function (options) {
 }
 
 Zotero.DataObject.prototype._postToJSON = function (env) {
+	var deleted = this._getLatestField('deleted');
+	if (deleted || env.options.mode == 'full') {
+		env.obj.deleted = !!deleted;
+	}
+	
 	if (env.mode == 'patch') {
 		env.obj = Zotero.DataObjectUtilities.patch(env.options.patchBase, env.obj);
 	}

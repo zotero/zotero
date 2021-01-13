@@ -95,30 +95,6 @@ Zotero.Items = function() {
 	
 	
 	/**
-	 * Return items marked as deleted
-	 *
-	 * @param {Integer} libraryID - Library to search
-	 * @param {Boolean} [asIDs] - Return itemIDs instead of Zotero.Item objects
-	 * @return {Promise<Zotero.Item[]|Integer[]>}
-	 */
-	this.getDeleted = Zotero.Promise.coroutine(function* (libraryID, asIDs, days) {
-		var sql = "SELECT itemID FROM items JOIN deletedItems USING (itemID) "
-				+ "WHERE libraryID=?";
-		if (days) {
-			sql += " AND dateDeleted<=DATE('NOW', '-" + parseInt(days) + " DAYS')";
-		}
-		var ids = yield Zotero.DB.columnQueryAsync(sql, [libraryID]);
-		if (!ids.length) {
-			return [];
-		}
-		if (asIDs) {
-			return ids;
-		}
-		return this.getAsync(ids);
-	});
-	
-	
-	/**
 	 * Returns all items in a given library
 	 *
 	 * @param  {Integer}  libraryID

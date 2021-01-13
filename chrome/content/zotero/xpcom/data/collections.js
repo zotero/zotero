@@ -40,6 +40,8 @@ Zotero.Collections = function() {
 		version: "O.version",
 		synced: "O.synced",
 		
+		deleted: "DC.collectionID IS NOT NULL AS deleted",
+		
 		parentID: "O.parentCollectionID AS parentID",
 		parentKey: "CP.key AS parentKey",
 		
@@ -51,7 +53,8 @@ Zotero.Collections = function() {
 	
 		
 	this._primaryDataSQLFrom = "FROM collections O "
-			+ "LEFT JOIN collections CP ON (O.parentCollectionID=CP.collectionID)";
+			+ "LEFT JOIN deletedCollections DC ON (O.collectionID=DC.collectionID)"
+			+ "LEFT JOIN collections CP ON (O.parentCollectionID=CP.collectionID) ";
 	
 	this._relationsTable = "collectionRelations";
 	

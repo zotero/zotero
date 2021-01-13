@@ -498,6 +498,19 @@ describe("Zotero.Search", function() {
 		});
 	});
 	
+	describe("#deleted", function () {
+		it("should set trash status", async function () {
+			var search = await createDataObject('search');
+			assert.isFalse(search.deleted);
+			search.deleted = true;
+			await search.saveTx();
+			assert.isTrue(search.deleted);
+			search.deleted = false;
+			await search.saveTx();
+			assert.isFalse(search.deleted);
+		});
+	});
+	
 	describe("#toJSON()", function () {
 		it("should output all data", function* () {
 			let s = new Zotero.Search();

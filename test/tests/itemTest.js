@@ -321,28 +321,6 @@ describe("Zotero.Item", function () {
 		})
 	})
 	
-	describe("#deleted", function () {
-		it("should be set to true after save", function* () {
-			var item = yield createDataObject('item');
-			item.deleted = true;
-			// Sanity check for itemsTest#trash()
-			assert.isTrue(item._changed.deleted);
-			yield item.saveTx();
-			assert.ok(item.deleted);
-		})
-		
-		it("should be set to false after save", function* () {
-			var collection = yield createDataObject('collection');
-			var item = createUnsavedDataObject('item');
-			item.deleted = true;
-			yield item.saveTx();
-			
-			item.deleted = false;
-			yield item.saveTx();
-			assert.isFalse(item.deleted);
-		})
-	})
-	
 	describe("#inPublications", function () {
 		it("should add item to publications table", function* () {
 			var item = yield createDataObject('item');
@@ -1500,20 +1478,6 @@ describe("Zotero.Item", function () {
 				assert.isUndefined(json.numPages);
 			})
 			
-			it("should output 'deleted' as 1", function* () {
-				var itemType = "book";
-				var title = "Test";
-				
-				var item = new Zotero.Item(itemType);
-				item.setField("title", title);
-				item.deleted = true;
-				var id = yield item.saveTx();
-				item = Zotero.Items.get(id);
-				var json = item.toJSON();
-				
-				assert.strictEqual(json.deleted, 1);
-			})
-			
 			it.skip("should output attachment fields from file", function* () {
 				var file = getTestDataDirectory();
 				file.append('test.png');
@@ -1662,36 +1626,6 @@ describe("Zotero.Item", function () {
 				assert.isUndefined(json.tags);
 			})
 			
-			it("should include changed 'deleted' field", function* () {
-				// True to false
-				var item = new Zotero.Item('book');
-				item.deleted = true;
-				var id = yield item.saveTx();
-				item = yield Zotero.Items.getAsync(id);
-				var patchBase = item.toJSON();
-				
-				item.deleted = false;
-				var json = item.toJSON({
-					patchBase: patchBase
-				})
-				assert.isUndefined(json.title);
-				assert.isFalse(json.deleted);
-				
-				// False to true
-				var item = new Zotero.Item('book');
-				item.deleted = false;
-				var id = yield item.saveTx();
-				item = yield Zotero.Items.getAsync(id);
-				var patchBase = item.toJSON();
-				
-				item.deleted = true;
-				var json = item.toJSON({
-					patchBase: patchBase
-				})
-				assert.isUndefined(json.title);
-				assert.strictEqual(json.deleted, 1);
-			})
-			
 			it("should set 'parentItem' to false when cleared", function* () {
 				var item = yield createDataObject('item');
 				var note = new Zotero.Item('note');
@@ -1810,19 +1744,6 @@ describe("Zotero.Item", function () {
 			assert.lengthOf(item.getNotes(), 0);
 		});
 		
-		it("should remove item from trash if 'deleted' property not provided", async function () {
-			var item = await createDataObject('item', { deleted: true });
-			
-			assert.isTrue(item.deleted);
-			
-			var json = item.toJSON();
-			delete json.deleted;
-			
-			item.fromJSON(json);
-			await item.saveTx();
-			
-			assert.isFalse(item.deleted);
-		});
 		
 		it("should remove item from My Publications if 'inPublications' property not provided", async function () {
 			var item = await createDataObject('item', { inPublications: true });
