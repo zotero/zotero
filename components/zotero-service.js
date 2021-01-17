@@ -367,6 +367,13 @@ function ZoteroService() {
 							zContext.Zotero.startupErrorHandler();
 						}
 						else if (zContext.Zotero.startupError) {
+							// Try to repair the DB on the next startup, in case it helps resolve
+							// the error
+							try {
+								zContext.Zotero.Schema.setIntegrityCheckRequired(true);
+							}
+							catch (e) {}
+							
 							try {
 								zContext.Zotero.startupError =
 									zContext.Zotero.Utilities.Internal.filterStack(

@@ -248,9 +248,11 @@ describe("Zotero.Schema", function() {
 			});
 		})
 		
-		it.skip("should repair a missing userdata table", async function () {
+		it("should create missing tables unless 'skipReconcile' is true", async function () {
 			await Zotero.DB.queryAsync("DROP TABLE retractedItems");
 			assert.isFalse(await Zotero.DB.tableExists('retractedItems'));
+			assert.isTrue(await Zotero.Schema.integrityCheck(false, { skipReconcile: true }));
+			
 			assert.isFalse(await Zotero.Schema.integrityCheck());
 			assert.isTrue(await Zotero.Schema.integrityCheck(true));
 			assert.isTrue(await Zotero.DB.tableExists('retractedItems'));

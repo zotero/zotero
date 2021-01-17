@@ -200,7 +200,10 @@ Zotero.Schema = new function(){
 				
 				// Auto-repair databases flagged for repair or coming from the DB Repair Tool
 				if (integrityCheck) {
-					await this.integrityCheck(true);
+					// If we need to run migration steps, don't reconcile tables, since it might
+					// create tables that aren't expected to exist yet
+					let toVersion = await _getSchemaSQLVersion('userdata');
+					await this.integrityCheck(true, { skipReconcile: userdata < toVersion });
 					options.skipIntegrityCheck = true;
 				}
 				
@@ -1763,7 +1766,14 @@ Zotero.Schema = new function(){
 	};
 	
 	
-	this.integrityCheck = Zotero.Promise.coroutine(function* (fix) {
+	/**
+	 * @param {Boolean} [fix=false]
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.skipReconcile=false] - Don't reconcile the schema to create tables
+	 *     and indexes that should have been created and drop existing ones that should have been
+	 *     deleted
+	 */
+	this.integrityCheck = Zotero.Promise.coroutine(function* (fix, options = {}) {
 		Zotero.debug("Checking database integrity");
 		
 		// Just as a sanity check, make sure combined field tables are populated,
@@ -1787,15 +1797,12 @@ Zotero.Schema = new function(){
 		// error, and either true or data to pass to the repair function on error. Functions should
 		// avoid assuming any global state (e.g., loaded data).
 		var checks = [
-			/*
-			Currently disabled, because it can cause problems with schema update steps that don't
-			expect tables to exist.
-			
-			The test "should repair a missing userdata table" is also disabled.
-			
-			// Create any tables or indexes that are missing and delete any tables or triggers that
-			// still exist but should have been deleted
 			[
+				// Create any tables or indexes that are missing and delete any tables or triggers
+				// that still exist but should have been deleted
+				//
+				// This is skipped for automatic checks, because it can cause problems with schema
+				// update steps that don't expect tables to exist.
 				async function () {
 					var statementsToRun = [];
 					
@@ -1864,10 +1871,12 @@ Zotero.Schema = new function(){
 					for (let statement of statements) {
 						await Zotero.DB.queryAsync(statement);
 					}
+				},
+				{
+					reconcile: true
 				}
 			],
-			*/
-			
+		
 			// Foreign key checks
 			[
 				async function () {
@@ -2037,6 +2046,11 @@ Zotero.Schema = new function(){
 			]
 		];
 		
+		// Remove reconcile steps
+		if (options && options.skipReconcile) {
+			checks = checks.filter(x => !x[2] || !x[2].reconcile);
+		}
+	
 		for (let check of checks) {
 			let errorsFound = false;
 			// SQL statement
@@ -2532,8 +2546,8 @@ Zotero.Schema = new function(){
 		}
 		
 		if (!options.skipIntegrityCheck) {
-			// TEMP: Disabled
-			//yield Zotero.Schema.integrityCheck(true);
+			// Check integrity, but don't create missing tables
+			yield Zotero.Schema.integrityCheck(true, { skipReconcile: true });
 		}
 		
 		Zotero.debug('Updating user data tables from version ' + fromVersion + ' to ' + toVersion);
