@@ -751,7 +751,9 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		catch (e) {
 			Zotero.logError(e);
 			if (!Zotero.startupError) {
-				Zotero.startupError = Zotero.getString('startupError') + "\n\n" + (e.stack || e);
+				Zotero.startupError = Zotero.getString('startupError', Zotero.appName) + "\n\n"
+					+ Zotero.getString('db.integrityCheck.reportInForums') + "\n\n"
+					+ (e.stack || e);
 			}
 			return false;
 		}
@@ -807,7 +809,9 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			}
 			else {
 				let stack = e.stack ? Zotero.Utilities.Internal.filterStack(e.stack) : null;
-				Zotero.startupError = Zotero.getString('startupError') + "\n\n" + (stack || e);
+				Zotero.startupError = Zotero.getString('startupError', Zotero.appName) + "\n\n"
+					+ Zotero.getString('db.integrityCheck.reportInForums') + "\n\n"
+					+ (stack || e);
 			}
 			
 			Zotero.debug(e.toString(), 1);

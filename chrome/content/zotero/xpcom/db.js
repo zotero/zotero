@@ -1287,7 +1287,7 @@ Zotero.DBConnection.prototype._handleCorruptionMarker = async function () {
 		
 		Zotero.alert(
 			null,
-			Zotero.getString('startupError'),
+			Zotero.getString('startupError', Zotero.appName),
 			Zotero.getString(
 				'db.dbCorruptedNoBackup',
 				[Zotero.appName, fileName, OS.Path.basename(damagedFile)]

@@ -2214,7 +2214,11 @@ Zotero.Schema = new function(){
 			Components.utils.reportError(e);
 			let ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 				.getService(Components.interfaces.nsIPromptService);
-			ps.alert(null, Zotero.getString('general.error'), Zotero.getString('startupError'));
+			ps.alert(
+				null,
+				Zotero.getString('general.error'),
+				Zotero.getString('startupError', Zotero.appName)
+			);
 			throw e;
 		});
 	}
