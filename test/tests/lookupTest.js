@@ -42,7 +42,7 @@ describe("Add Item by Identifier", function() {
 	});
 	
 	it("should add a DOI", function() {
-		this.timeout(10000);
+		this.timeout(20000);
 		return lookupIdentifier(win, "10.4103/0976-500X.85940").then(function(ids) {
 			var item = Zotero.Items.get(ids[0]);
 			assert.equal(item.getField("title"), "Zotero: A bibliographic assistant to researcher");
@@ -63,7 +63,7 @@ describe("Add Item by Identifier", function() {
 	});
 	
 	it("should add an item within a collection", function* () {
-		this.timeout(10000);
+		this.timeout(20000);
 		
 		var col = yield createDataObject('collection');
 		yield waitForItemsLoad(win);
