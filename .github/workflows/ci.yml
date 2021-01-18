@@ -1,0 +1,74 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  build:
+    name: Build, Upload, Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      
+      - name: Install Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      
+      # On GitHub
+      - name: Install xvfb
+        if: env.ACT != 'true'
+        run: sudo apt update && sudo apt install -y xvfb
+      
+      # Local via act
+      - name: Install packages for act
+        if: env.ACT == 'true'
+        run: apt update && apt install -y zstd xvfb dbus-x11 libgtk-3-0 libx11-xcb1 libdbus-glib-1-2 libxt6
+      
+      - name: Cache Firefox
+        id: firefox-cache
+        uses: actions/cache@v2
+        with:
+          path: firefox-x86_64
+          key: firefox-60.9.0esr
+      
+      - name: Download Firefox
+        if: steps.firefox-cache.outputs.cache-hit != 'true'
+        run: wget -O tarball "https://zotero-download.s3.us-east-1.amazonaws.com/dev/firefox-60.9.0esr-x86_64-modified.tar.gz"
+      
+      - name: Extract Firefox
+        if: steps.firefox-cache.outputs.cache-hit != 'true'
+        run: tar xvf tarball
+      
+      - name: Cache Node modules
+        id: node-cache
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+        
+      - name: Install Node modules
+        if: steps.node-cache.outputs.cache-hit != 'true'
+        run: npm install
+        
+      - name: Build Zotero
+        run: npm run build
+      
+      - name: Upload deployment ZIP
+        if: |
+          env.ACT != 'true'
+          && github.repository == 'zotero/zotero'
+          && github.event_name == 'push'
+          && (github.ref == 'refs/heads/master' || endsWith(github.ref, '-hotfix') || github.ref == 'refs/heads/gh-actions-ci-test')
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          mkdir build-zip
+          cd build
+          zip -r ../build-zip/$GITHUB_SHA.zip *
+          cd ..
+          sudo gem install --no-ri --no-rdoc dpl dpl-s3
+          dpl --provider=s3 --bucket=zotero-download --local-dir=build-zip --upload-dir=ci/client --acl=public-read --skip_cleanup=true
+      
+      - name: Run tests
+        run: xvfb-run test/runtests.sh -x firefox-x86_64/firefox -f
