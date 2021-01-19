@@ -100,7 +100,7 @@ function Reporter(runner) {
 
 	runner.on('suite', function(suite){
 		++indents;
-		dump("\r"+indent()+suite.title+"\n");
+		dump(indent() + suite.title + "\n");
 	});
 
 	runner.on('suite end', function(suite){
@@ -109,12 +109,12 @@ function Reporter(runner) {
 	});
 
 	runner.on('pending', function(test){
-		dump("\r"+indent()+"pending  -"+test.title+"\n");
+		dump(indent() + "pending  -" + test.title + "\n");
 	});
 
 	runner.on('pass', function(test){
 		passed++;
-		var msg = "\r"+indent()+Mocha.reporters.Base.symbols.ok+" "+test.title;
+		var msg = indent() + Mocha.reporters.Base.symbols.ok + " " + test.title;
 		if ('fast' != test.speed) {
 			msg += " ("+Math.round(test.duration)+" ms)";
 		}
@@ -139,7 +139,7 @@ function Reporter(runner) {
 		
 		failed++;
 		let indentStr = indent();
-		dump("\r" + indentStr
+		dump(indentStr
 			// Dark red X for errors
 			+ "\x1B[31;40m" + Mocha.reporters.Base.symbols.err + " [FAIL]\x1B[0m"
 			// Trigger bell if interactive
