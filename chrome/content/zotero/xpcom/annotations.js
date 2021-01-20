@@ -32,8 +32,75 @@ Zotero.Annotations = new function () {
 	Zotero.defineProperty(this, 'ANNOTATION_TYPE_IMAGE', { value: 3 });
 	
 	
+	this.getCacheImagePath = function ({ libraryID, key }) {
+		var file = this._getLibraryCacheDirectory(libraryID);
+		return OS.Path.join(file, key + '.png');
+	};
+	
+	
+	this.saveCacheImage = async function ({ libraryID, key }, blob) {
+		var item = await Zotero.Items.getByLibraryAndKey(libraryID, key);
+		if (!item) {
+			throw new Error(`Item not found`);
+		}
+		if (item.itemType != 'annotation' || item.annotationType != 'image') {
+			throw new Error("Item must be an image annotation item");
+		}
+		
+		var cacheDir = Zotero.DataDirectory.getSubdirectory('cache', true);
+		var file = this._getLibraryCacheDirectory(item.libraryID);
+		await Zotero.File.createDirectoryIfMissingAsync(file, { from: cacheDir });
+		
+		file = OS.Path.join(file, item.key + '.png');
+		await Zotero.File.putContentsAsync(file, blob);
+		await Zotero.File.setNormalFilePermissions(file);
+		
+		return file;
+	};
+	
+	
+	this.removeCacheImage = async function ({ libraryID, key }) {
+		var path = this.getCacheImagePath({ libraryID, key });
+		await OS.File.remove(path, { ignoreAbsent: true });
+	};
+	
+	
+	/**
+	 * Remove cache files that are no longer in use
+	 */
+	this.removeOrphanedCacheFiles = async function () {
+		// TODO
+	};
+	
+	
+	/**
+	 * Remove all cache files for a given library
+	 */
+	this.removeLibraryCacheFiles = async function (libraryID) {
+		var path = this._getLibraryCacheDirectory(libraryID);
+		await OS.File.removeDir(path, { ignoreAbsent: true, ignorePermissions: true });
+	};
+	
+	
+	this._getLibraryCacheDirectory = function (libraryID) {
+		var parts = [Zotero.DataDirectory.getSubdirectory('cache')];
+		var library = Zotero.Libraries.get(libraryID);
+		if (library.libraryType == 'user') {
+			parts.push('library');
+		}
+		else if (library.libraryType == 'group') {
+			parts.push('groups', library.groupID);
+		}
+		else {
+			throw new Error(`Unexpected library type '${library.libraryType}'`);
+		}
+		return OS.Path.join(...parts);
+	};
+	
+	
 	this.toJSON = async function (item) {
 		var o = {};
+		o.libraryID = item.libraryID;
 		o.key = item.key;
 		o.type = item.annotationType;
 		o.isAuthor = !item.createdByUserID || item.createdByUserID == Zotero.Users.getCurrentUserID();
@@ -44,12 +111,9 @@ Zotero.Annotations = new function () {
 			o.text = item.annotationText;
 		}
 		else if (o.type == 'image') {
-			var attachments = item.getAttachments();
-			if (attachments.length) {
-				let imageAttachment = Zotero.Items.get(attachments[0]);
-				if (imageAttachment) {
-					o.image = await imageAttachment.attachmentDataURI;
-				}
+			let file = this.getCacheImagePath(item);
+			if (await OS.File.exists(file)) {
+				o.image = await Zotero.File.generateDataURI(file, 'image/png');
 			}
 		}
 		o.comment = item.annotationComment;

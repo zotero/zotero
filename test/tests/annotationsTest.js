@@ -1,5 +1,6 @@
 describe("Zotero.Annotations", function() {
 	var exampleHighlight = {
+		"libraryID": null,
 		"key": "92JLMCVT",
 		"type": "highlight",
 		"isAuthor": true,
@@ -32,6 +33,7 @@ describe("Zotero.Annotations", function() {
 	var exampleHighlightAlt = jsonPositionToString(exampleHighlight);
 	
 	var exampleNote = {
+		"libraryID": null,
 		"key": "5TKU34XX",
 		"type": "note",
 		"isAuthor": true,
@@ -50,6 +52,7 @@ describe("Zotero.Annotations", function() {
 	var exampleNoteAlt = jsonPositionToString(exampleNote);
 	
 	var exampleImage = {
+		"libraryID": null,
 		"key": "QD32MQJF",
 		"type": "image",
 		"isAuthor": true,
@@ -71,6 +74,7 @@ describe("Zotero.Annotations", function() {
 	var exampleImageAlt = jsonPositionToString(exampleImage);
 	
 	var exampleGroupHighlight = {
+		"libraryID": null,
 		"key": "PE57YAYH",
 		"type": "highlight",
 		"isAuthor": false,
@@ -111,8 +115,12 @@ describe("Zotero.Annotations", function() {
 	before(async function () {
 		item = await createDataObject('item');
 		attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+		exampleHighlight.libraryID = item.libraryID;
+		exampleNote.libraryID = item.libraryID;
+		exampleImage.libraryID = item.libraryID;
 		
 		group = await getGroup();
+		exampleGroupHighlight.libraryID = group.libraryID;
 		groupItem = await createDataObject('item', { libraryID: group.libraryID });
 		groupAttachment = await importFileAttachment(
 			'test.pdf',
@@ -195,10 +203,7 @@ describe("Zotero.Annotations", function() {
 				array[i] = imageData.charCodeAt(i);
 			}
 			var blob = new Blob([array], { type: 'image/png' });
-			var imageAttachment = await Zotero.Attachments.importEmbeddedImage({
-				blob,
-				parentItemID: annotation.id
-			});
+			var file = await Zotero.Annotations.saveCacheImage(annotation, blob);
 			
 			var json = await Zotero.Annotations.toJSON(annotation);
 			
@@ -275,7 +280,7 @@ describe("Zotero.Annotations", function() {
 		it("should create an item from an image", async function () {
 			var annotation = await Zotero.Annotations.saveFromJSON(attachment, exampleImage);
 			
-			// Note: Image is created separately using Zotero.Attachments.importEmbeddedImage()
+			// Note: Image is created separately using Zotero.Annotations.saveCacheImage()
 			
 			assert.equal(annotation.key, exampleImage.key);
 			for (let prop of ['comment', 'color', 'pageLabel', 'sortIndex', 'position']) {

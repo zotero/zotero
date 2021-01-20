@@ -1294,34 +1294,14 @@ describe("Zotero.Item", function () {
 				await annotation.saveTx();
 				
 				var blob = new Blob([array], { type: 'image/png' });
-				await Zotero.Attachments.importEmbeddedImage({
-					blob,
-					parentItemID: annotation.id
-				});
+				await Zotero.Annotations.saveCacheImage(annotation, blob);
 				
-				var attachments = annotation.getAttachments();
-				assert.lengthOf(attachments, 1);
-				var imageAttachment = Zotero.Items.get(attachments[0]);
-				var imagePath = await imageAttachment.getFilePathAsync();
+				var imagePath = Zotero.Annotations.getCacheImagePath(annotation);
 				assert.ok(imagePath);
-				assert.equal(OS.Path.basename(imagePath), 'image.png');
+				assert.equal(OS.Path.basename(imagePath), annotation.key + '.png');
 				assert.equal(
 					await Zotero.File.getBinaryContentsAsync(imagePath),
 					imageData
-				);
-				assert.equal(imageAttachment.attachmentContentType, 'image/png');
-				
-				var blob2 = await new Zotero.Promise((resolve) => {
-					var reader = new FileReader();
-					reader.addEventListener("load", function () {
-						resolve(reader.result);
-					}, false);
-					reader.readAsDataURL(blob);
-				});
-				
-				assert.equal(
-					await imageAttachment.attachmentDataURI,
-					blob2
 				);
 			});
 		});
@@ -1554,6 +1534,25 @@ describe("Zotero.Item", function () {
 			await item.eraseTx({
 				skipEditCheck: true
 			});
+		});
+		
+		it("should remove cached image for an annotation item", async function () {
+			var attachment = await importFileAttachment('test.pdf');
+			var annotation = await createAnnotation('image', attachment);
+			
+			// Get Blob from file and attach it
+			var path = OS.Path.join(getTestDataDirectory().path, 'test.png');
+			var imageData = await Zotero.File.getBinaryContentsAsync(path);
+			var array = new Uint8Array(imageData.length);
+			for (let i = 0; i < imageData.length; i++) {
+				array[i] = imageData.charCodeAt(i);
+			}
+			var blob = new Blob([array], { type: 'image/png' });
+			var file = await Zotero.Annotations.saveCacheImage(annotation, blob);
+			
+			assert.isTrue(await OS.File.exists(file));
+			await annotation.eraseTx();
+			assert.isFalse(await OS.File.exists(file));
 		});
 	});
 	

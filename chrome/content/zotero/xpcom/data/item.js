@@ -4530,6 +4530,12 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 		// Zotero.Sync.EventListeners.ChangeListener needs to know if this was a storage file
 		env.notifierData[this.id].storageDeleteLog = this.isStoredFileAttachment();
 	}
+	// Delete cached file for image annotation
+	else if (this.isAnnotation()) {
+		if (this.isImageAnnotation()) {
+			yield Zotero.Annotations.removeCacheImage(this);
+		}
+	}
 	// Regular item
 	else {
 		let sql = "SELECT itemID FROM itemNotes WHERE parentItemID=?1 UNION "
