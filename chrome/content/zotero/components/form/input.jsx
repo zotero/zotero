@@ -69,7 +69,7 @@ class Input extends React.PureComponent {
 	}
 
 	handleChange({ target }, { newValue } = {}) {
-		var newValue = newValue || target.value;
+		newValue = newValue || target.value;
 		this.setState({
 			value: newValue,
 		});
