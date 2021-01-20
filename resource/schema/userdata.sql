@@ -126,6 +126,7 @@ CREATE TABLE itemAnnotations (
     pageLabel TEXT,
     sortIndex TEXT NOT NULL,
     position TEXT NOT NULL,
+    isExternal INT NOT NULL,
     FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,
     FOREIGN KEY (parentItemID) REFERENCES itemAttachments(itemID) ON DELETE CASCADE
 );

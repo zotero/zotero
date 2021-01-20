@@ -1386,6 +1386,62 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.equal(json.data.md5, md5);
 		})
 		
+		// See also: "shouldn't include external annotations" in syncLocalTest.js
+		it("shouldn't upload external annotations", async function () {
+			({ engine, client, caller } = await setup());
+			
+			var library = Zotero.Libraries.userLibrary;
+			var libraryID = library.id;
+			var lastLibraryVersion = 5;
+			library.libraryVersion = lastLibraryVersion;
+			await library.saveTx();
+			var nextLibraryVersion = lastLibraryVersion + 1;
+			
+			var attachment = await importFileAttachment('test.pdf');
+			var annotation1 = await createAnnotation('highlight', attachment);
+			var annotation2 = await createAnnotation('highlight', attachment, { isExternal: true });
+			
+			var item1ResponseJSON = attachment.toResponseJSON();
+			item1ResponseJSON.version = item1ResponseJSON.data.version = nextLibraryVersion;
+			var item2ResponseJSON = annotation1.toResponseJSON();
+			item2ResponseJSON.version = item2ResponseJSON.data.version = nextLibraryVersion;
+			
+			server.respond(function (req) {
+				if (req.method == "POST") {
+					assert.equal(
+						req.requestHeaders["If-Unmodified-Since-Version"], lastLibraryVersion
+					);
+					
+					if (req.url == baseURL + "users/1/items") {
+						let json = JSON.parse(req.requestBody);
+						assert.lengthOf(json, 2);
+						let keys = [json[0].key, json[1].key];
+						assert.include(keys, attachment.key);
+						assert.include(keys, annotation1.key);
+						
+						req.respond(
+							200,
+							{
+								"Content-Type": "application/json",
+								"Last-Modified-Version": nextLibraryVersion
+							},
+							JSON.stringify({
+								successful: {
+									"0": item1ResponseJSON,
+									"1": item2ResponseJSON
+								},
+								unchanged: {},
+								failed: {}
+							})
+						);
+						return;
+					}
+				}
+			})
+			
+			await engine.start();
+		});
+		
 		it("should update local objects with remotely saved version after uploading if necessary", function* () {
 			({ engine, client, caller } = yield setup());
 			

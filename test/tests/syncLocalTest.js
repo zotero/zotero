@@ -468,6 +468,17 @@ describe("Zotero.Sync.Data.Local", function() {
 	
 	
 	describe("#getUnsynced()", function () {
+		// See also: "shouldn't upload external annotations" in syncEngineTest.js
+		it("shouldn't include external annotations", async function () {
+			var attachment = await importFileAttachment('test.pdf');
+			var annotation1 = await createAnnotation('highlight', attachment);
+			var annotation2 = await createAnnotation('highlight', attachment, { isExternal: true });
+			
+			var ids = await Zotero.Sync.Data.Local.getUnsynced('item', Zotero.Libraries.userLibraryID);
+			assert.include(ids, attachment.id);
+			assert.include(ids, annotation1.id);
+		});
+		
 		it("should correct incorrectly nested collections", async function () {
 			var c1 = await createDataObject('collection');
 			var c2 = await createDataObject('collection');

@@ -952,6 +952,9 @@ async function createAnnotation(type, parentItem, options = {}) {
 			[314.4, 412.8, 556.2, 609.6]
 		]
 	});
+	if (options.isExternal) {
+		annotation.annotationIsExternal = options.isExternal;
+	}
 	if (options.tags) {
 		annotation.setTags(options.tags);
 	}

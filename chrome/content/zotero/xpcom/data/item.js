@@ -75,6 +75,7 @@ Zotero.Item = function(itemTypeOrID) {
 	this._annotationPageLabel = null;
 	this._annotationSortIndex = null;
 	this._annotationPosition = null;
+	this._annotationIsExternal = null;
 	
 	this._tags = [];
 	this._collections = [];
@@ -1795,10 +1796,11 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		let pageLabel = this._getLatestField('annotationPageLabel');
 		let sortIndex = this._getLatestField('annotationSortIndex');
 		let position = this._getLatestField('annotationPosition');
+		let isExternal = this._getLatestField('annotationIsExternal');
 		
 		let sql = "REPLACE INTO itemAnnotations "
-			+ "(itemID, parentItemID, type, text, comment, color, pageLabel, sortIndex, position) "
-			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			+ "(itemID, parentItemID, type, text, comment, color, pageLabel, sortIndex, position, isExternal) "
+			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		yield Zotero.DB.queryAsync(
 			sql,
 			[
@@ -1810,7 +1812,8 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 				color || null,
 				pageLabel || null,
 				sortIndex,
-				position
+				position,
+				isExternal ? 1 : 0
 			]
 		);
 		
@@ -3547,7 +3550,7 @@ Zotero.Item.prototype.clearBestAttachmentState = function () {
 ////////////////////////////////////////////////////////
 
 // Main annotation properties (required for items list display)
-for (let name of ['type', 'text', 'comment', 'color', 'pageLabel', 'sortIndex']) {
+for (let name of ['type', 'text', 'comment', 'color', 'pageLabel', 'sortIndex', 'isExternal']) {
 	let field = 'annotation' + name[0].toUpperCase() + name.substr(1);
 	Zotero.defineProperty(Zotero.Item.prototype, field, {
 		get: function () {
@@ -3585,6 +3588,16 @@ for (let name of ['type', 'text', 'comment', 'color', 'pageLabel', 'sortIndex'])
 				case 'sortIndex':
 					if (!/^\d{5}\|\d{6}\|\d{5}$/.test(value)) {
 						throw new Error(`Invalid sortIndex '${value}`);
+					}
+					break;
+				
+				case 'isExternal':
+					if (typeof value != 'boolean') {
+						throw new Error('annotationIsExternal must be a boolean');
+					}
+					let currentValue = this._getLatestField('annotationIsExternal');
+					if (currentValue !== null && currentValue !== value) {
+						throw new Error("Cannot change annotationIsExternal");
 					}
 					break;
 			}

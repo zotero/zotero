@@ -1834,6 +1834,26 @@ describe("Zotero.Item", function () {
 					assert.deepEqual(json.annotationPosition, item.annotationPosition);
 					assert.notProperty(json, 'collections');
 					assert.notProperty(json, 'relations');
+					assert.notProperty(json, 'annotationIsExternal');
+				});
+				
+				describe("#annotationIsExternal", function () {
+					it("should be false if not set", async function () {
+						var item = await createAnnotation('highlight', attachment);
+						assert.isFalse(item.annotationIsExternal);
+					});
+					
+					it("should be true if set", async function () {
+						var item = await createAnnotation('highlight', attachment, { isExternal: true });
+						assert.isTrue(item.annotationIsExternal);
+					});
+					
+					it("should prevent changing of annotationIsExternal on existing item", async function () {
+						var item = await createAnnotation('highlight', attachment);
+						assert.throws(() => {
+							item.annotationIsExternal = true;
+						}, "Cannot change annotationIsExternal");
+					});
 				});
 			});
 			

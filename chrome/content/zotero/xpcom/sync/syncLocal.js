@@ -543,9 +543,13 @@ Zotero.Sync.Data.Local = {
 		var sql = "SELECT O." + objectsClass.idColumn + " FROM " + objectsClass.table + " O";
 		if (objectType == 'item') {
 			sql += " LEFT JOIN itemAttachments IA USING (itemID) "
-				+ "LEFT JOIN itemNotes INo ON (O.itemID=INo.itemID) ";
+				+ "LEFT JOIN itemNotes INo ON (O.itemID=INo.itemID) "
+				+ "LEFT JOIN itemAnnotations IAn ON (O.itemID=IAn.itemID)";
 		}
 		sql += " WHERE libraryID=? AND synced=0";
+		if (objectType == 'item') {
+			sql += " AND (IAn.isExternal IS NULL OR IAN.isExternal=0)";
+		}
 		
 		var ids = yield Zotero.DB.columnQueryAsync(sql, [libraryID]);
 		

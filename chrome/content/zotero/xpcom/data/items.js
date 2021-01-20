@@ -495,7 +495,8 @@ Zotero.Items = function() {
 	
 	
 	this._loadAnnotations = async function (libraryID, ids, idSQL) {
-		var sql = "SELECT itemID, IA.parentItemID, IA.type, IA.text, IA.comment, IA.color, IA.sortIndex "
+		var sql = "SELECT itemID, IA.parentItemID, IA.type, IA.text, IA.comment, IA.color, "
+			+ "IA.sortIndex, IA.isExternal "
 			+ "FROM items JOIN itemAnnotations IA USING (itemID) "
 			+ "WHERE libraryID=?" + idSQL;
 		var params = [libraryID];
@@ -536,6 +537,7 @@ Zotero.Items = function() {
 					item._annotationComment = row.getResultByIndex(4);
 					item._annotationColor = row.getResultByIndex(5);
 					item._annotationSortIndex = row.getResultByIndex(6);
+					item._annotationIsExternal = !!row.getResultByIndex(7);
 					
 					item._loaded.annotation = true;
 					item._clearChanged('annotation');
