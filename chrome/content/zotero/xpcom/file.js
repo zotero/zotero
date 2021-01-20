@@ -1010,14 +1010,17 @@ Zotero.File = new function(){
 	}
 	
 	
-	this.createDirectoryIfMissingAsync = async function (path) {
+	this.createDirectoryIfMissingAsync = async function (path, options = {}) {
 		try {
 			await OS.File.makeDir(
 				path,
-				{
-					ignoreExisting: false,
-					unixMode: 0o755
-				}
+				Object.assign(
+					{
+						ignoreExisting: false,
+						unixMode: 0o755
+					},
+					options
+				)
 			)
 		}
 		catch (e) {
