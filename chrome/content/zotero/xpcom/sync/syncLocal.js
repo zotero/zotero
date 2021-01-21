@@ -547,6 +547,7 @@ Zotero.Sync.Data.Local = {
 				+ "LEFT JOIN itemAnnotations IAn ON (O.itemID=IAn.itemID)";
 		}
 		sql += " WHERE libraryID=? AND synced=0";
+		// Don't sync external annotations
 		if (objectType == 'item') {
 			sql += " AND (IAn.isExternal IS NULL OR IAN.isExternal=0)";
 		}
@@ -579,6 +580,14 @@ Zotero.Sync.Data.Local = {
 		
 		return ids;
 	}),
+	
+	
+	isSyncItem: function (item) {
+		if (item.itemType == 'annotation' && item.annotationIsExternal) {
+			return false;
+		}
+		return true;
+	},
 	
 	
 	//

@@ -4538,6 +4538,7 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 	}
 	// Regular item
 	else {
+		// Delete child items
 		let sql = "SELECT itemID FROM itemNotes WHERE parentItemID=?1 UNION "
 			+ "SELECT itemID FROM itemAttachments WHERE parentItemID=?1";
 		let toDelete = yield Zotero.DB.columnQueryAsync(sql, [this.id]);
@@ -4548,6 +4549,11 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 				skipEditCheck: env.options.skipEditCheck
 			});
 		}
+	}
+	
+	// Don't add non-syncing items to delete log
+	if (!Zotero.Sync.Data.Local.isSyncItem(this)) {
+		env.options.skipDeleteLog = true;
 	}
 	
 	// Remove related-item relations pointing to this item

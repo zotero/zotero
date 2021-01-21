@@ -1,6 +1,39 @@
 "use strict";
 
 describe("Zotero.Sync.EventListeners", function () {
+	describe("ChangeListener", function () {
+		it("should add items to sync delete log", async function () {
+			var item = await createDataObject('item');
+			await item.eraseTx();
+			assert.ok(
+				await Zotero.Sync.Data.Local.getDateDeleted('item', item.libraryID, item.key)
+			);
+		});
+		
+		it("shouldn't add items with `skipDeleteLog: true`", async function () {
+			var item = await createDataObject('item');
+			await item.eraseTx({
+				skipDeleteLog: true
+			});
+			assert.isFalse(
+				await Zotero.Sync.Data.Local.getDateDeleted('item', item.libraryID, item.key)
+			);
+		});
+		
+		// Technically skipped in Zotero.DataObject._finalizeErase(), which sets skipDeleteLog
+		// based on the result of Sync.Data.Local.isSyncItem()
+		it("shouldn't add non-syncing items to sync delete log", async function () {
+			var attachment = await importFileAttachment('test.pdf');
+			var annotation = await createAnnotation('image', attachment, { isExternal: true });
+			await annotation.eraseTx();
+			assert.isFalse(
+				await Zotero.Sync.Data.Local.getDateDeleted(
+					'item', attachment.libraryID, annotation.key
+				)
+			);
+		});
+	});
+	
 	describe("AutoSyncListener", function () {
 		var originalTimeout;
 		

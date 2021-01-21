@@ -1275,10 +1275,6 @@ Zotero.DataObject.prototype._initErase = Zotero.Promise.method(function (env) {
 	
 	if (!env.options.skipEditCheck) this.editCheck();
 	
-	if (env.options.skipDeleteLog) {
-		env.notifierData[this.id].skipDeleteLog = true;
-	}
-	
 	return true;
 });
 
@@ -1293,6 +1289,10 @@ Zotero.DataObject.prototype._finalizeErase = Zotero.Promise.coroutine(function* 
 	Zotero.DB.addCurrentCallback("commit", function () {
 		this.ObjectsClass.unload(env.deletedObjectIDs || this.id);
 	}.bind(this));
+	
+	if (env.options.skipDeleteLog) {
+		env.notifierData[this.id].skipDeleteLog = true;
+	}
 	
 	if (!env.options.skipNotifier) {
 		Zotero.Notifier.queue(
