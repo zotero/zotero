@@ -29,7 +29,7 @@ describe("Add Item by Identifier", function() {
 		this.timeout(20000);
 		return lookupIdentifier(win, "0838985890").then(function(ids) {
 			var item = Zotero.Items.get(ids[0]);
-			assert.equal(item.getField("title"), "Zotero: a guide for librarians, researchers, and educators");
+			assert.match(item.getField("title"), /^Zotero: a guide for librarians, researchers/);
 		});
 	});
 	
@@ -37,7 +37,7 @@ describe("Add Item by Identifier", function() {
 		this.timeout(20000);
 		return lookupIdentifier(win, "978-0838985892").then(function(ids) {
 			var item = Zotero.Items.get(ids[0]);
-			assert.equal(item.getField("title"), "Zotero: a guide for librarians, researchers, and educators");
+			assert.match(item.getField("title"), /^Zotero: a guide for librarians, researchers/);
 		});
 	});
 	
