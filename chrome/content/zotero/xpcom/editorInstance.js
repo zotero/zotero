@@ -253,8 +253,6 @@ class EditorInstance {
 				html += `<p><span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">(${formatted})</span></p>`;
 			}
 			else if (item.isNote()) {
-				// TODO: Remove when fixed
-				item._loaded.childItems = true;
 				let note = item.note;
 				let attachments = await Zotero.Items.getAsync(item.getAttachments());
 				for (let attachment of attachments) {
@@ -417,8 +415,6 @@ class EditorInstance {
 				if (this._isAttachment) {
 					return;
 				}
-				// TODO: Remove when fixed
-				this._item._loaded.childItems = true;
 				let attachmentItems = this._item.getAttachments().map(id => Zotero.Items.get(id));
 				let abandonedItems = attachmentItems.filter(item => !attachmentKeys.includes(item.key));
 				for (let item of abandonedItems) {
@@ -895,7 +891,6 @@ class EditorInstance {
 		editorInstance._item = note;
 		let jsonAnnotations = [];
 		for (let annotation of annotations) {
-			annotation._loaded.childItems = true;
 			let jsonAnnotation = await Zotero.Annotations.toJSON(annotation);
 			jsonAnnotation.itemId = attachmentItem.id;
 			jsonAnnotations.push(jsonAnnotation);

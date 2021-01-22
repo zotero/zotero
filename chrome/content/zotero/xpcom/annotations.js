@@ -36,10 +36,15 @@ Zotero.Annotations = new function () {
 		var file = this._getLibraryCacheDirectory(libraryID);
 		return OS.Path.join(file, key + '.png');
 	};
+
+
+	this.hasCacheImage = async function (item) {
+		return OS.File.exists(this.getCacheImagePath(item));
+	};
 	
 	
 	this.saveCacheImage = async function ({ libraryID, key }, blob) {
-		var item = await Zotero.Items.getByLibraryAndKey(libraryID, key);
+		var item = await Zotero.Items.getByLibraryAndKeyAsync(libraryID, key);
 		if (!item) {
 			throw new Error(`Item not found`);
 		}
@@ -96,6 +101,12 @@ Zotero.Annotations = new function () {
 		}
 		return OS.Path.join(...parts);
 	};
+
+
+	this.positionEquals = function (position1, position2) {
+		return position1.pageIndex == position2.pageIndex
+			&& JSON.stringify(position1.rects) == JSON.stringify(position2.rects);
+	};
 	
 	
 	this.toJSON = async function (item) {
@@ -103,6 +114,7 @@ Zotero.Annotations = new function () {
 		o.libraryID = item.libraryID;
 		o.key = item.key;
 		o.type = item.annotationType;
+		o.isExternal = item.annotationIsExternal;
 		o.isAuthor = !item.createdByUserID || item.createdByUserID == Zotero.Users.getCurrentUserID();
 		if (!o.isAuthor) {
 			o.authorName = Zotero.Users.getName(item.createdByUserID);
@@ -185,10 +197,19 @@ Zotero.Annotations = new function () {
 		if (json.type == 'highlight') {
 			item.annotationText = json.text;
 		}
+		item.annotationIsExternal = !!json.isExternal;
 		item.annotationComment = json.comment;
 		item.annotationColor = json.color;
 		item.annotationPageLabel = json.pageLabel;
 		item.annotationSortIndex = json.sortIndex;
+		
+		if (item.annotationType == 'image' && item.annotationPosition) {
+			var currentPosition = JSON.parse(item.annotationPosition);
+			if (!this.positionEquals(currentPosition, json.position)) {
+				await this.removeCacheImage(item);
+			}
+		}
+
 		item.annotationPosition = JSON.stringify(Object.assign({}, json.position));
 		// TODO: Can colors be set?
 		item.setTags((json.tags || []).map(t => ({ tag: t.name })));

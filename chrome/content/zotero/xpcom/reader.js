@@ -1,8 +1,27 @@
-// Temporary stuff
-Zotero.PDF = {
-	dateChecked: {},
-	hasUnmachedAnnotations: {}
-};
+/*
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2021 Corporation for Digital Scholarship
+                     Vienna, Virginia, USA
+                     http://digitalscholar.org/
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+*/
 
 class ReaderInstance {
 	constructor() {
@@ -46,7 +65,7 @@ class ReaderInstance {
 			annotations,
 			state,
 			location,
-			promptImport: item.attachmentHasUnimportedAnnotations,
+			promptImport: false,
 			showItemPaneToggle: this._showItemPaneToggle,
 			sidebarWidth: this._sidebarWidth,
 			sidebarOpen: this._sidebarOpen,
@@ -68,10 +87,10 @@ class ReaderInstance {
 		this._setTitleValue(title);
 	}
 
-	async setAnnotations(ids) {
+	async setAnnotations(items) {
 		let annotations = [];
-		for (let id of ids) {
-			let annotation = await this._getAnnotation(id);
+		for (let item of items) {
+			let annotation = await this._getAnnotation(item);
 			if (annotation) {
 				annotations.push(annotation);
 			}
@@ -89,10 +108,6 @@ class ReaderInstance {
 
 	async navigate(location) {
 		this._postMessage({ action: 'navigate', location });
-	}
-
-	toggleImportPrompt(enable) {
-		this._postMessage({ action: 'toggleImportPrompt', enable });
 	}
 	
 	enableAddToNote(enable) {
@@ -292,23 +307,10 @@ class ReaderInstance {
 						}
 					};
 					let savedAnnotation = await Zotero.Annotations.saveFromJSON(attachment, annotation, saveOptions);
-					if (annotation.image) {
+					
+					if (annotation.image && !await Zotero.Annotations.hasCacheImage(savedAnnotation)) {
 						let blob = this._dataURLtoBlob(annotation.image);
-						let attachmentIds = savedAnnotation.getAttachments();
-						if (attachmentIds.length) {
-							let attachment = Zotero.Items.get(attachmentIds[0]);
-							let path = await attachment.getFilePathAsync();
-							await Zotero.File.putContentsAsync(path, blob);
-							await Zotero.Sync.Storage.Local.updateSyncStates([attachment], 'to_upload');
-							Zotero.Notifier.trigger('modify', 'item', attachment.id, { instanceID: this._instanceID });
-						}
-						else {
-							await Zotero.Attachments.importEmbeddedImage({
-								blob,
-								parentItemID: savedAnnotation.id,
-								saveOptions
-							});
-						}
+						await Zotero.Annotations.saveCacheImage(savedAnnotation, blob);
 					}
 					return;
 				}
@@ -360,11 +362,11 @@ class ReaderInstance {
 					}
 					return;
 				}
-				case 'import': {
-					Zotero.debug('Importing PDF annotations');
-					Zotero.PDFWorker.import(this._itemID, true, true);
-					return;
-				}
+				// case 'import': {
+				// 	Zotero.debug('Importing PDF annotations');
+				// 	Zotero.PDFWorker.import(this._itemID, true, true);
+				// 	return;
+				// }
 				case 'importDismiss': {
 					Zotero.debug('Dismiss PDF annotations');
 					return;
@@ -434,7 +436,8 @@ class ReaderInstance {
 
 	/**
 	 * Return item JSON in the pdf-reader ready format
-	 * @param itemID
+	 * 
+	 * @param {Zotero.Item} item
 	 * @returns {Object|null}
 	 */
 	async _getAnnotation(item) {
@@ -442,10 +445,9 @@ class ReaderInstance {
 			if (!item || !item.isAnnotation()) {
 				return null;
 			}
-			// TODO: Remve when fixed
-			item._loaded.childItems = true;
 			let json = await Zotero.Annotations.toJSON(item);
 			json.id = item.key;
+			json.readOnly = !json.isAuthor || json.isExternal;
 			delete json.key;
 			for (let key in json) {
 				json[key] = json[key] || '';
@@ -622,7 +624,7 @@ class Reader {
 		this._sidebarOpen = false;
 		this._bottomPlaceholderHeight = 800;
 		this._readers = [];
-		this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'reader');
+		this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'tab'], 'reader');
 		this.onChangeSidebarWidth = null;
 		this.onChangeSidebarOpen = null;
 		
@@ -682,47 +684,42 @@ class Reader {
 			reader.setBottomPlaceholderHeight(height);
 		}
 	}
-	
+
 	notify(event, type, ids, extraData) {
-		// Listen for the parent item, PDF attachment and its annotation items updates
-		for (let readerWindow of this._readers) {
-			if (event === 'delete') {
-				let disappearedIds = readerWindow.annotationItemIDs.filter(x => ids.includes(x));
-				if (disappearedIds.length) {
-					let keys = disappearedIds.map(id => extraData[id].key);
-					readerWindow.unsetAnnotations(keys);
-				}
-				if (ids.includes(readerWindow._itemID)) {
-					readerWindow.close();
-				}
+		if (type === 'tab') {
+			var reader = Zotero.Reader.getByTabID(ids[0]);
+			if (reader) {
+				this.triggerAnnotationsImportCheck(reader._itemID);
 			}
-			else {
-				let item = Zotero.Items.get(readerWindow._itemID);
-				// TODO: Remove when fixed
-				item._loaded.childItems = true;
-				let annotationItems = item.getAnnotations();
-				readerWindow.annotationItemIDs = annotationItems.map(x => x.id);
-				let affectedAnnotationIds = annotationItems.filter(annotation => {
-					let annotationID = annotation.id;
-					let imageAttachmentID = null;
-					annotation._loaded.childItems = true;
-					let annotationAttachments = annotation.getAttachments();
-					if (annotationAttachments.length) {
-						imageAttachmentID = annotationAttachments[0];
+		}
+		else if (type === 'item') {
+			// Listen for the parent item, PDF attachment and its annotations updates
+			for (let reader of this._readers) {
+				if (event === 'delete') {
+					let disappearedIds = reader.annotationItemIDs.filter(x => ids.includes(x));
+					if (disappearedIds.length) {
+						let keys = disappearedIds.map(id => extraData[id].key);
+						reader.unsetAnnotations(keys);
 					}
-					return (
-						ids.includes(annotationID) && !(extraData[annotationID]
-							&& extraData[annotationID].instanceID === readerWindow._instanceID)
-						|| ids.includes(imageAttachmentID) && !(extraData[imageAttachmentID]
-							&& extraData[imageAttachmentID].instanceID === readerWindow._instanceID)
-					);
-				});
-				if (affectedAnnotationIds.length) {
-					readerWindow.setAnnotations(affectedAnnotationIds);
+					if (ids.includes(reader._itemID)) {
+						reader.close();
+					}
 				}
-				// Update title if the PDF attachment or the parent item changes
-				if (ids.includes(readerWindow._itemID) || ids.includes(item.parentItemID)) {
-					readerWindow.updateTitle();
+				else {
+					let item = Zotero.Items.get(reader._itemID);
+					let annotationItems = item.getAnnotations();
+					reader.annotationItemIDs = annotationItems.map(x => x.id);
+					let affectedAnnotations = annotationItems.filter(({ id }) => (
+						ids.includes(id)
+						&& !(extraData && extraData[id] && extraData[id].instanceID === reader._instanceID)
+					));
+					if (affectedAnnotations.length) {
+						reader.setAnnotations(affectedAnnotations);
+					}
+					// Update title if the PDF attachment or the parent item changes
+					if (ids.includes(reader._itemID) || ids.includes(item.parentItemID)) {
+						reader.updateTitle();
+					}
 				}
 			}
 		}
@@ -812,7 +809,7 @@ class Reader {
 		let item = await Zotero.Items.getAsync(itemID);
 		let mtime = await item.attachmentModificationTime;
 		if (item.attachmentLastProcessedModificationTime < Math.floor(mtime / 1000)) {
-			await Zotero.PDFWorker.import(itemID, false);
+			await Zotero.PDFWorker.import(itemID, true);
 		}
 	}
 }

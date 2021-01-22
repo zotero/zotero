@@ -2745,7 +2745,6 @@ var ZoteroPane = new function()
 			'createParent',
 			'renameAttachments',
 			'reindexItem',
-			'importAnnotations',
 			'createNoteFromAnnotations'
 		];
 		
@@ -2793,8 +2792,7 @@ var ZoteroPane = new function()
 					canIndex = true,
 					canRecognize = true,
 					canUnrecognize = true,
-					canRename = true,
-					canImportAnnotations = true;
+					canRename = true;
 				var canMarkRead = collectionTreeRow.isFeed();
 				var markUnread = true;
 				
@@ -2814,10 +2812,6 @@ var ZoteroPane = new function()
 					
 					if (canUnrecognize && !Zotero.RecognizePDF.canUnrecognize(item)) {
 						canUnrecognize = false;
-					}
-					
-					if (canImportAnnotations && !Zotero.PDFWorker.canImport(item)) {
-						canImportAnnotations = false;
 					}
 					
 					// Show rename option only if all items are child attachments
@@ -2899,9 +2893,6 @@ var ZoteroPane = new function()
 					}
 				}
 				
-				if (canImportAnnotations) {
-					show.push(m.importAnnotations);
-				}
 			}
 			
 			// Single item selected
@@ -2971,9 +2962,6 @@ var ZoteroPane = new function()
 						show.push(m.duplicateItem);
 					}
 					
-					if (Zotero.PDFWorker.canImport(item)) {
-						show.push(m.importAnnotations);
-					}
 					
 					if (Zotero.EditorInstance.canCreateNoteFromAnnotations(item)) {
 						show.push(m.createNoteFromAnnotations);
@@ -4579,17 +4567,6 @@ var ZoteroPane = new function()
 		}
 	};
 	
-	this.importAnnotationsForSelected = async function () {
-		let items = ZoteroPane.getSelectedItems();
-		for (let item of items) {
-			if (item.isRegularItem()) {
-				Zotero.PDFWorker.importParent(item);
-			}
-			else if (item.isAttachment()) {
-				Zotero.PDFWorker.import(item.id, true);
-			}
-		}
-	};
 	
 	this.reportMetadataForSelected = async function () {
 		let items = ZoteroPane.getSelectedItems();

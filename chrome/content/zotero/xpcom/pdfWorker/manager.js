@@ -25,6 +25,7 @@
 
 const WORKER_URL = 'chrome://zotero/content/xpcom/pdfWorker/worker.js';
 const CMAPS_URL = 'resource://zotero/pdf-reader/cmaps/';
+const RENDERER_URL = 'resource://zotero/pdf-renderer/renderer.html';
 
 class PDFWorker {
 	constructor() {
@@ -122,20 +123,16 @@ class PDFWorker {
 			Zotero.debug(event);
 		});
 	}
-
-	isPDFAttachment(item) {
-		return item.isAttachment() && item.attachmentContentType === 'application/pdf';
-	}
-
+	
 	canImport(item) {
-		if (this.isPDFAttachment(item)) {
+		if (item.isPDFAttachment()) {
 			return true;
 		}
 		else if (item.isRegularItem()) {
 			let ids = item.getAttachments();
 			for (let id of ids) {
 				let attachment = Zotero.Items.get(id);
-				if (this.isPDFAttachment(attachment)) {
+				if (attachment.isPDFAttachment()) {
 					return true;
 				}
 			}
@@ -154,8 +151,8 @@ class PDFWorker {
 	async export(itemID, path, isPriority, password) {
 		return this._enqueue(async () => {
 			let attachment = await Zotero.Items.getAsync(itemID);
-			if (!this.isPDFAttachment(attachment)) {
-				throw new Error('not a valid attachment');
+			if (!attachment.isPDFAttachment()) {
+				throw new Error('Item must be a PDF attachment');
 			}
 			let items = attachment.getAnnotations();
 			let annotations = [];
@@ -163,7 +160,7 @@ class PDFWorker {
 				annotations.push({
 					id: item.key,
 					type: item.annotationType,
-					authorName: Zotero.Users.getName(item.createdByUserID) || '',
+					authorName: Zotero.Users.getName(item.createdByUserID) || Zotero.Users.getCurrentUsername() || '',
 					comment: item.annotationComment || '',
 					color: item.annotationColor,
 					position: JSON.parse(item.annotationPosition),
@@ -187,7 +184,7 @@ class PDFWorker {
 	 */
 	async exportParent(item, directory) {
 		if (!item.isRegularItem()) {
-			throw new Error('regular item not provided');
+			throw new Error('Item must be a regular item');
 		}
 		if (!directory) {
 			throw new Error('\'directory\' not provided');
@@ -196,7 +193,7 @@ class PDFWorker {
 		let ids = item.getAttachments();
 		for (let id of ids) {
 			let attachment = Zotero.Items.get(id);
-			if (this.isPDFAttachment(attachment)) {
+			if (attachment.isPDFAttachment()) {
 				let path = OS.Path.join(directory, attachment.attachmentFilename);
 				promises.push(this.export(id, path));
 			}
@@ -207,57 +204,56 @@ class PDFWorker {
 	/**
 	 * Import annotations from PDF attachment
 	 *
-	 * @param {Integer} itemID
-	 * @param {Boolean} save Save imported annotations, or otherwise just return the number of importable annotations
+	 * @param {Integer} itemID Attachment item id
 	 * @param {Boolean} isPriority
 	 * @param {String} password
 	 * @returns {Promise<Integer>} Number of annotations
 	 */
-	async import(itemID, save, isPriority, password) {
+	async import(itemID, isPriority, password) {
 		return this._enqueue(async () => {
 			let attachment = await Zotero.Items.getAsync(itemID);
-			if (!this.isPDFAttachment(attachment)) {
-				throw new Error('not a valid PDF attachment');
+			if (!attachment.isPDFAttachment()) {
+				throw new Error('Item must be a PDF attachment');
 			}
-			// TODO: Remove when fixed
-			attachment._loaded.childItems = true;
-			let items = attachment.getAnnotations();
-			let existingAnnotations = [];
-			for (let item of items) {
-				existingAnnotations.push({
-					id: item.key,
-					type: item.annotationType,
-					comment: item.annotationComment || '',
-					position: JSON.parse(item.annotationPosition)
-				});
+
+			let mtime = Math.floor(await attachment.attachmentModificationTime / 1000);
+			if (attachment.attachmentLastProcessedModificationTime === mtime) {
+				return false;
 			}
+
+			let existingAnnotations = attachment
+			.getAnnotations()
+			.filter(x => x.annotationIsExternal)
+			.map(annotation => ({
+				id: annotation.key,
+				type: annotation.annotationType,
+				position: JSON.parse(annotation.annotationPosition),
+				comment: annotation.annotationComment || ''
+			}));
+
 			let path = await attachment.getFilePath();
 			let buf = await OS.File.read(path, {});
 			buf = new Uint8Array(buf).buffer;
-			let res = await this._query('import', { buf, existingAnnotations, password }, [buf]);
-			let annotations = res.annotations;
-			if (save) {
-				for (let annotation of annotations) {
-					// TODO: Utilize the saved Zotero item key for deduplication. Newer annotation modificaiton date wins
-					annotation.key = Zotero.DataObjectUtilities.generateKey();
-					await Zotero.Annotations.saveFromJSON(attachment, annotation);
-				}
-				attachment.attachmentHasUnimportedAnnotations = false;
+			let { imported, deleted } = await this._query('import', {
+				buf, existingAnnotations, password
+			}, [buf]);
+
+			for (let annotation of imported) {
+				annotation.key = Zotero.DataObjectUtilities.generateKey();
+				annotation.isExternal = true;
+				await Zotero.Annotations.saveFromJSON(attachment, annotation);
 			}
-			else {
-				attachment.attachmentHasUnimportedAnnotations = !!annotations.length;
+
+			for (let key of deleted) {
+				let annotation = Zotero.Items.getByLibraryAndKey(attachment.libraryID, key);
+				await annotation.eraseTx();
 			}
-			for (let reader of Zotero.Reader._readers) {
-				if (reader._itemID === itemID) {
-					reader.toggleImportPrompt(attachment.attachmentHasUnimportedAnnotations);
-				}
-			}
-			attachment.attachmentLastProcessedModificationTime = Math.floor(
-				await attachment.attachmentModificationTime / 1000
-			);
-			await attachment.saveTx();
-			return annotations.length;
-		});
+
+			attachment.attachmentLastProcessedModificationTime = mtime;
+			await attachment.saveTx({ skipDateModifiedUpdate: true });
+
+			return !!(imported.length || deleted.length);
+		}, isPriority);
 	}
 	
 	/**
@@ -267,14 +263,14 @@ class PDFWorker {
 	 */
 	async importParent(item) {
 		if (!item.isRegularItem()) {
-			throw new Error('regular item not provided');
+			throw new Error('Item must be a regular item');
 		}
 		let promises = [];
 		let ids = item.getAttachments();
 		for (let id of ids) {
 			let attachment = Zotero.Items.get(id);
-			if (this.isPDFAttachment(attachment)) {
-				promises.push(this.import(id, true));
+			if (attachment.isPDFAttachment()) {
+				promises.push(this.import({ itemID: id, isPriority: true }));
 			}
 		}
 		await Promise.all(promises);
@@ -282,3 +278,169 @@ class PDFWorker {
 }
 
 Zotero.PDFWorker = new PDFWorker();
+
+
+// PDF Renderer
+class PDFRenderer {
+	constructor() {
+		this._browser = null;
+		this._lastPromiseID = 0;
+		this._waitingPromises = {};
+		this._queue = [];
+		this._processingQueue = false;
+	}
+
+	async _processQueue() {
+		await this._init();
+		if (this._processingQueue) {
+			return;
+		}
+		this._processingQueue = true;
+		let item;
+		while ((item = this._queue.shift())) {
+			if (item) {
+				let [fn, resolve, reject] = item;
+				try {
+					resolve(await fn());
+				}
+				catch (e) {
+					reject(e);
+				}
+			}
+		}
+		this._processingQueue = false;
+	}
+
+	async _enqueue(fn, isPriority) {
+		return new Promise((resolve, reject) => {
+			if (isPriority) {
+				this._queue.unshift([fn, resolve, reject]);
+			}
+			else {
+				this._queue.push([fn, resolve, reject]);
+			}
+			this._processQueue();
+		});
+	}
+
+	async _query(action, data, transfer) {
+		return new Promise((resolve, reject) => {
+			this._lastPromiseID++;
+			this._waitingPromises[this._lastPromiseID] = { resolve, reject };
+			this._browser.contentWindow.postMessage({
+				id: this._lastPromiseID,
+				action,
+				data
+			}, this._browser.contentWindow.origin, transfer);
+		});
+	}
+
+	async _init() {
+		if (this._browser) return;
+		return new Promise((resolve) => {
+			this._browser = Zotero.Browser.createHiddenBrowser();
+			let doc = this._browser.ownerDocument;
+			let container = doc.createElement('hbox');
+			container.style.position = 'fixed';
+			container.style.zIndex = '-1';
+			container.append(this._browser);
+			doc.documentElement.append(container);
+			this._browser.style.width = '1px';
+			this._browser.style.height = '1px';
+			this._browser.addEventListener('DOMContentLoaded', (event) => {
+				if (this._browser.contentWindow.location.href === 'about:blank') return;
+				this._browser.contentWindow.addEventListener('message', _handleMessage);
+			});
+			this._browser.loadURI(RENDERER_URL);
+
+			let _handleMessage = async (event) => {
+				let message = event.data;
+				if (message.responseId) {
+					let { resolve, reject } = this._waitingPromises[message.responseId];
+					delete this._waitingPromises[message.responseId];
+					if (message.data) {
+						resolve(message.data);
+					}
+					else {
+						let err = new Error(message.error.message);
+						Object.assign(err, message.error);
+						reject(err);
+					}
+					return;
+				}
+				
+				if (message.action === 'initialized') {
+					resolve();
+				}
+				else if (message.action === 'renderedAnnotation') {
+					let { id, image } = message.data.annotation;
+					let item = await Zotero.Items.getAsync(id);
+					let win = Zotero.getMainWindow();
+					if (!win) {
+						return;
+					}
+					let blob = new win.Blob([new Uint8Array(image)]);
+					await Zotero.Annotations.saveCacheImage(item, blob);
+					await Zotero.Notifier.trigger('modify', 'item', [item.id]);
+				}
+			};
+		});
+	}
+
+	/**
+	 * Render missing image annotation images for attachment
+	 *
+	 * @param {Integer} itemID Attachment item id
+	 * @param {Boolean} isPriority
+	 * @returns {Promise<Integer>}
+	 */
+	async renderAttachmentAnnotations(itemID, isPriority) {
+		return this._enqueue(async () => {
+			let attachment = await Zotero.Items.getAsync(itemID);
+			let annotations = [];
+			for (let annotation of attachment.getAnnotations()) {
+				if (annotation.annotationType === 'image'
+					&& !await Zotero.Annotations.hasCacheImage(annotation)) {
+					annotations.push({
+						id: annotation.id,
+						position: JSON.parse(annotation.annotationPosition)
+					});
+				}
+			}
+			if (!annotations.length) {
+				return 0;
+			}
+			let path = await attachment.getFilePath();
+			let buf = await OS.File.read(path, {});
+			buf = new Uint8Array(buf).buffer;
+			return this._query('renderAnnotations', { buf, annotations }, [buf]);
+		}, isPriority);
+	}
+
+	/**
+	 * Render image annotation image
+	 *
+	 * @param {Integer} itemID Attachment item id
+	 * @param {Boolean} isPriority
+	 * @returns {Promise<Boolean>}
+	 */
+	async renderAnnotation(itemID, isPriority) {
+		return this._enqueue(async () => {
+			let annotation = await Zotero.Items.getAsync(itemID);
+			if (await Zotero.Annotations.hasCacheImage(annotation)) {
+				return false;
+			}
+			let attachment = await Zotero.Items.getAsync(annotation.parentID);
+			let path = await attachment.getFilePath();
+			let buf = await OS.File.read(path, {});
+			buf = new Uint8Array(buf).buffer;
+			let annotations = [{
+				id: annotation.id,
+				position: JSON.parse(annotation.annotationPosition)
+			}];
+			return !!await this._query('renderAnnotations', { buf, annotations }, [buf]);
+		}, isPriority);
+	}
+}
+
+Zotero.PDFRenderer = new PDFRenderer();
