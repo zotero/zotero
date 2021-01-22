@@ -1725,11 +1725,20 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		}
 	}
 	if (this._changed.attachmentData) {
-		let sql = "REPLACE INTO itemAttachments "
-			+ "(itemID, parentItemID, linkMode, contentType, charsetID, path, "
-				+ "syncState, storageModTime, storageHash, "
-				+ "lastProcessedModificationTime, pageIndex) "
-			+ "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+		let sql = "";
+		let cols = [
+			'parentItemID', 'linkMode', 'contentType', 'charsetID', 'path', 'syncState',
+			'storageModTime', 'storageHash', 'lastProcessedModificationTime', 'pageIndex'
+		];
+		// TODO: Replace with UPSERT after SQLite 3.24.0
+		if (isNew) {
+			sql = "INSERT INTO itemAttachments "
+				+ "(itemID, " + cols.join(", ") + ") "
+				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+		}
+		else {
+			sql = "UPDATE itemAttachments SET " + cols.join("=?, ") + "=? WHERE itemID=?";
+		}
 		let linkMode = this.attachmentLinkMode;
 		let contentType = this.attachmentContentType;
 		let charsetID = this.attachmentCharset
@@ -1747,7 +1756,6 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		}
 		
 		let params = [
-			itemID,
 			parentItemID,
 			{ int: linkMode },
 			contentType ? { string: contentType } : null,
@@ -1759,6 +1767,12 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			lastProcessedModificationTime || null,
 			typeof pageIndex === 'number' ? pageIndex : null
 		];
+		if (isNew) {
+			params.unshift(itemID);
+		}
+		else {
+			params.push(itemID);
+		}
 		yield Zotero.DB.queryAsync(sql, params);
 		
 		// Clear cached child attachments of the parent

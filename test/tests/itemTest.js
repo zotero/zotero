@@ -1501,6 +1501,25 @@ describe("Zotero.Item", function () {
 			assert.lengthOf(item.getAttachments(), 1);
 			assert.lengthOf(item.getNotes(), 1);
 		});
+		
+		// Make sure we're updating annotations rather than replacing and triggering ON DELETE CASCADE
+		it("should update attachment without deleting child annotations", async function () {
+			var attachment = await importFileAttachment('test.pdf');
+			var annotation = await createAnnotation('highlight', attachment);
+			
+			var annotationIDs = await Zotero.DB.columnQueryAsync(
+				"SELECT itemID FROM itemAnnotations WHERE parentItemID=?", attachment.id
+			);
+			assert.lengthOf(annotationIDs, 1);
+			
+			attachment.attachmentLastProcessedModificationTime = Date.now();
+			await attachment.saveTx();
+			
+			annotationIDs = await Zotero.DB.columnQueryAsync(
+				"SELECT itemID FROM itemAnnotations WHERE parentItemID=?", attachment.id
+			);
+			assert.lengthOf(annotationIDs, 1);
+		});
 	})
 	
 	
