@@ -3233,10 +3233,11 @@ for (let name of ['lastProcessedModificationTime', 'pageIndex']) {
 					}
 					if (parseInt(val) != val || val < 0) {
 						Zotero.debug(val, 2);
-						throw new Error(`${prop} must be a timestamp in milliseconds`);
+						throw new Error(`${prop} must be a timestamp in seconds`);
 					}
-					if (val < 10000000000) {
-						Zotero.logError("attachmentlastProcesedModificationTime should be a timestamp in milliseconds "
+					// Change before 2065!
+					if (val > 3000000000) {
+						throw new Error(`${prop} should be a timestamp in seconds `
 							+ "-- " + val + " given");
 					}
 					break;

@@ -1191,7 +1191,7 @@ describe("Zotero.Item", function () {
 			var item = await createDataObject('item');
 			var attachment = await importFileAttachment('test.pdf', { parentID: item.id });
 			
-			var mtime = Date.now();
+			var mtime = Math.floor(Date.now() / 1000);
 			attachment.attachmentLastProcessedModificationTime = mtime;
 			await attachment.saveTx();
 			
@@ -1512,7 +1512,7 @@ describe("Zotero.Item", function () {
 			);
 			assert.lengthOf(annotationIDs, 1);
 			
-			attachment.attachmentLastProcessedModificationTime = Date.now();
+			attachment.attachmentLastProcessedModificationTime = Math.floor(Date.now() / 1000);
 			await attachment.saveTx();
 			
 			annotationIDs = await Zotero.DB.columnQueryAsync(

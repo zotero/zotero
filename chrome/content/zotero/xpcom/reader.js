@@ -811,7 +811,7 @@ class Reader {
 	async triggerAnnotationsImportCheck(itemID) {
 		let item = await Zotero.Items.getAsync(itemID);
 		let mtime = await item.attachmentModificationTime;
-		if (item.attachmentLastProcessedModificationTime < mtime) {
+		if (item.attachmentLastProcessedModificationTime < Math.floor(mtime / 1000)) {
 			await Zotero.PDFWorker.import(itemID, false);
 		}
 	}

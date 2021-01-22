@@ -252,7 +252,9 @@ class PDFWorker {
 					reader.toggleImportPrompt(attachment.attachmentHasUnimportedAnnotations);
 				}
 			}
-			attachment.attachmentLastProcessedModificationTime = await attachment.attachmentModificationTime;
+			attachment.attachmentLastProcessedModificationTime = Math.floor(
+				await attachment.attachmentModificationTime / 1000
+			);
 			await attachment.saveTx();
 			return annotations.length;
 		});
