@@ -494,6 +494,10 @@ Zotero.RecognizePDF = new function () {
 			}
 		}
 
+		if (!res.isbn) {
+			Zotero.debug("Couldn't find ISBN, trying to extract from file name.");
+			res.isbn = _extractISBNFromFileName(fileName);
+		}
 		if (res.isbn) {
 			Zotero.debug(`RecognizePDF: Getting metadata by ISBN ${res.isbn}`);
 			let translate = new Zotero.Translate.Search();
@@ -599,16 +603,35 @@ Zotero.RecognizePDF = new function () {
 	function _extractDOIFromFileName(fileName){
 		// Modified the expression given at https://stackoverflow.com/a/10324802
 		let doiRe = /(10[.][0-9]{4,}(?:[.][0-9]+)*@(?:(?!\.pdf)[A-Za-z0-9-._;()/])+)/;
-		let doi = Array.from(fileName.match(doiRe));
-		if (!doi) {
+		let doiRes = fileName.match(doiRe);
+		if (!doiRes) {
 			return null;
 		}
 		// Replace `@` sign with `/` (`@` sign commonly used because `/` not
 		// allowed in file names).
 		// Grab first element of array (first captured group)
-		doiString = doi[1].replace("@", "/");
-		Zotero.debug(`Found DOI (${doiString}) in title`);
+		doiString = doiRes[1].replace("@", "/");
+		Zotero.debug(`Found DOI (${doiString}) in file name`);
 		return doiString;
+	}
+
+	/**
+	 * Tries to extract ISBN from a file name
+	 * @param {str} fileName - File name to examine
+	 * @return {str} - Found ISBN or null if nothing found.
+	 */
+	function _extractISBNFromFileName(fileName){
+		// Modified the expression given at https://stackoverflow.com/a/41271701
+		// Currently only searches for 13 digit ISBNs
+		let isbnRe = /(?=(?:\D*\d){13})((?:(?:978-[01])|(?:979-8))[\d-]+)/;
+		let isbnRes = fileName.match(isbnRe);
+		if (!isbnRes) {
+			return null;
+		}
+		// Grab first element of array (first captured group)
+		isbnString = isbnRes[1];
+		Zotero.debug(`Found ISBN (${isbnString}) in file name`);
+		return isbnString;
 	}
 
 	/**
