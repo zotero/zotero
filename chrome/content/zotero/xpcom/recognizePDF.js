@@ -547,7 +547,6 @@ Zotero.RecognizePDF = new function () {
 		}
 
 		if (res.title) {
-			Zotero.warn("Using title");
 			let type = 'journalArticle';
 
 			if (res.type === 'book-chapter') {
@@ -570,6 +569,10 @@ Zotero.RecognizePDF = new function () {
 			newItem.setCreators(creators);
 
 			if (res.abstract) newItem.setField('abstractNote', res.abstract);
+			if (!res.year) {
+				Zotero.debug("Couldn't find year, trying to extract from file name.");
+				res.year = _extractYearFromFileName(fileName);
+			}
 			if (res.year) newItem.setField('date', res.year);
 			if (res.pages) newItem.setField('pages', res.pages);
 			if (res.volume) newItem.setField('volume', res.volume);
@@ -632,6 +635,23 @@ Zotero.RecognizePDF = new function () {
 		isbnString = isbnRes[1];
 		Zotero.debug(`Found ISBN (${isbnString}) in file name`);
 		return isbnString;
+	}
+
+	/**
+	 * Tries to extract Year from a file name
+	 * @param {str} fileName - File name to examine
+	 * @return {str} - Found year or null if nothing found.
+	 */
+	function _extractYearFromFileName(fileName){
+		let yearRe = /(?=(?:\d){4})((?:(?:20)|(?:19))[\d]{2})/;
+		let yearRes = fileName.match(yearRe);
+		if (!yearRes) {
+			return null;
+		}
+		// Grab first element of array (first captured group)
+		yearString = yearRes[1];
+		Zotero.debug(`Found year (${yearString}) in file name`);
+		return yearString;
 	}
 
 	/**
