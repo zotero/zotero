@@ -1148,6 +1148,70 @@ describe("Zotero.Translate", function() {
 			var attachment = Zotero.Items.get(attachments[0]);
 			assert.isTrue(yield attachment.fileExists());
 		});
+		
+		it("should round-trip collections via Zotero RDF", async function () {
+			this.timeout(60000);
+			await resetDB();
+			
+			var c1 = await createDataObject('collection', { name: '1' });
+			var c2 = await createDataObject('collection', { name: '2', parentID: c1.id });
+			var c3 = await createDataObject('collection', { name: '3', parentID: c2.id });
+			var c4 = await createDataObject('collection', { name: '4', parentID: c3.id });
+			var c5 = await createDataObject('collection', { name: '5', parentID: c4.id });
+			var item = await createDataObject('item', { collections: [c5.id] });
+			
+			var tmpDir = await getTempDirectory();
+			var libraryExportFile = OS.Path.join(tmpDir, 'export-library.rdf');
+			var collectionExportFile = OS.Path.join(tmpDir, 'export-collection.rdf');
+			
+			// Export library
+			var translation = new Zotero.Translate.Export();
+			translation.setLocation(Zotero.File.pathToFile(libraryExportFile));
+			translation.setLibraryID(Zotero.Libraries.userLibraryID);
+			translation.setTranslator('14763d24-8ba0-45df-8f52-b8d1108e7ac9'); // Zotero RDF
+			await translation.translate();
+			
+			// Export top-most collection
+			translation = new Zotero.Translate.Export();
+			translation.setLocation(Zotero.File.pathToFile(collectionExportFile));
+			translation.setCollection(c1);
+			translation.setTranslator('14763d24-8ba0-45df-8f52-b8d1108e7ac9'); // Zotero RDF
+			await translation.translate();
+			
+			async function check(file, mode) {
+				var collectionNames = [c1.name, c2.name, c3.name, c4.name, c5.name];
+				
+				var translation = new Zotero.Translate.Import();
+				translation.setLocation(Zotero.File.pathToFile(file));
+				var translators = await translation.getTranslators();
+				translation.setTranslator(translators[0]);
+				var importCollection = await createDataObject('collection');
+				await translation.translate({
+					libraryID: Zotero.Libraries.userLibraryID,
+					collections: [importCollection.id]
+				});
+				
+				// When exporting a library, the top-most collection should be included. When
+				// exporting a collection, the selected collection isn't included, so remove it.
+				if (mode == 'collection') {
+					collectionNames.shift();
+				}
+				
+				var collections = importCollection.getChildCollections();
+				assert.lengthOf(collections, 1, mode);
+				assert.equal(collections[0].name, collectionNames.shift(), mode)
+				
+				var name;
+				while (name = collectionNames.shift()) {
+					collections = collections[0].getChildCollections();
+					assert.lengthOf(collections, 1, mode);
+					assert.equal(collections[0].name, name, mode)
+				}
+			}
+			
+			await check(libraryExportFile, 'library');
+			await check(collectionExportFile, 'collection');
+		});
 	});
 	
 	

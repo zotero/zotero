@@ -1021,12 +1021,13 @@ Zotero.Translate.ItemGetter.prototype = {
 		var items = new Set(collection.getChildItems());
 		
 		if(getChildCollections) {
-			// get child collections
-			this._collectionsLeft = Zotero.Collections.getByParent(collection.id, true);
+			// Get child collections
+			this._collectionsLeft = Zotero.Collections.getByParent(collection.id);
 			
-			// get items in child collections
-			for (let collection of this._collectionsLeft) {
-				var childItems = collection.getChildItems();
+			// Get items in all descendant collections
+			let descendantCollections = Zotero.Collections.getByParent(collection.id, true);
+			for (let collection of descendantCollections) {
+				let childItems = collection.getChildItems();
 				childItems.forEach(item => items.add(item));
 			}
 		}
@@ -1040,7 +1041,7 @@ Zotero.Translate.ItemGetter.prototype = {
 		this._itemsLeft = yield Zotero.Items.getAll(libraryID, true);
 		
 		if(getChildCollections) {
-			this._collectionsLeft = Zotero.Collections.getByLibrary(libraryID, true);
+			this._collectionsLeft = Zotero.Collections.getByLibrary(libraryID);
 		}
 		
 		this._itemsLeft.sort(function(a, b) { return a.id - b.id; });
