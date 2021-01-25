@@ -285,12 +285,12 @@ const GroupCustomSettings = memo(() => {
 
 	const onChangeTTLValue = (e, id) => {
 		if (id) {
-			Zotero.Prefs.set('sync.storage.groups.' + id + '.ttl.value', e.target.value);
+			Zotero.Prefs.set('sync.storage.groups.' + id + '.ttl.value', parseInt(e.target.value));
 		}
 		else {
-			Zotero.Prefs.set('sync.storage.groups.ttl.value', e.target.value);
+			Zotero.Prefs.set('sync.storage.groups.ttl.value', parseInt(e.target.value));
 		}
-		updatePrefInGroups(id, 'ttlValue', e.target.value);
+		updatePrefInGroups(id, 'ttlValue', parseInt(e.target.value));
 	};
 
 	return (
