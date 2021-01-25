@@ -203,7 +203,7 @@ Zotero.Collection.prototype.getChildCollections = function (asIDs) {
 	
 	// Return collectionIDs
 	if (asIDs) {
-		return this._childCollections.values();
+		return [...this._childCollections.values()];
 	}
 	
 	// Return Zotero.Collection objects

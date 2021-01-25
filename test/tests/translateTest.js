@@ -1196,7 +1196,7 @@ describe("Zotero.Translate", function() {
 				assert.isNumber(translation.newCollections[0].id);
 				assert.lengthOf(translation.newItems, 1);
 				assert.isNumber(translation.newItems[0].id);
-				var childCollections = Array.from(collection.getChildCollections(true));
+				var childCollections = collection.getChildCollections(true);
 				assert.sameMembers(childCollections, translation.newCollections.map(c => c.id));
 			});
 		});
