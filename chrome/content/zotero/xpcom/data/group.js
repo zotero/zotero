@@ -236,6 +236,9 @@ Zotero.Group.prototype._finalizeErase = Zotero.Promise.coroutine(function* (env)
 	
 	Zotero.Groups.unregister(this.groupID);
 	
+	// Clear custom preferences for this group
+	Zotero.Prefs.resetBranch([], 'extensions.zotero.sync.storage.groups.' + this.groupID + '.');
+
 	yield Zotero.Group._super.prototype._finalizeErase.call(this, env);
 });
 

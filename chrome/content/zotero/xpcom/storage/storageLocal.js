@@ -50,8 +50,9 @@ Zotero.Sync.Storage.Local = {
 		
 		case 'group':
 			// Check for custom group settings first
-			if (Zotero.Prefs.get('sync.storage.groups.' + libraryID + '.custom')) {
-				return Zotero.Prefs.get('sync.storage.groups.' + libraryID + '.sync');
+			let groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
+			if (Zotero.Prefs.get('sync.storage.groups.' + groupID + '.custom')) {
+				return Zotero.Prefs.get('sync.storage.groups.' + groupID + '.sync');
 			}
 
 			// Fall back to global settings

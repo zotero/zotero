@@ -1,0 +1,22 @@
+html > body, select, input {
+	font-family: Lucida Grande, Lucida Sans Unicode, Lucida Sans, Geneva, -apple-system, sans-serif;
+}
+
+label {
+	cursor: default;
+	margin-top: 1px;
+	margin-bottom: 2px;
+	margin-inline-start: 6px;
+	margin-inline-end: 5px;
+}
+
+input[type='checkbox'] + label {
+	margin: 1px 0 !important;
+}
+
+input[type='checkbox'] {
+	margin: 1px 3px 0 1px;
+	vertical-align: top;
+	width: 1.3em;
+	height: 1.3em;
+}

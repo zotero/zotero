@@ -1,14 +1,18 @@
 .group-files-sync-container {
-	font-family: Lucida Grande, Lucida Sans Unicode, Lucida Sans, Geneva, -apple-system, sans-serif;
-	
 	select {
-		font-family: Lucida Grande, Lucida Sans Unicode, Lucida Sans, Geneva, -apple-system, sans-serif;
 		font-size: 13px;
+		margin: 5px 2px 3px;
+		padding: 1px 3px !important;
 	}
-	
-	input {
-		font-family: Lucida Grande, Lucida Sans Unicode, Lucida Sans, Geneva, -apple-system, sans-serif;
-		font-size: 13px;
+
+	.setting-enabled-box {
+		margin-bottom: 4px;
+	}
+
+	.setting-downloadMode-box {
+		label {
+			margin-inline-start: 2px;
+		}
 	}
 
 	// .button-native comes from: chrome://global/skin/button.css

@@ -61,15 +61,19 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary				"Sync attachment files in My Library using">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups				"Sync attachment files in group libraries using Zotero storage">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups.global			"Global Settings">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups.custom			"Use Custom Settings">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups.custom			"Group-Specific Settings">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups.custom.use		"Use Custom Settings">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups.sync			"Sync attachment files">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups.customize		"Customize...">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups.revert			"Revert All Groups to Global Settings">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups.customize		"Customize Group Settings…">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups.revert			"Use Global Settings for All Groups">
 <!ENTITY zotero.preferences.sync.fileSyncing.download				"Download files">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime	"at sync time">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand		"as needed">
+<!ENTITY zotero.preferences.sync.fileSyncing.ttl.day				"1 day">
+<!ENTITY zotero.preferences.sync.fileSyncing.ttl.week				"1 week">
+<!ENTITY zotero.preferences.sync.fileSyncing.ttl.month				"1 month">
+<!ENTITY zotero.preferences.sync.fileSyncing.ttl.multipleMonths		"3 months">
 <!ENTITY zotero.preferences.sync.fileSyncing.remove				    "Remove downloaded files if not opened for">
-<!ENTITY zotero.preferences.sync.fileSyncing.remove.suffix			"day(s)">
 <!ENTITY zotero.preferences.sync.fileSyncing.verifyServer         "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1					"By using Zotero storage, you agree to become bound by its">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2					"terms and conditions">

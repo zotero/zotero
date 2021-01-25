@@ -33,6 +33,8 @@ Zotero_Preferences.Sync = {
 	noChar: '\uD83D\uDEAB',
 	
 	init: Zotero.Promise.coroutine(function* () {
+		this.checkCustomTTL(false);
+		this.checkCustomTTL(true);
 		this.updateStorageSettingsUI();
 		this.updateStorageSettingsGroupsUI();
 
@@ -71,6 +73,30 @@ Zotero_Preferences.Sync = {
 		
 		this.initResetPane();
 	}),
+
+	checkCustomTTL: function (groups) {
+		let id = groups ? 'storage-groups-download-ttl-custom' : 'storage-user-download-ttl-custom';
+		let value = Zotero.Prefs.get(
+			groups ? 'sync.storage.groups.ttl.value' : 'sync.storage.personal.ttl.value'
+		);
+
+		let customItem = document.getElementById(id);
+		if (![1, 7, 30, 90].includes(value)) {
+			customItem.setAttribute('label',
+				Zotero.getString(
+					'zotero.preferences.sync.fileSyncing.ttl.custom',
+					value,
+					value
+				)
+			);
+			customItem.value = value;
+			customItem.hidden = false;
+			customItem.parentNode.parentNode.selectedIndex = 0;
+		}
+		else {
+			customItem.hidden = true;
+		}
+	},
 	
 	displayFields: function (username) {
 		document.getElementById('sync-unauthorized').hidden = !!username;
@@ -420,6 +446,8 @@ Zotero_Preferences.Sync = {
 		var io = {};
 		window.openDialog('chrome://zotero/content/preferences/groupFilesToSync.html',
 			"zotero-preferences-groupFilesToSyncDialog", "chrome,modal,centerscreen", io);
+		// Group preferences may have changed so run our updates
+		this.updateStorageSettingsGroupsUI();
 	},
 	
 	updateStorageTerms: function () {

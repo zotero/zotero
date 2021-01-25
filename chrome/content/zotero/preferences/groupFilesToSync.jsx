@@ -37,17 +37,19 @@ const customPreferences = (id) => {
 		enabled: Zotero.Prefs.get(pref + '.custom') || false,
 		sync: Zotero.Prefs.get(pref + '.sync') || false,
 		downloadMode: Zotero.Prefs.get(pref + '.downloadMode') || 'on-sync',
-		ttl: Zotero.Prefs.get(pref + '.ttl') || false,
-		ttlValue: Zotero.Prefs.get(pref + '.ttl.value') || '30'
+		ttlEnabled: Zotero.Prefs.get(pref + '.ttl') || false,
+		ttlValue: Zotero.Prefs.get(pref + '.ttl.value') || 30
 	};
 };
 
 const Group = memo(({ id, name, prefs, onChangeEnabled, onChangeSync, onChangeMode, onChangeTTLEnabled, onChangeTTLValue }) => {
 	const intl = useIntl();
 
+	const defaultTTLValues = [1, 7, 30, 90];
+
 	return (
 		<div className="group">
-			<div className="group-header">
+			{ id > 0 && <div className="group-header">
 				<div className="group-header-label">
 					{ name }
 				</div>
@@ -59,21 +61,22 @@ const Group = memo(({ id, name, prefs, onChangeEnabled, onChangeSync, onChangeMo
 					onChange={ onChangeEnabled }
 				/>
 				<label htmlFor={ 'custom-' + id }>
-					{ intl.formatMessage({ id: 'zotero.preferences.sync.fileSyncing.groups.custom' }) }
+					{ intl.formatMessage({ id: 'zotero.preferences.sync.fileSyncing.groups.custom.use' }) }
 				</label>
-			</div>
+			</div> }
 
 			{ prefs.enabled && <div className="group-settings">
-				<input
-					id={ 'enabled-' + id }
-					type="checkbox"
-					className="setting-enabled"
-					checked={ prefs.sync }
-					onChange={ onChangeSync }
-				/>
-				<label htmlFor={ 'enabled-' + id }>
-					{ intl.formatMessage({ id: 'zotero.preferences.sync.fileSyncing.groups.sync' }) }
-				</label>
+				<div className="setting-enabled-box">
+					<input
+						id={ 'enabled-' + id }
+						type="checkbox"
+						checked={ prefs.sync }
+						onChange={ onChangeSync }
+					/>
+					<label htmlFor={ 'enabled-' + id }>
+						{ intl.formatMessage({ id: 'zotero.preferences.sync.fileSyncing.groups.sync' }) }
+					</label>
+				</div>
 
 				<div className="setting-downloadMode-box">
 					<label htmlFor={ 'downloadMode-' + id }>
@@ -98,7 +101,7 @@ const Group = memo(({ id, name, prefs, onChangeEnabled, onChangeSync, onChangeMo
 					<input
 						id={ 'ttl-' + id }
 						type="checkbox"
-						checked={ prefs.ttl }
+						checked={ prefs.ttlEnabled }
 						disabled={ !prefs.sync }
 						onChange={ onChangeTTLEnabled }
 					/>
@@ -106,19 +109,33 @@ const Group = memo(({ id, name, prefs, onChangeEnabled, onChangeSync, onChangeMo
 						{ intl.formatMessage({ id: 'zotero.preferences.sync.fileSyncing.remove' }) }
 					</label>
 					<select
-						id={ 'ttl-value-' + id }
 						value={ prefs.ttlValue }
-						disabled={ !prefs.sync || !prefs.ttl }
+						disabled={ !prefs.sync || !prefs.ttlEnabled }
 						className="setting-ttl-value"
 						onChange={ onChangeTTLValue }
 					>
-						<option value="1">1</option>
-						<option value="7">7</option>
-						<option value="30">30</option>
+						{ !defaultTTLValues.includes(prefs.ttlValue)
+							&& <option value={ prefs.ttlValue }>
+								{ Zotero.getString(
+									'zotero.preferences.sync.fileSyncing.ttl.custom',
+									prefs.ttlValue,
+									prefs.ttlValue
+								) }
+							</option>
+						}
+						<option value="1">
+							{ intl.formatMessage({ id: 'zotero.preferences.sync.fileSyncing.ttl.day' }) }
+						</option>
+						<option value="7">
+							{ intl.formatMessage({ id: 'zotero.preferences.sync.fileSyncing.ttl.week' }) }
+						</option>
+						<option value="30">
+							{ intl.formatMessage({ id: 'zotero.preferences.sync.fileSyncing.ttl.month' }) }
+						</option>
+						<option value="90">
+							{ intl.formatMessage({ id: 'zotero.preferences.sync.fileSyncing.ttl.multipleMonths' }) }
+						</option>
 					</select>
-					<label htmlFor={ 'ttl-value-' + id }>
-						{ intl.formatMessage({ id: 'zotero.preferences.sync.fileSyncing.remove.suffix' }) }
-					</label>
 				</div> }
 			</div> }
 		</div>
@@ -142,13 +159,15 @@ const GroupCustomSettings = memo(() => {
 	const [groups, setGroups] = useState([]);
 
 	// Global settings
-	const globalSyncEnabled = Zotero.Prefs.get('sync.storage.groups.enabled');
-	const globalDownloadMode = Zotero.Prefs.get('sync.storage.downloadMode.groups');
-
 	// If the global setting is on-sync for downloadMode then we
 	// might not have a set a TTL for global yet so we need default values
-	const globalTTLEnabled = Zotero.Prefs.get('sync.storage.groups.ttl') || false;
-	const globalTTLValue = Zotero.Prefs.get('sync.storage.groups.ttl.value') || 30;
+	const [globalPrefs, setGlobalPrefs] = useState({
+		enabled: true,
+		sync: Zotero.Prefs.get('sync.storage.groups.enabled'),
+		downloadMode: Zotero.Prefs.get('sync.storage.downloadMode.groups'),
+		ttlEnabled: Zotero.Prefs.get('sync.storage.groups.ttl') || false,
+		ttlValue: Zotero.Prefs.get('sync.storage.groups.ttl.value') || 30
+	});
 
 	// Simply turn off custom settings for all groups
 	const revertAllGroups = () => {
@@ -210,15 +229,22 @@ const GroupCustomSettings = memo(() => {
 
 	// Update the given pref and change the state
 	const updatePrefInGroups = (id, pref, value) => {
-		const newGroups = groups.map((group) => {
-			if (group.id === id) {
-				group.prefs[pref] = value;
-			}
+		if (id) {
+			const newGroups = groups.map((group) => {
+				if (group.id === id) {
+					group.prefs[pref] = value;
+				}
 
-			return group;
-		});
+				return group;
+			});
 
-		setGroups(newGroups);
+			setGroups(newGroups);
+		}
+		else {
+			const newGlobalPrefs = { ...globalPrefs };
+			newGlobalPrefs[pref] = value;
+			setGlobalPrefs(newGlobalPrefs);
+		}
 	};
 
 	// Change listeners for each custom settings section
@@ -228,22 +254,42 @@ const GroupCustomSettings = memo(() => {
 	};
 
 	const onChangeSync = (e, id) => {
-		Zotero.Prefs.set('sync.storage.groups.' + id + '.sync', e.target.checked);
+		if (id) {
+			Zotero.Prefs.set('sync.storage.groups.' + id + '.sync', e.target.checked);
+		}
+		else {
+			Zotero.Prefs.set('sync.storage.groups.enabled', e.target.checked);
+		}
 		updatePrefInGroups(id, 'sync', e.target.checked);
 	};
 
 	const onChangeMode = (e, id) => {
-		Zotero.Prefs.set('sync.storage.groups.' + id + '.downloadMode', e.target.value);
+		if (id) {
+			Zotero.Prefs.set('sync.storage.groups.' + id + '.downloadMode', e.target.value);
+		}
+		else {
+			Zotero.Prefs.set('sync.storage.downloadMode.groups', e.target.value);
+		}
 		updatePrefInGroups(id, 'downloadMode', e.target.value);
 	};
 
 	const onChangeTTLEnabled = (e, id) => {
-		Zotero.Prefs.set('sync.storage.groups.' + id + '.ttl', e.target.checked);
-		updatePrefInGroups(id, 'ttl', e.target.checked);
+		if (id) {
+			Zotero.Prefs.set('sync.storage.groups.' + id + '.ttl', e.target.checked);
+		}
+		else {
+			Zotero.Prefs.set('sync.storage.groups.ttl', e.target.checked);
+		}
+		updatePrefInGroups(id, 'ttlEnabled', e.target.checked);
 	};
 
 	const onChangeTTLValue = (e, id) => {
-		Zotero.Prefs.set('sync.storage.groups.' + id + '.ttl.value', e.target.value);
+		if (id) {
+			Zotero.Prefs.set('sync.storage.groups.' + id + '.ttl.value', e.target.value);
+		}
+		else {
+			Zotero.Prefs.set('sync.storage.groups.ttl.value', e.target.value);
+		}
 		updatePrefInGroups(id, 'ttlValue', e.target.value);
 	};
 
@@ -257,62 +303,14 @@ const GroupCustomSettings = memo(() => {
 			</label>
 
 			<div className="global-settings">
-				<input
-					type="checkbox"
-					className="setting-enabled"
-					disabled="disabled"
-					checked={ globalSyncEnabled }
+				<Group
+					id={ 0 }
+					prefs={ globalPrefs }
+					onChangeSync={ e => onChangeSync(e, false) }
+					onChangeMode={ e => onChangeMode(e, false) }
+					onChangeTTLEnabled={ e => onChangeTTLEnabled(e, false) }
+					onChangeTTLValue={ e => onChangeTTLValue(e, false) }
 				/>
-				<label htmlFor="global-enabled">
-					<FormattedMessage id="zotero.preferences.sync.fileSyncing.groups"/>
-				</label>
-
-				<div>
-					<div className="setting-downloadMode-box">
-						<label>
-							<FormattedMessage id="zotero.preferences.sync.fileSyncing.download"/>
-						</label>
-						<select
-							id="global-downloadMode"
-							disabled="disabled"
-							className="storage-mode"
-							value={ globalDownloadMode }
-						>
-							<option value="on-demand">
-								{ intl.formatMessage({ id: 'zotero.preferences.sync.fileSyncing.download.onDemand' }) }
-							</option>
-							<option value="on-sync">
-								{ intl.formatMessage({ id: 'zotero.preferences.sync.fileSyncing.download.atSyncTime' }) }
-							</option>
-						</select>
-					</div>
-
-					{ globalDownloadMode === 'on-demand' && <div className="setting-ttl-box">
-						<input
-							type="checkbox"
-							id="global-ttl"
-							disabled="disabled"
-							checked={ globalTTLEnabled }
-						/>
-						<label htmlFor="global-ttl">
-							{ intl.formatMessage({ id: 'zotero.preferences.sync.fileSyncing.remove' }) }
-						</label>
-						<select
-							id="global-ttl-value"
-							disabled="disabled"
-							className="storage-mode"
-							value={ globalTTLValue }
-						>
-							<option value="1">1</option>
-							<option value="7">7</option>
-							<option value="30">30</option>
-						</select>
-						<label htmlFor="global-ttl-value">
-							{ intl.formatMessage({ id: 'zotero.preferences.sync.fileSyncing.remove.suffix' }) }
-						</label>
-					</div> }
-
-				</div>
 
 				<div className="reset-container">
 					<button
@@ -324,7 +322,17 @@ const GroupCustomSettings = memo(() => {
 				</div>
 			</div>
 
-			<div className="groups-file-sync-groups">
+			<label
+				className="custom-settings-label"
+				htmlFor="custom-settings"
+			>
+				{ intl.formatMessage({ id: 'zotero.preferences.sync.fileSyncing.groups.custom' }) }
+			</label>
+
+			<div
+				id="custom-settings"
+				className="groups-file-sync-groups"
+			>
 				{ groups.length === 0 && <div className="group">
 					{ Zotero.getString('zotero.preferences.sync.librariesToSync.loadingLibraries') }
 				</div> }
@@ -368,4 +376,4 @@ ReactDOM.render(
 	document.getElementById('root')
 );
 
-document.title = Zotero.getString('zotero.preferences.sync.groups.title');
+document.title = Zotero.getString('zotero.preferences.sync.fileSyncing.groups.title');

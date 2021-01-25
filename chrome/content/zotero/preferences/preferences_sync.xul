@@ -41,10 +41,10 @@
 			<preference id="pref-storage-downloadMode-personal" name="extensions.zotero.sync.storage.downloadMode.personal" type="string"/>
 			<preference id="pref-storage-downloadMode-groups" name="extensions.zotero.sync.storage.downloadMode.groups" type="string"/>
 			<preference id="pref-storage-groups-enabled" name="extensions.zotero.sync.storage.groups.enabled" type="bool"/>
-			<preference id="pref-storage-groups-TTL" name="extensions.zotero.sync.storage.groups.ttl" type="bool"/>
-			<preference id="pref-storage-groups-TTL-value" name="extensions.zotero.sync.storage.groups.ttl.value" type="int"/>
 			<preference id="pref-storage-personal-TTL" name="extensions.zotero.sync.storage.personal.ttl" type="bool"/>
 			<preference id="pref-storage-personal-TTL-value" name="extensions.zotero.sync.storage.personal.ttl.value" type="int"/>
+			<preference id="pref-storage-groups-TTL" name="extensions.zotero.sync.storage.groups.ttl" type="bool"/>
+			<preference id="pref-storage-groups-TTL-value" name="extensions.zotero.sync.storage.groups.ttl.value" type="int"/>
 		</preferences>
 		
 		<tabbox>
@@ -263,12 +263,13 @@
 											  preference="pref-storage-personal-TTL-value"
 											  style="margin-left: 0">
 										<menupopup>
-											<menuitem label="1" value="1"/>
-											<menuitem label="7" value="7"/>
-											<menuitem label="30" value="30"/>
+											<menuitem id="storage-user-download-ttl-custom" value="0" hidden="true"/>
+											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.day;" value="1"/>
+											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.week;" value="7"/>
+											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.month;" value="30"/>
+											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.multipleMonths;" value="90"/>
 										</menupopup>
 									</menulist>
-									<label value="&zotero.preferences.sync.fileSyncing.remove.suffix;" />
 								</hbox>
 							</vbox>
 
@@ -307,12 +308,13 @@
 											  preference="pref-storage-groups-TTL-value"
 											  style="margin-left: 0">
 										<menupopup>
-											<menuitem label="1" value="1"/>
-											<menuitem label="7" value="7"/>
-											<menuitem label="30" value="30"/>
+											<menuitem id="storage-groups-download-ttl-custom" value="0" hidden="true"/>
+											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.day;" value="1"/>
+											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.week;" value="7"/>
+											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.month;" value="30"/>
+											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.multipleMonths;" value="90"/>
 										</menupopup>
 									</menulist>
-									<label value="&zotero.preferences.sync.fileSyncing.remove.suffix;" />
 								</hbox>
 
 								<box>
