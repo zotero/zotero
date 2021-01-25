@@ -90,9 +90,7 @@ class PDFWorker {
 					resolve(message.data);
 				}
 				else {
-					let err = new Error(message.error.message);
-					Object.assign(err, message.error);
-					reject(err);
+					reject(new Error(JSON.stringify(message.error)));
 				}
 				return;
 			}
@@ -119,8 +117,7 @@ class PDFWorker {
 			}
 		});
 		this._worker.addEventListener('error', (event) => {
-			Zotero.debug('PDF Web Worker error:');
-			Zotero.debug(event);
+			Zotero.logError(`PDF Web Worker error (${event.filename}:${event.lineno}): ${event.message}`);
 		});
 	}
 	
@@ -155,6 +152,7 @@ class PDFWorker {
 				throw new Error('Item must be a PDF attachment');
 			}
 			let items = attachment.getAnnotations();
+			items = items.filter(x => !x.annotationIsExternal);
 			let annotations = [];
 			for (let item of items) {
 				annotations.push({
@@ -170,10 +168,24 @@ class PDFWorker {
 			let attachmentPath = await attachment.getFilePath();
 			let buf = await OS.File.read(attachmentPath, {});
 			buf = new Uint8Array(buf).buffer;
-			let res = await this._query('export', { buf, annotations, password }, [buf]);
+
+			try {
+				var res = await this._query('export', {
+					buf, annotations, password
+				}, [buf]);
+			}
+			catch (e) {
+				let error = new Error(`Worker 'export' failed: ${JSON.stringify({
+					annotations,
+					error: e.message
+				})}`);
+				Zotero.logError(error);
+				throw error;
+			}
+			
 			await OS.File.writeAtomic(path, new Uint8Array(res.buf));
 			return annotations.length;
-		});
+		}, isPriority);
 	}
 
 	/**
@@ -181,8 +193,9 @@ class PDFWorker {
 	 *
 	 * @param {Zotero.Item} item
 	 * @param {String} directory
+	 * @param {Boolean} isPriority
 	 */
-	async exportParent(item, directory) {
+	async exportParent(item, directory, isPriority) {
 		if (!item.isRegularItem()) {
 			throw new Error('Item must be a regular item');
 		}
@@ -195,7 +208,7 @@ class PDFWorker {
 			let attachment = Zotero.Items.get(id);
 			if (attachment.isPDFAttachment()) {
 				let path = OS.Path.join(directory, attachment.attachmentFilename);
-				promises.push(this.export(id, path));
+				promises.push(this.export(id, path, isPriority));
 			}
 		}
 		await Promise.all(promises);
@@ -234,9 +247,20 @@ class PDFWorker {
 			let path = await attachment.getFilePath();
 			let buf = await OS.File.read(path, {});
 			buf = new Uint8Array(buf).buffer;
-			let { imported, deleted } = await this._query('import', {
-				buf, existingAnnotations, password
-			}, [buf]);
+
+			try {
+				var { imported, deleted } = await this._query('import', {
+					buf, existingAnnotations, password
+				}, [buf]);
+			}
+			catch (e) {
+				let error = new Error(`Worker 'import' failed: ${JSON.stringify({
+					existingAnnotations,
+					error: e.message
+				})}`);
+				Zotero.logError(error);
+				throw error;
+			}
 
 			for (let annotation of imported) {
 				annotation.key = Zotero.DataObjectUtilities.generateKey();
@@ -260,8 +284,9 @@ class PDFWorker {
 	 * Import annotations for each PDF attachment of parent item
 	 *
 	 * @param {Zotero.Item} item
+	 * @param {Boolean} isPriority
 	 */
-	async importParent(item) {
+	async importParent(item, isPriority) {
 		if (!item.isRegularItem()) {
 			throw new Error('Item must be a regular item');
 		}
@@ -270,7 +295,7 @@ class PDFWorker {
 		for (let id of ids) {
 			let attachment = Zotero.Items.get(id);
 			if (attachment.isPDFAttachment()) {
-				promises.push(this.import({ itemID: id, isPriority: true }));
+				promises.push(this.import(id, isPriority));
 			}
 		}
 		await Promise.all(promises);

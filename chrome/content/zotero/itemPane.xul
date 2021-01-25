@@ -114,8 +114,7 @@
 					while they're not being saved
 				-->
 				<zoteronoteeditor id="zotero-note-editor" flex="1" notitle="1"
-					previousfocus="zotero-items-tree"
-					onerror="ZoteroPane.displayErrorMessage(); this.mode = 'view'"/>
+					previousfocus="zotero-items-tree"/>
 				<button id="zotero-view-note-button"
 						label="&zotero.notes.separate;"
 						oncommand="ZoteroItemPane.openNoteWindow()"/>

@@ -23,6 +23,18 @@
     ***** END LICENSE BLOCK *****
 */
 
+// When changing this update in `zotero-note-editor` as well.
+// This only filters images that are being imported from a URL.
+// In all other cases `zotero-note-editor` should decide what
+// image types can be imported, and if not then
+// Zotero.Attachments.importEmbeddedImage does.
+// Additionally, the allready imported images should never be
+// affected
+const DOWNLOADED_IMAGE_TYPE = [
+	'image/jpeg',
+	'image/png'
+];
+
 class EditorInstance {
 	constructor() {
 		this.instanceID = Zotero.Utilities.randomString();
@@ -57,6 +69,9 @@ class EditorInstance {
 		};
 
 		this._iframeWindow.addEventListener('message', this._messageHandler);
+		this._iframeWindow.addEventListener('error', (event) => {
+			Zotero.logError(event.error);
+		});
 		
 		let note = this._item.note;
 
@@ -162,7 +177,7 @@ class EditorInstance {
 	async _digestAnnotations(annotations) {
 		let html = '';
 		for (let annotation of annotations) {
-			let attachmentItem = await Zotero.Items.getAsync(annotation.itemId);
+			let attachmentItem = await Zotero.Items.getAsync(annotation.attachmentItemId);
 			if (!attachmentItem) {
 				continue;
 			}
@@ -177,7 +192,6 @@ class EditorInstance {
 			// Citation
 			let parentItem = attachmentItem.parentID && await Zotero.Items.getAsync(attachmentItem.parentID) || attachmentItem;
 			if (parentItem) {
-				annotation.parentURI = Zotero.URI.getItemURI(parentItem);
 				let citationItem = {
 					uris: [Zotero.URI.getItemURI(parentItem)],
 					// TODO: Find a more elegant way to call this method
@@ -195,17 +209,9 @@ class EditorInstance {
 			
 			// Image
 			if (annotation.image) {
-				let blob = this._dataURLtoBlob(annotation.image);
+				// We assume that annotation.image is always PNG
+				let imageAttachmentKey = await this._importImage(annotation.image);
 				delete annotation.image;
-				let imageAttachment = await Zotero.Attachments.importEmbeddedImage({
-					blob,
-					parentItemID: this._item.id,
-					saveOptions: {
-						notifierData: {
-							noteEditorID: this.instanceID
-						}
-					}
-				});
 
 				// Normalize image dimensions to 1.25 of the print size
 				let rect = annotation.position.rects[0];
@@ -216,7 +222,7 @@ class EditorInstance {
 				const PDFJS_DEFAULT_SCALE = 1.25;
 				let width = Math.round(rectWidth * CSS_UNITS * PDFJS_DEFAULT_SCALE);
 				let height = Math.round(rectHeight * width / rectWidth);
-				imageHTML = `<img data-attachment-key="${imageAttachment.key}" width="${width}" height="${height}" data-annotation="${encodeURIComponent(JSON.stringify(annotation))}"/>`;
+				imageHTML = `<img data-attachment-key="${imageAttachmentKey}" width="${width}" height="${height}" data-natural-width="${annotation.imageNaturalWidth}" data-natural-height="${annotation.imageNaturalHeight}" data-annotation="${encodeURIComponent(JSON.stringify(annotation))}"/>`;
 			}
 
 			// Text
@@ -229,7 +235,11 @@ class EditorInstance {
 				commentHTML = ' ' + annotation.comment;
 			}
 			
-			html += '<p>' + imageHTML + [highlightHTML, citationHTML, commentHTML].filter(x => x).join(' ') + '</p>\n';
+			let otherHTML = [highlightHTML, citationHTML, commentHTML].filter(x => x).join(' ');
+			if (imageHTML && otherHTML) {
+				imageHTML += '<br/>';
+			}
+			html += '<p>' + imageHTML + otherHTML + '</p>\n';
 		}
 		return html;
 	}
@@ -260,6 +270,7 @@ class EditorInstance {
 					let buf = await OS.File.read(path, {});
 					buf = new Uint8Array(buf).buffer;
 					let blob = new (Zotero.getMainWindow()).Blob([buf], { type: attachment.attachmentContentType });
+					// Image type is not additionally filtered because it was an attachment already
 					let clonedAttachment = await Zotero.Attachments.importEmbeddedImage({
 						blob,
 						parentItemID: this._item.id,
@@ -285,7 +296,11 @@ class EditorInstance {
 		switch (message.action) {
 			case 'insertObject': {
 				let { type, data, pos } = message;
+				if (this._readOnly) {
+					return;
+				}
 				let html = '';
+				await this._ensureNoteCreated();
 				if (type === 'zotero/item') {
 					let ids = data.split(',').map(id => parseInt(id));
 					html = await this._digestItems(ids);
@@ -361,10 +376,16 @@ class EditorInstance {
 			}
 			case 'update': {
 				let { noteData } = message;
+				if (this._readOnly) {
+					return;
+				}
 				this._save(noteData);
 				return;
 			}
 			case 'generateCitation': {
+				if (this._readOnly) {
+					return;
+				}
 				let { citation, pos } = message;
 				let formatted = (await this._getFormattedCitationParts(citation)).join(';');
 				let html = `<span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">(${formatted})</span>`;
@@ -384,6 +405,9 @@ class EditorInstance {
 			}
 			case 'openCitationPopup': {
 				let { nodeId, citation } = message;
+				if (this._readOnly) {
+					return;
+				}
 				citation = JSON.parse(JSON.stringify(citation));
 				let availableCitationItems = [];
 				for (let citationItem of citation.citationItems) {
@@ -399,18 +423,26 @@ class EditorInstance {
 			}
 			case 'importImages': {
 				let { images } = message;
+				if (this._readOnly) {
+					return;
+				}
 				if (this._isAttachment) {
 					return;
 				}
 				for (let image of images) {
 					let { nodeId, src } = image;
-					let attachmentKey = await this._importImage(src);
+					let attachmentKey = await this._importImage(src, true);
 					// TODO: Inform editor about the failed to import images
-					this._postMessage({ action: 'attachImportedImage', nodeId, attachmentKey });
+					if (attachmentKey) {
+						this._postMessage({ action: 'attachImportedImage', nodeId, attachmentKey });
+					}
 				}
 				return;
 			}
 			case 'syncAttachmentKeys': {
+				if (this._readOnly) {
+					return;
+				}
 				let { attachmentKeys } = message;
 				if (this._isAttachment) {
 					return;
@@ -418,8 +450,8 @@ class EditorInstance {
 				let attachmentItems = this._item.getAttachments().map(id => Zotero.Items.get(id));
 				let abandonedItems = attachmentItems.filter(item => !attachmentKeys.includes(item.key));
 				for (let item of abandonedItems) {
-					// Store image data in case it will be necessary for undo,
-					// which is not ideal
+					// Store image data for undo. Although it stays as long
+					// as the note is opened. TODO: Find a better way
 					this._deletedImages[item.key] = await this._getDataURL(item);
 					await item.eraseTx();
 				}
@@ -459,19 +491,22 @@ class EditorInstance {
 					// TODO: Inform editor about the failed to import images
 					this._postMessage({ action: 'attachImportedImage', nodeId, attachmentKey: newAttachmentKey });
 				}
-				return;
 			}
-			let src = await this._getDataURL(item);
-			this._postMessage({ action: 'notifyProvider', id, type, data: { src } });
+			// Make sure attachment key belongs to the actual parent note,
+			// otherwise it would be a security risk
+			else if(item.parentID === this._item.id) {
+				let src = await this._getDataURL(item);
+				this._postMessage({ action: 'notifyProvider', id, type, data: { src } });
+			}
 		}
 	}
 
-	async _importImage(src) {
+	async _importImage(src, download) {
 		let blob;
 		if (src.startsWith('data:')) {
 			blob = this._dataURLtoBlob(src);
 		}
-		else {
+		else if (download) {
 			let res;
 
 			try {
@@ -482,6 +517,13 @@ class EditorInstance {
 			}
 
 			blob = res.response;
+			
+			if (!DOWNLOADED_IMAGE_TYPE.includes(blob.type)) {
+				return;
+			}
+		}
+		else {
+			return;
 		}
 
 		let attachment = await Zotero.Attachments.importEmbeddedImage({
@@ -531,6 +573,12 @@ class EditorInstance {
 		this._popup.openPopupAtScreen(x, y, true);
 	}
 
+	async _ensureNoteCreated() {
+		if (!this._item.id) {
+			return this._item.saveTx();
+		}
+	}
+
 	async _save(noteData) {
 		if (!noteData) return;
 		let { state, html } = noteData;
@@ -576,15 +624,17 @@ class EditorInstance {
 				}
 				if (!this._disableSaving) {
 					var id = await item.saveTx();
-
 					if (!this.parentItem && this.collection) {
 						this.collection.addItem(id);
 					}
+					this._item = item;
 				}
 			}
 		}
 		catch (e) {
 			Zotero.logError(e);
+			Zotero.crash(true);
+			// TODO: Prevent further writing in the note
 		}
 	}
 

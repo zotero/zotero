@@ -158,6 +158,7 @@ var ZoteroContextPane = new function () {
 					_toolbar.append(_itemToolbar);
 					_itemToolbar.classList.remove('tab-mode');
 					_splitButton.classList.add('hidden');
+					_tabCover.hidden = true;
 				}
 				else {
 					var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);

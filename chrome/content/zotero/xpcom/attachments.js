@@ -356,6 +356,9 @@ Zotero.Attachments = new function(){
 	/**
 	 * Saves an image for a parent note or image annotation
 	 *
+	 * Emerging formats like WebP and AVIF are supported here,
+	 * but should be filtered on the calling logic for now
+	 *
 	 * @param {Object} params
 	 * @param {Blob} params.blob - Image to save
 	 * @param {Integer} params.parentItemID - Note or annotation item to add item to
@@ -372,16 +375,30 @@ Zotero.Attachments = new function(){
 		var contentType = blob.type;
 		var fileExt;
 		switch (contentType) {
-			case 'image/png':
-				fileExt = 'png';
+			case 'image/apng':
+				fileExt = 'apng';
+				break;
+			case 'image/avif': // Supported from FF 86
+				fileExt = 'avif';
+				break;
+			case 'image/gif':
+				fileExt = 'gif';
 				break;
 			case 'image/jpeg':
 				fileExt = 'jpg';
 				break;
-			case 'image/jpg':
-				fileExt = 'jpg';
+			case 'image/png':
+				fileExt = 'png';
 				break;
-			
+			case 'image/svg+xml':
+				fileExt = 'svg';
+				break;
+			case 'image/webp': // Supported from FF 65
+				fileExt = 'webp';
+				break;
+			case 'image/bmp':
+				fileExt = 'bmp';
+				break;
 			default:
 				throw new Error(`Unsupported embedded image content type '${contentType}'`);
 		}

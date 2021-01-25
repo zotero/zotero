@@ -290,7 +290,6 @@ class ReaderInstance {
 			if (data.itemId !== this._itemID && data.message.action !== 'setAnnotation') {
 				return;
 			}
-			Zotero.debug('Received message from pdf-reader iframe: ' + JSON.stringify(data));
 			message = data.message;
 			switch (message.action) {
 				case 'initialized': {
@@ -362,22 +361,12 @@ class ReaderInstance {
 					}
 					return;
 				}
-				// case 'import': {
-				// 	Zotero.debug('Importing PDF annotations');
-				// 	Zotero.PDFWorker.import(this._itemID, true, true);
-				// 	return;
-				// }
-				case 'importDismiss': {
-					Zotero.debug('Dismiss PDF annotations');
-					return;
-				}
 				case 'addToNote': {
 					let { annotations } = message;
 					this._addToNote(annotations);
 					return;
 				}
 				case 'save': {
-					Zotero.debug('Exporting PDF');
 					let zp = Zotero.getActiveZoteroPane();
 					zp.exportPDF(this._itemID);
 					return;
@@ -474,10 +463,6 @@ class ReaderTab extends ReaderInstance {
 			type: 'reader',
 			title: '',
 			select: true,
-			onClose: () => {
-				this.tabID = null;
-				this.close();
-			},
 			notifierData: {
 				itemID
 			}
@@ -498,6 +483,9 @@ class ReaderTab extends ReaderInstance {
 			if (this._iframe && this._iframe.contentWindow && this._iframe.contentWindow.document === event.target) {
 				this._iframeWindow = this._iframe.contentWindow;
 				this._iframeWindow.addEventListener('message', this._handleMessage);
+				this._iframeWindow.addEventListener('error', (event) => {
+					Zotero.logError(event.error);
+				});
 			}
 		});
 		
@@ -505,10 +493,6 @@ class ReaderTab extends ReaderInstance {
 	}
 	
 	close() {
-		if (this.onClose) {
-			this.onClose();
-		}
-		
 		if (this.tabID) {
 			this._window.Zotero_Tabs.close(this.tabID);
 		}
@@ -687,9 +671,14 @@ class Reader {
 
 	notify(event, type, ids, extraData) {
 		if (type === 'tab') {
-			var reader = Zotero.Reader.getByTabID(ids[0]);
+			let reader = Zotero.Reader.getByTabID(ids[0]);
 			if (reader) {
-				this.triggerAnnotationsImportCheck(reader._itemID);
+				if (event === 'close') {
+					this._readers.splice(this._readers.indexOf(reader), 1);
+				}
+				else if (event === 'select') {
+					this.triggerAnnotationsImportCheck(reader._itemID);
+				}
 			}
 		}
 		else if (type === 'item') {
@@ -794,9 +783,6 @@ class Reader {
 				if (this.onChangeSidebarOpen) {
 					this.onChangeSidebarOpen(open);
 				}
-			};
-			reader.onClose = () => {
-				this._readers.splice(this._readers.indexOf(reader), 1);
 			};
 		}
 
