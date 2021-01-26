@@ -1304,6 +1304,29 @@ describe("Zotero.Item", function () {
 					imageData
 				);
 			});
+			
+			it("should remove cached image for an annotation item when position changes", async function () {
+				var attachment = await importFileAttachment('test.pdf');
+				var annotation = await createAnnotation('image', attachment);
+				
+				// Get Blob from file and attach it
+				var path = OS.Path.join(getTestDataDirectory().path, 'test.png');
+				var imageData = await Zotero.File.getBinaryContentsAsync(path);
+				var array = new Uint8Array(imageData.length);
+				for (let i = 0; i < imageData.length; i++) {
+					array[i] = imageData.charCodeAt(i);
+				}
+				var blob = new Blob([array], { type: 'image/png' });
+				var file = await Zotero.Annotations.saveCacheImage(annotation, blob);
+				
+				assert.isTrue(await OS.File.exists(file));
+				
+				var position = JSON.parse(annotation.annotationPosition);
+				position.rects[0][0] = position.rects[0][0] + 1;
+				annotation.annotationPosition = JSON.stringify(position);
+				await annotation.saveTx();
+				assert.isFalse(await OS.File.exists(file));
+			});
 		});
 		
 		describe("#getAnnotations()", function () {

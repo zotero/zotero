@@ -57,6 +57,7 @@ Zotero.Annotations = new function () {
 		await Zotero.File.createDirectoryIfMissingAsync(file, { from: cacheDir });
 		
 		file = OS.Path.join(file, item.key + '.png');
+		Zotero.debug("Creating annotation cache file " + file);
 		await Zotero.File.putContentsAsync(file, blob);
 		await Zotero.File.setNormalFilePermissions(file);
 		
@@ -66,6 +67,7 @@ Zotero.Annotations = new function () {
 	
 	this.removeCacheImage = async function ({ libraryID, key }) {
 		var path = this.getCacheImagePath({ libraryID, key });
+		Zotero.debug("Deleting annotation cache file " + path);
 		await OS.File.remove(path, { ignoreAbsent: true });
 	};
 	
@@ -100,12 +102,6 @@ Zotero.Annotations = new function () {
 			throw new Error(`Unexpected library type '${library.libraryType}'`);
 		}
 		return OS.Path.join(...parts);
-	};
-
-
-	this.positionEquals = function (position1, position2) {
-		return position1.pageIndex == position2.pageIndex
-			&& JSON.stringify(position1.rects) == JSON.stringify(position2.rects);
 	};
 	
 	
@@ -203,13 +199,6 @@ Zotero.Annotations = new function () {
 		item.annotationPageLabel = json.pageLabel;
 		item.annotationSortIndex = json.sortIndex;
 		
-		if (item.annotationType == 'image' && item.annotationPosition) {
-			var currentPosition = JSON.parse(item.annotationPosition);
-			if (!this.positionEquals(currentPosition, json.position)) {
-				await this.removeCacheImage(item);
-			}
-		}
-
 		item.annotationPosition = JSON.stringify(Object.assign({}, json.position));
 		// TODO: Can colors be set?
 		item.setTags((json.tags || []).map(t => ({ tag: t.name })));

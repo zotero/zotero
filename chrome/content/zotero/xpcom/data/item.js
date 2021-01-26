@@ -1833,6 +1833,15 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		
 		// Clear cached child items of the parent attachment
 		reloadParentChildItems[parentItemID] = true;
+		
+		// Mark cache image for deletion when image annotation position changes
+		if (!isNew && type == 'image' && this._hasFieldChanged('annotationPosition')) {
+			let libraryID = this.libraryID;
+			let key = this.key;
+			Zotero.DB.addCurrentCallback("commit", function () {
+				Zotero.Annotations.removeCacheImage({ libraryID, key });
+			}.bind(this));
+		}
 	}
 	
 	// Add to new collections
