@@ -1253,6 +1253,7 @@ describe("Zotero.Item", function () {
 					]
 				});
 				await annotation.saveTx();
+				assert.isFalse(annotation.hasChanged());
 			});
 			
 			it("should save a note annotation", async function () {
@@ -1268,6 +1269,7 @@ describe("Zotero.Item", function () {
 					]
 				});
 				await annotation.saveTx();
+				assert.isFalse(annotation.hasChanged());
 			});
 			
 			it("should save an image annotation", async function () {
@@ -1292,6 +1294,7 @@ describe("Zotero.Item", function () {
 					height: 1
 				});
 				await annotation.saveTx();
+				assert.isFalse(annotation.hasChanged());
 				
 				var blob = new Blob([array], { type: 'image/png' });
 				await Zotero.Annotations.saveCacheImage(annotation, blob);

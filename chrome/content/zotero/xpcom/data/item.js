@@ -1842,6 +1842,13 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 				Zotero.Annotations.removeCacheImage({ libraryID, key });
 			}.bind(this));
 		}
+		
+		let fields = ['Type', 'Text', 'Comment', 'PageLabel', 'SortIndex', 'Position', 'IsExternal'];
+		for (let field of fields) {
+			this._clearChanged('annotation' + field);
+		}
+		this._markForReload('annotation');
+		this._markForReload('annotationDeferred');
 	}
 	
 	// Add to new collections

@@ -300,8 +300,8 @@ describe("Zotero.Annotations", function() {
 			json.pageLabel = '';
 			await Zotero.Annotations.saveFromJSON(attachment, json);
 			
-			assert.equal(annotation.annotationComment, '');
-			assert.equal(annotation.annotationPageLabel, '');
+			assert.isNull(annotation.annotationComment);
+			assert.isNull(annotation.annotationPageLabel);
 		});
 	});
 })
