@@ -34,25 +34,49 @@ Zotero.Sync.Storage.Cache = {
 	_freeingCache: false,
 
 	/**
+	 * Helper function to take in a list of items, attachments, etc. and return a list of all
+	 * child imported attachments that have been selected.
+	 *
+	 * Removes duplicates in case both an item and it's children are passed in.
+	 *
+	 * @param items
+	 * @returns {Promise<Array>}
+	 * @private
+	 */
+	_getAllImportedAttachments: async function (items) {
+		let itemIDs = new Set();
+		let importedAttachments = [];
+		for (let item of items) {
+			if (item.isRegularItem()) {
+				let attachmentItems = item.getAttachments();
+				let attachments = await Zotero.Items.getAsync(attachmentItems);
+				for (let attachment of attachments) {
+					if (!itemIDs.has(attachment.id)) {
+						itemIDs.add(attachment.id);
+						importedAttachments.push(attachment);
+					}
+				}
+			}
+			else if (item.isImportedAttachment() && !itemIDs.has(item.id)) {
+				itemIDs.add(item.id);
+				importedAttachments.push(item);
+			}
+			// Ignore notes
+		}
+
+		return importedAttachments;
+	},
+
+	/**
 	 * Remove all attachment files for the given item/items and mark them as no longer cached
 	 *
 	 * @param items
 	 * @returns {Promise<void>}
 	 */
 	removeAttachmentFilesForItems: async function (items) {
-		// If an item is top-level grab all the attachment items for it
-		let attachmentItems = [];
-		for (let item of items) {
-			if (item.isAttachment()) {
-				attachmentItems.push(item);
-			}
-			else {
-				let attachments = await Zotero.Items.getAsync(item.getAttachments());
-				for (let attachment of attachments) {
-					attachmentItems.push(attachment);
-				}
-			}
-		}
+		let attachmentItems = await this._getAllImportedAttachments(items);
+
+		Zotero.debug(attachmentItems);
 
 		// Delete all files (will update the DB as well)
 		await Zotero.Promise.all(
@@ -60,7 +84,7 @@ Zotero.Sync.Storage.Cache = {
 		);
 		
 		// TODO: There seems to be a lag compared to download file of how long it takes the
-		// item pane to update
+		// item pane to update (in particular, snapshots don't seem to update at all)
 	},
 
 	/**
@@ -71,6 +95,8 @@ Zotero.Sync.Storage.Cache = {
 	 * @returns {Promise<void>}
 	 */
 	cacheItemAttachments: async function (items) {
+		items = await this._getAllImportedAttachments(items);
+
 		let failed = [];
 		await Zotero.Promise.all(items.map(async (item) => {
 			let path = item.getFilePath();
@@ -172,10 +198,10 @@ Zotero.Sync.Storage.Cache = {
 			return;
 		}
 		
-		let cacheTime = Zotero.Prefs.get(this._getCacheLimitPrefFromLibrary(libraryID));
-		if (cacheTime === 0) {
+		let cacheTime = this._cacheLimitForLibrary(libraryID);
+		if (cacheTime === false) {
 			Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID
-				+ ') exiting because cache time is unlimited.');
+				+ ') exiting because cache is disabled.');
 			return;
 		}
 
@@ -248,13 +274,28 @@ Zotero.Sync.Storage.Cache = {
 			+ recordsFreed + ' records.');
 	},
 
-	_getCacheLimitPrefFromLibrary: function (libraryID) {
-		if (libraryID === Zotero.Libraries.userLibraryID) {
-			return 'sync.storage.cacheLimit.personal';
+	_cacheLimitForLibrary: function (libraryID) {
+		let enabled = Zotero.Prefs.get(this._getPrefForLibrary(libraryID, 'ttl'));
+		if (!enabled) {
+			return false;
 		}
 
-		// Group library
-		return 'sync.storage.cacheLimit.groups';
+		return Zotero.Prefs.get(this._getPrefForLibrary(libraryID, 'ttl.value'));
+	},
+
+	_getPrefForLibrary: function (libraryID, pref) {
+		if (libraryID === Zotero.Libraries.userLibraryID) {
+			return 'sync.storage.personal.' + pref;
+		}
+
+		// Group library custom settings, if enabled
+		let groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
+		if (Zotero.Prefs.get('sync.storage.groups.' + groupID + '.custom')) {
+			return 'sync.storage.groups.' + groupID + '.' + pref;
+		}
+
+		// Fall back to global group settings
+		return 'sync.storage.groups.' + pref;
 	},
 
 	/**

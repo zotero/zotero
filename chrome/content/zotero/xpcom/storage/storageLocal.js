@@ -151,8 +151,9 @@ Zotero.Sync.Storage.Local = {
 		}
 		
 		// Group library custom settings, if enabled
-		if (Zotero.Prefs.get('sync.storage.groups.' + libraryID + '.custom')) {
-			return 'sync.storage.groups.' + libraryID + '.downloadMode';
+		let groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
+		if (Zotero.Prefs.get('sync.storage.groups.' + groupID + '.custom')) {
+			return 'sync.storage.groups.' + groupID + '.downloadMode';
 		}
 
 		// Fall back to global group settings

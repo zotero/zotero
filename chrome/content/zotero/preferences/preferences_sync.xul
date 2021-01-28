@@ -40,8 +40,6 @@
 			<preference id="pref-storage-username" name="extensions.zotero.sync.storage.username" type="string"/>
 			<preference id="pref-storage-downloadMode-personal" name="extensions.zotero.sync.storage.downloadMode.personal" type="string"/>
 			<preference id="pref-storage-downloadMode-groups" name="extensions.zotero.sync.storage.downloadMode.groups" type="string"/>
-			<preference id="pref-storage-cacheLimit-personal" name="extensions.zotero.sync.storage.cacheLimit.personal" type="int"/>
-			<preference id="pref-storage-cacheLimit-groups" name="extensions.zotero.sync.storage.cacheLimit.groups" type="int"/>
 			<preference id="pref-storage-groups-enabled" name="extensions.zotero.sync.storage.groups.enabled" type="bool"/>
 			<preference id="pref-storage-personal-TTL" name="extensions.zotero.sync.storage.personal.ttl" type="bool"/>
 			<preference id="pref-storage-personal-TTL-value" name="extensions.zotero.sync.storage.personal.ttl.value" type="int"/>

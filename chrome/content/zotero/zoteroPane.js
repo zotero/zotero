@@ -2812,7 +2812,8 @@ var ZoteroPane = new function()
 		var items = this.getSelectedItems();
 		
 		if (items.length > 0) {
-			let onDemandSyncStorage = Zotero.Sync.Storage.Local.downloadAsNeeded(items[0].libraryID);
+			let onDemandSyncStorage = Zotero.Sync.Storage.Local.getEnabledForLibrary(items[0].libraryID)
+				&& Zotero.Sync.Storage.Local.downloadAsNeeded(items[0].libraryID);
 
 			// Multiple items selected
 			if (items.length > 1) {
@@ -2854,16 +2855,18 @@ var ZoteroPane = new function()
 						markUnread = false;
 					}
 
-					if (onDemandSyncStorage && (!canCache || !canEvict) && item.isImportedAttachment()) {
-						if (item.attachmentSyncState === Zotero.Sync.Storage.SYNC_STATE_TO_DOWNLOAD) {
+					if ((!canCache || !canEvict) && onDemandSyncStorage && item.isImportedAttachment()) {
+						Zotero.debug(item.attachmentSyncState);
+						Zotero.debug(Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
+						if (item.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD) {
 							canCache = true;
 						}
-						else if (item.attachmentSyncState === Zotero.Sync.Storage.SYNC_STATE_IN_SYNC) {
+						else if (item.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC) {
 							canEvict = true;
 						}
 					}
 
-					if (onDemandSyncStorage && (!canCache || !canEvict) && item.isRegularItem() && !item.isFeedItem) {
+					if ((!canCache || !canEvict) && onDemandSyncStorage && item.isRegularItem() && !item.isFeedItem) {
 						let childAttachments = Zotero.Items.get(item.getAttachments());
 						if (!canCache && childAttachments.find(attachment => attachment.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD)) {
 							canCache = true;
@@ -4913,27 +4916,7 @@ var ZoteroPane = new function()
 	 * @returns {Promise<void>}
 	 */
 	this.cacheItems = async function () {
-		let items = this.getSelectedItems();
-		let itemAttachments = [];
-		for (let item of items) {
-			itemAttachments = itemAttachments.concat(
-				await Zotero.Items.getAsync(item.getAttachments())
-			);
-		}
-
-		Zotero.Sync.Storage.Cache.cacheItemAttachments(itemAttachments);
-	};
-
-
-	/**
-	 * Downloads and caches the given attachments. This will prevent them from being removed to
-	 * free up storage in the automatic cache.
-	 *
-	 * @returns {Promise<void>}
-	 */
-	this.cacheAttachmentItems = async function () {
-		let items = this.getSelectedItems();
-		Zotero.Sync.Storage.Cache.cacheItemAttachments(items);
+		Zotero.Sync.Storage.Cache.cacheItemAttachments(this.getSelectedItems());
 	};
 
 
@@ -4944,7 +4927,12 @@ var ZoteroPane = new function()
 	 */
 	this.removeCacheItems = async function () {
 		let items = this.getSelectedItems();
-		Zotero.Sync.Storage.Cache.removeAttachmentFilesForItems(items);
+		try {
+			await Zotero.Sync.Storage.Cache.removeAttachmentFilesForItems(items);
+		}
+		catch (e) {
+			Zotero.debug(e);
+		}
 	};
 
 	
