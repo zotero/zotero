@@ -25,10 +25,10 @@
 
 'use strict';
 
-import React, { memo, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
-import { IntlProvider, FormattedMessage, useIntl } from 'react-intl';
+import { IntlProvider, useIntl } from 'react-intl';
 
 const customPreferences = (id) => {
 	const pref = 'sync.storage.groups.' + id;
@@ -42,7 +42,7 @@ const customPreferences = (id) => {
 	};
 };
 
-const Group = memo(({ id, name, prefs, onChangeEnabled, onChangeSync, onChangeMode, onChangeTTLEnabled, onChangeTTLValue }) => {
+const Group = ({ id, name, prefs, onChangeEnabled, onChangeSync, onChangeMode, onChangeTTLEnabled, onChangeTTLValue }) => {
 	const intl = useIntl();
 
 	const defaultTTLValues = [1, 7, 30, 90];
@@ -140,7 +140,7 @@ const Group = memo(({ id, name, prefs, onChangeEnabled, onChangeSync, onChangeMo
 			</div> }
 		</div>
 	);
-});
+};
 
 Group.propTypes = {
 	id: PropTypes.number,
@@ -153,7 +153,7 @@ Group.propTypes = {
 	onChangeTTLValue: PropTypes.func
 };
 
-const GroupCustomSettings = memo(() => {
+const GroupCustomSettings = () => {
 	const intl = useIntl();
 
 	const [groups, setGroups] = useState([]);
@@ -248,49 +248,49 @@ const GroupCustomSettings = memo(() => {
 	};
 
 	// Change listeners for each custom settings section
-	const onChangeEnabled = (e, id) => {
-		Zotero.Prefs.set('sync.storage.groups.' + id + '.custom', e.target.checked);
-		updatePrefInGroups(id, 'enabled', e.target.checked);
+	const handleChangeEnabled = (event, id) => {
+		Zotero.Prefs.set('sync.storage.groups.' + id + '.custom', event.target.checked);
+		updatePrefInGroups(id, 'enabled', event.target.checked);
 	};
 
-	const onChangeSync = (e, id) => {
+	const handleChangeSync = (event, id) => {
 		if (id) {
-			Zotero.Prefs.set('sync.storage.groups.' + id + '.sync', e.target.checked);
+			Zotero.Prefs.set('sync.storage.groups.' + id + '.sync', event.target.checked);
 		}
 		else {
-			Zotero.Prefs.set('sync.storage.groups.enabled', e.target.checked);
+			Zotero.Prefs.set('sync.storage.groups.enabled', event.target.checked);
 		}
-		updatePrefInGroups(id, 'sync', e.target.checked);
+		updatePrefInGroups(id, 'sync', event.target.checked);
 	};
 
-	const onChangeMode = (e, id) => {
+	const handleChangeMode = (event, id) => {
 		if (id) {
-			Zotero.Prefs.set('sync.storage.groups.' + id + '.downloadMode', e.target.value);
+			Zotero.Prefs.set('sync.storage.groups.' + id + '.downloadMode', event.target.value);
 		}
 		else {
-			Zotero.Prefs.set('sync.storage.downloadMode.groups', e.target.value);
+			Zotero.Prefs.set('sync.storage.downloadMode.groups', event.target.value);
 		}
-		updatePrefInGroups(id, 'downloadMode', e.target.value);
+		updatePrefInGroups(id, 'downloadMode', event.target.value);
 	};
 
-	const onChangeTTLEnabled = (e, id) => {
+	const handleChangeTTLEnabled = (event, id) => {
 		if (id) {
-			Zotero.Prefs.set('sync.storage.groups.' + id + '.ttl', e.target.checked);
+			Zotero.Prefs.set('sync.storage.groups.' + id + '.ttl', event.target.checked);
 		}
 		else {
-			Zotero.Prefs.set('sync.storage.groups.ttl', e.target.checked);
+			Zotero.Prefs.set('sync.storage.groups.ttl', event.target.checked);
 		}
-		updatePrefInGroups(id, 'ttlEnabled', e.target.checked);
+		updatePrefInGroups(id, 'ttlEnabled', event.target.checked);
 	};
 
-	const onChangeTTLValue = (e, id) => {
+	const handleChangeTTLValue = (event, id) => {
 		if (id) {
-			Zotero.Prefs.set('sync.storage.groups.' + id + '.ttl.value', parseInt(e.target.value));
+			Zotero.Prefs.set('sync.storage.groups.' + id + '.ttl.value', parseInt(event.target.value));
 		}
 		else {
-			Zotero.Prefs.set('sync.storage.groups.ttl.value', parseInt(e.target.value));
+			Zotero.Prefs.set('sync.storage.groups.ttl.value', parseInt(event.target.value));
 		}
-		updatePrefInGroups(id, 'ttlValue', parseInt(e.target.value));
+		updatePrefInGroups(id, 'ttlValue', parseInt(event.target.value));
 	};
 
 	return (
@@ -306,10 +306,10 @@ const GroupCustomSettings = memo(() => {
 				<Group
 					id={ 0 }
 					prefs={ globalPrefs }
-					onChangeSync={ e => onChangeSync(e, false) }
-					onChangeMode={ e => onChangeMode(e, false) }
-					onChangeTTLEnabled={ e => onChangeTTLEnabled(e, false) }
-					onChangeTTLValue={ e => onChangeTTLValue(e, false) }
+					onChangeSync={ event => handleChangeSync(event, false) }
+					onChangeMode={ event => handleChangeMode(event, false) }
+					onChangeTTLEnabled={ event => handleChangeTTLEnabled(event, false) }
+					onChangeTTLValue={ event => handleChangeTTLValue(event, false) }
 				/>
 
 				<div className="reset-container">
@@ -343,11 +343,11 @@ const GroupCustomSettings = memo(() => {
 							name={ group.name }
 							id={ group.id }
 							prefs={ group.prefs }
-							onChangeEnabled={ e => onChangeEnabled(e, group.id) }
-							onChangeSync={ e => onChangeSync(e, group.id) }
-							onChangeMode={ e => onChangeMode(e, group.id) }
-							onChangeTTLEnabled={ e => onChangeTTLEnabled(e, group.id) }
-							onChangeTTLValue={ e => onChangeTTLValue(e, group.id) }
+							onChangeEnabled={ event => handleChangeEnabled(event, group.id) }
+							onChangeSync={ event => handleChangeSync(event, group.id) }
+							onChangeMode={ event => handleChangeMode(event, group.id) }
+							onChangeTTLEnabled={ event => handleChangeTTLEnabled(event group.id) }
+							onChangeTTLValue={ event => handleChangeTTLValue(event, group.id) }
 						/>
 					);
 				}) }
@@ -364,7 +364,7 @@ const GroupCustomSettings = memo(() => {
 			</div>
 		</div>
 	);
-});
+};
 
 ReactDOM.render(
 	<IntlProvider

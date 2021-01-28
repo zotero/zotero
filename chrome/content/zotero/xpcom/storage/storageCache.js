@@ -39,9 +39,8 @@ Zotero.Sync.Storage.Cache = {
 	 *
 	 * Removes duplicates in case both an item and it's children are passed in.
 	 *
-	 * @param items
-	 * @returns {Promise<Array>}
-	 * @private
+	 * @param {Zotero.Item[]} items
+	 * @return {Promise<Zotero.Item[]>}
 	 */
 	_getAllImportedAttachments: async function (items) {
 		let itemIDs = new Set();
@@ -70,13 +69,11 @@ Zotero.Sync.Storage.Cache = {
 	/**
 	 * Remove all attachment files for the given item/items and mark them as no longer cached
 	 *
-	 * @param items
-	 * @returns {Promise<void>}
+	 * @param {Zotero.Item[]} items
+	 * @return {Promise}
 	 */
 	removeAttachmentFilesForItems: async function (items) {
 		let attachmentItems = await this._getAllImportedAttachments(items);
-
-		Zotero.debug(attachmentItems);
 
 		// Delete all files (will update the DB as well)
 		await Zotero.Promise.all(
@@ -88,11 +85,10 @@ Zotero.Sync.Storage.Cache = {
 	},
 
 	/**
-	 * Cache the given item attachments
+	 * Cache all the attachments of the given items (top-level or child)
 	 *
-	 * @param items {Array} - List of items that are attachments
-	 *
-	 * @returns {Promise<void>}
+	 * @param {Zotero.Item[]} items
+	 * @return {Promise}
 	 */
 	cacheItemAttachments: async function (items) {
 		items = await this._getAllImportedAttachments(items);
@@ -139,9 +135,8 @@ Zotero.Sync.Storage.Cache = {
 	 * Called when the limit cache preference is turned on or when a new item is downloaded or
 	 * added.
 	 *
-	 * @param forGroups {boolean} - Are we identifying in group libraries or the user library
-	 *
-	 * @returns {Promise<void>}
+	 * @param {Boolean} [forGroups] - True if we identifying in group libraries or the user library
+	 * @return {Promise}
 	 */
 	identifyItemsToFree: async function (forGroups) {
 		this._freeingCache = true;
@@ -178,44 +173,40 @@ Zotero.Sync.Storage.Cache = {
 	 * Called when the limit cache preference is turned on or when a new item is downloaded or
 	 * added.
 	 *
-	 * @param libraryID {integer} - Library ID to search for items to free
-	 *
-	 * @returns {Promise<void>}
+	 * @param {Integer} libraryID - Library ID to search for items to free
+	 * @return {Promise}
 	 */
 	identifyItemsToFreeForLibrary: async function (libraryID) {
+		let library = Zotero.Libraries.get(libraryID);
 		// Check library has storage
 		if (!Zotero.Sync.Storage.Local.getEnabledForLibrary(libraryID)) {
-			Zotero.debug('Zotero.Sync.Storage.Cache ('
-				+ libraryID + ') exiting because it is not storage enabled ('
-				+ Zotero.Libraries.get(libraryID).libraryType + ').');
+			Zotero.debug(`Storage Cache: ${library.name} does not have storage enabled`);
 			return;
 		}
 
 		// Check this library is on demand
 		if (!Zotero.Sync.Storage.Local.downloadAsNeeded(libraryID)) {
-			Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID
-				+ ') exiting because it is not download as-needed.');
+			Zotero.debug(`Storage Cache: ${library.name} is not download-as-needed`);
 			return;
 		}
-		
+
 		let cacheTime = this._cacheLimitForLibrary(libraryID);
 		if (cacheTime === false) {
-			Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID
-				+ ') exiting because cache is disabled.');
+			Zotero.debug(`Storage Cache: ${library.name} does not have cache eviction enabled`);
 			return;
 		}
 
-		Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID
-			+ ') checking if cached files exceeds preference of ' + cacheTime + ' days.');
+		Zotero.debug(`Storage Cache: ${library.name} cache enabled for ${cacheTime} days`);
 
 		// Turn cache limit into seconds for timestamp
-		cacheTime = cacheTime * 24 * 60 * 60;
+		cacheTime *= 86400;
 
 		// Keep track of offset into table
 		let offset = 0;
+		let lastAccessedIsNull = false;
+		let recordsFreed = 0;
 
 		// Delete files older than the cache limit
-		let lastAccessedIsNull = false, i, recordsFreed = 0;
 		while (true) {
 			let sql = "SELECT itemID FROM itemAttachments JOIN items USING (itemID) "
 				+ " WHERE libraryID=? AND linkMode IN (?,?) AND syncState IN (?)";
@@ -239,11 +230,9 @@ Zotero.Sync.Storage.Cache = {
 			];
 			let rows = await Zotero.DB.queryAsync(sql, params);
 
-			for (i = 0; i < rows.length; i++) {
+			for (let i = 0; i < rows.length; i++) {
 				let item = await Zotero.Items.getAsync(rows[i].itemID);
 
-				Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID
-					+ ') freeing storage for item (' + item.id + ').');
 				await this._deleteItemFiles(item);
 
 				// Slow down so we don't bog the system down
@@ -252,8 +241,7 @@ Zotero.Sync.Storage.Cache = {
 
 			offset += 1000;
 			recordsFreed += rows.length;
-			Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID + ') processed '
-				+ recordsFreed + ' records.');
+			Zotero.debug(`Storage Cache: Processed ${recordsFreed} for ${library.name}`);
 
 			// Check if we need to break out of the loop
 			if (rows.length === 0 || rows.length < 1000) {
@@ -270,10 +258,15 @@ Zotero.Sync.Storage.Cache = {
 			}
 		}
 
-		Zotero.debug('Zotero.Sync.Storage.Cache (' + libraryID + ') freed '
-			+ recordsFreed + ' records.');
+		Zotero.debug(`Storage Cache: ${library.name} is finished processing`);
 	},
 
+	/**
+	 * Get the cache limit for the given library or `false` if TTL is not enabled
+	 *
+	 * @param {Integer} libraryID
+	 * @return {Boolean|Integer} False if TTL is not enabled, otherwise TTL value in days
+	 */
 	_cacheLimitForLibrary: function (libraryID) {
 		let enabled = Zotero.Prefs.get(this._getPrefForLibrary(libraryID, 'ttl'));
 		if (!enabled) {
@@ -304,15 +297,17 @@ Zotero.Sync.Storage.Cache = {
 	 * Note: This will also update the sync state to for affected items to:
 	 * Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD
 	 *
-	 * @param item {Zotero.Item} - Item to delete attachment files for
-	 *
-	 * @returns {Promise<boolean>} - True if we found files to delete
+	 * @param {Zotero.Item} item
+	 * @return {Promise<Boolean>} - True if we found files to delete
 	 */
 	_deleteItemFiles: async function (item) {
 		let fileExistsOnServer = await Zotero.Sync.Runner.checkFileExists(item);
 		if (!fileExistsOnServer) {
+			Zotero.debug(`Storage Cache: ${item.id} does not exist on server`);
 			return false;
 		}
+
+		Zotero.debug(`Storage Cache: Removing files for ${item.id}`);
 
 		// Delete files and update sync status
 		let attachmentDirectory = Zotero.Attachments.getStorageDirectory(item).path;
@@ -335,7 +330,7 @@ Zotero.Sync.Storage.Cache = {
 			await Zotero.Promise.all(deletes);
 		}
 		catch (e) {
-			Zotero.debug('Error deleting files for item (' + item.id + ').');
+			Zotero.debug(`Storage Cache: Could not delete files for ${item.id}`);
 			Zotero.logError(e);
 			throw e;
 		}
@@ -349,12 +344,7 @@ Zotero.Sync.Storage.Cache = {
 		item.attachmentSyncState = Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD;
 		await item.saveTx({ skipAll: true });
 
-		if (deletes.length > 0) {
-			Zotero.debug('Removed files for item (' + item.id + ').');
-			return true;
-		}
-
-		Zotero.debug('No files to remove for item (' + item.id + ').');
-		return false;
+		Zotero.debug(`Storage Cache: ${item.id} had ${deletes.length} files removed`);
+		return deletes.length > 0;
 	}
 };

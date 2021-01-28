@@ -3049,7 +3049,7 @@ var ZoteroPane = new function()
 							show.push(m.renameAttachments);
 							showSep5 = true;
 						}
-
+						
 						// If not linked URL, show reindex line
 						if (yield Zotero.Fulltext.canReindex(item)) {
 							show.push(m.reindexItem);

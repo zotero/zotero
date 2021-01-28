@@ -3226,7 +3226,7 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("UPDATE itemAttachments SET parentItemID=NULL WHERE itemID=parentItemID");
 				yield Zotero.DB.queryAsync("UPDATE itemNotes SET parentItemID=NULL WHERE itemID=parentItemID");
 			}
-
+			
 			else if (i == 111) {
 				yield Zotero.DB.queryAsync("CREATE TABLE deletedCollections (\n    collectionID INTEGER PRIMARY KEY,\n    dateDeleted DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    FOREIGN KEY (collectionID) REFERENCES collections(collectionID) ON DELETE CASCADE\n)");
 				yield Zotero.DB.queryAsync("CREATE INDEX deletedCollections_dateDeleted ON deletedCollections(dateDeleted)");

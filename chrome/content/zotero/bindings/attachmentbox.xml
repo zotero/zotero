@@ -281,7 +281,7 @@
 						urlField.hidden = true;
 						accessed.hidden = true;
 					}
-
+					
 					if (this.item.attachmentLinkMode
 								!= Zotero.Attachments.LINK_MODE_LINKED_URL
 							&& this.displayFileName) {

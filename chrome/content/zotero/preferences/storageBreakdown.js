@@ -65,13 +65,22 @@ async function calculateStorage() {
 	await Zotero.Promise.all(partitions.map(async (partition, index) => {
 		let items = await Zotero.Items.getAll(partition.libraryID);
 
-		const getFileSize = (attachmentFile) => {
-			Zotero.File.getFileSize(attachmentFile.path)
-				.then((size) => {
-					if (!attachmentFile.name.startsWith('.')) {
-						partitions[index].size += size;
+		const getFileSize = async (attachmentFile) => {
+			if (!attachmentFile.name.startsWith('.')) {
+				try {
+					partitions[index].size
+						+= (await OS.File.stat(attachmentFile.path)).size;
+				}
+				catch (e) {
+					if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
+						// File may or may not exist on disk becauser user's
+						// may manually delete files so swallow this error.
 					}
-				});
+					else {
+						throw e;
+					}
+				}
+			}
 		};
 
 		await Zotero.Promise.all(items.map(async (item) => {

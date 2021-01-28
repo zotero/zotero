@@ -24,14 +24,14 @@
 */
 'use strict';
 
-import React, { memo } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 import { IntlProvider } from "react-intl";
 import { humanReadableSize } from 'components/utils';
 
-const StorageBreakdown = memo(({ loading, partitions }) => {
+const StorageBreakdown = ({ loading, partitions }) => {
 	const partitionSum = partitions.reduce((sum, partition) => sum + partition.size, 0);
 	const countSum = partitions.reduce((sum, partition) => sum + partition.count, 0);
 
@@ -98,7 +98,7 @@ const StorageBreakdown = memo(({ loading, partitions }) => {
 			</div>
 		</IntlProvider>
 	);
-});
+};
 
 
 StorageBreakdown.propTypes = {

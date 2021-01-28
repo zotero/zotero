@@ -604,32 +604,6 @@ Zotero.File = new function(){
 		}
 	}
 
-	/**
-	 * Retrieve the size of the given file.
-	 *
-	 * Note: The returned size may be zero if the file does not exist or is a broken symlink
-	 *
-	 * @param path
-	 * @returns {Promise<integer>}
-	 */
-	this.getFileSize = async function (path) {
-		return OS.File.stat(path)
-			.then(
-				function (info) {
-					return info.size;
-				},
-				function (e) {
-					// Can happen if there's a symlink to a missing file
-					if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
-						return 0;
-					}
-					else {
-						throw e;
-					}
-				}
-			);
-	};
-
 	
 	/**
 	 * If directories can be moved at once, instead of recursively creating directories and moving files

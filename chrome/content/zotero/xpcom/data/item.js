@@ -1799,7 +1799,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			storageModTime !== undefined ? storageModTime : null,
 			storageHash || null,
 			lastProcessedModificationTime || null,
-			lastAccessed !== undefined ? lastAccessed : null
+			lastAccessed || null
 		];
 		if (isNew) {
 			params.unshift(itemID);
@@ -3365,23 +3365,14 @@ Zotero.Item.prototype._getLastPageIndexSettingKey = function () {
 
 Zotero.defineProperty(Zotero.Item.prototype, 'attachmentLastAccessed', {
 	get: function () {
-		if (!this.isFileAttachment()) {
+		if (!this.isImportedAttachment()) {
 			return undefined;
 		}
 		return this._attachmentLastAccessed;
 	},
 	set: function (val) {
-		if (!this.isAttachment()) {
-			throw new Error("attachmentLastAccessed can only be set for attachment items");
-		}
-
-		switch (this.attachmentLinkMode) {
-			case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
-			case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
-				break;
-
-			default:
-				throw new Error("attachmentLastAccessed can only be set for stored files");
+		if (!this.isImportedAttachment()) {
+			throw new Error("attachmentLastAccessed can only be set for imported attachment items");
 		}
 
 		if (typeof val != 'number') {
@@ -5204,10 +5195,6 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 					let md5 = this.attachmentSyncedHash;
 					if (md5 !== null) {
 						obj.md5 = md5;
-					}
-					let lastAccessed = this.attachmentLastAccessed;
-					if (lastAccessed !== null) {
-						obj.lastAccessed = lastAccessed;
 					}
 				}
 				else {
