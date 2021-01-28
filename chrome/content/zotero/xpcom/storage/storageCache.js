@@ -24,50 +24,20 @@
 */
 
 /**
- * Responsible for management and processing of local files to maintain proper cache size.
+ * Manage Storage Cache for libraries or items
  *
- * @function free - Add item ID to queue to be freed
- * @function identifyItemsToFree - Identify cache items to free
+ * @function removeAttachmentFilesForItems - Remove files for given items
+ * @function cacheItemAttachments - Download files for given items
+ * @function cleanCacheForLibrary - Remove synced files for given library
  */
 Zotero.Sync.Storage.Cache = {
-	// Flag to indicate if we are already processing
-	_freeingCache: false,
+	// Properties to make testing easier
+	_dbScanRecordLimit: 1000,
+	_dbScanSleepPeriod: 100,
+	_fileDeletionSleepPeriod: 100,
 
 	/**
-	 * Helper function to take in a list of items, attachments, etc. and return a list of all
-	 * child imported attachments that have been selected.
-	 *
-	 * Removes duplicates in case both an item and it's children are passed in.
-	 *
-	 * @param {Zotero.Item[]} items
-	 * @return {Promise<Zotero.Item[]>}
-	 */
-	_getAllImportedAttachments: async function (items) {
-		let itemIDs = new Set();
-		let importedAttachments = [];
-		for (let item of items) {
-			if (item.isRegularItem()) {
-				let attachmentItems = item.getAttachments();
-				let attachments = await Zotero.Items.getAsync(attachmentItems);
-				for (let attachment of attachments) {
-					if (!itemIDs.has(attachment.id)) {
-						itemIDs.add(attachment.id);
-						importedAttachments.push(attachment);
-					}
-				}
-			}
-			else if (item.isImportedAttachment() && !itemIDs.has(item.id)) {
-				itemIDs.add(item.id);
-				importedAttachments.push(item);
-			}
-			// Ignore notes
-		}
-
-		return importedAttachments;
-	},
-
-	/**
-	 * Remove all attachment files for the given item/items and mark them as no longer cached
+	 * Remove all attachment files for the given items and mark them as TO_DOWNLOAD
 	 *
 	 * @param {Zotero.Item[]} items
 	 * @return {Promise}
@@ -80,7 +50,7 @@ Zotero.Sync.Storage.Cache = {
 			attachmentItems.map(attachmentItem => this._deleteItemFiles(attachmentItem))
 		);
 		
-		// TODO: There seems to be a lag compared to download file of how long it takes the
+		// TODO: There seems to be a lag compared to download/delete file of how long it takes the
 		// item pane to update (in particular, snapshots don't seem to update at all)
 	},
 
@@ -129,126 +99,94 @@ Zotero.Sync.Storage.Cache = {
 		}
 	},
 
-	/**
-	 * Identify items with files currently downloaded that we should delete to limit cache
-	 *
-	 * Called when the limit cache preference is turned on or when a new item is downloaded or
-	 * added.
-	 *
-	 * @param {Boolean} [forGroups] - True if we identifying in group libraries or the user library
-	 * @return {Promise}
-	 */
-	identifyItemsToFree: async function (forGroups) {
-		this._freeingCache = true;
-		let promises = [];
-		try {
-			if (forGroups) {
-				Zotero.Libraries.getAll().forEach((library) => {
-					if (library.libraryID !== Zotero.Libraries.userLibraryID) {
-						promises.push(
-							this.identifyItemsToFreeForLibrary(library.libraryID)
-						);
-					}
-				});
-			}
-			else {
-				promises.push(
-					this.identifyItemsToFreeForLibrary(Zotero.Libraries.userLibraryID)
-				);
-			}
-	
-			await Zotero.Promise.all(promises);
-		}
-		catch (e) {
-			throw e;
-		}
-		finally {
-			this._freeingCache = false;
-		}
+	cleanCacheForLibrary: async function (libraryID) {
+		let expiredItems = this._getExpiredItemsForLibrary(libraryID);
+		await this._deleteItemFiles(expiredItems);
 	},
 
 	/**
-	 * Identify items with files currently downloaded that we should delete to limit cache
+	 * Scan the given library to identify items that have a `lastAccessed` date older than the
+	 * cache preference.
 	 *
-	 * Called when the limit cache preference is turned on or when a new item is downloaded or
-	 * added.
-	 *
-	 * @param {Integer} libraryID - Library ID to search for items to free
-	 * @return {Promise}
+	 * @param {Integer} libraryID
+	 * @return {Promise<Zotero.Items[]|Boolean>} - Items in library that are expired or `false`
+	 * 	if the library is not storage/cache enabled
 	 */
-	identifyItemsToFreeForLibrary: async function (libraryID) {
+	_getExpiredItemsForLibrary: async function (libraryID) {
 		let library = Zotero.Libraries.get(libraryID);
-		// Check library has storage
+		// Check library has file syncing storage enabled
 		if (!Zotero.Sync.Storage.Local.getEnabledForLibrary(libraryID)) {
 			Zotero.debug(`Storage Cache: ${library.name} does not have storage enabled`);
-			return;
+			return false;
 		}
 
-		// Check this library is on demand
+		// Check this library is on-demand
 		if (!Zotero.Sync.Storage.Local.downloadAsNeeded(libraryID)) {
 			Zotero.debug(`Storage Cache: ${library.name} is not download-as-needed`);
-			return;
+			return false;
 		}
 
 		let cacheTime = this._cacheLimitForLibrary(libraryID);
 		if (cacheTime === false) {
 			Zotero.debug(`Storage Cache: ${library.name} does not have cache eviction enabled`);
-			return;
+			return false;
 		}
 
 		Zotero.debug(`Storage Cache: ${library.name} cache enabled for ${cacheTime} days`);
 
-		// Turn cache limit into seconds for timestamp
-		cacheTime *= 86400;
+		// Turn cache limit into a timestamp
+		let cacheCutoff = Date.now() - (cacheTime * 86400000);
+		let cacheDate = Zotero.Date.dateToSQL(new Date(cacheCutoff));
 
-		// Keep track of offset into table
+		// Not every record in the DB is guaranteed to have a `lastAccessed`. So first we
+		// go through every record that does and then fallback to `dateModified` for all the
+		// ones that don't
+		let useLastAccessed = true;
+
+		let expiredItems = [];
 		let offset = 0;
-		let lastAccessedIsNull = false;
-		let recordsFreed = 0;
-
-		// Delete files older than the cache limit
 		while (true) {
 			let sql = "SELECT itemID FROM itemAttachments JOIN items USING (itemID) "
 				+ " WHERE libraryID=? AND linkMode IN (?,?) AND syncState IN (?)";
 			
-			// If we have no last accessed data in DB then compare with dateModified
-			if (lastAccessedIsNull) {
-				sql += " AND lastAccessed IS NULL AND dateModified < ?";
+			let dateParam;
+			if (useLastAccessed) {
+				sql += " AND lastAccessed IS NOT NULL AND lastAccessed < ?";
+				dateParam = cacheCutoff;
 			}
 			else {
-				sql += " AND lastAccessed IS NOT NULL AND lastAccessed > ?";
+				sql += " AND lastAccessed IS NULL AND dateModified < ?";
+				dateParam = cacheDate;
 			}
 			
-			sql += " ORDER BY lastAccessed DESC, dateModified DESC LIMIT ?,1000";
+			sql += " ORDER BY lastAccessed DESC, dateModified DESC LIMIT ?,?";
 			let params = [
 				libraryID,
 				Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
 				Zotero.Attachments.LINK_MODE_IMPORTED_URL,
 				Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC,
-				cacheTime,
-				offset
+				dateParam,
+				offset,
+				this._dbScanRecordLimit
 			];
+			// eslint-disable-next-line no-await-in-loop
 			let rows = await Zotero.DB.queryAsync(sql, params);
+			Zotero.debug(`Storage Cache: ${library.name} retrieved ${rows.length} rows`);
 
 			for (let i = 0; i < rows.length; i++) {
+				// eslint-disable-next-line no-await-in-loop
 				let item = await Zotero.Items.getAsync(rows[i].itemID);
-
-				await this._deleteItemFiles(item);
-
-				// Slow down so we don't bog the system down
-				await Zotero.Promise.delay(500);
+				expiredItems.push(item);
 			}
 
-			offset += 1000;
-			recordsFreed += rows.length;
-			Zotero.debug(`Storage Cache: Processed ${recordsFreed} for ${library.name}`);
+			offset += this._dbScanRecordLimit;
 
 			// Check if we need to break out of the loop
-			if (rows.length === 0 || rows.length < 1000) {
-				if (!lastAccessedIsNull) {
+			if (rows.length === 0 || rows.length < this._dbScanRecordLimit) {
+				if (useLastAccessed) {
 					// Now let's process records that don't have a last accessed
-					lastAccessedIsNull = true;
-
+					useLastAccessed = false;
+					// Reset offset since we are in a whole new category
 					offset = 0;
 				}
 				else {
@@ -256,9 +194,15 @@ Zotero.Sync.Storage.Cache = {
 					break;
 				}
 			}
+
+			// Slow down so we don't bog the system down if we are scanning a
+			// big library
+			// eslint-disable-next-line no-await-in-loop
+			await Zotero.Promise.delay(this._dbScanSleepPeriod);
 		}
 
-		Zotero.debug(`Storage Cache: ${library.name} is finished processing`);
+		Zotero.debug(`Storage Cache: ${library.name} has ${expiredItems.length} expired items`);
+		return expiredItems;
 	},
 
 	/**
@@ -292,59 +236,115 @@ Zotero.Sync.Storage.Cache = {
 	},
 
 	/**
-	 * Delete files for the given item
+	 * Delete files for the given items
 	 *
 	 * Note: This will also update the sync state to for affected items to:
 	 * Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD
 	 *
-	 * @param {Zotero.Item} item
-	 * @return {Promise<Boolean>} - True if we found files to delete
+	 * @param {Zotero.Item[]} items
+	 * @return {Promise<Integer|Boolean[]>} - List of results (number of files deleted or `false` on failure)
 	 */
-	_deleteItemFiles: async function (item) {
-		let fileExistsOnServer = await Zotero.Sync.Runner.checkFileExists(item);
-		if (!fileExistsOnServer) {
-			Zotero.debug(`Storage Cache: ${item.id} does not exist on server`);
-			return false;
+	_deleteItemFiles: async function (items) {
+		let results = [];
+
+		for (let item of items) {
+			if (!item.isImportedAttachment()) {
+				Zotero.debug(`Storage Cache: ${item.id} is not an imported attachment`);
+				results.push(false);
+				continue;
+			}
+
+			// eslint-disable-next-line no-await-in-loop
+			let fileExistsOnServer = await Zotero.Sync.Runner.checkFileExists(item);
+			if (!fileExistsOnServer) {
+				Zotero.debug(`Storage Cache: ${item.id} does not exist on server`);
+				results.push(false);
+				continue;
+			}
+
+			Zotero.debug(`Storage Cache: Removing files for ${item.id}`);
+
+			// Delete files and update sync status
+			let attachmentDirectory = Zotero.Attachments.getStorageDirectory(item).path;
+			let iterator = new OS.File.DirectoryIterator(attachmentDirectory);
+
+			// Iterate through the directory and delete files/folders
+			let deletes = [];
+			try {
+				// eslint-disable-next-line no-await-in-loop
+				await iterator.forEach(
+					(entry) => {
+						if (entry.isDir) {
+							deletes.push(OS.File.removeDir(entry.path));
+						}
+						else if (!entry.name.startsWith('.')) {
+							deletes.push(OS.File.remove(entry.path));
+						}
+					}
+				);
+
+				// eslint-disable-next-line no-await-in-loop
+				await Zotero.Promise.all(deletes);
+			}
+			catch (e) {
+				Zotero.debug(`Storage Cache: Could not delete files for ${item.id}`);
+				Zotero.logError(e);
+				throw e;
+			}
+			finally {
+				iterator.close();
+			}
+
+			// TODO: Do we care about overwriting another state here (do we need to check above)?
+			// Mark item to be downloaded again. Since we are in as-needed mode this won't cause
+			// it to immediately download again.
+			item.attachmentSyncState = Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD;
+			// eslint-disable-next-line no-await-in-loop
+			await item.saveTx({ skipAll: true });
+
+			Zotero.debug(`Storage Cache: ${item.id} had ${deletes.length} files removed`);
+			results.push(deletes.length);
+
+			// Rate limit this in case we are deleting a lot of files
+			// eslint-disable-next-line no-await-in-loop
+			await Zotero.Promise.delay(this._fileDeletionSleepPeriod);
 		}
 
-		Zotero.debug(`Storage Cache: Removing files for ${item.id}`);
+		return results;
+	},
 
-		// Delete files and update sync status
-		let attachmentDirectory = Zotero.Attachments.getStorageDirectory(item).path;
-		let iterator = new OS.File.DirectoryIterator(attachmentDirectory);
-
-		// Iterate through the directory and delete files/folders
-		let deletes = [];
-		try {
-			await iterator.forEach(
-				(entry) => {
-					if (entry.isDir) {
-						deletes.push(OS.File.removeDir(entry.path));
-					}
-					else if (!entry.name.startsWith('.')) {
-						deletes.push(OS.File.remove(entry.path));
+	/**
+	 * Helper function to take in a list of items, attachments, etc. and return a list of all
+	 * child imported attachments that have been selected.
+	 *
+	 * Removes duplicates in case both an item and it's children are passed in.
+	 *
+	 * @param {Zotero.Item[]} items
+	 * @return {Promise<Zotero.Item[]>}
+	 */
+	_getAllImportedAttachments: async function (items) {
+		let itemIDs = new Set();
+		let importedAttachments = [];
+		for (let item of items) {
+			if (item.isRegularItem()) {
+				let attachmentItems = item.getAttachments();
+				// eslint-disable-next-line no-await-in-loop
+				let attachments = await Zotero.Items.getAsync(attachmentItems);
+				for (let attachment of attachments) {
+					if (attachment.isImportedAttachment()
+						&& !itemIDs.has(attachment.id)) {
+						itemIDs.add(attachment.id);
+						importedAttachments.push(attachment);
 					}
 				}
-			);
-
-			await Zotero.Promise.all(deletes);
-		}
-		catch (e) {
-			Zotero.debug(`Storage Cache: Could not delete files for ${item.id}`);
-			Zotero.logError(e);
-			throw e;
-		}
-		finally {
-			iterator.close();
+			}
+			else if (item.isImportedAttachment() && !itemIDs.has(item.id)) {
+				itemIDs.add(item.id);
+				importedAttachments.push(item);
+			}
+			// Ignore notes
 		}
 
-		// TODO: Need to be careful about not overriding a sync state like to-upload or something
-		// Mark item to be downloaded again. Since we are in as-needed mode this won't cause
-		// it to immediately download again.
-		item.attachmentSyncState = Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD;
-		await item.saveTx({ skipAll: true });
-
-		Zotero.debug(`Storage Cache: ${item.id} had ${deletes.length} files removed`);
-		return deletes.length > 0;
-	}
+		return importedAttachments;
+	},
 };

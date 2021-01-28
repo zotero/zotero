@@ -346,7 +346,7 @@ const GroupCustomSettings = () => {
 							onChangeEnabled={ event => handleChangeEnabled(event, group.id) }
 							onChangeSync={ event => handleChangeSync(event, group.id) }
 							onChangeMode={ event => handleChangeMode(event, group.id) }
-							onChangeTTLEnabled={ event => handleChangeTTLEnabled(event group.id) }
+							onChangeTTLEnabled={ event => handleChangeTTLEnabled(event, group.id) }
 							onChangeTTLValue={ event => handleChangeTTLValue(event, group.id) }
 						/>
 					);

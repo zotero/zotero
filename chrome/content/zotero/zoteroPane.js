@@ -2406,7 +2406,7 @@ var ZoteroPane = new function()
 		{
 			id: "cleanCache",
 			oncommand: () => {
-				Zotero.Sync.Storage.Cache.identifyItemsToFreeForLibrary(this.getSelectedLibraryID());
+				Zotero.Sync.Storage.Cache.cleanCacheForLibrary(this.getSelectedLibraryID());
 			}
 		},
 		{
