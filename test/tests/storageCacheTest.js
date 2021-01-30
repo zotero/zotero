@@ -153,17 +153,21 @@ describe('Zotero.Sync.Storage.Cache', function () {
 
 		it('should check for existence on the server before deleting', async function () {
 			// Stub out remote file existence check
-			Zotero.Sync.Runner.checkFileExists = () => false;
+			let stub = sinon.stub(Zotero.Sync.Runner, 'checkFileExists');
+			stub.returns(false);
 
 			let attachment = await importFileAttachment('test.png');
 			let deleted = await Zotero.Sync.Storage.Cache._deleteItemFiles([attachment]);
 
 			assert.isFalse(deleted[0]);
+			assert.isTrue(stub.calledOnce);
+			stub.restore();
 		});
 
 		it('should remove all non-hidden files and sub-directories', async function () {
 			// Stub out remote file existence check
-			Zotero.Sync.Runner.checkFileExists = () => true;
+			let stub = sinon.stub(Zotero.Sync.Runner, 'checkFileExists');
+			stub.returns(true);
 
 			let attachment = await importFileAttachment('test.png');
 			let attachmentFilePath = await attachment.getFilePath();
@@ -196,11 +200,14 @@ describe('Zotero.Sync.Storage.Cache', function () {
 				await Zotero.File.getContentsAsync(hiddenFilePath),
 				'contents'
 			);
+			assert.isTrue(stub.calledOnce);
+			stub.restore();
 		});
 
 		it('should update sync state of affected item', async function () {
 			// Stub out remote file existence check
-			Zotero.Sync.Runner.checkFileExists = () => true;
+			let stub = sinon.stub(Zotero.Sync.Runner, 'checkFileExists');
+			stub.returns(true);
 
 			// Create attachment marked as synced
 			let attachment = await importFileAttachment('test.png');
@@ -217,11 +224,15 @@ describe('Zotero.Sync.Storage.Cache', function () {
 				attachment.attachmentSyncState,
 				Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD
 			);
+			assert.isTrue(stub.calledOnce);
+			stub.restore();
 		});
 
 		it('should rate limit file deletion', async function () {
 			// Stub out remote file existence check
-			Zotero.Sync.Runner.checkFileExists = () => true;
+			let stub = sinon.stub(Zotero.Sync.Runner, 'checkFileExists');
+			stub.returns(true);
+
 			let attachment = await importFileAttachment('test.png');
 
 			// Slow down the sleep period
@@ -233,6 +244,8 @@ describe('Zotero.Sync.Storage.Cache', function () {
 
 			assert.equal(deleted[0], 1);
 			assert.isAtLeast(totalTime, 2000);
+			assert.isTrue(stub.calledOnce);
+			stub.restore();
 		});
 	});
 
