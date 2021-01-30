@@ -7,6 +7,9 @@ describe('Zotero.Sync.Storage.Cache', function () {
 			skipBundledFiles: true
 		});
 	});
+	afterEach(function () {
+		sinon.restore();
+	});
 
 
 	describe('#_getAllImportedAttachments()', function () {
@@ -161,7 +164,6 @@ describe('Zotero.Sync.Storage.Cache', function () {
 
 			assert.isFalse(deleted[0]);
 			assert.isTrue(stub.calledOnce);
-			stub.restore();
 		});
 
 		it('should remove all non-hidden files and sub-directories', async function () {
@@ -201,7 +203,6 @@ describe('Zotero.Sync.Storage.Cache', function () {
 				'contents'
 			);
 			assert.isTrue(stub.calledOnce);
-			stub.restore();
 		});
 
 		it('should update sync state of affected item', async function () {
@@ -225,7 +226,6 @@ describe('Zotero.Sync.Storage.Cache', function () {
 				Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD
 			);
 			assert.isTrue(stub.calledOnce);
-			stub.restore();
 		});
 
 		it('should rate limit file deletion', async function () {
@@ -245,7 +245,6 @@ describe('Zotero.Sync.Storage.Cache', function () {
 			assert.equal(deleted[0], 1);
 			assert.isAtLeast(totalTime, 2000);
 			assert.isTrue(stub.calledOnce);
-			stub.restore();
 		});
 	});
 
