@@ -603,7 +603,7 @@ Zotero.File = new function(){
 			iterator.close();
 		}
 	}
-
+	
 	
 	/**
 	 * If directories can be moved at once, instead of recursively creating directories and moving files
