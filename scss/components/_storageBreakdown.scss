@@ -1,4 +1,8 @@
 .storage-breakdown {
+	height: 350px;
+	width: 350px;
+	font-size: 13px;
+	padding: 1em;
 
 	.title {
 		font-size: 1.2em;
@@ -6,7 +10,7 @@
 
 	.downloadProgress {
 		&.hidden {
-			display: none;
+			visibility: hidden;
 		}
 
 		.progress-bar {
@@ -17,51 +21,28 @@
 	}
 
 	.partitions {
-		margin-top: 2em;
-		width: 300px;
-		position: relative;
-		height: 30px;
-		border: solid 1px gray;
-	}
+		max-height: 250px;
+		height: 250px;
+		overflow-y: scroll;
+		overflow-x: visible;
+		background-color: $shade-0;
+		padding: 1em;
 
-	.partition {
-		display: inline-block;
-		position: absolute;
-		height: 30px;
-		top: 0;
+		.partition {
+			border-bottom: solid 1px $shade-4;
+			padding-bottom: 1em;
+			margin-bottom: 1em;
 
-		&.p0 {
-			background-color: $blue;
-		}
-
-		&.p1 {
-			background-color: $red;
-		}
-
-		.tooltip-container {
-			position: relative;
-			width: 100%;
-			height: 100%;
-
-			.tooltip {
-				position: absolute;
-				opacity: 0;
-				border-radius: 4px;
-				padding: 0.4em;
-				background-color: #1f1f1f;
-				color: white;
-				top: calc(100% - 5px);
-				left: 50%;
-				transform: translateX(-50%);
-				white-space: nowrap;
-				z-index: 10;
+			&:last-child {
+				border: none;
+				margin-bottom: 0;
 			}
 
-			&:hover {
-				.tooltip {
-					opacity: 1;
-					transition: opacity 0.5s ease-in-out 0.5s;
-				}
+			.top-row {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 0.5em;
 			}
 		}
 	}

@@ -14,43 +14,4 @@
 			margin-inline-start: 2px;
 		}
 	}
-
-	// .button-native comes from: chrome://global/skin/button.css
-	// For some reason those styles are overriden in the react world
-	// Note we changed the attribute selectors default="true" to just default
-	// because I couldn't figure out how to get react to pass the string "true"
-	.button-native {
-		font: {
-			family: inherit;
-			size: inherit;
-		}
-		line-height: 17.5px; // Added this after copy
-		// -moz-appearance: button;
-		/* The horizontal margin used here come from the Aqua Human Interface
-		   Guidelines, there should be 12 pixels between two buttons. */
-		margin: 5px 6px 3px;
-		min-width: 79px;
-	}
-
-	.button-native:not([disabled]):hover:active {
-		color: -moz-mac-buttonactivetext;
-	}
-
-	/* When the window isn't focused, the default button background isn't drawn,
-	 * so don't change the text color then: */
-	.button-native[default]:not([disabled]):not(:-moz-window-inactive) {
-		color: -moz-mac-defaultbuttontext;
-	}
-
-	/* Likewise, when active (mousedown) but not hovering, the default button
-	 * background isn't drawn, override the previous selector for that case: */
-	.button-native[default]:not(:hover):active {
-		color: ButtonText;
-	}
-
-	/* .......... disabled state .......... */
-
-	.button-native[disabled] {
-		color: GrayText;
-	}
 }

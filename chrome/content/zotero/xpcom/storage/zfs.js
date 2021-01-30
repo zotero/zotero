@@ -346,7 +346,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 	 * Check if the given file exists on the server
 	 *
 	 * @param {Zotero.Sync.Storage.Request} request
-	 * @returns {Promise<Zotero.Sync.Storage.Result>}
+	 * @return {Promise<Zotero.Sync.Storage.Result>}
 	 */
 	checkFileExists: async function (request) {
 		let funcName = "Zotero.Sync.Storage.ZFS.checkFileExists()";

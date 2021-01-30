@@ -463,8 +463,8 @@ Zotero_Preferences.Sync = {
 
 	viewStorageBreakdown: function () {
 		var io = {};
-		window.openDialog('chrome://zotero/content/preferences/storageBreakdown.xul',
-			"zotero-preferences-viewStorageBreakdown", "chrome,centerscreen", io);
+		window.openDialog('chrome://zotero/content/preferences/storageBreakdown.html',
+			"zotero-preferences-viewStorageBreakdown", "chrome,modal,centerscreen", io);
 	},
 	
 	

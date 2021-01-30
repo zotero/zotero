@@ -7,8 +7,15 @@ const humanReadableSize = (bytes, fractionDigits) => {
 		unitsIndex += 1;
 	}
 
-	const units = ['bytes', 'KB', 'MB', 'GB', 'TB'];
-	return bytes.toFixed(fractionDigits) + units[unitsIndex];
+	const units = [
+		'bytes', 'kiloBytes', 'megaBytes', 'gigaBytes', 'teraBytes'
+	];
+
+	return Zotero.getString(
+		'zotero.preferences.sync.fileSyncing.breakdown.' + units[unitsIndex],
+		bytes.toFixed(fractionDigits),
+		bytes.toFixed(fractionDigits)
+	);
 };
 
 export {
