@@ -382,10 +382,11 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		}
 
 		if (req.status === 200) {
-			if (req.getResponseHeader('ETag')
-				=== await item.attachmentHash) {
-				if (req.getResponseHeader('X-Zotero-Modification-Time')
-					=== await item.attachmentModificationTime) {
+			if (req.getResponseHeader('ETag') === await item.attachmentHash) {
+				let fmtime = await item.attachmentModificationTime;
+				let mtime = req.getResponseHeader('X-Zotero-Modification-Time');
+
+				if (Zotero.Sync.Storage.checkFileModTime(item, fmtime, mtime)) {
 					return true;
 				}
 				else {
@@ -397,7 +398,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			}
 		}
 		else if (req.status === 404) {
-			Zotero.debug(`Storage.ZFS.checkFileExists: ${item.id} is not found`);
+			Zotero.debug(`Storage.ZFS.checkFileExists: ${item.id} was not found`);
 		}
 
 		return false;

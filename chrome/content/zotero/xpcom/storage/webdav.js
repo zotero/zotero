@@ -600,8 +600,31 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 	 * @param {Zotero.Sync.Storage.Request} request
 	 * @return {boolean} True if the remote server has an up to date copy of the file
 	 */
-	checkFileExists: function (request) {
-		return false;
+	checkFileExists: async function (request) {
+		let item = Zotero.Sync.Storage.Utilities.getItemFromRequest(request);
+
+		let metadata = await this._getStorageFileMetadata(item, request);
+		if (!metadata.mtime) {
+			Zotero.debug(`Storage.WebDAV.checkFileExists: ${item.id} was not found`);
+			return false;
+		}
+
+		// Local file time
+		let fmtime = await item.attachmentModificationTime;
+		// Remote prop time
+		let mtime = metadata.mtime;
+
+		if (Zotero.Sync.Storage.Local.checkFileModTime(item, fmtime, mtime)) {
+			Zotero.debug(`Storage.WebDAV.checkFileExists: ${item.id} does not match server mtime`);
+			return false;
+		}
+
+		if (metadata.md5 && metadata.md5 != await item.attachmentHash) {
+			Zotero.debug(`Storage.ZFS.checkFileExists: ${item.id} does not match server hash`);
+			return false;
+		}
+
+		return true;
 	},
 	
 	
