@@ -262,23 +262,7 @@ Zotero.Prefs = new function(){
 				if (!win.Zotero) continue;
 				Zotero.updateQuickSearchBox(win.document);
 			}
-		}],
-		["storage.cacheLimit.personal", function (val) {
-			if (val) {
-				//Zotero.Sync.Storage.Cache.identifyItemsToFree(false, true);
-			}
-			else {
-				// TODO: Need to handle turning on and off a bunch with some locking
-			}
-		}],
-		["storage.cacheLimit.groups", function (val) {
-			if (val) {
-				// Zotero.Sync.Storage.Cache.identifyItemsToFree(true, true);
-			}
-			else {
-				// TODO: Need to handle turning on and off a bunch with some locking
-			}
-		}],
+		}]
 	];
 	
 	//

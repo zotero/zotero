@@ -374,16 +374,32 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 					+ " (" + item.libraryKey + ")";
 				Zotero.logError(msg);
 				Zotero.debug(e.xmlhttp.getAllResponseHeaders());
+				// TODO: This error doesn't make sense, but it sort of depends on how
+				// this function is called so leaving that for now.
 				throw new Error(Zotero.Sync.Storage.defaultError);
 			}
 			throw e;
 		}
 
 		if (req.status === 200) {
-			return true;
+			if (req.getResponseHeader('ETag')
+				=== await item.attachmentHash) {
+				if (req.getResponseHeader('X-Zotero-Modification-Time')
+					=== await item.attachmentModificationTime) {
+					return true;
+				}
+				else {
+					Zotero.debug(`Storage.ZFS.checkFileExists: ${item.id} does not match server hash`);
+				}
+			}
+			else {
+				Zotero.debug(`Storage.ZFS.checkFileExists: ${item.id} does not match server mtime`);
+			}
+		}
+		else if (req.status === 404) {
+			Zotero.debug(`Storage.ZFS.checkFileExists: ${item.id} is not found`);
 		}
 
-		// TODO: Add in retry on other status codes besides 404
 		return false;
 	},
 	

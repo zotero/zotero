@@ -1156,4 +1156,107 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.equal(responses, 1);
 		})
 	})
+
+	describe('#checkFileExists()', function () {
+		let client;
+		let zfs;
+		let item;
+		let fileURL;
+
+		beforeEach(async function () {
+			let setupObject = await setup();
+			client = setupObject.client;
+
+			zfs = new Zotero.Sync.Storage.Mode.ZFS({
+				apiClient: client
+			});
+
+			item = await importFileAttachment('test.png');
+			fileURL = `${baseURL}users/1/items/${item.key}/file?info=true`;
+		});
+
+		it('should throw exception for unknown status code', async function () {
+			server.respond(function (req) {
+				if (req.method === 'GET' && req.url === fileURL) {
+					req.respond(400, {}, 'Bad Request');
+				}
+			});
+
+			await assert.isRejected(
+				zfs.checkFileExists({ name: item.libraryKey }),
+				'A file sync error occurred. Please try syncing again.'
+			);
+		});
+
+		it('should return false for a 404', async function () {
+			server.respond(function (req) {
+				if (req.method === 'GET' && req.url === fileURL) {
+					req.respond(404, {}, 'Not found');
+				}
+			});
+
+			let result = await zfs.checkFileExists({
+				name: item.libraryKey
+			});
+			assert.isFalse(result);
+		});
+
+		it('should check for attachment hash', async function () {
+			let attachmentMTime = await item.attachmentModificationTime;
+
+			server.respond(function (req) {
+				if (req.method === 'GET' && req.url === fileURL) {
+					req.respond(
+						200,
+						{
+							ETag: '****',
+							'X-Zotero-Modification-Time': attachmentMTime
+						}
+					);
+				}
+			});
+
+			let result = await zfs.checkFileExists({ name: item.libraryKey });
+			assert.isFalse(result);
+		});
+
+		it('should check for attachment modification time', async function () {
+			let attachmentHash = await item.attachmentHash;
+
+			server.respond(function (req) {
+				if (req.method === 'GET' && req.url === fileURL) {
+					req.respond(
+						200,
+						{
+							ETag: attachmentHash,
+							'X-Zotero-Modification-Time': 0
+						}
+					);
+				}
+			});
+
+			let result = await zfs.checkFileExists({ name: item.libraryKey });
+			assert.isFalse(result);
+		});
+
+		it('should return true for matching metadata', async function () {
+			let attachmentHash = await item.attachmentHash;
+			let attachmentMTime = await item.attachmentModificationTime;
+
+			server.respond(function (req) {
+				if (req.method === 'GET' && req.url === fileURL) {
+					req.respond(
+						200,
+						{
+							ETag: attachmentHash,
+							'X-Zotero-Modification-Time': attachmentMTime
+						}
+					);
+				}
+			});
+
+			let result = await zfs.checkFileExists({ name: item.libraryKey });
+			assert.isTrue(result);
+		});
+	});
 })

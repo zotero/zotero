@@ -1011,7 +1011,7 @@ describe("Zotero.Sync.Runner", function () {
 		it('should check if attachment is imported', async function () {
 			let item = await createDataObject('item');
 
-			assert.isRejected(
+			await assert.isRejected(
 				Zotero.Sync.Runner.checkFileExists(item),
 				'Not an imported attachment'
 			);
