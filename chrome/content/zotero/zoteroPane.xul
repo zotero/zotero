@@ -49,6 +49,7 @@
 	<script src="browser.js" type="application/javascript"/>
 	<script src="lookup.js"/>
 	<script src="locateMenu.js" type="application/javascript"/>
+	<script src="tooltip.js"/>
 	
 	<commandset id="mainCommandSet">
 		<command id="cmd_zotero_reportErrors" oncommand="ZoteroPane_Local.reportErrors();"/>
@@ -289,6 +290,8 @@
 					<menuitem class="menuitem-iconic zotero-menuitem-rename-from-parent" oncommand="ZoteroPane_Local.renameSelectedAttachmentsFromParents()"/>
 					<menuitem class="menuitem-iconic zotero-menuitem-reindex" oncommand="ZoteroPane_Local.reindexItem();"/>
 				</menupopup>
+				
+				<tooltip id="fake-tooltip"/>
 			</popupset>
 			
 			<hbox id="zotero-trees" flex="1">
