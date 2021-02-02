@@ -462,7 +462,6 @@ Zotero.RecognizePDF = new function () {
 		}
 
 		if (!res.doi) {
-			Zotero.debug("Couldn't find DOI, trying to extract from file name.");
 			res.doi = _extractDOIFromFileName(fileName);
 		}
 		if (res.doi) {
@@ -495,7 +494,6 @@ Zotero.RecognizePDF = new function () {
 		}
 
 		if (!res.isbn) {
-			Zotero.debug("Couldn't find ISBN, trying to extract from file name.");
 			res.isbn = _extractISBNFromFileName(fileName);
 		}
 		if (res.isbn) {
@@ -570,7 +568,6 @@ Zotero.RecognizePDF = new function () {
 
 			if (res.abstract) newItem.setField('abstractNote', res.abstract);
 			if (!res.year) {
-				Zotero.debug("Couldn't find year, trying to extract from file name.");
 				res.year = _extractYearFromFileName(fileName);
 			}
 			if (res.year) newItem.setField('date', res.year);
@@ -600,10 +597,10 @@ Zotero.RecognizePDF = new function () {
 
 	/**
 	 * Tries to extract DOI from a file name
-	 * @param {str} fileName - File name to examine
-	 * @return {str} - Found DOI or null if nothing found.
+	 * @param {String} fileName - File name to examine
+	 * @return {String} - Found DOI or null if nothing found.
 	 */
-	function _extractDOIFromFileName(fileName){
+	function _extractDOIFromFileName(fileName) {
 		// Modified the expression given at https://stackoverflow.com/a/10324802
 		let doiRe = /(10[.][0-9]{4,}(?:[.][0-9]+)*@(?:(?!\.pdf)[A-Za-z0-9-._;()/])+)/;
 		let doiRes = fileName.match(doiRe);
@@ -613,17 +610,17 @@ Zotero.RecognizePDF = new function () {
 		// Replace `@` sign with `/` (`@` sign commonly used because `/` not
 		// allowed in file names).
 		// Grab first element of array (first captured group)
-		doiString = doiRes[1].replace("@", "/");
-		Zotero.debug(`Found DOI (${doiString}) in file name`);
+		let doiString = doiRes[1].replace("@", "/");
+		Zotero.debug(`Found DOI ${doiString} in file name`);
 		return doiString;
 	}
 
 	/**
 	 * Tries to extract ISBN from a file name
-	 * @param {str} fileName - File name to examine
-	 * @return {str} - Found ISBN or null if nothing found.
+	 * @param {String} fileName - File name to examine
+	 * @return {String} - Found ISBN or null if nothing found.
 	 */
-	function _extractISBNFromFileName(fileName){
+	function _extractISBNFromFileName(fileName) {
 		// Modified the expression given at https://stackoverflow.com/a/41271701
 		// Currently only searches for 13 digit ISBNs
 		let isbnRe = /(?=(?:\D*\d){13})((?:(?:978-[01])|(?:979-8))[\d-]+)/;
@@ -632,25 +629,25 @@ Zotero.RecognizePDF = new function () {
 			return null;
 		}
 		// Grab first element of array (first captured group)
-		isbnString = isbnRes[1];
-		Zotero.debug(`Found ISBN (${isbnString}) in file name`);
+		let isbnString = isbnRes[1];
+		Zotero.debug(`Found ISBN ${isbnString} in file name`);
 		return isbnString;
 	}
 
 	/**
 	 * Tries to extract Year from a file name
-	 * @param {str} fileName - File name to examine
-	 * @return {str} - Found year or null if nothing found.
+	 * @param {String} fileName - File name to examine
+	 * @return {String} - Found year or null if nothing found.
 	 */
-	function _extractYearFromFileName(fileName){
+	function _extractYearFromFileName(fileName) {
 		let yearRe = /(?=(?:\d){4})((?:(?:20)|(?:19))[\d]{2})/;
 		let yearRes = fileName.match(yearRe);
 		if (!yearRes) {
 			return null;
 		}
 		// Grab first element of array (first captured group)
-		yearString = yearRes[1];
-		Zotero.debug(`Found year (${yearString}) in file name`);
+		let yearString = yearRes[1];
+		Zotero.debug(`Found year ${yearString} in file name`);
 		return yearString;
 	}
 
