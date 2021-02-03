@@ -46,7 +46,7 @@ Zotero.Sync.APIClient = function (options) {
 Zotero.Sync.APIClient.prototype = {
 	MAX_OBJECTS_PER_REQUEST: 100,
 	MIN_GZIP_SIZE: 1000,
-	UPLOAD_TIMEOUT: 60000,
+	UPLOAD_TIMEOUT: 120000,
 	
 	
 	getKeyInfo: Zotero.Promise.coroutine(function* (options={}) {
