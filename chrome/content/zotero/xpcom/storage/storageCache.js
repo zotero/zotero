@@ -46,10 +46,10 @@ Zotero.Sync.Storage.Cache = {
 		let attachmentItems = await this._getAllImportedAttachments(items);
 
 		// Delete all files (will update the DB as well)
-		await Zotero.Promise.all(
-			attachmentItems.map(attachmentItem => this._deleteItemFiles(attachmentItem))
-		);
+		let deleted = await this._deleteItemFiles(attachmentItems);
 		
+		Zotero.debug(`Storage Cache: deleted files for ${deleted} attachment items`);
+
 		// TODO: There seems to be a lag compared to download/delete file of how long it takes the
 		// item pane to update (in particular, snapshots don't seem to update at all)
 	},
@@ -100,8 +100,10 @@ Zotero.Sync.Storage.Cache = {
 	},
 
 	cleanCacheForLibrary: async function (libraryID) {
-		let expiredItems = this._getExpiredItemsForLibrary(libraryID);
-		await this._deleteItemFiles(expiredItems);
+		let expiredItems = await this._getExpiredItemsForLibrary(libraryID);
+		let deleted = await this._deleteItemFiles(expiredItems);
+
+		Zotero.debug(`Storage Cache: deleted files for ${deleted} attachment items`);
 	},
 
 	/**
@@ -169,12 +171,10 @@ Zotero.Sync.Storage.Cache = {
 				offset,
 				this._dbScanRecordLimit
 			];
-			// eslint-disable-next-line no-await-in-loop
 			let rows = await Zotero.DB.queryAsync(sql, params);
 			Zotero.debug(`Storage Cache: ${library.name} retrieved ${rows.length} rows`);
 
 			for (let i = 0; i < rows.length; i++) {
-				// eslint-disable-next-line no-await-in-loop
 				let item = await Zotero.Items.getAsync(rows[i].itemID);
 				expiredItems.push(item);
 			}
@@ -197,7 +197,6 @@ Zotero.Sync.Storage.Cache = {
 
 			// Slow down so we don't bog the system down if we are scanning a
 			// big library
-			// eslint-disable-next-line no-await-in-loop
 			await Zotero.Promise.delay(this._dbScanSleepPeriod);
 		}
 
@@ -236,29 +235,26 @@ Zotero.Sync.Storage.Cache = {
 	},
 
 	/**
-	 * Delete files for the given items
+	 * Delete files for the given attachment items
 	 *
 	 * Note: This will also update the sync state to for affected items to:
 	 * Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD
 	 *
 	 * @param {Zotero.Item[]} items
-	 * @return {Promise<Integer|Boolean[]>} - List of results (number of files deleted or `false` on failure)
+	 * @return {Promise<Integer>} - Number of attachment items that had files deleted
 	 */
 	_deleteItemFiles: async function (items) {
-		let results = [];
+		let result = 0;
 
 		for (let item of items) {
 			if (!item.isImportedAttachment()) {
 				Zotero.debug(`Storage Cache: ${item.id} is not an imported attachment`);
-				results.push(false);
 				continue;
 			}
 
-			// eslint-disable-next-line no-await-in-loop
 			let fileExistsOnServer = await Zotero.Sync.Runner.checkFileExists(item);
 			if (!fileExistsOnServer) {
 				Zotero.debug(`Storage Cache: ${item.id} does not exist on server`);
-				results.push(false);
 				continue;
 			}
 
@@ -271,7 +267,6 @@ Zotero.Sync.Storage.Cache = {
 			// Iterate through the directory and delete files/folders
 			let deletes = [];
 			try {
-				// eslint-disable-next-line no-await-in-loop
 				await iterator.forEach(
 					(entry) => {
 						if (entry.isDir) {
@@ -283,7 +278,6 @@ Zotero.Sync.Storage.Cache = {
 					}
 				);
 
-				// eslint-disable-next-line no-await-in-loop
 				await Zotero.Promise.all(deletes);
 			}
 			catch (e) {
@@ -299,18 +293,16 @@ Zotero.Sync.Storage.Cache = {
 			// Mark item to be downloaded again. Since we are in as-needed mode this won't cause
 			// it to immediately download again.
 			item.attachmentSyncState = Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD;
-			// eslint-disable-next-line no-await-in-loop
 			await item.saveTx({ skipAll: true });
 
 			Zotero.debug(`Storage Cache: ${item.id} had ${deletes.length} files removed`);
-			results.push(deletes.length);
+			result += 1;
 
 			// Rate limit this in case we are deleting a lot of files
-			// eslint-disable-next-line no-await-in-loop
 			await Zotero.Promise.delay(this._fileDeletionSleepPeriod);
 		}
 
-		return results;
+		return result;
 	},
 
 	/**
@@ -328,7 +320,6 @@ Zotero.Sync.Storage.Cache = {
 		for (let item of items) {
 			if (item.isRegularItem()) {
 				let attachmentItems = item.getAttachments();
-				// eslint-disable-next-line no-await-in-loop
 				let attachments = await Zotero.Items.getAsync(attachmentItems);
 				for (let attachment of attachments) {
 					if (attachment.isImportedAttachment()

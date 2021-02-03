@@ -386,15 +386,15 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 				let fmtime = await item.attachmentModificationTime;
 				let mtime = req.getResponseHeader('X-Zotero-Modification-Time');
 
-				if (Zotero.Sync.Storage.checkFileModTime(item, fmtime, mtime)) {
-					return true;
+				if (Zotero.Sync.Storage.Local.checkFileModTime(item, fmtime, mtime)) {
+					Zotero.debug(`Storage.ZFS.checkFileExists: ${item.id} does not match server mtime`);
 				}
 				else {
-					Zotero.debug(`Storage.ZFS.checkFileExists: ${item.id} does not match server hash`);
+					return true;
 				}
 			}
 			else {
-				Zotero.debug(`Storage.ZFS.checkFileExists: ${item.id} does not match server mtime`);
+				Zotero.debug(`Storage.ZFS.checkFileExists: ${item.id} does not not match server hash`);
 			}
 		}
 		else if (req.status === 404) {

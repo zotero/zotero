@@ -8,7 +8,7 @@ const humanReadableSize = (bytes, fractionDigits) => {
 	}
 
 	const units = [
-		'bytes', 'kiloBytes', 'megaBytes', 'gigaBytes', 'teraBytes'
+		'bytes', 'kilobytes', 'megabytes', 'gigabytes', 'terabytes'
 	];
 
 	return Zotero.getString(

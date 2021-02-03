@@ -140,9 +140,7 @@ describe('Zotero.Sync.Storage.Cache', function () {
 				[attachment, attachment]
 			);
 
-			assert.lengthOf(deleted, 2);
-			assert.isFalse(deleted[0]);
-			assert.isFalse(deleted[1]);
+			assert.equal(deleted, 0);
 		});
 
 		it('should check item is an imported attachment', async function () {
@@ -151,7 +149,7 @@ describe('Zotero.Sync.Storage.Cache', function () {
 			});
 			let deleted = await Zotero.Sync.Storage.Cache._deleteItemFiles([attachment]);
 
-			assert.isFalse(deleted[0]);
+			assert.equal(deleted, 0);
 		});
 
 		it('should check for existence on the server before deleting', async function () {
@@ -162,7 +160,7 @@ describe('Zotero.Sync.Storage.Cache', function () {
 			let attachment = await importFileAttachment('test.png');
 			let deleted = await Zotero.Sync.Storage.Cache._deleteItemFiles([attachment]);
 
-			assert.isFalse(deleted[0]);
+			assert.equal(deleted, 0);
 			assert.isTrue(stub.calledOnce);
 		});
 
@@ -190,7 +188,7 @@ describe('Zotero.Sync.Storage.Cache', function () {
 
 			// Run delete
 			let deleted = await Zotero.Sync.Storage.Cache._deleteItemFiles([attachment]);
-			assert.equal(deleted[0], 2);
+			assert.equal(deleted, 1);
 
 			// Attachment file is gone
 			assert.isFalse(await OS.File.exists(attachmentFilePath));
@@ -218,7 +216,7 @@ describe('Zotero.Sync.Storage.Cache', function () {
 
 			// Run delete
 			let deleted = await Zotero.Sync.Storage.Cache._deleteItemFiles([attachment]);
-			assert.equal(deleted[0], 1);
+			assert.equal(deleted, 1);
 
 			// Check for updated status
 			assert.equal(
@@ -242,7 +240,7 @@ describe('Zotero.Sync.Storage.Cache', function () {
 			let deleted = await Zotero.Sync.Storage.Cache._deleteItemFiles([attachment]);
 			let totalTime = Date.now() - startTime;
 
-			assert.equal(deleted[0], 1);
+			assert.equal(deleted, 1);
 			assert.isAtLeast(totalTime, 2000);
 			assert.isTrue(stub.calledOnce);
 		});

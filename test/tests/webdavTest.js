@@ -1237,7 +1237,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			});
 		});
 
-		it('should throw exception for unexpected status code', async function () {
+		it('should throw exception if server responds with unknown status code', async function () {
 			setResponse({
 				method: 'GET',
 				url: `zotero/${item.key}.prop`,
@@ -1251,7 +1251,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			assertRequestCount(6);
 		});
 
-		it('should return false for file not found', async function () {
+		it('should return false if server responds with 404 for file not found', async function () {
 			setResponse({
 				method: 'GET',
 				url: `zotero/${item.key}.prop`,
@@ -1263,7 +1263,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			assertRequestCount(1);
 		});
 
-		it('should return false if hash is mismatched', async function () {
+		it('should return false if attachment does not match server', async function () {
 			let syncedHash = 'abc';
 			let syncedModTime = await item.attachmentModificationTime;
 
@@ -1281,7 +1281,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			assertRequestCount(1);
 		});
 
-		it('should return false if modified time is mismatched', async function () {
+		it('should return false if modification time does not match server', async function () {
 			let syncedHash = await item.attachmentHash;
 			let syncedModTime = 1;
 
@@ -1299,7 +1299,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			assertRequestCount(1);
 		});
 
-		it('should return true if missing hash', async function () {
+		it('should return true if modification time matches and hash does not exist', async function () {
 			// This can happen from old .prop files
 			let syncedModTime = await item.attachmentModificationTime;
 
@@ -1316,7 +1316,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			assertRequestCount(1);
 		});
 
-		it('should return true for file with proper metadata', async function () {
+		it('should return true if hash and modification time match server', async function () {
 			let syncedHash = await item.attachmentHash;
 			let syncedModTime = await item.attachmentModificationTime;
 

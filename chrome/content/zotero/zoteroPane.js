@@ -2772,8 +2772,7 @@ var ZoteroPane = new function()
 			'reindexItem',
 			'sep6',
 			'cacheItem',
-			'cacheAttachmentItem',
-			'cacheItemRemove'
+			'evictItem'
 		];
 		
 		var m = {};
@@ -2826,7 +2825,10 @@ var ZoteroPane = new function()
 					canRename = true;
 				var canMarkRead = collectionTreeRow.isFeed();
 				var markUnread = true;
-				let canCache = false, canEvict = false;
+				let canCache = false;
+				let canCacheAttachmentCount = 0;
+				let canEvict = false;
+				let canEvictAttachmentCount = 0;
 				
 				for (let i = 0; i < items.length; i++) {
 					let item = items[i];
@@ -2855,14 +2857,14 @@ var ZoteroPane = new function()
 						markUnread = false;
 					}
 
-					if ((!canCache || !canEvict) && onDemandSyncStorage && item.isImportedAttachment()) {
-						Zotero.debug(item.attachmentSyncState);
-						Zotero.debug(Zotero.Sync.Storage.SYNC_STATE_IN_SYNC);
+					if (onDemandSyncStorage && item.isImportedAttachment()) {
 						if (item.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD) {
 							canCache = true;
+							canCacheAttachmentCount += 1;
 						}
 						else if (item.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC) {
 							canEvict = true;
+							canEvictAttachmentCount += 1;
 						}
 					}
 
@@ -2936,9 +2938,17 @@ var ZoteroPane = new function()
 					show.push(m.sep6);
 					if (canCache) {
 						show.push(m.cacheItem);
+						menu.childNodes[m.cacheItem].setAttribute(
+							'label',
+							Zotero.getString('pane.items.menu.cacheItem', [], canCacheAttachmentCount)
+						);
 					}
 					if (canEvict) {
-						show.push(m.cacheItemRemove);
+						show.push(m.evictItem);
+						menu.childNodes[m.evictItem].setAttribute(
+							'label',
+							Zotero.getString('pane.items.menu.evictItem', [], canEvictAttachmentCount)
+						);
 					}
 				}
 
@@ -3006,14 +3016,44 @@ var ZoteroPane = new function()
 							let showSep6 = false;
 
 							let childAttachments = Zotero.Items.get(item.getAttachments());
-							if (childAttachments.find(attachment => attachment.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD)) {
-								show.push(m.cacheItem);
-								showSep6 = true;
+							let canCache = false;
+							let canCacheAttachmentCount = 0;
+							let canEvict = false;
+							let canEvictAttachmentCount = 0;
+							for (let attachment of childAttachments) {
+								if (attachment.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD) {
+									canCache = true;
+									canCacheAttachmentCount += 1;
+								}
+
+								if (attachment.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC) {
+									canEvict = true;
+									canEvictAttachmentCount += 1;
+								}
+
+								// Once we are plural of both cache and evict, stop looping
+								// TODO: Is this optimization allowed given localization needs?
+								if (canCacheAttachmentCount > 1 && canEvictAttachmentCount > 1) {
+									break;
+								}
 							}
 
-							if (childAttachments.find(attachment => attachment.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC)) {
-								show.push(m.cacheItemRemove);
+							if (canCache) {
 								showSep6 = true;
+								show.push(m.cacheItem);
+								menu.childNodes[m.cacheItem].setAttribute(
+									'label',
+									Zotero.getString('pane.items.menu.cacheItem', [], canCacheAttachmentCount)
+								);
+							}
+
+							if (canEvict) {
+								showSep6 = true;
+								show.push(m.evictItem);
+								menu.childNodes[m.evictItem].setAttribute(
+									'label',
+									Zotero.getString('pane.items.menu.evictItem', [], canEvictAttachmentCount)
+								);
 							}
 
 							if (showSep6) {
@@ -3064,13 +3104,20 @@ var ZoteroPane = new function()
 							let showSep6;
 							
 							if (item.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD) {
-								show.push(m.cacheAttachmentItem);
 								showSep6 = true;
+								show.push(m.cacheItem);
+								menu.childNodes[m.cacheItem].setAttribute(
+									'label',
+									Zotero.getString('pane.items.menu.cacheItem', [], 1)
+								);
 							}
-
-							if (yield item.fileExists()) {
-								show.push(m.cacheItemRemove);
+							else if (item.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC && (yield item.fileExists())) {
 								showSep6 = true;
+								show.push(m.evictItem);
+								menu.childNodes[m.evictItem].setAttribute(
+									'label',
+									Zotero.getString('pane.items.menu.evictItem', [], 1)
+								);
 							}
 							
 							if (showSep6) {
@@ -4910,8 +4957,7 @@ var ZoteroPane = new function()
 	
 
 	/**
-	 * Downloads and caches all attachments for the selected items. This will prevent them from
-	 * being removed to free up storage in the automatic cache.
+	 * Downloads all attachments for the selected items.
 	 *
 	 * @returns {Promise<void>}
 	 */
@@ -4921,11 +4967,11 @@ var ZoteroPane = new function()
 
 
 	/**
-	 * Removes any manually cached files for the given items or item attachments.
+	 * Removes any downloads for the given items or item attachments.
 	 *
 	 * @returns {Promise<void>}
 	 */
-	this.removeCacheItems = async function () {
+	this.evictItems = async function () {
 		let items = this.getSelectedItems();
 		try {
 			await Zotero.Sync.Storage.Cache.removeAttachmentFilesForItems(items);

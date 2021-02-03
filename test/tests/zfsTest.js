@@ -1175,7 +1175,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			fileURL = `${baseURL}users/1/items/${item.key}/file?info=true`;
 		});
 
-		it('should throw exception for unknown status code', async function () {
+		it('should throw exception if server responds with unknown status code', async function () {
 			server.respond(function (req) {
 				if (req.method === 'GET' && req.url === fileURL) {
 					req.respond(400, {}, 'Bad Request');
@@ -1188,7 +1188,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			);
 		});
 
-		it('should return false for a 404', async function () {
+		it('should return false if server responds with 404 for file not found', async function () {
 			server.respond(function (req) {
 				if (req.method === 'GET' && req.url === fileURL) {
 					req.respond(404, {}, 'Not found');
@@ -1201,7 +1201,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.isFalse(result);
 		});
 
-		it('should check for attachment hash', async function () {
+		it('should return false if attachment does not match server', async function () {
 			let attachmentMTime = await item.attachmentModificationTime;
 
 			server.respond(function (req) {
@@ -1220,7 +1220,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.isFalse(result);
 		});
 
-		it('should check for attachment modification time', async function () {
+		it('should return false if modification time does not match server', async function () {
 			let attachmentHash = await item.attachmentHash;
 
 			server.respond(function (req) {
@@ -1239,7 +1239,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.isFalse(result);
 		});
 
-		it('should return true for matching metadata', async function () {
+		it('should return true if hash and modification time match server', async function () {
 			let attachmentHash = await item.attachmentHash;
 			let attachmentMTime = await item.attachmentModificationTime;
 
