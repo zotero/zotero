@@ -317,11 +317,6 @@ Zotero.Sync.Storage.Local = {
 				for (let state in statesToSet) {
 					yield this.updateSyncStates(statesToSet[state], parseInt(state));
 				}
-
-				// If file changes, then update lastAccessed timestamp
-				if (statesToSet[this.SYNC_STATE_TO_UPLOAD]) {
-					this._updateLastAccessed(statesToSet[this.SYNC_STATE_TO_UPLOAD]);
-				}
 			}.bind(this));
 		}
 		
@@ -572,32 +567,6 @@ Zotero.Sync.Storage.Local = {
 					"UPDATE itemAttachments SET syncState=? WHERE itemID IN "
 						+ "(" + chunk.map(item => item.id).join(', ') + ")",
 					syncState
-				);
-			}
-		);
-	},
-
-
-	/**
-	 * Touch all the given items with a new `lastAccessed` timestamp
-	 *
-	 * @param {Zotero.Item[]} items
-	 * @return {Promise}
-	 */
-	_updateLastAccessed: async function (items) {
-		let timestamp = Date.now();
-
-		await Zotero.Utilities.Internal.forEachChunkAsync(
-			items,
-			1000,
-			async function (chunk) {
-				chunk.forEach((item) => {
-					item._attachmentLastAccessed = timestamp;
-				});
-				return Zotero.DB.queryAsync(
-					"UPDATE itemAttachments SET lastAccessed=? WHERE itemID IN "
-					+ "(" + chunk.map(item => item.id).join(', ') + ")",
-					timestamp
 				);
 			}
 		);

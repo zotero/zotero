@@ -28,8 +28,6 @@ describe("Zotero.Sync.Storage.Local", function () {
 			var path = yield item.getFilePathAsync();
 			yield OS.File.setDates(path);
 			yield Zotero.File.putContentsAsync(path, Zotero.Utilities.randomString());
-
-			let preTimestamp = Date.now();
 			
 			// File should be returned
 			var libraryID = Zotero.Libraries.userLibraryID;
@@ -39,8 +37,6 @@ describe("Zotero.Sync.Storage.Local", function () {
 			
 			assert.equal(changed, true);
 			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD);
-			assert.isAtLeast(item.attachmentLastAccessed, preTimestamp);
-			assert.isAtMost(item.attachmentLastAccessed, Date.now());
 		})
 		
 		it("should skip a file if mod time hasn't changed", function* () {
@@ -63,7 +59,6 @@ describe("Zotero.Sync.Storage.Local", function () {
 			
 			assert.isFalse(changed);
 			assert.equal(syncState, Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC);
-			assert.isNull(item.attachmentLastAccessed);
 		})
 		
 		it("should skip a file if mod time has changed but contents haven't", function* () {
@@ -95,7 +90,6 @@ describe("Zotero.Sync.Storage.Local", function () {
 			assert.isFalse(changed);
 			assert.equal(syncState, Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC);
 			assert.equal(syncedModTime, newModTime);
-			assert.isNull(item.attachmentLastAccessed);
 		})
 	})
 	
@@ -117,28 +111,6 @@ describe("Zotero.Sync.Storage.Local", function () {
 					"SELECT syncState FROM itemAttachments WHERE itemID=?", attachment.id
 				);
 				assert.strictEqual(state, local.SYNC_STATE_TO_UPLOAD);
-			}
-		});
-	});
-
-	describe("#updateLastAccessed()", function () {
-		it("should update attachment lastAccessed to now", function* () {
-			var attachment1 = yield importFileAttachment('test.png');
-			var attachment2 = yield importFileAttachment('test.png');
-
-			var local = Zotero.Sync.Storage.Local;
-			let preTimestamp = Date.now();
-			yield local._updateLastAccessed([attachment1, attachment2]);
-			let postTimestamp = Date.now();
-
-			for (let attachment of [attachment1, attachment2]) {
-				assert.isAtLeast(attachment.attachmentLastAccessed, preTimestamp);
-				assert.isAtMost(attachment.attachmentLastAccessed, postTimestamp);
-				let lastAccessed = yield Zotero.DB.valueQueryAsync(
-					"SELECT lastAccessed FROM itemAttachments WHERE itemID=?", attachment.id
-				);
-				assert.isAtLeast(lastAccessed, preTimestamp);
-				assert.isAtMost(lastAccessed, postTimestamp);
 			}
 		});
 	});
