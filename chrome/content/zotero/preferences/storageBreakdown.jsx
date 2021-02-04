@@ -57,19 +57,22 @@ const StorageBreakdown = () => {
 				let items = await Zotero.Items.getAll(partition.libraryID);
 
 				const getFileSize = async (attachmentFile) => {
-					if (!attachmentFile.name.startsWith('.')) {
-						try {
-							let size = (await OS.File.stat(attachmentFile.path)).size;
-							libraries[index].size += size;
+					if (attachmentFile.name.startsWith('.')) {
+						return;
+					}
+
+					try {
+						let size = (await OS.File.stat(attachmentFile.path)).size;
+						libraries[index].size += size;
+					}
+					catch (e) {
+						if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
+							// File may or may not exist on disk, but we
+							// don't care so swallow this error
 						}
-						catch (e) {
-							if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
-								// File may or may not exist on disk, but we
-								// don't care so swallow this error
-							}
-							else {
-								throw e;
-							}
+						else {
+							Zotero.logError(e);
+							return;
 						}
 					}
 
@@ -83,17 +86,16 @@ const StorageBreakdown = () => {
 				};
 
 				await Zotero.Promise.all(items.map(async (item) => {
-					if (item.isImportedAttachment()) {
-						libraries[index].count += 1;
-
-						await Zotero.File.iterateDirectory(
-							Zotero.Attachments.getStorageDirectory(item).path,
-							(attachmentFile) => {
-								getFileSize(attachmentFile);
-								return true;
-							}
-						);
+					if (!item.isImportedAttachment()) {
+						return;
 					}
+
+					libraries[index].count += 1;
+
+					await Zotero.File.iterateDirectory(
+						Zotero.Attachments.getStorageDirectory(item).path,
+						getFileSize
+					);
 				}));
 			}));
 
