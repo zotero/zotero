@@ -1316,6 +1316,9 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		item.attachmentSyncedModificationTime = params.mtime;
 		item.attachmentSyncedHash = params.md5;
 		item.attachmentSyncState = "in_sync";
+		if (!item.attachmentLastAccessed || params.mtime > item.attachmentLastAccessed) {
+			item.attachmentLastAccessed = params.mtime;
+		}
 		yield item.saveTx({ skipAll: true });
 		// skipAll doesn't mark as unsynced, so do that separately
 		yield item.updateSynced(false);

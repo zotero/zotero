@@ -667,6 +667,10 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 				item.attachmentSyncedModificationTime = fileModTime;
 				item.attachmentSyncedHash = fileHash;
 				item.attachmentSyncState = "in_sync";
+				if (!item.attachmentLastAccessed
+					&& fileModTime > item.attachmentLastAccessed) {
+					item.attachmentLastAccessed = fileModTime;
+				}
 				yield item.saveTx({ skipAll: true });
 				
 				return new Zotero.Sync.Storage.Result;
@@ -881,6 +885,10 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			item.attachmentSyncedModificationTime = params.mtime;
 			item.attachmentSyncedHash = params.md5;
 			item.attachmentSyncState = "in_sync";
+			if (!item.attachmentLastAccessed
+				|| params.mtime > item.attachmentLastAccessed) {
+				item.attachmentLastAccessed = params.mtime;
+			}
 			yield item.save({ skipAll: true });
 			
 			// Update sync cache with new file metadata and version from server

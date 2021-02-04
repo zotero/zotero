@@ -332,12 +332,16 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				}
 			);
 			
+			let preTimestamp = Date.now();
 			var result = yield engine.start();
 			
 			assert.isTrue(result.localChanges);
 			assert.isFalse(result.remoteChanges);
 			assert.isFalse(result.syncRequired);
 			
+			assert.isAtLeast(item.attachmentLastAccessed, preTimestamp);
+			assert.isAtMost(item.attachmentLastAccessed, Date.now());
+
 			var contents = yield Zotero.File.getContentsAsync(yield item.getFilePathAsync());
 			assert.equal(contents, text);
 			
@@ -447,6 +451,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			// Check local objects
 			assert.equal(item.attachmentSyncedModificationTime, mtime);
 			assert.equal(item.attachmentSyncedHash, hash);
+			assert.equal(item.attachmentLastAccessed, mtime);
 			assert.isFalse(item.synced);
 		})
 		
@@ -504,6 +509,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			// Check local objects
 			assert.equal(item.attachmentSyncedModificationTime, mtime);
 			assert.equal(item.attachmentSyncedHash, hash);
+			assert.equal(item.attachmentLastAccessed, mtime);
 			assert.isFalse(item.synced);
 		})
 		
@@ -539,6 +545,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			// Check local object
 			assert.equal(item.attachmentSyncedModificationTime, mtime);
 			assert.equal(item.attachmentSyncedHash, hash);
+			assert.isNull(item.attachmentLastAccessed);
 			assert.isFalse(item.synced);
 		});
 		
