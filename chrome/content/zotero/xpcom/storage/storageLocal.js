@@ -558,7 +558,7 @@ Zotero.Sync.Storage.Local = {
 		}
 		return Zotero.Utilities.Internal.forEachChunkAsync(
 			items,
-			1000,
+			Zotero.DB.MAX_BOUND_PARAMETERS,
 			async function (chunk) {
 				chunk.forEach((item) => {
 					item._attachmentSyncState = syncState;
