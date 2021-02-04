@@ -11,10 +11,16 @@ const humanReadableSize = (bytes, fractionDigits) => {
 		'bytes', 'kilobytes', 'megabytes', 'gigabytes', 'terabytes'
 	];
 
+	let size = bytes.toFixed(fractionDigits);
+	if (unitsIndex === 0) {
+		// Do not use a decimal for bytes
+		size = bytes;
+	}
+
 	return Zotero.getString(
 		'zotero.preferences.sync.fileSyncing.breakdown.' + units[unitsIndex],
-		bytes.toFixed(fractionDigits),
-		bytes.toFixed(fractionDigits)
+		size,
+		size
 	);
 };
 
