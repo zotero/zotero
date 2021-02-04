@@ -88,7 +88,10 @@ const StorageBreakdown = () => {
 
 						await Zotero.File.iterateDirectory(
 							Zotero.Attachments.getStorageDirectory(item).path,
-							getFileSize
+							(attachmentFile) => {
+								getFileSize(attachmentFile);
+								return true;
+							}
 						);
 					}
 				}));
