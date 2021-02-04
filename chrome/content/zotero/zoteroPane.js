@@ -2404,12 +2404,6 @@ var ZoteroPane = new function()
 			}
 		},
 		{
-			id: "cleanCache",
-			oncommand: () => {
-				Zotero.Sync.Storage.Cache.cleanCacheForLibrary(this.getSelectedLibraryID());
-			}
-		},
-		{
 			id: "sep1",
 		},
 		{
@@ -2660,7 +2654,6 @@ var ZoteroPane = new function()
 			if (!library.archived) {
 				show.push(
 					'sync',
-					'cleanCache',
 					'sep1',
 					'newCollection',
 					'newSavedSearch'

@@ -288,6 +288,16 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 	
 	Zotero.debug("Done with file sync for " + this.library.name);
 	
+	// Run cache clean once a day
+	if (!this.local.lastCacheClean.get(libraryID)
+		|| this.local.lastCacheClean.get(libraryID) < (Date.now() - 86400000)) {
+		yield Zotero.Sync.Storage.Cache.cleanCacheForLibrary(libraryID);
+	}
+	else {
+		let lastPerformed = Date.now() - this.local.lastCacheClean.get(libraryID);
+		Zotero.debug(`Cache clean for ${this.library.name} was performed ${lastPerformed}ms ago`);
+	}
+
 	return changes;
 })
 

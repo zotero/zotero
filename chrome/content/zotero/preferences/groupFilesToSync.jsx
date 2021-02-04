@@ -247,6 +247,27 @@ const GroupCustomSettings = () => {
 		}
 	};
 
+	const resetLastCleanedValues = function (groupID) {
+		Zotero.Libraries.getAll()
+			.filter((library) => {
+				if (groupID) {
+					return Zotero.Groups.getGroupIDFromLibraryID(library.libraryID) === groupID;
+				}
+				else {
+					return library.libraryID !== Zotero.Libraries.userLibraryID;
+				}
+			})
+			.forEach((library) => {
+				let groupID = Zotero.Groups.getGroupIDFromLibraryID(library.libraryID);
+				if (!Zotero.Prefs.get('sync.storage.groups.' + groupID + '.custom')) {
+					Zotero.Sync.Storage.Local.lastCacheClean.set(
+						library.libraryID,
+						0
+					);
+				}
+			});
+	};
+
 	// Change listeners for each custom settings section
 	const handleChangeEnabled = (event, id) => {
 		Zotero.Prefs.set('sync.storage.groups.' + id + '.custom', event.target.checked);
@@ -276,9 +297,11 @@ const GroupCustomSettings = () => {
 	const handleChangeTTLEnabled = (event, id) => {
 		if (id) {
 			Zotero.Prefs.set('sync.storage.groups.' + id + '.ttl', event.target.checked);
+			resetLastCleanedValues(id);
 		}
 		else {
 			Zotero.Prefs.set('sync.storage.groups.ttl', event.target.checked);
+			resetLastCleanedValues();
 		}
 		updatePrefInGroups(id, 'ttlEnabled', event.target.checked);
 	};
@@ -286,9 +309,11 @@ const GroupCustomSettings = () => {
 	const handleChangeTTLValue = (event, id) => {
 		if (id) {
 			Zotero.Prefs.set('sync.storage.groups.' + id + '.ttl.value', parseInt(event.target.value));
+			resetLastCleanedValues(id);
 		}
 		else {
 			Zotero.Prefs.set('sync.storage.groups.ttl.value', parseInt(event.target.value));
+			resetLastCleanedValues();
 		}
 		updatePrefInGroups(id, 'ttlValue', parseInt(event.target.value));
 	};

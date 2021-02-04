@@ -251,7 +251,6 @@
 								oncommand="ZoteroPane.onCollectionContextMenuSelect(event)">
 							<!-- Keep order in sync with buildCollectionContextMenu, which adds additional attributes -->
 							<menuitem class="zotero-menuitem-sync"/>
-							<menuitem class="zotero-menuitem-clean-cache" label="&zotero.items.menu.cleanCache;"/>
 							<menuseparator/>
 							<menuitem class="zotero-menuitem-new-collection" label="&zotero.toolbar.newCollection.label;"/>
 							<menuitem class="zotero-menuitem-new-saved-search" label="&zotero.toolbar.newSavedSearch.label;"/>

@@ -100,10 +100,14 @@ Zotero.Sync.Storage.Cache = {
 	},
 
 	cleanCacheForLibrary: async function (libraryID) {
-		let expiredItems = await this._getExpiredItemsForLibrary(libraryID);
-		let deleted = await this._deleteItemFiles(expiredItems);
+		Zotero.Sync.Storage.Local.lastCacheClean.set(libraryID, Date.now());
 
-		Zotero.debug(`Storage Cache: deleted files for ${deleted} attachment items`);
+		let expiredItems = await this._getExpiredItemsForLibrary(libraryID);
+
+		if (expiredItems.length) {
+			let deleted = await this._deleteItemFiles(expiredItems);
+			Zotero.debug(`Storage Cache: deleted files for ${deleted} attachment items`);
+		}
 	},
 
 	/**
@@ -111,7 +115,7 @@ Zotero.Sync.Storage.Cache = {
 	 * cache preference.
 	 *
 	 * @param {Integer} libraryID
-	 * @return {Promise<Zotero.Items[]|Boolean>} - Items in library that are expired or `false`
+	 * @return {Promise<Zotero.Item[]|Boolean>} - Items in library that are expired or `false`
 	 * 	if the library is not storage/cache enabled
 	 */
 	_getExpiredItemsForLibrary: async function (libraryID) {

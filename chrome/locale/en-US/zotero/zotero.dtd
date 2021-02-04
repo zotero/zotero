@@ -89,7 +89,6 @@
 <!ENTITY zotero.items.moreColumns.label					"More Columns">
 <!ENTITY zotero.items.restoreColumnOrder.label			"Restore Column Order">
 
-<!ENTITY zotero.items.menu.cleanCache					"Identify and Remove Oldest Cached Files">
 <!ENTITY zotero.items.menu.showInLibrary					"Show in Library">
 <!ENTITY zotero.items.menu.attach.note					"Add Note">
 <!ENTITY zotero.items.menu.attach.noteFromAnnotations     "Add Note from Annotations">

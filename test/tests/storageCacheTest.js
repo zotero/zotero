@@ -12,6 +12,28 @@ describe('Zotero.Sync.Storage.Cache', function () {
 	});
 
 
+	describe("#cleanCacheForLibrary()", function () {
+		it('should set lastCleanCache value for given libraryID', async function () {
+			let preTimestamp = Date.now();
+			await Zotero.Sync.Storage.Cache
+				.cleanCacheForLibrary(Zotero.Libraries.userLibraryID);
+
+			assert.hasAllKeys(
+				Zotero.Sync.Storage.Local.lastCacheClean,
+				[Zotero.Libraries.userLibraryID]
+			);
+			assert.isAtLeast(
+				Zotero.Sync.Storage.Local.lastCacheClean.get(Zotero.Libraries.userLibraryID),
+				preTimestamp
+			);
+			assert.isAtMost(
+				Zotero.Sync.Storage.Local.lastCacheClean.get(Zotero.Libraries.userLibraryID),
+				Date.now()
+			);
+		});
+	});
+
+
 	describe('#_getAllImportedAttachments()', function () {
 		it('should return imported attachments of top-level items', async function () {
 			let item = await createDataObject('item', false, { skipSelect: true });
