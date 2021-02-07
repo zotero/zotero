@@ -44,13 +44,6 @@ ButtonGroup.propTypes = {
 }
 
 class Button extends PureComponent {
-	componentDidMount() {
-		if (!Zotero.isNode && this.title) {
-			// Workaround for XUL tooltips
-			this.container.setAttribute('tooltiptext', this.title);
-		}
-	}
-
 	get classes() {
 		return ['btn', this.props.className, `btn-${this.props.size}`, {
 			'btn-icon': this.props.icon != null,
