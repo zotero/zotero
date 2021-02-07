@@ -1736,6 +1736,106 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.equal(spy.callCount, 4);
 		});
 		
+		it("shouldn't show CR window if remote data contains unknown field", async function () {
+			({ engine, client, caller } = await setup({
+				stopOnError: false
+			}));
+			
+			var library = Zotero.Libraries.userLibrary;
+			library.libraryVersion = 1;
+			await library.saveTx();
+			
+			var item = createUnsavedDataObject('item', { title: 'a' });
+			item.version = 1;
+			await item.saveTx();
+			
+			var json = item.toResponseJSON();
+			json.data.title = 'b';
+			json.data.invalidField = 'abcd';
+			
+			var headers = {
+				"Last-Modified-Version": 2
+			};
+			server.respond(function (req) {
+				// Return 412, because item has changed remotely
+				if (req.method == "POST") {
+					if (!req.url.startsWith(baseURL + "users/1/items")) {
+						throw new Error("Unexpected POST");
+					}
+					req.respond(
+						412,
+						{
+							"Last-Modified-Version": 2
+						},
+						""
+					);
+				}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/settings?since=1",
+				status: 200,
+				headers,
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/collections?format=versions&since=1",
+				status: 200,
+				headers,
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/searches?format=versions&since=1",
+				status: 200,
+				headers,
+				json: {}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/items/top?format=versions&since=1&includeTrashed=1",
+				status: 200,
+				headers,
+				json: {
+					[item.key]: 2
+				}
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/items?format=versions&since=1&includeTrashed=1",
+				status: 200,
+				headers,
+				json: {
+					[item.key]: 2
+				}
+			});
+			setResponse({
+				method: "GET",
+				url: `users/1/items?format=json&itemKey=${item.key}&includeTrashed=1`,
+				status: 200,
+				headers,
+				json: [json]
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/deleted?since=1",
+				status: 200,
+				headers,
+				json: {}
+			});
+			var spy = sinon.spy(engine, "onError");
+			await engine.start();
+			
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			
+			// Library version should have been updated
+			assert.equal(Zotero.Libraries.getVersion(userLibraryID), 2);
+			
+			var keys = await Zotero.Sync.Data.Local.getObjectsFromSyncQueue('item', userLibraryID);
+			assert.sameMembers(keys, [item.key]);
+		});
+		
 		it("should delay on second upload conflict", function* () {
 			var library = Zotero.Libraries.userLibrary;
 			library.libraryVersion = 5;

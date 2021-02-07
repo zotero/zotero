@@ -935,6 +935,22 @@ Zotero.Sync.Data.Local = {
 									if (objectType != 'item') {
 										throw new Error(`Unexpected conflict on ${objectType} object`);
 									}
+									
+									// Skip conflict resolution if there are invalid fields
+									try {
+										let testObj = obj.clone();
+										testObj.fromJSON(jsonData, { strict: true });
+									}
+									catch (e) {
+										results.push({
+											key: objectKey,
+											processed: false,
+											error: e,
+											retry: false
+										});
+										throw e;
+									}
+									
 									Zotero.debug("Conflict!", 2);
 									Zotero.debug(jsonDataLocal);
 									Zotero.debug(jsonData);
