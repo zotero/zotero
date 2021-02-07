@@ -133,6 +133,7 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 	
 	this.downloadDelayGenerator = null;
 	var autoReset = false;
+	var skipDownload = false;
 	
 	sync:
 	while (true) {
@@ -173,6 +174,9 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 			break;
 		
 		case this.UPLOAD_RESULT_NOTHING_TO_UPLOAD:
+			if (skipDownload) {
+				break sync;
+			}
 			downloadResult = yield this._startDownload();
 			Zotero.debug("Download result is " + downloadResult, 4);
 			if (downloadResult == this.DOWNLOAD_RESULT_CHANGES_TO_UPLOAD) {
@@ -198,6 +202,10 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 			
 			downloadResult = yield this._startDownload();
 			Zotero.debug("Download result is " + downloadResult, 4);
+			// No need to download again after the upload
+			if (downloadResult !== this.DOWNLOAD_RESULT_RESTART) {
+				skipDownload = true;
+			}
 			break;
 		
 		case this.UPLOAD_RESULT_RESTART:
