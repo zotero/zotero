@@ -29,6 +29,10 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import { IntlProvider, useIntl } from 'react-intl';
+import cx from "classnames";
+import { humanReadableSize } from 'components/utils';
+
+Components.utils.import("resource://gre/modules/osfile.jsm");
 
 const customPreferences = (id) => {
 	const pref = 'sync.storage.groups.' + id;
@@ -36,16 +40,31 @@ const customPreferences = (id) => {
 	return {
 		enabled: Zotero.Prefs.get(pref + '.custom') || false,
 		sync: Zotero.Prefs.get(pref + '.sync') || false,
-		downloadMode: Zotero.Prefs.get(pref + '.downloadMode') || 'on-sync',
-		ttlEnabled: Zotero.Prefs.get(pref + '.ttl') || false,
-		ttlValue: Zotero.Prefs.get(pref + '.ttl.value') || 30
+		downloadMode: Zotero.Prefs.get(pref + '.downloadMode') || 'on-sync'
 	};
 };
 
-const Group = ({ id, name, prefs, onChangeEnabled, onChangeSync, onChangeMode, onChangeTTLEnabled, onChangeTTLValue }) => {
+const Group = ({ id, name, prefs, count, size, onChangeEnabled, onChangeSync, onChangeMode }) => {
 	const intl = useIntl();
 
-	const defaultTTLValues = [1, 7, 30, 90];
+	const globalDownloadMode = Zotero.Prefs.get('sync.storage.downloadMode.groups');
+	const globalSync = Zotero.Prefs.get('sync.storage.groups.enabled');
+
+	const canClearCache = Zotero.Prefs.get('sync.storage.timeToLive.enabled')
+		&& (prefs.enabled
+			? (prefs.sync && prefs.downloadMode === 'on-demand')
+			: (globalSync && globalDownloadMode === 'on-demand'));
+
+	const [clearButtonEnabled, setClearButtonEnabled] = useState(true);
+
+	const handleClear = async () => {
+		setClearButtonEnabled(false);
+
+		let libraryID = Zotero.Groups.getLibraryIDFromGroupID(id);
+		await Zotero.Sync.Storage.Cache.cleanCacheForLibrary(libraryID);
+
+		setClearButtonEnabled(true);
+	};
 
 	return (
 		<div className="group">
@@ -96,47 +115,22 @@ const Group = ({ id, name, prefs, onChangeEnabled, onChangeSync, onChangeMode, o
 						</option>
 					</select>
 				</div>
+			</div> }
 
-				{ prefs.downloadMode === 'on-demand' && <div className="setting-ttl-box">
-					<input
-						id={ 'ttl-' + id }
-						type="checkbox"
-						checked={ prefs.ttlEnabled }
-						disabled={ !prefs.sync }
-						onChange={ onChangeTTLEnabled }
-					/>
-					<label htmlFor={ 'ttl-' + id }>
-						{ intl.formatMessage({ id: 'zotero.preferences.sync.fileSyncing.remove' }) }
-					</label>
-					<select
-						value={ prefs.ttlValue }
-						disabled={ !prefs.sync || !prefs.ttlEnabled }
-						className="setting-ttl-value"
-						onChange={ onChangeTTLValue }
-					>
-						{ !defaultTTLValues.includes(prefs.ttlValue)
-							&& <option value={ prefs.ttlValue }>
-								{ Zotero.getString(
-									'zotero.preferences.sync.fileSyncing.ttl.custom',
-									prefs.ttlValue,
-									prefs.ttlValue
-								) }
-							</option>
-						}
-						<option value="1">
-							{ intl.formatMessage({ id: 'zotero.preferences.sync.fileSyncing.ttl.oneDay' }) }
-						</option>
-						<option value="7">
-							{ intl.formatMessage({ id: 'zotero.preferences.sync.fileSyncing.ttl.oneWeek' }) }
-						</option>
-						<option value="30">
-							{ intl.formatMessage({ id: 'zotero.preferences.sync.fileSyncing.ttl.oneMonth' }) }
-						</option>
-						<option value="90">
-							{ intl.formatMessage({ id: 'zotero.preferences.sync.fileSyncing.ttl.threeMonths' }) }
-						</option>
-					</select>
-				</div> }
+			{ id > 0 && <div className="group-footer">
+				<div>
+					{ Zotero.getString(
+						'zotero.preferences.sync.fileSyncing.breakdown.attachments',
+						count,
+						count
+					) } - { humanReadableSize(size, 1) }
+				</div>
+				{ canClearCache && <button
+					onClick={ handleClear }
+					disabled={ !clearButtonEnabled }
+					className="button-native">
+					{ Zotero.getString('zotero.preferences.sync.fileSyncing.clear') }
+				</button> }
 			</div> }
 		</div>
 	);
@@ -146,32 +140,29 @@ Group.propTypes = {
 	id: PropTypes.number,
 	name: PropTypes.string,
 	prefs: PropTypes.object,
+	count: PropTypes.number,
+	size: PropTypes.number,
 	onChangeEnabled: PropTypes.func,
 	onChangeSync: PropTypes.func,
-	onChangeMode: PropTypes.func,
-	onChangeTTLEnabled: PropTypes.func,
-	onChangeTTLValue: PropTypes.func
+	onChangeMode: PropTypes.func
 };
 
 const GroupCustomSettings = () => {
 	const intl = useIntl();
 
-	const [groups, setGroups] = useState([]);
+	const [loading, setLoading] = useState(true);
+	const [groupsState, setGroups] = useState([]);
 
 	// Global settings
-	// If the global setting is on-sync for downloadMode then we
-	// might not have a set a TTL for global yet so we need default values
 	const [globalPrefs, setGlobalPrefs] = useState({
 		enabled: true,
 		sync: Zotero.Prefs.get('sync.storage.groups.enabled'),
-		downloadMode: Zotero.Prefs.get('sync.storage.downloadMode.groups'),
-		ttlEnabled: Zotero.Prefs.get('sync.storage.groups.ttl') || false,
-		ttlValue: Zotero.Prefs.get('sync.storage.groups.ttl.value') || 30
+		downloadMode: Zotero.Prefs.get('sync.storage.downloadMode.groups')
 	});
 
 	// Simply turn off custom settings for all groups
 	const revertAllGroups = () => {
-		const newGroups = groups.map((group) => {
+		const newGroups = groupsState.map((group) => {
 			Zotero.Prefs.set('sync.storage.groups.' + group.id + '.custom', false);
 			group.prefs.enabled = false;
 			return group;
@@ -185,11 +176,11 @@ const GroupCustomSettings = () => {
 		(async () => {
 			let apiKey = await Zotero.Sync.Data.Local.getAPIKey();
 			let client = Zotero.Sync.Runner.getAPIClient({ apiKey });
-			let groups = [];
+			let apiGroups = [];
 			try {
 				// Load up remote groups
 				let keyInfo = await Zotero.Sync.Runner.checkAccess(client, { timeout: 5000 });
-				groups = await client.getGroups(keyInfo.userID);
+				apiGroups = await client.getGroups(keyInfo.userID);
 			}
 			catch (e) {
 				// Connection problems
@@ -212,25 +203,78 @@ const GroupCustomSettings = () => {
 
 			// Sort groups
 			let collation = Zotero.getLocaleCollation();
-			groups.sort((a, b) => collation.compareString(1, a.data.name, b.data.name));
+			apiGroups.sort((a, b) => collation.compareString(1, a.data.name, b.data.name));
 
+			let sizeGroups = apiGroups
+				.filter(group => librariesToSkip.indexOf("G" + group.id) === -1)
+				.map(group => ({
+					name: group.data.name,
+					id: group.id,
+					prefs: customPreferences(group.id),
+					size: 0,
+					count: 0
+				}));
 			// Put them into state
-			setGroups(
-				groups
-					.filter(group => librariesToSkip.indexOf("G" + group.id) === -1)
-					.map(group => ({
-						name: group.data.name,
-						id: group.id,
-						prefs: customPreferences(group.id)
-					}))
-			);
+			setGroups(sizeGroups);
+
+			let update = 0;
+
+			await Zotero.Promise.all(sizeGroups.map(async (group, index) => {
+				let libraryID = Zotero.Groups.getLibraryIDFromGroupID(group.id);
+				let items = await Zotero.Items.getAll(libraryID);
+
+				const getFileSize = async (attachmentFile) => {
+					if (attachmentFile.name.startsWith('.')) {
+						return;
+					}
+
+					try {
+						let size = (await OS.File.stat(attachmentFile.path)).size;
+						sizeGroups[index].size += size;
+					}
+					catch (e) {
+						if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
+							// File may or may not exist on disk, but we
+							// don't care so swallow this error
+						}
+						else {
+							Zotero.logError(e);
+							return;
+						}
+					}
+
+					if (update > 200) {
+						setGroups(sizeGroups.map(group => group));
+						update = 0;
+					}
+					else {
+						update += 1;
+					}
+				};
+
+				await Zotero.Promise.all(items.map(async (item) => {
+					if (!item.isImportedAttachment()) {
+						return;
+					}
+
+					sizeGroups[index].count += 1;
+
+					await Zotero.File.iterateDirectory(
+						Zotero.Attachments.getStorageDirectory(item).path,
+						getFileSize
+					);
+				}));
+			}));
+
+			setLoading(false);
+			setGroups(sizeGroups.map(group => group));
 		})();
 	}, []);
 
 	// Update the given pref and change the state
 	const updatePrefInGroups = (id, pref, value) => {
 		if (id) {
-			const newGroups = groups.map((group) => {
+			const newGroups = groupsState.map((group) => {
 				if (group.id === id) {
 					group.prefs[pref] = value;
 				}
@@ -287,35 +331,13 @@ const GroupCustomSettings = () => {
 	const handleChangeMode = (event, id) => {
 		if (id) {
 			Zotero.Prefs.set('sync.storage.groups.' + id + '.downloadMode', event.target.value);
+			resetLastCleanedValues(id);
 		}
 		else {
 			Zotero.Prefs.set('sync.storage.downloadMode.groups', event.target.value);
+			resetLastCleanedValues();
 		}
 		updatePrefInGroups(id, 'downloadMode', event.target.value);
-	};
-
-	const handleChangeTTLEnabled = (event, id) => {
-		if (id) {
-			Zotero.Prefs.set('sync.storage.groups.' + id + '.ttl', event.target.checked);
-			resetLastCleanedValues(id);
-		}
-		else {
-			Zotero.Prefs.set('sync.storage.groups.ttl', event.target.checked);
-			resetLastCleanedValues();
-		}
-		updatePrefInGroups(id, 'ttlEnabled', event.target.checked);
-	};
-
-	const handleChangeTTLValue = (event, id) => {
-		if (id) {
-			Zotero.Prefs.set('sync.storage.groups.' + id + '.ttl.value', parseInt(event.target.value));
-			resetLastCleanedValues(id);
-		}
-		else {
-			Zotero.Prefs.set('sync.storage.groups.ttl.value', parseInt(event.target.value));
-			resetLastCleanedValues();
-		}
-		updatePrefInGroups(id, 'ttlValue', parseInt(event.target.value));
 	};
 
 	return (
@@ -333,8 +355,6 @@ const GroupCustomSettings = () => {
 					prefs={ globalPrefs }
 					onChangeSync={ event => handleChangeSync(event, false) }
 					onChangeMode={ event => handleChangeMode(event, false) }
-					onChangeTTLEnabled={ event => handleChangeTTLEnabled(event, false) }
-					onChangeTTLValue={ event => handleChangeTTLValue(event, false) }
 				/>
 
 				<div className="reset-container">
@@ -358,21 +378,27 @@ const GroupCustomSettings = () => {
 				id="custom-settings"
 				className="groups-file-sync-groups"
 			>
-				{ groups.length === 0 && <div className="group">
+				<div
+					mode="undetermined"
+					className={ cx('downloadProgress', { hidden: !loading }) }
+				>
+					<div className="progress-bar"></div>
+				</div>
+				{ groupsState.length === 0 && <div className="group">
 					{ Zotero.getString('zotero.preferences.sync.librariesToSync.loadingLibraries') }
 				</div> }
-				{ groups.map((group) => {
+				{ groupsState.map((group) => {
 					return (
 						<Group
 							key={ group.id }
 							name={ group.name }
 							id={ group.id }
 							prefs={ group.prefs }
+							count={ group.count }
+							size={ group.size }
 							onChangeEnabled={ event => handleChangeEnabled(event, group.id) }
 							onChangeSync={ event => handleChangeSync(event, group.id) }
 							onChangeMode={ event => handleChangeMode(event, group.id) }
-							onChangeTTLEnabled={ event => handleChangeTTLEnabled(event, group.id) }
-							onChangeTTLValue={ event => handleChangeTTLValue(event, group.id) }
 						/>
 					);
 				}) }

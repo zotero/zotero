@@ -213,20 +213,6 @@ Zotero.Prefs = new function(){
 		}
 	};
 	
-	const resetGroupLastCleanedValues = function (_val) {
-		// Reset last cleaned for all groups that do not have custom settings
-		Zotero.Libraries.getAll()
-			.filter(library => library.libraryID !== Zotero.Libraries.userLibraryID)
-			.forEach((library) => {
-				let groupID = Zotero.Groups.getGroupIDFromLibraryID(library.libraryID);
-				if (!Zotero.Prefs.get('sync.storage.groups.' + groupID + '.custom')) {
-					Zotero.Sync.Storage.Local.lastCacheClean.set(
-						library.libraryID,
-						0
-					);
-				}
-			});
-	};
 
 	// Handlers for some Zotero preferences
 	var _handlers = [
@@ -278,20 +264,24 @@ Zotero.Prefs = new function(){
 				Zotero.updateQuickSearchBox(win.document);
 			}
 		}],
-		["sync.storage.personal.ttl", function (_val) {
-			Zotero.Sync.Storage.Local.lastCacheClean.set(
-				Zotero.Libraries.userLibraryID,
-				0
-			);
+		["sync.storage.timeToLive.enabled", function (_val) {
+			Zotero.Libraries.getAll()
+				.forEach((library) => {
+					Zotero.Sync.Storage.Local.lastCacheClean.set(
+						library.libraryID,
+						0
+					);
+				});
 		}],
-		["sync.storage.personal.ttl.value", function (_val) {
-			Zotero.Sync.Storage.Local.lastCacheClean.set(
-				Zotero.Libraries.userLibraryID,
-				0
-			);
-		}],
-		["sync.storage.groups.ttl", resetGroupLastCleanedValues],
-		["sync.storage.groups.ttl.value", resetGroupLastCleanedValues]
+		["sync.storage.timeToLive.value", function (_val) {
+			Zotero.Libraries.getAll()
+				.forEach((library) => {
+					Zotero.Sync.Storage.Local.lastCacheClean.set(
+						library.libraryID,
+						0
+					);
+				});
+		}]
 	];
 	
 	//

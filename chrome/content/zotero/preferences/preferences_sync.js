@@ -33,8 +33,7 @@ Zotero_Preferences.Sync = {
 	noChar: '\uD83D\uDEAB',
 	
 	init: Zotero.Promise.coroutine(function* () {
-		this.checkCustomTTL(false);
-		this.checkCustomTTL(true);
+		this.checkCustomTimeToLive(true);
 		this.updateStorageSettingsUI();
 		this.updateStorageSettingsGroupsUI();
 
@@ -74,17 +73,15 @@ Zotero_Preferences.Sync = {
 		this.initResetPane();
 	}),
 
-	checkCustomTTL: function (groups) {
-		let id = groups ? 'storage-groups-download-ttl-custom' : 'storage-user-download-ttl-custom';
-		let value = Zotero.Prefs.get(
-			groups ? 'sync.storage.groups.ttl.value' : 'sync.storage.personal.ttl.value'
-		);
+	checkCustomTimeToLive: function () {
+		let id = 'storage-timeToLive-custom';
+		let value = Zotero.Prefs.get('sync.storage.timeToLive.value');
 
 		let customItem = document.getElementById(id);
 		if (![1, 7, 30, 90].includes(value)) {
 			customItem.setAttribute('label',
 				Zotero.getString(
-					'zotero.preferences.sync.fileSyncing.ttl.custom',
+					'zotero.preferences.sync.fileSyncing.timeToLive.custom',
 					value,
 					value
 				)
@@ -96,6 +93,10 @@ Zotero_Preferences.Sync = {
 		else {
 			customItem.hidden = true;
 		}
+
+		// Also, check if select should be disabled
+		document.getElementById('storage-timeToLive-value').disabled
+			= !document.getElementById('storage-timeToLive-enabled').checked;
 	},
 	
 	displayFields: function (username) {
@@ -406,41 +407,25 @@ Zotero_Preferences.Sync = {
 		}
 		
 		document.getElementById('storage-user-download-mode').disabled = !enabled;
-		document.getElementById('storage-user-download-ttl').disabled = !enabled;
-		document.getElementById('storage-user-download-ttl-value').disabled
-			= !(enabled && document.getElementById('storage-user-download-ttl').checked);
 		this.updateStorageTerms();
 		
 		window.sizeToContent();
 	}),
 	
 	
-	updateStorageSettingsTTLUI: function () {
-		document.getElementById('storage-user-download-ttl-box').hidden
-			= document.getElementById('storage-user-download-mode').value !== 'on-demand';
-	},
-
-
 	updateStorageSettingsGroupsUI: function () {
 		setTimeout(() => {
 			var enabled = document.getElementById('pref-storage-groups-enabled').value;
 			document.getElementById('storage-groups-download-mode').disabled = !enabled;
-			document.getElementById('storage-groups-download-ttl-box').hidden
-				= document.getElementById('storage-groups-download-mode').value !== 'on-demand';
-			document.getElementById('storage-groups-download-ttl').disabled = !enabled;
-			document.getElementById('storage-groups-download-ttl-value').disabled
-				= !(enabled && document.getElementById('storage-groups-download-ttl').checked);
 			this.updateStorageTerms();
 		});
 	},
 
-	updatePersonalTTLUI: function (event) {
-		document.getElementById('storage-user-download-ttl-value').disabled = !event.target.checked;
-	},
 	
-	updateGroupsTTLUI: function (event) {
-		document.getElementById('storage-groups-download-ttl-value').disabled = !event.target.checked;
+	updateTimeToLiveUI: function (event) {
+		document.getElementById('storage-timeToLive-value').disabled = !event.target.checked;
 	},
+
 
 	customizeGroups: function () {
 		var io = {};
@@ -450,6 +435,7 @@ Zotero_Preferences.Sync = {
 		this.updateStorageSettingsGroupsUI();
 	},
 	
+
 	updateStorageTerms: function () {
 		var terms = document.getElementById('storage-terms');
 		
@@ -461,13 +447,6 @@ Zotero_Preferences.Sync = {
 	},
 
 
-	viewStorageBreakdown: function () {
-		var io = {};
-		window.openDialog('chrome://zotero/content/preferences/storageBreakdown.html',
-			"zotero-preferences-viewStorageBreakdown", "chrome,modal,centerscreen", io);
-	},
-	
-	
 	onStorageSettingsKeyPress: Zotero.Promise.coroutine(function* (event) {
 		if (event.keyCode == 13) {
 			yield this.verifyStorageServer();

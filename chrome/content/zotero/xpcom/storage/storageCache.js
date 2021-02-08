@@ -36,6 +36,8 @@ Zotero.Sync.Storage.Cache = {
 	_dbScanSleepPeriod: 100,
 	_fileDeletionSleepPeriod: 100,
 
+	_cleaningCachePromises: {},
+
 	/**
 	 * Remove all attachment files for the given items and mark them as TO_DOWNLOAD
 	 *
@@ -99,7 +101,25 @@ Zotero.Sync.Storage.Cache = {
 		}
 	},
 
+	/**
+	 * Clean the cache for the given library, or if a clean is already in progress, await that
+	 * promise.
+	 *
+	 * @param libraryID
+	 * @return {Promise}
+	 */
 	cleanCacheForLibrary: async function (libraryID) {
+		if (!this._cleaningCachePromises[libraryID]) {
+			Zotero.debug(`Storage Cache: Execute clean for library ${libraryID}`);
+			this._cleaningCachePromises[libraryID] = this._executeCleanForLibrary(libraryID);
+		}
+
+		Zotero.debug(`Storage Cache: Awaiting cache clean for library ${libraryID}`);
+		await this._cleaningCachePromises[libraryID];
+		delete this._cleaningCachePromises[libraryID];
+	},
+
+	_executeCleanForLibrary: async function (libraryID) {
 		Zotero.Sync.Storage.Local.lastCacheClean.set(libraryID, Date.now());
 
 		let expiredItems = await this._getExpiredItemsForLibrary(libraryID);
@@ -132,7 +152,7 @@ Zotero.Sync.Storage.Cache = {
 			return false;
 		}
 
-		let cacheTime = this._cacheLimitForLibrary(libraryID);
+		let cacheTime = this._cacheLimitForLibrary();
 		if (cacheTime === false) {
 			Zotero.debug(`Storage Cache: ${library.name} does not have cache eviction enabled`);
 			return false;
@@ -211,31 +231,19 @@ Zotero.Sync.Storage.Cache = {
 	/**
 	 * Get the cache limit for the given library or `false` if TTL is not enabled
 	 *
-	 * @param {Integer} libraryID
 	 * @return {Boolean|Integer} False if TTL is not enabled, otherwise TTL value in days
 	 */
-	_cacheLimitForLibrary: function (libraryID) {
-		let enabled = Zotero.Prefs.get(this._getPrefForLibrary(libraryID, 'ttl'));
+	_cacheLimitForLibrary: function () {
+		let enabled = Zotero.Prefs.get(this._getPrefForLibrary('enabled'));
 		if (!enabled) {
 			return false;
 		}
 
-		return Zotero.Prefs.get(this._getPrefForLibrary(libraryID, 'ttl.value'));
+		return Zotero.Prefs.get(this._getPrefForLibrary('value'));
 	},
 
-	_getPrefForLibrary: function (libraryID, pref) {
-		if (libraryID === Zotero.Libraries.userLibraryID) {
-			return 'sync.storage.personal.' + pref;
-		}
-
-		// Group library custom settings, if enabled
-		let groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
-		if (Zotero.Prefs.get('sync.storage.groups.' + groupID + '.custom')) {
-			return 'sync.storage.groups.' + groupID + '.' + pref;
-		}
-
-		// Fall back to global group settings
-		return 'sync.storage.groups.' + pref;
+	_getPrefForLibrary: function (pref) {
+		return 'sync.storage.timeToLive.' + pref;
 	},
 
 	/**

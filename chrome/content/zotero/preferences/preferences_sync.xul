@@ -41,10 +41,8 @@
 			<preference id="pref-storage-downloadMode-personal" name="extensions.zotero.sync.storage.downloadMode.personal" type="string"/>
 			<preference id="pref-storage-downloadMode-groups" name="extensions.zotero.sync.storage.downloadMode.groups" type="string"/>
 			<preference id="pref-storage-groups-enabled" name="extensions.zotero.sync.storage.groups.enabled" type="bool"/>
-			<preference id="pref-storage-personal-TTL" name="extensions.zotero.sync.storage.personal.ttl" type="bool"/>
-			<preference id="pref-storage-personal-TTL-value" name="extensions.zotero.sync.storage.personal.ttl.value" type="int"/>
-			<preference id="pref-storage-groups-TTL" name="extensions.zotero.sync.storage.groups.ttl" type="bool"/>
-			<preference id="pref-storage-groups-TTL-value" name="extensions.zotero.sync.storage.groups.ttl.value" type="int"/>
+			<preference id="pref-storage-timeToLive-enabled" name="extensions.zotero.sync.storage.timeToLive.enabled" type="bool"/>
+			<preference id="pref-storage-timeToLive-value" name="extensions.zotero.sync.storage.timeToLive.value" type="int"/>
 		</preferences>
 		
 		<tabbox>
@@ -249,28 +247,6 @@
 										</menupopup>
 									</menulist>
 								</hbox>
-
-								<hbox id="storage-user-download-ttl-box"
-									  align="center">
-									<checkbox
-										id="storage-user-download-ttl"
-										label="&zotero.preferences.sync.fileSyncing.remove;"
-										preference="pref-storage-personal-TTL"
-										oncommand="Zotero_Preferences.Sync.updatePersonalTTLUI(event)"
-									/>
-									<menulist id="storage-user-download-ttl-value"
-											  class="storage-mode"
-											  preference="pref-storage-personal-TTL-value"
-											  style="margin-left: 0">
-										<menupopup>
-											<menuitem id="storage-user-download-ttl-custom" value="0" hidden="true"/>
-											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.oneDay;" value="1"/>
-											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.oneWeek;" value="7"/>
-											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.oneMonth;" value="30"/>
-											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.threeMonths;" value="90"/>
-										</menupopup>
-									</menulist>
-								</hbox>
 							</vbox>
 
 							<separator id="storage-separator" class="thin"/>
@@ -295,28 +271,6 @@
 									</menulist>
 								</hbox>
 
-								<hbox id="storage-groups-download-ttl-box"
-									  align="center">
-									<checkbox
-										id="storage-groups-download-ttl"
-										label="&zotero.preferences.sync.fileSyncing.remove;"
-										preference="pref-storage-groups-TTL"
-										oncommand="Zotero_Preferences.Sync.updateGroupsTTLUI(event)"
-									/>
-									<menulist id="storage-groups-download-ttl-value"
-											  class="storage-mode"
-											  preference="pref-storage-groups-TTL-value"
-											  style="margin-left: 0">
-										<menupopup>
-											<menuitem id="storage-groups-download-ttl-custom" value="0" hidden="true"/>
-											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.oneDay;" value="1"/>
-											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.oneWeek;" value="7"/>
-											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.oneMonth;" value="30"/>
-											<menuitem label="&zotero.preferences.sync.fileSyncing.ttl.threeMonths;" value="90"/>
-										</menupopup>
-									</menulist>
-								</hbox>
-
 								<box>
 									<button
 										label="&zotero.preferences.sync.fileSyncing.groups.customize;"
@@ -327,6 +281,30 @@
 
 							<separator class="thin"/>
 
+							<hbox id="storage-timeToLive-box"
+								  align="center">
+								<checkbox
+										id="storage-timeToLive-enabled"
+										label="&zotero.preferences.sync.fileSyncing.timeToLive;"
+										preference="pref-storage-timeToLive-enabled"
+										oncommand="Zotero_Preferences.Sync.updateTimeToLiveUI(event)"
+								/>
+								<menulist id="storage-timeToLive-value"
+										  class="storage-mode"
+										  preference="pref-storage-timeToLive-value"
+										  style="margin-left: 0">
+									<menupopup>
+										<menuitem id="storage-timeToLive-custom" value="0" hidden="true"/>
+										<menuitem label="&zotero.preferences.sync.fileSyncing.timeToLive.oneDay;" value="1"/>
+										<menuitem label="&zotero.preferences.sync.fileSyncing.timeToLive.oneWeek;" value="7"/>
+										<menuitem label="&zotero.preferences.sync.fileSyncing.timeToLive.oneMonth;" value="30"/>
+										<menuitem label="&zotero.preferences.sync.fileSyncing.timeToLive.threeMonths;" value="90"/>
+									</menupopup>
+								</menulist>
+							</hbox>
+
+							<separator class="thin"/>
+
 							<vbox id="storage-terms">
 								<hbox style="margin-top: .4em; display: block" align="center">
 									<label>&zotero.preferences.sync.fileSyncing.tos1;</label>
@@ -334,15 +312,6 @@
 									<label>&zotero.preferences.period;</label>
 								</hbox>
 							</vbox>
-
-							<separator class="thin"/>
-
-							<hbox align="right">
-								<button
-										label="&zotero.preferences.sync.fileSyncing.viewBreakdown;"
-										oncommand="Zotero_Preferences.Sync.viewStorageBreakdown()"
-								/>
-							</hbox>
 
 						</groupbox>
 					</vbox>

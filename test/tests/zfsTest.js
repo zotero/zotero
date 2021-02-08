@@ -723,7 +723,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			
 			// Check local objects
 			assert.equal(item.attachmentSyncedModificationTime, mtime);
-			assert.isNull(item.attachmentLastAccessed);
+			assert.equal(item.attachmentLastAccessed, mtime);
 			assert.equal(item.attachmentSyncedHash, hash);
 			assert.equal(item.version, newVersion);
 		})

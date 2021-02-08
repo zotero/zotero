@@ -12,11 +12,70 @@ describe('Zotero.Sync.Storage.Cache', function () {
 	});
 
 
-	describe("#cleanCacheForLibrary()", function () {
+	describe('#cleanCacheForLibrary()', function () {
+		it('should create a promise if non exists', async function () {
+			let executeResolve;
+			let executePromise = new Zotero.Promise((resolve) =>  {
+				executeResolve = resolve;
+			});
+
+			// Stub out execute and return a promise we can resolve
+			let stub = sinon.stub(Zotero.Sync.Storage.Cache, '_executeCleanForLibrary');
+			stub.returns(executePromise);
+
+			// Start the clean
+			let cleaning = Zotero.Sync.Storage.Cache.cleanCacheForLibrary(0);
+
+			// Check to make sure a cleaning promise was properly made
+			assert.propertyVal(
+				Zotero.Sync.Storage.Cache._cleaningCachePromises,
+				0,
+				executePromise
+			);
+
+			// Finish up execution
+			executeResolve();
+			await cleaning;
+
+			assert.isTrue(stub.calledOnce);
+			// Ensure we have deleted the promise
+			assert.isEmpty(Zotero.Sync.Storage.Cache._cleaningCachePromises);
+		});
+
+		it('should await the cleaning promise if it already exists', async function () {
+			let executeResolve;
+			let executePromise = new Zotero.Promise((resolve) =>  {
+				executeResolve = resolve;
+			});
+
+			// Set up an existing promise
+			Zotero.Sync.Storage.Cache._cleaningCachePromises[0] = executePromise;
+
+			// Start the clean
+			let cleaning = Zotero.Sync.Storage.Cache.cleanCacheForLibrary(0);
+
+			// Check to make sure we did not override promise
+			assert.propertyVal(
+				Zotero.Sync.Storage.Cache._cleaningCachePromises,
+				0,
+				executePromise
+			);
+
+			// Finish up execution
+			executeResolve();
+			await cleaning;
+
+			// Ensure we have deleted the promise
+			assert.isEmpty(Zotero.Sync.Storage.Cache._cleaningCachePromises);
+		});
+	});
+
+
+	describe('#_executeCleanForLibrary()', function () {
 		it('should set lastCleanCache value for given libraryID', async function () {
 			let preTimestamp = Date.now();
 			await Zotero.Sync.Storage.Cache
-				.cleanCacheForLibrary(Zotero.Libraries.userLibraryID);
+				._executeCleanForLibrary(Zotero.Libraries.userLibraryID);
 
 			assert.hasAllKeys(
 				Zotero.Sync.Storage.Local.lastCacheClean,
@@ -90,10 +149,12 @@ describe('Zotero.Sync.Storage.Cache', function () {
 		beforeEach(async function () {
 			group = await createGroup();
 			userLibraryID = Zotero.Libraries.userLibraryID;
+			Zotero.Prefs.set('sync.storage.timeToLive.enabled', true);
+			Zotero.Prefs.set('sync.storage.timeToLive.value', 3);
 		});
 
 		it('should check personal library is enabled', async function () {
-			Zotero.Prefs.set('sync.storage.personal.ttl', false);
+			Zotero.Prefs.set('sync.storage.timeToLive.enabled', false);
 
 			assert.isFalse(
 				Zotero.Sync.Storage.Cache._cacheLimitForLibrary(userLibraryID)
@@ -101,9 +162,6 @@ describe('Zotero.Sync.Storage.Cache', function () {
 		});
 
 		it('should retrieve personal library value', async function () {
-			Zotero.Prefs.set('sync.storage.personal.ttl', true);
-			Zotero.Prefs.set('sync.storage.personal.ttl.value', 3);
-
 			assert.equal(
 				Zotero.Sync.Storage.Cache._cacheLimitForLibrary(userLibraryID),
 				3
@@ -111,8 +169,7 @@ describe('Zotero.Sync.Storage.Cache', function () {
 		});
 
 		it('should check group library is enabled', async function () {
-			Zotero.Prefs.set('sync.storage.groups.' + group.groupID + '.custom', true);
-			Zotero.Prefs.set('sync.storage.groups.' + group.groupID + '.ttl', false);
+			Zotero.Prefs.set('sync.storage.timeToLive.enabled', false);
 
 			assert.isFalse(
 				Zotero.Sync.Storage.Cache._cacheLimitForLibrary(group.libraryID)
@@ -120,35 +177,9 @@ describe('Zotero.Sync.Storage.Cache', function () {
 		});
 
 		it('should retrieve group library value', async function () {
-			Zotero.Prefs.set('sync.storage.groups.' + group.groupID + '.custom', true);
-			Zotero.Prefs.set('sync.storage.groups.' + group.groupID + '.ttl', true);
-			Zotero.Prefs.set('sync.storage.groups.' + group.groupID + '.ttl.value', 3);
-
 			assert.equal(
 				Zotero.Sync.Storage.Cache._cacheLimitForLibrary(group.libraryID),
 				3
-			);
-		});
-
-		it('should fallback to global group library enabled setting', async function () {
-			Zotero.Prefs.set('sync.storage.groups.ttl', false);
-			Zotero.Prefs.set('sync.storage.groups.' + group.groupID + '.custom', false);
-			Zotero.Prefs.set('sync.storage.groups.' + group.groupID + '.ttl', true);
-
-			assert.isFalse(
-				Zotero.Sync.Storage.Cache._cacheLimitForLibrary(group.libraryID)
-			);
-		});
-
-		it('should fallback to global group library value', async function () {
-			Zotero.Prefs.set('sync.storage.groups.ttl', true);
-			Zotero.Prefs.set('sync.storage.groups.ttl.value', 5);
-			Zotero.Prefs.set('sync.storage.groups.' + group.groupID + '.custom', false);
-			Zotero.Prefs.set('sync.storage.groups.' + group.groupID + '.ttl', false);
-
-			assert.equal(
-				Zotero.Sync.Storage.Cache._cacheLimitForLibrary(group.libraryID),
-				5
 			);
 		});
 	});
@@ -284,8 +315,8 @@ describe('Zotero.Sync.Storage.Cache', function () {
 			// Set up default to on
 			Zotero.Prefs.set('sync.storage.enabled', true);
 			Zotero.Prefs.set('sync.storage.downloadMode.personal', 'on-demand');
-			Zotero.Prefs.set('sync.storage.personal.ttl', true);
-			Zotero.Prefs.set('sync.storage.personal.ttl.value', 1);
+			Zotero.Prefs.set('sync.storage.timeToLive.enabled', true);
+			Zotero.Prefs.set('sync.storage.timeToLive.value', 1);
 
 			twoDaysAgo = Date.now() - 172800000;
 
@@ -330,7 +361,7 @@ describe('Zotero.Sync.Storage.Cache', function () {
 		});
 
 		it('should check library has cache eviction enabled', async function () {
-			Zotero.Prefs.set('sync.storage.personal.ttl', false);
+			Zotero.Prefs.set('sync.storage.timeToLive.enabled', false);
 
 			assert.isFalse(await Zotero.Sync.Storage.Cache
 				._getExpiredItemsForLibrary(userLibraryID));
