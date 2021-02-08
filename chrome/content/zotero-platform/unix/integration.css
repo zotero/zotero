@@ -2,18 +2,18 @@ body {
 	line-height: 1.5em;
 }
 
-#quick-format-search:not([multiline="true"]) {
+.citation-dialog.search:not([multiline="true"]) {
 	height: 29px !important;
 }
 
-#quick-format-search {
+.citation-dialog.search {
 	background: white;
 	padding: 0 2px 0 0;
 	border: 1px solid rgba(0, 0, 0, 0.5);
 	-moz-appearance: textfield;
 }
 
-#quick-format-dialog {
+window.citation-dialog {
 	-moz-appearance: none;
 	padding: 5px;
 }

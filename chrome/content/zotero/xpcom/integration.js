@@ -160,7 +160,7 @@ Zotero.Integration = new function() {
 	/**
 	 * Executes an integration command, first checking to make sure that versions are compatible
 	 */
-	this.execCommand = async function(agent, command, docId) {
+	this.execCommand = async function(agent, command, docId, templateVersion) {
 		var document, session, documentImported;
 		
 		if (Zotero.Integration.currentDoc) {
@@ -194,7 +194,7 @@ Zotero.Integration = new function() {
 			}
 			Zotero.Integration.currentDoc = document = await documentPromise;
 			
-			[session, documentImported] = await Zotero.Integration.getSession(application, document, agent);
+			[session, documentImported] = await Zotero.Integration.getSession(application, document, agent, command == 'addNote');
 			Zotero.Integration.currentSession = session;
 			// TODO: figure this out
 			// Zotero.Notifier.trigger('delete', 'collection', 'document');
@@ -372,10 +372,10 @@ Zotero.Integration = new function() {
 	 * Either loads a cached session if doc communicated since restart or creates a new one
 	 * @return {Zotero.Integration.Session} Promise
 	 */
-	this.getSession = async function (app, doc, agent) {
+	this.getSession = async function (app, doc, agent, isNote) {
 		let documentImported = false;
 		try {
-			var progressBar = new Zotero.Integration.Progress(4, Zotero.isMac && agent != 'http');
+			var progressBar = new Zotero.Integration.Progress(4, isNote, Zotero.isMac && agent != 'http');
 			progressBar.show();
 			
 			var dataString = await doc.getDocumentData(),
@@ -593,6 +593,29 @@ Zotero.Integration.Interface.prototype.addEditCitation = async function (docFiel
 			await this._session.writeDelayedCitation(citation._field, citation);
 		}
 	} else {
+		return this._session.updateDocument(FORCE_CITATIONS_FALSE, false, false);
+	}
+};
+
+/**
+ * Edits the citation at the cursor position if one exists, or else adds a new one.
+ * @return {Promise}
+ */
+Zotero.Integration.Interface.prototype.addNote = async function () {
+	await this._session.init(false, false);
+
+	if ((!await this._doc.canInsertField(this._session.data.prefs['fieldType']))) {
+		throw new Zotero.Exception.Alert("integration.error.cannotInsertHere", [],
+			"integration.error.title");
+	}
+
+	let citations = await this._session.cite(null, true);
+	if (this._session.data.prefs.delayCitationUpdates) {
+		for (let citation of citations) {
+			await this._session.writeDelayedCitation(citation._field, citation);
+		}
+	}
+	else {
 		return this._session.updateDocument(FORCE_CITATIONS_FALSE, false, false);
 	}
 };
@@ -1262,7 +1285,7 @@ Zotero.Integration.Session.prototype._updateDocument = async function(forceCitat
  * display the citation dialog and perform any field/text inserts after
  * the dialog edits are accepted
  */
-Zotero.Integration.Session.prototype.cite = async function (field) {
+Zotero.Integration.Session.prototype.cite = async function (field, addNote=false) {
 	var newField;
 	var citation;
 	
@@ -1337,8 +1360,7 @@ Zotero.Integration.Session.prototype.cite = async function (field) {
 		
 	var io = new Zotero.Integration.CitationEditInterface(
 		citation, this.style.opt.sort_citations,
-		fieldIndexPromise, citationsByItemIDPromise, previewFn,
-		this._app.supportsTextInsertion
+		fieldIndexPromise, citationsByItemIDPromise, previewFn
 	);
 	Zotero.debug(`Editing citation:`);
 	Zotero.debug(JSON.stringify(citation.toJSON()));
@@ -1346,11 +1368,18 @@ Zotero.Integration.Session.prototype.cite = async function (field) {
 	if (Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
 		Zotero.Integration.displayDialog('chrome://zotero/content/integration/addCitationDialog.xul',
 			'alwaysRaised,resizable', io);
-	} else {
+	}
+	else {
 		var mode = (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')
 			? 'popup' : 'alwaysRaised')+',resizable=false';
-		Zotero.Integration.displayDialog('chrome://zotero/content/integration/quickFormat.xul',
-			mode, io);
+		if (addNote) {
+			Zotero.Integration.displayDialog('chrome://zotero/content/integration/insertNoteDialog.xul',
+				mode, io);
+		}
+		else {
+			Zotero.Integration.displayDialog('chrome://zotero/content/integration/quickFormat.xul',
+				mode, io);
+		}
 	}
 
 	// -------------------
@@ -1498,13 +1527,12 @@ Zotero.Integration.Session.prototype._insertItemsIntoDocument = async function (
  * Citation editing functions and propertiesaccessible to quickFormat.js and addCitationDialog.js
  */
 Zotero.Integration.CitationEditInterface = function(items, sortable, fieldIndexPromise,
-		citationsByItemIDPromise, previewFn, allowCitingNotes=false){
+		citationsByItemIDPromise, previewFn){
 	this.citation = items;
 	this.sortable = sortable;
 	this.previewFn = previewFn;
 	this._fieldIndexPromise = fieldIndexPromise;
 	this._citationsByItemIDPromise = citationsByItemIDPromise;
-	this.allowCitingNotes = allowCitingNotes;
 	
 	// Not available in quickFormat.js if this unspecified
 	this.wrappedJSObject = this;
@@ -3170,11 +3198,12 @@ Zotero.Integration.Progress = class {
 	 *		except for http agents (i.e. google docs), where even opening the citation dialog may potentially take
 	 *		a long time and having no indication of progress is worse than bringing the Zotero window to the front
 	 */
-	constructor(segmentCount=4, dontDisplay=false) {
+	constructor(segmentCount=4, isNote=false, dontDisplay=false) {
 		this.segments = Array.from({length: segmentCount}, () => undefined);
 		this.timer = new Zotero.Integration.Timer();
 		this.segmentIdx = 0;
 		this.dontDisplay = dontDisplay;
+		this.isNote = isNote;
 	}
 	
 	update() {
@@ -3214,6 +3243,7 @@ Zotero.Integration.Progress = class {
 			this.update();
 		}.bind(this)};
 		io.wrappedJSObject = io;
+		io.isNote = this.isNote;
 		this.window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 			.getService(Components.interfaces.nsIWindowWatcher)
 			.openWindow(null, 'chrome://zotero/content/integration/progressBar.xul', '', options, io);

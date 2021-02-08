@@ -306,23 +306,24 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 		var parts = Zotero.SearchConditions.parseSearchString(value);
 		
 		for (let part of parts) {
-			this.addCondition('blockStart');
+			if (condition == 'quicksearch-titleCreatorYearNote') {
+				this.addCondition('note', operator, part.text, false);
+				continue;
+			}
 			
+			this.addCondition('blockStart');
+
 			// Allow searching for exact object key
 			if (operator == 'contains' && Zotero.Utilities.isValidObjectKey(part.text)) {
 				this.addCondition('key', 'is', part.text, false);
 			}
-			
+
 			if (condition.startsWith('quicksearch-titleCreatorYear')) {
 				this.addCondition('title', operator, part.text, false);
 				this.addCondition('publicationTitle', operator, part.text, false);
 				this.addCondition('shortTitle', operator, part.text, false);
 				this.addCondition('court', operator, part.text, false);
 				this.addCondition('year', operator, part.text, false);
-
-				if (condition == 'quicksearch-titleCreatorYearNote') {
-					this.addCondition('note', operator, part.text, false);
-				}
 			}
 			else {
 				this.addCondition('field', operator, part.text, false);
@@ -353,8 +354,7 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 			this.addCondition('noChildren', 'true');
 		}
 		else if (condition == 'quicksearch-titleCreatorYearNote') {
-			this.addCondition('itemType', 'isNot', 'attachment');
-			this.addCondition('itemType', 'isNot', 'annotation');
+			this.addCondition('itemType', 'is', 'note');
 		}
 		
 		return false;

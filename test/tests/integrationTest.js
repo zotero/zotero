@@ -115,7 +115,7 @@ describe("Zotero.Integration", function () {
 		 * @param {Number} fieldType
 		 * @return {Field[]}
 		 */
-		convertPlaceholdersToFields: function (codes, placeholderIDs, noteType, fieldType) {
+		convertPlaceholdersToFields: function (codes, noteType, fieldType) {
 			return codes.map(code => {
 				let field = new DocumentPluginDummy.Field(this);
 				field.code = code;

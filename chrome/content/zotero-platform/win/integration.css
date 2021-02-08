@@ -1,9 +1,10 @@
-#quick-format-dialog {
+window.citation-dialog {
 	background: transparent;
 	padding: 0;
+	-moz-appearance: none;
 }
 
-#quick-format-search {
+.citation-dialog.search {
 	background: white;
 	padding: 2px 2px 2px 0;
 	border: 1px solid rgba(0, 0, 0, 0.5);
@@ -11,22 +12,20 @@
 	-moz-appearance: none;
 }
 
-#quick-format-dialog {
-	background: transparent;
-	-moz-appearance: none;
-	padding: 0;
-}
-
-#quick-format-search:not([multiline="true"]) {
+.citation-dialog.search:not([multiline="true"]) {
 	height: 28px !important;
 }
 
-#quick-format-entry {
+.citation-dialog.entry {
 	background: -moz-linear-gradient(-90deg, rgb(243,123,119) 0, rgb(180,47,38) 50%, rgb(156,36,27) 50%);
 	padding: 10px;
 }
 
-#quick-format-entry:not([square="true"]) {
+.note-dialog .citation-dialog.entry {
+	background: -moz-linear-gradient(-90deg, rgb(249, 231, 179) 0, rgb(228, 193, 94) 50%, rgb(221, 184, 81) 50%);
+}
+
+.citation-dialog.entry:not([square="true"]) {
 	-moz-border-radius: 15px;
 	border-radius: 15px;
 }

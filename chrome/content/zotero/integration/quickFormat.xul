@@ -33,6 +33,7 @@
 
 <window
 	id="quick-format-dialog"
+	class="citation-dialog"
 	orient="vertical"
 	title="&zotero.integration.quickFormatDialog.title;"
 	xmlns:html="http://www.w3.org/1999/xhtml"
@@ -44,40 +45,41 @@
 	<script src="../include.js"/>
 	<script src="windowDraggingUtils.js" type="text/javascript"/>
 	<script src="quickFormat.js" type="text/javascript"/>
-	
-	<box orient="horizontal" id="quick-format-entry"> 
-		<deck id="quick-format-deck" selectedIndex="0" flex="1">
-			<hbox id="quick-format-search" flex="1" align="start">
+
+	<box orient="horizontal" class="citation-dialog entry">
+		<deck class="citation-dialog deck" selectedIndex="0" flex="1">
+			<hbox class="citation-dialog search" flex="1" align="start">
 				<hbox flex="1">
 					<toolbarbutton id="zotero-icon" type="menu">
 						<menupopup>
 							<menuitem id="keep-sorted" label="&zotero.citation.keepSorted.label;"
-								oncommand="Zotero_QuickFormat.onKeepSortedCommand()" type="checkbox"
-								hidden="true"/>
+									  oncommand="Zotero_QuickFormat.onKeepSortedCommand()" type="checkbox"
+									  hidden="true"/>
 							<menuitem id="show-editor" label="&zotero.integration.showEditor.label;"
-								oncommand="Zotero_QuickFormat.onShowEditorCommand()" type="checkbox"
-								hidden="true"/>
+									  oncommand="Zotero_QuickFormat.onShowEditorCommand()" type="checkbox"
+									  hidden="true"/>
 							<menuitem id="classic-view" label="&zotero.integration.classicView.label;"
-								oncommand="Zotero_QuickFormat.onClassicViewCommand()"/>
+									  oncommand="Zotero_QuickFormat.onClassicViewCommand()"/>
 						</menupopup>
 					</toolbarbutton>
-					<iframe id="quick-format-iframe" ondragstart="event.stopPropagation()" src="data:application/xhtml+xml,%3C!DOCTYPE%20html%20PUBLIC%20%22-//W3C//DTD%20XHTML%201.0%20Strict//EN%22%20%22http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd%22%3E%3Chtml%20xmlns=%22http://www.w3.org/1999/xhtml%22%3E%3Chead%3E%3Clink%20rel=%22stylesheet%22%20type=%22text/css%22%20href=%22chrome://zotero/skin/integration.css%22/%3E%3Clink%20rel=%22stylesheet%22%20type=%22text/css%22%20href=%22chrome://zotero-platform/content/integration.css%22/%3E%3C/head%3E%3Cbody%20contenteditable=%22true%22%20spellcheck=%22false%22%20id=%22quick-format-editor%22/%3E%3C/html%3E"
-						tabindex="1" flex="1"/>
-					<vbox id="quick-format-spinner" style="visibility: hidden">
+
+					<iframe class="citation-dialog iframe" ondragstart="event.stopPropagation()" src="data:application/xhtml+xml,%3C!DOCTYPE%20html%20PUBLIC%20%22-//W3C//DTD%20XHTML%201.0%20Strict//EN%22%20%22http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd%22%3E%3Chtml%20xmlns=%22http://www.w3.org/1999/xhtml%22%3E%3Chead%3E%3Clink%20rel=%22stylesheet%22%20type=%22text/css%22%20href=%22chrome://zotero/skin/integration.css%22/%3E%3Clink%20rel=%22stylesheet%22%20type=%22text/css%22%20href=%22chrome://zotero-platform/content/integration.css%22/%3E%3C/head%3E%3Cbody%20contenteditable=%22true%22%20spellcheck=%22false%22%20class=%22citation-dialog%20editor%22/%3E%3C/html%3E"
+							tabindex="1" flex="1"/>
+					<vbox class="citation-dialog spinner" style="visibility: hidden">
 						<image class="zotero-spinner-16"/>
 					</vbox>
 				</hbox>
 			</hbox>
-			<progressmeter id="quick-format-progress-meter" mode="undetermined" value="0" flex="1"/>
+			<progressmeter class="citation-dialog progress-meter" mode="undetermined" value="0" flex="1"/>
 		</deck>
 	</box>
-	<panel id="quick-format-reference-panel" noautofocus="true" norestorefocus="true"
-			height="0" width="0">
-		<richlistbox id="quick-format-reference-list" flex="1"/>
+	<panel class="citation-dialog reference-panel" noautofocus="true" norestorefocus="true"
+		   height="0" width="0">
+		<richlistbox class="citation-dialog reference-list" flex="1"/>
 	</panel>
 	<panel id="citation-properties" type="arrow" orient="vertical"
-			onkeypress="Zotero_QuickFormat.onPanelKeyPress(event)"
-			onpopuphidden="Zotero_QuickFormat.onCitationPropertiesClosed(event)">
+		   onkeypress="Zotero_QuickFormat.onPanelKeyPress(event)"
+		   onpopuphidden="Zotero_QuickFormat.onCitationPropertiesClosed(event)">
 		<vbox flex="1">
 			<description id="citation-properties-title"/>
 			<hbox id="citation-properties-info"/>
@@ -90,25 +92,25 @@
 			<rows>
 				<row align="center">
 					<menulist id="locator-label" sizetopopup="none"
-							oncommand="Zotero_QuickFormat.onCitationPropertiesChanged(event)">
+							  oncommand="Zotero_QuickFormat.onCitationPropertiesChanged(event)">
 						<menupopup id="locator-label-popup"/>
 					</menulist>
 					<textbox id="locator" flex="1"
-							oninput="window.setTimeout(function(event) { Zotero_QuickFormat.onCitationPropertiesChanged(event) }, 0)"/>
+							 oninput="window.setTimeout(function(event) { Zotero_QuickFormat.onCitationPropertiesChanged(event) }, 0)"/>
 				</row>
 				<row align="center">
 					<label value="&zotero.citation.prefix.label;"/>
 					<textbox class="citation-textbox" id="prefix" flex="1"
-							oninput="window.setTimeout(function(event) { Zotero_QuickFormat.onCitationPropertiesChanged(event) }, 0)"/>
+							 oninput="window.setTimeout(function(event) { Zotero_QuickFormat.onCitationPropertiesChanged(event) }, 0)"/>
 				</row>
 				<row align="center">
 					<label value="&zotero.citation.suffix.label;"/>
 					<textbox class="citation-textbox" id="suffix" flex="1"
-							oninput="window.setTimeout(function(event) { Zotero_QuickFormat.onCitationPropertiesChanged(event) }, 0)"/>
+							 oninput="window.setTimeout(function(event) { Zotero_QuickFormat.onCitationPropertiesChanged(event) }, 0)"/>
 				</row>
 				<html:div>
 					<html:input type="checkbox" id="suppress-author"
-							onchange="Zotero_QuickFormat.onCitationPropertiesChanged(event)"/>
+								onchange="Zotero_QuickFormat.onCitationPropertiesChanged(event)"/>
 					<html:label for="suppress-author">
 						&zotero.citation.suppressAuthor.label;
 					</html:label>
@@ -119,6 +121,6 @@
 			<button id="citation-properties-library-link" onclick="Zotero_QuickFormat.showInLibrary()"/>
 		</vbox>
 	</panel>
-	<zoteroguidancepanel id="quick-format-guidance" about="quickFormat"
-			for="zotero-icon" x="26"/>
+	<zoteroguidancepanel class="citation-dialog guidance" about="quickFormat"
+						 for="zotero-icon" x="26"/>
 </window>
