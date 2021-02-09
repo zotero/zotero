@@ -253,31 +253,47 @@ var ZoteroItemPane = new function() {
 			tree.focus();
 		}
 	}
+
+
+	this.switchEditorEngine = function (type) {
+		var switherDeck = document.getElementById('zotero-note-editor-switcher');
+		switherDeck.selectedIndex = type == 'user' ? 1 : 0;
+	};
 	
 	
 	this.onNoteSelected = function (item, editable) {
 		_selectedNoteID = item.id;
 		
-		// If an external note window is open for this item, don't show the editor
-		// if (ZoteroPane.findNoteWindow(item.id)) {
-		// 	this.showNoteWindowMessage();
-		// 	return;
-		// }
+		var type = Zotero.Libraries.get(item.libraryID).libraryType;
+		if (type == 'user') {
+			var noteEditor = document.getElementById('zotero-note-editor');
+			
+			noteEditor.mode = editable ? 'edit' : 'view';
+			noteEditor.parent = null;
+			noteEditor.item = item;
+		}
+		else {
+			// If an external note window is open for this item, don't show the editor
+			if (ZoteroPane.findNoteWindow(item.id)) {
+				this.showNoteWindowMessage();
+				return;
+			}
 		
-		var noteEditor = document.getElementById('zotero-note-editor');
-		
-		// If loading new or different note, disable undo while we repopulate the text field
-		// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
-		// undo content from another note into the current one.
-		// var clearUndo = noteEditor.item ? noteEditor.item.id != item.id : false;
-		
-		noteEditor.mode = editable ? 'edit' : 'view';
-		noteEditor.parent = null;
-		noteEditor.item = item;
-		
-		// if (clearUndo) {
-		// 	noteEditor.clearUndo();
-		// }
+			var noteEditor = document.getElementById('zotero-note-editor-old');
+			
+			// If loading new or different note, disable undo while we repopulate the text field
+			// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
+			// undo content from another note into the current one.
+			var clearUndo = noteEditor.item ? noteEditor.item.id != item.id : false;
+			
+			noteEditor.mode = editable ? 'edit' : 'view';
+			noteEditor.parent = null;
+			noteEditor.item = item;
+
+			if (clearUndo) {
+				noteEditor.clearUndo();
+			}
+		}
 		
 		document.getElementById('zotero-view-note-button').hidden = !editable;
 		document.getElementById('zotero-item-pane-content').selectedIndex = 2;
@@ -285,7 +301,7 @@ var ZoteroItemPane = new function() {
 	
 	
 	this.showNoteWindowMessage = function () {
-		// ZoteroPane.setItemPaneMessage(Zotero.getString('pane.item.notes.editingInWindow'));
+		ZoteroPane.setItemPaneMessage(Zotero.getString('pane.item.notes.editingInWindow'));
 	};
 	
 	
@@ -295,16 +311,19 @@ var ZoteroItemPane = new function() {
 	this.openNoteWindow = async function () {
 		var selectedNote = Zotero.Items.get(_selectedNoteID);
 		
-		// We don't want to show the note in two places, since it causes unnecessary UI updates
-		// and can result in weird bugs where note content gets lost.
-		//
-		// If this is a child note, select the parent
-		if (selectedNote.parentID) {
-			await ZoteroPane.selectItem(selectedNote.parentID);
-		}
-		// Otherwise, hide note and replace with a message that we're editing externally
-		else {
-			this.showNoteWindowMessage();
+		var type = Zotero.Libraries.get(selectedNote.libraryID).libraryType;
+		if (type == 'group') {
+			// We don't want to show the note in two places, since it causes unnecessary UI updates
+			// and can result in weird bugs where note content gets lost.
+			//
+			// If this is a child note, select the parent
+			if (selectedNote.parentID) {
+				await ZoteroPane.selectItem(selectedNote.parentID);
+			}
+			// Otherwise, hide note and replace with a message that we're editing externally
+			else {
+				this.showNoteWindowMessage();
+			}
 		}
 		ZoteroPane.openNoteWindow(selectedNote.id);
 	};

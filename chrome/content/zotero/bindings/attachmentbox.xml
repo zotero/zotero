@@ -360,8 +360,17 @@
 						indexStatusRow.hidden = true;
 					}
 					
+					var type = Zotero.Libraries.get(this.item.libraryID).libraryType;
+					var switherDeck = this._id('attachment-note-editor-switcher');
+					switherDeck.selectedIndex = type == 'user' ? 1 : 0;
 					// Note editor
-					var noteEditor = this._id('attachment-note-editor');
+					if (type == 'user') {
+						var noteEditor = this._id('attachment-note-editor');
+					}
+					else {
+						var noteEditor = this._id('attachment-note-editor-old');
+					}
+					
 					if (this.displayNote && (this.displayNoteIfEmpty || this.item.note != '')) {
 						noteEditor.linksOnTop = true;
 						noteEditor.hidden = false;
@@ -624,7 +633,10 @@
 					</grid>
 				</vbox>
 				
-				<zoteronoteeditor id="attachment-note-editor" notitle="1" flex="1"/>
+				<deck id="attachment-note-editor-switcher" flex="1">
+					<oldzoteronoteeditor id="attachment-note-editor-old" notitle="1" flex="1"/>
+					<zoteronoteeditor id="attachment-note-editor" notitle="1" flex="1"/>
+				</deck>
 				
 				<button id="select-button" hidden="true"/>
 			</vbox>

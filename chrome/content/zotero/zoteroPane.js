@@ -1198,6 +1198,7 @@ var ZoteroPane = new function()
 			
 			// Rename tab
 			Zotero_Tabs.rename('zotero-pane', collectionTreeRow.getName());
+			ZoteroItemPane.switchEditorEngine(Zotero.Libraries.get(collectionTreeRow.ref.libraryID).libraryType);
 			
 			// Clear quick search and tag selector when switching views
 			document.getElementById('zotero-tb-search').value = "";
@@ -3552,6 +3553,19 @@ var ZoteroPane = new function()
 			if (w.name == name) {
 				return w;
 			}
+		}
+	};
+
+
+	this.onNoteWindowClosed = async function (itemID, noteText) {
+		var item = Zotero.Items.get(itemID);
+		item.setNote(noteText);
+		await item.saveTx();
+
+		// If note is still selected, show the editor again when the note window closes
+		var selectedItems = this.getSelectedItems(true);
+		if (selectedItems.length == 1 && itemID == selectedItems[0]) {
+			ZoteroItemPane.onNoteSelected(item, this.collectionsView.editable);
 		}
 	};
 	

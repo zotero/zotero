@@ -25,14 +25,14 @@
 
 var noteEditor;
 var notifierUnregisterID;
+var type;
+
+function switchEditorEngine(type) {
+	var switherDeck = document.getElementById('zotero-note-editor-switcher');
+	switherDeck.selectedIndex = type === 'user' ? 1 : 0;
+}
 
 async function onLoad() {
-	noteEditor = document.getElementById('zotero-note-editor');
-	noteEditor.mode = 'edit';
-	
-	// Set font size from pref
-	Zotero.setFontSize(noteEditor);
-	
 	if (window.arguments) {
 		var io = window.arguments[0];
 	}
@@ -40,6 +40,35 @@ async function onLoad() {
 	var itemID = parseInt(io.itemID);
 	var collectionID = parseInt(io.collectionID);
 	var parentItemKey = io.parentItemKey;
+	
+	if (itemID) {
+		var ref = await Zotero.Items.getAsync(itemID);
+		var libraryID = ref.libraryID;
+	}
+	else {
+		if (parentItemKey) {
+			var ref = Zotero.Items.getByLibraryAndKey(parentItemKey);
+			var libraryID = ref.libraryID;
+		}
+		else {
+			if (collectionID && collectionID != '' && collectionID != 'undefined') {
+				var collection = Zotero.Collections.get(collectionID);
+				var libraryID = collection.libraryID;
+			}
+		}
+	}
+	type = Zotero.Libraries.get(libraryID).libraryType;
+	switchEditorEngine(type);
+	if (type === 'group') {
+		noteEditor = document.getElementById('zotero-note-editor-old');
+	}
+	else {
+		noteEditor = document.getElementById('zotero-note-editor');
+	}
+	noteEditor.mode = 'edit';
+	
+	// Set font size from pref
+	Zotero.setFontSize(noteEditor);
 	
 	if (itemID) {
 		var ref = await Zotero.Items.getAsync(itemID);
@@ -77,7 +106,14 @@ function onError() {
 
 function onUnload() {
 	Zotero.Notifier.unregisterObserver(notifierUnregisterID);
-	noteEditor.saveSync();
+	if (type == 'user') {
+		noteEditor.saveSync();
+	}
+	else {
+		if (noteEditor.item) {
+			window.opener.ZoteroPane.onNoteWindowClosed(noteEditor.item.id, noteEditor.value);
+		}
+	}
 }
 
 var NotifyCallback = {
