@@ -32,6 +32,7 @@ if (!Zotero.Sync) {
 // Initialized as Zotero.Sync.Runner in zotero.js
 Zotero.Sync.Runner_Module = function (options = {}) {
 	const stopOnError = false;
+	const HTML_NS = 'http://www.w3.org/1999/xhtml';
 	
 	Zotero.defineProperty(this, 'enabled', {
 		get: () => {
@@ -84,7 +85,9 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	var _lastSyncStatus;
 	var _currentSyncStatusLabel;
 	var _currentLastSyncLabel;
+	var _currentTooltipMessages;
 	var _errors = [];
+	var _tooltipMessages = [];
 	
 	Zotero.addShutdownListener(() => this.stop());
 	
@@ -118,6 +121,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	this._sync = Zotero.Promise.coroutine(function* (options) {
 		// Clear message list
 		_errors = [];
+		_tooltipMessages = [];
 		
 		// Shouldn't be possible because of serial()
 		if (_syncInProgress) {
@@ -1033,7 +1037,8 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			upgrade: 4,
 			
 			// Skip these
-			animate: -1
+			animate: -1,
+			ignore: -2
 		};
 		var state = false;
 		for (let i = 0; i < errors.length; i++) {
@@ -1265,20 +1270,31 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		}
 		// Show warning for unknown data that couldn't be saved
 		else if (e.name && e.name == 'ZoteroInvalidDataError') {
-			e.message = Zotero.getString(
-				'sync.error.invalidDataError',
-				[
-					Zotero.Libraries.get(e.libraryID).name,
-					Zotero.clientName
-				]
-			)
-				+ "\n\n"
-				+ Zotero.getString('sync.error.invalidDataError.otherData');
-			e.errorType = 'warning';
-			e.dialogButtonText = Zotero.getString('general.checkForUpdates');
-			e.dialogButtonCallback = () => {
-				Zotero.openCheckForUpdatesWindow();
-			};
+			let library = Zotero.Libraries.get(e.libraryID);
+			let msg = Zotero.getString(
+					'sync.error.invalidDataError',
+					[
+						library.name,
+						Zotero.clientName
+					]
+				)
+					+ "\n\n"
+					+ Zotero.getString('sync.error.invalidDataError.otherData');
+			
+			// Show warning for My Library
+			if (library.libraryType == 'user') {
+				e.message = msg;
+				e.errorType = 'warning';
+				e.dialogButtonText = Zotero.getString('general.checkForUpdates');
+				e.dialogButtonCallback = () => {
+					Zotero.openCheckForUpdatesWindow();
+				};
+			}
+			// Otherwise just show in sync button tooltip
+			else {
+				_addTooltipMessage(msg);
+				e.errorType = 'ignore';
+			}
 		}
 	});
 	
@@ -1299,6 +1315,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			if (!Array.isArray(errors)) {
 				errors = [errors];
 			}
+			errors = errors.filter(o => o.errorType !== 'ignore');
 			var state = this.getPrimaryErrorType(errors);
 		}
 		
@@ -1512,10 +1529,12 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		if (tooltip) {
 			_currentSyncStatusLabel = tooltip.firstChild.nextSibling;
 			_currentLastSyncLabel = tooltip.firstChild.nextSibling.nextSibling;
+			_currentTooltipMessages = tooltip.querySelector('.sync-button-tooltip-messages');
 		}
 		else {
 			_currentSyncStatusLabel = null;
 			_currentLastSyncLabel = null;
+			_currentTooltipMessages = null;
 		}
 		if (_currentSyncStatusLabel) {
 			_updateSyncStatusLabel();
@@ -1547,7 +1566,12 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		Zotero.Sync.Data.Local.setAPIKey();
 		yield client.deleteAPIKey();
 	})
-
+	
+	
+	function _addTooltipMessage(msg) {
+		_tooltipMessages.push(msg.replace(/\n+/g, ' '));
+	};
+	
 	
 	function _updateSyncStatusLabel() {
 		if (_lastSyncStatus) {
@@ -1585,6 +1609,19 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		
 		_currentLastSyncLabel.value = Zotero.getString('sync.status.lastSync') + " " + msg;
 		_currentLastSyncLabel.hidden = false;
+		
+		if (_tooltipMessages.length) {
+			_currentTooltipMessages.textContent = '';
+			for (let message of _tooltipMessages) {
+				let elem = _currentTooltipMessages.ownerDocument.createElementNS(HTML_NS, 'p');
+				elem.textContent = message;
+				_currentTooltipMessages.appendChild(elem);
+			}
+			_currentTooltipMessages.hidden = false;
+		}
+		else {
+			_currentTooltipMessages.hidden = true;
+		}
 	}
 	
 	

@@ -214,6 +214,7 @@
 							<label id="zotero-tb-sync-label"/>
 							<label id="zotero-tb-sync-status" hidden="true"/>
 							<label id="zotero-tb-sync-last-sync"/>
+							<div xmlns="http://www.w3.org/1999/xhtml" class="sync-button-tooltip-messages"/>
 						</tooltip>
 					</toolbarbutton>
 				</hbox>

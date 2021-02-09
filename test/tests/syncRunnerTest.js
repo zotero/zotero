@@ -109,6 +109,63 @@ describe("Zotero.Sync.Runner", function () {
 		setHTTPResponse(server, baseURL, response, responses);
 	}
 	
+	function setDefaultResponses(options = {}) {
+		var target = options.target || 'users/1';
+		var headers = {
+			"Last-Modified-Version": options.libraryVersion || 5
+		};
+		var lastLibraryVersion = options.lastLibraryVersion || 4;
+		setResponse({
+			method: "GET",
+			url: `${target}/settings?since=${lastLibraryVersion}`,
+			status: 200,
+			headers,
+			json: {}
+		});
+		setResponse({
+			method: "GET",
+			url: `${target}/collections?format=versions&since=${lastLibraryVersion}`,
+			status: 200,
+			headers,
+			json: {}
+		});
+		setResponse({
+			method: "GET",
+			url: `${target}/searches?format=versions&since=${lastLibraryVersion}`,
+			status: 200,
+			headers,
+			json: {}
+		});
+		setResponse({
+			method: "GET",
+			url: `${target}/items/top?format=versions&since=${lastLibraryVersion}&includeTrashed=1`,
+			status: 200,
+			headers,
+			json: {}
+		});
+		setResponse({
+			method: "GET",
+			url: `${target}/items?format=versions&since=${lastLibraryVersion}&includeTrashed=1`,
+			status: 200,
+			headers,
+			json: {}
+		});
+		setResponse({
+			method: "GET",
+			url: `${target}/deleted?since=${lastLibraryVersion}`,
+			status: 200,
+			headers,
+			json: {}
+		});
+		setResponse({
+			method: "GET",
+			url: `${target}/fulltext?format=versions`,
+			status: 200,
+			headers,
+			json: {}
+		});
+	}
+	
 	
 	//
 	// Tests
@@ -993,28 +1050,18 @@ describe("Zotero.Sync.Runner", function () {
 			}
 		});
 		
-		it("should show the sync error icon on error", function* () {
+		it("should show the sync error icon on error", async function () {
 			let library = Zotero.Libraries.userLibrary;
-			library.libraryVersion = 5;
-			yield library.save();
+			library.libraryVersion = 1;
+			await library.save();
 			
 			setResponse('keyInfo.fullAccess');
 			setResponse('userGroups.groupVersionsEmpty');
-			// My Library
-			setResponse({
-				method: "GET",
-				url: "users/1/settings",
-				status: 200,
-				headers: {
-					"Last-Modified-Version": 5
-				},
-				json: {
-					INVALID: true // TODO: Find a cleaner error
-				}
-			});
+			
+			// No other responses, so settings response will be a 404
 			
 			spy = sinon.spy(runner, "updateIcons");
-			yield runner.sync();
+			await runner.sync();
 			assert.isTrue(spy.calledTwice);
 			assert.isArray(spy.args[1][0]);
 			assert.lengthOf(spy.args[1][0], 1);
@@ -1094,6 +1141,118 @@ describe("Zotero.Sync.Runner", function () {
 			var buttons = panel.getElementsByTagName('button');
 			assert.lengthOf(buttons, 1);
 			assert.include(buttons[0].label, Zotero.getString('pane.items.showItemInLibrary'));
+		});
+		
+		
+		it("should show an error for invalid My Library data", async function () {
+			let library = Zotero.Libraries.userLibrary;
+			library.libraryVersion = 1;
+			await library.save();
+			
+			var collection = await createDataObject('collection', { synced: true });
+			var json = collection.toResponseJSON();
+			json.version = json.data.version = 2;
+			json.data.INVALID = true;
+			
+			setResponse('keyInfo.fullAccess');
+			setResponse('userGroups.groupVersionsEmpty');
+			setDefaultResponses({
+				lastLibraryVersion: 1,
+				libraryVersion: 2
+			});
+			setResponse({
+				method: "GET",
+				url: "users/1/collections?format=versions&since=1",
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 2
+				},
+				json: {
+					[json.key]: 2
+				}
+			});
+			setResponse({
+				method: "GET",
+				url: `users/1/collections?format=json&collectionKey=${json.key}`,
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 2
+				},
+				json: [json]
+			});
+			
+			spy = sinon.spy(runner, "updateIcons");
+			await runner.sync();
+			assert.isTrue(spy.calledTwice);
+			assert.isArray(spy.args[1][0]);
+			assert.lengthOf(spy.args[1][0], 1);
+			// Not an instance of Error for some reason
+			var error = spy.args[1][0][0];
+			assert.equal(Object.getPrototypeOf(error).constructor.name, "Error");
+			assert.match(error.message, /^Some data in My Library/);
+		});
+		
+		
+		it("should show a warning in the sync button tooltip for invalid group data", async function () {
+			win = await loadZoteroPane();
+			var doc = win.document;
+			
+			// Create group with same id and version as groups response
+			var groupData = responses.groups.memberGroup;
+			var group = await createGroup({
+				id: groupData.json.id,
+				version: groupData.json.version
+			});
+			group.libraryVersion = 1;
+			await group.save();
+			
+			var collection = await createDataObject('collection', { synced: true });
+			var json = collection.toResponseJSON();
+			json.version = json.data.version = 2;
+			json.data.INVALID = true;
+			
+			var target = 'groups/' + group.id;
+			setResponse('keyInfo.fullAccess');
+			setResponse('userGroups.groupVersionsOnlyMemberGroup');
+			setResponse('groups.memberGroup');
+			setDefaultResponses({
+				target,
+				lastLibraryVersion: 1,
+				libraryVersion: 2
+			});
+			setResponse({
+				method: "GET",
+				url: target + '/collections?format=versions&since=1',
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 2
+				},
+				json: {
+					[json.key]: 2
+				}
+			});
+			setResponse({
+				method: "GET",
+				url: target + `/collections?format=json&collectionKey=${json.key}`,
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 2
+				},
+				json: [json]
+			});
+			
+			await runner.sync({ libraries: [group.libraryID] });
+			
+			assert.isTrue(doc.getElementById('zotero-tb-sync-error').hidden);
+			
+			// Fake what happens on button mouseover
+			var tooltip = doc.getElementById('zotero-tb-sync-tooltip');
+			runner.registerSyncStatus(tooltip);
+			
+			var html = doc.getElementById('zotero-tb-sync-tooltip').innerHTML;
+			assert.match(html, /Some data in .+\. Other data will continue to sync\./);
+			
+			runner.registerSyncStatus();
 		});
 		
 		
