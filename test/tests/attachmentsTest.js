@@ -1020,7 +1020,7 @@ describe("Zotero.Attachments", function() {
 			assert.equal(requestStub.getCall(5).args[1], pageURL4);
 			
 			// 'website' requests should be a second apart
-			assert.isAbove(requestStubCallTimes[5] - requestStubCallTimes[1], 999);
+			assert.isAbove(requestStubCallTimes[5] - requestStubCallTimes[1], 995);
 			
 			assert.equal(item1.numAttachments(), 1);
 			assert.equal(item2.numAttachments(), 0);
