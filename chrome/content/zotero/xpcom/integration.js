@@ -63,6 +63,8 @@ const EXPORTED_DOCUMENT_MARKER = "ZOTERO_TRANSFER_DOCUMENT";
 
 const NOTE_CITATION_PLACEHOLDER_LINK = 'https://www.zotero.org/?';
 
+const TEMPLATE_VERSION = 1;
+
 
 Zotero.Integration = new function() {
 	Components.utils.import("resource://gre/modules/Services.jsm");
@@ -70,6 +72,7 @@ Zotero.Integration = new function() {
 	
 	this.currentWindow = false;
 	this.sessions = {};
+	var upgradeTemplateNotNowTime = 0;
 	
 	/**
 	 * Begin listening for integration commands on the given pipe
@@ -79,12 +82,13 @@ Zotero.Integration = new function() {
 		Zotero.IPC.Pipe.initPipeListener(pipe, function(string) {
 			if(string != "") {
 				// exec command if possible
-				var parts = string.match(/^([^ \n]*) ([^ \n]*)(?: ([^\n]*))?\n?$/);
+				var parts = string.match(/^([^ \n]*) ([^ \n]*) (\/[^\n\\]*\/)(?: ([^ \n]*))?\n?$/);
 				if(parts) {
 					var agent = parts[1].toString();
 					var cmd = parts[2].toString();
-					var document = parts[3] ? parts[3].toString() : null;
-					Zotero.Integration.execCommand(agent, cmd, document);
+					var document = parts[3].toString();
+					var templateVersion = parts[4] ? parseInt(parts[4].toString()) : 0;
+					Zotero.Integration.execCommand(agent, cmd, document, templateVersion);
 				} else {
 					Components.utils.reportError("Zotero: Invalid integration input received: "+string);
 				}
@@ -127,6 +131,57 @@ Zotero.Integration = new function() {
 			}
 		}
 	}
+
+	/**
+	 * @param {String} agent Agent string provided by the integration plugin
+	 * @param {Integer} templateVersion Plugin reported template version
+	 * @returns {Boolean} true if integration operation should be cancelled
+	 */
+	this.warnOutdatedTemplate = function (agent, templateVersion) {
+		const validAgents = new Set(['OpenOffice', 'MacWord', 'WinWord']);
+		if (!validAgents.has(agent) || templateVersion >= TEMPLATE_VERSION) return false;
+		const daysToIgnore = 30;
+		const now = Math.floor(Date.now() / 1000);
+		const updateTemplateDelayedOn = Zotero.Prefs.get('integration.updateTemplateDelayedOn');
+		if (updateTemplateDelayedOn + (daysToIgnore * 86400) > now || upgradeTemplateNotNowTime + 86400 > now) {
+			return false;
+		}
+		Zotero.debug(`Integration: ${agent} command invoked with outdated template.`);
+		
+		var ps = Services.prompt;
+		var title = Zotero.getString('general.warning');
+		var client = agent == "OpenOffice" ? "Libre Office" : "Microsoft Word";
+		var message = Zotero.getString('integration.upgradeTemplate', client);
+		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
+		var checkbox = {};
+		var index = ps.confirmEx(
+			null,
+			title,
+			message,
+			buttonFlags,
+			Zotero.getString('general.openPreferences'),
+			Zotero.getString('general.notNow'),
+			null,
+			Zotero.getString(
+				'general.dontShowAgainFor',
+				daysToIgnore,
+				daysToIgnore
+			),
+			checkbox
+		);
+
+		if (index == 0) {
+			Zotero.Utilities.Internal.openPreferences('zotero-prefpane-cite', { tab: 'wordProcessors-tab' });
+			return true;
+		}
+
+		upgradeTemplateNotNowTime = now;
+		if (checkbox.value) {
+			Zotero.Prefs.set('integration.upgradeTemplateDelayedOn', now);
+		}
+		return false;
+	};
 	
 	this.resetSessionStyles = Zotero.Promise.coroutine(function* (){
 		for (let sessionID in Zotero.Integration.sessions) {
@@ -160,9 +215,10 @@ Zotero.Integration = new function() {
 	/**
 	 * Executes an integration command, first checking to make sure that versions are compatible
 	 */
-	this.execCommand = async function(agent, command, docId, templateVersion) {
+	this.execCommand = async function(agent, command, docId, templateVersion=0) {
 		var document, session, documentImported;
-		
+		if (Zotero.Integration.warnOutdatedTemplate(agent, templateVersion)) return;
+
 		if (Zotero.Integration.currentDoc) {
 			Zotero.Utilities.Internal.activate();
 			if(Zotero.Integration.currentWindow && !Zotero.Integration.currentWindow.closed) {

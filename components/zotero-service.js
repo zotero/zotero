@@ -535,8 +535,10 @@ ZoteroCommandLineHandler.prototype = {
 			
 			var command = cmdLine.handleFlagWithParam("ZoteroIntegrationCommand", false);
 			var docId = cmdLine.handleFlagWithParam("ZoteroIntegrationDocument", false);
+			var templateVersion = parseInt(cmdLine.handleFlagWithParam("ZoteroIntegrationTemplateVersion", false));
+			templateVersion = isNaN(templateVersion) ? 0 : templateVersion;
 			
-			zContext.Zotero.Integration.execCommand(agent, command, docId);
+			zContext.Zotero.Integration.execCommand(agent, command, docId, templateVersion);
 		}
 		
 		// handler for Windows IPC commands
