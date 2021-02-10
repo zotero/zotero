@@ -1182,7 +1182,7 @@ function ZoteroProtocolHandler() {
 			var opened = false;
 			if (page) {
 				try {
-					opened = await Zotero.OpenPDF.openToPage(path, page);
+					opened = await Zotero.OpenPDF.openToPage(item, page);
 				}
 				catch (e) {
 					Zotero.logError(e);

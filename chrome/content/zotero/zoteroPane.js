@@ -4095,9 +4095,13 @@ var ZoteroPane = new function()
 			}
 			// Custom PDF handler
 			if (contentType === 'application/pdf') {
-				this.viewPDF(itemID, event.shiftKey);
-				// TODO: Still leave an option to use an external PDF viewer
-				return;
+				let item = await Zotero.Items.getAsync(itemID);
+				let library = Zotero.Libraries.get(item.libraryID);
+				// TEMP
+				if (library.libraryType == 'user' && Zotero.Prefs.get('beta.useInternalPDFReader')) {
+					this.viewPDF(itemID, event && event.shiftKey);
+					return;
+				}
 				let pdfHandler  = Zotero.Prefs.get("fileHandler.pdf");
 				if (pdfHandler) {
 					if (await OS.File.exists(pdfHandler)) {

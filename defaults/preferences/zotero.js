@@ -178,6 +178,7 @@ pref("extensions.zotero.pane.persist", "");
 
 // Custom file handlers
 pref("extensions.zotero.fileHandler.pdf", "");
+pref("extensions.zotero.beta.useInternalPDFReader", true);
 
 // File/URL opening executable if launch() fails
 pref("extensions.zotero.fallbackLauncher.unix", "/usr/bin/xdg-open");

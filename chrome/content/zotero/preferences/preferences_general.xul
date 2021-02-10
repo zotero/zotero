@@ -45,6 +45,7 @@
 			<preference id="pref-groups-copyChildLinks" name="extensions.zotero.groups.copyChildLinks" type="bool"/>
 			<preference id="pref-groups-copyTags" name="extensions.zotero.groups.copyTags" type="bool"/>
 			
+			<preference id="pref-useInternalPDFReader" name="extensions.zotero.beta.useInternalPDFReader" type="bool"/>
 		</preferences>
 		
 		<groupbox id="zotero-prefpane-file-handling-groupbox">
@@ -67,6 +68,9 @@
 				<label value="&zotero.preferences.fileHandler.openPDFsUsing;" control="file-handler-pdf"/>
 				<menulist id="fileHandler-pdf" class="fileHandler-menu">
 					<menupopup>
+						<menuitem id="fileHandler-internal"
+								oncommand="Zotero_Preferences.General.setFileHandler('pdf', 'zotero')"
+								hidden="true"/>
 						<menuitem id="fileHandler-custom"/>
 						<menuitem label="&zotero.preferences.fileHandler.systemDefault;"
 								oncommand="Zotero_Preferences.General.setFileHandler('pdf', false)"/>
@@ -75,6 +79,9 @@
 					</menupopup>
 				</menulist>
 			</hbox>
+			<checkbox
+				label="Use Zotero PDF reader for My Library (beta)"
+				preference="pref-useInternalPDFReader"/>
 		</groupbox>
 		
 		<groupbox id="zotero-prefpane-miscellaneous-groupbox">

@@ -38,6 +38,8 @@ Zotero_Preferences.General = {
 				'zotero.preferences.launchNonNativeFiles', Zotero.appName
 			);
 		}
+		var menuitem = document.getElementById('fileHandler-internal');
+		menuitem.setAttribute('label', Zotero.appName);
 		
 		this.updateAutoRenameFilesUI();
 		this._updateFileHandlerUI();
@@ -88,6 +90,16 @@ Zotero_Preferences.General = {
 		var handler = Zotero.Prefs.get('fileHandler.pdf');
 		var menulist = document.getElementById('fileHandler-pdf');
 		var customMenuItem = document.getElementById('fileHandler-custom');
+		
+		// TEMP: Use separate checkbox for now
+		/*if (handler == 'zotero') {
+			let menuitem = document.getElementById('fileHandler-internal');
+			menulist.selectedIndex = 0;
+			customMenuItem.hidden = true;
+			return;
+		}*/
+		
+		// Custom handler
 		if (handler) {
 			let icon;
 			try {
@@ -113,11 +125,12 @@ Zotero_Preferences.General = {
 				customMenuItem.className = '';
 			}
 			customMenuItem.hidden = false;
-			menulist.selectedIndex = 0;
+			menulist.selectedIndex = 1;
 		}
+		// System default
 		else {
 			customMenuItem.hidden = true;
-			menulist.selectedIndex = 1;
+			menulist.selectedIndex = 2;
 		}
 	},
 	
