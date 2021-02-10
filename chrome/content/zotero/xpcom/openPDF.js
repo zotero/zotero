@@ -38,10 +38,7 @@ Zotero.OpenPDF = {
 			let library = Zotero.Libraries.get(item.libraryID);
 			if (library.libraryType == 'user' && Zotero.Prefs.get('beta.useInternalPDFReader')) {
 				let location = {
-					position: {
-						pageIndex: page - 1,
-						rects: [[0, 0, 0, 0]]
-					}
+					pageIndex: page - 1
 				};
 				await Zotero.Reader.open(item.id, location);
 				return true;
