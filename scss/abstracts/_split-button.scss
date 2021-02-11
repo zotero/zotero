@@ -171,14 +171,14 @@ $toolbar-btn-icon-active-offset:    0;
     box-shadow: $toolbar-btn-box-shadow-2x;
   }
 
-  &:focus-visible {
+  /*&:focus-visible {
     box-shadow: $toolbar-btn-focus-box-shadow;
     z-index: 1;
 
     @include retina {
       box-shadow: $toolbar-btn-focus-box-shadow-2x;
     }
-  }
+  }*/
 
   &:-moz-focusring {
     box-shadow: $toolbar-btn-focus-box-shadow;
@@ -248,7 +248,7 @@ $toolbar-btn-icon-active-offset:    0;
   box-shadow: none;
   position: relative;
 
-  &:focus-visible {
+  /*&:focus-visible {
     z-index: 2; // Chrome
 
     &::after {
@@ -265,7 +265,7 @@ $toolbar-btn-icon-active-offset:    0;
         box-shadow: inset 0 0 0 1px rgba($accent-color, 0.5), 0 0 0 2.5px rgba($accent-color, 0.5);
       }
     }
-  }
+  }*/
 
   &:-moz-focusring {
     &::after {
@@ -289,12 +289,12 @@ $toolbar-btn-icon-active-offset:    0;
     margin-right: 0;
     background: none;
 
-    &:focus-visible {
+    /*&:focus-visible {
       &::after {
         border-top-left-radius: 5px;
         border-bottom-left-radius: 5px;
       }
-    }
+    }*/
 
     &:-moz-focusring {
       &::after {
@@ -337,12 +337,12 @@ $toolbar-btn-icon-active-offset:    0;
       }
     }
 
-    &:focus-visible {
+    /*&:focus-visible {
       &::after {
         border-top-right-radius: 5px;
         border-bottom-right-radius: 5px;
       }
-    }
+    }*/
 
     &:-moz-focusring {
       &::after {
