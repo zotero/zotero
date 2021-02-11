@@ -228,7 +228,11 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			var version = yield deferred.promise;
 		}
 		Zotero.version = version;
-		Zotero.isDevBuild = Zotero.version.includes('beta') || Zotero.version.includes('SOURCE');
+		Zotero.isDevBuild = Zotero.version.includes('beta')
+			|| Zotero.version.includes('dev')
+			|| Zotero.version.includes('SOURCE');
+		Zotero.isPDFBuild = true // Toggle for testing
+			&& (Zotero.version.includes('dev') || Zotero.version.includes('SOURCE'));
 		
 		// OS platform
 		var win = Components.classes["@mozilla.org/appshell/appShellService;1"]

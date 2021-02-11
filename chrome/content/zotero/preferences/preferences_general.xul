@@ -80,8 +80,10 @@
 				</menulist>
 			</hbox>
 			<checkbox
+				id="useInternalPDFReader-checkbox"
 				label="Use Zotero PDF reader for My Library (beta)"
-				preference="pref-useInternalPDFReader"/>
+				preference="pref-useInternalPDFReader"
+				hidden="true"/>
 		</groupbox>
 		
 		<groupbox id="zotero-prefpane-miscellaneous-groupbox">

@@ -41,6 +41,10 @@ Zotero_Preferences.General = {
 		var menuitem = document.getElementById('fileHandler-internal');
 		menuitem.setAttribute('label', Zotero.appName);
 		
+		if (Zotero.isPDFBuild) {
+			document.getElementById('useInternalPDFReader-checkbox').hidden = false;
+		}
+		
 		this.updateAutoRenameFilesUI();
 		this._updateFileHandlerUI();
 	},
