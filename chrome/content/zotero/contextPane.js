@@ -447,7 +447,10 @@ var ZoteroContextPane = new function () {
 			s.addCondition('itemType', 'is', 'note');
 			s.addCondition('noChildren', 'true');
 			if (query) {
-				s.addCondition('note', 'contains', query, true);
+				let parts = Zotero.SearchConditions.parseSearchString(query);
+				for (let part of parts) {
+					s.addCondition('note', 'contains', part.text);
+				}
 			}
 			var notes = await s.search();
 			notes = Zotero.Items.get(notes);
