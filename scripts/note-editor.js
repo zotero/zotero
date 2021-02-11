@@ -9,14 +9,14 @@ const { buildsURL } = require('./config');
 async function getZoteroNoteEditor(signatures) {
 	const t1 = Date.now();
 
-	const { stdout } = await exec('git rev-parse HEAD', { cwd: './zotero-note-editor' });
+	const { stdout } = await exec('git rev-parse HEAD', { cwd: './note-editor' });
 	const hash = stdout.trim();
 
-	if (!('zotero-note-editor' in signatures) || signatures['zotero-note-editor'].hash !== hash) {
-		const targetDir = 'build/resource/zotero-note-editor/';
+	if (!('note-editor' in signatures) || signatures['note-editor'].hash !== hash) {
+		const targetDir = 'build/resource/note-editor/';
 		try {
 			const filename = hash + '.zip';
-			const tmpDir = 'tmp/builds/zotero-note-editor/';
+			const tmpDir = 'tmp/builds/note-editor/';
 			const url = buildsURL + 'client-note-editor/' + filename;
 			await exec(
 				`mkdir -p ${tmpDir}`
@@ -28,16 +28,16 @@ async function getZoteroNoteEditor(signatures) {
 			);
 		}
 		catch (e) {
-			await exec('npm ci;npm run build', { cwd: 'zotero-note-editor' });
-			await fs.copy('zotero-note-editor/build/zotero', targetDir);
+			await exec('npm ci;npm run build', { cwd: 'note-editor' });
+			await fs.copy('note-editor/build/zotero', targetDir);
 		}
-		signatures['zotero-note-editor'] = { hash };
+		signatures['note-editor'] = { hash };
 	}
 	
 	const t2 = Date.now();
 
 	return {
-		action: 'zotero-note-editor',
+		action: 'note-editor',
 		count: 1,
 		totalCount: 1,
 		processingTime: t2 - t1

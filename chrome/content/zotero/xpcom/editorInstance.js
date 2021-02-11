@@ -23,9 +23,9 @@
     ***** END LICENSE BLOCK *****
 */
 
-// When changing this update in `zotero-note-editor` as well.
+// When changing this update in `note-editor` as well.
 // This only filters images that are being imported from a URL.
-// In all other cases `zotero-note-editor` should decide what
+// In all other cases `note-editor` should decide what
 // image types can be imported, and if not then
 // Zotero.Attachments.importEmbeddedImage does.
 // Additionally, the allready imported images should never be

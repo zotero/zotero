@@ -7,7 +7,7 @@ const getSass = require('./sass');
 const getSymlinks = require('./symlinks');
 const getPDFReader = require('./pdf-reader');
 const getPDFWorker = require('./pdf-worker');
-const getZoteroNoteEditor = require('./zotero-note-editor');
+const getZoteroNoteEditor = require('./note-editor');
 const { formatDirsForMatcher, getSignatures, writeSignatures, cleanUp, onSuccess, onError} = require('./utils');
 const { dirs, symlinkDirs, copyDirs, symlinkFiles, jsFiles, scssFiles, ignoreMask } = require('./config');
 

@@ -333,7 +333,7 @@
 		<content>
 			<xul:vbox xbl:inherits="flex" style="display: flex;flex-direction: column;flex-grow: 1;">
 				<xul:iframe tooltip="editor-tooltip" anonid="editor-view" flex="1" overflow="auto" style="width: 100%;margin-right: 5px;border: 0;width: 100%;margin-right: 5px;border: 0;flex-grow: 1;"
-							frameBorder="0" src="resource://zotero/zotero-note-editor/editor.html" type="content"/>
+							frameBorder="0" src="resource://zotero/note-editor/editor.html" type="content"/>
 				<xul:hbox id="links-container" hidden="true">
 					<xul:linksbox id="links-box" flex="1" xbl:inherits="notitle"/>
 				</xul:hbox>
