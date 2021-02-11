@@ -42,7 +42,7 @@ const ZoteroStandalone = new function() {
 			window.document.documentElement.setAttribute('sizemode', 'normal');
 		}
 
-		if (Zotero.isMac) {
+		if (Zotero.isMac && Zotero.isPDFBuild) {
 			document.documentElement.setAttribute('drawintitlebar', true);
 			document.documentElement.setAttribute('tabsintitlebar', true);
 			document.documentElement.setAttribute('chromemargin', '0,-1,-1,-1');

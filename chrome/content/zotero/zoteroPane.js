@@ -69,6 +69,13 @@ var ZoteroPane = new function()
 	this.init = function () {
 		Zotero.debug("Initializing Zotero pane");
 		
+		if (!Zotero.isPDFBuild) {
+			let win = document.getElementById('main-window')
+			win.setAttribute('legacytoolbar', 'true');
+			document.getElementById('titlebar').hidden = true;
+			document.getElementById('tab-bar-container').hidden = true;
+		}
+		
 		// Set key down handler
 		document.getElementById('appcontent').addEventListener('keydown', ZoteroPane_Local.handleKeyDown, true);
 		
@@ -1197,7 +1204,9 @@ var ZoteroPane = new function()
 			}
 			
 			// Rename tab
-			Zotero_Tabs.rename('zotero-pane', collectionTreeRow.getName());
+			if (Zotero.isPDFBuild) {
+				Zotero_Tabs.rename('zotero-pane', collectionTreeRow.getName());
+			}
 			ZoteroItemPane.switchEditorEngine(Zotero.Libraries.get(collectionTreeRow.ref.libraryID).libraryType);
 			
 			// Clear quick search and tag selector when switching views
