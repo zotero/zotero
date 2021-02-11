@@ -36,7 +36,12 @@ Zotero.Sync.Storage.Cache = {
 	_dbScanSleepPeriod: 100,
 	_fileDeletionSleepPeriod: 100,
 
+	// Keep promises of running cache clean processes to prevent duplicates
 	_cleaningCachePromises: {},
+
+	// Cache the breakdown of storage for efficiency
+	_storageBreakdown: false,
+	_storageBreakdownCache: 0,
 
 	/**
 	 * Remove all attachment files for the given items and mark them as TO_DOWNLOAD
@@ -117,6 +122,9 @@ Zotero.Sync.Storage.Cache = {
 		Zotero.debug(`Storage Cache: Awaiting cache clean for library ${libraryID}`);
 		await this._cleaningCachePromises[libraryID];
 		delete this._cleaningCachePromises[libraryID];
+
+		// Reset cache breakdown age
+		this._storageBreakdownCache = 0;
 	},
 
 	_executeCleanForLibrary: async function (libraryID) {
@@ -350,4 +358,101 @@ Zotero.Sync.Storage.Cache = {
 
 		return importedAttachments;
 	},
+
+
+	/**
+	 * Scan all library attachment files to calculate breakdown of storage
+	 *
+	 * Results are cached and updated if older than 1 hour or a library has been cleaned
+	 *
+	 * @param {Function} [onUpdate] - Receive periodic updated storage counts while scanning
+	 * @param {Integer[]} [libraryIDs] - List of Library IDs to limit scan to
+	 * @return {Promise}
+	 */
+	calculateStorageBreakdown: async function (onUpdate, libraryIDs) {
+		// Check to see if we have recently scanned our groups
+		if (this._storageBreakdown && !libraryIDs) {
+			// Check if results are newer than 1 hour
+			if (this._storageBreakdownCache > (Date.now() - 3600000)) {
+				// Return the cached results
+				onUpdate(this._storageBreakdown);
+				return this._storageBreakdown;
+			}
+		}
+
+		this._storageBreakdownCache = Date.now();
+
+		// Otherwise start scanning
+		let update = 0;
+		let libraries = Zotero.Libraries.getAll();
+
+		if (libraryIDs) {
+			libraries = libraries
+				.filter(library => libraryIDs.includes(library.libraryID));
+
+			Zotero.debug('Storage Cache: Calculating storage breakdown for libraries: ' + libraryIDs.join(','));
+		}
+		else {
+			this._storageBreakdown = {};
+
+			Zotero.debug('Storage Cache: Calculating storage breakdown for all libraries');
+		}
+
+		await Zotero.Promise.all(libraries.map(async (library) => {
+			this._storageBreakdown[library.libraryID] = {
+				libraryID: library.libraryID,
+				name: library.name,
+				size: 0,
+				count: 0
+			};
+			onUpdate(this._storageBreakdown);
+
+			let items = await Zotero.Items.getAll(library.libraryID);
+
+			const getFileSize = async (attachmentFile) => {
+				if (attachmentFile.name.startsWith('.')) {
+					return;
+				}
+
+				try {
+					let size = (await OS.File.stat(attachmentFile.path)).size;
+					this._storageBreakdown[library.libraryID].size += size;
+				}
+				catch (e) {
+					if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
+						// File may or may not exist on disk, but we
+						// don't care so swallow this error
+					}
+					else {
+						Zotero.logError(e);
+						return;
+					}
+				}
+
+				if (onUpdate && update > 200) {
+					onUpdate(this._storageBreakdown);
+					update = 0;
+				}
+				else {
+					update += 1;
+				}
+			};
+
+			await Zotero.Promise.all(items.map(async (item) => {
+				if (!item.isImportedAttachment()) {
+					return;
+				}
+
+				this._storageBreakdown[library.libraryID].count += 1;
+
+				await Zotero.File.iterateDirectory(
+					Zotero.Attachments.getStorageDirectory(item).path,
+					getFileSize
+				);
+			}));
+		}));
+
+		onUpdate(this._storageBreakdown);
+		return this._storageBreakdown;
+	}
 };

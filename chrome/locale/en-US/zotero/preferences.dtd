@@ -69,6 +69,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download				"Download files">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime	"at sync time">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand		"as needed">
+<!ENTITY zotero.preferences.sync.fileSyncing.clear					"Clear…">
 <!ENTITY zotero.preferences.sync.fileSyncing.timeToLive				"If downloading as needed, remove downloaded files if not opened for">
 <!ENTITY zotero.preferences.sync.fileSyncing.timeToLive.oneDay		"1 day">
 <!ENTITY zotero.preferences.sync.fileSyncing.timeToLive.oneWeek		"1 week">

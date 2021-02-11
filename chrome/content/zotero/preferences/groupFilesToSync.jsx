@@ -29,8 +29,8 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import { IntlProvider, useIntl } from 'react-intl';
-import cx from "classnames";
 import { humanReadableSize } from 'components/utils';
+import ProgressMeter from 'components/progressMeter';
 
 Components.utils.import("resource://gre/modules/osfile.jsm");
 
@@ -44,7 +44,7 @@ const customPreferences = (id) => {
 	};
 };
 
-const Group = ({ id, name, prefs, count, size, onChangeEnabled, onChangeSync, onChangeMode }) => {
+const Group = ({ id, name, prefs, count, size, clearButtonEnabled, onChangeEnabled, onChangeSync, onChangeMode, onClear }) => {
 	const intl = useIntl();
 
 	const globalDownloadMode = Zotero.Prefs.get('sync.storage.downloadMode.groups');
@@ -54,17 +54,6 @@ const Group = ({ id, name, prefs, count, size, onChangeEnabled, onChangeSync, on
 		&& (prefs.enabled
 			? (prefs.sync && prefs.downloadMode === 'on-demand')
 			: (globalSync && globalDownloadMode === 'on-demand'));
-
-	const [clearButtonEnabled, setClearButtonEnabled] = useState(true);
-
-	const handleClear = async () => {
-		setClearButtonEnabled(false);
-
-		let libraryID = Zotero.Groups.getLibraryIDFromGroupID(id);
-		await Zotero.Sync.Storage.Cache.cleanCacheForLibrary(libraryID);
-
-		setClearButtonEnabled(true);
-	};
 
 	return (
 		<div className="group">
@@ -126,10 +115,10 @@ const Group = ({ id, name, prefs, count, size, onChangeEnabled, onChangeSync, on
 					) } - { humanReadableSize(size, 1) }
 				</div>
 				{ canClearCache && <button
-					onClick={ handleClear }
+					onClick={ onClear }
 					disabled={ !clearButtonEnabled }
 					className="button-native">
-					{ Zotero.getString('zotero.preferences.sync.fileSyncing.clear') }
+					{ intl.formatMessage({ id: 'zotero.preferences.sync.fileSyncing.clear' }) }
 				</button> }
 			</div> }
 		</div>
@@ -142,16 +131,19 @@ Group.propTypes = {
 	prefs: PropTypes.object,
 	count: PropTypes.number,
 	size: PropTypes.number,
+	clearButtonEnabled: PropTypes.bool,
 	onChangeEnabled: PropTypes.func,
 	onChangeSync: PropTypes.func,
-	onChangeMode: PropTypes.func
+	onChangeMode: PropTypes.func,
+	onClear: PropTypes.func
 };
+
 
 const GroupCustomSettings = () => {
 	const intl = useIntl();
 
 	const [loading, setLoading] = useState(true);
-	const [groupsState, setGroups] = useState([]);
+	const [groups, setGroups] = useState([]);
 
 	// Global settings
 	const [globalPrefs, setGlobalPrefs] = useState({
@@ -162,13 +154,23 @@ const GroupCustomSettings = () => {
 
 	// Simply turn off custom settings for all groups
 	const revertAllGroups = () => {
-		const newGroups = groupsState.map((group) => {
+		const newGroups = groups.map((group) => {
 			Zotero.Prefs.set('sync.storage.groups.' + group.id + '.custom', false);
 			group.prefs.enabled = false;
 			return group;
 		});
 
 		setGroups(newGroups);
+	};
+
+	const updateGroups = (storageBreakdown) => {
+		setGroups(groups => groups.map((group) => {
+			if (storageBreakdown[group.libraryID]) {
+				group.size = storageBreakdown[group.libraryID].size;
+				group.count = storageBreakdown[group.libraryID].count;
+			}
+			return group;
+		}));
 	};
 
 	// Asynchronously load all group libraries
@@ -205,76 +207,31 @@ const GroupCustomSettings = () => {
 			let collation = Zotero.getLocaleCollation();
 			apiGroups.sort((a, b) => collation.compareString(1, a.data.name, b.data.name));
 
-			let sizeGroups = apiGroups
+			// Put them into state
+			setGroups(apiGroups
 				.filter(group => librariesToSkip.indexOf("G" + group.id) === -1)
 				.map(group => ({
 					name: group.data.name,
 					id: group.id,
+					libraryID: Zotero.Groups.getLibraryIDFromGroupID(group.id),
 					prefs: customPreferences(group.id),
+					canClear: true,
 					size: 0,
 					count: 0
-				}));
-			// Put them into state
-			setGroups(sizeGroups);
+				})));
 
-			let update = 0;
-
-			await Zotero.Promise.all(sizeGroups.map(async (group, index) => {
-				let libraryID = Zotero.Groups.getLibraryIDFromGroupID(group.id);
-				let items = await Zotero.Items.getAll(libraryID);
-
-				const getFileSize = async (attachmentFile) => {
-					if (attachmentFile.name.startsWith('.')) {
-						return;
-					}
-
-					try {
-						let size = (await OS.File.stat(attachmentFile.path)).size;
-						sizeGroups[index].size += size;
-					}
-					catch (e) {
-						if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
-							// File may or may not exist on disk, but we
-							// don't care so swallow this error
-						}
-						else {
-							Zotero.logError(e);
-							return;
-						}
-					}
-
-					if (update > 200) {
-						setGroups(sizeGroups.map(group => group));
-						update = 0;
-					}
-					else {
-						update += 1;
-					}
-				};
-
-				await Zotero.Promise.all(items.map(async (item) => {
-					if (!item.isImportedAttachment()) {
-						return;
-					}
-
-					sizeGroups[index].count += 1;
-
-					await Zotero.File.iterateDirectory(
-						Zotero.Attachments.getStorageDirectory(item).path,
-						getFileSize
-					);
-				}));
-			}));
+			let storageBreakdown = await Zotero.Sync.Storage.Cache
+				.calculateStorageBreakdown(updateGroups);
 
 			setLoading(false);
-			setGroups(sizeGroups.map(group => group));
+			updateGroups(storageBreakdown);
 		})();
 	}, []);
 
 	// Update the given pref and change the state
 	const updatePrefInGroups = (id, pref, value) => {
 		if (id) {
-			const newGroups = groupsState.map((group) => {
+			const newGroups = groups.map((group) => {
 				if (group.id === id) {
 					group.prefs[pref] = value;
 				}
@@ -340,6 +297,40 @@ const GroupCustomSettings = () => {
 		updatePrefInGroups(id, 'downloadMode', event.target.value);
 	};
 
+	const handleClear = async (groupID, groupName) => {
+		const description = Zotero.getString(
+			'zotero.preferences.sync.fileSyncing.clear.desc',
+			groupName);
+
+		if (Zotero_Preferences.Sync.clearLibrariesPrompt(description) !== 0) {
+			return;
+		}
+
+		setGroups(groups => groups.map((group) => {
+			if (group.id === groupID) {
+				group.canClear = false;
+			}
+
+			return group;
+		}));
+
+		const libraryID = Zotero.Groups.getLibraryIDFromGroupID(groupID);
+		await Zotero.Sync.Storage.Cache.cleanCacheForLibrary(libraryID);
+
+		await Zotero.Sync.Storage.Cache.calculateStorageBreakdown(
+			updateGroups,
+			[libraryID]
+		);
+
+		setGroups(groups => groups.map((group) => {
+			if (group.id === groupID) {
+				group.canClear = true;
+			}
+
+			return group;
+		}));
+	};
+
 	return (
 		<div className="group-files-sync-container">
 			<label
@@ -378,16 +369,11 @@ const GroupCustomSettings = () => {
 				id="custom-settings"
 				className="groups-file-sync-groups"
 			>
-				<div
-					mode="undetermined"
-					className={ cx('downloadProgress', { hidden: !loading }) }
-				>
-					<div className="progress-bar"></div>
-				</div>
-				{ groupsState.length === 0 && <div className="group">
+				<ProgressMeter hidden={ !loading } />
+				{ groups.length === 0 && <div className="group">
 					{ Zotero.getString('zotero.preferences.sync.librariesToSync.loadingLibraries') }
 				</div> }
-				{ groupsState.map((group) => {
+				{ groups.map((group) => {
 					return (
 						<Group
 							key={ group.id }
@@ -396,9 +382,11 @@ const GroupCustomSettings = () => {
 							prefs={ group.prefs }
 							count={ group.count }
 							size={ group.size }
+							clearButtonEnabled={ group.canClear }
 							onChangeEnabled={ event => handleChangeEnabled(event, group.id) }
 							onChangeSync={ event => handleChangeSync(event, group.id) }
 							onChangeMode={ event => handleChangeMode(event, group.id) }
+							onClear={ () => handleClear(group.id, group.name) }
 						/>
 					);
 				}) }

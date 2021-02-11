@@ -1,4 +1,4 @@
-<!--
+/*
     ***** BEGIN LICENSE BLOCK *****
 
     Copyright © 2021 Corporation for Digital Scholarship
@@ -21,19 +21,27 @@
     along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
 
     ***** END LICENSE BLOCK *****
--->
+*/
 
-<html>
-	<head>
-		<link href="chrome://zotero-platform/content/zotero-react-client.css" rel="stylesheet"/>
-	</head>
+'use strict';
 
-	<body>
-		<div id="root"></div>
-	</body>
+import React from 'react';
+import PropTypes from 'prop-types';
+import cx from 'classnames';
 
-	<script src="chrome://zotero/content/include.js"></script>
-	<script src="preferences_sync.js"></script>
-	<script src="groupFilesToSync.js"></script>
+const ProgressMeter = ({ hidden }) => {
+	return (
+		<div
+			mode="undetermined"
+			className={ cx('downloadProgress', { hidden: hidden }) }
+		>
+			<div className="progress-bar"></div>
+		</div>
+	);
+};
 
-</html>
+ProgressMeter.propTypes = {
+	hidden: PropTypes.bool
+};
+
+export default ProgressMeter;

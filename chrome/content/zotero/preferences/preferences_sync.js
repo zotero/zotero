@@ -24,21 +24,31 @@
 */
 
 "use strict";
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+import ProgressMeter from 'components/progressMeter';
+import { humanReadableSize } from 'components/utils';
+
 Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/osfile.jsm");
 Components.utils.import("resource://zotero/config.js");
+
+if (!Zotero_Preferences) {
+	var Zotero_Preferences = {};
+}
 
 Zotero_Preferences.Sync = {
 	checkmarkChar: '\u2705',
 	noChar: '\uD83D\uDEAB',
 	
-	init: Zotero.Promise.coroutine(function* () {
+	init: async function () {
 		this.checkCustomTimeToLive(true);
 		this.updateStorageSettingsUI();
 		this.updateStorageSettingsGroupsUI();
 
 		var username = Zotero.Users.getCurrentUsername() || Zotero.Prefs.get('sync.server.username') || " ";
-		var apiKey = yield Zotero.Sync.Data.Local.getAPIKey();
+		var apiKey = await Zotero.Sync.Data.Local.getAPIKey();
 		this.displayFields(apiKey ? username : "");
 		
 		var pass = Zotero.Sync.Runner.getStorageController('webdav').password;
@@ -48,7 +58,7 @@ Zotero_Preferences.Sync = {
 		
 		if (apiKey) {
 			try {
-				var keyInfo = yield Zotero.Sync.Runner.checkAccess(
+				var keyInfo = await Zotero.Sync.Runner.checkAccess(
 					Zotero.Sync.Runner.getAPIClient({apiKey}),
 					{timeout: 5000}
 				);
@@ -71,7 +81,51 @@ Zotero_Preferences.Sync = {
 		}
 		
 		this.initResetPane();
-	}),
+
+		let userCacheProgress = document.getElementById('storage-user-cache-progress');
+		ReactDOM.render(<ProgressMeter />, userCacheProgress);
+		let groupsCacheProgress = document.getElementById('storage-groups-cache-progress');
+		ReactDOM.render(<ProgressMeter />, groupsCacheProgress);
+
+		await Zotero.Sync.Storage.Cache.calculateStorageBreakdown(this.storageBreakdownUpdate);
+		userCacheProgress.hidden = true;
+		groupsCacheProgress.hidden = true;
+	},
+
+
+	storageBreakdownUpdate: (storageBreakdown) => {
+		let myLibraryLabel = document.getElementById('storage-user-cache-size');
+		let groupLabel = document.getElementById('storage-groups-cache-size');
+		let groupCount = 0;
+		let groupSize = 0;
+
+		Object.keys(storageBreakdown).forEach((libraryID) => {
+			if (libraryID == Zotero.Libraries.userLibraryID) {
+				myLibraryLabel.setAttribute(
+					'value',
+					Zotero.getString(
+						'zotero.preferences.sync.fileSyncing.breakdown.attachments',
+						storageBreakdown[libraryID].count,
+						storageBreakdown[libraryID].count
+					) + ' - ' + humanReadableSize(storageBreakdown[libraryID].size, 1)
+				);
+			}
+			else {
+				groupCount += storageBreakdown[libraryID].count;
+				groupSize += storageBreakdown[libraryID].size;
+			}
+		});
+
+		groupLabel.setAttribute(
+			'value',
+			Zotero.getString(
+				'zotero.preferences.sync.fileSyncing.breakdown.attachments',
+				groupCount,
+				groupCount
+			) + ' - ' + humanReadableSize(groupSize, 1)
+		);
+	},
+
 
 	checkCustomTimeToLive: function () {
 		let id = 'storage-timeToLive-custom';
@@ -98,6 +152,7 @@ Zotero_Preferences.Sync = {
 		document.getElementById('storage-timeToLive-value').disabled
 			= !document.getElementById('storage-timeToLive-enabled').checked;
 	},
+
 	
 	displayFields: function (username) {
 		document.getElementById('sync-unauthorized').hidden = !!username;
@@ -406,7 +461,9 @@ Zotero_Preferences.Sync = {
 			sep.hidden = true;
 		}
 		
-		document.getElementById('storage-user-download-mode').disabled = !enabled;
+		let downloadMode = document.getElementById('storage-user-download-mode');
+		downloadMode.disabled = !enabled;
+		document.getElementById('storage-user-cache-clear').disabled = downloadMode.value !== 'on-demand';
 		this.updateStorageTerms();
 		
 		window.sizeToContent();
@@ -416,7 +473,9 @@ Zotero_Preferences.Sync = {
 	updateStorageSettingsGroupsUI: function () {
 		setTimeout(() => {
 			var enabled = document.getElementById('pref-storage-groups-enabled').value;
-			document.getElementById('storage-groups-download-mode').disabled = !enabled;
+			let downloadMode = document.getElementById('storage-groups-download-mode');
+			downloadMode.disabled = !enabled;
+			document.getElementById('storage-groups-cache-clear').disabled = downloadMode.value !== 'on-demand';
 			this.updateStorageTerms();
 		});
 	},
@@ -435,6 +494,78 @@ Zotero_Preferences.Sync = {
 		this.updateStorageSettingsGroupsUI();
 	},
 	
+
+	clearLibrariesPrompt: function (description) {
+		let ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+			.getService(Components.interfaces.nsIPromptService);
+		let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
+			+ ps.BUTTON_DELAY_ENABLE;
+		return ps.confirmEx(
+			null,
+			Zotero.getString('zotero.preferences.sync.fileSyncing.clear.title'),
+			description,
+			buttonFlags,
+			Zotero.getString('general.continue'),
+			Zotero.getString('general.cancel'), null, null, {});
+	},
+
+
+	clearLibraries: async function (allGroups) {
+		let description = Zotero.getString(
+			allGroups
+				? 'zotero.preferences.sync.fileSyncing.clear.desc.allGroups'
+				: 'zotero.preferences.sync.fileSyncing.clear.desc.myLibrary'
+		);
+
+		if (this.clearLibrariesPrompt(description) !== 0) {
+			return;
+		}
+
+		let button = document.getElementById(
+			allGroups
+				? 'storage-groups-cache-clear'
+				: 'storage-user-cache-clear'
+		);
+		button.disabled = true;
+		if (allGroups) {
+			await Zotero.Promise.all(Zotero.Libraries.getAll().map((library) => {
+				if (library.libraryID === Zotero.Libraries.userLibraryID) {
+					return Promise.resolve();
+				}
+
+				return Zotero.Sync.Storage.Cache.cleanCacheForLibrary(
+					library.libraryID);
+			}));
+
+			let groupsCacheProgress = document.getElementById('storage-groups-cache-progress');
+			groupsCacheProgress.hidden = false;
+
+			await Zotero.Sync.Storage.Cache.calculateStorageBreakdown(
+				this.storageBreakdownUpdate,
+				Zotero.Libraries.getAll()
+					.map(library => library.libraryID)
+					.filter(libraryID => libraryID !== Zotero.Libraries.userLibraryID)
+			);
+
+			groupsCacheProgress.hidden = true;
+		}
+		else {
+			await Zotero.Sync.Storage.Cache.cleanCacheForLibrary(
+				Zotero.Libraries.userLibraryID);
+
+			let userCacheProgress = document.getElementById('storage-user-cache-progress');
+			userCacheProgress.hidden = false;
+
+			await Zotero.Sync.Storage.Cache.calculateStorageBreakdown(
+				this.storageBreakdownUpdate,
+				[Zotero.Libraries.userLibraryID]);
+
+			userCacheProgress.hidden = true;
+		}
+		button.disabled = false;
+	},
+
 
 	updateStorageTerms: function () {
 		var terms = document.getElementById('storage-terms');

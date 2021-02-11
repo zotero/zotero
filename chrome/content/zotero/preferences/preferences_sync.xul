@@ -25,7 +25,8 @@
 -->
 <!DOCTYPE prefwindow SYSTEM "chrome://zotero/locale/preferences.dtd">
 
-<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		 xmlns:html="http://www.w3.org/1999/xhtml">
 	<prefpane id="zotero-prefpane-sync"
 			onpaneload="Zotero_Preferences.Sync.init()"
 			helpTopic="sync">
@@ -239,13 +240,24 @@
 									<menulist id="storage-user-download-mode"
 											class="storage-mode"
 											preference="pref-storage-downloadMode-personal"
-											oncommand="Zotero_Preferences.Sync.updateStorageSettingsTTLUI();"
+											oncommand="Zotero_Preferences.Sync.updateStorageSettingsUI();"
 											style="margin-left: 0">
 										<menupopup>
 											<menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
 											<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
 										</menupopup>
 									</menulist>
+								</hbox>
+
+								<hbox align="center">
+									<stack flex="1">
+										<label id="storage-user-cache-size" />
+										<html:div id="storage-user-cache-progress" style="margin-top: 1px;"/>
+									</stack>
+
+									<button id="storage-user-cache-clear"
+											label="&zotero.preferences.sync.fileSyncing.clear;"
+											oncommand="Zotero_Preferences.Sync.clearLibraries(false)"/>
 								</hbox>
 							</vbox>
 
@@ -269,6 +281,17 @@
 											<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
 										</menupopup>
 									</menulist>
+								</hbox>
+
+								<hbox align="center">
+									<stack flex="1">
+										<label id="storage-groups-cache-size"/>
+										<html:div id="storage-groups-cache-progress" style="margin-top: 1px;"/>
+									</stack>
+
+									<button id="storage-groups-cache-clear"
+											label="&zotero.preferences.sync.fileSyncing.clear;"
+											oncommand="Zotero_Preferences.Sync.clearLibraries(true)"/>
 								</hbox>
 
 								<box>

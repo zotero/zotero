@@ -25,6 +25,10 @@
 
   /* for overriding rules in progressmeter.css */
   -moz-appearance: none;
+
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
 }
 
 .downloadProgress[paused="true"] > .progress-bar {
