@@ -251,12 +251,13 @@ const GroupCustomSettings = () => {
 	const resetLastCleanedValues = function (groupID) {
 		Zotero.Libraries.getAll()
 			.filter((library) => {
-				if (groupID) {
-					return Zotero.Groups.getGroupIDFromLibraryID(library.libraryID) === groupID;
+				if (library.libraryID === Zotero.Libraries.userLibraryID) {
+					return false;
 				}
-				else {
-					return library.libraryID !== Zotero.Libraries.userLibraryID;
-				}
+
+				return groupID
+					? Zotero.Groups.getGroupIDFromLibraryID(library.libraryID) === groupID
+					: true;
 			})
 			.forEach((library) => {
 				let groupID = Zotero.Groups.getGroupIDFromLibraryID(library.libraryID);
