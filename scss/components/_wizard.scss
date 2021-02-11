@@ -1,0 +1,54 @@
+.wizard {
+	padding: 0;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	width: 100%;
+	font-size: 13px;
+
+	button {
+		padding: 2px 8px;
+	}
+}
+
+.wizard-page {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+}
+
+.wizard-header {
+	box-sizing: border-box;
+	display: flex;
+	height: 56px;
+	padding: 0 32px;
+	flex-direction: column;
+}
+
+.wizard-header-label {
+	margin: auto 0 0;
+	font-size: 16px;
+	font-weight: bold;
+}
+
+.wizard-body {
+	flex: 1 1 auto;
+	padding: 12px 32px;
+}
+
+.wizard-controls {
+	box-sizing: border-box;
+	display: flex;
+	flex: 0 0 24px;
+	padding: 16px 32px 16px;
+	width: 100%;
+
+	.cancel-controls, .next-back-controls {
+		flex: 1 1 50%;
+	}
+
+	.next-back-controls {
+		text-align: right;
+	}
+}

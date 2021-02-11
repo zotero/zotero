@@ -4268,7 +4268,7 @@ var ZoteroPane = new function()
 			}
 		}
 		io.hasRights = allItemsHaveRights ? 'all' : (noItemsHaveRights ? 'none' : 'some');
-		window.openDialog('chrome://zotero/content/publicationsDialog.xul','','chrome,modal', io);
+		window.openDialog('chrome://zotero/content/publications/publicationsDialog.xul','','chrome,modal', io);
 		return io.license ? io : false;
 	};
 	
@@ -4809,7 +4809,7 @@ var ZoteroPane = new function()
 			askForSteps: true
 		};
 		var io = { wrappedJSObject: { Zotero: Zotero, data:  data } };
-		var win = ww.openWindow(null, "chrome://zotero/content/errorReport.xul",
+		var win = ww.openWindow(null, "chrome://zotero/content/error/errorReport.xul",
 					"zotero-error-report", "chrome,centerscreen,modal", io);
 	}
 	

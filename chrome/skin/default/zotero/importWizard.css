@@ -5,7 +5,7 @@
 
 /* Start */
 wizard[currentpageid="page-start"] .wizard-header-label {
-	padding-top: 24px;
+	height: 80px; /* 56px + 24px extra */
 }
 
 wizard[currentpageid="page-start"] .wizard-page-box {

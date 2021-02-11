@@ -1,0 +1,21 @@
+.wizard-header {
+	border-bottom: 1px solid #9e9e9e;
+	box-shadow: 0px 1px 0px #f9f9f9;
+	padding-bottom: 16px;
+}
+
+.wizard-controls {
+	border-top: 1px solid #9e9e9e;
+	box-shadow: 0px 1px 0px #f9f9f9 inset;
+
+	.cancel-controls {
+		text-align: right;
+		flex: 1 1 auto;
+	}
+
+	.next-back-controls {
+		flex: 0 1 auto;
+		padding-left: 16px;
+		text-align: right;
+	}
+}

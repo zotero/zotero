@@ -1,0 +1,16 @@
+.progress-bar {
+	background: $shade-2;
+	border-radius: 8px;
+	border: 1px solid $shade-5;
+	box-sizing: border-box;
+	display: block;
+	height: 8px;
+	overflow: hidden;
+	width: 100%;
+
+	.progress-bar-value {
+		background: $shade-5;
+		display: block;
+		height: 100%;
+	}
+}
