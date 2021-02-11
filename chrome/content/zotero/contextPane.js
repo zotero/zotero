@@ -473,8 +473,7 @@ var ZoteroContextPane = new function () {
 			}));
 
 			var c = notes.length;
-			var str = 'pane.item.notes.count.' + (c == 0 && 'zero' || c == 1 && 'singular' || 'plural');
-			label.value = Zotero.getString(str, [c]);
+			label.value = Zotero.getString('pane.item.notes.count', c, c);
 		}
 
 		ReactDOM.render(
@@ -793,8 +792,7 @@ var ZoteroContextPane = new function () {
 				_removeNote(id);
 			});
 			var c = parentNotes.length;
-			var str = 'pane.item.notes.count.' + (c == 0 && 'zero' || c == 1 && 'singular' || 'plural');
-			label.value = Zotero.getString(str, [c]);
+			label.value = Zotero.getString('pane.item.notes.count', c, c);
 		}
 
 		context.update = Zotero.Utilities.throttle(_renderNotesPanel, 500);

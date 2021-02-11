@@ -457,21 +457,7 @@ var ZoteroItemPane = new function() {
 	
 	function _updateNoteCount() {
 		var c = _notesList.childNodes.length;
-		
-		var str = 'pane.item.notes.count.';
-		switch (c){
-		case 0:
-			str += 'zero';
-			break;
-		case 1:
-			str += 'singular';
-			break;
-		default:
-			str += 'plural';
-			break;
-		}
-		
-		_notesLabel.value = Zotero.getString(str, [c]);
+		_notesLabel.value = Zotero.getString('pane.item.notes.count', c, c);
 	}
 }   
 
