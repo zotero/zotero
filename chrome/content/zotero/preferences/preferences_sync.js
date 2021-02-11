@@ -463,7 +463,8 @@ Zotero_Preferences.Sync = {
 		
 		let downloadMode = document.getElementById('storage-user-download-mode');
 		downloadMode.disabled = !enabled;
-		document.getElementById('storage-user-cache-clear').disabled = downloadMode.value !== 'on-demand';
+		document.getElementById('storage-user-cache-clear')
+			.hidden = downloadMode.value !== 'on-demand' || !enabled;
 		this.updateStorageTerms();
 		
 		window.sizeToContent();
@@ -475,7 +476,8 @@ Zotero_Preferences.Sync = {
 			var enabled = document.getElementById('pref-storage-groups-enabled').value;
 			let downloadMode = document.getElementById('storage-groups-download-mode');
 			downloadMode.disabled = !enabled;
-			document.getElementById('storage-groups-cache-clear').disabled = downloadMode.value !== 'on-demand';
+			document.getElementById('storage-groups-cache-clear')
+				.hidden = downloadMode.value !== 'on-demand' || !enabled;
 			this.updateStorageTerms();
 		});
 	},
