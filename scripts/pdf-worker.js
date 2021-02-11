@@ -4,33 +4,33 @@ const fs = require('fs-extra');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const { getSignatures, writeSignatures, onSuccess, onError } = require('./utils');
+const { buildsURL } = require('./config');
 
 async function getPDFWorker(signatures) {
 	const t1 = Date.now();
 
-	var { stdout } = await exec('git rev-parse HEAD', { cwd: './pdf-worker/pdf.js' });
-	const PDFJSHash = stdout.trim();
+	const { stdout } = await exec('git rev-parse HEAD', { cwd: 'pdf-worker' });
+	const hash = stdout.trim();
 
-	var { stdout } = await exec('git rev-parse HEAD', { cwd: './pdf-worker' });
-	const PDFWorkerHash = stdout.trim();
-
-	let updated = false;
-	let name = 'pdf-worker/pdf.js';
-	if (!(name in signatures) || signatures[name].hash !== PDFJSHash) {
-		await exec('npm run build:pdf.js', { cwd: './pdf-worker' });
-		signatures[name] = { hash: PDFJSHash };
-		updated = true;
-	}
-	
-	name = 'pdf-worker';
-	if (!(name in signatures) || signatures[name].hash !== PDFWorkerHash) {
-		await exec('npm ci;npm run build:worker', { cwd: './pdf-worker' });
-		signatures[name] = { hash: PDFWorkerHash };
-		updated = true;
-	}
-
-	if (updated) {
-		await fs.copy('./pdf-worker/build/pdf-worker.js', './build/chrome/content/zotero/xpcom/pdfWorker/worker.js');
+	if (!('pdf-worker' in signatures) || signatures['pdf-worker'].hash !== hash) {
+		const targetDir = 'build/chrome/content/zotero/xpcom/pdfWorker/';
+		try {
+			const filename = hash + '.zip';
+			const tmpDir = 'tmp/builds/pdf-worker';
+			const url = buildsURL + 'client-pdf-worker/' + filename;
+			await exec(
+				`mkdir -p ${tmpDir}`
+				+ `&& cd ${tmpDir}`
+				+ `&& (test -f ${filename} || curl -f ${url} -o ${filename})`
+				+ `&& mkdir -p ../../../${targetDir}`
+				+ `&& unzip -o ${filename} -d ../../../${targetDir}`
+			);
+		}
+		catch (e) {
+			await exec('npm ci;npm run build', { cwd: 'pdf-worker' });
+			await fs.copy('pdf-worker/build/pdf-worker.js', targetDir + 'worker.js');
+		}
+		signatures['pdf-worker'] = { hash };
 	}
 
 	const t2 = Date.now();

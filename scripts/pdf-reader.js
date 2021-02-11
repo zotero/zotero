@@ -4,35 +4,36 @@ const fs = require('fs-extra');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const { getSignatures, writeSignatures, onSuccess, onError } = require('./utils');
+const { buildsURL } = require('./config');
 
 async function getPDFReader(signatures) {
 	const t1 = Date.now();
-
-	var { stdout } = await exec('git rev-parse HEAD', { cwd: './pdf-reader/pdf.js' });
-	const PDFJSHash = stdout.trim();
-
-	var { stdout } = await exec('git rev-parse HEAD', { cwd: './pdf-reader' });
-	const PDFReaderHash = stdout.trim();
-
-	let updated = false;
-	let name = 'pdf-reader/pdf.js';
-	if (!(name in signatures) || signatures[name].hash !== PDFJSHash) {
-		await exec('npm run build:pdf.js', { cwd: './pdf-reader' });
-		signatures[name] = { hash: PDFJSHash };
-		updated = true;
+	
+	const { stdout } = await exec('git rev-parse HEAD', { cwd: './pdf-reader' });
+	const hash = stdout.trim();
+	
+	if (!('pdf-reader' in signatures) || signatures['pdf-reader'].hash !== hash) {
+		const targetDir = 'build/resource/pdf-reader/';
+		try {
+			const filename = hash + '.zip';
+			const tmpDir = 'tmp/builds/pdf-reader/';
+			const url = buildsURL + 'client-pdf-reader/' + filename;
+			await exec(
+				`mkdir -p ${tmpDir}`
+				+ `&& cd ${tmpDir}`
+				+ `&& (test -f ${filename} || curl -f ${url} -o ${filename})`
+				+ `&& rm -rf ../../../${targetDir}`
+				+ `&& mkdir -p ../../../${targetDir}`
+				+ `&& unzip -o ${filename} -d ../../../${targetDir}`
+			);
+		}
+		catch (e) {
+			await exec('npm ci;npm run build', { cwd: 'pdf-reader' });
+			await fs.copy('pdf-reader/build/zotero', targetDir);
+		}
+		signatures['pdf-reader'] = { hash };
 	}
-
-	name = 'pdf-reader';
-	if (!(name in signatures) || signatures[name].hash !== PDFReaderHash) {
-		await exec('npm ci;npm run build:reader', { cwd: './pdf-reader' });
-		signatures[name] = { hash: PDFReaderHash };
-		updated = true;
-	}
-
-	if (updated) {
-		await fs.copy('./pdf-reader/build/zotero', './build/resource/pdf-reader');
-	}
-
+	
 	const t2 = Date.now();
 
 	return {

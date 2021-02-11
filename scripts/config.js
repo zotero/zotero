@@ -110,6 +110,8 @@ const scssFiles = [
 	'chrome/skin/default/zotero/**/*.scss'
 ];
 
+const buildsURL = 'https://zotero-download.s3.amazonaws.com/ci/';
+
 module.exports = {
-	dirs, symlinkDirs, copyDirs, symlinkFiles, browserifyConfigs, jsFiles, scssFiles, ignoreMask
+	dirs, symlinkDirs, copyDirs, symlinkFiles, browserifyConfigs, jsFiles, scssFiles, ignoreMask, buildsURL
 };
