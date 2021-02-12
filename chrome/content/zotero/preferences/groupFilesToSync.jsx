@@ -32,8 +32,6 @@ import { IntlProvider, useIntl } from 'react-intl';
 import { humanReadableSize } from 'components/utils';
 import ProgressMeter from 'components/progressMeter';
 
-Components.utils.import("resource://gre/modules/osfile.jsm");
-
 const customPreferences = (id) => {
 	const pref = 'sync.storage.groups.' + id;
 
@@ -138,7 +136,6 @@ Group.propTypes = {
 	onClear: PropTypes.func
 };
 
-
 const GroupCustomSettings = () => {
 	const intl = useIntl();
 
@@ -152,17 +149,16 @@ const GroupCustomSettings = () => {
 		downloadMode: Zotero.Prefs.get('sync.storage.downloadMode.groups')
 	});
 
-	// Simply turn off custom settings for all groups
+	// Revert groups to global settings by turning off all custom settings preferences
 	const revertAllGroups = () => {
-		const newGroups = groups.map((group) => {
+		setGroups(groups => groups.map((group) => {
 			Zotero.Prefs.set('sync.storage.groups.' + group.id + '.custom', false);
 			group.prefs.enabled = false;
 			return group;
-		});
-
-		setGroups(newGroups);
+		}));
 	};
 
+	// Update state from new storage breakdown information
 	const updateGroups = (storageBreakdown) => {
 		setGroups(groups => groups.map((group) => {
 			if (storageBreakdown[group.libraryID]) {
@@ -231,15 +227,12 @@ const GroupCustomSettings = () => {
 	// Update the given pref and change the state
 	const updatePrefInGroups = (id, pref, value) => {
 		if (id) {
-			const newGroups = groups.map((group) => {
+			setGroups(groups => groups.map((group) => {
 				if (group.id === id) {
 					group.prefs[pref] = value;
 				}
-
 				return group;
-			});
-
-			setGroups(newGroups);
+			}));
 		}
 		else {
 			const newGlobalPrefs = { ...globalPrefs };
@@ -248,6 +241,7 @@ const GroupCustomSettings = () => {
 		}
 	};
 
+	// Change last cleaned values to zero because preferences have changed
 	const resetLastCleanedValues = function (groupID) {
 		Zotero.Libraries.getAll()
 			.filter((library) => {
@@ -303,10 +297,12 @@ const GroupCustomSettings = () => {
 			'zotero.preferences.sync.fileSyncing.clear.desc',
 			groupName);
 
-		if (Zotero_Preferences.Sync.clearLibrariesPrompt(description) !== 0) {
+		// Prompt to confirm action
+		if (Zotero_Preferences.Sync.cleanLibraryStoragePrompt(description) !== 0) {
 			return;
 		}
 
+		// Disable clear button
 		setGroups(groups => groups.map((group) => {
 			if (group.id === groupID) {
 				group.canClear = false;
@@ -315,14 +311,17 @@ const GroupCustomSettings = () => {
 			return group;
 		}));
 
+		// Clean storage cache
 		const libraryID = Zotero.Groups.getLibraryIDFromGroupID(groupID);
 		await Zotero.Sync.Storage.Cache.cleanCacheForLibrary(libraryID);
 
+		// Recalculate storage breakdown for this group
 		await Zotero.Sync.Storage.Cache.calculateStorageBreakdown(
 			updateGroups,
 			[libraryID]
 		);
 
+		// Enable clear button again
 		setGroups(groups => groups.map((group) => {
 			if (group.id === groupID) {
 				group.canClear = true;

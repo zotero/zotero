@@ -213,7 +213,6 @@ Zotero.Prefs = new function(){
 		}
 	};
 	
-
 	// Handlers for some Zotero preferences
 	var _handlers = [
 		[ "automaticScraperUpdates", function(val) {

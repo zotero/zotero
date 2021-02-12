@@ -257,7 +257,7 @@
 
 									<button id="storage-user-cache-clear"
 											label="&zotero.preferences.sync.fileSyncing.clear;"
-											oncommand="Zotero_Preferences.Sync.clearLibraries(false)"/>
+											oncommand="Zotero_Preferences.Sync.cleanLibraryStorage(false)"/>
 								</hbox>
 							</vbox>
 
@@ -291,14 +291,12 @@
 
 									<button id="storage-groups-cache-clear"
 											label="&zotero.preferences.sync.fileSyncing.clear;"
-											oncommand="Zotero_Preferences.Sync.clearLibraries(true)"/>
+											oncommand="Zotero_Preferences.Sync.cleanLibraryStorage(true)"/>
 								</hbox>
 
 								<box>
-									<button
-										label="&zotero.preferences.sync.fileSyncing.groups.customize;"
-										oncommand="Zotero_Preferences.Sync.customizeGroups()"
-									/>
+									<button label="&zotero.preferences.sync.fileSyncing.groups.customize;"
+											oncommand="Zotero_Preferences.Sync.customizeGroups()"/>
 								</box>
 							</vbox>
 
@@ -335,7 +333,6 @@
 									<label>&zotero.preferences.period;</label>
 								</hbox>
 							</vbox>
-
 						</groupbox>
 					</vbox>
 				</tabpanel>
