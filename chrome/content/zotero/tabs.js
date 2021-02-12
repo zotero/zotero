@@ -93,6 +93,8 @@ var Zotero_Tabs = new function () {
 	 * @return {{ id: string, container: XULElement}} id - tab id, container - a new tab container created in the deck
 	 */
 	this.add = function ({ type, title, index, select, onClose, notifierData }) {
+		//this.showTabBar();
+		
 		if (typeof type != 'string') {
 			throw new Error(`'type' should be a string (was ${typeof type})`);
 		}
@@ -159,6 +161,10 @@ var Zotero_Tabs = new function () {
 		}
 		Zotero.Notifier.trigger('close', 'tab', [tab.id], true);
 		this._update();
+		
+		/*if (this._tabs.length == 1) {
+			this.hideTabBar();
+		}*/
 	};
 
 	/**
@@ -217,4 +223,25 @@ var Zotero_Tabs = new function () {
 		var { tabIndex } = this._getTab(this._selectedID);
 		this.select((this._tabs[tabIndex + 1] || this._tabs[0]).id);
 	};
+	
+	// Unused
+	this.showTabBar = function () {
+		document.documentElement.setAttribute('drawintitlebar', true);
+		document.documentElement.setAttribute('tabsintitlebar', true);
+		document.documentElement.setAttribute('chromemargin', '0,-1,-1,-1');
+		document.getElementById('titlebar').hidden = false;
+		document.getElementById('tab-bar-container').hidden = false;
+		document.getElementById('main-window').removeAttribute('legacytoolbar')
+	};
+	
+	// Unused
+	this.hideTabBar = function () {
+		document.documentElement.removeAttribute('drawintitlebar');
+		document.documentElement.removeAttribute('tabsintitlebar');
+		document.documentElement.removeAttribute('chromemargin');
+		document.getElementById('titlebar').hidden = true
+		document.getElementById('tab-bar-container').hidden = true;
+		document.getElementById('main-window').setAttribute('legacytoolbar', 'true')
+	};
+
 };
