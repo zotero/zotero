@@ -42,6 +42,8 @@ Zotero.Sync.Storage.Cache = {
 	// Cache the breakdown of storage for efficiency
 	_storageBreakdown: false,
 	_storageBreakdownCache: 0,
+	_storageBreakdownPromise: false,
+	_storageBreakdownUpdates: [],
 
 	/**
 	 * Remove all attachment files for the given items and mark them as TO_DOWNLOAD
@@ -370,6 +372,19 @@ Zotero.Sync.Storage.Cache = {
 	 * @return {Promise}
 	 */
 	calculateStorageBreakdown: async function (onUpdate, libraryIDs) {
+		// If we are currently calculating await the promise and return
+		if (this._storageBreakdownPromise) {
+			// Add our update function to the list
+			if (onUpdate) {
+				this._storageBreakdownUpdates.push(onUpdate);
+			}
+
+			await this._storageBreakdownPromise;
+			// No need for final update here because that is handled by the global
+			// updates list. However, we still need to return the final results.
+			return this._storageBreakdown;
+		}
+
 		// Check to see if we have recently scanned our groups
 		if (this._storageBreakdown && !libraryIDs) {
 			// Check if results are newer than 1 hour
@@ -381,6 +396,9 @@ Zotero.Sync.Storage.Cache = {
 		}
 
 		this._storageBreakdownCache = Date.now();
+		if (onUpdate) {
+			this._storageBreakdownUpdates.push(onUpdate);
+		}
 
 		// Otherwise start scanning
 		let update = 0;
@@ -398,7 +416,7 @@ Zotero.Sync.Storage.Cache = {
 			Zotero.debug('Storage Cache: Calculating storage breakdown for all libraries');
 		}
 
-		await Zotero.Promise.all(libraries.map(async (library) => {
+		this._storageBreakdownPromise = Zotero.Promise.all(libraries.map(async (library) => {
 			this._storageBreakdown[library.libraryID] = {
 				libraryID: library.libraryID,
 				name: library.name,
@@ -429,8 +447,8 @@ Zotero.Sync.Storage.Cache = {
 					}
 				}
 
-				if (onUpdate && update > 200) {
-					onUpdate(this._storageBreakdown);
+				if (update > 200) {
+					this._storageBreakdownUpdates.forEach(onUpdate => onUpdate(this._storageBreakdown));
 					update = 0;
 				}
 				else {
@@ -452,7 +470,11 @@ Zotero.Sync.Storage.Cache = {
 			}));
 		}));
 
-		onUpdate(this._storageBreakdown);
+		await this._storageBreakdownPromise;
+
+		this._storageBreakdownUpdates.forEach(onUpdate => onUpdate(this._storageBreakdown));
+		this._storageBreakdownUpdates = [];
+		this._storageBreakdownPromise = false;
 		return this._storageBreakdown;
 	}
 };
