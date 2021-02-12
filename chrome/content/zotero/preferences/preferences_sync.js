@@ -476,8 +476,27 @@ Zotero_Preferences.Sync = {
 			var enabled = document.getElementById('pref-storage-groups-enabled').value;
 			let downloadMode = document.getElementById('storage-groups-download-mode');
 			downloadMode.disabled = !enabled;
-			document.getElementById('storage-groups-cache-clear')
-				.hidden = downloadMode.value !== 'on-demand' || !enabled;
+
+			let canCleanCache = enabled && downloadMode.value === 'on-demand'
+				&& Zotero.Prefs.get('sync.storage.timeToLive.enabled');
+			if (!canCleanCache) {
+				canCleanCache = Zotero.Prefs.get('sync.storage.timeToLive.enabled')
+					&& Zotero.Libraries.getAll()
+					.filter(library => library.libraryID !== Zotero.Libraries.userLibraryID)
+					.map((library) => {
+						let groupID = Zotero.Groups.getGroupIDFromLibraryID(library.libraryID);
+						if (Zotero.Prefs.get('sync.storage.groups.' + groupID + '.custom')) {
+							return Zotero.Prefs.get('sync.storage.groups.' + groupID + '.sync')
+								&& Zotero.Prefs.get('sync.storage.groups.' + groupID + '.downloadMode') === 'on-demand';
+						}
+
+						return false;
+					})
+					.reduce((prev, current) => prev || current, false);
+			}
+
+			document.getElementById('storage-groups-cache-clear').hidden = !canCleanCache;
+
 			this.updateStorageTerms();
 		});
 	},
