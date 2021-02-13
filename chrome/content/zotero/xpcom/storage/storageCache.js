@@ -58,9 +58,6 @@ Zotero.Sync.Storage.Cache = {
 		let deleted = await this._deleteItemFiles(attachmentItems);
 		
 		Zotero.debug(`Storage Cache: deleted files for ${deleted} attachment items`);
-
-		// TODO: There seems to be a lag compared to download/delete file of how long it takes the
-		// item pane to update (in particular, snapshots don't seem to update at all)
 	},
 
 	/**
@@ -316,6 +313,15 @@ Zotero.Sync.Storage.Cache = {
 			// it to immediately download again.
 			item.attachmentSyncState = Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD;
 			await item.saveTx({ skipAll: true });
+			item._updateAttachmentStates(false);
+
+			// Redraw hasAttachment column since data has changed
+			Zotero.Notifier.begin();
+			Zotero.Notifier.queue('redraw', 'item', item.id, { column: "hasAttachment" });
+			if (item.parentItemID) {
+				Zotero.Notifier.queue('redraw', 'item', item.parentItemID, { column: "hasAttachment" });
+			}
+			Zotero.Notifier.commit();
 
 			Zotero.debug(`Storage Cache: ${item.id} had ${deletes.length} files removed`);
 			result += 1;
