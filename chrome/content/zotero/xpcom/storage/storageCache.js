@@ -271,6 +271,12 @@ Zotero.Sync.Storage.Cache = {
 				continue;
 			}
 
+			if (item.attachmentSyncState
+				!== Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC) {
+				Zotero.debug(`Storage Cache: ${item.id} is not in sync`);
+				continue;
+			}
+
 			let fileExistsOnServer = await Zotero.Sync.Runner.checkFileExists(item);
 			if (!fileExistsOnServer) {
 				Zotero.debug(`Storage Cache: ${item.id} does not exist on server`);
@@ -308,9 +314,8 @@ Zotero.Sync.Storage.Cache = {
 				iterator.close();
 			}
 
-			// TODO: Do we care about overwriting another state here (do we need to check above)?
-			// Mark item to be downloaded again. Since we are in as-needed mode this won't cause
-			// it to immediately download again.
+			// Mark item to be downloaded again. Since we are in as-needed mode this
+			// won't cause it to immediately download again.
 			item.attachmentSyncState = Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD;
 			await item.saveTx({ skipAll: true });
 			item._updateAttachmentStates(false);

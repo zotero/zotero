@@ -205,12 +205,32 @@ describe('Zotero.Sync.Storage.Cache', function () {
 			assert.equal(deleted, 0);
 		});
 
+		it('should check item is marked as in sync', async function () {
+			// Stub out remote file existence check
+			let stub = sinon.stub(Zotero.Sync.Runner, 'checkFileExists');
+			stub.returns(false);
+
+			let attachment = await importFileAttachment('test.png');
+			attachment.attachmentSyncState
+				= Zotero.Sync.Storage.Local.SYNC_STATE_TO_UPLOAD;
+			await attachment.saveTx({ skipAll: true });
+
+			let deleted = await Zotero.Sync.Storage.Cache._deleteItemFiles([attachment]);
+
+			assert.equal(deleted, 0);
+			assert.isFalse(stub.calledOnce);
+		});
+
 		it('should check for existence on the server before deleting', async function () {
 			// Stub out remote file existence check
 			let stub = sinon.stub(Zotero.Sync.Runner, 'checkFileExists');
 			stub.returns(false);
 
 			let attachment = await importFileAttachment('test.png');
+			attachment.attachmentSyncState
+				= Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC;
+			await attachment.saveTx({ skipAll: true });
+
 			let deleted = await Zotero.Sync.Storage.Cache._deleteItemFiles([attachment]);
 
 			assert.equal(deleted, 0);
@@ -223,6 +243,8 @@ describe('Zotero.Sync.Storage.Cache', function () {
 			stub.returns(true);
 
 			let attachment = await importFileAttachment('test.png');
+			attachment.attachmentSyncState
+				= Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC;
 			let attachmentFilePath = await attachment.getFilePath();
 			assert.isTrue(await OS.File.exists(attachmentFilePath));
 
@@ -285,6 +307,9 @@ describe('Zotero.Sync.Storage.Cache', function () {
 			stub.returns(true);
 
 			let attachment = await importFileAttachment('test.png');
+			attachment.attachmentSyncState
+				= Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC;
+			await attachment.saveTx({ skipAll: true });
 
 			// Slow down the sleep period
 			Zotero.Sync.Storage.Cache._fileDeletionSleepPeriod = 2000;
