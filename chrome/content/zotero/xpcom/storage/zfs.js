@@ -374,8 +374,6 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 					+ " (" + item.libraryKey + ")";
 				Zotero.logError(msg);
 				Zotero.debug(e.xmlhttp.getAllResponseHeaders());
-				// TODO: This error doesn't make sense, but it sort of depends on how
-				// this function is called so leaving that for now.
 				throw new Error(Zotero.Sync.Storage.defaultError);
 			}
 			throw e;

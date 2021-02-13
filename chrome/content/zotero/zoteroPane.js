@@ -3023,12 +3023,6 @@ var ZoteroPane = new function()
 									canEvict = true;
 									canEvictAttachmentCount += 1;
 								}
-
-								// Once we are plural of both cache and evict, stop looping
-								// TODO: Is this optimization allowed given localization needs?
-								if (canCacheAttachmentCount > 1 && canEvictAttachmentCount > 1) {
-									break;
-								}
 							}
 
 							if (canCache) {
