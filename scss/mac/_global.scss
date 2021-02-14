@@ -21,11 +21,6 @@ input[type='checkbox'] {
 	height: 1.3em;
 }
 
-.dialog-buttons {
-	display: flex;
-	justify-content: flex-end;
-}
-
 // .button-native comes from: chrome://global/skin/button.css
 // For some reason those styles are overriden in the react world
 // Note we changed the attribute selectors default="true" to just default

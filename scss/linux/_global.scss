@@ -1,0 +1,29 @@
+html {
+    overflow: hidden;
+}
+
+label {
+  cursor: default;
+  margin-top: 1px;
+  margin-bottom: 2px;
+  margin-inline-start: 6px;
+  margin-inline-end: 5px;
+}
+
+label[disabled] {
+  color: GrayText;
+}
+
+input[type='checkbox'] {
+  margin: 2px 4px;
+}
+
+input[type='checkbox'] + label {
+  margin: 0 !important;
+}
+
+/* ..... disabled state ..... */
+
+input[type='checkbox'][disabled] + label {
+  color: GrayText;
+}

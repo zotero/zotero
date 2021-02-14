@@ -88,4 +88,9 @@
 			margin-top: 0.25em;
 		}
 	}
+
+	.dialog-buttons {
+		display: flex;
+		justify-content: flex-end;
+	}
 }
