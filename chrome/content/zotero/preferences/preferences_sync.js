@@ -474,8 +474,9 @@ Zotero_Preferences.Sync = {
 		
 		let downloadMode = document.getElementById('storage-user-download-mode');
 		downloadMode.disabled = !enabled;
+		let timeToLiveEnabled = document.getElementById('storage-timeToLive-enabled').checked;
 		document.getElementById('storage-user-cache-clear')
-			.hidden = downloadMode.value !== 'on-demand' || !enabled;
+			.hidden = !timeToLiveEnabled || downloadMode.value !== 'on-demand' || !enabled;
 		this.updateStorageTerms();
 		
 		window.sizeToContent();
@@ -520,6 +521,9 @@ Zotero_Preferences.Sync = {
 	
 	updateTimeToLiveUI: function (event) {
 		document.getElementById('storage-timeToLive-value').disabled = !event.target.checked;
+
+		this.updateStorageSettingsUI();
+		this.updateStorageSettingsGroupsUI();
 	},
 
 
