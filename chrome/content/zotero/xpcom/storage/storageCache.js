@@ -472,16 +472,24 @@ Zotero.Sync.Storage.Cache = {
 					return;
 				}
 
-				this._storageBreakdown[library.libraryID].count += 1;
+				let attachmentDirectory = Zotero.Attachments.getStorageDirectory(item).path;
+				if (await OS.File.exists(attachmentDirectory)) {
+					await Zotero.File.iterateDirectory(
+						attachmentDirectory,
+						getFileSize
+					);
 
-				await Zotero.File.iterateDirectory(
-					Zotero.Attachments.getStorageDirectory(item).path,
-					getFileSize
-				);
+					this._storageBreakdown[library.libraryID].count += 1;
+				}
 			}));
 		}));
 
-		await this._storageBreakdownPromise;
+		try {
+			await this._storageBreakdownPromise;
+		}
+		catch (e) {
+			Zotero.debug(e);
+		}
 
 		this._storageBreakdownUpdates.forEach(onUpdate => onUpdate(this._storageBreakdown));
 		this._storageBreakdownUpdates = [];
