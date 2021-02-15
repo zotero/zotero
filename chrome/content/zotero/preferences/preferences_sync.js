@@ -489,7 +489,7 @@ Zotero_Preferences.Sync = {
 			let downloadMode = document.getElementById('storage-groups-download-mode');
 			downloadMode.disabled = !enabled;
 
-			let timeToLiveEnabled = Zotero.Prefs.get('sync.storage.timeToLive.enabled');
+			let timeToLiveEnabled = document.getElementById('storage-timeToLive-enabled').checked;
 			// Can clean cache if global setting is 'on-demand'
 			let canCleanCache = timeToLiveEnabled
 				&& enabled
