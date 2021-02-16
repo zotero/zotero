@@ -190,7 +190,7 @@ class EditorInstance {
 			annotation.uri = Zotero.URI.getItemURI(attachmentItem);
 			
 			// Citation
-			let parentItem = attachmentItem.parentID && await Zotero.Items.getAsync(attachmentItem.parentID) || attachmentItem;
+			let parentItem = attachmentItem.parentID && await Zotero.Items.getAsync(attachmentItem.parentID);
 			if (parentItem) {
 				let citationItem = {
 					uris: [Zotero.URI.getItemURI(parentItem)],
