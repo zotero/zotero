@@ -101,12 +101,12 @@ window.addEventListener('message', async (event) => {
 					parent.postMessage({ action: 'renderedAnnotation', data: { annotation } }, parent.origin, [annotation.image]);
 				}
 			);
-			parent.postMessage({ responseId: message.id, data: num }, parent.origin);
+			parent.postMessage({ responseID: message.id, data: num }, parent.origin);
 		}
 		catch (e) {
 			console.log(e);
 			parent.postMessage({
-				responseId: message.id,
+				responseID: message.id,
 				error: errObject(e)
 			}, parent.origin);
 		}

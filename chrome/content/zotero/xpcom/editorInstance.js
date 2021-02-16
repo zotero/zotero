@@ -152,12 +152,12 @@ class EditorInstance {
 	async insertAnnotations(annotations) {
 		let html = await this._digestAnnotations(annotations);
 		if (html) {
-			this._postMessage({ action: 'insertHtml', pos: -1, html });
+			this._postMessage({ action: 'insertHTML', pos: -1, html });
 		}
 	}
 	
 	_postMessage(message) {
-		this._iframeWindow.postMessage({ instanceId: this.instanceID, message }, '*');
+		this._iframeWindow.postMessage({ instanceID: this.instanceID, message }, '*');
 	}
 
 	_getFont() {
@@ -177,7 +177,7 @@ class EditorInstance {
 	async _digestAnnotations(annotations) {
 		let html = '';
 		for (let annotation of annotations) {
-			let attachmentItem = await Zotero.Items.getAsync(annotation.attachmentItemId);
+			let attachmentItem = await Zotero.Items.getAsync(annotation.attachmentItemID);
 			if (!attachmentItem) {
 				continue;
 			}
@@ -289,7 +289,7 @@ class EditorInstance {
 	}
 
 	_messageHandler = async (e) => {
-		if (e.data.instanceId !== this.instanceID) {
+		if (e.data.instanceID !== this.instanceID) {
 			return;
 		}
 		let message = e.data.message;
@@ -310,7 +310,7 @@ class EditorInstance {
 					html = await this._digestAnnotations(annotations);
 				}
 				if (html) {
-					this._postMessage({ action: 'insertHtml', pos, html });
+					this._postMessage({ action: 'insertHTML', pos, html });
 				}
 				return;
 			}
@@ -344,7 +344,7 @@ class EditorInstance {
 				}
 				return;
 			}
-			case 'openUrl': {
+			case 'openURL': {
 				let { url } = message;
 				let zp = Zotero.getActiveZoteroPane();
 				if (zp) {
@@ -389,7 +389,7 @@ class EditorInstance {
 				let { citation, pos } = message;
 				let formatted = (await this._getFormattedCitationParts(citation)).join(';');
 				let html = `<span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">(${formatted})</span>`;
-				this._postMessage({ action: 'insertHtml', pos, html });
+				this._postMessage({ action: 'insertHTML', pos, html });
 				return;
 			}
 			case 'subscribeProvider': {
@@ -404,7 +404,7 @@ class EditorInstance {
 				return;
 			}
 			case 'openCitationPopup': {
-				let { nodeId, citation } = message;
+				let { nodeID, citation } = message;
 				if (this._readOnly) {
 					return;
 				}
@@ -418,7 +418,7 @@ class EditorInstance {
 				}
 				citation.citationItems = availableCitationItems;
 				let libraryID = this._item.libraryID;
-				this._openQuickFormatDialog(nodeId, citation, [libraryID]);
+				this._openQuickFormatDialog(nodeID, citation, [libraryID]);
 				return;
 			}
 			case 'importImages': {
@@ -430,11 +430,11 @@ class EditorInstance {
 					return;
 				}
 				for (let image of images) {
-					let { nodeId, src } = image;
+					let { nodeID, src } = image;
 					let attachmentKey = await this._importImage(src, true);
 					// TODO: Inform editor about the failed to import images
 					if (attachmentKey) {
-						this._postMessage({ action: 'attachImportedImage', nodeId, attachmentKey });
+						this._postMessage({ action: 'attachImportedImage', nodeID, attachmentKey });
 					}
 				}
 				return;
@@ -470,7 +470,7 @@ class EditorInstance {
 	}
 
 	async _feedSubscription(subscription) {
-		let { id, type, nodeId, data } = subscription;
+		let { id, type, nodeID, data } = subscription;
 		if (type === 'citation') {
 			let parts = await this._getFormattedCitationParts(data.citation);
 			this._postMessage({ action: 'notifyProvider', id, type, data: { formattedCitation: parts.join(';') } });
@@ -489,7 +489,7 @@ class EditorInstance {
 					//  new image copy in memory
 					let newAttachmentKey = await this._importImage(dataURL);
 					// TODO: Inform editor about the failed to import images
-					this._postMessage({ action: 'attachImportedImage', nodeId, attachmentKey: newAttachmentKey });
+					this._postMessage({ action: 'attachImportedImage', nodeID, attachmentKey: newAttachmentKey });
 				}
 			}
 			// Make sure attachment key belongs to the actual parent note,
@@ -771,7 +771,7 @@ class EditorInstance {
 		return 'data:' + item.attachmentContentType + ';base64,' + this._arrayBufferToBase64(buf);
 	}
 
-	async _openQuickFormatDialog(nodeId, citationData, filterLibraryIDs) {
+	async _openQuickFormatDialog(nodeID, citationData, filterLibraryIDs) {
 		await Zotero.Styles.init();
 		let that = this;
 		let win;
@@ -830,7 +830,7 @@ class EditorInstance {
 				let formattedCitation = (await that._getFormattedCitationParts(citation)).join(';');
 
 				if (progressCallback || !citationData.citationItems.length) {
-					that._postMessage({ action: 'setCitation', nodeId, citation, formattedCitation });
+					that._postMessage({ action: 'setCitation', nodeID, citation, formattedCitation });
 				}
 			},
 
@@ -942,7 +942,7 @@ class EditorInstance {
 		let jsonAnnotations = [];
 		for (let annotation of annotations) {
 			let jsonAnnotation = await Zotero.Annotations.toJSON(annotation);
-			jsonAnnotation.itemId = attachmentItem.id;
+			jsonAnnotation.itemID = attachmentItem.id;
 			jsonAnnotations.push(jsonAnnotation);
 		}
 		let html = `<p>(${(new Date()).toLocaleString()})</p>\n`;

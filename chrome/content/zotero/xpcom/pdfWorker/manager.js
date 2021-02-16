@@ -83,9 +83,9 @@ class PDFWorker {
 		this._worker.addEventListener('message', async (event) => {
 			let message = event.data;
 			// console.log(event.data)
-			if (message.responseId) {
-				let { resolve, reject } = this._waitingPromises[message.responseId];
-				delete this._waitingPromises[message.responseId];
+			if (message.responseID) {
+				let { resolve, reject } = this._waitingPromises[message.responseID];
+				delete this._waitingPromises[message.responseID];
 				if (message.data) {
 					resolve(message.data);
 				}
@@ -113,7 +113,7 @@ class PDFWorker {
 					Zotero.debug('Failed to fetch CMap data:');
 					Zotero.debug(e);
 				}
-				this._worker.postMessage({ responseId: event.data.id, data: respData });
+				this._worker.postMessage({ responseID: event.data.id, data: respData });
 			}
 		});
 		this._worker.addEventListener('error', (event) => {
@@ -380,9 +380,9 @@ class PDFRenderer {
 
 			let _handleMessage = async (event) => {
 				let message = event.data;
-				if (message.responseId) {
-					let { resolve, reject } = this._waitingPromises[message.responseId];
-					delete this._waitingPromises[message.responseId];
+				if (message.responseID) {
+					let { resolve, reject } = this._waitingPromises[message.responseID];
+					delete this._waitingPromises[message.responseID];
 					if (message.data) {
 						resolve(message.data);
 					}

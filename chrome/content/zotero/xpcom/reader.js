@@ -190,7 +190,7 @@ class ReaderInstance {
 		tagsbox.item = item;
 	}
 
-	_openAnnotationPopup(x, y, annotationId, colors, selectedColor) {
+	_openAnnotationPopup(x, y, annotationID, colors, selectedColor) {
 		let popup = this._window.document.createElement('menupopup');
 		this._popupset.appendChild(popup);
 		popup.addEventListener('popuphidden', function () {
@@ -205,7 +205,7 @@ class ReaderInstance {
 				let data = {
 					action: 'popupCmd',
 					cmd: 'addToNote',
-					id: annotationId
+					id: annotationID
 				};
 				this._postMessage(data);
 			});
@@ -223,7 +223,7 @@ class ReaderInstance {
 				let data = {
 					action: 'popupCmd',
 					cmd: 'setAnnotationColor',
-					id: annotationId,
+					id: annotationID,
 					color: color[1]
 				};
 				this._postMessage(data);
@@ -239,7 +239,7 @@ class ReaderInstance {
 			let data = {
 				action: 'popupCmd',
 				cmd: 'deleteAnnotation',
-				id: annotationId
+				id: annotationID
 			};
 			this._postMessage(data);
 		});
@@ -274,7 +274,7 @@ class ReaderInstance {
 
 	async _postMessage(message, transfer) {
 		await this._waitForReader();
-		this._iframeWindow.postMessage({ itemId: this._itemID, message }, this._iframeWindow.origin, transfer);
+		this._iframeWindow.postMessage({ itemID: this._itemID, message }, this._iframeWindow.origin, transfer);
 	}
 
 	_handleMessage = async (event) => {
@@ -287,7 +287,7 @@ class ReaderInstance {
 			let data = JSON.parse(JSON.stringify(event.data));
 			// Filter messages coming from previous reader instances,
 			// except for `setAnnotation` to still allow saving it
-			if (data.itemId !== this._itemID && data.message.action !== 'setAnnotation') {
+			if (data.itemID !== this._itemID && data.message.action !== 'setAnnotation') {
 				return;
 			}
 			message = data.message;
@@ -297,7 +297,7 @@ class ReaderInstance {
 					return;
 				}
 				case 'setAnnotation': {
-					let attachment = Zotero.Items.get(data.itemId);
+					let attachment = Zotero.Items.get(data.itemID);
 					let { annotation } = message;
 					annotation.key = annotation.id;
 					let saveOptions = {
@@ -353,7 +353,7 @@ class ReaderInstance {
 					this._openColorPopup(x, y, colors, selectedColor);
 					return;
 				}
-				case 'openUrl': {
+				case 'openURL': {
 					let { url } = message;
 					let win = Services.wm.getMostRecentWindow('navigator:browser');
 					if (win) {
@@ -685,9 +685,9 @@ class Reader {
 			// Listen for the parent item, PDF attachment and its annotations updates
 			for (let reader of this._readers) {
 				if (event === 'delete') {
-					let disappearedIds = reader.annotationItemIDs.filter(x => ids.includes(x));
-					if (disappearedIds.length) {
-						let keys = disappearedIds.map(id => extraData[id].key);
+					let disappearedIDs = reader.annotationItemIDs.filter(x => ids.includes(x));
+					if (disappearedIDs.length) {
+						let keys = disappearedIDs.map(id => extraData[id].key);
 						reader.unsetAnnotations(keys);
 					}
 					if (ids.includes(reader._itemID)) {
