@@ -362,13 +362,14 @@
 					
 					var type = Zotero.Libraries.get(this.item.libraryID).libraryType;
 					var switherDeck = this._id('attachment-note-editor-switcher');
-					switherDeck.selectedIndex = type == 'user' ? 1 : 0;
 					// Note editor
-					if (type == 'user') {
-						var noteEditor = this._id('attachment-note-editor');
+					if (type == 'group' || !Zotero.isPDFBuild) {
+						var noteEditor = this._id('attachment-note-editor-old');
+						switherDeck.selectedIndex = 0;
 					}
 					else {
-						var noteEditor = this._id('attachment-note-editor-old');
+						var noteEditor = this._id('attachment-note-editor');
+						switherDeck.selectedIndex = 1;
 					}
 					
 					if (this.displayNote && (this.displayNoteIfEmpty || this.item.note != '')) {

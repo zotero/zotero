@@ -27,9 +27,9 @@ var noteEditor;
 var notifierUnregisterID;
 var type;
 
-function switchEditorEngine(type) {
+function switchEditorEngine(useOld) {
 	var switherDeck = document.getElementById('zotero-note-editor-switcher');
-	switherDeck.selectedIndex = type === 'user' ? 1 : 0;
+	switherDeck.selectedIndex = useOld ? 0 : 1;
 }
 
 async function onLoad() {
@@ -58,8 +58,8 @@ async function onLoad() {
 		}
 	}
 	type = Zotero.Libraries.get(libraryID).libraryType;
-	switchEditorEngine(type);
-	if (type === 'group') {
+	switchEditorEngine(type == 'group' || !Zotero.isPDFBuild);
+	if (type == 'group' || !Zotero.isPDFBuild) {
 		noteEditor = document.getElementById('zotero-note-editor-old');
 	}
 	else {
@@ -106,13 +106,13 @@ function onError() {
 
 function onUnload() {
 	Zotero.Notifier.unregisterObserver(notifierUnregisterID);
-	if (type == 'user') {
-		noteEditor.saveSync();
-	}
-	else {
+	if (type == 'group' || !Zotero.isPDFBuild) {
 		if (noteEditor.item) {
 			window.opener.ZoteroPane.onNoteWindowClosed(noteEditor.item.id, noteEditor.value);
 		}
+	}
+	else {
+		noteEditor.saveSync();
 	}
 }
 

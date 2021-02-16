@@ -255,9 +255,9 @@ var ZoteroItemPane = new function() {
 	}
 
 
-	this.switchEditorEngine = function (type) {
+	this.switchEditorEngine = function (useOld) {
 		var switherDeck = document.getElementById('zotero-note-editor-switcher');
-		switherDeck.selectedIndex = type == 'user' ? 1 : 0;
+		switherDeck.selectedIndex = useOld ? 0 : 1;
 	};
 	
 	
@@ -265,27 +265,20 @@ var ZoteroItemPane = new function() {
 		_selectedNoteID = item.id;
 		
 		var type = Zotero.Libraries.get(item.libraryID).libraryType;
-		if (type == 'user') {
-			var noteEditor = document.getElementById('zotero-note-editor');
-			
-			noteEditor.mode = editable ? 'edit' : 'view';
-			noteEditor.parent = null;
-			noteEditor.item = item;
-		}
-		else {
+		if (type == 'group' || !Zotero.isPDFBuild) {
 			// If an external note window is open for this item, don't show the editor
 			if (ZoteroPane.findNoteWindow(item.id)) {
 				this.showNoteWindowMessage();
 				return;
 			}
-		
+
 			var noteEditor = document.getElementById('zotero-note-editor-old');
-			
+
 			// If loading new or different note, disable undo while we repopulate the text field
 			// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
 			// undo content from another note into the current one.
 			var clearUndo = noteEditor.item ? noteEditor.item.id != item.id : false;
-			
+
 			noteEditor.mode = editable ? 'edit' : 'view';
 			noteEditor.parent = null;
 			noteEditor.item = item;
@@ -293,6 +286,12 @@ var ZoteroItemPane = new function() {
 			if (clearUndo) {
 				noteEditor.clearUndo();
 			}
+		}
+		else {
+			var noteEditor = document.getElementById('zotero-note-editor');
+			noteEditor.mode = editable ? 'edit' : 'view';
+			noteEditor.parent = null;
+			noteEditor.item = item;
 		}
 		
 		document.getElementById('zotero-view-note-button').hidden = !editable;
@@ -312,7 +311,7 @@ var ZoteroItemPane = new function() {
 		var selectedNote = Zotero.Items.get(_selectedNoteID);
 		
 		var type = Zotero.Libraries.get(selectedNote.libraryID).libraryType;
-		if (type == 'group') {
+		if (type == 'group' || !Zotero.isPDFBuild) {
 			// We don't want to show the note in two places, since it causes unnecessary UI updates
 			// and can result in weird bugs where note content gets lost.
 			//

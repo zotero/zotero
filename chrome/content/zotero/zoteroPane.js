@@ -1207,7 +1207,9 @@ var ZoteroPane = new function()
 			if (Zotero.isPDFBuild) {
 				Zotero_Tabs.rename('zotero-pane', collectionTreeRow.getName());
 			}
-			ZoteroItemPane.switchEditorEngine(Zotero.Libraries.get(collectionTreeRow.ref.libraryID).libraryType);
+			
+			let type = Zotero.Libraries.get(collectionTreeRow.ref.libraryID).libraryType;
+			ZoteroItemPane.switchEditorEngine(type == 'group' || !Zotero.isPDFBuild);
 			
 			// Clear quick search and tag selector when switching views
 			document.getElementById('zotero-tb-search').value = "";
