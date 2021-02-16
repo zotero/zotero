@@ -3301,7 +3301,11 @@ Zotero.Item.prototype.setAttachmentPageIndex = async function (val) {
 };
 
 
-// pageIndex_u_ABCD2345
+/**
+ * Get the key for the item's pageIndex synced setting
+ *
+ * E.g., 'pageIndex_u_ABCD2345' or 'pageIndex_g123_ABCD2345'
+ */
 Zotero.Item.prototype._getPageIndexSettingKey = function () {
 	var library = Zotero.Libraries.get(this.libraryID);
 	var id = 'pageIndex_';
