@@ -78,7 +78,6 @@ Zotero.Items = function() {
 				attachmentSyncedModificationTime: "IA.storageModTime AS attachmentSyncedModificationTime",
 				attachmentSyncedHash: "IA.storageHash AS attachmentSyncedHash",
 				attachmentLastProcessedModificationTime: "IA.lastProcessedModificationTime AS attachmentLastProcessedModificationTime",
-				attachmentPageIndex: "IA.pageIndex AS attachmentPageIndex"
 			};
 		}
 	}, {lazy: true});

@@ -3241,7 +3241,6 @@ Zotero.Schema = new function(){
 				
 				yield Zotero.DB.queryAsync("ALTER TABLE itemAttachments ADD COLUMN lastProcessedModificationTime INT");
 				yield Zotero.DB.queryAsync("CREATE INDEX itemAttachments_lastProcessedModificationTime ON itemAttachments(lastProcessedModificationTime)");
-				yield Zotero.DB.queryAsync("ALTER TABLE itemAttachments ADD COLUMN pageIndex INT");
 			}
 			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom

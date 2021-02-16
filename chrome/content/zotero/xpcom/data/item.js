@@ -50,7 +50,6 @@ Zotero.Item = function(itemTypeOrID) {
 	this._attachmentSyncedModificationTime = null;
 	this._attachmentSyncedHash = null;
 	this._attachmentLastProcessedModificationTime = null;
-	this._attachmentPageIndex = null;
 	
 	// loadCreators
 	this._creators = [];
@@ -342,7 +341,6 @@ Zotero.Item.prototype._parseRowData = function(row) {
 			case 'attachmentSyncedModificationTime':
 			case 'attachmentSyncedHash':
 			case 'attachmentLastProcessedModificationTime':
-			case 'attachmentPageIndex':
 			case 'createdByUserID':
 			case 'lastModifiedByUserID':
 				break;
@@ -1728,13 +1726,13 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		let sql = "";
 		let cols = [
 			'parentItemID', 'linkMode', 'contentType', 'charsetID', 'path', 'syncState',
-			'storageModTime', 'storageHash', 'lastProcessedModificationTime', 'pageIndex'
+			'storageModTime', 'storageHash', 'lastProcessedModificationTime'
 		];
 		// TODO: Replace with UPSERT after SQLite 3.24.0
 		if (isNew) {
 			sql = "INSERT INTO itemAttachments "
 				+ "(itemID, " + cols.join(", ") + ") "
-				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+				+ "VALUES (?,?,?,?,?,?,?,?,?,?)";
 		}
 		else {
 			sql = "UPDATE itemAttachments SET " + cols.join("=?, ") + "=? WHERE itemID=?";
@@ -1749,7 +1747,6 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		let storageModTime = this.attachmentSyncedModificationTime;
 		let storageHash = this.attachmentSyncedHash;
 		let lastProcessedModificationTime = this.attachmentLastProcessedModificationTime;
-		let pageIndex = this.attachmentPageIndex;
 		
 		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE && libraryType != 'user') {
 			throw new Error("Linked files can only be added to user library");
@@ -1765,7 +1762,6 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			storageModTime !== undefined ? storageModTime : null,
 			storageHash || null,
 			lastProcessedModificationTime || null,
-			typeof pageIndex === 'number' ? pageIndex : null
 		];
 		if (isNew) {
 			params.unshift(itemID);
@@ -3222,7 +3218,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentSyncedHash', {
 //
 // PDF attachment properties
 //
-for (let name of ['lastProcessedModificationTime', 'pageIndex']) {
+for (let name of ['lastProcessedModificationTime']) {
 	let prop = 'attachment' + Zotero.Utilities.capitalize(name);
 	
 	Zotero.defineProperty(Zotero.Item.prototype, prop, {
@@ -3257,13 +3253,6 @@ for (let name of ['lastProcessedModificationTime', 'pageIndex']) {
 							+ "-- " + val + " given");
 					}
 					break;
-				
-				case 'pageIndex':
-					if (typeof val != 'number') {
-						Zotero.debug(val, 2);
-						throw new Error(`${prop} must be a number`);
-					}
-					break;
 			}
 			
 			if (val == this['_' + prop]) {
@@ -3278,6 +3267,59 @@ for (let name of ['lastProcessedModificationTime', 'pageIndex']) {
 		}
 	});
 }
+
+
+Zotero.Item.prototype.getAttachmentPageIndex = function () {
+	if (!this.isFileAttachment()) {
+		throw new Error("getAttachmentPageIndex() can only be called on file attachments");
+	}
+	
+	var id = this._getPageIndexSettingKey();
+	var val = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, id);
+	if (val !== null && typeof val != 'number' || val != parseInt(val)) {
+		Zotero.logError(`Setting contains an invalid attachment page index ('${val}') -- discarding`);
+		return null;
+	}
+	return val;
+};
+
+Zotero.Item.prototype.setAttachmentPageIndex = async function (val) {
+	if (!this.isFileAttachment()) {
+		throw new Error("setAttachmentPageIndex() can only be called on file attachments");
+	}
+	
+	if (typeof val != 'number' || val != parseInt(val)) {
+		Zotero.debug(val, 2);
+		throw new Error(`setAttachmentPageIndex() must be passed an integer`);
+	}
+	
+	var id = this._getPageIndexSettingKey();
+	if (val === null) {
+		return Zotero.SyncedSettings.clear(id);
+	}
+	return Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, id, val);
+};
+
+
+// pageIndex_u_ABCD2345
+Zotero.Item.prototype._getPageIndexSettingKey = function () {
+	var library = Zotero.Libraries.get(this.libraryID);
+	var id = 'pageIndex_';
+	switch (library.libraryType) {
+		case 'user':
+			id += 'u';
+			break;
+		
+		case 'group':
+			id += 'g' + library.libraryTypeID;
+			break;
+		
+		default:
+			throw new Error(`Can't get page index id for ${library.libraryType} item`);
+	}
+	id += "_" + this.key;
+	return id;
+};
 
 
 /**
@@ -4560,6 +4602,11 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 		
 		// Zotero.Sync.EventListeners.ChangeListener needs to know if this was a storage file
 		env.notifierData[this.id].storageDeleteLog = this.isStoredFileAttachment();
+		
+		if (this.isFileAttachment()) {
+			let id = this._getPageIndexSettingKey();
+			yield Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, id);
+		}
 	}
 	// Delete cached file for image annotation
 	else if (this.isAnnotation()) {
@@ -4760,10 +4807,6 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 			this['attachment' + field[0].toUpperCase() + field.substr(1)] = val;
 			break;
 			
-		case 'attachmentPageIndex':
-			this[field] = val;
-			break;
-		
 		//
 		// Annotation fields
 		//
@@ -5030,18 +5073,6 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 					// TEMP
 					//obj.mtime = (yield this.attachmentModificationTime) || null;
 					//obj.md5 = (yield this.attachmentHash) || null;
-				}
-			}
-			
-			// PDF attachment properties
-			if (this.isFileAttachment()) {
-				let props = ['pageIndex'];
-				for (let prop of props) {
-					let fullProp = 'attachment' + Zotero.Utilities.capitalize(prop);
-					let val = this[fullProp];
-					if (val !== null && val !== undefined) {
-						obj[fullProp] = val;
-					}
 				}
 			}
 		}

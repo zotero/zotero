@@ -1205,6 +1205,42 @@ describe("Zotero.Item", function () {
 	});
 	
 	
+	describe("Attachment Page Index", function () {
+		describe("#getAttachmentPageIndex()", function () {
+			it("should get the page index", async function () {
+				var attachment = await importFileAttachment('test.pdf');
+				assert.isNull(attachment.getAttachmentPageIndex());
+				await attachment.setAttachmentPageIndex(2);
+				assert.equal(2, attachment.getAttachmentPageIndex());
+			});
+			
+			it("should throw an error if called on a regular item", async function () {
+				var item = createUnsavedDataObject('item');
+				assert.throws(
+					() => item.getAttachmentPageIndex(),
+					"getAttachmentPageIndex() can only be called on file attachments"
+				);
+			});
+			
+			it("should discard invalid page index", async function () {
+				var attachment = await importFileAttachment('test.pdf');
+				var id = attachment._getPageIndexSettingKey();
+				await Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, id, '"1"');
+				assert.isNull(attachment.getAttachmentPageIndex());
+			});
+		});
+		
+		it("should be cleared when item is deleted", async function () {
+			var attachment = await importFileAttachment('test.pdf');
+			await attachment.setAttachmentPageIndex(2);
+			var id = attachment._getPageIndexSettingKey();
+			assert.equal(2, Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, id));
+			await attachment.eraseTx();
+			assert.isNull(Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, id));
+		});
+	});
+	
+	
 	describe("Annotations", function () {
 		var item;
 		var attachment;
@@ -1808,13 +1844,6 @@ describe("Zotero.Item", function () {
 					assert.isNull(json.md5);
 				})
 				
-				it("should include PDF properties", async function () {
-					var item = await importPDFAttachment();
-					item.attachmentPageIndex = 4;
-					var json = item.toJSON();
-					assert.propertyVal(json, 'attachmentPageIndex', 4);
-				});
-				
 				it("shouldn't include filename, path, or PDF properties for linked_url attachments", function* () {
 					var item = new Zotero.Item('attachment');
 					item.attachmentLinkMode = 'linked_url';
@@ -1822,7 +1851,6 @@ describe("Zotero.Item", function () {
 					var json = item.toJSON();
 					assert.notProperty(json, "filename");
 					assert.notProperty(json, "path");
-					assert.notProperty(json, 'attachmentPageIndex');
 				});
 				
 				it("shouldn't include various properties on embedded-image attachments", async function () {
@@ -1838,7 +1866,6 @@ describe("Zotero.Item", function () {
 					assert.notProperty(json, 'note');
 					assert.notProperty(json, 'charset');
 					assert.notProperty(json, 'path');
-					assert.notProperty(json, 'attachmentPageIndex');
 				});
 			});
 			
@@ -2500,24 +2527,6 @@ describe("Zotero.Item", function () {
 			item.libraryID = Zotero.Libraries.userLibraryID;
 			item.fromJSON(json, { strict: true });
 			assert.propertyVal(item, 'attachmentCharset', 'utf-8');
-		});
-		
-		it("should import PDF fields", async function () {
-			var attachment = await importPDFAttachment();
-			var json = attachment.toJSON();
-			
-			var item = new Zotero.Item();
-			item.libraryID = attachment.libraryID;
-			item.fromJSON(json, { strict: true });
-			assert.propertyVal(item, 'attachmentPageIndex', null);
-			
-			json.attachmentPageIndex = 4;
-			
-			item = new Zotero.Item();
-			item.libraryID = attachment.libraryID;
-			item.fromJSON(json, { strict: true });
-			
-			assert.propertyVal(item, 'attachmentPageIndex', json.attachmentPageIndex);
 		});
 		
 		it("should import annotation fields", async function () {
