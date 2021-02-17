@@ -926,27 +926,27 @@ class EditorInstance {
 			wrappedJSObject: io
 		});
 	}
-	
-	static canCreateNoteFromAnnotations(item) {
-		return item.parentID && item.isAttachment() && item.attachmentContentType === 'application/pdf';
-	}
 
-	static async createNoteFromAnnotations(attachmentItem) {
-		if (!this.canCreateNoteFromAnnotations(attachmentItem)) {
-			return;
-		}
-		let annotations = attachmentItem.getAnnotations();
+	/**
+	 * Create note from annotations
+	 *
+	 * @param {Zotero.Item[]} annotations
+	 * @param {Integer} parentID Creates standalone note if not provided
+	 * @returns {Promise<Zotero.Item|undefined>}
+	 */
+	static async createNoteFromAnnotations(annotations, parentID) {
 		if (!annotations.length) {
 			return;
 		}
 		let note = new Zotero.Item('note');
-		note.libraryID = attachmentItem.libraryID;
-		note.parentID = attachmentItem.parentID;
+		note.libraryID = annotations[0].libraryID;
+		note.parentID = parentID;
 		await note.saveTx();
 		let editorInstance = new EditorInstance();
 		editorInstance._item = note;
 		let jsonAnnotations = [];
 		for (let annotation of annotations) {
+			let attachmentItem = Zotero.Items.get(annotation.parentID);
 			let jsonAnnotation = await Zotero.Annotations.toJSON(annotation);
 			jsonAnnotation.attachmentItemID = attachmentItem.id;
 			jsonAnnotations.push(jsonAnnotation);
@@ -955,6 +955,7 @@ class EditorInstance {
 		html += await editorInstance._digestAnnotations(jsonAnnotations);
 		note.setNote(html);
 		await note.saveTx();
+		return note;
 	}
 }
 

@@ -2975,7 +2975,7 @@ var ZoteroPane = new function()
 					}
 					
 					
-					if (Zotero.EditorInstance.canCreateNoteFromAnnotations(item)) {
+					if (item.isPDFAttachment()) {
 						show.push(m.createNoteFromAnnotations);
 					}
 				}
@@ -4687,7 +4687,7 @@ var ZoteroPane = new function()
 		}
 
 		let item = this.getSelectedItems()[0];
-		Zotero.EditorInstance.createNoteFromAnnotations(item);
+		Zotero.EditorInstance.createNoteFromAnnotations(item.getAnnotations(), item.parentID);
 	};
 	
 	this.createEmptyParent = async function (item) {
