@@ -1206,34 +1206,34 @@ describe("Zotero.Item", function () {
 	
 	
 	describe("Attachment Page Index", function () {
-		describe("#getAttachmentPageIndex()", function () {
+		describe("#getAttachmentLastPageIndex()", function () {
 			it("should get the page index", async function () {
 				var attachment = await importFileAttachment('test.pdf');
-				assert.isNull(attachment.getAttachmentPageIndex());
-				await attachment.setAttachmentPageIndex(2);
-				assert.equal(2, attachment.getAttachmentPageIndex());
+				assert.isNull(attachment.getAttachmentLastPageIndex());
+				await attachment.setAttachmentLastPageIndex(2);
+				assert.equal(2, attachment.getAttachmentLastPageIndex());
 			});
 			
 			it("should throw an error if called on a regular item", async function () {
 				var item = createUnsavedDataObject('item');
 				assert.throws(
-					() => item.getAttachmentPageIndex(),
-					"getAttachmentPageIndex() can only be called on file attachments"
+					() => item.getAttachmentLastPageIndex(),
+					"getAttachmentLastPageIndex() can only be called on file attachments"
 				);
 			});
 			
 			it("should discard invalid page index", async function () {
 				var attachment = await importFileAttachment('test.pdf');
-				var id = attachment._getPageIndexSettingKey();
+				var id = attachment._getLastPageIndexSettingKey();
 				await Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, id, '"1"');
-				assert.isNull(attachment.getAttachmentPageIndex());
+				assert.isNull(attachment.getAttachmentLastPageIndex());
 			});
 		});
 		
 		it("should be cleared when item is deleted", async function () {
 			var attachment = await importFileAttachment('test.pdf');
-			await attachment.setAttachmentPageIndex(2);
-			var id = attachment._getPageIndexSettingKey();
+			await attachment.setAttachmentLastPageIndex(2);
+			var id = attachment._getLastPageIndexSettingKey();
 			assert.equal(2, Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, id));
 			await attachment.eraseTx();
 			assert.isNull(Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, id));

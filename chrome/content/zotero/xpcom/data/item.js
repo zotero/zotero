@@ -3269,12 +3269,12 @@ for (let name of ['lastProcessedModificationTime']) {
 }
 
 
-Zotero.Item.prototype.getAttachmentPageIndex = function () {
+Zotero.Item.prototype.getAttachmentLastPageIndex = function () {
 	if (!this.isFileAttachment()) {
-		throw new Error("getAttachmentPageIndex() can only be called on file attachments");
+		throw new Error("getAttachmentLastPageIndex() can only be called on file attachments");
 	}
 	
-	var id = this._getPageIndexSettingKey();
+	var id = this._getLastPageIndexSettingKey();
 	var val = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, id);
 	if (val !== null && typeof val != 'number' || val != parseInt(val)) {
 		Zotero.logError(`Setting contains an invalid attachment page index ('${val}') -- discarding`);
@@ -3283,17 +3283,17 @@ Zotero.Item.prototype.getAttachmentPageIndex = function () {
 	return val;
 };
 
-Zotero.Item.prototype.setAttachmentPageIndex = async function (val) {
+Zotero.Item.prototype.setAttachmentLastPageIndex = async function (val) {
 	if (!this.isFileAttachment()) {
-		throw new Error("setAttachmentPageIndex() can only be called on file attachments");
+		throw new Error("setAttachmentLastPageIndex() can only be called on file attachments");
 	}
 	
 	if (typeof val != 'number' || val != parseInt(val)) {
 		Zotero.debug(val, 2);
-		throw new Error(`setAttachmentPageIndex() must be passed an integer`);
+		throw new Error(`setAttachmentLastPageIndex() must be passed an integer`);
 	}
 	
-	var id = this._getPageIndexSettingKey();
+	var id = this._getLastPageIndexSettingKey();
 	if (val === null) {
 		return Zotero.SyncedSettings.clear(id);
 	}
@@ -3304,11 +3304,11 @@ Zotero.Item.prototype.setAttachmentPageIndex = async function (val) {
 /**
  * Get the key for the item's pageIndex synced setting
  *
- * E.g., 'pageIndex_u_ABCD2345' or 'pageIndex_g123_ABCD2345'
+ * E.g., 'lastPageIndex_u_ABCD2345' or 'lastPageIndex_g123_ABCD2345'
  */
-Zotero.Item.prototype._getPageIndexSettingKey = function () {
+Zotero.Item.prototype._getLastPageIndexSettingKey = function () {
 	var library = Zotero.Libraries.get(this.libraryID);
-	var id = 'pageIndex_';
+	var id = 'lastPageIndex_';
 	switch (library.libraryType) {
 		case 'user':
 			id += 'u';
@@ -3319,7 +3319,7 @@ Zotero.Item.prototype._getPageIndexSettingKey = function () {
 			break;
 		
 		default:
-			throw new Error(`Can't get page index id for ${library.libraryType} item`);
+			throw new Error(`Can't get last page index key for ${library.libraryType} item`);
 	}
 	id += "_" + this.key;
 	return id;
@@ -4608,7 +4608,7 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 		env.notifierData[this.id].storageDeleteLog = this.isStoredFileAttachment();
 		
 		if (this.isFileAttachment()) {
-			let id = this._getPageIndexSettingKey();
+			let id = this._getLastPageIndexSettingKey();
 			yield Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, id);
 		}
 	}
