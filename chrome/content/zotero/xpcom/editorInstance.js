@@ -181,6 +181,12 @@ class EditorInstance {
 			if (!attachmentItem) {
 				continue;
 			}
+
+			if (!annotation.text
+				&& !annotation.comment
+				&& !annotation.image) {
+				continue;
+			}
 			
 			let citationHTML = '';
 			let imageHTML = '';
@@ -942,7 +948,7 @@ class EditorInstance {
 		let jsonAnnotations = [];
 		for (let annotation of annotations) {
 			let jsonAnnotation = await Zotero.Annotations.toJSON(annotation);
-			jsonAnnotation.itemID = attachmentItem.id;
+			jsonAnnotation.attachmentItemID = attachmentItem.id;
 			jsonAnnotations.push(jsonAnnotation);
 		}
 		let html = `<p>(${(new Date()).toLocaleString()})</p>\n`;
