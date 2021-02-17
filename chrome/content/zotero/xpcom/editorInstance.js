@@ -330,7 +330,34 @@ class EditorInstance {
 				}
 				return;
 			}
-			case 'openCitation': {
+			case 'openCitationPage': {
+				let { citation } = message;
+				if (!citation.citationItems.length) {
+					return;
+				}
+				let citationItem = citation.citationItems[0];
+				let item = await this._getItemFromURIs(citationItem.uris);
+				if (!item) {
+					return;
+				}
+				let attachments = Zotero.Items.get(item.getAttachments());
+				if (citationItem.locator && attachments.length === 1) {
+					await Zotero.Reader.open(attachments[0].id, { pageLabel: citationItem.locator });
+				}
+				else {
+					let zp = Zotero.getActiveZoteroPane();
+					if (zp) {
+						zp.selectItems([item.id]);
+						let win = Zotero.getMainWindow();
+						if (win) {
+							win.focus();
+							win.Zotero_Tabs.select('zotero-pane');
+						}
+					}
+				}
+				return;
+			}
+			case 'showCitationItem': {
 				let { citation } = message;
 				let items = [];
 				for (let citationItem of citation.citationItems) {
