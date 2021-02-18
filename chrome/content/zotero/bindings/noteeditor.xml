@@ -103,6 +103,7 @@
 							popup: document.getAnonymousElementByAttribute(this, 'anonid', 'editor-menu'),
 							onNavigate: this._navigateHandler,
 							readOnly: !this.editable,
+							disableUI: this.mode == 'merge',
 							onReturn: this._returnHandler,
 							placeholder: this.placeholder
 						});

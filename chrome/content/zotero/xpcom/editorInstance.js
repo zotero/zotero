@@ -45,6 +45,7 @@ class EditorInstance {
 		this.onNavigate = options.onNavigate;
 		this._item = options.item;
 		this._readOnly = options.readOnly;
+		this._disableUI = options.disableUI;
 		this._onReturn = options.onReturn;
 		this._iframeWindow = options.iframeWindow;
 		this._popup = options.popup;
@@ -79,6 +80,7 @@ class EditorInstance {
 			action: 'init',
 			value: this._state || this._item.note,
 			readOnly: this._readOnly,
+			disableUI: this._disableUI,
 			enableReturnButton: !!this._onReturn,
 			placeholder: options.placeholder,
 			dir: Zotero.dir,
@@ -526,7 +528,11 @@ class EditorInstance {
 				}
 			}
 			// Make sure attachment key belongs to the actual parent note,
-			// otherwise it would be a security risk
+			// otherwise it would be a security risk.
+			// TODO: Figure out what to do with images not being
+			//  displayed in merge dialog because of this,
+			//  although another reason is because items
+			//  are synced before image attachments
 			else if(item.parentID === this._item.id) {
 				let src = await this._getDataURL(item);
 				this._postMessage({ action: 'notifyProvider', id, type, data: { src } });
