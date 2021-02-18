@@ -228,7 +228,7 @@ class EditorInstance {
 				const PDFJS_DEFAULT_SCALE = 1.25;
 				let width = Math.round(rectWidth * CSS_UNITS * PDFJS_DEFAULT_SCALE);
 				let height = Math.round(rectHeight * width / rectWidth);
-				imageHTML = `<img data-attachment-key="${imageAttachmentKey}" width="${width}" height="${height}" data-natural-width="${annotation.imageNaturalWidth}" data-natural-height="${annotation.imageNaturalHeight}" data-annotation="${encodeURIComponent(JSON.stringify(annotation))}"/>`;
+				imageHTML = `<img data-attachment-key="${imageAttachmentKey}" width="${width}" height="${height}" data-annotation="${encodeURIComponent(JSON.stringify(annotation))}"/>`;
 			}
 
 			// Text
