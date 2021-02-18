@@ -152,6 +152,7 @@ class EditorInstance {
 	}
 
 	async insertAnnotations(annotations) {
+		await this._ensureNoteCreated();
 		let html = await this._digestAnnotations(annotations);
 		if (html) {
 			this._postMessage({ action: 'insertHTML', pos: -1, html });
