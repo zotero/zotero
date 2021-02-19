@@ -1544,6 +1544,41 @@ describe("Zotero.Item", function () {
 			assert.equal(e.message, "Item type must be set before saving");
 		})
 		
+		describe("saving a child item", function () {
+			it("should throw an error if a new note is the child of another note", async function () {
+				var note1 = await createDataObject('item', { itemType: 'note' });
+				var note2 = createUnsavedDataObject('item', { itemType: 'note', parentID: note1.id });
+				var e = await getPromiseError(note2.saveTx());
+				assert.ok(e);
+				assert.include(e.message, "must be a regular item");
+			});
+			
+			it("should throw an error if a new imported_file attachment is the child of a note", async function () {
+				var note = await createDataObject('item', { itemType: 'note' });
+				var e = await getPromiseError(importFileAttachment('test.png', { parentItemID: note.id }));
+				assert.ok(e);
+				assert.include(e.message, "must be a regular item");
+			});
+			
+			it("should throw an error if a new note is the child of another attachment", async function () {
+				var attachment = await importFileAttachment('test.png');
+				var note = createUnsavedDataObject('item', { itemType: 'note', parentID: attachment.id });
+				var e = await getPromiseError(note.saveTx());
+				assert.ok(e);
+				assert.include(e.message, "must be a regular item");
+			});
+			
+			it("should throw an error if an existing note is set as a child of another note", async function () {
+				var note1 = await createDataObject('item', { itemType: 'note' });
+				var note2 = createUnsavedDataObject('item', { itemType: 'note' });
+				await note2.saveTx();
+				note2.parentID = note1.id;
+				var e = await getPromiseError(note2.saveTx());
+				assert.ok(e);
+				assert.include(e.message, "must be a regular item");
+			});
+		});
+		
 		it("should reload child items for parent items", function* () {
 			var item = yield createDataObject('item');
 			var attachment = yield importFileAttachment('test.png', { parentItemID: item.id });

@@ -1420,11 +1420,23 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		? (this.ObjectsClass.getIDFromLibraryAndKey(this.libraryID, parentItemKey) || null)
 		: null;
 	if (this._changed.parentKey) {
-		if (isNew) {
-			if (parentItemKey == this.key) {
-				throw new Error("Item cannot be set as parent of itself");
+		if (parentItemKey && parentItemKey == this.key) {
+			throw new Error("Item cannot be set as parent of itself");
+		}
+		
+		// Make sure parent is a regular item
+		if (parentItemID) {
+			let parentItem = yield Zotero.Items.getAsync(parentItemID);
+			if (!parentItem.isRegularItem()
+					// Allow embedded-image attachments under notes
+					&& !(this.isEmbeddedImageAttachment() && parentItem.isNote())
+					// Allow annotations under attachments
+					&& !(this.isAnnotation() && parentItem.isFileAttachment())) {
+				throw new Error(`Parent item ${parentItem.libraryKey} must be a regular item`);
 			}
-			
+		}
+		
+		if (isNew) {
 			if (!parentItemID) {
 				// TODO: clear caches?
 				let msg = "Parent item " + this.libraryID + "/" + parentItemKey + " not found";
@@ -1451,10 +1463,6 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		}
 		else {
 			if (parentItemKey) {
-				if (parentItemKey == this.key) {
-					throw new Error("Item cannot be set as parent of itself");
-				}
-				
 				if (!parentItemID) {
 					// TODO: clear caches
 					let msg = "Parent item " + this.libraryID + "/" + parentItemKey + " not found";
