@@ -1799,6 +1799,9 @@ Zotero.Schema = new function(){
 		var noteID = parseInt(yield Zotero.DB.valueQueryAsync(
 			"SELECT itemTypeID FROM itemTypes WHERE typeName='note'"
 		));
+		var annotationID = parseInt(yield Zotero.DB.valueQueryAsync(
+			"SELECT itemTypeID FROM itemTypes WHERE typeName='annotation'"
+		));
 		
 		// The first position is for testing and the second is for repairing. Can be either SQL
 		// statements or promise-returning functions. For statements, the repair entry can be either
@@ -1924,16 +1927,29 @@ Zotero.Schema = new function(){
 				`SELECT COUNT(*) > 0 FROM items WHERE itemTypeID=${attachmentID} AND itemID NOT IN (SELECT itemID FROM itemAttachments)`,
 				`INSERT INTO itemAttachments (itemID, linkMode) SELECT itemID, 0 FROM items WHERE itemTypeID=${attachmentID} AND itemID NOT IN (SELECT itemID FROM itemAttachments)`,
 			],
-			// Note/child parents
+			// Attachments with note parents, unless they're embedded-image attachments
 			[
-				`SELECT COUNT(*) > 0 FROM itemAttachments WHERE parentItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (${noteID}, ${attachmentID}))`,
-				`UPDATE itemAttachments SET parentItemID=NULL WHERE parentItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (${noteID}, ${attachmentID}))`,
+				`SELECT COUNT(*) > 0 FROM itemAttachments `
+					+ `WHERE parentItemID IN (SELECT itemID FROM items WHERE itemTypeID=${noteID}) `
+					+ `AND linkMode != ${Zotero.Attachments.LINK_MODE_EMBEDDED_IMAGE}`,
+				`UPDATE itemAttachments SET parentItemID=NULL `
+					+ `WHERE parentItemID IN (SELECT itemID FROM items WHERE itemTypeID=${noteID}) `
+					+ `AND linkMode != ${Zotero.Attachments.LINK_MODE_EMBEDDED_IMAGE}`,
 			],
+			// Attachments with attachment or annotation parents
 			[
-				`SELECT COUNT(*) > 0 FROM itemNotes WHERE parentItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (${noteID}, ${attachmentID}))`,
-				`UPDATE itemNotes SET parentItemID=NULL WHERE parentItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (${noteID}, ${attachmentID}))`,
+				`SELECT COUNT(*) > 0 FROM itemAttachments `
+					+ `WHERE parentItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (${attachmentID}, ${annotationID}))`,
+				`UPDATE itemAttachments SET parentItemID=NULL `
+					+ `WHERE parentItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (${attachmentID}, ${annotationID}))`,
 			],
-			
+			// Notes with note/attachment/annotation parents
+			[
+				`SELECT COUNT(*) > 0 FROM itemNotes `
+					+ `WHERE parentItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (${noteID}, ${attachmentID}, ${annotationID}))`,
+				`UPDATE itemNotes SET parentItemID=NULL `
+					+ `WHERE parentItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (${noteID}, ${attachmentID}, ${annotationID}))`,
+			],
 			// Delete empty creators
 			// This may cause itemCreator gaps, but that's better than empty creators
 			[
