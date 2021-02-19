@@ -32,7 +32,6 @@ class ReaderInstance {
 		this._window = null;
 		this._iframeWindow = null;
 		this._itemID = null;
-		this._state = null;
 		this._isReaderInitialized = false;
 		this._showItemPaneToggle = false;
 		this._initPromise = new Promise((resolve, reject) => {
@@ -57,8 +56,7 @@ class ReaderInstance {
 		let annotationItems = item.getAnnotations();
 		let annotations = (await Promise.all(annotationItems.map(x => this._getAnnotation(x)))).filter(x => x);
 		this.annotationItemIDs = annotationItems.map(x => x.id);
-		state = state || await this._loadState();
-		this._state = state;
+		state = state || await this._getState();
 		this._postMessage({
 			action: 'open',
 			buf,
@@ -132,27 +130,40 @@ class ReaderInstance {
 		this._postMessage({ action: 'setToolbarPlaceholderWidth', width });
 	}
 
-	async _saveState(state) {
+	async _setState(state) {
 		let item = Zotero.Items.get(this._itemID);
+		item.setAttachmentLastPageIndex(state.pageIndex);
 		let file = Zotero.Attachments.getStorageDirectory(item);
 		file.append(this.pdfStateFileName);
 		await Zotero.File.putContentsAsync(file, JSON.stringify(state));
 	}
 
-	async _loadState() {
-		// TODO: Validate data to make sure the older format doesn't crash the future pdf-reader
+	async _getState() {
 		let item = Zotero.Items.get(this._itemID);
 		let file = Zotero.Attachments.getStorageDirectory(item);
 		file.append(this.pdfStateFileName);
 		file = file.path;
+		let state;
 		try {
 			if (await OS.File.exists(file)) {
-				let state = JSON.parse(await Zotero.File.getContentsAsync(file));
-				return state;
+				state = JSON.parse(await Zotero.File.getContentsAsync(file));
 			}
 		}
 		catch (e) {
 			Zotero.logError(e);
+		}
+
+		let pageIndex = item.getAttachmentLastPageIndex();
+		if (state) {
+			if (Number.isInteger(pageIndex) && state.pageIndex !== pageIndex) {
+				state.pageIndex = pageIndex;
+				delete state.top;
+				delete state.left;
+			}
+			return state;
+		}
+		else if (Number.isInteger(pageIndex)) {
+			return { pageIndex };
 		}
 		return null;
 	}
@@ -329,8 +340,7 @@ class ReaderInstance {
 				}
 				case 'setState': {
 					let { state } = message;
-					this._saveState(state);
-					this._state = state;
+					this._setState(state);
 					return;
 				}
 				case 'openTagsPopup': {
