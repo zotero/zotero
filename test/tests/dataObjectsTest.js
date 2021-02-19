@@ -137,17 +137,17 @@ describe("Zotero.DataObjects", function () {
 			function check(arr) {
 				var str = arr.map(o => title(o)).join('');
 				var possibilities = [
-					'ACDEFHI',
-					'ACDEFIH',
+					'ACDEFH',
+					'ACDEFH',
 					
-					'ADCEFHI',
-					'ADCEFIH',
+					'ADCEFH',
+					'ADCEFH',
 					
-					'EFHIACD',
-					'EFHIADC',
+					'EFHACD',
+					'EFHADC',
 					
-					'EFIHACD',
-					'EFIHADC',
+					'EFHACD',
+					'EFHADC',
 				];
 				assert.oneOf(str, possibilities);
 			}
@@ -163,30 +163,29 @@ describe("Zotero.DataObjects", function () {
 			var e = await createDataObject('item', { title: "E" });
 			var f = await importPDFAttachment(e, { title: 'F' });
 			var g = await createAnnotation('image', f, { tags: [{ tag: 'G' }] });
-			var h = await createEmbeddedImage(g, { tags: [{ tag: 'H' }] });
-			var i = await createAnnotation('highlight', f, { tags: [{ tag: 'I' }] });
+			var h = await createAnnotation('highlight', f, { tags: [{ tag: 'H' }] });
 			
-			var arr = Zotero.Items.sortByParent([a, c, d, e, f, h, i]);
+			var arr = Zotero.Items.sortByParent([a, c, d, e, f, h]);
 			Zotero.debug(arr.map(o => title(o)));
 			check(arr);
 			
 			// Reverse order
-			arr = Zotero.Items.sortByParent([a, c, d, e, f, h, i].reverse());
+			arr = Zotero.Items.sortByParent([a, c, d, e, f, h].reverse());
 			Zotero.debug(arr.map(o => title(o)));
 			check(arr);
 			
 			// Top-level first
-			arr = Zotero.Items.sortByParent([a, e, c, d, f, h, i]);
+			arr = Zotero.Items.sortByParent([a, e, c, d, f, h]);
 			Zotero.debug(arr.map(o => title(o)));
 			check(arr);
 			
 			// Child first
-			arr = Zotero.Items.sortByParent([c, h, d, i, f, a, e]);
+			arr = Zotero.Items.sortByParent([c, h, d, f, a, e]);
 			Zotero.debug(arr.map(o => title(o)));
 			check(arr);
 			
 			// Random
-			arr = Zotero.Items.sortByParent([i, e, d, h, c, a, f]);
+			arr = Zotero.Items.sortByParent([e, d, h, c, a, f]);
 			Zotero.debug(arr.map(o => title(o)));
 			check(arr);
 		});

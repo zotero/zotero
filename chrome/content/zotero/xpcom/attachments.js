@@ -366,7 +366,7 @@ Zotero.Attachments = new function(){
 	 * @return {Promise<Zotero.Item>}
 	 */
 	this.importEmbeddedImage = async function ({ blob, parentItemID, saveOptions }) {
-		Zotero.debug('Importing note or annotation image');
+		Zotero.debug('Importing embedded image');
 		
 		if (!parentItemID) {
 			throw new Error("parentItemID must be provided");
