@@ -77,5 +77,19 @@ describe("Zotero.Sync.EventListeners", function () {
 			yield Zotero.Promise.delay(10);
 			mock.verify();
 		});
+		
+		it("should auto-sync after settings change", async function () {
+			var attachment = await importFileAttachment('test.pdf');
+			
+			var mock = sinon.mock(Zotero.Sync.Runner);
+			var expectation = mock.expects("setSyncTimeout").once();
+			
+			// Create setting (e.g., lastPageIndex_u_ABCD2345)
+			await attachment.setAttachmentLastPageIndex(1);
+			
+			await Zotero.Promise.delay(10);
+			mock.verify();
+			assert.sameMembers(expectation.getCall(0).args[2].libraries, [Zotero.Libraries.userLibraryID]);
+		});
 	});
 });
