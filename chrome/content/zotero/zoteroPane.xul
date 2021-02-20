@@ -233,25 +233,19 @@
 									<div xmlns="http://www.w3.org/1999/xhtml" class="sync-button-tooltip-messages"/>
 								</tooltip>
 							</toolbarbutton>
-
-							<panel id="zotero-sync-reminder-panel" type="arrow" noautohide="true">
-								<vbox>
-									<label id="zotero-sync-reminder-header" class="header"/>
-
-									<description id="zotero-sync-reminder-description"/>
-									<hbox pack="end">
-										<label class="zotero-text-link" value="Learn more" href="http://www.zotero.org/support/sync"/>
-									</hbox>
-
-									<checkbox id="zotero-sync-reminder-show-again"/>
-									<hbox pack="end">
-										<button id="zotero-sync-reminder-remind-me"/>
-										<button default="true" id="zotero-sync-reminder-open"/>
-									</hbox>
-								</vbox>
-							</panel>
 						</hbox>
 					</toolbar>
+
+					<vbox id="sync-reminder-container" collapsed="true">
+						<div xmlns="http://www.w3.org/1999/xhtml" id="sync-reminder-banner">
+							<div id="sync-reminder-message"/>
+							<a id="sync-reminder-action" class="sync-reminder-link"/>
+							<div id="sync-reminder-spacer"/>
+							<a id="sync-reminder-disable" class="sync-reminder-link"/>
+							<a id="sync-reminder-remind" class="sync-reminder-link"/>
+							<div id="sync-reminder-close">×</div>
+						</div>
+					</vbox>
 					
 					<vbox id="retracted-items-container" collapsed="true">
 						<div xmlns="http://www.w3.org/1999/xhtml" id="retracted-items-banner">

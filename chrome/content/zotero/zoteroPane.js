@@ -2192,9 +2192,9 @@ var ZoteroPane = new function()
 	
 	
 	this.sync = function () {
-		let syncReminder = document.getElementById('zotero-sync-reminder-panel');
-		if (syncReminder.state !== 'closed') {
-			syncReminder.hidePopup();
+		let syncReminder = document.getElementById('sync-reminder-container');
+		if (!syncReminder.collapsed) {
+			syncReminder.collapsed = true;
 		}
 
 		Zotero.Sync.Server.canAutoResetClient = true;
@@ -2210,7 +2210,8 @@ var ZoteroPane = new function()
 				{ notify: (event) => {
 					// When the API Key is deleted we need to add an observer
 					if (event === 'delete') {
-						Zotero.debug(`Sync Reminder: Account has been unlinked`);
+						Zotero.Prefs.set('sync.reminder.setup.enabled', true);
+						Zotero.Prefs.set('sync.reminder.setup.lastDisplayed', String(Date.now()));
 						ZoteroPane.setupSyncReminders(false);
 					}
 					// When API Key is added we can remove the observer
@@ -2275,6 +2276,12 @@ var ZoteroPane = new function()
 			return;
 		}
 
+		// Check lastDisplayed was 30+ days ago
+		let lastDisplayed = parseInt(Zotero.Prefs.get(`sync.reminder.autoSync.lastDisplayed`));
+		if (lastDisplayed > (Date.now() - 2592000000)) {
+			return;
+		}
+
 		this.showSyncReminder('autoSync', false);
 	};
 
@@ -2288,9 +2295,14 @@ var ZoteroPane = new function()
 			return;
 		}
 
-		let firstWarningShown = parseInt(Zotero.Prefs.get('sync.reminder.setup.lastDisplayed')) > 0;
+		// Check lastDisplayed was 7+ days ago
+		let lastDisplayed = parseInt(Zotero.Prefs.get(`sync.reminder.setup.lastDisplayed`));
+		if (lastDisplayed > (Date.now() - 604800000)) {
+			return;
+		}
+
 		// When we have not seen the first warning, hide the checkbox
-		this.showSyncReminder('setup', !firstWarningShown);
+		this.showSyncReminder('setup', lastDisplayed === 0);
 	};
 
 
@@ -2298,63 +2310,51 @@ var ZoteroPane = new function()
 	 * Configure the UI and show the sync reminder panel for a given type of reminder
 	 *
 	 * @param reminderType - Possible values: 'setup' or 'autoSync'
-	 * @param hideCheckbox - True if the 'Don't show again' checkbox is hidden
+	 * @param hideDisable - True if the 'Don't show again' link is hidden
 	 */
-	this.showSyncReminder = function (reminderType, hideCheckbox) {
-		let lastDisplayed = parseInt(Zotero.Prefs.get(`sync.reminder.${reminderType}.lastDisplayed`));
-
-		// Check lastDisplayed was 30+ days ago
-		if (lastDisplayed > (Date.now() - 2592000000)) {
-			return;
-		}
-
-		let panel = document.getElementById('zotero-sync-reminder-panel');
-
-		let header = document.getElementById('zotero-sync-reminder-header');
-		header.setAttribute('value', Zotero.getString(`sync.reminder.${reminderType}.header`));
-
-		let description = document.getElementById('zotero-sync-reminder-description');
-		description.textContent = Zotero.getString(`sync.reminder.${reminderType}.description`);
-
-		let checkbox = document.getElementById('zotero-sync-reminder-show-again');
-		checkbox.setAttribute('label', Zotero.getString('general.dontShowReminderAgain'));
-		// This panel can hold an old value and when the user hits remind me it will use
-		// that value below, but we don't want that.
-		checkbox.checked = false;
-		// Hide if requested: sometimes we want to remind them twice before they have the
-		// option of never seeing it again
-		checkbox.hidden = hideCheckbox;
-
-		let remindMeButton = document.getElementById('zotero-sync-reminder-remind-me');
-		remindMeButton.setAttribute('label', Zotero.getString('sync.reminder.remindMeLater'));
-		remindMeButton.onclick = function () {
-			// User has asked to never see this reminder again
-			if (checkbox.checked) {
-				Zotero.Prefs.set(`sync.reminder.${reminderType}.enabled`, false);
-				// Check if we no longer need to observe item modifications
-				ZoteroPane.setupSyncReminders(false);
-			}
-			panel.hidePopup();
+	this.showSyncReminder = function (reminderType, hideDisable) {
+		let panel = document.getElementById('sync-reminder-container');
+		const closePanel = function () {
+			panel.setAttribute('collapsed', true);
+			Zotero.Prefs.set(`sync.reminder.${reminderType}.lastDisplayed`, String(Date.now()));
 		};
 
-		checkbox.onclick = function (event) {
-			let label = event.target.checked
-				? Zotero.getString('general.close')
-				: Zotero.getString('sync.reminder.remindMeLater');
-			remindMeButton.setAttribute('label', label);
-		};
-
-		let openButton = document.getElementById('zotero-sync-reminder-open');
-		openButton.setAttribute('label', Zotero.getString('sync.openSyncPreferences'));
-		openButton.onclick = function () {
-			panel.hidePopup();
+		let message = document.getElementById('sync-reminder-message');
+		message.textContent = Zotero.getString(`sync.reminder.${reminderType}.message`);
+		message.onclick = function () {
+			closePanel();
 			Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
 		};
 
-		Zotero.Prefs.set(`sync.reminder.${reminderType}.lastDisplayed`, String(Date.now()));
+		let actionLink = document.getElementById('sync-reminder-action');
+		actionLink.textContent = Zotero.getString(`sync.reminder.${reminderType}.action`);
+		actionLink.onclick = function () {
+			closePanel();
+			Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
+		};
 
-		let syncToolbarButton = document.getElementById('zotero-tb-sync');
-		panel.openPopup(syncToolbarButton, "after_end", 6, 0, false, false);
+		let dontShowAgainLink = document.getElementById('sync-reminder-disable');
+		dontShowAgainLink.textContent = Zotero.getString('general.dontAskMeAgain');
+		dontShowAgainLink.hidden = hideDisable;
+		dontShowAgainLink.onclick = function () {
+			closePanel();
+			Zotero.Prefs.set(`sync.reminder.${reminderType}.enabled`, false);
+			// Check if we no longer need to observe item modifications
+			ZoteroPane.setupSyncReminders(false);
+		};
+
+		let remindMeLink = document.getElementById('sync-reminder-remind');
+		remindMeLink.textContent = Zotero.getString('sync.reminder.remindMeLater');
+		remindMeLink.onclick = function () {
+			closePanel();
+		};
+
+		let closeButton = document.getElementById('sync-reminder-close');
+		closeButton.onclick = function () {
+			closePanel();
+		};
+
+		panel.removeAttribute('collapsed');
 	};
 
 
