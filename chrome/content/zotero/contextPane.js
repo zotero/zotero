@@ -168,6 +168,11 @@ var ZoteroContextPane = new function () {
 							await reader._initPromise;
 							_tabCover.hidden = true;
 						})();
+
+						var attachment = Zotero.Items.get(reader.itemID);
+						_selectNotesContext(attachment.libraryID);
+						var notesContext = _getNotesContext(attachment.libraryID);
+						notesContext.updateFromCache();
 					}
 				
 					_contextPaneSplitter.setAttribute('hidden', false);
@@ -177,10 +182,6 @@ var ZoteroContextPane = new function () {
 					_splitButton.classList.remove('hidden');
 				}
 				
-				var context = _itemContexts.find(x => x.tabID == ids[0]);
-				if (context) {
-					_selectNotesContext(context.libraryID);
-				}
 				_selectItemContext(ids[0]);
 				_update();
 			}
@@ -365,6 +366,16 @@ var ZoteroContextPane = new function () {
 
 		_panesDeck.append(_itemPaneDeck, _notesPaneDeck);
 	}
+
+	function _getCurrentParentItem() {
+		var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+		if (reader) {
+			var attachment = Zotero.Items.get(reader.itemID);
+			if (attachment) {
+				return attachment.parentItem;
+			}
+		}
+	}
 	
 	function _addNotesContext(libraryID) {
 		var list = document.createElement('vbox');
@@ -372,10 +383,12 @@ var ZoteroContextPane = new function () {
 		list.className = 'zotero-context-notes-list';
 
 		var noteContainer = document.createElement('vbox');
+		var title = document.createElement('vbox');
+		title.className = 'zotero-context-pane-editor-parent-line';
 		var editor = document.createElement('zoteronoteeditor');
 		editor.className = 'zotero-context-pane-pinned-note';
 		editor.setAttribute('flex', 1);
-		noteContainer.appendChild(editor);
+		noteContainer.append(title, editor);
 		
 		let contextNode = document.createElement('deck');
 		contextNode.append(list, noteContainer);
@@ -404,7 +417,10 @@ var ZoteroContextPane = new function () {
 					break;
 				
 				case 'context-pane-new-item-note':
-					// TODO: Get the parent item
+					var parentItem = _getCurrentParentItem();
+					if (!parentItem) {
+						return;
+					}
 					parentID = parentItem.id;
 					break;
 				
@@ -456,52 +472,70 @@ var ZoteroContextPane = new function () {
 
 		var notesListRef = React.createRef();
 
-		async function _updateNotesList(reset) {
-			if (reset) {
-				input.value = '';
-				contextNode.setAttribute('selectedIndex', 0);
+		async function _updateNotesList(useCached) {
+			var notes;
+			if (useCached && context.cachedNotes.length) {
+				notes = context.cachedNotes;
 			}
-			var query = input.value;
-
-			await Zotero.Schema.schemaUpdatePromise;
-			var s = new Zotero.Search();
-			s.addCondition('libraryID', 'is', libraryID);
-			s.addCondition('itemType', 'is', 'note');
-			if (query) {
-				let parts = Zotero.SearchConditions.parseSearchString(query);
-				for (let part of parts) {
-					s.addCondition('note', 'contains', part.text);
+			else {
+				var query = input.value;
+				await Zotero.Schema.schemaUpdatePromise;
+				var s = new Zotero.Search();
+				s.addCondition('libraryID', 'is', libraryID);
+				s.addCondition('itemType', 'is', 'note');
+				if (query) {
+					let parts = Zotero.SearchConditions.parseSearchString(query);
+					for (let part of parts) {
+						s.addCondition('note', 'contains', part.text);
+					}
 				}
+				notes = await s.search();
+				notes = Zotero.Items.get(notes);
+				notes.sort((a, b) => {
+					a = a.getField('dateModified');
+					b = b.getField('dateModified');
+					return b.localeCompare(a);
+				});
+				
+				notes = notes.map(note => {
+					var parentItem = note.parentItem;
+					var text = note.note;
+					text = Zotero.Utilities.unescapeHTML(text);
+					text = text.trim();
+					text = text.slice(0, 500);
+					var parts = text.split('\n').map(x => x.trim()).filter(x => x.length);
+					var title = parts[0] && parts[0].slice(0, Zotero.Notes.MAX_TITLE_LENGTH);
+					return {
+						id: note.id,
+						title: title || Zotero.getString('pane.item.notes.untitled'),
+						body: parts[1] || '',
+						date: (new Date(note.dateModified).toLocaleDateString(Zotero.locale)),
+						parentID: note.parentID,
+						parentItemType: parentItem && parentItem.itemType,
+						parentTitle: parentItem && parentItem.getDisplayTitle()
+					};
+				});
+				context.cachedNotes = notes;
 			}
-			var notes = await s.search();
-			notes = Zotero.Items.get(notes);
-			notes.sort((a, b) => {
-				a = a.getField('dateModified');
-				b = b.getField('dateModified');
-				return b.localeCompare(a);
-			});
 
-			notesListRef.current.setNotes(notes.map(note => {
-				var parentItem = note.parentItem;
-				var text = note.note;
-				text = Zotero.Utilities.unescapeHTML(text);
-				text = text.trim();
-				text = text.slice(0, 500);
-				var parts = text.split('\n').map(x => x.trim()).filter(x => x.length);
-				var title = parts[0] && parts[0].slice(0, Zotero.Notes.MAX_TITLE_LENGTH);
-				return {
-					id: note.id,
-					title: title || Zotero.getString('pane.item.notes.untitled'),
-					body: parts[1] || '',
-					date: (new Date(note.dateModified).toLocaleDateString(Zotero.locale)),
-					parentItemType: parentItem && parentItem.itemType,
-					parentTitle: parentItem && parentItem.getDisplayTitle()
-				};
-			}));
+			var readerParentItem = _getCurrentParentItem();
+			notesListRef.current.setNotes(notes.map(note => ({
+				...note,
+				isCurrentChild: readerParentItem && note.parentID == readerParentItem.id
+			})));
 
 			var c = notes.length;
 			label.value = Zotero.getString('pane.item.notes.count', c, c);
 		}
+
+		var context = {
+			libraryID,
+			node: contextNode,
+			editor,
+			cachedNotes: [],
+			update: Zotero.Utilities.throttle(_updateNotesList, 1000, { leading: false }),
+			updateFromCache: () => _updateNotesList(true)
+		};
 
 		ReactDOM.render(
 			<NotesList
@@ -515,16 +549,7 @@ var ZoteroContextPane = new function () {
 				_updateNotesList();
 			}
 		);
-
-		var context = {
-			libraryID,
-			node: contextNode,
-			update: Zotero.Utilities.throttle(_updateNotesList, 1000, { leading: false }),
-			editor
-		};
-
 		_notesContexts.push(context);
-		
 		return context;
 	}
 	
@@ -560,55 +585,29 @@ var ZoteroContextPane = new function () {
 	function _setPinnedNote(libraryID, itemID) {
 		var editable = _isLibraryEditable(libraryID);
 		var context = _getNotesContext(libraryID);
+		var item = Zotero.Items.get(itemID);
 		if (context) {
-			let { editor, node } = context;
+			var { editor, node } = context;
 			node.setAttribute('selectedIndex', 1);
 			editor.mode = editable ? 'edit' : 'view';
-			editor.item = Zotero.Items.get(itemID);
+			editor.item = item;
 			editor.parentItem = null;
 			editor.hideLinksContainer = true;
-			_updateAddToNote();
-		}
-	}
-	
-	function _appendNoteRows(notes, list, editable, onClick, onDelete) {
-		for (var i = 0; i < notes.length; i++) {
-			var note = notes[i];
-			let id = notes[i].id;
-
-			var icon = document.createElement('image');
-			icon.className = 'zotero-box-icon';
-			icon.setAttribute('src', `chrome://zotero/skin/treeitem-note${Zotero.hiDPISuffix}.png`);
-
-			var label = document.createElement('label');
-			label.className = 'zotero-box-label';
-			var title = note.getNoteTitle();
-			title = title ? title : Zotero.getString('pane.item.notes.untitled');
-			label.setAttribute('value', title);
-			label.setAttribute('flex', '1');	//so that the long names will flex smaller
-			label.setAttribute('crop', 'end');
-
-			var box = document.createElement('box');
-			box.setAttribute('class', 'zotero-clicky');
-			box.addEventListener('click', () => {
-				onClick(id);
-			});
-			box.appendChild(icon);
-			box.appendChild(label);
 			
-			var row = document.createElement('row');
-			row.appendChild(box);
-			if (editable) {
-				var removeButton = document.createElement('label');
-				removeButton.setAttribute('value', '-');
-				removeButton.setAttribute('class', 'zotero-clicky zotero-clicky-minus');
-				removeButton.addEventListener('click', function () {
-					onDelete(id);
-				});
-				row.appendChild(removeButton);
+			node.querySelector('.zotero-context-pane-editor-parent-line').innerHTML = '';
+			var parentItem = item.parentItem;
+			if (parentItem) {
+				var container = document.createElementNS(HTML_NS, 'div');
+				var img = document.createElementNS(HTML_NS, 'img');
+				img.src = Zotero.ItemTypes.getImageSrc(parentItem.itemType);
+				img.className = 'parent-item-type';
+				var title = document.createElementNS(HTML_NS, 'div');
+				title.append(parentItem.getDisplayTitle());
+				title.className = 'parent-title';
+				container.append(img, title);
+				node.querySelector('.zotero-context-pane-editor-parent-line').append(container);
 			}
-
-			list.appendChild(row);
+			_updateAddToNote();
 		}
 	}
 

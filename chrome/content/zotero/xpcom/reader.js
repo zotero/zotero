@@ -41,9 +41,6 @@ class ReaderInstance {
 	}
 
 	async open({ itemID, state, location }) {
-		if (itemID === this._itemID) {
-			return false;
-		}
 		let item = await Zotero.Items.getAsync(itemID);
 		if (!item) {
 			return false;
@@ -70,6 +67,10 @@ class ReaderInstance {
 			bottomPlaceholderHeight: this._bottomPlaceholderHeight
 		}, [buf]);
 		return true;
+	}
+	
+	get itemID() {
+		return this._itemID;
 	}
 	
 	updateTitle() {
@@ -464,6 +465,7 @@ class ReaderInstance {
 class ReaderTab extends ReaderInstance {
 	constructor({ itemID, sidebarWidth, sidebarOpen, bottomPlaceholderHeight }) {
 		super();
+		this._itemID = itemID;
 		this._sidebarWidth = sidebarWidth;
 		this._sidebarOpen = sidebarOpen;
 		this._bottomPlaceholderHeight = bottomPlaceholderHeight;

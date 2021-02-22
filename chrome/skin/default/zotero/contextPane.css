@@ -69,3 +69,22 @@
 .zotero-context-notes-list {
     padding-top: 5px;
 }
+
+.zotero-context-pane-editor-parent-line > div {
+    display: flex;
+    align-items: center;
+    padding: 5px 5px;
+}
+
+.zotero-context-pane-editor-parent-line .parent-item-type {
+    margin-right: 3px;
+    width: 16px;
+}
+
+.zotero-context-pane-editor-parent-line .parent-title {
+    flex-grow: 1;
+    width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

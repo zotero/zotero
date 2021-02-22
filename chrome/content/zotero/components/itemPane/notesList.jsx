@@ -52,9 +52,18 @@ const NoteRow = ({ title, body, date, onClick, parentItemType, parentTitle }) =>
 const NotesList = forwardRef(({ onClick }, ref) => {
 	const [notes, setNotes] = useState([]);
 	useImperativeHandle(ref, () => ({ setNotes }));
+	let currentChildNotes = notes.filter(x => x.isCurrentChild);
+	let allNotes = notes.filter(x => !x.isCurrentChild);
 	return (
 		<div className="notes-list">
-			{notes.map(note => <NoteRow key={note.id} {...note} onClick={() => onClick(note.id)}/>)}
+			<section>
+				{!!currentChildNotes.length && <h2>{Zotero.getString('pane.context.itemNotes')}</h2>}
+				{currentChildNotes.map(note => <NoteRow key={note.id} {...note} onClick={() => onClick(note.id)}/>)}
+			</section>
+			<section>
+				{!!allNotes && <h2>{Zotero.getString('pane.context.allNotes')}</h2>}
+				{allNotes.map(note => <NoteRow key={note.id} {...note} onClick={() => onClick(note.id)}/>)}
+			</section>
 		</div>
 	);
 });
