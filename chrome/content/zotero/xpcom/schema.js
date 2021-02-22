@@ -1799,9 +1799,9 @@ Zotero.Schema = new function(){
 		var noteID = parseInt(yield Zotero.DB.valueQueryAsync(
 			"SELECT itemTypeID FROM itemTypes WHERE typeName='note'"
 		));
-		var annotationID = parseInt(yield Zotero.DB.valueQueryAsync(
+		var annotationID = parseInt((yield Zotero.DB.valueQueryAsync(
 			"SELECT itemTypeID FROM itemTypes WHERE typeName='annotation'"
-		));
+		)) || -1);
 		
 		// The first position is for testing and the second is for repairing. Can be either SQL
 		// statements or promise-returning functions. For statements, the repair entry can be either
