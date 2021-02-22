@@ -395,18 +395,40 @@ var ZoteroContextPane = new function () {
 		var label = document.createElement('label');
 		var button = document.createElement('button');
 		button.setAttribute('label', Zotero.Intl.strings['zotero.toolbar.newNote']);
-		button.addEventListener('click', () => {
+		
+		// Create standalone or child note on menuitem click
+		document.getElementById('context-pane-new-note-button-popup').onclick = function (event) {
+			var parentID = null;
+			switch (event.originalTarget.id) {
+				case 'context-pane-new-standalone-note':
+					break;
+				
+				case 'context-pane-new-item-note':
+					// TODO: Get the parent item
+					parentID = parentItem.id;
+					break;
+				
+				default:
+					return;
+			}
+			
 			contextNode.setAttribute('selectedIndex', 1);
 			var item = new Zotero.Item('note');
 			item.libraryID = libraryID;
-			// item.parentKey = parentItem.key;
+			if (parentID) {
+				item.parentID = parentID;
+			}
 			editor.mode = 'edit';
 			editor.item = item;
 			editor.parentItem = null;
 			editor.focus();
 			_updateAddToNote();
+		};
+		
+		button.addEventListener('mousedown', (event) => {
+			var popup = document.getElementById('context-pane-new-note-button-popup');
+			popup.openPopup(event.target, 'after_end');
 		});
-
 
 		var vbox1 = document.createElement('vbox');
 		vbox1.append(label, button);
@@ -445,7 +467,6 @@ var ZoteroContextPane = new function () {
 			var s = new Zotero.Search();
 			s.addCondition('libraryID', 'is', libraryID);
 			s.addCondition('itemType', 'is', 'note');
-			s.addCondition('noChildren', 'true');
 			if (query) {
 				let parts = Zotero.SearchConditions.parseSearchString(query);
 				for (let part of parts) {
@@ -461,6 +482,7 @@ var ZoteroContextPane = new function () {
 			});
 
 			notesListRef.current.setNotes(notes.map(note => {
+				var parentItem = note.parentItem;
 				var text = note.note;
 				text = Zotero.Utilities.unescapeHTML(text);
 				text = text.trim();
@@ -471,7 +493,9 @@ var ZoteroContextPane = new function () {
 					id: note.id,
 					title: title || Zotero.getString('pane.item.notes.untitled'),
 					body: parts[1] || '',
-					date: (new Date(note.dateModified).toLocaleDateString(Zotero.locale))
+					date: (new Date(note.dateModified).toLocaleDateString(Zotero.locale)),
+					parentItemType: parentItem && parentItem.itemType,
+					parentTitle: parentItem && parentItem.getDisplayTitle()
 				};
 			}));
 
@@ -636,170 +660,17 @@ var ZoteroContextPane = new function () {
 		}
 		var parentItem = Zotero.Items.get(item.parentID);
 
-		// tabbox
-		var tabbox = document.createElement('tabbox');
-		tabbox.setAttribute('flex', '1');
-		tabbox.className = 'zotero-view-tabbox';
-
-		container.append(tabbox);
-
-		// tabs
-		var tabs = document.createElement('tabs');
-		tabs.className = 'zotero-editpane-tabs';
-		// tabpanels
-		var tabpanels = document.createElement('tabpanels');
-		tabpanels.setAttribute('flex', '1');
-		tabpanels.className = 'zotero-view-item';
-		tabpanels.addEventListener('select', () => {
-			_updateAddToNote();
-		});
-
-		tabbox.append(tabs, tabpanels);
-
-		// Info tab
-		var tabInfo = document.createElement('tab');
-		tabInfo.setAttribute('label', Zotero.Intl.strings['zotero.tabs.info.label']);
-		// Notes tab
-		var tabNotes = document.createElement('tab');
-		tabNotes.setAttribute('label', Zotero.Intl.strings['zotero.tabs.notes.label']);
-		// Tags tab
-		var tabTags = document.createElement('tab');
-		tabTags.setAttribute('label', Zotero.Intl.strings['zotero.tabs.tags.label']);
-		// Related tab
-		var tabRelated = document.createElement('tab');
-		tabRelated.setAttribute('label', Zotero.Intl.strings['zotero.tabs.related.label']);
-
-		tabs.append(tabInfo, tabNotes, tabTags, tabRelated);
-
-		// Info panel
-		var panelInfo = document.createElement('tabpanel');
+		// Info pane
+		var panelInfo = document.createElement('vbox');
 		panelInfo.setAttribute('flex', '1');
 		panelInfo.className = 'zotero-editpane-item-box';
 		var itemBox = document.createElement('zoteroitembox');
 		itemBox.setAttribute('flex', '1');
 		panelInfo.append(itemBox);
-		// Notes panel
-		var panelNotes = document.createElement('tabpanel');
-		panelNotes.setAttribute('flex', '1');
-		panelNotes.setAttribute('orient', 'vertical');
-		var deck = document.createElement('deck');
-		deck.className = 'notes-deck';
-		deck.setAttribute('flex', '1');
-		panelNotes.append(deck);
-		var vbox2 = document.createElement('vbox');
-		var note = document.createElement('zoteronoteeditor');
-		note.setAttribute('flex', 1);
-		vbox2.append(note);
-		var vbox = document.createElement('vbox');
-		vbox.setAttribute('flex', '1');
-		vbox.setAttribute('class', 'zotero-box');
-		vbox.style.overflowY = 'auto';
-		panelNotes.append(vbox);
-		var hbox = document.createElement('hbox');
-		hbox.setAttribute('align', 'center');
-		var label = document.createElement('label');
-		var button = document.createElement('button');
-		button.hidden = !editable;
-		button.setAttribute('label', Zotero.Intl.strings['zotero.item.add']);
-		button.addEventListener('click', () => {
-			deck.setAttribute('selectedIndex', 1);
-			var item = new Zotero.Item('note');
-			item.libraryID = parentItem.libraryID;
-			item.parentID = parentItem.id;
-			note.returnHandler = () => {
-				deck.setAttribute('selectedIndex', 0);
-				_updateAddToNote();
-			};
-			note.mode = editable ? 'edit' : 'view';
-			note.item = item;
-			note.focus();
-			_updateAddToNote();
-		});
-		hbox.append(label, button);
-		var grid = document.createElement('grid');
-		grid.setAttribute('flex', 1);
-		var columns = document.createElement('columns');
-		var column = document.createElement('column');
-		column.setAttribute('flex', 1);
-		columns.append(column);
-		var column = document.createElement('column');
-		columns.append(column);
-		grid.append(columns);
-		var rows = document.createElement('rows');
-		rows.setAttribute('flex', 1);
-		grid.append(rows);
-		vbox.append(hbox, grid);
-		deck.append(vbox, vbox2);
-		deck.setAttribute('selectedIndex', 0);
-		// Tags panel
-		var panelTags = document.createElement('tabpanel');
-		panelTags.setAttribute('orient', 'vertical');
-		panelTags.setAttribute('context', 'tags-context-menu');
-		panelTags.className = 'tags-pane';
-		panelTags.style.display = 'flex';
-		var div = document.createElementNS(HTML_NS, 'div');
-		div.className = 'tags-box-container';
-		div.style.display = 'flex';
-		div.style.flexGrow = '1';
-		panelTags.append(div);
-		var tagsBoxRef = React.createRef();
-		ReactDOM.render(
-			<TagsBoxContainer
-				key={'tagsBox-' + parentItem.id}
-				item={parentItem}
-				editable={editable}
-				ref={tagsBoxRef}
-			/>,
-			div
-		);
-		// Related panel
-		var panelRelated = document.createElement('tabpanel');
-		var relatedBox = document.createElement('relatedbox');
-		relatedBox.setAttribute('flex', '1');
-		relatedBox.className = 'zotero-editpane-related';
-		panelRelated.addEventListener('click', (event) => {
-			if (event.originalTarget.closest('.zotero-clicky')) {
-				Zotero_Tabs.select('zotero-pane');
-			}
-		});
-		panelRelated.append(relatedBox);
-
-		tabpanels.append(panelInfo, panelNotes, panelTags, panelRelated);
-		tabbox.selectedIndex = 0;
-
+		container.append(panelInfo);
 
 		itemBox.mode = editable ? 'edit' : 'view';
 		itemBox.item = parentItem;
-
-		relatedBox.mode = editable ? 'edit' : 'view';
-		relatedBox.item = parentItem;
-
-		function _renderNotesPanel() {
-			rows.innerHTML = '';
-			var parentItem = Zotero.Items.get(parentID);
-			if (!parentItem) {
-				return;
-			}
-			var parentNotes = Zotero.Items.get(parentItem.getNotes());
-			_appendNoteRows(parentNotes, rows, editable, (id) => {
-				deck.setAttribute('selectedIndex', 1);
-				note.returnHandler = () => {
-					deck.setAttribute('selectedIndex', 0);
-					_updateAddToNote();
-				};
-				note.mode = editable ? 'edit' : 'view';
-				note.item = Zotero.Items.get(id);
-				note.parentItem = null;
-				_updateAddToNote();
-			}, (id) => {
-				_removeNote(id);
-			});
-			var c = parentNotes.length;
-			label.value = Zotero.getString('pane.item.notes.count', c, c);
-		}
-
-		context.update = Zotero.Utilities.throttle(_renderNotesPanel, 500);
-		_renderNotesPanel();
 	}
 };
 

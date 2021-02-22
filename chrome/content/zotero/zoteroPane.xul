@@ -624,6 +624,13 @@
 					<hbox id="zotero-context-pane-inner" flex="1" zotero-persist="height"/>
 				</vbox>
 			</box>
+			
+			<popupset>
+				<menupopup id="context-pane-new-note-button-popup">
+					<menuitem id="context-pane-new-standalone-note" label="&zotero.toolbar.note.standalone;"/>
+					<menuitem id="context-pane-new-item-note" label="&zotero.toolbar.note.child;"/>
+				</menupopup>
+			</popupset>
 		</hbox>
 		
 		<!-- Barrier to prevent tabbing into Zotero pane when busy -->

@@ -20,6 +20,10 @@
 	margin-bottom: .25em !important;
 }
 
+.zotero-item-pane-content {
+	background: -moz-Field; /* Same as background colour for treeview */
+}
+
 .zotero-view-item
 {
 	padding: 0;

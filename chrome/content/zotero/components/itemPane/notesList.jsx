@@ -24,15 +24,23 @@
 */
 
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
+import cx from 'classnames';
 
-const NoteRow = ({ title, body, date, onClick }) => {
+const NoteRow = ({ title, body, date, onClick, parentItemType, parentTitle }) => {
 	return (
-		<div className="note-row" onClick={onClick}>
+		<div className={cx('note-row', { 'standalone-note-row': !parentItemType })} onClick={onClick}>
 			<div className="inner">
-				<div className="first-line">
+				{ parentItemType
+					? <div className="parent-line">
+						<img className="parent-item-type" src={Zotero.ItemTypes.getImageSrc(parentItemType)} />
+						<span className="parent-title">{parentTitle}</span>
+					</div>
+					: null
+				}
+				<div className="title-line">
 					<div className="title">{title}</div>
 				</div>
-				<div className="second-line">
+				<div className="body-line">
 					<div className="date">{date}</div>
 					<div className="body">{body}</div>
 				</div>
