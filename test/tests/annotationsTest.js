@@ -123,13 +123,14 @@ describe("Zotero.Annotations", function() {
 		exampleNote.libraryID = item.libraryID;
 		exampleImage.libraryID = item.libraryID;
 		
-		group = await getGroup();
+		// Disabled while group annotations are disabled
+		/*group = await getGroup();
 		exampleGroupHighlight.libraryID = group.libraryID;
 		groupItem = await createDataObject('item', { libraryID: group.libraryID });
 		groupAttachment = await importFileAttachment(
 			'test.pdf',
 			{ libraryID: group.libraryID, parentID: groupItem.id }
-		);
+		);*/
 	});
 	
 	describe("#toJSON()", function () {
@@ -232,7 +233,7 @@ describe("Zotero.Annotations", function() {
 			await annotation.eraseTx();
 		});
 		
-		it("should generate an object for a highlight by another user in a group library", async function () {
+		it.skip("should generate an object for a highlight by another user in a group library", async function () {
 			await Zotero.Users.setName(12345, 'Kate Smith');
 			
 			var annotation = new Zotero.Item('annotation');
