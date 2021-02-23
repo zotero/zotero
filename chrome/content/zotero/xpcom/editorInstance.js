@@ -343,7 +343,7 @@ class EditorInstance {
 				if (!item) {
 					return;
 				}
-				let attachments = Zotero.Items.get(item.getAttachments());
+				let attachments = Zotero.Items.get(item.getAttachments()).filter(x => x.isPDFAttachment());
 				if (citationItem.locator && attachments.length === 1) {
 					await Zotero.Reader.open(attachments[0].id, { pageLabel: citationItem.locator });
 				}
