@@ -2121,6 +2121,25 @@ describe("Zotero.Translate.ItemGetter", function() {
 		});
 	});
 	
+	describe("#setAll()", function () {
+		it("should exclude annotations", async function () {
+			var attachment = await importFileAttachment('test.pdf');
+			var annotation = await createAnnotation('highlight', attachment);
+			
+			var getter = new Zotero.Translate.ItemGetter();
+			await getter.setAll(attachment.libraryID, false);
+			
+			var item;
+			while (item = getter.nextItem()) {
+				if (item.itemType == 'annotation') {
+					assert.fail("Annotation item should not be returned from nextItem()");
+					break;
+				}
+			}
+			assert.equal(getter.numItems, 1);
+		});
+	});
+	
 	describe("#_attachmentToArray()", function () {
 		it("should handle missing attachment files", function* () {
 			var item = yield importFileAttachment('test.png');

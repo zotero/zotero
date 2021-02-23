@@ -1038,7 +1038,15 @@ Zotero.Translate.ItemGetter.prototype = {
 	},
 	
 	"setAll": Zotero.Promise.coroutine(function* (libraryID, getChildCollections) {
-		this._itemsLeft = yield Zotero.Items.getAll(libraryID, true);
+		this._itemsLeft = (yield Zotero.Items.getAll(libraryID, true))
+			.filter((item) => {
+				// Don't export annotations
+				switch (item.itemType) {
+					case 'annotation':
+						return false;
+				}
+				return true;
+			});
 		
 		if(getChildCollections) {
 			this._collectionsLeft = Zotero.Collections.getByLibrary(libraryID);
