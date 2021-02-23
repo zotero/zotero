@@ -26,6 +26,8 @@
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import cx from 'classnames';
 
+const MAX_ALL_NOTES = 7;
+
 const NoteRow = ({ title, body, date, onClick, parentItemType, parentTitle }) => {
 	return (
 		<div className={cx('note-row', { 'standalone-note-row': !parentItemType })} onClick={onClick}>
@@ -51,7 +53,13 @@ const NoteRow = ({ title, body, date, onClick, parentItemType, parentTitle }) =>
 
 const NotesList = forwardRef(({ onClick }, ref) => {
 	const [notes, setNotes] = useState([]);
-	useImperativeHandle(ref, () => ({ setNotes }));
+	const [expanded, setExpanded] = useState(false);
+	useImperativeHandle(ref, () => ({ setNotes, setExpanded }));
+	
+	function handleClickMore() {
+		setExpanded(true);
+	}
+	
 	let currentChildNotes = notes.filter(x => x.isCurrentChild);
 	let allNotes = notes.filter(x => !x.isCurrentChild);
 	return (
@@ -62,7 +70,8 @@ const NotesList = forwardRef(({ onClick }, ref) => {
 			</section>
 			<section>
 				{!!allNotes && <h2>{Zotero.getString('pane.context.allNotes')}</h2>}
-				{allNotes.map(note => <NoteRow key={note.id} {...note} onClick={() => onClick(note.id)}/>)}
+				{(expanded ? allNotes : allNotes.slice(0, MAX_ALL_NOTES)).map(note => <NoteRow key={note.id} {...note} onClick={() => onClick(note.id)}/>)}
+				{!expanded && allNotes.length > MAX_ALL_NOTES && <div className="more-row" onClick={handleClickMore}>{Zotero.getString('general.numMore', [allNotes.length - MAX_ALL_NOTES])}</div>}
 			</section>
 		</div>
 	);

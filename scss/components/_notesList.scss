@@ -93,6 +93,19 @@
 	}
 }
 
+.more-row {
+	border: 1px solid #bcc4d2;
+	border-radius: 5px;
+	margin: 4px 7px;
+	background-color: $shade-2;
+	text-align: center;
+	padding: 5px;
+
+	&:active {
+		background: #e4ebf9;
+	}
+}
+
 .standalone-note-row {
 	.title-line {
 		padding-top: 6px !important;
