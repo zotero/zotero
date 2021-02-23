@@ -120,6 +120,31 @@ Zotero.Notes = new function() {
 			await Zotero.Notifier.trigger('refresh', 'item', idsToRefresh);
 		});
 	};
+	
+	this.getExportableNote = async function(item) {
+		if (!item.isNote()) {
+			throw new Error('Item is not a note');
+		}
+		var note = item.getNote();
+		
+		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+			.createInstance(Components.interfaces.nsIDOMParser);
+		var doc = parser.parseFromString(note, 'text/html');
+		
+		var nodes = doc.querySelectorAll('img[data-attachment-key]');
+		for (var node of nodes) {
+			var attachmentKey = node.getAttribute('data-attachment-key');
+			if (attachmentKey) {
+				var attachment = Zotero.Items.getByLibraryAndKey(item.libraryID, attachmentKey);
+				if (attachment && attachment.parentID == item.id) {
+					var dataURI = await attachment.attachmentDataURI;
+					node.setAttribute('src', dataURI);
+				}
+			}
+			node.removeAttribute('data-attachment-key');
+		}
+		return doc.body.innerHTML;
+	};
 };
 
 if (typeof process === 'object' && process + '' === '[object process]') {
