@@ -503,7 +503,7 @@ var Zotero_QuickFormat = new function () {
 			searchString = searchString.toLowerCase();
 			var collation = Zotero.getLocaleCollation();
 			
-			items.sort(function _itemSort(a, b) {
+			function _itemSort(a, b) {
 				var firstCreatorA = a.firstCreator, firstCreatorB = b.firstCreator;
 				
 				// Favor left-bound name matches (e.g., "Baum" < "Appelbaum"),
@@ -549,7 +549,15 @@ var Zotero_QuickFormat = new function () {
 				var yearA = a.getField("date", true, true).substr(0, 4),
 					yearB = b.getField("date", true, true).substr(0, 4);
 				return yearA - yearB;
-			});
+			}
+			
+			function _noteSort(a, b) {
+				return collation.compareString(
+					1, b.getField('dateModified'), a.getField('dateModified')
+				);
+			}
+			
+			items.sort(Zotero_QuickFormat.citingNotes ? _noteSort : _itemSort);
 			
 			var previousLibrary = -1;
 			for(var i=0, n=Math.min(items.length, citedItemsMatchingSearch ? 50-citedItemsMatchingSearch.length : 50); i<n; i++) {
