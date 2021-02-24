@@ -35,6 +35,7 @@ const symlinks = symlinkFiles
 				.concat(dirs.map(d => `${d}/**`))
 				.concat([`!${formatDirsForMatcher(dirs)}/**/*.js`])
 				.concat([`!${formatDirsForMatcher(dirs)}/**/*.jsx`])
+				.concat([`!${formatDirsForMatcher(dirs)}/**/*.scss`])
 				.concat([`!${formatDirsForMatcher(copyDirs)}/**`]);
 
 var signatures;
@@ -48,24 +49,33 @@ function getWatch() {
 	let watcher = chokidar.watch(source, { cwd: ROOT })
 	.on('change', async (path) => {
 		try {
+			var matched = false;
 			if (multimatch(path, jsFiles).length && !multimatch(path, ignoreMask).length) {
 				onSuccess(await getJS(path, { ignore: ignoreMask }, signatures));
-			} else if (multimatch(path, scssFiles).length) {
-				if (multimatch(path, '**/_*.scss').length) {
-					onSuccess(await getSass(scssFiles, { ignore: ignoreMask }));
-				} else {
-					onSuccess(await getSass(path, {}, signatures));
-				}
-			} else if (multimatch(path, copyDirs.map(d => `${d}/**`)).length) {
-				onSuccess(await getCopy(path, {}, signatures));
-			} else if (multimatch(path, symlinks).length) {
-				onSuccess(await getSymlinks(path, { nodir: true }, signatures));
+				onSuccess(await cleanUp(signatures));
+				return;
 			}
-			onSuccess(await cleanUp(signatures));
-		} catch (err) {
+			for (var i = 0; i < scssFiles.length; i++) {
+				if (multimatch(path, scssFiles[i])) {
+					onSuccess(await getSass(scssFiles[i], { ignore: ignoreMask }));
+					onSuccess(await cleanUp(signatures));
+					return;
+				}
+			}
+			if (multimatch(path, copyDirs.map(d => `${d}/**`)).length) {
+				onSuccess(await getCopy(path, {}, signatures));
+				onSuccess(await cleanUp(signatures));
+				return;
+			}
+			if (multimatch(path, symlinks).length) {
+				onSuccess(await getSymlinks(path, { nodir: true }, signatures));
+				onSuccess(await cleanUp(signatures));
+				return;
+			}
+		}
+		catch (err) {
 			onError(err);
 		}
-
 	})
 	.on('unlink', async () => {
 		const signatures = await getSignatures();
