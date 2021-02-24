@@ -231,8 +231,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		Zotero.isDevBuild = Zotero.version.includes('beta')
 			|| Zotero.version.includes('dev')
 			|| Zotero.version.includes('SOURCE');
-		Zotero.isPDFBuild = true // Toggle for testing
-			&& (Zotero.version.includes('dev') || Zotero.version.includes('SOURCE'));
+		Zotero.isPDFBuild = true;
 		
 		// OS platform
 		var win = Components.classes["@mozilla.org/appshell/appShellService;1"]
