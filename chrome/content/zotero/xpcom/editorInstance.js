@@ -153,7 +153,7 @@ class EditorInstance {
 
 	async insertAnnotations(annotations) {
 		await this._ensureNoteCreated();
-		let html = await this._digestAnnotations(annotations);
+		let html = await this._serializeAnnotations(annotations);
 		if (html) {
 			this._postMessage({ action: 'insertHTML', pos: -1, html });
 		}
@@ -176,8 +176,13 @@ class EditorInstance {
 	_handleFontChange = () => {
 		this._postMessage({ action: 'updateFont', font: this._getFont() });
 	}
-
-	async _digestAnnotations(annotations) {
+	
+	
+	/**
+	 * @param {Zotero.Item[]} annotations
+	 * @return {String} - HTML string
+	 */
+	async _serializeAnnotations(annotations) {
 		let html = '';
 		for (let annotation of annotations) {
 			let attachmentItem = await Zotero.Items.getAsync(annotation.attachmentItemID);
@@ -316,7 +321,7 @@ class EditorInstance {
 				}
 				else if (type === 'zotero/annotation') {
 					let annotations = JSON.parse(data);
-					html = await this._digestAnnotations(annotations);
+					html = await this._serializeAnnotations(annotations);
 				}
 				if (html) {
 					this._postMessage({ action: 'insertHTML', pos, html });
@@ -966,11 +971,11 @@ class EditorInstance {
 	 *
 	 * @param {Zotero.Item[]} annotations
 	 * @param {Integer} parentID Creates standalone note if not provided
-	 * @returns {Promise<Zotero.Item|undefined>}
+	 * @returns {Promise<Zotero.Item>}
 	 */
 	static async createNoteFromAnnotations(annotations, parentID) {
 		if (!annotations.length) {
-			return;
+			throw new Error("No annotations provided");
 		}
 		let note = new Zotero.Item('note');
 		note.libraryID = annotations[0].libraryID;
@@ -985,8 +990,8 @@ class EditorInstance {
 			jsonAnnotation.attachmentItemID = attachmentItem.id;
 			jsonAnnotations.push(jsonAnnotation);
 		}
-		let html = `<p>(${(new Date()).toLocaleString()})</p>\n`;
-		html += await editorInstance._digestAnnotations(jsonAnnotations);
+		let html = `<h1>${Zotero.getString('note.annotationsWithDate', new Date().toLocaleString())}</h1>\n`;
+		html += await editorInstance._serializeAnnotations(jsonAnnotations);
 		note.setNote(html);
 		await note.saveTx();
 		return note;

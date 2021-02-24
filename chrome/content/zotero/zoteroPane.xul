@@ -280,6 +280,15 @@
 							<menuseparator/>
 							<!-- with icon: <menuitem class="menuitem-iconic" id="zotero-menuitem-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane_Local.newNote(false, this.parentNode.getAttribute('itemID'))"/>-->
 							<menuitem class="menuitem-iconic zotero-menuitem-attach-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane_Local.newNote(false, this.parentNode.getAttribute('itemKey'))"/>
+							
+							<menuitem class="menuitem-iconic zotero-menuitem-create-note-from-annotations"
+									label="&zotero.items.menu.attach.noteFromAnnotations;"
+									oncommand="ZoteroPane.createNoteFromAnnotationsFromSelected()"/>
+							<menu class="menuitem-iconic zotero-menuitem-create-note-from-annotations"
+									label="&zotero.items.menu.attach.noteFromAnnotations;">
+								<menupopup id="create-note-from-annotations-popup"/>
+							</menu>
+							
 							<menu class="menu-iconic zotero-menuitem-attach" label="&zotero.items.menu.attach;">
 								<menupopup id="zotero-add-attachment-popup">
 									<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link.uri;" oncommand="var itemID = parseInt(this.parentNode.parentNode.parentNode.getAttribute('itemID')); ZoteroPane_Local.addAttachmentFromURI(true, itemID);"/>
@@ -308,7 +317,6 @@
 							<menuitem class="menuitem-iconic zotero-menuitem-create-parent" oncommand="ZoteroPane_Local.createParentItemsFromSelected();"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-rename-from-parent" oncommand="ZoteroPane_Local.renameSelectedAttachmentsFromParents()"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-reindex" oncommand="ZoteroPane_Local.reindexItem();"/>
-							<menuitem class="menuitem-iconic zotero-menuitem-create-note-from-annotations" label="&zotero.items.menu.createNoteFromAnnotations;" oncommand="ZoteroPane.createNoteFromSelected()"/>
 						</menupopup>
 						
 						<tooltip id="fake-tooltip"/>

@@ -2302,7 +2302,7 @@ Zotero.Item.prototype.isEmbeddedImageAttachment = function() {
  * @return {Boolean} - Returns true if item is a stored or linked PDF attachment
  */
 Zotero.Item.prototype.isPDFAttachment = function () {
-	return this.isAttachment() && this.attachmentContentType == 'application/pdf';
+	return this.isFileAttachment() && this.attachmentContentType == 'application/pdf';
 };
 
 
@@ -3769,6 +3769,34 @@ Zotero.Item.prototype.isImageAnnotation = function() {
 }
 
 
+Zotero.Item.prototype.numAnnotations = function (includeTrashed) {
+	if (!this.isFileAttachment()) {
+		throw new Error("numAnnotations() can only be called on file attachments");
+	}
+	
+	this._requireData('childItems');
+	
+	if (!this._annotations) {
+		return 0;
+	}
+	
+	var cacheKey = 'with' + (includeTrashed ? '' : 'out') + 'Trashed';
+	
+	if (this._annotations[cacheKey]) {
+		return this._annotations[cacheKey].length
+	}
+	
+	var rows = this._annotations.rows;
+	// Remove trashed items if necessary
+	if (!includeTrashed) {
+		rows = rows.filter(row => !row.trashed);
+	}
+	var ids = rows.map(row => row.itemID);
+	this._annotations[cacheKey] = ids;
+	return rows.length;
+};
+
+
 /**
  * Returns child annotations for an attachment item
  *
@@ -3776,8 +3804,8 @@ Zotero.Item.prototype.isImageAnnotation = function() {
  * @return {Zotero.Item[]}
  */
 Zotero.Item.prototype.getAnnotations = function (includeTrashed) {
-	if (!this.isAttachment()) {
-		throw new Error("getAnnotations() can only be called on attachment items");
+	if (!this.isFileAttachment()) {
+		throw new Error("getAnnotations() can only be called on file attachments");
 	}
 	
 	this._requireData('childItems');
@@ -3792,7 +3820,7 @@ Zotero.Item.prototype.getAnnotations = function (includeTrashed) {
 		return Zotero.Items.get([...this._annotations[cacheKey]]);
 	}
 	
-	var rows = this._annotations.rows.concat();
+	var rows = this._annotations.rows;
 	// Remove trashed items if necessary
 	if (!includeTrashed) {
 		rows = rows.filter(row => !row.trashed);

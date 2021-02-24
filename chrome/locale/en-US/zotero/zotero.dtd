@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary					"Show in Library">
 <!ENTITY zotero.items.menu.attach.note					"Add Note">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations     "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach						"Add Attachment">
 <!ENTITY zotero.items.menu.attach.link.uri				"Attach Link to URI…">
 <!ENTITY zotero.items.menu.attach.file					"Attach Stored Copy of File…">
@@ -101,7 +102,6 @@
 <!ENTITY zotero.items.menu.unrecognize                "Undo Retrieve Metadata">
 <!ENTITY zotero.items.menu.reportMetadata             "Report Incorrect Metadata">
 <!ENTITY zotero.items.menu.importAnnotations          "Import Annotations">
-<!ENTITY zotero.items.menu.createNoteFromAnnotations  "Create Note from Annotations">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect			"Choose the version of the item to use as the master item:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect				"Select fields to keep from other versions of the item:">
