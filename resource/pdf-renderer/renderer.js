@@ -31,7 +31,22 @@ function errObject(err) {
 	return JSON.parse(JSON.stringify(err, Object.getOwnPropertyNames(err)));
 }
 
-async function renderAnnotations(buf, annotations, send) {
+let lastPromiseID = 0;
+let waitingPromises = {};
+
+async function query(action, data, transfer) {
+	return new Promise((resolve, reject) => {
+		lastPromiseID++;
+		waitingPromises[lastPromiseID] = { resolve, reject };
+		parent.postMessage({
+			id: lastPromiseID,
+			action,
+			data
+		}, parent.origin, transfer);
+	});
+}
+
+async function renderAnnotations(buf, annotations) {
 	let num = 0;
 	let pdfDocument = await window.pdfjsLib.getDocument({ data: buf }).promise;
 	let pages = new Map();
@@ -54,10 +69,9 @@ async function renderAnnotations(buf, annotations, send) {
 			newCanvas.height = height;
 			let newCanvasContext = newCanvas.getContext('2d');
 			newCanvasContext.drawImage(canvas, left, top, width, height, 0, 0, width, height);
-			newCanvas.toBlob(async (blob) => {
-				let image = await new Response(blob).arrayBuffer();
-				send({ id: annotation.id, image });
-			}, 'image/png');
+			let blob = await new Promise(resolve => newCanvas.toBlob(resolve, 'image/png'));
+			let image = await new Response(blob).arrayBuffer();
+			await query('renderedAnnotation', { annotation: { id: annotation.id, image } }, [image]);
 			num++;
 		}
 	}
@@ -91,16 +105,25 @@ window.addEventListener('message', async (event) => {
 		return;
 	}
 	let message = event.data;
+
+	if (message.responseID) {
+		let { resolve, reject } = waitingPromises[message.responseID];
+		delete waitingPromises[message.responseID];
+		if (message.data) {
+			resolve(message.data);
+		}
+		else {
+			let err = new Error(message.error.message);
+			Object.assign(err, message.error);
+			reject(err);
+		}
+		return;
+	}
+				
 	if (message.action === 'renderAnnotations') {
 		try {
 			let { buf, annotations } = message.data;
-			let num = await renderAnnotations(
-				buf,
-				annotations,
-				(annotation) => {
-					parent.postMessage({ action: 'renderedAnnotation', data: { annotation } }, parent.origin, [annotation.image]);
-				}
-			);
+			let num = await renderAnnotations(buf, annotations);
 			parent.postMessage({ responseID: message.id, data: num }, parent.origin);
 		}
 		catch (e) {
@@ -114,5 +137,5 @@ window.addEventListener('message', async (event) => {
 });
 
 setTimeout(() => {
-	parent.postMessage({ action: 'initialized' }, parent.origin);
+	query('initialized', {});
 }, 100);

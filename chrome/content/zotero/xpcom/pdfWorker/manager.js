@@ -82,7 +82,6 @@ class PDFWorker {
 		this._worker = new Worker(WORKER_URL);
 		this._worker.addEventListener('message', async (event) => {
 			let message = event.data;
-			// console.log(event.data)
 			if (message.responseID) {
 				let { resolve, reject } = this._waitingPromises[message.responseID];
 				delete this._waitingPromises[message.responseID];
@@ -141,8 +140,8 @@ class PDFWorker {
 	 *
 	 * @param {Integer} itemID
 	 * @param {String} path
-	 * @param {Boolean} isPriority
-	 * @param {String} password
+	 * @param {Boolean} [isPriority]
+	 * @param {String} [password]
 	 * @returns {Promise<Integer>} Number of written annotations
 	 */
 	async export(itemID, path, isPriority, password) {
@@ -165,7 +164,7 @@ class PDFWorker {
 					dateModified: item.dateModified
 				});
 			}
-			let attachmentPath = await attachment.getFilePath();
+			let attachmentPath = await attachment.getFilePathAsync();
 			let buf = await OS.File.read(attachmentPath, {});
 			buf = new Uint8Array(buf).buffer;
 
@@ -193,7 +192,7 @@ class PDFWorker {
 	 *
 	 * @param {Zotero.Item} item
 	 * @param {String} directory
-	 * @param {Boolean} isPriority
+	 * @param {Boolean} [isPriority]
 	 */
 	async exportParent(item, directory, isPriority) {
 		if (!item.isRegularItem()) {
@@ -218,8 +217,8 @@ class PDFWorker {
 	 * Import annotations from PDF attachment
 	 *
 	 * @param {Integer} itemID Attachment item id
-	 * @param {Boolean} isPriority
-	 * @param {String} password
+	 * @param {Boolean} [isPriority]
+	 * @param {String} [password]
 	 * @returns {Promise<Integer>} Number of annotations
 	 */
 	async import(itemID, isPriority, password) {
@@ -244,7 +243,7 @@ class PDFWorker {
 				comment: annotation.annotationComment || ''
 			}));
 
-			let path = await attachment.getFilePath();
+			let path = await attachment.getFilePathAsync();
 			let buf = await OS.File.read(path, {});
 			buf = new Uint8Array(buf).buffer;
 
@@ -284,7 +283,7 @@ class PDFWorker {
 	 * Import annotations for each PDF attachment of parent item
 	 *
 	 * @param {Zotero.Item} item
-	 * @param {Boolean} isPriority
+	 * @param {Boolean} [isPriority]
 	 */
 	async importParent(item, isPriority) {
 		if (!item.isRegularItem()) {
@@ -379,6 +378,9 @@ class PDFRenderer {
 			this._browser.loadURI(RENDERER_URL);
 
 			let _handleMessage = async (event) => {
+				if (event.source !== this._browser.contentWindow) {
+					return;
+				}
 				let message = event.data;
 				if (message.responseID) {
 					let { resolve, reject } = this._waitingPromises[message.responseID];
@@ -395,18 +397,29 @@ class PDFRenderer {
 				}
 				
 				if (message.action === 'initialized') {
+					this._browser.contentWindow.postMessage(
+						{ responseID: message.id, data: {} },
+						this._browser.contentWindow.origin
+					);
 					resolve();
 				}
 				else if (message.action === 'renderedAnnotation') {
 					let { id, image } = message.data.annotation;
-					let item = await Zotero.Items.getAsync(id);
-					let win = Zotero.getMainWindow();
-					if (!win) {
-						return;
+					
+					try {
+						let item = await Zotero.Items.getAsync(id);
+						let win = Zotero.getMainWindow();
+						let blob = new win.Blob([new Uint8Array(image)]);
+						await Zotero.Annotations.saveCacheImage(item, blob);
+						await Zotero.Notifier.trigger('modify', 'item', [item.id]);
+					} catch (e) {
+						Zotero.logError(e);
 					}
-					let blob = new win.Blob([new Uint8Array(image)]);
-					await Zotero.Annotations.saveCacheImage(item, blob);
-					await Zotero.Notifier.trigger('modify', 'item', [item.id]);
+
+					this._browser.contentWindow.postMessage(
+						{ responseID: message.id, data: {} },
+						this._browser.contentWindow.origin
+					);
 				}
 			};
 		});
@@ -416,7 +429,7 @@ class PDFRenderer {
 	 * Render missing image annotation images for attachment
 	 *
 	 * @param {Integer} itemID Attachment item id
-	 * @param {Boolean} isPriority
+	 * @param {Boolean} [isPriority]
 	 * @returns {Promise<Integer>}
 	 */
 	async renderAttachmentAnnotations(itemID, isPriority) {
@@ -435,7 +448,7 @@ class PDFRenderer {
 			if (!annotations.length) {
 				return 0;
 			}
-			let path = await attachment.getFilePath();
+			let path = await attachment.getFilePathAsync();
 			let buf = await OS.File.read(path, {});
 			buf = new Uint8Array(buf).buffer;
 			return this._query('renderAnnotations', { buf, annotations }, [buf]);
@@ -446,7 +459,7 @@ class PDFRenderer {
 	 * Render image annotation image
 	 *
 	 * @param {Integer} itemID Attachment item id
-	 * @param {Boolean} isPriority
+	 * @param {Boolean} [isPriority]
 	 * @returns {Promise<Boolean>}
 	 */
 	async renderAnnotation(itemID, isPriority) {
@@ -456,7 +469,7 @@ class PDFRenderer {
 				return false;
 			}
 			let attachment = await Zotero.Items.getAsync(annotation.parentID);
-			let path = await attachment.getFilePath();
+			let path = await attachment.getFilePathAsync();
 			let buf = await OS.File.read(path, {});
 			buf = new Uint8Array(buf).buffer;
 			let annotations = [{

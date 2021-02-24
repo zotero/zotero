@@ -977,6 +977,21 @@ class EditorInstance {
 		if (!annotations.length) {
 			throw new Error("No annotations provided");
 		}
+		
+		for (let annotation of annotations) {
+			if (annotation.annotationType === 'image'
+				&& !await Zotero.Annotations.hasCacheImage(annotation)) {
+				try {
+					await Zotero.PDFRenderer.renderAttachmentAnnotations(annotation.parentID);
+				}
+				catch (e) {
+					Zotero.debug(e);
+					throw e;
+				}
+				break;
+			}
+		}
+
 		let note = new Zotero.Item('note');
 		note.libraryID = annotations[0].libraryID;
 		note.parentID = parentID;
