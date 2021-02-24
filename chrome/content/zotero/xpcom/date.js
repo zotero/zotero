@@ -853,6 +853,40 @@ Zotero.Date = new function(){
 	}
 	
 	
+	this.toFriendlyDate = function (date) {
+		// 6:14:36 PM
+		if (isToday(date)) {
+			return date.toLocaleString(false, { hour: 'numeric', minute: 'numeric' })
+		}
+		// 'Thursday'
+		if (isThisWeek(date)) {
+			return date.toLocaleString(false, { weekday: 'long' });
+		}
+		return date.toLocaleDateString(false, { year: '2-digit', month: 'numeric', day: 'numeric' });
+	};
+	
+	
+	function isToday(date) {
+		var d = new Date();
+		return d.getDate() == date.getDate()
+			&& d.getMonth() == d.getMonth()
+			&& d.getFullYear() == d.getFullYear();
+	}
+	
+	
+	function isThisWeek(date) {
+		var d = new Date();
+		return d.getFullYear() == date.getFullYear() && getWeekNumber(d) == getWeekNumber(date);
+	}
+	
+	
+	// https://stackoverflow.com/a/27125580
+	function getWeekNumber(date) {
+		let onejan = new Date(date.getFullYear(), 0, 1);
+		return Math.ceil((((date.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7);
+	}
+	
+	
 	function getFileDateString(file){
 		var date = new Date();
 		date.setTime(file.lastModifiedTime);

@@ -507,13 +507,7 @@ var ZoteroContextPane = new function () {
 					var parts = text.split('\n').map(x => x.trim()).filter(x => x.length);
 					var title = parts[0] && parts[0].slice(0, Zotero.Notes.MAX_TITLE_LENGTH);
 					var date = Zotero.Date.sqlToDate(note.dateModified);
-					if (Date.now() - date < 24 * 60 * 60 * 1000) {
-						date = Zotero.getString('date.today');
-						date = date.charAt(0).toUpperCase() + date.slice(1);
-					}
-					else {
-						date = Zotero.Date.toRelativeDate(date);
-					}
+					date = Zotero.Date.toFriendlyDate(date);
 					
 					return {
 						id: note.id,
