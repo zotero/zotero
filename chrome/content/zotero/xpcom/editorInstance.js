@@ -241,7 +241,7 @@ class EditorInstance {
 
 			// Text
 			if (annotation.text) {
-				highlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(annotation))}">"${annotation.text}"</span>`;
+				highlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(annotation))}">“${annotation.text}”</span>`;
 			}
 			
 			// Note
