@@ -1509,8 +1509,8 @@ Zotero.Integration.Session.prototype._insertCitingResult = async function (field
  * placeholder IDs
  * @param item {Zotero.Item}
  */
-Zotero.Integration.Session.prototype._processNote = function (item) {
-	let text = item.getNote();
+Zotero.Integration.Session.prototype._processNote = async function (item) {
+	let text = await Zotero.Notes.getExportableNote(item);
 	let parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 		.createInstance(Components.interfaces.nsIDOMParser);
 	let doc = parser.parseFromString(text, "text/html");
@@ -1551,7 +1551,7 @@ Zotero.Integration.Session.prototype._processNote = function (item) {
 };
 
 Zotero.Integration.Session.prototype._insertNoteIntoDocument = async function (fieldIndex, field, noteItem) {
-	let [text, citations, placeholderIDs] = this._processNote(noteItem);
+	let [text, citations, placeholderIDs] = await this._processNote(noteItem);
 	await field.delete();
 	await this._doc.insertText(text);
 	if (!citations.length) return [];
