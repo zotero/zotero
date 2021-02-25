@@ -42,13 +42,8 @@
 }
 
 .empty-row {
-	border: 1px solid #bcc4d2;
-	border-radius: 5px;
-	margin: 4px 7px;
-	background-color: $shade-2;
+	margin: 4px 7px 0;
 	text-align: center;
-	padding: 5px;
-	opacity: 0.5;
 }
 
 .note-row {
@@ -58,7 +53,7 @@
 	background-color: #fff;
 	
 	&:active {
-		background: #e4ebf9;
+		background: #eef1f8;
 	}
 	
 	.inner {
@@ -127,12 +122,12 @@
 	border: 1px solid #bcc4d2;
 	border-radius: 5px;
 	margin: 4px 7px;
-	background-color: $shade-2;
+	background-color: white;
 	text-align: center;
 	padding: 5px;
 
 	&:active {
-		background: #e4ebf9;
+		background: #eef1f8;
 	}
 }
 
