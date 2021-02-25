@@ -67,7 +67,7 @@ jobs:
           cd build
           zip -r ../build-zip/$GITHUB_SHA.zip *
           cd ..
-          sudo gem install --no-ri --no-rdoc dpl dpl-s3
+          sudo gem install --no-document dpl dpl-s3
           dpl --provider=s3 --bucket=zotero-download --local-dir=build-zip --upload-dir=ci/client --acl=public-read --skip_cleanup=true
       
       - name: Run tests
