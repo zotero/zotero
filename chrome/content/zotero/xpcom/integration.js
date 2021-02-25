@@ -138,7 +138,7 @@ Zotero.Integration = new function() {
 	 * @returns {Boolean} true if integration operation should be cancelled
 	 */
 	this.warnOutdatedTemplate = function (agent, templateVersion) {
-		const validAgents = new Set(['OpenOffice', 'MacWord', 'WinWord']);
+		const validAgents = new Set(['OpenOffice', 'MacWord2016', 'MacWord16', 'WinWord']);
 		if (!validAgents.has(agent) || templateVersion >= TEMPLATE_VERSION) return false;
 		const daysToIgnore = 30;
 		const now = Math.floor(Date.now() / 1000);
