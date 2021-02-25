@@ -46,9 +46,9 @@ class ReaderInstance {
 			return false;
 		}
 		this._itemID = item.id;
+		this.updateTitle();
 		let path = await item.getFilePathAsync();
 		let buf = await OS.File.read(path, {});
-		this.updateTitle();
 		buf = new Uint8Array(buf).buffer;
 		let annotationItems = item.getAnnotations();
 		let annotations = (await Promise.all(annotationItems.map(x => this._getAnnotation(x)))).filter(x => x);
