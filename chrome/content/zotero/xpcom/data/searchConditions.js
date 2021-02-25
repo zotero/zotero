@@ -508,6 +508,7 @@ Zotero.SearchConditions = new function(){
 				},
 				table: 'itemAnnotations',
 				field: 'text',
+				special: true,
 			},
 			
 			{
@@ -518,6 +519,7 @@ Zotero.SearchConditions = new function(){
 				},
 				table: 'itemAnnotations',
 				field: 'comment',
+				special: true,
 			},
 			
 			{
