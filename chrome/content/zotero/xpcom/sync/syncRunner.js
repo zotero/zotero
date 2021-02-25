@@ -1289,6 +1289,10 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				e.dialogButtonCallback = () => {
 					Zotero.openCheckForUpdatesWindow();
 				};
+				e.dialogButton2Text = Zotero.getString('general.moreInformation');
+				e.dialogButton2Callback = () => {
+					Zotero.launchURL('https://www.zotero.org/support/kb/unknown_data_error');
+				};
 			}
 			// Otherwise just show in sync button tooltip
 			else {
@@ -1501,13 +1505,27 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					var buttonCallback = e.dialogButtonCallback;
 				}
 				
-				var button = doc.createElement('button');
+				let button = doc.createElement('button');
 				button.setAttribute('label', buttonText);
 				button.onclick = function () {
 					buttonCallback();
 					panel.hidePopup();
 				};
 				buttons.appendChild(button);
+				
+				// Second button
+				if (e.dialogButton2Text) {
+					buttonText = e.dialogButton2Text;
+					buttonCallback = e.dialogButton2Callback;
+					
+					let button2 = doc.createElement('button');
+					button2.setAttribute('label', buttonText);
+					button2.onclick = () => {
+						buttonCallback();
+						panel.hidePopup();
+					};
+					buttons.insertBefore(button2, button);
+				}
 			}
 			
 			panel.appendChild(box)
