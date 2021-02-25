@@ -13,12 +13,40 @@
 	height: 0;
 	flex-grow: 1;
 	padding-top: 2px;
-	
-	&> section > h2 {
-		font-weight: bold;
-		margin: 7px 8px 3px;
-		font-size: 13px;
+
+	& > section {
+		margin: 5px 0;
 	}
+}
+
+.header-row {
+	margin: 0 7px;
+	display: flex;
+	justify-content: space-between;
+	height: 24px;
+
+	h2 {
+		font-weight: bold;
+		margin: 0;
+		font-size: 13px;
+		align-self: center;
+	}
+
+	button {
+		height: 24px;
+		// Necessary on linux to horizontaly center text
+		line-height: 0;
+	}
+}
+
+.empty-row {
+	border: 1px solid #bcc4d2;
+	border-radius: 5px;
+	margin: 4px 7px;
+	background-color: $shade-2;
+	text-align: center;
+	padding: 5px;
+	opacity: 0.5;
 }
 
 .note-row {

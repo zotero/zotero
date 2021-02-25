@@ -150,6 +150,9 @@ var ZoteroContextPane = new function () {
 			}
 			else if (action == 'close') {
 				_removeItemContext(ids[0]);
+				if (Zotero_Tabs.deck.children.length == 1) {
+					_notesContexts.forEach(x => x.notesListRef.current.setExpanded(false));
+				}
 			}
 			else if (action == 'select') {
 				if (Zotero_Tabs.selectedIndex == 0) {
@@ -405,29 +408,8 @@ var ZoteroContextPane = new function () {
 		var head = document.createElement('hbox');
 		head.style.display = 'flex';
 		
-		var label = document.createElement('label');
-		var button = document.createElement('button');
-		button.setAttribute('label', Zotero.Intl.strings['zotero.toolbar.newNote']);
-		
-		// Create standalone or child note on menuitem click
-		document.getElementById('context-pane-new-note-button-popup').onclick = function (event) {
-			var parentID = null;
-			switch (event.originalTarget.id) {
-				case 'context-pane-new-standalone-note':
-					break;
-				
-				case 'context-pane-new-item-note':
-					var parentItem = _getCurrentParentItem();
-					if (!parentItem) {
-						return;
-					}
-					parentID = parentItem.id;
-					break;
-				
-				default:
-					return;
-			}
-			
+
+		function _createNote(parentID) {
 			contextNode.setAttribute('selectedIndex', 1);
 			var item = new Zotero.Item('note');
 			item.libraryID = libraryID;
@@ -439,28 +421,21 @@ var ZoteroContextPane = new function () {
 			editor.parentItem = null;
 			editor.focus();
 			_updateAddToNote();
-		};
-		
-		button.addEventListener('mousedown', (event) => {
-			var popup = document.getElementById('context-pane-new-note-button-popup');
-			popup.openPopup(event.target, 'after_end');
-		});
+		}
 
-		var vbox1 = document.createElement('vbox');
-		vbox1.append(label, button);
-
-		var vbox2 = document.createElement('vbox');
-		vbox2.style.flex = '1';
+		var vbox = document.createElement('vbox');
+		vbox.style.flex = '1';
 		var input = document.createElement('textbox');
+		input.style.width = 'calc(100% - 8px)';
 		input.setAttribute('type', 'search');
 		input.setAttribute('timeout', '250');
 		input.addEventListener('command', () => {
 			notesListRef.current.setExpanded(false);
 			_updateNotesList();
 		});
-		vbox2.append(input);
+		vbox.append(input);
 		
-		head.append(vbox2, vbox1);
+		head.append(vbox);
 
 		var listBox = document.createElement('vbox');
 		listBox.style.display = 'flex';
@@ -474,12 +449,12 @@ var ZoteroContextPane = new function () {
 		var notesListRef = React.createRef();
 
 		async function _updateNotesList(useCached) {
+			var query = input.value;
 			var notes;
 			if (useCached && context.cachedNotes.length) {
 				notes = context.cachedNotes;
 			}
 			else {
-				var query = input.value;
 				await Zotero.Schema.schemaUpdatePromise;
 				var s = new Zotero.Search();
 				s.addCondition('libraryID', 'is', libraryID);
@@ -523,19 +498,18 @@ var ZoteroContextPane = new function () {
 			}
 
 			var readerParentItem = _getCurrentParentItem();
+			notesListRef.current.setSearching(query.length);
 			notesListRef.current.setNotes(notes.map(note => ({
 				...note,
 				isCurrentChild: readerParentItem && note.parentID == readerParentItem.id
 			})));
-
-			var c = notes.length;
-			label.value = Zotero.getString('pane.item.notes.count', c, c);
 		}
 
 		var context = {
 			libraryID,
 			node: contextNode,
 			editor,
+			notesListRef,
 			cachedNotes: [],
 			update: Zotero.Utilities.throttle(_updateNotesList, 1000, { leading: false }),
 			updateFromCache: () => _updateNotesList(true)
@@ -546,6 +520,15 @@ var ZoteroContextPane = new function () {
 				ref={notesListRef}
 				onClick={(id) => {
 					_setPinnedNote(libraryID, id);
+				}}
+				onNewChild={() => {
+					var parentItem = _getCurrentParentItem();
+					if (parentItem) {
+						_createNote(parentItem.id);
+					}
+				}}
+				onNewStandalone={() => {
+					_createNote();
 				}}
 			/>,
 			listInner,
