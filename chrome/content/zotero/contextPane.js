@@ -426,7 +426,8 @@ var ZoteroContextPane = new function () {
 		var vbox = document.createElement('vbox');
 		vbox.style.flex = '1';
 		var input = document.createElement('textbox');
-		input.style.width = 'calc(100% - 8px)';
+		input.style.width = 'calc(100% - 42px)';
+		input.style.marginLeft = '12px';
 		input.setAttribute('type', 'search');
 		input.setAttribute('timeout', '250');
 		input.addEventListener('command', () => {
