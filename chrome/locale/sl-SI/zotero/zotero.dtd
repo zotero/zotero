@@ -175,8 +175,8 @@
 <!ENTITY zotero.lookup.description "Vnesite identifikacijske kode ISBN, DOI, PMID ali arXiv za dodajanje v knjižnico:">
 <!ENTITY zotero.lookup.button.search "Išči">
 
-<!ENTITY zotero.createParent.title "Create Parent Item">
-<!ENTITY zotero.createParent.button.manual "Manual Entry">
+<!ENTITY zotero.createParent.title "Ustvari nadrejeni vnos">
+<!ENTITY zotero.createParent.button.manual "Ročni vnos">
 
 <!ENTITY zotero.selectitems.title "Izberi vnose">
 <!ENTITY zotero.selectitems.intro.label "Izberite vnose, ki bi jih želeli dodati v svojo knjižnico">

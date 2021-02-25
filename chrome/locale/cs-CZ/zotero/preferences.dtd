@@ -11,7 +11,7 @@
 <!ENTITY zotero.preferences.fileHandling "Nakládání se souborem">
 <!ENTITY zotero.preferences.automaticSnapshots "Automaticky udělat snímek při vytváření položky z internetových stránek">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automaticky připojit propojené PDF a ostatní soubory při ukládání položek">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Atuomaticky získat metadata pro PDF">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Automaticky získat metadata pro PDF">
 <!ENTITY zotero.preferences.autoRenameFiles "Automaticky přejmenovat přiložené soubory podle rodičovských metadat">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Přejmenovat propojené soubory">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Otevřít PDF pomocí">
