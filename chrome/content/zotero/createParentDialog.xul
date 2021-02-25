@@ -5,7 +5,9 @@
 <?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
 
-<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+<!DOCTYPE dialog [
+		<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
+]>
 
 <dialog
 	id="zotero-parent-dialog"
@@ -23,7 +25,10 @@
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	style="padding:20px 15px;width:400px;">
 
+	<script src="chrome://global/content/globalOverlay.js"/>
+	<script src="chrome://global/content/editMenuOverlay.js"/>
 	<script src="include.js"/>
+	<script src="editContextMenu.js"/>
 	<script src="lookup.js"/>
 	<script src="createParentDialog.js"/>
 	<script src="components/createParent/createParent.js"/>
