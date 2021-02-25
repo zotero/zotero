@@ -80,7 +80,11 @@ const NotesList = forwardRef(({ onClick, onNewChild, onNewStandalone }, ref) => 
 				</div>
 				{!allNotes.length && !searching && <div className="empty-row">{Zotero.getString('pane.context.noNotes')}</div>}
 				{(expanded ? allNotes : allNotes.slice(0, MAX_ALL_NOTES)).map(note => <NoteRow key={note.id} {...note} onClick={() => onClick(note.id)}/>)}
-				{!expanded && allNotes.length > MAX_ALL_NOTES && <div className="more-row" onClick={handleClickMore}>{Zotero.getString('general.numMore', [allNotes.length - MAX_ALL_NOTES])}</div>}
+				{!expanded && allNotes.length > MAX_ALL_NOTES
+					&& <div className="more-row" onClick={handleClickMore}>{
+						Zotero.getString('general.numMore', Zotero.Utilities.numberFormat([allNotes.length - MAX_ALL_NOTES], 0))
+					}</div>
+				}
 			</section>}
 		</div>
 	);
