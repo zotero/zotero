@@ -1306,7 +1306,9 @@ var ZoteroPane = new function()
 			
 			// Don't allow normal buttons in My Publications, because things need to
 			// be dragged and go through the wizard
-			let forceDisable = collectionTreeRow.isPublications() && command != 'zotero-tb-note-add';
+			let forceDisable = collectionTreeRow.isPublications()
+				&& command != 'cmd_zotero_newCollection'
+				&& command != 'zotero-tb-note-add';
 			
 			if ((collectionTreeRow.editable || overrideEditable) && !forceDisable) {
 				if(el.hasAttribute("disabled")) el.removeAttribute("disabled");
