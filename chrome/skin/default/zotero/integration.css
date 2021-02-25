@@ -51,7 +51,6 @@
 }
 
 #add[disabled="true"] {
-	list-style-image: url('chrome://zotero/skin/citation-down.png');
 	list-style-image: url('chrome://zotero/skin/citation-add-gray.png');
 }
 
