@@ -329,3 +329,8 @@
 <!ENTITY zotero.attachLink.title                     "Attach Link to URI">
 <!ENTITY zotero.attachLink.label.link                "Link:">
 <!ENTITY zotero.attachLink.label.title               "Title:">
+
+<!ENTITY zotero.context.addChildNote						"Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations			"Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote					"Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations	"Add Standalone Note from Annotations">

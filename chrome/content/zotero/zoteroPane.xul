@@ -632,6 +632,18 @@
 					<hbox id="zotero-context-pane-inner" flex="1" zotero-persist="height"/>
 				</vbox>
 			</box>
+			
+			<popupset>
+				<menupopup id="context-pane-add-child-note-button-popup">
+					<menuitem id="context-pane-add-child-note" label="&zotero.context.addChildNote;"/>
+					<menuitem id="context-pane-add-child-note-from-annotations" label="&zotero.context.addChildNoteFromAnnotations;"/>
+				</menupopup>
+
+				<menupopup id="context-pane-add-standalone-note-button-popup">
+					<menuitem id="context-pane-add-standalone-note" label="&zotero.context.addStandaloneNote;"/>
+					<menuitem id="context-pane-add-standalone-note-from-annotations" label="&zotero.context.addStandaloneNoteFromAnnotations;"/>
+				</menupopup>
+			</popupset>
 		</hbox>
 		
 		<!-- Barrier to prevent tabbing into Zotero pane when busy -->

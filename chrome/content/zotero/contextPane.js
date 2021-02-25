@@ -369,14 +369,11 @@ var ZoteroContextPane = new function () {
 
 		_panesDeck.append(_itemPaneDeck, _notesPaneDeck);
 	}
-
-	function _getCurrentParentItem() {
+	
+	function _getCurrentAttachment() {
 		var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 		if (reader) {
-			var attachment = Zotero.Items.get(reader.itemID);
-			if (attachment) {
-				return attachment.parentItem;
-			}
+			return Zotero.Items.get(reader.itemID);
 		}
 	}
 	
@@ -408,19 +405,42 @@ var ZoteroContextPane = new function () {
 		var head = document.createElement('hbox');
 		head.style.display = 'flex';
 		
+		async function _createNoteFromAnnotations(child) {
+			var attachment = _getCurrentAttachment();
+			if (!attachment) {
+				return;
+			}
+			var note = await Zotero.EditorInstance.createNoteFromAnnotations(
+				attachment.getAnnotations(), child && attachment.parentID
+			);
 
-		function _createNote(parentID) {
+			_updateAddToNote();
+
+			input.value = '';
+			_updateNotesList();
+
+			_setPinnedNote(note.id);
+		}
+
+		function _createNote(child) {
 			contextNode.setAttribute('selectedIndex', 1);
 			var item = new Zotero.Item('note');
 			item.libraryID = libraryID;
-			if (parentID) {
-				item.parentID = parentID;
+			if (child) {
+				var attachment = _getCurrentAttachment();
+				if (!attachment) {
+					return;
+				}
+				item.parentID = attachment.parentID;
 			}
 			editor.mode = 'edit';
 			editor.item = item;
 			editor.parentItem = null;
 			editor.focus();
 			_updateAddToNote();
+			
+			input.value = '';
+			_updateNotesList();
 		}
 
 		var vbox = document.createElement('vbox');
@@ -498,11 +518,12 @@ var ZoteroContextPane = new function () {
 				context.cachedNotes = notes;
 			}
 
-			var readerParentItem = _getCurrentParentItem();
-			notesListRef.current.setSearching(query.length);
+			var attachment = _getCurrentAttachment();
+			var parentID = attachment && attachment.parentID;
+			notesListRef.current.setHasParent(!!parentID);
 			notesListRef.current.setNotes(notes.map(note => ({
 				...note,
-				isCurrentChild: readerParentItem && note.parentID == readerParentItem.id
+				isCurrentChild: parentID && note.parentID == parentID
 			})));
 		}
 
@@ -515,21 +536,50 @@ var ZoteroContextPane = new function () {
 			update: Zotero.Utilities.throttle(_updateNotesList, 1000, { leading: false }),
 			updateFromCache: () => _updateNotesList(true)
 		};
+		
+		function _handleAddChildNotePopupClick(event) {
+			switch (event.originalTarget.id) {
+				case 'context-pane-add-child-note':
+					_createNote(true);
+					break;
+
+				case 'context-pane-add-child-note-from-annotations':
+					_createNoteFromAnnotations(true);
+					break;
+
+				default:
+			}
+		}
+		
+		function _handleAddStandaloneNotePopupClick(event) {
+			switch (event.originalTarget.id) {
+				case 'context-pane-add-standalone-note':
+					_createNote();
+					break;
+
+				case 'context-pane-add-standalone-note-from-annotations':
+					_createNoteFromAnnotations();
+					break;
+
+				default:
+			}
+		}
 
 		ReactDOM.render(
 			<NotesList
 				ref={notesListRef}
 				onClick={(id) => {
-					_setPinnedNote(libraryID, id);
+					_setPinnedNote(id);
 				}}
-				onNewChild={() => {
-					var parentItem = _getCurrentParentItem();
-					if (parentItem) {
-						_createNote(parentItem.id);
-					}
+				onAddChildButtonDown={(event) => {
+					var popup = document.getElementById('context-pane-add-child-note-button-popup');
+					popup.onclick = _handleAddChildNotePopupClick;
+					popup.openPopup(event.target, 'after_end');
 				}}
-				onNewStandalone={() => {
-					_createNote();
+				onAddStandaloneButtonDown={(event) => {
+					var popup = document.getElementById('context-pane-add-standalone-note-button-popup');
+					popup.onclick = _handleAddStandaloneNotePopupClick;
+					popup.openPopup(event.target, 'after_end');
 				}}
 			/>,
 			listInner,
@@ -570,10 +620,13 @@ var ZoteroContextPane = new function () {
 		return true;
 	}
 
-	function _setPinnedNote(libraryID, itemID) {
-		var editable = _isLibraryEditable(libraryID);
-		var context = _getNotesContext(libraryID);
+	function _setPinnedNote(itemID) {
 		var item = Zotero.Items.get(itemID);
+		if (!item) {
+			return;
+		}
+		var editable = _isLibraryEditable(item.libraryID);
+		var context = _getNotesContext(item.libraryID);
 		if (context) {
 			var { editor, node } = context;
 			node.setAttribute('selectedIndex', 1);
