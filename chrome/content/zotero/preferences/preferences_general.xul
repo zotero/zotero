@@ -45,7 +45,7 @@
 			<preference id="pref-groups-copyChildLinks" name="extensions.zotero.groups.copyChildLinks" type="bool"/>
 			<preference id="pref-groups-copyTags" name="extensions.zotero.groups.copyTags" type="bool"/>
 			
-			<preference id="pref-useInternalPDFReader" name="extensions.zotero.beta.useInternalPDFReader" type="bool"/>
+			<preference id="pref-zotero6" name="extensions.zotero.beta.zotero6" type="bool"/>
 		</preferences>
 		
 		<groupbox id="zotero-prefpane-file-handling-groupbox">
@@ -80,10 +80,10 @@
 				</menulist>
 			</hbox>
 			<checkbox
-				id="useInternalPDFReader-checkbox"
-				label="Use Zotero PDF reader for My Library (beta)"
-				preference="pref-useInternalPDFReader"
-				hidden="true"/>
+				id="zotero6-checkbox"
+				label="Use Zotero PDF reader and new note editor (beta, My Library only)"
+				preference="pref-zotero6"
+				onsynctopreference="Zotero_Preferences.General.handleZotero6BetaChange()"/>
 		</groupbox>
 		
 		<groupbox id="zotero-prefpane-miscellaneous-groupbox">

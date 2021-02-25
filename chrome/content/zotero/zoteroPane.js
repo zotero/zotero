@@ -4132,9 +4132,7 @@ var ZoteroPane = new function()
 				let item = await Zotero.Items.getAsync(itemID);
 				let library = Zotero.Libraries.get(item.libraryID);
 				// TEMP
-				if (Zotero.isPDFBuild
-						&& library.libraryType == 'user'
-						&& Zotero.Prefs.get('beta.useInternalPDFReader')) {
+				if (Zotero.isPDFBuild && library.libraryType == 'user') {
 					this.viewPDF(itemID, event && event.shiftKey);
 					return;
 				}

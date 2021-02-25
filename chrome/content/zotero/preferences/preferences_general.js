@@ -41,10 +41,6 @@ Zotero_Preferences.General = {
 		var menuitem = document.getElementById('fileHandler-internal');
 		menuitem.setAttribute('label', Zotero.appName);
 		
-		if (Zotero.isPDFBuild) {
-			document.getElementById('useInternalPDFReader-checkbox').hidden = false;
-		}
-		
 		this.updateAutoRenameFilesUI();
 		this._updateFileHandlerUI();
 	},
@@ -143,5 +139,20 @@ Zotero_Preferences.General = {
 			throw new Error(`Unknown file type ${type}`);
 		}
 		return 'fileHandler.pdf';
+	},
+	
+	
+	handleZotero6BetaChange: function () {
+		var ps = Services.prompt;
+		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING;
+		ps.confirmEx(
+			window,
+			Zotero.getString('general.restartRequired'),
+			Zotero.getString('general.restartRequiredForChange', Zotero.appName),
+			buttonFlags,
+			Zotero.getString('general.restartApp', Zotero.appName),
+			null, null, null, {}
+		);
+		Zotero.Utilities.Internal.quitZotero(true);
 	}
 }
