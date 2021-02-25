@@ -240,7 +240,7 @@ Zotero.ItemFields = new function() {
 		
 		var baseFieldID = this.getID(baseField);
 		if (!baseFieldID) {
-			throw new Error("Invalid field '" + baseField + '" for base field');
+			throw new Error("Invalid field '" + baseField + "' for base field");
 		}
 		
 		if (fieldID == baseFieldID) {
@@ -277,7 +277,7 @@ Zotero.ItemFields = new function() {
 		
 		var baseFieldID = this.getID(baseField);
 		if (!baseFieldID) {
-			throw new Error("Invalid field '" + baseField + '" for base field');
+			throw new Error("Invalid field '" + baseField + "' for base field");
 		}
 		
 		// If field isn't a base field, return it if it's valid for the type
@@ -419,7 +419,7 @@ Zotero.ItemFields = new function() {
 		var fieldID = Zotero.ItemFields.getID(field);
 		if (!fieldID) {
 			Zotero.debug((new Error).stack, 1);
-			throw new Error(`Invalid field '${field}`);
+			throw new Error(`Invalid field '${field}'`);
 		}
 		return fieldID;
 	}
