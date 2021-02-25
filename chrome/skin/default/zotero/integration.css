@@ -38,7 +38,20 @@
 }
 
 #down {
-	list-style-image: url('chrome://zotero/skin/citation-down.png');git clone --recursive https://github.com/zotero/zotero-standalone-build
+	list-style-image: url('chrome://zotero/skin/citation-down.png');
+}
+
+#down[disabled="true"] {
+	list-style-image: url('chrome://zotero/skin/citation-down-gray.png');
+}
+
+
+#add {
+	list-style-image: url('chrome://zotero/skin/citation-add.png');
+}
+
+#add[disabled="true"] {
+	list-style-image: url('chrome://zotero/skin/citation-down.png');
 	list-style-image: url('chrome://zotero/skin/citation-add-gray.png');
 }
 
