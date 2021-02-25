@@ -41,13 +41,14 @@ const ZoteroStandalone = new function() {
 		if (Zotero.isMac && window.document.documentElement.getAttribute('sizemode') == 'fullscreen') {
 			window.document.documentElement.setAttribute('sizemode', 'normal');
 		}
-
-		if (Zotero.isMac && Zotero.isPDFBuild) {
+		
+		// Create tab bar by default
+		if (Zotero.isMac) {
 			document.documentElement.setAttribute('drawintitlebar', true);
 			document.documentElement.setAttribute('tabsintitlebar', true);
 			document.documentElement.setAttribute('chromemargin', '0,-1,-1,-1');
 		}
-
+		
 		this.switchMenuType('library');
 		Zotero.Notifier.registerObserver(
 			{
@@ -80,6 +81,13 @@ const ZoteroStandalone = new function() {
 			
 			ZoteroStandalone.DebugOutput.init();
 			
+			// TEMP: Remove tab bar if not PDF build
+			if (Zotero.isMac && !Zotero.isPDFBuild) {
+				document.documentElement.removeAttribute('drawintitlebar');
+				document.documentElement.removeAttribute('tabsintitlebar');
+				document.documentElement.removeAttribute('chromemargin');
+			}
+
 			Zotero.hideZoteroPaneOverlays();
 			ZoteroPane.init();
 			ZoteroPane.makeVisible();
