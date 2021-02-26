@@ -590,63 +590,78 @@ var Zotero_QuickFormat = new function () {
 	 */
 	function _buildItemDescription(item, infoHbox) {
 		var nodes = [];
-		
-		var author, authorDate = "";
-		if(item.firstCreator) author = authorDate = item.firstCreator;
-		var date = item.getField("date", true, true);
-		if(date && (date = date.substr(0, 4)) !== "0000") {
-			authorDate += " (" + parseInt(date) + ")";
-		}
-		authorDate = authorDate.trim();
-		if(authorDate) nodes.push(authorDate);
-		
-		var publicationTitle = item.getField("publicationTitle", false, true);
-		if(publicationTitle) {
-			var label = document.createElement("label");
-			label.setAttribute("value", publicationTitle);
-			label.setAttribute("crop", "end");
-			label.style.fontStyle = "italic";
-			nodes.push(label);
-		}
-		
-		var volumeIssue = item.getField("volume");
-		var issue = item.getField("issue");
-		if(issue) volumeIssue += "("+issue+")";
-		if(volumeIssue) nodes.push(volumeIssue);
-		
-		var publisherPlace = [], field;
-		if((field = item.getField("publisher"))) publisherPlace.push(field);
-		if((field = item.getField("place"))) publisherPlace.push(field);
-		if(publisherPlace.length) nodes.push(publisherPlace.join(": "));
-		
-		var pages = item.getField("pages");
-		if(pages) nodes.push(pages);
-		
-		if(!nodes.length) {
-			var url = item.getField("url");
-			if(url) nodes.push(url);
-		}
-		
-		// compile everything together
 		var str = "";
-		for(var i=0, n=nodes.length; i<n; i++) {
-			var node = nodes[i];
+
+		if (item.isNote()) {
+			var date = Zotero.Date.sqlToDate(item.dateModified);
+			date = Zotero.Date.toFriendlyDate(date);
+			str += date;
 			
-			if(i != 0) str += ", ";
-			
-			if(typeof node === "object") {
-				var label = document.createElement("label");
-				label.setAttribute("value", str);
-				label.setAttribute("crop", "end");
-				infoHbox.appendChild(label);
-				infoHbox.appendChild(node);
-				str = "";
-			} else {
-				str += node;
+			var text = item.note;
+			text = Zotero.Utilities.unescapeHTML(text);
+			text = text.trim();
+			text = text.slice(0, 500);
+			var parts = text.split('\n').map(x => x.trim()).filter(x => x.length);
+			if (parts[1]) str += " " + parts[1];
+		}
+		else {
+			var author, authorDate = "";
+			if(item.firstCreator) author = authorDate = item.firstCreator;
+			var date = item.getField("date", true, true);
+			if(date && (date = date.substr(0, 4)) !== "0000") {
+				authorDate += " (" + parseInt(date) + ")";
 			}
+			authorDate = authorDate.trim();
+			if(authorDate) nodes.push(authorDate);
+			
+			var publicationTitle = item.getField("publicationTitle", false, true);
+			if(publicationTitle) {
+				var label = document.createElement("label");
+				label.setAttribute("value", publicationTitle);
+				label.setAttribute("crop", "end");
+				label.style.fontStyle = "italic";
+				nodes.push(label);
+			}
+			
+			var volumeIssue = item.getField("volume");
+			var issue = item.getField("issue");
+			if(issue) volumeIssue += "("+issue+")";
+			if(volumeIssue) nodes.push(volumeIssue);
+			
+			var publisherPlace = [], field;
+			if((field = item.getField("publisher"))) publisherPlace.push(field);
+			if((field = item.getField("place"))) publisherPlace.push(field);
+			if(publisherPlace.length) nodes.push(publisherPlace.join(": "));
+			
+			var pages = item.getField("pages");
+			if(pages) nodes.push(pages);
+			
+			if(!nodes.length) {
+				var url = item.getField("url");
+				if(url) nodes.push(url);
+			}
+
+			// compile everything together
+			for(var i=0, n=nodes.length; i<n; i++) {
+				var node = nodes[i];
+
+				if(i != 0) str += ", ";
+
+				if(typeof node === "object") {
+					var label = document.createElement("label");
+					label.setAttribute("value", str);
+					label.setAttribute("crop", "end");
+					infoHbox.appendChild(label);
+					infoHbox.appendChild(node);
+					str = "";
+				} else {
+					str += node;
+				}
+			}
+
+			if(nodes.length && (!str.length || str[str.length-1] !== ".")) str += ".";	
 		}
 		
-		if(nodes.length && (!str.length || str[str.length-1] !== ".")) str += ".";
 		var label = document.createElement("label");
 		label.setAttribute("value", str);
 		label.setAttribute("crop", "end");
