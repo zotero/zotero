@@ -43,6 +43,7 @@ Zotero_Preferences.General = {
 		
 		this.updateAutoRenameFilesUI();
 		this._updateFileHandlerUI();
+		this._updateZotero6BetaCheckbox();
 	},
 	
 	updateAutoRenameFilesUI: function () {
@@ -142,10 +143,11 @@ Zotero_Preferences.General = {
 	},
 	
 	
-	handleZotero6BetaChange: function () {
+	handleZotero6BetaChange: function (event) {
 		var ps = Services.prompt;
-		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING;
-		ps.confirmEx(
+		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
+		var index = ps.confirmEx(
 			window,
 			Zotero.getString('general.restartRequired'),
 			Zotero.getString('general.restartRequiredForChange', Zotero.appName),
@@ -153,6 +155,23 @@ Zotero_Preferences.General = {
 			Zotero.getString('general.restartApp', Zotero.appName),
 			null, null, null, {}
 		);
-		Zotero.Utilities.Internal.quitZotero(true);
+		if (index == 0) {
+			Zotero.Prefs.set('beta.zotero6', !event.target.checked);
+			Zotero.Utilities.Internal.quitZotero(true);
+			return;
+		}
+		// Set to opposite so the click changes it back to what it was before
+		event.target.checked = !event.target.checked;
+	},
+	
+	
+	_updateZotero6BetaCheckbox: function () {
+		var checkbox = document.getElementById('zotero6-checkbox');
+		if (Zotero.Prefs.get('beta.zotero6')) {
+			checkbox.setAttribute('checked', true);
+		}
+		else {
+			checkbox.removeAttribute('checked');
+		}
 	}
 }

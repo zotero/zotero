@@ -44,8 +44,6 @@
 			<preference id="pref-groups-copyChildFileAttachments" name="extensions.zotero.groups.copyChildFileAttachments" type="bool"/>
 			<preference id="pref-groups-copyChildLinks" name="extensions.zotero.groups.copyChildLinks" type="bool"/>
 			<preference id="pref-groups-copyTags" name="extensions.zotero.groups.copyTags" type="bool"/>
-			
-			<preference id="pref-zotero6" name="extensions.zotero.beta.zotero6" type="bool"/>
 		</preferences>
 		
 		<groupbox id="zotero-prefpane-file-handling-groupbox">
@@ -82,8 +80,7 @@
 			<checkbox
 				id="zotero6-checkbox"
 				label="Use Zotero PDF reader and new note editor (beta, My Library only)"
-				preference="pref-zotero6"
-				onsynctopreference="Zotero_Preferences.General.handleZotero6BetaChange()"/>
+				onclick="Zotero_Preferences.General.handleZotero6BetaChange(event)"/>
 		</groupbox>
 		
 		<groupbox id="zotero-prefpane-miscellaneous-groupbox">
