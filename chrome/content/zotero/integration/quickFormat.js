@@ -88,10 +88,9 @@ var Zotero_QuickFormat = new function () {
 					qfb.setAttribute("square", "true");
 				}
 			}
-			
 			// With fx60 and drawintitlebar=true Firefox calculates the minHeight
 			// as titlebar+maincontent, so we have hack around that here.
-			if (Zotero.isMac && Zotero.platformMajorVersion >= 60) {
+			else if (Zotero.isMac) {
 				qfb.style.marginBottom = "-28px";
 			}
 			
