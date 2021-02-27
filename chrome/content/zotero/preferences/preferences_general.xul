@@ -79,7 +79,7 @@
 			</hbox>
 			<checkbox
 				id="zotero6-checkbox"
-				label="Use Zotero PDF reader and new note editor (beta, My Library only)"
+				label="Enable the Zotero PDF reader and new note editor (beta, My Library only)"
 				style="margin-top: 5px"
 				onclick="Zotero_Preferences.General.handleZotero6BetaChange(event)"/>
 			<label class="zotero-text-link" value="Learn more about the beta features"
