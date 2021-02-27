@@ -660,11 +660,9 @@ Zotero.Integration.Interface.prototype.addEditCitation = async function (docFiel
 Zotero.Integration.Interface.prototype.addNote = async function () {
 	if (!Zotero.isPDFBuild) {
 		let ps = Services.prompt;
-		let errorMessage = Zotero.getString('integration.error.noteEditorDisabled', ZOTERO_CONFIG.CLIENT_NAME);
-		let index = ps.confirm(null, Zotero.getString('integration.error.title'), errorMessage);
-		if (index == 1) {
-			Zotero.Utilities.Internal.openPreferences("zotero-prefpane-general");
-		}
+		let errorMessage = "To add notes to your document, you must enable the beta PDF reader "
+			+ "and note editor in the Zotero preferences.";
+		let index = ps.alert(null, Zotero.getString('general.error'), errorMessage);
 		throw new Zotero.Exception.UserCancelled('Cannot add notes with note editor disabled');
 	}
 	await this._session.init(false, false);
