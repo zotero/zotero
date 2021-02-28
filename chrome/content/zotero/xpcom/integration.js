@@ -150,8 +150,8 @@ Zotero.Integration = new function() {
 		
 		var ps = Services.prompt;
 		var title = Zotero.getString('general.warning');
-		var client = agent == "OpenOffice" ? "Libre Office" : "Microsoft Word";
-		var message = Zotero.getString('integration.upgradeTemplate', client);
+		var client = agent == "OpenOffice" ? "LibreOffice" : "Microsoft Word";
+		var message = Zotero.getString('integration.upgradeTemplate', [Zotero.appName, client]);
 		var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
 			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
 		var checkbox = {};
