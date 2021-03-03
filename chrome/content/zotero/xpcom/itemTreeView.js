@@ -328,6 +328,10 @@ Zotero.ItemTreeView.prototype.refresh = Zotero.serial(Zotero.Promise.coroutine(f
 		Zotero.CollectionTreeCache.clear();
 		// Get the full set of items we want to show
 		let newSearchItems = yield this.collectionTreeRow.getItems();
+		// TEMP: Hide annotations
+		newSearchItems = newSearchItems.filter(item => !item.isAnnotation());
+		// A temporary workaround to make item tree crash less often
+		newSearchItems = newSearchItems.filter(item => !(item.isAttachment() && item.attachmentLinkMode === Zotero.Attachments.LINK_MODE_EMBEDDED_IMAGE));
 		// Remove notes and attachments if necessary
 		if (this.regularOnly) {
 			newSearchItems = newSearchItems.filter(item => item.isRegularItem());
@@ -3505,7 +3509,7 @@ Zotero.ItemTreeRow.prototype.numNotes = function() {
 		return 0;
 	}
 	if (this.ref.isAttachment()) {
-		return this.ref.getNote() !== '' ? 1 : 0;
+		return this.ref.note !== '' ? 1 : 0;
 	}
 	return this.ref.numNotes(false, true) || 0;
 }

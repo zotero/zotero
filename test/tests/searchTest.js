@@ -360,6 +360,36 @@ describe("Zotero.Search", function() {
 				});
 			});
 			
+			describe("annotationText", function () {
+				it("should return matches for annotation text", async function () {
+					var attachment = await importPDFAttachment();
+					var annotation = await createAnnotation('highlight', attachment);
+					var str = annotation.annotationText.substr(0, 7);
+					
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('joinMode', 'any');
+					s.addCondition('annotationText', 'contains', str);
+					var matches = await s.search();
+					assert.sameMembers(matches, [annotation.id]);
+				});
+			});
+			
+			describe("annotationComment", function () {
+				it("should return matches for annotation comment", async function () {
+					var attachment = await importPDFAttachment();
+					var annotation = await createAnnotation('note', attachment);
+					var str = annotation.annotationComment.substr(0, 7);
+					
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('joinMode', 'any');
+					s.addCondition('annotationComment', 'contains', str);
+					var matches = await s.search();
+					assert.sameMembers(matches, [annotation.id]);
+				});
+			});
+			
 			describe("fulltextWord", function () {
 				it("should return matches with full-text conditions", function* () {
 					let s = new Zotero.Search();

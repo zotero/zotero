@@ -296,5 +296,11 @@ describe("Zotero.Schema", function() {
 			await assert.isTrue(await Zotero.Schema.integrityCheck(true));
 			await assert.isTrue(await Zotero.Schema.integrityCheck());
 		});
+		
+		it("should allow embedded-image attachments under notes", async function () {
+			var item = await createDataObject('item', { itemType: 'note' });
+			await createEmbeddedImage(item);
+			await assert.isTrue(await Zotero.Schema.integrityCheck());
+		});
 	})
 })

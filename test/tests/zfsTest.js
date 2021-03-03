@@ -884,7 +884,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			})
 			setResponse({
 				method: "GET",
-				url: `users/1/items?format=json&itemKey=${item.key}&includeTrashed=1`,
+				url: `users/1/items?itemKey=${item.key}&includeTrashed=1`,
 				status: 200,
 				text: JSON.stringify([itemJSON])
 			});
@@ -932,7 +932,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			})
 			setResponse({
 				method: "GET",
-				url: `users/1/items?format=json&itemKey=${item.key}&includeTrashed=1`,
+				url: `users/1/items?itemKey=${item.key}&includeTrashed=1`,
 				status: 200,
 				text: JSON.stringify([itemJSON])
 			});

@@ -44,7 +44,6 @@
 			<preference id="pref-groups-copyChildFileAttachments" name="extensions.zotero.groups.copyChildFileAttachments" type="bool"/>
 			<preference id="pref-groups-copyChildLinks" name="extensions.zotero.groups.copyChildLinks" type="bool"/>
 			<preference id="pref-groups-copyTags" name="extensions.zotero.groups.copyTags" type="bool"/>
-			
 		</preferences>
 		
 		<groupbox id="zotero-prefpane-file-handling-groupbox">
@@ -67,6 +66,9 @@
 				<label value="&zotero.preferences.fileHandler.openPDFsUsing;" control="file-handler-pdf"/>
 				<menulist id="fileHandler-pdf" class="fileHandler-menu">
 					<menupopup>
+						<menuitem id="fileHandler-internal"
+								oncommand="Zotero_Preferences.General.setFileHandler('pdf', 'zotero')"
+								hidden="true"/>
 						<menuitem id="fileHandler-custom"/>
 						<menuitem label="&zotero.preferences.fileHandler.systemDefault;"
 								oncommand="Zotero_Preferences.General.setFileHandler('pdf', false)"/>
@@ -75,6 +77,13 @@
 					</menupopup>
 				</menulist>
 			</hbox>
+			<checkbox
+				id="zotero6-checkbox"
+				label="Enable the Zotero PDF reader and new note editor (preview, My Library only)"
+				style="margin-top: 5px"
+				onclick="Zotero_Preferences.General.handleZotero6BetaChange(event)"/>
+			<label class="zotero-text-link" value="Learn more about the preview"
+				style="margin-left: 23px; margin-top: 1px" href="https://www.zotero.org/support/pdf_reader_preview"/>
 		</groupbox>
 		
 		<groupbox id="zotero-prefpane-miscellaneous-groupbox">

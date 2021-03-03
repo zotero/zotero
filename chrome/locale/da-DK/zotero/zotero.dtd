@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Vis i bibliotek">
 <!ENTITY zotero.items.menu.attach.note "Tilføj note">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Vedhæft">
 <!ENTITY zotero.items.menu.attach.link.uri "Vedhæft link til URI...">
 <!ENTITY zotero.items.menu.attach.file "Vedhæft en gemt kopi af ...">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Gem kopi af filen...">
 <!ENTITY zotero.toolbar.attachment.weblink "Gem link til den aktuelle side">
 <!ENTITY zotero.toolbar.attachment.snapshot "Tag kopi af den aktuelle side">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Der er ingen mærker at vise">
 <!ENTITY zotero.tagSelector.loadingTags "Indlæser mærker...">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "Tilføj link til URI">
 <!ENTITY zotero.attachLink.label.link "Link:">
 <!ENTITY zotero.attachLink.label.title "Titel:">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">

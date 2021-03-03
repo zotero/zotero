@@ -41,12 +41,12 @@ Zotero.Schema = new function(){
 	
 	// If updating from this userdata version or later, don't show "Upgrading database…" and don't make
 	// DB backup first. This should be set to false when breaking compatibility or making major changes.
-	const minorUpdateFrom = 107;
+	const minorUpdateFrom = false;
 	
 	var _dbVersions = [];
 	var _schemaVersions = [];
 	// Update when adding _updateCompatibility() line to schema update step
-	var _maxCompatibility = 6;
+	var _maxCompatibility = 7;
 	
 	var _repositoryTimerID;
 	var _repositoryNotificationTimerID;
@@ -1790,6 +1790,9 @@ Zotero.Schema = new function(){
 		var noteID = parseInt(yield Zotero.DB.valueQueryAsync(
 			"SELECT itemTypeID FROM itemTypes WHERE typeName='note'"
 		));
+		var annotationID = parseInt((yield Zotero.DB.valueQueryAsync(
+			"SELECT itemTypeID FROM itemTypes WHERE typeName='annotation'"
+		)) || -1);
 		
 		// The first position is for testing and the second is for repairing. Can be either SQL
 		// statements or promise-returning functions. For statements, the repair entry can be either
@@ -1915,16 +1918,29 @@ Zotero.Schema = new function(){
 				`SELECT COUNT(*) > 0 FROM items WHERE itemTypeID=${attachmentID} AND itemID NOT IN (SELECT itemID FROM itemAttachments)`,
 				`INSERT INTO itemAttachments (itemID, linkMode) SELECT itemID, 0 FROM items WHERE itemTypeID=${attachmentID} AND itemID NOT IN (SELECT itemID FROM itemAttachments)`,
 			],
-			// Note/child parents
+			// Attachments with note parents, unless they're embedded-image attachments
 			[
-				`SELECT COUNT(*) > 0 FROM itemAttachments WHERE parentItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (${noteID}, ${attachmentID}))`,
-				`UPDATE itemAttachments SET parentItemID=NULL WHERE parentItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (${noteID}, ${attachmentID}))`,
+				`SELECT COUNT(*) > 0 FROM itemAttachments `
+					+ `WHERE parentItemID IN (SELECT itemID FROM items WHERE itemTypeID=${noteID}) `
+					+ `AND linkMode != ${Zotero.Attachments.LINK_MODE_EMBEDDED_IMAGE}`,
+				`UPDATE itemAttachments SET parentItemID=NULL `
+					+ `WHERE parentItemID IN (SELECT itemID FROM items WHERE itemTypeID=${noteID}) `
+					+ `AND linkMode != ${Zotero.Attachments.LINK_MODE_EMBEDDED_IMAGE}`,
 			],
+			// Attachments with attachment or annotation parents
 			[
-				`SELECT COUNT(*) > 0 FROM itemNotes WHERE parentItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (${noteID}, ${attachmentID}))`,
-				`UPDATE itemNotes SET parentItemID=NULL WHERE parentItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (${noteID}, ${attachmentID}))`,
+				`SELECT COUNT(*) > 0 FROM itemAttachments `
+					+ `WHERE parentItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (${attachmentID}, ${annotationID}))`,
+				`UPDATE itemAttachments SET parentItemID=NULL `
+					+ `WHERE parentItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (${attachmentID}, ${annotationID}))`,
 			],
-			
+			// Notes with note/attachment/annotation parents
+			[
+				`SELECT COUNT(*) > 0 FROM itemNotes `
+					+ `WHERE parentItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (${noteID}, ${attachmentID}, ${annotationID}))`,
+				`UPDATE itemNotes SET parentItemID=NULL `
+					+ `WHERE parentItemID IN (SELECT itemID FROM items WHERE itemTypeID IN (${noteID}, ${attachmentID}, ${annotationID}))`,
+			],
 			// Delete empty creators
 			// This may cause itemCreator gaps, but that's better than empty creators
 			[
@@ -1944,8 +1960,8 @@ Zotero.Schema = new function(){
 			],
 			// Invalid link mode -- set to imported url
 			[
-				"SELECT COUNT(*) > 0 FROM itemAttachments WHERE linkMode NOT IN (0,1,2,3)",
-				"UPDATE itemAttachments SET linkMode=1 WHERE linkMode NOT IN (0,1,2,3)"
+				"SELECT COUNT(*) > 0 FROM itemAttachments WHERE linkMode NOT IN (0,1,2,3,4)",
+				"UPDATE itemAttachments SET linkMode=1 WHERE linkMode NOT IN (0,1,2,3,4)"
 			],
 			// Creators with first name can't be fieldMode 1
 			[
@@ -3216,6 +3232,22 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("CREATE INDEX deletedCollections_dateDeleted ON deletedCollections(dateDeleted)");
 				yield Zotero.DB.queryAsync("CREATE TABLE deletedSearches (\n    savedSearchID INTEGER PRIMARY KEY,\n    dateDeleted DEFAULT CURRENT_TIMESTAMP NOT NULL,\n    FOREIGN KEY (savedSearchID) REFERENCES savedSearches(savedSearchID) ON DELETE CASCADE\n)");
 				yield Zotero.DB.queryAsync("CREATE INDEX deletedSearches_dateDeleted ON deletedSearches(dateDeleted)");
+			}
+			
+			else if (i == 112) {
+				yield _updateCompatibility(7);
+				
+				yield Zotero.DB.queryAsync("DROP TABLE IF EXISTS annotations");
+				yield Zotero.DB.queryAsync("DROP TABLE IF EXISTS highlights");
+				
+				yield Zotero.DB.queryAsync("DROP TABLE IF EXISTS users");
+				yield Zotero.DB.queryAsync("CREATE TABLE users (\n    userID INTEGER PRIMARY KEY,\n    name TEXT NOT NULL\n)");
+				
+				yield Zotero.DB.queryAsync("CREATE TABLE itemAnnotations (\n    itemID INTEGER PRIMARY KEY,\n    parentItemID INT NOT NULL,\n    type INTEGER NOT NULL,\n    text TEXT,\n    comment TEXT,\n    color TEXT,\n    pageLabel TEXT,\n    sortIndex TEXT NOT NULL,\n    position TEXT NOT NULL,\n    isExternal INT NOT NULL,\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,\n    FOREIGN KEY (parentItemID) REFERENCES itemAttachments(itemID) ON DELETE CASCADE\n)");
+				yield Zotero.DB.queryAsync("CREATE INDEX itemAnnotations_parentItemID ON itemAnnotations(parentItemID)");
+				
+				yield Zotero.DB.queryAsync("ALTER TABLE itemAttachments ADD COLUMN lastProcessedModificationTime INT");
+				yield Zotero.DB.queryAsync("CREATE INDEX itemAttachments_lastProcessedModificationTime ON itemAttachments(lastProcessedModificationTime)");
 			}
 			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom

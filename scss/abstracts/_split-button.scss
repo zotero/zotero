@@ -1,0 +1,489 @@
+
+// The split button was originally created by flachware for pdf-reader:
+// https://github.com/zotero/pdf-reader/blob/master/src/stylesheets/abstracts/mixins/_split-button.scss
+
+$accent-color:          #0a6cf5; // 215° 96 96
+$accent-color-darken-6: darken($accent-color, 6%);
+
+$blue-btn:              #90c8f6;
+
+$toolbar-btn-height:                22px;
+$toolbar-btn-bg:                    linear-gradient(to bottom, #fafafa, #f2f2f2);
+$toolbar-btn-padding:               3px 11px;
+$toolbar-btn-border:                0;
+$toolbar-btn-border-radius:         3.75px;
+$toolbar-btn-margin-x:              4px;
+$toolbar-btn-box-shadow:            inset 0 1px 0 rgba(255, 255, 255, 0.33), 0 0 0 1px rgba(0, 0, 0, 0.08), 0 1px 0 rgba(0, 0, 0, 0.1);
+$toolbar-btn-box-shadow-2x:         inset 0 0.5px 0.5px rgba(255, 255, 255, 1), 0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 0.75px 0 rgba(0, 0, 0, 0.125);
+$toolbar-btn-focus-box-shadow:      0 0 0 4px rgba($accent-color, 0.5), $toolbar-btn-box-shadow;
+$toolbar-btn-focus-box-shadow-2x:   0 0 0 4px rgba($accent-color, 0.5), $toolbar-btn-box-shadow-2x;
+$toolbar-btn-hover-bg:              null;
+$toolbar-btn-border-hover-color:    null;
+$toolbar-btn-active-bg:             linear-gradient(to bottom, #e4e4e4, #ddd);
+$toolbar-btn-blurred-bg:            transparent;
+$toolbar-btn-blurred-box-shadow:    0 0 0 1px rgba(0, 0, 0, 0.11);
+$toolbar-btn-border-active-color:   $blue-btn;
+$toolbar-btn-icon-active-offset:    0;
+
+
+//
+// String functions
+//
+
+@function str-replace($string, $token, $replace: "") {
+  $i: str-index($string, $token);
+
+  @while (str-index($string, $token) != null) {
+    $first-part: str-slice($string, 1, ($i - 1));
+    $last-part: str-slice($string, ($i + str-length($token)));
+    $string: str-slice($string, 1, ($i - 1)) + $replace + $last-part;
+
+    $i: str-index($string, $token);
+  }
+
+  @return $string;
+}
+
+@function str-parse($string, $token) {
+  $i: str-index($string, $token);
+
+  @if $i {
+    $first-part: str-slice($string, 1, ($i - 1));
+    $string: str-parse(str-slice($string, ($i + str-length($token))), $token);
+
+    @return join(simple-selectors($first-part), $string);
+  }
+
+  @return simple-selectors($string);
+}
+
+
+
+// State mixin
+@mixin state($states...) {
+ 
+  @each $state in $states {
+    $string: $state;
+
+    @each $token in ">", "+", "~" {
+      $string: str-replace($string, $token, " ");
+    }
+
+    $string: str-replace($string, "  ", " ");
+
+    $selectors: str-parse($string, " ");
+ 
+    @each $sel in $selectors {
+      @if str-index("#{&}", $sel) != null {
+        @at-root #{selector-replace(&, $sel, $state)} {
+          @content;
+        }
+      }
+    }
+  }
+}
+
+// Variant mixin (alias)
+@mixin variant($args...) {
+  @include state($args...) {
+    @content;
+  }
+}
+
+
+//
+// Media queries
+//
+
+@mixin retina {
+  @media screen and (min-resolution: 1.25dppx) {
+    @content;
+  }
+}
+
+
+//
+// Asset URLs
+//
+
+@function asset-url($type, $path) {
+  @return url(unquote("#{$type}/#{$path}"));
+}
+
+@function icon-url($path) {
+  @return asset-url("chrome://zotero/skin", $path);
+}
+
+@function image-url($path) {
+  @return asset-url("chrome://zotero/skin", $path);
+}
+
+
+//
+// Icon
+//
+
+@mixin icon($file-name, $size: 16px) {
+  &::before {
+    content: "";
+    display: inline-block;
+    vertical-align: top;
+    width: $size;
+    height: $size;
+    background-image: icon-url("#{$file-name}.png");
+    background-size: 100%;
+
+    @include retina {
+      background-image: icon-url("#{$file-name}@2x.png");
+    }
+  }
+}
+
+
+.toolbarButton::before {
+    position: relative;
+    z-index: 2;
+}
+
+.toolbarButton > span:first-child {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.toolbarButton {
+  height: $toolbar-btn-height;
+  background: $toolbar-btn-bg;
+  padding: $toolbar-btn-padding;
+  border: $toolbar-btn-border;
+  border-radius: $toolbar-btn-border-radius;
+  margin: 0 $toolbar-btn-margin-x;
+  position: relative;
+  box-shadow: $toolbar-btn-box-shadow;
+
+  @include retina {
+    box-shadow: $toolbar-btn-box-shadow-2x;
+  }
+
+  /*&:focus-visible {
+    box-shadow: $toolbar-btn-focus-box-shadow;
+    z-index: 1;
+
+    @include retina {
+      box-shadow: $toolbar-btn-focus-box-shadow-2x;
+    }
+  }*/
+
+  &:-moz-focusring {
+    box-shadow: $toolbar-btn-focus-box-shadow;
+    z-index: 1;
+
+    @include retina {
+      box-shadow: $toolbar-btn-focus-box-shadow-2x;
+    }
+  }
+
+  &:hover {
+    background: $toolbar-btn-hover-bg;
+    border-color: $toolbar-btn-border-hover-color;
+  }
+
+  &:active,
+  &.active {
+    background: $toolbar-btn-active-bg;
+    border-color: $toolbar-btn-border-active-color;
+  }
+
+  &[disabled] {
+    pointer-events: none;
+
+    &::before {
+      opacity: 0.5;
+    }
+  }
+
+  &::before {
+    position: relative;
+    z-index: 2;
+
+    @include state(".toolbarButton:active", ".toolbarButton.active") {
+      top: $toolbar-btn-icon-active-offset;
+    }
+  }
+
+  // Label for screen readers
+  > span:first-child {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+.split-button {
+  display: flex;
+}
+
+
+//
+// Split button
+//
+
+@mixin split-button($height, $button, $padding-x, $padding-y) {
+  height: $height;
+  padding: $padding-y $padding-x $padding-y ($padding-x + 1px);
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
+  position: relative;
+
+  /*&:focus-visible {
+    z-index: 2; // Chrome
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      border-radius: 0;
+      box-shadow: inset 0 0 0 1px rgba($accent-color, 0.5), 0 0 0 3px rgba($accent-color, 0.5);
+
+      @include retina {
+        box-shadow: inset 0 0 0 1px rgba($accent-color, 0.5), 0 0 0 2.5px rgba($accent-color, 0.5);
+      }
+    }
+  }*/
+
+  &:-moz-focusring {
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      border-radius: 0;
+      box-shadow: inset 0 0 0 1px rgba($accent-color, 0.5), 0 0 0 3px rgba($accent-color, 0.5);
+      z-index: 2; // Firefox
+
+      @include retina {
+        box-shadow: inset 0 0 0 1px rgba($accent-color, 0.5), 0 0 0 2.5px rgba($accent-color, 0.5);
+      }
+    }
+  }
+
+  &:first-child {
+    margin-right: 0;
+    background: none;
+
+    /*&:focus-visible {
+      &::after {
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
+      }
+    }*/
+
+    &:-moz-focusring {
+      &::after {
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
+      }
+    }
+  }
+
+  &:last-child {
+    padding: $padding-y ($padding-x + 1px);
+    margin-left: 0;
+    background: image-url("mac/#{$button}-end.png") no-repeat right top;
+
+    @include retina {
+      background: image-url("mac/#{$button}-end@2x.png") no-repeat right top / auto $height;
+    }
+
+    &:active {
+      background: image-url("mac/#{$button}-end-pressed.png") no-repeat right top;
+
+      @include retina {
+        background: image-url("mac/#{$button}-end-pressed@2x.png") no-repeat right top / auto $height;
+      }
+    }
+    
+    @include state(".toolbarButton.toggled") {
+      background: image-url("mac/#{$button}-end-active.png") no-repeat right top;
+
+      @include retina {
+        background: image-url("mac/#{$button}-end-active@2x.png") no-repeat right top / auto $height;
+      }
+
+      @include state(".toolbarButton:active") {
+        background: image-url("mac/#{$button}-end-active-pressed.png") no-repeat right top;
+
+        @include retina {
+          background: image-url("mac/#{$button}-end-active-pressed@2x.png") no-repeat right top / auto $height;
+        }
+      }
+    }
+
+    /*&:focus-visible {
+      &::after {
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+      }
+    }*/
+
+    &:-moz-focusring {
+      &::after {
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+      }
+    }
+  }
+
+  &:not(:first-child) {
+    margin-left: 0;
+  }
+
+  &:not(:last-child) {
+    margin-right: 0;
+  }
+
+  > span:first-child {
+    clip: initial;
+    margin: initial;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    text-indent: -99em;
+    background:
+      linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)) no-repeat left center / 1px ($height - 2px),
+      image-url("mac/#{$button}-start.png") no-repeat center top;
+
+    @include retina {
+      background:
+        linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)) no-repeat left center / 1px ($height - 2px),
+        image-url("mac/#{$button}-start@2x.png") no-repeat center top / auto $height;
+    }
+
+    @include state(".toolbarButton:active") {
+      background: image-url("mac/#{$button}-start-pressed.png") no-repeat center top;
+
+      @include retina {
+        background: image-url("mac/#{$button}-start-pressed@2x.png") no-repeat center top / auto $height;
+      }
+    }
+
+    @include state(".toolbarButton.toggled") {
+      background: image-url("mac/#{$button}-start-active.png") no-repeat center top;
+
+      @include retina {
+        background: image-url("mac/#{$button}-start-active@2x.png") no-repeat center top / auto $height;
+      }
+
+      @include state(".toolbarButton:active") {
+        background: image-url("mac/#{$button}-start-active-pressed.png") no-repeat center top;
+
+        @include retina {
+          background: image-url("mac/#{$button}-start-active-pressed@2x.png") no-repeat center top / auto $height;
+        }
+      }
+    }
+
+    @include state(".toolbarButton.toggled + .toolbarButton:not(:active)") {
+      background: image-url("mac/#{$button}-start.png") no-repeat center top;
+
+      @include retina {
+        background: image-url("mac/#{$button}-start@2x.png") no-repeat center top / auto $height;
+      }
+    }
+
+    @include variant(".toolbarButton:first-child") {
+      background: image-url("mac/#{$button}-start.png") no-repeat left top;
+
+      @include retina {
+        background: image-url("mac/#{$button}-start@2x.png") no-repeat left top / auto $height;
+      }
+
+      @include state(".toolbarButton:active") {
+        background: image-url("mac/#{$button}-start-pressed.png") no-repeat left top;
+
+        @include retina {
+          background: image-url("mac/#{$button}-start-pressed@2x.png") no-repeat left top / auto $height;
+        }
+      }
+
+      @include state(".toolbarButton.toggled") {
+        background: image-url("mac/#{$button}-start-active.png") no-repeat left top;
+
+        @include retina {
+          background: image-url("mac/#{$button}-start-active@2x.png") no-repeat left top / auto $height;
+        }
+
+        @include state(".toolbarButton:active") {
+          background: image-url("mac/#{$button}-start-active-pressed.png") no-repeat left top;
+
+          @include retina {
+            background: image-url("mac/#{$button}-start-active-pressed@2x.png") no-repeat left top / auto $height;
+          }
+        }
+      }
+    }
+
+    @include variant(".toolbarButton:last-child") {
+      width: calc(100% - 17px);
+    }
+  }
+}
+
+
+// Move this out from mixins
+#zotero-tb-split {
+  $item-tool-icon:              "mac/item";
+  $item-tool-icon-active:       "mac/item-white";
+  $notes-tool-icon:             "mac/notes";
+  $notes-tool-icon-active:      "mac/notes-white";
+  
+  &.hidden {
+    display: none;
+  }
+
+  .item {
+    @include icon($item-tool-icon);
+
+    &.toggled {
+      @include icon($item-tool-icon-active);
+    }
+  }
+
+  .notes {
+    @include icon($notes-tool-icon);
+
+    &.toggled {
+      @include icon($notes-tool-icon-active);
+    }
+  }
+  
+  .toolbarButton {
+    box-sizing: border-box;
+
+    @include split-button(
+      $height: 24px,
+      $button: "menubutton",
+      $padding-x: 11px,
+      $padding-y: 4px
+    );
+  }
+}

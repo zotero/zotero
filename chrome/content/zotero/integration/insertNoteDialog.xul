@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2021 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     http://zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+-->
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://global/skin/browser.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/integration.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/integration.css" type="text/css"?>
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<window
+	id="insert-note-dialog"
+	class="citation-dialog note-dialog"
+	orient="vertical"
+	title="&zotero.integration.quickFormatDialog.title;"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	persist="screenX screenY"
+	onkeypress="Zotero_QuickFormat.onKeyPress(event)"
+	onunload="Zotero_QuickFormat.onUnload()">
+	
+	<script src="../include.js"/>
+	<script src="windowDraggingUtils.js" type="text/javascript"/>
+	<script src="quickFormat.js" type="text/javascript"/>
+	<script src="insertNoteDialog.js" type="text/javascript"/>
+
+	<box orient="horizontal" class="citation-dialog entry">
+		<deck class="citation-dialog deck" selectedIndex="0" flex="1">
+			<hbox class="citation-dialog search" flex="1" align="start">
+				<hbox flex="1">
+					<iframe class="citation-dialog iframe" ondragstart="event.stopPropagation()" src="data:application/xhtml+xml,%3C!DOCTYPE%20html%20PUBLIC%20%22-//W3C//DTD%20XHTML%201.0%20Strict//EN%22%20%22http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd%22%3E%3Chtml%20xmlns=%22http://www.w3.org/1999/xhtml%22%3E%3Chead%3E%3Clink%20rel=%22stylesheet%22%20type=%22text/css%22%20href=%22chrome://zotero/skin/integration.css%22/%3E%3Clink%20rel=%22stylesheet%22%20type=%22text/css%22%20href=%22chrome://zotero-platform/content/integration.css%22/%3E%3C/head%3E%3Cbody%20contenteditable=%22true%22%20spellcheck=%22false%22%20class=%22citation-dialog%20editor%22/%3E%3C/html%3E"
+							tabindex="1" flex="1"/>
+					<vbox class="citation-dialog spinner" style="visibility: hidden">
+						<image class="zotero-spinner-16"/>
+					</vbox>
+				</hbox>
+			</hbox>
+			<progressmeter class="citation-dialog progress-meter" mode="undetermined" value="0" flex="1"/>
+		</deck>
+	</box>
+	<panel class="citation-dialog reference-panel" noautofocus="true" norestorefocus="true"
+		   height="0" width="0">
+		<richlistbox class="citation-dialog reference-list" flex="1"/>
+	</panel>
+</window>

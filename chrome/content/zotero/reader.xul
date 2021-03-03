@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+
+<?xul-overlay href="chrome://zotero/content/standalone/editMenuOverlay.xul"?>
+<?xul-overlay href="chrome://zotero-platform/content/standalone/menuOverlay.xul"?>
+
+<!DOCTYPE window [
+		<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
+		<!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone.dtd" > %standaloneDTD;
+		<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
+		]>
+
+<window
+		id="pdf-reader"
+		windowtype="zotero:reader"
+		orient="vertical"
+		width="1300"
+		height="800"
+		persist="screenX screenY width height"
+		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+>
+	<script type="application/javascript">
+		Components.utils.import('resource://gre/modules/Services.jsm');
+	</script>
+	<script type="application/javascript" src="chrome://global/content/globalOverlay.js"/>
+	<script type="application/javascript" src="chrome://global/content/contentAreaUtils.js"/>
+	<script type="application/javascript" src="chrome://global/content/inlineSpellCheckUI.js"/>
+	<script src="include.js"/>
+	<commandset id="mainCommandSet">
+		<!--FILE-->
+		<command id="cmd_quitApplication" oncommand="goQuitApplication();"/>
+		<command id="cmd_close" oncommand="window.close();"/>
+		
+		<!--EDIT-->
+		<commandset id="editMenuCommands"/>
+		<command id="cmd_find"
+			oncommand="document.getElementById('zotero-tb-search').select()"/>
+	</commandset>
+	
+	<!-- TODO: Localize -->
+	<tooltip id="iframeTooltip" onpopupshowing="if (tooltipTitleNode = document.tooltipNode.closest('*[title]')) {this.setAttribute('label', tooltipTitleNode.getAttribute('title')); return true; } return false"/>
+	<menubar>
+		<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
+			<menupopup id="menu_FilePopup">
+				<menuitem label="Export" oncommand="menuCmd('export')"/>
+				<menuitem label="Print" oncommand="menuCmd('print')"/>
+				<menuseparator/>
+				<menuitem id="menu_close" label="&closeCmd.label;" key="key_close"
+						  accesskey="&closeCmd.accesskey;" command="cmd_close"/>
+			</menupopup>
+		</menu>
+
+		<menu id="menu_edit">
+			<menupopup id="menu_EditPopup">
+				<menuitem id="menu_undo"/>
+				<menuitem id="menu_redo"/>
+				<menuseparator/>
+				<menuitem id="menu_cut"/>
+				<menuitem id="menu_copy"/>
+				<menuitem id="menu_paste"/>
+				<menuitem id="menu_delete"/>
+			</menupopup>
+		</menu>
+		<menu label="View">
+			<menupopup>
+				<!--
+				To make presentation mode work it's necessary to set
+				full-screen-api.enabled=true
+				full-screen-api.allow-trusted-requests-only=false
+				and then hide all other visible window elements like toolbar, note sidebar, tabs, etc.
+				-->
+<!--				<menuitem label="Switch to Presentation Mode" oncommand="menuCmd('presentationmode')"/>-->
+<!--				<menuseparator/>-->
+				<menuitem label="Go to First Page" oncommand="menuCmd('firstpage')"/>
+				<menuitem label="Go to Last Page" oncommand="menuCmd('lastpage')"/>
+				<menuseparator/>
+				<menuitem label="Rotate Clockwise" oncommand="menuCmd('rotatecw')"/>
+				<menuitem label="Rotate Counterclockwise" oncommand="menuCmd('rotateccw')"/>
+				<menuseparator/>
+				<menuitem label="Text Selection Tool" oncommand="menuCmd('switchcursortool_select')"/>
+				<menuitem label="Hand Tool" oncommand="menuCmd('switchcursortool_hand')"/>
+				<menuseparator/>
+				<menuitem label="Vertical Scrolling" oncommand="menuCmd('switchscrollmode_vertical')"/>
+				<menuitem label="Horizontal Scrolling" oncommand="menuCmd('switchscrollmode_horizontal')"/>
+				<menuitem label="Wrapped Scrolling" oncommand="menuCmd('switchscrollmode_wrapped')"/>
+				<menuseparator/>
+				<menuitem label="No Spreads" oncommand="menuCmd('switchspreadmode_none')"/>
+				<menuitem label="Odd Spreads" oncommand="menuCmd('switchspreadmode_odd')"/>
+				<menuitem label="Even Spreads" oncommand="menuCmd('switchspreadmode_even')"/>
+			</menupopup>
+		</menu>
+<!--		<menu label="Tools">-->
+<!--			<menupopup>-->
+<!--				<menuitem label="Remove password (not implemented)" oncommand="menuCmd('remove_password')"/>-->
+<!--			</menupopup>-->
+<!--		</menu>-->
+		<menu id="windowMenu"
+			  label="&windowMenu.label;"
+			  onpopupshowing="macWindowMenuDidShow();"
+			  onpopuphidden="macWindowMenuDidHide();"
+		>
+		</menu>
+	</menubar>
+
+	<hbox flex="1">
+		<vbox id="zotero-reader" flex="3">
+			<browser id="reader"
+					 tooltip="iframeTooltip"
+					 type="content"
+					 primary="true"
+					 transparent="transparent"
+					 src="resource://zotero/pdf-reader/viewer.html"
+					 flex="1"/>
+			<popupset id="zotero-reader-popupset">
+			</popupset>
+		</vbox>
+	</hbox>
+</window>

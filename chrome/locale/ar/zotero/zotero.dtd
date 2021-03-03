@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "عرض في المكتبة">
 <!ENTITY zotero.items.menu.attach.note "اضافة ملاحظة">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "اضافة مرفق">
 <!ENTITY zotero.items.menu.attach.link.uri "ربط الرابط بالمسار...">
 <!ENTITY zotero.items.menu.attach.file "إرفاق نسخة من ملف مخزن...">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "تخزين نسخة من ملف...">
 <!ENTITY zotero.toolbar.attachment.weblink "حفظ رابط للصفحة الحالية">
 <!ENTITY zotero.toolbar.attachment.snapshot "اخذ لقطة من الصفحة الحالية">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "لاتوجد اوسمة لعرضها">
 <!ENTITY zotero.tagSelector.loadingTags "تحميل الوسوم...">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "ارفاق رابط لمحتوى على الانترنت">
 <!ENTITY zotero.attachLink.label.link "رابط:">
 <!ENTITY zotero.attachLink.label.title "عنوان:">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">

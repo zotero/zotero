@@ -73,6 +73,11 @@ Zotero.Prefs = new function(){
 						this.clear('firstRunGuidanceShown.saveIcon');
 						this.clear('firstRunGuidanceShown.saveButton');
 						break;
+					
+					// TEMP: Uncomment and set toVersion above to 3 when adding to prefs drop-down
+					//case 3:
+					//	this.clear('fileHandler.pdf');
+					//	break;
 				}
 			}
 			this.set('prefVersion', toVersion);

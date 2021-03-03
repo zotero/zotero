@@ -16,14 +16,28 @@
 		menubar: false,
 		resize: false,
 		statusbar: false,
-		
+		// Hack in text selection. More info: https://stackoverflow.com/a/52272322
+		readonly: 1,
+		setup: function (editor) {
+			editor.on('SwitchMode', function hack() {
+				if (editor.readonly) {
+					editor.readonly = 1;
+				}
+			});
+		},
 		init_instance_callback: function (ed) {
 			ed.setMode('readonly');
 			
 			setLocale(ed);
 			zoteroInit(ed);
-			
+
 			ed.getContainer().classList.add('readonly');
+			ed.dom.doc.addEventListener('click', (event) => {
+				if (event.target.nodeName === 'A') {
+					zoteroHandleEvent({ type: 'ZoteroLinkClick', value: event.target.href });
+					event.preventDefault();
+				}
+			}, true);
 		},
 		
 		// More restrictive version of default set, with JS/etc. removed

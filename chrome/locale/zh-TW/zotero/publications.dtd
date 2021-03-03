@@ -9,7 +9,7 @@
 <!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
 <!ENTITY zotero.publications.sharing.prompt "Would you like to allow your work to be shared by others?">
 <!ENTITY zotero.publications.sharing.cc "是的，以創用 CC 授權證">
-<!ENTITY zotero.publications.sharing.cc0 "是的，並將我的作品放在公眾所有之領域 (public domain)">
+<!ENTITY zotero.publications.sharing.cc0 "是的，並將我的作品放在公眾擁有之領域 (public domain)">
 <!ENTITY zotero.publications.sharing.reserved "不，只在 zotero.org 出版我的作品">
 
 <!ENTITY zotero.publications.chooseLicense.title "選擇創用 CC 授權證">

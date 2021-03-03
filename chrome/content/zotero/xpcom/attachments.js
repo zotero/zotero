@@ -24,11 +24,13 @@
 */
 
 Zotero.Attachments = new function(){
-	// Keep in sync with Zotero.Schema.integrityCheck()
+	// Keep in sync with Zotero.Schema.integrityCheck() and this.linkModeToName()
 	this.LINK_MODE_IMPORTED_FILE = 0;
 	this.LINK_MODE_IMPORTED_URL = 1;
 	this.LINK_MODE_LINKED_FILE = 2;
 	this.LINK_MODE_LINKED_URL = 3;
+	this.LINK_MODE_EMBEDDED_IMAGE = 4;
+	
 	this.BASE_PATH_PLACEHOLDER = 'attachments:';
 	
 	var _findPDFQueue = [];
@@ -351,6 +353,98 @@ Zotero.Attachments = new function(){
 	});
 
 
+	/**
+	 * Saves an image for a parent note or image annotation
+	 *
+	 * Emerging formats like WebP and AVIF are supported here,
+	 * but should be filtered on the calling logic for now
+	 *
+	 * @param {Object} params
+	 * @param {Blob} params.blob - Image to save
+	 * @param {Integer} params.parentItemID - Note or annotation item to add item to
+	 * @param {Object} [params.saveOptions] - Options to pass to Zotero.Item::save()
+	 * @return {Promise<Zotero.Item>}
+	 */
+	this.importEmbeddedImage = async function ({ blob, parentItemID, saveOptions }) {
+		Zotero.debug('Importing embedded image');
+		
+		if (!parentItemID) {
+			throw new Error("parentItemID must be provided");
+		}
+		
+		var contentType = blob.type;
+		var fileExt;
+		switch (contentType) {
+			case 'image/apng':
+				fileExt = 'apng';
+				break;
+			case 'image/avif': // Supported from FF 86
+				fileExt = 'avif';
+				break;
+			case 'image/gif':
+				fileExt = 'gif';
+				break;
+			case 'image/jpeg':
+				fileExt = 'jpg';
+				break;
+			case 'image/png':
+				fileExt = 'png';
+				break;
+			case 'image/svg+xml':
+				fileExt = 'svg';
+				break;
+			case 'image/webp': // Supported from FF 65
+				fileExt = 'webp';
+				break;
+			case 'image/bmp':
+				fileExt = 'bmp';
+				break;
+			default:
+				throw new Error(`Unsupported embedded image content type '${contentType}'`);
+		}
+		var filename = 'image.' + fileExt;
+		
+		var attachmentItem;
+		var destDir;
+		try {
+			await Zotero.DB.executeTransaction(async function () {
+				// Create a new attachment
+				attachmentItem = new Zotero.Item('attachment');
+				let { libraryID: parentLibraryID } = Zotero.Items.getLibraryAndKeyFromID(parentItemID);
+				attachmentItem.libraryID = parentLibraryID;
+				attachmentItem.parentID = parentItemID;
+				attachmentItem.attachmentLinkMode = this.LINK_MODE_EMBEDDED_IMAGE;
+				attachmentItem.attachmentPath = 'storage:' + filename;
+				attachmentItem.attachmentContentType = contentType;
+				await attachmentItem.save(saveOptions);
+				
+				// Write blob to file in attachment directory
+				destDir = await this.createDirectoryForItem(attachmentItem);
+				let file = OS.Path.join(destDir, filename);
+				await Zotero.File.putContentsAsync(file, blob);
+				await Zotero.File.setNormalFilePermissions(file);
+			}.bind(this));
+		}
+		catch (e) {
+			Zotero.logError("Failed importing image:\n\n" + e);
+			
+			// Clean up
+			try {
+				if (destDir) {
+					await OS.File.removeDir(destDir, { ignoreAbsent: true });
+				}
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+			
+			throw e;
+		}
+		
+		return attachmentItem;
+	};
+	
+	
 	/**
 	 * @param {Object} options
 	 * @param {Integer} options.libraryID
@@ -2102,6 +2196,9 @@ Zotero.Attachments = new function(){
 		if (!(item instanceof Zotero.Item)) {
 			throw new Error("'item' must be a Zotero.Item");
 		}
+		if (!item.key) {
+			throw new Error("Item key must be set");
+		}
 		return this.getStorageDirectoryByLibraryAndKey(item.libraryID, item.key);
 	}
 	
@@ -2210,6 +2307,9 @@ Zotero.Attachments = new function(){
 			case Zotero.Attachments.LINK_MODE_IMPORTED_URL:
 			case Zotero.Attachments.LINK_MODE_IMPORTED_FILE:
 				break;
+			
+			case Zotero.Attachments.LINK_MODE_EMBEDDED_IMAGE:
+				return false;
 			
 			default:
 				throw new Error("Invalid attachment link mode");
@@ -2367,7 +2467,7 @@ Zotero.Attachments = new function(){
 		Zotero.DB.requireTransaction();
 		
 		var newAttachment = attachment.clone(libraryID);
-		if (attachment.isImportedAttachment()) {
+		if (attachment.isStoredFileAttachment()) {
 			// Attachment path isn't copied over by clone() if libraryID is different
 			newAttachment.attachmentPath = attachment.attachmentPath;
 		}
@@ -2379,7 +2479,7 @@ Zotero.Attachments = new function(){
 		// Move files over if they exist
 		var oldDir;
 		var newDir;
-		if (newAttachment.isImportedAttachment()) {
+		if (newAttachment.isStoredFileAttachment()) {
 			oldDir = this.getStorageDirectory(attachment).path;
 			if (await OS.File.exists(oldDir)) {
 				newDir = this.getStorageDirectory(newAttachment).path;
@@ -2405,7 +2505,7 @@ Zotero.Attachments = new function(){
 		}
 		catch (e) {
 			// Move files back if old item can't be deleted
-			if (newAttachment.isImportedAttachment()) {
+			if (newAttachment.isStoredFileAttachment()) {
 				try {
 					await OS.File.move(newDir, oldDir);
 				}
@@ -2431,7 +2531,7 @@ Zotero.Attachments = new function(){
 		Zotero.DB.requireTransaction();
 		
 		var newAttachment = attachment.clone(libraryID);
-		if (attachment.isImportedAttachment()) {
+		if (attachment.isStoredFileAttachment()) {
 			// Attachment path isn't copied over by clone() if libraryID is different
 			newAttachment.attachmentPath = attachment.attachmentPath;
 		}
@@ -2441,7 +2541,7 @@ Zotero.Attachments = new function(){
 		yield newAttachment.save();
 		
 		// Copy over files if they exist
-		if (newAttachment.isImportedAttachment() && (yield attachment.fileExists())) {
+		if (newAttachment.isStoredFileAttachment() && (yield attachment.fileExists())) {
 			let dir = Zotero.Attachments.getStorageDirectory(attachment);
 			let newDir = yield Zotero.Attachments.createDirectoryForItem(newAttachment);
 			yield Zotero.File.copyDirectory(dir, newDir);
@@ -2787,6 +2887,8 @@ Zotero.Attachments = new function(){
 			return 'linked_file';
 		case this.LINK_MODE_LINKED_URL:
 			return 'linked_url';
+		case this.LINK_MODE_EMBEDDED_IMAGE:
+			return 'embedded_image';
 		default:
 			throw new Error(`Invalid link mode ${linkMode}`);
 		}

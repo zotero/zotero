@@ -778,23 +778,25 @@ Zotero.File = new function(){
 	
 	
 	/**
-	 * Generate a data: URI from an nsIFile
+	 * Generate a data: URI from a file path
 	 *
-	 * From https://developer.mozilla.org/en-US/docs/data_URIs
+	 * @param {String} path
+	 * @param {String} contentType
 	 */
-	this.generateDataURI = function (file) {
-		var contentType = Components.classes["@mozilla.org/mime;1"]
-			.getService(Components.interfaces.nsIMIMEService)
-			.getTypeFromFile(file);
-		var inputStream = Components.classes["@mozilla.org/network/file-input-stream;1"]
-			.createInstance(Components.interfaces.nsIFileInputStream);
-		inputStream.init(file, 0x01, 0o600, 0);
-		var stream = Components.classes["@mozilla.org/binaryinputstream;1"]
-			.createInstance(Components.interfaces.nsIBinaryInputStream);
-		stream.setInputStream(inputStream);
-		var encoded = btoa(stream.readBytes(stream.available()));
-		return "data:" + contentType + ";base64," + encoded;
-	}
+	this.generateDataURI = async function (file, contentType) {
+		if (!contentType) {
+			throw new Error("contentType not provided");
+		}
+		
+		var buf = await OS.File.read(file, {});
+		var bytes = new Uint8Array(buf);
+		var binary = '';
+		var len = bytes.byteLength;
+		for (let i = 0; i < len; i++) {
+			binary += String.fromCharCode(bytes[i]);
+		}
+		return 'data:' + contentType + ';base64,' + btoa(binary);
+	};
 	
 	
 	this.setNormalFilePermissions = function (file) {
@@ -1008,14 +1010,17 @@ Zotero.File = new function(){
 	}
 	
 	
-	this.createDirectoryIfMissingAsync = async function (path) {
+	this.createDirectoryIfMissingAsync = async function (path, options = {}) {
 		try {
 			await OS.File.makeDir(
 				path,
-				{
-					ignoreExisting: false,
-					unixMode: 0o755
-				}
+				Object.assign(
+					{
+						ignoreExisting: false,
+						unixMode: 0o755
+					},
+					options
+				)
 			)
 		}
 		catch (e) {

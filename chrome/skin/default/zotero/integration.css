@@ -91,22 +91,22 @@
 	max-height: 100px;
 }
 
-.quick-format-title {
+.citation-dialog.title {
 	margin: 0;
 	font-weight: bold;
 	overflow: hidden;
 }
 
-.quick-format-info {
+.citation-dialog.info {
 	margin: 0;
 	overflow: hidden;
 }
-.quick-format-info > label {
+.citation-dialog.info > label {
 	margin: 0;
 	padding: 0;
 }
 
-.quick-format-bubble {
+.citation-dialog.bubble {
 	border-radius: 8px;
 	background-color: #dee7f8;
 	border-style: solid;
@@ -120,25 +120,25 @@
 	-moz-user-select: all;
 }
 
-.quick-format-bubble:hover {
+.citation-dialog.bubble:hover {
 	background-color: #bbcef1;
 	border-color: #6d95e0;
 }
 
-.quick-format-bubble[selected="true"] {
+.citation-dialog.bubble[selected="true"] {
 	border-radius: 8px !important;
 	background-color: #598bec;
 	color: #fff;
 }
 
-#quick-format-search {
+.citation-dialog.search {
 	margin: 0;
 	padding: 0;
 	padding-top: 0;
 	padding-bottom: 0;
 }
 
-#quick-format-iframe {
+.citation-dialog.iframe {
 	margin-left: 4px;
 	height: 9999px;
 }
@@ -150,25 +150,25 @@ body {
 	overflow: hidden;
 }
 
-#quick-format-spinner {
+.citation-dialog.spinner {
 	margin-top: 2px;
 	margin-right: 8px;
 }
 
-.quick-format-item {
+.citation-dialog.item {
 	font-size: 12px;
 	font: -moz-field;
 	-moz-user-focus: normal;
 	padding: 3px 5px 3px 10px;
 }
 
-.quick-format-item:not(:last-child), .quick-format-separator:not(:last-child) {
+.citation-dialog.item:not(:last-child), .citation-dialog.separator:not(:last-child) {
 	border-style: solid;
 	border-width: 0 0 1px 0;
 	border-color: #BBB;
 }
 
-.quick-format-separator {
+.citation-dialog.separator {
 	font-size: 12px;
 	font: -moz-field;
 	-moz-user-focus: ignore;
@@ -180,7 +180,7 @@ richlistitem[selected="true"] {
 	color: HighlightText;
 }
 
-#quick-format-reference-panel {
+.citation-dialog.reference-panel {
 	margin: 0;
 	padding: 0;
 	border: none;
@@ -189,7 +189,7 @@ richlistitem[selected="true"] {
 	-moz-user-focus: ignore;
 }
 
-#quick-format-reference-list {
+.citation-dialog.reference-list {
 	margin: 0;
 	padding: 0;
 	-moz-user-focus: ignore;
@@ -241,6 +241,6 @@ panel button .button-text {
 	margin: 0 !important;
 }
 
-#quick-format-dialog {
+window.citation-dialog {
 	width: 600px;
 }

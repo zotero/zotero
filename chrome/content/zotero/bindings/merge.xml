@@ -335,7 +335,9 @@
 							break;
 						
 						case 'note':
-							elementName = 'zoteronoteeditor';
+							var type = Zotero.Libraries.get(this.libraryID).libraryType;
+							var useOld = type == 'group' || !Zotero.isPDFBuild;
+							elementName = useOld ? 'oldzoteronoteeditor' : 'zoteronoteeditor';
 							break;
 						
 						default:

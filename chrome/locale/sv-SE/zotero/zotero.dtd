@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Visa i bibliotek">
 <!ENTITY zotero.items.menu.attach.note "Lägg till anteckning">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Lägg till bilaga">
 <!ENTITY zotero.items.menu.attach.link.uri "Bifoga länk till URI...">
 <!ENTITY zotero.items.menu.attach.file "Bifoga Lagrad kopia av filen...">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Lagra kopia av fil...">
 <!ENTITY zotero.toolbar.attachment.weblink "Spara länk till aktuell sida">
 <!ENTITY zotero.toolbar.attachment.snapshot "Ta lokal kopia av aktuell sida">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Inga etiketter att visa">
 <!ENTITY zotero.tagSelector.loadingTags "Laddar etiketter…">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "Bifoga länk till URI">
 <!ENTITY zotero.attachLink.label.link "Länk:">
 <!ENTITY zotero.attachLink.label.title "Titel:">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">

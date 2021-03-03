@@ -149,6 +149,7 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 				throw e;
 			}
 			Zotero.debug("Upload failed -- performing download", 2);
+			Zotero.debug(e, 1);
 			downloadResult = yield this._startDownload();
 			Zotero.debug("Download result is " + downloadResult, 4);
 			throw e;
@@ -222,6 +223,15 @@ Zotero.Sync.Data.Engine.prototype.start = Zotero.Promise.coroutine(function* () 
 	yield this.library.saveTx({
 		skipNotifier: true
 	});
+	
+	if (this.library.libraryType == 'group') {
+		try {
+			yield this._updateGroupItemUsers();
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+	}
 	
 	Zotero.debug("Done syncing " + this.library.name);
 });
@@ -1426,6 +1436,58 @@ Zotero.Sync.Data.Engine.prototype._uploadDeletions = Zotero.Promise.coroutine(fu
 	
 	return libraryVersion;
 });
+
+
+/**
+ * Update createdByUserID/lastModifiedByUserID for previously downloaded group items
+ *
+ * TEMP: Currently only processes one batch of items, but before we start displaying the names,
+ * we'll need to update it to fetch all
+ */
+Zotero.Sync.Data.Engine.prototype._updateGroupItemUsers = async function () {
+	// TODO: Do more at once when we actually start showing these names
+	var max = this.apiClient.MAX_OBJECTS_PER_REQUEST;
+	
+	var sql = "SELECT key FROM items LEFT JOIN groupItems GI USING (itemID) "
+		+ `WHERE libraryID=? AND GI.itemID IS NULL ORDER BY itemID LIMIT ${max}`;
+	var keys = await Zotero.DB.columnQueryAsync(sql, this.libraryID);
+	if (!keys.length) {
+		return;
+	}
+	
+	Zotero.debug(`Updating item users in ${this.library.name}`);
+	
+	var jsonItems = await this.apiClient.downloadObjects(
+		this.library.libraryType, this.libraryTypeID, 'item', keys
+	)[0];
+	
+	if (!Array.isArray(jsonItems)) {
+		Zotero.logError(e);
+		return;
+	}
+	
+	for (let jsonItem of jsonItems) {
+		let item = Zotero.Items.getByLibraryAndKey(this.libraryID, jsonItem.key);
+		let params = [null, null];
+		
+		// This should almost always exist, but maybe doesn't for some old items?
+		if (jsonItem.meta.createdByUser) {
+			let { id: userID, username, name } = jsonItem.meta.createdByUser;
+			await Zotero.Users.setName(userID, name !== '' ? name : username);
+			params[0] = userID;
+		}
+		
+		if (jsonItem.meta.lastModifiedByUser) {
+			let { id: userID, username, name } = jsonItem.meta.lastModifiedByUser;
+			await Zotero.Users.setName(userID, name !== '' ? name : username);
+			params[1] = userID;
+		}
+		
+		await item.updateCreatedByUser.apply(item, params);
+	}
+	
+	return;
+};
 
 
 Zotero.Sync.Data.Engine.prototype._getJSONForObject = function (objectType, id, options = {}) {

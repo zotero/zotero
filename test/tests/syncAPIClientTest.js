@@ -43,6 +43,31 @@ describe("Zotero.Sync.APIClient", function () {
 		Zotero.HTTP.mock = null;
 	})
 	
+	
+	describe("#makeRequest()", function () {
+		after(function () {
+			sinon.restore();
+		});
+		
+		it("should send Zotero-Schema-Version", async function () {
+			server.respond(function (req) {
+				if (req.method == "GET" && req.url == baseURL + "test-schema-version") {
+					assert.propertyVal(
+						req.requestHeaders,
+						'Zotero-Schema-Version',
+						Zotero.Schema.globalSchemaVersion.toString()
+					);
+					
+					req.respond(200, {}, "");
+				}
+			});
+			var spy = sinon.spy(Zotero.HTTP, "request");
+			await client.makeRequest("GET", baseURL + "test-schema-version");
+			assert.isTrue(spy.calledOnce);
+		});
+	});
+	
+	
 	describe("#getGroups()", function () {
 		it("should automatically fetch multiple pages of results", function* () {
 			function groupJSON(groupID) {

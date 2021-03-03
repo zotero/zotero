@@ -23,17 +23,44 @@
   "progressWindow_tagPlaceholder": {
     "message": "標籤(可用逗號分隔)"
   },
+  "progressWindow_error_translation": {
+    "message": "儲存此項目時出錯。見 $1 以得更多資訊。"
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "找出轉譯器問題所在"
   },
+  "progressWindow_error_fallback": {
+    "message": "以 $1 儲存時出錯。改嘗試以 $2 儲存。"
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "您的 $1 版未支援此功能。請升級至 $2 版。"
+  },
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "最新版"
+  },
+  "appConnector": {
+    "message": "$1 連結器"
   },
   "upgradeApp": {
     "message": "升級 $1"
   },
   "error_connection_isAppRunning": {
     "message": "$1 正在執行？"
+  },
+  "error_connection_save": {
+    "message": "$1 無法與 $2 桌面應用程式溝通。連結器能直接儲存某些頁面到$3 帳戶，但若要得到最佳結果，在嘗試儲存前，得先確認 $2 已開啟。"
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "如有需要，您可 <a href=\"$1\">下載 $2</a> 或 <a href=\"$3\">檢查連結上的問題</a>。"
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "啟用儲存至線上文獻庫"
+  },
+  "integration_error_clientUpgrade": {
+    "message": "引用網站資料庫的文獻，需要 $1 或更新的版本。"
+  },
+  "integration_error_connection": {
+    "message": "$1 無法與 $2 桌面應用程式溝通。$2 一定得開啟，才能引用網站資料庫的文獻。"
   },
   "integration_googleDocs_updating": {
     "message": "$1正在更新您的文件。"

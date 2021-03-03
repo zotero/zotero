@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "បង្ហាញនៅក្នុងបណ្ណាល័យ">
 <!ENTITY zotero.items.menu.attach.note "បន្ថែមកំណត់ចំណាំ">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "បន្ថែមឯកសារកម្ជាប់">
 <!ENTITY zotero.items.menu.attach.link.uri "ភ្ជាប់កម្ជាប់ទៅនឹងយូអ៊ែរអិល...">
 <!ENTITY zotero.items.menu.attach.file "ភ្ជាប់ឯកសារចម្លងចូលទុក...">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "តម្កល់ឯកសារទុក...">
 <!ENTITY zotero.toolbar.attachment.weblink "ទាញរក្សាទុកកម្ជាប់គេហទំព័រនេះ">
 <!ENTITY zotero.toolbar.attachment.snapshot "ថតយកអត្ថបទគេហទំព័រនេះ">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "គ្មានស្លាកត្រូវបង្ហាញ">
 <!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "Attach Link to URI">
 <!ENTITY zotero.attachLink.label.link "Link:">
 <!ENTITY zotero.attachLink.label.title "Title:">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">

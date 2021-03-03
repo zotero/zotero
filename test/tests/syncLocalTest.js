@@ -468,6 +468,17 @@ describe("Zotero.Sync.Data.Local", function() {
 	
 	
 	describe("#getUnsynced()", function () {
+		// See also: "shouldn't upload external annotations" in syncEngineTest.js
+		it("shouldn't include external annotations", async function () {
+			var attachment = await importFileAttachment('test.pdf');
+			var annotation1 = await createAnnotation('highlight', attachment);
+			var annotation2 = await createAnnotation('highlight', attachment, { isExternal: true });
+			
+			var ids = await Zotero.Sync.Data.Local.getUnsynced('item', Zotero.Libraries.userLibraryID);
+			assert.include(ids, attachment.id);
+			assert.include(ids, annotation1.id);
+		});
+		
 		it("should correct incorrectly nested collections", async function () {
 			var c1 = await createDataObject('collection');
 			var c2 = await createDataObject('collection');
@@ -929,6 +940,69 @@ describe("Zotero.Sync.Data.Local", function() {
 			yield assert.eventually.equal(Zotero.DB.valueQueryAsync(
 				"SELECT COUNT(*) FROM items WHERE libraryID=? AND key=?", [libraryID, key2]
 			), 0);
+		});
+		
+		it("should update createdByUser and lastModifiedBy when saving group item", async function () {
+			var { libraryID } = await getGroup();
+			let item = await createDataObject('item', { libraryID });
+			let data = item.toJSON();
+			data.key = item.key;
+			data.version = 10;
+			let json = {
+				key: item.key,
+				version: 10,
+				meta: {
+					createdByUser: {
+						id: 12345,
+						username: 'foo',
+						name: 'Foo Foo'
+					},
+					lastModifiedByUser: {
+						id: 23456,
+						username: 'bar',
+						name: 'Bar Bar'
+					}
+				},
+				data
+			};
+			await Zotero.Sync.Data.Local.processObjectsFromJSON(
+				'item', libraryID, [json], { stopOnError: true }
+			);
+			let localItem = Zotero.Items.getByLibraryAndKey(libraryID, item.key);
+			assert.isTrue(localItem.synced);
+			
+			assert.equal(localItem.createdByUserID, 12345);
+			assert.equal(localItem.lastModifiedByUserID, 23456);
+			assert.equal(Zotero.Users.getName(12345), 'Foo Foo');
+			assert.equal(Zotero.Users.getName(23456), 'Bar Bar');
+		});
+		
+		it("should use username if empty name for createdByUser when saving group item", async function () {
+			var { libraryID } = await getGroup();
+			let item = await createDataObject('item', { libraryID });
+			let data = item.toJSON();
+			data.key = item.key;
+			data.version = 10;
+			let json = {
+				key: item.key,
+				version: 10,
+				meta: {
+					createdByUser: {
+						id: 12345,
+						username: 'foo',
+						name: ''
+					},
+				},
+				data
+			};
+			await Zotero.Sync.Data.Local.processObjectsFromJSON(
+				'item', libraryID, [json], { stopOnError: true }
+			);
+			let localItem = Zotero.Items.getByLibraryAndKey(libraryID, item.key);
+			assert.isTrue(localItem.synced);
+			
+			assert.equal(localItem.createdByUserID, 12345);
+			assert.equal(Zotero.Users.getName(12345), 'foo');
 		});
 	})
 	

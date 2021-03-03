@@ -21,6 +21,9 @@
 		<key id="key_close" key="W" modifiers="accel" command="cmd_close"/>
 	</keyset>
 	<command id="cmd_close" oncommand="window.close();"/>
-	
-	<zoteronoteeditor id="zotero-note-editor" flex="1" onerror="onError()"/>
+
+	<deck id="zotero-note-editor-switcher" flex="1">
+		<oldzoteronoteeditor id="zotero-note-editor-old" flex="1" onerror="onError()"/>
+		<zoteronoteeditor id="zotero-note-editor" flex="1" onerror="return;onError()"/>
+	</deck>
 </window>

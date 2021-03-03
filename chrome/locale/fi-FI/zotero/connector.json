@@ -14,6 +14,18 @@
   "general_cancel": {
     "message": "Peruuta"
   },
+  "general_pleaseWait": {
+    "message": "Odota..."
+  },
+  "progressWindow_savingTo": {
+    "message": "Tallennetaan kokoelmaan"
+  },
+  "progressWindow_tagPlaceholder": {
+    "message": "Avainsanat (pilkulla eroteltuna)"
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Sivukääntäjiin liittyvien ongelmien selvittäminen"
+  },
   "progressWindow_error_upgradeClient": {
     "message": "$1-versiosi ei tue tätä toimintoa. Päivitä versioon $2."
   },

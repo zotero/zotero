@@ -2,48 +2,60 @@
 	padding: 0 2em;
 }
 
-#zotero-view-tabbox, #zotero-item-pane-content > groupbox, #zotero-item-pane-content > groupbox > .groupbox-body
+.zotero-view-tabbox, .zotero-item-pane-content > groupbox, .zotero-item-pane-content > groupbox > .groupbox-body
 {
 	margin: 0 !important;
 	padding: 0 !important;
 }
 
-#zotero-view-tabbox tabs tab
+.zotero-view-tabbox tabs tab
 {
 	margin-top: 0 !important;
 	margin-bottom: 0 !important;
 }
 
-#zotero-view-tabbox tabs tab .tab-text
+.zotero-view-tabbox tabs tab .tab-text
 {
 	margin-top: .2em !important;
 	margin-bottom: .25em !important;
 }
 
-#zotero-view-item
+.zotero-item-pane-content {
+	background: -moz-Field; /* Same as background colour for treeview */
+}
+
+.zotero-view-item
 {
 	padding: 0;
 }
 
-#zotero-view-item.no-tabs
+.zotero-view-item.no-tabs
 {
 	margin-top: 0;
 }
 
-#zotero-view-item > tabpanel > *
+.zotero-view-item > tabpanel > *
 {
 	overflow: auto;
 }
 
-#zotero-view-item:not([selectedIndex="0"]) > tabpanel > * {
+.zotero-view-item:not([selectedIndex="0"]) > tabpanel > * {
 	padding-top: .25em;
 }
 
-#zotero-view-item > vbox
+.zotero-view-item > vbox
 {
 	overflow: auto;
 	margin-left: 5px;
 }
+
+.zotero-context-pane-pinned-note {
+	border-top: 1px solid #d9d9d9;
+}
+
+/*.zotero-editpane-tabs {*/
+/*	background: #ececec;*/
+/*}*/
 
 #retraction-box {
 	cursor: default;

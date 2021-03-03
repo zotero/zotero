@@ -1,0 +1,91 @@
+#tabs-deck {
+    min-width: 600px;
+}
+
+#zotero-context-pane {
+    min-width: 360px;
+}
+
+#zotero-context-pane.stacked {
+    position: fixed;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    font-size: 0;
+    pointer-events: none;
+}
+
+#zotero-context-pane.stacked #zotero-context-toolbar-extension {
+    display: none;
+}
+
+#zotero-context-pane .stacked-context-placeholder {
+    min-height: 300px;
+}
+
+#zotero-context-pane.standard .stacked-context-placeholder {
+    display: none;
+}
+
+#zotero-context-splitter-stacked {
+    pointer-events: auto;
+}
+
+#zotero-context-pane-inner {
+    width: 0;
+    font: message-box;
+    min-height: 100px;
+    height: 100%;
+    pointer-events: auto;
+}
+
+/*#zotero-context-pane.standard .stacked-splitter {*/
+/*    display: none;*/
+/*}*/
+
+#zotero-tab-toolbar-container {
+    position: fixed;
+    z-index: 1;
+    right: 0;
+    height: 32px;
+    -moz-appearance: none;
+    background: linear-gradient(to top, #a9a9a9 0, #a9a9a9 1px, #f6f6f6 1px, #f6f6f6 100%);
+}
+
+#zotero-tab-toolbar-container #zotero-tb-locate,
+#zotero-tab-toolbar-container #zotero-pq-buttons {
+    display: none;
+}
+
+#zotero-context-toolbar-extension {
+    height: 32px;
+    /* To cover the splitter that has a higher stacking order than our parent */
+    opacity: 0.99;
+    width: 100%;
+    margin-inline-start: -5px;
+    background: linear-gradient(to top, #a9a9a9 0, #a9a9a9 1px, #f6f6f6 1px, #f6f6f6 100%);
+}
+
+.zotero-context-notes-list {
+    padding-top: 5px;
+    background-color: #d2d8e2;
+}
+
+.zotero-context-pane-editor-parent-line > div {
+    display: flex;
+    align-items: center;
+    padding: 5px 5px;
+}
+
+.zotero-context-pane-editor-parent-line .parent-item-type {
+    margin-right: 3px;
+    width: 16px;
+}
+
+.zotero-context-pane-editor-parent-line .parent-title {
+    flex-grow: 1;
+    width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Εμφάνιση στην Βιβλιοθήκη">
 <!ENTITY zotero.items.menu.attach.note "Προσθήκη σημείωσης">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Προσθήκη προσαρτήματος">
 <!ENTITY zotero.items.menu.attach.link.uri "Προσάρτηση Συνδέσμου προς το URI...">
 <!ENTITY zotero.items.menu.attach.file "Προσκόληση αποθηκευμένου αντιγράφου αρχείου...">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Αποθήκευση αντιγράφου του αρχείου...">
 <!ENTITY zotero.toolbar.attachment.weblink "Αποθήκευση Συνδέσμου στην Τρέχουσα Σελίδα">
 <!ENTITY zotero.toolbar.attachment.snapshot "Λήψη Στιγμιότυπου της Τρέχουσας Σελίδας">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Δεν υπάρχουν ετικέτες προς εμφάνιση">
 <!ENTITY zotero.tagSelector.loadingTags "Φόρτωση ετικετών...">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "Προσάρτηση συνδέσμου στο URI">
 <!ENTITY zotero.attachLink.label.link "Σύνδεσμος:">
 <!ENTITY zotero.attachLink.label.title "Τίτλος:">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">

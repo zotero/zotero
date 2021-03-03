@@ -71,6 +71,127 @@ describe("Zotero.DataObjects", function () {
 		})
 	})
 	
+	
+	describe("#sortByLevel()", function () {
+		it("should return collections sorted from top-level to deepest", async function () {
+			// - A
+			//   - B
+			//     - C
+			//   - D
+			// - E
+			//   - F
+			//     - G
+			//       - H
+			//     - I
+			//
+			// Leave out B and G
+			//
+			// Order should be {A, E}, {D, F}, {C, I}, {H} (internal order is undefined)
+			
+			var check = function (arr) {
+				assert.sameMembers(arr.slice(0, 2), [c1, c5]);
+				assert.sameMembers(arr.slice(2, 4), [c4, c6]);
+				assert.sameMembers(arr.slice(4, 6), [c3, c9]);
+				assert.equal(arr[6], c8);
+			};
+			
+			var c1 = await createDataObject('collection', { "name": "A" });
+			var c2 = await createDataObject('collection', { "name": "B", parentID: c1.id });
+			var c3 = await createDataObject('collection', { "name": "C", parentID: c2.id });
+			var c4 = await createDataObject('collection', { "name": "D", parentID: c1.id });
+			var c5 = await createDataObject('collection', { "name": "E" });
+			var c6 = await createDataObject('collection', { "name": "F", parentID: c5.id });
+			var c7 = await createDataObject('collection', { "name": "G", parentID: c6.id });
+			var c8 = await createDataObject('collection', { "name": "H", parentID: c7.id });
+			var c9 = await createDataObject('collection', { "name": "I", parentID: c6.id });
+			
+			var arr = Zotero.Collections.sortByLevel([c1, c3, c4, c5, c6, c8, c9]);
+			//Zotero.debug(arr.map(id => Zotero.Collections.get(id).name));
+			check(arr);
+			
+			// Check reverse order
+			arr = Zotero.Collections.sortByLevel([c1, c3, c4, c5, c6, c8, c9].reverse());
+			//Zotero.debug(arr.map(id => Zotero.Collections.get(id).name));
+			check(arr);
+		});
+	});
+	
+	
+	describe("#sortByParent", function () {
+		it("should return items sorted hierarchically", async function () {
+			// - A
+			//   - B
+			//     - C
+			//   - D
+			// - E
+			//   - F
+			//     - G
+			//       - H
+			//     - I
+			//
+			// Leave out B and G
+			//
+			// Order should be top-down, with child items included immediately after their parents.
+			// The order of items at the same level is undefined.
+			
+			function check(arr) {
+				var str = arr.map(o => title(o)).join('');
+				var possibilities = [
+					'ACDEFH',
+					'ACDEFH',
+					
+					'ADCEFH',
+					'ADCEFH',
+					
+					'EFHACD',
+					'EFHADC',
+					
+					'EFHACD',
+					'EFHADC',
+				];
+				assert.oneOf(str, possibilities);
+			}
+			
+			function title(o) {
+				return o.getDisplayTitle() || o.getTags()[0].tag;
+			}
+			
+			var a = await createDataObject('item', { title: "A" });
+			var b = await createDataObject('item', { note: "B", itemType: 'note', parentID: a.id });
+			var c = await createEmbeddedImage(b, { tags: [{ tag: 'C' }] });
+			var d = await importPDFAttachment(a, { title: 'D' });
+			var e = await createDataObject('item', { title: "E" });
+			var f = await importPDFAttachment(e, { title: 'F' });
+			var g = await createAnnotation('image', f, { tags: [{ tag: 'G' }] });
+			var h = await createAnnotation('highlight', f, { tags: [{ tag: 'H' }] });
+			
+			var arr = Zotero.Items.sortByParent([a, c, d, e, f, h]);
+			Zotero.debug(arr.map(o => title(o)));
+			check(arr);
+			
+			// Reverse order
+			arr = Zotero.Items.sortByParent([a, c, d, e, f, h].reverse());
+			Zotero.debug(arr.map(o => title(o)));
+			check(arr);
+			
+			// Top-level first
+			arr = Zotero.Items.sortByParent([a, e, c, d, f, h]);
+			Zotero.debug(arr.map(o => title(o)));
+			check(arr);
+			
+			// Child first
+			arr = Zotero.Items.sortByParent([c, h, d, f, a, e]);
+			Zotero.debug(arr.map(o => title(o)));
+			check(arr);
+			
+			// Random
+			arr = Zotero.Items.sortByParent([e, d, h, c, a, f]);
+			Zotero.debug(arr.map(o => title(o)));
+			check(arr);
+		});
+	});
+	
+	
 	describe("#_setIdentifier", function () {
 		it("should not allow an id change", function* () {
 			var item = yield createDataObject('item');

@@ -25,14 +25,14 @@
 
 var noteEditor;
 var notifierUnregisterID;
+var type;
+
+function switchEditorEngine(useOld) {
+	var switherDeck = document.getElementById('zotero-note-editor-switcher');
+	switherDeck.selectedIndex = useOld ? 0 : 1;
+}
 
 async function onLoad() {
-	noteEditor = document.getElementById('zotero-note-editor');
-	noteEditor.mode = 'edit';
-	
-	// Set font size from pref
-	Zotero.setFontSize(noteEditor);
-	
 	if (window.arguments) {
 		var io = window.arguments[0];
 	}
@@ -40,6 +40,35 @@ async function onLoad() {
 	var itemID = parseInt(io.itemID);
 	var collectionID = parseInt(io.collectionID);
 	var parentItemKey = io.parentItemKey;
+	
+	if (itemID) {
+		var ref = await Zotero.Items.getAsync(itemID);
+		var libraryID = ref.libraryID;
+	}
+	else {
+		if (parentItemKey) {
+			var ref = Zotero.Items.getByLibraryAndKey(parentItemKey);
+			var libraryID = ref.libraryID;
+		}
+		else {
+			if (collectionID && collectionID != '' && collectionID != 'undefined') {
+				var collection = Zotero.Collections.get(collectionID);
+				var libraryID = collection.libraryID;
+			}
+		}
+	}
+	type = Zotero.Libraries.get(libraryID).libraryType;
+	switchEditorEngine(type == 'group' || !Zotero.isPDFBuild);
+	if (type == 'group' || !Zotero.isPDFBuild) {
+		noteEditor = document.getElementById('zotero-note-editor-old');
+	}
+	else {
+		noteEditor = document.getElementById('zotero-note-editor');
+	}
+	noteEditor.mode = 'edit';
+	
+	// Set font size from pref
+	Zotero.setFontSize(noteEditor);
 	
 	if (itemID) {
 		var ref = await Zotero.Items.getAsync(itemID);
@@ -77,9 +106,13 @@ function onError() {
 
 function onUnload() {
 	Zotero.Notifier.unregisterObserver(notifierUnregisterID);
-	
-	if (noteEditor.item) {
-		window.opener.ZoteroPane.onNoteWindowClosed(noteEditor.item.id, noteEditor.value);
+	if (type == 'group' || !Zotero.isPDFBuild) {
+		if (noteEditor.item) {
+			window.opener.ZoteroPane.onNoteWindowClosed(noteEditor.item.id, noteEditor.value);
+		}
+	}
+	else {
+		noteEditor.saveSync();
 	}
 }
 
@@ -87,9 +120,7 @@ var NotifyCallback = {
 	notify: function(action, type, ids){
 		if (noteEditor.item && ids.includes(noteEditor.item.id)) {
 			var noteTitle = noteEditor.item.getNoteTitle();
-			if (!document.title && noteTitle != '') {
-				document.title = noteTitle;
-			}
+			document.title = noteTitle;
 			
 			// Update the window name (used for focusing) in case this is a new note
 			window.name = 'zotero-note-' + noteEditor.item.id;

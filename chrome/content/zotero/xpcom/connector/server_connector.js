@@ -1701,7 +1701,8 @@ Zotero.Server.Connector.Ping.prototype = {
 			
 			let response = {
 				prefs: {
-					automaticSnapshots: Zotero.Prefs.get('automaticSnapshots')
+					automaticSnapshots: Zotero.Prefs.get('automaticSnapshots'),
+					googleDocsAddNoteEnabled: Zotero.isPDFBuild
 				}
 			};
 			if (Zotero.QuickCopy.hasSiteSettings()) {

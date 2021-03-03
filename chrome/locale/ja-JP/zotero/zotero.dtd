@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "ライブラリの中に表示">
 <!ENTITY zotero.items.menu.attach.note "メモを追加">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "添付ファイルを追加する">
 <!ENTITY zotero.items.menu.attach.link.uri "URIへのリンクを添付する...">
 <!ENTITY zotero.items.menu.attach.file "保存されたファイルのコピーを添付する...">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "ファイルのコピーを保存...">
 <!ENTITY zotero.toolbar.attachment.weblink "現在のページへのリンクを保存">
 <!ENTITY zotero.toolbar.attachment.snapshot "現在のページのスナップショットを撮る">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "表示するタグがありません">
 <!ENTITY zotero.tagSelector.loadingTags "タグを読込中...">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "URIへのリンクを添付する">
 <!ENTITY zotero.attachLink.label.link "リンク:">
 <!ENTITY zotero.attachLink.label.title "題:">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">

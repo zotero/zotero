@@ -95,6 +95,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		return new Zotero.Sync.APIClient({
 			baseURL: this.baseURL,
 			apiVersion: this.apiVersion,
+			schemaVersion: this.globalSchemaVersion,
 			apiKey: options.apiKey,
 			caller: this.caller,
 			cancellerReceiver: _cancellerReceiver,

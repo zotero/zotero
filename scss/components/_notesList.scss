@@ -1,0 +1,138 @@
+.notes-list-container {
+	display: flex;
+	width: 100%;
+	overflow-y: auto;
+	flex-grow: 1;
+	background: #d2d8e2;
+	border-top: 1px solid lightgray;
+}
+
+.notes-list {
+	display: flex;
+	flex-direction: column;
+	height: 0;
+	flex-grow: 1;
+	padding-top: 2px;
+
+	& > section {
+		margin: 5px 0;
+	}
+}
+
+.header-row {
+	margin: 0 7px;
+	display: flex;
+	justify-content: space-between;
+	height: 24px;
+
+	h2 {
+		font-weight: bold;
+		margin: 0;
+		font-size: 13px;
+		align-self: center;
+	}
+
+	button {
+		height: 24px;
+		padding-left: 4px;
+		padding-right: 4px;
+		// Necessary on linux to horizontaly center text
+		line-height: 0;
+	}
+}
+
+.empty-row {
+	margin: 4px 7px 0;
+	text-align: center;
+}
+
+.note-row {
+	border: 1px solid #bcc4d2;
+	border-radius: 5px;
+	margin: 4px 7px;
+	background-color: #fff;
+	
+	&:active {
+		background: #eef1f8;
+	}
+	
+	.inner {
+		> *:not(:first-child) {
+			margin-top: 3px;
+		}
+		
+		.parent-line {
+			display: flex;
+			width: calc(100% - 16px);
+			border-bottom: 1px solid #d7dad7;
+			align-items: center;
+			padding: 5px 8px 4px;
+			margin-bottom: 5px;
+		}
+		
+		.parent-item-type {
+			margin-right: 3px;
+			width: 16px; // Don't show HiDPI icons at 2x size
+		}
+		
+		.parent-title {
+			flex-grow: 1;
+			width: 0;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+		
+		.title-line {
+			display: flex;
+			padding: 0 8px 0;
+			
+			.title {
+				flex-grow: 1;
+				width: 0;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				font-weight: bold;
+			}
+		}
+		
+		.body-line {
+			display: flex;
+			padding: 0 8px 6px;
+
+			.date {
+				color: $shade-6;
+			}
+
+			.body {
+				flex-grow: 1;
+				width: 0;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				margin-left: 10px;
+				color: $shade-6;
+			}
+		}
+	}
+}
+
+.more-row {
+	border: 1px solid #bcc4d2;
+	border-radius: 5px;
+	margin: 4px 7px;
+	background-color: white;
+	text-align: center;
+	padding: 5px;
+
+	&:active {
+		background: #eef1f8;
+	}
+}
+
+.standalone-note-row {
+	.title-line {
+		padding-top: 6px !important;
+	}
+}

@@ -21,7 +21,10 @@ describe("Zotero.Integration", function () {
 		this.primaryFieldType = "Field";
 		this.secondaryFieldType = "Bookmark";
 		this.supportedNotes = ['footnotes', 'endnotes'];
+		// Will display an option to switch word processors in the Doc Prefs
 		this.supportsImportExport = true;
+		// Will allow inserting notes
+		this.supportsTextInsertion = true;
 		this.fields = [];
 	};
 	DocumentPluginDummy.Application.prototype = {
@@ -82,25 +85,50 @@ describe("Zotero.Integration", function () {
 		 */
 		setDocumentData: function(data) {this.data = data},
 		/**
-		 * Inserts a field at the given position and initializes the field object.
+		 * Inserts a field at cursor position and initializes the field object.
+		 * If Document.insertText() was called previously inserts the field
+		 * directly after the inserted text.
 		 * @param {String} fieldType
 		 * @param {Integer} noteType
 		 * @returns {DocumentPluginDummy.Field}
 		 */
-		insertField: function(fieldType, noteType) { 
+		insertField: function(fieldType, noteType) {
 			if (typeof noteType != "number") {
 				throw new Error("noteType must be an integer");
 			}
-			var field = new DocumentPluginDummy.Field(this); 
+			var field = new DocumentPluginDummy.Field(this);
 			this.fields.push(field);
 			return field;
+		},
+		/**
+		 * Inserts rich text at cursor position. If Document.insertField() was called
+		 * previously inserts the text directly after the inserted field.
+		 * @param {String} text
+		 */
+		insertText: function (text) { return; },
+		/**
+		 * Converts placeholders (which are text with links to https://www.zotero.org/?[placeholderID])
+		 * to fields and sets their field codes to strings in `codes` in the reverse order of their appearance
+		 * @param {String[]} codes
+		 * @param {String[]} placeholderIDs - the order of placeholders to be replaced
+		 * @param {Number} noteType - controls whether citations should be in-text or in footnotes/endnotes
+		 * @param {Number} fieldType
+		 * @return {Field[]}
+		 */
+		convertPlaceholdersToFields: function (codes, noteType, fieldType) {
+			return codes.map(code => {
+				let field = new DocumentPluginDummy.Field(this);
+				field.code = code;
+				this.fields.push(field);
+				return field;
+			});
 		},
 		/**
 		 * Gets all fields present in the document.
 		 * @param {String} fieldType
 		 * @returns {DocumentPluginDummy.Field[]}
 		 */
-		getFields: function(fieldType) {return Array.from(this.fields)},
+		getFields: function (fieldType) {return Array.from(this.fields)},
 		/**
 		 * Sets the bibliography style, overwriting the current values for this document
 		 */
@@ -692,12 +720,12 @@ describe("Zotero.Integration", function () {
 					doc.fields[1].code = doc.fields[0].code;
 					doc.fields[1].text = doc.fields[0].text;
 					
-					var originalUpdateDocument = Zotero.Integration.Fields.prototype.updateDocument;
-					var stubUpdateDocument = sinon.stub(Zotero.Integration.Fields.prototype, 'updateDocument');
+					var originalUpdateDocument = Zotero.Integration.Session.prototype.updateDocument;
+					var stubUpdateDocument = sinon.stub(Zotero.Integration.Session.prototype, 'updateDocument');
 					try {
 						var indicesLength;
 						stubUpdateDocument.callsFake(function() {
-							indicesLength = Object.keys(Zotero.Integration.currentSession.newIndices).length;
+							indicesLength = Object.keys(this.newIndices).length;
 							return originalUpdateDocument.apply(this, arguments);
 						});
 
@@ -726,12 +754,12 @@ describe("Zotero.Integration", function () {
 						`"citationID":"${newCitationID}"`);
 					doc.fields[1].text = doc.fields[0].text;
 					
-					var originalUpdateDocument = Zotero.Integration.Fields.prototype.updateDocument;
-					var stubUpdateDocument = sinon.stub(Zotero.Integration.Fields.prototype, 'updateDocument');
+					var originalUpdateDocument = Zotero.Integration.Session.prototype.updateDocument;
+					var stubUpdateDocument = sinon.stub(Zotero.Integration.Session.prototype, 'updateDocument');
 					try {
 						var indices;
 						stubUpdateDocument.callsFake(function() {
-							indices = Object.keys(Zotero.Integration.currentSession.newIndices);
+							indices = Object.keys(this.newIndices);
 							return originalUpdateDocument.apply(this, arguments);
 						});
 

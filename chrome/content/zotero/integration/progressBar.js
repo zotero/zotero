@@ -38,6 +38,10 @@ var Zotero_ProgressBar = new function () {
 				io.onLoad(_onProgress);
 			}
 			
+			if (io.isNote) {
+				document.documentElement.classList.add('note-dialog');
+			}
+			
 			// Only hide chrome on Windows or Mac
 			if(Zotero.isMac) {
 				document.documentElement.setAttribute("drawintitlebar", true);
@@ -45,12 +49,12 @@ var Zotero_ProgressBar = new function () {
 				document.documentElement.setAttribute("hidechrome", true);
 			}
 			
-			new WindowDraggingElement(document.getElementById("quick-format-dialog"), window);
+			new WindowDraggingElement(document.querySelector(".citation-dialog"), window);
 
 			// With fx60 and drawintitlebar=true Firefox calculates the minHeight
 			// as titlebar+maincontent, so we have hack around that here.
-			if (Zotero.isMac && Zotero.platformMajorVersion >= 60) {
-				document.getElementById("quick-format-entry").style.marginBottom = "-22px";
+			if (Zotero.isMac) {
+				document.querySelector(".citation-dialog.entry").style.marginBottom = "-28px";
 			}
 		
 		}
@@ -75,7 +79,7 @@ var Zotero_ProgressBar = new function () {
 	 * Called when progress changes
 	 */
 	function _onProgress(percent) {
-		var meter = document.getElementById("quick-format-progress-meter");
+		var meter = document.querySelector(".citation-dialog.progress-meter");
 		if(percent === null) {
 			meter.mode = "undetermined";
 		} else {

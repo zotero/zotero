@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "라이브러리로 표시">
 <!ENTITY zotero.items.menu.attach.note "노트 추가">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "첨부 추가">
 <!ENTITY zotero.items.menu.attach.link.uri "URL로 링크 걸기">
 <!ENTITY zotero.items.menu.attach.file "파일의 사본 첨부...">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "파일의 사본을 보존...">
 <!ENTITY zotero.toolbar.attachment.weblink "현재 페이지로 링크 저장">
 <!ENTITY zotero.toolbar.attachment.snapshot "현재 페이지의 스냅샷을 촬영">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "표시할 태그가 없음">
 <!ENTITY zotero.tagSelector.loadingTags "태그 불러오는 중...">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "URI로 링크 걸기">
 <!ENTITY zotero.attachLink.label.link "링크:">
 <!ENTITY zotero.attachLink.label.title "제목:">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">

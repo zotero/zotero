@@ -293,6 +293,13 @@ describe("Zotero.File", function () {
 			assert.ok(e);
 			assert.match(e.message, /^Broken symlink/);
 		});
+		
+		it("should handle 'from' in options", async function () {
+			var tmpPath = await getTempDirectory();
+			var path = OS.Path.join(tmpPath, 'a', 'b');
+			await Zotero.File.createDirectoryIfMissingAsync(path, { from: tmpPath });
+			assert.isTrue(await OS.File.exists(path));
+		});
 	});
 	
 	describe("#zipDirectory()", function () {

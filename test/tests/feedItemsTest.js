@@ -10,22 +10,31 @@ describe("Zotero.FeedItems", function () {
 	describe("#getMarkedAsRead", function() {
 		var items = [];
 		var result;
-		before(function* () {
+		
+		before(async function () {
 			for (let i = 0; i < 4; i++) {
-				let f = yield createDataObject('feedItem', {libraryID: feed.libraryID, guid: 'http://www.example.com/' + i});
+				let f = await createDataObject(
+					'feedItem',
+					{
+						libraryID: feed.libraryID,
+						guid: 'http://www.example.com/' + i
+					}
+				);
 				items.push(f);
 			}
-			yield items[0].toggleRead();
-			yield items[2].toggleRead();
-			result = yield Zotero.FeedItems.getMarkedAsRead(feed.libraryID);
+			await items[0].toggleRead();
+			await items[2].toggleRead();
+			result = (await Zotero.FeedItems.getMarkedAsRead(feed.libraryID)).map(x => x.id);
 		});
+		
 		it('should get all marked as read items', function() {
-			assert.include(result, items[0]);
-			assert.include(result, items[2]);
+			assert.include(result, items[0].id);
+			assert.include(result, items[2].id);
 		});
+		
 		it('should not include items that were not marked', function() {
-			assert.notInclude(result, items[1]);
-			assert.notInclude(result, items[3]);
+			assert.notInclude(result, items[1].id);
+			assert.notInclude(result, items[3].id);
 		});
 	});
 	

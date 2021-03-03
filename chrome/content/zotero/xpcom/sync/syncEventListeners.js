@@ -124,24 +124,39 @@ Zotero.Sync.EventListeners.AutoSyncListener = {
 		}
 		
 		// Only trigger sync for certain types
-		//
-		// TODO: settings, full text
-		if (!Zotero.DataObjectUtilities.getTypes().includes(type)) {
+		// TODO: full text
+		if (![...Zotero.DataObjectUtilities.getTypes(), 'setting'].includes(type)) {
 			return;
 		}
 		
 		// Determine affected libraries so only those can be synced
 		let libraries = [];
-		let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
-		ids.forEach(id => {
-			let lk = objectsClass.getLibraryAndKeyFromID(id);
-			if (lk) {
-				let library = Zotero.Libraries.get(lk.libraryID);
+		
+		if (type == 'setting') {
+			for (let id of ids) {
+				// E.g., '1/lastPageIndex_u_ABCD2345'
+				let libraryID = parseInt(id.split('/')[0]);
+				let library = Zotero.Libraries.get(libraryID);
 				if (library.syncable) {
 					libraries.push(library);
 				}
 			}
-		});
+		}
+		else if (Zotero.DataObjectUtilities.getTypes().includes(type)) {
+			let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
+			ids.forEach(id => {
+				let lk = objectsClass.getLibraryAndKeyFromID(id);
+				if (lk) {
+					let library = Zotero.Libraries.get(lk.libraryID);
+					if (library.syncable) {
+						libraries.push(library);
+					}
+				}
+			});
+		}
+		else {
+			return;
+		}
 		
 		libraries = Zotero.Sync.Data.Local.filterSkippedLibraries(libraries);
 		if (!libraries.length) {

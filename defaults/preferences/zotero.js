@@ -131,6 +131,7 @@ pref("extensions.zotero.integration.port", 50001);
 pref("extensions.zotero.integration.autoRegenerate", -1);	// -1 = ask; 0 = no; 1 = yes
 pref("extensions.zotero.integration.useClassicAddCitationDialog", false);
 pref("extensions.zotero.integration.keepAddCitationDialogRaised", false);
+pref("extensions.zotero.integration.upgradeTemplateDelayedOn", 0);
 
 // Connector settings
 pref("extensions.zotero.httpServer.enabled", false);	// TODO enabled for testing only
@@ -138,9 +139,6 @@ pref("extensions.zotero.httpServer.port", 23119);	// ascii "ZO"
 
 // Zeroconf
 pref("extensions.zotero.zeroconf.server.enabled", false);
-
-// Annotation settings
-pref("extensions.zotero.annotations.warnOnClose", true);
 
 // Streaming server
 pref("extensions.zotero.streaming.enabled", true);
@@ -181,6 +179,7 @@ pref("extensions.zotero.pane.persist", "");
 
 // Custom file handlers
 pref("extensions.zotero.fileHandler.pdf", "");
+pref("extensions.zotero.beta.zotero6", false);
 
 // File/URL opening executable if launch() fails
 pref("extensions.zotero.fallbackLauncher.unix", "/usr/bin/xdg-open");

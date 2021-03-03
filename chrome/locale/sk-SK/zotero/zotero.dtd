@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Zobraziť v knižnici">
 <!ENTITY zotero.items.menu.attach.note "Pridať poznámku">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Vložiť prílohu">
 <!ENTITY zotero.items.menu.attach.link.uri "Vložiť odkaz na URI...">
 <!ENTITY zotero.items.menu.attach.file "Vložiť kópiu lokálneho súboru...">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Uložiť kópiu súboru...">
 <!ENTITY zotero.toolbar.attachment.weblink "Uložiť odkaz na aktuálnu stránku">
 <!ENTITY zotero.toolbar.attachment.snapshot "Urobiť snímku z aktuálnej stránky">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Žiadne značky na zobrazenie">
 <!ENTITY zotero.tagSelector.loadingTags "Načítavam značky...">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "Priložiť odkaz k URI">
 <!ENTITY zotero.attachLink.label.link "Odkaz:">
 <!ENTITY zotero.attachLink.label.title "Názov:">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">

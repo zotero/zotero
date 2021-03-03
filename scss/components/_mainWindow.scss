@@ -1,0 +1,174 @@
+// Styling for displaying tabs in the title bar
+:root:not([legacytoolbar="true"]) {
+	& {
+	  --tab-min-height: 30px;
+	  --tabs-border-color: rgba(0,0,0,.3);
+	  --tabline-color: #0a84ff;
+	
+	  --toolbar-non-lwt-bgcolor: #f9f9fa;
+	  --toolbar-non-lwt-textcolor: #0c0c0d;
+	  --toolbar-non-lwt-bgimage: none;
+	  --toolbar-bgcolor: var(--toolbar-non-lwt-bgcolor);
+	  --toolbar-bgimage: var(--toolbar-non-lwt-bgimage);
+	  --chrome-content-separator-color: hsl(0, 0%, 60%);
+	
+	  --toolbarbutton-border-radius: 3px;
+	  --toolbarbutton-icon-fill-opacity: .85;
+	  --toolbarbutton-hover-background: hsla(0, 0%, 100%, .1)
+										linear-gradient(hsla(0, 0%, 100%, .3),
+										hsla(0, 0%, 100%, .1)) no-repeat;
+	  --toolbarbutton-hover-bordercolor: hsla(0, 0%, 0%, .2);
+	  --toolbarbutton-header-bordercolor: hsla(0, 0%, 0%, .2);
+	  --toolbarbutton-hover-boxshadow: 0 1px 0 hsla(0, 0%, 100%, .5),
+									   0 1px 0 hsla(0, 0%, 100%, .5) inset;
+	
+	  --toolbarbutton-active-background: hsla(0, 0%, 0%, .02)
+										 linear-gradient(hsla(0, 0%, 0%, .12),
+										 transparent) border-box;
+	  --toolbarbutton-active-bordercolor: hsla(0, 0%, 0%, .3);
+	  --toolbarbutton-active-boxshadow: 0 1px 0 hsla(0, 0%, 100%, .5),
+										0 1px 0 hsla(0, 0%, 0%, .05) inset,
+										0 1px 1px hsla(0, 0%, 0%, .2) inset;
+	  --toolbarbutton-inactive-bordercolor: rgba(0, 0, 0, 0.1);
+	  --toolbarbutton-inactive-boxshadow: 0 1px 0 hsla(0, 0%, 0%, .05) inset;
+	  --toolbarbutton-checkedhover-backgroundcolor: hsla(0, 0%, 0%, .09);
+	  --toolbarbutton-icon-fill-attention: var(--lwt-toolbarbutton-icon-fill-attention, #0a84ff);
+	
+	  --lwt-header-image: none;
+	  --row-grouped-header-bg-color: #d5d5d5;
+	  --row-grouped-header-bg-color-selected: #3874d1;
+	  --panel-separator-color: hsla(210, 4%, 10%, .14);
+	  --arrowpanel-dimmed: hsla(0, 0%, 80%, .3);
+	  --arrowpanel-dimmed-further: hsla(0, 0%, 80%, .45);
+	  --splitter-color: #bdbdbd;
+	  --urlbar-popup-url-color: hsl(210, 77%, 47%);
+	  --urlbar-popup-action-color: hsl(178, 100%, 28%);
+	  
+	  --autocomplete-popup-background: -moz-field;
+	  --autocomplete-popup-color: -moz-fieldtext;
+	  --autocomplete-popup-border-color: ThreeDShadow;
+	  --autocomplete-popup-highlight-background: Highlight;
+	  --autocomplete-popup-highlight-color: HighlightText;
+	  /* Note: Setting this to 0 (without px) breaks CSS calculations for OSX. */
+	  --space-above-tabbar: 0px;
+	}
+	
+	&:-moz-window-inactive {
+	  --toolbar-bgcolor: -moz-mac-chrome-inactive;
+	}
+	
+	
+	
+	
+	#titlebar {
+		margin-bottom: -30px;
+		-moz-box-pack: center;
+	}
+	
+	#personal-bookmarks {
+	  -moz-window-dragging: inherit;
+	}
+	
+	toolbarpaletteitem {
+	  -moz-window-dragging: no-drag;
+	  -moz-box-pack: start;
+	}
+	
+	.titlebar-buttonbox-container {
+	  -moz-box-ordinal-group: 1000;
+	}
+	
+	#titlebar-fullscreen-button {
+	  -moz-appearance: -moz-mac-fullscreen-button;
+	}
+	
+	
+	
+	
+	
+	
+	
+	/* ::::: Tabs in Titlebar :::::: */
+	
+	&:not([chromemargin]) > #titlebar {
+	  display: none;
+	}
+	
+	/**
+	 * For tabs in titlebar on OS X, we stretch the titlebar down so that the
+	 * tabstrip can overlap it.
+	 */
+	&[tabsintitlebar] > #titlebar {
+	  min-height: calc(var(--tab-min-height) + var(--space-above-tabbar));
+	}
+	
+	&[tabsintitlebar="true"]:not(:-moz-lwtheme) > #titlebar {
+	  -moz-appearance: -moz-window-titlebar;
+	}
+	
+	&:not([tabsintitlebar]) .titlebar-placeholder {
+	  visibility: collapse;
+	}
+	
+	/* NB: these would be margin-inline-start/end if it wasn't for the fact that OS X
+	 * doesn't reverse the order of the items in the titlebar in RTL mode. */
+	.titlebar-placeholder[type="caption-buttons"],
+	#titlebar-buttonbox {
+	  margin-right: 12px;
+	  margin-left: 12px;
+	}
+	
+	.titlebar-placeholder[type="fullscreen-button"],
+	#titlebar-fullscreen-button {
+	  margin-right: 7px;
+	  margin-left: 7px;
+	}
+	
+	#titlebar-fullscreen-button {
+	  -moz-appearance: -moz-mac-fullscreen-button;
+	}
+	
+	#titlebar-buttonbox {
+	  -moz-appearance: -moz-window-button-box;
+	}
+	
+	/* Fullscreen and caption buttons don't move with RTL on OS X so override the automatic ordering. */
+	#titlebar-fullscreen-button:-moz-locale-dir(ltr),
+	#titlebar-buttonbox-container:-moz-locale-dir(rtl),
+	.titlebar-placeholder[type="fullscreen-button"]:-moz-locale-dir(ltr),
+	.titlebar-placeholder[type="caption-buttons"]:-moz-locale-dir(rtl) {
+	  -moz-box-ordinal-group: 1000;
+	}
+	
+	#titlebar-fullscreen-button:-moz-locale-dir(rtl),
+	#titlebar-buttonbox-container:-moz-locale-dir(ltr),
+	.titlebar-placeholder[type="caption-buttons"]:-moz-locale-dir(ltr),
+	.titlebar-placeholder[type="fullscreen-button"]:-moz-locale-dir(rtl) {
+	  -moz-box-ordinal-group: 0;
+	}
+	
+	&[sizemode="fullscreen"] .titlebar-placeholder[type="fullscreen-button"],
+	&[sizemode="fullscreen"] .titlebar-placeholder[type="caption-buttons"] {
+	  display: none;
+	}
+	
+	
+	
+	#tab-bar-container {
+		-moz-window-dragging: drag;
+	}
+	
+	#tab-bar-container .tab {
+		background: $transparent;
+	}
+	
+	#tab-bar-container .tab.selected {
+		background: $toolbar-background-color;
+	}
+	
+	#zotero-toolbar {
+		-moz-appearance: none;
+		background: $toolbar-background-color;
+		border-bottom: $toolbar-border;
+	}
+}

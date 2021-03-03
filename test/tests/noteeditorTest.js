@@ -20,7 +20,7 @@ describe("Note Editor", function () {
 			noteEditor = win.document.getElementById('zotero-note-editor');
 		}
 		return new Zotero.Promise((resolve, reject) => {
-			noteEditor.noteField.onInit(() => resolve(noteEditor));
+			noteEditor.onInit(() => resolve(noteEditor));
 		});
 	});
 	

@@ -62,23 +62,23 @@
 		<button id="zotero-item-show-original" label="Show Original"
 			oncommand="ZoteroPane_Local.showOriginalItem()" hidden="true"/>
 		
-		<deck id="zotero-item-pane-content" selectedIndex="0" flex="1">
+		<deck id="zotero-item-pane-content" class="zotero-item-pane-content" selectedIndex="0" flex="1">
 			<!-- Center label (for zero or multiple item selection) -->
 			<groupbox id="zotero-item-pane-groupbox" pack="center" align="center">
 				<vbox id="zotero-item-pane-message-box"/>
 			</groupbox>
 			
 			<!-- Regular item -->
-			<tabbox id="zotero-view-tabbox" flex="1" onselect="if (!ZoteroPane_Local.collectionsView.selection || event.originalTarget.localName != 'tabpanels') { return; }; ZoteroItemPane.viewItem(ZoteroPane_Local.getSelectedItems()[0], ZoteroPane_Local.collectionsView.editable ? 'edit' : 'view', this.selectedIndex)">
-				<tabs id="zotero-editpane-tabs">
+			<tabbox id="zotero-view-tabbox" class="zotero-view-tabbox" flex="1" onselect="if (!ZoteroPane_Local.collectionsView.selection || event.originalTarget.localName != 'tabpanels') { return; }; ZoteroItemPane.viewItem(ZoteroPane_Local.getSelectedItems()[0], ZoteroPane_Local.collectionsView.editable ? 'edit' : 'view', this.selectedIndex)">
+				<tabs id="zotero-editpane-tabs" class="zotero-editpane-tabs">
 					<tab id="zotero-editpane-info-tab" label="&zotero.tabs.info.label;"/>
 					<tab id="zotero-editpane-notes-tab" label="&zotero.tabs.notes.label;"/>
 					<tab id="zotero-editpane-tags-tab" label="&zotero.tabs.tags.label;"/>
 					<tab id="zotero-editpane-related-tab" label="&zotero.tabs.related.label;"/>
 				</tabs>
-				<tabpanels id="zotero-view-item" flex="1">
-					<tabpanel>
-						<zoteroitembox id="zotero-editpane-item-box" flex="1"/>
+				<tabpanels id="zotero-view-item" class="zotero-view-item" flex="1">
+					<tabpanel flex="1">
+						<zoteroitembox id="zotero-editpane-item-box" class="zotero-editpane-item-box" flex="1"/>
 					</tabpanel>
 					
 					<tabpanel flex="1" orient="vertical">
@@ -97,12 +97,12 @@
 						</vbox>
 					</tabpanel>
 					
-					<tabpanel id="tags-pane" orient="vertical" context="tags-context-menu">
-						<html:div id="tags-box-container"></html:div>
+					<tabpanel id="tags-pane" class="tags-pane" orient="vertical" context="tags-context-menu">
+						<html:div id="tags-box-container" class="tags-box-container"></html:div>
 					</tabpanel>
 					
 					<tabpanel>
-						<relatedbox id="zotero-editpane-related" flex="1"/>
+						<relatedbox id="zotero-editpane-related" class="zotero-editpane-related" flex="1"/>
 					</tabpanel>
 				</tabpanels>
 			</tabbox>
@@ -113,9 +113,13 @@
 					'onerror' handler crashes the app on a save error to prevent typing in notes
 					while they're not being saved
 				-->
-				<zoteronoteeditor id="zotero-note-editor" flex="1" notitle="1"
-					previousfocus="zotero-items-tree"
-					onerror="ZoteroPane.displayErrorMessage(); this.mode = 'view'"/>
+				<deck id="zotero-note-editor-switcher" flex="1">
+					<oldzoteronoteeditor id="zotero-note-editor-old" flex="1" notitle="1"
+						previousfocus="zotero-items-tree"
+						onerror="ZoteroPane.displayErrorMessage(); this.mode = 'view'"/>
+					<zoteronoteeditor id="zotero-note-editor" flex="1" notitle="1"
+						previousfocus="zotero-items-tree"/>
+				</deck>
 				<button id="zotero-view-note-button"
 						label="&zotero.notes.separate;"
 						oncommand="ZoteroItemPane.openNoteWindow()"/>

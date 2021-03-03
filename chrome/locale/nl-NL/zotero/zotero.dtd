@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "In bibliotheek tonen">
 <!ENTITY zotero.items.menu.attach.note "Aantekening toevoegen">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Bijlage toevoegen">
 <!ENTITY zotero.items.menu.attach.link.uri "Koppeling naar URI toevoegen…">
 <!ENTITY zotero.items.menu.attach.file "Kopie van bestand toevoegen…">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Kopie van bestand bewaren…">
 <!ENTITY zotero.toolbar.attachment.weblink "Koppeling naar huidige webpagina bewaren">
 <!ENTITY zotero.toolbar.attachment.snapshot "Maak snapshot van huidige webpagina">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Geen labels om te tonen">
 <!ENTITY zotero.tagSelector.loadingTags "Labels laden…">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "Koppel verwijzing aan een URI">
 <!ENTITY zotero.attachLink.label.link "Verwijzing:">
 <!ENTITY zotero.attachLink.label.title "Titel:">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
