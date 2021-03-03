@@ -1173,7 +1173,7 @@ describe("Zotero.Sync.Runner", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: `users/1/collections?format=json&collectionKey=${json.key}`,
+				url: `users/1/collections?collectionKey=${json.key}`,
 				status: 200,
 				headers: {
 					"Last-Modified-Version": 2
@@ -1233,7 +1233,7 @@ describe("Zotero.Sync.Runner", function () {
 			});
 			setResponse({
 				method: "GET",
-				url: target + `/collections?format=json&collectionKey=${json.key}`,
+				url: target + `/collections?collectionKey=${json.key}`,
 				status: 200,
 				headers: {
 					"Last-Modified-Version": 2
