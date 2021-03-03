@@ -35,6 +35,9 @@ const DOWNLOADED_IMAGE_TYPE = [
 	'image/png'
 ];
 
+// Schema version here has to be the same as in note-editor!
+const SCHEMA_VERSION = 1;
+
 class EditorInstance {
 	constructor() {
 		this.instanceID = Zotero.Utilities.randomString();
@@ -1007,6 +1010,7 @@ class EditorInstance {
 		}
 		let html = `<h1>${Zotero.getString('note.annotationsWithDate', new Date().toLocaleString())}</h1>\n`;
 		html += await editorInstance._serializeAnnotations(jsonAnnotations);
+		html = `<div data-schema-version="${SCHEMA_VERSION}">${html}</div>`;
 		note.setNote(html);
 		await note.saveTx();
 		return note;
