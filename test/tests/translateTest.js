@@ -2136,7 +2136,6 @@ describe("Zotero.Translate.ItemGetter", function() {
 					break;
 				}
 			}
-			assert.equal(getter.numItems, 1);
 		});
 	});
 	
