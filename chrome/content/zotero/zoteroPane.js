@@ -4758,13 +4758,14 @@ var ZoteroPane = new function()
 	
 	this.exportPDF = async function (itemID) {
 		let item = await Zotero.Items.getAsync(itemID);
-		if (!item || !item.isAttachment()) {
-			throw new Error('Item ' + itemID + ' is not attachment');
+		if (!item || !item.isPDFAttachment()) {
+			throw new Error('Item ' + itemID + ' is not a PDF attachment');
 		}
 		let filename = item.attachmentFilename;
 		
 		var fp = new FilePicker();
-		fp.init(window, Zotero.getString('styles.editor.save'), fp.modeSave);
+		// TODO: Localize
+		fp.init(window, "Export File", fp.modeSave);
 		fp.appendFilter("PDF", "*.pdf");
 		fp.defaultString = filename;
 		
@@ -4772,6 +4773,50 @@ var ZoteroPane = new function()
 		if (rv === fp.returnOK || rv === fp.returnReplace) {
 			let outputFile = fp.file;
 			await Zotero.PDFWorker.export(item.id, outputFile, true);
+		}
+	};
+	
+	
+	// TEMP: Quick implementation
+	this.exportSelectedFiles = async function () {
+		var items = ZoteroPane.getSelectedItems()
+			.reduce((arr, item) => {
+				if (item.isPDFAttachment()) {
+					return arr.concat([item]);
+				}
+				if (item.isRegularItem()) {
+					return arr.concat(item.getAttachments()
+						.map(x => Zotero.Items.get(x))
+						.filter(x => x.isPDFAttachment()));
+				}
+				return arr;
+			}, []);
+		// Deduplicate, in case parent and child items are both selected
+		items = [...new Set(items)];
+		
+		if (!items.length) return;
+		if (items.length == 1) {
+			await this.exportPDF(items[0].id);
+			return;
+		}
+		
+		var fp = new FilePicker();
+		// TODO: Localize
+		fp.init(window, "Export Files", fp.modeGetFolder);
+		
+		var rv = await fp.show();
+		if (rv === fp.returnOK || rv === fp.returnReplace) {
+			let folder = fp.file;
+			for (let item of items) {
+				let outputFile = OS.Path.join(folder, item.attachmentFilename);
+				if (await OS.File.exists(outputFile)) {
+					let newNSIFile = Zotero.File.pathToFile(outputFile);
+					newNSIFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0o644);
+					outputFile = newNSIFile.path;
+					newNSIFile.remove(null);
+				}
+				await Zotero.PDFWorker.export(item.id, outputFile, true);
+			}
 		}
 	};
 	

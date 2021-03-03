@@ -143,6 +143,46 @@ const ZoteroStandalone = new function() {
 		}
 		catch (e) {}
 		this.updateMenuItemEnabled('manage-attachments-menu', active);
+		
+		// TEMP: Quick implementation
+		try {
+			let menuitem = document.getElementById('menu_export_files');
+			let sep = menuitem.nextSibling;
+			
+			let zp = Zotero.getActiveZoteroPane();
+			if (zp) {
+				let numFiles = zp.getSelectedItems().reduce((num, item) => {
+					if (item.isPDFAttachment()) {
+						return num + 1;
+					}
+					if (item.isRegularItem()) {
+						return num + item.numPDFAttachments();
+					}
+					return num;
+				}, 0);
+				if (numFiles) {
+					menuitem.hidden = false;
+					sep.hidden = false;
+					if (numFiles == 1) {
+						menuitem.label = 'Export PDF…';
+					}
+					else {
+						menuitem.label = 'Export PDFs…';
+					}
+				}
+				else {
+					menuitem.hidden = true;
+					sep.hidden = true;
+				}
+			}
+			else {
+				menuitem.hidden = true;
+				sep.hidden = true;
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
 	};
 	
 	
