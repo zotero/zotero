@@ -344,18 +344,9 @@ Zotero.Schema = new function(){
 	 * @return {Object}
 	 */
 	async function _readGlobalSchemaFromFile() {
-		var data = JSON.parse(
+		return JSON.parse(
 			await Zotero.File.getResourceAsync('resource://zotero/schema/global/schema.json')
 		);
-		// TEMP: Add annotation to schema
-		// TODO: Move to schema.json
-		data.itemTypes.push({
-			itemType: "annotation",
-			fields: [],
-			creatorTypes: []
-		});
-		data.locales['en-US'].itemTypes.annotation = 'Annotation';
-		return data;
 	}
 	
 	
