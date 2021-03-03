@@ -3114,8 +3114,8 @@ Zotero.Item.prototype.relinkAttachmentFile = function(file, skipItemUpdate) {
 		throw('Cannot relink linked URL in Zotero.Items.relinkAttachmentFile()');
 	}
 	
-	if (file.leafName.endsWith(".lnk")) {
-		throw new Error("Cannot relink to Windows shortcut");
+	if (file.isSymlink()) {
+		file = Zotero.File.getTargetFile(file);
 	}
 	
 	var newName = Zotero.File.getValidFileName(file.leafName);
