@@ -634,6 +634,7 @@ describe("Zotero.Items", function () {
 			await attachment.loadDataType('childItems');
 			assert.isTrue(attachment._loaded.childItems);
 			attachment.getAnnotations();
+			await attachment.eraseTx();
 		});
 	});
 });
