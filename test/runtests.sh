@@ -159,6 +159,7 @@ user_pref("dom.max_chrome_script_run_time", 0);
 // It would be better to leave this on and handle it in Sinon's FakeXMLHttpRequest
 user_pref("extensions.zotero.sync.server.compressData", false);
 user_pref("extensions.zotero.automaticScraperUpdates", false);
+user_pref("extensions.zotero.beta.zotero6", true);
 user_pref("extensions.zotero.debug.log", $DEBUG);
 user_pref("extensions.zotero.debug.level", $DEBUG_LEVEL);
 user_pref("extensions.zotero.debug.time", $DEBUG);
