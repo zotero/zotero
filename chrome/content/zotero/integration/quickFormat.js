@@ -592,7 +592,7 @@ var Zotero_QuickFormat = new function () {
 		var str = "";
 
 		if (item.isNote()) {
-			var date = Zotero.Date.sqlToDate(item.dateModified);
+			var date = Zotero.Date.sqlToDate(item.dateModified, true);
 			date = Zotero.Date.toFriendlyDate(date);
 			str += date;
 			

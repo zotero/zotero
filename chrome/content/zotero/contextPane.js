@@ -502,7 +502,7 @@ var ZoteroContextPane = new function () {
 					text = text.slice(0, 500);
 					var parts = text.split('\n').map(x => x.trim()).filter(x => x.length);
 					var title = parts[0] && parts[0].slice(0, Zotero.Notes.MAX_TITLE_LENGTH);
-					var date = Zotero.Date.sqlToDate(note.dateModified);
+					var date = Zotero.Date.sqlToDate(note.dateModified, true);
 					date = Zotero.Date.toFriendlyDate(date);
 					
 					return {
