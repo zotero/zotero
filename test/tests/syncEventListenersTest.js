@@ -82,7 +82,9 @@ describe("Zotero.Sync.EventListeners", function () {
 		});
 		
 		it("should auto-sync after settings change", async function () {
+			Zotero.Prefs.set('sync.autoSync', false);
 			var attachment = await importFileAttachment('test.pdf');
+			Zotero.Prefs.set('sync.autoSync', true);
 			
 			var mock = sinon.mock(Zotero.Sync.Runner);
 			var expectation = mock.expects("setSyncTimeout").once();
