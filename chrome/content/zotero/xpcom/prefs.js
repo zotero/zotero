@@ -49,7 +49,7 @@ Zotero.Prefs = new function(){
 		if (!fromVersion) {
 			fromVersion = 0;
 		}
-		var toVersion = 2;
+		var toVersion = 3;
 		if (fromVersion < toVersion) {
 			for (var i = fromVersion + 1; i <= toVersion; i++) {
 				switch (i) {
@@ -72,6 +72,10 @@ Zotero.Prefs = new function(){
 						// The saveButton guidance panel initially could auto-hide too easily.
 						this.clear('firstRunGuidanceShown.saveIcon');
 						this.clear('firstRunGuidanceShown.saveButton');
+						break;
+					
+					case 3:
+						this.clear('note.fontSize');
 						break;
 					
 					// TEMP: Uncomment and set toVersion above to 3 when adding to prefs drop-down
