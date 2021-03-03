@@ -145,6 +145,13 @@ Zotero.Notes = new function() {
 		}
 		return doc.body.innerHTML;
 	};
+
+	this.hasSchemaVersion = function (note) {
+		let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
+		.createInstance(Components.interfaces.nsIDOMParser);
+		let doc = parser.parseFromString(note, 'text/html');
+		return !!doc.querySelector('body > div[data-schema-version]');
+	};
 };
 
 if (typeof process === 'object' && process + '' === '[object process]') {

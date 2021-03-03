@@ -88,8 +88,7 @@ class EditorInstance {
 			placeholder: options.placeholder,
 			dir: Zotero.dir,
 			font: this._getFont(),
-			// TODO: We should avoid hitting `data-schema-version` in note text
-			hasBackup: note && note.toLowerCase().indexOf('data-schema-version') < 0
+			hasBackup: note && !Zotero.Notes.hasSchemaVersion(note)
 				|| !!await Zotero.NoteBackups.getNote(this._item.id)
 		});
 	}

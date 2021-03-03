@@ -34,8 +34,7 @@ Zotero.NoteBackups = {
 	
 	ensureBackup: async function(item) {
 		let note = item.note;
-		// TODO: We should avoid hitting `data-schema-version` in note text
-		if (note && note.toLowerCase().indexOf('data-schema-version') < 0) {
+		if (note && !Zotero.Notes.hasSchemaVersion(note)) {
 			await Zotero.DB.queryAsync("INSERT OR IGNORE INTO noteBackups VALUES (?, ?)", [item.id, item.note]);
 		}
 	},
