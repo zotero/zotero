@@ -42,6 +42,9 @@ describe("Zotero.Sync.EventListeners", function () {
 			assert.ok(originalTimeout);
 			// Set timeout to 1ms
 			Zotero.Sync.EventListeners.AutoSyncListener._editTimeout = 0.001;
+		});
+		
+		beforeEach(function () {
 			Zotero.Prefs.set('sync.autoSync', true);
 		});
 		
