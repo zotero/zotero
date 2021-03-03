@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Прикажи у библиотеци">
 <!ENTITY zotero.items.menu.attach.note "Додај белешку">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Додај прилог">
 <!ENTITY zotero.items.menu.attach.link.uri "Приложи везу до адресе…">
 <!ENTITY zotero.items.menu.attach.file "Приложи сачувану копију датотеке…">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Сачувај копију датотеке…">
 <!ENTITY zotero.toolbar.attachment.weblink "Сачувај везу на тренутну страницу">
 <!ENTITY zotero.toolbar.attachment.snapshot "Сачувај слику тренутне странице">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Нема ознака за приказ">
 <!ENTITY zotero.tagSelector.loadingTags "Учитавам ознаке…">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "Додај везу до УРИ адресе">
 <!ENTITY zotero.attachLink.label.link "Веза:">
 <!ENTITY zotero.attachLink.label.title "Наслов:">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">

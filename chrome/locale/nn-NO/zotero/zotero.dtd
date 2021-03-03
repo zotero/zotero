@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Vis i bibliotek">
 <!ENTITY zotero.items.menu.attach.note "Legg til notat">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Legg til vedlegg">
 <!ENTITY zotero.items.menu.attach.link.uri "Legg ved lenkje til URI …">
 <!ENTITY zotero.items.menu.attach.file "Legg ved lagra kopi av fil …">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Lagre kopi av fil …">
 <!ENTITY zotero.toolbar.attachment.weblink "Lagre lenkje til gjeldande side">
 <!ENTITY zotero.toolbar.attachment.snapshot "Lag snapshot av gjeldande side">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Ingen taggar finst">
 <!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "Attach Link to URI">
 <!ENTITY zotero.attachLink.label.link "Lenkje:">
 <!ENTITY zotero.attachLink.label.title "Tittel:">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">

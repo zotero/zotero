@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "แสดงในไลบรารี่">
 <!ENTITY zotero.items.menu.attach.note "เพิ่มหมายเหตุ">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "เพิ่มแฟ้มแนบ">
 <!ENTITY zotero.items.menu.attach.link.uri "แนบลิงค์ไปยัง URI…">
 <!ENTITY zotero.items.menu.attach.file "แนบแฟ้มพร้อมสำเนาจัดเก็บไว้...">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "จัดเก็บสำเนาของแฟ้มข้อมูล...">
 <!ENTITY zotero.toolbar.attachment.weblink "บันทึกลิงค์ไปยังหน้าเว็บปัจจุบัน">
 <!ENTITY zotero.toolbar.attachment.snapshot "จับภาพหน้าเว็บปัจจุบัน">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "ไม่มีแท็กให้แสดง">
 <!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "Attach Link to URI">
 <!ENTITY zotero.attachLink.label.link "Link:">
 <!ENTITY zotero.attachLink.label.title "Title:">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">

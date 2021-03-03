@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "نمایش در کتابخانه">
 <!ENTITY zotero.items.menu.attach.note "افزودن یادداشت">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "افزودن پیوست">
 <!ENTITY zotero.items.menu.attach.link.uri "پیوست پیوند به URI">
 <!ENTITY zotero.items.menu.attach.file "پیوست کردن رونوشت پرونده...">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "ذخیره رونوشت از پرونده...">
 <!ENTITY zotero.toolbar.attachment.weblink "ذخیره پیوند به صفحه جاری">
 <!ENTITY zotero.toolbar.attachment.snapshot "گرفتن تصویر لحظه‌ای از صفحه جاری">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "هیچ برچسبی برای نمایش وجود ندارد">
 <!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "پیوست کردن پیوند به URI">
 <!ENTITY zotero.attachLink.label.link "پیوند:">
 <!ENTITY zotero.attachLink.label.title "عنوان:">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">

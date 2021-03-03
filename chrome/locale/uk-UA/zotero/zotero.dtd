@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Покзати в бібліотеці">
 <!ENTITY zotero.items.menu.attach.note "Додати примітку">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Додати вкладення">
 <!ENTITY zotero.items.menu.attach.link.uri "Прикріпити посилання на URI…">
 <!ENTITY zotero.items.menu.attach.file "Прикріпити копію фалу...">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Зберегти копію файлу...">
 <!ENTITY zotero.toolbar.attachment.weblink "Зберегти посилання на поточну сторінку">
 <!ENTITY zotero.toolbar.attachment.snapshot "Зробити знімок поточної сторінки">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Немає тегів для відображення">
 <!ENTITY zotero.tagSelector.loadingTags "Завантажуємо теги...">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "Прикріпити посилання на URI">
 <!ENTITY zotero.attachLink.label.link "Посилання:">
 <!ENTITY zotero.attachLink.label.title "Назва">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">

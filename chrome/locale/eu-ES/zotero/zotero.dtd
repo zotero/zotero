@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Erakutsi liburutegian">
 <!ENTITY zotero.items.menu.attach.note "Oharra gehitu">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Eranskina gehitu">
 <!ENTITY zotero.items.menu.attach.link.uri "URI baterako esteka erantsi...">
 <!ENTITY zotero.items.menu.attach.file "Gordetako dokumentu baten kopia erantsi">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Fitxategi baten kopia gorde...">
 <!ENTITY zotero.toolbar.attachment.weblink "Oraingo orriaren esteka gorde">
 <!ENTITY zotero.toolbar.attachment.snapshot "Oraingo orrialdearen pantaila-irudia gorde">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Etiketarik ez erakusgarri">
 <!ENTITY zotero.tagSelector.loadingTags "Etiketak kargatzen...">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "URI baterako esteka erantsi">
 <!ENTITY zotero.attachLink.label.link "Esteka:">
 <!ENTITY zotero.attachLink.label.title "Izenburua:">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">

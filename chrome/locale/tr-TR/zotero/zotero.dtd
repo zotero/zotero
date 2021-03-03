@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Kitaplıkta Göster">
 <!ENTITY zotero.items.menu.attach.note "Not Ekle">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Ek Ekle">
 <!ENTITY zotero.items.menu.attach.link.uri "URI'ye Bağlantı İliştir">
 <!ENTITY zotero.items.menu.attach.file "Dosyanın Kaydedilmiş Kopyasını Ekle">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Dosyanın bir Kopyasının Sakla">
 <!ENTITY zotero.toolbar.attachment.weblink "Geçerli Sayfaya Bağlantıyı Kaydet">
 <!ENTITY zotero.toolbar.attachment.snapshot "Geçerli Sayfanın Görünümünü Al">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Gösterilecek etiket yok">
 <!ENTITY zotero.tagSelector.loadingTags "Etiketleri yüklüyor...">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "URI'ye Bağlantı Ekle.">
 <!ENTITY zotero.attachLink.label.link "Bağlantı">
 <!ENTITY zotero.attachLink.label.title "Başlık">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">

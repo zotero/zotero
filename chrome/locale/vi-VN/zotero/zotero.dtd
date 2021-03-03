@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Hiển thị trong Thư viện">
 <!ENTITY zotero.items.menu.attach.note "Tạo một Ghi chép">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Thêm tệp đính kèm">
 <!ENTITY zotero.items.menu.attach.link.uri "Đính kèm liên kết tới URI...">
 <!ENTITY zotero.items.menu.attach.file "Đính kèm bản sao đã lưu của tệp...">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Tạo một Bản lưu của Tập tin...">
 <!ENTITY zotero.toolbar.attachment.weblink "Lưu Đường dẫn tới Trang hiện tại">
 <!ENTITY zotero.toolbar.attachment.snapshot "Tạo Bản lưu trang Web của Trang hiện tại">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Không có thẻ nào để hiển thị">
 <!ENTITY zotero.tagSelector.loadingTags "Đang nạp các tag...">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "Attach Link to URI">
 <!ENTITY zotero.attachLink.label.link "Link:">
 <!ENTITY zotero.attachLink.label.title "Title:">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">

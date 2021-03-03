@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Sýna í færslusafni">
 <!ENTITY zotero.items.menu.attach.note "Bæta við athugasemd">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Sækja viðhengi">
 <!ENTITY zotero.items.menu.attach.link.uri "Hengja tengil við URI-slóð…">
 <!ENTITY zotero.items.menu.attach.file "Hengja við geymt afrit af skrá…">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Geyma afrit af skrá…">
 <!ENTITY zotero.toolbar.attachment.weblink "Vista slóð til þessarar síðu">
 <!ENTITY zotero.toolbar.attachment.snapshot "Taka flýtimynd af þessari síðu">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Engin merki til að sýna">
 <!ENTITY zotero.tagSelector.loadingTags "Hleð inn merkjum…">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "Hengja tengil við URI-slóð">
 <!ENTITY zotero.attachLink.label.link "Slóð:">
 <!ENTITY zotero.attachLink.label.title "Titill:">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">

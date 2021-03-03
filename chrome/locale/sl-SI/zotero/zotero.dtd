@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Pokaži v knjižnici">
 <!ENTITY zotero.items.menu.attach.note "Dodaj opombo">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Dodaj priponko">
 <!ENTITY zotero.items.menu.attach.link.uri "URI-ju pripni povezavo ...">
 <!ENTITY zotero.items.menu.attach.file "Pripni shranjeno kopijo datoteke ...">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Shrani kopijo datoteke ...">
 <!ENTITY zotero.toolbar.attachment.weblink "Shrani povezavo na trenutno stran">
 <!ENTITY zotero.toolbar.attachment.snapshot "Naredi posnetek trenutne strani">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Brez značk za prikaz">
 <!ENTITY zotero.tagSelector.loadingTags "Nalaganje značk ...">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "URI pripni povezavo">
 <!ENTITY zotero.attachLink.label.link "Povezava:">
 <!ENTITY zotero.attachLink.label.title "Naslov:">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">

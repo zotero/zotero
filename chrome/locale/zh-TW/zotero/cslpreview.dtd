@@ -1,6 +1,6 @@
 <!ENTITY styles.preview "預覽 Zotero 文獻格式">
 
-<!ENTITY styles.preview.citationFormat "引用文獻格式：">
+<!ENTITY styles.preview.citationFormat "引用文獻的格式：">
 <!ENTITY styles.preview.citationFormat.all "全部">
 <!ENTITY styles.preview.citationFormat.author "作者">
 <!ENTITY styles.preview.citationFormat.authorDate "author-date">

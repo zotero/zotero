@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Amosar na biblioteca">
 <!ENTITY zotero.items.menu.attach.note "Engadir unha nota">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Engadir un anexo">
 <!ENTITY zotero.items.menu.attach.link.uri "Anexar a ligazón ao URI...">
 <!ENTITY zotero.items.menu.attach.file "Anexar a copia almacenada do ficheiro...">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Gardar copias dos ficheiros...">
 <!ENTITY zotero.toolbar.attachment.weblink "Gardar a ligazón á páxina actual">
 <!ENTITY zotero.toolbar.attachment.snapshot "Tomar unha imaxe instantánea da páxina actual">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Non hai etiquetas que mostrar">
 <!ENTITY zotero.tagSelector.loadingTags "Cargando as etiquetas...">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "Engadirlle unha ligazón á URI:">
 <!ENTITY zotero.attachLink.label.link "Ligazón:">
 <!ENTITY zotero.attachLink.label.title "Título:">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">

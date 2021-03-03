@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Tunjukkan dalam Perpustakaan">
 <!ENTITY zotero.items.menu.attach.note "Tambahkan Catatan">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Tambahkan Lampiran">
 <!ENTITY zotero.items.menu.attach.link.uri "Lampirkan Tautan ke URL...">
 <!ENTITY zotero.items.menu.attach.file "Lampirkan Salinan Berkas Tersimpan">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Simpan Salinan Berkas">
 <!ENTITY zotero.toolbar.attachment.weblink "Simpan Tautan ke Laman Ini">
 <!ENTITY zotero.toolbar.attachment.snapshot "Ambil Snapshot Laman Ini">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Tidak ada tag untuk ditampilkan">
 <!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "Attach Link to URI">
 <!ENTITY zotero.attachLink.label.link "Link:">
 <!ENTITY zotero.attachLink.label.title "Title:">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">

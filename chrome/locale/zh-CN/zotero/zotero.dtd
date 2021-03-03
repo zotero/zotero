@@ -90,6 +90,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "在文献库中显示">
 <!ENTITY zotero.items.menu.attach.note "添加笔记">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "添加附件">
 <!ENTITY zotero.items.menu.attach.link.uri "附加URI的链接…">
 <!ENTITY zotero.items.menu.attach.file "附加文件副本...">
@@ -155,6 +156,8 @@
 <!ENTITY zotero.toolbar.attachment.add "文件副本...">
 <!ENTITY zotero.toolbar.attachment.weblink "保存当前页链接">
 <!ENTITY zotero.toolbar.attachment.snapshot "生成当前页快照">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "无标签可显示">
 <!ENTITY zotero.tagSelector.loadingTags "加载标记…">
@@ -325,3 +328,8 @@
 <!ENTITY zotero.attachLink.title "将链接附加到 URI">
 <!ENTITY zotero.attachLink.label.link "链接:">
 <!ENTITY zotero.attachLink.label.title "标题:">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">

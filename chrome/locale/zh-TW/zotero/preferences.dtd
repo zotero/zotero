@@ -12,7 +12,7 @@
 <!ENTITY zotero.preferences.automaticSnapshots "從網頁建立項目時自動建立快照">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "儲存項目時自動附加相關的 PDF 檔與其他檔">
 <!ENTITY zotero.preferences.autoRecognizeFiles "自動為 PDF 檔取得屬性資料">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
+<!ENTITY zotero.preferences.autoRenameFiles "自動使用上層屬性資料重新命名附加檔">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "重新命名連結的檔案">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "開啟 PDFs 使用">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "系統預設">
@@ -33,11 +33,11 @@
 <!ENTITY zotero.preferences.groups.childLinks "子連結">
 <!ENTITY zotero.preferences.groups.tags "標籤">
 
-<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds "新聞源">
 <!ENTITY zotero.preferences.feeds.sorting.label "排序：">
 <!ENTITY zotero.preferences.feeds.sorting.newest "新的項目在前">
 <!ENTITY zotero.preferences.feeds.sorting.oldest "舊的項目在前">
-<!ENTITY zotero.preferences.feeds.feedDefaults "Feed 預設值">
+<!ENTITY zotero.preferences.feeds.feedDefaults "新聞源預設值">
 
 <!ENTITY zotero.preferences.openurl.search "搜尋解析器">
 <!ENTITY zotero.preferences.openurl.custom "自訂...">
@@ -58,8 +58,8 @@
 <!ENTITY zotero.preferences.sync.about "關於同步">
 <!ENTITY zotero.preferences.sync.fileSyncing "檔案同步中">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
-<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "同步我的文獻庫中的附加檔案">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups "用 Zotero 本機儲存同步群組文獻庫中的附加檔案">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "同步我的文獻庫中的附加檔">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "用 Zotero 本機儲存同步群組文獻庫中的附加檔">
 <!ENTITY zotero.preferences.sync.fileSyncing.download "下載檔案">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "於同步時間">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "依所需">
@@ -132,7 +132,7 @@
 <!ENTITY zotero.preferences.keys.quicksearch "快速搜尋">
 <!ENTITY zotero.preferences.keys.newItem "新增項目">
 <!ENTITY zotero.preferences.keys.newNote "新增筆記">
-<!ENTITY zotero.preferences.keys.toggleAllRead "標示所有 Feed 的項目為已讀或未讀">
+<!ENTITY zotero.preferences.keys.toggleAllRead "所有新聞源項目標示成已讀或未讀">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "切換標籤選擇器">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "複製選擇項目的引用文獻到剪貼簿">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "複製所選項目到剪貼簿">
@@ -188,8 +188,8 @@
 <!ENTITY zotero.preferences.dataDir.reveal "顯示資料目錄">
 <!ENTITY zotero.preferences.dataDir.migrate "轉移到新的預設位置...">
 
-<!ENTITY zotero.preferences.attachmentBaseDir.caption "連到的附件檔的庫目錄">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero 會使用連到的附件檔的庫目錄內的相對路徑，讓你可在不同電腦存取檔案，只要庫目錄內的檔案結構保持不變即可。">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "連到的附加檔庫目錄">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero 會使用連到的附加檔庫目錄內的相對路徑，讓你可在不同電腦存取檔案，只要庫目錄內的檔案結構保持不變即可。">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "庫目錄：">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "選擇…">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "復原成絕對路徑…">
