@@ -195,6 +195,7 @@ Zotero.Translate.Sandbox = {
 		 * @returns {Object} A safeTranslator object, which operates mostly like Zotero.Translate
 		 */	 
 		"loadTranslator":function(translate, type) {
+			var errorHandlerSet = false;
 			const setDefaultHandlers = function(translate, translation) {
 				if(type !== "export"
 					&& (!translation._handlers['itemDone'] || !translation._handlers['itemDone'].length)) {
@@ -204,6 +205,11 @@ Zotero.Translate.Sandbox = {
 				}
 				if(!translation._handlers['selectItems'] || !translation._handlers['selectItems'].length) {
 					translation.setHandler("selectItems", translate._handlers["selectItems"]);
+				}
+				
+				if(!errorHandlerSet) {
+					errorHandlerSet = true;
+					translation.setHandler("error", function(obj, error) { translate.complete(false, error) });
 				}
 			}
 			
@@ -249,7 +255,7 @@ Zotero.Translate.Sandbox = {
 					return translation.setDocument(arg);
 				}
 			};
-			var errorHandlerSet = false;
+			
 			safeTranslator.setHandler = function(arg1, arg2) {
 				if(arg1 === "error") errorHandlerSet = true;
 				translation.setHandler(arg1, 
@@ -292,35 +298,24 @@ Zotero.Translate.Sandbox = {
 							'call getTranslators() in connector');
 					}
 				}
-				if(!translatorsHandlerSet) {
-					translation.setHandler("translators", function() {
-						translate.decrementAsyncProcesses("safeTranslator#getTranslators()");
-					});
-				}
-				translate.incrementAsyncProcesses("safeTranslator#getTranslators()");
+				
+				translation.setHandler("translators", function() {
+					translation.decrementAsyncProcesses("safeTranslator#getTranslators()");
+				});
+				
+				translation.incrementAsyncProcesses("safeTranslator#getTranslators()");
 				return translation.getTranslators();
 			};
 			
 			var doneHandlerSet = false;
 			safeTranslator.translate = function() {
-				translate.incrementAsyncProcesses("safeTranslator#translate()");
 				setDefaultHandlers(translate, translation);
-				if(!doneHandlerSet) {
-					doneHandlerSet = true;
-					translation.setHandler("done", function() { translate.decrementAsyncProcesses("safeTranslator#translate()") });
-				}
-				if(!errorHandlerSet) {
-					errorHandlerSet = true;
-					translation.setHandler("error", function(obj, error) { translate.complete(false, error) });
-				}
 				return translation.translate(false);
 			};
 			
 			safeTranslator.getTranslatorObject = function(callback) {
-				if(callback) {
-					translate.incrementAsyncProcesses("safeTranslator#getTranslatorObject()");
-				} else {
-					translate._debug("COMPAT WARNING: Translator must pass a callback to getTranslatorObject() to operate in connector");
+				if (!callback) {
+					throw new Error("Translator must pass a callback to getTranslatorObject()");
 				}
 				
 				var sandbox;
@@ -348,6 +343,7 @@ Zotero.Translate.Sandbox = {
 						}
 						
 						translation._prepareTranslation();
+						translation._currentState = 'translate';
 						setDefaultHandlers(translate, translation);
 						sandbox = translation._sandboxManager.sandbox;
 						if(!Zotero.Utilities.isEmpty(sandbox.exports)) {
@@ -364,14 +360,17 @@ Zotero.Translate.Sandbox = {
 							try {
 								callback(sandbox);
 							} catch(e) {
-								translate.complete(false, e);
+								translation.complete(false, e);
 								return;
 							}
-							translate.decrementAsyncProcesses("safeTranslator#getTranslatorObject()");
 						}
+						
+						translation.decrementAsyncProcesses("safeTranslator#getTranslatorObject()");
 					});
 				};
 				
+				
+				translation.incrementAsyncProcesses("safeTranslator#getTranslatorObject()");
 				if(typeof translation.translator[0] === "object") {
 					haveTranslatorFunction(translation.translator[0]);
 					return translation._sandboxManager.sandbox;
@@ -382,12 +381,7 @@ Zotero.Translate.Sandbox = {
 					}
 					
 					Zotero.Translators.get(translation.translator[0], haveTranslatorFunction);
-					if(Zotero.isConnector && Zotero.isFx && !callback) {
-						while(!sandbox && translate._currentState) {
-							// This processNextEvent call is used to handle a deprecated case
-							Zotero.mainThread.processNextEvent(true);
-						}
-					}
+					
 					if(sandbox) return sandbox;
 				}
 			};
@@ -839,7 +833,10 @@ Zotero.Translate.Sandbox = {
  * @property {Number} runningAsyncProcesses The number of async processes that are running. These
  *                                          need to terminate before Zotero.done() is called.
  */
-Zotero.Translate.Base = function() {}
+Zotero.Translate.Base = function() {
+	this._runningAsyncProcesses = 0;
+}
+
 Zotero.Translate.Base.prototype = {
 	/**
 	 * Initializes a Zotero.Translate instance
@@ -988,6 +985,12 @@ Zotero.Translate.Base.prototype = {
 			//Zotero.debug("Translate: Decremented asynchronous processes to "+this._runningAsyncProcesses+" for "+f, 4);
 			//Zotero.debug((new Error()).stack);
 		}
+		
+		if (this._runningAsyncProcesses < 0) {
+			Zotero.debug("WARNING: decrementAsyncProcesses called more times than incrementAsyncProcesses!!! " + this._runningAsyncProcesses);
+			this._runningAsyncProcesses = 0;
+		}
+		
 		if(this._runningAsyncProcesses === 0) {
 			this.complete();
 		}
@@ -1329,16 +1332,27 @@ Zotero.Translate.Base.prototype = {
 			return;
 		}
 		
-		// reset async processes and propagate them to parent
-		if(this._parentTranslator && this._runningAsyncProcesses) {
-			this._parentTranslator.decrementAsyncProcesses("Zotero.Translate#complete", this._runningAsyncProcesses);
-		}
-		this._runningAsyncProcesses = 0;
-		
 		if(!returnValue && this._returnValue) returnValue = this._returnValue;
 		
 		var errorString = null;
 		if(!returnValue && error) errorString = this._generateErrorString(error);
+		
+		// unset return value is equivalent to true for 'translate'
+		if (returnValue === undefined && this._currentState != 'detect') returnValue = true;
+		
+		// Don't proceed with actual saving from child translator, but clean up otherwise
+		if(this._parentTranslator) {
+			this._currentState = null;
+			if (!returnValue && error) this._runHandler("error", error);
+			this._runHandler("done", returnValue);
+			
+			// Make sure any left-over async processes are decremented from parent
+			if (this._runningAsyncProcesses) {
+				this._parentTranslator.decrementAsyncProcesses("Zotero.Translate#complete", this._runningAsyncProcesses);
+			}
+			
+			return;
+		}
 		
 		if(this._currentState === "detect") {
 			if(this._potentialTranslators.length) {
@@ -1373,9 +1387,6 @@ Zotero.Translate.Base.prototype = {
 				if(!this._waitingForRPC) this._detectTranslatorsCollected();
 			}
 		} else {
-			// unset return value is equivalent to true
-			if(returnValue === undefined) returnValue = true;
-			
 			if(returnValue) {
 				if(this.saveQueue.length) {
 					this._waitingForSave = true;
@@ -1551,7 +1562,6 @@ Zotero.Translate.Base.prototype = {
 		}
 		
 		this._currentTranslator = translator;
-		this._runningAsyncProcesses = 0;
 		this._returnValue = undefined;
 		this._aborted = false;
 		this.saveQueue = [];
