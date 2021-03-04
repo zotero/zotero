@@ -570,12 +570,14 @@ var ZoteroPane = new function()
 			if (ctrlOnly) {
 				if (event.key == 'PageUp') {
 					Zotero_Tabs.selectPrev();
+					event.preventDefault();
+					return;
 				}
 				else if (event.key == 'PageDown') {
 					Zotero_Tabs.selectNext();
+					event.preventDefault();
+					return;
 				}
-				event.preventDefault();
-				return;
 			}
 			
 			// Highlight collections containing selected items
