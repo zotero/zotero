@@ -280,6 +280,36 @@ class PDFWorker {
 	}
 	
 	/**
+	 * Process Mendeley annotations by extending with data from PDF file
+	 *
+	 * @param {String} pdfPath PDF file path
+	 * @param {Array} mendeleyAnnotations
+	 * @param {Boolean} [isPriority]
+	 * @param {String} [password]
+	 * @returns {Promise<Array>} Partial annotations
+	 */
+	async processMendeleyAnnotations(pdfPath, mendeleyAnnotations, isPriority, password) {
+		return this._enqueue(async () => {
+			let buf = await OS.File.read(pdfPath, {});
+			buf = new Uint8Array(buf).buffer;
+			try {
+				var annotations = await this._query('importMendeley', {
+					buf, mendeleyAnnotations, password
+				}, [buf]);
+			}
+			catch (e) {
+				let error = new Error(`Worker 'importMendeley' failed: ${JSON.stringify({
+					mendeleyAnnotations,
+					error: e.message
+				})}`);
+				Zotero.logError(error);
+				throw error;
+			}
+			return annotations;
+		}, isPriority);
+	}
+	
+	/**
 	 * Import annotations for each PDF attachment of parent item
 	 *
 	 * @param {Zotero.Item} item
