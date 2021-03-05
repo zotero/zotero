@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-// TODO: Fix import/require related isues that might be
+// TODO: Fix import/require related issues that might be
 //  related with `require` not reusing the context
 var React = require('react');
 var ReactDOM = require('react-dom');
@@ -537,6 +537,31 @@ var ZoteroContextPane = new function () {
 			updateFromCache: () => _updateNotesList(true)
 		};
 		
+		function _handleListPopupClick(id, event) {
+			switch (event.originalTarget.id) {
+				case 'context-pane-list-show-in-library':
+					ZoteroPane_Local.selectItem(id);
+					Zotero_Tabs.select('zotero-pane');
+					break;
+
+				case 'context-pane-list-edit-in-window':
+					ZoteroPane_Local.openNoteWindow(id);
+					break;
+
+				case 'context-pane-list-delete':
+					var ps = Components.classes['@mozilla.org/embedcomp/prompt-service;1']
+					.getService(Components.interfaces.nsIPromptService);
+					if (ps.confirm(null, '', Zotero.getString('pane.item.notes.delete.confirm'))) {
+						Zotero.Items.trashTx(id);
+						context.cachedNotes = context.cachedNotes.filter(x => x.id != id);
+						_updateNotesList(true);
+					}
+					break;
+
+				default:
+			}
+		}
+		
 		function _handleAddChildNotePopupClick(event) {
 			switch (event.originalTarget.id) {
 				case 'context-pane-add-child-note':
@@ -570,6 +595,11 @@ var ZoteroContextPane = new function () {
 				ref={notesListRef}
 				onClick={(id) => {
 					_setPinnedNote(id);
+				}}
+				onContextMenu={(id, event) => {
+					var popup = document.getElementById('context-pane-list-popup');
+					popup.onclick = (event) => _handleListPopupClick(id, event);
+					popup.openPopupAtScreen(event.screenX, event.screenY);
 				}}
 				onAddChildButtonDown={(event) => {
 					var popup = document.getElementById('context-pane-add-child-note-button-popup');

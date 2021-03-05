@@ -333,3 +333,4 @@
 <!ENTITY zotero.context.addChildNoteFromAnnotations			"Add Item Note from Annotations">
 <!ENTITY zotero.context.addStandaloneNote					"Add Standalone Note">
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations	"Add Standalone Note from Annotations">
+<!ENTITY zotero.context.editInWindow						"Edit in a Separate Window">

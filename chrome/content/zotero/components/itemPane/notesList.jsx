@@ -28,9 +28,9 @@ import cx from 'classnames';
 
 const MAX_ALL_NOTES = 7;
 
-const NoteRow = ({ title, body, date, onClick, parentItemType, parentTitle }) => {
+const NoteRow = ({ title, body, date, onClick, onContextMenu, parentItemType, parentTitle }) => {
 	return (
-		<div className={cx('note-row', { 'standalone-note-row': !parentItemType })} onClick={onClick}>
+		<div className={cx('note-row', { 'standalone-note-row': !parentItemType })} onClick={onClick} onContextMenu={onContextMenu}>
 			<div className="inner">
 				{ parentItemType
 					? <div className="parent-line">
@@ -51,7 +51,7 @@ const NoteRow = ({ title, body, date, onClick, parentItemType, parentTitle }) =>
 	);
 };
 
-const NotesList = forwardRef(({ onClick, onAddChildButtonDown, onAddStandaloneButtonDown }, ref) => {
+const NotesList = forwardRef(({ onClick, onContextMenu, onAddChildButtonDown, onAddStandaloneButtonDown }, ref) => {
 	const [notes, setNotes] = useState([]);
 	const [expanded, setExpanded] = useState(false);
 	const [hasParent, setHasParent] = useState(true);
@@ -71,7 +71,8 @@ const NotesList = forwardRef(({ onClick, onAddChildButtonDown, onAddStandaloneBu
 					<button onMouseDown={onAddChildButtonDown}>+</button>
 				</div>
 				{!childNotes.length && <div className="empty-row">{Zotero.getString('pane.context.noNotes')}</div>}
-				{childNotes.map(note => <NoteRow key={note.id} {...note} onClick={() => onClick(note.id)}/>)}
+				{childNotes.map(note => <NoteRow key={note.id} {...note}
+					onClick={() => onClick(note.id)} onContextMenu={(event) => onContextMenu(note.id, event)}/>)}
 			</section>}
 			<section>
 				<div className="header-row">
@@ -79,7 +80,9 @@ const NotesList = forwardRef(({ onClick, onAddChildButtonDown, onAddStandaloneBu
 					<button onMouseDown={onAddStandaloneButtonDown}>+</button>
 				</div>
 				{!allNotes.length && <div className="empty-row">{Zotero.getString('pane.context.noNotes')}</div>}
-				{(expanded ? allNotes : allNotes.slice(0, MAX_ALL_NOTES)).map(note => <NoteRow key={note.id} {...note} onClick={() => onClick(note.id)}/>)}
+				{(expanded ? allNotes : allNotes.slice(0, MAX_ALL_NOTES))
+					.map(note => <NoteRow key={note.id} {...note}
+						onClick={() => onClick(note.id)} onContextMenu={(event) => onContextMenu(note.id, event)}/>)}
 				{!expanded && allNotes.length > MAX_ALL_NOTES
 					&& <div className="more-row" onClick={handleClickMore}>{
 						Zotero.getString('general.numMore', Zotero.Utilities.numberFormat([allNotes.length - MAX_ALL_NOTES], 0))
