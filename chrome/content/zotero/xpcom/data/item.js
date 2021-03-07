@@ -3297,7 +3297,7 @@ Zotero.Item.prototype.getAttachmentLastPageIndex = function () {
 	
 	var id = this._getLastPageIndexSettingKey();
 	var val = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, id);
-	if (val !== null && typeof val != 'number' || val != parseInt(val)) {
+	if (val !== null && (typeof val != 'number' || val != parseInt(val))) {
 		Zotero.logError(`Setting contains an invalid attachment page index ('${val}') -- discarding`);
 		return null;
 	}
