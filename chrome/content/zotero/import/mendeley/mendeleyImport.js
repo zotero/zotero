@@ -136,6 +136,15 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 				}
 			}
 			
+			// Set content type for PDFs
+			if (docFiles) {
+				docFiles.forEach((file) => {
+					if (file.fileURL.endsWith('.pdf')) {
+						file.contentType = 'application/pdf';
+					}
+				});
+			}
+			
 			// Save each document with its attributes
 			let itemJSON = await this._documentToAPIJSON(
 				map,
