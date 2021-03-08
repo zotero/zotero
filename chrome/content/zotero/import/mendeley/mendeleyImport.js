@@ -1091,7 +1091,7 @@ Zotero_Import_Mendeley.prototype._saveFilesAndAnnotations = async function (file
 					// this file
 					annotations.filter(a => a.hash == file.hash),
 					parentItemID,
-					(attachment && file.contentType == 'application/pdf') ? attachment.id : null,
+					attachment ? attachment.id : null,
 					file.hash
 				);
 			}
@@ -1165,6 +1165,15 @@ Zotero_Import_Mendeley.prototype._saveAnnotations = async function (annotations,
 		if (attachmentItem) {
 			let file = await attachmentItem.getFilePathAsync();
 			if (file) {
+				// Fix blank PDF attachment MIME type from previous imports
+				if (!attachmentItem.attachmentContentType) {
+					let type = 'application/pdf';
+					if (Zotero.MIME.sniffForMIMEType(await Zotero.File.getSample(file)) == type) {
+						attachmentItem.attachmentContentType = type;
+						await attachmentItem.saveTx();
+					}
+				}
+				
 				let annotationMap = new Map();
 				for (let annotation of annotations) {
 					// 'type', 'uuid', 'hash', 'color', 'dateAdded', 'page'
