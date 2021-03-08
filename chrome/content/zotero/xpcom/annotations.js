@@ -203,6 +203,13 @@ Zotero.Annotations = new function () {
 		// TODO: Can colors be set?
 		item.setTags((json.tags || []).map(t => ({ tag: t.name })));
 		
+		// For Mendeley import -- additive only
+		if (json.relations) {
+			for (let predicate in json.relations) {
+				item.addRelation(predicate, json.relations[predicate]);
+			}
+		}
+		
 		await item.saveTx(saveOptions);
 		
 		return item;
