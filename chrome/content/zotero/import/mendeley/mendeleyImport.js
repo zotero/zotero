@@ -1187,6 +1187,11 @@ Zotero_Import_Mendeley.prototype._saveAnnotations = async function (annotations,
 				annotations = await Zotero.PDFWorker.processMendeleyAnnotations(file, annotations);
 				
 				for (let annotation of annotations) {
+					// Ignore empty highlights
+					if (annotation.type == 'highlight' && !annotation.text) {
+						continue;
+					}
+					
 					let o = annotationMap.get(annotation.id);
 					Object.assign(o, annotation);
 					
