@@ -102,6 +102,7 @@
 							iframeWindow: document.getAnonymousElementByAttribute(this, 'anonid', 'editor-view').contentWindow,
 							popup: document.getAnonymousElementByAttribute(this, 'anonid', 'editor-menu'),
 							onNavigate: this._navigateHandler,
+							viewMode: this.viewMode,
 							readOnly: !this.editable,
 							disableUI: this.mode == 'merge',
 							onReturn: this._returnHandler,

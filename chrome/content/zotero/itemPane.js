@@ -290,11 +290,12 @@ var ZoteroItemPane = new function() {
 		else {
 			var noteEditor = document.getElementById('zotero-note-editor');
 			noteEditor.mode = editable ? 'edit' : 'view';
+			noteEditor.viewMode = 'library';
 			noteEditor.parent = null;
 			noteEditor.item = item;
 		}
 		
-		document.getElementById('zotero-view-note-button').hidden = !editable;
+		document.getElementById('zotero-view-note-button').hidden = !editable || type != 'group' && Zotero.isPDFBuild;
 		document.getElementById('zotero-item-pane-content').selectedIndex = 2;
 	};
 	

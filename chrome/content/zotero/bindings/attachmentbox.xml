@@ -390,6 +390,7 @@
 					else {
 						noteEditor.hidden = true;
 					}
+					noteEditor.viewMode = 'library';
 					
 					if (this.displayButton) {
 						selectButton.label = this.buttonCaption;

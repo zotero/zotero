@@ -47,6 +47,7 @@ class EditorInstance {
 		Zotero.Notes.registerEditorInstance(this);
 		this.onNavigate = options.onNavigate;
 		this._item = options.item;
+		this._viewMode = options.viewMode;
 		this._readOnly = options.readOnly;
 		this._disableUI = options.disableUI;
 		this._onReturn = options.onReturn;
@@ -82,7 +83,9 @@ class EditorInstance {
 		this._postMessage({
 			action: 'init',
 			value: this._state || this._item.note,
+			viewMode: this._viewMode,
 			readOnly: this._readOnly,
+			unsaved: !this._item.id,
 			disableUI: this._disableUI,
 			enableReturnButton: !!this._onReturn,
 			placeholder: options.placeholder,
@@ -179,6 +182,17 @@ class EditorInstance {
 		this._postMessage({ action: 'updateFont', font: this._getFont() });
 	}
 	
+	_showInLibrary(ids) {
+		if (!Array.isArray(ids)) {
+			ids = [ids];
+		}
+		let win = Zotero.getMainWindow();
+		if (win) {
+			win.ZoteroPane.selectItems(ids);
+			win.Zotero_Tabs.select('zotero-pane');
+			win.focus();
+		}
+	}
 	
 	/**
 	 * @param {Zotero.Item[]} annotations
@@ -355,15 +369,7 @@ class EditorInstance {
 					await Zotero.Reader.open(attachments[0].id, { pageLabel: citationItem.locator });
 				}
 				else {
-					let zp = Zotero.getActiveZoteroPane();
-					if (zp) {
-						zp.selectItems([item.id]);
-						let win = Zotero.getMainWindow();
-						if (win) {
-							win.focus();
-							win.Zotero_Tabs.select('zotero-pane');
-						}
-					}
+					this._showInLibrary(item.id);
 				}
 				return;
 			}
@@ -376,14 +382,9 @@ class EditorInstance {
 						items.push(item);
 					}
 				}
-				let zp = Zotero.getActiveZoteroPane();
-				if (zp && items.length) {
-					zp.selectItems(items.map(item => item.id));
-					let win = Zotero.getMainWindow();
-					if (win) {
-						win.focus();
-						win.Zotero_Tabs.select('zotero-pane');
-					}
+				
+				if (items.length) {
+					this._showInLibrary(items.map(item => item.id));
 				}
 				return;
 			}
@@ -395,19 +396,15 @@ class EditorInstance {
 				}
 				return;
 			}
-			case 'showInLibrary': {
-				let { uri } = message;
+			case 'showNote': {
+				this._showInLibrary(this._item.id);
+				return;
+			}
+			case 'openWindow': {
+				// TODO: Can we can avoid creating empty note just to open it in a new window?
+				await this._ensureNoteCreated();
 				let zp = Zotero.getActiveZoteroPane();
-				if (zp) {
-					let item = await Zotero.URI.getURIItem(uri);
-					if (item) {
-						zp.selectItems([item.id]);
-						let win = Zotero.getMainWindow();
-						if (win) {
-							win.focus();
-						}
-					}
-				}
+				zp.openNoteWindow(this._item.id);
 				return;
 			}
 			case 'openBackup': {
