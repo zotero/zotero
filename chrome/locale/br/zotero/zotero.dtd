@@ -6,6 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Diziuzañ pep-tra">
 <!ENTITY zotero.general.edit "Aozañ">
 <!ENTITY zotero.general.delete "Dilemel">
+<!ENTITY zotero.general.moveToTrash "Move to Trash">
 <!ENTITY zotero.general.ok "Mat eo">
 <!ENTITY zotero.general.cancel "Nullañ">
 <!ENTITY zotero.general.refresh "Freskaat">
@@ -333,3 +334,4 @@
 <!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
 <!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
+<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">

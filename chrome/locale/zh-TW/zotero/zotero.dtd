@@ -6,6 +6,7 @@
 <!ENTITY zotero.general.deselectAll "全不選">
 <!ENTITY zotero.general.edit "編輯">
 <!ENTITY zotero.general.delete "刪除">
+<!ENTITY zotero.general.moveToTrash "Move to Trash">
 <!ENTITY zotero.general.ok "確定">
 <!ENTITY zotero.general.cancel "取消">
 <!ENTITY zotero.general.refresh "重新整理">
@@ -333,3 +334,4 @@
 <!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
 <!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
+<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">

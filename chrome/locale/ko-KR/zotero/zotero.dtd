@@ -6,6 +6,7 @@
 <!ENTITY zotero.general.deselectAll "모두 선택 해제">
 <!ENTITY zotero.general.edit "편집">
 <!ENTITY zotero.general.delete "삭제">
+<!ENTITY zotero.general.moveToTrash "Move to Trash">
 <!ENTITY zotero.general.ok "확인">
 <!ENTITY zotero.general.cancel "취소">
 <!ENTITY zotero.general.refresh "새로고침">
@@ -333,3 +334,4 @@
 <!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
 <!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
+<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">

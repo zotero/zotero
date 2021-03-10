@@ -6,6 +6,7 @@
 <!ENTITY zotero.general.deselectAll "انتخاب هیچ‌کدام">
 <!ENTITY zotero.general.edit "ویرایش">
 <!ENTITY zotero.general.delete "حذف">
+<!ENTITY zotero.general.moveToTrash "Move to Trash">
 <!ENTITY zotero.general.ok "تایید">
 <!ENTITY zotero.general.cancel "انصراف">
 <!ENTITY zotero.general.refresh "Refresh">
@@ -333,3 +334,4 @@
 <!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
 <!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
+<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">

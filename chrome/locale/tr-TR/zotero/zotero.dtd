@@ -6,6 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Hiçbirini Seçme">
 <!ENTITY zotero.general.edit "Düzenle">
 <!ENTITY zotero.general.delete "Sil">
+<!ENTITY zotero.general.moveToTrash "Move to Trash">
 <!ENTITY zotero.general.ok "Tamam">
 <!ENTITY zotero.general.cancel "İptal Et">
 <!ENTITY zotero.general.refresh "Yenile">
@@ -333,3 +334,4 @@
 <!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
 <!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
+<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">

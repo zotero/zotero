@@ -6,6 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Відмінити вибір">
 <!ENTITY zotero.general.edit "Редагувати">
 <!ENTITY zotero.general.delete "Видалити">
+<!ENTITY zotero.general.moveToTrash "Move to Trash">
 <!ENTITY zotero.general.ok "Гаразд">
 <!ENTITY zotero.general.cancel "Відміна">
 <!ENTITY zotero.general.refresh "Оновити">
@@ -333,3 +334,4 @@
 <!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
 <!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
+<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">

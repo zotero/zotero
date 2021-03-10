@@ -34,22 +34,22 @@
 <!ENTITY zotero.preferences.groups.tags "etiketa">
 
 <!ENTITY zotero.preferences.feeds "Jarioak">
-<!ENTITY zotero.preferences.feeds.sorting.label "Sorting:">
+<!ENTITY zotero.preferences.feeds.sorting.label "Ordena:">
 <!ENTITY zotero.preferences.feeds.sorting.newest "Elementu berrienak lehenengo">
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Elementu zaharrenak lehenengo">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Jarioen lehenetsitakoak">
 
 <!ENTITY zotero.preferences.openurl.search "Search for resolvers">
-<!ENTITY zotero.preferences.openurl.custom "Custom…">
-<!ENTITY zotero.preferences.openurl.server "Resolver:">
-<!ENTITY zotero.preferences.openurl.version "Version:">
+<!ENTITY zotero.preferences.openurl.custom "Pertsonalizatua...">
+<!ENTITY zotero.preferences.openurl.server "Ebazlea:">
+<!ENTITY zotero.preferences.openurl.version "Bertsioa:">
 
 <!ENTITY zotero.preferences.prefpane.sync "Sinkronizatu">
 <!ENTITY zotero.preferences.sync.username "Erabiltzailea:">
 <!ENTITY zotero.preferences.sync.password "Pasahitza:">
 <!ENTITY zotero.preferences.sync.syncServer "Datuen sinkronizazioa">
 <!ENTITY zotero.preferences.sync.setUpSync "Ezarri sinkronizazioa">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Kontua desestekatu...">
 <!ENTITY zotero.preferences.sync.createAccount "Kontua sortu">
 <!ENTITY zotero.preferences.sync.lostPassword "Pasahitza ahaztu zaizu?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sinkronizatu automatikoki">
@@ -60,19 +60,19 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URLa:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sync attachment files in My Library using">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Sync attachment files in group libraries using Zotero storage">
-<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Fitxategiak deskargatu">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
-<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Zerbitzaria egiaztatu">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "By using Zotero storage, you agree to become bound by its">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "terms and conditions">
 <!ENTITY zotero.preferences.sync.librariesToSync "Sinkronizatu beharreko liburutegiak">
 <!ENTITY zotero.preferences.sync.librariesToSync.button "Hautatu liburutegiak...">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Sinkronizatu">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Liburutegia">
-<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
-<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
-<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
+<!ENTITY zotero.preferences.sync.reset.warning1 "Honako operaziak egoera ezohiko eta zehatzetan erabitzeko bakarrik dira eta ez lirateke arazoen konponketa orokorrerako erabili behar. Kasu askotan, berrezarpenak arazo gehiago sor ditzake. Ikus">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Sinkronizazioaren berrezarpenerako aukerak">
+<!ENTITY zotero.preferences.sync.reset.warning3 "informazio gehiagorako.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Lineako liburutegitik berreskuratu">

@@ -1,9 +1,9 @@
 <!ENTITY preferencesCmdMac.label "Hobespenak...">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "Zerbitzuak">
-<!ENTITY hideThisAppCmdMac.label "Hide &brandShortName;">
+<!ENTITY hideThisAppCmdMac.label "Ezkutatu &brandShortName;">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
-<!ENTITY hideOtherAppsCmdMac.label "Hide Others">
+<!ENTITY hideOtherAppsCmdMac.label "Ezkutatu besteak">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "Erakutsi guztiak">
 <!ENTITY quitApplicationCmdMac.label "Irten Zoterotik">
@@ -15,7 +15,7 @@
 <!ENTITY saveCmd.label "Gorde...">
 <!ENTITY saveCmd.key "S">
 <!ENTITY saveCmd.accesskey "A">
-<!ENTITY pageSetupCmd.label "Page Setup…">
+<!ENTITY pageSetupCmd.label "Orrialdearen konfigurazioa...">
 <!ENTITY pageSetupCmd.accesskey "U">
 <!ENTITY printCmd.label "Inprimatu...">
 <!ENTITY printCmd.key "P">
@@ -23,8 +23,8 @@
 <!ENTITY closeCmd.label "Itxi">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
+<!ENTITY manageAttachments.label "Eranskinak kudeatu">
+<!ENTITY convertToStored.label "Estekatutako fitxategiak biltegiratutako fitxategi bihurtu...">
 <!ENTITY importCmd.label "Inportatu...">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Inportatu arbeletik">
@@ -37,23 +37,23 @@
 <!ENTITY copyCitationCmd.label "Kopiatu aipua">
 <!ENTITY copyBibliographyCmd.label "Kopiatu bibliografia">
 
-<!ENTITY bidiSwitchPageDirectionItem.label "Switch Page Direction">
+<!ENTITY bidiSwitchPageDirectionItem.label "Orrialdearen norabidea aldatu">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
-<!ENTITY bidiSwitchTextDirectionItem.label "Switch Text Direction">
+<!ENTITY bidiSwitchTextDirectionItem.label "Testuaren norabidea aldatu">
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
+<!ENTITY viewMenu.label "Ikuspegia">
+<!ENTITY layout.label "Konposaketa">
+<!ENTITY standardView.label "Ikuspegi estandarra">
+<!ENTITY stackedView.label "Pilatutako ikuspegia">
 <!ENTITY collectionsPane.label "Bildumen panela">
 <!ENTITY itemPane.label "Elementu panela">
 <!ENTITY tagSelector.label "Etiketa hautatzailea">
 <!ENTITY recursiveCollections.label "Azpi-bildumatako elementuak erakutsi">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY fontSize.label "Letra-tamaina">
+<!ENTITY noteFontSize.label "Oharraren letra-tamaina">
 
 
 <!ENTITY toolsMenu.label "Tresnak">
@@ -61,12 +61,12 @@
 <!ENTITY installConnector.label "Nabigatzaileko konektorea instalatu">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Gehigarriak">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "Garatzailea">
 
 
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Minimizatu">
-<!ENTITY bringAllToFront.label "Bring All to Front">
+<!ENTITY bringAllToFront.label "Guztiak aurrekaldera ekarri">
 <!ENTITY zoomWindow.label "Zoom">
 <!ENTITY windowMenu.label "Leihoa">
 
@@ -78,24 +78,24 @@
 <!ENTITY helpMenuWin.label "Laguntza">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "About &brandShortName;">
+<!ENTITY aboutProduct.label "&brandShortName;(r)i buruz">
 <!ENTITY aboutProduct.accesskey "A">
-<!ENTITY productHelp.label "Support and Documentation">
+<!ENTITY productHelp.label "Laguntza eta dokumentazioa">
 <!ENTITY productHelp.accesskey "D">
-<!ENTITY helpTroubleshootingInfo.label "Troubleshooting Information">
+<!ENTITY helpTroubleshootingInfo.label "Arazoak konpontzeko informazioa">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "Eztabaida foroak">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
 <!ENTITY helpReportErrors.label "Erroreak salatu...">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "Arazketa-irteeraren erregistroa">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
+<!ENTITY debugOutputLogging.submit "Irteera bidali">
 <!ENTITY debugOutputLogging.view "Ikusi irteera">
 <!ENTITY debugOutputLogging.clear "Garbitu irteera">
 <!ENTITY debugOutputLogging.restartWithLoggingEnabled "Berrabiarazi erregistroak hartzea gaituta...">
 
-<!ENTITY helpCheckForUpdates.label "Check for Updates…">
+<!ENTITY helpCheckForUpdates.label "Eguneraketak bilatu...">
 <!ENTITY helpCheckForUpdates.accesskey "U">

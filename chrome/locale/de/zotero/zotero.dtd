@@ -6,6 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Auswahl aufheben">
 <!ENTITY zotero.general.edit "Bearbeiten">
 <!ENTITY zotero.general.delete "Löschen">
+<!ENTITY zotero.general.moveToTrash "Move to Trash">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Abbrechen">
 <!ENTITY zotero.general.refresh "Aktualisieren">
@@ -333,3 +334,4 @@
 <!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
 <!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
+<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">

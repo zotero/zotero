@@ -6,6 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Deselectează tot">
 <!ENTITY zotero.general.edit "Editare">
 <!ENTITY zotero.general.delete "Ștergere">
+<!ENTITY zotero.general.moveToTrash "Move to Trash">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Anulare">
 <!ENTITY zotero.general.refresh "Reîmprospătare">
@@ -333,3 +334,4 @@
 <!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
 <!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
+<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
