@@ -805,6 +805,44 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 	})
 	
 	
+	describe("#uploadFile()", function () {
+		it("should compress single-file HTML snapshots", async function () {
+			var { engine, client, caller } = await setup();
+			var zfs = new Zotero.Sync.Storage.Mode.ZFS({
+				apiClient: client
+			})
+			
+			var dir = await getTempDirectory();
+			var file = OS.Path.join(getTestDataDirectory().path, 'snapshot', 'index.html');
+			var file2 = OS.Path.join(dir, 'index.html');
+			await OS.File.copy(file, file2);
+			file = file2;
+			
+			var parentItem = await createDataObject('item');
+			var item = await Zotero.Attachments.importSnapshotFromFile({
+				file,
+				url: 'http://example.com/',
+				parentItemID: parentItem.id,
+				title: 'Test',
+				contentType: 'text/html',
+				charset: 'utf-8'
+			});
+			
+			var request = { name: item.libraryKey };
+			
+			var stub = sinon.stub(zfs, '_processUploadFile');
+			await zfs.uploadFile(request);
+			
+			var zipFile = OS.Path.join(Zotero.getTempDirectory().path, item.key + '.zip');
+			// _getUploadFile() should return the ZIP file
+			assert.equal((await zfs._getUploadFile(item)).path, zipFile);
+			assert.isTrue(await OS.File.exists(zipFile));
+			
+			stub.restore();
+		});
+	});
+	
+	
 	describe("#_processUploadFile()", function () {
 		it("should handle 404 from upload authorization request", function* () {
 			var { engine, client, caller } = yield setup();
