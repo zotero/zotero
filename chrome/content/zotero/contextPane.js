@@ -199,14 +199,6 @@ var ZoteroContextPane = new function () {
 		_togglePane(1);
 	}
 	
-	function _removeNote(id) {
-		var ps = Components.classes['@mozilla.org/embedcomp/prompt-service;1']
-		.getService(Components.interfaces.nsIPromptService);
-		if (ps.confirm(null, '', Zotero.getString('pane.item.notes.delete.confirm'))) {
-			Zotero.Items.trashTx(id);
-		}
-	}
-
 	function _getActiveEditor() {
 		var splitter;
 		if (Zotero.Prefs.get('layout') == 'stacked') {
@@ -548,14 +540,10 @@ var ZoteroContextPane = new function () {
 					ZoteroPane_Local.openNoteWindow(id);
 					break;
 
-				case 'context-pane-list-delete':
-					var ps = Components.classes['@mozilla.org/embedcomp/prompt-service;1']
-					.getService(Components.interfaces.nsIPromptService);
-					if (ps.confirm(null, '', Zotero.getString('pane.item.notes.delete.confirm'))) {
-						Zotero.Items.trashTx(id);
-						context.cachedNotes = context.cachedNotes.filter(x => x.id != id);
-						_updateNotesList(true);
-					}
+				case 'context-pane-list-move-to-trash':
+					Zotero.Items.trashTx(id);
+					context.cachedNotes = context.cachedNotes.filter(x => x.id != id);
+					_updateNotesList(true);
 					break;
 
 				default:
