@@ -1184,7 +1184,9 @@ Zotero_Import_Mendeley.prototype._saveAnnotations = async function (annotations,
 				// PDFWorker needs 'id'
 				annotations.forEach(annotation => annotation.id = annotation.uuid);
 				// Returns 'id', 'position', 'type', 'pageLabel', 'sortIndex', 'text' (for highlight)
+				Zotero.debug("Processing annotations in " + file);
 				annotations = await Zotero.PDFWorker.processMendeleyAnnotations(file, annotations);
+				Zotero.debug("Done processing annotations");
 				
 				for (let annotation of annotations) {
 					// Ignore empty highlights
