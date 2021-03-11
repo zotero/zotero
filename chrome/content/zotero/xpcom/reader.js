@@ -201,6 +201,74 @@ class ReaderInstance {
 		tagsbox.mode = 'edit';
 		tagsbox.item = item;
 	}
+	
+	_openPagePopup(data) {
+		let popup = this._window.document.createElement('menupopup');
+		this._popupset.appendChild(popup);
+		popup.addEventListener('popuphidden', function () {
+			popup.remove();
+		});
+		let menuitem;
+		if (data.text) {
+			menuitem = this._window.document.createElement('menuitem');
+			menuitem.setAttribute('label', 'Copy');
+			menuitem.addEventListener('command', () => {
+				Zotero.Utilities.Internal.copyTextToClipboard(data.text);
+			});
+			popup.appendChild(menuitem);
+			// Separator
+			popup.appendChild(this._window.document.createElement('menuseparator'));
+		}
+		// Zoom in
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', 'Zoom In');
+		menuitem.addEventListener('command', () => {
+			this._postMessage({ action: 'popupCmd', cmd: 'zoomIn' });
+		});
+		popup.appendChild(menuitem);
+		// Zoom out
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', 'Zoom Out');
+		menuitem.addEventListener('command', () => {
+			this._postMessage({ action: 'popupCmd', cmd: 'zoomOut' });
+		});
+		popup.appendChild(menuitem);
+		// Zoom 'Auto'
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', 'Automatic');
+		menuitem.setAttribute('checked', data.isZoomAuto);
+		menuitem.addEventListener('command', () => {
+			this._postMessage({ action: 'popupCmd', cmd: 'zoomAuto' });
+		});
+		popup.appendChild(menuitem);
+		// Zoom 'Page Width'
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', 'Full Width');
+		menuitem.setAttribute('checked', data.isZoomPageWidth);
+		menuitem.addEventListener('command', () => {
+			this._postMessage({ action: 'popupCmd', cmd: 'zoomPageWidth' });
+		});
+		popup.appendChild(menuitem);
+		// Separator
+		popup.appendChild(this._window.document.createElement('menuseparator'));
+		// Next page
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', 'Next Page');
+		menuitem.setAttribute('disabled', !data.enableNextPage);
+		menuitem.addEventListener('command', () => {
+			this._postMessage({ action: 'popupCmd', cmd: 'nextPage' });
+		});
+		popup.appendChild(menuitem);
+		// Previous page
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', 'Previous Page');
+		menuitem.setAttribute('disabled', !data.enablePrevPage);
+		menuitem.addEventListener('command', () => {
+			this._postMessage({ action: 'popupCmd', cmd: 'prevPage' });
+		});
+		popup.appendChild(menuitem);
+		popup.openPopupAtScreen(data.x, data.y, true);
+	}
 
 	_openAnnotationPopup(x, y, annotationID, colors, selectedColor) {
 		let popup = this._window.document.createElement('menupopup');
@@ -352,6 +420,10 @@ class ReaderInstance {
 					if (annotation) {
 						this._openTagsPopup(x, y, annotation);
 					}
+					return;
+				}
+				case 'openPagePopup': {
+					this._openPagePopup(message);
 					return;
 				}
 				case 'openAnnotationPopup': {
