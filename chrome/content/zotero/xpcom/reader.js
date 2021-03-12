@@ -235,7 +235,7 @@ class ReaderInstance {
 		popup.appendChild(menuitem);
 		// Zoom 'Auto'
 		menuitem = this._window.document.createElement('menuitem');
-		menuitem.setAttribute('label', 'Automatic');
+		menuitem.setAttribute('label', 'Automatically Resize');
 		menuitem.setAttribute('checked', data.isZoomAuto);
 		menuitem.addEventListener('command', () => {
 			this._postMessage({ action: 'popupCmd', cmd: 'zoomAuto' });
@@ -243,7 +243,7 @@ class ReaderInstance {
 		popup.appendChild(menuitem);
 		// Zoom 'Page Width'
 		menuitem = this._window.document.createElement('menuitem');
-		menuitem.setAttribute('label', 'Full Width');
+		menuitem.setAttribute('label', 'Zoom to Page Width');
 		menuitem.setAttribute('checked', data.isZoomPageWidth);
 		menuitem.addEventListener('command', () => {
 			this._postMessage({ action: 'popupCmd', cmd: 'zoomPageWidth' });
