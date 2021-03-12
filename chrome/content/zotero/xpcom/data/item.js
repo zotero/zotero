@@ -1440,12 +1440,22 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		// Make sure parent is a regular item
 		if (parentItemID) {
 			let parentItem = yield Zotero.Items.getAsync(parentItemID);
-			if (!parentItem.isRegularItem()
-					// Allow embedded-image attachments under notes
-					&& !(this.isEmbeddedImageAttachment() && parentItem.isNote())
-					// Allow annotations under attachments
-					&& !(this.isAnnotation() && parentItem.isFileAttachment())) {
-				throw new Error(`Parent item ${parentItem.libraryKey} must be a regular item`);
+			if (!parentItem.isRegularItem()) {
+				// Allow embedded-image attachments under notes
+				if (this.isEmbeddedImageAttachment()) {
+					if (!parentItem.isNote()) {
+						throw new Error(`Parent item ${parentItem.libraryKey} must a note`);
+					}
+				}
+				// Allow annotations under attachments
+				else if (this.isAnnotation()) {
+					if (!parentItem.isFileAttachment()) {
+						throw new Error(`Parent item ${parentItem.libraryKey} must be a file attachment`);
+					}
+				}
+				else {
+					throw new Error(`Parent item ${parentItem.libraryKey} must be a regular item`);
+				}
 			}
 		}
 		
@@ -4653,13 +4663,25 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 			}
 		}
 		
-		// Zotero.Sync.EventListeners.ChangeListener needs to know if this was a storage file
-		env.notifierData[this.id].storageDeleteLog = this.isStoredFileAttachment();
-		
 		if (this.isFileAttachment()) {
+			// Delete child annotations
+			let sql = "SELECT itemID FROM itemAnnotations WHERE parentItemID=?";
+			let toDelete = yield Zotero.DB.columnQueryAsync(sql, [this.id]);
+			for (let i = 0; i < toDelete.length; i++) {
+				let obj = yield this.ObjectsClass.getAsync(toDelete[i]);
+				yield obj.erase({
+					skipParentRefresh: true,
+					skipEditCheck: env.options.skipEditCheck
+				});
+			}
+			
+			// Delete last page index
 			let id = this._getLastPageIndexSettingKey();
 			yield Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, id);
 		}
+		
+		// Zotero.Sync.EventListeners.ChangeListener needs to know if this was a storage file
+		env.notifierData[this.id].storageDeleteLog = this.isStoredFileAttachment();
 	}
 	// Delete cached file for image annotation
 	else if (this.isAnnotation()) {

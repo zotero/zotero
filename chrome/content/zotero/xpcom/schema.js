@@ -41,7 +41,7 @@ Zotero.Schema = new function(){
 	
 	// If updating from this userdata version or later, don't show "Upgrading database…" and don't make
 	// DB backup first. This should be set to false when breaking compatibility or making major changes.
-	const minorUpdateFrom = false;
+	const minorUpdateFrom = 112;
 	
 	var _dbVersions = [];
 	var _schemaVersions = [];
@@ -3248,6 +3248,24 @@ Zotero.Schema = new function(){
 				
 				yield Zotero.DB.queryAsync("ALTER TABLE itemAttachments ADD COLUMN lastProcessedModificationTime INT");
 				yield Zotero.DB.queryAsync("CREATE INDEX itemAttachments_lastProcessedModificationTime ON itemAttachments(lastProcessedModificationTime)");
+			}
+			
+			else if (i == 113) {
+				yield Zotero.DB.queryAsync("ALTER TABLE itemAnnotations RENAME TO itemAnnotationsOld");
+				yield Zotero.DB.queryAsync("CREATE TABLE itemAnnotations (\n    itemID INTEGER PRIMARY KEY,\n    parentItemID INT NOT NULL,\n    type INTEGER NOT NULL,\n    text TEXT,\n    comment TEXT,\n    color TEXT,\n    pageLabel TEXT,\n    sortIndex TEXT NOT NULL,\n    position TEXT NOT NULL,\n    isExternal INT NOT NULL,\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,\n    FOREIGN KEY (parentItemID) REFERENCES itemAttachments(itemID)\n)");
+				yield Zotero.DB.queryAsync("INSERT INTO itemAnnotations SELECT * FROM itemAnnotationsOld");
+				yield Zotero.DB.queryAsync("DROP TABLE itemAnnotationsOld");
+				yield Zotero.DB.queryAsync("CREATE INDEX itemAnnotations_parentItemID ON itemAnnotations(parentItemID)");
+				
+				let annotationID = parseInt((yield Zotero.DB.valueQueryAsync(
+					"SELECT itemTypeID FROM itemTypes WHERE typeName='annotation'"
+				)) || -1);
+				let syncObjectTypeID = yield Zotero.DB.valueQueryAsync("SELECT syncObjectTypeID FROM syncObjectTypes WHERE name='item'");
+				let rows = yield Zotero.DB.queryAsync("SELECT libraryID, key FROM items WHERE itemTypeID=? AND itemID NOT IN (SELECT itemID FROM itemAnnotations)", annotationID);
+				for (let row of rows) {
+					yield Zotero.DB.queryAsync("REPLACE INTO syncDeleteLog (syncObjectTypeID, libraryID, key) VALUES (?, ?, ?)", [syncObjectTypeID, row.libraryID, row.key]);
+				}
+				yield Zotero.DB.queryAsync("DELETE FROM items WHERE itemTypeID=? AND itemID NOT IN (SELECT itemID FROM itemAnnotations)", annotationID);
 			}
 			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom

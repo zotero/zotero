@@ -1,4 +1,4 @@
--- 112
+-- 113
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -127,7 +127,7 @@ CREATE TABLE itemAnnotations (
     position TEXT NOT NULL,
     isExternal INT NOT NULL,
     FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,
-    FOREIGN KEY (parentItemID) REFERENCES itemAttachments(itemID) ON DELETE CASCADE
+    FOREIGN KEY (parentItemID) REFERENCES itemAttachments(itemID)
 );
 CREATE INDEX itemAnnotations_parentItemID ON itemAnnotations(parentItemID);
 
