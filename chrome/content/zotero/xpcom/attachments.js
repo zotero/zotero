@@ -2553,7 +2553,7 @@ Zotero.Attachments = new function(){
 	
 	
 	this.convertLinkedFileToStoredFile = async function (item, options = {}) {
-		if (item.attachmentLinkMode != Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+		if (!item.isLinkedFileAttachment()) {
 			throw new Error("Not a linked-file attachment");
 		}
 		
@@ -2572,6 +2572,9 @@ Zotero.Attachments = new function(){
 		newItem.fromJSON(json);
 		await newItem.saveTx();
 		
+		// Move child annotations and embedded-image attachments
+		await Zotero.Items.moveChildItems(item, newItem);
+		// Copy relations pointing to the old item
 		await Zotero.Relations.copyObjectSubjectRelations(item, newItem);
 		
 		var newFile;

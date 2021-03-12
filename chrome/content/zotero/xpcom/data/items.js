@@ -875,6 +875,29 @@ Zotero.Items = function() {
 	});
 	
 	
+	/**
+	 * Move child items from one item to another
+	 *
+	 * @param {Zotero.Item} fromItem
+	 * @param {Zotero.Item} toItem
+	 * @return {Promise}
+	 */
+	this.moveChildItems = async function (fromItem, toItem) {
+		// Annotations on files
+		if (fromItem.isFileAttachment()) {
+			await Zotero.DB.executeTransaction(async function () {
+				let annotations = fromItem.getAnnotations();
+				for (let annotation of annotations) {
+					annotation.parentItemID = toItem.id;
+					await annotation.save();
+				}
+			}.bind(this));
+		}
+		
+		// TODO: Other things as necessary
+	};
+	
+	
 	this.merge = function (item, otherItems) {
 		Zotero.debug("Merging items");
 		

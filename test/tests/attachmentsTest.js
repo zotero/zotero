@@ -1339,6 +1339,30 @@ describe("Zotero.Attachments", function() {
 		});
 		
 		
+		it("should move annotations to stored file", async function () {
+			var item = await createDataObject('item');
+			var relatedItem = await createDataObject('item');
+			
+			var originalFile = OS.Path.join(getTestDataDirectory().path, 'test.pdf');
+			var attachment = await Zotero.Attachments.linkFromFile({
+				file: originalFile,
+				title: 'Title',
+				parentItemID: item.id
+			});
+			var annotation1 = await createAnnotation('highlight', attachment);
+			var annotation2 = await createAnnotation('note', attachment);
+			
+			var newAttachment = await Zotero.Attachments.convertLinkedFileToStoredFile(attachment);
+			
+			assert.isFalse(Zotero.Items.exists(attachment.id));
+			assert.isTrue(Zotero.Items.exists(annotation1.id));
+			assert.isTrue(Zotero.Items.exists(annotation2.id));
+			
+			var annotations = newAttachment.getAnnotations();
+			assert.lengthOf(annotations, 2);
+		});
+		
+		
 		it("should move a linked file to a stored file with `move: true`", async function () {
 			var item = await createDataObject('item');
 			
