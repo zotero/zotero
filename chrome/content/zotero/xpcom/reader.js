@@ -327,7 +327,7 @@ class ReaderInstance {
 		popup.openPopupAtScreen(x, y, true);
 	}
 
-	_openColorPopup(x, y, colors, selectedColor) {
+	_openColorPopup(elementID, colors, selectedColor) {
 		let popup = this._window.document.createElement('menupopup');
 		this._popupset.appendChild(popup);
 		popup.addEventListener('popuphidden', function () {
@@ -349,7 +349,8 @@ class ReaderInstance {
 			});
 			popup.appendChild(menuitem);
 		}
-		popup.openPopupAtScreen(x, y, true);
+		let element = this._iframeWindow.document.getElementById(elementID);
+		popup.openPopup(element, 'after_start', 0, 0, true);
 	}
 
 	async _postMessage(message, transfer) {
@@ -432,8 +433,8 @@ class ReaderInstance {
 					return;
 				}
 				case 'openColorPopup': {
-					let { x, y, colors, selectedColor } = message;
-					this._openColorPopup(x, y, colors, selectedColor);
+					let { elementID, colors, selectedColor } = message;
+					this._openColorPopup(elementID, colors, selectedColor);
 					return;
 				}
 				case 'openURL': {
