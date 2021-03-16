@@ -510,7 +510,7 @@ function ZoteroProtocolHandler() {
 					default:
 						this.contentType = 'text/html';
 						return Zotero.Utilities.Internal.getAsyncInputStream(
-							Zotero.Report.HTML.listGenerator(items, combineChildItems),
+							Zotero.Report.HTML.listGenerator(items, combineChildItems, params.libraryID),
 							function () {
 								Zotero.logError(e);
 								return '<span style="color: red; font-weight: bold">Error generating report</span>';
