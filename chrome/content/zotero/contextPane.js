@@ -173,9 +173,11 @@ var ZoteroContextPane = new function () {
 						})();
 
 						var attachment = Zotero.Items.get(reader.itemID);
-						_selectNotesContext(attachment.libraryID);
-						var notesContext = _getNotesContext(attachment.libraryID);
-						notesContext.updateFromCache();
+						if (attachment) {
+							_selectNotesContext(attachment.libraryID);
+							var notesContext = _getNotesContext(attachment.libraryID);
+							notesContext.updateFromCache();
+						}
 					}
 				
 					_contextPaneSplitter.setAttribute('hidden', false);

@@ -133,10 +133,12 @@ class ReaderInstance {
 
 	async _setState(state) {
 		let item = Zotero.Items.get(this._itemID);
-		item.setAttachmentLastPageIndex(state.pageIndex);
-		let file = Zotero.Attachments.getStorageDirectory(item);
-		file.append(this.pdfStateFileName);
-		await Zotero.File.putContentsAsync(file, JSON.stringify(state));
+		if (item) {
+			item.setAttachmentLastPageIndex(state.pageIndex);
+			let file = Zotero.Attachments.getStorageDirectory(item);
+			file.append(this.pdfStateFileName);
+			await Zotero.File.putContentsAsync(file, JSON.stringify(state));
+		}
 	}
 
 	async _getState() {
@@ -410,7 +412,7 @@ class ReaderInstance {
 				}
 				case 'setState': {
 					let { state } = message;
-					this._setState(state);
+					await this._setState(state);
 					return;
 				}
 				case 'openTagsPopup': {
@@ -766,33 +768,37 @@ class Reader {
 				}
 			}
 		}
+		// Listen for parent item, PDF attachment and its annotations updates
 		else if (type === 'item') {
-			// Listen for the parent item, PDF attachment and its annotations updates
-			for (let reader of this._readers) {
-				if (event === 'delete') {
-					let disappearedIDs = reader.annotationItemIDs.filter(x => ids.includes(x));
-					if (disappearedIDs.length) {
-						let keys = disappearedIDs.map(id => extraData[id].key);
-						reader.unsetAnnotations(keys);
-					}
-					if (ids.includes(reader._itemID)) {
-						reader.close();
-					}
+			for (let reader of this._readers.slice()) {
+				if (event === 'delete' && ids.includes(reader._itemID)) {
+					reader.close();
 				}
-				else {
-					let item = Zotero.Items.get(reader._itemID);
-					let annotationItems = item.getAnnotations();
-					reader.annotationItemIDs = annotationItems.map(x => x.id);
-					let affectedAnnotations = annotationItems.filter(({ id }) => (
-						ids.includes(id)
-						&& !(extraData && extraData[id] && extraData[id].instanceID === reader._instanceID)
-					));
-					if (affectedAnnotations.length) {
-						reader.setAnnotations(affectedAnnotations);
+
+				// Ignore other notifications if the attachment no longer exists
+				let item = Zotero.Items.get(reader._itemID);
+				if (item) {
+					if (event === 'delete') {
+						let disappearedIDs = reader.annotationItemIDs.filter(x => ids.includes(x));
+						if (disappearedIDs.length) {
+							let keys = disappearedIDs.map(id => extraData[id].key);
+							reader.unsetAnnotations(keys);
+						}
 					}
-					// Update title if the PDF attachment or the parent item changes
-					if (ids.includes(reader._itemID) || ids.includes(item.parentItemID)) {
-						reader.updateTitle();
+					else {
+						let annotationItems = item.getAnnotations();
+						reader.annotationItemIDs = annotationItems.map(x => x.id);
+						let affectedAnnotations = annotationItems.filter(({ id }) => (
+							ids.includes(id)
+							&& !(extraData && extraData[id] && extraData[id].instanceID === reader._instanceID)
+						));
+						if (affectedAnnotations.length) {
+							reader.setAnnotations(affectedAnnotations);
+						}
+						// Update title if the PDF attachment or the parent item changes
+						if (ids.includes(reader._itemID) || ids.includes(item.parentItemID)) {
+							reader.updateTitle();
+						}
 					}
 				}
 			}
