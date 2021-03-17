@@ -1892,7 +1892,7 @@ Zotero.ItemTreeView.prototype.selectItems = async function (ids, noRecurse) {
 	var rowsToSelect = [];
 	for (let id of idsToSelect) {
 		let row = this._rowMap[id];
-		if (!row) {
+		if (row === undefined) {
 			Zotero.debug(`Item ${id} not in row map -- skipping`);
 			continue;
 		}
