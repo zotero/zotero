@@ -153,7 +153,9 @@ var Zotero_Tabs = new function () {
 		if (!tab) {
 			return;
 		}
-		this.select((this._tabs[tabIndex + 1] || this._tabs[tabIndex - 1]).id);
+		if (tab.id == this._selectedID) {
+			this.select((this._tabs[tabIndex + 1] || this._tabs[tabIndex - 1]).id);
+		}
 		this._tabs.splice(tabIndex, 1);
 		document.getElementById(tab.id).remove();
 		if (tab.onClose) {
