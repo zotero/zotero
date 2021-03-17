@@ -1892,7 +1892,15 @@ Zotero.ItemTreeView.prototype.selectItems = async function (ids, noRecurse) {
 	var rowsToSelect = [];
 	for (let id of idsToSelect) {
 		let row = this._rowMap[id];
+		if (!row) {
+			Zotero.debug(`Item ${id} not in row map -- skipping`);
+			continue;
+		}
 		rowsToSelect.push(row);
+	}
+	
+	if (!rowsToSelect.length) {
+		return 0;
 	}
 	
 	// If items are already selected, just scroll to the top-most one
