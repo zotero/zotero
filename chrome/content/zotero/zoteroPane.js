@@ -370,6 +370,8 @@ var ZoteroPane = new function()
 		if(this.itemsView) this.itemsView.unregister();
 		
 		observerService.removeObserver(_reloadObserver, "zotero-reloaded");
+		
+		Zotero_Tabs.closeAll();
 	}
 	
 	/**

@@ -170,6 +170,13 @@ var Zotero_Tabs = new function () {
 	};
 
 	/**
+	 * Close all tabs except the first one
+	 */
+	this.closeAll = function () {
+		this._tabs.slice(1).map(tab => this.close(tab.id));
+	};
+
+	/**
 	 * Move a tab to the specified index
 	 *
 	 * @param {String} id

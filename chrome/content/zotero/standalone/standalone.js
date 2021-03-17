@@ -50,7 +50,7 @@ const ZoteroStandalone = new function() {
 		}
 		
 		this.switchMenuType('library');
-		Zotero.Notifier.registerObserver(
+		this._notifierID = Zotero.Notifier.registerObserver(
 			{
 				notify: async (action, type, ids, extraData) => {
 					if (action == 'select') {
@@ -586,6 +586,7 @@ const ZoteroStandalone = new function() {
 	 * Called before standalone window is closed
 	 */
 	this.onUnload = function() {
+		Zotero.Notifier.unregisterObserver(this._notifierID);
 		ZoteroPane.destroy();
 	}
 }
