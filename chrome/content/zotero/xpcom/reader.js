@@ -479,9 +479,10 @@ class ReaderInstance {
 			}
 		}
 		catch (e) {
+			let crash = ['setAnnotation'].includes(message.action);
 			this._postMessage({
-				action: 'error',
-				message: `An error occured during '${message ? message.action : ''}'`,
+				action: crash ? 'crash' : 'error',
+				message: `An error occurred during '${message ? message.action : ''}'`,
 				moreInfo: {
 					message: e.message,
 					stack: e.stack,
