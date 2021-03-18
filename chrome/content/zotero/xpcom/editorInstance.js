@@ -46,6 +46,7 @@ class EditorInstance {
 	async init(options) {
 		Zotero.Notes.registerEditorInstance(this);
 		this.onNavigate = options.onNavigate;
+		// TODO: Consider to use only itemID instead of loaded item
 		this._item = options.item;
 		this._viewMode = options.viewMode;
 		this._readOnly = options.readOnly;
@@ -323,189 +324,197 @@ class EditorInstance {
 			return;
 		}
 		let message = e.data.message;
-		switch (message.action) {
-			case 'insertObject': {
-				let { type, data, pos } = message;
-				if (this._readOnly) {
+		try {
+			switch (message.action) {
+				case 'insertObject': {
+					let { type, data, pos } = message;
+					if (this._readOnly) {
+						return;
+					}
+					let html = '';
+					await this._ensureNoteCreated();
+					if (type === 'zotero/item') {
+						let ids = data.split(',').map(id => parseInt(id));
+						html = await this._digestItems(ids);
+					}
+					else if (type === 'zotero/annotation') {
+						let annotations = JSON.parse(data);
+						html = await this._serializeAnnotations(annotations);
+					}
+					if (html) {
+						this._postMessage({ action: 'insertHTML', pos, html });
+					}
 					return;
 				}
-				let html = '';
-				await this._ensureNoteCreated();
-				if (type === 'zotero/item') {
-					let ids = data.split(',').map(id => parseInt(id));
-					html = await this._digestItems(ids);
+				case 'openAnnotation': {
+					let { uri, position } = message;
+					if (this.onNavigate) {
+						this.onNavigate(uri, { position });
+					}
+					else {
+						await Zotero.Reader.openURI(uri, { position });
+					}
+					return;
 				}
-				else if (type === 'zotero/annotation') {
-					let annotations = JSON.parse(data);
-					html = await this._serializeAnnotations(annotations);
+				case 'openCitationPage': {
+					let { citation } = message;
+					if (!citation.citationItems.length) {
+						return;
+					}
+					let citationItem = citation.citationItems[0];
+					let item = await this._getItemFromURIs(citationItem.uris);
+					if (!item) {
+						return;
+					}
+					let attachments = Zotero.Items.get(item.getAttachments()).filter(x => x.isPDFAttachment());
+					if (citationItem.locator && attachments.length === 1) {
+						await Zotero.Reader.open(attachments[0].id, { pageLabel: citationItem.locator });
+					}
+					else {
+						this._showInLibrary(item.id);
+					}
+					return;
 				}
-				if (html) {
+				case 'showCitationItem': {
+					let { citation } = message;
+					let items = [];
+					for (let citationItem of citation.citationItems) {
+						let item = await this._getItemFromURIs(citationItem.uris);
+						if (item) {
+							items.push(item);
+						}
+					}
+
+					if (items.length) {
+						this._showInLibrary(items.map(item => item.id));
+					}
+					return;
+				}
+				case 'openURL': {
+					let { url } = message;
+					let zp = Zotero.getActiveZoteroPane();
+					if (zp) {
+						zp.loadURI(url);
+					}
+					return;
+				}
+				case 'showNote': {
+					this._showInLibrary(this._item.id);
+					return;
+				}
+				case 'openWindow': {
+					// TODO: Can we can avoid creating empty note just to open it in a new window?
+					await this._ensureNoteCreated();
+					let zp = Zotero.getActiveZoteroPane();
+					zp.openNoteWindow(this._item.id);
+					return;
+				}
+				case 'openBackup': {
+					let zp = Zotero.getActiveZoteroPane();
+					if (zp) {
+						zp.openBackupNoteWindow(this._item.id);
+					}
+					return;
+				}
+				case 'update': {
+					let { noteData } = message;
+					if (this._readOnly) {
+						return;
+					}
+					await this._save(noteData);
+					return;
+				}
+				case 'generateCitation': {
+					if (this._readOnly) {
+						return;
+					}
+					let { citation, pos } = message;
+					let formatted = (await this._getFormattedCitationParts(citation)).join(';');
+					let html = `<span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">(${formatted})</span>`;
 					this._postMessage({ action: 'insertHTML', pos, html });
-				}
-				return;
-			}
-			case 'openAnnotation': {
-				let { uri, position } = message;
-				if (this.onNavigate) {
-					this.onNavigate(uri, { position });
-				}
-				else {
-					await Zotero.Reader.openURI(uri, { position });
-				}
-				return;
-			}
-			case 'openCitationPage': {
-				let { citation } = message;
-				if (!citation.citationItems.length) {
 					return;
 				}
-				let citationItem = citation.citationItems[0];
-				let item = await this._getItemFromURIs(citationItem.uris);
-				if (!item) {
+				case 'subscribeProvider': {
+					let { subscription } = message;
+					this._subscriptions.push(subscription);
+					await this._feedSubscription(subscription);
 					return;
 				}
-				let attachments = Zotero.Items.get(item.getAttachments()).filter(x => x.isPDFAttachment());
-				if (citationItem.locator && attachments.length === 1) {
-					await Zotero.Reader.open(attachments[0].id, { pageLabel: citationItem.locator });
+				case 'unsubscribeProvider': {
+					let { id } = message;
+					this._subscriptions.splice(this._subscriptions.findIndex(s => s.id === id), 1);
+					return;
 				}
-				else {
-					this._showInLibrary(item.id);
-				}
-				return;
-			}
-			case 'showCitationItem': {
-				let { citation } = message;
-				let items = [];
-				for (let citationItem of citation.citationItems) {
-					let item = await this._getItemFromURIs(citationItem.uris);
-					if (item) {
-						items.push(item);
+				case 'openCitationPopup': {
+					let { nodeID, citation } = message;
+					if (this._readOnly) {
+						return;
 					}
-				}
-				
-				if (items.length) {
-					this._showInLibrary(items.map(item => item.id));
-				}
-				return;
-			}
-			case 'openURL': {
-				let { url } = message;
-				let zp = Zotero.getActiveZoteroPane();
-				if (zp) {
-					zp.loadURI(url);
-				}
-				return;
-			}
-			case 'showNote': {
-				this._showInLibrary(this._item.id);
-				return;
-			}
-			case 'openWindow': {
-				// TODO: Can we can avoid creating empty note just to open it in a new window?
-				await this._ensureNoteCreated();
-				let zp = Zotero.getActiveZoteroPane();
-				zp.openNoteWindow(this._item.id);
-				return;
-			}
-			case 'openBackup': {
-				let zp = Zotero.getActiveZoteroPane();
-				if (zp) {
-					zp.openBackupNoteWindow(this._item.id);
-				}
-				return;
-			}
-			case 'update': {
-				let { noteData } = message;
-				if (this._readOnly) {
-					return;
-				}
-				this._save(noteData);
-				return;
-			}
-			case 'generateCitation': {
-				if (this._readOnly) {
-					return;
-				}
-				let { citation, pos } = message;
-				let formatted = (await this._getFormattedCitationParts(citation)).join(';');
-				let html = `<span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">(${formatted})</span>`;
-				this._postMessage({ action: 'insertHTML', pos, html });
-				return;
-			}
-			case 'subscribeProvider': {
-				let { subscription } = message;
-				this._subscriptions.push(subscription);
-				await this._feedSubscription(subscription);
-				return;
-			}
-			case 'unsubscribeProvider': {
-				let { id } = message;
-				this._subscriptions.splice(this._subscriptions.findIndex(s => s.id === id), 1);
-				return;
-			}
-			case 'openCitationPopup': {
-				let { nodeID, citation } = message;
-				if (this._readOnly) {
-					return;
-				}
-				citation = JSON.parse(JSON.stringify(citation));
-				let availableCitationItems = [];
-				for (let citationItem of citation.citationItems) {
-					let item = await this._getItemFromURIs(citationItem.uris);
-					if (item) {
-						availableCitationItems.push({ ...citationItem, id: item.id });
+					citation = JSON.parse(JSON.stringify(citation));
+					let availableCitationItems = [];
+					for (let citationItem of citation.citationItems) {
+						let item = await this._getItemFromURIs(citationItem.uris);
+						if (item) {
+							availableCitationItems.push({ ...citationItem, id: item.id });
+						}
 					}
-				}
-				citation.citationItems = availableCitationItems;
-				let libraryID = this._item.libraryID;
-				this._openQuickFormatDialog(nodeID, citation, [libraryID]);
-				return;
-			}
-			case 'importImages': {
-				let { images } = message;
-				if (this._readOnly) {
+					citation.citationItems = availableCitationItems;
+					let libraryID = this._item.libraryID;
+					this._openQuickFormatDialog(nodeID, citation, [libraryID]);
 					return;
 				}
-				if (this._isAttachment) {
-					return;
-				}
-				for (let image of images) {
-					let { nodeID, src } = image;
-					let attachmentKey = await this._importImage(src, true);
-					// TODO: Inform editor about the failed to import images
-					if (attachmentKey) {
-						this._postMessage({ action: 'attachImportedImage', nodeID, attachmentKey });
+				case 'importImages': {
+					let { images } = message;
+					if (this._readOnly) {
+						return;
 					}
-				}
-				return;
-			}
-			case 'syncAttachmentKeys': {
-				if (this._readOnly) {
+					if (this._isAttachment) {
+						return;
+					}
+					for (let image of images) {
+						let { nodeID, src } = image;
+						let attachmentKey = await this._importImage(src, true);
+						// TODO: Inform editor about the failed to import images
+						if (attachmentKey) {
+							this._postMessage({ action: 'attachImportedImage', nodeID, attachmentKey });
+						}
+					}
 					return;
 				}
-				let { attachmentKeys } = message;
-				if (this._isAttachment) {
+				case 'syncAttachmentKeys': {
+					if (this._readOnly) {
+						return;
+					}
+					let { attachmentKeys } = message;
+					if (this._isAttachment) {
+						return;
+					}
+					let attachmentItems = this._item.getAttachments().map(id => Zotero.Items.get(id));
+					let abandonedItems = attachmentItems.filter(item => !attachmentKeys.includes(item.key));
+					for (let item of abandonedItems) {
+						// Store image data for undo. Although it stays as long
+						// as the note is opened. TODO: Find a better way
+						this._deletedImages[item.key] = await this._getDataURL(item);
+						await item.eraseTx();
+					}
 					return;
 				}
-				let attachmentItems = this._item.getAttachments().map(id => Zotero.Items.get(id));
-				let abandonedItems = attachmentItems.filter(item => !attachmentKeys.includes(item.key));
-				for (let item of abandonedItems) {
-					// Store image data for undo. Although it stays as long
-					// as the note is opened. TODO: Find a better way
-					this._deletedImages[item.key] = await this._getDataURL(item);
-					await item.eraseTx();
+				case 'openContextMenu': {
+					let { x, y, pos, itemGroups } = message;
+					this._openPopup(x, y, pos, itemGroups);
+					return;
 				}
-				return;
+				case 'return': {
+					this._onReturn();
+					return;
+				}
 			}
-			case 'openContextMenu': {
-				let { x, y, pos, itemGroups } = message;
-				this._openPopup(x, y, pos, itemGroups);
-				return;
+		}
+		catch (e) {
+			if (message && ['update', 'importImages'].includes(message.action)) {
+				this._postMessage({ action: 'crash' });
 			}
-			case 'return': {
-				this._onReturn();
-				return;
-			}
+			throw e;
 		}
 	}
 
@@ -678,7 +687,7 @@ class EditorInstance {
 		catch (e) {
 			Zotero.logError(e);
 			Zotero.crash(true);
-			// TODO: Prevent further writing in the note
+			throw e;
 		}
 	}
 
