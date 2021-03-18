@@ -120,6 +120,11 @@ function onUnload() {
 var NotifyCallback = {
 	notify: function(action, type, ids){
 		if (noteEditor.item && ids.includes(noteEditor.item.id)) {
+			if (action == 'delete') {
+				window.close();
+				return;
+			}
+		
 			var noteTitle = noteEditor.item.getNoteTitle();
 			document.title = noteTitle;
 			
