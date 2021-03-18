@@ -558,7 +558,7 @@ class ReaderTab extends ReaderInstance {
 		this.tabID = id;
 		this._tabContainer = container;
 		
-		this._iframe = this._window.document.createElement('iframe');
+		this._iframe = this._window.document.createElement('browser');
 		this._iframe.setAttribute('flex', '1');
 		this._iframe.setAttribute('type', 'content');
 		this._iframe.setAttribute('src', 'resource://zotero/pdf-reader/viewer.html');
