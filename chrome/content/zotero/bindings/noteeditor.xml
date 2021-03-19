@@ -129,19 +129,26 @@
 						// Try to use the state from the item save event
 						let id = this.item.id;
 						if (ids.includes(id)) {
-							let state = extraData && extraData[id] && extraData[id].state;
-							if (state) {
-								if (extraData[id].noteEditorID !== this._editorInstance.instanceID) {
-									this.initEditor(state);
+							if (event == 'delete') {
+								if (this._returnHandler) {
+									this._returnHandler();
 								}
 							}
 							else {
-								let curValue = this.item.note;
-								if (curValue !== this._lastHtmlValue) {
-									this.initEditor();
+								let state = extraData && extraData[id] && extraData[id].state;
+								if (state) {
+									if (extraData[id].noteEditorID !== this._editorInstance.instanceID) {
+										this.initEditor(state);
+									}
 								}
+								else {
+									let curValue = this.item.note;
+									if (curValue !== this._lastHtmlValue) {
+										this.initEditor();
+									}
+								}
+								this._lastHtmlValue = this.item.note;
 							}
-							this._lastHtmlValue = this.item.note;
 						}
 
 						this._id('links-container').hidden = !(this.displayTags && this.displayRelated) || this._hideLinksContainer;
