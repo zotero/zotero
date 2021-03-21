@@ -31,6 +31,11 @@ Zotero.Annotations = new function () {
 	Zotero.defineProperty(this, 'ANNOTATION_TYPE_NOTE', { value: 2 });
 	Zotero.defineProperty(this, 'ANNOTATION_TYPE_IMAGE', { value: 3 });
 	
+	Zotero.defineProperty(this, 'PROPS', {
+		value: ['type', 'text', 'comment', 'color', 'sortIndex', 'position'],
+		writable: false
+	});
+	
 	
 	this.getCacheImagePath = function ({ libraryID, key }) {
 		var file = this._getLibraryCacheDirectory(libraryID);

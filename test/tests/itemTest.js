@@ -1729,6 +1729,19 @@ describe("Zotero.Item", function () {
 			var newItem = item.clone();
 			assert.isEmpty(Object.keys(newItem.toJSON().relations));
 		});
+		
+		it("should clone an annotation item", async function () {
+			var attachment = await importFileAttachment('test.pdf');
+			var annotation = await createAnnotation('highlight', attachment);
+			var newAnnotation = annotation.clone();
+			
+			var fields = Object.keys(annotation.toJSON())
+				.filter(field => field.startsWith('annotation'));
+			assert.isAbove(fields.length, 0);
+			for (let field of fields) {
+				assert.equal(annotation[field], newAnnotation[field]);
+			}
+		});
 	})
 	
 	describe("#moveToLibrary()", function () {

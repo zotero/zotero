@@ -4481,7 +4481,7 @@ Zotero.Item.prototype.clone = function (libraryID, options = {}) {
 	if (this.isRegularItem()) {
 		newItem.setCreators(this.getCreators());
 	}
-	else {
+	else if (this.isNote() || this.isAttachment()) {
 		newItem.setNote(this.getNote());
 		if (sameLibrary) {
 			var parent = this.parentKey;
@@ -4499,6 +4499,13 @@ Zotero.Item.prototype.clone = function (libraryID, options = {}) {
 					newItem.attachmentPath = this.attachmentPath;
 				}
 			}
+		}
+	}
+	else if (this.isAnnotation()) {
+		let props = Zotero.Annotations.PROPS;
+		for (let prop of props) {
+			let fullProp = 'annotation' + Zotero.Utilities.capitalize(prop);
+			newItem[fullProp] = this[fullProp];
 		}
 	}
 	
