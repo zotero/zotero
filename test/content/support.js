@@ -981,6 +981,17 @@ async function createEmbeddedImage(parentItem, options = {}) {
 }
 
 
+async function getImageBlob() {
+	var path = OS.Path.join(getTestDataDirectory().path, 'test.png');
+	var imageData = await Zotero.File.getBinaryContentsAsync(path);
+	var array = new Uint8Array(imageData.length);
+	for (let i = 0; i < imageData.length; i++) {
+		array[i] = imageData.charCodeAt(i);
+	}
+	return new Blob([array], { type: 'image/png' });
+}
+
+
 /**
  * Sets the fake XHR server to response to a given response
  *

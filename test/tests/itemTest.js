@@ -1349,13 +1349,7 @@ describe("Zotero.Item", function () {
 				var annotation = await createAnnotation('image', attachment);
 				
 				// Get Blob from file and attach it
-				var path = OS.Path.join(getTestDataDirectory().path, 'test.png');
-				var imageData = await Zotero.File.getBinaryContentsAsync(path);
-				var array = new Uint8Array(imageData.length);
-				for (let i = 0; i < imageData.length; i++) {
-					array[i] = imageData.charCodeAt(i);
-				}
-				var blob = new Blob([array], { type: 'image/png' });
+				var blob = await getImageBlob();
 				var file = await Zotero.Annotations.saveCacheImage(annotation, blob);
 				
 				assert.isTrue(await OS.File.exists(file));
