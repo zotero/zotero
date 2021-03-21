@@ -943,7 +943,10 @@ async function createAnnotation(type, parentItem, options = {}) {
 		annotation.annotationText = Zotero.Utilities.randomString();
 	}
 	annotation.annotationComment = Zotero.Utilities.randomString();
-	var page = Zotero.Utilities.rand(1, 100).toString().padStart(5, '0');
+	annotation.annotationColor = '#ffd400';
+	var page = Zotero.Utilities.rand(1, 100);
+	annotation.annotationPageLabel = `${page}`;
+	page = page.toString().padStart(5, '0');
 	var pos = Zotero.Utilities.rand(1, 10000).toString().padStart(6, '0');
 	annotation.annotationSortIndex = `${page}|${pos}|00000`;
 	annotation.annotationPosition = JSON.stringify({

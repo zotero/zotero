@@ -3624,6 +3624,158 @@ describe("Zotero.Sync.Data.Engine", function () {
 			assert.lengthOf(keys, 0);
 		});
 		
+		
+		it("should show conflict resolution window on annotation conflicts", async function () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			({ engine, client, caller } = await setup());
+			var values = [];
+			var dateAdded = Date.now() - 86400000;
+			var responseJSON = [];
+			
+			var attachment = await importFileAttachment('test.pdf');
+			var annotation1 = await createAnnotation('highlight', attachment);
+			var annotation2 = await createAnnotation('note', attachment);
+			var annotation3 = await createAnnotation('image', attachment);
+			var objects = [annotation1, annotation2, annotation3];
+			
+			for (let i = 0; i < objects.length; i++) {
+				values.push({
+					left: {},
+					right: {}
+				});
+				
+				let item = objects[i];
+				item.version = 10;
+				item.dateAdded = Zotero.Date.dateToSQL(new Date(dateAdded), true);
+				// Set Date Modified values one minute apart to enforce order
+				item.dateModified = Zotero.Date.dateToSQL(
+					new Date(dateAdded + (i * 60000)), true
+				);
+				await item.saveTx();
+				
+				let jsonData = item.toJSON();
+				jsonData.key = item.key;
+				jsonData.version = 10;
+				let json = {
+					key: item.key,
+					version: jsonData.version,
+					data: jsonData
+				};
+				// Save original version in cache
+				await Zotero.Sync.Data.Local.saveCacheObjects('item', libraryID, [json]);
+				
+				// Make conflicting local and remote changes
+				if (i == 0) {
+					values[i].left.annotationText
+						= item.annotationText = Zotero.Utilities.randomString();
+					values[i].right.annotationText
+						= jsonData.annotationText = Zotero.Utilities.randomString();
+				}
+				else if (i == 1) {
+					values[i].left.annotationComment
+						= item.annotationComment = Zotero.Utilities.randomString();
+					values[i].right.annotationComment
+						= jsonData.annotationComment = Zotero.Utilities.randomString();
+				}
+				else if (i == 2) {
+					values[i].left.annotationColor
+						= item.annotationColor = '#000000';
+					values[i].right.annotationColor = jsonData.annotationColor = '#ffffff';
+				}
+				await item.saveTx({
+					skipDateModifiedUpdate: true
+				});
+				
+				values[i].left.version = item.version;
+				values[i].right.version = json.version = jsonData.version = 15;
+				responseJSON.push(json);
+			}
+			
+			setResponse({
+				method: "GET",
+				url: `users/1/items?itemKey=${objects.map(x => x.key).join('%2C')}`
+					+ `&includeTrashed=1`,
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 15
+				},
+				json: responseJSON
+			});
+			
+			var crPromise = waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+				var doc = dialog.document;
+				var wizard = doc.documentElement;
+				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				
+				// TODO: Make this function async and verify that annotation widgets show up here
+				// after rendering. This may not be possible as long as this is within XBL.
+				
+				// 1 (remote)
+				// Remote version should be selected by default
+				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
+				wizard.getButton('next').click();
+				
+				// 2 (local)
+				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
+				// Select local object
+				mergeGroup.leftpane.click();
+				assert.equal(mergeGroup.leftpane.getAttribute('selected'), 'true');
+				wizard.getButton('next').click();
+				
+				// 2 (remote)
+				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
+				
+				if (Zotero.isMac) {
+					assert.isTrue(wizard.getButton('next').hidden);
+					assert.isFalse(wizard.getButton('finish').hidden);
+				}
+				else {
+					// TODO
+				}
+				wizard.getButton('finish').click();
+			});
+			await engine._downloadObjects('item', objects.map(o => o.key));
+			await crPromise;
+			
+			assert.equal(objects[0].annotationText, values[0].right.annotationText);
+			assert.equal(objects[1].annotationComment, values[1].left.annotationComment);
+			assert.equal(objects[2].annotationColor, values[2].right.annotationColor);
+			
+			assert.equal(objects[0].version, values[0].right.version);
+			assert.equal(objects[1].version, values[1].right.version);
+			assert.equal(objects[2].version, values[2].right.version);
+			assert.isTrue(objects[0].synced);
+			assert.isFalse(objects[1].synced);
+			assert.isTrue(objects[2].synced);
+			
+			// Cache versions should match remote
+			for (let i = 0; i < objects.length; i++) {
+				let cacheJSON = await Zotero.Sync.Data.Local.getCacheObject(
+					'item', libraryID, objects[i].key, values[i].right.version
+				);
+				assert.propertyVal(cacheJSON, 'version', values[i].right.version);
+				if (i == 0) {
+					assert.nestedPropertyVal(
+						cacheJSON, 'data.annotationText', values[i].right.annotationText
+					);
+				}
+				else if (i == 1) {
+					assert.nestedPropertyVal(
+						cacheJSON, 'data.annotationComment', values[i].right.annotationComment
+					);
+				}
+				else if (i == 2) {
+					assert.nestedPropertyVal(
+						cacheJSON, 'data.annotationColor', values[i].right.annotationColor
+					);
+				}
+			}
+			
+			var keys = await Zotero.Sync.Data.Local.getObjectsFromSyncQueue('item', libraryID);
+			assert.lengthOf(keys, 0);
+		});
+		
+		
 		it("should resolve all remaining conflicts with local version", async function () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			({ engine, client, caller } = await setup());
