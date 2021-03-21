@@ -32,7 +32,7 @@ Zotero.Annotations = new function () {
 	Zotero.defineProperty(this, 'ANNOTATION_TYPE_IMAGE', { value: 3 });
 	
 	Zotero.defineProperty(this, 'PROPS', {
-		value: ['type', 'text', 'comment', 'color', 'sortIndex', 'position'],
+		value: ['type', 'text', 'comment', 'color', 'pageLabel', 'sortIndex', 'position'],
 		writable: false
 	});
 	
