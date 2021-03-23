@@ -1733,7 +1733,7 @@ describe("Zotero.Item", function () {
 				.filter(field => field.startsWith('annotation'));
 			assert.isAbove(fields.length, 0);
 			for (let field of fields) {
-				assert.equal(annotation[field], newAnnotation[field]);
+				assert.equal(annotation[field], newAnnotation[field], field);
 			}
 		});
 	})
