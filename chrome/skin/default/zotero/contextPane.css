@@ -47,9 +47,12 @@
     position: fixed;
     z-index: 1;
     right: 0;
-    height: 32px;
     -moz-appearance: none;
     background: linear-gradient(to top, #a9a9a9 0, #a9a9a9 1px, #f6f6f6 1px, #f6f6f6 100%);
+}
+
+#zotero-item-toolbar {
+    height: 32px;
 }
 
 #zotero-tab-toolbar-container #zotero-tb-locate,

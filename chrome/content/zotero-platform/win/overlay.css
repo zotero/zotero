@@ -15,7 +15,7 @@
 
 
 @media (min-resolution: 1.25dppx) {
-	#zotero-toolbar .toolbarbutton-icon {
+	#zotero-pane-stack .toolbarbutton-icon {
 		width: 16px;
 	}
 	
