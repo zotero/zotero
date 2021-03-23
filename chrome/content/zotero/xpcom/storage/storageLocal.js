@@ -9,6 +9,10 @@ Zotero.Sync.Storage.Local = {
 	SYNC_STATE_FORCE_DOWNLOAD: 4,
 	SYNC_STATE_IN_CONFLICT: 5,
 	
+	// If last-known remaining storage is below this number of megabytes, skip further upload
+	// attempts in various situations
+	STORAGE_REMAINING_MINIMUM: 5,
+	
 	lastFullFileCheck: {},
 	uploadCheckFiles: [],
 	storageRemainingForLibrary: new Map(),

@@ -28,6 +28,7 @@
  * Transfer request for storage sync
  *
  * @param {Object} options
+ * @param {Zotero.Sync.Storage.Engine} options.engine
  * @param {String} options.type
  * @param {Integer} options.libraryID
  * @param {String} options.name - Identifier for request (e.g., "[libraryID]/[key]")
@@ -36,16 +37,18 @@
  * @param {Function|Function[]} [options.onStop]
  */
 Zotero.Sync.Storage.Request = function (options) {
+	if (!options.engine) throw new Error("engine must be provided");
 	if (!options.type) throw new Error("type must be provided");
 	if (!options.libraryID) throw new Error("libraryID must be provided");
 	if (!options.name) throw new Error("name must be provided");
-	['type', 'libraryID', 'name'].forEach(x => this[x] = options[x]);
+	['engine', 'type', 'libraryID', 'name'].forEach(x => this[x] = options[x]);
 	
 	Zotero.debug(`Initializing ${this.type} request ${this.name}`);
 	
 	this.callbacks = ['onStart', 'onProgress', 'onStop'];
 	
 	this.Type = Zotero.Utilities.capitalize(this.type);
+	this.engine = options.engine;
 	this.channel = null;
 	this.queue = null;
 	this.progress = 0;
