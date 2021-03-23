@@ -285,7 +285,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			}
 			if (skip) {
 				// Stop trying to upload files if there's very little storage remaining
-				if (remaining < Zotero.Sync.Storage.Local.STORAGE_REMAINING_MINIMUM) {
+				if (request.engine && remaining < Zotero.Sync.Storage.Local.STORAGE_REMAINING_MINIMUM) {
 					Zotero.debug(`${remaining} MB remaining in storage -- skipping further uploads`);
 					request.engine.stop('upload');
 				}
@@ -306,7 +306,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		catch (e) {
 			// Stop trying to upload files if we hit a quota error and there's very little space
 			// remaining. If there's more space, we keep going, because it might just be a big file.
-			if (e.error == Zotero.Error.ERROR_ZFS_OVER_QUOTA) {
+			if (request.engine && e.error == Zotero.Error.ERROR_ZFS_OVER_QUOTA) {
 				let remaining = Zotero.Sync.Storage.Local.storageRemainingForLibrary.get(item.libraryID);
 				if (remaining < Zotero.Sync.Storage.Local.STORAGE_REMAINING_MINIMUM) {
 					Zotero.debug(`${remaining} MB remaining in storage -- skipping further uploads`);

@@ -37,7 +37,6 @@
  * @param {Function|Function[]} [options.onStop]
  */
 Zotero.Sync.Storage.Request = function (options) {
-	if (!options.engine) throw new Error("engine must be provided");
 	if (!options.type) throw new Error("type must be provided");
 	if (!options.libraryID) throw new Error("libraryID must be provided");
 	if (!options.name) throw new Error("name must be provided");
