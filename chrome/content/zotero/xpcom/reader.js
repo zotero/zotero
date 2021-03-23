@@ -40,6 +40,14 @@ class ReaderInstance {
 		});
 	}
 
+	focus() {
+		try {
+			this._iframeWindow.document.querySelector('#viewerContainer').focus();
+		}
+		catch (e) {
+		}
+	}
+
 	async open({ itemID, state, location }) {
 		let item = await Zotero.Items.getAsync(itemID);
 		if (!item) {

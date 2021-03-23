@@ -170,6 +170,12 @@ var ZoteroContextPane = new function () {
 						(async () => {
 							await reader._initPromise;
 							_tabCover.hidden = true;
+							// Focus reader pages view if context pane note editor is not selected
+							if (Zotero_Tabs.selectedID == reader.tabID
+								&& (!document.activeElement
+									|| !document.activeElement.closest('.context-node iframe[anonid="editor-view"]'))) {
+								reader.focus();
+							}
 						})();
 
 						var attachment = Zotero.Items.get(reader.itemID);
