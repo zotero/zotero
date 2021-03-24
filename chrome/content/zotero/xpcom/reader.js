@@ -144,6 +144,9 @@ class ReaderInstance {
 		if (item) {
 			item.setAttachmentLastPageIndex(state.pageIndex);
 			let file = Zotero.Attachments.getStorageDirectory(item);
+			if (!await OS.File.exists(file.path)) {
+				await Zotero.Attachments.createDirectoryForItem(item);
+			}
 			file.append(this.pdfStateFileName);
 			await Zotero.File.putContentsAsync(file, JSON.stringify(state));
 		}
