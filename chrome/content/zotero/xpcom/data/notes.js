@@ -143,6 +143,25 @@ Zotero.Notes = new function() {
 			}
 			node.removeAttribute('data-attachment-key');
 		}
+		
+		var nodes = doc.querySelectorAll('.citation[data-citation]');
+		for (var node of nodes) {
+			var citation = node.getAttribute('data-citation');
+			try {
+				citation = JSON.parse(decodeURIComponent(citation));
+				for (var citationItem of citation.citationItems) {
+					var item = await Zotero.EditorInstance.getItemFromURIs(citationItem.uris);
+					if (item) {
+						citationItem.itemData = Zotero.Cite.System.prototype.retrieveItem(item);
+					}
+				}
+				citation = encodeURIComponent(JSON.stringify(citation));
+				node.setAttribute('data-citation', citation);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
 		return doc.body.innerHTML;
 	};
 

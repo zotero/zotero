@@ -223,10 +223,12 @@ class EditorInstance {
 			// Citation
 			let parentItem = attachmentItem.parentID && await Zotero.Items.getAsync(attachmentItem.parentID);
 			if (parentItem) {
+				// TODO: Find a more elegant way to call this
+				let itemData = Zotero.Cite.System.prototype.retrieveItem(parentItem);
+				delete itemData.abstract;
 				let citationItem = {
 					uris: [Zotero.URI.getItemURI(parentItem)],
-					// TODO: Find a more elegant way to call this method
-					itemData: Zotero.Cite.System.prototype.retrieveItem(parentItem),
+					itemData,
 					locator: annotation.pageLabel
 				};
 				annotation.citationItem = citationItem;
@@ -283,10 +285,12 @@ class EditorInstance {
 				continue;
 			}
 			if (item.isRegularItem()) {
+				let itemData = Zotero.Cite.System.prototype.retrieveItem(item);
+				delete itemData.abstract;
 				let citation = {
 					citationItems: [{
 						uris: [Zotero.URI.getItemURI(item)],
-						itemData: Zotero.Cite.System.prototype.retrieveItem(item)
+						itemData
 					}],
 					properties: {}
 				};
@@ -362,7 +366,7 @@ class EditorInstance {
 						return;
 					}
 					let citationItem = citation.citationItems[0];
-					let item = await this._getItemFromURIs(citationItem.uris);
+					let item = await Zotero.EditorInstance.getItemFromURIs(citationItem.uris);
 					if (!item) {
 						return;
 					}
@@ -379,7 +383,7 @@ class EditorInstance {
 					let { citation } = message;
 					let items = [];
 					for (let citationItem of citation.citationItems) {
-						let item = await this._getItemFromURIs(citationItem.uris);
+						let item = await Zotero.EditorInstance.getItemFromURIs(citationItem.uris);
 						if (item) {
 							items.push(item);
 						}
@@ -453,7 +457,7 @@ class EditorInstance {
 					citation = JSON.parse(JSON.stringify(citation));
 					let availableCitationItems = [];
 					for (let citationItem of citation.citationItems) {
-						let item = await this._getItemFromURIs(citationItem.uris);
+						let item = await Zotero.EditorInstance.getItemFromURIs(citationItem.uris);
 						if (item) {
 							availableCitationItems.push({ ...citationItem, id: item.id });
 						}
@@ -691,31 +695,6 @@ class EditorInstance {
 		}
 	}
 
-	async _getItemFromURIs(uris) {
-		for (let uri of uris) {
-			// Try getting URI directly
-			try {
-				let item = await Zotero.URI.getURIItem(uri);
-				if (item) {
-					// Ignore items in the trash
-					if (!item.deleted) {
-						return item;
-					}
-				}
-			}
-			catch (e) {
-			}
-
-			// Try merged item mapping
-			var replacer = await Zotero.Relations.getByPredicateAndObject(
-				'item', Zotero.Relations.replacedItemPredicate, uri
-			);
-			if (replacer.length && !replacer[0].deleted) {
-				return replacer[0];
-			}
-		}
-	}
-
 	/**
 	 * Builds the string to go inside a bubble
 	 */
@@ -758,7 +737,7 @@ class EditorInstance {
 			if (!Array.isArray(citationItem.uris)) {
 				continue;
 			}
-			let item = await this._getItemFromURIs(citationItem.uris);
+			let item = await Zotero.EditorInstance.getItemFromURIs(citationItem.uris);
 			if (!item && citationItem.itemData) {
 				item = new Zotero.Item();
 				Zotero.Utilities.itemFromCSLJSON(item, citationItem.itemData);
@@ -972,6 +951,32 @@ class EditorInstance {
 		.openWindow(null, 'chrome://zotero/content/integration/quickFormat.xul', '', mode, {
 			wrappedJSObject: io
 		});
+	}
+
+	// TODO: This should be moved to utilities
+	static async getItemFromURIs(uris) {
+		for (let uri of uris) {
+			// Try getting URI directly
+			try {
+				let item = await Zotero.URI.getURIItem(uri);
+				if (item) {
+					// Ignore items in the trash
+					if (!item.deleted) {
+						return item;
+					}
+				}
+			}
+			catch (e) {
+			}
+
+			// Try merged item mapping
+			var replacer = await Zotero.Relations.getByPredicateAndObject(
+				'item', Zotero.Relations.replacedItemPredicate, uri
+			);
+			if (replacer.length && !replacer[0].deleted) {
+				return replacer[0];
+			}
+		}
 	}
 
 	/**
