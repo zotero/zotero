@@ -45,6 +45,13 @@ const TabBar = forwardRef(function (props, ref) {
 	useImperativeHandle(ref, () => ({ setTabs }));
 
 	function handleMouseDown(event, id, index) {
+		if(index != 0 && event.button === 1){
+			handleTabClose(event, id);
+			return;	
+		}
+		if(index == 0 && event.button === 1){
+			return;
+		}
 		if (event.target.closest('.tab-close')) {
 			return;
 		}
