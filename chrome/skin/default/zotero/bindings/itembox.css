@@ -104,7 +104,6 @@ row > vbox > description
 #item-type-menu
 {
 	-moz-appearance: none;
-	color: black;
 	height: 1.5em !important;
 	min-height: 1.5em !important;
 	padding: 0 0 0 2px !important;
