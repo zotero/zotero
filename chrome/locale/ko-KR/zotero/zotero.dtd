@@ -61,7 +61,7 @@
 <!ENTITY zotero.items.title_column "제목">
 <!ENTITY zotero.items.creator_column "창작자">
 <!ENTITY zotero.items.date_column "날짜">
-<!ENTITY zotero.items.year_column "년">
+<!ENTITY zotero.items.year_column "연도">
 <!ENTITY zotero.items.publisher_column "출판사">
 <!ENTITY zotero.items.publication_column "출판">
 <!ENTITY zotero.items.journalAbbr_column "저널 약어">
@@ -179,7 +179,7 @@
 <!ENTITY zotero.lookup.description "라이브러리에 추가할 ISBN, DOI, PMID 또는 arXiv ID를 입력하세요:">
 <!ENTITY zotero.lookup.button.search "검색">
 
-<!ENTITY zotero.createParent.title "Create Parent Item">
+<!ENTITY zotero.createParent.title "상위 항목 생성">
 <!ENTITY zotero.createParent.button.manual "Manual Entry">
 
 <!ENTITY zotero.selectitems.title "항목 선택">
