@@ -181,7 +181,7 @@ Zotero.OpenURL = new function() {
 			_mapTag(item.patentNumber, "number");
 			
 			if(item.issueDate) {
-				_mapTag(Zotero.Date.strToISO(item.issueDate), "date");
+				_mapTag(item.issueDate.year, "date");
 			}
 		} else {
 			//we map as much as possible to DC for all other types. This will export some info
@@ -226,7 +226,7 @@ Zotero.OpenURL = new function() {
 		}
 		
 		if(item.date) {
-			_mapTag(Zotero.Date.strToISO(item.date), (item.itemType == "patent" ? "appldate" : "date"));
+			_mapTag(item.date.year, (item.itemType == "patent" ? "appldate" : "date"));
 		}
 		if(item.pages) {
 			_mapTag(item.pages, "pages");
