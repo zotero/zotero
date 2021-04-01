@@ -1250,6 +1250,21 @@ describe("Zotero.Item", function () {
 			attachment = await importFileAttachment('test.pdf', { parentID: item.id });
 		});
 		
+		describe("#annotationType", function () {
+			it("should throw an invalid-data error if unknown type", function () {
+				var a = new Zotero.Item('annotation');
+				try {
+					a.annotationType = 'foo';
+				}
+				catch (e) {
+					assert.equal(e.name, 'ZoteroInvalidDataError');
+					assert.equal(e.message, "Unknown annotation type 'foo'");
+					return;
+				}
+				assert.fail("Invalid annotationType should throw");
+			});
+		});
+		
 		describe("#annotationText", function () {
 			it("should not be changeable", async function () {
 				var a = new Zotero.Item('annotation');
