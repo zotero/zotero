@@ -818,6 +818,7 @@ var Zotero_QuickFormat = new function () {
 
 		var citationItem = {"id":referenceBox.selectedItem.getAttribute("zotero-item")};
 		if (typeof citationItem.id === "string" && citationItem.id.indexOf("/") !== -1) {
+			var item = Zotero.Cite.getItem(citationItem.id);
 			citationItem.uris = item.cslURIs;
 			citationItem.itemData = item.cslItemData;
 		}
