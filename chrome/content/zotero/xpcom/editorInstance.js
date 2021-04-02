@@ -1117,3 +1117,4 @@ class EditorInstance {
 }
 
 Zotero.EditorInstance = EditorInstance;
+Zotero.EditorInstance.SCHEMA_VERSION = SCHEMA_VERSION;
