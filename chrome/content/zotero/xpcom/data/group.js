@@ -29,7 +29,7 @@ Zotero.Group = function (params = {}) {
 	params.libraryType = 'group';
 	Zotero.Group._super.call(this, params);
 	
-	Zotero.Utilities.assignProps(this, params, ['groupID', 'name', 'description',
+	Zotero.Utilities.Internal.assignProps(this, params, ['groupID', 'name', 'description',
 		'version']);
 	
 	// Return a proxy so that we can disable the object once it's deleted

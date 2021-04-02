@@ -60,7 +60,7 @@ Zotero.Feed = function(params = {}) {
 		get: function() { return this._get('_libraryFilesEditable'); }
 	});
 	
-	Zotero.Utilities.assignProps(this, params, 
+	Zotero.Utilities.Internal.assignProps(this, params,
 		['name', 'url', 'refreshInterval', 'cleanupReadAfter', 'cleanupUnreadAfter']);
 	
 	// Return a proxy so that we can disable the object once it's deleted

@@ -33,7 +33,7 @@ Zotero.FeedItem = function(itemTypeOrID, params = {}) {
 	this._feedItemReadTime = null;
 	this._feedItemTranslatedTime = null;
 	
-	Zotero.Utilities.assignProps(this, params, ['guid']);
+	Zotero.Utilities.Internal.assignProps(this, params, ['guid']);
 };
 
 Zotero.extendClass(Zotero.Item, Zotero.FeedItem);

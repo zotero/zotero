@@ -31,7 +31,7 @@ Zotero.Collection = function(params = {}) {
 	this._childCollections = new Set();
 	this._childItems = new Set();
 	
-	Zotero.Utilities.assignProps(this, params, ['name', 'libraryID', 'parentID', 'parentKey']);
+	Zotero.Utilities.Internal.assignProps(this, params, ['name', 'libraryID', 'parentID', 'parentKey']);
 }
 
 Zotero.extendClass(Zotero.DataObject, Zotero.Collection);

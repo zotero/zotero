@@ -36,7 +36,7 @@ Zotero.Search = function(params = {}) {
 	this._conditions = {};
 	this._hasPrimaryConditions = false;
 	
-	Zotero.Utilities.assignProps(this, params, ['name', 'libraryID']);
+	Zotero.Utilities.Internal.assignProps(this, params, ['name', 'libraryID']);
 }
 
 Zotero.extendClass(Zotero.DataObject, Zotero.Search);
