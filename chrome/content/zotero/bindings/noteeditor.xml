@@ -95,6 +95,13 @@
 						if (this._editorInstance) {
 							this._editorInstance.uninit();
 						}
+
+						// Automatically upgrade editable v1 note before it's loaded
+						// TODO: Remove this at some point
+						if (this.editable) {
+							await Zotero.Notes.upgradeSchemaV1(this._item);
+						}
+
 						this._editorInstance = new Zotero.EditorInstance();
 						await this._editorInstance.init({
 							state,

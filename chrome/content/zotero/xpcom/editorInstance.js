@@ -36,7 +36,7 @@ const DOWNLOADED_IMAGE_TYPE = [
 ];
 
 // Schema version here has to be the same as in note-editor!
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 class EditorInstance {
 	constructor() {
@@ -159,7 +159,7 @@ class EditorInstance {
 
 	async insertAnnotations(annotations) {
 		await this._ensureNoteCreated();
-		let html = await this._serializeAnnotations(annotations);
+		let [html] = await this._serializeAnnotations(annotations);
 		if (html) {
 			this._postMessage({ action: 'insertHTML', pos: -1, html });
 		}
@@ -197,9 +197,11 @@ class EditorInstance {
 	
 	/**
 	 * @param {Zotero.Item[]} annotations
+	 * @param {Boolean} skipEmbeddingItemData Do not add itemData to citation items
 	 * @return {String} - HTML string
 	 */
-	async _serializeAnnotations(annotations) {
+	async _serializeAnnotations(annotations, skipEmbeddingItemData) {
+		let storedCitationItems = [];
 		let html = '';
 		for (let annotation of annotations) {
 			let attachmentItem = await Zotero.Items.getAsync(annotation.attachmentItemID);
@@ -218,20 +220,36 @@ class EditorInstance {
 			let highlightHTML = '';
 			let commentHTML = '';
 			
-			annotation.uri = Zotero.URI.getItemURI(attachmentItem);
+			let storedAnnotation = {
+				uri: Zotero.URI.getItemURI(attachmentItem),
+				text: annotation.text,
+				color: annotation.color,
+				pageLabel: annotation.pageLabel,
+				position: annotation.position
+			};
 			
 			// Citation
 			let parentItem = attachmentItem.parentID && await Zotero.Items.getAsync(attachmentItem.parentID);
 			if (parentItem) {
+				let uris = [Zotero.URI.getItemURI(parentItem)];
+				let citationItem = {
+					uris,
+					locator: annotation.pageLabel
+				};
+				
 				// TODO: Find a more elegant way to call this
 				let itemData = Zotero.Cite.System.prototype.retrieveItem(parentItem);
 				delete itemData.abstract;
-				let citationItem = {
-					uris: [Zotero.URI.getItemURI(parentItem)],
-					itemData,
-					locator: annotation.pageLabel
-				};
-				annotation.citationItem = citationItem;
+				if (!skipEmbeddingItemData) {
+					citationItem.itemData = itemData;
+				}
+
+				let item = storedCitationItems.find(item => item.uris.some(uri => uris.includes(uri)));
+				if (!item) {
+					storedCitationItems.push({ uris, itemData });
+				}
+				
+				storedAnnotation.citationItem = citationItem;
 				let citation = {
 					citationItems: [citationItem],
 					properties: {}
@@ -255,12 +273,12 @@ class EditorInstance {
 				const PDFJS_DEFAULT_SCALE = 1.25;
 				let width = Math.round(rectWidth * CSS_UNITS * PDFJS_DEFAULT_SCALE);
 				let height = Math.round(rectHeight * width / rectWidth);
-				imageHTML = `<img data-attachment-key="${imageAttachmentKey}" width="${width}" height="${height}" data-annotation="${encodeURIComponent(JSON.stringify(annotation))}"/>`;
+				imageHTML = `<img data-attachment-key="${imageAttachmentKey}" width="${width}" height="${height}" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}"/>`;
 			}
 
 			// Text
 			if (annotation.text) {
-				highlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(annotation))}">“${annotation.text}”</span>`;
+				highlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}">“${annotation.text}”</span>`;
 			}
 			
 			// Note
@@ -274,7 +292,7 @@ class EditorInstance {
 			}
 			html += '<p>' + imageHTML + otherHTML + '</p>\n';
 		}
-		return html;
+		return [html, storedCitationItems];
 	}
 
 	async _digestItems(ids) {
@@ -299,6 +317,66 @@ class EditorInstance {
 			}
 			else if (item.isNote()) {
 				let note = item.note;
+				
+				let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
+				.createInstance(Components.interfaces.nsIDOMParser);
+				let doc = parser.parseFromString(note, 'text/html');
+
+				// Get citationItems with itemData from note metadata
+				let storedCitationItems = [];
+				let containerNode = doc.querySelector('body > div[data-schema-version]');
+				if (containerNode) {
+					try {
+						let data = JSON.parse(decodeURIComponent(containerNode.getAttribute('data-citation-items')));
+						if (Array.isArray(data)) {
+							storedCitationItems = data;
+						}
+					}
+					catch (e) {
+					}
+				}
+
+				if (storedCitationItems.length) {
+					let fillWithItemData = (citationItems) => {
+						for (let citationItem of citationItems) {
+							let item = storedCitationItems.find(item => item.uris.some(uri => citationItem.uris.includes(uri)));
+							if (item) {
+								citationItem.itemData = item.itemData;
+							}
+						}
+					};
+
+					let nodes = doc.querySelectorAll('.citation[data-citation]');
+					for (let node of nodes) {
+						let citation = node.getAttribute('data-citation');
+						try {
+							citation = JSON.parse(decodeURIComponent(citation));
+							fillWithItemData(citation.citationItems);
+							citation = encodeURIComponent(JSON.stringify(citation));
+							node.setAttribute('data-citation', citation);
+						}
+						catch (e) {
+							Zotero.logError(e);
+						}
+					}
+					
+					// img[data-annotation] and div.highlight[data-annotation]
+					nodes = doc.querySelectorAll('*[data-annotation]');
+					for (let node of nodes) {
+						let annotation = node.getAttribute('data-annotation');
+						try {
+							annotation = JSON.parse(decodeURIComponent(annotation));
+							fillWithItemData([annotation.citationItem]);
+							annotation = encodeURIComponent(JSON.stringify(annotation));
+							node.setAttribute('data-annotation', annotation);
+						}
+						catch (e) {
+							Zotero.logError(e);
+						}
+					}
+				}
+
+				// Clone all note image attachments and replace keys in the new note
 				let attachments = await Zotero.Items.getAsync(item.getAttachments());
 				for (let attachment of attachments) {
 					let path = await attachment.getFilePathAsync();
@@ -315,9 +393,14 @@ class EditorInstance {
 							}
 						}
 					});
-					note = note.replace(attachment.key, clonedAttachment.key);
+					
+					let node = doc.querySelector(`img[data-attachment-key=${attachment.key}]`);
+					if (node) {
+						node.setAttribute('data-attachment-key', clonedAttachment.key);
+					}
 				}
-				html += `<p></p>${note}<p></p>`;
+				
+				html += `<p></p>${doc.body.innerHTML}<p></p>`;
 			}
 		}
 		return html;
@@ -343,7 +426,7 @@ class EditorInstance {
 					}
 					else if (type === 'zotero/annotation') {
 						let annotations = JSON.parse(data);
-						html = await this._serializeAnnotations(annotations);
+						[html] = await this._serializeAnnotations(annotations);
 					}
 					if (html) {
 						this._postMessage({ action: 'insertHTML', pos, html });
@@ -462,6 +545,7 @@ class EditorInstance {
 							availableCitationItems.push({ ...citationItem, id: item.id });
 						}
 					}
+					// Notice: Citation items that don't exist in the library aren't shown in the popup
 					citation.citationItems = availableCitationItems;
 					let libraryID = this._item.libraryID;
 					this._openQuickFormatDialog(nodeID, citation, [libraryID]);
@@ -857,6 +941,7 @@ class EditorInstance {
 					delete citationItem.id;
 					citationItem.uris = [Zotero.URI.getItemURI(item)];
 					citationItem.itemData = Zotero.Cite.System.prototype.retrieveItem(item);
+					delete citationItem.itemData.abstract;
 				}
 				
 				let formattedCitation = (await that._getFormattedCitationParts(citation)).join(';');
@@ -1019,8 +1104,12 @@ class EditorInstance {
 			jsonAnnotations.push(jsonAnnotation);
 		}
 		let html = `<h1>${Zotero.getString('note.annotationsWithDate', new Date().toLocaleString())}</h1>\n`;
-		html += await editorInstance._serializeAnnotations(jsonAnnotations);
-		html = `<div data-schema-version="${SCHEMA_VERSION}">${html}</div>`;
+		let [serializedHTML, storedCitationItems] = await editorInstance._serializeAnnotations(jsonAnnotations, true);
+		
+		html += serializedHTML;
+		
+		storedCitationItems = encodeURIComponent(JSON.stringify(storedCitationItems));
+		html = `<div data-citation-items="${storedCitationItems}" data-schema-version="${SCHEMA_VERSION}">${html}</div>`;
 		note.setNote(html);
 		await note.saveTx();
 		return note;

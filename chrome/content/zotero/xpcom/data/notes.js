@@ -125,41 +125,64 @@ Zotero.Notes = new function() {
 		if (!item.isNote()) {
 			throw new Error('Item is not a note');
 		}
-		var note = item.getNote();
+		let note = item.getNote();
 		
-		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+		let parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 			.createInstance(Components.interfaces.nsIDOMParser);
-		var doc = parser.parseFromString(note, 'text/html');
+		let doc = parser.parseFromString(note, 'text/html');
 		
-		var nodes = doc.querySelectorAll('img[data-attachment-key]');
-		for (var node of nodes) {
-			var attachmentKey = node.getAttribute('data-attachment-key');
-			if (attachmentKey) {
-				var attachment = Zotero.Items.getByLibraryAndKey(item.libraryID, attachmentKey);
-				if (attachment && attachment.parentID == item.id) {
-					var dataURI = await attachment.attachmentDataURI;
-					node.setAttribute('src', dataURI);
-				}
-			}
-			node.removeAttribute('data-attachment-key');
-		}
-		
-		var nodes = doc.querySelectorAll('.citation[data-citation]');
-		for (var node of nodes) {
-			var citation = node.getAttribute('data-citation');
-			try {
-				citation = JSON.parse(decodeURIComponent(citation));
-				for (var citationItem of citation.citationItems) {
-					var item = await Zotero.EditorInstance.getItemFromURIs(citationItem.uris);
-					if (item) {
-						citationItem.itemData = Zotero.Cite.System.prototype.retrieveItem(item);
+		// Make sure this is the new note
+		let metadataContainer = doc.querySelector('body > div[data-schema-version]');
+		if (metadataContainer) {
+			// Load base64 image data into src
+			let nodes = doc.querySelectorAll('img[data-attachment-key]');
+			for (let node of nodes) {
+				let attachmentKey = node.getAttribute('data-attachment-key');
+				if (attachmentKey) {
+					let attachment = Zotero.Items.getByLibraryAndKey(item.libraryID, attachmentKey);
+					if (attachment && attachment.parentID == item.id) {
+						let dataURI = await attachment.attachmentDataURI;
+						node.setAttribute('src', dataURI);
 					}
 				}
-				citation = encodeURIComponent(JSON.stringify(citation));
-				node.setAttribute('data-citation', citation);
+				node.removeAttribute('data-attachment-key');
 			}
-			catch (e) {
-				Zotero.logError(e);
+			
+			// Set itemData for each citation citationItem
+			nodes = doc.querySelectorAll('.citation[data-citation]');
+			for (let node of nodes) {
+				let citation = node.getAttribute('data-citation');
+				try {
+					citation = JSON.parse(decodeURIComponent(citation));
+					for (let citationItem of citation.citationItems) {
+						// Get itemData from existing item
+						let item = await Zotero.EditorInstance.getItemFromURIs(citationItem.uris);
+						if (item) {
+							citationItem.itemData = Zotero.Cite.System.prototype.retrieveItem(item);
+						}
+						// Get itemData from note metadata container
+						else {
+							try {
+								let items = JSON.parse(decodeURIComponent(metadataContainer.getAttribute('data-citation-items')));
+								let item = items.find(item => item.uris.some(uri => citationItem.uris.includes(uri)));
+								if (item) {
+									citationItem.itemData = item.itemData;
+								}
+							}
+							catch (e) {
+							}
+						}
+						if (!citationItem.itemData) {
+							node.replaceWith('(MISSING CITATION)');
+							break;
+						}
+					}
+					citation = encodeURIComponent(JSON.stringify(citation));
+					node.setAttribute('data-citation', citation);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
 			}
 		}
 		return doc.body.innerHTML;
@@ -170,6 +193,112 @@ Zotero.Notes = new function() {
 		.createInstance(Components.interfaces.nsIDOMParser);
 		let doc = parser.parseFromString(note, 'text/html');
 		return !!doc.querySelector('body > div[data-schema-version]');
+	};
+
+	/**
+	 * Upgrade v1 notes:
+	 * - Pull itemData from citations, highlights, images into metadata container
+	 * - Strip abstract field from itemData
+	 * - For `data-annotation` keep only the following fields:
+	 *    - uri
+	 *    - text
+	 *    - color
+	 *    - pageLabel
+	 *    - position
+	 *    - citationItem
+	 * - Increase schema version number
+	 *
+	 * @param item
+	 * @returns {Promise<boolean>}
+	 */
+	this.upgradeSchemaV1 = async function (item) {
+		let note = item.note;
+
+		let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
+		.createInstance(Components.interfaces.nsIDOMParser);
+		let doc = parser.parseFromString(note, 'text/html');
+
+		let metadataContainer = doc.querySelector('body > div[data-schema-version]');
+		if (!metadataContainer) {
+			return false;
+		}
+
+		let schemaVersion = parseInt(metadataContainer.getAttribute('data-schema-version'));
+		if (schemaVersion !== 1) {
+			return false;
+		}
+		
+		let storedCitationItems = [];
+		try {
+			let data = JSON.parse(decodeURIComponent(metadataContainer.getAttribute('data-citation-items')));
+			if (Array.isArray(data)) {
+				storedCitationItems = data;
+			}
+		} catch (e) {
+		}
+
+		function pullItemData(citationItem) {
+			let { uris, itemData } = citationItem;
+			if (itemData) {
+				delete citationItem.itemData.abstract;
+				delete citationItem.itemData;
+				let item = storedCitationItems.find(item => item.uris.some(uri => uris.includes(uri)));
+				if (!item) {
+					storedCitationItems.push({ uris, itemData });
+				}
+			}
+		}
+		
+		let nodes = doc.querySelectorAll('.citation[data-citation]');
+		for (let node of nodes) {
+			let citation = node.getAttribute('data-citation');
+			try {
+				citation = JSON.parse(decodeURIComponent(citation));
+				citation.citationItems.forEach(citationItem => pullItemData(citationItem));
+				citation = encodeURIComponent(JSON.stringify(citation));
+				node.setAttribute('data-citation', citation);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
+
+		// img[data-annotation] and div.highlight[data-annotation]
+		nodes = doc.querySelectorAll('*[data-annotation]');
+		for (let node of nodes) {
+			let annotation = node.getAttribute('data-annotation');
+			try {
+				annotation = JSON.parse(decodeURIComponent(annotation));
+				if (annotation.citationItem) {
+					pullItemData(annotation.citationItem);
+				}
+				annotation = {
+					uri: annotation.uri,
+					text: annotation.text,
+					color: annotation.color,
+					pageLabel: annotation.pageLabel,
+					position: annotation.position,
+					citationItem: annotation.citationItem
+				};
+				annotation = encodeURIComponent(JSON.stringify(annotation));
+				node.setAttribute('data-annotation', annotation);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
+
+		if (storedCitationItems.length) {
+			storedCitationItems = encodeURIComponent(JSON.stringify(storedCitationItems));
+			metadataContainer.setAttribute('data-citation-items', storedCitationItems);
+		}
+		schemaVersion++;
+		metadataContainer.setAttribute('data-schema-version', schemaVersion);
+		note = doc.body.innerHTML;
+		note = note.trim();
+		item.setNote(note);
+		await item.saveTx({ skipDateModifiedUpdate: true });
+		return true;
 	};
 };
 
