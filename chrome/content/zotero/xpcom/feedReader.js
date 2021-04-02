@@ -521,7 +521,7 @@ Zotero.FeedReader._getFeedItem = function (feedEntry, feedInfo) {
 Zotero.FeedReader._getRichText = function (feedText, field) {
 	let domDiv = Zotero.Utilities.Internal.getDOMDocument().createElement("div");
 	let domFragment = feedText.createDocumentFragment(domDiv);
-	return Zotero.Utilities.dom2text(domFragment, field);
+	return Zotero.Utilities.trimInternal(domFragment.textContent);
 };
 
 /*

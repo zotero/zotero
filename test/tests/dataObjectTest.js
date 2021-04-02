@@ -502,7 +502,7 @@ describe("Zotero.DataObject", function() {
 		function makeObjectURI(objectType) {
 			var objectTypePlural = Zotero.DataObjectUtilities.getObjectTypePlural(objectType);
 			return 'http://zotero.org/groups/1/' + objectTypePlural + '/'
-				+ Zotero.Utilities.generateObjectKey();
+				+ Zotero.Utilities.Internal.generateObjectKey();
 		}
 		
 		describe("#addRelation()", function () {

@@ -4009,7 +4009,7 @@ var ZoteroPane = new function()
 	 * @return {Zotero.Item|false} - The saved item, or false if item can't be saved
 	 */
 	this.addItemFromURL = Zotero.Promise.coroutine(function* (url, itemType, saveSnapshot, row) {
-		url = Zotero.Utilities.resolveIntermediateURL(url);
+		url = Zotero.Utilities.Internal.resolveIntermediateURL(url);
 		
 		let [mimeType, hasNativeHandler] = yield Zotero.MIME.getMIMETypeFromURL(url);
 		

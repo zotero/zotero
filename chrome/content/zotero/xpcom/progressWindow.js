@@ -434,7 +434,7 @@ Zotero.ProgressWindow = function(options = {}) {
 				var attachment = item.attachments[i];
 				_attachmentsMap.set(attachment,
 					new self.ItemProgress(
-						Zotero.Utilities.determineAttachmentIcon(attachment),
+						Zotero.Utilities.Internal.determineAttachmentIcon(attachment),
 						attachment.title, itemProgress));
 			}
 		}
@@ -449,7 +449,7 @@ Zotero.ProgressWindow = function(options = {}) {
 			} else {
 				itemProgress.setProgress(progress);
 				if(progress === 100) {
-					itemProgress.setIcon(Zotero.Utilities.determineAttachmentIcon(attachment));
+					itemProgress.setIcon(Zotero.Utilities.Internal.determineAttachmentIcon(attachment));
 				}
 			}
 		}

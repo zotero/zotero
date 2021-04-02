@@ -2672,7 +2672,7 @@ Zotero.Attachments = new function(){
 	
 	
 	this._getFileNameFromURL = function(url, contentType) {
-		url = Zotero.Utilities.parseURL(url);
+		url = Zotero.Utilities.Internal.parseURL(url);
 		
 		var fileBaseName = url.fileBaseName;
 		var fileExt = Zotero.MIME.getPrimaryExtension(contentType, url.fileExtension);

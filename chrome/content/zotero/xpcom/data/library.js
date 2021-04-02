@@ -38,7 +38,7 @@ Zotero.Library = function(params = {}) {
 	this._hasSearches = null;
 	this._storageDownloadNeeded = false;
 	
-	Zotero.Utilities.assignProps(
+	Zotero.Utilities.Internal.assignProps(
 		this,
 		params,
 		[
