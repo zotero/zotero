@@ -159,7 +159,7 @@ class EditorInstance {
 
 	async insertAnnotations(annotations) {
 		await this._ensureNoteCreated();
-		let [html] = await this._serializeAnnotations(annotations);
+		let { html } = await this._serializeAnnotations(annotations);
 		if (html) {
 			this._postMessage({ action: 'insertHTML', pos: -1, html });
 		}
@@ -198,7 +198,7 @@ class EditorInstance {
 	/**
 	 * @param {Zotero.Item[]} annotations
 	 * @param {Boolean} skipEmbeddingItemData Do not add itemData to citation items
-	 * @return {String} - HTML string
+	 * @return {Object} Object with `html` string and `citationItems` array to embed into metadata container
 	 */
 	async _serializeAnnotations(annotations, skipEmbeddingItemData) {
 		let storedCitationItems = [];
@@ -292,7 +292,7 @@ class EditorInstance {
 			}
 			html += '<p>' + imageHTML + otherHTML + '</p>\n';
 		}
-		return [html, storedCitationItems];
+		return { html, citationItems: storedCitationItems };
 	}
 
 	async _digestItems(ids) {
@@ -426,7 +426,8 @@ class EditorInstance {
 					}
 					else if (type === 'zotero/annotation') {
 						let annotations = JSON.parse(data);
-						[html] = await this._serializeAnnotations(annotations);
+						let { html: serializedHTML } = await this._serializeAnnotations(annotations);
+						html = serializedHTML;
 					}
 					if (html) {
 						this._postMessage({ action: 'insertHTML', pos, html });
@@ -1104,12 +1105,10 @@ class EditorInstance {
 			jsonAnnotations.push(jsonAnnotation);
 		}
 		let html = `<h1>${Zotero.getString('note.annotationsWithDate', new Date().toLocaleString())}</h1>\n`;
-		let [serializedHTML, storedCitationItems] = await editorInstance._serializeAnnotations(jsonAnnotations, true);
-		
+		let { html: serializedHTML, citationItems } = await editorInstance._serializeAnnotations(jsonAnnotations, true);
 		html += serializedHTML;
-		
-		storedCitationItems = encodeURIComponent(JSON.stringify(storedCitationItems));
-		html = `<div data-citation-items="${storedCitationItems}" data-schema-version="${SCHEMA_VERSION}">${html}</div>`;
+		citationItems = encodeURIComponent(JSON.stringify(citationItems));
+		html = `<div data-citation-items="${citationItems}" data-schema-version="${SCHEMA_VERSION}">${html}</div>`;
 		note.setNote(html);
 		await note.saveTx();
 		return note;
