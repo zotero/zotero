@@ -198,7 +198,6 @@ Zotero.Notes = new function() {
 	/**
 	 * Upgrade v1 notes:
 	 * - Pull itemData from citations, highlights, images into metadata container
-	 * - Strip abstract field from itemData
 	 * - For `data-annotation` keep only the following fields:
 	 *    - uri
 	 *    - text
@@ -208,7 +207,7 @@ Zotero.Notes = new function() {
 	 *    - citationItem
 	 * - Increase schema version number
 	 *
-	 * @param item
+	 * @param {Zotero.Item} item
 	 * @returns {Promise<boolean>}
 	 */
 	this.upgradeSchemaV1 = async function (item) {
@@ -240,7 +239,6 @@ Zotero.Notes = new function() {
 		function pullItemData(citationItem) {
 			let { uris, itemData } = citationItem;
 			if (itemData) {
-				delete citationItem.itemData.abstract;
 				delete citationItem.itemData;
 				let item = storedCitationItems.find(item => item.uris.some(uri => uris.includes(uri)));
 				if (!item) {

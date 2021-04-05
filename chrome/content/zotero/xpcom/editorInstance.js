@@ -239,7 +239,6 @@ class EditorInstance {
 				
 				// TODO: Find a more elegant way to call this
 				let itemData = Zotero.Cite.System.prototype.retrieveItem(parentItem);
-				delete itemData.abstract;
 				if (!skipEmbeddingItemData) {
 					citationItem.itemData = itemData;
 				}
@@ -304,7 +303,6 @@ class EditorInstance {
 			}
 			if (item.isRegularItem()) {
 				let itemData = Zotero.Cite.System.prototype.retrieveItem(item);
-				delete itemData.abstract;
 				let citation = {
 					citationItems: [{
 						uris: [Zotero.URI.getItemURI(item)],
@@ -942,7 +940,6 @@ class EditorInstance {
 					delete citationItem.id;
 					citationItem.uris = [Zotero.URI.getItemURI(item)];
 					citationItem.itemData = Zotero.Cite.System.prototype.retrieveItem(item);
-					delete citationItem.itemData.abstract;
 				}
 				
 				let formattedCitation = (await that._getFormattedCitationParts(citation)).join(';');
