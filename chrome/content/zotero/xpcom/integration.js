@@ -1108,7 +1108,7 @@ Zotero.Integration.Session.prototype.updateDocument = Zotero.Promise.coroutine(f
 	this.timer = null;
 	Zotero.debug(`Integration: updateDocument complete in ${diff}s`)
 	// If the update takes longer than 5s suggest delaying citation updates
-	if (diff > DELAY_CITATIONS_PROMPT_TIMEOUT && !this.data.prefs.dontAskDelayCitationUpdates && !this._session.data.prefs.delayCitationUpdates) {
+	if (diff > DELAY_CITATIONS_PROMPT_TIMEOUT && !this.data.prefs.dontAskDelayCitationUpdates && !this.data.prefs.delayCitationUpdates) {
 		yield this._doc.activate();
 		
 		var interfaceType = 'tab';
