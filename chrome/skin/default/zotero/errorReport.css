@@ -5,7 +5,6 @@ description {
 /* Intro pane */
 #zotero-error-message {
 	background: #FFF;
-	color: rgb(61, 61, 61);
 }
 
 #zotero-error-message .textbox-textarea {
