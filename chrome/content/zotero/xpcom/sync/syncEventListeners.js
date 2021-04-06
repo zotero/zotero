@@ -99,7 +99,8 @@ Zotero.Sync.EventListeners.ChangeListener = new function () {
 
 
 Zotero.Sync.EventListeners.AutoSyncListener = {
-	_editTimeout: 15,
+	_editTimeout: 3,
+	_noteEditTimeout: 15,
 	_observerID: null,
 	
 	init: function () {
@@ -114,13 +115,15 @@ Zotero.Sync.EventListeners.AutoSyncListener = {
 	},
 	
 	notify: function (event, type, ids, extraData) {
-		// TODO: skip others
-		if (event == 'refresh' || event == 'redraw') {
-			return;
-		}
-		
-		if (Zotero.Sync.Runner.syncInProgress) {
-			return;
+		switch (event) {
+			case 'add':
+			case 'modify':
+			case 'delete':
+			case 'index':
+				break;
+			
+			default:
+				return;
 		}
 		
 		// Only trigger sync for certain types
@@ -131,6 +134,8 @@ Zotero.Sync.EventListeners.AutoSyncListener = {
 		
 		// Determine affected libraries so only those can be synced
 		let libraries = [];
+		var fileLibraries = new Set();
+		var fullTextLibraries = new Set();
 		
 		if (type == 'setting') {
 			for (let id of ids) {
@@ -163,11 +168,33 @@ Zotero.Sync.EventListeners.AutoSyncListener = {
 			return;
 		}
 		
+		var noteEdit = false;
+		if (type == 'item' && (event == 'add' || event == 'modify' || event == 'index')) {
+			// Use a longer timeout for a single note edit, to avoid repeating syncing during typing
+			if (ids.length == 1 && (Zotero.Items.get(ids[0]) || {}).itemType == 'note') {
+				noteEdit = true;
+			}
+			else {
+				for (let id of ids) {
+					let item = Zotero.Items.get(id);
+					if (!item) continue;
+					if (item.isStoredFileAttachment()) {
+						fileLibraries.add(item.libraryID);
+					}
+					if (item.isFileAttachment()) {
+						fullTextLibraries.add(item.libraryID);
+					}
+				}
+			}
+		}
+		
 		Zotero.Sync.Runner.setSyncTimeout(
-			this._editTimeout,
+			noteEdit ? this._noteEditTimeout : this._editTimeout,
 			false,
 			{
-				libraries: libraries.map(library => library.libraryID)
+				libraries: libraries.map(library => library.libraryID),
+				fileLibraries: [...fileLibraries],
+				fullTextLibraries: [...fullTextLibraries]
 			}
 		);
 	},

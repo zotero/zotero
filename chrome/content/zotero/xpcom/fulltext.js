@@ -290,6 +290,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			Zotero.DB.query(sql, [itemID, {string:text}]);
 			*/
 			
+			Zotero.Notifier.queue('index', 'item', itemID);
 			Zotero.Notifier.queue('refresh', 'item', itemID);
 		}.bind(this));
 		

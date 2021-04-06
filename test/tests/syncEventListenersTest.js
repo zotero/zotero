@@ -96,5 +96,23 @@ describe("Zotero.Sync.EventListeners", function () {
 			mock.verify();
 			assert.sameMembers(expectation.getCall(0).args[2].libraries, [Zotero.Libraries.userLibraryID]);
 		});
+		
+		it("should auto-sync after attachment reindex", async function () {
+			Zotero.Prefs.set('sync.autoSync', false);
+			var attachment = await importFileAttachment('test.pdf');
+			Zotero.Prefs.set('sync.autoSync', true);
+			
+			var mock = sinon.mock(Zotero.Sync.Runner);
+			var expectation = mock.expects("setSyncTimeout").once();
+			
+			await Zotero.Fulltext.indexItems(attachment.id);
+			
+			await Zotero.Promise.delay(10);
+			mock.verify();
+			assert.sameMembers(
+				expectation.getCall(0).args[2].fullTextLibraries,
+				[Zotero.Libraries.userLibraryID]
+			);
+		});
 	});
 });

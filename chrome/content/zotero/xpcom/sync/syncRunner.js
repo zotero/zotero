@@ -75,6 +75,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	var _delayPromises = [];
 	var _firstInSession = true;
 	var _syncInProgress = false;
+	var _queuedSyncOptions = [];
 	var _stopping = false;
 	var _canceller;
 	var _manualSyncRequired = false; // TODO: make public?
@@ -238,6 +239,19 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				options.libraries ? Array.from(options.libraries) : []
 			);
 			
+			// If file and full-text libraries are specified, limit to libraries we're already
+			// syncing
+			var fileLibrariesToSync = new Set(
+				options.fileLibraries
+					? options.fileLibraries.filter(id => librariesToSync.includes(id))
+					: librariesToSync
+			);
+			var fullTextLibrariesToSync = new Set(
+				options.fullTextLibraries
+					? options.fullTextLibraries.filter(id => librariesToSync.includes(id))
+					: librariesToSync
+			);
+			
 			_stopCheck();
 			
 			// If items not yet loaded for libraries we need, load them now
@@ -268,8 +282,11 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				
 				_stopCheck();
 				
-				// Run file sync on all libraries that passed the last data sync
-				librariesToSync = yield _doFileSync(nextLibraries, engineOptions);
+				// Run file sync on all allowed libraries that passed the last data sync
+				librariesToSync = yield _doFileSync(
+					nextLibraries.filter(libraryID => fileLibrariesToSync.has(libraryID)),
+					engineOptions
+				);
 				if (librariesToSync.length) {
 					attempt++;
 					continue;
@@ -277,8 +294,11 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				
 				_stopCheck();
 				
-				// Run full-text sync on all libraries that haven't failed a data sync
-				librariesToSync = yield _doFullTextSync([...successfulLibraries], engineOptions);
+				// Run full-text sync on all allowed libraries that haven't failed a data sync
+				librariesToSync = yield _doFullTextSync(
+					[...successfulLibraries].filter(libraryID => fullTextLibrariesToSync.has(libraryID)),
+					engineOptions
+				);
 				if (librariesToSync.length) {
 					attempt++;
 					continue;
@@ -312,6 +332,12 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				delete options.restartSync;
 				Zotero.debug("Restarting sync");
 				yield this._sync(options);
+				return;
+			}
+			// If an auto-sync was queued while a sync was ongoing, start again with its options
+			else if (_queuedSyncOptions.length) {
+				Zotero.debug("Restarting sync");
+				yield this._sync(_queuedSyncOptions.shift());
 				return;
 			}
 			
@@ -942,11 +968,13 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				
 				if (Zotero.locked) {
 					Zotero.debug('Zotero is locked -- skipping auto-sync', 4);
+					_queuedSyncOptions.push(mergedOpts);
 					return;
 				}
 				
 				if (_syncInProgress) {
 					Zotero.debug('Sync already in progress -- skipping auto-sync', 4);
+					_queuedSyncOptions.push(mergedOpts);
 					return;
 				}
 				
@@ -968,6 +996,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		else {
 			if (_syncInProgress) {
 				Zotero.debug('Sync in progress -- not setting auto-sync timeout', 4);
+				_queuedSyncOptions.push(mergedOpts);
 				return;
 			}
 			
