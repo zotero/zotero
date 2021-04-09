@@ -29,7 +29,7 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 Components.utils.import("resource://zotero/config.js");
 
 var React = require('react');
-var ReactDom = require('react-dom');
+var ReactDOM = require('react-dom');
 var VirtualizedTable = require('components/virtualized-table');
 var { getDomElement } = require('components/icons');
 var { IntlProvider } = require('react-intl');
@@ -311,7 +311,7 @@ Zotero_Preferences.Sync = {
 			</IntlProvider>
 		);
 		
-		ReactDom.render(elem, document.getElementById("libraries-to-sync-tree"));
+		ReactDOM.render(elem, document.getElementById("libraries-to-sync-tree"));
 		
 		var addRow = function (libraryName, id, checked=false, editable=true) {
 			this._rows.push({

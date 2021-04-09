@@ -26,7 +26,7 @@
 const { noop, getDragTargetOrient } = require("components/utils");
 const PropTypes = require("prop-types");
 const React = require('react');
-const ReactDom = require('react-dom');
+const ReactDOM = require('react-dom');
 const { IntlProvider } = require('react-intl');
 const LibraryTree = require('containers/libraryTree');
 const VirtualizedTable = require('components/virtualized-table');
@@ -211,7 +211,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				<ItemTree ref={c => ref = c } {...opts} />
 			</IntlProvider>
 		);
-		await new Promise(resolve => ReactDom.render(elem, domEl, resolve));
+		await new Promise(resolve => ReactDOM.render(elem, domEl, resolve));
 		
 		Zotero.debug('React ItemTree initialized');
 		return ref;

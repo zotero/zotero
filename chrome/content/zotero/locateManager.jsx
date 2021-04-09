@@ -26,7 +26,7 @@
 import VirtualizedTable from 'components/virtualized-table';
 const { IntlProvider } = require('react-intl');
 import React from 'react';
-import ReactDom from 'react-dom';
+import ReactDOM from 'react-dom';
 
 
 var tree;
@@ -54,7 +54,7 @@ function init() {
 			/>
 		</IntlProvider>
 	);
-	return new Promise(resolve => ReactDom.render(elem, domEl, resolve));
+	return new Promise(resolve => ReactDOM.render(elem, domEl, resolve));
 }
 
 function getRowData(index) {

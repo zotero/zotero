@@ -24,7 +24,7 @@
 */
 
 const React = require('react');
-const ReactDom = require('react-dom');
+const ReactDOM = require('react-dom');
 const { IntlProvider } = require('react-intl');
 const LibraryTree = require('containers/libraryTree');
 const VirtualizedTable = require('components/virtualized-table');
@@ -47,7 +47,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				<CollectionTree ref={c => ref = c } {...opts} />
 			</IntlProvider>
 		);
-		await new Promise(resolve => ReactDom.render(elem, domEl, resolve));
+		await new Promise(resolve => ReactDOM.render(elem, domEl, resolve));
 
 		Zotero.debug('React CollectionTree initialized');
 		return ref;

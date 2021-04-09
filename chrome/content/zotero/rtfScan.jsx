@@ -29,7 +29,7 @@
 
 import FilePicker from 'zotero/filePicker';
 import React from 'react';
-import ReactDom from 'react-dom';
+import ReactDOM from 'react-dom';
 import VirtualizedTable from 'components/virtualized-table';
 import { IntlProvider } from 'react-intl';
 import { getDomElement } from 'components/icons';
@@ -778,6 +778,6 @@ var Zotero_RTFScan = new function() {
 				/>
 			</IntlProvider>
 		);
-		return new Promise(resolve => ReactDom.render(elem, domEl, resolve));
+		return new Promise(resolve => ReactDOM.render(elem, domEl, resolve));
 	};
 }

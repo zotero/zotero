@@ -24,7 +24,7 @@
 */
 
 import React from 'react';
-import ReactDom from 'react-dom';
+import ReactDOM from 'react-dom';
 import TagsBoxContainer from 'containers/tagsBoxContainer';
 
 var ZoteroItemPane = new function() {
@@ -182,7 +182,7 @@ var ZoteroItemPane = new function() {
 			return;
 		}
 		else if (index == 2) {
-			ReactDom.render(
+			ReactDOM.render(
 				<TagsBoxContainer
 					key={"tagsBox-" + item.id}
 					item={item}

@@ -26,7 +26,7 @@
 "use strict";
 
 var React = require('react');
-var ReactDom = require('react-dom');
+var ReactDOM = require('react-dom');
 var VirtualizedTable = require('components/virtualized-table');
 var { IntlProvider } = require('react-intl');
 var { makeRowRenderer } = VirtualizedTable;
@@ -307,7 +307,7 @@ Zotero_Preferences.Export = {
 					/>
 				</IntlProvider>
 			);
-			await new Promise(resolve => ReactDom.render(elem, document.getElementById("quickCopy-siteSettings"), resolve));
+			await new Promise(resolve => ReactDOM.render(elem, document.getElementById("quickCopy-siteSettings"), resolve));
 		} else {
 			this._tree.invalidate();
 		}

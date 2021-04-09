@@ -28,7 +28,7 @@
 import FilePicker from 'zotero/filePicker';
 
 var React = require('react');
-var ReactDom = require('react-dom');
+var ReactDOM = require('react-dom');
 var VirtualizedTable = require('components/virtualized-table');
 var { IntlProvider } = require('react-intl');
 var { makeRowRenderer } = VirtualizedTable;
@@ -124,7 +124,7 @@ Zotero_Preferences.Cite = {
 					/>
 				</IntlProvider>
 			);
-			await new Promise(resolve => ReactDom.render(elem, document.getElementById("styleManager"), resolve));
+			await new Promise(resolve => ReactDOM.render(elem, document.getElementById("styleManager"), resolve));
 		}
 		else {
 			this._tree.invalidate();

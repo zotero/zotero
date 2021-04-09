@@ -25,7 +25,7 @@
 
 Components.utils.import("resource://gre/modules/Services.jsm");
 import React from 'react';
-import ReactDom from 'react-dom';
+import ReactDOM from 'react-dom';
 import VirtualizedTable from 'components/virtualized-table';
 const { IntlProvider } = require('react-intl');
 const { getDomElement } = require('components/icons');
@@ -105,7 +105,7 @@ function _init() {
 			/>
 		</IntlProvider>
 	);
-	ReactDom.render(elem, domEl);
+	ReactDOM.render(elem, domEl);
 }
 	
 /**
