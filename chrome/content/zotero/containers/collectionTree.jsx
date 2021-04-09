@@ -92,7 +92,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		this._typingString = "";
 		this._typingTimeout = null;
 		
-		this.onLoad = this._createEventBinding('load', true, true);
+		this.onLoad = this.createEventBinding('load', true, true);
 	}
 	
 	async makeVisible() {

@@ -31,72 +31,7 @@
  */
 Zotero.Utilities.Internal = {
 	SNAPSHOT_SAVE_TIMEOUT: 30000,
-	
-	makeClassEventDispatcher: function (cls) {
-		cls.prototype._events = null;
-		cls.prototype.runListeners = async function (event) {
-			// Zotero.debug(`Running ${event} listeners on ${cls.toString()}`);
-			if (!this._events) this._events = {};
-			if (!this._events[event]) {
-				this._events[event] = {
-					listeners: new Map(),
-				};
-			}
-			this._events[event].triggered = true;
-			// Array.from(entries) since entries() returns an iterator and we want a snapshot of the entries
-			// at the time of runListeners() call to prevent triggering listeners that are added right
-			// runListeners() invocation
-			for (let [listener, once] of Array.from(this._events[event].listeners.entries())) {
-				await Zotero.Promise.resolve(listener.call(this));
-				if (once) {
-					this._events[event].listeners.delete(listener);
-				}
-			}
-		};
 
-		/**
-		 * @param event {String} name of the event
-		 * @param alwaysOnce {Boolean} whether all event listeners on this event will only be triggered once
-		 * @param immediateAfterTrigger {Boolean} whether the event listeners should be triggered immediately
-		 * 								upon being added if the event had been triggered at least once
-		 * @returns {Object} A listener object with an addListener(listener, once) method
-		 * @private
-		 */
-		cls.prototype._createEventBinding = function (event, alwaysOnce, immediateAfterTrigger) {
-			if (!this._events) this._events = {};
-			this._events[event] = {
-				listeners: new Map(),
-				immediateAfterTrigger
-			};
-			return {
-				addListener: (listener, once) => {
-					this._addListener(event, listener, alwaysOnce || once, immediateAfterTrigger)
-				}
-			}
-		};
-	
-		cls.prototype._addListener = function (event, listener, once, immediateAfterTrigger) {
-			if (!this._events) this._events = {};
-			let ev = this._events[event];
-			if (!ev) {
-				this._events[event] = {
-					listeners: new Map(),
-					immediateAfterTrigger
-				};
-			}
-			if ((immediateAfterTrigger || ev.immediateAfterTrigger) && ev.triggered) {
-				return listener.call(this);
-			}
-			this._events[event].listeners.set(listener, once);
-		};
-		
-		cls.prototype._waitForEvent = async function (event) {
-			return new Zotero.Promise((resolve, reject) => {
-				this._addListener(event, () => resolve(), true);
-			});
-		};
-	},
-	
 	/**
 	 * Run a function on chunks of a given size of an array's elements.
 	 *
@@ -2159,7 +2094,88 @@ Zotero.Utilities.Internal = {
 		return Zotero.ItemTypes.getImageSrc(attachment.mimeType === "application/pdf"
 			? "attachment-pdf" : "attachment-snapshot");
 	},
+	
+	/**
+	 * Pass a class into this to add generic methods for creating event listeners
+	 * (and running those events).
+	 *
+	 * ```
+	 * var MyClass = Zotero.Utilities.Internal.makeClassEventDispatcher(class {
+	 * 		constructor: () => {
+	 * 			this.onFoo = this.createEventBinding('foo');
+	 * 		}
+	 * 		foo: () => this.runListeners('foo');
+	 * });
+	 * let object = new MyClass();
+	 * object.onFoo.addListener(() => console.log('foo ran in object of MyClass'));
+	 * object.foo();
+	 * ```
+	 * @param cls
+	 */
+	makeClassEventDispatcher: function (cls) {
+		cls.prototype._events = null;
+		cls.prototype.runListeners = async function (event) {
+			// Zotero.debug(`Running ${event} listeners on ${cls.toString()}`);
+			if (!this._events) this._events = {};
+			if (!this._events[event]) {
+				this._events[event] = {
+					listeners: new Map(),
+				};
+			}
+			this._events[event].triggered = true;
+			// Array.from(entries) since entries() returns an iterator and we want a snapshot of the entries
+			// at the time of runListeners() call to prevent triggering listeners that are added right
+			// runListeners() invocation
+			for (let [listener, once] of Array.from(this._events[event].listeners.entries())) {
+				await Zotero.Promise.resolve(listener.call(this));
+				if (once) {
+					this._events[event].listeners.delete(listener);
+				}
+			}
+		};
 
+		/**
+		 * @param event {String} name of the event
+		 * @param alwaysOnce {Boolean} whether all event listeners on this event will only be triggered once
+		 * @param immediateAfterTrigger {Boolean} whether the event listeners should be triggered immediately
+		 * 								upon being added if the event had been triggered at least once
+		 * @returns {Object} A listener object with an addListener(listener, once) method
+		 * @private
+		 */
+		cls.prototype.createEventBinding = function (event, alwaysOnce, immediateAfterTrigger) {
+			if (!this._events) this._events = {};
+			this._events[event] = {
+				listeners: new Map(),
+				immediateAfterTrigger
+			};
+			return {
+				addListener: (listener, once) => {
+					this._addListener(event, listener, alwaysOnce || once, immediateAfterTrigger);
+				}
+			}
+		};
+
+		cls.prototype._addListener = function (event, listener, once, immediateAfterTrigger) {
+			if (!this._events) this._events = {};
+			let ev = this._events[event];
+			if (!ev) {
+				this._events[event] = {
+					listeners: new Map(),
+					immediateAfterTrigger
+				};
+			}
+			if ((immediateAfterTrigger || ev.immediateAfterTrigger) && ev.triggered) {
+				return listener.call(this);
+			}
+			this._events[event].listeners.set(listener, once);
+		};
+
+		cls.prototype._waitForEvent = async function (event) {
+			return new Zotero.Promise((resolve, reject) => {
+				this._addListener(event, () => resolve(), true);
+			});
+		};
+	}
 }
 
 /**
