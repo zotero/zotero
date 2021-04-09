@@ -32,7 +32,7 @@ const LibraryTree = require('containers/libraryTree');
 const VirtualizedTable = require('components/virtualized-table');
 const { renderCell, TreeSelectionStub } = VirtualizedTable;
 const Icons = require('components/icons');
-const { getDomElement } = Icons;
+const { getDOMElement } = Icons;
 const { COLUMNS } = require('containers/itemTreeColumns');
 const { Cc, Ci, Cu } = require('chrome');
 Cu.import("resource://gre/modules/osfile.jsm");
@@ -54,7 +54,7 @@ function makeItemRenderer(itemTree) {
 			twisty.classList.add("spacer-twisty");
 		}
 		else {
-			twisty = getDomElement("IconTwisty");
+			twisty = getDOMElement("IconTwisty");
 			twisty.classList.add('twisty');
 			if (itemTree.isContainerOpen(index)) {
 				twisty.classList.add('open');
@@ -71,7 +71,7 @@ function makeItemRenderer(itemTree) {
 		const item = itemTree.getRow(index).ref;
 		let retracted = "";
 		if (Zotero.Retractions.isRetracted(item)) {
-			retracted = getDomElement('IconCross');
+			retracted = getDOMElement('IconCross');
 			retracted.classList.add("retracted");
 		}
 		
@@ -108,11 +108,11 @@ function makeItemRenderer(itemTree) {
 				const state = item.getBestAttachmentStateCached();
 				let icon = "";
 				if (state === 1) {
-					icon = getDomElement('IconBulletBlue');
+					icon = getDOMElement('IconBulletBlue');
 					icon.classList.add('cell-icon');
 				}
 				else if (state === -1) {
-					icon = getDomElement('IconBulletBlueEmpty');
+					icon = getDOMElement('IconBulletBlueEmpty');
 					icon.classList.add('cell-icon');
 				}
 				span.append(icon);
@@ -128,7 +128,7 @@ function makeItemRenderer(itemTree) {
 			const exists = item.fileExistsCached();
 			let icon = "";
 			if (exists !== null) {
-				icon = exists ? getDomElement('IconBulletBlue') : getDomElement('IconBulletBlueEmpty');
+				icon = exists ? getDOMElement('IconBulletBlue') : getDOMElement('IconBulletBlueEmpty');
 				icon.classList.add('cell-icon');
 			}
 			span.append(icon);
@@ -3399,7 +3399,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (!Icons[iconClsName]) {
 			iconClsName = "IconTreeitem";
 		}
-		var icon = getDomElement(iconClsName);
+		var icon = getDOMElement(iconClsName);
 		if (!icon) {
 			Zotero.debug('Could not find tree icon for "' + itemType + '"');
 			return document.createElementNS("http://www.w3.org/1999/xhtml", 'span');

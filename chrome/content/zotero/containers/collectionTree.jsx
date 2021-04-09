@@ -30,7 +30,7 @@ const LibraryTree = require('containers/libraryTree');
 const VirtualizedTable = require('components/virtualized-table');
 const { TreeSelectionStub } = VirtualizedTable;
 const Icons = require('components/icons');
-const { getDomElement: getDOMIcon } = Icons;
+const { getDOMElement: getDOMIcon } = Icons;
 const { getDragTargetOrient } = require('components/utils');
 const { Cc, Ci, Cu } = require('chrome');
 

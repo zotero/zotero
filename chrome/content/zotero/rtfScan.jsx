@@ -32,7 +32,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import VirtualizedTable from 'components/virtualized-table';
 import { IntlProvider } from 'react-intl';
-import { getDomElement } from 'components/icons';
+import { getDOMElement } from 'components/icons';
 
 /**
  * Front end for recognizing PDFs
@@ -712,7 +712,7 @@ var Zotero_RTFScan = new function() {
 			if (column.primary) {
 				let twisty;
 				if (row.children || (this._rows[index + 1] && this._rows[index + 1].parent == row)) {
-					twisty = getDomElement("IconTwisty");
+					twisty = getDOMElement("IconTwisty");
 					twisty.classList.add('twisty');
 					if (!row.collapsed) {
 						twisty.classList.add('open');
@@ -743,10 +743,10 @@ var Zotero_RTFScan = new function() {
 				span.className = `cell action ${column.className}`;
 				if (row.parent) {
 					if (row.action) {
-						span.appendChild(getDomElement('IconRTFScanAccept'));
+						span.appendChild(getDOMElement('IconRTFScanAccept'));
 					}
 					else {
-						span.appendChild(getDomElement('IconRTFScanLink'));
+						span.appendChild(getDOMElement('IconRTFScanLink'));
 					}
 					span.addEventListener('mouseup', e => this._onActionMouseUp(e, index), { passive: true });
 					span.style.pointerEvents = 'auto';

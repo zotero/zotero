@@ -28,7 +28,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import VirtualizedTable from 'components/virtualized-table';
 const { IntlProvider } = require('react-intl');
-const { getDomElement } = require('components/icons');
+const { getDOMElement } = require('components/icons');
 const { renderCell } = VirtualizedTable;
 
 let _progressIndicator = null;
@@ -37,13 +37,13 @@ let _tree;
 
 function _getImageByStatus(status) {
 	if (status === Zotero.ProgressQueue.ROW_PROCESSING) {
-		return getDomElement('IconArrowRefresh');
+		return getDOMElement('IconArrowRefresh');
 	}
 	else if (status === Zotero.ProgressQueue.ROW_FAILED) {
-		return getDomElement('IconCross');
+		return getDOMElement('IconCross');
 	}
 	else if (status === Zotero.ProgressQueue.ROW_SUCCEEDED) {
-		return getDomElement('IconTick');
+		return getDOMElement('IconTick');
 	}
 	return document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
 }

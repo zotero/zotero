@@ -31,7 +31,7 @@ const cx = require('classnames');
 const JSWindow = require('./js-window');
 const Draggable = require('./draggable');
 const { injectIntl } = require('react-intl');
-const { IconDownChevron, getDomElement } = require('components/icons');
+const { IconDownChevron, getDOMElement } = require('components/icons');
 
 const RESIZER_WIDTH = 5; // px
 
@@ -1343,7 +1343,7 @@ function renderCheckboxCell(index, data, column) {
 	span.setAttribute('role', 'checkbox');
 	span.setAttribute('aria-checked', data);
 	if (data) {
-		span.appendChild(getDomElement('IconTick'));
+		span.appendChild(getDOMElement('IconTick'));
 	}
 	return span;
 }
