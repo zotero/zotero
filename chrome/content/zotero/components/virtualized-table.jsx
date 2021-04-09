@@ -39,8 +39,21 @@ const noop = () => 0;
 
 /**
  * Somewhat corresponds to nsITreeSelection
+ * https://udn.realityripple.com/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsITreeSelection
+ *
+ * @property pivot {Number} The selection "pivot". This is the first item the user selected as part of
+ * 		a ranged select (i.e. shift-select).
+ * @property focused {Number} The currently selected/focused item.
+ * @property count {Number} The number of selected items
+ * @property selected {Set} The set of currently selected items
+ * @property selectEventsSuppressed {Boolean} Controls whether select events are triggered on selection change.
  */
 class TreeSelection {
+
+	/**
+	 * @param tree {VirtualizedTable} The tree where selection occurs. Will be used to issue
+	 * updates.
+	 */
 	constructor(tree) {
 		this._tree = tree;
 		Object.assign(this, {
@@ -51,11 +64,21 @@ class TreeSelection {
 		});
 	}
 
+	/**
+	 * Returns whether the given index is selected.
+	 * @param index {Number} The index is 0-clamped.
+	 * @returns {boolean}
+	 */
 	isSelected(index) {
 		index = Math.max(0, index);
 		return this.selected.has(index);
 	}
 
+	/**
+	 * Toggles an item's selection state, updates focused item to index.
+	 * @param index {Number} The index is 0-clamped.
+	 * @param shouldDebounce {Boolean} Whether the update to the tree should be debounced
+	 */
 	toggleSelect(index, shouldDebounce) {
 		index = Math.max(0, index);
 		if (this.selected.has(index)) {
@@ -84,7 +107,9 @@ class TreeSelection {
 	}
 
 	/**
-	 * @param index
+	 * Selects an item, updates focused item to index.
+	 * @param index {Number} The index is 0-clamped.
+	 * @param shouldDebounce {Boolean} Whether the update to the tree should be debounced
 	 * @returns {boolean} False if nothing to select and select handlers won't be called
 	 */
 	select(index, shouldDebounce) {
@@ -136,6 +161,11 @@ class TreeSelection {
 		this._updateTree();
 	}
 
+	/**
+	 * Performs a shift-select from current pivot to provided index. Updates focused item to index.
+	 * @param index {Number} The index is 0-clamped.
+	 * @param shouldDebounce {Boolean} Whether the update to the tree should be debounced
+	 */
 	shiftSelect(index, shouldDebounce) {
 		index = Math.max(0, index);
 		let from = Math.min(index, this.pivot);
@@ -161,6 +191,11 @@ class TreeSelection {
 		this._updateTree(shouldDebounce);
 	}
 
+	/**
+	 * Calls the onSelectionChange prop on the tree
+	 * @param shouldDebounce {Boolean} Whether the update to the tree should be debounced
+	 * @private
+	 */
 	_updateTree(shouldDebounce) {
 		if (!this.selectEventsSuppressed && this._tree.props.onSelectionChange) {
 			this._tree.props.onSelectionChange(this, shouldDebounce);
@@ -204,6 +239,7 @@ class TreeSelection {
 	}
 }
 
+// Something to return on selection query before tree initialization
 let TreeSelectionStub = {};
 for (const key of Object.getOwnPropertyNames(TreeSelection.prototype)) {
 	TreeSelectionStub[key] = () => 0;
