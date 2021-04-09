@@ -302,6 +302,11 @@ class VirtualizedTable extends React.Component {
 		this.isHeaderMouseUp = true;
 		
 		this._isMouseDrag = false;
+
+		this.preventScrollKeys = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", " "]);
+		if (!Zotero.isMac) {
+			['PageUp', 'PageDown'].forEach(key => this.preventScrollKeys.add(key));
+		}
 		
 		this.onSelection = oncePerAnimationFrame(this._onSelection);
 	}
@@ -403,27 +408,18 @@ class VirtualizedTable extends React.Component {
 
 	// ------------------------ Selection Methods ------------------------- //
 		
-	_preventArrowKeyScrolling = (e) => {
-		switch (e.key) {
-			case "ArrowUp":
-			case "ArrowDown":
-			case "ArrowLeft":
-			case "ArrowRight":
-			case "PageUp":
-			case "PageDown":
-			case "Home":
-			case "End":
-			case " ":
-				e.preventDefault();
-				e.stopPropagation();
-				if (e.nativeEvent) {
-					if (e.nativeEvent.preventDefault) {
-						e.nativeEvent.preventDefault();
-					}
-					if (e.nativeEvent.stopPropagation) {
-						e.nativeEvent.stopPropagation();
-					}
+	_preventKeyboardScrolling = (e) => {
+		if (this.preventScrollKeys.has(e.key)) {
+			e.preventDefault();
+			e.stopPropagation();
+			if (e.nativeEvent) {
+				if (e.nativeEvent.preventDefault) {
+					e.nativeEvent.preventDefault();
 				}
+				if (e.nativeEvent.stopPropagation) {
+					e.nativeEvent.stopPropagation();
+				}
+			}
 		}
 	}
 	
@@ -491,7 +487,7 @@ class VirtualizedTable extends React.Component {
 	_onKeyDown = (e) => {
 		if (this.props.onKeyDown && this.props.onKeyDown(e) === false) return;
 
-		this._preventArrowKeyScrolling(e);
+		this._preventKeyboardScrolling(e);
 
 		if (e.altKey) return;
 		
@@ -527,11 +523,21 @@ class VirtualizedTable extends React.Component {
 			break;
 			
 		case "PageUp":
-			this._onJumpSelect(-1, shiftSelect, e.repeat);
+			if (!Zotero.isMac) {
+				this._onJumpSelect(-1, shiftSelect, e.repeat);
+			}
+			else {
+				this._jsWindow.scrollTo(this._jsWindow.scrollOffset - this._jsWindow.getWindowHeight() + this._rowHeight);
+			}
 			break;
 			
 		case "PageDown":
-			this._onJumpSelect(1, shiftSelect, e.repeat);
+			if (!Zotero.isMac) {
+				this._onJumpSelect(1, shiftSelect, e.repeat);
+			}
+			else {
+				this._jsWindow.scrollTo(this._jsWindow.scrollOffset + this._jsWindow.getWindowHeight() - this._rowHeight);
+			}
 			break;
 
 		case "a":

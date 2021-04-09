@@ -163,7 +163,8 @@ module.exports = class {
 	 * @param scrollOffset {Integer} offset for the top of the tree
 	 */
 	scrollTo(scrollOffset) {
-		scrollOffset = Math.max(0, scrollOffset);
+		const maxOffset = this.itemHeight * this._getItemCount() - this.getWindowHeight();
+		scrollOffset = Math.min(Math.max(0, scrollOffset), maxOffset);
 		this.scrollOffset = scrollOffset;
 		this.targetElement.scrollTop = scrollOffset;
 		this.render();
