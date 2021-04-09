@@ -49,7 +49,6 @@ const noop = () => 0;
  * @property selectEventsSuppressed {Boolean} Controls whether select events are triggered on selection change.
  */
 class TreeSelection {
-
 	/**
 	 * @param tree {VirtualizedTable} The tree where selection occurs. Will be used to issue
 	 * updates.
@@ -430,9 +429,6 @@ class VirtualizedTable extends React.Component {
 	
 	/**
 	 * Ensure the tree scrolls when dragging over top and bottom parts of it
-	 *
-	 * @param e
-	 * @private
 	 */
 	_onDragOver = (e) => {
 		let tree = e.currentTarget;
@@ -464,7 +460,6 @@ class VirtualizedTable extends React.Component {
 	 *
 	 * @param {Integer} direction - -1 for up, 1 for down
 	 * @param {Boolean} selectTo
-	 * @private
 	 */
 	_onJumpSelect(direction, selectTo) {
 		if (direction == 1) {
@@ -630,7 +625,7 @@ class VirtualizedTable extends React.Component {
 	/**
 	 * Scroll the row into view. Delegates to windowed-list
 	 *
-	 * @param index
+	 * @param index {Number}
 	 */
 	scrollToRow(index) {
 		this._jsWindow && this._jsWindow.scrollToRow(index);
@@ -642,13 +637,10 @@ class VirtualizedTable extends React.Component {
 	 * @param {Number} index
 	 *        The index of the item in a full DFS traversal (ignoring collapsed
 	 *        nodes). Ignored if `item` is undefined.
-	 *
 	 * @param {Boolean} shiftSelect
 	 * 		  If true will select from focused up to index (does not update pivot)
-	 *
 	 * @param {Boolean} toggleSelection
 	 * 		  If true will add to selection
-	 *
 	 * @param {Boolean} movePivot
 	 * 		  Will move pivot without adding anything to the selection
 	 */
@@ -1242,7 +1234,7 @@ var Columns = class {
 	 * Programatically sets the injected CSS width rules for each column.
 	 * This is necessary for performance reasons
 	 *
-	 * @param columnWidths - dictionary of columnId: width (px)
+	 * @param columnWidths {Object} dictionary of columnId: width (px)
 	 */
 	onResize = (columnWidths, storePrefs=false) => {
 		if (storePrefs) {
