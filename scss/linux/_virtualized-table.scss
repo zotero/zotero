@@ -1,28 +1,28 @@
 .virtualized-table {
-  border: 1px solid #ccc;
+	border: 1px solid #ccc;
 }
 .virtualized-table, .drag-image-container {
-  .twisty {
-    padding-inline-end: 3px;
-    svg {
-      width: 5px;
-    }
-  }
+	.twisty {
+		padding-inline-end: 3px;
+		svg {
+			width: 5px;
+		}
+	}
 }
 .virtualized-table-header {
-  height: 28px;
-  background-image: linear-gradient(#fff, #fafafa);
-  
-  &.dragging {
-    color: #666;
-    background: #f8f8f8;
-  }
-  
-  .cell .sort-indicator {
-    transform: scale(1.25);
-    
-    &.ascending {
-      transform: scale(1.25) rotate(180deg);
-    }
-  } 
+	height: 28px;
+	background-image: linear-gradient(#fff, #fafafa);
+
+	&.dragging {
+		color: #666;
+		background: #f8f8f8;
+	}
+
+	.cell .sort-indicator {
+		transform: scale(1.25);
+
+		&.ascending {
+			transform: scale(1.25) rotate(180deg);
+		}
+	}
 }

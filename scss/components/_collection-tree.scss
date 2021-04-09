@@ -1,45 +1,45 @@
 #zotero-collections-tree-container {
-  height: 5.2em;
+	height: 5.2em;
 }
 
 #zotero-collections-tree {
-  width: 100%;
-  
-  .virtualized-table {
-    overflow-y: auto;
-    flex: 1 0;
-    text-overflow: ellipsis;
-  }
+	width: 100%;
 
-  .cell.primary {
-    display: flex;
-    align-items: center;
+	.virtualized-table {
+		overflow-y: auto;
+		flex: 1 0;
+		text-overflow: ellipsis;
+	}
 
-    :not(.cell-text) {
-      flex-shrink: 0
-    }
-    
-    .cell-text {
-      flex-shrink: 1;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      margin-left: 6px;
-    }
-    
-    input.cell-text {
-      border: 1px highlight solid;
-      padding: 1px 2px;
-      margin-right: 5px;
-      width: 100%;
-      font-size: inherit;
-    }
+	.cell.primary {
+		display: flex;
+		align-items: center;
 
-    .cell-icon {
-      min-width: 16px;
-    }
-  }
-  
-  .row.editing .cell {
-    pointer-events: auto;
-  }
+		:not(.cell-text) {
+			flex-shrink: 0
+		}
+
+		.cell-text {
+			flex-shrink: 1;
+			text-overflow: ellipsis;
+			overflow: hidden;
+			margin-left: 6px;
+		}
+
+		input.cell-text {
+			border: 1px highlight solid;
+			padding: 1px 2px;
+			margin-right: 5px;
+			width: 100%;
+			font-size: inherit;
+		}
+
+		.cell-icon {
+			min-width: 16px;
+		}
+	}
+
+	.row.editing .cell {
+		pointer-events: auto;
+	}
 }

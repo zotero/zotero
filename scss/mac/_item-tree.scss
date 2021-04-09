@@ -1,9 +1,9 @@
 #zotero-items-tree {
-  // Selected rows when the tree is not the focused element
-  .virtualized-table:not(:focus) {
-    .row.selected {
-      background: #dcdcdc;
-      color: initial;
-    }
-  }
+	// Selected rows when the tree is not the focused element
+	.virtualized-table:not(:focus) {
+		.row.selected {
+			background: #dcdcdc;
+			color: initial;
+		}
+	}
 }

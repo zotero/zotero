@@ -12,11 +12,11 @@
   height: 0;
   flex-direction: column;
   > div {
-    display: flex;
-    flex: 1;
-    background-color: -moz-field;
-    overflow: hidden;
-    position: relative;
+	display: flex;
+	flex: 1;
+	background-color: -moz-field;
+	overflow: hidden;
+	position: relative;
   }
 }
 
@@ -27,103 +27,103 @@
   position: relative;
 
   &:focus {
-    outline: none;
+	outline: none;
   }
-  
+
   &.resizing {
-    cursor: col-resize;
-    .cell {
-      cursor: col-resize;
-    }
+	cursor: col-resize;
+	.cell {
+	  cursor: col-resize;
+	}
   }
-   
+
   .cell {
-    min-width: 30px;
-    cursor: default;
-    white-space: nowrap;
-    flex-grow: 1;
-    flex-shrink: 1;
-    box-sizing: border-box;
-    
-    &.primary {
-      display: flex;
-      align-items: center;
+	min-width: 30px;
+	cursor: default;
+	white-space: nowrap;
+	flex-grow: 1;
+	flex-shrink: 1;
+	box-sizing: border-box;
 
-      :not(.cell-text) {
-        flex-shrink: 0
-      }
+	&.primary {
+	  display: flex;
+	  align-items: center;
 
-      .cell-text {
-        flex-shrink: 1;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        margin-inline-start: 6px;
-      }
-      
-      .twisty + .cell-text, .spacer-twisty + .cell-text {
-        margin-inline-start: 0;
-      }
-    }
+	  :not(.cell-text) {
+		flex-shrink: 0
+	  }
 
-    .cell-icon {
-      min-width: 16px;
-    }
+	  .cell-text {
+		flex-shrink: 1;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		margin-inline-start: 6px;
+	  }
+
+	  .twisty + .cell-text, .spacer-twisty + .cell-text {
+		margin-inline-start: 0;
+	  }
+	}
+
+	.cell-icon {
+	  min-width: 16px;
+	}
   }
 
   .row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: 100%;
-    box-sizing: border-box;
-    
-    &.drop {
-      color: $shade-0 !important;
-      background: $shade-5 !important;
-      * {
-        pointer-events: none !important;
-      }
-    }
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	width: 100%;
+	box-sizing: border-box;
 
-    span.drop-before, span.drop-after {
-      position: absolute;
-      width: 20%;
-      height: 1px;
-      background-color: $shade-5;
-      pointer-events: none;
-    }
-    span.drop-before {
-      top: 0;
-    }
-    span.drop-after {
-      bottom: -1px;
-    }
-    
-    &.selected:not(.highlighted) {
-      background-color: highlight;
-      color: highlighttext;
-    }
+	&.drop {
+	  color: $shade-0 !important;
+	  background: $shade-5 !important;
+	  * {
+		pointer-events: none !important;
+	  }
+	}
 
-    &.highlighted {
-      background: #FFFF99;
-    }
+	span.drop-before, span.drop-after {
+	  position: absolute;
+	  width: 20%;
+	  height: 1px;
+	  background-color: $shade-5;
+	  pointer-events: none;
+	}
+	span.drop-before {
+	  top: 0;
+	}
+	span.drop-after {
+	  bottom: -1px;
+	}
 
-    &.unread {
-      font-weight: bold;
-    }
+	&.selected:not(.highlighted) {
+	  background-color: highlight;
+	  color: highlighttext;
+	}
 
-    &.context-row {
-      color: gray;
-    }
+	&.highlighted {
+	  background: #FFFF99;
+	}
+
+	&.unread {
+	  font-weight: bold;
+	}
+
+	&.context-row {
+	  color: gray;
+	}
   }
 
   .column-drag-marker {
-    z-index: 99999;
-    position: absolute;
-    top: 0;
-    height: 100%;
-    width: 2px;
-    background-color: #ccc;
+	z-index: 99999;
+	position: absolute;
+	top: 0;
+	height: 100%;
+	width: 2px;
+	background-color: #ccc;
   }
 }
 
@@ -137,62 +137,62 @@
   height: 14px;
   overflow: hidden;
   border-inline-end: 1px solid #ddd;
-  
-  &.static-columns {
-    pointer-events: none;
-  }
- 
-  .column-picker {
-    text-align: center;
-  }
- 
-  .cell {
-    display: flex;
-    position: relative;
-    height: 100%;
-    align-items: center;
 
-    &:hover {
-      background: #fff;
-    }
-    
-    &.dragging {
-      background: #e9e9e9;
-    }
-     
-    .resizer {
-      background: linear-gradient(#ddd, #ddd) no-repeat center/1px 80%;
-      cursor: col-resize;
-      height: 100%;
-      content: "\00a0";
-      display: block;
-      position: absolute;
-      left: -5px;
-      min-width: 10px;
-    }
-    
-    .label {
-      margin-inline-start: 10px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    &.cell-icon {
-      > .label {
-        margin-inline-start: 0;
-      }
-      justify-content: center;
-    }
-    
-    .sort-indicator {
-      -moz-appearance: toolbarbutton-dropdown;
-      display: block;
-      position: absolute;
-      right: 10px;
-      
-      &.ascending {
-        transform: rotate(180deg);
-      }
-    }
+  &.static-columns {
+	pointer-events: none;
+  }
+
+  .column-picker {
+	text-align: center;
+  }
+
+  .cell {
+	display: flex;
+	position: relative;
+	height: 100%;
+	align-items: center;
+
+	&:hover {
+	  background: #fff;
+	}
+
+	&.dragging {
+	  background: #e9e9e9;
+	}
+
+	.resizer {
+	  background: linear-gradient(#ddd, #ddd) no-repeat center/1px 80%;
+	  cursor: col-resize;
+	  height: 100%;
+	  content: "\00a0";
+	  display: block;
+	  position: absolute;
+	  left: -5px;
+	  min-width: 10px;
+	}
+
+	.label {
+	  margin-inline-start: 10px;
+	  overflow: hidden;
+	  text-overflow: ellipsis;
+	}
+	&.cell-icon {
+	  > .label {
+		margin-inline-start: 0;
+	  }
+	  justify-content: center;
+	}
+
+	.sort-indicator {
+	  -moz-appearance: toolbarbutton-dropdown;
+	  display: block;
+	  position: absolute;
+	  right: 10px;
+
+	  &.ascending {
+		transform: rotate(180deg);
+	  }
+	}
   }
 }
 
@@ -200,17 +200,17 @@
   flex: 1 0;
   max-width: 100%;
   overflow: auto;
-  
+
   .row {
-    padding-inline-start: 6px;
+	padding-inline-start: 6px;
   }
-  
+
   .cell {
-    padding: 2px 5px;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    pointer-events: none;
-    min-height: 90%;
+	padding: 2px 5px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	pointer-events: none;
+	min-height: 90%;
   }
 }
 .spacer-twisty {
@@ -224,28 +224,28 @@
   align-items: center;
 
   svg {
-    fill: #444;
-    transition: transform 0.125s ease;
-    transform: rotate(-90deg);
+	fill: #444;
+	transition: transform 0.125s ease;
+	transform: rotate(-90deg);
   }
 
   &.open svg {
-    transform: rotate(0deg) !important;
+	transform: rotate(0deg) !important;
   }
 }
 
 *[dir=rtl] {
   .virtualized-table-header {
-    .cell .sort-indicator {
-      left: 10px;
-      right: initial;
-    }
-    .resizer {
-      right: -5px;
-      left: initial;
-    }
+	.cell .sort-indicator {
+	  left: 10px;
+	  right: initial;
+	}
+	.resizer {
+	  right: -5px;
+	  left: initial;
+	}
   }
   .twisty svg {
-    transform: rotate(90deg);
+	transform: rotate(90deg);
   }
 }

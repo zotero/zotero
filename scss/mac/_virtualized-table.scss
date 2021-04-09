@@ -1,24 +1,24 @@
 .virtualized-table, .drag-image-container {
-  .twisty {
-    width: 19px;
-    
-    svg {
-      fill: #888;
-      width: 16px;
-    }
-  }
+	.twisty {
+		width: 19px;
 
-  .focused:not(.highlighted) .twisty svg {
-    fill: #fff;
-  }
+		svg {
+			fill: #888;
+			width: 16px;
+		}
+	}
 
-  .spacer-twisty {
-    min-width: 19px;
-  }
+	.focused:not(.highlighted) .twisty svg {
+		fill: #fff;
+	}
+
+	.spacer-twisty {
+		min-width: 19px;
+	}
 }
 
 .virtualized-table-body, .drag-image-container{
-  .cell:not(:first-child) {
-    border-inline-start: 1px solid #ddd;
-  }
+	.cell:not(:first-child) {
+		border-inline-start: 1px solid #ddd;
+	}
 }

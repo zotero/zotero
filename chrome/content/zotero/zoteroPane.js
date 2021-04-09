@@ -706,7 +706,7 @@ var ZoteroPane = new function()
 				}
 			}
 			else if ((event.keyCode == event.DOM_VK_BACK_SPACE && Zotero.isMac) ||
-				event.keyCode == event.DOM_VK_DELETE) {
+					event.keyCode == event.DOM_VK_DELETE) {
 				// If Cmd/Shift delete, use forced mode, which does different
 				// things depending on the context
 				var force = event.metaKey || (!Zotero.isMac && event.shiftKey);
@@ -1292,14 +1292,6 @@ var ZoteroPane = new function()
 	 */
 	this.itemSelected = function () {
 		return Zotero.Promise.coroutine(function* () {
-			// Don't select item until items list has loaded
-			//
-			// This avoids an error if New Item is used while the pane is first loading.
-			// var promise = this.itemsView.waitForLoad();
-			// if (promise.isPending()) {
-			// 	yield promise;
-			// }
-			
 			if (!this.itemsView || !this.itemsView.selection) {
 				Zotero.debug("Items view not available in itemSelected", 2);
 				return false;

@@ -3,45 +3,45 @@
   min-height: 150px;
   height: 150px;
   width: 290px;
-  
+
   .items-tree-message {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
   }
 }
 #zotero-items-tree {
   .virtualized-table-header .icon {
-    width: 13px;
-    height: 13px;
+	width: 13px;
+	height: 13px;
   }
-  
+
   .cell.primary {
-    .retracted {
-      width: 12px;
-      margin-inline-start: 3px;
-    }
-    
-    .tag-swatch {
-      display: inline-block;
-      min-width: 8px;
-      min-height: 8px;
-      margin-inline-start: 3px;
-      border-radius: 1px;
-    }
+	.retracted {
+	  width: 12px;
+	  margin-inline-start: 3px;
+	}
+
+	.tag-swatch {
+	  display: inline-block;
+	  min-width: 8px;
+	  min-height: 8px;
+	  margin-inline-start: 3px;
+	  border-radius: 1px;
+	}
   }
-  
+
   .cell.hasAttachment {
-    box-sizing: content-box;
-    padding: 0 4px;
+	box-sizing: content-box;
+	padding: 0 4px;
   }
-  
+
   .cell.numNotes {
-    text-align: center;
+	text-align: center;
   }
 }
