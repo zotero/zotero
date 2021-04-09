@@ -28,7 +28,7 @@
 const React = require('react');
 const PropTypes = require('prop-types');
 const cx = require('classnames');
-const JSWindow = require('./js-window');
+const WindowedList = require('./windowed-list');
 const Draggable = require('./draggable');
 const { injectIntl } = require('react-intl');
 const { IconDownChevron, getDOMElement } = require('components/icons');
@@ -255,21 +255,21 @@ TreeSelectionStub = Object.assign(TreeSelectionStub, {
 /**
  * A virtualized-table, inspired by https://github.com/bvaughn/react-virtualized
  *
- * Uses a custom js-window for fast item rendering and
+ * Uses a custom windowed-list for fast item rendering and
  * CSS style injection for fast column resizing
  *
- * Exposes the js-window to the object creator via a ref
+ * Exposes the windowed-list to the object creator via a ref
  * and also includes a bunch of helper methods for invalidating
  * rows, scrolling, etc.
  *
  * Any updates to actual rows being drawn have to be told about
- * to the js-window instance. More fundamental changes like the number and
+ * to the windowed-list instance. More fundamental changes like the number and
  * type of columns, window resizes, etc, have to be told about to the
  * VirtualizedTable instance via forceUpdate()
  *
  * Selection is controlled via the .selection property, which is an
  * instance of TableSelection. Selection changes perform their own row invalidation
- * on the js-window.
+ * on the windowed-list.
  */
 class VirtualizedTable extends React.Component {
 	constructor(props) {
@@ -371,7 +371,7 @@ class VirtualizedTable extends React.Component {
 		// Used for initial column widths calculation
 		containerWidth: PropTypes.number,
 
-		// Internal js-window ref
+		// Internal windowed-list ref
 		treeboxRef: PropTypes.func,
 
 		// Render with display: none
@@ -628,7 +628,7 @@ class VirtualizedTable extends React.Component {
 	}
 
 	/**
-	 * Scroll the row into view. Delegates to js-window
+	 * Scroll the row into view. Delegates to windowed-list
 	 *
 	 * @param index
 	 */
@@ -846,7 +846,7 @@ class VirtualizedTable extends React.Component {
 	}
 
 	componentDidMount() {
-		this._jsWindow = new JSWindow(this._getJSWindowOptions());
+		this._jsWindow = new WindowedList(this._getWindowedListOptions());
 		this._jsWindow.initialize();
 		this._jsWindow.render();
 		this._updateWidth();
@@ -883,7 +883,7 @@ class VirtualizedTable extends React.Component {
 		}
 	}
 	
-	_getJSWindowOptions() {
+	_getWindowedListOptions() {
 		return {
 			getItemCount: this.props.getRowCount,
 			itemHeight: this._rowHeight,
@@ -1020,7 +1020,7 @@ class VirtualizedTable extends React.Component {
 	}
 
 	/**
-	 * Invalidates the underlying js-window
+	 * Invalidates the underlying windowed-list
 	 */
 	invalidate() {
 		if (!this._jsWindow) return;
@@ -1029,7 +1029,7 @@ class VirtualizedTable extends React.Component {
 	}
 
 	/**
-	 * Rerenders/renders the underlying js-window. Use for container size changes
+	 * Rerenders/renders the underlying windowed-list. Use for container size changes
 	 * to render missing items and update widths
 	 */
 	rerender = () => {
@@ -1050,7 +1050,7 @@ class VirtualizedTable extends React.Component {
 		}
 
 		if (!this._jsWindow) return;
-		this._jsWindow.update(this._getJSWindowOptions());
+		this._jsWindow.update(this._getWindowedListOptions());
 		this._setAlternatingRows();
 		this._jsWindow.invalidate();
 	}
@@ -1059,7 +1059,7 @@ class VirtualizedTable extends React.Component {
 	
 	_updateWidth() {
 		if (!this.props.showHeader) return;
-		const jsWindow = document.querySelector(`#${this._jsWindowID} .js-window`);
+		const jsWindow = document.querySelector(`#${this._jsWindowID} .windowed-list`);
 		if (!jsWindow) return;
 		const tree = document.querySelector(`#${this.props.id}`);
 		const header = document.querySelector(`#${this.props.id} .virtualized-table-header`);
@@ -1069,7 +1069,7 @@ class VirtualizedTable extends React.Component {
 	}
 
 	/**
-	 * Rerender a row in the underlying js-window
+	 * Rerender a row in the underlying windowed-list
 	 * @param index
 	 */
 	invalidateRow(index) {
@@ -1078,7 +1078,7 @@ class VirtualizedTable extends React.Component {
 	}
 
 	/**
-	 * Rerender a row range in the underlying js-window
+	 * Rerender a row range in the underlying windowed-list
 	 * @param startIndex
 	 * @param endIndex
 	 */

@@ -45,12 +45,12 @@ module.exports = class {
 	 * 	- getItemCount {Function} a function that returns the number of items currently on display
 	 * 	- renderItem {Function} a function that returns a DOM element for an individual row to display
 	 * 	- itemHeight {Integer}
-	 * 	- targetElement {DOMElement} a container DOM element for the js-window
+	 * 	- targetElement {DOMElement} a container DOM element for the windowed-list
 	 */
 	constructor(options) {
 		for (let option of requiredOptions) {
 			if (!options.hasOwnProperty(option)) {
-				throw new Error('Attempted to initialize js-window without a required option: ' + option);
+				throw new Error('Attempted to initialize windowed-list without a required option: ' + option);
 			}
 		}
 		
@@ -64,12 +64,12 @@ module.exports = class {
 	}
 
 	/**
-	 * Call once to add the js-window DOM element to the container
+	 * Call once to add the windowed-list DOM element to the container
 	 */
 	initialize() {
 		const { targetElement } = this;
 		this.innerElem = document.createElementNS("http://www.w3.org/1999/xhtml", 'div');
-		this.innerElem.className = "js-window";
+		this.innerElem.className = "windowed-list";
 
 		targetElement.appendChild(this.innerElem);
 		targetElement.addEventListener('scroll', this._handleScroll);
@@ -78,7 +78,7 @@ module.exports = class {
 	}
 
 	/**
-	 * Call to remove the js-window from the container
+	 * Call to remove the windowed-list from the container
 	 */
 	destroy() {
 		if (this.innerElem) {
