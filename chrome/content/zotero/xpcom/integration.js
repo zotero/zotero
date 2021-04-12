@@ -72,10 +72,12 @@ Zotero.Integration = new function() {
 	/**
 	 * Begin listening for integration commands on the given pipe
 	 * @param {String} pipe The path to the pipe
+	 * @param {Function} callback The callback to call on pipe read
 	 */
-	this.initPipe = function(pipe) {
+	this.initPipe = function (pipe, callback) {
 		Zotero.IPC.Pipe.initPipeListener(pipe, function(string) {
 			if(string != "") {
+				if (typeof callback == 'function') callback(string);
 				// exec command if possible
 				var parts = string.match(/^([^ \n]*) ([^ \n]*)(?: ([^\n]*))?\n?$/);
 				if(parts) {
