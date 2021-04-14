@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-import FilePicker from 'zotero/filePicker';
+import FilePicker from 'zotero/modules/filePicker';
 
 /*
  * This object contains the various functions for the interface
@@ -1049,7 +1049,7 @@ var ZoteroPane = new function()
 
 	this.initItemsTree = async function () {
 		try {
-			const ItemTree = require('containers/itemTree');
+			const ItemTree = require('zotero/itemTree');
 			var itemsTree = document.getElementById('zotero-items-tree');
 			ZoteroPane.itemsView = await ItemTree.init(itemsTree, {
 				id: "main",
@@ -1072,7 +1072,7 @@ var ZoteroPane = new function()
 
 	this.initCollectionsTree = async function () {
 		try {
-			const CollectionTree = require('containers/collectionTree');
+			const CollectionTree = require('zotero/collectionTree');
 			var collectionsTree = document.getElementById('zotero-collections-tree');
 			ZoteroPane.collectionsView = await CollectionTree.init(collectionsTree, {
 				onSelectionChange: prevSelection => ZoteroPane.onCollectionSelected(prevSelection),

@@ -26,7 +26,7 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
 const { IntlProvider } = require('react-intl');
-const LibraryTree = require('containers/libraryTree');
+const LibraryTree = require('./libraryTree');
 const VirtualizedTable = require('components/virtualized-table');
 const { TreeSelectionStub } = VirtualizedTable;
 const Icons = require('components/icons');

@@ -25,7 +25,7 @@
 
 "use strict";
 
-import FilePicker from 'zotero/filePicker';
+import FilePicker from 'zotero/modules/filePicker';
 
 Zotero.DataDirectory = {
 	MIGRATION_MARKER: 'migrate-dir',

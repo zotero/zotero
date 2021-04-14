@@ -99,8 +99,7 @@ var require = (function() {
 			'': 'resource://zotero/',
 			'containers/': 'chrome://zotero/content/containers/',
 			'components/': 'chrome://zotero/content/components/',
-			'zotero/': 'chrome://zotero/content/modules/',
-			'@zotero/': 'chrome://zotero/content/modules/'
+			'zotero/': 'chrome://zotero/content/',
 		},
 		globals
 	});

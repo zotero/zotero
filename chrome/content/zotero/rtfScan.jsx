@@ -27,7 +27,7 @@
  * @fileOverview Tools for automatically retrieving a citation for the given PDF
  */
 
-import FilePicker from 'zotero/filePicker';
+import FilePicker from 'zotero/modules/filePicker';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import VirtualizedTable from 'components/virtualized-table';

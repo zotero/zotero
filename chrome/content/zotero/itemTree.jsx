@@ -28,12 +28,12 @@ const PropTypes = require("prop-types");
 const React = require('react');
 const ReactDOM = require('react-dom');
 const { IntlProvider } = require('react-intl');
-const LibraryTree = require('containers/libraryTree');
+const LibraryTree = require('./libraryTree');
 const VirtualizedTable = require('components/virtualized-table');
 const { renderCell, TreeSelectionStub } = VirtualizedTable;
 const Icons = require('components/icons');
 const { getDOMElement } = Icons;
-const { COLUMNS } = require('containers/itemTreeColumns');
+const { COLUMNS } = require('./itemTreeColumns');
 const { Cc, Ci, Cu } = require('chrome');
 Cu.import("resource://gre/modules/osfile.jsm");
 

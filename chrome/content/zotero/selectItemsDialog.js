@@ -23,8 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
-import CollectionTree from 'containers/collectionTree';
-import ItemTree from 'containers/itemTree';
+import CollectionTree from 'zotero/collectionTree';
+import ItemTree from 'zotero/itemTree';
 
 var itemsView;
 var collectionsView;

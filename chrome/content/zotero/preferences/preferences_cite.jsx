@@ -25,7 +25,7 @@
 
 "use strict";
 
-import FilePicker from 'zotero/filePicker';
+import FilePicker from 'zotero/modules/filePicker';
 
 var React = require('react');
 var ReactDOM = require('react-dom');
