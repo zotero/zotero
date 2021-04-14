@@ -23,6 +23,9 @@
 	***** END LICENSE BLOCK *****
 */
 
+// Run in RunJS:
+// window.open('chrome://zotero/content/tools/data_generator.html', '_blank', 'chrome,extrachrome,menubar,resizable,scrollbars,status,toolbar')
+
 const React = require('react');
 const ReactDOM = require('react-dom');
 
