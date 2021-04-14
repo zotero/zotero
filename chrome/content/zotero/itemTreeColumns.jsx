@@ -35,6 +35,7 @@ const COLUMNS = [
 		label: "zotero.items.title_column",
 		ignoreInColumnPicker: "true",
 		flex: 4,
+		inMenu: false,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
 	{
