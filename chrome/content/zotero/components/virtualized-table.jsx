@@ -1269,7 +1269,6 @@ var Columns = class {
 		}
 	}
 
-
 	setOrder = (index, insertBefore) => {
 		const column = this._columns[index];
 		if (column.ordinal == insertBefore) return;
@@ -1285,6 +1284,18 @@ var Columns = class {
 			prefs[column.dataKey] = prefs[column.dataKey] || {};
 			prefs[column.dataKey].ordinal = column.ordinal = index;
 		});
+		this._storePrefs(prefs);
+		this._updateVirtualizedTable();
+	}
+	
+	restoreDefaultOrder = () => {
+		let prefs = this._getPrefs();
+		for (const column of this._columns) {
+			column.ordinal = this._virtualizedTable.props.columns.findIndex(
+				col => col.dataKey == column.dataKey);
+			prefs[column.dataKey].ordinal = column.ordinal;
+		}
+		this._columns.sort((a, b) => a.ordinal - b.ordinal);
 		this._storePrefs(prefs);
 		this._updateVirtualizedTable();
 	}

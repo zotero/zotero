@@ -3275,11 +3275,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		
 		let sep = doc.createElementNS(ns, 'menuseparator');
-		sep.setAttribute('anonid', prefix + 'sep');
+		// sep.setAttribute('anonid', prefix + 'sep');
 		menupopup.appendChild(sep);
 		
-		// TODO: RESTORE DEFAULT ORDER option
 		//
+		// Restore Default Column Order
+		//
+		let menuitem = doc.createElementNS(ns, 'menuitem');
+		menuitem.setAttribute('label', Zotero.Intl.strings['zotero.items.restoreColumnOrder.label']);
+		menuitem.setAttribute('anonid', prefix + 'restore-order');
+		menuitem.addEventListener('command', () => this.tree._columns.restoreDefaultOrder());
+		menupopup.appendChild(menuitem);
 		
 		document.children[0].appendChild(menupopup);
 		menupopup.openPopup(null, null, event.clientX + 2, event.clientY + 2);
