@@ -319,7 +319,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 	
 	async setItemsPaneMessage(message) {
-		if (message.outerHTML) {
+		if (typeof message == 'string') {
+			let messageParts = message.split("\n\n");
+			message = messageParts.map(part => `<p>${part}</p>`).join('');
+		}
+		else if (message.outerHTML) {
 			message = message.outerHTML;
 		}
 		const shouldRerender = this._itemsPaneMessage != message;
