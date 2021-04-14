@@ -1168,6 +1168,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		try {
 			// Prevent modifier keys from doing their normal things
 			event.preventDefault();
+			var previousOrientation = Zotero.DragDrop.currentOrientation;
 			Zotero.DragDrop.currentOrientation = getDragTargetOrient(event);
 			
 			if (!this.canDropCheck(index, Zotero.DragDrop.currentOrientation, event.dataTransfer)) {
@@ -1260,7 +1261,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			} else {
 				this._dropRow = null;
 			}
-			if (prevDropRow != this._dropRow) {
+			if (prevDropRow != this._dropRow || previousOrientation != Zotero.DragDrop.currentOrientation) {
 				typeof prevDropRow == 'number' && this.tree.invalidateRow(prevDropRow);
 				this.tree.invalidateRow(index);
 			}

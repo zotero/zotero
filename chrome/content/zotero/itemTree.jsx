@@ -2053,6 +2053,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		try {
 			event.preventDefault();
 			event.stopPropagation();
+			var previousOrientation = Zotero.DragDrop.currentOrientation;
 			Zotero.DragDrop.currentOrientation = getDragTargetOrient(event);
 			Zotero.debug(`Dragging over item ${row} with ${Zotero.DragDrop.currentOrientation}, drop row: ${this._dropRow}`);
 
@@ -2144,7 +2145,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			} else {
 				this._dropRow = null;
 			}
-			if (prevDropRow != this._dropRow) {
+			if (prevDropRow != this._dropRow || previousOrientation != Zotero.DragDrop.currentOrientation) {
 				typeof prevDropRow == 'number' && this.tree.invalidateRow(prevDropRow);
 				this.tree.invalidateRow(row);
 			}
