@@ -3,18 +3,8 @@
   min-height: 150px;
   height: 150px;
   width: 290px;
-
-  .items-tree-message {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 100%;
-	height: 100%;
-	position: absolute;
-	top: 0;
-	left: 0;
-  }
 }
+
 #zotero-items-tree {
   .virtualized-table-header .icon {
 	width: 13px;
