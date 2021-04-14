@@ -999,6 +999,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 	
 	toggleOpenState = async (index) => {
+		if (this.isContainerEmpty(index)) return;
 		if (this.isContainerOpen(index)) {
 			return this._closeContainer(index);
 		}
@@ -2030,7 +2031,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 
 	_closeContainer(row, skipMap) {
-		if (!this.isContainerOpen(row)) return;
+		if (!this.isContainerOpen(row) || this.isContainerEmpty(row)) return;
 		
 		this.selection.selectEventsSuppressed = true;
 		let selectParent = this.getParentIndex(this.selection.focused);
