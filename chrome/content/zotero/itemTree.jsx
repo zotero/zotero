@@ -1010,7 +1010,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	handleActivate = (event, indices) => {
 		// Ignore double-clicks in duplicates view on everything except attachments
 		let items = indices.map(index => this.getRow(index).ref);
-		if (event.button == 0 && this.collectionTreeRow.isDuplicates) {
+		if (event.button == 0 && this.collectionTreeRow.isDuplicates()) {
 			if (items.length != 1 || !items[0].isAttachment()) {
 				return false;
 			}
