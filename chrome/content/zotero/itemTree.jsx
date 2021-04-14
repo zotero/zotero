@@ -1128,7 +1128,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					multiSelect: true,
 
 					onSelectionChange: this._handleSelectionChange,
-					isSelectable: () => true,
+					isSelectable: this.isSelectable,
 					getParentIndex: this.getParentIndex,
 					isContainer: this.isContainer,
 					isContainerEmpty: this.isContainerEmpty,
@@ -1904,6 +1904,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 	}
 
+	isSelectable = (index) => {
+		return !this._searchMode || this._searchItemIDs.has(this.getRow(index).id);
+	}
+	
 	isContainer = (index) => {
 		return this.getRow(index).ref.isRegularItem();
 	}

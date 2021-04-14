@@ -542,7 +542,22 @@ class VirtualizedTable extends React.Component {
 
 		case "a":
 			// i.e. if CTRL/CMD pressed down
-			if (movePivot) this.selection.rangedSelect(0, this.props.getRowCount()-1);
+			if (movePivot) {
+				// Do not select unselectable (disabled) rows
+				for (let i = 0; i < this.props.getRowCount(); i++) {
+					if (this.props.isSelectable(i)) {
+						this.selection.selected.add(i);
+					} else {
+						this.selection.selected.delete(i);
+					}
+				}
+				if (this.selection.selectEventsSuppressed) break;
+				this.invalidate();
+				if (!this.selection.selectEventsSuppressed) {
+					this.props.onSelectionChange(this, shouldDebounce);
+				}
+				this.selection.rangedSelect(0, this.props.getRowCount()-1);
+			}
 			break;
 			
 		case " ":
