@@ -492,7 +492,7 @@ class VirtualizedTable extends React.Component {
 		if (e.altKey) return;
 		
 		const shiftSelect = e.shiftKey;
-		const movePivot = e.ctrlKey || e.metaKey;
+		const movePivot = Zotero.isMac ? e.metaKey : e.ctrlKey;
 		const rowCount = this.props.getRowCount();
 
 		switch (e.key) {
@@ -554,9 +554,8 @@ class VirtualizedTable extends React.Component {
 				if (this.selection.selectEventsSuppressed) break;
 				this.invalidate();
 				if (!this.selection.selectEventsSuppressed) {
-					this.props.onSelectionChange(this, shouldDebounce);
+					this.props.onSelectionChange(this, false);
 				}
-				this.selection.rangedSelect(0, this.props.getRowCount()-1);
 			}
 			break;
 			

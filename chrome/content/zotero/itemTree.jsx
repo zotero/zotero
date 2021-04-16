@@ -365,6 +365,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					? []
 					: newSearchItems.filter(item => !!item.parentItemID).map(item => item.parentItemID)
 			);
+			this._searchParentIDs = newSearchParentIDs;
 			newSearchItems = new Set(newSearchItems);
 			
 			var newCellTextCache = {};
@@ -1058,6 +1059,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 			// since we need to return false below to prevent virtualized-table from handling the event
 			const _promise = Zotero.Tags.toggleItemsListTags(items, colorData.name);
 			return false;
+		}
+		else if (event.key == 'a' && (Zotero.isMac ? event.metaKey : event.ctrlKey)) {
+			if (!this.collectionTreeRow.isPublications()) {
+				this.expandMatchParents(this._searchParentIDs);
+			}
 		}
 		else if (event.key == '+' && !(event.ctrlKey || event.altKey || event.metaKey)) {
 			this.expandAllRows();
