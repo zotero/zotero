@@ -482,7 +482,7 @@ var Zotero_QuickFormat = new function () {
 		// exactly by # of items cited from each library, but maybe it's better this way.
 		_updateCitationObject();
 		for(var citationItem of io.citation.citationItems) {
-			var citedItem = Zotero.Cite.getItem(citationItem.id);
+			var citedItem = io.customGetItem && io.customGetItem(citationItem) || Zotero.Cite.getItem(citationItem.id);
 			if(!citedItem.cslItemID) {
 				var libraryID = citedItem.libraryID;
 				if(libraryID in nCitedItemsFromLibrary) {
@@ -720,7 +720,7 @@ var Zotero_QuickFormat = new function () {
 	 * Builds the string to go inside a bubble
 	 */
 	function _buildBubbleString(citationItem) {
-		var item = Zotero.Cite.getItem(citationItem.id);
+		var item = io.customGetItem && io.customGetItem(citationItem) || Zotero.Cite.getItem(citationItem.id);
 		// create text for bubble
 		
 		// Creator
@@ -1098,7 +1098,7 @@ var Zotero_QuickFormat = new function () {
 		panelLocator.value = citationItem["locator"] ? citationItem["locator"] : "";
 		panelSuppressAuthor.checked = !!citationItem["suppress-author"];
 		
-		var item = Zotero.Cite.getItem(citationItem.id);
+		var item = io.customGetItem && io.customGetItem(citationItem) || Zotero.Cite.getItem(citationItem.id);
 		document.getElementById("citation-properties-title").textContent = item.getDisplayTitle();
 		while(panelInfo.hasChildNodes()) panelInfo.removeChild(panelInfo.firstChild);
 		_buildItemDescription(item, panelInfo);

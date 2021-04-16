@@ -23,12 +23,18 @@
     ***** END LICENSE BLOCK *****
 */
 
+// Note: TinyMCE is automatically doing some meaningless corrections to
+// note-editor produced HTML. Which might result to more
+// conflicts, especially in group libraries
+
+// Note: Synchrounous save can still affect dateModified
+
 // When changing this update in `note-editor` as well.
 // This only filters images that are being imported from a URL.
 // In all other cases `note-editor` should decide what
 // image types can be imported, and if not then
 // Zotero.Attachments.importEmbeddedImage does.
-// Additionally, the allready imported images should never be
+// Additionally, the already imported images should never be
 // affected
 const DOWNLOADED_IMAGE_TYPE = [
 	'image/jpeg',
@@ -60,6 +66,7 @@ class EditorInstance {
 		this._deletedImages = {};
 		this._quickFormatWindow = null;
 		this._isAttachment = this._item.isAttachment();
+		this._citationItemsList = [];
 		this._prefObserverIDs = [
 			Zotero.Prefs.registerObserver('note.fontSize', this._handleFontChange),
 			Zotero.Prefs.registerObserver('note.fontFamily', this._handleFontChange)
@@ -111,7 +118,7 @@ class EditorInstance {
 		// both sides, editor instance can continue its work
 		// in the backstage. Although the danger here is that
 		// multiple editor instances of the same note can start
-		// compeating
+		// competing
 		this._iframeWindow.removeEventListener('message', this._messageHandler);
 		Zotero.Notes.unregisterEditorInstance(this);
 		this.saveSync();
@@ -121,30 +128,40 @@ class EditorInstance {
 		this._postMessage({ action: 'focus' });
 	}
 
-	async updateCitationsForURIs(uris) {
-		let subscriptions = this._subscriptions
-		.filter(s => s.data.citation && s.data.citation.citationItems
-		.some(citationItem => citationItem.uris && uris.some(uri => citationItem.uris.includes(uri))));
-		for (let subscription of subscriptions) {
-			await this._feedSubscription(subscription);
-		}
-	}
-	
 	async notify(ids) {
-		let items = await Zotero.Items.getAsync(ids);
+		// Update itemData and formatted citation in notes
+		if (this._readOnly || !this._item) {
+			return;
+		}
 
-		// Update attachments
-		let keys = items.map(item => item.key);
-		this._subscriptions
-		.filter(s => keys.includes(s.data.attachmentKey))
-		.forEach(s => this._feedSubscription(s));
+		// Make sure only single sibling instance does automatic
+		// citation update, and preferably the focused one
+		// to prevent another instances in the background resetting
+		// each other and the one where typing happens
+		
+		// This is a temporary solution, and in future sibling instances
+		// should have a better mechanism to share state, images,
+		// undo stack and know which one now is the "master"
+		let siblingInstances = Zotero.Notes._editorInstances
+		.filter(x => x._item.id === this._item.id);
+		if (siblingInstances.length) {
+			let masterInstance = siblingInstances
+			.find(x => x._iframeWindow.document.hasFocus());
+			if (!masterInstance) {
+				masterInstance = siblingInstances[0];
+			}
+			if (masterInstance !== this) {
+				return;
+			}
+		}
+	
+		let items = await Zotero.Items.getAsync(ids);
 
 		// Update citations
 		let uris = items.map(x => Zotero.URI.getItemURI(x)).filter(x => x);
-		this._subscriptions
-		.filter(s => s.data.citation && s.data.citation.citationItems
-		.some(citationItem => citationItem.uris && uris.some(uri => citationItem.uris.includes(uri))))
-		.forEach(s => this._feedSubscription(s));
+		let citationItemsList = this._citationItemsList
+		.filter(ci => ci.uris && uris.some(uri => ci.uris.includes(uri)));
+		await this._updateCitationItems(citationItemsList);
 	}
 
 	saveSync() {
@@ -253,7 +270,7 @@ class EditorInstance {
 					citationItems: [citationItem],
 					properties: {}
 				};
-				let formatted = (await this._getFormattedCitationParts(citation)).join(';');
+				let formatted = this._formatCitation(citation);
 				citationHTML = `<span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">(${formatted})</span>`;
 			}
 			
@@ -310,7 +327,7 @@ class EditorInstance {
 					}],
 					properties: {}
 				};
-				let formatted = (await this._getFormattedCitationParts(citation)).join(';');
+				let formatted = this._formatCitation(citation);
 				html += `<p><span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">(${formatted})</span></p>`;
 			}
 			else if (item.isNote()) {
@@ -364,9 +381,12 @@ class EditorInstance {
 						let annotation = node.getAttribute('data-annotation');
 						try {
 							annotation = JSON.parse(decodeURIComponent(annotation));
-							fillWithItemData([annotation.citationItem]);
-							annotation = encodeURIComponent(JSON.stringify(annotation));
-							node.setAttribute('data-annotation', annotation);
+							// citationItem is allowed to not exist in annotation
+							if (annotation.citationItem) {
+								fillWithItemData([annotation.citationItem]);
+								annotation = encodeURIComponent(JSON.stringify(annotation));
+								node.setAttribute('data-annotation', annotation);
+							}
 						}
 						catch (e) {
 							Zotero.logError(e);
@@ -503,21 +523,11 @@ class EditorInstance {
 					return;
 				}
 				case 'update': {
-					let { noteData } = message;
+					let { noteData, system } = message;
 					if (this._readOnly) {
 						return;
 					}
-					await this._save(noteData);
-					return;
-				}
-				case 'generateCitation': {
-					if (this._readOnly) {
-						return;
-					}
-					let { citation, pos } = message;
-					let formatted = (await this._getFormattedCitationParts(citation)).join(';');
-					let html = `<span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">(${formatted})</span>`;
-					this._postMessage({ action: 'insertHTML', pos, html });
+					await this._save(noteData, system);
 					return;
 				}
 				case 'subscribeProvider': {
@@ -531,23 +541,52 @@ class EditorInstance {
 					this._subscriptions.splice(this._subscriptions.findIndex(s => s.id === id), 1);
 					return;
 				}
+				case 'updateCitationItemsList': {
+					let { list } = message;
+					let newList = [];
+					for (let item of list) {
+						let existingItem = this._citationItemsList
+						.find(ci => ci.uris.some(uri => item.uris.includes(uri)));
+						if (!existingItem) {
+							newList.push(item);
+						}
+					}
+					await this._updateCitationItems(newList);
+					this._citationItemsList = list;
+					return;
+				}
 				case 'openCitationPopup': {
 					let { nodeID, citation } = message;
 					if (this._readOnly) {
 						return;
 					}
 					citation = JSON.parse(JSON.stringify(citation));
-					let availableCitationItems = [];
 					for (let citationItem of citation.citationItems) {
 						let item = await Zotero.EditorInstance.getItemFromURIs(citationItem.uris);
 						if (item) {
-							availableCitationItems.push({ ...citationItem, id: item.id });
+							citationItem.id = item.id;
 						}
 					}
-					// Notice: Citation items that don't exist in the library aren't shown in the popup
-					citation.citationItems = availableCitationItems;
+					let openedEmpty = !citation.citationItems.length;
+					if (!citation.citationItems.length) {
+						let win = Zotero.getMainWindow();
+						if (win) {
+							let reader = Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID);
+							if (reader) {
+								let item = Zotero.Items.get(reader.itemID);
+								if (item && item.parentItem) {
+									item = item.parentItem;
+									let citationItem = {};
+									citationItem.id = item.id;
+									citationItem.uris = [Zotero.URI.getItemURI(item)];
+									citationItem.itemData = Zotero.Cite.System.prototype.retrieveItem(item);
+									citation.citationItems.push(citationItem);
+								}
+							}
+						}
+					}
 					let libraryID = this._item.libraryID;
-					this._openQuickFormatDialog(nodeID, citation, [libraryID]);
+					this._openQuickFormatDialog(nodeID, citation, [libraryID], openedEmpty);
 					return;
 				}
 				case 'importImages': {
@@ -605,13 +644,23 @@ class EditorInstance {
 		}
 	}
 
+	async _updateCitationItems(citationItemsList) {
+		let citationItems = [];
+		for (let { uris } of citationItemsList) {
+			let item = await Zotero.EditorInstance.getItemFromURIs(uris);
+			if (item) {
+				let itemData = Zotero.Cite.System.prototype.retrieveItem(item);
+				citationItems.push({ uris, itemData });
+			}
+		}
+		if (citationItems.length) {
+			this._postMessage({ action: 'updateCitationItems', citationItems });
+		}
+	}
+
 	async _feedSubscription(subscription) {
 		let { id, type, nodeID, data } = subscription;
-		if (type === 'citation') {
-			let parts = await this._getFormattedCitationParts(data.citation);
-			this._postMessage({ action: 'notifyProvider', id, type, data: { formattedCitation: parts.join(';') } });
-		}
-		else if (type === 'image') {
+		if (type === 'image') {
 			let { attachmentKey } = data;
 			let item = Zotero.Items.getByLibraryAndKey(this._item.libraryID, attachmentKey);
 			if (!item) {
@@ -719,7 +768,7 @@ class EditorInstance {
 		}
 	}
 
-	async _save(noteData) {
+	async _save(noteData, skipDateModifiedUpdate) {
 		if (!noteData) return;
 		let { state, html } = noteData;
 		if (html === undefined) return;
@@ -744,6 +793,7 @@ class EditorInstance {
 					let changed = this._item.setNote(html);
 					if (changed && !this._disableSaving) {
 						await this._item.save({
+							skipDateModifiedUpdate,
 							notifierData: {
 								noteEditorID: this.instanceID,
 								state
@@ -779,13 +829,50 @@ class EditorInstance {
 	}
 
 	/**
-	 * Builds the string to go inside a bubble
+	 * Build citation item preview string (based on _buildBubbleString in quickFormat.js)
 	 */
-	_buildBubbleString(citationItem, str) {
+	_formatCitationItemPreview(citationItem) {
+		const STARTSWITH_ROMANESQUE_REGEXP = /^[&a-zA-Z\u0e01-\u0e5b\u00c0-\u017f\u0370-\u03ff\u0400-\u052f\u0590-\u05d4\u05d6-\u05ff\u1f00-\u1fff\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]/;
+		const ENDSWITH_ROMANESQUE_REGEXP = /[.;:&a-zA-Z\u0e01-\u0e5b\u00c0-\u017f\u0370-\u03ff\u0400-\u052f\u0590-\u05d4\u05d6-\u05ff\u1f00-\u1fff\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]$/;
+
+		let { itemData } = citationItem;
+		let str = '';
+		
+		// Authors
+		let authors = itemData.author;
+		if (authors) {
+			if (authors.length === 1) {
+				str = authors[0].family || authors[0].literal;
+			}
+			else if (authors.length === 2) {
+				let a = authors[0].family || authors[0].literal;
+				let b = authors[1].family || authors[1].literal;
+				str = a + ' and ' + b;
+			}
+			else if (authors.length >= 3) {
+				str = (authors[0].family || authors[0].literal) + ' et al.';
+			}
+		}
+		
+		// Title
+		if (!str && itemData.title) {
+			str = `“${itemData.title}”`;
+		}
+
+		// Date
+		if (itemData.issued
+			&& itemData.issued['date-parts']
+			&& itemData.issued['date-parts'][0]) {
+			let year = itemData.issued['date-parts'][0][0];
+			if (year && year != '0000') {
+				str += ', ' + year;
+			}
+		}
+	
 		// Locator
 		if (citationItem.locator) {
 			if (citationItem.label) {
-				// TODO localize and use short forms
+				// TODO: Localize and use short forms
 				var label = citationItem.label;
 			}
 			else if (/[\-–,]/.test(citationItem.locator)) {
@@ -799,58 +886,23 @@ class EditorInstance {
 		}
 
 		// Prefix
-		if (citationItem.prefix && Zotero.CiteProc.CSL.ENDSWITH_ROMANESQUE_REGEXP) {
+		if (citationItem.prefix && ENDSWITH_ROMANESQUE_REGEXP) {
 			str = citationItem.prefix
-				+ (Zotero.CiteProc.CSL.ENDSWITH_ROMANESQUE_REGEXP.test(citationItem.prefix) ? ' ' : '')
+				+ (ENDSWITH_ROMANESQUE_REGEXP.test(citationItem.prefix) ? ' ' : '')
 				+ str;
 		}
 
 		// Suffix
-		if (citationItem.suffix && Zotero.CiteProc.CSL.STARTSWITH_ROMANESQUE_REGEXP) {
-			str += (Zotero.CiteProc.CSL.STARTSWITH_ROMANESQUE_REGEXP.test(citationItem.suffix) ? ' ' : '')
+		if (citationItem.suffix && STARTSWITH_ROMANESQUE_REGEXP) {
+			str += (STARTSWITH_ROMANESQUE_REGEXP.test(citationItem.suffix) ? ' ' : '')
 				+ citationItem.suffix;
 		}
 
 		return str;
 	}
 
-	async _getFormattedCitationParts(citation) {
-		let formattedItems = [];
-		for (let citationItem of citation.citationItems) {
-			if (!Array.isArray(citationItem.uris)) {
-				continue;
-			}
-			let item = await Zotero.EditorInstance.getItemFromURIs(citationItem.uris);
-			if (!item && citationItem.itemData) {
-				item = new Zotero.Item();
-				Zotero.Utilities.itemFromCSLJSON(item, citationItem.itemData);
-			}
-			if (item) {
-				formattedItems.push(this._buildBubbleString(citationItem, this._getBackupStr(item)));
-			}
-			// else {
-			// 	let formattedItem = this._buildBubbleString(citationItem, citationItem.backupText);
-			// 	formattedItem = `<span style="color: red;">${formattedItem}</span>`;
-			// 	formattedItems.push(formattedItem);
-			// }
-		}
-		return formattedItems;
-	}
-
-	_getBackupStr(item) {
-		var str = item.getField('firstCreator');
-
-		// Title, if no creator (getDisplayTitle in order to get case, e-mail, statute which don't have a title field)
-		if (!str) {
-			str = Zotero.getString('punctuation.openingQMark') + item.getDisplayTitle() + Zotero.getString('punctuation.closingQMark');
-		}
-
-		// Date
-		var date = item.getField('date', true, true);
-		if (date && (date = date.substr(0, 4)) !== '0000') {
-			str += ', ' + date;
-		}
-		return str;
+	_formatCitation(citation) {
+		return citation.citationItems.map(x => this._formatCitationItemPreview(x)).join(';');
 	}
 
 	_arrayBufferToBase64(buffer) {
@@ -886,21 +938,54 @@ class EditorInstance {
 		return 'data:' + item.attachmentContentType + ';base64,' + this._arrayBufferToBase64(buf);
 	}
 
-	async _openQuickFormatDialog(nodeID, citationData, filterLibraryIDs) {
+	// TODO: Allow only one quickFormat dialog
+	async _openQuickFormatDialog(nodeID, citationData, filterLibraryIDs, openedEmpty) {
 		await Zotero.Styles.init();
 		let that = this;
 		let win;
+		
 		/**
-		 * Citation editing functions and propertiesaccessible to quickFormat.js and addCitationDialog.js
+		 * Citation editing functions and properties accessible to quickFormat.js and addCitationDialog.js
 		 */
 		let CI = function (citation, sortable, fieldIndexPromise, citationsByItemIDPromise, previewFn) {
 			this.citation = citation;
 			this.sortable = sortable;
 			this.filterLibraryIDs = filterLibraryIDs;
 			this.disableClassicDialog = true;
-		}
+			
+			// Cited items updated in `getItems`
+			this.citedItems = [];
+		};
 
 		CI.prototype = {
+		
+			/**
+			 * 1) Provide `quickFormat` dialog with items created from
+			 * `itemData`, without dealing with `Zotero.Integration.sessions`
+			 *
+			 * 2) Allow to pick already cited item from `quickFormat` dropdown
+			 *
+			 * @param citationItem
+			 * @returns {Zotero.Item|undefined}
+			 */
+			customGetItem(citationItem) {
+				// Using `id` as cited item index from `getItems` below
+				let citedItem = typeof citationItem.id === 'string'
+					&& this.citedItems[parseInt(citationItem.id.split('cited:')[1])];
+				
+				// Return cited item picked in `quickFormat` dropdown
+				if (citedItem) {
+					return citedItem.item;
+				}
+				// Provide an item created from `itemData`
+				else if (!citationItem.id && citationItem.itemData) {
+					let item = new Zotero.Item();
+					Zotero.Utilities.itemFromCSLJSON(item, citationItem.itemData);
+					return item;
+				}
+				// Otherwise returns `undefined` which makes this function to be
+			},
+			
 			/**
 			 * Execute a callback with a preview of the given citation
 			 * @return {Promise} A promise resolved with the previewed citation string
@@ -915,6 +1000,10 @@ class EditorInstance {
 			 */
 			sort: async function () {
 				// Zotero.debug('CI: sort');
+				// Normally `this.citation.citationItems` should be sorted by
+				// citation preview, but in our editor it doesn't make sense
+				// to do so, because we don't have a real style here and
+				// it's not the final document
 			},
 
 			/**
@@ -933,19 +1022,31 @@ class EditorInstance {
 				let citation = {
 					citationItems: this.citation.citationItems,
 					properties: this.citation.properties
-				}
+				};
 
 				for (let citationItem of citation.citationItems) {
-					let item = await Zotero.Items.getAsync(parseInt(citationItem.id));
+					let citedItem = typeof citationItem.id === 'string'
+						&& this.citedItems[parseInt(citationItem.id.split('cited:')[1])];
+					
+					// Cited item
+					if (citedItem) {
+						let ci = citedItem.citationItem;
+						citationItem.uris = ci.uris;
+						citationItem.itemData = ci.itemData;
+					}
+					// New item
+					else if (citationItem.id) {
+						let item = await Zotero.Items.getAsync(parseInt(citationItem.id));
+						citationItem.uris = [Zotero.URI.getItemURI(item)];
+						citationItem.itemData = Zotero.Cite.System.prototype.retrieveItem(item);
+					}
+					// Otherwise it's existing item, so just passing untouched citationItem
+					
 					delete citationItem.id;
-					citationItem.uris = [Zotero.URI.getItemURI(item)];
-					citationItem.itemData = Zotero.Cite.System.prototype.retrieveItem(item);
 				}
 				
-				let formattedCitation = (await that._getFormattedCitationParts(citation)).join(';');
-
-				if (progressCallback || !citationData.citationItems.length) {
-					that._postMessage({ action: 'setCitation', nodeID, citation, formattedCitation });
+				if (progressCallback || !citationData.citationItems.length || openedEmpty) {
+					that._postMessage({ action: 'setCitation', nodeID, citation });
 				}
 			},
 
@@ -955,9 +1056,39 @@ class EditorInstance {
 			 */
 			getItems: async function () {
 				// Zotero.debug('CI: getItems');
+				let note = that._item.note;
+
+				let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
+				.createInstance(Components.interfaces.nsIDOMParser);
+				let doc = parser.parseFromString(note, 'text/html');
+				
+				let metadataContainer = doc.querySelector('body > div[data-schema-version]');
+				if (metadataContainer) {
+					let citationItems = metadataContainer.getAttribute('data-citation-items');
+					if (citationItems) {
+						try {
+							citationItems = JSON.parse(decodeURIComponent(citationItems));
+							let items = [];
+							for (let citationItem of citationItems) {
+								let item = new Zotero.Item();
+								Zotero.Utilities.itemFromCSLJSON(item, citationItem.itemData);
+								// This is the only way to pass our custom id for already cited
+								// items, without modifying `quickFormat` dialog too much.
+								// Must not contain `/`
+								item.cslItemID = 'cited:' + items.length;
+								items.push({ item, citationItem });
+							}
+							this.citedItems = items;
+							return items.map(x => x.item);
+						}
+						catch (e) {
+							Zotero.logError(e);
+						}
+					}
+				}
 				return [];
 			}
-		}
+		};
 
 
 		let Citation = class {
