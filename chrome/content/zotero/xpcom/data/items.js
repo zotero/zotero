@@ -598,11 +598,12 @@ Zotero.Items = function() {
 		//
 		// Attachments
 		//
+		var titleFieldID = Zotero.ItemFields.getID('title');
 		var sql = "SELECT parentItemID, A.itemID, value AS title, "
 			+ "CASE WHEN DI.itemID IS NULL THEN 0 ELSE 1 END AS trashed "
 			+ "FROM itemAttachments A "
 			+ "JOIN items I ON (A.parentItemID=I.itemID) "
-			+ "LEFT JOIN itemData ID ON (fieldID=110 AND A.itemID=ID.itemID) "
+			+ `LEFT JOIN itemData ID ON (fieldID=${titleFieldID} AND A.itemID=ID.itemID) `
 			+ "LEFT JOIN itemDataValues IDV USING (valueID) "
 			+ "LEFT JOIN deletedItems DI USING (itemID) "
 			+ "WHERE libraryID=?"

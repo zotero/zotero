@@ -684,6 +684,49 @@ describe("Zotero.Item", function () {
 			assert.equal(attachments[0], attachment.id);
 		})
 		
+		it("should return child attachments sorted alphabetically", async function () {
+			var item = await createDataObject('item');
+			
+			var titles = ['B', 'C', 'A'];
+			var attachments = [];
+			for (let title of titles) {
+				let attachment = new Zotero.Item("attachment");
+				attachment.attachmentLinkMode = 'linked_url';
+				attachment.parentID = item.id;
+				attachment.setField('title', title);
+				await attachment.saveTx();
+				attachments.push(attachment);
+			}
+			
+			attachments = item.getAttachments().map(id => Zotero.Items.get(id));
+			assert.equal(attachments[0].getField('title'), 'A');
+			assert.equal(attachments[1].getField('title'), 'B');
+			assert.equal(attachments[2].getField('title'), 'C');
+		});
+		
+		it("should return re-sorted child attachments after one is modified", async function () {
+			var item = await createDataObject('item');
+			
+			var titles = ['B', 'C', 'A'];
+			var attachments = [];
+			for (let title of titles) {
+				let attachment = new Zotero.Item("attachment");
+				attachment.attachmentLinkMode = 'linked_url';
+				attachment.parentID = item.id;
+				attachment.setField('title', title);
+				await attachment.saveTx();
+				attachments.push(attachment);
+			}
+			
+			attachments[0].setField('title', 'D');
+			await attachments[0].saveTx();
+			
+			attachments = item.getAttachments().map(id => Zotero.Items.get(id));
+			assert.equal(attachments[0].getField('title'), 'A');
+			assert.equal(attachments[1].getField('title'), 'C');
+			assert.equal(attachments[2].getField('title'), 'D');
+		});
+		
 		it("#should ignore trashed child attachments by default", function* () {
 			var item = yield createDataObject('item');
 			var attachment = new Zotero.Item("attachment");

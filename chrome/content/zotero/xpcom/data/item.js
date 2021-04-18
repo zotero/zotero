@@ -1749,7 +1749,10 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	//
 	if (!isNew) {
 		// If attachment title changes, update parent attachments
-		if (this._changed.itemData && this._changed.itemData[110] && this.isAttachment() && parentItemID) {
+		let titleFieldID = Zotero.ItemFields.getID('title');
+		if (this._changed.itemData
+				&& this._changed.itemData[titleFieldID]
+				&& this.isAttachment() && parentItemID) {
 			reloadParentChildItems[parentItemID] = true;
 		}
 	}
