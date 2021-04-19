@@ -21,7 +21,7 @@
 		</div>
 		<hbox>
 			<label id="version"/>
-			<label id="changelog" class="zotero-text-link" href="https://www.zotero.org/support/changelog" value="&zotero.whatsNew;"/>
+			<label id="changelog" class="zotero-text-link" value="&zotero.whatsNew;"/>
 		</hbox>
 		<script>
 			document.getElementById('version').textContent = Zotero.version;
@@ -32,32 +32,43 @@
 				<p id="third-party-software"></p>
 				<p id="get-involved"></p>
 				<script><![CDATA[
+					Components.utils.import("resource://zotero/config.js");
+					
+					document.getElementById('changelog').href = ZOTERO_CONFIG.CHANGELOG_URL;
+					
 					// Replace [links] in localized strings with spans with onclick handlers
 					//
 					// TODO: Use helper function in common with intro text in itemTreeView.js
 					document.getElementById('created-by').innerHTML =
-						Zotero.Utilities.htmlSpecialChars(Zotero.getString('about.createdBy'))
+						Zotero.Utilities.htmlSpecialChars(
+							Zotero.getString(
+								'about.createdBy',
+								[Zotero.appName, `[${ZOTERO_CONFIG.PRODUCER}]`]
+							),
+						)
 						.replace(
 							/\[([^\]]+)](.+)\[([^\]]+)]/,
-							`<span data-href="https://digitalscholar.org/">$1</span>`
+							`<span data-href="${ZOTERO_CONFIG.PRODUCER_URL}">$1</span>`
 								+ '$2'
-								+ `<span data-href="https://www.zotero.org/support/credits_and_acknowledgments">$3</span>`
+								+ `<span data-href="${ZOTERO_CONFIG.CREDITS_URL}">$3</span>`
 						);
 					
 					document.getElementById('third-party-software').innerHTML =
-						Zotero.Utilities.htmlSpecialChars(Zotero.getString('about.openSource'))
+						Zotero.Utilities.htmlSpecialChars(
+							Zotero.getString('about.openSource', Zotero.appName)
+						)
 						.replace(
 							/\[([^\]]+)](.+)\[([^\]]+)]/,
-							`<span data-href="https://www.zotero.org/support/licensing">$1</span>`
+							`<span data-href="${ZOTERO_CONFIG.LICENSING_URL}">$1</span>`
 								+ '$2'
-								+ `<span data-href="https://www.zotero.org/support/credits_and_acknowledgments#third-party_software">$3</span>`
+								+ `<span data-href="${ZOTERO_CONFIG.CREDITS_URL}#third-party_software">$3</span>`
 						);
 					
 					document.getElementById('get-involved').innerHTML =
 						Zotero.Utilities.htmlSpecialChars(Zotero.getString('about.getInvolved'))
 						.replace(
 							/\[([^\]]+)]/,
-							`<span data-href="https://www.zotero.org/getinvolved/">$1</span>`
+							`<span data-href="${ZOTERO_CONFIG.GET_INVOLVED_URL}">$1</span>`
 						);
 					
 					// Activate text links
