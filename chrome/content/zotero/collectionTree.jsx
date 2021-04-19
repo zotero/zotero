@@ -159,8 +159,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		return true;
 	}
 	
-	_handleSelectionChange = (shouldDebounce) => {
-		let selection = this.selection;
+	_handleSelectionChange = (selection, shouldDebounce) => {
 		let treeRow = this.getRow(selection.focused);
 		// If selection changed (by click on a different row) and we are editing
 		// commit the edit
@@ -2028,7 +2027,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	
 	isSelectable = index => {
 		let treeRow = this.getRow(index);
-		return !(treeRow.isSeparator() || treeRow.isHeader());
+		return treeRow && !(treeRow.isSeparator() || treeRow.isHeader());
 	}
 
 	_closeContainer(row, skipMap) {

@@ -79,6 +79,7 @@ class TreeSelection {
 	 * @param shouldDebounce {Boolean} Whether the update to the tree should be debounced
 	 */
 	toggleSelect(index, shouldDebounce) {
+		if (!this._tree.props.isSelectable(index)) return;
 		index = Math.max(0, index);
 		if (this.selected.has(index)) {
 			this.selected.delete(index);
@@ -112,6 +113,7 @@ class TreeSelection {
 	 * @returns {boolean} False if nothing to select and select handlers won't be called
 	 */
 	select(index, shouldDebounce) {
+		if (!this._tree.props.isSelectable(index)) return;
 		index = Math.max(0, index);
 		if (this.selected.size == 1 && this._focused == index && this.pivot == index) {
 			return false;
@@ -140,7 +142,9 @@ class TreeSelection {
 			this.selected = new Set();
 		}
 		for (let i = from; i <= to; i++) {
-			this.selected.add(i);
+			if (this._tree.props.isSelectable(i)) {
+				this.selected.add(i);
+			}
 		}
 	}
 
@@ -166,6 +170,8 @@ class TreeSelection {
 	 * @param shouldDebounce {Boolean} Whether the update to the tree should be debounced
 	 */
 	shiftSelect(index, shouldDebounce) {
+		if (!this._tree.props.isSelectable(index)) return;
+		
 		index = Math.max(0, index);
 		let from = Math.min(index, this.pivot);
 		let to = Math.max(index, this.pivot);
@@ -542,21 +548,7 @@ class VirtualizedTable extends React.Component {
 
 		case "a":
 			// i.e. if CTRL/CMD pressed down
-			if (movePivot) {
-				// Do not select unselectable (disabled) rows
-				for (let i = 0; i < this.props.getRowCount(); i++) {
-					if (this.props.isSelectable(i)) {
-						this.selection.selected.add(i);
-					} else {
-						this.selection.selected.delete(i);
-					}
-				}
-				if (this.selection.selectEventsSuppressed) break;
-				this.invalidate();
-				if (!this.selection.selectEventsSuppressed) {
-					this.props.onSelectionChange(this, false);
-				}
-			}
+			if (movePivot) this.selection.rangedSelect(0, this.props.getRowCount()-1);
 			break;
 			
 		case " ":

@@ -1911,7 +1911,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	isSelectable = (index) => {
-		return !this._searchMode || this._searchItemIDs.has(this.getRow(index).id);
+		if (!this._searchMode || this.collectionTreeRow.isPublications()) return true;
+		let row = this.getRow(index);
+		return row && this._searchItemIDs.has(row.id);
 	}
 	
 	isContainer = (index) => {
@@ -2573,8 +2575,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	//
 	// //////////////////////////////////////////////////////////////////////////////
 
-	_handleSelectionChange = (shouldDebounce) => {
-		let selection = this.selection;
+	_handleSelectionChange = (selection, shouldDebounce) => {
 		// Update aria-activedescendant on the tree
 		if (this.collectionTreeRow.isDuplicates() && selection.count == 1) {
 			var itemID = this.getRow(selection.focused).ref.id;
@@ -3112,7 +3113,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			Zotero.logError(e);
 		}
 
-		this.ensureRowsAreVisible(Array.from(this.selection.selected.keys()));
+		this.ensureRowsAreVisible(Array.from(this.selection.selected));
 
 		if (unsuppress) {
 			this.selection.selectEventsSuppressed = false;

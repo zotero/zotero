@@ -83,7 +83,7 @@ Zotero.ProgressQueueDialog = function (progressQueue) {
 	};
 	
 	function _onWindowLoaded() {
-		var rootElement = document.getElementById('zotero-progress');
+		var rootElement = _progressWindow.document.getElementById('zotero-progress');
 		Zotero.setFontSize(rootElement);
 		
 		_progressIndicator = _progressWindow.document.getElementById('progress-indicator');

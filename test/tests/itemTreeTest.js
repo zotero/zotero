@@ -31,7 +31,45 @@ describe("Zotero.ItemTree", function() {
 		item.deleted = true;
 		await item.saveTx();
 		assert.isFalse(itemsView.getRowIndexByID(itemID));
-	})
+	});
+	
+	describe("when performing a quick search", function () {
+		let parentItem, match, nonMatch;
+		let selectAllEvent = {key: 'a'};
+		before(async function () {
+			parentItem = await createDataObject('item');
+			match = await importFileAttachment('test.png', { title: 'find-me', parentItemID: parentItem.id });
+			nonMatch = await importFileAttachment('test.png', { title: 'not-a-result', parentItemID: parentItem.id });
+			if (Zotero.isMac) {
+				selectAllEvent.metaKey = true;
+			} else {
+				selectAllEvent.ctrlKey = true;
+			}
+		});
+
+		it("should not select non-matching children when issuing a Select All command", async function () {
+			var quicksearch = win.document.getElementById('zotero-tb-search');
+			quicksearch.value = match.getField('title');
+			quicksearch.doCommand();
+			await itemsView._refreshPromise;
+			itemsView.tree._onKeyDown(selectAllEvent);
+
+			var selected = itemsView.getSelectedItems(true);
+			assert.lengthOf(selected, 1);
+			assert.equal(selected[0], match.id);
+		});
+
+		it("should expand collapsed parents with matching children when issuing a Select All command", async function () {
+			itemsView.collapseAllRows();
+			var selected = itemsView.getSelectedItems(true);
+			assert.lengthOf(selected, 0);
+			
+			itemsView.tree._onKeyDown(selectAllEvent);
+			selected = itemsView.getSelectedItems(true);
+			assert.lengthOf(selected, 1);
+			assert.equal(selected[0], match.id);
+		});
+	});
 	
 	describe("#selectItem()", function () {
 		/**
@@ -183,8 +221,10 @@ describe("Zotero.ItemTree", function() {
 				skipSelect: true
 			});
 			
-			// No select events should have occurred
-			assert.equal(win.ZoteroPane.itemSelected.callCount, 0);
+			// itemSelected should have been called once (from 'selectEventsSuppressed = false'
+			// in notify()) as a no-op
+			assert.equal(win.ZoteroPane.itemSelected.callCount, 1);
+			assert.isFalse(win.ZoteroPane.itemSelected.returnValues[0].value());
 			
 			// Existing item should still be selected
 			selected = itemsView.getSelectedItems(true);
@@ -274,8 +314,10 @@ describe("Zotero.ItemTree", function() {
 			item.setField('title', 'no select on modify');
 			yield item.saveTx();
 			
-			// No select events should have occurred
-			assert.equal(win.ZoteroPane.itemSelected.callCount, 0);
+			// itemSelected should have been called once (from 'selectEventsSuppressed = false'
+			// in notify()) as a no-op
+			assert.equal(win.ZoteroPane.itemSelected.callCount, 1);
+			assert.isFalse(win.ZoteroPane.itemSelected.returnValues[0].value());
 			
 			// Modified item should not be selected
 			assert.lengthOf(itemsView.getSelectedItems(), 0);
