@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Ne izberi ničesar">
 <!ENTITY zotero.general.edit "Uredi">
 <!ENTITY zotero.general.delete "Izbriši">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Premakni v koš">
 <!ENTITY zotero.general.ok "V redu">
 <!ENTITY zotero.general.cancel "Prekliči">
 <!ENTITY zotero.general.refresh "Osveži">
@@ -91,7 +91,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Pokaži v knjižnici">
 <!ENTITY zotero.items.menu.attach.note "Dodaj opombo">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Dodaj opombo iz zaznamkov">
 <!ENTITY zotero.items.menu.attach "Dodaj priponko">
 <!ENTITY zotero.items.menu.attach.link.uri "URI-ju pripni povezavo ...">
 <!ENTITY zotero.items.menu.attach.file "Pripni shranjeno kopijo datoteke ...">
@@ -158,7 +158,7 @@
 <!ENTITY zotero.toolbar.attachment.weblink "Shrani povezavo na trenutno stran">
 <!ENTITY zotero.toolbar.attachment.snapshot "Naredi posnetek trenutne strani">
 <!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.notes "Opombe">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Brez značk za prikaz">
 <!ENTITY zotero.tagSelector.loadingTags "Nalaganje značk ...">
@@ -332,6 +332,6 @@
 
 <!ENTITY zotero.context.addChildNote "Add Item Note">
 <!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
-<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
-<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
-<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
+<!ENTITY zotero.context.addStandaloneNote "Dodaj samostojno opombo">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Dodaj samostojno opombo iz zaznamkov">
+<!ENTITY zotero.context.editInWindow "Uredi v ločenem oknu">

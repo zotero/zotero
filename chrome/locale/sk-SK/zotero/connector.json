@@ -2,6 +2,9 @@
   "general_more": {
     "message": "Viac..."
   },
+  "general_moreInfo": {
+    "message": "Viac informácií..."
+  },
   "general_done": {
     "message": "Hotovo"
   },
@@ -16,6 +19,9 @@
   },
   "general_pleaseWait": {
     "message": "Počkajte, prosím..."
+  },
+  "general_copyToClipboard": {
+    "message": "Skopírovať do schránky"
   },
   "progressWindow_savingTo": {
     "message": "Ukladá sa do"
@@ -56,6 +62,15 @@
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Zapnúť ukladanie do Online knižnice"
   },
+  "reports_report_submitted": {
+    "message": "Vaše chybové hlásenie bolo odoslané.\n\nID správy: $1\n\nProsím napíšte správu do diskusného fóra Zotero obsahujúcu toto ID, popis problému a kroky, ktoré sú potrebné k jeho reprodukovaniu.\n\nChybové hlásenia sa nekontrolujú dokiaľ sa o nich nediskutuje vo fórach."
+  },
+  "reports_debug_output_submitted": {
+    "message": "Vaše ladiace informácie boli odoslané.\n\nID ladenia je $1."
+  },
+  "reports_submission_failed": {
+    "message": "Pri odosielaní vašej správy sa vyskytla chyba.\n\n$1\n\nSkontrolujte prosím svoje pripojenie na internet. Ak problémy pretrvávajú, pošlite správu na fóra Zotero."
+  },
   "integration_error_clientUpgrade": {
     "message": "Webové citovanie vyžaduje verziu $1 alebo vyššiu."
   },
@@ -76,6 +91,18 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "Integrácia $1 nie je dostupná pri úprave súborov .docx od Microsoft Word  priamo v Google Docs. Zvoľte Súbor → Uložiť ako Google Docs pre zapnutie tejto funkcie.<br/><br/>Ak chcete preniesť dokument Word s citáciami $1 do Google Docs, pozrite na <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Presun dokumentov medzi textovými editormi</a>."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "Zobraziť neprepojených $1 citácií"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "Citácia, ktorú sa pokúšate upraviť, prestala byť prepojená s $1."
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Znova prepojiť citáciu"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "Tieto citácie prestali byť <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">prepojené s $1</a>. Budete ich musieť znova prepojiť prv ako budú aktualizované alebo sa objavia vo vašej bibliografii."
   },
   "general_saveTo": {
     "message": "Uložiť do $1"

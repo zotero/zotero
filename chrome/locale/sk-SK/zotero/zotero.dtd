@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Odznačiť všetko">
 <!ENTITY zotero.general.edit "Upraviť">
 <!ENTITY zotero.general.delete "Vymazať">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Presunúť do koša">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Zrušiť">
 <!ENTITY zotero.general.refresh "Obnoviť">
@@ -91,7 +91,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Zobraziť v knižnici">
 <!ENTITY zotero.items.menu.attach.note "Pridať poznámku">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Vložiť poznámku z anotácií">
 <!ENTITY zotero.items.menu.attach "Vložiť prílohu">
 <!ENTITY zotero.items.menu.attach.link.uri "Vložiť odkaz na URI...">
 <!ENTITY zotero.items.menu.attach.file "Vložiť kópiu lokálneho súboru...">
@@ -157,8 +157,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Uložiť kópiu súboru...">
 <!ENTITY zotero.toolbar.attachment.weblink "Uložiť odkaz na aktuálnu stránku">
 <!ENTITY zotero.toolbar.attachment.snapshot "Urobiť snímku z aktuálnej stránky">
-<!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.item "Záznam">
+<!ENTITY zotero.toolbar.context.notes "Poznámky">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Žiadne značky na zobrazenie">
 <!ENTITY zotero.tagSelector.loadingTags "Načítavam značky...">
@@ -179,8 +179,8 @@
 <!ENTITY zotero.lookup.description "Pridajte nové záznamy zadaním čísel ISBN, DOI, PMID alebo arXiv:">
 <!ENTITY zotero.lookup.button.search "Hľadať">
 
-<!ENTITY zotero.createParent.title "Create Parent Item">
-<!ENTITY zotero.createParent.button.manual "Manual Entry">
+<!ENTITY zotero.createParent.title "Vytvoriť nadradený záznam">
+<!ENTITY zotero.createParent.button.manual "Ručné zadanie">
 
 <!ENTITY zotero.selectitems.title "Označiť záznamy">
 <!ENTITY zotero.selectitems.intro.label "Označte, ktoré záznamy chcete pridať do vašej knižnice">
@@ -330,8 +330,8 @@
 <!ENTITY zotero.attachLink.label.link "Odkaz:">
 <!ENTITY zotero.attachLink.label.title "Názov:">
 
-<!ENTITY zotero.context.addChildNote "Add Item Note">
-<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
-<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
-<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
-<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
+<!ENTITY zotero.context.addChildNote "Pridať poznámku o zázname">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Pridať poznámku o zázname z anotácií">
+<!ENTITY zotero.context.addStandaloneNote "Pridať samostatnú poznámku">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Pridať samostatnú poznámku z anotácií">
+<!ENTITY zotero.context.editInWindow "Upraviť v samostatnom okne">

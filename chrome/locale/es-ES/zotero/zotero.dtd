@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Deseleccionar todo">
 <!ENTITY zotero.general.edit "Editar">
 <!ENTITY zotero.general.delete "Borrar">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Mover a la papelera">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Cancelar">
 <!ENTITY zotero.general.refresh "Actualizar">
@@ -91,7 +91,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Mostrar en la biblioteca">
 <!ENTITY zotero.items.menu.attach.note "Añadir nota">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Añadir nota a partir de las anotaciones">
 <!ENTITY zotero.items.menu.attach "Añadir adjunto">
 <!ENTITY zotero.items.menu.attach.link.uri "Adjuntar enlace a URI...">
 <!ENTITY zotero.items.menu.attach.file "Adjuntar copia guardada del archivo...">
@@ -157,8 +157,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Guardar copia del archivo...">
 <!ENTITY zotero.toolbar.attachment.weblink "Guardar enlace a la página actual">
 <!ENTITY zotero.toolbar.attachment.snapshot "Tomar una instantánea de la página actual">
-<!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.item "Elemento">
+<!ENTITY zotero.toolbar.context.notes "Notas">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "No hay etiquetas que mostrar">
 <!ENTITY zotero.tagSelector.loadingTags "Cargando etiquetas...">
@@ -330,8 +330,8 @@
 <!ENTITY zotero.attachLink.label.link "Enlace:">
 <!ENTITY zotero.attachLink.label.title "Título:">
 
-<!ENTITY zotero.context.addChildNote "Add Item Note">
-<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
-<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
-<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
-<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
+<!ENTITY zotero.context.addChildNote "Añadir nota de elemento">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Añadir nota de elemento a partir de las anotaciones">
+<!ENTITY zotero.context.addStandaloneNote "Añadir nota independiente">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Añadir nota independiente a partir de las anotaciones">
+<!ENTITY zotero.context.editInWindow "Editar en una ventana aparte">

@@ -2,6 +2,9 @@
   "general_more": {
     "message": "Dodatno ..."
   },
+  "general_moreInfo": {
+    "message": "Podrobnosti ..."
+  },
   "general_done": {
     "message": "Opravljeno"
   },
@@ -16,6 +19,9 @@
   },
   "general_pleaseWait": {
     "message": "Počakajte trenutek ..."
+  },
+  "general_copyToClipboard": {
+    "message": "Kopiraj na odložišče"
   },
   "progressWindow_savingTo": {
     "message": "Shranjevanje v"
@@ -55,6 +61,9 @@
   },
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Omogoči shranjevanje v spletno knjižnico"
+  },
+  "reports_debug_output_submitted": {
+    "message": "Vaš izhod razhroščevanja je bil poslan.\n\nID razhroščevanja je $1."
   },
   "integration_error_clientUpgrade": {
     "message": "Citiranje prek spleta zahteva $1 ali novejšega."

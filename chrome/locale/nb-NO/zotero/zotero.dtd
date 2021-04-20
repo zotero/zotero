@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Fjern markeringen">
 <!ENTITY zotero.general.edit "Rediger">
 <!ENTITY zotero.general.delete "Slett">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Flytt til søppelkorg">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Avbryt">
 <!ENTITY zotero.general.refresh "Oppdater">
@@ -91,7 +91,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Vis i bibliotek">
 <!ENTITY zotero.items.menu.attach.note "Legg til notat">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Legg til notat fra merknader">
 <!ENTITY zotero.items.menu.attach "Legg til vedlegg">
 <!ENTITY zotero.items.menu.attach.link.uri "Legg til kobling til URI…">
 <!ENTITY zotero.items.menu.attach.file "Legg til lagret kopi av fil...">
@@ -157,8 +157,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Lagre kopi av fil...">
 <!ENTITY zotero.toolbar.attachment.weblink "Lagre kobling til gjeldende side">
 <!ENTITY zotero.toolbar.attachment.snapshot "Lag øyeblikksbilde av gjeldende side">
-<!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.item "Element">
+<!ENTITY zotero.toolbar.context.notes "Notater">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Ingen emneord å vise">
 <!ENTITY zotero.tagSelector.loadingTags "Laster emneord…">
@@ -199,7 +199,7 @@
 <!ENTITY zotero.bibliography.copyToClipboard.label "Kopier til utklippstavle">
 <!ENTITY zotero.bibliography.print.label "Skriv ut">
 
-<!ENTITY zotero.integration.docPrefs.title "Dokumentegenskaper">
+<!ENTITY zotero.integration.docPrefs.title "Innstillinger for dokument">
 <!ENTITY zotero.integration.addEditCitation.title "Legg til/endre henvisning">
 <!ENTITY zotero.integration.editBibliography.title "Rediger bibliografi">
 <!ENTITY zotero.integration.quickFormatDialog.title "Hurtigformater henvisning">
@@ -236,9 +236,9 @@
 <!ENTITY zotero.richText.superscript.label "Hevet skrift">
 <!ENTITY zotero.richText.subscript.label "Senket skrift">
 
-<!ENTITY zotero.annotate.toolbar.add.label "Legg til kommentar">
-<!ENTITY zotero.annotate.toolbar.collapse.label "Skjul alle kommentarer">
-<!ENTITY zotero.annotate.toolbar.expand.label "Vis alle kommentarer">
+<!ENTITY zotero.annotate.toolbar.add.label "Legg til merknad">
+<!ENTITY zotero.annotate.toolbar.collapse.label "Skjul alle merknader">
+<!ENTITY zotero.annotate.toolbar.expand.label "Vis alle merknader">
 <!ENTITY zotero.annotate.toolbar.highlight.label "Merk tekst">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "Fjern merking av tekst">
 
@@ -330,8 +330,8 @@
 <!ENTITY zotero.attachLink.label.link "Kobling:">
 <!ENTITY zotero.attachLink.label.title "Tittel:">
 
-<!ENTITY zotero.context.addChildNote "Add Item Note">
-<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
-<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
-<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
-<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
+<!ENTITY zotero.context.addChildNote "Legg til notat til element">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Legg til notat til element fra merknader">
+<!ENTITY zotero.context.addStandaloneNote "Legg til enkeltstående notat">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Legg til enkeltstående notat fra merknader">
+<!ENTITY zotero.context.editInWindow "Rediger i separat vindu">
