@@ -650,6 +650,17 @@
 					<menuseparator/>
 					<menuitem id="context-pane-list-move-to-trash" label="&zotero.general.moveToTrash;"/>
 				</menupopup>
+
+				<!-- `related` and `tags` popups displaying code is taken from noteeditor.xml -->
+				<menupopup id="context-pane-related-popup" width="300">
+					<relatedbox id="context-pane-related-box" flex="1"/>
+				</menupopup>
+
+				<menupopup id="context-pane-tags-popup" ignorekeys="true"
+						   onpopupshown="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='label'){ /* DEBUG: it would be nice to make this work -- if (this.firstChild.count==0){ this.firstChild.newTag(); } */ this.setAttribute('showing', 'true'); }"
+						   onpopuphidden="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='label'){ this.setAttribute('showing', 'false'); }">
+					<tagsbox id="context-pane-tags-box" flex="1"/>
+				</menupopup>
 			</popupset>
 		</hbox>
 		

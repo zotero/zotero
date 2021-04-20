@@ -659,7 +659,6 @@ var ZoteroContextPane = new function () {
 			editor.mode = editable ? 'edit' : 'view';
 			editor.item = item;
 			editor.parentItem = null;
-			editor.hideLinksContainer = true;
 			
 			node.querySelector('.zotero-context-pane-editor-parent-line').innerHTML = '';
 			var parentItem = item.parentItem;
@@ -709,7 +708,7 @@ var ZoteroContextPane = new function () {
 			itemID,
 			parentID,
 			libraryID,
-			update: () => {}
+			update: Zotero.Utilities.throttle(_update, 300, { leading: false }),
 		};
 		_itemContexts.push(context);
 		
@@ -732,11 +731,142 @@ var ZoteroContextPane = new function () {
 		panelInfo.className = 'zotero-editpane-item-box';
 		var itemBox = document.createElement('zoteroitembox');
 		itemBox.setAttribute('flex', '1');
-		panelInfo.append(itemBox);
+
+		// Links box
+		var linksBox = document.createElement('vbox');
+		linksBox.className = 'links-box';
+
+		var grid = document.createElement('grid');
+		var columns = document.createElement('columns');
+
+		var column1 = document.createElement('column');
+		var column2 = document.createElement('column');
+		column2.setAttribute('flex', 1);
+
+		columns.append(column1, column2);
+
+		var rows = document.createElement('rows');
+
+		// Related
+		var row1 = document.createElement('row');
+		var relatedLabel = document.createElement('label');
+		var relatedClick = document.createElement('label');
+		relatedClick.className = 'zotero-clicky';
+		relatedClick.setAttribute('crop', 'end');
+		relatedClick.onclick = () => {
+			var box = document.getElementById('context-pane-related-box');
+			var relatedList = parentItem.relatedItems;
+			if (relatedList.length > 0) {
+				box.mode = editable ? 'edit' : 'view';
+				box.item = parentItem;
+				var relatedPopup = document.getElementById('context-pane-related-popup');
+				// Hide popup on item click to prevent it being visible in library tab
+				relatedPopup.onclick = (event) => {
+					let target = event.originalTarget;
+					if (target.classList.contains('zotero-box-label')) {
+						relatedPopup.hidePopup();
+					}
+				};
+				var x = linksBox.boxObject.screenX;
+				var y = linksBox.boxObject.screenY;
+				relatedPopup.openPopupAtScreen(x, y, false);
+			}
+			else {
+				box.add();
+			}
+		};
+		row1.append(relatedLabel, relatedClick);
+
+		// Tags
+		var row2 = document.createElement('row');
+		var tagsLabel = document.createElement('label');
+		var tagsClick = document.createElement('label');
+		tagsClick.className = 'zotero-clicky';
+		tagsClick.setAttribute('crop', 'end');
+		tagsClick.onclick = () => {
+			var box = document.getElementById('context-pane-tags-box');
+			box.mode = editable ? 'edit' : 'view';
+			box.item = parentItem;
+			var popup = document.getElementById('context-pane-tags-popup');
+			var x = linksBox.boxObject.screenX;
+			var y = linksBox.boxObject.screenY;
+			popup.openPopupAtScreen(x, y, false);
+		};
+		row2.append(tagsLabel, tagsClick);
+
+		rows.append(row1, row2);
+
+		grid.append(columns, rows);
+
+		linksBox.append(grid);
+
+		panelInfo.append(itemBox, linksBox);
 		container.append(panelInfo);
 
 		itemBox.mode = editable ? 'edit' : 'view';
 		itemBox.item = parentItem;
+
+
+		function _update() {
+			let parentItem = item.parentItem;
+
+			if (!parentItem) {
+				return;
+			}
+
+			// Taken from noteeditor.xml
+
+			// Related items summary
+			var r = '';
+			var keys = parentItem.relatedItems;
+			if (keys.length) {
+				for (let key of keys) {
+					let item = Zotero.Items.getByLibraryAndKey(parentItem.libraryID, key);
+					if (!item) {
+						continue;
+					}
+					r = r + item.getDisplayTitle() + ', ';
+				}
+				r = r.substr(0, r.length - 2);
+			}
+
+			var v = r;
+
+			if (!v || v == '') {
+				v = '[' + Zotero.getString('pane.item.noteEditor.clickHere') + ']';
+			}
+
+			relatedLabel.value = Zotero.getString('itemFields.related')
+				+ Zotero.getString('punctuation.colon');
+			relatedClick.value = v;
+
+
+			// Tags summary
+			var r = '';
+
+			var tags = parentItem.getTags();
+
+			// Sort tags alphabetically
+			var collation = Zotero.getLocaleCollation();
+			tags.sort((a, b) => collation.compareString(1, a.tag, b.tag));
+
+			for (let i = 0; i < tags.length; i++) {
+				r = r + tags[i].tag + ', ';
+			}
+			r = r.substr(0, r.length - 2);
+
+			var v = r;
+
+			if (!v || v == '') {
+				v = '[' + Zotero.getString('pane.item.noteEditor.clickHere') + ']';
+			}
+
+			tagsLabel.value = Zotero.getString('itemFields.tags')
+				+ Zotero.getString('punctuation.colon');
+			tagsClick.value = v;
+		}
+
+		_update();
 	}
 };
 

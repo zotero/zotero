@@ -92,3 +92,26 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.links-box row > label:first-child {
+    text-align: right;
+    font-weight: bold;
+    -moz-margin-start: 5px !important;
+    -moz-margin-end: 0 !important;
+    width: 62px;
+}
+
+.links-box row > label {
+    margin-top: 1px !important;
+    margin-bottom: 1px !important;
+    -moz-box-pack: start;
+    -moz-margin-start: 1px !important;
+    -moz-margin-end: 5px !important;
+    padding: 0 2px 0 2px !important;
+    border-radius: 6px;
+    border: 1px solid transparent;
+}
+
+#context-pane-tags-popup {
+    min-width: 300px;
+}
