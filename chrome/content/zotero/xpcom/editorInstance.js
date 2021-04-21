@@ -239,7 +239,8 @@ class EditorInstance {
 			
 			let storedAnnotation = {
 				uri: Zotero.URI.getItemURI(attachmentItem),
-				text: annotation.text,
+				// trim() here is necessary because of already existing annotations
+				text: annotation.text ? annotation.text.trim() : annotation.text,
 				color: annotation.color,
 				pageLabel: annotation.pageLabel,
 				position: annotation.position
@@ -294,12 +295,12 @@ class EditorInstance {
 
 			// Text
 			if (annotation.text) {
-				highlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}">“${annotation.text}”</span>`;
+				highlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}">“${annotation.text.trim()}”</span>`;
 			}
 			
 			// Note
 			if (annotation.comment) {
-				commentHTML = ' ' + annotation.comment;
+				commentHTML = ' ' + annotation.comment.trim();
 			}
 			
 			let otherHTML = [highlightHTML, citationHTML, commentHTML].filter(x => x).join(' ');
