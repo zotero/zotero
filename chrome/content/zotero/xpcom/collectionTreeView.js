@@ -2474,7 +2474,9 @@ Zotero.CollectionTreeCache = {
 		if (this.lastTempTable) {
 			let tableName = this.lastTempTable;
 			let id = Zotero.DB.addCallback('commit', async function () {
-				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS " + tableName);
+				await Zotero.DB.queryAsync(
+					"DROP TABLE IF EXISTS " + tableName, false, { noCache: true }
+				);
 				Zotero.DB.removeCallback('commit', id);
 			});
 		}

@@ -569,6 +569,7 @@ Zotero.DataObjects.prototype._loadPrimaryData = Zotero.Promise.coroutine(functio
 		sql,
 		params,
 		{
+			noCache: true,
 			onRow: function (row) {
 				var id = row.getResultByName(this._ZDO_id);
 				var columns = Object.keys(this._primaryDataSQLParts);
@@ -682,7 +683,7 @@ Zotero.DataObjects.prototype._loadRelations = Zotero.Promise.coroutine(function*
 		sql,
 		params,
 		{
-			noCache: ids.length != 1,
+			noCache: true,
 			onRow: function (row) {
 				let id = row.getResultByIndex(0);
 				

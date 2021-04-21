@@ -217,7 +217,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
-				noCache: ids.length != 1,
+				noCache: true,
 				onRow: function (row) {
 					let itemID = row.getResultByIndex(0);
 					let fieldID = row.getResultByIndex(1);
@@ -251,7 +251,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
-				noCache: ids.length != 1,
+				noCache: true,
 				onRow: function (row) {
 					let itemID = row.getResultByIndex(0);
 					let item = this._objectCache[itemID];
@@ -283,6 +283,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
+				noCache: true,
 				onRow: function (row) {
 					let itemID = row.getResultByIndex(0);
 					let title = row.getResultByIndex(1);
@@ -334,7 +335,7 @@ Zotero.Items = function() {
 			+ 'FROM items LEFT JOIN itemCreators USING (itemID) '
 			+ 'WHERE libraryID=?' + idSQL + " ORDER BY itemID, orderIndex";
 		var params = [libraryID];
-		var rows = yield Zotero.DB.queryAsync(sql, params);
+		var rows = yield Zotero.DB.queryAsync(sql, params, { noCache: true });
 		
 		// Mark creator indexes above the number of creators as changed,
 		// so that they're cleared if the item is saved
@@ -413,7 +414,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
-				noCache: ids.length != 1,
+				noCache: true,
 				onRow: function (row) {
 					let itemID = row.getResultByIndex(0);
 					let item = this._objectCache[itemID];
@@ -476,7 +477,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
-				noCache: ids.length != 1,
+				noCache: true,
 				onRow: function (row) {
 					let itemID = row.getResultByIndex(0);
 					let item = this._objectCache[itemID];
@@ -503,7 +504,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
-				noCache: ids.length != 1,
+				noCache: true,
 				onRow: function (row) {
 					let itemID = row.getResultByIndex(0);
 					
@@ -555,7 +556,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
-				noCache: ids.length != 1,
+				noCache: true,
 				onRow: function (row) {
 					let itemID = row.getResultByIndex(0);
 					
@@ -633,7 +634,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
-				noCache: ids.length != 1,
+				noCache: true,
 				onRow: function (row) {
 					onRow(row, setAttachmentItem);
 				}
@@ -687,7 +688,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
-				noCache: ids.length != 1,
+				noCache: true,
 				onRow: function (row) {
 					onRow(row, setNoteItem);
 				}
@@ -732,7 +733,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
-				noCache: ids.length != 1,
+				noCache: true,
 				onRow: function (row) {
 					onRow(row, setAnnotationItem);
 				}
@@ -756,7 +757,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
-				noCache: ids.length != 1,
+				noCache: true,
 				onRow: function (row) {
 					var itemID = row.getResultByIndex(0);
 					var item = this._objectCache[itemID];
@@ -798,7 +799,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
-				noCache: ids.length != 1,
+				noCache: true,
 				onRow: function (row) {
 					let itemID = row.getResultByIndex(0);
 					
@@ -851,7 +852,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
-				noCache: ids.length != 1,
+				noCache: true,
 				onRow: function (row) {
 					let itemID = row.getResultByIndex(0);
 					
