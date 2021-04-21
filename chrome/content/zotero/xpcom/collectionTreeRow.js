@@ -327,7 +327,7 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 		}
 		// Called by ItemTreeView::unregister()
 		this.onUnload = async function () {
-			await Zotero.DB.queryAsync(`DROP TABLE IF EXISTS ${tmpTable}`);
+			await Zotero.DB.queryAsync(`DROP TABLE IF EXISTS ${tmpTable}`, false, { noCache: true });
 		};
 	}
 	else {
