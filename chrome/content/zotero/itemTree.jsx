@@ -2581,6 +2581,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			// which won't trigger item updates
 			for (let id of setItemIDs) {
 				selection.selected.add(this._rowMap[id]);
+				this.tree.invalidateRow(this._rowMap[id]);
 			}
 		}
 		if (shouldDebounce) {
