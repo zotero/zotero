@@ -1229,9 +1229,11 @@ var Columns = class {
 	}
 
 	_getColumnPrefsToPersist(column) {
-		if (!column.zoteroPersist) return {};
+		let persistKeys = column.zoteroPersist;
+		if (!persistKeys) persistKeys = new Set();
+		// Always persist
+		['ordinal', 'hidden', 'sortDirection'].forEach(k => persistKeys.add(k));
 		let persistSettings = {};
-		const persistKeys = column.zoteroPersist;
 		for (const key in column) {
 			if (persistKeys.has(key) || key == 'dataKey') {
 				persistSettings[key] = column[key];
@@ -1270,7 +1272,7 @@ var Columns = class {
 			}
 			const column = this._columns.find(column => column.dataKey == dataKey);
 			const styleIndex = this._columnStyleMap[dataKey];
-			if (storePrefs) {
+			if (storePrefs && (!column.fixedWidth || (column.zoteroPersist && !column.zoteroPersist.has('width')))) {
 				prefs[dataKey] = prefs[dataKey] || {};
 				prefs[dataKey].width = width;
 			}
