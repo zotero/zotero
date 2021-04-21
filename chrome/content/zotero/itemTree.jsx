@@ -1128,7 +1128,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					showHeader: true,
 					columns: this._getColumns(),
 					onColumnPickerMenu: this._displayColumnPickerMenu,
-					onColumnSort: this._handleColumnSort,
+					onColumnSort: this.collectionTreeRow.isFeed() ? null : this._handleColumnSort,
 					getColumnPrefs: this._getColumnPrefs,
 					storeColumnPrefs: this._storeColumnPrefs,
 					containerWidth: this.domEl.clientWidth,
@@ -1392,15 +1392,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		
 		var primaryField = this._getSortField();
 		var sortFields = this._getSortFields();
-		var order = 1;
-		const columns = this._getColumns();
-		for (const field of sortFields) {
-			const col = columns.find(c => c.dataKey == primaryField);
-			if (col) {
-				order = col.sortDirection;
-				break;
-			}
-		}
+		var order = this._getSortDirection(sortFields);
 		var collation = Zotero.getLocaleCollation();
 		var sortCreatorAsString = Zotero.Prefs.get('sortCreatorAsString');
 		
@@ -3127,9 +3119,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 	_handleColumnSort = async (index, sortDirection) => {
 		let columnSettings = this._getColumnPrefs();
 		let column = this._getColumn(index);
-		if (this.collectionTreeRow.isFeed()) {
-			return;
-		}
 		if (column.dataKey == 'hasAttachment') {
 			Zotero.debug("Caching best attachment states");
 			if (!this._cachedBestAttachmentStates) {
@@ -3325,6 +3314,20 @@ var ItemTree = class ItemTree extends LibraryTree {
 		
 		document.children[0].appendChild(menupopup);
 		menupopup.openPopup(null, null, event.clientX + 2, event.clientY + 2);
+	}
+	
+	_getSortDirection(sortFields) {
+		if (this.collectionTreeRow.isFeed()) {
+			return Zotero.Prefs.get('feeds.sortAscending') ? 1 : -1;
+		}
+		const columns = this._getColumns();
+		for (const field of sortFields) {
+			const col = columns.find(c => c.dataKey == field);
+			if (col) {
+				return col.sortDirection;
+			}
+		}
+		return 1;
 	}
 
 	_getSortField() {
