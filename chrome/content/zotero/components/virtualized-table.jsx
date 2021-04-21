@@ -791,6 +791,8 @@ class VirtualizedTable extends React.Component {
 		
 	_handleColumnDragStart = (index, event) => {
 		if (event.button !== 0) return false;
+		// Remember for sorting
+		this._headerMouseDownIndex = index;
 		this.setState({ draggingColumn: index });
 		this._isMouseDrag = true;
 	}
@@ -822,14 +824,15 @@ class VirtualizedTable extends React.Component {
 		this.isHeaderMouseUp = false;
 		this.setState({ dragColumnX: offsetX });
 	}
-	
-	_handleHeaderMouseUp = (event, dataKey) => {
+
+	_handleHeaderMouseUp = (event, dataKey, index) => {
 		if (!this.isHeaderMouseUp || event.button !== 0) {
 			this.isHeaderMouseUp = true;
 			return;
 		}
-		this._columns.toggleSort(
-			this._getColumns().findIndex(column => column.dataKey == dataKey));
+		// The mousedown event occurred on a different column so we shouldn't sort
+		if (this._headerMouseDownIndex != index) return;
+		this._columns.toggleSort(this._getColumns().findIndex(column => column.dataKey == dataKey));
 	}
 
 	_findColumnDragPosition(x) {
@@ -962,7 +965,7 @@ class VirtualizedTable extends React.Component {
 				key={columnName + '-draggable'}>
 				<div
 					key={columnName}
-					onMouseUp={e => this._handleHeaderMouseUp(e, column.dataKey)}>
+					onMouseUp={e => this._handleHeaderMouseUp(e, column.dataKey, index)}>
 					{resizer}
 					<span
 						key={columnName + '-label'}
