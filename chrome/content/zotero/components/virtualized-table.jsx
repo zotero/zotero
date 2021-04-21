@@ -716,12 +716,17 @@ class VirtualizedTable extends React.Component {
 		event.stopPropagation();
 		const result = this._getResizeColumns();
 		if (!result) return;
-		const [aColumn, bColumn] = result;
+		const [aColumn, bColumn, resizingColumn] = result;
 		const a = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${aColumn.dataKey}`);
 		const b = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${bColumn.dataKey}`);
+		const resizing = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${resizingColumn.dataKey}`);
 		const aRect = a.getBoundingClientRect();
 		const bRect = b.getBoundingClientRect();
-		const offset = aRect.x;
+		const resizingRect = resizing.getBoundingClientRect();
+		let offset = aRect.x;
+		if (aColumn.dataKey != resizingColumn.dataKey) {
+			offset += resizingRect.width;
+		}
 		const widthSum = aRect.width + bRect.width;
 		// Column min-width: 20px;
 		const aColumnWidth = Math.min(widthSum - 20, Math.max(20, event.clientX - (RESIZER_WIDTH / 2) - offset));
@@ -732,15 +737,19 @@ class VirtualizedTable extends React.Component {
 		this._columns.onResize(onResizeData);
 	}
 	
+	/**
+	 * Get all columns including hidden ones
+	 */
 	_getColumns() {
 		return this._columns.getAsArray();
 	}
 	
 	_getResizeColumns(index) {
 		index = typeof index != "undefined" ? index : this.state.resizing;
+		let resizingColumn, aColumn, bColumn;
 		const columns = this._getColumns().filter(col => !col.hidden).sort((a, b) => a.ordinal - b.ordinal);
-		let aColumn = columns[index - 1];
-		let bColumn = columns[index];
+		aColumn = resizingColumn = columns[index - 1];
+		bColumn = columns[index];
 		if (aColumn.fixedWidth) {
 			for (let i = index - 2; i >= 0; i--) {
 				aColumn = columns[i];
@@ -762,9 +771,9 @@ class VirtualizedTable extends React.Component {
 			}
 		}
 		if (Zotero.rtl) {
-			return [bColumn, aColumn];
+			return [bColumn, aColumn, resizingColumn];
 		}
-		return [aColumn, bColumn];
+		return [aColumn, bColumn, resizingColumn];
 	}
 
 	_handleResizerDragStop = (event) => {
