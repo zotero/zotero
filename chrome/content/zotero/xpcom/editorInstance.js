@@ -271,7 +271,11 @@ class EditorInstance {
 					citationItems: [citationItem],
 					properties: {}
 				};
-				let formatted = this._formatCitation(citation);
+				
+				let citationWithData = JSON.parse(JSON.stringify(citation));
+				citationWithData.citationItems[0].itemData = itemData;
+				let formatted = this._formatCitation(citationWithData);
+				
 				citationHTML = `<span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">(${formatted})</span>`;
 			}
 			
