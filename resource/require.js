@@ -61,13 +61,15 @@ var require = (function() {
 	}
 	
 	function getZotero() {
+		if (win.Zotero) Zotero = win.Zotero;
+		
 		if (typeof Zotero === 'undefined') {
 			try {
 				Zotero = Components.classes["@zotero.org/Zotero;1"]
 					.getService(Components.interfaces.nsISupports).wrappedJSObject;
 			} catch (e) {}
 		}
-		return Zotero || {};	
+		return Zotero || {};
 	}
 
 	var cons;
@@ -87,6 +89,8 @@ var require = (function() {
 		navigator: typeof win.navigator !== 'undefined' && win.navigator || {},
 		setTimeout: win.setTimeout,
 		clearTimeout: win.clearTimeout,
+		requestAnimationFrame: win.setTimeout,
+		cancelAnimationFrame: win.clearTimeout
 	};
 	Object.defineProperty(globals, 'Zotero', { get: getZotero });
 	var loader = Loader({
@@ -101,5 +105,5 @@ var require = (function() {
 		globals
 	});
 	let require = Require(loader, requirer);
-	return require
+	return require;
 })();

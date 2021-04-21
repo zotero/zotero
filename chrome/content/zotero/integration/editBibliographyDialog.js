@@ -36,7 +36,7 @@ var Zotero_Bibliography_Dialog = new function () {
 	/**
 	 * Initializes add citation dialog
 	 */
-	this.load = function() {
+	this.load = async function() {
 		bibEditInterface = window.arguments[0].wrappedJSObject;
 		
 		_revertAllButton = document.documentElement.getButton("extra2");
@@ -44,7 +44,6 @@ var Zotero_Bibliography_Dialog = new function () {
 		_addButton = document.getElementById("add");
 		_removeButton = document.getElementById("remove");
 		_itemList = document.getElementById("item-list");
-		_itemTree = document.getElementById("zotero-items-tree");
 		
 		_revertAllButton.label = Zotero.getString("integration.revertAll.button");
 		_revertAllButton.disabled = bibEditInterface.isAnyEdited();
@@ -54,7 +53,7 @@ var Zotero_Bibliography_Dialog = new function () {
 		document.getElementById('editor').format = "RTF";
 		
 		// load (from selectItemsDialog.js)
-		doLoad();
+		await doLoad();
 		
 		// load bibliography entries
 		_loadItems();
@@ -119,7 +118,7 @@ var Zotero_Bibliography_Dialog = new function () {
 		
 		if(_itemList.selectedItems.length) {
 			_suppressAllSelectEvents = true;
-			_itemTree.view.selection.clearSelection();
+			itemsView.selection.clearSelection();
 			_suppressAllSelectEvents = false;
 			
 			// only show revert button if at least one selected item has been edited

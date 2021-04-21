@@ -74,6 +74,16 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	focusTextbox() {
 		this.searchBoxRef.current.focus();
 	}
+
+	componentDidCatch(error, info) {
+		// Async operations might attempt to update the react components
+		// after window close in tests, which will cause unnecessary crashing.
+		if (this._uninitialized) return;
+		Zotero.debug("TagSelectorContainer: React threw an error");
+		Zotero.logError(error);
+		Zotero.debug(info);
+		Zotero.crash();
+	}
 	
 	componentDidUpdate(_prevProps, _prevState) {
 		Zotero.debug("Tag selector updated");
@@ -762,6 +772,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	}
 	
 	uninit() {
+		this._uninitialized = true;
 		ReactDOM.unmountComponentAtNode(this.domEl);
 		Zotero.Notifier.unregisterObserver(this._notifierID);
 		Zotero.Prefs.unregisterObserver(this._prefObserverID);

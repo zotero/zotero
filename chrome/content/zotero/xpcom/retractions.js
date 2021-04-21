@@ -303,7 +303,7 @@ Zotero.Retractions = {
 				// Changed
 				&& (previous != current
 					// Explicitly hidden
-					|| (current && !Zotero.Utilities.Internal.getVirtualCollectionStateForLibrary(libraryID, 'retracted')))) {
+					|| (current && !Zotero.Prefs.getVirtualCollectionStateForLibrary(libraryID, 'retracted')))) {
 			let promises = [];
 			for (let zp of Zotero.getZoteroPanes()) {
 				promises.push(zp.setVirtual(libraryID, 'retracted', current));

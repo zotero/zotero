@@ -62,7 +62,7 @@ Zotero.Server.Connector = {
 				if (!editable && !allowReadOnly) {
 					let userLibrary = Zotero.Libraries.userLibrary;
 					if (userLibrary && userLibrary.editable) {
-						Zotero.debug("Save target isn't editable -- switching to My Library");
+						Zotero.debug("Save target isn't editable -- switching lastViewedFolder to My Library");
 						let treeViewID = userLibrary.treeViewID;
 						Zotero.Prefs.set('lastViewedFolder', treeViewID);
 						({ library, collection, editable } = this.resolveTarget(treeViewID));

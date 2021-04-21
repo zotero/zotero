@@ -55,7 +55,7 @@ Zotero.Library = function(params = {}) {
 	// Return a proxy so that we can disable the object once it's deleted
 	return new Proxy(this, {
 		get: function(obj, prop) {
-			if (obj._disabled && !(prop == 'libraryID' || prop == 'id')) {
+			if (obj._disabled && !(prop == 'libraryID' || prop == 'id' || prop == 'name')) {
 				throw new Error("Library (" + obj.libraryID + ") has been disabled");
 			}
 			return obj[prop];

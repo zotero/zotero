@@ -163,6 +163,7 @@ Zotero.ProgressQueue = function (options) {
 	 * @param {String} message
 	 */
 	this.updateRow = function(itemID, status, message) {
+		Zotero.debug(`ProgressQueue: updating row ${itemID}, ${status}, ${message}`);
 		for (let row of _rows) {
 			if (row.id === itemID) {
 				row.status = status;

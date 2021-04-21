@@ -1988,7 +1988,6 @@ Zotero.VersionHeader = {
 Zotero.DragDrop = {
 	currentEvent: null,
 	currentOrientation: 0,
-	currentSourceNode: null,
 	
 	getDataFromDataTransfer: function (dataTransfer, firstOnly) {
 		var dt = dataTransfer;
@@ -2047,28 +2046,8 @@ Zotero.DragDrop = {
 	},
 	
 	
-	getDragSource: function (dataTransfer) {
-		if (!dataTransfer) {
-			//Zotero.debug("Drag data not available", 2);
-			return false;
-		}
-		
-		// For items, the drag source is the CollectionTreeRow of the parent window
-		// of the source tree
-		if (dataTransfer.types.contains("zotero/item")) {
-			let sourceNode = dataTransfer.mozSourceNode || this.currentSourceNode;
-			if (!sourceNode || sourceNode.tagName != 'treechildren'
-					|| sourceNode.parentElement.id != 'zotero-items-tree') {
-				return false;
-			}
-			var win = sourceNode.ownerDocument.defaultView;
-			if (win.document.documentElement.getAttribute('windowtype') == 'zotero:search') {
-				return win.ZoteroAdvancedSearch.itemsView.collectionTreeRow;
-			}
-			return win.ZoteroPane.collectionsView.selectedTreeRow;
-		}
-		
-		return false;
+	getDragSource: function () {
+		return this.currentDragSource;
 	},
 	
 	

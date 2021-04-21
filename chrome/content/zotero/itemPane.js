@@ -224,6 +224,9 @@ var ZoteroItemPane = new function() {
 				yield this.viewItem(_lastItem, null, 1);
 			}
 		}
+		if (viewBox.selectedIndex == 0 && action == 'refresh' && _lastItem) {
+			yield this.viewItem(_lastItem, null, 0);
+		}
 	});
 	
 	

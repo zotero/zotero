@@ -2,6 +2,20 @@
   width: 16px;
 }
 
-.icon.icon-downchevron > img {
-  width: 7px;
+.icon-bg {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  vertical-align: middle;
+}
+
+.icon.icon-downchevron {
+  width: 7px !important;
+}
+
+.icon {
+  -moz-appearance: none !important;
 }

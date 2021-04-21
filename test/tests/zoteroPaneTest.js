@@ -455,7 +455,7 @@ describe("ZoteroPane", function() {
 			var selected = iv.selectItem(item.id);
 			assert.ok(selected);
 			
-			var tree = doc.getElementById('zotero-items-tree');
+			var tree = doc.getElementById(iv.id);
 			tree.focus();
 			
 			yield Zotero.Promise.delay(1);
@@ -485,7 +485,7 @@ describe("ZoteroPane", function() {
 			var selected = iv.selectItem(item.id);
 			assert.ok(selected);
 			
-			var tree = doc.getElementById('zotero-items-tree');
+			var tree = doc.getElementById(iv.id);
 			tree.focus();
 			
 			yield Zotero.Promise.delay(1);
@@ -566,27 +566,29 @@ describe("ZoteroPane", function() {
 			assert.isFalse(cv.getRowIndexByID(id));
 			yield zp.setVirtual(userLibraryID, 'duplicates', true, true);
 			// Duplicate Items should be selected
-			assert.equal(cv.selectedTreeRow.id, id);
+			assert.equal(zp.getCollectionTreeRow().id, id);
 			// Should be missing from pref
 			assert.isUndefined(JSON.parse(Zotero.Prefs.get('duplicateLibraries'))[userLibraryID])
 			
 			// Clicking should select both items
 			var row = cv.getRowIndexByID(id);
 			assert.ok(row);
-			assert.equal(cv.selection.currentIndex, row);
+			assert.equal(cv.selection.pivot, row);
 			yield waitForItemsLoad(win);
 			var iv = zp.itemsView;
 			row = iv.getRowIndexByID(item1.id);
 			assert.isNumber(row);
-			clickOnItemsRow(iv, row);
+			var promise = iv.waitForSelect();
+			clickOnItemsRow(win, iv, row);
 			assert.equal(iv.selection.count, 2);
+			yield promise;
 			
 			// Show Unfiled Items
 			id = "U" + userLibraryID;
 			assert.isFalse(cv.getRowIndexByID(id));
 			yield zp.setVirtual(userLibraryID, 'unfiled', true, true);
 			// Unfiled Items should be selected
-			assert.equal(cv.selectedTreeRow.id, id);
+			assert.equal(zp.getCollectionTreeRow().id, id);
 			// Should be missing from pref
 			assert.isUndefined(JSON.parse(Zotero.Prefs.get('unfiledLibraries'))[userLibraryID])
 		});
@@ -608,7 +610,7 @@ describe("ZoteroPane", function() {
 			
 			// Library should have been expanded and Duplicate Items selected
 			assert.ok(cv.getRowIndexByID(id));
-			assert.equal(cv.selectedTreeRow.id, id);
+			assert.equal(zp.getCollectionTreeRow().id, id);
 		});
 		
 		it("should hide a virtual collection in My Library", function* () {
@@ -634,7 +636,7 @@ describe("ZoteroPane", function() {
 			
 			var group = yield createGroup();
 			var groupRow = cv.getRowIndexByID(group.treeViewID);
-			var rowCount = cv.rowCount;
+			var rowCount = cv._rows.length;
 			
 			// Make sure group is open
 			if (!cv.isContainerOpen(groupRow)) {
@@ -658,7 +660,7 @@ describe("ZoteroPane", function() {
 			// Group should remain open
 			assert.isTrue(cv.isContainerOpen(groupRow));
 			// Row count should be 1 less
-			assert.equal(cv.rowCount, --rowCount);
+			assert.equal(cv._rows.length, --rowCount);
 			
 			// Hide Unfiled Items
 			id = "U" + group.libraryID;
@@ -674,7 +676,7 @@ describe("ZoteroPane", function() {
 			// Group should remain open
 			assert.isTrue(cv.isContainerOpen(groupRow));
 			// Row count should be 1 less
-			assert.equal(cv.rowCount, --rowCount);
+			assert.equal(cv._rows.length, --rowCount);
 		});
 	});
 	
@@ -710,49 +712,6 @@ describe("ZoteroPane", function() {
 			yield promise;
 			var conditions = search.getConditions();
 			assert.lengthOf(Object.keys(conditions), 3);
-		});
-	});
-	
-	describe("#onCollectionSelected()", function() {
-		var cv;
-		
-		beforeEach(function* () {
-			cv = zp.collectionsView;
-			yield cv.selectLibrary(Zotero.Libraries.userLibraryID);
-			Zotero.Prefs.clear('itemsView.columnVisibility');
-			yield clearFeeds();
-		});
-		
-		it("should store column visibility settings when switching from default to feeds", function* () {
-			doc.getElementById('zotero-items-column-dateAdded').setAttribute('hidden', false);
-			var feed = yield createFeed();
-			yield cv.selectLibrary(feed.libraryID);
-			var settings = JSON.parse(Zotero.Prefs.get('itemsView.columnVisibility'));
-			assert.isOk(settings.default.dateAdded);
-		});
-		
-		it("should restore column visibility when switching between default and feeds", function* () {
-			doc.getElementById('zotero-items-column-dateAdded').setAttribute('hidden', false);
-			var feed = yield createFeed();
-			yield cv.selectLibrary(feed.libraryID);
-			assert.equal(doc.getElementById('zotero-items-column-dateAdded').getAttribute('hidden'), 'true');
-			doc.getElementById('zotero-items-column-firstCreator').setAttribute('hidden', true);
-			yield cv.selectLibrary(Zotero.Libraries.userLibraryID);
-			assert.equal(doc.getElementById('zotero-items-column-dateAdded').getAttribute('hidden'), 'false');
-			yield cv.selectLibrary(feed.libraryID);
-			assert.equal(doc.getElementById('zotero-items-column-firstCreator').getAttribute('hidden'), 'true');
-		});
-		
-		it("should restore column visibility settings on restart", function* () {
-			doc.getElementById('zotero-items-column-dateAdded').setAttribute('hidden', false);
-			assert.equal(doc.getElementById('zotero-items-column-dateAdded').getAttribute('hidden'), 'false');
-			
-			win.close();
-			win = yield loadZoteroPane();
-			doc = win.document;
-			zp = win.ZoteroPane;
-			
-			assert.equal(doc.getElementById('zotero-items-column-dateAdded').getAttribute('hidden'), 'false');
 		});
 	});
 })

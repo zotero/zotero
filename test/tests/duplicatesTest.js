@@ -38,8 +38,10 @@ describe("Duplicate Items", function () {
 			var iv = zp.itemsView;
 			var row = iv.getRowIndexByID(item1.id);
 			assert.isNumber(row);
-			clickOnItemsRow(iv, row);
+			var promise = iv.waitForSelect();
+			clickOnItemsRow(win, iv, row);
 			assert.equal(iv.selection.count, 2);
+			yield promise;
 			
 			// Click merge button
 			var button = win.document.getElementById('zotero-duplicates-merge-button');
@@ -75,7 +77,9 @@ describe("Duplicate Items", function () {
 			// Select the first item, which should select both
 			var iv = zp.itemsView;
 			var row = iv.getRowIndexByID(item1.id);
-			clickOnItemsRow(iv, row);
+			var promise = iv.waitForSelect();
+			clickOnItemsRow(win, iv, row);
+			yield promise;
 			
 			// Click merge button
 			var button = win.document.getElementById('zotero-duplicates-merge-button');

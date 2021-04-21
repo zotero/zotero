@@ -75,6 +75,7 @@
 	text-overflow: ellipsis;
 	white-space: pre;
 	padding: 1px 4px 3px; // See also TagSelectorList.jsx
+	background-color: $tag-selector-bg;
 
 	&.colored {
 		font-weight: bold;

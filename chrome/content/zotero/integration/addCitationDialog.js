@@ -319,7 +319,7 @@ var Zotero_Citation_Dialog = new function () {
 		_itemSelected(itemDataID);
 		// turn off highlight in item tree
 		_suppressNextTreeSelect = true;
-		document.getElementById("zotero-items-tree").view.selection.clearSelection();
+		itemsView.selection.clearSelection();
 		document.getElementById("remove").disabled = !itemDataID;
 		document.getElementById("add").disabled = true;
 		_configListPosition(!itemDataID, selectedListIndex);

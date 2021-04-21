@@ -190,11 +190,13 @@
 			<method name="add">
 				<body><![CDATA[
 					return Zotero.spawn(function* () {
-						var io = {dataIn: null, dataOut: null};
+						var io = {dataIn: null, dataOut: null, deferred: Zotero.Promise.defer()};
 						
 						window.openDialog('chrome://zotero/content/selectItemsDialog.xul', '',
-								'chrome,dialog=no,modal,centerscreen,resizable=yes', io);
-						
+								'chrome,dialog=no,centerscreen,resizable=yes', io);
+
+						yield io.deferred.promise;
+
 						if (!io.dataOut || !io.dataOut.length) {
 							return;
 						}

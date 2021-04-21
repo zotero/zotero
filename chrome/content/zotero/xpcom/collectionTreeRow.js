@@ -29,10 +29,12 @@ Zotero.CollectionTreeRow = function (collectionTreeView, type, ref, level, isOpe
 	this.view = collectionTreeView;
 	this.type = type;
 	this.ref = ref;
-	this.level = level || 0
+	this.level = level || 0;
 	this.isOpen = isOpen || false;
 	this.onUnload = null;
 }
+
+Zotero.CollectionTreeRow.IDCounter = 0;
 
 
 Zotero.CollectionTreeRow.prototype.__defineGetter__('id', function () {
@@ -73,7 +75,10 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('id', function () {
 			break;
 	}
 	
-	return '';
+	if (!this._id) {
+		this._id = 'I' + Zotero.CollectionTreeRow.IDCounter++;
+	}
+	return this._id;
 });
 
 Zotero.CollectionTreeRow.prototype.isLibrary = function (includeGlobal)
@@ -140,6 +145,10 @@ Zotero.CollectionTreeRow.prototype.isBucket = function()
 Zotero.CollectionTreeRow.prototype.isShare = function()
 {
 	return this.type == 'share';
+}
+
+Zotero.CollectionTreeRow.prototype.isContainer = function() {
+	return this.isLibrary(true) || this.isCollection() || this.isPublications() || this.isBucket();
 }
 
 
@@ -437,5 +446,26 @@ Zotero.CollectionTreeRow.prototype.isSearchMode = function() {
 	// Tag filter
 	if (this.tags && this.tags.size) {
 		return true;
+	}
+}
+
+Zotero.CollectionTreeCache = {
+	"lastTreeRow":null,
+	"lastTempTable":null,
+	"lastSearch":null,
+	"lastResults":null,
+
+	"clear": function () {
+		this.lastTreeRow = null;
+		this.lastSearch = null;
+		if (this.lastTempTable) {
+			let tableName = this.lastTempTable;
+			let id = Zotero.DB.addCallback('commit', async function () {
+				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS " + tableName);
+				Zotero.DB.removeCallback('commit', id);
+			});
+		}
+		this.lastTempTable = null;
+		this.lastResults = null;
 	}
 }
