@@ -3066,7 +3066,7 @@ var ZoteroPane = new function()
 		}
 
 		if (this.itemsView) {
-			this.itemsView.setItemsPaneMessage(content);
+			this.itemsView.setItemsPaneMessage(content, lock);
 		}
 	}
 	
