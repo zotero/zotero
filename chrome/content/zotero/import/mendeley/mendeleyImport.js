@@ -18,6 +18,7 @@ var Zotero_Import_Mendeley = function () {
 	
 	this._db;
 	this._file;
+	this._saveOptions = null;
 	this._itemDone;
 	this._progress = 0;
 	this._progressMax;
@@ -50,6 +51,10 @@ Zotero_Import_Mendeley.prototype.setTranslator = function () {};
 
 Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 	this._linkFiles = options.linkFiles;
+	this._saveOptions = {
+		skipSelect: true,
+		...(options.saveOptions || {})
+	};
 	this.timestamp = Date.now();
 	
 	if (true) {
@@ -431,9 +436,7 @@ Zotero_Import_Mendeley.prototype._saveCollections = async function (libraryID, j
 		delete toSave.remoteUUID;
 		
 		collection.fromJSON(toSave);
-		await collection.saveTx({
-			skipSelect: true
-		});
+		await collection.saveTx(this._saveOptions);
 	}
 };
 
@@ -1249,8 +1252,8 @@ Zotero_Import_Mendeley.prototype._saveItems = async function (libraryID, json) {
 		
 		item.fromJSON(toSave);
 		await item.saveTx({
-			skipSelect: true,
-			skipDateModifiedUpdate: true
+			skipDateModifiedUpdate: true,
+			...this._saveOptions
 		});
 		if (itemJSON.documentID) {
 			idMap.set(itemJSON.documentID, item.id);
@@ -1402,9 +1405,7 @@ Zotero_Import_Mendeley.prototype._saveFilesAndAnnotations = async function (file
 					attachment.setRelations({
 						'mendeleyDB:fileHash': file.hash
 					});
-					await attachment.saveTx({
-						skipSelect: true
-					});
+					await attachment.saveTx(this._saveOptions);
 				}
 			}
 			else {
@@ -1497,7 +1498,7 @@ Zotero_Import_Mendeley.prototype._saveAnnotations = async function (annotations,
 					let type = 'application/pdf';
 					if (Zotero.MIME.sniffForMIMEType(await Zotero.File.getSample(file)) == type) {
 						attachmentItem.attachmentContentType = type;
-						await attachmentItem.saveTx();
+						await attachmentItem.saveTx(this._saveOptions);
 					}
 				}
 				
@@ -1596,9 +1597,7 @@ Zotero_Import_Mendeley.prototype._saveAnnotations = async function (annotations,
 		});
 	}
 	note.setNote('<h1>' + Zotero.getString('extractedAnnotations') + '</h1>\n' + noteStrings.join('\n'));
-	return note.saveTx({
-		skipSelect: true
-	});
+	return note.saveTx(this._saveOptions);
 };
 
 
