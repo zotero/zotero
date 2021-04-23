@@ -294,7 +294,12 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		let twisty;
 		if (this.isContainerEmpty(index)) {
 			twisty = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
-			twisty.classList.add("spacer-twisty");
+			if (Zotero.isMac && treeRow.isHeader) {
+				twisty.classList.add("spacer-header");
+			}
+			else {
+				twisty.classList.add("spacer-twisty");
+			}
 		}
 		else {
 			twisty = getDOMIcon("IconTwisty");
