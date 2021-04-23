@@ -148,12 +148,8 @@ var LibraryTree = class LibraryTree extends React.Component {
 		var id = this.getRow(index).id;
 		let level = this.getLevel(index);
 
-		let moveSelect = index - 1;
-		if (index <= this.selection.pivot) {
-			while (moveSelect >= this._rows.length) {
-				moveSelect--;
-			}
-			this.selection.select(moveSelect);
+		if (index <= this.selection.focused) {
+			this.selection.select(this.selection.focused - 1);
 		}
 
 		this._rows.splice(index, 1);

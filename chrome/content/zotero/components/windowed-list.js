@@ -56,7 +56,7 @@ module.exports = class {
 		
 		this.scrollDirection = 0;
 		this.scrollOffset = 0;
-		this.overscanCount = 6;
+		this.overscanCount = 2;
 		this._lastItemCount = null;
 		
 		Object.assign(this, options);

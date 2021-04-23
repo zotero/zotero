@@ -2039,11 +2039,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		if (!this.isContainerOpen(row) || this.isContainerEmpty(row)) return;
 		
 		this.selection.selectEventsSuppressed = true;
-		let selectParent = this.getParentIndex(this.selection.focused);
-		while (selectParent != -1) {
-			if (selectParent === row) this.selection.select(row);
-			selectParent = this.getParentIndex(selectParent);
-		}
 		
 		var level = this.getLevel(row);
 		var nextRow = row + 1;

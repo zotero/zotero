@@ -1708,6 +1708,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (this.isContainerOpen(index)) {
 			return this._closeContainer(index, skipRowMapRefresh);
 		}
+		if (!skipRowMapRefresh) {
+			var savedSelection = this.getSelectedItems(true);
+		}
 
 		var count = 0;
 		var level = this.getLevel(index);
@@ -1753,11 +1756,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		if (!skipRowMapRefresh) {
-			await this._refreshPromise;
-			this.tree.invalidate(index);
-			
 			Zotero.debug('Refreshing item row map');
 			this._refreshRowMap();
+			
+			await this._refreshPromise;
+			this._restoreSelection(savedSelection);
+			this.tree.invalidate();
 		}
 	}
 
@@ -1774,7 +1778,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 				this.toggleOpenState(i, true);
 			}
 		}
-		this.tree && this.tree.invalidate();
 		this._refreshRowMap();
 		this._restoreSelection(savedSelection);
 	}
@@ -2601,6 +2604,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (!this.isContainer(index)) return;
 		if (!this.isContainerOpen(index)) return;
 
+		if (!skipRowMapRefresh) {
+			var savedSelection = this.getSelectedItems(true);
+		}
+
 		var count = 0;
 		var level = this.getLevel(index);
 
@@ -2619,11 +2626,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		if (!skipRowMapRefresh) {
-			await this._refreshPromise;
-			this.tree.invalidate(index);
-			
 			Zotero.debug('Refreshing item row map');
 			this._refreshRowMap();
+			
+			await this._refreshPromise;
+			this._restoreSelection(savedSelection, false);
+			this.tree.invalidate();
 		}
 	}
 
@@ -3057,11 +3065,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return;
 		}
 
-		this.selection.clearSelection();
-
 		if (!this.selection.selectEventsSuppressed) {
 			var unsuppress = this.selection.selectEventsSuppressed = true;
 		}
+
+		this.selection.clearSelection();
 
 		let focusedSet = false;
 		var toggleSelect = (function (itemID) {
