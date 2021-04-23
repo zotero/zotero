@@ -100,6 +100,8 @@ class TreeSelection {
 
 	clearSelection() {
 		this.selected = new Set();
+		if (this.selectEventsSuppressed) return;
+		
 		if (this._tree.invalidate) {
 			this._tree.invalidate();
 		}

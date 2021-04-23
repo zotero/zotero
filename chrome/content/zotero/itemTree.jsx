@@ -1609,13 +1609,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this._rows.sort((a, b) => rowSort(a, b) * order);
 		}
 		
-		this.tree && this.tree.invalidate();
-		
 		this._refreshRowMap();
 		
 		this._rememberOpenState(openItemIDs);
 		this._restoreSelection(savedSelection);
 		
+		if (this.tree && !this.selection.selectEventsSuppressed) {
+			this.tree.invalidate();
+		}
+
 		var numSorted = itemIDs ? itemIDs.length : this._rows.length;
 		Zotero.debug(`Sorted ${numSorted} ${Zotero.Utilities.pluralize(numSorted, ['item', 'items'])} `
 			+ `in ${new Date - t} ms`);
@@ -3154,14 +3156,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 
-		this._storeColumnPrefs(columnSettings);
 		await this._refreshPromise;
 		this.selection.selectEventsSuppressed = true;
 		await this.sort();
 		this.forceUpdate(() => {
-			this.tree.invalidate();
 			this.selection.selectEventsSuppressed = false;
-		})
+			// Store column prefs as a final action because it freezes the UI momentarily
+			// and makes the column sorting look laggy
+			this._storeColumnPrefs(columnSettings);
+		});
 	}
 
 	_displayColumnPickerMenu = (event) => {
