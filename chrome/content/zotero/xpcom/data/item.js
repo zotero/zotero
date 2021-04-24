@@ -1873,7 +1873,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			}.bind(this));
 		}
 		
-		let fields = ['Type', 'Text', 'Comment', 'PageLabel', 'SortIndex', 'Position', 'IsExternal'];
+		let fields = ['Type', 'Text', 'Comment', 'Color', 'PageLabel', 'SortIndex', 'Position', 'IsExternal'];
 		for (let field of fields) {
 			this._clearChanged('annotation' + field);
 		}

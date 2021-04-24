@@ -1339,6 +1339,7 @@ describe("Zotero.Item", function () {
 				annotation.parentID = attachment.id;
 				annotation.annotationType = 'highlight';
 				annotation.annotationText = "This is highlighted text.";
+				annotation.annotationColor = "#ffff66";
 				annotation.annotationSortIndex = '00015|002431|00000';
 				annotation.annotationPosition = JSON.stringify({
 					pageIndex: 123,
