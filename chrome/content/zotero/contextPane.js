@@ -54,7 +54,7 @@ var ZoteroContextPane = new function () {
 	var _itemContexts = [];
 	var _notesContexts = [];
 	
-	// Using attribute instead of propery to set 'selectedIndex'
+	// Using attribute instead of property to set 'selectedIndex'
 	// is more reliable
 	
 	this.update = _update;
@@ -131,7 +131,7 @@ var ZoteroContextPane = new function () {
 			let libraryIDs = [];
 			for (let id of ids) {
 				let item = Zotero.Items.get(id);
-				if (item && item.isNote()) {
+				if (item && (item.isNote() || item.isRegularItem())) {
 					libraryIDs.push(item.libraryID);
 				}
 				else if (action == 'delete') {
@@ -140,6 +140,7 @@ var ZoteroContextPane = new function () {
 			}
 			for (let context of _notesContexts) {
 				if (libraryIDs.includes(context.libraryID)) {
+					context.affectedIDs = new Set([...context.affectedIDs, ...ids]);
 					context.update();
 				}
 			}
@@ -496,6 +497,15 @@ var ZoteroContextPane = new function () {
 				
 				notes = notes.map(note => {
 					var parentItem = note.parentItem;
+					// If neither note nor parent item is affected try to return the cached note
+					if (!context.affectedIDs.has(note.id)
+						&& (!parentItem || !context.affectedIDs.has(parentItem.id))) {
+						let cachedNote = context.cachedNotes.find(x => x.id == note.id);
+						if (cachedNote) {
+							return cachedNote;
+						}
+					}
+
 					var text = note.note;
 					text = Zotero.Utilities.unescapeHTML(text);
 					text = text.trim();
@@ -503,6 +513,7 @@ var ZoteroContextPane = new function () {
 					var parts = text.split('\n').map(x => x.trim()).filter(x => x.length);
 					var title = parts[0] && parts[0].slice(0, Zotero.Notes.MAX_TITLE_LENGTH);
 					var date = Zotero.Date.sqlToDate(note.dateModified, true);
+					// This takes half of the CPU time
 					date = Zotero.Date.toFriendlyDate(date);
 					
 					return {
@@ -517,6 +528,7 @@ var ZoteroContextPane = new function () {
 				});
 				context.cachedNotes = notes;
 			}
+			context.affectedIDs = new Set();
 
 			var attachment = _getCurrentAttachment();
 			var parentID = attachment && attachment.parentID;
@@ -533,6 +545,7 @@ var ZoteroContextPane = new function () {
 			editor,
 			notesListRef,
 			cachedNotes: [],
+			affectedIDs: new Set(),
 			update: Zotero.Utilities.throttle(_updateNotesList, 1000, { leading: false }),
 			updateFromCache: () => _updateNotesList(true)
 		};
