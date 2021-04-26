@@ -4048,7 +4048,7 @@ var ZoteroPane = new function()
 	this.viewItems = Zotero.Promise.coroutine(function* (items, event) {
 		if (items.length > 1) {
 			if (!event || (!event.metaKey && !event.shiftKey)) {
-				event = { metaKey: true, shiftKey: true };
+				event = { metaKey: true, shiftKey: true, originalEvent: event };
 			}
 		}
 		
@@ -4137,7 +4137,8 @@ var ZoteroPane = new function()
 				let library = Zotero.Libraries.get(item.libraryID);
 				// TEMP
 				if (Zotero.isPDFBuild && library.libraryType == 'user') {
-					this.viewPDF(itemID, event && event.shiftKey);
+					let originalEvent = event && event.originalEvent || event;
+					this.viewPDF(itemID, originalEvent && originalEvent.shiftKey);
 					return;
 				}
 				let pdfHandler  = Zotero.Prefs.get("fileHandler.pdf");
