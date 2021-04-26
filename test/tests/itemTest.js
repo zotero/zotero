@@ -1333,6 +1333,20 @@ describe("Zotero.Item", function () {
 			});
 		});
 		
+		describe("#annotationComment", function () {
+			it("should not mark object without comment as changed if empty string", async function () {
+				var annotation = await createAnnotation('highlight', attachment, { comment: "" });
+				annotation.annotationComment = "";
+				assert.isFalse(annotation.hasChanged());
+			});
+			
+			it("should clear existing value when empty string is passed", async function () {
+				var annotation = await createAnnotation('highlight', attachment);
+				annotation.annotationComment = "";
+				assert.isTrue(annotation.hasChanged());
+			});
+		});
+		
 		describe("#saveTx()", function () {
 			it("should save a highlight annotation", async function () {
 				var annotation = new Zotero.Item('annotation');

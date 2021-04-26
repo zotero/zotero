@@ -3671,6 +3671,14 @@ for (let name of ['type', 'text', 'comment', 'color', 'pageLabel', 'sortIndex', 
 		set: function (value) {
 			this._requireData('annotation');
 			
+			// Normalize values
+			if (typeof value == 'string') {
+				value = value.trim().normalize();
+				if (value === "") {
+					value = null;
+				}
+			}
+			
 			if (this._getLatestField(field) === value) {
 				return;
 			}

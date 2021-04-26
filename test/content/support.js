@@ -942,7 +942,12 @@ async function createAnnotation(type, parentItem, options = {}) {
 	if (type == 'highlight') {
 		annotation.annotationText = Zotero.Utilities.randomString();
 	}
-	annotation.annotationComment = Zotero.Utilities.randomString();
+	if (options.comment !== undefined) {
+		annotation.annotationComment = options.comment;
+	}
+	else {
+		annotation.annotationComment = Zotero.Utilities.randomString();
+	}
 	annotation.annotationColor = '#ffd400';
 	var page = Zotero.Utilities.rand(1, 100);
 	annotation.annotationPageLabel = `${page}`;
