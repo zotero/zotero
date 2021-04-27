@@ -67,6 +67,10 @@ class EditorInstance {
 		this._quickFormatWindow = null;
 		this._isAttachment = this._item.isAttachment();
 		this._citationItemsList = [];
+		this._initPromise = new Promise((resolve, reject) => {
+			this._resolveInitPromise = resolve;
+			this._rejectInitPromise = reject;
+		});
 		this._prefObserverIDs = [
 			Zotero.Prefs.registerObserver('note.fontSize', this._handleFontChange),
 			Zotero.Prefs.registerObserver('note.fontFamily', this._handleFontChange)
@@ -436,6 +440,10 @@ class EditorInstance {
 		let message = e.data.message;
 		try {
 			switch (message.action) {
+				case 'initialized': {
+					this._resolveInitPromise();
+					return;
+				}
 				case 'insertObject': {
 					let { type, data, pos } = message;
 					if (this._readOnly) {

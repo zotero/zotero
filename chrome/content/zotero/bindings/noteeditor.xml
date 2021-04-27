@@ -227,9 +227,38 @@
 			<field name="_item"/>
 			<property name="item" onget="return this._item;">
 				<setter><![CDATA[
-						return (async () => {
+						// The binding can be immediately destroyed
+						// (which i.e. happens in merge dialog)
+						if (this._destroyed) {
+							return;
+						}
+
+						if (!val) {
+							this._item = null;
+						}
+						
+						if (this._item && this._item.id === val.id) {
+							return;
+						}
+
+						if (this._editorInstance) {
+							this._editorInstance.uninit();
+							this._editorInstance = null;
+						}
+
+						this._lastHtmlValue = val.note;
+						this._item = val;
+						
+						// var parentKey = this._item.parentKey;
+						// if (parentKey) {
+						// 	this.parentItem = Zotero.Items.getByLibraryAndKey(this._item.libraryID, parentKey);
+						// }
+
+						this._id('links-box').item = this._item;
+						
+						(async () => {
 							// `item` field can be set before the constructor is called
-							// or noteditor is attached to dom (which happens in the
+							// or noteeditor is attached to dom (which happens in the
 							// merge dialog i.e.), therefore we wait for the initialization
 							let n = 0;
 							while (!this._initialized && !this._destroyed) {
@@ -240,27 +269,11 @@
 								n++;
 							}
 
-							// The binding can also be immediately destructed
-							// (which also happens in the merge dialog)
 							if (this._destroyed) {
 								return;
 							}
-
-							if (!val) this._item = null;
-							if (this._item && this._item.id === val.id) return;
-
-							this._lastHtmlValue = val.note;
-							
-							this._item = val;
 							
 							this.initEditor();
-
-							// var parentKey = this._item.parentKey;
-							// if (parentKey) {
-							// 	this.parentItem = Zotero.Items.getByLibraryAndKey(this._item.libraryID, parentKey);
-							// }
-
-							this._id('links-box').item = this._item;
 						})();
 					]]></setter>
 			</property>
@@ -325,13 +338,15 @@
 			<method name="focus">
 				<body>
 					<![CDATA[
-						setTimeout(() => {
-							if (this._iframe && this._iframe.contentWindow) {
-								this._iframe.focus();
-								this._editorInstance.focus();
+						(async () => {
+							let n = 0;
+							while (!this._editorInstance && n++ < 100) {
+								await Zotero.Promise.delay(10);
 							}
-
-						}, 500);
+							await this._editorInstance._initPromise;
+							this._iframe.focus();
+							this._editorInstance.focus();
+						})();
 					]]>
 				</body>
 			</method>
