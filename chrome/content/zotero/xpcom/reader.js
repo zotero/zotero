@@ -138,6 +138,34 @@ class ReaderInstance {
 		await this._initPromise;
 		this._postMessage({ action: 'setToolbarPlaceholderWidth', width });
 	}
+	
+	menuCmd(cmd) {
+		if (cmd === 'export') {
+			let zp = Zotero.getActiveZoteroPane();
+			zp.exportPDF(this._itemID);
+			return;
+		}
+		else if (cmd === 'showInLibrary') {
+			let id = this._itemID;
+			let item = Zotero.Items.get(this._itemID);
+			if (item && item.parentItemID) {
+				id = item.parentItemID;
+			}
+			let win = Zotero.getMainWindow();
+			if (win) {
+				win.ZoteroPane.selectItems([id]);
+				win.Zotero_Tabs.select('zotero-pane');
+				win.focus();
+			}
+			return;
+		}
+
+		let data = {
+			action: 'menuCmd',
+			cmd
+		};
+		this._postMessage(data);
+	}
 
 	async _setState(state) {
 		let item = Zotero.Items.get(this._itemID);
@@ -597,19 +625,6 @@ class ReaderTab extends ReaderInstance {
 		}
 	}
 	
-	menuCmd(cmd) {
-		if (cmd === 'export') {
-			let zp = Zotero.getActiveZoteroPane();
-			zp.exportPDF(this._itemID);
-			return;
-		}
-		let data = {
-			action: 'menuCmd',
-			cmd
-		};
-		this._postMessage(data);
-	}
-	
 	_toggleNoteSidebar(isToggled) {
 		let itemPane = this._window.document.getElementById('zotero-item-pane');
 		if (itemPane.hidden) {
@@ -658,22 +673,8 @@ class ReaderWindow extends ReaderInstance {
 		this._window.addEventListener('DOMContentLoaded', (event) => {
 			if (event.target === this._window.document) {
 				this._window.addEventListener('keypress', this._handleKeyPress);
-				
 				this._popupset = this._window.document.getElementById('zotero-reader-popupset');
-
-				this._window.menuCmd = (cmd) => {
-					if (cmd === 'export') {
-						let zp = Zotero.getActiveZoteroPane();
-						zp.exportPDF(this._itemID);
-						return;
-					}
-					let data = {
-						action: 'menuCmd',
-						cmd
-					};
-					this._postMessage(data);
-				};
-
+				this._window.menuCmd = this.menuCmd.bind(this);
 				this._iframe = this._window.document.getElementById('reader');
 			}
 

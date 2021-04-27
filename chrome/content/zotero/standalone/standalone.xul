@@ -152,6 +152,7 @@
 									label="Save As…"
 									oncommand="ZoteroStandalone.onReaderCmd('export')"/>
 							<menuitem label="Print" class="menu-type-reader" oncommand="ZoteroStandalone.onReaderCmd('print')"/>
+							<menuitem label="&zotero.items.menu.showInLibrary;" class="menu-type-reader" oncommand="ZoteroStandalone.onReaderCmd('showInLibrary')"/>
 							<menuseparator/>
 							<menuitem id="menu_close" class="menu-type-library" label="&closeCmd.label;" key="key_close"
 									accesskey="&closeCmd.accesskey;" command="cmd_close"/>

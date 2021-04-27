@@ -44,8 +44,10 @@
 	<menubar>
 		<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
 			<menupopup id="menu_FilePopup">
-				<menuitem label="Export" oncommand="menuCmd('export')"/>
+				<!-- TODO: Localize -->
+				<menuitem label="Save As…" oncommand="menuCmd('export')"/>
 				<menuitem label="Print" oncommand="menuCmd('print')"/>
+				<menuitem label="&zotero.items.menu.showInLibrary;" oncommand="menuCmd('showInLibrary')"/>
 				<menuseparator/>
 				<menuitem id="menu_close" label="&closeCmd.label;" key="key_close"
 						  accesskey="&closeCmd.accesskey;" command="cmd_close"/>
