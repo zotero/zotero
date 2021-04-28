@@ -884,6 +884,7 @@ class VirtualizedTable extends React.Component {
 	componentDidUpdate(prevProps) {
 		if (this.props.id !== prevProps.id) {
 			this._columns = new Columns(this);
+			this.forceUpdate();
 		}
 	}
 	
@@ -928,7 +929,6 @@ class VirtualizedTable extends React.Component {
 
 	_renderHeaderCells = () => {
 		return this._getColumns().filter(col => !col.hidden).map((column, index) => {
-			if (column.hidden) return "";
 			let columnName = column.label;
 			if (column.label in Zotero.Intl.strings) {
 				columnName = this.props.intl.formatMessage({ id: column.label });

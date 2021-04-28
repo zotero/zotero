@@ -40,6 +40,7 @@ Cu.import("resource://gre/modules/osfile.jsm");
 const TYPING_TIMEOUT = 1000;
 const CHILD_INDENT = 20;
 const COLORED_TAGS_RE = new RegExp("^[0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1}$");
+const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
 
 function makeItemRenderer(itemTree) {
 	function renderPrimaryCell(index, data, column) {
@@ -203,7 +204,7 @@ function makeItemRenderer(itemTree) {
 
 var ItemTree = class ItemTree extends LibraryTree {
 	static async init(domEl, opts={}) {
-		Zotero.debug("Initializing React ItemTree");
+		Zotero.debug(`Initializing React ItemTree ${opts.id}`);
 		var ref;
 		opts.domEl = domEl;
 		let elem = (
@@ -213,7 +214,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		);
 		await new Promise(resolve => ReactDOM.render(elem, domEl, resolve));
 		
-		Zotero.debug('React ItemTree initialized');
+		Zotero.debug(`React ItemTree ${opts.id} initialized`);
 		return ref;
 	}
 	
@@ -284,6 +285,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	unregister() {
 		this._uninitialized = true;
 		Zotero.Notifier.unregisterObserver(this._unregisterID);
+		this._writeColumnPrefsToFile(true);
 	}
 
 	componentDidMount() {
@@ -1162,18 +1164,24 @@ var ItemTree = class ItemTree extends LibraryTree {
 	
 	async changeCollectionTreeRow(collectionTreeRow) {
 		if (this._locked) return;
-		Zotero.debug(`itemTree.changeCollectionTreeRow(): ${collectionTreeRow.id}`);
-		this.selection.selectEventsSuppressed = true;
-		this.collectionTreeRow = collectionTreeRow;
-		this.id = "item-tree-" + this.props.id + "-" + this.collectionTreeRow.visibilityGroup;
 		if (!collectionTreeRow) {
 			this.tree = null;
 			this._treebox = null;
 			return this.clearItemsPaneMessage();
 		}
+		Zotero.debug(`itemTree.changeCollectionTreeRow(): ${collectionTreeRow.id}`);
 		this._itemTreeLoadingDeferred = Zotero.Promise.defer();
-		this.collectionTreeRow.view.itemTreeView = this;
 		this.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
+		let newId = "item-tree-" + this.props.id + "-" + collectionTreeRow.visibilityGroup;
+		if (this.id != newId && this.props.persistColumns) {
+			await this._writeColumnPrefsToFile(true);
+			this.id = newId;
+			await this._loadColumnPrefsFromFile();
+		}
+		this.id = newId;
+		this.collectionTreeRow = collectionTreeRow;
+		this.selection.selectEventsSuppressed = true;
+		this.collectionTreeRow.view.itemTreeView = this;
 		// Ensures that an up to date this._columns is set
 		this._getColumns();
 
@@ -2726,29 +2734,67 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	_getColumnPrefs = () => {
 		if (!this.props.persistColumns) return {};
-		if (this._columnPrefs) return this._columnPrefs;
-		
-		const persistSettings = JSON.parse(Zotero.Prefs.get('pane.persist') || "{}");
-		this._columnPrefs = persistSettings[this._columnsId];
 		return this._columnPrefs || {};
 	}
 
-	// N.B. We are banging the prefs with this new implementation somewhat more:
-	// column resize, hiding and order changes require pref reads and sets
-	// but we do not have the magic of xul itemtree to handle this for us.
-	// We should try to avoid calling this function as much as possible since it writes
-	// to disk and might introduce undesirable performance costs on HDDs (which
-	// will not be obvious on SSDs)
 	_storeColumnPrefs = (prefs) => {
 		if (!this.props.persistColumns) return;
-		Zotero.debug(`Storing itemTree ${this._columnsId} column prefs`, 2);
+		Zotero.debug(`Storing itemTree ${this.id} column prefs`, 2);
 		this._columnPrefs = prefs;
-		let persistSettings = JSON.parse(Zotero.Prefs.get('pane.persist') || "{}");
-		persistSettings[this._columnsId] = prefs;
+		if (!this._columns) {
+			Zotero.debug(new Error(), 1);;
+		}
 		this._columns = this._columns.map(column => Object.assign(column, prefs[column.dataKey]))
 			.sort((a, b) => a.ordinal - b.ordinal);
-		Zotero.Prefs.set('pane.persist', JSON.stringify(persistSettings));
+		
+		this._writeColumnPrefsToFile();
 	}
+	
+	_loadColumnPrefsFromFile = async () => {
+		if (!this.props.persistColumns) return;
+		try {
+			let columnPrefs = await Zotero.File.getContentsAsync(COLUMN_PREFS_FILEPATH);
+			let persistSettings = JSON.parse(columnPrefs);
+			this._columnPrefs = persistSettings[this.id] || {};
+		}
+		catch (e) {
+			this._columnPrefs = {};
+		}
+	}
+
+	/**
+	 * Writes column prefs to file, but is throttled to not do it more often than
+	 * every 60s. Can use the force param to force write to file immediately.
+	 * @param force {Boolean} force an immediate write to file without throttling
+	 * @returns {Promise}
+	 */
+	_writeColumnPrefsToFile = async (force=false) => {
+		if (!this.props.persistColumns) return;
+		var writeToFile = async () => {
+			try {
+				let persistSettingsString = await Zotero.File.getContentsAsync(COLUMN_PREFS_FILEPATH);
+				var persistSettings = JSON.parse(persistSettingsString);
+			}
+			catch {
+				persistSettings = {};
+			}
+			persistSettings[this.id] = this._columnPrefs;
+
+			let prefString = JSON.stringify(persistSettings);
+			Zotero.debug(`Writing column prefs of length ${prefString.length} to file ${COLUMN_PREFS_FILEPATH}`);
+
+			return Zotero.File.putContentsAsync(COLUMN_PREFS_FILEPATH, prefString);
+		};
+		if (this._writeColumnsTimeout) {
+			clearTimeout(this._writeColumnsTimeout);
+		}
+		if (force) {
+			return writeToFile();
+		}
+		else {
+			this._writeColumnsTimeout = setTimeout(writeToFile, 60000);
+		}
+	};
 
 	_setLegacyColumnSettings(column) {
 		let persistSettings = JSON.parse(Zotero.Prefs.get('pane.persist') || "{}");
@@ -2791,7 +2837,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 		
 		this._columnsId = prefKey;
 		this._columns = [];
-		this._columnPrefs = null;
 		
 		let columnsSettings = this._getColumnPrefs();
 
