@@ -311,7 +311,7 @@ class ReaderInstance {
 		popup.openPopupAtScreen(data.x, data.y, true);
 	}
 
-	_openAnnotationPopup(x, y, annotationID, colors, selectedColor) {
+	_openAnnotationPopup(x, y, ids, colors, selectedColor, readOnly) {
 		let popup = this._window.document.createElement('menupopup');
 		this._popupset.appendChild(popup);
 		popup.addEventListener('popuphidden', function () {
@@ -319,32 +319,33 @@ class ReaderInstance {
 		});
 		let menuitem;
 		// Add to note
-		if (this._window.ZoteroContextPane.getActiveEditor()) {
-			menuitem = this._window.document.createElement('menuitem');
-			menuitem.setAttribute('label', 'Add to Note');
-			menuitem.addEventListener('command', () => {
-				let data = {
-					action: 'popupCmd',
-					cmd: 'addToNote',
-					id: annotationID
-				};
-				this._postMessage(data);
-			});
-			popup.appendChild(menuitem);
-			// Separator
-			popup.appendChild(this._window.document.createElement('menuseparator'));
-		}
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', 'Add to Note');
+		let hasActiveEditor = this._window.ZoteroContextPane.getActiveEditor();
+		menuitem.setAttribute('disabled', !hasActiveEditor);
+		menuitem.addEventListener('command', () => {
+			let data = {
+				action: 'popupCmd',
+				cmd: 'addToNote',
+				ids
+			};
+			this._postMessage(data);
+		});
+		popup.appendChild(menuitem);
+		// Separator
+		popup.appendChild(this._window.document.createElement('menuseparator'));
 		// Colors
 		for (let color of colors) {
 			menuitem = this._window.document.createElement('menuitem');
 			menuitem.setAttribute('label', color[0]);
 			menuitem.className = 'menuitem-iconic';
+			menuitem.setAttribute('disabled', readOnly);
 			menuitem.setAttribute('image', this._getColorIcon(color[1], color[1] === selectedColor));
 			menuitem.addEventListener('command', () => {
 				let data = {
 					action: 'popupCmd',
 					cmd: 'setAnnotationColor',
-					id: annotationID,
+					ids,
 					color: color[1]
 				};
 				this._postMessage(data);
@@ -356,11 +357,12 @@ class ReaderInstance {
 		// Delete
 		menuitem = this._window.document.createElement('menuitem');
 		menuitem.setAttribute('label', 'Delete');
+		menuitem.setAttribute('disabled', readOnly);
 		menuitem.addEventListener('command', () => {
 			let data = {
 				action: 'popupCmd',
 				cmd: 'deleteAnnotation',
-				id: annotationID
+				ids
 			};
 			this._postMessage(data);
 		});
@@ -469,8 +471,8 @@ class ReaderInstance {
 					return;
 				}
 				case 'openAnnotationPopup': {
-					let { x, y, id, colors, selectedColor } = message;
-					this._openAnnotationPopup(x, y, id, colors, selectedColor);
+					let { x, y, ids, colors, selectedColor, readOnly } = message;
+					this._openAnnotationPopup(x, y, ids, colors, selectedColor, readOnly);
 					return;
 				}
 				case 'openColorPopup': {
