@@ -21,8 +21,8 @@
 			onpageadvanced="Zotero_Import_Wizard.onModeChosen(); return false;">
 		<radiogroup id="import-source">
 			<radio id="radio-import-source-file" label="&zotero.import.source.file;"/>
-			<radio id="radio-import-source-mendeley-online" label="Mendeley Reference Manager" />
-			<radio id="radio-import-source-mendeley" label="Mendeley Desktop" hidden="true"/>
+			<radio id="radio-import-source-mendeley-online"/>
+			<radio id="radio-import-source-mendeley" hidden="true"/>
 		</radiogroup>
 	</wizardpage>
 

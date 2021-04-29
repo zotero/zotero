@@ -901,8 +901,8 @@ var Zotero_File_Interface = new function() {
 		};
 		let innerFunc = function () {
 			browser.removeEventListener("pageshow", innerFunc);
-			win.outerWidth = Math.max(640, Math.min(1024, win.screen.availHeight));
-			win.outerHeight = Math.max(480, Math.min(768, win.screen.availWidth));
+			win.outerWidth = Math.max(640, Math.min(1000, win.screen.availHeight));
+			win.outerHeight = Math.max(480, Math.min(800, win.screen.availWidth));
 		};
 
 		win.addEventListener("load", func);

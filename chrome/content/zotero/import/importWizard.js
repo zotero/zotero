@@ -40,6 +40,10 @@ var Zotero_Import_Wizard = {
 		}
 		
 		// Update labels
+		document.getElementById('radio-import-source-mendeley-online').label
+			= `Mendeley Reference Manager (${Zotero.getString('import.onlineImport')})`;
+		document.getElementById('radio-import-source-mendeley').label
+			= `Mendeley Desktop (${Zotero.getString('import.localImport')})`;
 		document.getElementById('file-handling-store').label = Zotero.getString(
 			'import.fileHandling.store',
 			Zotero.appName

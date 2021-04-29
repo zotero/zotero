@@ -877,7 +877,7 @@ Zotero_Import_Mendeley.prototype._getGroupsAPI = async function () {
 
 Zotero_Import_Mendeley.prototype._getGroupsDB = async function () {
 	const rows = await this._db.queryAsync(
-		'SELECT id, remoteUUid, name, isOwner FROM Groups WHERE remoteUuID != ""'
+		"SELECT id, remoteUUid, name, isOwner FROM Groups WHERE remoteUuID != ?", ['']
 	);
 	return rows;
 };
@@ -892,7 +892,7 @@ Zotero_Import_Mendeley.prototype._getProfileAPI = async function () {
 
 Zotero_Import_Mendeley.prototype._getProfileDB = async function () {
 	const rows = await this._db.queryAsync(
-		'SELECT uuid as id, firstName, lastName, displayName FROM Profiles ORDER BY ROWID LIMIT 1'
+		"SELECT uuid as id, firstName, lastName, displayName FROM Profiles ORDER BY ROWID LIMIT 1"
 	);
 
 	return rows[0];
