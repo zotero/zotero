@@ -24,7 +24,7 @@
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
 <!ENTITY manageAttachments.label "Gestisci allegati">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
+<!ENTITY convertToStored.label "Converti i file collegati in file archiviati…">
 <!ENTITY importCmd.label "Importa...">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Importa dalla Clipboard">

@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Poista valinnat">
 <!ENTITY zotero.general.edit "Muokkaa">
 <!ENTITY zotero.general.delete "Poista">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Siirrä roskakoriin">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Peruuta">
 <!ENTITY zotero.general.refresh "Päivitä">
@@ -157,8 +157,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Tallenna tiedoston kopio...">
 <!ENTITY zotero.toolbar.attachment.weblink "Tallenna linkki nykyiselle sivulle">
 <!ENTITY zotero.toolbar.attachment.snapshot "Ota tilannekuva nykyisestä sivusta">
-<!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.item "Nimike">
+<!ENTITY zotero.toolbar.context.notes "Muistiinpanot">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Ei näytettäviä avainsanoja">
 <!ENTITY zotero.tagSelector.loadingTags "Ladataan avainsanoja...">
@@ -179,7 +179,7 @@
 <!ENTITY zotero.lookup.description "Anna lisättävien nimikkeiden ISBN-, DOI-, PMID- tai arXiv ID -tunnisteet:">
 <!ENTITY zotero.lookup.button.search "Etsi">
 
-<!ENTITY zotero.createParent.title "Create Parent Item">
+<!ENTITY zotero.createParent.title "Luo tiedostolle nimike">
 <!ENTITY zotero.createParent.button.manual "Käsinsyöttö">
 
 <!ENTITY zotero.selectitems.title "Valitse nimikkeet">
@@ -207,7 +207,7 @@
 <!ENTITY zotero.progress.title "Tilanne">
 
 <!ENTITY zotero.import "Tuonti">
-<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
+<!ENTITY zotero.import.whereToImportFrom "Mistä haluat tuoda?">
 <!ENTITY zotero.import.source.file "Tiedosto (BibTeX, RIS, Zotero RDF, jne.)">
 <!ENTITY zotero.import.importing "Tuodaan...">
 <!ENTITY zotero.import.database "Tietokanta">
@@ -334,4 +334,4 @@
 <!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
 <!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
-<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
+<!ENTITY zotero.context.editInWindow "Muokkaa erillisessä ikkunassa">

@@ -21,7 +21,7 @@
     "message": "Si è verificato un errore durante il salvataggio dell'elemento.  Consultare $1 per ulteriori informazioni."
   },
   "progressWindow_error_troubleshootingTranslatorIssues": {
-    "message": "Risoluzione dei problemi del motore di ricerca"
+    "message": "Diagnostica degli errori nella conversione"
   },
   "progressWindow_error_fallback": {
     "message": "Si è verificato un errore durante il salvataggio con $1. Nuovo tentativo di salvataggio con$2. "

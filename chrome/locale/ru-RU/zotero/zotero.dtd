@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Отменить выбор всего">
 <!ENTITY zotero.general.edit "Редактировать">
 <!ENTITY zotero.general.delete "Удалить">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Поместить в Корзину">
 <!ENTITY zotero.general.ok "ОК">
 <!ENTITY zotero.general.cancel "Отменить">
 <!ENTITY zotero.general.refresh "Обновить">
@@ -91,7 +91,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Показать в библиотеке">
 <!ENTITY zotero.items.menu.attach.note "Добавить заметку">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Создать заметку из аннотаций">
 <!ENTITY zotero.items.menu.attach "Добавить вложение">
 <!ENTITY zotero.items.menu.attach.link.uri "Прикрепить ссылку на URI…">
 <!ENTITY zotero.items.menu.attach.file "Вложить сохраненную копию файла…">
@@ -157,8 +157,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Сохранить копию файла…">
 <!ENTITY zotero.toolbar.attachment.weblink "Сохранить ссылку на текущую страницу">
 <!ENTITY zotero.toolbar.attachment.snapshot "Сделать снимок текущей страницы">
-<!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.item "Запись">
+<!ENTITY zotero.toolbar.context.notes "Заметки">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Нет тегов для отображения">
 <!ENTITY zotero.tagSelector.loadingTags "Загрузка тегов...">
@@ -330,8 +330,8 @@
 <!ENTITY zotero.attachLink.label.link "Ссылка:">
 <!ENTITY zotero.attachLink.label.title "Заголовок:">
 
-<!ENTITY zotero.context.addChildNote "Add Item Note">
-<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
-<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
-<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
-<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
+<!ENTITY zotero.context.addChildNote "Добавить заметку">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Создать заметку из аннотаций">
+<!ENTITY zotero.context.addStandaloneNote "Создать отдельную заметку">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Создать отдельную заметку из аннотаций">
+<!ENTITY zotero.context.editInWindow "Редактировать в отдельном окне">

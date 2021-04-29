@@ -9,7 +9,7 @@
 
 <!ENTITY zotero.search.recursive.label "Cerca nelle sottocartelle">
 <!ENTITY zotero.search.noChildren "Visualizza solo gli elementi principali">
-<!ENTITY zotero.search.includeParentsAndChildren "Visualizza anche gli elementi  dei livelli superiore e inferiore">
+<!ENTITY zotero.search.includeParentsAndChildren "Visualizza anche gli elementi principali e secondari">
 
 <!ENTITY zotero.search.textModes.phrase "Frase">
 <!ENTITY zotero.search.textModes.phraseBinary "Frase (file binari inclusi)">
