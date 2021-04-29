@@ -135,7 +135,14 @@ label.zotero-text-link {
 	text-decoration: underline;
 	border: 1px solid transparent;
 	cursor: pointer;
+}
+
+.text-link {
+	-moz-user-focus: normal;
 	color: -moz-nativehyperlinktext;
+	text-decoration: underline;
+	border: 1px solid transparent;
+	cursor: pointer;
 }
 
 .zotero-clicky

@@ -44,7 +44,7 @@
 				onload="window.sizeToContent()"
 				windowtype="zotero:basicViewer" 
 				title="&brandShortName;"
-				width="1000" height="500"
+				width="1000" height="700"
 				persist="screenX screenY width height sizemode">
 	<script type="application/javascript" src="chrome://global/content/globalOverlay.js"/>
 	<script type="application/javascript" src="chrome://global/content/contentAreaUtils.js"/>
