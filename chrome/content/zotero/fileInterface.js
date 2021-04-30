@@ -867,6 +867,22 @@ var Zotero_File_Interface = new function() {
 			if (matchResult) {
 				const mendeleyAccessToken = matchResult[1];
 				Zotero.getMainWindow().setTimeout(() => this.showImportWizard({ mendeleyAccessToken }), 0);
+				
+				// Clear all cookies to remove access
+				//
+				// This includes unrelated cookies in the central cookie store, but that's fine for
+				// the moment, since we're not purposely using cookies for anything else.
+				//
+				// TODO: Switch to removeAllSince() once >Fx60
+				try {
+					Cc["@mozilla.org/cookiemanager;1"]
+						.getService(Ci.nsICookieManager)
+						.removeAll();
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+				
 				win.close();
 				return;
 			}
