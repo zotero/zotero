@@ -35,6 +35,7 @@
 		onpagerewound="return Zotero_Import_Wizard.goToStart()"
 	>
 		<description id="mendeley-online-description" />
+		<description id="mendeley-online-description2" />
 	</wizardpage>
 	
 	<wizardpage pageid="page-file-list"

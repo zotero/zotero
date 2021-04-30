@@ -103,7 +103,10 @@ var Zotero_Import_Wizard = {
 
 	onMendeleyOnlineShow: async function () {
 		document.getElementById('mendeley-online-description').textContent = Zotero.getString(
-			'import.mendeleyOnline.intro', [Zotero.appName, 'Mendeley Reference Manager', 'Mendeley']
+			'import.online.intro', [Zotero.appName, 'Mendeley Reference Manager', 'Mendeley']
+		);
+		document.getElementById('mendeley-online-description2').textContent = Zotero.getString(
+			'import.online.intro2', [Zotero.appName, 'Mendeley']
 		);
 	},
 
