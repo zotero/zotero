@@ -314,7 +314,7 @@ Zotero.Sync.EventListeners.StorageFileOpenListener = {
 		Zotero.Notifier.registerObserver(this, ['file'], 'storageFileOpen');
 	},
 	
-	notify: function (event, type, ids, extraData) {
+	notify: async function (event, type, ids, extraData) {
 		if (event == 'open' && type == 'file') {
 			let timestamp = new Date().getTime();
 			
@@ -324,6 +324,13 @@ Zotero.Sync.EventListeners.StorageFileOpenListener = {
 					timestamp: timestamp
 				});
 			}
+
+			await Zotero.Promise.all(ids.map(async (id) => {
+				let item = await Zotero.Items.getAsync(id);
+				Zotero.debug('Updating ' + item.getField('title') + ' last accessed: ' + timestamp);
+				item.attachmentLastAccessed = timestamp;
+				item.saveTx({ skipAll: true });
+			}));
 		}
 	}
 }

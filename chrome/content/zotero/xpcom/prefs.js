@@ -262,6 +262,24 @@ Zotero.Prefs = new function(){
 				if (!win.Zotero) continue;
 				Zotero.updateQuickSearchBox(win.document);
 			}
+		}],
+		["sync.storage.timeToLive.enabled", function (_val) {
+			Zotero.Libraries.getAll()
+				.forEach((library) => {
+					Zotero.Sync.Storage.Local.lastCacheClean.set(
+						library.libraryID,
+						0
+					);
+				});
+		}],
+		["sync.storage.timeToLive.value", function (_val) {
+			Zotero.Libraries.getAll()
+				.forEach((library) => {
+					Zotero.Sync.Storage.Local.lastCacheClean.set(
+						library.libraryID,
+						0
+					);
+				});
 		}]
 	];
 	

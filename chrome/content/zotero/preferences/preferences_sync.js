@@ -24,20 +24,31 @@
 */
 
 "use strict";
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+import ProgressMeter from 'components/progressMeter';
+import { humanReadableSize } from 'components/utils';
+
 Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/osfile.jsm");
 Components.utils.import("resource://zotero/config.js");
+
+if (!Zotero_Preferences) {
+	var Zotero_Preferences = {};
+}
 
 Zotero_Preferences.Sync = {
 	checkmarkChar: '\u2705',
 	noChar: '\uD83D\uDEAB',
 	
-	init: Zotero.Promise.coroutine(function* () {
+	init: async function () {
+		this.checkCustomTimeToLive();
 		this.updateStorageSettingsUI();
 		this.updateStorageSettingsGroupsUI();
 
 		var username = Zotero.Users.getCurrentUsername() || Zotero.Prefs.get('sync.server.username') || " ";
-		var apiKey = yield Zotero.Sync.Data.Local.getAPIKey();
+		var apiKey = await Zotero.Sync.Data.Local.getAPIKey();
 		this.displayFields(apiKey ? username : "");
 		
 		var pass = Zotero.Sync.Runner.getStorageController('webdav').password;
@@ -47,7 +58,7 @@ Zotero_Preferences.Sync = {
 		
 		if (apiKey) {
 			try {
-				var keyInfo = yield Zotero.Sync.Runner.checkAccess(
+				var keyInfo = await Zotero.Sync.Runner.checkAccess(
 					Zotero.Sync.Runner.getAPIClient({apiKey}),
 					{timeout: 5000}
 				);
@@ -70,7 +81,89 @@ Zotero_Preferences.Sync = {
 		}
 		
 		this.initResetPane();
-	}),
+
+		let userCacheProgress = document.getElementById('storage-user-cache-progress');
+		ReactDOM.render(<ProgressMeter />, userCacheProgress);
+		let groupsCacheProgress = document.getElementById('storage-groups-cache-progress');
+		ReactDOM.render(<ProgressMeter />, groupsCacheProgress);
+
+		await Zotero.Sync.Storage.Cache.calculateStorageBreakdown(this.storageBreakdownUpdate);
+		userCacheProgress.hidden = true;
+		groupsCacheProgress.hidden = true;
+	},
+
+
+	/**
+	 * Update UI storage breakdown labels
+	 *
+	 * @param {Object} storageBreakdown - Result from Zotero.Sync.Storage.Cache.calculateStorageBreakdown
+	 */
+	storageBreakdownUpdate: (storageBreakdown) => {
+		let myLibraryLabel = document.getElementById('storage-user-cache-size');
+		let groupLabel = document.getElementById('storage-groups-cache-size');
+		let groupCount = 0;
+		let groupSize = 0;
+
+		// Loop through libraries (keys)
+		Object.keys(storageBreakdown).forEach((libraryID) => {
+			if (libraryID == Zotero.Libraries.userLibraryID) {
+				// Only one user library so update now
+				myLibraryLabel.setAttribute(
+					'value',
+					Zotero.getString(
+						'zotero.preferences.sync.fileSyncing.breakdown.attachments',
+						storageBreakdown[libraryID].count,
+						storageBreakdown[libraryID].count
+					) + ' - ' + humanReadableSize(storageBreakdown[libraryID].size, 1)
+				);
+			}
+			else {
+				// Sum groups and update label below
+				groupCount += storageBreakdown[libraryID].count;
+				groupSize += storageBreakdown[libraryID].size;
+			}
+		});
+
+		groupLabel.setAttribute(
+			'value',
+			Zotero.getString(
+				'zotero.preferences.sync.fileSyncing.breakdown.attachments',
+				groupCount,
+				groupCount
+			) + ' - ' + humanReadableSize(groupSize, 1)
+		);
+	},
+
+
+	/**
+	 * Add a custom value to dropdown if preference is not standard
+	 */
+	checkCustomTimeToLive: function () {
+		let id = 'storage-timeToLive-custom';
+		let value = Zotero.Prefs.get('sync.storage.timeToLive.value');
+
+		let customItem = document.getElementById(id);
+		if (![1, 7, 30, 90].includes(value)) {
+			customItem.setAttribute('label',
+				Zotero.getString(
+					'zotero.preferences.sync.fileSyncing.timeToLive.custom',
+					value,
+					value
+				)
+			);
+			customItem.value = value;
+			customItem.hidden = false;
+			customItem.parentNode.parentNode.selectedIndex = 0;
+		}
+		else {
+			customItem.hidden = true;
+		}
+
+		// Also, check if select should be disabled
+		document.getElementById('storage-timeToLive-value').disabled
+			= !document.getElementById('storage-timeToLive-enabled').checked;
+	},
+
 	
 	displayFields: function (username) {
 		document.getElementById('sync-unauthorized').hidden = !!username;
@@ -379,7 +472,11 @@ Zotero_Preferences.Sync = {
 			sep.hidden = true;
 		}
 		
-		document.getElementById('storage-user-download-mode').disabled = !enabled;
+		let downloadMode = document.getElementById('storage-user-download-mode');
+		downloadMode.disabled = !enabled;
+		let timeToLiveEnabled = document.getElementById('storage-timeToLive-enabled').checked;
+		document.getElementById('storage-user-cache-clear')
+			.hidden = !timeToLiveEnabled || downloadMode.value !== 'on-demand' || !enabled;
 		this.updateStorageTerms();
 		
 		window.sizeToContent();
@@ -389,12 +486,138 @@ Zotero_Preferences.Sync = {
 	updateStorageSettingsGroupsUI: function () {
 		setTimeout(() => {
 			var enabled = document.getElementById('pref-storage-groups-enabled').value;
-			document.getElementById('storage-groups-download-mode').disabled = !enabled;
+			let downloadMode = document.getElementById('storage-groups-download-mode');
+			downloadMode.disabled = !enabled;
+
+			let timeToLiveEnabled = document.getElementById('storage-timeToLive-enabled').checked;
+			// Can clean cache if global setting is 'on-demand'
+			let canCleanCache = timeToLiveEnabled
+				&& enabled
+				&& downloadMode.value === 'on-demand';
+
+			if (!canCleanCache && timeToLiveEnabled) {
+				// Otherwise check if any group has custom settings that allow cleaning
+				canCleanCache = Zotero.Libraries.getAll()
+					.filter(library => library.libraryID !== Zotero.Libraries.userLibraryID)
+					.map((library) => {
+						let groupID = Zotero.Groups.getGroupIDFromLibraryID(library.libraryID);
+						// Need custom settings enabled, file sync enabled, and 'on-demand' mode
+						if (Zotero.Prefs.get('sync.storage.groups.' + groupID + '.custom')) {
+							return Zotero.Prefs.get('sync.storage.groups.' + groupID + '.sync')
+								&& Zotero.Prefs.get('sync.storage.groups.' + groupID + '.downloadMode') === 'on-demand';
+						}
+
+						return false;
+					})
+					.reduce((prev, current) => prev || current, false);
+			}
+
+			document.getElementById('storage-groups-cache-clear').hidden = !canCleanCache;
+
 			this.updateStorageTerms();
 		});
 	},
+
 	
-	
+	updateTimeToLiveUI: function (event) {
+		document.getElementById('storage-timeToLive-value').disabled = !event.target.checked;
+
+		this.updateStorageSettingsUI();
+		this.updateStorageSettingsGroupsUI();
+	},
+
+
+	customizeGroups: function () {
+		var io = {};
+		window.openDialog('chrome://zotero/content/preferences/groupFilesToSync.html',
+			"zotero-preferences-groupFilesToSyncDialog", "chrome,modal,centerscreen", io);
+		// Group preferences may have changed so run our updates
+		this.updateStorageSettingsGroupsUI();
+	},
+
+
+	/**
+	 * Prompt to ask for confirmation before cleaning a storage cache.
+	 *
+	 * @param {String} description - Main text of prompt
+	 * @return {Integer} If 'Continue' was chosen 0 is returned
+	 */
+	cleanLibraryStoragePrompt: function (description) {
+		let ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+			.getService(Components.interfaces.nsIPromptService);
+		let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+			+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
+			+ ps.BUTTON_DELAY_ENABLE;
+		return ps.confirmEx(
+			null,
+			Zotero.getString('zotero.preferences.sync.fileSyncing.clear.title'),
+			description,
+			buttonFlags,
+			Zotero.getString('general.continue'),
+			Zotero.getString('general.cancel'), null, null, {});
+	},
+
+
+	cleanLibraryStorage: async function (allGroups) {
+		let description = Zotero.getString(
+			allGroups
+				? 'zotero.preferences.sync.fileSyncing.clear.desc.allGroups'
+				: 'zotero.preferences.sync.fileSyncing.clear.desc.myLibrary'
+		);
+
+		if (this.cleanLibraryStoragePrompt(description) !== 0) {
+			return;
+		}
+
+		let button = document.getElementById(
+			allGroups
+				? 'storage-groups-cache-clear'
+				: 'storage-user-cache-clear'
+		);
+		button.disabled = true;
+		if (allGroups) {
+			// Loop through all groups and execute clean
+			await Zotero.Promise.all(Zotero.Libraries.getAll().map((library) => {
+				if (library.libraryID === Zotero.Libraries.userLibraryID) {
+					return Promise.resolve();
+				}
+
+				return Zotero.Sync.Storage.Cache.cleanCacheForLibrary(
+					library.libraryID);
+			}));
+
+			// Now we need to recalculate our storage breakdown
+			let groupsCacheProgress = document.getElementById('storage-groups-cache-progress');
+			groupsCacheProgress.hidden = false;
+
+			await Zotero.Sync.Storage.Cache.calculateStorageBreakdown(
+				this.storageBreakdownUpdate,
+				Zotero.Libraries.getAll()
+					.map(library => library.libraryID)
+					.filter(libraryID => libraryID !== Zotero.Libraries.userLibraryID)
+			);
+
+			groupsCacheProgress.hidden = true;
+		}
+		else {
+			// Clean 'My Library'
+			await Zotero.Sync.Storage.Cache.cleanCacheForLibrary(
+				Zotero.Libraries.userLibraryID);
+
+			// Update storage breakdown
+			let userCacheProgress = document.getElementById('storage-user-cache-progress');
+			userCacheProgress.hidden = false;
+
+			await Zotero.Sync.Storage.Cache.calculateStorageBreakdown(
+				this.storageBreakdownUpdate,
+				[Zotero.Libraries.userLibraryID]);
+
+			userCacheProgress.hidden = true;
+		}
+		button.disabled = false;
+	},
+
+
 	updateStorageTerms: function () {
 		var terms = document.getElementById('storage-terms');
 		

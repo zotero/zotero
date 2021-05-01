@@ -16,6 +16,7 @@ Zotero.Sync.Storage.Local = {
 	lastFullFileCheck: {},
 	uploadCheckFiles: [],
 	storageRemainingForLibrary: new Map(),
+	lastCacheClean: new Map(),
 	
 	init: function () {
 		Zotero.Notifier.registerObserver(this, ['group'], 'storageLocal');
@@ -30,6 +31,9 @@ Zotero.Sync.Storage.Local = {
 				}
 				if (this.storageRemainingForLibrary.has(libraryID)) {
 					this.storageRemainingForLibrary.delete(libraryID);
+				}
+				if (this.lastCacheClean.has(libraryID)) {
+					this.lastCacheClean.delete(libraryID);
 				}
 			}
 		}
@@ -53,6 +57,13 @@ Zotero.Sync.Storage.Local = {
 			return true;
 		
 		case 'group':
+			// Check for custom group settings first
+			let groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
+			if (Zotero.Prefs.get('sync.storage.groups.' + groupID + '.custom')) {
+				return Zotero.Prefs.get('sync.storage.groups.' + groupID + '.sync');
+			}
+
+			// Fall back to global settings
 			return Zotero.Prefs.get("sync.storage.groups.enabled");
 		
 		case 'feed':
@@ -142,9 +153,14 @@ Zotero.Sync.Storage.Local = {
 		if (libraryID == Zotero.Libraries.userLibraryID) {
 			return 'sync.storage.downloadMode.personal';
 		}
-		// TODO: Library-specific settings
 		
-		// Group library
+		// Group library custom settings, if enabled
+		let groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
+		if (Zotero.Prefs.get('sync.storage.groups.' + groupID + '.custom')) {
+			return 'sync.storage.groups.' + groupID + '.downloadMode';
+		}
+
+		// Fall back to global group settings
 		return 'sync.storage.downloadMode.groups';
 	},
 	
@@ -546,7 +562,7 @@ Zotero.Sync.Storage.Local = {
 		}
 		return Zotero.Utilities.Internal.forEachChunkAsync(
 			items,
-			1000,
+			Zotero.DB.MAX_BOUND_PARAMETERS,
 			async function (chunk) {
 				chunk.forEach((item) => {
 					item._attachmentSyncState = syncState;
@@ -683,6 +699,7 @@ Zotero.Sync.Storage.Local = {
 		item.attachmentSyncedModificationTime = mtime;
 		item.attachmentSyncedHash = md5;
 		item.attachmentSyncState = "in_sync";
+		item.attachmentLastAccessed = Date.now();
 		yield item.saveTx({ skipAll: true });
 		
 		return new Zotero.Sync.Storage.Result({

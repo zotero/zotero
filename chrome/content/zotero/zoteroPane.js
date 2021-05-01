@@ -2763,6 +2763,9 @@ var ZoteroPane = new function()
 			'createParent',
 			'renameAttachments',
 			'reindexItem',
+			'sep6',
+			'cacheItem',
+			'evictItem'
 		];
 		
 		var m = {};
@@ -2801,6 +2804,9 @@ var ZoteroPane = new function()
 		var items = this.getSelectedItems();
 		
 		if (items.length > 0) {
+			let onDemandSyncStorage = Zotero.Sync.Storage.Local.getEnabledForLibrary(items[0].libraryID)
+				&& Zotero.Sync.Storage.Local.downloadAsNeeded(items[0].libraryID);
+
 			// Multiple items selected
 			if (items.length > 1) {
 				var multiple =  '.multiple';
@@ -2812,6 +2818,10 @@ var ZoteroPane = new function()
 					canRename = true;
 				var canMarkRead = collectionTreeRow.isFeed();
 				var markUnread = true;
+				let canCache = false;
+				let canCacheAttachmentCount = 0;
+				let canEvict = false;
+				let canEvictAttachmentCount = 0;
 				
 				for (let i = 0; i < items.length; i++) {
 					let item = items[i];
@@ -2838,6 +2848,28 @@ var ZoteroPane = new function()
 					
 					if(canMarkRead && markUnread && !item.isRead) {
 						markUnread = false;
+					}
+
+					if (onDemandSyncStorage && item.isImportedAttachment()) {
+						if (item.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD) {
+							canCache = true;
+							canCacheAttachmentCount += 1;
+						}
+						else if (item.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC) {
+							canEvict = true;
+							canEvictAttachmentCount += 1;
+						}
+					}
+
+					if ((!canCache || !canEvict) && onDemandSyncStorage && item.isRegularItem() && !item.isFeedItem) {
+						let childAttachments = Zotero.Items.get(item.getAttachments());
+						if (!canCache && childAttachments.find(attachment => attachment.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD)) {
+							canCache = true;
+						}
+
+						if (!canEvict && childAttachments.find(attachment => attachment.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC)) {
+							canEvict = true;
+						}
 					}
 				}
 				
@@ -2895,6 +2927,24 @@ var ZoteroPane = new function()
 					show.push(m.sep5);
 				}
 				
+				if (canCache || canEvict) {
+					show.push(m.sep6);
+					if (canCache) {
+						show.push(m.cacheItem);
+						menu.childNodes[m.cacheItem].setAttribute(
+							'label',
+							Zotero.getString('pane.items.menu.cacheItem', [], canCacheAttachmentCount)
+						);
+					}
+					if (canEvict) {
+						show.push(m.evictItem);
+						menu.childNodes[m.evictItem].setAttribute(
+							'label',
+							Zotero.getString('pane.items.menu.evictItem', [], canEvictAttachmentCount)
+						);
+					}
+				}
+
 				// Block certain actions on files if no access and at least one item is a file
 				// attachment
 				if (!collectionTreeRow.filesEditable) {
@@ -2954,6 +3004,49 @@ var ZoteroPane = new function()
 								show.push(m.createNoteFromAnnotations);
 							}
 						}
+
+						if (onDemandSyncStorage) {
+							let showSep6 = false;
+
+							let childAttachments = Zotero.Items.get(item.getAttachments());
+							let canCache = false;
+							let canCacheAttachmentCount = 0;
+							let canEvict = false;
+							let canEvictAttachmentCount = 0;
+							for (let attachment of childAttachments) {
+								if (attachment.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD) {
+									canCache = true;
+									canCacheAttachmentCount += 1;
+								}
+
+								if (attachment.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC) {
+									canEvict = true;
+									canEvictAttachmentCount += 1;
+								}
+							}
+
+							if (canCache) {
+								showSep6 = true;
+								show.push(m.cacheItem);
+								menu.childNodes[m.cacheItem].setAttribute(
+									'label',
+									Zotero.getString('pane.items.menu.cacheItem', [], canCacheAttachmentCount)
+								);
+							}
+
+							if (canEvict) {
+								showSep6 = true;
+								show.push(m.evictItem);
+								menu.childNodes[m.evictItem].setAttribute(
+									'label',
+									Zotero.getString('pane.items.menu.evictItem', [], canEvictAttachmentCount)
+								);
+							}
+
+							if (showSep6) {
+								show.push(m.sep6);
+							}
+						}
 					}
 					
 					if (Zotero.Attachments.canFindPDFForItem(item)) {
@@ -2992,6 +3085,31 @@ var ZoteroPane = new function()
 						
 						if (showSep5) {
 							show.push(m.sep5);
+						}
+						
+						if (onDemandSyncStorage && item.isImportedAttachment()) {
+							let showSep6;
+							
+							if (item.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD) {
+								showSep6 = true;
+								show.push(m.cacheItem);
+								menu.childNodes[m.cacheItem].setAttribute(
+									'label',
+									Zotero.getString('pane.items.menu.cacheItem', [], 1)
+								);
+							}
+							else if (item.attachmentSyncState === Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC && (yield item.fileExists())) {
+								showSep6 = true;
+								show.push(m.evictItem);
+								menu.childNodes[m.evictItem].setAttribute(
+									'label',
+									Zotero.getString('pane.items.menu.evictItem', [], 1)
+								);
+							}
+							
+							if (showSep6) {
+								show.push(m.sep6);
+							}
 						}
 					}
 					else if (item.isFeedItem) {
@@ -4825,6 +4943,32 @@ var ZoteroPane = new function()
 		}
 	};
 	
+
+	/**
+	 * Downloads all attachments for the selected items.
+	 *
+	 * @returns {Promise<void>}
+	 */
+	this.cacheItems = async function () {
+		Zotero.Sync.Storage.Cache.cacheItemAttachments(this.getSelectedItems());
+	};
+
+
+	/**
+	 * Removes any downloads for the given items or item attachments.
+	 *
+	 * @returns {Promise<void>}
+	 */
+	this.evictItems = async function () {
+		let items = this.getSelectedItems();
+		try {
+			await Zotero.Sync.Storage.Cache.removeAttachmentFilesForItems(items);
+		}
+		catch (e) {
+			Zotero.debug(e);
+		}
+	};
+
 	
 	this.renameSelectedAttachmentsFromParents = Zotero.Promise.coroutine(function* () {
 		// TEMP: fix

@@ -281,11 +281,14 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 					}
 				}
 			);
+			let preTimestamp = Date.now();
 			var result = yield engine.start();
 			
 			assert.isTrue(result.localChanges);
 			assert.isFalse(result.remoteChanges);
 			assert.isFalse(result.syncRequired);
+			assert.isAtLeast(item.attachmentLastAccessed, preTimestamp);
+			assert.isAtMost(item.attachmentLastAccessed, Date.now());
 			
 			var contents = yield Zotero.File.getContentsAsync(yield item.getFilePathAsync());
 			assert.equal(contents, text);
@@ -602,9 +605,11 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			// Check local objects
 			assert.equal(item1.attachmentSyncedModificationTime, mtime1);
 			assert.equal(item1.attachmentSyncedHash, hash1);
+			assert.equal(item1.attachmentLastAccessed, mtime1);
 			assert.equal(item1.version, 10);
 			assert.equal(item2.attachmentSyncedModificationTime, mtime2);
 			assert.equal(item2.attachmentSyncedHash, hash2);
+			assert.equal(item2.attachmentLastAccessed, mtime2);
 			assert.equal(item2.version, 15);
 		})
 		
@@ -656,6 +661,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			var result = yield engine.start();
 			
 			assert.equal(item.attachmentSyncedModificationTime, mtime);
+			assert.isNull(item.attachmentLastAccessed);
 			yield assert.eventually.equal(item.attachmentModificationTime, mtime);
 			assert.isTrue(result.localChanges);
 			assert.isFalse(result.remoteChanges);
@@ -717,6 +723,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			
 			// Check local objects
 			assert.equal(item.attachmentSyncedModificationTime, mtime);
+			assert.equal(item.attachmentLastAccessed, mtime);
 			assert.equal(item.attachmentSyncedHash, hash);
 			assert.equal(item.version, newVersion);
 		})
@@ -1002,6 +1009,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 				name: item.libraryKey
 			});
 			assert.equal(item.attachmentSyncedHash, (yield item.attachmentHash));
+			assert.equal(item.attachmentLastAccessed, itemJSON.data.mtime);
 			assert.isFalse(result.localChanges);
 			assert.isFalse(result.remoteChanges);
 			assert.isFalse(result.syncRequired);
@@ -1051,6 +1059,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			});
 			assert.isNull(item.attachmentSyncedHash);
 			assert.equal(item.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_IN_CONFLICT);
+			assert.isNull(item.attachmentLastAccessed);
 			assert.isFalse(result.localChanges);
 			assert.isFalse(result.remoteChanges);
 			assert.isFalse(result.syncRequired);
@@ -1091,6 +1100,8 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			});
 			assert.equal(item.version, 5);
 			assert.equal(item.synced, true);
+			assert.isNull(item.attachmentLastAccessed);
+
 			assert.isFalse(result.localChanges);
 			assert.isFalse(result.remoteChanges);
 			assert.isTrue(result.syncRequired);
@@ -1156,4 +1167,107 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.equal(responses, 1);
 		})
 	})
+
+	describe('#checkFileExists()', function () {
+		let client;
+		let zfs;
+		let item;
+		let fileURL;
+
+		beforeEach(async function () {
+			let setupObject = await setup();
+			client = setupObject.client;
+
+			zfs = new Zotero.Sync.Storage.Mode.ZFS({
+				apiClient: client
+			});
+
+			item = await importFileAttachment('test.png');
+			fileURL = `${baseURL}users/1/items/${item.key}/file?info=true`;
+		});
+
+		it('should throw exception if server responds with unknown status code', async function () {
+			server.respond(function (req) {
+				if (req.method === 'GET' && req.url === fileURL) {
+					req.respond(400, {}, 'Bad Request');
+				}
+			});
+
+			await assert.isRejected(
+				zfs.checkFileExists({ name: item.libraryKey }),
+				'A file sync error occurred. Please try syncing again.'
+			);
+		});
+
+		it('should return false if server responds with 404 for file not found', async function () {
+			server.respond(function (req) {
+				if (req.method === 'GET' && req.url === fileURL) {
+					req.respond(404, {}, 'Not found');
+				}
+			});
+
+			let result = await zfs.checkFileExists({
+				name: item.libraryKey
+			});
+			assert.isFalse(result);
+		});
+
+		it('should return false if attachment does not match server', async function () {
+			let attachmentMTime = await item.attachmentModificationTime;
+
+			server.respond(function (req) {
+				if (req.method === 'GET' && req.url === fileURL) {
+					req.respond(
+						200,
+						{
+							ETag: '****',
+							'X-Zotero-Modification-Time': attachmentMTime
+						}
+					);
+				}
+			});
+
+			let result = await zfs.checkFileExists({ name: item.libraryKey });
+			assert.isFalse(result);
+		});
+
+		it('should return false if modification time does not match server', async function () {
+			let attachmentHash = await item.attachmentHash;
+
+			server.respond(function (req) {
+				if (req.method === 'GET' && req.url === fileURL) {
+					req.respond(
+						200,
+						{
+							ETag: attachmentHash,
+							'X-Zotero-Modification-Time': 0
+						}
+					);
+				}
+			});
+
+			let result = await zfs.checkFileExists({ name: item.libraryKey });
+			assert.isFalse(result);
+		});
+
+		it('should return true if hash and modification time match server', async function () {
+			let attachmentHash = await item.attachmentHash;
+			let attachmentMTime = await item.attachmentModificationTime;
+
+			server.respond(function (req) {
+				if (req.method === 'GET' && req.url === fileURL) {
+					req.respond(
+						200,
+						{
+							ETag: attachmentHash,
+							'X-Zotero-Modification-Time': attachmentMTime
+						}
+					);
+				}
+			});
+
+			let result = await zfs.checkFileExists({ name: item.libraryKey });
+			assert.isTrue(result);
+		});
+	});
 })

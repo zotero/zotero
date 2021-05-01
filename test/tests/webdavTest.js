@@ -332,12 +332,16 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 				}
 			);
 			
+			let preTimestamp = Date.now();
 			var result = yield engine.start();
 			
 			assert.isTrue(result.localChanges);
 			assert.isFalse(result.remoteChanges);
 			assert.isFalse(result.syncRequired);
 			
+			assert.isAtLeast(item.attachmentLastAccessed, preTimestamp);
+			assert.isAtMost(item.attachmentLastAccessed, Date.now());
+
 			var contents = yield Zotero.File.getContentsAsync(yield item.getFilePathAsync());
 			assert.equal(contents, text);
 			
@@ -447,6 +451,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			// Check local objects
 			assert.equal(item.attachmentSyncedModificationTime, mtime);
 			assert.equal(item.attachmentSyncedHash, hash);
+			assert.equal(item.attachmentLastAccessed, mtime);
 			assert.isFalse(item.synced);
 		})
 		
@@ -504,6 +509,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			// Check local objects
 			assert.equal(item.attachmentSyncedModificationTime, mtime);
 			assert.equal(item.attachmentSyncedHash, hash);
+			assert.equal(item.attachmentLastAccessed, mtime);
 			assert.isFalse(item.synced);
 		})
 		
@@ -539,6 +545,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			// Check local object
 			assert.equal(item.attachmentSyncedModificationTime, mtime);
 			assert.equal(item.attachmentSyncedHash, hash);
+			assert.isNull(item.attachmentLastAccessed);
 			assert.isFalse(item.synced);
 		});
 		
@@ -1219,4 +1226,119 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			yield controller.purgeOrphanedStorageFiles();
 		})
 	})
+
+	describe('#checkFileExists()', function () {
+		let item;
+		let request;
+
+		beforeEach(async function () {
+			// Since we are not callling setup() we need this here
+			resetRequestCount();
+
+			item = await importFileAttachment('test.png');
+
+			request = new Zotero.Sync.Storage.Request({
+				type: 'existenceCheck',
+				libraryID: item.libraryID,
+				name: item.libraryKey
+			});
+		});
+
+		it('should throw exception if server responds with unknown status code', async function () {
+			setResponse({
+				method: 'GET',
+				url: `zotero/${item.key}.prop`,
+				status: 500
+			});
+
+			await assert.isRejected(
+				controller.checkFileExists(request),
+				'Your WebDAV server returned an HTTP 500 error for a GET request.'
+			);
+			assertRequestCount(6);
+		});
+
+		it('should return false if server responds with 404 for file not found', async function () {
+			setResponse({
+				method: 'GET',
+				url: `zotero/${item.key}.prop`,
+				status: 404
+			});
+
+			let result = await controller.checkFileExists(request);
+			assert.isFalse(result);
+			assertRequestCount(1);
+		});
+
+		it('should return false if attachment does not match server', async function () {
+			let syncedHash = 'abc';
+			let syncedModTime = await item.attachmentModificationTime;
+
+			setResponse({
+				method: 'GET',
+				url: `zotero/${item.key}.prop`,
+				text: '<properties version="1">'
+					+ `<mtime>${syncedModTime}</mtime>`
+					+ `<hash>${syncedHash}</hash>`
+					+ '</properties>'
+			});
+
+			let result = await controller.checkFileExists(request);
+			assert.isFalse(result);
+			assertRequestCount(1);
+		});
+
+		it('should return false if modification time does not match server', async function () {
+			let syncedHash = await item.attachmentHash;
+			let syncedModTime = 1;
+
+			setResponse({
+				method: 'GET',
+				url: `zotero/${item.key}.prop`,
+				text: '<properties version="1">'
+					+ `<mtime>${syncedModTime}</mtime>`
+					+ `<hash>${syncedHash}</hash>`
+					+ '</properties>'
+			});
+
+			let result = await controller.checkFileExists(request);
+			assert.isFalse(result);
+			assertRequestCount(1);
+		});
+
+		it('should return true if modification time matches and hash does not exist', async function () {
+			// This can happen from old .prop files
+			let syncedModTime = await item.attachmentModificationTime;
+
+			setResponse({
+				method: 'GET',
+				url: `zotero/${item.key}.prop`,
+				text: '<properties version="1">'
+					+ `<mtime>${syncedModTime}</mtime>`
+					+ '</properties>'
+			});
+
+			let result = await controller.checkFileExists(request);
+			assert.isTrue(result);
+			assertRequestCount(1);
+		});
+
+		it('should return true if hash and modification time match server', async function () {
+			let syncedHash = await item.attachmentHash;
+			let syncedModTime = await item.attachmentModificationTime;
+
+			setResponse({
+				method: 'GET',
+				url: `zotero/${item.key}.prop`,
+				text: '<properties version="1">'
+					+ `<mtime>${syncedModTime}</mtime>`
+					+ `<hash>${syncedHash}</hash>`
+					+ '</properties>'
+			});
+
+			let result = await controller.checkFileExists(request);
+			assert.isTrue(result);
+			assertRequestCount(1);
+		});
+	});
 })

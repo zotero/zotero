@@ -583,7 +583,8 @@ Zotero.Sync.APIClient.prototype = {
 			'sort',
 			'direction',
 			'since',
-			'sincetime'
+			'sincetime',
+			'info'
 		];
 		queryParams = {};
 		

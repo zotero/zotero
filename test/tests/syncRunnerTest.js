@@ -972,7 +972,63 @@ describe("Zotero.Sync.Runner", function () {
 			stub.restore();
 		});
 	})
-	
+
+	describe('#checkFileExists()', async function () {
+		beforeEach(function () {
+			Zotero.Prefs.set('sync.storage.protocol', 'zfs');
+			Zotero.Sync.Runner.apiKey = true;
+		});
+
+		it('should check if browser is online', async function () {
+			stub = sinon.stub(Zotero.HTTP, 'browserIsOffline');
+			stub.returns(true);
+
+			let item = await createDataObject('item');
+
+			let fileExists = await Zotero.Sync.Runner.checkFileExists(item);
+			assert.isFalse(fileExists);
+			assert.isTrue(stub.calledOnce);
+		});
+
+		it('should check API Key is available', async function () {
+			Zotero.Sync.Runner.apiKey = false;
+
+			let item = await createDataObject('item');
+
+			let fileExists = await Zotero.Sync.Runner.checkFileExists(item);
+			assert.isFalse(fileExists);
+		});
+
+		it('should check if controller is verified', async function () {
+			Zotero.Prefs.set('sync.storage.protocol', 'webdav');
+
+			let item = await createDataObject('item');
+
+			let fileExists = await Zotero.Sync.Runner.checkFileExists(item);
+			assert.isFalse(fileExists);
+		});
+
+		it('should check if attachment is imported', async function () {
+			let item = await createDataObject('item');
+
+			await assert.isRejected(
+				Zotero.Sync.Runner.checkFileExists(item),
+				'Not an imported attachment'
+			);
+		});
+
+		it('should call storage checkFileExists', async function () {
+			stub = sinon.stub(Zotero.Sync.Storage.Mode.ZFS.prototype, 'checkFileExists');
+			stub.returns(true);
+
+			let item = await importFileAttachment('test.png');
+
+			let fileExists = await Zotero.Sync.Runner.checkFileExists(item);
+
+			assert.isTrue(fileExists);
+			assert.isTrue(stub.calledOnce);
+		});
+	});
 	
 	describe("#createAPIKeyFromCredentials()", function() {
 		var data = {

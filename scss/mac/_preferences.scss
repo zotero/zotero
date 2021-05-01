@@ -1,0 +1,17 @@
+.group-files-sync-container {
+	select {
+		font-size: 13px;
+		margin: 5px 2px 3px;
+		padding: 1px 3px !important;
+	}
+
+	.setting-enabled-box {
+		margin-bottom: 4px;
+	}
+
+	.setting-downloadMode-box {
+		label {
+			margin-inline-start: 2px;
+		}
+	}
+}

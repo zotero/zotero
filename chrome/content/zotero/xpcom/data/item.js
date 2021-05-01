@@ -50,6 +50,7 @@ Zotero.Item = function(itemTypeOrID) {
 	this._attachmentSyncedModificationTime = null;
 	this._attachmentSyncedHash = null;
 	this._attachmentLastProcessedModificationTime = null;
+	this._attachmentLastAccessed = null;
 	
 	// loadCreators
 	this._creators = [];
@@ -343,6 +344,7 @@ Zotero.Item.prototype._parseRowData = function(row) {
 			case 'attachmentLastProcessedModificationTime':
 			case 'createdByUserID':
 			case 'lastModifiedByUserID':
+			case 'attachmentLastAccessed':
 				break;
 			
 			case 'itemID':
@@ -1760,13 +1762,13 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		let sql = "";
 		let cols = [
 			'parentItemID', 'linkMode', 'contentType', 'charsetID', 'path', 'syncState',
-			'storageModTime', 'storageHash', 'lastProcessedModificationTime'
+			'storageModTime', 'storageHash', 'lastProcessedModificationTime', 'lastAccessed'
 		];
 		// TODO: Replace with UPSERT after SQLite 3.24.0
 		if (isNew) {
 			sql = "INSERT INTO itemAttachments "
 				+ "(itemID, " + cols.join(", ") + ") "
-				+ "VALUES (?,?,?,?,?,?,?,?,?,?)";
+				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 		}
 		else {
 			sql = "UPDATE itemAttachments SET " + cols.join("=?, ") + "=? WHERE itemID=?";
@@ -1781,6 +1783,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		let storageModTime = this.attachmentSyncedModificationTime;
 		let storageHash = this.attachmentSyncedHash;
 		let lastProcessedModificationTime = this.attachmentLastProcessedModificationTime;
+		let lastAccessed = this.attachmentLastAccessed;
 		
 		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE && libraryType != 'user') {
 			throw new Error("Linked files can only be added to user library");
@@ -1796,6 +1799,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			storageModTime !== undefined ? storageModTime : null,
 			storageHash || null,
 			lastProcessedModificationTime || null,
+			lastAccessed || null
 		];
 		if (isNew) {
 			params.unshift(itemID);
@@ -3358,6 +3362,43 @@ Zotero.Item.prototype._getLastPageIndexSettingKey = function () {
 	id += "_" + this.key;
 	return id;
 };
+
+Zotero.defineProperty(Zotero.Item.prototype, 'attachmentLastAccessed', {
+	get: function () {
+		if (!this.isImportedAttachment()) {
+			return undefined;
+		}
+		return this._attachmentLastAccessed;
+	},
+	set: function (val) {
+		if (!this.isImportedAttachment()) {
+			throw new Error("attachmentLastAccessed can only be set for imported attachment items");
+		}
+
+		if (typeof val != 'number') {
+			Zotero.debug(val, 2);
+			throw new Error("attachmentLastAccessed must be a number");
+		}
+		if (parseInt(val) != val || val < 0) {
+			Zotero.debug(val, 2);
+			throw new Error("attachmentLastAccessed must be a timestamp in milliseconds");
+		}
+		if (val < 10000000000) {
+			Zotero.logError("attachmentLastAccessed should be a timestamp in milliseconds "
+				+ "-- " + val + " given");
+		}
+
+		if (val == this.attachmentLastAccessed) {
+			return;
+		}
+
+		if (!this._changed.attachmentData) {
+			this._changed.attachmentData = {};
+		}
+		this._changed.attachmentData.lastAccessed = true;
+		this._attachmentLastAccessed = val;
+	}
+});
 
 
 /**

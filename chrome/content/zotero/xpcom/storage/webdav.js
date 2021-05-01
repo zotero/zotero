@@ -592,6 +592,40 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		request.setChannel(false);
 		return this._onUploadComplete(req, request, item, params);
 	}),
+
+
+	/**
+	 * Check if the given item is up to date on the remote server
+	 *
+	 * @param {Zotero.Sync.Storage.Request} request
+	 * @return {boolean} True if the remote server has an up to date copy of the file
+	 */
+	checkFileExists: async function (request) {
+		let item = Zotero.Sync.Storage.Utilities.getItemFromRequest(request);
+
+		let metadata = await this._getStorageFileMetadata(item, request);
+		if (!metadata.mtime) {
+			Zotero.debug(`Storage.WebDAV.checkFileExists: ${item.id} was not found`);
+			return false;
+		}
+
+		// Local file time
+		let fmtime = await item.attachmentModificationTime;
+		// Remote prop time
+		let mtime = metadata.mtime;
+
+		if (Zotero.Sync.Storage.Local.checkFileModTime(item, fmtime, mtime)) {
+			Zotero.debug(`Storage.WebDAV.checkFileExists: ${item.id} does not match server mtime`);
+			return false;
+		}
+
+		if (metadata.md5 && metadata.md5 != await item.attachmentHash) {
+			Zotero.debug(`Storage.ZFS.checkFileExists: ${item.id} does not match server hash`);
+			return false;
+		}
+
+		return true;
+	},
 	
 	
 	/**
@@ -1282,6 +1316,9 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		item.attachmentSyncedModificationTime = params.mtime;
 		item.attachmentSyncedHash = params.md5;
 		item.attachmentSyncState = "in_sync";
+		if (!item.attachmentLastAccessed || params.mtime > item.attachmentLastAccessed) {
+			item.attachmentLastAccessed = params.mtime;
+		}
 		yield item.saveTx({ skipAll: true });
 		// skipAll doesn't mark as unsynced, so do that separately
 		yield item.updateSynced(false);

@@ -340,6 +340,67 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		var sql = "DELETE FROM settings WHERE setting=? AND key=?";
 		yield Zotero.DB.queryAsync(sql, ['storage', 'zfsPurge']);
 	}),
+
+
+	/**
+	 * Check if the given file exists on the server
+	 *
+	 * @param {Zotero.Sync.Storage.Request} request
+	 * @return {Promise<Zotero.Sync.Storage.Result>}
+	 */
+	checkFileExists: async function (request) {
+		let funcName = "Zotero.Sync.Storage.ZFS.checkFileExists()";
+		let item = Zotero.Sync.Storage.Utilities.getItemFromRequest(request);
+
+		let params = this._getRequestParams(item.libraryID, `items/${item.key}/file`);
+		// Request file info
+		params.info = true;
+		let uri = this.apiClient.buildRequestURI(params);
+
+		let req;
+		try {
+			req = await this.apiClient.makeRequest(
+				'GET',
+				uri,
+				{
+					successCodes: [200, 404],
+					debug: true
+				}
+			);
+		}
+		catch (e) {
+			if (e instanceof Zotero.HTTP.UnexpectedStatusException) {
+				let msg = "Unexpected status code " + e.status + " in " + funcName
+					+ " (" + item.libraryKey + ")";
+				Zotero.logError(msg);
+				Zotero.debug(e.xmlhttp.getAllResponseHeaders());
+				throw new Error(Zotero.Sync.Storage.defaultError);
+			}
+			throw e;
+		}
+
+		if (req.status === 200) {
+			if (req.getResponseHeader('ETag') === await item.attachmentHash) {
+				let fmtime = await item.attachmentModificationTime;
+				let mtime = req.getResponseHeader('X-Zotero-Modification-Time');
+
+				if (Zotero.Sync.Storage.Local.checkFileModTime(item, fmtime, mtime)) {
+					Zotero.debug(`Storage.ZFS.checkFileExists: ${item.id} does not match server mtime`);
+				}
+				else {
+					return true;
+				}
+			}
+			else {
+				Zotero.debug(`Storage.ZFS.checkFileExists: ${item.id} does not not match server hash`);
+			}
+		}
+		else if (req.status === 404) {
+			Zotero.debug(`Storage.ZFS.checkFileExists: ${item.id} was not found`);
+		}
+
+		return false;
+	},
 	
 	
 	//
@@ -604,6 +665,10 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 				item.attachmentSyncedModificationTime = fileModTime;
 				item.attachmentSyncedHash = fileHash;
 				item.attachmentSyncState = "in_sync";
+				if (!item.attachmentLastAccessed
+					&& fileModTime > item.attachmentLastAccessed) {
+					item.attachmentLastAccessed = fileModTime;
+				}
 				yield item.saveTx({ skipAll: true });
 				
 				return new Zotero.Sync.Storage.Result;
@@ -818,6 +883,10 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			item.attachmentSyncedModificationTime = params.mtime;
 			item.attachmentSyncedHash = params.md5;
 			item.attachmentSyncState = "in_sync";
+			if (!item.attachmentLastAccessed
+				|| params.mtime > item.attachmentLastAccessed) {
+				item.attachmentLastAccessed = params.mtime;
+			}
 			yield item.save({ skipAll: true });
 			
 			// Update sync cache with new file metadata and version from server

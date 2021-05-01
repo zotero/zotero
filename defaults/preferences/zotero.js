@@ -160,6 +160,8 @@ pref("extensions.zotero.sync.storage.groups.enabled", true);
 pref("extensions.zotero.sync.storage.downloadMode.personal", "on-sync");
 pref("extensions.zotero.sync.storage.downloadMode.groups", "on-sync");
 pref("extensions.zotero.sync.fulltext.enabled", true);
+pref("extensions.zotero.sync.storage.timeToLive.enabled", false);
+pref("extensions.zotero.sync.storage.timeToLive.value", 30);
 
 // Proxy
 pref("extensions.zotero.proxies.autoRecognize", true);

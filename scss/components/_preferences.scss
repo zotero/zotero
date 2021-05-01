@@ -1,0 +1,96 @@
+.group-files-sync-container {
+	height: 500px;
+	width: 500px;
+	font-size: 13px;
+	margin: 1em;
+
+	input[type='checkbox'] {
+		height: 16px;
+		width: 16px;
+	}
+
+	.global-settings-label {
+		padding-bottom: 0.5em;
+	}
+
+	.global-settings {
+		background-color: $shade-3;
+		border-radius: 5px;
+		border: solid 1px $shade-4;
+		padding: 0.75em;
+		margin-bottom: 1em;
+
+		.reset-container {
+			display: flex;
+			justify-content: flex-end;
+		}
+	}
+
+	.setting-enabled-box {
+		display: flex;
+		align-items: flex-start;
+	}
+
+	.setting-downloadMode-box {
+		margin-left: 1.5em;
+		display: flex;
+		align-items: center;
+	}
+
+	.custom-settings-label {
+		padding-top: 1em !important;
+	}
+
+	.groups-file-sync-groups {
+		max-height: 300px;
+		height: 300px;
+		overflow-y: scroll;
+		overflow-x: visible;
+		background-color: $shade-0;
+		padding-top: 1em;
+
+		.downloadProgress {
+			margin: 0 1.5em 1em;
+
+			&.hidden {
+				display: none;
+			}
+		}
+
+		.group
+		{
+			padding-bottom: 1em;
+			margin-bottom: 1em;
+			margin-left: 1.5em;
+			margin-right: 1.5em;
+			border-bottom: solid 1px $shade-4;
+		}
+
+		.group:last-child {
+			border-bottom: none;
+			margin-bottom: 0;
+		}
+
+		.group-header {
+			display: flex;
+			align-items: center;
+			margin-bottom: 0.5em;
+		}
+
+		.group-header-label {
+			flex: 1;
+		}
+
+		.group-footer {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-top: 0.25em;
+		}
+	}
+
+	.dialog-buttons {
+		display: flex;
+		justify-content: flex-end;
+	}
+}

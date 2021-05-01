@@ -898,6 +898,57 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		});
 		return request.start();
 	});
+
+
+	/**
+	 * Check if attachment file exists on the server
+	 *
+	 * @param item
+	 * @return {Promise<Boolean>}
+	 */
+	this.checkFileExists = async function (item) {
+		if (Zotero.HTTP.browserIsOffline()) {
+			Zotero.debug("Browser is offline", 2);
+			return false;
+		}
+
+		let apiKey = await _getAPIKey();
+		if (!apiKey) {
+			Zotero.debug("API key not set -- skipping checkFileExists");
+			return false;
+		}
+
+		let modeClass = Zotero.Sync.Storage.Local.getClassForLibrary(item.libraryID);
+		let controller = new modeClass({
+			apiClient: this.getAPIClient({ apiKey })
+		});
+
+		// TODO: verify WebDAV on-demand?
+		if (!controller.verified) {
+			Zotero.debug("File syncing is not active for item's library -- skipping checkFileExists");
+			return false;
+		}
+
+		if (!item.isImportedAttachment()) {
+			throw new Error("Not an imported attachment");
+		}
+
+		let fileExistsOnServer = false;
+
+		let onStart = async function (request) {
+			fileExistsOnServer = await controller.checkFileExists(request);
+			return new Zotero.Sync.Storage.Result;
+		};
+		let request = new Zotero.Sync.Storage.Request({
+			type: 'existenceCheck',
+			libraryID: item.libraryID,
+			name: item.libraryKey,
+			onStart: [onStart]
+		});
+		await request.start();
+
+		return fileExistsOnServer;
+	};
 	
 	
 	this.stop = function () {

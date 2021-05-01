@@ -25,7 +25,8 @@
 -->
 <!DOCTYPE prefwindow SYSTEM "chrome://zotero/locale/preferences.dtd">
 
-<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		 xmlns:html="http://www.w3.org/1999/xhtml">
 	<prefpane id="zotero-prefpane-sync"
 			onpaneload="Zotero_Preferences.Sync.init()"
 			helpTopic="sync">
@@ -41,6 +42,8 @@
 			<preference id="pref-storage-downloadMode-personal" name="extensions.zotero.sync.storage.downloadMode.personal" type="string"/>
 			<preference id="pref-storage-downloadMode-groups" name="extensions.zotero.sync.storage.downloadMode.groups" type="string"/>
 			<preference id="pref-storage-groups-enabled" name="extensions.zotero.sync.storage.groups.enabled" type="bool"/>
+			<preference id="pref-storage-timeToLive-enabled" name="extensions.zotero.sync.storage.timeToLive.enabled" type="bool"/>
+			<preference id="pref-storage-timeToLive-value" name="extensions.zotero.sync.storage.timeToLive.value" type="int"/>
 		</preferences>
 		
 		<tabbox>
@@ -231,18 +234,32 @@
 
 							</stack>
 
-							<hbox class="storage-settings-download-options" align="center">
-								<label value="&zotero.preferences.sync.fileSyncing.download;"/>
-								<menulist id="storage-user-download-mode"
-										class="storage-mode"
-										preference="pref-storage-downloadMode-personal"
-										style="margin-left: 0">
-									<menupopup>
-										<menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
-										<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
-									</menupopup>
-								</menulist>
-							</hbox>
+							<vbox class="storage-settings-download-options">
+								<hbox align="center">
+									<label value="&zotero.preferences.sync.fileSyncing.download;"/>
+									<menulist id="storage-user-download-mode"
+											class="storage-mode"
+											preference="pref-storage-downloadMode-personal"
+											oncommand="Zotero_Preferences.Sync.updateStorageSettingsUI();"
+											style="margin-left: 0">
+										<menupopup>
+											<menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
+											<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
+										</menupopup>
+									</menulist>
+								</hbox>
+
+								<hbox align="center">
+									<stack flex="1">
+										<label id="storage-user-cache-size" />
+										<html:div id="storage-user-cache-progress" style="margin-top: 1px;"/>
+									</stack>
+
+									<button id="storage-user-cache-clear"
+											label="&zotero.preferences.sync.fileSyncing.clear;"
+											oncommand="Zotero_Preferences.Sync.cleanLibraryStorage(false)"/>
+								</hbox>
+							</vbox>
 
 							<separator id="storage-separator" class="thin"/>
 
@@ -251,15 +268,58 @@
 									preference="pref-storage-groups-enabled"
 										oncommand="Zotero_Preferences.Sync.updateStorageSettingsGroupsUI()"/>
 
-							<hbox class="storage-settings-download-options" align="center">
-								<label value="&zotero.preferences.sync.fileSyncing.download;"/>
-								<menulist id="storage-groups-download-mode"
-										class="storage-mode"
-										preference="pref-storage-downloadMode-groups"
-										style="margin-left: 0">
+							<vbox class="storage-settings-download-options">
+								<hbox align="center">
+									<label value="&zotero.preferences.sync.fileSyncing.download;"/>
+									<menulist id="storage-groups-download-mode"
+											class="storage-mode"
+											preference="pref-storage-downloadMode-groups"
+											oncommand="Zotero_Preferences.Sync.updateStorageSettingsGroupsUI()"
+											style="margin-left: 0">
+										<menupopup>
+											<menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
+											<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
+										</menupopup>
+									</menulist>
+								</hbox>
+
+								<hbox align="center">
+									<stack flex="1">
+										<label id="storage-groups-cache-size"/>
+										<html:div id="storage-groups-cache-progress" style="margin-top: 1px;"/>
+									</stack>
+
+									<button id="storage-groups-cache-clear"
+											label="&zotero.preferences.sync.fileSyncing.clear;"
+											oncommand="Zotero_Preferences.Sync.cleanLibraryStorage(true)"/>
+								</hbox>
+
+								<box>
+									<button label="&zotero.preferences.sync.fileSyncing.groups.customize;"
+											oncommand="Zotero_Preferences.Sync.customizeGroups()"/>
+								</box>
+							</vbox>
+
+							<separator class="thin"/>
+
+							<hbox id="storage-timeToLive-box"
+								  align="center">
+								<checkbox
+										id="storage-timeToLive-enabled"
+										label="&zotero.preferences.sync.fileSyncing.timeToLive;"
+										preference="pref-storage-timeToLive-enabled"
+										oncommand="Zotero_Preferences.Sync.updateTimeToLiveUI(event)"
+								/>
+								<menulist id="storage-timeToLive-value"
+										  class="storage-mode"
+										  preference="pref-storage-timeToLive-value"
+										  style="margin-left: 0">
 									<menupopup>
-										<menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
-										<menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
+										<menuitem id="storage-timeToLive-custom" value="0" hidden="true"/>
+										<menuitem label="&zotero.preferences.sync.fileSyncing.timeToLive.oneDay;" value="1"/>
+										<menuitem label="&zotero.preferences.sync.fileSyncing.timeToLive.oneWeek;" value="7"/>
+										<menuitem label="&zotero.preferences.sync.fileSyncing.timeToLive.oneMonth;" value="30"/>
+										<menuitem label="&zotero.preferences.sync.fileSyncing.timeToLive.threeMonths;" value="90"/>
 									</menupopup>
 								</menulist>
 							</hbox>
