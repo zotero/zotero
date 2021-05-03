@@ -1,0 +1,87 @@
+/* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+#include "nsISupports.idl"
+interface nsIFeedResult;
+interface nsIFeedEntry;
+
+/**
+ * nsIFeedResultListener defines a callback used when feed processing
+ * completes.
+ */
+[scriptable, uuid(4d2ebe88-36eb-4e20-bcd1-997b3c1f24ce)]
+interface nsIFeedResultListener : nsISupports 
+{
+   /** 
+   * Always called, even after an error. There could be new feed-level
+   * data available at this point, if it followed or was interspersed
+   * with the items. Fire-and-Forget implementations only need this.
+   * 
+   * @param result
+   *        An object implementing nsIFeedResult representing the feed 
+   *        and its metadata. 
+   */
+   void handleResult(in nsIFeedResult result);
+};
+
+
+/**
+ * nsIFeedProgressListener defines callbacks used during feed
+ * processing.
+ */
+[scriptable, uuid(ebfd5de5-713c-40c0-ad7c-f095117fa580)]
+interface nsIFeedProgressListener : nsIFeedResultListener {
+  
+   /**
+   * ReportError will be called in the event of fatal
+   * XML errors, or if the document is not a feed. The bozo 
+   * bit will be set if the error was due to a fatal error. 
+   * 
+   * @param errorText
+   *        A short description of the error.
+   * @param lineNumber
+   *        The line on which the error occurred.
+   */
+   void reportError(in AString errorText, in long lineNumber, 
+                    in boolean bozo);
+   
+   /**
+   * StartFeed will be called as soon as a reasonable start to
+   * a feed is detected. 
+   *  
+   * @param result
+   *        An object implementing nsIFeedResult representing the feed 
+   *        and its metadata. At this point, the result has version 
+   *        information.
+   */
+   void handleStartFeed(in nsIFeedResult result);
+
+   /**
+   * Called when the first entry/item is encountered. In Atom, all
+   * feed data is required to preceed the entries. In RSS, the data
+   * usually does. If the type is one of the entry/item-only types,
+   * this event will not be called.
+   *
+   * @param result
+   *        An object implementing nsIFeedResult representing the feed 
+   *        and its metadata. At this point, the result will likely have
+   *        most of its feed-level metadata.
+   */
+   void handleFeedAtFirstEntry(in nsIFeedResult result); 
+
+   /**
+   * Called after each entry/item. If the document is a standalone
+   * item or entry, this HandleFeedAtFirstEntry will not have been
+   * called. Also, this entry's parent field will be null.
+   * 
+   * @param entry
+   *        An object implementing nsIFeedEntry that represents the latest
+   *        entry encountered.
+   * @param result
+   *        An object implementing nsIFeedResult representing the feed 
+   *        and its metadata. 
+   */
+   void handleEntry(in nsIFeedEntry entry, in nsIFeedResult result);
+};

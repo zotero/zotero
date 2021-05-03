@@ -1,0 +1,85 @@
+/* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+#include "nsIFeedElementBase.idl"
+
+interface nsIURI;
+interface nsIWritablePropertyBag2;
+interface nsIArray;
+interface nsIFeedTextConstruct;
+
+/**
+ * A shared base for feeds and items, which are pretty similar,
+ * but they have some divergent attributes and require
+ * different convenience methods.
+ */ 
+[scriptable, uuid(577a1b4c-b3d4-4c76-9cf8-753e6606114f)]
+interface nsIFeedContainer : nsIFeedElementBase
+{
+  /**
+  * Many feeds contain an ID distinct from their URI, and
+  * entries have standard fields for this in all major formats.
+  */
+  attribute AString id;
+
+  /**
+  * The fields found in the document. Common Atom
+  * and RSS fields are normalized. This includes some namespaced
+  * extensions such as dc:subject and content:encoded. 
+  * Consumers can avoid normalization by checking the feed type
+  * and accessing specific fields.
+  *
+  * Common namespaces are accessed using prefixes, like get("dc:subject");.
+  * See nsIFeedResult::registerExtensionPrefix.
+  */
+  attribute nsIWritablePropertyBag2 fields;
+
+  /**
+   * Sometimes there's no title, or the title contains markup, so take
+   * care in decoding the attribute.
+   */
+  attribute nsIFeedTextConstruct title;
+
+  /**
+  * Returns the primary link for the feed or entry.
+  */
+  attribute nsIURI link;
+
+  /**
+  * Returns all links for a feed or entry.
+  */
+  attribute nsIArray links;
+
+  /**
+  * Returns the categories found in a feed or entry.
+  */
+  attribute nsIArray categories;
+
+  /**
+   * The rights or license associated with a feed or entry.
+   */
+  attribute nsIFeedTextConstruct rights;
+
+  /**
+   * A list of nsIFeedPersons that authored the feed.
+   */
+  attribute nsIArray authors;
+
+  /**
+   * A list of nsIFeedPersons that contributed to the feed.
+   */
+  attribute nsIArray contributors;
+
+  /**
+   * The date the feed was updated, in RFC822 form. Parsable by JS
+   * and mail code.
+   */
+  attribute AString updated;
+
+  /**
+  * Syncs a container's fields with its convenience attributes.
+  */
+  void normalize();
+};

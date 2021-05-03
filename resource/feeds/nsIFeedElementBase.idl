@@ -1,0 +1,28 @@
+/* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+#include "nsISupports.idl"
+
+interface nsISAXAttributes;
+interface nsIURI;
+
+/**
+ *  An nsIFeedGenerator represents the software used to create a feed.
+ */ 
+[scriptable, uuid(5215291e-fa0a-40c2-8ce7-e86cd1a1d3fa)]
+interface nsIFeedElementBase : nsISupports
+{
+  /**
+   * The attributes found on the element. Most interfaces provide convenience
+   * accessors for their standard fields, so this useful only when looking for
+   * an extension.
+   */
+  attribute nsISAXAttributes attributes;
+
+  /**
+   * The baseURI for the Entry or Feed.
+   */
+  attribute nsIURI baseURI;
+};

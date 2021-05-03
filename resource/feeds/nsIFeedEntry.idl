@@ -1,0 +1,46 @@
+/* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+#include "nsIFeedContainer.idl"
+interface nsIArray;
+
+/**
+ * An nsIFeedEntry represents an Atom or RSS entry/item. Summary
+ * and/or full-text content may be available, but callers will have to
+ * check both.
+ */
+[scriptable, uuid(31bfd5b4-8ff5-4bfd-a8cb-b3dfbd4f0a5b)]
+interface nsIFeedEntry : nsIFeedContainer {
+
+  /**
+  * Uses description, subtitle, summary, content and extensions
+  * to generate a summary. 
+  * 
+  */
+  attribute nsIFeedTextConstruct summary;
+
+  /**
+   * The date the entry was published, in RFC822 form. Parsable by JS
+   * and mail code.
+   */
+  attribute AString published;
+
+  /**
+  * Uses atom:content and content:encoded to provide
+  * a 'full text' view of an entry.
+  *
+  */
+  attribute nsIFeedTextConstruct content;
+
+  /**
+  * Enclosures are podcasts, photocasts, etc.
+  */
+  attribute nsIArray enclosures;
+
+  /**
+  * Enclosures, etc. that might be displayed inline.
+  */
+  attribute nsIArray mediaContent;
+};

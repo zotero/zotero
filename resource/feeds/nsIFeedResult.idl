@@ -1,0 +1,65 @@
+/* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+#include "nsISupports.idl"
+interface nsIFeedContainer;
+interface nsIProperties;
+interface nsIURI;
+
+/**
+ * The nsIFeedResult interface provides access to HTTP and parsing
+ * metadata for a feed or entry.
+ */
+[scriptable, uuid(7a180b78-0f46-4569-8c22-f3d720ea1c57)]
+interface nsIFeedResult : nsISupports {
+   
+  /** 
+  * The Feed parser will set the bozo bit when a feed triggers a fatal
+  * error during XML parsing. There may be entries and feed metadata
+  * that were parsed before the error.  Thanks to Tim Bray for
+  * suggesting this terminology.
+  * <http://www.tbray.org/ongoing/When/200x/2004/01/11/PostelPilgrim>
+  */
+  attribute boolean bozo;
+  
+  /**
+  * The parsed feed or entry. 
+  *
+  * Will be null if a non-feed is processed.
+  */
+  attribute nsIFeedContainer doc;
+
+  /** 
+  * The address from which the feed was fetched. 
+  */
+  attribute nsIURI uri;
+
+  /** 
+  * Feed Version: 
+  * atom, rss2, rss09, rss091, rss091userland, rss092, rss1, atom03, 
+  * atomEntry, rssItem
+  *
+  * Will be null if a non-feed is processed.
+  */
+  attribute AString version;
+
+  /**
+  * An XSLT stylesheet available to transform the source of the
+  * feed. Some feeds include this information in a processing
+  * instruction. It's generally intended for clients with specific
+  * feed capabilities.
+  */
+  attribute nsIURI stylesheet;
+
+  /**
+  * HTTP response headers that accompanied the feed. 
+  */
+  attribute nsIProperties headers;
+
+  /**
+  * Registers a prefix used to access an extension in the feed/entry 
+  */
+  void registerExtensionPrefix(in AString aNamespace, in AString aPrefix);
+};

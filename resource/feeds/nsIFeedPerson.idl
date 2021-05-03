@@ -1,0 +1,30 @@
+/* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+#include "nsIFeedElementBase.idl"
+
+interface nsIURI;
+
+/**
+ *  An nsIFeedPerson represents an author or contributor of a feed.
+ */ 
+[scriptable, uuid(29cbd45f-f2d3-4b28-b557-3ab7a61ecde4)]
+interface nsIFeedPerson : nsIFeedElementBase
+{
+  /**
+   * The name of the person.
+   */
+  attribute AString name;
+
+  /**
+   * An email address associated with the person.
+   */
+  attribute AString email;
+
+  /**
+   * A URI associated with the person (e.g. a homepage).
+   */
+  attribute nsIURI uri;
+};

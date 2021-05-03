@@ -1,0 +1,41 @@
+/* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+#include "nsIStreamListener.idl"
+
+interface nsIURI;
+interface nsIFeedResultListener;
+interface nsIInputStream;
+
+/**
+ * An nsIFeedProcessor parses feeds, triggering callbacks based on
+ * their contents.
+ */
+[scriptable, uuid(8a0b2908-21b0-45d7-b14d-30df0f92afc7)]
+interface nsIFeedProcessor : nsIStreamListener {
+
+  /**
+   * The listener that will respond to feed events. 
+   */
+  attribute nsIFeedResultListener listener;
+
+  // Level is where to listen for the extension, a constant: FEED,
+  // ENTRY, BOTH.
+  //
+  // XXX todo void registerExtensionHandler(in
+  // nsIFeedExtensionHandler, in long level);
+  
+  /**
+   * Parse a feed asynchronously. The caller must then call the
+   * nsIFeedProcessor's nsIStreamListener methods to drive the
+   * parse. Do not call the other parse methods during an asynchronous
+   * parse.
+   *
+   * @param requestObserver The observer to notify on start/stop. This
+   *                        argument can be null.
+   * @param uri The base URI.
+   */
+  void parseAsync(in nsIRequestObserver requestObserver, in nsIURI uri);
+};

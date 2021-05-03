@@ -1,0 +1,30 @@
+/* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+#include "nsIFeedElementBase.idl"
+
+interface nsIURI;
+
+/**
+ *  An nsIFeedGenerator represents the software used to create a feed.
+ */ 
+[scriptable, uuid(0fecd56b-bd92-481b-a486-b8d489cdd385)]
+interface nsIFeedGenerator : nsIFeedElementBase
+{
+  /**
+   * The name of the software.
+   */
+  attribute AString agent;
+
+  /**
+   * The version of the software.
+   */
+  attribute AString version;
+
+  /**
+   * A URI associated with the software.
+   */
+  attribute nsIURI uri;
+};
