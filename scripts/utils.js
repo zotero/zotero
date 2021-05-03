@@ -17,7 +17,7 @@ function onError(err) {
 function onSuccess(result) {
 	var msg = `${green('Success:')} ${blue(`[${result.action}]`)} ${result.count} files processed`;
 	if (result.totalCount) {
-		msg += ` (out of total ${result.totalCount} matched)`; 
+		msg += ` | ${result.totalCount} checked`; 
 	}
 
 	msg += ` [${yellow(`${result.processingTime}ms`)}]`;	

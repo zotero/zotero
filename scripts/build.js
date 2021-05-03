@@ -20,14 +20,15 @@ if (require.main === module) {
 				.concat(dirs.map(d => `${d}/**`))
 				.concat([`!${formatDirsForMatcher(dirs)}/**/*.js`])
 				.concat([`!${formatDirsForMatcher(dirs)}/**/*.jsx`])
-				.concat([`!${formatDirsForMatcher(copyDirs)}/**`])
+				.concat([`!${formatDirsForMatcher(dirs)}/**/*.scss`])
+				.concat([`!${formatDirsForMatcher(copyDirs)}/**`]);
 
 			const signatures = await getSignatures();
 			const results = await Promise.all([
 				getBrowserify(signatures),
 				getCopy(copyDirs.map(d => `${d}/**`), { ignore: ignoreMask }, signatures),
 				getJS(jsFiles, { ignore: ignoreMask }, signatures),
-				getSass(scssFiles, { ignore: ignoreMask }, signatures),
+				...scssFiles.map(scf => getSass(scf, { ignore: ignoreMask }, signatures)),
 				getSymlinks(symlinks, { nodir: true, ignore: ignoreMask }, signatures),
 				getSymlinks(symlinkDirs, { ignore: ignoreMask }, signatures),
 				cleanUp(signatures),
