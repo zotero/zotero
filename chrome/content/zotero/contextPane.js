@@ -156,6 +156,9 @@ var ZoteroContextPane = new function () {
 				}
 			}
 			else if (action == 'select') {
+				// It seems that changing `hidden` or `collapsed` values might
+				// be related with significant slow down when there are too many
+				// DOM nodes (i.e. 10k notes)
 				if (Zotero_Tabs.selectedIndex == 0) {
 					_contextPaneSplitter.setAttribute('hidden', true);
 					_contextPane.setAttribute('collapsed', true);
@@ -470,9 +473,27 @@ var ZoteroContextPane = new function () {
 
 		var notesListRef = React.createRef();
 
+		function _isVisible() {
+			let splitter = Zotero.Prefs.get('layout') == 'stacked'
+				? _contextPaneSplitterStacked : _contextPaneSplitter;
+			
+			return Zotero_Tabs.selectedID != 'zotero-pane'
+				&& _panesDeck.selectedIndex == 1
+				&& context.node.selectedIndex == 0
+				&& splitter.getAttribute('state') != 'collapsed';
+		}
+
 		async function _updateNotesList(useCached) {
 			var query = input.value;
 			var notes;
+			
+			// Calls itself and debounces until notes list becomes
+			// visible, and then updates
+			if (!useCached && !_isVisible()) {
+				context.update();
+				return;
+			}
+			
 			if (useCached && context.cachedNotes.length) {
 				notes = context.cachedNotes;
 			}
@@ -490,22 +511,25 @@ var ZoteroContextPane = new function () {
 				notes = await s.search();
 				notes = Zotero.Items.get(notes);
 				notes.sort((a, b) => {
-					a = a.getField('dateModified');
-					b = b.getField('dateModified');
-					return b.localeCompare(a);
+					a = a.dateModified;
+					b = b.dateModified;
+					return (a > b ? -1 : (a < b ? 1 : 0));
 				});
 				
+				let cachedNotesIndex = new Map();
+				for (let cachedNote of context.cachedNotes) {
+					cachedNotesIndex.set(cachedNote.id, cachedNote);
+				}
 				notes = notes.map(note => {
 					var parentItem = note.parentItem;
 					// If neither note nor parent item is affected try to return the cached note
 					if (!context.affectedIDs.has(note.id)
 						&& (!parentItem || !context.affectedIDs.has(parentItem.id))) {
-						let cachedNote = context.cachedNotes.find(x => x.id == note.id);
+						let cachedNote = cachedNotesIndex.get(note.id);
 						if (cachedNote) {
 							return cachedNote;
 						}
 					}
-
 					var text = note.note;
 					text = Zotero.Utilities.unescapeHTML(text);
 					text = text.trim();
@@ -513,7 +537,6 @@ var ZoteroContextPane = new function () {
 					var parts = text.split('\n').map(x => x.trim()).filter(x => x.length);
 					var title = parts[0] && parts[0].slice(0, Zotero.Notes.MAX_TITLE_LENGTH);
 					var date = Zotero.Date.sqlToDate(note.dateModified, true);
-					// This takes half of the CPU time
 					date = Zotero.Date.toFriendlyDate(date);
 					
 					return {

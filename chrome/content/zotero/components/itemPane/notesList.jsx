@@ -26,7 +26,7 @@
 import React, { forwardRef, useImperativeHandle, useState, memo } from 'react';
 import cx from 'classnames';
 
-const MAX_ALL_NOTES = 7;
+const MAX_UNEXPANDED_ALL_NOTES = 7;
 
 const NoteRow = memo(({ id, title, body, date, onClick, onContextMenu, parentItemType, parentTitle }) => {
 	return (
@@ -54,15 +54,32 @@ const NoteRow = memo(({ id, title, body, date, onClick, onContextMenu, parentIte
 const NotesList = forwardRef(({ onClick, onContextMenu, onAddChildButtonDown, onAddStandaloneButtonDown }, ref) => {
 	const [notes, setNotes] = useState([]);
 	const [expanded, setExpanded] = useState(false);
+	const [numVisible, setNumVisible] = useState(0);
 	const [hasParent, setHasParent] = useState(true);
-	useImperativeHandle(ref, () => ({ setNotes, setExpanded, setHasParent }));
+
+	const _setExpanded = (value) => {
+		setExpanded(value);
+		if (value) {
+			setNumVisible(numVisible + 1000);
+		}
+		else {
+			setNumVisible(0);
+		}
+	};
+	
+	useImperativeHandle(ref, () => ({
+		setNotes,
+		setHasParent,
+		setExpanded: _setExpanded
+	}));
 	
 	function handleClickMore() {
-		setExpanded(true);
+		_setExpanded(true);
 	}
 	
 	let childNotes = notes.filter(x => x.isCurrentChild);
 	let allNotes = notes.filter(x => !x.isCurrentChild);
+	let visibleNotes = allNotes.slice(0, expanded ? numVisible : MAX_UNEXPANDED_ALL_NOTES);
 	return (
 		<div className="notes-list">
 			{hasParent && <section>
@@ -80,12 +97,12 @@ const NotesList = forwardRef(({ onClick, onContextMenu, onAddChildButtonDown, on
 					<button onMouseDown={onAddStandaloneButtonDown}>+</button>
 				</div>
 				{!allNotes.length && <div className="empty-row">{Zotero.getString('pane.context.noNotes')}</div>}
-				{(expanded ? allNotes : allNotes.slice(0, MAX_ALL_NOTES))
-					.map(note => <NoteRow key={note.id} {...note}
-						onClick={onClick} onContextMenu={onContextMenu}/>)}
-				{!expanded && allNotes.length > MAX_ALL_NOTES
+				{visibleNotes.map(note => <NoteRow key={note.id} {...note}
+					onClick={onClick} onContextMenu={onContextMenu}/>)}
+				{allNotes.length > visibleNotes.length
 					&& <div className="more-row" onClick={handleClickMore}>{
-						Zotero.getString('general.numMore', Zotero.Utilities.numberFormat([allNotes.length - MAX_ALL_NOTES], 0))
+						Zotero.getString('general.numMore', Zotero.Utilities.numberFormat(
+							[(allNotes.length - visibleNotes.length) - MAX_UNEXPANDED_ALL_NOTES], 0))
 					}</div>
 				}
 			</section>

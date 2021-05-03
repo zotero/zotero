@@ -852,17 +852,28 @@ Zotero.Date = new function(){
 		return Zotero.getString("date.relative." + key + "." + (n ? "multiple" : "one"), n);
 	}
 	
+	// Initializing `toFriendlyDate` formatters, since
+	// `toLocaleDateString` is extremely slow (4500ms vs 200ms
+	// for 10k calls)
+	var _friendlyDateTodayFormatter = new Intl.DateTimeFormat(
+		false, { hour: 'numeric', minute: 'numeric' });
+
+	var _friendlyDateWeekFormatter = new Intl.DateTimeFormat(
+		false, { weekday: 'long' });
+
+	var _friendlyDateRegularFormatter = new Intl.DateTimeFormat(
+		false, { year: '2-digit', month: 'numeric', day: 'numeric' });
 	
 	this.toFriendlyDate = function (date) {
 		// 6:14:36 PM
 		if (isToday(date)) {
-			return date.toLocaleString(false, { hour: 'numeric', minute: 'numeric' })
+			return _friendlyDateTodayFormatter.format(date);
 		}
 		// 'Thursday'
 		if (isThisWeek(date)) {
-			return date.toLocaleString(false, { weekday: 'long' });
+			return _friendlyDateWeekFormatter.format(date);
 		}
-		return date.toLocaleDateString(false, { year: '2-digit', month: 'numeric', day: 'numeric' });
+		return _friendlyDateRegularFormatter.format(date);
 	};
 	
 	
