@@ -106,6 +106,9 @@ const TabBar = forwardRef(function (props, ref) {
 			<div
 				key={id}
 				className={cx('tab', { selected })}
+				/* Fix 'title' not working for HTML-in-XUL */
+				onMouseOver={() => window.Zotero_Tooltip.start(title)}
+				onMouseOut={() => window.Zotero_Tooltip.stop()}
 				onMouseDown={(event) => handleMouseDown(event, id, index)}
 			>
 				<div className="tab-name">{title}</div>
