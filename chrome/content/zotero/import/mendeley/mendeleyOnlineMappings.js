@@ -48,6 +48,7 @@ var mendeleyOnlineMappings = {
 		series_editor: 'seriesEditor',
 		series_number: 'seriesNumber',
 		short_title: 'shortTitle',
+		source: 'publication',
 		source_type: 'sourceType',
 		tags: false, // tags handled separately
 		translators: false, // all author types handled separately
