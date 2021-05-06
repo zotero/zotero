@@ -608,6 +608,11 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 					libraryID: c.libraryID,
 					key: c.key
 				};
+				// skipDeleteLog is normally added to notifierData in DataObject::_finalizeErase(),
+				// so we have to do it manually here
+				if (env.options && env.options.skipDeleteLog) {
+					env.notifierData[c.id].skipDeleteLog = true;
+				}
 			}
 		}
 		// Descendent items
