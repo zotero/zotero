@@ -61,6 +61,21 @@ describe("Zotero.Collection", function() {
 			yield collection.eraseTx({ deleteItems: true });
 			assert.lengthOf(item.getCollections(), 0);
 		});
+		
+		it("should apply 'skipDeleteLog: true' to subcollections", async function () {
+			var collection1 = await createDataObject('collection');
+			var collection2 = await createDataObject('collection', { parentID: collection1.id });
+			var collection3 = await createDataObject('collection', { parentID: collection2.id });
+			
+			await collection1.eraseTx({ skipDeleteLog: true });
+			
+			var deleted = await Zotero.Sync.Data.Local.getDeleted('collection', collection1.libraryID);
+			
+			// No collections should be in the delete log
+			assert.notInclude(deleted, collection1.key);
+			assert.notInclude(deleted, collection2.key);
+			assert.notInclude(deleted, collection3.key);
+		});
 	})
 	
 	describe("#version", function () {
