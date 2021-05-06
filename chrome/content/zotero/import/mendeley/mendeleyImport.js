@@ -1225,6 +1225,12 @@ Zotero_Import_Mendeley.prototype._saveItems = async function (libraryID, json) {
 			if (item.isRegularItem()) {
 				lastExistingParentItem = item;
 				
+				// Fill in Publication if empty, since it was missed in an early version of the
+				// online importer
+				if (itemJSON.publicationTitle && !item.getField('publicationTitle')) {
+					item.setField('publicationTitle', itemJSON.publicationTitle);
+				}
+				
 				// Update any child items to point to the existing item's key instead of the
 				// new generated one
 				this._updateParentKeys('item', json, i + 1, itemJSON.key, item.key);
