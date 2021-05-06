@@ -332,10 +332,10 @@ var Zotero_File_Interface = new function() {
 		
 		var translation;
 		
-		if (options.mendeleyOnlineToken) {
+		if (options.mendeleyCode) {
 			translation = yield _getMendeleyTranslation();
 			translation.createNewCollection = createNewCollection;
-			translation.token = options.mendeleyOnlineToken;
+			translation.mendeleyCode = options.mendeleyCode;
 		}
 		else {
 			// Check if the file is an SQLite database
@@ -863,10 +863,10 @@ var Zotero_File_Interface = new function() {
 
 	this.authenticateMendeleyOnlinePoll = function (win) {
 		if (win && win[0] && win[0].location) {
-			const matchResult = win[0].location.toString().match(/access_token=(.*?)(?:&|$)/i);
+			const matchResult = win[0].location.toString().match(/(?:\?|&)code=(.*?)(?:&|$)/i);
 			if (matchResult) {
-				const mendeleyAccessToken = matchResult[1];
-				Zotero.getMainWindow().setTimeout(() => this.showImportWizard({ mendeleyAccessToken }), 0);
+				const mendeleyCode = matchResult[1];
+				Zotero.getMainWindow().setTimeout(() => this.showImportWizard({ mendeleyCode }), 0);
 				
 				// Clear all cookies to remove access
 				//
@@ -894,8 +894,7 @@ var Zotero_File_Interface = new function() {
 	};
 
 	this.authenticateMendeleyOnline = function () {
-		const uri = 'https://api.mendeley.com/oauth/authorize?client_id=5907&redirect_uri=https%3A%2F%2Fzotero-static.s3.amazonaws.com%2Fmendeley_oauth_redirect.html&response_type=token&state=&scope=all';
-
+		const uri = `https://api.mendeley.com/oauth/authorize?client_id=5907&redirect_uri=https%3A%2F%2Fzotero-static.s3.amazonaws.com%2Fmendeley_oauth_redirect.html&response_type=code&state=&scope=all`;
 		var win = Services.wm.getMostRecentWindow("zotero:basicViewer");
 		if (win) {
 			win.loadURI(uri);

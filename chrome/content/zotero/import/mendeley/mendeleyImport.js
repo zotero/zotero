@@ -8,14 +8,15 @@ Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/men
 Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/mendeleyAPIUtils.js");
 
 const { apiTypeToDBType, apiFieldToDBField } = mendeleyOnlineMappings;
-const { apiFetch, get, getAll } = mendeleyAPIUtils;
+const { apiFetch, get, getAll, getTokens } = mendeleyAPIUtils;
 
 var Zotero_Import_Mendeley = function () {
 	this.createNewCollection = null;
 	this.linkFiles = null;
 	this.newItems = [];
-	this.token = null;
+	this.mendeleyCode = null;
 	
+	this._tokens = null;
 	this._db;
 	this._file;
 	this._saveOptions = null;
@@ -100,11 +101,15 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 			throw new Error("Not a valid Mendeley database");
 		}
 
-		if (!this._file && !this.token) {
+		if (this.mendeleyCode) {
+			this._tokens = await getTokens(this.mendeleyCode);
+		}
+
+		if (!this._file && !this._tokens) {
 			throw new Error("Missing import token");
 		}
 
-		const folders = this.token
+		const folders = this._tokens
 			? await this._getFoldersAPI(mendeleyGroupID)
 			: await this._getFoldersDB(mendeleyGroupID);
 
@@ -115,41 +120,41 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 		//
 		// Items
 		//
-		let documents = this.token
+		let documents = this._tokens
 			? await this._getDocumentsAPI(mendeleyGroupID)
 			: await this._getDocumentsDB(mendeleyGroupID);
 
 		this._progressMax = documents.length;
 		// Get various attributes mapped to document ids
-		let urls = this.token
+		let urls = this._tokens
 			? await this._getDocumentURLsAPI(documents)
 			: await this._getDocumentURLsDB(mendeleyGroupID);
 
-		let creators = this.token
+		let creators = this._tokens
 			? await this._getDocumentCreatorsAPI(documents)
 			: await this._getDocumentCreatorsDB(mendeleyGroupID, map.creatorTypes);
 
-		let tags = this.token
+		let tags = this._tokens
 			? await this._getDocumentTagsAPI(documents)
 			: await this._getDocumentTagsDB(mendeleyGroupID);
 
-		let collections = this.token
+		let collections = this._tokens
 			? await this._getDocumentCollectionsAPI(documents, rootCollectionKey, folderKeys)
 			: await this._getDocumentCollectionsDB(mendeleyGroupID, documents, rootCollectionKey, folderKeys);
 
-		let files = this.token
+		let files = this._tokens
 			? await this._getDocumentFilesAPI(documents)
 			: await this._getDocumentFilesDB(mendeleyGroupID);
 		
-		let annotations = this.token
+		let annotations = this._tokens
 			? await this._getDocumentAnnotationsAPI(mendeleyGroupID)
 			: await this._getDocumentAnnotationsDB(mendeleyGroupID);
 
-		let profile = this.token
+		let profile = this._tokens
 			? await this._getProfileAPI()
 			: await this._getProfileDB();
 
-		let groups = this.token
+		let groups = this._tokens
 			? await this._getGroupsAPI()
 			: await this._getGroupsDB();
 
@@ -163,7 +168,7 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 
 
 		for (let group of groups) {
-			let groupAnnotations = this.token
+			let groupAnnotations = this._tokens
 				? await this._getDocumentAnnotationsAPI(group.id, profile.id)
 				: await this._getDocumentAnnotationsDB(group.id, profile.id);
 
@@ -184,7 +189,7 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 			let docURLs = urls.get(document.id);
 			let docFiles = files.get(document.id);
 
-			if (this.token) {
+			if (this._tokens) {
 				// extract identifiers
 				['arxiv', 'doi', 'isbn', 'issn', 'pmid', 'scopus', 'pui', 'pii', 'sgr'].forEach(
 					i => document[i] = (document.identifiers || {})[i]
@@ -270,7 +275,7 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 			if (this._file) {
 				await this._db.closeDatabase();
 			}
-			if (this.token) {
+			if (this._tokens) {
 				await Promise.all(
 					this._tmpFilesToDelete.map(f => this._removeTemporaryFile(f))
 				);
@@ -341,8 +346,7 @@ Zotero_Import_Mendeley.prototype._getFoldersAPI = async function (groupID) {
 	if (groupID && groupID !== 0) {
 		params.group_id = groupID; //eslint-disable-line camelcase
 	}
-	
-	return (await getAll(this.token, 'folders', params, headers)).map(f => ({
+	return (await getAll(this._tokens, 'folders', params, headers)).map(f => ({
 		id: f.id,
 		uuid: f.id,
 		name: f.name,
@@ -489,7 +493,7 @@ Zotero_Import_Mendeley.prototype._getDocumentsAPI = async function (groupID) {
 	}
 	
 
-	return (await getAll(this.token, 'documents', params, headers)).map(d => ({
+	return (await getAll(this._tokens, 'documents', params, headers)).map(d => ({
 		...d,
 		uuid: d.id,
 		remoteUuid: d.id
@@ -677,7 +681,7 @@ Zotero_Import_Mendeley.prototype._getDocumentFilesDB = async function (groupID) 
 Zotero_Import_Mendeley.prototype._fetchFile = async function (fileID, filePath) {
 	const fileDir = OS.Path.dirname(filePath);
 	await Zotero.File.createDirectoryIfMissingAsync(fileDir);
-	const xhr = await apiFetch(this.token, `files/${fileID}`, {}, {}, { responseType: 'blob', followRedirects: false });
+	const xhr = await apiFetch(this._tokens, `files/${fileID}`, {}, {}, { responseType: 'blob', followRedirects: false });
 	const uri = xhr.getResponseHeader('location');
 	await Zotero.File.download(uri, filePath);
 
@@ -815,7 +819,7 @@ Zotero_Import_Mendeley.prototype._getDocumentAnnotationsAPI = async function (gr
 	}
 
 	const map = new Map();
-	(await getAll(this.token, 'annotations', params, { Accept: 'application/vnd.mendeley-annotation.1+json' }))
+	(await getAll(this._tokens, 'annotations', params, { Accept: 'application/vnd.mendeley-annotation.1+json' }))
 		.forEach((a) => {
 			if (profileID !== null && a.profile_id !== profileID) {
 				// optionally filter annotations by profile id
@@ -875,7 +879,7 @@ Zotero_Import_Mendeley.prototype._getGroupsAPI = async function () {
 	const params = { type: 'all' };
 	const headers = { Accept: 'application/vnd.mendeley-group-list+json' };
 	
-	return getAll(this.token, 'groups/v2', params, headers);
+	return getAll(this._tokens, 'groups/v2', params, headers);
 };
 
 Zotero_Import_Mendeley.prototype._getGroupsDB = async function () {
@@ -890,7 +894,7 @@ Zotero_Import_Mendeley.prototype._getProfileAPI = async function () {
 	const params = { };
 	const headers = { Accept: 'application/vnd.mendeley-profiles.2+json' };
 	
-	return get(this.token, 'profiles/v2/me', params, headers);
+	return get(this._tokens, 'profiles/v2/me', params, headers);
 };
 
 Zotero_Import_Mendeley.prototype._getProfileDB = async function () {

@@ -6,7 +6,7 @@ var Zotero_Import_Wizard = {
 	_file: null,
 	_translation: null,
 	_mendeleyOnlineRedirectURLWithCode: null,
-	_mendeleyAccessToken: null,
+	_mendeleyCode: null,
 	
 	
 	init: async function () {
@@ -34,8 +34,8 @@ var Zotero_Import_Wizard = {
 			}
 		}
 
-		if (args && args.mendeleyAccessToken) {
-			this._mendeleyAccessToken = args.mendeleyAccessToken;
+		if (args && args.mendeleyCode) {
+			this._mendeleyCode = args.mendeleyCode;
 			this._wizard.goTo('page-options');
 		}
 		
@@ -195,7 +195,7 @@ var Zotero_Import_Wizard = {
 	
 	
 	onOptionsShown: function () {
-		document.getElementById('file-handling-options').hidden = !!this._mendeleyAccessToken;
+		document.getElementById('file-handling-options').hidden = !!this._mendeleyCode;
 	},
 	
 	
@@ -222,7 +222,7 @@ var Zotero_Import_Wizard = {
 	
 	
 	onImportStart: async function () {
-		if (!this._file && !this._mendeleyAccessToken) {
+		if (!this._file && !this._mendeleyCode) {
 			let index = document.getElementById('file-list').selectedIndex;
 			this._file = this._dbs[index].path;
 		}
@@ -237,7 +237,7 @@ var Zotero_Import_Wizard = {
 				addToLibraryRoot: !document.getElementById('create-collection-checkbox')
 					.hasAttribute('checked'),
 				linkFiles: document.getElementById('file-handling-radio').selectedIndex == 1,
-				mendeleyOnlineToken: this._mendeleyAccessToken
+				mendeleyCode: this._mendeleyCode
 			});
 			
 			// Cancelled by user or due to error
