@@ -53,16 +53,15 @@
  * @method {void} terminate Stops retrieving/parsing the feed. Data parsed up
  *   to this point is still available.
  */
-Zotero.FeedReader = function(url) {
+Zotero.FeedReader = function (url) {
 	if (!url) throw new Error("Feed URL must be supplied");
-
 	
 	this._url = url;
 	this._feedItems = [Zotero.Promise.defer()];
 	this._feedProcessed = Zotero.Promise.defer();
-
+	
 	let feedFetched = Zotero.Promise.defer();
-	feedFetched.promise.then(function(feed) {
+	feedFetched.promise.then(function (feed) {
 		let info = {};
 		
 		info.title = feed.title ? feed.title.plainText() : '';
@@ -93,7 +92,7 @@ Zotero.FeedReader = function(url) {
 		if (issn) info.ISSN = issn;
 		
 		let isbn = Zotero.FeedReader._getFeedField(feed, 'isbn', 'prism')
-			|| Zotero.FeedReader._getFeedField(feed, 'isbn')
+			|| Zotero.FeedReader._getFeedField(feed, 'isbn');
 		if (isbn) info.ISBN = isbn;
 		
 		let language = Zotero.FeedReader._getFeedField(feed, 'language', 'dc')
@@ -105,10 +104,10 @@ Zotero.FeedReader = function(url) {
 		
 		this._feedProperties = info;
 		this._feed = feed;
-	}.bind(this)).then(function(){
+	}.bind(this)).then(function () {
 		let items = this._feed.items;
 		if (items && items.length) {
-			for (let i=0; i<items.length; i++) {
+			for (let i = 0; i < items.length; i++) {
 				let item = items.queryElementAt(i, Components.interfaces.nsIFeedEntry);
 				if (!item) continue;
 				
@@ -121,10 +120,11 @@ Zotero.FeedReader = function(url) {
 			}
 		}
 		this._feedProcessed.resolve();
-	}.bind(this)).catch(function(e) {
+	}.bind(this)).catch(function (e) {
 		Zotero.debug("Feed processing failed " + e.message);
 		this._feedProcessed.reject(e);
-	}.bind(this)).finally(function() {
+	// eslint-disable-next-line newline-per-chained-call
+	}.bind(this)).finally(function () {
 		// Make sure the last promise gets resolved to null
 		let lastItem = this._feedItems[this._feedItems.length - 1];
 		lastItem.resolve(null);
@@ -133,16 +133,16 @@ Zotero.FeedReader = function(url) {
 	// Set up asynchronous feed processor
 	let feedProcessor = Components.classes["@mozilla.org/feed-processor;1"]
 		.createInstance(Components.interfaces.nsIFeedProcessor);
-
+	
 	let feedUrl = Services.io.newURI(url, null, null);
 	feedProcessor.parseAsync(null, feedUrl);
 	
+	/*
+	 * MDN suggests that we could use nsIFeedProgressListener to handle the feed
+	 * as it gets loaded, but this is actually not implemented (as of 32.0.3),
+	 * so we have to load the whole feed and handle it in handleResult.
+	 */
 	feedProcessor.listener = {
-		/*
-		 * MDN suggests that we could use nsIFeedProgressListener to handle the feed
-		 * as it gets loaded, but this is actually not implemented (as of 32.0.3),
-		 * so we have to load the whole feed and handle it in handleResult.
-		 */
 		handleResult: (result) => {
 			if (!result.doc) {
 				this.terminate("No Feed");
@@ -156,12 +156,12 @@ Zotero.FeedReader = function(url) {
 	
 	Zotero.debug("FeedReader: Fetching feed from " + feedUrl.spec);
 	
-	this._channel = Services.io.newChannelFromURI2(feedUrl, null, 
-		Services.scriptSecurityManager.getSystemPrincipal(), null, 
+	this._channel = Services.io.newChannelFromURI2(feedUrl, null,
+		Services.scriptSecurityManager.getSystemPrincipal(), null,
 		Ci.nsILoadInfo.SEC_NORMAL, Ci.nsIContentPolicy.TYPE_OTHER);
 	this._channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
 	this._channel.asyncOpen(feedProcessor, null); // Sends an HTTP request
-}
+};
 
 /*
  * The constructor initiates async feed processing, but _feedProcessed
@@ -175,7 +175,7 @@ Zotero.FeedReader.prototype.process = Zotero.Promise.coroutine(function* () {
  * Terminate feed processing at any given time
  * @param {String} status Reason for terminating processing
  */
-Zotero.FeedReader.prototype.terminate = function(status) {
+Zotero.FeedReader.prototype.terminate = function (status) {
 	Zotero.debug("FeedReader: Terminating feed reader (" + status + ")");
 	
 	// Reject feed promise if not resolved yet
@@ -203,11 +203,11 @@ Zotero.FeedReader.prototype.terminate = function(status) {
 };
 
 Zotero.defineProperty(Zotero.FeedReader.prototype, 'feedProperties', {
-	get: function(){ 
+	get: function () {
 		if (!this._feedProperties) {
-			throw new Error("Feed has not been resolved yet. Try calling FeedReader#process first")
+			throw new Error("Feed has not been resolved yet. Try calling FeedReader#process first");
 		}
-		return this._feedProperties
+		return this._feedProperties;
 	}
 });
 
@@ -220,18 +220,19 @@ Zotero.defineProperty(Zotero.FeedReader.prototype, 'feedProperties', {
  * for termination.
  */
 Zotero.defineProperty(Zotero.FeedReader.prototype, 'ItemIterator', {
-	get: function() {
+	get: function () {
 		let items = this._feedItems;
+		// eslint-disable-next-line consistent-this
 		let feedReader = this;
 		
-		let iterator = function() {
+		let iterator = function () {
 			if (!feedReader._feedProperties) {
-				throw new Error("Feed has not been resolved yet. Try calling FeedReader#process first")
+				throw new Error("Feed has not been resolved yet. Try calling FeedReader#process first");
 			}
 			this.index = 0;
 		};
 		
-		iterator.prototype.next = function() {
+		iterator.prototype.next = function () {
 			let item = items[this.index++];
 			return {
 				value: item ? item.promise : null,
@@ -239,23 +240,23 @@ Zotero.defineProperty(Zotero.FeedReader.prototype, 'ItemIterator', {
 			};
 		};
 		
-		iterator.prototype.last = function() {
-			return items[items.length-1];
-		}
+		iterator.prototype.last = function () {
+			return items[items.length - 1];
+		};
 		
 		return iterator;
 	}
-}, {lazy: true});
+}, { lazy: true });
 
 
 /*****************************
  * Item processing functions *
  *****************************/
- 	 
+
 /**
  * Determine item type based on item data
  */
-Zotero.FeedReader._guessItemType = function(item) {
+Zotero.FeedReader._guessItemType = function (item) {
 	// Default to journalArticle
 	item.itemType = 'journalArticle';
 	
@@ -288,12 +289,12 @@ Zotero.FeedReader._guessItemType = function(item) {
 /*
  * Fetch creators from given field of a feed entry
  */
-Zotero.FeedReader._processCreators = function(feedEntry, field, role) {
+Zotero.FeedReader._processCreators = function (feedEntry, field, role) {
 	let names = [],
 		nameStr;
 	try {
 		let personArr = feedEntry[field]; // Seems like this part can throw if there is no author data in the feed
-		for (let i=0; i<personArr.length; i++) {
+		for (let i = 0; i < personArr.length; i++) {
 			let person = personArr.queryElementAt(i, Components.interfaces.nsIFeedPerson);
 			if (!person || !person.name) continue;
 			
@@ -301,25 +302,25 @@ Zotero.FeedReader._processCreators = function(feedEntry, field, role) {
 			if (!name) continue;
 			
 			let commas = name.split(',').length - 1,
-					other = name.split(/\s(?:and|&)\s|;/).length - 1,
-					separators = commas + other;
-			if (personArr.length == 1 &&
+				other = name.split(/\s(?:and|&)\s|;/).length - 1;
+			if (personArr.length == 1
 				// Has typical name separators
-				(other || commas > 1
-				// If only one comma and first part has more than one space,
-				// it's probably not lastName, firstName
+				&& (other || commas > 1
+					// If only one comma and first part has more than one space,
+					// it's probably not lastName, firstName
 					|| (commas == 1 && name.split(/\s*,/)[0].indexOf(' ') != -1)
 				)
 			) {
 				// Probably multiple authors listed in a single field
 				nameStr = name;
 				break; // For clarity. personArr.length == 1 anyway
-			} else {
+			}
+			else {
 				names.push(name);
 			}
 		}
-	} 
-	catch(e) {
+	}
+	catch (e) {
 		if (e.result != Components.results.NS_ERROR_FAILURE) throw e;
 		
 		if (field != 'authors') return [];
@@ -335,7 +336,7 @@ Zotero.FeedReader._processCreators = function(feedEntry, field, role) {
 	}
 	
 	let creators = [];
-	for (let i=0; i<names.length; i++) {
+	for (let i = 0; i < names.length; i++) {
 		let creator = Zotero.Utilities.cleanAuthor(
 			names[i],
 			role,
@@ -352,18 +353,18 @@ Zotero.FeedReader._processCreators = function(feedEntry, field, role) {
 		creators.push(creator);
 	}
 	return creators;
-}
+};
 
 /*
  * Parse feed entry into a Zotero item
  */
-Zotero.FeedReader._getFeedItem = function(feedEntry, feedInfo) {
+Zotero.FeedReader._getFeedItem = function (feedEntry, feedInfo) {
 	// ID is not required, but most feeds have these and we have to rely on them
 	// to handle updating properly
 	// Can probably fall back to links on missing id - unlikely to change
 	if (!feedEntry.id && !feedEntry.link) {
 		Zotero.debug("FeedReader: Feed item missing an ID or link - discarding");
-		return;
+		return null;
 	}
 	
 	let item = {
@@ -394,7 +395,7 @@ Zotero.FeedReader._getFeedItem = function(feedEntry, feedInfo) {
 	item.creators = Zotero.FeedReader._processCreators(feedEntry, 'authors', 'author');
 	if (!item.creators.length) {
 		// Use feed authors as item author. Maybe not the best idea.
-		for (let i=0; i<feedInfo.creators.length; i++) {
+		for (let i = 0; i < feedInfo.creators.length; i++) {
 			if (feedInfo.creators[i].creatorType != 'author') continue;
 			item.creators.push(feedInfo.creators[i]);
 		}
@@ -426,27 +427,26 @@ Zotero.FeedReader._getFeedItem = function(feedEntry, feedInfo) {
 	let startPage = Zotero.FeedReader._getFeedField(feedEntry, 'startPage');
 	let endPage = Zotero.FeedReader._getFeedField(feedEntry, 'endPage');
 	if (startPage || endPage) {
-		item.pages = ( startPage || '' )
-			+ ( endPage && startPage ? '–' : '' )
-			+ ( endPage || '' );
+		item.pages = (startPage || '')
+			+ (endPage && startPage ? '–' : '')
+			+ (endPage || '');
 	}
 	
 	let issn = Zotero.FeedReader._getFeedField(feedEntry, 'issn', 'prism');
 	if (issn) item.ISSN = issn;
 	
 	let isbn = Zotero.FeedReader._getFeedField(feedEntry, 'isbn', 'prism')
-		|| Zotero.FeedReader._getFeedField(feedEntry, 'isbn')
+		|| Zotero.FeedReader._getFeedField(feedEntry, 'isbn');
 	if (isbn) item.ISBN = isbn;
 	
 	let identifier = Zotero.FeedReader._getFeedField(feedEntry, 'identifier', 'dc');
 	if (identifier) {
-		let cleanId = Zotero.Utilities.cleanDOI(identifier);
-		if (cleanId) {
-			if (!item.DOI) item.DOI = cleanId;
-		} else if (cleanId = Zotero.Utilities.cleanISBN(identifier)) {
-			if (!item.ISBN) item.ISBN = cleanId;
-		} else if (cleanId = Zotero.Utilities.cleanISSN(identifier)) {
-			if (!item.ISSN) item.ISSN = cleanId;
+		for (let type of ['DOI', 'ISBN', 'ISSN']) {
+			let cleanId = Zotero.Utilities[`clean${type}`](identifier);
+			if (cleanId) {
+				if (!item[type]) item[type] = cleanId;
+				break;
+			}
 		}
 	}
 	
@@ -465,7 +465,7 @@ Zotero.FeedReader._getFeedItem = function(feedEntry, feedInfo) {
 	/** Incorporate missing values from feed metadata **/
 	
 	let supplementFields = ['publicationTitle', 'ISSN', 'publisher', 'rights', 'language'];
-	for (let i=0; i<supplementFields.length; i++) {
+	for (let i = 0; i < supplementFields.length; i++) {
 		let field = supplementFields[i];
 		if (!item[field] && feedInfo[field]) {
 			item[field] = feedInfo[field];
@@ -477,7 +477,7 @@ Zotero.FeedReader._getFeedItem = function(feedEntry, feedInfo) {
 	item.enclosedItems = Zotero.FeedReader._getEnclosedItems(feedEntry);
 	
 	return item;
-}
+};
 
 /*********************
  * Utility functions *
@@ -485,7 +485,7 @@ Zotero.FeedReader._getFeedItem = function(feedEntry, feedInfo) {
 /*
  * Convert HTML-formatted text to Zotero-compatible formatting
  */
-Zotero.FeedReader._getRichText = function(feedText, field) {
+Zotero.FeedReader._getRichText = function (feedText, field) {
 	let domDiv = Zotero.Utilities.Internal.getDOMDocument().createElement("div");
 	let domFragment = feedText.createDocumentFragment(domDiv);
 	return Zotero.Utilities.dom2text(domFragment, field);
@@ -497,37 +497,39 @@ Zotero.FeedReader._getRichText = function(feedText, field) {
 // Properties are stored internally as ns+name, but only some namespaces are
 // supported. Others are just "null"
 let ns = {
-	'prism': 'null',
-	'dc': 'dc:'
-}
-Zotero.FeedReader._getFeedField = function(feedEntry, field, namespace) {
+	prism: 'null',
+	dc: 'dc:'
+};
+Zotero.FeedReader._getFeedField = function (feedEntry, field, namespace) {
 	let prefix = namespace ? ns[namespace] || 'null' : '';
 	try {
-		return feedEntry.fields.getPropertyAsAUTF8String(prefix+field);
-	} catch(e) {}
+		return feedEntry.fields.getPropertyAsAUTF8String(prefix + field);
+	}
+	catch (e) {}
 	
 	try {
 		if (namespace && !ns[namespace]) {
 			prefix = namespace + ':';
-			return feedEntry.fields.getPropertyAsAUTF8String(prefix+field);
+			return feedEntry.fields.getPropertyAsAUTF8String(prefix + field);
 		}
-	} catch(e) {}
+	}
+	catch (e) { }
 	
-	return;
-}
+	return null;
+};
 
-Zotero.FeedReader._getEnclosedItems = function(feedEntry) {
+Zotero.FeedReader._getEnclosedItems = function (feedEntry) {
 	var enclosedItems = [];
 	
 	if (feedEntry.enclosures) {
 		for (let i = 0; i < feedEntry.enclosures.length; i++) {
 			let elem = feedEntry.enclosures.queryElementAt(0, Components.interfaces.nsIPropertyBag2);
 			if (elem.get('url')) {
-				let enclosedItem = {url: elem.get('url'), contentType: elem.get('type') || ''};
+				let enclosedItem = { url: elem.get('url'), contentType: elem.get('type') || '' };
 				enclosedItems.push(enclosedItem);
 			}
 		}
 	}
 	
 	return enclosedItems;
-}
+};
