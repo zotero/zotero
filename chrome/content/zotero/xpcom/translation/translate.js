@@ -1861,8 +1861,8 @@ Zotero.Translate.Base.prototype = {
 		this._sandboxManager.sandbox.ZU = this._sandboxZotero.Utilities;
 		this._transferItem = this._sandboxZotero._transferItem;
 		
-		// Add web helper functions
-		if (this.type == 'web') {
+		// Add helper functions
+		if (this.type == 'web' || this.type == 'search') {
 			this._sandboxManager.sandbox.attr = this._attr.bind(this);
 			this._sandboxManager.sandbox.text = this._text.bind(this);
 			this._sandboxManager.sandbox.innerText = this._innerText.bind(this);
