@@ -1,4 +1,3 @@
-/* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -18,41 +17,41 @@ webidl Element;
 [scriptable, uuid(fc97a2a9-d649-4494-931e-db81a156c873)]
 interface nsIFeedTextConstruct : nsISupports 
 {
-  /**
-   * If the text construct contains (X)HTML, relative references in
-   * the content should be resolved against this base URI.
-   */
-  attribute nsIURI base;
+	/**
+	 * If the text construct contains (X)HTML, relative references in
+	 * the content should be resolved against this base URI.
+	 */
+	attribute nsIURI base;
 
-  /**
-   * The language of the text. For example, "en-US" for US English.
-   */
-  attribute AString lang;
+	/**
+	 * The language of the text. For example, "en-US" for US English.
+	 */
+	attribute AString lang;
 
-  /**
-   * One of "text", "html", or "xhtml". If the type is (x)html, a '<'
-   * character represents markup. To display that character, an escape
-   * such as &lt; must be used. If the type is "text", the '<'
-   * character represents the character itself, and such text should
-   * not be embedded in markup without escaping it first.
-   */
-  attribute AString type;
+	/**
+	 * One of "text", "html", or "xhtml". If the type is (x)html, a '<'
+	 * character represents markup. To display that character, an escape
+	 * such as &lt; must be used. If the type is "text", the '<'
+	 * character represents the character itself, and such text should
+	 * not be embedded in markup without escaping it first.
+	 */
+	attribute AString type;
 
-  /**
-   * The content of the text construct.
-   */
-  attribute AString text;
+	/**
+	 * The content of the text construct.
+	 */
+	attribute AString text;
 
-  /**
-   * Returns the text of the text construct, with all markup stripped 
-   * and all entities decoded. If the type attribute's value is "text",
-   * this function returns the value of the text attribute unchanged.
-   */
-  AString plainText();
+	/**
+	 * Returns the text of the text construct, with all markup stripped 
+	 * and all entities decoded. If the type attribute's value is "text",
+	 * this function returns the value of the text attribute unchanged.
+	 */
+	AString plainText();
 
-  /**
-   * Return an nsIDocumentFragment containing the text and markup.
-   */
-  DocumentFragment createDocumentFragment(in Element element);
+	/**
+	 * Return an nsIDocumentFragment containing the text and markup.
+	 */
+	DocumentFragment createDocumentFragment(in Element element);
 };
  

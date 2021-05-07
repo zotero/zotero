@@ -1,4 +1,3 @@
-/* -*- Mode: C++; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
@@ -14,73 +13,73 @@ interface nsIFeedGenerator;
 [scriptable, uuid(3b8aae33-80e2-4efa-99c8-a6c5b99f76ea)]
 interface nsIFeed : nsIFeedContainer
 {
-  /** 
-  * Uses description, subtitle, and extensions
-  * to generate a summary. 
-  */
-  attribute nsIFeedTextConstruct subtitle;
+	/** 
+	* Uses description, subtitle, and extensions
+	* to generate a summary. 
+	*/
+	attribute nsIFeedTextConstruct subtitle;
 
-  // All content classifies as a "feed" - it is the transport.
-  const unsigned long TYPE_FEED = 0;
-  const unsigned long TYPE_AUDIO = 1;
-  const unsigned long TYPE_IMAGE = 2;
-  const unsigned long TYPE_VIDEO = 4;
+	// All content classifies as a "feed" - it is the transport.
+	const unsigned long TYPE_FEED = 0;
+	const unsigned long TYPE_AUDIO = 1;
+	const unsigned long TYPE_IMAGE = 2;
+	const unsigned long TYPE_VIDEO = 4;
 
-  /**
-  * The type of feed. For example, a podcast would be TYPE_AUDIO.
-  */
-  readonly attribute unsigned long type;
-  
-  /**
-  * The total number of enclosures found in the feed.
-  */
-  attribute long enclosureCount;
+	/**
+	* The type of feed. For example, a podcast would be TYPE_AUDIO.
+	*/
+	readonly attribute unsigned long type;
+	
+	/**
+	* The total number of enclosures found in the feed.
+	*/
+	attribute long enclosureCount;
 
-  /**
-  * The items or entries in feed.
-  */
-  attribute nsIArray items;
+	/**
+	* The items or entries in feed.
+	*/
+	attribute nsIArray items;
 
-  /**
-  * No one really knows what cloud is for.
-  *
-  * It supposedly enables some sort of interaction with an XML-RPC or
-  * SOAP service.
-  */
-  attribute nsIWritablePropertyBag2 cloud;
+	/**
+	* No one really knows what cloud is for.
+	*
+	* It supposedly enables some sort of interaction with an XML-RPC or
+	* SOAP service.
+	*/
+	attribute nsIWritablePropertyBag2 cloud;
 
-  /**
-  * Information about the software that produced the feed.
-  */
-  attribute nsIFeedGenerator generator;
+	/**
+	* Information about the software that produced the feed.
+	*/
+	attribute nsIFeedGenerator generator;
 
-  /**
-  * An image url and some metadata (as defined by RSS2).
-  *
-  */
-  attribute nsIWritablePropertyBag2 image;
+	/**
+	* An image url and some metadata (as defined by RSS2).
+	*
+	*/
+	attribute nsIWritablePropertyBag2 image;
 
-  /**
-  * No one really knows what textInput is for.
-  *
-  * See
-  * <http://www.cadenhead.org/workbench/news/2894/rss-joy-textinput>
-  * for more details.
-  */
-  attribute nsIWritablePropertyBag2 textInput;
+	/**
+	* No one really knows what textInput is for.
+	*
+	* See
+	* <http://www.cadenhead.org/workbench/news/2894/rss-joy-textinput>
+	* for more details.
+	*/
+	attribute nsIWritablePropertyBag2 textInput;
 
-  /**
-  * Days to skip fetching. This field was supposed to designate
-  * intervals for feed fetching. It's not generally implemented. For
-  * example, if this array contained "Monday", aggregators should not
-  * fetch the feed on Mondays.
-  */
-  attribute nsIArray skipDays;
+	/**
+	* Days to skip fetching. This field was supposed to designate
+	* intervals for feed fetching. It's not generally implemented. For
+	* example, if this array contained "Monday", aggregators should not
+	* fetch the feed on Mondays.
+	*/
+	attribute nsIArray skipDays;
 
  /**
-  * Hours to skip fetching. This field was supposed to designate
-  * intervals for feed fetching. It's not generally implemented. See
-  * <http://blogs.law.harvard.edu/tech/rss> for more information.
-  */
-  attribute nsIArray skipHours;
+	* Hours to skip fetching. This field was supposed to designate
+	* intervals for feed fetching. It's not generally implemented. See
+	* <http://blogs.law.harvard.edu/tech/rss> for more information.
+	*/
+	attribute nsIArray skipHours;
 };
