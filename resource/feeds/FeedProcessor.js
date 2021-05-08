@@ -284,18 +284,18 @@ Feed.prototype = {
 	},
 	
 	_calcEnclosureCountAndFeedType: function () {
-		var entries_with_enclosures = 0;
-		var audio_count = 0;
-		var image_count = 0;
-		var video_count = 0;
-		var other_count = 0;
+		var entriesWithEnclosures = 0;
+		var audioCount = 0;
+		var imageCount = 0;
+		var videoCount = 0;
+		var otherCount = 0;
 		
 		for (var i = 0; i < this.items.length; ++i) {
 			var entry = this.items.queryElementAt(i, Ci.nsIFeedEntry);
 			entry.QueryInterface(Ci.nsIFeedContainer);
 			
 			if (entry.enclosures && entry.enclosures.length > 0) {
-				++entries_with_enclosures;
+				++entriesWithEnclosures;
 				
 				for (var e = 0; e < entry.enclosures.length; ++e) {
 					var enc = entry.enclosures.queryElementAt(e, Ci.nsIWritablePropertyBag2);
@@ -303,20 +303,20 @@ Feed.prototype = {
 						var enctype = enc.get("type");
 						
 						if (/^audio/.test(enctype)) {
-							++audio_count;
+							++audioCount;
 						}
 						else if (/^image/.test(enctype)) {
-							++image_count;
+							++imageCount;
 						}
 						else if (/^video/.test(enctype)) {
-							++video_count;
+							++videoCount;
 						}
 						else {
-							++other_count;
+							++otherCount;
 						}
 					}
 					else {
-						++other_count;
+						++otherCount;
 					}
 				}
 			}
@@ -332,20 +332,20 @@ Feed.prototype = {
 		//       for TYPE_IMAGE
 		//
 		// Otherwise it's a TYPE_FEED.
-		if (entries_with_enclosures == this.items.length && other_count == 0) {
-			if (audio_count > 0 && !video_count && !image_count) {
+		if (entriesWithEnclosures == this.items.length && otherCount == 0) {
+			if (audioCount > 0 && !videoCount && !imageCount) {
 				feedtype = Ci.nsIFeed.TYPE_AUDIO;
 			}
-			else if (image_count > 0 && !audio_count && !video_count) {
+			else if (imageCount > 0 && !audioCount && !videoCount) {
 				feedtype = Ci.nsIFeed.TYPE_IMAGE;
 			}
-			else if (video_count > 0 && !audio_count && !image_count) {
+			else if (videoCount > 0 && !audioCount && !imageCount) {
 				feedtype = Ci.nsIFeed.TYPE_VIDEO;
 			}
 		}
 		
 		this.type = feedtype;
-		this.enclosureCount = other_count + video_count + audio_count + image_count;
+		this.enclosureCount = otherCount + videoCount + audioCount + imageCount;
 	},
 	
 	_atomLinksToURI: function () {
@@ -516,60 +516,60 @@ Entry.prototype = {
 		}
 	},
 	
-	__enclosure_map: null,
+	__enclosureMap: null,
 	
-	_addToEnclosures: function (new_enc) {
+	_addToEnclosures: function (newEnc) {
 		// items we add to the enclosures array get displayed in the FeedWriter and
 		// they must have non-empty urls.
-		if (!bagHasKey(new_enc, "url") || new_enc.getPropertyAsAString("url") == "") {
+		if (!bagHasKey(newEnc, "url") || newEnc.getPropertyAsAString("url") == "") {
 			return;
 		}
 		
-		if (this.__enclosure_map == null) {
-			this.__enclosure_map = {};
+		if (this.__enclosureMap === null) {
+			this.__enclosureMap = {};
 		}
 		
-		var previous_enc = this.__enclosure_map[new_enc.getPropertyAsAString("url")];
+		var previousEnc = this.__enclosureMap[newEnc.getPropertyAsAString("url")];
 		
-		if (previous_enc != undefined) {
-			previous_enc.QueryInterface(Ci.nsIWritablePropertyBag2);
+		if (previousEnc != undefined) {
+			previousEnc.QueryInterface(Ci.nsIWritablePropertyBag2);
 			
-			if (!bagHasKey(previous_enc, "type") && bagHasKey(new_enc, "type")) {
-				previous_enc.setPropertyAsAString("type", new_enc.getPropertyAsAString("type"));
+			if (!bagHasKey(previousEnc, "type") && bagHasKey(newEnc, "type")) {
+				previousEnc.setPropertyAsAString("type", newEnc.getPropertyAsAString("type"));
 				try {
-					let handlerInfoWrapper = gMimeService.getFromTypeAndExtension(new_enc.getPropertyAsAString("type"), null);
+					let handlerInfoWrapper = gMimeService.getFromTypeAndExtension(newEnc.getPropertyAsAString("type"), null);
 					if (handlerInfoWrapper && handlerInfoWrapper.description) {
-						previous_enc.setPropertyAsAString("typeDesc", handlerInfoWrapper.description);
+						previousEnc.setPropertyAsAString("typeDesc", handlerInfoWrapper.description);
 					}
 				}
 				catch (ext) {}
 			}
 			
-			if (!bagHasKey(previous_enc, "length") && bagHasKey(new_enc, "length")) {
-				previous_enc.setPropertyAsAString("length", new_enc.getPropertyAsAString("length"));
+			if (!bagHasKey(previousEnc, "length") && bagHasKey(newEnc, "length")) {
+				previousEnc.setPropertyAsAString("length", newEnc.getPropertyAsAString("length"));
 			}
 			
 			return;
 		}
 		
-		if (this.enclosures == null) {
+		if (this.enclosures === null) {
 			this.enclosures = Cc[ARRAY_CONTRACTID].createInstance(Ci.nsIMutableArray);
 			this.enclosures.QueryInterface(Ci.nsIMutableArray);
 		}
 		
-		this.enclosures.appendElement(new_enc);
-		this.__enclosure_map[new_enc.getPropertyAsAString("url")] = new_enc;
+		this.enclosures.appendElement(newEnc);
+		this.__enclosureMap[newEnc.getPropertyAsAString("url")] = newEnc;
 	},
 	
 	_atomLinksToEnclosures: function () {
 		var links = this.fields.getPropertyAsInterface("links", Ci.nsIArray);
-		var enc_links = findAtomLinks("enclosure", links);
-		if (enc_links.length == 0) {
+		var encLinks = findAtomLinks("enclosure", links);
+		if (encLinks.length == 0) {
 			return;
 		}
 		
-		for (var i = 0; i < enc_links.length; ++i) {
-			var link = enc_links[i];
+		for (var i = 0; i < encLinks.length; ++i) {
+			var link = encLinks[i];
 			
 			// an enclosure must have an href
 			if (!(link.getProperty("href"))) {
@@ -846,7 +846,7 @@ function rssAuthor(s, author) {
 	var chars = s.trim();
 	var matches = chars.match(/(.*)\((.*)\)/);
 	var emailCheck
-		= /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+		= /^([a-zA-Z0-9_.-])+@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
 	if (matches) {
 		var match1 = matches[1].trim();
 		var match2 = matches[2].trim();
@@ -962,7 +962,7 @@ XHTMLHandler.prototype = {
 				else {
 					// write a small set of allowed attribute namespaces
 					var prefix = gAllowedXHTMLNamespaces[uri];
-					if (prefix != null) {
+					if (prefix) {
 						// The attribute value we'll attempt to write
 						var attributeValue = xmlEscape(attributes.getValue(i));
 						
@@ -1287,7 +1287,7 @@ FeedProcessor.prototype = {
 		}
 		
 		try {
-			if (this.listener != null) {
+			if (this.listener !== null) {
 				this.listener.handleResult(this._result);
 			}
 		}
@@ -1420,9 +1420,9 @@ FeedProcessor.prototype = {
 		// and explicitly allows whitespace collapsing.
 		//
 		if ((this._result.version == "atom" || this._result.version == "atom03")
-				&& this._textConstructs[key] != null) {
+				&& this._textConstructs[key]) {
 			var type = attributes.getValueFromName("", "type");
-			if (type != null && type.includes("xhtml")) {
+			if (type !== null && type.includes("xhtml")) {
 				this._xhtmlHandler
 					= new XHTMLHandler(this, (this._result.version == "atom"));
 				this._reader.contentHandler = this._xhtmlHandler;
@@ -1504,7 +1504,7 @@ FeedProcessor.prototype = {
 	
 	processingInstruction: function (target, data) {
 		if (target == "xml-stylesheet") {
-			var hrefAttribute = data.match(/href=[\"\'](.*?)[\"\']/);
+			var hrefAttribute = data.match(/href=["'](.*?)["']/);
 			if (hrefAttribute && hrefAttribute.length == 2) {
 				this._result.stylesheet = strToURI(hrefAttribute[1], this._result.uri);
 			}
@@ -1672,7 +1672,7 @@ FeedProcessor.prototype = {
 		
 		// take control of the SAX events
 		this._reader.contentHandler = this;
-		if (localName == null && chars == null) {
+		if (localName === null && chars === null) {
 			return;
 		}
 		
@@ -1742,17 +1742,17 @@ FeedProcessor.prototype = {
 		
 		// But, it could be something containing HTML. If so,
 		// we need to know about that.
-		if (this._textConstructs[propName] != null
+		if (this._textConstructs[propName]
 				&& this._handlerStack[this._depth].containerClass !== null) {
 			var newProp = Cc[TEXTCONSTRUCT_CONTRACTID].createInstance(Ci.nsIFeedTextConstruct);
 			newProp.text = chars;
 			// Look up the default type in our table
 			var type = this._textConstructs[propName];
 			var typeAttribute = attributes.getValueFromName("", "type");
-			if (this._result.version == "atom" && typeAttribute != null) {
+			if (this._result.version == "atom" && typeAttribute !== null) {
 				type = typeAttribute;
 			}
-			else if (this._result.version == "atom03" && typeAttribute != null) {
+			else if (this._result.version == "atom03" && typeAttribute !== null) {
 				if (typeAttribute.toLowerCase().includes("xhtml")) {
 					type = "xhtml";
 				}
