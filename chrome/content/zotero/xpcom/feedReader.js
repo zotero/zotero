@@ -108,7 +108,7 @@ Zotero.FeedReader = function (url) {
 		let items = this._feed.items;
 		if (items && items.length) {
 			for (let i = 0; i < items.length; i++) {
-				let item = items.queryElementAt(i, Components.interfaces.nsIFeedEntry);
+				let item = items[i];
 				if (!item) continue;
 				
 				let feedItem = Zotero.FeedReader._getFeedItem(item, this._feedProperties);
@@ -295,7 +295,7 @@ Zotero.FeedReader._processCreators = function (feedEntry, field, role) {
 	try {
 		let personArr = feedEntry[field]; // Seems like this part can throw if there is no author data in the feed
 		for (let i = 0; i < personArr.length; i++) {
-			let person = personArr.queryElementAt(i, Components.interfaces.nsIFeedPerson);
+			let person = personArr[i];
 			if (!person || !person.name) continue;
 			
 			let name = Zotero.Utilities.cleanTags(Zotero.Utilities.trimInternal(person.name));
@@ -321,8 +321,6 @@ Zotero.FeedReader._processCreators = function (feedEntry, field, role) {
 		}
 	}
 	catch (e) {
-		if (e.result != Components.results.NS_ERROR_FAILURE) throw e;
-		
 		if (field != 'authors') return [];
 		
 		// ieeexplore places these in "authors"... sigh
@@ -502,18 +500,16 @@ let ns = {
 };
 Zotero.FeedReader._getFeedField = function (feedEntry, field, namespace) {
 	let prefix = namespace ? ns[namespace] || 'null' : '';
-	try {
-		return feedEntry.fields.getPropertyAsAUTF8String(prefix + field);
+	if (feedEntry.fields[prefix + field]) {
+		return feedEntry.fields[prefix + field];
 	}
-	catch (e) {}
 	
-	try {
-		if (namespace && !ns[namespace]) {
-			prefix = namespace + ':';
-			return feedEntry.fields.getPropertyAsAUTF8String(prefix + field);
+	if (namespace && !ns[namespace]) {
+		prefix = namespace + ':';
+		if (feedEntry.fields[prefix + field]) {
+			return feedEntry.fields[prefix + field];
 		}
 	}
-	catch (e) { }
 	
 	return null;
 };
@@ -523,9 +519,9 @@ Zotero.FeedReader._getEnclosedItems = function (feedEntry) {
 	
 	if (feedEntry.enclosures) {
 		for (let i = 0; i < feedEntry.enclosures.length; i++) {
-			let elem = feedEntry.enclosures.queryElementAt(0, Components.interfaces.nsIPropertyBag2);
-			if (elem.get('url')) {
-				let enclosedItem = { url: elem.get('url'), contentType: elem.get('type') || '' };
+			let elem = feedEntry.enclosures[0];
+			if (elem.url) {
+				let enclosedItem = { url: elem.url, contentType: elem.type || '' };
 				enclosedItems.push(enclosedItem);
 			}
 		}

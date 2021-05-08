@@ -10,8 +10,6 @@ function LOG(str) {
 	Zotero.debug("Feed Processor: " + str);
 }
 
-const BAG_CONTRACTID = "@mozilla.org/hash-property-bag;1";
-const ARRAY_CONTRACTID = "@mozilla.org/array;1";
 const SAX_CONTRACTID = "@mozilla.org/saxparser/xmlreader;1";
 const PARSERUTILS_CONTRACTID = "@mozilla.org/parserutils;1";
 
@@ -74,12 +72,12 @@ const IANA_URI = "http://www.iana.org/assignments/relation/";
 function findAtomLinks(rel, links) {
 	var rvLinks = [];
 	for (var i = 0; i < links.length; ++i) {
-		var linkElement = links.queryElementAt(i, Ci.nsIPropertyBag2);
+		var linkElement = links[i];
 		// atom:link MUST have @href
-		if (bagHasKey(linkElement, "href")) {
+		if (linkElement.href) {
 			var relAttribute = null;
-			if (bagHasKey(linkElement, "rel")) {
-				relAttribute = linkElement.getPropertyAsAString("rel");
+			if (linkElement.rel) {
+				relAttribute = linkElement.rel;
 			}
 			if ((!relAttribute && rel == "alternate") || relAttribute == rel) {
 				rvLinks.push(linkElement);
@@ -103,34 +101,9 @@ function xmlEscape(s) {
 	return s;
 }
 
-function arrayContains(array, element) {
-	for (var i = 0; i < array.length; ++i) {
-		if (array[i] == element) {
-			return true;
-		}
-	}
-	return false;
-}
-
-// XXX add hasKey to nsIPropertyBag
-function bagHasKey(bag, key) {
-	try {
-		bag.getProperty(key);
-		return true;
-	}
-	catch (e) {
-		return false;
-	}
-}
-
 function makePropGetter(key) {
-	return function (bag) {
-		try {
-			return bag.getProperty(key);
-		}
-		catch (e) {
-		}
-		return null;
+	return function(bag) {
+		return bag[key];
 	};
 }
 
@@ -179,12 +152,12 @@ FeedResult.prototype = {
 function Feed() {
 	this.subtitle = null;
 	this.title = null;
-	this.items = Cc[ARRAY_CONTRACTID].createInstance(Ci.nsIMutableArray);
+	this.items = [];
 	this.link = null;
 	this.id = null;
 	this.generator = null;
-	this.authors = Cc[ARRAY_CONTRACTID].createInstance(Ci.nsIMutableArray);
-	this.contributors = Cc[ARRAY_CONTRACTID].createInstance(Ci.nsIMutableArray);
+	this.authors = [];
+	this.contributors = [];
 	this.baseURI = null;
 	this.enclosureCount = 0;
 	this.type = Ci.nsIFeed.TYPE_FEED;
@@ -226,10 +199,10 @@ Feed.prototype = {
 	normalize: function () {
 		fieldsToObj(this, this.searchLists);
 		if (this.skipDays) {
-			this.skipDays = this.skipDays.getProperty("days");
+			this.skipDays = this.skipDays.days;
 		}
 		if (this.skipHours) {
-			this.skipHours = this.skipHours.getProperty("hours");
+			this.skipHours = this.skipHours.hours;
 		}
 		
 		if (this.updated) {
@@ -237,14 +210,14 @@ Feed.prototype = {
 		}
 		
 		// Assign Atom link if needed
-		if (bagHasKey(this.fields, "links")) {
+		if (this.fields.links) {
 			this._atomLinksToURI();
 		}
 		
 		this._calcEnclosureCountAndFeedType();
 		
 		// Resolve relative image links
-		if (this.image && bagHasKey(this.image, "url")) {
+		if (this.image && this.image.url) {
 			this._resolveImageLink();
 		}
 		
@@ -259,16 +232,15 @@ Feed.prototype = {
 		var otherCount = 0;
 		
 		for (var i = 0; i < this.items.length; ++i) {
-			var entry = this.items.queryElementAt(i, Ci.nsIFeedEntry);
-			entry.QueryInterface(Ci.nsIFeedContainer);
+			var entry = this.items[i];
 			
 			if (entry.enclosures && entry.enclosures.length > 0) {
 				++entriesWithEnclosures;
 				
 				for (var e = 0; e < entry.enclosures.length; ++e) {
-					var enc = entry.enclosures.queryElementAt(e, Ci.nsIWritablePropertyBag2);
-					if (enc.hasKey("type")) {
-						var enctype = enc.get("type");
+					var enc = entry.enclosures[e];
+					if (enc.type) {
+						var enctype = enc.type;
 						
 						if (/^audio/.test(enctype)) {
 							++audioCount;
@@ -317,13 +289,13 @@ Feed.prototype = {
 	},
 	
 	_atomLinksToURI: function () {
-		var links = this.fields.getPropertyAsInterface("links", Ci.nsIArray);
+		var links = this.fields.links;
 		var alternates = findAtomLinks("alternate", links);
 		if (alternates.length > 0) {
-			var href = alternates[0].getPropertyAsAString("href");
+			var href = alternates[0].href;
 			var base;
-			if (bagHasKey(alternates[0], "xml:base")) {
-				base = alternates[0].getPropertyAsAString("xml:base");
+			if (alternates[0]["xml:base"]) {
+				base = alternates[0]["xml:base"];
 			}
 			this.link = this._resolveURI(href, base);
 		}
@@ -331,12 +303,12 @@ Feed.prototype = {
 	
 	_resolveImageLink: function () {
 		var base;
-		if (bagHasKey(this.image, "xml:base")) {
-			base = this.image.getPropertyAsAString("xml:base");
+		if (this.image["xml:base"]) {
+			base = this.image["xml:base"];
 		}
-		var url = this._resolveURI(this.image.getPropertyAsAString("url"), base);
+		var url = this._resolveURI(this.image.url, base);
 		if (url) {
-			this.image.setPropertyAsAString("url", url.spec);
+			this.image.url = url.spec;
 		}
 	},
 	
@@ -357,9 +329,9 @@ Feed.prototype = {
 	_resetBagMembersToRawText: function (fieldLists) {
 		for (var i = 0; i < fieldLists.length; i++) {
 			for (var j = 0; j < fieldLists[i].length; j++) {
-				if (bagHasKey(this.fields, fieldLists[i][j])) {
-					var textConstruct = this.fields.getProperty(fieldLists[i][j]);
-					this.fields.setPropertyAsAString(fieldLists[i][j], textConstruct.text);
+				if (this.fields[fieldLists[i][j]]) {
+					var textConstruct = this.fields[fieldLists[i][j]];
+					this.fields[fieldLists[i][j]] = textConstruct.text;
 				}
 			}
 		}
@@ -371,14 +343,14 @@ function Entry() {
 	this.summary = null;
 	this.content = null;
 	this.title = null;
-	this.fields = Cc["@mozilla.org/hash-property-bag;1"].createInstance(Ci.nsIWritablePropertyBag2);
+	this.fields = {};
 	this.link = null;
 	this.id = null;
 	this.baseURI = null;
 	this.updated = null;
 	this.published = null;
-	this.authors = Cc[ARRAY_CONTRACTID].createInstance(Ci.nsIMutableArray);
-	this.contributors = Cc[ARRAY_CONTRACTID].createInstance(Ci.nsIMutableArray);
+	this.authors = [];
+	this.contributors = [];
 }
 
 Entry.prototype = {
@@ -420,7 +392,7 @@ Entry.prototype = {
 		fieldsToObj(this, this.searchLists);
 		
 		// Assign Atom link if needed
-		if (bagHasKey(this.fields, "links")) {
+		if (this.fields.links) {
 			this._atomLinksToURI();
 		}
 		
@@ -428,16 +400,16 @@ Entry.prototype = {
 		this._populateEnclosures();
 		
 		// The link might be a guid w/ permalink=true
-		if (!this.link && bagHasKey(this.fields, "guid")) {
-			var guid = this.fields.getProperty("guid");
+		if (!this.link && this.fields.guid) {
+			var guid = this.fields.guid;
 			var isPermaLink = true;
 			
-			if (bagHasKey(guid, "isPermaLink")) {
-				isPermaLink = guid.getProperty("isPermaLink").toLowerCase() != "false";
+			if (guid.isPermaLink) {
+				isPermaLink = guid.isPermaLink.toLowerCase() != "false";
 			}
 			
 			if (guid && isPermaLink) {
-				this.link = strToURI(guid.getProperty("guid"));
+				this.link = strToURI(guid.guid);
 			}
 		}
 		
@@ -456,27 +428,27 @@ Entry.prototype = {
 	},
 	
 	_populateEnclosures: function () {
-		if (bagHasKey(this.fields, "links")) {
+		if (this.fields.links) {
 			this._atomLinksToEnclosures();
 		}
 		
 		// Add RSS2 enclosure to enclosures
-		if (bagHasKey(this.fields, "enclosure")) {
+		if (this.fields.enclosure) {
 			this._enclosureToEnclosures();
 		}
 		
 		// Add media:content to enclosures
-		if (bagHasKey(this.fields, "mediacontent")) {
+		if (this.fields.mediacontent) {
 			this._mediaToEnclosures("mediacontent");
 		}
 		
 		// Add media:thumbnail to enclosures
-		if (bagHasKey(this.fields, "mediathumbnail")) {
+		if (this.fields.mediathumbnail) {
 			this._mediaToEnclosures("mediathumbnail");
 		}
 		
 		// Add media:content in media:group to enclosures
-		if (bagHasKey(this.fields, "mediagroup")) {
+		if (this.fields.mediagroup) {
 			this._mediaToEnclosures("mediagroup", "mediacontent");
 		}
 	},
@@ -486,7 +458,7 @@ Entry.prototype = {
 	_addToEnclosures: function (newEnc) {
 		// items we add to the enclosures array get displayed in the FeedWriter and
 		// they must have non-empty urls.
-		if (!bagHasKey(newEnc, "url") || newEnc.getPropertyAsAString("url") == "") {
+		if (!newEnc.url || newEnc.url == "") {
 			return;
 		}
 		
@@ -494,40 +466,37 @@ Entry.prototype = {
 			this.__enclosureMap = {};
 		}
 		
-		var previousEnc = this.__enclosureMap[newEnc.getPropertyAsAString("url")];
+		var previousEnc = this.__enclosureMap[newEnc.url];
 		
 		if (previousEnc != undefined) {
-			previousEnc.QueryInterface(Ci.nsIWritablePropertyBag2);
-			
-			if (!bagHasKey(previousEnc, "type") && bagHasKey(newEnc, "type")) {
-				previousEnc.setPropertyAsAString("type", newEnc.getPropertyAsAString("type"));
+			if (!previousEnc.type && newEnc.type) {
+				previousEnc.type = newEnc.type;
 				try {
-					let handlerInfoWrapper = gMimeService.getFromTypeAndExtension(newEnc.getPropertyAsAString("type"), null);
+					let handlerInfoWrapper = gMimeService.getFromTypeAndExtension(newEnc.type, null);
 					if (handlerInfoWrapper && handlerInfoWrapper.description) {
-						previousEnc.setPropertyAsAString("typeDesc", handlerInfoWrapper.description);
+						previousEnc.typeDesc = handlerInfoWrapper.description;
 					}
 				}
 				catch (ext) {}
 			}
 			
-			if (!bagHasKey(previousEnc, "length") && bagHasKey(newEnc, "length")) {
-				previousEnc.setPropertyAsAString("length", newEnc.getPropertyAsAString("length"));
+			if (!previousEnc.length && newEnc.length) {
+				previousEnc.length = newEnc.length;
 			}
 			
 			return;
 		}
 		
 		if (this.enclosures === null) {
-			this.enclosures = Cc[ARRAY_CONTRACTID].createInstance(Ci.nsIMutableArray);
-			this.enclosures.QueryInterface(Ci.nsIMutableArray);
+			this.enclosures = [];
 		}
 		
-		this.enclosures.appendElement(newEnc);
-		this.__enclosureMap[newEnc.getPropertyAsAString("url")] = newEnc;
+		this.enclosures.push(newEnc);
+		this.__enclosureMap[newEnc.url] = newEnc;
 	},
 	
 	_atomLinksToEnclosures: function () {
-		var links = this.fields.getPropertyAsInterface("links", Ci.nsIArray);
+		var links = this.fields.links;
 		var encLinks = findAtomLinks("enclosure", links);
 		if (encLinks.length == 0) {
 			return;
@@ -537,19 +506,19 @@ Entry.prototype = {
 			var link = encLinks[i];
 			
 			// an enclosure must have an href
-			if (!(link.getProperty("href"))) {
+			if (!link.href) {
 				return;
 			}
 			
-			var enc = Cc[BAG_CONTRACTID].createInstance(Ci.nsIWritablePropertyBag2);
+			var enc = {};
 			
 			// copy Atom bits over to equivalent enclosure bits
-			enc.setPropertyAsAString("url", link.getPropertyAsAString("href"));
-			if (bagHasKey(link, "type")) {
-				enc.setPropertyAsAString("type", link.getPropertyAsAString("type"));
+			enc.url = link.href;
+			if (link.type) {
+				enc.type = link.type;
 			}
-			if (bagHasKey(link, "length")) {
-				enc.setPropertyAsAString("length", link.getPropertyAsAString("length"));
+			if (link.length) {
+				enc.length = link.length;
 			}
 			
 			this._addToEnclosures(enc);
@@ -557,9 +526,9 @@ Entry.prototype = {
 	},
 	
 	_enclosureToEnclosures: function () {
-		var enc = this.fields.getPropertyAsInterface("enclosure", Ci.nsIPropertyBag2);
+		var enc = this.fields.enclosure;
 
-		if (!(enc.getProperty("url"))) {
+		if (!enc.url) {
 			return;
 		}
 
@@ -572,37 +541,37 @@ Entry.prototype = {
 		// If a contentType is specified, the mediaType is a simple propertybag,
 		// and the contentType is an array inside it.
 		if (contentType) {
-			var group = this.fields.getPropertyAsInterface(mediaType, Ci.nsIPropertyBag2);
-			content = group.getPropertyAsInterface(contentType, Ci.nsIArray);
+			var group = this.fields[mediaType];
+			content = group[contentType];
 		}
 		else {
-			content = this.fields.getPropertyAsInterface(mediaType, Ci.nsIArray);
+			content = this.fields[mediaType];
 		}
 		
 		for (var i = 0; i < content.length; ++i) {
-			var contentElement = content.queryElementAt(i, Ci.nsIWritablePropertyBag2);
+			var contentElement = content[i];
 			
 			// media:content don't require url, but if it's not there, we should
 			// skip it.
-			if (!bagHasKey(contentElement, "url")) {
+			if (!contentElement.url) {
 				continue;
 			}
 			
-			var enc = Cc[BAG_CONTRACTID].createInstance(Ci.nsIWritablePropertyBag2);
+			var enc = {};
 			
 			// copy media:content bits over to equivalent enclosure bits
-			enc.setPropertyAsAString("url", contentElement.getPropertyAsAString("url"));
-			if (bagHasKey(contentElement, "type")) {
-				enc.setPropertyAsAString("type", contentElement.getPropertyAsAString("type"));
+			enc.url = contentElement.url;
+			if (contentElement.type) {
+				enc.type = contentElement.type;
 			}
 			else if (mediaType == "mediathumbnail") {
 				// thumbnails won't have a type, but default to image types
-				enc.setPropertyAsAString("type", "image/*");
-				enc.setPropertyAsBool("thumbnail", true);
+				enc.type = "image/*";
+				enc.thumbnail = true;
 			}
 			
-			if (bagHasKey(contentElement, "fileSize")) {
-				enc.setPropertyAsAString("length", contentElement.getPropertyAsAString("fileSize"));
+			if (contentElement.fileSize) {
+				enc.length = contentElement.fileSize;
 			}
 			
 			this._addToEnclosures(enc);
@@ -721,11 +690,7 @@ function fieldsToObj(container, fields) {
 			props = searchList[i];
 			prop = null;
 			field = isArray(props) ? props[0] : props;
-			try {
-				prop = container.fields.getProperty(field);
-			}
-			catch (e) {
-			}
+			prop = container.fields[field];
 			if (prop) {
 				prop = isArray(props) ? props[1](prop) : prop;
 				container[key] = prop;
@@ -734,39 +699,27 @@ function fieldsToObj(container, fields) {
 	}
 }
 
-/**
- * Lower cases an element's localName property
- * @param   element A DOM element.
- *
- * @returns The lower case localName property of the specified element
- */
-function LC(element) {
-	return element.localName.toLowerCase();
-}
-
-// TODO move these post-processor functions
 // create a generator element
 function atomGenerator(s, generator) {
-	generator.QueryInterface(Ci.nsIFeedGenerator);
 	generator.agent = s.trim();
 	return generator;
 }
 
 // post-process atom:logo to create an RSS2-like structure
 function atomLogo(s, logo) {
-	logo.setPropertyAsAString("url", s.trim());
+	logo.url = s.trim();
 }
 
 // post-process an RSS category, map it to the Atom fields.
 function rssCatTerm(s, cat) {
 	// add slash handling?
-	cat.setPropertyAsAString("term", s.trim());
+	cat.term = s.trim();
 	return cat;
 }
 
 // post-process a GUID
 function rssGuid(s, guid) {
-	guid.setPropertyAsAString("guid", s.trim());
+	guid.guid = s.trim();
 	return guid;
 }
 
@@ -784,7 +737,6 @@ function rssGuid(s, guid) {
 // fields.
 //
 function rssAuthor(s, author) {
-	author.QueryInterface(Ci.nsIFeedPerson);
 	// check for RSS2 string format
 	var chars = s.trim();
 	var matches = chars.match(/(.*)\((.*)\)/);
@@ -816,17 +768,6 @@ function rssAuthor(s, author) {
 		}
 	}
 	return author;
-}
-
-//
-// skipHours and skipDays map to arrays, so we need to change the
-// string to an nsISupports in order to stick it in there.
-//
-function rssArrayElement(s) {
-	var str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
-	str.data = s;
-	str.QueryInterface(Ci.nsISupportsString);
-	return str;
 }
 
 /**
@@ -1045,7 +986,7 @@ function WrapperElementInfo(fieldName) {
 function FeedProcessor() {
 	this._reader = Cc[SAX_CONTRACTID].createInstance(Ci.nsISAXXMLReader);
 	this._buf = "";
-	this._feed = Cc[BAG_CONTRACTID].createInstance(Ci.nsIWritablePropertyBag2);
+	this._feed = {};
 	this._handlerStack = [];
 	this._xmlBaseStack = []; // sparse array keyed to nesting depth
 	this._depth = 0;
@@ -1129,11 +1070,11 @@ function FeedProcessor() {
 		},
 		
 		"IN_SKIPDAYS": {
-			"day": new ElementInfo("days", null, rssArrayElement, true),
+			"day": new ElementInfo("days", null, null, true),
 		},
 		
 		"IN_SKIPHOURS": {
-			"hour": new ElementInfo("hours", null, rssArrayElement, true),
+			"hour": new ElementInfo("hours", null, null, true),
 		},
 		
 		"IN_MEDIAGROUP": {
@@ -1476,7 +1417,7 @@ FeedProcessor.prototype = {
 			obj.attributes = attributes; // just set the SAX attributes
 		}
 		else {
-			obj = Cc[BAG_CONTRACTID].createInstance(Ci.nsIWritablePropertyBag2);
+			obj = {};
 			this._mapAttributes(obj, attributes);
 		}
 		
@@ -1489,27 +1430,15 @@ FeedProcessor.prototype = {
 		var container = this._stack[this._stack.length - 1][0];
 		
 		// Check to see if it has the property
-		var prop;
-		try {
-			prop = container.getProperty(elementInfo.fieldName);
-		}
-		catch (e) {
-		}
+		var prop = container[elementInfo.fieldName];
 		
 		if (elementInfo.isArray) {
 			if (!prop) {
-				container.setPropertyAsInterface(
-					elementInfo.fieldName,
-					Cc[ARRAY_CONTRACTID].createInstance(Ci.nsIMutableArray),
-				);
+				container[elementInfo.fieldName] = [];
 			}
 			
-			newProp = container.getProperty(elementInfo.fieldName);
-			// XXX This QI should not be necessary, but XPConnect seems to fly
-			// off the handle in the browser, and loses track of the interface
-			// on large files. Bug 335638.
-			newProp.QueryInterface(Ci.nsIMutableArray);
-			newProp.appendElement(obj);
+			newProp = container[elementInfo.fieldName];
+			newProp.push(obj);
 			
 			// If new object is an nsIFeedContainer, we want to deal with
 			// its member nsIPropertyBag instead.
@@ -1520,9 +1449,9 @@ FeedProcessor.prototype = {
 		else {
 			// If it doesn't, set it.
 			if (!prop) {
-				container.setPropertyAsInterface(elementInfo.fieldName, obj);
+				container[elementInfo.fieldName] = obj;
 			}
-			newProp = container.getProperty(elementInfo.fieldName);
+			newProp = container[elementInfo.fieldName];
 		}
 		
 		// make our new state name, and push the property onto the stack
@@ -1545,7 +1474,7 @@ FeedProcessor.prototype = {
 		// If it's an array and we have to post-process,
 		// grab the last element
 		if (isArray) {
-			element = container.queryElementAt(container.length - 1, Ci.nsISupports);
+			element = container[container.length - 1];
 		}
 		else {
 			element = container;
@@ -1564,7 +1493,7 @@ FeedProcessor.prototype = {
 		
 		// If it's an array, re-set the last element
 		if (isArray) {
-			container.replaceElementAt(element, container.length - 1);
+			container[container.length - 1] = element;
 		}
 	},
 	
@@ -1588,7 +1517,7 @@ FeedProcessor.prototype = {
 		for (var i = 0; i < attributes.length; ++i) {
 			var key = this._prefixForNS(attributes.getURI(i)) + attributes.getLocalName(i);
 			var val = attributes.getValue(i);
-			bag.setPropertyAsAString(key, val);
+			bag[key] = val;
 		}
 	},
 	
@@ -1638,13 +1567,8 @@ FeedProcessor.prototype = {
 			var contract = this._handlerStack[this._depth].containerClass;
 			// check if it's something specific, but not an entry
 			if (contract && contract != Entry) {
-				var el = container.queryElementAt(container.length - 1,
-					Ci.nsIFeedElementBase);
-				// XXX there must be a way to flatten these interfaces
-				if (contract == Person) {
-					el.QueryInterface(Ci.nsIFeedPerson);
-				}
-				else {
+				var el = container[container.length - 1];
+				if (contract != Person) {
 					return; // don't know about this interface
 				}
 				
@@ -1679,7 +1603,7 @@ FeedProcessor.prototype = {
 				// the rest of the function deals with entry- and feed-level stuff
 				return;
 			}
-			container = container.queryElementAt(container.length - 1, Ci.nsIWritablePropertyBag2);
+			container = container[container.length - 1];
 		}
 		
 		// Make the buffer our new property
@@ -1716,10 +1640,10 @@ FeedProcessor.prototype = {
 			}
 			newProp.type = type;
 			newProp.base = this._xmlBaseStack[this._xmlBaseStack.length - 1];
-			container.setPropertyAsInterface(propName, newProp);
+			container[propName] = newProp;
 		}
 		else {
-			container.setPropertyAsAString(propName, chars);
+			container[propName] = chars;
 		}
 	},
 	
@@ -1743,7 +1667,7 @@ FeedProcessor.prototype = {
 		newProp.text = chars;
 		newProp.type = "xhtml";
 		newProp.base = this._xmlBaseStack[this._xmlBaseStack.length - 1];
-		container.setPropertyAsInterface(this._prefixForNS(uri) + localName, newProp);
+		container[this._prefixForNS(uri) + localName] = newProp;
 		
 		// XHTML will cause us to peek too far. The XHTML handler will
 		// send us an end element to call. RFC4287-valid feeds allow a
