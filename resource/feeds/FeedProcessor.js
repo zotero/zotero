@@ -24,12 +24,12 @@ const ENTRY_CONTRACTID = "@mozilla.org/feed-entry;1";
 const ENTRY_CLASSID = Components.ID("{8e4444ff-8e99-4bdd-aa7f-fb3c1c77319f}");
 const ENTRY_CLASSNAME = "Feed Entry";
 const TEXTCONSTRUCT_CONTRACTID = "@mozilla.org/feed-textconstruct;1";
-const TEXTCONSTRUCT_CLASSID =
-	Components.ID("{b992ddcd-3899-4320-9909-924b3e72c922}");
+const TEXTCONSTRUCT_CLASSID
+	= Components.ID("{b992ddcd-3899-4320-9909-924b3e72c922}");
 const TEXTCONSTRUCT_CLASSNAME = "Feed Text Construct";
 const GENERATOR_CONTRACTID = "@mozilla.org/feed-generator;1";
-const GENERATOR_CLASSID =
-	Components.ID("{414af362-9ad8-4296-898e-62247f25a20e}");
+const GENERATOR_CLASSID
+	= Components.ID("{414af362-9ad8-4296-898e-62247f25a20e}");
 const GENERATOR_CLASSNAME = "Feed Generator";
 const PERSON_CONTRACTID = "@mozilla.org/feed-person;1";
 const PERSON_CLASSID = Components.ID("{95c963b7-20b2-11db-92f6-001422106990}");
@@ -51,7 +51,8 @@ function strToURI(link, base) {
 	base = base || null;
 	try {
 		return Services.io.newURI(link, null, base);
-	} catch (e) {
+	}
+	catch (e) {
 		return null;
 	}
 }
@@ -73,7 +74,8 @@ function isIID(a, iid) {
 	try {
 		a.QueryInterface(iid);
 		rv = true;
-	} catch (e) {
+	}
+	catch (e) {
 	}
 	return rv;
 }
@@ -102,8 +104,9 @@ function findAtomLinks(rel, links) {
 		// atom:link MUST have @href
 		if (bagHasKey(linkElement, "href")) {
 			var relAttribute = null;
-			if (bagHasKey(linkElement, "rel"))
+			if (bagHasKey(linkElement, "rel")) {
 				relAttribute = linkElement.getPropertyAsAString("rel");
+			}
 			if ((!relAttribute && rel == "alternate") || relAttribute == rel) {
 				rvLinks.push(linkElement);
 				continue;
@@ -140,16 +143,18 @@ function bagHasKey(bag, key) {
 	try {
 		bag.getProperty(key);
 		return true;
-	} catch (e) {
+	}
+	catch (e) {
 		return false;
 	}
 }
 
 function makePropGetter(key) {
-	return function FeedPropGetter(bag) {
+	return function (bag) {
 		try {
 			return bag.getProperty(key);
-		} catch (e) {
+		}
+		catch (e) {
 		}
 		return null;
 	};
@@ -194,7 +199,7 @@ FeedResult.prototype = {
 	uri: null,
 	stylesheet: null,
 	
-	registerExtensionPrefix: function FR_registerExtensionPrefix(ns, prefix) {
+	registerExtensionPrefix: function (ns, prefix) {
 		throw Cr.NS_ERROR_NOT_IMPLEMENTED;
 	},
 	
@@ -232,7 +237,7 @@ Feed.prototype = {
 		generator: ["generator"],
 		authors: ["authors"],
 		contributors: ["contributors"],
-		link:  [["link", strToURI], ["rss1:link", strToURI]],
+		link: [["link", strToURI], ["rss1:link", strToURI]],
 		categories: ["categories", "dc:subject"],
 		rights: ["atom03:rights", "atom:rights"],
 		cloud: ["cloud"],
@@ -250,31 +255,35 @@ Feed.prototype = {
 		],
 	},
 	
-	normalize: function Feed_normalize() {
+	normalize: function () {
 		fieldsToObj(this, this.searchLists);
-		if (this.skipDays)
+		if (this.skipDays) {
 			this.skipDays = this.skipDays.getProperty("days");
-		if (this.skipHours)
+		}
+		if (this.skipHours) {
 			this.skipHours = this.skipHours.getProperty("hours");
+		}
 		
-		if (this.updated)
+		if (this.updated) {
 			this.updated = dateParse(this.updated);
+		}
 		
 		// Assign Atom link if needed
-		if (bagHasKey(this.fields, "links"))
+		if (bagHasKey(this.fields, "links")) {
 			this._atomLinksToURI();
+		}
 		
 		this._calcEnclosureCountAndFeedType();
 		
 		// Resolve relative image links
-		if (this.image && bagHasKey(this.image, "url"))
+		if (this.image && bagHasKey(this.image, "url")) {
 			this._resolveImageLink();
+		}
 		
-		this._resetBagMembersToRawText([this.searchLists.subtitle,
-																		this.searchLists.title]);
+		this._resetBagMembersToRawText([this.searchLists.subtitle, this.searchLists.title]);
 	},
 	
-	_calcEnclosureCountAndFeedType: function Feed_calcEnclosureCountAndFeedType() {
+	_calcEnclosureCountAndFeedType: function () {
 		var entries_with_enclosures = 0;
 		var audio_count = 0;
 		var image_count = 0;
@@ -295,14 +304,18 @@ Feed.prototype = {
 						
 						if (/^audio/.test(enctype)) {
 							++audio_count;
-						} else if (/^image/.test(enctype)) {
+						}
+						else if (/^image/.test(enctype)) {
 							++image_count;
-						} else if (/^video/.test(enctype)) {
+						}
+						else if (/^video/.test(enctype)) {
 							++video_count;
-						} else {
+						}
+						else {
 							++other_count;
 						}
-					} else {
+					}
+					else {
 						++other_count;
 					}
 				}
@@ -322,9 +335,11 @@ Feed.prototype = {
 		if (entries_with_enclosures == this.items.length && other_count == 0) {
 			if (audio_count > 0 && !video_count && !image_count) {
 				feedtype = Ci.nsIFeed.TYPE_AUDIO;
-			} else if (image_count > 0 && !audio_count && !video_count) {
+			}
+			else if (image_count > 0 && !audio_count && !video_count) {
 				feedtype = Ci.nsIFeed.TYPE_IMAGE;
-			} else if (video_count > 0 && !audio_count && !image_count) {
+			}
+			else if (video_count > 0 && !audio_count && !image_count) {
 				feedtype = Ci.nsIFeed.TYPE_VIDEO;
 			}
 		}
@@ -333,33 +348,37 @@ Feed.prototype = {
 		this.enclosureCount = other_count + video_count + audio_count + image_count;
 	},
 	
-	_atomLinksToURI: function Feed_linkToURI() {
+	_atomLinksToURI: function () {
 		var links = this.fields.getPropertyAsInterface("links", Ci.nsIArray);
 		var alternates = findAtomLinks("alternate", links);
 		if (alternates.length > 0) {
 			var href = alternates[0].getPropertyAsAString("href");
 			var base;
-			if (bagHasKey(alternates[0], "xml:base"))
+			if (bagHasKey(alternates[0], "xml:base")) {
 				base = alternates[0].getPropertyAsAString("xml:base");
+			}
 			this.link = this._resolveURI(href, base);
 		}
 	},
 	
-	_resolveImageLink: function Feed_resolveImageLink() {
+	_resolveImageLink: function () {
 		var base;
-		if (bagHasKey(this.image, "xml:base"))
+		if (bagHasKey(this.image, "xml:base")) {
 			base = this.image.getPropertyAsAString("xml:base");
+		}
 		var url = this._resolveURI(this.image.getPropertyAsAString("url"), base);
-		if (url)
+		if (url) {
 			this.image.setPropertyAsAString("url", url.spec);
+		}
 	},
 	
-	_resolveURI: function Feed_resolveURI(linkSpec, baseSpec) {
+	_resolveURI: function (linkSpec, baseSpec) {
 		var uri = null;
 		try {
 			var base = baseSpec ? strToURI(baseSpec, this.baseURI) : this.baseURI;
 			uri = strToURI(linkSpec, base);
-		} catch (e) {
+		}
+		catch (e) {
 			LOG(e);
 		}
 
@@ -367,13 +386,12 @@ Feed.prototype = {
 	},
 	
 	// reset the bag to raw contents, not text constructs
-	_resetBagMembersToRawText: function Feed_resetBagMembers(fieldLists) {
+	_resetBagMembersToRawText: function (fieldLists) {
 		for (var i = 0; i < fieldLists.length; i++) {
 			for (var j = 0; j < fieldLists[i].length; j++) {
 				if (bagHasKey(this.fields, fieldLists[i][j])) {
 					var textConstruct = this.fields.getProperty(fieldLists[i][j]);
-					this.fields.setPropertyAsAString(fieldLists[i][j],
-																					 textConstruct.text);
+					this.fields.setPropertyAsAString(fieldLists[i][j], textConstruct.text);
 				}
 			}
 		}
@@ -388,8 +406,7 @@ function Entry() {
 	this.summary = null;
 	this.content = null;
 	this.title = null;
-	this.fields = Cc["@mozilla.org/hash-property-bag;1"].
-		createInstance(Ci.nsIWritablePropertyBag2);
+	this.fields = Cc["@mozilla.org/hash-property-bag;1"].createInstance(Ci.nsIWritablePropertyBag2);
 	this.link = null;
 	this.id = null;
 	this.baseURI = null;
@@ -434,12 +451,13 @@ Entry.prototype = {
 		],
 	},
 	
-	normalize: function Entry_normalize() {
+	normalize: function () {
 		fieldsToObj(this, this.searchLists);
 		
 		// Assign Atom link if needed
-		if (bagHasKey(this.fields, "links"))
+		if (bagHasKey(this.fields, "links")) {
 			this._atomLinksToURI();
+		}
 		
 		// Populate enclosures array
 		this._populateEnclosures();
@@ -449,54 +467,67 @@ Entry.prototype = {
 			var guid = this.fields.getProperty("guid");
 			var isPermaLink = true;
 			
-			if (bagHasKey(guid, "isPermaLink"))
+			if (bagHasKey(guid, "isPermaLink")) {
 				isPermaLink = guid.getProperty("isPermaLink").toLowerCase() != "false";
+			}
 			
-			if (guid && isPermaLink)
+			if (guid && isPermaLink) {
 				this.link = strToURI(guid.getProperty("guid"));
+			}
 		}
 		
-		if (this.updated)
+		if (this.updated) {
 			this.updated = dateParse(this.updated);
-		if (this.published)
+		}
+		if (this.published) {
 			this.published = dateParse(this.published);
+		}
 		
-		this._resetBagMembersToRawText([this.searchLists.content,
-																		this.searchLists.summary,
-																		this.searchLists.title]);
+		this._resetBagMembersToRawText([
+			this.searchLists.content,
+			this.searchLists.summary,
+			this.searchLists.title,
+		]);
 	},
 	
-	_populateEnclosures: function Entry_populateEnclosures() {
-		if (bagHasKey(this.fields, "links"))
+	_populateEnclosures: function () {
+		if (bagHasKey(this.fields, "links")) {
 			this._atomLinksToEnclosures();
+		}
 		
 		// Add RSS2 enclosure to enclosures
-		if (bagHasKey(this.fields, "enclosure"))
+		if (bagHasKey(this.fields, "enclosure")) {
 			this._enclosureToEnclosures();
+		}
 		
 		// Add media:content to enclosures
-		if (bagHasKey(this.fields, "mediacontent"))
+		if (bagHasKey(this.fields, "mediacontent")) {
 			this._mediaToEnclosures("mediacontent");
+		}
 		
 		// Add media:thumbnail to enclosures
-		if (bagHasKey(this.fields, "mediathumbnail"))
+		if (bagHasKey(this.fields, "mediathumbnail")) {
 			this._mediaToEnclosures("mediathumbnail");
+		}
 		
 		// Add media:content in media:group to enclosures
-		if (bagHasKey(this.fields, "mediagroup"))
+		if (bagHasKey(this.fields, "mediagroup")) {
 			this._mediaToEnclosures("mediagroup", "mediacontent");
+		}
 	},
 	
 	__enclosure_map: null,
 	
-	_addToEnclosures: function Entry_addToEnclosures(new_enc) {
+	_addToEnclosures: function (new_enc) {
 		// items we add to the enclosures array get displayed in the FeedWriter and
 		// they must have non-empty urls.
-		if (!bagHasKey(new_enc, "url") || new_enc.getPropertyAsAString("url") == "")
+		if (!bagHasKey(new_enc, "url") || new_enc.getPropertyAsAString("url") == "") {
 			return;
+		}
 		
-		if (this.__enclosure_map == null)
+		if (this.__enclosure_map == null) {
 			this.__enclosure_map = {};
+		}
 		
 		var previous_enc = this.__enclosure_map[new_enc.getPropertyAsAString("url")];
 		
@@ -510,11 +541,13 @@ Entry.prototype = {
 					if (handlerInfoWrapper && handlerInfoWrapper.description) {
 						previous_enc.setPropertyAsAString("typeDesc", handlerInfoWrapper.description);
 					}
-				} catch (ext) {}
+				}
+				catch (ext) {}
 			}
 			
-			if (!bagHasKey(previous_enc, "length") && bagHasKey(new_enc, "length"))
+			if (!bagHasKey(previous_enc, "length") && bagHasKey(new_enc, "length")) {
 				previous_enc.setPropertyAsAString("length", new_enc.getPropertyAsAString("length"));
+			}
 			
 			return;
 		}
@@ -528,42 +561,47 @@ Entry.prototype = {
 		this.__enclosure_map[new_enc.getPropertyAsAString("url")] = new_enc;
 	},
 	
-	_atomLinksToEnclosures: function Entry_linkToEnclosure() {
+	_atomLinksToEnclosures: function () {
 		var links = this.fields.getPropertyAsInterface("links", Ci.nsIArray);
 		var enc_links = findAtomLinks("enclosure", links);
-		if (enc_links.length == 0)
+		if (enc_links.length == 0) {
 			return;
+		}
 		
 		for (var i = 0; i < enc_links.length; ++i) {
 			var link = enc_links[i];
 			
 			// an enclosure must have an href
-			if (!(link.getProperty("href")))
+			if (!(link.getProperty("href"))) {
 				return;
+			}
 			
 			var enc = Cc[BAG_CONTRACTID].createInstance(Ci.nsIWritablePropertyBag2);
 			
 			// copy Atom bits over to equivalent enclosure bits
 			enc.setPropertyAsAString("url", link.getPropertyAsAString("href"));
-			if (bagHasKey(link, "type"))
+			if (bagHasKey(link, "type")) {
 				enc.setPropertyAsAString("type", link.getPropertyAsAString("type"));
-			if (bagHasKey(link, "length"))
+			}
+			if (bagHasKey(link, "length")) {
 				enc.setPropertyAsAString("length", link.getPropertyAsAString("length"));
+			}
 			
 			this._addToEnclosures(enc);
 		}
 	},
 	
-	_enclosureToEnclosures: function Entry_enclosureToEnclosures() {
+	_enclosureToEnclosures: function () {
 		var enc = this.fields.getPropertyAsInterface("enclosure", Ci.nsIPropertyBag2);
 
-		if (!(enc.getProperty("url")))
+		if (!(enc.getProperty("url"))) {
 			return;
+		}
 
 		this._addToEnclosures(enc);
 	},
 	
-	_mediaToEnclosures: function Entry_mediaToEnclosures(mediaType, contentType) {
+	_mediaToEnclosures: function (mediaType, contentType) {
 		var content;
 		
 		// If a contentType is specified, the mediaType is a simple propertybag,
@@ -571,7 +609,8 @@ Entry.prototype = {
 		if (contentType) {
 			var group = this.fields.getPropertyAsInterface(mediaType, Ci.nsIPropertyBag2);
 			content = group.getPropertyAsInterface(contentType, Ci.nsIArray);
-		} else {
+		}
+		else {
 			content = this.fields.getPropertyAsInterface(mediaType, Ci.nsIArray);
 		}
 		
@@ -580,8 +619,9 @@ Entry.prototype = {
 			
 			// media:content don't require url, but if it's not there, we should
 			// skip it.
-			if (!bagHasKey(contentElement, "url"))
+			if (!bagHasKey(contentElement, "url")) {
 				continue;
+			}
 			
 			var enc = Cc[BAG_CONTRACTID].createInstance(Ci.nsIWritablePropertyBag2);
 			
@@ -589,7 +629,8 @@ Entry.prototype = {
 			enc.setPropertyAsAString("url", contentElement.getPropertyAsAString("url"));
 			if (bagHasKey(contentElement, "type")) {
 				enc.setPropertyAsAString("type", contentElement.getPropertyAsAString("type"));
-			} else if (mediaType == "mediathumbnail") {
+			}
+			else if (mediaType == "mediathumbnail") {
 				// thumbnails won't have a type, but default to image types
 				enc.setPropertyAsAString("type", "image/*");
 				enc.setPropertyAsBool("thumbnail", true);
@@ -612,8 +653,7 @@ Entry.prototype = {
 
 Entry.prototype._atomLinksToURI = Feed.prototype._atomLinksToURI;
 Entry.prototype._resolveURI = Feed.prototype._resolveURI;
-Entry.prototype._resetBagMembersToRawText =
-	Feed.prototype._resetBagMembersToRawText;
+Entry.prototype._resetBagMembersToRawText = Feed.prototype._resetBagMembersToRawText;
 
 // TextConstruct represents and element that could contain (X)HTML
 function TextConstruct() {
@@ -625,17 +665,17 @@ function TextConstruct() {
 }
 
 TextConstruct.prototype = {
-	plainText: function TC_plainText() {
+	plainText: function () {
 		if (this.type != "text") {
 			return this.parserUtils.convertToPlainText(stripTags(this.text),
-				Ci.nsIDocumentEncoder.OutputSelectionOnly |
-				Ci.nsIDocumentEncoder.OutputAbsoluteLinks,
+				Ci.nsIDocumentEncoder.OutputSelectionOnly
+				| Ci.nsIDocumentEncoder.OutputAbsoluteLinks,
 				0);
 		}
 		return this.text;
 	},
 	
-	createDocumentFragment: function TC_createDocumentFragment(element) {
+	createDocumentFragment: function (element) {
 		if (this.type == "text") {
 			var doc = element.ownerDocument;
 			var docFragment = doc.createDocumentFragment();
@@ -644,16 +684,19 @@ TextConstruct.prototype = {
 			return docFragment;
 		}
 		var isXML;
-		if (this.type == "xhtml")
+		if (this.type == "xhtml") {
 			isXML = true;
-		else if (this.type == "html")
+		}
+		else if (this.type == "html") {
 			isXML = false;
-		else
+		}
+		else {
 			return null;
+		}
 		
 		let flags = Ci.nsIParserUtils.SanitizerDropForms;
 		return this.parserUtils.parseFragment(this.text, flags, isXML,
-																					this.base, element);
+			this.base, element);
 	},
 	
 	// XPCOM stuff
@@ -737,7 +780,8 @@ function fieldsToObj(container, fields) {
 			field = isArray(props) ? props[0] : props;
 			try {
 				prop = container.fields.getProperty(field);
-			} catch (e) {
+			}
+			catch (e) {
 			}
 			if (prop) {
 				prop = isArray(props) ? props[1](prop) : prop;
@@ -801,27 +845,32 @@ function rssAuthor(s, author) {
 	// check for RSS2 string format
 	var chars = s.trim();
 	var matches = chars.match(/(.*)\((.*)\)/);
-	var emailCheck =
-		/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+	var emailCheck
+		= /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
 	if (matches) {
 		var match1 = matches[1].trim();
 		var match2 = matches[2].trim();
-		if (match2.indexOf("mailto:") == 0)
+		if (match2.indexOf("mailto:") == 0) {
 			match2 = match2.substring(7);
+		}
 		if (emailCheck.test(match1)) {
 			author.email = match1;
 			author.name = match2;
-		} else if (emailCheck.test(match2)) {
+		}
+		else if (emailCheck.test(match2)) {
 			author.email = match2;
 			author.name = match1;
-		} else {
+		}
+		else {
 			// put it back together
 			author.name = match1 + " (" + match2 + ")";
 		}
-	} else {
+	}
+	else {
 		author.name = chars;
-		if (chars.indexOf("@"))
+		if (chars.indexOf("@")) {
 			author.email = chars;
+		}
 	}
 	return author;
 }
@@ -831,8 +880,7 @@ function rssAuthor(s, author) {
 // string to an nsISupports in order to stick it in there.
 //
 function rssArrayElement(s) {
-	var str = Cc["@mozilla.org/supports-string;1"].
-							createInstance(Ci.nsISupportsString);
+	var str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
 	str.data = s;
 	str.QueryInterface(Ci.nsISupportsString);
 	return str;
@@ -872,31 +920,33 @@ function XHTMLHandler(processor, isAtom) {
 // SVG and MathML. XXX
 XHTMLHandler.prototype = {
 	
-	 // look back up at the declared namespaces
-	 // we always use the same prefixes for our safe stuff
-	_isInScope: function XH__isInScope(ns) {
+	// look back up at the declared namespaces
+	// we always use the same prefixes for our safe stuff
+	_isInScope: function (ns) {
 		for (var i in this._inScopeNS) {
 			for (var uri in this._inScopeNS[i]) {
-				if (this._inScopeNS[i][uri] == ns)
+				if (this._inScopeNS[i][uri] == ns) {
 					return true;
+				}
 			}
 		}
 		return false;
 	},
 	
-	startDocument: function XH_startDocument() {
+	startDocument: function () {
 	},
-	endDocument: function XH_endDocument() {
+	endDocument: function () {
 	},
-	startElement: function XH_startElement(namespace, localName, qName, attributes) {
+	startElement: function (namespace, localName, qName, attributes) {
 		++this._depth;
 		this._inScopeNS.push([]);
 		
 		// RFC4287 requires XHTML to be wrapped in a div that is *not* part of
 		// the content. This prevents people from screwing up namespaces, but
 		// we need to skip it here.
-		if (this._isAtom && this._depth == 1 && localName == "div")
+		if (this._isAtom && this._depth == 1 && localName == "div") {
 			return;
+		}
 		
 		// If it's an XHTML element, record it. Otherwise, it's ignored.
 		if (namespace == XHTML_NS) {
@@ -906,9 +956,10 @@ XHTMLHandler.prototype = {
 				uri = attributes.getURI(i);
 				// XHTML attributes aren't in a namespace
 				if (uri == "") {
-					this._buf += (" " + attributes.getLocalName(i) + "='" +
-												xmlEscape(attributes.getValue(i)) + "'");
-				} else {
+					this._buf += (" " + attributes.getLocalName(i) + "='"
+						+ xmlEscape(attributes.getValue(i)) + "'");
+				}
+				else {
 					// write a small set of allowed attribute namespaces
 					var prefix = gAllowedXHTMLNamespaces[uri];
 					if (prefix != null) {
@@ -917,9 +968,9 @@ XHTMLHandler.prototype = {
 						
 						// it's an allowed attribute NS.
 						// write the attribute
-						this._buf += (" " + prefix + ":" +
-													attributes.getLocalName(i) +
-													"='" + attributeValue + "'");
+						this._buf += (" " + prefix + ":"
+													+ attributes.getLocalName(i)
+													+ "='" + attributeValue + "'");
 						
 						// write an xmlns declaration if necessary
 						if (prefix != "xml" && !this._isInScope(uri)) {
@@ -932,18 +983,18 @@ XHTMLHandler.prototype = {
 			this._buf += ">";
 		}
 	},
-	endElement: function XH_endElement(uri, localName, qName) {
+	endElement: function (uri, localName, qName) {
 		--this._depth;
 		this._inScopeNS.pop();
 		
 		// We need to skip outer divs in Atom. See comment in startElement.
-		if (this._isAtom && this._depth == 0 && localName == "div")
+		if (this._isAtom && this._depth == 0 && localName == "div") {
 			return;
+		}
 		
 		// When we peek too far, go back to the main processor
 		if (this._depth < 0) {
-			this._processor.returnFromXHTMLHandler(this._buf.trim(),
-																						 uri, localName, qName);
+			this._processor.returnFromXHTMLHandler(this._buf.trim(), uri, localName, qName);
 			return;
 		}
 		// If it's an XHTML element, record it. Otherwise, it's ignored.
@@ -951,10 +1002,10 @@ XHTMLHandler.prototype = {
 			this._buf += "</" + localName + ">";
 		}
 	},
-	characters: function XH_characters(data) {
+	characters: function (data) {
 		this._buf += xmlEscape(data);
 	},
-	processingInstruction: function XH_processingInstruction() {
+	processingInstruction: function () {
 	},
 };
 
@@ -978,11 +1029,11 @@ function ExtensionHandler(processor) {
 }
 
 ExtensionHandler.prototype = {
-	startDocument: function EH_startDocument() {
+	startDocument: function () {
 	},
-	endDocument: function EH_endDocument() {
+	endDocument: function () {
 	},
-	startElement: function EH_startElement(uri, localName, qName, attrs) {
+	startElement: function (uri, localName, qName, attrs) {
 		++this._depth;
 		
 		if (this._depth == 1) {
@@ -995,19 +1046,19 @@ ExtensionHandler.prototype = {
 		// if we descend into another element, we won't send text
 		this._hasChildElements = (this._depth > 1);
 	},
-	endElement: function EH_endElement(uri, localName, qName) {
+	endElement: function (uri, localName, qName) {
 		--this._depth;
 		if (this._depth == 0) {
 			var text = this._hasChildElements ? null : this._buf.trim();
-			this._processor.returnFromExtHandler(this._uri, this._localName,
-																					 text, this._attrs);
+			this._processor.returnFromExtHandler(this._uri, this._localName, text, this._attrs);
 		}
 	},
-	characters: function EH_characters(data) {
-		if (!this._hasChildElements)
+	characters: function (data) {
+		if (!this._hasChildElements) {
 			this._buf += data;
+		}
 	},
-	processingInstruction: function EH_processingInstruction() {
+	processingInstruction: function () {
 	},
 };
 
@@ -1048,7 +1099,7 @@ function WrapperElementInfo(fieldName) {
 /** *** The Processor *****/
 function FeedProcessor() {
 	this._reader = Cc[SAX_CONTRACTID].createInstance(Ci.nsISAXXMLReader);
-	this._buf =  "";
+	this._buf = "";
 	this._feed = Cc[BAG_CONTRACTID].createInstance(Ci.nsIWritablePropertyBag2);
 	this._handlerStack = [];
 	this._xmlBaseStack = []; // sparse array keyed to nesting depth
@@ -1199,7 +1250,7 @@ function FeedProcessor() {
 FeedProcessor.prototype = {
 	
 	// Set ourselves as the SAX handler, and set the base URI
-	_init: function FP_init(uri) {
+	_init: function (uri) {
 		this._reader.contentHandler = this;
 		this._reader.errorHandler = this;
 		this._result = Cc[FR_CONTRACTID].createInstance(Ci.nsIFeedResult);
@@ -1213,36 +1264,40 @@ FeedProcessor.prototype = {
 	// This function is called once we figure out what type of feed
 	// we're dealing with. Some feed types require digging a bit further
 	// than the root.
-	_docVerified: function FP_docVerified(version) {
+	_docVerified: function (version) {
 		this._result.doc = Cc[FEED_CONTRACTID].createInstance(Ci.nsIFeed);
-		this._result.doc.baseURI =
-			this._xmlBaseStack[this._xmlBaseStack.length - 1];
+		this._result.doc.baseURI
+			= this._xmlBaseStack[this._xmlBaseStack.length - 1];
 		this._result.doc.fields = this._feed;
 		this._result.version = version;
 	},
 	
 	// When we're done with the feed, let the listener know what
 	// happened.
-	_sendResult: function FP_sendResult() {
+	_sendResult: function () {
 		this._haveSentResult = true;
 		try {
 			// Can be null when a non-feed is fed to us
-			if (this._result.doc)
+			if (this._result.doc) {
 				this._result.doc.normalize();
-		} catch (e) {
+			}
+		}
+		catch (e) {
 			LOG("FIXME: " + e);
 		}
 		
 		try {
-			if (this.listener != null)
+			if (this.listener != null) {
 				this.listener.handleResult(this._result);
-		} finally {
+			}
+		}
+		finally {
 			this._result = null;
 		}
 	},
 	
 	// Parsing functions
-	parseAsync: function FP_parseAsync(requestObserver, uri) {
+	parseAsync: function (requestObserver, uri) {
 		this._init(uri);
 		this._reader.parseAsync(requestObserver);
 	},
@@ -1251,23 +1306,23 @@ FeedProcessor.prototype = {
 	
 	// The XMLReader will throw sensible exceptions if these get called
 	// out of order.
-	onStartRequest: function FP_onStartRequest(request, context) {
+	onStartRequest: function (request, context) {
 		// this will throw if the request is not a channel, but so will nsParser.
 		var channel = request.QueryInterface(Ci.nsIChannel);
 		channel.contentType = "application/vnd.mozilla.maybe.feed";
 		this._reader.onStartRequest(request, context);
 	},
 	
-	onStopRequest: function FP_onStopRequest(request, context, statusCode) {
+	onStopRequest: function (request, context, statusCode) {
 		try {
 			this._reader.onStopRequest(request, context, statusCode);
-		} finally {
+		}
+		finally {
 			this._reader = null;
 		}
 	},
 	
-	onDataAvailable:
-	function FP_onDataAvailable(request, context, inputStream, offset, count) {
+	onDataAvailable: function (request, context, inputStream, offset, count) {
 		this._reader.onDataAvailable(request, context, inputStream, offset, count);
 	},
 	
@@ -1278,22 +1333,24 @@ FeedProcessor.prototype = {
 	// listener can still show some of that data if it wants, and we'll
 	// set the bozo bit to indicate we were unable to parse all the way
 	// through.
-	fatalError: function FP_reportError() {
+	fatalError: function () {
 		this._result.bozo = true;
 		// XXX need to QI to FeedProgressListener
-		if (!this._haveSentResult)
+		if (!this._haveSentResult) {
 			this._sendResult();
+		}
 	},
 	
 	// nsISAXContentHandler
 	
-	startDocument: function FP_startDocument() {
+	startDocument: function () {
 		// LOG("----------");
 	},
 	
-	endDocument: function FP_endDocument() {
-		if (!this._haveSentResult)
+	endDocument: function () {
+		if (!this._haveSentResult) {
 			this._sendResult();
+		}
 	},
 	
 	// The transitions defined above identify elements that contain more
@@ -1323,7 +1380,7 @@ FeedProcessor.prototype = {
 	// formats allow this by default, and I don't of any extension that
 	// works this way.
 	//
-	startElement: function FP_startElement(uri, localName, qName, attributes) {
+	startElement: function (uri, localName, qName, attributes) {
 		this._buf = "";
 		++this._depth;
 		var elementInfo;
@@ -1333,8 +1390,8 @@ FeedProcessor.prototype = {
 		// Check for xml:base
 		var base = attributes.getValueFromName(XMLNS, "base");
 		if (base) {
-			this._xmlBaseStack[this._depth] =
-				strToURI(base, this._xmlBaseStack[this._xmlBaseStack.length - 1]);
+			this._xmlBaseStack[this._depth]
+				= strToURI(base, this._xmlBaseStack[this._xmlBaseStack.length - 1]);
 		}
 		
 		// To identify the element we're dealing with, we look up the
@@ -1343,7 +1400,7 @@ FeedProcessor.prototype = {
 		// allows Dublin Core "creator" elements to be consistently mapped
 		// to "dc:creator", for easy field access by consumer code. This
 		// strategy also happens to shorten up our state table.
-		var key =  this._prefixForNS(uri) + localName;
+		var key = this._prefixForNS(uri) + localName;
 		
 		// Check to see if we need to hand this off to our XHTML handler.
 		// The elements we're dealing with will look like this:
@@ -1362,12 +1419,12 @@ FeedProcessor.prototype = {
 		// The Atom spec explicitly says the div is not part of the content,
 		// and explicitly allows whitespace collapsing.
 		//
-		if ((this._result.version == "atom" || this._result.version == "atom03") &&
-				this._textConstructs[key] != null) {
+		if ((this._result.version == "atom" || this._result.version == "atom03")
+				&& this._textConstructs[key] != null) {
 			var type = attributes.getValueFromName("", "type");
 			if (type != null && type.includes("xhtml")) {
-				this._xhtmlHandler =
-					new XHTMLHandler(this, (this._result.version == "atom"));
+				this._xhtmlHandler
+					= new XHTMLHandler(this, (this._result.version == "atom"));
 				this._reader.contentHandler = this._xhtmlHandler;
 				return;
 			}
@@ -1378,7 +1435,8 @@ FeedProcessor.prototype = {
 		// will have one, and it tells us to add an item to our authors array.
 		if (this._trans[this._state] && this._trans[this._state][key]) {
 			elementInfo = this._trans[this._state][key];
-		} else {
+		}
+		else {
 			// If we don't have a transition, hand off to extension handler
 			this._extensionHandler = new ExtensionHandler(this);
 			this._reader.contentHandler = this._extensionHandler;
@@ -1392,19 +1450,23 @@ FeedProcessor.prototype = {
 		if (elementInfo.isWrapper) {
 			this._state = "IN_" + elementInfo.fieldName.toUpperCase();
 			this._stack.push([this._feed, this._state]);
-		} else if (elementInfo.feedVersion) {
+		}
+		else if (elementInfo.feedVersion) {
 			this._state = "IN_" + elementInfo.fieldName.toUpperCase();
 			
 			// Check for the older RSS2 variants
-			if (elementInfo.feedVersion == "rss2")
+			if (elementInfo.feedVersion == "rss2") {
 				elementInfo.feedVersion = this._findRSSVersion(attributes);
-			else if (uri == RSS090NS)
+			}
+			else if (uri == RSS090NS) {
 				elementInfo.feedVersion = "rss090";
+			}
 			
 			this._docVerified(elementInfo.feedVersion);
 			this._stack.push([this._feed, this._state]);
 			this._mapAttributes(this._feed, attributes);
-		} else {
+		}
+		else {
 			this._state = this._processComplexElement(elementInfo, attributes);
 		}
 	},
@@ -1414,34 +1476,38 @@ FeedProcessor.prototype = {
 	// of the state transition works as above in startElement, but
 	// the state we're looking for is prefixed with an underscore
 	// to distinguish endElement events from startElement events.
-	endElement:  function FP_endElement(uri, localName, qName) {
+	endElement: function (uri, localName, qName) {
 		var elementInfo = this._handlerStack[this._depth];
 		// LOG("</" + localName + ">");
-		if (elementInfo && !elementInfo.isWrapper)
+		if (elementInfo && !elementInfo.isWrapper) {
 			this._closeComplexElement(elementInfo);
+		}
 		
 		// cut down xml:base context
-		if (this._xmlBaseStack.length == this._depth + 1)
+		if (this._xmlBaseStack.length == this._depth + 1) {
 			this._xmlBaseStack = this._xmlBaseStack.slice(0, this._depth);
+		}
 		
 		// our new state is whatever is at the top of the stack now
-		if (this._stack.length > 0)
+		if (this._stack.length > 0) {
 			this._state = this._stack[this._stack.length - 1][1];
+		}
 		this._handlerStack = this._handlerStack.slice(0, this._depth);
 		--this._depth;
 	},
 	
 	// Buffer up character data. The buffer is cleared with every
 	// opening element.
-	characters: function FP_characters(data) {
+	characters: function (data) {
 		this._buf += data;
 	},
 	
-	processingInstruction: function FP_processingInstruction(target, data) {
+	processingInstruction: function (target, data) {
 		if (target == "xml-stylesheet") {
 			var hrefAttribute = data.match(/href=[\"\'](.*?)[\"\']/);
-			if (hrefAttribute && hrefAttribute.length == 2)
+			if (hrefAttribute && hrefAttribute.length == 2) {
 				this._result.stylesheet = strToURI(hrefAttribute[1], this._result.uri);
+			}
 		}
 	},
 	
@@ -1449,8 +1515,7 @@ FeedProcessor.prototype = {
 	
 	// Handle our more complicated elements--those that contain
 	// attributes and child elements.
-	_processComplexElement:
-	function FP__processComplexElement(elementInfo, attributes) {
+	_processComplexElement: function (elementInfo, attributes) {
 		var obj;
 		
 		// If the container is an entry/item, it'll need to have its
@@ -1459,11 +1524,13 @@ FeedProcessor.prototype = {
 			obj = elementInfo.containerClass.createInstance(Ci.nsIFeedEntry);
 			obj.baseURI = this._xmlBaseStack[this._xmlBaseStack.length - 1];
 			this._mapAttributes(obj.fields, attributes);
-		} else if (elementInfo.containerClass) {
+		}
+		else if (elementInfo.containerClass) {
 			obj = elementInfo.containerClass.createInstance(Ci.nsIFeedElementBase);
 			obj.baseURI = this._xmlBaseStack[this._xmlBaseStack.length - 1];
 			obj.attributes = attributes; // just set the SAX attributes
-		} else {
+		}
+		else {
 			obj = Cc[BAG_CONTRACTID].createInstance(Ci.nsIWritablePropertyBag2);
 			this._mapAttributes(obj, attributes);
 		}
@@ -1480,14 +1547,16 @@ FeedProcessor.prototype = {
 		var prop;
 		try {
 			prop = container.getProperty(elementInfo.fieldName);
-		} catch (e) {
+		}
+		catch (e) {
 		}
 		
 		if (elementInfo.isArray) {
 			if (!prop) {
-				container.setPropertyAsInterface(elementInfo.fieldName,
-																				 Cc[ARRAY_CONTRACTID].
-																				 createInstance(Ci.nsIMutableArray));
+				container.setPropertyAsInterface(
+					elementInfo.fieldName,
+					Cc[ARRAY_CONTRACTID].createInstance(Ci.nsIMutableArray),
+				);
 			}
 			
 			newProp = container.getProperty(elementInfo.fieldName);
@@ -1499,9 +1568,11 @@ FeedProcessor.prototype = {
 			
 			// If new object is an nsIFeedContainer, we want to deal with
 			// its member nsIPropertyBag instead.
-			if (isIFeedContainer(obj))
+			if (isIFeedContainer(obj)) {
 				newProp = obj.fields;
-		} else {
+			}
+		}
+		else {
 			// If it doesn't, set it.
 			if (!prop) {
 				container.setPropertyAsInterface(elementInfo.fieldName, obj);
@@ -1519,7 +1590,7 @@ FeedProcessor.prototype = {
 	// model for a given feed. We use helper functions to do the
 	// munging, but we need to identify array types here, so the munging
 	// happens only to the last element of an array.
-	_closeComplexElement: function FP__closeComplexElement(elementInfo) {
+	_closeComplexElement: function (elementInfo) {
 		var stateTuple = this._stack.pop();
 		var container = stateTuple[0];
 		var containerParent = stateTuple[2];
@@ -1528,37 +1599,45 @@ FeedProcessor.prototype = {
 		
 		// If it's an array and we have to post-process,
 		// grab the last element
-		if (isArray)
+		if (isArray) {
 			element = container.queryElementAt(container.length - 1, Ci.nsISupports);
-		else
+		}
+		else {
 			element = container;
+		}
 		
 		// Run the post-processing function if there is one.
-		if (elementInfo.closeFunc)
+		if (elementInfo.closeFunc) {
 			element = elementInfo.closeFunc(this._buf, element);
+		}
 		
 		// If an nsIFeedContainer was on top of the stack,
 		// we need to normalize it
-		if (elementInfo.containerClass == Cc[ENTRY_CONTRACTID])
+		if (elementInfo.containerClass == Cc[ENTRY_CONTRACTID]) {
 			containerParent.normalize();
+		}
 		
 		// If it's an array, re-set the last element
-		if (isArray)
+		if (isArray) {
 			container.replaceElementAt(element, container.length - 1);
+		}
 	},
 	
-	_prefixForNS: function FP_prefixForNS(uri) {
-		if (!uri)
+	_prefixForNS: function (uri) {
+		if (!uri) {
 			return "";
+		}
 		var prefix = gNamespaces[uri];
-		if (prefix)
+		if (prefix) {
 			return prefix + ":";
-		if (uri.toLowerCase().indexOf("http://backend.userland.com") == 0)
+		}
+		if (uri.toLowerCase().indexOf("http://backend.userland.com") == 0) {
 			return "";
+		}
 		return null;
 	},
 	
-	_mapAttributes: function FP__mapAttributes(bag, attributes) {
+	_mapAttributes: function (bag, attributes) {
 		// Cycle through the attributes, and set our properties using the
 		// prefix:localNames we find in our namespace dictionary.
 		for (var i = 0; i < attributes.length; ++i) {
@@ -1569,38 +1648,44 @@ FeedProcessor.prototype = {
 	},
 	
 	// Only for RSS2esque formats
-	_findRSSVersion: function FP__findRSSVersion(attributes) {
+	_findRSSVersion: function (attributes) {
 		var versionAttr = attributes.getValueFromName("", "version").trim();
-		var versions = { "0.91": "rss091",
-										 "0.92": "rss092",
-										 "0.93": "rss093",
-										 "0.94": "rss094" };
-		if (versions[versionAttr])
+		var versions = {
+			"0.91": "rss091",
+			"0.92": "rss092",
+			"0.93": "rss093",
+			"0.94": "rss094"
+		};
+		if (versions[versionAttr]) {
 			return versions[versionAttr];
-		if (versionAttr.substr(0, 2) != "2.")
+		}
+		if (versionAttr.substr(0, 2) != "2.") {
 			return "rssUnknown";
+		}
 		return "rss2";
 	},
 	
 	// unknown element values are returned here. See startElement above
 	// for how this works.
-	returnFromExtHandler:
-	function FP_returnExt(uri, localName, chars, attributes) {
+	returnFromExtHandler: function (uri, localName, chars, attributes) {
 		--this._depth;
 		
 		// take control of the SAX events
 		this._reader.contentHandler = this;
-		if (localName == null && chars == null)
+		if (localName == null && chars == null) {
 			return;
+		}
 		
 		// we don't take random elements inside rdf:RDF
-		if (this._state == "IN_RDF")
+		if (this._state == "IN_RDF") {
 			return;
+		}
 		
 		// Grab the top of the stack
 		var top = this._stack[this._stack.length - 1];
-		if (!top)
+		if (!top) {
 			return;
+		}
 		
 		var container = top[0];
 		// Grab the last element if it's an array
@@ -1609,23 +1694,28 @@ FeedProcessor.prototype = {
 			// check if it's something specific, but not an entry
 			if (contract && contract != Cc[ENTRY_CONTRACTID]) {
 				var el = container.queryElementAt(container.length - 1,
-																					Ci.nsIFeedElementBase);
+					Ci.nsIFeedElementBase);
 				// XXX there must be a way to flatten these interfaces
-				if (contract == Cc[PERSON_CONTRACTID])
+				if (contract == Cc[PERSON_CONTRACTID]) {
 					el.QueryInterface(Ci.nsIFeedPerson);
-				else
+				}
+				else {
 					return; // don't know about this interface
+				}
 				
 				let propName = localName;
 				var prefix = gNamespaces[uri];
 				
 				// synonyms
-				if ((uri == "" ||
-						 prefix &&
-						 ((prefix.indexOf("atom") > -1) ||
-							(prefix.indexOf("rss") > -1))) &&
-						(propName == "url" || propName == "href"))
+				if (
+					(uri == ""
+						|| prefix
+						&& ((prefix.indexOf("atom") > -1)
+							|| (prefix.indexOf("rss") > -1)))
+					&& (propName == "url" || propName == "href")
+				) {
 					propName = "uri";
+				}
 				
 				try {
 					if (el[propName] !== "undefined") {
@@ -1637,14 +1727,14 @@ FeedProcessor.prototype = {
 						}
 						el[propName] = propValue;
 					}
-				} catch (e) {
+				}
+				catch (e) {
 					// ignore XPConnect errors
 				}
 				// the rest of the function deals with entry- and feed-level stuff
 				return;
 			}
-			container = container.queryElementAt(container.length - 1,
-																					 Ci.nsIWritablePropertyBag2);
+			container = container.queryElementAt(container.length - 1, Ci.nsIWritablePropertyBag2);
 		}
 		
 		// Make the buffer our new property
@@ -1652,35 +1742,38 @@ FeedProcessor.prototype = {
 		
 		// But, it could be something containing HTML. If so,
 		// we need to know about that.
-		if (this._textConstructs[propName] != null &&
-				this._handlerStack[this._depth].containerClass !== null) {
-			var newProp = Cc[TEXTCONSTRUCT_CONTRACTID].
-										createInstance(Ci.nsIFeedTextConstruct);
+		if (this._textConstructs[propName] != null
+				&& this._handlerStack[this._depth].containerClass !== null) {
+			var newProp = Cc[TEXTCONSTRUCT_CONTRACTID].createInstance(Ci.nsIFeedTextConstruct);
 			newProp.text = chars;
 			// Look up the default type in our table
 			var type = this._textConstructs[propName];
 			var typeAttribute = attributes.getValueFromName("", "type");
 			if (this._result.version == "atom" && typeAttribute != null) {
 				type = typeAttribute;
-			} else if (this._result.version == "atom03" && typeAttribute != null) {
+			}
+			else if (this._result.version == "atom03" && typeAttribute != null) {
 				if (typeAttribute.toLowerCase().includes("xhtml")) {
 					type = "xhtml";
-				} else if (typeAttribute.toLowerCase().includes("html")) {
+				}
+				else if (typeAttribute.toLowerCase().includes("html")) {
 					type = "html";
-				} else if (typeAttribute.toLowerCase().includes("text")) {
+				}
+				else if (typeAttribute.toLowerCase().includes("text")) {
 					type = "text";
 				}
 			}
 			
 			// If it's rss feed-level description, it's not supposed to have html
-			if (this._result.version.includes("rss") &&
-					this._handlerStack[this._depth].containerClass != ENTRY_CONTRACTID) {
+			if (this._result.version.includes("rss")
+					&& this._handlerStack[this._depth].containerClass != ENTRY_CONTRACTID) {
 				type = "text";
 			}
 			newProp.type = type;
 			newProp.base = this._xmlBaseStack[this._xmlBaseStack.length - 1];
 			container.setPropertyAsInterface(propName, newProp);
-		} else {
+		}
+		else {
 			container.setPropertyAsAString(propName, chars);
 		}
 	},
@@ -1689,25 +1782,23 @@ FeedProcessor.prototype = {
 	// (see above) that will scrape out non-XHTML stuff, normalize
 	// namespaces, and remove the wrapper div from Atom 1.0. When the
 	// XHTMLHandler is done, it'll callback here.
-	returnFromXHTMLHandler:
-	function FP_returnFromXHTMLHandler(chars, uri, localName, qName) {
+	returnFromXHTMLHandler: function (chars, uri, localName, qName) {
 		// retake control of the SAX content events
 		this._reader.contentHandler = this;
 		
 		// Grab the top of the stack
 		var top = this._stack[this._stack.length - 1];
-		if (!top)
+		if (!top) {
 			return;
+		}
 		var container = top[0];
 		
 		// Assign the property
-		var newProp =  newProp = Cc[TEXTCONSTRUCT_CONTRACTID].
-									 createInstance(Ci.nsIFeedTextConstruct);
+		var newProp = newProp = Cc[TEXTCONSTRUCT_CONTRACTID].createInstance(Ci.nsIFeedTextConstruct);
 		newProp.text = chars;
 		newProp.type = "xhtml";
 		newProp.base = this._xmlBaseStack[this._xmlBaseStack.length - 1];
-		container.setPropertyAsInterface(this._prefixForNS(uri) + localName,
-																		 newProp);
+		container.setPropertyAsInterface(this._prefixForNS(uri) + localName, newProp);
 		
 		// XHTML will cause us to peek too far. The XHTML handler will
 		// send us an end element to call. RFC4287-valid feeds allow a
