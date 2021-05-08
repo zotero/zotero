@@ -4,38 +4,12 @@
 
 /* eslint-disable quote-props */
 
+"use strict";
+
 function LOG(str) {
-	dump("*** " + str + "\n");
+	Zotero.debug("Feed Processor: " + str);
 }
 
-ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
-ChromeUtils.import("resource://gre/modules/Services.jsm");
-
-const FP_CONTRACTID = "@mozilla.org/feed-processor;1";
-const FP_CLASSID = Components.ID("{26acb1f0-28fc-43bc-867a-a46aabc85dd4}");
-const FP_CLASSNAME = "Feed Processor";
-const FR_CONTRACTID = "@mozilla.org/feed-result;1";
-const FR_CLASSID = Components.ID("{072a5c3d-30c6-4f07-b87f-9f63d51403f2}");
-const FR_CLASSNAME = "Feed Result";
-const FEED_CONTRACTID = "@mozilla.org/feed;1";
-const FEED_CLASSID = Components.ID("{5d0cfa97-69dd-4e5e-ac84-f253162e8f9a}");
-const FEED_CLASSNAME = "Feed";
-const ENTRY_CONTRACTID = "@mozilla.org/feed-entry;1";
-const ENTRY_CLASSID = Components.ID("{8e4444ff-8e99-4bdd-aa7f-fb3c1c77319f}");
-const ENTRY_CLASSNAME = "Feed Entry";
-const TEXTCONSTRUCT_CONTRACTID = "@mozilla.org/feed-textconstruct;1";
-const TEXTCONSTRUCT_CLASSID
-	= Components.ID("{b992ddcd-3899-4320-9909-924b3e72c922}");
-const TEXTCONSTRUCT_CLASSNAME = "Feed Text Construct";
-const GENERATOR_CONTRACTID = "@mozilla.org/feed-generator;1";
-const GENERATOR_CLASSID
-	= Components.ID("{414af362-9ad8-4296-898e-62247f25a20e}");
-const GENERATOR_CLASSNAME = "Feed Generator";
-const PERSON_CONTRACTID = "@mozilla.org/feed-person;1";
-const PERSON_CLASSID = Components.ID("{95c963b7-20b2-11db-92f6-001422106990}");
-const PERSON_CLASSNAME = "Feed Person";
-
-const IO_CONTRACTID = "@mozilla.org/network/io-service;1";
 const BAG_CONTRACTID = "@mozilla.org/hash-property-bag;1";
 const ARRAY_CONTRACTID = "@mozilla.org/array;1";
 const SAX_CONTRACTID = "@mozilla.org/saxparser/xmlreader;1";
@@ -190,6 +164,7 @@ var gAllowedXHTMLNamespaces = {
 	"http://www.w3.org/1999/xhtml": "xhtml",
 };
 
+// Implements nsIFeedResult
 function FeedResult() {}
 FeedResult.prototype = {
 	bozo: false,
@@ -202,12 +177,9 @@ FeedResult.prototype = {
 	registerExtensionPrefix: function (ns, prefix) {
 		throw Cr.NS_ERROR_NOT_IMPLEMENTED;
 	},
-	
-	// XPCOM stuff
-	classID: FR_CLASSID,
-	QueryInterface: ChromeUtils.generateQI([Ci.nsIFeedResult]),
 };
 
+// Implements nsIFeed, nsIFeedContainer
 function Feed() {
 	this.subtitle = null;
 	this.title = null;
@@ -396,12 +368,9 @@ Feed.prototype = {
 			}
 		}
 	},
-	
-	// XPCOM stuff
-	classID: FEED_CLASSID,
-	QueryInterface: ChromeUtils.generateQI([Ci.nsIFeed, Ci.nsIFeedContainer]),
 };
 
+// Implements nsIFeedEntry, nsIFeedContainer
 function Entry() {
 	this.summary = null;
 	this.content = null;
@@ -643,12 +612,6 @@ Entry.prototype = {
 			this._addToEnclosures(enc);
 		}
 	},
-	
-	// XPCOM stuff
-	classID: ENTRY_CLASSID,
-	QueryInterface: ChromeUtils.generateQI(
-		[Ci.nsIFeedEntry, Ci.nsIFeedContainer]
-	),
 };
 
 Entry.prototype._atomLinksToURI = Feed.prototype._atomLinksToURI;
@@ -656,6 +619,7 @@ Entry.prototype._resolveURI = Feed.prototype._resolveURI;
 Entry.prototype._resetBagMembersToRawText = Feed.prototype._resetBagMembersToRawText;
 
 // TextConstruct represents and element that could contain (X)HTML
+// Implements nsIFeedTextConstruct
 function TextConstruct() {
 	this.lang = null;
 	this.base = null;
@@ -698,13 +662,10 @@ TextConstruct.prototype = {
 		return this.parserUtils.parseFragment(this.text, flags, isXML,
 			this.base, element);
 	},
-	
-	// XPCOM stuff
-	classID: TEXTCONSTRUCT_CLASSID,
-	QueryInterface: ChromeUtils.generateQI([Ci.nsIFeedTextConstruct]),
 };
 
 // Generator represents the software that produced the feed
+// Implements nsIFeedGenerator, nsIFeedElementBase
 function Generator() {
 	this.lang = null;
 	this.agent = null;
@@ -717,7 +678,6 @@ function Generator() {
 }
 
 Generator.prototype = {
-	
 	get attributes() {
 		return this._attributes;
 	},
@@ -736,14 +696,9 @@ Generator.prototype = {
 			this.uri = strToURI(uriAttribute, this.baseURI);
 		}
 	},
-	
-	// XPCOM stuff
-	classID: GENERATOR_CLASSID,
-	QueryInterface: ChromeUtils.generateQI(
-		[Ci.nsIFeedGenerator, Ci.nsIFeedElementBase]
-	),
 };
 
+// Implements nsIFeedPerson, nsIFeedElementBase
 function Person() {
 	this.name = null;
 	this.uri = null;
@@ -753,14 +708,6 @@ function Person() {
 	this.attributes = null;
 	this.baseURI = null;
 }
-
-Person.prototype = {
-	// XPCOM stuff
-	classID: PERSON_CLASSID,
-	QueryInterface: ChromeUtils.generateQI(
-		[Ci.nsIFeedPerson, Ci.nsIFeedElementBase]
-	),
-};
 
 /**
  * Map a list of fields into properties on a container.
@@ -1046,7 +993,7 @@ ExtensionHandler.prototype = {
 		// if we descend into another element, we won't send text
 		this._hasChildElements = (this._depth > 1);
 	},
-	endElement: function (uri, localName, qName) {
+	endElement: function (_uri, _localName, _qName) {
 		--this._depth;
 		if (this._depth == 0) {
 			var text = this._hasChildElements ? null : this._buf.trim();
@@ -1097,6 +1044,8 @@ function WrapperElementInfo(fieldName) {
 }
 
 /** *** The Processor *****/
+// Implements nsIFeedProcessor, nsISAXContentHandler, nsISAXErrorHandler,
+//            nsIStreamListener, nsIRequestObserver
 function FeedProcessor() {
 	this._reader = Cc[SAX_CONTRACTID].createInstance(Ci.nsISAXXMLReader);
 	this._buf = "";
@@ -1156,25 +1105,25 @@ function FeedProcessor() {
 		},
 		
 		"IN_CHANNEL": {
-			"item": new ElementInfo("items", Cc[ENTRY_CONTRACTID], null, true),
-			"managingEditor": new ElementInfo("authors", Cc[PERSON_CONTRACTID], rssAuthor, true),
-			"dc:creator": new ElementInfo("authors", Cc[PERSON_CONTRACTID], rssAuthor, true),
-			"dc:author": new ElementInfo("authors", Cc[PERSON_CONTRACTID], rssAuthor, true),
-			"dc:contributor": new ElementInfo("contributors", Cc[PERSON_CONTRACTID], rssAuthor, true),
+			"item": new ElementInfo("items", Entry, null, true),
+			"managingEditor": new ElementInfo("authors", Person, rssAuthor, true),
+			"dc:creator": new ElementInfo("authors", Person, rssAuthor, true),
+			"dc:author": new ElementInfo("authors", Person, rssAuthor, true),
+			"dc:contributor": new ElementInfo("contributors", Person, rssAuthor, true),
 			"category": new ElementInfo("categories", null, rssCatTerm, true),
 			"cloud": new ElementInfo("cloud", null, null, false),
 			"image": new ElementInfo("image", null, null, false),
 			"textInput": new ElementInfo("textInput", null, null, false),
 			"skipDays": new ElementInfo("skipDays", null, null, false),
 			"skipHours": new ElementInfo("skipHours", null, null, false),
-			"generator": new ElementInfo("generator", Cc[GENERATOR_CONTRACTID], atomGenerator, false),
+			"generator": new ElementInfo("generator", Generator, atomGenerator, false),
 		},
 		
 		"IN_ITEMS": {
-			"author": new ElementInfo("authors", Cc[PERSON_CONTRACTID], rssAuthor, true),
-			"dc:creator": new ElementInfo("authors", Cc[PERSON_CONTRACTID], rssAuthor, true),
-			"dc:author": new ElementInfo("authors", Cc[PERSON_CONTRACTID], rssAuthor, true),
-			"dc:contributor": new ElementInfo("contributors", Cc[PERSON_CONTRACTID], rssAuthor, true),
+			"author": new ElementInfo("authors", Person, rssAuthor, true),
+			"dc:creator": new ElementInfo("authors", Person, rssAuthor, true),
+			"dc:author": new ElementInfo("authors", Person, rssAuthor, true),
+			"dc:contributor": new ElementInfo("contributors", Person, rssAuthor, true),
 			"category": new ElementInfo("categories", null, rssCatTerm, true),
 			"enclosure": new ElementInfo("enclosure", null, null, false),
 			"media:content": new ElementInfo("mediacontent", null, null, true),
@@ -1202,58 +1151,57 @@ function FeedProcessor() {
 			"rss1:channel": new FeedElementInfo("rdf_channel", "rss1"),
 			"rss1:image": new ElementInfo("image", null, null, false),
 			"rss1:textinput": new ElementInfo("textInput", null, null, false),
-			"rss1:item": new ElementInfo("items", Cc[ENTRY_CONTRACTID], null, true),
+			"rss1:item": new ElementInfo("items", Entry, null, true),
 		},
 		
 		"IN_RDF_CHANNEL": {
-			"admin:generatorAgent": new ElementInfo("generator", Cc[GENERATOR_CONTRACTID], null, false),
-			"dc:creator": new ElementInfo("authors", Cc[PERSON_CONTRACTID], rssAuthor, true),
-			"dc:author": new ElementInfo("authors", Cc[PERSON_CONTRACTID], rssAuthor, true),
-			"dc:contributor": new ElementInfo("contributors", Cc[PERSON_CONTRACTID], rssAuthor, true),
+			"admin:generatorAgent": new ElementInfo("generator", Generator, null, false),
+			"dc:creator": new ElementInfo("authors", Person, rssAuthor, true),
+			"dc:author": new ElementInfo("authors", Person, rssAuthor, true),
+			"dc:contributor": new ElementInfo("contributors", Person, rssAuthor, true),
 		},
 		
 		/** ******* ATOM 1.0 **********/
 		"IN_ATOM": {
-			"atom:author": new ElementInfo("authors", Cc[PERSON_CONTRACTID], null, true),
-			"atom:generator": new ElementInfo("generator", Cc[GENERATOR_CONTRACTID], atomGenerator, false),
-			"atom:contributor": new ElementInfo("contributors", Cc[PERSON_CONTRACTID], null, true),
+			"atom:author": new ElementInfo("authors", Person, null, true),
+			"atom:generator": new ElementInfo("generator", Generator, atomGenerator, false),
+			"atom:contributor": new ElementInfo("contributors", Person, null, true),
 			"atom:link": new ElementInfo("links", null, null, true),
 			"atom:logo": new ElementInfo("atom:logo", null, atomLogo, false),
-			"atom:entry": new ElementInfo("entries", Cc[ENTRY_CONTRACTID], null, true),
+			"atom:entry": new ElementInfo("entries", Entry, null, true),
 		},
 		
 		"IN_ENTRIES": {
-			"atom:author": new ElementInfo("authors", Cc[PERSON_CONTRACTID], null, true),
-			"atom:contributor": new ElementInfo("contributors", Cc[PERSON_CONTRACTID], null, true),
+			"atom:author": new ElementInfo("authors", Person, null, true),
+			"atom:contributor": new ElementInfo("contributors", Person, null, true),
 			"atom:link": new ElementInfo("links", null, null, true),
 		},
 		
 		/** ******* ATOM 0.3 **********/
 		"IN_ATOM03": {
-			"atom03:author": new ElementInfo("authors", Cc[PERSON_CONTRACTID], null, true),
-			"atom03:contributor": new ElementInfo("contributors", Cc[PERSON_CONTRACTID], null, true),
+			"atom03:author": new ElementInfo("authors", Person, null, true),
+			"atom03:contributor": new ElementInfo("contributors", Person, null, true),
 			"atom03:link": new ElementInfo("links", null, null, true),
-			"atom03:entry": new ElementInfo("atom03_entries", Cc[ENTRY_CONTRACTID], null, true),
-			"atom03:generator": new ElementInfo("generator", Cc[GENERATOR_CONTRACTID], atomGenerator, false),
+			"atom03:entry": new ElementInfo("atom03_entries", Entry, null, true),
+			"atom03:generator": new ElementInfo("generator", Generator, atomGenerator, false),
 		},
 		
 		"IN_ATOM03_ENTRIES": {
-			"atom03:author": new ElementInfo("authors", Cc[PERSON_CONTRACTID], null, true),
-			"atom03:contributor": new ElementInfo("contributors", Cc[PERSON_CONTRACTID], null, true),
+			"atom03:author": new ElementInfo("authors", Person, null, true),
+			"atom03:contributor": new ElementInfo("contributors", Person, null, true),
 			"atom03:link": new ElementInfo("links", null, null, true),
-			"atom03:entry": new ElementInfo("atom03_entries", Cc[ENTRY_CONTRACTID], null, true),
+			"atom03:entry": new ElementInfo("atom03_entries", Entry, null, true),
 		},
 	};
 }
 
 // See startElement for a long description of how feeds are processed.
 FeedProcessor.prototype = {
-	
 	// Set ourselves as the SAX handler, and set the base URI
 	_init: function (uri) {
 		this._reader.contentHandler = this;
 		this._reader.errorHandler = this;
-		this._result = Cc[FR_CONTRACTID].createInstance(Ci.nsIFeedResult);
+		this._result = new FeedResult();
 		if (uri) {
 			this._result.uri = uri;
 			this._reader.baseURI = uri;
@@ -1265,7 +1213,7 @@ FeedProcessor.prototype = {
 	// we're dealing with. Some feed types require digging a bit further
 	// than the root.
 	_docVerified: function (version) {
-		this._result.doc = Cc[FEED_CONTRACTID].createInstance(Ci.nsIFeed);
+		this._result.doc = new Feed();
 		this._result.doc.baseURI
 			= this._xmlBaseStack[this._xmlBaseStack.length - 1];
 		this._result.doc.fields = this._feed;
@@ -1476,7 +1424,7 @@ FeedProcessor.prototype = {
 	// of the state transition works as above in startElement, but
 	// the state we're looking for is prefixed with an underscore
 	// to distinguish endElement events from startElement events.
-	endElement: function (uri, localName, qName) {
+	endElement: function (_uri, _localName, _qName) {
 		var elementInfo = this._handlerStack[this._depth];
 		// LOG("</" + localName + ">");
 		if (elementInfo && !elementInfo.isWrapper) {
@@ -1520,13 +1468,14 @@ FeedProcessor.prototype = {
 		
 		// If the container is an entry/item, it'll need to have its
 		// more esoteric properties put in the 'fields' property bag.
-		if (elementInfo.containerClass == Cc[ENTRY_CONTRACTID]) {
-			obj = elementInfo.containerClass.createInstance(Ci.nsIFeedEntry);
+		const Class = elementInfo.containerClass;
+		if (Class == Entry) {
+			obj = new Class();
 			obj.baseURI = this._xmlBaseStack[this._xmlBaseStack.length - 1];
 			this._mapAttributes(obj.fields, attributes);
 		}
 		else if (elementInfo.containerClass) {
-			obj = elementInfo.containerClass.createInstance(Ci.nsIFeedElementBase);
+			obj = new Class();
 			obj.baseURI = this._xmlBaseStack[this._xmlBaseStack.length - 1];
 			obj.attributes = attributes; // just set the SAX attributes
 		}
@@ -1613,7 +1562,7 @@ FeedProcessor.prototype = {
 		
 		// If an nsIFeedContainer was on top of the stack,
 		// we need to normalize it
-		if (elementInfo.containerClass == Cc[ENTRY_CONTRACTID]) {
+		if (elementInfo.containerClass == Entry) {
 			containerParent.normalize();
 		}
 		
@@ -1692,11 +1641,11 @@ FeedProcessor.prototype = {
 		if (isIArray(container)) {
 			var contract = this._handlerStack[this._depth].containerClass;
 			// check if it's something specific, but not an entry
-			if (contract && contract != Cc[ENTRY_CONTRACTID]) {
+			if (contract && contract != Entry) {
 				var el = container.queryElementAt(container.length - 1,
 					Ci.nsIFeedElementBase);
 				// XXX there must be a way to flatten these interfaces
-				if (contract == Cc[PERSON_CONTRACTID]) {
+				if (contract == Person) {
 					el.QueryInterface(Ci.nsIFeedPerson);
 				}
 				else {
@@ -1744,7 +1693,7 @@ FeedProcessor.prototype = {
 		// we need to know about that.
 		if (this._textConstructs[propName]
 				&& this._handlerStack[this._depth].containerClass !== null) {
-			var newProp = Cc[TEXTCONSTRUCT_CONTRACTID].createInstance(Ci.nsIFeedTextConstruct);
+			var newProp = new TextConstruct();
 			newProp.text = chars;
 			// Look up the default type in our table
 			var type = this._textConstructs[propName];
@@ -1766,7 +1715,7 @@ FeedProcessor.prototype = {
 			
 			// If it's rss feed-level description, it's not supposed to have html
 			if (this._result.version.includes("rss")
-					&& this._handlerStack[this._depth].containerClass != ENTRY_CONTRACTID) {
+					&& this._handlerStack[this._depth].containerClass != Entry) {
 				type = "text";
 			}
 			newProp.type = type;
@@ -1794,7 +1743,7 @@ FeedProcessor.prototype = {
 		var container = top[0];
 		
 		// Assign the property
-		var newProp = newProp = Cc[TEXTCONSTRUCT_CONTRACTID].createInstance(Ci.nsIFeedTextConstruct);
+		var newProp = new TextConstruct();
 		newProp.text = chars;
 		newProp.type = "xhtml";
 		newProp.base = this._xmlBaseStack[this._xmlBaseStack.length - 1];
@@ -1806,26 +1755,8 @@ FeedProcessor.prototype = {
 		// on compliance at this point.
 		this.endElement(uri, localName, qName);
 	},
-	
-	// XPCOM stuff
-	classID: FP_CLASSID,
-	QueryInterface: ChromeUtils.generateQI([
-		Ci.nsIFeedProcessor,
-		Ci.nsISAXContentHandler,
-		Ci.nsISAXErrorHandler,
-		Ci.nsIStreamListener,
-		Ci.nsIRequestObserver,
-	]),
 };
 
-var components = [
-	FeedProcessor,
-	FeedResult,
-	Feed,
-	Entry,
-	TextConstruct,
-	Generator,
-	Person,
-];
-
-this.NSGetFactory = XPCOMUtils.generateNSGetFactory(components);
+if (typeof module == "object") {
+	module.exports = FeedProcessor;
+}
