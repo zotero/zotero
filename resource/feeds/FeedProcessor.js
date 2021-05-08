@@ -173,10 +173,6 @@ FeedResult.prototype = {
 	headers: null,
 	uri: null,
 	stylesheet: null,
-	
-	registerExtensionPrefix: function (ns, prefix) {
-		throw Cr.NS_ERROR_NOT_IMPLEMENTED;
-	},
 };
 
 // Implements nsIFeed, nsIFeedContainer

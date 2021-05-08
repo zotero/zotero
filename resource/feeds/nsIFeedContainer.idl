@@ -31,7 +31,6 @@ interface nsIFeedContainer : nsIFeedElementBase
 	* and accessing specific fields.
 	*
 	* Common namespaces are accessed using prefixes, like get("dc:subject");.
-	* See nsIFeedResult::registerExtensionPrefix.
 	*/
 	attribute nsIWritablePropertyBag2 fields;
 

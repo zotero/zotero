@@ -56,9 +56,4 @@ interface nsIFeedResult : nsISupports {
 	* HTTP response headers that accompanied the feed. 
 	*/
 	attribute nsIProperties headers;
-
-	/**
-	* Registers a prefix used to access an extension in the feed/entry 
-	*/
-	void registerExtensionPrefix(in AString aNamespace, in AString aPrefix);
 };
