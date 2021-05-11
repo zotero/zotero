@@ -39,25 +39,6 @@ function isFunction(a) {
 	return typeof a == "function";
 }
 
-function isIID(a, iid) {
-	var rv = false;
-	try {
-		a.QueryInterface(iid);
-		rv = true;
-	}
-	catch (e) {
-	}
-	return rv;
-}
-
-function isIArray(a) {
-	return isIID(a, Ci.nsIArray);
-}
-
-function isIFeedContainer(a) {
-	return isIID(a, Ci.nsIFeedContainer);
-}
-
 function stripTags(someHTML) {
 	return someHTML.replace(/<[^>]+>/g, "");
 }
@@ -1433,7 +1414,7 @@ FeedProcessor.prototype = {
 			
 			// If new object is an nsIFeedContainer, we want to deal with
 			// its member nsIPropertyBag instead.
-			if (isIFeedContainer(obj)) {
+			if (obj.fields) {
 				newProp = obj.fields;
 			}
 		}
@@ -1460,11 +1441,10 @@ FeedProcessor.prototype = {
 		var container = stateTuple[0];
 		var containerParent = stateTuple[2];
 		var element = null;
-		var isArray = isIArray(container);
 		
 		// If it's an array and we have to post-process,
 		// grab the last element
-		if (isArray) {
+		if (isArray(container)) {
 			element = container[container.length - 1];
 		}
 		else {
@@ -1483,7 +1463,7 @@ FeedProcessor.prototype = {
 		}
 		
 		// If it's an array, re-set the last element
-		if (isArray) {
+		if (isArray(container)) {
 			container[container.length - 1] = element;
 		}
 	},
@@ -1554,7 +1534,7 @@ FeedProcessor.prototype = {
 		
 		var container = top[0];
 		// Grab the last element if it's an array
-		if (isIArray(container)) {
+		if (isArray(container)) {
 			var contract = this._handlerStack[this._depth].containerClass;
 			// check if it's something specific, but not an entry
 			if (contract && contract != Entry) {
