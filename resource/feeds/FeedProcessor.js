@@ -20,9 +20,9 @@ const RSS090NS = "http://my.netscape.com/rdf/simple/0.9/";
 
 /** *** Some general utils *****/
 function strToURI(link, base) {
-	base = base || null;
+	base = base || undefined;
 	try {
-		return Services.io.newURI(link, null, base);
+		return new URL(link, base);
 	}
 	catch (e) {
 		return null;
@@ -308,7 +308,7 @@ Feed.prototype = {
 		}
 		var url = this._resolveURI(this.image.url, base);
 		if (url) {
-			this.image.url = url.spec;
+			this.image.url = url.href;
 		}
 	},
 	

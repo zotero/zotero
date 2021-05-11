@@ -366,7 +366,7 @@ Zotero.FeedReader._getFeedItem = function (feedEntry, feedInfo) {
 	}
 	
 	let item = {
-		guid: feedEntry.id || feedEntry.link.spec
+		guid: feedEntry.id || feedEntry.link.href
 	};
 			
 	if (feedEntry.title) item.title = Zotero.FeedReader._getRichText(feedEntry.title, 'title');
@@ -386,7 +386,7 @@ Zotero.FeedReader._getFeedItem = function (feedEntry, feedInfo) {
 		}
 	}
 	
-	if (feedEntry.link) item.url = feedEntry.link.spec;
+	if (feedEntry.link) item.url = feedEntry.link.href;
 	
 	if (feedEntry.rights) item.rights = Zotero.FeedReader._getRichText(feedEntry.rights, 'rights');
 	
