@@ -139,8 +139,13 @@ function Feed() {
 	this.contributors = [];
 	this.baseURI = null;
 	this.enclosureCount = 0;
-	this.type = Ci.nsIFeed.TYPE_FEED;
+	this.type = Feed.TYPE_FEED;
 }
+
+Feed.TYPE_FEED = 0;
+Feed.TYPE_AUDIO = 1;
+Feed.TYPE_IMAGE = 2;
+Feed.TYPE_VIDEO = 4;
 
 Feed.prototype = {
 	searchLists: {
@@ -241,7 +246,7 @@ Feed.prototype = {
 			}
 		}
 		
-		var feedtype = Ci.nsIFeed.TYPE_FEED;
+		var feedtype = Feed.TYPE_FEED;
 		
 		// For a feed to be marked as TYPE_VIDEO, TYPE_AUDIO and TYPE_IMAGE,
 		// we enforce two things:
@@ -253,13 +258,13 @@ Feed.prototype = {
 		// Otherwise it's a TYPE_FEED.
 		if (entriesWithEnclosures == this.items.length && otherCount == 0) {
 			if (audioCount > 0 && !videoCount && !imageCount) {
-				feedtype = Ci.nsIFeed.TYPE_AUDIO;
+				feedtype = Feed.TYPE_AUDIO;
 			}
 			else if (imageCount > 0 && !audioCount && !videoCount) {
-				feedtype = Ci.nsIFeed.TYPE_IMAGE;
+				feedtype = Feed.TYPE_IMAGE;
 			}
 			else if (videoCount > 0 && !audioCount && !imageCount) {
-				feedtype = Ci.nsIFeed.TYPE_VIDEO;
+				feedtype = Feed.TYPE_VIDEO;
 			}
 		}
 		
