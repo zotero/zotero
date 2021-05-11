@@ -13,8 +13,6 @@ function LOG(str) {
 const SAX_CONTRACTID = "@mozilla.org/saxparser/xmlreader;1";
 const PARSERUTILS_CONTRACTID = "@mozilla.org/parserutils;1";
 
-const gMimeService = Cc["@mozilla.org/mime;1"].getService(Ci.nsIMIMEService);
-
 const XMLNS = "http://www.w3.org/XML/1998/namespace";
 const RSS090NS = "http://my.netscape.com/rdf/simple/0.9/";
 
@@ -471,13 +469,6 @@ Entry.prototype = {
 		if (previousEnc != undefined) {
 			if (!previousEnc.type && newEnc.type) {
 				previousEnc.type = newEnc.type;
-				try {
-					let handlerInfoWrapper = gMimeService.getFromTypeAndExtension(newEnc.type, null);
-					if (handlerInfoWrapper && handlerInfoWrapper.description) {
-						previousEnc.typeDesc = handlerInfoWrapper.description;
-					}
-				}
-				catch (ext) {}
 			}
 			
 			if (!previousEnc.length && newEnc.length) {
