@@ -13,7 +13,8 @@ var Zotero_Import_Wizard = {
 		this._wizard = document.getElementById('import-wizard');
 		var dbs = await Zotero_File_Interface.findMendeleyDatabases();
 		if (dbs.length) {
-			document.getElementById('radio-import-source-mendeley').hidden = false;
+			// Local import disabled
+			//document.getElementById('radio-import-source-mendeley').hidden = false;
 		}
 		
 		// If no existing collections or non-trash items in the library, don't create a new
