@@ -208,7 +208,7 @@ Zotero.Sync.EventListeners.AutoSyncListener = {
 			autoSyncDelay || this._editTimeout,
 			false,
 			{
-				libraries: libraries.map(library => library.libraryID),
+				libraries: [...new Set(libraries.map(library => library.libraryID))],
 				fileLibraries: [...fileLibraries],
 				fullTextLibraries: [...fullTextLibraries]
 			}
