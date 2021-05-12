@@ -808,6 +808,8 @@ class EditorInstance {
 						await this._item.save({
 							skipDateModifiedUpdate,
 							notifierData: {
+								// Use a longer timeout to avoid repeated syncing during typing
+								autoSyncDelay: Zotero.Notes.AUTO_SYNC_DELAY,
 								noteEditorID: this.instanceID,
 								state
 							}
@@ -826,7 +828,11 @@ class EditorInstance {
 					item.parentKey = this.parentItem.key;
 				}
 				if (!this._disableSaving) {
-					var id = await item.saveTx();
+					var id = await item.saveTx({
+						notifierData: {
+							autoSyncDelay: Zotero.Notes.AUTO_SYNC_DELAY
+						}
+					});
 					if (!this.parentItem && this.collection) {
 						this.collection.addItem(id);
 					}

@@ -3492,7 +3492,11 @@ var ZoteroPane = new function()
 		else if (this.collectionsView.selectedTreeRow.isCollection()) {
 			item.addToCollection(this.collectionsView.selectedTreeRow.ref.id);
 		}
-		var itemID = yield item.saveTx();
+		var itemID = yield item.saveTx({
+			notifierData: {
+				autoSyncDelay: Zotero.Notes.AUTO_SYNC_DELAY
+			}
+		});
 		
 		yield this.selectItem(itemID);
 		

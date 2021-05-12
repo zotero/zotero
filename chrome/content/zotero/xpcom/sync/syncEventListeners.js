@@ -100,7 +100,6 @@ Zotero.Sync.EventListeners.ChangeListener = new function () {
 
 Zotero.Sync.EventListeners.AutoSyncListener = {
 	_editTimeout: 3,
-	_noteEditTimeout: 15,
 	_observerID: null,
 	
 	init: function () {
@@ -168,13 +167,15 @@ Zotero.Sync.EventListeners.AutoSyncListener = {
 			return;
 		}
 		
-		var noteEdit = false;
-		if (type == 'item' && (event == 'add' || event == 'modify' || event == 'index')) {
-			// Use a longer timeout for a single note edit, to avoid repeating syncing during typing
-			if (ids.length == 1 && (Zotero.Items.get(ids[0]) || {}).itemType == 'note') {
-				noteEdit = true;
+		var autoSyncDelay = 0;
+		if (type == 'item') {
+			// Use a different timeout if specified (e.g., for note editing)
+			if (extraData[ids[0]] && extraData[ids[0]].autoSyncDelay) {
+				autoSyncDelay = Math.max(autoSyncDelay, extraData[ids[0]].autoSyncDelay);
 			}
-			else {
+			
+			// Check whether file syncing or full-text syncing are necessary
+			if (event == 'add' || event == 'modify' || event == 'index') {
 				for (let id of ids) {
 					let item = Zotero.Items.get(id);
 					if (!item) continue;
@@ -189,7 +190,7 @@ Zotero.Sync.EventListeners.AutoSyncListener = {
 		}
 		
 		Zotero.Sync.Runner.setSyncTimeout(
-			noteEdit ? this._noteEditTimeout : this._editTimeout,
+			autoSyncDelay || this._editTimeout,
 			false,
 			{
 				libraries: libraries.map(library => library.libraryID),

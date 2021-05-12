@@ -276,6 +276,7 @@
 									this.noteField.changed = false;
 									yield this.item.saveTx({
 										notifierData: {
+											autoSyncDelay: Zotero.Notes.AUTO_SYNC_DELAY,
 											noteEditorID: this.instanceID
 										}
 									});
@@ -293,7 +294,11 @@
 								item.parentKey = this.parentItem.key;
 							}
 							if (this.saveOnEdit) {
-								var id = yield item.saveTx();
+								var id = yield item.saveTx({
+									notifierData: {
+										autoSyncDelay: Zotero.Notes.AUTO_SYNC_DELAY
+									}
+								});
 								
 								if (!this.parentItem && this.collection) {
 									this.collection.addItem(id);
