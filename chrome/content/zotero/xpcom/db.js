@@ -859,7 +859,7 @@ Zotero.DBConnection.prototype.executeSQLFile = async function (sql) {
 	var statements = this.parseSQLFile(sql);
 	var statement;
 	while (statement = statements.shift()) {
-		await this.queryAsync(statement);
+		await this.queryAsync(statement, false, { noCache: true });
 	}
 };
 
