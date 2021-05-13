@@ -847,7 +847,9 @@ Zotero_Import_Mendeley.prototype._getDocumentAnnotationsAPI = async function (gr
 			
 			const annotation = {
 				id: a.id,
-				color: a.color ? `#${a.color.r.toString(16)}${a.color.g.toString(16)}${a.color.b.toString(16)}` : null,
+				color: a.color
+					? `#${a.color.r.toString(16).padStart(2, '0')}${a.color.g.toString(16).padStart(2, '0')}${a.color.b.toString(16).padStart(2, '0')}`
+					: null,
 				dateAdded: a.created,
 				dateModified: a.last_modified,
 				hash: a.filehash,
