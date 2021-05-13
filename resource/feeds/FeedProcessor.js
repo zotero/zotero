@@ -11,7 +11,6 @@ function LOG(str) {
 }
 
 const SAX_CONTRACTID = "@mozilla.org/saxparser/xmlreader;1";
-const PARSERUTILS_CONTRACTID = "@mozilla.org/parserutils;1";
 
 const XMLNS = "http://www.w3.org/XML/1998/namespace";
 const RSS090NS = "http://my.netscape.com/rdf/simple/0.9/";
@@ -567,42 +566,38 @@ function TextConstruct() {
 	this.base = null;
 	this.type = "text";
 	this.text = null;
-	this.parserUtils = Cc[PARSERUTILS_CONTRACTID].getService(Ci.nsIParserUtils);
 }
 
 TextConstruct.prototype = {
 	plainText: function () {
 		if (this.type != "text") {
-			return this.parserUtils.convertToPlainText(stripTags(this.text),
-				Ci.nsIDocumentEncoder.OutputSelectionOnly
-				| Ci.nsIDocumentEncoder.OutputAbsoluteLinks,
-				0);
+			return stripTags(this.text);
 		}
 		return this.text;
 	},
 	
 	createDocumentFragment: function (element) {
 		if (this.type == "text") {
-			var doc = element.ownerDocument;
-			var docFragment = doc.createDocumentFragment();
-			var node = doc.createTextNode(this.text);
+			const doc = element.ownerDocument;
+			const docFragment = doc.createDocumentFragment();
+			const node = doc.createTextNode(this.text);
 			docFragment.appendChild(node);
 			return docFragment;
 		}
-		var isXML;
+		
+		let parserType;
 		if (this.type == "xhtml") {
-			isXML = true;
+			parserType = "application/xhtml+xml";
 		}
 		else if (this.type == "html") {
-			isXML = false;
+			parserType = "text/html";
 		}
 		else {
 			return null;
 		}
 		
-		let flags = Ci.nsIParserUtils.SanitizerDropForms;
-		return this.parserUtils.parseFragment(this.text, flags, isXML,
-			this.base, element);
+		const parsedDoc = new DOMParser().parseFromString(this.text, parserType);
+		return parsedDoc.documentElement;
 	},
 };
 
