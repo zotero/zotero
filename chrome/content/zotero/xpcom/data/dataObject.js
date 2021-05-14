@@ -927,8 +927,8 @@ Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options =
 		}
 		// Pass along event-level notifier options, which become top-level extraData properties
 		for (let option of Zotero.Notifier.EVENT_LEVEL_OPTIONS) {
-			if (env.options[option]) {
-				env.notifierData[option] = true;
+			if (env.options[option] !== undefined) {
+				env.notifierData[option] = env.options[option];
 			}
 		}
 		if (!env.isNew) {

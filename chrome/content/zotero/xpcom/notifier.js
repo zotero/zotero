@@ -206,8 +206,8 @@ Zotero.Notifier = new function(){
 		if (extraData) {
 			// Set event-level options as top-level properties in extraData
 			for (let option of Zotero.Notifier.EVENT_LEVEL_OPTIONS) {
-				if (extraData[option]) {
-					queue[type][event].data[option] = true;
+				if (extraData[option] !== undefined) {
+					queue[type][event].data[option] = extraData[option];
 					delete extraData[option];
 				}
 			}

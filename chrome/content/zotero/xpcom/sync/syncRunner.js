@@ -936,6 +936,10 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			throw new Error("Timeout not provided");
 		}
 		
+		if (timeout != parseInt(timeout)) {
+			throw new Error(`Timeout must be an integer (${timeout} given)`);
+		}
+		
 		if (_autoSyncTimer) {
 			Zotero.debug("Cancelling auto-sync timer");
 			_autoSyncTimer.cancel();
