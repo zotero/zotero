@@ -918,12 +918,18 @@ Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options =
 		}
 		
 		env.notifierData = {};
-		// Pass along any 'notifierData' values
+		// Pass along any 'notifierData' values, which become 'extraData' in notifier events
 		if (env.options.notifierData) {
 			Object.assign(env.notifierData, env.options.notifierData);
 		}
 		if (env.options.skipSelect) {
 			env.notifierData.skipSelect = true;
+		}
+		// Pass along event-level notifier options, which become top-level extraData properties
+		for (let option of Zotero.Notifier.EVENT_LEVEL_OPTIONS) {
+			if (env.options[option]) {
+				env.notifierData[option] = true;
+			}
 		}
 		if (!env.isNew) {
 			env.changed = this._previousData;

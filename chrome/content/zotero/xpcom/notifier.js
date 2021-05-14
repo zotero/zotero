@@ -26,6 +26,9 @@
 "use strict";
 
 Zotero.Notifier = new function(){
+	// Options that apply to an entire event, not a specific object
+	this.EVENT_LEVEL_OPTIONS = ['autoSyncDelay', 'skipAutoSync'];
+	
 	var _observers = {};
 	var _types = [
 		'collection', 'search', 'share', 'share-items', 'item', 'file',
@@ -201,6 +204,14 @@ Zotero.Notifier = new function(){
 		
 		// Merge extraData keys
 		if (extraData) {
+			// Set event-level options as top-level properties in extraData
+			for (let option of Zotero.Notifier.EVENT_LEVEL_OPTIONS) {
+				if (extraData[option]) {
+					queue[type][event].data[option] = true;
+					delete extraData[option];
+				}
+			}
+			
 			// If just a single id, extra data can be keyed by id or passed directly
 			if (ids.length == 1) {
 				let id = ids[0];
@@ -300,11 +311,21 @@ Zotero.Notifier = new function(){
 			}
 			
 			var queue = {};
-			for (let q of queues) {
-				q = q._queue;
+			for (let { _queue: q, options } of queues) {
 				for (let type in q) {
 					for (let event in q[type]) {
-						_mergeEvent(queue, event, type, q[type][event].ids, q[type][event].data);
+						let extraData = Object.assign({}, q[type][event].data);
+						// Add options from queue as top-level options in extraData
+						if (options) {
+							for (let option in options) {
+								if (!this.EVENT_LEVEL_OPTIONS.includes(option)) {
+									throw new Error(`Queue option '${option} must be an event-level option`);
+								}
+								extraData[option] = options[option];
+							}
+						}
+						
+						_mergeEvent(queue, event, type, q[type][event].ids, extraData);
 					}
 				}
 			}
@@ -312,6 +333,7 @@ Zotero.Notifier = new function(){
 		else if (!_transactionID) {
 			throw new Error("Can't commit outside of transaction");
 		}
+		// Use default queue
 		else {
 			var queue = _queue;
 		}
@@ -419,9 +441,10 @@ Zotero.Notifier = new function(){
 }
 
 
-Zotero.Notifier.Queue = function () {
+Zotero.Notifier.Queue = function (options = {}) {
 	this.id = Zotero.Utilities.randomString();
 	Zotero.debug("Creating notifier queue " + this.id);
 	this._queue = {};
 	this.size = 0;
+	this.options = options;
 };

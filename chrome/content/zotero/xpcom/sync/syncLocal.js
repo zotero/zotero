@@ -807,7 +807,9 @@ Zotero.Sync.Data.Local = {
 						batchSize = options.getNotifierBatchSize()
 					}
 				}
-				let notifierQueue = new Zotero.Notifier.Queue;
+				let notifierQueue = new Zotero.Notifier.Queue({
+					skipAutoSync: true
+				});
 				
 				let jsonObject = json[i];
 				let jsonData = jsonObject.data;

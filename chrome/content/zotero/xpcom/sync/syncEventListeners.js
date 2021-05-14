@@ -131,6 +131,19 @@ Zotero.Sync.EventListeners.AutoSyncListener = {
 			return;
 		}
 		
+		var autoSyncDelay = 0;
+		if (extraData) {
+			// Some events (e.g., writes from the server) skip auto-syncing altogether
+			if (extraData.skipAutoSync) {
+				return;
+			}
+			
+			// Use a different timeout if specified (e.g., for note editing)
+			if (extraData.autoSyncDelay) {
+				autoSyncDelay = extraData.autoSyncDelay;
+			}
+		}
+		
 		// Determine affected libraries so only those can be synced
 		let libraries = [];
 		var fileLibraries = new Set();
@@ -175,13 +188,7 @@ Zotero.Sync.EventListeners.AutoSyncListener = {
 			return;
 		}
 		
-		var autoSyncDelay = 0;
 		if (type == 'item') {
-			// Use a different timeout if specified (e.g., for note editing)
-			if (extraData[ids[0]] && extraData[ids[0]].autoSyncDelay) {
-				autoSyncDelay = Math.max(autoSyncDelay, extraData[ids[0]].autoSyncDelay);
-			}
-			
 			// Check whether file syncing or full-text syncing are necessary
 			if (event == 'add' || event == 'modify' || event == 'index') {
 				for (let id of ids) {

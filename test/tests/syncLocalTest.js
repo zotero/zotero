@@ -515,6 +515,35 @@ describe("Zotero.Sync.Data.Local", function() {
 			});
 		})
 		
+		it("shouldn't trigger an auto-sync", async function () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			
+			var item = createUnsavedDataObject('item');
+			let data = item.toJSON();
+			data.key = Zotero.DataObjectUtilities.generateKey();
+			data.version = 10;
+			let json = {
+				key: data.key,
+				version: 10,
+				data
+			};
+			
+			// Make sure the pref in question is still disabled by default during tests
+			assert.isFalse(Zotero.Prefs.get('sync.autoSync'));
+			Zotero.Prefs.set('sync.autoSync', true);
+			var stub = sinon.stub(Zotero.Sync.Runner, 'setSyncTimeout');
+			
+			await Zotero.Sync.Data.Local.processObjectsFromJSON(
+				'item', libraryID, [json], { stopOnError: true }
+			);
+			
+			// setSyncTimeout() shouldn't have been called at all
+			assert.isFalse(stub.called);
+			
+			stub.restore();
+			Zotero.Prefs.set('sync.autoSync', false);
+		});
+		
 		it("should update local version number and mark as synced if remote version is identical", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			
