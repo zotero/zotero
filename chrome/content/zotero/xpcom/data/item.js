@@ -3706,6 +3706,15 @@ for (let name of ['type', 'text', 'comment', 'color', 'pageLabel', 'sortIndex', 
 					}
 					break;
 				
+				case 'color':
+					// Require 6-char hex value
+					if (!value.match(/#[a-f0-9]{6}/)) {
+						let e = new Error(`Invalid annotation color '${value}'`);
+						e.name = "ZoteroInvalidDataError";
+						throw e;
+					}
+					break;
+				
 				case 'sortIndex':
 					if (!/^\d{5}\|\d{6}\|\d{5}$/.test(value)) {
 						throw new Error(`Invalid sortIndex '${value}`);
