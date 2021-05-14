@@ -149,9 +149,17 @@ Zotero.Sync.EventListeners.AutoSyncListener = {
 		else if (Zotero.DataObjectUtilities.getTypes().includes(type)) {
 			let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType(type);
 			ids.forEach(id => {
+				let libraryID;
 				let lk = objectsClass.getLibraryAndKeyFromID(id);
 				if (lk) {
-					let library = Zotero.Libraries.get(lk.libraryID);
+					libraryID = lk.libraryID;
+				}
+				// On object deletion, libraryID should be in extraData
+				else if (extraData && extraData[id] && extraData[id].libraryID) {
+					libraryID = extraData[id].libraryID;
+				}
+				if (libraryID) {
+					let library = Zotero.Libraries.get(libraryID);
 					if (library.syncable) {
 						libraries.push(library);
 					}

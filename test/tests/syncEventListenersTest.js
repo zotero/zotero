@@ -97,6 +97,21 @@ describe("Zotero.Sync.EventListeners", function () {
 			assert.sameMembers(expectation.getCall(0).args[2].libraries, [Zotero.Libraries.userLibraryID]);
 		});
 		
+		it("should auto-sync after item deletion", async function () {
+			Zotero.Prefs.set('sync.autoSync', false);
+			var item = await createDataObject('item');
+			Zotero.Prefs.set('sync.autoSync', true);
+			
+			var mock = sinon.mock(Zotero.Sync.Runner);
+			var expectation = mock.expects("setSyncTimeout").once();
+			
+			await item.eraseTx();
+			
+			await Zotero.Promise.delay(10);
+			mock.verify();
+			assert.sameMembers(expectation.getCall(0).args[2].libraries, [Zotero.Libraries.userLibraryID]);
+		});
+		
 		it("should auto-sync after attachment reindex", async function () {
 			Zotero.Prefs.set('sync.autoSync', false);
 			var attachment = await importFileAttachment('test.pdf');
