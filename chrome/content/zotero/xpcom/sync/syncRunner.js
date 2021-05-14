@@ -337,7 +337,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			// If an auto-sync was queued while a sync was ongoing, start again with its options
 			else if (_queuedSyncOptions.length) {
 				Zotero.debug("Restarting sync");
-				yield this._sync(_queuedSyncOptions.shift());
+				yield this._sync(JSON.parse(_queuedSyncOptions.shift()));
 				return;
 			}
 			
@@ -925,7 +925,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	/**
 	 * @param {Integer} timeout - Timeout in seconds
 	 * @param {Boolean} [recurring=false]
-	 * @param {Object} [options] - Sync options
+	 * @param {Object} [options] - Sync options (e.g., 'libraries', 'fileLibraries', 'fullTextLibraries')
 	 */
 	this.setSyncTimeout = function (timeout, recurring, options = {}) {
 		if (!Zotero.Prefs.get('sync.autoSync') || !this.enabled) {
@@ -968,13 +968,13 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				
 				if (Zotero.locked) {
 					Zotero.debug('Zotero is locked -- skipping auto-sync', 4);
-					_queuedSyncOptions.push(mergedOpts);
+					_queueSyncOptions(mergedOpts);
 					return;
 				}
 				
 				if (_syncInProgress) {
 					Zotero.debug('Sync already in progress -- skipping auto-sync', 4);
-					_queuedSyncOptions.push(mergedOpts);
+					_queueSyncOptions(mergedOpts);
 					return;
 				}
 				
@@ -996,7 +996,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		else {
 			if (_syncInProgress) {
 				Zotero.debug('Sync in progress -- not setting auto-sync timeout', 4);
-				_queuedSyncOptions.push(mergedOpts);
+				_queueSyncOptions(mergedOpts);
 				return;
 			}
 			
@@ -1005,6 +1005,18 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				callback, timeout * 1000, Components.interfaces.nsITimer.TYPE_ONE_SHOT
 			);
 		}
+	}
+	
+	
+	function _queueSyncOptions(options) {
+		var jsonOptions = JSON.stringify(options);
+		// Don't queue options if already queued
+		if (_queuedSyncOptions.includes(jsonOptions)) {
+			return;
+		}
+		Zotero.debug("Queueing sync options");
+		Zotero.debug(options);
+		_queuedSyncOptions.push(jsonOptions);
 	}
 	
 	
