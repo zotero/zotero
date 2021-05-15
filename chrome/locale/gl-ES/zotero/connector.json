@@ -2,6 +2,9 @@
   "general_more": {
     "message": "Máis..."
   },
+  "general_moreInfo": {
+    "message": "Máis información..."
+  },
   "general_done": {
     "message": "Feito"
   },
@@ -16,6 +19,9 @@
   },
   "general_pleaseWait": {
     "message": "Agarde...."
+  },
+  "general_copyToClipboard": {
+    "message": "Copiar no portaretallos"
   },
   "progressWindow_savingTo": {
     "message": "Gardando en"
@@ -56,6 +62,15 @@
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Activar o almacenamento en librerías en liña"
   },
+  "reports_report_submitted": {
+    "message": "Enviouse o teu erro.\n\nID de informe: $1\n\nPrégase que publique unha mensaxe no Foro de Zotero indicando esta ID de informe, unha descrición do erro e calquera indicación para poder reproducilo.\n\nOs informes de erro non se revisan ata que se informe deles nos foros."
+  },
+  "reports_debug_output_submitted": {
+    "message": "Enviouse o teu rexistro de saída.\n\nA ID de informe é $1."
+  },
+  "reports_submission_failed": {
+    "message": "Houbo un erro enviando o teu informe.\n\n$1\n\nComproba a conexión a internet. Se persiste o problema, coméntao no Foros de Zotero."
+  },
   "integration_error_clientUpgrade": {
     "message": "As citas baseadas na web precisan da versión $1 ou seguintes."
   },
@@ -76,6 +91,18 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "$1 integración non está dispoñible cando se editan os Microsoft Word .docx directamente desde Google Docs.  Escolla Ficheiro → Gardar como Google Docs para permitir activar esa funcionalidade.<br/><br/>Se queres transferir de documento Word as $1 citas para Google Docs, olla <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Mover documentos entre editores de texto </a>."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "Amosar as citas $1 desligadas."
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "A cita que estás intentando editar atópase desligada de $1."
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Volver a ligar a cita"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "Estas citas quedaron <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">desligadas de $1</a>. Precisas volver a ligalas antes de seren actualizadas ou de apareceren na libraría."
   },
   "general_saveTo": {
     "message": "Gardar en $1"

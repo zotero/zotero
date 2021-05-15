@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Kijelölés megszüntetése">
 <!ENTITY zotero.general.edit "Szerkesztés">
 <!ENTITY zotero.general.delete "Törlés">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Mozgatás a Kukába">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Mégse">
 <!ENTITY zotero.general.refresh "Újratöltés">
@@ -91,7 +91,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Megjelenítés a könyvtárban">
 <!ENTITY zotero.items.menu.attach.note "Jegyzet hozzáadása">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Megjegyzés hozzáadása a kommentárokból">
 <!ENTITY zotero.items.menu.attach "Csatolmány hozzáadása">
 <!ENTITY zotero.items.menu.attach.link.uri "Link csatolása az URI-hez…">
 <!ENTITY zotero.items.menu.attach.file "Helyben tárolt példány csatolása">
@@ -157,8 +157,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Helyi másolat tárolása...">
 <!ENTITY zotero.toolbar.attachment.weblink "Hivatkozás az aktuális oldalra">
 <!ENTITY zotero.toolbar.attachment.snapshot "Pillanatfelvétel az aktuális oldalról">
-<!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.item "Elem">
+<!ENTITY zotero.toolbar.context.notes "Jegyzetek">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Nincsenek címkék">
 <!ENTITY zotero.tagSelector.loadingTags "Címkék betöltése…">

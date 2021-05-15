@@ -62,8 +62,14 @@
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Omogoči shranjevanje v spletno knjižnico"
   },
+  "reports_report_submitted": {
+    "message": "Vaše poročilo o napaki je oddano.\n\nID poročila: $1\n\nObjavite sporočilo na forumih Zotero z ID poročila, opisom težave in potrebnih korakih, da jo prikličete.\n\nPoročila o napaki bodo pregledana, če so omenjena na forumih."
+  },
   "reports_debug_output_submitted": {
     "message": "Vaš izhod razhroščevanja je bil poslan.\n\nID razhroščevanja je $1."
+  },
+  "reports_submission_failed": {
+    "message": "Pri oddaji vašega poročila je prišlo do napake.\n\n$1\n\nPreverite svojo internetno povezavo. Če se težava ponovi, objavite sporočilo na forumih Zotero."
   },
   "integration_error_clientUpgrade": {
     "message": "Citiranje prek spleta zahteva $1 ali novejšega."
@@ -85,6 +91,18 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "Integracija $1 ni na voljo pri neposrednem urejanju datotek Microsoft Word .docx v Google Docs. Izberite Datoteka → Shrani kot Google Docs, da omogočite to funkcionalnost.<br/><br/>Če želite prenesti dokument Word s citati $1 v Google Docs, glejte <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Prenašanje dokumentov med urejevalniki besedil</a>."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "Pokaži nepovezane citate $1"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "Citat, ki ga skušate urediti, je nepovezan z $1."
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Ponovno poveži citat"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "Ti citati so postali <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">nepovezani z $1</a>. Morali jih boste morali znova povezati, preden se posodobijo ali pojavijo v vaši bibliografiji."
   },
   "general_saveTo": {
     "message": "Shrani v $1"

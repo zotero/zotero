@@ -157,7 +157,7 @@
 <!ENTITY zotero.toolbar.attachment.add "Shrani kopijo datoteke ...">
 <!ENTITY zotero.toolbar.attachment.weblink "Shrani povezavo na trenutno stran">
 <!ENTITY zotero.toolbar.attachment.snapshot "Naredi posnetek trenutne strani">
-<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.item "Vnos">
 <!ENTITY zotero.toolbar.context.notes "Opombe">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Brez značk za prikaz">
@@ -330,8 +330,8 @@
 <!ENTITY zotero.attachLink.label.link "Povezava:">
 <!ENTITY zotero.attachLink.label.title "Naslov:">
 
-<!ENTITY zotero.context.addChildNote "Add Item Note">
-<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addChildNote "Dodaj opombo vnosu">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Dodaj opombo vnosu iz zaznamkov">
 <!ENTITY zotero.context.addStandaloneNote "Dodaj samostojno opombo">
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Dodaj samostojno opombo iz zaznamkov">
 <!ENTITY zotero.context.editInWindow "Uredi v ločenem oknu">

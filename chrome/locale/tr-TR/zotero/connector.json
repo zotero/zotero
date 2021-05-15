@@ -92,6 +92,18 @@
   "integration_googleDocs_docxAlert": {
     "message": "$1 ile birleştirme, Microsoft Word .docx dosyalarını Google Docs içinde düzenlerken kullanılamamaktadır. Dosya Seçiniz → Google Docs dosyası olarak kaydediniz seçenekleri ile bu fonksiyonu etkinleştirebilirsiniz.<br/><br/> $1 alıntısı içeren bir Word belgesini Google Docs uygulamasına aktarmak için, <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Moving Documents Between Word Processors</a> sayfasına bakınız."
   },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "Bağlantılarını kaybetmiş $1 alıntılarını göster"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "Düzenlemeye çalıştığınız alıntı $1 ile olan bağlantısını kaybetmiş."
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Alıntının Bağlantısını Yeniden Kur"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "Bu alıntılar <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">$1 ile olan bağlantılarını kaybetmiş</a>. Kaynakçanızda güncellenmeleri ya da görünebilmeleri için yeniden bağlantılarını kurmanız gerekmektedir."
+  },
   "general_saveTo": {
     "message": "$1'ya Kaydet"
   }
