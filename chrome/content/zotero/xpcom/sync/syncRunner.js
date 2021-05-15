@@ -379,25 +379,34 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				let index = ps.confirmEx(
 					null,
 					Zotero.getString('general.warning'),
-					Zotero.getString('account.warning.emptyLibrary', [keyInfo.username, Zotero.clientName]) + "\n\n"
-						+ Zotero.getString('account.warning.existingDataElsewhere', Zotero.clientName),
+					Zotero.getString(
+							'account.warning.emptyLibrary',
+							[Zotero.clientName, OS.Path.basename(Zotero.DB.path)]
+						) + "\n\n"
+						+ Zotero.getString(
+							'account.warning.emptyLibrary.dataWillBeDownloaded',
+							keyInfo.username
+						)
+						+ "\n\n"
+						+ Zotero.getString(
+							'account.warning.existingDataElsewhere',
+							Zotero.clientName
+						)
+						+ "\n\n"
+						+ Zotero.getString('dataDir.location', Zotero.DataDirectory.dir),
 					(ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING) 
 						+ (ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL)
 						+ (ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING),
 					Zotero.getString('sync.sync'),
 					null, 
-					Zotero.getString('dataDir.changeDataDirectory'), 
+					Zotero.getString('general.moreInformation'),
 					null, {}
 				);
 				if (index == 1) {
 					return false;
 				}
 				else if (index == 2) {
-					var win = Services.wm.getMostRecentWindow("navigator:browser");
-					win.openDialog("chrome://zotero/content/preferences/preferences.xul", null, null, {
-						pane: 'zotero-prefpane-advanced',
-						tabIndex: 1
-					});
+					Zotero.launchURL('https://www.zotero.org/support/zotero_data#locating_missing_zotero_data');
 					return false;
 				}
 			}
