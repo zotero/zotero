@@ -119,6 +119,12 @@ Zotero.DBConnection = function(dbNameOrPath) {
 // Public methods
 //
 /////////////////////////////////////////////////////////////////
+Zotero.defineProperty(Zotero.DBConnection.prototype, 'path', {
+	get: function () {
+		return this._dbPath;
+	}
+});
+
 
 /**
  * Test a read-only connection to the database, throwing any errors that occur
