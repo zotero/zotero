@@ -197,7 +197,6 @@ richlistitem[selected="true"] {
 
 #zotero-icon {
 	list-style-image: url("chrome://zotero/skin/zotero-new-z-16px.png");
-	background-color: #fff;
 	padding: 0;
 	margin: 0;
 }
