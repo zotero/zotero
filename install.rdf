@@ -7,17 +7,6 @@
     <em:id>zotero@chnm.gmu.edu</em:id>
     <em:name>Zotero</em:name>
     <em:version>5.0.97.SOURCE</em:version>
-    <em:creator>Center for History and New Media<br/>George Mason University</em:creator>
-    <em:contributor>Dan Cohen</em:contributor>
-    <em:contributor>Sean Takats</em:contributor>
-    <em:developer>Simon Kornblith</em:developer>
-    <em:developer>David Norton</em:developer>
-    <em:developer>Dan Stillman</em:developer>
-    <em:homepageURL>http://www.zotero.org</em:homepageURL>
-    <em:optionsURL>chrome://zotero/content/preferences/preferences.xul</em:optionsURL>
-    <em:aboutURL>chrome://zotero/content/about.xul</em:aboutURL>
-    <em:iconURL>chrome://zotero/skin/zotero-new-z-48px.png</em:iconURL>
-    <em:updateURL>https://www.zotero.org/download/update-source.rdf</em:updateURL>
     <em:multiprocessCompatible>false</em:multiprocessCompatible>
     <em:type>2</em:type> <!-- type=extension --> 
     
