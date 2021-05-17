@@ -66,6 +66,8 @@ var Zotero_Tabs = new function () {
 		var { tab } = this._getTab(this._selectedID);
 		document.title = (tab.title.length ? tab.title + ' - ' : '') + 'Zotero';
 		this._updateTabBar();
+		// Hide any tab title tooltips that might be open
+		window.Zotero_Tooltip.stop();
 	};
 
 	this.init = function () {
