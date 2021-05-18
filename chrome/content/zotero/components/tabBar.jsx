@@ -36,15 +36,15 @@ const TabBar = forwardRef(function (props, ref) {
 	const mouseMoveWaitUntil = useRef(0);
 
 	useEffect(() => {
-		window.addEventListener('mouseup', handleMouseUp);
+		window.addEventListener('mouseup', handleWindowMouseUp);
 		return () => {
-			window.removeEventListener('mouseup', handleMouseUp);
+			window.removeEventListener('mouseup', handleWindowMouseUp);
 		};
 	}, []);
 
 	useImperativeHandle(ref, () => ({ setTabs }));
 
-	function handleMouseDown(event, id, index) {
+	function handleTabMouseDown(event, id, index) {
 		if (event.target.closest('.tab-close')) {
 			return;
 		}
@@ -55,7 +55,7 @@ const TabBar = forwardRef(function (props, ref) {
 		event.stopPropagation();
 	}
 
-	function handleMouseMove(event) {
+	function handleTabBarMouseMove(event) {
 		if (!draggingID.current || mouseMoveWaitUntil.current > Date.now()) {
 			return;
 		}
@@ -91,7 +91,7 @@ const TabBar = forwardRef(function (props, ref) {
 		mouseMoveWaitUntil.current = Date.now() + 100;
 	}
 
-	function handleMouseUp(event) {
+	function handleWindowMouseUp(event) {
 		draggingID.current = null;
 		event.stopPropagation();
 	}
@@ -109,7 +109,7 @@ const TabBar = forwardRef(function (props, ref) {
 				/* Fix 'title' not working for HTML-in-XUL */
 				onMouseOver={() => window.Zotero_Tooltip.start(title)}
 				onMouseOut={() => window.Zotero_Tooltip.stop()}
-				onMouseDown={(event) => handleMouseDown(event, id, index)}
+				onMouseDown={(event) => handleTabMouseDown(event, id, index)}
 			>
 				<div className="tab-name">{title}</div>
 				<div
@@ -123,7 +123,7 @@ const TabBar = forwardRef(function (props, ref) {
 	}
 
 	return (
-		<div className="tabs" ref={tabsRef} onMouseMove={handleMouseMove}>
+		<div className="tabs" ref={tabsRef} onMouseMove={handleTabBarMouseMove}>
 			{tabs.map((tab, index) => renderTab(tab, index))}
 		</div>
 	);
