@@ -100,15 +100,26 @@ const TabBar = forwardRef(function (props, ref) {
 		props.onTabClose(id);
 		event.stopPropagation();
 	}
+	
+	function handleTabMouseMove(title) {
+		// Fix `title` not working for HTML-in-XUL. Using `mousemove` ensures we restart the tooltip
+		// after just a small movement even when the active tab has changed under the cursor, which
+		// matches behavior in Firefox.
+		window.Zotero_Tooltip.start(title);
+	}
+	
+	function handleTabBarMouseOut() {
+		// Hide any possibly open `title` tooltips when mousing out of any tab or the tab bar as a
+		// whole. `mouseout` bubbles up from element you moved out of, so it covers both cases.
+		window.Zotero_Tooltip.stop();
+	}
 
 	function renderTab({ id, title, selected }, index) {
 		return (
 			<div
 				key={id}
 				className={cx('tab', { selected })}
-				/* Fix 'title' not working for HTML-in-XUL */
-				onMouseOver={() => window.Zotero_Tooltip.start(title)}
-				onMouseOut={() => window.Zotero_Tooltip.stop()}
+				onMouseMove={() => handleTabMouseMove(title)}
 				onMouseDown={(event) => handleTabMouseDown(event, id, index)}
 			>
 				<div className="tab-name">{title}</div>
@@ -123,7 +134,12 @@ const TabBar = forwardRef(function (props, ref) {
 	}
 
 	return (
-		<div className="tabs" ref={tabsRef} onMouseMove={handleTabBarMouseMove}>
+		<div
+			ref={tabsRef}
+			className="tabs"
+			onMouseMove={handleTabBarMouseMove}
+			onMouseOut={handleTabBarMouseOut}
+		>
 			{tabs.map((tab, index) => renderTab(tab, index))}
 		</div>
 	);
