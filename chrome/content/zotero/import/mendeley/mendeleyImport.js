@@ -1399,7 +1399,7 @@ Zotero_Import_Mendeley.prototype._saveFilesAndAnnotations = async function (file
 						contentType: file.contentType
 					};
 					// If we're not set to link files or file is in Mendeley downloads folder, import it
-					if (!this._linkFiles || this._isDownloadedFile(path)) {
+					if (!this._linkFiles || this._isDownloadedFile(path) || this._isTempDownloadedFile(path)) {
 						if (file.url) {
 							options.title = file.title;
 							options.url = file.url;
@@ -1463,9 +1463,13 @@ Zotero_Import_Mendeley.prototype._isDownloadedFile = function (path) {
 	return parentDir.endsWith(OS.Path.join('Application Support', 'Mendeley Desktop', 'Downloaded'))
 		|| parentDir.endsWith(OS.Path.join('Local', 'Mendeley Ltd', 'Mendeley Desktop', 'Downloaded'))
 		|| parentDir.endsWith(OS.Path.join('Local', 'Mendeley Ltd.', 'Mendeley Desktop', 'Downloaded'))
-		|| parentDir.endsWith(OS.Path.join('data', 'Mendeley Ltd.', 'Mendeley Desktop', 'Downloaded'))
-		|| parentDir.startsWith(OS.Path.join(Zotero.getTempDirectory().path, 'mendeley-online-import')); // Mendeley Online Importer
+		|| parentDir.endsWith(OS.Path.join('data', 'Mendeley Ltd.', 'Mendeley Desktop', 'Downloaded'));
 }
+
+Zotero_Import_Mendeley.prototype._isTempDownloadedFile = function (path) {
+	var parentDir = OS.Path.dirname(path);
+	return parentDir.startsWith(OS.Path.join(Zotero.getTempDirectory().path, 'mendeley-online-import'));
+};
 
 /**
  * Get the path to use for a file that exists, or false if none
