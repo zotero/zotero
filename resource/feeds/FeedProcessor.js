@@ -621,13 +621,13 @@ Generator.prototype = {
 	
 	set attributes(value) {
 		this._attributes = value;
-		this.version = this._attributes.getValueFromName("", "version");
-		var uriAttribute = this._attributes.getValueFromName("", "uri")
-			|| this._attributes.getValueFromName("", "url");
+		this.version = (this._attributes.getNamedItemNS("", "version") || {}).value;
+		var uriAttribute = (this._attributes.getNamedItemNS("", "uri") || {}).value
+			|| (this._attributes.getNamedItemNS("", "url") || {}).value;
 		this.uri = strToURI(uriAttribute, this.baseURI);
 		
 		// RSS1
-		uriAttribute = this._attributes.getValueFromName(RDF_NS, "resource");
+		uriAttribute = (this._attributes.getNamedItemNS(RDF_NS, "resource") || {}).value;
 		if (uriAttribute) {
 			this.agent = uriAttribute;
 			this.uri = strToURI(uriAttribute, this.baseURI);
@@ -809,23 +809,23 @@ XHTMLHandler.prototype = {
 			this._buf += "<" + localName;
 			var uri;
 			for (var i = 0; i < attributes.length; ++i) {
-				uri = attributes.getURI(i);
+				uri = attributes.item(i).namespaceURI;
 				// XHTML attributes aren't in a namespace
 				if (uri == "") {
-					this._buf += (" " + attributes.getLocalName(i) + "='"
-						+ xmlEscape(attributes.getValue(i)) + "'");
+					this._buf += (" " + attributes.item(i).localName + "='"
+						+ xmlEscape(attributes.item(i).value) + "'");
 				}
 				else {
 					// write a small set of allowed attribute namespaces
 					var prefix = gAllowedXHTMLNamespaces[uri];
 					if (prefix) {
 						// The attribute value we'll attempt to write
-						var attributeValue = xmlEscape(attributes.getValue(i));
+						var attributeValue = xmlEscape(attributes.item(i).value);
 						
 						// it's an allowed attribute NS.
 						// write the attribute
 						this._buf += (" " + prefix + ":"
-													+ attributes.getLocalName(i)
+													+ attributes.item(i).localName
 													+ "='" + attributeValue + "'");
 						
 						// write an xmlns declaration if necessary
@@ -1245,7 +1245,7 @@ FeedProcessor.prototype = {
 		// LOG("<" + localName + ">");
 		
 		// Check for xml:base
-		var base = attributes.getValueFromName(XMLNS, "base");
+		var base = (attributes.getNamedItemNS(XMLNS, "base") || {}).value;
 		if (base) {
 			this._xmlBaseStack[this._depth]
 				= strToURI(base, this._xmlBaseStack[this._xmlBaseStack.length - 1]);
@@ -1278,8 +1278,8 @@ FeedProcessor.prototype = {
 		//
 		if ((this._result.version == "atom" || this._result.version == "atom03")
 				&& this._textConstructs[key]) {
-			var type = attributes.getValueFromName("", "type");
-			if (type !== null && type.includes("xhtml")) {
+			var type = (attributes.getNamedItemNS("", "type") || {}).value;
+			if (type && type.includes("xhtml")) {
 				this._xhtmlHandler
 					= new XHTMLHandler(this, (this._result.version == "atom"));
 				this._reader.contentHandler = this._xhtmlHandler;
@@ -1486,15 +1486,15 @@ FeedProcessor.prototype = {
 		// Cycle through the attributes, and set our properties using the
 		// prefix:localNames we find in our namespace dictionary.
 		for (var i = 0; i < attributes.length; ++i) {
-			var key = this._prefixForNS(attributes.getURI(i)) + attributes.getLocalName(i);
-			var val = attributes.getValue(i);
+			var key = this._prefixForNS(attributes.item(i).namespaceURI) + attributes.item(i).localName;
+			var val = attributes.item(i).value;
 			bag[key] = val;
 		}
 	},
 	
 	// Only for RSS2esque formats
 	_findRSSVersion: function (attributes) {
-		var versionAttr = attributes.getValueFromName("", "version").trim();
+		var versionAttr = (attributes.getNamedItemNS("", "version") || {}).value.trim();
 		var versions = {
 			"0.91": "rss091",
 			"0.92": "rss092",
@@ -1588,11 +1588,11 @@ FeedProcessor.prototype = {
 			newProp.text = chars;
 			// Look up the default type in our table
 			var type = this._textConstructs[propName];
-			var typeAttribute = attributes.getValueFromName("", "type");
-			if (this._result.version == "atom" && typeAttribute !== null) {
+			var typeAttribute = (attributes.getNamedItemNS("", "type") || {}).value;
+			if (this._result.version == "atom" && typeAttribute) {
 				type = typeAttribute;
 			}
-			else if (this._result.version == "atom03" && typeAttribute !== null) {
+			else if (this._result.version == "atom03" && typeAttribute) {
 				if (typeAttribute.toLowerCase().includes("xhtml")) {
 					type = "xhtml";
 				}
