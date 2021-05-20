@@ -1230,6 +1230,12 @@ Zotero.File = new function(){
 			ext = '.' + ext;
 		}
 
+		if (ext.length >= maxLength) {
+			// Improve resulting truncated filename by dropping extension if it wouldn't fit within
+			// the limit. e.g. for (lorem.json, 5) it returns "lorem", instead of ".json"
+			ext = '';
+		}
+
 		return fn.substr(0,maxLength-ext.length) + ext;
 	}
 	
