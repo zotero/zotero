@@ -706,7 +706,7 @@ Zotero_Import_Mendeley.prototype._getDocumentFilesAPI = async function (document
 	for (let doc of documents) {
 		const files = [];
 		for (let file of (doc.files || [])) {
-			const fileName = file.file_name || 'file';
+			const fileName = Zotero.File.getValidFileName(file.file_name || 'file');
 			const tmpFile = OS.Path.join(Zotero.getTempDirectory().path, `m-api-${this.timestamp}-${file.id}`, fileName);
 			this._tmpFilesToDelete.push(tmpFile);
 			caller.add(this._fetchFile.bind(this, file.id, tmpFile));
