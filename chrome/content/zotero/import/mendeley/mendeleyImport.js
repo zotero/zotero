@@ -707,7 +707,7 @@ Zotero_Import_Mendeley.prototype._getDocumentFilesAPI = async function (document
 		const files = [];
 		for (let file of (doc.files || [])) {
 			const fileName = file.file_name || 'file';
-			const tmpFile = OS.Path.join(Zotero.getTempDirectory().path, `mendeley-online-import-${this.timestamp}-${file.id}`, fileName);
+			const tmpFile = OS.Path.join(Zotero.getTempDirectory().path, `m-api-${this.timestamp}-${file.id}`, fileName);
 			this._tmpFilesToDelete.push(tmpFile);
 			caller.add(this._fetchFile.bind(this, file.id, tmpFile));
 			files.push({
@@ -1468,7 +1468,7 @@ Zotero_Import_Mendeley.prototype._isDownloadedFile = function (path) {
 
 Zotero_Import_Mendeley.prototype._isTempDownloadedFile = function (path) {
 	var parentDir = OS.Path.dirname(path);
-	return parentDir.startsWith(OS.Path.join(Zotero.getTempDirectory().path, 'mendeley-online-import'));
+	return parentDir.startsWith(OS.Path.join(Zotero.getTempDirectory().path, 'm-api'));
 };
 
 /**
