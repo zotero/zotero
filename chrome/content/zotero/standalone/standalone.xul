@@ -221,24 +221,76 @@
 							label="&viewMenu.label;"
 							onpopupshowing="ZoteroStandalone.onViewMenuOpen()">
 						<menupopup id="menu_viewPopup">
-<!--							<menuitem class="menu-type-reader" label="Switch to Presentation Mode" oncommand="ZoteroStandalone.onReaderCmd('presentationmode')"/>-->
-<!--							<menuseparator class="menu-type-reader"/>-->
-							<menuitem class="menu-type-reader" label="Go to First Page" oncommand="ZoteroStandalone.onReaderCmd('firstpage')"/>
-							<menuitem class="menu-type-reader" label="Go to Last Page" oncommand="ZoteroStandalone.onReaderCmd('lastpage')"/>
+<!--						<menuitem-->
+<!--							class="menu-type-reader"-->
+<!--							label="Switch to Presentation Mode"-->
+<!--							oncommand="ZoteroStandalone.onReaderCmd('presentationmode')"-->
+<!--						/>-->
+   			     		<menuseparator class="menu-type-reader"/>
+							<menuitem
+								class="menu-type-reader"
+								label="&zotero.pdfReader.goToFirstPage;"
+								oncommand="ZoteroStandalone.onReaderCmd('firstpage')"
+							/>
+							<menuitem
+								class="menu-type-reader"
+								label="&zotero.pdfReader.goToLastPage;"
+								oncommand="ZoteroStandalone.onReaderCmd('lastpage')"
+							/>
 							<menuseparator class="menu-type-reader"/>
-							<menuitem class="menu-type-reader" label="Rotate Clockwise" oncommand="ZoteroStandalone.onReaderCmd('rotatecw')"/>
-							<menuitem class="menu-type-reader" label="Rotate Counterclockwise" oncommand="ZoteroStandalone.onReaderCmd('rotateccw')"/>
+							<menuitem
+								class="menu-type-reader"
+								label="&zotero.pdfReader.rotateClockwise;"
+								oncommand="ZoteroStandalone.onReaderCmd('rotatecw')"
+							/>
+							<menuitem
+								class="menu-type-reader"
+								label="&zotero.pdfReader.rotateCounterclockwise;"
+								oncommand="ZoteroStandalone.onReaderCmd('rotateccw')"
+							/>
 							<menuseparator class="menu-type-reader"/>
-							<menuitem class="menu-type-reader" label="Text Selection Tool" oncommand="ZoteroStandalone.onReaderCmd('switchcursortool_select')"/>
-							<menuitem class="menu-type-reader" label="Hand Tool" oncommand="ZoteroStandalone.onReaderCmd('switchcursortool_hand')"/>
+							<menuitem
+								class="menu-type-reader"
+								label="&zotero.pdfReader.textSelectionTool;"
+								oncommand="ZoteroStandalone.onReaderCmd('switchcursortool_select')"
+							/>
+							<menuitem
+								class="menu-type-reader"
+								label="&zotero.pdfReader.handTool;"
+								oncommand="ZoteroStandalone.onReaderCmd('switchcursortool_hand')"
+							/>
 							<menuseparator class="menu-type-reader"/>
-							<menuitem class="menu-type-reader" label="Vertical Scrolling" oncommand="ZoteroStandalone.onReaderCmd('switchscrollmode_vertical')"/>
-							<menuitem class="menu-type-reader" label="Horizontal Scrolling" oncommand="ZoteroStandalone.onReaderCmd('switchscrollmode_horizontal')"/>
-							<menuitem class="menu-type-reader" label="Wrapped Scrolling" oncommand="ZoteroStandalone.onReaderCmd('switchscrollmode_wrapped')"/>
+							<menuitem
+								class="menu-type-reader"
+								label="&zotero.pdfReader.verticalScrolling;"
+								oncommand="ZoteroStandalone.onReaderCmd('switchscrollmode_vertical')"
+							/>
+							<menuitem
+								class="menu-type-reader"
+								label="&zotero.pdfReader.horizontalScrolling;"
+								oncommand="ZoteroStandalone.onReaderCmd('switchscrollmode_horizontal')"
+							/>
+							<menuitem 
+								class="menu-type-reader"
+								label="&zotero.pdfReader.wrappedScrolling;"
+								oncommand="ZoteroStandalone.onReaderCmd('switchscrollmode_wrapped')"
+							/>
 							<menuseparator class="menu-type-reader"/>
-							<menuitem class="menu-type-reader" label="No Spreads" oncommand="ZoteroStandalone.onReaderCmd('switchspreadmode_none')"/>
-							<menuitem class="menu-type-reader" label="Odd Spreads" oncommand="ZoteroStandalone.onReaderCmd('switchspreadmode_odd')"/>
-							<menuitem class="menu-type-reader" label="Even Spreads" oncommand="ZoteroStandalone.onReaderCmd('switchspreadmode_even')"/>
+							<menuitem
+								class="menu-type-reader"
+								label="&zotero.pdfReader.noSpreads;"
+								oncommand="ZoteroStandalone.onReaderCmd('switchspreadmode_none')"
+							/>
+							<menuitem
+								class="menu-type-reader"
+								label="&zotero.pdfReader.oddSpreads;"
+								oncommand="ZoteroStandalone.onReaderCmd('switchspreadmode_odd')"
+							/>
+							<menuitem
+								class="menu-type-reader"
+								label="&zotero.pdfReader.evenSpreads;"
+								oncommand="ZoteroStandalone.onReaderCmd('switchspreadmode_even')"
+							/>
 							<menuseparator class="menu-type-reader"/>
 
 							<menu id="layout-menu" label="&layout.label;">

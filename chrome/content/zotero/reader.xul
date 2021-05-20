@@ -75,22 +75,22 @@
 				-->
 <!--				<menuitem label="Switch to Presentation Mode" oncommand="menuCmd('presentationmode')"/>-->
 <!--				<menuseparator/>-->
-				<menuitem label="Go to First Page" oncommand="menuCmd('firstpage')"/>
-				<menuitem label="Go to Last Page" oncommand="menuCmd('lastpage')"/>
+				<menuitem label="&zotero.pdfReader.goToFirstPage;" oncommand="menuCmd('firstpage')"/>
+				<menuitem label="&zotero.pdfReader.goToLastPage;" oncommand="menuCmd('lastpage')"/>
 				<menuseparator/>
-				<menuitem label="Rotate Clockwise" oncommand="menuCmd('rotatecw')"/>
-				<menuitem label="Rotate Counterclockwise" oncommand="menuCmd('rotateccw')"/>
+				<menuitem label="&zotero.pdfReader.rotateClockwise;" oncommand="menuCmd('rotatecw')"/>
+				<menuitem label="&zotero.pdfReader.rotateCounterclockwise;" oncommand="menuCmd('rotateccw')"/>
 				<menuseparator/>
-				<menuitem label="Text Selection Tool" oncommand="menuCmd('switchcursortool_select')"/>
-				<menuitem label="Hand Tool" oncommand="menuCmd('switchcursortool_hand')"/>
+				<menuitem label="&zotero.pdfReader.textSelectionTool;" oncommand="menuCmd('switchcursortool_select')"/>
+				<menuitem label="&zotero.pdfReader.handTool;" oncommand="menuCmd('switchcursortool_hand')"/>
 				<menuseparator/>
-				<menuitem label="Vertical Scrolling" oncommand="menuCmd('switchscrollmode_vertical')"/>
-				<menuitem label="Horizontal Scrolling" oncommand="menuCmd('switchscrollmode_horizontal')"/>
-				<menuitem label="Wrapped Scrolling" oncommand="menuCmd('switchscrollmode_wrapped')"/>
+				<menuitem label="&zotero.pdfReader.verticalScrolling;" oncommand="menuCmd('switchscrollmode_vertical')"/>
+				<menuitem label="&zotero.pdfReader.horizontalScrolling;" oncommand="menuCmd('switchscrollmode_horizontal')"/>
+				<menuitem label="&zotero.pdfReader.wrappedScrolling;" oncommand="menuCmd('switchscrollmode_wrapped')"/>
 				<menuseparator/>
-				<menuitem label="No Spreads" oncommand="menuCmd('switchspreadmode_none')"/>
-				<menuitem label="Odd Spreads" oncommand="menuCmd('switchspreadmode_odd')"/>
-				<menuitem label="Even Spreads" oncommand="menuCmd('switchspreadmode_even')"/>
+				<menuitem label="&zotero.pdfReader.noSpreads;" oncommand="menuCmd('switchspreadmode_none')"/>
+				<menuitem label="&zotero.pdfReader.oddSpreads;" oncommand="menuCmd('switchspreadmode_odd')"/>
+				<menuitem label="&zotero.pdfReader.evenSpreads;" oncommand="menuCmd('switchspreadmode_even')"/>
 			</menupopup>
 		</menu>
 <!--		<menu label="Tools">-->

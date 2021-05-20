@@ -72,7 +72,8 @@ class ReaderInstance {
 			showItemPaneToggle: this._showItemPaneToggle,
 			sidebarWidth: this._sidebarWidth,
 			sidebarOpen: this._sidebarOpen,
-			bottomPlaceholderHeight: this._bottomPlaceholderHeight
+			bottomPlaceholderHeight: this._bottomPlaceholderHeight,
+			localizedStrings: Zotero.Intl.getPrefixedStrings('pdfReader')
 		}, [buf]);
 		return true;
 	}
@@ -252,7 +253,7 @@ class ReaderInstance {
 		let menuitem;
 		if (data.text) {
 			menuitem = this._window.document.createElement('menuitem');
-			menuitem.setAttribute('label', 'Copy');
+			menuitem.setAttribute('label', Zotero.getString('general.copy'));
 			menuitem.addEventListener('command', () => {
 				Zotero.Utilities.Internal.copyTextToClipboard(data.text);
 			});
@@ -262,21 +263,21 @@ class ReaderInstance {
 		}
 		// Zoom in
 		menuitem = this._window.document.createElement('menuitem');
-		menuitem.setAttribute('label', 'Zoom In');
+		menuitem.setAttribute('label', Zotero.getString('pdfReader.zoomIn'));
 		menuitem.addEventListener('command', () => {
 			this._postMessage({ action: 'popupCmd', cmd: 'zoomIn' });
 		});
 		popup.appendChild(menuitem);
 		// Zoom out
 		menuitem = this._window.document.createElement('menuitem');
-		menuitem.setAttribute('label', 'Zoom Out');
+		menuitem.setAttribute('label', Zotero.getString('pdfReader.zoomOut'));
 		menuitem.addEventListener('command', () => {
 			this._postMessage({ action: 'popupCmd', cmd: 'zoomOut' });
 		});
 		popup.appendChild(menuitem);
 		// Zoom 'Auto'
 		menuitem = this._window.document.createElement('menuitem');
-		menuitem.setAttribute('label', 'Automatically Resize');
+		menuitem.setAttribute('label', Zotero.getString('pdfReader.zoomAuto'));
 		menuitem.setAttribute('checked', data.isZoomAuto);
 		menuitem.addEventListener('command', () => {
 			this._postMessage({ action: 'popupCmd', cmd: 'zoomAuto' });
@@ -284,7 +285,7 @@ class ReaderInstance {
 		popup.appendChild(menuitem);
 		// Zoom 'Page Width'
 		menuitem = this._window.document.createElement('menuitem');
-		menuitem.setAttribute('label', 'Zoom to Page Width');
+		menuitem.setAttribute('label', Zotero.getString('pdfReader.zoomPageWidth'));
 		menuitem.setAttribute('checked', data.isZoomPageWidth);
 		menuitem.addEventListener('command', () => {
 			this._postMessage({ action: 'popupCmd', cmd: 'zoomPageWidth' });
@@ -294,7 +295,7 @@ class ReaderInstance {
 		popup.appendChild(this._window.document.createElement('menuseparator'));
 		// Next page
 		menuitem = this._window.document.createElement('menuitem');
-		menuitem.setAttribute('label', 'Next Page');
+		menuitem.setAttribute('label', Zotero.getString('pdfReader.nextPage'));
 		menuitem.setAttribute('disabled', !data.enableNextPage);
 		menuitem.addEventListener('command', () => {
 			this._postMessage({ action: 'popupCmd', cmd: 'nextPage' });
@@ -302,7 +303,7 @@ class ReaderInstance {
 		popup.appendChild(menuitem);
 		// Previous page
 		menuitem = this._window.document.createElement('menuitem');
-		menuitem.setAttribute('label', 'Previous Page');
+		menuitem.setAttribute('label', Zotero.getString('pdfReader.previousPage'));
 		menuitem.setAttribute('disabled', !data.enablePrevPage);
 		menuitem.addEventListener('command', () => {
 			this._postMessage({ action: 'popupCmd', cmd: 'prevPage' });
@@ -320,7 +321,7 @@ class ReaderInstance {
 		let menuitem;
 		// Add to note
 		menuitem = this._window.document.createElement('menuitem');
-		menuitem.setAttribute('label', 'Add to Note');
+		menuitem.setAttribute('label', Zotero.getString('pdfReader.addToNote'));
 		let hasActiveEditor = this._window.ZoteroContextPane.getActiveEditor();
 		menuitem.setAttribute('disabled', !hasActiveEditor);
 		menuitem.addEventListener('command', () => {
@@ -356,7 +357,7 @@ class ReaderInstance {
 		popup.appendChild(this._window.document.createElement('menuseparator'));
 		// Delete
 		menuitem = this._window.document.createElement('menuitem');
-		menuitem.setAttribute('label', 'Delete');
+		menuitem.setAttribute('label', Zotero.getString('general.delete'));
 		menuitem.setAttribute('disabled', readOnly);
 		menuitem.addEventListener('command', () => {
 			let data = {
@@ -523,7 +524,7 @@ class ReaderInstance {
 			let crash = message && ['setAnnotation'].includes(message.action);
 			this._postMessage({
 				action: crash ? 'crash' : 'error',
-				message: `An error occurred during '${message ? message.action : ''}'`,
+				message: `${Zotero.getString('general.error')}: '${message ? message.action : ''}'`,
 				moreInfo: {
 					message: e.message,
 					stack: e.stack,
@@ -553,7 +554,7 @@ class ReaderInstance {
 
 	/**
 	 * Return item JSON in the pdf-reader ready format
-	 * 
+	 *
 	 * @param {Zotero.Item} item
 	 * @returns {Object|null}
 	 */

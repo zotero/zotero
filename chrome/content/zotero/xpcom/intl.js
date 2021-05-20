@@ -133,6 +133,24 @@ Zotero.Intl = new function () {
 		return l10n;
 	};
 
+	/**
+	 * Get all strings with a specified prefix
+	 *
+	 * @param {String} prefix
+	 * @return {Object}
+	 */
+	this.getPrefixedStrings = function (prefix) {
+		let strings = [];
+		let enumerator = bundle.getSimpleEnumeration();
+		while (enumerator.hasMoreElements()) {
+			let entity = enumerator.getNext().QueryInterface(Ci.nsIPropertyElement);
+			if (entity.key.startsWith(prefix)) {
+				strings[entity.key] = entity.value;
+			}
+		}
+		return strings;
+	};
+
 	/*
 	 * Compares two strings based on the current collator.
 	 * @param {String} string1
