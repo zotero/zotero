@@ -340,6 +340,74 @@ describe("Zotero.File", function () {
 	});
 	
 	
+	describe("#truncateFileName()", function () {
+		it("should drop extension if longer than limit", function () {
+			var filename = "lorem.json";
+			var shortened = Zotero.File.truncateFileName(filename, 5);
+			assert.equal(shortened, "lorem");
+		});
+		
+		it("should use byte length rather than character length", function () {
+			var filename = "\uD83E\uDD92abcdefgh.pdf";
+			var shortened = Zotero.File.truncateFileName(filename, 10);
+			assert.equal(shortened, "\uD83E\uDD92ab.pdf");
+		});
+		
+		it("should remove characters, not bytes", function () {
+			// Emoji would put length over limit, so it should be removed completely
+			var filename = "abcé\uD83E\uDD92.pdf";
+			var shortened = Zotero.File.truncateFileName(filename, 10);
+			assert.equal(shortened, "abcé.pdf");
+		});
+		
+		it("should replace single multi-byte character with underscore if longer than maxLength", function () {
+			// Emoji would put length over limit, so it should be replaced with _
+			var filename = "\uD83E\uDD92.pdf";
+			var shortened = Zotero.File.truncateFileName(filename, 5);
+			assert.equal(shortened, "_.pdf");
+		});
+		
+		// The optimal behavior would probably be to remove the entire character sequence, but I'm
+		// not sure we can do that without an emoji library, so just make sure we're removing whole
+		// characters without corrupting anything.
+		it("should cruelly break apart families", function () {
+			var family = [
+				"\uD83D\uDC69", // woman (4)
+				"\uD83C\uDFFE", // skin tone (4)
+				"\u200D", // zero-width joiner (3)
+				"\uD83D\uDC68", // man (4)
+				"\uD83C\uDFFE", // skin tone (4)
+				"\u200D", // zero-width joiner (3)
+				"\uD83D\uDC67", // girl (4)
+				"\uD83C\uDFFE", // skin tone (4)
+				"\u200D", // zero-width joiner (3)
+				"\uD83D\uDC66", // boy (4)
+				"\uD83C\uDFFE" // skin tone (4)
+			].join("");
+			
+			var filename = "abc" + family + ".pdf";
+			var limit = 3 // 'abc'
+				+ 4 + 4 + 3
+				+ 4 + 4 + 3
+				+ 4; // ext
+			// Add some extra bytes to make sure we don't corrupt an emoji character
+			limit += 2;
+			var shortened = Zotero.File.truncateFileName(filename, limit);
+			assert.equal(
+				shortened,
+				"abc"
+					+ "\uD83D\uDC69"
+					+ "\uD83C\uDFFE"
+					+ "\u200D"
+					+ "\uD83D\uDC68"
+					+ "\uD83C\uDFFE"
+					+ "\u200D"
+					+ ".pdf"
+			);
+		});
+	});
+	
+	
 	describe("#checkFileAccessError()", function () {
 		it("should catch OS.File access-denied errors", function* () {
 			// We can't modify a real OS.File.Error, but we also don't do an instanceof check in

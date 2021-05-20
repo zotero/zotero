@@ -1202,41 +1202,60 @@ Zotero.File = new function(){
 	}
 	
 	/**
-	 * Truncate a filename (excluding the extension) to the given total length
-	 * If the "extension" is longer than 20 characters,
-	 * it is treated as part of the file name
+	 * Truncate a filename (excluding the extension) to the given byte length
+	 *
+	 * If the extension is longer than 20 characters, it's treated as part of the file name.
+	 *
+	 * @param {String} fileName
+	 * @param {Number} maxLength - Maximum length in bytes
 	 */
 	function truncateFileName(fileName, maxLength) {
-		if(!fileName || (fileName + '').length <= maxLength) return fileName;
+		if (!fileName || Zotero.Utilities.Internal.byteLength((fileName + '')).length <= maxLength) {
+			return fileName;
+		}
 
-		var parts = (fileName + '').split(/\.(?=[^\.]+$)/);
-		var fn = parts[0];
+		var parts = (fileName + '').split(/\.(?=[^.]+$)/);
+		var name = parts[0];
 		var ext = parts[1];
 		//if the file starts with a period , use the whole file
 		//the whole file name might also just be a period
-		if(!fn) {
-			fn = '.' + (ext || '');
+		if (!name) {
+			name = '.' + (ext || '');
 		}
 
 		//treat long extensions as part of the file name
-		if(ext && ext.length > 20) {
-			fn += '.' + ext;
+		if (ext && ext.length > 20) {
+			name += '.' + ext;
 			ext = undefined;
 		}
-
-		if(ext === undefined) {	//there was no period in the whole file name
+		
+		// No period in the whole filename
+		if (ext === undefined) {
 			ext = '';
-		} else {
+		}
+		else {
 			ext = '.' + ext;
 		}
 
-		if (ext.length >= maxLength) {
-			// Improve resulting truncated filename by dropping extension if it wouldn't fit within
-			// the limit. e.g. for (lorem.json, 5) it returns "lorem", instead of ".json"
+		// Drop extension if it wouldn't fit within the limit
+		// E.g., for (lorem.json, 5), return "lorem" instead of ".json"
+		if (Zotero.Utilities.Internal.byteLength(ext) >= maxLength) {
 			ext = '';
 		}
-
-		return fn.substr(0,maxLength-ext.length) + ext;
+		
+		while (Zotero.Utilities.Internal.byteLength(name + ext) > maxLength) {
+			// Split into characters, so we don't corrupt emoji characters (though we might
+			// change multi-part emoji in unfortunate ways by removing some of the characters)
+			let parts = [...name];
+			name = name.substring(0, name.length - parts[parts.length - 1].length);
+		}
+		
+		// If removed completely, use underscore
+		if (name == '') {
+			name = '_';
+		}
+		
+		return name + ext;
 	}
 	
 	/*
