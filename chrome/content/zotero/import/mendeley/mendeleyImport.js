@@ -708,7 +708,8 @@ Zotero_Import_Mendeley.prototype._getDocumentFilesAPI = async function (document
 		for (let file of (doc.files || [])) {
 			var fileName = Zotero.File.truncateFileName(Zotero.File.getValidFileName(file.file_name || 'file'), 255); // most filesystems limit filename to 255 characters
 			var tmpFile = OS.Path.join(Zotero.getTempDirectory().path, `m-api-${this.timestamp}-${file.id}`, fileName);
-			if (tmpFile.length >= 260) {
+			// Limit path length on Windows
+			if (Zotero.isWin && tmpFile.length >= 260) {
 				const surplus = tmpFile.length - 260;
 				if (surplus >= fileName.length) {
 					Zotero.logError(`File ${fileName} will be skipped due to path exceeding filesystem limits: ${tmpFile}`);
