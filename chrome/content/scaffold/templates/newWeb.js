@@ -1,7 +1,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2020 YOUR_NAME <- TODO
+	Copyright © 2021 YOUR_NAME <- TODO
 	
 	This file is part of Zotero.
 
@@ -37,7 +37,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	// TODO: adjust the CSS selector
-	var rows = doc.querySelectorAll('h2>a.title[href*="/article/"]');
+	var rows = doc.querySelectorAll('h2 > a.title[href*="/article/"]');
 	for (let row of rows) {
 		// TODO: check and maybe adjust
 		let href = row.href;
