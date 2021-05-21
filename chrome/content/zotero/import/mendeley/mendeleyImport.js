@@ -706,18 +706,27 @@ Zotero_Import_Mendeley.prototype._getDocumentFilesAPI = async function (document
 	for (let doc of documents) {
 		const files = [];
 		for (let file of (doc.files || [])) {
-			var fileName = Zotero.File.truncateFileName(Zotero.File.getValidFileName(file.file_name || 'file'), 255); // most filesystems limit filename to 255 characters
-			var tmpFile = OS.Path.join(Zotero.getTempDirectory().path, `m-api-${this.timestamp}-${file.id}`, fileName);
+			// Most filesystems limit filename to 255 bytes
+			let fileName = Zotero.File.truncateFileName(Zotero.File.getValidFileName(file.file_name || 'file'), 255);
+			let tmpFile = OS.Path.join(Zotero.getTempDirectory().path, `m-api-${this.timestamp}-${file.id}`, fileName);
 			// Limit path length on Windows
-			if (Zotero.isWin && tmpFile.length >= 260) {
-				const surplus = tmpFile.length - 260;
-				if (surplus >= fileName.length) {
-					Zotero.logError(`File ${fileName} will be skipped due to path exceeding filesystem limits: ${tmpFile}`);
-					continue;
+			//
+			// This can be raised in Windows 10 but probably isn't for most people. The limit is
+			// theoretically 260, but File Explorer seems to limit paths to 255, so stick to that.
+			// https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
+			if (Zotero.isWin) {
+				let pathLength = Zotero.Utilities.Internal.byteLength(tmpFile);
+				if (pathLength >= 255) {
+					let surplus = pathLength - 255;
+					let fileNameLength = Zotero.Utilities.Internal.byteLength(fileName);
+					if (surplus >= fileNameLength) {
+						Zotero.logError(`Skipping file due to path exceeding filesystem limits: ${tmpFile}`);
+						continue;
+					}
+					Zotero.debug(`${fileName} will be truncated by ${surplus} bytes`);
+					fileName = Zotero.File.truncateFileName(fileName, fileNameLength - surplus);
+					tmpFile = OS.Path.join(Zotero.getTempDirectory().path, `m-api-${this.timestamp}-${file.id}`, fileName);
 				}
-				Zotero.debug(`${fileName} will be truncated by ${surplus} characters`);
-				fileName = Zotero.File.truncateFileName(fileName, fileName.length - surplus);
-				tmpFile = OS.Path.join(Zotero.getTempDirectory().path, `m-api-${this.timestamp}-${file.id}`, fileName);
 			}
 			this._tmpFilesToDelete.push(tmpFile);
 			caller.add(this._fetchFile.bind(this, file.id, tmpFile));
