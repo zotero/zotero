@@ -922,7 +922,7 @@ class EditorInstance {
 	}
 
 	_formatCitation(citation) {
-		return citation.citationItems.map(x => this._formatCitationItemPreview(x)).join(';');
+		return citation.citationItems.map(x => this._formatCitationItemPreview(x)).join('; ');
 	}
 
 	_arrayBufferToBase64(buffer) {
