@@ -81,6 +81,8 @@
 		<key id="key_copyBibliography"
 				command="cmd_zotero_copyBibliography"
 				modifiers="accel shift"/>
+		<key id="key_back"/>
+		<key id="key_forward"/>
 	</keyset>
 	<keyset id="editMenuKeys"/>
 	
@@ -216,28 +218,11 @@
 									hidden="true"/>
 						</menupopup>
 					</menu>
-					
+
 					<menu id="view-menu"
 							label="&viewMenu.label;"
 							onpopupshowing="ZoteroStandalone.onViewMenuOpen()">
 						<menupopup id="menu_viewPopup">
-<!--						<menuitem-->
-<!--							class="menu-type-reader"-->
-<!--							label="Switch to Presentation Mode"-->
-<!--							oncommand="ZoteroStandalone.onReaderCmd('presentationmode')"-->
-<!--						/>-->
-   			     		<menuseparator class="menu-type-reader"/>
-							<menuitem
-								class="menu-type-reader"
-								label="&zotero.pdfReader.goToFirstPage;"
-								oncommand="ZoteroStandalone.onReaderCmd('firstpage')"
-							/>
-							<menuitem
-								class="menu-type-reader"
-								label="&zotero.pdfReader.goToLastPage;"
-								oncommand="ZoteroStandalone.onReaderCmd('lastpage')"
-							/>
-							<menuseparator class="menu-type-reader"/>
 							<menuitem
 								class="menu-type-reader"
 								label="&zotero.pdfReader.rotateClockwise;"
@@ -250,43 +235,45 @@
 							/>
 							<menuseparator class="menu-type-reader"/>
 							<menuitem
-								class="menu-type-reader"
-								label="&zotero.pdfReader.textSelectionTool;"
-								oncommand="ZoteroStandalone.onReaderCmd('switchcursortool_select')"
-							/>
-							<menuitem
+								id="view-menuitem-hand-tool"
 								class="menu-type-reader"
 								label="&zotero.pdfReader.handTool;"
 								oncommand="ZoteroStandalone.onReaderCmd('switchcursortool_hand')"
 							/>
 							<menuseparator class="menu-type-reader"/>
 							<menuitem
+								id="view-menuitem-vertical-scrolling"
 								class="menu-type-reader"
 								label="&zotero.pdfReader.verticalScrolling;"
 								oncommand="ZoteroStandalone.onReaderCmd('switchscrollmode_vertical')"
 							/>
 							<menuitem
+								id="view-menuitem-horizontal-scrolling"
 								class="menu-type-reader"
 								label="&zotero.pdfReader.horizontalScrolling;"
 								oncommand="ZoteroStandalone.onReaderCmd('switchscrollmode_horizontal')"
 							/>
-							<menuitem 
+							<menuitem
+								id="view-menuitem-wrapped-scrolling"
 								class="menu-type-reader"
 								label="&zotero.pdfReader.wrappedScrolling;"
 								oncommand="ZoteroStandalone.onReaderCmd('switchscrollmode_wrapped')"
 							/>
 							<menuseparator class="menu-type-reader"/>
 							<menuitem
+								id="view-menuitem-no-spreads"
 								class="menu-type-reader"
 								label="&zotero.pdfReader.noSpreads;"
 								oncommand="ZoteroStandalone.onReaderCmd('switchspreadmode_none')"
 							/>
 							<menuitem
+								id="view-menuitem-odd-spreads"
 								class="menu-type-reader"
 								label="&zotero.pdfReader.oddSpreads;"
 								oncommand="ZoteroStandalone.onReaderCmd('switchspreadmode_odd')"
 							/>
 							<menuitem
+								id="view-menuitem-even-spreads"
 								class="menu-type-reader"
 								label="&zotero.pdfReader.evenSpreads;"
 								oncommand="ZoteroStandalone.onReaderCmd('switchspreadmode_even')"
@@ -365,6 +352,41 @@
 								label="&recursiveCollections.label;"
 								oncommand="ZoteroStandalone.onViewMenuItemClick(event)"
 								type="checkbox"
+							/>
+						</menupopup>
+					</menu>
+					
+					<menu 
+						id="go-menu"
+						class="menu-type-reader"
+						label="&goMenu.label;"
+						onpopupshowing="ZoteroStandalone.onGoMenuOpen()"
+					>
+						<menupopup id="menu_goPopup">
+							<menuitem
+								id="go-menuitem-first-page"
+								class="menu-type-reader"
+								label="&zotero.pdfReader.firstPage;"
+								oncommand="ZoteroStandalone.onReaderCmd('firstpage')"
+							/>
+							<menuitem 
+								id="go-menuitem-last-page"
+								class="menu-type-reader"
+								label="&zotero.pdfReader.lastPage;"
+								oncommand="ZoteroStandalone.onReaderCmd('lastpage')"
+							/>
+							<menuseparator class="menu-type-reader"/>
+							<menuitem 
+								id="go-menuitem-back"
+								class="menu-type-reader"
+								label="&zotero.pdfReader.back;"
+								oncommand="ZoteroStandalone.onReaderCmd('back')"
+							/>
+							<menuitem 
+								id="go-menuitem-forward"
+								class="menu-type-reader"
+								label="&zotero.pdfReader.forward;"
+								oncommand="ZoteroStandalone.onReaderCmd('forward')"
 							/>
 						</menupopup>
 					</menu>

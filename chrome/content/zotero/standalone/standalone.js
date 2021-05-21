@@ -310,7 +310,54 @@ const ZoteroStandalone = new function() {
 	};
 	
 	
+	this.onGoMenuOpen = function () {
+		var keyBack = document.getElementById('key_back');
+		var keyForward = document.getElementById('key_forward');
+
+		if (Zotero.isMac) {
+			keyBack.setAttribute('key', '[');
+			keyBack.setAttribute('modifiers', 'meta');
+			keyForward.setAttribute('key', ']');
+			keyForward.setAttribute('modifiers', 'meta');
+		}
+		else {
+			keyBack.setAttribute('keycode', 'VK_LEFT');
+			keyBack.setAttribute('modifiers', 'alt');
+			keyForward.setAttribute('keycode', 'VK_RIGHT');
+			keyForward.setAttribute('modifiers', 'alt');
+		}
+
+		// `key` attribute needs to be dynamically set for `menuitem` when
+		// the key changes after DOM initialization
+		var menuItemBack = document.getElementById('go-menuitem-back');
+		var menuItemForward = document.getElementById('go-menuitem-forward');
+		menuItemBack.setAttribute('key', 'key_back');
+		menuItemForward.setAttribute('key', 'key_forward');
+
+		var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+		if (reader) {
+			this.updateMenuItemEnabled('go-menuitem-first-page', reader.allowNavigateFirstPage());
+			this.updateMenuItemEnabled('go-menuitem-last-page', reader.allowNavigateLastPage());
+			this.updateMenuItemEnabled('go-menuitem-back', reader.allowNavigateBack());
+			this.updateMenuItemEnabled('go-menuitem-forward', reader.allowNavigateForward());
+		}
+	};
+	
+	
 	this.onViewMenuOpen = function () {
+		// PDF Reader
+		var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+		if (reader) {
+			var { state } = reader;
+			this.updateMenuItemCheckmark('view-menuitem-vertical-scrolling', state.scrollMode == 0);
+			this.updateMenuItemCheckmark('view-menuitem-horizontal-scrolling', state.scrollMode == 1);
+			this.updateMenuItemCheckmark('view-menuitem-wrapped-scrolling', state.scrollMode == 2);
+			this.updateMenuItemCheckmark('view-menuitem-no-spreads', state.spreadMode == 0);
+			this.updateMenuItemCheckmark('view-menuitem-odd-spreads', state.spreadMode == 1);
+			this.updateMenuItemCheckmark('view-menuitem-even-spreads', state.spreadMode == 2);
+			this.updateMenuItemCheckmark('view-menuitem-hand-tool', reader.isHandToolActive());
+		}
+	
 		// Layout mode
 		var mode = Zotero.Prefs.get('layout');
 		this.updateMenuItemCheckmark('view-menuitem-standard', mode != 'stacked');

@@ -28,6 +28,7 @@ class ReaderInstance {
 		this.pdfStateFileName = '.zotero-pdf-state';
 		this.annotationItemIDs = [];
 		this.onChangeSidebarWidth = null;
+		this.state = null;
 		this._instanceID = Zotero.Utilities.randomString();
 		this._window = null;
 		this._iframeWindow = null;
@@ -53,6 +54,7 @@ class ReaderInstance {
 		if (!item) {
 			return false;
 		}
+		this.state = state;
 		this._itemID = item.id;
 		this.updateTitle();
 		let path = await item.getFilePathAsync();
@@ -140,6 +142,43 @@ class ReaderInstance {
 		this._postMessage({ action: 'setToolbarPlaceholderWidth', width });
 	}
 	
+	isHandToolActive() {
+		return this._iframeWindow.eval('PDFViewerApplication.pdfCursorTools.handTool.active');
+	}
+	
+	allowNavigateFirstPage() {
+		return this._iframeWindow.eval('PDFViewerApplication.pdfViewer.currentPageNumber > 1');
+	}
+	
+	allowNavigateLastPage() {
+		return this._iframeWindow.eval('PDFViewerApplication.pdfViewer.currentPageNumber < PDFViewerApplication.pdfViewer.pagesCount');
+	}
+	
+	allowNavigateBack() {
+		try {
+			let { uid } = this._iframeWindow.history.state;
+			if (uid == 0) {
+				return false;
+			}
+		}
+		catch (e) {
+		}
+		return true;
+	}
+	
+	allowNavigateForward() {
+		try {
+			let { uid } = this._iframeWindow.history.state;
+			let length = this._iframeWindow.history.length;
+			if (uid == length - 1) {
+				return false;
+			}
+		}
+		catch (e) {
+		}
+		return true;
+	}
+	
 	menuCmd(cmd) {
 		if (cmd === 'export') {
 			let zp = Zotero.getActiveZoteroPane();
@@ -169,6 +208,7 @@ class ReaderInstance {
 	}
 
 	async _setState(state) {
+		this.state = state;
 		let item = Zotero.Items.get(this._itemID);
 		if (item) {
 			item.setAttachmentLastPageIndex(state.pageIndex);
@@ -322,7 +362,7 @@ class ReaderInstance {
 		// Add to note
 		menuitem = this._window.document.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.addToNote'));
-		let hasActiveEditor = this._window.ZoteroContextPane.getActiveEditor();
+		let hasActiveEditor = this._window.ZoteroContextPane && this._window.ZoteroContextPane.getActiveEditor();
 		menuitem.setAttribute('disabled', !hasActiveEditor);
 		menuitem.addEventListener('command', () => {
 			let data = {
@@ -643,7 +683,7 @@ class ReaderTab extends ReaderInstance {
 	}
 
 	_addToNote(annotations) {
-		let noteEditor = this._window.ZoteroContextPane.getActiveEditor();
+		let noteEditor = this._window.ZoteroContextPane && this._window.ZoteroContextPane.getActiveEditor();
 		if (!noteEditor) {
 			return;
 		}
@@ -661,7 +701,7 @@ class ReaderWindow extends ReaderInstance {
 		super();
 		this._sidebarWidth = sidebarWidth;
 		this._sidebarOpen = sidebarOpen;
-		this._bottomPlaceholderHeight = bottomPlaceholderHeight;
+		this._bottomPlaceholderHeight = 0;
 		this.init();
 	}
 
@@ -678,6 +718,8 @@ class ReaderWindow extends ReaderInstance {
 				this._window.addEventListener('keypress', this._handleKeyPress);
 				this._popupset = this._window.document.getElementById('zotero-reader-popupset');
 				this._window.menuCmd = this.menuCmd.bind(this);
+				this._window.onGoMenuOpen = this._onGoMenuOpen.bind(this);
+				this._window.onViewMenuOpen = this._onViewMenuOpen.bind(this);
 				this._iframe = this._window.document.getElementById('reader');
 			}
 
@@ -701,6 +743,44 @@ class ReaderWindow extends ReaderInstance {
 			&& !event.shiftKey && !event.altKey && event.key === 'w') {
 			this._window.close();
 		}
+	}
+
+	_onViewMenuOpen() {
+		this._window.document.getElementById('view-menuitem-vertical-scrolling').setAttribute('checked', this.state.scrollMode == 0);
+		this._window.document.getElementById('view-menuitem-horizontal-scrolling').setAttribute('checked', this.state.scrollMode == 1);
+		this._window.document.getElementById('view-menuitem-wrapped-scrolling').setAttribute('checked', this.state.scrollMode == 2);
+		this._window.document.getElementById('view-menuitem-no-spreads').setAttribute('checked', this.state.spreadMode == 0);
+		this._window.document.getElementById('view-menuitem-odd-spreads').setAttribute('checked', this.state.spreadMode == 1);
+		this._window.document.getElementById('view-menuitem-even-spreads').setAttribute('checked', this.state.spreadMode == 2);
+		this._window.document.getElementById('view-menuitem-hand-tool').setAttribute('checked', this.isHandToolActive());
+	}
+
+	_onGoMenuOpen() {
+		let keyBack = this._window.document.getElementById('key_back');
+		let keyForward = this._window.document.getElementById('key_forward');
+
+		if (Zotero.isMac) {
+			keyBack.setAttribute('key', '[');
+			keyBack.setAttribute('modifiers', 'meta');
+			keyForward.setAttribute('key', ']');
+			keyForward.setAttribute('modifiers', 'meta');
+		}
+		else {
+			keyBack.setAttribute('keycode', 'VK_LEFT');
+			keyBack.setAttribute('modifiers', 'alt');
+			keyForward.setAttribute('keycode', 'VK_RIGHT');
+			keyForward.setAttribute('modifiers', 'alt');
+		}
+
+		let menuItemBack = this._window.document.getElementById('go-menuitem-back');
+		let menuItemForward = this._window.document.getElementById('go-menuitem-forward');
+		menuItemBack.setAttribute('key', 'key_back');
+		menuItemForward.setAttribute('key', 'key_forward');
+
+		this._window.document.getElementById('go-menuitem-first-page').setAttribute('disabled', !this.allowNavigateFirstPage());
+		this._window.document.getElementById('go-menuitem-last-page').setAttribute('disabled', !this.allowNavigateLastPage());
+		this._window.document.getElementById('go-menuitem-back').setAttribute('disabled', !this.allowNavigateBack());
+		this._window.document.getElementById('go-menuitem-forward').setAttribute('disabled', !this.allowNavigateForward());
 	}
 }
 

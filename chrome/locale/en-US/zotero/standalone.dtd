@@ -44,6 +44,9 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
+<!--GO MENU-->
+<!ENTITY goMenu.label "Go">
+
 <!--VIEW MENU-->
 <!ENTITY viewMenu.label                 "View">
 <!ENTITY layout.label                   "Layout">
