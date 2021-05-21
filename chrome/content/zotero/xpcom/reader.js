@@ -709,7 +709,7 @@ class Reader {
 	constructor() {
 		this._sidebarWidth = 200;
 		this._sidebarOpen = false;
-		this._bottomPlaceholderHeight = 800;
+		this._bottomPlaceholderHeight = 0;
 		this._readers = [];
 		this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'tab'], 'reader');
 		this.onChangeSidebarWidth = null;
