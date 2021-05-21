@@ -56,6 +56,7 @@ class ReaderInstance {
 		}
 		this.state = state;
 		this._itemID = item.id;
+		// Set `ReaderTab` title as fast as possible
 		this.updateTitle();
 		let path = await item.getFilePathAsync();
 		let buf = await OS.File.read(path, {});
@@ -77,6 +78,8 @@ class ReaderInstance {
 			bottomPlaceholderHeight: this._bottomPlaceholderHeight,
 			localizedStrings: Zotero.Intl.getPrefixedStrings('pdfReader')
 		}, [buf]);
+		// Set title once again, because `ReaderWindow` isn't loaded the first time
+		this.updateTitle();
 		return true;
 	}
 	
