@@ -706,8 +706,19 @@ Zotero_Import_Mendeley.prototype._getDocumentFilesAPI = async function (document
 	for (let doc of documents) {
 		const files = [];
 		for (let file of (doc.files || [])) {
-			const fileName = file.file_name || 'file';
-			const tmpFile = OS.Path.join(Zotero.getTempDirectory().path, `mendeley-online-import-${this.timestamp}-${file.id}`, fileName);
+			var fileName = Zotero.File.truncateFileName(Zotero.File.getValidFileName(file.file_name || 'file'), 255); // most filesystems limit filename to 255 characters
+			var tmpFile = OS.Path.join(Zotero.getTempDirectory().path, `m-api-${this.timestamp}-${file.id}`, fileName);
+			// Limit path length on Windows
+			if (Zotero.isWin && tmpFile.length >= 260) {
+				const surplus = tmpFile.length - 260;
+				if (surplus >= fileName.length) {
+					Zotero.logError(`File ${fileName} will be skipped due to path exceeding filesystem limits: ${tmpFile}`);
+					continue;
+				}
+				Zotero.debug(`${fileName} will be truncated by ${surplus} characters`);
+				fileName = Zotero.File.truncateFileName(fileName, fileName.length - surplus);
+				tmpFile = OS.Path.join(Zotero.getTempDirectory().path, `m-api-${this.timestamp}-${file.id}`, fileName);
+			}
 			this._tmpFilesToDelete.push(tmpFile);
 			caller.add(this._fetchFile.bind(this, file.id, tmpFile));
 			files.push({
@@ -1468,7 +1479,7 @@ Zotero_Import_Mendeley.prototype._isDownloadedFile = function (path) {
 
 Zotero_Import_Mendeley.prototype._isTempDownloadedFile = function (path) {
 	var parentDir = OS.Path.dirname(path);
-	return parentDir.startsWith(OS.Path.join(Zotero.getTempDirectory().path, 'mendeley-online-import'));
+	return parentDir.startsWith(OS.Path.join(Zotero.getTempDirectory().path, 'm-api'));
 };
 
 /**
