@@ -3,14 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /* eslint-disable quote-props */
+/* globals SAXXMLReader */
 
 "use strict";
 
 function LOG(str) {
 	Zotero.debug("Feed Processor: " + str);
 }
-
-const SAX_CONTRACTID = "@mozilla.org/saxparser/xmlreader;1";
 
 const XMLNS = "http://www.w3.org/XML/1998/namespace";
 const RSS090NS = "http://my.netscape.com/rdf/simple/0.9/";
@@ -956,7 +955,7 @@ function WrapperElementInfo(fieldName) {
 // Implements nsIFeedProcessor, nsISAXContentHandler, nsISAXErrorHandler,
 //            nsIStreamListener, nsIRequestObserver
 function FeedProcessor() {
-	this._reader = Cc[SAX_CONTRACTID].createInstance(Ci.nsISAXXMLReader);
+	this._reader = new SAXXMLReader();
 	this._buf = "";
 	this._feed = {};
 	this._handlerStack = [];
