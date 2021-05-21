@@ -1159,28 +1159,10 @@ FeedProcessor.prototype = {
 		this._reader.parseAsync(requestObserver);
 	},
 	
-	// nsIStreamListener
+	// Fetch API
 	
-	// The XMLReader will throw sensible exceptions if these get called
-	// out of order.
-	onStartRequest: function (request, context) {
-		// this will throw if the request is not a channel, but so will nsParser.
-		var channel = request.QueryInterface(Ci.nsIChannel);
-		channel.contentType = "application/vnd.mozilla.maybe.feed";
-		this._reader.onStartRequest(request, context);
-	},
-	
-	onStopRequest: function (request, context, statusCode) {
-		try {
-			this._reader.onStopRequest(request, context, statusCode);
-		}
-		finally {
-			this._reader = null;
-		}
-	},
-	
-	onDataAvailable: function (request, context, inputStream, offset, count) {
-		this._reader.onDataAvailable(request, context, inputStream, offset, count);
+	onResponseAvailable(response) {
+		return this._reader.onResponseAvailable(response);
 	},
 	
 	// nsISAXErrorHandler
