@@ -185,6 +185,7 @@ Zotero.Searches = function() {
 			}
 			search._loaded.conditions = true;
 			search._clearChanged('conditions');
+			search.register();
 		}.bind(this);
 		
 		yield Zotero.DB.queryAsync(

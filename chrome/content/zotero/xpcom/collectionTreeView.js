@@ -742,6 +742,12 @@ Zotero.CollectionTreeView.prototype.setHighlightedRows = Zotero.Promise.coroutin
 Zotero.CollectionTreeView.prototype.unregister = function()
 {
 	Zotero.Notifier.unregisterObserver(this._unregisterID);
+
+	if (this._rows) {
+		for (let row of this._rows) {
+			row.unregister();
+		}
+	}
 }
 
 

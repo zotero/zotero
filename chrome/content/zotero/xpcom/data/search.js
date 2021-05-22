@@ -35,6 +35,10 @@ Zotero.Search = function(params = {}) {
 	this._maxSearchConditionID = -1;
 	this._conditions = {};
 	this._hasPrimaryConditions = false;
+	// A list of other searches this search depends on. We listen to modifications of searches
+	// via Zotero.Notifier and update our cached SQL when that happens.
+	this._dependencyList = [];
+	this._observerID = null;
 	
 	Zotero.Utilities.assignProps(this, params, ['name', 'libraryID']);
 }
@@ -262,6 +266,9 @@ Zotero.Search.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env)
 		this._clearChanged();
 	}
 	
+	// Register notifications if needed
+	this.register();
+	
 	return env.isNew ? this.id : true;
 });
 
@@ -286,6 +293,8 @@ Zotero.Search.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 
 Zotero.Search.prototype._finalizeErase = Zotero.Promise.coroutine(function* (env) {
 	yield Zotero.Search._super.prototype._finalizeErase.call(this, env);
+
+	this.unregister();
 	
 	// Update library searches status
 	yield Zotero.Libraries.get(this.libraryID).updateSearches();
@@ -1718,3 +1727,58 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	this._sql = sql;
 	this._sqlParams = sqlParams.length ? sqlParams : false;
 });
+
+
+/**
+ * Register for notifications if needed
+ *
+ * If this search depends on another search (i.e. Collection is `Saved Search` condition) then if
+ * the dependency has a changed, we need to invalidate the SQL so we can update our search.
+ *
+ * @returns {Promise<void>}
+ */
+Zotero.Search.prototype.register = async function () {
+	this._requireData('conditions');
+
+	// Build a list of other searches this search depends on
+	this._dependencyList = [];
+	for (let id in this._conditions) {
+		if (this._conditions[id].condition === 'savedSearch') {
+			let obj = await Zotero.Searches.getByLibraryAndKeyAsync(
+				this.libraryID, this._conditions[id].value
+			);
+
+			if (obj) {
+				this._dependencyList.push(obj.id);
+			}
+		}
+	}
+
+	// If we have dependencies, register to receive notifications of changes
+	if (this._dependencyList.length) {
+		if (!this._observerID) {
+			this._observerID = Zotero.Notifier.registerObserver(this, 'search', 'searchDependency');
+		}
+	}
+	else {
+		this.unregister();
+	}
+};
+
+
+Zotero.Search.prototype.unregister = function () {
+	if (this._observerID) {
+		Zotero.Notifier.unregisterObserver(this._observerID);
+		this._observerID = null;
+	}
+};
+
+
+Zotero.Search.prototype.notify = function (event, type, ids) {
+	if (event === 'modify') {
+		if (ids.filter(id => this._dependencyList.includes(id)).length) {
+			Zotero.debug('Search (' + this.id + ') invalidated due to parent search change.');
+			this._sql = null;
+		}
+	}
+};

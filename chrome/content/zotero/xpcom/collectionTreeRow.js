@@ -439,3 +439,10 @@ Zotero.CollectionTreeRow.prototype.isSearchMode = function() {
 		return true;
 	}
 }
+
+
+Zotero.CollectionTreeRow.prototype.unregister = function () {
+	if (this.ref instanceof Zotero.Search) {
+		this.ref.unregister();
+	}
+};
