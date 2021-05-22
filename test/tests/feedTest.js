@@ -311,8 +311,11 @@ describe("Zotero.Feed", function() {
 		var feed, scheduleNextFeedCheck;
 		var feedUrl = getTestDataUrl("feed.rss");
 		var modifiedFeedUrl = getTestDataUrl("feedModified.rss");
+		var win;
 		
-		before(function() {
+		before(async function() {
+			// Browser window is needed as parent window to load the feed reader scripts.
+			win = await loadBrowserWindow();
 			scheduleNextFeedCheck = sinon.stub(Zotero.Feeds, 'scheduleNextFeedCheck').resolves();
 		});
 		
@@ -328,6 +331,9 @@ describe("Zotero.Feed", function() {
 		});
 		
 		after(function() {
+			if (win) {
+				win.close();
+			}
 			scheduleNextFeedCheck.restore();
 		});
 		

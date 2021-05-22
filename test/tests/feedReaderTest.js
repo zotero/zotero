@@ -35,8 +35,18 @@ describe("Zotero.FeedReader", function () {
 	var atomFeedURL = getTestDataUrl("feed.atom");
 	var mediaFeedURL = getTestDataUrl("feedMedia.xml");
 	
-	after(function* () {
-		yield clearFeeds();
+	var win;
+	
+	before(async function() {
+		// Browser window is needed as parent window to load the feed reader scripts.
+		win = await loadBrowserWindow();
+	});
+
+	after(async function() {
+		if (win) {
+			win.close();
+		}
+		await clearFeeds();
 	});
 
 	describe('FeedReader()', function () {

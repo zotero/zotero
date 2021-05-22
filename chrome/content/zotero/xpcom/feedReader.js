@@ -130,11 +130,49 @@ Zotero.FeedReader = function (url) {
 		lastItem.resolve(null);
 	}.bind(this));
 	
-	// Set up asynchronous feed processor
-	let feedProcessor = Components.classes["@mozilla.org/feed-processor;1"]
-		.createInstance(Components.interfaces.nsIFeedProcessor);
+	// The feed processor and related modules assume a content window environment, so we'll simulate
+	// one via a sandbox in a parent window. You might think we could jump straight to
+	// `hiddenDOMWindow` as a parent window, since it does indeed exist on all platforms...
+	// However, when loading scripts into the `hiddenDOMWindow` on Windows and Linux, they get
+	// stuck in some lazily parsed state which bizarrely drops function prototypes. To avoid this,
+	// we prefer other parent windows first, which work fine on all platforms.
+	let parentWindow = Services.wm.getMostRecentWindow("navigator:browser");
+	if (!parentWindow) {
+		parentWindow = Services.ww.activeWindow;
+	}
+	// Use the hidden DOM window on macOS with the main window closed
+	if (!parentWindow) {
+		parentWindow = Services.appShell.hiddenDOMWindow;
+	}
+	if (!parentWindow) {
+		this.terminate("Parent window not available for feed reader");
+		return;
+	}
 	
-	let feedUrl = Services.io.newURI(url, null, null);
+	const sandbox = new Cu.Sandbox(parentWindow, {
+		sandboxPrototype: parentWindow,
+		sandboxName: "Feed Processor",
+	});
+	sandbox.Zotero = {
+		debug: Components.utils.exportFunction(Zotero.debug, sandbox),
+	};
+
+	Services.scriptloader.loadSubScript("resource://zotero/feeds/FeedProcessor.js", sandbox);
+	Services.scriptloader.loadSubScript("resource://zotero/feeds/SAXXMLReader.js", sandbox);
+	
+	// Set up asynchronous feed processor
+	const { FeedProcessor } = sandbox;
+	const feedProcessor = new FeedProcessor();
+	if (!feedProcessor.parseAsync) {
+		this.terminate("Feed processor failed to load in parent window");
+		return;
+	}
+
+	// Borrow web utils to fetch feed content
+	const { fetch, URL } = parentWindow;
+	
+	// Pass along the URL
+	const feedUrl = new URL(url);
 	feedProcessor.parseAsync(null, feedUrl);
 	
 	/*
@@ -148,19 +186,21 @@ Zotero.FeedReader = function (url) {
 				this.terminate("No Feed");
 				return;
 			}
-			
-			let newFeed = result.doc.QueryInterface(Components.interfaces.nsIFeed);
-			feedFetched.resolve(newFeed);
+			feedFetched.resolve(result.doc);
 		}
 	};
 	
-	Zotero.debug("FeedReader: Fetching feed from " + feedUrl.spec);
+	Zotero.debug("FeedReader: Fetching feed from " + feedUrl);
 	
-	this._channel = Services.io.newChannelFromURI2(feedUrl, null,
-		Services.scriptSecurityManager.getSystemPrincipal(), null,
-		Ci.nsILoadInfo.SEC_NORMAL, Ci.nsIContentPolicy.TYPE_OTHER);
-	this._channel.loadFlags |= Components.interfaces.nsIRequest.LOAD_BYPASS_CACHE;
-	this._channel.asyncOpen(feedProcessor, null); // Sends an HTTP request
+	// Fetch and start processing
+	fetch(feedUrl, {
+		cache: "no-store",
+	}).then((response) => {
+		return feedProcessor.onResponseAvailable(response);
+	}).catch((e) => {
+		Zotero.debug(e);
+		this.terminate("Processing failed");
+	});
 };
 
 /*
@@ -194,11 +234,6 @@ Zotero.FeedReader.prototype.terminate = function (status) {
 		let er = new Error(status);
 		er.handledRejection = true;
 		lastItem.reject(er);
-	}
-	
-	// Close feed connection
-	if (this._channel.isPending()) {
-		this._channel.cancel(Components.results.NS_BINDING_ABORTED);
 	}
 };
 
