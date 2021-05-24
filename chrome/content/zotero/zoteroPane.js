@@ -2205,6 +2205,8 @@ var ZoteroPane = new function()
 		if (found) {
 			document.getElementById('zotero-items-tree').focus();
 		}
+		
+		Zotero_Tabs.select('zotero-pane');
 	};
 	
 	
