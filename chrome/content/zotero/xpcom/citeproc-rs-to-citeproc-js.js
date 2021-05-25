@@ -25,6 +25,8 @@
 
 (function() {
 
+const additionalCSLProperties = ['locator', 'label', 'suppress-author', 'author-only', 'prefix', 'suffix'];
+
 Zotero.CiteprocRs = {
 	init: async function () {
 		if (Zotero.CiteprocRs.deferred) {
@@ -113,7 +115,9 @@ Zotero.CiteprocRs = {
 				citeprocItem.id = `${citeprocItem.id}`;
 				Zotero.debug(`CiteprocRs: insertReference ${JSON.stringify(citeprocItem)}`, 5);
 				unwrapCiteprocRsResult(this._driver.insertReference(citeprocItem));
-				cites.push({ id: `${citeprocItem.id}`, locator: undefined, locators: undefined });
+				let cite = { id: `${citeprocItem.id}`, locator: undefined, locators: undefined };
+				additionalCSLProperties.forEach(key => cite[key] = citationItem[key]);
+				cites.push(cite);
 			}
 			return cites;
 		}
