@@ -105,7 +105,10 @@ class EditorInstance {
 			font: this._getFont(),
 			hasBackup: note && !Zotero.Notes.hasSchemaVersion(note)
 				|| !!await Zotero.NoteBackups.getNote(this._item.id),
-			localizedStrings: Zotero.Intl.getPrefixedStrings('noteEditor')
+			localizedStrings: {
+				...Zotero.Intl.getPrefixedStrings('general.'),
+				...Zotero.Intl.getPrefixedStrings('noteEditor.')
+			}
 		});
 	}
 
@@ -850,6 +853,7 @@ class EditorInstance {
 
 	/**
 	 * Build citation item preview string (based on _buildBubbleString in quickFormat.js)
+	 * TODO: Try to avoid duplicating this code here and inside note-editor
 	 */
 	_formatCitationItemPreview(citationItem) {
 		const STARTSWITH_ROMANESQUE_REGEXP = /^[&a-zA-Z\u0e01-\u0e5b\u00c0-\u017f\u0370-\u03ff\u0400-\u052f\u0590-\u05d4\u05d6-\u05ff\u1f00-\u1fff\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]/;
@@ -867,10 +871,10 @@ class EditorInstance {
 			else if (authors.length === 2) {
 				let a = authors[0].family || authors[0].literal;
 				let b = authors[1].family || authors[1].literal;
-				str = a + ' and ' + b;
+				str = a + ' ' + Zotero.getString('general.and') + ' ' + b;
 			}
 			else if (authors.length >= 3) {
-				str = (authors[0].family || authors[0].literal) + ' et al.';
+				str = (authors[0].family || authors[0].literal) + ' ' + Zotero.getString('general.etAl');
 			}
 		}
 		
