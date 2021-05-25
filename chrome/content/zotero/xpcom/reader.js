@@ -89,12 +89,12 @@ class ReaderInstance {
 	
 	updateTitle() {
 		let item = Zotero.Items.get(this._itemID);
-		let title = item.getField('title');
+		let title = item.getDisplayTitle();
 		let parentItemID = item.parentItemID;
 		if (parentItemID) {
 			let parentItem = Zotero.Items.get(parentItemID);
 			if (parentItem) {
-				title = parentItem.getField('title');
+				title = parentItem.getDisplayTitle();
 			}
 		}
 		this._setTitleValue(title);
