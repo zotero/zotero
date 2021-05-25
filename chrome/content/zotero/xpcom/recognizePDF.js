@@ -419,6 +419,7 @@ Zotero.RecognizePDF = new function () {
 		if (!filePath || !await OS.File.exists(filePath)) throw new Zotero.Exception.Alert('recognizePDF.fileNotFound');
 
 		let json = await extractJSON(filePath, MAX_PAGES);
+		json.fileName = OS.Path.basename(filePath);
 		
 		let containingTextPages = 0;
 		
