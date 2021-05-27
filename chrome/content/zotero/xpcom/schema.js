@@ -3276,6 +3276,10 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("DELETE FROM settings WHERE setting='quickCopySite' AND key=?", [""]);
 			}
 			
+			else if (i == 116) {
+				yield Zotero.DB.queryAsync("UPDATE itemAnnotations SET color='#000000' WHERE color='#000'");
+			}
+			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
 		}
 		
