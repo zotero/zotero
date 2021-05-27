@@ -106,6 +106,8 @@ class EditorInstance {
 			hasBackup: note && !Zotero.Notes.hasSchemaVersion(note)
 				|| !!await Zotero.NoteBackups.getNote(this._item.id),
 			localizedStrings: {
+				// Figure out a better way to pass this
+				'zotero.appName': Zotero.appName,
 				...Zotero.Intl.getPrefixedStrings('general.'),
 				...Zotero.Intl.getPrefixedStrings('noteEditor.')
 			}
