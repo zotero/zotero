@@ -985,20 +985,19 @@ Zotero.Translate.ItemSaver.prototype = {
 	
 	"_handleRelated":function(item, newItem) {
 		// add to ID map
-		if(item.itemID || item.id) {
-			this._IDMap[item.itemID || item.id] = newItem.id;
-		}
+		if (item.itemID || item.id) {
+			this._IDMap[item.itemID || item.id] = newItem;
+		  }
 
-		// // add see alsos
-		// if(item.seeAlso) {
-		// 	for(var i=0; i<item.seeAlso.length; i++) {
-		// 		var seeAlso = item.seeAlso[i];
-		// 		if(this._IDMap[seeAlso]) {
-		// 			newItem.addRelatedItem(this._IDMap[seeAlso]);
-		// 		}
-		// 	}
-		// 	newItem.save();
-		// }
+		  // add see alsos
+		  if(item.seeAlso) {
+			for(related in item.seeAlso) {
+			  if(this._IDMap[related]) {
+				newItem.addRelatedItem(this._IDMap[related]);
+				}
+			  }
+			newItem.save();
+		  }
 	}
 }
 
