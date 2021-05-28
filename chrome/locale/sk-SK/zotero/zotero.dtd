@@ -335,3 +335,17 @@
 <!ENTITY zotero.context.addStandaloneNote "Pridať samostatnú poznámku">
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Pridať samostatnú poznámku z anotácií">
 <!ENTITY zotero.context.editInWindow "Upraviť v samostatnom okne">
+
+<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.lastPage "Last Page">
+<!ENTITY zotero.pdfReader.back "Back">
+<!ENTITY zotero.pdfReader.forward "Forward">
+<!ENTITY zotero.pdfReader.rotateClockwise "Rotate Clockwise">
+<!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotate Counterclockwise">
+<!ENTITY zotero.pdfReader.handTool "Hand Tool">
+<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
+<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
+<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
+<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
+<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
+<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">

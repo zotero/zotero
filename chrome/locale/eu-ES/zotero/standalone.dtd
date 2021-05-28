@@ -44,6 +44,9 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
+<!ENTITY goMenu.label "Go">
+
+
 <!ENTITY viewMenu.label "Ikuspegia">
 <!ENTITY layout.label "Konposaketa">
 <!ENTITY standardView.label "Ikuspegi estandarra">

@@ -44,6 +44,9 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
+<!ENTITY goMenu.label "Go">
+
+
 <!ENTITY viewMenu.label "Vizualizare">
 <!ENTITY layout.label "Machetă">
 <!ENTITY standardView.label "Vizualizare standard">

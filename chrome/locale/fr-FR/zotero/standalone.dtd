@@ -44,6 +44,9 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
+<!ENTITY goMenu.label "Go">
+
+
 <!ENTITY viewMenu.label "Affichage">
 <!ENTITY layout.label "Mise en page">
 <!ENTITY standardView.label "Affichage standard">

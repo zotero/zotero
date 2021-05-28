@@ -44,6 +44,9 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
+<!ENTITY goMenu.label "Go">
+
+
 <!ENTITY viewMenu.label "보기">
 <!ENTITY layout.label "레이아웃">
 <!ENTITY standardView.label "표준 보기">

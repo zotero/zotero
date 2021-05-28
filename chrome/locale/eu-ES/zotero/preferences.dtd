@@ -20,11 +20,11 @@
 <!ENTITY zotero.preferences.miscellaneous "Bestelakoak">
 <!ENTITY zotero.preferences.autoUpdate "Automatikoki egiaztatu itzultzaile eta estiloen eguneraketan">
 <!ENTITY zotero.preferences.updateNow "Eguneratu orain">
-<!ENTITY zotero.preferences.reportTranslationFailure "Report broken site translators">
+<!ENTITY zotero.preferences.reportTranslationFailure "Hautsitako gune itzultzaileen berri eman">
 <!ENTITY zotero.preferences.parseRISRefer "Erabili Zotero deskargatutako RIS/Refer fitxategietarako">
 <!ENTITY zotero.preferences.automaticTags "Automatikoki etiketatu elementuak hitz gako eta gaien goiburuekin">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatikoki ezabatu zaborran daudek elementuak ">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "egun atzera">
 
 <!ENTITY zotero.preferences.groups "Taldeak">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Bildumen artean iemak kopiatzen dituzunean, horrekin batera kopiatuko dira:">
@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Elementu zaharrenak lehenengo">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Jarioen lehenetsitakoak">
 
-<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
+<!ENTITY zotero.preferences.openurl.search "Konpontzaileak bilatu">
 <!ENTITY zotero.preferences.openurl.custom "Pertsonalizatua...">
 <!ENTITY zotero.preferences.openurl.server "Ebazlea:">
 <!ENTITY zotero.preferences.openurl.version "Bertsioa:">
@@ -54,18 +54,18 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Pasahitza ahaztu zaizu?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Sinkronizatu automatikoki">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Sinkronizatu testu osoa">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zoterok zure Zotero liburutegietako fitxategien testu osoko edukia sinkronizatu dezake zotero.org eta estekatutako beste gailuekin, edonon zaudela ere zure fitxategietan bilaketak egitea ahalbidetuz. Zure fitxategien testu osoko edukia ez da publikoki partekatuko.">
 <!ENTITY zotero.preferences.sync.about "Sinkronizazioari buruz">
 <!ENTITY zotero.preferences.sync.fileSyncing "Fitxategiak sinkronizatzea">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URLa:">
-<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sync attachment files in My Library using">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups "Sync attachment files in group libraries using Zotero storage">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Talde liburutegietan erantsitako fitxategiak sinkronizatu honakoa erabiliz:">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "Talde liburutegietan erantsitako fitxategiak Zotero biltegia erabiliz sinkronizatu">
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Fitxategiak deskargatu">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "sinkronizazioaren unean">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "behar ahala">
 <!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Zerbitzaria egiaztatu">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "By using Zotero storage, you agree to become bound by its">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "terms and conditions">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero biltegia erabiltzean, adosten duzu onartzea haren">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "termino eta baldintzak">
 <!ENTITY zotero.preferences.sync.librariesToSync "Sinkronizatu beharreko liburutegiak">
 <!ENTITY zotero.preferences.sync.librariesToSync.button "Hautatu liburutegiak...">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Sinkronizatu">
@@ -73,131 +73,131 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Honako operaziak egoera ezohiko eta zehatzetan erabitzeko bakarrik dira eta ez lirateke arazoen konponketa orokorrerako erabili behar. Kasu askotan, berrezarpenak arazo gehiago sor ditzake. Ikus">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sinkronizazioaren berrezarpenerako aukerak">
 <!ENTITY zotero.preferences.sync.reset.warning3 "informazio gehiagorako.">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Berrezarri datuen sinkronizazioaren historia">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Bateratu datu lokalak urrunekoekin, sinkronizazioaren historia baztertuz">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Lineako liburutegitik berreskuratu">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Gainidatzi Zoteroko datu lokalak lineako liburutegikoekin.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Ordezkatu lineako liburutegia">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Gainidatzi lineako liburutegia Zoteroko datu lokalekin.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Garbitu Sync kronika">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Alderatu eranskin fitxategi guztiak biltegi zerbitzuarekin">
 <!ENTITY zotero.preferences.sync.reset "Berrezarri">
-<!ENTITY zotero.preferences.sync.reset.button "Reset…">
+<!ENTITY zotero.preferences.sync.reset.button "Berrezarri...">
 
 
 <!ENTITY zotero.preferences.prefpane.search "Bilatu">
-<!ENTITY zotero.preferences.search.fulltextCache "Full-Text Cache">
+<!ENTITY zotero.preferences.search.fulltextCache "Testu osoaren cachea">
 <!ENTITY zotero.preferences.search.indexStats "Indexaren estatistika">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "Indexatuta:">
-<!ENTITY zotero.preferences.search.indexStats.partial "Partial:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Erdizkakoa:">
 <!ENTITY zotero.preferences.search.indexStats.unindexed "Indexatu gabe:">
-<!ENTITY zotero.preferences.search.indexStats.words "Words:">
+<!ENTITY zotero.preferences.search.indexStats.words "Hitzak:">
 
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Indexatzeko gehieneko karaktere kopurua fitxategi bakoitzeko:">
 <!ENTITY zotero.preferences.fulltext.pdfMaxPages "Indexatzeko gehieneko orrialde kopurua fitxategi bakoitzeko:">
 
 <!ENTITY zotero.preferences.prefpane.export "Esportatu">
 
-<!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
+<!ENTITY zotero.preferences.citationOptions.caption "Aipuaren aukerak">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Paperezko artikuluen URLak gehitu erreferentziatan">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Aukera hau ezgaituta dagoenean, Zoterok URLak gehitzen ditu aldizkari eta egunkarietako artikuluak aipatzean, artikuluak orrialde-barruti bat zehazten ez badu bakarrik.">
 
-<!ENTITY zotero.preferences.quickCopy.caption "Quick Copy">
+<!ENTITY zotero.preferences.quickCopy.caption "Kopia azkarra">
 <!ENTITY zotero.preferences.quickCopy.defaultFormat "Lehenetsitako formatua:">
-<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copy as HTML">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Site-Specific Settings:">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g., wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopiatu HTML gisa">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Gunearen berariazko ezarpenak:">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domeinua/bidea">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(adibidez, wikipedia.eus)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.format "Formatua">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Hizkuntza">
-<!ENTITY zotero.preferences.quickCopy.dragLimit "Disable Quick Copy when dragging more than">
+<!ENTITY zotero.preferences.quickCopy.dragLimit "Kopia azkarra desgaitu hauek baino gehiago arrastratzean: ">
 
-<!ENTITY zotero.preferences.prefpane.cite "Cite">
-<!ENTITY zotero.preferences.cite.styles "Styles">
-<!ENTITY zotero.preferences.cite.wordProcessors "Word Processors">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
+<!ENTITY zotero.preferences.prefpane.cite "Aipatu">
+<!ENTITY zotero.preferences.cite.styles "Estiloak">
+<!ENTITY zotero.preferences.cite.wordProcessors "Testu prozesatzaileak">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Erabili Aipua gehitu elkarrizketa klasikoa">
 <!ENTITY zotero.preferences.styleEditor "Estilo editorea">
 <!ENTITY zotero.preferences.stylePreview "Estiloen aurrebista">
 
-<!ENTITY zotero.preferences.cite.styles.styleManager "Style Manager">
-<!ENTITY zotero.preferences.cite.styles.styleManager.title "Title">
-<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Estilo kudeatzailea">
+<!ENTITY zotero.preferences.cite.styles.styleManager.title "Izenburua">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Eguneratua">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Estilo gehiago lortu...">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Gorde Zoteron (helbide barrako ikonoa)">
 <!ENTITY zotero.preferences.keys.toggleFullscreen "Pantaila osoa bai/ez">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Enfokatu liburutegien panela">
 <!ENTITY zotero.preferences.keys.quicksearch "Bilatu:">
 <!ENTITY zotero.preferences.keys.newItem "Elementu berria sortu">
-<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
+<!ENTITY zotero.preferences.keys.newNote "Sortu ohar berria">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Jarioko elementu guztiak irakurrita/irakurri gabe markatu">
 <!ENTITY zotero.preferences.keys.toggleTagSelector "Etiketa hautatzailea ikusi bai/ez">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Hautatutako elementuen aipuak arbelera kopiatu">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Hautatutako elementuak arbelera kopiatu">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Arbeletik inportatu">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect after restart">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Aldaketak berrabiarazi ondoren sartuko dira indarrean">
 
-<!ENTITY zotero.preferences.prefpane.proxies "Proxies">
+<!ENTITY zotero.preferences.prefpane.proxies "Proxyak">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Proxy aukerak">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero will transparently redirect requests through saved proxies. See the">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Zoterok transparenteki berbideratuko ditu gordetako proxien bitartez egindako eskaerak. Ikus ">
 <!ENTITY zotero.preferences.proxies.desc_link "proxy dokumentazioa">
-<!ENTITY zotero.preferences.proxies.desc_after_link "for more information.">
+<!ENTITY zotero.preferences.proxies.desc_after_link "informazio gehiagorako.">
 <!ENTITY zotero.preferences.proxies.transparent "Gaitu proxy bidezko birbideratzea">
-<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
+<!ENTITY zotero.preferences.proxies.autoRecognize "Proxy bitartezko errekurtsoak automatikoki ezagutu">
 <!ENTITY zotero.preferences.proxies.showRedirectNotification "Erakutsi jakinarazpena proxy bidez birbideratzerakoan">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Ezgaitu proxy bidezko birbideratzea nire domeinu izenak honakoa duenean:">
 <!ENTITY zotero.preferences.proxies.configured "Konfiguratutako proxyak">
-<!ENTITY zotero.preferences.proxies.hostname "Hostname">
-<!ENTITY zotero.preferences.proxies.scheme "Scheme">
+<!ENTITY zotero.preferences.proxies.hostname "Ostalari-izena">
+<!ENTITY zotero.preferences.proxies.scheme "Eskema">
 
-<!ENTITY zotero.preferences.proxies.multiSite "Multi-Site">
-<!ENTITY zotero.preferences.proxies.autoAssociate "Automatically associate new hosts">
+<!ENTITY zotero.preferences.proxies.multiSite "Gune ugari">
+<!ENTITY zotero.preferences.proxies.autoAssociate "Ostalari berriak automatikoki erlazionatu">
 <!ENTITY zotero.preferences.proxies.variables "Honako aldagaiak erabil ditzakezu zure proxy eskeman: ">
-<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - The hostname of the proxied site (e.g., www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - Proxy bitartezko gunearen ostalari-izena (adibidez, www.zotero.org)">
 <!ENTITY zotero.preferences.proxies.p_variable "&#37;p - Proxy atzeko orrialderainoko bidea hasierako barra kanpoan utzita (adibidez, about/index.html)">
-<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - The directory path (e.g., about/)">
+<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - Direktorioaren bidea (adibidez, about/)">
 <!ENTITY zotero.preferences.proxies.f_variable "&#37;f - Fitxategiaren izena (adibidez, index.html)">
-<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Any string">
+<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Edozein kate">
 
-<!ENTITY zotero.preferences.prefpane.advanced "Advanced">
-<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.prefpane.advanced "Aurreratua">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "Fitxategiak eta karpetak">
+<!ENTITY zotero.preferences.advanced.keys "Lasterbideak">
 
 <!ENTITY zotero.preferences.advanced.advancedConfiguration "Konfigurazio aurreratua">
 
-<!ENTITY zotero.preferences.prefpane.locate "Locate">
-<!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
-<!ENTITY zotero.preferences.locate.description "Description">
-<!ENTITY zotero.preferences.locate.name "Name">
+<!ENTITY zotero.preferences.prefpane.locate "Aurkitu">
+<!ENTITY zotero.preferences.locate.locateEngineManager "Artikuluen bilaketarako motoreen kudeatzailea">
+<!ENTITY zotero.preferences.locate.description "Deskribapena">
+<!ENTITY zotero.preferences.locate.name "Izena">
 <!ENTITY zotero.preferences.locate.locateEnginedescription "Bilaketa motor batek Info paneleko Bilatu goitibeherako menuaren gaitasunak zabaltzen ditu. Beheko zerrendako bilaketa motorrak gaitzean, goitibeherako menuan gehituko dira eta erabilgarri izango dira zure liburutegitik webean baliabideak bilatzeko.">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
-<!ENTITY zotero.preferences.locate.restoreDefaults "Restore Defaults">
+<!ENTITY zotero.preferences.locate.addDescription "Zerrendan ez dagoen Bilaketa motore bat gehitzeko, bisitatu nahi duzun bilatzailea zure nabigatzailearen bitartez eta sakatu &quot;Gehitu&quot; Zoteroren &quot;Aurkitu&quot; menuan.">
+<!ENTITY zotero.preferences.locate.restoreDefaults "Lehenetsitakoak berrezarri">
 
 <!ENTITY zotero.preferences.charset "Karaktere-kodeketa">
 <!ENTITY zotero.preferences.charset.importCharset "Karaktere-kodeketa inportatu">
 <!ENTITY zotero.preferences.charset.displayExportOption "Karaktere-kodeketaren aukerak erakutsi esportatzerakoan">
 
 <!ENTITY zotero.preferences.dataDir "Datu direktorioaren kokalekua">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
-<!ENTITY zotero.preferences.dataDir.custom "Custom:">
-<!ENTITY zotero.preferences.dataDir.choose "Choose…">
-<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
-<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
+<!ENTITY zotero.preferences.dataDir.useProfile "Profilaren direktorioa erabili">
+<!ENTITY zotero.preferences.dataDir.custom "Pertsonalizatua:">
+<!ENTITY zotero.preferences.dataDir.choose "Aukeratu...">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(komando lerroaren bitartez zehaztua)">
+<!ENTITY zotero.preferences.dataDir.reveal "Datuen direktorioa erakutsi">
 <!ENTITY zotero.preferences.dataDir.migrate "Lehenetsitako kokaleku berrira migratu...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Estekatutako eranskinen erro-direktorioa">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
-<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
-<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
-<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zoterok bide erlatiboak erabiliko ditu oinarrizko direktorioko estekatutako fitxategi eranskinentzat. Modu horretan, oinarrizko direktorioaren direktorio egitura berbera den bitartean, ordenagailu ezberdinetan fitxategiak eskuragarri izatea ahalbidetzen da.">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Oinarrizko direktorioa:">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Aukeratu...">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Bide absolutuetara itzuli...">
 
-<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Check Database Integrity">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
+<!ENTITY zotero.preferences.dbMaintenance "Datu basearen mantenua">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Datu basearen integritatea egiaztatu">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Itzultzaile eta estiloak berrezarri...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Itzultzaileak berrezarri...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Estiloak berrezarri...">
 
-<!ENTITY zotero.preferences.configEditor "Config Editor">
+<!ENTITY zotero.preferences.configEditor "Konfigurazio editorea">

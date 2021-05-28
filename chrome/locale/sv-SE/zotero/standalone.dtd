@@ -44,6 +44,9 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
+<!ENTITY goMenu.label "Go">
+
+
 <!ENTITY viewMenu.label "Visa">
 <!ENTITY layout.label "Utseende">
 <!ENTITY standardView.label "Standardvy">

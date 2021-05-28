@@ -44,6 +44,9 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
+<!ENTITY goMenu.label "Go">
+
+
 <!ENTITY viewMenu.label "Näytä">
 <!ENTITY layout.label "Asettelu">
 <!ENTITY standardView.label "Vakionäkymä">
