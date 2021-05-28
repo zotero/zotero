@@ -994,6 +994,8 @@ Zotero.Translate.ItemSaver.prototype = {
 			for(related in item.seeAlso) {
 			  if(this._IDMap[related]) {
 				newItem.addRelatedItem(this._IDMap[related]);
+				this._IDMap[related].addRelatedItem(newItem);
+				this._IDMap[related].save();
 				}
 			  }
 			newItem.save();
