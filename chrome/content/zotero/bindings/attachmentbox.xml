@@ -169,7 +169,9 @@
 						}
 						
 						var noteEditor = this._id('attachment-note-editor')
-						if (extraData && extraData[id]
+						if (extraData
+								&& extraData[id]
+								&& extraData[id].noteEditorID
 								&& extraData[id].noteEditorID == noteEditor.instanceID) {
 							//Zotero.debug("Skipping notification from current attachment note field");
 							continue;

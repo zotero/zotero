@@ -270,6 +270,19 @@ describe("Item pane", function () {
 			var label = itemBox._id('fileName');
 			assert.equal(label.value, newName);
 		})
+		
+		it("should update on attachment title change", async function () {
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var item = await Zotero.Attachments.importFromFile({ file });
+			var newTitle = 'New Title';
+			item.setField('title', newTitle);
+			await item.saveTx();
+			
+			var itemBox = doc.getElementById('zotero-attachment-box');
+			var label = itemBox._id('title');
+			assert.equal(label.textContent, newTitle);
+		})
 	})
 	
 	
