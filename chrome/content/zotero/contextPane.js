@@ -79,6 +79,14 @@ var ZoteroContextPane = new function () {
 		_notesPaneToggle = document.getElementById('zotero-tb-toggle-notes-pane');
 		_toolbar = document.getElementById('zotero-toolbar');
 		_tabToolbarContainer = document.getElementById('zotero-tab-toolbar-container');
+		
+		if (Zotero.rtl) {
+			_tabToolbarContainer.style.left = 0;
+			_splitButton.style.transform = 'scaleX(-1)';
+		}
+		else {
+			_tabToolbarContainer.style.right = 0;
+		}
 
 		_init();
 
@@ -256,7 +264,14 @@ var ZoteroContextPane = new function () {
 		if (!Zotero.Reader.getSidebarOpen()) {
 			width = 0;
 		}
-		_contextPane.style.left = stacked ? width : 'unset';
+		if (Zotero.rtl) {
+			_contextPane.style.left = 0;
+			_contextPane.style.right = stacked ? width : 'unset';
+		}
+		else {
+			_contextPane.style.left = stacked ? width : 'unset';
+			_contextPane.style.right = 0;
+		}
 	}
 
 	function _updateToolbarWidth() {
