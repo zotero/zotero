@@ -1309,7 +1309,6 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 							var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 								.getService(Components.interfaces.nsIWindowMediator);
 							var win = wm.getMostRecentWindow("navigator:browser");
-							win.Zotero_Tabs.select('zotero-pane');
 							win.ZoteroPane.selectItem(object.id);
 						};
 					}

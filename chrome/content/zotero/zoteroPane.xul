@@ -82,7 +82,12 @@
 			<box id="zotero-tab-cover" hidden="true">
 				<label pack="center">&zotero.general.loading;</label>
 			</box>
-			<box id="zotero-tab-toolbar-container"/>
+			<box id="zotero-tab-toolbar" class="toolbar" hidden="true">
+				<div id="zotero-tb-split" xmlns="http://www.w3.org/1999/xhtml" class="split-button">
+					<div id="zotero-tb-toggle-item-pane" class="toolbarButton item" title="&zotero.toolbar.context.item;"><span/></div>
+					<div id="zotero-tb-toggle-notes-pane" class="toolbarButton notes" title="&zotero.toolbar.context.notes;"><span/></div>
+				</div>
+			</box>
 			<deck id="tabs-deck" flex="1">
 				<vbox id="zotero-pane"
 					onkeydown="ZoteroPane_Local.handleKeyDown(event, this.id)"
@@ -228,11 +233,6 @@
 									<div xmlns="http://www.w3.org/1999/xhtml" class="sync-button-tooltip-messages"/>
 								</tooltip>
 							</toolbarbutton>
-	
-							<div id="zotero-tb-split" xmlns="http://www.w3.org/1999/xhtml" class="split-button hidden">
-								<div id="zotero-tb-toggle-item-pane" class="toolbarButton item" title="&zotero.toolbar.context.item;"><span></span></div>
-								<div id="zotero-tb-toggle-notes-pane" class="toolbarButton notes" title="&zotero.toolbar.context.notes;"><span></span></div>
-							</div>
 						</hbox>
 					</toolbar>
 					

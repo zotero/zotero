@@ -43,7 +43,7 @@
 /*    display: none;*/
 /*}*/
 
-#zotero-tab-toolbar-container {
+#zotero-tab-toolbar {
     position: fixed;
     z-index: 1;
     -moz-appearance: none;
@@ -52,11 +52,6 @@
 
 #zotero-item-toolbar {
     height: 32px;
-}
-
-#zotero-tab-toolbar-container #zotero-tb-locate,
-#zotero-tab-toolbar-container #zotero-pq-buttons {
-    display: none;
 }
 
 #zotero-context-toolbar-extension {
