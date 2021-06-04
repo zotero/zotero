@@ -15,6 +15,7 @@ Zotero.Locale = {
 		'en-GB': 'English (UK)',
 		'es-ES': 'Español',
 		'et-EE': 'Eesti keel',
+		'eu-ES': 'Euskara',
 		'fa': 'فارسی',
 		'fi-FI': 'suomi',
 		'fr-FR': 'Français',
