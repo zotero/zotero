@@ -1550,7 +1550,7 @@ Zotero.Integration.Session.prototype._processNote = async function (item) {
 		}
 	}
 	// Encode unicode chars
-	text = text.replace(/[\u00A0-\u9999\&]/gim, function (i) {
+	text = text.replace(/[\u00A0-\u9999]/gim, function (i) {
 		return '&#'+i.charCodeAt(0)+';';
 	});
 	if (!text.startsWith('<html>')) {
