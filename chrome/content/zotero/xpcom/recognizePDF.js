@@ -628,7 +628,7 @@ Zotero.RecognizePDF = new function () {
 	 * @return {String} - Found year or null if nothing found.
 	 */
 	function _extractYearFromFileName(fileName) {
-		let yearRe = /(?=(?:\d){4})((?:(?:20)|(?:19))[\d]{2})/;
+		let yearRe = /\D((?:19|20)\d{2})\D?/;
 		let yearRes = fileName.match(yearRe);
 		if (!yearRes) {
 			return null;
