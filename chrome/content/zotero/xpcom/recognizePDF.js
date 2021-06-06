@@ -1,25 +1,25 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
-
+    
     Copyright © 2018 Center for History and New Media
                      George Mason University, Fairfax, Virginia, USA
                      http://zotero.org
-
+    
     This file is part of Zotero.
-
+    
     Zotero is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-
+    
     Zotero is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Affero General Public License for more details.
-
+    
     You should have received a copy of the GNU Affero General Public License
     along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-
+    
     ***** END LICENSE BLOCK *****
 */
 
@@ -27,13 +27,13 @@ Zotero.RecognizePDF = new function () {
 	const OFFLINE_RECHECK_DELAY = 60 * 1000;
 	const MAX_PAGES = 5;
 	const UNRECOGNIZE_TIMEOUT = 86400 * 1000;
-
+	
 	let _newItems = new WeakMap();
-
+	
 	let _queue = [];
 	let _queueProcessing = false;
 	let _processingItemID = null;
-
+	
 	let _progressQueue = Zotero.ProgressQueues.create({
 		id: 'recognize',
 		title: 'recognizePDF.title',
@@ -42,23 +42,23 @@ Zotero.RecognizePDF = new function () {
 			'recognizePDF.itemName.label'
 		]
 	});
-
+	
 	_progressQueue.addListener('cancel', function () {
 		_queue = [];
 	});
-
+	
 	this.recognizeStub = null;
-
+	
 	/**
 	 * Triggers queue processing and returns when all items in the queue are processed
 	 * @return {Promise}
 	 */
 	async function _processQueue() {
 		await Zotero.Schema.schemaUpdatePromise;
-
+		
 		if (_queueProcessing) return;
 		_queueProcessing = true;
-
+		
 		while (1) {
 			// While all current progress queue usages are related with
 			// online APIs, check internet connectivity here
@@ -66,27 +66,27 @@ Zotero.RecognizePDF = new function () {
 				await Zotero.Promise.delay(OFFLINE_RECHECK_DELAY);
 				continue;
 			}
-
+			
 			let itemID = _queue.pop();
 			if (!itemID) break;
-
+			
 			_processingItemID = itemID;
-
+			
 			_progressQueue.updateRow(itemID, Zotero.ProgressQueue.ROW_PROCESSING, Zotero.getString('general.processing'));
-
+			
 			try {
 				let item = await Zotero.Items.getAsync(itemID);
-
+				
 				if (!item) {
 					throw new Error();
 				}
-
+				
 				let res = await _processItem(item);
 				_progressQueue.updateRow(itemID, Zotero.ProgressQueue.ROW_SUCCEEDED, item.getField('title'));
 			}
 			catch (e) {
 				Zotero.logError(e);
-
+				
 				_progressQueue.updateRow(
 					itemID,
 					Zotero.ProgressQueue.ROW_FAILED,
@@ -96,12 +96,12 @@ Zotero.RecognizePDF = new function () {
 				);
 			}
 		}
-
+		
 		_queueProcessing = false;
 		_processingItemID = null;
 	}
-
-
+	
+	
 	/**
 	 * Adds items to the queue and triggers processing
 	 * @param {Zotero.Item[]} items
@@ -120,8 +120,8 @@ Zotero.RecognizePDF = new function () {
 		}
 		await _processQueue();
 	};
-
-
+	
+	
 	/**
 	 * Checks whether a given PDF could theoretically be recognized
 	 * @param {Zotero.Item} item
@@ -132,11 +132,11 @@ Zotero.RecognizePDF = new function () {
 			&& item.attachmentContentType === 'application/pdf'
 			&& item.isTopLevelItem();
 	};
-
-
+	
+	
 	this.autoRecognizeItems = async function (items) {
 		if (!Zotero.Prefs.get('autoRecognizeFiles')) return;
-
+		
 		var pdfs = items.filter((item) => {
 			return item
 				&& item.isFileAttachment()
@@ -161,8 +161,8 @@ Zotero.RecognizePDF = new function () {
 			queue.cancel();
 		}
 	};
-
-
+	
+	
 	this.canUnrecognize = function (item) {
 		var { dateModified } = _newItems.get(item) || {};
 		// Item must have been recognized recently, must not have been modified since it was
@@ -175,22 +175,22 @@ Zotero.RecognizePDF = new function () {
 			_newItems.delete(item);
 			return false;
 		}
-
+		
 		// Child attachment must be not be in trash and must be a PDF
 		var attachments = Zotero.Items.get(item.getAttachments());
 		if (!attachments.length || attachments[0].attachmentContentType != 'application/pdf') {
 			_newItems.delete(item);
 			return false;
 		}
-
+		
 		return true;
 	};
-
-
+	
+	
 	this.unrecognize = async function (item) {
 		var { originalTitle, originalFilename } = _newItems.get(item);
 		var attachment = Zotero.Items.get(item.getAttachments()[0]);
-
+		
 		try {
 			let currentFilename = attachment.attachmentFilename;
 			if (currentFilename != originalFilename) {
@@ -203,29 +203,29 @@ Zotero.RecognizePDF = new function () {
 		catch (e) {
 			Zotero.logError(e);
 		}
-
+		
 		return Zotero.DB.executeTransaction(async function () {
 			let collections = item.getCollections();
 			attachment.parentItemID = null
 			attachment.setCollections(collections);
 			await attachment.save();
-
+			
 			await item.erase();
 		}.bind(this));
 	};
-
-
+	
+	
 	this.report = async function (item, description) {
 		var attachment = Zotero.Items.get(item.getAttachments()[0]);
 		var filePath = attachment.getFilePath();
 		if (!filePath || !await OS.File.exists(filePath)) {
 			throw new Error("File not found when reporting metadata");
 		}
-
+		
 		var version = Zotero.version;
 		var json = await extractJSON(filePath, MAX_PAGES);
 		var metadata = item.toJSON();
-
+		
 		var data = { description, version, json, metadata };
 		var url = _getBaseURL() + 'report';
 		return Zotero.HTTP.request(
@@ -240,8 +240,8 @@ Zotero.RecognizePDF = new function () {
 			}
 		);
 	};
-
-
+	
+	
 	/**
 	 * Processes the item and places it as a children of the new item
 	 * @param itemID
@@ -252,7 +252,7 @@ Zotero.RecognizePDF = new function () {
 		if (attachment.parentItemID) {
 			throw new Error('Already has parent');
 		}
-
+		
 		var zp = Zotero.getActiveZoteroPane();
 		var selectParent = false;
 		if (zp) {
@@ -262,12 +262,12 @@ Zotero.RecognizePDF = new function () {
 				selectParent = selected.length == 1 && selected[0] == attachment;
 			}
 		}
-
+		
 		let parentItem = await _recognize(attachment);
 		if (!parentItem) {
 			throw new Zotero.Exception.Alert("recognizePDF.noMatches");
 		}
-
+		
 		// Put new item in same collections as the old one
 		let collections = attachment.getCollections();
 		await Zotero.DB.executeTransaction(async function () {
@@ -277,16 +277,16 @@ Zotero.RecognizePDF = new function () {
 				}
 				await parentItem.save();
 			}
-
+			
 			// Put old item as a child of the new item
 			attachment.parentID = parentItem.id;
 			await attachment.save();
 		});
-
+		
 		var originalTitle = attachment.getField('title');
 		var path = attachment.getFilePath();
 		var originalFilename = OS.Path.basename(path);
-
+		
 		// Rename attachment file to match new metadata
 		if (Zotero.Attachments.shouldAutoRenameFile(attachment.attachmentLinkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE)) {
 			let ext = Zotero.File.getExtension(path);
@@ -300,7 +300,7 @@ Zotero.RecognizePDF = new function () {
 			attachment.setField('title', newName);
 			await attachment.saveTx();
 		}
-
+		
 		try {
 			zp = Zotero.getActiveZoteroPane();
 			if (zp) {
@@ -312,7 +312,7 @@ Zotero.RecognizePDF = new function () {
 		catch (e) {
 			Zotero.logError(e);
 		}
-
+		
 		_newItems.set(
 			parentItem,
 			{
@@ -323,7 +323,7 @@ Zotero.RecognizePDF = new function () {
 		);
 		return parentItem;
 	}
-
+	
 	/**
 	 * Get json from a PDF
 	 * @param {String} filePath PDF file path
@@ -336,12 +336,12 @@ Zotero.RecognizePDF = new function () {
 		if (cacheFile.exists()) {
 			cacheFile.remove(false);
 		}
-
+		
 		let {exec, args} = Zotero.Fulltext.getPDFConverterExecAndArgs();
 		args.push('-json', '-l', pages, filePath, cacheFile.path);
-
+		
 		Zotero.debug("RecognizePDF: Running " + exec.path + " " + args.map(arg => "'" + arg + "'").join(" "));
-
+		
 		try {
 			await Zotero.Utilities.Internal.exec(exec, args);
 			let content = await Zotero.File.getContentsAsync(cacheFile.path);
@@ -361,7 +361,7 @@ Zotero.RecognizePDF = new function () {
 			throw new Zotero.Exception.Alert("recognizePDF.couldNotRead");
 		}
 	}
-
+	
 	/**
 	 * Attach appropriate handlers to a Zotero.Translate instance and begin translation
 	 * @return {Promise}
@@ -375,7 +375,7 @@ Zotero.RecognizePDF = new function () {
 				return;
 			}
 		});
-
+		
 		let newItems = await translate.translate({
 			libraryID,
 			saveAttachments: false
@@ -385,7 +385,7 @@ Zotero.RecognizePDF = new function () {
 		}
 		throw new Error('No items found');
 	}
-
+	
 	async function _query(json) {
 		var uri = _getBaseURL() + 'recognize';
 		let client = Zotero.Sync.Runner.getAPIClient();
@@ -403,7 +403,7 @@ Zotero.RecognizePDF = new function () {
 		);
 		return JSON.parse(req.responseText);
 	}
-
+	
 	/**
 	 * Retrieves metadata for a PDF and saves it as an item
 	 * @param {Zotero.Item} item
@@ -413,39 +413,38 @@ Zotero.RecognizePDF = new function () {
 		if (Zotero.RecognizePDF.recognizeStub) {
 			return Zotero.RecognizePDF.recognizeStub(item);
 		}
-
+		
 		let filePath = await item.getFilePath();
-
+		
 		if (!filePath || !await OS.File.exists(filePath)) throw new Zotero.Exception.Alert('recognizePDF.fileNotFound');
-		let fileName = OS.Path.basename(filePath);
 
 		let json = await extractJSON(filePath, MAX_PAGES);
 		json.fileName = OS.Path.basename(filePath);
 		
 		let containingTextPages = 0;
-
+		
 		for(let page of json.pages) {
 			if(page[2].length) {
 				containingTextPages++;
 			}
 		}
-
+		
 		if(!containingTextPages) {
 			throw new Zotero.Exception.Alert('recognizePDF.noOCR');
 		}
-
+		
 		let libraryID = item.libraryID;
-
+		
 		let res = await _query(json);
 		if (!res) return null;
-
+		
 		if (res.arxiv) {
 			Zotero.debug(`RecognizePDF: Getting metadata for arXiv ID ${res.arxiv}`);
 			let translate = new Zotero.Translate.Search();
 			translate.setIdentifier({arXiv: res.arxiv});
 			let translators = await translate.getTranslators();
 			translate.setTranslator(translators);
-
+			
 			try {
 				let newItem = await _promiseTranslate(translate, libraryID);
 				if (!newItem.abstractNote && res.abstract) {
@@ -544,18 +543,18 @@ Zotero.RecognizePDF = new function () {
 				Zotero.debug('RecognizePDF: ' + e);
 			}
 		}
-
+		
 		if (res.title) {
 			let type = 'journalArticle';
-
+			
 			if (res.type === 'book-chapter') {
 				type = 'bookSection';
 			}
-
+			
 			let newItem = new Zotero.Item(type);
 			newItem.libraryID = libraryID;
 			newItem.setField('title', res.title);
-
+			
 			let creators = [];
 			for (let author of res.authors) {
 				creators.push({
@@ -659,3 +658,4 @@ Zotero.RecognizePDF = new function () {
 		return url + "recognizer/";
 	}
 };
+
