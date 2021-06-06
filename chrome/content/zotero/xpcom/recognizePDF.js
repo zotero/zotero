@@ -563,9 +563,9 @@ Zotero.RecognizePDF = new function () {
 					creatorType: 'author'
 				})
 			}
-
+			
 			newItem.setCreators(creators);
-
+			
 			if (res.abstract) newItem.setField('abstractNote', res.abstract);
 			if (!res.year) {
 				res.year = _extractYearFromFileName(fileName);
@@ -575,7 +575,7 @@ Zotero.RecognizePDF = new function () {
 			if (res.volume) newItem.setField('volume', res.volume);
 			if (res.url) newItem.setField('url', res.url);
 			if (res.language) newItem.setField('language', res.language);
-
+			
 			if (type === 'journalArticle') {
 				if (res.issue) newItem.setField('issue', res.issue);
 				if (res.ISSN) newItem.setField('issn', res.issn);
@@ -585,13 +585,13 @@ Zotero.RecognizePDF = new function () {
 				if (res.container) newItem.setField('bookTitle', res.container);
 				if (res.publisher) newItem.setField('publisher', res.publisher);
 			}
-
+			
 			newItem.setField('libraryCatalog', 'Zotero');
-
+			
 			await newItem.saveTx();
 			return newItem;
 		}
-
+		
 		return null;
 	}
 
