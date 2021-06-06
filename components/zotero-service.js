@@ -47,6 +47,7 @@ const xpcomFilesAll = [
 	'http',
 	'mimeTypeHandler',
 	'openurl',
+	'pdfWorker/manager',
 	'ipc',
 	'profile',
 	'progressWindow',
@@ -64,7 +65,7 @@ const xpcomFilesLocal = [
 	'libraryTreeView',
 	'collectionTreeView',
 	'collectionTreeRow',
-	'annotate',
+	'annotations',
 	'api',
 	'attachments',
 	'cite',
@@ -95,6 +96,7 @@ const xpcomFilesLocal = [
 	'data/tags',
 	'db',
 	'duplicates',
+	'editorInstance',
 	'feedReader',
 	'fulltext',
 	'id',
@@ -103,8 +105,10 @@ const xpcomFilesLocal = [
 	'locale',
 	'locateManager',
 	'mime',
+	'noteBackups',
 	'notifier',
 	'openPDF',
+	'reader',
 	'progressQueue',
 	'progressQueueDialog',
 	'quickCopy',
@@ -531,8 +535,10 @@ ZoteroCommandLineHandler.prototype = {
 			
 			var command = cmdLine.handleFlagWithParam("ZoteroIntegrationCommand", false);
 			var docId = cmdLine.handleFlagWithParam("ZoteroIntegrationDocument", false);
+			var templateVersion = parseInt(cmdLine.handleFlagWithParam("ZoteroIntegrationTemplateVersion", false));
+			templateVersion = isNaN(templateVersion) ? 0 : templateVersion;
 			
-			zContext.Zotero.Integration.execCommand(agent, command, docId);
+			zContext.Zotero.Integration.execCommand(agent, command, docId, templateVersion);
 		}
 		
 		// handler for Windows IPC commands

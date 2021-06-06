@@ -76,7 +76,7 @@ Zotero.Intl = new function () {
 		Zotero.rtl = (Zotero.dir === 'rtl');
 		
 		this.strings = {};
-		const intlFiles = ['zotero.dtd'];
+		const intlFiles = ['zotero.dtd', 'mozilla/editMenuOverlay.dtd'];
 		for (let intlFile of intlFiles) {
 			let localeXML = Zotero.File.getContentsFromURL(`chrome://zotero/locale/${intlFile}`);
 			let regexp = /<!ENTITY ([^\s]+)\s+"([^"]+)/g;
@@ -131,6 +131,24 @@ Zotero.Intl = new function () {
 			throw new Error('Localized string not available for ' + name);
 		}
 		return l10n;
+	};
+
+	/**
+	 * Get all strings with a specified prefix
+	 *
+	 * @param {String} prefix
+	 * @return {Object}
+	 */
+	this.getPrefixedStrings = function (prefix) {
+		let strings = [];
+		let enumerator = bundle.getSimpleEnumeration();
+		while (enumerator.hasMoreElements()) {
+			let entity = enumerator.getNext().QueryInterface(Ci.nsIPropertyElement);
+			if (entity.key.startsWith(prefix)) {
+				strings[entity.key] = entity.value;
+			}
+		}
+		return strings;
 	};
 
 	/*

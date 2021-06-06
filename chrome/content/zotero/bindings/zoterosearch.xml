@@ -995,6 +995,7 @@
 										textbox.setAttribute('autocompletesearch', 'zotero');
 										textbox.setAttribute('timeout', '250');
 										
+										// TODO: Provide current libraryID
 										var autocompleteParams = {
 											fieldName: condition
 										};

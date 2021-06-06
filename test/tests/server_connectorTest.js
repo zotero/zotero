@@ -1359,7 +1359,7 @@ describe("Connector Server", function () {
 				});
 			});
 			
-			await Zotero.HTTP.request(
+			let response = await Zotero.HTTP.request(
 				'POST',
 				connectorServerPath + "/connector/saveSnapshot",
 				{
@@ -1368,10 +1368,13 @@ describe("Connector Server", function () {
 					},
 					body: JSON.stringify({
 						url: testServerPath + "/test.pdf",
-						pdf: true
+						pdf: true,
+						singleFile: true
 					})
 				}
 			);
+			let json = JSON.parse(response.responseText);
+			assert.propertyVal(json, 'saveSingleFile', false);
 			
 			var ids = await promise;
 			

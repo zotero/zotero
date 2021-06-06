@@ -1143,7 +1143,9 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 			return 500;
 		}
 		
-		return [201, "application/json", JSON.stringify({ saveSingleFile: !data.skipSnapshot })];
+		return [201,
+			"application/json",
+			JSON.stringify({ saveSingleFile: !data.skipSnapshot && !data.pdf })];
 	},
 	
 	/*
@@ -1699,7 +1701,8 @@ Zotero.Server.Connector.Ping.prototype = {
 			
 			let response = {
 				prefs: {
-					automaticSnapshots: Zotero.Prefs.get('automaticSnapshots')
+					automaticSnapshots: Zotero.Prefs.get('automaticSnapshots'),
+					googleDocsAddNoteEnabled: Zotero.isPDFBuild
 				}
 			};
 			if (Zotero.QuickCopy.hasSiteSettings()) {

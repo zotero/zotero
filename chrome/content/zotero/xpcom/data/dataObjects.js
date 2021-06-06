@@ -486,9 +486,14 @@ Zotero.DataObjects.prototype.loadDataTypes = Zotero.Promise.coroutine(function* 
  * @param {Integer[]} [ids]
  */
 Zotero.DataObjects.prototype._loadDataTypeInLibrary = Zotero.Promise.coroutine(function* (dataType, libraryID, ids) {
-	var funcName = "_load" + dataType[0].toUpperCase() + dataType.substr(1)
+	// note → loadNotes
+	// itemData → loadItemData
+	// annotationDeferred → loadAnnotationsDeferred
+	var baseDataType = dataType.replace('Deferred', '');
+	var funcName = "_load" + dataType[0].toUpperCase() + baseDataType.substr(1)
 		// Single data types need an 's' (e.g., 'note' -> 'loadNotes()')
-		+ ((dataType.endsWith('s') || dataType.endsWith('Data') ? '' : 's'));
+		+ ((baseDataType.endsWith('s') || baseDataType.endsWith('Data') ? '' : 's'))
+		+ (dataType.endsWith('Deferred') ? 'Deferred' : '');
 	if (!this[funcName]) {
 		throw new Error(`Zotero.${this._ZDO_Objects}.${funcName} is not a function`);
 	}
@@ -564,6 +569,7 @@ Zotero.DataObjects.prototype._loadPrimaryData = Zotero.Promise.coroutine(functio
 		sql,
 		params,
 		{
+			noCache: true,
 			onRow: function (row) {
 				var id = row.getResultByName(this._ZDO_id);
 				var columns = Object.keys(this._primaryDataSQLParts);
@@ -677,7 +683,7 @@ Zotero.DataObjects.prototype._loadRelations = Zotero.Promise.coroutine(function*
 		sql,
 		params,
 		{
-			noCache: ids.length != 1,
+			noCache: true,
 			onRow: function (row) {
 				let id = row.getResultByIndex(0);
 				
@@ -704,6 +710,150 @@ Zotero.DataObjects.prototype._loadRelations = Zotero.Promise.coroutine(function*
 		setRows(lastID, rows);
 	}
 });
+
+
+/**
+ * Sort an array of collections or items from top-level to deepest, grouped by level
+ *
+ * All top-level objects are returned, followed by all second-level objects, followed by
+ * third-level, etc. The order within each level is undefined.
+ *
+ * This is used to sort higher-level objects first in upload JSON, since otherwise the API would
+ * reject lower-level objects for having missing parents.
+ *
+ * @param {Zotero.DataObject[]} objects - An array of objects
+ * @return {Zotero.DataObject[]} - A sorted array of objects
+ */
+Zotero.DataObjects.prototype.sortByLevel = function (objects) {
+	// Convert to ids
+	var ids = objects.map(o => o.id);
+	var levels = {};
+	
+	// Get top-level objects
+	var top = objects.filter(o => !o.parentID).map(o => o.id);
+	levels["0"] = top.slice();
+	ids = Zotero.Utilities.arrayDiff(ids, top);
+	
+	// For each object in list, walk up its parent tree. If a parent is present in the
+	// list of ids, add it to the appropriate level bucket and remove it.
+	while (ids.length) {
+		let tree = [ids[0]];
+		let keep = [ids[0]];
+		let id = ids.shift();
+		let seen = new Set([id]);
+		while (true) {
+			let o = Zotero[this._ZDO_Objects].get(id);
+			let parentID = o.parentID;
+			if (!parentID) {
+				break;
+			}
+			// Avoid an infinite loop if objects are incorrectly nested within each other
+			if (seen.has(parentID)) {
+				throw new Zotero.Error(
+					`Incorrectly nested ${this._ZDO_objects}`,
+					Zotero.Error.ERROR_INVALID_OBJECT_NESTING,
+					{
+						[this._ZDO_id]: id
+					}
+				);
+			}
+			seen.add(parentID);
+			tree.push(parentID);
+			// If parent is in list, remove it
+			let pos = ids.indexOf(parentID);
+			if (pos != -1) {
+				keep.push(parentID);
+				ids.splice(pos, 1);
+			}
+			id = parentID;
+		}
+		let level = tree.length - 1;
+		for (let i = 0; i < tree.length; i++) {
+			let currentLevel = level - i;
+			for (let j = 0; j < keep.length; j++) {
+				if (tree[i] != keep[j]) continue;
+				
+				if (!levels[currentLevel]) {
+					levels[currentLevel] = [];
+				}
+				levels[currentLevel].push(keep[j]);
+			}
+		}
+	}
+	
+	var ordered = [];
+	for (let level in levels) {
+		ordered = ordered.concat(levels[level]);
+	}
+	// Convert back to objects
+	return ordered.map(id => Zotero[this._ZDO_Objects].get(id));
+};
+
+
+/**
+ * Sort an array of collections or items from top-level to deepest, grouped by parent
+ *
+ * Child objects are included before any sibling objects. The order within each level is undefined.
+ *
+ * This is used to sort higher-level objects first in upload JSON, since otherwise the API would
+ * reject lower-level objects for having missing parents.
+ *
+ * @param {Zotero.DataObject[]} ids - An array of data objects
+ * @return {Zotero.DataObject[]} - A sorted array of data objects
+ */
+Zotero.DataObjects.prototype.sortByParent = function (objects) {
+	// Convert to ids
+	var ids = objects.map(o => o.id);
+	var ordered = [];
+	
+	// For each object in list, walk up its parent tree. If a parent is present in the list of
+	// objects, keep track of it and remove it from the list. When we get to a top-level object, add
+	// all the objects we've kept to the ordered list.
+	while (ids.length) {
+		let id = ids.shift();
+		let keep = [id];
+		let seen = new Set([id]);
+		while (true) {
+			let o = Zotero[this._ZDO_Objects].get(id);
+			let parentID = o.parentID;
+			if (!parentID) {
+				// We've reached a top-level object, so add any kept ids to the list
+				ordered.push(...keep);
+				break;
+			}
+			// Avoid an infinite loop if objects are incorrectly nested within each other
+			if (seen.has(parentID)) {
+				throw new Zotero.Error(
+					`Incorrectly nested ${this._ZDO_objects}`,
+					Zotero.Error.ERROR_INVALID_OBJECT_NESTING,
+					{
+						[this._ZDO_id]: id
+					}
+				);
+			}
+			seen.add(parentID);
+			// If parent is in list of ids, keep it and remove it from list
+			let pos = ids.indexOf(parentID);
+			if (pos != -1) {
+				keep.unshift(parentID);
+				ids.splice(pos, 1);
+			}
+			// Otherwise, check if parent has already been added to the ordered list, in which case
+			// we can slot in all kept ids after it
+			else {
+				pos = ordered.indexOf(parentID);
+				if (pos != -1) {
+					ordered.splice(pos + 1, 0, ...keep);
+					break;
+				}
+			}
+			id = parentID;
+		}
+	}
+	
+	// Convert back to objects
+	return ordered.map(id => Zotero[this._ZDO_Objects].get(id));
+}
 
 
 /**

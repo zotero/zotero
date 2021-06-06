@@ -4,7 +4,7 @@ html > body {
 }
 
 body {
-	line-height: 1.45em;
+	line-height: 1.6em;
 	font-size: 15px;
 }
 
@@ -12,45 +12,42 @@ body[multiline="true"] {
 	line-height: 26px;
 }
 
-#quick-format-dialog {
+window.citation-dialog {
 	background: transparent;
 	-moz-appearance: none;
 	padding: 0;
 	width: 800px;
 }
 
-#quick-format-dialog.progress-bar #quick-format-deck {
+.citation-dialog.progress-bar .citation-dialog.deck {
 	height: 37px;
 }
 
-#quick-format-search {
+.citation-dialog.search {
 	background: white;
-	-moz-appearance: searchfield;
-}
-
-#quick-format-search[multiline="true"] {
-	padding: 2px 2px 0 19.5px;
+	padding: 2px 2px 0 2px;
 	margin: 2.5px 3.5px;
 	border: 1px solid rgba(0, 0, 0, 0.5);
 	-moz-appearance: none;
+	border-radius: 10px;
 }
 
-#quick-format-search:not([multiline="true"]) {
-	padding-top: 3.5px;
-	height: 37px !important;
+.citation-dialog.search:not([multiline="true"]) {
+	height: 32px !important;
 }
 
-#quick-format-entry {
+.citation-dialog.entry {
 	background: -moz-linear-gradient(-90deg, rgb(243,123,119) 0, rgb(180,47,38) 50%, rgb(156,36,27) 50%);
 	padding: 12px;
 }
 
-#zotero-icon {
-	margin: -2px 0 3px -6px;
+.note-dialog .citation-dialog.entry {
+	background: -moz-linear-gradient(-90deg, rgb(249, 231, 179) 0, rgb(228, 193, 94) 50%, rgb(221, 184, 81) 50%);
 }
 
-#quick-format-search[multiline="true"] #zotero-icon {
-	margin: 0 0 1px -13px;
+#zotero-icon {
+	margin: -1px 0 0 4px;
+	-moz-appearance: none;
 }
 
 #citation-properties menulist {
@@ -106,7 +103,6 @@ panel button:-moz-focusring {
   box-shadow: 0 0 1px -moz-mac-focusring inset, 0 0 4px 1px -moz-mac-focusring, 0 0 2px 1px -moz-mac-focusring;
 }
 
-.quick-format-bubble {
-	margin-top: 0;
+.citation-dialog.bubble {
 	padding: 1px 6px 1px 6px;
 }

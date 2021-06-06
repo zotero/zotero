@@ -59,6 +59,15 @@ listbox, #result-description, #result-description-html {
 	line-height: 1.5;
 }
 
+#mendeley-online-description, #mendeley-online-description2 {
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+#mendeley-online-description2 {
+	margin-top: 1em;
+}
+
 #result-description-html a {
 	text-decoration: underline;
 }

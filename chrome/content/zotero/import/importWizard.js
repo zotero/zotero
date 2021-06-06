@@ -5,14 +5,16 @@ var Zotero_Import_Wizard = {
 	_dbs: null,
 	_file: null,
 	_translation: null,
+	_mendeleyOnlineRedirectURLWithCode: null,
+	_mendeleyCode: null,
 	
 	
 	init: async function () {
 		this._wizard = document.getElementById('import-wizard');
-		
 		var dbs = await Zotero_File_Interface.findMendeleyDatabases();
 		if (dbs.length) {
-			document.getElementById('radio-import-source-mendeley').hidden = false;
+			// Local import disabled
+			//document.getElementById('radio-import-source-mendeley').hidden = false;
 		}
 		
 		// If no existing collections or non-trash items in the library, don't create a new
@@ -32,8 +34,17 @@ var Zotero_Import_Wizard = {
 				document.getElementById('create-collection-checkbox').removeAttribute('checked');
 			}
 		}
+
+		if (args && args.mendeleyCode) {
+			this._mendeleyCode = args.mendeleyCode;
+			this._wizard.goTo('page-options');
+		}
 		
 		// Update labels
+		document.getElementById('radio-import-source-mendeley-online').label
+			= `Mendeley Reference Manager (${Zotero.getString('import.onlineImport')})`;
+		document.getElementById('radio-import-source-mendeley').label
+			= `Mendeley Desktop (${Zotero.getString('import.localImport')})`;
 		document.getElementById('file-handling-store').label = Zotero.getString(
 			'import.fileHandling.store',
 			Zotero.appName
@@ -57,6 +68,11 @@ var Zotero_Import_Wizard = {
 			case 'radio-import-source-file':
 				await this.chooseFile();
 				break;
+
+			case 'radio-import-source-mendeley-online':
+				wizard.goTo('mendeley-online-explanation');
+				wizard.canRewind = true;
+			break;
 				
 			case 'radio-import-source-mendeley':
 				this._dbs = await Zotero_File_Interface.findMendeleyDatabases();
@@ -85,7 +101,22 @@ var Zotero_Import_Wizard = {
 			throw e;
 		}
 	},
-	
+
+	onMendeleyOnlineShow: async function () {
+		document.getElementById('mendeley-online-description').textContent = Zotero.getString(
+			'import.online.intro', [Zotero.appName, 'Mendeley Reference Manager', 'Mendeley']
+		);
+		document.getElementById('mendeley-online-description2').textContent = Zotero.getString(
+			'import.online.intro2', [Zotero.appName, 'Mendeley']
+		);
+	},
+
+	onMendeleyOnlineAdvance: function () {
+		if (!this._mendeleyOnlineRedirectURLWithCode) {
+			Zotero_File_Interface.authenticateMendeleyOnline();
+			window.close();
+		}
+	},
 	
 	goToStart: function () {
 		this._wizard.goTo('page-start');
@@ -165,7 +196,7 @@ var Zotero_Import_Wizard = {
 	
 	
 	onOptionsShown: function () {
-		
+		document.getElementById('file-handling-options').hidden = !!this._mendeleyCode;
 	},
 	
 	
@@ -192,7 +223,7 @@ var Zotero_Import_Wizard = {
 	
 	
 	onImportStart: async function () {
-		if (!this._file) {
+		if (!this._file && !this._mendeleyCode) {
 			let index = document.getElementById('file-list').selectedIndex;
 			this._file = this._dbs[index].path;
 		}
@@ -206,7 +237,8 @@ var Zotero_Import_Wizard = {
 				onBeforeImport: this.onBeforeImport.bind(this),
 				addToLibraryRoot: !document.getElementById('create-collection-checkbox')
 					.hasAttribute('checked'),
-				linkFiles: document.getElementById('file-handling-radio').selectedIndex == 1
+				linkFiles: document.getElementById('file-handling-radio').selectedIndex == 1,
+				mendeleyCode: this._mendeleyCode
 			});
 			
 			// Cancelled by user or due to error
@@ -224,13 +256,12 @@ var Zotero_Import_Wizard = {
 		catch (e) {
 			if (e.message == 'Encrypted Mendeley database') {
 				let url = 'https://www.zotero.org/support/kb/mendeley_import';
-				this._onDone(
-					Zotero.getString('general.error'),
-					// TODO: Localize
-					`The selected Mendeley database cannot be read, likely because it is encrypted. `
-						+ `See <a href="${url}" class="text-link">How do I import a Mendeley library `
-						+ `into Zotero?</a> for more information.`
-				);
+				let HTML_NS = 'http://www.w3.org/1999/xhtml'
+				let elem = document.createElementNS(HTML_NS, 'div');
+				elem.innerHTML = `The selected Mendeley database cannot be read, likely because it `
+					+ `is encrypted. See <a href="${url}" class="text-link">How do I import a `
+					+ `Mendeley library into Zotero?</a> for more information.`
+				this._onDone(Zotero.getString('general.error'), elem);
 			}
 			else {
 				this._onDone(
@@ -310,9 +341,9 @@ var Zotero_Import_Wizard = {
 		var xulElem = document.getElementById('result-description');
 		var htmlElem = document.getElementById('result-description-html');
 		
-		if (description.includes('href')) {
-			htmlElem.innerHTML = description;
-			Zotero.Utilities.Internal.updateHTMLInXUL(htmlElem);
+		if (description instanceof HTMLElement) {
+			htmlElem.appendChild(description);
+			Zotero.Utilities.Internal.updateHTMLInXUL(htmlElem, { callback: () => window.close() });
 			xulElem.hidden = true;
 			htmlElem.setAttribute('display', 'block');
 		}
@@ -321,7 +352,7 @@ var Zotero_Import_Wizard = {
 			xulElem.hidden = false;
 			htmlElem.setAttribute('display', 'none');
 		}
-		document.getElementById('result-description')
+		document.getElementById('result-description');
 		
 		if (showReportErrorButton) {
 			let button = document.getElementById('result-report-error');

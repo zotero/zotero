@@ -1,14 +1,13 @@
 <!ENTITY zotero.version "bertsioa">
-<!ENTITY zotero.whatsNew "What’s new">
+<!ENTITY zotero.whatsNew "Zer berri">
 <!ENTITY zotero.createdby "Egileak:">
-<!ENTITY zotero.director "Director:">
+<!ENTITY zotero.director "Zuzendaria:">
 <!ENTITY zotero.directors "Zuzendariak:">
 <!ENTITY zotero.developers "Garatzaileak:">
 <!ENTITY zotero.alumni "Ikasleak:">
 <!ENTITY zotero.about.localizations "Lokalizazioak:">
-<!ENTITY zotero.about.additionalSoftware "Third-Party Software and Standards:">
-<!ENTITY zotero.executiveProducer "Executive Producer:">
-<!ENTITY zotero.thanks "Mila esker:">
-<!ENTITY zotero.about.close "Gora askatasuna">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.about.additionalSoftware "Hirugarrenen softwarea:">
+<!ENTITY zotero.thanks "Eskertza berezia:">
+<!ENTITY zotero.about.close "Itxi">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "Kreditu eta jakinarazpen gehiago">
+<!ENTITY zotero.citationProcessing "Aipu eta bibliografien prozesamendua">

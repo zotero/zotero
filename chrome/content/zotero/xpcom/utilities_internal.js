@@ -836,6 +836,7 @@ Zotero.Utilities.Internal = {
 	 *                                 force links to open in new windows, pass with
 	 *                                 .shiftKey = true. If not provided, the actual event will
 	 *                                 be used instead.
+	 *                                 .callback - Function to call after launching URL
 	 */
 	updateHTMLInXUL: function (elem, options) {
 		options = options || {};
@@ -846,6 +847,9 @@ Zotero.Utilities.Internal = {
 			a.setAttribute('tooltiptext', href);
 			a.onclick = function (event) {
 				Zotero.launchURL(href);
+				if (options.callback) {
+					options.callback();
+				}
 				return false;
 			};
 		}

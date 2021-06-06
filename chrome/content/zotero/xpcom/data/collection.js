@@ -31,8 +31,7 @@ Zotero.Collection = function(params = {}) {
 	this._childCollections = new Set();
 	this._childItems = new Set();
 	
-	Zotero.Utilities.assignProps(this, params, ['name', 'libraryID', 'parentID',
-		'parentKey', 'lastSync']);
+	Zotero.Utilities.assignProps(this, params, ['name', 'libraryID', 'parentID', 'parentKey']);
 }
 
 Zotero.extendClass(Zotero.DataObject, Zotero.Collection);
@@ -203,7 +202,7 @@ Zotero.Collection.prototype.getChildCollections = function (asIDs) {
 	
 	// Return collectionIDs
 	if (asIDs) {
-		return this._childCollections.values();
+		return [...this._childCollections.values()];
 	}
 	
 	// Return Zotero.Collection objects
@@ -608,6 +607,11 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 					libraryID: c.libraryID,
 					key: c.key
 				};
+				// skipDeleteLog is normally added to notifierData in DataObject::_finalizeErase(),
+				// so we have to do it manually here
+				if (env.options && env.options.skipDeleteLog) {
+					env.notifierData[c.id].skipDeleteLog = true;
+				}
 			}
 		}
 		// Descendent items

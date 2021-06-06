@@ -154,6 +154,8 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 					if (status != 200) {
 						if (status == 404) {
 							Zotero.debug("Remote file not found for item " + item.libraryKey);
+							// Don't refresh item pane rows when nothing happened
+							request.skipProgressBarUpdate = true;
 							deferred.resolve(new Zotero.Sync.Storage.Result);
 							return;
 						}
@@ -257,15 +259,15 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 	
 	uploadFile: Zotero.Promise.coroutine(function* (request) {
 		var item = Zotero.Sync.Storage.Utilities.getItemFromRequest(request);
-		var multipleFiles = yield Zotero.Attachments.hasMultipleFiles(item);
+		var isZipUpload = yield this._isZipUpload(item);
 		
-		// If we got a quota error for this library, skip upload for all multi-file attachments
+		// If we got a quota error for this library, skip upload for all zipped attachments
 		// and for single-file attachments that are bigger than the remaining space. This is cleared
 		// in storageEngine for manual syncs.
 		var remaining = Zotero.Sync.Storage.Local.storageRemainingForLibrary.get(item.libraryID);
 		if (remaining !== undefined) {
 			let skip = false;
-			if (multipleFiles) {
+			if (isZipUpload) {
 				Zotero.debug("Skipping multi-file upload after quota error");
 				skip = true;
 			}
@@ -284,17 +286,37 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 				}
 			}
 			if (skip) {
+				// Stop trying to upload files if there's very little storage remaining
+				if (request.engine && remaining < Zotero.Sync.Storage.Local.STORAGE_REMAINING_MINIMUM) {
+					Zotero.debug(`${remaining} MB remaining in storage -- skipping further uploads`);
+					request.engine.stop('upload');
+				}
 				throw yield this._getQuotaError(item);
 			}
 		}
 		
-		if (multipleFiles) {
+		if (isZipUpload) {
 			let created = yield Zotero.Sync.Storage.Utilities.createUploadFile(request);
 			if (!created) {
 				return new Zotero.Sync.Storage.Result;
 			}
 		}
-		return this._processUploadFile(request);
+		
+		try {
+			return yield this._processUploadFile(request);
+		}
+		catch (e) {
+			// Stop trying to upload files if we hit a quota error and there's very little space
+			// remaining. If there's more space, we keep going, because it might just be a big file.
+			if (request.engine && e.error == Zotero.Error.ERROR_ZFS_OVER_QUOTA) {
+				let remaining = Zotero.Sync.Storage.Local.storageRemainingForLibrary.get(item.libraryID);
+				if (remaining < Zotero.Sync.Storage.Local.STORAGE_REMAINING_MINIMUM) {
+					Zotero.debug(`${remaining} MB remaining in storage -- skipping further uploads`);
+					request.engine.stop('upload');
+				}
+			}
+			throw e;
+		}
 	}),
 	
 	
@@ -346,7 +368,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		
 		var path = item.getFilePath();
 		var filename = OS.Path.basename(path);
-		var zip = yield Zotero.Attachments.hasMultipleFiles(item);
+		var zip = yield this._isZipUpload(item);
 		if (zip) {
 			var uploadPath = OS.Path.join(Zotero.getTempDirectory().path, item.key + '.zip');
 		}
@@ -607,7 +629,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			}
 			
 			// Store the remaining space so that we can skip files bigger than that until the next
-			// manual sync
+			// manual sync. Values are in megabytes.
 			let usage = req.getResponseHeader('Zotero-Storage-Usage');
 			let quota = req.getResponseHeader('Zotero-Storage-Quota');
 			Zotero.Sync.Storage.Local.storageRemainingForLibrary.set(item.libraryID, quota - usage);
@@ -818,7 +840,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		});
 		
 		try {
-			if (yield Zotero.Attachments.hasMultipleFiles(item)) {
+			if (yield this._isZipUpload(item)) {
 				var file = Zotero.getTempDirectory();
 				file.append(item.key + '.zip');
 				yield OS.File.remove(file.path);
@@ -837,7 +859,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		Zotero.debug("Upload of attachment " + item.key + " cancelled with status code " + status);
 		
 		try {
-			if (yield Zotero.Attachments.hasMultipleFiles(item)) {
+			if (yield this._isZipUpload(item)) {
 				var file = Zotero.getTempDirectory();
 				file.append(item.key + '.zip');
 				file.remove(false);
@@ -850,7 +872,7 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 	
 	
 	_getUploadFile: Zotero.Promise.coroutine(function* (item) {
-		if (yield Zotero.Attachments.hasMultipleFiles(item)) {
+		if (yield this._isZipUpload(item)) {
 			var file = Zotero.getTempDirectory();
 			var filename = item.key + '.zip';
 			file.append(filename);
@@ -1024,6 +1046,12 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 		}
 		return this._uploadFile(request, item, result);
 	}),
+	
+	
+	_isZipUpload: async function (item) {
+		return (item.isImportedAttachment() && item.attachmentContentType.startsWith('text/'))
+			|| Zotero.Attachments.hasMultipleFiles(item);
+	},
 	
 	
 	_getQuotaError: async function (item) {

@@ -1,20 +1,20 @@
 <!ENTITY zotero.search.name "Nome:">
 
-<!ENTITY zotero.search.searchInLibrary "Cerca nella libreria:">
+<!ENTITY zotero.search.searchInLibrary "Cerca nella biblioteca:">
 
 <!ENTITY zotero.search.joinMode.prefix "Trova">
-<!ENTITY zotero.search.joinMode.any "le corrispondenze parziali con i criteri">
-<!ENTITY zotero.search.joinMode.all "le corrispondenze esatte con i criteri">
-<!ENTITY zotero.search.joinMode.suffix "seguenti:">
+<!ENTITY zotero.search.joinMode.any "corrispondenza parziale">
+<!ENTITY zotero.search.joinMode.all "corrispondenza esatta">
+<!ENTITY zotero.search.joinMode.suffix "dei seguenti:">
 
-<!ENTITY zotero.search.recursive.label "Cerca nelle sottocartelle">
-<!ENTITY zotero.search.noChildren "Visualizza solo gli elementi principali">
-<!ENTITY zotero.search.includeParentsAndChildren "Visualizza anche gli elementi  dei livelli superiore e inferiore">
+<!ENTITY zotero.search.recursive.label "Cerca nelle sottosezioni">
+<!ENTITY zotero.search.noChildren "Mostra solo gli elementi principali">
+<!ENTITY zotero.search.includeParentsAndChildren "Visualizza anche gli elementi principali e secondari">
 
 <!ENTITY zotero.search.textModes.phrase "Frase">
 <!ENTITY zotero.search.textModes.phraseBinary "Frase (file binari inclusi)">
 <!ENTITY zotero.search.textModes.regexp "Espressione regolare">
-<!ENTITY zotero.search.textModes.regexpCS "Espressione regolare con distinzione tra maiuscole e minuscole">
+<!ENTITY zotero.search.textModes.regexpCS "Espressione regolare (case sensitive)">
 
 <!ENTITY zotero.search.date.units.days "giorni">
 <!ENTITY zotero.search.date.units.months "mesi">
@@ -22,4 +22,4 @@
 
 <!ENTITY zotero.search.search "Cerca">
 <!ENTITY zotero.search.clear "Cancella">
-<!ENTITY zotero.search.saveSearch "Salva ricerca">
+<!ENTITY zotero.search.saveSearch "Salva la ricerca">

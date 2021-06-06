@@ -9,6 +9,10 @@ Zotero.Sync.Storage.Local = {
 	SYNC_STATE_FORCE_DOWNLOAD: 4,
 	SYNC_STATE_IN_CONFLICT: 5,
 	
+	// If last-known remaining storage is below this number of megabytes, skip further upload
+	// attempts in various situations
+	STORAGE_REMAINING_MINIMUM: 5,
+	
 	lastFullFileCheck: {},
 	uploadCheckFiles: [],
 	storageRemainingForLibrary: new Map(),
@@ -328,6 +332,17 @@ Zotero.Sync.Storage.Local = {
 		
 		try {
 			file = yield OS.File.open(path);
+			
+			// If file is already marked for upload, skip check. Even if the file was changed
+			// both locally and remotely, conflicts are checked at upload time, so we don't need
+			// to worry about it here.
+			//
+			// This is after open() so that a missing file is properly marked for download.
+			if (item.attachmentSyncState == this.SYNC_STATE_TO_UPLOAD) {
+				Zotero.debug("File is already marked for upload");
+				return false;
+			}
+			
 			let info = yield file.stat();
 			//Zotero.debug("Memory usage: " + memmgr.resident);
 			
@@ -337,14 +352,6 @@ Zotero.Sync.Storage.Local = {
 			if (fmtime < 0) {
 				Zotero.debug("File mod time " + fmtime + " is less than 0 -- interpreting as 0", 2);
 				fmtime = 0;
-			}
-			
-			// If file is already marked for upload, skip check. Even if the file was changed
-			// both locally and remotely, conflicts are checked at upload time, so we don't need
-			// to worry about it here.
-			if (item.attachmentSyncState == this.SYNC_STATE_TO_UPLOAD) {
-				Zotero.debug("File is already marked for upload");
-				return false;
 			}
 			
 			//Zotero.debug("Stored mtime is " + attachmentData.mtime);
@@ -502,13 +509,14 @@ Zotero.Sync.Storage.Local = {
 	 */
 	getFilesToUpload: function (libraryID) {
 		var sql = "SELECT itemID FROM itemAttachments JOIN items USING (itemID) "
-			+ "WHERE libraryID=? AND syncState IN (?,?) AND linkMode IN (?,?)";
+			+ "WHERE libraryID=? AND syncState IN (?,?) AND linkMode IN (?,?,?)";
 		var params = [
 			libraryID,
 			this.SYNC_STATE_TO_UPLOAD,
 			this.SYNC_STATE_FORCE_UPLOAD,
 			Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
-			Zotero.Attachments.LINK_MODE_IMPORTED_URL
+			Zotero.Attachments.LINK_MODE_IMPORTED_URL,
+			Zotero.Attachments.LINK_MODE_EMBEDDED_IMAGE,
 		];
 		return Zotero.DB.columnQueryAsync(sql, params);
 	},
@@ -566,12 +574,13 @@ Zotero.Sync.Storage.Local = {
 		
 		return Zotero.DB.executeTransaction(async function () {
 			var sql = "SELECT itemID FROM items JOIN itemAttachments USING (itemID) "
-				+ "WHERE libraryID=? AND itemTypeID=? AND linkMode IN (?, ?)";
+				+ "WHERE libraryID=? AND itemTypeID=? AND linkMode IN (?, ?, ?)";
 			var params = [
 				libraryID,
 				Zotero.ItemTypes.getID('attachment'),
 				Zotero.Attachments.LINK_MODE_IMPORTED_FILE,
 				Zotero.Attachments.LINK_MODE_IMPORTED_URL,
+				Zotero.Attachments.LINK_MODE_EMBEDDED_IMAGE,
 			];
 			var itemIDs = await Zotero.DB.columnQueryAsync(sql, params);
 			for (let itemID of itemIDs) {

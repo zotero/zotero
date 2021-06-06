@@ -6,8 +6,7 @@
 <!ENTITY zotero.developers		"Developers:">
 <!ENTITY zotero.alumni			"Alumni:">
 <!ENTITY zotero.about.localizations	"Localizations:">
-<!ENTITY zotero.about.additionalSoftware	"Third-Party Software and Standards:">
-<!ENTITY zotero.executiveProducer		"Executive Producer:">
+<!ENTITY zotero.about.additionalSoftware	"Third-Party Software:">
 <!ENTITY zotero.thanks			"Special Thanks:">
 <!ENTITY zotero.about.close	"Close">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">

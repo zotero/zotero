@@ -6,8 +6,7 @@
 <!ENTITY zotero.developers "開発者:">
 <!ENTITY zotero.alumni "同窓会員:">
 <!ENTITY zotero.about.localizations "各国語版:">
-<!ENTITY zotero.about.additionalSoftware "サードパーティのソフトウェアとスタンダード:">
-<!ENTITY zotero.executiveProducer "製作責任者:">
+<!ENTITY zotero.about.additionalSoftware "Third-Party Software:">
 <!ENTITY zotero.thanks "次のコミュニティメンバーに謝辞を表します:">
 <!ENTITY zotero.about.close "閉じる">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "その他の貢献者と謝辞">

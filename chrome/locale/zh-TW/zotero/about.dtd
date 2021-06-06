@@ -6,8 +6,7 @@
 <!ENTITY zotero.developers "開發人：">
 <!ENTITY zotero.alumni "前成員：">
 <!ENTITY zotero.about.localizations "在地化：">
-<!ENTITY zotero.about.additionalSoftware "第三方軟體與標準：">
-<!ENTITY zotero.executiveProducer "執行製作人：">
+<!ENTITY zotero.about.additionalSoftware "Third-Party Software:">
 <!ENTITY zotero.thanks "特別感謝：">
 <!ENTITY zotero.about.close "關閉">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "其他功勞者及感謝">

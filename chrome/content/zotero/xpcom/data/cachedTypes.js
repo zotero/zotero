@@ -352,11 +352,9 @@ Zotero.ItemTypes = new function() {
 	this._hasCustom = true;
 	
 	var _primaryTypeNames = ['book', 'bookSection', 'journalArticle', 'newspaperArticle', 'document'];
-	var _primaryTypes;
-	var _secondaryTypes;
+	// Item types hidden from New Item menu
+	var _hiddenTypeNames = ['webpage', 'attachment', 'note', 'annotation'];
 	var _hiddenTypes;
-	
-	var _numPrimary = 5;
 	
 	var _customImages = {};
 	var _customLabels = {};
@@ -365,18 +363,10 @@ Zotero.ItemTypes = new function() {
 	this.init = Zotero.Promise.coroutine(function* () {
 		yield this.constructor.prototype.init.apply(this);
 		
-		_primaryTypes = yield this._getTypesFromDB(
-			`WHERE typeName IN ('${_primaryTypeNames.join("', '")}')`
-		);
-		
-		// Secondary types
-		_secondaryTypes = yield this._getTypesFromDB(
-			`WHERE display != 0 AND display NOT IN ('${_primaryTypeNames.join("', '")}')`
-			+ " AND name != 'webpage'"
-		);
-		
 		// Hidden types
-		_hiddenTypes = yield this._getTypesFromDB('WHERE display=0')
+		_hiddenTypes = yield this._getTypesFromDB(
+			`WHERE typeName IN ('${_hiddenTypeNames.join("', '")}')`
+		);
 		
 		// Custom labels and icons
 		var sql = "SELECT customItemTypeID AS id, label, icon FROM customItemTypes";
@@ -391,44 +381,41 @@ Zotero.ItemTypes = new function() {
 	
 	
 	this.getPrimaryTypes = function () {
-		if (!_primaryTypes) {
-			throw new Zotero.Exception.UnloadedDataException("Primary item type data not yet loaded");
-		}
+		var names = _primaryTypeNames.concat();
 		
 		var mru = Zotero.Prefs.get('newItemTypeMRU');
 		if (mru && mru.length) {
 			// Get types from the MRU list
 			mru = new Set(
 				mru.split(',')
-				.slice(0, _numPrimary)
+				.slice(0, _primaryTypeNames.length)
 				.map(name => this.getName(name))
-				// Ignore 'webpage' item type
-				.filter(name => name && name != 'webpage')
+				// Ignore hidden item types and 'webpage'
+				.filter(name => name && !_hiddenTypeNames.concat('webpage').includes(name))
 			);
 			
 			// Add types from defaults until we reach our limit
-			for (let i = 0; i < _primaryTypes.length && mru.size < _numPrimary; i++) {
-				mru.add(_primaryTypes[i].name);
+			for (let name of _primaryTypeNames) {
+				if (mru.size >= _primaryTypeNames.length) break;
+				mru.add(name);
 			}
 			
-			return Array.from(mru).map(name => ({ id: this.getID(name), name }));
+			names = Array.from(mru);
 		}
 		
-		return _primaryTypes;
+		return names.map(name => ({ id: this.getID(name), name }));
 	}
 
 	this.getSecondaryTypes = function () {
-		if (!_secondaryTypes) {
-			throw new Zotero.Exception.UnloadedDataException("Secondary item type data not yet loaded");
-		}
-		return _secondaryTypes;
+		var namesToRemove = new Set(this.getPrimaryTypes().map(x => x.name).concat(_hiddenTypeNames));
+		return this._typesArray.filter(x => !namesToRemove.has(x.name));
 	}
 	
 	this.getHiddenTypes = function () {
 		if (!_hiddenTypes) {
 			throw new Zotero.Exception.UnloadedDataException("Hidden item type data not yet loaded");
 		}
-		return _hiddenTypes;
+		return _hiddenTypes.concat();
 	}
 	
 	this.getLocalizedString = function (idOrName) {

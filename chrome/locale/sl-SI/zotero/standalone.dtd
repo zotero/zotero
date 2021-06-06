@@ -44,6 +44,9 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "b">
 
 
+<!ENTITY goMenu.label "Go">
+
+
 <!ENTITY viewMenu.label "Pogled">
 <!ENTITY layout.label "Postavitev">
 <!ENTITY standardView.label "Navadni pogled">

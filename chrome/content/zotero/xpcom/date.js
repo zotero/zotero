@@ -852,6 +852,51 @@ Zotero.Date = new function(){
 		return Zotero.getString("date.relative." + key + "." + (n ? "multiple" : "one"), n);
 	}
 	
+	// Initializing `toFriendlyDate` formatters, since
+	// `toLocaleDateString` is extremely slow (4500ms vs 200ms
+	// for 10k calls)
+	var _friendlyDateTodayFormatter = new Intl.DateTimeFormat(
+		false, { hour: 'numeric', minute: 'numeric' });
+
+	var _friendlyDateWeekFormatter = new Intl.DateTimeFormat(
+		false, { weekday: 'long' });
+
+	var _friendlyDateRegularFormatter = new Intl.DateTimeFormat(
+		false, { year: '2-digit', month: 'numeric', day: 'numeric' });
+	
+	this.toFriendlyDate = function (date) {
+		// 6:14:36 PM
+		if (isToday(date)) {
+			return _friendlyDateTodayFormatter.format(date);
+		}
+		// 'Thursday'
+		if (isThisWeek(date)) {
+			return _friendlyDateWeekFormatter.format(date);
+		}
+		return _friendlyDateRegularFormatter.format(date);
+	};
+	
+	
+	function isToday(date) {
+		var d = new Date();
+		return d.getDate() == date.getDate()
+			&& d.getMonth() == d.getMonth()
+			&& d.getFullYear() == d.getFullYear();
+	}
+	
+	
+	function isThisWeek(date) {
+		var d = new Date();
+		return d.getFullYear() == date.getFullYear() && getWeekNumber(d) == getWeekNumber(date);
+	}
+	
+	
+	// https://stackoverflow.com/a/27125580
+	function getWeekNumber(date) {
+		let onejan = new Date(date.getFullYear(), 0, 1);
+		return Math.ceil((((date.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7);
+	}
+	
 	
 	function getFileDateString(file){
 		var date = new Date();

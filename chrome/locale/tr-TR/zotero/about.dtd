@@ -6,8 +6,7 @@
 <!ENTITY zotero.developers "Geliştiriciler:">
 <!ENTITY zotero.alumni "Mezunlar:">
 <!ENTITY zotero.about.localizations "Yerelleştirenler:">
-<!ENTITY zotero.about.additionalSoftware "Üçüncü Parti Yazılımlar ve Standartlar:">
-<!ENTITY zotero.executiveProducer "Uygulayıcı Yapımcı:">
+<!ENTITY zotero.about.additionalSoftware "Üçüncü Taraf Yazılım:">
 <!ENTITY zotero.thanks "Özel teşekkürler:">
 <!ENTITY zotero.about.close "Kapat">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Diğer Katılımcılar ve Teşekkürler">

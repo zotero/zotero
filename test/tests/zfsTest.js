@@ -74,9 +74,10 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 	
 	var setup = Zotero.Promise.coroutine(function* (options = {}) {
 		Components.utils.import("resource://zotero/concurrentCaller.js");
+		var stopOnError = options.stopOnError !== undefined ? options.stopOnError : true;
 		var caller = new ConcurrentCaller(1);
 		caller.setLogger(msg => Zotero.debug(msg));
-		caller.stopOnError = true;
+		caller.stopOnError = stopOnError;
 		
 		Components.utils.import("resource://zotero/config.js");
 		var client = new Zotero.Sync.APIClient({
@@ -93,7 +94,8 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 				apiClient: client,
 				maxS3ConsecutiveFailures: 2
 			}),
-			stopOnError: true
+			background: options.background,
+			stopOnError
 		});
 		
 		return { engine, client, caller };
@@ -802,7 +804,114 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			var result = yield engine.start();
 			assert.equal(called, 4);
 		});
+		
+		
+		it("should stop uploading files on quota error", async function () {
+			var { engine, client, caller } = await setup({ stopOnError: false });
+			
+			var numItems = 4;
+			var items = [];
+			for (let i = 0; i < numItems; i++) {
+				let item = await importFileAttachment('test.png');
+				item.version = 5;
+				item.synced = true;
+				await item.saveTx();
+				items.push(item);
+			}
+			
+			var requests = 0;
+			server.respond(function (req) {
+				if (req.method == "POST"
+						&& req.url.startsWith(`${baseURL}users/1/items/`)
+						&& req.url.endsWith('/file')
+						&& req.requestBody.indexOf('upload=') == -1
+						&& req.requestHeaders["If-None-Match"] == "*") {
+					requests++;
+					req.respond(
+						413,
+						{
+							"Content-Type": "application/json",
+							"Last-Modified-Version": 10,
+							"Zotero-Storage-Usage": "300",
+							"Zotero-Storage-Quota": "300"
+						},
+						"File would exceed quota (299.7 + 0.5 > 300)"
+					);
+				}
+			})
+			
+			await engine.start();
+			assert.equal(requests, Zotero.Prefs.get('sync.storage.maxUploads'));
+			
+			Zotero.Sync.Storage.Local.storageRemainingForLibrary.delete(items[0].libraryID);
+		});
+		
+		
+		// If there was a quota error in a previous run and remaining storage was determined to be
+		// very low, stop further file uploads for a background sync even when we bail without an
+		// HTTP request. A manual sync clears the remaining-storage value.
+		it("should stop uploading files for background sync if no storage remaining after previous quota error", async function () {
+			var { engine, client, caller } = await setup({ background: true, stopOnError: false });
+			
+			var numItems = 4;
+			var items = [];
+			for (let i = 0; i < numItems; i++) {
+				let item = await importFileAttachment('test.png');
+				item.version = 5;
+				item.synced = true;
+				await item.saveTx();
+				items.push(item);
+			}
+			
+			Zotero.Sync.Storage.Local.storageRemainingForLibrary.set(items[0].libraryID, 0);
+			
+			var spy = sinon.spy(engine.controller, 'uploadFile');
+			await engine.start()
+			
+			assert.equal(spy.callCount, Zotero.Prefs.get('sync.storage.maxUploads'));
+			spy.restore();
+			
+			Zotero.Sync.Storage.Local.storageRemainingForLibrary.delete(items[0].libraryID);
+		});
 	})
+	
+	
+	describe("#uploadFile()", function () {
+		it("should compress single-file HTML snapshots", async function () {
+			var { engine, client, caller } = await setup();
+			var zfs = new Zotero.Sync.Storage.Mode.ZFS({
+				apiClient: client
+			})
+			
+			var dir = await getTempDirectory();
+			var file = OS.Path.join(getTestDataDirectory().path, 'snapshot', 'index.html');
+			var file2 = OS.Path.join(dir, 'index.html');
+			await OS.File.copy(file, file2);
+			file = file2;
+			
+			var parentItem = await createDataObject('item');
+			var item = await Zotero.Attachments.importSnapshotFromFile({
+				file,
+				url: 'http://example.com/',
+				parentItemID: parentItem.id,
+				title: 'Test',
+				contentType: 'text/html',
+				charset: 'utf-8'
+			});
+			
+			var request = { name: item.libraryKey };
+			
+			var stub = sinon.stub(zfs, '_processUploadFile').returns(Zotero.Promise.resolve());
+			await zfs.uploadFile(request);
+			
+			var zipFile = OS.Path.join(Zotero.getTempDirectory().path, item.key + '.zip');
+			// _getUploadFile() should return the ZIP file
+			assert.equal((await zfs._getUploadFile(item)).path, zipFile);
+			assert.isTrue(await OS.File.exists(zipFile));
+			
+			stub.restore();
+		});
+	});
 	
 	
 	describe("#_processUploadFile()", function () {
@@ -884,7 +993,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			})
 			setResponse({
 				method: "GET",
-				url: `users/1/items?format=json&itemKey=${item.key}&includeTrashed=1`,
+				url: `users/1/items?itemKey=${item.key}&includeTrashed=1`,
 				status: 200,
 				text: JSON.stringify([itemJSON])
 			});
@@ -932,7 +1041,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			})
 			setResponse({
 				method: "GET",
-				url: `users/1/items?format=json&itemKey=${item.key}&includeTrashed=1`,
+				url: `users/1/items?itemKey=${item.key}&includeTrashed=1`,
 				status: 200,
 				text: JSON.stringify([itemJSON])
 			});
@@ -1019,7 +1128,7 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 							"Zotero-Storage-Usage": "300",
 							"Zotero-Storage-Quota": "300"
 						},
-						"File would exceed quota (299.7 + 0.5 &gt; 300)"
+						"File would exceed quota (299.7 + 0.5 > 300)"
 					);
 				}
 			})
@@ -1035,7 +1144,8 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			
 			// Try again
 			var e = yield getPromiseError(zfs.uploadFile({
-				name: item.libraryKey
+				name: item.libraryKey,
+				engine
 			}));
 			assert.ok(e);
 			assert.equal(e.errorType, 'warning');

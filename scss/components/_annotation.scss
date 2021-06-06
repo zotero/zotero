@@ -1,0 +1,42 @@
+.AnnotationBox {
+	.title {
+		font-weight: bold;
+		font-size: 12px;
+		margin: 5px;
+	}
+	
+	.container {
+		display: flex;
+		flex-direction: column;
+		margin: 5px;
+		border: 1px solid #d7dad7;
+		border-radius: 5px;
+		background: white;
+		
+		.header {
+			font-weight: bold;
+			font-size: 11px;
+			margin-top: 4px;
+			border-bottom: 1px solid #d7dad7;
+			padding: 0 8px 3px;
+		}
+		
+		.text, .image-placeholder, .comment {
+			margin-left: 8px;
+			margin-right: 8px;
+			margin-bottom: 4px;
+		}
+		
+		.text, .image-placeholder {
+			margin-top: 8px;
+		}
+		
+		.text {
+			padding-left: 7px;
+		}
+		
+		.comment {
+			margin-top: 4px;
+		}
+	}
+}

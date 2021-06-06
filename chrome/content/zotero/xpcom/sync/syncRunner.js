@@ -32,6 +32,7 @@ if (!Zotero.Sync) {
 // Initialized as Zotero.Sync.Runner in zotero.js
 Zotero.Sync.Runner_Module = function (options = {}) {
 	const stopOnError = false;
+	const HTML_NS = 'http://www.w3.org/1999/xhtml';
 	
 	Zotero.defineProperty(this, 'enabled', {
 		get: () => {
@@ -74,6 +75,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	var _delayPromises = [];
 	var _firstInSession = true;
 	var _syncInProgress = false;
+	var _queuedSyncOptions = [];
 	var _stopping = false;
 	var _canceller;
 	var _manualSyncRequired = false; // TODO: make public?
@@ -84,7 +86,9 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	var _lastSyncStatus;
 	var _currentSyncStatusLabel;
 	var _currentLastSyncLabel;
+	var _currentTooltipMessages;
 	var _errors = [];
+	var _tooltipMessages = [];
 	
 	Zotero.addShutdownListener(() => this.stop());
 	
@@ -92,6 +96,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		return new Zotero.Sync.APIClient({
 			baseURL: this.baseURL,
 			apiVersion: this.apiVersion,
+			schemaVersion: this.globalSchemaVersion,
 			apiKey: options.apiKey,
 			caller: this.caller,
 			cancellerReceiver: _cancellerReceiver,
@@ -118,6 +123,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	this._sync = Zotero.Promise.coroutine(function* (options) {
 		// Clear message list
 		_errors = [];
+		_tooltipMessages = [];
 		
 		// Shouldn't be possible because of serial()
 		if (_syncInProgress) {
@@ -233,6 +239,19 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				options.libraries ? Array.from(options.libraries) : []
 			);
 			
+			// If file and full-text libraries are specified, limit to libraries we're already
+			// syncing
+			var fileLibrariesToSync = new Set(
+				options.fileLibraries
+					? options.fileLibraries.filter(id => librariesToSync.includes(id))
+					: librariesToSync
+			);
+			var fullTextLibrariesToSync = new Set(
+				options.fullTextLibraries
+					? options.fullTextLibraries.filter(id => librariesToSync.includes(id))
+					: librariesToSync
+			);
+			
 			_stopCheck();
 			
 			// If items not yet loaded for libraries we need, load them now
@@ -263,8 +282,11 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				
 				_stopCheck();
 				
-				// Run file sync on all libraries that passed the last data sync
-				librariesToSync = yield _doFileSync(nextLibraries, engineOptions);
+				// Run file sync on all allowed libraries that passed the last data sync
+				librariesToSync = yield _doFileSync(
+					nextLibraries.filter(libraryID => fileLibrariesToSync.has(libraryID)),
+					engineOptions
+				);
 				if (librariesToSync.length) {
 					attempt++;
 					continue;
@@ -272,8 +294,11 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				
 				_stopCheck();
 				
-				// Run full-text sync on all libraries that haven't failed a data sync
-				librariesToSync = yield _doFullTextSync([...successfulLibraries], engineOptions);
+				// Run full-text sync on all allowed libraries that haven't failed a data sync
+				librariesToSync = yield _doFullTextSync(
+					[...successfulLibraries].filter(libraryID => fullTextLibrariesToSync.has(libraryID)),
+					engineOptions
+				);
 				if (librariesToSync.length) {
 					attempt++;
 					continue;
@@ -307,6 +332,12 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				delete options.restartSync;
 				Zotero.debug("Restarting sync");
 				yield this._sync(options);
+				return;
+			}
+			// If an auto-sync was queued while a sync was ongoing, start again with its options
+			else if (_queuedSyncOptions.length) {
+				Zotero.debug("Restarting sync");
+				yield this._sync(JSON.parse(_queuedSyncOptions.shift()));
 				return;
 			}
 			
@@ -348,25 +379,34 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				let index = ps.confirmEx(
 					null,
 					Zotero.getString('general.warning'),
-					Zotero.getString('account.warning.emptyLibrary', [keyInfo.username, Zotero.clientName]) + "\n\n"
-						+ Zotero.getString('account.warning.existingDataElsewhere', Zotero.clientName),
+					Zotero.getString(
+							'account.warning.emptyLibrary',
+							[Zotero.clientName, OS.Path.basename(Zotero.DB.path)]
+						) + "\n\n"
+						+ Zotero.getString(
+							'account.warning.emptyLibrary.dataWillBeDownloaded',
+							keyInfo.username
+						)
+						+ "\n\n"
+						+ Zotero.getString(
+							'account.warning.existingDataElsewhere',
+							Zotero.clientName
+						)
+						+ "\n\n"
+						+ Zotero.getString('dataDir.location', Zotero.DataDirectory.dir),
 					(ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING) 
 						+ (ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL)
 						+ (ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING),
 					Zotero.getString('sync.sync'),
 					null, 
-					Zotero.getString('dataDir.changeDataDirectory'), 
+					Zotero.getString('general.moreInformation'),
 					null, {}
 				);
 				if (index == 1) {
 					return false;
 				}
 				else if (index == 2) {
-					var win = Services.wm.getMostRecentWindow("navigator:browser");
-					win.openDialog("chrome://zotero/content/preferences/preferences.xul", null, null, {
-						pane: 'zotero-prefpane-advanced',
-						tabIndex: 1
-					});
+					Zotero.launchURL('https://www.zotero.org/support/zotero_data#locating_missing_zotero_data');
 					return false;
 				}
 			}
@@ -894,7 +934,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	/**
 	 * @param {Integer} timeout - Timeout in seconds
 	 * @param {Boolean} [recurring=false]
-	 * @param {Object} [options] - Sync options
+	 * @param {Object} [options] - Sync options (e.g., 'libraries', 'fileLibraries', 'fullTextLibraries')
 	 */
 	this.setSyncTimeout = function (timeout, recurring, options = {}) {
 		if (!Zotero.Prefs.get('sync.autoSync') || !this.enabled) {
@@ -903,6 +943,10 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		
 		if (!timeout) {
 			throw new Error("Timeout not provided");
+		}
+		
+		if (timeout != parseInt(timeout)) {
+			throw new Error(`Timeout must be an integer (${timeout} given)`);
 		}
 		
 		if (_autoSyncTimer) {
@@ -937,11 +981,13 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				
 				if (Zotero.locked) {
 					Zotero.debug('Zotero is locked -- skipping auto-sync', 4);
+					_queueSyncOptions(mergedOpts);
 					return;
 				}
 				
 				if (_syncInProgress) {
 					Zotero.debug('Sync already in progress -- skipping auto-sync', 4);
+					_queueSyncOptions(mergedOpts);
 					return;
 				}
 				
@@ -963,6 +1009,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		else {
 			if (_syncInProgress) {
 				Zotero.debug('Sync in progress -- not setting auto-sync timeout', 4);
+				_queueSyncOptions(mergedOpts);
 				return;
 			}
 			
@@ -971,6 +1018,18 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				callback, timeout * 1000, Components.interfaces.nsITimer.TYPE_ONE_SHOT
 			);
 		}
+	}
+	
+	
+	function _queueSyncOptions(options) {
+		var jsonOptions = JSON.stringify(options);
+		// Don't queue options if already queued
+		if (_queuedSyncOptions.includes(jsonOptions)) {
+			return;
+		}
+		Zotero.debug("Queueing sync options");
+		Zotero.debug(options);
+		_queuedSyncOptions.push(jsonOptions);
 	}
 	
 	
@@ -1033,7 +1092,8 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			upgrade: 4,
 			
 			// Skip these
-			animate: -1
+			animate: -1,
+			ignore: -2
 		};
 		var state = false;
 		for (let i = 0; i < errors.length; i++) {
@@ -1265,20 +1325,35 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		}
 		// Show warning for unknown data that couldn't be saved
 		else if (e.name && e.name == 'ZoteroInvalidDataError') {
-			e.message = Zotero.getString(
-				'sync.error.invalidDataError',
-				[
-					Zotero.Libraries.get(e.libraryID).name,
-					Zotero.clientName
-				]
-			)
-				+ "\n\n"
-				+ Zotero.getString('sync.error.invalidDataError.otherData');
-			e.errorType = 'warning';
-			e.dialogButtonText = Zotero.getString('general.checkForUpdates');
-			e.dialogButtonCallback = () => {
-				Zotero.openCheckForUpdatesWindow();
-			};
+			let library = Zotero.Libraries.get(e.libraryID);
+			let msg = Zotero.getString(
+					'sync.error.invalidDataError',
+					[
+						library.name,
+						Zotero.clientName
+					]
+				)
+					+ "\n\n"
+					+ Zotero.getString('sync.error.invalidDataError.otherData');
+			
+			// Show warning for My Library
+			if (library.libraryType == 'user') {
+				e.message = msg;
+				e.errorType = 'warning';
+				e.dialogButtonText = Zotero.getString('general.checkForUpdates');
+				e.dialogButtonCallback = () => {
+					Zotero.openCheckForUpdatesWindow();
+				};
+				e.dialogButton2Text = Zotero.getString('general.moreInformation');
+				e.dialogButton2Callback = () => {
+					Zotero.launchURL('https://www.zotero.org/support/kb/unknown_data_error');
+				};
+			}
+			// Otherwise just show in sync button tooltip
+			else {
+				_addTooltipMessage(msg);
+				e.errorType = 'ignore';
+			}
 		}
 	});
 	
@@ -1299,6 +1374,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			if (!Array.isArray(errors)) {
 				errors = [errors];
 			}
+			errors = errors.filter(o => o.errorType !== 'ignore');
 			var state = this.getPrimaryErrorType(errors);
 		}
 		
@@ -1484,13 +1560,27 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					var buttonCallback = e.dialogButtonCallback;
 				}
 				
-				var button = doc.createElement('button');
+				let button = doc.createElement('button');
 				button.setAttribute('label', buttonText);
 				button.onclick = function () {
 					buttonCallback();
 					panel.hidePopup();
 				};
 				buttons.appendChild(button);
+				
+				// Second button
+				if (e.dialogButton2Text) {
+					buttonText = e.dialogButton2Text;
+					buttonCallback = e.dialogButton2Callback;
+					
+					let button2 = doc.createElement('button');
+					button2.setAttribute('label', buttonText);
+					button2.onclick = () => {
+						buttonCallback();
+						panel.hidePopup();
+					};
+					buttons.insertBefore(button2, button);
+				}
 			}
 			
 			panel.appendChild(box)
@@ -1512,10 +1602,12 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		if (tooltip) {
 			_currentSyncStatusLabel = tooltip.firstChild.nextSibling;
 			_currentLastSyncLabel = tooltip.firstChild.nextSibling.nextSibling;
+			_currentTooltipMessages = tooltip.querySelector('.sync-button-tooltip-messages');
 		}
 		else {
 			_currentSyncStatusLabel = null;
 			_currentLastSyncLabel = null;
+			_currentTooltipMessages = null;
 		}
 		if (_currentSyncStatusLabel) {
 			_updateSyncStatusLabel();
@@ -1547,7 +1639,12 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		Zotero.Sync.Data.Local.setAPIKey();
 		yield client.deleteAPIKey();
 	})
-
+	
+	
+	function _addTooltipMessage(msg) {
+		_tooltipMessages.push(msg.replace(/\n+/g, ' '));
+	};
+	
 	
 	function _updateSyncStatusLabel() {
 		if (_lastSyncStatus) {
@@ -1585,6 +1682,19 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		
 		_currentLastSyncLabel.value = Zotero.getString('sync.status.lastSync') + " " + msg;
 		_currentLastSyncLabel.hidden = false;
+		
+		if (_tooltipMessages.length) {
+			_currentTooltipMessages.textContent = '';
+			for (let message of _tooltipMessages) {
+				let elem = _currentTooltipMessages.ownerDocument.createElementNS(HTML_NS, 'p');
+				elem.textContent = message;
+				_currentTooltipMessages.appendChild(elem);
+			}
+			_currentTooltipMessages.hidden = false;
+		}
+		else {
+			_currentTooltipMessages.hidden = true;
+		}
 	}
 	
 	

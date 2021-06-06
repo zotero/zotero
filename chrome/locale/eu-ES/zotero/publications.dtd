@@ -1,19 +1,19 @@
-<!ENTITY zotero.publications.my_publications "My Publications">
+<!ENTITY zotero.publications.my_publications "Nire argitalpenak">
 
-<!ENTITY zotero.publications.intro "Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files if you have the rights to distribute them and wish to do so.">
-<!ENTITY zotero.publications.include.checkbox.files "Include files">
-<!ENTITY zotero.publications.include.checkbox.notes "Include notes">
-<!ENTITY zotero.publications.include.adjustAtAnyTime "You can adjust what to show at any time from the My Publications collection.">
+<!ENTITY zotero.publications.intro "Nire argitalpenak atalean gehitzen dituzun elementuak zure profilean erakutsiko dira zotero.org webgunean. Atxikitako fitxategiak erakustea hautatzen baduzu, publikoki eskuragarri jarriko dira zehazten duzun lizentziarekin. Zuk zeuk sortutako lanak bakarrik gehitu, eta zabaltzeko eskumena daukazun eta zabaldu nahi dituzun fitxategiak gehitu bakarrik.">
+<!ENTITY zotero.publications.include.checkbox.files "Fitxategiak gehitu">
+<!ENTITY zotero.publications.include.checkbox.notes "Oharrak gehitu">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "Edozein unetan doitu dezakezu zer erakutsi Nire argitalpenak bildumatik.">
 
-<!ENTITY zotero.publications.sharing.title "Choose how your work may be shared">
-<!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
-<!ENTITY zotero.publications.sharing.prompt "Would you like to allow your work to be shared by others?">
-<!ENTITY zotero.publications.sharing.cc "Yes, under a Creative Commons license">
-<!ENTITY zotero.publications.sharing.cc0 "Yes, and place my work in the public domain">
-<!ENTITY zotero.publications.sharing.reserved "No, only publish my work on zotero.org">
+<!ENTITY zotero.publications.sharing.title "Hautatu zure lana nola partekatu daitekeen">
+<!ENTITY zotero.publications.sharing.text "Zure lanaren inguruko eskubide guztiak gorde ditzakezu, Creative Commons lizentzia baten pean eskuragarri jarri, ala domeinu publikoko egin. Edozein kasutan, lana publikoki eskuragarri jarriko da zotero.org wegunean.">
+<!ENTITY zotero.publications.sharing.prompt "Besteek zure lana partekatzea baimendu nahi al duzu?">
+<!ENTITY zotero.publications.sharing.cc "Bai, Creative Commons lizentziapean">
+<!ENTITY zotero.publications.sharing.cc0 "Bai, domeinu publikoan">
+<!ENTITY zotero.publications.sharing.reserved "Ez, nire lana zotero.org-en argitaratu soilik">
 
-<!ENTITY zotero.publications.chooseLicense.title "Choose a Creative Commons license">
-<!ENTITY zotero.publications.chooseLicense.text "A Creative Commons license allows others to copy and redistribute your work as long as they give appropriate credit, provide a link to the license, and indicate if changes were made. Additional conditions can be specified below.">
-<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Allow adaptations of your work to be shared?">
-<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Yes, as long as others share alike">
-<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Allow commercial uses of your work?">
+<!ENTITY zotero.publications.chooseLicense.title "Hautatu Creative Commons lizentzia bat">
+<!ENTITY zotero.publications.chooseLicense.text "Creative Commons lizentzia batek zure lana kopiatu eta birbanatzeko ahalbidetzen ditu besteak, beti ere iturria behar bezala aitortu, lizentzia estekatu eta aldaketarik ote duen adierazten badute. Baldintza gehigarriak beherago zehaztu daitezke. ">
+<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Zure lanaren moldaketak partekatzea baimendu nahi al duzu?">
+<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Bai, besteek baldintza berdinetan partekatzen badute">
+<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Zure lanaren erabilera komertzialik baimendu nahi al duzu?">

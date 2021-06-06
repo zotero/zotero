@@ -50,7 +50,8 @@ const symlinkFiles = [
 	'resource/ace/theme-chrome.js',
 	'resource/ace/theme-monokai.js',
 	'resource/ace/worker-javascript.js',
-	'update.rdf'
+	'update.rdf',
+	'!chrome/skin/default/zotero/**/*.scss'
 ];
 
 
@@ -89,7 +90,6 @@ const browserifyConfigs = [
 // exclude mask used for js, copy, symlink and sass tasks
 const ignoreMask = [
 	'**/#*',
-	'**/_*.scss',
 	'resource/schema/global/schema.json.gz'
 ];
 
@@ -110,6 +110,8 @@ const scssFiles = [
 	'chrome/skin/default/zotero/**/*.scss'
 ];
 
+const buildsURL = 'https://zotero-download.s3.amazonaws.com/ci/';
+
 module.exports = {
-	dirs, symlinkDirs, copyDirs, symlinkFiles, browserifyConfigs, jsFiles, scssFiles, ignoreMask
+	dirs, symlinkDirs, copyDirs, symlinkFiles, browserifyConfigs, jsFiles, scssFiles, ignoreMask, buildsURL
 };

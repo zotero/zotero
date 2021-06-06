@@ -1,4 +1,4 @@
-<!ENTITY preferencesCmdMac.label "Valg...">
+<!ENTITY preferencesCmdMac.label "Innstillinger...">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "Tjenester">
 <!ENTITY hideThisAppCmdMac.label "Skjul &brandShortName;">
@@ -42,6 +42,9 @@
 <!ENTITY bidiSwitchTextDirectionItem.label "Bytt tekstretning">
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
+
+
+<!ENTITY goMenu.label "Go">
 
 
 <!ENTITY viewMenu.label "Vis">

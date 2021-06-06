@@ -350,7 +350,9 @@ const TagsBox = React.forwardRef((props, ref) => {
 						src={`chrome://zotero/skin/${iconFile}${Zotero.hiDPISuffix}.png`}
 						alt={title}
 						title={title}
-						tooltiptext={title}
+						/* Fix 'title' not working for HTML-in-XUL */
+						onMouseOver={() => window.Zotero_Tooltip.start(title)}
+						onMouseOut={() => window.Zotero_Tooltip.stop()}
 						style={{ width: "16px", height: "16px" }}
 						onClick={props.editable ? (() => setSelectedTag(tag.tag)) : undefined}
 				/>
@@ -385,7 +387,9 @@ const TagsBox = React.forwardRef((props, ref) => {
 							height="18"
 							width="18"
 							title={removeStr}
-							tooltiptext={removeStr}
+							/* Fix 'title' not working for HTML-in-XUL */
+							onMouseOver={() => window.Zotero_Tooltip.start(removeStr)}
+							onMouseOut={() => window.Zotero_Tooltip.stop()}
 							src={`chrome://zotero/skin/minus${Zotero.hiDPISuffix}.png`}/>
 					</button>)}
 			</li>

@@ -228,7 +228,10 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			var version = yield deferred.promise;
 		}
 		Zotero.version = version;
-		Zotero.isDevBuild = Zotero.version.includes('beta') || Zotero.version.includes('SOURCE');
+		Zotero.isDevBuild = Zotero.version.includes('beta')
+			|| Zotero.version.includes('dev')
+			|| Zotero.version.includes('SOURCE');
+		Zotero.isSourceBuild = Zotero.version.includes('SOURCE');
 		
 		// OS platform
 		var win = Components.classes["@mozilla.org/appshell/appShellService;1"]
@@ -256,6 +259,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		if (!_checkExecutableLocation()) {
 			return;
 		}
+		
+		Zotero.isPDFBuild = Zotero.Prefs.get('beta.zotero6');
 		
 		try {
 			yield Zotero.DataDirectory.init();
@@ -719,6 +724,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			yield Zotero.Groups.init();
 			yield Zotero.Relations.init();
 			yield Zotero.Retractions.init();
+			yield Zotero.NoteBackups.init();
 			
 			// Migrate fields from Extra that can be moved to item fields after a schema update
 			yield Zotero.Schema.migrateExtraFields();

@@ -6,8 +6,7 @@
 <!ENTITY zotero.developers "Desarrolladores:">
 <!ENTITY zotero.alumni "Eméritos:">
 <!ENTITY zotero.about.localizations "Traducciones:">
-<!ENTITY zotero.about.additionalSoftware "Software y estándares de terceros:">
-<!ENTITY zotero.executiveProducer "Productor ejecutivo:">
+<!ENTITY zotero.about.additionalSoftware "Programas de terceros:">
 <!ENTITY zotero.thanks "Agradecimientos especiales:">
 <!ENTITY zotero.about.close "Cerrar">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Más créditos y reconocimientos">

@@ -38,6 +38,7 @@ Zotero.Items = function() {
 		get: function () {
 			var itemTypeAttachment = Zotero.ItemTypes.getID('attachment');
 			var itemTypeNote = Zotero.ItemTypes.getID('note');
+			var itemTypeAnnotation = Zotero.ItemTypes.getID('annotation');
 			
 			return {
 				itemID: "O.itemID",
@@ -49,16 +50,25 @@ Zotero.Items = function() {
 				version: "O.version",
 				synced: "O.synced",
 				
+				createdByUserID: "createdByUserID",
+				lastModifiedByUserID: "lastModifiedByUserID",
+				
 				firstCreator: _getFirstCreatorSQL(),
 				sortCreator: _getSortCreatorSQL(),
 				
 				deleted: "DI.itemID IS NOT NULL AS deleted",
 				inPublications: "PI.itemID IS NOT NULL AS inPublications",
 				
-				parentID: `(CASE O.itemTypeID WHEN ${itemTypeAttachment} THEN IAP.itemID `
-					+ `WHEN ${itemTypeNote} THEN INoP.itemID END) AS parentID`,
-				parentKey: `(CASE O.itemTypeID WHEN ${itemTypeAttachment} THEN IAP.key `
-					+ `WHEN ${itemTypeNote} THEN INoP.key END) AS parentKey`,
+				parentID: `(CASE O.itemTypeID `
+					+ `WHEN ${itemTypeAttachment} THEN IAP.itemID `
+					+ `WHEN ${itemTypeNote} THEN INoP.itemID `
+					+ `WHEN ${itemTypeAnnotation} THEN IAnP.itemID `
+					+ `END) AS parentID`,
+				parentKey: `(CASE O.itemTypeID `
+					+ `WHEN ${itemTypeAttachment} THEN IAP.key `
+					+ `WHEN ${itemTypeNote} THEN INoP.key `
+					+ `WHEN ${itemTypeAnnotation} THEN IAnP.key `
+					+ `END) AS parentKey`,
 				
 				attachmentCharset: "CS.charset AS attachmentCharset",
 				attachmentLinkMode: "IA.linkMode AS attachmentLinkMode",
@@ -66,7 +76,8 @@ Zotero.Items = function() {
 				attachmentPath: "IA.path AS attachmentPath",
 				attachmentSyncState: "IA.syncState AS attachmentSyncState",
 				attachmentSyncedModificationTime: "IA.storageModTime AS attachmentSyncedModificationTime",
-				attachmentSyncedHash: "IA.storageHash AS attachmentSyncedHash"
+				attachmentSyncedHash: "IA.storageHash AS attachmentSyncedHash",
+				attachmentLastProcessedModificationTime: "IA.lastProcessedModificationTime AS attachmentLastProcessedModificationTime",
 			};
 		}
 	}, {lazy: true});
@@ -77,9 +88,12 @@ Zotero.Items = function() {
 		+ "LEFT JOIN items IAP ON (IA.parentItemID=IAP.itemID) "
 		+ "LEFT JOIN itemNotes INo ON (O.itemID=INo.itemID) "
 		+ "LEFT JOIN items INoP ON (INo.parentItemID=INoP.itemID) "
+		+ "LEFT JOIN itemAnnotations IAn ON (O.itemID=IAn.itemID) "
+		+ "LEFT JOIN items IAnP ON (IAn.parentItemID=IAnP.itemID) "
 		+ "LEFT JOIN deletedItems DI ON (O.itemID=DI.itemID) "
 		+ "LEFT JOIN publicationsItems PI ON (O.itemID=PI.itemID) "
-		+ "LEFT JOIN charsets CS ON (IA.charsetID=CS.charsetID)";
+		+ "LEFT JOIN charsets CS ON (IA.charsetID=CS.charsetID)"
+		+ "LEFT JOIN groupItems GI ON (O.itemID=GI.itemID)";
 	
 	this._relationsTable = "itemRelations";
 	
@@ -203,7 +217,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
-				noCache: ids.length != 1,
+				noCache: true,
 				onRow: function (row) {
 					let itemID = row.getResultByIndex(0);
 					let fieldID = row.getResultByIndex(1);
@@ -237,7 +251,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
-				noCache: ids.length != 1,
+				noCache: true,
 				onRow: function (row) {
 					let itemID = row.getResultByIndex(0);
 					let item = this._objectCache[itemID];
@@ -269,6 +283,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
+				noCache: true,
 				onRow: function (row) {
 					let itemID = row.getResultByIndex(0);
 					let title = row.getResultByIndex(1);
@@ -320,7 +335,7 @@ Zotero.Items = function() {
 			+ 'FROM items LEFT JOIN itemCreators USING (itemID) '
 			+ 'WHERE libraryID=?' + idSQL + " ORDER BY itemID, orderIndex";
 		var params = [libraryID];
-		var rows = yield Zotero.DB.queryAsync(sql, params);
+		var rows = yield Zotero.DB.queryAsync(sql, params, { noCache: true });
 		
 		// Mark creator indexes above the number of creators as changed,
 		// so that they're cleared if the item is saved
@@ -399,7 +414,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
-				noCache: ids.length != 1,
+				noCache: true,
 				onRow: function (row) {
 					let itemID = row.getResultByIndex(0);
 					let item = this._objectCache[itemID];
@@ -462,7 +477,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
-				noCache: ids.length != 1,
+				noCache: true,
 				onRow: function (row) {
 					let itemID = row.getResultByIndex(0);
 					let item = this._objectCache[itemID];
@@ -477,6 +492,88 @@ Zotero.Items = function() {
 			}
 		);
 	});
+	
+	
+	this._loadAnnotations = async function (libraryID, ids, idSQL) {
+		var sql = "SELECT itemID, IA.parentItemID, IA.type, IA.text, IA.comment, IA.color, "
+			+ "IA.sortIndex, IA.isExternal "
+			+ "FROM items JOIN itemAnnotations IA USING (itemID) "
+			+ "WHERE libraryID=?" + idSQL;
+		var params = [libraryID];
+		await Zotero.DB.queryAsync(
+			sql,
+			params,
+			{
+				noCache: true,
+				onRow: function (row) {
+					let itemID = row.getResultByIndex(0);
+					
+					let item = this._objectCache[itemID];
+					if (!item) {
+						throw new Error("Item " + itemID + " not found");
+					}
+					
+					item._parentItemID = row.getResultByIndex(1);
+					var typeID = row.getResultByIndex(2);
+					var type;
+					switch (typeID) {
+						case Zotero.Annotations.ANNOTATION_TYPE_HIGHLIGHT:
+							type = 'highlight';
+							break;
+						
+						case Zotero.Annotations.ANNOTATION_TYPE_NOTE:
+							type = 'note';
+							break;
+						
+						case Zotero.Annotations.ANNOTATION_TYPE_IMAGE:
+							type = 'image';
+							break;
+						
+						default:
+							throw new Error(`Unknown annotation type id ${typeID}`);
+					}
+					item._annotationType = type;
+					item._annotationText = row.getResultByIndex(3);
+					item._annotationComment = row.getResultByIndex(4);
+					item._annotationColor = row.getResultByIndex(5);
+					item._annotationSortIndex = row.getResultByIndex(6);
+					item._annotationIsExternal = !!row.getResultByIndex(7);
+					
+					item._loaded.annotation = true;
+					item._clearChanged('annotation');
+				}.bind(this)
+			}
+		);
+	};
+	
+	
+	this._loadAnnotationsDeferred = async function (libraryID, ids, idSQL) {
+		var sql = "SELECT itemID, IA.position, IA.pageLabel FROM items "
+			+ "JOIN itemAnnotations IA USING (itemID) "
+			+ "WHERE libraryID=?" + idSQL;
+		var params = [libraryID];
+		await Zotero.DB.queryAsync(
+			sql,
+			params,
+			{
+				noCache: true,
+				onRow: function (row) {
+					let itemID = row.getResultByIndex(0);
+					
+					let item = this._objectCache[itemID];
+					if (!item) {
+						throw new Error("Item " + itemID + " not found");
+					}
+					
+					item._annotationPosition = row.getResultByIndex(1);
+					item._annotationPageLabel = row.getResultByIndex(2);
+					
+					item._loaded.annotationDeferred = true;
+					item._clearChanged('annotationDeferred');
+				}.bind(this)
+			}
+		);
+	};
 	
 	
 	this._loadChildItems = Zotero.Promise.coroutine(function* (libraryID, ids, idSQL) {
@@ -499,11 +596,15 @@ Zotero.Items = function() {
 			});
 		};
 		
+		//
+		// Attachments
+		//
+		var titleFieldID = Zotero.ItemFields.getID('title');
 		var sql = "SELECT parentItemID, A.itemID, value AS title, "
 			+ "CASE WHEN DI.itemID IS NULL THEN 0 ELSE 1 END AS trashed "
 			+ "FROM itemAttachments A "
 			+ "JOIN items I ON (A.parentItemID=I.itemID) "
-			+ "LEFT JOIN itemData ID ON (fieldID=110 AND A.itemID=ID.itemID) "
+			+ `LEFT JOIN itemData ID ON (fieldID=${titleFieldID} AND A.itemID=ID.itemID) `
 			+ "LEFT JOIN itemDataValues IDV USING (valueID) "
 			+ "LEFT JOIN deletedItems DI USING (itemID) "
 			+ "WHERE libraryID=?"
@@ -533,7 +634,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
-				noCache: ids.length != 1,
+				noCache: true,
 				onRow: function (row) {
 					onRow(row, setAttachmentItem);
 				}
@@ -587,7 +688,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
-				noCache: ids.length != 1,
+				noCache: true,
 				onRow: function (row) {
 					onRow(row, setNoteItem);
 				}
@@ -602,14 +703,61 @@ Zotero.Items = function() {
 			ids.forEach(id => setNoteItem(id, []));
 		}
 		
-		// Mark all top-level items as having child items loaded
-		sql = "SELECT itemID FROM items I WHERE libraryID=?" + idSQL + " AND itemID NOT IN "
-			+ "(SELECT itemID FROM itemAttachments UNION SELECT itemID FROM itemNotes)";
+		//
+		// Annotations
+		//
+		sql = "SELECT parentItemID, IAn.itemID, "
+			+ "text || ' - ' || comment AS title, " // TODO: Make better
+			+ "CASE WHEN DI.itemID IS NULL THEN 0 ELSE 1 END AS trashed "
+			+ "FROM itemAnnotations IAn "
+			+ "JOIN items I ON (IAn.parentItemID=I.itemID) "
+			+ "LEFT JOIN deletedItems DI USING (itemID) "
+			+ "WHERE libraryID=?"
+			+ (ids.length ? " AND parentItemID IN (" + ids.map(id => parseInt(id)).join(", ") + ")" : "")
+			+ " ORDER BY parentItemID, sortIndex";
+		var setAnnotationItem = function (itemID, rows) {
+			var item = this._objectCache[itemID];
+			if (!item) {
+				throw new Error("Item " + itemID + " not loaded");
+			}
+			rows.sort((a, b) => a.sortIndex - b.sortIndex);
+			item._annotations = {
+				rows,
+				withTrashed: null,
+				withoutTrashed: null
+			};
+		}.bind(this);
+		lastItemID = null;
+		rows = [];
 		yield Zotero.DB.queryAsync(
 			sql,
 			params,
 			{
-				noCache: ids.length != 1,
+				noCache: true,
+				onRow: function (row) {
+					onRow(row, setAnnotationItem);
+				}
+			}
+		);
+		// Process unprocessed rows
+		if (lastItemID) {
+			setAnnotationItem(lastItemID, rows);
+		}
+		// Otherwise clear existing entries for passed items
+		else if (ids.length) {
+			ids.forEach(id => setAnnotationItem(id, []));
+		}
+		
+		// Mark either all passed items or all items as having child items loaded
+		sql = "SELECT itemID FROM items I WHERE libraryID=?";
+		if (idSQL) {
+			sql += idSQL;
+		}
+		yield Zotero.DB.queryAsync(
+			sql,
+			params,
+			{
+				noCache: true,
 				onRow: function (row) {
 					var itemID = row.getResultByIndex(0);
 					var item = this._objectCache[itemID];
@@ -651,7 +799,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
-				noCache: ids.length != 1,
+				noCache: true,
 				onRow: function (row) {
 					let itemID = row.getResultByIndex(0);
 					
@@ -704,7 +852,7 @@ Zotero.Items = function() {
 			sql,
 			params,
 			{
-				noCache: ids.length != 1,
+				noCache: true,
 				onRow: function (row) {
 					let itemID = row.getResultByIndex(0);
 					
@@ -727,6 +875,29 @@ Zotero.Items = function() {
 			setRows(lastItemID, rows);
 		}
 	});
+	
+	
+	/**
+	 * Move child items from one item to another
+	 *
+	 * @param {Zotero.Item} fromItem
+	 * @param {Zotero.Item} toItem
+	 * @return {Promise}
+	 */
+	this.moveChildItems = async function (fromItem, toItem) {
+		// Annotations on files
+		if (fromItem.isFileAttachment()) {
+			await Zotero.DB.executeTransaction(async function () {
+				let annotations = fromItem.getAnnotations();
+				for (let annotation of annotations) {
+					annotation.parentItemID = toItem.id;
+					await annotation.save();
+				}
+			}.bind(this));
+		}
+		
+		// TODO: Other things as necessary
+	};
 	
 	
 	this.merge = function (item, otherItems) {

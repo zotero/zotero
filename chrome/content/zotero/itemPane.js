@@ -253,33 +253,49 @@ var ZoteroItemPane = new function() {
 			tree.focus();
 		}
 	}
+
+
+	this.switchEditorEngine = function (useOld) {
+		var switherDeck = document.getElementById('zotero-note-editor-switcher');
+		switherDeck.selectedIndex = useOld ? 0 : 1;
+	};
 	
 	
 	this.onNoteSelected = function (item, editable) {
 		_selectedNoteID = item.id;
 		
-		// If an external note window is open for this item, don't show the editor
-		if (ZoteroPane.findNoteWindow(item.id)) {
-			this.showNoteWindowMessage();
-			return;
+		var type = Zotero.Libraries.get(item.libraryID).libraryType;
+		if (type == 'group' || !Zotero.isPDFBuild) {
+			// If an external note window is open for this item, don't show the editor
+			if (ZoteroPane.findNoteWindow(item.id)) {
+				this.showNoteWindowMessage();
+				return;
+			}
+
+			var noteEditor = document.getElementById('zotero-note-editor-old');
+
+			// If loading new or different note, disable undo while we repopulate the text field
+			// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
+			// undo content from another note into the current one.
+			var clearUndo = noteEditor.item ? noteEditor.item.id != item.id : false;
+
+			noteEditor.mode = editable ? 'edit' : 'view';
+			noteEditor.parent = null;
+			noteEditor.item = item;
+
+			if (clearUndo) {
+				noteEditor.clearUndo();
+			}
+		}
+		else {
+			var noteEditor = document.getElementById('zotero-note-editor');
+			noteEditor.mode = editable ? 'edit' : 'view';
+			noteEditor.viewMode = 'library';
+			noteEditor.parent = null;
+			noteEditor.item = item;
 		}
 		
-		var noteEditor = document.getElementById('zotero-note-editor');
-		
-		// If loading new or different note, disable undo while we repopulate the text field
-		// so Undo doesn't end up clearing the field. This also ensures that Undo doesn't
-		// undo content from another note into the current one.
-		var clearUndo = noteEditor.item ? noteEditor.item.id != item.id : false;
-		
-		noteEditor.mode = editable ? 'edit' : 'view';
-		noteEditor.parent = null;
-		noteEditor.item = item;
-		
-		if (clearUndo) {
-			noteEditor.clearUndo();
-		}
-		
-		document.getElementById('zotero-view-note-button').hidden = !editable;
+		document.getElementById('zotero-view-note-button').hidden = !editable || type != 'group' && Zotero.isPDFBuild;
 		document.getElementById('zotero-item-pane-content').selectedIndex = 2;
 	};
 	
@@ -295,16 +311,19 @@ var ZoteroItemPane = new function() {
 	this.openNoteWindow = async function () {
 		var selectedNote = Zotero.Items.get(_selectedNoteID);
 		
-		// We don't want to show the note in two places, since it causes unnecessary UI updates
-		// and can result in weird bugs where note content gets lost.
-		//
-		// If this is a child note, select the parent
-		if (selectedNote.parentID) {
-			await ZoteroPane.selectItem(selectedNote.parentID);
-		}
-		// Otherwise, hide note and replace with a message that we're editing externally
-		else {
-			this.showNoteWindowMessage();
+		var type = Zotero.Libraries.get(selectedNote.libraryID).libraryType;
+		if (type == 'group' || !Zotero.isPDFBuild) {
+			// We don't want to show the note in two places, since it causes unnecessary UI updates
+			// and can result in weird bugs where note content gets lost.
+			//
+			// If this is a child note, select the parent
+			if (selectedNote.parentID) {
+				await ZoteroPane.selectItem(selectedNote.parentID);
+			}
+			// Otherwise, hide note and replace with a message that we're editing externally
+			else {
+				this.showNoteWindowMessage();
+			}
 		}
 		ZoteroPane.openNoteWindow(selectedNote.id);
 	};
@@ -438,21 +457,7 @@ var ZoteroItemPane = new function() {
 	
 	function _updateNoteCount() {
 		var c = _notesList.childNodes.length;
-		
-		var str = 'pane.item.notes.count.';
-		switch (c){
-		case 0:
-			str += 'zero';
-			break;
-		case 1:
-			str += 'singular';
-			break;
-		default:
-			str += 'plural';
-			break;
-		}
-		
-		_notesLabel.value = Zotero.getString(str, [c]);
+		_notesLabel.value = Zotero.getString('pane.item.notes.count', c, c);
 	}
 }   
 

@@ -46,6 +46,11 @@ zoteronoteeditor
 	-moz-binding: url('chrome://zotero/content/bindings/noteeditor.xml#note-editor');
 }
 
+oldzoteronoteeditor
+{
+	-moz-binding: url('chrome://zotero/content/bindings/oldnoteeditor.xml#note-editor');
+}
+
 linksbox
 {
 	-moz-binding: url('chrome://zotero/content/bindings/noteeditor.xml#links-box');
@@ -130,7 +135,14 @@ label.zotero-text-link {
 	text-decoration: underline;
 	border: 1px solid transparent;
 	cursor: pointer;
+}
+
+.text-link {
+	-moz-user-focus: normal;
 	color: -moz-nativehyperlinktext;
+	text-decoration: underline;
+	border: 1px solid transparent;
+	cursor: pointer;
 }
 
 .zotero-clicky

@@ -1,6 +1,9 @@
 {
   "general_more": {
-    "message": "Altro..."
+    "message": "Altro…"
+  },
+  "general_moreInfo": {
+    "message": "Per maggiori informazioni…"
   },
   "general_done": {
     "message": "Fatto"
@@ -8,8 +11,17 @@
   "general_tryAgain": {
     "message": "Prova di nuovo"
   },
+  "general_warning": {
+    "message": "Attenzione"
+  },
   "general_cancel": {
     "message": "Annulla"
+  },
+  "general_pleaseWait": {
+    "message": "Ti preghiamo di attendere…"
+  },
+  "general_copyToClipboard": {
+    "message": "Copia negli appunti"
   },
   "progressWindow_savingTo": {
     "message": "Salva in"
@@ -18,16 +30,16 @@
     "message": "Tag (separati da virgole)"
   },
   "progressWindow_error_translation": {
-    "message": "Si è verificato un errore durante il salvataggio dell'elemento.  Consultare $1 per ulteriori informazioni."
+    "message": "Si è verificato un errore durante il salvataggio dell'elemento. Consulta $1 se desideri ricevere ulteriori informazioni."
   },
   "progressWindow_error_troubleshootingTranslatorIssues": {
-    "message": "Risoluzione dei problemi del motore di ricerca"
+    "message": "Risoluzione dei problemi di conversione"
   },
   "progressWindow_error_fallback": {
     "message": "Si è verificato un errore durante il salvataggio con $1. Nuovo tentativo di salvataggio con$2. "
   },
   "progressWindow_error_upgradeClient": {
-    "message": "Questa funzione non è supportata dalla versione di $1 in uso. Aggiornare alla $2."
+    "message": "Questa funzionalità non è supportata dalla versione di $1 in uso. Ti invitiamo ad aggiornarlo alla versione $2."
   },
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "ultima versione"
@@ -42,19 +54,55 @@
     "message": "$1 è in esecuzione?"
   },
   "error_connection_save": {
-    "message": "Il$1 non è stato in grado di comunicare con l'applicazione desktop $2. Il Connettore può salvare alcune pagine direttamente nel tuo account $3, ma per ottenere un risultato migliore è bene assicurarsi che $2 sia aperto prima di tentare il salvataggio."
+    "message": "$1 non è stato in grado di comunicare con l'applicazione desktop di  $2. Il Connettore può salvare alcune pagine direttamente nel tuo account $3, ma per ottenere un risultato migliore è bene assicurarsi che $2 sia aperto prima di tentare il salvataggio."
   },
   "error_connection_downloadOrTroubleshoot": {
     "message": "È possibile <a href=\"$1\">scaricare $2</a> o <a href=\"$3\">risolvere i problemi con la connessione</a> se necessario."
   },
   "error_connection_enableSavingToOnlineLibrary": {
-    "message": "Abilitare il salvataggio nella Libreria online"
+    "message": "Abilita il salvataggio nella biblioteca online"
+  },
+  "reports_report_submitted": {
+    "message": "Hai inviato correttamente una segnalazione di errore.\n\nID della segnalazione: $1\n\nTi preghiamo di pubblicare un messaggio sul forum di Zotero contenente l'ID di segnalazione, una descrizione del problema e tutti i passaggi necessari a ricrearlo.\n\nLe segnalazioni di errore non saranno revisionate a meno che non vengano espressamente menzionate nel forum."
+  },
+  "reports_debug_output_submitted": {
+    "message": "Il messaggio di debug è stato inviato.\n\nL'ID della segnalazione è $1."
+  },
+  "reports_submission_failed": {
+    "message": "Si è verificato un errore durante l'invio della segnalazione.\n\n$1\n\nTi preghiamo di controllare la tua connessione a Internet. Qualora il problema dovesse persistere, ti invitiamo a pubblicare un messaggio sul forum di Zotero."
   },
   "integration_error_clientUpgrade": {
-    "message": "Le citazioni web richiedono $1 o successivo."
+    "message": "Le citazioni web richiedono la versione $1 o successiva."
   },
   "integration_error_connection": {
-    "message": "Il$1 non è stato in grado di comunicare con l'applicazione desktop$2. $2 deve essere aperto per utilizzare le citazioni web."
+    "message": "$1 non è stato in grado di comunicare con l'applicazione desktop di $2. $2 deve essere aperto se desideri utilizzare le citazioni web."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "Il documento include delle citazioni dinamiche di Zotero che verranno mostrate come collegamento a zotero.org all'interno della copia scaricata."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Qualora desiderassi generare una versione più adatta alla condivisione, ti invitiamo a selezionare <b>Crea una copia…</b> dal menù File, <b>Scollega le citazioni</b> dal menù di Zotero all'interno del nuovo documento e, infine, a scaricare la versione senza collegamenti. Conserva comunque una copia del documento originale con i collegamenti nel caso in cui ti sia necessario apportare delle ulteriori modifiche."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "Ignora e scarica la versione con i collegamenti"
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1 sta caricando il documento."
+  },
+  "integration_googleDocs_docxAlert": {
+    "message": "L'integrazione con $1 non è disponibile durante la modifica di un file .docx di Microsoft Word direttamente da Google Docs. Scegli File → Salva come Google Docs se desideri attivare questa funzionalità.<br/><br/>Qualora desiderassi trasferire un documento di Word contenente delle citazioni di $1 all'interno di Google Docs, ti invitiamo a consultare <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Come spostare documenti tra programmi di scrittura differenti</a>."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "Mostra le citazioni orfane di collegamenti a $1"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "La citazione che stai tentando di modificare è orfana di collegamento da $1."
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Riaggiungi il collegamento alla citazione"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "Queste citazioni sono orfane <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">di collegamenti a $1</a>. Ti sarà necessario ricollegarle prima che possano aggiornarsi o comparire all'interno della tua bibliografia."
   },
   "general_saveTo": {
     "message": "Salva in $1"

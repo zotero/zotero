@@ -38,9 +38,12 @@ Zotero_Preferences.General = {
 				'zotero.preferences.launchNonNativeFiles', Zotero.appName
 			);
 		}
+		var menuitem = document.getElementById('fileHandler-internal');
+		menuitem.setAttribute('label', Zotero.appName);
 		
 		this.updateAutoRenameFilesUI();
 		this._updateFileHandlerUI();
+		this._updateZotero6BetaCheckbox();
 	},
 	
 	updateAutoRenameFilesUI: function () {
@@ -88,6 +91,16 @@ Zotero_Preferences.General = {
 		var handler = Zotero.Prefs.get('fileHandler.pdf');
 		var menulist = document.getElementById('fileHandler-pdf');
 		var customMenuItem = document.getElementById('fileHandler-custom');
+		
+		// TEMP: Use separate checkbox for now
+		/*if (handler == 'zotero') {
+			let menuitem = document.getElementById('fileHandler-internal');
+			menulist.selectedIndex = 0;
+			customMenuItem.hidden = true;
+			return;
+		}*/
+		
+		// Custom handler
 		if (handler) {
 			let icon;
 			try {
@@ -113,11 +126,12 @@ Zotero_Preferences.General = {
 				customMenuItem.className = '';
 			}
 			customMenuItem.hidden = false;
-			menulist.selectedIndex = 0;
+			menulist.selectedIndex = 1;
 		}
+		// System default
 		else {
 			customMenuItem.hidden = true;
-			menulist.selectedIndex = 1;
+			menulist.selectedIndex = 2;
 		}
 	},
 	
@@ -126,5 +140,38 @@ Zotero_Preferences.General = {
 			throw new Error(`Unknown file type ${type}`);
 		}
 		return 'fileHandler.pdf';
+	},
+	
+	
+	handleZotero6BetaChange: function (event) {
+		var ps = Services.prompt;
+		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
+		var index = ps.confirmEx(
+			window,
+			Zotero.getString('general.restartRequired'),
+			Zotero.getString('general.restartRequiredForChange', Zotero.appName),
+			buttonFlags,
+			Zotero.getString('general.restartApp', Zotero.appName),
+			null, null, null, {}
+		);
+		if (index == 0) {
+			Zotero.Prefs.set('beta.zotero6', !event.target.checked);
+			Zotero.Utilities.Internal.quitZotero(true);
+			return;
+		}
+		// Set to opposite so the click changes it back to what it was before
+		event.target.checked = !event.target.checked;
+	},
+	
+	
+	_updateZotero6BetaCheckbox: function () {
+		var checkbox = document.getElementById('zotero6-checkbox');
+		if (Zotero.Prefs.get('beta.zotero6')) {
+			checkbox.setAttribute('checked', true);
+		}
+		else {
+			checkbox.removeAttribute('checked');
+		}
 	}
 }

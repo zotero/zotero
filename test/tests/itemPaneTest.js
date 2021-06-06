@@ -270,6 +270,19 @@ describe("Item pane", function () {
 			var label = itemBox._id('fileName');
 			assert.equal(label.value, newName);
 		})
+		
+		it("should update on attachment title change", async function () {
+			var file = getTestDataDirectory();
+			file.append('test.png');
+			var item = await Zotero.Attachments.importFromFile({ file });
+			var newTitle = 'New Title';
+			item.setField('title', newTitle);
+			await item.saveTx();
+			
+			var itemBox = doc.getElementById('zotero-attachment-box');
+			var label = itemBox._id('title');
+			assert.equal(label.textContent, newTitle);
+		})
 	})
 	
 	
@@ -282,16 +295,18 @@ describe("Item pane", function () {
 			
 			// Wait for the editor
 			yield new Zotero.Promise((resolve, reject) => {
-				noteEditor.noteField.onInit(() => resolve());
-			})
-			assert.equal(noteEditor.noteField.value, '');
-			
+				noteEditor.onInit(() => resolve());
+			});
+			assert.equal(noteEditor._editorInstance._iframeWindow.wrappedJSObject.getDataSync(), null);
 			item.setNote('<p>Test</p>');
 			yield item.saveTx();
 			
-			assert.equal(noteEditor.noteField.value, '<p>Test</p>');
-		})
-	})
+			// Wait for asynchronous editor update
+			do {
+				yield Zotero.Promise.delay(10);
+			} while(noteEditor._editorInstance._iframeWindow.wrappedJSObject.getDataSync().html.replace(/\n/g,'') != `<div data-schema-version="${Zotero.EditorInstance.SCHEMA_VERSION}"><p>Test</p></div>`);
+		});
+	});
 	
 	describe("Feed buttons", function() {
 		describe("Mark as Read/Unread", function() {

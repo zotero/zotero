@@ -624,4 +624,17 @@ describe("Zotero.Items", function () {
 			);
 		});
 	});
+	
+	describe("#_loadChildItems()", function () {
+		it("should mark child items as loaded for an attachment", async function () {
+			var attachment = await importPDFAttachment();
+			var itemID = attachment.id;
+			Zotero.Items.unload([itemID]);
+			attachment = await Zotero.Items.getAsync(itemID);
+			await attachment.loadDataType('childItems');
+			assert.isTrue(attachment._loaded.childItems);
+			attachment.getAnnotations();
+			await attachment.eraseTx();
+		});
+	});
 });

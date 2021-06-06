@@ -5,9 +5,8 @@
 <!ENTITY zotero.directors "Direttori:">
 <!ENTITY zotero.developers "Sviluppatori:">
 <!ENTITY zotero.alumni "Ex-allievi:">
-<!ENTITY zotero.about.localizations "Traduzioni:">
-<!ENTITY zotero.about.additionalSoftware "Software e modelli di terze parti:">
-<!ENTITY zotero.executiveProducer "Produttore esecutivo:">
+<!ENTITY zotero.about.localizations "Localizzazioni:">
+<!ENTITY zotero.about.additionalSoftware "Software di terzi:">
 <!ENTITY zotero.thanks "Ringraziamenti speciali:">
 <!ENTITY zotero.about.close "Chiudi">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Altri riconoscimenti">

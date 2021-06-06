@@ -2,6 +2,9 @@
   "general_more": {
     "message": "Mer..."
   },
+  "general_moreInfo": {
+    "message": "Mer info…"
+  },
   "general_done": {
     "message": "Ferdig"
   },
@@ -16,6 +19,9 @@
   },
   "general_pleaseWait": {
     "message": "Vennligst vent…"
+  },
+  "general_copyToClipboard": {
+    "message": "Kopier til utklippstavle"
   },
   "progressWindow_savingTo": {
     "message": "Lagrer til"
@@ -48,13 +54,22 @@
     "message": "Kjører $1?"
   },
   "error_connection_save": {
-    "message": "$1 var ikke i stand til å kommunisere med $2 skrivebordsprogrammet. Connector kan lagre noen sider direkt til din $3 konto, men for best resultat bør du forsikre deg om at $2 er åpen før du forsøker å lagre."
+    "message": "$1 var ikke i stand til å kommunisere med $2 skrivebordsprogrammet. Connector kan lagre noen sider direkte til din $3 konto, men for best resultat bør du forsikre deg om at $2 er åpen før du forsøker å lagre."
   },
   "error_connection_downloadOrTroubleshoot": {
     "message": "Du kan <a href=\"$1\"> laste ned $2</a> eller <a href=\"$3\"> feilsøke forbindelsen </a> om nødvendig."
   },
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Aktiver Lagre til nettbiblioteket"
+  },
+  "reports_report_submitted": {
+    "message": "Feilrapporten din er levert.\n\nRapport ID: $1\n\nLegg igjen en melding på Zotero forumene med denne rapport ID-en, en beskrivelse av problemet, og nødvendige steg for å gjenskape problemet.\n\nFeilrapporter blir ikke gjennomfått hvis de følges av en melding på forumene."
+  },
+  "reports_debug_output_submitted": {
+    "message": "Ditt feilsøk output er levert.\n\nDebug ID er $1."
+  },
+  "reports_submission_failed": {
+    "message": "En feil skjedde under levering av rapporten din.\n\n$1\n\nSjekk internettforbindelsen din. Hvis problemet vedvarer, skriv en melding på Zotero forumene."
   },
   "integration_error_clientUpgrade": {
     "message": "Web-basert henvisning krever $1 eller senere."
@@ -76,6 +91,18 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "$1 integrasjon er ikke tilgjengelig når du redigerer Microsoft Word .docx filer direkte i Google Docs. Velg Fil → Lagres som Google Docs for å aktivere denne funksjonaliteten..<br/><br/>Hvis du ønsker å flytte et Word dokument med $1 henvisninger til Google Docs, se <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Flytte dokumenter mellom tekstbehandlere</a>."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "Vis frakoblede $1 henvisninger"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "Henvisningen du forsøker å redigere har blitt koblet fra $1."
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Gjenopprett kobling til henvisning"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "Disse henvisningene har blitt <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">frakoblet  $1</a>. Du må gjenopprette koblinger til de igjen før de vil bli oppdatert eller vises i bibliografien din."
   },
   "general_saveTo": {
     "message": "Lagre til $1"

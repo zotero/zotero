@@ -38,7 +38,7 @@
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	title="" buttons="cancel,accept"
 	id="zotero-quickCopySiteEditor"
-	onload="Zotero_Preferences.Export.updateQuickCopyUI(); sizeToContent()"
+	onload="Zotero_QuickCopySiteEditor.onLoad(); Zotero_Preferences.Export.updateQuickCopyUI(); sizeToContent()"
 	ondialogaccept="Zotero_QuickCopySiteEditor.onAccept();">
 	
 	<script src="chrome://zotero/content/include.js"/>
@@ -77,6 +77,12 @@
 		var Zotero_QuickCopySiteEditor = new function () {
 			var menu = document.getElementById('zotero-quickCopy-menu');
 			
+			this.onLoad = function () {
+				// Hide OK button initially if domain field is empty
+				document.documentElement.getButton('accept').disabled
+					= document.getElementById('zotero-quickCopy-domain').value.trim() === '';
+			};
+			
 			this.onAccept = function () {
 				var io = window.arguments[0];
 				io.domain = document.getElementById('zotero-quickCopy-domain').value;
@@ -91,8 +97,11 @@
 			}
 			
 			this.onDomainInput = function (event) {
+				// Hide OK button if domain field is empty
+				document.documentElement.getButton('accept').disabled = event.target.value.trim() === '';
+				
+				// Auto-select Wikipedia Citation Templates
 				if (event.target.value == 'wikipedia.org') {
-					Zotero.debug("SETTING TO WIKI");
 					menu.value = 'export=3f50aaac-7acc-4350-acd0-59cb77faf620';
 					Zotero_Preferences.Export.updateQuickCopyUI();
 				}

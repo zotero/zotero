@@ -1,4 +1,4 @@
--- 111
+-- 116
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -104,6 +104,7 @@ CREATE TABLE itemAttachments (
     syncState INT DEFAULT 0,
     storageModTime INT,
     storageHash TEXT,
+    lastProcessedModificationTime INT,
     FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,
     FOREIGN KEY (parentItemID) REFERENCES items(itemID) ON DELETE CASCADE,
     FOREIGN KEY (charsetID) REFERENCES charsets(charsetID) ON DELETE SET NULL
@@ -112,6 +113,23 @@ CREATE INDEX itemAttachments_parentItemID ON itemAttachments(parentItemID);
 CREATE INDEX itemAttachments_charsetID ON itemAttachments(charsetID);
 CREATE INDEX itemAttachments_contentType ON itemAttachments(contentType);
 CREATE INDEX itemAttachments_syncState ON itemAttachments(syncState);
+CREATE INDEX itemAttachments_lastProcessedModificationTime ON itemAttachments(lastProcessedModificationTime);
+
+CREATE TABLE itemAnnotations (
+    itemID INTEGER PRIMARY KEY,
+    parentItemID INT NOT NULL,
+    type INTEGER NOT NULL,
+    text TEXT,
+    comment TEXT,
+    color TEXT,
+    pageLabel TEXT,
+    sortIndex TEXT NOT NULL,
+    position TEXT NOT NULL,
+    isExternal INT NOT NULL,
+    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,
+    FOREIGN KEY (parentItemID) REFERENCES itemAttachments(itemID)
+);
+CREATE INDEX itemAnnotations_parentItemID ON itemAnnotations(parentItemID);
 
 CREATE TABLE tags (
     tagID INTEGER PRIMARY KEY,
@@ -275,7 +293,7 @@ CREATE TABLE libraries (
 
 CREATE TABLE users (
     userID INTEGER PRIMARY KEY,
-    username TEXT NOT NULL
+    name TEXT NOT NULL
 );
 
 CREATE TABLE groups (
@@ -373,37 +391,6 @@ CREATE TABLE storageDeleteLog (
     PRIMARY KEY (libraryID, key),
     FOREIGN KEY (libraryID) REFERENCES libraries(libraryID) ON DELETE CASCADE
 );
-
-CREATE TABLE annotations (
-    annotationID INTEGER PRIMARY KEY,
-    itemID INT NOT NULL,
-    parent TEXT,
-    textNode INT,
-    offset INT,
-    x INT,
-    y INT,
-    cols INT,
-    rows INT,
-    text TEXT,
-    collapsed BOOL,
-    dateModified DATE,
-    FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID) ON DELETE CASCADE
-);
-CREATE INDEX annotations_itemID ON annotations(itemID);
-
-CREATE TABLE highlights (
-    highlightID INTEGER PRIMARY KEY,
-    itemID INT NOT NULL,
-    startParent TEXT,
-    startTextNode INT,
-    startOffset INT,
-    endParent TEXT,
-    endTextNode INT,
-    endOffset INT,
-    dateModified DATE,
-    FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID) ON DELETE CASCADE
-);
-CREATE INDEX highlights_itemID ON highlights(itemID);
 
 CREATE TABLE proxies (
     proxyID INTEGER PRIMARY KEY,

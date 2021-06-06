@@ -2,6 +2,9 @@
   "general_more": {
     "message": "Więcej..."
   },
+  "general_moreInfo": {
+    "message": "Więcej informacji..."
+  },
   "general_done": {
     "message": "Zrobione"
   },
@@ -16,6 +19,9 @@
   },
   "general_pleaseWait": {
     "message": "Proszę czekać..."
+  },
+  "general_copyToClipboard": {
+    "message": "Kopiuj do schowka"
   },
   "progressWindow_savingTo": {
     "message": "Zapisywanie do"
@@ -55,6 +61,9 @@
   },
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Włącz zapisywanie do zdalnej biblioteki"
+  },
+  "reports_debug_output_submitted": {
+    "message": "Informacja debugowania została wysłana.\n\nIdentyfikator informacji to $1."
   },
   "integration_error_clientUpgrade": {
     "message": "Cytowanie oparte na stronach internetowych wymaga $1 lub nowszego."

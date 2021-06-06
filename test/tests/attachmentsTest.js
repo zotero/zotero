@@ -1020,7 +1020,7 @@ describe("Zotero.Attachments", function() {
 			assert.equal(requestStub.getCall(5).args[1], pageURL4);
 			
 			// 'website' requests should be a second apart
-			assert.isAbove(requestStubCallTimes[5] - requestStubCallTimes[1], 999);
+			assert.isAbove(requestStubCallTimes[5] - requestStubCallTimes[1], 995);
 			
 			assert.equal(item1.numAttachments(), 1);
 			assert.equal(item2.numAttachments(), 0);
@@ -1327,7 +1327,7 @@ describe("Zotero.Attachments", function() {
 			assert.equal(newAttachment.attachmentContentType, 'application/pdf');
 			assert.isTrue(await newAttachment.fileExists());
 			assert.equal(newAttachment.getField('title'), 'Title');
-			assert.equal(newAttachment.getNote(), 'Note');
+			assert.equal(newAttachment.note, 'Note');
 			assert.sameDeepMembers(newAttachment.getTags(), [{ tag: 'Tag' }]);
 			assert.sameMembers(newAttachment.relatedItems, [relatedItem.key]);
 			assert.sameMembers(relatedItem.relatedItems, [newAttachment.key]);
@@ -1336,6 +1336,30 @@ describe("Zotero.Attachments", function() {
 				await Zotero.Fulltext.getIndexedState(newAttachment),
 				Zotero.Fulltext.INDEX_STATE_INDEXED
 			);
+		});
+		
+		
+		it("should move annotations to stored file", async function () {
+			var item = await createDataObject('item');
+			var relatedItem = await createDataObject('item');
+			
+			var originalFile = OS.Path.join(getTestDataDirectory().path, 'test.pdf');
+			var attachment = await Zotero.Attachments.linkFromFile({
+				file: originalFile,
+				title: 'Title',
+				parentItemID: item.id
+			});
+			var annotation1 = await createAnnotation('highlight', attachment);
+			var annotation2 = await createAnnotation('note', attachment);
+			
+			var newAttachment = await Zotero.Attachments.convertLinkedFileToStoredFile(attachment);
+			
+			assert.isFalse(Zotero.Items.exists(attachment.id));
+			assert.isTrue(Zotero.Items.exists(annotation1.id));
+			assert.isTrue(Zotero.Items.exists(annotation2.id));
+			
+			var annotations = newAttachment.getAnnotations();
+			assert.lengthOf(annotations, 2);
 		});
 		
 		

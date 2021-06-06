@@ -6,6 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Ne izberi ničesar">
 <!ENTITY zotero.general.edit "Uredi">
 <!ENTITY zotero.general.delete "Izbriši">
+<!ENTITY zotero.general.moveToTrash "Premakni v koš">
 <!ENTITY zotero.general.ok "V redu">
 <!ENTITY zotero.general.cancel "Prekliči">
 <!ENTITY zotero.general.refresh "Osveži">
@@ -90,6 +91,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Pokaži v knjižnici">
 <!ENTITY zotero.items.menu.attach.note "Dodaj opombo">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Dodaj opombo iz zaznamkov">
 <!ENTITY zotero.items.menu.attach "Dodaj priponko">
 <!ENTITY zotero.items.menu.attach.link.uri "URI-ju pripni povezavo ...">
 <!ENTITY zotero.items.menu.attach.file "Pripni shranjeno kopijo datoteke ...">
@@ -155,6 +157,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Shrani kopijo datoteke ...">
 <!ENTITY zotero.toolbar.attachment.weblink "Shrani povezavo na trenutno stran">
 <!ENTITY zotero.toolbar.attachment.snapshot "Naredi posnetek trenutne strani">
+<!ENTITY zotero.toolbar.context.item "Vnos">
+<!ENTITY zotero.toolbar.context.notes "Opombe">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Brez značk za prikaz">
 <!ENTITY zotero.tagSelector.loadingTags "Nalaganje značk ...">
@@ -175,8 +179,8 @@
 <!ENTITY zotero.lookup.description "Vnesite identifikacijske kode ISBN, DOI, PMID ali arXiv za dodajanje v knjižnico:">
 <!ENTITY zotero.lookup.button.search "Išči">
 
-<!ENTITY zotero.createParent.title "Create Parent Item">
-<!ENTITY zotero.createParent.button.manual "Manual Entry">
+<!ENTITY zotero.createParent.title "Ustvari nadrejeni vnos">
+<!ENTITY zotero.createParent.button.manual "Ročni vnos">
 
 <!ENTITY zotero.selectitems.title "Izberi vnose">
 <!ENTITY zotero.selectitems.intro.label "Izberite vnose, ki bi jih želeli dodati v svojo knjižnico">
@@ -325,3 +329,23 @@
 <!ENTITY zotero.attachLink.title "URI pripni povezavo">
 <!ENTITY zotero.attachLink.label.link "Povezava:">
 <!ENTITY zotero.attachLink.label.title "Naslov:">
+
+<!ENTITY zotero.context.addChildNote "Dodaj opombo vnosu">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Dodaj opombo vnosu iz zaznamkov">
+<!ENTITY zotero.context.addStandaloneNote "Dodaj samostojno opombo">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Dodaj samostojno opombo iz zaznamkov">
+<!ENTITY zotero.context.editInWindow "Uredi v ločenem oknu">
+
+<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.lastPage "Last Page">
+<!ENTITY zotero.pdfReader.back "Back">
+<!ENTITY zotero.pdfReader.forward "Forward">
+<!ENTITY zotero.pdfReader.rotateClockwise "Rotate Clockwise">
+<!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotate Counterclockwise">
+<!ENTITY zotero.pdfReader.handTool "Hand Tool">
+<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
+<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
+<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
+<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
+<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
+<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">

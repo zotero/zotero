@@ -5,6 +5,9 @@
 	"general_more": {
 		"message": "More…"
 	},
+	"general_moreInfo": {
+		"message": "More Info…"
+	},
 	"general_done": {
 		"message": "Done"
 	},
@@ -19,6 +22,9 @@
 	},
 	"general_pleaseWait": {
 		"message": "Please wait…"
+	},
+	"general_copyToClipboard": {
+		"message": "Copy to Clipboard"
 	},
 	
 	"progressWindow_savingTo": {
@@ -66,6 +72,19 @@
 		"message": "Enable Saving to Online Library"
 	},
 	
+	"reports_report_submitted": {
+		"message": "Your error report has been submitted.\n\nReport ID: $1\n\nPlease post a message to the Zotero Forums with this Report ID, a description of the problem, and any steps necessary to reproduce it.\n\nError reports are not reviewed unless referred to in the forums."
+	},
+	
+	"reports_debug_output_submitted": {
+		"message": "Your debug output has been submitted.\n\nThe Debug ID is $1."
+	},
+
+	"reports_submission_failed": {
+		"message": "An error occurred submitting your report.\n\n$1\n\nPlease check your internet connection. If the problem persists, post a message to the Zotero Forums.",
+		"description": "$1 will be the error message sent to the Zotero servers"
+	},
+	
 	"integration_error_clientUpgrade": {
 		"message": "Web-based citing requires $1 or later."
 	},
@@ -88,5 +107,18 @@
 	},
 	"integration_googleDocs_docxAlert": {
 		"message": "$1 integration is not available when editing Microsoft Word .docx files directly in Google Docs. Choose File → Save as Google Docs to enable this functionality.<br/><br/>If you want to transfer a Word document with $1 citations to Google Docs, see <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Moving Documents Between Word Processors</a>."
+	},
+	
+	"integration_googleDocs_orphanedCitations_buttonTooltip": {
+		"message": "Show unlinked $1 citations"
+	},
+	"integration_googleDocs_orphanedCitations_alert": {
+		"message": "The citation you are trying to edit has become unlinked from $1."
+	},
+	"integration_googleDocs_orphanedCitations_alertButton": {
+		"message": "Relink Citation"
+	},
+	"integration_googleDocs_orphanedCitations_disclaimer": {
+		"message": "These citations have become <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">unlinked from $1</a>. You will need to relink them before they will update or appear in your bibliography."
 	}
 }

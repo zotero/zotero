@@ -323,6 +323,18 @@ Zotero.Server.DataListener.prototype._headerFinished = function() {
  */
 Zotero.Server.DataListener.prototype._bodyData = function() {
 	if(this.body.length >= this.bodyLength) {
+		let logContentTypes = [
+			'text/plain',
+			'application/json'
+		];
+		let noLogEndpoints = [
+			'/connector/saveSingleFile'
+		];
+		if (this.body != '{}'
+				&& logContentTypes.includes(this.contentType)
+				&& !noLogEndpoints.includes(this.pathname)) {
+			Zotero.debug(Zotero.Utilities.ellipsize(this.body, 1000, false, true), 5);
+		}
 		// handle envelope
 		this._processEndpoint("POST", this.body); // async
 	}

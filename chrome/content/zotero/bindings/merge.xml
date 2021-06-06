@@ -67,6 +67,7 @@
 						case 'item':
 						case 'attachment':
 						case 'note':
+						case 'annotation':
 						case 'file':
 							break;
 						
@@ -225,8 +226,11 @@
 						Zotero.debug(obj, 1);
 						throw new Error("obj is not item JSON");
 					}
-					if (obj.itemType == 'attachment' || obj.itemType == 'note') {
-						return obj.itemType;
+					switch (obj.itemType) {
+						case 'attachment':
+						case 'note':
+						case 'annotation':
+							return obj.itemType;
 					}
 					return 'item';
 				]]>
@@ -335,14 +339,26 @@
 							break;
 						
 						case 'note':
-							elementName = 'zoteronoteeditor';
+							var type = Zotero.Libraries.get(this.libraryID).libraryType;
+							var useOld = type == 'group' || !Zotero.isPDFBuild;
+							elementName = useOld ? 'oldzoteronoteeditor' : 'zoteronoteeditor';
+							break;
+						
+						case 'annotation':
+							elementName = 'div';
 							break;
 						
 						default:
 							throw new Error("Object type '" + this.type + "' not supported");
 					}
 					
-					var objbox = document.createElement(elementName);
+					if (elementName == 'div') {
+						let HTML_NS = 'http://www.w3.org/1999/xhtml';
+						var objbox = document.createElementNS(HTML_NS, elementName);
+					}
+					else {
+						var objbox = document.createElement(elementName);
+					}
 					
 					var parentRow = this._id('parent-row');
 					if (val.parentItem) {
@@ -387,7 +403,16 @@
 					var item = new Zotero.Item(val.itemType);
 					item.libraryID = this.libraryID;
 					item.fromJSON(displayJSON);
-					objbox.item = item;
+					
+					if (item.isAnnotation()) {
+						Zotero.Annotations.toJSON(item)
+						.then((data) => {
+							Zotero.AnnotationBox.render(objbox, { data });
+						});
+					}
+					else {
+						objbox.item = item;
+					}
 				]]>
 				</setter>
 			</property>

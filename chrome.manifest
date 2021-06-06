@@ -27,7 +27,7 @@ locale	zotero	de		chrome/locale/de/zotero/
 locale	zotero	en-GB		chrome/locale/en-GB/zotero/
 locale	zotero	es-ES		chrome/locale/es-ES/zotero/
 locale	zotero	et-EE		chrome/locale/et-EE/zotero/
-#locale	zotero	eu-ES		chrome/locale/eu-ES/zotero/
+locale	zotero	eu-ES		chrome/locale/eu-ES/zotero/
 locale	zotero	fa		chrome/locale/fa/zotero/
 locale	zotero	fi-FI		chrome/locale/fi-FI/zotero/
 locale	zotero	fr-FR		chrome/locale/fr-FR/zotero/

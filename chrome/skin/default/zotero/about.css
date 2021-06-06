@@ -8,22 +8,13 @@ dialog
 #aboutcontent
 {
 	background: white;
-	padding: 10px;
+	padding: 10px 16px;
+	font-size: 13px;
+	margin-bottom: 10px;
 }
 
-#column1 {
-	width: 23em;
-	padding-right: 2em;
-}
-
-#column2 {
-	margin-right: 1em;
-}
-
-#name
-{
-	font-size: large;
-	font-weight: bold;
+#logo {
+	margin: 7px 0 0 7px;
 }
 
 #version

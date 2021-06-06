@@ -6,6 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Отказ на всички">
 <!ENTITY zotero.general.edit "Редактиране">
 <!ENTITY zotero.general.delete "Изтриване">
+<!ENTITY zotero.general.moveToTrash "Move to Trash">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Отказ">
 <!ENTITY zotero.general.refresh "Опресняване">
@@ -90,6 +91,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Показване в библиотеката">
 <!ENTITY zotero.items.menu.attach.note "Добавяне на бележка">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Добавяне на прикачен файл">
 <!ENTITY zotero.items.menu.attach.link.uri "Добавяне на връзка към URI…">
 <!ENTITY zotero.items.menu.attach.file "Добавяне на съхранено копие на файл от твърдия диск...">
@@ -155,6 +157,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Запазване на копие от файл">
 <!ENTITY zotero.toolbar.attachment.weblink "Запазване на връзка към настоящата страница">
 <!ENTITY zotero.toolbar.attachment.snapshot "Направи &quot;моментна снимка&quot; на настоящата страница">
+<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Няма маркери, които да бъдат показани">
 <!ENTITY zotero.tagSelector.loadingTags "Зареждане на маркери...">
@@ -325,3 +329,23 @@
 <!ENTITY zotero.attachLink.title "Прикачване на линк към URI">
 <!ENTITY zotero.attachLink.label.link "Линк:">
 <!ENTITY zotero.attachLink.label.title "Заглавие:">
+
+<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
+<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
+
+<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.lastPage "Last Page">
+<!ENTITY zotero.pdfReader.back "Back">
+<!ENTITY zotero.pdfReader.forward "Forward">
+<!ENTITY zotero.pdfReader.rotateClockwise "Rotate Clockwise">
+<!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotate Counterclockwise">
+<!ENTITY zotero.pdfReader.handTool "Hand Tool">
+<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
+<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
+<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
+<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
+<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
+<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">

@@ -28,6 +28,7 @@
  * Transfer request for storage sync
  *
  * @param {Object} options
+ * @param {Zotero.Sync.Storage.Engine} options.engine
  * @param {String} options.type
  * @param {Integer} options.libraryID
  * @param {String} options.name - Identifier for request (e.g., "[libraryID]/[key]")
@@ -39,13 +40,14 @@ Zotero.Sync.Storage.Request = function (options) {
 	if (!options.type) throw new Error("type must be provided");
 	if (!options.libraryID) throw new Error("libraryID must be provided");
 	if (!options.name) throw new Error("name must be provided");
-	['type', 'libraryID', 'name'].forEach(x => this[x] = options[x]);
+	['engine', 'type', 'libraryID', 'name'].forEach(x => this[x] = options[x]);
 	
 	Zotero.debug(`Initializing ${this.type} request ${this.name}`);
 	
 	this.callbacks = ['onStart', 'onProgress', 'onStop'];
 	
 	this.Type = Zotero.Utilities.capitalize(this.type);
+	this.engine = options.engine;
 	this.channel = null;
 	this.queue = null;
 	this.progress = 0;
@@ -54,6 +56,7 @@ Zotero.Sync.Storage.Request = function (options) {
 	this._deferred = Zotero.Promise.defer();
 	this._running = false;
 	this._stopping = false;
+	this._progressUpdated = false;
 	this._percentage = 0;
 	this._remaining = null;
 	this._maxSize = null;
@@ -197,7 +200,6 @@ Zotero.Sync.Storage.Request.prototype.start = Zotero.Promise.coroutine(function*
 		result.updateFromResults(results);
 		
 		Zotero.debug(this.Type + " request " + this.name + " finished");
-		Zotero.debug(result + "");
 		
 		return result;
 	}
@@ -209,7 +211,11 @@ Zotero.Sync.Storage.Request.prototype.start = Zotero.Promise.coroutine(function*
 		this._finished = true;
 		this._running = false;
 		
-		Zotero.Sync.Storage.setItemDownloadPercentage(this.name, false);
+		// Clear the progress bar if it was set previously or we were told not to
+		// (e.g., by zfs.js on a 404)
+		if (this._progressUpdated || !this.skipProgressBarUpdate) {
+			Zotero.Sync.Storage.setItemDownloadPercentage(this.name, false);
+		}
 		
 		if (this._onStop) {
 			this._onStop.forEach(x => x());
@@ -256,7 +262,7 @@ Zotero.Sync.Storage.Request.prototype.onProgress = function (progress, progressM
 		return;
 	}
 	
-	if (progressMax != this.progressMax) {
+	if (this.progressMax && progressMax != this.progressMax) {
 		Zotero.debug("progressMax has changed from " + this.progressMax
 			+ " to " + progressMax + " for request '" + this.name + "'", 2);
 	}
@@ -265,7 +271,12 @@ Zotero.Sync.Storage.Request.prototype.onProgress = function (progress, progressM
 	this.progressMax = progressMax;
 	
 	if (this.type == 'download') {
-		Zotero.Sync.Storage.setItemDownloadPercentage(this.name, this.percentage);
+		// Update progress bar if we didn't skip to 100 on the first step (which might indicate a
+		// request failure)
+		if (this._progressUpdated || progress != progressMax) {
+			Zotero.Sync.Storage.setItemDownloadPercentage(this.name, this.percentage);
+			this._progressUpdated = true;
+		}
 	}
 	
 	if (this._onProgress) {

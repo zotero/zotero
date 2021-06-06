@@ -6,6 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Desmarcar todo">
 <!ENTITY zotero.general.edit "Editar">
 <!ENTITY zotero.general.delete "Eliminar">
+<!ENTITY zotero.general.moveToTrash "Mover ao lixo">
 <!ENTITY zotero.general.ok "Aceptar">
 <!ENTITY zotero.general.cancel "Cancelar">
 <!ENTITY zotero.general.refresh "Actualizar">
@@ -90,6 +91,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Amosar na biblioteca">
 <!ENTITY zotero.items.menu.attach.note "Engadir unha nota">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Engadir nota desde anotacións">
 <!ENTITY zotero.items.menu.attach "Engadir un anexo">
 <!ENTITY zotero.items.menu.attach.link.uri "Anexar a ligazón ao URI...">
 <!ENTITY zotero.items.menu.attach.file "Anexar a copia almacenada do ficheiro...">
@@ -155,6 +157,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Gardar copias dos ficheiros...">
 <!ENTITY zotero.toolbar.attachment.weblink "Gardar a ligazón á páxina actual">
 <!ENTITY zotero.toolbar.attachment.snapshot "Tomar unha imaxe instantánea da páxina actual">
+<!ENTITY zotero.toolbar.context.item "Elemento">
+<!ENTITY zotero.toolbar.context.notes "Notas">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Non hai etiquetas que mostrar">
 <!ENTITY zotero.tagSelector.loadingTags "Cargando as etiquetas...">
@@ -175,8 +179,8 @@
 <!ENTITY zotero.lookup.description "Introduce ISBNs, DOIs, PMIDs, ou IDs de arXiv IDs para engadilos na librería:">
 <!ENTITY zotero.lookup.button.search "Buscar">
 
-<!ENTITY zotero.createParent.title "Create Parent Item">
-<!ENTITY zotero.createParent.button.manual "Manual Entry">
+<!ENTITY zotero.createParent.title "Crear elemento pai">
+<!ENTITY zotero.createParent.button.manual "Entrada manual">
 
 <!ENTITY zotero.selectitems.title "Seleccionar elementos">
 <!ENTITY zotero.selectitems.intro.label "Seleccione os elementos que desexa engadir á súa biblioteca">
@@ -325,3 +329,23 @@
 <!ENTITY zotero.attachLink.title "Engadirlle unha ligazón á URI:">
 <!ENTITY zotero.attachLink.label.link "Ligazón:">
 <!ENTITY zotero.attachLink.label.title "Título:">
+
+<!ENTITY zotero.context.addChildNote "Engadir elemento de nota">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Engadir elemento de nota desde anotacións">
+<!ENTITY zotero.context.addStandaloneNote "Engadir nota independente">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Engadir nota independente desde anotacións">
+<!ENTITY zotero.context.editInWindow "Editar nunha xanela independente">
+
+<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.lastPage "Last Page">
+<!ENTITY zotero.pdfReader.back "Back">
+<!ENTITY zotero.pdfReader.forward "Forward">
+<!ENTITY zotero.pdfReader.rotateClockwise "Rotate Clockwise">
+<!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotate Counterclockwise">
+<!ENTITY zotero.pdfReader.handTool "Hand Tool">
+<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
+<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
+<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
+<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
+<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
+<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">

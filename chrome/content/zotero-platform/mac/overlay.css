@@ -107,12 +107,12 @@ input {
 	margin: 0;
 }
 
-#zotero-view-tabbox {
+.zotero-view-tabbox {
 	background-color: #fff;
 	padding: 0;
 }
 
-#zotero-item-pane-content .groupbox-body {
+.zotero-item-pane-content .groupbox-body {
 	-moz-appearance: none;
 	background-color: #ffffff;
 }
@@ -121,13 +121,13 @@ input {
 	color: #7f7f7f;
 }
 
-#zotero-view-tabbox > tabpanels {
+.zotero-view-tabbox > tabpanels {
 	margin: 12px 0 0 0;
 	padding: 0;
 	-moz-appearance: none;
 }
 
-#zotero-view-tabbox > tabs {
+.zotero-editpane-tabs {
 	-moz-appearance: none;
 	background: -moz-linear-gradient(top, #ededed, #cccccc);
 	border-style: solid;
@@ -136,15 +136,15 @@ input {
 	padding: 2px 0 2px 0;
 }
 
-#zotero-view-tabbox > tabs > tab > hbox {
+.zotero-editpane-tabs > tab > hbox {
 	padding: 0;
 }
 
-#zotero-view-tabbox > tabs > tab > hbox > .tab-icon {
+.zotero-editpane-tabs > tab > hbox > .tab-icon {
 	display: none;
 }
 
-#zotero-pane #zotero-view-tabbox > tabs > tab {
+.zotero-editpane-tabs > tab {
 	-moz-box-orient: vertical;
 	-moz-box-align: center;
 	-moz-appearance: toolbarbutton;
@@ -153,7 +153,7 @@ input {
 	padding: 3px 1px 3px 1px;
 }
 
-#zotero-pane #zotero-view-tabbox > tabs > tab > hbox .tab-text {
+.zotero-editpane-tabs > tab > hbox .tab-text {
 	font-size: 11px;
 	font-weight: bold;
 	margin: 2px 7px 2px 9px !important;
@@ -161,11 +161,11 @@ input {
 }
 
 /* This seems to be necessary to center the tabs. Not sure why. */
-#zotero-pane #zotero-view-tabbox > tabs > tab:last-of-type > hbox .tab-text {
+.zotero-editpane-tabs > tab:last-of-type > hbox .tab-text {
 	margin: 2px 9px 2px 9px !important;
 }
 
-#zotero-pane #zotero-view-tabbox > tabs > tab[selected=true] > hbox .tab-text {
+.zotero-editpane-tabs > tab[selected=true] > hbox .tab-text {
 	color: #FFF !important;
 	text-shadow: rgba(0, 0, 0, 0.4) 0 1px;
 }
@@ -217,18 +217,21 @@ input {
 }
 
 #zotero-collections-splitter:not([state=collapsed]),
-#zotero-items-splitter:not([state=collapsed])[orient=horizontal]
+#zotero-items-splitter:not([state=collapsed])[orient=horizontal],
+#zotero-context-splitter:not([state=collapsed])[orient=horizontal]
 {
 	-moz-appearance: none;
 	border-inline-start: 1px solid #bdbdbd;
 	margin-inline-end: -4px;
 	width: 5px !important;
 	min-width: 5px;
-	position: relative;
+	/* Create a separate stacking context to be on top */
+	opacity: 0.99;
 	background-image: none;
 }
 
-#zotero-items-splitter[orient=vertical]
+#zotero-items-splitter[orient=vertical],
+#zotero-context-splitter-stacked
 {
 	-moz-border-start: none !important;
 	-moz-border-end: none !important;
@@ -239,17 +242,25 @@ input {
 }
 
 #zotero-collections-splitter:not([state=collapsed]) > grippy,
-#zotero-items-splitter:not([state=collapsed]) > grippy
+#zotero-items-splitter:not([state=collapsed]) > grippy,
+#zotero-context-splitter:not([state=collapsed]) > grippy,
+#zotero-context-splitter-stacked:not([state=collapsed]) > grippy
 {
 	display: none;
 }
 
-#zotero-collections-splitter[state=collapsed], #zotero-items-splitter[state=collapsed] {
+#zotero-collections-splitter[state=collapsed],
+#zotero-items-splitter[state=collapsed],
+#zotero-context-splitter[state=collapsed],
+#zotero-context-splitter-stacked[state=collapsed]
+{
 	border: 0 solid #d6d6d6 !important;
 	padding: 0;
 }
 
-#zotero-collections-splitter[state=collapsed], #zotero-items-splitter[state=collapsed][orient=horizontal]
+#zotero-collections-splitter[state=collapsed],
+#zotero-items-splitter[state=collapsed][orient=horizontal],
+#zotero-context-splitter[state=collapsed][orient=horizontal]
 {
 	background-image: url("chrome://zotero/skin/mac/vsplitter.png");
 	background-repeat: repeat-y;
@@ -258,7 +269,8 @@ input {
 	width: 8px !important;
 }
 
-#zotero-items-splitter[state=collapsed][orient=vertical]
+#zotero-items-splitter[state=collapsed][orient=vertical],
+#zotero-context-splitter-stacked[state=collapsed][orient=vertical]
 {
 	background-image: url("chrome://zotero/skin/mac/hsplitter.png");
 	background-repeat: repeat-x;
@@ -271,11 +283,17 @@ input {
 	border-right-width: 1px !important;
 }
 
-#zotero-items-splitter[state=collapsed] {
+#zotero-items-splitter[state=collapsed],
+#zotero-context-splitter[state=collapsed],
+#zotero-context-splitter-stacked[state=collapsed]
+{
 	border-left-width: 1px !important;
 }
 
-#zotero-collections-splitter[state=collapsed] > grippy, #zotero-items-splitter[state=collapsed] > grippy
+#zotero-collections-splitter[state=collapsed] > grippy,
+#zotero-items-splitter[state=collapsed] > grippy,
+#zotero-context-splitter[state=collapsed] > grippy,
+#zotero-context-splitter-stacked[state=collapsed] > grippy
 {
 	-moz-appearance: none;
 	background: url(chrome://zotero/skin/mac/vgrippy.png) center/auto 8px no-repeat;
@@ -301,9 +319,18 @@ input {
 	height: 8px;
 }
 
-#zotero-tags-splitter > grippy:hover, #zotero-collections-splitter > grippy:hover, #zotero-items-splitter  > grippy:hover
+#zotero-tags-splitter > grippy:hover,
+#zotero-collections-splitter > grippy:hover,
+#zotero-items-splitter > grippy:hover,
+#zotero-context-splitter > grippy:hover,
+#zotero-context-splitter-stacked > grippy:hover
 {
 	background-color:transparent;
+}
+
+#zotero-context-toolbar-extension {
+	/* To cover #zotero-context-splitter 1px border */
+	margin-inline-start: -1px;
 }
 
 #zotero-items-tree

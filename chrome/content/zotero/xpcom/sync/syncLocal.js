@@ -175,6 +175,7 @@ Zotero.Sync.Data.Local = {
 				// Replace local user key with libraryID, in case duplicates were merged before the
 				// first sync
 				yield Zotero.Relations.updateUser(null, userID);
+				yield Zotero.Notes.updateUser(null, userID);
 			}
 		});
 		
@@ -542,12 +543,13 @@ Zotero.Sync.Data.Local = {
 		var sql = "SELECT O." + objectsClass.idColumn + " FROM " + objectsClass.table + " O";
 		if (objectType == 'item') {
 			sql += " LEFT JOIN itemAttachments IA USING (itemID) "
-				+ "LEFT JOIN itemNotes INo ON (O.itemID=INo.itemID) ";
+				+ "LEFT JOIN itemNotes INo ON (O.itemID=INo.itemID) "
+				+ "LEFT JOIN itemAnnotations IAn ON (O.itemID=IAn.itemID)";
 		}
 		sql += " WHERE libraryID=? AND synced=0";
-		// Sort child items last
+		// Don't sync external annotations
 		if (objectType == 'item') {
-			sql += " ORDER BY COALESCE(IA.parentItemID, INo.parentItemID)";
+			sql += " AND (IAn.isExternal IS NULL OR IAN.isExternal=0)";
 		}
 		
 		var ids = yield Zotero.DB.columnQueryAsync(sql, [libraryID]);
@@ -555,12 +557,12 @@ Zotero.Sync.Data.Local = {
 		// Sort descendent collections last
 		if (objectType == 'collection') {
 			try {
-				ids = Zotero.Collections.sortByLevel(ids);
+				ids = Zotero.Collections.sortByLevel(ids.map(id => Zotero.Collections.get(id))).map(o => o.id);
 			}
 			catch (e) {
 				Zotero.logError(e);
 				// If collections were incorrectly nested, fix and try again
-				if (e instanceof Zotero.Error && e.error == Zotero.Error.ERROR_INVALID_COLLECTION_NESTING) {
+				if (e instanceof Zotero.Error && e.error == Zotero.Error.ERROR_INVALID_OBJECT_NESTING) {
 					let c = Zotero.Collections.get(e.collectionID);
 					Zotero.debug(`Removing parent collection ${c.parentKey} from collection ${c.key}`);
 					c.parentID = null;
@@ -572,9 +574,20 @@ Zotero.Sync.Data.Local = {
 				}
 			}
 		}
+		else if (objectType == 'item') {
+			ids = Zotero.Items.sortByParent(ids.map(id => Zotero.Items.get(id))).map(o => o.id);
+		}
 		
 		return ids;
 	}),
+	
+	
+	isSyncItem: function (item) {
+		if (item.itemType == 'annotation' && item.annotationIsExternal) {
+			return false;
+		}
+		return true;
+	},
 	
 	
 	//
@@ -794,7 +807,9 @@ Zotero.Sync.Data.Local = {
 						batchSize = options.getNotifierBatchSize()
 					}
 				}
-				let notifierQueue = new Zotero.Notifier.Queue;
+				let notifierQueue = new Zotero.Notifier.Queue({
+					skipAutoSync: true
+				});
 				
 				let jsonObject = json[i];
 				let jsonData = jsonObject.data;
@@ -883,7 +898,7 @@ Zotero.Sync.Data.Local = {
 							// For items, check if mtime or file hash changed in metadata,
 							// which would indicate that a remote storage sync took place and
 							// a download is needed
-							if (objectType == 'item' && obj.isImportedAttachment()) {
+							if (objectType == 'item' && obj.isStoredFileAttachment()) {
 								if (jsonDataLocal.mtime != jsonData.mtime
 										|| jsonDataLocal.md5 != jsonData.md5) {
 									saveOptions.storageDetailsChanged = true;
@@ -935,6 +950,22 @@ Zotero.Sync.Data.Local = {
 									if (objectType != 'item') {
 										throw new Error(`Unexpected conflict on ${objectType} object`);
 									}
+									
+									// Skip conflict resolution if there are invalid fields
+									try {
+										let testObj = obj.clone();
+										testObj.fromJSON(jsonData, { strict: true });
+									}
+									catch (e) {
+										results.push({
+											key: objectKey,
+											processed: false,
+											error: e,
+											retry: false
+										});
+										throw e;
+									}
+									
 									Zotero.debug("Conflict!", 2);
 									Zotero.debug(jsonDataLocal);
 									Zotero.debug(jsonData);
@@ -1443,8 +1474,23 @@ Zotero.Sync.Data.Local = {
 			if (!options.skipData) {
 				obj.fromJSON(json.data, { strict: true });
 			}
-			if (obj.objectType == 'item' && obj.isImportedAttachment()) {
-				yield this._checkAttachmentForDownload(obj, json.data.mtime, options.isNewObject);
+			if (obj.objectType == 'item') {
+				// Update createdByUserID and lastModifiedByUserID
+				for (let p of ['createdByUser', 'lastModifiedByUser']) {
+					if (json.meta && json.meta[p]) {
+						let { id: userID, username, name } = json.meta[p];
+						obj[p + 'ID'] = userID;
+						name = name !== '' ? name : username;
+						// Update stored name if it changed
+						if (Zotero.Users.getName(userID) != name) {
+							yield Zotero.Users.setName(userID, name);
+						}
+					}
+				}
+				
+				if (obj.isStoredFileAttachment()) {
+					yield this._checkAttachmentForDownload(obj, json.data.mtime, options.isNewObject);
+				}
 			}
 			obj.version = json.data.version;
 			if (!options.saveAsUnsynced) {
@@ -1477,7 +1523,7 @@ Zotero.Sync.Data.Local = {
 			yield this._removeObjectFromSyncQueue(obj.objectType, obj.libraryID, json.key);
 			
 			// Mark updated attachments for download
-			if (obj.objectType == 'item' && obj.isImportedAttachment()) {
+			if (obj.objectType == 'item' && obj.isStoredFileAttachment()) {
 				// If storage changes were made (attachment mtime or hash), mark
 				// library as requiring download
 				if (options.isNewObject || options.storageDetailsChanged) {

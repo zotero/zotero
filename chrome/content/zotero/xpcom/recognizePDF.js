@@ -420,7 +420,8 @@ Zotero.RecognizePDF = new function () {
 		let fileName = OS.Path.basename(filePath);
 
 		let json = await extractJSON(filePath, MAX_PAGES);
-
+		json.fileName = OS.Path.basename(filePath);
+		
 		let containingTextPages = 0;
 
 		for(let page of json.pages) {

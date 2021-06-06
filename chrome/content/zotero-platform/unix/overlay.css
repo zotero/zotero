@@ -18,7 +18,7 @@
 
 
 @media (min-resolution: 1.25dppx) {
-	#zotero-pane .toolbarbutton-icon {
+	#zotero-pane-stack .toolbarbutton-icon {
 		width: 16px;
 	}
 	
@@ -75,4 +75,10 @@ tab {
 	width: 6px;
 	background-color: transparent;
 	background-image: none;
+}
+
+#zotero-context-splitter-stacked {
+	-moz-appearance: none;
+	background-color: #ececec;
+	border-top: 1px solid hsla(0, 0%, 0%, 0.2);
 }

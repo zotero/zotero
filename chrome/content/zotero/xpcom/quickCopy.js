@@ -292,7 +292,7 @@ Zotero.QuickCopy = new function() {
 					div.className = "zotero-note";
 					// AMO reviewer: This documented is never rendered (and the inserted markup
 					// is sanitized anyway)
-					div.insertAdjacentHTML('afterbegin', notes[i].getNote());
+					div.insertAdjacentHTML('afterbegin', notes[i].note);
 					container.appendChild(div);
 					textContainer.appendChild(textDoc.importNode(div, true));
 				}

@@ -639,7 +639,6 @@ Zotero.DataObject.prototype.loadPrimaryData = Zotero.Promise.coroutine(function*
 			throw new Error(this._ObjectType + " " + (id ? id : libraryID + "/" + key)
 				+ " not found in Zotero." + this._ObjectType + ".loadPrimaryData()");
 		}
-		this._clearChanged('primaryData');
 		
 		// If object doesn't exist, mark all data types as loaded
 		this._markAllDataTypeLoadStates(true);
@@ -735,11 +734,26 @@ Zotero.DataObject.prototype._markAllDataTypeLoadStates = function (loaded) {
 	}
 }
 
+Zotero.DataObject.prototype._hasFieldChanged = function (field) {
+	return field in this._changedData;
+};
+
+Zotero.DataObject.prototype._getChangedField = function (field) {
+	return this._changedData[field];
+};
+
 /**
  * Get either the unsaved value of a field or the saved value if unchanged since the last save
  */
 Zotero.DataObject.prototype._getLatestField = function (field) {
-        return this._changedData[field] !== undefined ? this._changedData[field] : this['_' + field];
+	return this._changedData[field] !== undefined ? this._changedData[field] : this['_' + field];
+};
+
+/**
+ * Get either the unsaved value of a field or the saved value if unchanged since the last save
+ */
+Zotero.DataObject.prototype._getLatestField = function (field) {
+	return this._changedData[field] !== undefined ? this._changedData[field] : this['_' + field];
 };
 
 /**
@@ -749,9 +763,12 @@ Zotero.DataObject.prototype._getLatestField = function (field) {
  */
 Zotero.DataObject.prototype._markFieldChange = function (field, value) {
 	// New method (changedData)
-	if (['deleted', 'tags'].includes(field)) {
+	if (['deleted', 'tags'].includes(field) || field.startsWith('annotation')) {
 		if (Array.isArray(value)) {
 			this._changedData[field] = [...value];
+		}
+		else if (typeof value === 'object' && value !== null) {
+			this._changedData[field] = Object.assign({}, value);
 		}
 		else {
 			this._changedData[field] = value;
@@ -901,12 +918,18 @@ Zotero.DataObject.prototype.save = Zotero.Promise.coroutine(function* (options =
 		}
 		
 		env.notifierData = {};
-		// Pass along any 'notifierData' values
+		// Pass along any 'notifierData' values, which become 'extraData' in notifier events
 		if (env.options.notifierData) {
 			Object.assign(env.notifierData, env.options.notifierData);
 		}
 		if (env.options.skipSelect) {
 			env.notifierData.skipSelect = true;
+		}
+		// Pass along event-level notifier options, which become top-level extraData properties
+		for (let option of Zotero.Notifier.EVENT_LEVEL_OPTIONS) {
+			if (env.options[option] !== undefined) {
+				env.notifierData[option] = env.options[option];
+			}
 		}
 		if (!env.isNew) {
 			env.changed = this._previousData;
@@ -1258,10 +1281,6 @@ Zotero.DataObject.prototype._initErase = Zotero.Promise.method(function (env) {
 	
 	if (!env.options.skipEditCheck) this.editCheck();
 	
-	if (env.options.skipDeleteLog) {
-		env.notifierData[this.id].skipDeleteLog = true;
-	}
-	
 	return true;
 });
 
@@ -1276,6 +1295,10 @@ Zotero.DataObject.prototype._finalizeErase = Zotero.Promise.coroutine(function* 
 	Zotero.DB.addCurrentCallback("commit", function () {
 		this.ObjectsClass.unload(env.deletedObjectIDs || this.id);
 	}.bind(this));
+	
+	if (env.options.skipDeleteLog) {
+		env.notifierData[this.id].skipDeleteLog = true;
+	}
 	
 	if (!env.options.skipNotifier) {
 		Zotero.Notifier.queue(

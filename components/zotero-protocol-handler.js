@@ -34,6 +34,8 @@ const ZOTERO_PROTOCOL_NAME = "Zotero Chrome Extension Protocol";
 
 Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Components.utils.import("resource://gre/modules/NetUtil.jsm");
+Components.utils.import("resource://gre/modules/osfile.jsm")
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -51,6 +53,75 @@ function ZoteroProtocolHandler() {
 	this.wrappedJSObject = this;
 	this._principal = null;
 	this._extensions = {};
+	
+	
+	
+	/**
+	 * zotero://attachment/library/[itemKey]
+	 * zotero://attachment/groups/[groupID]/[itemKey]
+	 */
+	var AttachmentExtension = {
+		loadAsChrome: false,
+		
+		newChannel: function (uri) {
+			return new AsyncChannel(uri, function* () {
+				try {
+					var uriPath = uri.pathQueryRef;
+					if (!uriPath) {
+						return this._errorChannel('Invalid URL');
+					}
+					uriPath = uriPath.substr('//attachment/'.length);
+					
+					var params = {};
+					var router = new Zotero.Router(params);
+					router.add('library/items/:itemKey', function () {
+						params.libraryID = Zotero.Libraries.userLibraryID;
+					});
+					router.add('groups/:groupID/items/:itemKey');
+					router.run(uriPath);
+					
+					if (params.groupID) {
+						params.libraryID = Zotero.Groups.getLibraryIDFromGroupID(params.groupID);
+					}
+					if (!params.itemKey) {
+						return this._errorChannel("Item key not provided");
+					}
+					var item = yield Zotero.Items.getByLibraryAndKeyAsync(params.libraryID, params.itemKey);
+					
+					if (!item) {
+						return this._errorChannel(`No item found for ${uriPath}`);
+					}
+					if (!item.isFileAttachment()) {
+						return this._errorChannel(`Item for ${uriPath} is not a file attachment`);
+					}
+					
+					var path = yield item.getFilePathAsync();
+					if (!path) {
+						return this._errorChannel(`${path} not found`);
+					}
+					
+					// Set originalURI so that it seems like we're serving from zotero:// protocol.
+					// This is necessary to allow url() links to work from within CSS files.
+					// Otherwise they try to link to files on the file:// protocol, which isn't allowed.
+					this.originalURI = uri;
+					
+					return Zotero.File.pathToFile(path);
+				}
+				catch (e) {
+					return this._errorChannel(e.message);
+				}
+			}.bind(this));
+		},
+		
+		
+		_errorChannel: function (msg) {
+			Zotero.logError(msg);
+			this.status = Components.results.NS_ERROR_FAILURE;
+			this.contentType = 'text/plain';
+			return msg;
+		}
+	};
+	
 	
 	
 	/**
@@ -439,7 +510,7 @@ function ZoteroProtocolHandler() {
 					default:
 						this.contentType = 'text/html';
 						return Zotero.Utilities.Internal.getAsyncInputStream(
-							Zotero.Report.HTML.listGenerator(items, combineChildItems),
+							Zotero.Report.HTML.listGenerator(items, combineChildItems, params.libraryID),
 							function () {
 								Zotero.logError(e);
 								return '<span style="color: red; font-weight: bold">Error generating report</span>';
@@ -966,6 +1037,71 @@ function ZoteroProtocolHandler() {
 	};
 	
 	
+	/*
+		zotero://pdf.js/viewer.html
+		zotero://pdf.js/pdf/1/ABCD5678
+	*/
+	var PDFJSExtension = {
+		loadAsChrome: true,
+		
+		newChannel: function (uri) {
+			return new AsyncChannel(uri, function* () {
+				try {
+					uri = uri.spec;
+					// Proxy PDF.js files
+					if (uri.startsWith('zotero://pdf.js/') && !uri.startsWith('zotero://pdf.js/pdf/')) {
+						uri = uri.replace(/zotero:\/\/pdf.js\//, 'resource://zotero/pdf.js/');
+						let newURI = Services.io.newURI(uri, null, null);
+						return this.getURIInputStream(newURI);
+					}
+					
+					// Proxy attachment PDFs
+					var pdfPrefix = 'zotero://pdf.js/pdf/';
+					if (!uri.startsWith(pdfPrefix)) {
+						return this._errorChannel("File not found");
+					}
+					var [libraryID, key] = uri.substr(pdfPrefix.length).split('/');
+					libraryID = parseInt(libraryID);
+					
+					var item = yield Zotero.Items.getByLibraryAndKeyAsync(libraryID, key);
+					if (!item) {
+						return this._errorChannel("Item not found");
+					}
+					var path = yield item.getFilePathAsync();
+					if (!path) {
+						return this._errorChannel("File not found");
+					}
+					return this.getURIInputStream(OS.Path.toFileURI(path));
+				}
+				catch (e) {
+					Zotero.debug(e, 1);
+					throw e;
+				}
+			}.bind(this));
+		},
+		
+		
+		getURIInputStream: function (uri) {
+			return new Zotero.Promise((resolve, reject) => {
+				NetUtil.asyncFetch(uri, function (inputStream, result) {
+					if (!Components.isSuccessCode(result)) {
+						// TODO: Handle error
+						return;
+					}
+					resolve(inputStream);
+				});
+			});
+		},
+		
+		
+		_errorChannel: function (msg) {
+			this.status = Components.results.NS_ERROR_FAILURE;
+			this.contentType = 'text/plain';
+			return msg;
+		}
+	};
+	
+	
 	/**
 	 * Open a PDF at a given page (or try to)
 	 *
@@ -1046,7 +1182,7 @@ function ZoteroProtocolHandler() {
 			var opened = false;
 			if (page) {
 				try {
-					opened = await Zotero.OpenPDF.openToPage(path, page);
+					opened = await Zotero.OpenPDF.openToPage(item, page);
 				}
 				catch (e) {
 					Zotero.logError(e);
@@ -1072,12 +1208,14 @@ function ZoteroProtocolHandler() {
 		}
 	};
 	
+	this._extensions[ZOTERO_SCHEME + "://attachment"] = AttachmentExtension;
 	this._extensions[ZOTERO_SCHEME + "://data"] = DataExtension;
 	this._extensions[ZOTERO_SCHEME + "://report"] = ReportExtension;
 	this._extensions[ZOTERO_SCHEME + "://timeline"] = TimelineExtension;
 	this._extensions[ZOTERO_SCHEME + "://select"] = SelectExtension;
 	this._extensions[ZOTERO_SCHEME + "://debug"] = DebugExtension;
 	this._extensions[ZOTERO_SCHEME + "://connector"] = ConnectorExtension;
+	this._extensions[ZOTERO_SCHEME + "://pdf.js"] = PDFJSExtension;
 	this._extensions[ZOTERO_SCHEME + "://open-pdf"] = OpenPDFExtension;
 }
 
@@ -1121,6 +1259,16 @@ ZoteroProtocolHandler.prototype = {
 	},
 				
 	newURI: function (spec, charset, baseURI) {
+		// A temporary workaround because baseURI.resolve(spec) just returns spec
+		if (baseURI) {
+			if (!spec.includes('://') && baseURI.spec.includes('/pdf.js/')) {
+				let parts = baseURI.spec.split('/');
+				parts.pop();
+				parts.push(spec);
+				spec = parts.join('/');
+			}
+		}
+	
 		return Components.classes["@mozilla.org/network/simple-uri-mutator;1"]
 			.createInstance(Components.interfaces.nsIURIMutator)
 			.setSpec(spec)
@@ -1298,7 +1446,7 @@ AsyncChannel.prototype = {
 				}
 				
 				Components.utils.import("resource://gre/modules/NetUtil.jsm");
-				NetUtil.asyncFetch(data, function (inputStream, status) {
+				NetUtil.asyncFetch({ uri: data, loadUsingSystemPrincipal: true }, function (inputStream, status) {
 					if (!Components.isSuccessCode(status)) {
 						reject();
 						return;

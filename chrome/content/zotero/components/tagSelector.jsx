@@ -59,7 +59,7 @@ class TagSelector extends React.PureComponent {
 						title="zotero.toolbar.actions.label"
 						className="tag-selector-actions"
 						isMenu
-						onClick={ev => this.props.onSettings(ev)}
+						onMouseDown={ev => this.props.onSettings(ev)}
 					/>
 				</div>
 			</div>

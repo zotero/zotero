@@ -183,7 +183,7 @@ Zotero.Tags = new function() {
 		// Not a perfect locale sort, but speeds up the sort in the tag selector later without any
 		// discernible performance cost
 		sql += "ORDER BY name COLLATE NOCASE";
-		var rows = await Zotero.DB.columnQueryAsync(sql, params);
+		var rows = await Zotero.DB.columnQueryAsync(sql, params, { noCache: !!tmpTable || !!tagIDs });
 		return rows.map((row) => {
 			var [tagID, type] = row.split(':');
 			return this.cleanData({
@@ -257,11 +257,15 @@ Zotero.Tags = new function() {
 					// This is ugly, but it's much faster than doing replaceTag() for each item
 					let sql = 'UPDATE OR REPLACE itemTags SET tagID=?, type=0 '
 						+ 'WHERE tagID=? AND itemID IN (' + placeholders + ')';
-					yield Zotero.DB.queryAsync(sql, [newTagID, oldTagID].concat(chunk));
+					yield Zotero.DB.queryAsync(
+						sql, [newTagID, oldTagID].concat(chunk), { noCache: true }
+					);
 					
 					sql = 'UPDATE items SET synced=0, clientDateModified=? '
 						+ 'WHERE itemID IN (' + placeholders + ')'
-					yield Zotero.DB.queryAsync(sql, [Zotero.DB.transactionDateTime].concat(chunk));
+					yield Zotero.DB.queryAsync(
+						sql, [Zotero.DB.transactionDateTime].concat(chunk), { noCache: true }
+					);
 					
 					yield Zotero.Items.reload(oldItemIDs, ['primaryData', 'tags'], true);
 				})
@@ -375,7 +379,7 @@ Zotero.Tags = new function() {
 					}
 					
 					sql = "DELETE FROM itemTags WHERE ROWID IN (" + rowIDs.join(", ") + ")";
-					yield Zotero.DB.queryAsync(sql);
+					yield Zotero.DB.queryAsync(sql, false, { noCache: true });
 					
 					yield this.purge(chunk);
 					
@@ -386,7 +390,9 @@ Zotero.Tags = new function() {
 						async function (chunk) {
 							var sql = 'UPDATE items SET synced=0, clientDateModified=? '
 								+ 'WHERE itemID IN (' + Array(chunk.length).fill('?').join(',') + ')';
-							await Zotero.DB.queryAsync(sql, [Zotero.DB.transactionDateTime].concat(chunk));
+							await Zotero.DB.queryAsync(
+								sql, [Zotero.DB.transactionDateTime].concat(chunk), { noCache: true }
+							);
 							
 							await Zotero.Items.reload(itemIDs, ['primaryData', 'tags'], true);
 						}
@@ -469,7 +475,10 @@ Zotero.Tags = new function() {
 					return Zotero.DB.queryAsync(
 						"INSERT OR IGNORE INTO tagDelete VALUES "
 							+ Array(chunk.length).fill('(?)').join(', '),
-						chunk
+						chunk,
+						{
+							noCache: true
+						}
 					);
 				}
 			);

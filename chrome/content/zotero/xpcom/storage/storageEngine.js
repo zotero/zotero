@@ -292,10 +292,19 @@ Zotero.Sync.Storage.Engine.prototype.start = Zotero.Promise.coroutine(function* 
 })
 
 
-Zotero.Sync.Storage.Engine.prototype.stop = function () {
-	Zotero.debug("Stopping file sync for " + this.library.name);
-	for (let type in this.queues) {
-		this.queues[type].stop();
+/**
+ * @param {String} [queueToStop] - 'upload' or 'download'; if not specified, stop all queues
+ */
+Zotero.Sync.Storage.Engine.prototype.stop = function (queueToStop) {
+	if (queueToStop) {
+		Zotero.debug(`Stopping file sync ${queueToStop} queue for ` + this.library.name);
+		this.queues[queueToStop].stop();
+	}
+	else {
+		Zotero.debug("Stopping file sync for " + this.library.name);
+		for (let type in this.queues) {
+			this.queues[type].stop();
+		}
 	}
 }
 
@@ -330,9 +339,10 @@ Zotero.Sync.Storage.Engine.prototype.queueItem = Zotero.Promise.coroutine(functi
 	this.queues[type].add(() => {
 		var request = new Zotero.Sync.Storage.Request({
 			type,
+			engine: this,
 			libraryID: this.libraryID,
 			name: item.libraryKey,
-			onStart: request => this.controller[fn](request),
+			onStart: request => this.controller[fn](request, this),
 			onStop: () => {
 				this.requestsRemaining--;
 				this.onProgress(this.numRequests - this.requestsRemaining, this.numRequests);

@@ -2,6 +2,7 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/about.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/about.dtd">
 
 <dialog
@@ -16,77 +17,70 @@
 	<script src="include.js"/>
 	
 	<vbox id="aboutcontent">
-		<label id="name" value="Zotero"/>
+		<div xmlns="http://www.w3.org/1999/xhtml">
+			<img id="logo" src="chrome://zotero/skin/zotero.svg" alt="Zotero" />
+		</div>
 		<hbox>
 			<label id="version"/>
-			<label id="changelog" class="zotero-text-link" href="https://www.zotero.org/support/changelog" value="&zotero.whatsNew;"/>
+			<label id="changelog" class="zotero-text-link" value="&zotero.whatsNew;"/>
 		</hbox>
 		<script>
 			document.getElementById('version').textContent = Zotero.version;
 		</script>
-		<hbox>
-			<vbox id="column1">
-				<div id="about-text" xmlns="http://www.w3.org/1999/xhtml">
-					<p id="created-by"></p>
-					<p id="get-involved"></p>
-					<script><![CDATA[
-						// Replace [links] in localized strings with spans with onclick handlers
-						//
-						// TODO: Use helper function in common with intro text in itemTreeView.js
-						document.getElementById('created-by').innerHTML =
-							Zotero.Utilities.htmlSpecialChars(Zotero.getString('about.createdBy'))
-							.replace(
-								/\[([^\]]+)](.+)\[([^\]]+)]/,
-								`<span data-href="https://rrchnm.org/">$1</span>`
-									+ '$2'
-									+ `<span data-href="https://www.zotero.org/support/credits_and_acknowledgments">$3</span>`
-							);
-						
-						document.getElementById('get-involved').innerHTML =
-							Zotero.Utilities.htmlSpecialChars(Zotero.getString('about.getInvolved'))
-							.replace(
-								/\[([^\]]+)]/,
-								`<span data-href="https://www.zotero.org/getinvolved/">$1</span>`
-							);
-						
-						// Activate text links
-						for (let span of document.getElementById('about-text').getElementsByTagName('span')) {
-							span.className = 'text-link';
-							span.onclick = function () {
-								Zotero.launchURL(this.getAttribute('data-href'));
-							};
-						}
-					]]></script>
-				</div>
-				<label class="subhead" value="&zotero.thanks;"/>
-				<vbox class="subcontent">
-					<label class="zotero-text-link" href="http://www.mellon.org/" value="Andrew W. Mellon Foundation"/>
-					<label class="zotero-text-link" href="http://www.imls.gov/" value="Institute of Museum and Library Services"/>
-					<label class="zotero-text-link" href="http://www.sloan.org/" value="Alfred P. Sloan Foundation"/>
-				</vbox>
-			</vbox>
-			<vbox id="column2">
-				<label class="subhead" value="&zotero.citationProcessing;"/>
-				<vbox class="subcontent">
-					<label class="zotero-text-link" href="http://citationstyles.org/" value="Citation Style Language"/>
-					<label class="zotero-text-link" href="https://github.com/Juris-M/citeproc-js" value="citeproc-js (Frank Bennett)"/>
-				</vbox>
-				<label class="subhead" value="&zotero.about.additionalSoftware;"/>
-				<vbox class="subcontent">
-					<label class="zotero-text-link" href="https://ace.c9.io/" value="ACE Editor (translator code editor)"/>
-					<label class="zotero-text-link" href="http://bluebirdjs.com/" value="Bluebird"/>
-					<label class="zotero-text-link" href="http://p.yusukekamiyamane.com/" value="Fugue icons (by Yusuke Kamiyamane)"/>
-					<label class="zotero-text-link" href="http://www.davidashen.net/rnv.html" value="RNV (CSL validation)"/>
-					<label class="zotero-text-link" href="https://codefisher.org/pastel-svg/" value="Pastel SVG icons (by Michael Buckley)"/>
-					<label class="zotero-text-link" href="http://www.famfamfam.com/lab/icons/silk/" value="Silk icons (by Mark James)"/>
-					<label class="zotero-text-link" href="http://simile.mit.edu/timeline/" value="SIMILE Project (Timeline)"/>
-					<label class="zotero-text-link" href="https://github.com/gildas-lormeau/SingleFile" value="SingleFile (webpage snapshots)"/>
-					<label class="zotero-text-link" href="http://www.w3.org/2005/ajar/tab" value="Tabulator (RDF parser)"/>
-					<label class="zotero-text-link" href="http://tango.freedesktop.org/Tango_Desktop_Project" value="Tango Desktop Project (pref icons)"/>
-					<label class="zotero-text-link" href="https://www.tinymce.com/" value="TinyMCE (rich-text editing)"/>
-					<label class="zotero-text-link" href="http://www.foolabs.com/xpdf/" value="Xpdf (pdftotext)"/>
-				</vbox>
-			</vbox>
-		</hbox>
+		<vbox>
+			<div id="about-text" xmlns="http://www.w3.org/1999/xhtml">
+				<p id="created-by"></p>
+				<p id="third-party-software"></p>
+				<p id="get-involved"></p>
+				<script><![CDATA[
+					Components.utils.import("resource://zotero/config.js");
+					
+					document.getElementById('changelog').href = ZOTERO_CONFIG.CHANGELOG_URL;
+					
+					// Replace [links] in localized strings with spans with onclick handlers
+					//
+					// TODO: Use helper function in common with intro text in itemTreeView.js
+					document.getElementById('created-by').innerHTML =
+						Zotero.Utilities.htmlSpecialChars(
+							Zotero.getString(
+								'about.createdBy',
+								[Zotero.appName, `[${ZOTERO_CONFIG.PRODUCER}]`]
+							),
+						)
+						.replace(
+							/\[([^\]]+)](.+)\[([^\]]+)]/,
+							`<span data-href="${ZOTERO_CONFIG.PRODUCER_URL}">$1</span>`
+								+ '$2'
+								+ `<span data-href="${ZOTERO_CONFIG.CREDITS_URL}">$3</span>`
+						);
+					
+					document.getElementById('third-party-software').innerHTML =
+						Zotero.Utilities.htmlSpecialChars(
+							Zotero.getString('about.openSource', Zotero.appName)
+						)
+						.replace(
+							/\[([^\]]+)](.+)\[([^\]]+)]/,
+							`<span data-href="${ZOTERO_CONFIG.LICENSING_URL}">$1</span>`
+								+ '$2'
+								+ `<span data-href="${ZOTERO_CONFIG.CREDITS_URL}#third-party_software">$3</span>`
+						);
+					
+					document.getElementById('get-involved').innerHTML =
+						Zotero.Utilities.htmlSpecialChars(Zotero.getString('about.getInvolved'))
+						.replace(
+							/\[([^\]]+)]/,
+							`<span data-href="${ZOTERO_CONFIG.GET_INVOLVED_URL}">$1</span>`
+						);
+					
+					// Activate text links
+					for (let span of document.getElementById('about-text').getElementsByTagName('span')) {
+						span.className = 'text-link';
+						span.onclick = function () {
+							Zotero.launchURL(this.getAttribute('data-href'));
+						};
+					}
+				]]></script>
+			</div>
+		</vbox>
 	</vbox>
 </dialog>

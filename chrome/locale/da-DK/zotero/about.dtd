@@ -6,8 +6,7 @@
 <!ENTITY zotero.developers "Udviklere:">
 <!ENTITY zotero.alumni "Alumner:">
 <!ENTITY zotero.about.localizations "Tilpasning til lokale forhold:">
-<!ENTITY zotero.about.additionalSoftware "Tredjepartsprogrammer og standarder:">
-<!ENTITY zotero.executiveProducer "Producent:">
+<!ENTITY zotero.about.additionalSoftware "Third-Party Software:">
 <!ENTITY zotero.thanks "Særlig tak til:">
 <!ENTITY zotero.about.close "Luk">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Flere anerkendelser">

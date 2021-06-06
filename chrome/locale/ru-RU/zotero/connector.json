@@ -2,6 +2,9 @@
   "general_more": {
     "message": "Еще…"
   },
+  "general_moreInfo": {
+    "message": "Дополнительные сведения…"
+  },
   "general_done": {
     "message": "Завершено"
   },
@@ -16,6 +19,9 @@
   },
   "general_pleaseWait": {
     "message": "Пожалуйста, подождите…"
+  },
+  "general_copyToClipboard": {
+    "message": "Скопировать в буфер обмена"
   },
   "progressWindow_savingTo": {
     "message": "Сохранение в"
@@ -56,6 +62,15 @@
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Разрешить сохранение в онлайн-библиотеку"
   },
+  "reports_report_submitted": {
+    "message": "Отчет об ошибке был отправлен.\n\nID отчета: $1\n\nПожалуйста, сообщайте этот идентификатор, опсание проблемы и шаги для ее воспроизведения в сообщениях на формах Zotero.\n\nОтчета об ошибках не будут рассмотрена без ссылки на сообщение в форуме."
+  },
+  "reports_debug_output_submitted": {
+    "message": "Отладочный вывод был отправлен.\n\nID сообщения — $1."
+  },
+  "reports_submission_failed": {
+    "message": "Произошла ошибка при отправка отчета.\n\n$1\n\nПожауйста проверьте соединение с сетью Internet. Если проблему не удстяся исправить, напишите сообщение на форуме Zotero."
+  },
   "integration_error_clientUpgrade": {
     "message": "Веб-цитирование требует $1 или более позднюю."
   },
@@ -76,6 +91,18 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "Интеграция с $1 не доступна при редактировании Microsoft Word .docx-файлов непосредственно в Google Docs. Выберите пункт меню «Файл» → «Сохранить как Google Docs », чтобы воспользоваться данной функциональностью.<br/><br/>Если вы переместили документ Word с  $1-цитированием на Google Docs, смотрите раздел <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Перемещение документов между текстовыми редакторами</a>."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "Показать отвязанные $1 цитирования"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "Цитирование, которое вы пытаетесь отредактировать, было отвязано от $1."
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Исправить цитирование"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "Это цитирование было <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">отвязано от $1</a>. Вы должны его исправить чтобы изменения появились в библиографии."
   },
   "general_saveTo": {
     "message": "Сохранить в $1"

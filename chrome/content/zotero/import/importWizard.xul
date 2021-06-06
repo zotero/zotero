@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/importWizard.css" type="text/css"?>
 
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
@@ -21,8 +22,20 @@
 			onpageadvanced="Zotero_Import_Wizard.onModeChosen(); return false;">
 		<radiogroup id="import-source">
 			<radio id="radio-import-source-file" label="&zotero.import.source.file;"/>
-			<radio id="radio-import-source-mendeley" label="Mendeley" hidden="true"/>
+			<radio id="radio-import-source-mendeley-online"/>
+			<radio id="radio-import-source-mendeley" hidden="true"/>
 		</radiogroup>
+	</wizardpage>
+
+	<wizardpage
+		next="page-options"
+		pageid="mendeley-online-explanation"
+		onpageshow="Zotero_Import_Wizard.onMendeleyOnlineShow()"
+		onpageadvanced="Zotero_Import_Wizard.onMendeleyOnlineAdvance(); return false;"
+		onpagerewound="return Zotero_Import_Wizard.goToStart()"
+	>
+		<description id="mendeley-online-description" />
+		<description id="mendeley-online-description2" />
 	</wizardpage>
 	
 	<wizardpage pageid="page-file-list"
@@ -63,7 +76,6 @@
 			</radiogroup>
 			<description id="file-handling-description"/>
 		</vbox>
-		
 	</wizardpage>
 	
 	<wizardpage pageid="page-progress"

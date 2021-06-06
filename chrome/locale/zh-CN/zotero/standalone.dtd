@@ -44,6 +44,9 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
+<!ENTITY goMenu.label "Go">
+
+
 <!ENTITY viewMenu.label "查看">
 <!ENTITY layout.label "布局">
 <!ENTITY standardView.label "标准视图">

@@ -1,9 +1,9 @@
-<!ENTITY preferencesCmdMac.label "Preferenze...">
+<!ENTITY preferencesCmdMac.label "Preferenze…">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "Servizi">
 <!ENTITY hideThisAppCmdMac.label "Nascondi &brandShortName;">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
-<!ENTITY hideOtherAppsCmdMac.label "Nascondi altri">
+<!ENTITY hideOtherAppsCmdMac.label "Nascondi gli altri">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
 <!ENTITY showAllAppsCmdMac.label "Mostra tutti">
 <!ENTITY quitApplicationCmdMac.label "Esci da Zotero">
@@ -12,22 +12,22 @@
 
 <!ENTITY fileMenu.label "File">
 <!ENTITY fileMenu.accesskey "F">
-<!ENTITY saveCmd.label "Salva...">
+<!ENTITY saveCmd.label "Salva…">
 <!ENTITY saveCmd.key "S">
 <!ENTITY saveCmd.accesskey "A">
-<!ENTITY pageSetupCmd.label "Impostazione pagina...">
+<!ENTITY pageSetupCmd.label "Impostazione pagina…">
 <!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY printCmd.label "Stampa...">
+<!ENTITY printCmd.label "Stampa…">
 <!ENTITY printCmd.key "P">
 <!ENTITY printCmd.accesskey "P">
 <!ENTITY closeCmd.label "Chiudi">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Gestisci allegati">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
-<!ENTITY importCmd.label "Importa...">
+<!ENTITY manageAttachments.label "Gestisci gli allegati">
+<!ENTITY convertToStored.label "Converti i file collegati in file archiviati…">
+<!ENTITY importCmd.label "Importa…">
 <!ENTITY importCmd.key "I">
-<!ENTITY importFromClipboardCmd.label "Importa dalla Clipboard">
+<!ENTITY importFromClipboardCmd.label "Importa dagli appunti">
 <!ENTITY quitApplicationCmdWin.label "Esci">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "Abbandona">
@@ -37,28 +37,31 @@
 <!ENTITY copyCitationCmd.label "Copia la citazione">
 <!ENTITY copyBibliographyCmd.label "Copia la bibliografia">
 
-<!ENTITY bidiSwitchPageDirectionItem.label "Inverti l'orientamento di pagina">
+<!ENTITY bidiSwitchPageDirectionItem.label "Inverti l'orientamento della pagina">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
 <!ENTITY bidiSwitchTextDirectionItem.label "Inverti la direzione del testo">
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
+<!ENTITY goMenu.label "Go">
+
+
 <!ENTITY viewMenu.label "Aspetto">
 <!ENTITY layout.label "Disposizione">
 <!ENTITY standardView.label "Aspetto standard">
 <!ENTITY stackedView.label "Aspetto a catasta">
-<!ENTITY collectionsPane.label "Pannello delle collezioni">
-<!ENTITY itemPane.label "Pannello dell'oggetto">
+<!ENTITY collectionsPane.label "Riquadro delle sezioni">
+<!ENTITY itemPane.label "Riquadro dell'elemento">
 <!ENTITY tagSelector.label "Selettore dei tag">
-<!ENTITY recursiveCollections.label "Mostra oggetti dalle collezioni secondarie">
-<!ENTITY fontSize.label "Dimensione caratteri">
-<!ENTITY noteFontSize.label "Dimensione caratteri delle note">
+<!ENTITY recursiveCollections.label "Mostra gli oggetti delle sottosezioni">
+<!ENTITY fontSize.label "Dimensione del font">
+<!ENTITY noteFontSize.label "Dimensione del font nelle note">
 
 
 <!ENTITY toolsMenu.label "Strumenti">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Installa il Connettore per il browser">
+<!ENTITY installConnector.label "Installa il connettore per il browser">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Estensioni">
 <!ENTITY developer.label "Sviluppatore">
@@ -80,22 +83,22 @@
 <!ENTITY helpMac.commandkey "?">
 <!ENTITY aboutProduct.label "Informazioni su &brandShortName;">
 <!ENTITY aboutProduct.accesskey "A">
-<!ENTITY productHelp.label "Supporto e Documentazione">
+<!ENTITY productHelp.label "Supporto e documentazione">
 <!ENTITY productHelp.accesskey "H">
-<!ENTITY helpTroubleshootingInfo.label "Informazioni di risoluzione dei problemi">
+<!ENTITY helpTroubleshootingInfo.label "Informazioni sulla risoluzione dei problemi">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
 <!ENTITY helpFeedbackPage.label "Forum di discussione">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Segnala errori...">
+<!ENTITY helpReportErrors.label "Segnala errori e bug…">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug dell'output di logging">
+<!ENTITY debugOutputLogging.label "Registro dei messaggi di debug">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Invia l'output">
-<!ENTITY debugOutputLogging.view "Vedi l'output">
-<!ENTITY debugOutputLogging.clear "Cancella l'output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Riavvia con il logging abilitato...">
+<!ENTITY debugOutputLogging.submit "Invia il messaggio di debug">
+<!ENTITY debugOutputLogging.view "Vedi il messaggio di debug">
+<!ENTITY debugOutputLogging.clear "Elimina il messaggio di debug">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Riavvia con registro abilitato…">
 
-<!ENTITY helpCheckForUpdates.label "Controlla gli aggiornamenti...">
+<!ENTITY helpCheckForUpdates.label "Controlla gli aggiornamenti…">
 <!ENTITY helpCheckForUpdates.accesskey "U">

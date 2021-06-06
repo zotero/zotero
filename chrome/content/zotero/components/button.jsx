@@ -44,13 +44,6 @@ ButtonGroup.propTypes = {
 }
 
 class Button extends PureComponent {
-	componentDidMount() {
-		if (!Zotero.isNode && this.title) {
-			// Workaround for XUL tooltips
-			this.container.setAttribute('tooltiptext', this.title);
-		}
-	}
-
 	get classes() {
 		return ['btn', this.props.className, `btn-${this.props.size}`, {
 			'btn-icon': this.props.icon != null,
@@ -99,8 +92,23 @@ class Button extends PureComponent {
 		}
 
 		if (!this.props.isDisabled) {
-			attr.onMouseDown = this.handleMouseDown
+			attr.onMouseDown = (event) => {
+				// Hide tooltip on mousedown
+				if (this.title) {
+					window.Zotero_Tooltip.stop();
+				}
+				return this.handleMouseDown(event);
+			};
 			attr.onClick = this.handleClick
+			// Fake tooltip behavior as long as 'title' doesn't work for HTML-in-XUL elements
+			if (this.title) {
+				attr.onMouseOver = () => {
+					window.Zotero_Tooltip.start(this.title);
+				};
+				attr.onMouseOut = () => {
+					window.Zotero_Tooltip.stop();
+				};
+			}
 		}
 
 		return attr

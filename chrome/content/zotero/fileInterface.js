@@ -23,7 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
-Components.utils.import("resource://gre/modules/osfile.jsm")
+Components.utils.import("resource://gre/modules/osfile.jsm");
+Components.utils.import("resource://gre/modules/Services.jsm");
 import FilePicker from 'zotero/filePicker';
 
 /****Zotero_File_Exporter****
@@ -266,7 +267,7 @@ var Zotero_File_Interface = new function() {
 	};
 	
 	
-	this.showImportWizard = function () {
+	this.showImportWizard = function (extraArgs = {}) {
 		var libraryID = Zotero.Libraries.userLibraryID;
 		try {
 			let zp = Zotero.getActiveZoteroPane();
@@ -276,7 +277,8 @@ var Zotero_File_Interface = new function() {
 			Zotero.logError(e);
 		}
 		var args = {
-			libraryID
+			libraryID,
+			...extraArgs
 		};
 		args.wrappedJSObject = args;
 		
@@ -329,30 +331,39 @@ var Zotero_File_Interface = new function() {
 		var defaultNewCollectionPrefix = Zotero.getString("fileInterface.imported");
 		
 		var translation;
-		// Check if the file is an SQLite database
-		var sample = yield Zotero.File.getSample(file.path);
-		if (file.path == Zotero.DataDirectory.getDatabase()) {
-			// Blacklist the current Zotero database, which would cause a hang
-		}
-		else if (Zotero.MIME.sniffForMIMEType(sample) == 'application/x-sqlite3') {
-			// Mendeley import doesn't use the real translation architecture, but we create a
-			// translation object with the same interface
+		
+		if (options.mendeleyCode) {
 			translation = yield _getMendeleyTranslation();
 			translation.createNewCollection = createNewCollection;
-			defaultNewCollectionPrefix = Zotero.getString(
-				'fileInterface.appImportCollection', 'Mendeley'
-			);
+			translation.mendeleyCode = options.mendeleyCode;
 		}
-		else if (file.path.endsWith('@www.mendeley.com.sqlite')
-				|| file.path.endsWith('online.sqlite')) {
-			// Keep in sync with importWizard.js
-			throw new Error('Encrypted Mendeley database');
+		else {
+			// Check if the file is an SQLite database
+			var sample = yield Zotero.File.getSample(file.path);
+			if (file.path == Zotero.DataDirectory.getDatabase()) {
+				// Blacklist the current Zotero database, which would cause a hang
+			}
+			else if (Zotero.MIME.sniffForMIMEType(sample) == 'application/x-sqlite3') {
+				// Mendeley import doesn't use the real translation architecture, but we create a
+				// translation object with the same interface
+				translation = yield _getMendeleyTranslation();
+				translation.createNewCollection = createNewCollection;
+				defaultNewCollectionPrefix = Zotero.getString(
+					'fileInterface.appImportCollection', 'Mendeley'
+				);
+			}
+			else if (file.path.endsWith('@www.mendeley.com.sqlite')
+					|| file.path.endsWith('online.sqlite')) {
+				// Keep in sync with importWizard.js
+				throw new Error('Encrypted Mendeley database');
+			}
+			
+			if (!translation) {
+				translation = new Zotero.Translate.Import();
+			}
+			translation.setLocation(file);
 		}
-		
-		if (!translation) {
-			translation = new Zotero.Translate.Import();
-		}
-		translation.setLocation(file);
+
 		return _finishImport({
 			translation,
 			createNewCollection,
@@ -592,7 +603,7 @@ var Zotero_File_Interface = new function() {
 			eval(xmlhttp.response);
 		}
 		return new Zotero_Import_Mendeley();
-	}
+	};
 	
 	
 	/**
@@ -849,7 +860,72 @@ var Zotero_File_Interface = new function() {
 			return false;
 		}
 	}
-}
+
+	this.authenticateMendeleyOnlinePoll = function (win) {
+		if (win && win[0] && win[0].location) {
+			const matchResult = win[0].location.toString().match(/(?:\?|&)code=(.*?)(?:&|$)/i);
+			if (matchResult) {
+				const mendeleyCode = matchResult[1];
+				Zotero.getMainWindow().setTimeout(() => this.showImportWizard({ mendeleyCode }), 0);
+				
+				// Clear all cookies to remove access
+				//
+				// This includes unrelated cookies in the central cookie store, but that's fine for
+				// the moment, since we're not purposely using cookies for anything else.
+				//
+				// TODO: Switch to removeAllSince() once >Fx60
+				try {
+					Cc["@mozilla.org/cookiemanager;1"]
+						.getService(Ci.nsICookieManager)
+						.removeAll();
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+				
+				win.close();
+				return;
+			}
+		}
+
+		if (win && !win.closed) {
+			Zotero.getMainWindow().setTimeout(this.authenticateMendeleyOnlinePoll.bind(this, win), 200);
+		}
+	};
+
+	this.authenticateMendeleyOnline = function () {
+		const uri = `https://api.mendeley.com/oauth/authorize?client_id=5907&redirect_uri=https%3A%2F%2Fzotero-static.s3.amazonaws.com%2Fmendeley_oauth_redirect.html&response_type=code&state=&scope=all`;
+		var win = Services.wm.getMostRecentWindow("zotero:basicViewer");
+		if (win) {
+			win.loadURI(uri);
+		}
+		else {
+			const ww = Services.ww;
+			const arg = Components.classes["@mozilla.org/supports-string;1"]
+				.createInstance(Components.interfaces.nsISupportsString);
+			arg.data = uri;
+			win = ww.openWindow(null, "chrome://zotero/content/standalone/basicViewer.xul",
+				"basicViewer", "chrome,dialog=yes,resizable,centerscreen,menubar,scrollbars", arg);
+		}
+
+		let browser;
+		let func = function () {
+			win.removeEventListener("load", func);
+			browser = win.document.documentElement.getElementsByTagName('browser')[0];
+			browser.addEventListener("pageshow", innerFunc);
+		};
+		let innerFunc = function () {
+			browser.removeEventListener("pageshow", innerFunc);
+			win.outerWidth = Math.max(640, Math.min(1000, win.screen.availHeight));
+			win.outerHeight = Math.max(480, Math.min(800, win.screen.availWidth));
+		};
+
+		win.addEventListener("load", func);
+
+		// polling executed by the main window because current (wizard) window will be closed
+		Zotero.getMainWindow().setTimeout(this.authenticateMendeleyOnlinePoll.bind(this, win), 200);
+	};
+};
 
 // Handles the display of a progress indicator
 Zotero_File_Interface.Progress = new function() {

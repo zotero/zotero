@@ -80,6 +80,15 @@ $clicky-active-color: $shade-0;
 // Components
 // --------------------------------------------------
 
+// Toolbar
+$toolbar-background-color: #f6f6f6;
+$toolbar-border-color: darkgray;
+$toolbar-border: .5px solid $toolbar-border-color;
+
+// Tab bar
+$tab-border: $toolbar-border;
+$tab-background-color-selected: #678AC5;
+
 // Icon
 $icon-color: $secondary;
 $icon-active-color: $shade-9;

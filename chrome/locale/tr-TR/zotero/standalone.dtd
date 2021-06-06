@@ -44,6 +44,9 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
+<!ENTITY goMenu.label "Go">
+
+
 <!ENTITY viewMenu.label "Görünüm">
 <!ENTITY layout.label "Yerleşim">
 <!ENTITY standardView.label "Normal Görünüm">

@@ -10,6 +10,7 @@ var map = {
 			EncyclopediaArticle: "encyclopediaArticle",
 			Film: "film",
 			Generic: "document",
+			Hearing: "hearing",
 			JournalArticle: "journalArticle",
 			MagazineArticle: "magazineArticle",
 			NewspaperArticle: "newspaperArticle",

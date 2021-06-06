@@ -1,8 +1,8 @@
-#tags-pane {
+.tags-pane {
 	display: flex;
 }
 
-#tags-box-container {
+.tags-box-container {
 	flex-grow: 1;
 	display: flex;
 }
@@ -14,7 +14,11 @@
 	$li-side-margin: 6px;
 	
 	flex-grow: 1;
-	width: 330px;
+	//width: 330px;
+	
+	// This is necessary for XUL layout to prevent children
+	// container to force its height for the parent
+	height: 0;
 	
 	.tags-box-header {
 		display: flex;
@@ -40,7 +44,6 @@
 		list-style: none;
 		margin: 0;
 		padding: 2px 0 0; // Leave space for textbox border on top tag
-		overflow-y: auto;
 	}
 	
 	ul.tags-box-list > li {
@@ -61,7 +64,7 @@
 	.editable-container {
 		flex-grow: 1;
 		margin: 0 2px;
-		width: $item-pane-width - $icon-width - $delete-button-width - ($li-side-margin * 2);
+		//width: $item-pane-width - $icon-width - $delete-button-width - ($li-side-margin * 2);
 	}
 	
 	ul.tags-box-list > li:not(.multiline) .editable-container {

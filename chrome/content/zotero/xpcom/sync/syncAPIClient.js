@@ -35,6 +35,7 @@ Zotero.Sync.APIClient = function (options) {
 	this.baseURL = options.baseURL;
 	this.apiVersion = options.apiVersion;
 	this.apiKey = options.apiKey;
+	this.schemaVersion = options.schemaVersion || Zotero.Schema.globalSchemaVersion;
 	this.caller = options.caller;
 	this.debugUploadPolicy = Zotero.Prefs.get('sync.debugUploadPolicy');
 	this.cancellerReceiver = options.cancellerReceiver;
@@ -46,7 +47,7 @@ Zotero.Sync.APIClient = function (options) {
 Zotero.Sync.APIClient.prototype = {
 	MAX_OBJECTS_PER_REQUEST: 100,
 	MIN_GZIP_SIZE: 1000,
-	UPLOAD_TIMEOUT: 60000,
+	UPLOAD_TIMEOUT: 120000,
 	
 	
 	getKeyInfo: Zotero.Promise.coroutine(function* (options={}) {
@@ -298,7 +299,6 @@ Zotero.Sync.APIClient.prototype = {
 			target: objectTypePlural,
 			libraryType: libraryType,
 			libraryTypeID: libraryTypeID,
-			format: 'json'
 		};
 		params[objectType + "Key"] = objectKeys.join(",");
 		if (objectType == 'item') {
@@ -617,6 +617,7 @@ Zotero.Sync.APIClient.prototype = {
 		if (this.apiKey) {
 			newHeaders["Zotero-API-Key"] = this.apiKey;
 		}
+		newHeaders["Zotero-Schema-Version"] = this.schemaVersion;
 		return newHeaders;
 	},
 	

@@ -652,7 +652,7 @@
 					
 					for (var i=0; i<itemTypes.length; i++) {
 						var name = itemTypes[i].name;
-						if (name != 'attachment' && name != 'note') {
+						if (name != 'attachment' && name != 'note' && name != 'annotation') {
 							this.itemTypeMenu.appendItem(itemTypes[i].localized, itemTypes[i].id);
 						}
 					}

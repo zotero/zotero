@@ -169,6 +169,17 @@ Zotero.SearchConditions = new function(){
 			},
 			
 			{
+				name: 'quicksearch-titleCreatorYearNote',
+				operators: {
+					is: true,
+					isNot: true,
+					contains: true,
+					doesNotContain: true
+				},
+				noLoad: true
+			},
+			
+			{
 				name: 'quicksearch-fields',
 				operators: {
 					is: true,
@@ -490,13 +501,25 @@ Zotero.SearchConditions = new function(){
 			},
 			
 			{
-				name: 'annotation',
+				name: 'annotationText',
 				operators: {
 					contains: true,
 					doesNotContain: true
 				},
-				table: 'annotations',
-				field: 'text'
+				table: 'itemAnnotations',
+				field: 'text',
+				special: true,
+			},
+			
+			{
+				name: 'annotationComment',
+				operators: {
+					contains: true,
+					doesNotContain: true
+				},
+				table: 'itemAnnotations',
+				field: 'comment',
+				special: true,
 			},
 			
 			{

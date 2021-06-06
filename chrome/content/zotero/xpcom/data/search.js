@@ -306,14 +306,19 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 		var parts = Zotero.SearchConditions.parseSearchString(value);
 		
 		for (let part of parts) {
-			this.addCondition('blockStart');
+			if (condition == 'quicksearch-titleCreatorYearNote') {
+				this.addCondition('note', operator, part.text, false);
+				continue;
+			}
 			
+			this.addCondition('blockStart');
+
 			// Allow searching for exact object key
 			if (operator == 'contains' && Zotero.Utilities.isValidObjectKey(part.text)) {
 				this.addCondition('key', 'is', part.text, false);
 			}
-			
-			if (condition == 'quicksearch-titleCreatorYear') {
+
+			if (condition.startsWith('quicksearch-titleCreatorYear')) {
 				this.addCondition('title', operator, part.text, false);
 				this.addCondition('publicationTitle', operator, part.text, false);
 				this.addCondition('shortTitle', operator, part.text, false);
@@ -328,7 +333,8 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 			this.addCondition('creator', operator, part.text, false);
 			
 			if (condition == 'quicksearch-everything') {
-				this.addCondition('annotation', operator, part.text, false);
+				this.addCondition('annotationText', operator, part.text, false);
+				this.addCondition('annotationComment', operator, part.text, false);
 				
 				if (part.inQuotes) {
 					this.addCondition('fulltextContent', operator, part.text, false);
@@ -346,6 +352,9 @@ Zotero.Search.prototype.addCondition = function (condition, operator, value, req
 		
 		if (condition == 'quicksearch-titleCreatorYear') {
 			this.addCondition('noChildren', 'true');
+		}
+		else if (condition == 'quicksearch-titleCreatorYearNote') {
+			this.addCondition('itemType', 'is', 'note');
 		}
 		
 		return false;
@@ -595,9 +604,9 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 				tmpTable = "tmpSearchResults_" + Zotero.randomString(8);
 				var sql = "CREATE TEMPORARY TABLE " + tmpTable + " AS "
 					+ (yield this._scope.getSQL());
-				yield Zotero.DB.queryAsync(sql, yield this._scope.getSQLParams());
+				yield Zotero.DB.queryAsync(sql, yield this._scope.getSQLParams(), { noCache: true });
 				var sql = "CREATE INDEX " + tmpTable + "_itemID ON " + tmpTable + "(itemID)";
-				yield Zotero.DB.queryAsync(sql);
+				yield Zotero.DB.queryAsync(sql, false, { noCache: true });
 			}
 			
 			// Search ids in temp table
@@ -613,7 +622,7 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 			}
 			sql += ")";
 			
-			var res = yield Zotero.DB.valueQueryAsync(sql, this._sqlParams);
+			var res = yield Zotero.DB.valueQueryAsync(sql, this._sqlParams, { noCache: true });
 			var ids = res ? res.split(",").map(id => parseInt(id)) : [];
 			/*
 			// DEBUG: Should this be here?
@@ -627,7 +636,7 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 		}
 		// Or just run main search
 		else {
-			var ids = yield Zotero.DB.columnQueryAsync(this._sql, this._sqlParams);
+			var ids = yield Zotero.DB.columnQueryAsync(this._sql, this._sqlParams, { noCache: true });
 		}
 		
 		//Zotero.debug('IDs from main search or subsearch: ');
@@ -671,9 +680,9 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 					if (this.libraryID) {
 						sql += " AND libraryID=?";
 					}
-					let res = yield Zotero.DB.valueQueryAsync(sql, this.libraryID);
+					let res = yield Zotero.DB.valueQueryAsync(sql, this.libraryID, { noCache: true });
 					scopeIDs = res ? res.split(",").map(id => parseInt(id)) : [];
-					yield Zotero.DB.queryAsync("DROP TABLE " + tmpTable);
+					yield Zotero.DB.queryAsync("DROP TABLE " + tmpTable, false, { noCache: true });
 				}
 				// In ALL mode, include remaining items from the main search
 				else {
@@ -788,7 +797,7 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 			}
 			
 			sql = "SELECT GROUP_CONCAT(itemID) FROM items WHERE itemID IN (" + sql + ")";
-			var res = yield Zotero.DB.valueQueryAsync(sql);
+			var res = yield Zotero.DB.valueQueryAsync(sql, false, { noCache: true });
 			var parentChildIDs = res ? res.split(",").map(id => parseInt(id)) : [];
 			
 			// Add parents and children to main ids
@@ -801,7 +810,7 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 	}
 	finally {
 		if (tmpTable && !asTempTable) {
-			yield Zotero.DB.queryAsync("DROP TABLE IF EXISTS " + tmpTable);
+			yield Zotero.DB.queryAsync("DROP TABLE IF EXISTS " + tmpTable, false, { noCache: true });
 		}
 	}
 	
@@ -924,9 +933,15 @@ Zotero.Search.idsToTempTable = Zotero.Promise.coroutine(function* (ids) {
 	else {
 		sql += " (itemID INTEGER PRIMARY KEY)";
 	}
-	yield Zotero.DB.queryAsync(sql, false, { debug: false });
+	yield Zotero.DB.queryAsync(sql, false, { debug: false, noCache: true });
 	if (ids.length) {
-		yield Zotero.DB.queryAsync(`CREATE UNIQUE INDEX ${tmpTable}_itemID ON ${tmpTable}(itemID)`);
+		yield Zotero.DB.queryAsync(
+			`CREATE UNIQUE INDEX ${tmpTable}_itemID ON ${tmpTable}(itemID)`,
+			false,
+			{
+				noCache: true
+			}
+		);
 	}
 	
 	return tmpTable;

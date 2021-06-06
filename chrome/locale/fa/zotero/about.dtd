@@ -6,8 +6,7 @@
 <!ENTITY zotero.developers "توسعه‌دهندگان:">
 <!ENTITY zotero.alumni "فارغ‌التحصیلان:">
 <!ENTITY zotero.about.localizations "محلی‌سازی:">
-<!ENTITY zotero.about.additionalSoftware "نرم‌افزارها و استاندارهای شخص سوم">
-<!ENTITY zotero.executiveProducer "مدیر اجرایی:">
+<!ENTITY zotero.about.additionalSoftware "Third-Party Software:">
 <!ENTITY zotero.thanks "تشکر ویژه از:">
 <!ENTITY zotero.about.close "بستن">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "سایر همکاران و سپاسگزاری">

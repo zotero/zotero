@@ -1,4 +1,44 @@
 describe("Zotero.CachedTypes", function() {
+	describe("Zotero.ItemTypes", function () {
+		describe("#getPrimaryTypes()", function () {
+			it("should return an array of objects with 'id' and 'name' properties", function () {
+				var types = Zotero.ItemTypes.getPrimaryTypes();
+				assert.lengthOf(types, 5);
+				for (let type of types) {
+					assert.property(type, 'id');
+					assert.property(type, 'name');
+				}
+			});
+			
+			it("shouldn't include 'webpage'", function () {
+				assert.notInclude(Zotero.ItemTypes.getPrimaryTypes().map(x => x.name), 'webpage');
+			});
+			
+			it("shouldn't include 'attachment'", function () {
+				assert.notInclude(Zotero.ItemTypes.getPrimaryTypes().map(x => x.name), 'attachment');
+			});
+		});
+		
+		describe("#getSecondaryTypes()", function () {
+			it("should return an array of objects with 'id' and 'name' properties", function () {
+				var types = Zotero.ItemTypes.getSecondaryTypes();
+				assert.isAbove(types.length, 5);
+				for (let type of types) {
+					assert.property(type, 'id');
+					assert.property(type, 'name');
+				}
+			});
+			
+			it("shouldn't include 'webpage'", function () {
+				assert.notInclude(Zotero.ItemTypes.getSecondaryTypes().map(x => x.name), 'webpage');
+			});
+			
+			it("shouldn't include 'attachment'", function () {
+				assert.notInclude(Zotero.ItemTypes.getPrimaryTypes().map(x => x.name), 'attachment');
+			});
+		});
+	});
+	
 	describe("Zotero.CharacterSets", function() {
 		describe("#toCanonical()", function() {
 			let toCanon = Zotero.CharacterSets.toCanonical.bind(Zotero.CharacterSets);
