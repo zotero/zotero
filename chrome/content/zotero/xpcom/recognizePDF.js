@@ -596,35 +596,35 @@ Zotero.RecognizePDF = new function () {
 	}
 
 	/**
-	 * Tries to extract DOI from a file name
-	 * @param {String} fileName - File name to examine
+	 * Tries to extract DOI from a filename
+	 * @param {String} fileName - Filename to examine
 	 * @return {String} - Found DOI or null if nothing found.
 	 */
 	function _extractDOIFromFileName(fileName) {
 		// Strip off file extension
 		let strippedName = fileName.substring(0, fileName.lastIndexOf("."));
 		// Replace `@` sign with `/` (`@` sign commonly used because `/` not
-		// allowed in file names).
+		// allowed in filenames).
 		strippedName = strippedName.replace("@", "/");
 		let foundDOI = Zotero.Utilities.cleanDOI(strippedName);
-		Zotero.debug(`Found DOI ${doiString} in file name`);
+		Zotero.debug(`Found DOI ${doiString} in filename`);
 		return doiString;
 	}
 
 	/**
-	 * Tries to extract ISBN from a file name
-	 * @param {String} fileName - File name to examine
+	 * Tries to extract ISBN from a filename
+	 * @param {String} fileName - Filename to examine
 	 * @return {String} - Found ISBN or null if nothing found.
 	 */
 	function _extractISBNFromFileName(fileName) {
 		let isbnString = Zotero.Utilities.cleanISBN(fileName);
-		Zotero.debug(`Found ISBN ${isbnString} in file name`);
+		Zotero.debug(`Found ISBN ${isbnString} in filename`);
 		return isbnString;
 	}
 
 	/**
-	 * Tries to extract Year from a file name
-	 * @param {String} fileName - File name to examine
+	 * Tries to extract Year from a filename
+	 * @param {String} fileName - Filename to examine
 	 * @return {String} - Found year or null if nothing found.
 	 */
 	function _extractYearFromFileName(fileName) {
@@ -635,7 +635,7 @@ Zotero.RecognizePDF = new function () {
 		}
 		// Grab first element of array (first captured group)
 		let yearString = yearRes[1];
-		Zotero.debug(`Found year ${yearString} in file name`);
+		Zotero.debug(`Found year ${yearString} in filename`);
 		return yearString;
 	}
 
