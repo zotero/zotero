@@ -43,21 +43,15 @@
 /*    display: none;*/
 /*}*/
 
-#zotero-tab-toolbar-container {
+#zotero-tab-toolbar {
     position: fixed;
     z-index: 1;
-    right: 0;
     -moz-appearance: none;
     background: linear-gradient(to top, #a9a9a9 0, #a9a9a9 1px, #f6f6f6 1px, #f6f6f6 100%);
 }
 
 #zotero-item-toolbar {
     height: 32px;
-}
-
-#zotero-tab-toolbar-container #zotero-tb-locate,
-#zotero-tab-toolbar-container #zotero-pq-buttons {
-    display: none;
 }
 
 #zotero-context-toolbar-extension {
@@ -81,7 +75,7 @@
 }
 
 .zotero-context-pane-editor-parent-line .parent-item-type {
-    margin-right: 3px;
+    margin-inline-end: 3px;
     width: 16px;
 }
 

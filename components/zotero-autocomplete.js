@@ -73,7 +73,7 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 		case 'tag':
 			var sql = "SELECT DISTINCT name AS val, NULL AS id FROM tags WHERE name LIKE ? ESCAPE '\\'";
 			var sqlParams = [Zotero.DB.escapeSQLExpression(searchString) + '%'];
-			if (searchParams.libraryID !== undefined) {
+			if (searchParams.libraryID) {
 				sql += " AND tagID IN (SELECT tagID FROM itemTags JOIN items USING (itemID) "
 					+ "WHERE libraryID=?)";
 				sqlParams.push(searchParams.libraryID);
@@ -95,15 +95,15 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 				var sql = "SELECT DISTINCT CASE fieldMode WHEN 1 THEN lastName "
 					+ "WHEN 0 THEN firstName || ' ' || lastName END AS val, NULL AS id "
 					+ "FROM creators ";
-				if (searchParams.libraryID !== undefined) {
+				if (searchParams.libraryID) {
 					sql += "JOIN itemCreators USING (creatorID) JOIN items USING (itemID) ";
 				}
 				sql += "WHERE CASE fieldMode "
-					+ "WHEN 1 THEN lastName LIKE ? "
-					+ "WHEN 0 THEN (firstName || ' ' || lastName LIKE ?) OR (lastName LIKE ?) END "
-				var sqlParams = [searchString + '%', searchString + '%', searchString + '%'];
-				if (searchParams.libraryID !== undefined) {
-					sql += " AND libraryID=?";
+					+ "WHEN 1 THEN lastName LIKE ?1 "
+					+ "WHEN 0 THEN (firstName || ' ' || lastName LIKE ?1) OR (lastName LIKE ?1) END ";
+				var sqlParams = [searchString + '%'];
+				if (searchParams.libraryID) {
+					sql += ` AND libraryID=?${sqlParams.length + 1}`;
 					sqlParams.push(searchParams.libraryID);
 				}
 				sql += "ORDER BY val";
@@ -131,26 +131,26 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 				}
 				
 				var fromSQL = " FROM creators "
-				if (searchParams.libraryID !== undefined) {
+				if (searchParams.libraryID) {
 					fromSQL += "JOIN itemCreators USING (creatorID) JOIN items USING (itemID) ";
 				}
-				fromSQL += "WHERE " + subField + " LIKE ? " + "AND fieldMode=?";
+				fromSQL += "WHERE " + subField + " LIKE ?1 AND fieldMode=?2";
 				var sqlParams = [
 					searchString + '%',
 					searchParams.fieldMode ? searchParams.fieldMode : 0
 				];
 				if (searchParams.itemID) {
 					fromSQL += " AND creatorID NOT IN (SELECT creatorID FROM "
-						+ "itemCreators WHERE itemID=?";
+						+ `itemCreators WHERE itemID=?${sqlParams.length + 1}`;
 					sqlParams.push(searchParams.itemID);
 					if (searchParams.creatorTypeID) {
-						fromSQL += " AND creatorTypeID=?";
+						fromSQL += ` AND creatorTypeID=?${sqlParams.length + 1}`;
 						sqlParams.push(searchParams.creatorTypeID);
 					}
 					fromSQL += ")";
 				}
-				if (searchParams.libraryID !== undefined) {
-					fromSQL += " AND libraryID=?";
+				if (searchParams.libraryID) {
+					fromSQL += ` AND libraryID=?${sqlParams.length + 1}`;
 					sqlParams.push(searchParams.libraryID);
 				}
 				
@@ -162,7 +162,6 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 					sql = "SELECT * FROM (" + sql + " UNION SELECT DISTINCT "
 						+ subField + " AS val, creatorID || '-1' AS id"
 						+ fromSQL + ") GROUP BY val";
-					sqlParams = sqlParams.concat(sqlParams);
 				}
 				
 				sql += " ORDER BY val";
@@ -171,17 +170,32 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 		
 		case 'dateModified':
 		case 'dateAdded':
-			var sql = "SELECT DISTINCT DATE(" + fieldName + ", 'localtime') AS val, NULL AS id FROM items "
-				+ "WHERE " + fieldName + " LIKE ? ORDER BY " + fieldName;
+			var sql = "SELECT DISTINCT DATE(" + fieldName + ", 'localtime') AS val, NULL AS id "
+				+ "FROM items WHERE " + fieldName + " LIKE ? ";
 			var sqlParams = [searchString + '%'];
+			if (searchParams.libraryID) {
+				sql += "AND libraryID=? ";
+				sqlParams.push(searchParams.libraryID);
+			}
+			sql += "ORDER BY " + fieldName;
+			
 			break;
 			
 		case 'accessDate':
 			var fieldID = Zotero.ItemFields.getID('accessDate');
 			
-			var sql = "SELECT DISTINCT DATE(value, 'localtime') AS val, NULL AS id FROM itemData "
-				+ "WHERE fieldID=? AND value LIKE ? ORDER BY value";
+			var sql = "SELECT DISTINCT DATE(value, 'localtime') AS val, NULL AS id FROM itemData ";
+			if (searchParams.libraryID) {
+				sql += "JOIN items USING (itemID) ";
+			}
+			sql += "WHERE fieldID=? AND value LIKE ? ";
 			var sqlParams = [fieldID, searchString + '%'];
+			if (searchParams.libraryID) {
+				sql += "AND libraryID=? ";
+				sqlParams.push(searchParams.libraryID);
+			}
+			sql += "ORDER BY value";
+			
 			break;
 		
 		default:
@@ -197,16 +211,23 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 			// use the user part of the multipart field
 			var valueField = fieldName == 'date' ? 'SUBSTR(value, 12, 100)' : 'value';
 			
-			var sql = "SELECT DISTINCT " + valueField + " AS val, NULL AS id "
-				+ "FROM itemData NATURAL JOIN itemDataValues "
-				+ "WHERE fieldID=?1 AND " + valueField
-				+ " LIKE ?2 "
-			
+			var sql = "SELECT DISTINCT " + valueField + " AS val, NULL AS id FROM itemData ";
+			if (searchParams.libraryID) {
+				sql += "JOIN items USING (itemID) ";
+			}
+			sql += "JOIN itemDataValues USING (valueID) "
+				+ "WHERE fieldID=?1 AND " + valueField + " LIKE ?2 ";
 			var sqlParams = [fieldID, searchString + '%'];
+			// Exclude values from an item
 			if (searchParams.itemID) {
 				sql += "AND value NOT IN (SELECT value FROM itemData "
 					+ "NATURAL JOIN itemDataValues WHERE fieldID=?1 AND itemID=?3) ";
 				sqlParams.push(searchParams.itemID);
+			}
+			// Limit to specific library
+			if (searchParams.libraryID) {
+				sql += `AND libraryID=?${sqlParams.length + 1} `;
+				sqlParams.push(searchParams.libraryID);
 			}
 			sql += "ORDER BY value";
 	}

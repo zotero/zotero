@@ -232,6 +232,8 @@ $toolbar-btn-icon-active-offset:    0;
 }
 
 .split-button {
+  height: 100%;
+  align-items: center;
   display: flex;
 }
 
@@ -451,6 +453,7 @@ $toolbar-btn-icon-active-offset:    0;
 
 // Move this out from mixins
 #zotero-tb-split {
+  direction: ltr;
   $item-tool-icon:              "mac/item";
   $item-tool-icon-active:       "mac/item-white";
   $notes-tool-icon:             "mac/notes";

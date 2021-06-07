@@ -44,12 +44,10 @@ var ZoteroContextPane = new function () {
 	var _itemPaneDeck;
 	var _notesPaneDeck;
 	
-	var _itemToolbar;
 	var _splitButton;
 	var _itemPaneToggle;
 	var _notesPaneToggle;
-	var _toolbar;
-	var _tabToolbarContainer;
+	var _tabToolbar;
 	
 	var _itemContexts = [];
 	var _notesContexts = [];
@@ -73,12 +71,18 @@ var ZoteroContextPane = new function () {
 		_contextPaneSplitter = document.getElementById('zotero-context-splitter');
 		_contextPaneSplitterStacked = document.getElementById('zotero-context-splitter-stacked');
 		
-		_itemToolbar = document.getElementById('zotero-item-toolbar');
 		_splitButton = document.getElementById('zotero-tb-split');
 		_itemPaneToggle = document.getElementById('zotero-tb-toggle-item-pane');
 		_notesPaneToggle = document.getElementById('zotero-tb-toggle-notes-pane');
-		_toolbar = document.getElementById('zotero-toolbar');
-		_tabToolbarContainer = document.getElementById('zotero-tab-toolbar-container');
+		_tabToolbar = document.getElementById('zotero-tab-toolbar');
+		
+		if (Zotero.rtl) {
+			_tabToolbar.style.left = 0;
+			_splitButton.style.transform = 'scaleX(-1)';
+		}
+		else {
+			_tabToolbar.style.right = 0;
+		}
 
 		_init();
 
@@ -88,13 +92,6 @@ var ZoteroContextPane = new function () {
 		_notesToggle.addEventListener('click', _toggleNotesButton);
 		Zotero.Reader.onChangeSidebarWidth = _updatePaneWidth;
 		Zotero.Reader.onChangeSidebarOpen = _updatePaneWidth;
-		
-		this._mutationObserver = new MutationObserver(() => {
-			_updateToolbarWidth();
-			// Sometimes XUL is late to reflow
-			setTimeout(_updateToolbarWidth, 100);
-		});
-		this._mutationObserver.observe(_tabToolbarContainer, { attributes: true, childList: true, subtree: true });
 	};
 
 	this.onUnload = function () {
@@ -102,7 +99,6 @@ var ZoteroContextPane = new function () {
 		_notesToggle.removeEventListener('click', _toggleNotesButton);
 		window.removeEventListener('resize', _update);
 		Zotero.Notifier.unregisterObserver(this._notifierID);
-		this._mutationObserver.disconnect();
 		Zotero.Reader.onChangeSidebarWidth = () => {};
 		Zotero.Reader.onChangeSidebarOpen = () => {};
 		_contextPaneInner.innerHTML = '';
@@ -162,9 +158,7 @@ var ZoteroContextPane = new function () {
 				if (Zotero_Tabs.selectedIndex == 0) {
 					_contextPaneSplitter.setAttribute('hidden', true);
 					_contextPane.setAttribute('collapsed', true);
-					_toolbar.append(_itemToolbar);
-					_itemToolbar.classList.remove('tab-mode');
-					_splitButton.classList.add('hidden');
+					_tabToolbar.hidden = true;
 					_tabCover.hidden = true;
 				}
 				else {
@@ -192,9 +186,7 @@ var ZoteroContextPane = new function () {
 				
 					_contextPaneSplitter.setAttribute('hidden', false);
 					_contextPane.setAttribute('collapsed', !(_contextPaneSplitter.getAttribute('state') != 'collapsed'));
-					_tabToolbarContainer.append(_itemToolbar);
-					_itemToolbar.classList.add('tab-mode');
-					_splitButton.classList.remove('hidden');
+					_tabToolbar.hidden = false;
 				}
 				
 				_selectItemContext(ids[0]);
@@ -256,7 +248,14 @@ var ZoteroContextPane = new function () {
 		if (!Zotero.Reader.getSidebarOpen()) {
 			width = 0;
 		}
-		_contextPane.style.left = stacked ? width : 'unset';
+		if (Zotero.rtl) {
+			_contextPane.style.left = 0;
+			_contextPane.style.right = stacked ? width : 'unset';
+		}
+		else {
+			_contextPane.style.left = stacked ? width : 'unset';
+			_contextPane.style.right = 0;
+		}
 	}
 
 	function _updateToolbarWidth() {
@@ -264,7 +263,7 @@ var ZoteroContextPane = new function () {
 		var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 		if (reader) {
 			if ((stacked || _contextPaneSplitter.getAttribute('state') == 'collapsed')) {
-				reader.setToolbarPlaceholderWidth(_tabToolbarContainer.boxObject.width);
+				reader.setToolbarPlaceholderWidth(_tabToolbar.boxObject.width);
 			}
 			else {
 				reader.setToolbarPlaceholderWidth(0);
