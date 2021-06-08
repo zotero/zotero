@@ -608,7 +608,6 @@ class ReaderInstance {
 			}
 			let json = await Zotero.Annotations.toJSON(item);
 			json.id = item.key;
-			json.readOnly = !json.isAuthor || json.isExternal;
 			delete json.key;
 			for (let key in json) {
 				json[key] = json[key] || '';
