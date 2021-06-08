@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+
+    Copyright © 2021 Corporation for Digital Scholarship
+                     Vienna, Virginia, USA
+                     https://www.zotero.org
+
+    This file is part of Zotero.
+
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+
+    ***** END LICENSE BLOCK *****
+-->
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+
+<!DOCTYPE window SYSTEM "chrome://scaffold/locale/scaffold.dtd">
+<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		title="&scaffold.load.title;"
+		width="400"
+		height="330"
+		buttons="cancel,accept"
+		buttondisabledaccept="true"
+		ondialogaccept="RunJS_Load.accept()"
+		onload="RunJS_Load.onLoad()"
+		id="runjs-load">
+	
+	<script src="chrome://zotero/content/include.js"/>
+	<script src="loadJS.js"/>
+	
+	<listbox id="listbox" flex="1">
+		<listhead>
+			<listheader label="Name"/>
+			<listheader label="Last Modified"/>
+		</listhead>
+		<listcols>
+			<listcol flex="1"/>
+			<listcol width="170"/>
+		</listcols>
+	</listbox>
+</dialog>

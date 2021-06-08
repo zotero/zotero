@@ -6,11 +6,54 @@ body {
 
 nav {
 	padding: 8px 5px 5px;
-	height: 25px;
+	height: 42px;
+	display: flex;
+	border-bottom: solid 1px #bbb;
+	background-color: #ddd;
 }
 
 button {
-	font-size: 15px;
+	font-size: 12px;
+}
+
+nav button {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	background: none;
+	border: none;
+	cursor: pointer;
+	margin-right: 10px;
+	padding-top: 3px;
+}
+
+nav button:hover {
+	background: #ccc;
+}
+
+nav button:active {
+	background: #bbb;
+}
+
+nav button.disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+
+nav button.disabled:hover {
+	background: none;
+}
+
+nav button.disabled:active {
+	background: none;
+}
+
+nav button img {
+	height: 20px;
+}
+
+.toolbar-spacer {
+	width: 50px;
 }
 
 #help-button {
@@ -25,7 +68,7 @@ button {
 main {
 	display: flex;
 	justify-content: stretch;
-	height: calc(100% - 38px);
+	height: calc(100% - 58px);
 }
 
 .textbox-container {
@@ -62,6 +105,7 @@ input[type=checkbox] {
 
 iframe {
 	border: 1px solid gray;
+	padding: 3px 0;
 }
 
 iframe, textarea {

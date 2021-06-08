@@ -845,7 +845,7 @@ function toJavaScriptConsole() {
 
 function openRunJSWindow() {
 	openWindowByType(
-		'chrome://zotero/content/runJS.html',
+		'chrome://zotero/content/tools/runJS/runJS.html',
 		'zotero:run-js',
 		'chrome,width=900,height=700,resizable,centerscreen'
 	);
