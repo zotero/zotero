@@ -42,7 +42,7 @@ const DOWNLOADED_IMAGE_TYPE = [
 ];
 
 // Schema version here has to be the same as in note-editor!
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 
 class EditorInstance {
 	constructor() {
@@ -249,8 +249,6 @@ class EditorInstance {
 			
 			let storedAnnotation = {
 				uri: Zotero.URI.getItemURI(attachmentItem),
-				// trim() here is necessary because of already existing annotations
-				text: annotation.text ? annotation.text.trim() : annotation.text,
 				color: annotation.color,
 				pageLabel: annotation.pageLabel,
 				position: annotation.position
