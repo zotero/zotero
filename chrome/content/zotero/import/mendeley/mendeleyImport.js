@@ -56,7 +56,6 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 		skipSelect: true,
 		...(options.saveOptions || {})
 	};
-	this.timestamp = Date.now();
 	
 	if (true) {
 		Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/mendeleySchemaMap.js");
@@ -708,26 +707,10 @@ Zotero_Import_Mendeley.prototype._getDocumentFilesAPI = async function (document
 		for (let file of (doc.files || [])) {
 			// Most filesystems limit filename to 255 bytes
 			let fileName = Zotero.File.truncateFileName(Zotero.File.getValidFileName(file.file_name || 'file'), 255);
-			let tmpFile = OS.Path.join(Zotero.getTempDirectory().path, `m-api-${this.timestamp}-${file.id}`, fileName);
-			// Limit path length on Windows
-			//
-			// This can be raised in Windows 10 but probably isn't for most people. The limit is
-			// theoretically 260, but File Explorer seems to limit paths to 255, so stick to that.
-			// https://docs.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
-			if (Zotero.isWin) {
-				let pathLength = Zotero.Utilities.Internal.byteLength(tmpFile);
-				if (pathLength >= 255) {
-					let surplus = pathLength - 255;
-					let fileNameLength = Zotero.Utilities.Internal.byteLength(fileName);
-					if (surplus >= fileNameLength) {
-						Zotero.logError(`Skipping file due to path exceeding filesystem limits: ${tmpFile}`);
-						continue;
-					}
-					Zotero.debug(`${fileName} will be truncated by ${surplus} bytes`);
-					fileName = Zotero.File.truncateFileName(fileName, fileNameLength - surplus);
-					tmpFile = OS.Path.join(Zotero.getTempDirectory().path, `m-api-${this.timestamp}-${file.id}`, fileName);
-				}
-			}
+			let ext = fileName.includes('.') ? fileName.split('.').pop() : '';
+			let fileBaseName = ext === '' ? fileName : fileName.slice(0, -ext.length - 1);
+			let tmpFile = OS.Path.join(Zotero.getTempDirectory().path, `m-api-${file.id}.${ext}`);
+			
 			this._tmpFilesToDelete.push(tmpFile);
 			caller.add(this._fetchFile.bind(this, file.id, tmpFile));
 			files.push({
@@ -735,6 +718,7 @@ Zotero_Import_Mendeley.prototype._getDocumentFilesAPI = async function (document
 				title: file.file_name || '',
 				contentType: file.mime_type || '',
 				hash: file.filehash,
+				fileBaseName
 			});
 			totalSize += file.size;
 			this._progressMax += 1;
@@ -1418,6 +1402,7 @@ Zotero_Import_Mendeley.prototype._saveFilesAndAnnotations = async function (file
 						title: file.title,
 						contentType: file.contentType
 					};
+
 					// If we're not set to link files or file is in Mendeley downloads folder, import it
 					if (!this._linkFiles || this._isDownloadedFile(path) || this._isTempDownloadedFile(path)) {
 						if (file.url) {
@@ -1427,6 +1412,9 @@ Zotero_Import_Mendeley.prototype._saveFilesAndAnnotations = async function (file
 							attachment = await Zotero.Attachments.importSnapshotFromFile(options);
 						}
 						else {
+							if (file.fileBaseName) {
+								options.fileBaseName = file.fileBaseName;
+							}
 							attachment = await Zotero.Attachments.importFromFile(options);
 						}
 					}
