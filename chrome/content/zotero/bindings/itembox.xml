@@ -1068,7 +1068,12 @@
 						fields.fieldMode = fieldMode;
 						this.modifyCreator(index, fields);
 						if (this.saveOnEdit) {
-							this.item.saveTx();
+							let activeField = this._dynamicFields.querySelector('textbox');
+							if (activeField !== null && activeField !== firstName && activeField !== lastName) {
+								this.blurOpenField();
+							} else {
+								this.item.saveTx();
+							}
 						}
 					}
 				]]>
