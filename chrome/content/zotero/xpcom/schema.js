@@ -2590,6 +2590,12 @@ Zotero.Schema = new function(){
 		
 		Zotero.DB.requireTransaction();
 		
+		// Use old rename/FK behavior from SQLite <3.25
+		// https://stackoverflow.com/a/57275538
+		if (fromVersion <= 113) {
+			yield Zotero.DB.queryAsync("PRAGMA legacy_alter_table=ON");
+		}
+		
 		// Step through version changes until we reach the current version
 		//
 		// Each block performs the changes necessary to move from the
@@ -3301,6 +3307,14 @@ Zotero.Schema = new function(){
 						yield Zotero.DB.queryAsync("UPDATE fields SET fieldName=? WHERE fieldName=?", ['versionNumber', 'version']);
 					}
 				}
+			}
+			
+			else if (i == 118) {
+				// Switch to new rename/FK behavior. All further table rebuilds must create a new
+				// table with a temporary name, do an INSERT...SELECT (with default/missing values
+				// as appropriate), delete the old table, and rename the new one back to the
+				// original name. https://stackoverflow.com/a/57275538
+				yield Zotero.DB.queryAsync("PRAGMA legacy_alter_table=OFF");
 			}
 			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
