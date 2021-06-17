@@ -210,12 +210,13 @@ var assert = chai.assert,
 
 // Set up tests to run
 var run = ZoteroUnit.runTests;
-if(run && ZoteroUnit.tests) {
+if (run && ZoteroUnit.tests) {
 	function getTestFilename(test) {
-		// Allow foo, fooTest, fooTest.js, and tests/fooTest.js
+		// Remove any directory prefixes e.g. tests/fooTest.js, test/tests/fooTest.js
+		test = test.split(/[/\\]/).pop();
+		// Allow foo, fooTest, fooTest.js 
 		test = test.replace(/\.js$/, "");
 		test = test.replace(/Test$/, "");
-		test = test.replace(/^tests[/\\]/, "");
 		return test + "Test.js";
 	}
 	

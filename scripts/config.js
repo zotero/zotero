@@ -50,6 +50,8 @@ const symlinkFiles = [
 	'resource/ace/theme-chrome.js',
 	'resource/ace/theme-monokai.js',
 	'resource/ace/worker-javascript.js',
+	// Feed *.idl files are for documentation only
+	'!resource/feeds/*.idl',
 	'update.rdf',
 	'!chrome/skin/default/zotero/**/*.scss'
 ];

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Extracted from https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml -->
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:media="http://search.yahoo.com/mrss/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:nyt="http://www.nytimes.com/namespaces/rss/2.0" version="2.0">
+  <channel>
+    <title>NYT &gt; Top Stories</title>
+    <link>https://www.nytimes.com</link>
+    <atom:link href="https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml" rel="self" type="application/rss+xml"></atom:link>
+    <description></description>
+    <language>en-us</language>
+    <copyright>Copyright 2021 The New York Times Company</copyright>
+    <lastBuildDate>Wed, 16 Jun 2021 19:30:15 +0000</lastBuildDate>
+    <pubDate>Wed, 16 Jun 2021 19:20:47 +0000</pubDate>
+    <item>
+      <title>In Pictures: President Biden’s Trip to Europe</title>
+      <link>https://www.nytimes.com/2021/06/10/world/europe/biden-europe-pictures.html</link>
+      <guid isPermaLink="true">https://www.nytimes.com/2021/06/10/world/europe/biden-europe-pictures.html</guid>
+      <atom:link href="https://www.nytimes.com/2021/06/10/world/europe/biden-europe-pictures.html" rel="standout"></atom:link>
+      <description>The president is in Cornwall, England, to meet with other leaders of wealthy democracies.</description>
+      <pubDate>Wed, 16 Jun 2021 18:53:17 +0000</pubDate>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Biden, Joseph R Jr</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Johnson, Boris</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_per">Biden, Jill Tracy Jacobs</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">Group of Seven</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_org">North Atlantic Treaty Organization</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/des">Coronavirus (2019-nCoV)</category>
+      <category domain="http://www.nytimes.com/namespaces/keywords/nyt_geo">Europe</category>
+      <media:content height="151" medium="image" url="https://static01.nyt.com/images/2021/06/16/world/16biden-photos1/16biden-photos1-moth.jpg" width="151"></media:content>
+      <media:credit>Doug Mills/The New York Times</media:credit>
+    </item>
+  </channel>
+</rss>

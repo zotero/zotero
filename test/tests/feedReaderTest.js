@@ -30,21 +30,23 @@ describe("Zotero.FeedReader", function () {
 		language: 'en'
 	};
 	
+	var richTextRSSFeedURL = getTestDataUrl("feedRichText.rss");
+	var cdataRSSFeedURL = getTestDataUrl("feedCDATA.rss");
 	var atomFeedURL = getTestDataUrl("feed.atom");
-	var atomFeedInfo = {
-		title: 'Incircular nets and confocal conics',
-		updated: new Date("Tue, 10 Jun 2003 09:41:01 GMT"),
-		creators: [{
-			firstName: '',
-			lastName: 'editor@example.com',
-			creatorType: 'author',
-			fieldMode: 1
-		}],
-		language: 'en-us'
-	};
+	var mediaFeedURL = getTestDataUrl("feedMedia.xml");
 	
-	after(function* () {
-		yield clearFeeds();
+	var win;
+	
+	before(async function() {
+		// Browser window is needed as parent window to load the feed reader scripts.
+		win = await loadBrowserWindow();
+	});
+
+	after(async function() {
+		if (win) {
+			win.close();
+		}
+		await clearFeeds();
 	});
 
 	describe('FeedReader()', function () {
@@ -199,6 +201,52 @@ describe("Zotero.FeedReader", function () {
 			let item;
 			while(item = yield itemIterator.next().value);
 			assert.isNull(item);
+		});
+		
+		it('should decode entities', async () => {
+			const fr = new Zotero.FeedReader(richTextRSSFeedURL);
+			await fr.process();
+			const itemIterator = new fr.ItemIterator();
+			const item = await itemIterator.next().value;
+			
+			assert.equal(item.title, `Encoded "entity"`);
+			assert.equal(item.abstractNote, "They take a crash course in language & protocol.");
+		});
+
+		it('should remove tags', async () => {
+			const fr = new Zotero.FeedReader(richTextRSSFeedURL);
+			await fr.process();
+			const itemIterator = new fr.ItemIterator();
+			let item;
+			for (let i = 0; i < 2; i++) {
+				// eslint-disable-next-line no-await-in-loop
+				item = await itemIterator.next().value;
+			}
+			
+			// The entry title is text only, so tags are just more text.
+			assert.equal(item.title, "Embedded <b>tags</b>");
+			// The entry description is XHTML, so tags are removed there.
+			assert.equal(item.abstractNote, "The proposed VASIMR engine would do that.");
+		});
+
+		it('should parse CDATA as text', async () => {
+			const fr = new Zotero.FeedReader(cdataRSSFeedURL);
+			await fr.process();
+			const itemIterator = new fr.ItemIterator();
+			const item = await itemIterator.next().value;
+			
+			assert.equal(item.title, `"The Descent of Man," 150 years on`);
+			assert.equal(item.creators[0].lastName, "Fuentes");
+		});
+
+		it('should parse enclosed media', async () => {
+			const fr = new Zotero.FeedReader(mediaFeedURL);
+			await fr.process();
+			const itemIterator = new fr.ItemIterator();
+			const item = await itemIterator.next().value;
+			
+			assert.equal(item.enclosedItems.length, 1);
+			assert.equal(item.enclosedItems[0].url, "https://static01.nyt.com/images/2021/06/16/world/16biden-photos1/16biden-photos1-moth.jpg");
 		});
 	});
 })

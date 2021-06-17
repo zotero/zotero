@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!-- Lifted from http://cyber.law.harvard.edu/rss/examples/rss2sample.xml -->
+<rss version="2.0">
+   <channel>
+      <title>Liftoff News</title>
+      <link>http://liftoff.msfc.nasa.gov/</link>
+      <description>Liftoff to Space Exploration.</description>
+      <language>en-us</language>
+      <pubDate>Tue, 10 Jun 2003 04:00:00 GMT</pubDate>
+      <lastBuildDate>Tue, 10 Jun 2003 09:41:01 GMT</lastBuildDate>
+      <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+      <generator>Weblog Editor 2.0</generator>
+      <managingEditor>editor@example.com</managingEditor>
+      <webMaster>webmaster@example.com</webMaster>
+      <item>
+         <title>Encoded &quot;entity&quot;</title>
+         <link>http://liftoff.msfc.nasa.gov/news/2003/news-starcity.asp</link>
+         <description>They take a crash course in language &amp; protocol.</description>
+         <pubDate>Tue, 03 Jun 2003 09:39:21 GMT</pubDate>
+         <guid>http://liftoff.msfc.nasa.gov/2003/06/03.html#item573</guid>
+      </item>
+      <item>
+         <title>Embedded &lt;b&gt;tags&lt;/b&gt;</title>
+         <link>http://liftoff.msfc.nasa.gov/news/2003/news-VASIMR.asp</link>
+         <description>The proposed &lt;b&gt;VASIMR&lt;/b&gt; engine would do that.</description>
+         <pubDate>Tue, 27 May 2003 08:37:32 GMT</pubDate>
+         <guid>http://liftoff.msfc.nasa.gov/2003/05/27.html#item571</guid>
+      </item>
+   </channel>
+</rss>
