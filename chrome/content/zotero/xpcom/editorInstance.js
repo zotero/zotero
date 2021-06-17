@@ -746,36 +746,48 @@ class EditorInstance {
 	}
 
 	_openPopup(x, y, pos, itemGroups) {
+		let appendItems = (parentNode, itemGroups) => {
+			for (let itemGroup of itemGroups) {
+				for (let item of itemGroup) {
+					if (item.groups) {
+						let menu = parentNode.ownerDocument.createElement('menu');
+						menu.setAttribute('label', item.label);
+						let menupopup = parentNode.ownerDocument.createElement('menupopup');
+						menu.append(menupopup);
+						appendItems(menupopup, item.groups);
+						parentNode.appendChild(menu);
+					}
+					else {
+						let menuitem = parentNode.ownerDocument.createElement('menuitem');
+						menuitem.setAttribute('value', item.name);
+						menuitem.setAttribute('label', item.label);
+						menuitem.setAttribute('disabled', !item.enabled);
+						menuitem.setAttribute('checked', item.checked);
+						menuitem.addEventListener('command', () => {
+							this._postMessage({
+								action: 'contextMenuAction',
+								ctxAction: item.name,
+								pos
+							});
+						});
+						parentNode.appendChild(menuitem);
+					}
+				}
+
+				if (itemGroups.indexOf(itemGroup) !== itemGroups.length - 1) {
+					let separator = parentNode.ownerDocument.createElement('menuseparator');
+					parentNode.appendChild(separator);
+				}
+			}
+		};
+		
 		this._popup.hidePopup();
 
 		while (this._popup.firstChild) {
 			this._popup.removeChild(this._popup.firstChild);
 		}
-
-		for (let itemGroup of itemGroups) {
-			for (let item of itemGroup) {
-				let menuitem = this._popup.ownerDocument.createElement('menuitem');
-				menuitem.setAttribute('value', item.name);
-				menuitem.setAttribute('label', item.label);
-				if (!item.enabled) {
-					menuitem.setAttribute('disabled', true);
-				}
-				menuitem.addEventListener('command', () => {
-					this._postMessage({
-						action: 'contextMenuAction',
-						ctxAction: item.name,
-						pos
-					});
-				});
-				this._popup.appendChild(menuitem);
-			}
-			
-			if (itemGroups.indexOf(itemGroup) !== itemGroups.length - 1) {
-				let separator = this._popup.ownerDocument.createElement('menuseparator');
-				this._popup.appendChild(separator);
-			}
-		}
-
+		
+		appendItems(this._popup, itemGroups);
 		this._popup.openPopupAtScreen(x, y, true);
 	}
 
