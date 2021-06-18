@@ -386,6 +386,10 @@ Zotero.Utilities.Translate.prototype.urlToProper = function(url) {
 	return url;
 };
 
+Zotero.Utilities.Translate.prototype.resolveURL = function (url, dontUseProxy) {
+	return this._translate.resolveURL(url, dontUseProxy);
+};
+
 Zotero.Utilities.Translate.prototype.__exposedProps__ = {"HTTP":"r"};
 for(var j in Zotero.Utilities.Translate.prototype) {
 	if(typeof Zotero.Utilities.Translate.prototype[j] === "function" && j[0] !== "_" && j != "Translate") {
