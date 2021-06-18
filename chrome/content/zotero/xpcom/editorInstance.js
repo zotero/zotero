@@ -1268,7 +1268,7 @@ class EditorInstance {
 			jsonAnnotation.attachmentItemID = attachmentItem.id;
 			jsonAnnotations.push(jsonAnnotation);
 		}
-		let html = `<h1>${Zotero.getString('noteEditor.annotationsWithDate', new Date().toLocaleString())}</h1>\n`;
+		let html = `<h1>${Zotero.getString('noteEditor.annotationsWithDate', new Date().toLocaleString()).replace(/\n/g, '<br/>')}</h1>\n`;
 		let { html: serializedHTML, citationItems } = await editorInstance._serializeAnnotations(jsonAnnotations, true);
 		html += serializedHTML;
 		citationItems = encodeURIComponent(JSON.stringify(citationItems));
