@@ -2214,7 +2214,6 @@ Zotero.Schema = new function(){
 			yield _getSchemaSQLVersion('triggers').then(function (version) {
 				return _updateDBVersion('triggers', version);
 			});
-			yield _updateDBVersion('compatibility', _maxCompatibility);
 			
 			var sql = "INSERT INTO libraries (libraryID, type, editable, filesEditable) "
 				+ "VALUES "
@@ -2222,6 +2221,7 @@ Zotero.Schema = new function(){
 			yield Zotero.DB.queryAsync(sql, userLibraryID);
 			
 			yield _updateLastClientVersion();
+			yield _updateCompatibility(_maxCompatibility);
 			
 			self.dbInitialized = true;
 		})
