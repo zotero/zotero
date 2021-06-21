@@ -448,14 +448,34 @@ Zotero.File = new function(){
 	
 	
 	this.download = Zotero.Promise.coroutine(function* (uri, path) {
-		Zotero.debug("Saving " + (uri.spec ? uri.spec : uri)
-			+ " to " + (path.pathQueryRef ? path.pathQueryRef : path));
+		var uriStr = uri.spec || uri;
+		
+		Zotero.debug(`Saving ${uriStr} to ${path.pathQueryRef || path}`);
+		
+		if (Zotero.HTTP.browserIsOffline()) {
+			let msg = `Download failed: ${Zotero.appName} is currently offline`;
+			Zotero.debug(msg, 2);
+			throw new Error(msg);
+		}
 		
 		var deferred = Zotero.Promise.defer();
 		NetUtil.asyncFetch(uri, function (is, status, request) {
 			if (!Components.isSuccessCode(status)) {
 				Zotero.logError(status);
-				deferred.reject(new Error("Download failed with status " + status));
+				let msg = Zotero.getString('sync.error.checkConnection');
+				switch (status) {
+					case 2152398878:
+						// TODO: Localize
+						msg = "Server not found. Check your internet connection."
+						break;
+				}
+				deferred.reject(new Error(msg));
+				return;
+			}
+			if (request.responseStatus != 200) {
+				let msg = `Download failed with response code ${request.responseStatus}`;
+				Zotero.logError(msg);
+				deferred.reject(new Error(msg));
 				return;
 			}
 			deferred.resolve(is);
