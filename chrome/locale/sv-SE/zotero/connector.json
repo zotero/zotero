@@ -2,6 +2,9 @@
   "general_more": {
     "message": "Mer…"
   },
+  "general_moreInfo": {
+    "message": "Mer info…"
+  },
   "general_done": {
     "message": "Klar"
   },
@@ -16,6 +19,9 @@
   },
   "general_pleaseWait": {
     "message": "Vänta…"
+  },
+  "general_copyToClipboard": {
+    "message": "Kopiera till urklipp"
   },
   "progressWindow_savingTo": {
     "message": "Spara till"
@@ -56,6 +62,15 @@
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Aktivera spara i onlinebibliotek"
   },
+  "reports_report_submitted": {
+    "message": "Din felrapport har skickats in.\n\nRapport ID: $1\n\nSkapa gärna ett inlägg i Zoteros forum med denna rapport ID, tillsammans med en beskrivning av problemet och vad du gjorde för att problemet skulle uppstå.\n\nFelrapporter gås inte igenom förrän de har beskrivits i forumet."
+  },
+  "reports_debug_output_submitted": {
+    "message": "Din felsökningsinformation har skickats in.\n\nFelsöknings ID (Debug ID) är $1."
+  },
+  "reports_submission_failed": {
+    "message": "Ett fel har uppstått när rapporten skulle skickas in\n\n$1\n\nKontrollera din internetuppkoppling. Om problemet kvarstår, gör ett inlägg i Zoteros forum."
+  },
   "integration_error_clientUpgrade": {
     "message": "Webbaserad referenstagning kräver $1 eller senare."
   },
@@ -76,6 +91,18 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "$1 integreringen är inte tillgänglig när du redigerar Microsoft Word .docx files direkt i Google Docs. Välj Arkiv → Spara som Google Docs för att aktivera denna funktionalitet.<br/><br/>Om du vill föra över ett Word-dokument med $1 referenser till Google Docs, se <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Flytta dokument mellan ordbehandlare</a>."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "Visa avlänkade $1 referenser"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "Den referens du försöker redigera har avlänkats från $1.,"
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Länka om referens"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "Dessa referenser har blivit <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">avlänkade från $1</a>. Du kommer att behöva omlänka dem innan de uppdateras eller visas i din källförteckning."
   },
   "general_saveTo": {
     "message": "Spara till $1"

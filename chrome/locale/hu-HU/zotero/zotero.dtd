@@ -330,18 +330,18 @@
 <!ENTITY zotero.attachLink.label.link "Link:">
 <!ENTITY zotero.attachLink.label.title "Cím:">
 
-<!ENTITY zotero.context.addChildNote "Add Item Note">
+<!ENTITY zotero.context.addChildNote "Elem jegyzetének hozzáadása">
 <!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
 <!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
-<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
+<!ENTITY zotero.context.editInWindow "Szerkesztés külön ablakban">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
-<!ENTITY zotero.pdfReader.lastPage "Last Page">
-<!ENTITY zotero.pdfReader.back "Back">
-<!ENTITY zotero.pdfReader.forward "Forward">
-<!ENTITY zotero.pdfReader.rotateClockwise "Rotate Clockwise">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotate Counterclockwise">
+<!ENTITY zotero.pdfReader.firstPage "Első oldal">
+<!ENTITY zotero.pdfReader.lastPage "Utolsó oldal">
+<!ENTITY zotero.pdfReader.back "Vissza">
+<!ENTITY zotero.pdfReader.forward "Előre">
+<!ENTITY zotero.pdfReader.rotateClockwise "Forgatás az óramutató járásával megegyező irányba">
+<!ENTITY zotero.pdfReader.rotateCounterclockwise "Forgatás az óramutató járásával ellentétes irányba">
 <!ENTITY zotero.pdfReader.handTool "Hand Tool">
 <!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
