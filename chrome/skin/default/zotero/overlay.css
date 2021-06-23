@@ -620,6 +620,15 @@
 	margin-top: 1px;
 }
 
+#zotero-tb-pq-update {
+	list-style-image: url(chrome://zotero/skin/document-search-result.png);
+}
+
+#zotero-tb-pq-update .toolbarbutton-icon {
+	width: 18px;
+	margin-top: 1px;
+}
+
 /* Sync error icon */
 #zotero-tb-sync-error {
 	list-style-image: url(chrome://zotero/skin/error.png);
