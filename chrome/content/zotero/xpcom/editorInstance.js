@@ -661,7 +661,9 @@ class EditorInstance {
 				}
 				case 'openContextMenu': {
 					let { x, y, pos, itemGroups } = message;
-					this._openPopup(x, y, pos, itemGroups);
+					// If `contenteditable` area wasn't focused before, the spell checker
+					// might not be fully initialized on right-click
+					setTimeout(() => this._openPopup(x, y, pos, itemGroups), 50);
 					return;
 				}
 				case 'return': {
