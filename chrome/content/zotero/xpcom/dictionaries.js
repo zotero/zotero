@@ -39,6 +39,7 @@ Zotero.Dictionaries = new function () {
 		}
 	});
 	
+	// Note: Doesn't include bundled en-US
 	Zotero.defineProperty(this, 'dictionaries', {
 		get: () => {
 			return _dictionaries;
@@ -63,7 +64,7 @@ Zotero.Dictionaries = new function () {
 				}
 				try {
 					let dir = OS.Path.join(dictionariesDir, entry.name);
-					await _loadDictionary(dir);
+					await _loadDirectory(dir);
 				}
 				catch (e) {
 					Zotero.logError(e);
@@ -87,41 +88,6 @@ Zotero.Dictionaries = new function () {
 	};
 
 	/**
-	 * Install the most popular dictionary for specified locale
-	 *
-	 * @param locale
-	 * @return {Promise<Boolean>}
-	 */
-	this.installByLocale = async function (locale) {
-		let dictionaries = await this.fetchDictionariesList();
-		let matched = dictionaries.filter(x => x.locale === locale);
-		if (!matched.length) {
-			matched = dictionaries.filter(x => x.locale === locale.split(/[-_]/)[0]);
-		}
-		if (!matched.length) {
-			return false;
-		}
-		matched.sort((a, b) => b.users - a.users);
-		await this.install(matched[0].id);
-		return true;
-	};
-
-	/**
-	 * Remove all dictionaries targeting specific locale
-	 *
-	 * @param locale
-	 * @return {Promise}
-	 */
-	this.removeByLocale = async function(locale) {
-		for (let dictionary of _dictionaries) {
-			if (dictionary.locales.includes(locale)
-			|| dictionary.locales.some(x => x === locale.split(/[-_]/)[0])) {
-				await this.remove(dictionary.id);
-			}
-		}
-	};
-
-	/**
 	 * Install dictionary by extension id,
 	 * e.g., `en-NZ@dictionaries.addons.mozilla.org`
 	 *
@@ -129,7 +95,11 @@ Zotero.Dictionaries = new function () {
 	 * @return {Promise}
 	 */
 	this.install = async function (id) {
+		if (id == '@unitedstatesenglishdictionary') {
+			throw new Error("en-US dictionary is bundled");
+		}
 		await this.remove(id);
+		Zotero.debug("Installing dictionaries from " + id);
 		let url = this.baseURL + id + '.xpi';
 		let xpiPath = OS.Path.join(Zotero.getTempDirectory().path, id);
 		let dir = OS.Path.join(Zotero.Profile.dir, 'dictionaries', id);
@@ -162,7 +132,7 @@ Zotero.Dictionaries = new function () {
 
 			zipReader.close();
 			await OS.File.remove(xpiPath);
-			await _loadDictionary(dir);
+			await _loadDirectory(dir);
 		}
 		catch (e) {
 			if (await OS.File.exists(xpiPath)) {
@@ -176,46 +146,116 @@ Zotero.Dictionaries = new function () {
 	};
 
 	/**
-	 * Remove dictionary by extension id
+	 * Remove dictionaries by extension id
 	 *
 	 * @param {String} id
 	 * @return {Promise}
 	 */
 	this.remove = async function (id) {
-		let dictionaryIndex = _dictionaries.findIndex(x => x.id === id);
-		if (dictionaryIndex !== -1) {
-			let dictionary = _dictionaries[dictionaryIndex];
-			try {
-				let manifestPath = OS.Path.join(dictionary.dir, 'manifest.json');
-				let manifest = await Zotero.File.getContentsAsync(manifestPath);
-				manifest = JSON.parse(manifest);
-				for (let locale in manifest.dictionaries) {
-					let dicPath = manifest.dictionaries[locale];
-					let affPath = OS.Path.join(dictionary.dir, dicPath.slice(0, -3) + 'aff');
-					_spellChecker.removeDictionary(locale, Zotero.File.pathToFile(affPath));
+		Zotero.debug("Removing dictionaries from " + id);
+		var dictionary = _dictionaries.find(x => x.id === id);
+		if (!dictionary) {
+			return;
+		}
+		try {
+			let manifestPath = OS.Path.join(dictionary.dir, 'manifest.json');
+			let manifest = await Zotero.File.getContentsAsync(manifestPath);
+			manifest = JSON.parse(manifest);
+			for (let locale in manifest.dictionaries) {
+				let dicPath = manifest.dictionaries[locale];
+				let affPath = OS.Path.join(dictionary.dir, dicPath.slice(0, -3) + 'aff');
+				Zotero.debug(`Removing ${locale} dictionary`);
+				_spellChecker.removeDictionary(locale, Zotero.File.pathToFile(affPath));
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+		await OS.File.removeDir(dictionary.dir);
+		// Technically there can be more than one dictionary provided by the same extension id,
+		// so remove all that match
+		_dictionaries = _dictionaries.filter(x => x.id != id);
+	};
+	
+	/**
+	 * @param {Object[]} [dictionaries] - Dictionary list from fetchDictionariesList(); fetched
+	 *     automatically if not provided
+	 * @return {Object[]} - Array of objects with 'old' and 'new'
+	 */
+	this.getAvailableUpdates = async function (dictionaries) {
+		var updates = [];
+		let availableDictionaries = dictionaries || await this.fetchDictionariesList();
+		for (let dictionary of _dictionaries) {
+			let availableDictionary = availableDictionaries.find((x) => {
+				return x.id === dictionary.id || x.locale == dictionary.locale;
+			});
+			if (!availableDictionary) continue;
+			// If same id, check if version is higher
+			if (availableDictionary.id == dictionary.id) {
+				if (Services.vc.compare(dictionary.version, availableDictionary.version) < 0) {
+					updates.push({ old: dictionary, new: availableDictionary });
 				}
+			}
+			// If different id for same locale, always offer as an update
+			else {
+				updates.push({ old: dictionary, new: availableDictionary });
+			}
+		}
+		if (updates.length) {
+			Zotero.debug("Available dictionary updates:");
+			Zotero.debug(updates);
+		}
+		else {
+			Zotero.debug("No dictionary updates found");
+		}
+		return updates;
+	};
+	
+	/**
+	 * Get the best display name for a dictionary
+	 *
+	 * For known locales, this will be the native name in the target locale. If a native name isn't
+	 * available and inlineSpellChecker is provided, an English name will be provided if available.
+	 *
+	 * @param {String} locale
+	 * @param {InlineSpellChecker} [inlineSpellChecker] - An instance of InlineSpellChecker from
+	 *     InlineSpellChecker.jsm
+	 * @return {String} - The best available name, or the locale code if unavailable
+	 */
+	this.getBestDictionaryName = function (locale, inlineSpellChecker) {
+		var name = Zotero.Locale.availableLocales[locale];
+		if (!name) {
+			for (let key in Zotero.Locale.availableLocales) {
+				if (key.split('-')[0] === locale) {
+					name = Zotero.Locale.availableLocales[key];
+				}
+			}
+		}
+		if (!name && inlineSpellChecker) {
+			name = inlineSpellChecker.getDictionaryDisplayName(locale)
+		}
+		return name || name;
+	};
+	
+	/**
+	 * Update dictionaries
+	 *
+	 * @return {Promise<Integer>} - Number of updated dictionaries
+	 */
+	this.update = async function () {
+		var updates = await Zotero.Dictionaries.getAvailableUpdates();
+		var updated = 0;
+		for (let update of updates) {
+			try {
+				await this.remove(update.old.id);
+				await this.install(update.new.id);
+				updated++;
 			}
 			catch (e) {
 				Zotero.logError(e);
 			}
-			await OS.File.removeDir(dictionary.dir);
-			_dictionaries.splice(dictionaryIndex, 1);
 		}
-	};
-
-	/**
-	 * Update all dictionaries
-	 *
-	 * @return {Promise}
-	 */
-	this.update = async function () {
-		let availableDictionaries = await this.fetchDictionariesList();
-		for (let dictionary of _dictionaries) {
-			let availableDictionary = availableDictionaries.find(x => x.id === dictionary.id);
-			if (availableDictionary && availableDictionary.version > dictionary.version) {
-				await this.install(availableDictionary.id);
-			}
-		}
+		return updated;
 	};
 
 	/**
@@ -224,7 +264,7 @@ Zotero.Dictionaries = new function () {
 	 * @param {String} dir
 	 * @return {Promise}
 	 */
-	async function _loadDictionary(dir) {
+	async function _loadDirectory(dir) {
 		let manifestPath = OS.Path.join(dir, 'manifest.json');
 		let manifest = await Zotero.File.getContentsAsync(manifestPath);
 		manifest = JSON.parse(manifest);
@@ -241,8 +281,9 @@ Zotero.Dictionaries = new function () {
 			locales.push(locale);
 			let dicPath = manifest.dictionaries[locale];
 			let affPath = OS.Path.join(dir, dicPath.slice(0, -3) + 'aff');
+			Zotero.debug(`Adding ${locale} dictionary`);
 			_spellChecker.addDictionary(locale, Zotero.File.pathToFile(affPath));
+			_dictionaries.push({ id, locale, version, dir });
 		}
-		_dictionaries.push({ id, locales, version, dir });
 	}
 };

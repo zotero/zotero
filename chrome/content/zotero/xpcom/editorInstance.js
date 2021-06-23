@@ -806,8 +806,6 @@ class EditorInstance {
 		
 		appendItems(this._popup, itemGroups);
 		
-		// TODO: Localize
-		
 		// Spell checker
 		let spellChecker = this._getSpellChecker();
 		
@@ -816,7 +814,7 @@ class EditorInstance {
 		this._popup.appendChild(separator);
 		// Check Spelling
 		var menuitem = this._popup.ownerDocument.createElement('menuitem');
-		menuitem.setAttribute('label', 'Check Spelling');
+		menuitem.setAttribute('label', Zotero.getString('spellCheck.checkSpelling'));
 		menuitem.setAttribute('checked', spellChecker.enabled);
 		menuitem.addEventListener('command', () => {
 			// Possible values: 0 - off, 1 - only multi-line, 2 - multi and single line input boxes
@@ -827,7 +825,7 @@ class EditorInstance {
 		if (spellChecker.enabled) {
 			// Languages menu
 			var menu = this._popup.ownerDocument.createElement('menu');
-			menu.setAttribute('label', 'Languages');
+			menu.setAttribute('label', Zotero.getString('general.languages'));
 			this._popup.append(menu);
 			// Languages menu popup
 			var menupopup = this._popup.ownerDocument.createElement('menupopup');
@@ -835,19 +833,13 @@ class EditorInstance {
 			
 			spellChecker.addDictionaryListToMenu(menupopup, null);
 			
+			// The menu is prepopulated with names from InlineSpellChecker::getDictionaryDisplayName(),
+			// which will be in English, so swap in native locale names where we have them
 			for (var menuitem of menupopup.children) {
 				// 'spell-check-dictionary-en-US'
 				let locale = menuitem.id.slice(23);
-				let label = Zotero.Locale.availableLocales[locale];
-				if (!label) {
-					for(let key in Zotero.Locale.availableLocales) {
-						if (key.split('-')[0] === locale) {
-							label = Zotero.Locale.availableLocales[key];
-						}
-					}
-				}
-				
-				if (label) {
+				let label = Zotero.Dictionaries.getBestDictionaryName(locale);
+				if (label && label != locale) {
 					menuitem.setAttribute('label', label);
 				}
 			}
@@ -857,9 +849,11 @@ class EditorInstance {
 			menupopup.appendChild(separator);
 			// Add Dictionaries
 			var menuitem = this._popup.ownerDocument.createElement('menuitem');
-			menuitem.setAttribute('label', 'Add Dictionaries...');
+			menuitem.setAttribute('label', Zotero.getString('spellCheck.addRemoveDictionaries'));
 			menuitem.addEventListener('command', () => {
-				Zotero.Utilities.Internal.openPreferences('zotero-prefpane-advanced');
+				Services.ww.openWindow(null, "chrome://zotero/content/dictionaryManager.xul",
+					"dictionary-manager", "chrome,centerscreen", {});
+				
 			});
 			menupopup.append(menuitem);
 			
