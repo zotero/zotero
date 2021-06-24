@@ -661,9 +661,7 @@ class EditorInstance {
 				}
 				case 'openContextMenu': {
 					let { x, y, pos, itemGroups } = message;
-					// If `contenteditable` area wasn't focused before, the spell checker
-					// might not be fully initialized on right-click
-					setTimeout(() => this._openPopup(x, y, pos, itemGroups), 50);
+					this._openPopup(x, y, pos, itemGroups);
 					return;
 				}
 				case 'return': {
@@ -764,7 +762,7 @@ class EditorInstance {
 		return attachment.key;
 	}
 
-	_openPopup(x, y, pos, itemGroups) {
+	async _openPopup(x, y, pos, itemGroups) {
 		let appendItems = (parentNode, itemGroups) => {
 			for (let itemGroup of itemGroups) {
 				for (let item of itemGroup) {
@@ -810,6 +808,23 @@ class EditorInstance {
 		
 		// Spell checker
 		let spellChecker = this._getSpellChecker();
+		
+		// If `contenteditable` area wasn't focused before, the spell checker
+		// might not be fully initialized on right-click.
+		// The wait time depends on system performance/load
+		let n = 0;
+		// Wait for 200ms
+		while (n++ < 20) {
+			try {
+				if (spellChecker.mInlineSpellChecker.spellChecker.GetCurrentDictionary()) {
+					break;
+				}
+			}
+			catch (e) {
+				break;
+			}
+			await Zotero.Promise.delay(10);
+		}
 		
 		// Separator
 		var separator = this._popup.ownerDocument.createElement('menuseparator');
