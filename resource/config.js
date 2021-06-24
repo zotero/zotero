@@ -28,6 +28,7 @@ var ZOTERO_CONFIG = {
 	CREDITS_URL: 'https://www.zotero.org/support/credits_and_acknowledgments',
 	LICENSING_URL: 'https://www.zotero.org/support/licensing',
 	GET_INVOLVED_URL: 'https://www.zotero.org/getinvolved',
+	DICTIONARIES_URL: 'https://download.zotero.org/dictionaries/',
 };
 
 if (typeof process === 'object' && process + '' === '[object process]'){

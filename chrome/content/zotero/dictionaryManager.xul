@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
+
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<window
+		id="dictionary-manager"
+		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		xmlns:html="http://www.w3.org/1999/xhtml"
+		xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		onload="Zotero_Dictionary_Manager.init()"
+		windowtype="zotero:dictionaries"
+		width="445"
+		height="400">
+	
+	<script src="chrome://global/content/globalOverlay.js"/>
+	<script src="include.js"/>
+	<script src="commonDialog.js"/>
+	<script src="dictionaryManager.js"/>
+	
+	<vbox id="DictionaryManager" flex="1">
+		<richlistbox id="dictionaries" flex="1" tabindex="0"/>
+		
+		<html:div id="status">&#xA0;</html:div>
+		
+		<hbox class="dialog-button-box">
+			<button dlgtype="cancel" label="&zotero.general.cancel;" oncommand="window.close()"/>
+			<button dlgtype="accept" default="true" label="&zotero.general.ok;"
+				oncommand="Zotero_Dictionary_Manager.handleAccept()"/>
+		</hbox>
+	</vbox>
+	
+	<keyset>
+		<key id="key_close" key="W" modifiers="accel" oncommand="window.close()"/>
+	</keyset>
+</window>

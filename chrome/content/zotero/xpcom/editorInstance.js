@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+Components.utils.import("resource://gre/modules/InlineSpellChecker.jsm");
+
 // Note: TinyMCE is automatically doing some meaningless corrections to
 // note-editor produced HTML. Which might result to more
 // conflicts, especially in group libraries
@@ -73,7 +75,8 @@ class EditorInstance {
 		});
 		this._prefObserverIDs = [
 			Zotero.Prefs.registerObserver('note.fontSize', this._handleFontChange),
-			Zotero.Prefs.registerObserver('note.fontFamily', this._handleFontChange)
+			Zotero.Prefs.registerObserver('note.fontFamily', this._handleFontChange),
+			Zotero.Prefs.registerObserver('layout.spellcheckDefault', this._handleSpellCheckChange, true)
 		];
 		
 		// Run Cut/Copy/Paste with chrome privileges
@@ -208,6 +211,20 @@ class EditorInstance {
 	
 	_handleFontChange = () => {
 		this._postMessage({ action: 'updateFont', font: this._getFont() });
+	}
+
+	_handleSpellCheckChange = () => {
+		try {
+			let spellChecker = this._getSpellChecker();
+			let value = Zotero.Prefs.get('layout.spellcheckDefault', true);
+			if (!value && spellChecker.enabled
+				|| value && !spellChecker.enabled) {
+				spellChecker.toggleEnabled();
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
 	}
 	
 	_showInLibrary(ids) {
@@ -644,7 +661,9 @@ class EditorInstance {
 				}
 				case 'openContextMenu': {
 					let { x, y, pos, itemGroups } = message;
-					this._openPopup(x, y, pos, itemGroups);
+					// If `contenteditable` area wasn't focused before, the spell checker
+					// might not be fully initialized on right-click
+					setTimeout(() => this._openPopup(x, y, pos, itemGroups), 50);
 					return;
 				}
 				case 'return': {
@@ -788,7 +807,85 @@ class EditorInstance {
 		}
 		
 		appendItems(this._popup, itemGroups);
+		
+		// Spell checker
+		let spellChecker = this._getSpellChecker();
+		
+		// Separator
+		var separator = this._popup.ownerDocument.createElement('menuseparator');
+		this._popup.appendChild(separator);
+		// Check Spelling
+		var menuitem = this._popup.ownerDocument.createElement('menuitem');
+		menuitem.setAttribute('label', Zotero.getString('spellCheck.checkSpelling'));
+		menuitem.setAttribute('checked', spellChecker.enabled);
+		menuitem.addEventListener('command', () => {
+			// Possible values: 0 - off, 1 - only multi-line, 2 - multi and single line input boxes
+			Zotero.Prefs.set('layout.spellcheckDefault', spellChecker.enabled ? 0 : 1, true);
+		});
+		this._popup.append(menuitem);
+
+		if (spellChecker.enabled) {
+			// Languages menu
+			var menu = this._popup.ownerDocument.createElement('menu');
+			menu.setAttribute('label', Zotero.getString('general.languages'));
+			this._popup.append(menu);
+			// Languages menu popup
+			var menupopup = this._popup.ownerDocument.createElement('menupopup');
+			menu.append(menupopup);
+			
+			spellChecker.addDictionaryListToMenu(menupopup, null);
+			
+			// The menu is prepopulated with names from InlineSpellChecker::getDictionaryDisplayName(),
+			// which will be in English, so swap in native locale names where we have them
+			for (var menuitem of menupopup.children) {
+				// 'spell-check-dictionary-en-US'
+				let locale = menuitem.id.slice(23);
+				let label = Zotero.Dictionaries.getBestDictionaryName(locale);
+				if (label && label != locale) {
+					menuitem.setAttribute('label', label);
+				}
+			}
+			
+			// Separator
+			var separator = this._popup.ownerDocument.createElement('menuseparator');
+			menupopup.appendChild(separator);
+			// Add Dictionaries
+			var menuitem = this._popup.ownerDocument.createElement('menuitem');
+			menuitem.setAttribute('label', Zotero.getString('spellCheck.addRemoveDictionaries'));
+			menuitem.addEventListener('command', () => {
+				Services.ww.openWindow(null, "chrome://zotero/content/dictionaryManager.xul",
+					"dictionary-manager", "chrome,centerscreen", {});
+				
+			});
+			menupopup.append(menuitem);
+			
+			let selection = this._iframeWindow.getSelection();
+			if (selection) {
+				spellChecker.initFromEvent(
+					selection.anchorNode,
+					selection.anchorOffset
+				);
+			}
+
+			let firstElementChild = this._popup.firstElementChild;
+			let suggestionCount = spellChecker.addSuggestionsToMenu(this._popup, firstElementChild, 5);
+			if (suggestionCount) {
+				let separator = this._popup.ownerDocument.createElement('menuseparator');
+				this._popup.insertBefore(separator, firstElementChild);
+			}
+		}
+		
 		this._popup.openPopupAtScreen(x, y, true);
+	}
+
+	_getSpellChecker() {
+		let spellChecker = new InlineSpellChecker();
+		let editingSession = this._iframeWindow
+			.getInterface(Ci.nsIWebNavigation)
+			.QueryInterface(Ci.nsIInterfaceRequestor)
+			.getInterface(Ci.nsIEditingSession);
+		spellChecker.init(editingSession.getEditorForWindow(this._iframeWindow));
+		return spellChecker;
 	}
 
 	async _ensureNoteCreated() {
@@ -860,6 +957,16 @@ class EditorInstance {
 			Zotero.logError(e);
 			Zotero.crash(true);
 			throw e;
+		}
+		
+		// Reset spell checker as ProseMirror DOM modifications are
+		// often ignored otherwise
+		try {
+			let spellChecker = this._getSpellChecker();
+			spellChecker.toggleEnabled();
+			spellChecker.toggleEnabled();
+		} catch(e) {
+			Zotero.logError(e);
 		}
 	}
 

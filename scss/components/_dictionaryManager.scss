@@ -1,0 +1,27 @@
+#DictionaryManager {
+	padding: 15px;
+	
+	richlistitem {
+		font-size: 12px;
+	}
+	
+	input {
+		// Select rows, not checkboxes
+		-moz-user-focus: ignore;
+	}
+	
+	#status {
+		margin: 9px 0 0 5px;
+		font-size: 10px;
+		line-height: 1em;
+	}
+	
+	.dialog-button-box {
+		display: flex;
+		justify-content: end;
+	}
+	
+	button {
+		font-size: 13px;
+	}
+}
