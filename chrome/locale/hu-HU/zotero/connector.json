@@ -26,6 +26,9 @@
   "progressWindow_savingTo": {
     "message": "Mentés"
   },
+  "progressWindow_tagPlaceholder": {
+    "message": "Címkék (vesszővel elválasztva)"
+  },
   "progressWindow_error_translation": {
     "message": "Hiba történt az elem mentése közben. Lásd a $1 további információért"
   },

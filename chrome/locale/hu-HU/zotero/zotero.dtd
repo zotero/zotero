@@ -343,8 +343,8 @@
 <!ENTITY zotero.pdfReader.rotateClockwise "Forgatás az óramutató járásával megegyező irányba">
 <!ENTITY zotero.pdfReader.rotateCounterclockwise "Forgatás az óramutató járásával ellentétes irányba">
 <!ENTITY zotero.pdfReader.handTool "Hand Tool">
-<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
-<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
+<!ENTITY zotero.pdfReader.verticalScrolling "Függőleges görgetés">
+<!ENTITY zotero.pdfReader.horizontalScrolling "Vízszintes görgetés">
 <!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
 <!ENTITY zotero.pdfReader.noSpreads "No Spreads">
 <!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
