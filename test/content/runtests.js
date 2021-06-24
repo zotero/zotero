@@ -275,13 +275,15 @@ if(run && ZoteroUnit.tests) {
 }
 
 if(run) {
-	window.onload = function() {
-		Zotero.spawn(function* () {
-			yield Zotero.Schema.schemaUpdatePromise;
-			
-			initPDFToolsPath();
-			
-			return mocha.run();
-		})
+	window.onload = async function () {
+		await Zotero.Schema.schemaUpdatePromise;
+		
+		// Make a copy of the database that can be used in resetDB()
+		var dbFile = Zotero.DataDirectory.getDatabase();
+		await OS.File.copy(dbFile, dbFile + '-test-template');
+		
+		initPDFToolsPath();
+		
+		return mocha.run();
 	};
 }

@@ -331,7 +331,7 @@ Zotero.Schema = new function(){
 						}, 250);
 					}
 				}
-			}.bind(this), 1000);
+			}.bind(this), Zotero.isStandalone ? 1000 : 0);
 		});
 		
 		return updated;
