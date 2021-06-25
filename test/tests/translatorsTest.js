@@ -1,6 +1,79 @@
 "use strict";
 
 describe("Zotero.Translators", function () {
+	describe("#init()", function () {
+		async function testUpdateCache({ translatorID, oldLabel, newLabel, oldLastUpdated, newLastUpdated }) {
+			var oldTranslator = buildDummyTranslator('web', `function doDetect() {}; function doSearch(); {}`, {
+				label: oldLabel,
+				translatorID,
+				translatorType: 8,
+				lastUpdated: oldLastUpdated
+			});
+			await Zotero.Translators.save(oldTranslator.metadata, oldTranslator.code);
+			await Zotero.Translators.reinit();
+			var matched = (await Zotero.Translators.getAllForType('search'))
+				.filter(x => x.translatorID == translatorID);
+			assert.lengthOf(matched, 1);
+			assert.equal(matched[0].label, oldLabel);
+			var oldPath = matched[0].path;
+			assert.isTrue(await OS.File.exists(oldPath));
+			
+			var rows = await Zotero.DB.valueQueryAsync(
+				"SELECT COUNT(*) FROM translatorCache WHERE fileName=?",
+				oldTranslator.label + ".js"
+			);
+			assert.equal(rows, 1);
+			
+			var newTranslator = buildDummyTranslator('web', `function doDetect() {}; function doSearch(); {}`, {
+				label: newLabel,
+				translatorID,
+				translatorType: 8,
+				lastUpdated: newLastUpdated
+			});
+			await Zotero.Translators.save(newTranslator.metadata, newTranslator.code);
+			await Zotero.Translators.reinit();
+			
+			matched = (await Zotero.Translators.getAllForType('search'))
+				.filter(x => x.translatorID == translatorID);
+			assert.lengthOf(matched, 1);
+			assert.equal(matched[0].label, newLabel);
+			assert.isFalse(await OS.File.exists(oldPath));
+			assert.isTrue(await OS.File.exists(matched[0].path));
+			
+			rows = await Zotero.DB.valueQueryAsync(
+				"SELECT COUNT(*) FROM translatorCache WHERE fileName=?",
+				oldTranslator.label + ".js"
+			);
+			assert.equal(rows, 0);
+			
+			rows = await Zotero.DB.valueQueryAsync(
+				"SELECT COUNT(*) FROM translatorCache WHERE fileName=?",
+				newTranslator.label + ".js"
+			);
+			assert.equal(rows, 1);
+		}
+		
+		it("should update cache when deleting old translator with same id", async function () {
+			await testUpdateCache({
+				translatorID: 'f678741b-b82d-48a3-a7c2-26764d08cc34',
+				oldLabel: 'Old Test Translator',
+				newLabel: 'New Test Translator',
+				oldLastUpdated: '2021-06-25 00:00:00',
+				newLastUpdated: '2021-06-25 00:05:00',
+			});
+		});
+		
+		it("should update cache when deleting second translator with same id and timestamp", async function () {
+			await testUpdateCache({
+				translatorID: '4bff4da8-b3f6-47dc-957a-dcb96dc48d4f',
+				oldLabel: 'Old Test Translator 2',
+				newLabel: 'New Test Translator 2',
+				oldLastUpdated: '2021-06-25 00:00:00',
+				newLastUpdated: '2021-06-25 00:00:00',
+			});
+		});
+	});
+	
 	describe("#getWebTranslatorsForLocation()", function () {
 		var genericTranslator, topLevelTranslator, frameTranslator;
 		var noMatchURL = 'http://notowls.com/citation/penguin-migration-patterns';
