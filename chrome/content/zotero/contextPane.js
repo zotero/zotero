@@ -238,7 +238,10 @@ var ZoteroContextPane = new function () {
 		var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 		if (reader) {
 			var editor = _getActiveEditor();
-			reader.enableAddToNote(!!editor);
+			var libraryReadOnly = editor && editor.item && !_isLibraryEditable(editor.item.libraryID);
+			var noteReadOnly = editor && editor.item
+				&& (editor.item.deleted || editor.item.parentItem && editor.item.parentItem.deleted);
+			reader.enableAddToNote(!!editor && !libraryReadOnly && !noteReadOnly);
 		}
 	}
 	
