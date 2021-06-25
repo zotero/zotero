@@ -167,7 +167,7 @@ Zotero.Translators = new function() {
 								+ existingTranslator.fileName + " with same ID as "
 								+ translator.fileName);
 							yield OS.File.remove(existingTranslator.path);
-							delete _translators[translator.translatorID];
+							yield removeFromCaches(existingTranslator);
 						}
 						// If cached translator is newer or the same, delete the current one
 						else {
@@ -175,6 +175,7 @@ Zotero.Translators = new function() {
 								+ " with same ID is already loaded -- deleting "
 								+ translator.fileName);
 							yield OS.File.remove(translator.path);
+							yield removeFromDBCache(translator.fileName);
 							continue;
 						}
 					}
@@ -184,10 +185,11 @@ Zotero.Translators = new function() {
 					for (let type in Zotero.Translator.TRANSLATOR_TYPES) {
 						if (translator.translatorType & Zotero.Translator.TRANSLATOR_TYPES[type]) {
 							_cache[type].push(translator);
-							if ((translator.translatorType & Zotero.Translator.TRANSLATOR_TYPES.web) && translator.targetAll) {
-								_cache.webWithTargetAll.push(translator);
-							}
 						}
+					}
+					if ((translator.translatorType & Zotero.Translator.TRANSLATOR_TYPES.web)
+							&& translator.targetAll) {
+						_cache.webWithTargetAll.push(translator);
 					}
 					
 					if (!dbCacheEntry) {
@@ -242,6 +244,33 @@ Zotero.Translators = new function() {
 	this.reinit = function (options = {}) {
 		return this.init(Object.assign({}, options, { reinit: true }));
 	};
+	
+	
+	async function removeFromCaches({ translatorID, translatorType, targetAll, fileName }) {
+		await removeFromDBCache(fileName);
+		
+		delete _translators[translatorID];
+		
+		for (let typeName in Zotero.Translator.TRANSLATOR_TYPES) {
+			if (translatorType & Zotero.Translator.TRANSLATOR_TYPES[typeName]) {
+				let pos = _cache[typeName].findIndex(x => x.translatorID == translatorID);
+				if (pos != -1) {
+					_cache[typeName].splice(pos, 1);
+				}
+			}
+		}
+		if ((translatorType & Zotero.Translator.TRANSLATOR_TYPES.web) && targetAll) {
+			let pos = _cache.webWithTargetAll.findIndex(x => x.translatorID == translatorID);
+			if (pos != -1) {
+				_cache.webWithTargetAll.splice(pos, 1);
+			}
+		}
+	}
+	
+	
+	async function removeFromDBCache(fileName) {
+		await Zotero.DB.queryAsync("DELETE FROM translatorCache WHERE fileName=?", fileName);
+	}
 	
 	
 	/**
@@ -531,7 +560,7 @@ Zotero.Translators = new function() {
 			"REPLACE INTO translatorCache VALUES (?, ?, ?)",
 			[fileName, JSON.stringify(metadataJSON), lastModifiedTime]
 		);
-	}
+	};
 	
 	this.makeTranslatorProvider = function (methods) {
 		var requiredMethods = [
