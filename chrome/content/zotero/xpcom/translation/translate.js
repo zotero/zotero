@@ -1754,9 +1754,9 @@ Zotero.Translate.Base.prototype = {
 	/**
 	 * Loads the translator into its sandbox
 	 * @param {Zotero.Translator} translator
-	 * @return {Promise<Boolean>} Whether the translator could be successfully loaded
+	 * @return {Promise}
 	 */
-	"_loadTranslator": Zotero.Promise.method(function (translator) {
+	_loadTranslator: async function (translator) {
 		var sandboxLocation = this._getSandboxLocation();
 		if(!this._sandboxLocation || sandboxLocation !== this._sandboxLocation) {
 			this._sandboxLocation = sandboxLocation;
@@ -1798,25 +1798,17 @@ Zotero.Translate.Base.prototype = {
 		}.bind(this);
 		
 		if (this.noWait) {
-			try {
-				let codePromise = translator.getCode();
-				if (!codePromise.isResolved()) {
-					throw new Error("Code promise is not resolved in noWait mode");
-				}
-				parse(codePromise.value());
+			let codePromise = translator.getCode();
+			if (!codePromise.isResolved()) {
+				throw new Error("Code promise is not resolved in noWait mode");
 			}
-			catch (e) {
-				this.complete(false, e);
-			}
+			parse(codePromise.value());
 		}
 		else {
-			return translator.getCode()
-			.then(parse)
-			.catch(function(e) {
-				this.complete(false, e);
-			}.bind(this));
+			let code = await translator.getCode();
+			await parse(code);
 		}
-	}),
+	},
 	
 	/**
 	 * Generates a sandbox for scraping/scraper detection
