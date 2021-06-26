@@ -1,75 +1,80 @@
 "use strict";
 
-describe("Zotero.Translators", function () {
+describe.only("Zotero.Translators", function () {
 	describe("#init()", function () {
-		async function testUpdateCache({ translatorID, oldLabel, newLabel, oldLastUpdated, newLastUpdated }) {
-			var oldTranslator = buildDummyTranslator('web', `function doDetect() {}; function doSearch(); {}`, {
-				label: oldLabel,
+		async function testUpdateCache({ translatorID, label1, label2, lastUpdated1, lastUpdated2, expect }) {
+			var translator1 = buildDummyTranslator('web', `function doDetect() {}; function doSearch(); {}`, {
+				label: label1,
 				translatorID,
 				translatorType: 8,
-				lastUpdated: oldLastUpdated
+				lastUpdated: lastUpdated1
 			});
-			await Zotero.Translators.save(oldTranslator.metadata, oldTranslator.code);
+			await Zotero.Translators.save(translator1.metadata, translator1.code);
 			await Zotero.Translators.reinit();
 			var matched = (await Zotero.Translators.getAllForType('search'))
 				.filter(x => x.translatorID == translatorID);
 			assert.lengthOf(matched, 1);
-			assert.equal(matched[0].label, oldLabel);
-			var oldPath = matched[0].path;
-			assert.isTrue(await OS.File.exists(oldPath));
+			assert.equal(matched[0].label, label1);
+			var path1 = matched[0].path;
+			assert.isTrue(await OS.File.exists(path1));
 			
 			var rows = await Zotero.DB.valueQueryAsync(
 				"SELECT COUNT(*) FROM translatorCache WHERE fileName=?",
-				oldTranslator.label + ".js"
+				translator1.label + ".js"
 			);
 			assert.equal(rows, 1);
 			
-			var newTranslator = buildDummyTranslator('web', `function doDetect() {}; function doSearch(); {}`, {
-				label: newLabel,
+			var translator2 = buildDummyTranslator('web', `function doDetect() {}; function doSearch(); {}`, {
+				label: label2,
 				translatorID,
 				translatorType: 8,
-				lastUpdated: newLastUpdated
+				lastUpdated: lastUpdated2
 			});
-			await Zotero.Translators.save(newTranslator.metadata, newTranslator.code);
+			await Zotero.Translators.save(translator2.metadata, translator2.code);
 			await Zotero.Translators.reinit();
 			
 			matched = (await Zotero.Translators.getAllForType('search'))
 				.filter(x => x.translatorID == translatorID);
 			assert.lengthOf(matched, 1);
-			assert.equal(matched[0].label, newLabel);
-			assert.isFalse(await OS.File.exists(oldPath));
+			assert.equal(matched[0].label, expect == 1 ? label1 : label2);
+			// If keeping the second translator, make sure the first one was deleted
+			if (expect == 2) {
+				assert.isFalse(await OS.File.exists(path1));
+			}
 			assert.isTrue(await OS.File.exists(matched[0].path));
 			
 			rows = await Zotero.DB.valueQueryAsync(
 				"SELECT COUNT(*) FROM translatorCache WHERE fileName=?",
-				oldTranslator.label + ".js"
+				(expect == 1 ? translator2.label  : translator1.label) + ".js"
 			);
 			assert.equal(rows, 0);
 			
 			rows = await Zotero.DB.valueQueryAsync(
 				"SELECT COUNT(*) FROM translatorCache WHERE fileName=?",
-				newTranslator.label + ".js"
+				(expect == 1 ? translator1.label  : translator2.label) + ".js"
 			);
 			assert.equal(rows, 1);
 		}
 		
-		it("should update cache when deleting old translator with same id", async function () {
+		it("should delete older translator with same id", async function () {
 			await testUpdateCache({
 				translatorID: 'f678741b-b82d-48a3-a7c2-26764d08cc34',
-				oldLabel: 'Old Test Translator',
-				newLabel: 'New Test Translator',
-				oldLastUpdated: '2021-06-25 00:00:00',
-				newLastUpdated: '2021-06-25 00:05:00',
+				label1: 'Test Translator A 1',
+				label2: 'Test Translator A 2',
+				lastUpdated1: '2021-06-25 00:00:00',
+				lastUpdated2: '2021-06-25 00:05:00',
+				expect: 2
 			});
 		});
 		
-		it("should update cache when deleting second translator with same id and timestamp", async function () {
+		it("should delete newer translator with same id", async function () {
 			await testUpdateCache({
-				translatorID: '4bff4da8-b3f6-47dc-957a-dcb96dc48d4f',
-				oldLabel: 'Old Test Translator 2',
-				newLabel: 'New Test Translator 2',
-				oldLastUpdated: '2021-06-25 00:00:00',
-				newLastUpdated: '2021-06-25 00:00:00',
+				translatorID: 'abd90f38-0900-4952-9935-3938933699b9',
+				label1: 'Test Translator B 1',
+				label2: 'Test Translator B 2',
+				lastUpdated1: '2021-06-25 00:05:00',
+				lastUpdated2: '2021-06-25 00:00:00',
+				expect: 1
 			});
 		});
 	});
