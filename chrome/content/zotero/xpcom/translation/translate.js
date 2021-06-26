@@ -1756,7 +1756,7 @@ Zotero.Translate.Base.prototype = {
 	 * @param {Zotero.Translator} translator
 	 * @return {Promise}
 	 */
-	_loadTranslator: async function (translator) {
+	_loadTranslator: Zotero.Promise.method(function (translator) {
 		var sandboxLocation = this._getSandboxLocation();
 		if(!this._sandboxLocation || sandboxLocation !== this._sandboxLocation) {
 			this._sandboxLocation = sandboxLocation;
@@ -1805,10 +1805,9 @@ Zotero.Translate.Base.prototype = {
 			parse(codePromise.value());
 		}
 		else {
-			let code = await translator.getCode();
-			await parse(code);
+			return translator.getCode().then(parse);
 		}
-	},
+	}),
 	
 	/**
 	 * Generates a sandbox for scraping/scraper detection
