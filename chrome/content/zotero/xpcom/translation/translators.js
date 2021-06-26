@@ -161,7 +161,7 @@ Zotero.Translators = new function() {
 					// Check if there's already a cached translator with the same id
 					if (_translators[translator.translatorID]) {
 						let existingTranslator = _translators[translator.translatorID];
-						// If cached translator is older, delete it
+						// If cached translator is older, delete it and install this one
 						if (existingTranslator.lastUpdated < translator.lastUpdated) {
 							translator.logError("Deleting older translator "
 								+ existingTranslator.fileName + " with same ID as "
@@ -169,14 +169,32 @@ Zotero.Translators = new function() {
 							yield OS.File.remove(existingTranslator.path);
 							yield removeFromCaches(existingTranslator);
 						}
-						// If cached translator is newer or the same, delete the current one
-						else {
+						// If cached translator is newer, keep it and discard this one
+						else if (existingTranslator.lastUpdated > translator.lastUpdated) {
+							translator.logError("Deleting older translator "
+								+ translator.fileName + " with same ID as "
+								+ existingTranslator.fileName);
+							yield OS.File.remove(translator.path);
+							yield removeFromDBCache(translator.fileName);
+							continue;
+						}
+						// If cached translator has the same timestamp and matches the label, keep
+						// it and discard this one
+						else if (this.getFileNameFromLabel(existingTranslator.label) == existingTranslator.fileName) {
 							translator.logError("Translator " + existingTranslator.fileName
-								+ " with same ID is already loaded -- deleting "
+								+ " with same ID is already loaded and matches label -- deleting "
 								+ translator.fileName);
 							yield OS.File.remove(translator.path);
 							yield removeFromDBCache(translator.fileName);
 							continue;
+						}
+						// Otherwise delete the cached one and install this one
+						else {
+							translator.logError("Deleting translator " + translator.fileName
+								+ " with same ID as " + existingTranslator.fileName + " but with "
+								+ "mismatched filename");
+							yield OS.File.remove(existingTranslator.path);
+							yield removeFromCaches(existingTranslator);
 						}
 					}
 					
