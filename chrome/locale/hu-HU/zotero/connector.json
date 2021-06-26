@@ -56,6 +56,9 @@
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Mentés engedélyezése online könyvtárba"
   },
+  "reports_debug_output_submitted": {
+    "message": "A hibakeresés eredménye elküldve.\n\nA hibaazonosító$1."
+  },
   "integration_error_clientUpgrade": {
     "message": "A webalapú hivatkozáshoz szükség van $1 vagy későbbire."
   },
