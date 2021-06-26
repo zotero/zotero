@@ -78,6 +78,7 @@ describe("Dictionaries", function () {
 		}
 		
 		sandbox.stub(Zotero.File, 'download').callsFake(async (url, downloadPath) => {
+			Zotero.debug("Fake downloading " + url);
 			if (url.includes('en-UK')) {
 				return OS.File.copy(enUKXPIOld, downloadPath);
 			}
@@ -89,9 +90,9 @@ describe("Dictionaries", function () {
 			}
 			throw new Error("Unexpected URL " + url);
 		});
-		await Zotero.Dictionaries.install('@fake-en-UK-dictionary');
-		await Zotero.Dictionaries.install('@fake-fr-FR-dictionary');
-		await Zotero.Dictionaries.install('@fake-xx-UN-dictionary');
+		await Zotero.Dictionaries.install('@fake-en-UK-dictionary', "5");
+		await Zotero.Dictionaries.install('@fake-fr-FR-dictionary', "1");
+		await Zotero.Dictionaries.install('@fake-xx-UN-dictionary', "5");
 		sandbox.restore();
 		
 		// Create metadata response for available dictionaries
@@ -112,10 +113,11 @@ describe("Dictionaries", function () {
 			]);
 		
 		sandbox.stub(Zotero.File, 'download').callsFake(async (url, downloadPath) => {
-			if (url.includes('en-UK')) {
+			Zotero.debug("Fake downloading " + url);
+			if (url.includes('en-UK') && url.includes("-1.xpi")) {
 				return OS.File.copy(enUKXPINew, downloadPath);
 			}
-			if (url.includes('fr-FR')) {
+			if (url.includes('fr-FR') && url.includes("-2.xpi")) {
 				return OS.File.copy(frFRv2XPI, downloadPath);
 			}
 			throw new Error("Unexpected URL " + url);

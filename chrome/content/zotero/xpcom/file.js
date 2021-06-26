@@ -53,7 +53,7 @@ Zotero.File = new function(){
 		catch (e) {
 			Zotero.logError(e);
 		}
-		throw new Error("Unexpected value '" + pathOrFile + "'");
+		throw new Error("Unexpected path value '" + pathOrFile + "'");
 	}
 	
 	

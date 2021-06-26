@@ -39,7 +39,7 @@ var Zotero_Dictionary_Manager = new function () {
 		var installedLocales = new Set(Zotero.Dictionaries.dictionaries.map(d => d.locale));
 		var availableDictionaries = await Zotero.Dictionaries.fetchDictionariesList();
 		var availableUpdates = await Zotero.Dictionaries.getAvailableUpdates(availableDictionaries);
-		updateMap = new Map(availableUpdates.map(x => [x.old.id, x.new.id]));
+		updateMap = new Map(availableUpdates.map(x => [x.old.id, { id: x.new.id, version: x.new.version }]));
 		
 		var { InlineSpellChecker } = ChromeUtils.import("resource://gre/modules/InlineSpellChecker.jsm", {});
 		var isc = new InlineSpellChecker();
@@ -83,6 +83,7 @@ var Zotero_Dictionary_Manager = new function () {
 			checkbox.dataset.dictId = d.id;
 			checkbox.dataset.dictLocale = d.locale;
 			checkbox.dataset.dictName = d.name;
+			checkbox.dataset.dictVersion = d.version;
 			// en-US is always checked and disabled
 			checkbox.checked = d.locale == 'en-US' || installed.has(d.id);
 			if (d.locale == 'en-US') {
@@ -133,10 +134,18 @@ var Zotero_Dictionary_Manager = new function () {
 			if (updateMap.has(id)) {
 				// If id is changing, delete the old one first
 				toRemove.push(id);
-				toDownload.push({ id: updateMap.get(id), name: elem.dataset.dictName });
+				toDownload.push({
+					id: updateMap.get(id).id,
+					name: elem.dataset.dictName,
+					version: updateMap.get(id).version
+				});
 			}
 			else if (!installed.has(id)) {
-				toDownload.push({ id, name: elem.dataset.dictName });
+				toDownload.push({
+					id,
+					name: elem.dataset.dictName,
+					version: elem.dataset.dictVersion
+				});
 			}
 		}
 		if (toRemove.length) {
@@ -145,10 +154,10 @@ var Zotero_Dictionary_Manager = new function () {
 			}
 		}
 		if (toDownload.length) {
-			for (let { id, name } of toDownload) {
+			for (let { id, name, version } of toDownload) {
 				_updateStatus(Zotero.getString('general.downloading.quoted', name));
 				try {
-					await Zotero.Dictionaries.install(id);
+					await Zotero.Dictionaries.install(id, version);
 				}
 				catch (e) {
 					Zotero.logError(e);
@@ -156,7 +165,7 @@ var Zotero_Dictionary_Manager = new function () {
 						null,
 						Zotero.getString('general.error'),
 						Zotero.getString('spellCheck.dictionaryManager.error.unableToInstall', name)
-							+ "\n\n" + e.message
+							+ "\n\n" + (e.message ? (e.message + "\n\n" + e.stack) : e)
 					);
 					return;
 				}

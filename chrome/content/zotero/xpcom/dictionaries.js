@@ -92,15 +92,19 @@ Zotero.Dictionaries = new function () {
 	 * e.g., `en-NZ@dictionaries.addons.mozilla.org`
 	 *
 	 * @param {String} id - Dictionary extension id
+	 * @param {String} version - Dictionary extension version
 	 * @return {Promise}
 	 */
-	this.install = async function (id) {
+	this.install = async function (id, version) {
 		if (id == '@unitedstatesenglishdictionary') {
 			throw new Error("en-US dictionary is bundled");
 		}
+		if (!version) {
+			throw new Error("Version not provided");
+		}
 		await this.remove(id);
 		Zotero.debug("Installing dictionaries from " + id);
-		let url = this.baseURL + id + '.xpi';
+		let url = this.baseURL + id + '-' + version + '.xpi';
 		let xpiPath = OS.Path.join(Zotero.getTempDirectory().path, id);
 		let dir = OS.Path.join(Zotero.Profile.dir, 'dictionaries', id);
 		let zipReader = Components.classes['@mozilla.org/libjar/zip-reader;1']
@@ -115,7 +119,7 @@ Zotero.Dictionaries = new function () {
 			let entries = zipReader.findEntries('*/');
 			while (entries.hasMore()) {
 				let entry = entries.getNext();
-				let destPath = OS.Path.join(dir, entry);
+				let destPath = OS.Path.join(dir, ...entry.split(/\//));
 				await Zotero.File.createDirectoryIfMissingAsync(destPath, { from: Zotero.Profile.dir });
 			}
 
@@ -126,7 +130,8 @@ Zotero.Dictionaries = new function () {
 				if (entry.substr(-1) === '/') {
 					continue;
 				}
-				let destPath = OS.Path.join(dir, entry);
+				Zotero.debug("Extracting " + entry);
+				let destPath = OS.Path.join(dir, ...entry.split(/\//));
 				zipReader.extract(entry, Zotero.File.pathToFile(destPath));
 			}
 
@@ -135,11 +140,21 @@ Zotero.Dictionaries = new function () {
 			await _loadDirectory(dir);
 		}
 		catch (e) {
-			if (await OS.File.exists(xpiPath)) {
-				await OS.File.remove(xpiPath);
+			try {
+				if (await OS.File.exists(xpiPath)) {
+					await OS.File.remove(xpiPath);
+				}
 			}
-			if (await OS.File.exists(dir)) {
-				await OS.File.removeDir(dir);
+			catch (e) {
+				Zotero.logError(e);
+			}
+			try {
+				if (await OS.File.exists(dir)) {
+					await OS.File.removeDir(dir);
+				}
+			}
+			catch (e) {
+				Zotero.logError(e);
 			}
 			throw e;
 		}
@@ -163,7 +178,7 @@ Zotero.Dictionaries = new function () {
 			manifest = JSON.parse(manifest);
 			for (let locale in manifest.dictionaries) {
 				let dicPath = manifest.dictionaries[locale];
-				let affPath = OS.Path.join(dictionary.dir, dicPath.slice(0, -3) + 'aff');
+				let affPath = OS.Path.join(dictionary.dir, ...dicPath.split(/\//)).slice(0, -3) + 'aff';
 				Zotero.debug(`Removing ${locale} dictionary`);
 				_spellChecker.removeDictionary(locale, Zotero.File.pathToFile(affPath));
 			}
@@ -248,7 +263,7 @@ Zotero.Dictionaries = new function () {
 		for (let update of updates) {
 			try {
 				await this.remove(update.old.id);
-				await this.install(update.new.id);
+				await this.install(update.new.id, update.new.version);
 				updated++;
 			}
 			catch (e) {
@@ -280,7 +295,7 @@ Zotero.Dictionaries = new function () {
 		for (let locale in manifest.dictionaries) {
 			locales.push(locale);
 			let dicPath = manifest.dictionaries[locale];
-			let affPath = OS.Path.join(dir, dicPath.slice(0, -3) + 'aff');
+			let affPath = OS.Path.join(dir, ...dicPath.split(/\//)).slice(0, -3) + 'aff';
 			Zotero.debug(`Adding ${locale} dictionary`);
 			_spellChecker.addDictionary(locale, Zotero.File.pathToFile(affPath));
 			_dictionaries.push({ id, locale, version, dir });
