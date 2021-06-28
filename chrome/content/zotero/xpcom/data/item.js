@@ -4480,7 +4480,7 @@ Zotero.Item.prototype.multiDiff = function (otherItems, ignoreFields) {
  * @param {Number} [libraryID] - libraryID of the new item, or the same as original if omitted
  * @param {Boolean} [options.skipTags=false] - Skip tags
  * @param {Boolean} [options.includeCollections=false] - Add new item to all collections
- * @return {Promise<Zotero.Item>}
+ * @return {Zotero.Item}
  */
 Zotero.Item.prototype.clone = function (libraryID, options = {}) {
 	Zotero.debug('Cloning item ' + this.id);
