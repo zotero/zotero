@@ -549,7 +549,23 @@ var ZoteroPane = new function()
 				return;
 			}
 		}
-	
+		
+		// Tab navigation
+		// TODO: Select across tabs without selecting with Ctrl-Shift, as in Firefox?
+		let ctrlOnly = event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey;
+		if (ctrlOnly) {
+			if (event.key == 'PageUp') {
+				Zotero_Tabs.selectPrev();
+				event.preventDefault();
+				return;
+			}
+			else if (event.key == 'PageDown') {
+				Zotero_Tabs.selectNext();
+				event.preventDefault();
+				return;
+			}
+		}
+		
 		try {
 			// Ignore keystrokes outside of Zotero pane
 			if (!(event.originalTarget.ownerDocument instanceof XULDocument)) {
@@ -564,24 +580,8 @@ var ZoteroPane = new function()
 			event.preventDefault();
 			return;
 		}
-		
-		if (from == 'zotero-pane') {
-			// Tab navigation
-			// TODO: Select across tabs without selecting with Ctrl-Shift, as in Firefox?
-			let ctrlOnly = event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey;
-			if (ctrlOnly) {
-				if (event.key == 'PageUp') {
-					Zotero_Tabs.selectPrev();
-					event.preventDefault();
-					return;
-				}
-				else if (event.key == 'PageDown') {
-					Zotero_Tabs.selectNext();
-					event.preventDefault();
-					return;
-				}
-			}
-			
+
+		if (from == 'zotero-pane') {			
 			// Highlight collections containing selected items
 			//
 			// We use Control (17) on Windows because Alt triggers the menubar;
