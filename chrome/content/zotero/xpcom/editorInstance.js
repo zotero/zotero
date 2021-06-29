@@ -238,6 +238,74 @@ class EditorInstance {
 			win.focus();
 		}
 	}
+
+	/**
+	 * Transform plain text, containing some supported HTML tags, into actual HTML.
+	 * A similar code is also used in pdf-reader mini editor for annotation text and comments.
+	 * It basically creates a text node and then parses and wraps specific parts
+	 * of it into supported HTML tags
+	 *
+	 * @param text Plain text flavored with some HTML tags
+	 * @returns {string} HTML
+	 * @private
+	 */
+	_transformTextToHTML(text) {
+		const supportedFormats = ['i', 'b', 'sub', 'sup'];
+
+		function getFormatter(str) {
+			let results = supportedFormats.map(format => str.toLowerCase().indexOf('<' + format + '>'));
+			results = results.map((offset, idx) => [supportedFormats[idx], offset]);
+			results.sort((a, b) => a[1] - b[1]);
+			for (let result of results) {
+				let format = result[0];
+				let offset = result[1];
+				if (offset < 0) continue;
+				let lastIndex = str.toLowerCase().indexOf('</' + format + '>', offset);
+				if (lastIndex >= 0) {
+					let parts = [];
+					parts.push(str.slice(0, offset));
+					parts.push(str.slice(offset + format.length + 2, lastIndex));
+					parts.push(str.slice(lastIndex + format.length + 3));
+					return {
+						format,
+						parts
+					};
+				}
+			}
+			return null;
+		}
+
+		function walkFormat(parent) {
+			let child = parent.firstChild;
+			while (child) {
+				if (child.nodeType === 3) {
+					let text = child.nodeValue;
+					let formatter = getFormatter(text);
+					if (formatter) {
+						let nodes = [];
+						nodes.push(doc.createTextNode(formatter.parts[0]));
+						let midNode = doc.createElement(formatter.format);
+						midNode.appendChild(doc.createTextNode(formatter.parts[1]));
+						nodes.push(midNode);
+						nodes.push(doc.createTextNode(formatter.parts[2]));
+						child.replaceWith(...nodes);
+						child = midNode;
+					}
+				}
+				walkFormat(child);
+				child = child.nextSibling;
+			}
+		}
+		
+		let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
+		.createInstance(Components.interfaces.nsIDOMParser);
+		let doc = parser.parseFromString('', 'text/html');
+		
+		// innerText transforms \n into <br>
+		doc.body.innerText = text;
+		walkFormat(doc.body);
+		return doc.body.innerHTML;
+	}
 	
 	/**
 	 * @param {Zotero.Item[]} annotations
@@ -324,18 +392,23 @@ class EditorInstance {
 
 			// Text
 			if (annotation.text) {
-				highlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}">“${annotation.text.trim()}”</span>`;
+				let text = this._transformTextToHTML(annotation.text.trim());
+				highlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}">“${text}”</span>`;
 			}
 			
 			// Note
 			if (annotation.comment) {
-				commentHTML = ' ' + annotation.comment.trim();
+				let comment = this._transformTextToHTML(annotation.comment.trim());
+				// Move comment to the next line if it has multiple lines
+				commentHTML = (((highlightHTML || imageHTML || citationHTML) && comment.includes('<br')) ? '<br/>' : ' ') + comment;
+			}
+			
+			if (citationHTML) {
+				// Move citation to the next line if highlight has multiple lines or is after image
+				citationHTML = ((highlightHTML && highlightHTML.includes('<br') || imageHTML) ? '<br>' : '') + citationHTML;
 			}
 			
 			let otherHTML = [highlightHTML, citationHTML, commentHTML].filter(x => x).join(' ');
-			if (imageHTML && otherHTML) {
-				imageHTML += '<br/>';
-			}
 			html += '<p>' + imageHTML + otherHTML + '</p>\n';
 		}
 		return { html, citationItems: storedCitationItems };
