@@ -102,7 +102,7 @@ const NotesList = forwardRef(({ onClick, onContextMenu, onAddChildButtonDown, on
 				{allNotes.length > visibleNotes.length
 					&& <div className="more-row" onClick={handleClickMore}>{
 						Zotero.getString('general.numMore', Zotero.Utilities.numberFormat(
-							[(allNotes.length - visibleNotes.length) - MAX_UNEXPANDED_ALL_NOTES], 0))
+							[allNotes.length - visibleNotes.length], 0))
 					}</div>
 				}
 			</section>

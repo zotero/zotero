@@ -736,29 +736,22 @@ Zotero.Tags = new function() {
 		// Color setting can exist without tag. If missing, we have to add the tag.
 		var tagID = this.getID(tagName);
 		
-		return Zotero.DB.executeTransaction(function* () {
-			// Base our action on the first item. If it has the tag,
-			// remove the tag from all items. If it doesn't, add it to all.
-			var firstItem = items[0];
-			// Remove from all items
-			if (tagID && firstItem.hasTag(tagName)) {
-				for (let i=0; i<items.length; i++) {
-					let item = items[i];
-					item.removeTag(tagName);
-					yield item.save({
-						skipDateModifiedUpdate: true
-					});
+		return Zotero.DB.executeTransaction(async function () {
+			// If all items already have the tag, remove it from all items
+			if (tagID && items.every(x => x.hasTag(tagName))) {
+				for (let item of items) {
+					if (item.removeTag(tagName)) {
+						await item.save();
+					}
 				}
 				Zotero.Prefs.set('purge.tags', true);
 			}
-			// Add to all items
+			// Otherwise add to all items
 			else {
-				for (let i=0; i<items.length; i++) {
-					let item = items[i];
-					item.addTag(tagName);
-					yield item.save({
-						skipDateModifiedUpdate: true
-					});
+				for (let item of items) {
+					if (item.addTag(tagName)) {
+						await item.save();
+					}
 				}
 			}
 		}.bind(this));

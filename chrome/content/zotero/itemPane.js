@@ -265,7 +265,7 @@ var ZoteroItemPane = new function() {
 		_selectedNoteID = item.id;
 		
 		var type = Zotero.Libraries.get(item.libraryID).libraryType;
-		if (type == 'group' || !Zotero.isPDFBuild) {
+		if (type == 'group' && !Zotero.enablePDFBuildForGroups || !Zotero.isPDFBuild) {
 			// If an external note window is open for this item, don't show the editor
 			if (ZoteroPane.findNoteWindow(item.id)) {
 				this.showNoteWindowMessage();
@@ -295,7 +295,7 @@ var ZoteroItemPane = new function() {
 			noteEditor.item = item;
 		}
 		
-		document.getElementById('zotero-view-note-button').hidden = !editable || type != 'group' && Zotero.isPDFBuild;
+		document.getElementById('zotero-view-note-button').hidden = !editable || (type == 'user' || Zotero.enablePDFBuildForGroups) && Zotero.isPDFBuild;
 		document.getElementById('zotero-item-pane-content').selectedIndex = 2;
 	};
 	
@@ -312,7 +312,7 @@ var ZoteroItemPane = new function() {
 		var selectedNote = Zotero.Items.get(_selectedNoteID);
 		
 		var type = Zotero.Libraries.get(selectedNote.libraryID).libraryType;
-		if (type == 'group' || !Zotero.isPDFBuild) {
+		if (type == 'group' && !Zotero.enablePDFBuildForGroups || !Zotero.isPDFBuild) {
 			// We don't want to show the note in two places, since it causes unnecessary UI updates
 			// and can result in weird bugs where note content gets lost.
 			//

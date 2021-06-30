@@ -336,16 +336,16 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Создать отдельную заметку из аннотаций">
 <!ENTITY zotero.context.editInWindow "Редактировать в отдельном окне">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
-<!ENTITY zotero.pdfReader.lastPage "Last Page">
-<!ENTITY zotero.pdfReader.back "Back">
-<!ENTITY zotero.pdfReader.forward "Forward">
-<!ENTITY zotero.pdfReader.rotateClockwise "Rotate Clockwise">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotate Counterclockwise">
-<!ENTITY zotero.pdfReader.handTool "Hand Tool">
-<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
-<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
+<!ENTITY zotero.pdfReader.firstPage "Первая страница">
+<!ENTITY zotero.pdfReader.lastPage "Последняя страница">
+<!ENTITY zotero.pdfReader.back "Назад">
+<!ENTITY zotero.pdfReader.forward "Вперед">
+<!ENTITY zotero.pdfReader.rotateClockwise "Повернуть по часовой стрелке">
+<!ENTITY zotero.pdfReader.rotateCounterclockwise "Повернуть против часовой стрелки">
+<!ENTITY zotero.pdfReader.handTool "Курсор-«рука»">
+<!ENTITY zotero.pdfReader.verticalScrolling "Страницы по вертикали">
+<!ENTITY zotero.pdfReader.horizontalScrolling "Страницы по горизонтали">
+<!ENTITY zotero.pdfReader.wrappedScrolling "Страницы парами">
+<!ENTITY zotero.pdfReader.noSpreads "Не показывать развороты">
+<!ENTITY zotero.pdfReader.oddSpreads "Развороты с нечетных номеров">
+<!ENTITY zotero.pdfReader.evenSpreads "Развороты с четных номеров">

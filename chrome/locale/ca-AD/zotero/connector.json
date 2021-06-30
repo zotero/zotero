@@ -2,6 +2,9 @@
   "general_more": {
     "message": "Més…"
   },
+  "general_moreInfo": {
+    "message": "Més informació…"
+  },
   "general_done": {
     "message": "Fet"
   },
@@ -16,6 +19,9 @@
   },
   "general_pleaseWait": {
     "message": "Si us plau, espereu..."
+  },
+  "general_copyToClipboard": {
+    "message": "Copia al portaretalls"
   },
   "progressWindow_savingTo": {
     "message": "S'està desant a"
@@ -56,6 +62,15 @@
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Habilita desar a la biblioteca en línia"
   },
+  "reports_report_submitted": {
+    "message": "S'ha tramès el vostre informe d'errors.\n\nID de l'informe: $1\n\nPubliqueu un missatge als fòrums del Zotero amb aquest ID d'informe, una descripció del problema, i tots els passos necessaris per a reproduir-lo.\n\nEls informes d'error no són revisats a menys que se'n faci referència als fòrums."
+  },
+  "reports_debug_output_submitted": {
+    "message": "S'ha tramès la vostra sortida de depuració.\n\nL'ID de depuració és $1."
+  },
+  "reports_submission_failed": {
+    "message": "S'ha produït un error en trametre el vostre informe.\n\n$1\n\nComproveu la connexió a Internet. Si el problema persisteix, publiqueu un missatge als fòrums del Zotero."
+  },
   "integration_error_clientUpgrade": {
     "message": "La citació basada en web requereix la versió $1 o posterior."
   },
@@ -76,6 +91,18 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "La integració de $1 no és disponible quan s'editen fitxers .docx de Microsoft Word directament a Google Docs. Trieu Fitxer → Desa com a Google Docs per a habilitar aquesta funcionalitat. <br/><br/>Si voleu transferir un document de Word amb citacions de $1 a Google Docs, consulteu <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Moure documents entre processadors de text</a>."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "Mostra cites de $1 no enllaçades"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "La cita que heu provat d'editar s'ha desenllaçat de $1"
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Torna a enllaçar la cita"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "Les cites <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">s'han desenllaçat de $1</a>. Caldrà que les torneu a enllaçar abans que s'actualitzin o apareguin a la vostra bibilografia."
   },
   "general_saveTo": {
     "message": "Desa a $1"

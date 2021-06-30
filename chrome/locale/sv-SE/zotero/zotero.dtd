@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Avmarkera allt">
 <!ENTITY zotero.general.edit "Ändra">
 <!ENTITY zotero.general.delete "Radera">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Flytta till papperskorgen">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Avbryt">
 <!ENTITY zotero.general.refresh "Uppdatera">
@@ -91,7 +91,7 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Visa i bibliotek">
 <!ENTITY zotero.items.menu.attach.note "Lägg till anteckning">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
+<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Lägg till anteckning från kommentarer">
 <!ENTITY zotero.items.menu.attach "Lägg till bilaga">
 <!ENTITY zotero.items.menu.attach.link.uri "Bifoga länk till URI...">
 <!ENTITY zotero.items.menu.attach.file "Bifoga Lagrad kopia av filen...">
@@ -157,8 +157,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Lagra kopia av fil...">
 <!ENTITY zotero.toolbar.attachment.weblink "Spara länk till aktuell sida">
 <!ENTITY zotero.toolbar.attachment.snapshot "Ta lokal kopia av aktuell sida">
-<!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.item "Källa">
+<!ENTITY zotero.toolbar.context.notes "Anteckningar">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Inga etiketter att visa">
 <!ENTITY zotero.tagSelector.loadingTags "Laddar etiketter…">
@@ -179,8 +179,8 @@
 <!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
 <!ENTITY zotero.lookup.button.search "Sök">
 
-<!ENTITY zotero.createParent.title "Create Parent Item">
-<!ENTITY zotero.createParent.button.manual "Manual Entry">
+<!ENTITY zotero.createParent.title "Skapa föräldra-källa">
+<!ENTITY zotero.createParent.button.manual "Manuell inmatning">
 
 <!ENTITY zotero.selectitems.title "Markera källor">
 <!ENTITY zotero.selectitems.intro.label "Välj vilka källor du vill lägga till i ditt bibliotek">
@@ -330,22 +330,22 @@
 <!ENTITY zotero.attachLink.label.link "Länk:">
 <!ENTITY zotero.attachLink.label.title "Titel:">
 
-<!ENTITY zotero.context.addChildNote "Add Item Note">
-<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
-<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
-<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
-<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
+<!ENTITY zotero.context.addChildNote "Lägg till anteckning för källa">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Lägg till anteckning för källa från kommentarer">
+<!ENTITY zotero.context.addStandaloneNote "Lägg till fristående anteckning">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Lägg till fristående anteckning från kommentarer">
+<!ENTITY zotero.context.editInWindow "Redigera i eget fönster">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
-<!ENTITY zotero.pdfReader.lastPage "Last Page">
-<!ENTITY zotero.pdfReader.back "Back">
-<!ENTITY zotero.pdfReader.forward "Forward">
-<!ENTITY zotero.pdfReader.rotateClockwise "Rotate Clockwise">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotate Counterclockwise">
-<!ENTITY zotero.pdfReader.handTool "Hand Tool">
-<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
-<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
+<!ENTITY zotero.pdfReader.firstPage "Första sidan">
+<!ENTITY zotero.pdfReader.lastPage "Sista sidan">
+<!ENTITY zotero.pdfReader.back "Bakåt">
+<!ENTITY zotero.pdfReader.forward "Framåt">
+<!ENTITY zotero.pdfReader.rotateClockwise "Rotera medsols">
+<!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotera motsols">
+<!ENTITY zotero.pdfReader.handTool "Handverktyget">
+<!ENTITY zotero.pdfReader.verticalScrolling "Lodrät skrollning">
+<!ENTITY zotero.pdfReader.horizontalScrolling "Vågrät skrollning">
 <!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
+<!ENTITY zotero.pdfReader.noSpreads "Inga uppslag">
+<!ENTITY zotero.pdfReader.oddSpreads "Udda uppslag">
+<!ENTITY zotero.pdfReader.evenSpreads "Jämna uppslag">

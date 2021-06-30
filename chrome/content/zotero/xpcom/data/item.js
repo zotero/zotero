@@ -1274,7 +1274,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	
 	// TEMP: Don't allow annotations or embedded images in group libraries
 	// TODO: Enable test in annotations.js after removing
-	if (libraryType != 'user') {
+	if (libraryType == 'group' && !Zotero.enablePDFBuildForGroups) {
 		if (this._changed.primaryData && this._changed.primaryData.itemTypeID
 				&& Zotero.ItemTypes.getName(itemTypeID) == 'annotation') {
 			throw new Error("Annotations can currently be created only in user libraries");
@@ -3955,6 +3955,7 @@ Zotero.Item.prototype.setTags = function (tags) {
  *
  * @param {String} name
  * @param {Number} [type=0]
+ * @return {Boolean} - True if the tag was added; false if the item already had the tag
  */
 Zotero.Item.prototype.addTag = function (name, type) {
 	type = type ? parseInt(type) : 0;
@@ -4023,6 +4024,9 @@ Zotero.Item.prototype.replaceTag = function (oldTag, newTag) {
  * Remove a tag from the item
  *
  * A separate save() is required to update the database.
+ *
+ * @param {String} tagName
+ * @return {Boolean} - True if the tag was removed; false if the item didn't have the tag
  */
 Zotero.Item.prototype.removeTag = function(tagName) {
 	this._requireData('tags');
@@ -4030,9 +4034,10 @@ Zotero.Item.prototype.removeTag = function(tagName) {
 	var newTags = oldTags.filter(tagData => tagData.tag !== tagName);
 	if (newTags.length == oldTags.length) {
 		Zotero.debug('Cannot remove missing tag ' + tagName + ' from item ' + this.libraryKey);
-		return;
+		return false;
 	}
 	this.setTags(newTags);
+	return true;
 }
 
 

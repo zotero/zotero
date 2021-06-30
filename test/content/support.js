@@ -623,10 +623,11 @@ async function resetDB(options = {}) {
 	}
 	var db = Zotero.DataDirectory.getDatabase();
 	await Zotero.reinit(
-		Zotero.Promise.coroutine(function* () {
-			yield OS.File.remove(db);
+		async function () {
+			// Swap in the initial copy we made of the DB
+			await OS.File.copy(db + '-test-template', db);
 			_defaultGroup = null;
-		}),
+		},
 		false,
 		options
 	);

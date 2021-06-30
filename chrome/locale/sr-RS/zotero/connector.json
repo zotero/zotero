@@ -2,6 +2,9 @@
   "general_more": {
     "message": "Више…"
   },
+  "general_moreInfo": {
+    "message": "Више података…"
+  },
   "general_done": {
     "message": "Готово"
   },
@@ -13,6 +16,12 @@
   },
   "general_cancel": {
     "message": "Откажи"
+  },
+  "general_pleaseWait": {
+    "message": "Сачекајте…"
+  },
+  "general_copyToClipboard": {
+    "message": "Копирај у оставу"
   },
   "progressWindow_savingTo": {
     "message": "Чувам у"
@@ -53,6 +62,15 @@
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Омогући чување у мрежну библиотеку"
   },
+  "reports_report_submitted": {
+    "message": "Ваш извештај о грешци је послат.\n\nИД број извештаја: $1\n\nМожете послати поруку на Зотеров форум са овим ИД бројем уз додатне податке који описују проблем и кораке који ће помоћи програмерима да понове грешку.\n\nИзвештаји о грешкама неће бити прегледани осим уколико их не поставите на форум."
+  },
+  "reports_debug_output_submitted": {
+    "message": "Ваш извештај за проналажење грешака је послат.\n\nИД број грешке је $1."
+  },
+  "reports_submission_failed": {
+    "message": "Дошло је до грешке приликом слања вашег извештаја.\n\n$1\n\nПроверите везу са интернетом, а уколико се проблем настави, пошаљите поруку на Зотеров форум."
+  },
   "integration_error_clientUpgrade": {
     "message": "Цитирање помоћу веба захтева издање $1 или новије."
   },
@@ -67,6 +85,24 @@
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Ипак преузми верзију са везама"
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1 ажурира ваш документ."
+  },
+  "integration_googleDocs_docxAlert": {
+    "message": "$1 интеграција није доступна када уређујете Microsoft Word .docx датотеке у Google Документима. Изаберите Датотека → Сачувај као Google Документ да омогућите интеграцију.<br/><br/>Уколико желите да пренесете документе из Word-а са $1 цитата у Google Документе, погледајте текст о <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">дељењу докумената између програма за обраду текста</a>."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "Прикажи $1 неповезаних цитата"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "Цитати које покушавате да уредите су постали невезани за $1."
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Поново повежи цитат"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "Ови цитати си постали <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">невезани са $1</a>. Потребно је да их поново повежете пре него што буду ажурирани или приказани унутар ваше библиографије."
   },
   "general_saveTo": {
     "message": "Сачувај у $1"

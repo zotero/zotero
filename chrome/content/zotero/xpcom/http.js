@@ -75,7 +75,7 @@ Zotero.HTTP = new function() {
 	 * @constructor
 	 */
 	this.BrowserOfflineException = function() {
-		this.message = "XMLHttpRequest could not complete because the browser is offline";
+		this.message = `Request could not be completed because ${Zotero.appName} is offline`;
 		this.stack = new Error().stack;
 	};
 	this.BrowserOfflineException.prototype = Object.create(Error.prototype);
@@ -259,7 +259,7 @@ Zotero.HTTP = new function() {
 		}
 		
 		if (url.startsWith('http') && this.browserIsOffline()) {
-			Zotero.debug("HTTP " + method + " " + dispURL + " failed: Browser is offline");
+			Zotero.debug(`HTTP ${method} ${dispURL} failed: ${Zotero.appName} is offline`);
 			throw new this.BrowserOfflineException();
 		}
 		

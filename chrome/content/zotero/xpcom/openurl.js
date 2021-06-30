@@ -210,8 +210,8 @@ Zotero.OpenURL = new function() {
 				_mapTag(firstCreator.firstName, "invfirst");
 				_mapTag(firstCreator.lastName, "invlast");
 			} else {
-				if(firstCreator.isInstitution) {
-					_mapTag(firstCreator.lastName, "aucorp");
+				if (firstCreator.name) {
+					_mapTag(firstCreator.name, "aucorp");
 				} else {
 					_mapTag(firstCreator.firstName, "aufirst");
 					_mapTag(firstCreator.lastName, "aulast");
@@ -407,7 +407,7 @@ Zotero.OpenURL = new function() {
 				
 				item.creators.push(_cloneIfNecessary(Zotero.Utilities.cleanAuthor(value, type, value.indexOf(",") !== -1), item));
 			} else if(key == "rft.aucorp") {
-				complexAu.push(_cloneIfNecessary({lastName:value, isInstitution:true}, item));
+				complexAu.push(_cloneIfNecessary({lastName:value, fieldMode:1}, item));
 			} else if(key == "rft.isbn" && !item.ISBN) {
 				item.ISBN = value;
 			} else if(key == "rft.pub" || key == "rft.publisher") {

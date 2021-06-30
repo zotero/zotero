@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Extracted from https://science.sciencemag.org/rss/current.xml -->
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns="http://purl.org/rss/1.0/"
+	xmlns:content="http://purl.org/rss/1.0/modules/content/"
+	xmlns:taxo="http://purl.org/rss/1.0/modules/taxonomy/"
+	xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:syn="http://purl.org/rss/1.0/modules/syndication/"
+	xmlns:prism="http://purl.org/rss/1.0/modules/prism/"
+	xmlns:admin="http://webns.net/mvcb/">
+	<channel rdf:about="http://science.sciencemag.org">
+		<title>Science current issue</title>
+		<link>http://science.sciencemag.org</link>
+		<description>Science RSS feed -- current issue</description>
+		<prism:eIssn>1095-9203</prism:eIssn>
+		<prism:coverDisplayDate>May 21 2021 12:00:00:000AM</prism:coverDisplayDate>
+		<prism:publicationName>Science</prism:publicationName>
+		<prism:issn>0036-8075</prism:issn>
+		<items>
+			<rdf:Seq>
+				<rdf:li rdf:resource="http://science.sciencemag.org/cgi/content/short/372/6544/769?rss=1" />
+				<rdf:li rdf:resource="http://science.sciencemag.org/cgi/content/short/372/6544/770?rss=1" />
+			</rdf:Seq>
+		</items>
+		<image rdf:resource="http://science.sciencemag.org/icons/banner/title.gif" />
+	</channel>
+	<image rdf:about="http://science.sciencemag.org/icons/banner/title.gif">
+		<title>Science</title>
+		<url>http://science.sciencemag.org/icons/banner/title.gif</url>
+		<link>http://science.sciencemag.org</link>
+	</image>
+	<item rdf:about="http://science.sciencemag.org/cgi/content/short/372/6544/769?rss=1">
+		<title><![CDATA["The Descent of Man," 150 years on]]></title>
+		<link>http://science.sciencemag.org/cgi/content/short/372/6544/769?rss=1</link>
+		<description><![CDATA[]]></description>
+		<dc:creator><![CDATA[Fuentes, A.]]></dc:creator>
+		<dc:date>2021-05-20T10:40:55-07:00</dc:date>
+		<dc:identifier>info:doi/10.1126/science.abj4606</dc:identifier>
+		<dc:identifier>hwp:resource-id:sci;372/6544/769</dc:identifier>
+		<dc:publisher>American Association for the Advancement of Science</dc:publisher>
+		<dc:subject><![CDATA[Editorials]]></dc:subject>
+		<dc:title><![CDATA["The Descent of Man," 150 years on]]></dc:title>
+		<prism:publicationDate>2021-05-21</prism:publicationDate>
+		<prism:section>editorial</prism:section>
+		<prism:volume>372</prism:volume>
+		<prism:number>6544</prism:number>
+		<prism:startingPage>769</prism:startingPage>
+		<prism:endingPage>769</prism:endingPage>
+	</item>
+	<item rdf:about="http://science.sciencemag.org/cgi/content/short/372/6544/770?rss=1">
+		<title><![CDATA[News at a glance]]></title>
+		<link>http://science.sciencemag.org/cgi/content/short/372/6544/770?rss=1</link>
+		<description><![CDATA[]]></description>
+		<dc:creator><![CDATA[]]></dc:creator>
+		<dc:date>2021-05-20T10:40:55-07:00</dc:date>
+		<dc:identifier>info:doi/10.1126/science.372.6544.770</dc:identifier>
+		<dc:identifier>hwp:resource-id:sci;372/6544/770</dc:identifier>
+		<dc:publisher>American Association for the Advancement of Science</dc:publisher>
+		<dc:subject><![CDATA[Scientific Community]]></dc:subject>
+		<dc:title><![CDATA[News at a glance]]></dc:title>
+		<prism:publicationDate>2021-05-21</prism:publicationDate>
+		<prism:section>In Brief</prism:section>
+		<prism:volume>372</prism:volume>
+		<prism:number>6544</prism:number>
+		<prism:startingPage>770</prism:startingPage>
+		<prism:endingPage>772</prism:endingPage>
+	</item>
+</rdf:RDF>

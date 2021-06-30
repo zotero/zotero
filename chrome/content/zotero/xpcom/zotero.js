@@ -261,6 +261,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		}
 		
 		Zotero.isPDFBuild = Zotero.Prefs.get('beta.zotero6');
+		Zotero.enablePDFBuildForGroups = false;
 		
 		try {
 			yield Zotero.DataDirectory.init();
@@ -725,6 +726,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			yield Zotero.Relations.init();
 			yield Zotero.Retractions.init();
 			yield Zotero.NoteBackups.init();
+			yield Zotero.Dictionaries.init();
 			
 			// Migrate fields from Extra that can be moved to item fields after a schema update
 			yield Zotero.Schema.migrateExtraFields();

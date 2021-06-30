@@ -158,7 +158,7 @@ class PDFWorker {
 					id: item.key,
 					type: item.annotationType,
 					authorName: Zotero.Users.getName(item.createdByUserID) || Zotero.Users.getCurrentUsername() || '',
-					comment: item.annotationComment || '',
+					comment: (item.annotationComment || '').replace(/<\/?(i|b|sub|sup)>/g, ''),
 					color: item.annotationColor,
 					position: JSON.parse(item.annotationPosition),
 					dateModified: item.dateModified

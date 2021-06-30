@@ -122,8 +122,7 @@ ZoteroPluginInstaller.prototype = {
 	
 	isInstalled: function() {
 		while(!this._version) Zotero.mainThread.processNextEvent(true);
-		return this.prefBranch.getCharPref("version") == this._version && 
-			this.prefBranch.getBoolPref("installed");
+		return this.prefBranch.getBoolPref("installed");
 	},
 	
 	getAddonPath: function(addonID) {

@@ -58,8 +58,8 @@ async function onLoad() {
 		}
 	}
 	type = Zotero.Libraries.get(libraryID).libraryType;
-	switchEditorEngine(type == 'group' || !Zotero.isPDFBuild);
-	if (type == 'group' || !Zotero.isPDFBuild) {
+	switchEditorEngine(type == 'group' && !Zotero.enablePDFBuildForGroups || !Zotero.isPDFBuild);
+	if (type == 'group' && !Zotero.enablePDFBuildForGroups || !Zotero.isPDFBuild) {
 		noteEditor = document.getElementById('zotero-note-editor-old');
 	}
 	else {
@@ -107,7 +107,7 @@ function onError() {
 
 function onUnload() {
 	Zotero.Notifier.unregisterObserver(notifierUnregisterID);
-	if (type == 'group' || !Zotero.isPDFBuild) {
+	if (type == 'group' && !Zotero.enablePDFBuildForGroups || !Zotero.isPDFBuild) {
 		if (noteEditor.item) {
 			window.opener.ZoteroPane.onNoteWindowClosed(noteEditor.item.id, noteEditor.value);
 		}

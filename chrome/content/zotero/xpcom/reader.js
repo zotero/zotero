@@ -72,6 +72,7 @@ class ReaderInstance {
 			state,
 			location,
 			promptImport: false,
+			readOnly: this._isReadOnly(),
 			showItemPaneToggle: this._showItemPaneToggle,
 			sidebarWidth: this._sidebarWidth,
 			sidebarOpen: this._sidebarOpen,
@@ -252,6 +253,21 @@ class ReaderInstance {
 			return { pageIndex };
 		}
 		return null;
+	}
+
+	_isReadOnly() {
+		let item = Zotero.Items.get(this._itemID);
+		if (item.deleted || item.parentItem && item.parentItem.deleted) {
+			return true;
+		}
+		let { libraryID } = item;
+		var type = Zotero.Libraries.get(libraryID).libraryType;
+		if (type === 'group') {
+			var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
+			var group = Zotero.Groups.get(groupID);
+			return !group.editable;
+		}
+		return false;
 	}
 
 	_dataURLtoBlob(dataurl) {
@@ -608,7 +624,6 @@ class ReaderInstance {
 			}
 			let json = await Zotero.Annotations.toJSON(item);
 			json.id = item.key;
-			json.readOnly = !json.isAuthor || json.isExternal;
 			delete json.key;
 			for (let key in json) {
 				json[key] = json[key] || '';
@@ -877,7 +892,10 @@ class Reader {
 				// Ignore other notifications if the attachment no longer exists
 				let item = Zotero.Items.get(reader._itemID);
 				if (item) {
-					if (event === 'delete') {
+					if (event === 'trash' && (ids.includes(item.id) || ids.includes(item.parentItemID))) {
+						reader.close();
+					}
+					else if (event === 'delete') {
 						let disappearedIDs = reader.annotationItemIDs.filter(x => ids.includes(x));
 						if (disappearedIDs.length) {
 							let keys = disappearedIDs.map(id => extraData[id].key);

@@ -365,7 +365,7 @@
 					var type = Zotero.Libraries.get(this.item.libraryID).libraryType;
 					var switherDeck = this._id('attachment-note-editor-switcher');
 					// Note editor
-					if (type == 'group' || !Zotero.isPDFBuild) {
+					if (type == 'group' && !Zotero.enablePDFBuildForGroups || !Zotero.isPDFBuild) {
 						var noteEditor = this._id('attachment-note-editor-old');
 						switherDeck.selectedIndex = 0;
 					}

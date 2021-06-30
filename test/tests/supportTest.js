@@ -1,10 +1,12 @@
 describe("Support Functions for Unit Testing", function() {
 	describe("resetDB", function() {
-		it("should restore the DB to factory settings", function* () {
-			yield resetDB({
+		it("should restore the DB to factory settings", async function () {
+			await Zotero.DB.queryAsync("CREATE TABLE testTable (foo INTEGER PRIMARY KEY)");
+			assert.isTrue(await Zotero.DB.tableExists('testTable'));
+			await resetDB({
 				thisArg: this
 			});
-			assert.equal((yield Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM items")), 0);
+			assert.isFalse(await Zotero.DB.tableExists('testTable'));
 		});
 	});
 	describe("loadSampleData", function() {

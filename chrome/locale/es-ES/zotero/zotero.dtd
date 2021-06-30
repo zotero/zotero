@@ -336,16 +336,16 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Añadir nota independiente a partir de las anotaciones">
 <!ENTITY zotero.context.editInWindow "Editar en una ventana aparte">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
-<!ENTITY zotero.pdfReader.lastPage "Last Page">
-<!ENTITY zotero.pdfReader.back "Back">
-<!ENTITY zotero.pdfReader.forward "Forward">
-<!ENTITY zotero.pdfReader.rotateClockwise "Rotate Clockwise">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotate Counterclockwise">
-<!ENTITY zotero.pdfReader.handTool "Hand Tool">
-<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
-<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
+<!ENTITY zotero.pdfReader.firstPage "Primera página">
+<!ENTITY zotero.pdfReader.lastPage "Última página">
+<!ENTITY zotero.pdfReader.back "Atrás">
+<!ENTITY zotero.pdfReader.forward "Adelante">
+<!ENTITY zotero.pdfReader.rotateClockwise "Girar en sentido horario">
+<!ENTITY zotero.pdfReader.rotateCounterclockwise "Girar en sentido antihorario">
+<!ENTITY zotero.pdfReader.handTool "Herramienta de mano">
+<!ENTITY zotero.pdfReader.verticalScrolling "Desplazamiento vertical">
+<!ENTITY zotero.pdfReader.horizontalScrolling "Desplazamiento horizontal">
+<!ENTITY zotero.pdfReader.wrappedScrolling "Desplazamiento en bloque">
+<!ENTITY zotero.pdfReader.noSpreads "Vista de libro">
+<!ENTITY zotero.pdfReader.oddSpreads "Vista de libro impar">
+<!ENTITY zotero.pdfReader.evenSpreads "Vista de libro par">

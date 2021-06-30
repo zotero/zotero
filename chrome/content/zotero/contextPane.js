@@ -238,7 +238,10 @@ var ZoteroContextPane = new function () {
 		var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 		if (reader) {
 			var editor = _getActiveEditor();
-			reader.enableAddToNote(!!editor);
+			var libraryReadOnly = editor && editor.item && _isLibraryReadOnly(editor.item.libraryID);
+			var noteReadOnly = editor && editor.item
+				&& (editor.item.deleted || editor.item.parentItem && editor.item.parentItem.deleted);
+			reader.enableAddToNote(!!editor && !libraryReadOnly && !noteReadOnly);
 		}
 	}
 	
@@ -381,6 +384,8 @@ var ZoteroContextPane = new function () {
 	}
 	
 	function _addNotesContext(libraryID) {
+		let readOnly = _isLibraryReadOnly(libraryID);
+		
 		var list = document.createElement('vbox');
 		list.setAttribute('flex', 1);
 		list.className = 'zotero-context-notes-list';
@@ -584,9 +589,11 @@ var ZoteroContextPane = new function () {
 					break;
 
 				case 'context-pane-list-move-to-trash':
-					Zotero.Items.trashTx(id);
-					context.cachedNotes = context.cachedNotes.filter(x => x.id != id);
-					_updateNotesList(true);
+					if (!readOnly) {
+						Zotero.Items.trashTx(id);
+						context.cachedNotes = context.cachedNotes.filter(x => x.id != id);
+						_updateNotesList(true);
+					}
 					break;
 
 				default:
@@ -594,6 +601,9 @@ var ZoteroContextPane = new function () {
 		}
 		
 		function _handleAddChildNotePopupClick(event) {
+			if (readOnly) {
+				return;
+			}
 			switch (event.originalTarget.id) {
 				case 'context-pane-add-child-note':
 					_createNote(true);
@@ -606,8 +616,11 @@ var ZoteroContextPane = new function () {
 				default:
 			}
 		}
-		
+
 		function _handleAddStandaloneNotePopupClick(event) {
+			if (readOnly) {
+				return;
+			}
 			switch (event.originalTarget.id) {
 				case 'context-pane-add-standalone-note':
 					_createNote();
@@ -620,6 +633,12 @@ var ZoteroContextPane = new function () {
 				default:
 			}
 		}
+
+		document.getElementById('context-pane-add-child-note').setAttribute('disabled', readOnly);
+		document.getElementById('context-pane-add-child-note-from-annotations').setAttribute('disabled', readOnly);
+		document.getElementById('context-pane-add-standalone-note').setAttribute('disabled', readOnly);
+		document.getElementById('context-pane-add-standalone-note-from-annotations').setAttribute('disabled', readOnly);
+		document.getElementById('context-pane-list-move-to-trash').setAttribute('disabled', readOnly);
 
 		ReactDOM.render(
 			<NotesList
@@ -671,14 +690,14 @@ var ZoteroContextPane = new function () {
 		_notesContexts = _notesContexts.filter(x => x.libraryID != libraryID);
 	}
 	
-	function _isLibraryEditable(libraryID) {
+	function _isLibraryReadOnly(libraryID) {
 		var type = Zotero.Libraries.get(libraryID).libraryType;
 		if (type == 'group') {
 			var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
 			var group = Zotero.Groups.get(groupID);
-			return group.editable;
+			return !group.editable;
 		}
-		return true;
+		return false;
 	}
 
 	function _setPinnedNote(itemID) {
@@ -686,12 +705,12 @@ var ZoteroContextPane = new function () {
 		if (!item) {
 			return;
 		}
-		var editable = _isLibraryEditable(item.libraryID);
+		var readOnly = _isLibraryReadOnly(item.libraryID);
 		var context = _getNotesContext(item.libraryID);
 		if (context) {
 			var { editor, node } = context;
 			node.setAttribute('selectedIndex', 1);
-			editor.mode = editable ? 'edit' : 'view';
+			editor.mode = readOnly ? 'view' : 'edit';
 			editor.item = item;
 			editor.parentItem = null;
 			editor.hideLinksContainer = true;
@@ -731,7 +750,7 @@ var ZoteroContextPane = new function () {
 			return;
 		}
 		var libraryID = item.libraryID;
-		var editable = _isLibraryEditable(libraryID);
+		var readOnly = _isLibraryReadOnly(libraryID);
 		var parentID = item.parentID;
 	
 		var container = document.createElement('vbox');
@@ -770,7 +789,7 @@ var ZoteroContextPane = new function () {
 		panelInfo.append(itemBox);
 		container.append(panelInfo);
 
-		itemBox.mode = editable ? 'edit' : 'view';
+		itemBox.mode = readOnly ? 'view' : 'edit';
 		itemBox.item = parentItem;
 	}
 };

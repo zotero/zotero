@@ -39,6 +39,7 @@ Zotero.Notes = new function() {
 	this.noteToTitle = function(text) {
 		var origText = text;
 		text = text.trim();
+		text = text.replace(/<br\s*\/?>/g, ' ');
 		text = Zotero.Utilities.unescapeHTML(text);
 		
 		// If first line is just an opening HTML tag, remove it

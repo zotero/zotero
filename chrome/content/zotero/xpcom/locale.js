@@ -1,6 +1,8 @@
 Zotero.Locale = {
 	/**
-	 * Keep this up to date with chrome.manifest
+	 * Keep this up to date with chrome.manifest and zotero-build/dictionaries/build-dictionaries
+	 *
+	 * Names from https://addons.mozilla.org/en-US/firefox/language-tools/
 	 */
 	availableLocales: Object.freeze({
 		'ar': 'عربي',
