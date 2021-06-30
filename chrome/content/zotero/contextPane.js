@@ -705,7 +705,7 @@ var ZoteroContextPane = new function () {
 		if (!item) {
 			return;
 		}
-		var readOnly = (item.libraryID);
+		var readOnly = _isLibraryReadOnly(item.libraryID);
 		var context = _getNotesContext(item.libraryID);
 		if (context) {
 			var { editor, node } = context;
