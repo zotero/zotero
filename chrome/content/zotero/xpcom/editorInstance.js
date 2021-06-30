@@ -57,7 +57,7 @@ class EditorInstance {
 		// TODO: Consider to use only itemID instead of loaded item
 		this._item = options.item;
 		this._viewMode = options.viewMode;
-		this._readOnly = options.readOnly;
+		this._readOnly = options.readOnly || this._isReadOnly();
 		this._disableUI = options.disableUI;
 		this._onReturn = options.onReturn;
 		this._iframeWindow = options.iframeWindow;
@@ -197,6 +197,21 @@ class EditorInstance {
 	
 	_postMessage(message) {
 		this._iframeWindow.postMessage({ instanceID: this.instanceID, message }, '*');
+	}
+
+	_isReadOnly() {
+		let item = this._item;
+		if (item.deleted || item.parentItem && item.parentItem.deleted) {
+			return true;
+		}
+		let { libraryID } = item;
+		var type = Zotero.Libraries.get(libraryID).libraryType;
+		if (type === 'group') {
+			var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
+			var group = Zotero.Groups.get(groupID);
+			return !group.editable;
+		}
+		return false;
 	}
 
 	_getFont() {

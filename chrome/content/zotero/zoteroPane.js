@@ -3560,7 +3560,9 @@ var ZoteroPane = new function()
 	
 	
 	this.openNoteWindow = function (itemID, col, parentKey) {
-		if (!this.canEdit()) {
+		var item = Zotero.Items.get(itemID);
+		var type = Zotero.Libraries.get(item.libraryID).libraryType;
+		if (!this.canEdit() && (type == 'group' || !Zotero.isPDFBuild)) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
@@ -3613,7 +3615,9 @@ var ZoteroPane = new function()
 	
 	
 	this.openBackupNoteWindow = function (itemID) {
-		if (!this.canEdit()) {
+		var item = Zotero.Items.get(itemID);
+		var type = Zotero.Libraries.get(item.libraryID).libraryType;
+		if (!this.canEdit() && (type == 'group' || !Zotero.isPDFBuild)) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
@@ -4095,7 +4099,8 @@ var ZoteroPane = new function()
 				}
 			}
 			else if (item.isNote()) {
-				if (!this.collectionsView.editable) {
+				var type = Zotero.Libraries.get(item.libraryID).libraryType;
+				if (!this.collectionsView.editable && (type == 'group' || !Zotero.isPDFBuild)) {
 					continue;
 				}
 				document.getElementById('zotero-view-note-button').doCommand();
