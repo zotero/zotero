@@ -340,7 +340,7 @@
 						
 						case 'note':
 							var type = Zotero.Libraries.get(this.libraryID).libraryType;
-							var useOld = type == 'group' || !Zotero.isPDFBuild;
+							var useOld = type == 'group' && !Zotero.enablePDFBuildForGroups || !Zotero.isPDFBuild;
 							elementName = useOld ? 'oldzoteronoteeditor' : 'zoteronoteeditor';
 							break;
 						

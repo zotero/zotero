@@ -1274,7 +1274,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 	
 	// TEMP: Don't allow annotations or embedded images in group libraries
 	// TODO: Enable test in annotations.js after removing
-	if (libraryType != 'user') {
+	if (libraryType == 'group' && !Zotero.enablePDFBuildForGroups) {
 		if (this._changed.primaryData && this._changed.primaryData.itemTypeID
 				&& Zotero.ItemTypes.getName(itemTypeID) == 'annotation') {
 			throw new Error("Annotations can currently be created only in user libraries");

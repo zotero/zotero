@@ -1213,7 +1213,7 @@ var ZoteroPane = new function()
 			}
 			
 			let type = Zotero.Libraries.get(collectionTreeRow.ref.libraryID).libraryType;
-			ZoteroItemPane.switchEditorEngine(type == 'group' || !Zotero.isPDFBuild);
+			ZoteroItemPane.switchEditorEngine(type == 'group' && !Zotero.enablePDFBuildForGroups || !Zotero.isPDFBuild);
 			
 			// Clear quick search and tag selector when switching views
 			document.getElementById('zotero-tb-search').value = "";
@@ -3562,7 +3562,7 @@ var ZoteroPane = new function()
 	this.openNoteWindow = function (itemID, col, parentKey) {
 		var item = Zotero.Items.get(itemID);
 		var type = Zotero.Libraries.get(item.libraryID).libraryType;
-		if (!this.canEdit() && (type == 'group' || !Zotero.isPDFBuild)) {
+		if (!this.canEdit() && (type == 'group' && !Zotero.enablePDFBuildForGroups || !Zotero.isPDFBuild)) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
@@ -3617,7 +3617,7 @@ var ZoteroPane = new function()
 	this.openBackupNoteWindow = function (itemID) {
 		var item = Zotero.Items.get(itemID);
 		var type = Zotero.Libraries.get(item.libraryID).libraryType;
-		if (!this.canEdit() && (type == 'group' || !Zotero.isPDFBuild)) {
+		if (!this.canEdit() && (type == 'group' && !Zotero.enablePDFBuildForGroups || !Zotero.isPDFBuild)) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
@@ -4100,7 +4100,7 @@ var ZoteroPane = new function()
 			}
 			else if (item.isNote()) {
 				var type = Zotero.Libraries.get(item.libraryID).libraryType;
-				if (!this.collectionsView.editable && (type == 'group' || !Zotero.isPDFBuild)) {
+				if (!this.collectionsView.editable && (type == 'group' && !Zotero.enablePDFBuildForGroups || !Zotero.isPDFBuild)) {
 					continue;
 				}
 				document.getElementById('zotero-view-note-button').doCommand();
@@ -4145,7 +4145,7 @@ var ZoteroPane = new function()
 				let item = await Zotero.Items.getAsync(itemID);
 				let library = Zotero.Libraries.get(item.libraryID);
 				// TEMP
-				if (Zotero.isPDFBuild && library.libraryType == 'user') {
+				if (Zotero.isPDFBuild && (library.libraryType == 'user' || Zotero.enablePDFBuildForGroups)) {
 					let originalEvent = event && event.originalEvent || event;
 					this.viewPDF(itemID, originalEvent && originalEvent.shiftKey);
 					return;

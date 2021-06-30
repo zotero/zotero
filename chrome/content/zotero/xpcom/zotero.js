@@ -261,6 +261,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		}
 		
 		Zotero.isPDFBuild = Zotero.Prefs.get('beta.zotero6');
+		Zotero.enablePDFBuildForGroups = false;
 		
 		try {
 			yield Zotero.DataDirectory.init();
