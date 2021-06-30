@@ -181,7 +181,7 @@ Zotero.Translate.ItemSaver.prototype = {
 					}
 					
 					// handle see also
-					this._handleRelated(jsonItem, item);
+					this._handleRelated(jsonItem, item, items);
 				}
 				
 				// Add to new item list
@@ -983,22 +983,25 @@ Zotero.Translate.ItemSaver.prototype = {
 		return newTags;
 	},
 	
-	"_handleRelated":function(item, newItem) {
+	"_handleRelated":function(item, newItem, items) {
 		// add to ID map
 		if(item.itemID || item.id) {
-			this._IDMap[item.itemID || item.id] = newItem;
+			this._IDMap[item.itemID || item.id] = newItem.id;
 		}
 
 		// add see alsos
-		if(item.seeAlso) {
-		 	for(related in item.seeAlso) {
-		 		if(this._IDMap[related]) {
-		 			newItem.addRelatedItem(this._IDMap[related]);
-					this._IDMap[related].addRelatedItem(newItem);
-					this._IDMap[related].save();
-		 		}
-		 	}
-		 	newItem.save();
+		if (item.seeAlso) {
+			for (let related in item.seeAlso) {
+				Zotero.debug(item.seeAlso[related]);
+				for (let id in this._IDMap) {
+					if (id == item.seeAlso[related]) {
+						newItem.addRelatedItem(items[id]);
+						items[id].addRelatedItem(newItem);
+						items[id].save();
+					}
+				}
+			}
+			newItem.save();
 		}
 	}
 }
