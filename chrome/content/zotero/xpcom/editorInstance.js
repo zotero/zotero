@@ -201,17 +201,9 @@ class EditorInstance {
 
 	_isReadOnly() {
 		let item = this._item;
-		if (item.deleted || item.parentItem && item.parentItem.deleted) {
-			return true;
-		}
-		let { libraryID } = item;
-		var type = Zotero.Libraries.get(libraryID).libraryType;
-		if (type === 'group') {
-			var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
-			var group = Zotero.Groups.get(groupID);
-			return !group.editable;
-		}
-		return false;
+		return !item.isEditable()
+			|| item.deleted
+			|| item.parentItem && item.parentItem.deleted;
 	}
 
 	_getFont() {

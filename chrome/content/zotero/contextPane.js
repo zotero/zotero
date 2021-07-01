@@ -690,13 +690,7 @@ var ZoteroContextPane = new function () {
 	}
 	
 	function _isLibraryReadOnly(libraryID) {
-		var type = Zotero.Libraries.get(libraryID).libraryType;
-		if (type == 'group') {
-			var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
-			var group = Zotero.Groups.get(groupID);
-			return !group.editable;
-		}
-		return false;
+		return !Zotero.Libraries.get(libraryID).editable;
 	}
 
 	function _setPinnedNote(itemID) {

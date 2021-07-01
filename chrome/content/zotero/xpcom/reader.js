@@ -257,17 +257,9 @@ class ReaderInstance {
 
 	_isReadOnly() {
 		let item = Zotero.Items.get(this._itemID);
-		if (item.deleted || item.parentItem && item.parentItem.deleted) {
-			return true;
-		}
-		let { libraryID } = item;
-		var type = Zotero.Libraries.get(libraryID).libraryType;
-		if (type === 'group') {
-			var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
-			var group = Zotero.Groups.get(groupID);
-			return !group.editable;
-		}
-		return false;
+		return !item.isEditable()
+			|| item.deleted
+			|| item.parentItem && item.parentItem.deleted;
 	}
 
 	_dataURLtoBlob(dataurl) {
@@ -999,8 +991,20 @@ class Reader {
 		}
 	}
 
+	/**
+	 * Trigger annotations import
+	 *
+	 * @param {Integer} itemID Attachment item id
+	 * @returns {Promise}
+	 */
 	async triggerAnnotationsImportCheck(itemID) {
 		let item = await Zotero.Items.getAsync(itemID);
+		if (!item.isEditable()
+			|| item.deleted
+			|| item.parentItem && item.parentItem.deleted
+		) {
+			return;
+		}
 		let mtime = await item.attachmentModificationTime;
 		if (item.attachmentLastProcessedModificationTime < Math.floor(mtime / 1000)) {
 			await Zotero.PDFWorker.import(itemID, true);
