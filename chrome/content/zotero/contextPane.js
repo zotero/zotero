@@ -634,12 +634,6 @@ var ZoteroContextPane = new function () {
 			}
 		}
 
-		document.getElementById('context-pane-add-child-note').setAttribute('disabled', readOnly);
-		document.getElementById('context-pane-add-child-note-from-annotations').setAttribute('disabled', readOnly);
-		document.getElementById('context-pane-add-standalone-note').setAttribute('disabled', readOnly);
-		document.getElementById('context-pane-add-standalone-note-from-annotations').setAttribute('disabled', readOnly);
-		document.getElementById('context-pane-list-move-to-trash').setAttribute('disabled', readOnly);
-
 		ReactDOM.render(
 			<NotesList
 				ref={notesListRef}
@@ -647,16 +641,21 @@ var ZoteroContextPane = new function () {
 					_setPinnedNote(id);
 				}}
 				onContextMenu={(id, event) => {
+					document.getElementById('context-pane-list-move-to-trash').setAttribute('disabled', readOnly);
 					var popup = document.getElementById('context-pane-list-popup');
 					popup.onclick = (event) => _handleListPopupClick(id, event);
 					popup.openPopupAtScreen(event.screenX, event.screenY);
 				}}
 				onAddChildButtonDown={(event) => {
+					document.getElementById('context-pane-add-child-note').setAttribute('disabled', readOnly);
+					document.getElementById('context-pane-add-child-note-from-annotations').setAttribute('disabled', readOnly);
 					var popup = document.getElementById('context-pane-add-child-note-button-popup');
 					popup.onclick = _handleAddChildNotePopupClick;
 					popup.openPopup(event.target, 'after_end');
 				}}
 				onAddStandaloneButtonDown={(event) => {
+					document.getElementById('context-pane-add-standalone-note').setAttribute('disabled', readOnly);
+					document.getElementById('context-pane-add-standalone-note-from-annotations').setAttribute('disabled', readOnly);
 					var popup = document.getElementById('context-pane-add-standalone-note-button-popup');
 					popup.onclick = _handleAddStandaloneNotePopupClick;
 					popup.openPopup(event.target, 'after_end');
