@@ -797,7 +797,7 @@ class ReaderWindow extends ReaderInstance {
 
 class Reader {
 	constructor() {
-		this._sidebarWidth = 200;
+		this._sidebarWidth = 240;
 		this._sidebarOpen = false;
 		this._bottomPlaceholderHeight = 0;
 		this._readers = [];
