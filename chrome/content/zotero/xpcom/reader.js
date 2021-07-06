@@ -77,7 +77,10 @@ class ReaderInstance {
 			sidebarWidth: this._sidebarWidth,
 			sidebarOpen: this._sidebarOpen,
 			bottomPlaceholderHeight: this._bottomPlaceholderHeight,
-			localizedStrings: Zotero.Intl.getPrefixedStrings('pdfReader')
+			localizedStrings: {
+				...Zotero.Intl.getPrefixedStrings('general.'),
+				...Zotero.Intl.getPrefixedStrings('pdfReader.')
+			}
 		}, [buf]);
 		// Set title once again, because `ReaderWindow` isn't loaded the first time
 		this.updateTitle();
@@ -389,7 +392,7 @@ class ReaderInstance {
 		// Colors
 		for (let color of colors) {
 			menuitem = this._window.document.createElement('menuitem');
-			menuitem.setAttribute('label', color[0]);
+			menuitem.setAttribute('label', Zotero.getString(color[0]));
 			menuitem.className = 'menuitem-iconic';
 			menuitem.setAttribute('disabled', readOnly);
 			menuitem.setAttribute('image', this._getColorIcon(color[1], color[1] === selectedColor));
@@ -431,7 +434,7 @@ class ReaderInstance {
 		let menuitem;
 		for (let color of colors) {
 			menuitem = this._window.document.createElement('menuitem');
-			menuitem.setAttribute('label', color[0]);
+			menuitem.setAttribute('label', Zotero.getString(color[0]));
 			menuitem.className = 'menuitem-iconic';
 			menuitem.setAttribute('image', this._getColorIcon(color[1], color[1] === selectedColor));
 			menuitem.addEventListener('command', () => {
