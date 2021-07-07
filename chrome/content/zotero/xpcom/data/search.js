@@ -247,12 +247,6 @@ Zotero.Search.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env)
 		Zotero.Notifier.queue('modify', 'search', this.id, env.notifierData, env.options.notifierQueue);
 	}
 	
-	if (env.isNew && Zotero.Libraries.isGroupLibrary(this.libraryID)) {
-		var groupID = Zotero.Groups.getGroupIDFromLibraryID(this.libraryID);
-		var group = yield Zotero.Groups.get(groupID);
-		group.clearSearchCache();
-	}
-	
 	if (!env.skipCache) {
 		yield this.reload();
 		// If new, there's no other data we don't have, so we can mark everything as loaded

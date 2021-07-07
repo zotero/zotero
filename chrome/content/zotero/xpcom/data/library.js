@@ -147,6 +147,12 @@ Zotero.defineProperty(Zotero.Library.prototype, 'libraryTypeID', {
 	}
 });
 
+Zotero.defineProperty(Zotero.Library.prototype, 'isGroup', {
+	get: function () {
+		return this.libraryType == 'group';
+	}
+});
+
 Zotero.defineProperty(Zotero.Library.prototype, 'libraryVersion', {
 	get: function() { return this._get('_libraryVersion'); },
 	set: function(v) { return this._set('_libraryVersion', v); }
