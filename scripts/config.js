@@ -92,7 +92,9 @@ const browserifyConfigs = [
 // exclude mask used for js, copy, symlink and sass tasks
 const ignoreMask = [
 	'**/#*',
-	'resource/schema/global/schema.json.gz'
+	'resource/schema/global/README.md',
+	'resource/schema/global/schema.json.gz',
+	'resource/schema/global/scripts/*'
 ];
 
 const jsFiles = [
