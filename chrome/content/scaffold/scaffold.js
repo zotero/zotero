@@ -604,6 +604,16 @@ var Scaffold = new function() {
 		}
 	}
 
+	this.runTranslatorOrTests = async function () {
+		var tabs = document.getElementById('tabs');
+		if (tabs.selectedItem.id == 'tab-testing') {
+			this.runSelectedTests();
+		}
+		else {
+			this.run('do');
+		}
+	}
+
 	/*
 	 * generate translator GUID
 	 */

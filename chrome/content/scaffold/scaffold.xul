@@ -39,7 +39,7 @@
 	<script src="scaffold.js"/>
 	
 	<keyset>
-		<key id="run-do-web" modifiers="accel" key="R" oncommand="Scaffold.run('do')"/>
+		<key id="run-do-web" modifiers="accel" key="R" oncommand="Scaffold.runTranslatorOrTests()"/>
 		<key id="detect-web" modifiers="accel" key="T" oncommand="Scaffold.run('detect')"/>
 		<key id="save" modifiers="accel" key="S" oncommand="Scaffold.save()"/>
 		<key id="increase-font-size" modifiers="accel" key="+" oncommand="Scaffold.increaseFontSize()"/>
@@ -205,6 +205,10 @@
 						<iframe src="chrome://zotero/content/ace/ace.html" id="editor-tests" flex="1"/>
 					</tabpanel>
 					<tabpanel flex="1" id="tabpanel-testing">
+						<keyset>
+							<key id="key-delete-tests" keycode="VK_BACK" oncommand="Scaffold.deleteSelectedTests()"/>
+						</keyset>
+
 						<vbox flex="1"><hbox><description>&scaffold.testing.description;</description></hbox>
 							<hbox flex="1" context="testing-context-menue">
 								<listbox id="testing-listbox" flex="1" seltype="multiple">
