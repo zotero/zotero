@@ -1110,7 +1110,7 @@ var Scaffold = new function() {
 	/**
 	 * Open the url of the first selected test in the browser (Browser tab or
 	 * the system's default browser).
-	 * @param {boolean} openExternally whether to open in the user's default browser
+	 * @param {boolean} openExternally whether to open in the default browser
 	**/
 	this.openURL = function (openExternally) {
 		var listbox = document.getElementById("testing-listbox");
