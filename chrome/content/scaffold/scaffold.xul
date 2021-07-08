@@ -52,7 +52,12 @@
 		<menupopup id="testing-context-menue">
 			<menuitem label="&scaffold.testing.edit.import;" tooltiptext="Edit the input data for the current test" oncommand="Scaffold.editImportFromTest()"/>
 			<menuitem label="&scaffold.testing.copyToClipboard;" tooltiptext="Copy the URL or data for the current test to the clipboard" oncommand="Scaffold.copyToClipboard()"/>
-			<menuitem label="&scaffold.testing.openUrl;" tooltiptext="Open the URL for the current test in the browser" oncommand="Scaffold.openURL()"/>
+			<menu label="&scaffold.testing.openUrl;">
+				<menupopup>
+					<menuitem label="&scaffold.testing.openUrl.internally;" tooltiptext="Open the URL for the current test in the Scaffold browser" oncommand="Scaffold.openURL(false)"/>
+					<menuitem label="&scaffold.testing.openUrl.externally;" tooltiptext="Open the URL for the current test in your default browser" oncommand="Scaffold.openURL(true)"/>
+				</menupopup>
+			</menu>
 		</menupopup>
 	</popupset>
 
