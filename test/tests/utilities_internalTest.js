@@ -356,6 +356,16 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.lengthOf(Object.keys(identifiers[0]), 1);
 			assert.propertyVal(identifiers[0], "DOI", id);
 		});
+
+		it("should extract multiple DOIs", async function () {
+			var id = "10.4103/0976-500X.85940 10.4103/0976-500X.85941";
+			var identifiers = ZUI.extractIdentifiers(id);
+			assert.lengthOf(identifiers, 2);
+			assert.lengthOf(Object.keys(identifiers[0]), 1);
+			assert.propertyVal(identifiers[0], "DOI", "10.4103/0976-500X.85940");
+			assert.lengthOf(Object.keys(identifiers[1]), 1);
+			assert.propertyVal(identifiers[1], "DOI", "10.4103/0976-500X.85941");
+		});
 		
 		it("should extract PMID", async function () {
 			var identifiers = ZUI.extractIdentifiers("1 PMID:24297125,222 3-4 1234567890, 123456789");
@@ -381,6 +391,30 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.propertyVal(identifiers[1], "arXiv", "0706.00441");
 			assert.propertyVal(identifiers[2], "arXiv", "hep-ex/9809001");
 			assert.propertyVal(identifiers[3], "arXiv", "math.GT/0309135");
+		});
+
+		it("should extract multiple identifiers", async function () {
+			var id = "978-0838985892 9781479347711 1 PMID:24297125,222 3-4 1234567890 10.4103/0976-500X.85940 10.4103/0976-500X.85941 0706.0044 arXiv:0706.00441v1";
+			var identifiers = ZUI.extractIdentifiers(id);
+			assert.lengthOf(identifiers, 9);
+			assert.lengthOf(Object.keys(identifiers[0]), 1);
+			assert.lengthOf(Object.keys(identifiers[1]), 1);
+			assert.lengthOf(Object.keys(identifiers[2]), 1);
+			assert.lengthOf(Object.keys(identifiers[3]), 1);
+			assert.lengthOf(Object.keys(identifiers[4]), 1);
+			assert.lengthOf(Object.keys(identifiers[5]), 1);
+			assert.lengthOf(Object.keys(identifiers[6]), 1);
+			assert.lengthOf(Object.keys(identifiers[7]), 1);
+			assert.lengthOf(Object.keys(identifiers[8]), 1);
+			assert.propertyVal(identifiers[0], "DOI", "10.4103/0976-500X.85940");
+			assert.propertyVal(identifiers[1], "DOI", "10.4103/0976-500X.85941");
+			assert.propertyVal(identifiers[2], "ISBN", "9780838985892");
+			assert.propertyVal(identifiers[3], "ISBN", "9781479347711");
+			assert.propertyVal(identifiers[4], "arXiv", "0706.0044");
+			assert.propertyVal(identifiers[5], "arXiv", "0706.00441");
+			assert.propertyVal(identifiers[6], "PMID", "1");
+			assert.propertyVal(identifiers[7], "PMID", "24297125");
+			assert.propertyVal(identifiers[8], "PMID", "222");
 		});
 	});
 	
