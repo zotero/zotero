@@ -374,6 +374,32 @@ Zotero.Utilities.Translate.prototype.doPost = function(url, body, onDone, header
 	}, Object.assign({}, translate.requestHeaders, headers), responseCharset, translate.cookieSandbox ? translate.cookieSandbox : undefined);
 }
 
+/**
+    * Run a function asynchronously after specified delay as part of the web translation process
+    * 
+    * @param {Function} callback Callback to be executed
+    * @param {Number} delay Delay in millisecond
+    * @param {Multiple} callbackArgs Callback arguments
+    * @return {Number} Timeout id
+    */
+Zotero.Utilities.Translate.prototype.setTimeout = function (callback, delay, ...callbackArgs) {
+  var translate = this._translate;
+
+  translate.incrementAsyncProcesses("Zotero.Utilities.Translate#setTimeout");
+  var timeoutID = setTimeout(setTimeoutCallback, delay);
+
+  return timeoutID;
+  
+  function setTimeoutCallback() {
+    try {
+      callback(...callbackArgs);
+      translate.decrementAsyncProcesses("Zotero.Utilities.Translate#setTimeout");
+    } catch (e) {
+      translate.complete(false, e);
+    }
+  }
+};
+
 Zotero.Utilities.Translate.prototype.urlToProxy = function(url) {
 	var proxy = this._translate._proxy;
 	if (proxy) return proxy.toProxy(url);
