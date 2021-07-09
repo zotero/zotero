@@ -352,7 +352,7 @@ Zotero.Translate.Sandbox = {
 			};
 			
 			var translatorsHandlerSet = false;
-			safeTranslator.getTranslators = function() {
+			safeTranslator.getTranslators = async function () {
 				if(!translation._handlers["translators"] || !translation._handlers["translators"].length) {
 					throw new Error('Translator must register a "translators" handler to '+
 						'call getTranslators() in this translation environment.');
@@ -367,7 +367,7 @@ Zotero.Translate.Sandbox = {
 			};
 			
 			var doneHandlerSet = false;
-			safeTranslator.translate = function() {
+			safeTranslator.translate = async function () {
 				translate.incrementAsyncProcesses("safeTranslator#translate()");
 				setDefaultHandlers(translate, translation);
 				if(!doneHandlerSet) {
@@ -378,7 +378,7 @@ Zotero.Translate.Sandbox = {
 					errorHandlerSet = true;
 					translation.setHandler("error", function(obj, error) { translate.complete(false, error) });
 				}
-				translation.translate(false);
+				return translation.translate(false);
 			};
 			
 			safeTranslator.getTranslatorObject = function(callback) {
@@ -1713,17 +1713,18 @@ Zotero.Translate.Base.prototype = {
 	/**
 	 * Runs detect code for a translator
 	 */
-	"_detectTranslatorLoaded":function() {
+	_detectTranslatorLoaded: async function () {
 		this._prepareDetection();
 		
 		this.incrementAsyncProcesses("Zotero.Translate#getTranslators");
 		
-		try {
-			var returnValue = Function.prototype.apply.call(this._sandboxManager.sandbox["detect"+this._entryFunctionSuffix], null, this._getParameters());
-		} catch(e) {
-			this.complete(false, e);
-			return;
-		}
+		var maybePromise = Function.prototype.apply.call(
+			this._sandboxManager.sandbox["detect" + this._entryFunctionSuffix],
+			null,
+			this._getParameters()
+		);
+		// If detect* returns a promise, wait for it
+		var returnValue = (maybePromise && maybePromise.then) ? await maybePromise : maybePromise;
 		
 		if(returnValue !== undefined) this._returnValue = returnValue;
 		this.decrementAsyncProcesses("Zotero.Translate#getTranslators");
