@@ -65,6 +65,7 @@
 		flex-grow: 1;
 		margin: 0 2px;
 		//width: $item-pane-width - $icon-width - $delete-button-width - ($li-side-margin * 2);
+		width: 0;
 	}
 	
 	ul.tags-box-list > li:not(.multiline) .editable-container {
