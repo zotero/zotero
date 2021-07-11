@@ -550,10 +550,9 @@ var ZoteroPane = new function()
 			}
 		}
 		
-		// Tab navigation
+		// Tab navigation: Ctrl-PageUp / PageDown
 		// TODO: Select across tabs without selecting with Ctrl-Shift, as in Firefox?
-		let ctrlOnly = event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey;
-		if (ctrlOnly) {
+		if (event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
 			if (event.key == 'PageUp') {
 				Zotero_Tabs.selectPrev();
 				event.preventDefault();
