@@ -229,6 +229,23 @@ var Zotero_Tabs = new function () {
 		var { tabIndex } = this._getTab(this._selectedID);
 		this.select((this._tabs[tabIndex + 1] || this._tabs[0]).id);
 	};
+	
+	/**
+	 * Select the last tab
+	 */
+	this.selectLast = function () {
+		this.select(this._tabs[this._tabs.length - 1].id);
+	};
+	
+	/**
+	 * Jump to the tab at a particular index. If the index points beyond the array, jump to the last
+	 * tab.
+	 *
+	 * @param {Integer} index
+	 */
+	this.jump = function(index) {
+		this.select(this._tabs[Math.min(index, this._tabs.length - 1)].id);
+	};
 
 	/**
 	 * Update state of the tab bar.

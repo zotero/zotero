@@ -535,12 +535,13 @@ var ZoteroPane = new function()
 	 * Trigger actions based on keyboard shortcuts
 	 */
 	function handleKeyDown(event, from) {
+		const metaOrCtrlOnly = Zotero.isMac
+			? (event.metaKey && !event.shiftKey && !event.ctrlKey && !event.altKey)
+			: (event.ctrlKey && !event.shiftKey && !event.altKey);
+		
 		// Close current tab
 		if (event.key == 'w') {
-			let close = Zotero.isMac
-				? (event.metaKey && !event.shiftKey && !event.ctrlKey && !event.altKey)
-				: (event.ctrlKey && !event.shiftKey && !event.altKey);
-			if (close) {
+			if (metaOrCtrlOnly) {
 				if (Zotero_Tabs.selectedIndex > 0) {
 					Zotero_Tabs.close();
 					event.preventDefault();
@@ -600,6 +601,31 @@ var ZoteroPane = new function()
 				event.preventDefault();
 				event.stopPropagation();
 				return;
+			}
+		}
+		
+		// Tab navigation: MetaOrCtrl-1 through 9
+		// Jump to tab N (or to the last tab if there are less than N tabs)
+		// MetaOrCtrl-9 is specially defined to jump to the last tab no matter how many there are.
+		if (metaOrCtrlOnly) {
+			switch (event.key) {
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+					Zotero_Tabs.jump(parseInt(event.key) - 1);
+					event.preventDefault();
+					event.stopPropagation();
+					return;
+				case '9':
+					Zotero_Tabs.selectLast();
+					event.preventDefault();
+					event.stopPropagation();
+					return;
 			}
 		}
 		
