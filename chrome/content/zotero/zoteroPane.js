@@ -556,11 +556,13 @@ var ZoteroPane = new function()
 			if (event.key == 'PageUp') {
 				Zotero_Tabs.selectPrev();
 				event.preventDefault();
+				event.stopPropagation();
 				return;
 			}
 			else if (event.key == 'PageDown') {
 				Zotero_Tabs.selectNext();
 				event.preventDefault();
+				event.stopPropagation();
 				return;
 			}
 		}
