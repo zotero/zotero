@@ -567,6 +567,26 @@ var ZoteroPane = new function()
 			}
 		}
 		
+		// Tab navigation: Cmd-Shift-[ / ]
+		// Common shortcut on macOS, but typically only supported on that platform to match OS
+		// conventions users expect from other macOS apps.
+		if (Zotero.isMac) {
+			if (event.metaKey && event.shiftKey && !event.altKey && !event.ctrlKey) {
+				if (event.key == '[') {
+					Zotero_Tabs.selectPrev();
+					event.preventDefault();
+					event.stopPropagation();
+					return;
+				}
+				else if (event.key == ']') {
+					Zotero_Tabs.selectNext();
+					event.preventDefault();
+					event.stopPropagation();
+					return;
+				}
+			}
+		}
+		
 		try {
 			// Ignore keystrokes outside of Zotero pane
 			if (!(event.originalTarget.ownerDocument instanceof XULDocument)) {
