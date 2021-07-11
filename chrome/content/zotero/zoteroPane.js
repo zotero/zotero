@@ -587,6 +587,22 @@ var ZoteroPane = new function()
 			}
 		}
 		
+		// Tab navigation: Ctrl-Tab / Ctrl-Shift-Tab
+		if (event.ctrlKey && !event.altKey && !event.metaKey && event.key == 'Tab') {
+			if (event.shiftKey) {
+				Zotero_Tabs.selectPrev();
+				event.preventDefault();
+				event.stopPropagation();
+				return;
+			}
+			else {
+				Zotero_Tabs.selectNext();
+				event.preventDefault();
+				event.stopPropagation();
+				return;
+			}
+		}
+		
 		try {
 			// Ignore keystrokes outside of Zotero pane
 			if (!(event.originalTarget.ownerDocument instanceof XULDocument)) {
