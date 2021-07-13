@@ -50,6 +50,7 @@ var mendeleyOnlineMappings = {
 		short_title: 'shortTitle',
 		source: 'publication',
 		source_type: 'sourceType',
+		starred: 'favourite',
 		tags: false, // tags handled separately
 		translators: false, // all author types handled separately
 		user_context: 'userContext',
