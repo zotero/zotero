@@ -1117,14 +1117,26 @@ var Scaffold = new function() {
 		Zotero.Utilities.Internal.copyTextToClipboard(urlOrData);
 	}
 	
-	/*
-	 * Open the url of the first selected test in the browser.
-	 */	
-	this.openURL = function() {
+	/**
+	 * Open the url of the first selected test in the browser (Browser tab or
+	 * the system's default browser).
+	 * @param {boolean} openExternally whether to open in the default browser
+	**/
+	this.openURL = function (openExternally) {
 		var listbox = document.getElementById("testing-listbox");
 		var item = listbox.selectedItems[0];
 		var url = item.getElementsByTagName("listcell")[0].getAttribute("label");
-		Zotero.launchURL(url);
+		if (openExternally) {
+			Zotero.launchURL(url);
+		}
+		else {
+			var tabs = document.getElementById('tabs');
+			_browser.loadURIWithFlags(
+				url,
+				Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE
+			);
+			tabs.selectedItem = document.getElementById('tab-browser');
+		}
 	}
 	
 	/*
