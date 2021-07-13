@@ -535,12 +535,13 @@ var ZoteroPane = new function()
 	 * Trigger actions based on keyboard shortcuts
 	 */
 	function handleKeyDown(event, from) {
+		const metaOrCtrlOnly = Zotero.isMac
+			? (event.metaKey && !event.shiftKey && !event.ctrlKey && !event.altKey)
+			: (event.ctrlKey && !event.shiftKey && !event.altKey);
+		
 		// Close current tab
 		if (event.key == 'w') {
-			let close = Zotero.isMac
-				? (event.metaKey && !event.shiftKey && !event.ctrlKey && !event.altKey)
-				: (event.ctrlKey && !event.shiftKey && !event.altKey);
-			if (close) {
+			if (metaOrCtrlOnly) {
 				if (Zotero_Tabs.selectedIndex > 0) {
 					Zotero_Tabs.close();
 					event.preventDefault();
@@ -549,7 +550,85 @@ var ZoteroPane = new function()
 				return;
 			}
 		}
-	
+		
+		// Tab navigation: Ctrl-PageUp / PageDown
+		// TODO: Select across tabs without selecting with Ctrl-Shift, as in Firefox?
+		if (event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
+			if (event.key == 'PageUp') {
+				Zotero_Tabs.selectPrev();
+				event.preventDefault();
+				event.stopPropagation();
+				return;
+			}
+			else if (event.key == 'PageDown') {
+				Zotero_Tabs.selectNext();
+				event.preventDefault();
+				event.stopPropagation();
+				return;
+			}
+		}
+		
+		// Tab navigation: Cmd-Shift-[ / ]
+		// Common shortcut on macOS, but typically only supported on that platform to match OS
+		// conventions users expect from other macOS apps.
+		if (Zotero.isMac) {
+			if (event.metaKey && event.shiftKey && !event.altKey && !event.ctrlKey) {
+				if (event.key == '[') {
+					Zotero_Tabs.selectPrev();
+					event.preventDefault();
+					event.stopPropagation();
+					return;
+				}
+				else if (event.key == ']') {
+					Zotero_Tabs.selectNext();
+					event.preventDefault();
+					event.stopPropagation();
+					return;
+				}
+			}
+		}
+		
+		// Tab navigation: Ctrl-Tab / Ctrl-Shift-Tab
+		if (event.ctrlKey && !event.altKey && !event.metaKey && event.key == 'Tab') {
+			if (event.shiftKey) {
+				Zotero_Tabs.selectPrev();
+				event.preventDefault();
+				event.stopPropagation();
+				return;
+			}
+			else {
+				Zotero_Tabs.selectNext();
+				event.preventDefault();
+				event.stopPropagation();
+				return;
+			}
+		}
+		
+		// Tab navigation: MetaOrCtrl-1 through 9
+		// Jump to tab N (or to the last tab if there are less than N tabs)
+		// MetaOrCtrl-9 is specially defined to jump to the last tab no matter how many there are.
+		if (metaOrCtrlOnly) {
+			switch (event.key) {
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+					Zotero_Tabs.jump(parseInt(event.key) - 1);
+					event.preventDefault();
+					event.stopPropagation();
+					return;
+				case '9':
+					Zotero_Tabs.selectLast();
+					event.preventDefault();
+					event.stopPropagation();
+					return;
+			}
+		}
+		
 		try {
 			// Ignore keystrokes outside of Zotero pane
 			if (!(event.originalTarget.ownerDocument instanceof XULDocument)) {
@@ -564,24 +643,8 @@ var ZoteroPane = new function()
 			event.preventDefault();
 			return;
 		}
-		
-		if (from == 'zotero-pane') {
-			// Tab navigation
-			// TODO: Select across tabs without selecting with Ctrl-Shift, as in Firefox?
-			let ctrlOnly = event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey;
-			if (ctrlOnly) {
-				if (event.key == 'PageUp') {
-					Zotero_Tabs.selectPrev();
-					event.preventDefault();
-					return;
-				}
-				else if (event.key == 'PageDown') {
-					Zotero_Tabs.selectNext();
-					event.preventDefault();
-					return;
-				}
-			}
-			
+
+		if (from == 'zotero-pane') {			
 			// Highlight collections containing selected items
 			//
 			// We use Control (17) on Windows because Alt triggers the menubar;
