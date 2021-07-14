@@ -585,4 +585,35 @@ describe("Zotero.Utilities", function() {
 			});
 		});
 	});
+
+
+	describe("cleanEdition", function() {
+		it('should clean valid editions (allowOtherText == false)', function() {
+			for (let [text, expected] of [
+				['2. Auflage', '2'],
+				['1. Auflage', null],
+				['second page ', 'second page '],
+				[' 2e ', '2'],
+				['tenth ed.', '10'],
+				['2nd edition with the author\'s signature', '2nd edition with the author\'s signature']
+			]) {
+				let edition = Zotero.Utilities.cleanEdition(text, false);
+				assert.equal(edition, expected);
+			}
+		});
+		
+		it('should clean valid editions (allowOtherText == true)', function() {
+			for (let [text, expected] of [
+				['2. Auflage', '2'],
+				['1. Auflage', null],
+				['second page ', '2'],
+				[' 2e ', '2'],
+				['tenth ed.', '10'],
+				['2nd edition with the author\'s signature', '2']
+			]) {
+				let edition = Zotero.Utilities.cleanEdition(text, true);
+				assert.equal(edition, expected);
+			}
+		});
+	});
 });

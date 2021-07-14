@@ -1989,7 +1989,54 @@ Zotero.Utilities = {
 	 * Provides unicode support and other additional features for regular expressions
 	 * See https://github.com/slevithan/xregexp for usage
 	 */
-	 "XRegExp": typeof XRegExp !== "undefined" ? XRegExp : null
+	"XRegExp": typeof XRegExp !== "undefined" ? XRegExp : null,
+
+	/**
+	 * Cleans an edition string ("second edition", "3e", "4."), converting
+	 * spelled-out ordinals and returning only the numeric part ("2", "3", "4").
+	 * 
+	 * If text is null or empty, or no edition can be found, returns the passed text.
+	 * If the resolved edition is "1" ("first edition", "1. Auflage"), returns null.
+	 * The Zotero.Item edition field should be left empty for first-edition items.
+	 * 
+	 * @param {string} text 
+	 * @param {boolean} allowOtherText If true, match even strings with extra content
+	 * ("3rd edition of the book", "there are 3 fish" -> "3"). More flexible, but can
+	 * cause false positives or lose information ("2nd edition with the author's signature" -> "2").
+	 * @return {string}
+	 */
+	"cleanEdition": function (text, allowOtherText) {
+		if (typeof text === "string" && text) {
+			const ordinals = {
+				first: "1",
+				second: "2",
+				third: "3",
+				fourth: "4",
+				fifth: "5",
+				sixth: "6",
+				seventh: "7",
+				eighth: "8",
+				ninth: "9",
+				tenth: "10"
+			};
+
+			const re = allowOtherText
+				? /(?:(?:([0-9]+)(?:st|nd|rd|th|er|re|d?e|d|ère|\.)?)|(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth))\s*(?:ed?\.?|(?:e|é)d(ition)?|auflage|editie)?/i
+				: /^(?:(?:([0-9]+)(?:st|nd|rd|th|er|re|d?e|d|ère|\.)?)|(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth))\s*(?:ed?\.?|(?:e|é)d(ition)?|auflage|editie)?$/i;
+
+			let cleaned = Zotero.Utilities.trimInternal(text).replace(/[[\]]/g, '');
+			// this somewhat complicated regex tries to isolate the number (spelled out
+			// or not) and make sure that it isn't followed by any extra info.
+			// supports English and some Dutch/German/French suffixes.
+			let matches = cleaned.match(re);
+			if (matches) {
+				let edition = matches[1] || matches[2];
+				edition = ordinals[edition.toLowerCase()] || edition;
+				return edition == "1" ? null : edition;
+			}
+		}
+		return text;
+	}
 }
 
 if (typeof process === 'object' && process + '' === '[object process]'){
