@@ -535,13 +535,13 @@ var ZoteroPane = new function()
 	 * Trigger actions based on keyboard shortcuts
 	 */
 	function handleKeyDown(event, from) {
-		const metaOrCtrlOnly = Zotero.isMac
+		const cmdOrCtrlOnly = Zotero.isMac
 			? (event.metaKey && !event.shiftKey && !event.ctrlKey && !event.altKey)
 			: (event.ctrlKey && !event.shiftKey && !event.altKey);
 		
 		// Close current tab
 		if (event.key == 'w') {
-			if (metaOrCtrlOnly) {
+			if (cmdOrCtrlOnly) {
 				if (Zotero_Tabs.selectedIndex > 0) {
 					Zotero_Tabs.close();
 					event.preventDefault();
@@ -604,10 +604,10 @@ var ZoteroPane = new function()
 			}
 		}
 		
-		// Tab navigation: MetaOrCtrl-1 through 9
+		// Tab navigation: CmdOrCtrl-1 through 9
 		// Jump to tab N (or to the last tab if there are less than N tabs)
-		// MetaOrCtrl-9 is specially defined to jump to the last tab no matter how many there are.
-		if (metaOrCtrlOnly) {
+		// CmdOrCtrl-9 is specially defined to jump to the last tab no matter how many there are.
+		if (cmdOrCtrlOnly) {
 			switch (event.key) {
 				case '1':
 				case '2':
