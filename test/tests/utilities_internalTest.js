@@ -382,6 +382,15 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.propertyVal(identifiers[2], "arXiv", "hep-ex/9809001");
 			assert.propertyVal(identifiers[3], "arXiv", "math.GT/0309135");
 		});
+
+		it("should extract ADS bibcodes", async function () {
+			var identifiers = ZUI.extractIdentifiers("9 2021wfc..rept....8D, 2022MSSP..16208010Y.");
+			assert.lengthOf(identifiers, 2);
+			assert.lengthOf(Object.keys(identifiers[0]), 1);
+			assert.lengthOf(Object.keys(identifiers[1]), 1);
+			assert.propertyVal(identifiers[0], "adsBibcode", "2021wfc..rept....8D");
+			assert.propertyVal(identifiers[1], "adsBibcode", "2022MSSP..16208010Y");
+		});
 	});
 	
 	describe("#resolveLocale()", function () {
