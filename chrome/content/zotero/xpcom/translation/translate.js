@@ -2644,6 +2644,12 @@ Zotero.Translate.Search.prototype.setIdentifier = function (identifier) {
 			arXiv: identifier.arXiv
 		};
 	}
+	else if (identifier.adsBibcode) {
+		search = {
+			itemType: "journalArticle",
+			adsBibcode: identifier.adsBibcode
+		};
+	}
 	else {
 		throw new Error("Unrecognized identifier");
 	}
