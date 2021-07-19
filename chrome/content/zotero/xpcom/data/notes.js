@@ -190,6 +190,77 @@ Zotero.Notes = new function() {
 		return doc.body.innerHTML;
 	};
 
+	/**
+	 * Download embedded images if they don't exist locally
+	 *
+	 * @param {Zotero.Item} item
+	 * @returns {Promise<boolean>}
+	 */
+	this.ensureEmbeddedImagesAvailable = async function (item) {
+		var attachments = Zotero.Items.get(item.getAttachments());
+		for (let attachment of attachments) {
+			let path = attachment.getFilePath();
+			if (!path || !await OS.File.exists(path)) {
+				let fileSyncingEnabled = Zotero.Sync.Storage.Local.getEnabledForLibrary(item.libraryID);
+				if (!fileSyncingEnabled) {
+					Zotero.debug('File sync is disabled');
+					return false;
+				}
+
+				try {
+					let results = await Zotero.Sync.Runner.downloadFile(attachment);
+					if (!results || !results.localChanges) {
+						Zotero.debug('Download failed');
+						return false;
+					}
+				}
+				catch (e) {
+					Zotero.debug(e);
+					return false;
+				}
+			}
+		}
+		return true;
+	};
+
+	/**
+	 * Copy embedded images from one note to another and update
+	 * item keys in note HTML.
+	 *
+	 * Must be called after copying a note
+ 	 *
+	 * @param {Zotero.Item} fromNote
+	 * @param {Zotero.Item} toNote
+	 * @returns {Promise}
+	 */
+	this.copyEmbeddedImages = async function (fromNote, toNote) {
+		Zotero.DB.requireTransaction();
+		
+		let attachments = Zotero.Items.get(fromNote.getAttachments());
+		if (!attachments.length) {
+			return;
+		}
+
+		let note = toNote.note;
+		let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
+			.createInstance(Components.interfaces.nsIDOMParser);
+		let doc = parser.parseFromString(note, 'text/html');
+	
+		// Copy note image attachments and replace keys in the new note
+		for (let attachment of attachments) {
+			let copiedAttachment = await Zotero.Attachments.copyEmbeddedImage({ attachment, note: toNote });
+			let node = doc.querySelector(`img[data-attachment-key="${attachment.key}"]`);
+			if (node) {
+				node.setAttribute('data-attachment-key', copiedAttachment.key);
+			}
+		}
+
+		note = doc.body.innerHTML;
+		note = note.trim();
+		toNote.setNote(note);
+		await toNote.save({ skipDateModifiedUpdate: true });
+	};
+
 	this.hasSchemaVersion = function (note) {
 		let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
 		.createInstance(Components.interfaces.nsIDOMParser);

@@ -880,8 +880,8 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			return false;
 		}
 		
-		if (!item.isImportedAttachment()) {
-			throw new Error("Not an imported attachment");
+		if (!item.isStoredFileAttachment()) {
+			throw new Error("Not a stored file attachment");
 		}
 		
 		if (yield item.getFilePathAsync()) {

@@ -115,6 +115,10 @@ class EditorInstance {
 				...Zotero.Intl.getPrefixedStrings('noteEditor.')
 			}
 		});
+		
+		if (!this._item.isAttachment()) {
+			Zotero.Notes.ensureEmbeddedImagesAvailable(this._item);
+		}
 	}
 
 	uninit() {
@@ -423,11 +427,20 @@ class EditorInstance {
 
 	async _digestItems(ids) {
 		let html = '';
-		for (let id of ids) {
-			let item = await Zotero.Items.getAsync(id);
-			if (!item) {
-				continue;
+		let items = await Zotero.Items.getAsync(ids);
+		for (let item of items) {
+			if (item.isNote()) {
+				if (!await Zotero.Notes.ensureEmbeddedImagesAvailable(item)) {
+					let win = Zotero.getMainWindow();
+					if (win) {
+						win.ZoteroPane.displayMissingImagesMessage();
+					}
+					return null;
+				}
 			}
+		}
+		
+		for (let item of items) {
 			if (item.isRegularItem()) {
 				let itemData = Zotero.Cite.System.prototype.retrieveItem(item);
 				let citation = {
@@ -505,27 +518,23 @@ class EditorInstance {
 				}
 
 				// Clone all note image attachments and replace keys in the new note
-				let attachments = await Zotero.Items.getAsync(item.getAttachments());
+				let attachments = Zotero.Items.get(item.getAttachments());
 				for (let attachment of attachments) {
-					let path = await attachment.getFilePathAsync();
-					let buf = await OS.File.read(path, {});
-					buf = new Uint8Array(buf).buffer;
-					let blob = new (Zotero.getMainWindow()).Blob([buf], { type: attachment.attachmentContentType });
-					// Image type is not additionally filtered because it was an attachment already
-					let clonedAttachment = await Zotero.Attachments.importEmbeddedImage({
-						blob,
-						parentItemID: this._item.id,
-						saveOptions: {
-							notifierData: {
-								noteEditorID: this.instanceID
+					await Zotero.DB.executeTransaction(async () => {
+						let copiedAttachment = await Zotero.Attachments.copyEmbeddedImage({
+							attachment,
+							note: this._item,
+							saveOptions: {
+								notifierData: {
+									noteEditorID: this.instanceID
+								}
 							}
+						});
+						let node = doc.querySelector(`img[data-attachment-key="${attachment.key}"]`);
+						if (node) {
+							node.setAttribute('data-attachment-key', copiedAttachment.key);
 						}
 					});
-					
-					let node = doc.querySelector(`img[data-attachment-key=${attachment.key}]`);
-					if (node) {
-						node.setAttribute('data-attachment-key', clonedAttachment.key);
-					}
 				}
 				
 				html += `<p></p>${doc.body.innerHTML}<p></p>`;
@@ -555,6 +564,9 @@ class EditorInstance {
 					if (type === 'zotero/item') {
 						let ids = data.split(',').map(id => parseInt(id));
 						html = await this._digestItems(ids);
+						if (!html) {
+							return;
+						}
 					}
 					else if (type === 'zotero/annotation') {
 						let annotations = JSON.parse(data);

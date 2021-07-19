@@ -1784,6 +1784,13 @@ var ZoteroPane = new function()
 		}
 		
 		var item = self.getSelectedItems()[0];
+		if (item.isNote()) {
+			if (!(yield Zotero.Notes.ensureEmbeddedImagesAvailable(item))) {
+				self.displayMissingImagesMessage();
+				return;
+			}
+		}
+		
 		var newItem;
 		
 		yield Zotero.DB.executeTransaction(function* () {
@@ -1793,6 +1800,9 @@ var ZoteroPane = new function()
 				newItem.setCollections([self.collectionsView.selectedTreeRow.ref.id]);
 			}
 			yield newItem.save();
+			if (item.isNote()) {
+				yield Zotero.Notes.copyEmbeddedImages(item, newItem);
+			}
 			for (let relItemKey of item.relatedItems) {
 				try {
 					let relItem = yield Zotero.Items.getByLibraryAndKeyAsync(item.libraryID, relItemKey);
@@ -4561,6 +4571,13 @@ var ZoteroPane = new function()
 								.getService(Components.interfaces.nsIPromptService);
 		ps.alert(null, "", Zotero.getString('save.error.cannotAddToMyPublications'));
 	}
+	
+	
+	this.displayMissingImagesMessage = function () {
+		var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+								.getService(Components.interfaces.nsIPromptService);
+		ps.alert(null, "", Zotero.getString('pane.item.attachments.missingImages.text'));
+	};
 	
 	
 	// TODO: Figure out a functioning way to get the original path and just copy the real file

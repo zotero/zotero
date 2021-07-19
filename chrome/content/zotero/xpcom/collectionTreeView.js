@@ -2052,6 +2052,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 		yield newItem.addLinkedItem(item);
 		
 		if (item.isNote()) {
+			yield Zotero.Notes.copyEmbeddedImages(item, newItem);
 			return newItemID;
 		}
 		
@@ -2067,7 +2068,7 @@ Zotero.CollectionTreeView.prototype.drop = Zotero.Promise.coroutine(function* (r
 				yield newNote.save({
 					skipSelect: true
 				})
-				
+				yield Zotero.Notes.copyEmbeddedImages(note, newNote);
 				yield newNote.addLinkedItem(note);
 			}
 		}
