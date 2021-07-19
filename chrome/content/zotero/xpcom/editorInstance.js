@@ -522,7 +522,7 @@ class EditorInstance {
 						}
 					});
 					
-					let node = doc.querySelector(`img[data-attachment-key=${attachment.key}]`);
+					let node = doc.querySelector(`img[data-attachment-key="${attachment.key}"]`);
 					if (node) {
 						node.setAttribute('data-attachment-key', clonedAttachment.key);
 					}
@@ -535,7 +535,8 @@ class EditorInstance {
 	}
 
 	_messageHandler = async (e) => {
-		if (e.data.instanceID !== this.instanceID) {
+		if (e.source !== this._iframeWindow
+			|| e.data.instanceID !== this.instanceID) {
 			return;
 		}
 		let message = e.data.message;
