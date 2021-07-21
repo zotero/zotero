@@ -516,6 +516,10 @@ Zotero.DataObject.prototype._getLinkedObject = Zotero.Promise.coroutine(function
 					+ "in Zotero." + this._ObjectType + "::getLinked" + this._ObjectType + "()", 2);
 				continue;
 			}
+			// Ignore items in the trash
+			if (obj.objectType == 'item' && obj.deleted) {
+				continue;
+			}
 			return obj;
 		}
 	}
@@ -534,6 +538,10 @@ Zotero.DataObject.prototype._getLinkedObject = Zotero.Promise.coroutine(function
 				continue;
 			}
 			if (obj.libraryID == libraryID) {
+				// Ignore items in the trash
+				if (obj.objectType == 'item' && obj.deleted) {
+					continue;
+				}
 				return obj;
 			}
 		}
