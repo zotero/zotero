@@ -564,6 +564,19 @@ describe("Zotero.DataObject", function() {
 				assert.equal(linkedItem.id, item2.id);
 			})
 			
+			it("shouldn't return a linked item in the trash in another library", async function () {
+				var group = await getGroup();
+				var item1 = await createDataObject('item');
+				var item2 = await createDataObject('item', { libraryID: group.libraryID });
+				var item2URI = Zotero.URI.getItemURI(item2);
+				
+				await item2.addLinkedItem(item1);
+				item2.deleted = true;
+				await item2.saveTx();
+				var linkedItem = await item1.getLinkedItem(item2.libraryID);
+				assert.isFalse(linkedItem);
+			})
+			
 			it("shouldn't return reverse linked objects by default", function* () {
 				var group = yield getGroup();
 				var item1 = yield createDataObject('item');
