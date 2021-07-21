@@ -29,7 +29,7 @@ Components.utils.import("resource://gre/modules/InlineSpellChecker.jsm");
 // note-editor produced HTML. Which might result to more
 // conflicts, especially in group libraries
 
-// Note: Synchrounous save can still affect dateModified
+// Note: Synchronous save can still affect dateModified
 
 // When changing this update in `note-editor` as well.
 // This only filters images that are being imported from a URL.
@@ -142,38 +142,15 @@ class EditorInstance {
 	}
 
 	async notify(ids) {
-		// Update itemData and formatted citation in notes
 		if (this._readOnly || !this._item) {
 			return;
 		}
-
-		// Make sure only single sibling instance does automatic
-		// citation update, and preferably the focused one
-		// to prevent another instances in the background resetting
-		// each other and the one where typing happens
 		
-		// This is a temporary solution, and in future sibling instances
-		// should have a better mechanism to share state, images,
-		// undo stack and know which one now is the "master"
-		let siblingInstances = Zotero.Notes._editorInstances
-		.filter(x => x._item.id === this._item.id);
-		if (siblingInstances.length) {
-			let masterInstance = siblingInstances
-			.find(x => x._iframeWindow.document.hasFocus());
-			if (!masterInstance) {
-				masterInstance = siblingInstances[0];
-			}
-			if (masterInstance !== this) {
-				return;
-			}
-		}
-	
+		// Update citations itemData
 		let items = await Zotero.Items.getAsync(ids);
-
-		// Update citations
 		let uris = items.map(x => Zotero.URI.getItemURI(x)).filter(x => x);
 		let citationItemsList = this._citationItemsList
-		.filter(ci => ci.uris && uris.some(uri => ci.uris.includes(uri)));
+			.filter(ci => ci.uris && uris.some(uri => ci.uris.includes(uri)));
 		await this._updateCitationItems(citationItemsList);
 	}
 
@@ -355,8 +332,9 @@ class EditorInstance {
 					locator: annotation.pageLabel
 				};
 				
-				// TODO: Find a more elegant way to call this
-				let itemData = Zotero.Cite.System.prototype.retrieveItem(parentItem);
+				// Note: integration.js` uses `Zotero.Cite.System.prototype.retrieveItem`,
+				// which produces a little bit different CSL JSON
+				let itemData = Zotero.Utilities.itemToCSLJSON(parentItem);
 				if (!skipEmbeddingItemData) {
 					citationItem.itemData = itemData;
 				}
@@ -429,7 +407,7 @@ class EditorInstance {
 				continue;
 			}
 			if (item.isRegularItem()) {
-				let itemData = Zotero.Cite.System.prototype.retrieveItem(item);
+				let itemData = Zotero.Utilities.itemToCSLJSON(item);
 				let citation = {
 					citationItems: [{
 						uris: [Zotero.URI.getItemURI(item)],
@@ -694,7 +672,7 @@ class EditorInstance {
 									let citationItem = {};
 									citationItem.id = item.id;
 									citationItem.uris = [Zotero.URI.getItemURI(item)];
-									citationItem.itemData = Zotero.Cite.System.prototype.retrieveItem(item);
+									citationItem.itemData = Zotero.Utilities.itemToCSLJSON(item);
 									citation.citationItems.push(citationItem);
 								}
 							}
@@ -764,7 +742,7 @@ class EditorInstance {
 		for (let { uris } of citationItemsList) {
 			let item = await Zotero.EditorInstance.getItemFromURIs(uris);
 			if (item) {
-				let itemData = Zotero.Cite.System.prototype.retrieveItem(item);
+				let itemData = Zotero.Utilities.itemToCSLJSON(item);
 				citationItems.push({ uris, itemData });
 			}
 		}
@@ -1277,7 +1255,7 @@ class EditorInstance {
 					else if (citationItem.id) {
 						let item = await Zotero.Items.getAsync(parseInt(citationItem.id));
 						citationItem.uris = [Zotero.URI.getItemURI(item)];
-						citationItem.itemData = Zotero.Cite.System.prototype.retrieveItem(item);
+						citationItem.itemData = Zotero.Utilities.itemToCSLJSON(item);
 					}
 					// Otherwise it's existing item, so just passing untouched citationItem
 					
