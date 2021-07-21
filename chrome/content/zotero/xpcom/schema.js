@@ -1527,11 +1527,13 @@ Zotero.Schema = new function(){
 			yield Zotero.DB.waitForTransaction();
 		}
 		
-		try {
-			yield Zotero.Retractions.updateFromServer();
-		}
-		catch (e) {
-			Zotero.logError(e);
+		if (mode == this.REPO_UPDATE_PERIODIC || mode == this.REPO_UPDATE_STARTUP) {
+			try {
+				yield Zotero.Retractions.updateFromServer();
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
 		}
 		
 		// Get the last timestamp we got from the server
