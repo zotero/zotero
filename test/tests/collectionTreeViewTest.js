@@ -888,35 +888,24 @@ describe("Zotero.CollectionTreeView", function() {
 				await group2.eraseTx();
 			});
 			
-			it("should remove a linked, trashed item in a group from the trash and collections", function* () {
-				var group = yield getGroup();
-				var collection = yield createDataObject('collection', { libraryID: group.libraryID });
+			it("should ignore a linked, trashed item when re-dragging an item to a group", async function () {
+				var group = await getGroup();
+				var collection = await createDataObject('collection', { libraryID: group.libraryID });
 				
-				var item = yield createDataObject('item', false, { skipSelect: true });
-				yield drop('item', 'L' + group.libraryID, [item.id]);
+				var item = await createDataObject('item', false, { skipSelect: true });
+				await drop('item', 'L' + group.libraryID, [item.id]);
 				
-				var droppedItem = yield item.getLinkedItem(group.libraryID);
+				var droppedItem = await item.getLinkedItem(group.libraryID);
 				droppedItem.setCollections([collection.id]);
 				droppedItem.deleted = true;
-				yield droppedItem.saveTx();
+				await droppedItem.saveTx();
 				
-				// Add observer to wait for collection add
-				var deferred = Zotero.Promise.defer();
-				var observerID = Zotero.Notifier.registerObserver({
-					notify: function (event, type, ids) {
-						if (event == 'refresh' && type == 'trash' && ids[0] == group.libraryID) {
-							setTimeout(function () {
-								deferred.resolve();
-							});
-						}
-					}
-				}, 'trash', 'test');
-				yield drop('item', 'L' + group.libraryID, [item.id], deferred.promise);
-				Zotero.Notifier.unregisterObserver(observerID);
+				await drop('item', 'L' + group.libraryID, [item.id]);
 				
-				assert.isFalse(droppedItem.deleted);
-				// Should be removed from collections when removed from trash
-				assert.lengthOf(droppedItem.getCollections(), 0);
+				var linkedItem = await item.getLinkedItem(group.libraryID);
+				assert.notEqual(linkedItem, droppedItem);
+				
+				assert.isTrue(droppedItem.deleted);
 			})
 		})
 		
