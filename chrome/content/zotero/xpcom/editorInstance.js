@@ -494,6 +494,9 @@ class EditorInstance {
 				// Clone all note image attachments and replace keys in the new note
 				let attachments = Zotero.Items.get(item.getAttachments());
 				for (let attachment of attachments) {
+					if (!await attachment.fileExists()) {
+						continue;
+					}
 					await Zotero.DB.executeTransaction(async () => {
 						let copiedAttachment = await Zotero.Attachments.copyEmbeddedImage({
 							attachment,

@@ -249,10 +249,12 @@ Zotero.Notes = new function() {
 	
 		// Copy note image attachments and replace keys in the new note
 		for (let attachment of attachments) {
-			let copiedAttachment = await Zotero.Attachments.copyEmbeddedImage({ attachment, note: toNote });
-			let node = doc.querySelector(`img[data-attachment-key="${attachment.key}"]`);
-			if (node) {
-				node.setAttribute('data-attachment-key', copiedAttachment.key);
+			if (await attachment.fileExists()) {
+				let copiedAttachment = await Zotero.Attachments.copyEmbeddedImage({ attachment, note: toNote });
+				let node = doc.querySelector(`img[data-attachment-key="${attachment.key}"]`);
+				if (node) {
+					node.setAttribute('data-attachment-key', copiedAttachment.key);
+				}
 			}
 		}
 		toNote.setNote(doc.body.innerHTML);

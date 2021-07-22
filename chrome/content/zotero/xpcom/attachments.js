@@ -457,8 +457,12 @@ Zotero.Attachments = new function(){
 	this.copyEmbeddedImage = async function ({ attachment, note, saveOptions }) {
 		Zotero.DB.requireTransaction();
 		
-		if (attachment.attachmentLinkMode !== Zotero.Attachments.LINK_MODE_EMBEDDED_IMAGE) {
+		if (!attachment.isEmbeddedImageAttachment()) {
 			throw new Error("'attachment' must be an embedded image");
+		}
+		
+		if (!await attachment.fileExists()) {
+			throw new Error("Image attachment file doesn't exist");
 		}
 		
 		var newAttachment = attachment.clone(note.libraryID);
@@ -467,13 +471,10 @@ Zotero.Attachments = new function(){
 		newAttachment.parentID = note.id;
 		await newAttachment.save(saveOptions);
 		
-		// Copy over files if they exist
-		if (newAttachment.isStoredFileAttachment() && (await attachment.fileExists())) {
-			let dir = Zotero.Attachments.getStorageDirectory(attachment);
-			let newDir = await Zotero.Attachments.createDirectoryForItem(newAttachment);
-			await Zotero.File.copyDirectory(dir, newDir);
-		}
-
+		let dir = Zotero.Attachments.getStorageDirectory(attachment);
+		let newDir = await Zotero.Attachments.createDirectoryForItem(newAttachment);
+		await Zotero.File.copyDirectory(dir, newDir);
+		
 		return newAttachment;
 	};
 	
