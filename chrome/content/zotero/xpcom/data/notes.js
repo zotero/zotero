@@ -196,11 +196,12 @@ Zotero.Notes = new function() {
 	 * @param {Zotero.Item} item
 	 * @returns {Promise<boolean>}
 	 */
-	this.ensureEmbeddedImagesAvailable = async function (item) {
+	this.ensureEmbeddedImagesAreAvailable = async function (item) {
 		var attachments = Zotero.Items.get(item.getAttachments());
 		for (let attachment of attachments) {
-			let path = attachment.getFilePath();
-			if (!path || !await OS.File.exists(path)) {
+			let path = await attachment.getFilePathAsync();
+			if (!path) {
+				Zotero.debug(`Image file not found for item ${attachment.key}. Trying to download`);
 				let fileSyncingEnabled = Zotero.Sync.Storage.Local.getEnabledForLibrary(item.libraryID);
 				if (!fileSyncingEnabled) {
 					Zotero.debug('File sync is disabled');
@@ -254,11 +255,23 @@ Zotero.Notes = new function() {
 				node.setAttribute('data-attachment-key', copiedAttachment.key);
 			}
 		}
-
-		note = doc.body.innerHTML;
-		note = note.trim();
-		toNote.setNote(note);
+		toNote.setNote(doc.body.innerHTML);
 		await toNote.save({ skipDateModifiedUpdate: true });
+	};
+	
+	this.promptToIgnoreMissingImage = function () {
+		let ps = Services.prompt;
+		let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
+		let index = ps.confirmEx(
+			null,
+			Zotero.getString('general.warning'),
+			Zotero.getString('pane.item.notes.ignoreMissingImage'),
+			buttonFlags,
+			Zotero.getString('general.continue'),
+			null, null, null, {}
+		);
+		return !index;
 	};
 
 	this.hasSchemaVersion = function (note) {
@@ -365,9 +378,7 @@ Zotero.Notes = new function() {
 		}
 		schemaVersion++;
 		metadataContainer.setAttribute('data-schema-version', schemaVersion);
-		note = doc.body.innerHTML;
-		note = note.trim();
-		item.setNote(note);
+		item.setNote(doc.body.innerHTML);
 		await item.saveTx({ skipDateModifiedUpdate: true });
 		return true;
 	};

@@ -117,7 +117,7 @@ class EditorInstance {
 		});
 		
 		if (!this._item.isAttachment()) {
-			Zotero.Notes.ensureEmbeddedImagesAvailable(this._item);
+			Zotero.Notes.ensureEmbeddedImagesAreAvailable(this._item);
 		}
 	}
 
@@ -408,12 +408,10 @@ class EditorInstance {
 		let items = await Zotero.Items.getAsync(ids);
 		for (let item of items) {
 			if (item.isNote()) {
-				if (!await Zotero.Notes.ensureEmbeddedImagesAvailable(item)) {
-					let win = Zotero.getMainWindow();
-					if (win) {
-						win.ZoteroPane.displayMissingImagesMessage();
+				if (!await Zotero.Notes.ensureEmbeddedImagesAreAvailable(item)) {
+					if (!Zotero.Notes.promptToIgnoreMissingImage()) {
+						return null;
 					}
-					return null;
 				}
 			}
 		}
