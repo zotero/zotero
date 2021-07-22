@@ -1784,12 +1784,10 @@ var ZoteroPane = new function()
 		}
 		
 		var item = self.getSelectedItems()[0];
-		if (item.isNote()) {
-			if (!(yield Zotero.Notes.ensureEmbeddedImagesAreAvailable(item))) {
-				if (!Zotero.Notes.promptToIgnoreMissingImage()) {
-					return;
-				}
-			}
+		if (item.isNote()
+			&& !(yield Zotero.Notes.ensureEmbeddedImagesAreAvailable(item))
+			&& !Zotero.Notes.promptToIgnoreMissingImage()) {
+			return;
 		}
 		
 		var newItem;

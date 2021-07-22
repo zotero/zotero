@@ -407,12 +407,10 @@ class EditorInstance {
 		let html = '';
 		let items = await Zotero.Items.getAsync(ids);
 		for (let item of items) {
-			if (item.isNote()) {
-				if (!await Zotero.Notes.ensureEmbeddedImagesAreAvailable(item)) {
-					if (!Zotero.Notes.promptToIgnoreMissingImage()) {
-						return null;
-					}
-				}
+			if (item.isNote()
+				&& !await Zotero.Notes.ensureEmbeddedImagesAreAvailable(item)
+				&& !Zotero.Notes.promptToIgnoreMissingImage()) {
+				return null;
 			}
 		}
 		
