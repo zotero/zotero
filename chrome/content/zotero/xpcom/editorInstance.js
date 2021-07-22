@@ -551,7 +551,13 @@ class EditorInstance {
 						this.onNavigate(uri, { position });
 					}
 					else {
-						await Zotero.Reader.openURI(uri, { position });
+						let zp = Zotero.getActiveZoteroPane();
+						if (zp) {
+							let item = await Zotero.URI.getURIItem(uri);
+							if (item) {
+								zp.viewPDF(item.id, { position });
+							}
+						}
 					}
 					return;
 				}
@@ -567,7 +573,10 @@ class EditorInstance {
 					}
 					let attachments = Zotero.Items.get(item.getAttachments()).filter(x => x.isPDFAttachment());
 					if (citationItem.locator && attachments.length === 1) {
-						await Zotero.Reader.open(attachments[0].id, { pageLabel: citationItem.locator });
+						let zp = Zotero.getActiveZoteroPane();
+						if (zp) {
+							zp.viewPDF(attachments[0].id, { pageLabel: citationItem.locator });
+						}
 					}
 					else {
 						this._showInLibrary(item.id);

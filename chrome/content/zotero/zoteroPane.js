@@ -4175,7 +4175,7 @@ var ZoteroPane = new function()
 	});
 	
 	
-	this.viewAttachment = Zotero.serial(async function (itemIDs, event, noLocateOnMissing, forceExternalViewer) {
+	this.viewAttachment = Zotero.serial(async function (itemIDs, event, noLocateOnMissing, extraData) {
 		// If view isn't editable, don't show Locate button, since the updated
 		// path couldn't be sent back up
 		if (!this.collectionsView.editable) {
@@ -4210,7 +4210,11 @@ var ZoteroPane = new function()
 				// TEMP
 				if (Zotero.isPDFBuild && (library.libraryType == 'user' || Zotero.enablePDFBuildForGroups)) {
 					let originalEvent = event && event.originalEvent || event;
-					this.viewPDF(itemID, originalEvent && originalEvent.shiftKey);
+					await Zotero.Reader.open(
+						itemID,
+						extraData && extraData.location,
+						originalEvent && originalEvent.shiftKey
+					);
 					return;
 				}
 				let pdfHandler  = Zotero.Prefs.get("fileHandler.pdf");
@@ -4378,8 +4382,8 @@ var ZoteroPane = new function()
 		}
 	});
 	
-	this.viewPDF = function (itemID, openWindow) {
-		Zotero.Reader.open(itemID, null, openWindow);
+	this.viewPDF = async function (itemID, location) {
+		await this.viewAttachment(itemID, null, false, { location });
 	};
 	
 	
