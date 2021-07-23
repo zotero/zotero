@@ -1099,6 +1099,13 @@ Zotero.ItemTreeView.prototype.getCellText = function (row, column)
 		case 'zotero-items-column-accessDate':
 		case 'zotero-items-column-date':
 			if (column.id == 'zotero-items-column-date' && !this.collectionTreeRow.isFeed()) {
+				if (val) {
+					var date = Zotero.Date.strToDate(val);
+					if (date.part == undefined) {
+						// val = Zotero.Date.isoToDate(date).toLocaleDateString();
+						val = Zotero.Date.dateToISO(date);
+					}
+				}
 				break;
 			}
 			if (val) {
