@@ -190,6 +190,92 @@ Zotero.Notes = new function() {
 		return doc.body.innerHTML;
 	};
 
+	/**
+	 * Download embedded images if they don't exist locally
+	 *
+	 * @param {Zotero.Item} item
+	 * @returns {Promise<boolean>}
+	 */
+	this.ensureEmbeddedImagesAreAvailable = async function (item) {
+		var attachments = Zotero.Items.get(item.getAttachments());
+		for (let attachment of attachments) {
+			let path = await attachment.getFilePathAsync();
+			if (!path) {
+				Zotero.debug(`Image file not found for item ${attachment.key}. Trying to download`);
+				let fileSyncingEnabled = Zotero.Sync.Storage.Local.getEnabledForLibrary(item.libraryID);
+				if (!fileSyncingEnabled) {
+					Zotero.debug('File sync is disabled');
+					return false;
+				}
+
+				try {
+					let results = await Zotero.Sync.Runner.downloadFile(attachment);
+					if (!results || !results.localChanges) {
+						Zotero.debug('Download failed');
+						return false;
+					}
+				}
+				catch (e) {
+					Zotero.debug(e);
+					return false;
+				}
+			}
+		}
+		return true;
+	};
+
+	/**
+	 * Copy embedded images from one note to another and update
+	 * item keys in note HTML.
+	 *
+	 * Must be called after copying a note
+ 	 *
+	 * @param {Zotero.Item} fromNote
+	 * @param {Zotero.Item} toNote
+	 * @returns {Promise}
+	 */
+	this.copyEmbeddedImages = async function (fromNote, toNote) {
+		Zotero.DB.requireTransaction();
+		
+		let attachments = Zotero.Items.get(fromNote.getAttachments());
+		if (!attachments.length) {
+			return;
+		}
+
+		let note = toNote.note;
+		let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
+			.createInstance(Components.interfaces.nsIDOMParser);
+		let doc = parser.parseFromString(note, 'text/html');
+	
+		// Copy note image attachments and replace keys in the new note
+		for (let attachment of attachments) {
+			if (await attachment.fileExists()) {
+				let copiedAttachment = await Zotero.Attachments.copyEmbeddedImage({ attachment, note: toNote });
+				let node = doc.querySelector(`img[data-attachment-key="${attachment.key}"]`);
+				if (node) {
+					node.setAttribute('data-attachment-key', copiedAttachment.key);
+				}
+			}
+		}
+		toNote.setNote(doc.body.innerHTML);
+		await toNote.save({ skipDateModifiedUpdate: true });
+	};
+	
+	this.promptToIgnoreMissingImage = function () {
+		let ps = Services.prompt;
+		let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
+		let index = ps.confirmEx(
+			null,
+			Zotero.getString('general.warning'),
+			Zotero.getString('pane.item.notes.ignoreMissingImage'),
+			buttonFlags,
+			Zotero.getString('general.continue'),
+			null, null, null, {}
+		);
+		return !index;
+	};
+
 	this.hasSchemaVersion = function (note) {
 		let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
 		.createInstance(Components.interfaces.nsIDOMParser);
@@ -294,9 +380,7 @@ Zotero.Notes = new function() {
 		}
 		schemaVersion++;
 		metadataContainer.setAttribute('data-schema-version', schemaVersion);
-		note = doc.body.innerHTML;
-		note = note.trim();
-		item.setNote(note);
+		item.setNote(doc.body.innerHTML);
 		await item.saveTx({ skipDateModifiedUpdate: true });
 		return true;
 	};

@@ -446,6 +446,40 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
+	 * Copy an image from one note to another
+	 *
+	 * @param {Object} params
+	 * @param {Zotero.Item} params.attachment - Image attachment to copy
+	 * @param {Zotero.Item} params.note - Note item to add attachment to
+	 * @param {Object} [params.saveOptions] - Options to pass to Zotero.Item::save()
+	 * @return {Promise<Zotero.Item>}
+	 */
+	this.copyEmbeddedImage = async function ({ attachment, note, saveOptions }) {
+		Zotero.DB.requireTransaction();
+		
+		if (!attachment.isEmbeddedImageAttachment()) {
+			throw new Error("'attachment' must be an embedded image");
+		}
+		
+		if (!await attachment.fileExists()) {
+			throw new Error("Image attachment file doesn't exist");
+		}
+		
+		var newAttachment = attachment.clone(note.libraryID);
+		// Attachment path isn't copied over by clone() if libraryID is different
+		newAttachment.attachmentPath = attachment.attachmentPath;
+		newAttachment.parentID = note.id;
+		await newAttachment.save(saveOptions);
+		
+		let dir = Zotero.Attachments.getStorageDirectory(attachment);
+		let newDir = await Zotero.Attachments.createDirectoryForItem(newAttachment);
+		await Zotero.File.copyDirectory(dir, newDir);
+		
+		return newAttachment;
+	};
+	
+	
+	/**
 	 * @param {Object} options
 	 * @param {Integer} options.libraryID
 	 * @param {String} options.url

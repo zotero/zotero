@@ -1784,6 +1784,12 @@ var ZoteroPane = new function()
 		}
 		
 		var item = self.getSelectedItems()[0];
+		if (item.isNote()
+			&& !(yield Zotero.Notes.ensureEmbeddedImagesAreAvailable(item))
+			&& !Zotero.Notes.promptToIgnoreMissingImage()) {
+			return;
+		}
+		
 		var newItem;
 		
 		yield Zotero.DB.executeTransaction(function* () {
@@ -1793,6 +1799,9 @@ var ZoteroPane = new function()
 				newItem.setCollections([self.collectionsView.selectedTreeRow.ref.id]);
 			}
 			yield newItem.save();
+			if (item.isNote()) {
+				yield Zotero.Notes.copyEmbeddedImages(item, newItem);
+			}
 			for (let relItemKey of item.relatedItems) {
 				try {
 					let relItem = yield Zotero.Items.getByLibraryAndKeyAsync(item.libraryID, relItemKey);
