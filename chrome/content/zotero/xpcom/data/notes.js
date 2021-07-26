@@ -34,34 +34,9 @@ Zotero.Notes = new function() {
 	this._editorInstances = [];
 	this._downloadInProgressPromise = null;
 	
-	/**
-	* Return first line (or first MAX_LENGTH characters) of note content
-	**/
 	this.noteToTitle = function(text) {
-		var origText = text;
-		text = text.trim();
-		text = text.replace(/<br\s*\/?>/g, ' ');
-		text = Zotero.Utilities.unescapeHTML(text);
-		
-		// If first line is just an opening HTML tag, remove it
-		//
-		// Example:
-		//
-		// <blockquote>
-		// <p>Foo</p>
-		// </blockquote>
-		if (/^<[^>\n]+[^\/]>\n/.test(origText)) {
-			text = text.trim();
-		}
-		
-		var max = this.MAX_TITLE_LENGTH;
-		
-		var t = text.substring(0, max);
-		var ln = t.indexOf("\n");
-		if (ln>-1 && ln<max) {
-			t = t.substring(0, ln);
-		}
-		return t;
+		Zotero.debug(`Zotero.Note.noteToTitle() is deprecated -- use Zotero.Utilities.Item.noteToTitle() instead`);
+		return Zotero.Utilities.Item.noteToTitle(text);
 	};
 	
 	this.registerEditorInstance = function(instance) {

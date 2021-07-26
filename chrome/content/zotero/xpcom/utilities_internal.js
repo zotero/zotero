@@ -987,8 +987,8 @@ Zotero.Utilities.Internal = {
 
 
 	itemToExportFormat: function () {
-		Zotero.debug(`Zotero.Utilities.Internal.itemToExportFormat() is deprecated -- use Zotero.Utilities.itemToExportFormat() instead`);
-		return Zotero.Utilities.itemToExportFormat.apply(Zotero.Utilities, arguments);
+		Zotero.debug(`Zotero.Utilities.Internal.itemToExportFormat() is deprecated -- use Zotero.Utilities.Item.itemToExportFormat() instead`);
+		return Zotero.Utilities.Item.itemToExportFormat.apply(Zotero.Utilities, arguments);
 	},
 	
 	
@@ -1279,84 +1279,8 @@ Zotero.Utilities.Internal = {
 	
 	
 	extractIdentifiers: function (text) {
-		var identifiers = [];
-		var foundIDs = new Set(); // keep track of identifiers to avoid duplicates
-		
-		// First look for DOIs
-		var ids = text.split(/[\s\u00A0]+/); // whitespace + non-breaking space
-		var doi;
-		for (let id of ids) {
-			if ((doi = Zotero.Utilities.cleanDOI(id)) && !foundIDs.has(doi)) {
-				identifiers.push({
-					DOI: doi
-				});
-				foundIDs.add(doi);
-			}
-		}
-		
-		// Then try ISBNs
-		if (!identifiers.length) {
-			// First try replacing dashes
-			let ids = text.replace(/[\u002D\u00AD\u2010-\u2015\u2212]+/g, "") // hyphens and dashes
-				.toUpperCase();
-			let ISBN_RE = /(?:\D|^)(97[89]\d{10}|\d{9}[\dX])(?!\d)/g;
-			let isbn;
-			while (isbn = ISBN_RE.exec(ids)) {
-				isbn = Zotero.Utilities.cleanISBN(isbn[1]);
-				if (isbn && !foundIDs.has(isbn)) {
-					identifiers.push({
-						ISBN: isbn
-					});
-					foundIDs.add(isbn);
-				}
-			}
-			
-			// Next try spaces
-			if (!identifiers.length) {
-				ids = ids.replace(/[ \u00A0]+/g, ""); // space + non-breaking space
-				while (isbn = ISBN_RE.exec(ids)) {
-					isbn = Zotero.Utilities.cleanISBN(isbn[1]);
-					if(isbn && !foundIDs.has(isbn)) {
-						identifiers.push({
-							ISBN: isbn
-						});
-						foundIDs.add(isbn);
-					}
-				}
-			}
-		}
-		
-		// Next try arXiv
-		if (!identifiers.length) {
-			// arXiv identifiers are extracted without version number
-			// i.e. 0706.0044v1 is extracted as 0706.0044,
-			// because arXiv OAI API doesn't allow to access individual versions
-			let arXiv_RE = /((?:[^A-Za-z]|^)([\-A-Za-z\.]+\/\d{7})(?:(v[0-9]+)|)(?!\d))|((?:\D|^)(\d{4}\.\d{4,5})(?:(v[0-9]+)|)(?!\d))/g;
-			let m;
-			while ((m = arXiv_RE.exec(text))) {
-				let arXiv = m[2] || m[5];
-				if (arXiv && !foundIDs.has(arXiv)) {
-					identifiers.push({arXiv: arXiv});
-					foundIDs.add(arXiv);
-				}
-			}
-		}
-		
-		// Finally try for PMID
-		if (!identifiers.length) {
-			// PMID; right now, the longest PMIDs are 8 digits, so it doesn't seem like we'll
-			// need to discriminate for a fairly long time
-			let PMID_RE = /(^|\s|,|:)(\d{1,9})(?=\s|,|$)/g;
-			let pmid;
-			while ((pmid = PMID_RE.exec(text)) && !foundIDs.has(pmid)) {
-				identifiers.push({
-					PMID: pmid[2]
-				});
-				foundIDs.add(pmid);
-			}
-		}
-		
-		return identifiers;
+		Zotero.debug(`Zotero.Utilities.Internal.extractIdentifiers() is deprecated -- use Zotero.Utilities.extractIdentifiers() instead`);
+		return Zotero.Utilities.extractIdentifiers.apply(Zotero.Utilities, arguments);
 	},
 	
 	

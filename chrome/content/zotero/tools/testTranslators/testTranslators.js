@@ -556,7 +556,7 @@ function haveTranslators(translators, type) {
 	
 	var promises = [];
 	for(var i in translators) {
-		promises.push(translators[i].getCode());
+		promises.push(Zotero.Translators.getCodeForTranslator(translators[i]));
 	}
 	
 	return Promise.all(promises).then(function(codes) {

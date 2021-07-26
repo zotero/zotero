@@ -2172,7 +2172,7 @@ Zotero.Item.prototype.setNote = function(text) {
 	
 	this._hasNote = text !== '';
 	this._noteText = text;
-	this._noteTitle = Zotero.Notes.noteToTitle(text);
+	this._noteTitle = Zotero.Utilities.Item.noteToTitle(text);
 	if (this.isNote()) {
 		this._displayTitle = this._noteTitle;
 	}

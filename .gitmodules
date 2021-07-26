@@ -41,3 +41,11 @@
 	path = note-editor
 	url = https://github.com/zotero/note-editor.git
 	branch = master
+[submodule "chrome/content/zotero/xpcom/utilities"]
+	path = chrome/content/zotero/xpcom/utilities
+	url = https://github.com/zotero/utilities.git
+	shallow = true
+[submodule "chrome/content/zotero/xpcom/translate"]
+	path = chrome/content/zotero/xpcom/translate
+	url = https://github.com/zotero/translate.git
+	shallow = true

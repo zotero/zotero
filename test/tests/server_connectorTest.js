@@ -57,7 +57,7 @@ describe("Connector Server", function () {
 			);
 
 			assert.isTrue(Zotero.Translators.get.calledWith('dummy-translator'));
-			let translatorCode = yield translator.getCode();
+			let translatorCode = yield Zotero.Translators.getCodeForTranslator(translator);
 			assert.equal(response.response, translatorCode);
 
 			Zotero.Translators.get.restore();
