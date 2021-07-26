@@ -42,7 +42,7 @@ var Zotero_Lookup = new function () {
 	 * @returns {Promise<boolean>}
 	 */
 	this.addItemsFromIdentifier = async function (textBox, childItem, toggleProgress) {
-		var identifiers = Zotero.Utilities.Internal.extractIdentifiers(textBox.value);
+		var identifiers = Zotero.Utilities.extractIdentifiers(textBox.value);
 		if (!identifiers.length) {
 			Zotero.alert(
 				window,
