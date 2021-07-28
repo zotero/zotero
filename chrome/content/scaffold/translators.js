@@ -107,6 +107,17 @@ var Scaffold_Translators = {
 				return translator ? translator.translator : false;
 			}.bind(this),
 			
+			getCodeForTranslator: async function (translator) {
+				if (translator.code) return translator.code;
+				return Zotero.File.getContentsAsync(translator.path).then(function(code) {
+					if (translator.cacheCode) {
+						// See Translator.init() for cache rules
+						translator.code = code;
+					}
+					return code;
+				});
+			}.bind(this),
+			
 			getAllForType: async function (type) {
 				if (!this._translators.size) {
 					await this.load();
