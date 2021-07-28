@@ -294,6 +294,61 @@ describe("Zotero.Sync.Storage.Mode.ZFS", function () {
 			assert.equal(library.storageVersion, library.libraryVersion);
 		})
 		
+		it("should notify when file is downloaded", async function () {
+			var { engine, client, caller } = await setup();
+			
+			var library = Zotero.Libraries.userLibrary;
+			library.libraryVersion = 5;
+			await library.saveTx();
+			library.storageDownloadNeeded = true;
+			
+			var item = new Zotero.Item("attachment");
+			item.attachmentLinkMode = 'imported_file';
+			item.attachmentPath = 'storage:test.txt';
+			var text = Zotero.Utilities.randomString();
+			item.attachmentSyncState = "to_download";
+			await item.saveTx();
+			
+			var mtime = "1441252524905";
+			var md5 = Zotero.Utilities.Internal.md5(text);
+			
+			var s3Path = `pretend-s3/${item.key}`;
+			this.httpd.registerPathHandler(
+				`/users/1/items/${item.key}/file`,
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 302, "Found");
+						response.setHeader("Zotero-File-Modification-Time", mtime, false);
+						response.setHeader("Zotero-File-MD5", md5, false);
+						response.setHeader("Zotero-File-Compressed", "No", false);
+						response.setHeader("Location", baseURL + s3Path, false);
+					}
+				}
+			);
+			this.httpd.registerPathHandler(
+				"/" + s3Path,
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 200, "OK");
+						response.write(text);
+					}
+				}
+			);
+
+			var deferred = Zotero.Promise.defer();
+			var observerID = Zotero.Notifier.registerObserver({
+				notify: async function (event, type, ids, extraData) {
+					if (event == 'download' && ids[0] == item.id && await item.getFilePathAsync()) {
+						deferred.resolve();
+					}
+				}
+			}, 'file', 'testFileDownload');
+			
+			await engine.start();
+			await deferred.promise;
+			Zotero.Notifier.unregisterObserver(observerID);
+		});
+		
 		it("should upload new files", function* () {
 			var { engine, client, caller } = yield setup();
 			

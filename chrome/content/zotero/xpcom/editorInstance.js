@@ -65,7 +65,6 @@ class EditorInstance {
 		this._state = options.state;
 		this._disableSaving = false;
 		this._subscriptions = [];
-		this._deletedImages = {};
 		this._quickFormatWindow = null;
 		this._isAttachment = this._item.isAttachment();
 		this._citationItemsList = [];
@@ -139,13 +138,28 @@ class EditorInstance {
 		this._iframeWindow.removeEventListener('message', this._messageHandler);
 		Zotero.Notes.unregisterEditorInstance(this);
 		this.saveSync();
+		if (!this._item.isAttachment()) {
+			Zotero.Notes.deleteUnusedEmbeddedImages(this._item);
+		}
 	}
 
 	focus() {
 		this._postMessage({ action: 'focus' });
 	}
 
-	async notify(ids) {
+	async notify(event, type, ids, extraData) {
+		if (type === 'file' && event === 'download') {
+			let items = await Zotero.Items.getAsync(ids);
+			for (let item of items) {
+				if (item.isAttachment() && await item.getFilePathAsync()) {
+					let subscription = this._subscriptions.find(x => x.data.attachmentKey === item.key);
+					if (subscription) {
+						await this._feedSubscription(subscription);
+					}
+				}
+			}
+		}
+		
 		if (this._readOnly || !this._item) {
 			return;
 		}
@@ -643,13 +657,15 @@ class EditorInstance {
 					await this._save(noteData, system);
 					return;
 				}
-				case 'subscribeProvider': {
+				case 'subscribe': {
 					let { subscription } = message;
 					this._subscriptions.push(subscription);
-					await this._feedSubscription(subscription);
+					if (subscription.type === 'image') {
+						await this._feedSubscription(subscription);
+					}
 					return;
 				}
-				case 'unsubscribeProvider': {
+				case 'unsubscribe': {
 					let { id } = message;
 					this._subscriptions.splice(this._subscriptions.findIndex(s => s.id === id), 1);
 					return;
@@ -720,24 +736,6 @@ class EditorInstance {
 					}
 					return;
 				}
-				case 'syncAttachmentKeys': {
-					if (this._readOnly) {
-						return;
-					}
-					let { attachmentKeys } = message;
-					if (this._isAttachment) {
-						return;
-					}
-					let attachmentItems = this._item.getAttachments().map(id => Zotero.Items.get(id));
-					let abandonedItems = attachmentItems.filter(item => !attachmentKeys.includes(item.key));
-					for (let item of abandonedItems) {
-						// Store image data for undo. Although it stays as long
-						// as the note is opened. TODO: Find a better way
-						this._deletedImages[item.key] = await this._getDataURL(item);
-						await item.eraseTx();
-					}
-					return;
-				}
 				case 'openContextMenu': {
 					let { x, y, pos, itemGroups } = message;
 					this._openPopup(x, y, pos, itemGroups);
@@ -772,33 +770,24 @@ class EditorInstance {
 	}
 
 	async _feedSubscription(subscription) {
-		let { id, type, nodeID, data } = subscription;
+		let { id, type, data } = subscription;
 		if (type === 'image') {
 			let { attachmentKey } = data;
 			let item = Zotero.Items.getByLibraryAndKey(this._item.libraryID, attachmentKey);
-			if (!item) {
-				// TODO: Find a better way to undo image deletion,
-				//  probably just keep it in a trash until the note is closed
-				// This recreates the attachment as a completely new item
-				let dataURL = this._deletedImages[attachmentKey];
-				if (dataURL) {
-					// delete this._deletedImages[attachmentKey];
-					// TODO: Fix every repeated undo-redo cycle caching a
-					//  new image copy in memory
-					let newAttachmentKey = await this._importImage(dataURL);
-					// TODO: Inform editor about the failed to import images
-					this._postMessage({ action: 'attachImportedImage', nodeID, attachmentKey: newAttachmentKey });
+			
+			// Note: Images aren't visible in merge dialog because:
+			// - Attachments aren't downloaded at the time
+			// - We are checking if attachments belong to the current note
+			
+			if (item.parentID === this._item.id) {
+				if (await item.getFilePathAsync()) {
+					let src = await this._getDataURL(item);
+					this._postMessage({ action: 'notifySubscription', id, data: { src } });
 				}
-			}
-			// Make sure attachment key belongs to the actual parent note,
-			// otherwise it would be a security risk.
-			// TODO: Figure out what to do with images not being
-			//  displayed in merge dialog because of this,
-			//  although another reason is because items
-			//  are synced before image attachments
-			else if(item.parentID === this._item.id) {
-				let src = await this._getDataURL(item);
-				this._postMessage({ action: 'notifyProvider', id, type, data: { src } });
+				else {
+					await Zotero.Notes.ensureEmbeddedImagesAreAvailable(this._item);
+					// this._postMessage({ action: 'notifySubscription', id, data: { src: 'error' } });
+				}
 			}
 		}
 	}

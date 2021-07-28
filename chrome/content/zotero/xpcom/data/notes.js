@@ -32,6 +32,7 @@ Zotero.Notes = new function() {
 	this.__defineGetter__("noteSuffix", function () { return '</div>'; });
 	
 	this._editorInstances = [];
+	this._downloadInProgressPromise = null;
 	
 	/**
 	* Return first line (or first MAX_LENGTH characters) of note content
@@ -197,30 +198,54 @@ Zotero.Notes = new function() {
 	 * @returns {Promise<boolean>}
 	 */
 	this.ensureEmbeddedImagesAreAvailable = async function (item) {
-		var attachments = Zotero.Items.get(item.getAttachments());
-		for (let attachment of attachments) {
-			let path = await attachment.getFilePathAsync();
-			if (!path) {
-				Zotero.debug(`Image file not found for item ${attachment.key}. Trying to download`);
-				let fileSyncingEnabled = Zotero.Sync.Storage.Local.getEnabledForLibrary(item.libraryID);
-				if (!fileSyncingEnabled) {
-					Zotero.debug('File sync is disabled');
-					return false;
-				}
+		let resolvePromise = () => {};
+		if (this._downloadInProgressPromise) {
+			await this._downloadInProgressPromise;
+		}
+		else {
+			this._downloadInProgressPromise = new Promise((resolve) => {
+				resolvePromise = () => {
+					this._downloadInProgressPromise = null;
+					resolve();
+				};
+			});
+		}
+		try {
+			var attachments = Zotero.Items.get(item.getAttachments());
+			for (let attachment of attachments) {
+				let path = await attachment.getFilePathAsync();
+				if (!path) {
+					Zotero.debug(`Image file not found for item ${attachment.key}. Trying to download`);
+					let fileSyncingEnabled = Zotero.Sync.Storage.Local.getEnabledForLibrary(item.libraryID);
+					if (!fileSyncingEnabled) {
+						Zotero.debug('File sync is disabled');
+						resolvePromise();
+						return false;
+					}
 
-				try {
-					let results = await Zotero.Sync.Runner.downloadFile(attachment);
-					if (!results || !results.localChanges) {
-						Zotero.debug('Download failed');
+					try {
+						let results = await Zotero.Sync.Runner.downloadFile(attachment);
+						if (!results || !results.localChanges) {
+							Zotero.debug('Download failed');
+							resolvePromise();
+							return false;
+						}
+					}
+					catch (e) {
+						Zotero.debug(e);
+						resolvePromise();
 						return false;
 					}
 				}
-				catch (e) {
-					Zotero.debug(e);
-					return false;
-				}
 			}
 		}
+		catch (e) {
+			Zotero.debug(e);
+			resolvePromise();
+			return false;
+		}
+
+		resolvePromise();
 		return true;
 	};
 
@@ -274,6 +299,27 @@ Zotero.Notes = new function() {
 			null, null, null, {}
 		);
 		return !index;
+	};
+	
+	this.deleteUnusedEmbeddedImages = async function (item) {
+		if (!item.isNote()) {
+			throw new Error('Item is not a note');
+		}
+		
+		let note = item.getNote();
+		let parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+			.createInstance(Components.interfaces.nsIDOMParser);
+		let doc = parser.parseFromString(note, 'text/html');
+		
+		let keys = Array.from(doc.querySelectorAll('img[data-attachment-key]'))
+			.map(node => node.getAttribute('data-attachment-key'));
+
+		let attachments = Zotero.Items.get(item.getAttachments());
+		for (let attachment of attachments) {
+			if (!keys.includes(attachment.key)) {
+				await attachment.eraseTx();
+			}
+		}
 	};
 
 	this.hasSchemaVersion = function (note) {

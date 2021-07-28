@@ -220,6 +220,12 @@ Zotero.Sync.Storage.Request.prototype.start = Zotero.Promise.coroutine(function*
 		if (this._onStop) {
 			this._onStop.forEach(x => x());
 		}
+
+		if (this.progress == this.progressMax) {
+			var [libraryID, key] = this.name.split('/');
+			var item = Zotero.Items.getByLibraryAndKey(libraryID, key);
+			Zotero.Notifier.trigger('download', 'file', item.id);
+		}
 	}
 });
 
