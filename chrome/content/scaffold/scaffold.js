@@ -269,7 +269,7 @@ var Scaffold = new function() {
 		}
 
 		//Strip JSON metadata
-		var code = yield translator.getCode();
+		var code = yield _translatorProvider.getCodeForTranslator(translator);
 		var lastUpdatedIndex = code.indexOf('"lastUpdated"');
 		var header = code.substr(0, lastUpdatedIndex + 50);
 		var m = /^\s*{[\S\s]*?}\s*?[\r\n]+/.exec(header);
@@ -747,10 +747,6 @@ var Scaffold = new function() {
 			translator[props[i]] = metadata[props[i]];
 		}
 		
-		translator.getCode = function () {
-			return Zotero.Promise.resolve(this.code);
-		};
-
 		if(!translator.configOptions) translator.configOptions = {};
 		if(!translator.displayOptions) translator.displayOptions = {};
 		if(!translator.browserSupport) translator.browserSupport = "g";

@@ -34,7 +34,7 @@
  title="Scaffold"
  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<script src="chrome://zotero/content/include.js"/>
-	<script src="chrome://zotero/content/tools/testTranslators/translatorTester.js"/>
+	<script src="chrome://zotero/content/xpcom/translate/testTranslators/translatorTester.js"/>
 	<script src="translators.js"/>
 	<script src="scaffold.js"/>
 	
