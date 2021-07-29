@@ -820,7 +820,7 @@ var ZoteroContextPane = new function () {
 		hbox.setAttribute('align', 'center');
 		var label = document.createElement('label');
 		var button = document.createElement('button');
-		button.hidden = !editable;
+		button.hidden = readOnly;
 		button.setAttribute('label', Zotero.Intl.strings['zotero.item.add']);
 		button.addEventListener('click', () => {
 			deck.setAttribute('selectedIndex', 1);
@@ -868,7 +868,7 @@ var ZoteroContextPane = new function () {
 			<TagsBoxContainer
 				key={'tagsBox-' + parentItem.id}
 				item={parentItem}
-				editable={editable}
+				editable={!readOnly}
 				ref={tagsBoxRef}
 			/>,
 			div
@@ -892,7 +892,7 @@ var ZoteroContextPane = new function () {
 		itemBox.mode = readOnly ? 'view' : 'edit';
 		itemBox.item = parentItem;
 
-		relatedBox.mode = editable ? 'edit' : 'view';
+		relatedBox.mode = readOnly ? 'view' : 'edit';
 		relatedBox.item = parentItem;
 	}
 };
