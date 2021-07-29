@@ -431,7 +431,7 @@ Zotero.Server.Connector.GetTranslators.prototype = {
 			}).catch(function(e) {
 				sendResponseCallback(500);
 				throw e;
-			}).done();
+			});
 		}
 	},
 	
