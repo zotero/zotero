@@ -5429,11 +5429,12 @@ var ZoteroPane = new function()
 		var itemToolbar = document.getElementById("zotero-item-toolbar");
 		var tagSelector = document.getElementById("zotero-tag-selector");
 		
-		collectionsToolbar.style.width = collectionsPane.boxObject.width + 'px';
-		tagSelector.style.maxWidth = collectionsPane.boxObject.width + 'px';
+		var collectionsPaneWidth = collectionsPane.getBoundingClientRect().width;
+		collectionsToolbar.style.width = collectionsPaneWidth + 'px';
+		tagSelector.style.maxWidth = collectionsPaneWidth + 'px';
 		if (collectionsTree) {
 			let borderSize = Zotero.isMac ? 0 : 2;
-			collectionsTree.style.maxWidth = (collectionsPane.boxObject.width - borderSize) + 'px';
+			collectionsTree.style.maxWidth = (collectionsPaneWidth - borderSize) + 'px';
 		}
 		if (ZoteroPane.itemsView) {
 			ZoteroPane.itemsView.updateHeight();
@@ -5444,10 +5445,10 @@ var ZoteroPane = new function()
 			itemsToolbar.setAttribute("flex", "1");
 			itemToolbar.setAttribute("flex", "0");
 		} else {
-			var itemsToolbarWidth = itemsPane.boxObject.width;
+			var itemsToolbarWidth = itemsPane.getBoundingClientRect().width;
 
 			if (collectionsPane.collapsed) {
-				itemsToolbarWidth -= collectionsToolbar.boxObject.width;
+				itemsToolbarWidth -= collectionsToolbar.getBoundingClientRect().width;
 			}
 			// Not sure why this is necessary, but it keeps the search bar from overflowing into the
 			// right-hand pane
