@@ -1574,6 +1574,11 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	
 	
 	this.updateQuickSearchBox = function (document) {
+		// TEMP: Fx78 -- search box is now <search-textbox> custom element. We may need to extend it
+		// to add a mode menu
+		return;
+		
+		
 		var searchBox = document.getElementById('zotero-tb-search');
 		if(!searchBox) return;
 		
