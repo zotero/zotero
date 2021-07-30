@@ -116,7 +116,19 @@ Zotero.CiteprocRs = {
 				Zotero.debug(`CiteprocRs: insertReference ${JSON.stringify(citeprocItem)}`, 5);
 				unwrapCiteprocRsResult(this._driver.insertReference(citeprocItem));
 				let cite = { id: `${citeprocItem.id}`, locator: undefined, locators: undefined };
-				additionalCSLProperties.forEach(key => cite[key] = citationItem[key]);
+				additionalCSLProperties.forEach((key) => {
+					if (!citationItem[key]) return;
+					switch (key) {
+						case 'suppress-author':
+							cite['mode'] = "SuppressAuthor";
+							break;
+						case 'author-only':
+							cite['mode'] = "AuthorOnly";
+							break;
+						default:
+							cite[key] = citationItem[key];
+					}
+				});
 				cites.push(cite);
 			}
 			return cites;
