@@ -46,7 +46,7 @@ var Zotero_Duplicates_Pane = new function () {
 				otherItems.push(item);
 			}
 			
-			if (!item.isRegularItem() || [1,14].indexOf(item.itemTypeID) != -1) {
+			if (!item.isRegularItem() || ['annotation', 'attachment', 'note'].includes(item.itemType)) {
 				var msg = Zotero.getString('pane.item.duplicates.onlyTopLevel');
 				ZoteroPane_Local.setItemPaneMessage(msg);
 				return false;
