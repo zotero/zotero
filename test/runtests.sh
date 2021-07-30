@@ -145,7 +145,7 @@ fi
 cp -R $PDF_TOOLS_CACHE_DIR $PDF_TOOLS_DIR
 
 # Add default prefs, which are apparently no longer read from extensions in Firefox 60
-cat "$ZOTERO_PATH/defaults/preferences/zotero.js" > "$PROFILE/prefs.js"
+cat "$ZOTERO_PATH/defaults/preferences/zotero.js" | sed 's/^pref/user_pref/g' > "$PROFILE/prefs.js"
 
 cat <<EOF >> "$PROFILE/prefs.js"
 user_pref("app.update.enabled", false);
