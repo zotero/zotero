@@ -847,6 +847,9 @@ class EditorInstance {
 						menuitem.setAttribute('value', item.name);
 						menuitem.setAttribute('label', item.label);
 						menuitem.setAttribute('disabled', !item.enabled);
+						if (item.checked) {
+							menuitem.setAttribute('type', 'checkbox');
+						}
 						menuitem.setAttribute('checked', item.checked);
 						menuitem.addEventListener('command', () => {
 							this._postMessage({
@@ -901,6 +904,7 @@ class EditorInstance {
 		var menuitem = this._popup.ownerDocument.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('spellCheck.checkSpelling'));
 		menuitem.setAttribute('checked', spellChecker.enabled);
+		menuitem.setAttribute('type', 'checkbox');
 		menuitem.addEventListener('command', () => {
 			// Possible values: 0 - off, 1 - only multi-line, 2 - multi and single line input boxes
 			Zotero.Prefs.set('layout.spellcheckDefault', spellChecker.enabled ? 0 : 1, true);

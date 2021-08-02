@@ -332,6 +332,7 @@ class ReaderInstance {
 		// Zoom 'Auto'
 		menuitem = this._window.document.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.zoomAuto'));
+		menuitem.setAttribute('type', 'checkbox');
 		menuitem.setAttribute('checked', data.isZoomAuto);
 		menuitem.addEventListener('command', () => {
 			this._postMessage({ action: 'popupCmd', cmd: 'zoomAuto' });
@@ -340,6 +341,7 @@ class ReaderInstance {
 		// Zoom 'Page Width'
 		menuitem = this._window.document.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.zoomPageWidth'));
+		menuitem.setAttribute('type', 'checkbox');
 		menuitem.setAttribute('checked', data.isZoomPageWidth);
 		menuitem.addEventListener('command', () => {
 			this._postMessage({ action: 'popupCmd', cmd: 'zoomPageWidth' });
