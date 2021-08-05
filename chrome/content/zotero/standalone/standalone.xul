@@ -286,6 +286,33 @@
 								oncommand="ZoteroStandalone.onReaderCmd('switchspreadmode_even')"
 							/>
 							<menuseparator class="menu-type-reader"/>
+							<menuitem
+								id="view-menuitem-zoom-in"
+								class="menu-type-reader"
+								label="&zotero.pdfReader.zoomIn;"
+								oncommand="ZoteroStandalone.onReaderCmd('zoomIn')"
+							/>
+							<menuitem
+								id="view-menuitem-zoom-out"
+								class="menu-type-reader"
+								label="&zotero.pdfReader.zoomOut;"
+								oncommand="ZoteroStandalone.onReaderCmd('zoomOut')"
+							/>
+							<menuitem
+								id="view-menuitem-zoom-auto"
+								class="menu-type-reader"
+								type="checkbox"
+								label="&zotero.pdfReader.zoomAuto;"
+								oncommand="ZoteroStandalone.onReaderCmd('zoomAuto')"
+							/>
+							<menuitem
+								id="view-menuitem-zoom-page-width"
+								class="menu-type-reader"
+								type="checkbox"
+								label="&zotero.pdfReader.zoomPageWidth;"
+								oncommand="ZoteroStandalone.onReaderCmd('zoomPageWidth')"
+							/>
+							<menuseparator class="menu-type-reader"/>
 
 							<menu id="layout-menu" label="&layout.label;">
 								<menupopup oncommand="ZoteroStandalone.onViewMenuItemClick(event)">

@@ -133,6 +133,29 @@
 					type="checkbox"
 					oncommand="menuCmd('switchspreadmode_even')"
 				/>
+				<menuseparator class="menu-type-reader"/>
+				<menuitem
+					id="view-menuitem-zoom-in"
+					label="&zotero.pdfReader.zoomIn;"
+					oncommand="menuCmd('zoomIn')"
+				/>
+				<menuitem
+					id="view-menuitem-zoom-out"
+					label="&zotero.pdfReader.zoomOut;"
+					oncommand="menuCmd('zoomOut')"
+				/>
+				<menuitem
+					id="view-menuitem-zoom-auto"
+					type="checkbox"
+					label="&zotero.pdfReader.zoomAuto;"
+					oncommand="menuCmd('zoomAuto')"
+				/>
+				<menuitem
+					id="view-menuitem-zoom-page-width"
+					type="checkbox"
+					label="&zotero.pdfReader.zoomPageWidth;"
+					oncommand="menuCmd('zoomPageWidth')"
+				/>
 			</menupopup>
 		</menu>
 		<menu

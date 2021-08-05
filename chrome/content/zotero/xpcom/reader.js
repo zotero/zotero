@@ -153,6 +153,14 @@ class ReaderInstance {
 		return this._iframeWindow.eval('PDFViewerApplication.pdfCursorTools.handTool.active');
 	}
 	
+	isZoomAutoActive() {
+		return this._iframeWindow.eval('PDFViewerApplication.pdfViewer.currentScaleValue === "auto"');
+	}
+	
+	isZoomPageWidthActive() {
+		return this._iframeWindow.eval('PDFViewerApplication.pdfViewer.currentScaleValue === "page-width"');
+	}
+	
 	allowNavigateFirstPage() {
 		return this._iframeWindow.eval('PDFViewerApplication.pdfViewer.currentPageNumber > 1');
 	}
@@ -768,6 +776,8 @@ class ReaderWindow extends ReaderInstance {
 		this._window.document.getElementById('view-menuitem-odd-spreads').setAttribute('checked', this.state.spreadMode == 1);
 		this._window.document.getElementById('view-menuitem-even-spreads').setAttribute('checked', this.state.spreadMode == 2);
 		this._window.document.getElementById('view-menuitem-hand-tool').setAttribute('checked', this.isHandToolActive());
+		this._window.document.getElementById('view-menuitem-zoom-auto').setAttribute('checked', this.isZoomAutoActive());
+		this._window.document.getElementById('view-menuitem-zoom-page-width').setAttribute('checked', this.isZoomPageWidthActive());
 	}
 
 	_onGoMenuOpen() {
