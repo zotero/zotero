@@ -44,7 +44,7 @@ const DOWNLOADED_IMAGE_TYPE = [
 ];
 
 // Schema version here has to be the same as in note-editor!
-const SCHEMA_VERSION = 3;
+const SCHEMA_VERSION = 4;
 
 class EditorInstance {
 	constructor() {
@@ -335,7 +335,8 @@ class EditorInstance {
 			let commentHTML = '';
 			
 			let storedAnnotation = {
-				uri: Zotero.URI.getItemURI(attachmentItem),
+				attachmentURI: Zotero.URI.getItemURI(attachmentItem),
+				annotationKey: annotation.id,
 				color: annotation.color,
 				pageLabel: annotation.pageLabel,
 				position: annotation.position
@@ -571,14 +572,14 @@ class EditorInstance {
 					return;
 				}
 				case 'openAnnotation': {
-					let { uri, position } = message;
+					let { attachmentURI, position } = message;
 					if (this.onNavigate) {
-						this.onNavigate(uri, { position });
+						this.onNavigate(attachmentURI, { position });
 					}
 					else {
 						let zp = Zotero.getActiveZoteroPane();
 						if (zp) {
-							let item = await Zotero.URI.getURIItem(uri);
+							let item = await Zotero.URI.getURIItem(attachmentURI);
 							if (item) {
 								zp.viewPDF(item.id, { position });
 							}
