@@ -26,6 +26,7 @@
 
 Zotero.Notes = new function() {
 	this.AUTO_SYNC_DELAY = 15;
+	// Keep in sync with utilities_item.js::noteToTitle() in zotero/utilities
 	this.__defineGetter__("MAX_TITLE_LENGTH", function() { return 120; });
 	this.__defineGetter__("defaultNote", function () { return '<div class="zotero-note znv1"></div>'; });
 	this.__defineGetter__("notePrefix", function () { return '<div class="zotero-note znv1">'; });
