@@ -1154,6 +1154,7 @@ function ZoteroProtocolHandler() {
 			if (parseInt(page) != page) {
 				page = null;
 			}
+			var annotation = params.annotation;
 			
 			if (!results.length) {
 				Zotero.warn(`No item found for ${uriPath}`);
@@ -1180,9 +1181,9 @@ function ZoteroProtocolHandler() {
 			}
 			
 			var opened = false;
-			if (page) {
+			if (page || annotation) {
 				try {
-					opened = await Zotero.OpenPDF.openToPage(item, page);
+					opened = await Zotero.OpenPDF.openToPage(item, page, annotation);
 				}
 				catch (e) {
 					Zotero.logError(e);
