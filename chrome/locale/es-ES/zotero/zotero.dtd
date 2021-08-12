@@ -349,3 +349,7 @@
 <!ENTITY zotero.pdfReader.noSpreads "Vista de libro">
 <!ENTITY zotero.pdfReader.oddSpreads "Vista de libro impar">
 <!ENTITY zotero.pdfReader.evenSpreads "Vista de libro par">
+<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
+<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
+<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">

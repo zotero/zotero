@@ -176,7 +176,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Ställ in färg">
 <!ENTITY zotero.tagColorChooser.removeColor "Ta bort färg">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, or arXiv IDs to add to your library:">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
 <!ENTITY zotero.lookup.button.search "Sök">
 
 <!ENTITY zotero.createParent.title "Skapa föräldra-källa">
@@ -349,3 +349,7 @@
 <!ENTITY zotero.pdfReader.noSpreads "Inga uppslag">
 <!ENTITY zotero.pdfReader.oddSpreads "Udda uppslag">
 <!ENTITY zotero.pdfReader.evenSpreads "Jämna uppslag">
+<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
+<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
+<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">

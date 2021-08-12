@@ -349,3 +349,7 @@
 <!ENTITY zotero.pdfReader.noSpreads "Birleştirme">
 <!ENTITY zotero.pdfReader.oddSpreads "Tek Numaralı">
 <!ENTITY zotero.pdfReader.evenSpreads "Çift Numaralı">
+<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
+<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
+<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">

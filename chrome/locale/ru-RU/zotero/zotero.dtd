@@ -349,3 +349,7 @@
 <!ENTITY zotero.pdfReader.noSpreads "Не показывать развороты">
 <!ENTITY zotero.pdfReader.oddSpreads "Развороты с нечетных номеров">
 <!ENTITY zotero.pdfReader.evenSpreads "Развороты с четных номеров">
+<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
+<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
+<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
