@@ -1467,7 +1467,7 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 	
 	let citations = await this._insertCitingResult(fieldIndex, field, io.citation);
 	if (!this.data.prefs.delayCitationUpdates) {
-		if (citations.length > 1) {
+		if (citations.length != 1) {
 			// We need to refetch fields because we've inserted multiple.
 			// This is not super optimal, but you're inserting 2+ citations at the time,
 			// so that sets it off
