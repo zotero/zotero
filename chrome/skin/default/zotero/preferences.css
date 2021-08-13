@@ -281,6 +281,12 @@ grid row hbox:first-child
 	width: 105px;
 }
 
+/* Advanced General pane */
+
+#zotero-prefpane-advanced-general-tab #openurl-menu {
+	width: 400px;
+}
+
 /* Shortcut Keys pane */
 #zotero-prefpane-advanced-keys-tab row
 {

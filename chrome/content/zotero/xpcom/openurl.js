@@ -24,67 +24,79 @@
 */
 
 Zotero.OpenURL = new function() {
-	this.resolve = resolve;
-	this.discoverResolvers = discoverResolvers;
 	this.createContextObject = createContextObject;
 	this.parseContextObject = parseContextObject;
 	
-	/*
-	 * Returns a URL to look up an item in the OpenURL resolver
-	 */
-	function resolve(itemObject) {
-		var co = createContextObject(itemObject, Zotero.Prefs.get("openURL.version"));
-		if(co) {
-			var base = Zotero.Prefs.get("openURL.resolver");
+	
+	/**
+	* Returns a URL to look up an item in the OpenURL resolver
+	*/
+	this.resolve = function (item) {
+		var co = Zotero.OpenURL.createContextObject(
+			item.toJSON(),
+			Zotero.Prefs.get("openURL.version")
+		);
+		if (co) {
+			let base = Zotero.Prefs.get("openURL.resolver");
 			// Add & if there's already a ?
-			var splice = base.indexOf("?") == -1 ? "?" : "&";
+			let splice = base.indexOf("?") == -1 ? "?" : "&";
 			return base + splice + co;
 		}
 		return false;
-	}
+	};
 	
-	/*
-	 * Queries OCLC's OpenURL resolver registry and returns an address and version
-	 */
-	function discoverResolvers() {
-		var req = new XMLHttpRequest();
-		req.open("GET", "http://worldcatlibraries.org/registry/lookup?IP=requestor", false);
-		req.send(null);
-		
-		if(!req.responseXML) {
-			throw new Error("Could not access resolver registry");
+	/**
+	* Fetch list of resolvers from the Zotero wiki
+	*
+	* https://www.zotero.org/support/locate/openurl_resolvers
+	*/
+	this.getResolvers = async function () {
+		var req = await Zotero.HTTP.request(
+			"GET",
+			"https://www.zotero.org/support/locate/openurl_resolvers?do=export_raw"
+		);
+		var text = req.response;
+		var lines = text.split(/\n/);
+		var urls = [];
+		var continent;
+		var country = null;
+		for (let line of lines) {
+			// Continent
+			let matches = line.match(/^\s*=====\s*([^=]+)=====\s*$/);
+			if (matches) {
+				continent = matches[1].trim();
+				country = null;
+				continue;
+			}
+			// Country
+			matches = line.match(/^\s*====\s*([^=]+)====\s*$/);
+			if (matches) {
+				country = matches[1].trim();
+				continue;
+			}
+			matches = line.match(/^\s*\|\s*([^|]+)\s*\|\s*%%([^%]+)%%\s*\|\s*$/);
+			if (matches) {
+				urls.push({
+					continent,
+					country,
+					name: matches[1].trim(),
+					url: matches[2],
+					version: "1.0"
+				});
+			}
 		}
-		
-		var resolverArray = new Array();
-		var resolvers = req.responseXML.getElementsByTagName("resolver");
-		for(var i=0; i<resolvers.length; i++) {
-			var resolver = resolvers[i];
-			
-			var name = resolver.parentNode.getElementsByTagName("institutionName");
-			if(!name.length) {
-				continue;
-			}
-			name = name[0].textContent;
-			
-			var url = resolver.getElementsByTagName("baseURL");
-			if(!url.length) {
-				continue;
-			}
-			url = url[0].textContent;
-			
-			if(resolver.getElementsByTagName("Z39.88-2004").length > 0) {
-				var version = "1.0";
-			} else if(resolver.getElementsByTagName("OpenURL_0.1").length > 0) {
-				var version = "0.1";
-			} else {
-				continue;
-			}
-			
-			resolverArray.push({name:name, url:url, version:version});
-		}
-		
-		return resolverArray;
-	}
+		// Skip global resolver, which is hard-coded locally
+		urls = urls.filter(x => x.continent != 'Global');
+		urls.sort((a, b) => {
+			var cmp = Zotero.localeCompare(a.continent, b.continent);
+			if (cmp) return cmp;
+			cmp = Zotero.localeCompare(a.country, b.country);
+			if (cmp) return cmp;
+			return Zotero.localeCompare(a.name, b.name);
+		});
+		return urls;
+	};
+	
 	
 	/*
 	 * Generates an OpenURL ContextObject from an item

@@ -575,10 +575,14 @@ var Zotero_LocateMenu = new function() {
 		this.icon = "chrome://zotero/skin/locate-library-lookup.png";
 		this.canHandleItem = function (item) { return Zotero.Promise.resolve(item.isRegularItem()); };
 		this.handleItems = Zotero.Promise.method(function (items, event) {
+			// If no resolver configured, just switch to the default
+			if (!Zotero.Prefs.get('openURL.resolver')) {
+				Zotero.Prefs.clear('openURL.resolver')
+			}
 			var urls = [];
 			for (let item of items) {
 				if(!item.isRegularItem()) continue;
-				var url = Zotero.OpenURL.resolve(item);
+				var url = Zotero.Utilities.Internal.OpenURL.resolve(item);
 				if(url) urls.push(url);
 			}
 			ZoteroPane_Local.loadURI(urls, event);

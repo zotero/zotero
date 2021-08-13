@@ -2698,6 +2698,78 @@ Zotero.Utilities.Internal.Base64 = {
 		 return string;
 	 }
  }
+
+Zotero.Utilities.Internal.OpenURL = {
+	/**
+	 * Returns a URL to look up an item in the OpenURL resolver
+	 */
+	resolve: function (item) {
+		var co = Zotero.OpenURL.createContextObject(
+			item.toJSON(),
+			Zotero.Prefs.get("openURL.version")
+		);
+		if (co) {
+			let base = Zotero.Prefs.get("openURL.resolver");
+			// Add & if there's already a ?
+			let splice = base.indexOf("?") == -1 ? "?" : "&";
+			return base + splice + co;
+		}
+		return false;
+	},
+	
+	/**
+	 * Fetch list of resolvers from the Zotero wiki
+	 *
+	 * https://www.zotero.org/support/locate/openurl_resolvers
+	 */
+	getResolvers: async function () {
+		var req = await Zotero.HTTP.request(
+			"GET",
+			"https://www.zotero.org/support/locate/openurl_resolvers?do=export_raw"
+		);
+		var text = req.response;
+		var lines = text.split(/\n/);
+		var urls = [];
+		var continent;
+		var country = null;
+		for (let line of lines) {
+			// Continent
+			let matches = line.match(/^\s*=====\s*([^=]+)=====\s*$/);
+			if (matches) {
+				continent = matches[1].trim();
+				country = null;
+				continue;
+			}
+			// Country
+			matches = line.match(/^\s*====\s*([^=]+)====\s*$/);
+			if (matches) {
+				country = matches[1].trim();
+				continue;
+			}
+			matches = line.match(/^\s*\|\s*([^|]+)\s*\|\s*%%([^%]+)%%\s*\|\s*$/);
+			if (matches) {
+				urls.push({
+					continent,
+					country,
+					name: matches[1].trim(),
+					url: matches[2],
+					version: "1.0"
+				});
+			}
+		}
+		// Skip global resolver, which is hard-coded locally
+		urls = urls.filter(x => x.continent != 'Global');
+		urls.sort((a, b) => {
+			var cmp = Zotero.localeCompare(a.continent, b.continent);
+			if (cmp) return cmp;
+			cmp = Zotero.localeCompare(a.country, b.country);
+			if (cmp) return cmp;
+			return Zotero.localeCompare(a.name, b.name);
+		});
+		return urls;
+	},
+};
+
 if (typeof process === 'object' && process + '' === '[object process]'){
     module.exports = Zotero.Utilities.Internal;
 }
