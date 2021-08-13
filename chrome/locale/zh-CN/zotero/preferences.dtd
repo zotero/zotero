@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "最早的项目在前">
 <!ENTITY zotero.preferences.feeds.feedDefaults "订阅默认">
 
-<!ENTITY zotero.preferences.openurl.search "搜索解析器">
+<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
 <!ENTITY zotero.preferences.openurl.custom "自定义...">
 <!ENTITY zotero.preferences.openurl.server "解析器:">
 <!ENTITY zotero.preferences.openurl.version "版本:">

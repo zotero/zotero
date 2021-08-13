@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Eldste elementer først">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Standardvalg for nyhetsstrøm">
 
-<!ENTITY zotero.preferences.openurl.search "Søk etter &quot;resolvers&quot;">
+<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
 <!ENTITY zotero.preferences.openurl.custom "Tilpasset...">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Versjon:">

@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Elementu zaharrenak lehenengo">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Jarioen lehenetsitakoak">
 
-<!ENTITY zotero.preferences.openurl.search "Konpontzaileak bilatu">
+<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
 <!ENTITY zotero.preferences.openurl.custom "Pertsonalizatua...">
 <!ENTITY zotero.preferences.openurl.server "Ebazlea:">
 <!ENTITY zotero.preferences.openurl.version "Bertsioa:">

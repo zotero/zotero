@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Ordina per elementi più vecchi">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Impostazioni predefinite dei feed">
 
-<!ENTITY zotero.preferences.openurl.search "Cerca un resolver">
+<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
 <!ENTITY zotero.preferences.openurl.custom "Personalizza…">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Versione:">

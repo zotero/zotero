@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "as máis antigas primeiro">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Configuracións das fontes">
 
-<!ENTITY zotero.preferences.openurl.search "Busca de solucións">
+<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
 <!ENTITY zotero.preferences.openurl.custom "Personalizar...">
 <!ENTITY zotero.preferences.openurl.server "Buscador de solucións:">
 <!ENTITY zotero.preferences.openurl.version "Versión:">

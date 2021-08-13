@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "An elfennoù koshañ da gentañ">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Arventennoù dre-ziouer ar froudoù">
 
-<!ENTITY zotero.preferences.openurl.search "Klask war-lerc'h an diskoulmerien">
+<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
 <!ENTITY zotero.preferences.openurl.custom "Personelaat...">
 <!ENTITY zotero.preferences.openurl.server "Diskoulmer:">
 <!ENTITY zotero.preferences.openurl.version "Stumm:">
