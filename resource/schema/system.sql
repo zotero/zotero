@@ -23,25 +23,6 @@
 -- This file creates system tables that can be safely wiped and reinitialized
 -- at any time, as long as existing ids are preserved.
 
--- Valid item types ("book," "journalArticle," etc.)
-DROP TABLE IF EXISTS itemTypes;
-CREATE TABLE itemTypes (
-    itemTypeID INTEGER PRIMARY KEY,
-    typeName TEXT,
-    templateItemTypeID INT,
-    display INT DEFAULT 1 -- 0 == hide, 1 == display, 2 == primary
-);
-
--- Populated at startup from itemTypes and customItemTypes
-DROP TABLE IF EXISTS itemTypesCombined;
-CREATE TABLE itemTypesCombined (
-    itemTypeID INT NOT NULL,
-    typeName TEXT NOT NULL,
-    display INT DEFAULT 1 NOT NULL,
-    custom INT NOT NULL,
-    PRIMARY KEY (itemTypeID)
-);
-
 -- Describes various types of fields and their format restrictions,
 -- and indicates whether data should be stored as strings or integers
 --
@@ -52,77 +33,6 @@ CREATE TABLE fieldFormats (
     regex TEXT,
     isInteger INT
 );
-
--- Field types for item metadata
-DROP TABLE IF EXISTS fields;
-CREATE TABLE fields (
-    fieldID INTEGER PRIMARY KEY,
-    fieldName TEXT,
-    fieldFormatID INT,
-    FOREIGN KEY (fieldFormatID) REFERENCES fieldFormats(fieldFormatID)
-);
-
--- Populated at startup from fields and customFields
-DROP TABLE IF EXISTS fieldsCombined;
-CREATE TABLE fieldsCombined (
-    fieldID INT NOT NULL,
-    fieldName TEXT NOT NULL,
-    label TEXT,
-    fieldFormatID INT,
-    custom INT NOT NULL,
-    PRIMARY KEY (fieldID)
-);
-
--- Defines valid fields for each itemType, their display order, and their default visibility
-DROP TABLE IF EXISTS itemTypeFields;
-CREATE TABLE itemTypeFields (
-    itemTypeID INT,
-    fieldID INT,
-    hide INT,
-    orderIndex INT,
-    PRIMARY KEY (itemTypeID, orderIndex),
-    UNIQUE (itemTypeID, fieldID),
-    FOREIGN KEY (itemTypeID) REFERENCES itemTypes(itemTypeID),
-    FOREIGN KEY (fieldID) REFERENCES fields(fieldID)
-);
-CREATE INDEX itemTypeFields_fieldID ON itemTypeFields(fieldID);
-
--- Populated at startup from itemTypeFields and customItemTypeFields
-DROP TABLE IF EXISTS itemTypeFieldsCombined;
-CREATE TABLE itemTypeFieldsCombined (
-    itemTypeID INT NOT NULL,
-    fieldID INT NOT NULL,
-    hide INT,
-    orderIndex INT NOT NULL,
-    PRIMARY KEY (itemTypeID, orderIndex),
-    UNIQUE (itemTypeID, fieldID)
-);
-CREATE INDEX itemTypeFieldsCombined_fieldID ON itemTypeFieldsCombined(fieldID);
-
--- Maps base fields to type-specific fields (e.g. publisher to label in audioRecording)
-DROP TABLE IF EXISTS baseFieldMappings;
-CREATE TABLE baseFieldMappings (
-    itemTypeID INT,
-    baseFieldID INT,
-    fieldID INT,
-    PRIMARY KEY (itemTypeID, baseFieldID, fieldID),
-    FOREIGN KEY (itemTypeID) REFERENCES itemTypes(itemTypeID),
-    FOREIGN KEY (baseFieldID) REFERENCES fields(fieldID),
-    FOREIGN KEY (fieldID) REFERENCES fields(fieldID)
-);
-CREATE INDEX baseFieldMappings_baseFieldID ON baseFieldMappings(baseFieldID);
-CREATE INDEX baseFieldMappings_fieldID ON baseFieldMappings(fieldID);
-
--- Populated at startup from baseFieldMappings and customBaseFieldMappings
-DROP TABLE IF EXISTS baseFieldMappingsCombined;
-CREATE TABLE baseFieldMappingsCombined (
-    itemTypeID INT,
-    baseFieldID INT,
-    fieldID INT,
-    PRIMARY KEY (itemTypeID, baseFieldID, fieldID)
-);
-CREATE INDEX baseFieldMappingsCombined_baseFieldID ON baseFieldMappingsCombined(baseFieldID);
-CREATE INDEX baseFieldMappingsCombined_fieldID ON baseFieldMappingsCombined(fieldID);
 
 DROP TABLE IF EXISTS charsets;
 CREATE TABLE charsets (
@@ -146,24 +56,6 @@ CREATE TABLE fileTypeMimeTypes (
     FOREIGN KEY (fileTypeID) REFERENCES fileTypes(fileTypeID)
 );
 CREATE INDEX fileTypeMimeTypes_mimeType ON fileTypeMimeTypes(mimeType);
-
--- Defines the possible creator types (contributor, editor, author)
-DROP TABLE IF EXISTS creatorTypes;
-CREATE TABLE creatorTypes (
-    creatorTypeID INTEGER PRIMARY KEY,
-    creatorType TEXT
-);
-    
-DROP TABLE IF EXISTS itemTypeCreatorTypes;
-CREATE TABLE itemTypeCreatorTypes (
-    itemTypeID INT,
-    creatorTypeID INT,
-    primaryField INT,
-    PRIMARY KEY (itemTypeID, creatorTypeID),
-    FOREIGN KEY (itemTypeID) REFERENCES itemTypes(itemTypeID),
-    FOREIGN KEY (creatorTypeID) REFERENCES creatorTypes(creatorTypeID)
-);
-CREATE INDEX itemTypeCreatorTypes_creatorTypeID ON itemTypeCreatorTypes(creatorTypeID);
 
 DROP TABLE IF EXISTS syncObjectTypes;
 CREATE TABLE syncObjectTypes (

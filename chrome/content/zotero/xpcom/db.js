@@ -424,6 +424,9 @@ Zotero.DBConnection.prototype.getNextName = Zotero.Promise.coroutine(function* (
 /**
  * @param {Function} func - Generator function that yields promises,
  *                          generally from queryAsync() and similar
+ * @param {Object} [options]
+ * @param {Boolean} [options.disableForeignKeys] - Disable foreign key constraints before
+ *    transaction and re-enable after. (`PRAGMA foreign_keys=0|1` is a no-op during a transaction.)
  * @return {Promise} - Promise for result of generator function
  */
 Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(function* (func, options) {
@@ -464,6 +467,11 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 				this._callbacks.begin[i](id);
 			}
 		}
+		
+		if (options.disableForeignKeys) {
+			yield this.queryAsync("PRAGMA foreign_keys = 0");
+		}
+		
 		var conn = this._getConnection(options) || (yield this._getConnectionAsync(options));
 		var result = yield conn.executeTransaction(func);
 		Zotero.debug(`Committed DB transaction ${id}`, 4);
@@ -538,6 +546,10 @@ Zotero.DBConnection.prototype.executeTransaction = Zotero.Promise.coroutine(func
 		throw e;
 	}
 	finally {
+		if (options.disableForeignKeys) {
+			yield this.queryAsync("PRAGMA foreign_keys = 1");
+		}
+		
 		// Reset options back to their previous values
 		if (options) {
 			for (let option in options) {

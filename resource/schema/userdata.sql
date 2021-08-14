@@ -1,4 +1,4 @@
--- 116
+-- 117
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -23,6 +23,111 @@
 -- This file creates tables containing user-specific data for new users --
 -- any changes made here must be mirrored in transition steps in schema.js::_migrateSchema()
 
+--
+-- Tables populated by global schema
+--
+
+-- Valid item types ("book," "journalArticle," etc.)
+CREATE TABLE itemTypes (
+    itemTypeID INTEGER PRIMARY KEY,
+    typeName TEXT,
+    templateItemTypeID INT,
+    display INT DEFAULT 1 -- 0 == hide, 1 == display, 2 == primary
+);
+
+-- Populated at startup from itemTypes and customItemTypes
+CREATE TABLE itemTypesCombined (
+    itemTypeID INT NOT NULL,
+    typeName TEXT NOT NULL,
+    display INT DEFAULT 1 NOT NULL,
+    custom INT NOT NULL,
+    PRIMARY KEY (itemTypeID)
+);
+
+-- Field types for item metadata
+CREATE TABLE fields (
+    fieldID INTEGER PRIMARY KEY,
+    fieldName TEXT,
+    fieldFormatID INT,
+    FOREIGN KEY (fieldFormatID) REFERENCES fieldFormats(fieldFormatID)
+);
+
+-- Populated at startup from fields and customFields
+CREATE TABLE fieldsCombined (
+    fieldID INT NOT NULL,
+    fieldName TEXT NOT NULL,
+    label TEXT,
+    fieldFormatID INT,
+    custom INT NOT NULL,
+    PRIMARY KEY (fieldID)
+);
+
+-- Defines valid fields for each itemType, their display order, and their default visibility
+CREATE TABLE itemTypeFields (
+    itemTypeID INT,
+    fieldID INT,
+    hide INT,
+    orderIndex INT,
+    PRIMARY KEY (itemTypeID, orderIndex),
+    UNIQUE (itemTypeID, fieldID),
+    FOREIGN KEY (itemTypeID) REFERENCES itemTypes(itemTypeID),
+    FOREIGN KEY (fieldID) REFERENCES fields(fieldID)
+);
+CREATE INDEX itemTypeFields_fieldID ON itemTypeFields(fieldID);
+
+-- Populated at startup from itemTypeFields and customItemTypeFields
+CREATE TABLE itemTypeFieldsCombined (
+    itemTypeID INT NOT NULL,
+    fieldID INT NOT NULL,
+    hide INT,
+    orderIndex INT NOT NULL,
+    PRIMARY KEY (itemTypeID, orderIndex),
+    UNIQUE (itemTypeID, fieldID)
+);
+CREATE INDEX itemTypeFieldsCombined_fieldID ON itemTypeFieldsCombined(fieldID);
+
+-- Maps base fields to type-specific fields (e.g. publisher to label in audioRecording)
+CREATE TABLE baseFieldMappings (
+    itemTypeID INT,
+    baseFieldID INT,
+    fieldID INT,
+    PRIMARY KEY (itemTypeID, baseFieldID, fieldID),
+    FOREIGN KEY (itemTypeID) REFERENCES itemTypes(itemTypeID),
+    FOREIGN KEY (baseFieldID) REFERENCES fields(fieldID),
+    FOREIGN KEY (fieldID) REFERENCES fields(fieldID)
+);
+CREATE INDEX baseFieldMappings_baseFieldID ON baseFieldMappings(baseFieldID);
+CREATE INDEX baseFieldMappings_fieldID ON baseFieldMappings(fieldID);
+
+-- Populated at startup from baseFieldMappings and customBaseFieldMappings
+CREATE TABLE baseFieldMappingsCombined (
+    itemTypeID INT,
+    baseFieldID INT,
+    fieldID INT,
+    PRIMARY KEY (itemTypeID, baseFieldID, fieldID)
+);
+CREATE INDEX baseFieldMappingsCombined_baseFieldID ON baseFieldMappingsCombined(baseFieldID);
+CREATE INDEX baseFieldMappingsCombined_fieldID ON baseFieldMappingsCombined(fieldID);
+
+-- Defines the possible creator types (contributor, editor, author)
+CREATE TABLE creatorTypes (
+    creatorTypeID INTEGER PRIMARY KEY,
+    creatorType TEXT
+);
+
+CREATE TABLE itemTypeCreatorTypes (
+    itemTypeID INT,
+    creatorTypeID INT,
+    primaryField INT,
+    PRIMARY KEY (itemTypeID, creatorTypeID),
+    FOREIGN KEY (itemTypeID) REFERENCES itemTypes(itemTypeID),
+    FOREIGN KEY (creatorTypeID) REFERENCES creatorTypes(creatorTypeID)
+);
+CREATE INDEX itemTypeCreatorTypes_creatorTypeID ON itemTypeCreatorTypes(creatorTypeID);
+
+--
+-- End of tables populated by global schema
+--
 
 CREATE TABLE version (
     schema TEXT PRIMARY KEY,
