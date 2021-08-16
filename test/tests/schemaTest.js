@@ -303,4 +303,24 @@ describe("Zotero.Schema", function() {
 			await assert.isTrue(await Zotero.Schema.integrityCheck());
 		});
 	})
+	
+	describe("Database Upgrades", function () {
+		after(async function () {
+			await resetDB({
+				thisArg: this,
+				skipBundledFiles: true,
+			});
+		});
+		
+		it("should upgrade 4.0 database", async function () {
+			await resetDB({
+				thisArg: this,
+				skipBundledFiles: true,
+				dbFile: OS.Path.join(getTestDataDirectory().path, 'zotero-4.0.sqlite.zip')
+			});
+			// Make sure we can open the Zotero pane without errors
+			win = await loadZoteroPane();
+			win.close();
+		});
+	});
 })

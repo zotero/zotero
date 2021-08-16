@@ -624,8 +624,19 @@ async function resetDB(options = {}) {
 	var db = Zotero.DataDirectory.getDatabase();
 	await Zotero.reinit(
 		async function () {
-			// Swap in the initial copy we made of the DB
-			await OS.File.copy(db + '-test-template', db);
+			// Extract a zipped DB file into place as the initial DB
+			if (options.dbFile && options.dbFile.endsWith('.zip')) {
+				let zipReader = Components.classes['@mozilla.org/libjar/zip-reader;1']
+					.createInstance(Components.interfaces.nsIZipReader);
+				zipReader.open(Zotero.File.pathToFile(options.dbFile));
+				zipReader.extract('zotero.sqlite', Zotero.File.pathToFile(db));
+				zipReader.close();
+			}
+			// Otherwise swap in the initial copy we made of the DB, or an alternative non-zip file
+			// if given
+			else {
+				await OS.File.copy(options.dbFile || db + '-test-template', db);
+			}
 			_defaultGroup = null;
 		},
 		false,
