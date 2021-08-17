@@ -50,7 +50,11 @@ class ReaderInstance {
 	}
 
 	async open({ itemID, state, location }) {
-		let item = await Zotero.Items.getAsync(itemID);
+		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
+		let library = Zotero.Libraries.get(libraryID);
+		await library.waitForDataLoad('item');
+		
+		let item = Zotero.Items.get(itemID);
 		if (!item) {
 			return false;
 		}
@@ -644,7 +648,7 @@ class ReaderInstance {
 }
 
 class ReaderTab extends ReaderInstance {
-	constructor({ itemID, sidebarWidth, sidebarOpen, bottomPlaceholderHeight }) {
+	constructor({ itemID, title, sidebarWidth, sidebarOpen, bottomPlaceholderHeight, background }) {
 		super();
 		this._itemID = itemID;
 		this._sidebarWidth = sidebarWidth;
@@ -654,11 +658,11 @@ class ReaderTab extends ReaderInstance {
 		this._window = Services.wm.getMostRecentWindow('navigator:browser');
 		let { id, container } = this._window.Zotero_Tabs.add({
 			type: 'reader',
-			title: '',
-			select: true,
-			notifierData: {
+			title: title || '',
+			data: {
 				itemID
-			}
+			},
+			select: !background
 		});
 		this.tabID = id;
 		this._tabContainer = container;
@@ -933,18 +937,18 @@ class Reader {
 		return this._readers.find(r => (r instanceof ReaderTab) && r.tabID === tabID);
 	}
 
-	async openURI(itemURI, location, openWindow) {
+	async openURI(itemURI, location, options) {
 		let item = await Zotero.URI.getURIItem(itemURI);
 		if (!item) return;
-		await this.open(item.id, location, openWindow);
+		await this.open(item.id, location, options);
 	}
 
-	async open(itemID, location, openWindow) {
+	async open(itemID, location, { title, openInBackground, openInWindow } = {}) {
 		this._loadSidebarOpenState();
 		this.triggerAnnotationsImportCheck(itemID);
 		let reader;
 
-		if (openWindow) {
+		if (openInWindow) {
 			reader = this._readers.find(r => r._itemID === itemID && (r instanceof ReaderWindow));
 		}
 		else {
@@ -960,7 +964,7 @@ class Reader {
 				reader.navigate(location);
 			}
 		}
-		else if (openWindow) {
+		else if (openInWindow) {
 			reader = new ReaderWindow({
 				sidebarWidth: this._sidebarWidth,
 				sidebarOpen: this._sidebarOpen,
@@ -977,6 +981,8 @@ class Reader {
 		else {
 			reader = new ReaderTab({
 				itemID,
+				title,
+				background: openInBackground,
 				sidebarWidth: this._sidebarWidth,
 				sidebarOpen: this._sidebarOpen,
 				bottomPlaceholderHeight: this._bottomPlaceholderHeight

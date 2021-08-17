@@ -153,6 +153,7 @@ var ZoteroPane = new function()
 		Zotero.hiDPISuffix = Zotero.hiDPI ? "@2x" : "";
 		
 		Zotero_Tabs.init();
+		ZoteroContextPane.init();
 		await ZoteroPane.initCollectionsTree();
 		await ZoteroPane.initItemsTree();
 		
@@ -248,6 +249,17 @@ var ZoteroPane = new function()
 			var importer = new Zotero_Import_Mendeley();
 			importer.deleteNonPrimaryFiles();
 		}, 10000)
+		
+		// Restore pane state
+		try {
+			let state = Zotero.Session.state.windows[0];
+			if (state) {
+				Zotero_Tabs.restoreState(state.tabs);
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
 	}
 	
 	
@@ -355,6 +367,12 @@ var ZoteroPane = new function()
 		
 		observerService.removeObserver(_reloadObserver, "zotero-reloaded");
 		
+		ZoteroContextPane.destroy();
+
+		if (!Zotero.getZoteroPanes().length) {
+			Zotero.Session.setLastClosedZoteroPaneState(this.getState());
+		}
+
 		Zotero_Tabs.closeAll();
 	}
 	
@@ -3801,7 +3819,7 @@ var ZoteroPane = new function()
 					await Zotero.Reader.open(
 						itemID,
 						extraData && extraData.location,
-						originalEvent && originalEvent.shiftKey
+						{ openInWindow: originalEvent && originalEvent.shiftKey }
 					);
 					return;
 				}
@@ -4854,6 +4872,12 @@ var ZoteroPane = new function()
 		ZoteroContextPane.update();
 	}
 	
+	
+	this.getState = function () {
+		return {
+			tabs: Zotero_Tabs.getState()
+		};
+	};
 	
 	/**
 	 * Unserializes zotero-persist elements from preferences

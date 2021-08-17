@@ -85,17 +85,51 @@ var Zotero_Tabs = new function () {
 		);
 	};
 
+	this.getState = function () {
+		return this._tabs.map((tab) => {
+			var o = {
+				type: tab.type,
+				title: tab.title,
+			};
+			if (tab.data) {
+				o.data = tab.data;
+			}
+			if (tab.id == this._selectedID) {
+				o.selected = true;
+			}
+			return o;
+		});
+	};
+	
+	this.restoreState = function(tabs) {
+		for (let tab of tabs) {
+			if (tab.type === 'library') {
+				this.rename('zotero-pane', tab.title);
+			}
+			else if (tab.type === 'reader') {
+				Zotero.Reader.open(tab.data.itemID,
+					null,
+					{
+						title: tab.title,
+						openInBackground: !tab.selected
+					}
+				);
+			}
+		}
+	};
+	
 	/**
 	 * Add a new tab
 	 *
 	 * @param {String} type
 	 * @param {String} title
+	 * @param {String} data - Extra data about the tab to pass to notifier and session
 	 * @param {Integer} index
 	 * @param {Boolean} select
 	 * @param {Function} onClose
 	 * @return {{ id: string, container: XULElement}} id - tab id, container - a new tab container created in the deck
 	 */
-	this.add = function ({ type, title, index, select, onClose, notifierData }) {
+	this.add = function ({ type, data, title, index, select, onClose }) {
 		if (typeof type != 'string') {
 			throw new Error(`'type' should be a string (was ${typeof type})`);
 		}
@@ -112,11 +146,11 @@ var Zotero_Tabs = new function () {
 		var container = document.createElement('vbox');
 		container.id = id;
 		this.deck.appendChild(container);
-		var tab = { id, type, title, onClose };
+		var tab = { id, type, title, data, onClose };
 		index = index || this._tabs.length;
 		this._tabs.splice(index, 0, tab);
 		this._update();
-		Zotero.Notifier.trigger('add', 'tab', [id], { [id]: notifierData }, true);
+		Zotero.Notifier.trigger('add', 'tab', [id], { [id]: data }, true);
 		if (select) {
 			this.select(id);
 		}
