@@ -109,8 +109,14 @@ Zotero.Attachments = new function(){
 				// Point to copied file
 				newFile = OS.Path.join(destDir, newName);
 				
-				// Copy file to unique filename, which automatically shortens long filenames
-				newFile = Zotero.File.copyToUnique(file, newFile);
+				// Copy or move file to unique filename, which automatically shortens long filenames
+				if (options.moveFile) {
+					const newFilePath = yield Zotero.File.moveToUnique(file.path, newFile);
+					newFile = Zotero.File.pathToFile(newFilePath);
+				}
+				else {
+					newFile = Zotero.File.copyToUnique(file, newFile);
+				}
 				
 				yield Zotero.File.setNormalFilePermissions(newFile.path);
 				
@@ -315,7 +321,12 @@ Zotero.Attachments = new function(){
 				// Copy single file to new directory
 				if (options.singleFile) {
 					yield this.createDirectoryForItem(attachmentItem);
-					yield OS.File.copy(file.path, newPath);
+					if (options.moveFile) {
+						yield OS.File.move(file.path, newPath);
+					}
+					else {
+						yield OS.File.copy(file.path, newPath);
+					}
 				}
 				// Copy entire parent directory (for HTML snapshots)
 				else {

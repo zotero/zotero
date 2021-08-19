@@ -1410,6 +1410,8 @@ Zotero_Import_Mendeley.prototype._saveFilesAndAnnotations = async function (file
 
 					// If we're not set to link files or file is in Mendeley downloads folder, import it
 					if (!this._linkFiles || this._isDownloadedFile(path) || this._isTempDownloadedFile(path)) {
+						options.moveFile = this._isTempDownloadedFile(path);
+						
 						if (file.url) {
 							options.title = file.title;
 							options.url = file.url;
