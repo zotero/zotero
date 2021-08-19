@@ -1480,8 +1480,7 @@ Zotero_Import_Mendeley.prototype._isDownloadedFile = function (path) {
 }
 
 Zotero_Import_Mendeley.prototype._isTempDownloadedFile = function (path) {
-	var parentDir = OS.Path.dirname(path);
-	return parentDir.startsWith(OS.Path.join(Zotero.getTempDirectory().path, 'm-api'));
+	return path.startsWith(OS.Path.join(Zotero.getTempDirectory().path, 'm-api'));
 };
 
 /**
