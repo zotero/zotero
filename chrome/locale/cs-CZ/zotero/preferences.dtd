@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Nejstarší položka první">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Nastavení kanálů">
 
-<!ENTITY zotero.preferences.openurl.search "Hledat resolvery">
+<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
 <!ENTITY zotero.preferences.openurl.custom "Vlastní...">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Verze">

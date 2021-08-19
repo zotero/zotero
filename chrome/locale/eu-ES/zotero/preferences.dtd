@@ -39,10 +39,10 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Elementu zaharrenak lehenengo">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Jarioen lehenetsitakoak">
 
-<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
-<!ENTITY zotero.preferences.openurl.custom "Custom…">
-<!ENTITY zotero.preferences.openurl.server "Resolver:">
-<!ENTITY zotero.preferences.openurl.version "Version:">
+<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
+<!ENTITY zotero.preferences.openurl.custom "Pertsonalizatua...">
+<!ENTITY zotero.preferences.openurl.server "Ebazlea:">
+<!ENTITY zotero.preferences.openurl.version "Bertsioa:">
 
 <!ENTITY zotero.preferences.prefpane.sync "Sinkronizatu">
 <!ENTITY zotero.preferences.sync.username "Erabiltzailea:">
@@ -70,11 +70,11 @@
 <!ENTITY zotero.preferences.sync.librariesToSync.button "Hautatu liburutegiak...">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Sinkronizatu">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Liburutegia">
-<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
-<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
-<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
+<!ENTITY zotero.preferences.sync.reset.warning1 "Honako operaziak egoera ezohiko eta zehatzetan erabitzeko bakarrik dira eta ez lirateke arazoen konponketa orokorrerako erabili behar. Kasu askotan, berrezarpenak arazo gehiago sor ditzake. Ikus">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Sinkronizazioaren berrezarpenerako aukerak">
+<!ENTITY zotero.preferences.sync.reset.warning3 "informazio gehiagorako.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Berrezarri datuen sinkronizazioaren historia">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Bateratu datu lokalak urrunekoekin, sinkronizazioaren historia baztertuz">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Lineako liburutegitik berreskuratu">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Gainidatzi Zoteroko datu lokalak lineako liburutegikoekin.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Ordezkatu lineako liburutegia">

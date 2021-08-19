@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Vanhimmat ensin">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Syötteen oletukset">
 
-<!ENTITY zotero.preferences.openurl.search "Etsi linkkipalvelimia">
+<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
 <!ENTITY zotero.preferences.openurl.custom "Oma asetus...">
 <!ENTITY zotero.preferences.openurl.server "Palvelin:">
 <!ENTITY zotero.preferences.openurl.version "Versio:">

@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Najprej najstarejši">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Privzeto za vir">
 
-<!ENTITY zotero.preferences.openurl.search "Išči razločitelje">
+<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
 <!ENTITY zotero.preferences.openurl.custom "Po meri ...">
 <!ENTITY zotero.preferences.openurl.server "Razločitelj:">
 <!ENTITY zotero.preferences.openurl.version "Različica:">
