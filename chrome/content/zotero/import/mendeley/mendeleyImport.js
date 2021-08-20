@@ -1410,6 +1410,8 @@ Zotero_Import_Mendeley.prototype._saveFilesAndAnnotations = async function (file
 
 					// If we're not set to link files or file is in Mendeley downloads folder, import it
 					if (!this._linkFiles || this._isDownloadedFile(path) || this._isTempDownloadedFile(path)) {
+						options.moveFile = this._isTempDownloadedFile(path);
+						
 						if (file.url) {
 							options.title = file.title;
 							options.url = file.url;
@@ -1480,8 +1482,7 @@ Zotero_Import_Mendeley.prototype._isDownloadedFile = function (path) {
 }
 
 Zotero_Import_Mendeley.prototype._isTempDownloadedFile = function (path) {
-	var parentDir = OS.Path.dirname(path);
-	return parentDir.startsWith(OS.Path.join(Zotero.getTempDirectory().path, 'm-api'));
+	return path.startsWith(OS.Path.join(Zotero.getTempDirectory().path, 'm-api'));
 };
 
 /**
