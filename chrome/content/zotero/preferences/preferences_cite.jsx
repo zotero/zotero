@@ -99,7 +99,7 @@ Zotero_Preferences.Cite = {
 					dataKey: "updated",
 					label: "zotero.preferences.cite.styles.styleManager.updated",
 					fixedWidth: true,
-					width: 150
+					width: 100
 				}
 			];
 			var handleKeyDown = (event) => {
@@ -108,13 +108,20 @@ Zotero_Preferences.Cite = {
 					return false;
 				}
 			};
+			let styles = Zotero.Styles.getVisible()
+				.map((style) => {
+					return {
+						title: style.title,
+						updated: Zotero.Date.sqlToDate(style.updated, true).toLocaleDateString()
+					};
+				});
 			let elem = (
 				<IntlProvider locale={Zotero.locale} messages={Zotero.Intl.strings}>
 					<VirtualizedTable
-						getRowCount={() => Zotero.Styles.getVisible().length}
+						getRowCount={() => styles.length}
 						id="styleManager-table"
 						ref={ref => this._tree = ref}
-						renderItem={makeRowRenderer(index => Zotero.Styles.getVisible()[index])}
+						renderItem={makeRowRenderer(index => styles[index])}
 						showHeader={true}
 						multiSelect={true}
 						columns={columns}
