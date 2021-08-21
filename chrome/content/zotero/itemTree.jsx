@@ -1125,6 +1125,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					hide: showMessage,
 					key: "virtualized-table",
 					label: Zotero.getString('pane.items.title'),
+					defaultRowHeight: 18, // px
 					alternatingRowColors: Zotero.isMac ? ['-moz-OddTreeRow', '-moz-EvenTreeRow'] : null,
 
 					showHeader: true,

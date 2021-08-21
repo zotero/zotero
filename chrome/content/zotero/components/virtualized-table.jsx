@@ -33,6 +33,7 @@ const Draggable = require('./draggable');
 const { injectIntl } = require('react-intl');
 const { IconDownChevron, getDOMElement } = require('components/icons');
 
+const DEFAULT_ROW_HEIGHT = 20; // px
 const RESIZER_WIDTH = 5; // px
 
 const noop = () => 0;
@@ -291,9 +292,9 @@ class VirtualizedTable extends React.Component {
 		
 		this._rowHeight = props.rowHeight;
 		if (!this._rowHeight) {
-			this._rowHeight = 20; // px
+			this._rowHeight = props.defaultRowHeight || DEFAULT_ROW_HEIGHT;
 			this._rowHeight *= Zotero.Prefs.get('fontSize');
-			if (Zotero.isMac && this._rowHeight > 20) {
+			if (Zotero.isMac && this._rowHeight > (props.defaultRowHeight || DEFAULT_ROW_HEIGHT)) {
 				this._rowHeight -= 2;
 			}
 		}
@@ -1061,9 +1062,9 @@ class VirtualizedTable extends React.Component {
 			Zotero.debug("Attempting to update virtualized-table font size with a prop-specified rowHeight."
 				+ "You should change the prop on the React component instead");
 		}
-		this._rowHeight = 20; // px
+		this._rowHeight = this.props.defaultRowHeight || DEFAULT_ROW_HEIGHT;
 		this._rowHeight *= Zotero.Prefs.get('fontSize');
-		if (Zotero.isMac && this._rowHeight > 20) {
+		if (Zotero.isMac && this._rowHeight > (this.props.defaultRowHeight || DEFAULT_ROW_HEIGHT)) {
 			this._rowHeight -= 2;
 		}
 
