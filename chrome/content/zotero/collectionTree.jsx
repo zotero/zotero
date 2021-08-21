@@ -294,7 +294,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		let twisty;
 		if (this.isContainerEmpty(index)) {
 			twisty = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
-			if (Zotero.isMac && treeRow.isHeader) {
+			if (Zotero.isMac && treeRow.isHeader()) {
 				twisty.classList.add("spacer-header");
 			}
 			else {
