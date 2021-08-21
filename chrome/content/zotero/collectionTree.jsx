@@ -34,7 +34,7 @@ const { getDOMElement: getDOMIcon } = Icons;
 const { getDragTargetOrient } = require('components/utils');
 const { Cc, Ci, Cu } = require('chrome');
 
-const CHILD_INDENT = 20;
+const CHILD_INDENT = 15;
 const TYPING_TIMEOUT = 1000;
 
 var CollectionTree = class CollectionTree extends LibraryTree {
