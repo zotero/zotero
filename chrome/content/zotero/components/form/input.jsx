@@ -27,7 +27,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 import { noop } from '../utils';
-import { pickKeys } from '@zotero/immutable';
+import { pickKeys } from 'zotero/modules/immutable';
 //import AutoResizer from './auto-resizer';
 import Autosuggest from 'react-autosuggest';
 

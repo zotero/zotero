@@ -1,4 +1,4 @@
-import FilePicker from 'zotero/filePicker';
+import FilePicker from 'zotero/modules/filePicker';
 
 var Zotero_Import_Wizard = {
 	_wizard: null,

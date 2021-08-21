@@ -24,7 +24,7 @@
 */
 
 Components.utils.import("resource://gre/modules/Services.jsm");
-import FilePicker from 'zotero/filePicker';
+import FilePicker from 'zotero/modules/filePicker';
 
 Zotero_Preferences.Advanced = {
 	DEFAULT_OPENURL_RESOLVER: 'https://www.worldcat.org/registry/gateway',

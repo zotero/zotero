@@ -1,6 +1,6 @@
 "use strict";
 
-describe("Zotero.LibraryTreeView", function() {
+describe("Zotero.LibraryTree", function() {
 	var win, zp, cv, itemsView;
 	
 	// Load Zotero pane and select library

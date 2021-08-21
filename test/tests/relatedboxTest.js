@@ -31,18 +31,16 @@ describe("Related Box", function () {
 			// wrappedJSObject isn't working on zotero-collections-tree for some reason, so
 			// just wait for the items tree to be created and select it directly
 			do {
-				var view = selectWin.document.getElementById('zotero-items-tree').view.wrappedJSObject;
+				var selectItemsView = selectWin.itemsView;
+				var selectCollectionsView = selectWin.collectionsView;
 				yield Zotero.Promise.delay(50);
 			}
-			while (!view);
-			yield view.waitForLoad();
+			while (!selectItemsView || !selectCollectionsView);
+			yield selectCollectionsView.waitForLoad();
+			yield selectItemsView.waitForLoad();
 			
 			// Select the other item
-			for (let i = 0; i < view.rowCount; i++) {
-				if (view.getRow(i).ref.id == item1.id) {
-					view.selection.select(i);
-				}
-			}
+			yield selectItemsView.selectItem(item1.id);
 			selectWin.document.documentElement.acceptDialog();
 			
 			// Wait for relations list to populate
