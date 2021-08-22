@@ -41,6 +41,7 @@ const TYPING_TIMEOUT = 1000;
 const CHILD_INDENT = 12;
 const COLORED_TAGS_RE = new RegExp("^[0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1}$");
 const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
+const EMOJI_RE = /\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\p{Emoji_Presentation}|\p{Emoji}\uFE0F/gu;
 
 function makeItemRenderer(itemTree) {
 	function renderPrimaryCell(index, data, column) {
@@ -76,7 +77,7 @@ function makeItemRenderer(itemTree) {
 			retracted.classList.add("retracted");
 		}
 		
-		let tags = item.getTagColors().map(color => itemTree._getTagSwatch(color));
+		let tags = item.getColoredTags().map(x => itemTree._getTagSwatch(x.tag, x.color));
 
 		let textSpan = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
 		textSpan.className = "cell-text";
@@ -3511,10 +3512,25 @@ var ItemTree = class ItemTree extends LibraryTree {
 		return icon;
 	}
 	
-	_getTagSwatch(color) {
+	_isOnlyEmoji(str) {
+		// Remove emoji and zero-width joiner and see if anything's left
+		return !str.replace(EMOJI_RE, '').replace(/\u200D/g,'');
+	}
+	
+	_getTagSwatch(tag, color) {
 		let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
 		span.className = 'tag-swatch';
-		span.style.backgroundColor = color;
+		// If only emoji, display directly
+		//
+		// TODO: Check for a maximum number of graphemes, which is hard to do
+		// https://stackoverflow.com/a/54369605
+		if (this._isOnlyEmoji(tag)) {
+			span.textContent = tag;
+		}
+		// Otherwise display color
+		else {
+			span.style.backgroundColor = color;
+		}
 		return span;
 	}
 };

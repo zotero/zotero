@@ -4254,6 +4254,17 @@ Zotero.Item.prototype.getImageSrc = function() {
 
 
 Zotero.Item.prototype.getTagColors = function () {
+	Zotero.warn("Zotero.Item::getTagColors() is deprecated -- use Zotero.Item::getColoredTags()");
+	return this.getColoredTags().map(x => x.color);
+};
+
+
+/**
+ * Return tags and colors
+ *
+ * @return {Object[]} - Array of object with 'tag' and 'color' properties
+ */
+Zotero.Item.prototype.getColoredTags = function () {
 	var tags = this.getTags();
 	if (!tags.length) return [];
 	
@@ -4262,12 +4273,11 @@ Zotero.Item.prototype.getTagColors = function () {
 	for (let tag of tags) {
 		let data = tagColors.get(tag.tag);
 		if (data) {
-			colorData.push(data);
+			colorData.push({tag: tag.tag, ...data});
 		}
 	}
-	return colorData.sort((a, b) => a.position - b.position).map(val => val.color);
+	return colorData.sort((a, b) => a.position - b.position).map(x => ({ tag: x.tag, color: x.color }));
 };
-
 
 
 /**
