@@ -841,7 +841,7 @@ class Reader {
 	async init() {
 		await Zotero.uiReadyPromise;
 		Zotero.Session.state.windows
-			.filter(x => x.type == 'reader')
+			.filter(x => x.type == 'reader' && Zotero.Items.exists(x.itemID))
 			.forEach(x => this.open(x.itemID, null, { title: x.title, openInWindow: true }));
 	}
 	
@@ -963,9 +963,6 @@ class Reader {
 	}
 
 	async open(itemID, location, { title, openInBackground, openInWindow } = {}) {
-		if (!Zotero.Items.exists(itemID)) {
-			return;
-		}
 		this._loadSidebarOpenState();
 		this.triggerAnnotationsImportCheck(itemID);
 		let reader;

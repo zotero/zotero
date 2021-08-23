@@ -107,13 +107,15 @@ var Zotero_Tabs = new function () {
 				this.rename('zotero-pane', tab.title);
 			}
 			else if (tab.type === 'reader') {
-				Zotero.Reader.open(tab.data.itemID,
-					null,
-					{
-						title: tab.title,
-						openInBackground: !tab.selected
-					}
-				);
+				if (Zotero.Items.exists(tab.data.itemID)) {
+					Zotero.Reader.open(tab.data.itemID,
+						null,
+						{
+							title: tab.title,
+							openInBackground: !tab.selected
+						}
+					);
+				}
 			}
 		}
 	};
