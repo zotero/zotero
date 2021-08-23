@@ -33,6 +33,7 @@ class ReaderInstance {
 		this._window = null;
 		this._iframeWindow = null;
 		this._itemID = null;
+		this._title = '';
 		this._isReaderInitialized = false;
 		this._showItemPaneToggle = false;
 		this._initPromise = new Promise((resolve, reject) => {
@@ -105,6 +106,7 @@ class ReaderInstance {
 				title = parentItem.getDisplayTitle();
 			}
 		}
+		this._title = title;
 		this._setTitleValue(title);
 	}
 
@@ -836,6 +838,13 @@ class Reader {
 		return this._sidebarWidth;
 	}
 	
+	async init() {
+		await Zotero.uiReadyPromise;
+		Zotero.Session.state.windows
+			.filter(x => x.type == 'reader')
+			.forEach(x => this.open(x.itemID, null, { title: x.title, openInWindow: true }));
+	}
+	
 	_loadSidebarOpenState() {
 		let win = Zotero.getMainWindow();
 		if (win) {
@@ -892,6 +901,10 @@ class Reader {
 					this.triggerAnnotationsImportCheck(reader._itemID);
 				}
 			}
+			
+			if (event === 'add' || event === 'close') {
+				Zotero.Session.debounceSave();
+			}
 		}
 		// Listen for parent item, PDF attachment and its annotations updates
 		else if (type === 'item') {
@@ -936,6 +949,12 @@ class Reader {
 	getByTabID(tabID) {
 		return this._readers.find(r => (r instanceof ReaderTab) && r.tabID === tabID);
 	}
+	
+	getWindowStates() {
+		return this._readers
+			.filter(r => r instanceof ReaderWindow)
+			.map(r => ({ type: 'reader', itemID: r._itemID, title: r._title }));
+	}
 
 	async openURI(itemURI, location, options) {
 		let item = await Zotero.URI.getURIItem(itemURI);
@@ -944,6 +963,9 @@ class Reader {
 	}
 
 	async open(itemID, location, { title, openInBackground, openInWindow } = {}) {
+		if (!Zotero.Items.exists(itemID)) {
+			return;
+		}
 		this._loadSidebarOpenState();
 		this.triggerAnnotationsImportCheck(itemID);
 		let reader;
@@ -974,8 +996,10 @@ class Reader {
 			if (!(await reader.open({ itemID, location }))) {
 				return;
 			}
+			Zotero.Session.debounceSave();
 			reader._window.addEventListener('unload', () => {
 				this._readers.splice(this._readers.indexOf(reader), 1);
+				Zotero.Session.debounceSave();
 			});
 		}
 		else {

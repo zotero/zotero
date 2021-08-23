@@ -252,7 +252,7 @@ var ZoteroPane = new function()
 		
 		// Restore pane state
 		try {
-			let state = Zotero.Session.state.windows[0];
+			let state = Zotero.Session.state.windows.find(x => x.type == 'pane');
 			if (state) {
 				Zotero_Tabs.restoreState(state.tabs);
 			}
@@ -4875,6 +4875,7 @@ var ZoteroPane = new function()
 	
 	this.getState = function () {
 		return {
+			type: 'pane',
 			tabs: Zotero_Tabs.getState()
 		};
 	};

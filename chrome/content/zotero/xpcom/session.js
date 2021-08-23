@@ -25,6 +25,7 @@
 
 Zotero.Session = new function () {
 	const SESSION_FILE_NAME = 'session.json';
+	const DEBOUNCED_SAVING_DELAY = 5 * 60 * 1000; // 5 min
 
 	let _state = {
 		windows: []
@@ -51,16 +52,24 @@ Zotero.Session = new function () {
 		_state.windows = [state];
 	};
 
+	this.debounceSave = Zotero.Utilities.debounce(() => {
+		this.save();
+	}, DEBOUNCED_SAVING_DELAY);
+
 	this.save = async function () {
 		try {
-			// Save is triggered when application receives quit event,
-			// but if it was triggered by closing window, ZoteroPane might
-			// be already destroyed
-			let panes = Zotero.getZoteroPanes();
+			// Saving is triggered in `zotero.js` when a quit event is received,
+			// though if it was triggered by closing a window, ZoteroPane might
+			// be already destroyed at the time
+			let panes = Zotero.getZoteroPanes().map(x => x.getState());
+			let readers = Zotero.Reader.getWindowStates();
 			if (panes.length) {
-				_state.windows = panes.map(x => x.getState());
+				_state.windows = [...readers, ...panes];
 			}
-
+			else if (readers.length) {
+				_state.windows = _state.windows.filter(x => x.type != 'reader');
+				_state.windows = [..._state.windows, ...readers];
+			}
 			let sessionFile = OS.Path.join(Zotero.Profile.dir, SESSION_FILE_NAME);
 			await Zotero.File.putContentsAsync(sessionFile, JSON.stringify(_state));
 		}
