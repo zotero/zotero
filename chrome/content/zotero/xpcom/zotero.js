@@ -380,6 +380,12 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		// Make sure data directory isn't in Dropbox, etc.
 		yield Zotero.DataDirectory.checkForUnsafeLocation(dataDir);
 		
+		Services.obs.addObserver({
+			observe: function () {
+				Zotero.Session.save();
+			}
+		}, "quit-application-granted", false);
+		
 		// Register shutdown handler to call Zotero.shutdown()
 		var _shutdownObserver = {observe:function() { Zotero.shutdown().done() }};
 		Services.obs.addObserver(_shutdownObserver, "quit-application", false);
@@ -690,6 +696,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			yield Zotero.CharacterSets.init();
 			yield Zotero.RelationPredicates.init();
 			
+			yield Zotero.Session.init();
+			
 			Zotero.locked = false;
 			
 			// Initialize various services
@@ -727,6 +735,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			yield Zotero.Retractions.init();
 			yield Zotero.NoteBackups.init();
 			yield Zotero.Dictionaries.init();
+			Zotero.Reader.init();
 			
 			// Migrate fields from Extra that can be moved to item fields after a schema update
 			yield Zotero.Schema.migrateExtraFields();

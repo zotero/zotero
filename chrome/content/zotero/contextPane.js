@@ -58,7 +58,7 @@ var ZoteroContextPane = new function () {
 	this.update = _update;
 	this.getActiveEditor = _getActiveEditor;
 	
-	this.onLoad = function () {
+	this.init = function () {
 		if (!Zotero) {
 			return;
 		}
@@ -83,8 +83,33 @@ var ZoteroContextPane = new function () {
 		else {
 			_tabToolbar.style.right = 0;
 		}
+		
+		// vbox
+		var vbox = document.createElement('vbox');
+		vbox.setAttribute('flex', '1');
 
-		_init();
+		_contextPaneInner.append(vbox);
+
+		// Toolbar extension
+		var toolbarExtension = document.createElement('box');
+		toolbarExtension.style.height = '32px';
+		toolbarExtension.id = 'zotero-context-toolbar-extension';
+		
+		_panesDeck = document.createElement('deck');
+		_panesDeck.setAttribute('flex', 1);
+		_panesDeck.setAttribute('selectedIndex', 0);
+
+		vbox.append(toolbarExtension, _panesDeck);
+
+		// Item pane deck
+		_itemPaneDeck = document.createElement('deck');
+		// Notes pane deck
+		_notesPaneDeck = document.createElement('deck');
+		_notesPaneDeck.style.backgroundColor = 'white';
+		_notesPaneDeck.setAttribute('flex', 1);
+		_notesPaneDeck.className = 'notes-pane-deck';
+
+		_panesDeck.append(_itemPaneDeck, _notesPaneDeck);
 
 		this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'tab'], 'contextPane');
 		window.addEventListener('resize', _update);
@@ -94,7 +119,7 @@ var ZoteroContextPane = new function () {
 		Zotero.Reader.onChangeSidebarOpen = _updatePaneWidth;
 	};
 
-	this.onUnload = function () {
+	this.destroy = function () {
 		_itemToggle.removeEventListener('click', _toggleItemButton);
 		_notesToggle.removeEventListener('click', _toggleNotesButton);
 		window.removeEventListener('resize', _update);
@@ -106,7 +131,7 @@ var ZoteroContextPane = new function () {
 		_notesContexts = [];
 	};
 
-	this.notify = Zotero.Promise.coroutine(function* (action, type, ids, extraData) {
+	this.notify = function (action, type, ids, extraData) {
 		if (type == 'item') {
 			// Update, remove or re-create item panes
 			for (let context of _itemContexts.slice()) {
@@ -174,14 +199,14 @@ var ZoteroContextPane = new function () {
 									|| !document.activeElement.closest('.context-node iframe[anonid="editor-view"]'))) {
 								reader.focus();
 							}
+							
+							var attachment = await Zotero.Items.getAsync(reader.itemID);
+							if (attachment) {
+								_selectNotesContext(attachment.libraryID);
+								var notesContext = _getNotesContext(attachment.libraryID);
+								notesContext.updateFromCache();
+							}
 						})();
-
-						var attachment = Zotero.Items.get(reader.itemID);
-						if (attachment) {
-							_selectNotesContext(attachment.libraryID);
-							var notesContext = _getNotesContext(attachment.libraryID);
-							notesContext.updateFromCache();
-						}
 					}
 				
 					_contextPaneSplitter.setAttribute('hidden', false);
@@ -193,7 +218,7 @@ var ZoteroContextPane = new function () {
 				_update();
 			}
 		}
-	});
+	};
 
 	function _toggleItemButton() {
 		_togglePane(0);
@@ -345,35 +370,6 @@ var ZoteroContextPane = new function () {
 		
 		splitter.setAttribute('state', hide ? 'collapsed' : 'open');
 		_update();
-	}
-
-	function _init() {
-		// vbox
-		var vbox = document.createElement('vbox');
-		vbox.setAttribute('flex', '1');
-
-		_contextPaneInner.append(vbox);
-
-		// Toolbar extension
-		var toolbarExtension = document.createElement('box');
-		toolbarExtension.style.height = '32px';
-		toolbarExtension.id = 'zotero-context-toolbar-extension';
-		
-		_panesDeck = document.createElement('deck');
-		_panesDeck.setAttribute('flex', 1);
-		_panesDeck.setAttribute('selectedIndex', 0);
-
-		vbox.append(toolbarExtension, _panesDeck);
-
-		// Item pane deck
-		_itemPaneDeck = document.createElement('deck');
-		// Notes pane deck
-		_notesPaneDeck = document.createElement('deck');
-		_notesPaneDeck.style.backgroundColor = 'white';
-		_notesPaneDeck.setAttribute('flex', 1);
-		_notesPaneDeck.className = 'notes-pane-deck';
-
-		_panesDeck.append(_itemPaneDeck, _notesPaneDeck);
 	}
 	
 	function _getCurrentAttachment() {
@@ -737,7 +733,16 @@ var ZoteroContextPane = new function () {
 		}
 	}
 
-	function _addItemContext(tabID, itemID) {
+	async function _addItemContext(tabID, itemID) {
+		var container = document.createElement('vbox');
+		container.id = tabID + '-context';
+		container.className = 'zotero-item-pane-content';
+		_itemPaneDeck.appendChild(container);
+	
+		var { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
+		var library = Zotero.Libraries.get(libraryID);
+		await library.waitForDataLoad('item');
+
 		var item = Zotero.Items.get(itemID);
 		if (!item) {
 			return;
@@ -745,11 +750,6 @@ var ZoteroContextPane = new function () {
 		var libraryID = item.libraryID;
 		var readOnly = _isLibraryReadOnly(libraryID);
 		var parentID = item.parentID;
-	
-		var container = document.createElement('vbox');
-		container.id = tabID + '-context';
-		container.className = 'zotero-item-pane-content';
-		_itemPaneDeck.appendChild(container);
 		
 		var context = {
 			tabID,
@@ -786,6 +786,3 @@ var ZoteroContextPane = new function () {
 		itemBox.item = parentItem;
 	}
 };
-
-addEventListener('load', function (e) { ZoteroContextPane.onLoad(e); }, false);
-addEventListener('unload', function (e) { ZoteroContextPane.onUnload(e); }, false);

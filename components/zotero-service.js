@@ -120,6 +120,7 @@ const xpcomFilesLocal = [
 	'router',
 	'schema',
 	'server',
+	'session',
 	'streamer',
 	'style',
 	'sync',

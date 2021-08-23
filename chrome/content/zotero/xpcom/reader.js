@@ -33,6 +33,7 @@ class ReaderInstance {
 		this._window = null;
 		this._iframeWindow = null;
 		this._itemID = null;
+		this._title = '';
 		this._isReaderInitialized = false;
 		this._showItemPaneToggle = false;
 		this._initPromise = new Promise((resolve, reject) => {
@@ -50,7 +51,11 @@ class ReaderInstance {
 	}
 
 	async open({ itemID, state, location }) {
-		let item = await Zotero.Items.getAsync(itemID);
+		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
+		let library = Zotero.Libraries.get(libraryID);
+		await library.waitForDataLoad('item');
+		
+		let item = Zotero.Items.get(itemID);
 		if (!item) {
 			return false;
 		}
@@ -101,6 +106,7 @@ class ReaderInstance {
 				title = parentItem.getDisplayTitle();
 			}
 		}
+		this._title = title;
 		this._setTitleValue(title);
 	}
 
@@ -644,7 +650,7 @@ class ReaderInstance {
 }
 
 class ReaderTab extends ReaderInstance {
-	constructor({ itemID, sidebarWidth, sidebarOpen, bottomPlaceholderHeight }) {
+	constructor({ itemID, title, sidebarWidth, sidebarOpen, bottomPlaceholderHeight, background }) {
 		super();
 		this._itemID = itemID;
 		this._sidebarWidth = sidebarWidth;
@@ -654,11 +660,11 @@ class ReaderTab extends ReaderInstance {
 		this._window = Services.wm.getMostRecentWindow('navigator:browser');
 		let { id, container } = this._window.Zotero_Tabs.add({
 			type: 'reader',
-			title: '',
-			select: true,
-			notifierData: {
+			title: title || '',
+			data: {
 				itemID
-			}
+			},
+			select: !background
 		});
 		this.tabID = id;
 		this._tabContainer = container;
@@ -832,6 +838,13 @@ class Reader {
 		return this._sidebarWidth;
 	}
 	
+	async init() {
+		await Zotero.uiReadyPromise;
+		Zotero.Session.state.windows
+			.filter(x => x.type == 'reader' && Zotero.Items.exists(x.itemID))
+			.forEach(x => this.open(x.itemID, null, { title: x.title, openInWindow: true }));
+	}
+	
 	_loadSidebarOpenState() {
 		let win = Zotero.getMainWindow();
 		if (win) {
@@ -888,6 +901,10 @@ class Reader {
 					this.triggerAnnotationsImportCheck(reader._itemID);
 				}
 			}
+			
+			if (event === 'add' || event === 'close') {
+				Zotero.Session.debounceSave();
+			}
 		}
 		// Listen for parent item, PDF attachment and its annotations updates
 		else if (type === 'item') {
@@ -932,19 +949,25 @@ class Reader {
 	getByTabID(tabID) {
 		return this._readers.find(r => (r instanceof ReaderTab) && r.tabID === tabID);
 	}
-
-	async openURI(itemURI, location, openWindow) {
-		let item = await Zotero.URI.getURIItem(itemURI);
-		if (!item) return;
-		await this.open(item.id, location, openWindow);
+	
+	getWindowStates() {
+		return this._readers
+			.filter(r => r instanceof ReaderWindow)
+			.map(r => ({ type: 'reader', itemID: r._itemID, title: r._title }));
 	}
 
-	async open(itemID, location, openWindow) {
+	async openURI(itemURI, location, options) {
+		let item = await Zotero.URI.getURIItem(itemURI);
+		if (!item) return;
+		await this.open(item.id, location, options);
+	}
+
+	async open(itemID, location, { title, openInBackground, openInWindow } = {}) {
 		this._loadSidebarOpenState();
 		this.triggerAnnotationsImportCheck(itemID);
 		let reader;
 
-		if (openWindow) {
+		if (openInWindow) {
 			reader = this._readers.find(r => r._itemID === itemID && (r instanceof ReaderWindow));
 		}
 		else {
@@ -960,7 +983,7 @@ class Reader {
 				reader.navigate(location);
 			}
 		}
-		else if (openWindow) {
+		else if (openInWindow) {
 			reader = new ReaderWindow({
 				sidebarWidth: this._sidebarWidth,
 				sidebarOpen: this._sidebarOpen,
@@ -970,13 +993,17 @@ class Reader {
 			if (!(await reader.open({ itemID, location }))) {
 				return;
 			}
+			Zotero.Session.debounceSave();
 			reader._window.addEventListener('unload', () => {
 				this._readers.splice(this._readers.indexOf(reader), 1);
+				Zotero.Session.debounceSave();
 			});
 		}
 		else {
 			reader = new ReaderTab({
 				itemID,
+				title,
+				background: openInBackground,
 				sidebarWidth: this._sidebarWidth,
 				sidebarOpen: this._sidebarOpen,
 				bottomPlaceholderHeight: this._bottomPlaceholderHeight
