@@ -38,6 +38,10 @@
 			cursor: col-resize;
 		}
 	}
+	
+	.cell:first-child {
+		padding-inline-start: 6px;
+	}
 
 	.cell {
 		min-width: 30px;
@@ -142,7 +146,6 @@
 	height: 1.8em;
 	overflow: hidden;
 	border-inline-end: 1px solid #ddd;
-	padding-inline-start: 6px;
 
 	&.static-columns {
 		pointer-events: none;
@@ -211,10 +214,6 @@
 	flex: 1 0;
 	max-width: 100%;
 	overflow: auto;
-
-	.row {
-		padding-inline-start: 6px;
-	}
 
 	.cell {
 		padding: 2px 5px;

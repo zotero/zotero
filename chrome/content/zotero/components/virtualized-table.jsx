@@ -1084,10 +1084,13 @@ class VirtualizedTable extends React.Component {
 		const header = document.querySelector(`#${this.props.id} .virtualized-table-header`);
 		const scrollbarWidth = Math.max(0,
 			tree.getBoundingClientRect().width - jsWindow.getBoundingClientRect().width);
+		let paddingWidth = 0;
+		if (Zotero.isLinux) {
+			paddingWidth = 2; // from the border
+		}
 		// Should be kept up to date with the _virtualized-table.scss value
 		// for .virtualized-table-header
-		const paddingInlineStart = 6;
-		header.style.width = `calc(100% - ${scrollbarWidth+paddingInlineStart}px)`;
+		header.style.width = `calc(100% - ${scrollbarWidth-paddingWidth}px)`;
 	}
 
 	/**
