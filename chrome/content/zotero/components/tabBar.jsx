@@ -55,6 +55,12 @@ const TabBar = forwardRef(function (props, ref) {
 		event.stopPropagation();
 	}
 
+	function handleTabClick(event, id) {
+		if (event.button === 1) {
+			props.onTabClose(id);
+		}
+	}
+
 	function handleTabBarMouseMove(event) {
 		if (!draggingID.current || mouseMoveWaitUntil.current > Date.now()) {
 			return;
@@ -121,6 +127,7 @@ const TabBar = forwardRef(function (props, ref) {
 				className={cx('tab', { selected })}
 				onMouseMove={() => handleTabMouseMove(title)}
 				onMouseDown={(event) => handleTabMouseDown(event, id, index)}
+				onClick={(event) => handleTabClick(event, id)}
 			>
 				<div className="tab-name">{title}</div>
 				<div
