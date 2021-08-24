@@ -234,8 +234,10 @@ Zotero_Preferences.Sync = {
 	},
 	
 	
-	toggleLibraryToSync: function () {
-		const index = this._tree.selection.focused;
+	toggleLibraryToSync: function (index) {
+		if (typeof index != "number") {
+			index = this._tree.selection.focused;
+		}
 		if (index == -1 || !this._rows[index].editable) return;
 		const row = this._rows[index];
 		this._rows[index].checked = !this._rows[index].checked;
@@ -268,7 +270,7 @@ Zotero_Preferences.Sync = {
 			}
 		];
 		this._rows = [];
-		function renderItem(index, selection, oldDiv=null, columns) {
+		let renderItem = (index, selection, oldDiv=null, columns) => {
 			const row = this._rows[index];
 			let div;
 			if (oldDiv) {
@@ -289,6 +291,10 @@ Zotero_Preferences.Sync = {
 						span.innerText = row.checked ? this.checkmarkChar : this.noChar;
 						span.style.textAlign = 'center';
 					}
+					span.addEventListener('mousedown', () => {
+						this.toggleLibraryToSync(index);
+					});
+					span.style.pointerEvents = 'initial';
 					div.appendChild(span);
 				}
 				else {
@@ -297,17 +303,24 @@ Zotero_Preferences.Sync = {
 			}
 			return div;
 		}
+		let handleKeyDown = (e) => {
+			if (e.key == ' ') {
+				this.toggleLibraryToSync();
+				return false;
+			}
+		};
 		let elem = (
 			<IntlProvider locale={Zotero.locale} messages={Zotero.Intl.strings}>
 				<VirtualizedTable
 					getRowCount={() => this._rows.length}
 					id="librariesToSync-table"
 					ref={ref => this._tree = ref}
-					renderItem={renderItem.bind(this)}
+					renderItem={renderItem}
 					showHeader={true}
 					columns={columns}
 					staticColumns={true}
 					onActivate={Zotero_Preferences.Sync.toggleLibraryToSync.bind(this)}
+					onKeyDown={handleKeyDown}
 				/>
 			</IntlProvider>
 		);

@@ -52,13 +52,6 @@
 		<hbox class="virtualized-table-container" flex="1" height="200" width="600">
 			<html:div id="libraries-to-sync-tree"/>
 		</hbox>
-		<separator class="thin"/>
-
-		<hbox align="center">
-			<hbox pack="start" flex="1">
-				<button label="&zotero.preferences.sync.toggle;" onclick="Zotero_Preferences.Sync.toggleLibraryToSync()"/>
-			</hbox>
-		</hbox>
 	</groupbox>
 	
 	<script>
