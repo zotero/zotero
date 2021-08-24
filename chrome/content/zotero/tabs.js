@@ -50,6 +50,7 @@ var Zotero_Tabs = new function () {
 		title: ''
 	}];
 	this._selectedID = 'zotero-pane';
+	this._prevSelectedID = null;
 
 	this._getTab = function (id) {
 		var tabIndex = this._tabs.findIndex(tab => tab.id == id);
@@ -154,7 +155,9 @@ var Zotero_Tabs = new function () {
 		this._update();
 		Zotero.Notifier.trigger('add', 'tab', [id], { [id]: data }, true);
 		if (select) {
+			let previousID = this._selectedID;
 			this.select(id);
+			this._prevSelectedID = previousID;
 		}
 		return { id, container };
 	};
@@ -191,7 +194,7 @@ var Zotero_Tabs = new function () {
 			return;
 		}
 		if (tab.id == this._selectedID) {
-			this.select((this._tabs[tabIndex + 1] || this._tabs[tabIndex - 1]).id);
+			this.select(this._prevSelectedID || (this._tabs[tabIndex + 1] || this._tabs[tabIndex - 1]).id);
 		}
 		this._tabs.splice(tabIndex, 1);
 		document.getElementById(tab.id).remove();
@@ -241,9 +244,10 @@ var Zotero_Tabs = new function () {
 	 */
 	this.select = function (id) {
 		var { tab } = this._getTab(id);
-		if (!tab) {
+		if (!tab || tab.id === this._selectedID) {
 			return;
 		}
+		this._prevSelectedID = null;
 		this._selectedID = id;
 		this.deck.selectedIndex = Array.from(this.deck.children).findIndex(x => x.id == id);
 		this._update();
