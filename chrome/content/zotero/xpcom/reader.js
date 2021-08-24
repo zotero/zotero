@@ -99,13 +99,27 @@ class ReaderInstance {
 	updateTitle() {
 		let item = Zotero.Items.get(this._itemID);
 		let title = item.getDisplayTitle();
-		let parentItemID = item.parentItemID;
-		if (parentItemID) {
-			let parentItem = Zotero.Items.get(parentItemID);
-			if (parentItem) {
-				title = parentItem.getDisplayTitle();
+		let parentItem = item.parentItem;
+		if (parentItem) {
+			let parts = [];
+			let displayTitle = parentItem.getDisplayTitle();
+			if (displayTitle) {
+				parts.push(displayTitle);
 			}
+
+			let firstCreator = parentItem.getField('firstCreator');
+			if (firstCreator) {
+				parts.push(firstCreator);
+			}
+
+			let year = parentItem.getField('year');
+			if (year) {
+				parts.push(year);
+			}
+
+			title = parts.join(' - ');
 		}
+		
 		this._title = title;
 		this._setTitleValue(title);
 	}
