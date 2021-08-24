@@ -775,6 +775,7 @@ var Zotero_RTFScan = new function() {
 					renderItem={this._renderItem}
 					showHeader={true}
 					columns={columns}
+					disableFontSizeScaling={true}
 				/>
 			</IntlProvider>
 		);

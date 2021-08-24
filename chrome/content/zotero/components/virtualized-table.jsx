@@ -290,11 +290,10 @@ class VirtualizedTable extends React.Component {
 		
 		this._columns = new Columns(this);
 		
-		this._rowHeight = props.rowHeight;
-		if (!this._rowHeight) {
-			this._rowHeight = props.defaultRowHeight || DEFAULT_ROW_HEIGHT;
+		this._rowHeight = props.rowHeight || DEFAULT_ROW_HEIGHT;
+		if (!props.disableFontSizeScaling) {
 			this._rowHeight *= Zotero.Prefs.get('fontSize');
-			if (Zotero.isMac && this._rowHeight > (props.defaultRowHeight || DEFAULT_ROW_HEIGHT)) {
+			if (Zotero.isMac && this._rowHeight > props.rowHeight || DEFAULT_ROW_HEIGHT) {
 				this._rowHeight -= 2;
 			}
 		}
@@ -367,6 +366,8 @@ class VirtualizedTable extends React.Component {
 		
 		renderItem: PropTypes.func,
 		rowHeight: PropTypes.number,
+		// Use rowHeight or default row height without adjusting for current UI font size
+		disableFontSizeScaling: PropTypes.bool,
 		// An array of two elements for alternating row colors
 		alternatingRowColors: PropTypes.array,
 		// For screen-readers
@@ -1062,10 +1063,12 @@ class VirtualizedTable extends React.Component {
 			Zotero.debug("Attempting to update virtualized-table font size with a prop-specified rowHeight."
 				+ "You should change the prop on the React component instead");
 		}
-		this._rowHeight = this.props.defaultRowHeight || DEFAULT_ROW_HEIGHT;
-		this._rowHeight *= Zotero.Prefs.get('fontSize');
-		if (Zotero.isMac && this._rowHeight > (this.props.defaultRowHeight || DEFAULT_ROW_HEIGHT)) {
-			this._rowHeight -= 2;
+		this._rowHeight = this.props.rowHeight || DEFAULT_ROW_HEIGHT;
+		if (!props.disableFontSizeScaling) {
+			this._rowHeight *= Zotero.Prefs.get('fontSize');
+			if (Zotero.isMac && this._rowHeight > (this.props.rowHeight || DEFAULT_ROW_HEIGHT)) {
+				this._rowHeight -= 2;
+			}
 		}
 
 		if (!this._jsWindow) return;

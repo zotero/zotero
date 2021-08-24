@@ -306,6 +306,7 @@ Zotero_Preferences.Sync = {
 					showHeader={true}
 					columns={columns}
 					staticColumns={true}
+					disableFontSizeScaling={true}
 					onActivate={Zotero_Preferences.Sync.toggleLibraryToSync.bind(this)}
 				/>
 			</IntlProvider>

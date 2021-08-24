@@ -50,6 +50,7 @@ function init() {
 				showHeader={true}
 				multiSelect={true}
 				columns={columns}
+				disableFontSizeScaling={true}
 				onActivate={handleActivate}
 			/>
 		</IntlProvider>

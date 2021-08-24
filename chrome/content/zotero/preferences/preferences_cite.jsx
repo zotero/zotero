@@ -126,6 +126,7 @@ Zotero_Preferences.Cite = {
 						multiSelect={true}
 						columns={columns}
 						staticColumns={true}
+						disableFontSizeScaling={true}
 						onSelectionChange={() => document.getElementById('styleManager-delete').disabled = undefined}
 						onKeyDown={handleKeyDown}
 					/>
