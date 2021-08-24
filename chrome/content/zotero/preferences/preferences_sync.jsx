@@ -259,7 +259,8 @@ Zotero_Preferences.Sync = {
 				dataKey: "checked",
 				label: "zotero.preferences.sync.librariesToSync.sync",
 				fixedWidth: true,
-				width: '60'
+				// TODO: Specify in ems?
+				width: Zotero.isLinux ? '40' : '35'
 			},
 			{
 				dataKey: "name",
