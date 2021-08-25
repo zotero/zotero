@@ -4,7 +4,7 @@
 <!ENTITY zotero.preferences.items "elementer">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Innstillinger">
-<!ENTITY zotero.preferences.custom "Tilpasset...">
+<!ENTITY zotero.preferences.custom "Egendefinert...">
 
 <!ENTITY zotero.preferences.prefpane.general "Generelt">
 
@@ -40,7 +40,7 @@
 <!ENTITY zotero.preferences.feeds.feedDefaults "Standardvalg for nyhetsstrøm">
 
 <!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
-<!ENTITY zotero.preferences.openurl.custom "Tilpasset...">
+<!ENTITY zotero.preferences.openurl.custom "Egendefinert...">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Versjon:">
 
