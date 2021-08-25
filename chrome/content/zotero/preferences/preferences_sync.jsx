@@ -280,6 +280,9 @@ Zotero_Preferences.Sync = {
 			else {
 				div = document.createElementNS("http://www.w3.org/1999/xhtml", 'div');
 				div.className = "row";
+				div.addEventListener('dblclick', () => {
+					this.toggleLibraryToSync(index);
+				});
 			}
 			div.classList.toggle('selected', selection.isSelected(index));
 
@@ -320,7 +323,6 @@ Zotero_Preferences.Sync = {
 					columns={columns}
 					staticColumns={true}
 					disableFontSizeScaling={true}
-					onActivate={Zotero_Preferences.Sync.toggleLibraryToSync.bind(this)}
 					onKeyDown={handleKeyDown}
 				/>
 			</IntlProvider>
