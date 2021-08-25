@@ -345,7 +345,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 	
 	async clearItemsPaneMessage() {
-		const shouldRerender = !this._itemsPaneMessage;
+		const shouldRerender = this._itemsPaneMessage;
 		this._itemsPaneMessage = null;
 		return shouldRerender && new Promise(resolve => this.forceUpdate(resolve));
 	}
