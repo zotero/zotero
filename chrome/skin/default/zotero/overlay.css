@@ -153,12 +153,12 @@
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	width: 100%;
+	width: calc(100% - 4em);
 	height: 100%;
 	position: absolute;
 	top: 0;
-	left: 0;
-	font-size: .7em;
+	left: 2em;
+	right: 2em;
 }
 
 .items-tree-message div {

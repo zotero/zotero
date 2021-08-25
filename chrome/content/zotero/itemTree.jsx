@@ -328,8 +328,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 	async setItemsPaneMessage(message, lock=false) {
 		if (this._locked) return;
 		if (typeof message == 'string') {
-			let messageParts = message.split("\n\n");
-			message = messageParts.map(part => `<p>${part}</p>`).join('');
+			// Hack to keep "Loading items…" small
+			if (message == Zotero.getString('pane.items.loading')) {}
+			else {
+				let messageParts = message.split("\n\n");
+				message = messageParts.map(part => `<p>${part}</p>`).join('');
+			}
 		}
 		else if (message.outerHTML) {
 			message = message.outerHTML;
