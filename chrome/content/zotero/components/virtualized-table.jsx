@@ -293,11 +293,11 @@ class VirtualizedTable extends React.Component {
 		this._rowHeight = props.rowHeight || DEFAULT_ROW_HEIGHT;
 		if (!props.disableFontSizeScaling) {
 			this._rowHeight *= Zotero.Prefs.get('fontSize');
-			if (Zotero.isMac && this._rowHeight > props.rowHeight || DEFAULT_ROW_HEIGHT) {
-				this._rowHeight -= 2;
-			}
 		}
-			
+		if (Zotero.isMac && this._rowHeight >= (props.rowHeight || DEFAULT_ROW_HEIGHT)) {
+			this._rowHeight -= 2;
+		}
+		
 		this.selection = new TreeSelection(this);
 		
 
@@ -1059,18 +1059,17 @@ class VirtualizedTable extends React.Component {
 	}
 	
 	updateFontSize = () => {
-		if (typeof this.props.rowHeight == 'number') {
-			Zotero.debug("Attempting to update virtualized-table font size with a prop-specified rowHeight."
-				+ "You should change the prop on the React component instead");
+		if (this.props.disableFontSizeScaling) {
+			Zotero.warn("Attempting to update font size on a VirtualizedTable with a font scaling "
+				+ "disabled. Change the prop instead.");
+			return;
 		}
 		this._rowHeight = this.props.rowHeight || DEFAULT_ROW_HEIGHT;
-		if (!props.disableFontSizeScaling) {
-			this._rowHeight *= Zotero.Prefs.get('fontSize');
-			if (Zotero.isMac && this._rowHeight > (this.props.rowHeight || DEFAULT_ROW_HEIGHT)) {
-				this._rowHeight -= 2;
-			}
+		this._rowHeight *= Zotero.Prefs.get('fontSize');
+		if (Zotero.isMac && this._rowHeight >= (this.props.rowHeight || DEFAULT_ROW_HEIGHT)) {
+			this._rowHeight -= 2;
 		}
-
+		
 		if (!this._jsWindow) return;
 		this._jsWindow.update(this._getWindowedListOptions());
 		this._setAlternatingRows();
