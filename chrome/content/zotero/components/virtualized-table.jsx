@@ -331,6 +331,7 @@ class VirtualizedTable extends React.Component {
 		getColumnPrefs: () => ({}),
 		storeColumnPrefs: noop,
 		staticColumns: false,
+		alternatingRowColors: Zotero.isMac ? ['-moz-OddTreeRow', '-moz-EvenTreeRow'] : null,
 
 		// Render with display: none
 		hide: false,

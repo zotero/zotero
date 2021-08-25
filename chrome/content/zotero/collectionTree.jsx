@@ -375,6 +375,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				renderItem: this.renderItem,
 				// Extra space on macOS (which gets reduced by 2, so this really means 20)
 				...(Zotero.isMac && { rowHeight: 22 }),
+				alternatingRowColors: null,
 
 				onSelectionChange: this._handleSelectionChange,
 				isSelectable: this.isSelectable,
