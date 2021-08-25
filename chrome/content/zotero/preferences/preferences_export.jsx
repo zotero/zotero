@@ -301,6 +301,7 @@ Zotero_Preferences.Export = {
 						showHeader={true}
 						columns={columns}
 						staticColumns={true}
+						disableFontSizeScaling={true}
 						onSelectionChange={() => Zotero_Preferences.Export.enableQuickCopySiteButtons()}
 						onKeyDown={handleKeyDown}
 						onActivate={(event, indices) => Zotero_Preferences.Export.showQuickCopySiteEditor()}
