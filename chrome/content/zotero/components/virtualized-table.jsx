@@ -294,6 +294,7 @@ class VirtualizedTable extends React.Component {
 		if (!props.disableFontSizeScaling) {
 			this._rowHeight *= Zotero.Prefs.get('fontSize');
 		}
+		// A bit less row spacing on macOS
 		if (Zotero.isMac && this._rowHeight >= (props.rowHeight || DEFAULT_ROW_HEIGHT)) {
 			this._rowHeight -= 2;
 		}
