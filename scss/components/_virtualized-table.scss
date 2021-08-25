@@ -184,6 +184,7 @@
 			margin-inline-start: 10px;
 			overflow: hidden;
 			text-overflow: ellipsis;
+			flex: 1;
 		}
 		&:first-child .label {
 			margin-inline-start: 4px;
@@ -200,8 +201,7 @@
 		.sort-indicator {
 			-moz-appearance: toolbarbutton-dropdown;
 			display: block;
-			position: absolute;
-			right: 10px;
+			margin-right: 10px;
 
 			&.ascending {
 				transform: rotate(180deg);
