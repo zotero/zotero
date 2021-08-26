@@ -25,31 +25,48 @@
 
 'use strict';
 
-import React, { forwardRef, useState, useRef, useImperativeHandle, useEffect } from 'react';
+import React, { forwardRef, useState, useRef, useImperativeHandle, useLayoutEffect } from 'react';
 import cx from 'classnames';
 const { IconXmark } = require('./icons');
 
 const TabBar = forwardRef(function (props, ref) {
 	const [tabs, setTabs] = useState([]);
-	const draggingID = useRef(null);
+	const [dragging, setDragging] = useState(false);
+	const [draggingX, setDraggingX] = useState(0);
+	const draggingIDRef = useRef(null);
+	const draggingDeltaXRef = useRef();
 	const tabsRef = useRef();
 	const mouseMoveWaitUntil = useRef(0);
-
-	useEffect(() => {
-		window.addEventListener('mouseup', handleWindowMouseUp);
-		return () => {
-			window.removeEventListener('mouseup', handleWindowMouseUp);
-		};
-	}, []);
-
+	
 	useImperativeHandle(ref, () => ({ setTabs }));
+	
+	useLayoutEffect(() => {
+		if (!draggingIDRef.current) return;
+		let tab = Array.from(tabsRef.current.children).find(x => x.dataset.id === draggingIDRef.current);
+		if (tab) {
+			let x = draggingX - tab.offsetLeft - draggingDeltaXRef.current;
 
-	function handleTabMouseDown(event, id, index) {
+			let firstTab = tabsRef.current.firstChild;
+			let lastTab = tabsRef.current.lastChild;
+
+			if (Zotero.rtl) {
+				if (tab.offsetLeft + x < lastTab.offsetLeft
+					|| tab.offsetLeft + tab.offsetWidth + x > firstTab.offsetLeft) {
+					x = 0;
+				}
+			}
+			else if (tab.offsetLeft + x > lastTab.offsetLeft
+				|| tab.offsetLeft + x < firstTab.offsetLeft + firstTab.offsetWidth) {
+				x = 0;
+			}
+			
+			tab.style.transform = dragging ? `translateX(${x}px)` : 'unset';
+		}
+	});
+	
+	function handleTabMouseDown(event, id) {
 		if (event.target.closest('.tab-close')) {
 			return;
-		}
-		if (index != 0) {
-			draggingID.current = id;
 		}
 		props.onTabSelect(id);
 		event.stopPropagation();
@@ -61,45 +78,71 @@ const TabBar = forwardRef(function (props, ref) {
 		}
 	}
 
-	function handleTabBarMouseMove(event) {
-		if (!draggingID.current || mouseMoveWaitUntil.current > Date.now()) {
+	function handleDragStart(event, id, index) {
+		if (index === 0) {
 			return;
 		}
+		event.dataTransfer.effectAllowed = 'move';
+		// Empty drag image
+		let img = document.createElement('img');
+		img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+		event.dataTransfer.setDragImage(img, 0, 0);
+		event.dataTransfer.setData('zotero/tab', id);
+		draggingDeltaXRef.current = event.clientX - event.target.offsetLeft;
+		setDragging(true);
+		draggingIDRef.current = id;
+	}
+	
+	function handleDragEnd() {
+		setDragging(false);
+	}
+
+	function handleTabBarDragOver(event) {
+		event.preventDefault();
+		event.dataTransfer.dropEffect = 'move';
+		if (!draggingIDRef.current || mouseMoveWaitUntil.current > Date.now()) {
+			return;
+		}
+
+		setDraggingX(event.clientX);
+		
+		let tabIndex = Array.from(tabsRef.current.children).findIndex(x => x.dataset.id === draggingIDRef.current);
+		let tab = tabsRef.current.children[tabIndex];
+
 		let points = Array.from(tabsRef.current.children).map((child) => {
-			let rect = child.getBoundingClientRect();
-			return rect.left + rect.width / 2;
+			return child.offsetLeft + child.offsetWidth / 2;
 		});
+		
+		let x1 = event.clientX - draggingDeltaXRef.current;
+		let x2 = event.clientX - draggingDeltaXRef.current + tab.offsetWidth;
+		
 		let index = null;
 		for (let i = 0; i < points.length - 1; i++) {
-			let point1 = points[i];
-			let point2 = points[i + 1];
-			if (event.clientX > Math.min(point1, point2)
-				&& event.clientX < Math.max(point1, point2)) {
+			if (i === tabIndex || i + 1 === tabIndex) {
+				continue;
+			}
+			let p1 = points[i];
+			let p2 = points[i + 1];
+			if (
+				Zotero.rtl && (x2 < p1 && x2 > p2 || x1 < p1 && x1 > p2)
+				|| !Zotero.rtl && (x2 > p1 && x2 < p2 || x1 > p1 && x1 < p2)
+			) {
 				index = i + 1;
 				break;
 			}
 		}
+
 		if (index === null) {
-			let point1 = points[0];
-			let point2 = points[points.length - 1];
-			if ((point1 < point2 && event.clientX < point1
-				|| point1 > point2 && event.clientX > point1)) {
-				index = 0;
-			}
-			else {
+			let p = points[points.length - 1];
+			if (Zotero.rtl && x1 < p || !Zotero.rtl && x2 > p) {
 				index = points.length;
 			}
 		}
-		if (index == 0) {
-			index = 1;
+		
+		if (index !== null) {
+			props.onTabMove(draggingIDRef.current, index);
 		}
-		props.onTabMove(draggingID.current, index);
-		mouseMoveWaitUntil.current = Date.now() + 100;
-	}
-
-	function handleWindowMouseUp(event) {
-		draggingID.current = null;
-		event.stopPropagation();
+		mouseMoveWaitUntil.current = Date.now() + 20;
 	}
 
 	function handleTabClose(event, id) {
@@ -124,10 +167,14 @@ const TabBar = forwardRef(function (props, ref) {
 		return (
 			<div
 				key={id}
-				className={cx('tab', { selected })}
+				data-id={id}
+				className={cx('tab', { selected, dragging: dragging && id === draggingIDRef.current })}
+				draggable={true}
 				onMouseMove={() => handleTabMouseMove(title)}
-				onMouseDown={(event) => handleTabMouseDown(event, id, index)}
+				onMouseDown={(event) => handleTabMouseDown(event, id)}
 				onClick={(event) => handleTabClick(event, id)}
+				onDragStart={(event) => handleDragStart(event, id, index)}
+				onDragEnd={handleDragEnd}
 			>
 				<div className="tab-name">{title}</div>
 				<div
@@ -144,7 +191,7 @@ const TabBar = forwardRef(function (props, ref) {
 		<div
 			ref={tabsRef}
 			className="tabs"
-			onMouseMove={handleTabBarMouseMove}
+			onDragOver={handleTabBarDragOver}
 			onMouseOut={handleTabBarMouseOut}
 		>
 			{tabs.map((tab, index) => renderTab(tab, index))}
