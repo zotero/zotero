@@ -78,6 +78,7 @@ var Zotero_Tabs = new function () {
 				onTabSelect={this.select.bind(this)}
 				onTabMove={this.move.bind(this)}
 				onTabClose={this.close.bind(this)}
+				onContextMenu={this._openMenu.bind(this)}
 			/>,
 			document.getElementById('tab-bar-container'),
 			() => {
@@ -283,8 +284,61 @@ var Zotero_Tabs = new function () {
 	 *
 	 * @param {Integer} index
 	 */
-	this.jump = function(index) {
+	this.jump = function (index) {
 		this.select(this._tabs[Math.min(index, this._tabs.length - 1)].id);
+	};
+
+	this._openMenu = function (x, y, id) {
+		window.Zotero_Tooltip.stop();
+		let menuitem;
+		let popup = document.createElement('menupopup');
+		document.querySelector('popupset').appendChild(popup);
+		popup.addEventListener('popuphidden', function () {
+			popup.remove();
+		});
+		if (id !== 'zotero-pane') {
+			// Show in library
+			menuitem = document.createElement('menuitem');
+			menuitem.setAttribute('label', Zotero.getString('tabs.showInLibrary'));
+			menuitem.addEventListener('command', () => {
+				var reader = Zotero.Reader.getByTabID(id);
+				if (reader) {
+					ZoteroPane_Local.selectItem(reader.itemID);
+					this.select('zotero-pane');
+				}
+			});
+			popup.appendChild(menuitem);
+			// Open in a separate window
+			menuitem = document.createElement('menuitem');
+			menuitem.setAttribute('label', Zotero.getString('tabs.openInWindow'));
+			menuitem.addEventListener('command', () => {
+				var reader = Zotero.Reader.getByTabID(id);
+				if (reader) {
+					Zotero.Reader.open(reader.itemID, null, { openInWindow: true });
+				}
+			});
+			popup.appendChild(menuitem);
+			// Separator
+			popup.appendChild(document.createElement('menuseparator'));
+			// Close
+			menuitem = document.createElement('menuitem');
+			menuitem.setAttribute('label', Zotero.getString('tabs.close'));
+			menuitem.addEventListener('command', () => {
+				this.close(id);
+			});
+			popup.appendChild(menuitem);
+		}
+		
+		if (!(this._tabs.length === 2 && id !== 'zotero-pane')) {
+			// Close other tabs
+			menuitem = document.createElement('menuitem');
+			menuitem.setAttribute('label', Zotero.getString('tabs.closeOther'));
+			menuitem.addEventListener('command', () => {
+				this._tabs.slice(1).forEach(tab => tab.id !== id && this.close(tab.id));
+			});
+			popup.appendChild(menuitem);
+		}
+		popup.openPopupAtScreen(x, y, true);
 	};
 
 	/**
