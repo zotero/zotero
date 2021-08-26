@@ -149,6 +149,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	/**
 	 * Extension developers: use this to monkey-patch additional columns. See
 	 * itemTreeColumns.js for available column fields.
+	 * @returns {Array<Column>}
 	 */
 	getColumns() {
 		return Array.from(this.props.columns);
@@ -2730,6 +2731,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 	}
 
+	/**
+	 * Returns an object describing the row data for each column.
+	 * The keys are column dataKey properties and the entries are the corresponding data.
+	 * @param index {Integer} the row index
+	 * @returns {Object}
+	 */
 	_getRowData = (index) => {
 		var treeRow = this.getRow(index);
 		if (!treeRow) {
