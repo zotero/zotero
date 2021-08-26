@@ -108,8 +108,11 @@ module.exports = class {
 	invalidate() {
 		// Removes any items out of view and adds the ones not in view
 		this.render();
+		let oldRenderedRows = new Set(this._renderedRows.keys());
 		// Rerender the rest
 		for (let index of Array.from(this._renderedRows.keys())) {
+			// Rerender only old rows, new ones got a fresh render in this.render() call
+			if (!oldRenderedRows.has(index)) continue;
 			this.rerenderItem(index);
 		}
 	}
@@ -125,15 +128,13 @@ module.exports = class {
 
 		const [startIndex, stopIndex] = this._getRangeToRender();
 
-		if (stopIndex - startIndex > 0) {
-			for (let index = startIndex; index < stopIndex; index++) {
-				if (this._renderedRows.has(index)) continue;
-				let elem = renderItem(index);
-				elem.style.top = this._getItemPosition(index) + "px";
-				elem.style.position = "absolute";
-				innerElem.appendChild(elem);
-				this._renderedRows.set(index, elem);
-			}
+		for (let index = startIndex; index < stopIndex; index++) {
+			if (this._renderedRows.has(index)) continue;
+			let elem = renderItem(index);
+			elem.style.top = this._getItemPosition(index) + "px";
+			elem.style.position = "absolute";
+			innerElem.appendChild(elem);
+			this._renderedRows.set(index, elem);
 		}
 		for (let [index, elem] of this._renderedRows.entries()) {
 			if (index < startIndex || index >= stopIndex) {
