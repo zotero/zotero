@@ -230,6 +230,9 @@ Zotero.Prefs = new function(){
 			Zotero.getActiveZoteroPane().collectionsView && Zotero.getActiveZoteroPane().collectionsView.updateFontSize();
 			Zotero.getActiveZoteroPane().itemsView && Zotero.getActiveZoteroPane().itemsView.updateFontSize();
 		}],
+		["recursiveCollections", function() {
+			Zotero.getActiveZoteroPane().itemsView.refreshAndMaintainSelection();
+		}],
 		[ "layout", function(val) {
 			Zotero.getActiveZoteroPane().updateLayout();
 		}],
