@@ -1406,9 +1406,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 		
-		var primaryField = this._getSortField();
-		var sortFields = this._getSortFields();
-		var order = this._getSortDirection(sortFields);
+		var primaryField = this.getSortField();
+		var sortFields = this.getSortFields();
+		var order = this.getSortDirection(sortFields);
 		var collation = Zotero.getLocaleCollation();
 		var sortCreatorAsString = Zotero.Prefs.get('sortCreatorAsString');
 		
@@ -1925,6 +1925,76 @@ var ItemTree = class ItemTree extends LibraryTree {
 			Zotero.debug(items);
 			throw e;
 		}
+	}
+
+	/**
+	 * Returns an array of items of visible items in current sort order
+	 *
+	 * @param {Boolean} asIDs - Return itemIDs
+	 * @return {Zotero.Item[]|Integer[]} - An array of Zotero.Item objects or itemIDs
+	 */
+	getSortedItems(asIDs) {
+		return this._rows.map(row => asIDs ? row.ref.id : row.ref);
+	}
+
+	getSortDirection(sortFields) {
+		sortFields = sortFields || this.getSortFields();
+		if (this.collectionTreeRow.isFeed()) {
+			return Zotero.Prefs.get('feeds.sortAscending') ? 1 : -1;
+		}
+		const columns = this._getColumns();
+		for (const field of sortFields) {
+			const col = columns.find(c => c.dataKey == field);
+			if (col) {
+				return col.sortDirection;
+			}
+		}
+		return 1;
+	}
+
+	getSortField() {
+		if (this.collectionTreeRow.isFeed()) {
+			return 'id';
+		}
+		var column = this._sortedColumn;
+		if (!column) {
+			column = this._getColumns().find(col => !col.hidden);
+		}
+		// zotero-items-column-_________
+		return column.dataKey;
+	}
+
+
+	getSortFields() {
+		var fields = [this.getSortField()];
+		var secondaryField = this._getSecondarySortField();
+		if (secondaryField) {
+			fields.push(secondaryField);
+		}
+		try {
+			var fallbackFields = Zotero.Prefs.get('fallbackSort')
+				.split(',')
+				.map((x) => x.trim())
+				.filter((x) => x !== '');
+		}
+		catch (e) {
+			Zotero.debug(e, 1);
+			Cu.reportError(e);
+			// This should match the default value for the fallbackSort pref
+			var fallbackFields = ['firstCreator', 'date', 'title', 'dateAdded'];
+		}
+		fields = Zotero.Utilities.arrayUnique(fields.concat(fallbackFields));
+
+		// If date appears after year, remove it, unless it's the explicit secondary sort
+		var yearPos = fields.indexOf('year');
+		if (yearPos != -1) {
+			let datePos = fields.indexOf('date');
+			if (datePos > yearPos && secondaryField != 'date') {
+				fields.splice(datePos, 1);
+			}
+		}
+
+		return fields;
 	}
 
 	isSelectable = (index) => {
@@ -3304,8 +3374,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (!this.collectionTreeRow.isFeed()) {
 			try {
 				const id = prefix + 'sort-menu';
-				const primaryField = this._getSortField();
-				const sortFields = this._getSortFields();
+				const primaryField = this.getSortField();
+				const sortFields = this.getSortFields();
 				let secondaryField = false;
 				if (sortFields[1]) {
 					secondaryField = sortFields[1];
@@ -3380,68 +3450,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 		document.children[0].appendChild(menupopup);
 		menupopup.openPopup(null, null, event.clientX + 2, event.clientY + 2);
 	}
-	
-	_getSortDirection(sortFields) {
-		if (this.collectionTreeRow.isFeed()) {
-			return Zotero.Prefs.get('feeds.sortAscending') ? 1 : -1;
-		}
-		const columns = this._getColumns();
-		for (const field of sortFields) {
-			const col = columns.find(c => c.dataKey == field);
-			if (col) {
-				return col.sortDirection;
-			}
-		}
-		return 1;
-	}
 
-	_getSortField() {
-		if (this.collectionTreeRow.isFeed()) {
-			return 'id';
-		}
-		var column = this._sortedColumn;
-		if (!column) {
-			column = this._getColumns().find(col => !col.hidden);
-		}
-		// zotero-items-column-_________
-		return column.dataKey;
-	}
-
-
-	_getSortFields() {
-		var fields = [this._getSortField()];
-		var secondaryField = this._getSecondarySortField();
-		if (secondaryField) {
-			fields.push(secondaryField);
-		}
-		try {
-			var fallbackFields = Zotero.Prefs.get('fallbackSort')
-				.split(',')
-				.map((x) => x.trim())
-				.filter((x) => x !== '');
-		}
-		catch (e) {
-			Zotero.debug(e, 1);
-			Cu.reportError(e);
-			// This should match the default value for the fallbackSort pref
-			var fallbackFields = ['firstCreator', 'date', 'title', 'dateAdded'];
-		}
-		fields = Zotero.Utilities.arrayUnique(fields.concat(fallbackFields));
-		
-		// If date appears after year, remove it, unless it's the explicit secondary sort
-		var yearPos = fields.indexOf('year');
-		if (yearPos != -1) {
-			let datePos = fields.indexOf('date');
-			if (datePos > yearPos && secondaryField != 'date') {
-				fields.splice(datePos, 1);
-			}
-		}
-		
-		return fields;
-	}
-	
 	_getSecondarySortField() {
-		var primaryField = this._getSortField();
+		var primaryField = this.getSortField();
 		var secondaryField = Zotero.Prefs.get('secondarySort.' + primaryField);
 		if (!secondaryField || secondaryField == primaryField) {
 			return false;
@@ -3450,9 +3461,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 	
 	_setSecondarySortField(secondaryField) {
-		var primaryField = this._getSortField();
+		var primaryField = this.getSortField();
 		var currentSecondaryField = this._getSecondarySortField();
-		var sortFields = this._getSortFields();
+		var sortFields = this.getSortFields();
 		
 		if (primaryField == secondaryField) {
 			return false;
