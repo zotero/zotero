@@ -17,9 +17,11 @@ var winName;
 if (typeof window != 'undefined') {
 	winName = window.name;
 }
-Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Components.interfaces.mozIJSSubScriptLoader)
-	.loadSubScript('resource://zotero/require.js');
+if (typeof require == "undefined") {
+	Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+		.getService(Components.interfaces.mozIJSSubScriptLoader)
+		.loadSubScript('resource://zotero/require.js');
+}
 
 if (winName) {
 	window.name = winName;
