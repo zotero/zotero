@@ -65,6 +65,15 @@ const TabBar = forwardRef(function (props, ref) {
 	});
 	
 	function handleTabMouseDown(event, id) {
+		if (event.button === 2) {
+			let { screenX, screenY } = event;
+			// Popup gets immediately closed without this
+			setTimeout(() => {
+				props.onContextMenu(screenX, screenY, id);
+			}, 0);
+			return;
+		}
+		
 		if (event.target.closest('.tab-close')) {
 			return;
 		}
