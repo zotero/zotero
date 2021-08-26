@@ -27,15 +27,35 @@
 const React = require('react');
 const Icons = require('components/icons');
 
+/**
+ * @type Column {
+ * 	dataKey: string,				// Required, see use in ItemTree#_getRowData()
+ *
+ * 	defaultIn: Set<string>,			// Types of trees the column is default in. Can be [default, feed];
+ * 	disabledIn: Set<string>,		// Types of trees where the column is not available
+ *
+ * 	flex: number,					// Default: 1. When the column is added to the tree how much space it should occupy as a flex ratio
+ * 	width: string,					// A column width instead of flex ratio. See above.
+ * 	fixedWidth: boolean				// Default: false. Set to true to disable column resizing
+ *
+ * 	label: string,					// The column label. Either a string or the id to an i18n string.
+ * 	iconLabel: React.Component,		// Set an Icon label instead of a text-based one
+ *
+ * 	ignoreInColumnPicker: boolean	// Default: false. Set to true to not display in column picker.
+ * 	submenu: boolean,				// Default: false. Set to true to display the column in "More Columns" submenu of column picker.
+ *
+ * 	primary: boolean,				// Should only be one column at the time. Title is the primary column
+ * 	zoteroPersist: Set<string>,		// Which column properties should be persisted between zotero close
+ * 	}
+ */
 const COLUMNS = [
 	{
 		dataKey: "title",
 		primary: true,
 		defaultIn: new Set(["default", "feed"]),
 		label: "zotero.items.title_column",
-		ignoreInColumnPicker: "true",
+		ignoreInColumnPicker: true,
 		flex: 4,
-		inMenu: false,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
 	{
@@ -268,13 +288,9 @@ const COLUMNS = [
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	}
 ];
-let DATA_KEY_TO_COLUMN = {};
-for (const column of COLUMNS) {
-	DATA_KEY_TO_COLUMN[column.dataKey] = column;
-}
 
 function getDefaultColumnByDataKey(dataKey) {
-	return Object.assign({}, DATA_KEY_TO_COLUMN[dataKey], {hidden: false});
+	return Object.assign({}, COLUMNS.find(col => col.dataKey == dataKey), {hidden: false});
 }
 
 function getDefaultColumnsByDataKeys(dataKeys) {

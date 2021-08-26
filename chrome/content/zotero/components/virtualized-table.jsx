@@ -1196,6 +1196,7 @@ var Columns = class {
 					columnWidths[column.dataKey] = column.width;
 				}
 				else {
+					column.flex = column.flex || 1;
 					columnWidths[column.dataKey] = column.width = containerWidth / visibleColumns * (column.flex || 1);
 				}
 			}
