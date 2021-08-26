@@ -529,6 +529,10 @@ Zotero.Items = function() {
 							type = 'image';
 							break;
 						
+						case Zotero.Annotations.ANNOTATION_TYPE_INK:
+							type = 'ink';
+							break;
+						
 						default:
 							throw new Error(`Unknown annotation type id ${typeID}`);
 					}
