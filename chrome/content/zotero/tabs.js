@@ -217,7 +217,7 @@ var Zotero_Tabs = new function () {
 			closedIDs.push(id);
 		}
 		this._history.push(historyEntry);
-		Zotero.Notifier.trigger('close', 'tab', [closedIDs], true);
+		Zotero.Notifier.trigger('close', 'tab', [closedIDs], {}, true);
 		this._update();
 	};
 

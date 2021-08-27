@@ -533,9 +533,10 @@ var ZoteroPane = new function()
 				return;
 			}
 		}
-		
+
+		// Undo closed tabs
 		if ((Zotero.isMac && event.metaKey || !Zotero.isMac && event.ctrlKey)
-			&& event.shiftKey && !event.altKey && event.code == 'KeyT') {
+				&& event.shiftKey && !event.altKey && event.key.toLowerCase() == 't') {
 			Zotero_Tabs.undoClose();
 			event.preventDefault();
 			event.stopPropagation();
