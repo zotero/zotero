@@ -534,6 +534,14 @@ var ZoteroPane = new function()
 			}
 		}
 		
+		if ((Zotero.isMac && event.metaKey || !Zotero.isMac && event.ctrlKey)
+			&& event.shiftKey && !event.altKey && event.code == 'KeyT') {
+			Zotero_Tabs.undoClose();
+			event.preventDefault();
+			event.stopPropagation();
+			return;
+		}
+		
 		// Tab navigation: Ctrl-PageUp / PageDown
 		// TODO: Select across tabs without selecting with Ctrl-Shift, as in Firefox?
 		if (event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {

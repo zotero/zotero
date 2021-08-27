@@ -664,7 +664,7 @@ class ReaderInstance {
 }
 
 class ReaderTab extends ReaderInstance {
-	constructor({ itemID, title, sidebarWidth, sidebarOpen, bottomPlaceholderHeight, background }) {
+	constructor({ itemID, title, sidebarWidth, sidebarOpen, bottomPlaceholderHeight, index, background }) {
 		super();
 		this._itemID = itemID;
 		this._sidebarWidth = sidebarWidth;
@@ -675,6 +675,7 @@ class ReaderTab extends ReaderInstance {
 		let { id, container } = this._window.Zotero_Tabs.add({
 			type: 'reader',
 			title: title || '',
+			index,
 			data: {
 				itemID
 			},
@@ -906,12 +907,17 @@ class Reader {
 
 	notify(event, type, ids, extraData) {
 		if (type === 'tab') {
-			let reader = Zotero.Reader.getByTabID(ids[0]);
-			if (reader) {
-				if (event === 'close') {
-					this._readers.splice(this._readers.indexOf(reader), 1);
+			if (event === 'close') {
+				for (let id of ids) {
+					let reader = Zotero.Reader.getByTabID(id);
+					if (reader) {
+						this._readers.splice(this._readers.indexOf(reader), 1);
+					}
 				}
-				else if (event === 'select') {
+			}
+			else if (event === 'select') {
+				let reader = Zotero.Reader.getByTabID(ids[0]);
+				if (reader) {
 					this.triggerAnnotationsImportCheck(reader._itemID);
 				}
 			}
@@ -976,7 +982,7 @@ class Reader {
 		await this.open(item.id, location, options);
 	}
 
-	async open(itemID, location, { title, openInBackground, openInWindow } = {}) {
+	async open(itemID, location, { title, tabIndex, openInBackground, openInWindow } = {}) {
 		this._loadSidebarOpenState();
 		this.triggerAnnotationsImportCheck(itemID);
 		let reader;
@@ -1017,6 +1023,7 @@ class Reader {
 			reader = new ReaderTab({
 				itemID,
 				title,
+				index: tabIndex,
 				background: openInBackground,
 				sidebarWidth: this._sidebarWidth,
 				sidebarOpen: this._sidebarOpen,

@@ -51,6 +51,7 @@ var Zotero_Tabs = new function () {
 	}];
 	this._selectedID = 'zotero-pane';
 	this._prevSelectedID = null;
+	this._history = [];
 
 	this._getTab = function (id) {
 		var tabIndex = this._tabs.findIndex(tab => tab.id == id);
@@ -182,27 +183,41 @@ var Zotero_Tabs = new function () {
 	};
 
 	/**
-	 * Close a tab
+	 * Close tabs
 	 *
-	 * @param {String} id
+	 * @param {String|Array<String>|undefined} ids One or more ids, or empty for the current tab
 	 */
-	this.close = function (id) {
-		var { tab, tabIndex } = this._getTab(id || this._selectedID);
-		if (tabIndex == 0) {
+	this.close = function (ids) {
+		if (!ids) {
+			ids = [this._selectedID];
+		}
+		else if (!Array.isArray(ids)) {
+			ids = [ids];
+		}
+		if (ids.includes('zotero-pane')) {
 			throw new Error('Library tab cannot be closed');
 		}
-		if (!tab) {
-			return;
+		var historyEntry = [];
+		var closedIDs = [];
+		var tmpTabs = this._tabs.slice();
+		for (var id of ids) {
+			var { tab, tabIndex } = this._getTab(id);
+			if (!tab) {
+				continue;
+			}
+			if (tab.id == this._selectedID) {
+				this.select(this._prevSelectedID || (this._tabs[tabIndex + 1] || this._tabs[tabIndex - 1]).id);
+			}
+			this._tabs.splice(tabIndex, 1);
+			document.getElementById(tab.id).remove();
+			if (tab.onClose) {
+				tab.onClose();
+			}
+			historyEntry.push({ index: tmpTabs.indexOf(tab), data: tab.data });
+			closedIDs.push(id);
 		}
-		if (tab.id == this._selectedID) {
-			this.select(this._prevSelectedID || (this._tabs[tabIndex + 1] || this._tabs[tabIndex - 1]).id);
-		}
-		this._tabs.splice(tabIndex, 1);
-		document.getElementById(tab.id).remove();
-		if (tab.onClose) {
-			tab.onClose();
-		}
-		Zotero.Notifier.trigger('close', 'tab', [tab.id], true);
+		this._history.push(historyEntry);
+		Zotero.Notifier.trigger('close', 'tab', [closedIDs], true);
 		this._update();
 	};
 
@@ -210,7 +225,27 @@ var Zotero_Tabs = new function () {
 	 * Close all tabs except the first one
 	 */
 	this.closeAll = function () {
-		this._tabs.slice(1).map(tab => this.close(tab.id));
+		this.close(this._tabs.slice(1).map(x => x.id));
+	};
+	
+	/**
+	 * Undo tabs closing
+	 */
+	this.undoClose = function () {
+		var historyEntry = this._history.pop();
+		if (historyEntry) {
+			for (var tab of historyEntry) {
+				if (Zotero.Items.exists(tab.data.itemID)) {
+					Zotero.Reader.open(tab.data.itemID,
+						null,
+						{
+							tabIndex: tab.index,
+							openInBackground: true
+						}
+					);
+				}
+			}
+		}
 	};
 
 	/**
@@ -289,12 +324,15 @@ var Zotero_Tabs = new function () {
 	};
 
 	this._openMenu = function (x, y, id) {
+		var { tabIndex } = this._getTab(id);
 		window.Zotero_Tooltip.stop();
 		let menuitem;
 		let popup = document.createElement('menupopup');
 		document.querySelector('popupset').appendChild(popup);
-		popup.addEventListener('popuphidden', function () {
-			popup.remove();
+		popup.addEventListener('popuphidden', function (event) {
+			if (event.target === popup) {
+				popup.remove();
+			}
 		});
 		if (id !== 'zotero-pane') {
 			// Show in library
@@ -308,33 +346,66 @@ var Zotero_Tabs = new function () {
 				}
 			});
 			popup.appendChild(menuitem);
-			// Open in a separate window
+			// Move tab
+			let menu = document.createElement('menu');
+			menu.setAttribute('label', Zotero.getString('tabs.move'));
+			let menupopup = document.createElement('menupopup');
+			menu.append(menupopup);
+			popup.appendChild(menu);
+			// Move to start
 			menuitem = document.createElement('menuitem');
-			menuitem.setAttribute('label', Zotero.getString('tabs.openInWindow'));
+			menuitem.setAttribute('label', Zotero.getString('tabs.moveToStart'));
+			menuitem.setAttribute('disabled', tabIndex == 1);
+			menuitem.addEventListener('command', () => {
+				this.move(id, 1);
+			});
+			menupopup.appendChild(menuitem);
+			// Move to end
+			menuitem = document.createElement('menuitem');
+			menuitem.setAttribute('label', Zotero.getString('tabs.moveToEnd'));
+			menuitem.setAttribute('disabled', tabIndex == this._tabs.length - 1);
+			menuitem.addEventListener('command', () => {
+				this.move(id, this._tabs.length);
+			});
+			menupopup.appendChild(menuitem);
+			// Move to new window
+			menuitem = document.createElement('menuitem');
+			menuitem.setAttribute('label', Zotero.getString('tabs.moveToWindow'));
+			menuitem.setAttribute('disabled', false);
 			menuitem.addEventListener('command', () => {
 				var reader = Zotero.Reader.getByTabID(id);
 				if (reader) {
+					this.close(id);
 					Zotero.Reader.open(reader.itemID, null, { openInWindow: true });
 				}
 			});
-			popup.appendChild(menuitem);
+			menupopup.appendChild(menuitem);
 			// Separator
 			popup.appendChild(document.createElement('menuseparator'));
+		}
+		// Undo close
+		menuitem = document.createElement('menuitem');
+		menuitem.setAttribute('label', Zotero.getString('tabs.undoClose'));
+		menuitem.setAttribute('disabled', !this._history.length);
+		menuitem.addEventListener('command', () => {
+			this.undoClose();
+		});
+		popup.appendChild(menuitem);
+		if (!(this._tabs.length == 2 && id != 'zotero-pane')) {
+			// Close other tabs
+			menuitem = document.createElement('menuitem');
+			menuitem.setAttribute('label', Zotero.getString('tabs.closeOther'));
+			menuitem.addEventListener('command', () => {
+				this.close(this._tabs.slice(1).map(x => x.id));
+			});
+			popup.appendChild(menuitem);
+		}
+		if (id != 'zotero-pane') {
 			// Close
 			menuitem = document.createElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('tabs.close'));
 			menuitem.addEventListener('command', () => {
 				this.close(id);
-			});
-			popup.appendChild(menuitem);
-		}
-		
-		if (!(this._tabs.length === 2 && id !== 'zotero-pane')) {
-			// Close other tabs
-			menuitem = document.createElement('menuitem');
-			menuitem.setAttribute('label', Zotero.getString('tabs.closeOther'));
-			menuitem.addEventListener('command', () => {
-				this._tabs.slice(1).forEach(tab => tab.id !== id && this.close(tab.id));
 			});
 			popup.appendChild(menuitem);
 		}
