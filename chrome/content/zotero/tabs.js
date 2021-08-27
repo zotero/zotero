@@ -396,7 +396,7 @@ var Zotero_Tabs = new function () {
 			menuitem = document.createElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('tabs.closeOther'));
 			menuitem.addEventListener('command', () => {
-				this.close(this._tabs.slice(1).map(x => x.id));
+				this.close(this._tabs.slice(1).filter(x => x.id != id).map(x => x.id));
 			});
 			popup.appendChild(menuitem);
 		}
