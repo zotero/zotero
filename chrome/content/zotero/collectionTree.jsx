@@ -492,8 +492,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	 */
 	async reload() {
 		await this.refresh();
-		this.selection.select(0);
-		this.selection.selectEventsSuppressed = false;
+		this.tree.invalidate();
 	}
 	
 	async selectByID(id) {
