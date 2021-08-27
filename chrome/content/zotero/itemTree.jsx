@@ -1566,7 +1566,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		if (this.isContainerOpen(index)) {
-			return this._closeContainer(index, skipRowMapRefresh);
+			return this._closeContainer(index, skipRowMapRefresh, true);
 		}
 		if (!skipRowMapRefresh) {
 			var savedSelection = this.getSelectedItems(true);
@@ -1620,7 +1620,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this._refreshRowMap();
 			
 			await this._refreshPromise;
-			this._restoreSelection(savedSelection);
+			this._restoreSelection(savedSelection, false, true);
 			this.tree.invalidate();
 		}
 	}
@@ -1684,7 +1684,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 		this._refreshRowMap();
-		this._restoreSelection(selectedItems);
+		this._restoreSelection(selectedItems, false, indices.length == 1);
 		this.tree.invalidate();
 		this.selection.selectEventsSuppressed = false;
 	}
@@ -1702,7 +1702,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 		this._refreshRowMap();
-		this._restoreSelection(selectedItems, false);
+		this._restoreSelection(selectedItems, false, true);
 		this.tree.invalidate();
 		this.selection.selectEventsSuppressed = false;
 	}
@@ -2698,7 +2698,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 	}
 
-	async _closeContainer(index, skipRowMapRefresh) {
+	async _closeContainer(index, skipRowMapRefresh, dontEnsureRowsVisible=false) {
 		// isContainer == false shouldn't happen but does if an item is dragged over a closed
 		// container until it opens and then released, since the container is no longer in the same
 		// place when the spring-load closes
@@ -2731,7 +2731,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this._refreshRowMap();
 			
 			await this._refreshPromise;
-			this._restoreSelection(savedSelection, false);
+			this._restoreSelection(savedSelection, false, dontEnsureRowsVisible);
 			this.tree.invalidate();
 		}
 	}
@@ -3203,9 +3203,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * @param selection
 	 * @param {Boolean} expandCollapsedParents - if an item to select is in a collapsed parent
 	 * 					will expand the parent, otherwise the item is ignored
+	 * @param {Boolean}	dontEnsureRowsVisible - do not scroll the item tree after restoring selection
+	 * 					to ensure restored selection is visible
 	 * @private
 	 */
-	async _restoreSelection(selection, expandCollapsedParents=true) {
+	async _restoreSelection(selection, expandCollapsedParents=true, dontEnsureRowsVisible=false) {
 		if (!selection.length || !this._treebox) {
 			return;
 		}
@@ -3265,7 +3267,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			Zotero.logError(e);
 		}
 
-		this.ensureRowsAreVisible(Array.from(this.selection.selected));
+		if (!dontEnsureRowsVisible) {
+			this.ensureRowsAreVisible(Array.from(this.selection.selected));
+		}
 
 		if (unsuppress) {
 			this.selection.selectEventsSuppressed = false;
