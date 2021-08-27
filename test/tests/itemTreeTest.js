@@ -62,7 +62,9 @@ describe("Zotero.ItemTree", function() {
 		it("should expand collapsed parents with matching children when issuing a Select All command", async function () {
 			itemsView.collapseAllRows();
 			var selected = itemsView.getSelectedItems(true);
-			assert.lengthOf(selected, 0);
+			// After collapse the parent item is selected
+			assert.lengthOf(selected, 1);
+			assert.equal(selected[0], parentItem.id);
 			
 			itemsView.tree._onKeyDown(selectAllEvent);
 			selected = itemsView.getSelectedItems(true);
