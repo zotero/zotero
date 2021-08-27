@@ -138,21 +138,21 @@ class TreeSelection {
 		return true;
 	}
 
-	_rangedSelect(from, to, augment) {
+	_rangedSelect(from, to, augment, isSelectAll) {
 		from = Math.max(0, from);
 		to = Math.max(0, to);
 		if (!augment) {
 			this.selected = new Set();
 		}
 		for (let i = from; i <= to; i++) {
-			if (this._tree.props.isSelectable(i)) {
+			if (this._tree.props.isSelectable(i, isSelectAll)) {
 				this.selected.add(i);
 			}
 		}
 	}
 
-	rangedSelect(from, to, augment) {
-		this._rangedSelect(from, to, augment);
+	rangedSelect(from, to, augment, isSelectAll) {
+		this._rangedSelect(from, to, augment, isSelectAll);
 
 		if (this.selectEventsSuppressed) return;
 
@@ -554,7 +554,7 @@ class VirtualizedTable extends React.Component {
 
 		case "a":
 			// i.e. if CTRL/CMD pressed down
-			if (movePivot) this.selection.rangedSelect(0, this.props.getRowCount()-1);
+			if (movePivot) this.selection.rangedSelect(0, this.props.getRowCount()-1, false, true);
 			break;
 			
 		case " ":

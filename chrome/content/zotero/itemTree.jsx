@@ -1841,8 +1841,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 		return fields;
 	}
 
-	isSelectable = (index) => {
-		if (!this._searchMode || this.collectionTreeRow.isPublications()) return true;
+	/**
+	 * @param index {Integer}
+	 * @param selectAll {Boolean} Whether the selection is part of a select-all event
+	 * @returns {Boolean}
+	 */
+	isSelectable = (index, selectAll=false) => {
+		if (!selectAll || !this._searchMode || this.collectionTreeRow.isPublications()) return true;
 		let row = this.getRow(index);
 		return row && this._searchItemIDs.has(row.id);
 	}
