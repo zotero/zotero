@@ -234,7 +234,8 @@ var Zotero_Tabs = new function () {
 	this.undoClose = function () {
 		var historyEntry = this._history.pop();
 		if (historyEntry) {
-			for (var tab of historyEntry) {
+			let maxIndex = -1;
+			for (let tab of historyEntry) {
 				if (Zotero.Items.exists(tab.data.itemID)) {
 					Zotero.Reader.open(tab.data.itemID,
 						null,
@@ -243,7 +244,14 @@ var Zotero_Tabs = new function () {
 							openInBackground: true
 						}
 					);
+					if (tab.index > maxIndex) {
+						maxIndex = tab.index;
+					}
 				}
+			}
+			// Select last reopened tab
+			if (maxIndex > -1) {
+				this.jump(maxIndex);
 			}
 		}
 	};
@@ -383,25 +391,8 @@ var Zotero_Tabs = new function () {
 			// Separator
 			popup.appendChild(document.createElement('menuseparator'));
 		}
-		// Undo close
-		menuitem = document.createElement('menuitem');
-		menuitem.setAttribute('label', Zotero.getString('tabs.undoClose'));
-		menuitem.setAttribute('disabled', !this._history.length);
-		menuitem.addEventListener('command', () => {
-			this.undoClose();
-		});
-		popup.appendChild(menuitem);
-		if (!(this._tabs.length == 2 && id != 'zotero-pane')) {
-			// Close other tabs
-			menuitem = document.createElement('menuitem');
-			menuitem.setAttribute('label', Zotero.getString('tabs.closeOther'));
-			menuitem.addEventListener('command', () => {
-				this.close(this._tabs.slice(1).filter(x => x.id != id).map(x => x.id));
-			});
-			popup.appendChild(menuitem);
-		}
+		// Close
 		if (id != 'zotero-pane') {
-			// Close
 			menuitem = document.createElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('general.close'));
 			menuitem.addEventListener('command', () => {
@@ -409,6 +400,31 @@ var Zotero_Tabs = new function () {
 			});
 			popup.appendChild(menuitem);
 		}
+		// Close other tabs
+		if (!(this._tabs.length == 2 && id != 'zotero-pane')) {
+			menuitem = document.createElement('menuitem');
+			menuitem.setAttribute('label', Zotero.getString('tabs.closeOther'));
+			menuitem.addEventListener('command', () => {
+				this.close(this._tabs.slice(1).filter(x => x.id != id).map(x => x.id));
+			});
+			popup.appendChild(menuitem);
+		}
+		// Undo close
+		menuitem = document.createElement('menuitem');
+		menuitem.setAttribute(
+			'label',
+			Zotero.getString(
+				'tabs.undoClose',
+				[],
+				// If not disabled, show proper plural for tabs to reopen
+				this._history.length ? this._history[this._history.length - 1].length : 1
+			)
+		);
+		menuitem.setAttribute('disabled', !this._history.length);
+		menuitem.addEventListener('command', () => {
+			this.undoClose();
+		});
+		popup.appendChild(menuitem);
 		popup.openPopupAtScreen(x, y, true);
 	};
 
