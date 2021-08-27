@@ -337,7 +337,7 @@ var Zotero_Tabs = new function () {
 		if (id !== 'zotero-pane') {
 			// Show in library
 			menuitem = document.createElement('menuitem');
-			menuitem.setAttribute('label', Zotero.getString('tabs.showInLibrary'));
+			menuitem.setAttribute('label', Zotero.getString('general.showInLibrary'));
 			menuitem.addEventListener('command', () => {
 				var reader = Zotero.Reader.getByTabID(id);
 				if (reader) {
@@ -403,7 +403,7 @@ var Zotero_Tabs = new function () {
 		if (id != 'zotero-pane') {
 			// Close
 			menuitem = document.createElement('menuitem');
-			menuitem.setAttribute('label', Zotero.getString('tabs.close'));
+			menuitem.setAttribute('label', Zotero.getString('general.close'));
 			menuitem.addEventListener('command', () => {
 				this.close(id);
 			});
