@@ -759,7 +759,7 @@ var ZoteroPane = new function()
 		try {
 			switch (command) {
 				case 'library':
-					document.getElementById('zotero-collections-tree').focus();
+					this.itemsView.focus();
 					break;
 				case 'quicksearch':
 					document.getElementById('zotero-tb-search').select();

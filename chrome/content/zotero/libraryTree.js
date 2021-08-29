@@ -46,7 +46,7 @@ var LibraryTree = class LibraryTree extends React.Component {
 	get window() {
 		return this._ownerDocument.defaultView;
 	}
-
+	
 	get selection() {
 		return this.tree ? this.tree.selection : TreeSelectionStub;
 	}
@@ -70,6 +70,17 @@ var LibraryTree = class LibraryTree extends React.Component {
 		Zotero.debug(info);
 		if (this.type == 'item') Zotero.Prefs.clear('lastViewedFolder');
 		Zotero.crash();
+	}
+	
+	focus() {
+		this.tree.focus();
+		// If no rows selected, select first visible row
+		if (!this.tree.selection.count) {
+			this.tree.selection.select(
+				// TODO: Return -1 when no rows, and skip selection here
+				this.tree._jsWindow.getFirstVisibleRow()
+			);
+		}
 	}
 
 	getParentIndex = (index) => {
