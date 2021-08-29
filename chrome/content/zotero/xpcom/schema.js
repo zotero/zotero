@@ -2452,10 +2452,7 @@ Zotero.Schema = new function(){
 				}
 			}
 			else {
-				Zotero.debug("CHECKING");
 				let exp = _hiddenNoticesWithoutIDs.get(text);
-				Zotero.debug(exp);
-				Zotero.debug(now);
 				if (exp && exp > now) {
 					Zotero.debug("Not showing hidden notice", 2);
 					Zotero.debug(text, 2);

@@ -246,6 +246,11 @@ describe("Zotero.Schema", function() {
 			var server;
 			
 			before(async function () {
+				// We need bundled files
+				await resetDB({
+					thisArg: this
+				});
+				
 				win = await loadZoteroPane();
 			});
 			
