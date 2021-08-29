@@ -1770,7 +1770,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 			throw e;
 		}
 	}
-
+	
+	saveSelection() {
+		Zotero.debug("ItemTree::saveSelection() is deprecated -- use getSelectedItems(true)");
+		return this.getSelectedItems(true);
+	}
+	
 	/**
 	 * Returns an array of items of visible items in current sort order
 	 *
