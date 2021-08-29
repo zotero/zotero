@@ -240,6 +240,159 @@ describe("Zotero.Schema", function() {
 	});
 	
 	
+	describe("Repository Check", function () {
+		describe("Notices", function () {
+			var win;
+			var server;
+			
+			before(async function () {
+				win = await loadZoteroPane();
+			});
+			
+			beforeEach(function () {
+				Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
+				server = sinon.fakeServer.create();
+				server.autoRespond = true;
+			});
+			
+			afterEach(function () {
+				Zotero.Prefs.clear('hiddenNotices');
+			});
+			
+			after(function () {
+				win.close();
+				Zotero.HTTP.mock = null;
+			});
+			
+			function createResponseWithMessage(message) {
+				server.respond(function (req) {
+					if (req.method != "POST" || !req.url.includes('/repo/updated')) {
+						return;
+					}
+					req.respond(
+						200,
+						{
+							"Content-Type": "application/xml"
+						},
+						'<xml>'
+							+ '<currentTime>1630219842</currentTime>'
+							+ message
+							+ '</xml>'
+					);
+				});
+			}
+			
+			it("should show dialog if repo returns a message", async function () {
+				createResponseWithMessage(
+					`<message infoURL="https://example.com">This is a warning</message>`
+				);
+				
+				var promise = waitForDialog(function (dialog) {
+					var html = dialog.document.documentElement.outerHTML;
+					assert.include(html, "This is a warning");
+				});
+				await Zotero.Schema.updateFromRepository(3);
+				await promise;
+				
+				// Don't show id-less message again for a day
+				var spy = sinon.spy(Zotero, 'debug');
+				await Zotero.Schema.updateFromRepository(3);
+				assert.notEqual(spy.args.findIndex(x => {
+					return typeof x[0] == 'string' && x[0].startsWith("Not showing hidden");
+				}), -1);
+				spy.restore();
+			});
+			
+			it("shouldn't show message with id again for 1 day even if not hidden", async function () {
+				var id = Zotero.Utilities.randomString();
+				createResponseWithMessage(
+					`<message id="${id}" infoURL="https://example.com">This is a warning</message>`
+				);
+				
+				var promise = waitForDialog();
+				await Zotero.Schema.updateFromRepository(3);
+				await promise;
+				
+				// Make sure notice is hidden for 1 day
+				var hiddenNotices;
+				var tries = 0;
+				var ttl = 86400;
+				while (tries < 100) {
+					tries++;
+					hiddenNotices = Zotero.Prefs.get('hiddenNotices');
+					if (!hiddenNotices) {
+						await Zotero.Promise.delay(10);
+						continue;
+					}
+					hiddenNotices = JSON.parse(hiddenNotices);
+					assert.property(hiddenNotices, id);
+					assert.approximately(hiddenNotices[id], Math.round(Date.now() / 1000) + ttl, 10);
+					break;
+				}
+			});
+			
+			it("shouldn't show message with id again for 30 days", async function () {
+				var id = Zotero.Utilities.randomString();
+				createResponseWithMessage(
+					`<message id="${id}" infoURL="https://example.com">This is a warning</message>`
+				);
+				
+				var promise = waitForDialog(function (dialog) {
+					var doc = dialog.document;
+					var innerHTML = doc.documentElement.innerHTML;
+					assert.include(innerHTML, "This is a warning");
+					assert.include(innerHTML, Zotero.getString('general.dontShowAgainFor', 30, 30));
+					// Check "Don't show again"
+					doc.getElementById('checkbox').click();
+				});
+				await Zotero.Schema.updateFromRepository(3);
+				await promise;
+				
+				// Make sure notice is hidden for 30 days
+				var hiddenNotices;
+				var tries = 0;
+				var ttl = 30 * 86400;
+				while (tries < 100) {
+					tries++;
+					hiddenNotices = Zotero.Prefs.get('hiddenNotices');
+					if (!hiddenNotices) {
+						await Zotero.Promise.delay(10);
+						continue;
+					}
+					hiddenNotices = JSON.parse(hiddenNotices);
+					assert.property(hiddenNotices, id);
+					assert.approximately(hiddenNotices[id], Math.round(Date.now() / 1000) + ttl, 10);
+					break;
+				}
+			});
+			
+			it("shouldn't show message with id if before expiration", async function () {
+				var id = Zotero.Utilities.randomString();
+				createResponseWithMessage(
+					`<message id="${id}" infoURL="https://example.com">This is a warning</message>`
+				);
+				
+				// Set expiration for 30 days from now
+				var ttl = 30 * 86400;
+				Zotero.Prefs.set(
+					'hiddenNotices',
+					JSON.stringify({
+						[id]: Math.round(Date.now() / 1000) + ttl
+					})
+				);
+				
+				// Message should be hidden
+				var spy = sinon.spy(Zotero, 'debug');
+				await Zotero.Schema.updateFromRepository(3);
+				assert.notEqual(spy.args.findIndex(x => {
+					return typeof x[0] == 'string' && x[0].startsWith("Not showing hidden");
+				}), -1);
+				spy.restore();
+			});
+		});
+	});
+	
+	
 	describe("#integrityCheck()", function () {
 		before(function* () {
 			yield resetDB({

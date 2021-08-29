@@ -53,6 +53,7 @@ Zotero.Schema = new function(){
 	var _nextRepositoryUpdate;
 	var _remoteUpdateInProgress = false;
 	var _localUpdateInProgress = false;
+	var _hiddenNoticesWithoutIDs = new Map();
 	
 	var self = this;
 	
@@ -2364,6 +2365,8 @@ Zotero.Schema = new function(){
 		var translatorUpdates = xmlhttp.responseXML.getElementsByTagName('translator');
 		var styleUpdates = xmlhttp.responseXML.getElementsByTagName('style');
 		
+		_showRepositoryMessage(xmlhttp.responseXML);
+		
 		if (!translatorUpdates.length && !styleUpdates.length){
 			await Zotero.DB.executeTransaction(function* (conn) {
 				// Store the timestamp provided by the server
@@ -2412,6 +2415,111 @@ Zotero.Schema = new function(){
 		}
 		
 		return updated;
+	}
+	
+	
+	/**
+	 * Show dialog if repo returns a message
+	 */
+	function _showRepositoryMessage(responseXML) {
+		try {
+			var messageElem = responseXML.querySelector('message');
+			if (!messageElem || !messageElem.textContent) {
+				return;
+			}
+			
+			let hiddenNotices = Zotero.Prefs.get('hiddenNotices') || '{}';
+			try {
+				hiddenNotices = JSON.parse(hiddenNotices);
+			}
+			catch (e) {
+				Zotero.logError(e);
+				hiddenNotices = {};
+			}
+			
+			let id = messageElem.getAttribute('id');
+			let title = messageElem.getAttribute('title');
+			let text = messageElem.textContent;
+			let url = messageElem.getAttribute('infoURL');
+			let now = Math.round(Date.now() / 1000);
+			let thirtyDays = 86400 * 30;
+			
+			if (id) {
+				if (hiddenNotices[id] && hiddenNotices[id] > now) {
+					Zotero.debug("Not showing hidden notice " + id, 2);
+					Zotero.debug(text, 2);
+					return;
+				}
+			}
+			else {
+				Zotero.debug("CHECKING");
+				let exp = _hiddenNoticesWithoutIDs.get(text);
+				Zotero.debug(exp);
+				Zotero.debug(now);
+				if (exp && exp > now) {
+					Zotero.debug("Not showing hidden notice", 2);
+					Zotero.debug(text, 2);
+					return;
+				}
+			}
+			
+			setTimeout(() => {
+				Zotero.debug(text, 2);
+				
+				var ps = Services.prompt;
+				var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_OK
+					+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
+				var checkState = {};
+				var index = ps.confirmEx(
+					null,
+					title || Zotero.getString('general.warning'),
+					text,
+					buttonFlags,
+					"",
+					// Show "More Information" button if repo includes a URL
+					url ? Zotero.getString('general.moreInformation') : "",
+					"",
+					// Show "Don't show again for 30 days" if repo includes an id
+					id ? Zotero.getString('general.dontShowAgainFor', 30, 30) : null,
+					checkState
+				);
+				
+				if (index == 1) {
+					setTimeout(function () {
+						Zotero.launchURL(url);
+					}, 1);
+				}
+				// Handle "Don't show again for 30 days" checkbox
+				if (id) {
+					if (checkState.value) {
+						hiddenNotices[id] = now + thirtyDays;
+					}
+					// If not checked, still don't show again for a day
+					else {
+						hiddenNotices[id] = now + 86400;
+					}
+					// Remove expired hidden notices
+					for (let i in hiddenNotices) {
+						if (hiddenNotices[i] < now) {
+							delete hiddenNotices[i];
+						}
+					}
+					if (Object.keys(hiddenNotices).length) {
+						Zotero.Prefs.set('hiddenNotices', JSON.stringify(hiddenNotices));
+					}
+					else {
+						Zotero.Prefs.clear('hiddenNotices');
+					}
+				}
+				else {
+					// Don't show id-less messages again for a day
+					_hiddenNoticesWithoutIDs.set(text, now + 86400);
+				}
+			}, 500);
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
 	}
 	
 	
