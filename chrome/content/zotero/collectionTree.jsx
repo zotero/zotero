@@ -153,7 +153,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		else if (event.key == "F2" && !Zotero.isMac && treeRow.isCollection()) {
 			this.handleActivate(event, [this.selection.focused]);
 		}
-		else if (event.key.length == 1) {
+		else if (event.key.length == 1 && !(event.ctrlKey || event.metaKey || !event.altKey)) {
 			this.handleTyping(event.key);
 		}
 		return true;

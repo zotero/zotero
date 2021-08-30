@@ -931,7 +931,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this.collapseAllRows();
 			return false;
 		}
-		else if (!event.ctrlKey && !event.metaKey && (event.key.length == 1 && (event.key != " " || this.selection.isSelected(this.selection.focused)))) {
+		else if (!(event.ctrlKey || event.metaKey || !event.altKey) && event.key.length == 1 && (event.key != " " || this._typingString.length > 1)) {
 			this.handleTyping(event.key);
 			return false;
 		}
