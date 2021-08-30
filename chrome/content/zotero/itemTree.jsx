@@ -1726,37 +1726,44 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (this.selection.count == 0) {
 			return;
 		}
+		
+		try {
+			this.selection.selectEventsSuppressed = true;
 
-		// Collapse open items
-		for (var i=0; i<this.rowCount; i++) {
-			if (this.selection.isSelected(i) && this.isContainer(i)) {
-				this._closeContainer(i, true, true);
+			// Collapse open items
+			for (var i = 0; i < this.rowCount; i++) {
+				if (this.selection.isSelected(i) && this.isContainer(i)) {
+					await this._closeContainer(i, false, true);
+				}
+			}
+			this._refreshRowMap();
+			this.tree.invalidate();
+
+			// Create an array of selected items
+			var ids = Array.from(this.selection.selected).map(index => this.getRow(index).id);
+
+			var collectionTreeRow = this.collectionTreeRow;
+
+			if (collectionTreeRow.isBucket()) {
+				collectionTreeRow.ref.deleteItems(ids);
+			}
+			if (collectionTreeRow.isTrash()) {
+				await Zotero.Items.erase(ids);
+			}
+			else if (collectionTreeRow.isLibrary(true) || force) {
+				await Zotero.Items.trashTx(ids);
+			}
+			else if (collectionTreeRow.isCollection()) {
+				await Zotero.DB.executeTransaction(async () => {
+					await collectionTreeRow.ref.removeItems(ids);
+				});
+			}
+			else if (collectionTreeRow.isPublications()) {
+				await Zotero.Items.removeFromPublications(ids.map(id => Zotero.Items.get(id)));
 			}
 		}
-		this._refreshRowMap();
-		this.tree.invalidate();
-
-		// Create an array of selected items
-		var ids = Array.from(this.selection.selected).map(index => this.getRow(index).id);
-
-		var collectionTreeRow = this.collectionTreeRow;
-
-		if (collectionTreeRow.isBucket()) {
-			collectionTreeRow.ref.deleteItems(ids);
-		}
-		if (collectionTreeRow.isTrash()) {
-			await Zotero.Items.erase(ids);
-		}
-		else if (collectionTreeRow.isLibrary(true) || force) {
-			await Zotero.Items.trashTx(ids);
-		}
-		else if (collectionTreeRow.isCollection()) {
-			await Zotero.DB.executeTransaction(async () => {
-				await collectionTreeRow.ref.removeItems(ids);
-			});
-		}
-		else if (collectionTreeRow.isPublications()) {
-			await Zotero.Items.removeFromPublications(ids.map(id => Zotero.Items.get(id)));
+		finally {
+			this.selection.selectEventsSuppressed = false;
 		}
 	}
 	
