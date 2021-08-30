@@ -35,7 +35,6 @@ const { getDragTargetOrient } = require('components/utils');
 const { Cc, Ci, Cu } = require('chrome');
 
 const CHILD_INDENT = 15;
-const TYPING_TIMEOUT = 1000;
 
 var CollectionTree = class CollectionTree extends LibraryTree {
 	static async init(domEl, opts) {
@@ -89,7 +88,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		this._editing = null;
 		this._editingInput = null;
 		this._dropRow = null;
-		this._typingString = "";
 		this._typingTimeout = null;
 		
 		this.onLoad = this.createEventBinding('load', true, true);
@@ -153,9 +151,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		else if (event.key == "F2" && !Zotero.isMac && treeRow.isCollection()) {
 			this.handleActivate(event, [this.selection.focused]);
 		}
-		else if (event.key.length == 1 && !(event.ctrlKey || event.metaKey || event.altKey)) {
-			this.handleTyping(event.key);
-		}
 		return true;
 	}
 	
@@ -205,48 +200,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	handleEditingChange = (event, index) => {
 		this.getRow(index).editingName = event.target.value;
 	}
-	
-	async handleTyping(char) {
-		char = char.toLowerCase();
-		this._typingString += char;
-		let allSameChar = true;
-		for (let i = this._typingString.length - 1; i >= 0; i--) {
-			if (char != this._typingString[i]) {
-				allSameChar = false;
-				break;
-			}
-		}
-		if (allSameChar) {
-			for (let i = this.selection.focused + 1, checked = 0; checked < this._rows.length; i++, checked++) {
-				i %= this._rows.length;
-				let row = this.getRow(i);
-				if (this.isSelectable(i) && row.getName().toLowerCase().indexOf(char) == 0) {
-					if (i != this.selection.focused) {
-						this.ensureRowIsVisible(i);
-						await this.selectWait(i);
-					}
-					break;
-				}
-			}
-		}
-		else {
-			for (let i = 0; i < this._rows.length; i++) {
-				let row = this.getRow(i);
-				if (this.isSelectable(i) && row.getName().toLowerCase().indexOf(this._typingString) == 0) {
-					if (i != this.selection.focused) {
-						this.ensureRowIsVisible(i);
-						await this.selectWait(i);
-					}
-					break;
-				}
-			}
-		}
-		clearTimeout(this._typingTimeout);
-		this._typingTimeout = setTimeout(() => {
-			this._typingString = "";
-		}, TYPING_TIMEOUT);
-	}
-	
+
 	async commitEditingName() {
 		let treeRow = this._editing;
 		if (!treeRow.editingName) return;
@@ -385,6 +339,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				isContainerEmpty: this.isContainerEmpty,
 				isContainerOpen: this.isContainerOpen,
 				toggleOpenState: this.toggleOpenState,
+				getRowString: this.getRowString.bind(this),
+				
 				onItemContextMenu: (e) => this.props.onContextMenu && this.props.onContextMenu(e),
 
 				onKeyDown: this.handleKeyDown,
@@ -1110,6 +1066,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	 */
 	get editable() {
 		return this.getRow(this.selection.focused).editable;
+	}
+	
+	getRowString(index) {
+		return this.getRow(index).getName();
 	}
 	
 	/**
