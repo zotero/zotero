@@ -3020,8 +3020,13 @@ var ZoteroPane = new function()
 	
 	this.onItemTreeActivate = function(event, items) {
 		var viewOnDoubleClick = Zotero.Prefs.get('viewOnDoubleClick');
-		if (items.length == 1 && (!event.button || viewOnDoubleClick)) {
+		// Mouse event
+		if (event.button && items.length == 1 && viewOnDoubleClick) {
 			ZoteroPane.viewItems([items[0]], event);
+		}
+		// Keyboard event
+		else if (items.length < 20) {
+			ZoteroPane_Local.viewItems(items, event);
 		}
 	};
 	
