@@ -826,7 +826,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	handleTyping(char) {
-		this._typingString += char.toLowerCase();
+		char = char.toLowerCase();
+		this._typingString += char;
 		let allSameChar = true;
 		for (let i = this._typingString.length - 1; i >= 0; i--) {
 			if (char != this._typingString[i]) {
@@ -931,7 +932,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this.collapseAllRows();
 			return false;
 		}
-		else if (!(event.ctrlKey || event.metaKey || !event.altKey) && event.key.length == 1 && (event.key != " " || this._typingString.length > 1)) {
+		else if (!(event.ctrlKey || event.metaKey || event.altKey) && event.key.length == 1 && (event.key != " " || this._typingString.length > 1)) {
 			this.handleTyping(event.key);
 			return false;
 		}

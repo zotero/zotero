@@ -153,7 +153,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		else if (event.key == "F2" && !Zotero.isMac && treeRow.isCollection()) {
 			this.handleActivate(event, [this.selection.focused]);
 		}
-		else if (event.key.length == 1 && !(event.ctrlKey || event.metaKey || !event.altKey)) {
+		else if (event.key.length == 1 && !(event.ctrlKey || event.metaKey || event.altKey)) {
 			this.handleTyping(event.key);
 		}
 		return true;
@@ -207,7 +207,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 	
 	async handleTyping(char) {
-		this._typingString += char.toLowerCase();
+		char = char.toLowerCase();
+		this._typingString += char;
 		let allSameChar = true;
 		for (let i = this._typingString.length - 1; i >= 0; i--) {
 			if (char != this._typingString[i]) {
