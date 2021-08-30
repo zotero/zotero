@@ -51,6 +51,7 @@ function init() {
 				multiSelect={true}
 				columns={columns}
 				disableFontSizeScaling={true}
+				getRowString={index => getRowData(index).name}
 				onActivate={handleActivate}
 			/>
 		</IntlProvider>

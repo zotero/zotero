@@ -322,6 +322,7 @@ Zotero_Preferences.Sync = {
 					showHeader={true}
 					columns={columns}
 					staticColumns={true}
+					getRowString={index => this._rows[index].name}
 					disableFontSizeScaling={true}
 					onKeyDown={handleKeyDown}
 				/>

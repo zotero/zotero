@@ -37,7 +37,6 @@ const { COLUMNS } = require('./itemTreeColumns');
 const { Cc, Ci, Cu } = require('chrome');
 Cu.import("resource://gre/modules/osfile.jsm");
 
-const TYPING_TIMEOUT = 1000;
 const CHILD_INDENT = 12;
 const COLORED_TAGS_RE = new RegExp("^[0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1}$");
 const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
@@ -88,7 +87,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this.type = 'item';
 		this.name = 'ItemTree';
 		
-		this._typingString = "";
 		this._skipKeypress = false;
 		this._initialized = false;
 		
@@ -824,47 +822,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this.selection.selectEventsSuppressed = false;
 		}
 	}
-
-	handleTyping(char) {
-		char = char.toLowerCase();
-		this._typingString += char;
-		let allSameChar = true;
-		for (let i = this._typingString.length - 1; i >= 0; i--) {
-			if (char != this._typingString[i]) {
-				allSameChar = false;
-				break;
-			}
-		}
-		if (allSameChar) {
-			for (let i = this.selection.pivot + 1, checked = 0; checked < this._rows.length; i++, checked++) {
-				i %= this._rows.length;
-				let row = this.getRow(i);
-				if (row.getField('title').toLowerCase().indexOf(char) == 0) {
-					if (i != this.selection.pivot) {
-						this.ensureRowIsVisible(i);
-						this.selectItem([row.ref.id]);
-					}
-					break;
-				}
-			}
-		}
-		else {
-			for (let i = 0; i < this._rows.length; i++) {
-				let row = this.getRow(i);
-				if (row.getField('title').toLowerCase().indexOf(this._typingString) == 0) {
-					if (i != this.selection.pivot) {
-						this.ensureRowIsVisible(i);
-						this.selectItem([row.ref.id]);
-					}
-					break;
-				}
-			}
-		}
-		clearTimeout(this._typingTimeout);
-		this._typingTimeout = setTimeout(() => {
-			this._typingString = "";
-		}, TYPING_TIMEOUT);
-	}
 	
 	handleActivate = (event, indices) => {
 		// Ignore double-clicks in duplicates view on everything except attachments
@@ -932,10 +889,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this.collapseAllRows();
 			return false;
 		}
-		else if (!(event.ctrlKey || event.metaKey || event.altKey) && event.key.length == 1 && (event.key != " " || this._typingString.length > 1)) {
-			this.handleTyping(event.key);
-			return false;
-		}
 		return true;
 	}
 	
@@ -997,6 +950,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 					isContainerEmpty: this.isContainerEmpty,
 					isContainerOpen: this.isContainerOpen,
 					toggleOpenState: this.toggleOpenState,
+
+					getRowString: this.getRowString.bind(this),
 
 					onDragOver: e => this.props.dragAndDrop && this.onDragOver(e, -1),
 					onDrop: e => this.props.dragAndDrop && this.onDrop(e, -1),
@@ -1716,6 +1671,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	getCellText(index, column) {
 		return this._getRowData(index)[column];
+	}
+
+	getRowString(index) {
+		return this.getCellText(index, this.getSortField())
 	}
 
 	async deleteSelection(force) {

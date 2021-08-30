@@ -33,6 +33,7 @@ const Draggable = require('./draggable');
 const { injectIntl } = require('react-intl');
 const { IconDownChevron, getDOMElement } = require('components/icons');
 
+const TYPING_TIMEOUT = 1000;
 const DEFAULT_ROW_HEIGHT = 20; // px
 const RESIZER_WIDTH = 5; // px
 
@@ -286,6 +287,7 @@ class VirtualizedTable extends React.Component {
 		this.state = {
 			resizing: null
 		};
+		this._typingString = "";
 		this._jsWindowID = `virtualized-table-list-${Zotero.Utilities.randomString(5)}`;
 		this._containerWidth = props.containerWidth || window.innerWidth;
 		
@@ -405,6 +407,10 @@ class VirtualizedTable extends React.Component {
 		isContainerEmpty: PropTypes.func,
 		isContainerOpen: PropTypes.func,
 		toggleOpenState: PropTypes.func,
+		
+		// A function with signature (index:Number) => result:String which will be used
+		// for find-as-you-type navigation. Find-as-you-type is disabled if prop is undefined.
+		getRowString: PropTypes.func,
 
 		// If you want to perform custom key handling it should be in this function
 		// if it returns false then virtualized-table's own key handler won't run
@@ -559,10 +565,16 @@ class VirtualizedTable extends React.Component {
 			break;
 			
 		case " ":
-			this.onSelection(this.selection.focused, false, true);
+			if (this._typingString.length <= 0) {
+				this.onSelection(this.selection.focused, false, true);
+				return;
+			}
 			break;
 		}
-		
+
+		if (this.props.getRowString && !(e.ctrlKey || e.metaKey) && e.key.length == 1) {
+			this._handleTyping(e.key);
+		}
 		
 		if (shiftSelect || movePivot) return;
 		
@@ -595,6 +607,48 @@ class VirtualizedTable extends React.Component {
 			this._activateNode(e);
 			break;
 		}
+	}
+	
+	_handleTyping = (char) => {
+		char = char.toLowerCase();
+		this._typingString += char;
+		let allSameChar = true;
+		for (let i = this._typingString.length - 1; i >= 0; i--) {
+			if (char != this._typingString[i]) {
+				allSameChar = false;
+				break;
+			}
+		}
+		const rowCount = this.props.getRowCount();
+		if (allSameChar) {
+			for (let i = this.selection.pivot + 1, checked = 0; checked < rowCount; i++, checked++) {
+				i %= rowCount;
+				let rowString = this.props.getRowString(i);
+				if (rowString.toLowerCase().indexOf(char) == 0) {
+					if (i != this.selection.pivot) {
+						this.scrollToRow(i);
+						this.onSelection(i);
+					}
+					break;
+				}
+			}
+		}
+		else {
+			for (let i = 0; i < rowCount; i++) {
+				let rowString = this.props.getRowString(i);
+				if (rowString.toLowerCase().indexOf(this._typingString) == 0) {
+					if (i != this.selection.pivot) {
+						this.scrollToRow(i);
+						this.onSelection(i);
+					}
+					break;
+				}
+			}
+		}
+		clearTimeout(this._typingTimeout);
+		this._typingTimeout = setTimeout(() => {
+			this._typingString = "";
+		}, TYPING_TIMEOUT);
 	}
 	
 	_onDragStart = () => {

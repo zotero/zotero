@@ -129,6 +129,7 @@ Zotero_Preferences.Cite = {
 						disableFontSizeScaling={true}
 						onSelectionChange={() => document.getElementById('styleManager-delete').disabled = undefined}
 						onKeyDown={handleKeyDown}
+						getRowString={index => styles[index].title}
 					/>
 				</IntlProvider>
 			);
