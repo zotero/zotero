@@ -221,6 +221,7 @@ class TreeSelection {
 	set focused(index) {
 		index = Math.max(0, index);
 		let oldValue = this._focused;
+		this.pivot = index;
 		this._focused = index;
 
 		if (this.selectEventsSuppressed) return;
@@ -554,7 +555,7 @@ class VirtualizedTable extends React.Component {
 
 		case "a":
 			// i.e. if CTRL/CMD pressed down
-			if (movePivot) this.selection.rangedSelect(0, this.props.getRowCount()-1, false, true);
+			if (movePivot && this.props.multiSelect) this.selection.rangedSelect(0, this.props.getRowCount()-1, false, true);
 			break;
 			
 		case " ":
@@ -666,7 +667,7 @@ class VirtualizedTable extends React.Component {
 		if (this.selection.selectEventsSuppressed) return;
 		
 		if (movePivot) {
-			this.selection.focused = index;
+			this.selection._focused = index;
 			this.selection.pivot = index;
 		}
 		// Normal selection
