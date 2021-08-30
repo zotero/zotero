@@ -288,13 +288,14 @@ var Zotero_Tabs = new function () {
 	 * Select a tab
 	 *
 	 * @param {String} id
+	 * @param {Boolean} reopening
 	 */
-	this.select = function (id) {
+	this.select = function (id, reopening) {
 		var { tab } = this._getTab(id);
 		if (!tab || tab.id === this._selectedID) {
 			return;
 		}
-		this._prevSelectedID = null;
+		this._prevSelectedID = reopening ? this._selectedID : null;
 		this._selectedID = id;
 		this.deck.selectedIndex = Array.from(this.deck.children).findIndex(x => x.id == id);
 		this._update();

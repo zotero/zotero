@@ -996,7 +996,7 @@ class Reader {
 
 		if (reader) {
 			if (reader instanceof ReaderTab) {
-				reader._window.Zotero_Tabs.select(reader.tabID);
+				reader._window.Zotero_Tabs.select(reader.tabID, true);
 			}
 			
 			if (location) {
