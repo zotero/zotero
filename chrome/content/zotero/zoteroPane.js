@@ -1210,7 +1210,7 @@ var ZoteroPane = new function()
 	};
 	
 	
-	this.onCollectionSelected = async function () {
+	this.onCollectionSelected = Zotero.serial(async function () {
 		try {
 			var collectionTreeRow = this.getCollectionTreeRow();
 			if (!collectionTreeRow) {
@@ -1262,7 +1262,7 @@ var ZoteroPane = new function()
 		} finally {
 			this.collectionsView.runListeners('select');
 		}
-	};
+	});
 	
 	
 	/**
