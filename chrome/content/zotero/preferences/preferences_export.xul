@@ -75,7 +75,7 @@
 			<separator class="thin"/>
 			<hbox>
 				<button disabled="true" id="quickCopy-edit" label="&zotero.general.edit;"
-					onclick="Zotero_Preferences.Export.showQuickCopySiteEditor(document.getElementById('quickCopy-siteSettings').currentIndex)"/>
+					onclick="Zotero_Preferences.Export.showQuickCopySiteEditor(true)"/>
 				<spacer flex="1"/>
 				<button disabled="true" id="quickCopy-delete" label="-" onclick="Zotero_Preferences.Export.deleteSelectedQuickCopySite()"/>
 				<button label="+"

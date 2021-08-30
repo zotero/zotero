@@ -197,8 +197,11 @@ Zotero_Preferences.Export = {
 		document.getElementById('quickCopy-delete').disabled = false;
 	},
 	
-	showQuickCopySiteEditor: async function () {
-		const index = this._tree.selection.focused;
+	showQuickCopySiteEditor: async function (editExisting) {
+		var index;
+		if (editExisting) {
+			index = this._tree.selection.focused;
+		}
 		var formattedName = document.getElementById('zotero-quickCopy-menu').label;
 		var locale = this._lastSelectedLocale;
 		var asHTML = document.getElementById('zotero-quickCopy-copyAsHTML').checked;
@@ -291,6 +294,15 @@ Zotero_Preferences.Export = {
 					Zotero_Preferences.Export.deleteSelectedQuickCopySite();
 				}
 			};
+			var handleSelectionChange = (selection) => {
+				if (selection.count) {
+					Zotero_Preferences.Export.enableQuickCopySiteButtons()
+				}
+				else {
+					Zotero_Preferences.Export.disableQuickCopySiteButtons();
+				}
+			};
+			
 			let elem = (
 				<IntlProvider locale={Zotero.locale} messages={Zotero.Intl.strings}>
 					<VirtualizedTable
@@ -302,7 +314,7 @@ Zotero_Preferences.Export = {
 						columns={columns}
 						staticColumns={true}
 						disableFontSizeScaling={true}
-						onSelectionChange={() => Zotero_Preferences.Export.enableQuickCopySiteButtons()}
+						onSelectionChange={handleSelectionChange}
 						onKeyDown={handleKeyDown}
 						onActivate={(event, indices) => Zotero_Preferences.Export.showQuickCopySiteEditor()}
 					/>
