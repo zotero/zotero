@@ -415,7 +415,7 @@ var ZoteroContextPane = new function () {
 				return;
 			}
 			var note = await Zotero.EditorInstance.createNoteFromAnnotations(
-				attachment.getAnnotations(), child && attachment.parentID
+				attachment.getAnnotations().filter(x => x.annotationType != 'ink'), child && attachment.parentID
 			);
 
 			_updateAddToNote();

@@ -4404,7 +4404,7 @@ var ZoteroPane = new function()
 			return;
 		}
 		var note = await Zotero.EditorInstance.createNoteFromAnnotations(
-			attachment.getAnnotations(), attachment.parentID
+			attachment.getAnnotations().filter(x => x.annotationType != 'ink'), attachment.parentID
 		);
 		await this.selectItem(note.id);
 	};
