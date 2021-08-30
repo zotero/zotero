@@ -1936,6 +1936,21 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			}
 		}
 		else if (dataType == 'text/x-moz-url' || dataType == 'application/x-moz-file') {
+			// See note in onDragOver() above
+			if (dataType == 'application/x-moz-file' && Zotero.isMac) {
+				if (event.metaKey) {
+					if (event.altKey) {
+						dropEffect = 'link';
+					}
+					else {
+						dropEffect = 'move';
+					}
+				}
+				else {
+					dropEffect = 'copy';
+				}
+			}
+			
 			var targetLibraryID = targetTreeRow.ref.libraryID;
 			if (targetTreeRow.isCollection()) {
 				var parentCollectionID = targetTreeRow.ref.id;
@@ -1974,7 +1989,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 						collections: parentCollectionID ? [parentCollectionID] : undefined
 					});
 					// If moving, delete original file
-					if (dragData.dropEffect == 'move') {
+					if (dropEffect == 'move') {
 						try {
 							file.remove(false);
 						}

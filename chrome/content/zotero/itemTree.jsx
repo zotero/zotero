@@ -2359,7 +2359,22 @@ var ItemTree = class ItemTree extends LibraryTree {
 				window.ZoteroPane.displayCannotEditLibraryMessage();
 				return;
 			}
-
+			
+			// See note in onDragOver() above
+			if (dataType == 'application/x-moz-file' && Zotero.isMac) {
+				if (event.metaKey) {
+					if (event.altKey) {
+						dropEffect = 'link';
+					}
+					else {
+						dropEffect = 'move';
+					}
+				}
+				else {
+					dropEffect = 'copy';
+				}
+			}
+			
 			var targetLibraryID = collectionTreeRow.ref.libraryID;
 
 			var parentItemID = false;
@@ -2484,7 +2499,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 							}
 						});
 						// If moving, delete original file
-						if (dragData.dropEffect == 'move') {
+						if (dropEffect == 'move') {
 							try {
 								await OS.File.remove(file);
 							}
