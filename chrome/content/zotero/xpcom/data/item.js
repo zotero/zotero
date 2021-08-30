@@ -3693,7 +3693,7 @@ for (let name of ['type', 'text', 'comment', 'color', 'pageLabel', 'sortIndex', 
 					if (currentType && currentType != value) {
 						throw new Error("Cannot change annotation type");
 					}
-					if (!['highlight', 'note', 'image'].includes(value)) {
+					if (!['highlight', 'note', 'image', 'ink'].includes(value)) {
 						let e = new Error(`Unknown annotation type '${value}'`);
 						e.name = "ZoteroInvalidDataError";
 						throw e;
