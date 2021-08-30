@@ -3732,12 +3732,6 @@ var ZoteroPane = new function()
 	
 	
 	this.viewItems = Zotero.Promise.coroutine(function* (items, event) {
-		if (items.length > 1) {
-			if (!event || (!event.metaKey && !event.shiftKey)) {
-				event = { metaKey: true, shiftKey: true, originalEvent: event };
-			}
-		}
-		
 		for (let i = 0; i < items.length; i++) {
 			let item = items[i];
 			if (item.isRegularItem()) {
@@ -3799,13 +3793,6 @@ var ZoteroPane = new function()
 		
 		if(typeof itemIDs != "object") itemIDs = [itemIDs];
 		
-		// If multiple items, set up event so we open in new tab
-		if(itemIDs.length > 1) {
-			if(!event || (!event.metaKey && !event.shiftKey)) {
-				event = {"metaKey":true, "shiftKey":true};
-			}
-		}
-		
 		var launchFile = async (path, contentType, itemID) => {
 			// Fix blank PDF attachment MIME type
 			if (!contentType) {
@@ -3824,11 +3811,10 @@ var ZoteroPane = new function()
 				let library = Zotero.Libraries.get(item.libraryID);
 				// TEMP
 				if (Zotero.isPDFBuild && (library.libraryType == 'user' || Zotero.enablePDFBuildForGroups)) {
-					let originalEvent = event && event.originalEvent || event;
 					await Zotero.Reader.open(
 						itemID,
 						extraData && extraData.location,
-						{ openInWindow: originalEvent && originalEvent.shiftKey }
+						{ openInWindow: event && event.shiftKey }
 					);
 					return;
 				}
