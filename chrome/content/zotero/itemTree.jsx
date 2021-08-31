@@ -1762,7 +1762,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		for (const field of sortFields) {
 			const col = columns.find(c => c.dataKey == field);
 			if (col) {
-				return col.sortDirection;
+				return col.sortDirection || 1;
 			}
 		}
 		return 1;
