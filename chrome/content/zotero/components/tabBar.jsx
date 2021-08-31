@@ -32,23 +32,29 @@ const { IconXmark } = require('./icons');
 const TabBar = forwardRef(function (props, ref) {
 	const [tabs, setTabs] = useState([]);
 	const [dragging, setDragging] = useState(false);
-	const [draggingX, setDraggingX] = useState(0);
-	const draggingIDRef = useRef(null);
-	const draggingDeltaXRef = useRef();
+	const [dragMouseX, setDragMouseX] = useState(0);
+	const dragIDRef = useRef(null);
+	const dragGrabbedDeltaXRef = useRef();
 	const tabsRef = useRef();
+	// Used to throttle mouse movement
 	const mouseMoveWaitUntil = useRef(0);
 	
 	useImperativeHandle(ref, () => ({ setTabs }));
 	
+	// Use offsetLeft and offsetWidth to calculate and translate tab X position
 	useLayoutEffect(() => {
-		if (!draggingIDRef.current) return;
-		let tab = Array.from(tabsRef.current.children).find(x => x.dataset.id === draggingIDRef.current);
+		if (!dragIDRef.current) return;
+		let tab = Array.from(tabsRef.current.children).find(x => x.dataset.id === dragIDRef.current);
 		if (tab) {
-			let x = draggingX - tab.offsetLeft - draggingDeltaXRef.current;
+			// While the actual tab node retains its space between other tabs,
+			// we use CSS translation to move it to the left/right side to
+			// position it under the mouse
+			let x = dragMouseX - tab.offsetLeft - dragGrabbedDeltaXRef.current;
 
 			let firstTab = tabsRef.current.firstChild;
 			let lastTab = tabsRef.current.lastChild;
 
+			// Don't allow to move tab beyond the second and the last tab
 			if (Zotero.rtl) {
 				if (tab.offsetLeft + x < lastTab.offsetLeft
 					|| tab.offsetLeft + tab.offsetWidth + x > firstTab.offsetLeft) {
@@ -88,18 +94,24 @@ const TabBar = forwardRef(function (props, ref) {
 	}
 
 	function handleDragStart(event, id, index) {
+		// Library tab is not draggable
 		if (index === 0) {
 			return;
 		}
 		event.dataTransfer.effectAllowed = 'move';
-		// Empty drag image
+		// We don't want the generated image from the target element,
+		// therefore setting an empty image
 		let img = document.createElement('img');
 		img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 		event.dataTransfer.setDragImage(img, 0, 0);
+		// Some data needs to be set, although this is not used anywhere
 		event.dataTransfer.setData('zotero/tab', id);
-		draggingDeltaXRef.current = event.clientX - event.target.offsetLeft;
+		// Store the relative mouse to tab X position where the tab was grabbed
+		dragGrabbedDeltaXRef.current = event.clientX - event.target.offsetLeft;
+		// Enable dragging
 		setDragging(true);
-		draggingIDRef.current = id;
+		// Store the current tab id
+		dragIDRef.current = id;
 	}
 	
 	function handleDragEnd() {
@@ -109,23 +121,31 @@ const TabBar = forwardRef(function (props, ref) {
 	function handleTabBarDragOver(event) {
 		event.preventDefault();
 		event.dataTransfer.dropEffect = 'move';
-		if (!draggingIDRef.current || mouseMoveWaitUntil.current > Date.now()) {
+		// Throttle
+		if (!dragIDRef.current || mouseMoveWaitUntil.current > Date.now()) {
 			return;
 		}
 
-		setDraggingX(event.clientX);
+		setDragMouseX(event.clientX);
 		
-		let tabIndex = Array.from(tabsRef.current.children).findIndex(x => x.dataset.id === draggingIDRef.current);
+		// Get the current tab DOM node
+		let tabIndex = Array.from(tabsRef.current.children).findIndex(x => x.dataset.id === dragIDRef.current);
 		let tab = tabsRef.current.children[tabIndex];
 
+		// Calculate the center points of each tab
 		let points = Array.from(tabsRef.current.children).map((child) => {
 			return child.offsetLeft + child.offsetWidth / 2;
 		});
 		
-		let x1 = event.clientX - draggingDeltaXRef.current;
-		let x2 = event.clientX - draggingDeltaXRef.current + tab.offsetWidth;
+		// Calculate where the new tab left and right (x1, x2) side points should
+		// be relative to the current mouse position, and take into account
+		// the initial relative mouse to tab position where the tab was grabbed
+		let x1 = event.clientX - dragGrabbedDeltaXRef.current;
+		let x2 = event.clientX - dragGrabbedDeltaXRef.current + tab.offsetWidth;
 		
 		let index = null;
+		// Try to determine if the new tab left or right side is crossing
+		// the middle point of the previous or the next tab, and use its index if so
 		for (let i = 0; i < points.length - 1; i++) {
 			if (i === tabIndex || i + 1 === tabIndex) {
 				continue;
@@ -141,6 +161,8 @@ const TabBar = forwardRef(function (props, ref) {
 			}
 		}
 
+		// If the new tab position doesn't fit between the central points
+		// of other tabs, check if it's moved beyond the last tab
 		if (index === null) {
 			let p = points[points.length - 1];
 			if (Zotero.rtl && x1 < p || !Zotero.rtl && x2 > p) {
@@ -149,7 +171,7 @@ const TabBar = forwardRef(function (props, ref) {
 		}
 		
 		if (index !== null) {
-			props.onTabMove(draggingIDRef.current, index);
+			props.onTabMove(dragIDRef.current, index);
 		}
 		mouseMoveWaitUntil.current = Date.now() + 20;
 	}
@@ -177,7 +199,7 @@ const TabBar = forwardRef(function (props, ref) {
 			<div
 				key={id}
 				data-id={id}
-				className={cx('tab', { selected, dragging: dragging && id === draggingIDRef.current })}
+				className={cx('tab', { selected, dragging: dragging && id === dragIDRef.current })}
 				draggable={true}
 				onMouseMove={() => handleTabMouseMove(title)}
 				onMouseDown={(event) => handleTabMouseDown(event, id)}
