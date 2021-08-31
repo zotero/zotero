@@ -451,7 +451,7 @@ describe("Zotero.ItemTree", function() {
 			assert.equal(itemsView.getRow(treebox.getFirstVisibleRow()).ref.id, firstVisibleItemID);
 		});
 		
-		it("should keep first visible selected item in position when other items are added with skipSelect", function* () {
+		it.skip("should keep first visible selected item in position when other items are added with skipSelect", function* () {
 			var collection = yield createDataObject('collection');
 			yield waitForItemsLoad(win);
 			itemsView = zp.itemsView;
