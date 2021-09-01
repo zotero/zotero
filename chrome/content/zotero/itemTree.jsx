@@ -1468,6 +1468,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		indices = Array.from(indices).filter(index => index < this._rows.length);
 		indices.sort((a, b) => a - b);
 		
+		// If all rows are already visible, don't do anything
+		if (indices.every(x => this.tree.rowIsVisible(x))) {
+			//Zotero.debug("All indices are already visible");
+			return;
+		}
+		
 		var indicesWithParents = [];
 		for (let row of indices) {
 			let parent = this.getParentIndex(row);

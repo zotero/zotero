@@ -1180,6 +1180,13 @@ class VirtualizedTable extends React.Component {
 	focus() {
 		setTimeout(() => this._topDiv.focus());
 	}
+	
+	
+	rowIsVisible(row) {
+		if (!this._jsWindow) return false;
+		return row >= this._jsWindow.getFirstVisibleRow()
+			&& row <= this._jsWindow.getLastVisibleRow();
+	}
 }
 
 /**
