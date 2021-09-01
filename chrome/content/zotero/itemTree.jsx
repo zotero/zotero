@@ -1456,11 +1456,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	ensureRowsAreVisible(indices) {
 		if (!this._treebox) return;
-		let itemHeight = 20; // px
-		if (Zotero.isLinux) {
-			itemHeight = 22;
-		}
-		itemHeight *= Zotero.Prefs.get('fontSize');
+		let itemHeight = this.tree._rowHeight;
 		
 		const pageLength = Math.floor(this._treebox.getWindowHeight() / itemHeight);
 		const maxBuffer = 5;
