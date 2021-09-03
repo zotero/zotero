@@ -759,6 +759,9 @@ var ZoteroContextPane = new function () {
 			return;
 		}
 		var parentItem = Zotero.Items.get(item.parentID);
+		
+		// Dynamically create item pane tabs and panels as in itemPane.xul.
+		// Keep the code below in sync with itemPane.xul
 
 		// tabbox
 		var tabbox = document.createElement('tabbox');
@@ -799,59 +802,6 @@ var ZoteroContextPane = new function () {
 		var itemBox = document.createElement('zoteroitembox');
 		itemBox.setAttribute('flex', '1');
 		panelInfo.append(itemBox);
-		// Notes panel
-		var panelNotes = document.createElement('tabpanel');
-		panelNotes.setAttribute('flex', '1');
-		panelNotes.setAttribute('orient', 'vertical');
-		var deck = document.createElement('deck');
-		deck.className = 'notes-deck';
-		deck.setAttribute('flex', '1');
-		panelNotes.append(deck);
-		var vbox2 = document.createElement('vbox');
-		var note = document.createElement('zoteronoteeditor');
-		note.setAttribute('flex', 1);
-		vbox2.append(note);
-		var vbox = document.createElement('vbox');
-		vbox.setAttribute('flex', '1');
-		vbox.setAttribute('class', 'zotero-box');
-		vbox.style.overflowY = 'auto';
-		panelNotes.append(vbox);
-		var hbox = document.createElement('hbox');
-		hbox.setAttribute('align', 'center');
-		var label = document.createElement('label');
-		var button = document.createElement('button');
-		button.hidden = readOnly;
-		button.setAttribute('label', Zotero.Intl.strings['zotero.item.add']);
-		button.addEventListener('click', () => {
-			deck.setAttribute('selectedIndex', 1);
-			var item = new Zotero.Item('note');
-			item.libraryID = parentItem.libraryID;
-			item.parentID = parentItem.id;
-			note.returnHandler = () => {
-				deck.setAttribute('selectedIndex', 0);
-				_updateAddToNote();
-			};
-			note.mode = editable ? 'edit' : 'view';
-			note.item = item;
-			note.focus();
-			_updateAddToNote();
-		});
-		hbox.append(label, button);
-		var grid = document.createElement('grid');
-		grid.setAttribute('flex', 1);
-		var columns = document.createElement('columns');
-		var column = document.createElement('column');
-		column.setAttribute('flex', 1);
-		columns.append(column);
-		var column = document.createElement('column');
-		columns.append(column);
-		grid.append(columns);
-		var rows = document.createElement('rows');
-		rows.setAttribute('flex', 1);
-		grid.append(rows);
-		vbox.append(hbox, grid);
-		deck.append(vbox, vbox2);
-		deck.setAttribute('selectedIndex', 0);
 		// Tags panel
 		var panelTags = document.createElement('tabpanel');
 		panelTags.setAttribute('orient', 'vertical');

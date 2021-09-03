@@ -281,8 +281,7 @@
 								
 								p = win.ZoteroPane;
 							}
-							
-							(win || window).Zotero_Tabs.select('zotero-pane');
+								
 							p.selectItem(id);
 						}
 					]]>
