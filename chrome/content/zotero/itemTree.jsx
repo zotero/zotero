@@ -875,7 +875,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 			const _promise = Zotero.Tags.toggleItemsListTags(items, colorData.name);
 			return false;
 		}
-		else if (event.key == 'a' && (Zotero.isMac ? event.metaKey : event.ctrlKey)) {
+		else if (event.key == 'a'
+				&& !event.altKey
+				&& !event.shiftKey
+				&& (Zotero.isMac ? (event.metaKey && !event.ctrlKey) : event.ctrlKey)) {
 			if (!this.collectionTreeRow.isPublications()) {
 				this.expandMatchParents(this._searchParentIDs);
 			}

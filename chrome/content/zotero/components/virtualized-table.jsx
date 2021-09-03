@@ -558,10 +558,14 @@ class VirtualizedTable extends React.Component {
 				this._jsWindow.scrollTo(this._jsWindow.scrollOffset + this._jsWindow.getWindowHeight() - this._rowHeight);
 			}
 			break;
-
+			
+		// Select All
 		case "a":
-			// i.e. if CTRL/CMD pressed down
-			if (movePivot && this.props.multiSelect) this.selection.rangedSelect(0, this.props.getRowCount()-1, false, true);
+			if (this.props.multiSelect
+					&& !e.shiftKey
+					&& (Zotero.isMac ? (e.metaKey && !e.ctrlKey) : e.ctrlKey)) {
+				this.selection.rangedSelect(0, this.props.getRowCount()-1, false, true);
+			}
 			break;
 			
 		case " ":
