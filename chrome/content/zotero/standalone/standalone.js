@@ -118,6 +118,17 @@ const ZoteroStandalone = new function() {
 			window.close();
 			return;
 		});
+		
+		// Switch to library tab if dragging over one or more PDF files
+		window.addEventListener('dragover', function (event) {
+			// TODO: Consider allowing more (or all) file types, although shouldn't interfere with image dragging to note editor
+			if (Zotero_Tabs.selectedID != 'zotero-pane'
+					&& event.dataTransfer.items
+					&& event.dataTransfer.items.length
+					&& !Array.from(event.dataTransfer.items).find(x => x.type != 'application/pdf')) {
+				Zotero_Tabs.select('zotero-pane');
+			}
+		}, true);
 	}
 
 	this.switchMenuType = function (type) {
