@@ -1048,10 +1048,7 @@ class Reader {
 				}
 			};
 		}
-
-		if (reader instanceof ReaderWindow) {
-			reader._window.focus();
-		}
+		reader._window.focus();
 	}
 
 	/**
