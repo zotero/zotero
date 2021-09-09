@@ -213,9 +213,57 @@ class ReaderInstance {
 		}
 		return true;
 	}
+
+	promptToTransferAnnotations(fromPDF) {
+		let ps = Services.prompt;
+		let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
+		let index = ps.confirmEx(
+			null,
+			Zotero.getString('general.warning'),
+			Zotero.getString(
+				fromPDF
+					? 'pdfReader.promptTransferFromPDF'
+					: 'pdfReader.promptTransferToPDF'
+			),
+			buttonFlags,
+			Zotero.getString('general.continue'),
+			null, null, null, {}
+		);
+		return !index;
+	}
 	
-	menuCmd(cmd) {
-		if (cmd === 'export') {
+	async menuCmd(cmd) {
+		if (cmd === 'transferFromPDF') {
+			if (this.promptToTransferAnnotations(true)) {
+				try {
+					await Zotero.PDFWorker.import(this._itemID, true, '', true);
+				}
+				catch (e) {
+					if (e.name === 'PasswordException') {
+						Zotero.alert(null, Zotero.getString('general.error'),
+							Zotero.getString('pdfReader.promptPasswordProtected'));
+					}
+					throw e;
+				}
+			}
+		}
+		else if (cmd === 'transferToPDF') {
+			if (this.promptToTransferAnnotations(false)) {
+				try {
+					await Zotero.PDFWorker.export(this._itemID, null, true, '', true);
+				}
+				catch (e) {
+					if (e.name === 'PasswordException') {
+						Zotero.alert(null, Zotero.getString('general.error'),
+							Zotero.getString('pdfReader.promptPasswordProtected'));
+					}
+					throw e;
+				}
+				await Zotero.PDFWorker.import(this._itemID, true);
+			}
+		}
+		else if (cmd === 'export') {
 			let zp = Zotero.getActiveZoteroPane();
 			zp.exportPDF(this._itemID);
 			return;
