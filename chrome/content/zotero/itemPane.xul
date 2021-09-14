@@ -69,6 +69,10 @@
 			</groupbox>
 			
 			<!-- Regular item -->
+			<!-- 
+				Keep in sync with contextPane.js (_addItemContext function) which
+				dynamically creates this itemPane part for each tab
+			-->
 			<tabbox id="zotero-view-tabbox" class="zotero-view-tabbox" flex="1" onselect="if (!ZoteroPane_Local.getCollectionTreeRow() || event.originalTarget.localName != 'tabpanels') { return; }; ZoteroItemPane.viewItem(ZoteroPane_Local.getSelectedItems()[0], ZoteroPane_Local.collectionsView.editable ? 'edit' : 'view', this.selectedIndex)">
 				<tabs id="zotero-editpane-tabs" class="zotero-editpane-tabs">
 					<tab id="zotero-editpane-info-tab" label="&zotero.tabs.info.label;"/>

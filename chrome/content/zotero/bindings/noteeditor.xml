@@ -274,6 +274,7 @@
 							}
 							
 							this.initEditor();
+							this._id('links-box').item = this._item;
 						})();
 					]]></setter>
 			</property>
@@ -392,6 +393,15 @@
 						this.id('tags').item = this.item;
 						this.id('related').item = this.item;
 						this.refresh();
+						
+						// Hide popup to prevent it being visible out of the context or
+						// in some cases even invisible but still blocking the next click
+						this.id('relatedPopup').addEventListener('click', (event) => {
+							let target = event.originalTarget;
+							if (target.classList.contains('zotero-box-label')) {
+								this.id('relatedPopup').hidePopup();
+							}
+						});
 					]]>
 				</setter>
 			</property>
@@ -568,7 +578,7 @@
 					<xul:menupopup id="tagsPopup" ignorekeys="true"
 								   onpopupshown="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='xul:label'){ /* DEBUG: it would be nice to make this work -- if (this.firstChild.count==0){ this.firstChild.newTag(); } */ this.setAttribute('showing', 'true'); }"
 								   onpopuphidden="if (!document.commandDispatcher.focusedElement || document.commandDispatcher.focusedElement.tagName=='xul:label'){ this.setAttribute('showing', 'false'); }">
-						<xul:tagsbox id="tags" flex="1" mode="edit" style="display: flex"/>
+						<xul:tagsbox id="tags" flex="1" mode="edit"/>
 					</xul:menupopup>
 				</xul:popupset>
 			</xul:vbox>
