@@ -1372,13 +1372,14 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				return true;
 			}
 			else if (dataType == 'zotero/collection') {
-				if (!treeRow.isLibrary() && !treeRow.isCollection()) {
+				if (!treeRow.isLibrary(true) && !treeRow.isCollection()) {
 					return false;
 				}
 				
 				let draggedCollectionID = data[0];
 				let draggedCollection = Zotero.Collections.get(draggedCollectionID);
 				
+				// Dragging within same library
 				if (treeRow.ref.libraryID == draggedCollection.libraryID) {
 					// Collections cannot be dropped on themselves
 					if (draggedCollectionID == treeRow.ref.id) {
@@ -1387,13 +1388,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					
 					// Nor in their children
 					if (draggedCollection.hasDescendent('collection', treeRow.ref.id)) {
-						return false;
-					}
-				}
-				// Dragging a collection to a different library
-				else {
-					// Allow cross-library drag only to root library and collections
-					if (!treeRow.isLibrary(true) && !treeRow.isCollection()) {
 						return false;
 					}
 				}
