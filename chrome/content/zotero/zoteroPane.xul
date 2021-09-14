@@ -330,7 +330,7 @@
 							<box id="zotero-collections-tree-shim"/>
 							<!-- This extra vbox prevents the toolbar from getting compressed when resizing
 									the tag selector to max height -->
-							<vbox id="zotero-collections-tree-container" class="virtualized-table-container" flex="1">
+							<vbox id="zotero-collections-tree-container" class="virtualized-table-container" flex="1" clickthrough="never">
 								<html:div id="zotero-collections-tree"></html:div>
 							</vbox>
 							<splitter
@@ -348,7 +348,7 @@
 								 
 								 TODO: deal with this some other way?
 							-->
-							<vbox id="zotero-tag-selector-container" zotero-persist="height,collapsed">
+							<vbox id="zotero-tag-selector-container" zotero-persist="height,collapsed" clickthrough="never">
 								<html:div id="zotero-tag-selector"/>
 							</vbox>
 						</vbox>
@@ -361,7 +361,7 @@
 						</splitter>
 						
 						<box id="zotero-layout-switcher" orient="horizontal" zotero-persist="orient" flex="1">
-							<hbox id="zotero-items-pane" class="virtualized-table-container" zotero-persist="width height" flex="1">
+							<hbox id="zotero-items-pane" class="virtualized-table-container" zotero-persist="width height" flex="1" clickthrough="never">
 								<html:div id="zotero-items-tree"></html:div>
 							</hbox>
 		
