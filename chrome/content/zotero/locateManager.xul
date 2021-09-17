@@ -63,7 +63,7 @@ To add a new preference:
 		<groupbox flex="1">
 			<caption label="&zotero.preferences.locate.locateEngineManager;"/>
 			
-			<label id="locateEngineDescription" width="45em" style="font-size: 10px"/>
+			<label id="locate-engine-description" width="45em" style="font-size: 12px"/>
 			
 			<separator class="thin"/>
 			
@@ -97,6 +97,6 @@ To add a new preference:
 	<script src="locateManager.js"/>
 
 	<script>
-		document.getElementById('locateEngineDescription').textContent = Zotero.getString('locate.locateEngineDescription', Zotero.appName);
+		document.getElementById('locate-engine-description').textContent = Zotero.getString('locate.locateEngineDescription', Zotero.appName);
 	</script>
 </prefwindow>
