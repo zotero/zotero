@@ -5,5 +5,5 @@
 <!ENTITY styles.preview.citationFormat.author "forfatter">
 <!ENTITY styles.preview.citationFormat.authorDate "forfatter-dato">
 <!ENTITY styles.preview.citationFormat.label "kode">
-<!ENTITY styles.preview.citationFormat.note "notat">
+<!ENTITY styles.preview.citationFormat.note "note">
 <!ENTITY styles.preview.citationFormat.numeric "numerisk">

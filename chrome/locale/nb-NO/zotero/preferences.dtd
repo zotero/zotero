@@ -9,7 +9,7 @@
 <!ENTITY zotero.preferences.prefpane.general "Generelt">
 
 <!ENTITY zotero.preferences.fileHandling "Filbehandling">
-<!ENTITY zotero.preferences.automaticSnapshots "Ta øyeblikksbilde automatisk når du genererer elementer fra nettsider">
+<!ENTITY zotero.preferences.automaticSnapshots "Ta øyeblikksbilde automatisk når du oppretter elementer fra nettsider">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Lagre tilknyttede PDF-filer og andre filer når du lagrer elementer">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Hent metadata for PDF-er automatisk">
 <!ENTITY zotero.preferences.autoRenameFiles "Gi automatisk nytt navn til vedlegg ved å bruke metadata fra overordnet element">
@@ -39,9 +39,9 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Eldste elementer først">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Standardvalg for nyhetsstrøm">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
+<!ENTITY zotero.preferences.openurl.choose "Velg en lenketjener…">
 <!ENTITY zotero.preferences.openurl.custom "Egendefinert...">
-<!ENTITY zotero.preferences.openurl.server "Resolver:">
+<!ENTITY zotero.preferences.openurl.server "Lenketjener:">
 <!ENTITY zotero.preferences.openurl.version "Versjon:">
 
 <!ENTITY zotero.preferences.prefpane.sync "Synkronisering">
@@ -139,7 +139,7 @@
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importer fra utklippstavle">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Endringer trer i kraft etter omstart">
 
-<!ENTITY zotero.preferences.prefpane.proxies "Proxier">
+<!ENTITY zotero.preferences.prefpane.proxies "Mellomtjenere">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Alternativer for mellomtjener">
 <!ENTITY zotero.preferences.proxies.desc_before_link "Zotero vil åpent omdirigere forespørsler gjennom lagrede mellomtjenere. Se">

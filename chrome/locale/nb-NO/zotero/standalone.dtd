@@ -61,7 +61,7 @@
 
 <!ENTITY toolsMenu.label "Verktøy">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Innstaller Connector for nettleser">
+<!ENTITY installConnector.label "Innstaller Tilknytter for nettleser">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Tillegg">
 <!ENTITY developer.label "Utvikler">
@@ -93,11 +93,11 @@
 <!ENTITY helpReportErrors.label "Rapporter feil...">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Feilsøk logging av output">
+<!ENTITY debugOutputLogging.label "Feilsøk logging av utdata">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Send inn output">
-<!ENTITY debugOutputLogging.view "Vis output">
-<!ENTITY debugOutputLogging.clear "Fjern output">
+<!ENTITY debugOutputLogging.submit "Send inn utdata">
+<!ENTITY debugOutputLogging.view "Vis utdata">
+<!ENTITY debugOutputLogging.clear "Fjern utdata">
 <!ENTITY debugOutputLogging.restartWithLoggingEnabled "Start på nytt med logging aktivert…">
 
 <!ENTITY helpCheckForUpdates.label "Se etter oppdateringer...">

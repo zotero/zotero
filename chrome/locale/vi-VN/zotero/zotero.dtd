@@ -176,7 +176,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Đặt màu">
 <!ENTITY zotero.tagColorChooser.removeColor "Bỏ màu">
 
-<!ENTITY zotero.lookup.description "Nhập ISBN, DOI, PMID hoặc arXiv ID để thêm vào thư viện của bạn:">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
 <!ENTITY zotero.lookup.button.search "Tìm">
 
 <!ENTITY zotero.createParent.title "Create Parent Item">

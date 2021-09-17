@@ -176,7 +176,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Καθορισμός χρώματος">
 <!ENTITY zotero.tagColorChooser.removeColor "Απομάκρυνση χρώματος">
 
-<!ENTITY zotero.lookup.description "Εισαγωγή ISBNs, DOIs, PMIDs, ή arXiv IDs για να το προσθέσετε στην βιβλιοθήκη σας:">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
 <!ENTITY zotero.lookup.button.search "Αναζήτηση">
 
 <!ENTITY zotero.createParent.title "Δημιουργία Γονικού Στοιχείου">

@@ -176,7 +176,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Termeniñ al liv">
 <!ENTITY zotero.tagColorChooser.removeColor "Dilemel al liv">
 
-<!ENTITY zotero.lookup.description "Ebarzhiñ anaouadurioù ISBN, PMID, pe arXiv da ouzhpennañ d'ho levraoueg:">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
 <!ENTITY zotero.lookup.button.search "Klask">
 
 <!ENTITY zotero.createParent.title "Krouiñ un elfenn kar">

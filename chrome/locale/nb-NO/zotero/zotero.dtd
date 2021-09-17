@@ -164,7 +164,7 @@
 <!ENTITY zotero.tagSelector.loadingTags "Laster emneord…">
 <!ENTITY zotero.tagSelector.showAutomatic "Vis automatisk">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Vis alle emneord i dette biblioteket">
-<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Slett automatisk emneord i dette biblioteket…">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Slett automatiske emneord i dette biblioteket…">
 <!ENTITY zotero.tagSelector.clearAll "Fravelg alle">
 <!ENTITY zotero.tagSelector.assignColor "Tildel farge…">
 <!ENTITY zotero.tagSelector.renameTag "Gi emneord nytt navn...">
@@ -176,7 +176,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Bruk farge">
 <!ENTITY zotero.tagColorChooser.removeColor "Fjern farge">
 
-<!ENTITY zotero.lookup.description "Skriv inn ISBN, DOI, PMID eller arXiv ID-er for elementer du vil legge til biblioteket ditt:">
+<!ENTITY zotero.lookup.description "Skriv inn ISBN-er, DOI-er, PMID-er, arXiv ID-er eller ADS bibliografiske koder for elementer du vil legge til biblioteket ditt:">
 <!ENTITY zotero.lookup.button.search "Søk">
 
 <!ENTITY zotero.createParent.title "Opprett overordnet element">
@@ -285,9 +285,9 @@
 <!ENTITY zotero.merge.deleted "Slettet">
 
 <!ENTITY zotero.proxy.recognized.title "Mellomtjener gjenkjent">
-<!ENTITY zotero.proxy.recognized.warning "Legg kun til proxier som er lenket fra nettsted til ditt bibliotek, din skole eller bedrift">
-<!ENTITY zotero.proxy.recognized.warning.secondary "Det å legge til andre proxier tillater skadelige nettsteder å gi seg ut for å være nettsteder du stoler på.">
-<!ENTITY zotero.proxy.recognized.disable.label "Ikke automatisk omdiriger forespørsler gjennom tidligere kjente proxier">
+<!ENTITY zotero.proxy.recognized.warning "Legg kun til mellomtjenere som er lenket fra nettsted til ditt bibliotek, din skole eller bedrift">
+<!ENTITY zotero.proxy.recognized.warning.secondary "Det å legge til andre mellomtjenere tillater skadelige nettsteder å gi seg ut for å være nettsteder du stoler på.">
+<!ENTITY zotero.proxy.recognized.disable.label "Ikke omdiriger forespørsler automatisk gjennom tidligere kjente mellomtjenere">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignorer">
 
 <!ENTITY zotero.feedSettings.title "Innstillinger for nyhetsstrøm">
@@ -349,7 +349,7 @@
 <!ENTITY zotero.pdfReader.noSpreads "Ingen tosidig visning">
 <!ENTITY zotero.pdfReader.oddSpreads "Oddetallssider mot hverandre">
 <!ENTITY zotero.pdfReader.evenSpreads "Partallssider mot hverandre">
-<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
-<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
-<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
-<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomIn "Zoom inn">
+<!ENTITY zotero.pdfReader.zoomOut "Zoom ut">
+<!ENTITY zotero.pdfReader.zoomAuto "Endre størrelse automatisk">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom til sidebredde">

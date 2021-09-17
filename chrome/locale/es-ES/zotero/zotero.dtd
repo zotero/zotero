@@ -176,7 +176,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Establecer color">
 <!ENTITY zotero.tagColorChooser.removeColor "Borrar color">
 
-<!ENTITY zotero.lookup.description "Introduzca los ISBN, DOI, PMID o arXiv ID a añadir a su biblioteca:">
+<!ENTITY zotero.lookup.description "Introduzca los ISBN, DOI, PMID o arXiv ID a ADS Bibcodes para añadirlos a su biblioteca:">
 <!ENTITY zotero.lookup.button.search "Buscar">
 
 <!ENTITY zotero.createParent.title "Crear elemento contenedor">
@@ -349,7 +349,7 @@
 <!ENTITY zotero.pdfReader.noSpreads "Vista de libro">
 <!ENTITY zotero.pdfReader.oddSpreads "Vista de libro impar">
 <!ENTITY zotero.pdfReader.evenSpreads "Vista de libro par">
-<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
-<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
-<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
-<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomIn "Ampliar zum">
+<!ENTITY zotero.pdfReader.zoomOut "Reducir zum">
+<!ENTITY zotero.pdfReader.zoomAuto "Redimensionar automáticamente">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Zum a ancho de página">

@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Сначала старые записи">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Настройки новостной ленты по умолчанию">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
+<!ENTITY zotero.preferences.openurl.choose "Выбериите обработчик адресов…">
 <!ENTITY zotero.preferences.openurl.custom "Особый…">
 <!ENTITY zotero.preferences.openurl.server "Сервер">
 <!ENTITY zotero.preferences.openurl.version "Версия">

@@ -176,7 +176,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Aseta väri">
 <!ENTITY zotero.tagColorChooser.removeColor "Poista väri">
 
-<!ENTITY zotero.lookup.description "Anna lisättävien nimikkeiden ISBN-, DOI-, PMID- tai arXiv ID -tunnisteet:">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
 <!ENTITY zotero.lookup.button.search "Etsi">
 
 <!ENTITY zotero.createParent.title "Luo tiedostolle nimike">
@@ -336,15 +336,15 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
 <!ENTITY zotero.context.editInWindow "Muokkaa erillisessä ikkunassa">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
-<!ENTITY zotero.pdfReader.lastPage "Last Page">
+<!ENTITY zotero.pdfReader.firstPage "Ensimmäinen sivu">
+<!ENTITY zotero.pdfReader.lastPage "Viimeinen sivu">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">
-<!ENTITY zotero.pdfReader.rotateClockwise "Rotate Clockwise">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotate Counterclockwise">
+<!ENTITY zotero.pdfReader.rotateClockwise "Kierrä myötäpäivään">
+<!ENTITY zotero.pdfReader.rotateCounterclockwise "Kierrä vastapäivään">
 <!ENTITY zotero.pdfReader.handTool "Hand Tool">
-<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
-<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
+<!ENTITY zotero.pdfReader.verticalScrolling "Pystyvieritys">
+<!ENTITY zotero.pdfReader.horizontalScrolling "Vaakavieritys">
 <!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
 <!ENTITY zotero.pdfReader.noSpreads "No Spreads">
 <!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
