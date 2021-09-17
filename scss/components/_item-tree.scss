@@ -1,37 +1,37 @@
 #zotero-items-pane {
-  min-width: 290px;
-  min-height: 150px;
-  height: 150px;
-  width: 290px;
+	min-width: 290px;
+	min-height: 150px;
+	height: 150px;
+	width: 290px;
 }
 
 #zotero-items-tree {
-  .virtualized-table-header .icon {
-	width: 13px;
-	height: 13px;
-  }
-
-  .cell.primary {
-	.retracted {
-	  width: 12px;
-	  margin-inline-start: 3px;
+	.virtualized-table-header .icon {
+		width: 13px;
+		height: 13px;
 	}
-
-	.tag-swatch {
-	  display: inline-block;
-	  min-width: .728em;
-	  min-height: .728em;
-	  margin-inline-start: 3px;
-	  border-radius: .15em;
+	
+	.cell.primary {
+		.retracted {
+			width: 12px;
+			margin-inline-start: 3px;
+		}
+		
+		.tag-swatch {
+			display: inline-block;
+			min-width: .728em;
+			min-height: .728em;
+			margin-inline-start: 3px;
+			border-radius: .15em;
+		}
 	}
-  }
-
-  .cell.hasAttachment {
-	box-sizing: content-box;
-	padding: 0 4px;
-  }
-
-  .cell.numNotes {
-	text-align: center;
-  }
+	
+	.cell.hasAttachment {
+		box-sizing: content-box;
+		padding: 0 4px;
+	}
+	
+	.cell.numNotes {
+		text-align: center;
+	}
 }
