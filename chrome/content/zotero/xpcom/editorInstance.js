@@ -44,7 +44,7 @@ const DOWNLOADED_IMAGE_TYPE = [
 ];
 
 // Schema version here has to be the same as in note-editor!
-const SCHEMA_VERSION = 4;
+const SCHEMA_VERSION = 5;
 
 class EditorInstance {
 	constructor() {
@@ -372,8 +372,7 @@ class EditorInstance {
 				let citationWithData = JSON.parse(JSON.stringify(citation));
 				citationWithData.citationItems[0].itemData = itemData;
 				let formatted = this._formatCitation(citationWithData);
-				
-				citationHTML = `<span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">(${formatted})</span>`;
+				citationHTML = `<span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">${formatted}</span>`;
 			}
 			
 			// Image
@@ -440,7 +439,7 @@ class EditorInstance {
 					properties: {}
 				};
 				let formatted = this._formatCitation(citation);
-				html += `<p><span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">(${formatted})</span></p>`;
+				html += `<p><span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">${formatted}</span></p>`;
 			}
 			else if (item.isNote()) {
 				let note = item.note;
@@ -1133,7 +1132,9 @@ class EditorInstance {
 	}
 
 	_formatCitation(citation) {
-		return citation.citationItems.map(x => this._formatCitationItemPreview(x)).join('; ');
+		return '(' + citation.citationItems.map((x) => {
+			return `<span class="citation-item">${this._formatCitationItemPreview(x)}</span>`;
+		}).join('; ') + ')';
 	}
 
 	_arrayBufferToBase64(buffer) {
