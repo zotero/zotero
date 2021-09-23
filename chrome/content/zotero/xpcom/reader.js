@@ -252,7 +252,7 @@ class ReaderInstance {
 				await Zotero.Attachments.createDirectoryForItem(item);
 			}
 			file.append(this.pdfStateFileName);
-			await Zotero.File.putContentsAsync(file, JSON.stringify(state));
+			await OS.File.writeAtomic(file.path, JSON.stringify(state));
 		}
 	}
 
