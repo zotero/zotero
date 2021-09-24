@@ -9,12 +9,12 @@
 	height: 1.5em;
 }
 
-*[zoteroFontSize=large] treechildren::-moz-tree-row
+*[zoteroFontSize=large] treechildren::-moz-tree-row, *[zoteroFontSize=x-large] treechildren::-moz-tree-row
 {
 	height: 1.5em;
 }
 
-*[zoteroFontSize=large] .treecol-text
+*[zoteroFontSize=large] .treecol-text, *[zoteroFontSize=x-large] .treecol-text
 {
 	margin:0;
 	padding:0;
@@ -305,7 +305,7 @@ label.zotero-text-link {
 	padding: 3px;
 }
 
-#zotero-advanced-search-dialog #zotero-items-tree
+#zotero-advanced-search-dialog .virtualized-table-container
 {
 	min-height: 250px;
 }

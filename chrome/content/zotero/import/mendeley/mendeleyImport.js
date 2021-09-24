@@ -1042,7 +1042,7 @@ Zotero_Import_Mendeley.prototype._documentToAPIJSON = async function (map, docum
 	}
 	parent.tags = [];
 	// Add star tag for favorites
-	if (documentRow.favourite == 'true') {
+	if (documentRow.favourite === 'true' || documentRow.favourite === true) {
 		parent.tags.push('\u2605');
 	}
 	if (tags) {
@@ -1240,6 +1240,11 @@ Zotero_Import_Mendeley.prototype._saveItems = async function (libraryID, json) {
 				if (itemJSON.publicationTitle && !item.getField('publicationTitle')) {
 					item.setField('publicationTitle', itemJSON.publicationTitle);
 				}
+
+				// Add "★" tag if not present, since it was previously missed in the online importer
+				if ((itemJSON.tags || []).includes('\u2605') && !item.hasTag('\u2605')) {
+					item.addTag('\u2605');
+				}
 				
 				// Update any child items to point to the existing item's key instead of the
 				// new generated one
@@ -1405,6 +1410,8 @@ Zotero_Import_Mendeley.prototype._saveFilesAndAnnotations = async function (file
 
 					// If we're not set to link files or file is in Mendeley downloads folder, import it
 					if (!this._linkFiles || this._isDownloadedFile(path) || this._isTempDownloadedFile(path)) {
+						options.moveFile = this._isTempDownloadedFile(path);
+						
 						if (file.url) {
 							options.title = file.title;
 							options.url = file.url;
@@ -1475,8 +1482,7 @@ Zotero_Import_Mendeley.prototype._isDownloadedFile = function (path) {
 }
 
 Zotero_Import_Mendeley.prototype._isTempDownloadedFile = function (path) {
-	var parentDir = OS.Path.dirname(path);
-	return parentDir.startsWith(OS.Path.join(Zotero.getTempDirectory().path, 'm-api'));
+	return path.startsWith(OS.Path.join(Zotero.getTempDirectory().path, 'm-api'));
 };
 
 /**

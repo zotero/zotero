@@ -2,10 +2,10 @@
 /* eslint-disable no-unused-vars */
 
 var Zotero = Components.classes['@zotero.org/Zotero;1']
-				// Currently uses only nsISupports
-				//.getService(Components.interfaces.chnmIZoteroService).
-				.getService(Components.interfaces.nsISupports)
-				.wrappedJSObject;
+	// Currently uses only nsISupports
+	//.getService(Components.interfaces.chnmIZoteroService).
+	.getService(Components.interfaces.nsISupports)
+	.wrappedJSObject;
 
 // Components.utils.import('resource://zotero/require.js');
 // Not using Cu.import here since we don't want the require module to be cached
@@ -17,9 +17,11 @@ var winName;
 if (typeof window != 'undefined') {
 	winName = window.name;
 }
-Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-	.getService(Components.interfaces.mozIJSSubScriptLoader)
-	.loadSubScript('resource://zotero/require.js');
+if (typeof require == "undefined") {
+	Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+		.getService(Components.interfaces.mozIJSSubScriptLoader)
+		.loadSubScript('resource://zotero/require.js');
+}
 
 if (winName) {
 	window.name = winName;

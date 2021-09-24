@@ -12,6 +12,72 @@ describe("Related Box", function () {
 		win.close();
 	})
 	
+	it("should update if a related item is renamed", async function () {
+		var title1 = 'aaaaaa';
+		var title2 = 'bbbbbb';
+		var item1 = await createDataObject('item', { title: title1 });
+		var item2 = await createDataObject('item', { title: title2 });
+		item1.addRelatedItem(item2);
+		await item1.saveTx();
+		item2.addRelatedItem(item1);
+		await item2.saveTx();
+		
+		// Select the Related pane
+		var tabbox = doc.getElementById('zotero-view-tabbox');
+		tabbox.selectedIndex = 3;
+		var relatedbox = doc.getElementById('zotero-editpane-related');
+		
+		// Wait for relations list to populate
+		do {
+			await Zotero.Promise.delay(50);
+		}
+		while (!relatedbox.id('relatedRows').childNodes.length);
+		
+		assert.include(doc.getAnonymousNodes(relatedbox)[0].innerHTML, title1);
+		
+		title1 = 'cccccc';
+		item1.setField('title', title1);
+		await item1.saveTx();
+		
+		// New title should appear in list
+		do {
+			await Zotero.Promise.delay(50);
+		}
+		while (!doc.getAnonymousNodes(relatedbox)[0].innerHTML.includes(title1));
+	});
+	
+	it("should update if a related item is deleted", async function () {
+		var title1 = 'aaaaaa';
+		var title2 = 'bbbbbb';
+		var item1 = await createDataObject('item', { title: title1 });
+		var item2 = await createDataObject('item', { title: title2 });
+		item1.addRelatedItem(item2);
+		await item1.saveTx();
+		item2.addRelatedItem(item1);
+		await item2.saveTx();
+		
+		// Select the Related pane
+		var tabbox = doc.getElementById('zotero-view-tabbox');
+		tabbox.selectedIndex = 3;
+		var relatedbox = doc.getElementById('zotero-editpane-related');
+		
+		// Wait for relations list to populate
+		do {
+			await Zotero.Promise.delay(50);
+		}
+		while (!relatedbox.id('relatedRows').childNodes.length);
+		
+		assert.include(doc.getAnonymousNodes(relatedbox)[0].innerHTML, title1);
+		
+		await item1.eraseTx();
+		
+		// Deleted item should be removed from list
+		do {
+			await Zotero.Promise.delay(50);
+		}
+		while (doc.getAnonymousNodes(relatedbox)[0].innerHTML.includes(title1));
+	});
+	
 	describe("Add button", function () {
 		it("should add a related item", function* () {
 			var item1 = yield createDataObject('item');
@@ -31,18 +97,16 @@ describe("Related Box", function () {
 			// wrappedJSObject isn't working on zotero-collections-tree for some reason, so
 			// just wait for the items tree to be created and select it directly
 			do {
-				var view = selectWin.document.getElementById('zotero-items-tree').view.wrappedJSObject;
+				var selectItemsView = selectWin.itemsView;
+				var selectCollectionsView = selectWin.collectionsView;
 				yield Zotero.Promise.delay(50);
 			}
-			while (!view);
-			yield view.waitForLoad();
+			while (!selectItemsView || !selectCollectionsView);
+			yield selectCollectionsView.waitForLoad();
+			yield selectItemsView.waitForLoad();
 			
 			// Select the other item
-			for (let i = 0; i < view.rowCount; i++) {
-				if (view.getRow(i).ref.id == item1.id) {
-					view.selection.select(i);
-				}
-			}
+			yield selectItemsView.selectItem(item1.id);
 			selectWin.document.documentElement.acceptDialog();
 			
 			// Wait for relations list to populate

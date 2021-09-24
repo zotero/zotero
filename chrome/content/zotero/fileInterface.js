@@ -25,7 +25,7 @@
 
 Components.utils.import("resource://gre/modules/osfile.jsm");
 Components.utils.import("resource://gre/modules/Services.jsm");
-import FilePicker from 'zotero/filePicker';
+import FilePicker from 'zotero/modules/filePicker';
 
 /****Zotero_File_Exporter****
  **
@@ -135,7 +135,7 @@ var Zotero_File_Interface = new function() {
 	 *
 	 * @return {Promise}
 	 */
-	this.exportFile = Zotero.Promise.method(function () {
+	this.exportFile = async function () {
 		var exporter = new Zotero_File_Exporter();
 		exporter.libraryID = ZoteroPane_Local.getSelectedLibraryID();
 		if (exporter.libraryID === false) {
@@ -143,7 +143,7 @@ var Zotero_File_Interface = new function() {
 		}
 		exporter.name = Zotero.Libraries.getName(exporter.libraryID);
 		return exporter.save();
-	});
+	};
 	
 	/*
 	 * exports a collection or saved search

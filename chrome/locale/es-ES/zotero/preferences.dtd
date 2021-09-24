@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Elementos más antiguos primero">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Valores predeterminados del canal">
 
-<!ENTITY zotero.preferences.openurl.search "Buscar sistemas de resolución">
+<!ENTITY zotero.preferences.openurl.choose "Elija un sistema de resolución...">
 <!ENTITY zotero.preferences.openurl.custom "Personalizar...">
 <!ENTITY zotero.preferences.openurl.server "Sistema de resolución:">
 <!ENTITY zotero.preferences.openurl.version "Versión:">

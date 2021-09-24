@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Od najstarszych elementów">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Wartości domyślne kanału">
 
-<!ENTITY zotero.preferences.openurl.search "Szukaj resolwerów">
+<!ENTITY zotero.preferences.openurl.choose "Wybierz resolwer...">
 <!ENTITY zotero.preferences.openurl.custom "Dostosuj...">
 <!ENTITY zotero.preferences.openurl.server "Resolwer:">
 <!ENTITY zotero.preferences.openurl.version "Wersja:">

@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Äldst först">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Matningens standardvärden">
 
-<!ENTITY zotero.preferences.openurl.search "Sök efter länkservrar">
+<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
 <!ENTITY zotero.preferences.openurl.custom "Anpassad...">
 <!ENTITY zotero.preferences.openurl.server "Länkserver:">
 <!ENTITY zotero.preferences.openurl.version "Version:">

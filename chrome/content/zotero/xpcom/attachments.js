@@ -109,8 +109,14 @@ Zotero.Attachments = new function(){
 				// Point to copied file
 				newFile = OS.Path.join(destDir, newName);
 				
-				// Copy file to unique filename, which automatically shortens long filenames
-				newFile = Zotero.File.copyToUnique(file, newFile);
+				// Copy or move file to unique filename, which automatically shortens long filenames
+				if (options.moveFile) {
+					const newFilePath = yield Zotero.File.moveToUnique(file.path, newFile);
+					newFile = Zotero.File.pathToFile(newFilePath);
+				}
+				else {
+					newFile = Zotero.File.copyToUnique(file, newFile);
+				}
 				
 				yield Zotero.File.setNormalFilePermissions(newFile.path);
 				
@@ -315,7 +321,12 @@ Zotero.Attachments = new function(){
 				// Copy single file to new directory
 				if (options.singleFile) {
 					yield this.createDirectoryForItem(attachmentItem);
-					yield OS.File.copy(file.path, newPath);
+					if (options.moveFile) {
+						yield OS.File.move(file.path, newPath);
+					}
+					else {
+						yield OS.File.copy(file.path, newPath);
+					}
 				}
 				// Copy entire parent directory (for HTML snapshots)
 				else {
@@ -442,6 +453,40 @@ Zotero.Attachments = new function(){
 		}
 		
 		return attachmentItem;
+	};
+	
+	
+	/**
+	 * Copy an image from one note to another
+	 *
+	 * @param {Object} params
+	 * @param {Zotero.Item} params.attachment - Image attachment to copy
+	 * @param {Zotero.Item} params.note - Note item to add attachment to
+	 * @param {Object} [params.saveOptions] - Options to pass to Zotero.Item::save()
+	 * @return {Promise<Zotero.Item>}
+	 */
+	this.copyEmbeddedImage = async function ({ attachment, note, saveOptions }) {
+		Zotero.DB.requireTransaction();
+		
+		if (!attachment.isEmbeddedImageAttachment()) {
+			throw new Error("'attachment' must be an embedded image");
+		}
+		
+		if (!await attachment.fileExists()) {
+			throw new Error("Image attachment file doesn't exist");
+		}
+		
+		var newAttachment = attachment.clone(note.libraryID);
+		// Attachment path isn't copied over by clone() if libraryID is different
+		newAttachment.attachmentPath = attachment.attachmentPath;
+		newAttachment.parentID = note.id;
+		await newAttachment.save(saveOptions);
+		
+		let dir = Zotero.Attachments.getStorageDirectory(attachment);
+		let newDir = await Zotero.Attachments.createDirectoryForItem(newAttachment);
+		await Zotero.File.copyDirectory(dir, newDir);
+		
+		return newAttachment;
 	};
 	
 	
@@ -2638,7 +2683,7 @@ Zotero.Attachments = new function(){
 	
 	
 	this._getFileNameFromURL = function(url, contentType) {
-		url = Zotero.Utilities.parseURL(url);
+		url = Zotero.Utilities.Internal.parseURL(url);
 		
 		var fileBaseName = url.fileBaseName;
 		var fileExt = Zotero.MIME.getPrimaryExtension(contentType, url.fileExtension);

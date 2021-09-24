@@ -235,12 +235,11 @@ describe("Zotero.Library", function() {
 			let library = new Zotero.Library();
 			yield assert.isRejected(library.eraseTx());
 		});
-		it("should throw when accessing erased library methods, except for #libraryID", function* () {
+		it("should throw when accessing erased library methods, except for #libraryID and #name", function* () {
 			let library = yield createGroup();
 			yield library.eraseTx();
 			
 			assert.doesNotThrow(() => library.libraryID);
-			assert.throws(() => library.name, /^Group \(\d+\) has been disabled$/);
 			assert.throws(() => library.editable = false, /^Group \(\d+\) has been disabled$/);
 		});
 		it("should clear child items from caches and DB", function* () {

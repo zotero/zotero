@@ -469,7 +469,7 @@ Zotero.QuickCopy = new function() {
 				return;
 			}
 			translator.cacheCode = true;
-			await translator.getCode();
+			await Zotero.Translators.getCodeForTranslator(translator);
 		}
 	};
 	

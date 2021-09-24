@@ -64,7 +64,12 @@
 	.editable-container {
 		flex-grow: 1;
 		margin: 0 2px;
-		//width: $item-pane-width - $icon-width - $delete-button-width - ($li-side-margin * 2);
+		// width: $item-pane-width - $icon-width - $delete-button-width - ($li-side-margin * 2);
+		
+		// This container shouldn't force any width for its parent,
+		// because tagsBox is used in more places than just item pane,
+		// and it can have smaller width than $item-pane-width
+		width: 0;
 	}
 	
 	ul.tags-box-list > li:not(.multiline) .editable-container {

@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "오래된 항목 먼저">
 <!ENTITY zotero.preferences.feeds.feedDefaults "피드 기본값">
 
-<!ENTITY zotero.preferences.openurl.search "해독기로 검색">
+<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
 <!ENTITY zotero.preferences.openurl.custom "사용자 지정...">
 <!ENTITY zotero.preferences.openurl.server "해독기:">
 <!ENTITY zotero.preferences.openurl.version "버전:">

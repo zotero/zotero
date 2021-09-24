@@ -24,7 +24,7 @@
 */
 
 Components.utils.import("resource://gre/modules/Services.jsm");
-import FilePicker from 'zotero/filePicker';
+import FilePicker from 'zotero/modules/filePicker';
 
 var Zotero = Components.classes["@zotero.org/Zotero;1"]
 				// Currently uses only nsISupports
@@ -269,7 +269,7 @@ var Scaffold = new function() {
 		}
 
 		//Strip JSON metadata
-		var code = yield translator.getCode();
+		var code = yield _translatorProvider.getCodeForTranslator(translator);
 		var lastUpdatedIndex = code.indexOf('"lastUpdated"');
 		var header = code.substr(0, lastUpdatedIndex + 50);
 		var m = /^\s*{[\S\s]*?}\s*?[\r\n]+/.exec(header);
@@ -604,6 +604,16 @@ var Scaffold = new function() {
 		}
 	}
 
+	this.runTranslatorOrTests = async function () {
+		var tabs = document.getElementById('tabs');
+		if (tabs.selectedItem.id == 'tab-testing') {
+			this.runSelectedTests();
+		}
+		else {
+			this.run('do');
+		}
+	}
+
 	/*
 	 * generate translator GUID
 	 */
@@ -737,10 +747,6 @@ var Scaffold = new function() {
 			translator[props[i]] = metadata[props[i]];
 		}
 		
-		translator.getCode = function () {
-			return Zotero.Promise.resolve(this.code);
-		};
-
 		if(!translator.configOptions) translator.configOptions = {};
 		if(!translator.displayOptions) translator.displayOptions = {};
 		if(!translator.browserSupport) translator.browserSupport = "g";
@@ -1107,14 +1113,26 @@ var Scaffold = new function() {
 		Zotero.Utilities.Internal.copyTextToClipboard(urlOrData);
 	}
 	
-	/*
-	 * Open the url of the first selected test in the browser.
-	 */	
-	this.openURL = function() {
+	/**
+	 * Open the url of the first selected test in the browser (Browser tab or
+	 * the system's default browser).
+	 * @param {boolean} openExternally whether to open in the default browser
+	**/
+	this.openURL = function (openExternally) {
 		var listbox = document.getElementById("testing-listbox");
 		var item = listbox.selectedItems[0];
 		var url = item.getElementsByTagName("listcell")[0].getAttribute("label");
-		Zotero.launchURL(url);
+		if (openExternally) {
+			Zotero.launchURL(url);
+		}
+		else {
+			var tabs = document.getElementById('tabs');
+			_browser.loadURIWithFlags(
+				url,
+				Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE
+			);
+			tabs.selectedItem = document.getElementById('tab-browser');
+		}
 	}
 	
 	/*

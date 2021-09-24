@@ -25,20 +25,22 @@
 
 
 Components.utils.import("resource://gre/modules/Services.jsm");
+import ItemTree from 'zotero/itemTree';
+import { getDefaultColumnsByDataKeys } from 'zotero/itemTreeColumns';
+
 
 var ZoteroAdvancedSearch = new function() {
 	this.onLoad = onLoad;
 	this.search = search;
 	this.clear = clear;
-	this.onDblClick = onDblClick;
-	this.onUnload = onUnload;
+	this.onItemActivate = onItemActivate;
 	
 	this.itemsView = false;
-	
+
 	var _searchBox;
 	var _libraryID;
 	
-	function onLoad() {
+	async function onLoad() {
 		_searchBox = document.getElementById('zotero-search-box');
 		
 		// Set font size from pref
@@ -52,8 +54,37 @@ var ZoteroAdvancedSearch = new function() {
 		.then(function () {
 			_searchBox.search = io.dataIn.search;
 		});
+		
+		var elem = document.getElementById('zotero-items-tree');
+		this.itemsView = await ItemTree.init(elem, {
+			id: "advanced-search",
+			dragAndDrop: true,
+			onActivate: this.onItemActivate.bind(this),
+			columns: getDefaultColumnsByDataKeys(['title', 'firstCreator']),
+		});
+
+		// A minimal implementation of Zotero.CollectionTreeRow
+		var collectionTreeRow = {
+			view: {},
+			ref: _searchBox.search,
+			isSearchMode: () => true,
+			getItems: async () => [],
+			isLibrary: () => false,
+			isCollection: () => false,
+			isSearch: () => true,
+			isPublications: () => false,
+			isDuplicates: () => false,
+			isFeed: () => false,
+			isShare: () => false,
+			isTrash: () => false
+		};
+
+		this.itemsView.changeCollectionTreeRow(collectionTreeRow);
 	}
 	
+	this.onUnload = function () {
+		this.itemsView.unregister();
+	}
 	
 	function search() {
 		_searchBox.updateSearch();
@@ -63,41 +94,34 @@ var ZoteroAdvancedSearch = new function() {
 		var collectionTreeRow = {
 			view: {},
 			ref: _searchBox.search,
-			isSearchMode: function() { return true; },
-			getItems: Zotero.Promise.coroutine(function* () {
+			isSearchMode: () => true,
+			getItems: async function () {
 				var search = _searchBox.search.clone();
 				search.libraryID = _libraryID;
-				var ids = yield search.search();
+				var ids = await search.search();
 				return Zotero.Items.get(ids);
-			}),
-			isLibrary: function () { return false; },
-			isCollection: function () { return false; },
-			isSearch: function () { return true; },
+			},
+			isLibrary: () => false,
+			isCollection: () => false,
+			isSearch: () => true,
 			isPublications: () => false,
+			isDuplicates: () => false,
 			isFeed: () => false,
-			isShare: function () { return false; },
-			isTrash: function () { return false; }
-		}
+			isShare: () => false,
+			isTrash: () => false
+		};
 		
-		if (this.itemsView) {
-			this.itemsView.unregister();
-		}
-		
-		this.itemsView = new Zotero.ItemTreeView(collectionTreeRow, false);
-		document.getElementById('zotero-items-tree').view = this.itemsView;
+		this.itemsView.changeCollectionTreeRow(collectionTreeRow);
 	}
 	
 	
 	function clear() {
-		if (this.itemsView) {
-			this.itemsView.unregister();
-		}
-		document.getElementById('zotero-items-tree').view = null;
+		this.itemsView.changeCollectionTreeRow(null);
 		
 		var s = new Zotero.Search();
 		// Don't clear the selected library
 		s.libraryID = _searchBox.search.libraryID;
-		s.addCondition('title', 'contains', '')
+		s.addCondition('title', 'contains', '');
 		_searchBox.search = s;
 		_searchBox.active = false;
 	}
@@ -118,26 +142,24 @@ var ZoteroAdvancedSearch = new function() {
 			searches.map(s => s.name).filter(n => n.startsWith(prefix))
 		);
 		
-		var name = { value: name };
+		name = { value: name };
 		var result = promptService.prompt(window,
 			Zotero.getString('pane.collections.newSavedSeach'),
 			Zotero.getString('pane.collections.savedSearchName'), name, "", {});
 		
-		if (!result)
-		{
+		if (!result) {
 			return;
 		}
 		
-		if (!name.value)
-		{
-			name.value = untitled;
+		if (!name.value) {
+			name.value = 'untitled';
 		}
 		
 		var s = _searchBox.search.clone();
 		s.name = name.value;
 		yield s.save();
 		
-		window.close()
+		window.close();
 	});
 	
 	
@@ -149,42 +171,18 @@ var ZoteroAdvancedSearch = new function() {
 	}
 	
 	
-	// Adapted from: http://www.xulplanet.com/references/elemref/ref_tree.html#cmnote-9
-	function onDblClick(event, tree)
+	function onItemActivate(event, items)
 	{
-		if (event && tree && event.type == "dblclick")
-		{
-			var row = {}, col = {}, obj = {};
-			tree.treeBoxObject.getCellAt(event.clientX, event.clientY, row, col, obj);
-			// obj.value == cell/text/image
-			// TODO: handle collection double-click
-			if (obj.value && this.itemsView && this.itemsView.selection.currentIndex > -1)
-			{
-				var item = this.itemsView.getSelectedItems()[0];
-				
-				var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-							   .getService(Components.interfaces.nsIWindowMediator);
-				
-				var lastWin = wm.getMostRecentWindow("navigator:browser");
-				
-				if (!lastWin) {
-					window.open();
-					var newWindow = wm.getMostRecentWindow("navigator:browser");
-					var b = newWindow.getBrowser();
-					return;
-				}
-				
-				lastWin.ZoteroPane.selectItem(item.getID(), false, true);
-				lastWin.focus();
-			}
+		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+					   .getService(Components.interfaces.nsIWindowMediator);
+		
+		var lastWin = wm.getMostRecentWindow("navigator:browser");
+		
+		if (!lastWin) {
+			return;
 		}
-	}
-	
-	
-	function onUnload() {
-		// Unregister search from Notifier
-		if (this.itemsView) {
-			this.itemsView.unregister();
-		}
+		
+		lastWin.ZoteroPane.selectItems(items.map(item => item.id), false);
+		lastWin.focus();
 	}
 }

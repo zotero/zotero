@@ -74,3 +74,5 @@
 <!ENTITY scaffold.testing.edit.import			"Edit Import">
 <!ENTITY scaffold.testing.copyToClipboard			"Copy to Clipboard">
 <!ENTITY scaffold.testing.openUrl			"Open URL">
+<!ENTITY scaffold.testing.openUrl.internally			"In Browser Tab">
+<!ENTITY scaffold.testing.openUrl.externally			"In External Browser">

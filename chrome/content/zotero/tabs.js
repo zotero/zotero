@@ -50,6 +50,8 @@ var Zotero_Tabs = new function () {
 		title: ''
 	}];
 	this._selectedID = 'zotero-pane';
+	this._prevSelectedID = null;
+	this._history = [];
 
 	this._getTab = function (id) {
 		var tabIndex = this._tabs.findIndex(tab => tab.id == id);
@@ -77,6 +79,7 @@ var Zotero_Tabs = new function () {
 				onTabSelect={this.select.bind(this)}
 				onTabMove={this.move.bind(this)}
 				onTabClose={this.close.bind(this)}
+				onContextMenu={this._openMenu.bind(this)}
 			/>,
 			document.getElementById('tab-bar-container'),
 			() => {
@@ -85,17 +88,53 @@ var Zotero_Tabs = new function () {
 		);
 	};
 
+	this.getState = function () {
+		return this._tabs.map((tab) => {
+			var o = {
+				type: tab.type,
+				title: tab.title,
+			};
+			if (tab.data) {
+				o.data = tab.data;
+			}
+			if (tab.id == this._selectedID) {
+				o.selected = true;
+			}
+			return o;
+		});
+	};
+	
+	this.restoreState = function(tabs) {
+		for (let tab of tabs) {
+			if (tab.type === 'library') {
+				this.rename('zotero-pane', tab.title);
+			}
+			else if (tab.type === 'reader') {
+				if (Zotero.Items.exists(tab.data.itemID)) {
+					Zotero.Reader.open(tab.data.itemID,
+						null,
+						{
+							title: tab.title,
+							openInBackground: !tab.selected
+						}
+					);
+				}
+			}
+		}
+	};
+	
 	/**
 	 * Add a new tab
 	 *
 	 * @param {String} type
 	 * @param {String} title
+	 * @param {String} data - Extra data about the tab to pass to notifier and session
 	 * @param {Integer} index
 	 * @param {Boolean} select
 	 * @param {Function} onClose
 	 * @return {{ id: string, container: XULElement}} id - tab id, container - a new tab container created in the deck
 	 */
-	this.add = function ({ type, title, index, select, onClose, notifierData }) {
+	this.add = function ({ type, data, title, index, select, onClose }) {
 		if (typeof type != 'string') {
 			throw new Error(`'type' should be a string (was ${typeof type})`);
 		}
@@ -112,13 +151,15 @@ var Zotero_Tabs = new function () {
 		var container = document.createElement('vbox');
 		container.id = id;
 		this.deck.appendChild(container);
-		var tab = { id, type, title, onClose };
+		var tab = { id, type, title, data, onClose };
 		index = index || this._tabs.length;
 		this._tabs.splice(index, 0, tab);
 		this._update();
-		Zotero.Notifier.trigger('add', 'tab', [id], { [id]: notifierData }, true);
+		Zotero.Notifier.trigger('add', 'tab', [id], { [id]: data }, true);
 		if (select) {
+			let previousID = this._selectedID;
 			this.select(id);
+			this._prevSelectedID = previousID;
 		}
 		return { id, container };
 	};
@@ -142,27 +183,44 @@ var Zotero_Tabs = new function () {
 	};
 
 	/**
-	 * Close a tab
+	 * Close tabs
 	 *
-	 * @param {String} id
+	 * @param {String|Array<String>|undefined} ids One or more ids, or empty for the current tab
 	 */
-	this.close = function (id) {
-		var { tab, tabIndex } = this._getTab(id || this._selectedID);
-		if (tabIndex == 0) {
+	this.close = function (ids) {
+		if (!ids) {
+			ids = [this._selectedID];
+		}
+		else if (!Array.isArray(ids)) {
+			ids = [ids];
+		}
+		if (ids.includes('zotero-pane')) {
 			throw new Error('Library tab cannot be closed');
 		}
-		if (!tab) {
-			return;
+		var historyEntry = [];
+		var closedIDs = [];
+		var tmpTabs = this._tabs.slice();
+		for (var id of ids) {
+			var { tab, tabIndex } = this._getTab(id);
+			if (!tab) {
+				continue;
+			}
+			if (tab.id == this._selectedID) {
+				this.select(this._prevSelectedID || (this._tabs[tabIndex + 1] || this._tabs[tabIndex - 1]).id);
+			}
+			if (tab.id == this._prevSelectedID) {
+				this._prevSelectedID = null;
+			}
+			this._tabs.splice(tabIndex, 1);
+			document.getElementById(tab.id).remove();
+			if (tab.onClose) {
+				tab.onClose();
+			}
+			historyEntry.push({ index: tmpTabs.indexOf(tab), data: tab.data });
+			closedIDs.push(id);
 		}
-		if (tab.id == this._selectedID) {
-			this.select((this._tabs[tabIndex + 1] || this._tabs[tabIndex - 1]).id);
-		}
-		this._tabs.splice(tabIndex, 1);
-		document.getElementById(tab.id).remove();
-		if (tab.onClose) {
-			tab.onClose();
-		}
-		Zotero.Notifier.trigger('close', 'tab', [tab.id], true);
+		this._history.push(historyEntry);
+		Zotero.Notifier.trigger('close', 'tab', [closedIDs]);
 		this._update();
 	};
 
@@ -170,7 +228,35 @@ var Zotero_Tabs = new function () {
 	 * Close all tabs except the first one
 	 */
 	this.closeAll = function () {
-		this._tabs.slice(1).map(tab => this.close(tab.id));
+		this.close(this._tabs.slice(1).map(x => x.id));
+	};
+	
+	/**
+	 * Undo tabs closing
+	 */
+	this.undoClose = function () {
+		var historyEntry = this._history.pop();
+		if (historyEntry) {
+			let maxIndex = -1;
+			for (let tab of historyEntry) {
+				if (Zotero.Items.exists(tab.data.itemID)) {
+					Zotero.Reader.open(tab.data.itemID,
+						null,
+						{
+							tabIndex: tab.index,
+							openInBackground: true
+						}
+					);
+					if (tab.index > maxIndex) {
+						maxIndex = tab.index;
+					}
+				}
+			}
+			// Select last reopened tab
+			if (maxIndex > -1) {
+				this.jump(maxIndex);
+			}
+		}
 	};
 
 	/**
@@ -202,12 +288,14 @@ var Zotero_Tabs = new function () {
 	 * Select a tab
 	 *
 	 * @param {String} id
+	 * @param {Boolean} reopening
 	 */
-	this.select = function (id) {
+	this.select = function (id, reopening) {
 		var { tab } = this._getTab(id);
-		if (!tab) {
+		if (!tab || tab.id === this._selectedID) {
 			return;
 		}
+		this._prevSelectedID = reopening ? this._selectedID : null;
 		this._selectedID = id;
 		this.deck.selectedIndex = Array.from(this.deck.children).findIndex(x => x.id == id);
 		this._update();
@@ -228,6 +316,120 @@ var Zotero_Tabs = new function () {
 	this.selectNext = function () {
 		var { tabIndex } = this._getTab(this._selectedID);
 		this.select((this._tabs[tabIndex + 1] || this._tabs[0]).id);
+	};
+	
+	/**
+	 * Select the last tab
+	 */
+	this.selectLast = function () {
+		this.select(this._tabs[this._tabs.length - 1].id);
+	};
+	
+	/**
+	 * Jump to the tab at a particular index. If the index points beyond the array, jump to the last
+	 * tab.
+	 *
+	 * @param {Integer} index
+	 */
+	this.jump = function (index) {
+		this.select(this._tabs[Math.min(index, this._tabs.length - 1)].id);
+	};
+
+	this._openMenu = function (x, y, id) {
+		var { tabIndex } = this._getTab(id);
+		window.Zotero_Tooltip.stop();
+		let menuitem;
+		let popup = document.createElement('menupopup');
+		document.querySelector('popupset').appendChild(popup);
+		popup.addEventListener('popuphidden', function (event) {
+			if (event.target === popup) {
+				popup.remove();
+			}
+		});
+		if (id !== 'zotero-pane') {
+			// Show in library
+			menuitem = document.createElement('menuitem');
+			menuitem.setAttribute('label', Zotero.getString('general.showInLibrary'));
+			menuitem.addEventListener('command', () => {
+				var reader = Zotero.Reader.getByTabID(id);
+				if (reader) {
+					ZoteroPane_Local.selectItem(reader.itemID);
+					this.select('zotero-pane');
+				}
+			});
+			popup.appendChild(menuitem);
+			// Move tab
+			let menu = document.createElement('menu');
+			menu.setAttribute('label', Zotero.getString('tabs.move'));
+			let menupopup = document.createElement('menupopup');
+			menu.append(menupopup);
+			popup.appendChild(menu);
+			// Move to start
+			menuitem = document.createElement('menuitem');
+			menuitem.setAttribute('label', Zotero.getString('tabs.moveToStart'));
+			menuitem.setAttribute('disabled', tabIndex == 1);
+			menuitem.addEventListener('command', () => {
+				this.move(id, 1);
+			});
+			menupopup.appendChild(menuitem);
+			// Move to end
+			menuitem = document.createElement('menuitem');
+			menuitem.setAttribute('label', Zotero.getString('tabs.moveToEnd'));
+			menuitem.setAttribute('disabled', tabIndex == this._tabs.length - 1);
+			menuitem.addEventListener('command', () => {
+				this.move(id, this._tabs.length);
+			});
+			menupopup.appendChild(menuitem);
+			// Move to new window
+			menuitem = document.createElement('menuitem');
+			menuitem.setAttribute('label', Zotero.getString('tabs.moveToWindow'));
+			menuitem.setAttribute('disabled', false);
+			menuitem.addEventListener('command', () => {
+				var reader = Zotero.Reader.getByTabID(id);
+				if (reader) {
+					this.close(id);
+					Zotero.Reader.open(reader.itemID, null, { openInWindow: true });
+				}
+			});
+			menupopup.appendChild(menuitem);
+			// Separator
+			popup.appendChild(document.createElement('menuseparator'));
+		}
+		// Close
+		if (id != 'zotero-pane') {
+			menuitem = document.createElement('menuitem');
+			menuitem.setAttribute('label', Zotero.getString('general.close'));
+			menuitem.addEventListener('command', () => {
+				this.close(id);
+			});
+			popup.appendChild(menuitem);
+		}
+		// Close other tabs
+		if (!(this._tabs.length == 2 && id != 'zotero-pane')) {
+			menuitem = document.createElement('menuitem');
+			menuitem.setAttribute('label', Zotero.getString('tabs.closeOther'));
+			menuitem.addEventListener('command', () => {
+				this.close(this._tabs.slice(1).filter(x => x.id != id).map(x => x.id));
+			});
+			popup.appendChild(menuitem);
+		}
+		// Undo close
+		menuitem = document.createElement('menuitem');
+		menuitem.setAttribute(
+			'label',
+			Zotero.getString(
+				'tabs.undoClose',
+				[],
+				// If not disabled, show proper plural for tabs to reopen
+				this._history.length ? this._history[this._history.length - 1].length : 1
+			)
+		);
+		menuitem.setAttribute('disabled', !this._history.length);
+		menuitem.addEventListener('command', () => {
+			this.undoClose();
+		});
+		popup.appendChild(menuitem);
+		popup.openPopupAtScreen(x, y, true);
 	};
 
 	/**

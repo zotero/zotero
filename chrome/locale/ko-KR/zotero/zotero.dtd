@@ -49,7 +49,7 @@
 <!ENTITY zotero.tabs.notes.label "노트">
 <!ENTITY zotero.tabs.attachments.label "첨부">
 <!ENTITY zotero.tabs.tags.label "태그">
-<!ENTITY zotero.tabs.related.label "관련 페이지">
+<!ENTITY zotero.tabs.related.label "연관">
 <!ENTITY zotero.notes.separate "새 창에서 편집">
 
 <!ENTITY zotero.toolbar.duplicate.label "중복 보기">
@@ -176,7 +176,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "색상 설정">
 <!ENTITY zotero.tagColorChooser.removeColor "색상 제거">
 
-<!ENTITY zotero.lookup.description "라이브러리에 추가할 ISBN, DOI, PMID 또는 arXiv ID를 입력하세요:">
+<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
 <!ENTITY zotero.lookup.button.search "검색">
 
 <!ENTITY zotero.createParent.title "상위 항목 생성">
@@ -349,3 +349,7 @@
 <!ENTITY zotero.pdfReader.noSpreads "No Spreads">
 <!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
 <!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
+<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
+<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
+<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">

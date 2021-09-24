@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Најпре најстарије ставке">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Подразумевано за довод">
 
-<!ENTITY zotero.preferences.openurl.search "Нађи разрешиваче">
+<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
 <!ENTITY zotero.preferences.openurl.custom "Произвољно…">
 <!ENTITY zotero.preferences.openurl.server "Разрешивач:">
 <!ENTITY zotero.preferences.openurl.version "Верзија:">

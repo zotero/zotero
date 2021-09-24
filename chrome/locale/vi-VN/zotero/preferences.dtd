@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Mục cũ nhất trước">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Feed mặc định">
 
-<!ENTITY zotero.preferences.openurl.search "Tìm kiếm các bộ phân giải">
+<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
 <!ENTITY zotero.preferences.openurl.custom "Tùy chỉnh...">
 <!ENTITY zotero.preferences.openurl.server "Bộ phân giải:">
 <!ENTITY zotero.preferences.openurl.version "Phiên bản:">

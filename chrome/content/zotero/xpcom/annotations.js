@@ -30,6 +30,7 @@ Zotero.Annotations = new function () {
 	Zotero.defineProperty(this, 'ANNOTATION_TYPE_HIGHLIGHT', { value: 1 });
 	Zotero.defineProperty(this, 'ANNOTATION_TYPE_NOTE', { value: 2 });
 	Zotero.defineProperty(this, 'ANNOTATION_TYPE_IMAGE', { value: 3 });
+	Zotero.defineProperty(this, 'ANNOTATION_TYPE_INK', { value: 4 });
 	
 	Zotero.defineProperty(this, 'PROPS', {
 		value: ['type', 'text', 'comment', 'color', 'pageLabel', 'sortIndex', 'position'],

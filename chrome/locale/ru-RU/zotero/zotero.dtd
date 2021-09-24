@@ -176,7 +176,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Задать цвет">
 <!ENTITY zotero.tagColorChooser.removeColor "Удалить цвет">
 
-<!ENTITY zotero.lookup.description "Введите идентификторы ISBN, DOI, PMID, или arXiv для добавления в вашу библиотеку:">
+<!ENTITY zotero.lookup.description "Введите ISBN, DOI, PMID, arXiv ID, или ADS Bibcode чтобы пополнить вашу ими библиотеку:">
 <!ENTITY zotero.lookup.button.search "Поиск">
 
 <!ENTITY zotero.createParent.title "Создать родительский элемент">
@@ -349,3 +349,7 @@
 <!ENTITY zotero.pdfReader.noSpreads "Не показывать развороты">
 <!ENTITY zotero.pdfReader.oddSpreads "Развороты с нечетных номеров">
 <!ENTITY zotero.pdfReader.evenSpreads "Развороты с четных номеров">
+<!ENTITY zotero.pdfReader.zoomIn "Увеличить">
+<!ENTITY zotero.pdfReader.zoomOut "Уменьшить">
+<!ENTITY zotero.pdfReader.zoomAuto "Масштабировать автоматически">
+<!ENTITY zotero.pdfReader.zoomPageWidth "По ширине страницы">

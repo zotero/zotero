@@ -1,10 +1,15 @@
 <?xml version="1.0" ?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
 	width="550" height="230"
+	onload="_init()"
 	id="zotero-progress">
+	<script src="include.js"></script>
+	<script src="progressQueueDialog.js"/>
 	<vbox style="padding:10px" flex="1">
 		<label id="label" control="progress-indicator" value=""/>
 		<hbox align="center">
@@ -13,15 +18,8 @@
 			<button id="minimize-button" label="&zotero.general.minimize;"/>
 			<button id="close-button" label="&zotero.general.close;"/>
 		</hbox>
-		<tree flex="1" id="tree" hidecolumnpicker="true">
-			<treecols>
-				<treecol id="success-col" style="width:20px;"/>
-				<splitter class="tree-splitter" hidden="true"/>
-				<treecol id="col1" flex="1"/>
-				<splitter class="tree-splitter"/>
-				<treecol id="col2" flex="2"/>
-			</treecols>
-			<treechildren id="treechildren"/>
-		</tree>
+		<hbox class="virtualized-table-container" flex="1" height="200px">
+			<html:div id="tree"/>
+		</hbox>
 	</vbox>
 </window>

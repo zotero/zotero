@@ -12,6 +12,7 @@ const dirs = [
 // list of folders that are symlinked
 const symlinkDirs = [
 	'chrome/content/zotero/xpcom/rdf',
+	'chrome/content/zotero/xpcom/translate/src',
 	'styles',
 	'translators'
 ];
@@ -92,7 +93,11 @@ const browserifyConfigs = [
 // exclude mask used for js, copy, symlink and sass tasks
 const ignoreMask = [
 	'**/#*',
-	'resource/schema/global/schema.json.gz'
+	'resource/schema/global/README.md',
+	'resource/schema/global/schema.json.gz',
+	'resource/schema/global/scripts/*',
+	'chrome/content/zotero/xpcom/translate/example/**/*',
+	'chrome/content/zotero/xpcom/translate/README.md',
 ];
 
 const jsFiles = [

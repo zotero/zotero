@@ -95,25 +95,23 @@
 					<groupbox>
 						<caption label="OpenURL"/>
 						
-						<hbox align="center">
-							<!-- vbox prevents some weird vertical stretching of the menulist -->
-							<vbox flex="1">
-								<menulist id="openURLMenu" oncommand="Zotero_Preferences.Advanced.onOpenURLSelected();">
-									<menupopup>
-										<menuseparator/>
-										<menuitem label="&zotero.preferences.openurl.custom;" value="custom" selected="true"/>
-									</menupopup>
-								</menulist>
-							</vbox>
-							<button id="openURLSearchButton" label="&zotero.preferences.openurl.search;"
-									oncommand="Zotero_Preferences.Advanced.populateOpenURLResolvers()"/>
+						<hbox>
+							<menulist id="openurl-menu">
+								<menupopup
+										id="openurl-primary-popup"
+										onpopupshowing="Zotero_Preferences.Advanced.handleOpenURLPopupShowing(event)"
+										oncommand="Zotero_Preferences.Advanced.handleOpenURLSelected(event)">
+									<menuitem label="&zotero.preferences.openurl.choose;"/>
+								</menupopup>
+							</menulist>
 						</hbox>
 						
 						<hbox align="center">
 							<label value="&zotero.preferences.openurl.server;"/>
 							<textbox id="openURLServerField" flex="1"
-									oninput="Zotero_Preferences.Advanced.onOpenURLCustomized();"
-									preference="pref-openURL-resolver"/>
+								oninput="Zotero_Preferences.Advanced.onOpenURLCustomized();"
+								preference="pref-openURL-resolver"
+							/>
 						</hbox>
 					
 						<hbox align="center">

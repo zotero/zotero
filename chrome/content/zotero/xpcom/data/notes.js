@@ -26,41 +26,18 @@
 
 Zotero.Notes = new function() {
 	this.AUTO_SYNC_DELAY = 15;
+	// Keep in sync with utilities_item.js::noteToTitle() in zotero/utilities
 	this.__defineGetter__("MAX_TITLE_LENGTH", function() { return 120; });
 	this.__defineGetter__("defaultNote", function () { return '<div class="zotero-note znv1"></div>'; });
 	this.__defineGetter__("notePrefix", function () { return '<div class="zotero-note znv1">'; });
 	this.__defineGetter__("noteSuffix", function () { return '</div>'; });
 	
 	this._editorInstances = [];
+	this._downloadInProgressPromise = null;
 	
-	/**
-	* Return first line (or first MAX_LENGTH characters) of note content
-	**/
 	this.noteToTitle = function(text) {
-		var origText = text;
-		text = text.trim();
-		text = text.replace(/<br\s*\/?>/g, ' ');
-		text = Zotero.Utilities.unescapeHTML(text);
-		
-		// If first line is just an opening HTML tag, remove it
-		//
-		// Example:
-		//
-		// <blockquote>
-		// <p>Foo</p>
-		// </blockquote>
-		if (/^<[^>\n]+[^\/]>\n/.test(origText)) {
-			text = text.trim();
-		}
-		
-		var max = this.MAX_TITLE_LENGTH;
-		
-		var t = text.substring(0, max);
-		var ln = t.indexOf("\n");
-		if (ln>-1 && ln<max) {
-			t = t.substring(0, ln);
-		}
-		return t;
+		Zotero.debug(`Zotero.Note.noteToTitle() is deprecated -- use Zotero.Utilities.Item.noteToTitle() instead`);
+		return Zotero.Utilities.Item.noteToTitle(text);
 	};
 	
 	this.registerEditorInstance = function(instance) {
@@ -190,6 +167,137 @@ Zotero.Notes = new function() {
 		return doc.body.innerHTML;
 	};
 
+	/**
+	 * Download embedded images if they don't exist locally
+	 *
+	 * @param {Zotero.Item} item
+	 * @returns {Promise<boolean>}
+	 */
+	this.ensureEmbeddedImagesAreAvailable = async function (item) {
+		let resolvePromise = () => {};
+		if (this._downloadInProgressPromise) {
+			await this._downloadInProgressPromise;
+		}
+		else {
+			this._downloadInProgressPromise = new Promise((resolve) => {
+				resolvePromise = () => {
+					this._downloadInProgressPromise = null;
+					resolve();
+				};
+			});
+		}
+		try {
+			var attachments = Zotero.Items.get(item.getAttachments());
+			for (let attachment of attachments) {
+				let path = await attachment.getFilePathAsync();
+				if (!path) {
+					Zotero.debug(`Image file not found for item ${attachment.key}. Trying to download`);
+					let fileSyncingEnabled = Zotero.Sync.Storage.Local.getEnabledForLibrary(item.libraryID);
+					if (!fileSyncingEnabled) {
+						Zotero.debug('File sync is disabled');
+						resolvePromise();
+						return false;
+					}
+
+					try {
+						let results = await Zotero.Sync.Runner.downloadFile(attachment);
+						if (!results || !results.localChanges) {
+							Zotero.debug('Download failed');
+							resolvePromise();
+							return false;
+						}
+					}
+					catch (e) {
+						Zotero.debug(e);
+						resolvePromise();
+						return false;
+					}
+				}
+			}
+		}
+		catch (e) {
+			Zotero.debug(e);
+			resolvePromise();
+			return false;
+		}
+
+		resolvePromise();
+		return true;
+	};
+
+	/**
+	 * Copy embedded images from one note to another and update
+	 * item keys in note HTML.
+	 *
+	 * Must be called after copying a note
+ 	 *
+	 * @param {Zotero.Item} fromNote
+	 * @param {Zotero.Item} toNote
+	 * @returns {Promise}
+	 */
+	this.copyEmbeddedImages = async function (fromNote, toNote) {
+		Zotero.DB.requireTransaction();
+		
+		let attachments = Zotero.Items.get(fromNote.getAttachments());
+		if (!attachments.length) {
+			return;
+		}
+
+		let note = toNote.note;
+		let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
+			.createInstance(Components.interfaces.nsIDOMParser);
+		let doc = parser.parseFromString(note, 'text/html');
+	
+		// Copy note image attachments and replace keys in the new note
+		for (let attachment of attachments) {
+			if (await attachment.fileExists()) {
+				let copiedAttachment = await Zotero.Attachments.copyEmbeddedImage({ attachment, note: toNote });
+				let node = doc.querySelector(`img[data-attachment-key="${attachment.key}"]`);
+				if (node) {
+					node.setAttribute('data-attachment-key', copiedAttachment.key);
+				}
+			}
+		}
+		toNote.setNote(doc.body.innerHTML);
+		await toNote.save({ skipDateModifiedUpdate: true });
+	};
+	
+	this.promptToIgnoreMissingImage = function () {
+		let ps = Services.prompt;
+		let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
+		let index = ps.confirmEx(
+			null,
+			Zotero.getString('general.warning'),
+			Zotero.getString('pane.item.notes.ignoreMissingImage'),
+			buttonFlags,
+			Zotero.getString('general.continue'),
+			null, null, null, {}
+		);
+		return !index;
+	};
+	
+	this.deleteUnusedEmbeddedImages = async function (item) {
+		if (!item.isNote()) {
+			throw new Error('Item is not a note');
+		}
+		
+		let note = item.getNote();
+		let parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+			.createInstance(Components.interfaces.nsIDOMParser);
+		let doc = parser.parseFromString(note, 'text/html');
+		
+		let keys = Array.from(doc.querySelectorAll('img[data-attachment-key]'))
+			.map(node => node.getAttribute('data-attachment-key'));
+
+		let attachments = Zotero.Items.get(item.getAttachments());
+		for (let attachment of attachments) {
+			if (!keys.includes(attachment.key)) {
+				await attachment.eraseTx();
+			}
+		}
+	};
+
 	this.hasSchemaVersion = function (note) {
 		let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
 		.createInstance(Components.interfaces.nsIDOMParser);
@@ -294,9 +402,7 @@ Zotero.Notes = new function() {
 		}
 		schemaVersion++;
 		metadataContainer.setAttribute('data-schema-version', schemaVersion);
-		note = doc.body.innerHTML;
-		note = note.trim();
-		item.setNote(note);
+		item.setNote(doc.body.innerHTML);
 		await item.saveTx({ skipDateModifiedUpdate: true });
 		return true;
 	};

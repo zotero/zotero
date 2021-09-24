@@ -380,6 +380,12 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		// Make sure data directory isn't in Dropbox, etc.
 		yield Zotero.DataDirectory.checkForUnsafeLocation(dataDir);
 		
+		Services.obs.addObserver({
+			observe: function () {
+				Zotero.Session.save();
+			}
+		}, "quit-application-granted", false);
+		
 		// Register shutdown handler to call Zotero.shutdown()
 		var _shutdownObserver = {observe:function() { Zotero.shutdown().done() }};
 		Services.obs.addObserver(_shutdownObserver, "quit-application", false);
@@ -690,6 +696,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			yield Zotero.CharacterSets.init();
 			yield Zotero.RelationPredicates.init();
 			
+			yield Zotero.Session.init();
+			
 			Zotero.locked = false;
 			
 			// Initialize various services
@@ -727,6 +735,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			yield Zotero.Retractions.init();
 			yield Zotero.NoteBackups.init();
 			yield Zotero.Dictionaries.init();
+			Zotero.Reader.init();
 			
 			// Migrate fields from Extra that can be moved to item fields after a schema update
 			yield Zotero.Schema.migrateExtraFields();
@@ -1991,7 +2000,6 @@ Zotero.VersionHeader = {
 Zotero.DragDrop = {
 	currentEvent: null,
 	currentOrientation: 0,
-	currentSourceNode: null,
 	
 	getDataFromDataTransfer: function (dataTransfer, firstOnly) {
 		var dt = dataTransfer;
@@ -2050,28 +2058,8 @@ Zotero.DragDrop = {
 	},
 	
 	
-	getDragSource: function (dataTransfer) {
-		if (!dataTransfer) {
-			//Zotero.debug("Drag data not available", 2);
-			return false;
-		}
-		
-		// For items, the drag source is the CollectionTreeRow of the parent window
-		// of the source tree
-		if (dataTransfer.types.contains("zotero/item")) {
-			let sourceNode = dataTransfer.mozSourceNode || this.currentSourceNode;
-			if (!sourceNode || sourceNode.tagName != 'treechildren'
-					|| sourceNode.parentElement.id != 'zotero-items-tree') {
-				return false;
-			}
-			var win = sourceNode.ownerDocument.defaultView;
-			if (win.document.documentElement.getAttribute('windowtype') == 'zotero:search') {
-				return win.ZoteroAdvancedSearch.itemsView.collectionTreeRow;
-			}
-			return win.ZoteroPane.collectionsView.selectedTreeRow;
-		}
-		
-		return false;
+	getDragSource: function () {
+		return this.currentDragSource;
 	},
 	
 	

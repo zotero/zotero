@@ -29,7 +29,7 @@ Components.utils.import("resource://gre/modules/InlineSpellChecker.jsm");
 // note-editor produced HTML. Which might result to more
 // conflicts, especially in group libraries
 
-// Note: Synchrounous save can still affect dateModified
+// Note: Synchronous save can still affect dateModified
 
 // When changing this update in `note-editor` as well.
 // This only filters images that are being imported from a URL.
@@ -44,7 +44,7 @@ const DOWNLOADED_IMAGE_TYPE = [
 ];
 
 // Schema version here has to be the same as in note-editor!
-const SCHEMA_VERSION = 3;
+const SCHEMA_VERSION = 5;
 
 class EditorInstance {
 	constructor() {
@@ -65,7 +65,6 @@ class EditorInstance {
 		this._state = options.state;
 		this._disableSaving = false;
 		this._subscriptions = [];
-		this._deletedImages = {};
 		this._quickFormatWindow = null;
 		this._isAttachment = this._item.isAttachment();
 		this._citationItemsList = [];
@@ -115,6 +114,10 @@ class EditorInstance {
 				...Zotero.Intl.getPrefixedStrings('noteEditor.')
 			}
 		});
+		
+		if (!this._item.isAttachment()) {
+			Zotero.Notes.ensureEmbeddedImagesAreAvailable(this._item);
+		}
 	}
 
 	uninit() {
@@ -135,45 +138,37 @@ class EditorInstance {
 		this._iframeWindow.removeEventListener('message', this._messageHandler);
 		Zotero.Notes.unregisterEditorInstance(this);
 		this.saveSync();
+		if (!this._item.isAttachment()) {
+			Zotero.Notes.deleteUnusedEmbeddedImages(this._item);
+		}
 	}
 
 	focus() {
 		this._postMessage({ action: 'focus' });
 	}
 
-	async notify(ids) {
-		// Update itemData and formatted citation in notes
+	async notify(event, type, ids, extraData) {
+		if (type === 'file' && event === 'download') {
+			let items = await Zotero.Items.getAsync(ids);
+			for (let item of items) {
+				if (item.isAttachment() && await item.getFilePathAsync()) {
+					let subscription = this._subscriptions.find(x => x.data.attachmentKey === item.key);
+					if (subscription) {
+						await this._feedSubscription(subscription);
+					}
+				}
+			}
+		}
+		
 		if (this._readOnly || !this._item) {
 			return;
 		}
-
-		// Make sure only single sibling instance does automatic
-		// citation update, and preferably the focused one
-		// to prevent another instances in the background resetting
-		// each other and the one where typing happens
 		
-		// This is a temporary solution, and in future sibling instances
-		// should have a better mechanism to share state, images,
-		// undo stack and know which one now is the "master"
-		let siblingInstances = Zotero.Notes._editorInstances
-		.filter(x => x._item.id === this._item.id);
-		if (siblingInstances.length) {
-			let masterInstance = siblingInstances
-			.find(x => x._iframeWindow.document.hasFocus());
-			if (!masterInstance) {
-				masterInstance = siblingInstances[0];
-			}
-			if (masterInstance !== this) {
-				return;
-			}
-		}
-	
+		// Update citations itemData
 		let items = await Zotero.Items.getAsync(ids);
-
-		// Update citations
 		let uris = items.map(x => Zotero.URI.getItemURI(x)).filter(x => x);
 		let citationItemsList = this._citationItemsList
-		.filter(ci => ci.uris && uris.some(uri => ci.uris.includes(uri)));
+			.filter(ci => ci.uris && uris.some(uri => ci.uris.includes(uri)));
 		await this._updateCitationItems(citationItemsList);
 	}
 
@@ -201,17 +196,9 @@ class EditorInstance {
 
 	_isReadOnly() {
 		let item = this._item;
-		if (item.deleted || item.parentItem && item.parentItem.deleted) {
-			return true;
-		}
-		let { libraryID } = item;
-		var type = Zotero.Libraries.get(libraryID).libraryType;
-		if (type === 'group') {
-			var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
-			var group = Zotero.Groups.get(groupID);
-			return !group.editable;
-		}
-		return false;
+		return !item.isEditable()
+			|| item.deleted
+			|| item.parentItem && item.parentItem.deleted;
 	}
 
 	_getFont() {
@@ -348,7 +335,8 @@ class EditorInstance {
 			let commentHTML = '';
 			
 			let storedAnnotation = {
-				uri: Zotero.URI.getItemURI(attachmentItem),
+				attachmentURI: Zotero.URI.getItemURI(attachmentItem),
+				annotationKey: annotation.id,
 				color: annotation.color,
 				pageLabel: annotation.pageLabel,
 				position: annotation.position
@@ -363,8 +351,9 @@ class EditorInstance {
 					locator: annotation.pageLabel
 				};
 				
-				// TODO: Find a more elegant way to call this
-				let itemData = Zotero.Cite.System.prototype.retrieveItem(parentItem);
+				// Note: integration.js` uses `Zotero.Cite.System.prototype.retrieveItem`,
+				// which produces a little bit different CSL JSON
+				let itemData = Zotero.Utilities.itemToCSLJSON(parentItem);
 				if (!skipEmbeddingItemData) {
 					citationItem.itemData = itemData;
 				}
@@ -383,8 +372,7 @@ class EditorInstance {
 				let citationWithData = JSON.parse(JSON.stringify(citation));
 				citationWithData.citationItems[0].itemData = itemData;
 				let formatted = this._formatCitation(citationWithData);
-				
-				citationHTML = `<span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">(${formatted})</span>`;
+				citationHTML = `<span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">${formatted}</span>`;
 			}
 			
 			// Image
@@ -431,13 +419,18 @@ class EditorInstance {
 
 	async _digestItems(ids) {
 		let html = '';
-		for (let id of ids) {
-			let item = await Zotero.Items.getAsync(id);
-			if (!item) {
-				continue;
+		let items = await Zotero.Items.getAsync(ids);
+		for (let item of items) {
+			if (item.isNote()
+				&& !await Zotero.Notes.ensureEmbeddedImagesAreAvailable(item)
+				&& !Zotero.Notes.promptToIgnoreMissingImage()) {
+				return null;
 			}
+		}
+		
+		for (let item of items) {
 			if (item.isRegularItem()) {
-				let itemData = Zotero.Cite.System.prototype.retrieveItem(item);
+				let itemData = Zotero.Utilities.itemToCSLJSON(item);
 				let citation = {
 					citationItems: [{
 						uris: [Zotero.URI.getItemURI(item)],
@@ -446,7 +439,7 @@ class EditorInstance {
 					properties: {}
 				};
 				let formatted = this._formatCitation(citation);
-				html += `<p><span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">(${formatted})</span></p>`;
+				html += `<p><span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">${formatted}</span></p>`;
 			}
 			else if (item.isNote()) {
 				let note = item.note;
@@ -513,27 +506,26 @@ class EditorInstance {
 				}
 
 				// Clone all note image attachments and replace keys in the new note
-				let attachments = await Zotero.Items.getAsync(item.getAttachments());
+				let attachments = Zotero.Items.get(item.getAttachments());
 				for (let attachment of attachments) {
-					let path = await attachment.getFilePathAsync();
-					let buf = await OS.File.read(path, {});
-					buf = new Uint8Array(buf).buffer;
-					let blob = new (Zotero.getMainWindow()).Blob([buf], { type: attachment.attachmentContentType });
-					// Image type is not additionally filtered because it was an attachment already
-					let clonedAttachment = await Zotero.Attachments.importEmbeddedImage({
-						blob,
-						parentItemID: this._item.id,
-						saveOptions: {
-							notifierData: {
-								noteEditorID: this.instanceID
+					if (!await attachment.fileExists()) {
+						continue;
+					}
+					await Zotero.DB.executeTransaction(async () => {
+						let copiedAttachment = await Zotero.Attachments.copyEmbeddedImage({
+							attachment,
+							note: this._item,
+							saveOptions: {
+								notifierData: {
+									noteEditorID: this.instanceID
+								}
 							}
+						});
+						let node = doc.querySelector(`img[data-attachment-key="${attachment.key}"]`);
+						if (node) {
+							node.setAttribute('data-attachment-key', copiedAttachment.key);
 						}
 					});
-					
-					let node = doc.querySelector(`img[data-attachment-key=${attachment.key}]`);
-					if (node) {
-						node.setAttribute('data-attachment-key', clonedAttachment.key);
-					}
 				}
 				
 				html += `<p></p>${doc.body.innerHTML}<p></p>`;
@@ -543,7 +535,8 @@ class EditorInstance {
 	}
 
 	_messageHandler = async (e) => {
-		if (e.data.instanceID !== this.instanceID) {
+		if (e.source !== this._iframeWindow
+			|| e.data.instanceID !== this.instanceID) {
 			return;
 		}
 		let message = e.data.message;
@@ -563,6 +556,9 @@ class EditorInstance {
 					if (type === 'zotero/item') {
 						let ids = data.split(',').map(id => parseInt(id));
 						html = await this._digestItems(ids);
+						if (!html) {
+							return;
+						}
 					}
 					else if (type === 'zotero/annotation') {
 						let annotations = JSON.parse(data);
@@ -575,12 +571,18 @@ class EditorInstance {
 					return;
 				}
 				case 'openAnnotation': {
-					let { uri, position } = message;
+					let { attachmentURI, position } = message;
 					if (this.onNavigate) {
-						this.onNavigate(uri, { position });
+						this.onNavigate(attachmentURI, { position });
 					}
 					else {
-						await Zotero.Reader.openURI(uri, { position });
+						let zp = Zotero.getActiveZoteroPane();
+						if (zp) {
+							let item = await Zotero.URI.getURIItem(attachmentURI);
+							if (item) {
+								zp.viewPDF(item.id, { position });
+							}
+						}
 					}
 					return;
 				}
@@ -596,7 +598,10 @@ class EditorInstance {
 					}
 					let attachments = Zotero.Items.get(item.getAttachments()).filter(x => x.isPDFAttachment());
 					if (citationItem.locator && attachments.length === 1) {
-						await Zotero.Reader.open(attachments[0].id, { pageLabel: citationItem.locator });
+						let zp = Zotero.getActiveZoteroPane();
+						if (zp) {
+							zp.viewPDF(attachments[0].id, { pageLabel: citationItem.locator });
+						}
 					}
 					else {
 						this._showInLibrary(item.id);
@@ -652,13 +657,15 @@ class EditorInstance {
 					await this._save(noteData, system);
 					return;
 				}
-				case 'subscribeProvider': {
+				case 'subscribe': {
 					let { subscription } = message;
 					this._subscriptions.push(subscription);
-					await this._feedSubscription(subscription);
+					if (subscription.type === 'image') {
+						await this._feedSubscription(subscription);
+					}
 					return;
 				}
-				case 'unsubscribeProvider': {
+				case 'unsubscribe': {
 					let { id } = message;
 					this._subscriptions.splice(this._subscriptions.findIndex(s => s.id === id), 1);
 					return;
@@ -701,7 +708,7 @@ class EditorInstance {
 									let citationItem = {};
 									citationItem.id = item.id;
 									citationItem.uris = [Zotero.URI.getItemURI(item)];
-									citationItem.itemData = Zotero.Cite.System.prototype.retrieveItem(item);
+									citationItem.itemData = Zotero.Utilities.itemToCSLJSON(item);
 									citation.citationItems.push(citationItem);
 								}
 							}
@@ -729,24 +736,6 @@ class EditorInstance {
 					}
 					return;
 				}
-				case 'syncAttachmentKeys': {
-					if (this._readOnly) {
-						return;
-					}
-					let { attachmentKeys } = message;
-					if (this._isAttachment) {
-						return;
-					}
-					let attachmentItems = this._item.getAttachments().map(id => Zotero.Items.get(id));
-					let abandonedItems = attachmentItems.filter(item => !attachmentKeys.includes(item.key));
-					for (let item of abandonedItems) {
-						// Store image data for undo. Although it stays as long
-						// as the note is opened. TODO: Find a better way
-						this._deletedImages[item.key] = await this._getDataURL(item);
-						await item.eraseTx();
-					}
-					return;
-				}
 				case 'openContextMenu': {
 					let { x, y, pos, itemGroups } = message;
 					this._openPopup(x, y, pos, itemGroups);
@@ -771,7 +760,7 @@ class EditorInstance {
 		for (let { uris } of citationItemsList) {
 			let item = await Zotero.EditorInstance.getItemFromURIs(uris);
 			if (item) {
-				let itemData = Zotero.Cite.System.prototype.retrieveItem(item);
+				let itemData = Zotero.Utilities.itemToCSLJSON(item);
 				citationItems.push({ uris, itemData });
 			}
 		}
@@ -781,33 +770,24 @@ class EditorInstance {
 	}
 
 	async _feedSubscription(subscription) {
-		let { id, type, nodeID, data } = subscription;
+		let { id, type, data } = subscription;
 		if (type === 'image') {
 			let { attachmentKey } = data;
 			let item = Zotero.Items.getByLibraryAndKey(this._item.libraryID, attachmentKey);
-			if (!item) {
-				// TODO: Find a better way to undo image deletion,
-				//  probably just keep it in a trash until the note is closed
-				// This recreates the attachment as a completely new item
-				let dataURL = this._deletedImages[attachmentKey];
-				if (dataURL) {
-					// delete this._deletedImages[attachmentKey];
-					// TODO: Fix every repeated undo-redo cycle caching a
-					//  new image copy in memory
-					let newAttachmentKey = await this._importImage(dataURL);
-					// TODO: Inform editor about the failed to import images
-					this._postMessage({ action: 'attachImportedImage', nodeID, attachmentKey: newAttachmentKey });
+			
+			// Note: Images aren't visible in merge dialog because:
+			// - Attachments aren't downloaded at the time
+			// - We are checking if attachments belong to the current note
+			
+			if (item.parentID === this._item.id) {
+				if (await item.getFilePathAsync()) {
+					let src = await this._getDataURL(item);
+					this._postMessage({ action: 'notifySubscription', id, data: { src } });
 				}
-			}
-			// Make sure attachment key belongs to the actual parent note,
-			// otherwise it would be a security risk.
-			// TODO: Figure out what to do with images not being
-			//  displayed in merge dialog because of this,
-			//  although another reason is because items
-			//  are synced before image attachments
-			else if(item.parentID === this._item.id) {
-				let src = await this._getDataURL(item);
-				this._postMessage({ action: 'notifyProvider', id, type, data: { src } });
+				else {
+					await Zotero.Notes.ensureEmbeddedImagesAreAvailable(this._item);
+					// this._postMessage({ action: 'notifySubscription', id, data: { src: 'error' } });
+				}
 			}
 		}
 	}
@@ -867,6 +847,9 @@ class EditorInstance {
 						menuitem.setAttribute('value', item.name);
 						menuitem.setAttribute('label', item.label);
 						menuitem.setAttribute('disabled', !item.enabled);
+						if (item.checked) {
+							menuitem.setAttribute('type', 'checkbox');
+						}
 						menuitem.setAttribute('checked', item.checked);
 						menuitem.addEventListener('command', () => {
 							this._postMessage({
@@ -921,6 +904,7 @@ class EditorInstance {
 		var menuitem = this._popup.ownerDocument.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('spellCheck.checkSpelling'));
 		menuitem.setAttribute('checked', spellChecker.enabled);
+		menuitem.setAttribute('type', 'checkbox');
 		menuitem.addEventListener('command', () => {
 			// Possible values: 0 - off, 1 - only multi-line, 2 - multi and single line input boxes
 			Zotero.Prefs.set('layout.spellcheckDefault', spellChecker.enabled ? 0 : 1, true);
@@ -1148,7 +1132,9 @@ class EditorInstance {
 	}
 
 	_formatCitation(citation) {
-		return citation.citationItems.map(x => this._formatCitationItemPreview(x)).join('; ');
+		return '(' + citation.citationItems.map((x) => {
+			return `<span class="citation-item">${this._formatCitationItemPreview(x)}</span>`;
+		}).join('; ') + ')';
 	}
 
 	_arrayBufferToBase64(buffer) {
@@ -1284,7 +1270,7 @@ class EditorInstance {
 					else if (citationItem.id) {
 						let item = await Zotero.Items.getAsync(parseInt(citationItem.id));
 						citationItem.uris = [Zotero.URI.getItemURI(item)];
-						citationItem.itemData = Zotero.Cite.System.prototype.retrieveItem(item);
+						citationItem.itemData = Zotero.Utilities.itemToCSLJSON(item);
 					}
 					// Otherwise it's existing item, so just passing untouched citationItem
 					

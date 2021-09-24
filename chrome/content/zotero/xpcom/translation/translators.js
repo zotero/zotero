@@ -326,31 +326,40 @@ Zotero.Translators = new function() {
 	 *
 	 * @param {String} id The ID of the translator
 	 */
-	this.get = function(id) {
+	this.get = function (id) {
 		if (!_initialized) {
 			throw new Zotero.Exception.UnloadedDataException("Translators not yet loaded", 'translators');
 		}
-		return  _translators[id] ? _translators[id] : false
+		return _translators[id] ? _translators[id] : false;
 	}
+	
+	this.getCodeForTranslator = Zotero.Promise.method(function (translator) {
+		if (translator.code) return translator.code;
+		return Zotero.File.getContentsAsync(translator.path).then(function(code) {
+			if (translator.cacheCode) {
+				// See Translator.init() for cache rules
+				translator.code = code;
+			}
+			return code;
+		});
+	});
 	
 	/**
 	 * Gets all translators for a specific type of translation
 	 *
 	 * @param {String} type The type of translators to get (import, export, web, or search)
 	 */
-	this.getAllForType = function(type) {
-		return this.init().then(function () {
-			return _cache[type].slice();
-		});
+	this.getAllForType = async function (type) {
+		await this.init();
+		return _cache[type].slice();
 	}
 	
 	/**
 	 * Gets all translators for a specific type of translation
 	 */
-	this.getAll = function() {
-		return this.init().then(function () {
-			return Object.keys(_translators).map(id => _translators[id]);
-		});
+	this.getAll = async function () {
+		await this.init();
+		return Object.keys(_translators).map(id => _translators[id]);
 	}
 	
 	/**

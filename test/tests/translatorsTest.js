@@ -1,6 +1,6 @@
 "use strict";
 
-describe.only("Zotero.Translators", function () {
+describe("Zotero.Translators", function () {
 	describe("#init()", function () {
 		async function testUpdateCache({ translatorID, label1, label2, lastUpdated1, lastUpdated2, expect }) {
 			var translator1 = buildDummyTranslator('web', `function doDetect() {}; function doSearch(); {}`, {

@@ -45,7 +45,7 @@
     "message": "siste versjon"
   },
   "appConnector": {
-    "message": "$1 Connector"
+    "message": "$1 Tilknytter"
   },
   "upgradeApp": {
     "message": "Oppgrader $1"
@@ -54,7 +54,7 @@
     "message": "Kjører $1?"
   },
   "error_connection_save": {
-    "message": "$1 var ikke i stand til å kommunisere med $2 skrivebordsprogrammet. Connector kan lagre noen sider direkte til din $3 konto, men for best resultat bør du forsikre deg om at $2 er åpen før du forsøker å lagre."
+    "message": "$1 var ikke i stand til å kommunisere med $2 skrivebordsprogrammet. Tilknytteren kan lagre noen sider direkte til din $3 konto, men for best resultat bør du forsikre deg om at $2 er åpen før du forsøker å lagre."
   },
   "error_connection_downloadOrTroubleshoot": {
     "message": "Du kan <a href=\"$1\"> laste ned $2</a> eller <a href=\"$3\"> feilsøke forbindelsen </a> om nødvendig."
@@ -66,7 +66,7 @@
     "message": "Feilrapporten din er levert.\n\nRapport ID: $1\n\nLegg igjen en melding på Zotero forumene med denne rapport ID-en, en beskrivelse av problemet, og nødvendige steg for å gjenskape problemet.\n\nFeilrapporter blir ikke gjennomfått hvis de følges av en melding på forumene."
   },
   "reports_debug_output_submitted": {
-    "message": "Ditt feilsøk output er levert.\n\nDebug ID er $1."
+    "message": "Utdata fra feilsøket ditt er levert.\n\nDebug ID er $1."
   },
   "reports_submission_failed": {
     "message": "En feil skjedde under levering av rapporten din.\n\n$1\n\nSjekk internettforbindelsen din. Hvis problemet vedvarer, skriv en melding på Zotero forumene."
@@ -81,7 +81,7 @@
     "message": "Dette dokumentet inneholder aktive Zotero henvisninger som vil vises som zotero.org koblinger i en nedlastet kopi."
   },
   "integration_googleDocs_unlinkBeforeSaving_instructions": {
-    "message": "For å generere en versjon som kan deles, velg <b>Lag en kopi…</b>fra Fil menyen, velg deretter<b>Fjern kobling fra henvisninger</b> fra Zotero menyen i det nye dokumentet, og last deretter ned versjon med koblinger fjernet. Behold det opprinnelige dokumentet med koblinger i tilfelle du trenger å gjøre flere endringer."
+    "message": "For å lage en versjon som kan deles, velg <b>Lag en kopi…</b>fra Fil menyen, velg deretter<b>Fjern kobling fra henvisninger</b> fra Zotero menyen i det nye dokumentet, og last deretter ned versjon med koblinger fjernet. Behold det opprinnelige dokumentet med koblinger i tilfelle du trenger å gjøre flere endringer."
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Last uansett ned versjon med koblinger"

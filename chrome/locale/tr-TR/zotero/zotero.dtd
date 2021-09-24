@@ -176,7 +176,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Rengi Ayarla">
 <!ENTITY zotero.tagColorChooser.removeColor "Rengi Kaldır">
 
-<!ENTITY zotero.lookup.description "ISBN, DOI, PMID ya da arXiv numaralarını girerek kitaplığınıza ekleyin:">
+<!ENTITY zotero.lookup.description "ISBN, DOI, PMID, arXiv ID ya da ADS Bibcode tanımlayıcılarını girerek kitaplığınıza ekleyin:">
 <!ENTITY zotero.lookup.button.search "Ara">
 
 <!ENTITY zotero.createParent.title "Ana Eser Yarat">
@@ -349,3 +349,7 @@
 <!ENTITY zotero.pdfReader.noSpreads "Birleştirme">
 <!ENTITY zotero.pdfReader.oddSpreads "Tek Numaralı">
 <!ENTITY zotero.pdfReader.evenSpreads "Çift Numaralı">
+<!ENTITY zotero.pdfReader.zoomIn "Yakınlaştır">
+<!ENTITY zotero.pdfReader.zoomOut "Uzaklaştır">
+<!ENTITY zotero.pdfReader.zoomAuto "Otomatik Olarak Yeniden Boyutlandır">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Sayfa Genişliğine Yakınlaştır">

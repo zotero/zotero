@@ -2172,7 +2172,7 @@ Zotero.Item.prototype.setNote = function(text) {
 	
 	this._hasNote = text !== '';
 	this._noteText = text;
-	this._noteTitle = Zotero.Notes.noteToTitle(text);
+	this._noteTitle = Zotero.Utilities.Item.noteToTitle(text);
 	if (this.isNote()) {
 		this._displayTitle = this._noteTitle;
 	}
@@ -3693,7 +3693,7 @@ for (let name of ['type', 'text', 'comment', 'color', 'pageLabel', 'sortIndex', 
 					if (currentType && currentType != value) {
 						throw new Error("Cannot change annotation type");
 					}
-					if (!['highlight', 'note', 'image'].includes(value)) {
+					if (!['highlight', 'note', 'image', 'ink'].includes(value)) {
 						let e = new Error(`Unknown annotation type '${value}'`);
 						e.name = "ZoteroInvalidDataError";
 						throw e;
@@ -4253,39 +4253,31 @@ Zotero.Item.prototype.getImageSrc = function() {
 }
 
 
-Zotero.Item.prototype.getImageSrcWithTags = Zotero.Promise.coroutine(function* () {
-	//Zotero.debug("Generating tree image for item " + this.id);
-	
-	var uri = this.getImageSrc();
-	
-	var retracted = Zotero.Retractions.isRetracted(this);
-	
-	var tags = this.getTags();
-	if (!tags.length && !retracted) {
-		return uri;
-	}
-	
-	var colorData = [];
-	if (tags.length) {
-		let tagColors = Zotero.Tags.getColors(this.libraryID);
-		for (let tag of tags) {
-			let data = tagColors.get(tag.tag);
-			if (data) {
-				colorData.push(data);
-			}
-		}
-		if (!colorData.length && !retracted) {
-			return uri;
-		}
-		colorData.sort(function (a, b) {
-			return a.position - b.position;
-		});
-	}
-	var colors = colorData.map(val => val.color);
-	
-	return Zotero.Tags.generateItemsListImage(colors, uri, retracted);
-});
+Zotero.Item.prototype.getTagColors = function () {
+	Zotero.warn("Zotero.Item::getTagColors() is deprecated -- use Zotero.Item::getColoredTags()");
+	return this.getColoredTags().map(x => x.color);
+};
 
+
+/**
+ * Return tags and colors
+ *
+ * @return {Object[]} - Array of object with 'tag' and 'color' properties
+ */
+Zotero.Item.prototype.getColoredTags = function () {
+	var tags = this.getTags();
+	if (!tags.length) return [];
+	
+	let colorData = [];
+	let tagColors = Zotero.Tags.getColors(this.libraryID);
+	for (let tag of tags) {
+		let data = tagColors.get(tag.tag);
+		if (data) {
+			colorData.push({tag: tag.tag, ...data});
+		}
+	}
+	return colorData.sort((a, b) => a.position - b.position).map(x => ({ tag: x.tag, color: x.color }));
+};
 
 
 /**
@@ -4480,7 +4472,7 @@ Zotero.Item.prototype.multiDiff = function (otherItems, ignoreFields) {
  * @param {Number} [libraryID] - libraryID of the new item, or the same as original if omitted
  * @param {Boolean} [options.skipTags=false] - Skip tags
  * @param {Boolean} [options.includeCollections=false] - Add new item to all collections
- * @return {Promise<Zotero.Item>}
+ * @return {Zotero.Item}
  */
 Zotero.Item.prototype.clone = function (libraryID, options = {}) {
 	Zotero.debug('Cloning item ' + this.id);

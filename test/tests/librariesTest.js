@@ -187,9 +187,11 @@ describe("Zotero.Libraries", function() {
 				assert.isFalse(Zotero.Libraries.isGroupLibrary(id), "returns false for " + type + " library");
 			}
 		});
-		if("should return true for group library", function(){
+		
+		it("should return true for group library", function () {
 			assert.isTrue(Zotero.Libraries.isGroupLibrary(group.libraryID));
 		})
+		
 		it("should throw for invalid library ID", function() {
 			assert.throws(Zotero.Libraries.isGroupLibrary.bind(Zotero.Libraries, -1), /^Invalid library ID /);
 		});

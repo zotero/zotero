@@ -1014,17 +1014,17 @@ Zotero.Translate.ItemGetter = function() {
 };
 
 Zotero.Translate.ItemGetter.prototype = {
-	"setItems":function(items) {
+	setItems: function (items) {
 		this._itemsLeft = items;
-		this._itemsLeft.sort(function(a, b) { return a.id - b.id; });
+		this._itemsLeft.sort((a, b) => a.id - b.id);
 		this.numItems = this._itemsLeft.length;
 	},
 	
-	"setCollection": function (collection, getChildCollections) {
+	setCollection: function (collection, getChildCollections) {
 		// get items in this collection
 		var items = new Set(collection.getChildItems());
 		
-		if(getChildCollections) {
+		if (getChildCollections) {
 			// Get child collections
 			this._collectionsLeft = Zotero.Collections.getByParent(collection.id);
 			
@@ -1037,12 +1037,16 @@ Zotero.Translate.ItemGetter.prototype = {
 		}
 		
 		this._itemsLeft = Array.from(items.values());
-		this._itemsLeft.sort(function(a, b) { return a.id - b.id; });
+		this._itemsLeft.sort((a, b) => a.id - b.id);
 		this.numItems = this._itemsLeft.length;
 	},
 	
-	"setAll": Zotero.Promise.coroutine(function* (libraryID, getChildCollections) {
-		this._itemsLeft = (yield Zotero.Items.getAll(libraryID, true))
+	/**
+	 * NOTE: This function should use the Zotero.Promise.method wrapper which adds a
+	 * isResolved property to the returned promise for noWait translation.
+	 */
+	setAll: Zotero.Promise.method(async function (libraryID, getChildCollections) {
+		this._itemsLeft = (await Zotero.Items.getAll(libraryID, true))
 			.filter((item) => {
 				// Don't export annotations
 				switch (item.itemType) {
@@ -1052,11 +1056,11 @@ Zotero.Translate.ItemGetter.prototype = {
 				return true;
 			});
 		
-		if(getChildCollections) {
+		if (getChildCollections) {
 			this._collectionsLeft = Zotero.Collections.getByLibrary(libraryID);
 		}
-		
-		this._itemsLeft.sort(function(a, b) { return a.id - b.id; });
+
+		this._itemsLeft.sort((a, b) => a.id - b.id);
 		this.numItems = this._itemsLeft.length;
 	}),
 	

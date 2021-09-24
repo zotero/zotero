@@ -516,6 +516,10 @@ Zotero.DataObject.prototype._getLinkedObject = Zotero.Promise.coroutine(function
 					+ "in Zotero." + this._ObjectType + "::getLinked" + this._ObjectType + "()", 2);
 				continue;
 			}
+			// Ignore items in the trash
+			if (obj.objectType == 'item' && obj.deleted) {
+				continue;
+			}
 			return obj;
 		}
 	}
@@ -534,6 +538,10 @@ Zotero.DataObject.prototype._getLinkedObject = Zotero.Promise.coroutine(function
 				continue;
 			}
 			if (obj.libraryID == libraryID) {
+				// Ignore items in the trash
+				if (obj.objectType == 'item' && obj.deleted) {
+					continue;
+				}
 				return obj;
 			}
 		}
@@ -1094,10 +1102,16 @@ Zotero.DataObject.prototype._finalizeSave = Zotero.Promise.coroutine(function* (
 				toAdd[i][0] = yield Zotero.RelationPredicates.add(toAdd[i][0]);
 				env.relationsToRegister.push([toAdd[i][0], toAdd[i][1]]);
 			}
-			yield Zotero.DB.queryAsync(
-				sql + toAdd.map(x => "(?, ?, ?)").join(", "),
-				toAdd.map(x => [this.id, x[0], x[1]])
-				.reduce((x, y) => x.concat(y))
+			yield Zotero.Utilities.Internal.forEachChunkAsync(
+				toAdd,
+				Math.floor(Zotero.DB.MAX_BOUND_PARAMETERS / 3),
+				async function (chunk) {
+					await Zotero.DB.queryAsync(
+						sql + chunk.map(x => "(?, ?, ?)").join(", "),
+						chunk.map(x => [this.id, x[0], x[1]])
+							.reduce((x, y) => x.concat(y))
+					);
+				}.bind(this)
 			);
 		}
 		

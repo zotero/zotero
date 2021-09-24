@@ -33,6 +33,7 @@ class ReaderInstance {
 		this._window = null;
 		this._iframeWindow = null;
 		this._itemID = null;
+		this._title = '';
 		this._isReaderInitialized = false;
 		this._showItemPaneToggle = false;
 		this._initPromise = new Promise((resolve, reject) => {
@@ -50,7 +51,11 @@ class ReaderInstance {
 	}
 
 	async open({ itemID, state, location }) {
-		let item = await Zotero.Items.getAsync(itemID);
+		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
+		let library = Zotero.Libraries.get(libraryID);
+		await library.waitForDataLoad('item');
+		
+		let item = Zotero.Items.get(itemID);
 		if (!item) {
 			return false;
 		}
@@ -77,7 +82,10 @@ class ReaderInstance {
 			sidebarWidth: this._sidebarWidth,
 			sidebarOpen: this._sidebarOpen,
 			bottomPlaceholderHeight: this._bottomPlaceholderHeight,
-			localizedStrings: Zotero.Intl.getPrefixedStrings('pdfReader')
+			localizedStrings: {
+				...Zotero.Intl.getPrefixedStrings('general.'),
+				...Zotero.Intl.getPrefixedStrings('pdfReader.')
+			}
 		}, [buf]);
 		// Set title once again, because `ReaderWindow` isn't loaded the first time
 		this.updateTitle();
@@ -91,13 +99,28 @@ class ReaderInstance {
 	updateTitle() {
 		let item = Zotero.Items.get(this._itemID);
 		let title = item.getDisplayTitle();
-		let parentItemID = item.parentItemID;
-		if (parentItemID) {
-			let parentItem = Zotero.Items.get(parentItemID);
-			if (parentItem) {
-				title = parentItem.getDisplayTitle();
+		let parentItem = item.parentItem;
+		if (parentItem) {
+			let parts = [];
+			let displayTitle = parentItem.getDisplayTitle();
+			if (displayTitle) {
+				parts.push(displayTitle);
 			}
+
+			let firstCreator = parentItem.getField('firstCreator');
+			if (firstCreator) {
+				parts.push(firstCreator);
+			}
+
+			let year = parentItem.getField('year');
+			if (year) {
+				parts.push(year);
+			}
+
+			title = parts.join(' - ');
 		}
+		
+		this._title = title;
 		this._setTitleValue(title);
 	}
 
@@ -148,6 +171,14 @@ class ReaderInstance {
 	
 	isHandToolActive() {
 		return this._iframeWindow.eval('PDFViewerApplication.pdfCursorTools.handTool.active');
+	}
+	
+	isZoomAutoActive() {
+		return this._iframeWindow.eval('PDFViewerApplication.pdfViewer.currentScaleValue === "auto"');
+	}
+	
+	isZoomPageWidthActive() {
+		return this._iframeWindow.eval('PDFViewerApplication.pdfViewer.currentScaleValue === "page-width"');
 	}
 	
 	allowNavigateFirstPage() {
@@ -221,7 +252,7 @@ class ReaderInstance {
 				await Zotero.Attachments.createDirectoryForItem(item);
 			}
 			file.append(this.pdfStateFileName);
-			await Zotero.File.putContentsAsync(file, JSON.stringify(state));
+			await OS.File.writeAtomic(file.path, JSON.stringify(state));
 		}
 	}
 
@@ -257,17 +288,9 @@ class ReaderInstance {
 
 	_isReadOnly() {
 		let item = Zotero.Items.get(this._itemID);
-		if (item.deleted || item.parentItem && item.parentItem.deleted) {
-			return true;
-		}
-		let { libraryID } = item;
-		var type = Zotero.Libraries.get(libraryID).libraryType;
-		if (type === 'group') {
-			var groupID = Zotero.Groups.getGroupIDFromLibraryID(libraryID);
-			var group = Zotero.Groups.get(groupID);
-			return !group.editable;
-		}
-		return false;
+		return !item.isEditable()
+			|| item.deleted
+			|| item.parentItem && item.parentItem.deleted;
 	}
 
 	_dataURLtoBlob(dataurl) {
@@ -337,6 +360,7 @@ class ReaderInstance {
 		// Zoom 'Auto'
 		menuitem = this._window.document.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.zoomAuto'));
+		menuitem.setAttribute('type', 'checkbox');
 		menuitem.setAttribute('checked', data.isZoomAuto);
 		menuitem.addEventListener('command', () => {
 			this._postMessage({ action: 'popupCmd', cmd: 'zoomAuto' });
@@ -345,6 +369,7 @@ class ReaderInstance {
 		// Zoom 'Page Width'
 		menuitem = this._window.document.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.zoomPageWidth'));
+		menuitem.setAttribute('type', 'checkbox');
 		menuitem.setAttribute('checked', data.isZoomPageWidth);
 		menuitem.addEventListener('command', () => {
 			this._postMessage({ action: 'popupCmd', cmd: 'zoomPageWidth' });
@@ -397,7 +422,7 @@ class ReaderInstance {
 		// Colors
 		for (let color of colors) {
 			menuitem = this._window.document.createElement('menuitem');
-			menuitem.setAttribute('label', color[0]);
+			menuitem.setAttribute('label', Zotero.getString(color[0]));
 			menuitem.className = 'menuitem-iconic';
 			menuitem.setAttribute('disabled', readOnly);
 			menuitem.setAttribute('image', this._getColorIcon(color[1], color[1] === selectedColor));
@@ -439,7 +464,7 @@ class ReaderInstance {
 		let menuitem;
 		for (let color of colors) {
 			menuitem = this._window.document.createElement('menuitem');
-			menuitem.setAttribute('label', color[0]);
+			menuitem.setAttribute('label', Zotero.getString(color[0]));
 			menuitem.className = 'menuitem-iconic';
 			menuitem.setAttribute('image', this._getColorIcon(color[1], color[1] === selectedColor));
 			menuitem.addEventListener('command', () => {
@@ -639,7 +664,7 @@ class ReaderInstance {
 }
 
 class ReaderTab extends ReaderInstance {
-	constructor({ itemID, sidebarWidth, sidebarOpen, bottomPlaceholderHeight }) {
+	constructor({ itemID, title, sidebarWidth, sidebarOpen, bottomPlaceholderHeight, index, background }) {
 		super();
 		this._itemID = itemID;
 		this._sidebarWidth = sidebarWidth;
@@ -649,11 +674,12 @@ class ReaderTab extends ReaderInstance {
 		this._window = Services.wm.getMostRecentWindow('navigator:browser');
 		let { id, container } = this._window.Zotero_Tabs.add({
 			type: 'reader',
-			title: '',
-			select: true,
-			notifierData: {
+			title: title || '',
+			index,
+			data: {
 				itemID
-			}
+			},
+			select: !background
 		});
 		this.tabID = id;
 		this._tabContainer = container;
@@ -771,6 +797,8 @@ class ReaderWindow extends ReaderInstance {
 		this._window.document.getElementById('view-menuitem-odd-spreads').setAttribute('checked', this.state.spreadMode == 1);
 		this._window.document.getElementById('view-menuitem-even-spreads').setAttribute('checked', this.state.spreadMode == 2);
 		this._window.document.getElementById('view-menuitem-hand-tool').setAttribute('checked', this.isHandToolActive());
+		this._window.document.getElementById('view-menuitem-zoom-auto').setAttribute('checked', this.isZoomAutoActive());
+		this._window.document.getElementById('view-menuitem-zoom-page-width').setAttribute('checked', this.isZoomPageWidthActive());
 	}
 
 	_onGoMenuOpen() {
@@ -805,7 +833,7 @@ class ReaderWindow extends ReaderInstance {
 
 class Reader {
 	constructor() {
-		this._sidebarWidth = 200;
+		this._sidebarWidth = 240;
 		this._sidebarOpen = false;
 		this._bottomPlaceholderHeight = 0;
 		this._readers = [];
@@ -823,6 +851,13 @@ class Reader {
 	
 	getSidebarWidth() {
 		return this._sidebarWidth;
+	}
+	
+	async init() {
+		await Zotero.uiReadyPromise;
+		Zotero.Session.state.windows
+			.filter(x => x.type == 'reader' && Zotero.Items.exists(x.itemID))
+			.forEach(x => this.open(x.itemID, null, { title: x.title, openInWindow: true }));
 	}
 	
 	_loadSidebarOpenState() {
@@ -872,14 +907,23 @@ class Reader {
 
 	notify(event, type, ids, extraData) {
 		if (type === 'tab') {
-			let reader = Zotero.Reader.getByTabID(ids[0]);
-			if (reader) {
-				if (event === 'close') {
-					this._readers.splice(this._readers.indexOf(reader), 1);
+			if (event === 'close') {
+				for (let id of ids) {
+					let reader = Zotero.Reader.getByTabID(id);
+					if (reader) {
+						this._readers.splice(this._readers.indexOf(reader), 1);
+					}
 				}
-				else if (event === 'select') {
+			}
+			else if (event === 'select') {
+				let reader = Zotero.Reader.getByTabID(ids[0]);
+				if (reader) {
 					this.triggerAnnotationsImportCheck(reader._itemID);
 				}
+			}
+			
+			if (event === 'add' || event === 'close') {
+				Zotero.Session.debounceSave();
 			}
 		}
 		// Listen for parent item, PDF attachment and its annotations updates
@@ -925,19 +969,25 @@ class Reader {
 	getByTabID(tabID) {
 		return this._readers.find(r => (r instanceof ReaderTab) && r.tabID === tabID);
 	}
-
-	async openURI(itemURI, location, openWindow) {
-		let item = await Zotero.URI.getURIItem(itemURI);
-		if (!item) return;
-		await this.open(item.id, location, openWindow);
+	
+	getWindowStates() {
+		return this._readers
+			.filter(r => r instanceof ReaderWindow)
+			.map(r => ({ type: 'reader', itemID: r._itemID, title: r._title }));
 	}
 
-	async open(itemID, location, openWindow) {
+	async openURI(itemURI, location, options) {
+		let item = await Zotero.URI.getURIItem(itemURI);
+		if (!item) return;
+		await this.open(item.id, location, options);
+	}
+
+	async open(itemID, location, { title, tabIndex, openInBackground, openInWindow } = {}) {
 		this._loadSidebarOpenState();
 		this.triggerAnnotationsImportCheck(itemID);
 		let reader;
 
-		if (openWindow) {
+		if (openInWindow) {
 			reader = this._readers.find(r => r._itemID === itemID && (r instanceof ReaderWindow));
 		}
 		else {
@@ -946,14 +996,14 @@ class Reader {
 
 		if (reader) {
 			if (reader instanceof ReaderTab) {
-				reader._window.Zotero_Tabs.select(reader.tabID);
+				reader._window.Zotero_Tabs.select(reader.tabID, true);
 			}
 			
 			if (location) {
 				reader.navigate(location);
 			}
 		}
-		else if (openWindow) {
+		else if (openInWindow) {
 			reader = new ReaderWindow({
 				sidebarWidth: this._sidebarWidth,
 				sidebarOpen: this._sidebarOpen,
@@ -963,13 +1013,18 @@ class Reader {
 			if (!(await reader.open({ itemID, location }))) {
 				return;
 			}
+			Zotero.Session.debounceSave();
 			reader._window.addEventListener('unload', () => {
 				this._readers.splice(this._readers.indexOf(reader), 1);
+				Zotero.Session.debounceSave();
 			});
 		}
 		else {
 			reader = new ReaderTab({
 				itemID,
+				title,
+				index: tabIndex,
+				background: openInBackground,
 				sidebarWidth: this._sidebarWidth,
 				sidebarOpen: this._sidebarOpen,
 				bottomPlaceholderHeight: this._bottomPlaceholderHeight
@@ -993,14 +1048,23 @@ class Reader {
 				}
 			};
 		}
-
-		if (reader instanceof ReaderWindow) {
-			reader._window.focus();
-		}
+		reader._window.focus();
 	}
 
+	/**
+	 * Trigger annotations import
+	 *
+	 * @param {Integer} itemID Attachment item id
+	 * @returns {Promise}
+	 */
 	async triggerAnnotationsImportCheck(itemID) {
 		let item = await Zotero.Items.getAsync(itemID);
+		if (!item.isEditable()
+			|| item.deleted
+			|| item.parentItem && item.parentItem.deleted
+		) {
+			return;
+		}
 		let mtime = await item.attachmentModificationTime;
 		if (item.attachmentLastProcessedModificationTime < Math.floor(mtime / 1000)) {
 			await Zotero.PDFWorker.import(itemID, true);

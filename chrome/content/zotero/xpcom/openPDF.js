@@ -26,7 +26,7 @@
 /* eslint-disable array-element-newline */
 
 Zotero.OpenPDF = {
-	openToPage: async function (pathOrItem, page) {
+	openToPage: async function (pathOrItem, page, annotationKey) {
 		var path;
 		if (pathOrItem == 'string') {
 			Zotero.logError("Zotero.OpenPDF.openToPage() now takes a Zotero.Item rather than a path "
@@ -39,7 +39,8 @@ Zotero.OpenPDF = {
 			// TEMP
 			if (Zotero.isPDFBuild && (library.libraryType == 'user' || Zotero.enablePDFBuildForGroups)) {
 				let location = {
-					pageIndex: page - 1
+					annotationKey,
+					pageIndex: page && page - 1
 				};
 				await Zotero.Reader.open(item.id, location);
 				return true;

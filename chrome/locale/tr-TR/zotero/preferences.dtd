@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "En eski eserler ilk">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Besleme Varsayılanları">
 
-<!ENTITY zotero.preferences.openurl.search "Çözücü ara">
+<!ENTITY zotero.preferences.openurl.choose "Bir çözümleyici seç...">
 <!ENTITY zotero.preferences.openurl.custom "Özel...">
 <!ENTITY zotero.preferences.openurl.server "Çözücü:">
 <!ENTITY zotero.preferences.openurl.version "Sürüm:">

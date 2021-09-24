@@ -91,40 +91,70 @@
 				<menuseparator/>
 				<menuitem
 					id="view-menuitem-hand-tool"
-					label="&zotero.pdfReader.handTool;" 
+					label="&zotero.pdfReader.handTool;"
+					type="checkbox"
 					oncommand="menuCmd('switchcursortool_hand')"
 				/>
 				<menuseparator/>
 				<menuitem
 					id="view-menuitem-vertical-scrolling"
 					label="&zotero.pdfReader.verticalScrolling;"
+					type="checkbox"
 					oncommand="menuCmd('switchscrollmode_vertical')"
 				/>
 				<menuitem
 					id="view-menuitem-horizontal-scrolling"
 					label="&zotero.pdfReader.horizontalScrolling;"
+					type="checkbox"
 					oncommand="menuCmd('switchscrollmode_horizontal')"
 				/>
 				<menuitem
 					id="view-menuitem-wrapped-scrolling"
 					label="&zotero.pdfReader.wrappedScrolling;"
+					type="checkbox"
 					oncommand="menuCmd('switchscrollmode_wrapped')"
 				/>
 				<menuseparator/>
 				<menuitem
 					id="view-menuitem-no-spreads"
 					label="&zotero.pdfReader.noSpreads;"
+					type="checkbox"
 					oncommand="menuCmd('switchspreadmode_none')"
 				/>
 				<menuitem
 					id="view-menuitem-odd-spreads"
 					label="&zotero.pdfReader.oddSpreads;"
+					type="checkbox"
 					oncommand="menuCmd('switchspreadmode_odd')"
 				/>
 				<menuitem
 					id="view-menuitem-even-spreads"
 					label="&zotero.pdfReader.evenSpreads;"
+					type="checkbox"
 					oncommand="menuCmd('switchspreadmode_even')"
+				/>
+				<menuseparator class="menu-type-reader"/>
+				<menuitem
+					id="view-menuitem-zoom-in"
+					label="&zotero.pdfReader.zoomIn;"
+					oncommand="menuCmd('zoomIn')"
+				/>
+				<menuitem
+					id="view-menuitem-zoom-out"
+					label="&zotero.pdfReader.zoomOut;"
+					oncommand="menuCmd('zoomOut')"
+				/>
+				<menuitem
+					id="view-menuitem-zoom-auto"
+					type="checkbox"
+					label="&zotero.pdfReader.zoomAuto;"
+					oncommand="menuCmd('zoomAuto')"
+				/>
+				<menuitem
+					id="view-menuitem-zoom-page-width"
+					type="checkbox"
+					label="&zotero.pdfReader.zoomPageWidth;"
+					oncommand="menuCmd('zoomPageWidth')"
 				/>
 			</menupopup>
 		</menu>

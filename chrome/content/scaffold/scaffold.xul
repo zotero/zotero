@@ -34,12 +34,12 @@
  title="Scaffold"
  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<script src="chrome://zotero/content/include.js"/>
-	<script src="chrome://zotero/content/tools/testTranslators/translatorTester.js"/>
+	<script src="chrome://zotero/content/xpcom/translate/testTranslators/translatorTester.js"/>
 	<script src="translators.js"/>
 	<script src="scaffold.js"/>
 	
 	<keyset>
-		<key id="run-do-web" modifiers="accel" key="R" oncommand="Scaffold.run('do')"/>
+		<key id="run-do-web" modifiers="accel" key="R" oncommand="Scaffold.runTranslatorOrTests()"/>
 		<key id="detect-web" modifiers="accel" key="T" oncommand="Scaffold.run('detect')"/>
 		<key id="save" modifiers="accel" key="S" oncommand="Scaffold.save()"/>
 		<key id="increase-font-size" modifiers="accel" key="+" oncommand="Scaffold.increaseFontSize()"/>
@@ -52,7 +52,12 @@
 		<menupopup id="testing-context-menue">
 			<menuitem label="&scaffold.testing.edit.import;" tooltiptext="Edit the input data for the current test" oncommand="Scaffold.editImportFromTest()"/>
 			<menuitem label="&scaffold.testing.copyToClipboard;" tooltiptext="Copy the URL or data for the current test to the clipboard" oncommand="Scaffold.copyToClipboard()"/>
-			<menuitem label="&scaffold.testing.openUrl;" tooltiptext="Open the URL for the current test in the browser" oncommand="Scaffold.openURL()"/>
+			<menu label="&scaffold.testing.openUrl;">
+				<menupopup>
+					<menuitem label="&scaffold.testing.openUrl.internally;" tooltiptext="Open the URL for the current test in the Scaffold browser" oncommand="Scaffold.openURL(false)"/>
+					<menuitem label="&scaffold.testing.openUrl.externally;" tooltiptext="Open the URL for the current test in your default browser" oncommand="Scaffold.openURL(true)"/>
+				</menupopup>
+			</menu>
 		</menupopup>
 	</popupset>
 
@@ -205,6 +210,10 @@
 						<iframe src="chrome://zotero/content/ace/ace.html" id="editor-tests" flex="1"/>
 					</tabpanel>
 					<tabpanel flex="1" id="tabpanel-testing">
+						<keyset>
+							<key id="key-delete-tests" keycode="VK_BACK" oncommand="Scaffold.deleteSelectedTests()"/>
+						</keyset>
+
 						<vbox flex="1"><hbox><description>&scaffold.testing.description;</description></hbox>
 							<hbox flex="1" context="testing-context-menue">
 								<listbox id="testing-listbox" flex="1" seltype="multiple">

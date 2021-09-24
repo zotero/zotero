@@ -181,13 +181,13 @@ describe("Zotero.HTTP", function () {
 				spy = sinon.spy(Zotero.HTTP, "_requestInternal");
 				setTimeout(() => {
 					cancel();
-				}, 80);
+				}, 300);
 				var e = await getPromiseError(
 					Zotero.HTTP.request(
 						"GET",
 						baseURL + "error",
 						{
-							errorDelayIntervals: [10, 10, 150],
+							errorDelayIntervals: [10, 10, 600],
 							cancellerReceiver: function () {
 								cancel = arguments[0];
 							}

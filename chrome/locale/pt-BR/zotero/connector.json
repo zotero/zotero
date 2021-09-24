@@ -2,6 +2,9 @@
   "general_more": {
     "message": "Mais..."
   },
+  "general_moreInfo": {
+    "message": "Mais informações..."
+  },
   "general_done": {
     "message": "Feito"
   },
@@ -16,6 +19,9 @@
   },
   "general_pleaseWait": {
     "message": "Por favor, espere..."
+  },
+  "general_copyToClipboard": {
+    "message": "Copiar para a área de transferência"
   },
   "progressWindow_savingTo": {
     "message": "Salvando em"
@@ -56,6 +62,15 @@
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Habilite o salvamento para a biblioteca online"
   },
+  "reports_report_submitted": {
+    "message": "Seu relatório de erro foi submetido.\n\nID do relatório: $1\n\nPor favor, poste uma mensagem no Fórum do Zotero com o ID do relatório, uma descrição do problema e os passos necessários para reproduzí-lo.\n\nRelatórios de erro não são revisados a não ser que sejam referenciados no Fórum."
+  },
+  "reports_debug_output_submitted": {
+    "message": "O resultado do seu debug foi submetido.\n\nO ID do debug é $1"
+  },
+  "reports_submission_failed": {
+    "message": "Um erro ocorreu na submissão do seu relatório.\n\n$1\n\nPor favor, verifique sua conexão com a internet. Se o problema persistir, poste uma mensagem no Fórum do Zotero."
+  },
   "integration_error_clientUpgrade": {
     "message": "Citação pela web requer $1 ou mais atual."
   },
@@ -76,6 +91,18 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "$1 integração não está disponível quando editando arquivos .docx do Micorsoft Word diretamente no Google Docs. Escolha Arquivo → Salve como Google Docs para habilitar esta funcionalidade. <br/> <br/> se você deseja transferir um documento Word com $1 citações para o Google Docs, veja <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\"> Movendo documentos entre Processadores de Texto</a>."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "Mostrar $1 citações desvinculadas"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "A citação que você está tentando editar foi desvinculada de $1."
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Religar citação"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "Estas citações foram desvinculadas<a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">de$1</a>. Você terá que religá-las antes que sejam atualizadas ou apareçam na sua bibliografia."
   },
   "general_saveTo": {
     "message": "Salvar para $1"

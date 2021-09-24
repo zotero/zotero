@@ -176,7 +176,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Določi barvo">
 <!ENTITY zotero.tagColorChooser.removeColor "Odstrani barvo">
 
-<!ENTITY zotero.lookup.description "Vnesite identifikacijske kode ISBN, DOI, PMID ali arXiv za dodajanje v knjižnico:">
+<!ENTITY zotero.lookup.description "Vnesite bibliografske kode ISBN, DOI, PMID, arXiv ID ali ADS za dodajanje v knjižnico:">
 <!ENTITY zotero.lookup.button.search "Išči">
 
 <!ENTITY zotero.createParent.title "Ustvari nadrejeni vnos">
@@ -336,16 +336,20 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Dodaj samostojno opombo iz zaznamkov">
 <!ENTITY zotero.context.editInWindow "Uredi v ločenem oknu">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
-<!ENTITY zotero.pdfReader.lastPage "Last Page">
-<!ENTITY zotero.pdfReader.back "Back">
-<!ENTITY zotero.pdfReader.forward "Forward">
-<!ENTITY zotero.pdfReader.rotateClockwise "Rotate Clockwise">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotate Counterclockwise">
-<!ENTITY zotero.pdfReader.handTool "Hand Tool">
-<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
-<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
+<!ENTITY zotero.pdfReader.firstPage "Naslovnica">
+<!ENTITY zotero.pdfReader.lastPage "Zadnja stran">
+<!ENTITY zotero.pdfReader.back "Nazaj">
+<!ENTITY zotero.pdfReader.forward "Naprej">
+<!ENTITY zotero.pdfReader.rotateClockwise "Zavrti v SUK">
+<!ENTITY zotero.pdfReader.rotateCounterclockwise "Zavrti v nasprotni SUK">
+<!ENTITY zotero.pdfReader.handTool "Ročno orodje">
+<!ENTITY zotero.pdfReader.verticalScrolling "Navpično drsenje">
+<!ENTITY zotero.pdfReader.horizontalScrolling "Vodoravno drsenje">
+<!ENTITY zotero.pdfReader.wrappedScrolling "Ovito drsenje">
 <!ENTITY zotero.pdfReader.noSpreads "No Spreads">
 <!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
 <!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
+<!ENTITY zotero.pdfReader.zoomIn "Približaj">
+<!ENTITY zotero.pdfReader.zoomOut "Oddalji">
+<!ENTITY zotero.pdfReader.zoomAuto "Samodejno spremeni velikost">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Približaj na širino strani">

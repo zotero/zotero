@@ -45,6 +45,15 @@
 		border-top: 2px solid $tab-background-color-selected;
 	}
 	
+	&.dragging {
+		border-inline-start: $tab-border;
+		z-index: 1;
+	}
+	
+	&.dragging + & {
+		border-inline-start: $tab-border;
+	}
+	
 	.tab-name {
 		line-height: 30px;
 		overflow-x: hidden;

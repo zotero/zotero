@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Înregistrările cele mai vechi primele">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Flux pentru implicite">
 
-<!ENTITY zotero.preferences.openurl.search "Caută rezolvatori">
+<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
 <!ENTITY zotero.preferences.openurl.custom "Personalizare...">
 <!ENTITY zotero.preferences.openurl.server "Rezolvator:">
 <!ENTITY zotero.preferences.openurl.version "Versiune:">

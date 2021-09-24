@@ -257,6 +257,11 @@ var waitForTagSelector = function (win, numUpdates = 1) {
 	return deferred.promise;
 };
 
+var waitForCollectionTree = function(win) {
+	let cv = win.ZoteroPane.collectionsView;
+	return cv._waitForEvent('refresh');
+}
+
 /**
  * Waits for a single item event. Returns a promise for the item ID(s).
  */
@@ -324,29 +329,10 @@ function waitForCallback(cb, interval, timeout) {
 }
 
 
-function clickOnItemsRow(itemsView, row, button = 0) {
-	var x = {};
-	var y = {};
-	var width = {};
-	var height = {};
-	itemsView._treebox.getCoordsForCellItem(
-		row,
-		itemsView._treebox.columns.getNamedColumn('zotero-items-column-title'),
-		'text',
-		x, y, width, height
-	);
-	
-	// Select row to trigger multi-select
-	var tree = itemsView._treebox.treeBody;
-	var rect = tree.getBoundingClientRect();
-	var x = rect.left + x.value;
-	var y = rect.top + y.value;
-	tree.dispatchEvent(new MouseEvent("mousedown", {
-		clientX: x,
-		clientY: y,
-		button,
-		detail: 1
-	}));
+function clickOnItemsRow(win, itemsView, row) {
+	itemsView._treebox.scrollToRow(row);
+	let elem = win.document.querySelector(`#${itemsView.id}-row-${row}`);
+	elem.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0 }));
 }
 
 
@@ -624,8 +610,19 @@ async function resetDB(options = {}) {
 	var db = Zotero.DataDirectory.getDatabase();
 	await Zotero.reinit(
 		async function () {
-			// Swap in the initial copy we made of the DB
-			await OS.File.copy(db + '-test-template', db);
+			// Extract a zipped DB file into place as the initial DB
+			if (options.dbFile && options.dbFile.endsWith('.zip')) {
+				let zipReader = Components.classes['@mozilla.org/libjar/zip-reader;1']
+					.createInstance(Components.interfaces.nsIZipReader);
+				zipReader.open(Zotero.File.pathToFile(options.dbFile));
+				zipReader.extract('zotero.sqlite', Zotero.File.pathToFile(db));
+				zipReader.close();
+			}
+			// Otherwise swap in the initial copy we made of the DB, or an alternative non-zip file
+			// if given
+			else {
+				await OS.File.copy(options.dbFile || db + '-test-template', db);
+			}
 			_defaultGroup = null;
 		},
 		false,

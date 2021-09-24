@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Elstu atriði fyrst">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Sjálfgefnar stillingar streymis">
 
-<!ENTITY zotero.preferences.openurl.search "Leita að auðkennum netþjóna">
+<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
 <!ENTITY zotero.preferences.openurl.custom "Sérsniðið…">
 <!ENTITY zotero.preferences.openurl.server "Auðkennir:">
 <!ENTITY zotero.preferences.openurl.version "Útgáfa:">

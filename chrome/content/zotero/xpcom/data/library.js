@@ -38,7 +38,7 @@ Zotero.Library = function(params = {}) {
 	this._hasSearches = null;
 	this._storageDownloadNeeded = false;
 	
-	Zotero.Utilities.assignProps(
+	Zotero.Utilities.Internal.assignProps(
 		this,
 		params,
 		[
@@ -55,7 +55,7 @@ Zotero.Library = function(params = {}) {
 	// Return a proxy so that we can disable the object once it's deleted
 	return new Proxy(this, {
 		get: function(obj, prop) {
-			if (obj._disabled && !(prop == 'libraryID' || prop == 'id')) {
+			if (obj._disabled && !(prop == 'libraryID' || prop == 'id' || prop == 'name')) {
 				throw new Error("Library (" + obj.libraryID + ") has been disabled");
 			}
 			return obj[prop];
@@ -144,6 +144,12 @@ Zotero.defineProperty(Zotero.Library.prototype, 'libraryTypeID', {
 		default:
 			throw new Error(`Tried to get library type id for ${this._libraryType} library`);
 		}
+	}
+});
+
+Zotero.defineProperty(Zotero.Library.prototype, 'isGroup', {
+	get: function () {
+		return this.libraryType == 'group';
 	}
 });
 

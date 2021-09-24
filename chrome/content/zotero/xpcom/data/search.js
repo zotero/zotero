@@ -36,7 +36,7 @@ Zotero.Search = function(params = {}) {
 	this._conditions = {};
 	this._hasPrimaryConditions = false;
 	
-	Zotero.Utilities.assignProps(this, params, ['name', 'libraryID']);
+	Zotero.Utilities.Internal.assignProps(this, params, ['name', 'libraryID']);
 }
 
 Zotero.extendClass(Zotero.DataObject, Zotero.Search);
@@ -245,12 +245,6 @@ Zotero.Search.prototype._finalizeSave = Zotero.Promise.coroutine(function* (env)
 	}
 	else if (!env.options.skipNotifier) {
 		Zotero.Notifier.queue('modify', 'search', this.id, env.notifierData, env.options.notifierQueue);
-	}
-	
-	if (env.isNew && Zotero.Libraries.isGroupLibrary(this.libraryID)) {
-		var groupID = Zotero.Groups.getGroupIDFromLibraryID(this.libraryID);
-		var group = yield Zotero.Groups.get(groupID);
-		group.clearSearchCache();
 	}
 	
 	if (!env.skipCache) {

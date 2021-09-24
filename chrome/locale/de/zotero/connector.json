@@ -2,6 +2,9 @@
   "general_more": {
     "message": "Mehr..."
   },
+  "general_moreInfo": {
+    "message": "Weitere Informationen…"
+  },
   "general_done": {
     "message": "Erledigt"
   },
@@ -16,6 +19,9 @@
   },
   "general_pleaseWait": {
     "message": "Bitte warten Sie..."
+  },
+  "general_copyToClipboard": {
+    "message": "In die Zwischenablage kopieren"
   },
   "progressWindow_savingTo": {
     "message": "Speichern nach"
@@ -55,6 +61,15 @@
   },
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Speichern in der Online-Bibliothek aktivieren"
+  },
+  "reports_report_submitted": {
+    "message": "Ihr Fehlerbericht wurde übermittelt.\n\nBericht-ID: $1\n\nBitte erstellen Sie einen Beitrag in den Zotero-Foren mit dieser Berichts-ID, einer Beschreibung des Problems und den Schritten, die notwendig sind, um es zu reporoduzieren.\n\nFehlerberichte werden nicht überprüft, es sei denn, sie werden in den Foren erwähnt."
+  },
+  "reports_debug_output_submitted": {
+    "message": "Ihr Debug-Output wurde übermittelt.\n\nDie Debug-ID lautet $1."
+  },
+  "reports_submission_failed": {
+    "message": "Bei der Übermittlung Ihres Berichts ist ein Fehler aufgetreten.\n\n$1\n\nBitte prüfen Sie Ihre Internetverbindung. Falls das Problem bestehen bleibt, schreiben Sie einen Beitrag im Zotero Forum."
   },
   "integration_error_clientUpgrade": {
     "message": "Web-basiertes Zitieren benötigt $1 oder später."
