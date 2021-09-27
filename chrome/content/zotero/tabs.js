@@ -353,7 +353,12 @@ var Zotero_Tabs = new function () {
 			menuitem.addEventListener('command', () => {
 				var reader = Zotero.Reader.getByTabID(id);
 				if (reader) {
-					ZoteroPane_Local.selectItem(reader.itemID);
+					let itemID = reader.itemID;
+					let item = Zotero.Items.get(itemID);
+					if (item && item.parentItemID) {
+						itemID = item.parentItemID;
+					}
+					ZoteroPane_Local.selectItem(itemID);
 					this.select('zotero-pane');
 				}
 			});

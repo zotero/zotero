@@ -221,14 +221,9 @@ class ReaderInstance {
 			return;
 		}
 		else if (cmd === 'showInLibrary') {
-			let id = this._itemID;
-			let item = Zotero.Items.get(this._itemID);
-			if (item && item.parentItemID) {
-				id = item.parentItemID;
-			}
 			let win = Zotero.getMainWindow();
 			if (win) {
-				win.ZoteroPane.selectItems([id]);
+				win.ZoteroPane.selectItems([this._itemID]);
 				win.Zotero_Tabs.select('zotero-pane');
 				win.focus();
 			}
