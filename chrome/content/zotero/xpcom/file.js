@@ -445,9 +445,8 @@ Zotero.File = new function(){
 			});
 		});
 	};
-	
-	
-	this.download = Zotero.Promise.coroutine(function* (uri, path) {
+
+	this.download = async function (uri, path) {
 		var uriStr = uri.spec || uri;
 		
 		Zotero.debug(`Saving ${uriStr} to ${path.pathQueryRef || path}`);
@@ -459,31 +458,52 @@ Zotero.File = new function(){
 		}
 		
 		var deferred = Zotero.Promise.defer();
-		NetUtil.asyncFetch(uri, function (is, status, request) {
-			if (!Components.isSuccessCode(status)) {
-				Zotero.logError(status);
-				let msg = Zotero.getString('sync.error.checkConnection');
-				switch (status) {
-					case 2152398878:
-						// TODO: Localize
-						msg = "Server not found. Check your internet connection."
-						break;
+		const uri_ = NetUtil.ioService.newURI(uri);
+		const inputChannel = NetUtil.ioService.newChannelFromURI(uri_);
+		const outputChannel = FileUtils.openSafeFileOutputStream(new FileUtils.File(path));
+		const pipe = Cc["@mozilla.org/pipe;1"].createInstance(Ci.nsIPipe);
+		pipe.init(true, true, 0, 0xffffffff, null);
+
+		let listener = Cc[
+			"@mozilla.org/network/simple-stream-listener;1"
+		].createInstance(Ci.nsISimpleStreamListener);
+		
+		listener.init(pipe.outputStream, {
+			onStartRequest(request) {
+				// NOTE: This noop callback is required, do not remove.
+			},
+			onStopRequest(request, status) {
+				const responseStatus = 'responseStatus' in request ? request.responseStatus : null;
+				pipe.outputStream.close();
+
+				if (!Components.isSuccessCode(status)) {
+					Zotero.logError(status);
+					let msg = Zotero.getString('sync.error.checkConnection');
+					switch (status) {
+						case 2152398878:
+							// TODO: Localize
+							msg = "Server not found. Check your internet connection."
+							break;
+					}
+					deferred.reject(new Error(msg));
+					return;
 				}
-				deferred.reject(new Error(msg));
-				return;
+				if (responseStatus != 200) {
+					let msg = `Download failed with response code ${responseStatus}`;
+					Zotero.logError(msg);
+					deferred.reject(new Error(msg));
+					return;
+				}
 			}
-			if (request.responseStatus != 200) {
-				let msg = `Download failed with response code ${request.responseStatus}`;
-				Zotero.logError(msg);
-				deferred.reject(new Error(msg));
-				return;
-			}
-			deferred.resolve(is);
 		});
-		var is = yield deferred.promise;
-		yield Zotero.File.putContentsAsync(path, is);
-	});
-	
+
+		NetUtil.asyncCopy(pipe.inputStream, outputChannel, function(aResult) {
+			deferred.resolve();
+		});
+		inputChannel.asyncOpen(listener, null);
+
+		return deferred.promise;
+	};
 	
 	/**
 	 * Rename file within its parent directory
