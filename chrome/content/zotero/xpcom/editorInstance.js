@@ -102,6 +102,7 @@ class EditorInstance {
 			unsaved: !this._item.id,
 			disableUI: this._disableUI,
 			enableReturnButton: !!this._onReturn,
+			isAttachmentNote: this._isAttachment,
 			placeholder: options.placeholder,
 			dir: Zotero.dir,
 			font: this._getFont(),
