@@ -538,8 +538,8 @@ var ZoteroContextPane = new function () {
 					};
 				});
 				context.cachedNotes = notes;
+				context.affectedIDs = new Set();
 			}
-			context.affectedIDs = new Set();
 
 			var attachment = _getCurrentAttachment();
 			var parentID = attachment && attachment.parentID;
