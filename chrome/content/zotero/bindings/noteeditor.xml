@@ -91,7 +91,7 @@
 						return this._editorInstance;
 					}
 
-					this.initEditor = async (state) => {
+					this.initEditor = async (state, reloaded) => {
 						if (this._editorInstance) {
 							this._editorInstance.uninit();
 						}
@@ -106,6 +106,7 @@
 						await this._editorInstance.init({
 							state,
 							item: this._item,
+							reloaded,
 							iframeWindow: document.getAnonymousElementByAttribute(this, 'anonid', 'editor-view').contentWindow,
 							popup: document.getAnonymousElementByAttribute(this, 'anonid', 'editor-menu'),
 							onNavigate: this._navigateHandler,
@@ -145,13 +146,13 @@
 								let state = extraData && extraData[id] && extraData[id].state;
 								if (state) {
 									if (extraData[id].noteEditorID !== this._editorInstance.instanceID) {
-										this.initEditor(state);
+										this.initEditor(state, true);
 									}
 								}
 								else {
 									let curValue = this.item.note;
 									if (curValue !== this._lastHtmlValue) {
-										this.initEditor();
+										this.initEditor(null, true);
 									}
 								}
 								this._lastHtmlValue = this.item.note;

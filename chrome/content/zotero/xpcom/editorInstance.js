@@ -56,6 +56,7 @@ class EditorInstance {
 		this.onNavigate = options.onNavigate;
 		// TODO: Consider to use only itemID instead of loaded item
 		this._item = options.item;
+		this._reloaded = options.reloaded;
 		this._viewMode = options.viewMode;
 		this._readOnly = options.readOnly || this._isReadOnly();
 		this._disableUI = options.disableUI;
@@ -170,7 +171,7 @@ class EditorInstance {
 		let uris = items.map(x => Zotero.URI.getItemURI(x)).filter(x => x);
 		let citationItemsList = this._citationItemsList
 			.filter(ci => ci.uris && uris.some(uri => ci.uris.includes(uri)));
-		await this._updateCitationItems(citationItemsList);
+		await this._updateCitationItems(citationItemsList, true);
 	}
 
 	saveSync() {
@@ -671,6 +672,7 @@ class EditorInstance {
 					this._subscriptions.splice(this._subscriptions.findIndex(s => s.id === id), 1);
 					return;
 				}
+				// Called on note editor load
 				case 'updateCitationItemsList': {
 					let { list } = message;
 					let newList = [];
@@ -681,7 +683,11 @@ class EditorInstance {
 							newList.push(item);
 						}
 					}
-					await this._updateCitationItems(newList);
+					// Force note saving only when note was opened by user and not by
+					// reload, otherwise it can result to sync carousel, if different
+					// clients have different citation item data and the same note is
+					// opened on both clients
+					await this._updateCitationItems(newList, !this._reloaded);
 					this._citationItemsList = list;
 					return;
 				}
@@ -756,7 +762,7 @@ class EditorInstance {
 		}
 	}
 
-	async _updateCitationItems(citationItemsList) {
+	async _updateCitationItems(citationItemsList, forceSaving) {
 		let citationItems = [];
 		for (let { uris } of citationItemsList) {
 			let item = await Zotero.EditorInstance.getItemFromURIs(uris);
@@ -766,7 +772,7 @@ class EditorInstance {
 			}
 		}
 		if (citationItems.length) {
-			this._postMessage({ action: 'updateCitationItems', citationItems });
+			this._postMessage({ action: 'updateCitationItems', citationItems, forceSaving });
 		}
 	}
 
