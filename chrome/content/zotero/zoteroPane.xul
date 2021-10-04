@@ -77,7 +77,7 @@
 	
 	<stack id="zotero-pane-stack">
 		<!-- A placeholder to persist pdf-reader sidebar collapse state to avoid introducing another pref -->
-		<box id="zotero-reader-sidebar-pane" hidden="true" collapsed="true" zotero-persist="collapsed"/>
+		<box id="zotero-reader-sidebar-pane" hidden="true" collapsed="true" zotero-persist="collapsed width"/>
 		<hbox>
 			<box id="zotero-tab-cover" hidden="true">
 				<label pack="center">&zotero.general.loading;</label>

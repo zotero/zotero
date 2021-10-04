@@ -841,6 +841,7 @@ class Reader {
 			for (let reader of readers) {
 				reader.setSidebarWidth(this._sidebarWidth);
 			}
+			this._setSidebarState();
 		}, 500);
 	}
 	
@@ -855,19 +856,24 @@ class Reader {
 			.forEach(x => this.open(x.itemID, null, { title: x.title, openInWindow: true }));
 	}
 	
-	_loadSidebarOpenState() {
+	_loadSidebarState() {
 		let win = Zotero.getMainWindow();
 		if (win) {
 			let pane = win.document.getElementById('zotero-reader-sidebar-pane');
 			this._sidebarOpen = pane.getAttribute('collapsed') == 'false';
+			let width = pane.getAttribute('width');
+			if (width) {
+				this._sidebarWidth = parseInt(width);
+			}
 		}
 	}
 
-	_setSidebarOpenState() {
+	_setSidebarState() {
 		let win = Zotero.getMainWindow();
 		if (win) {
 			let pane = win.document.getElementById('zotero-reader-sidebar-pane');
 			pane.setAttribute('collapsed', this._sidebarOpen ? 'false' : 'true');
+			pane.setAttribute('width', this._sidebarWidth);
 		}
 	}
 	
@@ -881,6 +887,7 @@ class Reader {
 		for (let reader of readers) {
 			reader.setSidebarWidth(width);
 		}
+		this._setSidebarState();
 	}
 	
 	setSidebarOpen(open) {
@@ -889,7 +896,7 @@ class Reader {
 		for (let reader of readers) {
 			reader.setSidebarOpen(open);
 		}
-		this._setSidebarOpenState();
+		this._setSidebarState();
 	}
 	
 	setBottomPlaceholderHeight(height) {
@@ -978,7 +985,7 @@ class Reader {
 	}
 
 	async open(itemID, location, { title, tabIndex, openInBackground, openInWindow } = {}) {
-		this._loadSidebarOpenState();
+		this._loadSidebarState();
 		this.triggerAnnotationsImportCheck(itemID);
 		let reader;
 
