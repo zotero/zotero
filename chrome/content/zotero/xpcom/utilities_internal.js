@@ -2151,7 +2151,10 @@ Zotero.Utilities.Internal = {
 			return {
 				addListener: (listener, once) => {
 					this._addListener(event, listener, alwaysOnce || once, immediateAfterTrigger);
-				}
+				},
+				removeListener: (listener) => {
+					this._removeListener(event, listener);
+				},
 			}
 		};
 
@@ -2168,6 +2171,15 @@ Zotero.Utilities.Internal = {
 				return listener.call(this);
 			}
 			this._events[event].listeners.set(listener, once);
+		};
+		
+		cls.prototype._removeListener = function(event, listener) {
+			let ev = this._events[event];
+			if (!ev || !ev.listeners) {
+				Zotero.debug(`EventListener.removeListener(): attempting to remove an invalid event ${event} listener`);
+				return;
+			}
+			ev.listeners.delete(listener);
 		};
 
 		cls.prototype._waitForEvent = async function (event) {
