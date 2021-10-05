@@ -1050,7 +1050,10 @@ class Reader {
 				}
 			};
 		}
-		reader._window.focus();
+		
+		if (!openInBackground) {
+			reader._window.focus();
+		}
 	}
 
 	/**
