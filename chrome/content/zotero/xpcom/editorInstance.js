@@ -355,7 +355,7 @@ class EditorInstance {
 				
 				// Note: integration.js` uses `Zotero.Cite.System.prototype.retrieveItem`,
 				// which produces a little bit different CSL JSON
-				let itemData = Zotero.Utilities.itemToCSLJSON(parentItem);
+				let itemData = Zotero.Utilities.Item.itemToCSLJSON(parentItem);
 				if (!skipEmbeddingItemData) {
 					citationItem.itemData = itemData;
 				}
@@ -432,7 +432,7 @@ class EditorInstance {
 		
 		for (let item of items) {
 			if (item.isRegularItem()) {
-				let itemData = Zotero.Utilities.itemToCSLJSON(item);
+				let itemData = Zotero.Utilities.Item.itemToCSLJSON(item);
 				let citation = {
 					citationItems: [{
 						uris: [Zotero.URI.getItemURI(item)],
@@ -715,7 +715,7 @@ class EditorInstance {
 									let citationItem = {};
 									citationItem.id = item.id;
 									citationItem.uris = [Zotero.URI.getItemURI(item)];
-									citationItem.itemData = Zotero.Utilities.itemToCSLJSON(item);
+									citationItem.itemData = Zotero.Utilities.Item.itemToCSLJSON(item);
 									citation.citationItems.push(citationItem);
 								}
 							}
@@ -767,7 +767,7 @@ class EditorInstance {
 		for (let { uris } of citationItemsList) {
 			let item = await Zotero.EditorInstance.getItemFromURIs(uris);
 			if (item) {
-				let itemData = Zotero.Utilities.itemToCSLJSON(item);
+				let itemData = Zotero.Utilities.Item.itemToCSLJSON(item);
 				citationItems.push({ uris, itemData });
 			}
 		}
@@ -1277,7 +1277,7 @@ class EditorInstance {
 					else if (citationItem.id) {
 						let item = await Zotero.Items.getAsync(parseInt(citationItem.id));
 						citationItem.uris = [Zotero.URI.getItemURI(item)];
-						citationItem.itemData = Zotero.Utilities.itemToCSLJSON(item);
+						citationItem.itemData = Zotero.Utilities.Item.itemToCSLJSON(item);
 					}
 					// Otherwise it's existing item, so just passing untouched citationItem
 					
