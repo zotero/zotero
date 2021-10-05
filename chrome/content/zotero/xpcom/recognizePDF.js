@@ -303,10 +303,8 @@ Zotero.RecognizePDF = new function () {
 		
 		try {
 			zp = Zotero.getActiveZoteroPane();
-			if (zp) {
-				if (selectParent) {
-					await zp.selectItem(parentItem.id);
-				}
+			if (selectParent && zp && zp.Zotero_Tabs.selectedID != 'zotero-pane') {
+				await zp.selectItem(parentItem.id);
 			}
 		}
 		catch (e) {
