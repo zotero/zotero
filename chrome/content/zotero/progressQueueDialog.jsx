@@ -101,7 +101,6 @@ function _init() {
 				renderItem={_rowToTreeItem}
 				showHeader={true}
 				columns={tableColumns}
-				disableFontSizeScaling={true}
 				onActivate={_handleActivate}
 			/>
 		</IntlProvider>

@@ -10,7 +10,7 @@
 	id="zotero-progress">
 	<script src="include.js"></script>
 	<script src="progressQueueDialog.js"/>
-	<vbox style="padding:10px" flex="1">
+	<vbox id="zotero-progress-box" style="padding:10px" flex="1">
 		<label id="label" control="progress-indicator" value=""/>
 		<hbox align="center">
 			<progressmeter id="progress-indicator" mode="determined" flex="1"/>
