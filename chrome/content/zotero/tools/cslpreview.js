@@ -91,7 +91,7 @@ var Zotero_CSL_Preview = new function() {
 		}
 		
 		var locale = document.getElementById("locale-menu").value;
-		var styleEngine = style.getCiteProc(locale);
+		var styleEngine = style.getCiteProc(locale, 'html');
 		
 		// Generate multiple citations
 		var citations = styleEngine.previewCitationCluster(

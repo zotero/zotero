@@ -434,10 +434,10 @@ Zotero.QuickCopy = new function() {
 				csl.free();
 			} else {
 				var style = Zotero.Styles.get(format.id);
-				var cslEngine = style.getCiteProc(locale);
+				var cslEngine = style.getCiteProc(locale, 'html');
  				var html = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "html");
  				cslEngine.free();
-				cslEngine = style.getCiteProc(locale);
+				cslEngine = style.getCiteProc(locale, 'text');
 				var text = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "text");
 				cslEngine.free();
 			}

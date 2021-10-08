@@ -70,7 +70,7 @@ const xpcomFilesLocal = [
 	'api',
 	'attachments',
 	'cite',
-	'citeproc-rs-to-citeproc-js',
+	'citeprocRsBridge',
 	'cookieSandbox',
 	'data/library',
 	'data/libraries',

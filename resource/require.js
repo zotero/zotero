@@ -1,7 +1,7 @@
 'use strict';
 
 var require = (function() {
-	var win, Zotero;
+	var win, cons, Zotero;
 	Components.utils.import('resource://zotero/loader.jsm');
 	var requirer = Module('/', '/');
 	var _runningTimers = {};
@@ -72,7 +72,6 @@ var require = (function() {
 		return Zotero || {};
 	}
 
-	var cons;
 	if (typeof win.console !== 'undefined') {
 		cons = console;
 	}
@@ -81,6 +80,9 @@ var require = (function() {
 		for (let key of ['log', 'warn', 'error']) {
 			cons[key] = text => {getZotero(); typeof Zotero !== 'undefined' && false && Zotero.debug(`console.${key}: ${text}`)};
 		}
+	}
+	if (!win.console) {
+		win.console = cons;
 	}
 	let globals = {
 		window: win,

@@ -133,7 +133,6 @@ Zotero.Cite = {
 	 * @return {String} Bibliography in specified format
 	 */
 	"makeFormattedBibliography":function makeFormattedBibliography(cslEngine, format) {
-		cslEngine.setOutputFormat(format);
 		var bib = cslEngine.makeBibliography();
 		if(!bib) return false;
 		

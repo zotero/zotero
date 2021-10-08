@@ -1791,8 +1791,7 @@ Zotero.Integration.Session.prototype.setData = async function (data, resetStyle)
 			if (this.style && this.style.free) {
 				this.style.free();
 			}
-			this.style = getStyle.getCiteProc(data.style.locale, data.prefs.automaticJournalAbbreviations);
-			this.style.setOutputFormat(this.outputFormat);
+			this.style = getStyle.getCiteProc(data.style.locale, this.outputFormat, data.prefs.automaticJournalAbbreviations);
 			this.styleClass = getStyle.class;
 			// We're changing the citeproc instance, so we'll have to reinsert all citations into the registry
 			this.reload = true;
@@ -3245,7 +3244,6 @@ Zotero.Integration.Bibliography = class {
 
 		Zotero.debug(`Integration: style.updateUncitedItems ${Array.from(this.uncitedItemIDs.values()).toSource()}`);
 		citeproc.updateUncitedItems(Array.from(this.uncitedItemIDs.values()));
-		citeproc.setOutputFormat(Zotero.Integration.currentSession.outputFormat);
 		let bibliography = citeproc.makeBibliography();
 		Zotero.Cite.removeFromBibliography(bibliography, this.omittedItemIDs);
 	
