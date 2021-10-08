@@ -233,12 +233,8 @@
 						if (this._destroyed) {
 							return;
 						}
-
-						if (!val) {
-							this._item = null;
-						}
 						
-						if (this._item && this._item.id === val.id) {
+						if (this._item && this._item.id && this._item.id === val.id) {
 							return;
 						}
 
