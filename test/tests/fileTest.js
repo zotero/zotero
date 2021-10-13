@@ -429,4 +429,79 @@ describe("Zotero.File", function () {
 			throw new Error("Error not thrown");
 		});
 	});
+
+	describe('#download()', function () {
+		const sizeInMB = 16; // size of the generated text file
+		let port, httpd, baseURL;
+
+		before(async function () {
+			// Real HTTP server
+			Components.utils.import("resource://zotero-unit/httpd.js");
+			port = 16213;
+			httpd = new HttpServer();
+			baseURL = `http://127.0.0.1:${port}`;
+			httpd.start(port);
+			httpd.registerPathHandler(
+				'/file1.txt',
+				{
+					handle: function (request, response) {
+						const text1KB = Array.from({ length: 64 }, _ => "lorem ipsum foo\n").join('');
+						const text16MB = Array.from({ length: 1024 * sizeInMB }, _ => text1KB).join('');
+						response.setStatusLine(null, 200, "OK");
+						response.setHeader('Content-Type', 'text/plain', false);
+						response.write(text16MB);
+					}
+				}
+			);
+		});
+
+		after(function* () {
+			var defer = new Zotero.Promise.defer();
+			httpd.stop(() => defer.resolve());
+			yield defer.promise;
+		});
+
+		it("should download a file", async function () {
+			const url = `${baseURL}/file1.txt`;
+			const path = OS.Path.join(Zotero.getTempDirectory().path, 'zotero.txt');
+			await Zotero.File.download(url, path);
+			const fileSize = (await OS.File.stat(path)).size;
+			assert.equal(fileSize, 1024 * 1024 * sizeInMB);
+		});
+
+		it("should concurrently download three large files", async function () {
+			const url = `${baseURL}/file1.txt`;
+
+			var caller = new ConcurrentCaller({
+				numConcurrent: 3,
+				Promise: Zotero.Promise,
+			});
+
+			let failed = false;
+
+			const fetchFile = async (srcUrl, targetPath) => {
+				try {
+					await Zotero.File.download(srcUrl, targetPath);
+				}
+				catch (e) {
+					failed = true;
+					throw e;
+				}
+			};
+
+			
+			caller.add(() => fetchFile(url, OS.Path.join(Zotero.getTempDirectory().path, 'zotero-1.txt')));
+			caller.add(() => fetchFile(url, OS.Path.join(Zotero.getTempDirectory().path, 'zotero-2.txt')));
+			caller.add(() => fetchFile(url, OS.Path.join(Zotero.getTempDirectory().path, 'zotero-3.txt')));
+
+			await caller.runAll();
+
+			assert.isFalse(failed);
+			for (let i = 1; i < 4; i++) {
+				const path = OS.Path.join(Zotero.getTempDirectory().path, `zotero-${i}.txt`);
+				const fileSize = (await OS.File.stat(path)).size;
+				assert.equal(fileSize, 1024 * 1024 * sizeInMB);
+			}
+		});
+	});
 })
