@@ -49,10 +49,7 @@ Zotero.Notes = new function() {
 		// Zotero.Notes.updateUser is in progress, otherwise the
 		// instance might not get the`disableSaving` flag set
 		await Zotero.DB.executeTransaction(async () => {
-			let index = this._editorInstances.indexOf(instance);
-			if (index >= 0) {
-				this._editorInstances.splice(index, 1);
-			}
+			this._editorInstances = this._editorInstances.filter(x => x !== instance);
 		});
 	};
 
@@ -280,6 +277,10 @@ Zotero.Notes = new function() {
 	this.deleteUnusedEmbeddedImages = async function (item) {
 		if (!item.isNote()) {
 			throw new Error('Item is not a note');
+		}
+		
+		if (this._editorInstances.some(x => x._item && x._item.id === item.id)) {
+			return;
 		}
 		
 		let note = item.getNote();

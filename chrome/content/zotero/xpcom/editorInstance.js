@@ -67,7 +67,6 @@ class EditorInstance {
 		this._disableSaving = false;
 		this._subscriptions = [];
 		this._quickFormatWindow = null;
-		this._isAttachment = this._item.isAttachment();
 		this._citationItemsList = [];
 		this._initPromise = new Promise((resolve, reject) => {
 			this._resolveInitPromise = resolve;
@@ -98,12 +97,13 @@ class EditorInstance {
 		this._postMessage({
 			action: 'init',
 			value: this._state || this._item.note,
+			reloaded: this._reloaded,
 			viewMode: this._viewMode,
 			readOnly: this._readOnly,
 			unsaved: !this._item.id,
 			disableUI: this._disableUI,
 			enableReturnButton: !!this._onReturn,
-			isAttachmentNote: this._isAttachment,
+			isAttachmentNote: this._item.isAttachment(),
 			placeholder: options.placeholder,
 			dir: Zotero.dir,
 			font: this._getFont(),
@@ -122,24 +122,15 @@ class EditorInstance {
 		}
 	}
 
-	uninit() {
+	async uninit() {
 		this._prefObserverIDs.forEach(id => Zotero.Prefs.unregisterObserver(id));
-		
 		if (this._quickFormatWindow) {
 			this._quickFormatWindow.close();
 			this._quickFormatWindow = null;
 		}
-		// TODO: Allow editor instance to finish its work before
-		//  the uninitialization. I.e. to finish image importing
-
-		// As long as the message listeners are attached on
-		// both sides, editor instance can continue its work
-		// in the backstage. Although the danger here is that
-		// multiple editor instances of the same note can start
-		// competing
 		this._iframeWindow.removeEventListener('message', this._messageHandler);
-		Zotero.Notes.unregisterEditorInstance(this);
 		this.saveSync();
+		await Zotero.Notes.unregisterEditorInstance(this);
 		if (!this._item.isAttachment()) {
 			Zotero.Notes.deleteUnusedEmbeddedImages(this._item);
 		}
@@ -171,7 +162,7 @@ class EditorInstance {
 		let uris = items.map(x => Zotero.URI.getItemURI(x)).filter(x => x);
 		let citationItemsList = this._citationItemsList
 			.filter(ci => ci.uris && uris.some(uri => ci.uris.includes(uri)));
-		await this._updateCitationItems(citationItemsList, true);
+		await this._updateCitationItems(citationItemsList);
 	}
 
 	saveSync() {
@@ -683,11 +674,7 @@ class EditorInstance {
 							newList.push(item);
 						}
 					}
-					// Force note saving only when note was opened by user and not by
-					// reload, otherwise it can result to sync carousel, if different
-					// clients have different citation item data and the same note is
-					// opened on both clients
-					await this._updateCitationItems(newList, !this._reloaded);
+					await this._updateCitationItems(newList);
 					this._citationItemsList = list;
 					return;
 				}
@@ -730,7 +717,7 @@ class EditorInstance {
 					if (this._readOnly) {
 						return;
 					}
-					if (this._isAttachment) {
+					if (this._item.isAttachment()) {
 						return;
 					}
 					for (let image of images) {
@@ -762,7 +749,7 @@ class EditorInstance {
 		}
 	}
 
-	async _updateCitationItems(citationItemsList, forceSaving) {
+	async _updateCitationItems(citationItemsList) {
 		let citationItems = [];
 		for (let { uris } of citationItemsList) {
 			let item = await Zotero.EditorInstance.getItemFromURIs(uris);
@@ -772,7 +759,7 @@ class EditorInstance {
 			}
 		}
 		if (citationItems.length) {
-			this._postMessage({ action: 'updateCitationItems', citationItems, forceSaving });
+			this._postMessage({ action: 'updateCitationItems', citationItems });
 		}
 	}
 
