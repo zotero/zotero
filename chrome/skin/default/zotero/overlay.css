@@ -153,16 +153,11 @@
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	width: calc(100% - 4em);
-	height: 100%;
-	position: absolute;
-	top: 0;
-	left: 2em;
-	right: 2em;
+	width: 100%;
 }
 
 .items-tree-message div {
-	padding: 0 35px;
+	padding: 0 65px;
 }
 
 .items-tree-message p {

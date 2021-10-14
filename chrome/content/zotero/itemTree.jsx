@@ -1982,12 +1982,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 			Zotero.DragDrop.currentOrientation = getDragTargetOrient(event);
 			Zotero.debug(`Dragging over item ${row} with ${Zotero.DragDrop.currentOrientation}, drop row: ${this._dropRow}`);
 
-			var target = event.target;
+			var target = event.currentTarget;
 			if (target.classList.contains('items-tree-message')) {
 				let doc = target.ownerDocument;
 				// Consider a drop on the items pane message box (e.g., when showing the welcome text)
 				// a drop on the items tree
-				if (target.firstChild.hasAttribute('allowdrop')) {
+				if (target.firstChild.dataset.allowdrop) {
 					target = doc.querySelector('#zotero-items-tree treechildren');
 				}
 				else {
@@ -3049,7 +3049,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					}
 				}
 
-				div.setAttribute('allowdrop', true);
+				div.dataset.allowdrop = true;
 			}
 			// My Publications
 			else if (this.collectionTreeRow.isPublications()) {
