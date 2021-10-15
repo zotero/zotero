@@ -61,7 +61,7 @@ var doLoad = async function () {
 		},
 		id: "select-items-dialog",
 		dragAndDrop: false,
-		persistColumns: false,
+		persistColumns: true,
 		columnPicker: true,
 		emptyMessage: Zotero.getString('pane.items.loading')
 	});
