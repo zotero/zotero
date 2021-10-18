@@ -705,15 +705,9 @@ var Zotero_File_Interface = new function() {
 	 * Shows bibliography options and creates a bibliography
 	 */
 	async function _doBibliographyOptions(name, items) {
-		// make sure at least one item is not a standalone note or attachment
-		var haveRegularItem = false;
-		for (let item of items) {
-			if (item.isRegularItem()) {
-				haveRegularItem = true;
-				break;
-			}
-		}
-		if (!haveRegularItem) {
+		// Limit to regular items
+		items = items.filter(item => item.isRegularItem());
+		if (!items.length) {
 			Zotero.alert(
 				null,
 				Zotero.getString('general.error'),
