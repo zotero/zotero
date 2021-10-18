@@ -54,6 +54,12 @@ const ZoteroStandalone = new function() {
 			{
 				notify: async (action, type, ids, extraData) => {
 					if (action == 'select') {
+						// Reader doesn't have tabID yet
+						setTimeout(async () => {
+							// Item and other things might not be loaded yet when reopening tabs
+							await Zotero.Schema.schemaUpdatePromise;
+							this.updateQuickCopyOptions();
+						}, 0);
 						// "library" or "reader"
 						this.switchMenuType(extraData[ids[0]].type);
 						setTimeout(() => ZoteroPane.updateToolbarPosition(), 0);
@@ -283,13 +289,30 @@ const ZoteroStandalone = new function() {
 	
 	this.updateQuickCopyOptions = function () {
 		var selected = false;
-		try {
-			selected = Zotero.getActiveZoteroPane()
-				.getSelectedItems()
-				.filter(item => item.isRegularItem())
-				.length;
+
+		let win = Zotero.getMainWindow();
+		if (win) {
+			if (win.Zotero_Tabs.selectedID == 'zotero-pane') {
+				try {
+					selected = win.ZoteroPane
+					.getSelectedItems()
+					.filter(item => item.isRegularItem())
+						.length;
+				}
+				catch (e) {
+				}
+				win.ZoteroPane.updateQuickCopyCommands(win.ZoteroPane.getSelectedItems());
+			}
+			else {
+				let reader = Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID);
+				if (reader) {
+					let item = Zotero.Items.get(reader.itemID);
+					selected = !!item.parentItemID;
+					item = item.parentItem || item;
+					win.ZoteroPane.updateQuickCopyCommands([item]);
+				}
+			}
 		}
-		catch (e) {}
 		
 		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
 		format = Zotero.QuickCopy.unserializeSetting(format);

@@ -1330,7 +1330,11 @@ var ZoteroPane = new function()
 			// selection hasn't changed, because the selected items might have been modified.
 			this.updateItemPaneButtons(selectedItems);
 			
-			this.updateQuickCopyCommands(selectedItems);
+			// Tab selection observer in standalone.js makes sure that
+			// updateQuickCopyCommands is called
+			if (Zotero_Tabs.selectedID == 'zotero-pane') {
+				this.updateQuickCopyCommands(selectedItems);
+			}
 			
 			// Check if selection has actually changed. The onselect event that calls this
 			// can be called in various situations where the selection didn't actually change,
@@ -2069,7 +2073,20 @@ var ZoteroPane = new function()
 	
 	
 	this.copySelectedItemsToClipboard = function (asCitations) {
-		var items = this.getSelectedItems();
+		var items = [];
+		if (Zotero_Tabs.selectedID == 'zotero-pane') {
+			items = this.getSelectedItems();
+		}
+		else {
+			var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+			if (reader) {
+				let item = Zotero.Items.get(reader.itemID);
+				if (item.parentItem) {
+					items = [item.parentItem];
+				}
+			}
+		}
+		
 		if (!items.length) {
 			return;
 		}

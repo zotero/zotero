@@ -183,13 +183,11 @@
 							<menuitem id="menu_cut"/>
 							<menuitem id="menu_copy"/>
 							<menuitem id="menu_copyCitation"
-									class="menu-type-library"
 									label="&copyCitationCmd.label;"
 									command="cmd_zotero_copyCitation"
 									key="key_copyCitation"
 									hidden="true"/>
 							<menuitem id="menu_copyBibliography"
-									class="menu-type-library"
 									label="&copyBibliographyCmd.label;"
 									command="cmd_zotero_copyBibliography"
 									key="key_copyBibliography"
