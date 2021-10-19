@@ -749,7 +749,10 @@
 					
 					var typeBox = document.createElement("hbox");
 					typeBox.setAttribute("typeid", typeID);
-					typeBox.setAttribute("popup", "creator-type-menu");
+					typeBox.onclick = () => {
+						document.popupNode = typeBox;
+						this._id("creator-type-menu").openPopup(typeBox);
+					}
 					typeBox.setAttribute("fieldname", 'creator-' + this._creatorCount + '-typeID');
 					if (this.editable) {
 						typeBox.className = 'creator-type-label zotero-clicky';
@@ -2570,10 +2573,10 @@
 								var hideMoveDown = !exists || !moreCreators;
 								var hideMoveSep = hideMoveUp &amp;&amp; hideMoveDown;
 								
-								document.getElementById('zotero-creator-move-sep').setAttribute('hidden', hideMoveSep);
-								document.getElementById('zotero-creator-move-to-top').setAttribute('hidden', hideMoveToTop);
-								document.getElementById('zotero-creator-move-up').setAttribute('hidden', hideMoveUp);
-								document.getElementById('zotero-creator-move-down').setAttribute('hidden', hideMoveDown);"
+								document.getBindingParent(this)._id('zotero-creator-move-sep').setAttribute('hidden', hideMoveSep);
+								document.getBindingParent(this)._id('zotero-creator-move-to-top').setAttribute('hidden', hideMoveToTop);
+								document.getBindingParent(this)._id('zotero-creator-move-up').setAttribute('hidden', hideMoveUp);
+								document.getBindingParent(this)._id('zotero-creator-move-down').setAttribute('hidden', hideMoveDown);"
 						oncommand="return async function () {
 							var typeBox = document.popupNode.localName == 'hbox' ? document.popupNode : document.popupNode.parentNode;
 							var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
