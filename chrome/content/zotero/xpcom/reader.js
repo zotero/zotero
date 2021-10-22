@@ -391,7 +391,7 @@ class ReaderInstance {
 		popup.openPopupAtScreen(data.x, data.y, true);
 	}
 
-	_openAnnotationPopup(x, y, ids, colors, selectedColor, readOnly) {
+	_openAnnotationPopup(x, y, ids, colors, selectedColor, readOnly, enableAddToNote) {
 		let popup = this._window.document.createElement('menupopup');
 		this._popupset.appendChild(popup);
 		popup.addEventListener('popuphidden', function () {
@@ -402,7 +402,7 @@ class ReaderInstance {
 		menuitem = this._window.document.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.addToNote'));
 		let hasActiveEditor = this._window.ZoteroContextPane && this._window.ZoteroContextPane.getActiveEditor();
-		menuitem.setAttribute('disabled', !hasActiveEditor);
+		menuitem.setAttribute('disabled', !hasActiveEditor || !enableAddToNote);
 		menuitem.addEventListener('command', () => {
 			let data = {
 				action: 'popupCmd',
@@ -551,8 +551,8 @@ class ReaderInstance {
 					return;
 				}
 				case 'openAnnotationPopup': {
-					let { x, y, ids, colors, selectedColor, readOnly } = message;
-					this._openAnnotationPopup(x, y, ids, colors, selectedColor, readOnly);
+					let { x, y, ids, colors, selectedColor, readOnly, enableAddToNote } = message;
+					this._openAnnotationPopup(x, y, ids, colors, selectedColor, readOnly, enableAddToNote);
 					return;
 				}
 				case 'openColorPopup': {

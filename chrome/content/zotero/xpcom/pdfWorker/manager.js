@@ -335,6 +335,7 @@ Zotero.PDFWorker = new PDFWorker();
 
 
 // PDF Renderer
+// TODO: Add ink annotations rendering
 class PDFRenderer {
 	constructor() {
 		this._browser = null;

@@ -54,8 +54,8 @@ Zotero.Annotations = new function () {
 		if (!item) {
 			throw new Error(`Item not found`);
 		}
-		if (item.itemType != 'annotation' || item.annotationType != 'image') {
-			throw new Error("Item must be an image annotation item");
+		if (item.itemType != 'annotation' || !['image', 'ink'].includes(item.annotationType)) {
+			throw new Error("Item must be an image/ink annotation item");
 		}
 		
 		var cacheDir = Zotero.DataDirectory.getSubdirectory('cache', true);
@@ -127,7 +127,7 @@ Zotero.Annotations = new function () {
 		if (o.type == 'highlight') {
 			o.text = item.annotationText;
 		}
-		else if (o.type == 'image') {
+		else if (['image', 'ink'].includes(o.type)) {
 			let file = this.getCacheImagePath(item);
 			if (await OS.File.exists(file)) {
 				o.image = await Zotero.File.generateDataURI(file, 'image/png');

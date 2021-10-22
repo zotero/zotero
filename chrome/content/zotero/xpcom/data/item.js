@@ -1864,8 +1864,11 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		// Clear cached child items of the parent attachment
 		reloadParentChildItems[parentItemID] = true;
 		
-		// Mark cache image for deletion when image annotation position changes
-		if (!isNew && type == 'image' && this._hasFieldChanged('annotationPosition')) {
+		// Mark cache image for deletion when image or ink annotation position (or ink color) changes
+		if (!isNew && (
+			['image', 'ink'].includes(type) && this._hasFieldChanged('annotationPosition')
+			|| type == 'ink' && this._hasFieldChanged('annotationColor')
+		)) {
 			let libraryID = this.libraryID;
 			let key = this.key;
 			Zotero.DB.addCurrentCallback("commit", function () {
@@ -3765,23 +3768,6 @@ for (let name of ['position']) {
 
 
 /**
- * @property {Zotero.Item} annotationImageAttachment
- */
-Zotero.defineProperty(Zotero.Item.prototype, 'annotationImageAttachment', {
-	get: function () {
-		if (!this.isImageAnnotation()) {
-			return undefined;
-		}
-		var attachments = this.getAttachments();
-		if (!attachments.length) {
-			throw new Error("No attachments found for image annotation");
-		}
-		return Zotero.Items.get(attachments[0]);
-	}
-});
-
-
-/**
  * Determine if an item is an annotation
  *
  * @return {Boolean}
@@ -3796,8 +3782,8 @@ Zotero.Item.prototype.isAnnotation = function() {
  *
  * @return {Boolean}
  **/
-Zotero.Item.prototype.isImageAnnotation = function() {
-	return this.isAnnotation() && this._getLatestField('annotationType') == 'image';
+Zotero.Item.prototype.isAnnotationSupportingImage = function() {
+	return this.isAnnotation() && ['image', 'ink'].includes(this._getLatestField('annotationType'));
 }
 
 
@@ -4709,9 +4695,9 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 		// Zotero.Sync.EventListeners.ChangeListener needs to know if this was a storage file
 		env.notifierData[this.id].storageDeleteLog = this.isStoredFileAttachment();
 	}
-	// Delete cached file for image annotation
+	// Delete cached file for image and ink annotations
 	else if (this.isAnnotation()) {
-		if (this.isImageAnnotation()) {
+		if (this.isAnnotationSupportingImage()) {
 			yield Zotero.Annotations.removeCacheImage(this);
 		}
 	}
