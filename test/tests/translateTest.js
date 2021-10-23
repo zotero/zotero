@@ -1219,6 +1219,7 @@ describe("Zotero.Translate", function() {
 		var doc;
 
 		before(function* () {
+			setupAttachmentEndpoints();
 			doc = (yield Zotero.HTTP.processDocuments(url, doc => doc))[0];
 		});
 
