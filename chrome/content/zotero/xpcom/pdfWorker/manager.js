@@ -335,7 +335,6 @@ Zotero.PDFWorker = new PDFWorker();
 
 
 // PDF Renderer
-// TODO: Add ink annotations rendering
 class PDFRenderer {
 	constructor() {
 		this._browser = null;
@@ -468,10 +467,11 @@ class PDFRenderer {
 			let attachment = await Zotero.Items.getAsync(itemID);
 			let annotations = [];
 			for (let annotation of attachment.getAnnotations()) {
-				if (annotation.annotationType === 'image'
+				if (['image', 'ink'].includes(annotation.annotationType)
 					&& !await Zotero.Annotations.hasCacheImage(annotation)) {
 					annotations.push({
 						id: annotation.id,
+						color: annotation.annotationColor,
 						position: JSON.parse(annotation.annotationPosition)
 					});
 				}
@@ -505,6 +505,7 @@ class PDFRenderer {
 			buf = new Uint8Array(buf).buffer;
 			let annotations = [{
 				id: annotation.id,
+				color: annotation.annotationColor,
 				position: JSON.parse(annotation.annotationPosition)
 			}];
 			return !!await this._query('renderAnnotations', { buf, annotations }, [buf]);
