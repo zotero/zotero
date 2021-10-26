@@ -25,6 +25,7 @@
 
 const SCALE = 4;
 const PATH_BOX_PADDING = 10; // pt
+const MIN_PATH_BOX_SIZE = 30; // pt
 const MAX_CANVAS_PIXELS = 16777216; // 16 megapixels
 
 window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'resource://zotero/pdf-reader/pdf.worker.js';
@@ -145,13 +146,26 @@ async function renderImage(pdfDocument, annotation) {
 	// paths
 	else {
 		let rect = getPositionBoundingRect(position);
-		// Add padding
-		expandedPosition.rects = [fitRectIntoRect([
+		rect = [
 			rect[0] - PATH_BOX_PADDING,
 			rect[1] - PATH_BOX_PADDING,
 			rect[2] + PATH_BOX_PADDING,
 			rect[3] + PATH_BOX_PADDING
-		], page.view)];
+		];
+
+		if (rect[2] - rect[0] < MIN_PATH_BOX_SIZE) {
+			let x = rect[0] + (rect[2] - rect[0]) / 2;
+			rect[0] = x - MIN_PATH_BOX_SIZE;
+			rect[2] = x + MIN_PATH_BOX_SIZE;
+		}
+
+		if (rect[3] - rect[1] < MIN_PATH_BOX_SIZE) {
+			let y = rect[1] + (rect[3] - rect[1]) / 2;
+			rect[1] = y - MIN_PATH_BOX_SIZE;
+			rect[3] = y + MIN_PATH_BOX_SIZE;
+		}
+
+		expandedPosition.rects = [fitRectIntoRect(rect, page.view)];
 	}
 
 	let rect = expandedPosition.rects[0];
@@ -169,8 +183,6 @@ async function renderImage(pdfDocument, annotation) {
 
 	let canvasWidth = (rect[2] - rect[0]);
 	let canvasHeight = (rect[3] - rect[1]);
-
-	let cropScale = viewport.width / canvasWidth;
 
 	let canvas = document.createElement('canvas');
 	
@@ -193,7 +205,9 @@ async function renderImage(pdfDocument, annotation) {
 	await page.render(renderContext).promise;
 
 	if (position.paths) {
-		ctx.lineWidth = position.width * cropScale;
+		ctx.lineCap = 'round';
+		ctx.lineJoin = 'round';
+		ctx.lineWidth = position.width;
 		ctx.beginPath();
 		ctx.strokeStyle = color;
 		for (let path of position.paths) {
@@ -203,7 +217,6 @@ async function renderImage(pdfDocument, annotation) {
 
 				if (i === 0) {
 					ctx.moveTo(x, y);
-					continue;
 				}
 				ctx.lineTo(x, y);
 			}
