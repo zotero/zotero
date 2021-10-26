@@ -2865,7 +2865,7 @@ var ZoteroPane = new function()
 						popup.textContent = '';
 						let eligibleAttachments = Zotero.Items.get(item.getAttachments())
 							.filter(item => item.isPDFAttachment());
-						let attachmentsWithAnnotations = eligibleAttachments.filter(x => x.numAnnotations());
+						let attachmentsWithAnnotations = eligibleAttachments.filter(x => x.getAnnotations().some(x => x.annotationType != 'ink'));
 						if (attachmentsWithAnnotations.length) {
 							// Display submenu if there's more than one PDF attachment, even if
 							// there's only attachment with annotations, so it's clear which one
@@ -4429,7 +4429,7 @@ var ZoteroPane = new function()
 		var attachment;
 		if (item.isRegularItem()) {
 			attachment = Zotero.Items.get(item.getAttachments())
-				.find(x => x.isPDFAttachment() && x.numAnnotations());
+				.find(x => x.isPDFAttachment() && x.getAnnotations().some(x => x.annotationType != 'ink'));
 		}
 		else if (item.isFileAttachment()) {
 			attachment = item;
