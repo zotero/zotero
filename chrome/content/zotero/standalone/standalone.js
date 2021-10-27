@@ -164,6 +164,18 @@ const ZoteroStandalone = new function() {
 		catch (e) {}
 		this.updateMenuItemEnabled('manage-attachments-menu', active);
 		
+		let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+		if (reader) {
+			let item = Zotero.Items.get(reader.itemID);
+			if (item) {
+				let annotations = item.getAnnotations();
+				let canTransferFromPDF = annotations.find(x => x.annotationIsExternal);
+				let canTransferToPDF = annotations.find(x => !x.annotationIsExternal);
+				this.updateMenuItemEnabled('menu_transferFromPDF', canTransferFromPDF);
+				this.updateMenuItemEnabled('menu_transferToPDF', canTransferToPDF);
+			}
+		}
+		
 		// TEMP: Quick implementation
 		try {
 			let menuitem = document.getElementById('menu_export_files');

@@ -149,10 +149,22 @@
 									command="cmd_zotero_newStandaloneNote"/>
 							<menuitem id="menu_newCollection" class="menu-type-library" label="&zotero.toolbar.newCollection.label;"
 									command="cmd_zotero_newCollection"/>
-							<!-- TODO: Localize -->
 							<menuitem id="menu_export_file" class="menu-type-reader"
-									label="Save As…"
+									label="&zotero.general.saveAs;"
 									oncommand="ZoteroStandalone.onReaderCmd('export')"/>
+							<menuitem
+								id="menu_transferFromPDF"
+								class="menu-type-reader"
+								label="&zotero.pdfReader.transferFromPDF;"
+								oncommand="ZoteroStandalone.onReaderCmd('transferFromPDF')"
+							/>
+							<menuitem
+								id="menu_transferToPDF"
+								class="menu-type-reader"
+								label="&zotero.pdfReader.transferToPDF;"
+								oncommand="ZoteroStandalone.onReaderCmd('transferToPDF')"
+							/>
+							<menuseparator/>
 							<menuitem label="Print" class="menu-type-reader" oncommand="ZoteroStandalone.onReaderCmd('print')"/>
 							<menuitem label="&zotero.items.menu.showInLibrary;" class="menu-type-reader" oncommand="ZoteroStandalone.onReaderCmd('showInLibrary')"/>
 							<menuseparator/>

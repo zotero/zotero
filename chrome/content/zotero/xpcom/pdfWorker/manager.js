@@ -144,7 +144,7 @@ class PDFWorker {
 	 * @param {String} [password]
 	 * @returns {Promise<Integer>} Number of written annotations
 	 */
-	async export(itemID, path, isPriority, password) {
+	async export(itemID, path, isPriority, password, transfer) {
 		return this._enqueue(async () => {
 			let attachment = await Zotero.Items.getAsync(itemID);
 			if (!attachment.isPDFAttachment()) {
@@ -161,7 +161,8 @@ class PDFWorker {
 					comment: (item.annotationComment || '').replace(/<\/?(i|b|sub|sup)>/g, ''),
 					color: item.annotationColor,
 					position: JSON.parse(item.annotationPosition),
-					dateModified: item.dateModified
+					dateModified: item.dateModified,
+					tags: item.getTags().map(x => x.tag)
 				});
 			}
 			let attachmentPath = await attachment.getFilePathAsync();
@@ -178,11 +179,22 @@ class PDFWorker {
 					annotations,
 					error: e.message
 				})}`);
+				try {
+					error.name = JSON.parse(e.message).name;
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
 				Zotero.logError(error);
 				throw error;
 			}
 			
-			await OS.File.writeAtomic(path, new Uint8Array(res.buf));
+			await OS.File.writeAtomic(path || attachmentPath, new Uint8Array(res.buf));
+			
+			if (transfer) {
+				await Zotero.Items.erase(items.map(x => x.id));
+			}
+			
 			return annotations.length;
 		}, isPriority);
 	}
@@ -219,9 +231,10 @@ class PDFWorker {
 	 * @param {Integer} itemID Attachment item id
 	 * @param {Boolean} [isPriority]
 	 * @param {String} [password]
-	 * @returns {Promise<Integer>} Number of annotations
+	 * @param {Boolean} transfer
+	 * @returns {Promise<Boolean>} Whether any annotations were imported/deleted
 	 */
-	async import(itemID, isPriority, password) {
+	async import(itemID, isPriority, password, transfer) {
 		return this._enqueue(async () => {
 			let attachment = await Zotero.Items.getAsync(itemID);
 			if (!attachment.isPDFAttachment()) {
@@ -229,7 +242,7 @@ class PDFWorker {
 			}
 
 			let mtime = Math.floor(await attachment.attachmentModificationTime / 1000);
-			if (attachment.attachmentLastProcessedModificationTime === mtime) {
+			if (!transfer && attachment.attachmentLastProcessedModificationTime === mtime) {
 				return false;
 			}
 
@@ -248,8 +261,8 @@ class PDFWorker {
 			buf = new Uint8Array(buf).buffer;
 
 			try {
-				var { imported, deleted } = await this._query('import', {
-					buf, existingAnnotations, password
+				var { imported, deleted, buf: modifiedBuf } = await this._query('import', {
+					buf, existingAnnotations, password, transfer
 				}, [buf]);
 			}
 			catch (e) {
@@ -257,19 +270,43 @@ class PDFWorker {
 					existingAnnotations,
 					error: e.message
 				})}`);
+				try {
+					error.name = JSON.parse(e.message).name;
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
 				Zotero.logError(error);
 				throw error;
 			}
-
-			for (let annotation of imported) {
-				annotation.key = Zotero.DataObjectUtilities.generateKey();
-				annotation.isExternal = true;
-				await Zotero.Annotations.saveFromJSON(attachment, annotation);
-			}
-
+			
+			let ids = [];
 			for (let key of deleted) {
 				let annotation = Zotero.Items.getByLibraryAndKey(attachment.libraryID, key);
-				await annotation.eraseTx();
+				if (annotation) {
+					ids.push(annotation.id);
+				}
+			}
+			if (ids.length) {
+				await Zotero.Items.erase(ids);
+			}
+			
+			let notifierQueue = new Zotero.Notifier.Queue();
+			for (let annotation of imported) {
+				annotation.key = Zotero.DataObjectUtilities.generateKey();
+				annotation.isExternal = !(transfer && annotation.transferable);
+				annotation.tags = annotation.tags.map(x => ({ name: x }));
+				await Zotero.Annotations.saveFromJSON(attachment, annotation, {
+					notifierQueue
+				});
+			}
+			await Zotero.Notifier.commit(notifierQueue);
+			
+			if (transfer) {
+				if (modifiedBuf) {
+					await OS.File.writeAtomic(path, new Uint8Array(modifiedBuf));
+					mtime = Math.floor(await attachment.attachmentModificationTime / 1000);
+				}
 			}
 
 			attachment.attachmentLastProcessedModificationTime = mtime;
