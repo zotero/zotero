@@ -2664,14 +2664,22 @@ var ItemTree = class ItemTree extends LibraryTree {
 					this.onDrop(e, index);
 				}, { passive: true });
 			}
+			div.addEventListener('mousedown', e => this._handleRowMouseDown(e, index), { passive : true });
 		}
 
 		return div;
 	};
+	
+	_handleRowMouseDown = (event, index) => {
+		const modifierIsPressed = ['ctrlKey', 'metaKey', 'shiftKey', 'altKey'].some(key => event[key]);
+		if (this.collectionTreeRow.isDuplicates() && !modifierIsPressed) {
+			this.duplicateMouseSelection = true;
+		}
+	}
 
 	_handleSelectionChange = (selection, shouldDebounce) => {
 		// Update aria-activedescendant on the tree
-		if (this.collectionTreeRow.isDuplicates() && selection.count == 1) {
+		if (this.collectionTreeRow.isDuplicates() && selection.count == 1 && this.duplicateMouseSelection) {
 			var itemID = this.getRow(selection.focused).ref.id;
 			var setItemIDs = this.collectionTreeRow.ref.getSetItemsByItemID(itemID);
 			
@@ -2682,6 +2690,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				this.tree.invalidateRow(this._rowMap[id]);
 			}
 		}
+		this.duplicateMouseSelection = false;
 		if (shouldDebounce) {
 			this._onSelectionChangeDebounced();
 		}
