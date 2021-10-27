@@ -77,7 +77,7 @@ var ZoteroPane = new function()
 		}
 		
 		// Set key down handler
-		document.getElementById('appcontent').addEventListener('keydown', ZoteroPane_Local.handleKeyDown, true);
+		document.addEventListener('keydown', ZoteroPane_Local.handleKeyDown, true);
 		document.addEventListener('blur', ZoteroPane.handleBlur);
 		
 		// Init toolbar buttons for all progress queues
