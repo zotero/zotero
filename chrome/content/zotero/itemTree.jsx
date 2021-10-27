@@ -2839,13 +2839,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	_storeColumnPrefs = (prefs) => {
+		// Even if we don't persist column info we still need to store it on the itemTree instance
+		// otherwise sorting and such breaks after dragging columns
+		this._columns = this._columns.map(column => Object.assign(column, prefs[column.dataKey]))
+			.sort((a, b) => a.ordinal - b.ordinal);
+		
 		if (!this.props.persistColumns) return;
 		Zotero.debug(`Storing itemTree ${this.id} column prefs`, 2);
 		this._columnPrefs = prefs;
 		if (!this._columns) {
 			Zotero.debug(new Error(), 1);
 		}
-		this._columns = this._columns.map(column => Object.assign(column, prefs[column.dataKey]));
 		
 		this._writeColumnPrefsToFile();
 	}
@@ -2977,7 +2981,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this._columns.push(column);
 		}
 		
-		return this._columns;
+		return this._columns.sort((a, b) => a.ordinal - b.ordinal);
 	}
 	
 	_getColumn(index) {
@@ -3339,8 +3343,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		});
 		
-		const columns = this._getColumns()
-			.sort((a, b) => a.ordinal - b.ordinal);
+		const columns = this._getColumns();
 		for (let i = 0; i < columns.length; i++) {
 			const column = columns[i];
 			if (column.ignoreInColumnPicker === true) continue;
