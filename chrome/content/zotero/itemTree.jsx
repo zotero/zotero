@@ -3279,9 +3279,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 	
 	_handleColumnSort = async (index, sortDirection) => {
 		let columnSettings = this._getColumnPrefs();
-		// TEMP: Sort the columns by their ordinals, which can get out of sync after column
-		// dragging. There's probably a better way to do this.
-		this._getColumns().sort((a, b) => a.ordinal - b.ordinal);
 		let column = this._getColumn(index);
 		if (column.dataKey == 'hasAttachment') {
 			Zotero.debug("Caching best attachment states");
