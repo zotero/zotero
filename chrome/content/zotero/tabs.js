@@ -295,11 +295,22 @@ var Zotero_Tabs = new function () {
 		if (!tab || tab.id === this._selectedID) {
 			return;
 		}
+		if (this._selectedID === 'zotero-pane') {
+			var { tab: selectedTab } = this._getTab(this._selectedID);
+			selectedTab.lastFocusedElement = document.activeElement;
+		}
 		this._prevSelectedID = reopening ? this._selectedID : null;
 		this._selectedID = id;
 		this.deck.selectedIndex = Array.from(this.deck.children).findIndex(x => x.id == id);
 		this._update();
 		Zotero.Notifier.trigger('select', 'tab', [tab.id], { [tab.id]: { type: tab.type } }, true);
+		if (tab.id === 'zotero-pane' && tab.lastFocusedElement) {
+			tab.lastFocusedElement.focus();
+			if (document.activeElement !== tab.lastFocusedElement) {
+				ZoteroPane_Local.itemsView.focus();
+			}
+			tab.lastFocusedElement = null;
+		}
 	};
 
 	/**

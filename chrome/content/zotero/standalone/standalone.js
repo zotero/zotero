@@ -54,9 +54,6 @@ const ZoteroStandalone = new function() {
 			{
 				notify: async (action, type, ids, extraData) => {
 					if (action == 'select') {
-						if (Zotero_Tabs.selectedIndex == 0) {
-							ZoteroPane.itemsView.focus();
-						}
 						// Reader doesn't have tabID yet
 						setTimeout(async () => {
 							// Item and other things might not be loaded yet when reopening tabs
