@@ -2092,7 +2092,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	/**
 	 * Persist the current open/closed state of rows to a pref
 	 */
-	_saveOpenStates = Zotero.Utilities.debounce(async function() {
+	_saveOpenStates = async function() {
 		var state = this._containerState;
 		
 		// Every so often, remove obsolete rows
@@ -2134,8 +2134,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		}
 		
 		this._containerState = state;
-		this._storeOpenStates = state;
-	});
+		this._storeOpenStates(state);
+	};
 	
 	_storeOpenStates = Zotero.Utilities.debounce(function(state) {
 		Zotero.Prefs.set("sourceList.persist", JSON.stringify(state));

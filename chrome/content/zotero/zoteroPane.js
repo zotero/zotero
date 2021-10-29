@@ -1219,7 +1219,7 @@ var ZoteroPane = new function()
 			}
 			
 			if (this.itemsView && this.itemsView.collectionTreeRow && this.itemsView.collectionTreeRow.id == collectionTreeRow.id) {
-				Zotero.debug("Collection selection hasn't changed");
+				Zotero.debug("ZoteroPane.onCollectionSelected: Collection selection hasn't changed");
 
 				// Update toolbar, in case editability has changed
 				this._updateToolbarIconsForRow(collectionTreeRow);
