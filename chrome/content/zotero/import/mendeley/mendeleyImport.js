@@ -1235,17 +1235,6 @@ Zotero_Import_Mendeley.prototype._saveItems = async function (libraryID, json) {
 			if (item.isRegularItem()) {
 				lastExistingParentItem = item;
 				
-				// Fill in Publication if empty, since it was missed in an early version of the
-				// online importer
-				if (itemJSON.publicationTitle && !item.getField('publicationTitle')) {
-					item.setField('publicationTitle', itemJSON.publicationTitle);
-				}
-
-				// Add "★" tag if not present, since it was previously missed in the online importer
-				if ((itemJSON.tags || []).includes('\u2605') && !item.hasTag('\u2605')) {
-					item.addTag('\u2605');
-				}
-				
 				// Update any child items to point to the existing item's key instead of the
 				// new generated one
 				this._updateParentKeys('item', json, i + 1, itemJSON.key, item.key);
