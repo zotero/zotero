@@ -130,6 +130,24 @@ function setupAttachmentEndpoints() {
 	}
 }
 
+/**
+ * Set up endpoints for testing async translators
+ * As above, this must happen immediately before the test.
+ */
+function setupAsyncEndpoints() {
+	var JSONTest = function () {};
+	Zotero.Server.Endpoints["/test/translate/test.json"] = JSONTest;
+	JSONTest.prototype = {
+		"supportedMethods": ["GET"],
+		"init": function(data, sendResponseCallback) {
+			sendResponseCallback(200, "application/json", JSON.stringify({
+				success: true,
+				array: [1, 2, 3]
+			}));
+		}
+	}
+}
+
 describe("Zotero.Translate", function() {
 	let win;
 	before(function* () {
@@ -1215,12 +1233,15 @@ describe("Zotero.Translate", function() {
 	});
 	
 	describe("Async translators", function () {
-		var url = "http://127.0.0.1:23119/test/translate/test.html";
+		var htmlURL = "http://127.0.0.1:23119/test/translate/test.html";
+		var jsonURL = "http://127.0.0.1:23119/test/translate/test.json";
+		var notFoundURL = "http://127.0.0.1:23119/test/translate/does_not_exist.html"
 		var doc;
 
 		before(function* () {
 			setupAttachmentEndpoints();
-			doc = (yield Zotero.HTTP.processDocuments(url, doc => doc))[0];
+			setupAsyncEndpoints();
+			doc = (yield Zotero.HTTP.processDocuments(htmlURL, doc => doc))[0];
 		});
 
 		it('should support async detectWeb', async function () {
@@ -1293,23 +1314,39 @@ describe("Zotero.Translate", function() {
 			translate.setTranslator(
 				buildDummyTranslator(
 					4,
-					`function detectWeb() {}
+					`
+					function detectWeb() {}
 
 					async function doWeb(doc) {
-						let { status, body } = await request('${url}');
 						let item = new Zotero.Item('webpage');
-						item.title = 'Status ' + status;
-						item.abstractNote = body;
+
+						let otherDoc = await requestDocument('${htmlURL}');
+						item.title = otherDoc.title;
+
+						let { status } = await request('${htmlURL}');
+						item.abstractNote = 'Status ' + status;
+
 						item.complete();
-					}`
+
+						let json = await requestJSON('${jsonURL}');
+						if (json.success) {
+							item = new Zotero.Item('webpage');
+							item.title = 'JSON Test';
+							item.complete();
+						}
+					}
+					`
 				)
 			);
 			var newItems = await translate.translate();
-			assert.equal(newItems.length, 1);
+			assert.equal(newItems.length, 2);
 			
 			var item = newItems[0];
-			assert.equal(item.getField('title'), 'Status 200');
-			assert.include(item.getField('abstractNote'), '<title>Test</title>');
+			assert.equal(item.getField('title'), 'Test');
+			assert.equal(item.getField('abstractNote'), 'Status 200');
+
+			var item = newItems[1];
+			assert.equal(item.getField('title'), 'JSON Test');
 		});
 
 		it('should not fail translation on a non-200 status code', async function () {
@@ -1321,7 +1358,7 @@ describe("Zotero.Translate", function() {
 					`function detectWeb() {}
 
 					async function doWeb(doc) {
-						await request('https://nonexistent.example.com/').catch(e => {});
+						await request('${notFoundURL}').catch(e => {});
 						let item = new Zotero.Item('webpage');
 						item.title = 'Nothing';
 						item.complete();
