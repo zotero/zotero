@@ -60,9 +60,9 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "マイ・ライブラリ内の添付ファイルの同期に右のプログラムを使う:">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Zotero ストレジを利用してグループ・ライブラリの添付ファイルを同期する">
-<!ENTITY zotero.preferences.sync.fileSyncing.download "必要に応じて">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "ファイルをダウンロードする">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "同期する際に">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "ファイルをダウンロードする">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "必要に応じて">
 <!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "サーバーを検証する">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Zotero ストレジをお使いになると、次の使用許諾条件に同意したことになります。">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "使用許諾条件">
