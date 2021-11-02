@@ -1550,9 +1550,13 @@ Zotero.Integration.Session.prototype._processNote = async function (item) {
 		}
 	}
 	// Encode unicode chars
-	text = text.replace(/[\u00A0-\u9999]/gim, function (i) {
-		return '&#'+i.charCodeAt(0)+';';
-	});
+	let value = '';
+	for (let char of text) {
+		let code = char.codePointAt(0);
+		value += code > 127 ? '&#' + code + ';' : char;
+	}
+	text = value;
+	
 	if (!text.startsWith('<html>')) {
 		text = `<html><body>${text}</body></html>`;
 	}
