@@ -295,7 +295,7 @@ class ReaderInstance {
 				await Zotero.Attachments.createDirectoryForItem(item);
 			}
 			file.append(this.pdfStateFileName);
-			await OS.File.writeAtomic(file.path, JSON.stringify(state));
+			await Zotero.File.putContentsAsync(file.path, JSON.stringify(state));
 		}
 	}
 
@@ -648,6 +648,7 @@ class ReaderInstance {
 			}
 		}
 		catch (e) {
+			Zotero.logError(e);
 			let crash = message && ['setAnnotation'].includes(message.action);
 			this._postMessage({
 				action: crash ? 'crash' : 'error',

@@ -132,7 +132,7 @@ class EditorInstance {
 		this.saveSync();
 		await Zotero.Notes.unregisterEditorInstance(this);
 		if (!this._item.isAttachment()) {
-			Zotero.Notes.deleteUnusedEmbeddedImages(this._item);
+			await Zotero.Notes.deleteUnusedEmbeddedImages(this._item);
 		}
 	}
 
@@ -742,6 +742,7 @@ class EditorInstance {
 			}
 		}
 		catch (e) {
+			Zotero.logError(e);
 			if (message && ['update', 'importImages'].includes(message.action)) {
 				this._postMessage({ action: 'crash' });
 			}
