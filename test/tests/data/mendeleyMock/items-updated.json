@@ -1,0 +1,19 @@
+[
+    {
+        "authored": false,
+        "confirmed": true,
+        "created": "2021-11-04T11:53:10.353Z",
+        "file_attached": false,
+        "hidden": false,
+        "id": "07a74c26-28d1-4d9f-a60d-3f3bc5ef76ef",
+        "last_modified": "2021-11-05T11:53:10.353Z",
+        "private_publication": false,
+        "profile_id": "8dbf0832-8723-4c48-b532-20c0b7f6e01a",
+        "read": false,
+        "starred": true,
+        "title": "Report updated to Journal Article",
+        "type": "journal",
+        "source": "lorem ipsum",
+        "year": 2002
+    }
+]

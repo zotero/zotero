@@ -1,0 +1,24 @@
+{
+    "academic_status": "Unspecified",
+    "created": "2021-04-26T09:07:29.000Z",
+    "disciplines":
+    [
+        {
+            "name": "Unspecified",
+            "subdisciplines":
+            []
+        }
+    ],
+    "display_name": "some name",
+    "email": "zotero@zotero.com",
+    "first_name": "some",
+    "id": "97d3193e-2d2a-4700-abd6-d82335ef551d",
+    "last_name": "name",
+    "marketing": true,
+    "member_type": "free",
+    "photos": [],
+    "scopus_author_ids": [],
+    "user_type": "normal",
+    "verified": false,
+    "web_user_id": 1234567890
+}
