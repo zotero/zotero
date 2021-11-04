@@ -102,6 +102,11 @@ describe('Zotero_Import_Mendeley', function () {
 			assert.equal(journal.itemTypeID, Zotero.ItemTypes.getID('journalArticle'));
 			assert.equal(report.getField('title'), 'Sample Report');
 			assert.equal(report.itemTypeID, Zotero.ItemTypes.getID('report'));
+
+			// test identifiers
+			assert.equal(journal.getField('DOI'), '10.1111');
+			assert.include(journal.getField('extra'), 'PMID: 11111111');
+			assert.include(journal.getField('extra'), 'arXiv: 1111.2222');
 			
 			const parentCollection = await Zotero.Collections.getAsync(
 				journal.getCollections().pop()

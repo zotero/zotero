@@ -25,6 +25,7 @@ var mendeleyOnlineMappings = {
 		working_paper: 'WorkingPaper'
 	},
 	apiFieldToDBField: {
+		arxiv: 'arxivId',
 		accessed: 'dateAccessed',
 		authors: false, // all author types handled separately
 		citation_key: 'citationKey',
