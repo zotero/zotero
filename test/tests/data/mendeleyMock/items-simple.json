@@ -11,6 +11,12 @@
         "profile_id": "8dbf0832-8723-4c48-b532-20c0b7f6e01a",
         "read": false,
         "source": "lorem ipsum",
+        "identifiers":
+        {
+            "doi": "10.1111",
+            "pmid": "11111111",
+            "arxiv": "1111.2222"
+        },
         "starred": false,
         "title": "Foo Bar",
         "type": "journal",
