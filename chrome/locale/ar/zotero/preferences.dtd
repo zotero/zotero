@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "إدارة محرك البحث">
 <!ENTITY zotero.preferences.locate.description "الوصف">
 <!ENTITY zotero.preferences.locate.name "الاسم">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "خاصية محرك البحث تمد القائمة المنسدلة لتحديد الموقع الموجودة بالنافذة الرئيسية للبرنامج. بتفعيل محركات البحث في القائمة التالية سيتم اضافة محرك البحث للقائمة النسدلة ويمكن استخدامها للبحث وتحديد موقع المصادر بمكتبتك على الويب.">
 <!ENTITY zotero.preferences.locate.addDescription "لأضافه محرك بحث غير مدرج في القائمة ، قم بزيارة محرك البحث المطلوب في  متصفحك وحدد &quot;إضافة&quot; من قائمة تحديد زوتيرو.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "استعادة الاعدادات الافتراضية">
 

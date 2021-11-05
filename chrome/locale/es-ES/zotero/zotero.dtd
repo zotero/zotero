@@ -145,7 +145,7 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap "Intercambiar Nombre/Apellido">
 <!ENTITY zotero.item.viewOnline "Ver en línea">
 <!ENTITY zotero.item.copyAsURL "Copiar como URL">
-<!ENTITY zotero.item.deletePermanently "Eliminar permanentemente....">
+<!ENTITY zotero.item.deletePermanently "Eliminar permanentemente...">
 
 <!ENTITY zotero.item.tags.removeAll "Eliminar todas las etiquetas...">
 
@@ -353,3 +353,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Reducir zum">
 <!ENTITY zotero.pdfReader.zoomAuto "Redimensionar automáticamente">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zum a ancho de página">
+<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
+<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

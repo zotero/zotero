@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Диспетчер систем пошуку статей">
 <!ENTITY zotero.preferences.locate.description "Опис">
 <!ENTITY zotero.preferences.locate.name "Нзва">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Пошукова система розширює можливості меню, що випадає, 'Виявити' в панелі 'Інформація'. Включенні Пошукової системи в наведеному списку додасть її і це меню, що випадає, і її можна буде використовувати для пошуку ресурсів в вашій бібліотеці через Інтернет.">
 <!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Відновити знчення за замовчуванням">
 

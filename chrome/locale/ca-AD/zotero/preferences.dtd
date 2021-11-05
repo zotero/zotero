@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gestor del motor de cerca d'articles">
 <!ENTITY zotero.preferences.locate.description "Descripció">
 <!ENTITY zotero.preferences.locate.name "Nom">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Un motor de cerca estén la capacitat del desplegable de localització en el panell d'informació. Quan habiliteu els motors de cerca a la llista, s'afegiran a la llista desplegable i es podran fer servir per localitzar els recursos de la vostra biblioteca al web.">
 <!ENTITY zotero.preferences.locate.addDescription "Per a afegir un motor de consulta que no és a la llista, visiteu el motor de cerca desitjat al vostre navegador i seleccioneu «Afegeix» des del menú de Cerca.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Restaura els valors predeterminats">
 

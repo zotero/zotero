@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gestor de motores de búsqueda de artículos">
 <!ENTITY zotero.preferences.locate.description "Descripción">
 <!ENTITY zotero.preferences.locate.name "Nombre">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Un motor de búsqueda amplía la capacidad del menú desplegable Buscar en el panel de información. Al habilitar dichos motores de búsqueda en la lista de abajo, éstos se añadirán a la lista desplegable y se podrán utilizar para localizar recursos a partir de su biblioteca en la web.">
 <!ENTITY zotero.preferences.locate.addDescription "Para añadir un motor de búsqueda que no esté en la lista, visite el motor de búsqueda deseado en su navegador y seleccione &quot;Añadir&quot; desde el menú Búsqueda de Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Restaurar predeterminados">
 

@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Диспетчер систем поиска статей">
 <!ENTITY zotero.preferences.locate.description "Описание">
 <!ENTITY zotero.preferences.locate.name "Название">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Поисковая система расширяет возможности выпадающего меню «Найти» в панели «Информация». Включение поисковой системы в приведенном списке добавит её в это выпадающее меню, и её можно будет использовать для поиска ресурсов из вашей библиотеки через интернет.">
 <!ENTITY zotero.preferences.locate.addDescription "Для добавления поисковой системы, отсутствующей в списке, посетите страницу желаемой системы в браузере и выберите «Добавить» в меню «Обнаружение» Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Востановить список по умолчанию">
 

@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Artikkelihakumoottorin hallinta">
 <!ENTITY zotero.preferences.locate.description "Kuvaus">
 <!ENTITY zotero.preferences.locate.name "Nimi">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Artikkelihakumoottori laajentaa Info-sivulla olevan Paikanna-valikon toimintaa. Laittamalla päälle alla luetellut artikkelihakumoottorit ne lisätään pudotusvalikkoon ja niitä voi käyttää kirjastossasi olevien resurssien etsimiseen webistä.">
 <!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Palauta oletusarvot">
 

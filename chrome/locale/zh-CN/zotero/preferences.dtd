@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "文章检索引擎管理器">
 <!ENTITY zotero.preferences.locate.description "描述">
 <!ENTITY zotero.preferences.locate.name "名称">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "文章检索引擎可以扩展信息栏中“定位”下拉列表的功能. 启用下面列表中的检索引擎, 它们将添加到下拉列表中, 它们可以让您在 Web 中定位您的文献资源.">
 <!ENTITY zotero.preferences.locate.addDescription "若要添加一个列表中不存在的搜索引擎，请先在浏览器中访问该搜索引擎，然后在 Zotero 的菜单中点击“添加”。">
 <!ENTITY zotero.preferences.locate.restoreDefaults "恢复默认">
 

@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Håndtering af søgemaskiner for artikler">
 <!ENTITY zotero.preferences.locate.description "Beskrivelse">
 <!ENTITY zotero.preferences.locate.name "Navn">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "En søgemaskine udvider mulighederne i drop-down-menuen for Find i Info-fanebladet. Hvis man aktiverer søgemaskinerne i nedenstående liste, bliver de føjet til drop-down-menuen og kan anvendes til at lokalisere elementer fra dit bibliotek på WWW.">
 <!ENTITY zotero.preferences.locate.addDescription "For at tilføje en søgemaskine, som ikke er på listen, skal du i din browser besøge den pågældende søgemaskine og vælge &quot;Tilføj&quot; i Zoteros Lokalisér-menu">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Gendan Defaults">
 

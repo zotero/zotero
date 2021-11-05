@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Søkemotorer for å finne artikler på nett">
 <!ENTITY zotero.preferences.locate.description "Beskrivelse">
 <!ENTITY zotero.preferences.locate.name "Navn">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "En søkemotor utvider mulighetene i nedtrekksmenyen Lokaliser i Inforuten. Ved å aktivere søkemotorer i listen nedenfor vil de bli lagt til nedtrekksmenyen og kan bli brukt til å finne ressurser fra ditt bibliotek på nettet.">
 <!ENTITY zotero.preferences.locate.addDescription "For å legge til en søkemotor som ikke er på listen, besøk nettside for ønsket søkemotor in din nettleser og velg &quot;Legg til&quot; fra Zotero's Lokaliser meny.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Gjenopprett standardvalg">
 

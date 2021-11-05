@@ -176,7 +176,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Ställ in färg">
 <!ENTITY zotero.tagColorChooser.removeColor "Ta bort färg">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
+<!ENTITY zotero.lookup.description "Ange ISBN, DOI, PMID, arXiv ID, eller ADS Bibcode för att lägga till ditt bibliotek:">
 <!ENTITY zotero.lookup.button.search "Sök">
 
 <!ENTITY zotero.createParent.title "Skapa föräldra-källa">
@@ -343,13 +343,15 @@
 <!ENTITY zotero.pdfReader.rotateClockwise "Rotera medsols">
 <!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotera motsols">
 <!ENTITY zotero.pdfReader.handTool "Handverktyget">
-<!ENTITY zotero.pdfReader.verticalScrolling "Lodrät skrollning">
-<!ENTITY zotero.pdfReader.horizontalScrolling "Vågrät skrollning">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
+<!ENTITY zotero.pdfReader.verticalScrolling "Lodrät rullning">
+<!ENTITY zotero.pdfReader.horizontalScrolling "Vågrät rullning">
+<!ENTITY zotero.pdfReader.wrappedScrolling "Överlappande rullning">
 <!ENTITY zotero.pdfReader.noSpreads "Inga uppslag">
 <!ENTITY zotero.pdfReader.oddSpreads "Udda uppslag">
 <!ENTITY zotero.pdfReader.evenSpreads "Jämna uppslag">
-<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
-<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
-<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
-<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomIn "Zooma in">
+<!ENTITY zotero.pdfReader.zoomOut "Zooma ut">
+<!ENTITY zotero.pdfReader.zoomAuto "Anpassa storlek automatiskt">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Anpassa till sidbredd">
+<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
+<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

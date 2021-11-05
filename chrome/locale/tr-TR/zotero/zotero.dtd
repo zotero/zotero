@@ -353,3 +353,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Uzaklaştır">
 <!ENTITY zotero.pdfReader.zoomAuto "Otomatik Olarak Yeniden Boyutlandır">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Sayfa Genişliğine Yakınlaştır">
+<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
+<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

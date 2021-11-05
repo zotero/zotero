@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "سامان‌دهی مکان‌یاب مقالات">
 <!ENTITY zotero.preferences.locate.description "توضیح">
 <!ENTITY zotero.preferences.locate.name "نام">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "یک مکان‌یاب، قابلیت منوی مکان‌یابی در قسمت «اطلاعات» را افزایش می‌دهد. با فعال کردن مکان‌یاب‌های فهرست زیر، می‌توانید آنها را به منوی مذکور اضافه کنید و منابع را از کتابخانه خود روی وب مکان‌یابی کنید.">
 <!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "بازگرداندن تنظیمات پیش‌فرض">
 

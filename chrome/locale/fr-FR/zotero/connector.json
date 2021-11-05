@@ -2,6 +2,9 @@
   "general_more": {
     "message": "Plus…"
   },
+  "general_moreInfo": {
+    "message": "Plus d'info..."
+  },
   "general_done": {
     "message": "Terminé"
   },
@@ -16,6 +19,9 @@
   },
   "general_pleaseWait": {
     "message": "Veuillez patienter…"
+  },
+  "general_copyToClipboard": {
+    "message": "Copier dans le presse-papiers"
   },
   "progressWindow_savingTo": {
     "message": "Enregistrer dans"
@@ -55,6 +61,12 @@
   },
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Activer l'enregistrement dans la bibliothèque en ligne"
+  },
+  "reports_report_submitted": {
+    "message": "Votre rapport d'erreur a été soumis.\n\nReport ID: $1\n\nVeuillez poster un message sur les forums de Zotero avec cet identifiant, une description du problème et toutes les étapes nécessaires pour le reproduire.\nLes rapports d'erreur ne sont pas analysés tant qu'ils ne sont pas cités dans les forums avec cet identifiant."
+  },
+  "reports_submission_failed": {
+    "message": "Une erreur s'est produite lors de l'envoi de votre rapport.\n\n$1\n\nVeuillez vérifier votre connexion internet. Si le problème persiste, veuillez poster un message sur les forums Zotero."
   },
   "integration_error_clientUpgrade": {
     "message": "L'insertion de citations dans une application web nécessite $1 ou ultérieur."

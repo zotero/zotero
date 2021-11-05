@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Les plus anciens documents en premier">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Paramètres par défaut des flux">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
+<!ENTITY zotero.preferences.openurl.choose "Choisir un résolveur...">
 <!ENTITY zotero.preferences.openurl.custom "Personnaliser…">
 <!ENTITY zotero.preferences.openurl.server "Résolveur de liens :">
 <!ENTITY zotero.preferences.openurl.version "Version :">
@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gestion des moteurs de recherche d'articles">
 <!ENTITY zotero.preferences.locate.description "Description">
 <!ENTITY zotero.preferences.locate.name "Nom">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Un moteur de recherche étend les capacités du menu Localiser du panneau Info. En activant des moteurs de recherche dans la liste ci-dessous, ils seront ajoutés au menu déroulant et pourront être utilisés pour localiser des ressources de votre bibliothèque sur le Web.">
 <!ENTITY zotero.preferences.locate.addDescription "Pour ajouter un moteur de recherche absent de la liste, rendez-vous à l'adresse de ce moteur de recherche avec votre navigateur, puis sélectionnez “Ajoutez” à partir du menu Localiser de Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Rétablir les moteurs par défaut">
 

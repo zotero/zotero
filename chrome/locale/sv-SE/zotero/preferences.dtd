@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Äldst först">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Matningens standardvärden">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
+<!ENTITY zotero.preferences.openurl.choose "Välj en länkserver…">
 <!ENTITY zotero.preferences.openurl.custom "Anpassad...">
 <!ENTITY zotero.preferences.openurl.server "Länkserver:">
 <!ENTITY zotero.preferences.openurl.version "Version:">
@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Hantera söktjänst för artiklar">
 <!ENTITY zotero.preferences.locate.description "Beskrivning">
 <!ENTITY zotero.preferences.locate.name "Namn">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "En söktjänst förbättrar funktionerna i Hitta-menyn ovanför Infofliken. Genom att aktivera söktjänsterna nedan läggs de till Hitta-menyn och kan användas för att hitta källor på ditt bibliotek eller på nätet.">
 <!ENTITY zotero.preferences.locate.addDescription "För att lägga till en söktjänst som inte finns på listan, gå till söktjänstens hemsida i din webbläsare och välj “Lägg till” i Zoteros Hitta-meny.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Återställ till standard">
 

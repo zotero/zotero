@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Διαχειριστής Μηχανής Αναζήτησης Άρθρων">
 <!ENTITY zotero.preferences.locate.description "Περιγραφή">
 <!ENTITY zotero.preferences.locate.name "Όνομα">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Η Μηχανή Αναζήτησης επεκτείνει τις δυνατότητες της αναπτυσσόμενης λίστας Εντοπισμού, του πλαισίου Πληροφορίες. Ενεργοποιώντας τις Μηχανές Αναζήτησης στην λίστα που ακολουθεί, αυτές θα προστεθούν στην αναπτυσσόμενη λίστα και μπορούν να χρησιμοποιηθούν για τον εντοπισμό πόρων από την βιβλιοθήκη σας στο web.">
 <!ENTITY zotero.preferences.locate.addDescription "Για να προσθέσετε μια Μηχανή Αναζήτησης που δεν περιλαμβάνεται στη λίστα, επισκεφθείτε την μηχανή αναζήτησης που επιθυμείτε και επιλέξτε &quot;Προσθήκη&quot; από το μενού εντοπισμού του Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Επαναφορά αρχικών ρυθμίσεων">
 

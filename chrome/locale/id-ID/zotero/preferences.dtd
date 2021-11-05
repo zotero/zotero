@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Pengelola Mesin Pencarian Artikel">
 <!ENTITY zotero.preferences.locate.description "Deskripsi">
 <!ENTITY zotero.preferences.locate.name "Nama">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Mesin Pencarian memperluas kapabilitas menu drop down Temukan dalam jendela Info. Dengan mengaktifkan Mesin Pencarian yang terdapat dalam daftar di bawah ini, mereka akan ditambahkan pada menu drop down dan dapat digunakan untuk menemukan referensi-referensi dari perpustakaan Anda di web.">
 <!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Kembalikan Default">
 

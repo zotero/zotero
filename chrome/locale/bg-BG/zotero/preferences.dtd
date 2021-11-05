@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Мениджър на услугата за откриване на статии">
 <!ENTITY zotero.preferences.locate.description "Описание">
 <!ENTITY zotero.preferences.locate.name "Име">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Услугата за откриване увеличава възможностите на падащото меню Откриване в панел Информация. При включване на различни услуги за откриване те ще бъдат добавени в падащото меню и могат да бъдат използвани за откриване на ресурси от Вашата Библиотека онлайн.">
 <!ENTITY zotero.preferences.locate.addDescription "За да добавите услуга за откриване, която не е налична в списъка, посетете желаната от Вас търсеща машина във Вашия браузър и изберете &quot;Добавяне&quot; от менюто на Зотеро &quot;Локализиране&quot;.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Възстановяване на настройките по подразбиране">
 

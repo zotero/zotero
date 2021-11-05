@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Artikuluen bilaketarako motoreen kudeatzailea">
 <!ENTITY zotero.preferences.locate.description "Deskribapena">
 <!ENTITY zotero.preferences.locate.name "Izena">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Bilaketa motor batek Info paneleko Bilatu goitibeherako menuaren gaitasunak zabaltzen ditu. Beheko zerrendako bilaketa motorrak gaitzean, goitibeherako menuan gehituko dira eta erabilgarri izango dira zure liburutegitik webean baliabideak bilatzeko.">
 <!ENTITY zotero.preferences.locate.addDescription "Zerrendan ez dagoen Bilaketa motore bat gehitzeko, bisitatu nahi duzun bilatzailea zure nabigatzailearen bitartez eta sakatu &quot;Gehitu&quot; Zoteroren &quot;Aurkitu&quot; menuan.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Lehenetsitakoak berrezarri">
 

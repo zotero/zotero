@@ -1,11 +1,11 @@
-<!ENTITY zotero.publications.my_publications "My Publications">
+<!ENTITY zotero.publications.my_publications "Các xuất bản của tôi">
 
-<!ENTITY zotero.publications.intro "Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files if you have the rights to distribute them and wish to do so.">
-<!ENTITY zotero.publications.include.checkbox.files "Include files">
-<!ENTITY zotero.publications.include.checkbox.notes "Include notes">
-<!ENTITY zotero.publications.include.adjustAtAnyTime "You can adjust what to show at any time from the My Publications collection.">
+<!ENTITY zotero.publications.intro "Các mục bạn thêm vào Các Xuất bản của tôi sẽ xuất hiện trong trang hồ sơ của bạn trên zotero.org. Nếu bạn chọn gộp các tệp đính kèm, các tệp đó sẽ chuyển thành công cộng theo giấy phép bạn xác định. Chỉ thêm những gì bạn tạo ra và gộp các tệp bạn có quyền phân phối và bạn muốn làm thế.">
+<!ENTITY zotero.publications.include.checkbox.files "Gộp các tệp">
+<!ENTITY zotero.publications.include.checkbox.notes "Gộp các ghi chú">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "Bạn có thể điều chỉnh những gì bạn muốn hiển thị vào bất cứ lúc nào trong bộ sưu tập Các xuất bản của tôi.">
 
-<!ENTITY zotero.publications.sharing.title "Choose how your work may be shared">
+<!ENTITY zotero.publications.sharing.title "Chọn cách các tài liệu của bạn được chia sẻ">
 <!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
 <!ENTITY zotero.publications.sharing.prompt "Would you like to allow your work to be shared by others?">
 <!ENTITY zotero.publications.sharing.cc "Yes, under a Creative Commons license">

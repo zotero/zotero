@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Správce mechanismu pro vyhledávání článků">
 <!ENTITY zotero.preferences.locate.description "Popis">
 <!ENTITY zotero.preferences.locate.name "Jméno">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "&quot;Mechanismus pro vyhledávání&quot; rozšiřuje možnosti funkce Najít v info panelu. Položky přidané do seznamu níže se přidají do kontextového menu a mohou být použity k nalezení zdrojů z vaší knihovny na webu.">
 <!ENTITY zotero.preferences.locate.addDescription "Pro přidání vyhledávače, který není v seznamu, přejděte na požadovaný vyhledávač v prohlížeči a vyberte položku „Přidat“ v Zotero menu Najít.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Obnovit původní nastavení">
 

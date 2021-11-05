@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "所在確認エンジンの管理">
 <!ENTITY zotero.preferences.locate.description "詳細">
 <!ENTITY zotero.preferences.locate.name "名称">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "所在確認エンジンは、所在確認ドロップダウンメニューの機能を拡張するものです。所在確認エンジンを有効化すると、それがドロップダウンメニューに追加され、ウェブ上での資料の所在確認に利用することができます。">
 <!ENTITY zotero.preferences.locate.addDescription "リストにないルックアップ・エンジンを追加するには、ブラウザで希望のサーチエンジンを訪れて、Zotero の場所メニューから「追加」を選んでください">
 <!ENTITY zotero.preferences.locate.restoreDefaults "初期設定に戻す">
 

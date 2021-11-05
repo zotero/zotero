@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Xestor do motor de busca de artigos">
 <!ENTITY zotero.preferences.locate.description "Descrición">
 <!ENTITY zotero.preferences.locate.name "Nome">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Un motor de busca que aporta a capacidade de localizar no panel de información. Activando o motor de busca na lista de abaixo engádense á lista desagregable e pódense empregar para localizar recursos da súa biblioteca na web.">
 <!ENTITY zotero.preferences.locate.addDescription "Para engadir un motor de busca que non estea na lista, visita a páxina do motor de busca no navegador e prémelle a &quot;engadir&quot; no menú local de Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Restablecer os valores por defecto">
 

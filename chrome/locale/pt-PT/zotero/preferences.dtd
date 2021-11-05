@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gestor do Motor de Localização de Artigos">
 <!ENTITY zotero.preferences.locate.description "Descrição">
 <!ENTITY zotero.preferences.locate.name "Nome">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Um Motor de Localização estende as capacidades do menu de Localização no painel Info. Activar Motores de Localização na lista abaixo leva à sua adição ao menu e à possibilidade de os usar para localizar na Web recursos da sua biblioteca.">
 <!ENTITY zotero.preferences.locate.addDescription "Para adicionar um Motor de Localização que não esteja na lista, visite o motor de pesquisa desejado no seu navegador e seleccione «Adicionar» no menu Localizar do Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Reestabelecer Valores por Omissão">
 

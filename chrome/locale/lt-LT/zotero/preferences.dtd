@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Straipsnių paieškos variklių tvarkytuvė">
 <!ENTITY zotero.preferences.locate.description "Aprašas">
 <!ENTITY zotero.preferences.locate.name "Pavadinimas">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Paieškos variklis išplečia dokumentų suradimo galimybes, kuriomis galite pasinaudoti informaciniame skydelyje per išskleidžiamąjį meniu. Įgalindami žemiau pateiktus paieškos variklius, įtrauksite juos į išskleidžiamąjį meniu, tad savo bibliotekos šaltinių galėsite ieškoti internete. ">
 <!ENTITY zotero.preferences.locate.addDescription "Norėdami įtraukti paieškos variklį, kurio nėra sąraše, interneto naršyklėje atverkite tos paieškos sistemos svetainę ir nuspauskite Zotero meniu mygtuką „Pridėti“.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Naudoti numatytuosius">
 

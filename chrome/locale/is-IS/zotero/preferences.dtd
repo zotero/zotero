@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Stýring á uppflettikerfi greina">
 <!ENTITY zotero.preferences.locate.description "Lýsing">
 <!ENTITY zotero.preferences.locate.name "Nafn">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Uppflettikerfi fjölgar mögulegum leitarleiðum í upplýsingaflipanum. Ef leitarvélar eru virkjaðar í listanum hér fyrir neðan bætast þær við í flettilistanum og hægt verður að nota þær til að leita á vefnum að gögnum sem tengjast þínu færslusafni.">
 <!ENTITY zotero.preferences.locate.addDescription "Til að bæta við leitarvél sem er ekki á listanum, þá er fyrst vafrað á vefsíðu leitarvélarinnar og svo valið &quot;Bæta við&quot; úr staðsetningar vallista Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Endurheimta upphafsstillingar">
 

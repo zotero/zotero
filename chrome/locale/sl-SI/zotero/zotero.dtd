@@ -353,3 +353,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Oddalji">
 <!ENTITY zotero.pdfReader.zoomAuto "Samodejno spremeni velikost">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Približaj na širino strani">
+<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
+<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

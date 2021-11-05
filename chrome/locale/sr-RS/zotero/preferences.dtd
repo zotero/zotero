@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Управник позадинским програмима за претрагу научних радова">
 <!ENTITY zotero.preferences.locate.description "Опис">
 <!ENTITY zotero.preferences.locate.name "Назив">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Позадински програми за претрагу научних радова проширују могућност опције Лоцирај из површи са информацијама. Уколико омогућите додатне позадинске програме са приложеног списка, они ће бити додати на списак, па се могу користити за претрагу библиотека на вебу.">
 <!ENTITY zotero.preferences.locate.addDescription "За додавање позадинских програма за претрагу научних радова који нису на списку, посетите жељени претраживач у вашем веб прегледнику и изаберите „Додај“ унутар одговарајућег Зотеровог менија.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Врати подразумевано">
 

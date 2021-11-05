@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Merer al luskerioù enklask pennadoù">
 <!ENTITY zotero.preferences.locate.description "Deskrivadur">
 <!ENTITY zotero.preferences.locate.name "Anv">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Ul lusker enklask a astenn barregezh ar banell Titouroù. En ur enaouiñ luskerioù enklask el listenn amañ dindan e vint ouzhpennet d'al lañser disachañ hag e c'hallint bezañ implijet evit lec'helaat mammennoù ho levraoueg betek ar Web.">
 <!ENTITY zotero.preferences.locate.addDescription "Evit ouzhpennañ ul lusker enklask ha n'emañ ket el listenn, kit da welet al lusker enklask c'hoantaet en ho merdeer ha diuzit &quot;Ouzhpennañ&quot; adalek al lañser lec'helaat.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Adlakaat dre-ziouer">
 

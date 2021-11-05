@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Správca motora vyhľadávania článkov">
 <!ENTITY zotero.preferences.locate.description "Popis">
 <!ENTITY zotero.preferences.locate.name "Meno">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Vyhľadávací motor rozširuje schopnosť rozbaľovacej ponuky lokalizácie v table informácií. Aktivované vyhľadávacie motory v zozname dole sa pridajú do rozbaľovacej ponuky a použijú sa na lokalizáciu zdrojov z vašej knižnice na webe.">
 <!ENTITY zotero.preferences.locate.addDescription "Na pridanie vyhľadávacieho motora, ktorý nie je v zozname, navštívte želaný vyhľadávací motor vo svojom prehliadači a vyberte &quot;Pridať&quot; z ponuky Zotera Nájsť.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Obnoviť predvolené">
 

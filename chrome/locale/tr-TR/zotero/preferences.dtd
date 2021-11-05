@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Makale Bakma Motoru Yöneticisi">
 <!ENTITY zotero.preferences.locate.description "Tanım">
 <!ENTITY zotero.preferences.locate.name "Ad">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Bir Bakma Motoru, Bilgi bölmesindeki Yerini Bul açılırının yeteneklerini genişletir. Bakma Motorlarını aşağıdaki listede etkinleştirerek bu açılıra ekleyebilir ve onları kitaplığınızdaki kaynakların yerlerini bulmak amacıyla webde kullanabilirsiniz.">
 <!ENTITY zotero.preferences.locate.addDescription "Listede olmayan bir Bakma Motoru eklemek için, tarayıcınızda istediğiniz arama moturunu ziyaret edip Zotero'nun Yerini Bul menüsünden &quot;Ekle&quot;yi seçiniz.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Varsayılanları Geri Yükle">
 

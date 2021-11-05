@@ -1,13 +1,13 @@
 <!ENTITY zotero.version "versi">
-<!ENTITY zotero.whatsNew "What’s new">
+<!ENTITY zotero.whatsNew "Yang baru">
 <!ENTITY zotero.createdby "Dibuat oleh:">
 <!ENTITY zotero.director "Direktur:">
 <!ENTITY zotero.directors "Direktur-direktur:">
 <!ENTITY zotero.developers "Pengembang:">
 <!ENTITY zotero.alumni "Alumni:">
 <!ENTITY zotero.about.localizations "Lokalisasi:">
-<!ENTITY zotero.about.additionalSoftware "Third-Party Software:">
+<!ENTITY zotero.about.additionalSoftware "Perangkat lunak pihak ketiga:">
 <!ENTITY zotero.thanks "Ucapan Terima kasih khusus:">
 <!ENTITY zotero.about.close "Tutup">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Pengakuan &amp; Penghargaan lain">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.citationProcessing "Proses sitasi &amp; bibliografi">

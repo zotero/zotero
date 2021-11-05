@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Manager voor artikel-zoekmachines">
 <!ENTITY zotero.preferences.locate.description "Beschrijving">
 <!ENTITY zotero.preferences.locate.name "Naam">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Een zoekmachine is een uitbreiding van de Opzoeken-keuzelijst in het Info-venster. Hier gekozen zoekmachines worden aan de keuzelijst toegevoegd en kunnen worden gebruikt om bronnen op te zoeken via de website van uw bibliotheek.">
 <!ENTITY zotero.preferences.locate.addDescription "Om een zoekmachine toe te voegen die niet in deze lijst aanwezig is, bezoek de zoekmachine via uw webbrowser en selecteer “Toevoegen” in het Opzoeken-menu van Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Standaardinstellingen herstellen">
 

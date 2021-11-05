@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Article 검색 엔진 메니저">
 <!ENTITY zotero.preferences.locate.description "설명">
 <!ENTITY zotero.preferences.locate.name "이름">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "A Lookup Engine extends the capability of the Locate drop down in the Info pane. By enabling Lookup Engines in the list below they will be added to the drop down and can be used to locate resources from your library on the web.">
 <!ENTITY zotero.preferences.locate.addDescription "목록에 없는 검색 엔진을 추가하려면, 브라우저에서 원하는 검색 엔진에 접속한 뒤 Zotero의 Locate 메뉴에서 추가를 선택하세요.*">
 <!ENTITY zotero.preferences.locate.restoreDefaults "기본값 복원">
 

@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gestore dei motori di ricerca degli articoli">
 <!ENTITY zotero.preferences.locate.description "Descrizione">
 <!ENTITY zotero.preferences.locate.name "Nome">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Un motore di ricerca amplia le funzionalità del menu Trova nella barra degli strumenti Informazioni. Attivando motori di ricerca dalla lista seguente, questi saranno aggiunti al menu e potranno essere usati per rintracciare risorse della propria biblioteca sul web.">
 <!ENTITY zotero.preferences.locate.addDescription "Per aggiungere un motore di ricerca non presente nella lista, visitalo con il tuo browser e seleziona &#34;Aggiungi&#34; dal menu Trova di Zotero">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Ripristina le impostazioni predefinite">
 

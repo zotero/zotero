@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Gerenciador dos Mecanismos de Pesquisa de artigos">
 <!ENTITY zotero.preferences.locate.description "Descrição">
 <!ENTITY zotero.preferences.locate.name "Nome">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Um Mecanismo de Pesquisa amplia as capacidades do menu Localizar no Painel de Informações. Ativando os Mecanismos de Pesquisa na lista abaixo, eles serão adicionados ao menu e podem ser utilizados para localizar recursos da sua biblioteca na web.">
 <!ENTITY zotero.preferences.locate.addDescription "Para adicionar um Mecanismo de Pesquisa que não está na lista, visite o mecanismo de pesquisa no seu navegador e selecione &quot;Adicionar&quot; no menu Localizar do Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Restaurar os padrões">
 

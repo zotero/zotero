@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Zarządzanie silnikami wyszukiwania">
 <!ENTITY zotero.preferences.locate.description "Opis">
 <!ENTITY zotero.preferences.locate.name "Nazwa">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Silnik wyszukiwania rozszerza możliwości menu wyszukiwania w panelu informacji. Włączając silniki wyszukiwania na poniższej liście, zostaną one dodane do rozwijanego menu i mogą zostać użyte do wyszukiwania zasobów z twojej biblioteki w sieci internet.">
 <!ENTITY zotero.preferences.locate.addDescription "Aby dodać silnik wyszukiwania, którego nie ma na liście, odwiedź określony silnik wyszukiwania w przeglądarce i wybierz &quot;Dodaj&quot; w menu wyszukiwania Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Przywróć domyślne">
 

@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Manager pentru motorul de căutare a articolelor">
 <!ENTITY zotero.preferences.locate.description "Descriere">
 <!ENTITY zotero.preferences.locate.name "Nume">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Un motor de căutare extinde capacitatea de localizare în lista derulantă din panoul Informații. Activând motoarele de căutare din lista de mai jos, ele vor fi adăugate în lista derulantă și vor putea fi folosite pentru localizarea resurselor din biblioteca ta de pe web.">
 <!ENTITY zotero.preferences.locate.addDescription "Pentru a adăuga un motor de căutare care nu este în listă, vizitați în browser motorul de căutare dorit și selectați „Adaugă” din meniul Localizare din Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Restaurează valorile implicite">
 

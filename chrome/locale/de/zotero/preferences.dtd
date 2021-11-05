@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Artikel Finder verwalten">
 <!ENTITY zotero.preferences.locate.description "Beschreibung">
 <!ENTITY zotero.preferences.locate.name "Name">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Ein Artikel Finder erweitert die Optionen der &quot;Finden&quot; Funktion. Die unten ausgewählten Finder werden zum drop-down Menü hinzugefügt und können zum finden von Ressourcen  in Bibliotheken oder dem Netz verwendet werden.">
 <!ENTITY zotero.preferences.locate.addDescription "Um einen Artikel Findern hinzuzufügen der nicht auf der Liste ist, besuchen Sie die Seite der gewünschten Suchmaschine und klicken &quot;hinzufügen&quot;  in Zoteros &quot;Finden&quot; Menü.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Standardeinstellung wiederherstellen">
 

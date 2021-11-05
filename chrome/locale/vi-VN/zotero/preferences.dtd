@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Mục cũ nhất trước">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Feed mặc định">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
+<!ENTITY zotero.preferences.openurl.choose "Chọn một bộ phân giải...">
 <!ENTITY zotero.preferences.openurl.custom "Tùy chỉnh...">
 <!ENTITY zotero.preferences.openurl.server "Bộ phân giải:">
 <!ENTITY zotero.preferences.openurl.version "Phiên bản:">
@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Bộ quản lý cơ chế tìm bài viết">
 <!ENTITY zotero.preferences.locate.description "Mô tả">
 <!ENTITY zotero.preferences.locate.name "Tên">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "Cơ chế tìm kiếm mở rộng khả năng của mục Locate trên khung thông tin. Thêm cơ chế tìm kiếm trong danh mục dưới đây sẽ cho phép tìm kiếm tài nguyên trên mạng.">
 <!ENTITY zotero.preferences.locate.addDescription "Để thêm cơ chế tìm kiếm không có trong danh sách, mở trang tìm kiếm trong trình duyệt và chọn &quot;Thêm&quot; từ menu Locate của Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Phục hồi mặc định">
 

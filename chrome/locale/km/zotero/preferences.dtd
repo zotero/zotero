@@ -172,7 +172,6 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "ម៉ាស៊ីនគ្រប់គ្រងស្វែងរកអត្ថបទ">
 <!ENTITY zotero.preferences.locate.description "ពិពណ៌នា">
 <!ENTITY zotero.preferences.locate.name "ឈ្មោះ">
-<!ENTITY zotero.preferences.locate.locateEnginedescription "ម៉ាស៊ីនស្រាវជ្រាវអាចពង្រីកសមត្ថភាពនៃទីតាំងឯកសារតាមរយៈទាញចូលទៅក្នុងផ្ទាំងទិន្នន័យ។ តាមរយៈការធ្វើឲម៉ាស៊ីនស្រាវជ្រាវអាចដំណើរ​ការនៅក្នុងបញ្ជីខាងក្រោមនឹងត្រូវបញ្ចូលក្នុងបញ្ជីដែលបានពង្រីក ហើយ អាចត្រូវបានប្រើដើម្បីកំណត់ទីតាំងប្រភពឯកសារក្នុងបណ្ណាល័យរបស់នៅលើគេហទំព័រ។">
 <!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "ស្តារលំនាំដើម">
 
