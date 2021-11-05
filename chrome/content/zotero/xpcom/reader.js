@@ -300,7 +300,9 @@ class ReaderInstance {
 				await Zotero.Attachments.createDirectoryForItem(item);
 			}
 			file.append(this.pdfStateFileName);
-			await Zotero.File.putContentsAsync(file.path, JSON.stringify(state));
+			// Using `writeAtomic` instead of `putContentsAsync` to avoid
+			// using temp file that causes conflicts on simultaneous writes (on slow systems)
+			await OS.File.writeAtomic(file.path, JSON.stringify(state));
 		}
 	}
 
