@@ -220,11 +220,16 @@ class ReaderInstance {
 			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
 		let index = ps.confirmEx(
 			null,
-			Zotero.getString('general.warning'),
 			Zotero.getString(
 				fromPDF
-					? 'pdfReader.promptTransferFromPDF'
-					: 'pdfReader.promptTransferToPDF'
+					? 'pdfReader.promptTransferFromPDF.title'
+					: 'pdfReader.promptTransferToPDF.title'
+			),
+			Zotero.getString(
+				fromPDF
+					? 'pdfReader.promptTransferFromPDF.text'
+					: 'pdfReader.promptTransferToPDF.text',
+				Zotero.appName
 			),
 			buttonFlags,
 			Zotero.getString('general.continue'),
