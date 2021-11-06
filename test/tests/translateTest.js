@@ -130,6 +130,24 @@ function setupAttachmentEndpoints() {
 	}
 }
 
+/**
+ * Set up endpoints for testing async translators
+ * As above, this must happen immediately before the test.
+ */
+function setupAsyncEndpoints() {
+	var JSONTest = function () {};
+	Zotero.Server.Endpoints["/test/translate/test.json"] = JSONTest;
+	JSONTest.prototype = {
+		"supportedMethods": ["GET"],
+		"init": function(data, sendResponseCallback) {
+			sendResponseCallback(200, "application/json", JSON.stringify({
+				success: true,
+				array: [1, 2, 3]
+			}));
+		}
+	}
+}
+
 describe("Zotero.Translate", function() {
 	let win;
 	before(function* () {
@@ -1214,6 +1232,146 @@ describe("Zotero.Translate", function() {
 		});
 	});
 	
+	describe("Async translators", function () {
+		var htmlURL = "http://127.0.0.1:23119/test/translate/test.html";
+		var jsonURL = "http://127.0.0.1:23119/test/translate/test.json";
+		var notFoundURL = "http://127.0.0.1:23119/test/translate/does_not_exist.html"
+		var doc;
+
+		before(function* () {
+			setupAttachmentEndpoints();
+			setupAsyncEndpoints();
+			doc = (yield Zotero.HTTP.processDocuments(htmlURL, doc => doc))[0];
+		});
+
+		it('should support async detectWeb', async function () {
+			var info = {
+				translatorID: "e6111720-1f6c-42b0-a487-99b9fa50b8a1",
+				label: "Test",
+				creator: "Creator",
+				target: "^http:\/\/127.0.0.1:23119\/test",
+				minVersion: "5.0",
+				maxVersion: "",
+				priority: 100,
+				translatorType: 4,
+				browserSupport: "gcsibv",
+				lastUpdated: "2021-10-23 00:00:00",
+				cacheCode: true
+			};
+			info.code = JSON.stringify(info, null, '\t') + "\n\n"
+				+ `
+				// asynchronous detectWeb
+				async function detectWeb() {
+					await doNothing();
+					return 'book';
+				}
+
+				function doNothing() {
+					return new Promise(resolve => resolve('nothing'));
+				}
+
+				// synchronous doWeb
+				function doWeb(doc) {
+					let item = new Zotero.Item('webpage');
+					item.title = 'Untitled';
+					item.complete();
+				}
+				`;
+			var translator = new Zotero.Translator(info);
+			
+			var translate = new Zotero.Translate.Web();
+			var provider = Zotero.Translators.makeTranslatorProvider({
+				get: function (translatorID) {
+					if (translatorID == info.translatorID) {
+						return translator;
+					}
+					return false;
+				},
+				
+				getAllForType: async function (type) {
+					var translators = [];
+					if (type == 'web') {
+						translators.push(translator);
+					}
+					return translators;
+				}
+			});
+			translate.setTranslatorProvider(provider);
+			translate.setDocument(doc);
+
+			var translators = await translate.getTranslators();
+			assert.equal(translators.length, 1);
+			assert.equal(translators[0].translatorID, info.translatorID);
+
+			var newItems = await translate.translate();
+			assert.equal(newItems.length, 1);
+			assert.equal(newItems[0].getField('title'), 'Untitled');
+		});
+
+		it('should support async doWeb', async function () {
+			var translate = new Zotero.Translate.Web();
+			translate.setDocument(doc);
+			translate.setTranslator(
+				buildDummyTranslator(
+					4,
+					`
+					function detectWeb() {}
+
+					async function doWeb(doc) {
+						let item = new Zotero.Item('webpage');
+
+						let otherDoc = await requestDocument('${htmlURL}');
+						item.title = otherDoc.title;
+
+						let { status } = await request('${htmlURL}');
+						item.abstractNote = 'Status ' + status;
+
+						item.complete();
+
+						let json = await requestJSON('${jsonURL}');
+						if (json.success) {
+							item = new Zotero.Item('webpage');
+							item.title = 'JSON Test';
+							item.complete();
+						}
+					}
+					`
+				)
+			);
+			var newItems = await translate.translate();
+			assert.equal(newItems.length, 2);
+			
+			var item = newItems[0];
+			assert.equal(item.getField('title'), 'Test');
+			assert.equal(item.getField('abstractNote'), 'Status 200');
+
+			var item = newItems[1];
+			assert.equal(item.getField('title'), 'JSON Test');
+		});
+
+		it('should not fail translation on a non-200 status code', async function () {
+			var translate = new Zotero.Translate.Web();
+			translate.setDocument(doc);
+			translate.setTranslator(
+				buildDummyTranslator(
+					4,
+					`function detectWeb() {}
+
+					async function doWeb(doc) {
+						await request('${notFoundURL}').catch(e => {});
+						let item = new Zotero.Item('webpage');
+						item.title = 'Nothing';
+						item.complete();
+					}`
+				)
+			);
+			var newItems = await translate.translate();
+			assert.equal(newItems.length, 1);
+			
+			var item = newItems[0];
+			assert.equal(item.getField('title'), 'Nothing');
+		});
+	});
 	
 	describe("ItemSaver", function () {
 		describe("#saveCollections()", function () {
