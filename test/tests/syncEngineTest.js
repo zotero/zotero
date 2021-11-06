@@ -959,6 +959,67 @@ describe("Zotero.Sync.Data.Engine", function () {
 		});
 		
 		
+		it("should upload settings in batches", async function () {
+			({ engine, client, caller } = await setup());
+			
+			var batchSize = 250;
+			
+			var library = Zotero.Libraries.userLibrary;
+			var libraryID = library.id;
+			var lastLibraryVersion = 5;
+			library.libraryVersion = library.storageVersion = lastLibraryVersion;
+			await library.saveTx();
+			
+			for (let i = 0; i < (batchSize * 2 + 5); i++) {
+				let key = Zotero.DataObjectUtilities.generateKey();
+				let page = Zotero.Utilities.rand(1, 20);
+				await Zotero.SyncedSettings.set(libraryID, `lastPageIndex_u_${key}`, page);
+			}
+			
+			var keys = new Set();
+			
+			var numRequests = 0;
+			server.respond(function (req) {
+				if (req.method == "POST") {
+					numRequests++;
+					assert.equal(
+						req.requestHeaders["If-Unmodified-Since-Version"], lastLibraryVersion
+					);
+					
+					if (req.url == baseURL + "users/1/settings") {
+						let json = JSON.parse(req.requestBody);
+						
+						Zotero.debug(json);
+						if (numRequests == 1 || numRequests == 2) {
+							assert.lengthOf(Object.keys(json), batchSize);
+						}
+						else {
+							assert.lengthOf(Object.keys(json), 5);
+						}
+						
+						for (let key of Object.keys(json)) {
+							keys.add(key);
+						}
+						
+						req.respond(
+							204,
+							{
+								"Last-Modified-Version": ++lastLibraryVersion
+							},
+							""
+						);
+						return;
+					}
+				}
+			})
+			
+			await engine.start();
+			
+			assert.equal(numRequests, 3);
+			assert.equal(keys.size, batchSize * 2 + 5);
+		});
+		
+		
 		it("shouldn't update library storage version after settings upload if storage version was already behind", function* () {
 			({ engine, client, caller } = yield setup());
 			

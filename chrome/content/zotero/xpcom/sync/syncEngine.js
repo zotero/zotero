@@ -1102,35 +1102,42 @@ Zotero.Sync.Data.Engine.prototype._startUpload = Zotero.Promise.coroutine(functi
 });
 
 
-Zotero.Sync.Data.Engine.prototype._uploadSettings = Zotero.Promise.coroutine(function* (settings, libraryVersion) {
-	let json = {};
-	for (let key in settings) {
-		json[key] = {
-			value: settings[key]
-		};
-	}
-	libraryVersion = yield this.apiClient.uploadSettings(
-		this.library.libraryType,
-		this.libraryTypeID,
-		libraryVersion,
-		json
-	);
-	yield Zotero.SyncedSettings.markAsSynced(
-		this.libraryID,
+Zotero.Sync.Data.Engine.prototype._uploadSettings = async function (settings, libraryVersion) {
+	const SETTINGS_BATCH_SIZE = 250;
+	await Zotero.Utilities.Internal.forEachChunkAsync(
 		Object.keys(settings),
-		libraryVersion
+		SETTINGS_BATCH_SIZE,
+		async function (keys) {
+			let json = {};
+			for (let key of keys) {
+				json[key] = {
+					value: settings[key]
+				};
+			}
+			libraryVersion = await this.apiClient.uploadSettings(
+				this.library.libraryType,
+				this.libraryTypeID,
+				libraryVersion,
+				json
+			);
+			await Zotero.SyncedSettings.markAsSynced(
+				this.libraryID,
+				keys,
+				libraryVersion
+			);
+			
+			if (this.library.libraryVersion == this.library.storageVersion) {
+				this.library.storageVersion = libraryVersion;
+			}
+			this.library.libraryVersion = libraryVersion;
+			await this.library.saveTx({
+				skipNotifier: true
+			});
+		}.bind(this)
 	);
-	if (this.library.libraryVersion == this.library.storageVersion) {
-		this.library.storageVersion = libraryVersion;
-	}
-	this.library.libraryVersion = libraryVersion;
-	yield this.library.saveTx({
-		skipNotifier: true
-	});
-	
 	Zotero.debug("Done uploading settings in " + this.library.name);
 	return libraryVersion;
-});
+};
 
 
 Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(function* (objectType, ids, libraryVersion) {
