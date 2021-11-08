@@ -2664,13 +2664,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 					this.onDrop(e, index);
 				}, { passive: true });
 			}
-			div.addEventListener('mousedown', e => this._handleRowMouseDown(e, index), { passive : true });
+			div.addEventListener('mousedown', this._handleRowMouseUpDown, { passive: true });
+			div.addEventListener('mouseup', this._handleRowMouseUpDown, { passive: true });
 		}
 
 		return div;
 	};
 	
-	_handleRowMouseDown = (event, index) => {
+	_handleRowMouseUpDown = (event) => {
 		const modifierIsPressed = ['ctrlKey', 'metaKey', 'shiftKey', 'altKey'].some(key => event[key]);
 		if (this.collectionTreeRow.isDuplicates() && !modifierIsPressed) {
 			this.duplicateMouseSelection = true;

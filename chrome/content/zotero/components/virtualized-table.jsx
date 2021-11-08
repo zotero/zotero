@@ -687,9 +687,7 @@ class VirtualizedTable extends React.Component {
 			this._isMouseDrag = false;
 			return;
 		}
-		if (shiftSelect || toggleSelection) {
-			this._onSelection(index, shiftSelect, toggleSelection);
-		}
+		this._onSelection(index, shiftSelect, toggleSelection);
 	}
 
 	_activateNode = (event, indices) => {
