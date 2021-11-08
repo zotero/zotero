@@ -164,12 +164,18 @@ const ZoteroStandalone = new function() {
 		let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 		if (reader) {
 			let item = Zotero.Items.get(reader.itemID);
-			if (item) {
+			if (item
+				&& Zotero.Libraries.get(item.libraryID).editable
+				&& !(item.deleted || item.parentItem && item.parentItem.deleted)) {
 				let annotations = item.getAnnotations();
 				let canTransferFromPDF = annotations.find(x => x.annotationIsExternal);
 				let canTransferToPDF = annotations.find(x => !x.annotationIsExternal);
 				this.updateMenuItemEnabled('menu_transferFromPDF', canTransferFromPDF);
 				this.updateMenuItemEnabled('menu_transferToPDF', canTransferToPDF);
+			}
+			else {
+				this.updateMenuItemEnabled('menu_transferFromPDF', false);
+				this.updateMenuItemEnabled('menu_transferToPDF', false);
 			}
 		}
 		

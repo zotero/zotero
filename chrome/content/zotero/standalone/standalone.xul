@@ -165,7 +165,7 @@
 							<menuitem id="menu_export_file" class="menu-type-reader"
 									label="&zotero.general.saveAs;"
 									oncommand="ZoteroStandalone.onReaderCmd('export')"/>
-							<menuseparator/>
+							<menuseparator class="menu-type-reader"/>
 							<menuitem label="Print" class="menu-type-reader" oncommand="ZoteroStandalone.onReaderCmd('print')"/>
 							<menuitem label="&zotero.items.menu.showInLibrary;" class="menu-type-reader" oncommand="ZoteroStandalone.onReaderCmd('showInLibrary')"/>
 							<menuseparator/>
