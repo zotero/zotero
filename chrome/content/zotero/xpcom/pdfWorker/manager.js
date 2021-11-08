@@ -99,7 +99,7 @@ class PDFWorker {
 					if (message.action === 'FetchBuiltInCMap') {
 						let response = await Zotero.HTTP.request(
 							'GET',
-							CMAPS_URL + event.data.data.name + '.bcmap',
+							CMAPS_URL + message.data + '.bcmap',
 							{ responseType: 'arraybuffer' }
 						);
 						respData = {
