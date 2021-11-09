@@ -19,6 +19,17 @@
         },
         "starred": false,
         "title": "Foo Bar",
+        "authors":
+        [
+            {
+                "first_name": "Tom",
+                "last_name": "Najdek"
+            },
+            {
+                "first_name": "Lorem",
+                "last_name": "Ipsum"
+            }
+        ],
         "type": "journal",
         "folder_uuids": [
             "8d2f262d-49b3-4dfc-8968-0bb71bcd92ea"
@@ -39,5 +50,39 @@
         "title": "Sample Report",
         "type": "report",
         "year": 2002
+    }, {
+        "title": "Item with PDF",
+        "type": "journal",
+        "year": 2005,
+        "source": "Zotero",
+        "pages": "1-11",
+        "websites":
+        [
+            "https://zotero.org"
+        ],
+        "id": "c54b0c6f-c4ce-4706-8742-bc7d032df862",
+        "created": "2021-11-09T10:26:15.201Z",
+        "file_attached": true,
+        "profile_id": "8dbf0832-8723-4c48-b532-20c0b7f6e01a",
+        "last_modified": "2021-11-09T10:26:16.303Z",
+        "read": false,
+        "starred": false,
+        "authored": false,
+        "confirmed": true,
+        "hidden": false,
+        "private_publication": false,
+        "abstract": "Lorem Ipsum. Nostrud elit ullamco laborum cillum.",
+        "files":
+        [
+            {
+                "id": "19fb5e5b-1a39-4851-b513-d48441a670e1",
+                "document_id": "c54b0c6f-c4ce-4706-8742-bc7d032df862",
+                "mime_type": "application/pdf",
+                "file_name": "item.pdf",
+                "size": 123456,
+                "created": "2021-11-09T10:26:16.292Z",
+                "filehash": "cc22c6611277df346ff8dc7386ba3880b2bafa15"
+            }
+        ]
     }
 ]
