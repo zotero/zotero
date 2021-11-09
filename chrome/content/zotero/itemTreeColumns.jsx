@@ -93,7 +93,6 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "publicationTitle",
-		disabledIn: "feed",
 		label: "zotero.items.publication_column",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
