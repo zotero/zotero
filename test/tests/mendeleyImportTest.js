@@ -88,7 +88,9 @@ describe('Zotero_Import_Mendeley', function () {
 			url: `groups/v2?type=all&limit=500`,
 			status: 200,
 			headers: {},
-			json: []
+			json: JSON.parse(
+				await Zotero.File.getContentsFromURLAsync('resource://zotero-unit-tests/data/mendeleyMock/groups.json')
+			)
 		});
 
 		setHTTPResponse(server, 'https://api.mendeley.com/', {
@@ -100,6 +102,29 @@ describe('Zotero_Import_Mendeley', function () {
 			},
 			text: ''
 		});
+		
+		setHTTPResponse(server, 'https://api.mendeley.com/', {
+			method: 'GET',
+			url: `annotations?group_id=ec66aee6-455c-300c-b601-ba4d6a34a95e&limit=200`,
+			status: 200,
+			json: JSON.parse(
+				await Zotero.File.getContentsFromURLAsync('resource://zotero-unit-tests/data/mendeleyMock/group-annotations.json')
+			)
+		});
+		
+		setHTTPResponse(server, 'https://api.mendeley.com/', {
+			method: 'GET',
+			url: `annotations?group_id=cc697d28-054c-37d2-afa3-74fa4cf8a727&limit=200`,
+			status: 200,
+			json: []
+		});
+
+		setHTTPResponse(server, 'https://api.mendeley.com/', {
+			method: 'GET',
+			url: `annotations?group_id=6a15e9d6-c7e6-3716-8834-7a67d6f5f91f&limit=200`,
+			status: 200,
+			json: []
+		});
 	});
 
 	afterEach(() => {
@@ -107,7 +132,7 @@ describe('Zotero_Import_Mendeley', function () {
 	});
 
 	describe('#import', () => {
-		it("should import items & collections", async () => {
+		it("should import collections, items, attachments & annotations", async () => {
 			await importer.translate({
 				libraryID: Zotero.Libraries.userLibraryID,
 				collections: null,
@@ -156,7 +181,12 @@ describe('Zotero_Import_Mendeley', function () {
 			assert.lengthOf(withpdf.getAttachments(), 1);
 			assert.equal(pdf.parentID, withpdf.id);
 			const annotations = await pdf.getAnnotations();
-			assert.equal(annotations.length, 4);
+			assert.equal(annotations.length, 5);
+			assert.isTrue(annotations.some(a => a.annotationComment === 'blue note 2'));
+			assert.isTrue(annotations.some(a => a.annotationComment === 'orange note1'));
+			assert.isTrue(annotations.some(a => a.annotationComment === 'note by me'));
+			assert.isFalse(annotations.some(a => a.annotationComment === 'note by other'));
+			assert.isFalse(annotations.some(a => a.annotationComment === 'mismatched note'));
 
 			// collection
 			const parentCollection = await Zotero.Collections.getAsync(

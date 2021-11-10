@@ -1,0 +1,74 @@
+[
+    {
+        "name": "group 1",
+        "description": "group 1 is owned by me",
+        "disciplines":
+        [],
+        "tags":
+        [],
+        "photo":
+        {
+            "standard": "",
+            "square": ""
+        },
+        "id": "ec66aee6-455c-300c-b601-ba4d6a34a95e",
+        "created": "2021-04-22T11:41:43.000Z",
+        "owning_profile_id": "97d3193e-2d2a-4700-abd6-d82335ef551d",
+        "link": "",
+        "role": "owner",
+        "access_level": "private",
+        "used_space": 1234,
+        "member_count": 3,
+        "member_limit": 25,
+        "url_slug": "",
+        "pending_invitation_count": 0
+    },
+    {
+        "name": "group 2",
+        "description": "group 2 is also owned by me",
+        "disciplines":
+        [],
+        "tags":
+        [],
+        "photo":
+        {
+            "standard": "",
+            "square": ""
+        },
+        "id": "cc697d28-054c-37d2-afa3-74fa4cf8a727",
+        "created": "2021-04-22T13:40:54.000Z",
+        "owning_profile_id": "97d3193e-2d2a-4700-abd6-d82335ef551d",
+        "link": "",
+        "role": "owner",
+        "access_level": "private",
+        "used_space": 0,
+        "member_count": 1,
+        "member_limit": 25,
+        "url_slug": "",
+        "pending_invitation_count": 0
+    },
+    {
+        "name": "group 3",
+        "description": "group 3 is owned by someone else",
+        "disciplines":
+        [],
+        "tags":
+        [],
+        "photo":
+        {
+            "standard": "",
+            "square": ""
+        },
+        "id": "6a15e9d6-c7e6-3716-8834-7a67d6f5f91f",
+        "created": "2021-04-22T13:38:17.000Z",
+        "owning_profile_id": "18b8c872-0e57-36e2-912a-40325fe8c542",
+        "link": "",
+        "role": "normal",
+        "access_level": "private",
+        "used_space": 0,
+        "member_count": 2,
+        "member_limit": 25,
+        "url_slug": "",
+        "pending_invitation_count": 0
+    }
+]
