@@ -156,7 +156,7 @@ describe('Zotero_Import_Mendeley', function () {
 			assert.lengthOf(withpdf.getAttachments(), 1);
 			assert.equal(pdf.parentID, withpdf.id);
 			const annotations = await pdf.getAnnotations();
-			assert.lengthOf(annotations, 4);
+			assert.equal(annotations.length, 4);
 
 			// collection
 			const parentCollection = await Zotero.Collections.getAsync(
