@@ -725,7 +725,7 @@ Zotero_Import_Mendeley.prototype._getDocumentFilesAPI = async function (document
 		}
 		map.set(doc.id, files);
 	}
-	// check if enough space available totalSize
+	// TODO: check if enough space available totalSize
 	await caller.runAll();
 	return map;
 };

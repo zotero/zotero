@@ -1,0 +1,68 @@
+[
+    {
+        "id": "656fd591-451a-4bb0-8d5f-30c36c135fc9",
+        "type": "sticky_note",
+        "color":
+        {
+            "r": 211,
+            "g": 194,
+            "b": 255
+        },
+        "profile_id": "8dbf0832-8723-4c48-b532-20c0b7f6e01a",
+        "positions":
+        [
+            {
+                "top_left":
+                {
+                    "x": 232.5055339011597,
+                    "y": 744.3609065973726
+                },
+                "bottom_right":
+                {
+                    "x": 232.5055339011597,
+                    "y": 744.3609065973726
+                },
+                "page": 1
+            }
+        ],
+        "text": "note by me",
+        "created": "2021-04-22T12:09:51.125Z",
+        "last_modified": "2021-04-22T12:09:51.125Z",
+        "privacy_level": "group",
+        "filehash": "cc22c6611277df346ff8dc7386ba3880b2bafa15",
+        "document_id": "15edb87e-8526-4e27-af5e-03ada85e447a"
+    },
+    {
+        "id": "c781467c-31eb-4522-8676-489aea8975e9",
+        "type": "sticky_note",
+        "color":
+        {
+            "r": 255,
+            "g": 245,
+            "b": 173
+        },
+        "profile_id": "1beef079-1488-3b20-ba55-12b1ae854506",
+        "positions":
+        [
+            {
+                "top_left":
+                {
+                    "x": 167.22474856840384,
+                    "y": 678.5074827967856
+                },
+                "bottom_right":
+                {
+                    "x": 167.22474856840384,
+                    "y": 678.5074827967856
+                },
+                "page": 1
+            }
+        ],
+        "text": "note by other",
+        "created": "2021-04-22T12:03:07.293Z",
+        "last_modified": "2021-04-27T08:51:05.373Z",
+        "privacy_level": "group",
+        "filehash": "cc22c6611277df346ff8dc7386ba3880b2bafa15",
+        "document_id": "15edb87e-8526-4e27-af5e-03ada85e447a"
+    }
+]

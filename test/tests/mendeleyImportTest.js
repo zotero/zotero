@@ -1,12 +1,27 @@
-/* global setHTTPResponse:false, sinon: false, Zotero_Import_Mendeley: false */
+/* global setHTTPResponse:false, sinon: false, Zotero_Import_Mendeley: false, HttpServer: false */
 
 describe('Zotero_Import_Mendeley', function () {
-	var server, importer;
+	var server, importer, httpd, httpdURL;
 
 	before(async () => {
 		Components.utils.import('chrome://zotero/content/import/mendeley/mendeleyImport.js');
 		importer = new Zotero_Import_Mendeley();
 		importer.mendeleyCode = 'CODE';
+
+		// real http server is used to deliver an empty pdf so that annotations can be processed during import
+		Components.utils.import("resource://zotero-unit/httpd.js");
+		const port = 16213;
+		httpd = new HttpServer();
+		httpdURL = `http://127.0.0.1:${port}`;
+		httpd.start(port);
+		httpd.registerFile(
+			'/file1.pdf',
+			Zotero.File.pathToFile(OS.Path.join(getTestDataDirectory().path, 'empty.pdf'))
+		);
+	});
+
+	after(async () => {
+		await new Zotero.Promise(resolve => httpd.stop(resolve));
 	});
 
 	beforeEach(async () => {
@@ -43,7 +58,9 @@ describe('Zotero_Import_Mendeley', function () {
 			url: `annotations?limit=200`,
 			status: 200,
 			headers: {},
-			json: []
+			json: JSON.parse(
+				await Zotero.File.getContentsFromURLAsync('resource://zotero-unit-tests/data/mendeleyMock/annotations.json')
+			)
 		});
 
 		setHTTPResponse(server, 'https://api.mendeley.com/', {
@@ -71,6 +88,41 @@ describe('Zotero_Import_Mendeley', function () {
 			url: `groups/v2?type=all&limit=500`,
 			status: 200,
 			headers: {},
+			json: JSON.parse(
+				await Zotero.File.getContentsFromURLAsync('resource://zotero-unit-tests/data/mendeleyMock/groups.json')
+			)
+		});
+
+		setHTTPResponse(server, 'https://api.mendeley.com/', {
+			method: 'GET',
+			url: `files/19fb5e5b-1a39-4851-b513-d48441a670e1?`,
+			status: 200, // ideally would be 303 but mock http doesn't like it
+			headers: {
+				Location: `${httpdURL}/file1.pdf`
+			},
+			text: ''
+		});
+		
+		setHTTPResponse(server, 'https://api.mendeley.com/', {
+			method: 'GET',
+			url: `annotations?group_id=ec66aee6-455c-300c-b601-ba4d6a34a95e&limit=200`,
+			status: 200,
+			json: JSON.parse(
+				await Zotero.File.getContentsFromURLAsync('resource://zotero-unit-tests/data/mendeleyMock/group-annotations.json')
+			)
+		});
+		
+		setHTTPResponse(server, 'https://api.mendeley.com/', {
+			method: 'GET',
+			url: `annotations?group_id=cc697d28-054c-37d2-afa3-74fa4cf8a727&limit=200`,
+			status: 200,
+			json: []
+		});
+
+		setHTTPResponse(server, 'https://api.mendeley.com/', {
+			method: 'GET',
+			url: `annotations?group_id=6a15e9d6-c7e6-3716-8834-7a67d6f5f91f&limit=200`,
+			status: 200,
 			json: []
 		});
 	});
@@ -80,8 +132,7 @@ describe('Zotero_Import_Mendeley', function () {
 	});
 
 	describe('#import', () => {
-		it("should import items & collections", async () => {
-			
+		it("should import collections, items, attachments & annotations", async () => {
 			await importer.translate({
 				libraryID: Zotero.Libraries.userLibraryID,
 				collections: null,
@@ -98,16 +149,46 @@ describe('Zotero_Import_Mendeley', function () {
 				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
 				.shift();
 
+			const withpdf = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:documentUUID', 'c54b0c6f-c4ce-4706-8742-bc7d032df862'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+
+			const pdf = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:fileHash', 'cc22c6611277df346ff8dc7386ba3880b2bafa15'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+
 			assert.equal(journal.getField('title'), 'Foo Bar');
 			assert.equal(journal.itemTypeID, Zotero.ItemTypes.getID('journalArticle'));
 			assert.equal(report.getField('title'), 'Sample Report');
 			assert.equal(report.itemTypeID, Zotero.ItemTypes.getID('report'));
+			assert.equal(withpdf.getField('title'), 'Item with PDF');
+			assert.equal(withpdf.itemTypeID, Zotero.ItemTypes.getID('journalArticle'));
+			
+			// creators
+			const creators = journal.getCreators();
+			assert.lengthOf(creators, 2);
+			assert.sameMembers(creators.map(c => c.firstName), ["Tom", "Lorem"]);
+			assert.sameMembers(creators.map(c => c.lastName), ["Najdek", "Ipsum"]);
 
-			// test identifiers
+			// identifiers
 			assert.equal(journal.getField('DOI'), '10.1111');
 			assert.include(journal.getField('extra'), 'PMID: 11111111');
 			assert.include(journal.getField('extra'), 'arXiv: 1111.2222');
-			
+
+			// attachment & annotations
+			assert.lengthOf(withpdf.getAttachments(), 1);
+			assert.equal(pdf.parentID, withpdf.id);
+			const annotations = await pdf.getAnnotations();
+			assert.equal(annotations.length, 5);
+			assert.isTrue(annotations.some(a => a.annotationComment === 'blue note 2'));
+			assert.isTrue(annotations.some(a => a.annotationComment === 'orange note1'));
+			assert.isTrue(annotations.some(a => a.annotationComment === 'note by me'));
+			assert.isFalse(annotations.some(a => a.annotationComment === 'note by other'));
+			assert.isFalse(annotations.some(a => a.annotationComment === 'mismatched note'));
+
+			// collection
 			const parentCollection = await Zotero.Collections.getAsync(
 				journal.getCollections().pop()
 			);
