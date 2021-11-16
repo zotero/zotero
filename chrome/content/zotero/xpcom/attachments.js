@@ -1127,7 +1127,17 @@ Zotero.Attachments = new function(){
 		var sample = await Zotero.File.getContentsAsync(path, null, 1000);
 		if (Zotero.MIME.sniffForMIMEType(sample) != 'application/pdf') {
 			Zotero.debug("Downloaded PDF was not a PDF", 2);
-			Zotero.debug(sample, 3);
+			if (Zotero.Debug.enabled) {
+				Zotero.debug(
+					Zotero.Utilities.ellipsize(
+						await Zotero.File.getContentsAsync(path),
+						20000,
+						false,
+						true
+					),
+					3
+				);
+			}
 			throw new Zotero.Attachments.InvalidPDFException();
 		}
 	}
