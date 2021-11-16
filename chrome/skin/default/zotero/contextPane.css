@@ -88,6 +88,8 @@
 }
 
 #zotero-context-pane[collapsed=true] .notes-list-container,
-#zotero-context-pane[collapsed=true] .zotero-view-item > tabpanel > * {
+#zotero-context-pane-inner[collapsed=true] .notes-list-container,
+#zotero-context-pane[collapsed=true] .zotero-view-item > tabpanel > *,
+#zotero-context-pane-inner[collapsed=true] .zotero-view-item > tabpanel > * {
     overflow: unset !important;
 }
