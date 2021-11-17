@@ -49,34 +49,17 @@ async function babelWorker(ev) {
 		}
 
 		// Patch single-file
-		else if (sourcefile === 'resource/SingleFile/lib/single-file/single-file.js') {
-			// We need to add this bit that is done for the cli implementation of singleFile
-			// See resource/SingleFile/cli/back-ends/common/scripts.js
-			const WEB_SCRIPTS = [
-				"lib/single-file/processors/hooks/content/content-hooks-web.js",
-				"lib/single-file/processors/hooks/content/content-hooks-frames-web.js"
-			];
-			let basePath = 'resource/SingleFile/';
-		
-			function readScriptFile(path, basePath) {
-				return new Promise((resolve, reject) =>
-					fs.readFile(basePath + path, (err, data) => {
-						if (err) {
-							reject(err);
-						} else {
-							resolve(data.toString() + "\n");
-						}
-					})
-				);
-			}
-		
-			const webScripts = {};
-			await Promise.all(
-				WEB_SCRIPTS.map(async path => webScripts[path] = await readScriptFile(path, basePath))
-			);
-		
-			transformed = contents + '\n\n'
-				+ "this.singlefile.lib.getFileContent = filename => (" + JSON.stringify(webScripts) + ")[filename];\n";
+		else if (sourcefile === 'resource/SingleFile/dist/single-file.js') {
+			// Change for what I assume is a bug in Firefox. We create a singlefile
+			// sandbox which is based on a document.defaultView of a hidden browser.
+			// The minified single-file then uses globalThis.Set which for some reason
+			// doesn't properly support iterating over and throws an error. The normal
+			// `Set` object accessible in the sandbox does not have this problem.
+			// I've tried using a proxy for globalThis with a custom Set, but that
+			// manifest its own issues. Setting the globalThis to sandbox produced
+			// issues with monkey-patching that singleFile does for default interfaces.
+			transformed = contents.replace('globalThis.Set', 'Set')
+				.replace('globalThis.Map', 'Map');
 		}
 
 		else if ('ignore' in options && options.ignore.some(ignoreGlob => multimatch(sourcefile, ignoreGlob).length)) {
