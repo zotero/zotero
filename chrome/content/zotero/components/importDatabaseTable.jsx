@@ -27,7 +27,7 @@ import PropTypes from 'prop-types';
 import cx from 'classnames';
 import { scrollIntoViewIfNeeded } from './utils';
 
-const ImportDatabaseTable = ({ files, onChange }, ref) => {
+const ImportDatabaseTable = memo(forwardRef(({ files, onChange }, ref) => {
 	const [selectedIndex, setSelectedIndex] = useState(null);
 	const bodyRef = useRef(null);
 	const entries = files.map((file) => {
@@ -146,7 +146,9 @@ const ImportDatabaseTable = ({ files, onChange }, ref) => {
 			</div>
 		</div>
 	);
-};
+}));
+
+ImportDatabaseTable.displayName = 'ImportDatabaseTable';
 
 ImportDatabaseTable.propTypes = {
 	files: PropTypes.shape({
@@ -157,4 +159,4 @@ ImportDatabaseTable.propTypes = {
 	onChange: PropTypes.func,
 };
 
-export default memo(forwardRef(ImportDatabaseTable));
+export default ImportDatabaseTable;

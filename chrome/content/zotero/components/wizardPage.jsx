@@ -25,7 +25,7 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 
-function WizardPage({ children, label }) {
+const WizardPage = ({ children, label }) => {
 	return (
 		<div className="wizard-page">
 			{ (label && typeof label === 'string' && label.length > 0) && (
@@ -40,7 +40,7 @@ function WizardPage({ children, label }) {
 			</div>
 		</div>
 	);
-}
+};
 
 WizardPage.propTypes = {
 	children: PropTypes.oneOfType([PropTypes.element, PropTypes.array]),
