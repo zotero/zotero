@@ -38,7 +38,7 @@ import ProgressBar from './components/progressBar';
 import ImportDatabaseTable from './components/importDatabaseTable';
 import { nextHtmlId } from './components/utils';
 
-const ImportWizard = memo(({ libraryID }) => {
+const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 	const id = useRef(nextHtmlId());
 	const translationResult = useRef(null);
 	const tableRef = useRef(null);
@@ -58,6 +58,7 @@ const ImportWizard = memo(({ libraryID }) => {
 
 	const importSourceOptions = [
 		{ label: Zotero.getString('import.source.file'), value: 'file' },
+		{ label: `Mendeley Reference Manager (${Zotero.getString('import.onlineImport')})`, value: 'mendeleyOnline' },
 	];
 
 	if (dbs.length > 0) {
@@ -145,6 +146,14 @@ const ImportWizard = memo(({ libraryID }) => {
 		setShouldCreateCollection(await Zotero.DB.valueQueryAsync(sql, libraryID));
 	}, [libraryID]);
 
+	const handleSourceChange = useCallback((newSource) => {
+		setSelectedMode(newSource);
+	}, []);
+
+	const handleClose = useCallback(() => {
+		window.close();
+	}, []);
+
 	const findFiles = useCallback(async () => {
 		try {
 			var refreshedDbs;
@@ -152,7 +161,10 @@ const ImportWizard = memo(({ libraryID }) => {
 				case 'file':
 					await chooseFile();
 					break;
-					
+				case 'mendeleyOnline':
+					wizardRef.current.goTo('mendeley-online-intro');
+					setCanRewind(true);
+					break;
 				case 'mendeley':
 					refreshedDbs = await Zotero_File_Interface.findMendeleyDatabases();
 					setDbs(refreshedDbs);
@@ -179,17 +191,9 @@ const ImportWizard = memo(({ libraryID }) => {
 		}
 	}, [chooseFile, selectedMode, skipToDonePage]);
 
-	const handleSourceChange = useCallback((newSource) => {
-		setSelectedMode(newSource);
-	}, []);
-
-	const handleClose = useCallback(() => {
-		window.close();
-	}, []);
-
 	const handleModeChosen = useCallback(() => {
 		findFiles();
-		return false;
+		return false; // must return false to prevent wizard advancing
 	}, [findFiles]);
 
 	const handleSelectedDbChange = useCallback((newSelectedDb) => {
@@ -242,6 +246,11 @@ const ImportWizard = memo(({ libraryID }) => {
 		setCanRewind(false);
 	}, []);
 
+	const beginOnlineImport = useCallback(() => {
+		Zotero_File_Interface.authenticateMendeleyOnline();
+		window.close();
+	}, []);
+
 	const startImport = useCallback(async () => {
 		setCanCancel(false);
 		setCanAdvance(false);
@@ -252,7 +261,8 @@ const ImportWizard = memo(({ libraryID }) => {
 				file: file,
 				onBeforeImport: handleBeforeImport,
 				addToLibraryRoot: !shouldCreateCollection,
-				linkFiles: fileHandling === 'link'
+				linkFiles: fileHandling === 'link',
+				mendeleyCode
 			});
 			
 			// Cancelled by user or due to error
@@ -291,7 +301,7 @@ const ImportWizard = memo(({ libraryID }) => {
 			}
 			throw e;
 		}
-	}, [file, fileHandling, handleBeforeImport, handleUrlClick, shouldCreateCollection, skipToDonePage]);
+	}, [file, fileHandling, handleBeforeImport, handleUrlClick, mendeleyCode, shouldCreateCollection, skipToDonePage]);
 
 	const goToStart = useCallback(() => {
 		wizardRef.current.goTo('page-start');
@@ -304,6 +314,12 @@ const ImportWizard = memo(({ libraryID }) => {
 			updateCreateCollectionsCheckbox();
 		})();
 	}, [updateCreateCollectionsCheckbox]);
+
+	useEffect(() => {
+		if (mendeleyCode) {
+			wizardRef.current.goTo('page-options');
+		}
+	}, [mendeleyCode]);
 
 	return (
 		<Wizard
@@ -328,7 +344,7 @@ const ImportWizard = memo(({ libraryID }) => {
 			<WizardPage
 				pageId="page-file-list"
 				onPageRewound={ goToStart }
-				label={ selectedMode === 'mendeley' && Zotero.getString('fileInterface.chooseAppDatabaseToImport', 'Mendeley') }
+				label={ selectedMode === 'mendeley' ? Zotero.getString('fileInterface.chooseAppDatabaseToImport', 'Mendeley') : '' }
 			>
 				{ selectedMode === 'mendeley' ? (
 					<React.Fragment>
@@ -343,6 +359,19 @@ const ImportWizard = memo(({ libraryID }) => {
 						</div>
 					</React.Fragment>
 				) : null }
+			</WizardPage>
+			<WizardPage
+				pageId="mendeley-online-intro"
+				onPageRewound={ goToStart }
+				onPageAdvance={ beginOnlineImport }
+				label={ Zotero.getString('import.online.intro.title') }
+			>
+				<div className="mendeley-online-intro">
+					{ Zotero.getString('import.online.intro', [Zotero.appName, 'Mendeley Reference Manager', 'Mendeley']) }
+				</div>
+				<div className="mendeley-online-intro">
+					{ Zotero.getString('import.online.intro2', [Zotero.appName, 'Mendeley']) }
+				</div>
 			</WizardPage>
 			<WizardPage
 				onPageAdvance={ startImport }
@@ -362,20 +391,22 @@ const ImportWizard = memo(({ libraryID }) => {
 						{ Zotero.getString('import.createCollection') }
 					</label>
 				</div>
-				<div className="page-options-file-handling">
-					<h2>
-						{ Zotero.getString("import.fileHandling") }
-					</h2>
-					<RadioSet
-						id={ id.current + 'file-handling-radio' }
-						onChange={ handleFileHandlingChange }
-						options={ fileHandlingOptions }
-						value={ fileHandling }
-					/>
-				</div>
-				<div className="page-options-file-handling-description">
-					{ Zotero.getString('import.fileHandling.description', Zotero.appName) }
-				</div>
+				{ !mendeleyCode && (
+					<div className="page-options-file-handling">
+						<h2>
+							{ Zotero.getString("import.fileHandling") }
+						</h2>
+						<RadioSet
+							id={ id.current + 'file-handling-radio' }
+							onChange={ handleFileHandlingChange }
+							options={ fileHandlingOptions }
+							value={ fileHandling }
+						/>
+						<div className="page-options-file-handling-description">
+							{ Zotero.getString('import.fileHandling.description', Zotero.appName) }
+						</div>
+					</div>
+				)}
 			</WizardPage>
 			<WizardPage
 				pageId="page-progress"
@@ -412,6 +443,7 @@ ImportWizard.init = (domEl, props) => {
 
 ImportWizard.propTypes = {
 	libraryID: PropTypes.number,
+	mendeleyCode: PropTypes.string,
 };
 
 Zotero.ImportWizard = ImportWizard;
