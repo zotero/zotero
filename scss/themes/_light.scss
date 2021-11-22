@@ -184,6 +184,11 @@ $modal-icon-spin-color:       $shade-0;
 // Tag selector
 $tag-selector-bg:             -moz-field;
 
-// os-specific
+// Wizards
+$wizard-header-bg: 				#fff;
+$radio-button-border:			$shade-4;
+$radio-button-box-shadow:		inset 0px 0px 1px 0px $shade-3;
+$radio-button-checked: 			#787878;
+$radio-button-checked-focus: 	$shade-5
 
-$wizard-header-bg: #fff;
+// os-specific

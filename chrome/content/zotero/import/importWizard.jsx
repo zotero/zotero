@@ -120,10 +120,6 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 		setShouldCreateCollection(await Zotero.DB.valueQueryAsync(sql, libraryID));
 	}, [libraryID]);
 
-	const handleSourceChange = useCallback((newSource) => {
-		setSelectedMode(newSource);
-	}, []);
-
 	const handleClose = useCallback(() => {
 		window.close();
 	}, []);
@@ -156,6 +152,16 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 		findFiles();
 		return false; // must return false to prevent wizard advancing
 	}, [findFiles]);
+
+	const handleSourceChange = useCallback((newSource) => {
+		setSelectedMode(newSource);
+	}, []);
+
+	const handleSourceKeyDown = useCallback((ev) => {
+		if (ev.key === "Enter") {
+			handleModeChosen();
+		}
+	}, [handleModeChosen]);
 
 	const handleReportErrorClick = useCallback(() => {
 		Zotero.getActiveZoteroPane().reportErrors();
@@ -256,6 +262,12 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 		}
 	}, [file, fileHandling, handleBeforeImport, handleUrlClick, mendeleyCode, shouldCreateCollection, skipToDonePage]);
 
+	const handlePageOptionsKeyDown = useCallback((ev) => {
+		if (ev.key === "Enter") {
+			startImport();
+		}
+	}, [startImport]);
+
 	const goToStart = useCallback(() => {
 		wizardRef.current.goTo('page-start');
 		setCanAdvance(true);
@@ -290,6 +302,7 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 				<RadioSet
 					autoFocus
 					onChange={ handleSourceChange }
+					onKeyDown={ handleSourceKeyDown }
 					options={ importSourceOptions }
 					value={ selectedMode }
 				/>
@@ -319,6 +332,7 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 						id={ id.current + '-create-collection-checkbox' }
 						label={ Zotero.getString('import.createCollection') }
 						onChange={ handleCreateCollectionCheckboxChange }
+						onKeyDown={ handlePageOptionsKeyDown }
 						type="checkbox"
 					/>
 					<label htmlFor={ id.current + '-create-collection-checkbox' }>
@@ -331,8 +345,10 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 							{ Zotero.getString("import.fileHandling") }
 						</h2>
 						<RadioSet
+							autoFocus
 							id={ id.current + 'file-handling-radio' }
 							onChange={ handleFileHandlingChange }
+							onKeyDown={ handlePageOptionsKeyDown }
 							options={ fileHandlingOptions }
 							value={ fileHandling }
 						/>

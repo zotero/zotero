@@ -87,6 +87,7 @@ function getLicense(sharing, adaptations, commercial, currentPage) {
 
 const PublicationsDialog = memo(({ io }) => {
 	const id = useRef(nextHtmlId());
+	const wizard = useRef(null);
 	const [shouldIncludeFiles, setShouldIncludeFiles] = useState(false);
 	const [shouldIncludeNotes, setShouldIncludeNotes] = useState(false);
 	const [authorship, setAuthorship] = useState(false);
@@ -165,6 +166,12 @@ const PublicationsDialog = memo(({ io }) => {
 		return true;
 	}, [handleFinish, nextPageId]);
 
+	const handleKeyDown = useCallback((ev) => {
+		if (ev.key === 'Enter') {
+			wizard.current.advance();
+		}
+	}, []);
+
 	const handleClose = useCallback(() => {
 		window.close();
 	}, []);
@@ -189,10 +196,11 @@ const PublicationsDialog = memo(({ io }) => {
 		<Wizard
 			canAdvance={ canAdvance }
 			className="publications-dialog"
-			nextLabel={ nextLabel }
 			doneLabel={ Zotero.getString('publications.buttons.addToMyPublications') }
-			onFinish={ handleFinish }
+			nextLabel={ nextLabel }
 			onClose={ handleClose }
+			onFinish={ handleFinish }
+			ref={ wizard }
 		>
 			<WizardPage
 				pageId="intro"
@@ -274,6 +282,8 @@ const PublicationsDialog = memo(({ io }) => {
 							{ Zotero.getString('publications.sharing.prompt') }
 						</p>
 						<RadioSet
+							autoFocus
+							onKeyDown={ handleKeyDown }
 							onChange={ handleSharingChange }
 							options={ importSourceOptions }
 							value={ sharing }
@@ -295,6 +305,8 @@ const PublicationsDialog = memo(({ io }) => {
 					{ Zotero.getString('publications.chooseLicense.adaptations.prompt') }
 				</h2>
 				<RadioSet
+					autoFocus
+					onKeyDown={ handleKeyDown }
 					onChange={ handleAdaptationsChange }
 					options={ adaptationsOptions }
 					value={ adaptations }
@@ -303,6 +315,7 @@ const PublicationsDialog = memo(({ io }) => {
 					{ Zotero.getString('publications.chooseLicense.commercial.prompt') }
 				</h2>
 				<RadioSet
+					onKeyDown={ handleKeyDown }
 					onChange={ handleCommercialChange }
 					options={ commercialOptions }
 					value={ commercial }
