@@ -35,15 +35,12 @@ import Wizard from './components/wizard';
 import WizardPage from './components/wizardPage';
 import RadioSet from './components/radioSet';
 import ProgressBar from './components/progressBar';
-import ImportDatabaseTable from './components/importDatabaseTable';
 import { nextHtmlId } from './components/utils';
 
 const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 	const id = useRef(nextHtmlId());
 	const translationResult = useRef(null);
-	const tableRef = useRef(null);
 	const wizardRef = useRef(null);
-	const [dbs, setDbs] = useState([]);
 	const [selectedMode, setSelectedMode] = useState('file');
 	const [fileHandling, setFileHandling] = useState('store');
 	const [file, setFile] = useState(null);
@@ -60,10 +57,6 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 		{ label: Zotero.getString('import.source.file'), value: 'file' },
 		{ label: `Mendeley Reference Manager (${Zotero.getString('import.onlineImport')})`, value: 'mendeleyOnline' },
 	];
-
-	if (dbs.length > 0) {
-		importSourceOptions.push({ label: 'Mendeley', value: 'mendeley' });
-	}
 
 	const fileHandlingOptions = [
 		{ label: Zotero.getString('import.fileHandling.store', Zotero.appName), value: 'store' },
@@ -103,25 +96,6 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 		wizardRef.current.goTo('page-options');
 	}, []);
 
-	/**
-	 * When the user clicks "Other…" to choose a file not in the list
-	 */
-	const chooseMendeleyDB = useCallback(async () => {
-		if (tableRef.current) {
-			tableRef.current.reset();
-		}
-		var fp = new FilePicker();
-		fp.init(window, Zotero.getString('fileInterface.import'), fp.modeOpen);
-		fp.appendFilter("Mendeley Database", "*.sqlite"); // TODO: Localize
-		var rv = await fp.show();
-		if (rv != fp.returnOK) {
-			return;
-		}
-		setFile(fp.file);
-		setCanAdvance(true);
-		wizardRef.current.advance();
-	}, []);
-
 	const skipToDonePage = useCallback((label, description, showReportErrorButton = false) => {
 		setDoneLabel(label);
 		setShouldShowErrorButton(showReportErrorButton);
@@ -156,7 +130,6 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 
 	const findFiles = useCallback(async () => {
 		try {
-			var refreshedDbs;
 			switch (selectedMode) {
 				case 'file':
 					await chooseFile();
@@ -165,18 +138,6 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 					wizardRef.current.goTo('mendeley-online-intro');
 					setCanRewind(true);
 					break;
-				case 'mendeley':
-					refreshedDbs = await Zotero_File_Interface.findMendeleyDatabases();
-					setDbs(refreshedDbs);
-					// This shouldn't happen, because we only show the wizard if there are databases
-					if (!refreshedDbs.length) {
-						throw new Error("No databases found");
-					}
-					wizardRef.current.goTo('page-file-list');
-					setCanRewind(true);
-					setCanCancel(true);
-					break;
-				
 				default:
 					throw new Error(`Unknown mode ${selectedMode}`);
 			}
@@ -196,10 +157,6 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 		return false; // must return false to prevent wizard advancing
 	}, [findFiles]);
 
-	const handleSelectedDbChange = useCallback((newSelectedDb) => {
-		setFile(newSelectedDb.path);
-	}, []);
-
 	const handleReportErrorClick = useCallback(() => {
 		Zotero.getActiveZoteroPane().reportErrors();
 		window.close();
@@ -212,10 +169,6 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 	const handleFileHandlingChange = useCallback((newFileHandling) => {
 		setFileHandling(newFileHandling);
 	}, []);
-
-	const handleOtherDbClick = useCallback(() => {
-		chooseMendeleyDB();
-	}, [chooseMendeleyDB]);
 
 	const handleBeforeImport = useCallback(async (translation) => {
 		// Unrecognized translator
@@ -310,7 +263,6 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 
 	useEffect(() => {
 		(async () => {
-			setDbs(await Zotero_File_Interface.findMendeleyDatabases());
 			updateCreateCollectionsCheckbox();
 		})();
 	}, [updateCreateCollectionsCheckbox]);
@@ -336,29 +288,11 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 				pageId="page-start"
 			>
 				<RadioSet
+					autoFocus
 					onChange={ handleSourceChange }
 					options={ importSourceOptions }
 					value={ selectedMode }
 				/>
-			</WizardPage>
-			<WizardPage
-				pageId="page-file-list"
-				onPageRewound={ goToStart }
-				label={ selectedMode === 'mendeley' ? Zotero.getString('fileInterface.chooseAppDatabaseToImport', 'Mendeley') : '' }
-			>
-				{ selectedMode === 'mendeley' ? (
-					<React.Fragment>
-						<ImportDatabaseTable ref={ tableRef } onChange={ handleSelectedDbChange } files={ dbs } />
-						<div className="toolbar-other">
-							<button
-								title={ Zotero.getString('general.other') }
-								onClick={ handleOtherDbClick }
-							>
-								{ Zotero.getString('general.other') }
-							</button>
-						</div>
-					</React.Fragment>
-				) : null }
 			</WizardPage>
 			<WizardPage
 				pageId="mendeley-online-intro"
