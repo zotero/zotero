@@ -1,11 +1,43 @@
 fieldset.radioset {
 	border: none;
 
-	.radio {
+	.radio-container {
 		margin-top: .5em;
 
 		&:first-child {
 			margin-top: 0;
 		}
 	}
+
+	input[type=radio] {
+		-moz-appearance: none;
+		background: white;
+		border-radius: 50%;
+		border: 1px solid $radio-button-border;
+		box-shadow: $radio-button-box-shadow;
+		height: 14px;
+		margin-right: 5px;
+		position: relative;
+		top: 4px;
+		width: 14px;
+
+		&:checked {
+			border: 4px solid $radio-button-checked;
+		}
+	}
+
+	&:focus {
+		outline: none;
+
+		input[type=radio]:checked::after {
+			content: "";
+			border: 3px solid $radio-button-checked-focus;
+			position: absolute;
+			border-radius: 50%;
+			height: 14px;
+			width: 14px;
+			top: -7px;
+			left: -7px;
+		}
+	}	
 }

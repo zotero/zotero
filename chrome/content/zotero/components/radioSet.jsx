@@ -22,13 +22,14 @@
     
     ***** END LICENSE BLOCK *****
 */
-import React, { memo, useCallback, useRef } from 'react';
+import React, { memo, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 import { nextHtmlId } from './utils';
 
-function RadioSet({ className, onChange, options, value }) {
+function RadioSet({ autoFocus, className, onChange, onKeyDown, options, value }) {
 	const id = useRef(nextHtmlId());
+	const fieldsetRef = useRef(null);
 
 	const handleChange = useCallback((ev) => {
 		if (value !== ev.target.value) {
@@ -36,11 +37,43 @@ function RadioSet({ className, onChange, options, value }) {
 		}
 	}, [value, onChange]);
 
+	const handleKeyDown = useCallback((ev) => {
+		let currentIndex = options.findIndex(o => o.value === value);
+		currentIndex = currentIndex === -1 ? 0 : currentIndex;
+
+		if (ev.key === 'ArrowUp') {
+			let nextIndex = (currentIndex - 1) % options.length;
+			nextIndex = nextIndex < 0 ? nextIndex + options.length : nextIndex;
+			onChange(options[nextIndex].value);
+		}
+		else if (ev.key === 'ArrowDown') {
+			const nextIndex = (currentIndex + 1) % options.length;
+			onChange(options[nextIndex].value);
+		}
+
+		if (onKeyDown) {
+			onKeyDown(ev);
+		}
+	}, [options, onChange, onKeyDown, value]);
+
+	useEffect(() => {
+		if (autoFocus) {
+			fieldsetRef.current.focus();
+		}
+	}, []); // eslint-disable-line react-hooks/exhaustive-deps
+
 	return (
-		<fieldset className={ cx('form-group radioset', className) }>
+		<fieldset
+			className={ cx('form-group radioset', className) }
+			onKeyDown={ handleKeyDown }
+			tabIndex={ 0 }
+			ref={ fieldsetRef }
+		>
 			{ options.map((option, index) => (
-				<div key={ option.value } className="radio">
+				<div key={ option.value } className="radio-container">
 					<input
+						tabIndex={ -1 }
+						data-index={ index }
 						id={ id.current + '-' + index}
 						value={ option.value }
 						type="radio"
@@ -57,6 +90,7 @@ function RadioSet({ className, onChange, options, value }) {
 }
 
 RadioSet.propTypes = {
+	autoFocus: PropTypes.bool,
 	className: PropTypes.string,
 	onChange: PropTypes.func.isRequired,
 	options: PropTypes.array.isRequired,
