@@ -41,6 +41,7 @@
 			<preference id="pref-quickCopy-setting" name="extensions.zotero.export.quickCopy.setting" type="string"/>
 			<preference id="pref-quickCopy-dragLimit" name="extensions.zotero.export.quickCopy.dragLimit" type="int"/>
 			<preference id="pref-quickCopy-locale" name="extensions.zotero.export.quickCopy.locale" type="string"/>
+			<preference id="pref-noteQuickCopy-setting" name="extensions.zotero.export.noteQuickCopy.setting" type="string"/>
 			<preference id="pref-import-charset" name="extensions.zotero.import.charset" type="string"/>
 		</preferences>
 		
@@ -53,7 +54,7 @@
 			
 			<separator/>
 			
-			<label value="&zotero.preferences.quickCopy.defaultFormat;" control="quickCopy-menu"/>
+			<label value="&zotero.preferences.quickCopy.itemFormat;" control="quickCopy-menu"/>
 			<menulist id="zotero-quickCopy-menu" label="&zotero.general.loading;"/>
 			
 			<hbox align="center">
@@ -68,8 +69,13 @@
 			
 			<separator/>
 			
+			<label value="&zotero.preferences.quickCopy.noteFormat;" control="zotero-noteQuickCopy-menu"/>
+			<menulist id="zotero-noteQuickCopy-menu" label="&zotero.general.loading;"/>
+			
+			<separator/>
+			
 			<label value="&zotero.preferences.quickCopy.siteEditor.setings;" control="quickCopy-siteSettings"/>
-			<hbox class="virtualized-table-container" flex="1" height="300px">
+			<hbox class="virtualized-table-container" flex="1" height="120px">
 				<html:div id="quickCopy-siteSettings"/>
 			</hbox>
 			<separator class="thin"/>

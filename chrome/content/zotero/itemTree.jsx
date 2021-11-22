@@ -1934,22 +1934,46 @@ var ItemTree = class ItemTree extends LibraryTree {
 		// Get Quick Copy format for current URL (set via /ping from connector)
 		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
 
-		Zotero.debug("Dragging with format " + format);
-
-		var exportCallback = function(obj, worked) {
-			if (!worked) {
-				Zotero.log(Zotero.getString("fileInterface.exportError"), 'warning');
-				return;
-			}
-
-			var text = obj.string.replace(/\r\n/g, "\n");
-			event.dataTransfer.setData("text/plain", text);
+		// If all items are notes, use one of the note export translators
+		if (!items.some(item => !item.isNote())) {
+			format = Zotero.QuickCopy.getNoteFormat();
 		}
 
+		Zotero.debug("Dragging with format " + format);
 		format = Zotero.QuickCopy.unserializeSetting(format);
 		try {
 			if (format.mode == 'export') {
-				Zotero.QuickCopy.getContentFromItems(items, format, exportCallback);
+				// If exporting with Note Text translator, call Note HTML and Note Markdown translators instead
+				if (format.id === 'a45eca67-1ee8-45e5-b4c6-23fb8a852873') {
+					let markdownFormat = { mode: 'export', id: '154c2785-ec83-4c27-8a8a-d27b3a2eded1' };
+					Zotero.QuickCopy.getContentFromItems(items, markdownFormat, (obj, worked) => {
+						if (!worked) {
+							Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
+							return;
+						}
+						// Existing `items` can't be reused in another translator
+						let items = Zotero.Items.get(itemIDs);
+						let htmlFormat = { mode: 'export', id: '897a81c2-9f60-4bec-ae6b-85a5030b8be5' };
+						Zotero.QuickCopy.getContentFromItems(items, htmlFormat, (obj2, worked) => {
+							if (!worked) {
+								Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
+								return;
+							}
+							event.dataTransfer.setData('text/plain', obj.string.replace(/\r\n/g, '\n'));
+							event.dataTransfer.setData('text/html', obj2.string.replace(/\r\n/g, '\n'));
+						});
+					});
+				}
+				else {
+					Zotero.QuickCopy.getContentFromItems(items, format, (obj, worked) => {
+						if (!worked) {
+							Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
+							return;
+						}
+						var text = obj.string.replace(/\r\n/g, '\n');
+						event.dataTransfer.setData('text/plain', text);
+					});
+				}
 			}
 			else if (format.mode == 'bibliography') {
 				var content = Zotero.QuickCopy.getContentFromItems(items, format, null, event.shiftKey);

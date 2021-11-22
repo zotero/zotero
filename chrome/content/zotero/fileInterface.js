@@ -49,6 +49,11 @@ var Zotero_File_Exporter = function() {
 Zotero_File_Exporter.prototype.save = async function () {
 	var translation = new Zotero.Translate.Export();
 	var translators = await translation.getTranslators();
+
+	// Exclude note export translators if not all items are notes or attachments
+	if (this.items && this.items.some(item => !item.isNote() && !item.isAttachment())) {
+		translators = translators.filter(t => !t.configOptions || !t.configOptions.noteTranslator);
+	}
 	
 	// present options dialog
 	var io = {translators:translators}
