@@ -93,37 +93,6 @@ const scrollIntoViewIfNeeded = (element, container, opts = {}) => {
 	return 0;
 };
 
-const getLicenseData = (license) => {
-	var name, img, url;
-
-	switch (license) {
-		case 'reserved':
-			url = null;
-			name = 'All rights reserved';
-			img = 'chrome://zotero/skin/licenses/reserved.png';
-			break;
-		case 'cc':
-			url = 'https://creativecommons.org/';
-			name = Zotero.getString('licenses.' + license) + ' (' + license.toUpperCase() + ')';
-			img = 'chrome://zotero/skin/licenses/cc-srr.png';
-			break;
-		
-		case 'cc0':
-			url = "https://creativecommons.org/publicdomain/zero/1.0/";
-			name = 'CC0 1.0 Universal Public Domain Dedication';
-			img = 'chrome://zotero/skin/licenses/' + license + ".svg";
-			break;
-		
-		default:
-			url = 'https://creativecommons.org/licenses/' + license.replace(/^cc-/, '') + '/4.0/';
-			name = Zotero.getString('licenses.' + license) + ' (' + license.toUpperCase() + ')';
-			img = 'chrome://zotero/skin/licenses/' + license + ".svg";
-			break;
-	}
-
-	return { name, img, url };
-};
-
 export {
-	getLicenseData, nextHtmlId, noop, getDragTargetOrient, createDragHandler, scrollIntoViewIfNeeded
+	nextHtmlId, noop, getDragTargetOrient, createDragHandler, scrollIntoViewIfNeeded
 };
