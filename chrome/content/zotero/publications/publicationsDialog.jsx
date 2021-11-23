@@ -30,8 +30,7 @@ import ReactDom from 'react-dom';
 import Wizard from './components/wizard';
 import WizardPage from './components/wizardPage';
 import RadioSet from './components/radioSet';
-import LicenseInfo from './components/licenseInfo';
-import { getLicenseData, nextHtmlId } from './components/utils';
+import { nextHtmlId } from './components/utils';
 
 const importSourceOptions = [
 	{ label: Zotero.getString('publications.sharing.reserved'), value: 'reserved' },
@@ -84,6 +83,98 @@ function getLicense(sharing, adaptations, commercial, currentPage) {
 	}
 	return license;
 }
+
+const links = {
+	cc: 'https://wiki.creativecommons.org/Considerations_for_licensors_and_licensees',
+	cc0: 'https://wiki.creativecommons.org/CC0_FAQ'
+};
+
+const getLicenseData = (license) => {
+	var name, img, url;
+
+	switch (license) {
+		case 'reserved':
+			url = null;
+			name = 'All rights reserved';
+			img = 'chrome://zotero/skin/licenses/reserved.png';
+			break;
+		case 'cc':
+			url = 'https://creativecommons.org/';
+			name = Zotero.getString('licenses.' + license) + ' (' + license.toUpperCase() + ')';
+			img = 'chrome://zotero/skin/licenses/cc-srr.png';
+			break;
+		
+		case 'cc0':
+			url = "https://creativecommons.org/publicdomain/zero/1.0/";
+			name = 'CC0 1.0 Universal Public Domain Dedication';
+			img = 'chrome://zotero/skin/licenses/' + license + ".svg";
+			break;
+		
+		default:
+			url = 'https://creativecommons.org/licenses/' + license.replace(/^cc-/, '') + '/4.0/';
+			name = Zotero.getString('licenses.' + license) + ' (' + license.toUpperCase() + ')';
+			img = 'chrome://zotero/skin/licenses/' + license + ".svg";
+			break;
+	}
+
+	return { name, img, url };
+};
+
+
+const LicenseInfo = memo(({ license }) => {
+	const { name, img, url } = getLicenseData(license);
+	
+	const handleUrlClick = useCallback((ev) => {
+		Zotero.launchURL(ev.currentTarget.href);
+		ev.preventDefault();
+	}, []);
+
+	const licenseInfo = (
+		<React.Fragment>
+			<div>
+				<img
+					title={ url }
+					src={ img }
+					className="license-icon"
+				></img>
+			</div>
+			<div>{ name }</div>
+		</React.Fragment>
+	);
+
+	const needsMoreInfo = license.startsWith('cc') && license !== 'cc';
+	const ccType = license === 'cc0' ? 'cc0' : 'cc';
+	const moreInfo = Zotero.getString('publications.' + ccType + '.moreInfo.text').split('%S');
+		
+	return (
+		<React.Fragment>
+			{ url ? (
+				<a className="license-info" href={ url } onClick={ handleUrlClick } >
+					{ licenseInfo }
+				</a>
+			) : (
+				<div className="license-info">
+					{ licenseInfo }
+				</div>
+			) }
+			{ needsMoreInfo && (
+				<div className="license-more-info">
+					{ moreInfo[0] }
+					<a href={ links[ccType] } onClick={ handleUrlClick } >
+						{ Zotero.getString('publications.' + ccType + '.moreInfo.linkText') }
+					</a>
+					{ moreInfo[1] }
+				</div>
+			) }
+		</React.Fragment>
+	);
+});
+
+LicenseInfo.displayName = 'LicenseInfo';
+
+LicenseInfo.propTypes = {
+	license: PropTypes.string,
+};
 
 const PublicationsDialog = memo(({ io }) => {
 	const id = useRef(nextHtmlId());
@@ -331,7 +422,7 @@ PublicationsDialog.init = (domEl, io) => {
 };
 
 PublicationsDialog.propTypes = {
-	libraryID: PropTypes.number,
+	io: PropTypes.object,
 };
 
 PublicationsDialog.displayName = 'PublicationsDialog';
