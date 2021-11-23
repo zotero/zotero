@@ -25,10 +25,10 @@
 import React, { memo, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
-import { nextHtmlId } from './utils';
+import { nextHTMLID } from './utils';
 
 function RadioSet({ autoFocus, className, onChange, onKeyDown, options, value }) {
-	const id = useRef(nextHtmlId());
+	const id = useRef(nextHTMLID());
 	const fieldsetRef = useRef(null);
 
 	const handleChange = useCallback((ev) => {
