@@ -35,10 +35,10 @@ import Wizard from './components/wizard';
 import WizardPage from './components/wizardPage';
 import RadioSet from './components/radioSet';
 import ProgressBar from './components/progressBar';
-import { nextHtmlId } from './components/utils';
+import { nextHTMLID } from './components/utils';
 
 const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
-	const id = useRef(nextHtmlId());
+	const id = useRef(nextHTMLID());
 	const translationResult = useRef(null);
 	const wizardRef = useRef(null);
 	const [selectedMode, setSelectedMode] = useState('file');

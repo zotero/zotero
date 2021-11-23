@@ -29,11 +29,11 @@ import PropTypes from 'prop-types';
 import ReactDom from 'react-dom';
 import Wizard from './components/wizard';
 import WizardPage from './components/wizardPage';
-import { nextHtmlId } from './components/utils';
+import { nextHTMLID } from './components/utils';
 import ZOTERO_CONFIG from 'config';
 
 const ErrorReport = memo(({ io }) => {
-	const id = useRef(nextHtmlId());
+	const id = useRef(nextHTMLID());
 	const data = io.data;
 	const msg = data.msg;
 	const errorData = data.errorData;

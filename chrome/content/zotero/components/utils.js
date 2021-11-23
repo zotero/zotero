@@ -71,12 +71,12 @@ function createDragHandler({ handleDrag, handleDragStop }) {
 	return {
 		start: onDragStart,
 		stop: onDragStop
-	}
+	};
 }
 
-var _htmlId = 1;
+var _htmlID = 1;
 
-const nextHtmlId = (prefix = 'id-') => prefix + _htmlId++;
+const nextHTMLID = (prefix = 'id-') => prefix + _htmlID++;
 
 const scrollIntoViewIfNeeded = (element, container, opts = {}) => {
 	const containerTop = container.scrollTop;
@@ -94,5 +94,5 @@ const scrollIntoViewIfNeeded = (element, container, opts = {}) => {
 };
 
 export {
-	nextHtmlId, noop, getDragTargetOrient, createDragHandler, scrollIntoViewIfNeeded
+	nextHTMLID, noop, getDragTargetOrient, createDragHandler, scrollIntoViewIfNeeded
 };

@@ -30,7 +30,7 @@ import ReactDom from 'react-dom';
 import Wizard from './components/wizard';
 import WizardPage from './components/wizardPage';
 import RadioSet from './components/radioSet';
-import { nextHtmlId } from './components/utils';
+import { nextHTMLID } from './components/utils';
 
 const importSourceOptions = [
 	{ label: Zotero.getString('publications.sharing.reserved'), value: 'reserved' },
@@ -177,7 +177,7 @@ LicenseInfo.propTypes = {
 };
 
 const PublicationsDialog = memo(({ io }) => {
-	const id = useRef(nextHtmlId());
+	const id = useRef(nextHTMLID());
 	const wizard = useRef(null);
 	const [shouldIncludeFiles, setShouldIncludeFiles] = useState(false);
 	const [shouldIncludeNotes, setShouldIncludeNotes] = useState(false);
