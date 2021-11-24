@@ -111,17 +111,32 @@ Zotero_Preferences.Export = {
 		var translation = new Zotero.Translate("export");
 		var translators = await translation.getTranslators();
 		
-		// Add/override Note Text translator
-		translators = translators.filter(x => x.translatorID != 'a45eca67-1ee8-45e5-b4c6-23fb8a852873');
-		translators.push({
-			translatorID: 'a45eca67-1ee8-45e5-b4c6-23fb8a852873',
-			label: 'Note Text',
-			configOptions: {
-				noteTranslator: true
-			}
-		});
-		
 		translators.sort((a, b) => a.label.localeCompare(b.label));
+		
+		// Remove "Note" prefix from Note HTML translator
+		let htmlTranslator = translators.find(x => x.translatorID == '897a81c2-9f60-4bec-ae6b-85a5030b8be5');
+		if (htmlTranslator) {
+			htmlTranslator.label = 'HTML';
+		}
+		
+		// Remove Note Text translator in case it would exist
+		translators = translators.filter(x => x.translatorID != 'a45eca67-1ee8-45e5-b4c6-23fb8a852873');
+
+		let markdownTranslatorIdx = translators.findIndex(x => x.translatorID == '154c2785-ec83-4c27-8a8a-d27b3a2eded1');
+		// Make sure we actually have both translators
+		if (markdownTranslatorIdx != -1 && htmlTranslator) {
+			// Exclude standalone Note Markdown translator
+			translators.splice(markdownTranslatorIdx, 1);
+			// Add virtual Note Text translator to the top
+			translators.unshift({
+				translatorID: 'a45eca67-1ee8-45e5-b4c6-23fb8a852873',
+				label: 'Markdown + ' + Zotero.getString('general.richText'),
+				configOptions: {
+					noteTranslator: true
+				}
+			});
+		}
+		
 		translators.forEach(function (translator) {
 			// Allow only note export translators
 			if (!translator.configOptions || !translator.configOptions.noteTranslator) {

@@ -306,42 +306,45 @@ const ZoteroStandalone = new function() {
 	
 	
 	this.updateQuickCopyOptions = function () {
-		var selected = false;
+		var selected = [];
 
 		let win = Zotero.getMainWindow();
 		if (win) {
 			if (win.Zotero_Tabs.selectedID == 'zotero-pane') {
 				try {
-					selected = win.ZoteroPane
-					.getSelectedItems()
-					.filter(item => item.isRegularItem())
-						.length;
+					selected = win.ZoteroPane.getSelectedItems();
 				}
 				catch (e) {
 				}
-				win.ZoteroPane.updateQuickCopyCommands(win.ZoteroPane.getSelectedItems());
+				win.ZoteroPane.updateQuickCopyCommands(selected);
 			}
 			else {
 				let reader = Zotero.Reader.getByTabID(win.Zotero_Tabs.selectedID);
 				if (reader) {
 					let item = Zotero.Items.get(reader.itemID);
-					selected = !!item.parentItemID;
+					selected = item.parentItem && [item.parentItem] || [];
 					item = item.parentItem || item;
 					win.ZoteroPane.updateQuickCopyCommands([item]);
 				}
 			}
 		}
 		
+		var onlyNotes = selected.every(item => item.isNote() || item.isAttachment());
 		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
+		if (onlyNotes) {
+			format = Zotero.QuickCopy.getNoteFormat();
+		}
 		format = Zotero.QuickCopy.unserializeSetting(format);
 		
 		var copyCitation = document.getElementById('menu_copyCitation');
 		var copyBibliography = document.getElementById('menu_copyBibliography');
 		var copyExport = document.getElementById('menu_copyExport');
+		var copyNote = document.getElementById('menu_copyNote');
 		
-		copyCitation.hidden = !selected || format.mode != 'bibliography';
-		copyBibliography.hidden = !selected || format.mode != 'bibliography';
-		copyExport.hidden = !selected || format.mode != 'export';
+		copyCitation.hidden = !selected.length || format.mode != 'bibliography';
+		copyBibliography.hidden = !selected.length || format.mode != 'bibliography';
+		copyExport.hidden = !selected.length || format.mode != 'export' || onlyNotes;
+		copyNote.hidden = !selected.length || format.mode != 'export' || !onlyNotes;
 		if (format.mode == 'export') {
 			try {
 				let obj = Zotero.Translators.get(format.id);

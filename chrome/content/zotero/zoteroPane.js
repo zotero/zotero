@@ -1605,11 +1605,17 @@ var ZoteroPane = new function()
 	
 	/**
 	 * Update the <command> elements that control the shortcut keys and the enabled state of the
-	 * "Copy Citation"/"Copy Bibliography"/"Copy as" menu options. When disabled, the shortcuts are
+	 * "Copy Citation"/"Copy Bibliography"/"Copy as"/"Copy Note" menu options. When disabled, the shortcuts are
 	 * still caught in handleKeyPress so that we can show an alert about not having references selected.
 	 */
 	this.updateQuickCopyCommands = function (selectedItems) {
 		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
+		// If all items are notes/attachments and at least one note is not empty,
+		// use note export format
+		if (selectedItems.every(item => item.isNote() || item.isAttachment())
+			&& selectedItems.some(item => item.getNote())) {
+			format = Zotero.QuickCopy.getNoteFormat();
+		}
 		format = Zotero.QuickCopy.unserializeSetting(format);
 		if (format.mode == 'bibliography') {
 			var canCopy = selectedItems.some(item => item.isRegularItem());
@@ -2092,6 +2098,9 @@ var ZoteroPane = new function()
 		}
 		
 		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
+		if (items.every(item => item.isNote() || item.isAttachment())) {
+			format = Zotero.QuickCopy.getNoteFormat();
+		}
 		format = Zotero.QuickCopy.unserializeSetting(format);
 		
 		// In bibliography mode, remove notes and attachments
