@@ -49,28 +49,28 @@ Zotero.MIMETypeHandler = new function () {
 	/**
 	 * Initializes handlers for MIME types
 	 */
-	this.initializeHandlers = function() {
+	this.initializeHandlers = function () {
 		_typeHandlers = {};
-		_ignoreContentDispositionTypes = [];
+		_ignoreContentDispositionTypes = new Set();
 		_observers = [];
 		
 		// Install styles from the Cite preferences
-		this.addHandler("application/vnd.citationstyles.style+xml", Zotero.Promise.coroutine(function* (a1, a2) {
+		this.addHandler("application/vnd.citationstyles.style+xml", async function (data, origin) {
 			let win = Services.wm.getMostRecentWindow("zotero:basicViewer");
 			try {
-				yield Zotero.Styles.install(a1, a2, true);
+				await Zotero.Styles.install(data, origin, true);
 			}
 			catch (e) {
 				Zotero.logError(e);
 				(new Zotero.Exception.Alert("styles.install.unexpectedError",
-					a2, "styles.install.title", e)).present();
+					origin, "styles.install.title", e)).present();
 			}
 			// Close styles page in basic viewer after installing a style
 			if (win) {
 				win.close();
 			}
-		}));
-	}
+		}, true);
+	};
 	
 	/**
 	 * Adds a handler to handle a specific MIME type
@@ -80,22 +80,37 @@ Zotero.MIMETypeHandler = new function () {
 	 *	which is often used to force a file to download rather than let it be handled by the web
 	 *	browser
 	 */
-	this.addHandler = function(type, fn, ignoreContentDisposition) {
-		_typeHandlers[type] = fn;
-		_ignoreContentDispositionTypes.push(type);
-	}
+	this.addHandler = function (type, fn, ignoreContentDisposition) {
+		if (_typeHandlers[type]) {
+			_typeHandlers[type].push(fn);
+		}
+		else {
+			_typeHandlers[type] = [fn];
+		}
+		if (ignoreContentDisposition) {
+			_ignoreContentDispositionTypes.add(type);
+		}
+	};
 	
 	/**
 	 * Removes a handler for a specific MIME type
 	 * @param {String} type MIME type to handle
+	 * @param {Function} handler Function handler to remove
 	 */
-	this.removeHandler = function(type) {
-		delete _typeHandlers[type];
-		var i = _ignoreContentDispositionTypes.indexOf(type);
-		if (i != -1) {
-			_ignoreContentDispositionTypes.splice(i, 1);
+	this.removeHandler = function (type, handler) {
+		// If no handler specified or this is the last handler for the type
+		// stop monitoring the content type completely.
+		if (!handler || _typeHandlers[type] && _typeHandlers[type].length <= 1) {
+			delete _typeHandlers[type];
+			_ignoreContentDispositionTypes.delete(type);
 		}
-	}
+		else if (_typeHandlers[type]) {
+			var i = _typeHandlers[type].indexOf(handler);
+			if (i != -1) {
+				_typeHandlers.splice(i, 1);
+			}
+		}
+	};
 	
 	/**
 	 * Adds an observer to inspect and possibly modify page headers
@@ -119,13 +134,9 @@ Zotero.MIMETypeHandler = new function () {
 					// remove content-disposition headers for EndNote, etc.
 					var contentType = channel.getResponseHeader("Content-Type").toLowerCase();
 					for (let handledType of _ignoreContentDispositionTypes) {
-						if(contentType.length < handledType.length) {
+						if (contentType.startsWith(handledType)) {
+							channel.setResponseHeader("Content-Disposition", "inline", false);
 							break;
-						} else {
-							if(contentType.substr(0, handledType.length) == handledType) {
-								channel.setResponseHeader("Content-Disposition", "", false);
-								break;
-							}
 						}
 					}
 				} catch(e) {}
@@ -232,7 +243,7 @@ Zotero.MIMETypeHandler = new function () {
 	/**
 	 * Called when the request is done
 	 */
-	_StreamListener.prototype.onStopRequest = Zotero.Promise.coroutine(function* (channel, context, status) {
+	_StreamListener.prototype.onStopRequest = async function (channel, context, status) {
 		Zotero.debug("charset is " + channel.contentCharset);
 		
 		var inputStream = this._storageStream.newInputStream(0);
@@ -251,12 +262,19 @@ Zotero.MIMETypeHandler = new function () {
 		
 		var handled = false;
 		try {
-			handled = _typeHandlers[this._contentType](
-				readString,
-				this._request.name ? this._request.name : null,
-				this._contentType,
-				channel
-			);
+			for (let handler of _typeHandlers[this._contentType]) {
+				let maybePromise = handler(
+					readString,
+					this._request.name ? this._request.name : null,
+					this._contentType,
+					channel
+				);
+				if (maybePromise.then) {
+					maybePromise = await maybePromise;
+				}
+				handled = handled || maybePromise;
+				if (handled) break;
+			}
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -283,5 +301,5 @@ Zotero.MIMETypeHandler = new function () {
 		}
 		
 		this._storageStream.close();
-	});
+	};
 }

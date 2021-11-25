@@ -279,6 +279,29 @@ describe("Zotero.Attachments", function() {
 		});
 	});
 	
+	
+	describe("#importFromURL()", function () {
+		it("should download a PDF from a JS redirect page", async function () {
+			this.timeout(65e3);
+			
+			let stub = sinon.stub(Zotero.Attachments, 'downloadFile');
+			stub.callsFake(Zotero.Attachments.downloadPDFViaBrowser.bind(Zotero.Attachments));
+
+			var item = await Zotero.Attachments.importFromURL({
+				libraryID: Zotero.Libraries.userLibraryID,
+				url: 'https://zotero-static.s3.amazonaws.com/test-pdf-redirect.html',
+				contentType: 'application/pdf'
+			});
+			
+			assert.isTrue(item.isPDFAttachment());
+			
+			// Clean up
+			stub.restore();
+			await Zotero.Items.erase(item.id);
+		});
+	});
+	
+	
 	describe("#linkFromDocument", function () {
 		it("should add a link attachment for the current webpage", function* () {
 			var item = yield createDataObject('item');
