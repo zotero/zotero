@@ -857,7 +857,7 @@ var Zotero_File_Interface = new function() {
 
 	this.authenticateMendeleyOnlinePoll = function (win) {
 		if (win && win[0] && win[0].location) {
-			const matchResult = win[0].location.toString().match(/(?:\?|&)code=(.*?)(?:&|$)/i);
+			const matchResult = win[0].location.toString().match(/mendeley_oauth_redirect.html(?:.*?)(?:\?|&)code=(.*?)(?:&|$)/i);
 			if (matchResult) {
 				const mendeleyCode = matchResult[1];
 				Zotero.getMainWindow().setTimeout(() => this.showImportWizard({ mendeleyCode }), 0);
