@@ -284,9 +284,6 @@ describe("Zotero.Attachments", function() {
 		it("should download a PDF from a JS redirect page", async function () {
 			this.timeout(65e3);
 			
-			let stub = sinon.stub(Zotero.Attachments, 'downloadFile');
-			stub.callsFake(Zotero.Attachments.downloadPDFViaBrowser.bind(Zotero.Attachments));
-
 			var item = await Zotero.Attachments.importFromURL({
 				libraryID: Zotero.Libraries.userLibraryID,
 				url: 'https://zotero-static.s3.amazonaws.com/test-pdf-redirect.html',
@@ -294,9 +291,10 @@ describe("Zotero.Attachments", function() {
 			});
 			
 			assert.isTrue(item.isPDFAttachment());
+			var sample = await Zotero.File.getContentsAsync(item.getFilePath(), null, 1000);
+			assert.equal(Zotero.MIME.sniffForMIMEType(sample), 'application/pdf');
 			
 			// Clean up
-			stub.restore();
 			await Zotero.Items.erase(item.id);
 		});
 	});
