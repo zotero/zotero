@@ -778,7 +778,27 @@ describe("Zotero.ItemTree", function() {
 		
 		function drop(index, orient, dataTransfer) {
 			Zotero.DragDrop.currentOrientation = orient;
-			return itemsView.onDrop({ dataTransfer: dataTransfer }, index);
+			var event = { dataTransfer };
+			// On macOS, ItemTree checks modifier keys, not just the dropEffect
+			if (Zotero.isMac
+					&& dataTransfer.types.contains('application/x-moz-file')) {
+				switch (dataTransfer.dropEffect) {
+					case 'link':
+						event.metaKey = true;
+						event.altKey = true;
+						break;
+					
+					case 'move':
+						event.metaKey = true;
+						event.altKey = false;
+						break;
+					
+					default:
+						event.metaKey = false;
+						event.altKey = false;
+				}
+			}
+			return itemsView.onDrop(event, index);
 		}
 		
 		// Serve a PDF to test URL dragging
