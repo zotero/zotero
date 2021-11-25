@@ -1176,23 +1176,46 @@ describe("Zotero.Translate", function() {
 			var c3 = await createDataObject('collection', { name: '3', parentID: c2.id });
 			var c4 = await createDataObject('collection', { name: '4', parentID: c3.id });
 			var c5 = await createDataObject('collection', { name: '5', parentID: c4.id });
-			var item = await createDataObject('item', { collections: [c5.id] });
+			// Add item, standalone note, and standalone attachment to collection
+			var item = await createDataObject(
+				'item',
+				{ collections: [c5.id], title: Zotero.Utilities.randomString() }
+			);
+			var note = await createDataObject(
+				'item',
+				{ itemType: 'note', collections: [c5.id], note: Zotero.Utilities.randomString() }
+			);
+			var attachment = await importFileAttachment('test.pdf', {
+				url: 'https://example.com/test.pdf',
+				title: Zotero.Utilities.randomString(),
+				collections: [c5.id]
+			});
 			
 			var tmpDir = await getTempDirectory();
-			var libraryExportFile = OS.Path.join(tmpDir, 'export-library.rdf');
-			var collectionExportFile = OS.Path.join(tmpDir, 'export-collection.rdf');
+			var libraryExportDir = OS.Path.join(tmpDir, 'export-library');
+			var libraryExportFile = OS.Path.join(libraryExportDir, 'export-library.rdf');
+			var collectionExportDir = OS.Path.join(tmpDir, 'export-collection');
+			var collectionExportFile = OS.Path.join(collectionExportDir, 'export-collection.rdf');
 			
 			// Export library
 			var translation = new Zotero.Translate.Export();
-			translation.setLocation(Zotero.File.pathToFile(libraryExportFile));
+			translation.setLocation(Zotero.File.pathToFile(libraryExportDir));
 			translation.setLibraryID(Zotero.Libraries.userLibraryID);
+			translation.setDisplayOptions({
+				exportFileData: true,
+				exportNotes: true
+			});
 			translation.setTranslator('14763d24-8ba0-45df-8f52-b8d1108e7ac9'); // Zotero RDF
 			await translation.translate();
 			
 			// Export top-most collection
 			translation = new Zotero.Translate.Export();
-			translation.setLocation(Zotero.File.pathToFile(collectionExportFile));
+			translation.setLocation(Zotero.File.pathToFile(collectionExportDir));
 			translation.setCollection(c1);
+			translation.setDisplayOptions({
+				exportFileData: true,
+				exportNotes: true
+			});
 			translation.setTranslator('14763d24-8ba0-45df-8f52-b8d1108e7ac9'); // Zotero RDF
 			await translation.translate();
 			
@@ -1223,7 +1246,19 @@ describe("Zotero.Translate", function() {
 				while (name = collectionNames.shift()) {
 					collections = collections[0].getChildCollections();
 					assert.lengthOf(collections, 1, mode);
-					assert.equal(collections[0].name, name, mode)
+					let c = collections[0];
+					assert.equal(c.name, name, mode);
+					
+					// Get the collection we imported items into
+					if (name == c5.name) {
+						// Make sure items were imported and added to collection
+						let titles = c.getChildItems().map(x => x.getDisplayTitle());
+						assert.sameMembers(titles, [item, note, attachment].map(x => x.getDisplayTitle()));
+					}
+					// Other collections should be empty
+					else {
+						assert.lengthOf(c.getChildItems(), 0);
+					}
 				}
 			}
 			

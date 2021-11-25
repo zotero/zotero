@@ -552,8 +552,8 @@ Zotero.Translate.ItemSaver.prototype = {
 			if (attachment.accessDate) newAttachment.setField("accessDate", attachment.accessDate);
 			if (attachment.tags) newAttachment.setTags(this._cleanTags(attachment.tags));
 			if (attachment.note) newAttachment.setNote(attachment.note);
-			this._handleRelated(attachment, newAttachment);
 			yield newAttachment.saveTx(this._saveOptions);
+			this._handleRelated(attachment, newAttachment);
 
 			Zotero.debug("Translate: Created attachment; id is " + newAttachment.id, 4);
 			attachmentCallback(attachment, 100);
@@ -941,7 +941,6 @@ Zotero.Translate.ItemSaver.prototype = {
 		if(typeof note == "object") {
 			myNote.setNote(note.note);
 			if(note.tags) myNote.setTags(this._cleanTags(note.tags));
-			this._handleRelated(note, myNote);
 		} else {
 			myNote.setNote(note);
 		}
@@ -949,6 +948,9 @@ Zotero.Translate.ItemSaver.prototype = {
 			myNote.setCollections(this._collections);
 		}
 		yield myNote.save(this._saveOptions);
+		if (typeof note == "object") {
+			this._handleRelated(note, myNote);
+		}
 		return myNote;
 	}),
 	
