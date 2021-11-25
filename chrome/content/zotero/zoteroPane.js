@@ -1609,20 +1609,24 @@ var ZoteroPane = new function()
 	 * still caught in handleKeyPress so that we can show an alert about not having references selected.
 	 */
 	this.updateQuickCopyCommands = function (selectedItems) {
-		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
-		// If all items are notes/attachments and at least one note is not empty,
-		// use note export format
-		if (selectedItems.every(item => item.isNote() || item.isAttachment())
-			&& selectedItems.some(item => item.getNote())) {
-			format = Zotero.QuickCopy.getNoteFormat();
-		}
-		format = Zotero.QuickCopy.unserializeSetting(format);
-		if (format.mode == 'bibliography') {
-			var canCopy = selectedItems.some(item => item.isRegularItem());
+		let canCopy = false;
+		// If all items are notes/attachments and at least one note is not empty
+		if (selectedItems.every(item => item.isNote() || item.isAttachment())) {
+			if (selectedItems.some(item => item.note)) {
+				canCopy = true;
+			}
 		}
 		else {
-			var canCopy = true;
+			let format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
+			format = Zotero.QuickCopy.unserializeSetting(format);
+			if (format.mode == 'bibliography') {
+				canCopy = selectedItems.some(item => item.isRegularItem());
+			}
+			else {
+				canCopy = true;
+			}
 		}
+		
 		document.getElementById('cmd_zotero_copyCitation').setAttribute('disabled', !canCopy);
 		document.getElementById('cmd_zotero_copyBibliography').setAttribute('disabled', !canCopy);
 	};
@@ -2971,6 +2975,12 @@ var ZoteroPane = new function()
 			
 			disable.push(m.showInLibrary, m.duplicateItem, m.removeItems,
 				m.moveToTrash, m.deleteFromLibrary, m.exportItems, m.createBib, m.loadReport);
+		}
+
+		if (!disable.includes(m.exportItems)
+			&& items.every(item => item.isNote() || item.isAttachment())
+			&& !items.some(item => item.note)) {
+			disable.push(m.exportItems);
 		}
 		
 		if ((!collectionTreeRow.editable || collectionTreeRow.isPublications()) && !collectionTreeRow.isFeed()) {

@@ -50,20 +50,24 @@ Zotero_File_Exporter.prototype.save = async function () {
 	var translation = new Zotero.Translate.Export();
 	var translators = await translation.getTranslators();
 
-	if (this.items) {
-		// Keep only note export and Zotero RDF translators, if all items are notes or attachments
-		if (this.items.every(item => item.isNote() || item.isAttachment())) {
-			translators = translators.filter((translator) => {
-				return (
-					translator.translatorID === '14763d24-8ba0-45df-8f52-b8d1108e7ac9'
-					|| translator.configOptions && translator.configOptions.noteTranslator
-				);
-			});
-		}
-		// Otherwise exclude note export translators
-		else {
-			translators = translators.filter(t => !t.configOptions || !t.configOptions.noteTranslator);
-		}
+	if (!this.items) {
+		return;
+	}
+
+	let exportingNotes = this.items.every(item => item.isNote() || item.isAttachment());
+	
+	// Keep only note export and Zotero RDF translators, if all items are notes or attachments
+	if (exportingNotes) {
+		translators = translators.filter((translator) => {
+			return (
+				translator.translatorID === '14763d24-8ba0-45df-8f52-b8d1108e7ac9'
+				|| translator.configOptions && translator.configOptions.noteTranslator
+			);
+		});
+	}
+	// Otherwise exclude note export translators
+	else {
+		translators = translators.filter(t => !t.configOptions || !t.configOptions.noteTranslator);
 	}
 
 	translators.sort((a, b) => a.label.localeCompare(b.label));
@@ -81,7 +85,7 @@ Zotero_File_Exporter.prototype.save = async function () {
 	}
 	
 	// present options dialog
-	var io = {translators:translators}
+	var io = { translators, exportingNotes };
 	window.openDialog("chrome://zotero/content/exportOptions.xul",
 		"_blank", "chrome,modal,centerscreen,resizable=no", io);
 	if(!io.selectedTranslator) {

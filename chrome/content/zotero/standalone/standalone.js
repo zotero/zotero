@@ -328,10 +328,10 @@ const ZoteroStandalone = new function() {
 				}
 			}
 		}
-		
-		var onlyNotes = selected.every(item => item.isNote() || item.isAttachment());
+
 		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
-		if (onlyNotes) {
+		var exportingNotes = selected.every(item => item.isNote() || item.isAttachment());
+		if (exportingNotes) {
 			format = Zotero.QuickCopy.getNoteFormat();
 		}
 		format = Zotero.QuickCopy.unserializeSetting(format);
@@ -343,8 +343,8 @@ const ZoteroStandalone = new function() {
 		
 		copyCitation.hidden = !selected.length || format.mode != 'bibliography';
 		copyBibliography.hidden = !selected.length || format.mode != 'bibliography';
-		copyExport.hidden = !selected.length || format.mode != 'export' || onlyNotes;
-		copyNote.hidden = !selected.length || format.mode != 'export' || !onlyNotes;
+		copyExport.hidden = !selected.length || format.mode != 'export' || exportingNotes;
+		copyNote.hidden = !selected.length || format.mode != 'export' || !exportingNotes;
 		if (format.mode == 'export') {
 			try {
 				let obj = Zotero.Translators.get(format.id);
