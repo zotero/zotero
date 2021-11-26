@@ -22,7 +22,7 @@
     
     ***** END LICENSE BLOCK *****
 */
-import React, { memo, useEffect, useCallback, useRef } from 'react';
+import React, { memo, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 import { nextHTMLID } from './utils';
@@ -32,6 +32,7 @@ function RadioSet({ autoFocus, className, onChange, onKeyDown, options, value })
 	const fieldsetRef = useRef(null);
 
 	const handleChange = useCallback((ev) => {
+		ev.target.focus();
 		if (value !== ev.target.value) {
 			onChange(ev.target.value);
 		}
@@ -41,14 +42,11 @@ function RadioSet({ autoFocus, className, onChange, onKeyDown, options, value })
 		let currentIndex = options.findIndex(o => o.value === value);
 		currentIndex = currentIndex === -1 ? 0 : currentIndex;
 
-		if (ev.key === 'ArrowUp') {
-			let nextIndex = (currentIndex - 1) % options.length;
-			nextIndex = nextIndex < 0 ? nextIndex + options.length : nextIndex;
+		if (ev.key === 'ArrowUp' || ev.key === 'ArrowDown') {
+			let nextIndex = currentIndex + (ev.key === 'ArrowUp' ? -1 : 1);
+			nextIndex = (nextIndex < 0 ? nextIndex + options.length : nextIndex) % options.length;
 			onChange(options[nextIndex].value);
-		}
-		else if (ev.key === 'ArrowDown') {
-			const nextIndex = (currentIndex + 1) % options.length;
-			onChange(options[nextIndex].value);
+			fieldsetRef.current.querySelector(`[data-index="${nextIndex}"]`).focus();
 		}
 
 		if (onKeyDown) {
@@ -56,23 +54,17 @@ function RadioSet({ autoFocus, className, onChange, onKeyDown, options, value })
 		}
 	}, [options, onChange, onKeyDown, value]);
 
-	useEffect(() => {
-		if (autoFocus) {
-			fieldsetRef.current.focus();
-		}
-	}, []); // eslint-disable-line react-hooks/exhaustive-deps
-
 	return (
 		<fieldset
 			className={ cx('form-group radioset', className) }
 			onKeyDown={ handleKeyDown }
-			tabIndex={ 0 }
 			ref={ fieldsetRef }
 		>
 			{ options.map((option, index) => (
 				<div key={ option.value } className="radio-container">
 					<input
-						tabIndex={ -1 }
+						autoFocus={ autoFocus && index === 0 }
+						tabIndex={ option.value === value ? 0 : -1 }
 						data-index={ index }
 						id={ id.current + '-' + index}
 						value={ option.value }
@@ -93,6 +85,7 @@ RadioSet.propTypes = {
 	autoFocus: PropTypes.bool,
 	className: PropTypes.string,
 	onChange: PropTypes.func.isRequired,
+	onKeyDown: PropTypes.func,
 	options: PropTypes.array.isRequired,
 	value: PropTypes.string,
 };
