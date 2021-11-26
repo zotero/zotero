@@ -818,6 +818,70 @@ Zotero.HTTP = new function() {
 	};
 	
 	
+	/**
+	 * General mechanism for modifying requests based on predefined rules
+	 *
+	 * The observer is only active if any rules are enabled.
+	 */
+	this.RequestModifier = {
+		rules: new Set([
+			'remove-nature-feed-origin'
+		]),
+		enabledRules: new Set(),
+		
+		observe: function (channel, topic) {
+			channel.QueryInterface(Components.interfaces.nsIHttpChannel);
+			if (topic == "http-on-modify-request") {
+				// https://github.com/zotero/zotero/issues/2249
+				if (this.enabledRules.has('remove-nature-feed-origin')
+						&& channel.URI.spec.match(/^https?:\/\/idp\.nature\.com\/.+\.rss/)) {
+					let dispURL = Zotero.HTTP.getDisplayURI(channel.URI).spec;
+					Zotero.debug("RequestModifier: Removing Origin header for " + dispURL);
+					channel.setRequestHeader("Origin", "", false);
+				}
+			}
+		},
+		
+		enableRule: function (rule) {
+			if (!this.rules.has(rule)) {
+				throw new Error(`RequestModifier: Can't enable invalid rule '${rule}'`);
+			}
+			if (this.enabledRules.has(rule)) {
+				Zotero.debug(`RequestModifier: Rule '${rule}' is already enabled`);
+				return;
+			}
+			this.enabledRules.add(rule);
+			// Register the observer if any rules are enabled
+			if (this.enabledRules.size == 1) {
+				this.register();
+			}
+		},
+		
+		disableRule: function (rule) {
+			if (!this.rules.has(rule)) {
+				throw new Error(`RequestModifier: Can't disable invalid rule '${rule}'`);
+			}
+			if (!this.enabledRules.has(rule)) {
+				Zotero.debug(`RequestModifier: Rule '${rule}' isn't enabled`);
+				return;
+			}
+			this.enabledRules.delete(rule);
+			// Disable the observer if no rules are enabled
+			if (!this.enabledRules.size) {
+				this.unregister();
+			}
+		},
+		
+		register: function () {
+			Services.obs.addObserver(this, "http-on-modify-request", false);
+		},
+		
+		unregister: function () {
+			Services.obs.removeObserver(this, "http-on-modify-request");
+		}
+	};
+	
+	
 	this.CookieBlocker = {
 		registered: false,
 		observeredTopics: [

@@ -190,6 +190,12 @@ Zotero.FeedReader = function (url) {
 		}
 	};
 	
+	// https://github.com/zotero/zotero/issues/2249
+	let isNatureFeed = url.match(/^https?:\/\/[^.]+\.nature\.com\/.+\.rss/);
+	if (isNatureFeed) {
+		Zotero.HTTP.RequestModifier.enableRule('remove-nature-feed-origin');
+	}
+	
 	Zotero.debug("FeedReader: Fetching feed from " + feedUrl);
 	
 	// Fetch and start processing
@@ -200,6 +206,10 @@ Zotero.FeedReader = function (url) {
 	}).catch((e) => {
 		Zotero.debug(e);
 		this.terminate("Processing failed");
+	}).finally(() => {
+		if (isNatureFeed) {
+			Zotero.HTTP.RequestModifier.disableRule('remove-nature-feed-origin');
+		}
 	});
 };
 
