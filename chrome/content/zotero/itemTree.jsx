@@ -1879,6 +1879,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		event.dataTransfer.setDragImage(this._dragImageContainer, 0, 0);
 
 		var itemIDs = this.getSelectedItems(true);
+		// Get selected item IDs in the item tree order
+		itemIDs = this.getSortedItems(true).filter(id => itemIDs.includes(id));
 		event.dataTransfer.setData("zotero/item", itemIDs);
 
 		var items = Zotero.Items.get(itemIDs);
@@ -1969,6 +1971,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 							return;
 						}
 						var text = obj.string.replace(/\r\n/g, '\n');
+						// For Note HTML translator use body content only
+						if (format.id == '897a81c2-9f60-4bec-ae6b-85a5030b8be5') {
+							// Use body content only
+							let parser = Cc['@mozilla.org/xmlextras/domparser;1']
+								.createInstance(Ci.nsIDOMParser);
+							let doc = parser.parseFromString(text, 'text/html');
+							text = doc.body.innerHTML;
+						}
 						event.dataTransfer.setData('text/plain', text);
 					});
 				}

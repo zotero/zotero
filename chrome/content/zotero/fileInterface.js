@@ -55,7 +55,6 @@ Zotero_File_Exporter.prototype.save = async function () {
 	}
 
 	let exportingNotes = this.items.every(item => item.isNote() || item.isAttachment());
-	
 	// Keep only note export and Zotero RDF translators, if all items are notes or attachments
 	if (exportingNotes) {
 		translators = translators.filter((translator) => {
@@ -209,8 +208,10 @@ var Zotero_File_Interface = new function() {
 	 */
 	function exportItems() {
 		var exporter = new Zotero_File_Exporter();
-		
-		exporter.items = ZoteroPane_Local.getSelectedItems();
+		let itemIDs = ZoteroPane_Local.getSelectedItems(true);
+		// Get selected item IDs in the item tree order
+		itemIDs = ZoteroPane_Local.getSortedItems(true).filter(id => itemIDs.includes(id));
+		exporter.items = Zotero.Items.get(itemIDs);
 		if(!exporter.items || !exporter.items.length) throw("no items currently selected");
 		
 		exporter.save();
@@ -273,9 +274,17 @@ var Zotero_File_Interface = new function() {
 					Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
 					return;
 				}
+				let text = obj.string;
+				// For Note HTML translator use body content only
+				if (translatorID == '897a81c2-9f60-4bec-ae6b-85a5030b8be5') {
+					let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
+						.createInstance(Components.interfaces.nsIDOMParser);
+					let doc = parser.parseFromString(text, 'text/html');
+					text = doc.body.innerHTML;
+				}
 				Components.classes['@mozilla.org/widget/clipboardhelper;1']
 					.getService(Components.interfaces.nsIClipboardHelper)
-					.copyString(obj.string.replace(/\r\n/g, '\n'));
+					.copyString(text.replace(/\r\n/g, '\n'));
 			});
 		}
 	}

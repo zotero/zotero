@@ -2085,7 +2085,10 @@ var ZoteroPane = new function()
 	this.copySelectedItemsToClipboard = function (asCitations) {
 		var items = [];
 		if (Zotero_Tabs.selectedID == 'zotero-pane') {
-			items = this.getSelectedItems();
+			let itemIDs = this.getSelectedItems(true);
+			// Get selected item IDs in the item tree order
+			itemIDs = this.getSortedItems(true).filter(id => itemIDs.includes(id));
+			items = Zotero.Items.get(itemIDs);
 		}
 		else {
 			var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
