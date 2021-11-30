@@ -22,12 +22,13 @@
     
     ***** END LICENSE BLOCK *****
 */
-import React, { forwardRef, memo, useCallback, useEffect, useState, useImperativeHandle } from 'react';
+import React, { forwardRef, memo, useCallback, useEffect, useRef, useState, useImperativeHandle } from 'react';
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 import { usePrevious } from '../hooks/use-previous';
 
 const Wizard = memo(forwardRef(({ canAdvance = true, canRewind = true, canCancel = true, className, children, onClose, onFinish, ...props }, ref) => {
+	const containerRef = useRef(null);
 	const [currentId, setCurrentId] = useState(null);
 	const [hasFocus, setHasFocus] = useState(true); // assumes modal is active when opened
 	const previousId = usePrevious(currentId);
@@ -97,11 +98,38 @@ const Wizard = memo(forwardRef(({ canAdvance = true, canRewind = true, canCancel
 		window.close();
 	}, [onFinish]);
 
+	const handleKeyDown = useCallback((ev) => {
+		if (ev.key === 'Enter') {
+			if (canAdvance) {
+				handleContinue();
+			}
+			else if (isLastPage) {
+				handleDone();
+			}
+		}
+		else if (ev.key === 'Escape') {
+			if (currentIndex > 0 && canRewind) {
+				handleGoBack();
+			}
+			else if (currentIndex === 0 && canCancel) {
+				handleCancel();
+			}
+		}
+	}, [canAdvance, canCancel, canRewind, currentIndex, handleCancel, handleContinue, handleDone, handleGoBack, isLastPage]);
+
 	useEffect(() => {
 		if (currentId !== previousId && 'onPageShow' in currentPage.props) {
 			currentPage.props.onPageShow(currentPage.props.pageId);
 		}
-	}, [currentId, previousId, currentPage]);
+
+		if (containerRef.current) {
+			(containerRef
+				.current
+				.querySelector('button:not(.wizard-button), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+				|| containerRef.current
+			).focus();
+		}
+	}, [currentId, previousId, currentPage, containerRef]);
 
 	// @NOTE: window management, XUL only
 	useEffect(() => {
@@ -119,12 +147,17 @@ const Wizard = memo(forwardRef(({ canAdvance = true, canRewind = true, canCancel
 	}, [handleDeactivate]);
 
 	return (
-		<div className={ cx('wizard', className, { focused: hasFocus }) }>
+		<div
+			className={ cx('wizard', className, { focused: hasFocus }) }
+			onKeyDown={ handleKeyDown }
+			tabIndex={ -1 }
+			ref={ containerRef }
+		>
 			{ currentPage }
 			<div className="wizard-controls">
 				<div className="cancel-controls">
 					<button
-						className="cancel-button"
+						className="wizard-button cancel-button"
 						disabled={ !canCancel }
 						onClick={ handleCancel }
 						title={ cancelLabel }
@@ -135,7 +168,7 @@ const Wizard = memo(forwardRef(({ canAdvance = true, canRewind = true, canCancel
 				<div className="next-back-controls">
 					{ (!Zotero.isLinux || (Zotero.isLinux && canRewind)) && (
 						<button
-							className="back-button"
+							className="wizard-button back-button"
 							disabled={ !canRewind }
 							onClick={ handleGoBack }
 							title={ backLabel }
@@ -145,7 +178,7 @@ const Wizard = memo(forwardRef(({ canAdvance = true, canRewind = true, canCancel
 					) }
 					{ !isLastPage && (
 						<button
-							className="continue-button"
+							className="wizard-button continue-button"
 							disabled={ !canAdvance }
 							onClick={ handleContinue }
 							title={ nextLabel }
@@ -155,7 +188,7 @@ const Wizard = memo(forwardRef(({ canAdvance = true, canRewind = true, canCancel
 					) }
 					{ isLastPage && (
 						<button
-							className="done-button"
+							className="wizard-button done-button"
 							onClick={ handleDone }
 							title={ doneLabel }
 						>
