@@ -319,7 +319,8 @@ Zotero.QuickCopy = new function() {
 	var _loadNoteOutputFormat = async function () {
 		var format = Zotero.Prefs.get("export.noteQuickCopy.setting");
 		format = Zotero.QuickCopy.unserializeSetting(format);
-		// If Note Text translator is selected, preload Note Markdown and Note HTML translators
+		// If virtual "Markdown + Rich Text" translator is selected, preload Note Markdown and
+		// Note HTML translators
 		if (format.id == 'a45eca67-1ee8-45e5-b4c6-23fb8a852873') {
 			await _preloadFormat({ mode: 'export', id: '154c2785-ec83-4c27-8a8a-d27b3a2eded1' });
 			await _preloadFormat({ mode: 'export', id: '897a81c2-9f60-4bec-ae6b-85a5030b8be5' });

@@ -230,7 +230,8 @@ var Zotero_File_Interface = new function() {
 			translation.translate();
 		}
 		
-		// If translating with Note Text translator use Note Markdown and Note HTML instead
+		// If translating with virtual "Markdown + Rich Text" translator, use Note Markdown and
+		// Note HTML instead
 		if (translatorID == 'a45eca67-1ee8-45e5-b4c6-23fb8a852873') {
 			translatorID = '154c2785-ec83-4c27-8a8a-d27b3a2eded1';
 			_translate(items, translatorID, (obj, worked) => {

@@ -119,7 +119,7 @@ Zotero_Preferences.Export = {
 			htmlTranslator.label = 'HTML';
 		}
 		
-		// Remove Note Text translator in case it would exist
+		// Make sure virtual "Markdown + Rich Text" translator doesn't actually exist
 		translators = translators.filter(x => x.translatorID != 'a45eca67-1ee8-45e5-b4c6-23fb8a852873');
 
 		let markdownTranslatorIdx = translators.findIndex(x => x.translatorID == '154c2785-ec83-4c27-8a8a-d27b3a2eded1');
@@ -127,7 +127,7 @@ Zotero_Preferences.Export = {
 		if (markdownTranslatorIdx != -1 && htmlTranslator) {
 			// Exclude standalone Note Markdown translator
 			translators.splice(markdownTranslatorIdx, 1);
-			// Add virtual Note Text translator to the top
+			// Add virtual "Markdown + Rich Text" translator to the top
 			translators.unshift({
 				translatorID: 'a45eca67-1ee8-45e5-b4c6-23fb8a852873',
 				label: 'Markdown + ' + Zotero.getString('general.richText'),
