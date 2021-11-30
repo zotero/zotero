@@ -257,12 +257,6 @@ const PublicationsDialog = memo(({ io }) => {
 		return true;
 	}, [handleFinish, nextPageId]);
 
-	const handleKeyDown = useCallback((ev) => {
-		if (ev.key === 'Enter') {
-			wizard.current.advance();
-		}
-	}, []);
-
 	const handleClose = useCallback(() => {
 		window.close();
 	}, []);
@@ -374,7 +368,6 @@ const PublicationsDialog = memo(({ io }) => {
 						</p>
 						<RadioSet
 							autoFocus
-							onKeyDown={ handleKeyDown }
 							onChange={ handleSharingChange }
 							options={ importSourceOptions }
 							value={ sharing }
@@ -397,7 +390,6 @@ const PublicationsDialog = memo(({ io }) => {
 				</h2>
 				<RadioSet
 					autoFocus
-					onKeyDown={ handleKeyDown }
 					onChange={ handleAdaptationsChange }
 					options={ adaptationsOptions }
 					value={ adaptations }
@@ -406,7 +398,6 @@ const PublicationsDialog = memo(({ io }) => {
 					{ Zotero.getString('publications.chooseLicense.commercial.prompt') }
 				</h2>
 				<RadioSet
-					onKeyDown={ handleKeyDown }
 					onChange={ handleCommercialChange }
 					options={ commercialOptions }
 					value={ commercial }
