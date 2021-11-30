@@ -1013,7 +1013,7 @@ Zotero.Translate.ItemGetter.prototype = {
 	setItems: function (items) {
 		this._itemsLeft = items;
 		// Don't sort items if doing notes export
-		if (!items.every(item => item.isNote || item.isAttachment())) {
+		if (!items.every(item => item.isNote() || item.isAttachment())) {
 			this._itemsLeft.sort((a, b) => a.id - b.id);
 		}
 		this.numItems = this._itemsLeft.length;
