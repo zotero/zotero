@@ -122,33 +122,47 @@ Zotero_File_Exporter.prototype.save = async function () {
 		translation.setLibraryID(this.libraryID);
 	}
 	
-	translation.setLocation(Zotero.File.pathToFile(fp.file));
+	function _exportDone(obj, worked) {
+		// Close the items exported indicator
+		Zotero_File_Interface.Progress.close();
+
+		if (!worked) {
+			Zotero.alert(
+				null,
+				Zotero.getString('general.error'),
+				Zotero.getString('fileInterface.exportError')
+			);
+			return;
+		}
+
+		// For Note Markdown translator replace zotero:// URI scheme,
+		// if the current app is not Zotero
+		if (io.selectedTranslator.translatorID == '154c2785-ec83-4c27-8a8a-d27b3a2eded1'
+			&& ZOTERO_CONFIG.ID != 'zotero') {
+			let text = obj.string;
+			text = text.replace(/zotero:\/\//g, ZOTERO_CONFIG.ID + '://');
+			Zotero.File.putContentsAsync(fp.file, text);
+		}
+	}
+
+	// Post process and save translator output in _exportDone, if using
+	// Note Markdown translator and the current app is not Zotero
+	if (!(io.selectedTranslator.translatorID == '154c2785-ec83-4c27-8a8a-d27b3a2eded1'
+		&& ZOTERO_CONFIG.ID != 'zotero')) {
+		translation.setLocation(Zotero.File.pathToFile(fp.file));
+	}
 	translation.setTranslator(io.selectedTranslator);
 	translation.setDisplayOptions(io.displayOptions);
 	translation.setHandler("itemDone", function () {
 		Zotero.updateZoteroPaneProgressMeter(translation.getProgress());
 	});
-	translation.setHandler("done", this._exportDone);
+	translation.setHandler("done", _exportDone);
 	Zotero_File_Interface.Progress.show(
 		Zotero.getString("fileInterface.itemsExported")
 	);
 	translation.translate()
 };
-	
-/*
- * Closes the items exported indicator
- */
-Zotero_File_Exporter.prototype._exportDone = function(obj, worked) {
-	Zotero_File_Interface.Progress.close();
-	
-	if(!worked) {
-		Zotero.alert(
-			null,
-			Zotero.getString('general.error'),
-			Zotero.getString("fileInterface.exportError")
-		);
-	}
-}
+
 
 /****Zotero_File_Interface****
  **
@@ -282,12 +296,6 @@ var Zotero_File_Interface = new function() {
 						.createInstance(Components.interfaces.nsIDOMParser);
 					let doc = parser.parseFromString(text, 'text/html');
 					text = doc.body.innerHTML;
-				}
-				// For Note Markdown translator replace zotero:// URI scheme,
-				// if necessary for the current app
-				else if (translatorID == '154c2785-ec83-4c27-8a8a-d27b3a2eded1'
-					&& ZOTERO_CONFIG.ID !== 'zotero') {
-					text = text.replace(/zotero:\/\//g, ZOTERO_CONFIG.ID + '://');
 				}
 				Components.classes['@mozilla.org/widget/clipboardhelper;1']
 					.getService(Components.interfaces.nsIClipboardHelper)
