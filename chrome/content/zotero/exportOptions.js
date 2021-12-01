@@ -73,7 +73,12 @@ var Zotero_File_Interface_Export = new function() {
 												// presented to the user
 					// get readable name for option
 					try {
-						var optionLabel = Zotero.getString("exportOptions."+option);
+						if (option == 'includeAppLinks') {
+							var optionLabel = Zotero.getString("exportOptions." + option, Zotero.appName);
+						}
+						else {
+							var optionLabel = Zotero.getString("exportOptions." + option);
+						}
 					} catch(e) {
 						var optionLabel = option;
 					}

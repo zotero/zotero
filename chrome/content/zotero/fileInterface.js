@@ -283,6 +283,12 @@ var Zotero_File_Interface = new function() {
 					let doc = parser.parseFromString(text, 'text/html');
 					text = doc.body.innerHTML;
 				}
+				// For Note Markdown translator replace zotero:// URI scheme,
+				// if necessary for the current app
+				else if (translatorID == '154c2785-ec83-4c27-8a8a-d27b3a2eded1'
+					&& ZOTERO_CONFIG.ID !== 'zotero') {
+					text = text.replace(/zotero:\/\//g, ZOTERO_CONFIG.ID + '://');
+				}
 				Components.classes['@mozilla.org/widget/clipboardhelper;1']
 					.getService(Components.interfaces.nsIClipboardHelper)
 					.copyString(text.replace(/\r\n/g, '\n'));
