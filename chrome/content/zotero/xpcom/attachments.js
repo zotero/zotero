@@ -1087,7 +1087,9 @@ Zotero.Attachments = new function(){
 	 */
 	this.downloadFile = async function (url, path, options = {}) {
 		Zotero.debug(`Downloading file from ${url}`);
+		let unproxiedUrls = Object.keys(Zotero.Proxies.getPotentialProxies(url));
 		
+		let enforcingPDF = false;
 		try {
 			await new Zotero.Promise(function (resolve) {
 				var wbp = Components.classes["@mozilla.org/embedding/browser/nsWebBrowserPersist;1"]
@@ -1105,6 +1107,7 @@ Zotero.Attachments = new function(){
 			});
 			
 			if (options.isPDF) {
+				enforcingPDF = true;
 				await _enforcePDF(path);
 			}
 		}
@@ -1113,9 +1116,102 @@ Zotero.Attachments = new function(){
 				await OS.File.remove(path, { ignoreAbsent: true });
 			}
 			catch (e) {
-				Zotero.debug(e, 1);
+				Zotero.logError(e);
+			}
+			const downloadViaBrowserList = [
+				'https://zotero-static.s3.amazonaws.com/test-pdf-redirect.html',
+				'://www.sciencedirect.com',
+			];
+			// Custom handling for PDFs that are bot-guarded
+			// via a JS-redirect
+			if (enforcingPDF && e instanceof this.InvalidPDFException) {
+				for (let unproxiedUrl of unproxiedUrls) {
+					if (downloadViaBrowserList.some(checkUrl => unproxiedUrl.includes(checkUrl))) {
+						return this.downloadPDFViaBrowser(url, path, options);
+					}
+				}
+			}
+			else {
+				throw e;
+			}
+		}
+	};
+
+	/**
+	 * @param {String} url
+	 * @param {String} path
+	 * @param {Object} [options]
+	 * @param {Object} [options.cookieSandbox]
+	 */
+	this.downloadPDFViaBrowser = async function (url, path, options = {}) {
+		Zotero.debug(`downloadPDFViaBrowser: Downloading file via browser from ${url}`);
+		const timeout = 60e3;
+		let channelBrowser, hiddenBrowser;
+		let hiddenBrowserPDFFoundDeferred = Zotero.Promise.defer();
+		
+		var pdfMIMETypeHandler = async (blob, name, _, channel) => {
+			Zotero.debug(`downloadPDFViaBrowser: Sniffing a PDF loaded at ${name}`);
+			
+			let isOurPDF = false;
+			// try the browser
+			try {
+				channelBrowser = channel.notificationCallbacks.getInterface(Ci.nsIWebNavigation)
+					.QueryInterface(Ci.nsIDocShell).chromeEventHandler;
+			}
+			catch (e) {}
+			if (channelBrowser) {
+				isOurPDF = hiddenBrowser === channelBrowser;
+			}
+			else {
+				// try the document for the load group
+				try {
+					channelBrowser = channel.loadGroup.notificationCallbacks.getInterface(Ci.nsIWebNavigation)
+						.QueryInterface(Ci.nsIDocShell).chromeEventHandler;
+				}
+				catch(e) {}
+				if (channelBrowser) {
+					isOurPDF = hiddenBrowser === channelBrowser;
+				}
+			}
+
+			if (isOurPDF) {
+				Zotero.debug(`downloadPDFViaBrowser: Found our PDF at ${name}`);
+				await Zotero.File.putContentsAsync(path, blob);
+				hiddenBrowserPDFFoundDeferred.resolve();
+				return true;
+			}
+			else {
+				Zotero.debug(`downloadPDFViaBrowser: Not our PDF at ${name}`);
+				return false;
+			}
+		};
+		try {
+			Zotero.MIMETypeHandler.addHandler("application/pdf", pdfMIMETypeHandler, true);
+			let noop = () => 0;
+			hiddenBrowser = Zotero.HTTP.loadDocuments([url], noop, noop, noop, true, options.cookieSandbox);
+			await Zotero.Promise.race([
+				Zotero.Promise.delay(timeout).then(() => {
+					if (!hiddenBrowserPDFFoundDeferred.promise.isResolved()) {
+						throw new Error(`Loading PDF via browser timed out after ${timeout}ms`);
+					}
+				}),
+				hiddenBrowserPDFFoundDeferred.promise
+			]);
+		}
+		catch (e) {
+			try {
+				await OS.File.remove(path, { ignoreAbsent: true });
+			}
+			catch (e) {
+				Zotero.logError(e, 1);
 			}
 			throw e;
+		}
+		finally {
+			Zotero.MIMETypeHandler.removeHandler('application/pdf', pdfMIMETypeHandler);
+			if (hiddenBrowser) {
+				Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+			}
 		}
 	};
 	
