@@ -942,22 +942,27 @@ Zotero.Utilities.Internal = {
 	 * Parse a Blob (e.g., as received from Zotero.HTTP.request()) into an HTML Document
 	 */
 	blobToHTMLDocument: async function (blob, url) {
-		var charset = null;
-		var matches = blob.type && blob.type.match(/charset=([a-z0-9\-_+])/i);
-		if (matches) {
-			charset = matches[1];
+		var responseText = await Zotero.Utilities.Internal.blobToText(blob);
+		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+			.createInstance(Components.interfaces.nsIDOMParser);
+		var doc = parser.parseFromString(responseText, 'text/html');
+		return Zotero.HTTP.wrapDocument(doc, url);
+	},
+	
+	blobToText: async function (blob, charset=null) {
+		if (!charset) {
+			var matches = blob.type && blob.type.match(/charset=([a-z0-9\-_+])/i);
+			if (matches) {
+				charset = matches[1];
+			}
 		}
-		var responseText = await new Promise(function (resolve) {
+		return new Promise(function (resolve) {
 			let fr = new FileReader();
 			fr.addEventListener("loadend", function() {
 				resolve(fr.result);
 			});
 			fr.readAsText(blob, charset);
 		});
-		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-			.createInstance(Components.interfaces.nsIDOMParser);
-		var doc = parser.parseFromString(responseText, 'text/html');
-		return Zotero.HTTP.wrapDocument(doc, url);
 	},
 
 

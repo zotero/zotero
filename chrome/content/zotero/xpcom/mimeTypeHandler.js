@@ -55,8 +55,9 @@ Zotero.MIMETypeHandler = new function () {
 		_observers = [];
 		
 		// Install styles from the Cite preferences
-		this.addHandler("application/vnd.citationstyles.style+xml", async function (data, origin) {
+		this.addHandler("application/vnd.citationstyles.style+xml", async function (blob, origin) {
 			let win = Services.wm.getMostRecentWindow("zotero:basicViewer");
+			var data = await Zotero.Utilities.Internal.blobToText(blob);
 			try {
 				await Zotero.Styles.install(data, origin, true);
 			}
@@ -247,24 +248,20 @@ Zotero.MIMETypeHandler = new function () {
 		Zotero.debug("charset is " + channel.contentCharset);
 		
 		var inputStream = this._storageStream.newInputStream(0);
-		var charset = channel.contentCharset ? channel.contentCharset : "UTF-8";
-		const replacementChar = Components.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER;
-		var convStream = Components.classes["@mozilla.org/intl/converter-input-stream;1"]
-					.createInstance(Components.interfaces.nsIConverterInputStream);
-		convStream.init(inputStream, charset, 16384, replacementChar);
-		var readString = "";
-		var str = {};
-		while (convStream.readString(16384, str) != 0) {
-			readString += str.value;
-		}
-		convStream.close();
+		var stream = Components.classes["@mozilla.org/binaryinputstream;1"]
+					.createInstance(Components.interfaces.nsIBinaryInputStream);
+		stream.setInputStream(inputStream);
+		let buffer = new ArrayBuffer(this._storageStream.length);
+		stream.readArrayBuffer(buffer.byteLength, buffer);
+		stream.close();
 		inputStream.close();
+		let blob = new (Zotero.getMainWindow()).Blob([buffer], { type: this._contentType });
 		
 		var handled = false;
 		try {
 			for (let handler of _typeHandlers[this._contentType]) {
 				let maybePromise = handler(
-					readString,
+					blob,
 					this._request.name ? this._request.name : null,
 					this._contentType,
 					channel

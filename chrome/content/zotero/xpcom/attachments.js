@@ -1149,7 +1149,7 @@ Zotero.Attachments = new function(){
 		let channelBrowser, hiddenBrowser;
 		let hiddenBrowserPDFFoundDeferred = Zotero.Promise.defer();
 		
-		var pdfMIMETypeHandler = async (data, name, _, channel) => {
+		var pdfMIMETypeHandler = async (blob, name, _, channel) => {
 			Zotero.debug(`downloadPDFViaBrowser: Sniffing a PDF loaded at ${name}`);
 			
 			let isOurPDF = false;
@@ -1176,7 +1176,7 @@ Zotero.Attachments = new function(){
 
 			if (isOurPDF) {
 				Zotero.debug(`downloadPDFViaBrowser: Found our PDF at ${name}`);
-				await Zotero.File.putContentsAsync(path, data);
+				await Zotero.File.putContentsAsync(path, blob);
 				hiddenBrowserPDFFoundDeferred.resolve();
 				return true;
 			}
