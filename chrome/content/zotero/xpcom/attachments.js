@@ -1087,7 +1087,6 @@ Zotero.Attachments = new function(){
 	 */
 	this.downloadFile = async function (url, path, options = {}) {
 		Zotero.debug(`Downloading file from ${url}`);
-		let unproxiedUrls = Object.keys(Zotero.Proxies.getPotentialProxies(url));
 		
 		let enforcingPDF = false;
 		try {
@@ -1118,22 +1117,21 @@ Zotero.Attachments = new function(){
 			catch (e) {
 				Zotero.logError(e);
 			}
-			const downloadViaBrowserList = [
-				'https://zotero-static.s3.amazonaws.com/test-pdf-redirect.html',
-				'://www.sciencedirect.com',
-			];
 			// Custom handling for PDFs that are bot-guarded
 			// via a JS-redirect
 			if (enforcingPDF && e instanceof this.InvalidPDFException) {
+				const downloadViaBrowserList = [
+					'https://zotero-static.s3.amazonaws.com/test-pdf-redirect.html',
+					'://www.sciencedirect.com',
+				];
+				const unproxiedUrls = Object.keys(Zotero.Proxies.getPotentialProxies(url));
 				for (let unproxiedUrl of unproxiedUrls) {
 					if (downloadViaBrowserList.some(checkUrl => unproxiedUrl.includes(checkUrl))) {
 						return this.downloadPDFViaBrowser(url, path, options);
 					}
 				}
 			}
-			else {
-				throw e;
-			}
+			throw e;
 		}
 	};
 
