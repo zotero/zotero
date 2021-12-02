@@ -34,6 +34,7 @@ var { IntlProvider } = require('react-intl');
 var { makeRowRenderer } = VirtualizedTable;
 
 Zotero_Preferences.Cite = {
+	styles: [],
 	wordPluginIDs: new Set([
 		'zoteroOpenOfficeIntegration@zotero.org',
 		'zoteroMacWordIntegration@zotero.org',
@@ -88,6 +89,13 @@ Zotero_Preferences.Cite = {
 		Zotero.debug("Refreshing styles list");
 		
 		await Zotero.Styles.init();
+		this.styles = Zotero.Styles.getVisible()
+			.map((style) => {
+				return {
+					title: style.title,
+					updated: Zotero.Date.sqlToDate(style.updated, true).toLocaleDateString()
+				};
+			});
 		
 		if (!this._tree) {
 			const columns = [
@@ -108,20 +116,13 @@ Zotero_Preferences.Cite = {
 					return false;
 				}
 			};
-			let styles = Zotero.Styles.getVisible()
-				.map((style) => {
-					return {
-						title: style.title,
-						updated: Zotero.Date.sqlToDate(style.updated, true).toLocaleDateString()
-					};
-				});
 			let elem = (
 				<IntlProvider locale={Zotero.locale} messages={Zotero.Intl.strings}>
 					<VirtualizedTable
-						getRowCount={() => styles.length}
+						getRowCount={() => this.styles.length}
 						id="styleManager-table"
 						ref={ref => this._tree = ref}
-						renderItem={makeRowRenderer(index => styles[index])}
+						renderItem={makeRowRenderer(index => this.styles[index])}
 						showHeader={true}
 						multiSelect={true}
 						columns={columns}
@@ -129,7 +130,7 @@ Zotero_Preferences.Cite = {
 						disableFontSizeScaling={true}
 						onSelectionChange={() => document.getElementById('styleManager-delete').disabled = undefined}
 						onKeyDown={handleKeyDown}
-						getRowString={index => styles[index].title}
+						getRowString={index => this.styles[index].title}
 					/>
 				</IntlProvider>
 			);
