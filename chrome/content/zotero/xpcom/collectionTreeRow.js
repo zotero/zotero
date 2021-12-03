@@ -245,6 +245,15 @@ Zotero.CollectionTreeRow.prototype.getName = function()
 	}
 }
 
+Zotero.CollectionTreeRow.prototype.getChildren = function () {
+	if (this.isLibrary(true)) {
+		return Zotero.Collections.getByLibrary(this.ref.libraryID);
+	}
+	else if (this.isCollection()) {
+		return Zotero.Collections.getByParent(this.ref.id);
+	}
+}
+
 Zotero.CollectionTreeRow.prototype.getItems = Zotero.Promise.coroutine(function* ()
 {
 	switch (this.type) {

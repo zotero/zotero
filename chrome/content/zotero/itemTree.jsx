@@ -934,7 +934,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 					renderItem: this._renderItem.bind(this),
 					hide: showMessage,
 					key: "virtualized-table",
-					label: Zotero.getString('pane.items.title'),
 
 					showHeader: true,
 					columns: this._getColumns(),
@@ -962,6 +961,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 					onActivate: this.handleActivate,
 
 					onItemContextMenu: e => this.props.onContextMenu(e),
+					
+					role: 'treegrid',
+					label: Zotero.getString('pane.items.title'),
 				}
 			);
 		}
@@ -1005,6 +1007,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this.clearItemsPaneMessage();
 		}
 		this.forceUpdate(() => {
+			this.selection.select(0);
 			this.selection.selectEventsSuppressed = false;
 			this._updateIntroText();
 			this._itemTreeLoadingDeferred.resolve();
@@ -2580,6 +2583,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 					icon = getDOMElement('IconBulletBlueEmpty');
 					icon.classList.add('cell-icon');
 				}
+
+				if (icon.setAttribute) {
+					icon.setAttribute('aria-label', Zotero.getString('pane.item.attachments.has') + '.');
+				}
 				span.append(icon);
 
 				item.getBestAttachmentState()
@@ -2607,8 +2614,21 @@ var ItemTree = class ItemTree extends LibraryTree {
 		return span;
 	}
 
-	_renderCell() {
-		return renderCell.apply(this, arguments);
+	_renderCell(index, data, column) {
+		if (column.primary) {
+			return this._renderPrimaryCell(index, data, column);
+		}
+		else if (column.dataKey === 'hasAttachment') {
+			return this._renderHasAttachmentCell(index, data, column);
+		}
+		let cell = renderCell.apply(this, arguments);
+		if (column.dataKey === 'numNotes' && data) {
+			cell.setAttribute('aria-label', Zotero.getString('pane.item.notes.count', data, data) + '.');
+		}
+		else if (column.dataKey === 'itemType') {
+			cell.setAttribute('aria-hidden', true);
+		}
+		return cell;
 	}
 
 	_renderItem(index, selection, oldDiv=null, columns) {
@@ -2640,16 +2660,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		for (let column of columns) {
 			if (column.hidden) continue;
-
-			if (column.primary) {
-				div.appendChild(this._renderPrimaryCell(index, rowData[column.dataKey], column));
-			}
-			else if (column.dataKey === 'hasAttachment') {
-				div.appendChild(this._renderHasAttachmentCell(index, rowData[column.dataKey], column));
-			}
-			else {
-				div.appendChild(this._renderCell(index, rowData[column.dataKey], column));
-			}
+			div.appendChild(this._renderCell(index, rowData[column.dataKey], column));
 		}
 
 		if (!oldDiv) {
@@ -2668,6 +2679,16 @@ var ItemTree = class ItemTree extends LibraryTree {
 			div.addEventListener('mouseup', this._handleRowMouseUpDown, { passive: true });
 		}
 
+		// Accessibility
+		div.setAttribute('role', 'row');
+		div.setAttribute('aria-level', this.getLevel(index) + 1);
+		if (!this.isContainerEmpty(index)) {
+			div.setAttribute('aria-expanded', this.isContainerOpen(index));
+		}
+		if (!!rowData.contextRow) {
+			div.setAttribute('aria-disabled', true);
+		}
+
 		return div;
 	};
 	
@@ -2679,7 +2700,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	_handleSelectionChange = (selection, shouldDebounce) => {
-		// Update aria-activedescendant on the tree
 		if (this.collectionTreeRow.isDuplicates() && selection.count == 1 && this.duplicateMouseSelection) {
 			var itemID = this.getRow(selection.focused).ref.id;
 			var setItemIDs = this.collectionTreeRow.ref.getSetItemsByItemID(itemID);
@@ -2691,6 +2711,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 				this.tree.invalidateRow(this._rowMap[id]);
 			}
 		}
+		// Update aria-activedescendant on the tree
+		this.forceUpdate();
 		this.duplicateMouseSelection = false;
 		if (shouldDebounce) {
 			this._onSelectionChangeDebounced();
@@ -3560,6 +3582,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 			Zotero.debug('Could not find tree icon for "' + itemType + '"');
 			return document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
 		}
+		try {
+			let label = Zotero.getString(`itemTypes.${itemType}`);
+			icon.setAttribute('aria-label', label + '.');
+		} catch (e) {
+			Zotero.debug('Error attempting to get a localized item type label for ' + itemType, 1);
+			Zotero.debug(e, 1);
+		}
 		return icon;
 	}
 	
@@ -3571,6 +3600,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	_getTagSwatch(tag, color) {
 		let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
 		span.className = 'tag-swatch';
+		let tagLabel = Zotero.getString('searchConditions.tag');
 		// If only emoji, display directly
 		//
 		// TODO: Check for a maximum number of graphemes, which is hard to do
@@ -3580,6 +3610,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		// Otherwise display color
 		else {
+			span.setAttribute('aria-label', `${tagLabel} ${tag}`);
 			span.style.backgroundColor = color;
 		}
 		return span;
