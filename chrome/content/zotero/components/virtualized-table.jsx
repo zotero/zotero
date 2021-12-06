@@ -423,6 +423,8 @@ class VirtualizedTable extends React.Component {
 
 		// Enter, double-clicking
 		onActivate: PropTypes.func,
+		
+		onFocus: PropTypes.func,
 
 		onItemContextMenu: PropTypes.func,
 	};
@@ -1076,6 +1078,7 @@ class VirtualizedTable extends React.Component {
 			onKeyDown: this._onKeyDown,
 			onDragOver: this._onDragOver,
 			onDrop: e => this.props.onDrop && this.props.onDrop(e),
+			onFocus: e => this.props.onFocus && this.props.onFocus(e),
 			className: cx(["virtualized-table", { resizing: this.state.resizing }]),
 			id: this.props.id,
 			ref: ref => this._topDiv = ref,

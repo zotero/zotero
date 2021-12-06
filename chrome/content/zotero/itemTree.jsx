@@ -823,6 +823,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 	}
 	
+	handleFocus = (event) => {
+		if (Zotero.locked) {
+			return false;
+		}
+		if (this.selection.count == 0) {
+			this.selection.select(0);
+		}
+	}
+	
 	handleActivate = (event, indices) => {
 		// Ignore double-clicks in duplicates view on everything except attachments
 		let items = indices.map(index => this.getRow(index).ref);
@@ -959,6 +968,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					onDrop: e => this.props.dragAndDrop && this.onDrop(e, -1),
 					onKeyDown: this.handleKeyDown,
 					onActivate: this.handleActivate,
+					onFocus: this.handleFocus,
 
 					onItemContextMenu: e => this.props.onContextMenu(e),
 					
@@ -1007,7 +1017,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 			this.clearItemsPaneMessage();
 		}
 		this.forceUpdate(() => {
-			this.selection.select(0);
 			this.selection.selectEventsSuppressed = false;
 			this._updateIntroText();
 			this._itemTreeLoadingDeferred.resolve();
@@ -2534,18 +2543,43 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		const item = this.getRow(index).ref;
 		let retracted = "";
+		let retractedAriaLabel = "";
 		if (Zotero.Retractions.isRetracted(item)) {
 			retracted = getDOMElement('IconCross');
 			retracted.classList.add("retracted");
+			retractedAriaLabel = Zotero.getString('retraction.banner');
 		}
 
-		let tags = item.getColoredTags().map(x => this._getTagSwatch(x.tag, x.color));
+		let tagAriaLabel = ''
+		let tagSpans = ''
+		let coloredTags = item.getColoredTags();
+		if (coloredTags.length) {
+			tagSpans = coloredTags.map(x => this._getTagSwatch(x.tag, x.color));
+			tagAriaLabel = Zotero.getString('itemFields.tags') + ' ' + coloredTags.map(x => x.tag).join(',') + '.';;
+		}
+
+		let itemTypeAriaLabel;
+		try {
+			var itemType = Zotero.ItemTypes.getName(item.itemTypeID);
+			itemTypeAriaLabel = Zotero.getString(`itemTypes.${itemType}`) + '.';
+		}
+		catch (e) {
+			Zotero.debug('Error attempting to get a localized item type label for ' + itemType, 1);
+			Zotero.debug(e, 1);
+		}
+		
+		let textWithFullStop = data;
+		if (textWithFullStop.length != textWithFullStop.lastIndexOf('.') + 1) {
+			textWithFullStop += '.';
+		}
+		let textSpanAriaLabel = [textWithFullStop, itemTypeAriaLabel, tagAriaLabel, retractedAriaLabel].join(' ');
 
 		let textSpan = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
 		textSpan.className = "cell-text";
 		textSpan.innerText = data;
+		textSpan.setAttribute('aria-label', textSpanAriaLabel);
 
-		span.append(twisty, icon, retracted, ...tags, textSpan);
+		span.append(twisty, icon, retracted, ...tagSpans, textSpan);
 
 		// Set depth indent
 		const depth = this.getLevel(index);
@@ -3582,13 +3616,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 			Zotero.debug('Could not find tree icon for "' + itemType + '"');
 			return document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
 		}
-		try {
-			let label = Zotero.getString(`itemTypes.${itemType}`);
-			icon.setAttribute('aria-label', label + '.');
-		} catch (e) {
-			Zotero.debug('Error attempting to get a localized item type label for ' + itemType, 1);
-			Zotero.debug(e, 1);
-		}
 		return icon;
 	}
 	
@@ -3600,7 +3627,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 	_getTagSwatch(tag, color) {
 		let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
 		span.className = 'tag-swatch';
-		let tagLabel = Zotero.getString('searchConditions.tag');
 		// If only emoji, display directly
 		//
 		// TODO: Check for a maximum number of graphemes, which is hard to do
@@ -3610,7 +3636,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		// Otherwise display color
 		else {
-			span.setAttribute('aria-label', `${tagLabel} ${tag}`);
 			span.style.backgroundColor = color;
 		}
 		return span;
