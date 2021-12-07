@@ -1143,7 +1143,9 @@ Zotero.Attachments = new function(){
 	 */
 	this.downloadPDFViaBrowser = async function (url, path, options = {}) {
 		Zotero.debug(`downloadPDFViaBrowser: Downloading file via browser from ${url}`);
-		const timeout = 60e3;
+		const onLoadTimeout = 1e3;
+		// Technically this is not a download, but the full operation timeout
+		const downloadTimeout = 60e3;
 		let channelBrowser, hiddenBrowser;
 		let hiddenBrowserPDFFoundDeferred = Zotero.Promise.defer();
 		
@@ -1187,10 +1189,21 @@ Zotero.Attachments = new function(){
 			Zotero.MIMETypeHandler.addHandler("application/pdf", pdfMIMETypeHandler, true);
 			let noop = () => 0;
 			hiddenBrowser = Zotero.HTTP.loadDocuments([url], noop, noop, noop, true, options.cookieSandbox);
+			let onLoadTimeoutDeferred = Zotero.Promise.defer();
+			hiddenBrowser.addEventListener("load", async function onLoad() {
+				Zotero.debug(`downloadPDFViaBrowser: Page with potential JS redirect loaded, giving it ${onLoadTimeout}ms to process`);
+				hiddenBrowser.addEventListener("unload", () => {
+					Zotero.debug(`downloadPDFViaBrowser: A JS redirect occurred, short timeout cancelled`);
+					hiddenBrowser.removeEventListener('load', onLoad);
+				});
+				await Zotero.Promise.delay(onLoadTimeout);
+				onLoadTimeoutDeferred.reject(`Loading PDF via browser timed out on the JS challenge page after ${onLoadTimeout}ms`);
+			}, true);
 			await Zotero.Promise.race([
-				Zotero.Promise.delay(timeout).then(() => {
+				onLoadTimeoutDeferred.promise,
+				Zotero.Promise.delay(downloadTimeout).then(() => {
 					if (!hiddenBrowserPDFFoundDeferred.promise.isResolved()) {
-						throw new Error(`Loading PDF via browser timed out after ${timeout}ms`);
+						throw new Error(`Loading PDF via browser timed out after ${downloadTimeout}ms`);
 					}
 				}),
 				hiddenBrowserPDFFoundDeferred.promise
