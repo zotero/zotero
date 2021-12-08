@@ -297,15 +297,19 @@ class PDFWorker {
 			}
 			
 			let notifierQueue = new Zotero.Notifier.Queue();
-			for (let annotation of imported) {
-				annotation.key = Zotero.DataObjectUtilities.generateKey();
-				annotation.isExternal = !(transfer && annotation.transferable);
-				annotation.tags = annotation.tags.map(x => ({ name: x }));
-				await Zotero.Annotations.saveFromJSON(attachment, annotation, {
-					notifierQueue
-				});
+			try {
+				for (let annotation of imported) {
+					annotation.key = Zotero.DataObjectUtilities.generateKey();
+					annotation.isExternal = !(transfer && annotation.transferable);
+					annotation.tags = annotation.tags.map(x => ({ name: x }));
+					await Zotero.Annotations.saveFromJSON(attachment, annotation, {
+						notifierQueue
+					});
+				}
 			}
-			await Zotero.Notifier.commit(notifierQueue);
+			finally {
+				await Zotero.Notifier.commit(notifierQueue);
+			}
 			
 			if (transfer) {
 				if (modifiedBuf) {

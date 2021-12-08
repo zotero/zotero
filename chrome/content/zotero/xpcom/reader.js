@@ -557,20 +557,28 @@ class ReaderInstance {
 					this._resolveInitPromise();
 					return;
 				}
-				case 'setAnnotation': {
+				case 'saveAnnotations': {
 					let attachment = Zotero.Items.get(data.itemID);
-					let { annotation } = message;
-					annotation.key = annotation.id;
-					let saveOptions = {
-						notifierData: {
-							instanceID: this._instanceID
+					let { annotations } = message;
+					let notifierQueue = new Zotero.Notifier.Queue();
+					try {
+						for (let annotation of annotations) {
+							annotation.key = annotation.id;
+							let saveOptions = {
+								notifierQueue,
+								notifierData: {
+									instanceID: this._instanceID
+								}
+							};
+							let savedAnnotation = await Zotero.Annotations.saveFromJSON(attachment, annotation, saveOptions);
+							if (annotation.image && !await Zotero.Annotations.hasCacheImage(savedAnnotation)) {
+								let blob = this._dataURLtoBlob(annotation.image);
+								await Zotero.Annotations.saveCacheImage(savedAnnotation, blob);
+							}
 						}
-					};
-					let savedAnnotation = await Zotero.Annotations.saveFromJSON(attachment, annotation, saveOptions);
-					
-					if (annotation.image && !await Zotero.Annotations.hasCacheImage(savedAnnotation)) {
-						let blob = this._dataURLtoBlob(annotation.image);
-						await Zotero.Annotations.saveCacheImage(savedAnnotation, blob);
+					}
+					finally {
+						await Zotero.Notifier.commit(notifierQueue);
 					}
 					return;
 				}
@@ -578,13 +586,19 @@ class ReaderInstance {
 					let { ids: keys } = message;
 					let attachment = Zotero.Items.get(this._itemID);
 					let libraryID = attachment.libraryID;
-					for (let key of keys) {
-						let annotation = Zotero.Items.getByLibraryAndKey(libraryID, key);
-						// A small check, as we are receiving a list of item keys from a less secure code
-						if (annotation && annotation.isAnnotation() && annotation.parentID === this._itemID) {
-							this.annotationItemIDs = this.annotationItemIDs.filter(id => id !== annotation.id);
-							await annotation.eraseTx();
+					let notifierQueue = new Zotero.Notifier.Queue();
+					try {
+						for (let key of keys) {
+							let annotation = Zotero.Items.getByLibraryAndKey(libraryID, key);
+							// Make sure the annotation actually belongs to the current PDF
+							if (annotation && annotation.isAnnotation() && annotation.parentID === this._itemID) {
+								this.annotationItemIDs = this.annotationItemIDs.filter(id => id !== annotation.id);
+								await annotation.eraseTx({ notifierQueue });
+							}
 						}
+					}
+					finally {
+						await Zotero.Notifier.commit(notifierQueue);
 					}
 					return;
 				}
