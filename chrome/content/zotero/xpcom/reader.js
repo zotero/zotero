@@ -447,7 +447,7 @@ class ReaderInstance {
 		popup.openPopupAtScreen(data.x, data.y, true);
 	}
 
-	_openAnnotationPopup(x, y, ids, colors, selectedColor, readOnly, enableAddToNote) {
+	_openAnnotationPopup(data) {
 		let popup = this._window.document.createElement('menupopup');
 		this._popupset.appendChild(popup);
 		popup.addEventListener('popuphidden', function () {
@@ -458,33 +458,61 @@ class ReaderInstance {
 		menuitem = this._window.document.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.addToNote'));
 		let hasActiveEditor = this._window.ZoteroContextPane && this._window.ZoteroContextPane.getActiveEditor();
-		menuitem.setAttribute('disabled', !hasActiveEditor || !enableAddToNote);
+		menuitem.setAttribute('disabled', !hasActiveEditor || !data.enableAddToNote);
 		menuitem.addEventListener('command', () => {
-			let data = {
+			this._postMessage({
 				action: 'popupCmd',
 				cmd: 'addToNote',
-				ids
-			};
-			this._postMessage(data);
+				ids: data.ids
+			});
 		});
 		popup.appendChild(menuitem);
 		// Separator
 		popup.appendChild(this._window.document.createElement('menuseparator'));
 		// Colors
-		for (let color of colors) {
+		for (let color of data.colors) {
 			menuitem = this._window.document.createElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString(color[0]));
 			menuitem.className = 'menuitem-iconic';
-			menuitem.setAttribute('disabled', readOnly);
-			menuitem.setAttribute('image', this._getColorIcon(color[1], color[1] === selectedColor));
+			menuitem.setAttribute('disabled', data.readOnly);
+			menuitem.setAttribute('image', this._getColorIcon(color[1], color[1] === data.selectedColor));
 			menuitem.addEventListener('command', () => {
-				let data = {
+				this._postMessage({
 					action: 'popupCmd',
 					cmd: 'setAnnotationColor',
-					ids,
+					ids: data.ids,
 					color: color[1]
-				};
-				this._postMessage(data);
+				});
+			});
+			popup.appendChild(menuitem);
+		}
+		// Separator
+		popup.appendChild(this._window.document.createElement('menuseparator'));
+		// Change page number
+		if (data.enableChangePageNumber) {
+			menuitem = this._window.document.createElement('menuitem');
+			menuitem.setAttribute('label', Zotero.getString('pdfReader.changePageNumber'));
+			menuitem.setAttribute('disabled', data.readOnly);
+			menuitem.addEventListener('command', () => {
+				this._postMessage({
+					action: 'popupCmd',
+					cmd: 'openPageLabelPopup',
+					data
+				});
+			});
+			popup.appendChild(menuitem);
+		}
+		// Edit highlighted text
+		if (data.enableEditHighlightedText) {
+			menuitem = this._window.document.createElement('menuitem');
+			menuitem.setAttribute('label', Zotero.getString('pdfReader.editHighlightedText'));
+			menuitem.setAttribute('disabled', data.readOnly);
+			menuitem.addEventListener('command', () => {
+				this._postMessage({
+					action: 'popupCmd',
+					cmd: 'editHighlightedText',
+					data
+				});
 			});
 			popup.appendChild(menuitem);
 		}
@@ -493,42 +521,40 @@ class ReaderInstance {
 		// Delete
 		menuitem = this._window.document.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('general.delete'));
-		menuitem.setAttribute('disabled', readOnly);
+		menuitem.setAttribute('disabled', data.readOnly);
 		menuitem.addEventListener('command', () => {
-			let data = {
+			this._postMessage({
 				action: 'popupCmd',
 				cmd: 'deleteAnnotation',
-				ids
-			};
-			this._postMessage(data);
+				ids: data.ids
+			});
 		});
 		popup.appendChild(menuitem);
-		popup.openPopupAtScreen(x, y, true);
+		popup.openPopupAtScreen(data.x, data.y, true);
 	}
 
-	_openColorPopup(elementID, colors, selectedColor) {
+	_openColorPopup(data) {
 		let popup = this._window.document.createElement('menupopup');
 		this._popupset.appendChild(popup);
 		popup.addEventListener('popuphidden', function () {
 			popup.remove();
 		});
 		let menuitem;
-		for (let color of colors) {
+		for (let color of data.colors) {
 			menuitem = this._window.document.createElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString(color[0]));
 			menuitem.className = 'menuitem-iconic';
-			menuitem.setAttribute('image', this._getColorIcon(color[1], color[1] === selectedColor));
+			menuitem.setAttribute('image', this._getColorIcon(color[1], color[1] === data.selectedColor));
 			menuitem.addEventListener('command', () => {
-				let data = {
+				this._postMessage({
 					action: 'popupCmd',
 					cmd: 'setColor',
 					color: color[1]
-				};
-				this._postMessage(data);
+				});
 			});
 			popup.appendChild(menuitem);
 		}
-		let element = this._iframeWindow.document.getElementById(elementID);
+		let element = this._iframeWindow.document.getElementById(data.elementID);
 		popup.openPopup(element, 'after_start', 0, 0, true);
 	}
 
@@ -617,17 +643,15 @@ class ReaderInstance {
 					return;
 				}
 				case 'openPagePopup': {
-					this._openPagePopup(message);
+					this._openPagePopup(message.data);
 					return;
 				}
 				case 'openAnnotationPopup': {
-					let { x, y, ids, colors, selectedColor, readOnly, enableAddToNote } = message;
-					this._openAnnotationPopup(x, y, ids, colors, selectedColor, readOnly, enableAddToNote);
+					this._openAnnotationPopup(message.data);
 					return;
 				}
 				case 'openColorPopup': {
-					let { elementID, colors, selectedColor } = message;
-					this._openColorPopup(elementID, colors, selectedColor);
+					this._openColorPopup(message.data);
 					return;
 				}
 				case 'openURL': {
