@@ -3005,6 +3005,34 @@ describe("Zotero.Sync.Data.Engine", function () {
 				await Zotero.Sync.Data.Local.getDateDeleted('item', libraryID, item.key)
 			);
 		});
+		
+		
+		it("should add object from failed download request to sync queue", async function () {
+			({ engine, client, caller } = await setup({
+				stopOnError: false
+			}));
+			var libraryID = Zotero.Libraries.userLibraryID;
+			
+			var item = await createDataObject('item');
+			var itemKey = item.key;
+			
+			var headers = {
+				"Last-Modified-Version": 5
+			};
+			setResponse({
+				method: "GET",
+				url: `users/1/items?itemKey=${itemKey}&includeTrashed=1`,
+				status: 0,
+				headers,
+				body: ""
+			});
+			await engine._downloadObjects('item', [itemKey]);
+			
+			assert.sameMembers(
+				await Zotero.Sync.Data.Local.getObjectsFromSyncQueue('item', libraryID),
+				[itemKey]
+			);
+		});
 	});
 	
 	

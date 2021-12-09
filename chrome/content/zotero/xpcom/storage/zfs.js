@@ -567,14 +567,14 @@ Zotero.Sync.Storage.Mode.ZFS.prototype = {
 			
 			// Get updated item metadata
 			let library = Zotero.Libraries.get(item.libraryID);
-			let json = yield this.apiClient.downloadObjects(
+			let { json, error } = yield this.apiClient.downloadObjects(
 				library.libraryType,
 				library.libraryTypeID,
 				'item',
 				[item.key]
 			)[0];
-			if (!Array.isArray(json)) {
-				Zotero.logError(json);
+			if (error) {
+				Zotero.logError(error);
 				throw new Error(Zotero.Sync.Storage.defaultError);
 			}
 			if (json.length > 1) {

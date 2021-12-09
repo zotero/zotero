@@ -259,8 +259,9 @@ Zotero.Sync.APIClient.prototype = {
 	 * @param {Integer} libraryTypeID - userID or groupID
 	 * @param {String} objectType - 'collection', 'item', 'search'
 	 * @param {String[]} objectKeys - Keys of objects to request
-	 * @return {Array<Promise<Object[]|Error[]>>} - An array of promises for batches of JSON objects
-	 *     or Errors for failures
+	 * @return {Promise<Object>[]} - An array of promises for objects with JSON data as
+	 *     { keys: String[], json: Object[] } or objects with errors as
+	 *     { keys: String[], error: Error }
 	 */
 	downloadObjects: function (libraryType, libraryTypeID, objectType, objectKeys) {
 		if (!objectKeys.length) {
@@ -309,7 +310,10 @@ Zotero.Sync.APIClient.prototype = {
 		return [
 			this.makeRequest("GET", uri)
 			.then(function (xmlhttp) {
-				return this._parseJSON(xmlhttp.responseText)
+				return {
+					keys: objectKeys,
+					json: this._parseJSON(xmlhttp.responseText)
+				};
 			}.bind(this))
 			// Return the error without failing the whole chain
 			.catch(function (e) {
@@ -317,7 +321,10 @@ Zotero.Sync.APIClient.prototype = {
 				if (e instanceof Zotero.HTTP.UnexpectedStatusException && e.is4xx()) {
 					throw e;
 				}
-				return e;
+				return {
+					keys: objectKeys,
+					error: e
+				};
 			})
 		];
 	},
