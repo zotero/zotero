@@ -276,7 +276,9 @@ class ReaderInstance {
 		else if (cmd === 'showInLibrary') {
 			let win = Zotero.getMainWindow();
 			if (win) {
-				win.ZoteroPane.selectItems([this._itemID]);
+				let item = Zotero.Items.get(this._itemID);
+				let id = item.parentID || item.id;
+				win.ZoteroPane.selectItems([id]);
 				win.Zotero_Tabs.select('zotero-pane');
 				win.focus();
 			}
