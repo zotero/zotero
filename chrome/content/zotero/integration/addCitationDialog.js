@@ -73,16 +73,7 @@ var Zotero_Citation_Dialog = new function () {
 	this.load = Zotero.Promise.coroutine(function* () {
 		// make sure we are visible
 		window.setTimeout(function() {
-			var screenX = window.screenX;
-			var screenY = window.screenY;
-			var xRange = [window.screen.availLeft, window.screen.width-window.outerWidth];
-			var yRange = [window.screen.availTop, window.screen.height-window.outerHeight];
-			if(screenX < xRange[0] || screenX > xRange[1] || screenY < yRange[0] || screenY > yRange[1]) {
-				var targetX = Math.max(Math.min(screenX, xRange[1]), xRange[0]);
-				var targetY = Math.max(Math.min(screenY, yRange[1]), yRange[0]);
-				Zotero.debug("Moving window to "+targetX+", "+targetY);
-				window.moveTo(targetX, targetY);
-			}
+			Zotero.Utilities.Internal.centerWindow(window);
 		}, 0);
 		
 		document.documentElement.getButton("extra1").label = Zotero.getString("citation.multipleSources");

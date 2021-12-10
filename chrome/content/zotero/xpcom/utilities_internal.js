@@ -1831,6 +1831,19 @@ Zotero.Utilities.Internal = {
 		return win;
 	},
 	
+	centerWindow: function (win, parent) {
+		if (!win) {
+			Zotero.logError(new Error('Called centerWindow() without a window to center'));
+			return;
+		}
+		parent = parent || win.opener || Zotero.getMainWindow();
+
+		var left = parent.screen.left + (parent.screen.width / 2) - (win.outerWidth / 2);
+		var top = parent.screen.top + (parent.screen.height / 2) - (win.outerHeight / 2);
+
+		win.moveTo(left, top);
+	},
+	
 	
 	filterStack: function (stack) {
 		return stack.split(/\n/)

@@ -388,10 +388,10 @@ Zotero.Integration = new function() {
 		await Zotero.Integration.currentDoc.cleanup();
 		Zotero.Integration.currentSession && await Zotero.Integration.currentSession.progressBar.hide(true);
 		
-		var allOptions = 'chrome,centerscreen';
+		var allOptions = `chrome`;
 		// without this, Firefox gets raised with our windows under Compiz
-		if(Zotero.isLinux) allOptions += ',dialog=no';
-		if(options) allOptions += ','+options;
+		if (Zotero.isLinux) allOptions += ',dialog=no';
+		if (options) allOptions += ',' + options;
 		
 		var window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 			.getService(Components.interfaces.nsIWindowWatcher)

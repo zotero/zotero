@@ -129,6 +129,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 				Zotero.debug("No styles to select", 2);
 				return;
 			}
+			Zotero.Utilities.Internal.centerWindow(window);
 			Zotero_File_Interface_Bibliography.styleChanged();
 		}, 0);
 		
