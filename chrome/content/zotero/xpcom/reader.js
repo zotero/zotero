@@ -76,7 +76,6 @@ class ReaderInstance {
 			annotations,
 			state,
 			location,
-			promptImport: false,
 			readOnly: this._isReadOnly(),
 			showItemPaneToggle: this._showItemPaneToggle,
 			sidebarWidth: this._sidebarWidth,
