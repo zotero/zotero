@@ -439,12 +439,14 @@
 								label.classList.add("pointer");
 								label.setAttribute("onclick", "ZoteroPane_Local.loadURI('" + doi + "', event)");
 								label.setAttribute("tooltiptext", Zotero.getString('locate.online.tooltip'));
-								valueElement.setAttribute('contextmenu', 'zotero-doi-menu');
+								valueElement.oncontextmenu = () => {
+									this._id('zotero-doi-menu').openPopup(valueElement);
+								};
 								
-								var openURLMenuItem = document.getElementById('zotero-doi-menu-view-online');
+								var openURLMenuItem = this._id('zotero-doi-menu-view-online');
 								openURLMenuItem.setAttribute("oncommand", "ZoteroPane_Local.loadURI('" + doi + "', event)");
 								
-								var copyMenuItem = document.getElementById('zotero-doi-menu-copy');
+								var copyMenuItem = this._id('zotero-doi-menu-copy');
 								copyMenuItem.setAttribute("oncommand", "Zotero.Utilities.Internal.copyTextToClipboard('" + doi + "')");
 							}
 						}
@@ -804,7 +806,10 @@
 					}
 					
 					if (this.editable && fieldMode == 0) {
-						firstlast.setAttribute('contextmenu', 'zotero-creator-transform-menu');
+						firstlast.oncontextmenu = () => {
+							document.popupNode = firstlast;
+							this._id('zotero-creator-transform-menu').openPopup(firstlast);
+						};
 					}
 					
 					this._tabIndexMaxCreators = Math.max(this._tabIndexMaxCreators, tabindex);
@@ -1374,7 +1379,10 @@
 						if (this.editable && (fieldName == 'seriesTitle' || fieldName == 'shortTitle' ||
 								Zotero.ItemFields.isFieldOfBase(fieldID, 'title') ||
 								Zotero.ItemFields.isFieldOfBase(fieldID, 'publicationTitle'))) {
-							valueElement.setAttribute('contextmenu', 'zotero-field-transform-menu');
+							valueElement.oncontextmenu = () => {
+								document.popupNode = valueElement;
+								this._id('zotero-field-transform-menu').openPopup(valueElement);
+							};
 						}
 					}
 					
@@ -2181,7 +2189,7 @@
 				<body><![CDATA[
 				return (async function () {
 					var row = Zotero.getAncestorByTagName(document.popupNode, 'row');
-					var typeBox = row.getElementsByAttribute('popup', 'creator-type-menu')[0];
+					var typeBox = row.querySelector('.creator-type-label');
 					var creatorIndex = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
 					var fields = this.getCreatorFields(row);
 					var lastName = fields.lastName;
@@ -2634,7 +2642,7 @@
 					</menupopup>
 					<menupopup id="zotero-creator-transform-menu"
 						onpopupshowing="var row = Zotero.getAncestorByTagName(document.popupNode, 'row');
-							var typeBox = row.getElementsByAttribute('popup', 'creator-type-menu')[0];
+							var typeBox = row.querySelector('.creator-type-label');
 							var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
 							var item = document.getBindingParent(this).item;
 							var exists = item.hasCreatorAt(index);
