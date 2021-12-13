@@ -579,6 +579,11 @@ class VirtualizedTable extends React.Component {
 			}
 			break;
 		}
+		
+		if (e.key == 'ContextMenu' || (e.key == 'F10' && e.shiftKey)) {
+			this.props.onItemContextMenu(e);
+			return;
+		}
 
 		if (this.props.getRowString && !(e.ctrlKey || e.metaKey) && e.key.length == 1) {
 			this._handleTyping(e.key);
@@ -673,9 +678,7 @@ class VirtualizedTable extends React.Component {
 			if (!modifierClick && !this.selection.isSelected(index)) {
 				this._onSelection(index, false, false);
 			}
-			if (this.props.onItemContextMenu) {
-				this.props.onItemContextMenu(e);
-			}
+			this.props.onItemContextMenu(e);
 		}
 		// All modifier clicks handled in mouseUp per mozilla itemtree convention
 		if (!modifierClick && !this.selection.isSelected(index)) {

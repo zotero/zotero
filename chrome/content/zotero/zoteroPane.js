@@ -2308,10 +2308,9 @@ var ZoteroPane = new function()
 	 * Show context menu once it's ready
 	 */
 	this.onItemsContextMenuOpen = async function (event) {
-		await ZoteroPane.buildItemContextMenu()
+		await ZoteroPane.buildItemContextMenu();
 		document.getElementById('zotero-itemmenu').openPopup(
-			null, null, event.clientX + 1, event.clientY + 1, true, false, event
-		);
+			null, null, event.clientX + 1, event.clientY + 1);
 	};
 	
 	
