@@ -2550,12 +2550,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 			retractedAriaLabel = Zotero.getString('retraction.banner');
 		}
 
-		let tagAriaLabel = ''
-		let tagSpans = ''
+		let tagAriaLabel = '';
+		let tagSpans = '';
 		let coloredTags = item.getColoredTags();
 		if (coloredTags.length) {
 			tagSpans = coloredTags.map(x => this._getTagSwatch(x.tag, x.color));
-			tagAriaLabel = Zotero.getString('itemFields.tags') + ' ' + coloredTags.map(x => x.tag).join(',') + '.';;
+			tagAriaLabel = tagSpans.length == 1 ? Zotero.getString('searchConditions.tag') : Zotero.getString('itemFields.tags');
+			tagAriaLabel += ' ' + coloredTags.map(x => x.tag).join(', ') + '.';
 		}
 
 		let itemTypeAriaLabel;
@@ -2569,7 +2570,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		
 		let textWithFullStop = data;
-		if (textWithFullStop.length != textWithFullStop.lastIndexOf('.') + 1) {
+		if (!textWithFullStop.match(/\.$/)) {
 			textWithFullStop += '.';
 		}
 		let textSpanAriaLabel = [textWithFullStop, itemTypeAriaLabel, tagAriaLabel, retractedAriaLabel].join(' ');
@@ -2719,7 +2720,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (!this.isContainerEmpty(index)) {
 			div.setAttribute('aria-expanded', this.isContainerOpen(index));
 		}
-		if (!!rowData.contextRow) {
+		if (!rowData.contextRow) {
 			div.setAttribute('aria-disabled', true);
 		}
 
@@ -3588,10 +3589,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 			
 			if (item.attachmentContentType == 'application/pdf' && item.isFileAttachment()) {
 				if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-					itemType += 'PdfLink';
+					itemType += 'PDFLink';
 				}
 				else {
-					itemType += 'Pdf';
+					itemType += 'PDF';
 				}
 			}
 			else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
