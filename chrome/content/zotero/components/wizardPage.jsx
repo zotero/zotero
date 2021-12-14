@@ -24,10 +24,11 @@
 */
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
+import cx from 'classnames';
 
-const WizardPage = ({ children, label }) => {
+const WizardPage = ({ className, children, label }) => {
 	return (
-		<div className="wizard-page">
+		<div className={ cx('wizard-page', className) }>
 			{ (label && typeof label === 'string' && label.length > 0) && (
 				<div className="wizard-header">
 					<h1 className="wizard-header-label">
@@ -44,6 +45,7 @@ const WizardPage = ({ children, label }) => {
 
 WizardPage.propTypes = {
 	children: PropTypes.oneOfType([PropTypes.element, PropTypes.array]),
+	className: PropTypes.string,
 	label: PropTypes.string,
 	onPageAdvance: PropTypes.func,
 	onPageRewound: PropTypes.func,

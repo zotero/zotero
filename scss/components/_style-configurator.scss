@@ -1,0 +1,66 @@
+.style-configurator {
+	.style-selector-wrapper {
+		flex-direction: column;
+		display: flex;
+
+		> span {
+			display: block;
+			margin-bottom: $space-min;
+		}
+	}
+
+	.style-selector-input-wrapper {
+		background-color: $shade-3;
+		border-radius: $border-radius-base;
+		border: 1px solid darken($shade-3, 5%);
+		padding: $space-sm;
+
+		select {
+			width: 100%;
+		}
+	}
+
+	.locale-selector-wrapper {
+		background-color: $shade-3;
+		border-radius: $border-radius-base;
+		border: 1px solid darken($shade-3, 5%);
+		margin-top: 1.5em;
+		padding: $space-sm;
+
+		select {
+			margin-left: $space-sm;
+		}
+	}
+
+	.display-as-wrapper {
+		margin-top: 1.5em;
+
+		> span {
+			display: block;
+			margin-bottom: $space-min;
+		}
+
+		.display-as-input-wrapper {
+			background-color: $shade-3;
+			border-radius: $border-radius-base;
+			border: 1px solid darken($shade-3, 5%);
+			padding: $space-sm;
+
+			fieldset {
+				padding: 0;
+			}
+		}
+
+		.radioset {
+			display: flex;
+			flex-direction: row;
+
+			.radio-container {
+				margin: 0;
+			}
+			.radio-container + .radio-container {
+				margin-left: $space-sm;
+			}
+		}
+	}
+}

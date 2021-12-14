@@ -1,0 +1,68 @@
+.rtfscan-wizard {
+	.example, .page-start-1, .page-start-2, .file-input-label {
+		display: block;
+	}
+
+	.example {
+		line-height: 1.5em
+	}
+
+	.page-start-1 {
+		margin-bottom: 1em;
+	}
+
+	.page-start-2 {
+		margin-top: 1em;
+	}
+
+	.file-input-label {
+		margin: 1em $space-xs $space-min;
+	}
+
+	.file-input-container {
+		background-color: $shade-3;
+		border-radius: $border-radius-base;
+		border: 1px solid darken($shade-3, 5%);
+		display: flex;
+		margin: auto $space-min auto;
+		padding: .5em;
+
+		> input {
+			flex: 1 0 auto;
+		}
+
+		> button {
+			flex: 0 1 auto;
+			margin-left: 1em;
+		}
+	}
+
+	.citations-page-description {
+		margin-bottom: 1em;
+	}
+
+	.citations-page > .wizard-body {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.table-container {
+		display: flex;
+		height: 0;
+		flex-direction: column;
+		flex: 1 0 auto;
+
+		> div {
+			display: flex;
+			flex: 1 0 auto;
+			background-color: -moz-field;
+			overflow: hidden;
+			position: relative;
+			height: 100%;
+		}
+	}
+
+	button, input, select {
+		font-size: 13px;
+	}
+}
