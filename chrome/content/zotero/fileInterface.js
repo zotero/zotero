@@ -129,6 +129,7 @@ Zotero_File_Exporter.prototype.save = async function () {
 				Zotero.getString('general.error'),
 				Zotero.getString('fileInterface.exportError')
 			);
+			Zotero_File_Interface.Progress.close();
 			return;
 		}
 
