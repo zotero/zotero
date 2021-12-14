@@ -3344,7 +3344,7 @@ Zotero.Item.prototype.setAttachmentLastPageIndex = async function (val) {
  *
  * E.g., 'lastPageIndex_u_ABCD2345' or 'lastPageIndex_g123_ABCD2345'
  */
-Zotero.Item.prototype._getLastPageIndexSettingKey = function () {
+Zotero.Item.prototype._getLastPageIndexSettingKey = function (ignoreInvalid) {
 	var library = Zotero.Libraries.get(this.libraryID);
 	var id = 'lastPageIndex_';
 	switch (library.libraryType) {
@@ -3357,7 +3357,12 @@ Zotero.Item.prototype._getLastPageIndexSettingKey = function () {
 			break;
 		
 		default:
-			throw new Error(`Can't get last page index key for ${library.libraryType} item`);
+			var msg = `Can't get last page index key for ${library.libraryType} item`;
+			if (ignoreInvalid) {
+				Zotero.logError(msg);
+				return false;
+			}
+			throw new Error(msg);
 	}
 	id += "_" + this.key;
 	return id;
@@ -4689,8 +4694,15 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 			}
 			
 			// Delete last page index
-			let id = this._getLastPageIndexSettingKey();
-			yield Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, id);
+			//
+			// Getting a key is optional so that the deletion doesn't fail if the attachment
+			// exists in a type of library where it doesn't belong, most likely if a plugin created
+			// one and we didn't properly prevent it:
+			// https://forums.zotero.org/discussion/93453/unsubscribe-rss-feed-fail
+			let id = this._getLastPageIndexSettingKey(true);
+			if (id) {
+				yield Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, id);
+			}
 		}
 		
 		// Zotero.Sync.EventListeners.ChangeListener needs to know if this was a storage file
