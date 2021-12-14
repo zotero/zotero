@@ -721,7 +721,7 @@ const RtfScan = memo((props) => {
 			canAdvance={ canAdvance }
 			canCancel={ canCancel }
 			canRewind={ canRewind }
-			className="import-wizard"
+			className="rtfscan-wizard"
 			onClose={ handleClose }
 			ref={ wizardRef }
 		>
@@ -732,23 +732,23 @@ const RtfScan = memo((props) => {
 				pageId="page-start"
 			>
 				<div>
-					<span>
+					<span className="page-start-1">
 						{ Zotero.getString('rtfScan.introPage.description') }
 					</span>
-					<span>{ '{Smith, 2009}' }</span>
-					<span>{ 'Smith {2009}' }</span>
-					<span>{ '{Smith et al., 2009}' }</span>
-					<span>{ '{John Smith, 2009}' }</span>
-					<span>{ '{Smith, 2009, 10-14}' }</span>
-					<span>{ '{Smith, &quot;Title,&quot; 2009}' }</span>
-					<span>{ '{Jones, 2005; Smith, 2009}' }</span>
-					<span> { /*style="padding-top:1em"*/ }
+					<span className="example">{ '{Smith, 2009}' }</span>
+					<span className="example">{ 'Smith {2009}' }</span>
+					<span className="example">{ '{Smith et al., 2009}' }</span>
+					<span className="example">{ '{John Smith, 2009}' }</span>
+					<span className="example">{ '{Smith, 2009, 10-14}' }</span>
+					<span className="example">{ '{Smith, &quot;Title,&quot; 2009}' }</span>
+					<span className="example">{ '{Jones, 2005; Smith, 2009}' }</span>
+					<span className="page-start-2">
 						{ Zotero.getString('rtfScan.introPage.description2') }
 					</span>
 				</div>
 				<div>
-					<label>{ Zotero.getString('rtfScan.inputFile.label') }</label>
-					<div>
+					<label className="file-input-label">{ Zotero.getString('rtfScan.inputFile.label') }</label>
+					<div className="file-input-container">
 						<input
 							className="file-path"
 							readOnly
@@ -763,8 +763,8 @@ const RtfScan = memo((props) => {
 					</div>
 				</div>
 				<div>
-					<label>{ Zotero.getString('rtfScan.outputFile.label') }</label>
-					<div>
+					<label className="file-input-label">{ Zotero.getString('rtfScan.outputFile.label') }</label>
+					<div className="file-input-container">
 						<input
 							className="file-path"
 							readOnly
@@ -790,13 +790,16 @@ const RtfScan = memo((props) => {
 				<ProgressBar value={ progress } /> { /*TODO: undetermined */ }
 			</WizardPage>
 			<WizardPage
+				className="citations-page"
 				pageId="citations-page"
 				label={ Zotero.getString('rtfScan.citationsPage.label') }
 				onPageRewound={ handleCitationsPageRewound }
 				onPageShow={ refreshCanAdvanceIfCitationsReady }
 			>
-				<span>{ Zotero.getString('rtfScan.citationsPage.description') }</span> {/* width="700" */}
-				<div> {/*flex="1" height="500" */}
+				<span className="citations-page-description">
+					{ Zotero.getString('rtfScan.citationsPage.description') }
+				</span>
+				<div className="table-container"> {/*flex="1" height="500" */}
 					<IntlProvider locale={ Zotero.locale } messages={ Zotero.Intl.strings }>
 						<VirtualizedTable
 							columns={ columns }

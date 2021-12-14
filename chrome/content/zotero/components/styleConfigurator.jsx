@@ -150,31 +150,33 @@ const StyleConfigurator = memo(({ onStyleConfigChange = noop, supportedNotes = d
 		<div className="style-configurator">
 			{ isReady && (
 				<React.Fragment>
-					<div>
+					<div className="style-selector-wrapper">
 						<span>{ Zotero.getString('bibliography.style.label') }</span>
-						<StyleSelector
-							style={ style }
-							onStyleChange={ handleStyleChange }
-						/>
-					</div>
-					<div>
-						<div align="center">
-							<span>{ Zotero.getString('bibliography.locale.label') }</span>
-							<LocaleSelector
-								locale={ locale }
+						<div className="style-selector-input-wrapper">
+							<StyleSelector
 								style={ style }
-								onLocaleChange={ handleLocaleChange }
+								onStyleChange={ handleStyleChange }
 							/>
 						</div>
 					</div>
+					<div className="locale-selector-wrapper">
+						<span>{ Zotero.getString('bibliography.locale.label') }</span>
+						<LocaleSelector
+							locale={ locale }
+							style={ style }
+							onLocaleChange={ handleLocaleChange }
+						/>
+					</div>
 					{ (supportedNotes.length > 1 && !isNoteStyle) && (
-						<div id="displayAs-groupbox">
+						<div className="display-as-wrapper">
 							<span>{ Zotero.getString('integration.prefs.displayAs.label') }</span>
-							<RadioSet
-								onChange={ handleDisplayAsChange }
-								options={ options }
-								value={ displayAs }
-							/>
+							<div className="display-as-input-wrapper">
+								<RadioSet
+									onChange={ handleDisplayAsChange }
+									options={ options }
+									value={ displayAs }
+								/>
+							</div>
 						</div>
 					)}
 				</React.Fragment>
