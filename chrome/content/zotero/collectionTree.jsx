@@ -357,7 +357,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				toggleOpenState: this.toggleOpenState,
 				getRowString: this.getRowString.bind(this),
 				
-				onItemContextMenu: (e) => this.props.onContextMenu && this.props.onContextMenu(e),
+				onItemContextMenu: (...args) => this.props.onContextMenu && this.props.onContextMenu(...args),
 
 				onKeyDown: this.handleKeyDown,
 				onActivate: this.handleActivate,

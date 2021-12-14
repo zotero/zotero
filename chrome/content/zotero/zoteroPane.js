@@ -1084,7 +1084,7 @@ var ZoteroPane = new function()
 				persistColumns: true,
 				columnPicker: true,
 				onSelectionChange: selection => ZoteroPane.itemSelected(selection),
-				onContextMenu: event => ZoteroPane.onItemsContextMenuOpen(event),
+				onContextMenu: (...args) => ZoteroPane.onItemsContextMenuOpen(...args),
 				onActivate: (event, items) => ZoteroPane.onItemTreeActivate(event, items),
 				emptyMessage: Zotero.getString('pane.items.loading')
 			});
@@ -1103,7 +1103,7 @@ var ZoteroPane = new function()
 			var collectionsTree = document.getElementById('zotero-collections-tree');
 			ZoteroPane.collectionsView = await CollectionTree.init(collectionsTree, {
 				onSelectionChange: prevSelection => ZoteroPane.onCollectionSelected(prevSelection),
-				onContextMenu: e => ZoteroPane.onCollectionsContextMenuOpen(e),
+				onContextMenu: (...args) => ZoteroPane.onCollectionsContextMenuOpen(...args),
 				dragAndDrop: true
 			});
 		}
@@ -2297,20 +2297,24 @@ var ZoteroPane = new function()
 	/**
 	 * Show context menu once it's ready
 	 */
-	this.onCollectionsContextMenuOpen = async function (event) {
+	this.onCollectionsContextMenuOpen = async function (event, x, y) {
 		await ZoteroPane.buildCollectionContextMenu();
+		x = x || event.clientX;
+		y = y || event.clientY;
 		document.getElementById('zotero-collectionmenu').openPopup(
-			null, null, event.clientX + 1, event.clientY + 1);
+			null, null, x + 1, y + 1);
 	};
 	
 	
 	/**
 	 * Show context menu once it's ready
 	 */
-	this.onItemsContextMenuOpen = async function (event) {
+	this.onItemsContextMenuOpen = async function (event, x, y) {
 		await ZoteroPane.buildItemContextMenu();
+		x = x || event.clientX;
+		y = y || event.clientY;
 		document.getElementById('zotero-itemmenu').openPopup(
-			null, null, event.clientX + 1, event.clientY + 1);
+			null, null, x + 1, y + 1);
 	};
 	
 	

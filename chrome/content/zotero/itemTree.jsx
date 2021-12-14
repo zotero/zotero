@@ -970,7 +970,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					onActivate: this.handleActivate,
 					onFocus: this.handleFocus,
 
-					onItemContextMenu: e => this.props.onContextMenu(e),
+					onItemContextMenu: (...args) => this.props.onContextMenu(...args),
 					
 					role: 'treegrid',
 					label: Zotero.getString('pane.items.title'),
