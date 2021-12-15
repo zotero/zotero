@@ -809,8 +809,19 @@ Zotero.Translate.IO.Write.prototype = {
 		this._charset = charset;
 	},
 	
+	/**
+	 * Set a function to modify data on each write()
+	 */
+	setDataProcessor: function (processor) {
+		this._processor = processor;
+	},
+	
 	"write":function(data) {
 		if(!this._charset) this.setCharacterSet("UTF-8");
+		
+		if (this._processor) {
+			data = this._processor(data);
+		}
 		
 		if(!this._writtenToStream && this._charset.substr(this._charset.length-4) == "xBOM"
 		   && BOMs[this._charset.substr(0, this._charset.length-4).toUpperCase()]) {
