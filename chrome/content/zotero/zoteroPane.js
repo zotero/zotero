@@ -2817,12 +2817,17 @@ var ZoteroPane = new function()
 					}
 				}
 				
-				// "Find Available PDFs"
+				// "Add Notes from Annotation" and "Find Available PDFs"
 				if (collectionTreeRow.filesEditable
 						&& !collectionTreeRow.isDuplicates()
-						&& !collectionTreeRow.isFeed()
-						&& items.some(item => item.isRegularItem())) {
-					show.push(m.findPDF, m.sep3);
+						&& !collectionTreeRow.isFeed()) {
+					if (items.some(item => attachmentsWithExtractableAnnotations(item).length)) {
+						show.push(m.createNoteFromAnnotations, m.sep3);
+					}
+					
+					if (items.some(item => item.isRegularItem())) {
+						show.push(m.findPDF, m.sep3);
+					}
 				}
 
 				let canCreateParent = true;
@@ -2884,7 +2889,8 @@ var ZoteroPane = new function()
 						popup.textContent = '';
 						let eligibleAttachments = Zotero.Items.get(item.getAttachments())
 							.filter(item => item.isPDFAttachment());
-						let attachmentsWithAnnotations = eligibleAttachments.filter(x => x.getAnnotations().some(x => x.annotationType != 'ink'));
+						let attachmentsWithAnnotations = eligibleAttachments
+							.filter(item => isAttachmentWithExtractableAnnotations(item));
 						if (attachmentsWithAnnotations.length) {
 							// Display submenu if there's more than one PDF attachment, even if
 							// there's only attachment with annotations, so it's clear which one
@@ -3030,6 +3036,8 @@ var ZoteroPane = new function()
 		}
 		
 		// Set labels, plural if necessary
+		menu.childNodes[m.createNoteFromAnnotations].setAttribute('label', Zotero.getString('pane.items.menu.addNoteFromAnnotations' + multiple));
+		menu.childNodes[m.createNoteFromAnnotationsMenu].setAttribute('label', Zotero.getString('pane.items.menu.addNoteFromAnnotations' + multiple));
 		menu.childNodes[m.findPDF].setAttribute('label', Zotero.getString('pane.items.menu.findAvailablePDF' + multiple));
 		menu.childNodes[m.moveToTrash].setAttribute('label', Zotero.getString('pane.items.menu.moveToTrash' + multiple));
 		menu.childNodes[m.deleteFromLibrary].setAttribute('label', Zotero.getString('pane.items.menu.delete' + multiple));
@@ -3073,6 +3081,18 @@ var ZoteroPane = new function()
 			ZoteroPane_Local.viewItems(items, event);
 		}
 	};
+	
+	
+	function attachmentsWithExtractableAnnotations(item) {
+		return Zotero.Items.get(item.getAttachments())
+			.filter(item => isAttachmentWithExtractableAnnotations(item));
+	}
+	
+	
+	function isAttachmentWithExtractableAnnotations(item) {
+		return item.isPDFAttachment() && item.getAnnotations().some(x => x.annotationType != 'ink');
+	}
+	
 	
 	this.openPreferences = function (paneID, action) {
 		Zotero.warn("ZoteroPane.openPreferences() is deprecated"
@@ -4433,7 +4453,7 @@ var ZoteroPane = new function()
 	};
 	
 	
-	this.createNoteFromAnnotationsForAttachment = async function (attachment) {
+	this.createNoteFromAnnotationsForAttachment = async function (attachment, { skipSelect } = {}) {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
@@ -4441,7 +4461,10 @@ var ZoteroPane = new function()
 		var note = await Zotero.EditorInstance.createNoteFromAnnotations(
 			attachment.getAnnotations().filter(x => x.annotationType != 'ink'), attachment.parentID
 		);
-		await this.selectItem(note.id);
+		if (!skipSelect) {
+			await this.selectItem(note.id);
+		}
+		return note;
 	};
 	
 	
@@ -4450,19 +4473,38 @@ var ZoteroPane = new function()
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
-		var item = this.getSelectedItems()[0];
-		var attachment;
-		if (item.isRegularItem()) {
-			attachment = Zotero.Items.get(item.getAttachments())
-				.find(x => x.isPDFAttachment() && x.getAnnotations().some(x => x.annotationType != 'ink'));
+		var items = this.getSelectedItems();
+		var itemIDsToSelect = [];
+		for (let item of items) {
+			let attachments = [];
+			if (item.isRegularItem()) {
+				// Find all child attachments with non-ink annotations
+				attachments.push(
+					...Zotero.Items.get(item.getAttachments())
+						.filter((x) => {
+							return x.isPDFAttachment()
+								&& x.getAnnotations().some(x => x.annotationType != 'ink');
+						})
+				);
+			}
+			else if (item.isFileAttachment()) {
+				attachments.push(item);
+			}
+			else if (items.length == 1) {
+				throw new Error("Not a regular item or file attachment");
+			}
+			else {
+				continue;
+			}
+			for (let attachment of attachments) {
+				let note = await this.createNoteFromAnnotationsForAttachment(
+					attachment,
+					{ skipSelect: true }
+				);
+				itemIDsToSelect.push(note.id);
+			}
 		}
-		else if (item.isFileAttachment()) {
-			attachment = item;
-		}
-		else {
-			throw new Error("Not a regular item or file attachment");
-		}
-		return this.createNoteFromAnnotationsForAttachment(attachment);
+		await this.selectItems(itemIDsToSelect);
 	};
 	
 	this.createEmptyParent = async function (item) {

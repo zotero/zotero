@@ -282,10 +282,8 @@
 							<menuitem class="menuitem-iconic zotero-menuitem-attach-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane_Local.newNote(false, this.parentNode.getAttribute('itemKey'))"/>
 							
 							<menuitem class="menuitem-iconic zotero-menuitem-create-note-from-annotations"
-									label="&zotero.items.menu.attach.noteFromAnnotations;"
 									oncommand="ZoteroPane.createNoteFromAnnotationsFromSelected()"/>
-							<menu class="menuitem-iconic zotero-menuitem-create-note-from-annotations"
-									label="&zotero.items.menu.attach.noteFromAnnotations;">
+							<menu class="menuitem-iconic zotero-menuitem-create-note-from-annotations">
 								<menupopup id="create-note-from-annotations-popup"/>
 							</menu>
 							
