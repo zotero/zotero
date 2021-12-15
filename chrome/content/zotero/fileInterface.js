@@ -122,34 +122,33 @@ Zotero_File_Exporter.prototype.save = async function () {
 		translation.setLibraryID(this.libraryID);
 	}
 	
-	async function _exportDone(obj, worked) {
-		if (!worked) {
-			Zotero.alert(
-				null,
-				Zotero.getString('general.error'),
-				Zotero.getString('fileInterface.exportError')
-			);
-			Zotero_File_Interface.Progress.close();
-			return;
-		}
-		
-		// Close the items exported indicator
-		Zotero_File_Interface.Progress.close();
-	}
-
 	translation.setLocation(Zotero.File.pathToFile(fp.file));
 	translation.setTranslator(io.selectedTranslator);
 	translation.setDisplayOptions(io.displayOptions);
 	translation.setHandler("itemDone", function () {
 		Zotero.updateZoteroPaneProgressMeter(translation.getProgress());
 	});
-	translation.setHandler("done", _exportDone);
+	translation.setHandler("done", this._exportDone);
 	Zotero_File_Interface.Progress.show(
 		Zotero.getString("fileInterface.itemsExported")
 	);
 	translation.translate()
 };
-
+	
+/*
+ * Closes the items exported indicator
+ */
+Zotero_File_Exporter.prototype._exportDone = function(obj, worked) {
+	Zotero_File_Interface.Progress.close();
+	
+	if(!worked) {
+		Zotero.alert(
+			null,
+			Zotero.getString('general.error'),
+			Zotero.getString("fileInterface.exportError")
+		);
+	}
+}
 
 /****Zotero_File_Interface****
  **
