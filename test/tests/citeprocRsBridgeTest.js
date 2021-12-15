@@ -1,7 +1,8 @@
 "use strict";
 
 describe("Zotero.CiteprocRs", function () {
-	var styleID = "http://www.zotero.org/styles/chicago-note-bibliography";
+	var chicagoNoteStyleID = "http://www.zotero.org/styles/chicago-note-bibliography";
+	var chicagoAuthorDateStyleID = "http://www.zotero.org/styles/chicago-author-date";
 	var style;
 	function getCiteprocJSEngine(style) {
 		Zotero.Prefs.set('cite.useCiteprocRs', false);
@@ -35,25 +36,23 @@ describe("Zotero.CiteprocRs", function () {
 		
 		// We need to deepcopy before passing to citeproc-js, because it doesn't respect
 		// our objects and just writes stuff all over them.
-		let [_, citationInfo] = citeprocJS.processCitationCluster(Zotero.Utilities.deepCopy(citation), [], []);
+		let [_, citationInfo] = citeprocJS.processCitationCluster(citation, [], []);
 		let CJSCitation = citationInfo[0][1];
 		let CJSBibl = Zotero.Cite.makeFormattedBibliography(citeprocJS, 'text');
 		
 		Zotero.debug(`\nciteproc-js: ${CJSCitation}\nciteproc-rs: ${CRSCitation}`, 2);
+		Zotero.debug(`\nciteproc-js: ${CJSBibl}\nciteproc-rs: ${CRSBibl}`, 2);
 		
 		assert.equal(CJSCitation, CRSCitation, 'citations are equal');
 		assert.deepEqual(CJSBibl, CRSBibl, 'bibliographies are equal');
 	}
 	
 	var item1, item2SameLastName, item3;
-	var basicCitation;
 	var citeprocRS, citeprocJS;
 	var noteIndex = 1;
 	
 	before(async function () {
 		await Zotero.Styles.init();
-		style = Zotero.Styles.get(styleID);
-		
 		item1 = createUnsavedDataObject(
 			'item',
 			{
@@ -105,56 +104,67 @@ describe("Zotero.CiteprocRs", function () {
 		citeprocJS.free();
 		citeprocRS.free();
 	});
+	
+	describe('with chicago-note-bibliography.csl', function () {
+		before(function () {
+			style = Zotero.Styles.get(chicagoNoteStyleID);
+		});
+		
+		it("should produce a correct citation", function () {
+			assertProducedCitationsAreEqual(createACitation([item1, item3]));
+		});
 
-	it("should produce a correct citation", function () {
-		assertProducedCitationsAreEqual(createACitation([item1, item3]));
-	});
-	
-	it("should produce a correct citation with a locator", function () {
-		let citation = createACitation(item1);
-		Object.assign(citation.citationItems[0], { locator: 1, label: "page" });
-		assertProducedCitationsAreEqual(citation);
-	});
-	
-	it("should produce a correct citation with a prefix", function () {
-		let citation = createACitation(item1);
-		Object.assign(citation.citationItems[0], { prefix: 'hello' });
-		assertProducedCitationsAreEqual(citation);
-	});
-	
-	it("should produce a correct citation with a suppressed author", function () {
-		let citation = createACitation(item1);
-		Object.assign(citation.citationItems[0], { 'suppress-author': true });
-		assertProducedCitationsAreEqual(citation);
-	});
-	
-	it("should perform disambiguation", function () {
-		assertProducedCitationsAreEqual(createACitation([item1, item2SameLastName]));
-	});
-	
-	it("should should produce ibid when appropriate", function () {
-		let citation1 = createACitation(item1);
-		let citation2 = createACitation(item1);
-		
-		citeprocRS.insertCluster(citation1);
-		citeprocRS.insertCluster(citation2);
-		citeprocRS.setClusterOrder([[citation1.citationID, 1], [citation2.citationID, 2]]);
-		let updateSummary = citeprocRS.getBatchedUpdates();
-		
-		let [_, citationInfo] = citeprocJS.processCitationCluster(citation1, [], []);
-		[_, citationInfo] = citeprocJS.processCitationCluster(citation2, [[citation1.citationID, 1]], []);
-		
-		for (let i = 0; i < 2; i++) {
-			let CRSCitation = updateSummary.clusters[i][1];
-			let CJSCitation = citationInfo[i][1];
-			Zotero.debug(`\nciteproc-js: ${CJSCitation}\nciteproc-rs: ${CRSCitation}`, 2);
-			assert.equal(CJSCitation, CRSCitation, `citations #${i} are equal`);
-		}
+		it("should produce a correct citation with a locator", function () {
+			let citation = createACitation(item1);
+			Object.assign(citation.citationItems[0], { locator: 1, label: "page" });
+			assertProducedCitationsAreEqual(citation);
+		});
 
-		let CRSBibl = Zotero.Cite.makeFormattedBibliography(citeprocRS, 'text');
-		let CJSBibl = Zotero.Cite.makeFormattedBibliography(citeprocJS, 'text');
-		assert.deepEqual(CJSBibl, CRSBibl, 'bibliographies are equal');
+		it("should produce a correct citation with a prefix", function () {
+			let citation = createACitation(item1);
+			Object.assign(citation.citationItems[0], { prefix: 'hello' });
+			assertProducedCitationsAreEqual(citation);
+		});
+
+		it("should produce a correct citation with a suppressed author", function () {
+			let citation = createACitation(item1);
+			Object.assign(citation.citationItems[0], { 'suppress-author': true });
+			assertProducedCitationsAreEqual(citation);
+		});
+
+		it("should should produce ibid when appropriate", function () {
+			let citation1 = createACitation(item1);
+			let citation2 = createACitation(item1);
+
+			citeprocRS.insertCluster(citation1);
+			citeprocRS.insertCluster(citation2);
+			citeprocRS.setClusterOrder([[citation1.citationID, 1], [citation2.citationID, 2]]);
+			let updateSummary = citeprocRS.getBatchedUpdates();
+
+			let [_, citationInfo] = citeprocJS.processCitationCluster(citation1, [], []);
+			[_, citationInfo] = citeprocJS.processCitationCluster(citation2, [[citation1.citationID, 1]], []);
+
+			for (let i = 0; i < 2; i++) {
+				let CRSCitation = updateSummary.clusters[i][1];
+				let CJSCitation = citationInfo[i][1];
+				Zotero.debug(`\nciteproc-js: ${CJSCitation}\nciteproc-rs: ${CRSCitation}`, 2);
+				assert.equal(CJSCitation, CRSCitation, `citations #${i} are equal`);
+			}
+
+			let CRSBibl = Zotero.Cite.makeFormattedBibliography(citeprocRS, 'text');
+			let CJSBibl = Zotero.Cite.makeFormattedBibliography(citeprocJS, 'text');
+			assert.deepEqual(CJSBibl, CRSBibl, 'bibliographies are equal');
+		});
 	});
-	
-	
+
+	// Chicago note-bibliography does not perform last name disambiguation
+	describe('with chicago-author-date.csl', function () {
+		before(function () {
+			style = Zotero.Styles.get(chicagoAuthorDateStyleID);
+		});
+		
+		it("should perform last name disambiguation", function () {
+			assertProducedCitationsAreEqual(createACitation([item1, item2SameLastName]));
+		});
+	});
 });
