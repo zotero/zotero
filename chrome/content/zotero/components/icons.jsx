@@ -98,8 +98,8 @@ i('BulletBlueEmpty', "chrome://zotero/skin/bullet_blue_empty.png");
 // TreeItems
 i('TreeitemArtwork', 'chrome://zotero/skin/treeitem-artwork.png');
 i('TreeitemAttachmentLink', 'chrome://zotero/skin/treeitem-attachment-link.png');
-i('TreeitemAttachmentPdf', 'chrome://zotero/skin/treeitem-attachment-pdf.png');
-i('TreeitemAttachmentPdfLink', 'chrome://zotero/skin/treeitem-attachment-pdf-link.png');
+i('TreeitemAttachmentPDF', 'chrome://zotero/skin/treeitem-attachment-pdf.png');
+i('TreeitemAttachmentPDFLink', 'chrome://zotero/skin/treeitem-attachment-pdf-link.png');
 i('TreeitemAttachmentSnapshot', 'chrome://zotero/skin/treeitem-attachment-snapshot.png');
 i('TreeitemAttachmentWebLink', 'chrome://zotero/skin/treeitem-attachment-web-link.png');
 i('TreeitemAudioRecording', 'chrome://zotero/skin/treeitem-audioRecording.png');

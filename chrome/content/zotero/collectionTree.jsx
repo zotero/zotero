@@ -299,6 +299,22 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		cell.appendChild(icon);
 		cell.appendChild(label);
 		div.appendChild(cell);
+		
+		// Accessibility
+		div.setAttribute('aria-level', depth+1);
+		if (!this.isContainerEmpty(index)) {
+			div.setAttribute('aria-expanded', this.isContainerOpen(index));
+		}
+		div.setAttribute('role', 'treeitem');
+		if (treeRow.isSeparator()) {
+			div.setAttribute('role', 'none');
+		}
+		let children = [];
+		for (let i = index + 1; ; i++) {
+			let row = this.getRow(i);
+			if (!row || treeRow.level >= row.level) break;
+			children.push(this.id + '-row-' + i);
+		}
 
 		// Drag-and-drop stuff
 		if (this.props.dragAndDrop) {
@@ -341,11 +357,12 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				toggleOpenState: this.toggleOpenState,
 				getRowString: this.getRowString.bind(this),
 				
-				onItemContextMenu: (e) => this.props.onContextMenu && this.props.onContextMenu(e),
+				onItemContextMenu: (...args) => this.props.onContextMenu && this.props.onContextMenu(...args),
 
 				onKeyDown: this.handleKeyDown,
 				onActivate: this.handleActivate,
 
+				role: 'tree',
 				label: Zotero.getString('pane.collections.title')
 			}
 		);
@@ -2152,12 +2169,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			return false;
 		}
 		
-		if (isLibrary) {
-			var collections = Zotero.Collections.getByLibrary(libraryID);
-		}
-		else if (isCollection) {
-			var collections = Zotero.Collections.getByParent(treeRow.ref.id);
-		}
+		var collections = treeRow.getChildren();
 		
 		if (isLibrary) {
 			var savedSearches = await Zotero.Searches.getAll(libraryID);

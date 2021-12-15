@@ -325,6 +325,7 @@ class VirtualizedTable extends React.Component {
 
 	static defaultProps = {
 		label: '',
+		role: 'grid',
 
 		showHeader: false,
 		// Array of column objects like the ones in itemTreeColumns.js
@@ -377,6 +378,7 @@ class VirtualizedTable extends React.Component {
 		alternatingRowColors: PropTypes.array,
 		// For screen-readers
 		label: PropTypes.string,
+		role: PropTypes.string,
 
 		showHeader: PropTypes.bool,
 		// Array of column objects like the ones in itemTreeColumns.js
@@ -421,6 +423,8 @@ class VirtualizedTable extends React.Component {
 
 		// Enter, double-clicking
 		onActivate: PropTypes.func,
+		
+		onFocus: PropTypes.func,
 
 		onItemContextMenu: PropTypes.func,
 	};
@@ -575,6 +579,13 @@ class VirtualizedTable extends React.Component {
 			}
 			break;
 		}
+		
+		if (e.key == 'ContextMenu' || (e.key == 'F10' && e.shiftKey)) {
+			let selectedElem = document.querySelector(`#${this._jsWindowID} [aria-selected=true]`);
+			let boundingRect = selectedElem.getBoundingClientRect();
+			this.props.onItemContextMenu(e, boundingRect.left + 50, boundingRect.bottom);
+			return;
+		}
 
 		if (this.props.getRowString && !(e.ctrlKey || e.metaKey) && e.key.length == 1) {
 			this._handleTyping(e.key);
@@ -669,9 +680,7 @@ class VirtualizedTable extends React.Component {
 			if (!modifierClick && !this.selection.isSelected(index)) {
 				this._onSelection(index, false, false);
 			}
-			if (this.props.onItemContextMenu) {
-				this.props.onItemContextMenu(e);
-			}
+			this.props.onItemContextMenu(e, e.clientX, e.clientY);
 		}
 		// All modifier clicks handled in mouseUp per mozilla itemtree convention
 		if (!modifierClick && !this.selection.isSelected(index)) {
@@ -768,7 +777,7 @@ class VirtualizedTable extends React.Component {
 		this.setState({ resizing: index });
 		
 		let onResizeData = {};
-		const columns = this._getColumns().filter(col => !col.hidden);
+		const columns = this._getVisibleColumns();
 		for (let i = 0; i < columns.length; i++) {
 			let elem = event.target.parentNode.parentNode.children[i];
 			onResizeData[columns[i].dataKey] = elem.getBoundingClientRect().width;
@@ -809,10 +818,14 @@ class VirtualizedTable extends React.Component {
 		return this._columns.getAsArray();
 	}
 	
+	_getVisibleColumns() {
+		return this._getColumns().filter(col => !col.hidden);
+	}
+	
 	_getResizeColumns(index) {
 		index = typeof index != "undefined" ? index : this.state.resizing;
 		let resizingColumn, aColumn, bColumn;
-		const columns = this._getColumns().filter(col => !col.hidden).sort((a, b) => a.ordinal - b.ordinal);
+		const columns = this._getVisibleColumns().sort((a, b) => a.ordinal - b.ordinal);
 		aColumn = resizingColumn = columns[index - 1];
 		bColumn = columns[index];
 		if (aColumn.fixedWidth) {
@@ -868,7 +881,7 @@ class VirtualizedTable extends React.Component {
 			// If inserting before the column that was being dragged
 			// there is nothing to do
 			if (this.state.draggingColumn != index) {
-				const visibleColumns = this._getColumns().filter(col => !col.hidden);
+				const visibleColumns = this._getVisibleColumns();
 				const dragColumn = this._getColumns().findIndex(
 					col => col == visibleColumns[this.state.draggingColumn]);
 				// Insert as final column (before end of list)
@@ -986,12 +999,20 @@ class VirtualizedTable extends React.Component {
 		}
 		node.style.height = this._rowHeight + 'px';
 		node.id = this.props.id + "-row-" + index;
-		node.setAttribute('role', 'row');
+		if (!node.hasAttribute('role')) {
+			node.setAttribute('role', 'row');
+		}
+		if (this.selection.isSelected(index)) {
+			node.setAttribute('aria-selected', true);
+		}
+		else {
+			node.removeAttribute('aria-selected');
+		}
 		return node;
 	}
 
 	_renderHeaderCells = () => {
-		return this._getColumns().filter(col => !col.hidden).map((column, index) => {
+		return this._getVisibleColumns().map((column, index) => {
 			let columnName = column.label;
 			if (column.label in Zotero.Intl.strings) {
 				columnName = this.props.intl.formatMessage({ id: column.label });
@@ -1062,17 +1083,25 @@ class VirtualizedTable extends React.Component {
 			onKeyDown: this._onKeyDown,
 			onDragOver: this._onDragOver,
 			onDrop: e => this.props.onDrop && this.props.onDrop(e),
+			onFocus: e => this.props.onFocus && this.props.onFocus(e),
 			className: cx(["virtualized-table", { resizing: this.state.resizing }]),
 			id: this.props.id,
 			ref: ref => this._topDiv = ref,
 			tabIndex: 0,
-			role: "table",
+			role: this.props.role,
 		};
 		if (this.props.hide) {
 			props.style = { display: "none" };
 		}
 		if (this.props.label) {
-			props.label = this.props.label;
+			props['aria-label'] = this.props.label;
+		}
+		if (this.props.columns.length && this.props.showHeader) {
+			props['aria-multiselectable'] = this.props.multiSelect;
+			props['aria-colcount'] = this._getVisibleColumns().length;
+		}
+		if (this.props.role == 'treegrid') {
+			props['aria-readonly'] = true;
 		}
 		if (this.selection.count > 0) {
 			const elem = this._jsWindow && this._jsWindow.getElementByIndex(this.selection.focused);

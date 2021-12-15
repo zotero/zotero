@@ -823,6 +823,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 	}
 	
+	handleFocus = (event) => {
+		if (Zotero.locked) {
+			return false;
+		}
+		if (this.selection.count == 0) {
+			this.selection.select(0);
+		}
+	}
+	
 	handleActivate = (event, indices) => {
 		// Ignore double-clicks in duplicates view on everything except attachments
 		let items = indices.map(index => this.getRow(index).ref);
@@ -934,7 +943,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 					renderItem: this._renderItem.bind(this),
 					hide: showMessage,
 					key: "virtualized-table",
-					label: Zotero.getString('pane.items.title'),
 
 					showHeader: true,
 					columns: this._getColumns(),
@@ -960,8 +968,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 					onDrop: e => this.props.dragAndDrop && this.onDrop(e, -1),
 					onKeyDown: this.handleKeyDown,
 					onActivate: this.handleActivate,
+					onFocus: this.handleFocus,
 
-					onItemContextMenu: e => this.props.onContextMenu(e),
+					onItemContextMenu: (...args) => this.props.onContextMenu(...args),
+					
+					role: 'treegrid',
+					label: Zotero.getString('pane.items.title'),
 				}
 			);
 		}
@@ -2531,18 +2543,44 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		const item = this.getRow(index).ref;
 		let retracted = "";
+		let retractedAriaLabel = "";
 		if (Zotero.Retractions.isRetracted(item)) {
 			retracted = getDOMElement('IconCross');
 			retracted.classList.add("retracted");
+			retractedAriaLabel = Zotero.getString('retraction.banner');
 		}
 
-		let tags = item.getColoredTags().map(x => this._getTagSwatch(x.tag, x.color));
+		let tagAriaLabel = '';
+		let tagSpans = '';
+		let coloredTags = item.getColoredTags();
+		if (coloredTags.length) {
+			tagSpans = coloredTags.map(x => this._getTagSwatch(x.tag, x.color));
+			tagAriaLabel = tagSpans.length == 1 ? Zotero.getString('searchConditions.tag') : Zotero.getString('itemFields.tags');
+			tagAriaLabel += ' ' + coloredTags.map(x => x.tag).join(', ') + '.';
+		}
+
+		let itemTypeAriaLabel;
+		try {
+			var itemType = Zotero.ItemTypes.getName(item.itemTypeID);
+			itemTypeAriaLabel = Zotero.getString(`itemTypes.${itemType}`) + '.';
+		}
+		catch (e) {
+			Zotero.debug('Error attempting to get a localized item type label for ' + itemType, 1);
+			Zotero.debug(e, 1);
+		}
+		
+		let textWithFullStop = data;
+		if (!textWithFullStop.match(/\.$/)) {
+			textWithFullStop += '.';
+		}
+		let textSpanAriaLabel = [textWithFullStop, itemTypeAriaLabel, tagAriaLabel, retractedAriaLabel].join(' ');
 
 		let textSpan = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
 		textSpan.className = "cell-text";
 		textSpan.innerText = data;
+		textSpan.setAttribute('aria-label', textSpanAriaLabel);
 
-		span.append(twisty, icon, retracted, ...tags, textSpan);
+		span.append(twisty, icon, retracted, ...tagSpans, textSpan);
 
 		// Set depth indent
 		const depth = this.getLevel(index);
@@ -2580,6 +2618,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 					icon = getDOMElement('IconBulletBlueEmpty');
 					icon.classList.add('cell-icon');
 				}
+
+				if (icon.setAttribute) {
+					icon.setAttribute('aria-label', Zotero.getString('pane.item.attachments.has') + '.');
+				}
 				span.append(icon);
 
 				item.getBestAttachmentState()
@@ -2607,8 +2649,21 @@ var ItemTree = class ItemTree extends LibraryTree {
 		return span;
 	}
 
-	_renderCell() {
-		return renderCell.apply(this, arguments);
+	_renderCell(index, data, column) {
+		if (column.primary) {
+			return this._renderPrimaryCell(index, data, column);
+		}
+		else if (column.dataKey === 'hasAttachment') {
+			return this._renderHasAttachmentCell(index, data, column);
+		}
+		let cell = renderCell.apply(this, arguments);
+		if (column.dataKey === 'numNotes' && data) {
+			cell.setAttribute('aria-label', Zotero.getString('pane.item.notes.count', data, data) + '.');
+		}
+		else if (column.dataKey === 'itemType') {
+			cell.setAttribute('aria-hidden', true);
+		}
+		return cell;
 	}
 
 	_renderItem(index, selection, oldDiv=null, columns) {
@@ -2640,16 +2695,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		for (let column of columns) {
 			if (column.hidden) continue;
-
-			if (column.primary) {
-				div.appendChild(this._renderPrimaryCell(index, rowData[column.dataKey], column));
-			}
-			else if (column.dataKey === 'hasAttachment') {
-				div.appendChild(this._renderHasAttachmentCell(index, rowData[column.dataKey], column));
-			}
-			else {
-				div.appendChild(this._renderCell(index, rowData[column.dataKey], column));
-			}
+			div.appendChild(this._renderCell(index, rowData[column.dataKey], column));
 		}
 
 		if (!oldDiv) {
@@ -2668,6 +2714,16 @@ var ItemTree = class ItemTree extends LibraryTree {
 			div.addEventListener('mouseup', this._handleRowMouseUpDown, { passive: true });
 		}
 
+		// Accessibility
+		div.setAttribute('role', 'row');
+		div.setAttribute('aria-level', this.getLevel(index) + 1);
+		if (!this.isContainerEmpty(index)) {
+			div.setAttribute('aria-expanded', this.isContainerOpen(index));
+		}
+		if (!rowData.contextRow) {
+			div.setAttribute('aria-disabled', true);
+		}
+
 		return div;
 	};
 	
@@ -2679,7 +2735,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	_handleSelectionChange = (selection, shouldDebounce) => {
-		// Update aria-activedescendant on the tree
 		if (this.collectionTreeRow.isDuplicates() && selection.count == 1 && this.duplicateMouseSelection) {
 			var itemID = this.getRow(selection.focused).ref.id;
 			var setItemIDs = this.collectionTreeRow.ref.getSetItemsByItemID(itemID);
@@ -2691,6 +2746,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 				this.tree.invalidateRow(this._rowMap[id]);
 			}
 		}
+		// Update aria-activedescendant on the tree
+		this.forceUpdate();
 		this.duplicateMouseSelection = false;
 		if (shouldDebounce) {
 			this._onSelectionChangeDebounced();
@@ -3532,10 +3589,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 			
 			if (item.attachmentContentType == 'application/pdf' && item.isFileAttachment()) {
 				if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-					itemType += 'PdfLink';
+					itemType += 'PDFLink';
 				}
 				else {
-					itemType += 'Pdf';
+					itemType += 'PDF';
 				}
 			}
 			else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
