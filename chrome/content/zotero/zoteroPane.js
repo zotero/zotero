@@ -1605,18 +1605,28 @@ var ZoteroPane = new function()
 	
 	/**
 	 * Update the <command> elements that control the shortcut keys and the enabled state of the
-	 * "Copy Citation"/"Copy Bibliography"/"Copy as" menu options. When disabled, the shortcuts are
+	 * "Copy Citation"/"Copy Bibliography"/"Copy as"/"Copy Note" menu options. When disabled, the shortcuts are
 	 * still caught in handleKeyPress so that we can show an alert about not having references selected.
 	 */
 	this.updateQuickCopyCommands = function (selectedItems) {
-		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
-		format = Zotero.QuickCopy.unserializeSetting(format);
-		if (format.mode == 'bibliography') {
-			var canCopy = selectedItems.some(item => item.isRegularItem());
+		let canCopy = false;
+		// If all items are notes/attachments and at least one note is not empty
+		if (selectedItems.every(item => item.isNote() || item.isAttachment())) {
+			if (selectedItems.some(item => item.note)) {
+				canCopy = true;
+			}
 		}
 		else {
-			var canCopy = true;
+			let format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
+			format = Zotero.QuickCopy.unserializeSetting(format);
+			if (format.mode == 'bibliography') {
+				canCopy = selectedItems.some(item => item.isRegularItem());
+			}
+			else {
+				canCopy = true;
+			}
 		}
+		
 		document.getElementById('cmd_zotero_copyCitation').setAttribute('disabled', !canCopy);
 		document.getElementById('cmd_zotero_copyBibliography').setAttribute('disabled', !canCopy);
 	};
@@ -2075,7 +2085,10 @@ var ZoteroPane = new function()
 	this.copySelectedItemsToClipboard = function (asCitations) {
 		var items = [];
 		if (Zotero_Tabs.selectedID == 'zotero-pane') {
-			items = this.getSelectedItems();
+			let itemIDs = this.getSelectedItems(true);
+			// Get selected item IDs in the item tree order
+			itemIDs = this.getSortedItems(true).filter(id => itemIDs.includes(id));
+			items = Zotero.Items.get(itemIDs);
 		}
 		else {
 			var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
@@ -2092,6 +2105,9 @@ var ZoteroPane = new function()
 		}
 		
 		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
+		if (items.every(item => item.isNote() || item.isAttachment())) {
+			format = Zotero.QuickCopy.getNoteFormat();
+		}
 		format = Zotero.QuickCopy.unserializeSetting(format);
 		
 		// In bibliography mode, remove notes and attachments
@@ -2965,6 +2981,12 @@ var ZoteroPane = new function()
 			
 			disable.push(m.showInLibrary, m.duplicateItem, m.removeItems,
 				m.moveToTrash, m.deleteFromLibrary, m.exportItems, m.createBib, m.loadReport);
+		}
+
+		if (!disable.includes(m.exportItems)
+			&& items.every(item => item.isNote() || item.isAttachment())
+			&& !items.some(item => item.note)) {
+			disable.push(m.exportItems);
 		}
 		
 		if ((!collectionTreeRow.editable || collectionTreeRow.isPublications()) && !collectionTreeRow.isFeed()) {

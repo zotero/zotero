@@ -1891,6 +1891,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		event.dataTransfer.setDragImage(this._dragImageContainer, 0, 0);
 
 		var itemIDs = this.getSelectedItems(true);
+		// Get selected item IDs in the item tree order
+		itemIDs = this.getSortedItems(true).filter(id => itemIDs.includes(id));
 		event.dataTransfer.setData("zotero/item", itemIDs);
 
 		var items = Zotero.Items.get(itemIDs);
@@ -1946,22 +1948,53 @@ var ItemTree = class ItemTree extends LibraryTree {
 		// Get Quick Copy format for current URL (set via /ping from connector)
 		var format = Zotero.QuickCopy.getFormatFromURL(Zotero.QuickCopy.lastActiveURL);
 
-		Zotero.debug("Dragging with format " + format);
-
-		var exportCallback = function(obj, worked) {
-			if (!worked) {
-				Zotero.log(Zotero.getString("fileInterface.exportError"), 'warning');
-				return;
-			}
-
-			var text = obj.string.replace(/\r\n/g, "\n");
-			event.dataTransfer.setData("text/plain", text);
+		// If all items are notes, use one of the note export translators
+		if (items.every(item => item.isNote())) {
+			format = Zotero.QuickCopy.getNoteFormat();
 		}
 
+		Zotero.debug("Dragging with format " + format);
 		format = Zotero.QuickCopy.unserializeSetting(format);
 		try {
 			if (format.mode == 'export') {
-				Zotero.QuickCopy.getContentFromItems(items, format, exportCallback);
+				// If exporting with virtual "Markdown + Rich Text" translator, call Note Markdown
+				// and Note HTML translators instead
+				if (format.id === Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
+					let markdownFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN };
+					let htmlFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_HTML };
+					Zotero.QuickCopy.getContentFromItems(items, markdownFormat, (obj, worked) => {
+						if (!worked) {
+							Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
+							return;
+						}
+						Zotero.QuickCopy.getContentFromItems(items, htmlFormat, (obj2, worked) => {
+							if (!worked) {
+								Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
+								return;
+							}
+							event.dataTransfer.setData('text/plain', obj.string.replace(/\r\n/g, '\n'));
+							event.dataTransfer.setData('text/html', obj2.string.replace(/\r\n/g, '\n'));
+						});
+					});
+				}
+				else {
+					Zotero.QuickCopy.getContentFromItems(items, format, (obj, worked) => {
+						if (!worked) {
+							Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
+							return;
+						}
+						var text = obj.string.replace(/\r\n/g, '\n');
+						// For Note HTML translator use body content only
+						if (format.id == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
+							// Use body content only
+							let parser = Cc['@mozilla.org/xmlextras/domparser;1']
+								.createInstance(Ci.nsIDOMParser);
+							let doc = parser.parseFromString(text, 'text/html');
+							text = doc.body.innerHTML;
+						}
+						event.dataTransfer.setData('text/plain', text);
+					});
+				}
 			}
 			else if (format.mode == 'bibliography') {
 				var content = Zotero.QuickCopy.getContentFromItems(items, format, null, event.shiftKey);

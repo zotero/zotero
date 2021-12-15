@@ -49,9 +49,46 @@ var Zotero_File_Exporter = function() {
 Zotero_File_Exporter.prototype.save = async function () {
 	var translation = new Zotero.Translate.Export();
 	var translators = await translation.getTranslators();
+
+	if (!this.items) {
+		return;
+	}
+
+	let exportingNotes = this.items.every(item => item.isNote() || item.isAttachment());
+	// Keep only note export and Zotero RDF translators, if all items are notes or attachments
+	if (exportingNotes) {
+		translators = translators.filter((translator) => {
+			return (
+				translator.translatorID === '14763d24-8ba0-45df-8f52-b8d1108e7ac9'
+				|| translator.configOptions && translator.configOptions.noteTranslator
+			);
+		});
+	}
+	// Otherwise exclude note export translators
+	else {
+		translators = translators.filter(t => !t.configOptions || !t.configOptions.noteTranslator);
+	}
+
+	translators.sort((a, b) => a.label.localeCompare(b.label));
+	
+	// Remove "Note" prefix from Note Markdown and Note HTML translators
+	let markdownTranslator = translators.find(
+		t => t.translatorID == Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN
+	);
+	if (markdownTranslator) {
+		markdownTranslator.label = 'Markdown';
+		// Move Note Markdown translator to the top
+		translators.unshift(...translators.splice(translators.indexOf(markdownTranslator), 1));
+	}
+	let htmlTranslator = translators.find(
+		t => t.translatorID == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML
+	);
+	if (htmlTranslator) {
+		htmlTranslator.label = 'HTML';
+	}
 	
 	// present options dialog
-	var io = {translators:translators}
+	var io = { translators, exportingNotes };
 	window.openDialog("chrome://zotero/content/exportOptions.xul",
 		"_blank", "chrome,modal,centerscreen,resizable=no", io);
 	if(!io.selectedTranslator) {
@@ -89,33 +126,34 @@ Zotero_File_Exporter.prototype.save = async function () {
 		translation.setLibraryID(this.libraryID);
 	}
 	
+	async function _exportDone(obj, worked) {
+		// Close the items exported indicator
+		Zotero_File_Interface.Progress.close();
+		
+		if (!worked) {
+			Zotero.alert(
+				null,
+				Zotero.getString('general.error'),
+				Zotero.getString('fileInterface.exportError')
+			);
+			Zotero_File_Interface.Progress.close();
+			return;
+		}
+	}
+
 	translation.setLocation(Zotero.File.pathToFile(fp.file));
 	translation.setTranslator(io.selectedTranslator);
 	translation.setDisplayOptions(io.displayOptions);
 	translation.setHandler("itemDone", function () {
 		Zotero.updateZoteroPaneProgressMeter(translation.getProgress());
 	});
-	translation.setHandler("done", this._exportDone);
+	translation.setHandler("done", _exportDone);
 	Zotero_File_Interface.Progress.show(
 		Zotero.getString("fileInterface.itemsExported")
 	);
 	translation.translate()
 };
-	
-/*
- * Closes the items exported indicator
- */
-Zotero_File_Exporter.prototype._exportDone = function(obj, worked) {
-	Zotero_File_Interface.Progress.close();
-	
-	if(!worked) {
-		Zotero.alert(
-			null,
-			Zotero.getString('general.error'),
-			Zotero.getString("fileInterface.exportError")
-		);
-	}
-}
+
 
 /****Zotero_File_Interface****
  **
@@ -175,36 +213,91 @@ var Zotero_File_Interface = new function() {
 	 */
 	function exportItems() {
 		var exporter = new Zotero_File_Exporter();
-		
-		exporter.items = ZoteroPane_Local.getSelectedItems();
+		let itemIDs = ZoteroPane_Local.getSelectedItems(true);
+		// Get selected item IDs in the item tree order
+		itemIDs = ZoteroPane_Local.getSortedItems(true).filter(id => itemIDs.includes(id));
+		exporter.items = Zotero.Items.get(itemIDs);
 		if(!exporter.items || !exporter.items.length) throw("no items currently selected");
 		
 		exporter.save();
 	}
 	
+	
 	/*
 	 * exports items to clipboard
 	 */
 	function exportItemsToClipboard(items, translatorID) {
-		var translation = new Zotero.Translate.Export();
-		translation.setItems(items);
-		translation.setTranslator(translatorID);
-		translation.setHandler("done", _copyToClipboard);
-		translation.translate();
-	}
-	
-	/*
-	 * handler when done exporting items to clipboard
-	 */
-	function _copyToClipboard(obj, worked) {
-		if(!worked) {
-			Zotero.alert(
-				null, Zotero.getString('general.error'), Zotero.getString("fileInterface.exportError")
-			);
-		} else {
-			Components.classes["@mozilla.org/widget/clipboardhelper;1"]
-                      .getService(Components.interfaces.nsIClipboardHelper)
-                      .copyString(obj.string.replace(/\r\n/g, "\n"));
+		function _translate(items, translatorID, callback) {
+			let translation = new Zotero.Translate.Export();
+			translation.setItems(items.slice());
+			translation.setTranslator(translatorID);
+			translation.setHandler("done", callback);
+			translation.translate();
+		}
+		
+		// If translating with virtual "Markdown + Rich Text" translator, use Note Markdown and
+		// Note HTML instead
+		if (translatorID == Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
+			translatorID = Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN;
+			_translate(items, translatorID, (obj, worked) => {
+				if (!worked) {
+					Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
+					return;
+				}
+				translatorID = Zotero.Translators.TRANSLATOR_ID_NOTE_HTML;
+				_translate(items, translatorID, (obj2, worked) => {
+					if (!worked) {
+						Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
+						return;
+					}
+					
+					let text = obj.string.replace(/\r\n/g, '\n');
+					let html = obj2.string.replace(/\r\n/g, '\n');
+
+					// copy to clipboard
+					let transferable = Components.classes['@mozilla.org/widget/transferable;1']
+						.createInstance(Components.interfaces.nsITransferable);
+					let clipboardService = Components.classes['@mozilla.org/widget/clipboard;1']
+						.getService(Components.interfaces.nsIClipboard);
+
+					// Add Text
+					let str = Components.classes['@mozilla.org/supports-string;1']
+						.createInstance(Components.interfaces.nsISupportsString);
+					str.data = text;
+					transferable.addDataFlavor('text/unicode');
+					transferable.setTransferData('text/unicode', str, text.length * 2);
+
+					// Add HTML
+					str = Components.classes['@mozilla.org/supports-string;1']
+						.createInstance(Components.interfaces.nsISupportsString);
+					str.data = html;
+					transferable.addDataFlavor('text/html');
+					transferable.setTransferData('text/html', str, html.length * 2);
+
+					clipboardService.setData(
+						transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard
+					);
+				});
+			});
+		}
+		else {
+			_translate(items, translatorID, (obj, worked) => {
+				if (!worked) {
+					Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
+					return;
+				}
+				let text = obj.string;
+				// For Note HTML translator use body content only
+				if (translatorID == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
+					let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
+						.createInstance(Components.interfaces.nsIDOMParser);
+					let doc = parser.parseFromString(text, 'text/html');
+					text = doc.body.innerHTML;
+				}
+				Components.classes['@mozilla.org/widget/clipboardhelper;1']
+					.getService(Components.interfaces.nsIClipboardHelper)
+					.copyString(text.replace(/\r\n/g, '\n'));
+			});
 		}
 	}
 	

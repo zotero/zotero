@@ -34,6 +34,10 @@ Zotero.Translators = new function() {
 	var _initialized = false;
 	var _initializationDeferred = false;
 	
+	this.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT = 'a45eca67-1ee8-45e5-b4c6-23fb8a852873';
+	this.TRANSLATOR_ID_NOTE_MARKDOWN = '1412e9e2-51e1-42ec-aa35-e036a895534b';
+	this.TRANSLATOR_ID_NOTE_HTML = '897a81c2-9f60-4bec-ae6b-85a5030b8be5';
+	
 	/**
 	 * Initializes translator cache, loading all translator metadata into memory
 	 *

@@ -35,6 +35,7 @@ Zotero_Preferences.Export = {
 	init: Zotero.Promise.coroutine(function* () {
 		this.updateQuickCopyInstructions();
 		yield this.populateQuickCopyList();
+		yield this.populateNoteQuickCopyList();
 		
 		var charsetMenu = document.getElementById("zotero-import-charsetMenu");
 		var charsetMap = Zotero_Charset_Menu.populate(charsetMenu, false);
@@ -51,6 +52,8 @@ Zotero_Preferences.Export = {
 			var collation = Zotero.getLocaleCollation();
 			return collation.compareString(1, a.label, b.label);
 		});
+		// Exclude note export translators
+		translators = translators.filter(x => !x.configOptions || !x.configOptions.noteTranslator);
 		return translators;
 	},
 	
@@ -80,6 +83,86 @@ Zotero_Preferences.Export = {
 		
 		yield this.refreshQuickCopySiteList();
 	}),
+	
+	
+	/*
+	 * Builds the note Quick Copy drop-down from the current global pref
+	 */
+	populateNoteQuickCopyList: async function () {
+		// Initialize default format drop-down
+		var format = Zotero.Prefs.get("export.noteQuickCopy.setting");
+		format = Zotero.QuickCopy.unserializeSetting(format);
+		var menulist = document.getElementById("zotero-noteQuickCopy-menu");
+		menulist.setAttribute('preference', "pref-noteQuickCopy-setting");
+		
+		if (!format) {
+			format = menulist.value;
+		}
+		
+		format = Zotero.QuickCopy.unserializeSetting(format);
+		
+		menulist.selectedItem = null;
+		menulist.removeAllItems();
+		
+		var popup = document.createElement('menupopup');
+		menulist.appendChild(popup);
+
+		// add export formats to list
+		var translation = new Zotero.Translate("export");
+		var translators = await translation.getTranslators();
+		
+		translators.sort((a, b) => a.label.localeCompare(b.label));
+		
+		// Remove "Note" prefix from Note HTML translator
+		let htmlTranslator = translators.find(
+			x => x.translatorID == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML
+		);
+		if (htmlTranslator) {
+			htmlTranslator.label = 'HTML';
+		}
+		
+		// Make sure virtual "Markdown + Rich Text" translator doesn't actually exist
+		translators = translators.filter(
+			x => x.translatorID != Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT
+		);
+
+		let markdownTranslatorIdx = translators.findIndex(
+			x => x.translatorID == Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN
+		);
+		// Make sure we actually have both translators
+		if (markdownTranslatorIdx != -1 && htmlTranslator) {
+			// Exclude standalone Note Markdown translator
+			translators.splice(markdownTranslatorIdx, 1);
+			// Add virtual "Markdown + Rich Text" translator to the top
+			translators.unshift({
+				translatorID: Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT,
+				label: 'Markdown + ' + Zotero.getString('general.richText'),
+				configOptions: {
+					noteTranslator: true
+				}
+			});
+		}
+		
+		translators.forEach(function (translator) {
+			// Allow only note export translators
+			if (!translator.configOptions || !translator.configOptions.noteTranslator) {
+				return;
+			}
+
+			var val = JSON.stringify({ mode: 'export', id: translator.translatorID });
+			var itemNode = document.createElement('menuitem');
+			itemNode.setAttribute('value', val);
+			itemNode.setAttribute('label', translator.label);
+			// itemNode.setAttribute('oncommand', 'Zotero_Preferences.Export.updateQuickCopyUI()');
+			popup.appendChild(itemNode);
+
+			if (format.mode == 'export' && format.id == translator.translatorID) {
+				menulist.selectedItem = itemNode;
+			}
+		});
+
+		menulist.click();
+	},
 	
 	
 	/*

@@ -49,8 +49,7 @@ var Zotero_File_Interface_Export = new function() {
 		
 		var addedOptions = new Object();
 		
-		var translators = window.arguments[0].translators;
-		translators.sort(function(a, b) { return a.label.localeCompare(b.label) });
+		var { translators, exportingNotes } = window.arguments[0];
 		
 		// get format popup
 		var formatPopup = document.getElementById("format-popup");
@@ -58,7 +57,9 @@ var Zotero_File_Interface_Export = new function() {
 		var optionsBox = document.getElementById("translator-options");
 		var charsetBox = document.getElementById("charset-box");
 		
-		var selectedTranslator = Zotero.Prefs.get("export.lastTranslator");
+		var selectedTranslator = Zotero.Prefs.get(
+			exportingNotes ? "export.lastNoteTranslator" : "export.lastTranslator"
+		);
 		
 		// add styles to format popup
 		for(var i in translators) {
@@ -72,7 +73,12 @@ var Zotero_File_Interface_Export = new function() {
 												// presented to the user
 					// get readable name for option
 					try {
-						var optionLabel = Zotero.getString("exportOptions."+option);
+						if (option == 'includeAppLinks') {
+							var optionLabel = Zotero.getString("exportOptions." + option, Zotero.appName);
+						}
+						else {
+							var optionLabel = Zotero.getString("exportOptions." + option);
+						}
 					} catch(e) {
 						var optionLabel = option;
 					}
@@ -121,7 +127,9 @@ var Zotero_File_Interface_Export = new function() {
 			_charsets = Zotero_Charset_Menu.populate(document.getElementById(OPTION_PREFIX+"exportCharset"), true);
 		}
 		
-		this.updateOptions(Zotero.Prefs.get("export.translatorSettings"));
+		this.updateOptions(Zotero.Prefs.get(
+			exportingNotes ? "export.noteTranslatorSettings" : "export.translatorSettings"
+		));
 	}
 	
 	/*
@@ -224,7 +232,10 @@ var Zotero_File_Interface_Export = new function() {
 		window.arguments[0].selectedTranslator = window.arguments[0].translators[index];
 		
 		// save selected translator
-		Zotero.Prefs.set("export.lastTranslator", window.arguments[0].translators[index].translatorID);
+		Zotero.Prefs.set(
+			window.arguments[0].exportingNotes ? "export.lastNoteTranslator" : "export.lastTranslator",
+			window.arguments[0].translators[index].translatorID
+		);
 		
 		// set options on selected translator and generate optionString
 		var optionsAvailable = window.arguments[0].selectedTranslator.displayOptions;
@@ -253,7 +264,10 @@ var Zotero_File_Interface_Export = new function() {
 		
 		// save options
 		var optionString = JSON.stringify(displayOptions);
-		Zotero.Prefs.set("export.translatorSettings", optionString);
+		Zotero.Prefs.set(
+			window.arguments[0].exportingNotes ? "export.noteTranslatorSettings" : "export.translatorSettings",
+			optionString
+		);
 	}
 	
 	/*

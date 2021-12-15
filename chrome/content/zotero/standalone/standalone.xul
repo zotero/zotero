@@ -210,6 +210,11 @@
 									key="key_copyBibliography"
 									command="cmd_zotero_copyBibliography"
 									hidden="true"/>
+							<menuitem id="menu_copyNote"
+									label="&copyNoteCmd.label;"
+									command="cmd_zotero_copyBibliography"
+									key="key_copyBibliography"
+									hidden="true"/>
 							<menuitem id="menu_paste"/>
 							<menuitem id="menu_delete"/>
 							<menuseparator class="menu-type-library"/>
