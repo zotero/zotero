@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Najstaršie záznamy ako prvé">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Predvolené RSS správy">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
+<!ENTITY zotero.preferences.openurl.choose "Zvoľte resolver...">
 <!ENTITY zotero.preferences.openurl.custom "Vlastné...">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Verzia:">

@@ -2,6 +2,9 @@
   "general_more": {
     "message": "更多…"
   },
+  "general_moreInfo": {
+    "message": "更多信息..."
+  },
   "general_done": {
     "message": "完成"
   },
@@ -16,6 +19,9 @@
   },
   "general_pleaseWait": {
     "message": "请稍等……"
+  },
+  "general_copyToClipboard": {
+    "message": "复制到剪贴板"
   },
   "progressWindow_savingTo": {
     "message": "保存到"
@@ -56,6 +62,15 @@
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "启用保存到在线文献库"
   },
+  "reports_report_submitted": {
+    "message": "您的错误报告已提交\n\n报告 ID: $1\n\n请在Zetero论坛发布问题，问题请包含该错误报告ID，问题描述，以及任何比较的步骤以重现该问题。\n\n未在论坛提交的错误报告将不会处理。"
+  },
+  "reports_debug_output_submitted": {
+    "message": "你的debug输出已经提交。Debug ID是 $1。"
+  },
+  "reports_submission_failed": {
+    "message": "提交报告时产生错误\n\n$1\n\n请检查您的网络连接。如果错误重复出现，请在Zotero论坛发帖。"
+  },
   "integration_error_clientUpgrade": {
     "message": "基于 Web 的引用请求 $1 或稍后。"
   },
@@ -76,6 +91,18 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "当在 Google Docs 中直接编辑 Microsoft Word .docx 文件时，$1整合无法使用。选择文件 → 储存为 Google Docs 来允许该功能。<br/><br/>如果你想把有$1引用的 Word 文档转换为Google Docs 时，请查阅<a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">在文档编辑器间移动文档</a>。"
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "显示未链接的 $1 引文"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "你正在编辑的引文已经从 $1.断开链接"
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "重新链接引文"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "该引文已  <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">从 $1断开</a>。您需要重新链接后，引文方可在参考文献部分更新或出现。"
   },
   "general_saveTo": {
     "message": "保存到 $1"

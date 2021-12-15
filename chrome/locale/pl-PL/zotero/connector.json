@@ -62,8 +62,14 @@
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Włącz zapisywanie do zdalnej biblioteki"
   },
+  "reports_report_submitted": {
+    "message": "Twój raport o błędzie został przesłany.\n\nID raportu: $1\n\nProszę wyślij wiadomość na Forum Zotero z tym ID raportu, opisem problemu i krokami niezbędnymi do powtórzenia błędu.\n\nRaporty błędów nie są weryfikowane, jeśli nie są przesłane na forum."
+  },
   "reports_debug_output_submitted": {
     "message": "Informacja debugowania została wysłana.\n\nIdentyfikator informacji to $1."
+  },
+  "reports_submission_failed": {
+    "message": "Błąd podczas przesyłania raportu.\n\n$1\n\nProszę, sprawdź swoje połączenie internetowe. Jeśli problem wciąż istnieje, wyślij wiadomość na Forum Zotero."
   },
   "integration_error_clientUpgrade": {
     "message": "Cytowanie oparte na stronach internetowych wymaga $1 lub nowszego."
