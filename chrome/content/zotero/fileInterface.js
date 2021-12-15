@@ -72,13 +72,17 @@ Zotero_File_Exporter.prototype.save = async function () {
 	translators.sort((a, b) => a.label.localeCompare(b.label));
 	
 	// Remove "Note" prefix from Note Markdown and Note HTML translators
-	let markdownTranslator = translators.find(t => t.translatorID == '154c2785-ec83-4c27-8a8a-d27b3a2eded1');
+	let markdownTranslator = translators.find(
+		t => t.translatorID == Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN
+	);
 	if (markdownTranslator) {
 		markdownTranslator.label = 'Markdown';
 		// Move Note Markdown translator to the top
 		translators.unshift(...translators.splice(translators.indexOf(markdownTranslator), 1));
 	}
-	let htmlTranslator = translators.find(t => t.translatorID == '897a81c2-9f60-4bec-ae6b-85a5030b8be5');
+	let htmlTranslator = translators.find(
+		t => t.translatorID == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML
+	);
 	if (htmlTranslator) {
 		htmlTranslator.label = 'HTML';
 	}
@@ -233,14 +237,14 @@ var Zotero_File_Interface = new function() {
 		
 		// If translating with virtual "Markdown + Rich Text" translator, use Note Markdown and
 		// Note HTML instead
-		if (translatorID == 'a45eca67-1ee8-45e5-b4c6-23fb8a852873') {
-			translatorID = '154c2785-ec83-4c27-8a8a-d27b3a2eded1';
+		if (translatorID == Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
+			translatorID = Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN;
 			_translate(items, translatorID, (obj, worked) => {
 				if (!worked) {
 					Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
 					return;
 				}
-				translatorID = '897a81c2-9f60-4bec-ae6b-85a5030b8be5';
+				translatorID = Zotero.Translators.TRANSLATOR_ID_NOTE_HTML;
 				_translate(items, translatorID, (obj2, worked) => {
 					if (!worked) {
 						Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
@@ -284,7 +288,7 @@ var Zotero_File_Interface = new function() {
 				}
 				let text = obj.string;
 				// For Note HTML translator use body content only
-				if (translatorID == '897a81c2-9f60-4bec-ae6b-85a5030b8be5') {
+				if (translatorID == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
 					let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
 						.createInstance(Components.interfaces.nsIDOMParser);
 					let doc = parser.parseFromString(text, 'text/html');

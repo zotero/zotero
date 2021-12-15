@@ -1959,9 +1959,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			if (format.mode == 'export') {
 				// If exporting with virtual "Markdown + Rich Text" translator, call Note Markdown
 				// and Note HTML translators instead
-				if (format.id === 'a45eca67-1ee8-45e5-b4c6-23fb8a852873') {
-					let markdownFormat = { mode: 'export', id: '154c2785-ec83-4c27-8a8a-d27b3a2eded1' };
-					let htmlFormat = { mode: 'export', id: '897a81c2-9f60-4bec-ae6b-85a5030b8be5' };
+				if (format.id === Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
+					let markdownFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN };
+					let htmlFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_HTML };
 					Zotero.QuickCopy.getContentFromItems(items, markdownFormat, (obj, worked) => {
 						if (!worked) {
 							Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
@@ -1985,7 +1985,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 						}
 						var text = obj.string.replace(/\r\n/g, '\n');
 						// For Note HTML translator use body content only
-						if (format.id == '897a81c2-9f60-4bec-ae6b-85a5030b8be5') {
+						if (format.id == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
 							// Use body content only
 							let parser = Cc['@mozilla.org/xmlextras/domparser;1']
 								.createInstance(Ci.nsIDOMParser);
