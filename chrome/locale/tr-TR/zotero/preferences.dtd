@@ -104,7 +104,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Bu seçenek devre dışı bırakıldığında, Zotero, bilimsel dergi, magazin ve gazete makalelerine olan alıntılara URL'leri, yalnızca bir sayfa aralığı belirtilmediği halde ekleyecektir.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Çabuk Kopyala">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Varsayılan Biçim:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "HTML olarak kopyala">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Siteye Özgü Ayarlar:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Etki alanı/Yol">

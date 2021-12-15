@@ -36,6 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "Копіювати цитату">
 <!ENTITY copyBibliographyCmd.label "Копіювати список літератури">
+<!ENTITY copyNoteCmd.label "Copy Note">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Переключити напрямок сторінки">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">

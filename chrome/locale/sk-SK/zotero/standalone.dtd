@@ -36,6 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "Kopírovať citáciu">
 <!ENTITY copyBibliographyCmd.label "Kopírovať bibliografiu">
+<!ENTITY copyNoteCmd.label "Copy Note">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Prepnúť smer stránky">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">

@@ -36,6 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "复制引文">
 <!ENTITY copyBibliographyCmd.label "复制引文目录">
+<!ENTITY copyNoteCmd.label "Copy Note">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "切换页面方向">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">

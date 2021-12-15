@@ -36,6 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "Kopijuoti citatą">
 <!ENTITY copyBibliographyCmd.label "Kopijuoti bibliografiją">
+<!ENTITY copyNoteCmd.label "Copy Note">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Keisti puslapio kryptį">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "p">

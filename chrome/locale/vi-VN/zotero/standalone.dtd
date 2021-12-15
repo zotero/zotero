@@ -36,6 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "Sao chép trích dẫn">
 <!ENTITY copyBibliographyCmd.label "Sao chép danh mục tài liệu tham khảo">
+<!ENTITY copyNoteCmd.label "Copy Note">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Đổi hướng trang in">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">

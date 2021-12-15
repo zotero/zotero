@@ -36,6 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "สำเนาการอ้างอิง">
 <!ENTITY copyBibliographyCmd.label "สำเนาบรรณานุกรม">
+<!ENTITY copyNoteCmd.label "Copy Note">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "สลับทิศทางของหน้า">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">

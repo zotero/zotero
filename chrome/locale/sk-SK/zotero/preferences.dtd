@@ -104,7 +104,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Keď táto voľba nie je vybraná, Zotero vloží URL adresy pri citovaní článkov (z odborných a populárnych časopisov alebo novín) iba v prípade, ak článok nemá špecifikovaný rozsah strán.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Rýchle kopírovanie">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Predvolený formát:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopírovať ako HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Nastavenia pre jednotlivé sídla:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "doména/cesta">

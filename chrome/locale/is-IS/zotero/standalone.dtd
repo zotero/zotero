@@ -36,6 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "Afrita tilvísun">
 <!ENTITY copyBibliographyCmd.label "Afrita heimildaskrá">
+<!ENTITY copyNoteCmd.label "Copy Note">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Snúa við síðustefnu">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">

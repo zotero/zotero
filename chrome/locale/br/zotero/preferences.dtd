@@ -104,7 +104,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Pa vez enaouet an dibarzh-mañ, Zotero a enkloz an URLioù pa vez arroudennet pennadoù kelaouennoù, magazinoù, ha kazetennoù ma ne spisa ket ar pennad niverenn ar bajenn.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Eilañ prim">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Stumm dre-ziouer:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Eilañ en HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Arventennoù ispisial al lec'hienn:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domani/Hent">

@@ -104,7 +104,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Þegar þetta val er ekki virkjað, þá mun Zotero einungis birta vefslóð í fræðigreinar, tímaritsgreinar og dagblaðagreinar ef ekkert síðubil er tiltekið.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Flýtiafrit">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Sjálfgefið snið:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Afrita á HTML-sniði">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Sértækar stillingar fyrir hvert vefsvæði:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Lén/Slóð">

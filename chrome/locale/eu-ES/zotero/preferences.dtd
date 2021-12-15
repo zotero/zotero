@@ -104,7 +104,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Aukera hau ezgaituta dagoenean, Zoterok URLak gehitzen ditu aldizkari eta egunkarietako artikuluak aipatzean, artikuluak orrialde-barruti bat zehazten ez badu bakarrik.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Kopia azkarra">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Lehenetsitako formatua:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopiatu HTML gisa">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Gunearen berariazko ezarpenak:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domeinua/bidea">

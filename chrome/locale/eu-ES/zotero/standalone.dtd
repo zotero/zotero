@@ -36,6 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "Kopiatu aipua">
 <!ENTITY copyBibliographyCmd.label "Kopiatu bibliografia">
+<!ENTITY copyNoteCmd.label "Copy Note">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Orrialdearen norabidea aldatu">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">

@@ -36,6 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "Kopi Sitasi">
 <!ENTITY copyBibliographyCmd.label "Kopi Bibliografi">
+<!ENTITY copyNoteCmd.label "Copy Note">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Ubah Arah Halaman">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">

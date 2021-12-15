@@ -36,6 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "Verwijzing kopiëren">
 <!ENTITY copyBibliographyCmd.label "Bibliografie kopiëren">
+<!ENTITY copyNoteCmd.label "Copy Note">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Paginarichting wijzigen">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">

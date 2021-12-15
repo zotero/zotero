@@ -104,7 +104,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "នៅពេលដែលជម្រើសនេះអស់លទ្ធភាព ហ្ស៊ូតេរ៉ូបញ្ចូលគេហទំព័រ នៅពេលយោងអត្ថបទទនានុប្បវត្តិ ទស្សនាវដ្តី និង កាសែត លើកលែង​តែអត្ថបទដែលពុំមានទំព័រជាក់លាក់។">
 
 <!ENTITY zotero.preferences.quickCopy.caption "ចម្លងលឿន">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "ចម្លងជាអេចធីអេមអិល">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "កំណត់គេហទំព័រជាក់លាក់:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "វិស័យ/ផ្លូវ">

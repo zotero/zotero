@@ -36,6 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "ថតចម្លងអាគតដ្ឋាន">
 <!ENTITY copyBibliographyCmd.label "ថតចម្លងគន្ថនិទេ្ទស">
+<!ENTITY copyNoteCmd.label "Copy Note">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "ប្តូរទិសទំព័រ">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">

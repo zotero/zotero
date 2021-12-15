@@ -104,7 +104,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Όταν απενεργοποιείται αυτή η λειτουργία το Zotero συμπεριλαμβάνει τις διευθύνσεις URL κατά την παράθεση άρθρων περιοδικών και εφημερίδων, μόνο αν στα άρθρα δεν ορίζεται το εύρος των σελίδων.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Γρήγορη αντιγραφή">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Αρχική Μορφή:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Αντιγραφή ως HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Ρυθμίσεις εκάστου ιστοτόπου:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Περιοχή/Διαδρομή">

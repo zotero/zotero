@@ -104,7 +104,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Quando essa opção está desabilitada, o Zotero inclui URLs ao citar artigos de periódicos, revistas e jornais apenas quando o artigo não tem a paginação especificada.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Cópia rápida">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Formato padrão:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copiar como HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Configurações específicas do site:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domínio/Caminho">

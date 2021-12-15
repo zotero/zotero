@@ -36,6 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "Viite kopeerimine">
 <!ENTITY copyBibliographyCmd.label "Bibliograafia kopeerimine">
+<!ENTITY copyNoteCmd.label "Copy Note">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Lehekülje orientatsiooni muutmine">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">

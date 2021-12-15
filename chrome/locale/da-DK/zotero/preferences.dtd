@@ -104,7 +104,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Når denne mulighed er valgt fra, medtager Zotero kun URL'er for artikler i tidsskrifter, blade og aviser hvis der ikke er anført sidetal (første og sidste side).">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Hurtig kopi">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Standardformat:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopier som HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "site-specikke indstillinger">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domæne/Sti">

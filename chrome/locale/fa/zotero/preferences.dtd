@@ -104,7 +104,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "در صورت غیرفعال بودن این گزینه، زوترو در یادکرد مقالات روزنامه و مجله، فقط به شرطی URL را می‌گنجاند که شماره صفحات مقاله، مشخص نشده باشد.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "رونوشت سریع">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Default Format:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "رونوشت به صورت HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "تنظیمات اختصاصی وب‌گاه‌ها:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "دامنه/مسیر">

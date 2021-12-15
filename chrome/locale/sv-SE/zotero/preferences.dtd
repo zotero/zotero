@@ -104,7 +104,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "När detta är bortvalt lägger Zotero bara till webblänken om artikeln inte har ett sidintervall specificerat.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Snabbkopiera">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "Standardformat:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopiera som HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Webbplats-specifika inställningar:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domän/sökväg">

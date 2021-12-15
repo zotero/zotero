@@ -36,6 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "Hivatkozás másolása">
 <!ENTITY copyBibliographyCmd.label "Bibliográfia másolása">
+<!ENTITY copyNoteCmd.label "Copy Note">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Oldal irányának megfordítása">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">

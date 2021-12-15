@@ -36,6 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "Kopiraj citat">
 <!ENTITY copyBibliographyCmd.label "Kopiraj bibliografijo">
+<!ENTITY copyNoteCmd.label "Copy Note">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Preklopi smer strani">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "t">

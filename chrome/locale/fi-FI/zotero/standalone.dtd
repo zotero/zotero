@@ -36,6 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "Kopioi viite">
 <!ENTITY copyBibliographyCmd.label "Kopioi kirjallisuusluettelo">
+<!ENTITY copyNoteCmd.label "Copy Note">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Vaihda sivun suuntaa">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">

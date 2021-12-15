@@ -104,7 +104,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "이 기능을 선택하지 않으면, 페이지 범위가 지정되지 않은 저널, 잡지, 신문 기사 인용문에 대해서만 URL을 넣습니다.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "빠른 복사">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "기본 형식:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "HTML로 복사">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "사이트별 설정:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "도메인/경로">

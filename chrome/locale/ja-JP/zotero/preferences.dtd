@@ -104,7 +104,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "この機能が無効化されていると、Zotero はページ範囲が指定されていない文献に限り、学術雑誌、雑誌論文、新聞記事を引用する際に、URL アドレスを含みます。">
 
 <!ENTITY zotero.preferences.quickCopy.caption "クィックコピー">
-<!ENTITY zotero.preferences.quickCopy.defaultFormat "デフォルトのフォーマット:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "HTMLとしてコピー">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "サイト固有の設定:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "ドメイン／パス">

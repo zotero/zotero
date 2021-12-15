@@ -36,6 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "העתק ציטוט">
 <!ENTITY copyBibliographyCmd.label "העתק ביבליוגרפיה">
+<!ENTITY copyNoteCmd.label "Copy Note">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "החלף כיוון עמוד">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
