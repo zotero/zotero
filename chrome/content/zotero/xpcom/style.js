@@ -45,6 +45,8 @@ Zotero.Styles = new function() {
 	 * Initializes styles cache, loading metadata for styles into memory
 	 */
 	this.init = Zotero.Promise.coroutine(function* (options = {}) {
+		yield Zotero.CiteprocRs.init();
+		
 		// Wait until bundled files have been updated, except when this is called by the schema update
 		// code itself
 		if (!options.fromSchemaUpdate) {
@@ -682,15 +684,17 @@ Zotero.Style = function (style, path) {
 /**
  * Get a citeproc-js CSL.Engine instance
  * @param {String} locale Locale code
+ * @param {String} format Output format one of [rtf, html, text]
  * @param {Boolean} automaticJournalAbbreviations Whether to automatically abbreviate titles
  */
-Zotero.Style.prototype.getCiteProc = function(locale, automaticJournalAbbreviations) {
+Zotero.Style.prototype.getCiteProc = function(locale, format, automaticJournalAbbreviations) {
 	if(!locale) {
 		var locale = Zotero.locale;
 		if(!locale) {
 			var locale = 'en-US';
 		}
 	}
+	format = format || 'text';
 	
 	// APA and some similar styles capitalize the first word of subtitles
 	var uppercaseSubtitlesRE = /^apa($|-)|^academy-of-management($|-)|^(freshwater-science)/;
@@ -757,19 +761,36 @@ Zotero.Style.prototype.getCiteProc = function(locale, automaticJournalAbbreviati
 	}
 	
 	try {
-		var citeproc = new Zotero.CiteProc.CSL.Engine(
-			new Zotero.Cite.System({
-				automaticJournalAbbreviations,
-				uppercaseSubtitles
-			}),
-			xml,
-			locale,
-			overrideLocale
-		);
-		
-		citeproc.opt.development_extensions.wrap_url_and_doi = true;
-		// Don't try to parse author names. We parse them in itemToCSLJSON
-		citeproc.opt.development_extensions.parse_names = false;
+		var citeproc;
+		if (Zotero.Prefs.get('cite.useCiteprocRs')) {
+			citeproc = new Zotero.CiteprocRs.Engine(
+				new Zotero.Cite.System({
+					automaticJournalAbbreviations,
+					uppercaseSubtitles: uppercaseSubtitles
+				}),
+				this,
+				xml,
+				locale,
+				format == 'text' ? 'plain' : format,
+				overrideLocale
+			);
+		}
+		else {
+			citeproc = new Zotero.CiteProc.CSL.Engine(
+				new Zotero.Cite.System({
+					automaticJournalAbbreviations,
+					uppercaseSubtitles
+				}),
+				xml,
+				locale,
+				overrideLocale
+			);
+			citeproc.setOutputFormat(format);
+			citeproc.free = () => 0;
+			citeproc.opt.development_extensions.wrap_url_and_doi = true;
+			// Don't try to parse author names. We parse them in itemToCSLJSON
+			citeproc.opt.development_extensions.parse_names = false;
+		}
 		
 		return citeproc;
 	} catch(e) {

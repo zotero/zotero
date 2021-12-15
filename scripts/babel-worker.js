@@ -47,7 +47,6 @@ async function babelWorker(ev) {
 				.replace('document.body.appendChild(scrollDiv)', 'document.documentElement.appendChild(scrollDiv)')
 				.replace('document.body.removeChild(scrollDiv)', 'document.documentElement.removeChild(scrollDiv)');
 		}
-
 		// Patch single-file
 		else if (sourcefile === 'resource/SingleFile/dist/single-file.js') {
 			// Change for what I assume is a bug in Firefox. We create a singlefile

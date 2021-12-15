@@ -70,6 +70,7 @@ const xpcomFilesLocal = [
 	'api',
 	'attachments',
 	'cite',
+	'citeprocRsBridge',
 	'cookieSandbox',
 	'data/library',
 	'data/libraries',

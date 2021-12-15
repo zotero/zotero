@@ -35,6 +35,7 @@
 	id="csl-edit"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	onload="Zotero_CSL_Editor.init();"
+	onunload="Zotero_CSL_Editor.onUnload()"
 	title="&styles.editor;">
 	
 	<script src="chrome://zotero/content/include.js"/>

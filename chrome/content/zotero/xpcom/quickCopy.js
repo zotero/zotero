@@ -288,13 +288,16 @@ Zotero.QuickCopy = new function() {
 					properties: {}
 				};
 				var html = csl.previewCitationCluster(citation, [], [], "html"); 
-				var text = csl.previewCitationCluster(citation, [], [], "text"); 
+				var text = csl.previewCitationCluster(citation, [], [], "text");
+				csl.free();
 			} else {
 				var style = Zotero.Styles.get(format.id);
-				var cslEngine = style.getCiteProc(locale);
+				var cslEngine = style.getCiteProc(locale, 'html');
  				var html = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "html");
-				cslEngine = style.getCiteProc(locale);
+ 				cslEngine.free();
+				cslEngine = style.getCiteProc(locale, 'text');
 				var text = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, items, "text");
+				cslEngine.free();
 			}
 			
 			return {text:(format.contentType == "html" ? html : text), html:html};

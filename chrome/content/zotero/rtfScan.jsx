@@ -465,8 +465,7 @@ var Zotero_RTFScan = new function() {
 		// load style and create ItemSet with all items
 		var zStyle = Zotero.Styles.get(document.getElementById("style-listbox").value)
 		var locale = document.getElementById("locale-menu").value;
-		var style = zStyle.getCiteProc(locale);
-		style.setOutputFormat("rtf");
+		var style = zStyle.getCiteProc(locale, 'rtf');
 		var isNote = zStyle.class == "note";
 		
 		// create citations
@@ -563,6 +562,8 @@ var Zotero_RTFScan = new function() {
 				}
 			}
 		}
+
+		cslEngine.free();
 		
 		Zotero.File.putContents(outputFile, contents);
 		

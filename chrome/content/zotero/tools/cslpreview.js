@@ -99,7 +99,7 @@ var Zotero_CSL_Preview = new function() {
 		}
 		
 		var locale = document.getElementById("locale-menu").value;
-		var styleEngine = style.getCiteProc(locale);
+		var styleEngine = style.getCiteProc(locale, 'html');
 		
 		// Generate multiple citations
 		var citations = styleEngine.previewCitationCluster(
@@ -116,6 +116,8 @@ var Zotero_CSL_Preview = new function() {
 			styleEngine.updateItems(items.map(item => item.id));
 			bibliography = Zotero.Cite.makeFormattedBibliography(styleEngine, "html");
 		}
+		
+		styleEngine.free();
 		
 		return '<p>' + citations + '</p>' + bibliography;
 	}
