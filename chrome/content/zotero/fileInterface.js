@@ -136,7 +136,7 @@ Zotero_File_Exporter.prototype.save = async function () {
 		// For Note Markdown translator replace zotero:// URI scheme,
 		// if the current app is not Zotero
 		if (io.selectedTranslator.translatorID == '154c2785-ec83-4c27-8a8a-d27b3a2eded1'
-			&& ZOTERO_CONFIG.ID != 'zotero') {
+				&& ZOTERO_CONFIG.ID != 'zotero') {
 			let text = obj.string;
 			text = text.replace(/zotero:\/\//g, ZOTERO_CONFIG.ID + '://');
 			await Zotero.File.putContentsAsync(fp.file, text);
@@ -150,7 +150,7 @@ Zotero_File_Exporter.prototype.save = async function () {
 	// Note Markdown translator and the current app is not Zotero.
 	// For other translators setLocation is better because it uses streaming
 	if (!(io.selectedTranslator.translatorID == '154c2785-ec83-4c27-8a8a-d27b3a2eded1'
-		&& ZOTERO_CONFIG.ID != 'zotero')) {
+			&& ZOTERO_CONFIG.ID != 'zotero')) {
 		translation.setLocation(Zotero.File.pathToFile(fp.file));
 	}
 	translation.setTranslator(io.selectedTranslator);
@@ -266,22 +266,28 @@ var Zotero_File_Interface = new function() {
 					let html = obj2.string.replace(/\r\n/g, '\n');
 
 					// copy to clipboard
-					let transferable = Components.classes['@mozilla.org/widget/transferable;1'].createInstance(Components.interfaces.nsITransferable);
-					let clipboardService = Components.classes['@mozilla.org/widget/clipboard;1'].getService(Components.interfaces.nsIClipboard);
+					let transferable = Components.classes['@mozilla.org/widget/transferable;1']
+						.createInstance(Components.interfaces.nsITransferable);
+					let clipboardService = Components.classes['@mozilla.org/widget/clipboard;1']
+						.getService(Components.interfaces.nsIClipboard);
 
 					// Add Text
-					let str = Components.classes['@mozilla.org/supports-string;1'].createInstance(Components.interfaces.nsISupportsString);
+					let str = Components.classes['@mozilla.org/supports-string;1']
+						.createInstance(Components.interfaces.nsISupportsString);
 					str.data = text;
 					transferable.addDataFlavor('text/unicode');
 					transferable.setTransferData('text/unicode', str, text.length * 2);
 
 					// Add HTML
-					str = Components.classes['@mozilla.org/supports-string;1'].createInstance(Components.interfaces.nsISupportsString);
+					str = Components.classes['@mozilla.org/supports-string;1']
+						.createInstance(Components.interfaces.nsISupportsString);
 					str.data = html;
 					transferable.addDataFlavor('text/html');
 					transferable.setTransferData('text/html', str, html.length * 2);
 
-					clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
+					clipboardService.setData(
+						transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard
+					);
 				});
 			});
 		}
