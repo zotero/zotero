@@ -123,6 +123,9 @@ Zotero_File_Exporter.prototype.save = async function () {
 	}
 	
 	async function _exportDone(obj, worked) {
+		// Close the items exported indicator
+		Zotero_File_Interface.Progress.close();
+		
 		if (!worked) {
 			Zotero.alert(
 				null,
@@ -132,27 +135,9 @@ Zotero_File_Exporter.prototype.save = async function () {
 			Zotero_File_Interface.Progress.close();
 			return;
 		}
-
-		// For Note Markdown translator replace zotero:// URI scheme,
-		// if the current app is not Zotero
-		if (io.selectedTranslator.translatorID == '154c2785-ec83-4c27-8a8a-d27b3a2eded1'
-				&& ZOTERO_CONFIG.ID != 'zotero') {
-			let text = obj.string;
-			text = text.replace(/zotero:\/\//g, ZOTERO_CONFIG.ID + '://');
-			await Zotero.File.putContentsAsync(fp.file, text);
-		}
-		
-		// Close the items exported indicator
-		Zotero_File_Interface.Progress.close();
 	}
 
-	// Post process and save translator output in _exportDone, if using
-	// Note Markdown translator and the current app is not Zotero.
-	// For other translators setLocation is better because it uses streaming
-	if (!(io.selectedTranslator.translatorID == '154c2785-ec83-4c27-8a8a-d27b3a2eded1'
-			&& ZOTERO_CONFIG.ID != 'zotero')) {
-		translation.setLocation(Zotero.File.pathToFile(fp.file));
-	}
+	translation.setLocation(Zotero.File.pathToFile(fp.file));
 	translation.setTranslator(io.selectedTranslator);
 	translation.setDisplayOptions(io.displayOptions);
 	translation.setHandler("itemDone", function () {
