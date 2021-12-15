@@ -60,11 +60,19 @@ var Zotero_CSL_Preview = new function() {
 				if (style.source) {
 					continue;
 				}
-				Zotero.debug("Generate Bib for " + style.title);
-				var cite = generateBibliography(style);
-				if (cite) {
+				Zotero.debug("Generate bibliography for " + style.title);
+				let bib;
+				let err = false;
+				try {
+					bib = generateBibliography(style);
+				}
+				catch (e) {
+					err = e;
+					Zotero.logError(e);
+				}
+				if (bib || err) {
 					str += '<h3>' + style.title + '</h3>';
-					str += cite;
+					str += bib || `<p style="color: red">${Zotero.Utilities.htmlSpecialChars(err)}</p>`;
 					str += '<hr>';
 				}
 			}
