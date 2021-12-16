@@ -5,12 +5,6 @@
 	box-sizing: border-box;
 	display: block;
 	height: 8px;
-	overflow: hidden;
+	margin: 1em 0;
 	width: 100%;
-
-	.progress-bar-value {
-		background: $shade-5;
-		display: block;
-		height: 100%;
-	}
 }
