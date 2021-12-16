@@ -26,6 +26,7 @@ import React, { forwardRef, memo, useCallback, useEffect, useRef, useState, useI
 import PropTypes from 'prop-types';
 import cx from 'classnames';
 import { usePrevious } from '../hooks/use-previous';
+import { stopPropagation } from './utils';
 
 const Wizard = memo(forwardRef(({ canAdvance = true, canRewind = true, canCancel = true, className, children, onClose, onFinish, ...props }, ref) => {
 	const containerRef = useRef(null);
@@ -171,6 +172,7 @@ const Wizard = memo(forwardRef(({ canAdvance = true, canRewind = true, canCancel
 							className="wizard-button back-button"
 							disabled={ !canRewind }
 							onClick={ handleGoBack }
+							onKeyDown={ stopPropagation }
 							title={ backLabel }
 						>
 							<span>{ backLabel }</span>
@@ -181,6 +183,7 @@ const Wizard = memo(forwardRef(({ canAdvance = true, canRewind = true, canCancel
 							className="wizard-button continue-button"
 							disabled={ !canAdvance }
 							onClick={ handleContinue }
+							onKeyDown={ stopPropagation }
 							title={ nextLabel }
 						>
 							<span>{ nextLabel }</span>
@@ -190,6 +193,7 @@ const Wizard = memo(forwardRef(({ canAdvance = true, canRewind = true, canCancel
 						<button
 							className="wizard-button done-button"
 							onClick={ handleDone }
+							onKeyDown={ stopPropagation }
 							title={ doneLabel }
 						>
 							<span>{ doneLabel }</span>
