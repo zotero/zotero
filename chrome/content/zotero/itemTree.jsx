@@ -2753,7 +2753,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (!this.isContainerEmpty(index)) {
 			div.setAttribute('aria-expanded', this.isContainerOpen(index));
 		}
-		if (!rowData.contextRow) {
+		if (rowData.contextRow) {
 			div.setAttribute('aria-disabled', true);
 		}
 
