@@ -93,6 +93,8 @@ const scrollIntoViewIfNeeded = (element, container, opts = {}) => {
 	return 0;
 };
 
+const stopPropagation = ev => ev.stopPropagation();
+
 export {
-	nextHTMLID, noop, getDragTargetOrient, createDragHandler, scrollIntoViewIfNeeded
+	nextHTMLID, noop, getDragTargetOrient, createDragHandler, scrollIntoViewIfNeeded, stopPropagation
 };

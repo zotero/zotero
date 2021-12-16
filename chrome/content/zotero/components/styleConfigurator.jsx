@@ -24,14 +24,13 @@
 */
 
 import PropTypes from 'prop-types';
-import React, { useCallback, useEffect, memo, useMemo, useState } from 'react';
-import ReactDOM from 'react-dom';
+import React, { useCallback, useEffect, memo, useMemo, useRef, useState } from 'react';
 
 import RadioSet from './radioSet';
-import { noop } from './utils';
+import { noop, nextHTMLID, stopPropagation } from './utils';
 
 
-const StyleSelector = memo(({ onStyleChange = noop, style }) => {
+const StyleSelector = memo(({ id, onStyleChange = noop, style }) => {
 	const styles = useMemo(() => Zotero.Styles.getVisible().map((so) => {
 		const value = so.styleID;
 		// Add acronyms to APA and ASA to avoid confusion
@@ -48,7 +47,13 @@ const StyleSelector = memo(({ onStyleChange = noop, style }) => {
 	}, [onStyleChange]);
 
 	return (
-		<select value={ style } onChange={ handleChange } size="10">
+		<select
+			id={ id }
+			onChange={ handleChange }
+			onKeyDown={ stopPropagation }
+			size="10"
+			value={ style }
+		>
 			{ styles.map(({ value, label }) => (
 				<option key={ value } value={ value } >{ label }</option>
 			))}
@@ -57,13 +62,15 @@ const StyleSelector = memo(({ onStyleChange = noop, style }) => {
 });
 
 StyleSelector.propTypes = {
-	onStyleChange: PropTypes.func
+	id: PropTypes.string,
+	onStyleChange: PropTypes.func,
+	style: PropTypes.string,
 };
 
 StyleSelector.displayName = 'StyleSelector';
 
 
-const LocaleSelector = memo(({ locale, onLocaleChange = noop, style }) => {
+const LocaleSelector = memo(({ id, locale, onLocaleChange = noop, style }) => {
 	const locales = useMemo(() => {
 		const fallbackLocale = Zotero.Styles.primaryDialects[Zotero.locale]
 			|| Zotero.locale;
@@ -90,7 +97,9 @@ const LocaleSelector = memo(({ locale, onLocaleChange = noop, style }) => {
 	return (
 		<select
 			disabled={ !style || styleData.locale }
+			id={ id }
 			onChange={ handleChange }
+			onKeyDown={ stopPropagation }
 			value={ styleData && styleData.locale || locale }
 		>
 			{ locales.map(({ value, label }) => (
@@ -101,6 +110,7 @@ const LocaleSelector = memo(({ locale, onLocaleChange = noop, style }) => {
 });
 
 LocaleSelector.propTypes = {
+	id: PropTypes.string,
 	locale: PropTypes.string,
 	onLocaleChange: PropTypes.func,
 	style: PropTypes.string,
@@ -115,6 +125,8 @@ const StyleConfigurator = memo(({ onStyleConfigChange = noop, supportedNotes = d
 	const [locale, setLocale] = useState(otherProps.locale || Zotero.Prefs.get('export.lastLocale'));
 	const [displayAs, setDisplayAs] = useState(otherProps.displayAs || 'footnotes');
 	const [isReady, setIsReady] = useState(false);
+
+	const htmlID = useRef(nextHTMLID());
 
 	const options = [
 		{ label: Zotero.getString('integration.prefs.footnotes.label'), value: 'footnotes' },
@@ -151,28 +163,35 @@ const StyleConfigurator = memo(({ onStyleConfigChange = noop, supportedNotes = d
 			{ isReady && (
 				<React.Fragment>
 					<div className="style-selector-wrapper">
-						<span>{ Zotero.getString('bibliography.style.label') }</span>
+						<label htmlFor={ htmlID.current + '-style-selector' }>
+							{ Zotero.getString('bibliography.style.label') }
+						</label>
 						<div className="style-selector-input-wrapper">
 							<StyleSelector
+								id={ htmlID.current + '-style-selector' }
 								style={ style }
 								onStyleChange={ handleStyleChange }
 							/>
 						</div>
 					</div>
 					<div className="locale-selector-wrapper">
-						<span>{ Zotero.getString('bibliography.locale.label') }</span>
+						<label htmlFor={ htmlID.current + '-locale-selector' }>
+							{ Zotero.getString('bibliography.locale.label') }
+						</label>
 						<LocaleSelector
+							id={ htmlID.current + '-locale-selector' }
 							locale={ locale }
-							style={ style }
 							onLocaleChange={ handleLocaleChange }
+							style={ style }
 						/>
 					</div>
 					{ (supportedNotes.length > 1 && !isNoteStyle) && (
 						<div className="display-as-wrapper">
-							<span>{ Zotero.getString('integration.prefs.displayAs.label') }</span>
+							<label>{ Zotero.getString('integration.prefs.displayAs.label') }</label>
 							<div className="display-as-input-wrapper">
 								<RadioSet
 									onChange={ handleDisplayAsChange }
+									onKeyDown={ stopPropagation }
 									options={ options }
 									value={ displayAs }
 								/>
