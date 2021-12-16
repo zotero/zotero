@@ -38,6 +38,7 @@ import Wizard from './components/wizard';
 import WizardPage from './components/wizardPage';
 import ProgressBar from './components/progressBar';
 import StyleConfigurator from './components/styleConfigurator';
+import { nextHTMLID, stopPropagation } from './components/utils';
 
 const getLastFile = (type) => {
 	const prefValue = Zotero.Prefs.get(`rtfScan.last${type}File`);
@@ -146,6 +147,7 @@ const RtfScan = memo((props) => {
 
 	const wizardRef = useRef(null);
 	const treeRef = useRef(null);
+	const htmlID = useRef(nextHTMLID());
 
 	const [canAdvance, setCanAdvance] = useState(true);
 	const [canRewind, setCanRewind] = useState(true);
@@ -616,7 +618,11 @@ const RtfScan = memo((props) => {
 
 	const getRowCount = useCallback(() => rows.current.length, []);
 
-	const handleChooseInputFile = useCallback(async () => {
+	const handleChooseInputFile = useCallback(async (ev) => {
+		if (ev.type === 'keydown' && ev.key !== 'Enter') {
+			return;
+		}
+		ev.stopPropagation();
 		const fp = new FilePicker();
 		fp.init(window, Zotero.getString("rtfScan.openTitle"), fp.modeOpen);
 		
@@ -630,7 +636,11 @@ const RtfScan = memo((props) => {
 		}
 	}, [outputFile]);
 
-	const handleChooseOutputFile = useCallback(async () => {
+	const handleChooseOutputFile = useCallback(async (ev) => {
+		if (ev.type === 'keydown' && ev.key !== 'Enter') {
+			return;
+		}
+		ev.stopPropagation();
 		const fp = new FilePicker();
 		fp.init(window, Zotero.getString("rtfScan.saveTitle"), fp.modeSave);
 		fp.appendFilter(Zotero.getString("rtfScan.rtf"), "*.rtf");
@@ -747,32 +757,48 @@ const RtfScan = memo((props) => {
 					</span>
 				</div>
 				<div>
-					<label className="file-input-label">{ Zotero.getString('rtfScan.inputFile.label') }</label>
+					<label
+						htmlFor={ htmlID.current + '-input-file' }
+						className="file-input-label"
+					>
+						{ Zotero.getString('rtfScan.inputFile.label') }
+					</label>
 					<div className="file-input-container">
 						<input
 							className="file-path"
+							id={ htmlID.current + '-input-file' }
+							onKeyDown={ handleChooseInputFile }
 							readOnly
 							value={ inputFile ? inputFile.path : '' }
 						/>
 						<button
 							id="choose-input-file"
 							onClick={ handleChooseInputFile }
+							onKeyDown={ stopPropagation }
 						>
 							{ Zotero.getString('file.choose.label') }
 						</button>
 					</div>
 				</div>
 				<div>
-					<label className="file-input-label">{ Zotero.getString('rtfScan.outputFile.label') }</label>
+					<label
+						htmlFor={ htmlID.current + '-output-file' }
+						className="file-input-label"
+					>
+						{ Zotero.getString('rtfScan.outputFile.label') }
+					</label>
 					<div className="file-input-container">
 						<input
 							className="file-path"
+							id={ htmlID.current + '-output-file' }
+							onKeyDown={ handleChooseOutputFile }
 							readOnly
 							value={ outputFile ? outputFile.path : '' }
 						/>
 						<button
 							id="choose-input-file"
 							onClick={ handleChooseOutputFile }
+							onKeyDown={ stopPropagation }
 						>
 							{ Zotero.getString('file.choose.label') }
 						</button>
