@@ -303,7 +303,7 @@ class EditorInstance {
 	}
 	
 	/**
-	 * @param {Zotero.Item[]} annotations
+	 * @param {Object[]} annotations JSON annotations
 	 * @param {Boolean} skipEmbeddingItemData Do not add itemData to citation items
 	 * @return {Object} Object with `html` string and `citationItems` array to embed into metadata container
 	 */
@@ -1457,6 +1457,7 @@ class EditorInstance {
 			let attachmentItem = Zotero.Items.get(annotation.parentID);
 			let jsonAnnotation = await Zotero.Annotations.toJSON(annotation);
 			jsonAnnotation.attachmentItemID = attachmentItem.id;
+			jsonAnnotation.id = annotation.key;
 			jsonAnnotations.push(jsonAnnotation);
 		}
 		let html = `<h1>${Zotero.getString('pdfReader.annotations')}<br/>`
