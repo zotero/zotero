@@ -49,42 +49,41 @@ var Zotero_File_Exporter = function() {
 Zotero_File_Exporter.prototype.save = async function () {
 	var translation = new Zotero.Translate.Export();
 	var translators = await translation.getTranslators();
-
-	if (!this.items) {
-		return;
-	}
-
-	let exportingNotes = this.items.every(item => item.isNote() || item.isAttachment());
-	// Keep only note export and Zotero RDF translators, if all items are notes or attachments
-	if (exportingNotes) {
-		translators = translators.filter((translator) => {
-			return (
-				translator.translatorID === '14763d24-8ba0-45df-8f52-b8d1108e7ac9'
-				|| translator.configOptions && translator.configOptions.noteTranslator
-			);
-		});
-	}
-	// Otherwise exclude note export translators
-	else {
-		translators = translators.filter(t => !t.configOptions || !t.configOptions.noteTranslator);
-	}
-
 	translators.sort((a, b) => a.label.localeCompare(b.label));
 	
-	// Remove "Note" prefix from Note Markdown and Note HTML translators
-	let markdownTranslator = translators.find(
-		t => t.translatorID == Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN
-	);
-	if (markdownTranslator) {
-		markdownTranslator.label = 'Markdown';
-		// Move Note Markdown translator to the top
-		translators.unshift(...translators.splice(translators.indexOf(markdownTranslator), 1));
-	}
-	let htmlTranslator = translators.find(
-		t => t.translatorID == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML
-	);
-	if (htmlTranslator) {
-		htmlTranslator.label = 'HTML';
+	// If exporting items, check whether they're only notes to determine which translators to show
+	let exportingNotes = false;
+	if (this.items) {
+		exportingNotes = this.items.every(item => item.isNote() || item.isAttachment());
+		// Keep only note export and Zotero RDF translators, if all items are notes or attachments
+		if (exportingNotes) {
+			translators = translators.filter((translator) => {
+				return (
+					translator.translatorID === '14763d24-8ba0-45df-8f52-b8d1108e7ac9'
+					|| translator.configOptions && translator.configOptions.noteTranslator
+				);
+			});
+			
+			// Remove "Note" prefix from Note Markdown and Note HTML translators
+			let markdownTranslator = translators.find(
+				t => t.translatorID == Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN
+			);
+			if (markdownTranslator) {
+				markdownTranslator.label = 'Markdown';
+				// Move Note Markdown translator to the top
+				translators.unshift(...translators.splice(translators.indexOf(markdownTranslator), 1));
+			}
+			let htmlTranslator = translators.find(
+				t => t.translatorID == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML
+			);
+			if (htmlTranslator) {
+				htmlTranslator.label = 'HTML';
+			}
+		}
+		// Otherwise exclude note export translators
+		else {
+			translators = translators.filter(t => !t.configOptions || !t.configOptions.noteTranslator);
+		}
 	}
 	
 	// present options dialog
