@@ -979,6 +979,9 @@ Zotero.Translate.ItemSaver.prototype = {
 			if (typeof tag == 'string') {
 				tag = { tag };
 			}
+			if (!tag.tag.trim()) {
+				continue;
+			}
 			tag.type = this._forceTagType || tag.type || 0;
 			newTags.push(tag);
 		}

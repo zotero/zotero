@@ -59,7 +59,9 @@ const TEST_TAGS = [
 	{"tag":"manual tag as object"},
 	{"tag":"manual tag as object with type", "type":0},
 	{"tag":"automatic tag as object", "type":1},
-	{"name":"tag in name property"}
+	{"name":"tag in name property"},
+	{ name: "" },
+	{ name: "  " },
 ];
 
 /**
