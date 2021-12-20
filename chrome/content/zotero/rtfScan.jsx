@@ -465,7 +465,7 @@ var Zotero_RTFScan = new function() {
 		// load style and create ItemSet with all items
 		var zStyle = Zotero.Styles.get(document.getElementById("style-listbox").value)
 		var locale = document.getElementById("locale-menu").value;
-		var style = zStyle.getCiteProc(locale, 'rtf');
+		var cslEngine = zStyle.getCiteProc(locale, 'rtf');
 		var isNote = zStyle.class == "note";
 		
 		// create citations
@@ -499,7 +499,7 @@ var Zotero_RTFScan = new function() {
 		Zotero.debug(itemIDs);
 		
 		// prepare the list of rendered citations
-		var citationResults = style.rebuildProcessorState(cslCitations, "rtf");
+		var citationResults = cslEngine.rebuildProcessorState(cslCitations, "rtf");
 		
 		// format citations
 		var contentArray = [];
@@ -536,7 +536,7 @@ var Zotero_RTFScan = new function() {
 		
 		// add bibliography
 		if(zStyle.hasBibliography) {
-			var bibliography = Zotero.Cite.makeFormattedBibliography(style, "rtf");
+			var bibliography = Zotero.Cite.makeFormattedBibliography(cslEngine, "rtf");
 			bibliography = bibliography.substring(5, bibliography.length-1);
 			// fix line breaks
 			var linebreak = "\r\n";
