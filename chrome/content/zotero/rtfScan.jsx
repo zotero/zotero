@@ -90,7 +90,7 @@ function _matchesItemCreators(creators, item, etAl) {
 	var primaryCreatorTypeID = Zotero.CreatorTypes.getPrimaryIDForType(item.itemTypeID);
 	
 	// use only primary creators if primary creators exist
-	for (var i = 0; i < itemCreators.length; i++) {
+	for (let i = 0; i < itemCreators.length; i++) {
 		if (itemCreators[i].creatorTypeID == primaryCreatorTypeID) {
 			primaryCreators.push(itemCreators[i]);
 		}
@@ -103,7 +103,7 @@ function _matchesItemCreators(creators, item, etAl) {
 	// item creator list length, or et al has to be used
 	if (itemCreators.length == creators.length || (etAl && itemCreators.length > creators.length)) {
 		var matched = true;
-		for (var i = 0; i < creators.length; i++) {
+		for (let i = 0; i < creators.length; i++) {
 			// check each item creator to see if it matches
 			matched = matched && _matchesItemCreator(creators[i], itemCreators[i]);
 			if (!matched) break;
@@ -132,9 +132,7 @@ const columns = [
 	{ dataKey: 'action', label: "", fixedWidth: true, width: "26px" },
 ];
 
-const RtfScan = memo((props) => {
-	const ACCEPT_ICON = "chrome://zotero/skin/rtfscan-accept.png";
-	const LINK_ICON = "chrome://zotero/skin/rtfscan-link.png";
+const RtfScan = memo(() => {
 	const BIBLIOGRAPHY_PLACEHOLDER = "\\{Bibliography\\}";
 
 	const rows = useRef([...initialRows]);
@@ -151,9 +149,6 @@ const RtfScan = memo((props) => {
 
 	const [canAdvance, setCanAdvance] = useState(true);
 	const [canRewind, setCanRewind] = useState(true);
-	const [canCancel, setCanCancel] = useState(true);
-	const [progress, setProgress] = useState(0);
-	const [formatProgress, setFormatProgress] = useState(0);
 	const [inputFile, setInputFile] = useState(getLastFile('Input'));
 	const [outputFile, setOutputFile] = useState(getLastFile('Output'));
 	const [styleConfig, setStyleConfig] = useState({
@@ -729,7 +724,7 @@ const RtfScan = memo((props) => {
 	return (
 		<Wizard
 			canAdvance={ canAdvance }
-			canCancel={ canCancel }
+			canCancel={ true }
 			canRewind={ canRewind }
 			className="rtfscan-wizard"
 			onClose={ handleClose }
