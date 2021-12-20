@@ -8,8 +8,17 @@
 	"general_moreInfo": {
 		"message": "More Info…"
 	},
+	"general_needHelp": {
+		"message": "Need help?"
+	},
 	"general_done": {
 		"message": "Done"
+	},
+	"general_yes": {
+		"message": "Yes"
+	},
+	"general_no": {
+		"message": "No"
 	},
 	"general_tryAgain": {
 		"message": "Try Again"
@@ -36,8 +45,15 @@
 	"progressWindow_error_translation": {
 		"message": "An error occurred while saving this item. See $1 for more information."
 	},
+	"progressWindow_error_siteAccessLimitsError": {
+		"message": "An error occurred while saving this item. $1 may limit the number of items you can save at once. See $2 for more information.",
+		"description": "The placeholders are for the failing translator label (e.g., Google Scholar) and the Site Access Limits link"
+	},
 	"progressWindow_error_troubleshootingTranslatorIssues": {
 		"message": "Troubleshooting Translator Issues"
+	},
+	"progressWindow_error_siteAccessLimits": {
+		"message": "Site Access Limits"
 	},
 	"progressWindow_error_fallback": {
 		"message": "An error occurred saving with $1. Attempting to save using $2 instead.",
@@ -56,6 +72,20 @@
 	},
 	"upgradeApp": {
 		"message": "Upgrade $1"
+	},
+	
+	"firstRun_title": {
+		"message": "You’ve installed the $1 Connector!"
+	},
+	"firstRun_text1": {
+		"message": "The $1 Connector enables you to <a href=\"$2\">save items to $1</a> from your browser in a single click."
+	},
+	"firstRun_text2": {
+		"message": "If you haven’t yet, <a href=\"$2\">download</a> the standalone $1 application for the best experience."
+	},
+	"firstRun_acceptButton": {
+		"message": "Got it",
+		"description": "The Accept button for the first-run dialog"
 	},
 	
 	"error_connection_isAppRunning": {
@@ -107,6 +137,15 @@
 	},
 	"integration_googleDocs_docxAlert": {
 		"message": "$1 integration is not available when editing Microsoft Word .docx files directly in Google Docs. Choose File → Save as Google Docs to enable this functionality.<br/><br/>If you want to transfer a Word document with $1 citations to Google Docs, see <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Moving Documents Between Word Processors</a>."
+	},
+	"integration_googleDocs_documentLocked": {
+		"message": "The document citations are being edited by another $1 user. Please try again later."
+	},
+	"integration_googleDocs_documentLocked_moreInfo": {
+		"message": "$1 locks your document to prevent multiple users from editing citations at the same time. Concurrent citation editing in the document may lead to citation or document corruption. Certain unforeseeable circumstances, such as network failures, may lead to your document becoming permanently locked. If you believe this has happened, you can override the lock.<br/><br/>Would you like to override the document lock?"
+	},
+	"integration_googleDocs_documentPermissionError": {
+		"message": "The Google account you selected does not have permission to edit this document. Please try again, and be sure to choose the account with editing access."
 	},
 	
 	"integration_googleDocs_orphanedCitations_buttonTooltip": {
