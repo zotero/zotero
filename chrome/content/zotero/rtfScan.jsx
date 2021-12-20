@@ -813,7 +813,7 @@ const RtfScan = memo((props) => {
 				<span>
 					{ Zotero.getString('rtfScan.scanPage.description') }
 				</span>
-				<ProgressBar value={ progress } /> { /*TODO: undetermined */ }
+				<ProgressBar indeterminate />
 			</WizardPage>
 			<WizardPage
 				className="citations-page"
@@ -852,7 +852,7 @@ const RtfScan = memo((props) => {
 				onPageShow={ handleFormatPageShow }
 			>
 				<span>{ Zotero.getString('rtfScan.formatPage.description') }</span>{/*width="700"*/}
-				<ProgressBar value={ formatProgress } />
+				<ProgressBar indeterminate />
 			</WizardPage>
 			<WizardPage
 				pageId="complete-page"
