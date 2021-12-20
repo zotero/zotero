@@ -1,6 +1,7 @@
 Zotero.Locale = {
 	/**
-	 * Keep this up to date with chrome.manifest and zotero-build/dictionaries/build-dictionaries
+	 * Keep this up to date with zotero-standalone-build:assets/multilocale.txt,
+	 * zotero-build/dictionaries/build-dictionaries, and possibly chrome.manifest
 	 *
 	 * Names from https://addons.mozilla.org/en-US/firefox/language-tools/
 	 */
@@ -12,9 +13,11 @@ Zotero.Locale = {
 		'cs-CZ': 'Čeština',
 		'da-DK': 'Dansk',
 		'de': 'Deutsch',
+		'en-AU': 'English (Australian)',
 		'en-CA': 'English (Canada)',
 		'en-US': 'English',
 		'en-GB': 'English (UK)',
+		'en-NZ': 'English (New Zealand)',
 		'es-ES': 'Español',
 		'et-EE': 'Eesti keel',
 		'eu-ES': 'Euskara',
