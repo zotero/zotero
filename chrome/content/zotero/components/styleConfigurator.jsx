@@ -89,6 +89,7 @@ const LocaleSelector = memo(({ id, locale, onLocaleChange = noop, style }) => {
 	}, []);
 
 	const styleData = style ? Zotero.Styles.get(style) : null;
+	locale = Zotero.Styles.primaryDialects[locale] || locale;
 
 	const handleChange = useCallback((ev) => {
 		onLocaleChange(ev.currentTarget.value);
@@ -122,7 +123,7 @@ const defaultSupportedNotes = ['footnotes', 'endnotes'];
 
 const StyleConfigurator = memo(({ onStyleConfigChange = noop, supportedNotes = defaultSupportedNotes, ...otherProps }) => {
 	const [style, setStyle] = useState(otherProps.style || Zotero.Prefs.get('export.lastStyle'));
-	const [locale, setLocale] = useState(otherProps.locale || Zotero.Prefs.get('export.lastLocale'));
+	const [locale, setLocale] = useState(otherProps.locale || Zotero.Prefs.get('export.lastLocale') || Zotero.locale);
 	const [displayAs, setDisplayAs] = useState(otherProps.displayAs || 'footnotes');
 	const [isReady, setIsReady] = useState(false);
 
