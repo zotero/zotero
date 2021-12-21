@@ -3090,7 +3090,10 @@ var ZoteroPane = new function()
 	
 	
 	function isAttachmentWithExtractableAnnotations(item) {
-		return item.isPDFAttachment() && item.getAnnotations().some(x => x.annotationType != 'ink');
+		// For now, consider all PDF attachments eligible, since we want to extract external
+		// annotations in unprocessed files if present
+		//return item.isPDFAttachment() && item.getAnnotations().some(x => x.annotationType != 'ink');
+		return item.isPDFAttachment();
 	}
 	
 	
@@ -4458,6 +4461,7 @@ var ZoteroPane = new function()
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
+		await Zotero.PDFWorker.import(attachment.id, true);
 		var note = await Zotero.EditorInstance.createNoteFromAnnotations(
 			attachment.getAnnotations().filter(x => x.annotationType != 'ink'), attachment.parentID
 		);
@@ -4478,13 +4482,10 @@ var ZoteroPane = new function()
 		for (let item of items) {
 			let attachments = [];
 			if (item.isRegularItem()) {
-				// Find all child attachments with non-ink annotations
+				// Find all child attachments with extractable annotations
 				attachments.push(
 					...Zotero.Items.get(item.getAttachments())
-						.filter((x) => {
-							return x.isPDFAttachment()
-								&& x.getAnnotations().some(x => x.annotationType != 'ink');
-						})
+						.filter(item => isAttachmentWithExtractableAnnotations(item))
 				);
 			}
 			else if (item.isFileAttachment()) {
