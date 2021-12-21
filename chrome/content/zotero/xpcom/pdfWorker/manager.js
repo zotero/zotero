@@ -315,7 +315,9 @@ class PDFWorker {
 			}
 
 			attachment.attachmentLastProcessedModificationTime = mtime;
-			await attachment.saveTx({ skipDateModifiedUpdate: true });
+			await attachment.saveTx({
+				skipAll: true
+			});
 			
 			Zotero.debug(`Imported ${imported.length} annotation(s) for item ${attachment.libraryKey} `
 				+ `in ${new Date() - t} ms`);
