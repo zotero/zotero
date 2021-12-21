@@ -443,6 +443,8 @@ describe("ZoteroPane", function() {
 	
 	
 	describe("#deleteSelectedItems()", function () {
+		const DELETE_KEY_CODE = 46;
+		
 		it("should remove an item from My Publications", function* () {
 			var item = createUnsavedDataObject('item');
 			item.inPublications = true;
@@ -464,7 +466,18 @@ describe("ZoteroPane", function() {
 			var modifyPromise = waitForItemEvent('modify');
 			
 			var event = doc.createEvent("KeyboardEvent");
-			event.initKeyEvent("keypress", true, true, window, false, false, false, false, 46, 0);
+			event.initKeyEvent(
+				"keypress",
+				true,
+				true,
+				window,
+				false,
+				false,
+				false,
+				false,
+				DELETE_KEY_CODE,
+				0
+			);
 			tree.dispatchEvent(event);
 			yield promise;
 			yield modifyPromise;
@@ -473,7 +486,7 @@ describe("ZoteroPane", function() {
 			assert.isFalse(item.deleted);
 		});
 		
-		it("should move an item to trash from My Publications", function* () {
+		it("should move My Publications item to trash with prompt for modified Delete", function* () {
 			var item = createUnsavedDataObject('item');
 			item.inPublications = true;
 			yield item.saveTx();
@@ -503,7 +516,7 @@ describe("ZoteroPane", function() {
 				false,
 				!Zotero.isMac, // shift
 				Zotero.isMac, // meta
-				46,
+				DELETE_KEY_CODE,
 				0
 			);
 			tree.dispatchEvent(event);
@@ -511,6 +524,80 @@ describe("ZoteroPane", function() {
 			yield modifyPromise;
 			
 			assert.isTrue(item.inPublications);
+			assert.isTrue(item.deleted);
+		});
+		
+		it("should move saved search item to trash with prompt for unmodified Delete", async function () {
+			var search = await createDataObject('search');
+			var title = [...Object.values(search.conditions)]
+				.filter(x => x.condition == 'title' && x.operator == 'contains')[0].value;
+			var item = await createDataObject('item', { title });
+			
+			await waitForItemsLoad(win);
+			var iv = zp.itemsView;
+			
+			var selected = iv.selectItem(item.id);
+			assert.ok(selected);
+			
+			var tree = doc.getElementById(iv.id);
+			tree.focus();
+			
+			await Zotero.Promise.delay(1);
+			
+			var promise = waitForDialog();
+			var modifyPromise = waitForItemEvent('modify');
+			
+			var event = new KeyboardEvent(
+				"keypress",
+				{
+					key: 'Delete',
+					code: 'Delete',
+					keyCode: DELETE_KEY_CODE,
+					bubbles: true,
+					cancelable: true
+				}
+			);
+			tree.dispatchEvent(event);
+			await promise;
+			await modifyPromise;
+			
+			assert.isTrue(item.deleted);
+		});
+		
+		it("should move saved search trash without prompt for modified Delete", async function () {
+			var search = await createDataObject('search');
+			var title = [...Object.values(search.conditions)]
+				.filter(x => x.condition == 'title' && x.operator == 'contains')[0].value;
+			var item = await createDataObject('item', { title });
+			
+			await waitForItemsLoad(win);
+			var iv = zp.itemsView;
+			
+			var selected = iv.selectItem(item.id);
+			assert.ok(selected);
+			
+			var tree = doc.getElementById(iv.id);
+			tree.focus();
+			
+			await Zotero.Promise.delay(1);
+			
+			var modifyPromise = waitForItemEvent('modify');
+			
+			var event = new KeyboardEvent(
+				"keypress",
+				{
+					key: 'Delete',
+					code: 'Delete',
+					metaKey: Zotero.isMac,
+					shiftKey: !Zotero.isMac,
+					keyCode: DELETE_KEY_CODE,
+					bubbles: true,
+					cancelable: true
+				}
+			);
+			tree.dispatchEvent(event);
+			await modifyPromise;
+			
 			assert.isTrue(item.deleted);
 		});
 	});

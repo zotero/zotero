@@ -1750,7 +1750,11 @@ var ZoteroPane = new function()
 			};
 			var prompt = force ? toTrash : toRemoveFromPublications;
 		}
-		else if (collectionTreeRow.isLibrary(true)) {
+		else if (collectionTreeRow.isLibrary(true)
+				|| collectionTreeRow.isSearch()
+				|| collectionTreeRow.isUnfiled()
+				|| collectionTreeRow.isRetracted()
+				|| collectionTreeRow.isDuplicates()) {
 			// In library, don't prompt if meta key was pressed
 			var prompt = (force && !fromMenu) ? false : toTrash;
 		}
@@ -1762,15 +1766,6 @@ var ZoteroPane = new function()
 			}
 			
 			var prompt = force ? toTrash : toRemove;
-		}
-		else if (collectionTreeRow.isSearch()
-				|| collectionTreeRow.isUnfiled()
-				|| collectionTreeRow.isRetracted()
-				|| collectionTreeRow.isDuplicates()) {
-			if (!force) {
-				return;
-			}
-			var prompt = toTrash;
 		}
 		// Do nothing in trash view if any non-deleted items are selected
 		else if (collectionTreeRow.isTrash()) {

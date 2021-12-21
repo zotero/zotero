@@ -1726,7 +1726,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 			if (collectionTreeRow.isTrash()) {
 				await Zotero.Items.erase(ids);
 			}
-			else if (collectionTreeRow.isLibrary(true) || force) {
+			else if (collectionTreeRow.isLibrary(true)
+					|| collectionTreeRow.isSearch()
+					|| collectionTreeRow.isUnfiled()
+					|| collectionTreeRow.isRetracted()
+					|| collectionTreeRow.isDuplicates()
+					|| force) {
 				await Zotero.Items.trashTx(ids);
 			}
 			else if (collectionTreeRow.isCollection()) {
