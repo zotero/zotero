@@ -237,12 +237,17 @@ class PDFWorker {
 	async import(itemID, isPriority, password, transfer) {
 		return this._enqueue(async () => {
 			let attachment = await Zotero.Items.getAsync(itemID);
+			
+			Zotero.debug("Importing annotations for item " + attachment.libraryKey);
+			let t = new Date();
+			
 			if (!attachment.isPDFAttachment()) {
 				throw new Error('Item must be a PDF attachment');
 			}
 
 			let mtime = Math.floor(await attachment.attachmentModificationTime / 1000);
 			if (!transfer && attachment.attachmentLastProcessedModificationTime === mtime) {
+				Zotero.debug("File hasn't changed since last-processed time -- skipping annotations import");
 				return false;
 			}
 
@@ -311,7 +316,10 @@ class PDFWorker {
 
 			attachment.attachmentLastProcessedModificationTime = mtime;
 			await attachment.saveTx({ skipDateModifiedUpdate: true });
-
+			
+			Zotero.debug(`Imported ${imported.length} annotation(s) for item ${attachment.libraryKey} `
+				+ `in ${new Date() - t} ms`);
+			
 			return !!(imported.length || deleted.length);
 		}, isPriority);
 	}
