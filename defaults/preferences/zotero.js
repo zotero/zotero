@@ -85,7 +85,6 @@ pref("extensions.zotero.keys.library", "L");
 pref("extensions.zotero.keys.quicksearch", "K");
 pref("extensions.zotero.keys.copySelectedItemCitationsToClipboard", "A");
 pref("extensions.zotero.keys.copySelectedItemsToClipboard", "C");
-pref("extensions.zotero.keys.toggleTagSelector", "T");
 pref("extensions.zotero.keys.sync", "Y");
 pref("extensions.zotero.keys.toggleAllRead", "R");
 pref("extensions.zotero.keys.toggleRead", "`");

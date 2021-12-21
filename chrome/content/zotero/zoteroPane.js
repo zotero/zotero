@@ -809,9 +809,6 @@ var ZoteroPane = new function()
 					// Use key that's not the modifier as the popup toggle
 					ZoteroPane_Local.newNote(event.altKey, parentKey);
 					break;
-				case 'toggleTagSelector':
-					ZoteroPane_Local.toggleTagSelector();
-					break;
 				case 'sync':
 					Zotero.Sync.Runner.sync();
 					break;

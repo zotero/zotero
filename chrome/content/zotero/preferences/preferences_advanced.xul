@@ -51,7 +51,6 @@
 			<preference id="pref-keys-saveToZotero" name="extensions.zotero.keys.saveToZotero" type="string"/>
 			<preference id="pref-keys-library" name="extensions.zotero.keys.library" type="string"/>
 			<preference id="pref-keys-quicksearch" name="extensions.zotero.keys.quicksearch" type="string"/>
-			<preference id="pref-keys-toggleTagSelector" name="extensions.zotero.keys.toggleTagSelector" type="string"/>
 			<preference id="pref-keys-newItem" name="extensions.zotero.keys.newItem" type="string"/>
 			<preference id="pref-keys-newNote" name="extensions.zotero.keys.newNote" type="string"/>
 			<preference id="pref-keys-toggleRead" name="extensions.zotero.keys.toggleRead" type="string"/>
@@ -270,12 +269,6 @@
 										onchange="if (Zotero_Preferences.Export) { Zotero_Preferences.Export.updateQuickCopyInstructions(); }"/>
 							</row>
 							
-							<row>
-								<label value="&zotero.preferences.keys.toggleTagSelector;" control="textbox-toggleTagSelector"/>
-								<label class="modifier"/>
-								<textbox id="textbox-toggleTagSelector" maxlength="1" size="1" preference="pref-keys-toggleTagSelector"/>
-							</row>
-
 							<row>
 								<label value="&zotero.preferences.keys.toggleAllRead;" control="textbox-toggleAllRead"/>
 								<label class="modifier"/>
