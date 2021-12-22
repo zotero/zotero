@@ -297,10 +297,6 @@ class VirtualizedTable extends React.Component {
 		if (!props.disableFontSizeScaling) {
 			this._rowHeight *= Zotero.Prefs.get('fontSize');
 		}
-		// A bit less row spacing on macOS
-		if (Zotero.isMac && this._rowHeight >= (props.rowHeight || DEFAULT_ROW_HEIGHT)) {
-			this._rowHeight -= 2;
-		}
 		
 		this.selection = new TreeSelection(this);
 		
@@ -1156,9 +1152,6 @@ class VirtualizedTable extends React.Component {
 		}
 		this._rowHeight = this.props.rowHeight || DEFAULT_ROW_HEIGHT;
 		this._rowHeight *= Zotero.Prefs.get('fontSize');
-		if (Zotero.isMac && this._rowHeight >= (this.props.rowHeight || DEFAULT_ROW_HEIGHT)) {
-			this._rowHeight -= 2;
-		}
 		
 		if (!this._jsWindow) return;
 		this._jsWindow.update(this._getWindowedListOptions());
