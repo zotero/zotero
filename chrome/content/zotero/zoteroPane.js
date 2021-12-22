@@ -759,7 +759,7 @@ var ZoteroPane = new function()
 		try {
 			switch (command) {
 				case 'library':
-					this.collectionsView.focus();
+					document.getElementById(ZoteroPane.collectionsView.id).focus();
 					break;
 				case 'quicksearch':
 					document.getElementById('zotero-tb-search').select();
@@ -2228,7 +2228,7 @@ var ZoteroPane = new function()
 		
 		// Focus the items pane
 		if (found) {
-			document.getElementById('zotero-items-tree').focus();
+			document.getElementById(ZoteroPane.itemsView.id).focus();
 		}
 		
 		Zotero_Tabs.select('zotero-pane');
