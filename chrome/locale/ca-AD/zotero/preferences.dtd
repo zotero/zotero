@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Aconsegueix estils addicionals…">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Desa al Zotero (icona de la barra d'adreces)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Commuta a pantalla completa">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Enfoca la subfinestra de les biblioteques">
 <!ENTITY zotero.preferences.keys.quicksearch "Cerca ràpida">
 <!ENTITY zotero.preferences.keys.newItem "Crea un element nou">
 <!ENTITY zotero.preferences.keys.newNote "Crea una nota nova">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Marca tots els elements del canal com a llegits / no llegits">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Canvia el selector d&apos;etiquetes">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copia les cites dels elements seleccionats al porta-retalls">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copia els elements seleccionats al porta-retalls">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importa des del porta-retalls">

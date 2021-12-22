@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Få ytterligare stilar...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Spara till Zotero (adressradsikon)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Växla fullskärmsläge">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Ruta för fokusbibliotek">
 <!ENTITY zotero.preferences.keys.quicksearch "Snabbsökning">
 <!ENTITY zotero.preferences.keys.newItem "Lagra en ny källa">
 <!ENTITY zotero.preferences.keys.newNote "Skapa en ny anteckning">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Markera alla matningsobjekt som lästa">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Växla etikettväljare">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiera markerade källor som noter till urklipp">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiera markerade källor till urklipp">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Klistra in från urklipp">

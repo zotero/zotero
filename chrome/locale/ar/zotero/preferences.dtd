@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "احصل على أنماط إضافية">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "احفظ في زوتيرو (ايقونة شريط العنوان)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "التنشيط لوضع ملء الشاشة">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "ركز على جزء المكتبات">
 <!ENTITY zotero.preferences.keys.quicksearch "البحث السريع">
 <!ENTITY zotero.preferences.keys.newItem "انشئ عنصر جديد">
 <!ENTITY zotero.preferences.keys.newNote "انشئ ملاحظة جديدة">
 <!ENTITY zotero.preferences.keys.toggleAllRead "علم كل عناصر الخلاصة كمقروءة / غير مقروءة">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "تنشيط محدد الأوسمة">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "نسخ استشهادات العنصر المختار للحافظة">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "انسخ العناصر المحددة للحافظة">
 <!ENTITY zotero.preferences.keys.importFromClipboard "الاستيراد من الحافظة">

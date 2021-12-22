@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Sýna í færslusafni">
 <!ENTITY zotero.items.menu.attach.note "Bæta við athugasemd">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Sækja viðhengi">
 <!ENTITY zotero.items.menu.attach.link.uri "Hengja tengil við URI-slóð…">
 <!ENTITY zotero.items.menu.attach.file "Hengja við geymt afrit af skrá…">

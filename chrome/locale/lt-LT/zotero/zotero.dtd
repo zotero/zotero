@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Rodyti bibliotekoje">
 <!ENTITY zotero.items.menu.attach.note "Įtraukti pastabą">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Įtraukti priedą">
 <!ENTITY zotero.items.menu.attach.link.uri "Pridėti URI nuorodą...">
 <!ENTITY zotero.items.menu.attach.file "Pridėti turimo failo kopiją...">

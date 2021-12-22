@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Vis i bibliotek">
 <!ENTITY zotero.items.menu.attach.note "Legg til notat">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Legg til vedlegg">
 <!ENTITY zotero.items.menu.attach.link.uri "Legg ved lenkje til URI …">
 <!ENTITY zotero.items.menu.attach.file "Legg ved lagra kopi av fil …">

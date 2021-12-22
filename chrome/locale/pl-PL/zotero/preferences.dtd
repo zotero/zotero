@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Pobierz dodatkowe style...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Zapisz w Zotero (ikona paska adresu)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Przełącz w tryb pełnoekranowy">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Przenieś fokus na panel bibliotek (lewy)">
 <!ENTITY zotero.preferences.keys.quicksearch "Szybkie wyszukiwanie">
 <!ENTITY zotero.preferences.keys.newItem "Utwórz nowy element">
 <!ENTITY zotero.preferences.keys.newNote "Utwórz nową notatkę">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Oznacz wszystkie elementy kanału jako przeczytane/nieprzeczytane">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Wyświetl/Ukryj wybór etykiet">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiuj wybrane odnośniki bibliograficzne do schowka">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiuj zaznaczone elementy do schowka">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importuj ze schowka">

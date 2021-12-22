@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Získat další styly...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Uložit do Zotera (ikona v adresním řádku)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Zapnutí celoobrazového módu">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Přejít do panelu Knihovny">
 <!ENTITY zotero.preferences.keys.quicksearch "Rychlé hledání">
 <!ENTITY zotero.preferences.keys.newItem "Vytvořit novou položku">
 <!ENTITY zotero.preferences.keys.newNote "Vytvořit novou poznámku">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Označit všechny položky kanálu jako přečtené/nepřečtené">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Zapnout Výběr štítků">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopírovat citaci vybrané položky do schránky">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopírovat vybrané položky do schránky">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importovat ze schránky">

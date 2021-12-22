@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Megjelenítés a könyvtárban">
 <!ENTITY zotero.items.menu.attach.note "Jegyzet hozzáadása">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Megjegyzés hozzáadása a kommentárokból">
 <!ENTITY zotero.items.menu.attach "Csatolmány hozzáadása">
 <!ENTITY zotero.items.menu.attach.link.uri "Link csatolása az URI-hez…">
 <!ENTITY zotero.items.menu.attach.file "Helyben tárolt példány csatolása">

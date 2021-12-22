@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Dobi dodatne sloge ...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Shrani v Zotero (ikona v naslovni vrstici)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Vključi/izključi celozaslonski način">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Pozornost na podokno knjižnic">
 <!ENTITY zotero.preferences.keys.quicksearch "Hitro iskanje">
 <!ENTITY zotero.preferences.keys.newItem "Ustvari nov vnos">
 <!ENTITY zotero.preferences.keys.newNote "Ustvari novo opombo">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Označi vse elemente vira kot prebrane/neprebrane">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Vključi/izključi izbirnik značk">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiraj citate izbranega elementa na odložišče">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiraj izbrane elemente na odložišče">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Uvozi z odložišča">

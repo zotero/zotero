@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "추가 스타일 받기...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Zotero에 저장 (주소 표시줄 아이콘)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "전체화면 끄기/켜기">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "라이브러리 창에 포커스">
 <!ENTITY zotero.preferences.keys.quicksearch "빠른 검색">
 <!ENTITY zotero.preferences.keys.newItem "새 항목 작성">
 <!ENTITY zotero.preferences.keys.newNote "새 노트 ">
 <!ENTITY zotero.preferences.keys.toggleAllRead "모든 피드 항목을 읽음/읽지 않음으로 표시">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "태그 선택기 끄기/켜기">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "선택된 항목 인용을 클립보드에 복사">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "선택된 항목을 클립보드에 복사">
 <!ENTITY zotero.preferences.keys.importFromClipboard "클립보드에서 불러오기">

@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "បង្ហាញនៅក្នុងបណ្ណាល័យ">
 <!ENTITY zotero.items.menu.attach.note "បន្ថែមកំណត់ចំណាំ">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "បន្ថែមឯកសារកម្ជាប់">
 <!ENTITY zotero.items.menu.attach.link.uri "ភ្ជាប់កម្ជាប់ទៅនឹងយូអ៊ែរអិល...">
 <!ENTITY zotero.items.menu.attach.file "ភ្ជាប់ឯកសារចម្លងចូលទុក...">

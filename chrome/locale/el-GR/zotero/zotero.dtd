@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Εμφάνιση στην Βιβλιοθήκη">
 <!ENTITY zotero.items.menu.attach.note "Προσθήκη σημείωσης">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Προσθήκη προσαρτήματος">
 <!ENTITY zotero.items.menu.attach.link.uri "Προσάρτηση Συνδέσμου προς το URI...">
 <!ENTITY zotero.items.menu.attach.file "Προσκόληση αποθηκευμένου αντιγράφου αρχείου...">

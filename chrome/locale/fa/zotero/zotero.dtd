@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "نمایش در کتابخانه">
 <!ENTITY zotero.items.menu.attach.note "افزودن یادداشت">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "افزودن پیوست">
 <!ENTITY zotero.items.menu.attach.link.uri "پیوست پیوند به URI">
 <!ENTITY zotero.items.menu.attach.file "پیوست کردن رونوشت پرونده...">

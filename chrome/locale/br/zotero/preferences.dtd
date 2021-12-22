@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Kaout stiloù all...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Enrollañ e-barzh Zotero (ikon ar varrenn chomlec'hioù)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Gwintañ d'ar mod Skramm-leun">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Fokus war banell al levraouegoù">
 <!ENTITY zotero.preferences.keys.quicksearch "Enklask prim">
 <!ENTITY zotero.preferences.keys.newItem "Krouiñ un elfenn nevez">
 <!ENTITY zotero.preferences.keys.newNote "Krouiñ un notenn nevez">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Merkañ holl elfennoù ar froud evel lennet/anlennet">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Gwintañ d'an diuzer balizoù">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Eilañ er golver an arroudenniñ elfennoù diuzet">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Eilañ an elfennoù diuzet er golver">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Emporzhiañ diwar ar golver">

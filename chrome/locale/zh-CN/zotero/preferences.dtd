@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "获取更多样式……">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "保存到Zotero (地址栏图标)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "切换全屏模式">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "聚焦文献库面板">
 <!ENTITY zotero.preferences.keys.quicksearch "快速搜索">
 <!ENTITY zotero.preferences.keys.newItem "新建条目">
 <!ENTITY zotero.preferences.keys.newNote "新建笔记">
 <!ENTITY zotero.preferences.keys.toggleAllRead "标记全部订阅项目为 读/未读">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "切换标签选择器">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "复制选定条目的引文到剪贴板">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "复制选定的条目到剪贴板">
 <!ENTITY zotero.preferences.keys.importFromClipboard "从剪贴板导入">

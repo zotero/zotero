@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Pokaži v knjižnici">
 <!ENTITY zotero.items.menu.attach.note "Dodaj opombo">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Dodaj opombo iz zaznamkov">
 <!ENTITY zotero.items.menu.attach "Dodaj priponko">
 <!ENTITY zotero.items.menu.attach.link.uri "URI-ju pripni povezavo ...">
 <!ENTITY zotero.items.menu.attach.file "Pripni shranjeno kopijo datoteke ...">

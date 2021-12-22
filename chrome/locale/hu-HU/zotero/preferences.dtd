@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles " További stílusok telepítése...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Mentés Zotero-ba (adress bar icon)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Teljesképernyős üzemmód">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "Gyorskeresés">
 <!ENTITY zotero.preferences.keys.newItem "Új elem létrehozása">
 <!ENTITY zotero.preferences.keys.newNote "Új jegyzet létrehozása">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Az összes elem megjelölése olvasottként/olvasatlanként">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Címkeválasztó mutatása/elrejtése">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kiválasztott hivatkozás másolása a vágólapra">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kiválasztott elemek másolása a vágólapra">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importálás a vágólapról">

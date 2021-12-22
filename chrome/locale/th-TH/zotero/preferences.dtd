@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "เปลี่ยนสู่แบบเต็มจอ">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "โฟกัสที่ช่องไลบรารี">
 <!ENTITY zotero.preferences.keys.quicksearch "ค้นหาแบบเร็ว">
 <!ENTITY zotero.preferences.keys.newItem "Create a New Item">
 <!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "เปลี่ยนตัวเลือกแท็ก">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "ทำสำเนารายการอ้างอิงที่เลือกไว้ไปยังคลิปบอร์ด">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "ทำสำเนารายการที่เลือกไปยังคลิปบอร์ด">
 <!ENTITY zotero.preferences.keys.importFromClipboard "นำเข้าจากคลิปบอร์ด">

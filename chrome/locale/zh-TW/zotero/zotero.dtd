@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "在文獻庫中顯示">
 <!ENTITY zotero.items.menu.attach.note "新增筆記">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "新增附加檔案">
 <!ENTITY zotero.items.menu.attach.link.uri "附加連結到 URI…">
 <!ENTITY zotero.items.menu.attach.file "附加已儲存的檔案副本…">

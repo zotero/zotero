@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Salvestada Zoterosse (aadressiriba ikoon)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Täisekraan režiim">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Kataloogide paan fookusesse">
 <!ENTITY zotero.preferences.keys.quicksearch "Kiirotsing">
 <!ENTITY zotero.preferences.keys.newItem "Uue kirje loomine">
 <!ENTITY zotero.preferences.keys.newNote "Uue märkuse loomine">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Lipikuvalija olek">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopeerida valitud kirje tsiteeringud lõikepuhvrisse">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopeerida valitud kirjed lõikepuhvrisse">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Lõikepuhvrist importimine">

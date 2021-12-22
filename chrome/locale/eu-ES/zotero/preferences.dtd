@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Estilo gehiago lortu...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Gorde Zoteron (helbide barrako ikonoa)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Pantaila osoa bai/ez">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Enfokatu liburutegien panela">
 <!ENTITY zotero.preferences.keys.quicksearch "Bilatu:">
 <!ENTITY zotero.preferences.keys.newItem "Elementu berria sortu">
 <!ENTITY zotero.preferences.keys.newNote "Sortu ohar berria">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Jarioko elementu guztiak irakurrita/irakurri gabe markatu">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Etiketa hautatzailea ikusi bai/ez">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Hautatutako elementuen aipuak arbelera kopiatu">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Hautatutako elementuak arbelera kopiatu">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Arbeletik inportatu">

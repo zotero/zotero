@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "他の引用スタイルを入手する...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Zotero に保存する (アドレスバーのアイコン)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "全画面表示の切り替え">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "ライブラリ画面へ">
 <!ENTITY zotero.preferences.keys.quicksearch "簡易検索">
 <!ENTITY zotero.preferences.keys.newItem "新しいアイテムを作成する">
 <!ENTITY zotero.preferences.keys.newNote "新しいメモを作成する">
 <!ENTITY zotero.preferences.keys.toggleAllRead "すべてのフィードのアイテムを既読/未読にする">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "タグ選択ボックスを表示する／隠す">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "選択されたアイテムの出典表記をクリップボードにコピー">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "選択されたアイテムの参考文献目録をクリップボードにコピー">
 <!ENTITY zotero.preferences.keys.importFromClipboard "クリップボードからインポート">

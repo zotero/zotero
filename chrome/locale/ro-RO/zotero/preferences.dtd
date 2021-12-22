@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Obține stiluri adiționale...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Salvează în Zotero (iconița din bara de adrese)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Extinde pe tot ecranul">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Panou de focalizare biblioteci">
 <!ENTITY zotero.preferences.keys.quicksearch "Căutare rapidă">
 <!ENTITY zotero.preferences.keys.newItem "Creează o nouă înregistrare">
 <!ENTITY zotero.preferences.keys.newNote "Creează o notă nouă">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Marchează toate fluxurile de înregistrări ca citite/necitite">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Afișează/ascunde selectorul de etichete">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copiază citările înregistrărilor selectate în memoria Clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copiază înregistrările selectate în memoria Clipboard">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importă din memoria Clipboard">

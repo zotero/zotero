@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Hidupkan/Matikan Mode Layar Penuh">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Fokus Jendela Pustaka">
 <!ENTITY zotero.preferences.keys.quicksearch "Pencarian Cepat">
 <!ENTITY zotero.preferences.keys.newItem "Create a New Item">
 <!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Munculkan/Sembunyikan Selektor Tag">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Salin Sitasi Item Terpilih ke Clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Salin Item Terpilih ke Clipboard">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Impor dari Clipboard">

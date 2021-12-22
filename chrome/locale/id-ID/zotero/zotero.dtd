@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Tunjukkan dalam Perpustakaan">
 <!ENTITY zotero.items.menu.attach.note "Tambahkan Catatan">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Tambah catatan dari Anotasi">
 <!ENTITY zotero.items.menu.attach "Tambahkan Lampiran">
 <!ENTITY zotero.items.menu.attach.link.uri "Lampirkan Tautan ke URL...">
 <!ENTITY zotero.items.menu.attach.file "Lampirkan Salinan Berkas Tersimpan">

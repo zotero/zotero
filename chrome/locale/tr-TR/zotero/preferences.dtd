@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Ek stiller indir...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Zotero'ya Kaydet (adres çubuğu ikonu)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Tam Ekran Moduna Geç">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Dermeler Bölmesine Odaklan">
 <!ENTITY zotero.preferences.keys.quicksearch "Çabuk Arama">
 <!ENTITY zotero.preferences.keys.newItem "Yeni Eser Oluştur">
 <!ENTITY zotero.preferences.keys.newNote "Yeni Not Oluştur">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Tüm Besleme Eserlerini Okunmuş/Okunmamış İşaretle">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Etiket Seçiciyi Aç">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Seçili Eserin Alıntılarını Panoya Kopyala">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Seçilen Eserleri Panoya Kopyala">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Panodan İçeri Aktar">

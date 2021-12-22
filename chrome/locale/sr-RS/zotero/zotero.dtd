@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Прикажи у библиотеци">
 <!ENTITY zotero.items.menu.attach.note "Додај белешку">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Додај белешку из напомена">
 <!ENTITY zotero.items.menu.attach "Додај прилог">
 <!ENTITY zotero.items.menu.attach.link.uri "Приложи везу до адресе…">
 <!ENTITY zotero.items.menu.attach.file "Приложи сачувану копију датотеке…">

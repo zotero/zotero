@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Zusätzliche Stile erhalten...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "In Zotero speichern (Adressleisten-Symbol)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Vollbild-Modus an/aus">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Fokus auf Bibliotheksspalte">
 <!ENTITY zotero.preferences.keys.quicksearch "Schnellsuche">
 <!ENTITY zotero.preferences.keys.newItem "Neuen Eintrag erstellen">
 <!ENTITY zotero.preferences.keys.newNote "Neue Notiz erstellen">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Alle Feed-Einträge alls Gelesen/Ungelesen markieren">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Tag-Selector an/aus">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Ausgewählte Einträge als In-Text-Zitationen in die Zwischenablage kopieren">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Ausgewählte Einträge in die Zwischenablage kopieren">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Import aus der Zwischenablage">

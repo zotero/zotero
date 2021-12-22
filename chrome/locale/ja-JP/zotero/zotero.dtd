@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "ライブラリの中に表示">
 <!ENTITY zotero.items.menu.attach.note "メモを追加">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "添付ファイルを追加する">
 <!ENTITY zotero.items.menu.attach.link.uri "URIへのリンクを添付する...">
 <!ENTITY zotero.items.menu.attach.file "保存されたファイルのコピーを添付する...">

@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Erakutsi liburutegian">
 <!ENTITY zotero.items.menu.attach.note "Oharra gehitu">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Gehitu oharra oharpenetatik">
 <!ENTITY zotero.items.menu.attach "Eranskina gehitu">
 <!ENTITY zotero.items.menu.attach.link.uri "URI baterako esteka erantsi...">
 <!ENTITY zotero.items.menu.attach.file "Gordetako dokumentu baten kopia erantsi">

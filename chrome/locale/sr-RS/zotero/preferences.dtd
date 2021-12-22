@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Преузми додатке стилове…">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Сачувај у Зотеро (иконица траке за адресу)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Укључи/искључи приказ преко целог екрана">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Пребаци на површ са библиотеком">
 <!ENTITY zotero.preferences.keys.quicksearch "Брза претрага">
 <!ENTITY zotero.preferences.keys.newItem "Направи нову ставку">
 <!ENTITY zotero.preferences.keys.newNote "Направи нову белешку">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Означи све ставке из довода као прочитане/непрочитане">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Искључи/укључи избирача ознаке">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Копирај цитат изабране ставке у списак исечака">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Копирај изабране ставке у списак исечака">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Увези из оставе">

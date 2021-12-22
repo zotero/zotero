@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Ná í viðbótarstíla…">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Vista í Zotero (tákn birt í vefslóðareit)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Víxla úr og í heilskjásham">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Áhersla á safnaglugga">
 <!ENTITY zotero.preferences.keys.quicksearch "Flýtileit">
 <!ENTITY zotero.preferences.keys.newItem "Ný færsla">
 <!ENTITY zotero.preferences.keys.newNote "Ný athugasemd">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Merkja öll atriði í streymi sem lesin/ólesin">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Víxla merkjaveljara af/á">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Afrita valdar tilvísunarfærslur á klippispjald">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Afrita valdar færslur á klippispjald">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Flytja inn af klippispjaldi">

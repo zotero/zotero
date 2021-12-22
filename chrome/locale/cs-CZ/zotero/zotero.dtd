@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Ukázat v knihovně">
 <!ENTITY zotero.items.menu.attach.note "Přidat poznámku">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Přidat přílohu">
 <!ENTITY zotero.items.menu.attach.link.uri "Připojit odkaz na URI..,">
 <!ENTITY zotero.items.menu.attach.file "Přiložit uloženou kopii souboru...">

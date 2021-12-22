@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Kitaplıkta Göster">
 <!ENTITY zotero.items.menu.attach.note "Not Ekle">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Açıklamalardan Not Ekle">
 <!ENTITY zotero.items.menu.attach "Ek Ekle">
 <!ENTITY zotero.items.menu.attach.link.uri "URI'ye Bağlantı Ekle">
 <!ENTITY zotero.items.menu.attach.file "Dosyanın Kaydedilmiş Kopyasını Ekle">

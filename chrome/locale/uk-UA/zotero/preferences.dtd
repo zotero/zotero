@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Отримати додаткові стилі...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Зберегти в Zotero (значок в адресному рядку браузера)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Перключенні повноекранного режиму">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Фокус на панелі бібліотек">
 <!ENTITY zotero.preferences.keys.quicksearch "Швидкий пошук">
 <!ENTITY zotero.preferences.keys.newItem "Створити новий документ">
 <!ENTITY zotero.preferences.keys.newNote "Створити нову закладку">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Позначити всі записи стрічки, як прочитані/непрочитані">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Переключити панель вибору тегів">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Скопіювати цитати з вибраного докмента в буфер обміну">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Копіювати вибрані документи в буфер обміну">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Імпортувати з буфера обміну">

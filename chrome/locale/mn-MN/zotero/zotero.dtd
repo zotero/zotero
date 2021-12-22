@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Show in Library">
 <!ENTITY zotero.items.menu.attach.note "Тэмдэглэл нэмэх">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Add Attachment">
 <!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
 <!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">

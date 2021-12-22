@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Parsisiųsti papildomų stilių...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Įrašyti į Zotero (ženkliukas adreso juostoje)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Įjungti/išungti viso ekrano veikseną">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Aktyvuoti bibliotekos skydelį">
 <!ENTITY zotero.preferences.keys.quicksearch "Greita paieška">
 <!ENTITY zotero.preferences.keys.newItem "Sukurti naują įrašą">
 <!ENTITY zotero.preferences.keys.newNote "Sukurti naują pastabą">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Visus naujienų kanalo įrašus pažymėti skaitytais/neskaitytais">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Rodyti/slėpti gairių parinkiklį">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopijuoti pasirinktų įrašų citavimą į iškarpinę">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopijuoti pasirinktus įrašus į iškarpinę">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importuoti iš iškarpinės">

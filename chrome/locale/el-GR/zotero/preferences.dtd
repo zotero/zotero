@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Αποκτήστε επιπλέον στυλ ...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Αποθήκευση στο Zotero (εικονίδιο γραμμής διεύθυνσης)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Εναλλαγή σε λειτουργία πλήρους οθόνης">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Εστίαση στο πλαίσιο Βιβλιοθηκών">
 <!ENTITY zotero.preferences.keys.quicksearch "Γρήγορη αναζήτηση">
 <!ENTITY zotero.preferences.keys.newItem "Δημιουργία Νέου στοιχείου">
 <!ENTITY zotero.preferences.keys.newNote "Δημιουργία Νέας σημείωσης">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Σημειώστε όλα τα στοιχεία ροής ως αναγνωσμένα / μη αναγνωσμένα">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Εναλλαγή Επιλογέα ετικετών">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Αντιγραφή των επιλεγμένων παραπομπών στοιχείου στην προσωρινή μνήμη">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Αντιγραφή των επιλεγμένων στοιχείων στην προσωρινή μνήμη">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Εισαγωγή από το Πρόχειρο">

@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "عرض في المكتبة">
 <!ENTITY zotero.items.menu.attach.note "اضافة ملاحظة">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "اضافة مرفق">
 <!ENTITY zotero.items.menu.attach.link.uri "ربط الرابط بالمسار...">
 <!ENTITY zotero.items.menu.attach.file "إرفاق نسخة من ملف مخزن...">

@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Afișează în bibliotecă">
 <!ENTITY zotero.items.menu.attach.note "Adaugă notă">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Adaugă anexă">
 <!ENTITY zotero.items.menu.attach.link.uri "Anexează legătură la URI...">
 <!ENTITY zotero.items.menu.attach.file "Anexează copia salvată a fișierului...">

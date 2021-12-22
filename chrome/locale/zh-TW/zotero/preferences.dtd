@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "獲取額外的樣式…">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "儲存到 Zotero (網址列圖示)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "切換全螢幕模式">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "轉至文獻庫窗格">
 <!ENTITY zotero.preferences.keys.quicksearch "快速搜尋">
 <!ENTITY zotero.preferences.keys.newItem "新增項目">
 <!ENTITY zotero.preferences.keys.newNote "新增筆記">
 <!ENTITY zotero.preferences.keys.toggleAllRead "所有新聞源項目標示成已讀或未讀">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "切換標籤選擇器">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "複製選擇項目的引用文獻到剪貼簿">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "複製所選項目到剪貼簿">
 <!ENTITY zotero.preferences.keys.importFromClipboard "從剪貼簿匯入">

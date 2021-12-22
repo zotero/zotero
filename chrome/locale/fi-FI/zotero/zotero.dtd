@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Näytä kirjastossa">
 <!ENTITY zotero.items.menu.attach.note "Lisää muistiinpano">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Lisää liite">
 <!ENTITY zotero.items.menu.attach.link.uri "Liitä linkki URIin...">
 <!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">

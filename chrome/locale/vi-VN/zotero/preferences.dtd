@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Lấy các style khác...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Lưu vào Zotero (biểu tượng thanh địa chỉ)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Bật/Tắt chế độ Toàn-màn-hình">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Khung thư viện quan tâm">
 <!ENTITY zotero.preferences.keys.quicksearch "Tìm kiếm nhanh">
 <!ENTITY zotero.preferences.keys.newItem "Tạo tài liệu mới">
 <!ENTITY zotero.preferences.keys.newNote "Tạo ghi chú mới">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Đánh dấu mọi feed là đã đọc/chưa đọc">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Bật/Tắt Bộ-chọn-thẻ">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Sao chép các trích dẫn đã chọn vào clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Sao chép các tài liệu đã chọn vào clipboard">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Nhập từ Clipboard">

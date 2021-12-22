@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Afficher dans la bibliothèque">
 <!ENTITY zotero.items.menu.attach.note "Ajouter une note">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Ajouter une pièce jointe">
 <!ENTITY zotero.items.menu.attach.link.uri "Joindre un lien vers un URI…">
 <!ENTITY zotero.items.menu.attach.file "Joindre une copie enregistrée d'un fichier…">

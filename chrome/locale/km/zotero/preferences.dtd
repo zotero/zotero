@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "បើកពេញអេក្រង់">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
 <!ENTITY zotero.preferences.keys.quicksearch "ស្វែងរកលឿន">
 <!ENTITY zotero.preferences.keys.newItem "Create a New Item">
 <!ENTITY zotero.preferences.keys.newNote "Create a New Note">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "បើកជម្រើសស្លាក">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "ចម្លងអាគតដ្ឋានឯកសារដែលបានជ្រើសរើសទៅកាន់កន្លែងរក្សាទុកឯកសារបណ្តោះអាសន្ន">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "ចម្លងឯកសារដែលបានជ្រើសរើសកន្លែងរក្សាទុកឯកសារបណ្តោះអាសន្ន">
 <!ENTITY zotero.preferences.keys.importFromClipboard "ទាញឯកសារចេញពីកន្លែងរក្សាទុកឯកសារបណ្តោះអាសន្ន">

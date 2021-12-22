@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Diskouez el levraoueg:">
 <!ENTITY zotero.items.menu.attach.note "Ouzhpennañ un notenn">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Ouzhpennañ ur pezh-stag">
 <!ENTITY zotero.items.menu.attach.link.uri "Stagañ ul liamm betek un URI…">
 <!ENTITY zotero.items.menu.attach.file "Stagañ un eilenn enrollet eus ur restr...">

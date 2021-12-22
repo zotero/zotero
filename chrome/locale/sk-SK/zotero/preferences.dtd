@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Získať ďalšie štýly...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Uložiť do Zotera (ikona v lište pre adresu)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Prepnúť Zotero do celého okna">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Tabla knižníc Focus">
 <!ENTITY zotero.preferences.keys.quicksearch "Rýchle vyhľadávanie">
 <!ENTITY zotero.preferences.keys.newItem "Vytvoriť nový záznam">
 <!ENTITY zotero.preferences.keys.newNote "Vytvoriť novú poznámku">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Označiť všetky RSS správy ako prečítané/neprečítané">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Prepnúť výber značiek">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopírovať vybrané citácie do schránky">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopírovať vybrané záznamy do schránky">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importovať zo schránky">

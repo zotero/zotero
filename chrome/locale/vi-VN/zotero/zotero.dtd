@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "Hiển thị trong Thư viện">
 <!ENTITY zotero.items.menu.attach.note "Tạo một Ghi chép">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Thêm tệp đính kèm">
 <!ENTITY zotero.items.menu.attach.link.uri "Đính kèm liên kết tới URI...">
 <!ENTITY zotero.items.menu.attach.file "Đính kèm bản sao đã lưu của tệp...">

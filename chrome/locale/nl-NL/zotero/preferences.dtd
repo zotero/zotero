@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Meer stijlen ophalen">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Sla op naar Zotero (adresbalk icoon)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Volledige schermweergave">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Breng venster Bibliotheken naar voren">
 <!ENTITY zotero.preferences.keys.quicksearch "Snelzoeken">
 <!ENTITY zotero.preferences.keys.newItem "Maak een Nieuw item">
 <!ENTITY zotero.preferences.keys.newNote "Maak een Nieuwe aantekening">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Markeer alle feed items als gelezen/ongelezen">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Labelkiezer tonen">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Verwijzingen van geselecteerde items naar klembord kopiëren">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Geselecteerde items naar klembord kopiëren">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importeren vanaf klembord">

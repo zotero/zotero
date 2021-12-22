@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Изтегляне на допълнителни стилове">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Запазване в Зотеро (икона в адресната лента)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Превключване в режим на цял екран">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Фокусиране на панел Библиотеки">
 <!ENTITY zotero.preferences.keys.quicksearch "Бързо Търсене">
 <!ENTITY zotero.preferences.keys.newItem "Създаване на нов запис">
 <!ENTITY zotero.preferences.keys.newNote "Създаване на нова бележка">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Отбелязване на всички емисии като прочетени/непрочетени">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Избиране на маркери">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Копиране на избраните цитирания в клипборда">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Копиране на избраните записи в клипборда">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Внасяне от клипборда">

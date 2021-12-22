@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "In bibliotheek tonen">
 <!ENTITY zotero.items.menu.attach.note "Aantekening toevoegen">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "Bijlage toevoegen">
 <!ENTITY zotero.items.menu.attach.link.uri "Koppeling naar URI toevoegen…">
 <!ENTITY zotero.items.menu.attach.file "Kopie van bestand toevoegen…">

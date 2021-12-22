@@ -91,7 +91,6 @@
 
 <!ENTITY zotero.items.menu.showInLibrary "라이브러리로 표시">
 <!ENTITY zotero.items.menu.attach.note "노트 추가">
-<!ENTITY zotero.items.menu.attach.noteFromAnnotations "Add Note from Annotations">
 <!ENTITY zotero.items.menu.attach "첨부 추가">
 <!ENTITY zotero.items.menu.attach.link.uri "URL로 링크 걸기">
 <!ENTITY zotero.items.menu.attach.file "파일의 사본 첨부...">

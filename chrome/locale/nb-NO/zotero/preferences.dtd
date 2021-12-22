@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Hent flere stiler...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Lagre til Zotero (adressefelt ikon)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Fullskjerm av/på">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Fokus biblioteksrute">
 <!ENTITY zotero.preferences.keys.quicksearch "Hurtigsøk">
 <!ENTITY zotero.preferences.keys.newItem "Opprett et nytt element">
 <!ENTITY zotero.preferences.keys.newNote "Opprett et nytt notat">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Merk alle nyhetsstrømelementene som lest/ikke lest">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Slå emneord av/på">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopier de valgte henvisningene til utklippstavla">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopier de valgte elementene til utklippstavla">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importer fra utklippstavle">

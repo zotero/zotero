@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Hanki lisää tyylejä...">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "Tallenna Zoteroon (osoitepalkin kuvake)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "Koko ruudun tila">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Kohdista kirjastonäkymään">
 <!ENTITY zotero.preferences.keys.quicksearch "Pikahaku">
 <!ENTITY zotero.preferences.keys.newItem "Luo uusi nimike">
 <!ENTITY zotero.preferences.keys.newNote "Luo uusi muistiinpano">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Merkitse kaikki syötteen kohteet luetuiksi/lukemattomiksi">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "Aiheenvalitsin päälle/pois">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopioi valittujen nimikkeiden sitaatit leikepöydälle">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopioi valitut nimikkeet leikepöydälle">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Tuo leikepöydältä">

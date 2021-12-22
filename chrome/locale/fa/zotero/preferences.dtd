@@ -128,13 +128,11 @@
 <!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "ذخیره در زوترو ( نماد نوار آدرس)">
-<!ENTITY zotero.preferences.keys.toggleFullscreen "فعال/غیرفعال کردن حالت تمام‌صفحه">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "تمرکز بر قاب کتابخانه">
 <!ENTITY zotero.preferences.keys.quicksearch "جستجوی سریع">
 <!ENTITY zotero.preferences.keys.newItem "ایجاد آیتم جدید">
 <!ENTITY zotero.preferences.keys.newNote "ایجاد یادداشت جدید">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
-<!ENTITY zotero.preferences.keys.toggleTagSelector "روشن/خاموش کردن انتخاب برچسب">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "رونوشت یادکرد آیتم‌های انتخاب شده به حافظه موقت">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "رونوشت آیتم‌های انتخاب شده به حافظه موقت">
 <!ENTITY zotero.preferences.keys.importFromClipboard "درون‌برد از حافظه موقت">
