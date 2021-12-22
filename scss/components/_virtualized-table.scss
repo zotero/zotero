@@ -50,7 +50,6 @@
 		flex-grow: 1;
 		flex-shrink: 1;
 		box-sizing: border-box;
-		height: 100%;
 
 		&.primary {
 			display: flex;
@@ -221,7 +220,7 @@
 		text-overflow: ellipsis;
 		overflow: hidden;
 		pointer-events: none;
-		min-height: 90%;
+		max-height: 100%;
 	}
 }
 

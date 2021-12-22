@@ -24,5 +24,12 @@
 .virtualized-table-body, .drag-image-container{
 	.cell:not(:first-child) {
 		border-inline-start: 1px solid #ddd;
+		
+		// A hack to make empty cells have a content, otherwise the border applied
+		// above has a height of a few pixels in empty cells.
+		&::after {
+			content: " ";
+			border-inline-start: 1px solid transparent;
+		}
 	}
 }
