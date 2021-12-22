@@ -2316,6 +2316,16 @@ Zotero.Item.prototype.isEmbeddedImageAttachment = function() {
 
 
 /**
+ * @return {Boolean} - Returns true if item is a snapshot
+ */
+Zotero.Item.prototype.isSnapshotAttachment = function () {
+	return this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL
+		&& this.attachmentContentType == 'text/html';
+};
+
+
+
+/**
  * @return {Boolean} - Returns true if item is a stored or linked PDF attachment
  */
 Zotero.Item.prototype.isPDFAttachment = function () {
@@ -3631,28 +3641,42 @@ Zotero.Item.prototype.getBestAttachments = Zotero.Promise.coroutine(function* ()
 /**
  * Return state of best attachment
  *
- * @return {Promise<Integer>}  Promise for 0 (none), 1 (present), -1 (missing)
+ * @return {Promise<Object>} - Promise for object with string 'type' ('none'|'pdf'|'snapshot'|'other')
+ *     and boolean 'exists'
  */
-Zotero.Item.prototype.getBestAttachmentState = Zotero.Promise.coroutine(function* () {
+Zotero.Item.prototype.getBestAttachmentState = async function () {
 	if (this._bestAttachmentState !== null) {
 		return this._bestAttachmentState;
 	}
-	var item = yield this.getBestAttachment();
-	if (item) {
-		let exists = yield item.fileExists();
-		return this._bestAttachmentState = exists ? 1 : -1;
+	var item = await this.getBestAttachment();
+	if (!item) {
+		return this._bestAttachmentState = {
+			type: 'none'
+		};
 	}
-	return this._bestAttachmentState = 0;
-});
+	var type;
+	if (item.isPDFAttachment()) {
+		type = 'pdf';
+	}
+	else if (item.isSnapshotAttachment()) {
+		type = 'snapshot';
+	}
+	else {
+		type = 'other';
+	}
+	var exists = await item.fileExists();
+	return this._bestAttachmentState = { type, exists };
+};
 
 
 /**
  * Return cached state of best attachment for use in items view
  *
- * @return {Integer|null}  0 (none), 1 (present), -1 (missing), null (unavailable)
+ * @return {Object|null} - Resolved value from getBestAttachmentState() or { type: null } if
+ *     unavailable
  */
 Zotero.Item.prototype.getBestAttachmentStateCached = function () {
-	return this._bestAttachmentState;
+	return this._bestAttachmentState || { type: null };
 }
 
 

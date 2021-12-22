@@ -86,6 +86,7 @@ i('Twisty', (
 i('Cross', "chrome://zotero/skin/cross.png");
 i('Tick', "chrome://zotero/skin/tick.png");
 i('ArrowRefresh', "chrome://zotero/skin/arrow_refresh.png");
+//i('Link', "chrome://zotero/skin/link.png");
 
 i('RTFScanAccept', "chrome://zotero/skin/rtfscan-accept.png");
 i('RTFScanLink', "chrome://zotero/skin/rtfscan-link.png");

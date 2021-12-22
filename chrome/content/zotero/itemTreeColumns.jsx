@@ -275,7 +275,7 @@ const COLUMNS = [
 		label: "zotero.tabs.attachments.label",
 		iconLabel: <Icons.IconAttachSmall />,
 		fixedWidth: true,
-		width: "14",
+		width: "16",
 		zoteroPersist: new Set(["hidden", "sortDirection"])
 	},
 	{

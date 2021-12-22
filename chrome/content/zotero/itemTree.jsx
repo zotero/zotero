@@ -2644,28 +2644,57 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return span;
 		}
 
+		// TEMP: For now, we use the blue bullet for all non-PDF attachments, but there's
+		// commented-out code for showing different icons for snapshots, files, and URL/DOI links
 		if (this.isContainer(index)) {
 			if (item.isRegularItem()) {
-				const state = item.getBestAttachmentStateCached();
+				const { type, exists } = item.getBestAttachmentStateCached();
 				let icon = "";
-				if (state === 1) {
-					icon = getDOMElement('IconBulletBlue');
+				let ariaLabel;
+				// If the item has a child attachment
+				if (type !== null && type != 'none') {
+					if (type == 'pdf') {
+						icon = getDOMElement('IconTreeitemAttachmentPDF');
+						ariaLabel = Zotero.getString('pane.item.attachments.hasPDF');
+						if (!exists) {
+							icon.classList.add('icon-missing-file');
+						}
+					}
+					else if (type == 'snapshot') {
+						//icon = getDOMElement('IconTreeitemAttachmentSnapshot');
+						icon = exists ? getDOMElement('IconBulletBlue') : getDOMElement('IconBulletBlueEmpty');
+						ariaLabel = Zotero.getString('pane.item.attachments.hasSnapshot');
+					}
+					else {
+						//icon = getDOMElement('IconTreeitem');
+						icon = exists ? getDOMElement('IconBulletBlue') : getDOMElement('IconBulletBlueEmpty');
+						ariaLabel = Zotero.getString('pane.item.attachments.has');
+					}
 					icon.classList.add('cell-icon');
+					//if (!exists) {
+					//	icon.classList.add('icon-missing-file');
+					//}
 				}
-				else if (state === -1) {
-					icon = getDOMElement('IconBulletBlueEmpty');
-					icon.classList.add('cell-icon');
-				}
-
-				if (icon.setAttribute) {
-					icon.setAttribute('aria-label', Zotero.getString('pane.item.attachments.has') + '.');
+				//else if (type == 'none') {
+				//	if (item.getField('url') || item.getField('DOI')) {
+				//		icon = getDOMElement('IconLink');
+				//		ariaLabel = Zotero.getString('pane.item.attachments.hasLink');
+				//		icon.classList.add('cell-icon');
+				//	}
+				//}
+				if (ariaLabel) {
+					icon.setAttribute('aria-label', ariaLabel + '.');
 				}
 				span.append(icon);
 
 				item.getBestAttachmentState()
 					// TODO: With no cell refreshing this is possibly somewhat inefficient
 					// Refresh cell when promise is fulfilled
-					.then(bestState => bestState != state && this.tree.invalidateRow(index));
+					.then(({ type: newType, exists: newExists }) => {
+						if (newType !== type || newExists !== exists) {
+							this.tree.invalidateRow(index);
+						}
+					});
 			}
 		}
 
@@ -2673,8 +2702,24 @@ var ItemTree = class ItemTree extends LibraryTree {
 			const exists = item.fileExistsCached();
 			let icon = "";
 			if (exists !== null) {
-				icon = exists ? getDOMElement('IconBulletBlue') : getDOMElement('IconBulletBlueEmpty');
+				if (item.isPDFAttachment()) {
+					icon = getDOMElement('IconTreeitemAttachmentPDF');
+					if (!exists) {
+						icon.classList.add('icon-missing-file');
+					}
+				}
+				else if (item.isSnapshotAttachment()) {
+					//icon = getDOMElement('IconTreeitemAttachmentSnapshot');
+					icon = exists ? getDOMElement('IconBulletBlue') : getDOMElement('IconBulletBlueEmpty');
+				}
+				else {
+					//icon = getDOMElement('IconTreeitem');
+					icon = exists ? getDOMElement('IconBulletBlue') : getDOMElement('IconBulletBlueEmpty');
+				}
 				icon.classList.add('cell-icon');
+				//if (!exists) {
+				//	icon.classList.add('icon-missing-file');
+				//}
 			}
 			span.append(icon);
 

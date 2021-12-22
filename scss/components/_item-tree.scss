@@ -29,6 +29,23 @@
 	.cell.hasAttachment {
 		box-sizing: content-box;
 		padding: 0 4px;
+		height: 100%;
+		
+		.icon-treeitemattachmentpdf {
+			min-width: 10px;
+			max-width: 10px;
+			margin: 3px;
+		}
+		
+		.icon-link {
+			min-width: 14px;
+			max-width: 14px;
+			margin: 2px 1px;
+		}
+		
+		.icon-missing-file {
+			opacity: 0.4;
+		}
 	}
 	
 	.cell.numNotes {
