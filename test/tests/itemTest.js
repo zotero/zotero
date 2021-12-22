@@ -1147,7 +1147,10 @@ describe("Zotero.Item", function () {
 				parentItemID: parentItem.id
 			});
 			yield parentItem.getBestAttachmentState();
-			assert.equal(parentItem.getBestAttachmentStateCached(), 1);
+			assert.deepEqual(
+				parentItem.getBestAttachmentStateCached(),
+				{ type: 'other', exists: true }
+			);
 		})
 		
 		it("should cache state for a missing file", function* () {
@@ -1161,7 +1164,10 @@ describe("Zotero.Item", function () {
 			let path = yield childItem.getFilePathAsync();
 			yield OS.File.remove(path);
 			yield parentItem.getBestAttachmentState();
-			assert.equal(parentItem.getBestAttachmentStateCached(), -1);
+			assert.deepEqual(
+				parentItem.getBestAttachmentStateCached(),
+				{ type: 'other', exists: false }
+			);
 		})
 	})
 	
