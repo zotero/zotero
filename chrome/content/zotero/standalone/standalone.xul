@@ -37,6 +37,7 @@
 	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
 	<!ENTITY % textcontextDTD SYSTEM "chrome://global/locale/textcontext.dtd" > %textcontextDTD;
 	<!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone.dtd" > %standaloneDTD;
+	<!ENTITY % editMenuOverlayDTD SYSTEM "chrome://zotero/locale/mozilla/editMenuOverlay.dtd" > %editMenuOverlayDTD;
 	<!ENTITY % brandDTD SYSTEM "chrome://branding/locale/brand.dtd" > %brandDTD;
 	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
 ]>
@@ -81,6 +82,10 @@
 		<key id="key_copyBibliography"
 				command="cmd_zotero_copyBibliography"
 				modifiers="accel shift"/>
+		<key id="key_advancedSearch"
+				command="cmd_zotero_advancedSearch"
+				key="&findCmd.key;"
+				modifiers="accel,shift"/>
 		<key id="key_back"/>
 		<key id="key_forward"/>
 	</keyset>
@@ -224,7 +229,8 @@
 							<menuitem id="menu_advancedSearch"
 									class="menu-type-library"
 									label="&zotero.toolbar.advancedSearch;"
-									command="cmd_zotero_advancedSearch"/>
+									command="cmd_zotero_advancedSearch"
+									key="key_advancedSearch"/>
 							<menuseparator class="menu-type-library" hidden="true" id="textfieldDirection-separator"/>
 							<menuitem id="textfieldDirection-swap"
 									command="cmd_switchTextDirection"
