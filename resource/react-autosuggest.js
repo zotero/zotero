@@ -1,1 +1,1 @@
-../node_modules/react-autosuggest/dist/standalone/autosuggest.min.js
+../node_modules/react-autosuggest/dist/dist/standalone/autosuggest.min.js
