@@ -574,6 +574,10 @@ class VirtualizedTable extends React.Component {
 				return;
 			}
 			break;
+		
+		case "Enter":
+			this._activateNode(e);
+			return;
 		}
 		
 		if (e.key == 'ContextMenu' || (e.key == 'F10' && e.shiftKey)) {
@@ -612,10 +616,6 @@ class VirtualizedTable extends React.Component {
 					this.onSelection(this.selection.focused + 1);
 				}
 			}
-			break;
-
-		case "Enter":
-			this._activateNode(e);
 			break;
 		}
 	}
