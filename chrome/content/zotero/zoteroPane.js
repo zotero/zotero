@@ -2702,7 +2702,6 @@ var ZoteroPane = new function()
 			'sep5',
 			'recognizePDF',
 			'unrecognize',
-			'reportMetadata',
 			'createParent',
 			'renameAttachments',
 			'reindexItem',
@@ -2910,7 +2909,7 @@ var ZoteroPane = new function()
 					}
 					
 					if (Zotero.RecognizePDF.canUnrecognize(item)) {
-						show.push(m.sep5, m.unrecognize, m.reportMetadata);
+						show.push(m.sep5, m.unrecognize);
 					}
 					
 					if (item.isAttachment()) {
@@ -4362,42 +4361,6 @@ var ZoteroPane = new function()
 		var items = ZoteroPane.getSelectedItems();
 		for (let item of items) {
 			await Zotero.RecognizePDF.unrecognize(item);
-		}
-	};
-	
-	
-	this.reportMetadataForSelected = async function () {
-		let items = ZoteroPane.getSelectedItems();
-		if(!items.length) return;
-		
-		let input = {value: ''};
-		let confirmed;
-		do {
-			confirmed = Services.prompt.prompt(
-				null,
-				Zotero.getString('recognizePDF.reportMetadata'),
-				Zotero.getString('general.describeProblem'),
-				input, null, {}
-			);
-		} while(confirmed && !input.value);
-		
-		if(!confirmed) return;
-		
-		try {
-			await Zotero.RecognizePDF.report(items[0], input.value);
-			Zotero.alert(
-				window,
-				Zotero.getString('general.submitted'),
-				Zotero.getString('general.thanksForHelpingImprove', Zotero.clientName)
-			);
-		}
-		catch (e) {
-			Zotero.logError(e);
-			Zotero.alert(
-				window,
-				Zotero.getString('general.error'),
-				Zotero.getString('general.invalidResponseServer')
-			);
 		}
 	};
 	
