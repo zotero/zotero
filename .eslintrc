@@ -23,7 +23,7 @@
 		"@zotero",
 		"plugin:react/recommended"
 	],
-	"parser": "babel-eslint",
+	"parser": "@babel/eslint-parser",
 	"parserOptions": {
 		"ecmaVersion": 2018,
 		"ecmaFeatures": {
@@ -32,11 +32,12 @@
 		"sourceType": "module"
 	},
 	"plugins": [
-		"react"
+		"react",
+		"@babel"
 	],
 	"settings": {
 		"react": {
-			"version": "16.8"
+			"version": "17.0"
 		}
 	},
 	"rules": {}
