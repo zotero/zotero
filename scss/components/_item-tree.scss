@@ -30,6 +30,8 @@
 		box-sizing: content-box;
 		padding: 0 4px;
 		height: 100%;
+		// Don't show ellipsis
+		text-overflow: unset;
 		
 		.icon-treeitemattachmentpdf {
 			min-width: 10px;
