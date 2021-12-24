@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "Elementua bikoiztu">
 <!ENTITY zotero.items.menu.mergeItems "Elementuak bateratu...">
 <!ENTITY zotero.items.menu.unrecognize "Metadatuak berreskuratzea desegin">
-<!ENTITY zotero.items.menu.reportMetadata "Metadatu okerrak salatu">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Elementu nagusi gisa erabiltzeko elementuaren bertsioa aukeratu:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Elementuaren beste bertsioetatik mantentzeko eremuak hautatu:">

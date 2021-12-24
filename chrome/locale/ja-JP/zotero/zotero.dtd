@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "選択されたアイテムを複製">
 <!ENTITY zotero.items.menu.mergeItems "アイテムを統合する...">
 <!ENTITY zotero.items.menu.unrecognize "メタデータの回収を取り消す">
-<!ENTITY zotero.items.menu.reportMetadata "不正確なメタデータを報告する">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "土台として用いるアイテムのヴァージョンを選んでください:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "このアイテムの重複するヴァージョンから維持したいフィールドを選択してください:">

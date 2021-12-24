@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "Eilskrivañ an elfenn">
 <!ENTITY zotero.items.menu.mergeItems "Kendeuziñ an elfennoù...">
 <!ENTITY zotero.items.menu.unrecognize "Nullañ an adpakañ metaroadennoù">
-<!ENTITY zotero.items.menu.reportMetadata "Danevelliñ metaroadennoù direizh">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Dibabit stumm an elfenn da implijout evel elfenn mestr:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Diuzañ ar maeziennoù da virout diwar stummoù all an elfenn:">

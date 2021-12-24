@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "Сделать дубликат выбранной записи">
 <!ENTITY zotero.items.menu.mergeItems "Объединить записи...">
 <!ENTITY zotero.items.menu.unrecognize "Отменить получение метаданных">
-<!ENTITY zotero.items.menu.reportMetadata "Сообщить о неправильных метаданных">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Выберите версию записи для использования в качестве главной:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Выберите поля для сохранения из других версий записи:">

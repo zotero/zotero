@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "Duplicar os elementos seleccionados">
 <!ENTITY zotero.items.menu.mergeItems "Xunguir os elemento...">
 <!ENTITY zotero.items.menu.unrecognize "Desfacer a recuperación de metadatos">
-<!ENTITY zotero.items.menu.reportMetadata "Informar de erros nos metadatos">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Escolle que versión deste elemento queres usar como o principal:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Escolle os campos a manter das outras versións do elemento:">

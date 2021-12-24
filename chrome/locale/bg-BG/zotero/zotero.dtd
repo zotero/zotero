@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "Удвояване на избраните записи">
 <!ENTITY zotero.items.menu.mergeItems "Сливане на записите...">
 <!ENTITY zotero.items.menu.unrecognize "Отменяне на извличането на данни">
-<!ENTITY zotero.items.menu.reportMetadata "Докладване за неправилни извлечени данни">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Изберете версията на записа, която да използвате като главен запис">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Изберете полета за запазване от другите версии на записа">

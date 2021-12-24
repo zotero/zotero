@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "Умножи ставку">
 <!ENTITY zotero.items.menu.mergeItems "Споји ставке…">
 <!ENTITY zotero.items.menu.unrecognize "Опозиви преузимање метаподатака">
-<!ENTITY zotero.items.menu.reportMetadata "Пријави неисправне метаподатке">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Изаберите верзију ставке која ће постати главна ставка:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Изаберите поља која желите да преузмете из друге верзије ставке:">

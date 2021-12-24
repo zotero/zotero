@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "Maak kopie van geselecteerd item">
 <!ENTITY zotero.items.menu.mergeItems "Items samenvoegen">
 <!ENTITY zotero.items.menu.unrecognize "Ophalen van metadata ongedaan maken">
-<!ENTITY zotero.items.menu.reportMetadata "Incorrecte metadata rapporteren">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Kies de versie van het item om te gebruiken als het meest voornaamste item:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Selecteer velden om te behouden ten opzichte van andere versie van het item:">

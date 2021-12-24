@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "Duplikasi Item Terpilih">
 <!ENTITY zotero.items.menu.mergeItems "Gabungkan Item...">
 <!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
-<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Pilih versi item untuk digunakan sebagai item utama:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Pilih kolom untuk dipertahankan dari versi lain item ini:">

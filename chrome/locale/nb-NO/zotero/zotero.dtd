@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "Dupliser det valgte elementet">
 <!ENTITY zotero.items.menu.mergeItems "Slå sammen elementer…">
 <!ENTITY zotero.items.menu.unrecognize "Gjør om hent metadat">
-<!ENTITY zotero.items.menu.reportMetadata "Rapporter inkorrekte metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Velg versjon av element til bruk som hovedelement:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Velg felt å bevare fra andre versjoner av elementet:">

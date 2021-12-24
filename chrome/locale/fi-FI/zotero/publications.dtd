@@ -1,19 +1,19 @@
-<!ENTITY zotero.publications.my_publications "My Publications">
+<!ENTITY zotero.publications.my_publications "Omat julkaisuni">
 
-<!ENTITY zotero.publications.intro "Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files if you have the rights to distribute them and wish to do so.">
-<!ENTITY zotero.publications.include.checkbox.files "Include files">
-<!ENTITY zotero.publications.include.checkbox.notes "Include notes">
-<!ENTITY zotero.publications.include.adjustAtAnyTime "You can adjust what to show at any time from the My Publications collection.">
+<!ENTITY zotero.publications.intro "Omat julkaisuni -kokoelmaan lisätyt nimikkeet näkyvät profiilisivullasi zotero.org:ssa. Jos päätät sisällyttää liitetiedostot, ne julkaistaan sivulla määrittelemälläsi lisenssillä. Lisää vain julkaisuja jotka olet itse tehnyt ja sisällytä vain tiedostot, joiden levittämiseen sinulla on oikeudet ja joita haluat levittää.">
+<!ENTITY zotero.publications.include.checkbox.files "Sisällytä tiedostot">
+<!ENTITY zotero.publications.include.checkbox.notes "Sisällytä muistiinpanot">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "Voin milloin tahansa valita, mitä Omat julkaisuni -kokoelmassa näytetään.">
 
-<!ENTITY zotero.publications.sharing.title "Choose how your work may be shared">
-<!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
-<!ENTITY zotero.publications.sharing.prompt "Would you like to allow your work to be shared by others?">
-<!ENTITY zotero.publications.sharing.cc "Yes, under a Creative Commons license">
-<!ENTITY zotero.publications.sharing.cc0 "Yes, and place my work in the public domain">
-<!ENTITY zotero.publications.sharing.reserved "No, only publish my work on zotero.org">
+<!ENTITY zotero.publications.sharing.title "Valitse, millä ehdoilla julkaisujasi saa jakaa">
+<!ENTITY zotero.publications.sharing.text "Voit pidättää kaikki oikeudet julkaisuihisi, jakaa ne Creative Commons -lisenssillä tai vapauttaa ne tekijänoikeudettomiksi (public domain). Kaikissa tapauksissa työsi on julkisesti saatavilla zotero.org:ssa.">
+<!ENTITY zotero.publications.sharing.prompt "Saavatko muut levittää julkaisujasi edelleen?">
+<!ENTITY zotero.publications.sharing.cc "Kyllä, Creative Commons -lisenssillä">
+<!ENTITY zotero.publications.sharing.cc0 "Kyllä, ja jaa julkaisuni tekijänoikeudettomana eli public domainina">
+<!ENTITY zotero.publications.sharing.reserved "Ei, näytä julkaisuni vain zotero.org:ssa.">
 
-<!ENTITY zotero.publications.chooseLicense.title "Choose a Creative Commons license">
-<!ENTITY zotero.publications.chooseLicense.text "A Creative Commons license allows others to copy and redistribute your work as long as they give appropriate credit, provide a link to the license, and indicate if changes were made. Additional conditions can be specified below.">
-<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Allow adaptations of your work to be shared?">
-<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Yes, as long as others share alike">
-<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Allow commercial uses of your work?">
+<!ENTITY zotero.publications.chooseLicense.title "Valitse Creative Commons -lisenssi">
+<!ENTITY zotero.publications.chooseLicense.text "Creative Commons -lisenssi sallii julkaisujesi levittämisen määrittelemilläsi ehdoilla, edellyttäen että tekijä mainitaan asianmukaisesti, lisenssiin linkitetään ja kerrotaan, mikäli teosta on muutettu. Alla voit määritellä lisäehtoja.">
+<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Saako työtäsi muunnella?">
+<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Kyllä, mikäli jaetaan samalla lisenssillä">
+<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Sallitaanko julkaisusi kaupallinen käyttö?">

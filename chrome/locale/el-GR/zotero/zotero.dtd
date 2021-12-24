@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "Δημιουργία Διπλότυπου για το Στοιχείο">
 <!ENTITY zotero.items.menu.mergeItems "Συνένωση Στοιχείων...">
 <!ENTITY zotero.items.menu.unrecognize "Αναίρεση ανάκτησης Μεταδεδομένων">
-<!ENTITY zotero.items.menu.reportMetadata "Αναφορά εσφαλμένων Μεταδεδομένων">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Επιλέξτε την έκδοση του Στοιχείου που θα χρησιμοποιηθεί ως κύριο στοιχείο:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Επιλέξτε πεδία που θα διατηρηθούν από άλλες εκδόσεις του στοιχείου:">

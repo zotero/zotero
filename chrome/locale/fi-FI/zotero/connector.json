@@ -2,6 +2,9 @@
   "general_more": {
     "message": "Lisää..."
   },
+  "general_moreInfo": {
+    "message": "Lisätietoja..."
+  },
   "general_done": {
     "message": "Valmis"
   },
@@ -17,14 +20,23 @@
   "general_pleaseWait": {
     "message": "Odota..."
   },
+  "general_copyToClipboard": {
+    "message": "Kopioi leikepöydälle"
+  },
   "progressWindow_savingTo": {
     "message": "Tallennetaan kokoelmaan"
   },
   "progressWindow_tagPlaceholder": {
     "message": "Avainsanat (pilkulla eroteltuna)"
   },
+  "progressWindow_error_translation": {
+    "message": "Nimikkeen tallentamisessa tapahtui virhe. Katso $1, jos haluat lisätietoja."
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Sivukääntäjiin liittyvien ongelmien selvittäminen"
+  },
+  "progressWindow_error_fallback": {
+    "message": "Tapahtui virhe tallennettaessa työkalulla $1. Yritetään tallennusta $2 avulla."
   },
   "progressWindow_error_upgradeClient": {
     "message": "$1-versiosi ei tue tätä toimintoa. Päivitä versioon $2."
@@ -32,16 +44,67 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "tuorein versio"
   },
+  "appConnector": {
+    "message": "$1Connector"
+  },
   "upgradeApp": {
     "message": "Päivitä $1"
   },
   "error_connection_isAppRunning": {
     "message": "Onko $1 käynnissä?"
   },
+  "error_connection_save": {
+    "message": "$1 ei saanut yhteyttä $2-työpöytäsovellukseen. Zotero Connector pystyy tallentamaan joitain sivuja $3-tilille, mutta paras toimivuus saavutetaan, jos avaat $2n ennen kuin yrität tallentaa."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Voit <a href=\"$1\">ladata $2</a> tai <a href=\"$3\">suorittaa tarvittaessa yhteyden vianmäärityksen</a>. "
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "Käytä tallennusta verkkokirjastoon (Online Library)"
+  },
+  "reports_report_submitted": {
+    "message": "Virheraporttisi on lähetetty.\n\nRaportin tunniste: $1\n\nKirjoita seuraavaksi Zoteron käyttäjäfoorumille viesti, jossa mainitset raportin tunnisteen, ongelman kuvauksen sekä kuvauksen siitä, mitä käyttäjän pitää tehdä vian toistamiseksi.\n\nVirheilmoituksia ei käsitellä ellei yllämainittua käyttäjäfoorumiviestiä kirjoiteta."
+  },
+  "reports_debug_output_submitted": {
+    "message": "Virheenjäljitystallenne on lähetetty.\n\nTallenteen tunniste (Debug ID) on $1."
+  },
+  "reports_submission_failed": {
+    "message": "Raporttia lähetettäessä tapahtui virhe.\n\n$1\n\nTarkista internetyhteytesi toimivuus ja yritä uudelleen. Jos ongelma ei poistu, kirjoita aiheesta viesti käyttäjäfoorumille."
+  },
+  "integration_error_clientUpgrade": {
+    "message": "Verkkopohjainen viittaaminen vaatii $1 tai myöhemmän."
+  },
+  "integration_error_connection": {
+    "message": "$1ei saanut yhteyttä työpöytäsovellukseen $2. $2 tulee olla auki jotta verkkopohjainen viittaaminen onnistuu. "
+  },
   "integration_googleDocs_unlinkBeforeSaving_warning": {
     "message": "Tämä asiakirja sisältää aktiivisia Zotero-viitteitä jotka näkyvät zotero.org-linkkeinä ladatussa kopiossa."
   },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "Tehdäksesi jakamiskelpoisen version tiedostosta, valitse <b>Luo kopio</b> Tiedosto-valikosta, valitse <b>Poista linkitys viitteistä</b> uuden asiakirjan Zotero-valikosta ja lataa linkittämätön versio itsellesi. Säilytä alkuperäinen linkitetty versio asiakirjasta siltä varalta että haluat tehdä siihen muutoksia."
+  },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Lataa silti linkitetty versio"
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1päivittää asiakirjaasi."
+  },
+  "integration_googleDocs_docxAlert": {
+    "message": "$1-integrointi ei ole mahdollista jos muokkaat Microsoft Wording .docx-tiedostoja suoraan Google Docsissa. Valitse Tiedosto → Tallenna Google Docs -muodossa, jotta integrointi toimii. <br/><br/> Jos haluat siirtää Google Docsiin Word-asiakirjan jossa on $1-viittauksia, tutustu artikkeliin <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Moving Documents Between Word Processors</a> (englanniksi)."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "Näytä $1 viitettä joiden linkitys on poistettu. "
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "Viitten, jota yrität muokata, linkitys kohteeseen $1 on poistettu.  "
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Uudelleenlinkitä viittaus."
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "Näiden viitteiden linkitys <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">puuttuu nyt kohteesta $1</a>. Sinun täytyy linkittää ne uudelleen, jotta ne päivittyvät ja näkyvät kirjallisuusluettelossa. "
+  },
+  "general_saveTo": {
+    "message": "Tallenna kohteeseen $1"
   }
 }

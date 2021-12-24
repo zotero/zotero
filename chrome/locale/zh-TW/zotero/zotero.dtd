@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "重覆的項目">
 <!ENTITY zotero.items.menu.mergeItems "合併項目…">
 <!ENTITY zotero.items.menu.unrecognize "撤回之前取得屬性資料">
-<!ENTITY zotero.items.menu.reportMetadata "報告不正確的屬性資料">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "選擇項目之版本，以用作主項目(master item)：">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "選取欄位，以防止項目之其他版本：">

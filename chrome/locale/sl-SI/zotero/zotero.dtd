@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "Podvoji vnos">
 <!ENTITY zotero.items.menu.mergeItems "Spoji vnose ...">
 <!ENTITY zotero.items.menu.unrecognize "Razveljavi pridobivanje metapodatkov">
-<!ENTITY zotero.items.menu.reportMetadata "Poročaj o nepravilnih metapodatkih">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Izberite različico vnosa, ki naj bo osrednja:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Izberite polja, ki jih želite izvzeti iz drugih različic vnosa:">

@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "Duplica l&apos;element seleccionat">
 <!ENTITY zotero.items.menu.mergeItems "Combina els elements...">
 <!ENTITY zotero.items.menu.unrecognize "Desfés les metadades recuperades">
-<!ENTITY zotero.items.menu.reportMetadata "Informa de metadades incorrectes">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Triaeu la versió de l'element com a element prinicpal:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Seleccioneu els camps que voleu mantenir de les altres versions de l'element:">

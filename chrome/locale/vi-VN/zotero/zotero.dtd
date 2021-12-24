@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "Nhân đôi mục chọn">
 <!ENTITY zotero.items.menu.mergeItems "Ghộp các mục...">
 <!ENTITY zotero.items.menu.unrecognize "Bỏ thông tin meta đã lấy">
-<!ENTITY zotero.items.menu.reportMetadata "Báo thông tin meta sai">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Chọn phiên bản của mục đề dùng như mục mẫu:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Chọn các trường muốn giữ lại từ các bản khác của mục này:">

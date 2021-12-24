@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "Duplizieren">
 <!ENTITY zotero.items.menu.mergeItems "Einträge zusammenführen...">
 <!ENTITY zotero.items.menu.unrecognize "Abgerufene Metadaten rückgängig machen">
-<!ENTITY zotero.items.menu.reportMetadata "Falsche Metadaten melden">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Wählen Sie die Version des Eintrags, die als Master-Eintrag verwendet werden soll:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Wählen Sie die beizubehaltenden Felder aus anderen Versionen des Eintrags:">

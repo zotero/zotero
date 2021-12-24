@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "Sukurti įrašo kopiją">
 <!ENTITY zotero.items.menu.mergeItems "Apjungti įrašus...">
 <!ENTITY zotero.items.menu.unrecognize "Atšaukti metaduomenų gavimą">
-<!ENTITY zotero.items.menu.reportMetadata "Pranešti apie klaidingus metaduomenis">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Pasirinkite pagrindinę įrašo versiją:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Pasirinkite senesnių įrašo versijų laukus:">

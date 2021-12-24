@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "Creează un duplicat al înregistrării">
 <!ENTITY zotero.items.menu.mergeItems "Unește înregistrările...">
 <!ENTITY zotero.items.menu.unrecognize "Anulare extragere metadate">
-<!ENTITY zotero.items.menu.reportMetadata "Raportare metadate incorecte">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Alege versiunea înregistrării pe care o folosești ca înregistrare master:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Selectează câmpurile pentru a le păstra față de alte versiuni ale înregistrării:">

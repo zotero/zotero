@@ -5,5 +5,5 @@
 <!ENTITY styles.preview.citationFormat.author "tekijä">
 <!ENTITY styles.preview.citationFormat.authorDate "tekijä-päivämäärä">
 <!ENTITY styles.preview.citationFormat.label "otsake">
-<!ENTITY styles.preview.citationFormat.note "note">
+<!ENTITY styles.preview.citationFormat.note "muistiinpano">
 <!ENTITY styles.preview.citationFormat.numeric "numeerinen">

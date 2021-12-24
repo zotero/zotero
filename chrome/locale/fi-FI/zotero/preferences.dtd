@@ -12,8 +12,8 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Ota tilannekuvat automaattisesti luotaessa nimikettä web-sivusta">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Liitä automaattisesti asiaankuuluvat PDF:t ja muut tiedostot">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Nouda metadata PDF-tiedostoille automaattisesti">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
-<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
+<!ENTITY zotero.preferences.autoRenameFiles "Nimeä liitetiedostot automaattisesti käyttämällä nimikkeen metatietoja">
+<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Nimeä uudelleen linkitetyt tiedostot">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Avaa PDF:t ohjelmalla">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Järjestelmän oletus">
 
@@ -39,7 +39,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Vanhimmat ensin">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Syötteen oletukset">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
+<!ENTITY zotero.preferences.openurl.choose "Valitse sivutulkki...">
 <!ENTITY zotero.preferences.openurl.custom "Oma asetus...">
 <!ENTITY zotero.preferences.openurl.server "Palvelin:">
 <!ENTITY zotero.preferences.openurl.version "Versio:">
@@ -47,9 +47,9 @@
 <!ENTITY zotero.preferences.prefpane.sync "Synkronointi">
 <!ENTITY zotero.preferences.sync.username "Käyttäjätunnus:">
 <!ENTITY zotero.preferences.sync.password "Salasana:">
-<!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
+<!ENTITY zotero.preferences.sync.syncServer "Tietojen synkronointi">
 <!ENTITY zotero.preferences.sync.setUpSync "Määritä synkronointi">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Poista linkitys käyttäjätiliin...">
 <!ENTITY zotero.preferences.sync.createAccount "Luo käyttäjätili">
 <!ENTITY zotero.preferences.sync.lostPassword "Unohditko salasanan?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "Synkronoi automaattisesti">
@@ -73,12 +73,12 @@
 <!ENTITY zotero.preferences.sync.reset.warning1 "Seuraavat toiminnot ovat tarpeen vain äärimmäisen harvinaisissa tilanteissa, eikä niitä tulisi käyttää tavalliseen virheenetsintään. Monissa tapauksissa asetusten nollaus voi aiheuttaa lisää ongelmia. Katso ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Synkroinnin nollauksen asetukset">
 <!ENTITY zotero.preferences.sync.reset.warning3 "saadaksesi lisätietoja.">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Tyhjennä synkronointihistoria">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Yhdistä paikalliset tiedot palvelimella olevien kanssa, välittämättä synkronointihistoriasta">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Palauta tiedot verkkokirjastosta">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Korvaa Zoteron paikalliset tiedot verkkokirjastossa olevilla tiedoilla.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "Korvaa verkkokirjasto">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Korvaa verkkokirjastossa olevat tiedot Zoteron paikallisilla tiedoilla.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Poista tiedostojen synkronointihistoria">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Vertaa kaikkia liitetiedostoja tallennuspalvelun kanssa">
 <!ENTITY zotero.preferences.sync.reset "Palauta alkutilaan">
@@ -110,7 +110,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Sivustokohtaiset asetukset:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Verkkotunnus/polku">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(esim. wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Muoto">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Kieli">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Estä pikakopiointi raahattaessa yli ">
 
@@ -171,7 +171,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "Artikkelihakumoottorin hallinta">
 <!ENTITY zotero.preferences.locate.description "Kuvaus">
 <!ENTITY zotero.preferences.locate.name "Nimi">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
+<!ENTITY zotero.preferences.locate.addDescription "Lisätäksesi hakukoneen listan ulkopuolelta, käy kyseisen hakukoneen verkkosivulla ja valitse &quot;Lisää&quot; Zoteron &quot;Etsi&quot;-valikosta.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Palauta oletusarvot">
 
 <!ENTITY zotero.preferences.charset "Merkistökoodaus">
@@ -184,7 +184,7 @@
 <!ENTITY zotero.preferences.dataDir.choose "Valitse...">
 <!ENTITY zotero.preferences.dataDir.viaCommandLine "(määritetään komentoriviltä)">
 <!ENTITY zotero.preferences.dataDir.reveal "Näytä datahakemisto">
-<!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
+<!ENTITY zotero.preferences.dataDir.migrate "Siirrä uuteen vakiosijaintiin...">
 
 <!ENTITY zotero.preferences.attachmentBaseDir.caption "Linkattujen liitteiden juurikansio">
 <!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero käyttää suhteellisia polkuja viitatakseen tiedostoliitteisiin juurikansiossa, joten voit käyttää tiedostoja eri tietokoneilla, kunhan tiedostorakenne juurikansion sisällä pysyy samana.">
@@ -194,8 +194,8 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "Tietokannan huolto">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Tarkista tietokannan eheys">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Nollaa sivustotulkit ja tyylit...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Nollaa sivustotulkit...">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "Palauta tyylit alkutilaan...">
 
 <!ENTITY zotero.preferences.configEditor "Asetuseditori">

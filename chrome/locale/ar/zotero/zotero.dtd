@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "تكرار العنصر المحدد">
 <!ENTITY zotero.items.menu.mergeItems "دمج العناصر...">
 <!ENTITY zotero.items.menu.unrecognize "تراجع عن استيراد البيانات الوصفية">
-<!ENTITY zotero.items.menu.reportMetadata "بلغ عن بيانات وصفية غير صحيحة">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "اختار اصدارة العنصر المناسبة لاستخدامه كعنصر رئيسي:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "اختار الحقول المراد الابقاء عليها من الاصدارات الاخرى للعنصر:">

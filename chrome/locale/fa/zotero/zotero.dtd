@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "ساخت رونوشت از این آیتم">
 <!ENTITY zotero.items.menu.mergeItems "ادغام آیتم‌ها">
 <!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
-<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "آن نسخه از آیتمی را که می‌خواهید به عنوان آیتم اصلی استفاده شود، انتخاب کنید.">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "مواردی را که می‌خواهید از سایر نسخه‌ها نگه داشته شوند، انتخاب کنید.">

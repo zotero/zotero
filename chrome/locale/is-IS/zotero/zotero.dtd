@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "Endurtekin færsla">
 <!ENTITY zotero.items.menu.mergeItems "Sameina færslur…">
 <!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
-<!ENTITY zotero.items.menu.reportMetadata "Report Incorrect Metadata">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Veldu útgáfuna af þeirri færslu sem nota skal sem móðurfærslu:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Veldu svæði sem nota skal frá öðrum útgáfum af færslunni:">

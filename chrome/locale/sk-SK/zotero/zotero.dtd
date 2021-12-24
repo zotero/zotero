@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "Duplikovať vybraný záznam">
 <!ENTITY zotero.items.menu.mergeItems "Zlúčiť záznamy...">
 <!ENTITY zotero.items.menu.unrecognize "Vrátiť získanie metadát">
-<!ENTITY zotero.items.menu.reportMetadata "Nahlásiť nesprávne metadáta">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Zvoľte verziu záznamu, ktorý chcete použiť ako hlavný záznam:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "Vyberte polia, ktoré chcete zachovať z ostatných verzií záznamu:">

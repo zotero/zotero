@@ -100,7 +100,6 @@
 <!ENTITY zotero.items.menu.duplicateItem "선택된 항목 복제">
 <!ENTITY zotero.items.menu.mergeItems "항목 병합...">
 <!ENTITY zotero.items.menu.unrecognize "메타데이터 검색 실행취소">
-<!ENTITY zotero.items.menu.reportMetadata "잘못된 메타데이터 보고">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "원본 항목으로 사용할 항목의 버전 선택:">
 <!ENTITY zotero.duplicatesMerge.fieldSelect "항목의 다른 버전과 무관하게 유지할 필드 선택:">
