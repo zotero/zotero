@@ -473,7 +473,7 @@ Zotero.DataDirectory = {
 						let index = ps.confirmEx(
 							null,
 							Zotero.getString('general.error'),
-							Zotero.getString('dataDir.cannotBeSetWithAlternative', [parentPath]),
+							Zotero.getString('dataDir.cannotBeSetWithAlternative', ['storage', parentPath]),
 							buttonFlags,
 							null, null, null, null, {}
 						);
