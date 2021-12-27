@@ -743,6 +743,8 @@ var Zotero_File_Interface = new function() {
 	 * @param {Boolean} [asCitations=false] - Copy citation cluster instead of bibliography
 	 */
 	this.copyItemsToClipboard = function (items, style, locale, asHTML, asCitations) {
+		var d = new Date();
+		
 		// copy to clipboard
 		var transferable = Components.classes["@mozilla.org/widget/transferable;1"].
 						   createInstance(Components.interfaces.nsITransferable);
@@ -792,6 +794,8 @@ var Zotero_File_Interface = new function() {
 		transferable.setTransferData("text/unicode", str, output.length * 2);
 		
 		clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
+		
+		Zotero.debug(`Copied bibliography to clipboard in ${new Date() - d} ms}`);
 	}
 	
 	

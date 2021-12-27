@@ -53,6 +53,7 @@ var Zotero_CSL_Preview = new function() {
 		progressWin.show();
 		progressWin.startCloseTimer();
 		var f = function() {
+			var d = new Date();
 			var styles = Zotero.Styles.getVisible();
 			// XXX needs its own string really for the title!
 			var str = '<html><head><title></title></head><body>';
@@ -78,7 +79,9 @@ var Zotero_CSL_Preview = new function() {
 			}
 			
 			str += '</body></html>';
-			iframe.contentDocument.documentElement.innerHTML = str;			
+			iframe.contentDocument.documentElement.innerHTML = str;
+			
+			Zotero.debug(`Generated previews in ${new Date() - d} ms`);
 		};
 		// Give progress window time to appear
 		setTimeout(f, 100);
