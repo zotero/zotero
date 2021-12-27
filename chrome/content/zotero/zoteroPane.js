@@ -2997,11 +2997,25 @@ var ZoteroPane = new function()
 			].forEach(x => disable.add(x));
 			
 		}
-
-		if (!disable.has(m.exportItems)
-			&& items.every(item => item.isNote() || item.isAttachment())
-			&& !items.some(item => item.note)) {
-			disable.add(m.exportItems);
+		// Show "Export Note…" if all notes or attachments
+		var noteExport = items.every(item => item.isNote() || item.isAttachment());
+		// Disable export if all notes are empty
+		if (noteExport) {
+			// If no non-empty notes, hide if all attachments and disable if all notes or a mixture
+			// of notes and attachments
+			if (!items.some(item => item.note)) {
+				if (items.every(item => item.isAttachment())) {
+					show.delete(m.exportItems);
+				}
+				else {
+					disable.add(m.exportItems);
+				}
+			}
+		}
+		
+		// Disable Create Bibliography if no regular items
+		if (show.has(m.createBib) && !items.some(item => item.isRegularItem())) {
+			show.delete(m.createBib);
 		}
 		
 		if ((!collectionTreeRow.editable || collectionTreeRow.isPublications()) && !collectionTreeRow.isFeed()) {
@@ -3050,7 +3064,7 @@ var ZoteroPane = new function()
 		menu.childNodes[m.findPDF].setAttribute('label', Zotero.getString('pane.items.menu.findAvailablePDF' + multiple));
 		menu.childNodes[m.moveToTrash].setAttribute('label', Zotero.getString('pane.items.menu.moveToTrash' + multiple));
 		menu.childNodes[m.deleteFromLibrary].setAttribute('label', Zotero.getString('pane.items.menu.delete' + multiple));
-		menu.childNodes[m.exportItems].setAttribute('label', Zotero.getString('pane.items.menu.export' + multiple));
+		menu.childNodes[m.exportItems].setAttribute('label', Zotero.getString(`pane.items.menu.export${noteExport ? 'Note' : ''}` + multiple));
 		menu.childNodes[m.createBib].setAttribute('label', Zotero.getString('pane.items.menu.createBib' + multiple));
 		menu.childNodes[m.loadReport].setAttribute('label', Zotero.getString('pane.items.menu.generateReport' + multiple));
 		menu.childNodes[m.createParent].setAttribute('label', Zotero.getString('pane.items.menu.createParent' + multiple));

@@ -803,12 +803,34 @@ describe("ZoteroPane", function() {
 	});
 	
 	describe("#buildItemContextMenu()", function () {
-		it("should build menu for multiple standalone file attachments", async function () {
+		it("shouldn't show export or bib options for multiple standalone file attachments without notes", async function () {
 			var item1 = await importFileAttachment('test.png');
 			var item2 = await importFileAttachment('test.png');
 			
 			await zp.selectItems([item1.id, item2.id]);
 			await zp.buildItemContextMenu();
+			
+			var menu = win.document.getElementById('zotero-itemmenu');
+			assert.isTrue(menu.querySelector('.zotero-menuitem-export').hidden);
+			assert.isTrue(menu.querySelector('.zotero-menuitem-create-bibliography').hidden);
+		});
+		
+		it("should show “Export Note…” for standalone file attachment with note", async function () {
+			var item1 = await importFileAttachment('test.png');
+			item1.setNote('<p>Foo</p>');
+			await item1.saveTx();
+			var item2 = await importFileAttachment('test.png');
+			
+			await zp.selectItems([item1.id, item2.id]);
+			await zp.buildItemContextMenu();
+			
+			var menu = win.document.getElementById('zotero-itemmenu');
+			var exportMenuItem = menu.querySelector('.zotero-menuitem-export');
+			assert.isFalse(exportMenuItem.hidden);
+			assert.equal(
+				exportMenuItem.getAttribute('label'),
+				Zotero.getString('pane.items.menu.exportNote.multiple')
+			);
 		});
 	});
 })
