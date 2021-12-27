@@ -1437,17 +1437,19 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 						break;
 				}
 				
-				// If an item file URI, get the property URI
+				// If a .zip file URL, get the .prop file URI
 				var deletePropURI = this._getPropertyURIFromItemURI(deleteURI);
-				// Only nsIURL has fileName
-				deletePropURI.QueryInterface(Ci.nsIURL);
-				
-				// If we already deleted the prop file, skip it
-				if (!deletePropURI || results.deleted.has(deletePropURI.fileName)) {
+				// Not a .zip file URL
+				if (!deletePropURI) {
 					return;
 				}
-				
+				// Only nsIURL has fileName
+				deletePropURI.QueryInterface(Ci.nsIURL);
 				fileName = deletePropURI.fileName;
+				// Already deleted
+				if (results.deleted.has(fileName)) {
+					return;
+				}
 				
 				// Delete property file
 				var req = yield Zotero.HTTP.request(
