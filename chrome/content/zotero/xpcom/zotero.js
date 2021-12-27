@@ -1937,7 +1937,7 @@ Zotero.Keys = new function() {
 
 
 /**
- * Add X-Zotero-Version header to HTTP requests to zotero.org
+ * Identify client when connecting to first-party domains
  *
  * @namespace
  */
@@ -1955,13 +1955,21 @@ Zotero.VersionHeader = {
 		try {
 			let channel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
 			let domain = channel.URI.host;
-			if (domain.endsWith(ZOTERO_CONFIG.DOMAIN_NAME)) {
+			// Add X-Zotero-Version header to HTTP requests to zotero.org
+			let isPrimaryDomain = domain == ZOTERO_CONFIG.DOMAIN_NAME
+				|| domain.endsWith('.' + ZOTERO_CONFIG.DOMAIN_NAME);
+			if (isPrimaryDomain) {
 				channel.setRequestHeader("X-Zotero-Version", Zotero.version, false);
 			}
 			else {
-				let ua = channel.getRequestHeader('User-Agent');
-				ua = this.update(domain, ua);
-				channel.setRequestHeader('User-Agent', ua, false);
+				// Use "Firefox/[version]" in user agent if not a file sync request
+				let s3DomainRE = /zoterofilestorage(test)?\.s3\.(us-east-1\.)?amazonaws\.com/;
+				let isAppNameDomain = s3DomainRE.test(domain);
+				if (!isAppNameDomain) {
+					let ua = channel.getRequestHeader('User-Agent');
+					ua = this.update(ua);
+					channel.setRequestHeader('User-Agent', ua, false);
+				}
 			}
 		}
 		catch (e) {
@@ -1972,12 +1980,11 @@ Zotero.VersionHeader = {
 	/**
 	 * Replace Zotero/[version] with Firefox/[version] in the default user agent
 	 *
-	 * @param {String} domain
 	 * @param {String} ua - User Agent
 	 * @param {String} [testAppName] - App name to look for (necessary in tests, which are
 	 *     currently run in Firefox)
 	 */
-	update: function (domain, ua, testAppName) {
+	update: function (ua, testAppName) {
 		var info = Services.appinfo;
 		var appName = testAppName || info.name;
 		
