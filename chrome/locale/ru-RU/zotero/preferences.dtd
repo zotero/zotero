@@ -104,8 +104,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Когда эта опция отключена, при цитировании журнальных и газетных статей Zotero добавляет URL только при отсутствии у статьи диапазона страниц.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Быстрое копирование">
-<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Формат элемента:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Формат заметки:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Копировать как HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Настройки для сайта:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Домен/путь">

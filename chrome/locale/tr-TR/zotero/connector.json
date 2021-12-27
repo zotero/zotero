@@ -5,8 +5,17 @@
   "general_moreInfo": {
     "message": "Daha Fazla Bilgi..."
   },
+  "general_needHelp": {
+    "message": "Yardıma ihtiyacınız var mı?"
+  },
   "general_done": {
     "message": "Tamam"
+  },
+  "general_yes": {
+    "message": "Evet"
+  },
+  "general_no": {
+    "message": "Hayır"
   },
   "general_tryAgain": {
     "message": "Yeniden Dene"
@@ -32,8 +41,14 @@
   "progressWindow_error_translation": {
     "message": "Bu eseri kaydederken bir hata meydana geldi. Daha fazla bilgi için $1'ye bakınız."
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "Bu eseri kaydederken bir hata oldu. $1, aynı anda kaydedilen eser sayısını kısıtlamakta olabilir. Daha çok bilgi için buraya bakınız: $2 "
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Çevirmen Sorunlarını Giderme"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Siteye Erişim Sınırlamaları"
   },
   "progressWindow_error_fallback": {
     "message": "$1 çevirmenini kullanarak kaydetme işlemi sırasında bir hata oldu. $2 kullanılarak kaydetme deneniyor."
@@ -49,6 +64,18 @@
   },
   "upgradeApp": {
     "message": "$1 Programını Yükselt"
+  },
+  "firstRun_title": {
+    "message": "$1 Bağlayıcısını Kurdunuz!"
+  },
+  "firstRun_text1": {
+    "message": "$1 Bağlayıcısı, tarayıcınızda tek bir tıklama ile <a href=\"$2\">eserleri $1 içinde kaydetmenizi</a> sağlar."
+  },
+  "firstRun_text2": {
+    "message": "Eğer hala yapmadıysanız, en iyi deneyim için $1 uygulamasını <a href=\"$2\">indiriniz</a>."
+  },
+  "firstRun_acceptButton": {
+    "message": "Tamam"
   },
   "error_connection_isAppRunning": {
     "message": "$1 Çalışıyor mu?"
@@ -91,6 +118,15 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "$1 ile birleştirme, Microsoft Word .docx dosyalarını Google Docs içinde düzenlerken kullanılamamaktadır. Dosya Seçiniz → Google Docs dosyası olarak kaydediniz seçenekleri ile bu fonksiyonu etkinleştirebilirsiniz.<br/><br/> $1 alıntısı içeren bir Word belgesini Google Docs uygulamasına aktarmak için, <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Moving Documents Between Word Processors</a> sayfasına bakınız."
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "Bu belgenin alıntıları başka bir $1 kullanıcısı tarafından düzenlenmektedir. Lütfen daha sonra tekrar deneyin."
+  },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1, birçok kullanıcının aynı anda alıntıları düzenlemesini engellemek için belgeyi kilitlemektedir. Eşzamanlı alıntı düzenlemeler alıntı veya belge bozulmasına neden olabilir. Ağ arızaları gibi bazı öngörülemeyen durumlar, belgenizin kalıcı olarak kilitlenmesine neden olabilir. Eğer bunun olduğuna inanıyorsanız, kilidi geçersiz kılabilirsiniz.<br/><br/>Belgedeki kilidi geçersiz kılmak ister misiniz?"
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "Seçtiğiniz Google hesabının bu belgeyi düzenleme izni yok. Lütfen tekrar deneyin ve düzenleme erişimi olan hesabı seçtiğinizden emin olun."
   },
   "integration_googleDocs_orphanedCitations_buttonTooltip": {
     "message": "Bağlantılarını kaybetmiş $1 alıntılarını göster"

@@ -154,7 +154,7 @@
 <!ENTITY zotero.toolbar.attachment.linked "Dosyaya Bağlantı Kur...">
 <!ENTITY zotero.toolbar.attachment.add "Dosyanın bir Kopyasının Sakla">
 <!ENTITY zotero.toolbar.attachment.weblink "Geçerli Sayfaya Bağlantıyı Kaydet">
-<!ENTITY zotero.toolbar.attachment.snapshot "Geçerli Sayfanın Görünümünü Al">
+<!ENTITY zotero.toolbar.attachment.snapshot "Geçerli Sayfanın Anlık Görüntüsünü Al">
 <!ENTITY zotero.toolbar.context.item "Eser">
 <!ENTITY zotero.toolbar.context.notes "Notlar">
 
@@ -234,9 +234,9 @@
 <!ENTITY zotero.richText.superscript.label "Üstsimge">
 <!ENTITY zotero.richText.subscript.label "Altsimge">
 
-<!ENTITY zotero.annotate.toolbar.add.label "Açıklama Ekle">
-<!ENTITY zotero.annotate.toolbar.collapse.label "Tüm Açıklamaları Daralt">
-<!ENTITY zotero.annotate.toolbar.expand.label "Tüm Açıklamaları Genişlet">
+<!ENTITY zotero.annotate.toolbar.add.label "Ek Açıklama Ekle">
+<!ENTITY zotero.annotate.toolbar.collapse.label "Tüm Ek Açıklamaları Daralt">
+<!ENTITY zotero.annotate.toolbar.expand.label "Tüm Ek Açıklamaları Genişlet">
 <!ENTITY zotero.annotate.toolbar.highlight.label "Metni Vurgula">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "Metni Vurgulama">
 
@@ -329,9 +329,9 @@
 <!ENTITY zotero.attachLink.label.title "Başlık">
 
 <!ENTITY zotero.context.addChildNote "Eser Notu Ekle">
-<!ENTITY zotero.context.addChildNoteFromAnnotations "Açıklamalardan Eser Notu Ekle">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Ek Açıklamalardan Eser Notu Ekle">
 <!ENTITY zotero.context.addStandaloneNote "Bağımsız Not Ekle">
-<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Açıklamalardan Bağımsız Not Ekle">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Ek Açıklamalardan Bağımsız Not Ekle">
 <!ENTITY zotero.context.editInWindow "Ayrı Bir Pencerede Düzenle">
 
 <!ENTITY zotero.pdfReader.firstPage "İlk Sayfa">
@@ -351,5 +351,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Uzaklaştır">
 <!ENTITY zotero.pdfReader.zoomAuto "Otomatik Olarak Yeniden Boyutlandır">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Sayfa Genişliğine Yakınlaştır">
-<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">
+<!ENTITY zotero.pdfReader.transferFromPDF "Ek Açıklamaları İçeri Aktar...">
+<!ENTITY zotero.pdfReader.transferToPDF "Ek Açıklamaları Dosya İçinde Kaydet...">

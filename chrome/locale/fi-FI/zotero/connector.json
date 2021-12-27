@@ -5,8 +5,17 @@
   "general_moreInfo": {
     "message": "Lisätietoja..."
   },
+  "general_needHelp": {
+    "message": "Tarvitsetko apua?"
+  },
   "general_done": {
     "message": "Valmis"
+  },
+  "general_yes": {
+    "message": "Kyllä"
+  },
+  "general_no": {
+    "message": "Ei"
   },
   "general_tryAgain": {
     "message": "Yritä uudelleen"
@@ -32,8 +41,14 @@
   "progressWindow_error_translation": {
     "message": "Nimikkeen tallentamisessa tapahtui virhe. Katso $1, jos haluat lisätietoja."
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "Nimikettä tallennettaessa tapahtui virhe. $1 saattaa rajoittaa kerralla tallennettavien nimikkeiden määrää. Tutustu $2saadaksesi lisätietoja."
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Sivukääntäjiin liittyvien ongelmien selvittäminen"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Sivuston pääsyrajoitukset"
   },
   "progressWindow_error_fallback": {
     "message": "Tapahtui virhe tallennettaessa työkalulla $1. Yritetään tallennusta $2 avulla."
@@ -49,6 +64,18 @@
   },
   "upgradeApp": {
     "message": "Päivitä $1"
+  },
+  "firstRun_title": {
+    "message": "$1 Connector on nyt asennettu!"
+  },
+  "firstRun_text1": {
+    "message": "$1 Connector mahdollistaa <a href=\"$2\">nimikkeiden tallentamisen $1on</a> selaimestasi yhdellä klikkauksella."
+  },
+  "firstRun_text2": {
+    "message": "Jos et ole vielä tehnyt sitä, <a href=\"$2\">lataa</a> $1n työpöytäversio saavuttaaksesi parhaan käyttökokemuksen."
+  },
+  "firstRun_acceptButton": {
+    "message": "Selvä"
   },
   "error_connection_isAppRunning": {
     "message": "Onko $1 käynnissä?"
@@ -91,6 +118,15 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "$1-integrointi ei ole mahdollista jos muokkaat Microsoft Wording .docx-tiedostoja suoraan Google Docsissa. Valitse Tiedosto → Tallenna Google Docs -muodossa, jotta integrointi toimii. <br/><br/> Jos haluat siirtää Google Docsiin Word-asiakirjan jossa on $1-viittauksia, tutustu artikkeliin <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Moving Documents Between Word Processors</a> (englanniksi)."
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "Toinen $1-käyttäjä editoi juuri asiakirjan viitteitä. Yritä myöhemmin uudelleen."
+  },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1 lukitsee asiakirjasi, jotta useampi käyttäjä ei voi vahingossa muokata viitteitä samaan aikaan. Samanaikainen viitteiden muokkaus saattaisi johtaa viitteen tai asiakirjan vaurioitumiseen. Tietyt tapahtumat, kuten verkkoyhteyden katkeaminen, voivat johtaa tilanteeseen, jossa asiakirjan lukitus jää epätarkoituksenmukaisesti päälle. Jos uskot että näin on tapahtunut nyt, voit ohittaa lukituksen. <br/><br/> Haluatko ohittaa asiakirjan lukituksen?"
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "Valitsemallasi Google-tilillä ei ole oikeuksia muokata tätä asiakirjaa. Yritä uudelleen ja varmista, että tilillä on muokkausoikeudet."
   },
   "integration_googleDocs_orphanedCitations_buttonTooltip": {
     "message": "Näytä $1 viitettä joiden linkitys on poistettu. "

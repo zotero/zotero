@@ -5,8 +5,17 @@
   "general_moreInfo": {
     "message": "Más información..."
   },
+  "general_needHelp": {
+    "message": "¿Necesita ayuda?"
+  },
   "general_done": {
     "message": "Hecho"
+  },
+  "general_yes": {
+    "message": "Sí"
+  },
+  "general_no": {
+    "message": "No"
   },
   "general_tryAgain": {
     "message": "Pruebe de nuevo"
@@ -32,8 +41,14 @@
   "progressWindow_error_translation": {
     "message": "Ocurrió un error mientras se guardaba este elemento. Véase $1 para más información."
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "Ocurrió un error mientras se guardaba este elemento. $1puede limitar el número de elementos que puede guardar a la vez. Véase$2para más información."
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Solución de problemas del traductor"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Límites de acceso al sitio"
   },
   "progressWindow_error_fallback": {
     "message": "Ocurrió un error al guardar con $1. Intentando guardar usando $2 en su lugar."
@@ -49,6 +64,18 @@
   },
   "upgradeApp": {
     "message": "Actualizar $1"
+  },
+  "firstRun_title": {
+    "message": "¡Ha instalado el conector $1!"
+  },
+  "firstRun_text1": {
+    "message": "El conector$1le permite <a href=\"$2\">guardar elementos a $1</a> desde su navegador con un solo clic."
+  },
+  "firstRun_text2": {
+    "message": "Si aún no la tiene, <a href=\"$2\">descargue</a> la aplicación $1 independiente para una mejor experiencia."
+  },
+  "firstRun_acceptButton": {
+    "message": "Entendido"
   },
   "error_connection_isAppRunning": {
     "message": "¿Está $1 en ejecución?"
@@ -91,6 +118,15 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "La integración de $1 no está disponible cuando editas archivos .docx de Microsoft Word directamente en Google Docs. Elige Archivo → Guardar como Google Docs para habilitar esta funcionalidad.<br/><br/>Si quieres transferir un documento Word con citas  $1 a Google Docs, consulta <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Mover documentos entre procesadores de texto</a>."
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "Las citas del documento están siendo editadas por otro usuario $1. Por favor, inténtelo más tarde."
+  },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1 bloquea el documento para evitar que varios usuarios editen las citas al mismo tiempo. La edición simultánea de citas en el documento puede provocar la corrupción de las citas o del documento. Ciertas circunstancias imprevisibles, como los fallos de la red, pueden hacer que su documento se bloquee permanentemente. Si cree que esto ha ocurrido, puede anular el bloqueo.<br/><br/>¿Desea anular el bloqueo del documento?"
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "La cuenta de Google que eligió no tiene permiso para editar este documento. Por favor, inténtelo de nuevo y asegúrese de elegir una cuenta con acceso de edición."
   },
   "integration_googleDocs_orphanedCitations_buttonTooltip": {
     "message": "Mostar citas$1 desvinculadas"

@@ -9,7 +9,7 @@
 <!ENTITY zotero.preferences.prefpane.general "Genel">
 
 <!ENTITY zotero.preferences.fileHandling "Dosya Kullanımı">
-<!ENTITY zotero.preferences.automaticSnapshots "Web sayfalarından eserler yaratılırken sayfa görünümü otomatik olarak kaydet">
+<!ENTITY zotero.preferences.automaticSnapshots "Web sayfalarından eserler yaratırken sayfanın anlık görüntüsünü otomatik olarak kaydet">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Eserleri kaydederken ilişkili PDF ve diğer dosyaları da otomatik olarak ekle">
 <!ENTITY zotero.preferences.autoRecognizeFiles "PDF'ler için otomatik olarak üstveri al ">
 <!ENTITY zotero.preferences.autoRenameFiles "Ana üstverileri kullanarak ve otomatik olarak ek dosyaları yeniden adlandır">
@@ -29,7 +29,7 @@
 <!ENTITY zotero.preferences.groups "Gruplar">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Kitaplıklar arası eserler kopyalanırken, bunları ekle:">
 <!ENTITY zotero.preferences.groups.childNotes "alt notlar">
-<!ENTITY zotero.preferences.groups.childFiles "alt görüntüler ve içeri aktarılan dosyalar">
+<!ENTITY zotero.preferences.groups.childFiles "alt anlık görüntüler ve içeri aktarılan dosyalar">
 <!ENTITY zotero.preferences.groups.childLinks "alt bağlantılar">
 <!ENTITY zotero.preferences.groups.tags "etiketler">
 
@@ -104,8 +104,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Bu seçenek devre dışı bırakıldığında, Zotero, bilimsel dergi, magazin ve gazete makalelerine olan alıntılara URL'leri, yalnızca bir sayfa aralığı belirtilmediği halde ekleyecektir.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Çabuk Kopyala">
-<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Eser Biçimi:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Not Biçimi:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "HTML olarak kopyala">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Siteye Özgü Ayarlar:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Etki alanı/Yol">

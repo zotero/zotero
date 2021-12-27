@@ -5,8 +5,17 @@
   "general_moreInfo": {
     "message": "Więcej informacji..."
   },
+  "general_needHelp": {
+    "message": "Czy potrzebujesz pomocy?"
+  },
   "general_done": {
     "message": "Zrobione"
+  },
+  "general_yes": {
+    "message": "Tak"
+  },
+  "general_no": {
+    "message": "Nie"
   },
   "general_tryAgain": {
     "message": "Spróbuj ponownie"
@@ -49,6 +58,12 @@
   },
   "upgradeApp": {
     "message": "Aktualizuj $1"
+  },
+  "firstRun_title": {
+    "message": "$1 Connector został zainstalowany!"
+  },
+  "firstRun_text1": {
+    "message": "$1 Connector umożliwia ci <a href=\"$2\">zapisywanie elementów do $1</a> z twojej przeglądarki tylko jednym kliknięciem."
   },
   "error_connection_isAppRunning": {
     "message": "Czy $1 jest uruchomiony?"

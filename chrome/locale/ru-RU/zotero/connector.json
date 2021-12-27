@@ -5,8 +5,17 @@
   "general_moreInfo": {
     "message": "Дополнительные сведения…"
   },
+  "general_needHelp": {
+    "message": "Нужна помощь?"
+  },
   "general_done": {
     "message": "Завершено"
+  },
+  "general_yes": {
+    "message": "Да"
+  },
+  "general_no": {
+    "message": "Нет"
   },
   "general_tryAgain": {
     "message": "Попытайтесь снова"
@@ -32,8 +41,14 @@
   "progressWindow_error_translation": {
     "message": "Произошла ошибка при сохранении этой записи. Смотрите $1 для получения дополнительной информации."
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "При записи этого элемента произошла ошибка. $1 может иметь лимит на количество сохраняемых за один раз элементов. Посмотрите $2 для дополнительной информации."
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Устранение неисправностей преобразователя"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Лимит на доступ к сайту"
   },
   "progressWindow_error_fallback": {
     "message": "Произошла ошибка при сохранении с помощью $1. Выполняется попытка сохранения с использованием $2."
@@ -49,6 +64,18 @@
   },
   "upgradeApp": {
     "message": "Обновить $1"
+  },
+  "firstRun_title": {
+    "message": "Вы установили коннектор $1!"
+  },
+  "firstRun_text1": {
+    "message": "Коннектор $1 позволяет вам в один клик сохранять элементы из вашего браузера <a href=\"$2\"> в $1</a>."
+  },
+  "firstRun_text2": {
+    "message": "Если вы еще не <a href=\"$2\">загрузили</a> автономное $1 приложение для большего удобства."
+  },
+  "firstRun_acceptButton": {
+    "message": "Понял"
   },
   "error_connection_isAppRunning": {
     "message": "$1 запущено?"
@@ -91,6 +118,15 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "Интеграция с $1 не доступна при редактировании Microsoft Word .docx-файлов непосредственно в Google Docs. Выберите пункт меню «Файл» → «Сохранить как Google Docs », чтобы воспользоваться данной функциональностью.<br/><br/>Если вы переместили документ Word с  $1-цитированием на Google Docs, смотрите раздел <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Перемещение документов между текстовыми редакторами</a>."
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "Цитрование документа было изменено другим пользователем $1. Пожалуйста, попробуйте повторить позже."
+  },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1 блокирует ваш документ для предотвращения редактирования цитирования несколькими пользователями одновременно. Конкурентное редактирование цитирования может привести к порче цитирования или документа. Различные непредвиденные обстоятельства, такие как разрывы сети, могут привести в постоянной блокировке документа. Если вы убеждены что это произошло, вы можете снять блокировку принудительно.<br/><br/>Желаете снять блокировку документа принудительно?"
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "Выбранная вами учетная запись Google не имеет разрешения на редактирование этого документа. Пожалуйста, повторите позже, и убедитесь что выбрали учетную запись с разрешением на редактирование."
   },
   "integration_googleDocs_orphanedCitations_buttonTooltip": {
     "message": "Показать отвязанные $1 цитирования"
