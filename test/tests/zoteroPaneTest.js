@@ -801,4 +801,14 @@ describe("ZoteroPane", function() {
 			assert.lengthOf(Object.keys(conditions), 3);
 		});
 	});
+	
+	describe("#buildItemContextMenu()", function () {
+		it("should build menu for multiple standalone file attachments", async function () {
+			var item1 = await importFileAttachment('test.png');
+			var item2 = await importFileAttachment('test.png');
+			
+			await zp.selectItems([item1.id, item2.id]);
+			await zp.buildItemContextMenu();
+		});
+	});
 })

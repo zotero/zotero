@@ -3075,6 +3075,7 @@ var ZoteroPane = new function()
 	
 	
 	function attachmentsWithExtractableAnnotations(item) {
+		if (!item.isRegularItem()) return [];
 		return Zotero.Items.get(item.getAttachments())
 			.filter(item => isAttachmentWithExtractableAnnotations(item));
 	}
