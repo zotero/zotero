@@ -489,9 +489,9 @@ class ReaderInstance {
 		// Separator
 		popup.appendChild(this._window.document.createElement('menuseparator'));
 		// Change page number
-		if (data.enableChangePageNumber) {
+		if (data.enableEditPageNumber) {
 			menuitem = this._window.document.createElement('menuitem');
-			menuitem.setAttribute('label', Zotero.getString('pdfReader.changePageNumber'));
+			menuitem.setAttribute('label', Zotero.getString('pdfReader.editPageNumber'));
 			menuitem.setAttribute('disabled', data.readOnly);
 			menuitem.addEventListener('command', () => {
 				this._postMessage({
