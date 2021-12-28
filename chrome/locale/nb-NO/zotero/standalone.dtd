@@ -36,7 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "Kopier henvisning">
 <!ENTITY copyBibliographyCmd.label "Kopier bibliografi">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyNoteCmd.label "Kopier notat">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Bytt sideretning">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">

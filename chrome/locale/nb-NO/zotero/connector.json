@@ -5,11 +5,20 @@
   "general_moreInfo": {
     "message": "Mer info…"
   },
+  "general_needHelp": {
+    "message": "Trenger du hjelp?"
+  },
   "general_done": {
     "message": "Ferdig"
   },
+  "general_yes": {
+    "message": "Ja"
+  },
+  "general_no": {
+    "message": "Nei"
+  },
   "general_tryAgain": {
-    "message": "Prøv på nytt"
+    "message": "Prøv igjen"
   },
   "general_warning": {
     "message": "Advarsel"
@@ -32,8 +41,14 @@
   "progressWindow_error_translation": {
     "message": "En feil oppstod mens dette elementet ble forsøkt lagret. Se $1 for mer informasjon."
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "Det skjedde en feil under lagring av dette elementet. $1 kan ha begrensninger på antall elementer du kan lagre på en gang. Se $2 for mer informasjon."
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Feilsøker problemer med oversetteren"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Begrensninger for nettstedtilgang"
   },
   "progressWindow_error_fallback": {
     "message": "En feil oppstod under lagring med $1. Forsøker å lagre med $2 i stedet."
@@ -49,6 +64,18 @@
   },
   "upgradeApp": {
     "message": "Oppgrader $1"
+  },
+  "firstRun_title": {
+    "message": "Du har installert $1 Tilknytter!"
+  },
+  "firstRun_text1": {
+    "message": "$1 Tilknytter gjør deg i stand til å <a href=\"$2\"> lagre elementer til $1 </a> fra nettleseren din med et enkelt klikk."
+  },
+  "firstRun_text2": {
+    "message": "Hvis du ikke har gjort det enda, <a href=\"$2\">last ned</a> den frittstående $1 applikasjonen for den beste opplevelsen."
+  },
+  "firstRun_acceptButton": {
+    "message": "Har det"
   },
   "error_connection_isAppRunning": {
     "message": "Kjører $1?"
@@ -91,6 +118,15 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "$1 integrasjon er ikke tilgjengelig når du redigerer Microsoft Word .docx filer direkte i Google Docs. Velg Fil → Lagres som Google Docs for å aktivere denne funksjonaliteten..<br/><br/>Hvis du ønsker å flytte et Word dokument med $1 henvisninger til Google Docs, se <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Flytte dokumenter mellom tekstbehandlere</a>."
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "Henvisningene i dokumentet blir redigert av en annen $1 bruker. Vennligst prøv igjen senere."
+  },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1 låser dokumentet ditt for å forhindre at flere brukere redigerer henvisningene på samme tid. Samtidig redigering av henvisninger i dokumentet kan føre til at henvisninger eller dokument blir ødelagt. Visse uforutsigbare omstendigheter, for eksempel nettverksfeil, kan føre til at dokumentet ditt blir permanent låst. Hvis du tror dette har skjedd, kan du overstyre låsingen.<br/><br/>Vil du overstyre låsingen av dokumentet?"
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "Googlekontoen du har valgt har ikke rettigheter til å redigere dette dokumentet. Vennligst prøv igjen og forsikre deg om at du har valgt en konto med redigeringstilgang."
   },
   "integration_googleDocs_orphanedCitations_buttonTooltip": {
     "message": "Vis frakoblede $1 henvisninger"

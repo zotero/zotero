@@ -104,8 +104,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Når dette alternativet er deaktivert, vil Zotero kun inkludere URL til tidsskrift-, magasin- eller avisartikler, dersom artikkelen er registrert uten sidetall.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Hurtigkopi">
-<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Format for element:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Format for notat:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopier som HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Innstillinger">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domene/sti">
