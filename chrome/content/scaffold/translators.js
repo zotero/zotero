@@ -7,16 +7,16 @@ var Scaffold_Translators = {
 	_provider: null,
 	_translators: new Map(),
 	_translatorFiles: new Map(),
+	_onLoadBeginListener: null,
+	_onLoadCompleteListener: null,
 	
-	load: Zotero.serial(async function (reload, filenames) {
+	load: Zotero.serial(async function (reload) {
 		if (this._translators.size && !reload) {
 			Zotero.debug("Scaffold: Translators already loaded");
-			return;
+			return { numLoaded: 0, numDeleted: 0 };
 		}
-		
-		if (filenames) {
-			
-		}
+
+		if (this._onLoadBeginListener) this._onLoadBeginListener();
 		
 		var t = new Date();
 		var dir = this.getDirectory();
@@ -77,6 +77,13 @@ var Scaffold_Translators = {
 				this._translators.delete(id);
 			}
 		}
+
+		if (this._onLoadCompleteListener) this._onLoadCompleteListener();
+
+		return {
+			numLoaded,
+			numDeleted: deletedTranslators.size
+		};
 	}),
 	
 	deleteByID: async function (translatorID) {
@@ -92,6 +99,10 @@ var Scaffold_Translators = {
 	
 	getDirectory: function () {
 		return Zotero.Prefs.get('scaffold.translatorsDir');
+	},
+
+	getModifiedTime: function (translatorID) {
+		return this._translators.get(translatorID)?.mtime;
 	},
 	
 	getProvider: function () {
@@ -139,5 +150,10 @@ var Scaffold_Translators = {
 			}.bind(this)
 		});
 		return this._provider;
+	},
+
+	setLoadListener({ onLoadBegin, onLoadComplete }) {
+		this._onLoadBeginListener = onLoadBegin;
+		this._onLoadCompleteListener = onLoadComplete;
 	}
 };
