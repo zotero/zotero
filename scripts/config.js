@@ -14,7 +14,8 @@ const symlinkDirs = [
 	'chrome/content/zotero/xpcom/rdf',
 	'chrome/content/zotero/xpcom/translate/src',
 	'styles',
-	'translators'
+	'translators',
+	'resource/vs'
 ];
 
 // list of folders which are copied to the build folder
