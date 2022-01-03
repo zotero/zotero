@@ -1962,9 +1962,9 @@ Zotero.VersionHeader = {
 				channel.setRequestHeader("X-Zotero-Version", Zotero.version, false);
 			}
 			else {
-				// Use "Firefox/[version]" in user agent if not a file sync request
-				let s3DomainRE = /zoterofilestorage(test)?\.s3\.(us-east-1\.)?amazonaws\.com/;
-				let isAppNameDomain = s3DomainRE.test(domain);
+				// Use "Firefox/[version]" in user agent if not a proxy check or file sync request
+				let s3RE = /(zoteroproxycheck|zoterofilestorage(test))?\.s3\.(us-east-1\.)?amazonaws\.com/;
+				let isAppNameDomain = s3RE.test(domain);
 				if (!isAppNameDomain) {
 					let ua = channel.getRequestHeader('User-Agent');
 					ua = this.update(ua);
