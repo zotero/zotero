@@ -487,7 +487,9 @@ class ReaderInstance {
 			popup.appendChild(menuitem);
 		}
 		// Separator
-		popup.appendChild(this._window.document.createElement('menuseparator'));
+		if (data.enableEditPageNumber || data.enableEditHighlightedText) {
+			popup.appendChild(this._window.document.createElement('menuseparator'));
+		}
 		// Change page number
 		if (data.enableEditPageNumber) {
 			menuitem = this._window.document.createElement('menuitem');
