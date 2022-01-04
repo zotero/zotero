@@ -23,7 +23,7 @@
  ***** END LICENSE BLOCK *****
 */
 
-Zotero.Attachments = new function(){
+Zotero.Attachments = new function () {
 	const { HiddenBrowser } = ChromeUtils.import("chrome://zotero/content/HiddenBrowser.jsm");
 	
 	// Keep in sync with Zotero.Schema.integrityCheck() and this.linkModeToName()
@@ -2261,35 +2261,16 @@ Zotero.Attachments = new function(){
 		if (!formatString) {
 			formatString = Zotero.Prefs.get('attachmentRenameFormatString');
 		}
-		
-		// Replaces the substitution marker with the field value,
-		// truncating based on the {[0-9]+} modifier if applicable
-		function rpl(field, str) {
-			if (!str) {
-				str = formatString;
-			}
-			
-			switch (field) {
-				case 'creator':
-					field = 'firstCreator';
-					var rpl = '%c';
-					break;
-					
-				case 'year':
-					var rpl = '%y';
-					break;
-					
-				case 'title':
-					var rpl = '%t';
-					break;
-			}
-			
+
+		const markers = {
+			c: 'firstCreator',
+			y: 'year',
+			t: 'title'
+		};
+
+		const getValue = (field) => {
 			var value;
 			switch (field) {
-				case 'title':
-					value = item.getField('title', false, true);
-					break;
-				
 				case 'year':
 					value = item.getField('date', true, true);
 					if (value) {
@@ -2298,38 +2279,35 @@ Zotero.Attachments = new function(){
 							value = '';
 						}
 					}
-				break;
+					break;
 				
 				default:
 					value = '' + item.getField(field, false, true);
 			}
-			
-			var re = new RegExp("\{?([^%\{\}]*)" + rpl + "(\{[0-9]+\})?" + "([^%\{\}]*)\}?");
-			
-			// If no value for this field, strip entire conditional block
-			// (within curly braces)
-			if (!value) {
-				if (str.match(re)) {
-					return str.replace(re, '')
-				}
-			}
-			
-			var f = function(match, p1, p2, p3) {
-				var maxChars = p2 ? p2.replace(/[^0-9]+/g, '') : false;
-				return p1 + (maxChars ? value.substr(0, maxChars) : value) + p3;
-			}
-			
-			return str.replace(re, f);
-		}
-		
-		formatString = rpl('creator');
-		formatString = rpl('year');
-		formatString = rpl('title');
-		
+
+			return value;
+		};
+
+		// Regexp contains 4 capture groups all wrapped in {}:
+		// 		* Prefix before the wildcard, can be empty string
+		// 		* Any recognized marker. % sign marks a wildcard and is required for a match but is
+		// 		  not part of the capture group. Recognized markers are specified in a `markers`
+		// 		  lookup.
+		// 		* Optionally a maximum number of characters to truncate the value to
+		// 		* Suffix after the wildcard, can be empty string
+		const re = new RegExp(`{([^%{}]*)%(${Object.keys(markers).join('|')})({[0-9]+})?([^%{}]*)}`, 'ig');
+
+		formatString = formatString.replace(re, (match, pre, marker, maxChars, post) => {
+			maxChars = maxChars ? maxChars.replace(/[^0-9]+/g, '') : false;
+			const field = markers[marker];
+			const value = getValue(field);
+			return pre + (maxChars ? value.substr(0, maxChars) : value) + post;
+		});
+
 		formatString = Zotero.Utilities.cleanTags(formatString);
 		formatString = Zotero.File.getValidFileName(formatString);
 		return formatString;
-	}
+	};
 	
 	
 	this.shouldAutoRenameFile = function (isLink) {
@@ -3029,4 +3007,4 @@ Zotero.Attachments = new function(){
 		}
 		throw new Error(`Invalid link mode name '${linkModeName}'`);
 	}
-}
+};

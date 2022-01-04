@@ -1293,10 +1293,41 @@ describe("Zotero.Attachments", function() {
 	});
 	
 	describe("#getFileBaseNameFromItem()", function () {
+		var item;
+
+		before(() => {
+			item = createUnsavedDataObject('item', { title: 'Lorem Ipsum' });
+			item.setCreators([
+				{ firstName: 'Foocius', lastName: 'Barius', creatorType: 'author' },
+				{ firstName: 'Bazius', lastName: 'Pixelus', creatorType: 'author' }
+			]);
+			item.setField('date', "1975-10-15");
+		});
+
+		
 		it("should strip HTML tags from title", async function () {
-			var item = createUnsavedDataObject('item', { title: 'Foo <i>Bar</i> Foo<br><br/><br />Bar' });
-			var str = Zotero.Attachments.getFileBaseNameFromItem(item);
+			var htmlItem = createUnsavedDataObject('item', { title: 'Foo <i>Bar</i> Foo<br><br/><br />Bar' });
+			var str = Zotero.Attachments.getFileBaseNameFromItem(htmlItem);
 			assert.equal(str, 'Foo Bar Foo Bar');
+		});
+
+		it("should accept basic wildcards for formatString", async function () {
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, "{FOO%yBAR}"),
+				'FOO1975BAR'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, "{%c - }{%y - }{%t}"),
+				'Barius and Pixelus - 1975 - Lorem Ipsum'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, "{%y-}{%c{10}-}{%t{5}}"),
+				'1975-Barius and-Lorem'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, "foo {%y} bar {++%y{2}++}"),
+				'foo 1975 bar ++19++'
+			);
 		});
 	});
 	
