@@ -2262,30 +2262,65 @@ Zotero.Attachments = new function () {
 			formatString = Zotero.Prefs.get('attachmentRenameFormatString');
 		}
 
-		const markers = {
-			c: 'firstCreator',
-			y: 'year',
-			t: 'title'
+		const getSlicedCreatorsOfType = (creatorTypeIDs, slice) => {
+			if (!Array.isArray(creatorTypeIDs)) {
+				creatorTypeIDs = [creatorTypeIDs];
+			}
+			if (slice === 0) {
+				return [];
+			}
+			const matchingCreators = item.getCreators(true)
+				.filter(c => creatorTypeIDs.includes(c.creatorTypeID));
+			const slicedCreators = slice > 0
+				? matchingCreators.slice(0, slice)
+				: matchingCreators.slice(slice);
+
+			if (slice < 0) {
+				slicedCreators.reverse();
+			}
+			return slicedCreators;
 		};
 
-		const getValue = (field) => {
-			var value;
-			switch (field) {
-				case 'year':
-					value = item.getField('date', true, true);
-					if (value) {
-						value = Zotero.Date.multipartToSQL(value).substr(0, 4);
-						if (value == '0000') {
-							value = '';
-						}
-					}
-					break;
-				
-				default:
-					value = '' + item.getField(field, false, true);
-			}
+		const primaryCreator = Zotero.CreatorTypes.getPrimaryIDForType(item.itemTypeID);
+		const editorCreators = [Zotero.CreatorTypes.getID('editor'), Zotero.CreatorTypes.getID('seriesEditor')];
 
-			return value;
+		const markers = {
+			a: slice => getSlicedCreatorsOfType(
+				primaryCreator, slice
+			).map(a => a.lastName || a.name).join(' '),
+			A: slice => getSlicedCreatorsOfType(
+				primaryCreator, slice
+			).map(a => (a.lastName || a.name).slice(0, 1)).join(' '),
+			d: slice => getSlicedCreatorsOfType(
+				editorCreators, slice
+			).map(a => a.lastName || a.name).join(' '),
+			D: slice => getSlicedCreatorsOfType(
+				editorCreators, slice
+			).map(a => (a.lastName || a.name).slice(0, 1)).join(' '),
+			F: slice => getSlicedCreatorsOfType(
+				primaryCreator, slice
+			).map(a => a.name && a.name || a.lastName + (a.firstName).slice(0, 1)).join(' '),
+			c: 'firstCreator',
+			I: slice => getSlicedCreatorsOfType(
+				primaryCreator, slice
+			).map(a => a.name && (a.name).slice(0, 1) || (a.firstName).slice(0, 1) + (a.lastName).slice(0, 1)).join(' '),
+			l: slice => getSlicedCreatorsOfType(
+				editorCreators, slice
+			).map(a => a.name && (a.name).slice(0, 1) || (a.firstName).slice(0, 1) + (a.lastName).slice(0, 1)).join(' '),
+			L: slice => getSlicedCreatorsOfType(
+				editorCreators, slice
+			).map(a => a.name && a.name || a.lastName + (a.firstName).slice(0, 1)).join(' '),
+			y: () => {
+				let value = item.getField('date', true, true);
+				if (value) {
+					value = Zotero.Date.multipartToSQL(value).substr(0, 4);
+					if (value == '0000') {
+						value = '';
+					}
+				}
+				return value;
+			},
+			t: 'title'
 		};
 
 		// Regexp contains 4 capture groups all wrapped in {}:
@@ -2295,12 +2330,14 @@ Zotero.Attachments = new function () {
 		// 		  lookup.
 		// 		* Optionally a maximum number of characters to truncate the value to
 		// 		* Suffix after the wildcard, can be empty string
-		const re = new RegExp(`{([^%{}]*)%(${Object.keys(markers).join('|')})({[0-9]+})?([^%{}]*)}`, 'ig');
+		const re = new RegExp(`{([^%{}]*)%(${Object.keys(markers).join('|')})(-?[1-9])?({[0-9]+})?([^%{}]*)}`, 'g');
 
-		formatString = formatString.replace(re, (match, pre, marker, maxChars, post) => {
+		formatString = formatString.replace(re, (match, pre, marker, maxCount, maxChars, post) => {
 			maxChars = maxChars ? maxChars.replace(/[^0-9]+/g, '') : false;
-			const field = markers[marker];
-			const value = getValue(field);
+			maxCount = maxCount ? parseInt(maxCount) : 1;
+			const value = markers[marker] instanceof Function
+				? markers[marker](maxCount)
+				: '' + item.getField(markers[marker], false, true);
 			return pre + (maxChars ? value.substr(0, maxChars) : value) + post;
 		});
 

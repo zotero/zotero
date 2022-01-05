@@ -1293,15 +1293,35 @@ describe("Zotero.Attachments", function() {
 	});
 	
 	describe("#getFileBaseNameFromItem()", function () {
-		var item;
+		var item, itemManyAuthors, itemPatent;
 
 		before(() => {
-			item = createUnsavedDataObject('item', { title: 'Lorem Ipsum' });
+			item = createUnsavedDataObject('item', { title: 'Lorem Ipsum', itemType: 'journalArticle' });
 			item.setCreators([
 				{ firstName: 'Foocius', lastName: 'Barius', creatorType: 'author' },
 				{ firstName: 'Bazius', lastName: 'Pixelus', creatorType: 'author' }
 			]);
 			item.setField('date', "1975-10-15");
+
+			itemManyAuthors = createUnsavedDataObject('item', { title: 'Has Many Authors', itemType: 'book' });
+			itemManyAuthors.setCreators([
+				{ firstName: 'First', lastName: 'Author', creatorType: 'author' },
+				{ firstName: 'Second', lastName: 'Creator', creatorType: 'author' },
+				{ firstName: 'Third', lastName: 'Person', creatorType: 'author' },
+				{ firstName: 'Final', lastName: 'Writer', creatorType: 'author' },
+				{ firstName: 'Some', lastName: 'Editor1', creatorType: 'editor' },
+				{ firstName: 'Other', lastName: 'ProEditor2', creatorType: 'editor' },
+				{ firstName: 'Last', lastName: 'SuperbEditor3', creatorType: 'editor' },
+			]);
+			itemManyAuthors.setField('date', "2000-01-02");
+
+			itemPatent = createUnsavedDataObject('item', { title: 'Retroencabulator', itemType: 'patent' });
+			itemPatent.setCreators([
+				{ name: 'AcmeCorp', creatorType: 'inventor' },
+				{ firstName: 'Wile', lastName: 'E', creatorType: 'contributor' },
+				{ firstName: 'Road', lastName: 'R', creatorType: 'contributor' },
+			]);
+			itemPatent.setField('date', "1952-05-10");
 		});
 
 		
@@ -1327,6 +1347,100 @@ describe("Zotero.Attachments", function() {
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(item, "foo {%y} bar {++%y{2}++}"),
 				'foo 1975 bar ++19++'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%c - }{%y - }{%t}"),
+				'Author et al. - 2000 - Has Many Authors'
+			);
+		});
+
+		it("should accept advanced wildcards for formating primary creators", async function () {
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, "{%a}"),
+				'Barius'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, "{%a-1}"),
+				'Pixelus'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, "{%a-1{5}}"),
+				'Pixel'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, "{%a5}"),
+				'Barius Pixelus'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, "{%a-5}"),
+				'Pixelus Barius'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%a3}"),
+				'Author Creator Person'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemPatent, "{%a}"),
+				'AcmeCorp'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%A2}"),
+				'A C'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemPatent, "{%A2}"),
+				'A'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, "{%I}"),
+				'FB'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, "{%I-1}"),
+				'BP'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%I-3}"),
+				'FW TP SC'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, "{%F}"),
+				'BariusF'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%F2}"),
+				'AuthorF CreatorS'
+			);
+		});
+
+		it("should accept advanced wildcards for formating editors", async function () {
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, "{%d}test"),
+				'test'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%d}"),
+				'Editor1'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%d5}"),
+				'Editor1 ProEditor2 SuperbEditor3'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%D2}"),
+				'E P'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%D-1}"),
+				'S'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%l}"),
+				'SE'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%L}"),
+				'Editor1S'
 			);
 		});
 	});
