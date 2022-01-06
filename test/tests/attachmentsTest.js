@@ -1334,161 +1334,189 @@ describe("Zotero.Attachments", function() {
 		});
 
 		
-		it("should strip HTML tags from title", async function () {
+		it('should strip HTML tags from title', async function () {
 			var htmlItem = createUnsavedDataObject('item', { title: 'Foo <i>Bar</i> Foo<br><br/><br />Bar' });
 			var str = Zotero.Attachments.getFileBaseNameFromItem(htmlItem);
 			assert.equal(str, 'Foo Bar Foo Bar');
 		});
 
-		it("should accept basic wildcards for formatString", async function () {
+		it('should accept basic wildcards for formatString', async function () {
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, "{FOO%yBAR}"),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{FOO%yBAR}'),
 				'FOO1975BAR'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, "{%c - }{%y - }{%t}"),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{%c - }{%y - }{%t}'),
 				'Barius and Pixelus - 1975 - Lorem Ipsum'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, "{%y-}{%c{10}-}{%t{5}}"),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{%y-}{%c{10}-}{%t{5}}'),
 				'1975-Barius and-Lorem'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, "foo {%y} bar {++%y{2}++}"),
+				Zotero.Attachments.getFileBaseNameFromItem(item, 'foo {%y} bar {++%y{2}++}'),
 				'foo 1975 bar ++19++'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%c - }{%y - }{%t}"),
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{%c - }{%y - }{%t}'),
 				'Author et al. - 2000 - Has Many Authors'
 			);
 		});
 
-		it("should accept advanced wildcards for primary creators for formatString", async function () {
+		it('should accept advanced wildcards for primary creators for formatString', async function () {
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, "{%a}"),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{%a}'),
 				'Barius'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, "{%a-1}"),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{%a-1}'),
 				'Pixelus'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, "{%a-1{5}}"),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{%a-1{5}}'),
 				'Pixel'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, "{%a5}"),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{%a5}'),
 				'Barius Pixelus'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, "{%a-5}"),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{%a-5}'),
 				'Pixelus Barius'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%a3}"),
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{%a3}'),
 				'Author Creator Person'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemPatent, "{%a}"),
+				Zotero.Attachments.getFileBaseNameFromItem(itemPatent, '{%a}'),
 				'AcmeCorp'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%A2}"),
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{%A2}'),
 				'A C'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemPatent, "{%A2}"),
+				Zotero.Attachments.getFileBaseNameFromItem(itemPatent, '{%A2}'),
 				'A'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, "{%I}"),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{%I}'),
 				'FB'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, "{%I-1}"),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{%I-1}'),
 				'BP'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%I-3}"),
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{%I-3}'),
 				'FW TP SC'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, "{%F}"),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{%F}'),
 				'BariusF'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%F2}"),
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{%F2}'),
 				'AuthorF CreatorS'
 			);
 		});
 
-		it("should accept advanced wildcards for editors form formatString", async function () {
+		it('should accept advanced wildcards for editors form formatString', async function () {
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, "{%d}test"),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{%d}test'),
 				'test'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%d}"),
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{%d}'),
 				'Editor1'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%d5}"),
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{%d5}'),
 				'Editor1 ProEditor2 SuperbEditor3'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%D2}"),
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{%D2}'),
 				'E P'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%D-1}"),
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{%D-1}'),
 				'S'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%l}"),
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{%l}'),
 				'SE'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%L}"),
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{%L}'),
 				'Editor1S'
 			);
 		});
 
-		it("should accept other advanced wildcards for formatString", async function () {
+		it('should accept other advanced wildcards for formatString', async function () {
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, "{%T}"),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{%T}'),
 				'Journal Article'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, "{%j}"),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{%j}'),
 				'Best Publications Place'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, "{%s}"),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{%s}'),
 				'BPP'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%p}"),
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{%p}'),
 				'Awesome House'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%v}"),
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{%v}'),
 				'3'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, "{%e}"),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{%e}'),
 				'42'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, "{%f}"),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{%f}'),
 				'321'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemPatent, "{%n}"),
+				Zotero.Attachments.getFileBaseNameFromItem(itemPatent, '{%n}'),
 				'HBK-8539b'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemPatent, "{%i}"),
+				Zotero.Attachments.getFileBaseNameFromItem(itemPatent, '{%i}'),
 				'Fast FooBar'
+			);
+		});
+
+		it("should be backwards-compatible", async function () {
+			var justTitleItem = createUnsavedDataObject('item', { title: 'lorem ipsum' });
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(justTitleItem, '{%c - }{%y - }{%t{50}}'),
+				'lorem ipsum'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{%y - }'),
+				'1975 - '
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{%y{2}00}'),
+				'1900'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{%c5 - }'),
+				'Barius and Pixelus5 - '
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{%c-2 - }'),
+				'Author et al.-2 - '
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{%t5 - }'),
+				'Lorem Ipsum5 - '
 			);
 		});
 	});

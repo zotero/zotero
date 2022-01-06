@@ -2332,21 +2332,37 @@ Zotero.Attachments = new function () {
 			},
 		};
 
+		const markersWithSlices = ['a', 'A', 'd', 'D', 'F', 'I', 'l', 'L'];
+		const markersRegexPart = markersWithSlices
+			.map(m => `${m}(?:-?[1-9])?`)
+			.concat(Object.keys(markers).filter(m => !markersWithSlices.includes(m)))
+			.join('|');
+
 		// Regexp contains 4 capture groups all wrapped in {}:
 		// 		* Prefix before the wildcard, can be empty string
 		// 		* Any recognized marker. % sign marks a wildcard and is required for a match but is
 		// 		  not part of the capture group. Recognized markers are specified in a `markers`
-		// 		  lookup.
+		// 		  lookup. This capture group is a "combined" marker, which means it can include
+		// 		  optional a single digit number, possible prefixed with a sign e.g. a1, A-3
 		// 		* Optionally a maximum number of characters to truncate the value to
 		// 		* Suffix after the wildcard, can be empty string
-		const re = new RegExp(`{([^%{}]*)%(${Object.keys(markers).join('|')})(-?[1-9])?({[0-9]+})?([^%{}]*)}`, 'g');
+		const re = new RegExp(`{([^%{}]*)%(${markersRegexPart})({[0-9]+})?([^%{}]*)}`, 'g');
 
-		formatString = formatString.replace(re, (match, pre, marker, maxCount, maxChars, post) => {
+		formatString = formatString.replace(re, (match, pre, combinedMarker, maxChars, post) => {
 			maxChars = maxChars ? maxChars.replace(/[^0-9]+/g, '') : false;
-			maxCount = maxCount ? parseInt(maxCount) : 1;
+			const marker = combinedMarker.slice(0, 1);
+
+			let slice = null;
+			if (markersWithSlices.includes(marker)) {
+				slice = combinedMarker.length > 1 ? parseInt(combinedMarker.slice(1)) : 1;
+			}
 			const value = markers[marker] instanceof Function
-				? markers[marker](maxCount)
+				? markers[marker](slice)
 				: '' + item.getField(markers[marker], false, true);
+			
+			if (!value) {
+				return '';
+			}
 			return pre + (maxChars ? value.substr(0, maxChars) : value) + post;
 		});
 
