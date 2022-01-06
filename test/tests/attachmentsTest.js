@@ -1302,7 +1302,12 @@ describe("Zotero.Attachments", function() {
 				{ firstName: 'Bazius', lastName: 'Pixelus', creatorType: 'author' }
 			]);
 			item.setField('date', "1975-10-15");
+			item.setField('publicationTitle', 'Best Publications Place');
+			item.setField('journalAbbreviation', 'BPP');
+			item.setField('issue', '42');
+			item.setField('pages', '321');
 
+			
 			itemManyAuthors = createUnsavedDataObject('item', { title: 'Has Many Authors', itemType: 'book' });
 			itemManyAuthors.setCreators([
 				{ firstName: 'First', lastName: 'Author', creatorType: 'author' },
@@ -1314,6 +1319,8 @@ describe("Zotero.Attachments", function() {
 				{ firstName: 'Last', lastName: 'SuperbEditor3', creatorType: 'editor' },
 			]);
 			itemManyAuthors.setField('date', "2000-01-02");
+			itemManyAuthors.setField('publisher', 'Awesome House');
+			itemManyAuthors.setField('volume', '3');
 
 			itemPatent = createUnsavedDataObject('item', { title: 'Retroencabulator', itemType: 'patent' });
 			itemPatent.setCreators([
@@ -1321,7 +1328,9 @@ describe("Zotero.Attachments", function() {
 				{ firstName: 'Wile', lastName: 'E', creatorType: 'contributor' },
 				{ firstName: 'Road', lastName: 'R', creatorType: 'contributor' },
 			]);
-			itemPatent.setField('date', "1952-05-10");
+			itemPatent.setField('date', '1952-05-10');
+			itemPatent.setField('number', 'HBK-8539b');
+			itemPatent.setField('assignee', 'Fast FooBar');
 		});
 
 		
@@ -1354,7 +1363,7 @@ describe("Zotero.Attachments", function() {
 			);
 		});
 
-		it("should accept advanced wildcards for formating primary creators", async function () {
+		it("should accept advanced wildcards for primary creators for formatString", async function () {
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(item, "{%a}"),
 				'Barius'
@@ -1413,7 +1422,7 @@ describe("Zotero.Attachments", function() {
 			);
 		});
 
-		it("should accept advanced wildcards for formating editors", async function () {
+		it("should accept advanced wildcards for editors form formatString", async function () {
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(item, "{%d}test"),
 				'test'
@@ -1441,6 +1450,45 @@ describe("Zotero.Attachments", function() {
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%L}"),
 				'Editor1S'
+			);
+		});
+
+		it("should accept other advanced wildcards for formatString", async function () {
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, "{%T}"),
+				'Journal Article'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, "{%j}"),
+				'Best Publications Place'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, "{%s}"),
+				'BPP'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%p}"),
+				'Awesome House'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, "{%v}"),
+				'3'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, "{%e}"),
+				'42'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, "{%f}"),
+				'321'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemPatent, "{%n}"),
+				'HBK-8539b'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemPatent, "{%i}"),
+				'Fast FooBar'
 			);
 		});
 	});

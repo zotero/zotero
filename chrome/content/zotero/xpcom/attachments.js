@@ -2291,6 +2291,8 @@ Zotero.Attachments = new function () {
 			A: slice => getSlicedCreatorsOfType(
 				primaryCreator, slice
 			).map(a => (a.lastName || a.name).slice(0, 1)).join(' '),
+			e: 'issue',
+			f: 'pages',
 			d: slice => getSlicedCreatorsOfType(
 				editorCreators, slice
 			).map(a => a.lastName || a.name).join(' '),
@@ -2301,15 +2303,23 @@ Zotero.Attachments = new function () {
 				primaryCreator, slice
 			).map(a => a.name && a.name || a.lastName + (a.firstName).slice(0, 1)).join(' '),
 			c: 'firstCreator',
+			i: 'assignee',
 			I: slice => getSlicedCreatorsOfType(
 				primaryCreator, slice
 			).map(a => a.name && (a.name).slice(0, 1) || (a.firstName).slice(0, 1) + (a.lastName).slice(0, 1)).join(' '),
+			j: 'publicationTitle',
 			l: slice => getSlicedCreatorsOfType(
 				editorCreators, slice
 			).map(a => a.name && (a.name).slice(0, 1) || (a.firstName).slice(0, 1) + (a.lastName).slice(0, 1)).join(' '),
 			L: slice => getSlicedCreatorsOfType(
 				editorCreators, slice
 			).map(a => a.name && a.name || a.lastName + (a.firstName).slice(0, 1)).join(' '),
+			n: 'number',
+			p: 'publisher',
+			s: 'journalAbbreviation',
+			t: 'title',
+			v: 'volume',
+			T: () => Zotero.ItemTypes.getLocalizedString(item.itemType),
 			y: () => {
 				let value = item.getField('date', true, true);
 				if (value) {
@@ -2320,7 +2330,6 @@ Zotero.Attachments = new function () {
 				}
 				return value;
 			},
-			t: 'title'
 		};
 
 		// Regexp contains 4 capture groups all wrapped in {}:
