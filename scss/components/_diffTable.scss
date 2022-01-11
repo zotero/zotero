@@ -19,17 +19,14 @@
 	}
 
 	.value {
-
 		.removed {
-			background-color: #dbdbdb;
+			background-color: #d0d0d0;
 			text-decoration: line-through;
 		}
 
 		.added {
-			background-color: #eaeaea;
+			background-color: #eeeeee;
 		}
-
-
 	}
 
 
@@ -65,9 +62,10 @@
 
 		.row {
 			padding: 3px 0;
-			
+
 			.header {
 				display: flex;
+
 				.icon {
 					width: 30px;
 					text-align: center;

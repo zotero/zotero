@@ -1,9 +1,9 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
     
-    Copyright © 2020 Center for History and New Media
-                     George Mason University, Fairfax, Virginia, USA
-                     http://zotero.org
+    Copyright © 2020 Corporation for Digital Scholarship
+                     Vienna, Virginia, USA
+                     https://www.zotero.org
     
     This file is part of Zotero.
     
@@ -115,10 +115,8 @@ Zotero.UpdateMetadata = new function () {
 			if (row) {
 				let item = Zotero.Items.get(row.itemID);
 				row.title = item.getField('title', false, true);
-
-				let oldItem = item.toJSON();
 				if (row.newItem) {
-					_setRowFields(row, oldItem, row.newItem);
+					_setRowFields(row, item, row.newItem);
 					// If item type changes it's safer to un-accept all fields,
 					// when the current item is modified (i.e. in the item pane)
 					if (_isItemTypeChanged(row)) {
@@ -229,10 +227,9 @@ Zotero.UpdateMetadata = new function () {
 					throw new Error();
 				}
 
-				let oldItem = item.toJSON();
 				let newItem = await Zotero.Utilities.Internal.getUpdatedMetadata(item);
 				if (newItem) {
-					_setRowFields(row, oldItem, newItem);
+					_setRowFields(row, item, newItem);
 				}
 
 				row.newItem = newItem || oldItem;
@@ -276,7 +273,9 @@ Zotero.UpdateMetadata = new function () {
 
 			let type = insertType ? ` (${Zotero.CreatorTypes.getLocalizedString(c.creatorType)})` : '';
 
-			return name + type;
+			// Use a non-breaking space to differentiate between
+			// single creator names (and type) and other creators
+			return (name + type).replace(/\s/g, '\u00A0');
 		}).join(', ');
 	}
 
@@ -287,17 +286,27 @@ Zotero.UpdateMetadata = new function () {
 	 * @returns {Boolean}
 	 * @private
 	 */
-	function _isFieldAccepted(row, fieldName) {
+	function _isFieldAccepted(row, fieldName, isRisky) {
 		// If field already exists use its `accept` state
 		let field = row.fields.find(field => field.fieldName === fieldName);
 		if (field) {
 			return field.isAccepted;
 		}
 
-		// If the row is already processed and succeeded, all new field
-		// differences (i.e. when the existing item was modified in the item pane)
-		// are unaccepted by default
-		return row.status !== Zotero.UpdateMetadata.ROW_SUCCEEDED;
+		// If the field change is risky or the row is already processed and succeeded,
+		// all new field differences (i.e. when the existing item was modified in
+		// the item pane) are unaccepted by default
+		return !isRisky && row.status !== Zotero.UpdateMetadata.ROW_SUCCEEDED;
+	}
+
+	function _fieldsEqual(fieldName, oldField, newField) {
+		// Return true if the new field is only upper-cased or title-cased
+		if (oldField.toLowerCase() === newField.toLowerCase()
+			&& (Zotero.Utilities.capitalizeTitle(oldField, true) === oldField
+				|| oldField.toUpperCase() === newField)) {
+			return true;
+		}
+		return oldField === newField;
 	}
 
 	/**
@@ -309,59 +318,61 @@ Zotero.UpdateMetadata = new function () {
 	 */
 	function _setRowFields(row, oldItem, newItem) {
 		let combinedFields = [];
+		let isMetadataRisky = false;
 
-		let oldFields = Zotero.ItemFields.getItemTypeFields(Zotero.ItemTypes.getID(oldItem.itemType));
-		oldFields = oldFields.map(x => Zotero.ItemFields.getName(x));
+		let item = new Zotero.Item;
+		item.fromJSON(newItem);
+		newItem = item;
+		let oldItemTypeID = oldItem.itemTypeID;
+		oldItem = oldItem.clone();
+		oldItem.setType(newItem.itemTypeID);
 
-		let newFields = Zotero.ItemFields.getItemTypeFields(Zotero.ItemTypes.getID(newItem.itemType));
-		newFields = newFields.map(x => Zotero.ItemFields.getName(x));
-
-		let includeCreatorType = false;
-		for (let i = 0; i < Math.min(oldItem.creators.length, newItem.creators.length); i++) {
-			if (oldItem.creators[i].creatorType !== newItem.creators[i].creatorType) {
-				includeCreatorType = true;
-				break;
-			}
-		}
-
-		let oldCreators = _formatCreators(oldItem.creators, includeCreatorType);
-		let newCreators = _formatCreators(newItem.creators, includeCreatorType);
-
-		if (oldCreators !== newCreators) {
-			combinedFields.push({
-				fieldName: 'creators',
-				fieldLabel: 'Creators', // TODO: Localize
-				oldValue: oldItem.creators,
-				oldLabel: oldCreators,
-				newValue: newItem.creators,
-				newLabel: newCreators,
-				isAccepted: _isFieldAccepted(row, 'creators')
-			});
+		// Append extra
+		let oldExtra = oldItem.getField('extra');
+		let newExtra = newItem.getField('extra');
+		if (oldExtra && newExtra && oldExtra !== newExtra &&
+			!oldExtra.includes(newExtra)) {
+			newItem.setField('extra', oldExtra + '\n' + newExtra);
 		}
 
 		// When item type changes some fields disappear as well
-		if (oldItem.itemType !== newItem.itemType) {
-			let oldValue = Zotero.ItemTypes.getLocalizedString(oldItem.itemType);
-			let newValue = Zotero.ItemTypes.getLocalizedString(newItem.itemType);
+		if (oldItemTypeID !== newItem.itemTypeID) {
+			let oldItemType = Zotero.ItemTypes.getName(oldItemTypeID);
+			let newItemType = Zotero.ItemTypes.getName(newItem.itemTypeID);
+			let oldItemTypeLocalized = Zotero.ItemTypes.getLocalizedString(oldItemTypeID);
+			let newItemTypeLocalized = Zotero.ItemTypes.getLocalizedString(newItem.itemTypeID);
+
+			if (newItemType === 'webpage') {
+				isMetadataRisky = true;
+			}
+
 			combinedFields.push({
 				fieldName: 'itemType',
 				fieldLabel: Zotero.ItemFields.getLocalizedString('itemType'),
-				oldValue: oldItem.itemType,
-				oldLabel: oldValue,
-				newValue: newItem.itemType,
-				newLabel: newValue,
-				isAccepted: _isFieldAccepted(row, 'itemType')
+				oldValue: oldItemType,
+				oldLabel: oldItemTypeLocalized,
+				newValue: newItemType,
+				newLabel: newItemTypeLocalized,
+				isAccepted: _isFieldAccepted(row, 'itemType', isMetadataRisky)
 			});
 		}
 
-		for (let fieldName of [...oldFields, ...newFields]) {
-			let oldValue = oldItem[fieldName] || '';
-			let newValue = newItem[fieldName] || '';
+		let allFields = Zotero.ItemFields.getItemTypeFields(oldItemTypeID);
+		allFields = allFields.concat(Zotero.ItemFields.getItemTypeFields(newItem.itemTypeID));
+		allFields = allFields.map(x => Zotero.ItemFields.getName(x));
+		for (let fieldName of allFields) {
+			let oldValue = oldItem.getField(fieldName) || '';
+			let newValue = newItem.getField(fieldName) || '';
 			if (['accessDate'].includes(fieldName)
-				|| oldValue === newValue
+				|| _fieldsEqual(fieldName, oldValue, newValue)
 				|| combinedFields.find(x => x.fieldName === fieldName)) {
 				continue;
 			}
+
+			let isNewLonger = newValue.length > oldValue.length;
+			let isNewEmpty = !newValue;
+			let isFieldRisky = isMetadataRisky || isNewEmpty || !isNewLonger;
+
 			combinedFields.push({
 				fieldName: fieldName,
 				fieldLabel: Zotero.ItemFields.getLocalizedString(fieldName),
@@ -369,9 +380,41 @@ Zotero.UpdateMetadata = new function () {
 				oldLabel: oldValue,
 				newValue,
 				newLabel: newValue,
-				isAccepted: _isFieldAccepted(row, fieldName)
+				isAccepted: _isFieldAccepted(row, fieldName, isFieldRisky)
 			});
 		}
+
+		let includeCreatorType = false;
+		let oldCreators = oldItem.getCreators();
+		let newCreators = newItem.getCreators();
+		for (let i = 0; i < Math.min(oldCreators.length, newCreators.length); i++) {
+			if (oldCreators[i].creatorType !== newCreators[i].creatorType) {
+				includeCreatorType = true;
+				break;
+			}
+		}
+
+		let oldCreatorsFormatted = _formatCreators(oldCreators, includeCreatorType);
+		let newCreatorsFormatted = _formatCreators(newCreators, includeCreatorType);
+		if (oldCreatorsFormatted !== newCreatorsFormatted) {
+			let creators = {
+				fieldName: 'creators',
+				fieldLabel: Zotero.getString('general.creators'),
+				oldValue: oldCreators,
+				oldLabel: oldCreatorsFormatted,
+				newValue: newCreators,
+				newLabel: newCreatorsFormatted,
+				isAccepted: _isFieldAccepted(row, 'creators', isMetadataRisky)
+			};
+
+			let index = combinedFields.findIndex(field =>
+				Zotero.ItemFields.getBaseIDFromTypeAndField(newItem.itemType, field.fieldName) === 110
+			);
+
+			index = index >= 0 && index + 1 || 0;
+			combinedFields.splice(index, 0, creators);
+		}
+
 		row.fields = combinedFields;
 	}
 

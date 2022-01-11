@@ -3,7 +3,7 @@
     
     Copyright © 2020 Corporation for Digital Scholarship
                      Vienna, Virginia, USA
-                     https://digitalscholar.org
+                     https://www.zotero.org
     
     This file is part of Zotero.
     
@@ -31,7 +31,7 @@ import DMP from 'diff-match-patch';
 
 const dmp = new DMP();
 
-const MAX_DIFF_SEGMENT_LENGTH = 35;
+const MAX_DIFF_SEGMENT_LENGTH = 60;
 
 // TODO: Improve performance by reducing re-renders
 
@@ -39,10 +39,41 @@ const Field = (props) => {
 	const { itemID, field, onToggle } = props;
 	const { fieldName, fieldLabel, oldLabel, newLabel, isAccepted } = field;
 
-	function shrink(str) {
-		if (str.length > MAX_DIFF_SEGMENT_LENGTH) {
-			return str.slice(0, 30) + '[…]' + str.slice(-30);
+	function cut(str, index) {
+		if (index < 0) {
+			return 0;
 		}
+		
+		let cutIndex = null;
+
+		let idx = -1;
+		while ((idx = str.indexOf(' ', idx + 1)) >= 0) {
+			if (Math.abs(index - idx) < Math.abs(cutIndex - idx)) {
+				cutIndex = idx;
+			}
+		}
+
+		if (!cutIndex || Math.abs(index - cutIndex) > 15) {
+			return index;
+		}
+
+		return cutIndex;
+	}
+
+	function shrink(str, pos) {
+		if (pos === 'start' && str.length > MAX_DIFF_SEGMENT_LENGTH / 2) {
+			return '…' + str.slice(cut(str, str.length - MAX_DIFF_SEGMENT_LENGTH / 2 - 1));
+		}
+		else if (pos === 'middle' && str.length > MAX_DIFF_SEGMENT_LENGTH) {
+			return str.slice(cut(str, MAX_DIFF_SEGMENT_LENGTH / 2 - 1)) + '[…]' + str.slice(cut(str, str.length - MAX_DIFF_SEGMENT_LENGTH / 2 - 1));
+		}
+		else if (pos === 'end' && str.length > MAX_DIFF_SEGMENT_LENGTH / 2) {
+			return str.slice(0, cut(str, MAX_DIFF_SEGMENT_LENGTH / 2 - 1)) + '…';
+		}
+		else if (pos === 'single' && str.length > MAX_DIFF_SEGMENT_LENGTH) {
+			return str.slice(0, cut(str, MAX_DIFF_SEGMENT_LENGTH - 1)) + '…';
+		}
+
 		return str;
 	}
 
@@ -52,7 +83,7 @@ const Field = (props) => {
 
 	function getDiff(oldValue, newValue) {
 		// As described in https://github.com/google/diff-match-patch/wiki/Line-or-Word-Diffs#word-mode
-		var a = dmp.diff_wordsToChars_(oldValue, newValue);
+		var a = dmp.diff_wordsToChars_(oldValue, newValue, [' ', ',']);
 		var lineText1 = a.chars1;
 		var lineText2 = a.chars2;
 		var lineArray = a.lineArray;
@@ -62,17 +93,20 @@ const Field = (props) => {
 
 		if (!diffs) return [];
 
-		if (diffs.length === 2 && diffs[0][0] === -1 && diffs[1][0] === 1 && diffs[0][1].length + diffs[1][1].length > 60) {
+		let commonNum = diffs.reduce((acc, value) => acc + (value[0] === 0 ? value[1].length : 0), 0);
+		let changedNum = diffs.reduce((acc, value) => acc + (value[0] !== 0 ? value[1].length : 0), 0);
+		
+		if (commonNum > 0 && changedNum / commonNum > 3 || diffs.length === 2 && diffs[0][0] === -1 && diffs[1][0] === 1 && diffs[0][1].length + diffs[1][1].length > 60) {
 			return [
-				<span className="removed">{shrink(oldLabel)}</span>, <br/>,
-				<span className="added">{shrink(newLabel)}</span>
+				<span className="removed">{shrink(oldLabel, 'single')}</span>, <br/>,
+				<span className="added">{shrink(newLabel, 'single')}</span>
 			];
 		}
 
 		return diffs.map((part, index) => {
 			let className = part[0] === 1 ? 'added' : part[0] === -1 ? 'removed' : '';
 			let value = part[1];
-			value = shrink(value);
+			value = shrink(value, diffs.length === 1 && 'single' || index === 0 && 'start' || index === diffs.length - 1 && 'end' || 'middle');
 			return <span key={index} className={className}>{value}</span>
 		});
 	}

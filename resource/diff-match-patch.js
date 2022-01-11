@@ -2267,7 +2267,7 @@ diff_match_patch.patch_obj.prototype.toString = function() {
  *     The zeroth element of the array of unique strings is intentionally blank.
  * @private
  */
-diff_match_patch.prototype.diff_wordsToChars_ = function(text1, text2) {
+diff_match_patch.prototype.diff_wordsToChars_ = function(text1, text2, whiteSpaces) {
   var lineArray = [];  // e.g. lineArray[4] == 'Hello\n'
   var lineHash = {};   // e.g. lineHash['Hello\n'] == 4
 
@@ -2293,7 +2293,14 @@ diff_match_patch.prototype.diff_wordsToChars_ = function(text1, text2) {
     // Keeping our own length variable is faster than looking it up.
     var lineArrayLength = lineArray.length;
     while (lineEnd < text.length - 1) {
-      lineEnd = text.indexOf(' ', lineStart);
+      lineEnd = -1;
+      for (let space of whiteSpaces) {
+        let index = text.indexOf(space, lineStart);
+        if (index >= 0 && (lineEnd === -1 || index < lineEnd)) {
+          lineEnd = index;
+        }
+      }
+      
       if (lineEnd == -1) {
         lineEnd = text.length - 1;
       }
@@ -2324,7 +2331,6 @@ diff_match_patch.prototype.diff_wordsToChars_ = function(text1, text2) {
   var chars2 = diff_linesToCharsMunge_(text2);
   return {chars1: chars1, chars2: chars2, lineArray: lineArray};
 };
-
 
 module.exports = diff_match_patch;
 module.exports['diff_match_patch'] = diff_match_patch;

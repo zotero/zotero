@@ -22,7 +22,7 @@
 		</hbox>
 		<html:div id="diff-table-container" style="padding: 5px; min-width: 100px"></html:div>
 		<hbox>
-			<button id="apply-button" label="&zotero.general.applyAll;"/>
+			<button id="apply-button" label="&zotero.general.applyUpdates;"/>
 		</hbox>
 	</vbox>
 </window>

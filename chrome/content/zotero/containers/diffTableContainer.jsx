@@ -3,7 +3,7 @@
     
     Copyright © 2020 Corporation for Digital Scholarship
                      Vienna, Virginia, USA
-                     https://digitalscholar.org
+                     https://www.zotero.org
     
     This file is part of Zotero.
     

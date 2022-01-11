@@ -1,9 +1,9 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
     
-    Copyright © 2020 Center for History and New Media
-                     George Mason University, Fairfax, Virginia, USA
-                     http://zotero.org
+    Copyright © 2020 Corporation for Digital Scholarship
+                     Vienna, Virginia, USA
+                     https://www.zotero.org
     
     This file is part of Zotero.
     
