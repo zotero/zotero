@@ -33,6 +33,282 @@ Zotero.Utilities.Internal = {
 	SNAPSHOT_SAVE_TIMEOUT: 30000,
 
 	/**
+	 * Get an identifier from the item whether it's in 'extra' or a separate field
+	 *
+	 * @param {Zotero.Item} item
+	 * @return {Object[]} Identifiers
+	 */
+	getItemIdentifiers: function (item) {
+		let identifiers = [];
+		let DOI = item.getField('DOI') || item.getExtraField('DOI');
+		if (DOI) {
+			identifiers.push({DOI});
+		}
+		
+		let ISBN = item.getField('ISBN') || item.getExtraField('ISBN');
+		if (ISBN) {
+			identifiers.push({ISBN});
+		}
+		
+		let PMID = item.getField('PMID') || item.getExtraField('PMID');
+		if (PMID) {
+			identifiers.push({PMID});
+		}
+		
+		let arXiv = item.getField('arXiv') || item.getExtraField('arXiv');
+		if (arXiv) {
+			identifiers.push({arXiv});
+		}
+		
+		return identifiers;
+	},
+	
+	
+	/**
+	 * Resolve an identifier by using fields like title, authors, years, etc.
+	 *
+	 * @param {Zotero.Item} item
+	 * @return {Promise<Object>} Object containing resolved identifiers
+	 */
+	resolveItemIdentifiers: async function (item) {
+		let uri = ZOTERO_CONFIG.SERVICES_URL + 'resolve';
+		let req = await Zotero.HTTP.request(
+			"POST",
+			uri,
+			{
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(item.toJSON())
+			}
+		);
+		
+		return JSON.parse(req.response);
+	},
+	
+	
+	/**
+	 * Translate URL
+	 *
+	 * @param {String} url
+	 * @return {Promise<Object|null>} Item metadata in translator format,
+	 * or null if nothing was translated
+	 */
+	translateURL: async function (url) {
+		let doc = (await Zotero.HTTP.processDocuments(url, doc => doc))[0];
+		let newItems = await this.translateDocument(doc);
+		if (!newItems.length) {
+			return null;
+		}
+		return newItems[0];
+	},
+	
+	
+	/**
+	 * Gets metadata from identifier APIs and a publisher website.
+	 * Identifier API metadata is used as a base and the missing fields
+	 * are added from a publisher website
+	 *
+	 * @param {Object} identifier
+	 * @return {Promise<Object|null>} Item metadata in translator format
+	 * or null if translation fails
+	 */
+	translateIdentifier: async function (identifier) {
+		let translate = new Zotero.Translate.Search();
+		translate.setIdentifier(identifier);
+		
+		let translators = await translate.getTranslators();
+		translate.setTranslator(translators);
+		let newItems;
+		try {
+			newItems = await translate.translate({
+				libraryID: false
+			});
+		}
+		catch (e) {
+			Zotero.logError(e);
+			return null;
+		}
+		
+		if (!newItems.length) {
+			return null;
+		}
+		
+		let newItem;
+		let item1 = newItems[0];
+		let item2 = null;
+		
+		if (identifier.DOI) {
+			try {
+				item2 = await this.translateURL('https://doi.org/' + identifier.DOI);
+			} catch(e) {
+				Zotero.logError(e);
+			}
+		}
+		
+		// If both items are translated
+		if (item1 && item2) {
+			// Combine item1 and item2
+			for (let key in item2) {
+				if (Zotero.Utilities.fieldIsValidForType(key, item1.itemType)) {
+					// Add all item2 fields that doesn't exist in item1
+					if (!item1[key] && item2[key]) {
+						item1[key] = item2[key];
+					}
+				}
+			}
+			
+			// If item1 doesn't have creators, take them from item2
+			if ((!item1.creators || !item1.creators.length) && item2.creators) {
+				item1.creators = item2.creators;
+			}
+			
+			newItem = item1;
+		}
+		// If at least one item was translated
+		else {
+			newItem = item1 || item2;
+		}
+		
+		return newItem;
+	},
+	
+	
+	/**
+	 * Combines an existing item with the new metadata.
+	 * The existing item usually has additional data like notes,
+	 * tags, creation date, etc. therefore we can't completely
+	 * replace it by creating a new item
+	 *
+	 * @param {Zotero.Item} item
+	 * @param {Object} newItem Item metadata in translator format
+	 * @return {Promise<boolean>} True if the item was updated and false if not
+	 */
+	combineItemMetadata: async function (item, newItem) {
+		let itemUpdated = false;
+		
+		// Set the new item type
+		let newItemTypeID = Zotero.ItemTypes.getID(newItem.itemType);
+		if (item.itemTypeID !== newItemTypeID) {
+			item.setType(newItemTypeID);
+			itemUpdated = true;
+		}
+		
+		// Check if creators are updated
+		let creators1 = item.toJSON().creators;
+		let creators2 = newItem.creators;
+		
+		let creatorsUpdated = false;
+		
+		// Check if creators count is not equal
+		if (creators1.length !== creators2.length) {
+			creatorsUpdated = true;
+		}
+		// Check if creators aren't equal
+		else {
+			// Compare names and type for each creator
+			for (let i = 0; i < creators1.length; i++) {
+				if (
+					creators1[i].creatorType !== creators2[i].creatorType ||
+					creators1[i].firstName !== creators2[i].firstName ||
+					creators1[i].lastName !== creators2[i].lastName
+				) {
+					creatorsUpdated = true;
+					break;
+				}
+			}
+		}
+		
+		// If at least something is updated in creators, set the new creators
+		if (creatorsUpdated) {
+			// Empty creators, because setCreators() doesn't do that by default
+			item.setCreators([]);
+			item.setCreators(newItem.creators);
+			itemUpdated = true;
+		}
+		
+		// Get all field names for specific item type
+		let fields = Zotero.ItemFields.getItemTypeFields(Zotero.ItemTypes.getID(newItem.itemType));
+		fields = fields.map(x => Zotero.ItemFields.getName(x));
+		
+		// Transfer all fields from the new item to the existing one
+		for (let key of fields) {
+			// Null is when a field doesn't exist
+			let field1 = item.getField(key) || null;
+			let field2 = newItem[key] || null;
+			
+			// If fields aren't identical
+			if (field1 !== field2) {
+				// accessDate is always new, but it doesn't mean that metadata is changed
+				if (key !== 'accessDate') itemUpdated = true;
+				item.setField(key, field2);
+			}
+		}
+		
+		if (itemUpdated) {
+			await item.saveTx();
+		}
+		
+		return itemUpdated;
+	},
+	
+	
+	/**
+	 * Update item metadata
+	 *
+	 * @param {Zotero.Item} item
+	 * @return {Promise<boolean>} Returns true if metadata was updated and false if not
+	 */
+	updateItemMetadata: async function (item) {
+		let newItem;
+		// Get identifiers from the existing item
+		let itemIdentifiers = this.getItemIdentifiers(item);
+		// Try all identifiers until one is successfully translated
+		for (let itemIdentifier of itemIdentifiers) {
+			newItem = await this.translateIdentifier(itemIdentifier);
+			if (newItem) {
+				// Combine the existing item with the new one
+				return this.combineItemMetadata(item, newItem);
+			}
+		}
+		
+		// Try to update item metadata by re-translating its URL
+		if (item.getField('url')) {
+			// TODO: Avoid querying the same URL if it was already queried through doi.org redirect
+			try {
+				newItem = await this.translateURL(item.getField('url'));
+			} catch(e) {
+				Zotero.logError(e);
+			}
+			
+			if (newItem) {
+				// Combine the existing item with the new one
+				return this.combineItemMetadata(item, newItem);
+			}
+		}
+		
+		// Try to resolve identifiers by using item fields
+		let resolvedIdentifiers = await this.resolveItemIdentifiers(item);
+		// Try all resolved identifiers until one is successfully translated
+		for (let resolvedIdentifier of resolvedIdentifiers) {
+			// Make sure we don't retry identifiers that already exist in the item
+			if (itemIdentifiers.find(x => JSON.stringify(resolvedIdentifier) === JSON.stringify(x))) {
+				continue;
+			}
+			
+			// Translate the resolved identifier
+			newItem = await this.translateIdentifier(resolvedIdentifier);
+			if (newItem) {
+				// Combine the existing item with the new one
+				return this.combineItemMetadata(item, newItem);
+			}
+		}
+		
+		return false;
+	},
+	
+	
+	/**
 	 * Run a function on chunks of a given size of an array's elements.
 	 *
 	 * @param {Array} arr
@@ -1439,25 +1715,41 @@ Zotero.Utilities.Internal = {
 	
 	
 	/**
+	 * Run translation on a Document and return translated items
+	 *
+	 * @param {doc} Document
+	 * @return {Promise<Object[]|null>} Item metadata in translator format or null on failure
+	 */
+	translateDocument: async function(doc) {
+		let translate = new Zotero.Translate.Web();
+		translate.setDocument(doc);
+		let translators = await translate.getTranslators();
+		// TEMP: Until there's a generic webpage translator
+		if (!translators.length) {
+			return [];
+		}
+		translate.setTranslator(translators[0]);
+		let options = {
+			libraryID: false,
+			saveAttachments: true
+		};
+		try {
+			return await translate.translate(options);
+		} catch(err) {
+			Zotero.logError(err);
+		}
+		return [];
+	},
+	
+	
+	/**
 	 * Run translation on a Document to try to find a PDF URL
 	 *
 	 * @param {doc} Document
 	 * @return {String|false} - PDF URL, or false if none found
 	 */
 	getPDFFromDocument: async function (doc) {
-		let translate = new Zotero.Translate.Web();
-		translate.setDocument(doc);
-		var translators = await translate.getTranslators();
-		// TEMP: Until there's a generic webpage translator
-		if (!translators.length) {
-			return false;
-		}
-		translate.setTranslator(translators[0]);
-		var options = {
-			libraryID: false,
-			saveAttachments: true
-		};
-		let newItems = await translate.translate(options);
+		let newItems = await this.translateDocument(doc);
 		if (!newItems.length) {
 			return false;
 		}

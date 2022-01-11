@@ -2958,6 +2958,7 @@ var ZoteroPane = new function()
 			'sep5',
 			'recognizePDF',
 			'unrecognize',
+			'updateMetadata',
 			'createParent',
 			'renameAttachments',
 			'reindexItem',
@@ -3016,6 +3017,7 @@ var ZoteroPane = new function()
 					canIndex = true,
 					canRecognize = true,
 					canUnrecognize = true,
+					canUpdateMetadata = true,
 					canRename = true;
 				var canMarkRead = collectionTreeRow.isFeed();
 				var markUnread = true;
@@ -3036,6 +3038,10 @@ var ZoteroPane = new function()
 					
 					if (canUnrecognize && !Zotero.RecognizePDF.canUnrecognize(item)) {
 						canUnrecognize = false;
+					}
+					
+					if (canUpdateMetadata && !Zotero.UpdateMetadata.canUpdate(item)) {
+						canUpdateMetadata = false;
 					}
 					
 					// Show rename option only if all items are child attachments
@@ -3062,6 +3068,10 @@ var ZoteroPane = new function()
 				
 				if (canUnrecognize) {
 					show.add(m.unrecognize);
+				}
+				
+				if (canUpdateMetadata) {
+					show.add(m.updateMetadata);
 				}
 				
 				if (canMarkRead) {
@@ -3180,6 +3190,10 @@ var ZoteroPane = new function()
 					if (Zotero.RecognizePDF.canUnrecognize(item)) {
 						show.add(m.sep5);
 						show.add(m.unrecognize);
+					}
+					
+					if (Zotero.UpdateMetadata.canUpdate(item)) {
+						show.add(m.updateMetadata);
 					}
 					
 					if (item.isAttachment()) {
@@ -4706,6 +4720,12 @@ var ZoteroPane = new function()
 	};
 	
 	
+	this.updateMetadataForSelected = async function () {
+		Zotero.UpdateMetadata.updateItems(ZoteroPane.getSelectedItems());
+		Zotero.ProgressQueues.get('update').getDialog().open();
+	};
+
+
 	this.createParentItemsFromSelected = async function () {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
