@@ -114,6 +114,7 @@ const xpcomFilesLocal = [
 	'reader',
 	'progressQueue',
 	'progressQueueDialog',
+	'updateMetadataDialog',
 	'quickCopy',
 	'recognizePDF',
 	'report',

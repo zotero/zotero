@@ -172,94 +172,15 @@ Zotero.Utilities.Internal = {
 		
 		return newItem;
 	},
-	
-	
+
+
 	/**
-	 * Combines an existing item with the new metadata.
-	 * The existing item usually has additional data like notes,
-	 * tags, creation date, etc. therefore we can't completely
-	 * replace it by creating a new item
+	 * Get updated metadata
 	 *
 	 * @param {Zotero.Item} item
-	 * @param {Object} newItem Item metadata in translator format
-	 * @return {Promise<boolean>} True if the item was updated and false if not
+	 * @return {Promise<object>} JSON Item
 	 */
-	combineItemMetadata: async function (item, newItem) {
-		let itemUpdated = false;
-		
-		// Set the new item type
-		let newItemTypeID = Zotero.ItemTypes.getID(newItem.itemType);
-		if (item.itemTypeID !== newItemTypeID) {
-			item.setType(newItemTypeID);
-			itemUpdated = true;
-		}
-		
-		// Check if creators are updated
-		let creators1 = item.toJSON().creators;
-		let creators2 = newItem.creators;
-		
-		let creatorsUpdated = false;
-		
-		// Check if creators count is not equal
-		if (creators1.length !== creators2.length) {
-			creatorsUpdated = true;
-		}
-		// Check if creators aren't equal
-		else {
-			// Compare names and type for each creator
-			for (let i = 0; i < creators1.length; i++) {
-				if (
-					creators1[i].creatorType !== creators2[i].creatorType ||
-					creators1[i].firstName !== creators2[i].firstName ||
-					creators1[i].lastName !== creators2[i].lastName
-				) {
-					creatorsUpdated = true;
-					break;
-				}
-			}
-		}
-		
-		// If at least something is updated in creators, set the new creators
-		if (creatorsUpdated) {
-			// Empty creators, because setCreators() doesn't do that by default
-			item.setCreators([]);
-			item.setCreators(newItem.creators);
-			itemUpdated = true;
-		}
-		
-		// Get all field names for specific item type
-		let fields = Zotero.ItemFields.getItemTypeFields(Zotero.ItemTypes.getID(newItem.itemType));
-		fields = fields.map(x => Zotero.ItemFields.getName(x));
-		
-		// Transfer all fields from the new item to the existing one
-		for (let key of fields) {
-			// Null is when a field doesn't exist
-			let field1 = item.getField(key) || null;
-			let field2 = newItem[key] || null;
-			
-			// If fields aren't identical
-			if (field1 !== field2) {
-				// accessDate is always new, but it doesn't mean that metadata is changed
-				if (key !== 'accessDate') itemUpdated = true;
-				item.setField(key, field2);
-			}
-		}
-		
-		if (itemUpdated) {
-			await item.saveTx();
-		}
-		
-		return itemUpdated;
-	},
-	
-	
-	/**
-	 * Update item metadata
-	 *
-	 * @param {Zotero.Item} item
-	 * @return {Promise<boolean>} Returns true if metadata was updated and false if not
-	 */
-	updateItemMetadata: async function (item) {
+	getUpdatedMetadata: async function (item) {
 		let newItem;
 		// Get identifiers from the existing item
 		let itemIdentifiers = this.getItemIdentifiers(item);
@@ -267,26 +188,25 @@ Zotero.Utilities.Internal = {
 		for (let itemIdentifier of itemIdentifiers) {
 			newItem = await this.translateIdentifier(itemIdentifier);
 			if (newItem) {
-				// Combine the existing item with the new one
-				return this.combineItemMetadata(item, newItem);
+				return newItem;
 			}
 		}
-		
+
 		// Try to update item metadata by re-translating its URL
 		if (item.getField('url')) {
 			// TODO: Avoid querying the same URL if it was already queried through doi.org redirect
 			try {
 				newItem = await this.translateURL(item.getField('url'));
-			} catch(e) {
+			}
+			catch (e) {
 				Zotero.logError(e);
 			}
-			
+
 			if (newItem) {
-				// Combine the existing item with the new one
-				return this.combineItemMetadata(item, newItem);
+				return newItem;
 			}
 		}
-		
+
 		// Try to resolve identifiers by using item fields
 		let resolvedIdentifiers = await this.resolveItemIdentifiers(item);
 		// Try all resolved identifiers until one is successfully translated
@@ -295,15 +215,14 @@ Zotero.Utilities.Internal = {
 			if (itemIdentifiers.find(x => JSON.stringify(resolvedIdentifier) === JSON.stringify(x))) {
 				continue;
 			}
-			
+
 			// Translate the resolved identifier
 			newItem = await this.translateIdentifier(resolvedIdentifier);
 			if (newItem) {
-				// Combine the existing item with the new one
-				return this.combineItemMetadata(item, newItem);
+				return newItem;
 			}
 		}
-		
+
 		return false;
 	},
 	

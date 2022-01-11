@@ -1,10 +1,9 @@
-<?xml version="1.0"?>
-<!--
+/*
     ***** BEGIN LICENSE BLOCK *****
     
-    Copyright © 2018 Center for History and New Media
-                     George Mason University, Fairfax, Virginia, USA
-                     http://zotero.org
+    Copyright © 2020 Corporation for Digital Scholarship
+                     Vienna, Virginia, USA
+                     https://digitalscholar.org
     
     This file is part of Zotero.
     
@@ -22,14 +21,23 @@
     along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
     
     ***** END LICENSE BLOCK *****
--->
-<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
-<?xul-overlay href="chrome://zotero/content/containers/tagSelector.xul"?>
-<?xul-overlay href="chrome://zotero/content/containers/tagsBox.xul"?>
+*/
 
-<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<script src="chrome://zotero/content/include.js"></script>
-	
-	<script src="tagSelectorContainer.js"></script>
-	<script src="diffTableContainer.js"></script>
-</overlay>
+import React from 'react';
+const ReactDOM = require('react-dom');
+const { IntlProvider } = require('react-intl');
+import DiffTable from 'components/diffTable/table';
+
+Zotero.DiffTable = {
+	init(container, props, callback) {
+		let ref = React.createRef();
+		let elem = (
+			<IntlProvider locale={Zotero.locale} messages={Zotero.Intl.strings}>
+				<DiffTable ref={ref} {...props} />
+			</IntlProvider>
+		);
+		ReactDOM.render(elem, container, () => {
+			callback(ref);
+		})
+	}
+}

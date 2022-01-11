@@ -94,6 +94,18 @@ var ZoteroPane = new function()
 			
 			progressQueueButtons.appendChild(button);
 		}
+
+		// A toolbar icon for the update metadata dialog
+		let button = document.createElement('toolbarbutton');
+		button.id = 'zotero-tb-pq-update';
+		button.hidden = Zotero.UpdateMetadata.getRowsCount() < 1;
+		button.addEventListener('command', function () {
+			Zotero.UpdateMetadata.openDialog();
+		}, false);
+		Zotero.UpdateMetadata.addListener('rowscount', (count) => {
+			button.hidden = count < 1;
+		});
+		progressQueueButtons.appendChild(button);
 		
 		_loaded = true;
 		
@@ -4722,7 +4734,6 @@ var ZoteroPane = new function()
 	
 	this.updateMetadataForSelected = async function () {
 		Zotero.UpdateMetadata.updateItems(ZoteroPane.getSelectedItems());
-		Zotero.ProgressQueues.get('update').getDialog().open();
 	};
 
 

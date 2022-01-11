@@ -1,0 +1,80 @@
+
+.diff-table-field {
+	display: flex;
+
+	&:hover {
+		opacity: 0.7;
+	}
+
+	.name {
+		font-weight: bold;
+		padding-right: 5px;
+	}
+
+	.removed {
+		background-color: #dbdbdb;
+		text-decoration: line-through;
+	}
+
+	.added {
+		background-color: #eaeaea;
+	}
+
+	&.accepted {
+		color: initial;
+
+		.removed {
+			background-color: #ff8989;
+			text-decoration: line-through;
+		}
+
+		.added {
+			background-color: #a9edae;
+		}
+	}
+}
+
+.diff-table {
+	background-color: $diff-table-bg;
+	color: $diff-table-color;
+	min-width: 0;
+	border: 1px solid gray;
+	cursor: default;
+	user-select: none;
+
+	.body {
+		height: 400px;
+		overflow-y: auto;
+		overflow-x: hidden;
+
+		.row {
+			display: flex;
+			padding: 3px 0;
+			
+			.left {
+				min-width: 50px;
+				text-align: center;
+			}
+
+			.right {
+				min-width: 0;
+
+				.title {
+					display: block;
+					position: relative;
+					overflow: hidden;
+					text-overflow: ellipsis;
+					white-space: nowrap;
+				}
+
+				.message {
+					font-size: 80%;
+				}
+
+				.fields {
+					font-size: 80%;
+				}
+			}
+		}
+	}
+}

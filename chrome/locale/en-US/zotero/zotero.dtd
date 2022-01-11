@@ -22,6 +22,7 @@
 <!ENTITY zotero.general.bigger                             "Bigger">
 <!ENTITY zotero.general.smaller                            "Smaller">
 <!ENTITY zotero.general.reset                              "Reset">
+<!ENTITY zotero.general.apply                              "Apply">
 
 
 <!ENTITY zotero.errorReport.title							"Zotero Error Report">

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
+
+<!DOCTYPE window PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+		"chrome://zotero/locale/zotero.dtd">
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		xmlns:html="http://www.w3.org/1999/xhtml"
+		id="update-metadata"
+		width="600"
+		height="550"
+		style="padding: 10px;">
+	<vbox flex="1">
+		<label id="label" control="progress-indicator" value=""/>
+		<hbox align="center">
+			<progressmeter id="progress-indicator" mode="determined" flex="1"/>
+			<button id="cancel-button" label="&zotero.general.cancel;"/>
+			<button id="minimize-button" label="&zotero.general.minimize;"/>
+			<button id="close-button" label="&zotero.general.close;"/>
+		</hbox>
+		<html:div id="diff-table-container" style="padding: 5px; min-width: 100px"></html:div>
+		<hbox>
+			<button id="apply-button" label="&zotero.general.apply;"/>
+		</hbox>
+	</vbox>
+</window>
