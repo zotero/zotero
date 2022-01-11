@@ -82,7 +82,8 @@ Zotero.UpdateMetadataDialog = function (options) {
 		_diffTable.current.setRows(rows);
 		let total = rows.length;
 		let processed = rows.filter(row => [Zotero.UpdateMetadata.ROW_SUCCEEDED,
-			Zotero.UpdateMetadata.ROW_FAILED].includes(row.status)).length;
+			Zotero.UpdateMetadata.ROW_FAILED,
+			Zotero.UpdateMetadata.ROW_NO_METADATA].includes(row.status)).length;
 		_updateProgress(total, processed);
 
 		// Disabled 'Apply All' when processing or when no pending changes left
@@ -133,6 +134,7 @@ Zotero.UpdateMetadataDialog = function (options) {
 			diffTableContainer,
 			{
 				onToggle: options.onToggle,
+				onExpand: options.onExpand,
 				onIgnore: options.onIgnore,
 				onOpenItem: options.onOpenItem,
 				onApply: options.onApply

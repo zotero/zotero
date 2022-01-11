@@ -31,6 +31,7 @@ import {
 	IconTick,
 	IconCross,
 	IconArrowRotateAnimated,
+	IconPencil,
 	IconWarning,
 	IconBulletBlueEmpty
 } from '../icons';
@@ -46,6 +47,10 @@ const Table = React.forwardRef((props, ref) => {
 
 	function handleFieldToggle(itemID, fieldName) {
 		props.onToggle(itemID, fieldName);
+	}
+
+	function handleFieldExpand(itemID, fieldName) {
+		props.onExpand(itemID, fieldName);
 	}
 
 	function handleMouseDown(event) {
@@ -66,9 +71,10 @@ const Table = React.forwardRef((props, ref) => {
 						<div className="right fields-view">
 							<div className="header" onClick={() => props.onOpenItem(row.itemID)}>
 								{row.status === Zotero.UpdateMetadata.ROW_SUCCEEDED && isDone && <IconTick/>
-								|| row.status === Zotero.UpdateMetadata.ROW_SUCCEEDED && row.fields.length && <IconWarning/>
+								|| row.status === Zotero.UpdateMetadata.ROW_SUCCEEDED && row.fields.length && <IconPencil/>
 								|| row.status === Zotero.UpdateMetadata.ROW_PROCESSING && <IconArrowRotateAnimated/>
 								|| row.status === Zotero.UpdateMetadata.ROW_FAILED && <IconCross/>
+								|| row.status === Zotero.UpdateMetadata.ROW_NO_METADATA && <IconWarning/>
 								|| <IconBulletBlueEmpty/>}
 								<div className="title">{row.title}</div>
 							</div>
@@ -81,6 +87,7 @@ const Table = React.forwardRef((props, ref) => {
 										readonly={row.isDone}
 										field={field}
 										onToggle={handleFieldToggle}
+										onExpand={handleFieldExpand}
 									/>
 								))}
 							</div>

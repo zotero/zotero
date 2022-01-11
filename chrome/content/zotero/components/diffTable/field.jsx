@@ -34,8 +34,8 @@ const dmp = new DMP();
 const MAX_DIFF_SEGMENT_LENGTH = 60;
 
 const Field = (props) => {
-	const { itemID, field, readonly, onToggle } = props;
-	const { fieldName, fieldLabel, oldLabel, newLabel, isDisabled } = field;
+	const { itemID, field, readonly, onToggle, onExpand } = props;
+	const { fieldName, fieldLabel, oldLabel, newLabel, isDisabled, canAbbreviate = true } = field;
 
 	function cut(str, index) {
 		if (index < 0) {
@@ -60,28 +60,46 @@ const Field = (props) => {
 
 	function shrink(str, pos) {
 		if (pos === 'start' && str.length > MAX_DIFF_SEGMENT_LENGTH / 2) {
-			return '…' + str.slice(cut(str, str.length - MAX_DIFF_SEGMENT_LENGTH / 2 - 1)).replace(/^\s+/, '');
+			return [
+				<a key={0} href="#" onClick={expand}>…</a>,
+				str.slice(cut(str, str.length - MAX_DIFF_SEGMENT_LENGTH / 2 - 1)).replace(/^\s+/, '')
+			];
 		}
 		else if (pos === 'middle' && str.length > MAX_DIFF_SEGMENT_LENGTH) {
-			return str.slice(0, cut(str, MAX_DIFF_SEGMENT_LENGTH / 2 - 1)) + '[…]' + str.slice(cut(str, str.length - MAX_DIFF_SEGMENT_LENGTH / 2 - 1));
+			return [
+				str.slice(0, cut(str, MAX_DIFF_SEGMENT_LENGTH / 2 - 1)),
+				<a key={0} href="#" onClick={expand}>[…]</a>,
+				str.slice(cut(str, str.length - MAX_DIFF_SEGMENT_LENGTH / 2 - 1))
+			];
 		}
 		else if (pos === 'end' && str.length > MAX_DIFF_SEGMENT_LENGTH / 2) {
-			return str.slice(0, cut(str, MAX_DIFF_SEGMENT_LENGTH / 2 - 1)) + '…';
+			return [
+				str.slice(0, cut(str, MAX_DIFF_SEGMENT_LENGTH / 2 - 1)),
+				<a key={0} href="#" onClick={expand}>…</a>
+			];
 		}
 		else if (pos === 'single' && str.length > MAX_DIFF_SEGMENT_LENGTH) {
-			return str.slice(0, cut(str, MAX_DIFF_SEGMENT_LENGTH - 1)) + '…';
+			return [
+				str.slice(0, cut(str, MAX_DIFF_SEGMENT_LENGTH - 1)),
+				<a key={0} href="#" onClick={expand}>…</a>
+			];
 		}
 
 		return str;
 	}
 
-	function handleClick() {
-		if (!readonly) {
+	function handleClick(event) {
+		if (!readonly && !event.target.closest('a')) {
 			onToggle(itemID, fieldName, !isDisabled);
 		}
 	}
 
-	function getDiff(oldValue, newValue) {
+	function expand(event) {
+		onExpand(itemID, fieldName);
+		event.preventDefault();
+	}
+
+	function getDiff(oldValue, newValue, canAbbreviate) {
 		// As described in https://github.com/google/diff-match-patch/wiki/Line-or-Word-Diffs#word-mode
 		var a = dmp.diff_wordsToChars_(oldValue, newValue, [' ', ',']);
 		var lineText1 = a.chars1;
@@ -110,9 +128,9 @@ const Field = (props) => {
 				&& diffs[0][1].length + diffs[1][1].length > 60
 			)) {
 			return [
-				<span key={0} className="removed">{shrink(oldLabel, 'single')}</span>,
+				<span key={0} className="removed">{canAbbreviate ? shrink(oldLabel, 'single') : oldLabel}</span>,
 				<br key={1}/>,
-				<span key={2} className="added">{shrink(newLabel, 'single')}</span>
+				<span key={2} className="added">{canAbbreviate ? shrink(newLabel, 'single') : newLabel}</span>
 			];
 		}
 
@@ -120,12 +138,14 @@ const Field = (props) => {
 		return diffs.map((part, index) => {
 			let className = part[0] === 1 ? 'added' : part[0] === -1 ? 'removed' : '';
 			let value = part[1];
-			value = shrink(value, diffs.length === 1 && 'single' || index === 0 && 'start' || index === diffs.length - 1 && 'end' || 'middle');
+			value = canAbbreviate
+				? shrink(value, diffs.length === 1 && 'single' || index === 0 && 'start' || index === diffs.length - 1 && 'end' || 'middle')
+				: value;
 			return <span key={index} className={className}>{value}</span>;
 		});
 	}
 
-	let diff = useMemo(() => getDiff(oldLabel, newLabel), [oldLabel, newLabel]);
+	let diff = useMemo(() => getDiff(oldLabel, newLabel, canAbbreviate), [oldLabel, newLabel, canAbbreviate]);
 
 	return (
 		<div
@@ -142,7 +162,8 @@ Field.propTypes = {
 	itemID: PropTypes.number.isRequired,
 	readonly: PropTypes.bool.isRequired,
 	field: PropTypes.object.isRequired,
-	onToggle: PropTypes.func.isRequired
+	onToggle: PropTypes.func.isRequired,
+	onExpand: PropTypes.func.isRequired
 };
 
 export default Field;

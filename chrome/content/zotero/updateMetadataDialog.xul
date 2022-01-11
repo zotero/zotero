@@ -5,6 +5,7 @@
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
+<?xul-overlay href="chrome://zotero/content/containers/containers.xul"?>
 
 <!DOCTYPE window PUBLIC "-//W3C//DTD XHTML 1.1//EN"
 		"chrome://zotero/locale/zotero.dtd">
@@ -27,4 +28,8 @@
 			<button id="apply-all-button" default="true" label="&zotero.general.applyUpdates;"/>
 		</hbox>
 	</vbox>
+
+	<keyset>
+		<key id="key_close" key="W" modifiers="accel" oncommand="window.close()"/>
+	</keyset>
 </window>

@@ -23,6 +23,7 @@
 
 	.value {
 		-moz-user-select: text;
+		white-space: pre-wrap;
 
 		.removed {
 			background-color: #ff8989;
@@ -95,6 +96,7 @@
 					overflow: hidden;
 					text-overflow: ellipsis;
 					white-space: nowrap;
+					cursor: pointer;
 
 					&:hover {
 						text-decoration: underline;

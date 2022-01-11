@@ -1187,28 +1187,9 @@ Zotero.Utilities.Internal = {
 		var skipKeys = new Set();
 		var lines = extra.split(/\n/g);
 		
-		var getKeyAndValue = (line) => {
-			let parts = line.match(/^([a-z][a-z -_]+):(.+)/i);
-			// Old citeproc.js cheater syntax;
-			if (!parts) {
-				parts = line.match(/^{:([a-z -_]+):(.+)}/i);
-			}
-			if (!parts) {
-				return [null, null];
-			}
-			let [_, originalField, value] = parts;
-			let key = this._normalizeExtraKey(originalField);
-			value = value.trim();
-			// Skip empty values
-			if (value === "") {
-				return [null, null];
-			}
-			return [key, value];
-		};
-		
 		// Extract item type from 'type:' lines
 		lines = lines.filter((line) => {
-			let [key, value] = getKeyAndValue(line);
+			let [key, value] = this.splitExtraLine(line);
 			
 			if (!key
 					|| key != 'type'
@@ -1247,7 +1228,7 @@ Zotero.Utilities.Internal = {
 		});
 		
 		lines = lines.filter((line) => {
-			let [key, value] = getKeyAndValue(line);
+			let [key, value] = this.splitExtraLine(line);
 			
 			if (!key || skipKeys.has(key) || key == 'type') {
 				return true;
@@ -1328,6 +1309,33 @@ Zotero.Utilities.Internal = {
 			creators,
 			extra: lines.join('\n')
 		};
+	},
+
+
+	/**
+	 * Split a line possibly representing a field in Extra text.
+	 *
+	 * @param {String} line The line to split
+	 * @param {Boolean} normalize Whether to normalize to snake-case
+	 * @return {String[]}
+	 */
+	splitExtraLine: function (line, normalize = true) {
+		let parts = line.match(/^([a-z][a-z -_]+):(.+)/i);
+		// Old citeproc.js cheater syntax;
+		if (!parts) {
+			parts = line.match(/^{:([a-z -_]+):(.+)}/i);
+		}
+		if (!parts) {
+			return [null, null];
+		}
+		let [_, originalField, value] = parts;
+		let key = normalize ? this._normalizeExtraKey(originalField) : originalField;
+		value = value.trim();
+		// Skip empty values
+		if (value === "") {
+			return [null, null];
+		}
+		return [key, value];
 	},
 	
 	
@@ -1509,9 +1517,14 @@ Zotero.Utilities.Internal = {
 			identifiers.push({ PMID });
 		}
 
-		let arXiv = item.getField('arXiv') || item.getExtraField('arXiv');
+		let arXiv = item.getField('arXiv') || item.getExtraField('arXiv') || item.getExtraField('arXiv ID');
 		if (arXiv) {
 			identifiers.push({ arXiv });
+		}
+
+		let adsBibcode = item.getExtraField('ADS Bibcode');
+		if (adsBibcode) {
+			identifiers.push({ adsBibcode });
 		}
 
 		return identifiers;
@@ -1560,12 +1573,53 @@ Zotero.Utilities.Internal = {
 	/**
 	 * Gets metadata from identifier APIs and a publisher website.
 	 * Identifier API metadata is used as a base and the missing fields
-	 * are added from a publisher website
+	 * are added from a publisher website.
+	 *
+	 * Passed identifier objects must contain exactly one identifier field.
+	 * Searches are rate-limited by identifier.
 	 *
 	 * @param {Object} identifier
 	 * @return {Promise<Object|null>} Item metadata in translator format
 	 */
-	translateIdentifier: async function (identifier) {
+	translateIdentifier: function (identifier) {
+		if (Object.keys(identifier).length != 1) {
+			throw new Error('Identifier object must contain one identifier field');
+		}
+
+		let caller = this._getSearchCaller(Object.keys(identifier)[0]);
+		return caller.start(() => this._translateIdentifierNow(identifier));
+	},
+
+
+	_searchCallers: new Map(),
+
+
+	/**
+	 * Return a rate-limiting search caller for the given identifier type.
+	 */
+	_getSearchCaller: function (identifier) {
+		if (this._searchCallers.has(identifier)) {
+			return this._searchCallers.get(identifier);
+		}
+
+		Components.utils.import("resource://zotero/concurrentCaller.js");
+		let caller = new ConcurrentCaller({
+			numConcurrent: 1,
+			// Crossref tolerates 50 queries per second [https://github.com/CrossRef/rest-api-doc/issues/196#issuecomment-297260099]
+			// For all other identifier types, be cautious and limit to two per second.
+			interval: identifier == 'DOI' ? 30 : 500,
+			onError: e => Zotero.logError(e)
+		});
+		this._searchCallers.set(identifier, caller);
+		return caller;
+	},
+
+
+	/**
+	 * Helper function for translateIdentifier. Runs translation without
+	 * any rate limiting.
+	 */
+	_translateIdentifierNow: async function (identifier) {
 		let translate = new Zotero.Translate.Search();
 		translate.setIdentifier(identifier);
 
@@ -1675,6 +1729,19 @@ Zotero.Utilities.Internal = {
 			}
 
 			if (newItem) {
+				// If the new item has a DOI and the original item didn't,
+				// it might be a now-published preprint. If so, we don't want
+				// to use the preprint server's metadata anymore, so we'll try
+				// translating by DOI first.
+				// (The arXiv translator tries to do this already, but it only
+				// copies certain fields; we're better off using the DOI item
+				// directly.)
+				if (newItem.DOI && !itemIdentifiers.some(id => id.DOI)) {
+					let doiItem = await this.translateIdentifier({ DOI: newItem.DOI });
+					if (doiItem) {
+						return doiItem;
+					}
+				}
 				return newItem;
 			}
 		}

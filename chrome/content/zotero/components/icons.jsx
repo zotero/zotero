@@ -87,6 +87,7 @@ i('ArrowRefresh', "chrome://zotero/skin/arrow_refresh.png");
 i('PuzzleArrow', "chrome://zotero/skin/puzzle-arrow.png")
 i('ArrowRotateAnimated', "chrome://zotero/skin/arrow_rotate_animated.png")
 i('Warning', "chrome://zotero/skin/warning.png")
+i('Pencil', "chrome://zotero/skin/pencil.png")
 
 i('RTFScanAccept', "chrome://zotero/skin/rtfscan-accept.png", false);
 i('RTFScanLink', "chrome://zotero/skin/rtfscan-link.png", false);
