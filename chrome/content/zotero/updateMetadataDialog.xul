@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
 
 <!DOCTYPE window PUBLIC "-//W3C//DTD XHTML 1.1//EN"
@@ -11,13 +14,12 @@
 		id="update-metadata"
 		width="650"
 		height="550"
-		style="padding: 10px;">
+		style="padding: 10px;font: -moz-dialog !important;">
 	<vbox id="update-metadata-container" flex="1">
 		<label id="label" control="progress-indicator" value=""/>
 		<hbox align="center">
 			<progressmeter id="progress-indicator" mode="determined" flex="1"/>
 			<button id="cancel-button" label="&zotero.general.cancel;"/>
-			<button id="minimize-button" label="&zotero.general.minimize;"/>
 			<button id="close-button" label="&zotero.general.done;"/>
 		</hbox>
 		<html:div id="diff-table-container" style="padding: 5px; min-width: 100px"></html:div>

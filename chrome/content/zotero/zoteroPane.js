@@ -2954,6 +2954,7 @@ var ZoteroPane = new function()
 			'addAttachments',
 			'sep2',
 			'findPDF',
+			'updateMetadata',
 			'sep3',
 			'toggleRead',
 			'addToCollection',
@@ -2970,7 +2971,6 @@ var ZoteroPane = new function()
 			'sep5',
 			'recognizePDF',
 			'unrecognize',
-			'updateMetadata',
 			'createParent',
 			'renameAttachments',
 			'reindexItem',
@@ -3082,10 +3082,6 @@ var ZoteroPane = new function()
 					show.add(m.unrecognize);
 				}
 				
-				if (canUpdateMetadata) {
-					show.add(m.updateMetadata);
-				}
-				
 				if (canMarkRead) {
 					show.add(m.toggleRead);
 					if (markUnread) {
@@ -3106,6 +3102,11 @@ var ZoteroPane = new function()
 					
 					if (items.some(item => item.isRegularItem())) {
 						show.add(m.findPDF);
+						show.add(m.sep3);
+					}
+
+					if (canUpdateMetadata) {
+						show.add(m.updateMetadata);
 						show.add(m.sep3);
 					}
 				}
@@ -3198,14 +3199,15 @@ var ZoteroPane = new function()
 						show.add(m.findPDF);
 						show.add(m.sep3);
 					}
+
+					if (Zotero.UpdateMetadata.canUpdate(item)) {
+						show.add(m.updateMetadata);
+						show.add(m.sep3);
+					}
 					
 					if (Zotero.RecognizePDF.canUnrecognize(item)) {
 						show.add(m.sep5);
 						show.add(m.unrecognize);
-					}
-					
-					if (Zotero.UpdateMetadata.canUpdate(item)) {
-						show.add(m.updateMetadata);
 					}
 					
 					if (item.isAttachment()) {
@@ -3359,6 +3361,7 @@ var ZoteroPane = new function()
 		menu.childNodes[m.createNoteFromAnnotations].setAttribute('label', Zotero.getString('pane.items.menu.addNoteFromAnnotations' + multiple));
 		menu.childNodes[m.createNoteFromAnnotationsMenu].setAttribute('label', Zotero.getString('pane.items.menu.addNoteFromAnnotations' + multiple));
 		menu.childNodes[m.findPDF].setAttribute('label', Zotero.getString('pane.items.menu.findAvailablePDF' + multiple));
+		menu.childNodes[m.updateMetadata].setAttribute('label', Zotero.getString('pane.items.menu.updateMetadata' + multiple));
 		menu.childNodes[m.moveToTrash].setAttribute('label', Zotero.getString('pane.items.menu.moveToTrash' + multiple));
 		menu.childNodes[m.deleteFromLibrary].setAttribute('label', Zotero.getString('pane.items.menu.delete'));
 		menu.childNodes[m.exportItems].setAttribute('label', Zotero.getString(`pane.items.menu.export${noteExport ? 'Note' : ''}` + multiple));

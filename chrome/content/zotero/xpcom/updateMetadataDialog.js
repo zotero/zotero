@@ -27,7 +27,6 @@ Zotero.UpdateMetadataDialog = function (options) {
 	let _progressWindow;
 	let _progressIndicator;
 	let _applyAll;
-	let _showMinimize = true;
 	let _diffTable;
 
 	/**
@@ -86,9 +85,10 @@ Zotero.UpdateMetadataDialog = function (options) {
 			Zotero.UpdateMetadata.ROW_FAILED].includes(row.status)).length;
 		_updateProgress(total, processed);
 
-		// Disabled 'Apply All' when no pending changes left
-		let hasPending = rows.find(row => row.fields.length !== 0 && row.isDone);
-		_applyAll.disabled = hasPending ? 'true' : false;
+		// Disabled 'Apply All' when processing or when no pending changes left
+		let isProcessing = total !== processed;
+		let hasPending = rows.find(row => row.fields.length !== 0 && !row.isDone && row.fields.find(field => !field.isDisabled));
+		_applyAll.disabled = (isProcessing || !hasPending) ? 'true' : false;
 	};
 
 	/**
@@ -96,20 +96,12 @@ Zotero.UpdateMetadataDialog = function (options) {
 	 * @private
 	 */
 	function _onWindowLoaded() {
-		// Set font size from pref
-		Zotero.setFontSize(_progressWindow.document.getElementById('update-metadata-container'));
-
 		_progressWindow.document.title = Zotero.getString('updateMetadata.title');
 		_progressIndicator = _progressWindow.document.getElementById('progress-indicator');
 		_progressWindow.document.getElementById('cancel-button')
 		.addEventListener('command', () => {
 			this.close();
 			options.onCancel();
-		}, false);
-
-		_progressWindow.document.getElementById('minimize-button')
-		.addEventListener('command', () => {
-			this.close();
 		}, false);
 
 		_progressWindow.document.getElementById('close-button')
@@ -132,7 +124,6 @@ Zotero.UpdateMetadataDialog = function (options) {
 		_progressWindow.addEventListener('unload', function () {
 			_progressWindow = null;
 			_progressIndicator = null;
-			_showMinimize = true;
 			_diffTable = null;
 		});
 
@@ -143,7 +134,7 @@ Zotero.UpdateMetadataDialog = function (options) {
 			{
 				onToggle: options.onToggle,
 				onIgnore: options.onIgnore,
-				onDoubleClick: options.onDoubleClick,
+				onOpenItem: options.onOpenItem,
 				onApply: options.onApply
 			},
 			(ref) => {
@@ -164,13 +155,11 @@ Zotero.UpdateMetadataDialog = function (options) {
 		_progressIndicator.value = processed * 100 / total;
 		if (processed === total) {
 			_progressWindow.document.getElementById('cancel-button').hidden = true;
-			_progressWindow.document.getElementById('minimize-button').hidden = true;
 			_progressWindow.document.getElementById('close-button').hidden = false;
 			_progressWindow.document.getElementById('label').value = Zotero.getString('general.finished');
 		}
 		else {
 			_progressWindow.document.getElementById('cancel-button').hidden = false;
-			_progressWindow.document.getElementById('minimize-button').hidden = total === processed;
 			_progressWindow.document.getElementById('close-button').hidden = true;
 			_progressWindow.document.getElementById('label').value = Zotero.getString('general.processing');
 		}

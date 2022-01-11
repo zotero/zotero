@@ -79,12 +79,15 @@
 
 			.header {
 				display: flex;
-				font-size: 1.1em;
 
 				.icon {
 					width: 30px;
 					text-align: center;
 					flex-shrink: 0;
+
+					&.icon-arrowrotateanimated img {
+						width: 22px;
+					}
 				}
 
 				.title {
@@ -94,16 +97,18 @@
 					white-space: nowrap;
 
 					&:hover {
-						opacity: 0.7;
+						text-decoration: underline;
 					}
 				}
 			}
 
 			.message {
 				padding-left: 30px;
+				font-size: 0.9em;
 			}
 
 			.fields {
+				font-size: 0.9em;
 				margin-top: 4px;
 				margin-bottom: 5px;
 			}

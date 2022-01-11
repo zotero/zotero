@@ -8,6 +8,13 @@
     min-width: 79px;
     color: ButtonText;
     text-shadow: none;
+
+    // Bump font-size up from main window (override -moz-appearance above)
+    font: -moz-dialog !important;
+    // Re-override the font family
+    font-family: Lucida Grande, Lucida Sans Unicode, Lucida Sans, Geneva, -apple-system, sans-serif !important;
+    // Reduce the font a titch compared to the window buttons for a clean hierarchy
+    font-size: 0.95em !important;
   }
 
   button:not([disabled]):hover:active {

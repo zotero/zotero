@@ -60,7 +60,7 @@ Zotero.UpdateMetadata = new function () {
 				_update();
 			}
 		},
-		onDoubleClick(itemID) {
+		onOpenItem(itemID) {
 			let win = Services.wm.getMostRecentWindow('navigator:browser');
 			if (win) {
 				win.ZoteroPane.selectItem(itemID, false, true);
@@ -396,6 +396,38 @@ Zotero.UpdateMetadata = new function () {
 		return oldValue.length ? oldValue + '\n' + newValue : newValue;
 	}
 
+
+	/**
+	 * Convert translator format to API JSON like format that does not throw errors
+	 *
+	 * This is similar to the translation server function here:
+	 * https://github.com/zotero/translation-server/blob/3d11fc9af4e2fe026a084722bb5388bd2994a86a/src/utilities.js#L50
+	 *
+	 * Notably we also remove tags and notes here since we don't need them in this case
+	 *
+	 * @param {Object} item - Item metadata in translator format
+	 * @returns {Object} Item metadata in API JSON format
+	 * @private
+	 */
+	function _itemToAPIJSON(item) {
+		let newItem = {
+			key: Zotero.Utilities.generateObjectKey(),
+			version: 0
+		};
+
+		for (let field in item) {
+			if (field === "complete" || field === "itemID" || field === "attachments"
+				|| field === "seeAlso" || field === "tags" || field === "notes") {
+				continue;
+			}
+
+			newItem[field] = item[field];
+		}
+
+		return newItem;
+	}
+
+
 	/**
 	 * Compare old and new item and set row fields that are different
 	 * @param {Object} row
@@ -407,9 +439,9 @@ Zotero.UpdateMetadata = new function () {
 		let oldItemTypeID = oldItem.itemTypeID;
 		let combinedFields = [];
 
-		// Convert `newItem` to Zotero.Item
+		// Convert `newItem` to Zotero.Item through API JSON format
 		let tmpItem = new Zotero.Item;
-		tmpItem.fromJSON(newItem);
+		tmpItem.fromJSON(_itemToAPIJSON(newItem));
 		newItem = tmpItem;
 
 		// Check if metadata is not potentially bad
@@ -494,8 +526,10 @@ Zotero.UpdateMetadata = new function () {
 			};
 
 			// Find title index to insert creators after
+			// Note: ignore the itemType field because it's not a valid field
 			let titleIndex = combinedFields.findIndex(
-				field => Zotero.ItemFields.getBaseIDFromTypeAndField(newItem.itemTypeID, field.fieldName) === 110
+				field => field.fieldName !== 'itemType'
+					&& Zotero.ItemFields.getBaseIDFromTypeAndField(newItem.itemTypeID, field.fieldName) === 110
 			);
 			titleIndex = titleIndex >= 0 && titleIndex + 1 || 0;
 			combinedFields.splice(titleIndex, 0, creators);
