@@ -115,7 +115,8 @@ Zotero.UpdateMetadataDialog = function (options) {
 			diffTableContainer,
 			{
 				onToggle: options.onToggle,
-				onDoubleClick: options.onDoubleClick
+				onDoubleClick: options.onDoubleClick,
+				onApply: options.onApply
 			},
 			(ref) => {
 				_diffTable = ref;

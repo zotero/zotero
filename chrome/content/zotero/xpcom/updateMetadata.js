@@ -56,8 +56,8 @@ Zotero.UpdateMetadata = new function () {
 				win.focus();
 			}
 		},
-		onApply() {
-			_apply();
+		onApply(itemID) {
+			_apply(itemID);
 		},
 		onCancel() {
 			_rows = [];
@@ -181,11 +181,9 @@ Zotero.UpdateMetadata = new function () {
 			};
 
 			if (existingRowIdx >= 0) {
-				_rows.splice(existingRowIdx, 1, row);
+				_rows.splice(existingRowIdx, 1);
 			}
-			else {
-				_rows.push(row);
-			}
+			_rows.push(row);
 			_update();
 		}
 
@@ -382,8 +380,11 @@ Zotero.UpdateMetadata = new function () {
 	 * @returns {Promise}
 	 * @private
 	 */
-	async function _apply() {
+	async function _apply(itemID) {
 		for (let row of _rows) {
+			if (itemID && row.itemID !== itemID) {
+				continue;
+			}
 			let item = await Zotero.Items.getAsync(row.itemID);
 			let itemTypeField = row.fields.find(field => field.fieldName === 'itemType');
 			if (itemTypeField && itemTypeField.isAccepted) {

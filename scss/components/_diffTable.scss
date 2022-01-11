@@ -1,6 +1,7 @@
 
 .diff-table-field {
 	display: flex;
+	padding-bottom: 2px;
 
 	&:hover {
 		opacity: 0.7;
@@ -8,28 +9,42 @@
 
 	.name {
 		font-weight: bold;
+		width: 120px;
+		text-align: right;
+		flex-shrink: 0;
 		padding-right: 5px;
+		white-space: nowrap;
+		overflow-x: hidden;
+		text-overflow: ellipsis;
 	}
 
-	.removed {
-		background-color: #dbdbdb;
-		text-decoration: line-through;
-	}
-
-	.added {
-		background-color: #eaeaea;
-	}
-
-	&.accepted {
-		color: initial;
+	.value {
 
 		.removed {
-			background-color: #ff8989;
+			background-color: #dbdbdb;
 			text-decoration: line-through;
 		}
 
 		.added {
-			background-color: #a9edae;
+			background-color: #eaeaea;
+		}
+
+
+	}
+
+
+	&.accepted {
+		.value {
+			color: initial;
+
+			.removed {
+				background-color: #ff8989;
+				text-decoration: line-through;
+			}
+
+			.added {
+				background-color: #a9edae;
+			}
 		}
 	}
 }
@@ -46,35 +61,41 @@
 		height: 400px;
 		overflow-y: auto;
 		overflow-x: hidden;
+		padding: 5px;
 
 		.row {
-			display: flex;
 			padding: 3px 0;
 			
-			.left {
-				min-width: 50px;
-				text-align: center;
-			}
-
-			.right {
-				min-width: 0;
+			.header {
+				display: flex;
+				.icon {
+					width: 30px;
+					text-align: center;
+					flex-shrink: 0;
+				}
 
 				.title {
-					display: block;
 					position: relative;
 					overflow: hidden;
 					text-overflow: ellipsis;
 					white-space: nowrap;
 				}
-
-				.message {
-					font-size: 80%;
-				}
-
-				.fields {
-					font-size: 80%;
-				}
 			}
+
+			.message {
+				font-size: 80%;
+				padding-left: 30px;
+			}
+
+			.fields {
+				font-size: 80%;
+			}
+
+			.footer {
+				text-align: right;
+				padding: 5px 0 10px;
+			}
+
 		}
 	}
 }

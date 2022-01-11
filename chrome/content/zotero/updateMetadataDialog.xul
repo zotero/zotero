@@ -9,7 +9,7 @@
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 		xmlns:html="http://www.w3.org/1999/xhtml"
 		id="update-metadata"
-		width="600"
+		width="650"
 		height="550"
 		style="padding: 10px;">
 	<vbox flex="1">
@@ -22,7 +22,7 @@
 		</hbox>
 		<html:div id="diff-table-container" style="padding: 5px; min-width: 100px"></html:div>
 		<hbox>
-			<button id="apply-button" label="&zotero.general.apply;"/>
+			<button id="apply-button" label="&zotero.general.applyAll;"/>
 		</hbox>
 	</vbox>
 </window>

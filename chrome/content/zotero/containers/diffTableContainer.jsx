@@ -24,7 +24,10 @@
 */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+// TODO: Investigate what causes `import ReactDOM` to fail
+// with https://fb.me/react-invalid-hook-call in `tagsboxTest.js`
+// import ReactDOM from 'react-dom';
+const ReactDOM = require('react-dom');
 import { IntlProvider } from 'react-intl';
 import DiffTable from 'components/diffTable/table';
 
@@ -38,6 +41,6 @@ Zotero.DiffTable = {
 		);
 		ReactDOM.render(elem, container, () => {
 			callback(ref);
-		})
+		});
 	}
 }

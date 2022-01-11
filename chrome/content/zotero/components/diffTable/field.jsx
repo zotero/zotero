@@ -51,10 +51,25 @@ const Field = (props) => {
 	}
 
 	function getDiff(oldValue, newValue) {
-		let diff = dmp.diff_main(oldValue, newValue);
-		dmp.diff_cleanupSemantic(diff);
-		if (!diff) return [];
-		return diff.map((part, index) => {
+		// As described in https://github.com/google/diff-match-patch/wiki/Line-or-Word-Diffs#word-mode
+		var a = dmp.diff_wordsToChars_(oldValue, newValue);
+		var lineText1 = a.chars1;
+		var lineText2 = a.chars2;
+		var lineArray = a.lineArray;
+		var diffs = dmp.diff_main(lineText1, lineText2, false);
+		dmp.diff_charsToLines_(diffs, lineArray);
+		// dmp.diff_cleanupSemantic(diffs);
+
+		if (!diffs) return [];
+
+		if (diffs.length === 2 && diffs[0][0] === -1 && diffs[1][0] === 1 && diffs[0][1].length + diffs[1][1].length > 60) {
+			return [
+				<span className="removed">{shrink(oldLabel)}</span>, <br/>,
+				<span className="added">{shrink(newLabel)}</span>
+			];
+		}
+
+		return diffs.map((part, index) => {
 			let className = part[0] === 1 ? 'added' : part[0] === -1 ? 'removed' : '';
 			let value = part[1];
 			value = shrink(value);
@@ -63,23 +78,6 @@ const Field = (props) => {
 	}
 
 	let diff = getDiff(oldLabel, newLabel);
-
-	if (diff.length > 4) {
-		return (
-			<React.Fragment>
-				<div
-					className={cx('diff-table-field', { accepted: isAccepted })}
-					onClick={handleClick}
-				>
-					<div className="name">{fieldLabel}:</div>
-					<div className="value">
-						<span className="removed">{shrink(oldLabel)}</span><br/>
-						<span className="added">{shrink(newLabel)}</span>
-					</div>
-				</div>
-			</React.Fragment>
-		);
-	}
 
 	return (
 		<div
@@ -96,6 +94,6 @@ Field.propTypes = {
 	itemID: PropTypes.number.isRequired,
 	field: PropTypes.object.isRequired,
 	onToggle: PropTypes.func.isRequired
-}
+};
 
 export default Field;
