@@ -34,7 +34,7 @@ const dmp = new DMP();
 const MAX_DIFF_SEGMENT_LENGTH = 60;
 
 const Field = (props) => {
-	const { itemID, field, onToggle } = props;
+	const { itemID, field, readonly, onToggle } = props;
 	const { fieldName, fieldLabel, oldLabel, newLabel, isDisabled } = field;
 
 	function cut(str, index) {
@@ -76,7 +76,9 @@ const Field = (props) => {
 	}
 
 	function handleClick() {
-		onToggle(itemID, fieldName, !isDisabled);
+		if (!readonly) {
+			onToggle(itemID, fieldName, !isDisabled);
+		}
 	}
 
 	function getDiff(oldValue, newValue) {
@@ -127,7 +129,7 @@ const Field = (props) => {
 
 	return (
 		<div
-			className={cx('diff-table-field', { disabled: isDisabled })}
+			className={cx('diff-table-field', { disabled: isDisabled, readonly: readonly })}
 			onClick={handleClick}
 		>
 			<div className="name">{newLabel ? fieldLabel + ':' : <s>{fieldLabel}:</s>}</div>
@@ -138,6 +140,7 @@ const Field = (props) => {
 
 Field.propTypes = {
 	itemID: PropTypes.number.isRequired,
+	readonly: PropTypes.bool.isRequired,
 	field: PropTypes.object.isRequired,
 	onToggle: PropTypes.func.isRequired
 };

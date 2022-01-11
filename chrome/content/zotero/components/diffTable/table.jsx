@@ -30,8 +30,8 @@ import PropTypes from 'prop-types';
 import {
 	IconTick,
 	IconCross,
-	IconArrowRefresh,
-	IconPuzzleArrow,
+	IconArrowRotateAnimated,
+	IconWarning,
 	IconBulletBlueEmpty
 } from '../icons';
 
@@ -58,13 +58,16 @@ const Table = React.forwardRef((props, ref) => {
 	return (
 		<div className="diff-table" onMouseDown={handleMouseDown}>
 			<div className="body">
-				{rows.map(row => (
-					<div key={row.itemID} className="row">
+				{rows.map((row) => {
+					const isDone = row.fields.length === 0 || row.isDone;
+					const hasPendingChanges = row.fields.find(field => !field.isDisabled);
+
+					return (<div key={row.itemID} className="row">
 						<div className="right fields-view">
 							<div className="header" onDoubleClick={() => props.onDoubleClick(row.itemID)}>
-								{row.status === Zotero.UpdateMetadata.ROW_SUCCEEDED && row.fields.length && <IconPuzzleArrow/>
-								|| row.status === Zotero.UpdateMetadata.ROW_SUCCEEDED && !row.fields.length && <IconTick/>
-								|| row.status === Zotero.UpdateMetadata.ROW_PROCESSING && <IconArrowRefresh/>
+								{row.status === Zotero.UpdateMetadata.ROW_SUCCEEDED && isDone && <IconTick/>
+								|| row.status === Zotero.UpdateMetadata.ROW_SUCCEEDED && row.fields.length && <IconWarning/>
+								|| row.status === Zotero.UpdateMetadata.ROW_PROCESSING && <IconArrowRotateAnimated/>
 								|| row.status === Zotero.UpdateMetadata.ROW_FAILED && <IconCross/>
 								|| <IconBulletBlueEmpty/>}
 								<div className="title">{row.title}</div>
@@ -72,25 +75,46 @@ const Table = React.forwardRef((props, ref) => {
 							{row.message && <div className="message">{row.message}</div>}
 							<div className="fields">
 								{row.fields.map(field => (
-									<Field key={field.fieldName} itemID={row.itemID} field={field} onToggle={handleFieldToggle}/>
+									<Field
+										key={field.fieldName}
+										itemID={row.itemID}
+										readonly={row.isDone}
+										field={field}
+										onToggle={handleFieldToggle}
+									/>
 								))}
 							</div>
-							{row.status === Zotero.UpdateMetadata.ROW_SUCCEEDED && row.fields.length > 0 && (
+							{row.status === Zotero.UpdateMetadata.ROW_SUCCEEDED && !isDone && (
 								<div className="footer">
 									<button
 										className="toggle-button"
 										onClick={() => props.onToggle(row.itemID)}>
 										<FormattedMessage
-											id={row.fields.find(field => !field.isDisabled) ? 'zotero.general.deselectAll' : 'zotero.general.selectAll'}
+											id={hasPendingChanges ? 'zotero.general.deselectAll' : 'zotero.general.selectAll'}
 										/>
 									</button>
-									<button className="apply-button" onClick={() => props.onApply(row.itemID)}>
-										<FormattedMessage id="zotero.general.apply"/>
+									<div className="spacer"></div>
+									{hasPendingChanges && (
+										<button
+											className="apply-button"
+											default={true}
+											onClick={() => props.onApply(row.itemID)}
+										>
+											<FormattedMessage id="zotero.general.apply"/>
+										</button>
+									)}
+									<button
+										className="ignore-button"
+										onClick={() => props.onIgnore(row.itemID)}
+									>
+										<FormattedMessage id="zotero.general.ignore"/>
 									</button>
-								</div>)}
+								</div>
+							)}
+							<div className="separator"></div>
 						</div>
-					</div>
-				))}
+					</div>);
+				})}
 			</div>
 		</div>
 	);
@@ -99,6 +123,7 @@ const Table = React.forwardRef((props, ref) => {
 Table.propTypes = {
 	onToggle: PropTypes.func,
 	onApply: PropTypes.func,
+	onIgnore: PropTypes.func,
 	onDoubleClick: PropTypes.func
 };
 

@@ -26,6 +26,7 @@
 Zotero.UpdateMetadataDialog = function (options) {
 	let _progressWindow;
 	let _progressIndicator;
+	let _applyAll;
 	let _showMinimize = true;
 	let _diffTable;
 
@@ -84,6 +85,10 @@ Zotero.UpdateMetadataDialog = function (options) {
 		let processed = rows.filter(row => [Zotero.UpdateMetadata.ROW_SUCCEEDED,
 			Zotero.UpdateMetadata.ROW_FAILED].includes(row.status)).length;
 		_updateProgress(total, processed);
+
+		// Disabled 'Apply All' when no pending changes left
+		let hasPending = rows.find(row => row.fields.length !== 0 && row.isDone);
+		_applyAll.disabled = hasPending ? 'true' : false;
 	};
 
 	/**
@@ -91,6 +96,9 @@ Zotero.UpdateMetadataDialog = function (options) {
 	 * @private
 	 */
 	function _onWindowLoaded() {
+		// Set font size from pref
+		Zotero.setFontSize(_progressWindow.document.getElementById('update-metadata-container'));
+
 		_progressWindow.document.title = Zotero.getString('updateMetadata.title');
 		_progressIndicator = _progressWindow.document.getElementById('progress-indicator');
 		_progressWindow.document.getElementById('cancel-button')
@@ -100,9 +108,8 @@ Zotero.UpdateMetadataDialog = function (options) {
 		}, false);
 
 		_progressWindow.document.getElementById('minimize-button')
-		.addEventListener('command', function () {
-			_progressWindow.close();
-			options.onClose();
+		.addEventListener('command', () => {
+			this.close();
 		}, false);
 
 		_progressWindow.document.getElementById('close-button')
@@ -111,9 +118,9 @@ Zotero.UpdateMetadataDialog = function (options) {
 			options.onClose();
 		}, false);
 
-		_progressWindow.document.getElementById('apply-button')
-		.addEventListener('command', () => {
-			options.onApply();
+		_applyAll = _progressWindow.document.getElementById('apply-all-button');
+		_applyAll.addEventListener('command', () => {
+			options.onApplyAll();
 		}, false);
 
 		_progressWindow.addEventListener('keypress', function (e) {
@@ -135,6 +142,7 @@ Zotero.UpdateMetadataDialog = function (options) {
 			diffTableContainer,
 			{
 				onToggle: options.onToggle,
+				onIgnore: options.onIgnore,
 				onDoubleClick: options.onDoubleClick,
 				onApply: options.onApply
 			},

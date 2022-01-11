@@ -1,0 +1,52 @@
+.diff-table {
+
+  button {
+    -moz-appearance: button;
+    /* The horizontal margin used here come from the Aqua Human Interface
+       Guidelines, there should be 12 pixels between two buttons. */
+    margin: 5px 6px 3px;
+    min-width: 79px;
+    color: ButtonText;
+    text-shadow: none;
+  }
+
+  button:not([disabled]):hover:active {
+    color: -moz-mac-buttonactivetext;
+  }
+
+  /* When the window isn't focused, the default button background isn't drawn,
+   * so don't change the text color then: */
+  button[default]:not([disabled]):not(:-moz-window-inactive) {
+    color: -moz-mac-defaultbuttontext;
+  }
+
+  /* Likewise, when active (mousedown) but not hovering, the default button
+   * background isn't drawn, override the previous selector for that case: */
+  button[default]:not(:hover):active {
+    color: ButtonText;
+  }
+
+  /* Change this from button-text to button since we don't have a child element
+   * in XUL. Furthermore, switch from margin to padding. */
+  button {
+    padding: 1px 0 !important;
+    padding-inline-start: 3px !important;
+    padding-inline-end: 2px !important;
+    text-align: center;
+  }
+
+  .button-icon {
+    margin-inline-start: 1px;
+  }
+
+  button[type="default"] {
+    font: menu;
+  }
+
+  /* .......... disabled state .......... */
+
+  button[disabled] {
+    color: GrayText;
+  }
+
+}

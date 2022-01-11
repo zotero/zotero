@@ -4,6 +4,10 @@
 
 	&:hover {
 		opacity: 0.7;
+
+		&.readonly {
+			opacity: 1;
+		}
 	}
 
 	.name {
@@ -30,11 +34,23 @@
 		}
 	}
 
+	&.readonly {
+		.value {
+			.removed {
+				background-color: #ff8989;
+				opacity: 0.4;
+			}
+
+			.added {
+				background-color: rgba(169, 237, 174, 0.6);
+			}
+		}
+	}
+
 	&.disabled {
 		.value {
 			.removed {
 				background-color: #d0d0d0;
-				text-decoration: line-through;
 			}
 
 			.added {
@@ -63,6 +79,7 @@
 
 			.header {
 				display: flex;
+				font-size: 1.1em;
 
 				.icon {
 					width: 30px;
@@ -75,21 +92,41 @@
 					overflow: hidden;
 					text-overflow: ellipsis;
 					white-space: nowrap;
+
+					&:hover {
+						opacity: 0.7;
+					}
 				}
 			}
 
 			.message {
-				font-size: 80%;
 				padding-left: 30px;
 			}
 
 			.fields {
-				font-size: 80%;
+				margin-top: 4px;
+				margin-bottom: 5px;
 			}
 
 			.footer {
-				text-align: right;
-				padding: 5px 0 10px;
+				margin-left: 30px;
+				display: flex;
+
+				.spacer {
+					flex: 1;
+				}
+			}
+
+			.separator {
+				width: 100%;
+				border-top: 1px solid $separator-color;
+				margin: 6px auto;
+			}
+
+			&:last-child {
+				.separator {
+					display: none;
+				}
 			}
 		}
 	}
