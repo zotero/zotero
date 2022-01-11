@@ -81,7 +81,7 @@ const Table = React.forwardRef((props, ref) => {
 										className="toggle-button"
 										onClick={() => props.onToggle(row.itemID)}>
 										<FormattedMessage
-											id={row.fields.find(field => field.isDisabled) ? 'zotero.general.deselectAll' : 'zotero.general.selectAll'}
+											id={row.fields.find(field => !field.isDisabled) ? 'zotero.general.deselectAll' : 'zotero.general.selectAll'}
 										/>
 									</button>
 									<button className="apply-button" onClick={() => props.onApply(row.itemID)}>

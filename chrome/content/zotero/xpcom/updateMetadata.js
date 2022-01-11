@@ -39,8 +39,8 @@ Zotero.UpdateMetadata = new function () {
 			if (row) {
 				// Toggle all if no field is passed or item type is changed
 				if (!fieldName || _isItemTypeChanged(row)) {
-					let hasDisabledFields = row.fields.find(field => field.isDisabled);
-					row.fields.forEach(field => field.isDisabled = !hasDisabledFields);
+					let hasEnabledFields = row.fields.find(field => !field.isDisabled);
+					row.fields.forEach(field => field.isDisabled = hasEnabledFields);
 				}
 				else {
 					let field = row.fields.find(x => x.fieldName === fieldName);
@@ -505,7 +505,7 @@ Zotero.UpdateMetadata = new function () {
 
 			// Find title index to insert creators after
 			let titleIndex = combinedFields.findIndex(
-				field => Zotero.ItemFields.getBaseIDFromTypeAndField(newItem.itemType, field.fieldName) === 110
+				field => Zotero.ItemFields.getBaseIDFromTypeAndField(newItem.itemTypeID, field.fieldName) === 110
 			);
 			titleIndex = titleIndex >= 0 && titleIndex + 1 || 0;
 			combinedFields.splice(titleIndex, 0, creators);

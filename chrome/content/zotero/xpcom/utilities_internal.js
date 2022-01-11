@@ -1610,13 +1610,20 @@ Zotero.Utilities.Internal = {
 		) {
 			for (let key in item2) {
 				if (Zotero.Utilities.fieldIsValidForType(key, item1.itemType)) {
-					if (!item1[key] && item2[key]) {
+					if (item2[key]
+						// item1 doesn't have the field
+						&& (!item1[key]
+							// item1 field is shorter
+							|| item1[key].length < item2[key].length)) {
 						item1[key] = item2[key];
 					}
 				}
 			}
 
-			if ((!item1.creators || !item1.creators.length) && item2.creators) {
+			let _clen = (c) => c.map(x => (x.firstName || '') + (x.lastName || '')).length;
+			if (item2.creators
+				&& (!item1.creators
+					|| _clen(item1.creators) < _clen(item2.creators))) {
 				item1.creators = item2.creators;
 			}
 

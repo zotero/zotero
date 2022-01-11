@@ -60,10 +60,10 @@ const Field = (props) => {
 
 	function shrink(str, pos) {
 		if (pos === 'start' && str.length > MAX_DIFF_SEGMENT_LENGTH / 2) {
-			return '…' + str.slice(cut(str, str.length - MAX_DIFF_SEGMENT_LENGTH / 2 - 1)).trim();
+			return '…' + str.slice(cut(str, str.length - MAX_DIFF_SEGMENT_LENGTH / 2 - 1)).replace(/^\s+/, '');
 		}
 		else if (pos === 'middle' && str.length > MAX_DIFF_SEGMENT_LENGTH) {
-			return str.slice(cut(str, MAX_DIFF_SEGMENT_LENGTH / 2 - 1)) + '[…]' + str.slice(cut(str, str.length - MAX_DIFF_SEGMENT_LENGTH / 2 - 1));
+			return str.slice(0, cut(str, MAX_DIFF_SEGMENT_LENGTH / 2 - 1)) + '[…]' + str.slice(cut(str, str.length - MAX_DIFF_SEGMENT_LENGTH / 2 - 1));
 		}
 		else if (pos === 'end' && str.length > MAX_DIFF_SEGMENT_LENGTH / 2) {
 			return str.slice(0, cut(str, MAX_DIFF_SEGMENT_LENGTH / 2 - 1)) + '…';
