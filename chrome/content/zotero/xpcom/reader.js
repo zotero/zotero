@@ -560,6 +560,28 @@ class ReaderInstance {
 		popup.openPopup(element, 'after_start', 0, 0, true);
 	}
 
+	_openSelectorPopup(data) {
+		let popup = this._window.document.createElement('menupopup');
+		this._popupset.appendChild(popup);
+		popup.addEventListener('popuphidden', function () {
+			popup.remove();
+		});
+		let menuitem;
+		// Clear Selection
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', Zotero.getString('general.clearSelection'));
+		menuitem.setAttribute('disabled', !data.enableClearSelection);
+		menuitem.addEventListener('command', () => {
+			this._postMessage({
+				action: 'popupCmd',
+				cmd: 'clearSelector',
+				ids: data.ids
+			});
+		});
+		popup.appendChild(menuitem);
+		popup.openPopupAtScreen(data.x, data.y, true);
+	}
+
 	async _postMessage(message, transfer) {
 		await this._waitForReader();
 		this._iframeWindow.postMessage({ itemID: this._itemID, message }, this._iframeWindow.origin, transfer);
@@ -654,6 +676,10 @@ class ReaderInstance {
 				}
 				case 'openColorPopup': {
 					this._openColorPopup(message.data);
+					return;
+				}
+				case 'openSelectorPopup': {
+					this._openSelectorPopup(message.data);
 					return;
 				}
 				case 'openURL': {
