@@ -366,6 +366,7 @@ class ReaderInstance {
 
 	_openTagsPopup(x, y, item) {
 		let menupopup = this._window.document.createElement('menupopup');
+		menupopup.className = 'tags-popup';
 		menupopup.style.minWidth = '300px';
 		menupopup.setAttribute('ignorekeys', true);
 		let tagsbox = this._window.document.createElement('tagsbox');
@@ -678,8 +679,14 @@ class ReaderInstance {
 					this._openColorPopup(message.data);
 					return;
 				}
-				case 'openSelectorPopup': {
-					this._openSelectorPopup(message.data);
+				case 'closePopup': {
+					// Note: This currently only closes tags popup when annotations are
+					// disappearing from pdf-reader sidebar
+					for (let child of Array.from(this._popupset.children)) {
+						if (child.classList.contains('tags-popup')) {
+							child.hidePopup();
+						}
+					}
 					return;
 				}
 				case 'openURL': {
