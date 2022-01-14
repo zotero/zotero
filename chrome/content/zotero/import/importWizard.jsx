@@ -44,10 +44,12 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 	const [selectedMode, setSelectedMode] = useState('file');
 	const [fileHandling, setFileHandling] = useState('store');
 	const [file, setFile] = useState(null);
+	const [folder, setFolder] = useState(null);
 	const [doneLabel, setDoneLabel] = useState(null);
 	const [doneDescription, setDoneDescription] = useState(null);
 	const [shouldShowErrorButton, setShouldShowErrorButton] = useState(false);
 	const [shouldCreateCollection, setShouldCreateCollection] = useState(true);
+	const [shouldRecreateStructure, setShouldRecreateStructure] = useState(true);
 	const [canAdvance, setCanAdvance] = useState(true);
 	const [canRewind, setCanRewind] = useState(true);
 	const [canCancel, setCanCancel] = useState(true);
@@ -56,6 +58,7 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 	const importSourceOptions = [
 		{ label: Zotero.getString('import.source.file'), value: 'file' },
 		{ label: `Mendeley Reference Manager (${Zotero.getString('import.onlineImport')})`, value: 'mendeleyOnline' },
+		{ label: Zotero.getString('import.source.folder'), value: 'folder' },
 	];
 
 	const fileHandlingOptions = [
@@ -96,6 +99,23 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 		wizardRef.current.goTo('page-options');
 	}, []);
 
+	const chooseFolder = useCallback(async () => {
+		const fp = new FilePicker();
+		fp.init(window, Zotero.getString('attachmentBasePath.selectDir'), fp.modeGetFolder);
+		fp.appendFilters(fp.filterAll);
+
+		const rv = await fp.show();
+		if (rv !== fp.returnOK && rv !== fp.returnReplace) {
+			return;
+		}
+		
+		Zotero.debug(`Folder is ${fp.file}`);
+
+		setFolder(fp.file);
+		setCanAdvance(true);
+		wizardRef.current.goTo('page-options');
+	}, []);
+
 	const skipToDonePage = useCallback((label, description, showReportErrorButton = false) => {
 		setDoneLabel(label);
 		setShouldShowErrorButton(showReportErrorButton);
@@ -128,9 +148,16 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 		try {
 			switch (selectedMode) {
 				case 'file':
+					setFolder(null);
 					await chooseFile();
 					break;
+				case 'folder':
+					setFile(null);
+					await chooseFolder();
+					break;
 				case 'mendeleyOnline':
+					setFile(null);
+					setFolder(null);
 					wizardRef.current.goTo('mendeley-online-intro');
 					setCanRewind(true);
 					break;
@@ -146,7 +173,7 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 			);
 			throw e;
 		}
-	}, [chooseFile, selectedMode, skipToDonePage]);
+	}, [chooseFile, chooseFolder, selectedMode, skipToDonePage]);
 
 	const handleModeChosen = useCallback(() => {
 		findFiles();
@@ -165,6 +192,10 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 	const handleCreateCollectionCheckboxChange = useCallback(() => {
 		setShouldCreateCollection(!shouldCreateCollection);
 	}, [shouldCreateCollection]);
+
+	const handleRecreateStructureChange = useCallback(() => {
+		setShouldRecreateStructure(!shouldRecreateStructure);
+	}, [shouldRecreateStructure]);
 
 	const handleFileHandlingChange = useCallback((newFileHandling) => {
 		setFileHandling(newFileHandling);
@@ -215,7 +246,9 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 				onBeforeImport: handleBeforeImport,
 				addToLibraryRoot: !shouldCreateCollection,
 				linkFiles: fileHandling === 'link',
-				mendeleyCode
+				mendeleyCode,
+				folder,
+				recreateStructure: shouldRecreateStructure
 			});
 			
 			// Cancelled by user or due to error
@@ -254,7 +287,7 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 			}
 			throw e;
 		}
-	}, [file, fileHandling, handleBeforeImport, handleUrlClick, mendeleyCode, shouldCreateCollection, skipToDonePage]);
+	}, [file, folder, fileHandling, handleBeforeImport, handleUrlClick, mendeleyCode, shouldCreateCollection, shouldRecreateStructure, skipToDonePage]);
 
 	const goToStart = useCallback(() => {
 		wizardRef.current.goTo('page-start');
@@ -325,6 +358,20 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 						{ Zotero.getString('import.createCollection') }
 					</label>
 				</div>
+				{ folder && (
+					<div className="page-options-recreate-structure">
+						<input
+							checked={ shouldRecreateStructure }
+							id={ id.current + '-recreate-structure-checkbox' }
+							label={ Zotero.getString('import.recreateStructure') }
+							onChange={ handleRecreateStructureChange }
+							type="checkbox"
+						/>
+						<label htmlFor={ id.current + '-recreate-structure-checkbox' }>
+							{ Zotero.getString('import.recreateStructure') }
+						</label>
+					</div>
+				)}
 				{ !mendeleyCode && (
 					<div className="page-options-file-handling">
 						<h2>
@@ -371,6 +418,8 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 		</Wizard>
 	);
 });
+
+ImportWizard.displayName = 'ImportWizard';
 
 ImportWizard.init = (domEl, props) => {
 	ReactDom.render(<ImportWizard { ...props } />, domEl);

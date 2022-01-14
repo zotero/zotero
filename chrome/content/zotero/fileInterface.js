@@ -445,6 +445,13 @@ var Zotero_File_Interface = new function() {
 			translation.createNewCollection = createNewCollection;
 			translation.mendeleyCode = options.mendeleyCode;
 		}
+		else if (options.folder) {
+			Components.utils.import("chrome://zotero/content/import/importFolder.js");
+			translation = new Zotero_Import_Folder({
+				folder: options.folder,
+				recreateStructure: options.recreateStructure
+			});
+		}
 		else {
 			// Check if the file is an SQLite database
 			var sample = yield Zotero.File.getSample(file.path);
