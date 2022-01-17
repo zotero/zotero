@@ -5,8 +5,17 @@
   "general_moreInfo": {
     "message": "További információ…"
   },
+  "general_needHelp": {
+    "message": "Szüksége van segítségre?"
+  },
   "general_done": {
     "message": "Rendben"
+  },
+  "general_yes": {
+    "message": "Igen"
+  },
+  "general_no": {
+    "message": "Nem"
   },
   "general_tryAgain": {
     "message": "Próbálja újra"
@@ -49,6 +58,9 @@
   },
   "upgradeApp": {
     "message": "$1frissítése"
+  },
+  "firstRun_acceptButton": {
+    "message": "Értem"
   },
   "error_connection_isAppRunning": {
     "message": "A(z)$1fut?"

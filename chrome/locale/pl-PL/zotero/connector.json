@@ -41,8 +41,14 @@
   "progressWindow_error_translation": {
     "message": "Podczas zapisu tego elementu wystąpił błąd. Aby uzyskać więcej informacji zobacz $1."
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "W trakcie zapisu tego elementu wystąpił błąd. $1 może ograniczać liczbę elementów, które możesz zapisać jednocześnie. Zobacz $2 aby uzyskać więcej informacji."
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Znane błędy translacji"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Limit dostępu do witryny"
   },
   "progressWindow_error_fallback": {
     "message": "Podczas zapisywania za pomocą $1 wystąpił błąd. Próba zapisu za pomocą $2."
@@ -106,6 +112,12 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "Integracja z $1 nie jest dostępna podczas edycji plików .docx Microsoft Word bezpośrednio w Dokumentach Google. Wybierz Plik → Zapisz jako plik Dokumentów Google, aby włączyć tę funkcję.<br/><br/> Jeśli chcesz przesłać dokument Word z cytowaniami $1 do Dokumentów Google, zobacz intrukcję <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Moving Documents Between Word Processors</a>."
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "Cytowania w dokumencie są właśnie edytowane przez innego użytkownika $1. Proszę spróbuj ponownie później."
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "Konto Google, które zostało wybrane, nie ma dostępu do edycji tego dokumentu. Proszę, spróbuj ponownie i upewnij się, że wybrano konto z dostępem do edycji."
   },
   "general_saveTo": {
     "message": "Zapisz w $1"

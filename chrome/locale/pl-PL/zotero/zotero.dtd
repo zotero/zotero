@@ -331,7 +331,7 @@
 <!ENTITY zotero.context.addChildNote "Add Item Note">
 <!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
 <!ENTITY zotero.context.addStandaloneNote "Dodaj osobną notatkę">
-<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Dodaj osobną notatkę z adnotacji">
 <!ENTITY zotero.context.editInWindow "Edytuj w oddzielnym oknie">
 
 <!ENTITY zotero.pdfReader.firstPage "Pierwsza strona">
@@ -340,7 +340,7 @@
 <!ENTITY zotero.pdfReader.forward "Naprzód">
 <!ENTITY zotero.pdfReader.rotateClockwise "Obróć zgodnie z ruchem wskazówek zegara">
 <!ENTITY zotero.pdfReader.rotateCounterclockwise "Obróć przeciwnie do ruchu wskazówek zegara">
-<!ENTITY zotero.pdfReader.handTool "Hand Tool">
+<!ENTITY zotero.pdfReader.handTool "Narzędzie rączka">
 <!ENTITY zotero.pdfReader.verticalScrolling "Przewijanie pionowe">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Przewijanie poziome">
 <!ENTITY zotero.pdfReader.wrappedScrolling "Przewijanie zawinięte">

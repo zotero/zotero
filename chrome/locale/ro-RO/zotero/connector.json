@@ -2,8 +2,20 @@
   "general_more": {
     "message": "Mai mult..."
   },
+  "general_moreInfo": {
+    "message": "Mai multe informații…"
+  },
+  "general_needHelp": {
+    "message": "E nevoie de ajutor?"
+  },
   "general_done": {
     "message": "Gata"
+  },
+  "general_yes": {
+    "message": "Da"
+  },
+  "general_no": {
+    "message": "Nu"
   },
   "general_tryAgain": {
     "message": "Încearcă din nou"
@@ -17,6 +29,9 @@
   "general_pleaseWait": {
     "message": "Te rog să aștepți…"
   },
+  "general_copyToClipboard": {
+    "message": "Copiere în clipboard"
+  },
   "progressWindow_savingTo": {
     "message": "Se salvează în"
   },
@@ -25,6 +40,9 @@
   },
   "progressWindow_error_translation": {
     "message": "A apărut o eroare în timpul salvării acestui item. Vezi $1 pentru mai multe informații."
+  },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "A apărut o eroare la salvarea acestui item. $1 poate limita numărul de itemi pe care îi puteți salva o singură dată. Pentru mai multe informații, a se vedea $2."
   },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Probleme cu depanarea translatorului"
