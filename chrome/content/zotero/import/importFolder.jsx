@@ -15,6 +15,14 @@ const collectFilesRecursive = async (dirPath, parents = [], files = []) => {
 	return files;
 };
 
+const findCollection = (libraryID, parentCollectionID, collectionName) => {
+	const collections = parentCollectionID
+		? Zotero.Collections.getByParent(parentCollectionID)
+		: Zotero.Collections.getByLibrary(libraryID);
+
+	return collections.find(c => c.name === collectionName);
+};
+
 class Zotero_Import_Folder { // eslint-disable-line camelcase,no-unused-vars
 	constructor({ folder, libraryID, recreateStructure }) {
 		this.folder = folder;
@@ -52,7 +60,6 @@ class Zotero_Import_Folder { // eslint-disable-line camelcase,no-unused-vars
 	async translate({ collections = [], linkFiles = false } = {}) {
 		const libraryID = this.libraryID || Zotero.Libraries.userLibraryID;
 		const files = await collectFilesRecursive(this.folder);
-		const collectionsLookup = {};
 
 		// import is done in three phases: sniff for mime type, import as attachment, recognize.
 		// hence number of files is multiplied by 3 to determine max progress
@@ -68,33 +75,28 @@ class Zotero_Import_Folder { // eslint-disable-line camelcase,no-unused-vars
 		));
 
 		if (this.recreateStructure) {
-			for (const { parents } of files) {
+			for (const fileData of files) {
+				const { parents } = fileData;
+				let prevParentCollectionID = null;
 				if (parents.length) {
-					let prevParentCollectionID = (collections && collections.length) ? collections[0] : null;
-					let path = '';
+					prevParentCollectionID = (collections && collections.length) ? collections[0] : null;
 					for (const parentName of parents) {
-						path += '/' + parentName;
-						if (!(path in collectionsLookup)) {
-							const parentCollection = new Zotero.Collection;
-							parentCollection.libraryID = libraryID;
-							parentCollection.name = parentName;
-							if (prevParentCollectionID) {
-								parentCollection.parentID = prevParentCollectionID;
-							}
-							await parentCollection.saveTx({ skipSelect: true }); //eslint-disable-line no-await-in-loop
-							collectionsLookup[path] = parentCollection.id;
-							prevParentCollectionID = parentCollection.id;
+						const parentCollection = findCollection(libraryID, prevParentCollectionID, parentName) || new Zotero.Collection;
+						parentCollection.libraryID = libraryID;
+						parentCollection.name = parentName;
+						if (prevParentCollectionID) {
+							parentCollection.parentID = prevParentCollectionID;
 						}
-						else {
-							prevParentCollectionID = collectionsLookup[path];
-						}
+						await parentCollection.saveTx({ skipSelect: true }); //eslint-disable-line no-await-in-loop
+						prevParentCollectionID = parentCollection.id;
 					}
 				}
+				fileData.parentCollectionId = prevParentCollectionID;
 			}
 		}
 
 		const attachmentItems = await Promise.all(files.map(
-			async ({ path, parents }, index) => {
+			async ({ path, parentCollectionId = null }, index) => {
 				const contentType = mimeTypes[index];
 				const options = {
 					collections,
@@ -106,8 +108,8 @@ class Zotero_Import_Folder { // eslint-disable-line camelcase,no-unused-vars
 				let attachmentItem = null;
 
 				if (this.types.includes(contentType)) {
-					if (this.recreateStructure && parents.length) {
-						options.collections = [collectionsLookup['/' + parents.join('/')]];
+					if (this.recreateStructure && parentCollectionId) {
+						options.collections = [parentCollectionId];
 					}
 					if (linkFiles) {
 						attachmentItem = await Zotero.Attachments.linkFromFile(options);
