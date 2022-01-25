@@ -365,7 +365,7 @@ class ReaderInstance {
 		return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect shape-rendering="geometricPrecision" fill="${fill}" stroke-width="2" x="2" y="2" stroke="${stroke}" width="12" height="12" rx="3"/></svg>`;
 	}
 
-	_openTagsPopup(x, y, item) {
+	_openTagsPopup(item, selector) {
 		let menupopup = this._window.document.createElement('menupopup');
 		menupopup.className = 'tags-popup';
 		menupopup.style.minWidth = '300px';
@@ -374,7 +374,8 @@ class ReaderInstance {
 		menupopup.appendChild(tagsbox);
 		tagsbox.setAttribute('flex', '1');
 		this._popupset.appendChild(menupopup);
-		menupopup.openPopupAtScreen(x, y, false);
+		let element = this._iframeWindow.document.querySelector(selector);
+		menupopup.openPopup(element, 'overlap', 0, 0, true);
 		tagsbox.mode = 'edit';
 		tagsbox.item = item;
 		if (tagsbox.mode == 'edit' && tagsbox.count == 0) {
@@ -537,7 +538,14 @@ class ReaderInstance {
 			});
 		});
 		popup.appendChild(menuitem);
-		popup.openPopupAtScreen(data.x, data.y, true);
+
+		if (data.x) {
+			popup.openPopupAtScreen(data.x, data.y, true);
+		}
+		else if (data.selector) {
+			let element = this._iframeWindow.document.querySelector(data.selector);
+			popup.openPopup(element, 'after_start', 0, 0, true);
+		}
 	}
 
 	_openColorPopup(data) {
@@ -662,12 +670,12 @@ class ReaderInstance {
 					return;
 				}
 				case 'openTagsPopup': {
-					let { id: key, x, y } = message;
+					let { id: key, selector } = message;
 					let attachment = Zotero.Items.get(this._itemID);
 					let libraryID = attachment.libraryID;
 					let annotation = Zotero.Items.getByLibraryAndKey(libraryID, key);
 					if (annotation) {
-						this._openTagsPopup(x, y, annotation);
+						this._openTagsPopup(annotation, selector);
 					}
 					return;
 				}
