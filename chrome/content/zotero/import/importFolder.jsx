@@ -8,7 +8,8 @@ const collectFilesRecursive = async (dirPath, parents = [], files = []) => {
 		if (isDir) {
 			await collectFilesRecursive(path, [...parents, name], files);
 		}
-		else {
+		// TODO: Also check for hidden file attribute on windows?
+		else if (!name.startsWith('.')) {
 			files.push({ parents, path });
 		}
 	});
