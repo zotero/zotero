@@ -292,6 +292,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			// Feels like a bit of a hack, but it gets the job done
 			setTimeout(() => {
 				label.focus();
+				label.select();
 			});
 		}
 
