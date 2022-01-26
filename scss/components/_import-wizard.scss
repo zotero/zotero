@@ -31,10 +31,6 @@
 		}
 	}
 
-	.page-options-create-collection {
-		font-size: 14px;
-	}
-
 	.page-options-recreate-structure {
 		margin-top: .5em;
 	}
@@ -55,6 +51,10 @@
 
 	.mendeley-online-intro + .mendeley-online-intro {
 		margin-top: 1em;
+	}
+
+	label {
+		font-size: 14px;
 	}
 
 	button, input[type="checkbox"] {
