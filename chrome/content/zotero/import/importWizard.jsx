@@ -57,8 +57,8 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 
 	const importSourceOptions = [
 		{ label: Zotero.getString('import.source.file'), value: 'file' },
-		{ label: `Mendeley Reference Manager (${Zotero.getString('import.onlineImport')})`, value: 'mendeleyOnline' },
 		{ label: Zotero.getString('import.source.folder'), value: 'folder' },
+		{ label: `Mendeley Reference Manager (${Zotero.getString('import.onlineImport')})`, value: 'mendeleyOnline' },
 	];
 
 	const fileHandlingOptions = [
