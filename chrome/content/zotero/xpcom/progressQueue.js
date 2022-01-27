@@ -28,7 +28,14 @@ Zotero.ProgressQueue = function (options) {
 	let _title = options.title;
 	let _columns = options.columns;
 	
-	let _listeners = {};
+	let _listeners = {
+		empty: [],
+		cancel: [],
+		rowadded: [],
+		nonempty: [],
+		rowupdated: [],
+		rowdeleted: [],
+	};
 	let _rows = [];
 	
 	let _dialog = null;
@@ -75,7 +82,10 @@ Zotero.ProgressQueue = function (options) {
 	 * @param callback
 	 */
 	this.addListener = function (name, callback) {
-		_listeners[name] = callback;
+		if (!(name in _listeners)) {
+			throw new Error(`Invalid event listener "${name}"`);
+		}
+		_listeners[name].push(callback);
 	};
 	
 	
@@ -83,8 +93,17 @@ Zotero.ProgressQueue = function (options) {
 	 * Remove listener
 	 * @param {String} name Event name
 	 */
-	this.removeListener = function (name) {
-		delete _listeners[name];
+	this.removeListener = function (name, callback) {
+		if (!(name in _listeners)) {
+			throw new Error(`Invalid event listener "${name}"`);
+		}
+		if (!callback) {
+			Zotero.debug(`Calling "removeListener" without specifying which callback to remove is deprecated`);
+			_listeners[name] = []; // remove all callbacks to simulate previous behaviour
+		}
+		else {
+			_listeners[name] = _listeners[name].filter(existingCallback => existingCallback !== callback);
+		}
 	};
 	
 	
@@ -120,13 +139,8 @@ Zotero.ProgressQueue = function (options) {
 	 */
 	this.cancel = function () {
 		_rows = [];
-		if (_listeners.empty) {
-			_listeners.empty();
-		}
-		
-		if (_listeners.cancel) {
-			_listeners.cancel();
-		}
+		_listeners.empty.forEach(listener => listener());
+		_listeners.cancel.forEach(listener => listener());
 	};
 	
 	
@@ -146,13 +160,8 @@ Zotero.ProgressQueue = function (options) {
 		
 		_rows.push(row);
 		
-		if (_listeners.rowadded) {
-			_listeners.rowadded(row);
-		}
-		
-		if (_listeners.nonempty) {
-			_listeners.nonempty();
-		}
+		_listeners.rowadded.forEach(listener => listener(row));
+		_listeners.nonempty.forEach(listener => listener());
 	};
 	
 	
@@ -168,13 +177,11 @@ Zotero.ProgressQueue = function (options) {
 			if (row.id === itemID) {
 				row.status = status;
 				row.message = message;
-				if (_listeners.rowupdated) {
-					_listeners.rowupdated({
-						id: row.id,
-						status,
-						message: message || ''
-					});
-				}
+				_listeners.rowupdated.forEach(listener => listener({
+					id: row.id,
+					status,
+					message: message || ''
+				}));
 				return;
 			}
 		}
@@ -187,13 +194,11 @@ Zotero.ProgressQueue = function (options) {
 	 */
 	this.deleteRow = function(itemID) {
 		let row = _rows.find(x => x.id === itemID);
-		if(row) {
+		if (row) {
 			_rows.splice(_rows.indexOf(row), 1);
-			if (_listeners.rowdeleted) {
-				_listeners.rowdeleted({
-					id: row.id
-				});
-			}
+			_listeners.rowdeleted.forEach(listener => listener({
+				id: row.id
+			}));
 		}
 	};
 };
