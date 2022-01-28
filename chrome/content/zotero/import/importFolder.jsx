@@ -196,7 +196,8 @@ class Zotero_Import_Folder { // eslint-disable-line camelcase,no-unused-vars
 
 		const recognizeQueue = Zotero.ProgressQueues.get('recognize');
 		const itemsToSavePostRecognize = [];
-		recognizeQueue.addListener('rowupdated', ({ status, id }) => {
+		
+		const processRecognizedItem = ({ status, id }) => {
 			const updatedItem = recognizableItems.find(i => i.id === id);
 			if (status === Zotero.ProgressQueue.ROW_SUCCEEDED) {
 				const recognizedItem = updatedItem.parentItem;
@@ -215,9 +216,16 @@ class Zotero_Import_Folder { // eslint-disable-line camelcase,no-unused-vars
 				this._progress++;
 				this._itemDone();
 			}
-		});
-		await Zotero.RecognizePDF.recognizeItems(recognizableItems);
-		recognizeQueue.removeListener('rowupdated');
+		};
+		
+		recognizeQueue.addListener('rowupdated', processRecognizedItem);
+		try {
+			await Zotero.RecognizePDF.recognizeItems(recognizableItems);
+		}
+		finally {
+			recognizeQueue.removeListener('rowupdated', processRecognizedItem);
+		}
+		
 		await Zotero.Promise.all(
 			itemsToSavePostRecognize.map(async item => item.saveTx({ skipSelect: true }))
 		);

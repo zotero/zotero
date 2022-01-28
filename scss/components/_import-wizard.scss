@@ -53,6 +53,32 @@
 		margin-top: 1em;
 	}
 
+	.wizard-body {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.progress-queue {
+		margin-top: 1em;
+	}
+
+	// TODO: deduplicate with rtfscan
+	.table-container {
+		display: flex;
+		height: 0;
+		flex-direction: column;
+		flex: 1 0 auto;
+
+		> div {
+			display: flex;
+			flex: 1 0 auto;
+			background-color: -moz-field;
+			overflow: hidden;
+			position: relative;
+			height: 100%;
+		}
+	}
+
 	label {
 		font-size: 14px;
 	}

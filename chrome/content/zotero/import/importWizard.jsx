@@ -35,6 +35,7 @@ import Wizard from './components/wizard';
 import WizardPage from './components/wizardPage';
 import RadioSet from './components/radioSet';
 import ProgressBar from './components/progressBar';
+import ProgressQueueTable from './components/progressQueueTable';
 import { nextHTMLID } from './components/utils';
 
 const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
@@ -54,6 +55,7 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 	const [canRewind, setCanRewind] = useState(true);
 	const [canCancel, setCanCancel] = useState(true);
 	const [progress, setProgress] = useState(0);
+	const [progressQueue, setProgressQueue] = useState(null);
 
 	const importSourceOptions = [
 		{ label: Zotero.getString('import.source.file'), value: 'file' },
@@ -141,8 +143,17 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 	}, [libraryID]);
 
 	const handleClose = useCallback(() => {
+		if (progressQueue) {
+			progressQueue.cancel();
+		}
 		window.close();
-	}, []);
+	}, [progressQueue]);
+
+	const handleFinish = useCallback(() => {
+		if (progressQueue) {
+			progressQueue.cancel();
+		}
+	}, [progressQueue]);
 
 	const findFiles = useCallback(async () => {
 		try {
@@ -228,7 +239,10 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 
 	const handleProgressPageShow = useCallback(() => {
 		setCanRewind(false);
-	}, []);
+		if (folder) {
+			setProgressQueue(Zotero.ProgressQueues.get('recognize'));
+		}
+	}, [folder]);
 
 	const beginOnlineImport = useCallback(() => {
 		Zotero_File_Interface.authenticateMendeleyOnline();
@@ -313,6 +327,7 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 			canRewind={ canRewind }
 			className="import-wizard"
 			onClose={ handleClose }
+			onFinish={ handleFinish }
 			ref={ wizardRef }
 		>
 			<WizardPage
@@ -396,6 +411,11 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 				label={ Zotero.getString('import.importing') }
 			>
 				<ProgressBar value={ progress } />
+				{ (folder && progressQueue) && (
+					<div className="progress-queue table-container">
+						<ProgressQueueTable progressQueue={ progressQueue } />
+					</div>
+				) }
 			</WizardPage>
 			<WizardPage
 				label={ doneLabel }
@@ -404,6 +424,11 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 				<div className="page-done-description">
 					{ doneDescription }
 				</div>
+				{ (folder && progressQueue && !shouldShowErrorButton) && (
+					<div className="progress-queue table-container">
+						<ProgressQueueTable progressQueue={ progressQueue } />
+					</div>
+				) }
 				{ shouldShowErrorButton && (
 					<div className="page-done-error">
 						<button
