@@ -391,13 +391,13 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 				)}
 			</WizardPage>
 			<WizardPage
+				onPageShow={ handleProgressPageShow }
 				pageId="page-progress"
 				label={ Zotero.getString('import.importing') }
 			>
 				<ProgressBar value={ progress } />
 			</WizardPage>
 			<WizardPage
-				onPageShow={ handleProgressPageShow }
 				label={ doneLabel }
 				pageId="page-done"
 			>
