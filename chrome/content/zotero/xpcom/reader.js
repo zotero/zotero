@@ -825,6 +825,10 @@ class ReaderTab extends ReaderInstance {
 				this._iframeWindow.addEventListener('error', (event) => {
 					Zotero.logError(event.error);
 				});
+
+				this._iframeWindow.wrappedJSObject.zoteroConfirmDeletion = function (plural) {
+					return Services.prompt.confirm(null, '', Zotero.getString('pdfReader.deleteAnnotation.' + (plural ? 'plural' : 'singular')));
+				};
 			}
 		});
 		
