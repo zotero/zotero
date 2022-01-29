@@ -306,52 +306,6 @@ describe("Zotero.Sync.Data.Local", function() {
 		});
 		
 		
-		describe("#resetUnsyncedLibraryFiles", function () {
-			it("should delete unsynced files", function* () {
-				var group = yield createGroup({
-					version: 1,
-					libraryVersion: 2
-				});
-				var libraryID = group.libraryID;
-				
-				// File attachment that's totally in sync -- leave alone
-				var attachment1 = yield importFileAttachment('test.png', { libraryID });
-				attachment1.attachmentSyncState = "in_sync";
-				attachment1.attachmentSyncedModificationTime = yield attachment1.attachmentModificationTime;
-				attachment1.attachmentSyncedHash = yield attachment1.attachmentHash;
-				attachment1.synced = true;
-				yield attachment1.saveTx({
-					skipSyncedUpdate: true
-				});
-				
-				// File attachment that's in sync with changed file -- delete file and mark for download
-				var attachment2 = yield importFileAttachment('test.png', { libraryID });
-				attachment2.synced = true;
-				yield attachment2.saveTx({
-					skipSyncedUpdate: true
-				});
-				
-				// File attachment that's unsynced -- delete item and file
-				var attachment3 = yield importFileAttachment('test.pdf', { libraryID });
-				
-				// Has to be called before resetUnsyncedLibraryFiles()
-				assert.isTrue(yield Zotero.Sync.Data.Local._libraryHasUnsyncedFiles(libraryID));
-				
-				yield Zotero.Sync.Data.Local.resetUnsyncedLibraryFiles(libraryID);
-				
-				assert.isTrue(yield attachment1.fileExists());
-				assert.isFalse(yield attachment2.fileExists());
-				assert.isFalse(yield attachment3.fileExists());
-				assert.equal(
-					attachment1.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC
-				);
-				assert.equal(
-					attachment2.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD
-				);
-				assert.isFalse(Zotero.Items.get(attachment3.id));
-			});
-		});
-		
 		it("should revert modified file attachment item", async function () {
 			var group = await createGroup({
 				version: 1,
@@ -395,6 +349,53 @@ describe("Zotero.Sync.Data.Local", function() {
 			assert.equal(
 				attachment.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC
 			);
+		});
+	});
+	
+	
+	describe("#resetUnsyncedLibraryFiles()", function () {
+		it("should delete unsynced files", function* () {
+			var group = yield createGroup({
+				version: 1,
+				libraryVersion: 2
+			});
+			var libraryID = group.libraryID;
+			
+			// File attachment that's totally in sync -- leave alone
+			var attachment1 = yield importFileAttachment('test.png', { libraryID });
+			attachment1.attachmentSyncState = "in_sync";
+			attachment1.attachmentSyncedModificationTime = yield attachment1.attachmentModificationTime;
+			attachment1.attachmentSyncedHash = yield attachment1.attachmentHash;
+			attachment1.synced = true;
+			yield attachment1.saveTx({
+				skipSyncedUpdate: true
+			});
+			
+			// File attachment that's in sync with changed file -- delete file and mark for download
+			var attachment2 = yield importFileAttachment('test.png', { libraryID });
+			attachment2.synced = true;
+			yield attachment2.saveTx({
+				skipSyncedUpdate: true
+			});
+			
+			// File attachment that's unsynced -- delete item and file
+			var attachment3 = yield importFileAttachment('test.pdf', { libraryID });
+			
+			// Has to be called before resetUnsyncedLibraryFiles()
+			assert.isTrue(yield Zotero.Sync.Data.Local._libraryHasUnsyncedFiles(libraryID));
+			
+			yield Zotero.Sync.Data.Local.resetUnsyncedLibraryFiles(libraryID);
+			
+			assert.isTrue(yield attachment1.fileExists());
+			assert.isFalse(yield attachment2.fileExists());
+			assert.isFalse(yield attachment3.fileExists());
+			assert.equal(
+				attachment1.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_IN_SYNC
+			);
+			assert.equal(
+				attachment2.attachmentSyncState, Zotero.Sync.Storage.Local.SYNC_STATE_TO_DOWNLOAD
+			);
+			assert.isFalse(Zotero.Items.get(attachment3.id));
 		});
 	});
 	
