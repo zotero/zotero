@@ -1273,19 +1273,6 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		env.sqlValues.push({ int: itemTypeID });
 	}
 	
-	// TEMP: Don't allow annotations or embedded images in group libraries
-	// TODO: Enable test in annotations.js after removing
-	if (libraryType == 'group' && !Zotero.enablePDFBuildForGroups) {
-		if (this._changed.primaryData && this._changed.primaryData.itemTypeID
-				&& Zotero.ItemTypes.getName(itemTypeID) == 'annotation') {
-			throw new Error("Annotations can currently be created only in user libraries");
-		}
-		if (this._changed.attachmentData
-				&& this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_EMBEDDED_IMAGE) {
-			throw new Error("Embedded-image attachments can currently be created only in user libraries");
-		}
-	}
-
 	if (isNew || (this._changed.primaryData && this._changed.primaryData.dateAdded)) {
 		env.sqlColumns.push('dateAdded');
 		env.sqlValues.push(this.dateAdded ? this.dateAdded : Zotero.DB.transactionDateTime);

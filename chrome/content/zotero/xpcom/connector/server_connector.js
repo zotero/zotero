@@ -1702,7 +1702,7 @@ Zotero.Server.Connector.Ping.prototype = {
 			let response = {
 				prefs: {
 					automaticSnapshots: Zotero.Prefs.get('automaticSnapshots'),
-					googleDocsAddNoteEnabled: Zotero.isPDFBuild
+					googleDocsAddNoteEnabled: true
 				}
 			};
 			if (Zotero.QuickCopy.hasSiteSettings()) {

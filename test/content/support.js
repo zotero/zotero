@@ -935,6 +935,10 @@ async function importPDFAttachment(parentItem, options = {}) {
 
 async function createAnnotation(type, parentItem, options = {}) {
 	var annotation = new Zotero.Item('annotation');
+	annotation.libraryID = parentItem.libraryID;
+	if (options.version != undefined) {
+		annotation.version = options.version;
+	}
 	annotation.parentID = parentItem.id;
 	annotation.annotationType = type;
 	if (type == 'highlight') {
@@ -958,13 +962,21 @@ async function createAnnotation(type, parentItem, options = {}) {
 			[314.4, 412.8, 556.2, 609.6]
 		]
 	});
+	if (options.createdByUserID) {
+		annotation.createdByUserID = options.createdByUserID;
+	}
 	if (options.isExternal) {
 		annotation.annotationIsExternal = options.isExternal;
 	}
 	if (options.tags) {
 		annotation.setTags(options.tags);
 	}
-	await annotation.saveTx();
+	if (options.synced !== undefined) {
+		annotation.synced = options.synced;
+	}
+	await annotation.saveTx({
+		skipEditCheck: true
+	});
 	return annotation;
 }
 

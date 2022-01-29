@@ -43,7 +43,6 @@ Zotero_Preferences.General = {
 		
 		this.updateAutoRenameFilesUI();
 		this._updateFileHandlerUI();
-		this._updateZotero6BetaCheckbox();
 	},
 	
 	updateAutoRenameFilesUI: function () {
@@ -60,7 +59,7 @@ Zotero_Preferences.General = {
 		var currentPath = Zotero.Prefs.get(pref);
 		
 		var fp = new FilePicker();
-		if (currentPath) {
+		if (currentPath && currentPath != 'system') {
 			fp.displayDirectory = OS.Path.dirname(currentPath);
 		}
 		fp.init(
@@ -78,12 +77,7 @@ Zotero_Preferences.General = {
 	
 	setFileHandler: function (type, handler) {
 		var pref = this._getFileHandlerPref(type);
-		if (handler) {
-			Zotero.Prefs.set(pref, handler);
-		}
-		else {
-			Zotero.Prefs.clear(pref);
-		}
+		Zotero.Prefs.set(pref, handler);
 		this._updateFileHandlerUI();
 	},
 	
@@ -92,16 +86,13 @@ Zotero_Preferences.General = {
 		var menulist = document.getElementById('fileHandler-pdf');
 		var customMenuItem = document.getElementById('fileHandler-custom');
 		
-		// TEMP: Use separate checkbox for now
-		/*if (handler == 'zotero') {
-			let menuitem = document.getElementById('fileHandler-internal');
-			menulist.selectedIndex = 0;
+		// System default
+		if (handler == 'system') {
 			customMenuItem.hidden = true;
-			return;
-		}*/
-		
+			menulist.selectedIndex = 1;
+		}
 		// Custom handler
-		if (handler) {
+		else if (handler) {
 			let icon;
 			try {
 				let fph = Services.io.getProtocolHandler("file")
@@ -126,12 +117,13 @@ Zotero_Preferences.General = {
 				customMenuItem.className = '';
 			}
 			customMenuItem.hidden = false;
-			menulist.selectedIndex = 1;
-		}
-		// System default
-		else {
-			customMenuItem.hidden = true;
 			menulist.selectedIndex = 2;
+		}
+		// Zotero
+		else {
+			let menuitem = document.getElementById('fileHandler-internal');
+			menulist.selectedIndex = 0;
+			customMenuItem.hidden = true;
 		}
 	},
 	
@@ -140,38 +132,5 @@ Zotero_Preferences.General = {
 			throw new Error(`Unknown file type ${type}`);
 		}
 		return 'fileHandler.pdf';
-	},
-	
-	
-	handleZotero6BetaChange: function (event) {
-		var ps = Services.prompt;
-		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
-		var index = ps.confirmEx(
-			window,
-			Zotero.getString('general.restartRequired'),
-			Zotero.getString('general.restartRequiredForChange', Zotero.appName),
-			buttonFlags,
-			Zotero.getString('general.restartApp', Zotero.appName),
-			null, null, null, {}
-		);
-		if (index == 0) {
-			Zotero.Prefs.set('beta.zotero6', !event.target.checked);
-			Zotero.Utilities.Internal.quitZotero(true);
-			return;
-		}
-		// Set to opposite so the click changes it back to what it was before
-		event.target.checked = !event.target.checked;
-	},
-	
-	
-	_updateZotero6BetaCheckbox: function () {
-		var checkbox = document.getElementById('zotero6-checkbox');
-		if (Zotero.Prefs.get('beta.zotero6')) {
-			checkbox.setAttribute('checked', true);
-		}
-		else {
-			checkbox.removeAttribute('checked');
-		}
 	}
 }

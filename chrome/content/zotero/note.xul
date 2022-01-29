@@ -22,8 +22,5 @@
 	</keyset>
 	<command id="cmd_close" oncommand="window.close();"/>
 
-	<deck id="zotero-note-editor-switcher" flex="1">
-		<oldzoteronoteeditor id="zotero-note-editor-old" flex="1" onerror="onError()"/>
-		<zoteronoteeditor id="zotero-note-editor" flex="1" onerror="return;onError()"/>
-	</deck>
+	<zoteronoteeditor id="zotero-note-editor" flex="1" onerror="return;onError()"/>
 </window>

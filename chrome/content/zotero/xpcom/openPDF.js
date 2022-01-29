@@ -27,6 +27,8 @@
 
 Zotero.OpenPDF = {
 	openToPage: async function (pathOrItem, page, annotationKey) {
+		var handler = Zotero.Prefs.get("fileHandler.pdf");
+		
 		var path;
 		if (pathOrItem == 'string') {
 			Zotero.logError("Zotero.OpenPDF.openToPage() now takes a Zotero.Item rather than a path "
@@ -36,8 +38,8 @@ Zotero.OpenPDF = {
 		else {
 			let item = pathOrItem;
 			let library = Zotero.Libraries.get(item.libraryID);
-			// TEMP
-			if (Zotero.isPDFBuild && (library.libraryType == 'user' || Zotero.enablePDFBuildForGroups)) {
+			// Zotero PDF reader
+			if (!handler) {
 				let location = {
 					annotationKey,
 					pageIndex: page && page - 1
@@ -53,10 +55,9 @@ Zotero.OpenPDF = {
 			}
 		}
 		
-		var handler = Zotero.Prefs.get("fileHandler.pdf");
 		var opened = false;
 		
-		if (handler) {
+		if (handler != 'system') {
 			Zotero.debug(`Custom handler is ${handler}`);
 		}
 		
@@ -72,7 +73,7 @@ Zotero.OpenPDF = {
 			opened = true;
 		}
 		else if (Zotero.isWin) {
-			if (!handler) {
+			if (handler == 'system') {
 				handler = this._getPDFHandlerWindows();
 				if (handler) {
 					Zotero.debug(`Default handler is ${handler}`);
@@ -92,7 +93,7 @@ Zotero.OpenPDF = {
 			}
 		}
 		else if (Zotero.isLinux) {
-			if (!handler) {
+			if (handler == 'system') {
 				handler = await this._getPDFHandlerLinux();
 				if (handler) {
 					Zotero.debug(`Resolved handler is ${handler}`);

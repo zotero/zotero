@@ -27,11 +27,6 @@ var noteEditor;
 var notifierUnregisterID;
 var type;
 
-function switchEditorEngine(useOld) {
-	var switherDeck = document.getElementById('zotero-note-editor-switcher');
-	switherDeck.selectedIndex = useOld ? 0 : 1;
-}
-
 async function onLoad() {
 	if (window.arguments) {
 		var io = window.arguments[0];
@@ -58,13 +53,7 @@ async function onLoad() {
 		}
 	}
 	type = Zotero.Libraries.get(libraryID).libraryType;
-	switchEditorEngine(type == 'group' && !Zotero.enablePDFBuildForGroups || !Zotero.isPDFBuild);
-	if (type == 'group' && !Zotero.enablePDFBuildForGroups || !Zotero.isPDFBuild) {
-		noteEditor = document.getElementById('zotero-note-editor-old');
-	}
-	else {
-		noteEditor = document.getElementById('zotero-note-editor');
-	}
+	noteEditor = document.getElementById('zotero-note-editor');
 	noteEditor.mode = 'edit';
 	noteEditor.viewMode = 'window';
 	
@@ -107,14 +96,7 @@ function onError() {
 
 function onUnload() {
 	Zotero.Notifier.unregisterObserver(notifierUnregisterID);
-	if (type == 'group' && !Zotero.enablePDFBuildForGroups || !Zotero.isPDFBuild) {
-		if (noteEditor.item) {
-			window.opener.ZoteroPane.onNoteWindowClosed(noteEditor.item.id, noteEditor.value);
-		}
-	}
-	else {
-		noteEditor.saveSync();
-	}
+	noteEditor.saveSync();
 }
 
 var NotifyCallback = {

@@ -126,14 +126,13 @@ describe("Zotero.Annotations", function() {
 		exampleNote.libraryID = item.libraryID;
 		exampleImage.libraryID = item.libraryID;
 		
-		// Disabled while group annotations are disabled
-		/*group = await getGroup();
+		group = await getGroup();
 		exampleGroupHighlight.libraryID = group.libraryID;
 		groupItem = await createDataObject('item', { libraryID: group.libraryID });
 		groupAttachment = await importFileAttachment(
 			'test.pdf',
 			{ libraryID: group.libraryID, parentID: groupItem.id }
-		);*/
+		);
 	});
 	
 	describe("#toJSON()", function () {
@@ -236,11 +235,11 @@ describe("Zotero.Annotations", function() {
 			await annotation.eraseTx();
 		});
 		
-		it.skip("should generate an object for a highlight by another user in a group library", async function () {
-			await Zotero.Users.setName(12345, 'Kate Smith');
+		it("should generate an object for a highlight by another user in a group library", async function () {
+			await Zotero.Users.setName(12345, 'First Last');
 			
 			var annotation = new Zotero.Item('annotation');
-			annotation.libraryID = group.libraryID;
+			annotation.libraryID = groupAttachment.libraryID;
 			annotation.key = exampleGroupHighlight.key;
 			await annotation.loadPrimaryData();
 			annotation.createdByUserID = 12345;
@@ -250,13 +249,17 @@ describe("Zotero.Annotations", function() {
 				let itemProp = 'annotation' + prop[0].toUpperCase() + prop.substr(1);
 				annotation[itemProp] = exampleGroupHighlightAlt[prop];
 			}
-			await annotation.saveTx();
+			await annotation.saveTx({
+				skipEditCheck: true
+			});
 			var json = await Zotero.Annotations.toJSON(annotation);
 			
 			assert.isFalse(json.isAuthor);
-			assert.equal(json.authorName, 'Kate Smith');
+			assert.equal(json.authorName, 'First Last');
 			
-			await annotation.eraseTx();
+			await annotation.eraseTx({
+				skipEditCheck: true
+			});
 		});
 	});
 	

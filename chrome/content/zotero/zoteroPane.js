@@ -69,13 +69,6 @@ var ZoteroPane = new function()
 	this.init = function () {
 		Zotero.debug("Initializing Zotero pane");
 		
-		if (!Zotero.isPDFBuild) {
-			let win = document.getElementById('main-window')
-			win.setAttribute('legacytoolbar', 'true');
-			document.getElementById('titlebar').hidden = true;
-			document.getElementById('tab-bar-container').hidden = true;
-		}
-		
 		// Set key down handler
 		document.addEventListener('keydown', ZoteroPane_Local.handleKeyDown, true);
 		document.addEventListener('blur', ZoteroPane.handleBlur);
@@ -1224,12 +1217,9 @@ var ZoteroPane = new function()
 			}
 			
 			// Rename tab
-			if (Zotero.isPDFBuild) {
-				Zotero_Tabs.rename('zotero-pane', collectionTreeRow.getName());
-			}
+			Zotero_Tabs.rename('zotero-pane', collectionTreeRow.getName());
 			
 			let type = Zotero.Libraries.get(collectionTreeRow.ref.libraryID).libraryType;
-			ZoteroItemPane.switchEditorEngine(type == 'group' && !Zotero.enablePDFBuildForGroups || !Zotero.isPDFBuild);
 			
 			// Clear quick search and tag selector when switching views
 			document.getElementById('zotero-tb-search').value = "";
@@ -3334,7 +3324,7 @@ var ZoteroPane = new function()
 	this.openNoteWindow = function (itemID, col, parentKey) {
 		var item = Zotero.Items.get(itemID);
 		var type = Zotero.Libraries.get(item.libraryID).libraryType;
-		if (!this.canEdit() && (type == 'group' && !Zotero.enablePDFBuildForGroups || !Zotero.isPDFBuild)) {
+		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
@@ -3371,25 +3361,12 @@ var ZoteroPane = new function()
 			}
 		}
 	};
-
-
-	this.onNoteWindowClosed = async function (itemID, noteText) {
-		var item = Zotero.Items.get(itemID);
-		item.setNote(noteText);
-		await item.saveTx();
-
-		// If note is still selected, show the editor again when the note window closes
-		var selectedItems = this.getSelectedItems(true);
-		if (selectedItems.length == 1 && itemID == selectedItems[0]) {
-			ZoteroItemPane.onNoteSelected(item, this.collectionsView.editable);
-		}
-	};
 	
 	
 	this.openBackupNoteWindow = function (itemID) {
 		var item = Zotero.Items.get(itemID);
 		var type = Zotero.Libraries.get(item.libraryID).libraryType;
-		if (!this.canEdit() && (type == 'group' && !Zotero.enablePDFBuildForGroups || !Zotero.isPDFBuild)) {
+		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
@@ -3866,10 +3843,10 @@ var ZoteroPane = new function()
 			}
 			else if (item.isNote()) {
 				var type = Zotero.Libraries.get(item.libraryID).libraryType;
-				if (!this.collectionsView.editable && (type == 'group' && !Zotero.enablePDFBuildForGroups || !Zotero.isPDFBuild)) {
+				if (!this.collectionsView.editable) {
 					continue;
 				}
-				document.getElementById('zotero-view-note-button').doCommand();
+				ZoteroItemPane.openNoteWindow();
 			}
 			else if (item.isAttachment()) {
 				yield this.viewAttachment(item.id, event);
@@ -3899,12 +3876,12 @@ var ZoteroPane = new function()
 					await item.saveTx();
 				}
 			}
-			// Custom PDF handler
 			if (contentType === 'application/pdf') {
 				let item = await Zotero.Items.getAsync(itemID);
 				let library = Zotero.Libraries.get(item.libraryID);
-				// TEMP
-				if (Zotero.isPDFBuild && (library.libraryType == 'user' || Zotero.enablePDFBuildForGroups)) {
+				let pdfHandler  = Zotero.Prefs.get("fileHandler.pdf");
+				// Zotero PDF reader
+				if (!pdfHandler) {
 					await Zotero.Reader.open(
 						itemID,
 						extraData && extraData.location,
@@ -3912,15 +3889,18 @@ var ZoteroPane = new function()
 					);
 					return;
 				}
-				let pdfHandler  = Zotero.Prefs.get("fileHandler.pdf");
-				if (pdfHandler) {
-					if (await OS.File.exists(pdfHandler)) {
-						Zotero.launchFileWithApplication(path, pdfHandler);
-						return;
+				// Custom PDF handler
+				if (pdfHandler != 'system') {
+					try {
+						if (await OS.File.exists(pdfHandler)) {
+							Zotero.launchFileWithApplication(path, pdfHandler);
+							return;
+						}
 					}
-					else {
-						Zotero.logError(`${pdfHandler} not found -- launching file normally`);
+					catch (e) {
+						Zotero.logError(e);
 					}
+					Zotero.logError(`${pdfHandler} not found -- launching file normally`);
 				}
 			}
 			Zotero.launchFile(path);

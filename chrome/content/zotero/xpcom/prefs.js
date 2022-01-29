@@ -49,7 +49,7 @@ Zotero.Prefs = new function(){
 		if (!fromVersion) {
 			fromVersion = 0;
 		}
-		var toVersion = 3;
+		var toVersion = 4;
 		if (fromVersion < toVersion) {
 			for (var i = fromVersion + 1; i <= toVersion; i++) {
 				switch (i) {
@@ -78,10 +78,9 @@ Zotero.Prefs = new function(){
 						this.clear('note.fontSize');
 						break;
 					
-					// TEMP: Uncomment and set toVersion above to 3 when adding to prefs drop-down
-					//case 3:
-					//	this.clear('fileHandler.pdf');
-					//	break;
+					case 4:
+						this.clear('fileHandler.pdf');
+						break;
 				}
 			}
 			this.set('prefVersion', toVersion);

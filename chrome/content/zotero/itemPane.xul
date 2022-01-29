@@ -117,16 +117,8 @@
 					'onerror' handler crashes the app on a save error to prevent typing in notes
 					while they're not being saved
 				-->
-				<deck id="zotero-note-editor-switcher" flex="1">
-					<oldzoteronoteeditor id="zotero-note-editor-old" flex="1" notitle="1"
-						previousfocus="zotero-items-tree"
-						onerror="ZoteroPane.displayErrorMessage(); this.mode = 'view'"/>
-					<zoteronoteeditor id="zotero-note-editor" flex="1" notitle="1"
-						previousfocus="zotero-items-tree"/>
-				</deck>
-				<button id="zotero-view-note-button"
-						label="&zotero.notes.separate;"
-						oncommand="ZoteroItemPane.openNoteWindow()"/>
+				<zoteronoteeditor id="zotero-note-editor" flex="1" notitle="1"
+					previousfocus="zotero-items-tree"/>
 			</groupbox>
 			
 			<!-- Attachment item -->

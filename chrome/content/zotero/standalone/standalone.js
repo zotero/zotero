@@ -87,13 +87,6 @@ const ZoteroStandalone = new function() {
 			
 			ZoteroStandalone.DebugOutput.init();
 			
-			// TEMP: Remove tab bar if not PDF build
-			if (Zotero.isMac && !Zotero.isPDFBuild) {
-				document.documentElement.removeAttribute('drawintitlebar');
-				document.documentElement.removeAttribute('tabsintitlebar');
-				document.documentElement.removeAttribute('chromemargin');
-			}
-
 			Zotero.hideZoteroPaneOverlays();
 			ZoteroPane.init();
 			ZoteroPane.makeVisible();
