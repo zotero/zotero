@@ -782,7 +782,11 @@
 						}
 						
 						var row = this.addDynamicRow();
-						row.firstChild.nextSibling.click();
+						// It needs relatively high delay to make focus-on-click work
+						setTimeout(() => {
+							row.firstChild.nextSibling.click();
+						}, 50);
+
 						return row;
 					]]>
 				</body>

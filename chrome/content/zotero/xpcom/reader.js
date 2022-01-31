@@ -376,6 +376,9 @@ class ReaderInstance {
 		menupopup.openPopupAtScreen(x, y, false);
 		tagsbox.mode = 'edit';
 		tagsbox.item = item;
+		if (tagsbox.mode == 'edit' && tagsbox.count == 0) {
+			tagsbox.newTag();
+		}
 	}
 	
 	_openPagePopup(data) {
