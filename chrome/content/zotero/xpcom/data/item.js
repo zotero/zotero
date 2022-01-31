@@ -4598,7 +4598,7 @@ Zotero.Item.prototype.clone = function (libraryID, options = {}) {
  * @return {Zotero.Item} - New item
  */
 Zotero.Item.prototype.moveToLibrary = async function (libraryID, onSkippedAttachment) {
-	if (!this.isEditable) {
+	if (!this.isEditable()) {
 		throw new Error("Can't move item in read-only library");
 	}
 	var library = Zotero.Libraries.get(libraryID);
