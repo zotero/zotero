@@ -343,7 +343,7 @@ describe("Zotero.DataObject", function() {
 				let item = createUnsavedDataObject('item', { libraryID: group.libraryID });
 				var e = yield getPromiseError(item.saveTx());
 				assert.ok(e);
-				assert.include(e.message, "read-only");
+				assert.include(e.message, "Cannot edit item");
 			});
 			
 			it("should allow saving if skipEditCheck is passed", function* () {
@@ -360,14 +360,6 @@ describe("Zotero.DataObject", function() {
 					skipAll: true
 				}));
 				assert.isFalse(e);
-			});
-		});
-		
-		describe("Options", function () {
-			describe("#skipAll", function () {
-				it("should include edit check", function* () {
-					
-				});
 			});
 		});
 	})

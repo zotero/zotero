@@ -850,27 +850,17 @@ Zotero.DataObject.prototype._markForReload = function (dataType) {
 }
 
 
-Zotero.DataObject.prototype.isEditable = function () {
-	return Zotero.Libraries.get(this.libraryID).editable;
-}
-
-
-Zotero.DataObject.prototype.editCheck = function () {
+/**
+ * @param {String} [op='edit'] - Operation to check; if not provided, check edit privileges for
+ *     library
+ */
+Zotero.DataObject.prototype.isEditable = function (_op = 'edit') {
 	let library = Zotero.Libraries.get(this.libraryID);
-	if ((this._objectType == 'collection' || this._objectType == 'search')
-			&& library.libraryType == 'publications') {
-		throw new Error(this._ObjectTypePlural + " cannot be added to My Publications");
-	}
-	
 	if (library.libraryType == 'feed') {
-		return;
+		return true;
 	}
-	
-	if (!this.isEditable()) {
-		throw new Error("Cannot edit " + this._objectType + " in read-only library "
-			+ Zotero.Libraries.get(this.libraryID).name);
-	}
-}
+	return library.editable;
+};
 
 /**
  * Save changes to database
@@ -998,7 +988,10 @@ Zotero.DataObject.prototype._initSave = Zotero.Promise.coroutine(function* (env)
 	env.isNew = !this.id;
 	
 	if (!env.options.skipEditCheck) {
-		this.editCheck();
+		if (!this.isEditable()) {
+			throw new Error("Cannot edit " + this._objectType + " in library "
+				+ Zotero.Libraries.get(this.libraryID).name);
+		}
 	}
 	
 	let targetLib = Zotero.Libraries.get(this.libraryID);
@@ -1293,7 +1286,12 @@ Zotero.DataObject.prototype._initErase = Zotero.Promise.method(function (env) {
 		key: this.key
 	};
 	
-	if (!env.options.skipEditCheck) this.editCheck();
+	if (!env.options.skipEditCheck) {
+		if (!this.isEditable('erase')) {
+			throw new Error(`Cannot erase ${this._objectType} in library `
+				+ Zotero.Libraries.get(this.libraryID).name);
+		}
+	}
 	
 	return true;
 });

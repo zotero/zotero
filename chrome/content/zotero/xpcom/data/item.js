@@ -1228,21 +1228,46 @@ Zotero.Item.prototype.removeRelatedItem = Zotero.Promise.coroutine(function* (it
 });
 
 
-Zotero.Item.prototype.isEditable = function() {
-	var editable = Zotero.Item._super.prototype.isEditable.apply(this);
+/**
+ * @param {String} [op='edit'] - Operation to check; if not provided, check edit privileges for
+ *     library
+ */
+Zotero.Item.prototype.isEditable = function (op = 'edit') {
+	// DataObject::isEditable() checks if library is editable
+	var editable = Zotero.Item._super.prototype.isEditable.call(this, op);
 	if (!editable) return false;
 	
-	// Check if we're allowed to save attachments
+	// Check if we're allowed to edit file attachments
 	if (this.isAttachment()
-		&& (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL ||
-			this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE)
-		&& !Zotero.Libraries.get(this.libraryID).filesEditable
-	) {
+			&& (this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL
+				|| this.attachmentLinkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE)
+			&& !Zotero.Libraries.get(this.libraryID).filesEditable) {
 		return false;
 	}
 	
+	switch (op) {
+		case 'edit':
+			// Group library annotations created by other users aren't editable
+			if (this.isAnnotation()) {
+				let library = this.library;
+				if (library.isGroup
+						&& this.createdByUserID
+						&& this.createdByUserID != Zotero.Users.getCurrentUserID()) {
+					return false;
+				}
+			}
+			break;
+		
+		case 'erase':
+			break;
+		
+		default:
+			throw new Error(`Unknown operation ${op}`);
+	}
+	
+	
 	return true;
-}
+};
 
 Zotero.Item.prototype._initSave = Zotero.Promise.coroutine(function* (env) {
 	if (!this.itemTypeID) {

@@ -1466,6 +1466,66 @@ describe("Zotero.Item", function () {
 				assert.sameMembers(items, [annotation1, annotation2]);
 			});
 		});
+		
+		describe("#isEditable()", function () {
+			var group;
+			var groupAttachment;
+			var groupAnnotation1;
+			var groupAnnotation2;
+			var groupAnnotation3;
+			
+			before(async function () {
+				await Zotero.Users.setCurrentUserID(1);
+				await Zotero.Users.setName(1, 'Abc');
+				await Zotero.Users.setName(12345, 'Def');
+				group = await createGroup();
+				groupAttachment = await importFileAttachment('test.pdf', { libraryID: group.libraryID });
+				groupAnnotation1 = await createAnnotation('highlight', groupAttachment);
+				groupAnnotation2 = await createAnnotation('highlight', groupAttachment, { createdByUserID: Zotero.Users.getCurrentUserID() });
+				groupAnnotation3 = await createAnnotation('highlight', groupAttachment, { createdByUserID: 12345 });
+			});
+			
+			describe("'edit'", function () {
+				it("should return true for personal library annotation", async function () {
+					var item = await createDataObject('item');
+					var attachment = await importFileAttachment('test.pdf', { parentID: item.id });
+					var annotation = await createAnnotation('highlight', attachment);
+					assert.isTrue(annotation.isEditable());
+				});
+				
+				it("should return true for group annotation created locally", async function () {
+					assert.isTrue(groupAnnotation1.isEditable());
+				});
+				
+				it("should return true for group annotation created by current user elsewhere", async function () {
+					assert.isTrue(groupAnnotation2.isEditable());
+				});
+				
+				it("should return false for annotations created by another user", async function () {
+					assert.isFalse(groupAnnotation3.isEditable());
+				});
+				
+				it("shouldn't allow editing of group annotation owned by another user", async function () {
+					var annotation = await createAnnotation('image', groupAttachment, { createdByUserID: 12345 });
+					
+					annotation.annotationComment = 'foobar';
+					var e = await getPromiseError(annotation.saveTx());
+					assert.ok(e);
+					assert.include(e.message, "Cannot edit item");
+				});
+			});
+			
+			describe("'erase'", function () {
+				it("should return true for annotations created by another user", async function () {
+					assert.isTrue(groupAnnotation3.isEditable('erase'));
+				});
+				
+				it("should allow deletion of group annotation owned by another user", async function () {
+					var annotation = await createAnnotation('image', groupAttachment, { createdByUserID: 12345 });
+					await annotation.eraseTx();
+				});
+			});
+		});
 	});
 	
 	
@@ -1711,7 +1771,7 @@ describe("Zotero.Item", function () {
 			);
 		});
 		
-		it("should remove an item in a collection in a read-only library", async function () {
+		it("should remove an item in a collection in a read-only library with 'skipEditCheck'", async function () {
 			var group = await createGroup();
 			var libraryID = group.libraryID;
 			var collection = await createDataObject('collection', { libraryID });
