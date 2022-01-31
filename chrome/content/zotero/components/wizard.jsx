@@ -119,16 +119,18 @@ const Wizard = memo(forwardRef(({ canAdvance = true, canRewind = true, canCancel
 	}, [canAdvance, canCancel, canRewind, currentIndex, handleCancel, handleContinue, handleDone, handleGoBack, isLastPage]);
 
 	useEffect(() => {
-		if (currentId !== previousId && 'onPageShow' in currentPage.props) {
-			currentPage.props.onPageShow(currentPage.props.pageId);
-		}
+		if (currentId !== previousId) {
+			if ('onPageShow' in currentPage.props) {
+				currentPage.props.onPageShow(currentPage.props.pageId);
+			}
 
-		if (containerRef.current) {
-			(containerRef
+			if (containerRef.current) {
+				(containerRef
 				.current
 				.querySelector('button:not(.wizard-button), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
 				|| containerRef.current
-			).focus();
+				).focus();
+			}
 		}
 	}, [currentId, previousId, currentPage, containerRef]);
 
