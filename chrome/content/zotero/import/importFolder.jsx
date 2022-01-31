@@ -2,6 +2,7 @@ var EXPORTED_SYMBOLS = ["Zotero_Import_Folder"]; // eslint-disable-line no-unuse
 
 Components.utils.import("resource://gre/modules/Services.jsm");
 Services.scriptloader.loadSubScript("chrome://zotero/content/include.js");
+const multimatch = require('multimatch');
 
 const collectFilesRecursive = async (dirPath, parents = [], files = []) => {
 	await Zotero.File.iterateDirectory(dirPath, async ({ isDir, _isSymlink, name, path }) => {
@@ -10,7 +11,7 @@ const collectFilesRecursive = async (dirPath, parents = [], files = []) => {
 		}
 		// TODO: Also check for hidden file attribute on windows?
 		else if (!name.startsWith('.')) {
-			files.push({ parents, path });
+			files.push({ parents, path, name });
 		}
 	});
 	return files;
@@ -41,15 +42,16 @@ const findItemByHash = async (libraryID, hash) => {
 };
 
 class Zotero_Import_Folder { // eslint-disable-line camelcase,no-unused-vars
-	constructor({ folder, libraryID, recreateStructure }) {
+	constructor({ mimeTypes = ['application/pdf'], fileTypes, folder, libraryID, recreateStructure }) {
 		this.folder = folder;
 		this.libraryID = libraryID;
 		this.newItems = [];
 		this.recreateStructure = recreateStructure;
+		this.fileTypes = fileTypes && fileTypes.length ? fileTypes.split(',').map(ft => ft.trim()) : [];
 		this._progress = 0;
 		this._progressMax = 0;
 		this._itemDone = () => {};
-		this.types = ['application/pdf']; // whitelist of mime types to process
+		this.types = mimeTypes; // whitelist of mime types to process
 	}
 
 	setLocation(folder) {
@@ -92,9 +94,9 @@ class Zotero_Import_Folder { // eslint-disable-line camelcase,no-unused-vars
 		));
 
 		const fileHashes = await Promise.all(files.map(
-			async ({ path }, index) => {
+			async ({ name, path }, index) => {
 				const contentType = mimeTypes[index];
-				if (!this.types.includes(contentType)) {
+				if (!(this.types.includes(contentType) || multimatch(name, this.fileTypes).length > 0)) {
 					// don't bother calculating a hash for file that will be ignored
 					return null;
 				}
@@ -147,7 +149,7 @@ class Zotero_Import_Folder { // eslint-disable-line camelcase,no-unused-vars
 
 		const attachmentItemHashLookup = {};
 		const attachmentItems = await Promise.all(Object.entries(fileDataByHash).map(
-			async ([hash, { path, parentCollectionIDs, mimeType }]) => {
+			async ([hash, { name, path, parentCollectionIDs, mimeType }]) => {
 				const options = {
 					collections: parentCollectionIDs,
 					contentType: mimeType,
@@ -156,8 +158,8 @@ class Zotero_Import_Folder { // eslint-disable-line camelcase,no-unused-vars
 				};
 
 				let attachmentItem = null;
-
-				if (this.types.includes(mimeType)) {
+				
+				if ((this.types.includes(mimeType) || multimatch(name, this.fileTypes).length > 0)) {
 					const existingItem = await findItemByHash(libraryID, hash);
 
 					if (existingItem) {

@@ -13,21 +13,37 @@
 	}
 
 	.toolbar-other {
-		margin-top: 1em;
+		margin-top: 1.25em;
+	}
+
+	.page-options-file-types {
+		padding-top: 1em;
+
+		.page-options-file-type + .page-options-file-type {
+			margin-top: .5em;
+		}
+
+		input[type=checkbox] + * {
+			margin-left: 5px;
+		}
+
+		input[type=text] {
+			font-size: 14px;
+			width: 400px;
+		}
+
+		fieldset {
+			border: none;
+			margin-left: 1em;
+		}
 	}
 
 	.page-options-file-handling {
-		margin-top: 2em;
+		padding-top: 1.25em;
 
 		.radioset {
 			font-size: 13px;
 			margin-left: 1em;
-		}
-
-		h2 {
-			font-size: 14px;
-			font-weight: normal;
-			margin-bottom: 6px;
 		}
 	}
 
@@ -77,6 +93,13 @@
 			position: relative;
 			height: 100%;
 		}
+	}
+
+	h2 {
+		font-size: 14px;
+		font-weight: normal;
+		margin-bottom: 6px;
+		margin: 0;
 	}
 
 	label {

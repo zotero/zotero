@@ -51,6 +51,9 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 	const [shouldShowErrorButton, setShouldShowErrorButton] = useState(false);
 	const [shouldCreateCollection, setShouldCreateCollection] = useState(true);
 	const [shouldRecreateStructure, setShouldRecreateStructure] = useState(true);
+	const [shouldImportPDF, setShouldImportPDF] = useState(true);
+	const [shouldImportOther, setShouldImportOther] = useState(false);
+	const [fileTypes, setFileTypes] = useState('');
 	const [canAdvance, setCanAdvance] = useState(true);
 	const [canRewind, setCanRewind] = useState(true);
 	const [canCancel, setCanCancel] = useState(true);
@@ -212,6 +215,19 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 		setFileHandling(newFileHandling);
 	}, []);
 
+	const handleImportPDFChange = useCallback(() => {
+		setShouldImportPDF(prevShouldImportPDF => !prevShouldImportPDF);
+	}, []);
+
+	const handleImportOtherChange = useCallback(() => {
+		setShouldImportOther(prevShouldImportOther => !prevShouldImportOther);
+	}, []);
+
+	const handleOtherFileTypesChange = useCallback((ev) => {
+		setFileTypes(ev.currentTarget.value);
+		setShouldImportOther(ev.currentTarget.value.length > 0);
+	}, []);
+
 	const handleBeforeImport = useCallback(async (translation) => {
 		// Unrecognized translator
 		if (!translation) {
@@ -262,7 +278,9 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 				linkFiles: fileHandling === 'link',
 				mendeleyCode,
 				folder,
-				recreateStructure: shouldRecreateStructure
+				recreateStructure: shouldRecreateStructure,
+				mimeTypes: shouldImportPDF ? ['application/pdf'] : [],
+				fileTypes: shouldImportOther ? fileTypes : null
 			});
 			
 			// Cancelled by user or due to error
@@ -301,7 +319,7 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 			}
 			throw e;
 		}
-	}, [file, folder, fileHandling, handleBeforeImport, handleUrlClick, mendeleyCode, shouldCreateCollection, shouldRecreateStructure, skipToDonePage]);
+	}, [file, fileTypes, folder, fileHandling, handleBeforeImport, handleUrlClick, mendeleyCode, shouldCreateCollection, shouldImportOther, shouldImportPDF, shouldRecreateStructure, skipToDonePage]);
 
 	const goToStart = useCallback(() => {
 		wizardRef.current.goTo('page-start');
@@ -365,7 +383,6 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 					<input
 						checked={ shouldCreateCollection }
 						id={ id.current + '-create-collection-checkbox' }
-						label={ Zotero.getString('import.createCollection') }
 						onChange={ handleCreateCollectionCheckboxChange }
 						type="checkbox"
 					/>
@@ -374,18 +391,52 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 					</label>
 				</div>
 				{ folder && (
-					<div className="page-options-recreate-structure">
-						<input
-							checked={ shouldRecreateStructure }
-							id={ id.current + '-recreate-structure-checkbox' }
-							label={ Zotero.getString('import.recreateStructure') }
-							onChange={ handleRecreateStructureChange }
-							type="checkbox"
-						/>
-						<label htmlFor={ id.current + '-recreate-structure-checkbox' }>
-							{ Zotero.getString('import.recreateStructure') }
-						</label>
-					</div>
+					<React.Fragment>
+						<div className="page-options-recreate-structure">
+							<input
+								checked={ shouldRecreateStructure }
+								id={ id.current + '-recreate-structure-checkbox' }
+								onChange={ handleRecreateStructureChange }
+								type="checkbox"
+							/>
+							<label htmlFor={ id.current + '-recreate-structure-checkbox' }>
+								{ Zotero.getString('import.recreateStructure') }
+							</label>
+						</div>
+						<div className="page-options-file-types">
+							<h2>
+								{ Zotero.getString("import.fileTypes.header") }
+							</h2>
+							<fieldset>
+								<div className="page-options-file-type">
+									<input
+										checked={ shouldImportPDF }
+										id={ id.current + '-import-pdf-checkbox' }
+										onChange={ handleImportPDFChange }
+										type="checkbox"
+									/>
+									<label htmlFor={ id.current + '-import-pdf-checkbox' }>
+										{ Zotero.getString('import.fileTypes.pdf') }
+									</label>
+								</div>
+								<div className="page-options-file-type">
+									<input
+										checked={ shouldImportOther }
+										id={ id.current + '-import-other' }
+										onChange={ handleImportOtherChange }
+										type="checkbox"
+									/>
+									<input
+										id={ id.current + '-import-other-files' }
+										onChange={ handleOtherFileTypesChange }
+										placeholder={ Zotero.getString('import.fileTypes.otherPlaceholder') }
+										type="text"
+										value={ fileTypes }
+									/>
+								</div>
+							</fieldset>
+						</div>
+					</React.Fragment>
 				)}
 				{ !mendeleyCode && (
 					<div className="page-options-file-handling">

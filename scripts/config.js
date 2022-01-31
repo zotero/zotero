@@ -88,7 +88,14 @@ const browserifyConfigs = [
 		config: {
 			standalone: 'chaiAsPromised'
 		}
-	}
+	},
+	{
+		src: 'node_modules/multimatch/index.js',
+		dest: 'resource/multimatch.js',
+		config: {
+			standalone: 'multimatch'
+		}
+	},
 ];
 
 // exclude mask used for js, copy, symlink and sass tasks

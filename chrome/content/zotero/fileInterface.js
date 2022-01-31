@@ -449,7 +449,9 @@ var Zotero_File_Interface = new function() {
 			Components.utils.import("chrome://zotero/content/import/importFolder.js");
 			translation = new Zotero_Import_Folder({
 				folder: options.folder,
-				recreateStructure: options.recreateStructure
+				recreateStructure: options.recreateStructure,
+				fileTypes: options.fileTypes,
+				mimeTypes: options.mimeTypes,
 			});
 		}
 		else {
