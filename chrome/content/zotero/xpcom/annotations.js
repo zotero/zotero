@@ -118,12 +118,10 @@ Zotero.Annotations = new function () {
 		o.type = item.annotationType;
 		o.isExternal = item.annotationIsExternal;
 		o.isAuthor = !item.createdByUserID || item.createdByUserID == Zotero.Users.getCurrentUserID();
-		if (!o.isAuthor) {
+		if (!o.isExternal && item.library.libraryType == 'group') {
 			o.authorName = Zotero.Users.getName(item.createdByUserID);
 		}
-		// TODO: Replace this with the actual code that checks if user is a group admin
-		let isGroupAdmin = false;
-		o.readOnly = o.isExternal || (!o.isAuthor && !isGroupAdmin);
+		o.readOnly = o.isExternal || !o.isAuthor;
 		if (o.type == 'highlight') {
 			o.text = item.annotationText;
 		}
