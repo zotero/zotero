@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "Přílohy">
 <!ENTITY zotero.tabs.tags.label "Štítky">
 <!ENTITY zotero.tabs.related.label "Související">
-<!ENTITY zotero.notes.separate "Upravit v samostatném okně">
 
 <!ENTITY zotero.toolbar.duplicate.label "Ukázat duplikáty">
 <!ENTITY zotero.collections.showUnfiledItems "Zobrazit sjednocené položky">

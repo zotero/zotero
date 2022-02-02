@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "附件">
 <!ENTITY zotero.tabs.tags.label "标签">
 <!ENTITY zotero.tabs.related.label "关联文献">
-<!ENTITY zotero.notes.separate "打开浮动编辑窗口">
 
 <!ENTITY zotero.toolbar.duplicate.label "显示重复条目">
 <!ENTITY zotero.collections.showUnfiledItems "显示未分类条目">

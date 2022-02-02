@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "Вкладення">
 <!ENTITY zotero.tabs.tags.label "Теги">
 <!ENTITY zotero.tabs.related.label "Пов'язані">
-<!ENTITY zotero.notes.separate "Редагувати в окремому вікні">
 
 <!ENTITY zotero.toolbar.duplicate.label "Показати дублювання">
 <!ENTITY zotero.collections.showUnfiledItems "Показати незаповненні записи">

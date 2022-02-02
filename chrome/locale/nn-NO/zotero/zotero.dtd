@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "Vedlegg">
 <!ENTITY zotero.tabs.tags.label "Taggar">
 <!ENTITY zotero.tabs.related.label "Relatert">
-<!ENTITY zotero.notes.separate "Rediger i separat vindauge">
 
 <!ENTITY zotero.toolbar.duplicate.label "Vis duplikat">
 <!ENTITY zotero.collections.showUnfiledItems "Vis uplasserte objekt">

@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "צרופות">
 <!ENTITY zotero.tabs.tags.label "תגיות">
 <!ENTITY zotero.tabs.related.label "Related">
-<!ENTITY zotero.notes.separate "Edit in a separate window">
 
 <!ENTITY zotero.toolbar.duplicate.label "הצג כפילויות">
 <!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">

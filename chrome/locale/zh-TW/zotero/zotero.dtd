@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "附件檔">
 <!ENTITY zotero.tabs.tags.label "標籤">
 <!ENTITY zotero.tabs.related.label "相關">
-<!ENTITY zotero.notes.separate "分出一個獨立視窗來編輯">
 
 <!ENTITY zotero.toolbar.duplicate.label "顯示重覆的項目">
 <!ENTITY zotero.collections.showUnfiledItems "顯示未歸檔的項目">

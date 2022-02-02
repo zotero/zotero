@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "Priponke">
 <!ENTITY zotero.tabs.tags.label "Značke">
 <!ENTITY zotero.tabs.related.label "Sorodno">
-<!ENTITY zotero.notes.separate "Uredi v ločenem oknu">
 
 <!ENTITY zotero.toolbar.duplicate.label "Pokaži dvojnike">
 <!ENTITY zotero.collections.showUnfiledItems "Pokaži nerazvrščene vnose">

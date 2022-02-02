@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "‌پیوست‌ها">
 <!ENTITY zotero.tabs.tags.label "برچسب‌ها">
 <!ENTITY zotero.tabs.related.label "مرتبط">
-<!ENTITY zotero.notes.separate "ویرایش در پنجره مستقل">
 
 <!ENTITY zotero.toolbar.duplicate.label "نمایش آیتم‌‌های تکراری">
 <!ENTITY zotero.collections.showUnfiledItems "نمایش آیتم‌های دسته‌بندی نشده">

@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "Manused">
 <!ENTITY zotero.tabs.tags.label "Märksõnad">
 <!ENTITY zotero.tabs.related.label "Seotud">
-<!ENTITY zotero.notes.separate "Salvestada eraldi aknas">
 
 <!ENTITY zotero.toolbar.duplicate.label "Näidata duplikaate">
 <!ENTITY zotero.collections.showUnfiledItems "Teemata kirjed">

@@ -5,8 +5,17 @@
   "general_moreInfo": {
     "message": "Plus d'info..."
   },
+  "general_needHelp": {
+    "message": "Besoin d'aide?"
+  },
   "general_done": {
     "message": "Terminé"
+  },
+  "general_yes": {
+    "message": "Oui"
+  },
+  "general_no": {
+    "message": "Non"
   },
   "general_tryAgain": {
     "message": "Réessayer"
@@ -32,8 +41,14 @@
   "progressWindow_error_translation": {
     "message": "Une erreur s’est produite lors de l’enregistrement de ce document. Consultez $1 pour davantage de précisions. "
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "Une erreur s'est produite lors de l'enregistrement de ce document. Il est possible que $1 limite le nombre de documents que vous pouvez enregistrer en même temps. Voir $2 pour plus d'informations."
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Résoudre les problèmes de convertisseur"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Limites d'accès au site"
   },
   "progressWindow_error_fallback": {
     "message": "Une erreur s’est produite lors de l’enregistrement avec $1. Tentative d’enregistrement en utilisant $2 à la place."
@@ -50,6 +65,18 @@
   "upgradeApp": {
     "message": "Mettre à niveau $1"
   },
+  "firstRun_title": {
+    "message": "Vous avez installé le connecteur pour $1!"
+  },
+  "firstRun_text1": {
+    "message": "Le Connecteur $1 vous permet <a href=\"$2\">d'enregistrer des documents dans$1</a> depuis de votre navigateur en un seul clic."
+  },
+  "firstRun_text2": {
+    "message": "Si vous ne l'avez pas encore fait, <a href=\"$2\">téléchargez</a>l'application autonome $1 pour bénéficier d'une expérience optimale."
+  },
+  "firstRun_acceptButton": {
+    "message": "Compris"
+  },
   "error_connection_isAppRunning": {
     "message": "$1 est-il ouvert ?"
   },
@@ -64,6 +91,9 @@
   },
   "reports_report_submitted": {
     "message": "Votre rapport d'erreur a été soumis.\n\nReport ID: $1\n\nVeuillez poster un message sur les forums de Zotero avec cet identifiant, une description du problème et toutes les étapes nécessaires pour le reproduire.\nLes rapports d'erreur ne sont pas analysés tant qu'ils ne sont pas cités dans les forums avec cet identifiant."
+  },
+  "reports_debug_output_submitted": {
+    "message": "Le journal de débogage a été envoyé.\n\nLe Debug ID est $1."
   },
   "reports_submission_failed": {
     "message": "Une erreur s'est produite lors de l'envoi de votre rapport.\n\n$1\n\nVeuillez vérifier votre connexion internet. Si le problème persiste, veuillez poster un message sur les forums Zotero."
@@ -88,6 +118,27 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "L'intégration de $1 n'est pas disponible lors de l'édition directe de fichiers Microsoft Word .docx dans Google Docs. Sélectionnez Fichier → Enregistrer au format Google Docs afin d'activer cette fonctionnalité.<br/><br/>Si vous souhaitez transférer un document Word avec $1 citations vers Google Docs, consultez <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Transférer des documents comportant des citations Zotero entre différents logiciels de traitement de texte</a>."
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "Les citations du document sont en cours de modification par un autre utilisateur $1. Veuillez réessayer ultérieurement."
+  },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1 verrouille votre document pour empêcher plusieurs utilisateurs de modifier les citations en même temps. La modification simultanée de citations dans le document peut entraîner une corruption des citations ou du document. Certaines circonstances imprévisibles, telles que des pannes de réseau, peuvent entraîner le verrouillage permanent de votre document. Si vous pensez que cela s'est produit, vous pouvez annuler le verrouillage. <br/><br/>Voulez-vous annuler le verrouillage du document ?"
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "Le compte Google que vous avez sélectionné n'a pas l'autorisation de modifier ce document. Veuillez réessayer, en vous assurant de choisir un compte disposant d'un accès en modification."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "Afficher les citations $1 non liées."
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "La citation que vous tentez de modifier n'est plus liée à  $1."
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Lier à nouveau la citation."
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "Ces citations ne sont <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">plus liées à $1</a>. Vous devez les lier à nouveau pour qu'elles soient mises à jour ou apparaissent dans votre bibliographie."
   },
   "general_saveTo": {
     "message": "Enregistrer dans $1"

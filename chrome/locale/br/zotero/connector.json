@@ -5,6 +5,12 @@
   "general_done": {
     "message": "Graet"
   },
+  "general_yes": {
+    "message": "Ya"
+  },
+  "general_no": {
+    "message": "Ket"
+  },
   "general_tryAgain": {
     "message": "Klask en-dro"
   },

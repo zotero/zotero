@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "Pezhioù-stag">
 <!ENTITY zotero.tabs.tags.label "Balizoù">
 <!ENTITY zotero.tabs.related.label "Kevreet">
-<!ENTITY zotero.notes.separate "Aozit en ur prenestr distag">
 
 <!ENTITY zotero.toolbar.duplicate.label "Diskouez an doublennoù">
 <!ENTITY zotero.collections.showUnfiledItems "Diskouez an elfennoù amrummet">
@@ -155,7 +154,7 @@
 <!ENTITY zotero.toolbar.attachment.add "Stokañ un eilenn eus ar restr...">
 <!ENTITY zotero.toolbar.attachment.weblink "Enrollañ al liamm d'ar bajenn a-vremañ">
 <!ENTITY zotero.toolbar.attachment.snapshot "Kemer un dapadenn-skramm eus ar bajenn a-vremañ">
-<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.item "Elfenn">
 <!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Baliz ebet da ziskouez">

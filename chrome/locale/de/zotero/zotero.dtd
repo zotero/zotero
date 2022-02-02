@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "Anhänge">
 <!ENTITY zotero.tabs.tags.label "Tags">
 <!ENTITY zotero.tabs.related.label "Zugehörig">
-<!ENTITY zotero.notes.separate "In einem neuen Fenster bearbeiten">
 
 <!ENTITY zotero.toolbar.duplicate.label "Duplikate anzeigen">
 <!ENTITY zotero.collections.showUnfiledItems "Einträge ohne Sammlung anzeigen">

@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "Csatolmányok">
 <!ENTITY zotero.tabs.tags.label "Címkék">
 <!ENTITY zotero.tabs.related.label "Kapcsolatok">
-<!ENTITY zotero.notes.separate "Szerkesztés külön ablakban">
 
 <!ENTITY zotero.toolbar.duplicate.label "Duplumok listázása">
 <!ENTITY zotero.collections.showUnfiledItems "Besorolatlan elemek mutatása">

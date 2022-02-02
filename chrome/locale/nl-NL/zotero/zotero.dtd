@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "Bijlagen">
 <!ENTITY zotero.tabs.tags.label "Labels">
 <!ENTITY zotero.tabs.related.label "Gerelateerd">
-<!ENTITY zotero.notes.separate "In een nieuw venster bewerken">
 
 <!ENTITY zotero.toolbar.duplicate.label "Duplicaten tonen">
 <!ENTITY zotero.collections.showUnfiledItems "Ongesorteerde items tonen">

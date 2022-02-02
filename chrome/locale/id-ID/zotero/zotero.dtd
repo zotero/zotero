@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "Lampiran">
 <!ENTITY zotero.tabs.tags.label "Tag">
 <!ENTITY zotero.tabs.related.label "Terkait">
-<!ENTITY zotero.notes.separate "Edit pada Jendela Terpisah">
 
 <!ENTITY zotero.toolbar.duplicate.label "Tunjukkan Duplikat">
 <!ENTITY zotero.collections.showUnfiledItems "Tunjukkan Item-Item yang Belum Diisikan">

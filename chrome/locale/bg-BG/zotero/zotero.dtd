@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "Прикачени файлове">
 <!ENTITY zotero.tabs.tags.label "Маркери">
 <!ENTITY zotero.tabs.related.label "Свързани">
-<!ENTITY zotero.notes.separate "Редактиране в отделен прозорец">
 
 <!ENTITY zotero.toolbar.duplicate.label "Показване на дупликатите">
 <!ENTITY zotero.collections.showUnfiledItems "Показване на непопълнените записи">

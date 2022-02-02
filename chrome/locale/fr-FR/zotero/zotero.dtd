@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "Fichiers joints">
 <!ENTITY zotero.tabs.tags.label "Marqueurs">
 <!ENTITY zotero.tabs.related.label "Connexe">
-<!ENTITY zotero.notes.separate "Modifier dans une nouvelle fenêtre">
 
 <!ENTITY zotero.toolbar.duplicate.label "Afficher les doublons">
 <!ENTITY zotero.collections.showUnfiledItems "Afficher les documents sans collection">
@@ -156,7 +155,7 @@
 <!ENTITY zotero.toolbar.attachment.weblink "Enregistrer le lien vers la page courante">
 <!ENTITY zotero.toolbar.attachment.snapshot "Capturer la page courante">
 <!ENTITY zotero.toolbar.context.item "Document">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.notes "Défilement vertical">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Aucun marqueur à afficher">
 <!ENTITY zotero.tagSelector.loadingTags "Chargement des marqueurs…">
@@ -174,7 +173,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Définir la couleur">
 <!ENTITY zotero.tagColorChooser.removeColor "Supprimer la couleur">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
+<!ENTITY zotero.lookup.description "Entrer des ISBN, DOI, PMID, arXiv ID ou bibcodes ADS à ajouter à votre bibliothèque:">
 <!ENTITY zotero.lookup.button.search "Rechercher">
 
 <!ENTITY zotero.createParent.title "Créer un document parent">
@@ -341,8 +340,8 @@
 <!ENTITY zotero.pdfReader.rotateClockwise "Rotate Clockwise">
 <!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotate Counterclockwise">
 <!ENTITY zotero.pdfReader.handTool "Hand Tool">
-<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
-<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
+<!ENTITY zotero.pdfReader.verticalScrolling "Défilement vertical">
+<!ENTITY zotero.pdfReader.horizontalScrolling "Défilement horizontal">
 <!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
 <!ENTITY zotero.pdfReader.noSpreads "No Spreads">
 <!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
@@ -351,5 +350,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Dé-zoomer">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
-<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
+<!ENTITY zotero.pdfReader.transferFromPDF "Importer des annotations...">
 <!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

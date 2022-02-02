@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "مرفقات">
 <!ENTITY zotero.tabs.tags.label "أوسمة">
 <!ENTITY zotero.tabs.related.label "عناصر ذات صلة">
-<!ENTITY zotero.notes.separate "التحرير في نافذة منفصلة">
 
 <!ENTITY zotero.toolbar.duplicate.label "عرض التكرارات">
 <!ENTITY zotero.collections.showUnfiledItems "عرض العناصر غير المصنفة">

@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "Προσαρτήματα">
 <!ENTITY zotero.tabs.tags.label "Ετικέτες">
 <!ENTITY zotero.tabs.related.label "Σχετίζεται με">
-<!ENTITY zotero.notes.separate "Επεξεργασία σε ξεχωριστό παράθυρο">
 
 <!ENTITY zotero.toolbar.duplicate.label "Εμφάνιση διπλότυπων">
 <!ENTITY zotero.collections.showUnfiledItems "Εμφάνιση Αταξινόμητων στοιχείων">

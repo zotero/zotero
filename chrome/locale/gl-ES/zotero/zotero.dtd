@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "Anexo">
 <!ENTITY zotero.tabs.tags.label "Etiquetas">
 <!ENTITY zotero.tabs.related.label "Relacionados">
-<!ENTITY zotero.notes.separate "Editar nunha xanela independente">
 
 <!ENTITY zotero.toolbar.duplicate.label "Mostrar os duplicados">
 <!ENTITY zotero.collections.showUnfiledItems "Mostrar os elementos sen cubrir">

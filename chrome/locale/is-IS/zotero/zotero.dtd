@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "Viðhengi">
 <!ENTITY zotero.tabs.tags.label "Merki">
 <!ENTITY zotero.tabs.related.label "Venslað">
-<!ENTITY zotero.notes.separate "Yfirfara í sérstökum glugga">
 
 <!ENTITY zotero.toolbar.duplicate.label "Sýna eins færslur">
 <!ENTITY zotero.collections.showUnfiledItems "Sýna sameinaðar færslur">

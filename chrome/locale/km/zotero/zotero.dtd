@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "ឯកសារកម្ជាប់">
 <!ENTITY zotero.tabs.tags.label "ស្លាក">
 <!ENTITY zotero.tabs.related.label "ពាក់ព័ន្ធ">
-<!ENTITY zotero.notes.separate "កែតម្រូវនៅក្នុងវីនដូយ៍ដោយឡែក">
 
 <!ENTITY zotero.toolbar.duplicate.label "បង្ហាញឯកសារត្រួត">
 <!ENTITY zotero.collections.showUnfiledItems "បង្ហាញឯកសារមិនទាន់បានតម្កល់ទុក">

@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "Prílohy">
 <!ENTITY zotero.tabs.tags.label "Značky">
 <!ENTITY zotero.tabs.related.label "Súvisiace">
-<!ENTITY zotero.notes.separate "Upraviť v samostatnom okne">
 
 <!ENTITY zotero.toolbar.duplicate.label "Zobraziť duplicity">
 <!ENTITY zotero.collections.showUnfiledItems "Zobraziť nezaradené záznam">

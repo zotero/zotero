@@ -36,7 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "Copier la citation">
 <!ENTITY copyBibliographyCmd.label "Copier la bibliographie">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyNoteCmd.label "Copier la note">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Inverser le sens de la page">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">

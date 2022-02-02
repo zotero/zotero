@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "Allegati">
 <!ENTITY zotero.tabs.tags.label "Tag">
 <!ENTITY zotero.tabs.related.label "Correlati">
-<!ENTITY zotero.notes.separate "Modifica in una nuova finestra">
 
 <!ENTITY zotero.toolbar.duplicate.label "Mostra i duplicati">
 <!ENTITY zotero.collections.showUnfiledItems "Mostra gli oggetti non classificati">

@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "Bilagor">
 <!ENTITY zotero.tabs.tags.label "Etiketter">
 <!ENTITY zotero.tabs.related.label "Liknande källor">
-<!ENTITY zotero.notes.separate "Redigera i ett separat fönster">
 
 <!ENTITY zotero.toolbar.duplicate.label "Visa dubletter">
 <!ENTITY zotero.collections.showUnfiledItems "Visa oregistererade källor">

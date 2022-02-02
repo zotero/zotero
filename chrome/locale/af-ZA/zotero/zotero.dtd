@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "Aanhegsels">
 <!ENTITY zotero.tabs.tags.label "Etikette">
 <!ENTITY zotero.tabs.related.label "Verwant">
-<!ENTITY zotero.notes.separate "Redigeer in 'n apparte venster">
 
 <!ENTITY zotero.toolbar.duplicate.label "Wys duplikate">
 <!ENTITY zotero.collections.showUnfiledItems "Wys ongeliaseerde items">

@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "Вложения">
 <!ENTITY zotero.tabs.tags.label "Теги">
 <!ENTITY zotero.tabs.related.label "Связанные">
-<!ENTITY zotero.notes.separate "Редактировать в отдельном окне">
 
 <!ENTITY zotero.toolbar.duplicate.label "Показать дубликаты">
 <!ENTITY zotero.collections.showUnfiledItems "Показать неподшитые записи">

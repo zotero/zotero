@@ -50,7 +50,6 @@
 <!ENTITY zotero.tabs.attachments.label "ไฟล์แนบ">
 <!ENTITY zotero.tabs.tags.label "แท็ก">
 <!ENTITY zotero.tabs.related.label "เชื่อมโยงกับ">
-<!ENTITY zotero.notes.separate "แก้ไขในหน้าต่างแยกต่างหาก">
 
 <!ENTITY zotero.toolbar.duplicate.label "แสดงรายการซ้ำ">
 <!ENTITY zotero.collections.showUnfiledItems "แสดงรายการที่ไม่ได้จัดกลุ่ม">
