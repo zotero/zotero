@@ -446,7 +446,7 @@ var Zotero_File_Interface = new function() {
 			translation.mendeleyCode = options.mendeleyCode;
 		}
 		else if (options.folder) {
-			Components.utils.import("chrome://zotero/content/import/importFolder.js");
+			Components.utils.import("chrome://zotero/content/import/folderImport.js");
 			translation = new Zotero_Import_Folder({
 				folder: options.folder,
 				recreateStructure: options.recreateStructure,

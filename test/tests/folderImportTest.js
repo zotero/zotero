@@ -40,7 +40,7 @@ describe('Zotero_Import_Folder', function () {
 			OS.Path.join(tmpDir, uc('dir2'), 'test.txt')
 		);
 
-		Components.utils.import('chrome://zotero/content/import/importFolder.js');
+		Components.utils.import('chrome://zotero/content/import/folderImport.js');
 	});
 
 	describe('#import', () => {
