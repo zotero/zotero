@@ -49,7 +49,7 @@ Zotero.Prefs = new function(){
 		if (!fromVersion) {
 			fromVersion = 0;
 		}
-		var toVersion = 4;
+		var toVersion = 5;
 		if (fromVersion < toVersion) {
 			for (var i = fromVersion + 1; i <= toVersion; i++) {
 				switch (i) {
@@ -80,6 +80,10 @@ Zotero.Prefs = new function(){
 					
 					case 4:
 						this.clear('fileHandler.pdf');
+						break;
+					
+					case 5:
+						this.clear('extensions.spellcheck.inline.max-misspellings', true);
 						break;
 				}
 			}
