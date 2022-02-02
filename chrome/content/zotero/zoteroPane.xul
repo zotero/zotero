@@ -246,7 +246,7 @@
 					
 					<popupset>
 						<!-- Allows to display a tooltip for 'title' attrbute for HTML nodes. Must be on an XUL node i.e. iframe or toolbar: "tooltip"="html-tooltip" -->
-						<tooltip id="html-tooltip" onpopupshowing="if (document.tooltipNode &amp;&amp; (tooltipTitleNode = document.tooltipNode.closest('*[title]'))) {this.setAttribute('label', tooltipTitleNode.getAttribute('title')); return true; } return false"/>
+						<tooltip id="html-tooltip" onpopupshowing="if (document.tooltipNode &amp;&amp; (tooltipTitleNode = document.tooltipNode.closest('div *[title], iframe *[title], browser *[title]'))) {this.setAttribute('label', tooltipTitleNode.getAttribute('title')); return true; } return false"/>
 						<menupopup id="zotero-collectionmenu"
 								oncommand="ZoteroPane.onCollectionContextMenuSelect(event)">
 							<!-- Keep order in sync with buildCollectionContextMenu, which adds additional attributes -->
@@ -358,7 +358,7 @@
 						</splitter>
 						
 						<box id="zotero-layout-switcher" orient="horizontal" zotero-persist="orient" flex="1">
-							<hbox id="zotero-items-pane" class="virtualized-table-container" zotero-persist="width height" flex="1" clickthrough="never">
+							<hbox id="zotero-items-pane" class="virtualized-table-container" zotero-persist="width height" flex="1" clickthrough="never" tooltip="html-tooltip">
 								<html:div id="zotero-items-tree"></html:div>
 							</hbox>
 		

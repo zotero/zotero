@@ -1051,7 +1051,8 @@ class VirtualizedTable extends React.Component {
 					{resizer}
 					<span
 						key={columnName + '-label'}
-						className={`label ${column.dataKey}`}>
+						className={`label ${column.dataKey}`}
+						title={columnName}>
 						{label}
 					</span>
 					{sortIndicator}
