@@ -113,29 +113,18 @@ Zotero.ProgressQueueDialog = function (progressQueue) {
 		});
 		
 		_progressWindow.addEventListener('unload', function () {
-			_progressQueue.removeListener('rowadded');
-			_progressQueue.removeListener('rowupdated');
-			_progressQueue.removeListener('rowdeleted');
+			_progressQueue.removeListener('rowadded', _updateProgress);
+			_progressQueue.removeListener('rowupdated', _updateProgress);
+			_progressQueue.removeListener('rowdeleted', _updateProgress);
 			_progressWindow = null;
 			_progressIndicator = null;
 			_status = null;
 			_showMinimize = true;
 		});
 		
-		_progressQueue.addListener('rowadded', function (row) {
-			_io.tree.invalidate();
-			_updateProgress();
-		});
-		
-		_progressQueue.addListener('rowupdated', function (row) {
-			_io.tree.invalidate();
-			_updateProgress();
-		});
-		
-		_progressQueue.addListener('rowdeleted', function (row) {
-			_io.tree.invalidate();
-			_updateProgress();
-		});
+		_progressQueue.addListener('rowadded', _updateProgress);
+		_progressQueue.addListener('rowupdated', _updateProgress);
+		_progressQueue.addListener('rowdeleted', _updateProgress);
 		
 		_updateProgress();
 	}

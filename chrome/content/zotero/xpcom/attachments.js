@@ -1478,6 +1478,7 @@ Zotero.Attachments = new function(){
 	this.addAvailablePDFs = async function (items, options = {}) {
 		const MAX_CONSECUTIVE_DOMAIN_FAILURES = 5;
 		const SAME_DOMAIN_REQUEST_DELAY = options.sameDomainRequestDelay || 1000;
+		var queue;
 		
 		var domains = new Map();
 		function getDomainInfo(domain) {
@@ -1502,8 +1503,10 @@ Zotero.Attachments = new function(){
 					'general.pdf'
 				]
 			});
+			progressQueue.addListener('cancel', () => queue = []);
 		}
-		var queue = _findPDFQueue;
+
+		queue = _findPDFQueue;
 		
 		for (let item of items) {
 			// Skip items that aren't eligible. This is sort of weird, because it means some
@@ -1570,11 +1573,6 @@ Zotero.Attachments = new function(){
 		var queueResolve;
 		_findPDFQueuePromise = new Zotero.Promise((resolve) => {
 			queueResolve = resolve;
-		});
-		
-		// Only one listener can be added, so we just add each time
-		progressQueue.addListener('cancel', () => {
-			queue = [];
 		});
 		
 		//

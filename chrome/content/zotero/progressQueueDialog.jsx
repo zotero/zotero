@@ -26,86 +26,24 @@
 Components.utils.import("resource://gre/modules/Services.jsm");
 import React from 'react';
 import ReactDOM from 'react-dom';
-import VirtualizedTable from 'components/virtualized-table';
-const { IntlProvider } = require('react-intl');
-const { getDOMElement } = require('components/icons');
-const { renderCell } = VirtualizedTable;
+import ProgressQueueTable from 'components/progressQueueTable';
 
-let _progressIndicator = null;
 let _progressQueue;
-let _tree;
-
-function _getImageByStatus(status) {
-	if (status === Zotero.ProgressQueue.ROW_PROCESSING) {
-		return getDOMElement('IconArrowRefresh');
-	}
-	else if (status === Zotero.ProgressQueue.ROW_FAILED) {
-		return getDOMElement('IconCross');
-	}
-	else if (status === Zotero.ProgressQueue.ROW_SUCCEEDED) {
-		return getDOMElement('IconTick');
-	}
-	return document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
-}
-	
-function _rowToTreeItem(index, selection, oldDiv=null, columns) {
-	let rows = _progressQueue.getRows();
-	let row = rows[index];
-	
-	let div;
-	if (oldDiv) {
-		div = oldDiv;
-		div.innerHTML = "";
-	}
-	else {
-		div = document.createElementNS("http://www.w3.org/1999/xhtml", 'div');
-		div.className = "row";
-	}
-
-	div.classList.toggle('selected', selection.isSelected(index));
-
-	for (let column of columns) {
-		if (column.dataKey === 'success') {
-			let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
-			span.className = `cell icon ${column.className}`;
-			span.appendChild(_getImageByStatus(row.status));
-			div.appendChild(span);
-		}
-		else {
-			div.appendChild(renderCell(index, row[column.dataKey], column));
-		}
-	}
-	return div;
-}
 	
 function _init() {
 	var io = window.arguments[0];
 	_progressQueue = io.progressQueue;
 	document.title = Zotero.getString(_progressQueue.getTitle());
-
-	let columns = _progressQueue.getColumns();
-
-	const tableColumns = [
-		{ dataKey: 'success', fixedWidth: true, width: "26" },
-		{ dataKey: 'fileName', label: Zotero.getString(columns[0]) },
-		{ dataKey: 'message', label: Zotero.getString(columns[1]) },
-	];
 	
 	const domEl = document.querySelector('#tree');
-	let elem = (
-		<IntlProvider locale={Zotero.locale} messages={Zotero.Intl.strings}>
-			<VirtualizedTable
-				getRowCount={() => _progressQueue.getRows().length}
-				id="locateManager-table"
-				ref={ref => io.tree = _tree = ref}
-				renderItem={_rowToTreeItem}
-				showHeader={true}
-				columns={tableColumns}
-				onActivate={_handleActivate}
-			/>
-		</IntlProvider>
+	
+	ReactDOM.render(
+		<ProgressQueueTable
+			onActivate={ _handleActivate }
+			progressQueue={ _progressQueue }
+		/>,
+		domEl
 	);
-	ReactDOM.render(elem, domEl);
 }
 	
 /**
