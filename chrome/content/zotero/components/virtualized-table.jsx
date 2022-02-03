@@ -682,6 +682,7 @@ class VirtualizedTable extends React.Component {
 		if (!modifierClick && !this.selection.isSelected(index)) {
 			this._onSelection(index, false, false);
 		}
+		this.focus();
 	}
 	
 	_handleMouseUp = async (e, index) => {
@@ -693,6 +694,7 @@ class VirtualizedTable extends React.Component {
 			return;
 		}
 		this._onSelection(index, shiftSelect, toggleSelection);
+		this.focus();
 	}
 
 	_activateNode = (event, indices) => {
@@ -850,6 +852,32 @@ class VirtualizedTable extends React.Component {
 		return [aColumn, bColumn, resizingColumn];
 	}
 
+	/**
+	 * Toggle [title] attribute on cells when text is truncated
+	 * so that a tooltip gets displayed on hover.
+	 * @param event
+	 */
+	_handleMouseOver = (event) => {
+		let elem = event.target;
+		if (!elem.classList.contains('cell') || elem.classList.contains('cell-icon')) return;
+		let textElem = elem.querySelector('.label, .cell-text');
+		// .label is used in the header, .cell-text on primary cells,
+		// otherwise the .cell element if its immediate child is a text node
+		// should be used.
+		if (!textElem) {
+			if (elem.childNodes[0].nodeType != window.Node.TEXT_NODE) return;
+			textElem = elem;
+		}
+		// We need to set the [title] attribute on the .label element in the header
+		if (textElem.classList.contains('label')) elem = textElem;
+		if (textElem.offsetWidth < textElem.scrollWidth) {
+			elem.setAttribute('title', textElem.textContent);
+		}
+		else {
+			elem.removeAttribute('title');
+		}
+	}
+
 	_handleResizerDragStop = (event) => {
 		event.stopPropagation();
 		const result = this._getResizeColumns();
@@ -943,6 +971,7 @@ class VirtualizedTable extends React.Component {
 		this.props.treeboxRef && this.props.treeboxRef(this._jsWindow);
 	
 		this._setAlternatingRows();
+		this._setXulTooltip();
 
 		window.addEventListener("resize", () => {
 			this._debouncedRerender();
@@ -958,6 +987,31 @@ class VirtualizedTable extends React.Component {
 			this._columns = new Columns(this);
 			this.forceUpdate();
 		}
+	}
+
+	/**
+	 * Make HTML [title] attribute display a tooltip. Without this
+	 * HTML [title] attribute when embedded in a XUL window does not
+	 * trigger a tooltip to be displayed
+	 * @private
+	 */
+	_setXulTooltip() {
+		// Make sure container xul element has a tooltip set
+		let xulElem = this._topDiv.closest('.virtualized-table-container');
+		if (xulElem.getAttribute('tooltip') != 'html-tooltip') {
+			xulElem.setAttribute('tooltip', 'html-tooltip');
+		}
+		if (document.querySelector('tooltip#html-tooltip')) return;
+		let tooltip = document.createElement('tooltip');
+		tooltip.id = 'html-tooltip';
+		tooltip.addEventListener('popupshowing', function(e) {
+			let tooltipTitleNode = document.tooltipNode.closest('div *[title], iframe *[title], browser *[title]');
+			if (document.tooltipNode && tooltipTitleNode) {
+				this.setAttribute('label', tooltipTitleNode.getAttribute('title'));
+			}
+			e.preventDefault();
+		});
+		document.documentElement.appendChild(tooltip);
 	}
 	
 	_setAlternatingRows() {
@@ -1052,7 +1106,7 @@ class VirtualizedTable extends React.Component {
 					<span
 						key={columnName + '-label'}
 						className={`label ${column.dataKey}`}
-						title={columnName}>
+						title={column.iconLabel ? columnName : ""}>
 						{label}
 					</span>
 					{sortIndicator}
@@ -1081,6 +1135,7 @@ class VirtualizedTable extends React.Component {
 			onDragOver: this._onDragOver,
 			onDrop: e => this.props.onDrop && this.props.onDrop(e),
 			onFocus: e => this.props.onFocus && this.props.onFocus(e),
+			onMouseOver: e => this._handleMouseOver(e),
 			className: cx(["virtualized-table", { resizing: this.state.resizing }]),
 			id: this.props.id,
 			ref: ref => this._topDiv = ref,

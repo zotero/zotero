@@ -358,7 +358,7 @@
 						</splitter>
 						
 						<box id="zotero-layout-switcher" orient="horizontal" zotero-persist="orient" flex="1">
-							<hbox id="zotero-items-pane" class="virtualized-table-container" zotero-persist="width height" flex="1" clickthrough="never" tooltip="html-tooltip">
+							<hbox id="zotero-items-pane" class="virtualized-table-container" zotero-persist="width height" flex="1" clickthrough="never">
 								<html:div id="zotero-items-tree"></html:div>
 							</hbox>
 		

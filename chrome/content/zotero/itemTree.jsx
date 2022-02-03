@@ -2684,6 +2684,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				//}
 				if (ariaLabel) {
 					icon.setAttribute('aria-label', ariaLabel + '.');
+					span.setAttribute('title', ariaLabel);
 				}
 				span.append(icon);
 
