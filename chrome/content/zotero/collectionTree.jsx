@@ -191,6 +191,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		else if (treeRow.isSearch()) {
 			window.ZoteroPane.editSelectedCollection();
 		}
+		else if (treeRow.isFeed()) {
+			window.ZoteroPane.editSelectedFeed();
+		}
 		else if (treeRow.isGroup()) {
 			let uri = Zotero.URI.getGroupURI(treeRow.ref, true);
 			window.ZoteroPane.loadURI(uri);
