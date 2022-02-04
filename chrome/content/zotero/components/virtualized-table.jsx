@@ -997,7 +997,11 @@ class VirtualizedTable extends React.Component {
 	 */
 	_setXulTooltip() {
 		// Make sure container xul element has a tooltip set
-		let xulElem = this._topDiv.closest('.virtualized-table-container');
+		let xulElem = this._topDiv;
+		while (xulElem && xulElem.namespaceURI !== "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul") {
+			xulElem = xulElem.parentElement;
+		}
+		if (!xulElem) return;
 		if (xulElem.getAttribute('tooltip') != 'html-tooltip') {
 			xulElem.setAttribute('tooltip', 'html-tooltip');
 		}
@@ -1008,6 +1012,7 @@ class VirtualizedTable extends React.Component {
 			let tooltipTitleNode = document.tooltipNode.closest('div *[title], iframe *[title], browser *[title]');
 			if (document.tooltipNode && tooltipTitleNode) {
 				this.setAttribute('label', tooltipTitleNode.getAttribute('title'));
+				return;
 			}
 			e.preventDefault();
 		});
