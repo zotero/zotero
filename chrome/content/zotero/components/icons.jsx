@@ -23,25 +23,22 @@ Icon.propTypes = {
 module.exports = { Icon }
 
 
-function i(name, svgOrSrc, hasHiDPI=true) {
+function i(name, svgOrSrc, hasHiDPI = true) {
+	if (typeof svgOrSrc == 'string' && hasHiDPI && window.devicePixelRatio >= 1.25) {
+		// N.B. In Electron we can use css-image-set
+		let parts = svgOrSrc.split('.');
+		parts[parts.length - 2] = parts[parts.length - 2] + '@2x';
+		svgOrSrc = parts.join('.');
+	}
+
 	const icon = class extends PureComponent {
 		render() {
 			let props = Object.assign({}, this.props);
 			props.name = name.toLowerCase();
 			
 			if (typeof svgOrSrc == 'string') {
-				let finalSrc = svgOrSrc;
-				// N.B. In Electron we can use css-image-set
-				// Also N.B. this modifies svgOrSrc and hasHiDPI for all future invocations
-				// of this function
-				if (hasHiDPI && window.devicePixelRatio >= 1.25) {
-					let parts = svgOrSrc.split('.');
-					parts[parts.length - 2] = parts[parts.length - 2] + '@2x';
-					finalSrc = parts.join('.');
-					hasHiDPI = false;
-				}
 				if (!("style" in props)) props.style = {};
-				props.style.backgroundImage = `url(${finalSrc})`;
+				props.style.backgroundImage = `url(${svgOrSrc})`;
 				props.className = props.className || "";
 				props.className += " icon-bg";
 				// We use css background-image.
