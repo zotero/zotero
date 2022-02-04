@@ -450,8 +450,8 @@ Zotero.Feed.prototype._updateFeed = Zotero.Promise.coroutine(function* () {
 				// that works with sync.
 				if (feedItem.libraryID != this.libraryID) {
 					let otherFeed = Zotero.Feeds.get(feedItem.libraryID);
-					Zotero.debug("Feed item " + feedItem.url + " from " + this.url + 
-						" exists in a different feed " + otherFeed.url + ". Skipping");
+					Zotero.debug("Feed item " + feedItem.guid + " from " + this.url
+						+ " exists in a different feed " + otherFeed.url + ". Skipping");
 					continue;
 				}
 				
