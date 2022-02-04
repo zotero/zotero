@@ -589,11 +589,15 @@ class EditorInstance {
 					if (!item) {
 						return;
 					}
-					let attachments = Zotero.Items.get(item.getAttachments()).filter(x => x.isPDFAttachment());
-					if (citationItem.locator && attachments.length === 1) {
-						let zp = Zotero.getActiveZoteroPane();
-						if (zp) {
-							zp.viewPDF(attachments[0].id, { pageLabel: citationItem.locator });
+
+					if (citationItem.locator) {
+						let attachments = await item.getBestAttachments();
+						attachments = attachments.filter(x => x.isPDFAttachment());
+						if (attachments.length) {
+							let zp = Zotero.getActiveZoteroPane();
+							if (zp) {
+								zp.viewPDF(attachments[0].id, { pageLabel: citationItem.locator });
+							}
 						}
 					}
 					else {
