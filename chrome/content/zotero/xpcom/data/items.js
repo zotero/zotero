@@ -919,19 +919,20 @@ Zotero.Items = function() {
 	 *
 	 * @param {Zotero.Item} fromItem
 	 * @param {Zotero.Item} toItem
+	 * @param {Boolean} includeTrashed
 	 * @return {Promise}
 	 */
-	this.moveChildItems = async function (fromItem, toItem) {
+	this.moveChildItems = async function (fromItem, toItem, includeTrashed = false) {
 		//Zotero.DB.requireTransaction();
 		
 		// Annotations on files
 		if (fromItem.isFileAttachment()) {
 			let fn = async function () {
-				let annotations = fromItem.getAnnotations();
+				let annotations = fromItem.getAnnotations(includeTrashed);
 				for (let annotation of annotations) {
 					annotation.parentItemID = toItem.id;
 					await annotation.save();
-				};
+				}
 			};
 			
 			if (!Zotero.DB.inTransaction) {
@@ -949,9 +950,8 @@ Zotero.Items = function() {
 	
 	this.merge = function (item, otherItems) {
 		Zotero.debug("Merging items");
-		
+
 		return Zotero.DB.executeTransaction(function* () {
-			var otherItemIDs = [];
 			var itemURI = Zotero.URI.getItemURI(item);
 			
 			var replPred = Zotero.Relations.replacedItemPredicate;
@@ -959,24 +959,31 @@ Zotero.Items = function() {
 			toSave[item.id] = item;
 			
 			var earliestDateAdded = item.dateAdded;
+
+			let remapAttachmentKeys = yield this._mergePDFAttachments(item, otherItems);
+			yield this._mergeWebAttachments(item, otherItems);
+			yield this._mergeOtherAttachments(item, otherItems);
 			
 			for (let otherItem of otherItems) {
+				if (otherItem.libraryID !== item.libraryID) {
+					throw new Error('Items being merged must be in the same library');
+				}
+
 				// Use the earliest date added of all the items
 				if (otherItem.dateAdded < earliestDateAdded) {
 					earliestDateAdded = otherItem.dateAdded;
 				}
-				
+
 				let otherItemURI = Zotero.URI.getItemURI(otherItem);
 				
-				// Move child items to master
-				var ids = otherItem.getAttachments(true).concat(otherItem.getNotes(true));
-				for (let id of ids) {
-					var attachment = yield this.getAsync(id);
-					
-					// TODO: Skip identical children?
-					
-					attachment.parentID = item.id;
-					yield attachment.save();
+				// Move notes to master
+				var noteIDs = otherItem.getNotes(true);
+				for (let id of noteIDs) {
+					var note = yield this.getAsync(id);
+					note.parentItemID = item.id;
+					Zotero.Notes.replaceItemKey(note, otherItem.key, item.key);
+					Zotero.Notes.replaceAllItemKeys(note, remapAttachmentKeys);
+					toSave[note.id] = note;
 				}
 				
 				// Add relations to master
@@ -1041,7 +1048,7 @@ Zotero.Items = function() {
 				
 				// Trash other item
 				otherItem.deleted = true;
-				yield otherItem.save();
+				toSave[otherItem.id] = otherItem;
 			}
 			
 			item.setField('dateAdded', earliestDateAdded);
@@ -1054,7 +1061,260 @@ Zotero.Items = function() {
 			Zotero.Notifier.trigger('removeDuplicatesMaster', 'item', item.id);
 		}.bind(this));
 	};
-	
+
+
+	this._mergePDFAttachments = async function (item, otherItems) {
+		let savePromises = [];
+
+		let remapAttachmentKeys = new Map();
+		let masterAttachmentHashes = await this._hashItem(item, 'bytes');
+		let hashesIncludeText = false;
+
+		await Promise.all(otherItems.map(async (otherItem) => {
+			let mergedMasterAttachments = new Set();
+
+			for (let otherAttachment of await this.getAsync(otherItem.getAttachments(true))) {
+				if (!otherAttachment.isPDFAttachment()) {
+					continue;
+				}
+
+				// First check if master has an attachment with identical MD5 hash
+				let matchingHash = await otherAttachment.attachmentHash;
+				let masterAttachmentID = masterAttachmentHashes.get(matchingHash);
+
+				if (!masterAttachmentID && item.numAttachments(true)) {
+					// If that didn't work, hash master attachments by the
+					// most common words in their text and check again.
+					if (!hashesIncludeText) {
+						masterAttachmentHashes = new Map([
+							...masterAttachmentHashes,
+							...await this._hashItem(item, 'text')
+						]);
+						hashesIncludeText = true;
+					}
+
+					matchingHash = await this._hashAttachmentText(otherAttachment);
+					masterAttachmentID = masterAttachmentHashes.get(matchingHash);
+				}
+
+				if (!masterAttachmentID || mergedMasterAttachments.has(masterAttachmentID)) {
+					Zotero.debug(`No unmerged match for attachment ${otherAttachment.id} in master item - moving`);
+					otherAttachment.parentItemID = item.id;
+					savePromises.push(otherAttachment.save());
+					continue;
+				}
+				mergedMasterAttachments.add(masterAttachmentID);
+
+				let masterAttachment = await this.getAsync(masterAttachmentID);
+
+				if (masterAttachment.attachmentContentType !== otherAttachment.attachmentContentType) {
+					Zotero.debug(`Master attachment ${masterAttachmentID} matches ${otherAttachment.id}, `
+						+ 'but content types differ - moving');
+					otherAttachment.parentItemID = item.id;
+					savePromises.push(otherAttachment.save());
+					continue;
+				}
+
+				Zotero.debug(`Master attachment ${masterAttachmentID} matches ${otherAttachment.id} - merging`);
+				savePromises.push(this.moveChildItems(otherAttachment, masterAttachment, true));
+				savePromises.push(this._moveEmbeddedNote(otherAttachment, masterAttachment));
+
+				otherAttachment.deleted = true;
+				savePromises.push(otherAttachment.save());
+
+				// Later on, when processing notes, we'll use this to remap
+				// URLs pointing to the old attachment.
+				remapAttachmentKeys.set(otherAttachment.key, masterAttachment.key);
+
+				// Items can only have one replaced item predicate
+				if (!masterAttachment.getRelationsByPredicate(Zotero.Relations.replacedItemPredicate)) {
+					masterAttachment.addRelation(Zotero.Relations.replacedItemPredicate,
+						Zotero.URI.getItemURI(otherAttachment));
+				}
+
+				savePromises.push(masterAttachment.save());
+			}
+		}));
+
+		await Promise.all(savePromises);
+		return remapAttachmentKeys;
+	};
+
+
+	this._mergeWebAttachments = async function (item, otherItems) {
+		let savePromises = [];
+
+		let masterAttachments = (await this.getAsync(item.getAttachments(true)))
+			.filter(attachment => attachment.isWebAttachment());
+
+		for (let otherItem of otherItems) {
+			for (let otherAttachment of await this.getAsync(otherItem.getAttachments(true))) {
+				if (!otherAttachment.isWebAttachment()) {
+					continue;
+				}
+
+				// If we can find an attachment with the same title *and* URL, use it.
+				let masterAttachment = (
+					masterAttachments.find(attachment => attachment.getField('title') == otherAttachment.getField('title')
+						&& attachment.getField('url') == otherAttachment.getField('url')
+						&& attachment.attachmentLinkMode === otherAttachment.attachmentLinkMode)
+					|| masterAttachments.find(attachment => attachment.getField('title') == otherAttachment.getField('title')
+						&& attachment.attachmentLinkMode === otherAttachment.attachmentLinkMode)
+				);
+
+				if (!masterAttachment) {
+					Zotero.debug(`No match for web attachment ${otherAttachment.id} in master item - moving`);
+					otherAttachment.parentItemID = item.id;
+					savePromises.push(otherAttachment.save());
+					continue;
+				}
+
+				otherAttachment.deleted = true;
+				savePromises.push(otherAttachment.save());
+
+				masterAttachment.addRelation(Zotero.Relations.replacedItemPredicate,
+					Zotero.URI.getItemURI(otherAttachment));
+				savePromises.push(masterAttachment.save());
+
+				// Don't match with this attachment again
+				masterAttachments = masterAttachments.filter(a => a !== masterAttachment);
+			}
+		}
+
+		await Promise.all(savePromises);
+	};
+
+
+	this._mergeOtherAttachments = async function (item, otherItems) {
+		let savePromises = [];
+
+		for (let otherItem of otherItems) {
+			for (let otherAttachment of await this.getAsync(otherItem.getAttachments(true))) {
+				if (otherAttachment.isPDFAttachment() || otherAttachment.isWebAttachment()) {
+					continue;
+				}
+
+				otherAttachment.parentItemID = item.id;
+				savePromises.push(otherAttachment.save());
+			}
+		}
+
+		await Promise.all(savePromises);
+	};
+
+
+	/**
+	 * Hash each attachment of the provided item. Return a map from hashes to
+	 * attachment IDs.
+	 *
+	 * @param {Zotero.Item} item
+	 * @param {String} hashType 'bytes' or 'text'
+	 * @return {Promise<Map<String, String>>}
+	 */
+	this._hashItem = async function (item, hashType) {
+		if (!['bytes', 'text'].includes(hashType)) {
+			throw new Error('Invalid hash type');
+		}
+
+		let attachments = (await this.getAsync(item.getAttachments(true)))
+			.filter(attachment => attachment.isFileAttachment());
+		let hashes = new Map();
+		await Promise.all(attachments.map(async (attachment) => {
+			let hash = hashType === 'bytes'
+				? await attachment.attachmentHash
+				: await this._hashAttachmentText(attachment);
+			if (hash) {
+				hashes.set(hash, attachment.id);
+			}
+		}));
+		return hashes;
+	};
+
+
+	/**
+	 * Hash an attachment by the most common words in its text.
+	 * @param {Zotero.Item} attachment
+	 * @return {Promise<String>}
+	 */
+	this._hashAttachmentText = async function (attachment) {
+		if ((await OS.File.stat(await attachment.getFilePathAsync())).size > 12000000) {
+			Zotero.debug('_hashAttachmentText: Attachment too large');
+			return null;
+		}
+
+		let text = await attachment.attachmentText;
+		if (!text) {
+			Zotero.debug('_hashAttachmentText: Attachment has no text');
+			return null;
+		}
+
+		let mostCommonWords = this._getMostCommonWords(text, 50);
+		if (mostCommonWords.length < 10) {
+			Zotero.debug('_hashAttachmentText: Not enough unique words');
+			return null;
+		}
+		return Zotero.Utilities.Internal.md5(mostCommonWords.join(' '));
+	};
+
+
+	/**
+	 * Get the n most common words in s in descending order of frequency.
+	 * If s contains fewer than n unique words, the size of the returned array
+	 * will be less than n.
+	 *
+	 * @param {String} s
+	 * @param {Number} n
+	 * @return {String[]}
+	 */
+	this._getMostCommonWords = function (s, n) {
+		// Use an iterative approach for better performance.
+
+		const whitespaceRe = /\s/;
+		const wordCharRe = /\p{Letter}/u; // [a-z] only matches Latin
+
+		let freqs = new Map();
+		let currentWord = '';
+
+		for (let codePoint of s) {
+			if (whitespaceRe.test(codePoint)) {
+				if (currentWord.length > 3) {
+					freqs.set(currentWord, (freqs.get(currentWord) || 0) + 1);
+				}
+
+				currentWord = '';
+				continue;
+			}
+
+			if (wordCharRe.test(codePoint)) {
+				currentWord += codePoint.toLowerCase();
+			}
+		}
+
+		// Break ties in locale order.
+		return [...freqs.keys()]
+			.sort((a, b) => (freqs.get(b) - freqs.get(a)) || Zotero.localeCompare(a, b))
+			.slice(0, n);
+	};
+
+	/**
+	 * Move fromItem's embedded note, if it has one, to toItem.
+	 * If toItem already has an embedded note, the note will be added as a new
+	 * child note item on toItem's parent.
+	 */
+	this._moveEmbeddedNote = async function (fromItem, toItem) {
+		if (fromItem.getNote()) {
+			let noteItem = toItem;
+			if (toItem.getNote()) {
+				noteItem = new Zotero.Item('note');
+				noteItem.parentItemID = toItem.parentItemID;
+			}
+			noteItem.setNote(fromItem.getNote());
+			fromItem.setNote('');
+			Zotero.Notes.replaceItemKey(noteItem, fromItem.key, toItem.key);
+			await noteItem.save();
+		}
+	};
+
 	
 	this.trash = Zotero.Promise.coroutine(function* (ids) {
 		Zotero.DB.requireTransaction();

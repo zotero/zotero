@@ -96,7 +96,36 @@ Zotero.Notes = new function() {
 			await Zotero.Notifier.trigger('refresh', 'item', idsToRefresh);
 		});
 	};
-	
+
+	/**
+	 * Update item key URLs in the item's note, replacing all instances of each
+	 * key in itemKeyMap with the associated value.
+	 * Passed item should have an embedded note or be a note item.
+	 *
+	 * @param {Zotero.Item} item
+	 * @param {Map<String, String>} itemKeyMap
+	 */
+	this.replaceAllItemKeys = function (item, itemKeyMap) {
+		let note = item.getNote();
+		let keys = [...itemKeyMap.keys()].join('|');
+		let re = new RegExp(`%2Fitems%2F(${keys})`, 'g');
+		note = note.replace(re, (str, key) => `%2Fitems%2F${itemKeyMap.get(key)}`);
+		re = new RegExp(`data-attachment-key="${keys}"`);
+		note = note.replace(re, (str, key) => `data-attachment-key="${itemKeyMap.get(key)}"`);
+		item.setNote(note);
+	};
+
+	/**
+	 * Convenience function to call replaceAllItemKeys with a single key-value pair.
+	 *
+	 * @param {Zotero.Item} item
+	 * @param {String} fromItemKey
+	 * @param {String} toItemKey
+	 */
+	this.replaceItemKey = function (item, fromItemKey, toItemKey) {
+		this.replaceAllItemKeys(item, new Map([[fromItemKey, toItemKey]]));
+	};
+
 	this.getExportableNote = async function(item) {
 		if (!item.isNote()) {
 			throw new Error('Item is not a note');

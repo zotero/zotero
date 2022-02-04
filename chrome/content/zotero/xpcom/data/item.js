@@ -2881,7 +2881,7 @@ Zotero.Item.prototype.deleteAttachmentFile = Zotero.Promise.coroutine(function* 
  * Return a file:/// URL path to files and snapshots
  */
 Zotero.Item.prototype.getLocalFileURL = function() {
-	if (!this.isAttachment) {
+	if (!this.isAttachment()) {
 		throw ("getLocalFileURL() can only be called on attachment items");
 	}
 	
