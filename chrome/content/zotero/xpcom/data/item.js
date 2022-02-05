@@ -3762,7 +3762,7 @@ for (let name of ['type', 'text', 'comment', 'color', 'pageLabel', 'sortIndex', 
 				
 				case 'sortIndex':
 					if (!/^\d{5}\|\d{6}\|\d{5}$/.test(value)) {
-						throw new Error(`Invalid sortIndex '${value}`);
+						throw new Error(`Invalid sortIndex '${value}'`);
 					}
 					break;
 				
