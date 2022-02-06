@@ -154,12 +154,16 @@ const ZoteroStandalone = new function() {
 		catch (e) {}
 		this.updateMenuItemEnabled('manage-attachments-menu', active);
 		
+		// PDF annotation transfer ("Import Annotation"/"Store Annotations in File")
 		let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 		if (reader) {
 			let item = Zotero.Items.get(reader.itemID);
+			let library = Zotero.Libraries.get(item.libraryID);
 			if (item
-				&& Zotero.Libraries.get(item.libraryID).editable
-				&& !(item.deleted || item.parentItem && item.parentItem.deleted)) {
+					// Don't allow annotation transfer in group libraries
+					&& library.libraryType == 'user'
+					&& library.editable
+					&& !(item.deleted || item.parentItem && item.parentItem.deleted)) {
 				let annotations = item.getAnnotations();
 				let canTransferFromPDF = annotations.find(x => x.annotationIsExternal);
 				let canTransferToPDF = annotations.find(x => !x.annotationIsExternal);
