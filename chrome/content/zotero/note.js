@@ -23,6 +23,9 @@
     ***** END LICENSE BLOCK *****
 */
 
+// Auto-suggester fails without this
+Components.utils.import("resource://gre/modules/Services.jsm");
+
 var noteEditor;
 var notifierUnregisterID;
 var type;
