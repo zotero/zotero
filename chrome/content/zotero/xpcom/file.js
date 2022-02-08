@@ -1097,7 +1097,7 @@ Zotero.File = new function(){
 		dir = OS.Path.normalize(dir).replace(/\\/g, "/");
 		file = OS.Path.normalize(file).replace(/\\/g, "/");
 		// Normalize D:\ vs. D:\foo
-		if (!dir.endsWith('/')) {
+		if (dir != file && !dir.endsWith('/')) {
 			dir += '/';
 		}
 		
