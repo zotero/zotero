@@ -865,7 +865,7 @@ class VirtualizedTable extends React.Component {
 		// otherwise the .cell element if its immediate child is a text node
 		// should be used.
 		if (!textElem) {
-			if (elem.childNodes[0].nodeType != window.Node.TEXT_NODE) return;
+			if (!elem.childNodes.length || elem.childNodes[0].nodeType != window.Node.TEXT_NODE) return;
 			textElem = elem;
 		}
 		// We need to set the [title] attribute on the .label element in the header
