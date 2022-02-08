@@ -117,11 +117,11 @@ Zotero.Annotations = new function () {
 		o.key = item.key;
 		o.type = item.annotationType;
 		o.isExternal = item.annotationIsExternal;
-		o.isAuthor = !item.createdByUserID || item.createdByUserID == Zotero.Users.getCurrentUserID();
+		var isAuthor = !item.createdByUserID || item.createdByUserID == Zotero.Users.getCurrentUserID();
 		if (!o.isExternal && item.library.libraryType == 'group') {
 			o.authorName = Zotero.Users.getName(item.createdByUserID);
 		}
-		o.readOnly = o.isExternal || !o.isAuthor;
+		o.readOnly = o.isExternal || !isAuthor;
 		if (o.type == 'highlight') {
 			o.text = item.annotationText;
 		}

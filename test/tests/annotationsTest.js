@@ -4,7 +4,6 @@ describe("Zotero.Annotations", function() {
 		"key": "92JLMCVT",
 		"type": "highlight",
 		"isExternal": false,
-		"isAuthor": true,
 		"readOnly": false,
 		"text": "This is an <b>extracted</b> text with rich-text\nAnd a new line",
 		"comment": "This is a comment with <i>rich-text</i>\nAnd a new line",
@@ -39,7 +38,6 @@ describe("Zotero.Annotations", function() {
 		"key": "5TKU34XX",
 		"type": "note",
 		"isExternal": false,
-		"isAuthor": true,
 		"readOnly": false,
 		"comment": "This is a note",
 		"color": "#ffec00",
@@ -60,7 +58,6 @@ describe("Zotero.Annotations", function() {
 		"key": "QD32MQJF",
 		"type": "image",
 		"isExternal": false,
-		"isAuthor": true,
 		"readOnly": false,
 		"image": "zotero://attachment/library/items/LB417FR4",
 		"comment": "This is a comment",
@@ -84,7 +81,6 @@ describe("Zotero.Annotations", function() {
 		"key": "PE57YAYH",
 		"type": "highlight",
 		"isExternal": false,
-		"isAuthor": false,
 		"authorName": "Kate Smith",
 		"text": "This is an <b>extracted</b> text with rich-text\nAnd a new line",
 		"comment": "This is a comment with <i>rich-text</i>\nAnd a new line",
@@ -254,7 +250,6 @@ describe("Zotero.Annotations", function() {
 			});
 			var json = await Zotero.Annotations.toJSON(annotation);
 			
-			assert.isFalse(json.isAuthor);
 			assert.equal(json.authorName, 'First Last');
 			
 			await annotation.eraseTx({
