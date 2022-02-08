@@ -1,4 +1,4 @@
--- 117
+-- 119
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -224,6 +224,7 @@ CREATE TABLE itemAnnotations (
     itemID INTEGER PRIMARY KEY,
     parentItemID INT NOT NULL,
     type INTEGER NOT NULL,
+    authorName TEXT,
     text TEXT,
     comment TEXT,
     color TEXT,

@@ -67,6 +67,7 @@ Zotero.Item = function(itemTypeOrID) {
 	
 	// loadAnnotation
 	this._annotationType = null;
+	this._annotationAuthorName = null;
 	this._annotationText = null;
 	this._annotationImage = null;
 	this._annotationComment = null;
@@ -1847,6 +1848,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			throw new Error(`Invalid annotation type '${type}'`);
 		}
 		
+		let authorName = this._getLatestField('annotationAuthorName');
 		let text = this._getLatestField('annotationText');
 		let comment = this._getLatestField('annotationComment');
 		let color = this._getLatestField('annotationColor');
@@ -1856,14 +1858,15 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		let isExternal = this._getLatestField('annotationIsExternal');
 		
 		let sql = "REPLACE INTO itemAnnotations "
-			+ "(itemID, parentItemID, type, text, comment, color, pageLabel, sortIndex, position, isExternal) "
-			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			+ "(itemID, parentItemID, type, authorName, text, comment, color, pageLabel, sortIndex, position, isExternal) "
+			+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		yield Zotero.DB.queryAsync(
 			sql,
 			[
 				itemID,
 				parentItemID,
 				typeID,
+				authorName || null,
 				text || null,
 				comment || null,
 				color || null,
@@ -3706,7 +3709,7 @@ Zotero.Item.prototype.clearBestAttachmentState = function () {
 ////////////////////////////////////////////////////////
 
 // Main annotation properties (required for items list display)
-for (let name of ['type', 'text', 'comment', 'color', 'pageLabel', 'sortIndex', 'isExternal']) {
+for (let name of ['type', 'authorName', 'text', 'comment', 'color', 'pageLabel', 'sortIndex', 'isExternal']) {
 	let field = 'annotation' + name[0].toUpperCase() + name.substr(1);
 	Zotero.defineProperty(Zotero.Item.prototype, field, {
 		get: function () {
@@ -4948,6 +4951,7 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 		//
 		case 'annotationType':
 		case 'annotationType':
+		case 'annotationAuthorName':
 		case 'annotationText':
 		case 'annotationComment':
 		case 'annotationColor':
@@ -5224,6 +5228,7 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 		if (this.isAnnotation()) {
 			let type = this.annotationType;
 			obj.annotationType = type;
+			obj.annotationAuthorName = this.annotationAuthorName || '';
 			if (type == 'highlight') {
 				obj.annotationText = this.annotationText || '';
 			}

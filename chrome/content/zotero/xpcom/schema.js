@@ -3422,6 +3422,14 @@ Zotero.Schema = new function(){
 				yield Zotero.DB.queryAsync("PRAGMA legacy_alter_table=OFF");
 			}
 			
+			else if (i == 119) {
+				yield Zotero.DB.queryAsync("CREATE TABLE itemAnnotationsTemp (\n    itemID INTEGER PRIMARY KEY,\n    parentItemID INT NOT NULL,\n    type INTEGER NOT NULL,\n    authorName TEXT,\n    text TEXT,\n    comment TEXT,\n    color TEXT,\n    pageLabel TEXT,\n    sortIndex TEXT NOT NULL,\n    position TEXT NOT NULL,\n    isExternal INT NOT NULL,\n    FOREIGN KEY (itemID) REFERENCES items(itemID) ON DELETE CASCADE,\n    FOREIGN KEY (parentItemID) REFERENCES itemAttachments(itemID)\n)");
+				yield Zotero.DB.queryAsync("INSERT INTO itemAnnotationsTemp SELECT itemID, parentItemID, type, '', text, comment, color, pageLabel, sortIndex, position, isExternal FROM itemAnnotations");
+				yield Zotero.DB.queryAsync("DROP TABLE itemAnnotations");
+				yield Zotero.DB.queryAsync("ALTER TABLE itemAnnotationsTemp RENAME TO itemAnnotations");
+				yield Zotero.DB.queryAsync("CREATE INDEX itemAnnotations_parentItemID ON itemAnnotations(parentItemID)");
+			}
+			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
 		}
 		

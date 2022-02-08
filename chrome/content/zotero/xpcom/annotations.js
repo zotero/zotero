@@ -118,8 +118,15 @@ Zotero.Annotations = new function () {
 		o.type = item.annotationType;
 		o.isExternal = item.annotationIsExternal;
 		var isAuthor = !item.createdByUserID || item.createdByUserID == Zotero.Users.getCurrentUserID();
-		if (!o.isExternal && item.library.libraryType == 'group') {
+		var isGroup = item.library.libraryType == 'group';
+		if (item.annotationAuthorName) {
+			o.authorName = item.annotationAuthorName;
+		}
+		else if (!o.isExternal && isGroup) {
 			o.authorName = Zotero.Users.getName(item.createdByUserID);
+		}
+		if (o.authorName && isGroup) {
+			o.lastModifiedByUser = Zotero.Users.getName(item.lastModifiedByUserID)
 		}
 		o.readOnly = o.isExternal || !isAuthor;
 		if (o.type == 'highlight') {
@@ -197,6 +204,7 @@ Zotero.Annotations = new function () {
 		item._requireData('annotation');
 		item._requireData('annotationDeferred');
 		item.annotationType = json.type;
+		item.annotationAuthorName = json.authorName || '';
 		if (json.type == 'highlight') {
 			item.annotationText = json.text;
 		}

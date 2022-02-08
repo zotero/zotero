@@ -256,6 +256,38 @@ describe("Zotero.Annotations", function() {
 				skipEditCheck: true
 			});
 		});
+		
+		it("should generate an object for a highlight by another user modified by the current user in a group library", async function () {
+			await Zotero.Users.setName(1, 'My Name');
+			await Zotero.Users.setName(12345, 'Their Name');
+			
+			var annotation = await createAnnotation('highlight', groupAttachment);
+			annotation.createdByUserID = 12345;
+			annotation.lastModifiedByUserID = 1;
+			await annotation.saveTx({
+				skipEditCheck: true
+			});
+			var json = await Zotero.Annotations.toJSON(annotation);
+			
+			assert.equal(json.authorName, 'Their Name');
+			assert.equal(json.lastModifiedByUser, 'My Name');
+			
+			await annotation.eraseTx({
+				skipEditCheck: true
+			});
+		});
+		
+		it("should generate an object for an annotation by another user in a personal library", async function () {
+			var annotation = await createAnnotation('highlight', attachment);
+			annotation.annotationAuthorName = 'First Last';
+			await annotation.saveTx();
+			
+			var json = await Zotero.Annotations.toJSON(annotation);
+			
+			assert.equal(json.authorName, 'First Last');
+			
+			await annotation.eraseTx();
+		});
 	});
 	
 	
