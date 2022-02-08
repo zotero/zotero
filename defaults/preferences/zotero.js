@@ -51,6 +51,7 @@ pref("extensions.zotero.reopenPanesOnRestart", true);
 
 pref("extensions.zotero.groups.copyChildLinks", true);
 pref("extensions.zotero.groups.copyChildFileAttachments", true);
+pref("extensions.zotero.groups.copyAnnotations", true);
 pref("extensions.zotero.groups.copyChildNotes", true);
 pref("extensions.zotero.groups.copyTags", true);
 

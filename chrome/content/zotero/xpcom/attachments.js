@@ -2682,6 +2682,8 @@ Zotero.Attachments = new function(){
 	
 	/**
 	 * Copy attachment item, including file, to another library
+	 *
+	 * @return {Zotero.Item} - The new attachment
 	 */
 	this.copyAttachmentToLibrary = Zotero.Promise.coroutine(function* (attachment, libraryID, parentItemID) {
 		if (attachment.libraryID == libraryID) {
@@ -2708,7 +2710,7 @@ Zotero.Attachments = new function(){
 		}
 		
 		yield newAttachment.addLinkedItem(attachment);
-		return newAttachment.id;
+		return newAttachment;
 	});
 	
 	

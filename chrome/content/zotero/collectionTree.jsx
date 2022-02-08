@@ -1540,7 +1540,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			tags: Zotero.Prefs.get('groups.copyTags'),
 			childNotes: Zotero.Prefs.get('groups.copyChildNotes'),
 			childLinks: Zotero.Prefs.get('groups.copyChildLinks'),
-			childFileAttachments: Zotero.Prefs.get('groups.copyChildFileAttachments')
+			childFileAttachments: Zotero.Prefs.get('groups.copyChildFileAttachments'),
+			annotations: Zotero.Prefs.get('groups.copyAnnotations'),
 		};
 		var copyItem = async function (item, targetLibraryID, options) {
 			var targetLibraryType = Zotero.Libraries.get(targetLibraryID).libraryType;
@@ -1612,7 +1613,12 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					return false;
 				}
 				
-				return Zotero.Attachments.copyAttachmentToLibrary(item, targetLibraryID);
+				let newAttachment = Zotero.Attachments.copyAttachmentToLibrary(item, targetLibraryID);
+				if (options.annotations) {
+					await Zotero.Items.copyChildItems(item, newAttachment);
+				}
+				
+				return newAttachment.id;
 			}
 			
 			// Create new clone item in target library
@@ -1675,7 +1681,13 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 							continue;
 						}
 					}
-					await Zotero.Attachments.copyAttachmentToLibrary(attachment, targetLibraryID, newItemID);
+					let newAttachment = await Zotero.Attachments.copyAttachmentToLibrary(
+						attachment, targetLibraryID, newItemID
+					);
+					
+					if (options.annotations) {
+						await Zotero.Items.copyChildItems(attachment, newAttachment);
+					}
 				}
 			}
 			
@@ -1804,6 +1816,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				copyOptions.childNotes = io.includeNotes;
 				copyOptions.childFileAttachments = io.includeFiles;
 				copyOptions.childLinks = true;
+				copyOptions.annotations = false;
 				['keepRights', 'license', 'licenseName'].forEach(function (field) {
 					copyOptions[field] = io[field];
 				});

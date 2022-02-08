@@ -814,21 +814,22 @@ describe("Zotero.CollectionTree", function() {
 				});
 			});
 			
-			it("should copy an item with an attachment to a group", function* () {
-				var group = yield createGroup();
+			it("should copy an item with a PDF attachment containing annotations to a group", async function () {
+				var group = await createGroup();
 				
-				var item = yield createDataObject('item', false, { skipSelect: true });
+				var item = await createDataObject('item', false, { skipSelect: true });
 				var file = getTestDataDirectory();
-				file.append('test.png');
-				var attachment = yield Zotero.Attachments.importFromFile({
-					file: file,
+				file.append('test.pdf');
+				var attachment = await Zotero.Attachments.importFromFile({
+					file,
 					parentItemID: item.id
 				});
+				var annotation = await createAnnotation('highlight', attachment);
 				
-				var ids = (yield onDrop('item', 'L' + group.libraryID, [item.id])).ids;
+				var ids = (await onDrop('item', 'L' + group.libraryID, [item.id])).ids;
 				
-				yield cv.selectLibrary(group.libraryID);
-				yield waitForItemsLoad(win);
+				await cv.selectLibrary(group.libraryID);
+				await waitForItemsLoad(win);
 				
 				// Check parent
 				var itemsView = win.ZoteroPane.itemsView;
@@ -837,7 +838,7 @@ describe("Zotero.CollectionTree", function() {
 				assert.equal(treeRow.ref.libraryID, group.libraryID);
 				assert.equal(treeRow.ref.id, ids[0]);
 				// New item should link back to original
-				var linked = yield item.getLinkedItem(group.libraryID);
+				var linked = await item.getLinkedItem(group.libraryID);
 				assert.equal(linked.id, treeRow.ref.id);
 				
 				// Check attachment
@@ -847,11 +848,44 @@ describe("Zotero.CollectionTree", function() {
 				treeRow = itemsView.getRow(1);
 				assert.equal(treeRow.ref.id, ids[1]);
 				// New attachment should link back to original
-				linked = yield attachment.getLinkedItem(group.libraryID);
+				linked = await attachment.getLinkedItem(group.libraryID);
 				assert.equal(linked.id, treeRow.ref.id);
 				
+				// Check annotation
+				var groupAttachment = Zotero.Items.get(treeRow.ref.id);
+				var annotations = groupAttachment.getAnnotations();
+				assert.lengthOf(annotations, 1);
+				
 				return group.eraseTx();
-			})
+			});
+			
+			it("should copy a group item with a PDF attachment containing annotations to the personal library", async function () {
+				var group = await createGroup();
+				await cv.selectLibrary(group.libraryID);
+				
+				var groupItem = await createDataObject('item', { libraryID: group.libraryID });
+				var file = getTestDataDirectory();
+				file.append('test.pdf');
+				var attachment = await Zotero.Attachments.importFromFile({
+					file,
+					parentItemID: groupItem.id
+				});
+				var annotation = await createAnnotation('highlight', attachment);
+				await Zotero.Users.setName(12345, 'Name');
+				annotation.createdByUserID = 12345;
+				
+				var ids = (await onDrop('item', 'L1', [groupItem.id])).ids;
+				var newItem = Zotero.Items.get(ids[0]);
+				
+				var newAttachment = Zotero.Items.get(newItem.getAttachments())[0];
+				
+				// Check annotation
+				var annotations = newAttachment.getAnnotations();
+				assert.lengthOf(annotations, 1);
+				assert.equal(annotations[0].annotationAuthorName, 'Name');
+				
+				return group.eraseTx();
+			});
 			
 			it("should not copy an item or its attachment to a group twice", function* () {
 				var group = yield getGroup();

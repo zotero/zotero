@@ -883,6 +883,36 @@ Zotero.Items = function() {
 	
 	
 	/**
+	 * Copy child items from one item to another (e.g., in another library)
+	 *
+	 * Requires a transaction
+	 */
+	this.copyChildItems = async function (fromItem, toItem) {
+		Zotero.DB.requireTransaction();
+		
+		var fromGroup = fromItem.library.isGroup;
+		
+		// Annotations on files
+		if (fromItem.isFileAttachment()) {
+			let annotations = fromItem.getAnnotations();
+			for (let annotation of annotations) {
+				let newAnnotation = annotation.clone(toItem.libraryID);
+				newAnnotation.parentItemID = toItem.id;
+				// If there's no explicit author and we're copying from a group, set the author
+				// to the creating user
+				if (!annotation.annotationAuthorName && fromGroup) {
+					newAnnotation.annotationAuthorName =
+						Zotero.Users.getName(annotation.createdByUserID);
+				}
+				await newAnnotation.save();
+			}
+		}
+		
+		// TODO: Other things as necessary
+	};
+	
+	
+	/**
 	 * Move child items from one item to another
 	 *
 	 * @param {Zotero.Item} fromItem
