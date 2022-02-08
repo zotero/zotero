@@ -915,20 +915,32 @@ Zotero.Items = function() {
 	/**
 	 * Move child items from one item to another
 	 *
+	 * Requires a transaction
+	 *
 	 * @param {Zotero.Item} fromItem
 	 * @param {Zotero.Item} toItem
 	 * @return {Promise}
 	 */
 	this.moveChildItems = async function (fromItem, toItem) {
+		//Zotero.DB.requireTransaction();
+		
 		// Annotations on files
 		if (fromItem.isFileAttachment()) {
-			await Zotero.DB.executeTransaction(async function () {
+			let fn = async function () {
 				let annotations = fromItem.getAnnotations();
 				for (let annotation of annotations) {
 					annotation.parentItemID = toItem.id;
 					await annotation.save();
-				}
-			}.bind(this));
+				};
+			};
+			
+			if (!Zotero.DB.inTransaction) {
+				Zotero.logError("moveChildItems() now requires a transaction -- please update your code");
+				await Zotero.DB.executeTransaction(fn);
+			}
+			else {
+				await fn();
+			}
 		}
 		
 		// TODO: Other things as necessary
