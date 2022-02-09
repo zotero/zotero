@@ -832,5 +832,30 @@ describe("ZoteroPane", function() {
 				Zotero.getString('pane.items.menu.exportNote.multiple')
 			);
 		});
+
+		it("should enable “Delete Item…” when selected item or an ancestor is deleted", async function () {
+			var item1 = await createDataObject('item', { setTitle: true, deleted: true });
+			var attachment1 = await importFileAttachment('test.png', { parentItemID: item1.id });
+
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			await zp.collectionsView.selectByID('T' + userLibraryID);
+			
+			await zp.selectItems([attachment1.id]);
+			await zp.buildItemContextMenu();
+			var menu = win.document.getElementById('zotero-itemmenu');
+			var deleteMenuItem = menu.querySelector('.zotero-menuitem-delete-from-lib');
+			assert.isFalse(deleteMenuItem.disabled);
+
+			await zp.selectItems([item1.id, attachment1.id]);
+			await zp.buildItemContextMenu();
+			assert.isFalse(deleteMenuItem.disabled);
+
+			item1.deleted = false;
+			attachment1.deleted = true;
+			await item1.save();
+			await attachment1.save();
+			await zp.buildItemContextMenu();
+			assert.isTrue(deleteMenuItem.disabled);
+		});
 	});
 })
