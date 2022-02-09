@@ -79,6 +79,13 @@ Zotero_File_Exporter.prototype.save = async function () {
 			if (htmlTranslator) {
 				htmlTranslator.label = 'HTML';
 			}
+
+			if (this.items.length == 1) {
+				let noteTitle = Zotero.Utilities.Item.noteToTitle(this.items[0].getNote());
+				if (noteTitle) {
+					this.name = Zotero.File.getValidFileName(noteTitle);
+				}
+			}
 		}
 		// Otherwise exclude note export translators
 		else {
