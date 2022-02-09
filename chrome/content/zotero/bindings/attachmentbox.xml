@@ -310,22 +310,13 @@
 						fileNameRow.hidden = true;
 					}
 
-					if (this.item.attachmentLinkMode
-								!= Zotero.Attachments.LINK_MODE_LINKED_URL
-							&& this.displayFileSize) {
-						// File size check takes a while, so hide the row
-						// while processing
-						fileSizeRow.hidden = true;
-						this.item.getFormattedFileSize().then((fileSize) => {
-							if (fileSize) {
-								this._id("fileSize-label").value = Zotero.getString('pane.item.attachments.fileSize')
-									+ Zotero.getString('punctuation.colon');
-								this._id("fileSize").value = fileSize;
-								fileSizeRow.hidden = false;
-							}
-							else {
-								fileSizeRow.hidden = true;
-							}
+					if (this.item.isFileAttachment() && this.displayFileSize) {
+						this._id("fileSize-label").value = Zotero.getString('pane.item.attachments.fileSize')
+							+ Zotero.getString('punctuation.colon');
+						this._id("fileSize").value = Zotero.getString('general.loading');
+						fileSizeRow.hidden = false;
+						this.item.getFileSize().then((fileSize) => {
+							this._id("fileSize").value = Zotero.File.formatFileSize(fileSize);
 						});
 					}
 					else {

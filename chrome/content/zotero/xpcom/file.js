@@ -1508,4 +1508,30 @@ Zotero.File = new function(){
 			}
 		}
 	});
+
+
+	/**
+	 * Format the given file size using locale suffixes
+	 *
+	 * @param {Number} size Size in bytes
+	 * @return {String}
+	 */
+	this.formatFileSize = function (size) {
+		let suffixString = 'Bytes';
+		// Use base-10 prefixes for consistency with most systems
+		if (size > 10e9) {
+			suffixString = 'Gigabytes';
+			size /= 10e9;
+		}
+		else if (size > 10e6) {
+			suffixString = 'Megabytes';
+			size /= 10e6;
+		}
+		else if (size > 10e3) {
+			suffixString = 'Kilobytes';
+			size /= 10e3;
+		}
+		size = Math.round(size);
+		return Zotero.getString(`general.n${suffixString}`, size);
+	};
 }
