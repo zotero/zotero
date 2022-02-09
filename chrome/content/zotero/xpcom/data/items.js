@@ -896,6 +896,10 @@ Zotero.Items = function() {
 		if (fromItem.isFileAttachment()) {
 			let annotations = fromItem.getAnnotations();
 			for (let annotation of annotations) {
+				// Don't copy embedded PDF annotations
+				if (annotation.annotationIsExternal) {
+					continue;
+				}
 				let newAnnotation = annotation.clone(toItem.libraryID);
 				newAnnotation.parentItemID = toItem.id;
 				// If there's no explicit author and we're copying from a group, set the author
