@@ -82,6 +82,8 @@ Zotero.Item = function(itemTypeOrID) {
 	
 	this._bestAttachmentState = null;
 	this._fileExists = null;
+	this._fileSize = null;
+	this._formattedFileSize = null;
 	
 	this._hasNote = null;
 	
@@ -2034,6 +2036,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			let parentItem = yield this.ObjectsClass.getAsync(parseInt(parentItemID));
 			yield parentItem.reload(['primaryData', 'childItems'], true);
 			parentItem.clearBestAttachmentState();
+			parentItem.clearFileSize();
 		}
 	}
 	
@@ -3735,6 +3738,72 @@ Zotero.Item.prototype.clearBestAttachmentState = function () {
 }
 
 
+Zotero.Item.prototype.getFileSize = async function () {
+	if (this._fileSize !== null) {
+		return this._fileSize;
+	}
+
+	if (this.isFileAttachment()) {
+		return Zotero.Attachments.getTotalFileSize(this)
+			// getTotalFileSize() throws when file is gone/unreadable
+			.catch(_ => 0);
+	}
+
+	let childIDs = [
+		...(this.isAttachment() ? [] : this.getAttachments(true)),
+		...(this.isNote() ? [] : this.getNotes(true))
+	];
+	let children = await Zotero.Items.getAsync(childIDs);
+	let childFileSizes = await Promise.all(children.map(item => item.getFileSize()));
+	this._fileSize = childFileSizes.reduce((accum, x) => accum + x, 0);
+	return this._fileSize;
+};
+
+
+Zotero.Item.prototype.getFileSizeCached = function () {
+	return this._fileSize || 0;
+};
+
+
+Zotero.Item.prototype.getFormattedFileSize = async function () {
+	if (this._formattedFileSize !== null) {
+		return this._formattedFileSize;
+	}
+
+	let fileSize = await this.getFileSize();
+	let suffixString = '';
+
+	// Use base-10 prefixes for consistency with most systems
+	if (fileSize > 10e9) {
+		suffixString = 'giga';
+		fileSize /= 10e9;
+	}
+	else if (fileSize > 10e6) {
+		suffixString = 'mega';
+		fileSize /= 10e6;
+	}
+	else if (fileSize > 10e3) {
+		suffixString = 'kilo';
+		fileSize /= 10e3;
+	}
+	fileSize = Math.round(fileSize);
+
+	let suffix = Zotero.getString(`pane.item.attachments.sizeSuffix.${suffixString}bytes`);
+	this._formattedFileSize = `${fileSize} ${suffix}`;
+	return this._formattedFileSize;
+};
+
+
+Zotero.Item.prototype.getFormattedFileSizeCached = function () {
+	return this._formattedFileSize || Zotero.getString('punctuation.ellipsis');
+};
+
+
+Zotero.Item.prototype.clearFileSize = function () {
+	this._fileSize = this._formattedFileSize = null;
+};
+
+
 ////////////////////////////////////////////////////////
 //
 //
@@ -4831,6 +4900,7 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 	if (parentItem && !env.options.skipParentRefresh) {
 		yield parentItem.reload(['primaryData', 'childItems'], true);
 		parentItem.clearBestAttachmentState();
+		parentItem.clearFileSize();
 	}
 	
 	Zotero.Prefs.set('purge.items', true);

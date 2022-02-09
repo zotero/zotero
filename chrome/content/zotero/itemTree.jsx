@@ -293,7 +293,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 			// This still results in a lot of extra work (e.g., when clearing a quick search, we have to
 			// re-sort all items that didn't match the search), so as a further optimization we could keep
 			// a sorted list of items for a given column configuration and restore items from that.
-			await this.sort([...addedItemIDs]);
+			this.cacheAttachmentSortValues(this.getSortField(), true)
+				.then(() => this.sort([...addedItemIDs]));
 			
 			// Toggle all open containers closed and open to refresh child items
 			//
@@ -1179,6 +1180,36 @@ var ItemTree = class ItemTree extends LibraryTree {
 		return rowsToSelect.length;
 	}
 
+	async cacheAttachmentSortValues(field, force = false) {
+		if (field == 'hasAttachment' && (force || !this._cachedBestAttachmentStates)) {
+			Zotero.debug("Caching best attachment states");
+			let t = new Date();
+			for (let i = 0; i < this._rows.length; i++) {
+				let item = this.getRow(i).ref;
+				if (item.isRegularItem()) {
+					await item.getBestAttachmentState();
+				}
+			}
+			Zotero.debug("Cached best attachment states in " + (new Date - t) + " ms");
+			this._cachedBestAttachmentStates = true;
+			return true;
+		}
+		else if (field == 'fileSize' && (force || !this._cachedFileSizes)) {
+			Zotero.debug("Caching file sizes");
+			let t = new Date();
+			for (let i = 0; i < this._rows.length; i++) {
+				let item = this.getRow(i).ref;
+				if (item.isRegularItem()) {
+					await item.getFormattedFileSize();
+				}
+			}
+			Zotero.debug("Cached file sizes in " + (new Date - t) + " ms");
+			this._cachedFileSizes = true;
+			return true;
+		}
+		return false;
+	}
+
 	/*
 	 *  Sort the items by the currently sorted column.
 	 */
@@ -1283,6 +1314,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			
 			case 'numNotes':
 				return row.numNotes(false, true) || 0;
+
+			case 'fileSize':
+				return row.fileSize;
 			
 			// Use unformatted part of date strings (YYYY-MM-DD) for sorting
 			case 'date':
@@ -2837,12 +2871,29 @@ var ItemTree = class ItemTree extends LibraryTree {
 		return span;
 	}
 
+	_renderFileSizeCell(index, data, column) {
+		let item = this.getRow(index).ref;
+		let cachedFileSize = item.getFormattedFileSizeCached();
+
+		let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+		span.className = `cell ${column.className}`;
+		span.innerText = cachedFileSize;
+
+		item.getFormattedFileSize()
+			.then(fileSize => fileSize !== cachedFileSize && this.tree.invalidateRow(index));
+
+		return span;
+	}
+
 	_renderCell(index, data, column) {
 		if (column.primary) {
 			return this._renderPrimaryCell(index, data, column);
 		}
 		else if (column.dataKey === 'hasAttachment') {
 			return this._renderHasAttachmentCell(index, data, column);
+		}
+		else if (column.dataKey === 'fileSize') {
+			return this._renderFileSizeCell(index, data, column);
 		}
 		let cell = renderCell.apply(this, arguments);
 		if (column.dataKey === 'numNotes' && data) {
@@ -3015,6 +3066,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 			var num = Zotero.Sync.Storage.getItemDownloadImageNumber(treeRow.ref);
 			row.hasAttachment = num === false ? "pie" : "pie" + num;
 		}
+
+		row.fileSize = treeRow.ref.getFormattedFileSizeCached();
 		
 		// Style unread items in feeds
 		if (treeRow.ref.isFeedItem && !treeRow.ref.isRead) {
@@ -3530,20 +3583,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 	_handleColumnSort = async (index, sortDirection) => {
 		let columnSettings = this._getColumnPrefs();
 		let column = this._getColumn(index);
-		if (column.dataKey == 'hasAttachment') {
-			Zotero.debug("Caching best attachment states");
-			if (!this._cachedBestAttachmentStates) {
-				let t = new Date();
-				for (let i = 0; i < this._rows.length; i++) {
-					let item = this.getRow(i).ref;
-					if (item.isRegularItem()) {
-						await item.getBestAttachmentState();
-					}
-				}
-				Zotero.debug("Cached best attachment states in " + (new Date - t) + " ms");
-				this._cachedBestAttachmentStates = true;
-			}
-		}
 		if (this._sortedColumn && this._sortedColumn.dataKey == column.dataKey) {
 			this._sortedColumn.sortDirection = sortDirection;
 			if (columnSettings[column.dataKey]) {

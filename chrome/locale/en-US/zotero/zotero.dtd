@@ -72,6 +72,7 @@
 <!ENTITY zotero.items.dateAdded_column					"Date Added">
 <!ENTITY zotero.items.dateModified_column				"Date Modified">
 <!ENTITY zotero.items.extra_column						"Extra">
+<!ENTITY zotero.items.file_size_column					"File Size">
 <!ENTITY zotero.items.archive_column					"Archive">
 <!ENTITY zotero.items.archiveLocation_column			"Loc. in Archive">
 <!ENTITY zotero.items.place_column						"Place">

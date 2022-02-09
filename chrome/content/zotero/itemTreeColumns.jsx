@@ -291,6 +291,13 @@ const COLUMNS = [
 		iconLabel: <Icons.IconTreeitemNoteSmall />,
 		width: "14",
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+	},
+	{
+		dataKey: "fileSize",
+		disabledIn: "feed",
+		label: "zotero.items.file_size_column",
+		flex: 1,
+		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	}
 ];
 
