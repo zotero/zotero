@@ -1842,8 +1842,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 */
 	isSelectable = (index, selectAll=false) => {
 		if (!selectAll || !this._searchMode || this.collectionTreeRow.isPublications()) return true;
+
 		let row = this.getRow(index);
-		return row && this._searchItemIDs.has(row.id);
+		if (!row) {
+			return false;
+		}
+		if (this.collectionTreeRow.isTrash()) {
+			return row.ref.deleted;
+		}
+		else {
+			return this._searchItemIDs.has(row.id);
+		}
 	}
 	
 	isContainer = (index) => {

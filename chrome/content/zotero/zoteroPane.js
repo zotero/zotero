@@ -1688,6 +1688,31 @@ var ZoteroPane = new function()
 		return newItem;
 	});
 	
+
+	/**
+	 * Return whether every selected item can be deleted from the current
+	 * collection context (library, trash, collection, etc.).
+	 *
+	 * @return {Boolean}
+	 */
+	this.canDeleteSelectedItems = function () {
+		let collectionTreeRow = this.getCollectionTreeRow();
+		if (collectionTreeRow.isTrash()) {
+			for (let index of this.itemsView.selection.selected) {
+				while (index != -1 && !this.itemsView.getRow(index).ref.deleted) {
+					index = this.itemsView.getParentIndex(index);
+				}
+				if (index == -1) {
+					return false;
+				}
+			}
+		}
+		else if (collectionTreeRow.isShare()) {
+			return false;
+		}
+		return true;
+	};
+
 	
 	this.deleteSelectedItem = function () {
 		Zotero.debug("ZoteroPane_Local.deleteSelectedItem() is deprecated -- use ZoteroPane_Local.deleteSelectedItems()");
@@ -1730,6 +1755,10 @@ var ZoteroPane = new function()
 				'pane.items.remove' + (this.itemsView.selection.count > 1 ? '.multiple' : '')
 			)
 		};
+
+		if (!this.canDeleteSelectedItems()) {
+			return;
+		}
 		
 		if (collectionTreeRow.isPublications()) {
 			let toRemoveFromPublications = {
@@ -1757,21 +1786,8 @@ var ZoteroPane = new function()
 			
 			var prompt = force ? toTrash : toRemove;
 		}
-		// Do nothing in trash view if any non-deleted items are selected
-		else if (collectionTreeRow.isTrash()) {
-			for (const index of this.itemsView.selection.selected) {
-				if (!this.itemsView.getRow(index).ref.deleted) {
-					return;
-				}
-			}
+		else if (collectionTreeRow.isTrash() || collectionTreeRow.isBucket()) {
 			var prompt = toDelete;
-		}
-		else if (collectionTreeRow.isBucket()) {
-			var prompt = toDelete;
-		}
-		// Do nothing in share views
-		else if (collectionTreeRow.isShare()) {
-			return;
 		}
 		
 		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
@@ -1893,6 +1909,36 @@ var ZoteroPane = new function()
 		}
 		this.selectItem(item.id).done();
 	}
+
+
+	/**
+	 * Return whether every selected item is deleted or has all of its deleted
+	 * ancestors selected. (Items that aren't themselves deleted won't be
+	 * modified by the restore operation.)
+	 *
+	 * @return {Boolean}
+	 */
+	this.canRestoreSelectedItems = function () {
+		let collectionTreeRow = this.getCollectionTreeRow();
+		if (!collectionTreeRow.isTrash()) {
+			return false;
+		}
+
+		for (let index of this.itemsView.selection.selected) {
+			if (this.itemsView.getRow(index).ref.deleted) {
+				continue;
+			}
+
+			while (index != -1) {
+				if (this.itemsView.getRow(index).ref.deleted && !this.itemsView.selection.isSelected(index)) {
+					return false;
+				}
+				index = this.itemsView.getParentIndex(index);
+			}
+		}
+
+		return true;
+	};
 	
 	
 	/**
@@ -2721,6 +2767,12 @@ var ZoteroPane = new function()
 		if (isTrash) {
 			show.add(m.deleteFromLibrary);
 			show.add(m.restoreToLibrary);
+			if (!ZoteroPane_Local.canDeleteSelectedItems()) {
+				disable.add(m.deleteFromLibrary);
+			}
+			if (!ZoteroPane_Local.canRestoreSelectedItems()) {
+				disable.add(m.restoreToLibrary);
+			}
 		}
 		else if (!collectionTreeRow.isFeed()) {
 			show.add(m.moveToTrash);
