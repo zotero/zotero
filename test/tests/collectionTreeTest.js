@@ -873,7 +873,9 @@ describe("Zotero.CollectionTree", function() {
 				var annotation = await createAnnotation('highlight', attachment);
 				await Zotero.Users.setName(12345, 'Name');
 				annotation.createdByUserID = 12345;
-				await annotation.saveTx();
+				await annotation.saveTx({
+					skipEditCheck: true
+				});
 				
 				var ids = (await onDrop('item', 'L1', [groupItem.id])).ids;
 				var newItem = Zotero.Items.get(ids[0]);
@@ -904,6 +906,9 @@ describe("Zotero.CollectionTree", function() {
 				await Zotero.Users.setName(1, 'Name');
 				annotation.createdByUserID = 1;
 				annotation.annotationAuthorName = 'Another Name';
+				await annotation.saveTx({
+					skipEditCheck: true
+				});
 				
 				var ids = (await onDrop('item', 'L1', [groupItem.id])).ids;
 				var newItem = Zotero.Items.get(ids[0]);
