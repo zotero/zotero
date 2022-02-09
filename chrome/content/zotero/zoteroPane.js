@@ -1912,9 +1912,7 @@ var ZoteroPane = new function()
 
 
 	/**
-	 * Return whether every selected item is deleted or has all of its deleted
-	 * ancestors selected. (Items that aren't themselves deleted won't be
-	 * modified by the restore operation.)
+	 * Return whether every selected item is deleted.
 	 *
 	 * @return {Boolean}
 	 */
@@ -1924,20 +1922,7 @@ var ZoteroPane = new function()
 			return false;
 		}
 
-		for (let index of this.itemsView.selection.selected) {
-			if (this.itemsView.getRow(index).ref.deleted) {
-				continue;
-			}
-
-			while (index != -1) {
-				if (this.itemsView.getRow(index).ref.deleted && !this.itemsView.selection.isSelected(index)) {
-					return false;
-				}
-				index = this.itemsView.getParentIndex(index);
-			}
-		}
-
-		return true;
+		return this.getSelectedItems().every(item => item.deleted);
 	};
 	
 	
