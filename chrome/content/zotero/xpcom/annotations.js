@@ -33,7 +33,7 @@ Zotero.Annotations = new function () {
 	Zotero.defineProperty(this, 'ANNOTATION_TYPE_INK', { value: 4 });
 	
 	Zotero.defineProperty(this, 'PROPS', {
-		value: ['type', 'text', 'comment', 'color', 'pageLabel', 'sortIndex', 'position'],
+		value: ['type', 'authorName', 'text', 'comment', 'color', 'pageLabel', 'sortIndex', 'position'],
 		writable: false
 	});
 	
