@@ -121,12 +121,14 @@ Zotero.Annotations = new function () {
 		var isGroup = item.library.libraryType == 'group';
 		if (item.annotationAuthorName) {
 			o.authorName = item.annotationAuthorName;
+			if (isGroup) {
+				o.lastModifiedByUser = Zotero.Users.getName(item.lastModifiedByUserID)
+					|| Zotero.Users.getName(item.createdByUserID);
+			}
 		}
 		else if (!o.isExternal && isGroup) {
 			o.authorName = Zotero.Users.getName(item.createdByUserID);
-		}
-		if (o.authorName && isGroup) {
-			o.lastModifiedByUser = Zotero.Users.getName(item.lastModifiedByUserID)
+			o.isAuthorNameAuthoritative = true;
 		}
 		o.readOnly = o.isExternal || !isAuthor;
 		if (o.type == 'highlight') {

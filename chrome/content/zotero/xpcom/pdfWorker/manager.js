@@ -157,7 +157,10 @@ class PDFWorker {
 				annotations.push({
 					id: item.key,
 					type: item.annotationType,
-					authorName: Zotero.Users.getName(item.createdByUserID) || Zotero.Users.getCurrentUsername() || '',
+					// Author name is only set when the PDF file is 1) in a group library,
+					// 2) was moved back to a private library or 3) was imported from a PDF file
+					// that was previously exported in 1) or 2) case
+					authorName: item.annotationAuthorName || Zotero.Users.getName(item.createdByUserID) || '',
 					comment: (item.annotationComment || '').replace(/<\/?(i|b|sub|sup)>/g, ''),
 					color: item.annotationColor,
 					position: JSON.parse(item.annotationPosition),
