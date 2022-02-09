@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Quellen sortiert halten">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Autor unterdrücken">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "Präfix:">
 <!ENTITY zotero.citation.suffix.label "Suffix:">
 <!ENTITY zotero.citation.editorWarning.label "Achtung: Wenn Sie eine Zitation im Editor bearbeiten, wird diese nicht mehr geupdatet, wenn Sie Änderungen an der Datenbank oder dem Zitationsstil vornehmen.">

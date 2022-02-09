@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Pa eiler elfennoù kenetre levraouegoù, enklozañ:">
 <!ENTITY zotero.preferences.groups.childNotes "notennoù bugel">
 <!ENTITY zotero.preferences.groups.childFiles "an tapadennoù-skramm ha restroù emporzhiet bugel">
+<!ENTITY zotero.preferences.groups.annotations "annotations">
 <!ENTITY zotero.preferences.groups.childLinks "liammoù bugel">
 <!ENTITY zotero.preferences.groups.tags "balizoù">
 

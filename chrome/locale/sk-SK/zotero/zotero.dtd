@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Zachovať zoradenie zdrojov">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Vynechať autora">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "Predpona:">
 <!ENTITY zotero.citation.suffix.label "Prípona:">
 <!ENTITY zotero.citation.editorWarning.label "Pozor: Ak citáciu upravíte v editore, nebude už aktualizovaná s ohľadom na neskoršie zmeny vo vašej databáze alebo v citačnom štýle.">

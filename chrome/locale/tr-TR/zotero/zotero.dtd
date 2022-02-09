@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Kaynakları Sıralı Tut">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Yazarı Sakla">
+<!ENTITY zotero.citation.suppressAuthor.label "Yazar Adını Sakla">
 <!ENTITY zotero.citation.prefix.label "Önek:">
 <!ENTITY zotero.citation.suffix.label "Sonek:">
 <!ENTITY zotero.citation.editorWarning.label "Uyarı: Eğer düzenleyicide bir alıntı düzenlerseniz, bu veritabanınızdaki ya da alıntı stilinizdeki değişikliklerle güncellenmeyecektir.">

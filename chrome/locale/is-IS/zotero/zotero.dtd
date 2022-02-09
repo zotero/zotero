@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Raða uppruna">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Fela höfund">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "Forskeyti:">
 <!ENTITY zotero.citation.suffix.label "Viðskeyti:">
 <!ENTITY zotero.citation.editorWarning.label "Viðvörun: Ef þú breytir tilvitnun í ritlinum þá mun hún ekki uppfærast og breytast í gagnagrunninum þínum eða stílfærast.">

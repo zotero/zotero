@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "令來源保持排序">
 
-<!ENTITY zotero.citation.suppressAuthor.label "不顯示作者">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "前綴：">
 <!ENTITY zotero.citation.suffix.label "後綴：">
 <!ENTITY zotero.citation.editorWarning.label "警告：若是在編輯器中編輯引用文獻，Zotero 就不會更新以反應文獻庫或引用文獻樣式中的變更。">

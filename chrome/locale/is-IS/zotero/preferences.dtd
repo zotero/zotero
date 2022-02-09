@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Þegar færslur eru afritaðar frá einu safni til annars, þá skal einnig afrita:">
 <!ENTITY zotero.preferences.groups.childNotes "undirathugasemdir">
 <!ENTITY zotero.preferences.groups.childFiles "undirskjámyndir og tengdar skrár">
+<!ENTITY zotero.preferences.groups.annotations "annotations">
 <!ENTITY zotero.preferences.groups.childLinks "undirslóðir">
 <!ENTITY zotero.preferences.groups.tags "merki">
 

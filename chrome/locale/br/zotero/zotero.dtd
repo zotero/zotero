@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Mirout ar mammennoù rummet">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Dilemel an aozer">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "Rakger:">
 <!ENTITY zotero.citation.suffix.label "Lostger:">
 <!ENTITY zotero.citation.editorWarning.label "Kemenn-diwall: Ma aozit un arroudenn en aozer, ne vo ket gouest ken da velezouriñ ar cheñchadurioù en ho tiaz-roadennoù pe ar stil arroudenniñ.">

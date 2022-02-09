@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "При копіюванні документів між ібіліотеками вклбчати:">
 <!ENTITY zotero.preferences.groups.childNotes "дочірні примітки">
 <!ENTITY zotero.preferences.groups.childFiles "дочірні знімки та імпортовані файли">
+<!ENTITY zotero.preferences.groups.annotations "annotations">
 <!ENTITY zotero.preferences.groups.childLinks "дочірні посилання">
 <!ENTITY zotero.preferences.groups.tags "теги">
 

@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Håll källor sorterade">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Dölj författare">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "Prefix:">
 <!ENTITY zotero.citation.suffix.label "Suffix:">
 <!ENTITY zotero.citation.editorWarning.label "Varning: Om du redigerar en referens i redigeraren så kommer den inte längre uppdateras för att spegla förändringar i databasen eller referensstilen.">

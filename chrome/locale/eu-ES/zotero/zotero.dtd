@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Iturriak ordenaturik mantendu">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Ezkutatu autorea">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "Aurrizkia:">
 <!ENTITY zotero.citation.suffix.label "Atzizkia:">
 <!ENTITY zotero.citation.editorWarning.label "Kontuz: aipu bat editorearen bitartez editatzen baduzu, ez da gehiago eguneratuko zure datubasean edo aipuen estiloan egon daitezkeen aldaketak islatzeko.">

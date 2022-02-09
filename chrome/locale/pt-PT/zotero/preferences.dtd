@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Ao copiar itens entre bibliotecas incluir:">
 <!ENTITY zotero.preferences.groups.childNotes "notas descendentes">
 <!ENTITY zotero.preferences.groups.childFiles "capturas e arquivos importados descendentes">
+<!ENTITY zotero.preferences.groups.annotations "annotations">
 <!ENTITY zotero.preferences.groups.childLinks "ligações descendentes">
 <!ENTITY zotero.preferences.groups.tags "etiquetas">
 

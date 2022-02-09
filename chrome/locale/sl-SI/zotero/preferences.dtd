@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Pri kopiranju med knjižnicami vključi:">
 <!ENTITY zotero.preferences.groups.childNotes "podrejene opombe">
 <!ENTITY zotero.preferences.groups.childFiles "podrejene slike stanj in uvožene datoteke">
+<!ENTITY zotero.preferences.groups.annotations "annotations">
 <!ENTITY zotero.preferences.groups.childLinks "otroške povezave">
 <!ENTITY zotero.preferences.groups.tags "značke">
 
@@ -104,8 +105,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Če ta možnost ni vključena, Zotero vključi URL-je pri citiranju revij in časopisnih člankov le, če članek nima določenega obsega strani.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Hitro kopiraj">
-<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Oblika elementa:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Oblika opombe:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopiraj kot HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Nastavitve za to mesto:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domena/pot">

@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Se devi copiare degli elementi da una biblioteca a un'altra, includi:">
 <!ENTITY zotero.preferences.groups.childNotes "note secondarie">
 <!ENTITY zotero.preferences.groups.childFiles "istantanee di pagine web e file importati secondari">
+<!ENTITY zotero.preferences.groups.annotations "annotations">
 <!ENTITY zotero.preferences.groups.childLinks "collegamenti secondari">
 <!ENTITY zotero.preferences.groups.tags "tag">
 

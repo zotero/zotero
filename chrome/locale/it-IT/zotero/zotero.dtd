@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Mantieni l'ordinamento delle fonti">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Ometti autore">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "Prefisso:">
 <!ENTITY zotero.citation.suffix.label "Suffisso:">
 <!ENTITY zotero.citation.editorWarning.label "Attenzione: se modifichi una citazione direttamente nel testo non sarà più collegata ai cambiamenti successivi nel tuo database bibliografico o agli stili di citazione.">

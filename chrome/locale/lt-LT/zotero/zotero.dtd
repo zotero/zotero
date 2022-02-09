@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Šaltinius automatiškai rikiuoti">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Nerodyti autoriaus">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "Priešdėlis:">
 <!ENTITY zotero.citation.suffix.label "Priesaga:">
 <!ENTITY zotero.citation.editorWarning.label "Įspėjimas: jei pakeisite citavimą tekstų rengyklėje, jis nebebus atnaujinamas pagal jūsiškę duomenų bazę ar citavimo stilių.">

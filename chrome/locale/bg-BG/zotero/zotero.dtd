@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Запазване на подредбата на източниците">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Скриване на автора">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "Представка:">
 <!ENTITY zotero.citation.suffix.label "Надставка:">
 <!ENTITY zotero.citation.editorWarning.label "Внимание: Ако промените цитиране / бележка под линия в редактора, тя повече няма да се актуализира и да отразява промените, които са направени в базата данни и в стила на цитиране.">

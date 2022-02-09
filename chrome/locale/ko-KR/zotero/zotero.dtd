@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "원본 정렬 유지">
 
-<!ENTITY zotero.citation.suppressAuthor.label "저자 숨기기">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "접두사:">
 <!ENTITY zotero.citation.suffix.label "접미사:">
 <!ENTITY zotero.citation.editorWarning.label "경고: 편집기에서 인용 문구를 직접 수정하면, 더 이상 데이터베이스나 인용 형식에 대한 변경 사항이 반영되지 않습니다.">

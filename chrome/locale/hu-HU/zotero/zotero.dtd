@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Források sorbarendezése">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Szerző figyelmen kívül hagyása">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "Előtag:">
 <!ENTITY zotero.citation.suffix.label "Utótag:">
 <!ENTITY zotero.citation.editorWarning.label "Figyelmeztetés: Ha a szerkesztőben szerkeszt egy hivatkozást, akkor nem fog frissülni és nem fogja megjeleníteni az adatbázis vagy a hivatkozási stílus változásait.">

@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Pidä lähteet lajiteltuna">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Piilota tekijä">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "Etuliite:">
 <!ENTITY zotero.citation.suffix.label "Jälkiliite:">
 <!ENTITY zotero.citation.editorWarning.label "Varoitus: Jos muokkaat viittausta editorissa, se ei enää päivity tietokannan tietojen tai viittaustyylin muuttuessa.">

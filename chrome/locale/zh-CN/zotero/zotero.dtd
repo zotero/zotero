@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "保持源分类">
 
-<!ENTITY zotero.citation.suppressAuthor.label "略去作者">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "前缀:">
 <!ENTITY zotero.citation.suffix.label "后缀:">
 <!ENTITY zotero.citation.editorWarning.label "警告: 如果你在编辑器中编辑引文, 引文将无法与数据库或引文样式同步更新.">

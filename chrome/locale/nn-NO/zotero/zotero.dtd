@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Hald på sortering av kjeldene">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Utelat forfattar">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "Prefiks:">
 <!ENTITY zotero.citation.suffix.label "Suffiks:">
 <!ENTITY zotero.citation.editorWarning.label "Åtvaring: Dersom du endrar ein referanse i redigeringsmodusen vil han etterpå ikkje bli oppdatert med endringar frå databasen eller siteringsstilen.">

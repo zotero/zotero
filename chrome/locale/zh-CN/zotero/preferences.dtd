@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "跨文献库复制条目时, 包括:">
 <!ENTITY zotero.preferences.groups.childNotes "子笔记">
 <!ENTITY zotero.preferences.groups.childFiles "子网页截图和导入的文件">
+<!ENTITY zotero.preferences.groups.annotations "annotations">
 <!ENTITY zotero.preferences.groups.childLinks "子链接">
 <!ENTITY zotero.preferences.groups.tags "标签">
 

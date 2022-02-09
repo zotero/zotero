@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "参考文献の順序を維持">
 
-<!ENTITY zotero.citation.suppressAuthor.label "著者名の非表示">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "接頭辞:">
 <!ENTITY zotero.citation.suffix.label "接尾辞:">
 <!ENTITY zotero.citation.editorWarning.label "警告: エディタの中で出典表記を編集すると、データベース側、または引用スタイルの変更を反映した自動更新が行われなくなります。">

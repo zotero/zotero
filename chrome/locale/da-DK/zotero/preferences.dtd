@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Når elementer kopieres mellem biblioteker, så medtag:">
 <!ENTITY zotero.preferences.groups.childNotes "underliggende Noter">
 <!ENTITY zotero.preferences.groups.childFiles "underliggende &quot;Snapshots&quot; og importerede filer">
+<!ENTITY zotero.preferences.groups.annotations "annotations">
 <!ENTITY zotero.preferences.groups.childLinks "underliggende links">
 <!ENTITY zotero.preferences.groups.tags "etiketter">
 

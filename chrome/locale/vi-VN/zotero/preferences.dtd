@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Thông tin của tài liệu được sao chép giữa các thư viện:">
 <!ENTITY zotero.preferences.groups.childNotes "các ghi chú con">
 <!ENTITY zotero.preferences.groups.childFiles "các ảnh chụp và tập tin được nhập khẩu">
+<!ENTITY zotero.preferences.groups.annotations "annotations">
 <!ENTITY zotero.preferences.groups.childLinks "các liên kết con">
 <!ENTITY zotero.preferences.groups.tags "các tag">
 

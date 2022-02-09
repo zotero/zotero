@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "При копиране на записи между библиотеките, включвай:">
 <!ENTITY zotero.preferences.groups.childNotes "Дъщерни бележки">
 <!ENTITY zotero.preferences.groups.childFiles "Дъщерни &quot;моментни снимки&quot; и внесени файлове">
+<!ENTITY zotero.preferences.groups.annotations "annotations">
 <!ENTITY zotero.preferences.groups.childLinks "Дъщерни връзки">
 <!ENTITY zotero.preferences.groups.tags "маркери">
 

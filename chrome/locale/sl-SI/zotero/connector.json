@@ -122,6 +122,9 @@
   "integration_googleDocs_documentLocked": {
     "message": "Drug uporabnik $1 ureja citate dokumenta. Poskusite znova kasneje."
   },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1 zaklene vaš dokument, da prepreči, da bi več uporabnikov urejalo citate naenkrat. Hkratno sourejanje citatov v dokumentu lahko pripelje do okvare citata ali dokumenta. Določene nepredvidljive okoliščine, kot je padec omrežja, lahko pripeljejo do tega, da je vaš dokument trajno zaklenjen. Če menite, da se vam je to zgodilo, lahko preglasite zaklep<br/><br/>Ali želite preglasiti zaklep dokumenta?"
+  },
   "integration_googleDocs_documentPermissionError": {
     "message": "Račun Google, ki ste ga izbrali, nima pravic urejanja tega dokumenta. Poskusite znova in preverite, da ste izbrali račun z dostopom za urejanje."
   },

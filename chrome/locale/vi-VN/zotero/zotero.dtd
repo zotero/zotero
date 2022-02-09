@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Giữ thứ tự sắp xếp của các Tài liệu nguồn">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Bỏ tên Tác giả">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "Tiền tố:">
 <!ENTITY zotero.citation.suffix.label "Hậu tố">
 <!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">

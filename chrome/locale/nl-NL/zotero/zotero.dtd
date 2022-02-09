@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Bronnen gesorteerd houden">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Auteur weglaten">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "Voorvoegsel:">
 <!ENTITY zotero.citation.suffix.label "Achtervoegsel:">
 <!ENTITY zotero.citation.editorWarning.label "Waarschuwing: Als u een verwijzing bewerkt in de editor dan zal het niet geüpdate worden in uw database of in de citeerstijl.">

@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Sorter kilder">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Undertryk forfatter/ophav">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "Præfiks:">
 <!ENTITY zotero.citation.suffix.label "Suffiks:">
 <!ENTITY zotero.citation.editorWarning.label "Advarsel: hvis du redigerer en reference i editoren vil den ikke længere blive opdateret når der sker ændringer i din database eller reference-typografi.">

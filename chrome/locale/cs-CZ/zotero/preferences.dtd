@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Při kopírování položek mezi knihovnami zahrnout:">
 <!ENTITY zotero.preferences.groups.childNotes "dceřiné poznámky">
 <!ENTITY zotero.preferences.groups.childFiles "dceřiné snímky a importované soubory">
+<!ENTITY zotero.preferences.groups.annotations "annotations">
 <!ENTITY zotero.preferences.groups.childLinks "dceřiné odkazy">
 <!ENTITY zotero.preferences.groups.tags "štítky">
 

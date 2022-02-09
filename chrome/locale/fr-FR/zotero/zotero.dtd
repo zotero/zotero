@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Trier les sources automatiquement">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Supprimer l'auteur">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "Préfixe :">
 <!ENTITY zotero.citation.suffix.label "Suffixe :">
 <!ENTITY zotero.citation.editorWarning.label "Avertissement : Si vous modifiez une référence dans l'éditeur, elle ne sera plus mise à jour pour refléter les changements dans votre base de données ou dans le style de citation.">

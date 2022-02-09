@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Διατήρηση της ταξινόμησης των πηγών">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Σύμπτυξη συγγραφέα">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "Πρόθεμα:">
 <!ENTITY zotero.citation.suffix.label "Επίθημα:">
 <!ENTITY zotero.citation.editorWarning.label "Προειδοποίηση: Αν επεξεργαστείτε κάποια παραπομπή με το επεξεργαστή, δεν θα ενημερωθεί ώστε να αντανακλά τις αλλαγές μέσα στην βάση δεδομένων σας ή στο στυλ των παραπομπών.">

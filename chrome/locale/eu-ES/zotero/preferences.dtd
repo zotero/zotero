@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Bildumen artean iemak kopiatzen dituzunean, horrekin batera kopiatuko dira:">
 <!ENTITY zotero.preferences.groups.childNotes "ohar umeak">
 <!ENTITY zotero.preferences.groups.childFiles "pantaila-argazki umeak eta inportatutako fitxategiak">
+<!ENTITY zotero.preferences.groups.annotations "annotations">
 <!ENTITY zotero.preferences.groups.childLinks "esteka umeak">
 <!ENTITY zotero.preferences.groups.tags "etiketa">
 

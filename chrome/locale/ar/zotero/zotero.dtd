@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "الحفاظ على المصادر مرتبة">
 
-<!ENTITY zotero.citation.suppressAuthor.label "عدم اضافة المؤلف">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "بادئة:">
 <!ENTITY zotero.citation.suffix.label "لاحقة:">
 <!ENTITY zotero.citation.editorWarning.label "تحذير: إذا قمت بتحرير استشهاد في المحرر فلن يتم تحديثه ليعكس التغييرات في قاعدة بياناتك أو نمط الاستشهاد.">

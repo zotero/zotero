@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Приликом копирања ставке у другу библиотеку задржи:">
 <!ENTITY zotero.preferences.groups.childNotes "подбелешке">
 <!ENTITY zotero.preferences.groups.childFiles "приложене фотке и увезене датотеке">
+<!ENTITY zotero.preferences.groups.annotations "annotations">
 <!ENTITY zotero.preferences.groups.childLinks "приложене везе">
 <!ENTITY zotero.preferences.groups.tags "ознаке">
 

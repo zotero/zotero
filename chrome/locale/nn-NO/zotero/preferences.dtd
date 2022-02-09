@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Ta med når element vert kopierte mellom bibliotek:">
 <!ENTITY zotero.preferences.groups.childNotes "undernotat">
 <!ENTITY zotero.preferences.groups.childFiles "undernotat og importerte filer">
+<!ENTITY zotero.preferences.groups.annotations "annotations">
 <!ENTITY zotero.preferences.groups.childLinks "underlenkjer">
 <!ENTITY zotero.preferences.groups.tags "taggar">
 

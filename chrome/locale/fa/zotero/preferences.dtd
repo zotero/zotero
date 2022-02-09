@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "در زمان رونوشت‌بردای آیتم‌ها بین کتابخانه‌ها این موارد هم رونوشت‌برداری شوند:">
 <!ENTITY zotero.preferences.groups.childNotes "یادداشت‌های وابسته">
 <!ENTITY zotero.preferences.groups.childFiles "تصاویر لحظه‌ای و پرونده‌های درون‌برد شده">
+<!ENTITY zotero.preferences.groups.annotations "annotations">
 <!ENTITY zotero.preferences.groups.childLinks "پیوندهای وابسته">
 <!ENTITY zotero.preferences.groups.tags "برچسب‌ها">
 

@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Mantingues les fonts ordenades">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Suprimeix l'autor">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "Prefix:">
 <!ENTITY zotero.citation.suffix.label "Sufix:">
 <!ENTITY zotero.citation.editorWarning.label "Avís: Si editeu la cita a l'editor de cites no s'actualitzarà més i no reflectirà els canvis en la base de dades o de l'estil de cita.">

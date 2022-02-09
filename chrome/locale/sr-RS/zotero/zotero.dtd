@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Држи изворе поређане">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Потисни аутора">
+<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
 <!ENTITY zotero.citation.prefix.label "Префикс:">
 <!ENTITY zotero.citation.suffix.label "Суфикс:">
 <!ENTITY zotero.citation.editorWarning.label "Упозорење: Цитат неће пратити измене које направите у вашој бази података уколико га директно измените у програму за уређивање текста.">
