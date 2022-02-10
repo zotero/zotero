@@ -129,6 +129,9 @@ Zotero.Annotations = new function () {
 		else if (!o.isExternal && isGroup) {
 			o.authorName = Zotero.Users.getName(item.createdByUserID);
 			o.isAuthorNameAuthoritative = true;
+			if (item.lastModifiedByUserID) {
+				o.lastModifiedByUser = Zotero.Users.getName(item.lastModifiedByUserID);
+			}
 		}
 		o.readOnly = o.isExternal || !isAuthor;
 		if (o.type == 'highlight') {
