@@ -1094,8 +1094,12 @@ Zotero.File = new function(){
 		if (typeof dir != 'string') throw new Error("dir must be a string");
 		if (typeof file != 'string') throw new Error("file must be a string");
 		
-		dir = OS.Path.normalize(dir);
-		file = OS.Path.normalize(file);
+		dir = OS.Path.normalize(dir).replace(/\\/g, "/");
+		file = OS.Path.normalize(file).replace(/\\/g, "/");
+		// Normalize D:\ vs. D:\foo
+		if (dir != file && !dir.endsWith('/')) {
+			dir += '/';
+		}
 		
 		return file.startsWith(dir);
 	};
