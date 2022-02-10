@@ -131,8 +131,8 @@ const ZoteroStandalone = new function() {
 	}
 
 	this.switchMenuType = function (type) {
-		document.querySelectorAll('.menu-type-library, .menu-type-reader').forEach(el => el.collapsed = true);
-		document.querySelectorAll('.menu-type-' + type).forEach(el => el.collapsed = false);
+		document.querySelectorAll('.menu-type-library, .menu-type-reader').forEach(el => el.hidden = true);
+		document.querySelectorAll('.menu-type-' + type).forEach(el => el.hidden = false);
 	};
 
 	this.onReaderCmd = function (cmd) {
