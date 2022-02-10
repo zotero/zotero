@@ -50,6 +50,7 @@
 
 <!--VIEW MENU-->
 <!ENTITY viewMenu.label                 "View">
+<!ENTITY viewMenu.accesskey             "V">
 <!ENTITY layout.label                   "Layout">
 <!ENTITY standardView.label             "Standard View">
 <!ENTITY stackedView.label              "Stacked View">

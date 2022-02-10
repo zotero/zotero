@@ -243,6 +243,7 @@
 
 					<menu id="view-menu"
 							label="&viewMenu.label;"
+							accesskey="&viewMenu.accesskey;"
 							onpopupshowing="ZoteroStandalone.onViewMenuOpen()">
 						<menupopup id="menu_viewPopup">
 							<menuitem
