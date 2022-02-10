@@ -302,6 +302,28 @@ describe("Zotero.File", function () {
 		});
 	});
 	
+	describe("#directoryContains()", function () {
+		it("should return true for file within folder ending in slash", function () {
+			assert.isTrue(Zotero.File.directoryContains('/foo/', '/foo/bar'));
+		});
+		
+		it("should return true for file within folder not ending in slash", function () {
+				assert.isTrue(Zotero.File.directoryContains('/foo/', '/foo/bar'));
+		});
+		
+		it("should return true for file within subfolder", function () {
+				assert.isTrue(Zotero.File.directoryContains('/foo/', '/foo/bar/qux'));
+		});
+		
+		it("should return false for subfolder with same name within another folder", function () {
+				assert.isFalse(Zotero.File.directoryContains('/foo', '/bar/foo'));
+		});
+		
+		it("should return false for sibling folder that starts with the same string", function () {
+			assert.isFalse(Zotero.File.directoryContains('/foo', '/foobar'));
+		});
+	});
+	
 	describe("#zipDirectory()", function () {
 		it("should compress a directory recursively", function* () {
 			var tmpPath = Zotero.getTempDirectory().path;
