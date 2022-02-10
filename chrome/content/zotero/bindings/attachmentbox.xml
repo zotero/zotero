@@ -313,14 +313,20 @@
 					if (this.item.isFileAttachment() && this.displayFileSize) {
 						this._id("fileSize-label").value = Zotero.getString('pane.item.attachments.fileSize')
 							+ Zotero.getString('punctuation.colon');
-						this._id("fileSize").value = Zotero.getString('general.loading');
+
+						let fileSizeCached = this.item.getFileSizeCached();
+						this._id("fileSize").value = fileSizeCached !== null
+							? Zotero.File.formatFileSize(fileSizeCached)
+							: Zotero.getString('general.loading');
 						fileSizeRow.hidden = false;
 						this.item.getFileSize().then((fileSize) => {
-							this._id("fileSize").value = Zotero.File.formatFileSize(fileSize);
+							if (fileSize !== fileSizeCached) {
+								this._id("fileSize").value = Zotero.File.formatFileSize(fileSize);
+							}
 						});
 					}
 					else {
-						fileNameRow.hidden = true;
+						fileSizeRow.hidden = true;
 					}
 					
 					// Page count
