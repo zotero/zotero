@@ -332,6 +332,27 @@ class PDFWorker {
 			return !!(imported.length || deleted.length);
 		}, isPriority);
 	}
+
+	async processCitaviAnnotations(pdfPath, citaviAnnotations, isPriority, password) {
+		return this._enqueue(async () => {
+			let buf = await OS.File.read(pdfPath, {});
+			buf = new Uint8Array(buf).buffer;
+			try {
+				var annotations = await this._query('importCitavi', {
+					buf, citaviAnnotations, password
+				}, [buf]);
+			}
+			catch (e) {
+				let error = new Error(`Worker 'importCitavi' failed: ${JSON.stringify({
+					citaviAnnotations,
+					error: e.message
+				})}`);
+				Zotero.logError(error);
+				throw error;
+			}
+			return annotations;
+		}, isPriority);
+	}
 	
 	/**
 	 * Process Mendeley annotations by extending with data from PDF file
