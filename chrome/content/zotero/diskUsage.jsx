@@ -109,7 +109,7 @@ class DiskUsageTable extends React.Component {
 		if (!indices.length) return;
 		let win = Services.wm.getMostRecentWindow('navigator:browser');
 		if (win) {
-			win.ZoteroPane.selectItem(this.state.rows[indices[0]].id, false, true)
+			win.ZoteroPane.selectItem(this.state.rows[indices[0]].item.id, false, true)
 				.then(() => win.focus());
 		}
 	};
