@@ -8,7 +8,6 @@
 <!DOCTYPE window [
     <!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
     <!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
-    <!ENTITY % preferencesDTD SYSTEM "chrome://zotero/locale/preferences.dtd"> %preferencesDTD;
 ]>
 
 <window
