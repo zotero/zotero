@@ -354,3 +354,4 @@
 <!ENTITY zotero.pdfReader.transferToPDF						"Store Annotations in File…">
 
 <!ENTITY zotero.diskUsageDialog.title						"Disk Usage">
+<!ENTITY zotero.diskUsageDialog.noItems						"No items">

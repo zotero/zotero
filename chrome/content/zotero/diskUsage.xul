@@ -24,9 +24,14 @@
     <script src="include.js"/>
     <script src="diskUsage.js"/>
 
-    <menulist id="disk-usage-library-list">
-        <menupopup/>
-    </menulist>
+    <hbox align="center">
+        <menulist id="disk-usage-library-list" flex="1">
+            <menupopup/>
+        </menulist>
+        <vbox style="margin: 2px;">
+            <image id="loading-spinner" class="zotero-spinner-14" hidden="false"/>
+        </vbox>
+    </hbox>
     
     <hbox class="virtualized-table-container" flex="1"><html:div id="disk-usage-container"/></hbox>
     

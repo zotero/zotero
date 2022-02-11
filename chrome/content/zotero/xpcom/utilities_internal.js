@@ -2298,6 +2298,29 @@ Zotero.Utilities.Internal = {
 			}
 		}
 		return html;
+	},
+
+	/**
+	 * Insert the given value into a presorted array, keeping items in order.
+	 * The array is modified in place.
+	 *
+	 * @param {T[]} array
+	 * @param {T} value
+	 * @param {function(T): T} [key = (x => x)]
+	 * @template T
+	 */
+	insertSorted: function (array, value, key = (x => x)) {
+		let low = 0, high = array.length;
+		while (low < high) {
+			let mid = (low + high) >>> 1;
+			if (key(array[mid]) < key(value)) {
+				low = mid + 1;
+			}
+			else {
+				high = mid;
+			}
+		}
+		array.splice(low, 0, value);
 	}
 }
 

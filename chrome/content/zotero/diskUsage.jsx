@@ -2,7 +2,7 @@ Components.utils.import("resource://gre/modules/Services.jsm");
 
 const React = require('react');
 const ReactDOM = require('react-dom');
-const { IntlProvider } = require('react-intl');
+const { IntlProvider, FormattedMessage } = require('react-intl');
 const PropTypes = require('prop-types');
 const VirtualizedTable = require('components/virtualized-table');
 const Icons = require('components/icons');
@@ -15,23 +15,31 @@ class DiskUsageTable extends React.Component {
 
 	async loadItems() {
 		let items = await Zotero.Items.getAll(this.props.libraryID, true, true);
-		let rows = await Promise.all(
+		let rows = [];
+		this.props.onLoadBegin();
+		await Promise.all(
 			items.map(async (item) => {
 				let size = await item.getFileSize();
-				return {
-					item,
-					size: size,
-					formattedSize: Zotero.File.formatFileSize(size)
-				};
+				if (size > 0) {
+					let row = {
+						item,
+						size: size,
+						formattedSize: Zotero.File.formatFileSize(size)
+					};
+					Zotero.Utilities.Internal.insertSorted(rows, row, x => -x.size);
+					this.setState({ rows, empty: false });
+					if (this._tree) {
+						this._tree.invalidate();
+					}
+				}
 			})
 		);
-		rows = rows
-			.filter(row => row.size > 0)
-			.sort((a, b) => b.size - a.size);
-		this.setState({ rows });
-		if (this._tree) {
-			this._tree.invalidate();
+
+		if (!items.length) {
+			this.setState({ empty: true });
 		}
+
+		this.props.onLoadEnd();
 	}
 
 	componentDidMount() {
@@ -45,6 +53,8 @@ class DiskUsageTable extends React.Component {
 	}
 
 	renderItem = (index, selection, oldDiv = null, columns) => {
+		const HTML_NS = "http://www.w3.org/1999/xhtml";
+
 		let row = this.state.rows[index];
 		let div;
 		if (oldDiv) {
@@ -52,13 +62,13 @@ class DiskUsageTable extends React.Component {
 			div.innerHTML = "";
 		}
 		else {
-			div = document.createElementNS("http://www.w3.org/1999/xhtml", 'div');
+			div = document.createElementNS(HTML_NS, 'div');
 			div.className = "row";
 		}
 		div.classList.toggle('selected', selection.isSelected(index));
 
 		for (let column of columns) {
-			let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+			let span = document.createElementNS(HTML_NS, 'span');
 			span.className = `cell ${column.className}`;
 
 			if (column.primary) {
@@ -84,7 +94,7 @@ class DiskUsageTable extends React.Component {
 					Zotero.debug('Unknown data key: ' + column.dataKey);
 			}
 
-			let textSpan = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+			let textSpan = document.createElementNS(HTML_NS, 'span');
 			textSpan.className = "cell-text";
 			textSpan.innerText = text;
 			span.appendChild(textSpan);
@@ -105,6 +115,14 @@ class DiskUsageTable extends React.Component {
 	};
 
 	render() {
+		if (this.state.empty) {
+			return (
+				<div className={"items-tree-message"}>
+					<FormattedMessage id="zotero.diskUsageDialog.noItems" />
+				</div>
+			);
+		}
+
 		let columns = [
 			{
 				dataKey: "displayTitle",
@@ -141,7 +159,9 @@ class DiskUsageTable extends React.Component {
 	}
 
 	static propTypes = {
-		libraryID: PropTypes.number.isRequired
+		libraryID: PropTypes.number.isRequired,
+		onLoadBegin: PropTypes.func.isRequired,
+		onLoadEnd: PropTypes.func.isRequired
 	};
 }
 
@@ -162,9 +182,15 @@ Zotero.DiskUsage = {
 		// We don't really need to rerender the entire tree, but in this case
 		// it's pretty much equivalent
 		let container = document.querySelector('#disk-usage-container');
+		let handleLoadBegin = () => document.querySelector('#loading-spinner').hidden = false;
+		let handleLoadEnd = () => document.querySelector('#loading-spinner').hidden = true;
 		ReactDOM.render(
 			<IntlProvider locale={Zotero.locale} messages={Zotero.Intl.strings}>
-				<DiskUsageTable libraryID={id} />
+				<DiskUsageTable
+					libraryID={id}
+					onLoadBegin={handleLoadBegin}
+					onLoadEnd={handleLoadEnd}
+				/>
 			</IntlProvider>,
 			container
 		);
