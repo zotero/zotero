@@ -319,8 +319,11 @@
 							? Zotero.File.formatFileSize(fileSizeCached)
 							: Zotero.getString('general.loading');
 						fileSizeRow.hidden = false;
-						this.item.getFileSize().then((fileSize) => {
-							if (fileSize !== fileSizeCached) {
+						this.item.getFileSize().then(async (fileSize) => {
+							if (fileSize === 0 && !await this.item.fileExists()) {
+								this._id("fileSize").value = Zotero.getString('recognizePDF.fileNotFound');
+							}
+							else if (fileSize !== fileSizeCached) {
 								this._id("fileSize").value = Zotero.File.formatFileSize(fileSize);
 							}
 						});
