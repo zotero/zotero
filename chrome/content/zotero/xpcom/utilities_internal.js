@@ -2074,6 +2074,48 @@ Zotero.Utilities.Internal = {
 		return Zotero.ItemTypes.getImageSrc(attachment.mimeType === "application/pdf"
 			? "attachment-pdf" : "attachment-snapshot");
 	},
+
+	/**
+	 * Get the React icon class name for the given item, suitable for passing
+	 * into Icons.getDOMElement.
+	 *
+	 * @param {Zotero.Item} item
+	 * @return {String}
+	 */
+	getTreeItemIconClass: function (item) {
+		const Icons = require('components/icons');
+
+		var itemType = item.itemType;
+		if (itemType == 'attachment') {
+			var linkMode = item.attachmentLinkMode;
+			
+			if (item.attachmentContentType == 'application/pdf' && item.isFileAttachment()) {
+				if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+					itemType += 'PDFLink';
+				}
+				else {
+					itemType += 'PDF';
+				}
+			}
+			else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
+				itemType += "File";
+			}
+			else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+				itemType += "Link";
+			}
+			else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL) {
+				itemType += "Snapshot";
+			}
+			else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+				itemType += "WebLink";
+			}
+		}
+		let iconClsName = "IconTreeitem" + Zotero.Utilities.capitalize(itemType);
+		if (!Icons[iconClsName]) {
+			iconClsName = "IconTreeitem";
+		}
+		return iconClsName;
+	},
 	
 	/**
 	 * Pass a class into this to add generic methods for creating event listeners

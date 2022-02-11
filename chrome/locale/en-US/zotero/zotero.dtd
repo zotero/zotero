@@ -352,3 +352,5 @@
 <!ENTITY zotero.pdfReader.zoomPageWidth						"Zoom to Page Width">
 <!ENTITY zotero.pdfReader.transferFromPDF					"Import Annotations…">
 <!ENTITY zotero.pdfReader.transferToPDF						"Store Annotations in File…">
+
+<!ENTITY zotero.diskUsageDialog.title						"Disk Usage">
