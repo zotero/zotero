@@ -1509,7 +1509,7 @@ var Columns = class {
 					column.sortDirection *= -1;
 				}
 				else {
-					column.sortDirection = 1;
+					column.sortDirection = column.defaultSort || 1;
 				}
 			}
 		});

@@ -33,6 +33,7 @@ const Icons = require('components/icons');
  *
  * 	defaultIn: Set<string>,			// Types of trees the column is default in. Can be [default, feed];
  * 	disabledIn: Set<string>,		// Types of trees where the column is not available
+ * 	defaultSort: number				// Default: 1. -1 for descending sort
  *
  * 	flex: number,					// Default: 1. When the column is added to the tree how much space it should occupy as a flex ratio
  * 	width: string,					// A column width instead of flex ratio. See above.
@@ -74,6 +75,7 @@ const COLUMNS = [
 	{
 		dataKey: "date",
 		defaultIn: new Set(["feed"]),
+		defaultSort: -1,
 		label: "zotero.items.date_column",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
@@ -81,6 +83,7 @@ const COLUMNS = [
 	{
 		dataKey: "year",
 		disabledIn: "feed",
+		defaultSort: -1,
 		label: "zotero.items.year_column",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
@@ -115,6 +118,7 @@ const COLUMNS = [
 	{
 		dataKey: "accessDate",
 		disabledIn: "feed",
+		defaultSort: -1,
 		submenu: true,
 		label: "zotero.items.accessDate_column",
 		flex: 1,
@@ -145,6 +149,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "dateAdded",
+		defaultSort: -1,
 		disabledIn: "feed",
 		label: "zotero.items.dateAdded_column",
 		flex: 1,
@@ -152,6 +157,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "dateModified",
+		defaultSort: -1,
 		disabledIn: "feed",
 		label: "zotero.items.dateModified_column",
 		flex: 1,
