@@ -1912,7 +1912,7 @@ var ZoteroPane = new function()
 
 
 	/**
-	 * Return whether every selected item is deleted.
+	 * Check whether every selected item can be restored from trash
 	 *
 	 * @return {Boolean}
 	 */
@@ -1922,28 +1922,61 @@ var ZoteroPane = new function()
 			return false;
 		}
 
-		return this.getSelectedItems().every(item => item.deleted);
+		return this.getSelectedItems().some(item => item.deleted);
 	};
 	
 	
 	/**
 	 * @return {Promise}
 	 */
-	this.restoreSelectedItems = Zotero.Promise.coroutine(function* () {
-		var items = this.getSelectedItems();
-		if (!items) {
+	this.restoreSelectedItems = async function () {
+		let items = this.getSelectedItems();
+		if (!items.length) {
 			return;
 		}
-		
-		yield Zotero.DB.executeTransaction(function* () {
-			for (let i=0; i<items.length; i++) {
-				items[i].deleted = false;
-				yield items[i].save({
-					skipDateModifiedUpdate: true
-				});
+
+		let selectedIDs = new Set(items.map(item => item.id));
+		let isSelected = itemOrID => (itemOrID.id ? selectedIDs.has(itemOrID.id) : selectedIDs.has(itemOrID));
+
+		await Zotero.DB.executeTransaction(async () => {
+			let savePromises = [];
+			for (let row = 0; row < this.itemsView.rowCount; row++) {
+				// Only look at top-level items
+				if (this.itemsView.getLevel(row) !== 0) {
+					continue;
+				}
+
+				let parent = this.itemsView.getRow(row).ref;
+
+				if (isSelected(parent)) {
+					if (parent.deleted) {
+						parent.deleted = false;
+						savePromises.push(parent.save());
+					}
+
+					let children = [...parent.getNotes(true), ...parent.getAttachments(true)];
+					let noneSelected = !children.some(isSelected);
+					for (let child of Zotero.Items.get(children)) {
+						Zotero.debug('Child: ' + child.id, -1)
+						if ((noneSelected || isSelected(child)) && child.deleted) {
+							child.deleted = false;
+							savePromises.push(child.save());
+						}
+					}
+				}
+				else {
+					let children = [...parent.getNotes(true), ...parent.getAttachments(true)];
+					for (let child of Zotero.Items.get(children)) {
+						if (isSelected(child) && child.deleted) {
+							child.deleted = false;
+							savePromises.push(child.save());
+						}
+					}
+				}
 			}
-		}.bind(this));
-	});
+			await Promise.all(savePromises);
+		});
+	};
 	
 	
 	/**

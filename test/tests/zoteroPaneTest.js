@@ -833,8 +833,8 @@ describe("ZoteroPane", function() {
 			);
 		});
 
-		it("should enable “Delete Item…” when selected item or an ancestor is deleted", async function () {
-			var item1 = await createDataObject('item', { setTitle: true, deleted: true });
+		it("should enable “Delete Item…” when selected item or an ancestor is in trash", async function () {
+			var item1 = await createDataObject('item', { deleted: true });
 			var attachment1 = await importFileAttachment('test.png', { parentItemID: item1.id });
 
 			var userLibraryID = Zotero.Libraries.userLibraryID;
@@ -852,10 +852,160 @@ describe("ZoteroPane", function() {
 
 			item1.deleted = false;
 			attachment1.deleted = true;
-			await item1.save();
-			await attachment1.save();
+			await item1.saveTx();
+			await attachment1.saveTx();
 			await zp.buildItemContextMenu();
 			assert.isTrue(deleteMenuItem.disabled);
+		});
+
+		it("should enable “Restore to Library” when at least one selected item is in trash", async function () {
+			var item1 = await createDataObject('item', { deleted: true });
+			var attachment1 = await importFileAttachment('test.png', { parentItemID: item1.id });
+
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			await zp.collectionsView.selectByID('T' + userLibraryID);
+			
+			await zp.selectItems([item1.id]);
+			await zp.buildItemContextMenu();
+			var menu = win.document.getElementById('zotero-itemmenu');
+			var restoreMenuItem = menu.querySelector('.zotero-menuitem-restore-to-library');
+			assert.isFalse(restoreMenuItem.disabled);
+
+			await zp.selectItems([item1.id, attachment1.id]);
+			await zp.buildItemContextMenu();
+			assert.isFalse(restoreMenuItem.disabled);
+		});
+
+		it("should disable “Restore to Library” when no selected items are in trash", async function () {
+			var item1 = await createDataObject('item');
+			var attachment1 = await importFileAttachment('test.png', { parentItemID: item1.id });
+			attachment1.deleted = true;
+			await attachment1.saveTx();
+
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			await zp.collectionsView.selectByID('T' + userLibraryID);
+			
+			await zp.selectItems([item1.id]);
+			await zp.buildItemContextMenu();
+			var menu = win.document.getElementById('zotero-itemmenu');
+			var restoreMenuItem = menu.querySelector('.zotero-menuitem-restore-to-library');
+			assert.isTrue(restoreMenuItem.disabled);
+		});
+	});
+
+	describe("#restoreSelectedItems()", function () {
+		it("should restore trashed parent and single trashed child when both are selected", async function () {
+			let item1 = await createDataObject('item', { deleted: true });
+			let attachment1 = await importFileAttachment('test.png', { parentItemID: item1.id });
+			attachment1.deleted = true;
+			await attachment1.saveTx();
+
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			await zp.collectionsView.selectByID('T' + userLibraryID);
+			await zp.selectItems([item1.id, attachment1.id]);
+			await zp.restoreSelectedItems();
+
+			assert.isFalse(item1.deleted);
+			assert.isFalse(attachment1.deleted);
+		});
+
+		it("should restore child when parent and trashed child are selected", async function () {
+			let item1 = await createDataObject('item', { deleted: false });
+			let attachment1 = await importFileAttachment('test.png', { parentItemID: item1.id });
+			attachment1.deleted = true;
+			await attachment1.saveTx();
+
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			await zp.collectionsView.selectByID('T' + userLibraryID);
+			await zp.selectItems([item1.id, attachment1.id]);
+			await zp.restoreSelectedItems();
+
+			assert.isFalse(item1.deleted);
+			assert.isFalse(attachment1.deleted);
+		});
+
+		it("should restore parent and selected children when parent and some trashed children are selected", async function () {
+			let item1 = await createDataObject('item', { deleted: false });
+			let attachment1 = await importFileAttachment('test.png', { parentItemID: item1.id });
+			let attachment2 = await importFileAttachment('test.png', { parentItemID: item1.id });
+			attachment1.deleted = true;
+			await attachment1.saveTx();
+			attachment2.deleted = true;
+			await attachment2.saveTx();
+
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			await zp.collectionsView.selectByID('T' + userLibraryID);
+			await zp.selectItems([item1.id, attachment1.id]);
+			await zp.restoreSelectedItems();
+
+			assert.isFalse(item1.deleted);
+			assert.isFalse(attachment1.deleted);
+			assert.isTrue(attachment2.deleted);
+		});
+
+		it("should restore parent and all children when trashed parent and no children are selected", async function () {
+			let item1 = await createDataObject('item', { deleted: true });
+			let attachment1 = await importFileAttachment('test.png', { parentItemID: item1.id });
+			let attachment2 = await importFileAttachment('test.png', { parentItemID: item1.id });
+			let attachment3 = await importFileAttachment('test.png', { parentItemID: item1.id });
+			attachment1.deleted = true;
+			await attachment1.saveTx();
+			attachment2.deleted = true;
+			await attachment2.saveTx();
+			attachment3.deleted = true;
+			await attachment3.saveTx();
+
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			await zp.collectionsView.selectByID('T' + userLibraryID);
+			await zp.selectItems([item1.id]);
+			await zp.restoreSelectedItems();
+
+			assert.isFalse(item1.deleted);
+			assert.isFalse(attachment1.deleted);
+			assert.isFalse(attachment2.deleted);
+			assert.isFalse(attachment3.deleted);
+		});
+
+		it("should restore parent and selected children when trashed parent and some trashed children are selected", async function () {
+			let item1 = await createDataObject('item', { deleted: true });
+			let attachment1 = await importFileAttachment('test.png', { parentItemID: item1.id });
+			let attachment2 = await importFileAttachment('test.png', { parentItemID: item1.id });
+			let attachment3 = await importFileAttachment('test.png', { parentItemID: item1.id });
+			attachment1.deleted = true;
+			await attachment1.saveTx();
+			attachment2.deleted = true;
+			await attachment2.saveTx();
+
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			await zp.collectionsView.selectByID('T' + userLibraryID);
+			await zp.selectItems([item1.id, attachment2.id, attachment3.id]);
+			await zp.restoreSelectedItems();
+
+			assert.isFalse(item1.deleted);
+			assert.isTrue(attachment1.deleted);
+			assert.isFalse(attachment2.deleted);
+			assert.isFalse(attachment3.deleted);
+		});
+
+		it("should restore selected children when trashed children and untrashed children are selected", async function () {
+			let item1 = await createDataObject('item', { deleted: false });
+			let attachment1 = await importFileAttachment('test.png', { parentItemID: item1.id });
+			let attachment2 = await importFileAttachment('test.png', { parentItemID: item1.id });
+			let attachment3 = await importFileAttachment('test.png', { parentItemID: item1.id });
+			attachment1.deleted = true;
+			await attachment1.saveTx();
+			attachment2.deleted = true;
+			await attachment2.saveTx();
+
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			await zp.collectionsView.selectByID('T' + userLibraryID);
+			await zp.selectItems([attachment1.id, attachment2.id, attachment3.id]);
+			await zp.restoreSelectedItems();
+
+			assert.isFalse(item1.deleted);
+			assert.isFalse(attachment1.deleted);
+			assert.isFalse(attachment2.deleted);
+			assert.isFalse(attachment3.deleted);
 		});
 	});
 })
