@@ -116,9 +116,10 @@ class TreeSelection {
 	 * Selects an item, updates focused item to index.
 	 * @param index {Number} The index is 0-clamped.
 	 * @param shouldDebounce {Boolean} Whether the update to the tree should be debounced
+	 * @param {Boolean} [shouldScroll=true] Whether to scroll the item into view
 	 * @returns {boolean} False if nothing to select and select handlers won't be called
 	 */
-	select(index, shouldDebounce) {
+	select(index, shouldDebounce, shouldScroll = true) {
 		if (!this._tree.props.isSelectable(index)) return;
 		index = Math.max(0, index);
 		if (this.selected.size == 1 && this._focused == index && this.pivot == index) {
@@ -134,7 +135,7 @@ class TreeSelection {
 
 		if (this.selectEventsSuppressed) return true;
 
-		this._tree.scrollToRow(index);
+		if (shouldScroll) this._tree.scrollToRow(index);
 		this._updateTree(shouldDebounce);
 		if (this._tree.invalidate) {
 			toInvalidate.forEach(this._tree.invalidateRow.bind(this._tree));

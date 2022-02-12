@@ -830,7 +830,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return false;
 		}
 		if (this.selection.count == 0) {
-			this.selection.select(this.selection.pivot);
+			this.selection.select(this.selection.pivot, false, false);
 		}
 	}
 	
