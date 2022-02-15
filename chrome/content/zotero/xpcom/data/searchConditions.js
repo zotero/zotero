@@ -400,6 +400,42 @@ Zotero.SearchConditions = new function(){
 			},
 			
 			{
+				name: 'author',
+				operators: {
+					is: true,
+					isNot: true,
+					contains: true,
+					doesNotContain: true
+				},
+				table: 'itemCreators',
+				field: "TRIM(firstName || ' ' || lastName)"
+			},
+			
+			{
+				name: 'editor',
+				operators: {
+					is: true,
+					isNot: true,
+					contains: true,
+					doesNotContain: true
+				},
+				table: 'itemCreators',
+				field: "TRIM(firstName || ' ' || lastName)"
+			},
+			
+			{
+				name: 'bookAuthor',
+				operators: {
+					is: true,
+					isNot: true,
+					contains: true,
+					doesNotContain: true
+				},
+				table: 'itemCreators',
+				field: "TRIM(firstName || ' ' || lastName)"
+			},
+			
+			{
 				name: 'field',
 				operators: {
 					is: true,
