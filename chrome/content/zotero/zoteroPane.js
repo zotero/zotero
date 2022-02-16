@@ -2334,7 +2334,15 @@ var ZoteroPane = new function()
 		actionLink.textContent = Zotero.getString(`sync.reminder.${reminderType}.action`);
 		actionLink.onclick = function () {
 			closePanel();
-			Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
+
+			switch (reminderType) {
+				case 'autoSync':
+					Zotero.Prefs.set(`sync.autoSync`, true);
+					break;
+				case 'setup':
+					Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
+					break;
+			}
 		};
 
 		let dontShowAgainLink = document.getElementById('sync-reminder-disable');
