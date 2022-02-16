@@ -705,6 +705,9 @@ Zotero.SearchConditions = new function(){
 		if (str == 'itemType') {
 			str = 'itemTypeID';
 		}
+		else if (['author', 'editor', 'bookAuthor'].includes(str)) {
+			return Zotero.CreatorTypes.getLocalizedString(str);
+		}
 		
 		try {
 			return Zotero.getString('searchConditions.' + str)
