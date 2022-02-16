@@ -2263,22 +2263,24 @@ var ZoteroPane = new function()
 
 
 	this.showAutoSyncOffReminder = function () {
+		const sevenDays = 1000 * 60 * 60 * 24 * 7;
+
 		// Reasons not to show reminder:
 		// - User turned reminder off
 		// - Sync is not enabled
 		// - Auto-Sync is enabled
-		// - Last sync for all libraries was within 30 days
+		// - Last sync for all libraries was within 7 days
 		if (!Zotero.Prefs.get('sync.reminder.autoSync.enabled')
 			|| !Zotero.Sync.Runner.enabled
 			|| Zotero.Prefs.get('sync.autoSync')
 			|| !Zotero.Libraries.getAll()
-				.find(library => library.lastSync.getTime() < (Date.now() - 2592000000))) {
+				.find(library => library.lastSync.getTime() < (Date.now() - sevenDays))) {
 			return;
 		}
 
 		// Check lastDisplayed was 30+ days ago
 		let lastDisplayed = parseInt(Zotero.Prefs.get(`sync.reminder.autoSync.lastDisplayed`));
-		if (lastDisplayed > (Date.now() - 2592000000)) {
+		if (lastDisplayed > (Date.now() - sevenDays)) {
 			return;
 		}
 
@@ -2287,6 +2289,8 @@ var ZoteroPane = new function()
 
 
 	this.showSetupSyncReminder = function () {
+		const sevenDays = 1000 * 60 * 60 * 24 * 7;
+
 		// Reasons not to show reminder:
 		// - User turned reminder off
 		// - Sync is enabled
@@ -2297,7 +2301,7 @@ var ZoteroPane = new function()
 
 		// Check lastDisplayed was 7+ days ago
 		let lastDisplayed = parseInt(Zotero.Prefs.get(`sync.reminder.setup.lastDisplayed`));
-		if (lastDisplayed > (Date.now() - 604800000)) {
+		if (lastDisplayed > (Date.now() - sevenDays)) {
 			return;
 		}
 
@@ -2334,7 +2338,7 @@ var ZoteroPane = new function()
 		};
 
 		let dontShowAgainLink = document.getElementById('sync-reminder-disable');
-		dontShowAgainLink.textContent = Zotero.getString('general.dontAskMeAgain');
+		dontShowAgainLink.textContent = Zotero.getString('sync.reminder.dontAskAgain');
 		dontShowAgainLink.hidden = hideDisable;
 		dontShowAgainLink.onclick = function () {
 			closePanel();
