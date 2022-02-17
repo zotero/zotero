@@ -989,7 +989,6 @@
 										break;
 									
 									default:
-									
 										var textbox = document.getAnonymousNodes(this)[0];
 										textbox.setAttribute('type', 'autocomplete');
 										textbox.setAttribute('autocompletesearch', 'zotero');
@@ -999,8 +998,13 @@
 										var autocompleteParams = {
 											fieldName: condition
 										};
-										if (condition == 'creator') {
-											autocompleteParams.fieldMode = 2;
+										switch (condition) {
+											case 'creator':
+											case 'author':
+											case 'bookAuthor':
+											case 'editor':
+												autocompleteParams.fieldMode = 2;
+												break;
 										}
 										textbox.setAttribute(
 											'autocompletesearchparam',

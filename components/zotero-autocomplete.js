@@ -87,6 +87,9 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 			break;
 		
 		case 'creator':
+		case 'author':
+		case 'bookAuthor':
+		case 'editor':
 			// Valid fieldMode values:
 			// 		0 == search two-field creators
 			// 		1 == search single-field creators
@@ -95,15 +98,23 @@ ZoteroAutoComplete.prototype.startSearch = Zotero.Promise.coroutine(function* (s
 				var sql = "SELECT DISTINCT CASE fieldMode WHEN 1 THEN lastName "
 					+ "WHEN 0 THEN firstName || ' ' || lastName END AS val, NULL AS id "
 					+ "FROM creators ";
+				if (fieldName != 'creator' || searchParams.libraryID) {
+					sql += "JOIN itemCreators USING (creatorID) ";
+				}
 				if (searchParams.libraryID) {
-					sql += "JOIN itemCreators USING (creatorID) JOIN items USING (itemID) ";
+					sql += "JOIN items USING (itemID) ";
 				}
 				sql += "WHERE CASE fieldMode "
 					+ "WHEN 1 THEN lastName LIKE ?1 "
 					+ "WHEN 0 THEN (firstName || ' ' || lastName LIKE ?1) OR (lastName LIKE ?1) END ";
 				var sqlParams = [searchString + '%'];
+				// Limit results to specific creator type
+				if (fieldName != 'creator') {
+					sql += "AND creatorTypeID=? ";
+					sqlParams.push(Zotero.CreatorTypes.getID(fieldName));
+				}
 				if (searchParams.libraryID) {
-					sql += ` AND libraryID=?${sqlParams.length + 1}`;
+					sql += ` AND libraryID=? `;
 					sqlParams.push(searchParams.libraryID);
 				}
 				sql += "ORDER BY val";
