@@ -41,6 +41,7 @@ const CHILD_INDENT = 12;
 const COLORED_TAGS_RE = new RegExp("^[0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1}$");
 const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
 const EMOJI_RE = /\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\p{Emoji_Presentation}|\p{Emoji}\uFE0F/gu;
+const HTML_NS = "http://www.w3.org/1999/xhtml";
 
 var ItemTree = class ItemTree extends LibraryTree {
 	static async init(domEl, opts={}) {
@@ -130,7 +131,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._itemTreeLoadingDeferred.resolve();
 		// Create an element where we can create drag images to be displayed next to the cursor while dragging
 		// since for multiple item drags we need to display all the elements
-		let elem = this._dragImageContainer = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
+		let elem = this._dragImageContainer = document.createElementNS(HTML_NS, "div");
 		elem.style.width = "100%";
 		elem.style.height = "2000px";
 		elem.style.position = "absolute";
@@ -2553,15 +2554,101 @@ var ItemTree = class ItemTree extends LibraryTree {
 	//
 	// //////////////////////////////////////////////////////////////////////////////
 
+	_titleMarkup = {
+		'<i>': {
+			beginsTag: 'i',
+			inverseStyle: { fontStyle: 'normal' }
+		},
+		'</i>': {
+			endsTag: 'i'
+		},
+		'<b>': {
+			beginsTag: 'b',
+			inverseStyle: { fontWeight: 'normal' }
+		},
+		'</b>': {
+			endsTag: 'b'
+		},
+		'<sub>': {
+			beginsTag: 'sub'
+		},
+		'</sub>': {
+			endsTag: 'sub'
+		},
+		'<sup>': {
+			beginsTag: 'sup'
+		},
+		'</sup>': {
+			endsTag: 'sup'
+		},
+		'<span style="font-variant:small-caps;">': {
+			beginsTag: 'span',
+			style: { fontVariant: 'small-caps' }
+		},
+		'<span class="nocase">': {
+			// No effect in item tree
+			beginsTag: 'span'
+		},
+		'</span>': {
+			endsTag: 'span'
+		}
+	};
+
+	_renderItemTitle(title, targetNode) {
+		let markupStack = [];
+		let nodeStack = [targetNode];
+
+		for (let token of title.split(/(<[^>]+>)/)) {
+			if (this._titleMarkup.hasOwnProperty(token)) {
+				let markup = this._titleMarkup[token];
+				if (markup.beginsTag) {
+					let node = document.createElementNS(HTML_NS, markup.beginsTag);
+					if (markup.style) {
+						Object.assign(node.style, markup.style);
+					}
+					if (markup.inverseStyle && markupStack.find(otherMarkup => otherMarkup.beginsTag === markup.beginsTag)) {
+						Object.assign(node.style, markup.inverseStyle);
+					}
+					markupStack.push({ ...markup, token });
+					nodeStack.push(node);
+					continue;
+				}
+				else if (markup.endsTag && markupStack.some(otherMarkup => otherMarkup.beginsTag === markup.endsTag)) {
+					while (markupStack.length) {
+						let discardedMarkup = markupStack.pop();
+						let discardedNode = nodeStack.pop();
+						if (discardedMarkup.beginsTag === markup.endsTag) {
+							nodeStack[nodeStack.length - 1].append(discardedNode);
+							break;
+						}
+						else {
+							nodeStack[nodeStack.length - 1].append(discardedMarkup.token, ...discardedNode.childNodes);
+						}
+					}
+
+					continue;
+				}
+			}
+
+			nodeStack[nodeStack.length - 1].append(token);
+		}
+
+		while (markupStack.length) {
+			let discardedMarkup = markupStack.pop();
+			let discardedNode = nodeStack.pop();
+			nodeStack[0].append(discardedMarkup.token, ...discardedNode.childNodes);
+		}
+	}
+
 	_renderPrimaryCell(index, data, column) {
-		let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+		let span = document.createElementNS(HTML_NS, 'span');
 		span.className = `cell ${column.className}`;
 		span.classList.add('primary');
 
 		// Add twisty, icon, tag swatches and retraction indicator
 		let twisty;
 		if (this.isContainerEmpty(index)) {
-			twisty = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+			twisty = document.createElementNS(HTML_NS, 'span');
 			twisty.classList.add("spacer-twisty");
 		}
 		else {
@@ -2613,9 +2700,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		let textSpanAriaLabel = [textWithFullStop, itemTypeAriaLabel, tagAriaLabel, retractedAriaLabel].join(' ');
 
-		let textSpan = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+		let textSpan = document.createElementNS(HTML_NS, 'span');
 		textSpan.className = "cell-text";
-		textSpan.innerText = data;
+		this._renderItemTitle(data, textSpan);
 		textSpan.setAttribute('aria-label', textSpanAriaLabel);
 
 		span.append(twisty, icon, retracted, ...tagSpans, textSpan);
@@ -2632,7 +2719,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	_renderHasAttachmentCell(index, data, column) {
-		let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+		let span = document.createElementNS(HTML_NS, 'span');
 		span.className = `cell ${column.className}`;
 
 		if (this.collectionTreeRow.isTrash()) return span;
@@ -2757,7 +2844,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			div.innerHTML = "";
 		}
 		else {
-			div = document.createElementNS("http://www.w3.org/1999/xhtml", 'div');
+			div = document.createElementNS(HTML_NS, 'div');
 			div.className = "row";
 		}
 
@@ -2769,7 +2856,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (this._dropRow == index) {
 			let span;
 			if (Zotero.DragDrop.currentOrientation != 0) {
-				span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+				span = document.createElementNS(HTML_NS, 'span');
 				span.className = Zotero.DragDrop.currentOrientation < 0 ? "drop-before" : "drop-after";
 				div.appendChild(span);
 			} else {
@@ -3699,7 +3786,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		var icon = getDOMElement(iconClsName);
 		if (!icon) {
 			Zotero.debug('Could not find tree icon for "' + itemType + '"');
-			return document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+			return document.createElementNS(HTML_NS, 'span');
 		}
 		return icon;
 	}
@@ -3710,7 +3797,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 	
 	_getTagSwatch(tag, color) {
-		let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+		let span = document.createElementNS(HTML_NS, 'span');
 		span.className = 'tag-swatch';
 		// If only emoji, display directly
 		//
