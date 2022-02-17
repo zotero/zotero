@@ -2680,6 +2680,7 @@ var ZoteroPane = new function()
 			'sep3',
 			'toggleRead',
 			'duplicateItem',
+			'addToCollection',
 			'removeItems',
 			'restoreToLibrary',
 			'moveToTrash',
@@ -3037,6 +3038,16 @@ var ZoteroPane = new function()
 				disable.add(m[i]);
 			}
 		}
+
+		// Add to collection
+		let parentItems = Zotero.Items.keepParents(items);
+		if (!collectionTreeRow.isFeed()
+			&& collectionTreeRow.editable
+			&& parentItems.every(item => item.isTopLevelItem())
+		) {
+			menu.childNodes[m.addToCollection].setAttribute('label', Zotero.getString('pane.items.menu.addToCollection'));
+			show.add(m.addToCollection);
+		}
 		
 		// Remove from collection
 		if (collectionTreeRow.isCollection() && items.every(item => item.isTopLevelItem())) {
@@ -3080,6 +3091,51 @@ var ZoteroPane = new function()
 		// add locate menu options
 		yield Zotero_LocateMenu.buildContextMenu(menu, true);
 	});
+
+
+	this.buildAddToCollectionMenu = function () {
+		let popup = document.querySelector('#zotero-add-to-collection-popup');
+		let separator = popup.querySelector('#zotero-add-to-collection-separator');
+		while (popup.childElementCount > 2) {
+			popup.removeChild(popup.firstElementChild);
+		}
+
+		let items = Zotero.Items.keepParents(this.getSelectedItems());
+		let collections = Zotero.Collections.getByLibrary(this.getSelectedLibraryID(), true);
+		for (let col of collections) {
+			let menuItem = document.createElement('menuitem');
+			let indent = col.level
+				? '    '.repeat(col.level - 1) + '- '
+				: '';
+			menuItem.setAttribute('label', indent + col.name);
+
+			if (items.every(item => col.hasItem(item))) {
+				menuItem.setAttribute('disabled', true);
+			}
+			else {
+				menuItem.addEventListener('command',
+					() => this.addItemsToCollection(col));
+			}
+			separator.before(menuItem);
+		}
+
+		separator.setAttribute('hidden', !collections.length);
+	};
+
+
+	this.addItemsToCollection = async function (collection, createNew = false) {
+		// Get items first because newCollection() will deselect
+		let items = Zotero.Items.keepParents(this.getSelectedItems());
+
+		if (createNew) {
+			let id = await this.newCollection();
+			collection = Zotero.Collections.get(id);
+		}
+
+		await Zotero.DB.executeTransaction(
+			() => collection.addItems(items.map(item => item.id)));
+	};
+
 	
 	this.onItemTreeActivate = function(event, items) {
 		var viewOnDoubleClick = Zotero.Prefs.get('viewOnDoubleClick');
