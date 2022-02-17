@@ -73,7 +73,14 @@ describe("Zotero.DB", function() {
 			assert.lengthOf(rows, 2);
 			assert.equal(rows[0].a, 1);
 			assert.equal(rows[1].a, 3);
-		})
+		});
+		
+		it("should accept combination of numbered and unnumbered placeholders", async function () {
+			var rows = await Zotero.DB.queryAsync("SELECT a FROM " + tmpTable + " WHERE (a=?1 OR b=?1) OR b=?", [2, 4]);
+			assert.lengthOf(rows, 2);
+			assert.equal(rows[0].a, 1);
+			assert.equal(rows[1].a, 3);
+		});
 		
 		it("should accept a single placeholder within parentheses", function* () {
 			var rows = yield Zotero.DB.queryAsync("SELECT a FROM " + tmpTable + " WHERE b IN (?)", 2);
