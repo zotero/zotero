@@ -193,3 +193,8 @@ pref("extensions.zotero.translators.RIS.import.keepID", false);
 // Retracted Items
 pref("extensions.zotero.retractions.enabled", true);
 pref("extensions.zotero.retractions.recentItems", "[]");
+
+// Annotations
+pref("extensions.zotero.annotations.noteTemplates.title", "<h1>{{strings.pdfReader.annotations}}<br/>({{date}})</h1>");
+pref("extensions.zotero.annotations.noteTemplates.highlight", "<p>{{quotestart}}{{text}}{{quotestop}} {{citation}} {{comment}}</p>");
+pref("extensions.zotero.annotations.noteTemplates.note", "<p>{{citation}} {{comment}}</p>");

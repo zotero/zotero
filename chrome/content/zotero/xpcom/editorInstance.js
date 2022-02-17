@@ -44,7 +44,68 @@ const DOWNLOADED_IMAGE_TYPE = [
 ];
 
 // Schema version here has to be the same as in note-editor!
-const SCHEMA_VERSION = 5;
+const SCHEMA_VERSION = 6;
+
+function generateHTMLFromTemplate(template, vars) {
+	let levels = [{ condition: true }];
+	let html = '';
+	let parts = template.split(/{{|}}/);
+	for (let i = 0; i < parts.length; i++) {
+		let part = parts[i];
+		let level = levels[levels.length - 1];
+		if (i % 2 === 1) {
+			let operator = part.split(' ').filter(x => x)[0];
+			// Get arguments that are used for 'if'
+			let args = [];
+			let match = part.match(/(["'][^"|^']+["']|[^\s"']+)/g);
+			if (match) {
+				args = match.map(x => x.replace(/['"](.*)['"]/, '$1')).slice(1);
+			}
+			if (operator === 'if') {
+				level = { condition: false, executed: false, parentCondition: levels[levels.length-1].condition };
+				levels.push(level);
+			}
+			if (['if', 'elseif'].includes(operator)) {
+				if (!level.executed) {
+					level.condition = level.parentCondition && (args[2] ? vars[args[0]].toLowerCase() == args[2].toLowerCase() : !!vars[args[0]]);
+					level.executed = level.condition;
+				}
+				else {
+					level.condition = false;
+				}
+				continue;
+			}
+			else if (operator === 'else') {
+				level.condition = level.parentCondition && !level.executed;
+				level.executed = level.condition;
+				continue;
+			}
+			else if (operator === 'endif') {
+				levels.pop();
+				continue;
+			}
+			if (level.condition) {
+				// Get parameters i.e. join=" #"
+				let parametersRegexp = new RegExp(/(\w*) *=+ *((['"])?((\\\3|[^\3])*?)\3|(\w+))/g);
+				let parameters = {};
+				while (match = parametersRegexp.exec(part)) {
+					parameters[match[1]] = match[4];
+				}
+				switch (operator) {
+					case 'tags':
+						html += (vars['tags'] || []).join(parameters.join || ' ');
+						break;
+					default:
+						html += vars[operator] || '';
+				}
+			}
+		}
+		else if (level.condition) {
+			html += part;
+		}
+	}
+	return html;
+}
 
 class EditorInstance {
 	constructor() {
@@ -301,7 +362,7 @@ class EditorInstance {
 		walkFormat(doc.body);
 		return doc.body.innerHTML;
 	}
-	
+
 	/**
 	 * @param {Object[]} annotations JSON annotations
 	 * @param {Boolean} skipEmbeddingItemData Do not add itemData to citation items
@@ -389,23 +450,43 @@ class EditorInstance {
 			// Text
 			if (annotation.text) {
 				let text = this._transformTextToHTML(annotation.text.trim());
-				highlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}">“${text}”</span>`;
+				highlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}">${text}</span>`;
 			}
 			
 			// Note
 			if (annotation.comment) {
-				let comment = this._transformTextToHTML(annotation.comment.trim());
-				// Move comment to the next line if it has multiple lines
-				commentHTML = (((highlightHTML || imageHTML || citationHTML) && comment.includes('<br')) ? '<br/>' : ' ') + comment;
+				commentHTML = this._transformTextToHTML(annotation.comment.trim());
 			}
-			
-			if (citationHTML) {
-				// Move citation to the next line if highlight has multiple lines or is after image
-				citationHTML = ((highlightHTML && highlightHTML.includes('<br') || imageHTML) ? '<br>' : '') + citationHTML;
+
+			let template;
+			if (annotation.type === 'highlight') {
+				template = Zotero.Prefs.get('annotations.noteTemplates.highlight');
 			}
-			
-			let otherHTML = [highlightHTML, citationHTML, commentHTML].filter(x => x).join(' ');
-			html += '<p>' + imageHTML + otherHTML + '</p>\n';
+			else if (annotation.type === 'note') {
+				template = Zotero.Prefs.get('annotations.noteTemplates.note');
+			}
+			else if (annotation.type === 'image') {
+				template = '<p>{{image}}<br/>{{citation}} {{comment}}</p>';
+			}
+
+			let vars = {
+				quotestart: Zotero.getString('punctuation.openingQMark'),
+				quotestop: Zotero.getString('punctuation.closingQMark'),
+				color: annotation.color,
+				text: highlightHTML,
+				comment: commentHTML,
+				citation: citationHTML,
+				image: imageHTML,
+				tags: annotation.tags && annotation.tags.map(tag => tag.name)
+			};
+			let templateHTML = generateHTMLFromTemplate(template, vars);
+			// Move quotation marks into highlight node if they are used
+			templateHTML = templateHTML.replace(/(['"“”‘’„«»])(<span.*class="highlight".*>)(.*)(<\/span>)(['"“”‘’„«»])/, '$2$1$3$5$4');
+			// Remove some spaces at the end of paragraph
+			templateHTML = templateHTML.replace(/([\s]*)(<\/p)/g, '$2');
+			// Remove multiple spaces
+			templateHTML = templateHTML.replace(/\s\s+/g, ' ');
+			html += templateHTML;
 		}
 		return { html, citationItems: storedCitationItems };
 	}
@@ -1464,9 +1545,15 @@ class EditorInstance {
 			jsonAnnotation.id = annotation.key;
 			jsonAnnotations.push(jsonAnnotation);
 		}
-		let html = `<h1>${Zotero.getString('pdfReader.annotations')}<br/>`
-			+ Zotero.getString('noteEditor.annotationsDateLine', new Date().toLocaleString())
-			+ `</h1>\n`;
+
+		let vars = {
+			'strings.pdfReader.annotations': Zotero.getString('pdfReader.annotations'),
+			date: new Date().toLocaleString()
+		};
+		let html = generateHTMLFromTemplate(Zotero.Prefs.get('annotations.noteTemplates.title'), vars);
+		// New line is needed for note title parser
+		html += '\n';
+
 		let { html: serializedHTML, citationItems } = await editorInstance._serializeAnnotations(jsonAnnotations, true);
 		html += serializedHTML;
 		citationItems = encodeURIComponent(JSON.stringify(citationItems));
