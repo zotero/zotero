@@ -3040,10 +3040,9 @@ var ZoteroPane = new function()
 		}
 
 		// Add to collection
-		let parentItems = Zotero.Items.keepParents(items);
 		if (!collectionTreeRow.isFeed()
 			&& collectionTreeRow.editable
-			&& parentItems.every(item => item.isTopLevelItem())
+			&& Zotero.Items.keepParents(items).every(item => item.isTopLevelItem())
 		) {
 			menu.childNodes[m.addToCollection].setAttribute('label', Zotero.getString('pane.items.menu.addToCollection'));
 			show.add(m.addToCollection);
