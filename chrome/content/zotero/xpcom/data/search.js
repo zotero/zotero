@@ -1331,6 +1331,15 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						condSQL += "creatorID IN (SELECT creatorID FROM creators WHERE ";
 						openParens++;
 						break;
+
+					case 'author':
+					case 'editor':
+					case 'bookAuthor': {
+						let creatorTypeID = Zotero.CreatorTypes.getID(condition.name);
+						condSQL += `creatorTypeID = ${creatorTypeID} AND creatorID IN (SELECT creatorID FROM creators WHERE `;
+						openParens++;
+						break;
+					}
 					
 					case 'childNote':
 						condSQL += "itemID IN (SELECT parentItemID FROM "
