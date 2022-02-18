@@ -81,7 +81,12 @@ Zotero_File_Exporter.prototype.save = async function () {
 			}
 
 			if (this.items.length == 1) {
-				let noteTitle = Zotero.Utilities.Item.noteToTitle(this.items[0].getNote());
+				let noteTitle = Zotero.Utilities.Item.noteToTitle(
+					this.items[0].getNote(),
+					// Stop at <br/> to exclude date from annotation notes, which won't be a valid
+					// filename in many locales
+					{ stopAtLineBreak: true }
+				);
 				if (noteTitle) {
 					this.name = Zotero.File.getValidFileName(noteTitle);
 				}
