@@ -46,67 +46,6 @@ const DOWNLOADED_IMAGE_TYPE = [
 // Schema version here has to be the same as in note-editor!
 const SCHEMA_VERSION = 6;
 
-function generateHTMLFromTemplate(template, vars) {
-	let levels = [{ condition: true }];
-	let html = '';
-	let parts = template.split(/{{|}}/);
-	for (let i = 0; i < parts.length; i++) {
-		let part = parts[i];
-		let level = levels[levels.length - 1];
-		if (i % 2 === 1) {
-			let operator = part.split(' ').filter(x => x)[0];
-			// Get arguments that are used for 'if'
-			let args = [];
-			let match = part.match(/(["'][^"|^']+["']|[^\s"']+)/g);
-			if (match) {
-				args = match.map(x => x.replace(/['"](.*)['"]/, '$1')).slice(1);
-			}
-			if (operator === 'if') {
-				level = { condition: false, executed: false, parentCondition: levels[levels.length-1].condition };
-				levels.push(level);
-			}
-			if (['if', 'elseif'].includes(operator)) {
-				if (!level.executed) {
-					level.condition = level.parentCondition && (args[2] ? vars[args[0]].toLowerCase() == args[2].toLowerCase() : !!vars[args[0]]);
-					level.executed = level.condition;
-				}
-				else {
-					level.condition = false;
-				}
-				continue;
-			}
-			else if (operator === 'else') {
-				level.condition = level.parentCondition && !level.executed;
-				level.executed = level.condition;
-				continue;
-			}
-			else if (operator === 'endif') {
-				levels.pop();
-				continue;
-			}
-			if (level.condition) {
-				// Get parameters i.e. join=" #"
-				let parametersRegexp = new RegExp(/(\w*) *=+ *((['"])?((\\\3|[^\3])*?)\3|(\w+))/g);
-				let parameters = {};
-				while (match = parametersRegexp.exec(part)) {
-					parameters[match[1]] = match[4];
-				}
-				switch (operator) {
-					case 'tags':
-						html += (vars['tags'] || []).join(parameters.join || ' ');
-						break;
-					default:
-						html += vars[operator] || '';
-				}
-			}
-		}
-		else if (level.condition) {
-			html += part;
-		}
-	}
-	return html;
-}
-
 class EditorInstance {
 	constructor() {
 		this.instanceID = Zotero.Utilities.randomString();
@@ -386,6 +325,7 @@ class EditorInstance {
 			let citationHTML = '';
 			let imageHTML = '';
 			let highlightHTML = '';
+			let quotedHighlightHTML = '';
 			let commentHTML = '';
 			
 			let storedAnnotation = {
@@ -451,6 +391,7 @@ class EditorInstance {
 			if (annotation.text) {
 				let text = this._transformTextToHTML(annotation.text.trim());
 				highlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}">${text}</span>`;
+				quotedHighlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}">${Zotero.getString('punctuation.openingQMark')}${text}${Zotero.getString('punctuation.closingQMark')}</span>`;
 			}
 			
 			// Note
@@ -470,18 +411,15 @@ class EditorInstance {
 			}
 
 			let vars = {
-				quotestart: Zotero.getString('punctuation.openingQMark'),
-				quotestop: Zotero.getString('punctuation.closingQMark'),
 				color: annotation.color,
-				text: highlightHTML,
+				highlight: highlightHTML,
+				quotedHighlight: quotedHighlightHTML,
 				comment: commentHTML,
 				citation: citationHTML,
 				image: imageHTML,
-				tags: annotation.tags && annotation.tags.map(tag => tag.name)
+				tags: (attrs) => annotation.tags && annotation.tags.map(tag => tag.name).join(attrs.join || ' ')
 			};
-			let templateHTML = generateHTMLFromTemplate(template, vars);
-			// Move quotation marks into highlight node if they are used
-			templateHTML = templateHTML.replace(/(['"“”‘’„«»])(<span.*class="highlight".*>)(.*)(<\/span>)(['"“”‘’„«»])/, '$2$1$3$5$4');
+			let templateHTML = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
 			// Remove some spaces at the end of paragraph
 			templateHTML = templateHTML.replace(/([\s]*)(<\/p)/g, '$2');
 			// Remove multiple spaces
@@ -1547,10 +1485,10 @@ class EditorInstance {
 		}
 
 		let vars = {
-			'strings.pdfReader.annotations': Zotero.getString('pdfReader.annotations'),
+			title: Zotero.getString('pdfReader.annotations'),
 			date: new Date().toLocaleString()
 		};
-		let html = generateHTMLFromTemplate(Zotero.Prefs.get('annotations.noteTemplates.title'), vars);
+		let html = Zotero.Utilities.Internal.generateHTMLFromTemplate(Zotero.Prefs.get('annotations.noteTemplates.title'), vars);
 		// New line is needed for note title parser
 		html += '\n';
 
