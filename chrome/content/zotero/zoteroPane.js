@@ -3092,7 +3092,9 @@ var ZoteroPane = new function()
 	});
 
 
-	this.buildAddToCollectionMenu = function () {
+	this.buildAddToCollectionMenu = function (event) {
+		if (event.target.id !== 'zotero-add-to-collection-popup') return;
+
 		let popup = document.querySelector('#zotero-add-to-collection-popup');
 		let separator = popup.querySelector('#zotero-add-to-collection-separator');
 		while (popup.childElementCount > 2) {
@@ -3100,21 +3102,20 @@ var ZoteroPane = new function()
 		}
 
 		let items = Zotero.Items.keepParents(this.getSelectedItems());
-		let collections = Zotero.Collections.getByLibrary(this.getSelectedLibraryID(), true);
+		let collections = Zotero.Collections.getByLibrary(this.getSelectedLibraryID());
 		for (let col of collections) {
-			let menuItem = document.createElement('menuitem');
-			let indent = col.level
-				? '    '.repeat(col.level - 1) + '- '
-				: '';
-			menuItem.setAttribute('label', indent + col.name);
-
-			if (items.every(item => col.hasItem(item))) {
-				menuItem.setAttribute('disabled', true);
-			}
-			else {
-				menuItem.addEventListener('command',
-					() => this.addItemsToCollection(col));
-			}
+			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
+				col,
+				popup,
+				null,
+				(event, collection) => {
+					if (event.target.tagName == 'menuitem') {
+						this.addItemsToCollection(collection);
+						event.stopPropagation();
+					}
+				},
+				collection => items.every(item => collection.hasItem(item))
+			);
 			separator.before(menuItem);
 		}
 

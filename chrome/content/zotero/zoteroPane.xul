@@ -300,7 +300,7 @@
 							<menuitem class="menuitem-iconic zotero-menuitem-toggle-read-item" oncommand="ZoteroPane_Local.toggleSelectedItemsRead();"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-duplicate-item" label="&zotero.items.menu.duplicateItem;" oncommand="ZoteroPane_Local.duplicateSelectedItem().done();"/>
 							<menu class="menuitem-iconic zotero-menuitem-add-to-collection">
-								<menupopup id="zotero-add-to-collection-popup" onpopupshowing="ZoteroPane_Local.buildAddToCollectionMenu()">
+								<menupopup id="zotero-add-to-collection-popup" onpopupshowing="ZoteroPane_Local.buildAddToCollectionMenu(event)">
 									<menuseparator id="zotero-add-to-collection-separator"/>
 									<menuitem id="zotero-add-to-new-collection" label="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane_Local.addItemsToCollection(null, true)"/>
 								</menupopup>
