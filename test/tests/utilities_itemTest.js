@@ -258,4 +258,25 @@ describe("Zotero.Utilities.Item", function() {
 			assert.equal(accessed['date-parts'][0][2], 9);
 		});
 	});
+	
+	
+	describe("#noteToTitle()", function () {
+		it("should stop after first block element with content", async function () {
+			var str = "<h1>Foo</h1><p>Bar</p>";
+			var title = Zotero.Utilities.Item.noteToTitle(str, { stopAtLineBreak: true });
+			assert.equal(title, 'Foo');
+		});
+		
+		it("should skip first line if no content", async function () {
+			var str = "<blockquote>\n<p>Foo</p>\n</blockquote>\n<p>Bar</p>";
+			var title = Zotero.Utilities.Item.noteToTitle(str);
+			assert.equal(title, 'Foo');
+		});
+		
+		it("should stop at <br/> when options.stopAtLineBreak is true", async function () {
+			var str = "<h1>Annotations<br/>(2/18/2022, 3:49:43 AM)</h1><p>Foo</p>";
+			var title = Zotero.Utilities.Item.noteToTitle(str, { stopAtLineBreak: true });
+			assert.equal(title, 'Annotations');
+		});
+	});
 });
