@@ -2597,6 +2597,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	_renderItemTitle(title, targetNode) {
 		let markupStack = [];
 		let nodeStack = [targetNode];
+		let textContent = '';
 
 		for (let token of title.split(/(<[^>]+>)/)) {
 			if (this._titleMarkup.hasOwnProperty(token)) {
@@ -2606,7 +2607,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					if (markup.style) {
 						Object.assign(node.style, markup.style);
 					}
-					if (markup.inverseStyle && markupStack.find(otherMarkup => otherMarkup.beginsTag === markup.beginsTag)) {
+					if (markup.inverseStyle && markupStack.some(otherMarkup => otherMarkup.beginsTag === markup.beginsTag)) {
 						Object.assign(node.style, markup.inverseStyle);
 					}
 					markupStack.push({ ...markup, token });
@@ -2631,6 +2632,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 
 			nodeStack[nodeStack.length - 1].append(token);
+			textContent += token;
 		}
 
 		while (markupStack.length) {
@@ -2638,6 +2640,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 			let discardedNode = nodeStack.pop();
 			nodeStack[0].append(discardedMarkup.token, ...discardedNode.childNodes);
 		}
+
+		return textContent;
 	}
 
 	_renderPrimaryCell(index, data, column) {
@@ -2694,15 +2698,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 			Zotero.debug(e, 1);
 		}
 		
-		let textWithFullStop = data;
+		let textSpan = document.createElementNS(HTML_NS, 'span');
+		let textWithFullStop = this._renderItemTitle(data, textSpan);
 		if (!textWithFullStop.match(/\.$/)) {
 			textWithFullStop += '.';
 		}
 		let textSpanAriaLabel = [textWithFullStop, itemTypeAriaLabel, tagAriaLabel, retractedAriaLabel].join(' ');
-
-		let textSpan = document.createElementNS(HTML_NS, 'span');
 		textSpan.className = "cell-text";
-		this._renderItemTitle(data, textSpan);
 		textSpan.setAttribute('aria-label', textSpanAriaLabel);
 
 		span.append(twisty, icon, retracted, ...tagSpans, textSpan);
