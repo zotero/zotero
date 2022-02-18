@@ -2167,6 +2167,95 @@ Zotero.Utilities.Internal = {
 				this._addListener(event, () => resolve(), true);
 			});
 		};
+	},
+
+	/**
+	 * A basic templating engine
+	 *
+	 * - 'if' statement does case-insensitive string comparison
+	 * - Spaces around '==' are necessary in 'if' statement
+	 *
+	 * Vars example:
+	 *  {
+	 * 	  color: '#ff6666',
+	 * 	  highlight: '<span class="highlight">This is a highlight</span>,
+	 *    comment: 'This is a comment',
+	 *    citation: '<span class="citation">(Author, 1900)</citation>',
+	 *    image: '<img src="…"/>',
+	 *    tags: (attrs) => ['tag1', 'tag2'].map(tag => tag.name).join(attrs.join || ' ')
+	 *  }
+	 *
+	 * Template example:
+	 *  {{if color == '#ff6666'}}
+	 *    <h2>{{highlight}}</h2>
+	 *  {{elseif color == '#2ea8e5'}}
+	 *    {{if comment}}<p>{{comment}}:</p>{{endif}}<blockquote>{{highlight}}</blockquote><p>{{citation}}</p>
+	 *  {{else}}
+	 *    <p>{{highlight}} {{citation}} {{comment}} {{if tags}} #{{tags join=' #'}}{{endif}}</p>
+	 *  {{endif}}
+	 *
+	 * @param {String} template
+	 * @param {Object} vars
+	 * @returns {String} HTML
+	 */
+	generateHTMLFromTemplate: function (template, vars) {
+		let levels = [{ condition: true }];
+		let html = '';
+		let parts = template.split(/{{|}}/);
+		for (let i = 0; i < parts.length; i++) {
+			let part = parts[i];
+			let level = levels[levels.length - 1];
+			if (i % 2 === 1) {
+				let operator = part.split(' ').filter(x => x)[0];
+				// Get arguments that are used for 'if'
+				let args = [];
+				let match = part.match(/(["'][^"|^']+["']|[^\s"']+)/g);
+				if (match) {
+					args = match.map(x => x.replace(/['"](.*)['"]/, '$1')).slice(1);
+				}
+				if (operator === 'if') {
+					level = { condition: false, executed: false, parentCondition: levels[levels.length-1].condition };
+					levels.push(level);
+				}
+				if (['if', 'elseif'].includes(operator)) {
+					if (!level.executed) {
+						level.condition = level.parentCondition && (args[2] ? vars[args[0]].toLowerCase() == args[2].toLowerCase() : !!vars[args[0]]);
+						level.executed = level.condition;
+					}
+					else {
+						level.condition = false;
+					}
+					continue;
+				}
+				else if (operator === 'else') {
+					level.condition = level.parentCondition && !level.executed;
+					level.executed = level.condition;
+					continue;
+				}
+				else if (operator === 'endif') {
+					levels.pop();
+					continue;
+				}
+				if (level.condition) {
+					// Get attributes i.e. join=" #"
+					let attrsRegexp = new RegExp(/((\w*) *=+ *(['"])((\\\3|[^\3])*?)\3)|((\w*) *=+ *(\w*))/g);
+					let attrs = {};
+					while ((match = attrsRegexp.exec(part))) {
+						if (match[4]) {
+							attrs[match[2]] = match[4];
+						}
+						else {
+							attrs[match[7]] = match[8];
+						}
+					}
+					html += (typeof vars[operator] === 'function' ? vars[operator](attrs) : vars[operator]) || '';
+				}
+			}
+			else if (level.condition) {
+				html += part;
+			}
+		}
+		return html;
 	}
 }
 

@@ -44,7 +44,7 @@ const DOWNLOADED_IMAGE_TYPE = [
 ];
 
 // Schema version here has to be the same as in note-editor!
-const SCHEMA_VERSION = 5;
+const SCHEMA_VERSION = 6;
 
 class EditorInstance {
 	constructor() {
@@ -301,7 +301,7 @@ class EditorInstance {
 		walkFormat(doc.body);
 		return doc.body.innerHTML;
 	}
-	
+
 	/**
 	 * @param {Object[]} annotations JSON annotations
 	 * @param {Boolean} skipEmbeddingItemData Do not add itemData to citation items
@@ -325,6 +325,7 @@ class EditorInstance {
 			let citationHTML = '';
 			let imageHTML = '';
 			let highlightHTML = '';
+			let quotedHighlightHTML = '';
 			let commentHTML = '';
 			
 			let storedAnnotation = {
@@ -389,23 +390,40 @@ class EditorInstance {
 			// Text
 			if (annotation.text) {
 				let text = this._transformTextToHTML(annotation.text.trim());
-				highlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}">“${text}”</span>`;
+				highlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}">${text}</span>`;
+				quotedHighlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}">${Zotero.getString('punctuation.openingQMark')}${text}${Zotero.getString('punctuation.closingQMark')}</span>`;
 			}
 			
 			// Note
 			if (annotation.comment) {
-				let comment = this._transformTextToHTML(annotation.comment.trim());
-				// Move comment to the next line if it has multiple lines
-				commentHTML = (((highlightHTML || imageHTML || citationHTML) && comment.includes('<br')) ? '<br/>' : ' ') + comment;
+				commentHTML = this._transformTextToHTML(annotation.comment.trim());
 			}
-			
-			if (citationHTML) {
-				// Move citation to the next line if highlight has multiple lines or is after image
-				citationHTML = ((highlightHTML && highlightHTML.includes('<br') || imageHTML) ? '<br>' : '') + citationHTML;
+
+			let template;
+			if (annotation.type === 'highlight') {
+				template = Zotero.Prefs.get('annotations.noteTemplates.highlight');
 			}
-			
-			let otherHTML = [highlightHTML, citationHTML, commentHTML].filter(x => x).join(' ');
-			html += '<p>' + imageHTML + otherHTML + '</p>\n';
+			else if (annotation.type === 'note') {
+				template = Zotero.Prefs.get('annotations.noteTemplates.note');
+			}
+			else if (annotation.type === 'image') {
+				template = '<p>{{image}}<br/>{{citation}} {{comment}}</p>';
+			}
+
+			let vars = {
+				color: annotation.color,
+				highlight: (attrs) => attrs.quotes === 'true' ? quotedHighlightHTML : highlightHTML,
+				comment: commentHTML,
+				citation: citationHTML,
+				image: imageHTML,
+				tags: (attrs) => annotation.tags && annotation.tags.map(tag => tag.name).join(attrs.join || ' ')
+			};
+			let templateHTML = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
+			// Remove some spaces at the end of paragraph
+			templateHTML = templateHTML.replace(/([\s]*)(<\/p)/g, '$2');
+			// Remove multiple spaces
+			templateHTML = templateHTML.replace(/\s\s+/g, ' ');
+			html += templateHTML;
 		}
 		return { html, citationItems: storedCitationItems };
 	}
@@ -1464,9 +1482,15 @@ class EditorInstance {
 			jsonAnnotation.id = annotation.key;
 			jsonAnnotations.push(jsonAnnotation);
 		}
-		let html = `<h1>${Zotero.getString('pdfReader.annotations')}<br/>`
-			+ Zotero.getString('noteEditor.annotationsDateLine', new Date().toLocaleString())
-			+ `</h1>\n`;
+
+		let vars = {
+			title: Zotero.getString('pdfReader.annotations'),
+			date: new Date().toLocaleString()
+		};
+		let html = Zotero.Utilities.Internal.generateHTMLFromTemplate(Zotero.Prefs.get('annotations.noteTemplates.title'), vars);
+		// New line is needed for note title parser
+		html += '\n';
+
 		let { html: serializedHTML, citationItems } = await editorInstance._serializeAnnotations(jsonAnnotations, true);
 		html += serializedHTML;
 		citationItems = encodeURIComponent(JSON.stringify(citationItems));

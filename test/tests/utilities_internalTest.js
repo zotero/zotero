@@ -522,4 +522,26 @@ describe("Zotero.Utilities.Internal", function () {
 			});
 		});
 	});
+
+	describe("#generateHTMLFromTemplate()", function () {
+		it("should support variables with attributes", function () {
+			var vars = {
+				v1: '1',
+				v2: (pars) => pars.a1 + pars.a2 + pars.a3,
+				v3: () => undefined,
+			};
+			var template = `{{ v1}}{{v2 a1= 1  a2 =' 2' a3 = "3 "}}{{v3}}{{v4}}`;
+			var html = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
+			assert.equal(html, '11 23 ');
+		});
+		it("should support nested 'if' statements", function () {
+			var vars = {
+				v1: '1',
+				v2: 'H',
+			};
+			var template = `{{if v1 == '1'}}yes1{{if x}}no{{elseif v2  == h }}yes2{{endif}}{{elseif v2 == 2}}no{{else}}no{{endif}} {{if v2 == 1}}not{{elseif x}}not{{else}}yes3{{ endif}}`;
+			var html = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
+			assert.equal(html, 'yes1yes2 yes3');
+		});
+	});
 })
