@@ -412,8 +412,7 @@ class EditorInstance {
 
 			let vars = {
 				color: annotation.color,
-				highlight: highlightHTML,
-				quotedHighlight: quotedHighlightHTML,
+				highlight: (attrs) => attrs.quotes === 'true' ? quotedHighlightHTML : highlightHTML,
 				comment: commentHTML,
 				citation: citationHTML,
 				image: imageHTML,
