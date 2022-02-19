@@ -1345,10 +1345,45 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		}
 	}
 	
-	if (this._changed.primaryData
-			&& (this._changed.primaryData.createdByUserID || this._changed.primaryData.lastModifiedByUserID)) {
-		let sql = "REPLACE INTO groupItems VALUES (?, ?, ?)";
-		yield Zotero.DB.queryAsync(sql, [itemID, this._createdByUserID || null, this._lastModifiedByUserID || null]);
+	// In group libraries:
+	//
+	// - If createdByUserID or lastModifiedByUserID are explicitly set, use those values
+	// - Otherwise, set current user as createdByUserID if new or lastModifiedByUserID if not
+	if (libraryType == 'group') {
+		let createdByUserID;
+		let lastModifiedByUserID;
+		if (this._changed.primaryData) {
+			if (this._changed.primaryData.createdByUserID) {
+				createdByUserID = this._createdByUserID;
+			}
+			if (this._changed.primaryData.lastModifiedByUserID) {
+				lastModifiedByUserID = this._lastModifiedByUserID;
+			}
+		}
+		if (!options.skipGroupItemsUserUpdate) {
+			if (!createdByUserID && isNew) {
+				createdByUserID = Zotero.Users.getCurrentUserID();
+			}
+			// TEMP: For now, don't update lastModifiedByUserID -- we may want to start doing this
+			// before we start showing a last-modified-by name in the UI so that it updates
+			// immediately rather than waiting until a sync happens, but we should figure out if we
+			// want all changes to count and make sure the dataserver follows the same behavior.
+			//
+			//if (!lastModifiedByUserID && !isNew) {
+			//	lastModifiedByUserID = Zotero.Users.getCurrentUserID();
+			//}
+		}
+		if (createdByUserID || lastModifiedByUserID) {
+			let sql = "REPLACE INTO groupItems VALUES (?, ?, ?)";
+			yield Zotero.DB.queryAsync(
+				sql,
+				[
+					itemID,
+					createdByUserID || null,
+					lastModifiedByUserID || null
+				]
+			);
+		}
 	}
 	
 	//

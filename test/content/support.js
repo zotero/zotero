@@ -360,6 +360,12 @@ var getGroup = Zotero.Promise.method(function () {
 
 
 var createGroup = Zotero.Promise.coroutine(function* (props = {}) {
+	// Create a group item requires the current user to be set
+	if (!Zotero.Users.getCurrentUserID()) {
+		yield Zotero.Users.setCurrentUserID(1);
+		yield Zotero.Users.setName(1, 'Name');
+	}
+	
 	var group = new Zotero.Group;
 	group.id = props.id || Zotero.Utilities.rand(10000, 1000000);
 	group.name = props.name || "Test " + Zotero.Utilities.randomString();

@@ -175,6 +175,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 		
 		yield Zotero.Users.setCurrentUserID(userID);
 		yield Zotero.Users.setCurrentUsername("testuser");
+		yield Zotero.Users.setCurrentName("Test User");
 	})
 	
 	after(function () {
@@ -4367,9 +4368,9 @@ describe("Zotero.Sync.Data.Engine", function () {
 			var { id: groupID, libraryID } = await createGroup();
 			({ engine, client, caller } = await setup({ libraryID }));
 			
-			var item1 = await createDataObject('item', { libraryID });
+			var item1 = await createDataObject('item', { libraryID }, { skipGroupItemsUserUpdate: true });
 			var item1DateModified = item1.dateModified;
-			var item2 = await createDataObject('item', { libraryID });
+			var item2 = await createDataObject('item', { libraryID }, { skipGroupItemsUserUpdate: true });
 			var responseJSON = [
 				item1.toResponseJSON(),
 				item2.toResponseJSON()
@@ -4413,7 +4414,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 			var { id: groupID, libraryID } = await createGroup();
 			({ engine, client, caller } = await setup({ libraryID }));
 			
-			var item = await createDataObject('item', { libraryID });
+			var item = await createDataObject('item', { libraryID }, { skipGroupItemsUserUpdate: true });
 			var responseJSON = [
 				item.toResponseJSON()
 			];
