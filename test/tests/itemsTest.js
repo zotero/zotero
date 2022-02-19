@@ -153,6 +153,71 @@ describe("Zotero.Items", function () {
 	});
 	
 	
+	describe("#copyChildItems()", function () {
+		var group;
+		
+		before(async function () {
+			group = await createGroup();
+		});
+		
+		after(async function () {
+			await group.eraseTx();
+		});
+		
+		it("should copy annotations from a group library to a personal library", async function () {
+			await Zotero.Users.setCurrentUserID(1);
+			await Zotero.Users.setName(1, 'Name 1');
+			await Zotero.Users.setName(12345, 'Name 2');
+			
+			var userLibraryID = Zotero.Libraries.userLibraryID;
+			
+			var item = await createDataObject('item', { libraryID: group.libraryID });
+			var file = getTestDataDirectory();
+			file.append('test.pdf');
+			var attachment = await Zotero.Attachments.importFromFile({
+				file,
+				parentItemID: item.id
+			});
+			// Annotation by this user
+			var annotation1 = await createAnnotation('highlight', attachment);
+			await annotation1.saveTx();
+			// Annotation by this user with createdByUserID set
+			var annotation2 = await createAnnotation('highlight', attachment);
+			annotation2.createdByUserID = 1;
+			await annotation2.saveTx({
+				skipEditCheck: true
+			});
+			// Annotation by another user
+			var annotation3 = await createAnnotation('highlight', attachment);
+			annotation3.createdByUserID = 12345;
+			await annotation3.saveTx({
+				skipEditCheck: true
+			});
+			
+			var newItem = item.clone(userLibraryID);
+			await newItem.saveTx();
+			var newAttachment = attachment.clone(userLibraryID);
+			await newAttachment.saveTx();
+			
+			await Zotero.DB.executeTransaction(async function () {
+				await Zotero.Items.copyChildItems(attachment, newAttachment);
+			});
+			
+			// Check annotations
+			var annotations = newAttachment.getAnnotations();
+			assert.lengthOf(annotations, 3);
+			var newAnnotation1 = annotations.find(o => o.annotationText == annotation1.annotationText);
+			var newAnnotation2 = annotations.find(o => o.annotationText == annotation2.annotationText);
+			var newAnnotation3 = annotations.find(o => o.annotationText == annotation3.annotationText);
+			// Current user's name shouldn't have been transferred
+			assert.isNull(newAnnotation1.annotationAuthorName);
+			assert.isNull(newAnnotation2.annotationAuthorName);
+			// Other user's should've been transferred
+			assert.equal(newAnnotation3.annotationAuthorName, 'Name 2');
+		});
+	});
+	
+	
 	describe("#merge()", function () {
 		it("should merge two items", function* () {
 			var item1 = yield createDataObject('item');

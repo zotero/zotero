@@ -815,6 +815,9 @@ describe("Zotero.CollectionTree", function() {
 			});
 			
 			it("should copy an item with a PDF attachment containing annotations to a group", async function () {
+				await Zotero.Users.setCurrentUserID(1);
+				await Zotero.Users.setName(1, 'Name');
+				
 				var group = await createGroup();
 				
 				var item = await createDataObject('item', false, { skipSelect: true });
@@ -860,6 +863,10 @@ describe("Zotero.CollectionTree", function() {
 			});
 			
 			it("should copy a group item with a PDF attachment containing annotations to the personal library", async function () {
+				await Zotero.Users.setCurrentUserID(1);
+				await Zotero.Users.setName(1, 'Name 1');
+				await Zotero.Users.setName(12345, 'Name 2');
+				
 				var group = await createGroup();
 				await cv.selectLibrary(group.libraryID);
 				
@@ -871,55 +878,15 @@ describe("Zotero.CollectionTree", function() {
 					parentItemID: groupItem.id
 				});
 				var annotation = await createAnnotation('highlight', attachment);
-				await Zotero.Users.setName(12345, 'Name');
-				annotation.createdByUserID = 12345;
-				await annotation.saveTx({
-					skipEditCheck: true
-				});
+				await annotation.saveTx();
 				
 				var ids = (await onDrop('item', 'L1', [groupItem.id])).ids;
 				var newItem = Zotero.Items.get(ids[0]);
 				
-				var newAttachment = Zotero.Items.get(newItem.getAttachments())[0];
-				
 				// Check annotation
+				var newAttachment = Zotero.Items.get(newItem.getAttachments())[0];
 				var annotations = newAttachment.getAnnotations();
 				assert.lengthOf(annotations, 1);
-				// Name transferred by Zotero.Items.copyChildItems()
-				assert.equal(annotations[0].annotationAuthorName, 'Name');
-				
-				return group.eraseTx();
-			});
-			
-			it("should preserve an explicit annotation author name when copied from a group to a personal library", async function () {
-				var group = await createGroup();
-				await cv.selectLibrary(group.libraryID);
-				
-				var groupItem = await createDataObject('item', { libraryID: group.libraryID });
-				var file = getTestDataDirectory();
-				file.append('test.pdf');
-				var attachment = await Zotero.Attachments.importFromFile({
-					file,
-					parentItemID: groupItem.id
-				});
-				var annotation = await createAnnotation('highlight', attachment);
-				await Zotero.Users.setName(1, 'Name');
-				annotation.createdByUserID = 1;
-				annotation.annotationAuthorName = 'Another Name';
-				await annotation.saveTx({
-					skipEditCheck: true
-				});
-				
-				var ids = (await onDrop('item', 'L1', [groupItem.id])).ids;
-				var newItem = Zotero.Items.get(ids[0]);
-				
-				var newAttachment = Zotero.Items.get(newItem.getAttachments())[0];
-				
-				// Check annotation
-				var annotations = newAttachment.getAnnotations();
-				assert.lengthOf(annotations, 1);
-				// Name transferred by Zotero.Items.copyChildItems()
-				assert.equal(annotations[0].annotationAuthorName, 'Another Name');
 				
 				return group.eraseTx();
 			});

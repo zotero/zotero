@@ -902,9 +902,11 @@ Zotero.Items = function() {
 				}
 				let newAnnotation = annotation.clone(toItem.libraryID);
 				newAnnotation.parentItemID = toItem.id;
-				// If there's no explicit author and we're copying from a group, set the author
-				// to the creating user
-				if (!annotation.annotationAuthorName && fromGroup) {
+				// If there's no explicit author and we're copying an annotation created by another
+				// user from a group, set the author to the creating user
+				if (fromGroup
+						&& !annotation.annotationAuthorName
+						&& annotation.createdByUserID != Zotero.Users.getCurrentUserID()) {
 					newAnnotation.annotationAuthorName =
 						Zotero.Users.getName(annotation.createdByUserID);
 				}
