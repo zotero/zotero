@@ -116,10 +116,9 @@ class TreeSelection {
 	 * Selects an item, updates focused item to index.
 	 * @param index {Number} The index is 0-clamped.
 	 * @param shouldDebounce {Boolean} Whether the update to the tree should be debounced
-	 * @param {Boolean} [shouldScroll=true] Whether to scroll the item into view
 	 * @returns {boolean} False if nothing to select and select handlers won't be called
 	 */
-	select(index, shouldDebounce, shouldScroll = true) {
+	select(index, shouldDebounce) {
 		if (!this._tree.props.isSelectable(index)) return;
 		index = Math.max(0, index);
 		if (this.selected.size == 1 && this._focused == index && this.pivot == index) {
@@ -135,7 +134,7 @@ class TreeSelection {
 
 		if (this.selectEventsSuppressed) return true;
 
-		if (shouldScroll) this._tree.scrollToRow(index);
+		this._tree.scrollToRow(index);
 		this._updateTree(shouldDebounce);
 		if (this._tree.invalidate) {
 			toInvalidate.forEach(this._tree.invalidateRow.bind(this._tree));
@@ -359,6 +358,7 @@ class VirtualizedTable extends React.Component {
 		// If you want to perform custom key handling it should be in this function
 		// if it returns false then virtualized-table's own key handler won't run
 		onKeyDown: () => true,
+		onKeyUp: noop,
 
 		onDragOver: noop,
 		onDrop: noop,
@@ -421,6 +421,7 @@ class VirtualizedTable extends React.Component {
 		// If you want to perform custom key handling it should be in this function
 		// if it returns false then virtualized-table's own key handler won't run
 		onKeyDown: PropTypes.func,
+		onKeyUp: PropTypes.func,
 
 		onDragOver: PropTypes.func,
 		onDrop: PropTypes.func,
@@ -1146,6 +1147,7 @@ class VirtualizedTable extends React.Component {
 		}
 		let props = {
 			onKeyDown: this._onKeyDown,
+			onKeyUp: e => this.props.onKeyUp && this.props.onKeyUp(e),
 			onDragOver: this._onDragOver,
 			onDrop: e => this.props.onDrop && this.props.onDrop(e),
 			onFocus: e => this.props.onFocus && this.props.onFocus(e),
