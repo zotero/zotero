@@ -1688,15 +1688,30 @@ Zotero.Items = function() {
 	}
 	
 	
-	this.getSortTitle = function(title) {
-		if (title === false || title === undefined || title == null) {
+	this.getSortTitle = function (title) {
+		if (!title) {
 			return '';
 		}
+
 		if (typeof title == 'number') {
-			return title + '';
+			return title.toString();
 		}
-		return title.replace(/^[\[\'\"](.*)[\'\"\]]?$/, '$1')
-	}
+
+		let toRemove = [
+			'</?i>',
+			'</?b>',
+			'</?sub>',
+			'</?sup>',
+			'<span style="font-variant:small-caps;">',
+			'<span class="nocase">',
+			'</span>',
+			'\\p{P}'
+		].map(re => new RegExp(re, 'g'));
+		for (let re of toRemove) {
+			title = title.replace(re, '');
+		}
+		return title;
+	};
 	
 	
 	Zotero.DataObjects.call(this);
