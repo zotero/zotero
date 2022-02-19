@@ -30,7 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Kitaplıklar arası eserler kopyalanırken, bunları ekle:">
 <!ENTITY zotero.preferences.groups.childNotes "alt notlar">
 <!ENTITY zotero.preferences.groups.childFiles "alt anlık görüntüler ve içeri aktarılan dosyalar">
-<!ENTITY zotero.preferences.groups.annotations "annotations">
+<!ENTITY zotero.preferences.groups.annotations "ek açıklamalar">
 <!ENTITY zotero.preferences.groups.childLinks "alt bağlantılar">
 <!ENTITY zotero.preferences.groups.tags "etiketler">
 

@@ -30,7 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Amikor könyvtárak között másol elemeket, az alábbiakat másolja:">
 <!ENTITY zotero.preferences.groups.childNotes "kapcsolódó jegyzetek">
 <!ENTITY zotero.preferences.groups.childFiles "kapcsolódó pillanatfelvételek és importált fájlok">
-<!ENTITY zotero.preferences.groups.annotations "annotations">
+<!ENTITY zotero.preferences.groups.annotations "jegyzetek">
 <!ENTITY zotero.preferences.groups.childLinks "kapcsolódó hivatkozások">
 <!ENTITY zotero.preferences.groups.tags "címkék">
 
@@ -81,7 +81,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Az Online Könyvtár cseréje">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Az online könyvtár felülírása a helyi Zotero adatokkal">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "A szinkronizációs előzmények törlése">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Az összes csatolt fájl összehasonlítása a tárhely szerveren">
 <!ENTITY zotero.preferences.sync.reset "Visszaállítás">
 <!ENTITY zotero.preferences.sync.reset.button "Visszaállítás">
 
@@ -105,8 +105,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Ha ez a lehetőség nincs bekapcsolva, a Zotero csak akkor jeleníti meg az URL-t folyóirat-, újság- vagy magazincikkeknél, ha nincs megadva oldalszám.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Gyorsmásolás">
-<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Elemformátum:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Jegyzetformátum:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Másolás HTML-ként">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Weboldal-specifikus beállítások:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domén/Útvonal">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "további információkért.">
 <!ENTITY zotero.preferences.proxies.transparent "Emlékezzen a proxyn keresztül megtekintett erőforrásokra">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Proxy-források automatikus felismerése">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Értesítés megjelenítése proxy-n keresztüli átirányításkor">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Proxy átirányítás tiltása, ha a domén nevem tartalmaz">
 <!ENTITY zotero.preferences.proxies.configured "Proxyk">
 <!ENTITY zotero.preferences.proxies.hostname "Host neve">

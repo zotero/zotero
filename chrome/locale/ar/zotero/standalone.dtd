@@ -49,6 +49,7 @@
 
 
 <!ENTITY viewMenu.label "عرض">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "تخطيط">
 <!ENTITY standardView.label "عرض قياسي">
 <!ENTITY stackedView.label "عرض مرصوص">

@@ -49,6 +49,7 @@
 
 
 <!ENTITY viewMenu.label "查看">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "布局">
 <!ENTITY standardView.label "标准视图">
 <!ENTITY stackedView.label "堆栈视图">

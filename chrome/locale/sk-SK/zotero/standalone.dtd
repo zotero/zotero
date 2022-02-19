@@ -49,6 +49,7 @@
 
 
 <!ENTITY viewMenu.label "Zobraziť">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "Rozloženie">
 <!ENTITY standardView.label "Štandardné zobrazenie">
 <!ENTITY stackedView.label "Poskladané zobrazenie">

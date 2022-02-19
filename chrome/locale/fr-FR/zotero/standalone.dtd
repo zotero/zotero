@@ -49,6 +49,7 @@
 
 
 <!ENTITY viewMenu.label "Affichage">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "Mise en page">
 <!ENTITY standardView.label "Affichage standard">
 <!ENTITY stackedView.label "Affichage emplié">

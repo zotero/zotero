@@ -349,6 +349,6 @@
 <!ENTITY zotero.pdfReader.zoomIn "Nagyítás">
 <!ENTITY zotero.pdfReader.zoomOut "Kicsinyítés">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatikus átméretezés">
-<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Nagyítás oldalszélességre">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
 <!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

@@ -49,6 +49,7 @@
 
 
 <!ENTITY viewMenu.label "Ver">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "Interface">
 <!ENTITY standardView.label "Interface estándar">
 <!ENTITY stackedView.label "Interface agrupada">

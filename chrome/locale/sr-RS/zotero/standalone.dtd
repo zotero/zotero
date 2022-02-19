@@ -49,6 +49,7 @@
 
 
 <!ENTITY viewMenu.label "Преглед">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "Распоред">
 <!ENTITY standardView.label "Уобичајени приказ">
 <!ENTITY stackedView.label "Приказ на гомили">

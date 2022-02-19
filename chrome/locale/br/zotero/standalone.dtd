@@ -49,6 +49,7 @@
 
 
 <!ENTITY viewMenu.label "Gwel">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "Aozadur">
 <!ENTITY standardView.label "Mod-gwelet standard">
 <!ENTITY stackedView.label "Mod-gwelet berniet">

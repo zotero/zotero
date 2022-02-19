@@ -49,6 +49,7 @@
 
 
 <!ENTITY viewMenu.label "Zobrazení">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "Rozvržení">
 <!ENTITY standardView.label "Standardní zobrazení">
 <!ENTITY stackedView.label "Horizontální uspořádání">

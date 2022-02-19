@@ -49,6 +49,7 @@
 
 
 <!ENTITY viewMenu.label "Beeld">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "Lay-out">
 <!ENTITY standardView.label "Standaard">
 <!ENTITY stackedView.label "Gestapeld">

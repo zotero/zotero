@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Поддерживать источники отсортированными">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
+<!ENTITY zotero.citation.suppressAuthor.label "Не выводить автора">
 <!ENTITY zotero.citation.prefix.label "Префикс:">
 <!ENTITY zotero.citation.suffix.label "Суффикс:">
 <!ENTITY zotero.citation.editorWarning.label "Предупреждение: Если вы измените цитату в редакторе, она больше не будет обновляться в соответствии с изменениями в базе данных или стиле цитирования">

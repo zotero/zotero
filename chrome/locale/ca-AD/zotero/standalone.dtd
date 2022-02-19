@@ -49,6 +49,7 @@
 
 
 <!ENTITY viewMenu.label "Visualitza">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "Disposició">
 <!ENTITY standardView.label "Vista estàndard">
 <!ENTITY stackedView.label "Vista apilada">

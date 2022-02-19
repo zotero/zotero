@@ -49,6 +49,7 @@
 
 
 <!ENTITY viewMenu.label "نمایش">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "چیدمان">
 <!ENTITY standardView.label "استاندارد">
 <!ENTITY stackedView.label "انباشت">

@@ -49,6 +49,7 @@
 
 
 <!ENTITY viewMenu.label "Görünüm">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "Yerleşim">
 <!ENTITY standardView.label "Normal Görünüm">
 <!ENTITY stackedView.label "Yığılmış Görünüm">
@@ -76,16 +77,16 @@
 
 
 <!ENTITY helpMenu.label "Yardım">
-<!ENTITY helpMenu.accesskey "?">
+<!ENTITY helpMenu.accesskey "H">
 
 
 <!ENTITY helpMenuWin.label "Yardım">
-<!ENTITY helpMenuWin.accesskey "?">
+<!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">
 <!ENTITY aboutProduct.label "&brandShortName; Hakkında">
 <!ENTITY aboutProduct.accesskey "A">
 <!ENTITY productHelp.label "Destek ve Belgeleme">
-<!ENTITY productHelp.accesskey "?">
+<!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Sorun Giderme Bilgisi">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
 <!ENTITY helpFeedbackPage.label "Tartışma Forumları">

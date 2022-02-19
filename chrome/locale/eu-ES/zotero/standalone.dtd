@@ -36,7 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "Kopiatu aipua">
 <!ENTITY copyBibliographyCmd.label "Kopiatu bibliografia">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyNoteCmd.label "Kopiatu oharra">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Orrialdearen norabidea aldatu">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
@@ -45,10 +45,11 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY goMenu.label "Go">
+<!ENTITY goMenu.label "Joan">
 
 
 <!ENTITY viewMenu.label "Ikuspegia">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "Konposaketa">
 <!ENTITY standardView.label "Ikuspegi estandarra">
 <!ENTITY stackedView.label "Pilatutako ikuspegia">

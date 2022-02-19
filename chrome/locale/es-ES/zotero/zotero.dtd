@@ -78,7 +78,7 @@
 <!ENTITY zotero.items.volume_column "Volumen">
 <!ENTITY zotero.items.edition_column "Edición">
 <!ENTITY zotero.items.pages_column "Páginas">
-<!ENTITY zotero.items.issue_column "Ejemplar">
+<!ENTITY zotero.items.issue_column "Número">
 <!ENTITY zotero.items.series_column "Serie">
 <!ENTITY zotero.items.seriesTitle_column "Título de la serie">
 <!ENTITY zotero.items.court_column "Juzgado">

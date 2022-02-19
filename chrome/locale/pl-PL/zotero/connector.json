@@ -71,6 +71,9 @@
   "firstRun_text1": {
     "message": "$1 Connector umożliwia ci <a href=\"$2\">zapisywanie elementów do $1</a> z twojej przeglądarki tylko jednym kliknięciem."
   },
+  "firstRun_acceptButton": {
+    "message": "Rozumiem"
+  },
   "error_connection_isAppRunning": {
     "message": "Czy $1 jest uruchomiony?"
   },

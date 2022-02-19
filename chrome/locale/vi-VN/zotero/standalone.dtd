@@ -49,6 +49,7 @@
 
 
 <!ENTITY viewMenu.label "Cách xem">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "Bố trí">
 <!ENTITY standardView.label "Cách xem chuẩn">
 <!ENTITY stackedView.label "Cách xem chồng lên nhau">

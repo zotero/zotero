@@ -30,7 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Når elementer kopieres mellom biblioteker, inkluder:">
 <!ENTITY zotero.preferences.groups.childNotes "Underordnede notater">
 <!ENTITY zotero.preferences.groups.childFiles "Underordnede øyblikksbilder og importerte filer">
-<!ENTITY zotero.preferences.groups.annotations "annotations">
+<!ENTITY zotero.preferences.groups.annotations "merknader">
 <!ENTITY zotero.preferences.groups.childLinks "Underordnede koblinger">
 <!ENTITY zotero.preferences.groups.tags "Emneord">
 

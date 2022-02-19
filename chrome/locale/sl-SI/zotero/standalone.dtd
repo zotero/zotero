@@ -49,6 +49,7 @@
 
 
 <!ENTITY viewMenu.label "Pogled">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "Postavitev">
 <!ENTITY standardView.label "Navadni pogled">
 <!ENTITY stackedView.label "Naloženi pogled">

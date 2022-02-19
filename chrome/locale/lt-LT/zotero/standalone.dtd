@@ -49,6 +49,7 @@
 
 
 <!ENTITY viewMenu.label "Rodymas">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "Išdėstymas">
 <!ENTITY standardView.label "Įprastas rodymas">
 <!ENTITY stackedView.label "Straipsnio informacija apačioje">

@@ -173,7 +173,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Definir a cor">
 <!ENTITY zotero.tagColorChooser.removeColor "Remover a cor">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
+<!ENTITY zotero.lookup.description "Insira ISBNs, DOIs, PMIDs, arXiv IDs ou ADS Bibcodes para adicionar a sua biblioteca:">
 <!ENTITY zotero.lookup.button.search "Pesquisar">
 
 <!ENTITY zotero.createParent.title "Criar item pai">
@@ -222,7 +222,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Manter as fontes ordenadas">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
+<!ENTITY zotero.citation.suppressAuthor.label "Omitir autor">
 <!ENTITY zotero.citation.prefix.label "Prefixo:">
 <!ENTITY zotero.citation.suffix.label "Sufixo:">
 <!ENTITY zotero.citation.editorWarning.label "Atenção: se você alterar a citação no editor, ela não será mais atualizada de acordo com as mudanças no seu banco de dados ou no estilo de citação.">
@@ -342,13 +342,13 @@
 <!ENTITY zotero.pdfReader.handTool "Ferramenta mão">
 <!ENTITY zotero.pdfReader.verticalScrolling "Rolagem vertical">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Rolagem horizontal">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
-<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
-<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
-<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
-<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
-<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">
+<!ENTITY zotero.pdfReader.wrappedScrolling "Deslocamento contido">
+<!ENTITY zotero.pdfReader.noSpreads "Não estender">
+<!ENTITY zotero.pdfReader.oddSpreads "Estender ímpares">
+<!ENTITY zotero.pdfReader.evenSpreads "Estender pares">
+<!ENTITY zotero.pdfReader.zoomIn "Aumentar o zoom">
+<!ENTITY zotero.pdfReader.zoomOut "Diminuir o zoom">
+<!ENTITY zotero.pdfReader.zoomAuto "Zoom automático">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Largura da página">
+<!ENTITY zotero.pdfReader.transferFromPDF "Importar anotações...">
+<!ENTITY zotero.pdfReader.transferToPDF "Armazenar anotações no arquivo...">

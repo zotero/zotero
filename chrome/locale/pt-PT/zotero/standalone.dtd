@@ -49,6 +49,7 @@
 
 
 <!ENTITY viewMenu.label "Vista">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "Disposição">
 <!ENTITY standardView.label "Vista Padrão">
 <!ENTITY stackedView.label "Vista em Pilha">

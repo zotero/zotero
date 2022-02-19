@@ -49,6 +49,7 @@
 
 
 <!ENTITY viewMenu.label "Visa">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "Utseende">
 <!ENTITY standardView.label "Standardvy">
 <!ENTITY stackedView.label "Staplad vy">

@@ -59,6 +59,9 @@
   "upgradeApp": {
     "message": "$1frissítése"
   },
+  "firstRun_title": {
+    "message": "Telepítette a$1Connector-t!"
+  },
   "firstRun_acceptButton": {
     "message": "Értem"
   },
@@ -82,6 +85,12 @@
   },
   "integration_googleDocs_updating": {
     "message": "$1 frissíti az ön dokumentumát"
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "A dokumentum hivatkozásait egy másik $1 felhasználó szerkeszti. Próbálja meg később."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "A$1jelenítse meg a nem linkelt hivatkozásokat"
   },
   "integration_googleDocs_orphanedCitations_alertButton": {
     "message": "Hivatkozás újralinkelése"

@@ -49,6 +49,7 @@
 
 
 <!ENTITY viewMenu.label "Vizualizare">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "Machetă">
 <!ENTITY standardView.label "Vizualizare standard">
 <!ENTITY stackedView.label "Vizualizare în stivă">

@@ -49,6 +49,7 @@
 
 
 <!ENTITY viewMenu.label "Вид">
+<!ENTITY viewMenu.accesskey "В">
 <!ENTITY layout.label "Расположение">
 <!ENTITY standardView.label "Стандартный вид">
 <!ENTITY stackedView.label "Стопками">

@@ -49,6 +49,7 @@
 
 
 <!ENTITY viewMenu.label "Widok">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "Układ">
 <!ENTITY standardView.label "Standardowy">
 <!ENTITY stackedView.label "Stos">

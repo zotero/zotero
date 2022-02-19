@@ -36,7 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "Hivatkozás másolása">
 <!ENTITY copyBibliographyCmd.label "Bibliográfia másolása">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyNoteCmd.label "Jegyzet másolása">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Oldal irányának megfordítása">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
@@ -49,6 +49,7 @@
 
 
 <!ENTITY viewMenu.label "Nézet">
+<!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "Layout">
 <!ENTITY standardView.label "Alapértelmezett nézet">
 <!ENTITY stackedView.label "Stacked View">

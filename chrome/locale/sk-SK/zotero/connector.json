@@ -5,8 +5,17 @@
   "general_moreInfo": {
     "message": "Viac informácií..."
   },
+  "general_needHelp": {
+    "message": "Potrebujete pomoc?"
+  },
   "general_done": {
     "message": "Hotovo"
+  },
+  "general_yes": {
+    "message": "Áno"
+  },
+  "general_no": {
+    "message": "Nie"
   },
   "general_tryAgain": {
     "message": "Skúste znova"
@@ -32,8 +41,14 @@
   "progressWindow_error_translation": {
     "message": "Pri ukladaní tohto súboru došlo k chybe. Pre viac informácií si pozrite $1."
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "Pri ukladaní záznamu došlo k chybe. $1 môže obmedziť počet záznamov, ktoré môžete naraz uložiť. Pozrite na $2 pre viac informácií."
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Riešenie problémov s translátormi"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Obmedzenia prístupu na stránku"
   },
   "progressWindow_error_fallback": {
     "message": "Pri ukladaní pomocou $1 došlo k chybe. Namiesto toho prebieha pokus o ukladanie pomocou $2."
@@ -49,6 +64,12 @@
   },
   "upgradeApp": {
     "message": "Aktualizovať $1"
+  },
+  "firstRun_title": {
+    "message": "Nainštalovali ste $1 konektor!"
+  },
+  "firstRun_acceptButton": {
+    "message": "Rozumiem"
   },
   "error_connection_isAppRunning": {
     "message": "Beží $1?"
@@ -91,6 +112,15 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "Integrácia $1 nie je dostupná pri úprave súborov .docx od Microsoft Word  priamo v Google Docs. Zvoľte Súbor → Uložiť ako Google Docs pre zapnutie tejto funkcie.<br/><br/>Ak chcete preniesť dokument Word s citáciami $1 do Google Docs, pozrite na <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Presun dokumentov medzi textovými editormi</a>."
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "Citácie v dokumente práve edituje iný $1 užívateľ. Skúste to prosím neskôr."
+  },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1 uzamkne váš dokument, aby zabránil viacerým používateľom upravovať citácie súčasne. Súbežné úpravy citácií v dokumente môžu viesť k poškodeniu citácie alebo dokumentu. Niektoré nepredvídateľné okolnosti, ako napríklad zlyhanie siete, môžu viesť k trvalému uzamknutiu vášho dokumentu. Ak si myslíte, že sa to stalo, môžete obísť zámok. <br/><br/>Chcete obísť zámok dokumentu?"
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "Účet Google, ktorý ste vybrali, nemá povolenie na úpravu tohto dokumentu. Skúste to znova a vyberte účet s prístupom na úpravy."
   },
   "integration_googleDocs_orphanedCitations_buttonTooltip": {
     "message": "Zobraziť neprepojených $1 citácií"
