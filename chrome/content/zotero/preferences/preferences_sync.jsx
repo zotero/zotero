@@ -169,8 +169,14 @@ Zotero_Preferences.Sync = {
 			);
 			return;
 		}
-
-		if (!(yield Zotero.Sync.Data.Local.checkUser(window, json.userID, json.username))) {
+		
+		var ok = yield Zotero.Sync.Data.Local.checkUser(
+			window,
+			json.userID,
+			json.username,
+			json.displayName
+		);
+		if (!ok) {
 			// createAPIKeyFromCredentials will have created an API key,
 			// but user decided not to use it, so we remove it here.
 			Zotero.Sync.Runner.deleteAPIKey();

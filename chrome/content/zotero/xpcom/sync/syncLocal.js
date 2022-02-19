@@ -114,12 +114,14 @@ Zotero.Sync.Data.Local = {
 	 *
 	 * @param {Window|null}
 	 * @param {Integer} userID - New userID
-	 * @param {Integer} username - New username
+	 * @param {String} username - New username
+	 * @param {String} [name] - New display name
 	 * @return {Boolean} - True to continue, false to cancel
 	 */
-	checkUser: Zotero.Promise.coroutine(function* (win, userID, username) {
+	checkUser: Zotero.Promise.coroutine(function* (win, userID, username, name) {
 		var lastUserID = Zotero.Users.getCurrentUserID();
 		var lastUsername = Zotero.Users.getCurrentUsername();
+		var lastName = Zotero.Users.getCurrentName();
 		
 		if (lastUserID && lastUserID != userID) {
 			Zotero.debug(`Last user id ${lastUserID}, current user id ${userID}, `
@@ -165,17 +167,21 @@ Zotero.Sync.Data.Local = {
 			return false;
 		}
 		
-		yield Zotero.DB.executeTransaction(function* () {
+		yield Zotero.DB.executeTransaction(async function () {
 			if (lastUsername != username) {
-				yield Zotero.Users.setCurrentUsername(username);
-			} 
+				await Zotero.Users.setCurrentUsername(username);
+			}
 			if (!lastUserID) {
-				yield Zotero.Users.setCurrentUserID(userID);
+				await Zotero.Users.setCurrentUserID(userID);
 				
 				// Replace local user key with libraryID, in case duplicates were merged before the
 				// first sync
-				yield Zotero.Relations.updateUser(null, userID);
-				yield Zotero.Notes.updateUser(null, userID);
+				await Zotero.Relations.updateUser(null, userID);
+				await Zotero.Notes.updateUser(null, userID);
+			}
+			var newName = name || username;
+			if (lastName != newName) {
+				await Zotero.Users.setCurrentName(newName);
 			}
 		});
 		

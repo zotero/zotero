@@ -203,7 +203,13 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			let wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 				.getService(Components.interfaces.nsIWindowMediator);
 			let lastWin = wm.getMostRecentWindow("navigator:browser");
-			if (!(yield Zotero.Sync.Data.Local.checkUser(lastWin, keyInfo.userID, keyInfo.username))) {
+			let ok = yield Zotero.Sync.Data.Local.checkUser(
+				lastWin,
+				keyInfo.userID,
+				keyInfo.username,
+				keyInfo.displayName
+			);
+			if (!ok) {
 				Zotero.debug("User cancelled sync on username mismatch");
 				return false;
 			}

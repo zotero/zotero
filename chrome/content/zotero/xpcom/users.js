@@ -90,6 +90,19 @@ Zotero.Users = new function () {
 	});
 	
 	
+	this.getCurrentName = function () {
+		var userID = this.getCurrentUserID();
+		return userID ? this.getName(userID) : '';
+	};
+	this.setCurrentName = async function (name) {
+		var userID = this.getCurrentUserID();
+		if (!userID) {
+			throw new Error("Current user ID must be set before setting name");
+		}
+		await this.setName(userID, name);
+	};
+	
+	
 	this.getLocalUserKey = function () {
 		return _localUserKey;
 	};
