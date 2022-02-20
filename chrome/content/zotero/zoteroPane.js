@@ -1688,6 +1688,31 @@ var ZoteroPane = new function()
 		return newItem;
 	});
 	
+
+	/**
+	 * Return whether every selected item can be deleted from the current
+	 * collection context (library, trash, collection, etc.).
+	 *
+	 * @return {Boolean}
+	 */
+	this.canDeleteSelectedItems = function () {
+		let collectionTreeRow = this.getCollectionTreeRow();
+		if (collectionTreeRow.isTrash()) {
+			for (let index of this.itemsView.selection.selected) {
+				while (index != -1 && !this.itemsView.getRow(index).ref.deleted) {
+					index = this.itemsView.getParentIndex(index);
+				}
+				if (index == -1) {
+					return false;
+				}
+			}
+		}
+		else if (collectionTreeRow.isShare()) {
+			return false;
+		}
+		return true;
+	};
+
 	
 	this.deleteSelectedItem = function () {
 		Zotero.debug("ZoteroPane_Local.deleteSelectedItem() is deprecated -- use ZoteroPane_Local.deleteSelectedItems()");
@@ -1730,6 +1755,10 @@ var ZoteroPane = new function()
 				'pane.items.remove' + (this.itemsView.selection.count > 1 ? '.multiple' : '')
 			)
 		};
+
+		if (!this.canDeleteSelectedItems()) {
+			return;
+		}
 		
 		if (collectionTreeRow.isPublications()) {
 			let toRemoveFromPublications = {
@@ -1757,21 +1786,8 @@ var ZoteroPane = new function()
 			
 			var prompt = force ? toTrash : toRemove;
 		}
-		// Do nothing in trash view if any non-deleted items are selected
-		else if (collectionTreeRow.isTrash()) {
-			for (const index of this.itemsView.selection.selected) {
-				if (!this.itemsView.getRow(index).ref.deleted) {
-					return;
-				}
-			}
+		else if (collectionTreeRow.isTrash() || collectionTreeRow.isBucket()) {
 			var prompt = toDelete;
-		}
-		else if (collectionTreeRow.isBucket()) {
-			var prompt = toDelete;
-		}
-		// Do nothing in share views
-		else if (collectionTreeRow.isShare()) {
-			return;
 		}
 		
 		var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
@@ -1893,26 +1909,71 @@ var ZoteroPane = new function()
 		}
 		this.selectItem(item.id).done();
 	}
+
+
+	/**
+	 * Check whether every selected item can be restored from trash
+	 *
+	 * @return {Boolean}
+	 */
+	this.canRestoreSelectedItems = function () {
+		let collectionTreeRow = this.getCollectionTreeRow();
+		if (!collectionTreeRow.isTrash()) {
+			return false;
+		}
+
+		return this.getSelectedItems().some(item => item.deleted);
+	};
 	
 	
 	/**
 	 * @return {Promise}
 	 */
-	this.restoreSelectedItems = Zotero.Promise.coroutine(function* () {
-		var items = this.getSelectedItems();
-		if (!items) {
+	this.restoreSelectedItems = async function () {
+		let items = this.getSelectedItems();
+		if (!items.length) {
 			return;
 		}
-		
-		yield Zotero.DB.executeTransaction(function* () {
-			for (let i=0; i<items.length; i++) {
-				items[i].deleted = false;
-				yield items[i].save({
-					skipDateModifiedUpdate: true
-				});
+
+		let selectedIDs = new Set(items.map(item => item.id));
+		let isSelected = itemOrID => (itemOrID.id ? selectedIDs.has(itemOrID.id) : selectedIDs.has(itemOrID));
+
+		await Zotero.DB.executeTransaction(async () => {
+			for (let row = 0; row < this.itemsView.rowCount; row++) {
+				// Only look at top-level items
+				if (this.itemsView.getLevel(row) !== 0) {
+					continue;
+				}
+
+				let parent = this.itemsView.getRow(row).ref;
+
+				if (isSelected(parent)) {
+					if (parent.deleted) {
+						parent.deleted = false;
+						await parent.save();
+					}
+
+					let children = [...parent.getNotes(true), ...parent.getAttachments(true)];
+					let noneSelected = !children.some(isSelected);
+					for (let child of Zotero.Items.get(children)) {
+						if ((noneSelected || isSelected(child)) && child.deleted) {
+							child.deleted = false;
+							await child.save();
+						}
+					}
+				}
+				else {
+					let children = [...parent.getNotes(true), ...parent.getAttachments(true)];
+					for (let child of Zotero.Items.get(children)) {
+						if (isSelected(child) && child.deleted) {
+							child.deleted = false;
+							await child.save();
+						}
+					}
+				}
 			}
-		}.bind(this));
-	});
+		});
+	};
 	
 	
 	/**
@@ -2721,6 +2782,12 @@ var ZoteroPane = new function()
 		if (isTrash) {
 			show.add(m.deleteFromLibrary);
 			show.add(m.restoreToLibrary);
+			if (!ZoteroPane_Local.canDeleteSelectedItems()) {
+				disable.add(m.deleteFromLibrary);
+			}
+			if (!ZoteroPane_Local.canRestoreSelectedItems()) {
+				disable.add(m.restoreToLibrary);
+			}
 		}
 		else if (!collectionTreeRow.isFeed()) {
 			show.add(m.moveToTrash);
@@ -3053,7 +3120,7 @@ var ZoteroPane = new function()
 		menu.childNodes[m.createNoteFromAnnotationsMenu].setAttribute('label', Zotero.getString('pane.items.menu.addNoteFromAnnotations' + multiple));
 		menu.childNodes[m.findPDF].setAttribute('label', Zotero.getString('pane.items.menu.findAvailablePDF' + multiple));
 		menu.childNodes[m.moveToTrash].setAttribute('label', Zotero.getString('pane.items.menu.moveToTrash' + multiple));
-		menu.childNodes[m.deleteFromLibrary].setAttribute('label', Zotero.getString('pane.items.menu.delete' + multiple));
+		menu.childNodes[m.deleteFromLibrary].setAttribute('label', Zotero.getString('pane.items.menu.delete'));
 		menu.childNodes[m.exportItems].setAttribute('label', Zotero.getString(`pane.items.menu.export${noteExport ? 'Note' : ''}` + multiple));
 		menu.childNodes[m.createBib].setAttribute('label', Zotero.getString('pane.items.menu.createBib' + multiple));
 		menu.childNodes[m.loadReport].setAttribute('label', Zotero.getString('pane.items.menu.generateReport' + multiple));
