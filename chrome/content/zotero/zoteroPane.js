@@ -1939,7 +1939,6 @@ var ZoteroPane = new function()
 		let isSelected = itemOrID => (itemOrID.id ? selectedIDs.has(itemOrID.id) : selectedIDs.has(itemOrID));
 
 		await Zotero.DB.executeTransaction(async () => {
-			let savePromises = [];
 			for (let row = 0; row < this.itemsView.rowCount; row++) {
 				// Only look at top-level items
 				if (this.itemsView.getLevel(row) !== 0) {
@@ -1951,16 +1950,15 @@ var ZoteroPane = new function()
 				if (isSelected(parent)) {
 					if (parent.deleted) {
 						parent.deleted = false;
-						savePromises.push(parent.save());
+						await parent.save();
 					}
 
 					let children = [...parent.getNotes(true), ...parent.getAttachments(true)];
 					let noneSelected = !children.some(isSelected);
 					for (let child of Zotero.Items.get(children)) {
-						Zotero.debug('Child: ' + child.id, -1)
 						if ((noneSelected || isSelected(child)) && child.deleted) {
 							child.deleted = false;
-							savePromises.push(child.save());
+							await child.save();
 						}
 					}
 				}
@@ -1969,12 +1967,11 @@ var ZoteroPane = new function()
 					for (let child of Zotero.Items.get(children)) {
 						if (isSelected(child) && child.deleted) {
 							child.deleted = false;
-							savePromises.push(child.save());
+							await child.save();
 						}
 					}
 				}
 			}
-			await Promise.all(savePromises);
 		});
 	};
 	
