@@ -52,6 +52,7 @@ describe("Zotero.CiteprocRs", function () {
 	var noteIndex = 1;
 	
 	before(async function () {
+		await Zotero.CiteprocRs.init();
 		await Zotero.Styles.init();
 		item1 = createUnsavedDataObject(
 			'item',
