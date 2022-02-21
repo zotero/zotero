@@ -1160,47 +1160,55 @@ function ZoteroProtocolHandler() {
 				Zotero.warn(`No item found for ${uriPath}`);
 				return;
 			}
-			
-			var item = results[0];
-			
-			if (!item.isFileAttachment()) {
-				Zotero.warn(`Item for ${uriPath} is not a file attachment`);
+
+			let pdf_attachment;
+
+			// Find a pdf attachment within search results
+			for (let i=0; i < results.length; i++){
+				let result = results[i]
+				let pdfs = (
+					result.getAttachments()
+						.map(itemID => Zotero.Items.get(itemID))
+						.filter(x => x.isFileAttachment() && x.attachmentContentType == 'application/pdf')
+				)
+				if (pdfs.length) {
+					pdf_attachment = pdfs[0]
+					break
+				}
+			}
+
+			if (!pdf_attachment) {
+				Zotero.warn(`Item for ${uriPath} has no pdf attachment`);
 				return;
 			}
-			
-			var path = await item.getFilePathAsync();
+
+			var path = await pdf_attachment.getFilePathAsync();
 			if (!path) {
 				Zotero.warn(`${path} not found`);
 				return;
 			}
-			
-			if (!path.toLowerCase().endsWith('.pdf')
-					&& Zotero.MIME.sniffForMIMEType(await Zotero.File.getSample(path)) != 'application/pdf') {
-				Zotero.warn(`${path} is not a PDF`);
-				return;
-			}
-			
+
 			var opened = false;
 			if (page || annotation) {
 				try {
-					opened = await Zotero.OpenPDF.openToPage(item, page, annotation);
+					opened = await Zotero.OpenPDF.openToPage(pdf_attachment, page, annotation);
 				}
 				catch (e) {
 					Zotero.logError(e);
 				}
 			}
-			
+
 			// If something went wrong, just open PDF without page
 			if (!opened) {
 				Zotero.debug("Launching PDF without page number");
 				let zp = Zotero.getActiveZoteroPane();
 				// TODO: Open pane if closed (macOS)
 				if (zp) {
-					zp.viewAttachment([item.id]);
+					zp.viewAttachment([pdf_attachment.id]);
 				}
 				return;
 			}
-			Zotero.Notifier.trigger('open', 'file', item.id);
+			Zotero.Notifier.trigger('open', 'file', pdf_attachment.id);
 		},
 		
 		
