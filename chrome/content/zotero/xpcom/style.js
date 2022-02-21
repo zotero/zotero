@@ -45,7 +45,9 @@ Zotero.Styles = new function() {
 	 * Initializes styles cache, loading metadata for styles into memory
 	 */
 	this.init = Zotero.Promise.coroutine(function* (options = {}) {
-		yield Zotero.CiteprocRs.init();
+		if (Zotero.Prefs.get('cite.useCiteprocRs')) {
+			yield Zotero.CiteprocRs.init();
+		}
 		
 		// Wait until bundled files have been updated, except when this is called by the schema update
 		// code itself

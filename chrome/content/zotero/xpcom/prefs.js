@@ -270,6 +270,9 @@ Zotero.Prefs = new function(){
 				if (!win.Zotero) continue;
 				Zotero.updateQuickSearchBox(win.document);
 			}
+		}],
+		[ "cite.useCiteprocRs", function(val) {
+			val && Zotero.CiteprocRs.init();
 		}]
 	];
 	
