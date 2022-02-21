@@ -42,6 +42,7 @@ const COLORED_TAGS_RE = new RegExp("^[0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1}
 const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
 const EMOJI_RE = /\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\p{Emoji_Presentation}|\p{Emoji}\uFE0F/gu;
 const HTML_NS = "http://www.w3.org/1999/xhtml";
+const ATTACHMENT_STATE_LOAD_DELAY = 150; //ms
 
 var ItemTree = class ItemTree extends LibraryTree {
 	static async init(domEl, opts={}) {
@@ -2786,14 +2787,19 @@ var ItemTree = class ItemTree extends LibraryTree {
 				}
 				span.append(icon);
 
-				item.getBestAttachmentState()
-					// TODO: With no cell refreshing this is possibly somewhat inefficient
-					// Refresh cell when promise is fulfilled
-					.then(({ type: newType, exists: newExists }) => {
-						if (newType !== type || newExists !== exists) {
-							this.tree.invalidateRow(index);
-						}
-					});
+				// Don't run this immediately since it might cause a db check and disk access
+				// but delay for some time and see if the item is still visible in the tree
+				// (i.e. if we haven't scrolled right past it)
+				setTimeout(() => {
+					if (!this.tree.rowIsVisible(index)) return;
+					item.getBestAttachmentState()
+						// Refresh cell when promise is fulfilled
+						.then(({ type: newType, exists: newExists }) => {
+							if (newType !== type || newExists !== exists) {
+								this.tree.invalidateRow(index);
+							}
+						});
+				}, ATTACHMENT_STATE_LOAD_DELAY);
 			}
 		}
 
