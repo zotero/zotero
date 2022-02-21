@@ -121,6 +121,8 @@ var Zotero_Tabs = new function () {
 				}
 			}
 		}
+		// Unset the previously selected tab id, because it was set when restoring tabs
+		this._prevSelectedID = null;
 	};
 	
 	/**
@@ -136,7 +138,6 @@ var Zotero_Tabs = new function () {
 	 */
 	this.add = function ({ type, data, title, index, select, onClose }) {
 		if (typeof type != 'string') {
-			throw new Error(`'type' should be a string (was ${typeof type})`);
 		}
 		if (typeof title != 'string') {
 			throw new Error(`'title' should be a string (was ${typeof title})`);
