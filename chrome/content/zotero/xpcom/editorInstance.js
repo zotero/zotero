@@ -59,6 +59,7 @@ class EditorInstance {
 		this._reloaded = options.reloaded;
 		this._viewMode = options.viewMode;
 		this._readOnly = options.readOnly || this._isReadOnly();
+		this._filesReadOnly = !Zotero.Libraries.get(this._item.libraryID).filesEditable;
 		this._disableUI = options.disableUI;
 		this._onReturn = options.onReturn;
 		this._iframeWindow = options.iframeWindow;
@@ -131,7 +132,7 @@ class EditorInstance {
 		this._iframeWindow.removeEventListener('message', this._messageHandler);
 		this.saveSync();
 		await Zotero.Notes.unregisterEditorInstance(this);
-		if (!this._item.isAttachment()) {
+		if (!this._item.isAttachment() && !this._filesReadOnly) {
 			await Zotero.Notes.deleteUnusedEmbeddedImages(this._item);
 		}
 	}
@@ -370,7 +371,7 @@ class EditorInstance {
 			}
 			
 			// Image
-			if (annotation.image) {
+			if (annotation.image && !this._filesReadOnly) {
 				// We assume that annotation.image is always PNG
 				let imageAttachmentKey = await this._importImage(annotation.image);
 				delete annotation.image;
@@ -517,26 +518,28 @@ class EditorInstance {
 				}
 
 				// Clone all note image attachments and replace keys in the new note
-				let attachments = Zotero.Items.get(item.getAttachments());
-				for (let attachment of attachments) {
-					if (!await attachment.fileExists()) {
-						continue;
-					}
-					await Zotero.DB.executeTransaction(async () => {
-						let copiedAttachment = await Zotero.Attachments.copyEmbeddedImage({
-							attachment,
-							note: this._item,
-							saveOptions: {
-								notifierData: {
-									noteEditorID: this.instanceID
+				if (!this._filesReadOnly) {
+					let attachments = Zotero.Items.get(item.getAttachments());
+					for (let attachment of attachments) {
+						if (!await attachment.fileExists()) {
+							continue;
+						}
+						await Zotero.DB.executeTransaction(async () => {
+							let copiedAttachment = await Zotero.Attachments.copyEmbeddedImage({
+								attachment,
+								note: this._item,
+								saveOptions: {
+									notifierData: {
+										noteEditorID: this.instanceID
+									}
 								}
+							});
+							let node = doc.querySelector(`img[data-attachment-key="${attachment.key}"]`);
+							if (node) {
+								node.setAttribute('data-attachment-key', copiedAttachment.key);
 							}
 						});
-						let node = doc.querySelector(`img[data-attachment-key="${attachment.key}"]`);
-						if (node) {
-							node.setAttribute('data-attachment-key', copiedAttachment.key);
-						}
-					});
+					}
 				}
 				
 				html += `<p></p>${doc.body.innerHTML}<p></p>`;
@@ -736,7 +739,7 @@ class EditorInstance {
 				}
 				case 'importImages': {
 					let { images } = message;
-					if (this._readOnly) {
+					if (this._readOnly || this._filesReadOnly) {
 						return;
 					}
 					if (this._item.isAttachment()) {

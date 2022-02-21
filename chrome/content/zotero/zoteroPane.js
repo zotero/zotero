@@ -1665,7 +1665,7 @@ var ZoteroPane = new function()
 				newItem.setCollections([self.getCollectionTreeRow().ref.id]);
 			}
 			yield newItem.save();
-			if (item.isNote()) {
+			if (item.isNote() && Zotero.Libraries.get(newItem.libraryID).filesEditable) {
 				yield Zotero.Notes.copyEmbeddedImages(item, newItem);
 			}
 			for (let relItemKey of item.relatedItems) {
