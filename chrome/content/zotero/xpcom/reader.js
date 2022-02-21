@@ -77,6 +77,7 @@ class ReaderInstance {
 			state,
 			location,
 			readOnly: this._isReadOnly(),
+			authorName: item.library.libraryType === 'group' ? Zotero.Users.getCurrentName() : '',
 			showItemPaneToggle: this._showItemPaneToggle,
 			sidebarWidth: this._sidebarWidth,
 			sidebarOpen: this._sidebarOpen,
