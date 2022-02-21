@@ -268,6 +268,14 @@ const COLUMNS = [
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
 	{
+		dataKey: "shortTitle",
+		disabledIn: "feed",
+		submenu: true,
+		label: "zotero.items.shortTitle_column",
+		flex: 2,
+		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+	},
+	{
 		dataKey: "extra",
 		disabledIn: "feed",
 		label: "zotero.items.extra_column",

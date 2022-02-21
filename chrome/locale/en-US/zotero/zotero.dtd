@@ -85,6 +85,7 @@
 <!ENTITY zotero.items.medium_column						"Medium/Format">
 <!ENTITY zotero.items.genre_column						"Genre">
 <!ENTITY zotero.items.system_column						"System">
+<!ENTITY zotero.items.shortTitle_column					"Short Title">
 <!ENTITY zotero.items.moreColumns.label					"More Columns">
 <!ENTITY zotero.items.restoreColumnOrder.label			"Restore Column Order">
 
