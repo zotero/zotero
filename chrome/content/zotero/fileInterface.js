@@ -426,10 +426,14 @@ var Zotero_File_Interface = new function() {
 		}
 		else if (!createNewCollection) {
 			try {
-				if (!ZoteroPane.collectionsView.editable) {
-					ZoteroPane.collectionsView.selectLibrary(null);
+				let zp = Zotero.getActiveZoteroPane();
+				if (!zp.canEdit()) {
+					yield zp.collectionsView.selectLibrary(Zotero.Libraries.userLibraryID);
 				}
-			} catch(e) {}
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
 		}
 		
 		var defaultNewCollectionPrefix = Zotero.getString("fileInterface.imported");
