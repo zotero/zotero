@@ -91,9 +91,10 @@ Zotero_Preferences.Cite = {
 		await Zotero.Styles.init();
 		this.styles = Zotero.Styles.getVisible()
 			.map((style) => {
+				var updated = Zotero.Date.sqlToDate(style.updated, true);
 				return {
 					title: style.title,
-					updated: Zotero.Date.sqlToDate(style.updated, true).toLocaleDateString()
+					updated: updated ? updated.toLocaleDateString() : ""
 				};
 			});
 		
