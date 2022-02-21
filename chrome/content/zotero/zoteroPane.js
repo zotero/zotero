@@ -3098,7 +3098,7 @@ var ZoteroPane = new function()
 		let popup = document.getElementById('zotero-add-to-collection-popup');
 		let separator = document.getElementById('zotero-add-to-collection-separator');
 		while (popup.childElementCount > 2) {
-			popup.removeChild(popup.firstElementChild);
+			popup.removeChild(popup.lastElementChild);
 		}
 
 		let items = Zotero.Items.keepParents(this.getSelectedItems());
@@ -3116,7 +3116,7 @@ var ZoteroPane = new function()
 				},
 				collection => items.every(item => collection.hasItem(item))
 			);
-			separator.before(menuItem);
+			popup.append(menuItem);
 		}
 
 		separator.setAttribute('hidden', !collections.length);
