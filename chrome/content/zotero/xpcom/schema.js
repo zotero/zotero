@@ -1566,42 +1566,6 @@ Zotero.Schema = new function(){
 				url += '&m=' + mode;
 			}
 			
-			// TEMP: DB diagnostics
-			if (Zotero.isDevBuild) {
-				let badDB = false;
-				let exists = await Zotero.DB.tableExists('transactionSets');
-				url += "&ts=" + (exists ? "1" : "0");
-				if (exists) {
-					Zotero.logError("DB table 'transactionSets' still exists");
-					badDB = true;
-				}
-				exists = await Zotero.DB.tableExists('dbDebug1');
-				url += "&db1=" + (exists ? "1" : "0");
-				if (!exists) {
-					Zotero.logError("DB table 'dbDebug1' does not exist");
-					badDB = true;
-				}
-				if (badDB) {
-					let cloudDir = Zotero.File.isCloudStorageFolder(Zotero.DataDirectory.dir);
-					url += "&cd=" + (cloudDir ? "1" : "0");
-					
-					if (!this._debugDBIntegrityChecked) {
-						try {
-							let dbPath = Zotero.DataDirectory.getDatabase();
-							let dbInfo = await OS.File.stat(dbPath);
-							if (dbInfo.size < 500000000) {
-								let ok = await Zotero.DB.quickCheck();
-								url += "&qc=" + (ok ? "1" : "0");
-								this._debugDBIntegrityChecked = true;
-							}
-						}
-						catch (e) {
-							Zotero.logError(e);
-						}
-					}
-				}
-			}
-			
 			// Send list of installed styles
 			var styles = Zotero.Styles.getAll();
 			var styleTimestamps = [];
