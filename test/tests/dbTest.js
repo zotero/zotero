@@ -309,11 +309,18 @@ describe("Zotero.DB", function() {
 			yield Zotero.DB.queryAsync("DROP TABLE " + tmpTable);
 		});
 		
-		it("should time out on nested transactions", function* () {
+		it("should time out on nested transactions", async function () {
 			var e;
-			yield Zotero.DB.executeTransaction(function* () {
-				e = yield getPromiseError(
-					Zotero.DB.executeTransaction(function* () {}).timeout(250)
+			await Zotero.DB.executeTransaction(async function () {
+				e = await getPromiseError(
+					Promise.race([
+						Zotero.Promise.delay(250).then(() => {
+							var e = new Error;
+							e.name = "TimeoutError";
+							throw e;
+						}),
+						Zotero.DB.executeTransaction(async function () {})
+					])
 				);
 			});
 			assert.ok(e);
