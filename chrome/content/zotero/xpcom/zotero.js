@@ -172,25 +172,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		this.uiReadyDeferred = Zotero.Promise.defer();
 		this.uiReadyPromise = this.uiReadyDeferred.promise;
 		
-		// Add a function to Zotero.Promise to check whether a value is still defined, and if not
-		// to throw a specific error that's ignored by the unhandled rejection handler in
-		// bluebird.js. This allows for easily cancelling promises when they're no longer
-		// needed, for example after a binding is destroyed.
-		//
-		// Example usage:
-		//
-		// getAsync.tap(() => Zotero.Promise.check(this.mode))
-		//
-		// If the binding is destroyed while getAsync() is being resolved and this.mode no longer
-		// exists, subsequent lines won't be run, and nothing will be logged to the console.
-		this.Promise.check = function (val) {
-			if (!val && val !== 0) {
-				let e = new Error;
-				e.name = "ZoteroPromiseInterrupt";
-				throw e;
-			}
-		};
-		
 		if (options) {
 			let opts = [
 				'openPane',

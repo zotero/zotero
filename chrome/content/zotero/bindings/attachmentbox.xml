@@ -306,8 +306,9 @@
 					// Page count
 					if (this.displayPages) {
 						Zotero.Fulltext.getPages(this.item.id)
-						.tap(() => Zotero.Promise.check(this.item))
 						.then(function (pages) {
+							if (!this.item) return;
+							
 							pages = pages ? pages.total : null;
 							if (pages) {
 								this._id("pages-label").value = Zotero.getString('itemFields.pages')
@@ -337,8 +338,9 @@
 						}
 						else {
 							this.item.attachmentModificationTime
-							.tap(() => Zotero.Promise.check(this._id))
 							.then(function (mtime) {
+								if (!this._id) return;
+								
 								if (mtime) {
 									this._id("dateModified").value = new Date(mtime).toLocaleString();
 								}
@@ -353,10 +355,10 @@
 					// Full-text index information
 					if (this.displayIndexed) {
 						this.updateItemIndexedState()
-						.tap(() => Zotero.Promise.check(this.item))
 						.then(function () {
+							if (!this.item) return;
 							indexStatusRow.hidden = false;
-						});
+						}.bind(this));
 					}
 					else {
 						indexStatusRow.hidden = true;
@@ -533,8 +535,9 @@
 						var indexStatus = this._id('index-status');
 						var reindexButton = this._id('reindex');
 						
-						var status = yield Zotero.Fulltext.getIndexedState(this.item)
-							.tap(() => Zotero.Promise.check(this.item));
+						var status = yield Zotero.Fulltext.getIndexedState(this.item);
+						if (!this.item) return;
+						
 						var str = 'fulltext.indexState.';
 						switch (status) {
 							case Zotero.Fulltext.INDEX_STATE_UNAVAILABLE:
@@ -563,8 +566,8 @@
 						
 						var show = false;
 						if (this.editable) {
-							show = yield Zotero.Fulltext.canReindex(this.item)
-								.tap(() => Zotero.Promise.check(this.item));
+							show = yield Zotero.Fulltext.canReindex(this.item);
+							if (!this.item) return;
 						}
 						
 						if (show) {

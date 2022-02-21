@@ -21,7 +21,7 @@ Promise.defer = function() {
 }
 // TEMP: Only turn on if debug logging enabled?
 Promise.onPossiblyUnhandledRejection((e, promise) => {
-		if (e.name == 'ZoteroPromiseInterrupt' || e.handledRejection) {
+		if (e.handledRejection) {
 			return;
 		}
 
