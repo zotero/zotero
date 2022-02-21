@@ -1694,8 +1694,8 @@ Zotero.Utilities.Internal = {
 	 * If has no children, returns a <menuitem> element, otherwise <menu>.
 	 * 
 	 * @param {Library|Collection} libraryOrCollection
-	 * @param {Node<menupopup>} elem parent element
-	 * @param {Zotero.Library|Zotero.Collection} Currently selected item (displays as checked)
+	 * @param {Node<menupopup>} elem Parent element
+	 * @param {Zotero.Library|Zotero.Collection} currentTarget Currently selected item (displays as checked)
 	 * @param {Function} clickAction function to execute on clicking the menuitem.
 	 * 		Receives the event and libraryOrCollection for given item.
 	 * @param {Function} disabledPred If provided, called on each library/collection

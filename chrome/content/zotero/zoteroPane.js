@@ -3095,8 +3095,8 @@ var ZoteroPane = new function()
 	this.buildAddToCollectionMenu = function (event) {
 		if (event.target.id !== 'zotero-add-to-collection-popup') return;
 
-		let popup = document.querySelector('#zotero-add-to-collection-popup');
-		let separator = popup.querySelector('#zotero-add-to-collection-separator');
+		let popup = document.getElementById('zotero-add-to-collection-popup');
+		let separator = document.getElementById('zotero-add-to-collection-separator');
 		while (popup.childElementCount > 2) {
 			popup.removeChild(popup.firstElementChild);
 		}
@@ -3110,7 +3110,7 @@ var ZoteroPane = new function()
 				null,
 				(event, collection) => {
 					if (event.target.tagName == 'menuitem') {
-						this.addItemsToCollection(collection);
+						this.addSelectedItemsToCollection(collection);
 						event.stopPropagation();
 					}
 				},
@@ -3123,11 +3123,14 @@ var ZoteroPane = new function()
 	};
 
 
-	this.addItemsToCollection = async function (collection, createNew = false) {
+	this.addSelectedItemsToCollection = async function (collection, createNew = false) {
 		// Get items first because newCollection() will deselect
 		let items = Zotero.Items.keepParents(this.getSelectedItems());
 
 		if (createNew) {
+			if (collection) {
+				throw new Error('collection must be null if createNew is true');
+			}
 			let id = await this.newCollection();
 			collection = Zotero.Collections.get(id);
 		}
