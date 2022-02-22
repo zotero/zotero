@@ -75,7 +75,7 @@ describe("Zotero.Notifier", function () {
 			}.bind(this), { waitTimeout: 1000 });
 			
 			await promise1;
-			assert.isTrue(promise2.isRejected());
+			assert.ok(await getPromiseError(promise2));
 		});
 	});
 	
