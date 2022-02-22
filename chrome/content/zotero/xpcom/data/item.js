@@ -3743,9 +3743,10 @@ Zotero.Item.prototype.getFileSize = async function () {
 	}
 
 	if (this.isFileAttachment()) {
-		return Zotero.Attachments.getTotalFileSize(this)
+		this._fileSize = Zotero.Attachments.getTotalFileSize(this)
 			// getTotalFileSize() throws when file is gone/unreadable
 			.catch(_ => 0);
+		return this._fileSize;
 	}
 
 	let childIDs = [
@@ -3764,8 +3765,14 @@ Zotero.Item.prototype.getFileSizeCached = function () {
 };
 
 
-Zotero.Item.prototype.clearFileSize = function () {
+Zotero.Item.prototype.clearFileSize = async function () {
 	this._fileSize = null;
+	let childIDs = [
+		...(this.isAttachment() ? [] : this.getAttachments(true)),
+		...(this.isNote() ? [] : this.getNotes(true))
+	];
+	let children = await Zotero.Items.getAsync(childIDs);
+	await Promise.all(children.map(child => child.clearFileSize()));
 };
 
 

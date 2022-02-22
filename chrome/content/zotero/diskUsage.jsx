@@ -10,36 +10,58 @@ const Icons = require('components/icons');
 class DiskUsageTable extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = { rows: [] };
+		this.state = { rows: [], loading: true };
 	}
 
 	async loadItems() {
+		this.props.onLoadBegin();
+
 		let items = await Zotero.Items.getAll(this.props.libraryID, true, true);
 		let rows = [];
-		this.props.onLoadBegin();
-		await Promise.all(
-			items.map(async (item) => {
-				let size = await item.getFileSize();
-				if (size > 0) {
-					let row = {
-						item,
-						size: size,
-						formattedSize: Zotero.File.formatFileSize(size)
-					};
-					Zotero.Utilities.Internal.insertSorted(rows, row, x => -x.size);
-					this.setState({ rows, empty: false });
-					if (this._tree) {
-						this._tree.invalidate();
-					}
-				}
-			})
-		);
 
-		if (!items.length) {
-			this.setState({ empty: true });
+		// Add all items to the list using possibly cached sizes
+		await Promise.all(items.map(async (item) => {
+			await this._insertItem(item, rows);
+		}));
+		this.setState({ rows, loading: false });
+
+		// Main load is done
+		this.props.onLoadEnd();
+
+		// Wait a bit and recalculate sizes without cache
+		await Zotero.Promise.delay(500);
+		await Promise.all(items.map(async (item) => {
+			await item.clearFileSize();
+			await this._insertItem(item, rows, true);
+		}));
+		this.setState({ rows });
+		this._tree.invalidate();
+	}
+
+	async _insertItem(item, rows, checkForExisting = false) {
+		let size = await item.getFileSize();
+
+		if (checkForExisting) {
+			let oldIndex = rows.findIndex(other => other.item === item);
+			if (oldIndex !== -1) {
+				if (rows[oldIndex].size === size) {
+					return;
+				}
+
+				// If sizes are different, first remove the old item
+				// before we add the new one below
+				rows.splice(oldIndex, 1);
+			}
 		}
 
-		this.props.onLoadEnd();
+		if (size > 0) {
+			let row = {
+				item,
+				size: size,
+				formattedSize: Zotero.File.formatFileSize(size)
+			};
+			Zotero.Utilities.Internal.insertSorted(rows, row, x => -x.size);
+		}
 	}
 
 	componentDidMount() {
@@ -115,7 +137,14 @@ class DiskUsageTable extends React.Component {
 	};
 
 	render() {
-		if (this.state.empty) {
+		if (this.state.loading) {
+			return (
+				<div className={"items-tree-message"}>
+					<FormattedMessage id="zotero.general.loading" />
+				</div>
+			);
+		}
+		else if (!this.state.rows.length) {
 			return (
 				<div className={"items-tree-message"}>
 					<FormattedMessage id="zotero.diskUsageDialog.noItems" />
@@ -168,7 +197,7 @@ class DiskUsageTable extends React.Component {
 Zotero.DiskUsage = {
 	libraryID: Zotero.Libraries.userLibraryID,
 
-	async onLoad() {
+	onLoad() {
 		let libraryMenu = document.querySelector('#disk-usage-library-list');
 		let libraries = Zotero.Libraries.getAll().filter(lib => lib.libraryType !== 'feed');
 		Zotero.Utilities.Internal.buildLibraryMenu(
