@@ -30,7 +30,7 @@ const ReactDOM = require('react-dom');
 const { IntlProvider } = require('react-intl');
 const LibraryTree = require('./libraryTree');
 const VirtualizedTable = require('components/virtualized-table');
-const { renderCell } = VirtualizedTable;
+const { renderCell, formatColumnName } = VirtualizedTable;
 const Icons = require('components/icons');
 const { getDOMElement } = Icons;
 const { COLUMNS } = require('./itemTreeColumns');
@@ -3593,7 +3593,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		for (let i = 0; i < columns.length; i++) {
 			const column = columns[i];
 			if (column.ignoreInColumnPicker === true) continue;
-			let label = Zotero.Intl.strings[column.label] || column.label;
+			let label = formatColumnName(column);
 			let menuitem = doc.createElementNS(ns, 'menuitem');
 			menuitem.setAttribute('type', 'checkbox');
 			menuitem.setAttribute('label', label);
@@ -3659,7 +3659,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					secondaryField = sortFields[1];
 				}
 				
-				const primaryFieldLabel = Zotero.Intl.strings[columns.find(c => c.dataKey == primaryField).label];
+				const primaryFieldLabel = formatColumnName(columns.find(c => c.dataKey == primaryField));
 				
 				const sortMenu = doc.createElementNS(ns, 'menu');
 				sortMenu.setAttribute('label',
@@ -3687,7 +3687,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 						continue;
 					}
 					let column = columns.find(c => c.dataKey == field);
-					let label = Zotero.Intl.strings[column.label] || column.label;
+					let label = formatColumnName(column);
 					
 					let sortMenuItem = doc.createElementNS(ns, 'menuitem');
 					sortMenuItem.setAttribute('fieldName', field);

@@ -54,7 +54,7 @@ const COLUMNS = [
 		dataKey: "title",
 		primary: true,
 		defaultIn: new Set(["default", "feed"]),
-		label: "zotero.items.title_column",
+		label: "itemFields.title",
 		ignoreInColumnPicker: true,
 		flex: 4,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
@@ -68,7 +68,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "itemType",
-		label: "zotero.items.type_column",
+		label: "zotero.items.itemType",
 		width: "40",
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
@@ -76,7 +76,7 @@ const COLUMNS = [
 		dataKey: "date",
 		defaultIn: new Set(["feed"]),
 		defaultSort: -1,
-		label: "zotero.items.date_column",
+		label: "itemFields.date",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
@@ -90,13 +90,13 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "publisher",
-		label: "zotero.items.publisher_column",
+		label: "itemFields.publisher",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
 	{
 		dataKey: "publicationTitle",
-		label: "zotero.items.publication_column",
+		label: "itemFields.publicationTitle",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
@@ -104,14 +104,14 @@ const COLUMNS = [
 		dataKey: "journalAbbreviation",
 		disabledIn: "feed",
 		submenu: true,
-		label: "zotero.items.journalAbbr_column",
+		label: "itemFields.journalAbbreviation",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
 	{
 		dataKey: "language",
 		submenu: true,
-		label: "zotero.items.language_column",
+		label: "itemFields.language",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
@@ -120,7 +120,7 @@ const COLUMNS = [
 		disabledIn: "feed",
 		defaultSort: -1,
 		submenu: true,
-		label: "zotero.items.accessDate_column",
+		label: "itemFields.accessDate",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
@@ -128,7 +128,7 @@ const COLUMNS = [
 		dataKey: "libraryCatalog",
 		disabledIn: "feed",
 		submenu: true,
-		label: "zotero.items.libraryCatalog_column",
+		label: "itemFields.libraryCatalog",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
@@ -136,14 +136,14 @@ const COLUMNS = [
 		dataKey: "callNumber",
 		disabledIn: "feed",
 		submenu: true,
-		label: "zotero.items.callNumber_column",
+		label: "itemFields.callNumber",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
 	{
 		dataKey: "rights",
 		submenu: true,
-		label: "zotero.items.rights_column",
+		label: "itemFields.rights",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
@@ -151,7 +151,7 @@ const COLUMNS = [
 		dataKey: "dateAdded",
 		defaultSort: -1,
 		disabledIn: "feed",
-		label: "zotero.items.dateAdded_column",
+		label: "itemFields.dateAdded",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
@@ -167,7 +167,7 @@ const COLUMNS = [
 		dataKey: "archive",
 		disabledIn: "feed",
 		submenu: true,
-		label: "zotero.items.archive_column",
+		label: "itemFields.archive",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
@@ -175,7 +175,7 @@ const COLUMNS = [
 		dataKey: "archiveLocation",
 		disabledIn: "feed",
 		submenu: true,
-		label: "zotero.items.archiveLocation_column",
+		label: "itemFields.archiveLocation",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
@@ -183,7 +183,7 @@ const COLUMNS = [
 		dataKey: "place",
 		disabledIn: "feed",
 		submenu: true,
-		label: "zotero.items.place_column",
+		label: "itemFields.place",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
@@ -191,7 +191,7 @@ const COLUMNS = [
 		dataKey: "volume",
 		disabledIn: "feed",
 		submenu: true,
-		label: "zotero.items.volume_column",
+		label: "itemFields.volume",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
@@ -199,7 +199,7 @@ const COLUMNS = [
 		dataKey: "edition",
 		disabledIn: "feed",
 		submenu: true,
-		label: "zotero.items.edition_column",
+		label: "itemFields.edition",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
@@ -207,7 +207,7 @@ const COLUMNS = [
 		dataKey: "pages",
 		disabledIn: "feed",
 		submenu: true,
-		label: "zotero.items.pages_column",
+		label: "itemFields.pages",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
@@ -215,7 +215,7 @@ const COLUMNS = [
 		dataKey: "issue",
 		disabledIn: "feed",
 		submenu: true,
-		label: "zotero.items.issue_column",
+		label: "itemFields.issue",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
@@ -223,7 +223,7 @@ const COLUMNS = [
 		dataKey: "series",
 		disabledIn: "feed",
 		submenu: true,
-		label: "zotero.items.series_column",
+		label: "itemFields.series",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
@@ -231,7 +231,7 @@ const COLUMNS = [
 		dataKey: "seriesTitle",
 		disabledIn: "feed",
 		submenu: true,
-		label: "zotero.items.seriesTitle_column",
+		label: "itemFields.seriesTitle",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
@@ -239,7 +239,7 @@ const COLUMNS = [
 		dataKey: "court",
 		disabledIn: "feed",
 		submenu: true,
-		label: "zotero.items.court_column",
+		label: "itemFields.court",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
@@ -247,7 +247,7 @@ const COLUMNS = [
 		dataKey: "medium",
 		disabledIn: "feed",
 		submenu: true,
-		label: "zotero.items.medium_column",
+		label: "itemFields.medium",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
@@ -255,7 +255,7 @@ const COLUMNS = [
 		dataKey: "genre",
 		disabledIn: "feed",
 		submenu: true,
-		label: "zotero.items.genre_column",
+		label: "itemFields.genre",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
@@ -263,7 +263,7 @@ const COLUMNS = [
 		dataKey: "system",
 		disabledIn: "feed",
 		submenu: true,
-		label: "zotero.items.system_column",
+		label: "itemFields.system",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
@@ -271,14 +271,14 @@ const COLUMNS = [
 		dataKey: "shortTitle",
 		disabledIn: "feed",
 		submenu: true,
-		label: "zotero.items.shortTitle_column",
+		label: "itemFields.shortTitle",
 		flex: 2,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
 	{
 		dataKey: "extra",
 		disabledIn: "feed",
-		label: "zotero.items.extra_column",
+		label: "itemFields.extra",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
