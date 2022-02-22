@@ -77,6 +77,12 @@ var Scaffold = new function () {
 	this.onLoad = async function (e) {
 		if (e.target !== document) return;
 		_document = document;
+
+		if (Zotero.isWin) {
+			// Hack to fix Windows toolbar
+			let toolbar = document.getElementById('zotero-toolbar');
+			toolbar.className = '';
+		}
 		
 		_browser = document.getElementById('browser');
 

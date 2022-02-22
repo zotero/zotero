@@ -28,8 +28,9 @@
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform-version/content/style.css"?>
-<?xul-overlay href="chrome://zotero/content/containers/containers.xul"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
 
+<?xul-overlay href="chrome://zotero/content/containers/containers.xul"?>
 <?xul-overlay href="chrome://zotero/content/standalone/editMenuOverlay.xul"?>
 <?xul-overlay href="chrome://zotero-platform/content/standalone/menuOverlay.xul"?>
 
@@ -223,27 +224,29 @@
 			</menu>
 		</menubar>
 
-		<toolbar id="zotero-toolbar" align="center" class="toolbar">
-			<toolbarbutton id="tb-load" tooltiptext="&scaffold.toolbar.load.label;" command="cmd_load" class="zotero-tb-button" />
-			<toolbarbutton id="tb-save" tooltiptext="&scaffold.toolbar.save.label;" oncommand="Scaffold.save()" class="zotero-tb-button" />
-			<toolbarbutton id="tb-saveToZotero" tooltiptext="&scaffold.toolbar.saveToZotero.label;" oncommand="Scaffold.save(true)" class="zotero-tb-button" />
-			<toolbarseparator/>
-			<toolbarbutton id="tb-detect" tooltiptext="&scaffold.toolbar.detect.label;" oncommand="Scaffold.run('detect')" class="zotero-tb-button" />
-			<toolbarbutton id="tb-do" tooltiptext="&scaffold.toolbar.do.label;" oncommand="Scaffold.run('do')" class="zotero-tb-button" />
-			<toolbarseparator/>
-			<toolbarbutton id="tb-template" observes="code-tab-only" tooltiptext="&scaffold.toolbar.template.label;" class="zotero-tb-button" type="menu">
-				<menupopup>
-					<menuitem label="&scaffold.toolbar.template.newWeb.label;" oncommand="Scaffold.addTemplate('newWeb')"/>
-					<menu label="&scaffold.toolbar.template.scrape.label;">
-						<menupopup id="menu_template_scrapePopup">
-							<menuitem id="tb-template-scrape-em" label="Embedded Metadata" oncommand="Scaffold.addTemplate('scrapeEM')"/>
-							<menuitem id="tb-template-scrape-ris" label="RIS" oncommand="Scaffold.addTemplate('scrapeRIS')"/>
-							<menuitem id="tb-template-scrape-bibtex" label="BibTeX" oncommand="Scaffold.addTemplate('scrapeBibTeX')"/>
-							<menuitem id="tb-template-scrape-marc" label="MARC" oncommand="Scaffold.addTemplate('scrapeMARC')"/>
-						</menupopup>
-					</menu>
-				</menupopup>
-			</toolbarbutton>
+		<toolbar id="zotero-toolbar" class="toolbar toolbar-primary">
+			<hbox id="scaffold-toolbar" align="center">
+				<toolbarbutton id="tb-load" tooltiptext="&scaffold.toolbar.load.label;" command="cmd_load" class="zotero-tb-button" />
+				<toolbarbutton id="tb-save" tooltiptext="&scaffold.toolbar.save.label;" oncommand="Scaffold.save()" class="zotero-tb-button" />
+				<toolbarbutton id="tb-saveToZotero" tooltiptext="&scaffold.toolbar.saveToZotero.label;" oncommand="Scaffold.save(true)" class="zotero-tb-button" />
+				<toolbarseparator/>
+				<toolbarbutton id="tb-detect" tooltiptext="&scaffold.toolbar.detect.label;" oncommand="Scaffold.run('detect')" class="zotero-tb-button" />
+				<toolbarbutton id="tb-do" tooltiptext="&scaffold.toolbar.do.label;" oncommand="Scaffold.run('do')" class="zotero-tb-button" />
+				<toolbarseparator/>
+				<toolbarbutton id="tb-template" observes="code-tab-only" tooltiptext="&scaffold.toolbar.template.label;" class="zotero-tb-button" type="menu">
+					<menupopup>
+						<menuitem label="&scaffold.toolbar.template.newWeb.label;" oncommand="Scaffold.addTemplate('newWeb')"/>
+						<menu label="&scaffold.toolbar.template.scrape.label;">
+							<menupopup id="menu_template_scrapePopup">
+								<menuitem id="tb-template-scrape-em" label="Embedded Metadata" oncommand="Scaffold.addTemplate('scrapeEM')"/>
+								<menuitem id="tb-template-scrape-ris" label="RIS" oncommand="Scaffold.addTemplate('scrapeRIS')"/>
+								<menuitem id="tb-template-scrape-bibtex" label="BibTeX" oncommand="Scaffold.addTemplate('scrapeBibTeX')"/>
+								<menuitem id="tb-template-scrape-marc" label="MARC" oncommand="Scaffold.addTemplate('scrapeMARC')"/>
+							</menupopup>
+						</menu>
+					</menupopup>
+				</toolbarbutton>
+			</hbox>
 		</toolbar>
 		<hbox flex="1">
 			<tabbox id="left-tabbox" flex="2" width="300">
