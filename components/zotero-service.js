@@ -611,42 +611,49 @@ ZoteroCommandLineHandler.prototype = {
 				}
 			}
 			if (param) {
-				addInitCallback(function (Zotero) {
+				addInitCallback(async function (Zotero) {
 					// Wait to handle things that require the UI until after it's loaded
-					Zotero.uiReadyPromise
-					.then(function () {
-						var file = Zotero.File.pathToFile(param);
-						
-						if(file.leafName.substr(-4).toLowerCase() === ".csl"
-								|| file.leafName.substr(-8).toLowerCase() === ".csl.txt") {
-							// Install CSL file
-							Zotero.Styles.install({ file: file.path }, file.path);
-						} else {
-							// Ask before importing
-							var checkState = {
-								value: Zotero.Prefs.get('import.createNewCollection.fromFileOpenHandler')
-							};
-							if (Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-									.getService(Components.interfaces.nsIPromptService)
-									.confirmCheck(null, Zotero.getString('ingester.importFile.title'),
-									Zotero.getString('ingester.importFile.text', [file.leafName]),
-									Zotero.getString('ingester.importFile.intoNewCollection'),
-									checkState)) {
-								Zotero.Prefs.set(
-									'import.createNewCollection.fromFileOpenHandler', checkState.value
-								);
-								
-								// Perform file import in front window
-								var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-								   .getService(Components.interfaces.nsIWindowMediator);
-								var browserWindow = wm.getMostRecentWindow("navigator:browser");
-								browserWindow.Zotero_File_Interface.importFile({
-									file,
-									createNewCollection: checkState.value
-								});
-							}
+					await Zotero.uiReadyPromise;
+					var file = Zotero.File.pathToFile(param);
+					
+					if (file.leafName.substr(-4).toLowerCase() === ".csl"
+							|| file.leafName.substr(-8).toLowerCase() === ".csl.txt") {
+						// Install CSL file
+						Zotero.Styles.install({ file: file.path }, file.path);
+					}
+					else if (file.leafName.substr(-4).toLowerCase() === ".pdf") {
+						let item = await Zotero.Attachments.importFromFile({
+							file,
+							libraryID: Zotero.Libraries.userLibraryID
+						});
+						await Zotero.getActiveZoteroPane().selectItem(item.id);
+						Zotero.RecognizePDF.autoRecognizeItems([item]);
+					}
+					else {
+						// Ask before importing
+						var checkState = {
+							value: Zotero.Prefs.get('import.createNewCollection.fromFileOpenHandler')
+						};
+						if (Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+								.getService(Components.interfaces.nsIPromptService)
+								.confirmCheck(null, Zotero.getString('ingester.importFile.title'),
+								Zotero.getString('ingester.importFile.text', [file.leafName]),
+								Zotero.getString('ingester.importFile.intoNewCollection'),
+								checkState)) {
+							Zotero.Prefs.set(
+								'import.createNewCollection.fromFileOpenHandler', checkState.value
+							);
+							
+							// Perform file import in front window
+							var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+								.getService(Components.interfaces.nsIWindowMediator);
+							var browserWindow = wm.getMostRecentWindow("navigator:browser");
+							browserWindow.Zotero_File_Interface.importFile({
+								file,
+								createNewCollection: checkState.value
+							});
 						}
-					});
+					}
 				});
 			}
 		}
