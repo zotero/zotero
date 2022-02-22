@@ -1068,10 +1068,7 @@ class VirtualizedTable extends React.Component {
 
 	_renderHeaderCells = () => {
 		return this._getVisibleColumns().map((column, index) => {
-			let columnName = column.label;
-			if (column.label in Zotero.Intl.strings) {
-				columnName = this.props.intl.formatMessage({ id: column.label });
-			}
+			let columnName = formatColumnName(column);
 			let label = columnName;
 			if (column.iconLabel) {
 				label = column.iconLabel;
@@ -1570,9 +1567,25 @@ function makeRowRenderer(getRowData) {
 	};
 }
 
+function formatColumnName(column) {
+	if (column.label in Zotero.Intl.strings) {
+		return Zotero.Intl.strings[column.label];
+	}
+	else if (/^[^\s]+\w\.\w[^\s]+$/.test(column.label)) {
+		try {
+			return Zotero.getString(column.label);
+		}
+		catch (e) {
+			// ignore missing string
+		}
+	}
+	return column.label;
+}
+
 module.exports = injectIntl(VirtualizedTable, { forwardRef: true });
 module.exports.TreeSelection = TreeSelection;
 module.exports.TreeSelectionStub = TreeSelectionStub;
 module.exports.renderCell = renderCell;
 module.exports.renderCheckboxCell = renderCheckboxCell;
 module.exports.makeRowRenderer = makeRowRenderer;
+module.exports.formatColumnName = formatColumnName;
