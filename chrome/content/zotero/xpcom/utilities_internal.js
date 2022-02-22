@@ -1693,16 +1693,19 @@ Zotero.Utilities.Internal = {
 	 * Create a libraryOrCollection DOM tree to place in <menupopup> element.
 	 * If has no children, returns a <menuitem> element, otherwise <menu>.
 	 * 
-	 * @param {Library/Collection} libraryOrCollection
-	 * @param {Node<menupopup>} elem parent element
-	 * @param {function} clickAction function to execute on clicking the menuitem.
+	 * @param {Library|Collection} libraryOrCollection
+	 * @param {Node<menupopup>} elem Parent element
+	 * @param {Zotero.Library|Zotero.Collection} currentTarget Currently selected item (displays as checked)
+	 * @param {Function} clickAction function to execute on clicking the menuitem.
 	 * 		Receives the event and libraryOrCollection for given item.
+	 * @param {Function} disabledPred If provided, called on each library/collection
+	 * 		to determine whether disabled
 	 * 
-	 * @return {Node<menuitem>/Node<menu>} appended node
+	 * @return {Node<menuitem>|Node<menu>} appended node
 	 */
-	createMenuForTarget: function(libraryOrCollection, elem, currentTarget, clickAction) {
+	createMenuForTarget: function(libraryOrCollection, elem, currentTarget, clickAction, disabledPred) {
 		var doc = elem.ownerDocument;
-		function _createMenuitem(label, value, icon, command) {
+		function _createMenuitem(label, value, icon, command, disabled) {
 			let menuitem = doc.createElement('menuitem');
 			menuitem.setAttribute("label", label);
 			menuitem.setAttribute("type", "checkbox");
@@ -1711,6 +1714,7 @@ Zotero.Utilities.Internal = {
 			}
 			menuitem.setAttribute("value", value);
 			menuitem.setAttribute("image", icon);
+			menuitem.setAttribute("disabled", disabled);
 			menuitem.addEventListener('command', command);
 			menuitem.classList.add('menuitem-iconic');
 			return menuitem
@@ -1722,7 +1726,11 @@ Zotero.Utilities.Internal = {
 			menu.setAttribute("value", value);
 			menu.setAttribute("image", icon);
 			// Allow click on menu itself to select a target
-			menu.addEventListener('click', command);
+			menu.addEventListener('click', (event) => {
+				if (event.target == menu) {
+					command(event);
+				}
+			});
 			menu.classList.add('menu-iconic');
 			let menupopup = doc.createElement('menupopup');
 			menu.appendChild(menupopup);
@@ -1739,7 +1747,8 @@ Zotero.Utilities.Internal = {
 			imageSrc,
 			function (event) {
 				clickAction(event, libraryOrCollection);
-			}
+			},
+			disabledPred && disabledPred(libraryOrCollection)
 		);
 		
 		var collections;
@@ -1769,7 +1778,7 @@ Zotero.Utilities.Internal = {
 		menupopup.appendChild(doc.createElement('menuseparator'));
 		for (let collection of collections) {
 			let collectionMenu = this.createMenuForTarget(
-				collection, elem, currentTarget, clickAction
+				collection, elem, currentTarget, clickAction, disabledPred
 			);
 			menupopup.appendChild(collectionMenu);
 		}
