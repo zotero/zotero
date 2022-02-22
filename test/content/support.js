@@ -475,7 +475,7 @@ function createUnsavedDataObject(objectType, params = {}) {
 		obj.addCondition('title', 'isNot', Zotero.Utilities.randomString());
 	}
 	
-	Zotero.Utilities.assignProps(obj, params, allowedParams);
+	Zotero.Utilities.Internal.assignProps(obj, params, allowedParams);
 	
 	return obj;
 }
