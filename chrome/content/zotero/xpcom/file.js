@@ -1518,20 +1518,22 @@ Zotero.File = new function(){
 	 */
 	this.formatFileSize = function (size) {
 		let suffixString = 'Bytes';
-		// Use base-10 prefixes for consistency with most systems
-		if (size > 10e9) {
+		let base = Zotero.isWin ? 1024 : 1000;
+		if (size > base ** 3) {
 			suffixString = 'Gigabytes';
-			size /= 10e9;
+			size /= base ** 3;
+			size = size.toFixed(2);
 		}
-		else if (size > 10e6) {
+		else if (size > base ** 2) {
 			suffixString = 'Megabytes';
-			size /= 10e6;
+			size /= base ** 2;
+			size = size.toFixed(1);
 		}
-		else if (size > 10e3) {
+		else if (size > base) {
 			suffixString = 'Kilobytes';
-			size /= 10e3;
+			size /= base;
+			size = size.toFixed(0);
 		}
-		size = Math.round(size);
 		return Zotero.getString(`general.n${suffixString}`, size);
 	};
 }
