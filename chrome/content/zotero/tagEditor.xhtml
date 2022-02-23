@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform-version/content/style.css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
+
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<dialog id="zotero-tag-editor-dialog"
+		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		xmlns:html="http://www.w3.org/1999/xhtml"
+		buttons="accept,cancel"
+		minwidth="300"
+		onload="TagEditorDialog.init()"
+		ondialogcancel="TagEditorDialog.cancel()"
+		ondialogaccept="TagEditorDialog.save()">
+	
+	<script src="include.js"/>
+	<script src="tagEditor.js"/>
+	
+	<html:div id="tag-editor-container" />
+</dialog>

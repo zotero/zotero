@@ -245,9 +245,8 @@
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit		"Synced tags must be shorter than 256 characters.">
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete			"You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
 <!ENTITY zotero.sync.longTagFixer.split					"Split">
-<!ENTITY zotero.sync.longTagFixer.splitAtThe				"Split at the">
-<!ENTITY zotero.sync.longTagFixer.character				"character">
-<!ENTITY zotero.sync.longTagFixer.characters				"characters">
+<!ENTITY zotero.sync.longTagFixer.splitAction			"Split…">
+<!ENTITY zotero.sync.longTagFixer.splitOn				"Split on">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved	"Unchecked tags will not be saved.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted			"The tag will be deleted from all items.">
 

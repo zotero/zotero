@@ -1222,12 +1222,16 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 								let oldTagIDs = yield Zotero.Tags.getLongTagsInLibrary(libraryID);
 								for (let oldTagID of oldTagIDs) {
 									let oldTag = Zotero.Tags.getName(oldTagID);
+									let dataIn = {
+										oldTag,
+										isLongTag: true
+									};
 									let dataOut = { result: null };
 									lastWin.openDialog(
-										'chrome://zotero/content/longTagFixer.xul',
+										'chrome://zotero/content/tagEditor.xhtml',
 										'',
 										'chrome,modal,centerscreen',
-										oldTag,
+										dataIn,
 										dataOut
 									);
 									// If dialog was cancelled, stop
@@ -1258,7 +1262,11 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 											yield Zotero.DB.executeTransaction(async function () {
 												for (let itemID of itemIDs) {
 													let item = await Zotero.Items.getAsync(itemID);
-													item.replaceTag(oldTag, dataOut.result.tag);
+													if (dataOut.result.tags.length !== 1) {
+														throw new Error('Expected one tag from edit op');
+													}
+													let tag = dataOut.result.tags[0];
+													item.replaceTag(oldTag, tag);
 													await item.save();
 												}
 											});

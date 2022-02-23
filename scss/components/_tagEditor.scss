@@ -1,0 +1,43 @@
+.tag-editor {
+    textarea {
+        width: 100%;
+        resize: none;
+    }
+
+    .split-on {
+        margin-left: 1em;
+    }
+
+    input[type="radio"] {
+        margin: 0.5em;
+    }
+
+    #splitter-table {
+        margin: 5px 0;
+        height: 200px;
+        border: 1px solid gray;
+        background-color: white;
+    }
+
+    .original-tag {
+        margin: 0 10px;
+    }
+
+    .op-editor {
+        margin: 5px 10px;
+    }
+
+    .virtualized-table-body .cell {
+        border: none !important;
+    }
+
+    .editor-length {
+        text-align: right;
+        margin-top: 5px;
+        font-weight: bold;
+    }
+
+    .editor-length.invalid {
+        color: red;
+    }
+}
