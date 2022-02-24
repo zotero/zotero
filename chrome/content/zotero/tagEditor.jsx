@@ -147,15 +147,17 @@ class Splitter extends React.Component {
 					isSelectable={() => false}
 				/>
 
-				<input
-					type="button"
-					value={Zotero.Intl.strings['zotero.general.selectAll']}
-					onClick={() => this._toggleAllRows(true)}
-				/>
+				<p><FormattedMessage id="zotero.sync.longTagFixer.uncheckedTagsNotSaved" /></p>
+
 				<input
 					type="button"
 					value={Zotero.Intl.strings['zotero.general.deselectAll']}
 					onClick={() => this._toggleAllRows(false)}
+				/>
+				<input
+					type="button"
+					value={Zotero.Intl.strings['zotero.general.selectAll']}
+					onClick={() => this._toggleAllRows(true)}
 				/>
 			</div>
 		);
@@ -389,6 +391,20 @@ var TagEditorDialog = {
 	_handleTagsChange(op, tags, valid) {
 		this.op = op;
 		this.tags = tags;
-		this._dialog.getButton('accept').disabled = !valid;
+
+		let acceptButton = this._dialog.getButton('accept');
+		acceptButton.disabled = !valid;
+
+		switch (op) {
+			case 'split':
+				acceptButton.label = Zotero.getString('sync.longTagFixer.saveTags');
+				break;
+			case 'edit':
+				acceptButton.label = Zotero.getString('sync.longTagFixer.saveTag');
+				break;
+			case 'delete':
+				acceptButton.label = Zotero.getString('sync.longTagFixer.deleteTag');
+				break;
+		}
 	}
 };
