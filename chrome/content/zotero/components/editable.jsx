@@ -87,17 +87,20 @@ class Editable extends React.PureComponent {
 				onClick={ event => this.props.onClick(event) }
 				onFocus={ event => this.props.onFocus(event) }
 				onMouseDown={ event => this.props.onMouseDown(event) }
+				onContextMenu={ event => this.props.onContextMenu(event) }
 				className={ cx(this.className) }
 			>
 				{ this.isActive ? this.renderControls() : this.renderContent() }
 			</div>
 		);
 	}
+
 	static defaultProps = {
 		inputComponent: Input,
 		onClick: noop,
 		onFocus: noop,
 		onMouseDown: noop,
+		onContextMenu: noop,
 	};
 
 	static propTypes = {
@@ -108,6 +111,10 @@ class Editable extends React.PureComponent {
 		isBusy: PropTypes.bool,
 		isDisabled: PropTypes.bool,
 		isReadOnly: PropTypes.bool,
+		onClick: PropTypes.func,
+		onFocus: PropTypes.func,
+		onMouseDown: PropTypes.func,
+		onContextMenu: PropTypes.func,
 	};
 }
 

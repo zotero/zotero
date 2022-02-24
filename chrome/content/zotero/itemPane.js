@@ -309,6 +309,43 @@ var ZoteroItemPane = new function() {
 			return false;
 		}
 	}
+
+
+	this.handleSplitTag = async function (event) {
+		let oldTag = event.currentTarget.closest('menupopup').getAttribute('data-tag');
+		let dataIn = {
+			oldTag,
+			isLongTag: false
+		};
+		let dataOut = { result: null };
+		window.openDialog(
+			'chrome://zotero/content/tagEditor.xhtml',
+			'',
+			'chrome,modal,centerscreen',
+			dataIn, dataOut
+		);
+
+		if (!dataOut.result) return;
+		if (dataOut.result.op !== 'split') {
+			throw new Error('Unsupported op: ' + dataOut.result.op);
+		}
+
+		let oldTagID = Zotero.Tags.getID(oldTag);
+		for (let library of Zotero.Libraries.getAll().filter(lib => lib.editable)) {
+			let itemIDs = await Zotero.Tags.getTagItems(library.id, oldTagID);
+			await Zotero.DB.executeTransaction(async () => {
+				for (let itemID of itemIDs) {
+					let item = await Zotero.Items.getAsync(itemID);
+					for (let tag of dataOut.result.tags) {
+						item.addTag(tag);
+					}
+					item.removeTag(oldTag);
+					await item.save();
+				}
+				await Zotero.Tags.purge(oldTagID);
+			});
+		}
+	};
 	
 	
 	this.removeAllTags = async function () {

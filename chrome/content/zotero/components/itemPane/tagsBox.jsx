@@ -270,6 +270,13 @@ const TagsBox = React.forwardRef((props, ref) => {
 			event.preventDefault();
 		}
 	}
+
+	function handleContextMenu(event) {
+		let popup = document.getElementById('tags-context-menu');
+		popup.setAttribute('data-tag', event.currentTarget.closest('[data-tag]').dataset.tag);
+		popup.openPopupAtScreen(event.screenX, event.screenY);
+		event.preventDefault();
+	}
 	
 	function blurOpenField(event) {
 		if (textboxRef.current && (!event || event.target != textboxRef.current)) {
@@ -372,6 +379,7 @@ const TagsBox = React.forwardRef((props, ref) => {
 						onKeyDown={handleKeyDown}
 						onMouseDown={handleMouseDown}
 						onPaste={handlePaste}
+						onContextMenu={handleContextMenu}
 						ref={textboxRef}
 						selectOnFocus={!isMultiline}
 						value={(selected && isMultiline) ? currentValue : tag.tag}

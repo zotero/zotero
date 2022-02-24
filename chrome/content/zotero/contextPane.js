@@ -855,7 +855,6 @@ var ZoteroContextPane = new function () {
 		// Tags panel
 		var panelTags = document.createXULElement('tabpanel');
 		panelTags.setAttribute('orient', 'vertical');
-		panelTags.setAttribute('context', 'tags-context-menu');
 		panelTags.className = 'tags-pane';
 		panelTags.style.display = 'flex';
 		var div = document.createElementNS(HTML_NS, 'div');

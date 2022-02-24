@@ -1130,7 +1130,7 @@
 														</vbox>
 													</tabpanel>
 													
-													<tabpanel id="tags-pane" class="tags-pane" orient="vertical" context="tags-context-menu">
+													<tabpanel id="tags-pane" class="tags-pane" orient="vertical">
 														<html:div id="tags-box-container" class="tags-box-container"></html:div>
 													</tabpanel>
 													
@@ -1308,6 +1308,8 @@
 	<popupset>
 		<menupopup id="tags-context-menu"
 				onpopupshowing="return ZoteroItemPane.onTagsContextPopupShowing()">
+			<menuitem id="split-tag" label="&zotero.sync.longTagFixer.splitAction;"
+				oncommand="ZoteroItemPane.handleSplitTag(event)"/>
 			<menuitem id="remove-all-item-tags" label="&zotero.item.tags.removeAll;"
 				oncommand="ZoteroItemPane.removeAllTags()"/>
 		</menupopup>
