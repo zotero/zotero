@@ -611,10 +611,39 @@ ZoteroCommandLineHandler.prototype = {
 				}
 			}
 			if (param) {
-				addInitCallback(async function (Zotero) {
+				addInitCallback(async (Zotero) => {
+					function promptForImportTarget() {
+						let io = {
+							dataIn: { filename: file.leafName },
+							dataOut: {}
+						};
+
+						let win = Services.wm.getMostRecentWindow("navigator:browser");
+						win.openDialog(
+							'chrome://zotero/content/selectImportTargetDialog.xul',
+							'',
+							'chrome,modal,centerscreen',
+							io
+						);
+
+						if (io.dataOut.libraryID) {
+							Zotero.Prefs.set('import.createNewCollection.fromFileOpenHandler',
+								io.dataOut.checkboxValue);
+							return io.dataOut;
+						}
+						else {
+							return null;
+						}
+					}
+
 					// Wait to handle things that require the UI until after it's loaded
 					await Zotero.uiReadyPromise;
 					var file = Zotero.File.pathToFile(param);
+
+					// Perform import in front window
+					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+						.getService(Components.interfaces.nsIWindowMediator);
+					var browserWindow = wm.getMostRecentWindow("navigator:browser");
 					
 					if (file.leafName.substr(-4).toLowerCase() === ".csl"
 							|| file.leafName.substr(-8).toLowerCase() === ".csl.txt") {
@@ -622,35 +651,39 @@ ZoteroCommandLineHandler.prototype = {
 						Zotero.Styles.install({ file: file.path }, file.path);
 					}
 					else if (file.leafName.substr(-4).toLowerCase() === ".pdf") {
-						let item = await Zotero.Attachments.importFromFile({
-							file,
-							libraryID: Zotero.Libraries.userLibraryID
-						});
-						await Zotero.getActiveZoteroPane().selectItem(item.id);
-						Zotero.RecognizePDF.autoRecognizeItems([item]);
+						let dataOut = promptForImportTarget();
+						if (dataOut) {
+							let zp = Zotero.getActiveZoteroPane();
+							let collections = [];
+							if (dataOut.createNewCollection) {
+								let collection = await browserWindow.Zotero_File_Interface.createCollectionForImportedFile(
+									file,
+									dataOut.libraryID,
+									Zotero.getString("fileInterface.imported")
+								);
+								collections = [collection.id];
+							}
+							else if (dataOut.libraryID === zp.getSelectedLibraryID()
+									&& zp.getSelectedCollection()) {
+								collections = [zp.getSelectedCollection().id];
+							}
+
+							let item = await Zotero.Attachments.importFromFile({
+								file,
+								libraryID: dataOut.libraryID,
+								collections
+							});
+							await zp.selectItem(item.id);
+							Zotero.RecognizePDF.autoRecognizeItems([item]);
+						}
 					}
 					else {
-						// Ask before importing
-						var checkState = {
-							value: Zotero.Prefs.get('import.createNewCollection.fromFileOpenHandler')
-						};
-						if (Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-								.getService(Components.interfaces.nsIPromptService)
-								.confirmCheck(null, Zotero.getString('ingester.importFile.title'),
-								Zotero.getString('ingester.importFile.text', [file.leafName]),
-								Zotero.getString('ingester.importFile.intoNewCollection'),
-								checkState)) {
-							Zotero.Prefs.set(
-								'import.createNewCollection.fromFileOpenHandler', checkState.value
-							);
-							
-							// Perform file import in front window
-							var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-								.getService(Components.interfaces.nsIWindowMediator);
-							var browserWindow = wm.getMostRecentWindow("navigator:browser");
+						let dataOut = promptForImportTarget();
+						if (dataOut) {
 							browserWindow.Zotero_File_Interface.importFile({
 								file,
-								createNewCollection: checkState.value
+								createNewCollection: dataOut.createNewCollection,
+								libraryID: dataOut.libraryID
 							});
 						}
 					}
