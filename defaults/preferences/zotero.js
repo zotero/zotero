@@ -160,8 +160,8 @@ pref("extensions.zotero.sync.storage.groups.enabled", true);
 pref("extensions.zotero.sync.storage.downloadMode.personal", "on-sync");
 pref("extensions.zotero.sync.storage.downloadMode.groups", "on-sync");
 pref("extensions.zotero.sync.fulltext.enabled", true);
-pref("extensions.zotero.sync.reminder.setup.enabled", true);
-pref("extensions.zotero.sync.reminder.setup.lastDisplayed", "0");
+pref("extensions.zotero.sync.reminder.setUp.enabled", true);
+pref("extensions.zotero.sync.reminder.setUp.lastDisplayed", "0");
 pref("extensions.zotero.sync.reminder.autoSync.enabled", true);
 pref("extensions.zotero.sync.reminder.autoSync.lastDisplayed", "0");
 
