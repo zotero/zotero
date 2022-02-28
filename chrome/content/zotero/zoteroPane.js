@@ -2212,7 +2212,7 @@ var ZoteroPane = new function()
 						// When the API Key is deleted we need to add an observer
 						if (event === 'delete') {
 							Zotero.Prefs.set('sync.reminder.setUp.enabled', true);
-							Zotero.Prefs.set('sync.reminder.setUp.lastDisplayed', Date.now());
+							Zotero.Prefs.set('sync.reminder.setUp.lastDisplayed', Math.round(Date.now() / 1000));
 							ZoteroPane.initSyncReminders(false);
 						}
 						// When API Key is added we can remove the observer
@@ -2267,7 +2267,7 @@ var ZoteroPane = new function()
 
 
 	this.showSetUpSyncReminder = function () {
-		const sevenDays = 1000 * 60 * 60 * 24 * 7;
+		const sevenDays = 60 * 60 * 24 * 7;
 
 		// Reasons not to show reminder:
 		// - User turned reminder off
@@ -2278,8 +2278,8 @@ var ZoteroPane = new function()
 		}
 
 		// Check lastDisplayed was 7+ days ago
-		let lastDisplayed = parseInt(Zotero.Prefs.get(`sync.reminder.setUp.lastDisplayed`));
-		if (lastDisplayed > (Date.now() - sevenDays)) {
+		let lastDisplayed = Zotero.Prefs.get('sync.reminder.setUp.lastDisplayed');
+		if (lastDisplayed > Math.round(Date.now() / 1000) - sevenDays) {
 			return;
 		}
 
@@ -2289,7 +2289,7 @@ var ZoteroPane = new function()
 
 
 	this.showAutoSyncReminder = function () {
-		const sevenDays = 1000 * 60 * 60 * 24 * 7;
+		const sevenDays = 60 * 60 * 24 * 7;
 
 		// Reasons not to show reminder:
 		// - User turned reminder off
@@ -2301,13 +2301,13 @@ var ZoteroPane = new function()
 				|| Zotero.Prefs.get('sync.autoSync')
 				|| Zotero.Libraries.getAll()
 					.every(library => !library.syncable
-						|| library.lastSync.getTime() > (Date.now() - sevenDays))) {
+						|| library.lastSync.getTime() > Date.now() - 1000 * sevenDays)) {
 			return;
 		}
 
 		// Check lastDisplayed was 7+ days ago
-		let lastDisplayed = parseInt(Zotero.Prefs.get(`sync.reminder.autoSync.lastDisplayed`));
-		if (lastDisplayed > (Date.now() - sevenDays)) {
+		let lastDisplayed = Zotero.Prefs.get('sync.reminder.autoSync.lastDisplayed');
+		if (lastDisplayed > Math.round(Date.now() / 1000) - sevenDays) {
 			return;
 		}
 
@@ -2329,7 +2329,7 @@ var ZoteroPane = new function()
 		let panel = document.getElementById('sync-reminder-container');
 		const closePanel = function () {
 			panel.setAttribute('collapsed', true);
-			Zotero.Prefs.set(`sync.reminder.${reminderType}.lastDisplayed`, String(Date.now()));
+			Zotero.Prefs.set(`sync.reminder.${reminderType}.lastDisplayed`, Math.round(Date.now() / 1000));
 		};
 
 		let message = document.getElementById('sync-reminder-message');

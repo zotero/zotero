@@ -254,7 +254,7 @@ Zotero.Prefs = new function(){
 				Zotero.Sync.EventListeners.IdleListener.unregister();
 				Zotero.Prefs.set('sync.reminder.autoSync.enabled', true);
 				// We don't want to immediately display reminder so bump this value
-				Zotero.Prefs.set('sync.reminder.autoSync.lastDisplayed', Date.now());
+				Zotero.Prefs.set('sync.reminder.autoSync.lastDisplayed', Math.round(Date.now() / 1000));
 			}
 			try {
 				Zotero.getActiveZoteroPane().initSyncReminders(false);
