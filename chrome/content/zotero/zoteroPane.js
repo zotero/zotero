@@ -1946,6 +1946,9 @@ var ZoteroPane = new function()
 				}
 
 				let parent = this.itemsView.getRow(row).ref;
+				let children = [];
+				if (!parent.isNote()) children.push(...parent.getNotes(true));
+				if (!parent.isAttachment()) children.push(...parent.getAttachments(true));
 
 				if (isSelected(parent)) {
 					if (parent.deleted) {
@@ -1953,7 +1956,6 @@ var ZoteroPane = new function()
 						await parent.save();
 					}
 
-					let children = [...parent.getNotes(true), ...parent.getAttachments(true)];
 					let noneSelected = !children.some(isSelected);
 					for (let child of Zotero.Items.get(children)) {
 						if ((noneSelected || isSelected(child)) && child.deleted) {
@@ -1963,7 +1965,6 @@ var ZoteroPane = new function()
 					}
 				}
 				else {
-					let children = [...parent.getNotes(true), ...parent.getAttachments(true)];
 					for (let child of Zotero.Items.get(children)) {
 						if (isSelected(child) && child.deleted) {
 							child.deleted = false;
