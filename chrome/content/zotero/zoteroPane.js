@@ -5526,7 +5526,13 @@ var ZoteroPane = new function()
 			
 			var dir = await Zotero.File.getClosestDirectory(file);
 			if (dir) {
-				fp.displayDirectory = dir;
+				try {
+					fp.displayDirectory = dir;
+				}
+				catch (e) {
+					// Directory is invalid; ignore and go with the filesystem root
+					fp.displayDirectory = OS.Constants.Path.homeDir;
+				}
 			}
 			
 			fp.appendFilters(fp.filterAll);
