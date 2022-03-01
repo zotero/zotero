@@ -4472,7 +4472,7 @@ var ZoteroPane = new function()
 			let path = item.getFilePath();
 			if (!path) {
 				ZoteroPane_Local.showAttachmentNotFoundDialog(
-					item.id,
+					item,
 					path,
 					{
 						noLocate: true,
@@ -4561,7 +4561,7 @@ var ZoteroPane = new function()
 			
 			if (isLinkedFile || !fileSyncingEnabled) {
 				this.showAttachmentNotFoundDialog(
-					itemID,
+					item,
 					path,
 					{
 						noLocate: noLocateOnMissing,
@@ -4587,7 +4587,7 @@ var ZoteroPane = new function()
 			
 			if (!await item.getFilePathAsync()) {
 				ZoteroPane_Local.showAttachmentNotFoundDialog(
-					item.id,
+					item,
 					path,
 					{
 						noLocate: noLocateOnMissing,
@@ -4654,7 +4654,7 @@ var ZoteroPane = new function()
 		
 		if (!fileExists) {
 			this.showAttachmentNotFoundDialog(
-				attachment.id,
+				attachment,
 				path,
 				{
 					noLocate: noLocateOnMissing,
@@ -4800,9 +4800,13 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.showAttachmentNotFoundDialog = function (itemID, path, options = {}) {
+	this.showAttachmentNotFoundDialog = async function (item, path, options = {}) {
 		var { noLocate, notOnServer, linkedFile } = options;
-		
+
+		if (item.isLinkedFileAttachment() && await this.checkForLinkedFilesToRelink(item)) {
+			return;
+		}
+
 		var title = Zotero.getString('pane.item.attachments.fileNotFound.title');
 		var text = Zotero.getString(
 				'pane.item.attachments.fileNotFound.text1' + (path ? '.path' : '')
@@ -4817,7 +4821,7 @@ var ZoteroPane = new function()
 					),
 				[ZOTERO_CONFIG.CLIENT_NAME, ZOTERO_CONFIG.DOMAIN_NAME]
 			);
-		var supportURL = options.linkedFile
+		var supportURL = linkedFile
 			? 'https://www.zotero.org/support/kb/missing_linked_file'
 			: 'https://www.zotero.org/support/kb/files_not_syncing';
 		
@@ -4855,12 +4859,69 @@ var ZoteroPane = new function()
 		);
 		
 		if (index == 0) {
-			this.relinkAttachment(itemID);
+			this.relinkAttachment(item.id);
 		}
 		else if (index == 2) {
 			this.loadURI(supportURL, { metaKey: true, shiftKey: true });
 		}
 	}
+
+
+	/**
+	 * Prompt the user to relink one or all of the attachment files found in
+	 * the LABD.
+	 *
+	 * @param {Zotero.Item} item
+	 * @param {String} path Path to the file matching `item`
+	 * @param {Number} numOthers If zero, "Relink All" option is not offered
+	 * @return {'one' | 'all' | 'manual' | 'cancel'}
+	 */
+	this.showLinkedFileFoundAutomaticallyDialog = function (item, path, numOthers) {
+		let ps = Services.prompt;
+
+		let title = Zotero.getString('pane.item.attachments.autoRelink.title');
+		let text = Zotero.getString('pane.item.attachments.autoRelink.text1') + '\n\n'
+			+ Zotero.getString('pane.item.attachments.autoRelink.text2', item.getFilePath()) + '\n'
+			+ Zotero.getString('pane.item.attachments.autoRelink.text3', path) + '\n\n'
+			+ Zotero.getString('pane.item.attachments.autoRelink.text4', Zotero.appName);
+		let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
+			+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
+		let index = ps.confirmEx(null,
+			title,
+			text,
+			buttonFlags,
+			Zotero.getString('pane.item.attachments.autoRelink.relink'),
+			null,
+			Zotero.getString('pane.item.attachments.autoRelink.locateManually'),
+			null, {}
+		);
+		
+		if (index == 1) {
+			// Cancel
+			return 'cancel';
+		}
+		else if (index == 2) {
+			// Locate Manually...
+			return 'manual';
+		}
+		
+		// Relink
+		if (!numOthers) {
+			return 'one';
+		}
+
+		title = Zotero.getString('pane.item.attachments.autoRelinkOthers.title');
+		text = Zotero.getString('pane.item.attachments.autoRelinkOthers.text', numOthers, numOthers);
+		index = ps.confirmEx(null,
+			title,
+			text,
+			ps.STD_YES_NO_BUTTONS,
+			null, null, null, null, {}
+		);
+		
+		return index == 0 ? 'all' : 'one';
+	};
 	
 	
 	this.syncAlert = function (e) {
@@ -5357,6 +5418,120 @@ var ZoteroPane = new function()
 			}
 		}
 	};
+
+
+	/**
+	 * Attempt to find a file in the LABD matching the passed attachment
+	 * by searching successive subdirectories. Prompt the user if a match is
+	 * found and offer to relink one or all matching files in the directory.
+	 * The user can also choose to relink manually, which opens a file picker.
+	 *
+	 * If the synced path is 'C:\Users\user\Documents\Dissertation\Files\Paper.pdf',
+	 * the LABD is '/Users/user/Documents', and the (not yet known) correct local
+	 * path is '/Users/user/Documents/Dissertation/Files/Paper.pdf', check:
+	 *
+	 * 1. /Users/user/Documents/Users/user/Documents/Dissertation/Files/Paper.pdf
+	 * 2. /Users/user/Documents/user/Documents/Dissertation/Files/Paper.pdf
+	 * 3. /Users/user/Documents/Documents/Dissertation/Files/Paper.pdf
+	 * 4. /Users/user/Documents/Dissertation/Files/Paper.pdf
+	 *
+	 * If line 4 had not been the correct local path (in other words, if no file
+	 * existed at that path), we would have continued on to check
+	 * '/Users/user/Documents/Dissertation/Paper.pdf'. If that did not match,
+	 * with no more segments in the synced path to drop, we would have given up.
+	 *
+	 * Once we find the file, check for other linked files beginning with
+	 * C:\Users\user\Documents\Dissertation\Files and see if they exist relative
+	 * to /Users/user/Documents/Dissertation/Files, and prompt to relink them
+	 * all if so.
+	 *
+	 * @param {Zotero.Item} item
+	 * @return {Promise<Boolean>} True if relinked successfully or canceled
+	 */
+	this.checkForLinkedFilesToRelink = async function (item) {
+		Zotero.debug('Attempting to relink automatically');
+		
+		let basePath = Zotero.Prefs.get('baseAttachmentPath');
+		if (!basePath) {
+			Zotero.debug('No LABD');
+			return false;
+		}
+		Zotero.debug('LABD path: ' + basePath);
+
+		let syncedPath = item.getFilePath();
+		if (!syncedPath) {
+			Zotero.debug('No synced path');
+			return false;
+		}
+		syncedPath = Zotero.File.normalizeToUnix(syncedPath);
+		Zotero.debug('Synced path: ' + syncedPath);
+
+		if (Zotero.File.directoryContains(basePath, syncedPath)) {
+			// Already in the LABD - nothing to do
+			Zotero.debug('Synced path is already within LABD');
+			return false;
+		}
+
+		// We can't use OS.Path.dirname because that function expects paths valid for the current platform...
+		// but we can't normalize first because we're going to be comparing it to other un-normalized paths
+		let unNormalizedDirname = item.getFilePath();
+		let lastSlash = Math.max(
+			unNormalizedDirname.lastIndexOf('/'),
+			unNormalizedDirname.lastIndexOf('\\')
+		);
+		if (lastSlash != -1) {
+			unNormalizedDirname = unNormalizedDirname.substring(0, lastSlash + 1);
+		}
+
+		let parts = OS.Path.split(syncedPath).components;
+		for (let segmentsToDrop = 0; segmentsToDrop < parts.length; segmentsToDrop++) {
+			let correctedPath = OS.Path.join(basePath, ...parts.slice(segmentsToDrop));
+
+			if (!(await OS.File.exists(correctedPath))) {
+				Zotero.debug('Does not exist: ' + correctedPath);
+				continue;
+			}
+			Zotero.debug('Exists! ' + correctedPath);
+
+			let otherUnlinked = await Zotero.Items.findMissingLinkedFiles(
+				item.libraryID,
+				unNormalizedDirname
+			);
+			let othersToRelink = new Map();
+			for (let otherItem of otherUnlinked) {
+				if (otherItem.id === item.id) continue;
+				let otherParts = otherItem.getFilePath()
+					.split(/[/\\]/)
+					// Slice as much off the beginning as when creating correctedPath
+					.slice(segmentsToDrop);
+				if (!otherParts.length) continue;
+				let otherCorrectedPath = OS.Path.join(basePath, ...otherParts);
+				if (await OS.File.exists(otherCorrectedPath)) {
+					othersToRelink.set(otherItem, otherCorrectedPath);
+				}
+			}
+
+			let choice = this.showLinkedFileFoundAutomaticallyDialog(item, correctedPath, othersToRelink.size);
+			switch (choice) {
+				case 'one':
+					await item.relinkAttachmentFile(correctedPath);
+					return true;
+				case 'all':
+					await item.relinkAttachmentFile(correctedPath);
+					await Promise.all([...othersToRelink]
+						.map(([i, p]) => i.relinkAttachmentFile(p)));
+					return true;
+				case 'manual':
+					await this.relinkAttachment(item.id);
+					return true;
+				case 'cancel':
+					return true;
+			}
+		}
+		
+		Zotero.debug('No segments left to drop; match not found in LABD');
+		return false;
+	};
 	
 	
 	this.relinkAttachment = async function (itemID) {
@@ -5369,7 +5544,7 @@ var ZoteroPane = new function()
 		if (!item) {
 			throw new Error('Item ' + itemID + ' not found in ZoteroPane_Local.relinkAttachment()');
 		}
-		
+
 		while (true) {
 			let fp = new FilePicker();
 			fp.init(window, Zotero.getString('pane.item.attachments.select'), fp.modeOpen);
@@ -5382,7 +5557,13 @@ var ZoteroPane = new function()
 			
 			var dir = await Zotero.File.getClosestDirectory(file);
 			if (dir) {
-				fp.displayDirectory = dir;
+				try {
+					fp.displayDirectory = dir;
+				}
+				catch (e) {
+					// Directory is invalid; ignore and go with the home directory
+					fp.displayDirectory = OS.Constants.Path.homeDir;
+				}
 			}
 			
 			fp.appendFilters(fp.filterAll);
