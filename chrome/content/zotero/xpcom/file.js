@@ -1088,7 +1088,31 @@ Zotero.File = new function(){
 			}
 			throw e;
 		}
-	}
+	};
+
+
+	/**
+	 * Normalize to a Unix-style path, replacing backslashes (interpreted as
+	 * separators only on Windows) with forward slashes (interpreted as
+	 * separators everywhere)
+	 *
+	 * @param {String} path
+	 * @return {String}
+	 */
+	this.normalizeToUnix = function (path) {
+		// If we're on Windows, we need to normalize first and then replace
+		// the slashes, because OS.Path.normalize won't handle forward slashes
+		// correctly. Otherwise, we replace slashes first and *then* normalize.
+		// This should ensure consistent behavior across platforms.
+		if (Zotero.isWin) {
+			let normalized = OS.Path.normalize(path);
+			return normalized.replace(/\\/g, '/');
+		}
+		else {
+			let replaced = path.replace(/\\/g, '/');
+			return OS.Path.normalize(replaced);
+		}
+	};
 	
 	
 	/**
@@ -1098,8 +1122,8 @@ Zotero.File = new function(){
 		if (typeof dir != 'string') throw new Error("dir must be a string");
 		if (typeof file != 'string') throw new Error("file must be a string");
 		
-		dir = OS.Path.normalize(dir).replace(/\\/g, "/");
-		file = OS.Path.normalize(file).replace(/\\/g, "/");
+		dir = this.normalizeToUnix(dir);
+		file = this.normalizeToUnix(file);
 		// Normalize D:\ vs. D:\foo
 		if (dir != file && !dir.endsWith('/')) {
 			dir += '/';

@@ -521,7 +521,13 @@ var Zotero_LocateMenu = new function() {
 				if(attachment.attachmentLinkMode !== Zotero.Attachments.LINK_MODE_LINKED_URL) {
 					var path = yield attachment.getFilePathAsync();
 					if (path) {
-						var ext = Zotero.File.getExtension(Zotero.File.pathToFile(path));
+						try {
+							var ext = Zotero.File.getExtension(Zotero.File.pathToFile(path));
+						}
+						catch (e) {
+							Zotero.logError(e);
+							return false;
+						}
 						if(!attachment.attachmentContentType ||
 								Zotero.MIME.hasNativeHandler(attachment.attachmentContentType, ext)) {
 							return false;
