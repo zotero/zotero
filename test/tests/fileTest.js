@@ -534,4 +534,18 @@ describe("Zotero.File", function () {
 			assert.equal(contents, 'Hello Zotero\n');
 		});
 	});
+
+	describe("#normalizeToUnix()", function () {
+		it("should normalize a Unix-style path", async function () {
+			assert.equal(Zotero.File.normalizeToUnix('/path/to/directory/'), '/path/to/directory');
+		});
+
+		it("should normalize '.' and '..'", async function () {
+			assert.equal(Zotero.File.normalizeToUnix('/path/./to/some/../file'), '/path/to/file');
+		});
+
+		it("should replace backslashes with forward slashes and trim trailing", async function () {
+			assert.equal(Zotero.File.normalizeToUnix('C:\\Zotero\\Some\\Directory\\'), 'C:/Zotero/Some/Directory');
+		});
+	});
 })
