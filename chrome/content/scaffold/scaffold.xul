@@ -188,8 +188,10 @@
 					</menu>
 					<menuseparator/>
 					<menu id="linter-menu"
-							label="&scaffold.menu.linter;">
+							label="&scaffold.menu.linter;"
+							onpopupshowing="Scaffold.populateLinterMenu()">
 						<menupopup>
+							<menuitem id="menu_eslintStatus" disabled="true"/>
 							<menuitem id="menu_configureESLint" label="&scaffold.menu.configureESLint;" oncommand="Scaffold.configureESLint()"/>
 						</menupopup>
 					</menu>
@@ -340,8 +342,6 @@
 					</tabpanel>
 					<tabpanel flex="1" id="tabpanel-tests">
 						<vbox flex="1">
-							<iframe src="monaco/monaco.html" id="editor-tests" flex="2" onmousedown="this.focus()"/>
-							<splitter resizeafter="farthest"/>
 							<vbox flex="1">
 								<hbox flex="1" context="testing-context-menue">
 									<keyset>
@@ -362,9 +362,11 @@
 								<hbox>
 									<button observes="validate-tests" label="&scaffold.testing.delete;" tooltiptext="Delete the selected tests" oncommand="Scaffold.deleteSelectedTests()"/>
 									<button observes="validate-tests" label="&scaffold.testing.run;" tooltiptext="Run the selected tests" oncommand="Scaffold.runSelectedTests()"/>
-									<button observes="validate-tests" label="&scaffold.testing.update;" tooltiptext="Update a test to match current item" oncommand="Scaffold.updateSelectedTests()"/>
+									<button observes="validate-tests" label="&scaffold.testing.update;" tooltiptext="Run the selected tests and bless the results" oncommand="Scaffold.updateSelectedTests()"/>
 								</hbox>
 							</vbox>
+							<splitter resizeafter="farthest"/>
+							<iframe src="monaco/monaco.html" id="editor-tests" flex="2" onmousedown="this.focus()"/>
 						</vbox>
 					</tabpanel>
 					<tabpanel>
