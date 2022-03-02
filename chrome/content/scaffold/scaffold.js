@@ -343,7 +343,7 @@ var Scaffold = new function () {
 						range: match.range,
 						command: {
 							id: runMethod,
-							title: `▶ Run ${methodName}`,
+							title: `Run ${methodName}`,
 							arguments: [methodName]
 						}
 					});
