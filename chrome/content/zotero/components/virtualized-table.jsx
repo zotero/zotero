@@ -92,11 +92,13 @@ class TreeSelection {
 
 		if (this.selectEventsSuppressed) return;
 
-		if (this._tree.invalidate) {
-			this._tree.invalidateRow(index);
-		}
+		let previousPivot = this.pivot;
 		this.pivot = index;
 		this._focused = index;
+		if (this._tree.invalidate) {
+			this._tree.invalidateRow(index);
+			this._tree.invalidateRow(previousPivot);
+		}
 		this._updateTree(shouldDebounce);
 	}
 
@@ -123,8 +125,9 @@ class TreeSelection {
 			return false;
 		}
 
-		let toInvalidate = Array.from(this.selected);
-		toInvalidate.push(index);
+		let toInvalidate = new Set(this.selected);
+		toInvalidate.add(index);
+		toInvalidate.add(this.pivot);
 		this.selected = new Set([index]);
 		this._focused = index;
 		this.pivot = index;
@@ -221,7 +224,8 @@ class TreeSelection {
 
 	set focused(index) {
 		index = Math.max(0, index);
-		let oldValue = this._focused;
+		let previousFocused = this._focused;
+		let previousPivot = this.pivot;
 		this.pivot = index;
 		this._focused = index;
 
@@ -229,7 +233,10 @@ class TreeSelection {
 
 		this._updateTree();
 		if (this._tree.invalidate) {
-			this._tree.invalidateRow(oldValue);
+			this._tree.invalidateRow(previousFocused);
+			if (previousPivot != previousFocused) {
+				this._tree.invalidateRow(previousPivot);
+			}
 			this._tree.invalidateRow(index);
 		}
 	}
@@ -732,8 +739,12 @@ class VirtualizedTable extends React.Component {
 		if (this.selection.selectEventsSuppressed) return;
 		
 		if (movePivot) {
+			if (!this.props.multiSelect) return;
+			let previousPivot = this.selection.pivot;
 			this.selection._focused = index;
 			this.selection.pivot = index;
+			this.invalidateRow(previousPivot);
+			this.invalidateRow(index);
 		}
 		// Normal selection
 		else if (!shiftSelect && !toggleSelection) {
@@ -1138,7 +1149,10 @@ class VirtualizedTable extends React.Component {
 			onDrop: e => this.props.onDrop && this.props.onDrop(e),
 			onFocus: e => this.props.onFocus && this.props.onFocus(e),
 			onMouseOver: e => this._handleMouseOver(e),
-			className: cx(["virtualized-table", { resizing: this.state.resizing }]),
+			className: cx(["virtualized-table", {
+				resizing: this.state.resizing,
+				'multi-select': this.props.multiSelect
+			}]),
 			id: this.props.id,
 			ref: ref => this._topDiv = ref,
 			tabIndex: 0,
@@ -1550,6 +1564,7 @@ function makeRowRenderer(getRowData) {
 		}
 
 		div.classList.toggle('selected', selection.isSelected(index));
+		div.classList.toggle('pivot', selection.pivot == index);
 		const rowData = getRowData(index);
 		
 		for (let column of columns) {

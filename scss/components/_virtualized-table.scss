@@ -136,6 +136,23 @@
 	}
 }
 
+.virtualized-table.multi-select {
+
+	.row.pivot {
+		border: 1px dotted highlight;
+		box-sizing: initial;
+		margin: -1px 0;
+		width: calc(100% - 2px);
+
+		> *:first-child {
+			margin-inline-start: -1px;
+		}
+		> *:last-child {
+			margin-inline-end: -1px;
+		}
+	}
+}
+
 .virtualized-table-header {
 	display: flex;
 	flex-direction: row;
