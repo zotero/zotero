@@ -1253,7 +1253,7 @@ Zotero.Items = function() {
 			Zotero.debug('_hashAttachmentText: Not enough unique words');
 			return null;
 		}
-		return Zotero.Utilities.Internal.md5(mostCommonWords.join(' '));
+		return Zotero.Utilities.Internal.md5(mostCommonWords.sort().join(' '));
 	};
 
 
