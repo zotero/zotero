@@ -229,6 +229,7 @@ var ZoteroPane = new function()
 		
 		setTimeout(function () {
 			ZoteroPane.showRetractionBanner();
+			ZoteroPane.initSyncReminders(true);
 		});
 		
 		// TEMP: Clean up extra files from Mendeley imports <5.0.51
@@ -355,6 +356,9 @@ var ZoteroPane = new function()
 
 		if(this.collectionsView) this.collectionsView.unregister();
 		if(this.itemsView) this.itemsView.unregister();
+		if (_syncRemindersObserverID) {
+			Zotero.Notifier.unregisterObserver(_syncRemindersObserverID);
+		}
 		
 		this.uninitContainers();
 		
@@ -2249,6 +2253,205 @@ var ZoteroPane = new function()
 	});
 	
 	
+	this.sync = function () {
+		let syncReminder = document.getElementById('sync-reminder-container');
+		if (!syncReminder.collapsed) {
+			syncReminder.collapsed = true;
+		}
+
+		Zotero.Sync.Server.canAutoResetClient = true;
+		Zotero.Sync.Server.manualSyncRequired = false;
+		Zotero.Sync.Runner.sync();
+	};
+
+
+	var _syncRemindersObserverID = null;
+	this.initSyncReminders = function (startup) {
+		if (startup) {
+			Zotero.Notifier.registerObserver(
+				{
+					notify: (event) => {
+						// When the API Key is deleted we need to add an observer
+						if (event === 'delete') {
+							Zotero.Prefs.set('sync.reminder.setUp.enabled', true);
+							Zotero.Prefs.set('sync.reminder.setUp.lastDisplayed', Math.round(Date.now() / 1000));
+							ZoteroPane.initSyncReminders(false);
+						}
+						// When API Key is added we can remove the observer
+						else if (event === 'add') {
+							ZoteroPane.initSyncReminders(false);
+						}
+					}
+				},
+				'api-key');
+		}
+
+		// If both reminders are disabled, we don't need an observer
+		if (!Zotero.Prefs.get('sync.reminder.setUp.enabled')
+				&& !Zotero.Prefs.get('sync.reminder.autoSync.enabled')) {
+			if (_syncRemindersObserverID) {
+				Zotero.Notifier.unregisterObserver(_syncRemindersObserverID);
+				_syncRemindersObserverID = null;
+			}
+			return;
+		}
+
+		// If we are syncing and auto-syncing then no need for observer
+		if (Zotero.Sync.Runner.enabled && Zotero.Prefs.get('sync.autoSync')) {
+			if (_syncRemindersObserverID) {
+				Zotero.Notifier.unregisterObserver(_syncRemindersObserverID);
+				_syncRemindersObserverID = null;
+			}
+			return;
+		}
+
+		// If we already have an observer don't add another one
+		if (_syncRemindersObserverID) {
+			return;
+		}
+
+		const eventTypes = ['add', 'modify', 'delete'];
+		_syncRemindersObserverID = Zotero.Notifier.registerObserver(
+			{
+				notify: (event) => {
+					if (!eventTypes.includes(event)) {
+						return;
+					}
+					setTimeout(() => {
+						this.showSetUpSyncReminder();
+						this.showAutoSyncReminder();
+					}, 5000);
+				}
+			},
+			'item',
+			'syncReminder');
+	};
+
+
+	this.showSetUpSyncReminder = function () {
+		const sevenDays = 60 * 60 * 24 * 7;
+
+		// Reasons not to show reminder:
+		// - User turned reminder off
+		// - Sync is enabled
+		if (!Zotero.Prefs.get('sync.reminder.setUp.enabled')
+				|| Zotero.Sync.Runner.enabled) {
+			return;
+		}
+
+		// Check lastDisplayed was 7+ days ago
+		let lastDisplayed = Zotero.Prefs.get('sync.reminder.setUp.lastDisplayed');
+		if (lastDisplayed > Math.round(Date.now() / 1000) - sevenDays) {
+			return;
+		}
+
+		this.showSyncReminder('setUp', { learnMoreURL: ZOTERO_CONFIG.SYNC_INFO_URL });
+	};
+
+
+	this.showAutoSyncReminder = function () {
+		const sevenDays = 60 * 60 * 24 * 7;
+
+		// Reasons not to show reminder:
+		// - User turned reminder off
+		// - Sync is not enabled
+		// - Auto-Sync is enabled
+		// - Last sync for all libraries was within 7 days
+		if (!Zotero.Prefs.get('sync.reminder.autoSync.enabled')
+				|| !Zotero.Sync.Runner.enabled
+				|| Zotero.Prefs.get('sync.autoSync')
+				|| Zotero.Libraries.getAll()
+					.every(library => !library.syncable
+						|| library.lastSync.getTime() > Date.now() - 1000 * sevenDays)) {
+			return;
+		}
+
+		// Check lastDisplayed was 7+ days ago
+		let lastDisplayed = Zotero.Prefs.get('sync.reminder.autoSync.lastDisplayed');
+		if (lastDisplayed > Math.round(Date.now() / 1000) - sevenDays) {
+			return;
+		}
+		
+		this.showSyncReminder('autoSync');
+	};
+
+
+	/**
+	 * Configure the UI and show the sync reminder panel for a given type of reminder
+	 *
+	 * @param {String} reminderType - Possible values: 'setUp' or 'autoSync'
+	 * @param {Object} [options]
+	 * @param {String} [options.learnMoreURL] - Show "Learn More" link to this URL
+	 */
+	this.showSyncReminder = function (reminderType, options = {}) {
+		if (!['setUp', 'autoSync'].includes(reminderType)) {
+			throw new Error(`Invalid reminder type: ${reminderType}`);
+		}
+
+		let panel = document.getElementById('sync-reminder-container');
+		const closePanel = function () {
+			panel.setAttribute('collapsed', true);
+			Zotero.Prefs.set(`sync.reminder.${reminderType}.lastDisplayed`, Math.round(Date.now() / 1000));
+		};
+
+		let message = document.getElementById('sync-reminder-message');
+		message.textContent = Zotero.getString(`sync.reminder.${reminderType}.message`, Zotero.appName);
+
+		let actionLink = document.getElementById('sync-reminder-action');
+		switch (reminderType) {
+			case 'autoSync':
+				var actionStr = Zotero.getString('general.enable');
+				break;
+			
+			default:
+				var actionStr = Zotero.getString(`sync.reminder.${reminderType}.action`);
+				break;
+		}
+		actionLink.textContent = actionStr;
+		actionLink.onclick = function () {
+			closePanel();
+
+			switch (reminderType) {
+				case 'setUp':
+					Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync');
+					break;
+				case 'autoSync':
+					Zotero.Prefs.set(`sync.autoSync`, true);
+					break;
+			}
+		};
+
+		let learnMoreLink = document.getElementById('sync-reminder-learn-more');
+		learnMoreLink.textContent = Zotero.getString('general.learnMore');
+		learnMoreLink.hidden = !options.learnMoreURL;
+		learnMoreLink.onclick = function () {
+			Zotero.launchURL(options.learnMoreURL);
+		};
+		
+		let dontShowAgainLink = document.getElementById('sync-reminder-disable');
+		dontShowAgainLink.textContent = Zotero.getString('general.dontAskAgain');
+		dontShowAgainLink.onclick = function () {
+			closePanel();
+			Zotero.Prefs.set(`sync.reminder.${reminderType}.enabled`, false);
+			// Check if we no longer need to observe item modifications
+			ZoteroPane.initSyncReminders(false);
+		};
+
+		let remindMeLink = document.getElementById('sync-reminder-remind');
+		remindMeLink.textContent = Zotero.getString('general.remindMeLater');
+		remindMeLink.onclick = function () {
+			closePanel();
+		};
+
+		let closeButton = document.getElementById('sync-reminder-close');
+		closeButton.onclick = function () {
+			closePanel();
+		};
+
+		panel.removeAttribute('collapsed');
+	};
+
+
 	this.selectItem = async function (itemID, inLibraryRoot) {
 		if (!itemID) {
 			return false;
