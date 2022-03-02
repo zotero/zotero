@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Тип документу">
-<!ENTITY zotero.items.type_column "Тип документа">
-<!ENTITY zotero.items.title_column "Назва">
 <!ENTITY zotero.items.creator_column "Автор">
-<!ENTITY zotero.items.date_column "Дата">
 <!ENTITY zotero.items.year_column "Рік">
-<!ENTITY zotero.items.publisher_column "Видавник">
-<!ENTITY zotero.items.publication_column "Публікація">
-<!ENTITY zotero.items.journalAbbr_column "Журнал скор.">
-<!ENTITY zotero.items.language_column "Мова">
-<!ENTITY zotero.items.accessDate_column "Дата доступу">
-<!ENTITY zotero.items.libraryCatalog_column "Архів">
-<!ENTITY zotero.items.callNumber_column "Шифр">
-<!ENTITY zotero.items.rights_column "Права">
-<!ENTITY zotero.items.dateAdded_column "Дата додавання">
 <!ENTITY zotero.items.dateModified_column "Дата зміни">
-<!ENTITY zotero.items.extra_column "Додатково">
-<!ENTITY zotero.items.archive_column "Архів">
-<!ENTITY zotero.items.archiveLocation_column "Місце в архіві">
-<!ENTITY zotero.items.place_column "Місце">
-<!ENTITY zotero.items.volume_column "Том">
-<!ENTITY zotero.items.edition_column "Видання">
-<!ENTITY zotero.items.pages_column "Сторінки">
-<!ENTITY zotero.items.issue_column "Випуск">
-<!ENTITY zotero.items.series_column "Серія">
-<!ENTITY zotero.items.seriesTitle_column "Назва серії">
-<!ENTITY zotero.items.court_column "Суд">
-<!ENTITY zotero.items.medium_column "Джерело/формат">
-<!ENTITY zotero.items.genre_column "Жанр">
-<!ENTITY zotero.items.system_column "Система">
 <!ENTITY zotero.items.moreColumns.label "Додаткові стовпці">
 <!ENTITY zotero.items.restoreColumnOrder.label "Відновити порядок стовпців">
 

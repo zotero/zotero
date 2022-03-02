@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Εμφάνιση Ανακληθέντων Στοιχείων">
 
 <!ENTITY zotero.items.itemType "Τύπος στοιχείου">
-<!ENTITY zotero.items.type_column "Τύπος στοιχείου">
-<!ENTITY zotero.items.title_column "Τίτλος">
 <!ENTITY zotero.items.creator_column "Δημιουργός">
-<!ENTITY zotero.items.date_column "Ημερομηνία">
 <!ENTITY zotero.items.year_column "Έτος">
-<!ENTITY zotero.items.publisher_column "Εκδότης">
-<!ENTITY zotero.items.publication_column "Έκδοση">
-<!ENTITY zotero.items.journalAbbr_column "Συντομογραφία περιοδικού">
-<!ENTITY zotero.items.language_column "Γλώσσα">
-<!ENTITY zotero.items.accessDate_column "Πρόσβαση">
-<!ENTITY zotero.items.libraryCatalog_column "Κατάλογος βιβλιοθήκης">
-<!ENTITY zotero.items.callNumber_column "Τηλεφωνικός αριθμός">
-<!ENTITY zotero.items.rights_column "Δικαιώματα">
-<!ENTITY zotero.items.dateAdded_column "Ημερομηνία προσθήκης">
 <!ENTITY zotero.items.dateModified_column "Ημερομηνία τροποποίησης">
-<!ENTITY zotero.items.extra_column "Επιπλέον">
-<!ENTITY zotero.items.archive_column "Αρχείο">
-<!ENTITY zotero.items.archiveLocation_column "Θέση στο Αρχείο">
-<!ENTITY zotero.items.place_column "Τόπο">
-<!ENTITY zotero.items.volume_column "Τόμο">
-<!ENTITY zotero.items.edition_column "Έκδοση">
-<!ENTITY zotero.items.pages_column "Σελίδες">
-<!ENTITY zotero.items.issue_column "Τεύχος">
-<!ENTITY zotero.items.series_column "Σειρά">
-<!ENTITY zotero.items.seriesTitle_column "Τίτλος σειράς">
-<!ENTITY zotero.items.court_column "Αίθουσα">
-<!ENTITY zotero.items.medium_column "Μέσο/Μορφή">
-<!ENTITY zotero.items.genre_column "Είδος">
-<!ENTITY zotero.items.system_column "Σύστημα">
 <!ENTITY zotero.items.moreColumns.label "Περισσότερες στήλες">
 <!ENTITY zotero.items.restoreColumnOrder.label "Αποκατάσταση διάταξης στηλών">
 

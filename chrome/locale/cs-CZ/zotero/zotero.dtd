@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Zobrazit položky s odvolaným publikováním">
 
 <!ENTITY zotero.items.itemType "Typ položky">
-<!ENTITY zotero.items.type_column "Typ položky">
-<!ENTITY zotero.items.title_column "Název">
 <!ENTITY zotero.items.creator_column "Tvůrce">
-<!ENTITY zotero.items.date_column "Datum">
 <!ENTITY zotero.items.year_column "Rok">
-<!ENTITY zotero.items.publisher_column "Vydavatel">
-<!ENTITY zotero.items.publication_column "Publikace">
-<!ENTITY zotero.items.journalAbbr_column "Zkrácený název časopisu">
-<!ENTITY zotero.items.language_column "Jazyk">
-<!ENTITY zotero.items.accessDate_column "Přistoupeno">
-<!ENTITY zotero.items.libraryCatalog_column "Katalog knihovny">
-<!ENTITY zotero.items.callNumber_column "Signatura">
-<!ENTITY zotero.items.rights_column "Práva">
-<!ENTITY zotero.items.dateAdded_column "Přidáno dne">
 <!ENTITY zotero.items.dateModified_column "Upraveno dne">
-<!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Archiv">
-<!ENTITY zotero.items.archiveLocation_column "Umístění v archivu">
-<!ENTITY zotero.items.place_column "Místo">
-<!ENTITY zotero.items.volume_column "Ročník">
-<!ENTITY zotero.items.edition_column "Edice">
-<!ENTITY zotero.items.pages_column "Stránky">
-<!ENTITY zotero.items.issue_column "Číslo">
-<!ENTITY zotero.items.series_column "Série">
-<!ENTITY zotero.items.seriesTitle_column "Název série">
-<!ENTITY zotero.items.court_column "Soud">
-<!ENTITY zotero.items.medium_column "Médium/Formát">
-<!ENTITY zotero.items.genre_column "Žánr">
-<!ENTITY zotero.items.system_column "Systém">
 <!ENTITY zotero.items.moreColumns.label "Více sloupců">
 <!ENTITY zotero.items.restoreColumnOrder.label "Obnovit pořadí sloupců">
 

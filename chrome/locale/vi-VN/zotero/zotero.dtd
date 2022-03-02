@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Loại tham khảo">
-<!ENTITY zotero.items.type_column "Loại tham khảo">
-<!ENTITY zotero.items.title_column "Tiêu đề">
 <!ENTITY zotero.items.creator_column "Người tạo lập">
-<!ENTITY zotero.items.date_column "Ngày">
 <!ENTITY zotero.items.year_column "Năm">
-<!ENTITY zotero.items.publisher_column "Nhà xuất bản">
-<!ENTITY zotero.items.publication_column "Ấn phẩm">
-<!ENTITY zotero.items.journalAbbr_column "Tên tạp chí viết tắt">
-<!ENTITY zotero.items.language_column "Ngôn ngữ">
-<!ENTITY zotero.items.accessDate_column "Truy cập">
-<!ENTITY zotero.items.libraryCatalog_column "Loại thư viện">
-<!ENTITY zotero.items.callNumber_column "Ký hiệu xếp giá">
-<!ENTITY zotero.items.rights_column "Quyền hạn">
-<!ENTITY zotero.items.dateAdded_column "Ngày tạo lập">
 <!ENTITY zotero.items.dateModified_column "Ngày thay đổi">
-<!ENTITY zotero.items.extra_column "Mở rộng">
-<!ENTITY zotero.items.archive_column "Lưu">
-<!ENTITY zotero.items.archiveLocation_column "Vị trí lưu">
-<!ENTITY zotero.items.place_column "Nơi xuất bản">
-<!ENTITY zotero.items.volume_column "Tập">
-<!ENTITY zotero.items.edition_column "Ấn bản">
-<!ENTITY zotero.items.pages_column "Trang">
-<!ENTITY zotero.items.issue_column "Lần phát hành">
-<!ENTITY zotero.items.series_column "Tùng thư">
-<!ENTITY zotero.items.seriesTitle_column "Tiêu đề tùng thư">
-<!ENTITY zotero.items.court_column "Court">
-<!ENTITY zotero.items.medium_column "Định dạng">
-<!ENTITY zotero.items.genre_column "Thể loại">
-<!ENTITY zotero.items.system_column "Hệ thống">
 <!ENTITY zotero.items.moreColumns.label "Thêm cột">
 <!ENTITY zotero.items.restoreColumnOrder.label "Phục hồi thứ tự cột">
 

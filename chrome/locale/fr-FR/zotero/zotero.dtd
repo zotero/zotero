@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Afficher les documents rétractés">
 
 <!ENTITY zotero.items.itemType "Type de document">
-<!ENTITY zotero.items.type_column "Type de document">
-<!ENTITY zotero.items.title_column "Titre">
 <!ENTITY zotero.items.creator_column "Créateur">
-<!ENTITY zotero.items.date_column "Date">
 <!ENTITY zotero.items.year_column "Année">
-<!ENTITY zotero.items.publisher_column "Maison d’édition">
-<!ENTITY zotero.items.publication_column "Publication">
-<!ENTITY zotero.items.journalAbbr_column "Abrév. de revue">
-<!ENTITY zotero.items.language_column "Langue">
-<!ENTITY zotero.items.accessDate_column "Date de consultation">
-<!ENTITY zotero.items.libraryCatalog_column "Catalogue de bibliothèque">
-<!ENTITY zotero.items.callNumber_column "Cote">
-<!ENTITY zotero.items.rights_column "Autorisations">
-<!ENTITY zotero.items.dateAdded_column "Date d'ajout">
 <!ENTITY zotero.items.dateModified_column "Date de modification">
-<!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Archive">
-<!ENTITY zotero.items.archiveLocation_column "Loc. ds l’archive">
-<!ENTITY zotero.items.place_column "Lieu">
-<!ENTITY zotero.items.volume_column "Volume">
-<!ENTITY zotero.items.edition_column "Édition">
-<!ENTITY zotero.items.pages_column "Pages">
-<!ENTITY zotero.items.issue_column "Numéro">
-<!ENTITY zotero.items.series_column "Collection">
-<!ENTITY zotero.items.seriesTitle_column "Titre de la coll.">
-<!ENTITY zotero.items.court_column "Tribunal">
-<!ENTITY zotero.items.medium_column "Média/Format">
-<!ENTITY zotero.items.genre_column "Genre">
-<!ENTITY zotero.items.system_column "Système">
 <!ENTITY zotero.items.moreColumns.label "Plus de colonnes">
 <!ENTITY zotero.items.restoreColumnOrder.label "Restaurer l’ordre des colonnes">
 

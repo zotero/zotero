@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "إظهار العناصر المستردة">
 
 <!ENTITY zotero.items.itemType "نوع العنصر">
-<!ENTITY zotero.items.type_column "نوع العنصر">
-<!ENTITY zotero.items.title_column "العنوان">
 <!ENTITY zotero.items.creator_column "المؤلف">
-<!ENTITY zotero.items.date_column "التاريخ">
 <!ENTITY zotero.items.year_column "السنة">
-<!ENTITY zotero.items.publisher_column "الناشر">
-<!ENTITY zotero.items.publication_column "النشر">
-<!ENTITY zotero.items.journalAbbr_column "اختصار دورية">
-<!ENTITY zotero.items.language_column "اللغة">
-<!ENTITY zotero.items.accessDate_column "تاريخ الدخول">
-<!ENTITY zotero.items.libraryCatalog_column "فهرس المكتبة">
-<!ENTITY zotero.items.callNumber_column "الرقم العام">
-<!ENTITY zotero.items.rights_column "الملكية الفكرية">
-<!ENTITY zotero.items.dateAdded_column "تاريخ الإضافة">
 <!ENTITY zotero.items.dateModified_column "تاريخ التعديل">
-<!ENTITY zotero.items.extra_column "معلومات إضافية">
-<!ENTITY zotero.items.archive_column "الارشيف">
-<!ENTITY zotero.items.archiveLocation_column "الموقع في الأرشيف">
-<!ENTITY zotero.items.place_column "مكان">
-<!ENTITY zotero.items.volume_column "صوت">
-<!ENTITY zotero.items.edition_column "طبعة">
-<!ENTITY zotero.items.pages_column "صفحات">
-<!ENTITY zotero.items.issue_column "العدد">
-<!ENTITY zotero.items.series_column "السلسلة">
-<!ENTITY zotero.items.seriesTitle_column "عنوان السلسلة">
-<!ENTITY zotero.items.court_column "المحكمة">
-<!ENTITY zotero.items.medium_column "الوسيط/الصيغة">
-<!ENTITY zotero.items.genre_column "عام">
-<!ENTITY zotero.items.system_column "نظام">
 <!ENTITY zotero.items.moreColumns.label "المزيد من الاعمدة">
 <!ENTITY zotero.items.restoreColumnOrder.label "استعادة ترتيب الاعمدة">
 
@@ -154,7 +128,7 @@
 <!ENTITY zotero.toolbar.attachment.add "تخزين نسخة من ملف...">
 <!ENTITY zotero.toolbar.attachment.weblink "حفظ رابط للصفحة الحالية">
 <!ENTITY zotero.toolbar.attachment.snapshot "اخذ لقطة من الصفحة الحالية">
-<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.item "العنصر">
 <!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "لاتوجد اوسمة لعرضها">

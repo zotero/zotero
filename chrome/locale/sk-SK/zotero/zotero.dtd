@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Zobraziť odobraté exempláre">
 
 <!ENTITY zotero.items.itemType "Typ záznamu">
-<!ENTITY zotero.items.type_column "Typ záznamu">
-<!ENTITY zotero.items.title_column "Názov">
 <!ENTITY zotero.items.creator_column "Autor">
-<!ENTITY zotero.items.date_column "Dátum">
 <!ENTITY zotero.items.year_column "Rok">
-<!ENTITY zotero.items.publisher_column "Vydavateľ">
-<!ENTITY zotero.items.publication_column "Publikácia">
-<!ENTITY zotero.items.journalAbbr_column "Skratka periodika">
-<!ENTITY zotero.items.language_column "Jazyk">
-<!ENTITY zotero.items.accessDate_column "Citované">
-<!ENTITY zotero.items.libraryCatalog_column "Knižničný katalóg">
-<!ENTITY zotero.items.callNumber_column "Signatúra">
-<!ENTITY zotero.items.rights_column "Práva">
-<!ENTITY zotero.items.dateAdded_column "Pridané">
 <!ENTITY zotero.items.dateModified_column "Zmenené">
-<!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Archív">
-<!ENTITY zotero.items.archiveLocation_column "Umiestnenie v archíve">
-<!ENTITY zotero.items.place_column "Miesto">
-<!ENTITY zotero.items.volume_column "Zväzok">
-<!ENTITY zotero.items.edition_column "Vydanie">
-<!ENTITY zotero.items.pages_column "Strany">
-<!ENTITY zotero.items.issue_column "Číslo">
-<!ENTITY zotero.items.series_column "Edícia">
-<!ENTITY zotero.items.seriesTitle_column "Názov edície">
-<!ENTITY zotero.items.court_column "Súd">
-<!ENTITY zotero.items.medium_column "Médium/Formát">
-<!ENTITY zotero.items.genre_column "Žáner">
-<!ENTITY zotero.items.system_column "Systém">
 <!ENTITY zotero.items.moreColumns.label "Viac stĺpcov">
 <!ENTITY zotero.items.restoreColumnOrder.label "Obnoviť usporiadanie stĺpcov">
 

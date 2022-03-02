@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Visszavont elemek mutatása">
 
 <!ENTITY zotero.items.itemType "Forrás típusa">
-<!ENTITY zotero.items.type_column "Forrás típusa">
-<!ENTITY zotero.items.title_column "Cím">
 <!ENTITY zotero.items.creator_column "Szerző">
-<!ENTITY zotero.items.date_column "Dátum">
 <!ENTITY zotero.items.year_column "Év">
-<!ENTITY zotero.items.publisher_column "Kiadó">
-<!ENTITY zotero.items.publication_column "Kiadvány">
-<!ENTITY zotero.items.journalAbbr_column "Rövidített cím">
-<!ENTITY zotero.items.language_column "Nyelv">
-<!ENTITY zotero.items.accessDate_column "Hozzáférés dátuma">
-<!ENTITY zotero.items.libraryCatalog_column "Könyvtár Katalógus">
-<!ENTITY zotero.items.callNumber_column "Raktári jelzet">
-<!ENTITY zotero.items.rights_column "Jogok">
-<!ENTITY zotero.items.dateAdded_column "Hozzáadás dátuma">
 <!ENTITY zotero.items.dateModified_column "Módosítás dátuma">
-<!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Archívum">
-<!ENTITY zotero.items.archiveLocation_column "Pontos lelőhely">
-<!ENTITY zotero.items.place_column "Hely">
-<!ENTITY zotero.items.volume_column "Kötet">
-<!ENTITY zotero.items.edition_column "Kiadás">
-<!ENTITY zotero.items.pages_column "Oldalak">
-<!ENTITY zotero.items.issue_column "Szám">
-<!ENTITY zotero.items.series_column "Sorozat">
-<!ENTITY zotero.items.seriesTitle_column "Sorozat címe">
-<!ENTITY zotero.items.court_column "Bíróság">
-<!ENTITY zotero.items.medium_column "Közepes/Formátum">
-<!ENTITY zotero.items.genre_column "Műfaj">
-<!ENTITY zotero.items.system_column "Rendszer">
 <!ENTITY zotero.items.moreColumns.label "Több oszlop">
 <!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 

@@ -1,13 +1,13 @@
 <!ENTITY zotero.version "version">
 <!ENTITY zotero.whatsNew "Hvad er nyt">
 <!ENTITY zotero.createdby "Oprettet af:">
-<!ENTITY zotero.director "Direktør:">
-<!ENTITY zotero.directors "Direktører:">
+<!ENTITY zotero.director "Instruktør:">
+<!ENTITY zotero.directors "Instruktører:">
 <!ENTITY zotero.developers "Udviklere:">
 <!ENTITY zotero.alumni "Alumner:">
-<!ENTITY zotero.about.localizations "Tilpasning til lokale forhold:">
-<!ENTITY zotero.about.additionalSoftware "Third-Party Software:">
+<!ENTITY zotero.about.localizations "Oversættelser:">
+<!ENTITY zotero.about.additionalSoftware "Trediepartsprogrammer:">
 <!ENTITY zotero.thanks "Særlig tak til:">
 <!ENTITY zotero.about.close "Luk">
 <!ENTITY zotero.moreCreditsAndAcknowledgements "Flere anerkendelser">
-<!ENTITY zotero.citationProcessing "Arbejde med referencer og referencelister">
+<!ENTITY zotero.citationProcessing "Citations- og bibliografiprocessering">

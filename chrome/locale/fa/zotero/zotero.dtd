@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "نوع آیتم">
-<!ENTITY zotero.items.type_column "نوع آیتم">
-<!ENTITY zotero.items.title_column "عنوان‌">
 <!ENTITY zotero.items.creator_column "پدیدآورنده">
-<!ENTITY zotero.items.date_column "تاریخ">
 <!ENTITY zotero.items.year_column "سال">
-<!ENTITY zotero.items.publisher_column "ناشر">
-<!ENTITY zotero.items.publication_column "انتشار">
-<!ENTITY zotero.items.journalAbbr_column "نام مختصر مجله">
-<!ENTITY zotero.items.language_column "زبان">
-<!ENTITY zotero.items.accessDate_column "تاریخ دسترسی">
-<!ENTITY zotero.items.libraryCatalog_column "فهرست کتابخانه">
-<!ENTITY zotero.items.callNumber_column "شماره فراخوانی">
-<!ENTITY zotero.items.rights_column "حقوق">
-<!ENTITY zotero.items.dateAdded_column "تاریخ افزودن">
 <!ENTITY zotero.items.dateModified_column "تاریخ تغییر">
-<!ENTITY zotero.items.extra_column "اضافی">
-<!ENTITY zotero.items.archive_column "بایگانی">
-<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
-<!ENTITY zotero.items.place_column "مکان">
-<!ENTITY zotero.items.volume_column "جلد">
-<!ENTITY zotero.items.edition_column "ویرایش">
-<!ENTITY zotero.items.pages_column "صفحات">
-<!ENTITY zotero.items.issue_column "شماره">
-<!ENTITY zotero.items.series_column "سری">
-<!ENTITY zotero.items.seriesTitle_column "عنوان سری">
-<!ENTITY zotero.items.court_column "دادگاه">
-<!ENTITY zotero.items.medium_column "رسانه / قالب">
-<!ENTITY zotero.items.genre_column "ژانر">
-<!ENTITY zotero.items.system_column "سیستم">
 <!ENTITY zotero.items.moreColumns.label "ستون‌های بیشتر">
 <!ENTITY zotero.items.restoreColumnOrder.label "بازیابی نظم ستون">
 

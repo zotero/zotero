@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Zurückgezogene Einträge anzeigen">
 
 <!ENTITY zotero.items.itemType "Eintragsart">
-<!ENTITY zotero.items.type_column "Eintragsart">
-<!ENTITY zotero.items.title_column "Titel">
 <!ENTITY zotero.items.creator_column "Ersteller">
-<!ENTITY zotero.items.date_column "Datum">
 <!ENTITY zotero.items.year_column "Jahr">
-<!ENTITY zotero.items.publisher_column "Verlag">
-<!ENTITY zotero.items.publication_column "Publikation">
-<!ENTITY zotero.items.journalAbbr_column "Abkürzung der Zeitschrift">
-<!ENTITY zotero.items.language_column "Sprache">
-<!ENTITY zotero.items.accessDate_column "Zugriffsdatum">
-<!ENTITY zotero.items.libraryCatalog_column "Bibliothekskatalog">
-<!ENTITY zotero.items.callNumber_column "Signatur">
-<!ENTITY zotero.items.rights_column "Rechte">
-<!ENTITY zotero.items.dateAdded_column "hinzugefügt am">
 <!ENTITY zotero.items.dateModified_column "geändert am">
-<!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Archiv">
-<!ENTITY zotero.items.archiveLocation_column "Standort im Archiv">
-<!ENTITY zotero.items.place_column "Ort">
-<!ENTITY zotero.items.volume_column "Band">
-<!ENTITY zotero.items.edition_column "Auflage">
-<!ENTITY zotero.items.pages_column "Seiten">
-<!ENTITY zotero.items.issue_column "Ausgabe">
-<!ENTITY zotero.items.series_column "Reihe">
-<!ENTITY zotero.items.seriesTitle_column "Titel der Reihe">
-<!ENTITY zotero.items.court_column "Gericht">
-<!ENTITY zotero.items.medium_column "Medium/Format">
-<!ENTITY zotero.items.genre_column "Genre">
-<!ENTITY zotero.items.system_column "System">
 <!ENTITY zotero.items.moreColumns.label "Weitere Spalten">
 <!ENTITY zotero.items.restoreColumnOrder.label "Spaltenordnung wiederherstellen">
 

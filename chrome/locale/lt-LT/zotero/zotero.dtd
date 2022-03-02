@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Rodyti atšauktus įrašus">
 
 <!ENTITY zotero.items.itemType "Įrašo tipas">
-<!ENTITY zotero.items.type_column "Įrašo tipas">
-<!ENTITY zotero.items.title_column "Pavadinimas">
 <!ENTITY zotero.items.creator_column "Autorius">
-<!ENTITY zotero.items.date_column "Data">
 <!ENTITY zotero.items.year_column "Metai">
-<!ENTITY zotero.items.publisher_column "Leidėjas">
-<!ENTITY zotero.items.publication_column "Leidinys">
-<!ENTITY zotero.items.journalAbbr_column "Žurnalo santrumpa">
-<!ENTITY zotero.items.language_column "Kalba">
-<!ENTITY zotero.items.accessDate_column "Žiūrėta">
-<!ENTITY zotero.items.libraryCatalog_column "Išteklius">
-<!ENTITY zotero.items.callNumber_column "Šifras">
-<!ENTITY zotero.items.rights_column "Teisės">
-<!ENTITY zotero.items.dateAdded_column "Pridėta">
 <!ENTITY zotero.items.dateModified_column "Keitimo laikas">
-<!ENTITY zotero.items.extra_column "Papildoma">
-<!ENTITY zotero.items.archive_column "Archyvas">
-<!ENTITY zotero.items.archiveLocation_column "Vieta archyve">
-<!ENTITY zotero.items.place_column "Vieta">
-<!ENTITY zotero.items.volume_column "Tomas">
-<!ENTITY zotero.items.edition_column "Leidimas, Nr.">
-<!ENTITY zotero.items.pages_column "Puslapiai">
-<!ENTITY zotero.items.issue_column "Numeris">
-<!ENTITY zotero.items.series_column "Serija">
-<!ENTITY zotero.items.seriesTitle_column "Serijos pavadinimas">
-<!ENTITY zotero.items.court_column "Teismas">
-<!ENTITY zotero.items.medium_column "Laikmena/formatas">
-<!ENTITY zotero.items.genre_column "Žanras">
-<!ENTITY zotero.items.system_column "Sistema">
 <!ENTITY zotero.items.moreColumns.label "Daugiau stulpelių">
 <!ENTITY zotero.items.restoreColumnOrder.label "Atstatyti stulpelių tvarką">
 

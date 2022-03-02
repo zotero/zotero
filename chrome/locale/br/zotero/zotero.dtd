@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Diskouez an elfennoù skrizet">
 
 <!ENTITY zotero.items.itemType "Doare elfenn">
-<!ENTITY zotero.items.type_column "Doare elfenn">
-<!ENTITY zotero.items.title_column "Titl">
 <!ENTITY zotero.items.creator_column "Krouer">
-<!ENTITY zotero.items.date_column "Deiziad">
 <!ENTITY zotero.items.year_column "Bloavezh">
-<!ENTITY zotero.items.publisher_column "Embanner">
-<!ENTITY zotero.items.publication_column "Embannadenn">
-<!ENTITY zotero.items.journalAbbr_column "Berradur anv kelaouenn">
-<!ENTITY zotero.items.language_column "Yezh">
-<!ENTITY zotero.items.accessDate_column "Gwelet d'an/ar/al">
-<!ENTITY zotero.items.libraryCatalog_column "Dastumad levraoueg">
-<!ENTITY zotero.items.callNumber_column "Niver-envel">
-<!ENTITY zotero.items.rights_column "Aotreadurioù">
-<!ENTITY zotero.items.dateAdded_column "Deiziad ouzhpennañ">
 <!ENTITY zotero.items.dateModified_column "Deiziad kemmañ">
-<!ENTITY zotero.items.extra_column "Traoù dibarr">
-<!ENTITY zotero.items.archive_column "Dielloù">
-<!ENTITY zotero.items.archiveLocation_column "Lec'hiadur en diell">
-<!ENTITY zotero.items.place_column "Lec'h">
-<!ENTITY zotero.items.volume_column "Levrenn">
-<!ENTITY zotero.items.edition_column "Embannadur">
-<!ENTITY zotero.items.pages_column "Pajennoù">
-<!ENTITY zotero.items.issue_column "Niverenn">
-<!ENTITY zotero.items.series_column "Dastumad">
-<!ENTITY zotero.items.seriesTitle_column "Titl an dastumad">
-<!ENTITY zotero.items.court_column "Lez-varn">
-<!ENTITY zotero.items.medium_column "Media/Stumm">
-<!ENTITY zotero.items.genre_column "Doare">
-<!ENTITY zotero.items.system_column "Sistem">
 <!ENTITY zotero.items.moreColumns.label "Muioc'h a vannoù">
 <!ENTITY zotero.items.restoreColumnOrder.label "Adsevel urzh ar bannoù">
 

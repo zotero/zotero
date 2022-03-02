@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Вид запис">
-<!ENTITY zotero.items.type_column "Вид запис">
-<!ENTITY zotero.items.title_column "Заглавие">
 <!ENTITY zotero.items.creator_column "Създател">
-<!ENTITY zotero.items.date_column "Дата">
 <!ENTITY zotero.items.year_column "Година">
-<!ENTITY zotero.items.publisher_column "Издател">
-<!ENTITY zotero.items.publication_column "Публикация">
-<!ENTITY zotero.items.journalAbbr_column "Списание (съкратено)">
-<!ENTITY zotero.items.language_column "Език">
-<!ENTITY zotero.items.accessDate_column "Отворен на">
-<!ENTITY zotero.items.libraryCatalog_column "Библиотечен каталог">
-<!ENTITY zotero.items.callNumber_column "Номер на обаждане">
-<!ENTITY zotero.items.rights_column "Права">
-<!ENTITY zotero.items.dateAdded_column "Добавен на">
 <!ENTITY zotero.items.dateModified_column "Променен на">
-<!ENTITY zotero.items.extra_column "Допълнително">
-<!ENTITY zotero.items.archive_column "Архив">
-<!ENTITY zotero.items.archiveLocation_column "Място в архива">
-<!ENTITY zotero.items.place_column "Място">
-<!ENTITY zotero.items.volume_column "Том">
-<!ENTITY zotero.items.edition_column "Издание">
-<!ENTITY zotero.items.pages_column "Страници">
-<!ENTITY zotero.items.issue_column "Пореден номер">
-<!ENTITY zotero.items.series_column "Серия">
-<!ENTITY zotero.items.seriesTitle_column "Название на серията">
-<!ENTITY zotero.items.court_column "Съдебна зала">
-<!ENTITY zotero.items.medium_column "Носител/Формат">
-<!ENTITY zotero.items.genre_column "Жанр">
-<!ENTITY zotero.items.system_column "Система">
 <!ENTITY zotero.items.moreColumns.label "Повече колони">
 <!ENTITY zotero.items.restoreColumnOrder.label "Възстановяване на подредбата на колоните">
 

@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Type">
-<!ENTITY zotero.items.type_column "Type">
-<!ENTITY zotero.items.title_column "Tittel">
 <!ENTITY zotero.items.creator_column "Namn">
-<!ENTITY zotero.items.date_column "Dato">
 <!ENTITY zotero.items.year_column "År">
-<!ENTITY zotero.items.publisher_column "Utgjevar">
-<!ENTITY zotero.items.publication_column "Publikasjon">
-<!ENTITY zotero.items.journalAbbr_column "Tidsskriftforkorting">
-<!ENTITY zotero.items.language_column "Språk">
-<!ENTITY zotero.items.accessDate_column "Sist opna">
-<!ENTITY zotero.items.libraryCatalog_column "Bibliotek-katalog">
-<!ENTITY zotero.items.callNumber_column "Plass-signatur">
-<!ENTITY zotero.items.rights_column "Rettar">
-<!ENTITY zotero.items.dateAdded_column "Lagt til">
 <!ENTITY zotero.items.dateModified_column "Sist endra">
-<!ENTITY zotero.items.extra_column "Ekstra">
-<!ENTITY zotero.items.archive_column "Arkiv">
-<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
-<!ENTITY zotero.items.place_column "Stad">
-<!ENTITY zotero.items.volume_column "Volume">
-<!ENTITY zotero.items.edition_column "Utgåve">
-<!ENTITY zotero.items.pages_column "Sider">
-<!ENTITY zotero.items.issue_column "Nummer">
-<!ENTITY zotero.items.series_column "Serie">
-<!ENTITY zotero.items.seriesTitle_column "Serietittel">
-<!ENTITY zotero.items.court_column "Court">
-<!ENTITY zotero.items.medium_column "Medium/format">
-<!ENTITY zotero.items.genre_column "Sjanger">
-<!ENTITY zotero.items.system_column "System">
 <!ENTITY zotero.items.moreColumns.label "Fleire kolonner">
 <!ENTITY zotero.items.restoreColumnOrder.label "Gjenopprett kolonnerekkefølgje">
 

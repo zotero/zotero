@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "철회된 항목 표시">
 
 <!ENTITY zotero.items.itemType "항목 형식">
-<!ENTITY zotero.items.type_column "항목 형식">
-<!ENTITY zotero.items.title_column "제목">
 <!ENTITY zotero.items.creator_column "창작자">
-<!ENTITY zotero.items.date_column "날짜">
 <!ENTITY zotero.items.year_column "연도">
-<!ENTITY zotero.items.publisher_column "출판사">
-<!ENTITY zotero.items.publication_column "출판">
-<!ENTITY zotero.items.journalAbbr_column "저널 약어">
-<!ENTITY zotero.items.language_column "언어">
-<!ENTITY zotero.items.accessDate_column "접근일">
-<!ENTITY zotero.items.libraryCatalog_column "라이브러리 카탈로그">
-<!ENTITY zotero.items.callNumber_column "호출 번호">
-<!ENTITY zotero.items.rights_column "권리">
-<!ENTITY zotero.items.dateAdded_column "입력일">
 <!ENTITY zotero.items.dateModified_column "변경일">
-<!ENTITY zotero.items.extra_column "추가사항">
-<!ENTITY zotero.items.archive_column "아카이브">
-<!ENTITY zotero.items.archiveLocation_column "아카이브 위치">
-<!ENTITY zotero.items.place_column "발행지">
-<!ENTITY zotero.items.volume_column "권">
-<!ENTITY zotero.items.edition_column "판본">
-<!ENTITY zotero.items.pages_column "쪽">
-<!ENTITY zotero.items.issue_column "호">
-<!ENTITY zotero.items.series_column "시리즈">
-<!ENTITY zotero.items.seriesTitle_column "시리즈 제목">
-<!ENTITY zotero.items.court_column "법원">
-<!ENTITY zotero.items.medium_column "매체/">
-<!ENTITY zotero.items.genre_column "장르">
-<!ENTITY zotero.items.system_column "시스템">
 <!ENTITY zotero.items.moreColumns.label "추가 열">
 <!ENTITY zotero.items.restoreColumnOrder.label "열 순서 복원">
 

@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "顯示被撤回的項目">
 
 <!ENTITY zotero.items.itemType "項目類型">
-<!ENTITY zotero.items.type_column "項目類型">
-<!ENTITY zotero.items.title_column "標題">
 <!ENTITY zotero.items.creator_column "作者">
-<!ENTITY zotero.items.date_column "日期">
 <!ENTITY zotero.items.year_column "年">
-<!ENTITY zotero.items.publisher_column "出版者">
-<!ENTITY zotero.items.publication_column "著作">
-<!ENTITY zotero.items.journalAbbr_column "期刊簡寫">
-<!ENTITY zotero.items.language_column "語言">
-<!ENTITY zotero.items.accessDate_column "取用">
-<!ENTITY zotero.items.libraryCatalog_column "文獻庫目錄">
-<!ENTITY zotero.items.callNumber_column "索書號">
-<!ENTITY zotero.items.rights_column "權利">
-<!ENTITY zotero.items.dateAdded_column "加入日期">
 <!ENTITY zotero.items.dateModified_column "修改日期">
-<!ENTITY zotero.items.extra_column "額外增列">
-<!ENTITY zotero.items.archive_column "存庫">
-<!ENTITY zotero.items.archiveLocation_column "文件庫中的位置">
-<!ENTITY zotero.items.place_column "所在地">
-<!ENTITY zotero.items.volume_column "卷次">
-<!ENTITY zotero.items.edition_column "版本">
-<!ENTITY zotero.items.pages_column "頁">
-<!ENTITY zotero.items.issue_column "期號">
-<!ENTITY zotero.items.series_column "系列">
-<!ENTITY zotero.items.seriesTitle_column "系列標題">
-<!ENTITY zotero.items.court_column "法庭">
-<!ENTITY zotero.items.medium_column "裝載物(Medium)/格式">
-<!ENTITY zotero.items.genre_column "流派">
-<!ENTITY zotero.items.system_column "系統">
 <!ENTITY zotero.items.moreColumns.label "更多直欄">
 <!ENTITY zotero.items.restoreColumnOrder.label "還原直欄次序">
 

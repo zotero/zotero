@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Mostra gli elementi ritrattati">
 
 <!ENTITY zotero.items.itemType "Tipo di elemento">
-<!ENTITY zotero.items.type_column "Tipo di elemento">
-<!ENTITY zotero.items.title_column "Titolo">
 <!ENTITY zotero.items.creator_column "Autore">
-<!ENTITY zotero.items.date_column "Data">
 <!ENTITY zotero.items.year_column "Anno">
-<!ENTITY zotero.items.publisher_column "Editore">
-<!ENTITY zotero.items.publication_column "Pubblicazione">
-<!ENTITY zotero.items.journalAbbr_column "Sigla della rivista">
-<!ENTITY zotero.items.language_column "Lingua">
-<!ENTITY zotero.items.accessDate_column "Consultato">
-<!ENTITY zotero.items.libraryCatalog_column "Catalogo della biblioteca">
-<!ENTITY zotero.items.callNumber_column "Segnatura">
-<!ENTITY zotero.items.rights_column "Diritti">
-<!ENTITY zotero.items.dateAdded_column "Data di aggiunta">
 <!ENTITY zotero.items.dateModified_column "Data dell'ultima modifica">
-<!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Archivio">
-<!ENTITY zotero.items.archiveLocation_column "Posizione in archivio">
-<!ENTITY zotero.items.place_column "Luogo">
-<!ENTITY zotero.items.volume_column "Volume">
-<!ENTITY zotero.items.edition_column "Edizione">
-<!ENTITY zotero.items.pages_column "Pagine">
-<!ENTITY zotero.items.issue_column "Fascicolo">
-<!ENTITY zotero.items.series_column "Serie">
-<!ENTITY zotero.items.seriesTitle_column "Titolo della serie">
-<!ENTITY zotero.items.court_column "Corte">
-<!ENTITY zotero.items.medium_column "Supporto/formato">
-<!ENTITY zotero.items.genre_column "Genere">
-<!ENTITY zotero.items.system_column "Sistema">
 <!ENTITY zotero.items.moreColumns.label "Altri campi">
 <!ENTITY zotero.items.restoreColumnOrder.label "Ripristina l'ordine dei campi">
 

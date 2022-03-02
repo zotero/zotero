@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Tegund færslu">
-<!ENTITY zotero.items.type_column "Tegund færslu">
-<!ENTITY zotero.items.title_column "Titill">
 <!ENTITY zotero.items.creator_column "Höfundur">
-<!ENTITY zotero.items.date_column "Dagsetning">
 <!ENTITY zotero.items.year_column "Ár">
-<!ENTITY zotero.items.publisher_column "Útgefandi">
-<!ENTITY zotero.items.publication_column "Útgáfa">
-<!ENTITY zotero.items.journalAbbr_column "Skammstöfun tímarits">
-<!ENTITY zotero.items.language_column "Tungumál">
-<!ENTITY zotero.items.accessDate_column "Sótt">
-<!ENTITY zotero.items.libraryCatalog_column "Færslusafnskrá">
-<!ENTITY zotero.items.callNumber_column "Kallnúmer">
-<!ENTITY zotero.items.rights_column "Réttindi">
-<!ENTITY zotero.items.dateAdded_column "Dagsetning viðbótar">
 <!ENTITY zotero.items.dateModified_column "Dagsetning breytingar">
-<!ENTITY zotero.items.extra_column "Auka">
-<!ENTITY zotero.items.archive_column "Safnvista">
-<!ENTITY zotero.items.archiveLocation_column "Staðsetning í safnvistu">
-<!ENTITY zotero.items.place_column "Staður">
-<!ENTITY zotero.items.volume_column "Bindi">
-<!ENTITY zotero.items.edition_column "Útgáfa">
-<!ENTITY zotero.items.pages_column "Síður">
-<!ENTITY zotero.items.issue_column "Hefti">
-<!ENTITY zotero.items.series_column "Ritröð">
-<!ENTITY zotero.items.seriesTitle_column "Titill ritraðar">
-<!ENTITY zotero.items.court_column "Dómur">
-<!ENTITY zotero.items.medium_column "Miðill/snið">
-<!ENTITY zotero.items.genre_column "Kynslóð">
-<!ENTITY zotero.items.system_column "Kerfi">
 <!ENTITY zotero.items.moreColumns.label "Fleiri dálkar">
 <!ENTITY zotero.items.restoreColumnOrder.label "Endurheimta röðun dálka">
 

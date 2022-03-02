@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Kirje tüüp">
-<!ENTITY zotero.items.type_column "Kirje tüüp">
-<!ENTITY zotero.items.title_column "Pealkiri">
 <!ENTITY zotero.items.creator_column "Autor">
-<!ENTITY zotero.items.date_column "Kuupäev">
 <!ENTITY zotero.items.year_column "Aasta">
-<!ENTITY zotero.items.publisher_column "Väljaandja">
-<!ENTITY zotero.items.publication_column "Teos">
-<!ENTITY zotero.items.journalAbbr_column "Ajakirja lühend">
-<!ENTITY zotero.items.language_column "Keel">
-<!ENTITY zotero.items.accessDate_column "Vaadatud">
-<!ENTITY zotero.items.libraryCatalog_column "Raamatukogu kataloog">
-<!ENTITY zotero.items.callNumber_column "Kohaviit">
-<!ENTITY zotero.items.rights_column "Õigused">
-<!ENTITY zotero.items.dateAdded_column "Lisamise kuupäev">
 <!ENTITY zotero.items.dateModified_column "Muutmise kuupäev">
-<!ENTITY zotero.items.extra_column "Lisa">
-<!ENTITY zotero.items.archive_column "Arhiiv">
-<!ENTITY zotero.items.archiveLocation_column "Asukoht arhiivis">
-<!ENTITY zotero.items.place_column "Koht">
-<!ENTITY zotero.items.volume_column "Köide">
-<!ENTITY zotero.items.edition_column "Trükk">
-<!ENTITY zotero.items.pages_column "Leheküljed">
-<!ENTITY zotero.items.issue_column "Väljalase">
-<!ENTITY zotero.items.series_column "Seeria">
-<!ENTITY zotero.items.seriesTitle_column "Seeria pealkiri">
-<!ENTITY zotero.items.court_column "Kohus">
-<!ENTITY zotero.items.medium_column "Kandja/formaat">
-<!ENTITY zotero.items.genre_column "Žanr">
-<!ENTITY zotero.items.system_column "Süsteem">
 <!ENTITY zotero.items.moreColumns.label "Rohkem tulpasid">
 <!ENTITY zotero.items.restoreColumnOrder.label "Taastada tulpade järjekord">
 
