@@ -362,7 +362,7 @@
 								<hbox>
 									<button observes="validate-tests" label="&scaffold.testing.delete;" tooltiptext="Delete the selected tests" oncommand="Scaffold.deleteSelectedTests()"/>
 									<button observes="validate-tests" label="&scaffold.testing.run;" tooltiptext="Run the selected tests" oncommand="Scaffold.runSelectedTests()"/>
-									<button observes="validate-tests" label="&scaffold.testing.update;" tooltiptext="Run the selected tests and bless the results" oncommand="Scaffold.updateSelectedTests()"/>
+									<button observes="validate-tests" label="&scaffold.testing.update;" tooltiptext="Run the selected tests and update the translator" oncommand="Scaffold.updateSelectedTests()"/>
 								</hbox>
 							</vbox>
 							<splitter resizeafter="farthest"/>

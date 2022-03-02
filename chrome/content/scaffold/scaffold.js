@@ -486,7 +486,7 @@ var Scaffold = new function () {
 					range: firstChar,
 					command: {
 						id: updateTestsCommand,
-						title: 'Run and Bless All'
+						title: 'Run and Update All'
 					}
 				});
 
@@ -504,7 +504,7 @@ var Scaffold = new function () {
 						range: range,
 						command: {
 							id: updateTestsCommand,
-							title: 'Run and Bless',
+							title: 'Run and Update',
 							arguments: [[testIndex]]
 						}
 					});
