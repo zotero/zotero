@@ -1686,6 +1686,18 @@ Zotero.Items = function() {
 		_sortCreatorSQL = sql;
 		return sql;
 	}
+
+
+	let _stripFromSortTitle = [
+		'</?i>',
+		'</?b>',
+		'</?sub>',
+		'</?sup>',
+		'<span style="font-variant:small-caps;">',
+		'<span class="nocase">',
+		'</span>',
+		'\\p{P}'
+	].map(re => Zotero.Utilities.XRegExp(re, 'g'));
 	
 	
 	this.getSortTitle = function (title) {
@@ -1697,17 +1709,7 @@ Zotero.Items = function() {
 			return title.toString();
 		}
 
-		let toRemove = [
-			'</?i>',
-			'</?b>',
-			'</?sub>',
-			'</?sup>',
-			'<span style="font-variant:small-caps;">',
-			'<span class="nocase">',
-			'</span>',
-			'\\p{P}'
-		].map(re => new RegExp(re, 'g'));
-		for (let re of toRemove) {
+		for (let re of _stripFromSortTitle) {
 			title = title.replace(re, '');
 		}
 		return title;
