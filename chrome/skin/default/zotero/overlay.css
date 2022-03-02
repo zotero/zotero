@@ -646,10 +646,14 @@
 	text-align: center;
 	padding: 0 2em;
 	position: relative;
+	white-space: nowrap;
+	overflow: hidden;
 }
 
 #sync-reminder-banner {
-	background: rgb(89, 139, 236);
+	background: rgb(255, 234, 80);
+	border-bottom: #a9a9a9 .5px solid;
+	color: black;
 }
 
 #retracted-items-message, #sync-reminder-message {
@@ -673,8 +677,12 @@
 	padding-right: 0.5em;
 }
 
-#retracted-items-link:active, .sync-reminder-link:active {
+#retracted-items-link:active {
 	color: #f9e8e2;
+}
+
+.sync-reminder-link:active {
+	color: #4b4b4b;
 }
 
 #retracted-items-close, #sync-reminder-close {

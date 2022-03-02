@@ -240,6 +240,7 @@
 						<div xmlns="http://www.w3.org/1999/xhtml" id="sync-reminder-banner">
 							<div id="sync-reminder-message"/>
 							<a id="sync-reminder-action" class="sync-reminder-link"/>
+							<a id="sync-reminder-learn-more" class="sync-reminder-link"/>
 							<div id="sync-reminder-spacer"/>
 							<a id="sync-reminder-disable" class="sync-reminder-link"/>
 							<a id="sync-reminder-remind" class="sync-reminder-link"/>
