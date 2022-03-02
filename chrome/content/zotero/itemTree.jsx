@@ -825,15 +825,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 	}
 	
-	handleFocus = (event) => {
-		if (Zotero.locked) {
-			return false;
-		}
-		if (this.selection.count == 0) {
-			this.selection.select(this.selection.pivot);
-		}
-	}
-	
 	handleActivate = (event, indices) => {
 		// Ignore double-clicks in duplicates view on everything except attachments
 		let items = indices.map(index => this.getRow(index).ref);
@@ -905,6 +896,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		return true;
 	}
+
+	/**
+	 * Select the first row when the tree is focused by the keyboard.
+	 */
+	handleKeyUp = (event) => {
+		if (!Zotero.locked && event.code === 'Tab' && this.selection.count == 0) {
+			this.selection.select(this.selection.pivot);
+		}
+	};
 	
 	render() {
 		const itemsPaneMessageHTML = this._itemsPaneMessage || this.props.emptyMessage;
@@ -969,8 +969,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 					onDragOver: e => this.props.dragAndDrop && this.onDragOver(e, -1),
 					onDrop: e => this.props.dragAndDrop && this.onDrop(e, -1),
 					onKeyDown: this.handleKeyDown,
+					onKeyUp: this.handleKeyUp,
 					onActivate: this.handleActivate,
-					onFocus: this.handleFocus,
 
 					onItemContextMenu: (...args) => this.props.onContextMenu(...args),
 					

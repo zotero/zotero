@@ -358,6 +358,7 @@ class VirtualizedTable extends React.Component {
 		// If you want to perform custom key handling it should be in this function
 		// if it returns false then virtualized-table's own key handler won't run
 		onKeyDown: () => true,
+		onKeyUp: noop,
 
 		onDragOver: noop,
 		onDrop: noop,
@@ -420,6 +421,7 @@ class VirtualizedTable extends React.Component {
 		// If you want to perform custom key handling it should be in this function
 		// if it returns false then virtualized-table's own key handler won't run
 		onKeyDown: PropTypes.func,
+		onKeyUp: PropTypes.func,
 
 		onDragOver: PropTypes.func,
 		onDrop: PropTypes.func,
@@ -1145,6 +1147,7 @@ class VirtualizedTable extends React.Component {
 		}
 		let props = {
 			onKeyDown: this._onKeyDown,
+			onKeyUp: e => this.props.onKeyUp && this.props.onKeyUp(e),
 			onDragOver: this._onDragOver,
 			onDrop: e => this.props.onDrop && this.props.onDrop(e),
 			onFocus: e => this.props.onFocus && this.props.onFocus(e),
