@@ -1713,22 +1713,15 @@ var Scaffold = new function () {
 	};
 
 	this.populateLinterMenu = function () {
-		let status = 'ESLint: ';
-		if (Zotero.Prefs.get('scaffold.eslintExecutable.suppress')) {
-			status += 'Disabled';
-		}
-		else if (Zotero.Prefs.get('scaffold.eslintExecutable')) {
-			status += Zotero.Prefs.get('scaffold.eslintExecutable');
-		}
-		else {
-			status += 'Not Configured';
-		}
+		let status = 'Path: ' + getDefaultESLintPath();
+		let toggle = Zotero.Prefs.get('scaffold.eslint.enabled') ? 'Disable' : 'Enable';
 		document.getElementById('menu_eslintStatus').label = status;
+		document.getElementById('menu_toggleESLint').label = toggle;
 	};
 
-	this.configureESLint = async function () {
-		Zotero.Prefs.set('scaffold.eslintExecutable.suppress', false);
-		await showConfigureESLintPrompt();
+	this.toggleESLint = async function () {
+		Zotero.Prefs.set('scaffold.eslint.enabled', !Zotero.Prefs.get('scaffold.eslint.enabled'));
+		await getESLintPath();
 	};
 
 	this.showTabNumbered = function (tabNumber) {
@@ -1999,65 +1992,51 @@ var Scaffold = new function () {
 		return ranges;
 	}
 
-	async function showConfigureESLintPrompt() {
-		var ps = Services.prompt;
-		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING
-			+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_CANCEL;
-		var index = ps.confirmEx(null,
-			"Scaffold",
-			"Zotero uses ESLint to enable code suggestions and error checking.\n\n"
-				+ "Choose the location of the ESLint executable.\n"
-				+ "(Try running `which eslint` in a terminal if you can't find it.)",
-			buttonFlags,
-			"Find ESLint…",
-			"Disable Error Checking",
-			null, null, {}
-		);
-		if (index == 0) {
-			let path = await browseForESLintExecutable();
-			if (path) {
-				Zotero.Prefs.set('scaffold.eslintExecutable', path);
-				return path;
+	function getDefaultESLintPath() {
+		return OS.Path.join(Scaffold_Translators.getDirectory(), 'node_modules', '.bin', 'teslint');
+	}
+
+	async function getESLintPath() {
+		if (!Zotero.Prefs.get('scaffold.eslint.enabled')) {
+			return null;
+		}
+
+		let eslintPath = getDefaultESLintPath();
+
+		while (!await OS.File.exists(eslintPath)) {
+			let ps = Services.prompt;
+			let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING
+				+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_CANCEL;
+
+			let index = ps.confirmEx(null,
+				"Scaffold",
+				"Zotero uses ESLint to enable code suggestions and error checking, "
+					+ "but it wasn't found in the selected translators directory.\n\n"
+					+ "You can install it from the command line:\n\n"
+					+ `  cd ${Scaffold_Translators.getDirectory()}\n`
+					+ "  npm install\n\n",
+				buttonFlags,
+				"Try Again",
+				"Disable Error Checking",
+				null, null, {}
+			);
+			if (index == 1) {
+				Zotero.Prefs.set('scaffold.eslint.enabled', false);
+				return null;
 			}
-		}
-		else if (index == 1) {
-			Zotero.Prefs.set('scaffold.eslintExecutable', null);
-			Zotero.Prefs.set('scaffold.eslintExecutable.suppress', true);
-		}
-		return false;
-	}
-
-	async function browseForESLintExecutable() {
-		var fp = new FilePicker();
-		var oldPath = Zotero.Prefs.get('scaffold.eslintExecutable');
-		if (oldPath) {
-			fp.displayDirectory = oldPath;
-		}
-		fp.init(
-			window,
-			"Select ESLint",
-			fp.modeOpen
-		);
-		fp.appendFilters(fp.filterAll);
-		if (await fp.show() != fp.returnOK) {
-			return false;
-		}
-		var path = OS.Path.normalize(fp.file);
-		if (oldPath == path) {
-			return false;
-		}
-		return path;
-	}
-
-	async function runESLint(translatorPath) {
-		let eslintPath = Zotero.Prefs.get("scaffold.eslintExecutable");
-		if ((!eslintPath || !await OS.File.exists(eslintPath)) && !Zotero.Prefs.get('scaffold.eslintExecutable.suppress')) {
-			eslintPath = await showConfigureESLintPrompt();
-			if (!eslintPath) {
+			else if (index == 2) {
 				return null;
 			}
 		}
+		return eslintPath;
+	}
+
+	async function runESLint(translatorPath) {
+		if (!translatorPath) return [];
+
+		let eslintPath = await getESLintPath();
+		if (!eslintPath) return [];
 
 		let outputFile = OS.Path.join(
 			Zotero.getTempDirectory().path,
@@ -2066,7 +2045,7 @@ var Scaffold = new function () {
 
 		Zotero.debug(`Running ESLint`);
 		try {
-			await Zotero.Utilities.Internal.exec(eslintPath, ['--format', 'json', '-o', outputFile, '--', translatorPath]);
+			await Zotero.Utilities.Internal.exec(eslintPath, ['-o', outputFile, '--', translatorPath]);
 		}
 		catch (e) {
 			// ignore non-zero exit code (which just means that there were lint errors in the translator)

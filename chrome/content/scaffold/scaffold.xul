@@ -192,7 +192,7 @@
 							onpopupshowing="Scaffold.populateLinterMenu()">
 						<menupopup>
 							<menuitem id="menu_eslintStatus" disabled="true"/>
-							<menuitem id="menu_configureESLint" label="&scaffold.menu.configureESLint;" oncommand="Scaffold.configureESLint()"/>
+							<menuitem id="menu_toggleESLint" oncommand="Scaffold.toggleESLint()"/>
 						</menupopup>
 					</menu>
 				</menupopup>
