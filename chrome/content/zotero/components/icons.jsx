@@ -127,6 +127,7 @@ i('TreeitemNoteSmall', 'chrome://zotero/skin/treeitem-note-small.png');
 i('TreeitemPatent', 'chrome://zotero/skin/treeitem-patent.png');
 i('Treeitem', 'chrome://zotero/skin/treeitem.png');
 i('TreeitemPodcast', 'chrome://zotero/skin/treeitem-podcast.png', false);
+i('TreeitemPreprint', 'chrome://zotero/skin/treeitem-preprint.png');
 i('TreeitemPresentation', 'chrome://zotero/skin/treeitem-presentation.png');
 i('TreeitemRadioBroadcast', 'chrome://zotero/skin/treeitem-radioBroadcast.png', false);
 i('TreeitemReport', 'chrome://zotero/skin/treeitem-report.png');
