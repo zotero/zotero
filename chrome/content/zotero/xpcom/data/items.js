@@ -1064,13 +1064,13 @@ Zotero.Items = function() {
 
 
 	this._mergePDFAttachments = async function (item, otherItems) {
-		let savePromises = [];
+		Zotero.DB.requireTransaction();
 
 		let remapAttachmentKeys = new Map();
 		let masterAttachmentHashes = await this._hashItem(item, 'bytes');
 		let hashesIncludeText = false;
 
-		await Promise.all(otherItems.map(async (otherItem) => {
+		for (let otherItem of otherItems) {
 			let mergedMasterAttachments = new Set();
 
 			for (let otherAttachment of await this.getAsync(otherItem.getAttachments(true))) {
@@ -1100,7 +1100,7 @@ Zotero.Items = function() {
 				if (!masterAttachmentID || mergedMasterAttachments.has(masterAttachmentID)) {
 					Zotero.debug(`No unmerged match for attachment ${otherAttachment.id} in master item - moving`);
 					otherAttachment.parentItemID = item.id;
-					savePromises.push(otherAttachment.save());
+					await otherAttachment.save();
 					continue;
 				}
 				mergedMasterAttachments.add(masterAttachmentID);
@@ -1111,16 +1111,16 @@ Zotero.Items = function() {
 					Zotero.debug(`Master attachment ${masterAttachmentID} matches ${otherAttachment.id}, `
 						+ 'but content types differ - moving');
 					otherAttachment.parentItemID = item.id;
-					savePromises.push(otherAttachment.save());
+					await otherAttachment.save();
 					continue;
 				}
 
 				Zotero.debug(`Master attachment ${masterAttachmentID} matches ${otherAttachment.id} - merging`);
-				savePromises.push(this.moveChildItems(otherAttachment, masterAttachment, true));
-				savePromises.push(this._moveEmbeddedNote(otherAttachment, masterAttachment));
+				await this.moveChildItems(otherAttachment, masterAttachment, true);
+				await this._moveEmbeddedNote(otherAttachment, masterAttachment);
 
 				otherAttachment.deleted = true;
-				savePromises.push(otherAttachment.save());
+				await otherAttachment.save();
 
 				// Later on, when processing notes, we'll use this to remap
 				// URLs pointing to the old attachment.
@@ -1132,17 +1132,16 @@ Zotero.Items = function() {
 						Zotero.URI.getItemURI(otherAttachment));
 				}
 
-				savePromises.push(masterAttachment.save());
+				await masterAttachment.save();
 			}
-		}));
+		}
 
-		await Promise.all(savePromises);
 		return remapAttachmentKeys;
 	};
 
 
 	this._mergeWebAttachments = async function (item, otherItems) {
-		let savePromises = [];
+		Zotero.DB.requireTransaction();
 
 		let masterAttachments = (await this.getAsync(item.getAttachments(true)))
 			.filter(attachment => attachment.isWebAttachment());
@@ -1165,28 +1164,26 @@ Zotero.Items = function() {
 				if (!masterAttachment) {
 					Zotero.debug(`No match for web attachment ${otherAttachment.id} in master item - moving`);
 					otherAttachment.parentItemID = item.id;
-					savePromises.push(otherAttachment.save());
+					await otherAttachment.save();
 					continue;
 				}
 
 				otherAttachment.deleted = true;
-				savePromises.push(otherAttachment.save());
+				await otherAttachment.save();
 
 				masterAttachment.addRelation(Zotero.Relations.replacedItemPredicate,
 					Zotero.URI.getItemURI(otherAttachment));
-				savePromises.push(masterAttachment.save());
+				await masterAttachment.save();
 
 				// Don't match with this attachment again
 				masterAttachments = masterAttachments.filter(a => a !== masterAttachment);
 			}
 		}
-
-		await Promise.all(savePromises);
 	};
 
 
 	this._mergeOtherAttachments = async function (item, otherItems) {
-		let savePromises = [];
+		Zotero.DB.requireTransaction();
 
 		for (let otherItem of otherItems) {
 			for (let otherAttachment of await this.getAsync(otherItem.getAttachments(true))) {
@@ -1195,11 +1192,9 @@ Zotero.Items = function() {
 				}
 
 				otherAttachment.parentItemID = item.id;
-				savePromises.push(otherAttachment.save());
+				await otherAttachment.save();
 			}
 		}
-
-		await Promise.all(savePromises);
 	};
 
 
@@ -1237,7 +1232,7 @@ Zotero.Items = function() {
 	 * @return {Promise<String>}
 	 */
 	this._hashAttachmentText = async function (attachment) {
-		if ((await OS.File.stat(await attachment.getFilePathAsync())).size > 12000000) {
+		if ((await OS.File.stat(await attachment.getFilePathAsync())).size > 5e8) {
 			Zotero.debug('_hashAttachmentText: Attachment too large');
 			return null;
 		}
