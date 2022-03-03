@@ -281,6 +281,59 @@ describe("Duplicate Items", function () {
 			assert.include(annotation2Note.getNote(), attachment1.key);
 		});
 
+		it("should update all item keys when moving notes", async function () {
+			let attachmentFilenames = [
+				'recognizePDF_test_arXiv.pdf',
+				'recognizePDF_test_DOI.pdf',
+				'recognizePDF_test_title.pdf'
+			];
+
+			let item1 = await createDataObject('item', { setTitle: true });
+			let attachments1 = [];
+			for (let filename of attachmentFilenames) {
+				let attachment = await importFileAttachment(filename, { parentID: item1.id });
+				attachments1.push(attachment);
+			}
+
+			let item2 = item1.clone();
+			await item2.saveTx();
+			let attachments2 = [];
+			let annotations2 = [];
+			let notes2 = [];
+			for (let filename of attachmentFilenames) {
+				let attachment = await importFileAttachment(filename, { parentID: item2.id });
+				let annotation = await createAnnotation('highlight', attachment);
+				let note = await Zotero.EditorInstance.createNoteFromAnnotations([annotation], item2.id);
+				attachments2.push(attachment);
+				annotations2.push(annotation);
+				notes2.push(note);
+
+				assert.include(note.getNote(), item2.key);
+				assert.include(note.getNote(), attachment.key);
+			}
+
+			await merge(item1.id);
+
+			var iv = zp.itemsView;
+			assert.isFalse(iv.getRowIndexByID(item1.id));
+			assert.isFalse(iv.getRowIndexByID(item2.id));
+			assert.isFalse(item1.deleted);
+			assert.equal(item1.numAttachments(true), 3);
+			assert.isTrue(item2.deleted);
+
+			for (let i = 0; i < 3; i++) {
+				let attachment1 = attachments1[i];
+				let attachment2 = attachments2[i];
+				let note = notes2[i];
+
+				assert.equal(note.parentItemID, item1.id);
+				assert.include(note.getNote(), item1.key);
+				assert.notInclude(note.getNote(), item2.key);
+				assert.include(note.getNote(), attachment1.key);
+				assert.notInclude(note.getNote(), attachment2.key);
+			}
+		});
+
 		it("should merge snapshots with the same title, even if URL differs", async function () {
 			let content = getTestDataDirectory();
 			content.append('snapshot');

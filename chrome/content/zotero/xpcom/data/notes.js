@@ -110,7 +110,7 @@ Zotero.Notes = new function() {
 		let keys = [...itemKeyMap.keys()].join('|');
 		let re = new RegExp(`%2Fitems%2F(${keys})`, 'g');
 		note = note.replace(re, (str, key) => `%2Fitems%2F${itemKeyMap.get(key)}`);
-		re = new RegExp(`data-attachment-key="${keys}"`);
+		re = new RegExp(`data-attachment-key="(${keys})"`);
 		note = note.replace(re, (str, key) => `data-attachment-key="${itemKeyMap.get(key)}"`);
 		item.setNote(note);
 	};
