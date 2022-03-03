@@ -202,3 +202,6 @@ pref("extensions.zotero.retractions.recentItems", "[]");
 pref("extensions.zotero.annotations.noteTemplates.title", "<h1>{{title}}<br/>({{date}})</h1>");
 pref("extensions.zotero.annotations.noteTemplates.highlight", "<p>{{highlight quotes='true'}} {{citation}} {{comment}}</p>");
 pref("extensions.zotero.annotations.noteTemplates.note", "<p>{{citation}} {{comment}}</p>");
+
+// Scaffold
+pref("extensions.zotero.scaffold.eslint.enabled", true);

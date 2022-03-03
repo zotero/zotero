@@ -47,6 +47,10 @@ var Scaffold_Load = new function() {
 			.sort((a, b) => a.label.localeCompare(b.label));
 		translators["Import Translators"] = (yield translatorProvider.getAllForType("import"))
 			.sort((a, b) => a.label.localeCompare(b.label));
+		translators["Export Translators"] = (yield translatorProvider.getAllForType("export"))
+			.sort((a, b) => a.label.localeCompare(b.label));
+		translators["Search Translators"] = (yield translatorProvider.getAllForType("search"))
+			.sort((a, b) => a.label.localeCompare(b.label));
 
 		for (set in translators) {
 			// Make a separator
