@@ -178,7 +178,8 @@ class EditorInstance {
 
 	async insertAnnotations(annotations) {
 		await this._ensureNoteCreated();
-		let { html } = await this._serializeAnnotations(annotations);
+		await this.importImages(annotations);
+		let { html } = Zotero.EditorInstanceUtilities.serializeAnnotations(annotations);
 		if (html) {
 			this._postMessage({ action: 'insertHTML', pos: -1, html });
 		}
@@ -235,198 +236,13 @@ class EditorInstance {
 		}
 	}
 
-	/**
-	 * Transform plain text, containing some supported HTML tags, into actual HTML.
-	 * A similar code is also used in pdf-reader mini editor for annotation text and comments.
-	 * It basically creates a text node and then parses and wraps specific parts
-	 * of it into supported HTML tags
-	 *
-	 * @param text Plain text flavored with some HTML tags
-	 * @returns {string} HTML
-	 * @private
-	 */
-	_transformTextToHTML(text) {
-		const supportedFormats = ['i', 'b', 'sub', 'sup'];
-
-		function getFormatter(str) {
-			let results = supportedFormats.map(format => str.toLowerCase().indexOf('<' + format + '>'));
-			results = results.map((offset, idx) => [supportedFormats[idx], offset]);
-			results.sort((a, b) => a[1] - b[1]);
-			for (let result of results) {
-				let format = result[0];
-				let offset = result[1];
-				if (offset < 0) continue;
-				let lastIndex = str.toLowerCase().indexOf('</' + format + '>', offset);
-				if (lastIndex >= 0) {
-					let parts = [];
-					parts.push(str.slice(0, offset));
-					parts.push(str.slice(offset + format.length + 2, lastIndex));
-					parts.push(str.slice(lastIndex + format.length + 3));
-					return {
-						format,
-						parts
-					};
-				}
-			}
-			return null;
-		}
-
-		function walkFormat(parent) {
-			let child = parent.firstChild;
-			while (child) {
-				if (child.nodeType === 3) {
-					let text = child.nodeValue;
-					let formatter = getFormatter(text);
-					if (formatter) {
-						let nodes = [];
-						nodes.push(doc.createTextNode(formatter.parts[0]));
-						let midNode = doc.createElement(formatter.format);
-						midNode.appendChild(doc.createTextNode(formatter.parts[1]));
-						nodes.push(midNode);
-						nodes.push(doc.createTextNode(formatter.parts[2]));
-						child.replaceWith(...nodes);
-						child = midNode;
-					}
-				}
-				walkFormat(child);
-				child = child.nextSibling;
-			}
-		}
-		
-		let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
-		.createInstance(Components.interfaces.nsIDOMParser);
-		let doc = parser.parseFromString('', 'text/html');
-		
-		// innerText transforms \n into <br>
-		doc.body.innerText = text;
-		walkFormat(doc.body);
-		return doc.body.innerHTML;
-	}
-
-	/**
-	 * @param {Object[]} annotations JSON annotations
-	 * @param {Boolean} skipEmbeddingItemData Do not add itemData to citation items
-	 * @return {Object} Object with `html` string and `citationItems` array to embed into metadata container
-	 */
-	async _serializeAnnotations(annotations, skipEmbeddingItemData) {
-		let storedCitationItems = [];
-		let html = '';
+	async importImages(annotations) {
 		for (let annotation of annotations) {
-			let attachmentItem = await Zotero.Items.getAsync(annotation.attachmentItemID);
-			if (!attachmentItem) {
-				continue;
-			}
-
-			if (!annotation.text
-				&& !annotation.comment
-				&& !annotation.image) {
-				continue;
-			}
-			
-			let citationHTML = '';
-			let imageHTML = '';
-			let highlightHTML = '';
-			let quotedHighlightHTML = '';
-			let commentHTML = '';
-			
-			let storedAnnotation = {
-				attachmentURI: Zotero.URI.getItemURI(attachmentItem),
-				annotationKey: annotation.id,
-				color: annotation.color,
-				pageLabel: annotation.pageLabel,
-				position: annotation.position
-			};
-			
-			// Citation
-			let parentItem = attachmentItem.parentID && await Zotero.Items.getAsync(attachmentItem.parentID);
-			if (parentItem) {
-				let uris = [Zotero.URI.getItemURI(parentItem)];
-				let citationItem = {
-					uris,
-					locator: annotation.pageLabel
-				};
-				
-				// Note: integration.js` uses `Zotero.Cite.System.prototype.retrieveItem`,
-				// which produces a little bit different CSL JSON
-				let itemData = Zotero.Utilities.Item.itemToCSLJSON(parentItem);
-				if (!skipEmbeddingItemData) {
-					citationItem.itemData = itemData;
-				}
-
-				let item = storedCitationItems.find(item => item.uris.some(uri => uris.includes(uri)));
-				if (!item) {
-					storedCitationItems.push({ uris, itemData });
-				}
-				
-				storedAnnotation.citationItem = citationItem;
-				let citation = {
-					citationItems: [citationItem],
-					properties: {}
-				};
-				
-				let citationWithData = JSON.parse(JSON.stringify(citation));
-				citationWithData.citationItems[0].itemData = itemData;
-				let formatted = this._formatCitation(citationWithData);
-				citationHTML = `<span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">${formatted}</span>`;
-			}
-			
-			// Image
 			if (annotation.image && !this._filesReadOnly) {
-				// We assume that annotation.image is always PNG
-				let imageAttachmentKey = await this._importImage(annotation.image);
-				delete annotation.image;
-
-				// Normalize image dimensions to 1.25 of the print size
-				let rect = annotation.position.rects[0];
-				let rectWidth = rect[2] - rect[0];
-				let rectHeight = rect[3] - rect[1];
-				// Constants from pdf.js
-				const CSS_UNITS = 96.0 / 72.0;
-				const PDFJS_DEFAULT_SCALE = 1.25;
-				let width = Math.round(rectWidth * CSS_UNITS * PDFJS_DEFAULT_SCALE);
-				let height = Math.round(rectHeight * width / rectWidth);
-				imageHTML = `<img data-attachment-key="${imageAttachmentKey}" width="${width}" height="${height}" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}"/>`;
+				annotation.imageAttachmentKey = await this._importImage(annotation.image);
 			}
-
-			// Text
-			if (annotation.text) {
-				let text = this._transformTextToHTML(annotation.text.trim());
-				highlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}">${text}</span>`;
-				quotedHighlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}">${Zotero.getString('punctuation.openingQMark')}${text}${Zotero.getString('punctuation.closingQMark')}</span>`;
-			}
-			
-			// Note
-			if (annotation.comment) {
-				commentHTML = this._transformTextToHTML(annotation.comment.trim());
-			}
-
-			let template;
-			if (annotation.type === 'highlight') {
-				template = Zotero.Prefs.get('annotations.noteTemplates.highlight');
-			}
-			else if (annotation.type === 'note') {
-				template = Zotero.Prefs.get('annotations.noteTemplates.note');
-			}
-			else if (annotation.type === 'image') {
-				template = '<p>{{image}}<br/>{{citation}} {{comment}}</p>';
-			}
-
-			let vars = {
-				color: annotation.color,
-				highlight: (attrs) => attrs.quotes === 'true' ? quotedHighlightHTML : highlightHTML,
-				comment: commentHTML,
-				citation: citationHTML,
-				image: imageHTML,
-				tags: (attrs) => annotation.tags && annotation.tags.map(tag => tag.name).join(attrs.join || ' ')
-			};
-			let templateHTML = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
-			// Remove some spaces at the end of paragraph
-			templateHTML = templateHTML.replace(/([\s]*)(<\/p)/g, '$2');
-			// Remove multiple spaces
-			templateHTML = templateHTML.replace(/\s\s+/g, ' ');
-			html += templateHTML;
+			delete annotation.image;
 		}
-		return { html, citationItems: storedCitationItems };
 	}
 
 	async _digestItems(ids) {
@@ -450,7 +266,7 @@ class EditorInstance {
 					}],
 					properties: {}
 				};
-				let formatted = this._formatCitation(citation);
+				let formatted = Zotero.EditorInstanceUtilities.formatCitation(citation);
 				html += `<p><span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">${formatted}</span></p>`;
 			}
 			else if (item.isNote()) {
@@ -576,7 +392,8 @@ class EditorInstance {
 					}
 					else if (type === 'zotero/annotation') {
 						let annotations = JSON.parse(data);
-						let { html: serializedHTML } = await this._serializeAnnotations(annotations);
+						await this.importImages(annotations);
+						let { html: serializedHTML } = Zotero.EditorInstanceUtilities.serializeAnnotations(annotations);
 						html = serializedHTML;
 					}
 					if (html) {
@@ -1077,86 +894,6 @@ class EditorInstance {
 		}
 	}
 
-	/**
-	 * Build citation item preview string (based on _buildBubbleString in quickFormat.js)
-	 * TODO: Try to avoid duplicating this code here and inside note-editor
-	 */
-	_formatCitationItemPreview(citationItem) {
-		const STARTSWITH_ROMANESQUE_REGEXP = /^[&a-zA-Z\u0e01-\u0e5b\u00c0-\u017f\u0370-\u03ff\u0400-\u052f\u0590-\u05d4\u05d6-\u05ff\u1f00-\u1fff\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]/;
-		const ENDSWITH_ROMANESQUE_REGEXP = /[.;:&a-zA-Z\u0e01-\u0e5b\u00c0-\u017f\u0370-\u03ff\u0400-\u052f\u0590-\u05d4\u05d6-\u05ff\u1f00-\u1fff\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]$/;
-
-		let { itemData } = citationItem;
-		let str = '';
-		
-		// Authors
-		let authors = itemData.author;
-		if (authors) {
-			if (authors.length === 1) {
-				str = authors[0].family || authors[0].literal;
-			}
-			else if (authors.length === 2) {
-				let a = authors[0].family || authors[0].literal;
-				let b = authors[1].family || authors[1].literal;
-				str = a + ' ' + Zotero.getString('general.and') + ' ' + b;
-			}
-			else if (authors.length >= 3) {
-				str = (authors[0].family || authors[0].literal) + ' ' + Zotero.getString('general.etAl');
-			}
-		}
-		
-		// Title
-		if (!str && itemData.title) {
-			str = `“${itemData.title}”`;
-		}
-
-		// Date
-		if (itemData.issued
-			&& itemData.issued['date-parts']
-			&& itemData.issued['date-parts'][0]) {
-			let year = itemData.issued['date-parts'][0][0];
-			if (year && year != '0000') {
-				str += ', ' + year;
-			}
-		}
-	
-		// Locator
-		if (citationItem.locator) {
-			if (citationItem.label) {
-				// TODO: Localize and use short forms
-				var label = citationItem.label;
-			}
-			else if (/[\-–,]/.test(citationItem.locator)) {
-				var label = 'pp.';
-			}
-			else {
-				var label = 'p.';
-			}
-
-			str += ', ' + label + ' ' + citationItem.locator;
-		}
-
-		// Prefix
-		if (citationItem.prefix && ENDSWITH_ROMANESQUE_REGEXP) {
-			str = citationItem.prefix
-				+ (ENDSWITH_ROMANESQUE_REGEXP.test(citationItem.prefix) ? ' ' : '')
-				+ str;
-		}
-
-		// Suffix
-		if (citationItem.suffix && STARTSWITH_ROMANESQUE_REGEXP) {
-			str += (STARTSWITH_ROMANESQUE_REGEXP.test(citationItem.suffix) ? ' ' : '')
-				+ citationItem.suffix;
-		}
-
-		return str;
-	}
-
-	_formatCitation(citation) {
-		return '(' + citation.citationItems.map((x) => {
-			return `<span class="citation-item">${this._formatCitationItemPreview(x)}</span>`;
-		}).join('; ') + ')';
-	}
-
 	_arrayBufferToBase64(buffer) {
 		var binary = '';
 		var bytes = new Uint8Array(buffer);
@@ -1494,7 +1231,8 @@ class EditorInstance {
 		// New line is needed for note title parser
 		html += '\n';
 
-		let { html: serializedHTML, citationItems } = await editorInstance._serializeAnnotations(jsonAnnotations, true);
+		await editorInstance.importImages(jsonAnnotations);
+		let { html: serializedHTML, citationItems } = Zotero.EditorInstanceUtilities.serializeAnnotations(jsonAnnotations, true);
 		html += serializedHTML;
 		citationItems = encodeURIComponent(JSON.stringify(citationItems));
 		html = `<div data-citation-items="${citationItems}" data-schema-version="${SCHEMA_VERSION}">${html}</div>`;
@@ -1504,5 +1242,283 @@ class EditorInstance {
 	}
 }
 
+class EditorInstanceUtilities {
+	/**
+	 * Serialize annotations into HTML
+	 *
+	 * @param {Object[]} annotations JSON annotations
+	 * @param {Boolean} skipEmbeddingItemData Do not add itemData to citation items
+	 * @return {Object} Object with `html` string and `citationItems` array to embed into metadata container
+	 */
+	serializeAnnotations(annotations, skipEmbeddingItemData) {
+		let storedCitationItems = [];
+		let html = '';
+		for (let annotation of annotations) {
+			let attachmentItem = Zotero.Items.get(annotation.attachmentItemID);
+			if (!attachmentItem) {
+				continue;
+			}
+
+			if (!annotation.text
+				&& !annotation.comment
+				&& !annotation.imageAttachmentKey) {
+				continue;
+			}
+
+			let citationHTML = '';
+			let imageHTML = '';
+			let highlightHTML = '';
+			let quotedHighlightHTML = '';
+			let commentHTML = '';
+
+			let storedAnnotation = {
+				attachmentURI: Zotero.URI.getItemURI(attachmentItem),
+				annotationKey: annotation.id,
+				color: annotation.color,
+				pageLabel: annotation.pageLabel,
+				position: annotation.position
+			};
+
+			// Citation
+			let parentItem = attachmentItem.parentID && Zotero.Items.get(attachmentItem.parentID);
+			if (parentItem) {
+				let uris = [Zotero.URI.getItemURI(parentItem)];
+				let citationItem = {
+					uris,
+					locator: annotation.pageLabel
+				};
+
+				// Note: integration.js` uses `Zotero.Cite.System.prototype.retrieveItem`,
+				// which produces a little bit different CSL JSON
+				let itemData = Zotero.Utilities.Item.itemToCSLJSON(parentItem);
+				if (!skipEmbeddingItemData) {
+					citationItem.itemData = itemData;
+				}
+
+				let item = storedCitationItems.find(item => item.uris.some(uri => uris.includes(uri)));
+				if (!item) {
+					storedCitationItems.push({ uris, itemData });
+				}
+
+				storedAnnotation.citationItem = citationItem;
+				let citation = {
+					citationItems: [citationItem],
+					properties: {}
+				};
+
+				let citationWithData = JSON.parse(JSON.stringify(citation));
+				citationWithData.citationItems[0].itemData = itemData;
+				let formatted = Zotero.EditorInstanceUtilities.formatCitation(citationWithData);
+				citationHTML = `<span class="citation" data-citation="${encodeURIComponent(JSON.stringify(citation))}">${formatted}</span>`;
+			}
+
+			// Image
+			if (annotation.imageAttachmentKey) {
+				// // let imageAttachmentKey = await this._importImage(annotation.image);
+				// delete annotation.image;
+
+				// Normalize image dimensions to 1.25 of the print size
+				let rect = annotation.position.rects[0];
+				let rectWidth = rect[2] - rect[0];
+				let rectHeight = rect[3] - rect[1];
+				// Constants from pdf.js
+				const CSS_UNITS = 96.0 / 72.0;
+				const PDFJS_DEFAULT_SCALE = 1.25;
+				let width = Math.round(rectWidth * CSS_UNITS * PDFJS_DEFAULT_SCALE);
+				let height = Math.round(rectHeight * width / rectWidth);
+				imageHTML = `<img data-attachment-key="${annotation.imageAttachmentKey}" width="${width}" height="${height}" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}"/>`;
+			}
+
+			// Text
+			if (annotation.text) {
+				let text = this._transformTextToHTML(annotation.text.trim());
+				highlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}">${text}</span>`;
+				quotedHighlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}">${Zotero.getString('punctuation.openingQMark')}${text}${Zotero.getString('punctuation.closingQMark')}</span>`;
+			}
+
+			// Note
+			if (annotation.comment) {
+				commentHTML = this._transformTextToHTML(annotation.comment.trim());
+			}
+
+			let template;
+			if (annotation.type === 'highlight') {
+				template = Zotero.Prefs.get('annotations.noteTemplates.highlight');
+			}
+			else if (annotation.type === 'note') {
+				template = Zotero.Prefs.get('annotations.noteTemplates.note');
+			}
+			else if (annotation.type === 'image') {
+				template = '<p>{{image}}<br/>{{citation}} {{comment}}</p>';
+			}
+
+			let vars = {
+				color: annotation.color,
+				highlight: (attrs) => attrs.quotes === 'true' ? quotedHighlightHTML : highlightHTML,
+				comment: commentHTML,
+				citation: citationHTML,
+				image: imageHTML,
+				tags: (attrs) => annotation.tags && annotation.tags.map(tag => tag.name).join(attrs.join || ' ')
+			};
+			let templateHTML = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
+			// Remove some spaces at the end of paragraph
+			templateHTML = templateHTML.replace(/([\s]*)(<\/p)/g, '$2');
+			// Remove multiple spaces
+			templateHTML = templateHTML.replace(/\s\s+/g, ' ');
+			html += templateHTML;
+		}
+		return { html, citationItems: storedCitationItems };
+	}
+
+	/**
+	 * Transform plain text, containing some supported HTML tags, into actual HTML.
+	 * A similar code is also used in pdf-reader mini editor for annotation text and comments.
+	 * It basically creates a text node and then parses and wraps specific parts
+	 * of it into supported HTML tags
+	 *
+	 * @param text Plain text flavored with some HTML tags
+	 * @returns {string} HTML
+	 * @private
+	 */
+	_transformTextToHTML(text) {
+		const supportedFormats = ['i', 'b', 'sub', 'sup'];
+
+		function getFormatter(str) {
+			let results = supportedFormats.map(format => str.toLowerCase().indexOf('<' + format + '>'));
+			results = results.map((offset, idx) => [supportedFormats[idx], offset]);
+			results.sort((a, b) => a[1] - b[1]);
+			for (let result of results) {
+				let format = result[0];
+				let offset = result[1];
+				if (offset < 0) continue;
+				let lastIndex = str.toLowerCase().indexOf('</' + format + '>', offset);
+				if (lastIndex >= 0) {
+					let parts = [];
+					parts.push(str.slice(0, offset));
+					parts.push(str.slice(offset + format.length + 2, lastIndex));
+					parts.push(str.slice(lastIndex + format.length + 3));
+					return {
+						format,
+						parts
+					};
+				}
+			}
+			return null;
+		}
+
+		function walkFormat(parent) {
+			let child = parent.firstChild;
+			while (child) {
+				if (child.nodeType === 3) {
+					let text = child.nodeValue;
+					let formatter = getFormatter(text);
+					if (formatter) {
+						let nodes = [];
+						nodes.push(doc.createTextNode(formatter.parts[0]));
+						let midNode = doc.createElement(formatter.format);
+						midNode.appendChild(doc.createTextNode(formatter.parts[1]));
+						nodes.push(midNode);
+						nodes.push(doc.createTextNode(formatter.parts[2]));
+						child.replaceWith(...nodes);
+						child = midNode;
+					}
+				}
+				walkFormat(child);
+				child = child.nextSibling;
+			}
+		}
+
+		let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
+		.createInstance(Components.interfaces.nsIDOMParser);
+		let doc = parser.parseFromString('', 'text/html');
+
+		// innerText transforms \n into <br>
+		doc.body.innerText = text;
+		walkFormat(doc.body);
+		return doc.body.innerHTML;
+	}
+
+	/**
+	 * Build citation item preview string (based on _buildBubbleString in quickFormat.js)
+	 * TODO: Try to avoid duplicating this code here and inside note-editor
+	 */
+	_formatCitationItemPreview(citationItem) {
+		const STARTSWITH_ROMANESQUE_REGEXP = /^[&a-zA-Z\u0e01-\u0e5b\u00c0-\u017f\u0370-\u03ff\u0400-\u052f\u0590-\u05d4\u05d6-\u05ff\u1f00-\u1fff\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]/;
+		const ENDSWITH_ROMANESQUE_REGEXP = /[.;:&a-zA-Z\u0e01-\u0e5b\u00c0-\u017f\u0370-\u03ff\u0400-\u052f\u0590-\u05d4\u05d6-\u05ff\u1f00-\u1fff\u0600-\u06ff\u200c\u200d\u200e\u0218\u0219\u021a\u021b\u202a-\u202e]$/;
+
+		let { itemData } = citationItem;
+		let str = '';
+
+		// Authors
+		let authors = itemData.author;
+		if (authors) {
+			if (authors.length === 1) {
+				str = authors[0].family || authors[0].literal;
+			}
+			else if (authors.length === 2) {
+				let a = authors[0].family || authors[0].literal;
+				let b = authors[1].family || authors[1].literal;
+				str = a + ' ' + Zotero.getString('general.and') + ' ' + b;
+			}
+			else if (authors.length >= 3) {
+				str = (authors[0].family || authors[0].literal) + ' ' + Zotero.getString('general.etAl');
+			}
+		}
+
+		// Title
+		if (!str && itemData.title) {
+			str = `“${itemData.title}”`;
+		}
+
+		// Date
+		if (itemData.issued
+			&& itemData.issued['date-parts']
+			&& itemData.issued['date-parts'][0]) {
+			let year = itemData.issued['date-parts'][0][0];
+			if (year && year != '0000') {
+				str += ', ' + year;
+			}
+		}
+
+		// Locator
+		if (citationItem.locator) {
+			if (citationItem.label) {
+				// TODO: Localize and use short forms
+				var label = citationItem.label;
+			}
+			else if (/[\-–,]/.test(citationItem.locator)) {
+				var label = 'pp.';
+			}
+			else {
+				var label = 'p.';
+			}
+
+			str += ', ' + label + ' ' + citationItem.locator;
+		}
+
+		// Prefix
+		if (citationItem.prefix && ENDSWITH_ROMANESQUE_REGEXP) {
+			str = citationItem.prefix
+				+ (ENDSWITH_ROMANESQUE_REGEXP.test(citationItem.prefix) ? ' ' : '')
+				+ str;
+		}
+
+		// Suffix
+		if (citationItem.suffix && STARTSWITH_ROMANESQUE_REGEXP) {
+			str += (STARTSWITH_ROMANESQUE_REGEXP.test(citationItem.suffix) ? ' ' : '')
+				+ citationItem.suffix;
+		}
+
+		return str;
+	}
+
+	formatCitation(citation) {
+		return '(' + citation.citationItems.map((x) => {
+			return `<span class="citation-item">${this._formatCitationItemPreview(x)}</span>`;
+		}).join('; ') + ')';
+	}
+}
+
 Zotero.EditorInstance = EditorInstance;
 Zotero.EditorInstance.SCHEMA_VERSION = SCHEMA_VERSION;
+Zotero.EditorInstanceUtilities = new EditorInstanceUtilities();
