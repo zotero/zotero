@@ -85,8 +85,8 @@
 						<hbox align="center">
 							<label value="&zotero.bibliography.locale.label;"/>
 							<menulist id="locale-menu"
-									oncommand="Zotero_Preferences.Advanced.onLocaleChange()">
-								<menupopup/>
+									onblur="if (!Zotero.isMac) Zotero_Preferences.Advanced.onLocaleChange()">
+								<menupopup onpopuphidden="Zotero_Preferences.Advanced.onLocaleChange()"/>
 							</menulist>
 						</hbox>
 					</groupbox>

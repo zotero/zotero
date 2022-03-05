@@ -629,15 +629,18 @@ Zotero_Preferences.Advanced = {
 	onLocaleChange: function () {
 		var requestedLocale = Services.locale.getRequestedLocale();
 		var menu = document.getElementById('locale-menu');
+		
 		if (menu.value == 'automatic') {
 			// Changed if not already set to automatic (unless we have the automatic locale name,
 			// meaning we just switched away to the same manual locale and back to automatic)
-			var changed = requestedLocale && menu.label != this._getAutomaticLocaleMenuLabel();
+			var changed = requestedLocale
+				&& requestedLocale == Zotero.locale
+				&& menu.label != this._getAutomaticLocaleMenuLabel();
 			Services.locale.setRequestedLocales(null);
 		}
 		else {
 			// Changed if moving to a locale other than the current one
-			var changed = Zotero.locale != menu.value
+			var changed = requestedLocale != menu.value
 			Services.locale.setRequestedLocales([menu.value]);
 		}
 		
