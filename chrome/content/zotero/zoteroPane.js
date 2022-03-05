@@ -3693,48 +3693,6 @@ var ZoteroPane = new function()
 	};
 	
 	
-	this.openBackupNoteWindow = function (itemID) {
-		var item = Zotero.Items.get(itemID);
-		var type = Zotero.Libraries.get(item.libraryID).libraryType;
-		if (!this.canEdit()) {
-			this.displayCannotEditLibraryMessage();
-			return;
-		}
-		
-		var name = null;
-		
-		if (itemID) {
-			let w = this.findBackupNoteWindow(itemID);
-			if (w) {
-				w.focus();
-				return;
-			}
-			
-			// Create a name for this window so we can focus it later
-			//
-			// Collection is only used on new notes, so we don't need to
-			// include it in the name
-			name = 'zotero-backup-note-' + itemID;
-		}
-		
-		var io = { itemID: itemID };
-		window.openDialog('chrome://zotero/content/noteBackup.xul', name, 'chrome,resizable,centerscreen,dialog=false', io);
-	}
-	
-	
-	this.findBackupNoteWindow = function (itemID) {
-		var name = 'zotero-backup-note-' + itemID;
-		var wm = Services.wm;
-		var e = wm.getEnumerator('zotero:note');
-		while (e.hasMoreElements()) {
-			var w = e.getNext();
-			if (w.name == name) {
-				return w;
-			}
-		}
-	};
-	
-	
 	this.addAttachmentFromURI = Zotero.Promise.method(function (link, itemID) {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();

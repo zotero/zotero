@@ -108,8 +108,6 @@ class EditorInstance {
 			placeholder: options.placeholder,
 			dir: Zotero.dir,
 			font: this._getFont(),
-			hasBackup: note && !Zotero.Notes.hasSchemaVersion(note)
-				|| !!await Zotero.NoteBackups.getNote(this._item.id),
 			localizedStrings: {
 				// Figure out a better way to pass this
 				'zotero.appName': Zotero.appName,
@@ -477,13 +475,6 @@ class EditorInstance {
 					zp.openNoteWindow(this._item.id);
 					return;
 				}
-				case 'openBackup': {
-					let zp = Zotero.getActiveZoteroPane();
-					if (zp) {
-						zp.openBackupNoteWindow(this._item.id);
-					}
-					return;
-				}
 				case 'update': {
 					let { noteData, system } = message;
 					if (this._readOnly) {
@@ -838,7 +829,6 @@ class EditorInstance {
 			}
 			// Update note
 			if (this._item) {
-				await Zotero.NoteBackups.ensureBackup(this._item);
 				await Zotero.DB.executeTransaction(async () => {
 					let changed = this._item.setNote(html);
 					if (changed && !this._disableSaving) {

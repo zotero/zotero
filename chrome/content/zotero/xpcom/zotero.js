@@ -711,7 +711,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			yield Zotero.Groups.init();
 			yield Zotero.Relations.init();
 			yield Zotero.Retractions.init();
-			yield Zotero.NoteBackups.init();
 			yield Zotero.Dictionaries.init();
 			Zotero.Reader.init();
 			
