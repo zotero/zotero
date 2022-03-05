@@ -2011,6 +2011,99 @@
 		"uri": "http://zotero.org/users/local/GtG6GoZj/items/CDUFPIKZ",
 		"url": "http://www.example.com"
 	},
+	"preprint": {
+		"DOI": "10.1234/example.doi",
+		"abstractNote": "Abstract note",
+		"accessDate": "1997-06-13 23:59:58",
+		"archive": "Archive",
+		"archiveID": "Archive ID",
+		"archiveLocation": "Archive location",
+		"attachments": [],
+		"callNumber": "Call number",
+		"citationKey": "Citation key",
+		"collections": [],
+		"creators": [
+			{
+				"creatorType": "author",
+				"firstName": "authorFirst",
+				"lastName": "authorLast"
+			},
+			{
+				"creatorType": "contributor",
+				"firstName": "contributorFirst",
+				"lastName": "contributorLast"
+			},
+			{
+				"creatorType": "editor",
+				"firstName": "editorFirst",
+				"lastName": "editorLast"
+			},
+			{
+				"creatorType": "reviewedAuthor",
+				"firstName": "reviewedAuthorFirst",
+				"lastName": "reviewedAuthorLast"
+			},
+			{
+				"creatorType": "translator",
+				"firstName": "translatorFirst",
+				"lastName": "translatorLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
+			}
+		],
+		"date": "1999-12-31",
+		"dateAdded": "2022-03-05 10:56:06",
+		"dateModified": "2022-03-05 10:56:06",
+		"extra": "Extra",
+		"genre": "Type",
+		"itemID": 62,
+		"itemType": "preprint",
+		"key": "46EWSSRQ",
+		"language": "en-US",
+		"libraryCatalog": "Library catalog",
+		"libraryID": null,
+		"notes": [],
+		"place": "Place",
+		"publisher": "Publisher",
+		"relations": {},
+		"repository": "Publisher",
+		"rights": "Rights",
+		"seeAlso": [],
+		"series": "Series",
+		"seriesNumber": "9",
+		"shortTitle": "Short title",
+		"tags": [],
+		"title": "Title",
+		"type": "Type",
+		"uniqueFields": {
+			"DOI": "10.1234/example.doi",
+			"abstractNote": "Abstract note",
+			"accessDate": "1997-06-13 23:59:58",
+			"archive": "Archive",
+			"archiveID": "Archive ID",
+			"archiveLocation": "Archive location",
+			"callNumber": "Call number",
+			"citationKey": "Citation key",
+			"date": "1999-12-31",
+			"extra": "Extra",
+			"language": "en-US",
+			"libraryCatalog": "Library catalog",
+			"place": "Place",
+			"publisher": "Publisher",
+			"rights": "Rights",
+			"series": "Series",
+			"seriesNumber": "9",
+			"shortTitle": "Short title",
+			"title": "Title",
+			"type": "Type",
+			"url": "http://www.example.com"
+		},
+		"uri": "http://zotero.org/users/local/NHq2tGeA/items/46EWSSRQ",
+		"url": "http://www.example.com"
+	},
 	"presentation": {
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13 23:59:58",

@@ -1169,6 +1169,62 @@
 		"title": "Title",
 		"url": "http://www.example.com"
 	},
+	"preprint": {
+		"DOI": "10.1234/example.doi",
+		"abstractNote": "Abstract note",
+		"accessDate": "1997-06-13T23:59:58Z",
+		"archive": "Archive",
+		"archiveID": "Archive ID",
+		"archiveLocation": "Archive location",
+		"callNumber": "Call number",
+		"citationKey": "Citation key",
+		"creators": [
+			{
+				"creatorType": "author",
+				"firstName": "authorFirst",
+				"lastName": "authorLast"
+			},
+			{
+				"creatorType": "contributor",
+				"firstName": "contributorFirst",
+				"lastName": "contributorLast"
+			},
+			{
+				"creatorType": "editor",
+				"firstName": "editorFirst",
+				"lastName": "editorLast"
+			},
+			{
+				"creatorType": "reviewedAuthor",
+				"firstName": "reviewedAuthorFirst",
+				"lastName": "reviewedAuthorLast"
+			},
+			{
+				"creatorType": "translator",
+				"firstName": "translatorFirst",
+				"lastName": "translatorLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
+			}
+		],
+		"date": "1999-12-31",
+		"extra": "Extra",
+		"itemType": "preprint",
+		"language": "en-US",
+		"libraryCatalog": "Library catalog",
+		"place": "Place",
+		"publisher": "Publisher",
+		"rights": "Rights",
+		"series": "Series",
+		"seriesNumber": 9,
+		"shortTitle": "Short title",
+		"title": "Title",
+		"type": "Type",
+		"url": "http://www.example.com"
+	},
 	"presentation": {
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
