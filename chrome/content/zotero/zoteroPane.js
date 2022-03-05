@@ -5530,7 +5530,7 @@ var ZoteroPane = new function()
 					fp.displayDirectory = dir;
 				}
 				catch (e) {
-					// Directory is invalid; ignore and go with the filesystem root
+					// Directory is invalid; ignore and go with the home directory
 					fp.displayDirectory = OS.Constants.Path.homeDir;
 				}
 			}
