@@ -1377,6 +1377,70 @@
 		"url": "http://www.example.com",
 		"version": 0
 	},
+	"preprint": {
+		"DOI": "10.1234/example.doi",
+		"abstractNote": "Abstract note",
+		"accessDate": "1997-06-13T23:59:58Z",
+		"archive": "Archive",
+		"archiveID": "Archive ID",
+		"archiveLocation": "Archive location",
+		"attachments": [],
+		"callNumber": "Call number",
+		"citationKey": "Citation key",
+		"collections": [],
+		"creators": [
+			{
+				"creatorType": "author",
+				"firstName": "authorFirst",
+				"lastName": "authorLast"
+			},
+			{
+				"creatorType": "contributor",
+				"firstName": "contributorFirst",
+				"lastName": "contributorLast"
+			},
+			{
+				"creatorType": "editor",
+				"firstName": "editorFirst",
+				"lastName": "editorLast"
+			},
+			{
+				"creatorType": "reviewedAuthor",
+				"firstName": "reviewedAuthorFirst",
+				"lastName": "reviewedAuthorLast"
+			},
+			{
+				"creatorType": "translator",
+				"firstName": "translatorFirst",
+				"lastName": "translatorLast"
+			},
+			{
+				"creatorType": "author",
+				"name": "Institutional Author"
+			}
+		],
+		"date": "1999-12-31",
+		"dateAdded": "2022-03-05T10:56:07Z",
+		"dateModified": "2022-03-05T10:56:07Z",
+		"extra": "Extra",
+		"genre": "Type",
+		"itemType": "preprint",
+		"language": "en-US",
+		"libraryCatalog": "Library catalog",
+		"notes": [],
+		"place": "Place",
+		"relations": {},
+		"repository": "Publisher",
+		"rights": "Rights",
+		"series": "Series",
+		"seriesNumber": "9",
+		"shortTitle": "Short title",
+		"tags": [],
+		"title": "Title",
+		"uri": "http://zotero.org/users/local/NHq2tGeA/items/IEKTBA5B",
+		"url": "http://www.example.com",
+		"version": 0
+	},
 	"presentation": {
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
