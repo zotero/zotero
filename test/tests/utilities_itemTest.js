@@ -118,7 +118,7 @@ describe("Zotero.Utilities.Item", function() {
 			yield note.saveTx();
 
 			let cslJSONNote = Zotero.Utilities.itemToCSLJSON(note);
-			assert.equal(cslJSONNote.type, 'article', 'note is exported as "article"');
+			assert.equal(cslJSONNote.type, 'document', 'note is exported as "document"');
 			assert.equal(cslJSONNote.title, note.getNoteTitle(), 'note title is set to Zotero pseudo-title');
 		}));
 		it("should convert standalone attachments to expected format", Zotero.Promise.coroutine(function* () {
@@ -134,7 +134,7 @@ describe("Zotero.Utilities.Item", function() {
 			yield attachment.saveTx();
 
 			let cslJSONAttachment = Zotero.Utilities.itemToCSLJSON(attachment);
-			assert.equal(cslJSONAttachment.type, 'article', 'attachment is exported as "article"');
+			assert.equal(cslJSONAttachment.type, 'document', 'attachment is exported as "document"');
 			assert.equal(cslJSONAttachment.title, 'Empty', 'attachment title is correct');
 			assert.deepEqual(cslJSONAttachment.accessed, {"date-parts":[["2001",2,3]]}, 'attachment access date is mapped correctly');
 		}));
