@@ -952,8 +952,6 @@ Zotero.Items = function() {
 		Zotero.debug("Merging items");
 
 		return Zotero.DB.executeTransaction(function* () {
-			var itemURI = Zotero.URI.getItemURI(item);
-			
 			var replPred = Zotero.Relations.replacedItemPredicate;
 			var toSave = {};
 			toSave[item.id] = item;
@@ -973,8 +971,6 @@ Zotero.Items = function() {
 				if (otherItem.dateAdded < earliestDateAdded) {
 					earliestDateAdded = otherItem.dateAdded;
 				}
-
-				let otherItemURI = Zotero.URI.getItemURI(otherItem);
 				
 				// Move notes to master
 				var noteIDs = otherItem.getNotes(true);
@@ -986,38 +982,10 @@ Zotero.Items = function() {
 					toSave[note.id] = note;
 				}
 				
-				// Add relations to master
-				let oldRelations = otherItem.getRelations();
-				for (let pred in oldRelations) {
-					oldRelations[pred].forEach(obj => item.addRelation(pred, obj));
-				}
+				// Move relations to master
+				yield this._moveRelations(otherItem, item);
 				
-				// Remove merge-tracking relations from other item, so that there aren't two
-				// subjects for a given deleted object
-				let replItems = otherItem.getRelationsByPredicate(replPred);
-				for (let replItem of replItems) {
-					otherItem.removeRelation(replPred, replItem);
-				}
-				
-				// Update relations on items in the library that point to the other item
-				// to point to the master instead
-				let rels = yield Zotero.Relations.getByObject('item', otherItemURI);
-				for (let rel of rels) {
-					// Skip merge-tracking relations, which are dealt with above
-					if (rel.predicate == replPred) continue;
-					// Skip items in other libraries. They might not be editable, and even
-					// if they are, merging items in one library shouldn't affect another library,
-					// so those will follow the merge-tracking relations and can optimize their
-					// path if they're resaved.
-					if (rel.subject.libraryID != item.libraryID) continue;
-					rel.subject.removeRelation(rel.predicate, otherItemURI);
-					rel.subject.addRelation(rel.predicate, itemURI);
-					if (!toSave[rel.subject.id]) {
-						toSave[rel.subject.id] = rel.subject;
-					}
-				}
-				
-				// All other operations are additive only and do not affect the,
+				// All other operations are additive only and do not affect the
 				// old item, which will be put in the trash
 				
 				// Add collections to master
@@ -1042,9 +1010,6 @@ Zotero.Items = function() {
 						item.addTag(tagName, tags[j].type);
 					}
 				}
-				
-				// Add relation to track merge
-				item.addRelation(replPred, otherItemURI);
 				
 				// Trash other item
 				otherItem.deleted = true;
@@ -1118,6 +1083,7 @@ Zotero.Items = function() {
 				Zotero.debug(`Master attachment ${masterAttachmentID} matches ${otherAttachment.id} - merging`);
 				await this.moveChildItems(otherAttachment, masterAttachment, true);
 				await this._moveEmbeddedNote(otherAttachment, masterAttachment);
+				await this._moveRelations(otherAttachment, masterAttachment);
 
 				otherAttachment.deleted = true;
 				await otherAttachment.save();
@@ -1169,6 +1135,7 @@ Zotero.Items = function() {
 				}
 
 				otherAttachment.deleted = true;
+				await this._moveRelations(otherAttachment, masterAttachment);
 				await otherAttachment.save();
 
 				masterAttachment.addRelation(Zotero.Relations.replacedItemPredicate,
@@ -1295,8 +1262,11 @@ Zotero.Items = function() {
 	 * Move fromItem's embedded note, if it has one, to toItem.
 	 * If toItem already has an embedded note, the note will be added as a new
 	 * child note item on toItem's parent.
+	 * Requires a transaction.
 	 */
 	this._moveEmbeddedNote = async function (fromItem, toItem) {
+		Zotero.DB.requireTransaction();
+
 		if (fromItem.getNote()) {
 			let noteItem = toItem;
 			if (toItem.getNote()) {
@@ -1308,6 +1278,58 @@ Zotero.Items = function() {
 			Zotero.Notes.replaceItemKey(noteItem, fromItem.key, toItem.key);
 			await noteItem.save();
 		}
+	};
+
+
+	/**
+	 * Move fromItem's relations to toItem as part of a merge.
+	 * Requires a transaction.
+	 *
+	 * @param {Zotero.Item} fromItem
+	 * @param {Zotero.Item} toItem
+	 * @return {Promise}
+	 */
+	this._moveRelations = async function (fromItem, toItem) {
+		Zotero.DB.requireTransaction();
+
+		let replPred = Zotero.Relations.replacedItemPredicate;
+		let fromURI = Zotero.URI.getItemURI(fromItem);
+		let toURI = Zotero.URI.getItemURI(toItem);
+
+		// Add relations to toItem
+		let oldRelations = fromItem.getRelations();
+		for (let pred in oldRelations) {
+			oldRelations[pred].forEach(obj => toItem.addRelation(pred, obj));
+		}
+		
+		// Remove merge-tracking relations from fromItem, so that there aren't two
+		// subjects for a given deleted object
+		let replItems = fromItem.getRelationsByPredicate(replPred);
+		for (let replItem of replItems) {
+			fromItem.removeRelation(replPred, replItem);
+		}
+		
+		// Update relations on items in the library that point to the other item
+		// to point to the master instead
+		let rels = await Zotero.Relations.getByObject('item', fromURI);
+		for (let rel of rels) {
+			// Skip merge-tracking relations, which are dealt with above
+			if (rel.predicate == replPred) continue;
+			// Skip items in other libraries. They might not be editable, and even
+			// if they are, merging items in one library shouldn't affect another library,
+			// so those will follow the merge-tracking relations and can optimize their
+			// path if they're resaved.
+			if (rel.subject.libraryID != toItem.libraryID) continue;
+			rel.subject.removeRelation(rel.predicate, fromURI);
+			rel.subject.addRelation(rel.predicate, toURI);
+			await rel.subject.save();
+		}
+
+		// Add relation to track merge
+		toItem.addRelation(replPred, fromURI);
+
+		await fromItem.save();
+		await toItem.save();
 	};
 
 	

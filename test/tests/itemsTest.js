@@ -671,6 +671,48 @@ describe("Zotero.Items", function () {
 			assert.isFalse(attachment2.deleted);
 			assert.isTrue(attachment3.deleted);
 		});
+
+		it("should move related items of merged attachments", async function () {
+			let relatedItem = await createDataObject('item');
+
+			let item1 = await createDataObject('item', { setTitle: true });
+			let attachment1 = await importPDFAttachment(item1);
+
+			let item2 = item1.clone();
+			await item2.saveTx();
+			let attachment2 = await importPDFAttachment(item2);
+			attachment2.addRelatedItem(relatedItem);
+
+			await Zotero.Items.merge(item1, [item2]);
+			
+			assert.isFalse(item1.deleted);
+			assert.isFalse(attachment1.deleted);
+			assert.equal(item1.numAttachments(true), 1);
+			assert.isTrue(item2.deleted);
+			assert.isTrue(attachment2.deleted);
+			assert.lengthOf(attachment1.relatedItems, 1);
+			assert.equal(attachment1.relatedItems[0], relatedItem.key);
+		});
+
+		it("should move merge-tracking relation from replaced attachment to master attachment", async function () {
+			let item1 = await createDataObject('item');
+			let attachment1 = await importPDFAttachment(item1);
+
+			let item2 = await createDataObject('item');
+			let attachment2 = await importPDFAttachment(item2);
+			let attachment2URI = Zotero.URI.getItemURI(attachment2);
+
+			let item3 = await createDataObject('item');
+			let attachment3 = await importPDFAttachment(item3);
+			let attachment3URI = Zotero.URI.getItemURI(attachment3);
+			
+			await Zotero.Items.merge(item2, [item3]);
+			await Zotero.Items.merge(item1, [item2]);
+			
+			var rels = attachment1.getRelationsByPredicate(Zotero.Relations.replacedItemPredicate);
+			assert.lengthOf(rels, 2);
+			assert.sameMembers(rels, [attachment2URI, attachment3URI]);
+		});
 	})
 	
 	
