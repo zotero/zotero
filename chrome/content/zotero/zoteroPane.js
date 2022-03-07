@@ -2254,10 +2254,7 @@ var ZoteroPane = new function()
 	
 	
 	this.sync = function () {
-		let syncReminder = document.getElementById('sync-reminder-container');
-		if (!syncReminder.collapsed) {
-			syncReminder.collapsed = true;
-		}
+		this.hideSyncReminder();
 
 		Zotero.Sync.Server.canAutoResetClient = true;
 		Zotero.Sync.Server.manualSyncRequired = false;
@@ -2389,10 +2386,7 @@ var ZoteroPane = new function()
 		}
 
 		let panel = document.getElementById('sync-reminder-container');
-		const closePanel = function () {
-			panel.setAttribute('collapsed', true);
-			Zotero.Prefs.set(`sync.reminder.${reminderType}.lastDisplayed`, Math.round(Date.now() / 1000));
-		};
+		panel.setAttribute('data-reminder-type', reminderType);
 
 		let message = document.getElementById('sync-reminder-message');
 		message.textContent = Zotero.getString(`sync.reminder.${reminderType}.message`, Zotero.appName);
@@ -2408,8 +2402,8 @@ var ZoteroPane = new function()
 				break;
 		}
 		actionLink.textContent = actionStr;
-		actionLink.onclick = function () {
-			closePanel();
+		actionLink.onclick = () => {
+			this.hideSyncReminder();
 
 			switch (reminderType) {
 				case 'setUp':
@@ -2424,14 +2418,12 @@ var ZoteroPane = new function()
 		let learnMoreLink = document.getElementById('sync-reminder-learn-more');
 		learnMoreLink.textContent = Zotero.getString('general.learnMore');
 		learnMoreLink.hidden = !options.learnMoreURL;
-		learnMoreLink.onclick = function () {
-			Zotero.launchURL(options.learnMoreURL);
-		};
+		learnMoreLink.onclick = () => Zotero.launchURL(options.learnMoreURL);
 		
 		let dontShowAgainLink = document.getElementById('sync-reminder-disable');
 		dontShowAgainLink.textContent = Zotero.getString('general.dontAskAgain');
-		dontShowAgainLink.onclick = function () {
-			closePanel();
+		dontShowAgainLink.onclick = () => {
+			this.hideSyncReminder();
 			Zotero.Prefs.set(`sync.reminder.${reminderType}.enabled`, false);
 			// Check if we no longer need to observe item modifications
 			ZoteroPane.initSyncReminders(false);
@@ -2439,16 +2431,28 @@ var ZoteroPane = new function()
 
 		let remindMeLink = document.getElementById('sync-reminder-remind');
 		remindMeLink.textContent = Zotero.getString('general.remindMeLater');
-		remindMeLink.onclick = function () {
-			closePanel();
-		};
+		remindMeLink.onclick = () => this.hideSyncReminder();
 
 		let closeButton = document.getElementById('sync-reminder-close');
-		closeButton.onclick = function () {
-			closePanel();
-		};
+		closeButton.onclick = () => this.hideSyncReminder();
 
 		panel.removeAttribute('collapsed');
+	};
+
+
+	/**
+	 * Hide the currently displayed sync reminder and update its associated
+	 * lastDisplayed time.
+	 */
+	this.hideSyncReminder = function () {
+		let panel = document.getElementById('sync-reminder-container');
+		let reminderType = panel.getAttribute('data-reminder-type');
+		panel.setAttribute('collapsed', true);
+		panel.removeAttribute('data-reminder-type');
+
+		if (['setUp', 'autoSync'].includes(reminderType)) {
+			Zotero.Prefs.set(`sync.reminder.${reminderType}.lastDisplayed`, Math.round(Date.now() / 1000));
+		}
 	};
 
 
