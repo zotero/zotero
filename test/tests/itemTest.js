@@ -2267,6 +2267,38 @@ describe("Zotero.Item", function () {
 			assert.strictEqual(item.getField('accessDate'), '');
 		});
 		
+		it("should remove missing creators and change existing", function () {
+			var item = new Zotero.Item('book');
+			item.setCreators(
+				[
+					{
+						name: "A",
+						creatorType: "author"
+					},
+					{
+						name: "B",
+						creatorType: "author"
+					},
+					{
+						name: "C",
+						creatorType: "author"
+					}
+				]
+			);
+			var json = item.toJSON();
+			// Remove creators, which should cause them to be cleared in fromJSON()
+			var newCreators = [
+				{
+					name: "D",
+					creatorType: "author"
+				}
+			];
+			json.creators = newCreators;
+			
+			item.fromJSON(json);
+			assert.sameDeepMembers(item.getCreatorsJSON(), newCreators);
+		});
+		
 		it("should remove item from collection if 'collections' property not provided", function* () {
 			var collection = yield createDataObject('collection');
 			// Create standalone attachment in collection
