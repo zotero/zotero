@@ -217,4 +217,50 @@ describe("Zotero_File_Interface", function() {
 			assert.include(str, '<i>B</i>');
 		});
 	});
+
+	describe('Citavi annotations', () => {
+		it('should import Citavi', async () => {
+			var testFile = OS.Path.join(getTestDataDirectory().path, 'citavi-test-project.ctv6');
+			
+			const promise = waitForItemEvent('add');
+			await win.Zotero_File_Interface.importFile({
+				file: testFile,
+				createNewCollection: false
+			});
+			
+			const itemIDs = await promise;
+			const importedItem = await Zotero.Items.getAsync(itemIDs[0]);
+			assert.equal(importedItem.getField('title'), 'Bitcoin: A Peer-to-Peer Electronic Cash System');
+			const importedPDF = await Zotero.Items.getAsync(importedItem.getAttachments()[0]);
+			const annotations = importedPDF.getAnnotations();
+			assert.lengthOf(annotations, 4);
+			const annotationTexts = importedPDF.getAnnotations().map(a => a.annotationText);
+			const annotationPositions = importedPDF.getAnnotations().map(a => JSON.parse(a.annotationPosition));
+			const annotationSortIndexes = importedPDF.getAnnotations().map(a => a.annotationSortIndex);
+			const annotationTags = importedPDF.getAnnotations().map(a => a.getTags());
+			
+			assert.sameMembers(annotationTexts, [
+				'peer-to-peer',
+				'CPU power is controlled by nodes that are not cooperating to attack the network, they\'ll generate the longest chain and outpace attackers.',
+				'double-spending',
+				'This is a comment'
+			]);
+			assert.sameMembers(annotationSortIndexes, [
+				'00000|000103|00206',
+				'00000|000723|00309',
+				'00000|000390|00252',
+				'00000|000981|00355'
+			]);
+			assert.sameDeepMembers(annotationPositions, [
+				{ pageIndex: 0, rects: [[230.20219999999998, 578.879472, 275.47790585937497, 585.816528], [230.20219999999998, 578.879472, 275.47790585937497, 585.816528]]},
+				{ pageIndex: 0, rects: [[254.51480000000004, 532.840598, 316.46209999999974, 539.6787019999999], [254.51480000000004, 532.840598, 316.46209999999974, 539.6787019999999]]},
+				{ pageIndex: 0, rects: [[228.3353, 475.340598, 461.7559999999991, 482.178702], [146.3, 463.840598, 437.5108999999992, 470.678702], [146.3, 463.840598, 461.7559999999991, 482.178702]]},
+				{ pageIndex: 0, rects: [[146.3, 429.340598, 199.49469218750005, 436.178702], [146.3, 429.340598, 199.49469218750005, 436.178702]] }
+			]);
+
+			assert.sameDeepMembers(annotationTags, [
+				[{ tag: 'red' }], [], [{ tag: 'blue' }], [{ tag: 'comment' }]
+			]);
+		});
+	});
 });

@@ -26,6 +26,7 @@
 Components.utils.import("resource://gre/modules/osfile.jsm");
 Components.utils.import("resource://gre/modules/Services.jsm");
 import FilePicker from 'zotero/modules/filePicker';
+import { ImportCitaviAnnotatons } from 'zotero/import/citavi';
 
 /****Zotero_File_Exporter****
  **
@@ -606,7 +607,7 @@ var Zotero_File_Interface = new function() {
 			importCollection.name = collectionName;
 			yield importCollection.saveTx();
 		}
-		
+
 		translation.setTranslator(translators[0]);
 		
 		// Show progress popup
@@ -659,6 +660,10 @@ var Zotero_File_Interface = new function() {
 		}
 		finally {
 			yield Zotero.Notifier.commit(notifierQueue);
+		}
+
+		if (translators[0].label.match(/^Citavi (?:[56]) XML/i)) {
+			yield ImportCitaviAnnotatons(translation);
 		}
 		
 		var numItems = translation.newItems.length;
