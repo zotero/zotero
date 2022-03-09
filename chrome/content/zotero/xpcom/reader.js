@@ -158,6 +158,19 @@ class ReaderInstance {
 	setSidebarOpen(open) {
 		this._postMessage({ action: 'setSidebarOpen', open });
 	}
+
+	focusLastToolbarButton() {
+		this._iframeWindow.focus();
+		this._postMessage({ action: 'focusLastToolbarButton' });
+	}
+
+	tabToolbar(reverse) {
+		this._postMessage({ action: 'tabToolbar', reverse });
+		// Avoid toolbar find button being focused for a short moment
+		setTimeout(() => {
+			this._iframeWindow.focus();
+		});
+	}
 	
 	async setBottomPlaceholderHeight(height) {
 		await this._initPromise;
@@ -735,6 +748,20 @@ class ReaderInstance {
 					let { open } = message;
 					if (this.onChangeSidebarOpen) {
 						this.onChangeSidebarOpen(open);
+					}
+					return;
+				}
+				case 'focusSplitButton': {
+					let win = Zotero.getMainWindow();
+					if (win) {
+						win.document.getElementById('zotero-tb-toggle-item-pane').focus();
+					}
+					return;
+				}
+				case 'focusContextPane': {
+					let win = Zotero.getMainWindow();
+					if (win) {
+						this._window.ZoteroContextPane.focus();
 					}
 					return;
 				}

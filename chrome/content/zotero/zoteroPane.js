@@ -515,6 +515,42 @@ var ZoteroPane = new function()
 	 * Trigger actions based on keyboard shortcuts
 	 */
 	function handleKeyDown(event, from) {
+		let itemPaneToggle = document.getElementById('zotero-tb-toggle-item-pane');
+		let notesPaneToggle = document.getElementById('zotero-tb-toggle-notes-pane');
+		if (event.key === 'ArrowRight') {
+			if (event.target === itemPaneToggle) {
+				notesPaneToggle.focus();
+			}
+		}
+		else if (event.key === 'ArrowLeft') {
+			if (event.target === notesPaneToggle) {
+				itemPaneToggle.focus();
+			}
+			else if (event.target === itemPaneToggle) {
+				let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+				if (reader) {
+					reader.focusLastToolbarButton();
+				}
+			}
+		}
+		else if (event.key === 'Tab'
+			&& [itemPaneToggle, notesPaneToggle].includes(event.target)) {
+			let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+			if (reader) {
+				reader.tabToolbar(event.shiftKey);
+				event.preventDefault();
+				event.stopPropagation();
+			}
+		}
+		else if (event.key === 'Escape') {
+			let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+			if (reader) {
+				reader.focus();
+				event.preventDefault();
+				event.stopPropagation();
+			}
+		}
+
 		const cmdOrCtrlOnly = Zotero.isMac
 			? (event.metaKey && !event.shiftKey && !event.ctrlKey && !event.altKey)
 			: (event.ctrlKey && !event.shiftKey && !event.altKey);

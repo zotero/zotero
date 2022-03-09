@@ -136,3 +136,16 @@
 		padding-top: 6px !important;
 	}
 }
+
+.note-row, .more-row {
+	outline: 0;
+
+	&:-moz-focusring {
+		box-shadow: $toolbar-btn-focus-box-shadow;
+		z-index: 1;
+
+		@include retina {
+			box-shadow: $toolbar-btn-focus-box-shadow-2x;
+		}
+	}
+}
