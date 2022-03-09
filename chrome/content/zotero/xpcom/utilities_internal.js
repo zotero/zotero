@@ -1214,7 +1214,7 @@ Zotero.Utilities.Internal = {
 					|| additionalFields.has('itemType')
 					|| skipKeys.has(key)
 					// 1) Ignore 'type: note' and 'type: attachment'
-					// 2) Ignore 'article' until we have a Preprint item type
+					// TODO: Don't ignore 'article' now that we have a Preprint item type
 					//    (https://github.com/zotero/translators/pull/2248#discussion_r546428184)
 					|| ['note', 'attachment', 'article'].includes(value)) {
 				return true;
