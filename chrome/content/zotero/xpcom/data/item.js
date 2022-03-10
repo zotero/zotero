@@ -4889,6 +4889,7 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 			Object.keys(json)
 				// TEMP until we move creator lines to real creators
 				.concat('creators')
+				.filter(x => x !== 'itemType')
 		);
 	// If a different item type was parsed out of Extra, use that instead
 	if (itemType && json.itemType != itemType) {
