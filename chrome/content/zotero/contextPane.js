@@ -259,19 +259,23 @@ var ZoteroContextPane = new function () {
 
 		if (splitter.getAttribute('state') != 'collapsed') {
 			if (_panesDeck.selectedIndex == 0) {
-				var node = _itemPaneDeck.selectedPanel;
-				node.querySelector('tab').focus();
+				var node = _panesDeck.selectedPanel;
+				node.querySelector('tab[selected]').focus();
+				return true;
 			}
 			else {
 				var node = _notesPaneDeck.selectedPanel;
 				if (node.selectedIndex == 0) {
 					node.querySelector('textbox').focus();
+					return true;
 				}
 				else {
 					node.querySelector('zoteronoteeditor').focus();
+					return true;
 				}
 			}
 		}
+		return false;
 	}
 
 	function _updateAddToNote() {
