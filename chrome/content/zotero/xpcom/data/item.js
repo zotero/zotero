@@ -531,8 +531,22 @@ Zotero.Item.prototype.setType = function(itemTypeID, loadIn) {
 				}
 			}
 		}
+
+		if (this.getField('extra')) {
+			let { fields, creators: extractedCreators, extra } = Zotero.Utilities.Internal.extractExtraFields(
+				this.getField('extra'),
+				this,
+				// Ignore itemType because that's what we're changing
+				['itemType']
+			);
+			for (let [field, value] of fields.entries()) {
+				copiedFields.push([field, value]);
+			}
+			this.setCreators([...this.getCreators(), ...extractedCreators]);
+			copiedFields.push(['extra', extra]);
+		}
 	}
-	
+
 	// Initialize this._itemData with type-specific fields
 	this._itemData = {};
 	var fields = Zotero.ItemFields.getItemTypeFields(itemTypeID);
