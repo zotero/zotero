@@ -82,4 +82,26 @@ describe("Duplicate Items", function () {
 			assert.isTrue(collection2.hasItem(item1.id));
 		});
 	});
+
+	describe("Different-Item Relations", function () {
+		it("should prevent items from showing in Duplicate Items", async function () {
+			let item1 = await createDataObject('item', { setTitle: true });
+			let item2 = item1.clone();
+			await item2.saveTx();
+
+			item1.addRelation(Zotero.Relations.differentItemPredicate, Zotero.URI.getItemURI(item2));
+			item2.addRelation(Zotero.Relations.differentItemPredicate, Zotero.URI.getItemURI(item1));
+			await item1.saveTx();
+			await item2.saveTx();
+
+			let userLibraryID = Zotero.Libraries.userLibraryID;
+
+			let selected = await cv.selectByID('D' + userLibraryID);
+			assert.ok(selected);
+			await waitForItemsLoad(win);
+
+			let iv = zp.itemsView;
+			assert.equal(iv.rowCount, 0);
+		});
+	});
 });

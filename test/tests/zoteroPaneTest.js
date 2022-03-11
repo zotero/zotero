@@ -1146,6 +1146,38 @@ describe("ZoteroPane", function() {
 			var restoreMenuItem = menu.querySelector('.zotero-menuitem-restore-to-library');
 			assert.isTrue(restoreMenuItem.disabled);
 		});
+
+		it("should enable “Hide in Duplicate Items” when selected items make up a duplicate set", async function () {
+			let item1 = await createDataObject('item', { setTitle: true });
+			let item2 = item1.clone();
+			await item2.saveTx();
+			let item3 = item1.clone();
+			await item3.saveTx();
+
+			let item4 = await createDataObject('item', { setTitle: true });
+			let item5 = item4.clone();
+			await item5.saveTx();
+
+			let userLibraryID = Zotero.Libraries.userLibraryID;
+			await zp.collectionsView.selectByID('D' + userLibraryID);
+			await zp.selectItems([item1.id, item2.id, item3.id]);
+
+			await zp.buildItemContextMenu();
+			let menu = win.document.getElementById('zotero-itemmenu');
+			let markAsNonDupMenuItem = menu.querySelector('.zotero-menuitem-mark-as-different');
+			assert.isFalse(markAsNonDupMenuItem.hidden);
+			assert.isFalse(markAsNonDupMenuItem.disabled);
+
+			await zp.selectItems([item1.id, item2.id]);
+			await zp.buildItemContextMenu();
+			assert.isFalse(markAsNonDupMenuItem.hidden);
+			assert.isTrue(markAsNonDupMenuItem.disabled);
+
+			await zp.selectItems([item1.id, item2.id, item3.id, item4.id, item5.id]);
+			await zp.buildItemContextMenu();
+			assert.isFalse(markAsNonDupMenuItem.hidden);
+			assert.isTrue(markAsNonDupMenuItem.disabled);
+		});
 	});
 
 	describe("#restoreSelectedItems()", function () {
@@ -1426,6 +1458,32 @@ describe("ZoteroPane", function() {
 			}
 
 			stub.restore();
+		});
+	});
+
+	describe("#markSelectedItemsAsDifferent()", function () {
+		it("should mark all selected items as different using a predicate", async function () {
+			let item1 = await createDataObject('item', { setTitle: true });
+			let item2 = item1.clone();
+			await item2.saveTx();
+			let item3 = item1.clone();
+			await item3.saveTx();
+
+			let item1URI = Zotero.URI.getItemURI(item1);
+			let item2URI = Zotero.URI.getItemURI(item2);
+			let item3URI = Zotero.URI.getItemURI(item3);
+
+			let diffPred = Zotero.Relations.differentItemPredicate;
+
+			let userLibraryID = Zotero.Libraries.userLibraryID;
+			await zp.collectionsView.selectByID('D' + userLibraryID);
+			await zp.selectItems([item1.id, item2.id, item3.id]);
+
+			await zp.markSelectedItemsAsDifferent();
+
+			assert.sameMembers(item1.getRelationsByPredicate(diffPred), [item2URI, item3URI]);
+			assert.sameMembers(item2.getRelationsByPredicate(diffPred), [item1URI, item3URI]);
+			assert.sameMembers(item3.getRelationsByPredicate(diffPred), [item1URI, item2URI]);
 		});
 	});
 })

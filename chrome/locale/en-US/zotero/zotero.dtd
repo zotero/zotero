@@ -71,6 +71,7 @@
 <!ENTITY zotero.items.menu.attach.fileLink				"Attach Link to File…">
 
 <!ENTITY zotero.items.menu.restoreToLibrary				"Restore to Library">
+<!ENTITY zotero.items.menu.markAsDifferent				"Hide in Duplicate Items">
 <!ENTITY zotero.items.menu.duplicateItem					"Duplicate Item">
 <!ENTITY zotero.items.menu.mergeItems					"Merge Items…">
 <!ENTITY zotero.items.menu.unrecognize                "Undo Retrieve Metadata">

@@ -2036,6 +2036,30 @@ var ZoteroPane = new function()
 		yield Zotero.FullText.indexItems(itemIDs, { complete: true });
 		yield document.getElementById('zotero-attachment-box').updateItemIndexedState();
 	});
+
+
+	/**
+	 * Add differentItemPredicate relations to each selected item and save.
+	 * @return {Promise}
+	 */
+	this.markSelectedItemsAsDifferent = async function () {
+		let items = this.getSelectedItems();
+		await Zotero.DB.executeTransaction(async () => {
+			for (let i = 0; i < items.length; i++) {
+				let subject = items[i];
+				for (let j = 0; j < items.length; j++) {
+					if (i === j) continue;
+					let object = items[j];
+					subject.addRelation(Zotero.Relations.differentItemPredicate, Zotero.URI.getItemURI(object));
+				}
+				await subject.save();
+
+				// Reusing a little hack from Zotero.Items.merge to remove
+				// without fully recalculating duplicates
+				Zotero.Notifier.trigger('removeDuplicatesMaster', 'item', subject.id);
+			}
+		});
+	};
 	
 	
 	/**
@@ -3471,6 +3495,7 @@ var ZoteroPane = new function()
 			'toggleRead',
 			'addToCollection',
 			'removeItems',
+			'markAsDifferent',
 			'duplicateAndConvert',
 			'duplicateItem',
 			'restoreToLibrary',
@@ -3650,6 +3675,15 @@ var ZoteroPane = new function()
 				// Add in attachment separator
 				if (canCreateParent || canRecognize || canUnrecognize || canRename || canIndex) {
 					show.add(m.sep5);
+				}
+
+				if (collectionTreeRow.isDuplicates()) {
+					show.add(m.markAsDifferent);
+					let setFromFirst = collectionTreeRow.ref.getSetItemsByItemID(items[0].id);
+					if (!(items.length == setFromFirst.length
+						&& items.every(item => setFromFirst.includes(item.id)))) {
+						disable.add(m.markAsDifferent);
+					}
 				}
 				
 				// Block certain actions on files if no access and at least one item is a file
