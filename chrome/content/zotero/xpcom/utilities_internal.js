@@ -2228,7 +2228,15 @@ Zotero.Utilities.Internal = {
 				}
 				if (['if', 'elseif'].includes(operator)) {
 					if (!level.executed) {
-						level.condition = level.parentCondition && (args[2] ? vars[args[0]].toLowerCase() == args[2].toLowerCase() : !!vars[args[0]]);
+						level.condition = level.parentCondition && (
+							args[2]
+								? vars[args[0]].toLowerCase() == args[2].toLowerCase()
+								: (
+									Array.isArray(vars[args[0]])
+										? !!vars[args[0]].length
+										: !!vars[args[0]]
+								)
+						);
 						level.executed = level.condition;
 					}
 					else {

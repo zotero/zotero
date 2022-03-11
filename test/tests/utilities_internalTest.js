@@ -529,11 +529,14 @@ describe("Zotero.Utilities.Internal", function () {
 				v1: '1',
 				v2: (pars) => pars.a1 + pars.a2 + pars.a3,
 				v3: () => undefined,
+				ar1: [],
+				ar2: [1, 2]
 			};
-			var template = `{{ v1}}{{v2 a1= 1  a2 =' 2' a3 = "3 "}}{{v3}}{{v4}}`;
+			var template = `{{ v1}}{{v2 a1= 1  a2 =' 2' a3 = "3 "}}{{v3}}{{v4}}{{if ar1}}ar1{{endif}}{{if ar2}}{{ar2}}{{endif}}`;
 			var html = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
-			assert.equal(html, '11 23 ');
+			assert.equal(html, '11 23 1,2');
 		});
+
 		it("should support nested 'if' statements", function () {
 			var vars = {
 				v1: '1',
