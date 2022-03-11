@@ -956,14 +956,12 @@ var ZoteroPane = new function()
 			Zotero.getString('pane.collections.newCollection'),
 			Zotero.getString('pane.collections.name'), newName, "", {});
 		
-		if (!result)
-		{
+		if (!result) {
 			return;
 		}
 		
-		if (!newName.value)
-		{
-			newName.value = untitled;
+		if (!newName.value) {
+			newName.value = name;
 		}
 		
 		var collection = new Zotero.Collection;
