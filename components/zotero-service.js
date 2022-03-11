@@ -627,8 +627,6 @@ ZoteroCommandLineHandler.prototype = {
 						);
 
 						if (io.dataOut.libraryID) {
-							Zotero.Prefs.set('import.createNewCollection.fromFileOpenHandler',
-								io.dataOut.checkboxValue);
 							return io.dataOut;
 						}
 						else {
