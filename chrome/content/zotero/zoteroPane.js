@@ -899,6 +899,9 @@ var ZoteroPane = new function()
 		//set to Info tab
 		document.getElementById('zotero-view-item').selectedIndex = 0;
 		
+		// Ensure item is visible
+		yield this.selectItem(itemID);
+
 		if (manual) {
 			// Update most-recently-used list for New Item menu
 			this.addItemTypeToNewItemTypeMRU(Zotero.ItemTypes.getName(typeID));
@@ -1262,6 +1265,7 @@ var ZoteroPane = new function()
 			"cmd_zotero_newCollection",
 			"cmd_zotero_newSavedSearch",
 			"zotero-tb-add",
+			"menu_newItem",
 			"zotero-tb-lookup",
 			"cmd_zotero_newStandaloneNote",
 			"zotero-tb-note-add",
