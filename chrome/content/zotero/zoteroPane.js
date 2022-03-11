@@ -570,13 +570,15 @@ var ZoteroPane = new function()
 				}
 			}
 			else if (event.key === 'Tab') {
-				if (ZoteroContextPane.isLastFocusableNodeFocused()) {
-					let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
-					if (reader) {
-						reader.focus();
-					}
-					event.preventDefault();
-					event.stopPropagation();
+				if (!document.activeElement.classList.contains('reader')) {
+					setTimeout(() => {
+						if (document.activeElement.classList.contains('reader')) {
+							let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+							if (reader) {
+								reader.focusFirst();
+							}
+						}
+					});
 				}
 			}
 		}
