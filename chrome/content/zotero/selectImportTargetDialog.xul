@@ -51,6 +51,5 @@
 		<menulist id="select-target-menu">
 			<menupopup id="select-target-menu-popup"/>
 		</menulist>
-		<checkbox id="select-target-checkbox"/>
 	</vbox>
 </dialog>

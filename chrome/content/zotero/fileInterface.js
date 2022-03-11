@@ -403,6 +403,10 @@ var Zotero_File_Interface = new function() {
 	 * @param {Function} [options.onBeforeImport] - Callback to receive translation object, useful
 	 *     for displaying progress in a different way. This also causes an error to be throw
 	 *     instead of shown in the main window.
+	 * @param {Number} [options.libraryID] Library to import into
+	 * @param {Number} [options.collectionID] Collection to import into.
+	 * 		If createNewCollection == true, the created collection will be
+	 * 		a child collection of this one.
 	 */
 	this.importFile = Zotero.Promise.coroutine(function* (options = {}) {
 		if (!options) {
@@ -422,6 +426,7 @@ var Zotero_File_Interface = new function() {
 		var linkFiles = options.linkFiles;
 		var onBeforeImport = options.onBeforeImport;
 		var libraryID = options.libraryID;
+		var collectionID = options.collectionID;
 		
 		if (createNewCollection === undefined && !addToLibraryRoot) {
 			createNewCollection = true;
@@ -481,7 +486,8 @@ var Zotero_File_Interface = new function() {
 			linkFiles,
 			defaultNewCollectionPrefix,
 			onBeforeImport,
-			libraryID
+			libraryID,
+			collectionID
 		});
 	});
 	
@@ -527,11 +533,10 @@ var Zotero_File_Interface = new function() {
 	});
 
 
-	this.createCollectionForImportedFile = async function (maybeFile, libraryID, defaultNewCollectionPrefix) {
-		let collectionName;
+	this.nameCollectionForImportedFile = function (maybeFile, libraryID, defaultNewCollectionPrefix) {
 		if (maybeFile instanceof Components.interfaces.nsIFile) {
 			let leafName = maybeFile.leafName;
-			collectionName = maybeFile.isDirectory() || leafName.indexOf(".") === -1
+			let collectionName = maybeFile.isDirectory() || leafName.indexOf(".") === -1
 				? leafName
 				: leafName.substr(0, leafName.lastIndexOf("."));
 			for (let collection of Zotero.Collections.getByLibrary(libraryID)) {
@@ -540,17 +545,11 @@ var Zotero_File_Interface = new function() {
 					break;
 				}
 			}
+			return collectionName;
 		}
 		else {
-			collectionName = defaultNewCollectionPrefix + " " + (new Date()).toLocaleString();
+			return defaultNewCollectionPrefix + " " + (new Date()).toLocaleString();
 		}
-
-		let importCollection = new Zotero.Collection();
-		importCollection.libraryID = libraryID;
-		importCollection.name = collectionName;
-		await importCollection.saveTx();
-
-		return importCollection;
 	};
 	
 	
@@ -564,11 +563,16 @@ var Zotero_File_Interface = new function() {
 		var defaultNewCollectionPrefix = options.defaultNewCollectionPrefix;
 		var onBeforeImport = options.onBeforeImport;
 		var libraryID = options.libraryID;
+		var collectionID = options.collectionID;
 		
 		if (addToLibraryRoot && createNewCollection) {
 			throw new Error("Can't add to library root and create new collection");
 		}
-		
+
+		if (addToLibraryRoot && collectionID) {
+			throw new Error("Can't add to library root and add to specific collection");
+		}
+
 		var showProgressWindow = !onBeforeImport;
 		
 		let translators = yield translation.getTranslators();
@@ -599,31 +603,43 @@ var Zotero_File_Interface = new function() {
 		}
 		
 		var importCollection = null;
-		try {
-			let zp = Zotero.getActiveZoteroPane();
-			if (!libraryID) {
-				libraryID = zp.getSelectedLibraryID();
-				if (addToLibraryRoot) {
+		if (collectionID) {
+			importCollection = Zotero.Collections.get(collectionID);
+		}
+		else {
+			try {
+				let zp = Zotero.getActiveZoteroPane();
+				if (!libraryID) {
+					libraryID = zp.getSelectedLibraryID();
+					if (addToLibraryRoot) {
+						yield zp.collectionsView.selectLibrary(libraryID);
+					}
+				}
+				else if (libraryID !== zp.getSelectedLibraryID()) {
 					yield zp.collectionsView.selectLibrary(libraryID);
 				}
+				if (!createNewCollection) {
+					importCollection = zp.getSelectedCollection();
+				}
 			}
-			else if (libraryID !== zp.getSelectedLibraryID()) {
-				yield zp.collectionsView.selectLibrary(libraryID);
+			catch (e) {
+				Zotero.logError(e);
 			}
-			if (!createNewCollection) {
-				importCollection = zp.getSelectedCollection();
-			}
-		}
-		catch (e) {
-			Zotero.logError(e);
 		}
 		
 		if (createNewCollection) {
-			importCollection = yield Zotero_File_Interface.createCollectionForImportedFile(
+			let collectionName = Zotero_File_Interface.nameCollectionForImportedFile(
 				translation.location,
 				libraryID,
 				defaultNewCollectionPrefix
 			);
+			importCollection = new Zotero.Collection();
+			importCollection.libraryID = libraryID;
+			importCollection.name = collectionName;
+			if (collectionID) {
+				importCollection.parentID = collectionID;
+			}
+			yield importCollection.saveTx();
 		}
 
 		translation.setTranslator(translators[0]);
@@ -642,7 +658,7 @@ var Zotero_File_Interface = new function() {
 			);
 			progressWin.show();
 			
-			translation.setHandler("itemDone",  function () {
+			translation.setHandler("itemDone", function () {
 				progress.setProgress(translation.getProgress());
 			});
 			

@@ -614,7 +614,7 @@ ZoteroCommandLineHandler.prototype = {
 				addInitCallback(async (Zotero) => {
 					function promptForImportTarget() {
 						let io = {
-							dataIn: { filename: file.leafName },
+							dataIn: { file },
 							dataOut: {}
 						};
 
@@ -654,24 +654,12 @@ ZoteroCommandLineHandler.prototype = {
 						let dataOut = promptForImportTarget();
 						if (dataOut) {
 							let zp = Zotero.getActiveZoteroPane();
-							let collections = [];
-							if (dataOut.createNewCollection) {
-								let collection = await browserWindow.Zotero_File_Interface.createCollectionForImportedFile(
-									file,
-									dataOut.libraryID,
-									Zotero.getString("fileInterface.imported")
-								);
-								collections = [collection.id];
-							}
-							else if (dataOut.libraryID === zp.getSelectedLibraryID()
-									&& zp.getSelectedCollection()) {
-								collections = [zp.getSelectedCollection().id];
-							}
-
+							let libraryID = dataOut.libraryID;
+							let collectionIDs = dataOut.collectionID ? [dataOut.collectionID] : [];
 							let item = await Zotero.Attachments.importFromFile({
 								file,
-								libraryID: dataOut.libraryID,
-								collections
+								libraryID,
+								collections: collectionIDs
 							});
 							await zp.selectItem(item.id);
 							Zotero.RecognizePDF.autoRecognizeItems([item]);
@@ -680,10 +668,13 @@ ZoteroCommandLineHandler.prototype = {
 					else {
 						let dataOut = promptForImportTarget();
 						if (dataOut) {
+							let libraryID = dataOut.libraryID;
+							let collectionID = dataOut.collectionID;
 							browserWindow.Zotero_File_Interface.importFile({
 								file,
-								createNewCollection: dataOut.createNewCollection,
-								libraryID: dataOut.libraryID
+								createNewCollection: false,
+								libraryID,
+								collectionID
 							});
 						}
 					}
