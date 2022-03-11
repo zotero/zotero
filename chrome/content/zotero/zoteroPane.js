@@ -537,12 +537,17 @@ var ZoteroPane = new function()
 			}
 			else if (event.key === 'Tab'
 				&& [itemPaneToggle, notesPaneToggle].includes(event.target)) {
-				let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
-				if (reader) {
-					reader.tabToolbar(event.shiftKey);
-					event.preventDefault();
-					event.stopPropagation();
+				if (event.shiftKey) {
+					ZoteroContextPane.focus();
 				}
+				else {
+					let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+					if (reader) {
+						reader.tabToolbar();
+					}
+				}
+				event.preventDefault();
+				event.stopPropagation();
 			}
 			else if (event.key === 'Escape') {
 				if (!document.activeElement.classList.contains('reader')) {
