@@ -345,29 +345,10 @@ var ZoteroItemPane = new function() {
 			Zotero.Utilities.Internal.createMenuForTarget(
 				library,
 				menu,
-				target,
-				function(event, libraryOrCollection) {
-					if (event.target.tagName == 'menu') {
-						Zotero.Promise.coroutine(function* () {
-							// Simulate menuitem flash on OS X
-							if (Zotero.isMac) {
-								event.target.setAttribute('_moz-menuactive', false);
-								yield Zotero.Promise.delay(50);
-								event.target.setAttribute('_moz-menuactive', true);
-								yield Zotero.Promise.delay(50);
-								event.target.setAttribute('_moz-menuactive', false);
-								yield Zotero.Promise.delay(50);
-								event.target.setAttribute('_moz-menuactive', true);
-							}
-							menu.hidePopup();
-							
-							ZoteroItemPane.setTranslationTarget(libraryOrCollection);
-							event.stopPropagation();
-						})();
-					}
-					else {
+				{
+					initialValue: target,
+					onChange(event, libraryOrCollection) {
 						ZoteroItemPane.setTranslationTarget(libraryOrCollection);
-						event.stopPropagation();
 					}
 				}
 			);

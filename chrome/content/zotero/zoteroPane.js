@@ -3482,14 +3482,15 @@ var ZoteroPane = new function()
 			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
 				col,
 				popup,
-				null,
-				(event, collection) => {
-					if (event.target.tagName == 'menuitem') {
-						this.addSelectedItemsToCollection(collection);
-						event.stopPropagation();
-					}
-				},
-				collection => items.every(item => collection.hasItem(item))
+				{
+					onChange: (event, collection) => {
+						if (event.target.tagName == 'menuitem') {
+							this.addSelectedItemsToCollection(collection);
+							event.stopPropagation();
+						}
+					},
+					disabledPred: collection => items.every(item => collection.hasItem(item))
+				}
 			);
 			popup.append(menuItem);
 		}
