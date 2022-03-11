@@ -1274,6 +1274,7 @@ var ZoteroPane = new function()
 		for (let i = 0; i < disableIfNoEdit.length; i++) {
 			let command = disableIfNoEdit[i];
 			let el = document.getElementById(command);
+			if (!el) continue;
 			
 			// If a trash is selected, new collection depends on the
 			// editability of the library
