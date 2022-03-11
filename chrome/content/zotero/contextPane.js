@@ -259,7 +259,7 @@ var ZoteroContextPane = new function () {
 
 		if (splitter.getAttribute('state') != 'collapsed') {
 			if (_panesDeck.selectedIndex == 0) {
-				var node = _panesDeck.selectedPanel;
+				var node = _itemPaneDeck.selectedPanel;
 				node.querySelector('tab[selected]').focus();
 				return true;
 			}
