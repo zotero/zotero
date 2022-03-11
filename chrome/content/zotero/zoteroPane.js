@@ -554,17 +554,29 @@ var ZoteroPane = new function()
 					}
 				}
 			}
-			// If Shift-Tab was pressed and the focus shifted to PDF reader iframe
 			else if (event.key === 'Tab' && event.shiftKey) {
-				if (!document.activeElement.classList.contains('reader')) {
-					setTimeout(() => {
-						if (document.activeElement.classList.contains('reader')) {
-							let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
-							if (reader) {
-								reader.focus();
-							}
-						}
-					});
+				let node = document.activeElement;
+				if (node && node.nodeType === Node.ELEMENT_NODE && (
+					node.parentNode.classList.contains('zotero-editpane-tabs')
+					|| node.getAttribute('type') === 'search'
+					|| node.getAttribute('anonid') === 'editor-view'
+					&& node.contentWindow.document.activeElement.classList.contains('toolbar-button-return'))) {
+					let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+					if (reader) {
+						reader.focus();
+					}
+					event.preventDefault();
+					event.stopPropagation();
+				}
+			}
+			else if (event.key === 'Tab') {
+				if (ZoteroContextPane.isLastFocusableNodeFocused()) {
+					let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+					if (reader) {
+						reader.focus();
+					}
+					event.preventDefault();
+					event.stopPropagation();
 				}
 			}
 		}

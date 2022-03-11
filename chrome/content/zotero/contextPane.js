@@ -58,6 +58,7 @@ var ZoteroContextPane = new function () {
 	this.update = _update;
 	this.getActiveEditor = _getActiveEditor;
 	this.focus = _focus;
+	this.isLastFocusableNodeFocused = _isLastFocusableNodeFocused;
 
 	this.init = function () {
 		if (!Zotero) {
@@ -270,8 +271,42 @@ var ZoteroContextPane = new function () {
 					return true;
 				}
 				else {
-					node.querySelector('zoteronoteeditor').focus();
+					node.querySelector('zoteronoteeditor').focusFirst();
 					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	function _isLastFocusableNodeFocused() {
+		var splitter;
+		if (Zotero.Prefs.get('layout') == 'stacked') {
+			splitter = _contextPaneSplitterStacked;
+		}
+		else {
+			splitter = _contextPaneSplitter;
+		}
+
+		if (splitter.getAttribute('state') != 'collapsed') {
+			if (_panesDeck.selectedIndex == 0) {
+				let node = document.activeElement;
+				if (node
+					&& node.parentNode
+					&& node.parentNode.parentNode
+					&& node.parentNode.parentNode.id === 'itembox-field-textbox-extra') {
+					return true;
+				}
+			}
+			else {
+				var node = _notesPaneDeck.selectedPanel;
+				if (node.selectedIndex == 0) {
+					// node.querySelector('textbox').focus();
+					// return true;
+				}
+				else {
+					// node.querySelector('zoteronoteeditor').focus();
+					// return true;
 				}
 			}
 		}
