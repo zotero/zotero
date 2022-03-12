@@ -2362,7 +2362,7 @@ var ZoteroPane = new function()
 				|| Zotero.Prefs.get('sync.autoSync')
 				|| Zotero.Libraries.getAll()
 					.every(library => !library.syncable
-						|| library.lastSync.getTime() > Date.now() - 1000 * sevenDays)) {
+						|| library.lastSync?.getTime() > Date.now() - 1000 * sevenDays)) {
 			return;
 		}
 
