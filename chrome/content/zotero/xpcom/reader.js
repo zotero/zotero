@@ -158,6 +158,22 @@ class ReaderInstance {
 	setSidebarOpen(open) {
 		this._postMessage({ action: 'setSidebarOpen', open });
 	}
+
+	focusLastToolbarButton() {
+		this._iframeWindow.focus();
+		this._postMessage({ action: 'focusLastToolbarButton' });
+	}
+
+	tabToolbar(reverse) {
+		this._postMessage({ action: 'tabToolbar', reverse });
+		// Avoid toolbar find button being focused for a short moment
+		setTimeout(() => this._iframeWindow.focus());
+	}
+
+	focusFirst() {
+		this._postMessage({ action: 'focusFirst' });
+		setTimeout(() => this._iframeWindow.focus());
+	}
 	
 	async setBottomPlaceholderHeight(height) {
 		await this._initPromise;
@@ -738,6 +754,22 @@ class ReaderInstance {
 					}
 					return;
 				}
+				case 'focusSplitButton': {
+					let win = Zotero.getMainWindow();
+					if (win) {
+						win.document.getElementById('zotero-tb-toggle-item-pane').focus();
+					}
+					return;
+				}
+				case 'focusContextPane': {
+					let win = Zotero.getMainWindow();
+					if (win) {
+						if (!this._window.ZoteroContextPane.focus()) {
+							this.focusFirst();
+						}
+					}
+					return;
+				}
 			}
 		}
 		catch (e) {
@@ -822,6 +854,7 @@ class ReaderTab extends ReaderInstance {
 		this._tabContainer = container;
 		
 		this._iframe = this._window.document.createElement('browser');
+		this._iframe.setAttribute('class', 'reader');
 		this._iframe.setAttribute('flex', '1');
 		this._iframe.setAttribute('type', 'content');
 		this._iframe.setAttribute('src', 'resource://zotero/pdf-reader/viewer.html');

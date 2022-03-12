@@ -515,6 +515,79 @@ var ZoteroPane = new function()
 	 * Trigger actions based on keyboard shortcuts
 	 */
 	function handleKeyDown(event, from) {
+		if (Zotero_Tabs.selectedIndex > 0) {
+			let itemPaneToggle = document.getElementById('zotero-tb-toggle-item-pane');
+			let notesPaneToggle = document.getElementById('zotero-tb-toggle-notes-pane');
+			// Using ArrowDown and ArrowUp to be consistent with pdf-reader
+			if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+				if (event.target === itemPaneToggle) {
+					notesPaneToggle.focus();
+				}
+			}
+			else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+				if (event.target === notesPaneToggle) {
+					itemPaneToggle.focus();
+				}
+				else if (event.target === itemPaneToggle) {
+					let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+					if (reader) {
+						reader.focusLastToolbarButton();
+					}
+				}
+			}
+			else if (event.key === 'Tab'
+				&& [itemPaneToggle, notesPaneToggle].includes(event.target)) {
+				if (event.shiftKey) {
+					ZoteroContextPane.focus();
+				}
+				else {
+					let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+					if (reader) {
+						reader.tabToolbar();
+					}
+				}
+				event.preventDefault();
+				event.stopPropagation();
+			}
+			else if (event.key === 'Escape') {
+				if (!document.activeElement.classList.contains('reader')) {
+					let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+					if (reader) {
+						reader.focus();
+						event.preventDefault();
+						event.stopPropagation();
+					}
+				}
+			}
+			else if (event.key === 'Tab' && event.shiftKey) {
+				let node = document.activeElement;
+				if (node && node.nodeType === Node.ELEMENT_NODE && (
+					node.parentNode.classList.contains('zotero-editpane-tabs')
+					|| node.getAttribute('type') === 'search'
+					|| node.getAttribute('anonid') === 'editor-view'
+					&& node.contentWindow.document.activeElement.classList.contains('toolbar-button-return'))) {
+					let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+					if (reader) {
+						reader.focus();
+					}
+					event.preventDefault();
+					event.stopPropagation();
+				}
+			}
+			else if (event.key === 'Tab') {
+				if (!document.activeElement.classList.contains('reader')) {
+					setTimeout(() => {
+						if (document.activeElement.classList.contains('reader')) {
+							let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+							if (reader) {
+								reader.focusFirst();
+							}
+						}
+					});
+				}
+			}
+		}
+
 		const cmdOrCtrlOnly = Zotero.isMac
 			? (event.metaKey && !event.shiftKey && !event.ctrlKey && !event.altKey)
 			: (event.ctrlKey && !event.shiftKey && !event.altKey);

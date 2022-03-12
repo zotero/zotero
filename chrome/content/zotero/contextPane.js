@@ -57,7 +57,8 @@ var ZoteroContextPane = new function () {
 	
 	this.update = _update;
 	this.getActiveEditor = _getActiveEditor;
-	
+	this.focus = _focus;
+
 	this.init = function () {
 		if (!Zotero) {
 			return;
@@ -247,6 +248,36 @@ var ZoteroContextPane = new function () {
 		}
 	}
 
+	function _focus() {
+		var splitter;
+		if (Zotero.Prefs.get('layout') == 'stacked') {
+			splitter = _contextPaneSplitterStacked;
+		}
+		else {
+			splitter = _contextPaneSplitter;
+		}
+
+		if (splitter.getAttribute('state') != 'collapsed') {
+			if (_panesDeck.selectedIndex == 0) {
+				var node = _itemPaneDeck.selectedPanel;
+				node.querySelector('tab[selected]').focus();
+				return true;
+			}
+			else {
+				var node = _notesPaneDeck.selectedPanel;
+				if (node.selectedIndex == 0) {
+					node.querySelector('textbox').focus();
+					return true;
+				}
+				else {
+					node.querySelector('zoteronoteeditor').focusFirst();
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	function _updateAddToNote() {
 		var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 		if (reader) {
@@ -358,6 +389,10 @@ var ZoteroContextPane = new function () {
 		
 		splitter.setAttribute('state', hide ? 'collapsed' : 'open');
 		_update();
+
+		if (!hide) {
+			ZoteroContextPane.focus();
+		}
 	}
 	
 	function _getCurrentAttachment() {
@@ -455,6 +490,8 @@ var ZoteroContextPane = new function () {
 		listBox.setAttribute('flex', '1');
 		var listInner = document.createElementNS(HTML_NS, 'div');
 		listInner.className = 'notes-list-container';
+		// Otherwise it can be focused with tab
+		listInner.tabIndex = -1;
 		listBox.append(listInner);
 
 		list.append(head, listBox);

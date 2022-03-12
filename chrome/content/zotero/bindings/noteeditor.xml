@@ -349,6 +349,25 @@
 				</body>
 			</method>
 
+			<method name="focusFirst">
+				<body>
+					<![CDATA[
+						(async () => {
+							let n = 0;
+							while (!this._editorInstance && n++ < 100) {
+								await Zotero.Promise.delay(10);
+							}
+							await this._editorInstance._initPromise;
+							this._iframe.focus();
+							try {
+								this._editorInstance._iframeWindow.document.querySelector('.toolbar-button-return').focus();
+							} catch(e) {
+							}
+						})();
+					]]>
+				</body>
+			</method>
+
 			<method name="_id">
 				<parameter name="id"/>
 				<body>

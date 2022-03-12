@@ -189,6 +189,11 @@ $toolbar-btn-icon-active-offset:    0;
     }
   }
 
+  // Remove strange inner dotted outline that appears on focus
+  &::-moz-focus-inner {
+    border: 0;
+  }
+
   &:hover {
     background: $toolbar-btn-hover-bg;
     border-color: $toolbar-btn-border-hover-color;

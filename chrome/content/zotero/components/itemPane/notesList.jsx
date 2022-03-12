@@ -28,9 +28,15 @@ import cx from 'classnames';
 
 const MAX_UNEXPANDED_ALL_NOTES = 7;
 
-const NoteRow = memo(({ id, title, body, date, onClick, onContextMenu, parentItemType, parentTitle }) => {
+const NoteRow = memo(({ id, title, body, date, onClick, onKeyDown, onContextMenu, parentItemType, parentTitle }) => {
 	return (
-		<div className={cx('note-row', { 'standalone-note-row': !parentItemType })} onClick={() => onClick(id)} onContextMenu={(event) => onContextMenu(id, event)}>
+		<div
+			tabIndex={-1}
+			className={cx('note-row', { 'standalone-note-row': !parentItemType })}
+			onClick={() => onClick(id)}
+			onContextMenu={(event) => onContextMenu(id, event)}
+			onKeyDown={onKeyDown}
+		>
 			<div className="inner">
 				{ parentItemType
 					? <div className="parent-line">
@@ -76,6 +82,54 @@ const NotesList = forwardRef(({ onClick, onContextMenu, onAddChildButtonDown, on
 	function handleClickMore() {
 		_setExpanded(true);
 	}
+
+	function handleButtonKeydown(event) {
+		if (event.key === 'Tab' && !event.shiftKey) {
+			let node = event.target.parentElement.parentElement.querySelector('[tabindex="-1"]');
+			if (node) {
+				node.focus();
+				event.preventDefault();
+			}
+		}
+		else if (event.key === 'Tab' && event.shiftKey) {
+			let prevSection = event.target.parentElement.parentElement.previousElementSibling;
+			if (prevSection) {
+				let node = prevSection.querySelector('[tabindex="-1"]:last-child');
+				if (node) {
+					node.focus();
+					event.preventDefault();
+				}
+			}
+		}
+	}
+
+	function handleRowKeyDown(event) {
+		if (['Enter', 'Space'].includes(event.key)) {
+			// Focus the previous row, because "more-row" will disappear
+			if (event.target.classList.contains('more-row')) {
+				let node = event.target.previousElementSibling;
+				if (node) {
+					node.focus();
+					event.preventDefault();
+				}
+			}
+			event.target.click();
+		}
+		else if (event.key === 'ArrowUp') {
+			let node = event.target.previousElementSibling;
+			if (node) {
+				node.focus();
+				event.preventDefault();
+			}
+		}
+		else if (event.key === 'ArrowDown') {
+			let node = event.target.nextElementSibling;
+			if (node) {
+				node.focus();
+				event.preventDefault();
+			}
+		}
+	}
 	
 	let childNotes = notes.filter(x => x.isCurrentChild);
 	let allNotes = notes.filter(x => !x.isCurrentChild);
@@ -85,22 +139,22 @@ const NotesList = forwardRef(({ onClick, onContextMenu, onAddChildButtonDown, on
 			{hasParent && <section>
 				<div className="header-row">
 					<h2>{Zotero.getString('pane.context.itemNotes')}</h2>
-					<button onMouseDown={onAddChildButtonDown}>+</button>
+					<button onMouseDown={onAddChildButtonDown} onClick={onAddChildButtonDown} onKeyDown={handleButtonKeydown}>+</button>
 				</div>
 				{!childNotes.length && <div className="empty-row">{Zotero.getString('pane.context.noNotes')}</div>}
 				{childNotes.map(note => <NoteRow key={note.id} {...note}
-					onClick={onClick} onContextMenu={onContextMenu}/>)}
+					onClick={onClick} onKeyDown={handleRowKeyDown} onContextMenu={onContextMenu}/>)}
 			</section>}
 			<section>
 				<div className="header-row">
 					<h2>{Zotero.getString('pane.context.allNotes')}</h2>
-					<button onMouseDown={onAddStandaloneButtonDown}>+</button>
+					<button onMouseDown={onAddStandaloneButtonDown} onClick={onAddStandaloneButtonDown} onKeyDown={handleButtonKeydown}>+</button>
 				</div>
 				{!allNotes.length && <div className="empty-row">{Zotero.getString('pane.context.noNotes')}</div>}
 				{visibleNotes.map(note => <NoteRow key={note.id} {...note}
-					onClick={onClick} onContextMenu={onContextMenu}/>)}
+					onClick={onClick} onKeyDown={handleRowKeyDown} onContextMenu={onContextMenu}/>)}
 				{allNotes.length > visibleNotes.length
-					&& <div className="more-row" onClick={handleClickMore}>{
+					&& <div className="more-row" tabIndex={-1} onClick={handleClickMore} onKeyDown={handleRowKeyDown}>{
 						Zotero.getString('general.numMore', Zotero.Utilities.numberFormat(
 							[allNotes.length - visibleNotes.length], 0))
 					}</div>

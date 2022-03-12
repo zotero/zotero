@@ -84,8 +84,8 @@
 			</box>
 			<box id="zotero-tab-toolbar" class="toolbar" hidden="true">
 				<div id="zotero-tb-split" xmlns="http://www.w3.org/1999/xhtml" class="split-button">
-					<div id="zotero-tb-toggle-item-pane" class="toolbarButton item" title="&zotero.toolbar.context.item;"><span/></div>
-					<div id="zotero-tb-toggle-notes-pane" class="toolbarButton notes" title="&zotero.toolbar.context.notes;"><span/></div>
+					<button id="zotero-tb-toggle-item-pane" class="toolbarButton item" title="&zotero.toolbar.context.item;" tabindex="-1"><span/></button>
+					<button id="zotero-tb-toggle-notes-pane" class="toolbarButton notes" title="&zotero.toolbar.context.notes;" tabindex="-1"><span/></button>
 				</div>
 			</box>
 			<deck id="tabs-deck" flex="1">
