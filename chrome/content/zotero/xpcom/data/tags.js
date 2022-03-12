@@ -163,6 +163,9 @@ Zotero.Tags = new function() {
 		if (libraryID) {
 			sql += "JOIN items USING (itemID) WHERE libraryID = ? ";
 			params.push(libraryID);
+			// TEMP: Don't show annotation tags in tag selector
+			sql += "AND itemTypeID != ? ";
+			params.push(Zotero.ItemTypes.getID('annotation'));
 		}
 		else {
 			sql += "WHERE 1 ";
