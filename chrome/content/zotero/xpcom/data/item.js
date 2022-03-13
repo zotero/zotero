@@ -3502,7 +3502,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentHash', {
  * @return {Promise<String>} - A promise for attachment text or empty string if unavailable
  */
 Zotero.defineProperty(Zotero.Item.prototype, 'attachmentText', {
-	get: Zotero.Promise.coroutine(function* () {
+	get: async function () {
 		if (!this.isAttachment()) {
 			return undefined;
 		}
@@ -3511,53 +3511,65 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentText', {
 			return null;
 		}
 		
-		var file = this.getFile();
-		
-		if (!(yield OS.File.exists(file.path))) {
-			file = false;
-		}
-		
-		var cacheFile = Zotero.Fulltext.getItemCacheFile(this);
-		if (!file) {
-			if (cacheFile.exists()) {
-				var str = yield Zotero.File.getContentsAsync(cacheFile);
-				
-				return str.trim();
-			}
-			return '';
-		}
+		var path = await this.getFilePathAsync();
 		
 		var contentType = this.attachmentContentType;
 		if (!contentType) {
-			contentType = yield Zotero.MIME.getMIMETypeFromFile(file);
-			if (contentType) {
-				this.attachmentContentType = contentType;
-				yield this.save();
+			if (!path) {
+				Zotero.debug(`Can't get attachment text for item ${this.libraryKey}`);
+				return '';
 			}
+			contentType = await Zotero.MIME.getMIMETypeFromFile(path);
 		}
 		
 		var str;
 		if (Zotero.Fulltext.isCachedMIMEType(contentType)) {
-			if (!cacheFile.exists()) {
-				Zotero.debug(`Cache file doesn't exist for item ${this.libraryKey}-- returning empty .attachmentText`);
-				return '';
+			// If no cache file or not fully indexed, get text on-demand
+			let cacheFile = Zotero.Fulltext.getItemCacheFile(this);
+			if (!cacheFile.exists() || !await Zotero.FullText.isFullyIndexed(this)) {
+				// Use processor cache file if it exists
+				let processorCacheFile = Zotero.FullText.getItemProcessorCacheFile(this).path;
+				if (await OS.File.exists(processorCacheFile)) {
+					let json = await Zotero.File.getContentsAsync(processorCacheFile);
+					let data = JSON.parse(json);
+					str = data.text;
+				}
+				// Otherwise extract text to temporary file and read that
+				else if (contentType == 'application/pdf') {
+					let tmpCacheFile = OS.Path.join(
+						Zotero.getTempDirectory().path, Zotero.Utilities.randomString()
+					);
+					let { exec, args } = Zotero.FullText.getPDFConverterExecAndArgs();
+					args.push(
+						'-nopgbrk',
+						path,
+						tmpCacheFile
+					);
+					await Zotero.Utilities.Internal.exec(exec, args);
+					if (!await OS.File.exists(tmpCacheFile)) {
+						Zotero.logError("Cache file not found after running PDF converter");
+						return '';
+					}
+					str = await Zotero.File.getContentsAsync(tmpCacheFile);
+					await OS.File.remove(tmpCacheFile);
+				}
+				else {
+					Zotero.logError("Unsupported cached file type in .attachmentText");
+					return '';
+				}
 			}
-			// Return empty string if not fully indexed
-			if (!(yield Zotero.Fulltext.isFullyIndexed(this))) {
-				Zotero.debug("Item " + this.libraryKey + " is not fully indexed -- returning empty .attachmentText");
-				return '';
+			else {
+				str = await Zotero.File.getContentsAsync(cacheFile);
 			}
-			
-			str = yield Zotero.File.getContentsAsync(cacheFile);
 		}
 		
 		else if (contentType == 'text/html') {
-			str = yield Zotero.File.getContentsAsync(file);
+			str = await Zotero.File.getContentsAsync(path);
 			str = Zotero.Utilities.unescapeHTML(str);
 		}
 		
 		else if (contentType == 'text/plain') {
-			str = yield Zotero.File.getContentsAsync(file);
+			str = await Zotero.File.getContentsAsync(path);
 		}
 		
 		else {
@@ -3565,7 +3577,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentText', {
 		}
 		
 		return str.trim();
-	})
+	}
 });
 
 

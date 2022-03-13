@@ -1209,8 +1209,14 @@ Zotero.Items = function() {
 			Zotero.debug('_hashAttachmentText: Attachment too large');
 			return null;
 		}
-
-		let text = await attachment.attachmentText;
+		
+		let text;
+		try {
+			text = await attachment.attachmentText;
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
 		if (!text) {
 			Zotero.debug('_hashAttachmentText: Attachment has no text');
 			return null;

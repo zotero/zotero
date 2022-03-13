@@ -460,6 +460,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 
 		
 		var {exec, args} = this.getPDFConverterExecAndArgs();
+		// Keep in sync with Item::attachmentText
 		args.push('-nopgbrk');
 		
 		if (allPages) {

@@ -474,7 +474,7 @@ describe("Zotero.Items", function () {
 			assert.isTrue(attachment2.deleted);
 		});
 		
-		it.skip("should merge identical attachments based on content hash when unindexed", async function () {
+		it("should merge identical attachments based on content hash when unindexed", async function () {
 			let item1 = await createDataObject('item');
 			let attachment1 = await importPDFAttachment(item1);
 			
