@@ -473,8 +473,30 @@ describe("Zotero.Items", function () {
 			assert.isTrue(item2.deleted);
 			assert.isTrue(attachment2.deleted);
 		});
-
-		it("shouldn't merge based on content hash when files are empty", async function () {
+		
+		it.skip("should merge identical attachments based on content hash when unindexed", async function () {
+			let item1 = await createDataObject('item');
+			let attachment1 = await importPDFAttachment(item1);
+			
+			let item2 = item1.clone();
+			await item2.saveTx();
+			let attachment2 = await importFileAttachment('duplicatesMerge_test_new_md5.pdf', { parentItemID: item2.id });
+			
+			await Zotero.DB.executeTransaction(async () => {
+				await Zotero.FullText.clearItemWords(attachment1.id);
+				await Zotero.FullText.clearItemWords(attachment2.id);
+			});
+			
+			await Zotero.Items.merge(item1, [item2]);
+			
+			assert.isFalse(item1.deleted);
+			assert.isFalse(attachment1.deleted);
+			assert.equal(item1.numAttachments(true), 1);
+			assert.isTrue(item2.deleted);
+			assert.isTrue(attachment2.deleted);
+		});
+		
+		it("shouldn't merge attachments based on content hash when files are empty", async function () {
 			let item1 = await createDataObject('item', { setTitle: true });
 			let attachment1 = await importFileAttachment('empty.pdf', { parentItemID: item1.id });
 
