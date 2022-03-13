@@ -3538,26 +3538,16 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentText', {
 		
 		var str;
 		if (Zotero.Fulltext.isCachedMIMEType(contentType)) {
-			var reindex = false;
-			
 			if (!cacheFile.exists()) {
-				Zotero.debug("Regenerating item " + this.id + " full-text cache file");
-				reindex = true;
-			}
-			// Fully index item if it's not yet
-			else if (!(yield Zotero.Fulltext.isFullyIndexed(this))) {
-				Zotero.debug("Item " + this.id + " is not fully indexed -- caching now");
-				reindex = true;
-			}
-			
-			if (reindex) {
-				yield Zotero.Fulltext.indexItems(this.id, false);
-			}
-			
-			if (!cacheFile.exists()) {
-				Zotero.debug("Cache file doesn't exist after indexing -- returning empty .attachmentText");
+				Zotero.debug(`Cache file doesn't exist for item ${this.libraryKey}-- returning empty .attachmentText`);
 				return '';
 			}
+			// Return empty string if not fully indexed
+			if (!(yield Zotero.Fulltext.isFullyIndexed(this))) {
+				Zotero.debug("Item " + this.libraryKey + " is not fully indexed -- returning empty .attachmentText");
+				return '';
+			}
+			
 			str = yield Zotero.File.getContentsAsync(cacheFile);
 		}
 		
