@@ -902,7 +902,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 */
 	handleKeyUp = (event) => {
 		if (!Zotero.locked && event.code === 'Tab' && this.selection.count == 0) {
-			this.selection.select(this.selection.pivot);
+			this.selection.select(this.selection.focused);
 		}
 	};
 	
@@ -1011,7 +1011,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._getColumns();
 
 		this.selection.clearSelection();
-		this.selection.pivot = 0;
+		this.selection.focused = 0;
 		await this.refresh();
 		if (Zotero.CollectionTreeCache.error) {
 			return this.setItemsPaneMessage(Zotero.getString('pane.items.loadError'));
@@ -2867,7 +2867,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		div.classList.toggle('selected', selection.isSelected(index));
-		div.classList.toggle('pivot', selection.pivot == index);
+		div.classList.toggle('focused', selection.focused == index);
 		div.classList.remove('drop', 'drop-before', 'drop-after');
 		const rowData = this._getRowData(index);
 		div.classList.toggle('context-row', !!rowData.contextRow);

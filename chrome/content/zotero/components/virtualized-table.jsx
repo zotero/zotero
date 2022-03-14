@@ -59,7 +59,7 @@ class TreeSelection {
 		this._tree = tree;
 		Object.assign(this, {
 			pivot: 0,
-			_focused: 0,
+			focused: 0,
 			selected: new Set([]),
 			_selectEventsSuppressed: false
 		});
@@ -92,12 +92,12 @@ class TreeSelection {
 
 		if (this.selectEventsSuppressed) return;
 
-		let previousPivot = this.pivot;
+		let previousFocused = this.focused;
 		this.pivot = index;
-		this._focused = index;
+		this.focused = index;
 		if (this._tree.invalidate) {
 			this._tree.invalidateRow(index);
-			this._tree.invalidateRow(previousPivot);
+			this._tree.invalidateRow(previousFocused);
 		}
 		this._updateTree(shouldDebounce);
 	}
@@ -121,7 +121,7 @@ class TreeSelection {
 	select(index, shouldDebounce) {
 		if (!this._tree.props.isSelectable(index)) return;
 		index = Math.max(0, index);
-		if (this.selected.size == 1 && this._focused == index && this.pivot == index) {
+		if (this.selected.size == 1 && this.isSelected(index)) {
 			return false;
 		}
 
@@ -129,7 +129,7 @@ class TreeSelection {
 		toInvalidate.add(index);
 		toInvalidate.add(this.pivot);
 		this.selected = new Set([index]);
-		this._focused = index;
+		this.focused = index;
 		this.pivot = index;
 
 		if (this.selectEventsSuppressed) return true;
@@ -174,17 +174,22 @@ class TreeSelection {
 	/**
 	 * Performs a shift-select from current pivot to provided index. Updates focused item to index.
 	 * @param index {Number} The index is 0-clamped.
+	 * @param augment {Boolean} Adds to existing selection if true
 	 * @param shouldDebounce {Boolean} Whether the update to the tree should be debounced
 	 */
-	shiftSelect(index, shouldDebounce) {
+	shiftSelect(index, augment, shouldDebounce) {
 		if (!this._tree.props.isSelectable(index)) return;
 		
 		index = Math.max(0, index);
 		let from = Math.min(index, this.pivot);
 		let to = Math.max(index, this.pivot);
-		this._focused = index;
+		let oldFocused = this.focused;
+		this.focused = index;
 		let oldSelected = this.selected;
-		this._rangedSelect(from, to);
+		if (augment) {
+			oldSelected = new Set(oldSelected);
+		}
+		this._rangedSelect(from, to, augment);
 
 		if (this.selectEventsSuppressed) return;
 
@@ -199,6 +204,7 @@ class TreeSelection {
 			for (let index of oldSelected) {
 				this._tree.invalidateRow(index);
 			}
+			this._tree.invalidateRow(oldFocused);
 		}
 		this._updateTree(shouldDebounce);
 	}
@@ -216,29 +222,6 @@ class TreeSelection {
 
 	get count() {
 		return this.selected.size;
-	}
-
-	get focused() {
-		return this._focused;
-	}
-
-	set focused(index) {
-		index = Math.max(0, index);
-		let previousFocused = this._focused;
-		let previousPivot = this.pivot;
-		this.pivot = index;
-		this._focused = index;
-
-		if (this.selectEventsSuppressed) return;
-
-		this._updateTree();
-		if (this._tree.invalidate) {
-			this._tree.invalidateRow(previousFocused);
-			if (previousPivot != previousFocused) {
-				this._tree.invalidateRow(previousPivot);
-			}
-			this._tree.invalidateRow(index);
-		}
 	}
 
 	get selectEventsSuppressed() {
@@ -485,17 +468,17 @@ class VirtualizedTable extends React.Component {
 	 * @param {Integer} direction - -1 for up, 1 for down
 	 * @param {Boolean} selectTo
 	 */
-	_onJumpSelect(direction, selectTo) {
+	_onJumpSelect(direction, selectTo, toggleSelection) {
 		if (direction == 1) {
 			const lastVisible = this._jsWindow.getLastVisibleRow();
 			if (this.selection.focused != lastVisible) {
-				return this.onSelection(lastVisible, selectTo);
+				return this.onSelection(lastVisible, selectTo, toggleSelection);
 			}
 		}
 		else {
 			const firstVisible = this._jsWindow.getFirstVisibleRow();
 			if (this.selection.focused != firstVisible) {
-				return this.onSelection(firstVisible, selectTo);
+				return this.onSelection(firstVisible, selectTo, toggleSelection);
 			}
 		}
 		const height = document.getElementById(this._jsWindowID).clientHeight;
@@ -504,7 +487,7 @@ class VirtualizedTable extends React.Component {
 		const rowCount = this.props.getRowCount();
 		destination = Math.min(destination, rowCount - 1);
 		destination = Math.max(0, destination);
-		return this.onSelection(destination, selectTo);
+		return this.onSelection(destination, selectTo, toggleSelection);
 	}
 
 	/**
@@ -520,7 +503,8 @@ class VirtualizedTable extends React.Component {
 		if (e.altKey) return;
 		
 		const shiftSelect = e.shiftKey;
-		const movePivot = Zotero.isMac ? e.metaKey : e.ctrlKey;
+		const moveFocused = Zotero.isMac ? e.metaKey : e.ctrlKey;
+		const toggleSelection = shiftSelect && moveFocused;
 		const rowCount = this.props.getRowCount();
 
 		switch (e.key) {
@@ -530,7 +514,7 @@ class VirtualizedTable extends React.Component {
 				prevSelect--;
 			}
 			prevSelect = Math.max(0, prevSelect);
-			this.onSelection(prevSelect, shiftSelect, false, movePivot, e.repeat);
+			this.onSelection(prevSelect, shiftSelect, toggleSelection, moveFocused, e.repeat);
 			break;
 
 		case "ArrowDown":
@@ -539,20 +523,20 @@ class VirtualizedTable extends React.Component {
 				nextSelect++;
 			}
 			nextSelect = Math.min(nextSelect, rowCount - 1);
-			this.onSelection(nextSelect, shiftSelect, false, movePivot, e.repeat);
+			this.onSelection(nextSelect, shiftSelect, toggleSelection, moveFocused, e.repeat);
 			break;
 
 		case "Home":
-			this.onSelection(0, shiftSelect, false, movePivot);
+			this.onSelection(0, shiftSelect, toggleSelection, moveFocused);
 			break;
 
 		case "End":
-			this.onSelection(rowCount - 1, shiftSelect, false, movePivot);
+			this.onSelection(rowCount - 1, shiftSelect, toggleSelection, moveFocused);
 			break;
 			
 		case "PageUp":
 			if (!Zotero.isMac) {
-				this._onJumpSelect(-1, shiftSelect, e.repeat);
+				this._onJumpSelect(-1, shiftSelect, toggleSelection, e.repeat);
 			}
 			else {
 				this._jsWindow.scrollTo(this._jsWindow.scrollOffset - this._jsWindow.getWindowHeight() + this._rowHeight);
@@ -561,7 +545,7 @@ class VirtualizedTable extends React.Component {
 			
 		case "PageDown":
 			if (!Zotero.isMac) {
-				this._onJumpSelect(1, shiftSelect, e.repeat);
+				this._onJumpSelect(1, shiftSelect, toggleSelection, e.repeat);
 			}
 			else {
 				this._jsWindow.scrollTo(this._jsWindow.scrollOffset + this._jsWindow.getWindowHeight() - this._rowHeight);
@@ -600,7 +584,7 @@ class VirtualizedTable extends React.Component {
 			this._handleTyping(e.key);
 		}
 		
-		if (shiftSelect || movePivot) return;
+		if (shiftSelect || moveFocused) return;
 		
 		switch (e.key) {
 		case "ArrowLeft":
@@ -641,11 +625,11 @@ class VirtualizedTable extends React.Component {
 		}
 		const rowCount = this.props.getRowCount();
 		if (allSameChar) {
-			for (let i = this.selection.pivot + 1, checked = 0; checked < rowCount; i++, checked++) {
+			for (let i = this.selection.focused + 1, checked = 0; checked < rowCount; i++, checked++) {
 				i %= rowCount;
 				let rowString = this.props.getRowString(i);
 				if (rowString.toLowerCase().indexOf(char) == 0) {
-					if (i != this.selection.pivot) {
+					if (i != this.selection.focused) {
 						this.scrollToRow(i);
 						this.onSelection(i);
 					}
@@ -657,7 +641,7 @@ class VirtualizedTable extends React.Component {
 			for (let i = 0; i < rowCount; i++) {
 				let rowString = this.props.getRowString(i);
 				if (rowString.toLowerCase().indexOf(this._typingString) == 0) {
-					if (i != this.selection.pivot) {
+					if (i != this.selection.focused) {
 						this.scrollToRow(i);
 						this.onSelection(i);
 					}
@@ -696,13 +680,13 @@ class VirtualizedTable extends React.Component {
 	
 	_handleMouseUp = async (e, index) => {
 		const shiftSelect = e.shiftKey;
-		const toggleSelection = e.ctrlKey || e.metaKey;
+		const augment = e.ctrlKey || e.metaKey;
 		if (this._isMouseDrag || e.button != 0) {
 			// other mouse buttons are ignored
 			this._isMouseDrag = false;
 			return;
 		}
-		this._onSelection(index, shiftSelect, toggleSelection);
+		this._onSelection(index, shiftSelect, augment);
 		this.focus();
 	}
 
@@ -734,38 +718,38 @@ class VirtualizedTable extends React.Component {
 	 * 		  If true will select from focused up to index (does not update pivot)
 	 * @param {Boolean} toggleSelection
 	 * 		  If true will add to selection
-	 * @param {Boolean} movePivot
-	 * 		  Will move pivot without adding anything to the selection
+	 * @param {Boolean} moveFocused
+	 * 		  Will move focus without adding anything to the selection
 	 */
-	_onSelection = (index, shiftSelect, toggleSelection, movePivot, shouldDebounce) => {
+	_onSelection = (index, shiftSelect, toggleSelection, moveFocused, shouldDebounce) => {
 		if (this.selection.selectEventsSuppressed) return;
 		
-		if (movePivot) {
-			if (!this.props.multiSelect) return;
-			let previousPivot = this.selection.pivot;
-			this.selection._focused = index;
+		if (!this.props.multiSelect && (shiftSelect || toggleSelection || moveFocused)) {
+			return;
+		}
+		else if (shiftSelect) {
+			this.selection.shiftSelect(index, toggleSelection, shouldDebounce);
+		}
+		else if (toggleSelection) {
+			this.selection.toggleSelect(index, shouldDebounce);
+		}
+		else if (moveFocused) {
+			let previousFocused = this.selection.focused;
+			this.selection.focused = index;
 			this.selection.pivot = index;
-			this.invalidateRow(previousPivot);
+			this.invalidateRow(previousFocused);
 			this.invalidateRow(index);
 		}
 		// Normal selection
-		else if (!shiftSelect && !toggleSelection) {
+		else if (!toggleSelection) {
 			if (index > 0 && !this.props.isSelectable(index)) {
 				return;
 			}
 			this.selection.select(index, shouldDebounce);
 		}
-		// Range selection
-		else if (shiftSelect && this.props.multiSelect) {
-			this.selection.shiftSelect(index, shouldDebounce);
-		}
 		// If index is not selectable and this is not normal selection we return
 		else if (!this.props.isSelectable(index)) {
 			return;
-		}
-		// Additive selection
-		else if (this.props.multiSelect) {
-			this.selection.toggleSelect(index, shouldDebounce);
 		}
 		// None of the previous conditions were satisfied, so nothing changes
 		else {
@@ -1567,7 +1551,7 @@ function makeRowRenderer(getRowData) {
 		}
 
 		div.classList.toggle('selected', selection.isSelected(index));
-		div.classList.toggle('pivot', selection.pivot == index);
+		div.classList.toggle('focused', selection.focused == index);
 		const rowData = getRowData(index);
 		
 		for (let column of columns) {
