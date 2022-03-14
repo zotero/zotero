@@ -237,6 +237,12 @@
 		text-overflow: ellipsis;
 		overflow: hidden;
 		max-height: 100%;
+		// TEMP: Disables tooltip display for truncated cells, but without this rule
+		// you cannot drag items before selecting them first because the ondrag event is
+		// not called if any children under the drag element are removed for which 
+		// pointer-events are enabled, and we need to rerender the rows for selection
+		// before dragging.
+		pointer-events: none;
 	}
 }
 
