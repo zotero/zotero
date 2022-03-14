@@ -3,9 +3,8 @@
 		padding-inline-end: 1px;
 		&.selected {
 			background-color: #e5f3ff;
-			border: 1px solid #7bc3ff;
 			color: inherit;
-			padding-inline-start: 1px;
+			padding-inline-start: 2px;
 			padding-inline-end: 0;
 		}
 		&:hover {
@@ -20,14 +19,16 @@
 			color: inherit;
 			background: #f0f0f0;
 			border: none;
-			padding-inline-start: 2px;
-			padding-inline-end: 1px;
 		}
 		&.selected:hover {
 			background-color: #e5f3ff;
-			border: 1px solid #7bc3ff;
-			padding-inline-start: 1px;
+			padding-inline-start: 2px;
 			padding-inline-end: 0;
 		}
 	}
+}
+
+.virtualized-table.multi-select:focus .row.focused {
+	padding-inline-start: 2px;
+	width: calc(100% - 5px);
 }

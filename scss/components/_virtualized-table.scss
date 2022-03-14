@@ -143,6 +143,7 @@
 		box-sizing: initial;
 		margin: -1px 0;
 		width: calc(100% - 2px);
+		z-index: 10000;
 
 		> *:first-child {
 			margin-inline-start: -1px;
