@@ -282,7 +282,7 @@ const TabBar = forwardRef(function (props, ref) {
 				onDragStart={(event) => handleDragStart(event, id, index)}
 				onDragEnd={handleDragEnd}
 			>
-				<div className="tab-name">{iconBackgroundImage &&
+				<div className="tab-name" dir="auto">{iconBackgroundImage &&
 					<span className="icon-bg" style={{ backgroundImage: iconBackgroundImage }}/>}{title}</div>
 				<div
 					className="tab-close"
@@ -320,6 +320,7 @@ const TabBar = forwardRef(function (props, ref) {
 						onDragOver={handleTabBarDragOver}
 						onMouseOut={handleTabBarMouseOut}
 						onScroll={updateScrollArrows}
+						dir={Zotero.dir}
 					>
 						{tabs.map((tab, index) => renderTab(tab, index))}
 					</div>

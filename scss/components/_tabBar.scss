@@ -143,7 +143,15 @@
 
 	.tab-close {
 		position: absolute;
-		right: 6px;
+
+		&:dir(ltr) {
+			right: 6px;
+		}
+
+		&:dir(rtl) {
+			left: 6px;
+		}
+
 		top: 6px;
 		width: 16px;
 		height: 16px;

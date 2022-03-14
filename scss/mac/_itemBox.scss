@@ -25,7 +25,8 @@ th > label, .creator-type-label, #more-creators-label {
 }
 
 input {
-	margin: -1px 5px -1px 0;
+	margin: -1px 0;
+	margin-inline-end: 5px;
 	padding: 0;
 }
 

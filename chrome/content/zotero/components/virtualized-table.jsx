@@ -797,8 +797,8 @@ class VirtualizedTable extends React.Component {
 		const aRect = a.getBoundingClientRect();
 		const bRect = b.getBoundingClientRect();
 		const resizingRect = resizing.getBoundingClientRect();
-		let offset = aRect.x;
-		if (aColumn.dataKey != resizingColumn.dataKey) {
+		let offset = aRect.left;
+		if (aColumn.dataKey != resizingColumn.dataKey && !Zotero.rtl) {
 			offset += resizingRect.width;
 		}
 		const widthSum = aRect.width + bRect.width;
@@ -1151,6 +1151,10 @@ class VirtualizedTable extends React.Component {
 			ref: ref => this._topDiv = ref,
 			tabIndex: 0,
 			role: this.props.role,
+			// XUL's chromedir attribute doesn't work with CSS :dir selectors,
+			// so we'll manually propagate the locale's script direction to the
+			// table.
+			dir: Zotero.Locale.defaultScriptDirection(Zotero.locale),
 		};
 		if (this.props.hide) {
 			props.style = { display: "none" };
@@ -1578,16 +1582,18 @@ var Columns = class {
 	}
 };
 
-function renderCell(index, data, column) {
+function renderCell(index, data, column, dir = null) {
 	let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
 	span.className = `cell ${column.className}`;
 	span.innerText = data;
+	if (dir) span.dir = dir;
 	return span;
 }
 
-function renderCheckboxCell(index, data, column) {
+function renderCheckboxCell(index, data, column, dir = null) {
 	let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
 	span.className = `cell checkbox ${column.className}`;
+	if (dir) span.dir = dir;
 	span.setAttribute('role', 'checkbox');
 	span.setAttribute('aria-checked', data);
 	if (data) {

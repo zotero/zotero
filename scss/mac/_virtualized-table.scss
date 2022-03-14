@@ -29,4 +29,12 @@
 		background-repeat: no-repeat;
 		height: 100%;
 	}
+
+	// Put the border on the end side if the directionality of the cell
+	// is the opposite of that of the table
+	&:dir(ltr) .cell:not(:first-child):dir(rtl),
+	&:dir(rtl) .cell:not(:first-child):dir(ltr) {
+		border-inline-start: none;
+		border-inline-end: 1px solid #ddd;
+	}
 }

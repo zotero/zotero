@@ -2648,6 +2648,19 @@ var ZoteroPane = new function()
 		
 		return this.itemsView.getSortDirection();
 	}
+
+
+	function openPopup(popup, clientX, clientY) {
+		if (Zotero.rtl) {
+			// Use openPopupAtScreen because it behaves better in RTL mode
+			let screenX = clientX + window.screenX;
+			let screenY = clientY + window.screenY;
+			popup.openPopupAtScreen(screenX + 1, screenY + 1, true);
+		}
+		else {
+			popup.openPopup(null, '', clientX + 1, clientY + 1);
+		}
+	}
 	
 	
 	/**
@@ -2655,9 +2668,9 @@ var ZoteroPane = new function()
 	 */
 	this.onCollectionsContextMenuOpen = async function (event, x, y) {
 		await ZoteroPane.buildCollectionContextMenu();
-		x = x || event.screenX;
-		y = y || event.screenY;
-		document.getElementById('zotero-collectionmenu').openPopupAtScreen(x + 1, y + 1, true);
+		x = x || event.clientX;
+		y = y || event.clientY;
+		openPopup(document.getElementById('zotero-collectionmenu'), x, y);
 	};
 	
 	
@@ -2666,9 +2679,9 @@ var ZoteroPane = new function()
 	 */
 	this.onItemsContextMenuOpen = async function (event, x, y) {
 		await ZoteroPane.buildItemContextMenu();
-		x = x || event.screenX;
-		y = y || event.screenY;
-		document.getElementById('zotero-itemmenu').openPopupAtScreen(x + 1, y + 1, true);
+		x = x || event.clientX;
+		y = y || event.clientY;
+		openPopup(document.getElementById('zotero-itemmenu'), x, y);
 	};
 	
 	

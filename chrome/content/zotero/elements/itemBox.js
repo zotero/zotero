@@ -870,7 +870,7 @@
 			
 			// Comma
 			var comma = document.createElement("span");
-			comma.textContent = ',';
+			comma.textContent = Zotero.getString('punctuation.comma');
 			comma.className = 'comma';
 			firstlast.appendChild(comma);
 			

@@ -59,6 +59,10 @@
 	padding-left: 2px;
 }
 
+#zotero-pane[dir=rtl] .zotero-tb-button > .toolbarbutton-icon {
+	transform: scaleX(-1);
+}
+
 #zotero-collections-splitter:not([state=collapsed]),
 #zotero-items-splitter:not([state=collapsed]),
 #zotero-tags-splitter:not([state=collapsed]),
