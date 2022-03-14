@@ -519,12 +519,14 @@ var ZoteroPane = new function()
 			let itemPaneToggle = document.getElementById('zotero-tb-toggle-item-pane');
 			let notesPaneToggle = document.getElementById('zotero-tb-toggle-notes-pane');
 			// Using ArrowDown and ArrowUp to be consistent with pdf-reader
-			if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+			if (!Zotero.rtl && (event.key === 'ArrowRight' || event.key === 'ArrowDown')
+				|| Zotero.rtl && (event.key === 'ArrowLeft' || event.key === 'ArrowUp')) {
 				if (event.target === itemPaneToggle) {
 					notesPaneToggle.focus();
 				}
 			}
-			else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+			else if (!Zotero.rtl && (event.key === 'ArrowLeft' || event.key === 'ArrowUp')
+				|| Zotero.rtl && (event.key === 'ArrowRight' || event.key === 'ArrowDown')) {
 				if (event.target === notesPaneToggle) {
 					itemPaneToggle.focus();
 				}

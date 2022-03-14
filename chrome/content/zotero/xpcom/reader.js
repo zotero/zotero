@@ -82,6 +82,7 @@ class ReaderInstance {
 			sidebarWidth: this._sidebarWidth,
 			sidebarOpen: this._sidebarOpen,
 			bottomPlaceholderHeight: this._bottomPlaceholderHeight,
+			rtl: Zotero.rtl,
 			localizedStrings: {
 				...Zotero.Intl.getPrefixedStrings('general.'),
 				...Zotero.Intl.getPrefixedStrings('pdfReader.')
