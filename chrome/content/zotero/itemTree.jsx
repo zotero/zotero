@@ -1368,9 +1368,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			// Extract the beginning of the string in non-greedy mode
 			"^.+?"
 			// up to either the end of the string, "et al." at the end of string
-			+ "(?=(?: " + Zotero.getString('general.etAl').replace('.', '\.') + ")?$"
+			+ "(?=(?: " + Zotero.getString('general.etAl').replace('.', '\\.') + ")?$"
 			// or ' and '
-			+ "| " + Zotero.getString('general.and') + " "
+			+ "| " + Zotero.getString('general.and').replace('.', '\\.') + " "
 			+ ")"
 		);
 		
