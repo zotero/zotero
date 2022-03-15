@@ -649,6 +649,22 @@ class ReaderInstance {
 									instanceID: this._instanceID
 								}
 							};
+
+							// Note: annotation.image is always saved separately from the rest
+							// of annotation properties
+
+							let item = Zotero.Items.getByLibraryAndKey(attachment.libraryID, annotation.key);
+							// Save image for read-only annotation.
+							if (item
+								&& !item.isEditable()
+								&& annotation.image
+								&& !await Zotero.Annotations.hasCacheImage(item)
+							) {
+								let blob = this._dataURLtoBlob(annotation.image);
+								await Zotero.Annotations.saveCacheImage(item, blob);
+								continue;
+							}
+
 							let savedAnnotation = await Zotero.Annotations.saveFromJSON(attachment, annotation, saveOptions);
 							if (annotation.image && !await Zotero.Annotations.hasCacheImage(savedAnnotation)) {
 								let blob = this._dataURLtoBlob(annotation.image);
