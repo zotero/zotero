@@ -411,7 +411,7 @@ class ReaderInstance {
 			menuitem = this._window.document.createElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('general.copy'));
 			menuitem.addEventListener('command', () => {
-				Zotero.Utilities.Internal.copyTextToClipboard(data.text);
+				this._window.document.getElementById('menu_copy').click();
 			});
 			popup.appendChild(menuitem);
 			// Separator
