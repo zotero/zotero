@@ -27,7 +27,8 @@ async function getPDFWorker(signatures) {
 			);
 		}
 		catch (e) {
-			await exec('npm ci;npm run build', { cwd: 'pdf-worker' });
+			await exec('npm ci', { cwd: 'pdf-worker' });
+			await exec('npm run build', { cwd: 'pdf-worker' });
 			await fs.copy('pdf-worker/build/worker.js', targetDir + 'worker.js');
 		}
 		signatures['pdf-worker'] = { hash };

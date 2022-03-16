@@ -28,7 +28,8 @@ async function getPDFReader(signatures) {
 			);
 		}
 		catch (e) {
-			await exec('npm ci;npm run build', { cwd: 'pdf-reader' });
+			await exec('npm ci', { cwd: 'pdf-reader' });
+			await exec('npm run build', { cwd: 'pdf-reader' });
 			await fs.copy('pdf-reader/build/zotero', targetDir);
 		}
 		signatures['pdf-reader'] = { hash };

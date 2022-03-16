@@ -28,7 +28,8 @@ async function getZoteroNoteEditor(signatures) {
 			);
 		}
 		catch (e) {
-			await exec('npm ci;npm run build', { cwd: 'note-editor' });
+			await exec('npm ci', { cwd: 'note-editor' });
+			await exec('npm run build', { cwd: 'note-editor' });
 			await fs.copy('note-editor/build/zotero', targetDir);
 		}
 		signatures['note-editor'] = { hash };
