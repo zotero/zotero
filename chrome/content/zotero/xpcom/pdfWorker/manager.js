@@ -55,6 +55,8 @@ class PDFWorker {
 			}
 		}
 		this._processingQueue = false;
+		this._worker.terminate();
+		this._worker = null;
 	}
 
 	async _enqueue(fn, isPriority) {
