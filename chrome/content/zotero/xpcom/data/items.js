@@ -960,8 +960,7 @@ Zotero.Items = function() {
 	this.merge = function (item, otherItems) {
 		Zotero.debug("Merging items");
 
-		return Zotero.DB.executeTransaction(async function () {
-			var replPred = Zotero.Relations.replacedItemPredicate;
+		return Zotero.DB.executeTransaction(async () => {
 			var toSave = {};
 			toSave[item.id] = item;
 			
@@ -1033,7 +1032,7 @@ Zotero.Items = function() {
 			for (let i in toSave) {
 				await toSave[i].save();
 			}
-		}.bind(this));
+		});
 	};
 
 

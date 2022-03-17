@@ -104,4 +104,43 @@ describe("Duplicate Items", function () {
 			assert.equal(iv.rowCount, 0);
 		});
 	});
+
+	describe("Merge All Duplicates", function () {
+		it("should merge two duplicate sets", async function () {
+			let item1 = createUnsavedDataObject('item', { setTitle: true, dateAdded: '2000-01-01 00:00:00' });
+			item1.setField('abstractNote', 'Abstract 1');
+			await item1.saveTx();
+			let item2 = item1.clone();
+			item2.dateAdded = '2001-01-01 00:00:00';
+			item2.setField('abstractNote', 'Abstract 2');
+			await item2.saveTx();
+
+			let item3 = await createDataObject('item', { setTitle: true, dateAdded: '2022-05-17 01:00:00' });
+			let item4 = item3.clone();
+			item4.dateAdded = '2022-05-17 00:00:00';
+			item4.setField('abstractNote', 'Abstract 4');
+			await item4.saveTx();
+
+			let userLibraryID = Zotero.Libraries.userLibraryID;
+
+			let selected = await cv.selectByID('D' + userLibraryID);
+			assert.ok(selected);
+			await waitForItemsLoad(win);
+
+			let iv = zp.itemsView;
+			assert.equal(iv.rowCount, 4);
+			await zp.selectItems([item1.id, item2.id, item3.id, item4.id]);
+			await zp.mergeAllDuplicates('dateAdded', true);
+
+			assert.equal(iv.rowCount, 0);
+			assert.isTrue(item1.deleted);
+			assert.isFalse(item2.deleted);
+			assert.isFalse(item3.deleted);
+			assert.isTrue(item4.deleted);
+			assert.equal(item2.dateAdded, item1.dateAdded);
+			assert.equal(item3.dateAdded, '2022-05-17 00:00:00');
+			assert.equal(item2.getField('abstractNote'), 'Abstract 2');
+			assert.equal(item3.getField('abstractNote'), 'Abstract 4');
+		});
+	});
 });
