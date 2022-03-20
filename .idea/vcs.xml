@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/chrome/content/zotero/locale/csl" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/chrome/content/zotero/xpcom/translate" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/chrome/content/zotero/xpcom/translate/modules/utilities" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/chrome/content/zotero/xpcom/utilities" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/note-editor" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/pdf-reader" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/pdf-reader/pdf.js" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/pdf-reader/pdf.js/test/ttx/fonttools-code" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/pdf-worker" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/pdf-worker/pdf.js" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/pdf-worker/pdf.js/test/ttx/fonttools-code" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/resource/SingleFile" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/resource/schema/global" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/styles" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/test/resource/chai" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/test/resource/mocha" vcs="Git" />
+  </component>
+</project>
