@@ -1979,7 +1979,13 @@ Zotero.Items = function() {
 		'<span style="font-variant:small-caps;">',
 		'<span class="nocase">',
 		'</span>',
-		'\\p{P}'
+		// Any punctuation at the beginning of the string
+		'^\\p{P}+',
+		// Initial, opening, closing, final, other punctuation:
+		// pretty much anything that isn't a connector/dash.
+		// Positively matching each of these classes compiles to a cleaner
+		// native RegExp than XRegExp('[^\\P{P}\\p{Pd}]')
+		'[\\p{Pi}\\p{Ps}\\p{Pe}\\p{Pf}\\p{Po}]'
 	].map(re => Zotero.Utilities.XRegExp(re, 'g'));
 	
 	
@@ -1995,7 +2001,7 @@ Zotero.Items = function() {
 		for (let re of _stripFromSortTitle) {
 			title = title.replace(re, '');
 		}
-		return title;
+		return title.trim();
 	};
 	
 	
