@@ -2735,7 +2735,9 @@ Zotero.Attachments = new function(){
 		await newItem.saveTx();
 		
 		// Move child annotations and embedded-image attachments
-		await Zotero.Items.moveChildItems(item, newItem);
+		await Zotero.DB.executeTransaction(async function () {
+			await Zotero.Items.moveChildItems(item, newItem);
+		});
 		// Copy relations pointing to the old item
 		await Zotero.Relations.copyObjectSubjectRelations(item, newItem);
 		

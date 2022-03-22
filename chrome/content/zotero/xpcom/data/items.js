@@ -929,24 +929,14 @@ Zotero.Items = function() {
 	 * @return {Promise}
 	 */
 	this.moveChildItems = async function (fromItem, toItem, includeTrashed = false) {
-		//Zotero.DB.requireTransaction();
+		Zotero.DB.requireTransaction();
 		
 		// Annotations on files
 		if (fromItem.isFileAttachment()) {
-			let fn = async function () {
-				let annotations = fromItem.getAnnotations(includeTrashed);
-				for (let annotation of annotations) {
-					annotation.parentItemID = toItem.id;
-					await annotation.save();
-				}
-			};
-			
-			if (!Zotero.DB.inTransaction) {
-				Zotero.logError("moveChildItems() now requires a transaction -- please update your code");
-				await Zotero.DB.executeTransaction(fn);
-			}
-			else {
-				await fn();
+			let annotations = fromItem.getAnnotations(includeTrashed);
+			for (let annotation of annotations) {
+				annotation.parentItemID = toItem.id;
+				await annotation.save();
 			}
 		}
 		
