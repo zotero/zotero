@@ -191,7 +191,12 @@ Zotero.Schema = new function(){
 				}
 				
 				// TEMP
-				await _fixSciteValues();
+				try {
+					await _fixSciteValues();
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
 				
 				updated = await _migrateUserDataSchema(userdata, options);
 				await _updateSchema('triggers');
