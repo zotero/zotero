@@ -8,7 +8,7 @@
 		}
 	}
 
-	.focused:not(.highlighted) .twisty svg {
+	.selected:not(.highlighted) .twisty svg {
 		fill: #fff;
 	}
 
