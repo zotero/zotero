@@ -190,6 +190,9 @@ Zotero.Schema = new function(){
 					integrityCheckDone = true;
 				}
 				
+				// TEMP
+				await _fixSciteValues();
+				
 				updated = await _migrateUserDataSchema(userdata, options);
 				await _updateSchema('triggers');
 				
@@ -3679,4 +3682,23 @@ Zotero.Schema = new function(){
 		await Zotero.DB.queryAsync("INSERT OR IGNORE INTO itemRelations SELECT ISA.itemID, " + predicateID + ", 'http://zotero.org/' || (CASE WHEN G.libraryID IS NULL THEN 'users/' || IFNULL((SELECT value FROM settings WHERE setting='account' AND key='userID'), 'local/' || (SELECT value FROM settings WHERE setting='account' AND key='localUserKey')) ELSE 'groups/' || G.groupID END) || '/items/' || I.key FROM itemSeeAlso ISA JOIN items I ON (ISA.linkedItemID=I.itemID) LEFT JOIN groups G USING (libraryID)");
 		await Zotero.DB.queryAsync("DROP TABLE itemSeeAlso");
 	};
+	
+	async function _fixSciteValues() {
+		// See if there are any bad values
+		var badData = await Zotero.DB.rowQueryAsync("SELECT 1 FROM itemDataValues WHERE value=0 LIMIT 1");
+		if (!badData) {
+			return;
+		}
+		
+		var replacementValueID = await Zotero.DB.valueQueryAsync("SELECT valueID FROM itemDataValues WHERE value='INVALID_SCITE_VALUE'");
+		// We already replaced some rows
+		if (replacementValueID) {
+			let invalidValueID = await Zotero.DB.valueQueryAsync("SELECT valueID FROM itemDataValues WHERE value=0");
+			await Zotero.DB.queryAsync("UPDATE itemData SET valueID=? WHERE valueID=?", [replacementValueID, invalidValueID]);
+			await Zotero.DB.queryAsync("DELETE FROM itemDataValues WHERE valueID=?", invalidValueID);
+		}
+		else {
+			await Zotero.DB.queryAsync("UPDATE itemDataValues SET value='INVALID_SCITE_VALUE' WHERE value=0");
+		}
+	}
 }
