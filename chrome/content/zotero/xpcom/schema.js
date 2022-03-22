@@ -3705,5 +3705,6 @@ Zotero.Schema = new function(){
 		else {
 			await Zotero.DB.queryAsync("UPDATE itemDataValues SET value='INVALID_SCITE_VALUE' WHERE value=0");
 		}
+		await Zotero.DB.queryAsync("DELETE FROM itemData WHERE fieldID=(SELECT fieldID FROM fields WHERE fieldName='accessDate') AND valueID=?", replacementValueID);
 	}
 }
