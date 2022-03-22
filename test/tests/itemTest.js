@@ -1750,6 +1750,19 @@ describe("Zotero.Item", function () {
 			);
 			assert.lengthOf(annotationIDs, 1);
 		});
+		
+		it("should set username as name if not set for library item", async function () {
+			await Zotero.Users.setCurrentUserID(1);
+			var username = Zotero.Utilities.randomString();
+			await Zotero.Users.setCurrentUsername(username);
+			await Zotero.DB.queryAsync("DELETE FROM users");
+			
+			var group = await createGroup();
+			var libraryID = group.libraryID;
+			var item = await createDataObject('item', { libraryID });
+			
+			assert.equal(Zotero.Users.getCurrentName(), username);
+		});
 	})
 	
 	

@@ -1374,15 +1374,37 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			//}
 		}
 		if (createdByUserID || lastModifiedByUserID) {
-			let sql = "REPLACE INTO groupItems VALUES (?, ?, ?)";
-			yield Zotero.DB.queryAsync(
-				sql,
-				[
-					itemID,
-					createdByUserID || null,
-					lastModifiedByUserID || null
-				]
-			);
+			try {
+				let sql = "REPLACE INTO groupItems VALUES (?, ?, ?)";
+				yield Zotero.DB.queryAsync(
+					sql,
+					[
+						itemID,
+						createdByUserID || null,
+						lastModifiedByUserID || null
+					]
+				);
+			}
+			// TODO: Use schema update step to add username to users table if group library
+			// and no current name
+			catch (e) {
+				let username = yield Zotero.DB.valueQueryAsync(
+					"SELECT value FROM settings WHERE setting='account' AND key='username'"
+				);
+				if (username) {
+					yield Zotero.Users.setCurrentName(username);
+					
+					let sql = "REPLACE INTO groupItems VALUES (?, ?, ?)";
+					yield Zotero.DB.queryAsync(
+						sql,
+						[
+							itemID,
+							createdByUserID || null,
+							lastModifiedByUserID || null
+						]
+					);
+				}
+			}
 		}
 	}
 	
