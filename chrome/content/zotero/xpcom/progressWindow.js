@@ -115,24 +115,24 @@ Zotero.ProgressWindow = function(options = {}) {
 	 * Shows the progress window
 	 */
 	this.show = function show() {
-		if(_windowLoading || _windowLoaded) {	// already loading or loaded
+		if (_windowLoading || _windowLoaded) {	// already loading or loaded
 			return false;
 		}
 		
-		var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].
-					getService(Components.interfaces.nsIWindowWatcher);
-		
-		if (!_window){
-			_window = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-				.getService(Components.interfaces.nsIWindowMediator)
-				.getMostRecentWindow("navigator:browser");
+		if (!_window) {
+			_window = Zotero.getMainWindow();
 		}
 		
 		if (_window) {
 			_progressWindow = _window.openDialog("chrome://zotero/content/progressWindow.xul",
 				"", "chrome,dialog=no,titlebar=no,popup=yes");
+			_window.addEventListener('close', () => {
+				this.close();
+			});
 		}
 		else {
+			let ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
+				.getService(Components.interfaces.nsIWindowWatcher);
 			_progressWindow = ww.openWindow(null, "chrome://zotero/content/progressWindow.xul",
 				"", "chrome,dialog=no,titlebar=no,popup=yes", null);
 		}
@@ -140,9 +140,6 @@ Zotero.ProgressWindow = function(options = {}) {
 		_progressWindow.addEventListener("mouseover", _onMouseOver, false);
 		_progressWindow.addEventListener("mouseout", _onMouseOut, false);
 		_progressWindow.addEventListener("mouseup", _onMouseUp, false);
-		_window.addEventListener('close', () => {
-			this.close();
-		});
 		
 		_windowLoading = true;
 		
