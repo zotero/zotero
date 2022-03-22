@@ -117,6 +117,7 @@
 	display: inline-block;
 	white-space: nowrap;
 	line-height: normal;
+	color: #c4c4c4;
 	-moz-user-select: all;
 }
 
