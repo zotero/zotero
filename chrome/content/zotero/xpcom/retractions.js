@@ -770,7 +770,7 @@ Zotero.Retractions = {
 		for (let row of rows) {
 			// DOI field
 			if (row.fieldID == doiFieldID) {
-				let value = Zotero.Utilities.cleanDOI(row.value);
+				let value = Zotero.Utilities.cleanDOI(row.value + '');
 				if (value) {
 					this._addItemKeyMapping(this.TYPE_DOI, value, row.id);
 				}
