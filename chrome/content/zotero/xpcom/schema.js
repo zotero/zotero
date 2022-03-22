@@ -3701,10 +3701,11 @@ Zotero.Schema = new function(){
 			let invalidValueID = await Zotero.DB.valueQueryAsync("SELECT valueID FROM itemDataValues WHERE value=0");
 			await Zotero.DB.queryAsync("UPDATE itemData SET valueID=? WHERE valueID=?", [replacementValueID, invalidValueID]);
 			await Zotero.DB.queryAsync("DELETE FROM itemDataValues WHERE valueID=?", invalidValueID);
+			await Zotero.DB.queryAsync("DELETE FROM itemData WHERE fieldID=(SELECT fieldID FROM fields WHERE fieldName='accessDate') AND valueID=?", replacementValueID);
 		}
 		else {
 			await Zotero.DB.queryAsync("UPDATE itemDataValues SET value='INVALID_SCITE_VALUE' WHERE value=0");
+			await Zotero.DB.queryAsync("DELETE FROM itemData WHERE fieldID=(SELECT fieldID FROM fields WHERE fieldName='accessDate') AND valueID=(SELECT valueID FROM itemDataValues WHERE value='INVALID_SCITE_VALUE')");
 		}
-		await Zotero.DB.queryAsync("DELETE FROM itemData WHERE fieldID=(SELECT fieldID FROM fields WHERE fieldName='accessDate') AND valueID=?", replacementValueID);
 	}
 }
