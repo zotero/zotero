@@ -127,7 +127,7 @@ class TreeSelection {
 
 		let toInvalidate = new Set(this.selected);
 		toInvalidate.add(index);
-		toInvalidate.add(this.pivot);
+		toInvalidate.add(this.focused);
 		this.selected = new Set([index]);
 		this.focused = index;
 		this.pivot = index;
