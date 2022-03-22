@@ -1089,4 +1089,60 @@ describe("Zotero.Items", function () {
 			await attachment.eraseTx();
 		});
 	});
+
+	describe("#getSortTitle()", function () {
+		it("should strip recognized markup tags", function () {
+			let tests = [
+				['A title <i>in italics</i>', 'A title in italics'],
+				['An unmatched </b> tag', 'An unmatched  tag'],
+				['A <sup>title</sub> with mismatched tags', 'A title with mismatched tags'],
+				['A title with a valid <span style="font-variant:small-caps;">span</span>', 'A title with a valid span'],
+				['Another title with a valid <span class="nocase">span</span>', 'Another title with a valid span'],
+				['A random <span>span tag</span>', 'A random <span>span tag']
+			];
+
+			for (let [input, expected] of tests) {
+				assert.equal(Zotero.Items.getSortTitle(input), expected);
+			}
+		});
+
+		it("should strip any punctuation at the beginning of the string", function () {
+			let tests = [
+				['_title', 'title'],
+				['-title', 'title'],
+				['-- longer title', 'longer title'],
+				['"Quoted title', 'Quoted title']
+			];
+
+			for (let [input, expected] of tests) {
+				assert.equal(Zotero.Items.getSortTitle(input), expected);
+			}
+		});
+
+		it("should strip quotes", function () {
+			let tests = [
+				['A "title"', 'A title'],
+				['A “title”', 'A title'],
+				[' xyz ”””', 'xyz'],
+				['‘Punctuation’', 'Punctuation']
+			];
+
+			for (let [input, expected] of tests) {
+				assert.equal(Zotero.Items.getSortTitle(input), expected);
+			}
+		});
+
+		it("should not strip dashes in the middle of the string", function () {
+			let tests = [
+				['123-456', '123-456'],
+				['Meyers-Briggs', 'Meyers-Briggs'],
+				['En–dash', 'En–dash'],
+				['Em—dash', 'Em—dash']
+			];
+
+			for (let [input, expected] of tests) {
+				assert.equal(Zotero.Items.getSortTitle(input), expected);
+			}
+		});
+	});
 });
