@@ -1021,6 +1021,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		this.forceUpdate(() => {
 			this.selection.selectEventsSuppressed = false;
+			// Reset scrollbar to top
+			this._treebox && this._treebox.scrollTo(0);
 			this._updateIntroText();
 			this._itemTreeLoadingDeferred.resolve();
 		});
