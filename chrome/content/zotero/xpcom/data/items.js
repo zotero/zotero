@@ -1023,13 +1023,14 @@ Zotero.Items = function() {
 			}
 			
 			item.setField('dateAdded', earliestDateAdded);
+
+			// Hack to remove master item from duplicates view without recalculating duplicates
+			// Pass force = true so observers will be notified before this transaction is committed
+			yield Zotero.Notifier.trigger('removeDuplicatesMaster', 'item', item.id, null, true);
 			
 			for (let i in toSave) {
 				yield toSave[i].save();
 			}
-			
-			// Hack to remove master item from duplicates view without recalculating duplicates
-			Zotero.Notifier.trigger('removeDuplicatesMaster', 'item', item.id);
 		}.bind(this));
 	};
 
