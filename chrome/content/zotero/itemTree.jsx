@@ -2847,7 +2847,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		else if (column.dataKey === 'hasAttachment') {
 			return this._renderHasAttachmentCell(index, data, column);
 		}
-		let cell = renderCell.apply(this, arguments);
+		if (typeof data == 'string' && data.includes('\n')) {
+			// Truncate cell data to its first line and ellipsize
+			// if it contains a newline
+			data = data.split('\n')[0] + Zotero.getString('punctuation.ellipsis');
+		}
+		let cell = renderCell.apply(this, [index, data, column]);
 		if (column.dataKey === 'numNotes' && data) {
 			cell.setAttribute('aria-label', Zotero.getString('pane.item.notes.count', data, data) + '.');
 		}
