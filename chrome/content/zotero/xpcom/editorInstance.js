@@ -44,7 +44,7 @@ const DOWNLOADED_IMAGE_TYPE = [
 ];
 
 // Schema version here has to be the same as in note-editor!
-const SCHEMA_VERSION = 6;
+const SCHEMA_VERSION = 7;
 
 class EditorInstance {
 	constructor() {
