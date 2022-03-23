@@ -1428,22 +1428,20 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 	);
 	Zotero.debug(`Editing citation:`);
 	Zotero.debug(JSON.stringify(citation.toJSON()));
-	
-	if (Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
+
+	var mode = (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')
+		? 'popup' : 'alwaysRaised')+',resizable=false';
+	if (addNote) {
+		Zotero.Integration.displayDialog('chrome://zotero/content/integration/insertNoteDialog.xul',
+			mode, io);
+	}
+	else if (Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
 		Zotero.Integration.displayDialog('chrome://zotero/content/integration/addCitationDialog.xul',
 			'alwaysRaised,resizable', io);
 	}
 	else {
-		var mode = (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')
-			? 'popup' : 'alwaysRaised')+',resizable=false';
-		if (addNote) {
-			Zotero.Integration.displayDialog('chrome://zotero/content/integration/insertNoteDialog.xul',
-				mode, io);
-		}
-		else {
-			Zotero.Integration.displayDialog('chrome://zotero/content/integration/quickFormat.xul',
-				mode, io);
-		}
+		Zotero.Integration.displayDialog('chrome://zotero/content/integration/quickFormat.xul',
+			mode, io);
 	}
 
 	// -------------------
