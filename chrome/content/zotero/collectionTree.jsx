@@ -1985,7 +1985,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 							file.remove(false);
 						}
 						catch (e) {
-							Cu.reportError("Error deleting original file " + file.path + " after drag");
+							Zotero.logError("Error deleting original file " + file.path + " after drag");
 						}
 					}
 				}

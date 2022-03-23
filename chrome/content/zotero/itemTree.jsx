@@ -1822,7 +1822,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		catch (e) {
 			Zotero.debug(e, 1);
-			Cu.reportError(e);
+			Zotero.logError(e);
 			// This should match the default value for the fallbackSort pref
 			var fallbackFields = ['firstCreator', 'date', 'title', 'dateAdded'];
 		}
@@ -2025,12 +2025,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 				}
 			}
 			else {
-				Cu.reportError("Invalid Quick Copy mode");
+				Zotero.logError("Invalid Quick Copy mode");
 			}
 		}
 		catch (e) {
 			Zotero.debug(e);
-			Cu.reportError(e + " with '" + format.id + "'");
+			Zotero.logError(e + " with '" + format.id + "'");
 		}
 	}
 
@@ -3646,7 +3646,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			menupopup.appendChild(moreMenu);
 		}
 		catch (e) {
-			Cu.reportError(e);
+			Zotero.logError(e);
 			Zotero.debug(e, 1);
 		}
 		
@@ -3712,7 +3712,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				menupopup.appendChild(sortMenu);
 			}
 			catch (e) {
-				Cu.reportError(e);
+				Zotero.logError(e);
 				Zotero.debug(e, 1);
 			}
 		}
