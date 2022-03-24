@@ -5,8 +5,17 @@
   "general_moreInfo": {
     "message": "Weitere Informationen…"
   },
+  "general_needHelp": {
+    "message": "Brauchen Sie Hilfe?"
+  },
   "general_done": {
     "message": "Erledigt"
+  },
+  "general_yes": {
+    "message": "Ja"
+  },
+  "general_no": {
+    "message": "Nein"
   },
   "general_tryAgain": {
     "message": "Versuchen Sie es erneut"
@@ -32,8 +41,14 @@
   "progressWindow_error_translation": {
     "message": "Ein Fehler ist aufgetreten beim Versuch, diesen Eintrag zu speichern. Siehe $1 für weitere Informationen."
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "Während des Speicherns dieses Eintrags ist ein Fehler aufgetreten. $1 beschränkt möglicherweise die Anzahl an Einträgen, die Sie gleichzeitig speichern können. Siehe $2 für mehr Informationen."
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Problembehebung für Übersetzer"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Seitenzugriffsbeschränkungen"
   },
   "progressWindow_error_fallback": {
     "message": "Ein Fehler ist aufgetreten beim Speichern mit $1. Es wird versucht stattdessen $2 zu nutzen."
@@ -49,6 +64,12 @@
   },
   "upgradeApp": {
     "message": "Upgrade $1"
+  },
+  "firstRun_title": {
+    "message": "Sie haben den $1 Connector installiert!"
+  },
+  "firstRun_text1": {
+    "message": "Der $1 Connector ermöglicht Ihnen das <a href=\"$2\">Speichern von Einträgen in $1</a> aus Ihrem Browser mit nur einem Klick."
   },
   "error_connection_isAppRunning": {
     "message": "Läuft $1?"

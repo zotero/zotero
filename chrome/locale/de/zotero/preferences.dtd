@@ -30,7 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Beim Kopieren von Einträgen zwischen Bibliotheken, übernehmen:">
 <!ENTITY zotero.preferences.groups.childNotes "zugehörige Notizen">
 <!ENTITY zotero.preferences.groups.childFiles "zugehörige Schnappschüsse und importierte Dateien">
-<!ENTITY zotero.preferences.groups.annotations "annotations">
+<!ENTITY zotero.preferences.groups.annotations "Anmerkungen">
 <!ENTITY zotero.preferences.groups.childLinks "zugehörige Links">
 <!ENTITY zotero.preferences.groups.tags "Tags">
 
@@ -40,7 +40,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Alte Einträge zuerst">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Feed Standards">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
+<!ENTITY zotero.preferences.openurl.choose "Resolver auswählen…">
 <!ENTITY zotero.preferences.openurl.custom "Benutzerdefiniert...">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Version:">
@@ -105,8 +105,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Wenn diese Option deaktiviert ist, führt Zotero URLs bei der Zitierung von Zeitschriften-, Magazin-, oder Zeitungsartikeln nur dann auf, wenn bei dem Artikel kein Seitenbereich angegeben ist.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Quick-Copy">
-<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Format für Einträge:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Format für Notizen:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Als HTML kopieren">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Website-spezifische Einstellungen:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Pfad">

@@ -1,106 +1,106 @@
-<!ENTITY preferencesCmdMac.label "...העדפות">
+<!ENTITY preferencesCmdMac.label "העדפות…">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "שירותים">
-<!ENTITY hideThisAppCmdMac.label "Hide &brandShortName;">
-<!ENTITY hideThisAppCmdMac.commandkey "H">
-<!ENTITY hideOtherAppsCmdMac.label "הסתר אחרים">
-<!ENTITY hideOtherAppsCmdMac.commandkey "H">
-<!ENTITY showAllAppsCmdMac.label "הצג הכל">
-<!ENTITY quitApplicationCmdMac.label "צא מ-Zotero">
-<!ENTITY quitApplicationCmdMac.key "Q">
+<!ENTITY hideThisAppCmdMac.label "הסתרת &brandShortName;">
+<!ENTITY hideThisAppCmdMac.commandkey "ס">
+<!ENTITY hideOtherAppsCmdMac.label "הסתרה של אחרים">
+<!ENTITY hideOtherAppsCmdMac.commandkey "ס">
+<!ENTITY showAllAppsCmdMac.label "להציג הכול">
+<!ENTITY quitApplicationCmdMac.label "יציאה מ־Zotero">
+<!ENTITY quitApplicationCmdMac.key "צ">
 
 
 <!ENTITY fileMenu.label "קובץ">
-<!ENTITY fileMenu.accesskey "F">
-<!ENTITY saveCmd.label "שמירה...">
-<!ENTITY saveCmd.key "S">
-<!ENTITY saveCmd.accesskey "A">
-<!ENTITY pageSetupCmd.label "Page Setup…">
-<!ENTITY pageSetupCmd.accesskey "U">
-<!ENTITY printCmd.label "הדפסה...">
-<!ENTITY printCmd.key "P">
-<!ENTITY printCmd.accesskey "P">
-<!ENTITY closeCmd.label "Close">
-<!ENTITY closeCmd.key "W">
-<!ENTITY closeCmd.accesskey "C">
-<!ENTITY manageAttachments.label "Manage Attachments">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
-<!ENTITY importCmd.label "Import…">
-<!ENTITY importCmd.key "I">
-<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
+<!ENTITY fileMenu.accesskey "ק">
+<!ENTITY saveCmd.label "שמירה…">
+<!ENTITY saveCmd.key "ש">
+<!ENTITY saveCmd.accesskey "ג">
+<!ENTITY pageSetupCmd.label "הגדרות עמוד…">
+<!ENTITY pageSetupCmd.accesskey "ע">
+<!ENTITY printCmd.label "הדפסה…">
+<!ENTITY printCmd.key "ד">
+<!ENTITY printCmd.accesskey "ד">
+<!ENTITY closeCmd.label "סגירה">
+<!ENTITY closeCmd.key "ר">
+<!ENTITY closeCmd.accesskey "ר">
+<!ENTITY manageAttachments.label "ניהול צרופות">
+<!ENTITY convertToStored.label "המרת קבצים מקושרים לקבצים מאוחסנים…">
+<!ENTITY importCmd.label "ייבוא…">
+<!ENTITY importCmd.key "ב">
+<!ENTITY importFromClipboardCmd.label "ייבוא מלוח הגזירים">
 <!ENTITY quitApplicationCmdWin.label "יציאה">
-<!ENTITY quitApplicationCmdWin.accesskey "x">
-<!ENTITY quitApplicationCmd.label "Quit">
-<!ENTITY quitApplicationCmd.accesskey "Q">
+<!ENTITY quitApplicationCmdWin.accesskey "א">
+<!ENTITY quitApplicationCmd.label "יציאה">
+<!ENTITY quitApplicationCmd.accesskey "צ">
 
 
-<!ENTITY copyCitationCmd.label "העתק ציטוט">
-<!ENTITY copyBibliographyCmd.label "העתק ביבליוגרפיה">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyCitationCmd.label "העתקת ציטוט">
+<!ENTITY copyBibliographyCmd.label "העתקת ביבליוגרפיה">
+<!ENTITY copyNoteCmd.label "העתקת הערה">
 
-<!ENTITY bidiSwitchPageDirectionItem.label "החלף כיוון עמוד">
-<!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
-<!ENTITY bidiSwitchTextDirectionItem.label "החלף כיוון טקסט">
-<!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
-<!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
-
-
-<!ENTITY goMenu.label "Go">
+<!ENTITY bidiSwitchPageDirectionItem.label "החלפת כיוון העמוד">
+<!ENTITY bidiSwitchPageDirectionItem.accesskey "כ">
+<!ENTITY bidiSwitchTextDirectionItem.label "החלפת כיוון הטקסט">
+<!ENTITY bidiSwitchTextDirectionItem.accesskey "ט">
+<!ENTITY bidiSwitchTextDirectionItem.commandkey "ק">
 
 
-<!ENTITY viewMenu.label "View">
-<!ENTITY viewMenu.accesskey "V">
-<!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard View">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
-<!ENTITY fontSize.label "Font Size">
-<!ENTITY noteFontSize.label "Note Font Size">
+<!ENTITY goMenu.label "קדימה">
+
+
+<!ENTITY viewMenu.label "תצוגה">
+<!ENTITY viewMenu.accesskey "ת">
+<!ENTITY layout.label "פריסה">
+<!ENTITY standardView.label "תצוגה רגילה">
+<!ENTITY stackedView.label "תצוגת ערימה">
+<!ENTITY collectionsPane.label "חלונית אוספים">
+<!ENTITY itemPane.label "חלונית פריט">
+<!ENTITY tagSelector.label "בורר תגיות">
+<!ENTITY recursiveCollections.label "הצגת פריטים מתת־אוספים">
+<!ENTITY fontSize.label "גודל גופן">
+<!ENTITY noteFontSize.label "גודל גופן הערה">
 
 
 <!ENTITY toolsMenu.label "כלים">
-<!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Install Browser Connector">
-<!ENTITY installConnector.accesskey "C">
+<!ENTITY toolsMenu.accesskey "כ">
+<!ENTITY installConnector.label "התקנת מגשר דפדפן">
+<!ENTITY installConnector.accesskey "ש">
 <!ENTITY addons.label "תוספים">
-<!ENTITY developer.label "Developer">
+<!ENTITY developer.label "פיתוח">
 
 
-<!ENTITY minimizeWindow.key "m">
-<!ENTITY minimizeWindow.label "Minimize">
-<!ENTITY bringAllToFront.label "Bring All to Front">
-<!ENTITY zoomWindow.label "Zoom">
+<!ENTITY minimizeWindow.key "ז">
+<!ENTITY minimizeWindow.label "מזעור">
+<!ENTITY bringAllToFront.label "קידום של הכול לחזית">
+<!ENTITY zoomWindow.label "תקריב">
 <!ENTITY windowMenu.label "חלון">
 
 
 <!ENTITY helpMenu.label "עזרה">
-<!ENTITY helpMenu.accesskey "H">
+<!ENTITY helpMenu.accesskey "ע">
 
 
 <!ENTITY helpMenuWin.label "עזרה">
-<!ENTITY helpMenuWin.accesskey "H">
+<!ENTITY helpMenuWin.accesskey "ע">
 <!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "About &brandShortName;">
-<!ENTITY aboutProduct.accesskey "A">
+<!ENTITY aboutProduct.label "על &brandShortName;">
+<!ENTITY aboutProduct.accesskey "ל">
 <!ENTITY productHelp.label "תמיכה ותיעוד">
-<!ENTITY productHelp.accesskey "D">
-<!ENTITY helpTroubleshootingInfo.label "Troubleshooting Information">
-<!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
-<!ENTITY helpFeedbackPage.accesskey "F">
+<!ENTITY productHelp.accesskey "מ">
+<!ENTITY helpTroubleshootingInfo.label "טיפול בתקלות">
+<!ENTITY helpTroubleshootingInfo.accesskey "ק">
+<!ENTITY helpFeedbackPage.label "פורומים לדיונים">
+<!ENTITY helpFeedbackPage.accesskey "פ">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
-<!ENTITY helpReportErrors.accesskey "R">
+<!ENTITY helpReportErrors.label "דיווח על שגיאות…">
+<!ENTITY helpReportErrors.accesskey "ד">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
-<!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
+<!ENTITY debugOutputLogging.label "תיעוד פלט ניפוי שגיאות">
+<!ENTITY debugOutputLogging.accesskey "נ">
+<!ENTITY debugOutputLogging.submit "הגשת הפלט">
+<!ENTITY debugOutputLogging.view "הצגת הפלט">
+<!ENTITY debugOutputLogging.clear "פינוי הפלט">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "להפעיל מחדש עם תיעוד פעיל…">
 
-<!ENTITY helpCheckForUpdates.label "Check for Updates…">
-<!ENTITY helpCheckForUpdates.accesskey "U">
+<!ENTITY helpCheckForUpdates.label "חיפוש עדכונים…">
+<!ENTITY helpCheckForUpdates.accesskey "ח">

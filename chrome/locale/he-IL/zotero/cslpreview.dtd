@@ -1,9 +1,9 @@
-<!ENTITY styles.preview "Zotero Style Preview">
+<!ENTITY styles.preview "תצוגה מקדימה של סגנון של Zotero">
 
-<!ENTITY styles.preview.citationFormat "Citation Format:">
-<!ENTITY styles.preview.citationFormat.all "all">
-<!ENTITY styles.preview.citationFormat.author "author">
-<!ENTITY styles.preview.citationFormat.authorDate "author-date">
-<!ENTITY styles.preview.citationFormat.label "label">
-<!ENTITY styles.preview.citationFormat.note "note">
-<!ENTITY styles.preview.citationFormat.numeric "numeric">
+<!ENTITY styles.preview.citationFormat "תצורת ציטוט:">
+<!ENTITY styles.preview.citationFormat.all "הכול">
+<!ENTITY styles.preview.citationFormat.author "מחבר">
+<!ENTITY styles.preview.citationFormat.authorDate "מחבר-תאריך">
+<!ENTITY styles.preview.citationFormat.label "תווית">
+<!ENTITY styles.preview.citationFormat.note "הערה">
+<!ENTITY styles.preview.citationFormat.numeric "מספרי">

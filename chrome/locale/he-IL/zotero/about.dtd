@@ -1,13 +1,13 @@
 <!ENTITY zotero.version "גירסה">
 <!ENTITY zotero.whatsNew "מה חדש">
-<!ENTITY zotero.createdby ":נוצר על ידי">
+<!ENTITY zotero.createdby "נוצר על ידי:">
 <!ENTITY zotero.director "במאי:">
-<!ENTITY zotero.directors ":במאים">
-<!ENTITY zotero.developers ":מפתחים">
-<!ENTITY zotero.alumni ":בוגרים">
-<!ENTITY zotero.about.localizations ":לוקליזציה">
-<!ENTITY zotero.about.additionalSoftware "Third-Party Software:">
-<!ENTITY zotero.thanks ":תודות מיוחדות">
-<!ENTITY zotero.about.close "סגור">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "עוד תודות">
+<!ENTITY zotero.directors "במאים:">
+<!ENTITY zotero.developers "מפתחים:">
+<!ENTITY zotero.alumni "תורמי עבר:">
+<!ENTITY zotero.about.localizations "תרגום:">
+<!ENTITY zotero.about.additionalSoftware "תוכנות צד־שלישי:">
+<!ENTITY zotero.thanks "תודות מיוחדות:">
+<!ENTITY zotero.about.close "סגירה">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "עוד הוקרות תודה">
 <!ENTITY zotero.citationProcessing "עיבוד ציטוטים וביבליוגרפיה">
