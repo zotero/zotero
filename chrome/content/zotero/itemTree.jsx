@@ -3594,7 +3594,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		});
 		
 		// Filter out ignored columns
-		let columns = this._getColumns().filter(col => !col.ignoreInColumnPicker);
+		const columns = this._getColumns();
+		let columnMenuitemElements = {};
 		for (let i = 0; i < columns.length; i++) {
 			const column = columns[i];
 			if (column.ignoreInColumnPicker === true) continue;
@@ -3610,6 +3611,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			if (column.disabledIn && column.disabledIn.includes(this.collectionTreeRow.visibilityGroup)) {
 				menuitem.setAttribute('disabled', true);
 			}
+			columnMenuitemElements[column.dataKey] = menuitem;
 			menupopup.appendChild(menuitem);
 		}
 		
@@ -3628,7 +3630,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			for (let i = 0; i < columns.length; i++) {
 				const column = columns[i];
 				if (column.submenu) {
-					moreItems.push(menupopup.children[i]);
+					moreItems.push(columnMenuitemElements[column.dataKey]);
 				}
 			}
 			
@@ -3651,8 +3653,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 			Zotero.debug(e, 1);
 		}
 
-		// Secondary sort submenu can include columns that cannot have their visibility toggled
-		columns = this._getColumns();
 		//
 		// Secondary Sort menu
 		//
