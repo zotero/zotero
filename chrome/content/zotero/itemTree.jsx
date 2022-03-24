@@ -3593,7 +3593,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		});
 		
-		const columns = this._getColumns().filter(col => !col.ignoreInColumnPicker);
+		// Filter out ignored columns
+		let columns = this._getColumns().filter(col => !col.ignoreInColumnPicker);
 		for (let i = 0; i < columns.length; i++) {
 			const column = columns[i];
 			if (column.ignoreInColumnPicker === true) continue;
@@ -3649,7 +3650,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			Zotero.logError(e);
 			Zotero.debug(e, 1);
 		}
-		
+
+		// Secondary sort submenu can include columns that cannot have their visibility toggled
+		columns = this._getColumns();
 		//
 		// Secondary Sort menu
 		//
