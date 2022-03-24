@@ -1293,8 +1293,8 @@ var ZoteroPane = new function()
 			if (this.itemsView && this.itemsView.collectionTreeRow && this.itemsView.collectionTreeRow.id == collectionTreeRow.id) {
 				Zotero.debug("ZoteroPane.onCollectionSelected: Collection selection hasn't changed");
 
-				// Update toolbar, in case editability has changed
-				this._updateToolbarIconsForRow(collectionTreeRow);
+				// Update enabled actions, in case editability has changed
+				this._updateActionsEnabledForRow(collectionTreeRow);
 				return;
 			}
 			
@@ -1314,7 +1314,7 @@ var ZoteroPane = new function()
 				collectionTreeRow.setTags(ZoteroPane.tagSelector.getTagSelection());
 			}
 			
-			this._updateToolbarIconsForRow(collectionTreeRow);
+			this._updateActionsEnabledForRow(collectionTreeRow);
 
 			// If item data not yet loaded for library, load it now.
 			// Other data types are loaded at startup
@@ -1335,12 +1335,14 @@ var ZoteroPane = new function()
 	
 	
 	/**
-	 * Enable or disable toolbar icons and menu options as necessary
+	 * Enable or disable toolbar icons, menu options, and commands as necessary
 	 */
-	this._updateToolbarIconsForRow = function (collectionTreeRow) {
+	this._updateActionsEnabledForRow = function (collectionTreeRow) {
 		const disableIfNoEdit = [
 			"cmd_zotero_newCollection",
 			"cmd_zotero_newSavedSearch",
+			"cmd_zotero_import",
+			"cmd_zotero_importFromClipboard",
 			"zotero-tb-add",
 			"menu_newItem",
 			"zotero-tb-lookup",
