@@ -516,7 +516,26 @@ describe("Zotero.Items", function () {
 			assert.isTrue(item2.deleted);
 			assert.isFalse(attachment2.deleted);
 		});
-
+		
+		it("should ignore attachment with missing file", async function () {
+			let item1 = await createDataObject('item');
+			let attachment1 = await importPDFAttachment(item1);
+			
+			let item2 = item1.clone();
+			await item2.saveTx();
+			let attachment2 = await importPDFAttachment(item2);
+			// Delete the attachment file
+			await OS.File.remove(await attachment2.getFilePathAsync());
+			
+			await Zotero.Items.merge(item1, [item2]);
+			
+			assert.isFalse(item1.deleted);
+			assert.isFalse(attachment1.deleted);
+			assert.equal(item1.numAttachments(true), 2);
+			assert.isTrue(item2.deleted);
+			assert.isFalse(attachment2.deleted);
+		});
+		
 		it("should allow small differences when hashing content", async function () {
 			let item1 = await createDataObject('item', { setTitle: true });
 			let attachment1 = await importFileAttachment('duplicatesMerge_JSTOR_1.pdf', { parentItemID: item1.id });

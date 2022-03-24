@@ -1195,7 +1195,19 @@ Zotero.Items = function() {
 	 * @return {Promise<String>}
 	 */
 	this._hashAttachmentText = async function (attachment) {
-		if ((await OS.File.stat(await attachment.getFilePathAsync())).size > 5e8) {
+		var fileInfo;
+		try {
+			fileInfo = await OS.File.stat(attachment.getFilePath());
+		}
+		catch (e) {
+			if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
+				Zotero.debug('_hashAttachmentText: Attachment not found');
+				return null;
+			}
+			Zotero.logError(e);
+			return null;
+		}
+		if (fileInfo.size > 5e8) {
 			Zotero.debug('_hashAttachmentText: Attachment too large');
 			return null;
 		}
