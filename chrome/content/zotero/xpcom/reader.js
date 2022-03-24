@@ -650,6 +650,10 @@ class ReaderInstance {
 								}
 							};
 
+							if (annotation.onlyTextOrComment) {
+								saveOptions.notifierData.autoSyncDelay = Zotero.Notes.AUTO_SYNC_DELAY;
+							}
+
 							// Note: annotation.image is always saved separately from the rest
 							// of annotation properties
 
