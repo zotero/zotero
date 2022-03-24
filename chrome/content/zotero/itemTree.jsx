@@ -3593,7 +3593,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		});
 		
-		const columns = this._getColumns();
+		const columns = this._getColumns().filter(col => !col.ignoreInColumnPicker);
 		for (let i = 0; i < columns.length; i++) {
 			const column = columns[i];
 			if (column.ignoreInColumnPicker === true) continue;
