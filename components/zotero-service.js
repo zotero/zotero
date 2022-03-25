@@ -642,6 +642,7 @@ ZoteroCommandLineHandler.prototype = {
 					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 						.getService(Components.interfaces.nsIWindowMediator);
 					var browserWindow = wm.getMostRecentWindow("navigator:browser");
+					let zp = Zotero.getActiveZoteroPane();
 					
 					if (file.leafName.substr(-4).toLowerCase() === ".csl"
 							|| file.leafName.substr(-8).toLowerCase() === ".csl.txt") {
@@ -651,7 +652,6 @@ ZoteroCommandLineHandler.prototype = {
 					else if (file.leafName.substr(-4).toLowerCase() === ".pdf") {
 						let dataOut = promptForImportTarget();
 						if (dataOut) {
-							let zp = Zotero.getActiveZoteroPane();
 							let libraryID = dataOut.libraryID;
 							let collectionIDs = dataOut.collectionID ? [dataOut.collectionID] : [];
 							let item = await Zotero.Attachments.importFromFile({
@@ -659,6 +659,9 @@ ZoteroCommandLineHandler.prototype = {
 								libraryID,
 								collections: collectionIDs
 							});
+							if (dataOut.collectionID) {
+								await zp.collectionsView.selectCollection(dataOut.collectionID);
+							}
 							await zp.selectItem(item.id);
 							Zotero.RecognizePDF.autoRecognizeItems([item]);
 						}
@@ -668,12 +671,22 @@ ZoteroCommandLineHandler.prototype = {
 						if (dataOut) {
 							let libraryID = dataOut.libraryID;
 							let collectionID = dataOut.collectionID;
-							browserWindow.Zotero_File_Interface.importFile({
+							let translation;
+							await browserWindow.Zotero_File_Interface.importFile({
 								file,
 								createNewCollection: false,
 								libraryID,
-								collectionID
+								collectionID,
+								onBeforeImport: (t) => {
+									translation = t;
+								}
 							});
+							if (collectionID) {
+								await zp.collectionsView.selectCollection(collectionID);
+							}
+							if (translation.newItems.length == 1) {
+								await zp.selectItem(translation.newItems[0].id);
+							}
 						}
 					}
 				});
