@@ -1575,7 +1575,10 @@ function formatColumnName(column) {
 	}
 	else if (/^[^\s]+\w\.\w[^\s]+$/.test(column.label)) {
 		try {
-			return Zotero.getString(column.label);
+			let labelString = Zotero.getString(column.label);
+			if (labelString !== column.label) {
+				return labelString;
+			}
 		}
 		catch (e) {
 			// ignore missing string

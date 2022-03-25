@@ -89,7 +89,10 @@ Zotero.Exception.Alert.prototype = {
 	get title() {
 		if(this._title) {
 			try {
-				return Zotero.getString(this._title);
+				let titleString = Zotero.getString(this._title);
+				if (titleString !== this._title) {
+					return titleString;
+				}
 			} catch(e) {}
 		}
 		try {
