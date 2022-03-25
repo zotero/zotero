@@ -682,7 +682,16 @@ ZoteroCommandLineHandler.prototype = {
 								}
 							});
 							if (collectionID) {
-								await zp.collectionsView.selectCollection(collectionID);
+								// If "Show Items from Subcollections" is disabled,
+								// just show the library root. Jumping to a collection
+								// that won't visually contain the new items is confusing.
+								if (translation.newCollections.length
+										&& !Zotero.Prefs.get('recursiveCollections')) {
+									await zp.collectionsView.selectLibrary(libraryID);
+								}
+								else {
+									await zp.collectionsView.selectCollection(collectionID);
+								}
 							}
 							if (translation.newItems.length == 1) {
 								await zp.selectItem(translation.newItems[0].id);
