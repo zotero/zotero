@@ -309,6 +309,80 @@ class ReaderInstance {
 		this._postMessage(data);
 	}
 
+	_initIframeWindow() {
+		this._iframeWindow.addEventListener('message', this._handleMessage);
+		this._iframeWindow.addEventListener('error', (event) => {
+			Zotero.logError(event.error);
+		});
+		this._iframeWindow.wrappedJSObject.zoteroSetDataTransferAnnotations = (dataTransfer, annotations) => {
+			let res = Zotero.EditorInstanceUtilities.serializeAnnotations(annotations);
+			let tmpNote = new Zotero.Item('note');
+			tmpNote.libraryID = Zotero.Libraries.userLibraryID;
+			tmpNote.setNote(res.html);
+			let items = [tmpNote];
+			let format = Zotero.QuickCopy.getNoteFormat();
+			Zotero.debug('Copying/dragging annotation(s) with ' + format);
+			format = Zotero.QuickCopy.unserializeSetting(format);
+			// Basically the same code is used in itemTree.jsx onDragStart
+			try {
+				if (format.mode === 'export') {
+					// If exporting with virtual "Markdown + Rich Text" translator, call Note Markdown
+					// and Note HTML translators instead
+					if (format.id === Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
+						let markdownFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN };
+						let htmlFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_HTML };
+						Zotero.QuickCopy.getContentFromItems(items, markdownFormat, (obj, worked) => {
+							if (!worked) {
+								return;
+							}
+							Zotero.QuickCopy.getContentFromItems(items, htmlFormat, (obj2, worked) => {
+								if (!worked) {
+									return;
+								}
+								dataTransfer.setData('text/plain', obj.string.replace(/\r\n/g, '\n'));
+								dataTransfer.setData('text/html', obj2.string.replace(/\r\n/g, '\n'));
+							});
+						});
+					}
+					else {
+						Zotero.QuickCopy.getContentFromItems(items, format, (obj, worked) => {
+							if (!worked) {
+								return;
+							}
+							var text = obj.string.replace(/\r\n/g, '\n');
+							// For Note HTML translator use body content only
+							if (format.id === Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
+								// Use body content only
+								let parser = Cc['@mozilla.org/xmlextras/domparser;1']
+								.createInstance(Ci.nsIDOMParser);
+								let doc = parser.parseFromString(text, 'text/html');
+								text = doc.body.innerHTML;
+							}
+							dataTransfer.setData('text/plain', text);
+						});
+					}
+				}
+			}
+			catch (e) {
+				Zotero.debug(e);
+			}
+		};
+		this._iframeWindow.wrappedJSObject.zoteroConfirmDeletion = function (plural) {
+			let ps = Services.prompt;
+			let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
+			let index = ps.confirmEx(
+				null,
+				'',
+				Zotero.getString('pdfReader.deleteAnnotation.' + (plural ? 'plural' : 'singular')),
+				buttonFlags,
+				Zotero.getString('general.delete'),
+				null, null, null, {}
+			);
+			return !index;
+		};
+	}
+
 	async _setState(state) {
 		this.state = state;
 		let item = Zotero.Items.get(this._itemID);
@@ -887,79 +961,7 @@ class ReaderTab extends ReaderInstance {
 		this._window.addEventListener('DOMContentLoaded', (event) => {
 			if (this._iframe && this._iframe.contentWindow && this._iframe.contentWindow.document === event.target) {
 				this._iframeWindow = this._iframe.contentWindow;
-				this._iframeWindow.addEventListener('message', this._handleMessage);
-				this._iframeWindow.addEventListener('error', (event) => {
-					Zotero.logError(event.error);
-				});
-
-				this._iframeWindow.wrappedJSObject.zoteroSetDataTransferAnnotations = (dataTransfer, annotations) => {
-					let res = Zotero.EditorInstanceUtilities.serializeAnnotations(annotations);
-					let tmpNote = new Zotero.Item('note');
-					tmpNote.libraryID = Zotero.Libraries.userLibraryID;
-					tmpNote.setNote(res.html);
-					let items = [tmpNote];
-					let format = Zotero.QuickCopy.getNoteFormat();
-					Zotero.debug('Copying/dragging annotation(s) with ' + format);
-					format = Zotero.QuickCopy.unserializeSetting(format);
-					// Basically the same code is used in itemTree.jsx onDragStart
-					try {
-						if (format.mode === 'export') {
-							// If exporting with virtual "Markdown + Rich Text" translator, call Note Markdown
-							// and Note HTML translators instead
-							if (format.id === Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
-								let markdownFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN };
-								let htmlFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_HTML };
-								Zotero.QuickCopy.getContentFromItems(items, markdownFormat, (obj, worked) => {
-									if (!worked) {
-										return;
-									}
-									Zotero.QuickCopy.getContentFromItems(items, htmlFormat, (obj2, worked) => {
-										if (!worked) {
-											return;
-										}
-										dataTransfer.setData('text/plain', obj.string.replace(/\r\n/g, '\n'));
-										dataTransfer.setData('text/html', obj2.string.replace(/\r\n/g, '\n'));
-									});
-								});
-							}
-							else {
-								Zotero.QuickCopy.getContentFromItems(items, format, (obj, worked) => {
-									if (!worked) {
-										return;
-									}
-									var text = obj.string.replace(/\r\n/g, '\n');
-									// For Note HTML translator use body content only
-									if (format.id === Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
-										// Use body content only
-										let parser = Cc['@mozilla.org/xmlextras/domparser;1']
-											.createInstance(Ci.nsIDOMParser);
-										let doc = parser.parseFromString(text, 'text/html');
-										text = doc.body.innerHTML;
-									}
-									dataTransfer.setData('text/plain', text);
-								});
-							}
-						}
-					}
-					catch (e) {
-						Zotero.debug(e);
-					}
-				};
-
-				this._iframeWindow.wrappedJSObject.zoteroConfirmDeletion = function (plural) {
-					let ps = Services.prompt;
-					let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-						+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
-					let index = ps.confirmEx(
-						null,
-						'',
-						Zotero.getString('pdfReader.deleteAnnotation.' + (plural ? 'plural' : 'singular')),
-						buttonFlags,
-						Zotero.getString('general.delete'),
-						null, null, null, {}
-					);
-					return !index;
-				};
+				this._initIframeWindow();
 			}
 		});
 		
@@ -1049,7 +1051,7 @@ class ReaderWindow extends ReaderInstance {
 
 			if (this._iframe.contentWindow && this._iframe.contentWindow.document === event.target) {
 				this._iframeWindow = this._window.document.getElementById('reader').contentWindow;
-				this._iframeWindow.addEventListener('message', this._handleMessage);
+				this._initIframeWindow();
 			}
 		});
 	}
