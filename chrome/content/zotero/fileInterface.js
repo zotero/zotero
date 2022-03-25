@@ -553,7 +553,7 @@ var Zotero_File_Interface = new function() {
 	};
 	
 	
-	var _finishImport = Zotero.Promise.coroutine(function* (options) {
+	var _finishImport = async function (options) {
 		var t = performance.now();
 		
 		var translation = options.translation;
@@ -575,12 +575,12 @@ var Zotero_File_Interface = new function() {
 
 		var showProgressWindow = !onBeforeImport;
 		
-		let translators = yield translation.getTranslators();
+		let translators = await translation.getTranslators();
 		
 		// Unrecognized file
 		if (!translators.length) {
 			if (onBeforeImport) {
-				yield onBeforeImport(false);
+				await onBeforeImport(false);
 			}
 			
 			let ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
@@ -612,11 +612,11 @@ var Zotero_File_Interface = new function() {
 				if (!libraryID) {
 					libraryID = zp.getSelectedLibraryID();
 					if (addToLibraryRoot) {
-						yield zp.collectionsView.selectLibrary(libraryID);
+						await zp.collectionsView.selectLibrary(libraryID);
 					}
 				}
 				else if (libraryID !== zp.getSelectedLibraryID()) {
-					yield zp.collectionsView.selectLibrary(libraryID);
+					await zp.collectionsView.selectLibrary(libraryID);
 				}
 				if (!createNewCollection) {
 					importCollection = zp.getSelectedCollection();
@@ -639,7 +639,7 @@ var Zotero_File_Interface = new function() {
 			if (collectionID) {
 				importCollection.parentID = collectionID;
 			}
-			yield importCollection.saveTx();
+			await importCollection.saveTx();
 		}
 
 		translation.setTranslator(translators[0]);
@@ -662,15 +662,15 @@ var Zotero_File_Interface = new function() {
 				progress.setProgress(translation.getProgress());
 			});
 			
-			yield Zotero.Promise.delay(0);
+			await Zotero.Promise.delay(0);
 		}
 		else {
-			yield onBeforeImport(translation);
+			await onBeforeImport(translation);
 		}
 		
 		var notifierQueue = new Zotero.Notifier.Queue;
 		try {
-			yield translation.translate({
+			await translation.translate({
 				libraryID,
 				collections: importCollection ? [importCollection.id] : null,
 				linkFiles,
@@ -693,11 +693,11 @@ var Zotero_File_Interface = new function() {
 			return false;
 		}
 		finally {
-			yield Zotero.Notifier.commit(notifierQueue);
+			await Zotero.Notifier.commit(notifierQueue);
 		}
 
 		if (translators[0].label.match(/^Citavi (?:[56]) XML/i)) {
-			yield ImportCitaviAnnotatons(translation);
+			await ImportCitaviAnnotatons(translation);
 		}
 		
 		var numItems = translation.newItems.length;
@@ -723,7 +723,7 @@ var Zotero_File_Interface = new function() {
 		Zotero.debug(`Imported ${numItems} item(s) in ${performance.now() - t} ms`);
 		
 		return true;
-	});
+	};
 	
 	
 	var _getMendeleyTranslation = async function () {
