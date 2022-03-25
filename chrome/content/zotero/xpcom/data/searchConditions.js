@@ -710,11 +710,15 @@ Zotero.SearchConditions = new function(){
 		}
 		
 		try {
-			return Zotero.getString('searchConditions.' + str)
+			let conditionKey = 'searchConditions.' + str;
+			let conditionString = Zotero.getString(conditionKey);
+			if (conditionString !== conditionKey) {
+				return conditionString;
+			}
 		}
-		catch (e) {
-			return Zotero.ItemFields.getLocalizedString(str);
-		}
+		catch (e) {}
+
+		return Zotero.ItemFields.getLocalizedString(str);
 	}
 	
 	
