@@ -20,7 +20,13 @@
 		for (let fieldID of fieldIDs) {
 			var fieldObj = [/* name */Zotero.ItemFields.getName(fieldID)];
 			try {
-				fieldObj.push(/* localizedString */Zotero.getString("itemFields." + fieldObj.name));
+				// localizedString
+				let str = Zotero.getString("itemFields." + fieldObj.name);
+				if (str == "itemFields." + fieldObj.name) {
+					// Use name for localizedString
+					str = fieldObj[0];
+				}
+				fieldObj.push(str);
 			} catch(e) {
 				fieldObj.push(/* name -> localizedString */fieldObj[0]);
 			}
