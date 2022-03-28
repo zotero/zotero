@@ -760,6 +760,21 @@ class VirtualizedTable extends React.Component {
 	}
 	
 	// ------------------------ Column Methods ------------------------- //
+
+	/**
+	 * A public function to update the column CSS flex widths. To be used
+	 * upon window resize and similar. Especially important on macOS where
+	 * column borders are used and get out of sync with column headers.
+	 */
+	updateColumnWidths = Zotero.Utilities.debounce(() => {
+		let resizeData = {};
+		const columns = this._getVisibleColumns();
+		for (const column of columns) {
+			const elem = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${column.dataKey}`)
+			resizeData[column.dataKey] = elem.getBoundingClientRect().width;
+		}
+		this._columns.onResize(resizeData, true);
+	}, 200)
 	
 	_handleResizerDragStart = (index, event) => {
 		if (event.button !== 0) return false;

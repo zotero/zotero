@@ -106,6 +106,7 @@ var ZoteroPane = new function()
 			this.updateWindow();
 			this.updateToolbarPosition();
 			this.updateTagsBoxSize();
+			this.updateItemTreeColumnWidths();
 		});
 		window.setTimeout(this.updateToolbarPosition.bind(this), 0);
 		
@@ -5457,7 +5458,12 @@ var ZoteroPane = new function()
 			list.style.height = height + 'px';
 		}
 	};
-	
+
+	this.updateItemTreeColumnWidths = function() {
+		if (!ZoteroPane.itemsView) return;
+		ZoteroPane.itemsView.tree.updateColumnWidths();
+	};
+
 	/**
 	 * Opens the about dialog
 	 */
