@@ -341,11 +341,15 @@ var Zotero_LocateMenu = new function() {
 	 * Should appear only when the item is a PDF, or a linked or attached file or web attachment is
 	 * a PDF
 	 */
-	ViewOptions.pdf = new function() {
+	function ViewPDF(inNewWindow) {
 		this.icon = "chrome://zotero/skin/treeitem-attachment-pdf.png";
 		this._mimeTypes = ["application/pdf"];
 		
-		this.canHandleItem = function (item) {
+		this.canHandleItem = async function (item) {
+			// Don't show "View PDF in New Window" when using an external PDF viewer
+			if (inNewWindow && Zotero.Prefs.get("fileHandler.pdf")) {
+				return false;
+			}
 			return _getFirstAttachmentWithMIMEType(item, this._mimeTypes).then((item) => !!item);
 		}
 		
@@ -356,7 +360,8 @@ var Zotero_LocateMenu = new function() {
 				if(attachment) attachments.push(attachment.id);
 			}
 			
-			ZoteroPane_Local.viewAttachment(attachments, event);
+			ZoteroPane_Local.viewAttachment(attachments, event, false,
+				{ forceOpenPDFInWindow: inNewWindow });
 		});
 		
 		var _getFirstAttachmentWithMIMEType = Zotero.Promise.coroutine(function* (item, mimeTypes) {
@@ -370,7 +375,10 @@ var Zotero_LocateMenu = new function() {
 			}
 			return false;
 		});
-	};
+	}
+
+	ViewOptions.pdf = new ViewPDF(false);
+	ViewOptions.pdfNewWindow = new ViewPDF(true);
 	
 	/**
 	 * "View Online" option
