@@ -531,7 +531,6 @@ const ZoteroStandalone = new function() {
 			
 			case 'note-font-size-reset':
 				Zotero.Prefs.clear('note.fontSize');
-				this.promptForRestart();
 				break;
 			
 			case 'recursive-collections':

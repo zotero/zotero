@@ -390,7 +390,7 @@
 									<menuitem label="64" type="checkbox"/>
 									<menuitem label="72" type="checkbox"/>
 									<menuitem label="96" type="checkbox"/>
-									<menuitem/>
+									<menuseparator/>
 									<menuitem
 										id="view-menuitem-note-font-size-reset"
 										label="&zotero.general.reset;"
