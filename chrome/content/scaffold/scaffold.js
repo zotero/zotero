@@ -1672,6 +1672,11 @@ var Scaffold = new function () {
 			status.setAttribute('label', oldStatuses[testString] || 'Not run');
 			item.appendChild(status);
 
+			let defer = document.createElement('listcell');
+			defer.setAttribute('type', 'checkbox');
+			defer.setAttribute('checked', test.defer);
+			item.appendChild(defer);
+
 			item.setUserData('test-string', testString, null);
 			item.setUserData('test-type', test.type);
 

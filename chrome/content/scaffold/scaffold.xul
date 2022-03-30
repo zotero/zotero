@@ -352,10 +352,12 @@
 										<listhead>
 											<listheader label="&scaffold.testing.input.label;"/>
 											<listheader label="&scaffold.testing.status.label;"/>
+											<listheader label="&scaffold.testing.defer.label;"/>
 										</listhead>
 										<listcols>
 											<listcol flex="1"/>
 											<listcol class="listcol-testMessage"/>
+											<listcol/>
 										</listcols>
 									</listbox>
 								</hbox>
