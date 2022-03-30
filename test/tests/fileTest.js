@@ -525,5 +525,13 @@ describe("Zotero.File", function () {
 				assert.equal(fileSize, 1024 * 1024 * sizeInMB);
 			}
 		});
+
+		it("should extract a file from xpi", async function () {
+			const url = `jar:file://${getTestDataDirectory().path}/fake.xpi!/test.txt`;
+			const path = OS.Path.join(Zotero.getTempDirectory().path, 'xpi-extracted.txt');
+			await Zotero.File.download(url, path);
+			const contents = await Zotero.File.getContentsAsync(path);
+			assert.equal(contents, 'Hello Zotero\n');
+		});
 	});
 })
