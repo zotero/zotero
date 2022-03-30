@@ -160,12 +160,6 @@
 								label="&zotero.pdfReader.transferFromPDF;"
 								oncommand="ZoteroStandalone.onReaderCmd('transferFromPDF')"
 							/>
-							<menuitem
-								id="menu_transferToPDF"
-								class="menu-type-reader"
-								label="&zotero.pdfReader.transferToPDF;"
-								oncommand="ZoteroStandalone.onReaderCmd('transferToPDF')"
-							/>
 							<menuseparator class="menu-type-reader"/>
 							<menuitem id="menu_export_file" class="menu-type-reader"
 									label="&zotero.general.saveAs;"
