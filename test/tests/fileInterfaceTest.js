@@ -233,35 +233,56 @@ describe("Zotero_File_Interface", function() {
 			assert.equal(importedItem.getField('title'), 'Bitcoin: A Peer-to-Peer Electronic Cash System');
 			const importedPDF = await Zotero.Items.getAsync(importedItem.getAttachments()[0]);
 			const annotations = importedPDF.getAnnotations();
-			assert.lengthOf(annotations, 4);
-			const annotationTexts = importedPDF.getAnnotations().map(a => a.annotationText);
-			const annotationPositions = importedPDF.getAnnotations().map(a => JSON.parse(a.annotationPosition));
-			const annotationSortIndexes = importedPDF.getAnnotations().map(a => a.annotationSortIndex);
-			const annotationTags = importedPDF.getAnnotations().map(a => a.getTags());
-			
-			assert.sameMembers(annotationTexts, [
-				'peer-to-peer',
-				'CPU power is controlled by nodes that are not cooperating to attack the network, they\'ll generate the longest chain and outpace attackers.',
-				'double-spending',
-				'This is a comment'
-			]);
-			assert.sameMembers(annotationSortIndexes, [
-				'00000|000103|00206',
-				'00000|000723|00309',
-				'00000|000390|00252',
-				'00000|000981|00355'
-			]);
+			assert.lengthOf(annotations, 5);
 
-			assert.sameDeepMembers(annotationPositions, [
-				{ pageIndex: 0, rects: [[230.202, 578.879, 275.478, 585.817], [230.202, 578.879, 275.478, 585.817]] },
-				{ pageIndex: 0, rects: [[254.515, 532.841, 316.462, 539.679], [254.515, 532.841, 316.462, 539.679]] },
+			const annotation1 = annotations.find(a => a.annotationText === 'peer-to-peer');
+			const annotation2 = annotations.find(a => a.annotationText === 'CPU power is controlled by nodes that are not cooperating to attack the network, they\'ll generate the longest chain and outpace attackers.');
+			const annotation3 = annotations.find(a => a.annotationText === 'double-spending');
+			const annotation4 = annotations.find(a => a.annotationText === 'This is a comment');
+			const annotation5 = annotations.find(a => a.annotationText === 'This is a green highlight on page 3');
+
+			assert.deepEqual(
+				JSON.parse(annotation1.annotationPosition),
+				{ pageIndex: 0, rects: [[230.202, 578.879, 275.478, 585.817], [230.202, 578.879, 275.478, 585.817]] }
+			);
+
+			assert.deepEqual(
+				JSON.parse(annotation2.annotationPosition),
 				{ pageIndex: 0, rects: [[228.335, 475.341, 461.756, 482.179], [146.3, 463.841, 437.511, 470.679], [146.3, 463.841, 461.756, 482.179]] },
-				{ pageIndex: 0, rects: [[146.3, 429.341, 199.495, 436.179], [146.3, 429.341, 199.495, 436.179]] }
-			]);
+			);
 
-			assert.sameDeepMembers(annotationTags, [
-				[{ tag: 'red' }], [], [{ tag: 'blue' }], [{ tag: 'comment' }]
-			]);
+			assert.deepEqual(
+				JSON.parse(annotation3.annotationPosition),
+				{ pageIndex: 0, rects: [[254.515, 532.841, 316.462, 539.679], [254.515, 532.841, 316.462, 539.679]] },
+			);
+
+			assert.deepEqual(
+				JSON.parse(annotation4.annotationPosition),
+				{ pageIndex: 0, rects: [[146.3, 429.341, 199.495, 436.179], [146.3, 429.341, 199.495, 436.179]] }
+			);
+
+			assert.deepEqual(
+				JSON.parse(annotation5.annotationPosition),
+				{ pageIndex: 2, rects: [[133.3, 330.924, 185.269, 340.294], [133.3, 330.924, 185.269, 340.294]] }
+			);
+
+			assert.equal(annotation1.annotationSortIndex, '00000|000103|00206');
+			assert.equal(annotation2.annotationSortIndex, '00000|000723|00309');
+			assert.equal(annotation3.annotationSortIndex, '00000|000390|00252');
+			assert.equal(annotation4.annotationSortIndex, '00000|000981|00355');
+			assert.equal(annotation5.annotationSortIndex, '00002|001638|00451');
+
+			assert.deepEqual(annotation1.getTags(), [{ tag: 'red' }]);
+			assert.deepEqual(annotation2.getTags(), [{ tag: 'blue' }]);
+			assert.deepEqual(annotation3.getTags(), []);
+			assert.deepEqual(annotation4.getTags(), [{ tag: 'comment' }]);
+			assert.deepEqual(annotation5.getTags(), []);
+
+			assert.equal(annotation1.annotationPageLabel, '1');
+			assert.equal(annotation2.annotationPageLabel, '1');
+			assert.equal(annotation3.annotationPageLabel, '1');
+			assert.equal(annotation4.annotationPageLabel, '1');
+			assert.equal(annotation5.annotationPageLabel, '3');
 		});
 	});
 });
