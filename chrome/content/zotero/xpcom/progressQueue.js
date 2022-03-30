@@ -154,7 +154,7 @@ Zotero.ProgressQueue = function (options) {
 		let row = {
 			id: item.id,
 			status: Zotero.ProgressQueue.ROW_QUEUED,
-			fileName: item.getField('title'),
+			fileName: item.getDisplayTitle(),
 			message: ''
 		};
 		
