@@ -231,23 +231,14 @@ class ReaderInstance {
 		return true;
 	}
 
-	promptToTransferAnnotations(fromPDF) {
+	promptToTransferAnnotations() {
 		let ps = Services.prompt;
 		let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
 		let index = ps.confirmEx(
 			null,
-			Zotero.getString(
-				fromPDF
-					? 'pdfReader.promptTransferFromPDF.title'
-					: 'pdfReader.promptTransferToPDF.title'
-			),
-			Zotero.getString(
-				fromPDF
-					? 'pdfReader.promptTransferFromPDF.text'
-					: 'pdfReader.promptTransferToPDF.text',
-				Zotero.appName
-			),
+			Zotero.getString('pdfReader.promptTransferFromPDF.title'),
+			Zotero.getString('pdfReader.promptTransferFromPDF.text', Zotero.appName),
 			buttonFlags,
 			Zotero.getString('general.continue'),
 			null, null, null, {}
@@ -268,21 +259,6 @@ class ReaderInstance {
 					}
 					throw e;
 				}
-			}
-		}
-		else if (cmd === 'transferToPDF') {
-			if (this.promptToTransferAnnotations(false)) {
-				try {
-					await Zotero.PDFWorker.export(this._itemID, null, true, '', true);
-				}
-				catch (e) {
-					if (e.name === 'PasswordException') {
-						Zotero.alert(null, Zotero.getString('general.error'),
-							Zotero.getString('pdfReader.promptPasswordProtected'));
-					}
-					throw e;
-				}
-				await Zotero.PDFWorker.import(this._itemID, true);
 			}
 		}
 		else if (cmd === 'export') {
