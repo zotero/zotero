@@ -17,6 +17,8 @@
     <mapping directory="$PROJECT_DIR$/resource/schema/global" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/styles" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/test/resource/chai" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/test/resource/chai-as-promised" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/test/resource/mocha" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/translators" vcs="Git" />
   </component>
 </project>
