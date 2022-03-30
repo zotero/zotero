@@ -1983,11 +1983,9 @@ Zotero.Items = function() {
 		'</span>',
 		// Any punctuation at the beginning of the string
 		'^\\p{P}+',
-		// Initial, opening, closing, final, other punctuation:
-		// pretty much anything that isn't a connector/dash.
-		// Positively matching each of these classes compiles to a cleaner
-		// native RegExp than XRegExp('[^\\P{P}\\p{Pd}]')
-		'[\\p{Pi}\\p{Ps}\\p{Pe}\\p{Pf}\\p{Po}]'
+		// Initial, opening, closing, final, and "other" punctuation that isn't
+		// followed by a digit. Doesn't match connectors or dashes.
+		'[\\p{Pi}\\p{Ps}\\p{Pe}\\p{Pf}\\p{Po}](?!\\d)'
 	].map(re => Zotero.Utilities.XRegExp(re, 'g'));
 	
 	

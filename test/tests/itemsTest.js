@@ -1163,5 +1163,17 @@ describe("Zotero.Items", function () {
 				assert.equal(Zotero.Items.getSortTitle(input), expected);
 			}
 		});
+
+		it("should not strip any punctuation before a digit", function () {
+			let tests = [
+				['1.5', '1.5'],
+				['abc .5', 'abc .5'],
+				['abc 5.', 'abc 5']
+			];
+
+			for (let [input, expected] of tests) {
+				assert.equal(Zotero.Items.getSortTitle(input), expected);
+			}
+		});
 	});
 });
