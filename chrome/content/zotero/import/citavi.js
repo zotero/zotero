@@ -52,7 +52,6 @@ const ImportCitaviAnnotatons = async (translation) => {
 		const createdOn = xpathTextOrNull(knowledgeItem, './CreatedOn');
 		const modifiedOn = xpathTextOrNull(knowledgeItem, './ModifiedOn');
 		const coreStatement = xpathTextOrNull(knowledgeItem, './CoreStatement');
-		const pageRange = xpathTextOrNull(knowledgeItem, './PageRange');
 		const quotationType = xpathTextOrNull(knowledgeItem, './QuotationType');
 		const text = xpathTextOrNull(knowledgeItem, './Text');
 		const itemID = IDMap[referenceID];
@@ -95,7 +94,6 @@ const ImportCitaviAnnotatons = async (translation) => {
 				comment: isFirstPage ? coreStatement : '',
 				text: isFirstPage ? text : '',
 				position: { pageIndex, rects: pageRects },
-				pageLabel: pageRange || '',
 				dateAdded: createdOn,
 				dateModified: modifiedOn,
 				tags: keywords.map(keyword => ({ name: keyword }))
