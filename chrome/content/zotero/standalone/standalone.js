@@ -179,7 +179,7 @@ const ZoteroStandalone = new function() {
 			let sep = menuitem.nextSibling;
 			
 			let zp = Zotero.getActiveZoteroPane();
-			if (zp) {
+			if (zp && !reader) {
 				let numFiles = zp.getSelectedItems().reduce((num, item) => {
 					if (item.isPDFAttachment()) {
 						return num + 1;
