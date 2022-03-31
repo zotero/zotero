@@ -179,7 +179,7 @@ class EditorInstance {
 		await this.importImages(annotations);
 		let { html } = Zotero.EditorInstanceUtilities.serializeAnnotations(annotations);
 		if (html) {
-			this._postMessage({ action: 'insertHTML', pos: -1, html });
+			this._postMessage({ action: 'insertHTML', pos: null, html });
 		}
 	}
 	
