@@ -329,6 +329,13 @@
 								label="&zotero.pdfReader.zoomPageWidth;"
 								oncommand="ZoteroStandalone.onReaderCmd('zoomPageWidth')"
 							/>
+							<menuitem
+								id="view-menuitem-zoom-page-height"
+								class="menu-type-reader"
+								type="checkbox"
+								label="&zotero.pdfReader.zoomPageHeight;"
+								oncommand="ZoteroStandalone.onReaderCmd('zoomPageHeight')"
+							/>
 							<menuseparator class="menu-type-reader"/>
 
 							<menu id="layout-menu" label="&layout.label;">

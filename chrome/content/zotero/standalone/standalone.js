@@ -407,6 +407,7 @@ const ZoteroStandalone = new function() {
 			this.updateMenuItemCheckmark('view-menuitem-hand-tool', reader.isHandToolActive());
 			this.updateMenuItemCheckmark('view-menuitem-zoom-auto', reader.isZoomAutoActive());
 			this.updateMenuItemCheckmark('view-menuitem-zoom-page-width', reader.isZoomPageWidthActive());
+			this.updateMenuItemCheckmark('view-menuitem-zoom-page-height', reader.isZoomPageHeightActive());
 		}
 	
 		// Layout mode

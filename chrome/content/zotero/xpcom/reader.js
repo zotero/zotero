@@ -197,6 +197,10 @@ class ReaderInstance {
 	isZoomPageWidthActive() {
 		return this._iframeWindow.eval('PDFViewerApplication.pdfViewer.currentScaleValue === "page-width"');
 	}
+
+	isZoomPageHeightActive() {
+		return this._iframeWindow.eval('PDFViewerApplication.pdfViewer.currentScaleValue === "page-fit"');
+	}
 	
 	allowNavigateFirstPage() {
 		return this._iframeWindow.eval('PDFViewerApplication.pdfViewer.currentPageNumber > 1');
@@ -497,6 +501,15 @@ class ReaderInstance {
 		menuitem.setAttribute('checked', data.isZoomPageWidth);
 		menuitem.addEventListener('command', () => {
 			this._postMessage({ action: 'popupCmd', cmd: 'zoomPageWidth' });
+		});
+		popup.appendChild(menuitem);
+		// Zoom 'Page Height'
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', Zotero.getString('pdfReader.zoomPageHeight'));
+		menuitem.setAttribute('type', 'checkbox');
+		menuitem.setAttribute('checked', data.isZoomPageHeight);
+		menuitem.addEventListener('command', () => {
+			this._postMessage({ action: 'popupCmd', cmd: 'zoomPageHeight' });
 		});
 		popup.appendChild(menuitem);
 		// Separator
@@ -1057,6 +1070,7 @@ class ReaderWindow extends ReaderInstance {
 		this._window.document.getElementById('view-menuitem-hand-tool').setAttribute('checked', this.isHandToolActive());
 		this._window.document.getElementById('view-menuitem-zoom-auto').setAttribute('checked', this.isZoomAutoActive());
 		this._window.document.getElementById('view-menuitem-zoom-page-width').setAttribute('checked', this.isZoomPageWidthActive());
+		this._window.document.getElementById('view-menuitem-zoom-page-height').setAttribute('checked', this.isZoomPageHeightActive());
 	}
 
 	_onGoMenuOpen() {
