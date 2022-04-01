@@ -156,7 +156,7 @@ Zotero.UpdateMetadata = new function () {
 	 * @return {Boolean}
 	 */
 	this.canUpdate = function (item) {
-		return item.isRegularItem();
+		return item.isRegularItem() && !item.isFeedItem;
 	};
 
 	/**
