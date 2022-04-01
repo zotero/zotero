@@ -295,6 +295,14 @@ class ReaderInstance {
 			Zotero.logError(event.error);
 		});
 		this._iframeWindow.wrappedJSObject.zoteroSetDataTransferAnnotations = (dataTransfer, annotations) => {
+			// A small hack to force serializeAnnotations to include image annotation
+			// even if image isn't saved and imageAttachmentKey isn't available
+			for (let annotation of annotations) {
+				if (annotation.image && !annotation.imageAttachmentKey) {
+					annotation.imageAttachmentKey = 'none';
+					delete annotation.image;
+				}
+			}
 			let res = Zotero.EditorInstanceUtilities.serializeAnnotations(annotations);
 			let tmpNote = new Zotero.Item('note');
 			tmpNote.libraryID = Zotero.Libraries.userLibraryID;
