@@ -95,6 +95,10 @@ class EditorInstance {
 		
 		let note = this._item.note;
 
+		// TODO: From Firefox 64 this is no longer necessary
+		this._iframeWindow.document.execCommand('enableObjectResizing', false, 'false');
+		this._iframeWindow.document.execCommand('enableInlineTableEditing', false, 'false');
+
 		this._postMessage({
 			action: 'init',
 			value: this._state || this._item.note,
