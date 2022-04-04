@@ -284,15 +284,8 @@ class VirtualizedTable extends React.Component {
 		this._columns = new Columns(this);
 		
 		this._renderedTextHeight = this._getRenderedTextHeight();
-		this._rowHeight = props.linesPerRow * this._renderedTextHeight;
-		if (!props.disableFontSizeScaling) {
-			this._rowHeight *= Zotero.Prefs.get('fontSize');
-		}
-		this._rowHeight += 2;
-		this._rowHeight = Math.max(MINIMUM_ROW_HEIGHT, this._rowHeight);
-		
+		this._rowHeight = this._getRowHeight();
 		this.selection = new TreeSelection(this);
-		
 
 		// Due to how the Draggable element works dragging (for column dragging and for resizing)
 		// is not handled via React events but via native ones attached on `document`
@@ -1215,12 +1208,7 @@ class VirtualizedTable extends React.Component {
 				+ "disabled. Change the prop instead.");
 			return;
 		}
-		this._rowHeight = this.props.linesPerRow * this._renderedTextHeight;
-		if (!this.props.disableFontSizeScaling) {
-			this._rowHeight *= Zotero.Prefs.get('fontSize');
-		}
-		this._rowHeight += 2;
-		this._rowHeight = Math.max(MINIMUM_ROW_HEIGHT, this._rowHeight);
+		this._rowHeight = this._getRowHeight();
 		
 		if (!this._jsWindow) return;
 		this._jsWindow.update(this._getWindowedListOptions());
@@ -1228,6 +1216,17 @@ class VirtualizedTable extends React.Component {
 		this._jsWindow.invalidate();
 	}
 	
+	_getRowHeight() {
+		let rowHeight = this.props.linesPerRow * this._renderedTextHeight;
+		if (!this.props.disableFontSizeScaling) {
+			rowHeight *= Zotero.Prefs.get('fontSize');
+		}
+		// padding
+		rowHeight *= 1.4;
+		rowHeight = Math.round(Math.max(MINIMUM_ROW_HEIGHT, rowHeight));
+		return rowHeight;
+	}
+
 	_getRenderedTextHeight() {
 		let div = document.createElementNS("http://www.w3.org/1999/xhtml", 'div');
 		div.style.visibility = "hidden";
