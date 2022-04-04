@@ -324,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "התרחקות">
 <!ENTITY zotero.pdfReader.zoomAuto "שינוי גודל אוטומטי">
 <!ENTITY zotero.pdfReader.zoomPageWidth "התאמת התקריב לרוחב העמוד">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "ייבוא הסברים…">
-<!ENTITY zotero.pdfReader.transferToPDF "אחסון הסברים בקובץ…">

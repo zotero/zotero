@@ -102,7 +102,7 @@
 
 <!ENTITY zotero.preferences.citationOptions.caption "אפשרויות ציטוט">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "לכלול כתובות של מאמרי נייר בהפניות">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "כאשר אפשרות זו מושבתת, Zotero כולל כתובות בעת ציטוט מקומונים, מגזינים וכתבות בעתון רק אם לא צוין טווח עמודים למאמר.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "כאשר אפשרות זו מושבתת, Zotero כולל כתובות בעת ציטוט מכתבי עת, מגזינים וכתבות בעתון רק אם לא צוין טווח עמודים למאמר.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "העתקה מהירה">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "עיצוב הפריט:">

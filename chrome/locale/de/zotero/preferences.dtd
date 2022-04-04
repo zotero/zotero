@@ -13,8 +13,8 @@
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automatisch zugehörige PDFs und andere Dateien beim Speichern von Einträgen anhängen">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Automatisch Metadaten für PDF-Dateien abrufen">
 <!ENTITY zotero.preferences.autoRenameFiles "Automatisch angehängte Dateien unter Verwendung von übergeordneten Metadaten umbenennen">
-<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Verknüpfte Dateien umbenennen">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Zum Öffnen von PDFs benutze">
+<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Verlinkte Dateien umbenennen">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "PDFs öffnen mit">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Systemstandard">
 
 <!ENTITY zotero.preferences.miscellaneous "Verschiedenes">
@@ -49,7 +49,7 @@
 <!ENTITY zotero.preferences.sync.username "Benutzername:">
 <!ENTITY zotero.preferences.sync.password "Passwort:">
 <!ENTITY zotero.preferences.sync.syncServer "Daten-Synchronisierung">
-<!ENTITY zotero.preferences.sync.setUpSync "Synchronisierung Konfigurieren">
+<!ENTITY zotero.preferences.sync.setUpSync "Synchronisierung einrichten">
 <!ENTITY zotero.preferences.sync.unlinkAccount "Benutzerkonto trennen ...">
 <!ENTITY zotero.preferences.sync.createAccount "Account erstellen">
 <!ENTITY zotero.preferences.sync.lostPassword "Passwort vergessen?">
@@ -59,8 +59,8 @@
 <!ENTITY zotero.preferences.sync.about "Über Synchronisierung">
 <!ENTITY zotero.preferences.sync.fileSyncing "Datei-Synchronisierung">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
-<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Angehängte Dateien in Meine Bibliothek synchronisieren mit:">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups "Angehängte Dateien in Gruppen-Bibliotheken mit Zotero Storage synchronisieren">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Dateianhänge in Meine Bibliothek synchronisieren mit">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "Dateianhänge in Gruppen-Bibliotheken mit Zotero Storage synchronisieren">
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Dateien herunterladen">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "beim Synchronisieren">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "bei Aufruf">
@@ -169,7 +169,7 @@
 <!ENTITY zotero.preferences.advanced.advancedConfiguration "Erweiterte Konfiguration">
 
 <!ENTITY zotero.preferences.prefpane.locate "Finden">
-<!ENTITY zotero.preferences.locate.locateEngineManager "Artikel Finder verwalten">
+<!ENTITY zotero.preferences.locate.locateEngineManager "Artikel-Lookup-Engines verwalten">
 <!ENTITY zotero.preferences.locate.description "Beschreibung">
 <!ENTITY zotero.preferences.locate.name "Name">
 <!ENTITY zotero.preferences.locate.addDescription "Um einen Artikel Findern hinzuzufügen der nicht auf der Liste ist, besuchen Sie die Seite der gewünschten Suchmaschine und klicken &quot;hinzufügen&quot;  in Zoteros &quot;Finden&quot; Menü.">
@@ -181,17 +181,17 @@
 
 <!ENTITY zotero.preferences.dataDir "Speicherort">
 <!ENTITY zotero.preferences.dataDir.useProfile "Verwende den Firefox-Profil-Ordner">
-<!ENTITY zotero.preferences.dataDir.custom "Eigene:">
+<!ENTITY zotero.preferences.dataDir.custom "Benutzerdefiniert:">
 <!ENTITY zotero.preferences.dataDir.choose "Auswählen...">
 <!ENTITY zotero.preferences.dataDir.viaCommandLine "(über Kommandozeile spezifiziert)">
 <!ENTITY zotero.preferences.dataDir.reveal "Datenverzeichnis anzeigen">
 <!ENTITY zotero.preferences.dataDir.migrate "Nach neuem Standardverzeichnis migrieren...">
 
-<!ENTITY zotero.preferences.attachmentBaseDir.caption "Basisverzeichnis für verknüpfte Dateianhänge">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero verwendet relative Pfade für verknüpfte Dateien innerhalb des Basisverzeichnisses, so dass Sie auf verschiedenen Computern Zugang auf die Dateien haben, solange die Ordnerstruktur im Basisverzeichnis die gleiche ist.">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Basisverzeichnis für verlinkte Dateianhänge">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero wird relative Pfade für verlinkte Dateianhänge innerhalb des Basisverzeichnisses verwenden, sodass Sie auf verschiedenen Computern auf die Dateien zugreifen können, solange die Ordnerstruktur im Basisverzeichnis die gleiche ist.">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "Basisverzeichnis:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Auswählen...">
-<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Auf Absolute Dateipfade zurücksetzen">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Auf absolute Pfade zurücksetzen">
 
 <!ENTITY zotero.preferences.dbMaintenance "Datenbankwartung">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Integrität der Datenbank überprüfen">

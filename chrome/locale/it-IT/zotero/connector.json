@@ -5,8 +5,17 @@
   "general_moreInfo": {
     "message": "Per maggiori informazioni…"
   },
+  "general_needHelp": {
+    "message": "Hai bisogno di aiuto?"
+  },
   "general_done": {
     "message": "Fatto"
+  },
+  "general_yes": {
+    "message": "Si"
+  },
+  "general_no": {
+    "message": "No"
   },
   "general_tryAgain": {
     "message": "Prova di nuovo"
@@ -32,8 +41,14 @@
   "progressWindow_error_translation": {
     "message": "Si è verificato un errore durante il salvataggio dell'elemento. Consulta $1 se desideri ricevere ulteriori informazioni."
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "Si è verificato un errore durante il salvataggio di questo elemento. $1 può limitare il numero di elementi che puoi salvare in una volta. Vedi $2 per ulteriori informazioni."
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Risoluzione dei problemi di conversione"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Limiti di accesso al sito"
   },
   "progressWindow_error_fallback": {
     "message": "Si è verificato un errore durante il salvataggio con $1. Nuovo tentativo di salvataggio con$2. "
@@ -49,6 +64,18 @@
   },
   "upgradeApp": {
     "message": "Aggiorna $1"
+  },
+  "firstRun_title": {
+    "message": "Hai installato il connettore $1"
+  },
+  "firstRun_text1": {
+    "message": "Il connettore $1 ti consente di <a href=\"$2\"> salvare gli elementi su $1</a> dal tuo browser in un solo click."
+  },
+  "firstRun_text2": {
+    "message": "Se non lo hai ancora fatto, <a href=\"$2\">scarica</a> l'applicazione standalone $1 per migliorare la tua esperienza."
+  },
+  "firstRun_acceptButton": {
+    "message": "Ho capito"
   },
   "error_connection_isAppRunning": {
     "message": "$1 è in esecuzione?"
@@ -91,6 +118,15 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "L'integrazione con $1 non è disponibile durante la modifica di un file .docx di Microsoft Word direttamente da Google Docs. Scegli File → Salva come Google Docs se desideri attivare questa funzionalità.<br/><br/>Qualora desiderassi trasferire un documento di Word contenente delle citazioni di $1 all'interno di Google Docs, ti invitiamo a consultare <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Come spostare documenti tra programmi di scrittura differenti</a>."
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "Le citazioni del documento sono in corso di modifica da un altro utente $1. Per favore, riprova più tardi."
+  },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1 blocca il tuo documento per impedire a più utenti di modificare le citazioni allo stesso tempo. La modifica simultanea delle citazioni nel documento può portare alla danneggiamento delle citazioni o del documento. Alcune circostanze imprevedibili, come i guasti di rete, possono portare al blocco permanente del tuo documento. Se credi che sia successo questo, puoi annullare il blocco. <br/><br/>Vuoi annullare il blocco del documento?"
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "L'account Google che hai selezionato non ha il permesso di modificare questo documento. Per favore riprova, e assicurati di scegliere l'account con accesso alla modifica."
   },
   "integration_googleDocs_orphanedCitations_buttonTooltip": {
     "message": "Mostra le citazioni orfane di collegamenti a $1"

@@ -324,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Loitonna">
 <!ENTITY zotero.pdfReader.zoomAuto "Säädä kokoa automaattisesti">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Koko sivun leveys">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Tuo huomautukset...">
-<!ENTITY zotero.pdfReader.transferToPDF "Tallenna huomautukset tiedostoon...">

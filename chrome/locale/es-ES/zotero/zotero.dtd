@@ -324,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Reducir zum">
 <!ENTITY zotero.pdfReader.zoomAuto "Redimensionar automáticamente">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zum a ancho de página">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Importar anotaciones...">
-<!ENTITY zotero.pdfReader.transferToPDF "Guardar anotaciones en archivo...">

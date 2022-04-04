@@ -324,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Oddalji">
 <!ENTITY zotero.pdfReader.zoomAuto "Samodejno spremeni velikost">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Približaj na širino strani">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Uvozi zaznamke ...">
-<!ENTITY zotero.pdfReader.transferToPDF "Shrani zaznamke v datoteko ...">

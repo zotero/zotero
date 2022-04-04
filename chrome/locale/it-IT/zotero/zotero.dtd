@@ -147,7 +147,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Imposta il colore">
 <!ENTITY zotero.tagColorChooser.removeColor "Elimina il colore">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
+<!ENTITY zotero.lookup.description "Inserisci DOI, ISBN, PMID, arXiv ID o ADS Bibcode per aggiungere alla biblioteca:">
 <!ENTITY zotero.lookup.button.search "Cerca">
 
 <!ENTITY zotero.createParent.title "Crea un elemento principale">
@@ -196,7 +196,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Mantieni l'ordinamento delle fonti">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
+<!ENTITY zotero.citation.suppressAuthor.label "Ometti l'autore">
 <!ENTITY zotero.citation.prefix.label "Prefisso:">
 <!ENTITY zotero.citation.suffix.label "Suffisso:">
 <!ENTITY zotero.citation.editorWarning.label "Attenzione: se modifichi una citazione direttamente nel testo non sarà più collegata ai cambiamenti successivi nel tuo database bibliografico o agli stili di citazione.">
@@ -307,22 +307,22 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Aggiungi una nota indipendente dalle annotazioni">
 <!ENTITY zotero.context.editInWindow "Modifica in una nuova finestra">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
-<!ENTITY zotero.pdfReader.lastPage "Last Page">
-<!ENTITY zotero.pdfReader.back "Back">
-<!ENTITY zotero.pdfReader.forward "Forward">
-<!ENTITY zotero.pdfReader.rotateClockwise "Rotate Clockwise">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotate Counterclockwise">
-<!ENTITY zotero.pdfReader.handTool "Hand Tool">
-<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
-<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
-<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
-<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
-<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
-<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
-<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">
+<!ENTITY zotero.pdfReader.firstPage "Prima pagina">
+<!ENTITY zotero.pdfReader.lastPage "Ultima pagina">
+<!ENTITY zotero.pdfReader.back "Indietro">
+<!ENTITY zotero.pdfReader.forward "Avanti">
+<!ENTITY zotero.pdfReader.rotateClockwise "Ruota in senso orario">
+<!ENTITY zotero.pdfReader.rotateCounterclockwise "Ruota in senso antiorario">
+<!ENTITY zotero.pdfReader.handTool "Strumento Mano">
+<!ENTITY zotero.pdfReader.verticalScrolling "Scorrimento verticale">
+<!ENTITY zotero.pdfReader.horizontalScrolling "Scorrimento orizzontale">
+<!ENTITY zotero.pdfReader.wrappedScrolling "Scorrimento a pagine affiancate">
+<!ENTITY zotero.pdfReader.noSpreads "Nessuno spread">
+<!ENTITY zotero.pdfReader.oddSpreads "Affianca pagina dispari e pagina pari">
+<!ENTITY zotero.pdfReader.evenSpreads "Affianca pagina pari e pagina dispari">
+<!ENTITY zotero.pdfReader.zoomIn "Zoom avanti">
+<!ENTITY zotero.pdfReader.zoomOut "Zoom indietro">
+<!ENTITY zotero.pdfReader.zoomAuto "Ridimensiona automaticamente">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Adatta alla larghezza della pagina">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
+<!ENTITY zotero.pdfReader.transferFromPDF "Importa le annotazioni...">
