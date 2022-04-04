@@ -225,7 +225,7 @@
 									label="&zotero.toolbar.advancedSearch;"
 									command="cmd_zotero_advancedSearch"
 									key="key_advancedSearch"/>
-							<menuseparator class="menu-type-library" hidden="true" id="textfieldDirection-separator"/>
+							<menuseparator hidden="true" id="textfieldDirection-separator"/>
 							<menuitem id="textfieldDirection-swap"
 									command="cmd_switchTextDirection"
 									key="key_switchTextDirection"
