@@ -1331,6 +1331,11 @@ var Columns = class {
 
 		let columns = this._columns = [];
 		for (let column of virtualizedTable.props.columns) {
+			// Fixed width columns can sometimes somehow obtain a width property
+			// this fixes it for users that may have run into the bug
+			if (column.fixedWidth) {
+				delete columnsSettings[column.dataKey].width;;
+			}
 			column = Object.assign({}, column, columnsSettings[column.dataKey]);
 			column.className = cx(column.className, column.dataKey, column.dataKey + this._cssSuffix,
 				{ 'fixed-width': column.fixedWidth });
@@ -1448,9 +1453,9 @@ var Columns = class {
 			}
 			const column = this._columns.find(column => column.dataKey == dataKey);
 			const styleIndex = this._columnStyleMap[dataKey];
-			if (storePrefs && (!column.fixedWidth || (column.zoteroPersist && !column.zoteroPersist.has('width')))) {
-				prefs[dataKey] = prefs[dataKey] || {};
-				prefs[dataKey].width = width;
+			if (storePrefs && !column.fixedWidth) {
+				column.width = width;
+				prefs[dataKey] = this._getColumnPrefsToPersist(column);
 			}
 			if (column.fixedWidth && column.width) {
 				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('flex', `0 0`, `important`);
