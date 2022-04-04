@@ -194,6 +194,12 @@ const TabBar = forwardRef(function (props, ref) {
 		window.Zotero_Tooltip.stop();
 	}
 
+	function handleWheel(event) {
+		window.requestAnimationFrame(() => {
+			tabsRef.current.scrollLeft += event.deltaX;
+		});
+	}
+
 	function renderTab({ id, title, selected }, index) {
 		return (
 			<div
@@ -219,13 +225,15 @@ const TabBar = forwardRef(function (props, ref) {
 	}
 
 	return (
-		<div
-			ref={tabsRef}
-			className="tabs"
-			onDragOver={handleTabBarDragOver}
-			onMouseOut={handleTabBarMouseOut}
-		>
-			{tabs.map((tab, index) => renderTab(tab, index))}
+		<div className="tab-bar-inner-container" onWheel={handleWheel}>
+			<div
+				ref={tabsRef}
+				className="tabs"
+				onDragOver={handleTabBarDragOver}
+				onMouseOut={handleTabBarMouseOut}
+			>
+				{tabs.map((tab, index) => renderTab(tab, index))}
+			</div>
 		</div>
 	);
 });

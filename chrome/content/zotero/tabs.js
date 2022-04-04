@@ -312,6 +312,7 @@ var Zotero_Tabs = new function () {
 			}
 			tab.lastFocusedElement = null;
 		}
+		document.querySelector(`.tab[data-id="${tab.id}"]`).scrollIntoView({ behavior: 'smooth' });
 	};
 
 	/**

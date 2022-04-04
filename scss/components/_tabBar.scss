@@ -2,8 +2,16 @@
 	min-height: 30px;
 }
 
+.tab-bar-inner-container {
+	position: relative;
+}
+
 .tabs {
 	display: flex;
+	position: absolute;
+	overflow: hidden;
+	left: 0;
+	right: 0;
 
 	&:before {
 		content: "";
@@ -36,6 +44,7 @@
 	color: #000;
 	text-align: center;
 	padding: 0 30px;
+	min-width: 100px;
 	
 	&:not(:last-child) {
 		border-inline-end: $tab-border;
