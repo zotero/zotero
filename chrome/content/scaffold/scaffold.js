@@ -78,10 +78,10 @@ var Scaffold = new function () {
 		if (e.target !== document) return;
 		_document = document;
 
-		if (Zotero.isWin) {
-			// Hack to fix Windows toolbar
+		if (!Zotero.isMac) {
+			// Hack to fix Windows/Linux toolbar
 			let toolbar = document.getElementById('zotero-toolbar');
-			toolbar.className = '';
+			toolbar.className = 'toolbar-scaffold-small';
 		}
 		
 		_browser = document.getElementById('browser');
