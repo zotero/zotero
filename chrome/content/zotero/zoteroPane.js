@@ -5460,7 +5460,7 @@ var ZoteroPane = new function()
 	};
 
 	this.updateItemTreeColumnWidths = function() {
-		if (!ZoteroPane.itemsView) return;
+		if (!ZoteroPane.itemsView || !ZoteroPane.itemsView.tree) return;
 		ZoteroPane.itemsView.tree.updateColumnWidths();
 	};
 
