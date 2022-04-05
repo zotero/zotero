@@ -1333,7 +1333,7 @@ var Columns = class {
 		for (let column of virtualizedTable.props.columns) {
 			// Fixed width columns can sometimes somehow obtain a width property
 			// this fixes it for users that may have run into the bug
-			if (column.fixedWidth) {
+			if (column.fixedWidth && typeof columnsSettings[column.dataKey] == "object") {
 				delete columnsSettings[column.dataKey].width;;
 			}
 			column = Object.assign({}, column, columnsSettings[column.dataKey]);
