@@ -42,6 +42,7 @@
 		title="&zotero.preferences.title;"
 		onload="Zotero_Preferences.init()"
 		onunload="Zotero_Preferences.onUnload()"
+		ondialogaccept="return Zotero_Preferences.onDialogAccept(event)"
 		ondialoghelp="Zotero_Preferences.openHelpLink()"
 		windowtype="zotero:pref"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
