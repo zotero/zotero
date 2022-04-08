@@ -371,11 +371,14 @@ Zotero.Integration = new function() {
 				Zotero.launchURL(supportURL);
 			}
 			
-			// If the driver panicked we cannot reuse it
-			if (e instanceof Zotero.CiteprocRs.CiteprocRsDriverError) {
-				session.style.free(true);
-				delete Zotero.Integration.sessions[session.id];
-			}
+			// CiteprocRsDriverError available only if citeproc-rs is enabled
+			try {
+				// If the driver panicked we cannot reuse it
+				if (e instanceof Zotero.CiteprocRs.CiteprocRsDriverError) {
+					session.style.free(true);
+					delete Zotero.Integration.sessions[session.id];
+				}
+			} catch (e) {}
 		}
 		finally {
 			Zotero.logError(e);
