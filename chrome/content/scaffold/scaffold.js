@@ -57,7 +57,6 @@ var Scaffold = new function () {
 	var _translatorsLoadedPromise;
 	var _translatorProvider = null;
 	var _lastModifiedTime = 0;
-	var _lastHadFocus = true;
 	
 	var _editors = {};
 
@@ -147,22 +146,8 @@ var Scaffold = new function () {
 		this.initCodeEditor();
 		this.initTestsEditor();
 
-		// Listen for Scaffold coming to the foreground and reload translators.
-		// We can't just set a focus listener on the <window> because it'll fire
-		// when focus switches between the root window and any of the iframes.
-		setInterval(() => {
-			let hasFocus = document.hasFocus();
-			if (_lastHadFocus == hasFocus) {
-				return;
-			}
-
-			if (hasFocus) {
-				this.reloadTranslators();
-			}
-
-			_lastHadFocus = hasFocus;
-		}, 1000);
-
+		// Listen for Scaffold coming to the foreground and reload translators
+		window.addEventListener('activate', () => this.reloadTranslators());
 
 		Scaffold_Translators.setLoadListener({
 			onLoadBegin: () => {
