@@ -189,6 +189,19 @@ Zotero.Notes = new function() {
 					Zotero.logError(e);
 				}
 			}
+
+			nodes = doc.querySelectorAll('span[style]');
+			for (let node of nodes) {
+				// Browser converts #RRGGBBAA hex color to rgba function, and we convert it to rgb function,
+				// because word processors don't understand colors with alpha channel
+				if (node.style.backgroundColor && node.style.backgroundColor.startsWith('rgba')) {
+					node.style.backgroundColor = node.style.backgroundColor
+						.replace('rgba', 'rgb')
+						.split(',')
+						.slice(0, 3)
+						.join(',') + ')';
+				}
+			}
 		}
 		return doc.body.innerHTML;
 	};
