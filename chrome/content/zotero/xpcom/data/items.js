@@ -1060,7 +1060,7 @@ Zotero.Items = function() {
 				}
 
 				if (!masterAttachmentID || mergedMasterAttachments.has(masterAttachmentID)) {
-					Zotero.debug(`No unmerged match for attachment ${otherAttachment.id} in master item - moving`);
+					Zotero.debug(`No unmerged match for attachment ${otherAttachment.key} in master item - moving`);
 					otherAttachment.parentItemID = item.id;
 					await otherAttachment.save();
 					continue;
@@ -1070,14 +1070,22 @@ Zotero.Items = function() {
 				let masterAttachment = await this.getAsync(masterAttachmentID);
 
 				if (masterAttachment.attachmentContentType !== otherAttachment.attachmentContentType) {
-					Zotero.debug(`Master attachment ${masterAttachmentID} matches ${otherAttachment.id}, `
+					Zotero.debug(`Master attachment ${masterAttachment.key} matches ${otherAttachment.key}, `
 						+ 'but content types differ - moving');
 					otherAttachment.parentItemID = item.id;
 					await otherAttachment.save();
 					continue;
 				}
 
-				Zotero.debug(`Master attachment ${masterAttachmentID} matches ${otherAttachment.id} - merging`);
+				if (masterAttachment.attachmentLinkMode !== otherAttachment.attachmentLinkMode) {
+					Zotero.debug(`Master attachment ${masterAttachment.key} matches ${otherAttachment.key}, `
+						+ 'but link modes differ - moving');
+					otherAttachment.parentItemID = item.id;
+					await otherAttachment.save();
+					continue;
+				}
+
+				Zotero.debug(`Master attachment ${masterAttachment.key} matches ${otherAttachment.key} - merging`);
 				await this.moveChildItems(otherAttachment, masterAttachment, true);
 				await this._moveEmbeddedNote(otherAttachment, masterAttachment);
 				await this._moveRelations(otherAttachment, masterAttachment);
@@ -1125,7 +1133,7 @@ Zotero.Items = function() {
 				);
 
 				if (!masterAttachment) {
-					Zotero.debug(`No match for web attachment ${otherAttachment.id} in master item - moving`);
+					Zotero.debug(`No match for web attachment ${otherAttachment.key} in master item - moving`);
 					otherAttachment.parentItemID = item.id;
 					await otherAttachment.save();
 					continue;
