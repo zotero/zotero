@@ -840,7 +840,29 @@ describe("Zotero.Items", function () {
 			assert.equal(attachment2.parentItemID, item1.id);
 		});
 
-		it("should not merge attachments with different link modes", async function () {
+		it("should merge two stored-file attachments with different link modes", async function () {
+			let file = getTestDataDirectory();
+			file.append('test.pdf');
+
+			let item1 = await createDataObject('item', { setTitle: true });
+			let attachment1 = await importPDFAttachment(item1);
+			attachment1.attachmentLinkMode = Zotero.Attachments.LINK_MODE_IMPORTED_URL;
+			await attachment1.saveTx();
+
+			let item2 = item1.clone();
+			await item2.saveTx();
+			let attachment2 = await importPDFAttachment(item2);
+
+			await Zotero.Items.merge(item1, [item2]);
+
+			assert.isFalse(item1.deleted);
+			assert.isFalse(attachment1.deleted);
+			assert.equal(item1.numAttachments(true), 1);
+			assert.isTrue(item2.deleted);
+			assert.isTrue(attachment2.deleted);
+		});
+
+		it("should not merge attachments with different link mode types", async function () {
 			let file = getTestDataDirectory();
 			file.append('test.pdf');
 

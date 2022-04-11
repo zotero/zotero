@@ -1077,7 +1077,8 @@ Zotero.Items = function() {
 					continue;
 				}
 
-				if (masterAttachment.attachmentLinkMode !== otherAttachment.attachmentLinkMode) {
+				if (!((masterAttachment.isImportedAttachment() && otherAttachment.isImportedAttachment())
+						|| (masterAttachment.isLinkedFileAttachment() && otherAttachment.isLinkedFileAttachment()))) {
 					Zotero.debug(`Master attachment ${masterAttachment.key} matches ${otherAttachment.key}, `
 						+ 'but link modes differ - moving');
 					otherAttachment.parentItemID = item.id;
