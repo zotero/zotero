@@ -45,7 +45,7 @@ var Zotero_LocateMenu = new function() {
 		var selectedItems = _getSelectedItems();
 		
 		if(selectedItems.length) {
-			_addViewOptions(locateMenu, selectedItems, true, true);
+			_addViewOptions(locateMenu, selectedItems, true, true, true);
 			
 			var availableEngines = _getAvailableLocateEngines(selectedItems);
 			// add engines that are available for selected items
@@ -143,14 +143,17 @@ var Zotero_LocateMenu = new function() {
 	 * @param {Zotero.Item[]} selectedItems The items to create view options based upon
 	 * @param {Boolean} showIcons Whether menu items should have associated icons
 	 * @param {Boolean} addExtraOptions Whether to add options that start with "_" below the separator
+	 * @param {Boolean} isToolbarMenu Whether the menu being populated is displayed in the toolbar
+	 * 		(and not the item tree context menu)
 	 */
-	var _addViewOptions = Zotero.Promise.coroutine(function* (locateMenu, selectedItems, showIcons, addExtraOptions) {
+	var _addViewOptions = Zotero.Promise.coroutine(function* (locateMenu, selectedItems, showIcons, addExtraOptions, isToolbarMenu) {
 		var optionsToShow = {};
 		
 		// check which view options are available
 		for (let item of selectedItems) {
 			for(var viewOption in ViewOptions) {
-				if(!optionsToShow[viewOption]) {
+				if (!optionsToShow[viewOption]
+						&& (!isToolbarMenu || !ViewOptions[viewOption].hideInToolbar)) {
 					optionsToShow[viewOption] = yield ViewOptions[viewOption].canHandleItem(item);
 				}
 			}
@@ -336,7 +339,7 @@ var Zotero_LocateMenu = new function() {
 	var ViewOptions = {};
 	
 	/**
-	 * "View PDF" option
+	 * "Open PDF" option
 	 *
 	 * Should appear only when the item is a PDF, or a linked or attached file or web attachment is
 	 * a PDF
@@ -344,9 +347,12 @@ var Zotero_LocateMenu = new function() {
 	function ViewPDF(inNewWindow) {
 		this.icon = "chrome://zotero/skin/treeitem-attachment-pdf.png";
 		this._mimeTypes = ["application/pdf"];
+
+		// Don't show "Open PDF in New Window" in toolbar Locate menu
+		this.hideInToolbar = inNewWindow;
 		
 		this.canHandleItem = async function (item) {
-			// Don't show "View PDF in New Window" when using an external PDF viewer
+			// Don't show "Open PDF in New Window" when using an external PDF viewer
 			if (inNewWindow && Zotero.Prefs.get("fileHandler.pdf")) {
 				return false;
 			}
@@ -449,7 +455,7 @@ var Zotero_LocateMenu = new function() {
 	 * "View File" option
 	 *
 	 * Should appear only when an item or a linked or attached file or web attachment does not
-	 * satisfy the conditions for "View PDF" or "View Snapshot"
+	 * satisfy the conditions for "Open PDF" or "View Snapshot"
 	 */
 	ViewOptions.file = new function() {
 		this.icon = "chrome://zotero/skin/treeitem-attachment-file.png";
