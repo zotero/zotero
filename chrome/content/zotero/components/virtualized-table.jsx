@@ -34,7 +34,7 @@ const { injectIntl } = require('react-intl');
 const { IconDownChevron, getDOMElement } = require('components/icons');
 
 const TYPING_TIMEOUT = 1000;
-const DEFAULT_ROW_HEIGHT = 20; // px
+const MINIMUM_ROW_HEIGHT = 20; // px
 const RESIZER_WIDTH = 5; // px
 
 const noop = () => 0;
@@ -283,13 +283,9 @@ class VirtualizedTable extends React.Component {
 		
 		this._columns = new Columns(this);
 		
-		this._rowHeight = props.rowHeight || DEFAULT_ROW_HEIGHT;
-		if (!props.disableFontSizeScaling) {
-			this._rowHeight *= Zotero.Prefs.get('fontSize');
-		}
-		
+		this._renderedTextHeight = this._getRenderedTextHeight();
+		this._rowHeight = this._getRowHeight();
 		this.selection = new TreeSelection(this);
-		
 
 		// Due to how the Draggable element works dragging (for column dragging and for resizing)
 		// is not handled via React events but via native ones attached on `document`
@@ -312,6 +308,7 @@ class VirtualizedTable extends React.Component {
 	static defaultProps = {
 		label: '',
 		role: 'grid',
+		linesPerRow: 1,
 
 		showHeader: false,
 		// Array of column objects like the ones in itemTreeColumns.js
@@ -358,8 +355,9 @@ class VirtualizedTable extends React.Component {
 		getRowCount: PropTypes.func.isRequired,
 		
 		renderItem: PropTypes.func,
-		rowHeight: PropTypes.number,
-		// Use rowHeight or default row height without adjusting for current UI font size
+		// Row height specified as lines of text per row. Defaults to 1
+		linesPerRow: PropTypes.number,
+		// Do not adjust for Zotero-defined font scaling
 		disableFontSizeScaling: PropTypes.bool,
 		// An array of two elements for alternating row colors
 		alternatingRowColors: PropTypes.array,
@@ -1065,6 +1063,7 @@ class VirtualizedTable extends React.Component {
 			node.addEventListener('dblclick', e => this._activateNode(e, [index]), { passive: true });
 		}
 		node.style.height = this._rowHeight + 'px';
+		node.style.lineHeight = this._rowHeight + 'px';
 		node.id = this.props.id + "-row-" + index;
 		if (!node.hasAttribute('role')) {
 			node.setAttribute('role', 'row');
@@ -1224,13 +1223,33 @@ class VirtualizedTable extends React.Component {
 				+ "disabled. Change the prop instead.");
 			return;
 		}
-		this._rowHeight = this.props.rowHeight || DEFAULT_ROW_HEIGHT;
-		this._rowHeight *= Zotero.Prefs.get('fontSize');
+		this._rowHeight = this._getRowHeight();
 		
 		if (!this._jsWindow) return;
 		this._jsWindow.update(this._getWindowedListOptions());
 		this._setAlternatingRows();
 		this._jsWindow.invalidate();
+	}
+	
+	_getRowHeight() {
+		let rowHeight = this.props.linesPerRow * this._renderedTextHeight;
+		if (!this.props.disableFontSizeScaling) {
+			rowHeight *= Zotero.Prefs.get('fontSize');
+		}
+		// padding
+		rowHeight *= 1.4;
+		rowHeight = Math.round(Math.max(MINIMUM_ROW_HEIGHT, rowHeight));
+		return rowHeight;
+	}
+
+	_getRenderedTextHeight() {
+		let div = document.createElementNS("http://www.w3.org/1999/xhtml", 'div');
+		div.style.visibility = "hidden";
+		div.textContent = "Zotero";
+		document.documentElement.appendChild(div);
+		let height = window.getComputedStyle(div).height;
+		document.documentElement.removeChild(div);
+		return parseFloat(height.split('px')[0]);
 	}
 	
 	_debouncedRerender = Zotero.Utilities.debounce(this.rerender, 200);
