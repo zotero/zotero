@@ -548,8 +548,8 @@ var ZoteroContextPane = new function () {
 				else {
 					let collation = Zotero.getLocaleCollation();
 					notes.sort((a, b) => {
-						let aTitle = Zotero.Items.getSortTitle(a.getField('title'));
-						let bTitle = Zotero.Items.getSortTitle(b.getField('title'));
+						let aTitle = Zotero.Items.getSortTitle(a.getNoteTitle());
+						let bTitle = Zotero.Items.getSortTitle(b.getNoteTitle());
 						return collation.compareString(1, aTitle, bTitle);
 					});
 				}
