@@ -538,11 +538,21 @@ var ZoteroContextPane = new function () {
 				}
 				notes = await s.search();
 				notes = Zotero.Items.get(notes);
-				notes.sort((a, b) => {
-					a = a.dateModified;
-					b = b.dateModified;
-					return (a > b ? -1 : (a < b ? 1 : 0));
-				});
+				if (Zotero.Prefs.get('sortNotesChronologically')) {
+					notes.sort((a, b) => {
+						a = a.dateModified;
+						b = b.dateModified;
+						return (a > b ? -1 : (a < b ? 1 : 0));
+					});
+				}
+				else {
+					let collation = Zotero.getLocaleCollation();
+					notes.sort((a, b) => {
+						let aTitle = Zotero.Items.getSortTitle(a.getField('title'));
+						let bTitle = Zotero.Items.getSortTitle(b.getField('title'));
+						return collation.compareString(1, aTitle, bTitle);
+					});
+				}
 				
 				let cachedNotesIndex = new Map();
 				for (let cachedNote of context.cachedNotes) {
