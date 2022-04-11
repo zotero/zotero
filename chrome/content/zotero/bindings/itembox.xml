@@ -1821,6 +1821,12 @@
 				<parameter name="textbox"/>
 				<body><![CDATA[
 				return (async function () {
+					// Handle cases where creator autocomplete doesn't trigger
+					// the textentered and change events handled in showEditor
+					if (textbox.getAttribute('fieldname').startsWith('creator-')) {
+						this.handleCreatorAutoCompleteSelect(textbox);
+					}
+
 					Zotero.debug(`Hiding editor for ${textbox.getAttribute('fieldname')}`);
 					
 					var label = Zotero.getAncestorByTagName(textbox, 'row').querySelector('label');
