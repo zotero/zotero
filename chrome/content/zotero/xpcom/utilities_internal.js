@@ -2230,11 +2230,20 @@ Zotero.Utilities.Internal = {
 					if (!level.executed) {
 						level.condition = level.parentCondition && (
 							args[2]
+								// If string variable is equal to the provided string
 								? vars[args[0]].toLowerCase() == args[2].toLowerCase()
 								: (
 									Array.isArray(vars[args[0]])
+										// Is array non empty
 										? !!vars[args[0]].length
-										: !!vars[args[0]]
+										: (
+											typeof vars[args[0]] === 'function'
+												// If function returns a value (only string is supported)
+												// Note: To keep things simple, this doesn't support function attributes
+												? !!vars[args[0]]()
+												// If string variable exists
+												: !!vars[args[0]]
+										)
 								)
 						);
 						level.executed = level.condition;
