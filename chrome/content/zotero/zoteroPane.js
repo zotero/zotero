@@ -1294,7 +1294,7 @@ var ZoteroPane = new function()
 				Zotero.debug("ZoteroPane.onCollectionSelected: Collection selection hasn't changed");
 
 				// Update enabled actions, in case editability has changed
-				this._updateActionsEnabledForRow(collectionTreeRow);
+				this._updateEnabledActionsForRow(collectionTreeRow);
 				return;
 			}
 			
@@ -1314,7 +1314,7 @@ var ZoteroPane = new function()
 				collectionTreeRow.setTags(ZoteroPane.tagSelector.getTagSelection());
 			}
 			
-			this._updateActionsEnabledForRow(collectionTreeRow);
+			this._updateEnabledActionsForRow(collectionTreeRow);
 
 			// If item data not yet loaded for library, load it now.
 			// Other data types are loaded at startup
@@ -1337,7 +1337,7 @@ var ZoteroPane = new function()
 	/**
 	 * Enable or disable toolbar icons, menu options, and commands as necessary
 	 */
-	this._updateActionsEnabledForRow = function (collectionTreeRow) {
+	this._updateEnabledActionsForRow = function (collectionTreeRow) {
 		const disableIfNoEdit = [
 			"cmd_zotero_newCollection",
 			"cmd_zotero_newSavedSearch",
