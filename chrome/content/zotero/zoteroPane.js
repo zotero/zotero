@@ -4261,7 +4261,10 @@ var ZoteroPane = new function()
 					await Zotero.Reader.open(
 						itemID,
 						extraData && extraData.location,
-						{ openInWindow: event && event.shiftKey }
+						{
+							openInWindow: (event && event.shiftKey)
+								|| (extraData && extraData.forceOpenPDFInWindow)
+						}
 					);
 					return;
 				}
