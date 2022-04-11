@@ -124,7 +124,7 @@ var Zotero_LocateMenu = new function() {
 	
 	function _addViewOption(selectedItems, optionName, optionObject, showIcons) {
 		var menuitem = _createMenuItem(Zotero.getString("locate."+optionName+".label"),
-			null, Zotero.getString("locate."+optionName+".tooltip"));
+			null, null);
 		if(showIcons) {
 			menuitem.setAttribute("class", "menuitem-iconic");
 			menuitem.style.listStyleImage = "url('"+optionObject.icon+"')";
