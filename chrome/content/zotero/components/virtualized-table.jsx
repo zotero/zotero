@@ -372,6 +372,7 @@ class VirtualizedTable extends React.Component {
 		onColumnSort: PropTypes.func,
 		getColumnPrefs: PropTypes.func,
 		storeColumnPrefs: PropTypes.func,
+		getDefaultColumnOrder: PropTypes.func,
 		// Makes columns unmovable, unsortable, etc
 		staticColumns: PropTypes.bool,
 		// Used for initial column widths calculation
@@ -1510,10 +1511,19 @@ var Columns = class {
 	
 	restoreDefaultOrder = () => {
 		let prefs = this._getPrefs();
-		for (const column of this._columns) {
-			column.ordinal = this._virtualizedTable.props.columns.findIndex(
-				col => col.dataKey == column.dataKey);
-			prefs[column.dataKey].ordinal = column.ordinal;
+		if (this._virtualizedTable.props.getDefaultColumnOrder) {
+			let defaultOrder = this._virtualizedTable.props.getDefaultColumnOrder();
+			for (const column of this._columns) {
+				column.ordinal = defaultOrder[column.dataKey];
+				prefs[column.dataKey].ordinal = defaultOrder[column.dataKey];
+			}
+		}
+		else {
+			for (const column of this._columns) {
+				column.ordinal = this._virtualizedTable.props.columns.findIndex(
+					col => col.dataKey == column.dataKey);
+				prefs[column.dataKey].ordinal = column.ordinal;
+			}
 		}
 		this._columns.sort((a, b) => a.ordinal - b.ordinal);
 		this._storePrefs(prefs);

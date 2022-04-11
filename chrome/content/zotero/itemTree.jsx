@@ -955,6 +955,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					onColumnSort: this.collectionTreeRow.isFeed() ? null : this._handleColumnSort,
 					getColumnPrefs: this._getColumnPrefs,
 					storeColumnPrefs: this._storeColumnPrefs,
+					getDefaultColumnOrder: this._getDefaultColumnOrder,
 					containerWidth: this.domEl.clientWidth,
 
 					multiSelect: true,
@@ -3105,6 +3106,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		
 		this._writeColumnPrefsToFile();
+	}
+	
+	_getDefaultColumnOrder = () => {
+		let columnOrder = {};
+		this.getColumns().forEach((column, index) => columnOrder[column.dataKey] = index);
+		return columnOrder;
 	}
 	
 	_loadColumnPrefsFromFile = async () => {
