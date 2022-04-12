@@ -49,7 +49,7 @@
 
 
 <!ENTITY viewMenu.label "Ansicht">
-<!ENTITY viewMenu.accesskey "V">
+<!ENTITY viewMenu.accesskey "A">
 <!ENTITY layout.label "Layout">
 <!ENTITY standardView.label "Standard Ansicht">
 <!ENTITY stackedView.label "Gestapelte Ansicht">

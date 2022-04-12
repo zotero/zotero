@@ -71,6 +71,9 @@
   "firstRun_text1": {
     "message": "Der $1 Connector ermöglicht Ihnen das <a href=\"$2\">Speichern von Einträgen in $1</a> aus Ihrem Browser mit nur einem Klick."
   },
+  "firstRun_text2": {
+    "message": "Falls Sie es noch nicht getan haben, <a href=\"$2\">laden Sie</a> für das optimale Benutzererlebnis die eigenständige $1-Anwendung herunter."
+  },
   "firstRun_acceptButton": {
     "message": "Alles klar"
   },
@@ -102,13 +105,13 @@
     "message": "Die $1 war nicht in der Lage mit der $2 Desktop Applikation zu kommunizieren. $2 muss geöffnet sein zum web-basierten Zitieren."
   },
   "integration_googleDocs_unlinkBeforeSaving_warning": {
-    "message": "Dieses Dokument enthält aktive Zitate aus Zotero, die als zotero.org-Links in einer heruntergeladenen Kopie erscheinen."
+    "message": "Dieses Dokument enthält aktive Zitationen aus Zotero, die in einer heruntergeladenen Kopie als zotero.org-Links erscheinen."
   },
   "integration_googleDocs_unlinkBeforeSaving_instructions": {
     "message": "Um eine zum Teilen geeignete Version zu erzeugen, wählen Sie im Menü Datei den Befehl <b>Kopie erstellen…</b>, wählen Sie <b>Unlink Citations</b> aus dem Menü Zotero und laden Sie dann die unverknüpfte Version herunter. Bewahren Sie dieses Originaldokument mit den Verknüpfungen auf, falls Sie weitere Änderungen vornehmen müssen."
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
-    "message": "Verlinkte Version trotzdem herunterladen"
+    "message": "Verknüpfte Version trotzdem herunterladen"
   },
   "integration_googleDocs_updating": {
     "message": "$1 aktualisiert Ihr Dokument."
