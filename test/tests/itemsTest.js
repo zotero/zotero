@@ -1192,13 +1192,14 @@ describe("Zotero.Items", function () {
 			}
 		});
 
-		it("should strip any punctuation at the beginning of the string", function () {
+		it("should strip any punctuation at the beginning of the string besides the @ sign", function () {
 			let tests = [
 				['_title', 'title'],
 				['-title', 'title'],
 				['-- longer title', 'longer title'],
 				['-_ longer title with different second character', '_ longer title with different second character'],
-				['"Quoted title', 'Quoted title']
+				['"Quoted title', 'Quoted title'],
+				['@zotero on Twitter', '@zotero on Twitter']
 			];
 
 			for (let [input, expected] of tests) {
