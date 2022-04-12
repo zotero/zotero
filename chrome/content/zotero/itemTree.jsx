@@ -1354,7 +1354,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				}
 
 				if (sortField == 'callNumber') {
-					let deweyRe = /^(\d{3})(?:\.(\d{1,4}))?(?:\/([a-zA-Z]{3}))?$/;
+					let deweyRe = /^(\d{3})(?:\.(\d+))?(?:\/([a-zA-Z]{3}))?$/;
 					let splitA = fieldA.toLowerCase().replace(/\s/g, '').match(deweyRe);
 					let splitB = fieldB.toLowerCase().replace(/\s/g, '').match(deweyRe);
 					if (splitA && splitB) {
