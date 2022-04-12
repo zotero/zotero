@@ -1197,20 +1197,8 @@ describe("Zotero.Items", function () {
 				['_title', 'title'],
 				['-title', 'title'],
 				['-- longer title', 'longer title'],
+				['-_ longer title with different second character', '_ longer title with different second character'],
 				['"Quoted title', 'Quoted title']
-			];
-
-			for (let [input, expected] of tests) {
-				assert.equal(Zotero.Items.getSortTitle(input), expected);
-			}
-		});
-
-		it("should strip quotes", function () {
-			let tests = [
-				['A "title"', 'A title'],
-				['A “title”', 'A title'],
-				[' xyz ”””', 'xyz'],
-				['‘Punctuation’', 'Punctuation']
 			];
 
 			for (let [input, expected] of tests) {
@@ -1231,15 +1219,39 @@ describe("Zotero.Items", function () {
 			}
 		});
 
-		it("should not strip any punctuation before a digit", function () {
+		it("should strip opening punctuation after string-initial punctuation", function () {
 			let tests = [
-				['1.5', '1.5'],
-				['abc .5', 'abc .5'],
-				['abc 5.', 'abc 5']
+				['.[Test]', 'Test]'],
+				['"❮Word❯"', 'Word❯"'],
+				['"@": The Musical', '@": The Musical'],
 			];
 
 			for (let [input, expected] of tests) {
 				assert.equal(Zotero.Items.getSortTitle(input), expected);
+			}
+		});
+
+		it("should sort titles with special characters correctly", function () {
+			let tests = [
+				[
+					['A*B*@!@C*D 1', 'ABCD 2', 'A*B*@!@C*D 3', 'ABCD 4'],
+					['A*B*@!@C*D 1', 'A*B*@!@C*D 3', 'ABCD 2', 'ABCD 4']
+				],
+				[
+					['Why? Volume 1', 'Why! Volume 1', 'Why! Volume 2', 'Why? Volume 2'],
+					['Why! Volume 1', 'Why! Volume 2', 'Why? Volume 1', 'Why? Volume 2']
+				],
+				[
+					['Sign and symbol', '"@" Sign. Its accidental history.', 'Sign language'],
+					['"@" Sign. Its accidental history.', 'Sign and symbol', 'Sign language']
+				],
+			];
+
+			let st = Zotero.Items.getSortTitle;
+			let collation = Zotero.getLocaleCollation();
+			for (let [input, expected] of tests) {
+				input.sort((a, b) => collation.compareString(1, st(a), st(b)));
+				assert.deepEqual(input, expected);
 			}
 		});
 	});
