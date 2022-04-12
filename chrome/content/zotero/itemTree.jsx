@@ -1352,6 +1352,28 @@ var ItemTree = class ItemTree extends LibraryTree {
 				if (sortField == 'hasAttachment') {
 					return fieldB - fieldA;
 				}
+
+				if (sortField == 'callNumber') {
+					let deweyRe = /^(\d{3})(?:\.(\d{1,4}))?(?:\/([a-zA-Z]{3}))?$/;
+					let splitA = fieldA.toLowerCase().replace(/\s/g, '').match(deweyRe);
+					let splitB = fieldB.toLowerCase().replace(/\s/g, '').match(deweyRe);
+					if (splitA && splitB) {
+						// Looks like Dewey Decimal, so we'll compare by parts
+						let i;
+						for (i = 1; i < splitA.length && i < splitB.length; i++) {
+							if (splitA[i] < splitB[i]) {
+								return -1;
+							}
+							else if (splitA[i] > splitB[i]) {
+								return 1;
+							}
+						}
+						return (i < splitA.length) ? 1 : (i < splitB.length) ? -1 : 0;
+					}
+					else {
+						return (fieldA > fieldB) ? 1 : (fieldA < fieldB) ? -1 : 0;
+					}
+				}
 				
 				return collation.compareString(1, fieldA, fieldB);
 			}
