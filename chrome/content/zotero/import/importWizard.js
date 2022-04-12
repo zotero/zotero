@@ -264,9 +264,15 @@ var Zotero_Import_Wizard = {
 				this._onDone(Zotero.getString('general.error'), elem);
 			}
 			else {
+				let translatorLabel = this._translation?.translator
+					&& this._translation.translator[0]
+					&& this._translation.translator[0].label;
+				let message = translatorLabel
+					? Zotero.getString('fileInterface.importError.translator', translatorLabel)
+					: Zotero.getString('fileInterface.importError');
 				this._onDone(
 					Zotero.getString('general.error'),
-					Zotero.getString('fileInterface.importError'),
+					message,
 					true
 				);
 			}
