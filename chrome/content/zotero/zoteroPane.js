@@ -5175,14 +5175,18 @@ var ZoteroPane = new function()
 			var errFunc = Zotero.startupErrorHandler;
 		}
 		
-		var stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
-			.getService(Components.interfaces.nsIStringBundleService);
+		var stringBundleService = Services.strings;
 		var src = 'chrome://zotero/locale/zotero.properties';
 		var stringBundle = stringBundleService.createBundle(src);
 		
 		var title = stringBundle.GetStringFromName('general.error');
 		if (!errMsg) {
-			var errMsg = stringBundle.GetStringFromName('startupError');
+			var appName = Zotero && Zotero.appName
+				? Zotero.appName
+				: stringBundleService
+					.createBundle('chrome://branding/locale/brand.properties')
+					.GetStringFromName('brandShortName');
+			var errMsg = stringBundle.formatStringFromName('startupError', [appName], 1);
 		}
 		
 		if (errFunc) {
