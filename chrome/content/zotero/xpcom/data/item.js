@@ -5340,10 +5340,6 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 	
 	var json = this._postToJSON(env);
 	
-	if (this.isAnnotation()) {
-		delete json.relations;
-	}
-	
 	// TODO: Remove once we stop clearing props from the cached JSON in patch mode
 	if (options.skipStorageProperties) {
 		delete json.md5;

@@ -2097,9 +2097,35 @@ describe("Zotero.Item", function () {
 						assert.propertyVal(json, name, item[name]);
 					}
 					assert.deepEqual(json.annotationPosition, item.annotationPosition);
+					assert.doesNotHaveAnyKeys(json.relations);
 					assert.notProperty(json, 'collections');
-					assert.notProperty(json, 'relations');
 					assert.notProperty(json, 'annotationIsExternal');
+				});
+				
+				it("should include Mendeley annotation relation", async function () {
+					var item = createUnsavedDataObject(
+						'item', { itemType: 'annotation', parentKey: attachment.key }
+					);
+					item.annotationType = 'highlight';
+					item.annotationText = "Foo";
+					item.annotationComment = "";
+					item.annotationColor = "#ffec00";
+					item.annotationPageLabel = "15";
+					item.annotationSortIndex = "00015|002431|00000";
+					item.annotationPosition = JSON.stringify({
+						"pageIndex": 1,
+						"rects": [
+							[231.284, 402.126, 293.107, 410.142]
+						]
+					});
+					item.setRelations({
+						'mendeleyDB:annotationUUID': '13e4ec18-f49a-47fb-93f6-fda915d3a1c2'
+					});
+					var json = item.toJSON();
+					assert.sameMembers(
+						json.relations['mendeleyDB:annotationUUID'],
+						item.getRelations()['mendeleyDB:annotationUUID']
+					);
 				});
 				
 				describe("#annotationIsExternal", function () {
