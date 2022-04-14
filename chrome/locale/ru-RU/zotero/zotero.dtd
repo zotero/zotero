@@ -324,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Уменьшить">
 <!ENTITY zotero.pdfReader.zoomAuto "Масштабировать автоматически">
 <!ENTITY zotero.pdfReader.zoomPageWidth "По ширине страницы">
-<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
+<!ENTITY zotero.pdfReader.zoomPageHeight "По высоте страницы">
 <!ENTITY zotero.pdfReader.transferFromPDF "Импортировать аннотации…">
