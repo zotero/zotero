@@ -32,14 +32,11 @@
 			margin-right: 5px;
 			width: 100%;
 			font-size: inherit;
+			pointer-events: auto;
 		}
 
 		.cell-icon {
 			min-width: 16px;
 		}
-	}
-
-	.row.editing .cell {
-		pointer-events: auto;
 	}
 }

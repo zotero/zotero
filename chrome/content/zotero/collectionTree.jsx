@@ -282,13 +282,14 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		// Editing input
 		div.classList.toggle('editing', treeRow == this._editing);
 		if (treeRow == this._editing) {
-			div.style.pointerEvents = 'auto';
 			label = document.createElementNS("http://www.w3.org/1999/xhtml", 'input');
 			label.className = 'cell-text';
 			label.setAttribute("size", 5);
 			label.value = treeRow.editingName;
 			label.addEventListener('input', e => this.handleEditingChange(e, index));
-			label.addEventListener('blur', async () => {
+			label.addEventListener('mousedown', (e) => e.stopImmediatePropagation());
+			label.addEventListener('mouseup', (e) => e.stopImmediatePropagation());
+			label.addEventListener('blur', async (e) => {
 				await this.commitEditingName();
 				this.stopEditing();
 			});
