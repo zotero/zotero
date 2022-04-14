@@ -654,7 +654,7 @@ var Zotero_File_Interface = new function() {
 			Zotero.alert(
 				null,
 				Zotero.getString('general.error'),
-				Zotero.getString("fileInterface.importError")
+				Zotero_File_Interface.makeImportErrorString(translation)
 			);
 			return false;
 		}
@@ -1037,6 +1037,22 @@ var Zotero_File_Interface = new function() {
 
 		// polling executed by the main window because current (wizard) window will be closed
 		Zotero.getMainWindow().setTimeout(this.authenticateMendeleyOnlinePoll.bind(this, win), 200);
+	};
+
+	/**
+	 * Generate an error string reporting a translation failure. Includes the
+	 * label of the running translator if available.
+	 *
+	 * @param {Zotero.Translate} [translate]
+	 * @return {String}
+	 */
+	this.makeImportErrorString = function (translate) {
+		let translatorLabel = translate?.translator
+			&& translate.translator[0]
+			&& translate.translator[0].label;
+		return translatorLabel
+			? Zotero.getString('fileInterface.importError.translator', translatorLabel)
+			: Zotero.getString('fileInterface.importError');
 	};
 };
 

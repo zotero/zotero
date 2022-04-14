@@ -266,7 +266,7 @@ var Zotero_Import_Wizard = {
 			else {
 				this._onDone(
 					Zotero.getString('general.error'),
-					Zotero.getString('fileInterface.importError'),
+					Zotero_File_Interface.makeImportErrorString(this._translation),
 					true
 				);
 			}
