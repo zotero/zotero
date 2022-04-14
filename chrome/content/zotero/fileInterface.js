@@ -1043,7 +1043,7 @@ var Zotero_File_Interface = new function() {
 	 * Generate an error string reporting a translation failure. Includes the
 	 * label of the running translator if available.
 	 *
-	 * @param {Zotero.Translate?} translate
+	 * @param {Zotero.Translate} [translate]
 	 * @return {String}
 	 */
 	this.makeImportErrorString = function (translate) {
