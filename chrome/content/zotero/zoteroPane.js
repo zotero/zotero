@@ -104,9 +104,12 @@ var ZoteroPane = new function()
 		this.updateWindow();
 		window.addEventListener("resize", () => {
 			this.updateWindow();
-			this.updateToolbarPosition();
-			this.updateTagsBoxSize();
-			this.updateItemTreeColumnWidths();
+			let tabsDeck = document.querySelector('#tabs-deck')
+			if (!tabsDeck || tabsDeck.getAttribute('selectedIndex') == 0) {
+				this.updateToolbarPosition();
+				this.updateTagsBoxSize();
+				this.updateItemTreeColumnWidths();
+			}
 		});
 		window.setTimeout(this.updateToolbarPosition.bind(this), 0);
 		
