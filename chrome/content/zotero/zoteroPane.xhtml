@@ -191,6 +191,8 @@
 		<key id="key_findPrevious2" keycode="&findAgainCmd.key2;" modifiers="shift" command="cmd_findPrevious"/>
 	</keyset>
 	
+	<keyset id="sortSubmenuKeys"/>
+	
 	<vbox id="titlebar">
 		<hbox class="titlebar-icon-container">
 			<html:div class="titlebar-icon"></html:div>
@@ -623,6 +625,19 @@
 										label="&zotero.general.reset;"
 										oncommand="ZoteroStandalone.onViewMenuItemClick(event); event.stopPropagation();"/>
 								</menupopup>
+							</menu>
+							<menuseparator class="menu-type-library" />
+							<menu id="column-picker-submenu"
+								  class="menu-type-library"
+								  label="&columns.label;"
+								  onpopupshowing="ZoteroPane_Local.onColumnPickerSubmenuOpen()">
+								<menupopup/>
+							</menu>
+							<menu id="sort-submenu"
+								  class="menu-type-library"
+								  label="&sortBy.label;"
+								  onpopupshowing="ZoteroPane_Local.onSortSubmenuOpen()">
+								<menupopup/>
 							</menu>
 							<menuseparator/>
 							<menuitem id="view-menuitem-recursive-collections"

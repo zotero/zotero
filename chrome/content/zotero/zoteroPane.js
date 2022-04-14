@@ -552,6 +552,17 @@ var ZoteroPane = new function()
 		
 		Zotero.Keys.windowInit(document);
 		
+		let sortSubmenuKeys = document.getElementById('sortSubmenuKeys');
+		for (let i = 0; i < 10; i++) {
+			let key = document.createElement('key');
+			key.id = 'key_sortCol' + i;
+			key.setAttribute('modifiers', Zotero.isMac ? 'accel alt control' : 'accel alt');
+			key.setAttribute('key', (i + 1) % 10);
+			// addListener('command', ...) doesn't trigger unless attached to a menuitem
+			key.setAttribute('oncommand', `ZoteroPane.itemsView.toggleSort(${i}, true)`);
+			sortSubmenuKeys.append(key);
+		}
+		
 		if (Zotero.restoreFromServer) {
 			Zotero.restoreFromServer = false;
 			
@@ -6166,6 +6177,25 @@ var ZoteroPane = new function()
 
 		this.itemPane.handleResize();
 	}
+
+	this.onColumnPickerSubmenuOpen = function () {
+		let menuPopup = document.getElementById('column-picker-submenu').menupopup;
+		menuPopup.replaceChildren();
+		this.itemsView?.buildColumnPickerMenu(menuPopup);
+	};
+
+	this.onSortSubmenuOpen = function () {
+		let menuPopup = document.getElementById('sort-submenu').menupopup;
+		menuPopup.replaceChildren();
+		this.itemsView?.buildSortMenu(menuPopup);
+
+		for (let i = 0; i < 10; i++) {
+			if (!menuPopup.children[i]) {
+				break;
+			}
+			menuPopup.children[i].setAttribute('key', 'key_sortCol' + i);
+		}
+	};
 	
 	/**
 	 * Opens the about dialog
