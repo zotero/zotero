@@ -1243,7 +1243,7 @@ class VirtualizedTable extends React.Component {
 		if (Zotero.isMac) {
 			rowHeight *= 1.4;
 		}
-		else if (Zotero.isWindows) {
+		else if (Zotero.isWin) {
 			rowHeight *= 1.2;
 		}
 		else {
