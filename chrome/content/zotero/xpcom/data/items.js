@@ -1991,11 +1991,9 @@ Zotero.Items = function() {
 		'<span style="font-variant:small-caps;">',
 		'<span class="nocase">',
 		'</span>',
-		// Any punctuation at the beginning of the string
-		'^\\p{P}+',
-		// Initial, opening, closing, final, and "other" punctuation that isn't
-		// followed by a digit. Doesn't match connectors or dashes.
-		'[\\p{Pi}\\p{Ps}\\p{Pe}\\p{Pf}\\p{Po}](?!\\d)'
+		// Any punctuation at the beginning of the string, repeated any number
+		// of times, and any opening punctuation that follows
+		'^\\s*([^\\P{P}@#*])\\1*[\\p{Ps}"\']*',
 	].map(re => Zotero.Utilities.XRegExp(re, 'g'));
 	
 	
