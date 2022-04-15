@@ -1238,7 +1238,17 @@ class VirtualizedTable extends React.Component {
 			rowHeight *= Zotero.Prefs.get('fontSize');
 		}
 		// padding
-		rowHeight *= 1.4;
+		// This is weird, but Firefox trees always had different amount of padding on
+		// different OSes
+		if (Zotero.isMac) {
+			rowHeight *= 1.4;
+		}
+		else if (Zotero.isWindows) {
+			rowHeight *= 1.2;
+		}
+		else {
+			rowHeight *= 1.1;
+		}
 		rowHeight = Math.round(Math.max(MINIMUM_ROW_HEIGHT, rowHeight));
 		return rowHeight;
 	}
