@@ -1311,8 +1311,9 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* (parent
 									condSQL += "NOT ";
 								}
 								condSQL += "IN (";
-								condSQL += yield obj.getSQL([...parentKeys, this.key]);
-								let subpar = yield obj.getSQLParams([...parentKeys, this.key]);
+								let newParentKeys = [...parentKeys, this.key];
+								condSQL += yield obj.getSQL(newParentKeys);
+								let subpar = yield obj.getSQLParams(newParentKeys);
 								for (let k in subpar){
 									condSQLParams.push(subpar[k]);
 								}
