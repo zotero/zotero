@@ -1993,7 +1993,7 @@ Zotero.Items = function() {
 		'</span>',
 		// Any punctuation at the beginning of the string, repeated any number
 		// of times, and any opening punctuation that follows
-		'^\\s*([^\\P{P}@])\\1*[\\p{Ps}"\']*',
+		'^\\s*([^\\P{P}@#*])\\1*[\\p{Ps}"\']*',
 	].map(re => Zotero.Utilities.XRegExp(re, 'g'));
 	
 	
