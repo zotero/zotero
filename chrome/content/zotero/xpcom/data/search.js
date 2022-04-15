@@ -528,9 +528,16 @@ Zotero.Search.prototype.hasPostSearchFilter = function() {
  * Run the search and return an array of item ids for results
  *
  * @param {Boolean} [asTempTable=false]
+ * @param {String[]} [parentKeys=[]] The stack of searches currently being executed.
+ * 		For use internally when executing recursive searches.
  * @return {Promise}
  */
-Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable) {
+Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable, parentKeys = []) {
+	if (this.key && parentKeys.includes(this.key)) {
+		Zotero.logError(new Error(`Search condition leads to loop (this: ${this.key}, parents: ${parentKeys})`));
+		return [];
+	}
+
 	var tmpTable;
 	
 	// Mark conditions as loaded
@@ -540,7 +547,7 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 	}
 	try {
 		if (!this._sql){
-			yield this._buildQuery();
+			yield this._buildQuery(parentKeys);
 		}
 		
 		// Default to 'all' mode
@@ -596,9 +603,10 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 			// Otherwise, just copy to temp table directly
 			else {
 				tmpTable = "tmpSearchResults_" + Zotero.randomString(8);
+				let newParentKeys = [...parentKeys, this.key];
 				var sql = "CREATE TEMPORARY TABLE " + tmpTable + " AS "
-					+ (yield this._scope.getSQL());
-				yield Zotero.DB.queryAsync(sql, yield this._scope.getSQLParams(), { noCache: true });
+					+ (yield this._scope.getSQL(newParentKeys));
+				yield Zotero.DB.queryAsync(sql, yield this._scope.getSQLParams(newParentKeys), { noCache: true });
 				var sql = "CREATE INDEX " + tmpTable + "_itemID ON " + tmpTable + "(itemID)";
 				yield Zotero.DB.queryAsync(sql, false, { noCache: true });
 			}
@@ -890,20 +898,31 @@ Zotero.Search.prototype.toJSON = function (options = {}) {
 }
 
 
-/*
+/**
  * Get the SQL string for the search
+ *
+ * @param {String[]} [parentKeys=[]] The stack of searches currently being executed.
+ * 		For use internally when executing recursive searches.
+ * @return {String}
  */
-Zotero.Search.prototype.getSQL = Zotero.Promise.coroutine(function* () {
+Zotero.Search.prototype.getSQL = Zotero.Promise.coroutine(function* (parentKeys = []) {
 	if (!this._sql) {
-		yield this._buildQuery();
+		yield this._buildQuery(parentKeys);
 	}
 	return this._sql;
 });
 
 
-Zotero.Search.prototype.getSQLParams = Zotero.Promise.coroutine(function* () {
+/**
+ * Get the SQL parameter array for the search
+ *
+ * @param {String[]} [parentKeys=[]] The stack of searches currently being executed.
+ * 		For use internally when executing recursive searches.
+ * @return {Array}
+ */
+Zotero.Search.prototype.getSQLParams = Zotero.Promise.coroutine(function* (parentKeys = []) {
 	if (!this._sql) {
-		yield this._buildQuery();
+		yield this._buildQuery(parentKeys);
 	}
 	return this._sqlParams;
 });
@@ -942,10 +961,17 @@ Zotero.Search.idsToTempTable = Zotero.Promise.coroutine(function* (ids) {
 });
 
 
-/*
+/**
  * Build the SQL query for the search
+ *
+ * @param {String[]} parentKeys The stack of searches currently being executed
  */
-Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
+Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* (parentKeys) {
+	if (this.key && parentKeys.includes(this.key)) {
+		Zotero.logError(new Error(`Search condition leads to loop (this: ${this.key}, parents: ${parentKeys})`));
+		return [];
+	}
+
 	this._requireData('conditions');
 	
 	var sql = 'SELECT itemID FROM items';
@@ -1271,7 +1297,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 							// or that this slows things down with large libraries
 							// -- should probably use a temporary table instead
 							if (hasFilter){
-								let subids = yield obj.search();
+								let subids = yield obj.search([...parentKeys, this.key]);
 								condSQL += "itemID ";
 								if (condition.operator == 'isNot') {
 									condSQL += "NOT ";
@@ -1285,8 +1311,8 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 									condSQL += "NOT ";
 								}
 								condSQL += "IN (";
-								condSQL += yield obj.getSQL();
-								let subpar = yield obj.getSQLParams();
+								condSQL += yield obj.getSQL([...parentKeys, this.key]);
+								let subpar = yield obj.getSQLParams([...parentKeys, this.key]);
 								for (let k in subpar){
 									condSQLParams.push(subpar[k]);
 								}
