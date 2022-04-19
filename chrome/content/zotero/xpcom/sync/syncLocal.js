@@ -667,7 +667,14 @@ Zotero.Sync.Data.Local = {
 			+ "syncObjectTypes WHERE name=?)";
 		var data = yield Zotero.DB.valueQueryAsync(sql, [libraryID, key, version, objectType]);
 		if (data) {
-			return JSON.parse(data);
+			try {
+				return JSON.parse(data);
+			}
+			// Shouldn't happen, but don't break syncing if it does
+			// https://forums.zotero.org/discussion/95926/zotero-not-syncing-report-id-1924846177
+			catch (e) {
+				Zotero.logError(e);
+			}
 		}
 		return false;
 	}),
