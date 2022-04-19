@@ -25,9 +25,11 @@
 
 'use strict';
 
-import React, { forwardRef, useState, useRef, useImperativeHandle, useLayoutEffect } from 'react';
+import React, { forwardRef, useState, useRef, useImperativeHandle, useEffect, useLayoutEffect } from 'react';
 import cx from 'classnames';
-const { IconXmark } = require('./icons');
+const { IconXmark, IconArrowLeft, IconArrowRight } = require('./icons');
+
+const SCROLL_ARROW_SCROLL_BY = 200;
 
 const TabBar = forwardRef(function (props, ref) {
 	const [tabs, setTabs] = useState([]);
@@ -36,11 +38,23 @@ const TabBar = forwardRef(function (props, ref) {
 	const dragIDRef = useRef(null);
 	const dragGrabbedDeltaXRef = useRef();
 	const tabsRef = useRef();
+	const startArrowRef = useRef();
+	const endArrowRef = useRef();
 	// Used to throttle mouse movement
 	const mouseMoveWaitUntil = useRef(0);
 	
 	useImperativeHandle(ref, () => ({ setTabs }));
-	
+
+	useEffect(() => {
+		let handleResize = () => updateScrollArrows();
+		window.addEventListener('resize', handleResize);
+		return () => {
+			window.removeEventListener('resize', handleResize);
+		};
+	}, []);
+
+	useLayoutEffect(() => updateScrollArrows());
+
 	// Use offsetLeft and offsetWidth to calculate and translate tab X position
 	useLayoutEffect(() => {
 		if (!dragIDRef.current) return;
@@ -69,6 +83,34 @@ const TabBar = forwardRef(function (props, ref) {
 			tab.style.transform = dragging ? `translateX(${x}px)` : 'unset';
 		}
 	});
+
+	function updateScrollArrows() {
+		let enableArrows = tabsRef.current.scrollWidth !== tabsRef.current.clientWidth;
+		if (enableArrows) {
+			startArrowRef.current.classList.add('enabled');
+			endArrowRef.current.classList.add('enabled');
+		}
+		else {
+			startArrowRef.current.classList.remove('enabled');
+			endArrowRef.current.classList.remove('enabled');
+		}
+
+		if (enableArrows) {
+			if (tabsRef.current.scrollLeft !== 0) {
+				startArrowRef.current.classList.add('active');
+			}
+			else {
+				startArrowRef.current.classList.remove('active');
+			}
+
+			if (tabsRef.current.scrollWidth - tabsRef.current.clientWidth !== Math.abs(tabsRef.current.scrollLeft)) {
+				endArrowRef.current.classList.add('active');
+			}
+			else {
+				endArrowRef.current.classList.remove('active');
+			}
+		}
+	}
 	
 	function handleTabMouseDown(event, id) {
 		if (event.button === 2) {
@@ -194,6 +236,41 @@ const TabBar = forwardRef(function (props, ref) {
 		window.Zotero_Tooltip.stop();
 	}
 
+	function handleWheel(event) {
+		// Normalize wheel speed
+		let x = event.deltaX;
+		if (x && event.deltaMode) {
+			if (event.deltaMode === 1) {
+				x *= 20;
+			}
+			else {
+				x *= 400;
+			}
+		}
+		window.requestAnimationFrame(() => {
+			tabsRef.current.scrollLeft += x;
+		});
+	}
+
+	function handleClickScrollStart() {
+		tabsRef.current.scrollTo({
+			left: tabsRef.current.scrollLeft - (SCROLL_ARROW_SCROLL_BY * (Zotero.rtl ? -1 : 1)),
+			behavior: 'smooth'
+		});
+	}
+
+	function handleClickScrollEnd() {
+		tabsRef.current.scrollTo({
+			left: tabsRef.current.scrollLeft + (SCROLL_ARROW_SCROLL_BY * (Zotero.rtl ? -1 : 1)),
+			behavior: 'smooth'
+		});
+	}
+
+	// Prevent maximizing/minimizing window
+	function handleScrollArrowDoubleClick(event) {
+		event.preventDefault();
+	}
+
 	function renderTab({ id, title, selected }, index) {
 		return (
 			<div
@@ -219,13 +296,34 @@ const TabBar = forwardRef(function (props, ref) {
 	}
 
 	return (
-		<div
-			ref={tabsRef}
-			className="tabs"
-			onDragOver={handleTabBarDragOver}
-			onMouseOut={handleTabBarMouseOut}
-		>
-			{tabs.map((tab, index) => renderTab(tab, index))}
+		<div>
+			<div className="tab-bar-inner-container" onWheel={handleWheel}>
+				<div
+					ref={startArrowRef}
+					className="scroll-start-arrow"
+					style={{ transform: Zotero.rtl ? 'scaleX(-1)' : undefined }}
+					onClick={handleClickScrollStart}
+					onDoubleClick={handleScrollArrowDoubleClick}
+				><IconArrowLeft/></div>
+				<div className="tabs-wrapper">
+					<div
+						ref={tabsRef}
+						className="tabs"
+						onDragOver={handleTabBarDragOver}
+						onMouseOut={handleTabBarMouseOut}
+						onScroll={updateScrollArrows}
+					>
+						{tabs.map((tab, index) => renderTab(tab, index))}
+					</div>
+				</div>
+				<div
+					ref={endArrowRef}
+					className="scroll-end-arrow"
+					style={{ transform: Zotero.rtl ? 'scaleX(-1)' : undefined }}
+					onClick={handleClickScrollEnd}
+					onDoubleClick={handleScrollArrowDoubleClick}
+				><IconArrowRight/></div>
+			</div>
 		</div>
 	);
 });
