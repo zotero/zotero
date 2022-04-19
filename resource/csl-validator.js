@@ -235,7 +235,7 @@ div {
     
     ## Specify the journal's ISSN-L for journal-specific styles.
     element cs:issnl { issn }
-  issn = xsd:string { pattern = "\d{4}\-\d{3}(\d|x|X)" }
+  issn = xsd:string { pattern = "\\d{4}\\-\\d{3}(\\d|x|X)" }
   independent-style.info.link =
     element cs:link {
       attribute href { xsd:anyURI },
@@ -1298,7 +1298,7 @@ div {
   terms.ordinals =
     
     ## Ordinals
-    xsd:string { pattern = "ordinal(-\d{2})?" }
+    xsd:string { pattern = "ordinal(-\\d{2})?" }
   terms.long-ordinals =
     
     ## Long ordinals
