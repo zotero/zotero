@@ -1044,7 +1044,7 @@ Zotero.Items = function() {
 				let matchingHash = await otherAttachment.attachmentHash;
 				let masterAttachmentID = masterAttachmentHashes.get(matchingHash);
 
-				if (!masterAttachmentID && item.numAttachments(true)) {
+				if (!masterAttachmentID && item.numAttachments()) {
 					// If that didn't work, hash master attachments by the
 					// most common words in their text and check again.
 					if (!hashesIncludeText) {
@@ -1184,7 +1184,7 @@ Zotero.Items = function() {
 			throw new Error('Invalid hash type');
 		}
 
-		let attachments = (await this.getAsync(item.getAttachments(true)))
+		let attachments = (await this.getAsync(item.getAttachments()))
 			.filter(attachment => attachment.isFileAttachment());
 		let hashes = new Map();
 		await Promise.all(attachments.map(async (attachment) => {

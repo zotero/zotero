@@ -886,6 +886,26 @@ describe("Zotero.Items", function () {
 			assert.isFalse(attachment2.deleted);
 			assert.equal(attachment2.parentItemID, item1.id);
 		});
+
+		it("should not merge an attachment with a deleted master attachment", async function () {
+			let item1 = await createDataObject('item', { setTitle: true });
+			let attachment1 = await importPDFAttachment(item1);
+			attachment1.deleted = true;
+			await attachment1.saveTx();
+
+			let item2 = item1.clone();
+			await item2.saveTx();
+			let attachment2 = await importPDFAttachment(item2);
+
+			await Zotero.Items.merge(item1, [item2]);
+
+			assert.isFalse(item1.deleted);
+			assert.isTrue(attachment1.deleted);
+			assert.equal(item1.numAttachments(true), 2);
+			assert.isTrue(item2.deleted);
+			assert.isFalse(attachment2.deleted);
+			assert.equal(attachment2.parentItemID, item1.id);
+		});
 	})
 	
 	
