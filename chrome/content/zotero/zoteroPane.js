@@ -271,43 +271,14 @@ var ZoteroPane = new function()
 	};
 	
 	
-	/*
-	 * Create the New Item (+) submenu with each item type
-	 */
-	this.buildItemTypeSubMenu = function () {
-		var moreMenu = document.getElementById('zotero-tb-add-more');
-		
-		while (moreMenu.hasChildNodes()) {
-			moreMenu.removeChild(moreMenu.firstChild);
-		}
-		
-		// Sort by localized name
-		var t = Zotero.ItemTypes.getSecondaryTypes();
-		var itemTypes = [];
-		for (var i=0; i<t.length; i++) {
-			itemTypes.push({
-				id: t[i].id,
-				name: t[i].name,
-				localized: Zotero.ItemTypes.getLocalizedString(t[i].id)
-			});
-		}
-		var collation = Zotero.getLocaleCollation();
-		itemTypes.sort(function(a, b) {
-			return collation.compareString(1, a.localized, b.localized);
-		});
-		
-		for (var i = 0; i<itemTypes.length; i++) {
-			var menuitem = document.createElement("menuitem");
-			menuitem.setAttribute("label", itemTypes[i].localized);
-			menuitem.setAttribute("tooltiptext", "");
-			let type = itemTypes[i].id;
-			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type, {}, null, true).done(); }, false);
-			moreMenu.appendChild(menuitem);
-		}
-	}
-	
-	
+	var _lastPrimaryTypes;
 	this.updateNewItemTypes = function () {
+		var primaryTypes = Zotero.ItemTypes.getPrimaryTypes();
+		var primaryTypesJoined = primaryTypes.join(',');
+		if (_lastPrimaryTypes == primaryTypesJoined) {
+			return;
+		}
+		
 		var addMenu = document.getElementById('zotero-tb-add').firstChild;
 		
 		// Remove all nodes so we can regenerate
@@ -316,35 +287,63 @@ var ZoteroPane = new function()
 			var p = options[0].parentNode;
 			p.removeChild(options[0]);
 		}
+		var moreMenu = document.getElementById('zotero-tb-add-more');
+		while (moreMenu.hasChildNodes()) {
+			moreMenu.removeChild(moreMenu.firstChild);
+		}
 		
 		var separator = addMenu.firstChild;
 		
-		// Sort by localized name
-		var t = Zotero.ItemTypes.getPrimaryTypes();
+		// Populate primary types from MRU
+		
 		var itemTypes = [];
-		for (var i=0; i<t.length; i++) {
+		for (let type of primaryTypes) {
 			itemTypes.push({
-				id: t[i].id,
-				name: t[i].name,
-				localized: Zotero.ItemTypes.getLocalizedString(t[i].id)
+				id: type.id,
+				name: type.name,
+				localized: Zotero.ItemTypes.getLocalizedString(type.id)
 			});
 		}
 		var collation = Zotero.getLocaleCollation();
 		itemTypes.sort(function(a, b) {
 			return collation.compareString(1, a.localized, b.localized);
 		});
+		for (let itemType of itemTypes) {
+			let menuitem = document.createElement("menuitem");
+			menuitem.setAttribute("label", itemType.localized);
+			menuitem.setAttribute("tooltiptext", "");
+			let type = itemType.id;
+			menuitem.addEventListener("command", function () {
+				ZoteroPane.newItem(type, {}, null, true);
+			});
+			menuitem.className = "zotero-tb-add";
+			addMenu.insertBefore(menuitem, separator);
+		}
 		
+		// Populate submenu with each item type not in the MRU list
+		itemTypes = [];
+		for (let type of Zotero.ItemTypes.getSecondaryTypes()) {
+			itemTypes.push({
+				id: type.id,
+				name: type.name,
+				localized: Zotero.ItemTypes.getLocalizedString(type.id)
+			});
+		}
+		var collation = Zotero.getLocaleCollation();
+		itemTypes.sort(function(a, b) {
+			return collation.compareString(1, a.localized, b.localized);
+		});
 		for (var i = 0; i<itemTypes.length; i++) {
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", itemTypes[i].localized);
 			menuitem.setAttribute("tooltiptext", "");
 			let type = itemTypes[i].id;
-			menuitem.addEventListener("command", function() { ZoteroPane_Local.newItem(type, {}, null, true).done(); }, false);
-			menuitem.className = "zotero-tb-add";
-			addMenu.insertBefore(menuitem, separator);
+			menuitem.addEventListener("command", function () {
+				ZoteroPane.newItem(type, {}, null, true);
+			});
+			moreMenu.appendChild(menuitem);
 		}
 	}
-	
 	
 	
 	/*
@@ -403,9 +402,6 @@ var ZoteroPane = new function()
 			return false;
 		}
 		
-		if(!_madeVisible) {
-			this.buildItemTypeSubMenu();
-		}
 		_madeVisible = true;
 
 		this.unserializePersist();
