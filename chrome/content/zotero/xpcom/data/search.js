@@ -527,12 +527,18 @@ Zotero.Search.prototype.hasPostSearchFilter = function() {
 /**
  * Run the search and return an array of item ids for results
  *
- * @param {Boolean} [asTempTable=false]
- * @param {String[]} [parentKeys=[]] The stack of searches currently being executed.
+ * @param {Boolean} [options.asTempTable=false]
+ * @param {String[]} [options.parentKeys=[]] The stack of searches currently being executed.
  * 		For use internally when executing recursive searches.
  * @return {Promise}
  */
-Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable, parentKeys = []) {
+Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (options = {}) {
+	if (typeof options !== 'object') {
+		Zotero.debug("WARNING: search() now takes an options object -- update your code");
+		options = { asTempTable: options };
+	}
+	let { asTempTable = false, parentKeys = [] } = options;
+
 	if (this.key && parentKeys.includes(this.key)) {
 		Zotero.logError(new Error(`Search condition leads to loop (this: ${this.key}, parents: ${parentKeys})`));
 		return [];
@@ -594,7 +600,7 @@ Zotero.Search.prototype.search = Zotero.Promise.coroutine(function* (asTempTable
 		if (this._scope) {
 			// If subsearch has post-search filter, run and insert ids into temp table
 			if (this._scope.hasPostSearchFilter()) {
-				var ids = yield this._scope.search();
+				var ids = yield this._scope.search({ parentKeys: [...parentKeys, this.key] });
 				if (!ids) {
 					return [];
 				}
@@ -1299,7 +1305,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* (parent
 							// or that this slows things down with large libraries
 							// -- should probably use a temporary table instead
 							if (hasFilter){
-								let subids = yield obj.search([...parentKeys, this.key]);
+								let subids = yield obj.search({ parentKeys: [...parentKeys, this.key] });
 								condSQL += "itemID ";
 								if (condition.operator == 'isNot') {
 									condSQL += "NOT ";
