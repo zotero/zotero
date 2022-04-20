@@ -339,12 +339,18 @@ var Zotero_Tabs = new function () {
 			}
 			tab.lastFocusedElement = null;
 		}
-		let tabNode = document.querySelector(`.tab[data-id="${tab.id}"]`);
-		let tabsContainerNode = document.querySelector('#tab-bar-container .tabs');
-		document.querySelector(`.tab[data-id="${tab.id}"]`).scrollIntoView({ behavior: 'smooth' });
+		// Allow React to create a tab node
+		setTimeout(() => {
+			document.querySelector(`.tab[data-id="${tab.id}"]`).scrollIntoView({ behavior: 'smooth' });
+		});
 		// Border is not included when scrolling element node into view, therefore we do it manually.
 		// TODO: `scroll-padding` since Firefox 68 can probably be used instead
 		setTimeout(() => {
+			let tabNode = document.querySelector(`.tab[data-id="${tab.id}"]`);
+			if (!tabNode) {
+				return;
+			}
+			let tabsContainerNode = document.querySelector('#tab-bar-container .tabs');
 			if (tabNode.offsetLeft + tabNode.offsetWidth - tabsContainerNode.offsetWidth + 1 >= tabsContainerNode.scrollLeft) {
 				document.querySelector('#tab-bar-container .tabs').scrollLeft += 1;
 			}
