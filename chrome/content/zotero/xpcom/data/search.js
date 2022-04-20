@@ -969,7 +969,9 @@ Zotero.Search.idsToTempTable = Zotero.Promise.coroutine(function* (ids) {
 Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* (parentKeys) {
 	if (this.key && parentKeys.includes(this.key)) {
 		Zotero.logError(new Error(`Search condition leads to loop (this: ${this.key}, parents: ${parentKeys})`));
-		return [];
+		this._sql = '';
+		this._sqlParams = false;
+		return;
 	}
 
 	this._requireData('conditions');
