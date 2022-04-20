@@ -30,9 +30,16 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 import TabBar from 'components/tabBar';
 
+const MAX_LOADED_TABS = 5;
+const UNLOAD_UNUSED_AFTER = 86400; // 24h
+
 var Zotero_Tabs = new function () {
 	Object.defineProperty(this, 'selectedID', {
 		get: () => this._selectedID
+	});
+
+	Object.defineProperty(this, 'selectedType', {
+		get: () => this._getTab(this._selectedID).tab.type
 	});
 
 	Object.defineProperty(this, 'selectedIndex', {
@@ -52,6 +59,10 @@ var Zotero_Tabs = new function () {
 	this._selectedID = 'zotero-pane';
 	this._prevSelectedID = null;
 	this._history = [];
+
+	this._unloadInterval = setInterval(() => {
+		this.unloadUnusedTabs();
+	}, 60000); // Trigger every minute
 
 	this._getTab = function (id) {
 		var tabIndex = this._tabs.findIndex(tab => tab.id == id);
@@ -90,8 +101,12 @@ var Zotero_Tabs = new function () {
 
 	this.getState = function () {
 		return this._tabs.map((tab) => {
+			let type = tab.type;
+			if (type === 'reader-unloaded') {
+				type = 'reader';
+			}
 			var o = {
-				type: tab.type,
+				type,
 				title: tab.title,
 			};
 			if (tab.data) {
@@ -103,21 +118,21 @@ var Zotero_Tabs = new function () {
 			return o;
 		});
 	};
-	
-	this.restoreState = function(tabs) {
-		for (let tab of tabs) {
+
+	this.restoreState = function (tabs) {
+		for (let i = 0; i < tabs.length; i++) {
+			let tab = tabs[i];
 			if (tab.type === 'library') {
 				this.rename('zotero-pane', tab.title);
 			}
 			else if (tab.type === 'reader') {
 				if (Zotero.Items.exists(tab.data.itemID)) {
-					Zotero.Reader.open(tab.data.itemID,
-						null,
-						{
-							title: tab.title,
-							openInBackground: !tab.selected
-						}
-					);
+					this.add({
+						type: 'reader-unloaded',
+						title: tab.title,
+						index: i,
+						data: tab.data
+					});
 				}
 			}
 		}
@@ -292,8 +307,20 @@ var Zotero_Tabs = new function () {
 	 * @param {Boolean} reopening
 	 */
 	this.select = function (id, reopening) {
-		var { tab } = this._getTab(id);
+		var { tab, tabIndex } = this._getTab(id);
 		if (!tab || tab.id === this._selectedID) {
+			return;
+		}
+		if (this._selectedID) {
+			let { tab: selectedTab } = this._getTab(this._selectedID);
+			selectedTab.timeUnselected = Zotero.Date.getUnixTimestamp();
+		}
+		if (tab.type === 'reader-unloaded') {
+			this.close(tab.id);
+			Zotero.Reader.open(tab.data.itemID, null, {
+				title: tab.title,
+				tabIndex
+			});
 			return;
 		}
 		if (this._selectedID === 'zotero-pane') {
@@ -312,12 +339,18 @@ var Zotero_Tabs = new function () {
 			}
 			tab.lastFocusedElement = null;
 		}
-		let tabNode = document.querySelector(`.tab[data-id="${tab.id}"]`);
-		let tabsContainerNode = document.querySelector('#tab-bar-container .tabs');
-		document.querySelector(`.tab[data-id="${tab.id}"]`).scrollIntoView({ behavior: 'smooth' });
+		// Allow React to create a tab node
+		setTimeout(() => {
+			document.querySelector(`.tab[data-id="${tab.id}"]`).scrollIntoView({ behavior: 'smooth' });
+		});
 		// Border is not included when scrolling element node into view, therefore we do it manually.
 		// TODO: `scroll-padding` since Firefox 68 can probably be used instead
 		setTimeout(() => {
+			let tabNode = document.querySelector(`.tab[data-id="${tab.id}"]`);
+			if (!tabNode) {
+				return;
+			}
+			let tabsContainerNode = document.querySelector('#tab-bar-container .tabs');
 			if (tabNode.offsetLeft + tabNode.offsetWidth - tabsContainerNode.offsetWidth + 1 >= tabsContainerNode.scrollLeft) {
 				document.querySelector('#tab-bar-container .tabs').scrollLeft += 1;
 			}
@@ -325,6 +358,36 @@ var Zotero_Tabs = new function () {
 				document.querySelector('#tab-bar-container .tabs').scrollLeft -= 1;
 			}
 		}, 500);
+		tab.timeSelected = Zotero.Date.getUnixTimestamp();
+		this.unloadUnusedTabs();
+	};
+
+	this.unload = function (id) {
+		var { tab, tabIndex } = this._getTab(id);
+		if (!tab || tab.id === this._selectedID || tab.type !== 'reader') {
+			return;
+		}
+		this.close(tab.id);
+		this.add({
+			type: 'reader-unloaded',
+			title: tab.title,
+			index: tabIndex,
+			data: tab.data
+		});
+	};
+
+	this.unloadUnusedTabs = function () {
+		for (let tab of this._tabs) {
+			if (Zotero.Date.getUnixTimestamp() - tab.timeUnselected > UNLOAD_UNUSED_AFTER) {
+				this.unload(tab.id);
+			}
+		}
+		let tabs = this._tabs.slice().filter(x => x.type === 'reader');
+		tabs.sort((a, b) => b.timeUnselected - a.timeUnselected);
+		tabs = tabs.slice(MAX_LOADED_TABS);
+		for (let tab of tabs) {
+			this.unload(tab.id);
+		}
 	};
 
 	/**

@@ -969,6 +969,7 @@ class ReaderTab extends ReaderInstance {
 		// i.e. note-editor. There should be a better way to solve this
 		this._window.addEventListener('pointerup', (event) => {
 			if (this._window.Zotero_Tabs.selectedID === this.tabID
+				&& this._iframeWindow
 				&& event.target
 				&& event.target.closest
 				&& !event.target.closest('#outerContainer')) {

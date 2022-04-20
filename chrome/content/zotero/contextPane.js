@@ -181,13 +181,13 @@ var ZoteroContextPane = new function () {
 				// It seems that changing `hidden` or `collapsed` values might
 				// be related with significant slow down when there are too many
 				// DOM nodes (i.e. 10k notes)
-				if (Zotero_Tabs.selectedIndex == 0) {
+				if (Zotero_Tabs.selectedType == 'library') {
 					_contextPaneSplitter.setAttribute('hidden', true);
 					_contextPane.setAttribute('collapsed', true);
 					_tabToolbar.hidden = true;
 					_tabCover.hidden = true;
 				}
-				else {
+				else if (Zotero_Tabs.selectedType == 'reader') {
 					var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 					if (reader) {
 						_tabCover.hidden = false;
@@ -217,7 +217,7 @@ var ZoteroContextPane = new function () {
 					});
 					_tabToolbar.hidden = false;
 				}
-				
+
 				_selectItemContext(ids[0]);
 				_update();
 			}
