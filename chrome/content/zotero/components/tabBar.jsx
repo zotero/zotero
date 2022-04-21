@@ -281,6 +281,7 @@ const TabBar = forwardRef(function (props, ref) {
 				onMouseMove={() => handleTabMouseMove(title)}
 				onMouseDown={(event) => handleTabMouseDown(event, id)}
 				onClick={(event) => handleTabClick(event, id)}
+				onAuxClick={(event) => handleTabClick(event, id)}
 				onDragStart={(event) => handleDragStart(event, id, index)}
 				onDragEnd={handleDragEnd}
 			>
