@@ -79,7 +79,7 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Nowy element">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Więcej">
-<!ENTITY zotero.toolbar.lookup.label "Dodaj element za pomocą identyfikatora">
+<!ENTITY zotero.toolbar.lookup.label "Dodaj element(y) za pomocą identyfikatora">
 <!ENTITY zotero.toolbar.removeItem.label "Usuń element...">
 <!ENTITY zotero.toolbar.newLibrary.label "Nowa biblioteka">
 <!ENTITY zotero.toolbar.newCollection.label "Nowa kolekcja...">
