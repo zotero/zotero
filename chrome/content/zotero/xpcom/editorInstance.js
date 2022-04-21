@@ -76,6 +76,7 @@ class EditorInstance {
 		this._prefObserverIDs = [
 			Zotero.Prefs.registerObserver('note.fontSize', this._handleFontChange),
 			Zotero.Prefs.registerObserver('note.fontFamily', this._handleFontChange),
+			Zotero.Prefs.registerObserver('note.css', this._handleStyleChange),
 			Zotero.Prefs.registerObserver('layout.spellcheckDefault', this._handleSpellCheckChange, true)
 		];
 		
@@ -99,6 +100,12 @@ class EditorInstance {
 		this._iframeWindow.document.execCommand('enableObjectResizing', false, 'false');
 		this._iframeWindow.document.execCommand('enableInlineTableEditing', false, 'false');
 
+		let style = Zotero.Prefs.get('note.css');
+		if (style) {
+			Zotero.debug('Using a custom CSS style:');
+			Zotero.debug(style);
+		}
+
 		this._postMessage({
 			action: 'init',
 			value: this._state || this._item.note,
@@ -112,6 +119,7 @@ class EditorInstance {
 			placeholder: options.placeholder,
 			dir: Zotero.dir,
 			font: this._getFont(),
+			style,
 			localizedStrings: {
 				// Figure out a better way to pass this
 				'zotero.appName': Zotero.appName,
@@ -209,8 +217,12 @@ class EditorInstance {
 	}
 	
 	_handleFontChange = () => {
-		this._postMessage({ action: 'updateFont', font: this._getFont() });
-	}
+		this._postMessage({ action: 'setFont', font: this._getFont() });
+	};
+
+	_handleStyleChange = () => {
+		this._postMessage({ action: 'setStyle', style: Zotero.Prefs.get('note.css') });
+	};
 
 	_handleSpellCheckChange = () => {
 		try {
