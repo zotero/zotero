@@ -1267,6 +1267,46 @@ describe("Zotero.Translate", function() {
 			await check(libraryExportFile, 'library');
 			await check(collectionExportFile, 'collection');
 		});
+
+		it("should round-trip an item and note with annotation links via Zotero RDF", async function () {
+			let item = await createDataObject('item', { setTitle: true });
+			let attachment = await importPDFAttachment(item);
+			let annotation = await createAnnotation('highlight', attachment);
+			let note = (await Zotero.EditorInstance.createNoteFromAnnotations([annotation], item.id)).getNote();
+
+			assert.include(note, item.key);
+			assert.include(note, attachment.key);
+			// and annotation.key but we aren't rewriting that
+
+			let exportDir = OS.Path.join(await getTempDirectory(), 'export');
+			let exportFile = OS.Path.join(exportDir, 'export.rdf');
+
+			let translation = new Zotero.Translate.Export();
+			translation.setLocation(Zotero.File.pathToFile(exportDir));
+			translation.setItems([item]);
+			translation.setDisplayOptions({
+				exportFileData: true,
+				exportNotes: true
+			});
+			translation.setTranslator('14763d24-8ba0-45df-8f52-b8d1108e7ac9'); // Zotero RDF
+			await translation.translate();
+
+			translation = new Zotero.Translate.Import();
+			translation.setLocation(Zotero.File.pathToFile(exportFile));
+			translation.setTranslator('5e3ad958-ac79-463d-812b-a86a9235c28f'); // RDF
+			let newItems = await translation.translate({
+				libraryID: Zotero.Libraries.userLibraryID
+			});
+			assert.lengthOf(newItems, 1);
+			let newItem = newItems[0];
+			let newAttachment = Zotero.Items.get(newItem.getAttachments()[0]);
+			let newNote = Zotero.Items.get(newItem.getNotes()[0]).getNote();
+			
+			assert.include(newNote, newItem.key);
+			assert.include(newNote, newAttachment.key);
+			assert.notInclude(newNote, item.key);
+			assert.notInclude(newNote, attachment.key);
+		});
 	});
 	
 	describe("Async translators", function () {
@@ -1535,6 +1575,42 @@ describe("Zotero.Translate", function() {
 					}
 				});
 				yield Zotero.Promise.all([itemDeferred.promise, attachmentDeferred.promise]);
+			});
+
+			it("should update URIs in imported notes", async function () {
+				let testDir = getTestDataDirectory().path;
+				let file = OS.Path.join(testDir, 'test.pdf');
+				let json = [
+					{
+						itemType: "journalArticle",
+						itemID: "#item_1",
+						title: "Parent Item",
+						attachments: [
+							{
+								itemType: "attachment",
+								title: "PDF",
+								itemID: "#item_2",
+								mimeType: "application/pdf",
+								path: file
+							}
+						],
+						notes: [
+							{
+								note: 'data-annotation=&quot;%7B%22attachmentURI%22%3A%22{_z_itemURI:#item_1}%22%2C%22annotationKey%22%3A%22JUZMYZRM%22%2C%22color%22%3A%22%235fb236%22%2C%22pageLabel%22%3A%221%22%2C%22position%22%3A%7B%22pageIndex%22%3A0%2C%22rects%22%3A%5B%5B165.42%2C701.554%2C256.848%2C716.789%5D%5D%7D%2C%22citationItem%22%3A%7B%22uris%22%3A%5B%22{_z_itemURI:#item_2}%22%5D%2C%22locator%22%3A%221%22%7D%7D&quot;'
+							}
+						]
+					}
+				];
+				let itemSaver = new Zotero.Translate.ItemSaver({
+					libraryID: Zotero.Libraries.userLibraryID,
+					attachmentMode: Zotero.Translate.ItemSaver.ATTACHMENT_MODE_FILE
+				});
+				let [item] = await itemSaver.saveItems(json);
+				let attachment = Zotero.Items.get(item.getAttachments()[0]);
+				let note = Zotero.Items.get(item.getNotes()[0]).getNote();
+				assert.include(note, Zotero.URI.getItemURI(attachment));
+				assert.include(note, Zotero.URI.getItemURI(item));
+				assert.notInclude(note, '_z_itemURI');
 			});
 		});
 	});
