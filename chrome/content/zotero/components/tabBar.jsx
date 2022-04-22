@@ -29,7 +29,7 @@ import React, { forwardRef, useState, useRef, useImperativeHandle, useEffect, us
 import cx from 'classnames';
 const { IconXmark, IconArrowLeft, IconArrowRight } = require('./icons');
 
-const SCROLL_ARROW_SCROLL_BY = 200;
+const SCROLL_ARROW_SCROLL_BY = 222;
 
 const TabBar = forwardRef(function (props, ref) {
 	const [tabs, setTabs] = useState([]);
