@@ -2240,7 +2240,7 @@ Zotero.Utilities.Internal = {
 											typeof vars[args[0]] === 'function'
 												// If function returns a value (only string is supported)
 												// Note: To keep things simple, this doesn't support function attributes
-												? !!vars[args[0]]()
+												? !!vars[args[0]]({})
 												// If string variable exists
 												: !!vars[args[0]]
 										)

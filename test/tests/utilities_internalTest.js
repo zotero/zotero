@@ -533,7 +533,7 @@ describe("Zotero.Utilities.Internal", function () {
 				ar1: [],
 				ar2: [1, 2]
 			};
-			var template = `{{ v1}}{{v2 a1= 1  a2 =' 2' a3 = "3 "}}{{v3}}{{v4}}{{if ar1}}ar1{{endif}}{{if ar2}}{{ar2}}{{endif}}{{if v5}}yes{{endif}}{{if v3}}no{{endif}}`;
+			var template = `{{ v1}}{{v2 a1= 1  a2 =' 2' a3 = "3 "}}{{v3}}{{v4}}{{if ar1}}ar1{{endif}}{{if ar2}}{{ar2}}{{endif}}{{if v5}}yes{{endif}}{{if v3}}no{{endif}}{{if v2}}no{{endif}}`;
 			var html = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
 			assert.equal(html, '11 23 1,2yes');
 		});
