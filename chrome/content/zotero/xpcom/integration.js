@@ -219,6 +219,7 @@ Zotero.Integration = new function() {
 	 */
 	this.execCommand = async function(agent, command, docId, templateVersion=0) {
 		var document, session, documentImported;
+		Zotero.debug(`Integration: ${agent}-${command}${docId ? `:'${docId}'` : ''} invoked`)
 		if (Zotero.Integration.warnOutdatedTemplate(agent, templateVersion)) return;
 
 		if (Zotero.Integration.currentDoc) {
@@ -230,7 +231,6 @@ Zotero.Integration = new function() {
 			return;
 		}
 		Zotero.Integration.currentDoc = true;
-		Zotero.debug(`Integration: ${agent}-${command}${docId ? `:'${docId}'` : ''} invoked`)
 
 		var startTime = (new Date()).getTime();
 
