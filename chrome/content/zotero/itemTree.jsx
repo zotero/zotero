@@ -1355,8 +1355,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 				if (sortField == 'callNumber') {
 					let deweyRe = /^(\d{3})(?:\.(\d+))?(?:\/([a-zA-Z]{3}))?$/;
+					let lcWithClassificationRe = /^([a-zA-Z]{1,3}\d+\s*\.)(?=[a-zA-Z])/;
 					let splitA = fieldA.toLowerCase().replace(/\s/g, '').match(deweyRe);
 					let splitB = fieldB.toLowerCase().replace(/\s/g, '').match(deweyRe);
+
 					if (splitA && splitB) {
 						// Looks like Dewey Decimal, so we'll compare by parts
 						let i;
@@ -1371,8 +1373,28 @@ var ItemTree = class ItemTree extends LibraryTree {
 						return (i < splitA.length) ? 1 : (i < splitB.length) ? -1 : 0;
 					}
 					else {
-						return (fieldA > fieldB) ? 1 : (fieldA < fieldB) ? -1 : 0;
+						let classificationA = fieldA.match(lcWithClassificationRe);
+						let classificationB = fieldB.match(lcWithClassificationRe);
+						if (classificationA && classificationB) {
+							// Looks like a LC call number, so we'll first compare
+							// by classification field using locale collation
+							let classificationComp = collation.compareString(
+								1, classificationA[1], classificationB[1]
+							);
+
+							if (classificationComp == 0) {
+								// If they match, we'll compare the rest using
+								// basic string comparison
+								fieldA = fieldA.substring(classificationA[1].length);
+								fieldB = fieldB.substring(classificationB[1].length);
+							}
+							else {
+								return classificationComp;
+							}
+						}
 					}
+
+					return (fieldA > fieldB) ? 1 : (fieldA < fieldB) ? -1 : 0;
 				}
 				
 				return collation.compareString(1, fieldA, fieldB);
