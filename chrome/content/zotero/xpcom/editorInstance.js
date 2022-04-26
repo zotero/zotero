@@ -1359,13 +1359,15 @@ class EditorInstanceUtilities {
 			}
 
 			let vars = {
-				color: annotation.color,
+				color: annotation.color || '',
 				highlight: (attrs) => attrs.quotes === 'true' ? quotedHighlightHTML : highlightHTML,
 				comment: commentHTML,
 				citation: citationHTML,
 				image: imageHTML,
-				tags: (attrs) => annotation.tags && annotation.tags.map(tag => tag.name).join(attrs.join || ' ')
+				tags: (attrs) => (annotation.tags && annotation.tags.map(tag => tag.name) || []).join(attrs.join || ' ')
 			};
+			Zotero.debug('Using note template:');
+			Zotero.debug(template);
 			let templateHTML = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
 			// Remove some spaces at the end of paragraph
 			templateHTML = templateHTML.replace(/([\s]*)(<\/p)/g, '$2');
