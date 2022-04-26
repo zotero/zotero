@@ -1270,7 +1270,7 @@ class Reader {
 		await this.open(item.id, location, options);
 	}
 
-	async open(itemID, location, { title, tabIndex, openInBackground, openInWindow } = {}) {
+	async open(itemID, location, { title, tabIndex, openInBackground, openInWindow, allowDuplicate } = {}) {
 		this._loadSidebarState();
 		this.triggerAnnotationsImportCheck(itemID);
 		let reader;
@@ -1278,7 +1278,7 @@ class Reader {
 		if (openInWindow) {
 			reader = this._readers.find(r => r._itemID === itemID && (r instanceof ReaderWindow));
 		}
-		else {
+		else if (!allowDuplicate) {
 			reader = this._readers.find(r => r._itemID === itemID);
 		}
 

@@ -319,7 +319,8 @@ var Zotero_Tabs = new function () {
 			this.close(tab.id);
 			Zotero.Reader.open(tab.data.itemID, null, {
 				title: tab.title,
-				tabIndex
+				tabIndex,
+				allowDuplicate: true
 			});
 			return;
 		}
@@ -485,6 +486,18 @@ var Zotero_Tabs = new function () {
 				}
 			});
 			menupopup.appendChild(menuitem);
+			// Duplicate tab
+			menuitem = document.createElement('menuitem');
+			menuitem.setAttribute('label', Zotero.getString('tabs.duplicate'));
+			menuitem.addEventListener('command', () => {
+				var { tab, tabIndex } = this._getTab(id);
+				if (tab.data.itemID) {
+					tabIndex++;
+					Zotero.Reader.open(tab.data.itemID, null, { tabIndex, allowDuplicate: true });
+
+				}
+			});
+			popup.appendChild(menuitem);
 			// Separator
 			popup.appendChild(document.createElement('menuseparator'));
 		}
