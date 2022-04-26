@@ -12,7 +12,7 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Automatisch einen Schnappschuss erstellen, sobald ein Eintrag aus einer Webseite erstellt wird">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automatisch zugehörige PDFs und andere Dateien beim Speichern von Einträgen anhängen">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Automatisch Metadaten für PDF-Dateien abrufen">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatisch angehängte Dateien unter Verwendung von übergeordneten Metadaten umbenennen">
+<!ENTITY zotero.preferences.autoRenameFiles "Automatisch Dateianhänge nach Metadaten des übergeordneten Eintrags umbenennen">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Verlinkte Dateien umbenennen">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "PDFs öffnen mit">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Systemstandard">
@@ -104,7 +104,7 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "URLs von gedruckten Artikeln in Literaturverzeichnis aufführen">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Wenn diese Option deaktiviert ist, führt Zotero URLs bei der Zitierung von Zeitschriften-, Magazin-, oder Zeitungsartikeln nur dann auf, wenn bei dem Artikel kein Seitenbereich angegeben ist.">
 
-<!ENTITY zotero.preferences.quickCopy.caption "Quick-Copy">
+<!ENTITY zotero.preferences.quickCopy.caption "Schnelles Kopieren">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "Format für Einträge:">
 <!ENTITY zotero.preferences.quickCopy.noteFormat "Format für Notizen:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Als HTML kopieren">
@@ -113,7 +113,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(z. B. wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Sprache">
-<!ENTITY zotero.preferences.quickCopy.dragLimit "Quick-Copy deaktiveren, wenn mehr als ... Einträge aktiv sind">
+<!ENTITY zotero.preferences.quickCopy.dragLimit "Schnelles Kopieren via Drag-and-Drop ist zeitgleich möglich für max.">
 
 <!ENTITY zotero.preferences.prefpane.cite "Zitieren">
 <!ENTITY zotero.preferences.cite.styles "Stile">
@@ -169,14 +169,14 @@
 <!ENTITY zotero.preferences.advanced.advancedConfiguration "Erweiterte Konfiguration">
 
 <!ENTITY zotero.preferences.prefpane.locate "Finden">
-<!ENTITY zotero.preferences.locate.locateEngineManager "Artikel-Lookup-Engines verwalten">
+<!ENTITY zotero.preferences.locate.locateEngineManager "Wissenschaftliche Suchmaschinen verwalten">
 <!ENTITY zotero.preferences.locate.description "Beschreibung">
 <!ENTITY zotero.preferences.locate.name "Name">
-<!ENTITY zotero.preferences.locate.addDescription "Um einen Artikel Findern hinzuzufügen der nicht auf der Liste ist, besuchen Sie die Seite der gewünschten Suchmaschine und klicken &quot;hinzufügen&quot;  in Zoteros &quot;Finden&quot; Menü.">
+<!ENTITY zotero.preferences.locate.addDescription "Um eine wissenschaftliche Suchmaschine hinzuzufügen, die nicht auf der Liste steht, besuchen Sie diese in Ihrem Browser und klicken Sie in Zoteros &quot;Finden&quot;-Menü auf &quot;Hinzufügen&quot;.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Standardeinstellung wiederherstellen">
 
 <!ENTITY zotero.preferences.charset "Zeichenkodierung">
-<!ENTITY zotero.preferences.charset.importCharset "Zeichenkodierung importieren">
+<!ENTITY zotero.preferences.charset.importCharset "Zeichenkodierung von Importen">
 <!ENTITY zotero.preferences.charset.displayExportOption "Option für Zeichenkodierung beim Export anzeigen">
 
 <!ENTITY zotero.preferences.dataDir "Speicherort">
