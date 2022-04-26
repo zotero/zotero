@@ -538,7 +538,7 @@ var ZoteroContextPane = new function () {
 				}
 				notes = await s.search();
 				notes = Zotero.Items.get(notes);
-				if (Zotero.Prefs.get('sortNotesChronologically')) {
+				if (Zotero.Prefs.get('sortNotesChronologically.reader')) {
 					notes.sort((a, b) => {
 						a = a.dateModified;
 						b = b.dateModified;
