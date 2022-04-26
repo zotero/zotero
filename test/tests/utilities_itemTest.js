@@ -279,4 +279,50 @@ describe("Zotero.Utilities.Item", function() {
 			assert.equal(title, 'Annotations');
 		});
 	});
+
+
+	describe("#compareCallNumbers()", function () {
+		function checkSort(numbersInOrder) {
+			let numbersResorted = [...numbersInOrder]
+				.sort(() => Math.random() - 0.5) // First shuffle
+				.sort(Zotero.Utilities.Item.compareCallNumbers); // Then re-sort
+			assert.deepEqual(numbersResorted, numbersInOrder);
+		}
+
+		it("should correctly order integer call numbers", function () {
+			let numbersInOrder = [
+				'1',
+				'2',
+				'12',
+				'20',
+				'21',
+				'100',
+				'101',
+			];
+			checkSort(numbersInOrder);
+		});
+
+		it("should correctly order Dewey Decimal call numbers", function () {
+			let numbersInOrder = [
+				'641.5/Cor',
+				'641.5/wol',
+				'641.55541/Ray',
+				'641.594/Mun',
+				'641.5945/Foo',
+				'641.596/Mon',
+				'642.000/ABC',
+			];
+			checkSort(numbersInOrder);
+		});
+
+		it("should correctly order LC call numbers", function () {
+			let numbersInOrder = [
+				'PJ403.B64 C666',
+				'PJ3930.S49 A53 2015',
+				'PJ4519 .B9798 A58 1999',
+				'PJ4519 .B99 A65 1976',
+			];
+			checkSort(numbersInOrder);
+		});
+	});
 });
