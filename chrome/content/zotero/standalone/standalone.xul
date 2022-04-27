@@ -457,11 +457,10 @@
 									command="cmd_zotero_rtfScan"/>
 							<menuseparator/>
 							<menuitem id="installConnector"
-									class="menu-type-library"
 									accessKey="&installConnector.accesskey;"
 									label="&installConnector.label;"
 									oncommand="ZoteroStandalone.openHelp('connectors');"/>
-							<menuitem id="menu_addons" class="menu-type-library" label="&addons.label;"
+							<menuitem id="menu_addons" label="&addons.label;"
 									oncommand="Zotero.openInViewer('chrome://mozapps/content/extensions/extensions.xul', ZoteroStandalone.updateAddonsPane)"/>
 							<menu id="developer-menu"
 									label="&developer.label;">
