@@ -3258,6 +3258,10 @@ var ZoteroPane = new function()
 							}
 						}
 					}
+					else if (isAttachmentWithExtractableAnnotations(item) && !item.isTopLevelItem()) {
+						show.add(m.createNoteFromAnnotations);
+						show.add(m.sep2);
+					}
 					
 					if (Zotero.Attachments.canFindPDFForItem(item)) {
 						show.add(m.findPDF);
@@ -4832,11 +4836,11 @@ var ZoteroPane = new function()
 						.filter(item => isAttachmentWithExtractableAnnotations(item))
 				);
 			}
-			else if (item.isFileAttachment()) {
+			else if (item.isFileAttachment() && !item.isTopLevelItem()) {
 				attachments.push(item);
 			}
 			else if (items.length == 1) {
-				throw new Error("Not a regular item or file attachment");
+				throw new Error("Not a regular item or child file attachment");
 			}
 			else {
 				continue;
