@@ -120,6 +120,7 @@ class EditorInstance {
 			dir: Zotero.dir,
 			font: this._getFont(),
 			style,
+			smartQuotes: Zotero.Prefs.get('note.smartQuotes'),
 			localizedStrings: {
 				// Figure out a better way to pass this
 				'zotero.appName': Zotero.appName,

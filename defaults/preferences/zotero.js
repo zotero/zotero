@@ -101,6 +101,7 @@ pref("extensions.zotero.search.useLeftBound", true);
 pref("extensions.zotero.note.fontFamily", "Lucida Grande, Tahoma, Verdana, Helvetica, sans-serif");
 pref("extensions.zotero.note.fontSize", "14");
 pref("extensions.zotero.note.css", "");
+pref("extensions.zotero.note.smartQuotes", true);
 
 // Reports
 pref("extensions.zotero.report.includeAllChildItems", true);
