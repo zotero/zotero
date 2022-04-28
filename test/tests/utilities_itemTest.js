@@ -323,6 +323,21 @@ describe("Zotero.Utilities.Item", function() {
 				'PJ4519 .B99 A65 1976',
 			];
 			checkSort(numbersInOrder);
+
+			numbersInOrder = [
+				'PJ6611.B35 2014',
+				'PJ6611 .Z36 2001',
+			];
+			checkSort(numbersInOrder);
+
+			numbersInOrder = [
+				'PC43 .O95 2016',
+				'PC45 .P4 1976',
+				'PC4074.7 .P46 2000',
+				'PC4075',
+				'PC4075 .P69 2001',
+			];
+			checkSort(numbersInOrder);
 		});
 	});
 });
