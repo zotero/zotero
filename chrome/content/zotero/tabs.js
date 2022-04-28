@@ -202,8 +202,9 @@ var Zotero_Tabs = new function () {
 	 * Close tabs
 	 *
 	 * @param {String|Array<String>|undefined} ids One or more ids, or empty for the current tab
+	 * @param {Boolean} [allowReopen=true]
 	 */
-	this.close = function (ids) {
+	this.close = function (ids, allowReopen = true) {
 		if (!ids) {
 			ids = [this._selectedID];
 		}
@@ -235,7 +236,9 @@ var Zotero_Tabs = new function () {
 			historyEntry.push({ index: tmpTabs.indexOf(tab), data: tab.data });
 			closedIDs.push(id);
 		}
-		this._history.push(historyEntry);
+		if (allowReopen) {
+			this._history.push(historyEntry);
+		}
 		Zotero.Notifier.trigger('close', 'tab', [closedIDs]);
 		this._update();
 	};
@@ -316,7 +319,7 @@ var Zotero_Tabs = new function () {
 			selectedTab.timeUnselected = Zotero.Date.getUnixTimestamp();
 		}
 		if (tab.type === 'reader-unloaded') {
-			this.close(tab.id);
+			this.close(tab.id, false);
 			Zotero.Reader.open(tab.data.itemID, null, {
 				title: tab.title,
 				tabIndex,
