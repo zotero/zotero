@@ -71,15 +71,16 @@ Zotero.HTTPIntegrationClient.Application.prototype = {
 		this.supportsImportExport = result.supportsImportExport || this.supportsImportExport;
 		this.supportsTextInsertion = result.supportsTextInsertion || this.supportsTextInsertion;
 		this.processorName = result.processorName || this.processorName;
-		return new Zotero.HTTPIntegrationClient.Document(result.documentID);
+		return new Zotero.HTTPIntegrationClient.Document(result.documentID, this.processorName);
 	}
 };
 
 /**
  * See integrationTests.js
  */
-Zotero.HTTPIntegrationClient.Document = function(documentID) {
+Zotero.HTTPIntegrationClient.Document = function(documentID, processorName) {
 	this._documentID = documentID;
+	this.processorName = processorName;
 };
 for (let method of ["activate", "canInsertField", "displayAlert", "getDocumentData",
 	"setDocumentData", "setBibliographyStyle", "importDocument", "exportDocument",

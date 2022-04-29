@@ -263,16 +263,19 @@ Zotero.Integration = new function() {
 		}
 		catch (e) {
 			if (!(e instanceof Zotero.Exception.UserCancelled)) {
-				Zotero.Integration._handleCommandError(document, session, e);
+				await Zotero.Integration._handleCommandError(document, session, e);
 			}
 			else {
 				if (session) {
 					// If user cancels we should still write the currently assigned session ID
-					await document.setDocumentData(session.data.serialize());
-					// And any citations marked for processing (like retraction warning ignore flag changes)
-					if (Object.keys(session.processIndices).length) {
-						session.updateDocument(FORCE_CITATIONS_FALSE, false, false);
-					}
+					try {
+						await document.setDocumentData(session.data.serialize());
+						// And any citations marked for processing (like retraction warning ignore flag changes)
+						if (Object.keys(session.processIndices).length) {
+							session.updateDocument(FORCE_CITATIONS_FALSE, false, false);
+						}
+					// Since user cancelled we can ignore if processor fails here.
+					} catch(e) {}
 				}
 			}
 		}
@@ -366,9 +369,14 @@ Zotero.Integration = new function() {
 			
 			Zotero.Utilities.Internal.activate();
 			let ps = Services.prompt;
-			let index = ps.confirm(null, Zotero.getString('integration.error.title'), displayError);
-			if (index == 1) {
-				Zotero.launchURL(supportURL);
+			if (e instanceof Zotero.Exception.Alert) {
+				ps.alert(null, Zotero.getString('integration.error.title'), displayError);
+			}
+			else {
+				let index = ps.confirm(null, Zotero.getString('integration.error.title'), displayError);
+				if (index == 1) {
+					Zotero.launchURL(supportURL);
+				}
 			}
 			
 			// CiteprocRsDriverError available only if citeproc-rs is enabled

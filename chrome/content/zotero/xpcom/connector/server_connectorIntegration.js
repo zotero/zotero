@@ -64,12 +64,17 @@ Zotero.Server.Endpoints['/connector/document/respond'].prototype = {
 		catch (e) {}
 		if (data && data.error) {
 			// Apps Script stack is a JSON object
+			let error = new Error("HTTP Integration Error");
 			if (typeof data.stack != "string") {
 				data.stack = JSON.stringify(data.stack);
 			}
-			let error = data;
 			if (data.error == 'Alert') {
 				error = new Zotero.Exception.Alert(data.message);
+				error.stack = data.stack;
+			}
+			else if (data.error == 'Tab Not Available Error') {
+				let client = Zotero.Integration.currentDoc.processorName || 'Google Docs';
+				error = new Zotero.Exception.Alert(Zotero.getString('integration.error.tabUnavailable', client));
 				error.stack = data.stack;
 			}
 			Zotero.HTTPIntegrationClient.deferredResponse.reject(error);

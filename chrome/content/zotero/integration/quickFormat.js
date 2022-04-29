@@ -1163,6 +1163,7 @@ var Zotero_QuickFormat = new function () {
 			accepted = true;
 			io.citation.citationItems = [];
 			io.accept();
+			window.close();
 		}
 	};
 
