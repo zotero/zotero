@@ -652,6 +652,20 @@ var ZoteroPane = new function()
 					return;
 				}
 			}
+			else if (event.metaKey && event.altKey) {
+				if (event.key == 'ArrowLeft') {
+					Zotero_Tabs.selectPrev();
+					event.preventDefault();
+					event.stopPropagation();
+					return;
+				}
+				else if (event.key == 'ArrowRight') {
+					Zotero_Tabs.selectNext();
+					event.preventDefault();
+					event.stopPropagation();
+					return;
+				}
+			}
 		}
 		
 		// Tab navigation: Ctrl-Tab / Ctrl-Shift-Tab
