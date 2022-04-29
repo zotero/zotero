@@ -68,6 +68,12 @@
   "firstRun_title": {
     "message": "Nainštalovali ste $1 konektor!"
   },
+  "firstRun_text1": {
+    "message": "Konektor $1 vám umožní jedným kliknutím <a href=\"$2\">ukladať záznamy do $1</a> z vášho prehliadača."
+  },
+  "firstRun_text2": {
+    "message": "Ak ho ešte nemáte, <a href=\"$2\">stiahnite si </a> samostatnú aplikáciu $1 pre najlepší zážitok."
+  },
   "firstRun_acceptButton": {
     "message": "Rozumiem"
   },

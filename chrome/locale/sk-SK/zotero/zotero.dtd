@@ -147,7 +147,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Nastaviť farbu">
 <!ENTITY zotero.tagColorChooser.removeColor "Odstrániť farbu">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
+<!ENTITY zotero.lookup.description "Pridajte nové záznamy zadaním čísel ISBN, DOI, PMID, arXiv alebo kódov ADS:">
 <!ENTITY zotero.lookup.button.search "Hľadať">
 
 <!ENTITY zotero.createParent.title "Vytvoriť nadradený záznam">
@@ -196,7 +196,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Zachovať zoradenie zdrojov">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
+<!ENTITY zotero.citation.suppressAuthor.label "Vynechať autora">
 <!ENTITY zotero.citation.prefix.label "Predpona:">
 <!ENTITY zotero.citation.suffix.label "Prípona:">
 <!ENTITY zotero.citation.editorWarning.label "Pozor: Ak citáciu upravíte v editore, nebude už aktualizovaná s ohľadom na neskoršie zmeny vo vašej databáze alebo v citačnom štýle.">
@@ -307,22 +307,22 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Pridať samostatnú poznámku z anotácií">
 <!ENTITY zotero.context.editInWindow "Upraviť v samostatnom okne">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
-<!ENTITY zotero.pdfReader.lastPage "Last Page">
-<!ENTITY zotero.pdfReader.back "Back">
-<!ENTITY zotero.pdfReader.forward "Forward">
-<!ENTITY zotero.pdfReader.rotateClockwise "Rotate Clockwise">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotate Counterclockwise">
-<!ENTITY zotero.pdfReader.handTool "Hand Tool">
-<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
-<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
-<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
-<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
-<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
-<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
-<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
-<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
+<!ENTITY zotero.pdfReader.firstPage "Prvá strana">
+<!ENTITY zotero.pdfReader.lastPage "Posledná strana">
+<!ENTITY zotero.pdfReader.back "Späť">
+<!ENTITY zotero.pdfReader.forward "Ďalej">
+<!ENTITY zotero.pdfReader.rotateClockwise "Otočiť doprava">
+<!ENTITY zotero.pdfReader.rotateCounterclockwise "Otočiť doľava">
+<!ENTITY zotero.pdfReader.handTool "Náradie">
+<!ENTITY zotero.pdfReader.verticalScrolling "Zvislé posúvanie">
+<!ENTITY zotero.pdfReader.horizontalScrolling "Vodorovné posúvanie">
+<!ENTITY zotero.pdfReader.wrappedScrolling "Zbalené posúvanie">
+<!ENTITY zotero.pdfReader.noSpreads "Žiadne rozpätia">
+<!ENTITY zotero.pdfReader.oddSpreads "Nepárne rozpätia">
+<!ENTITY zotero.pdfReader.evenSpreads "Párne rozpätia">
+<!ENTITY zotero.pdfReader.zoomIn "Priblížiť">
+<!ENTITY zotero.pdfReader.zoomOut "Oddialiť">
+<!ENTITY zotero.pdfReader.zoomAuto "Automaticky upraviť veľkosť">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Prispôsobiť na šírku stránky">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Prispôsobiť na výšku stránky">
+<!ENTITY zotero.pdfReader.transferFromPDF "Importovať anotácie...">

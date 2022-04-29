@@ -176,7 +176,7 @@
 <!ENTITY zotero.preferences.locate.restoreDefaults "Varsayılanları Geri Yükle">
 
 <!ENTITY zotero.preferences.charset "Karakter Kodlaması">
-<!ENTITY zotero.preferences.charset.importCharset "Karakter Kodlamasını içeri aktar">
+<!ENTITY zotero.preferences.charset.importCharset "İçeri Aktarmada Kullanılan Karakter Kodlaması">
 <!ENTITY zotero.preferences.charset.displayExportOption "Dışarı aktarırken karakter kodlama seçeneğini göster">
 
 <!ENTITY zotero.preferences.dataDir "Veri Dizini Konumu">

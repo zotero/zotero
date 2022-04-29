@@ -1,6 +1,6 @@
 <!ENTITY zotero.preferences.title "Zotero-Einstellungen">
 
-<!ENTITY zotero.preferences.default "Standardeinstellungen:">
+<!ENTITY zotero.preferences.default "Standardeinstellung:">
 <!ENTITY zotero.preferences.items "Einträge">
 <!ENTITY zotero.preferences.period ".">
 <!ENTITY zotero.preferences.settings "Einstellungen">
@@ -38,7 +38,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.label "Sortierung:">
 <!ENTITY zotero.preferences.feeds.sorting.newest "Neue Einträge zuerst">
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Alte Einträge zuerst">
-<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Standards">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Standardeinstellungen für Feeds">
 
 <!ENTITY zotero.preferences.openurl.choose "Resolver auswählen…">
 <!ENTITY zotero.preferences.openurl.custom "Benutzerdefiniert...">
@@ -122,7 +122,7 @@
 <!ENTITY zotero.preferences.styleEditor "Zitierstil-Editor">
 <!ENTITY zotero.preferences.stylePreview "Zitierstil-Vorschau">
 
-<!ENTITY zotero.preferences.cite.styles.styleManager "Stil Manager">
+<!ENTITY zotero.preferences.cite.styles.styleManager "Zitierstile verwalten">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Titel">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Aktualisiert">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
@@ -133,8 +133,8 @@
 <!ENTITY zotero.preferences.keys.quicksearch "Schnellsuche">
 <!ENTITY zotero.preferences.keys.newItem "Neuen Eintrag erstellen">
 <!ENTITY zotero.preferences.keys.newNote "Neue Notiz erstellen">
-<!ENTITY zotero.preferences.keys.toggleAllRead "Alle Feed-Einträge alls Gelesen/Ungelesen markieren">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Ausgewählte Einträge als In-Text-Zitationen in die Zwischenablage kopieren">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Alle Feed-Einträge als gelesen/ungelesen markieren">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Ausgewählte Einträge als Zitationen in die Zwischenablage kopieren">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Ausgewählte Einträge in die Zwischenablage kopieren">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Import aus der Zwischenablage">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Änderungen werden nach Neustart wirksam">

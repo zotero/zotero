@@ -267,9 +267,9 @@
 <!ENTITY zotero.feedSettings.title.label "Titel:">
 <!ENTITY zotero.feedSettings.refresh.label1 "Feed aktualisieren alle">
 <!ENTITY zotero.feedSettings.refresh.label2 "Stunde(n)">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Lösche ungelesene Feed Einträge nach">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Lösche ungelesene Feed-Einträge nach">
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "Tag(en)">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Lösche gelesene Feed Einträge nach">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Lösche gelesene Feed-Einträge nach">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "Tag(en)">
 
 <!ENTITY zotero.rtfScan.title "RTF-Scan">

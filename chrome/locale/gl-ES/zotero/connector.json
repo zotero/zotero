@@ -5,8 +5,17 @@
   "general_moreInfo": {
     "message": "Máis información..."
   },
+  "general_needHelp": {
+    "message": "Necesitas axuda?"
+  },
   "general_done": {
     "message": "Feito"
+  },
+  "general_yes": {
+    "message": "Si"
+  },
+  "general_no": {
+    "message": "Non"
   },
   "general_tryAgain": {
     "message": "Intentar de novo"
@@ -50,6 +59,9 @@
   "upgradeApp": {
     "message": "Anovar $1"
   },
+  "firstRun_title": {
+    "message": "Instalaches o conector $1!"
+  },
   "error_connection_isAppRunning": {
     "message": "Está $1 aberto?"
   },
@@ -91,6 +103,12 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "$1 integración non está dispoñible cando se editan os Microsoft Word .docx directamente desde Google Docs.  Escolla Ficheiro → Gardar como Google Docs para permitir activar esa funcionalidade.<br/><br/>Se queres transferir de documento Word as $1 citas para Google Docs, olla <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Mover documentos entre editores de texto </a>."
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "As citas do documento están a ser editadas por outro usuario $1. Por favor, téntao de novo máis tarde."
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "A conta de Google seleccionado non ten permisos para editar este documento. Por favor inténtao de novo e asegúrate de escoller unha conta con permiso para editar."
   },
   "integration_googleDocs_orphanedCitations_buttonTooltip": {
     "message": "Amosar as citas $1 desligadas."
