@@ -1343,7 +1343,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					const order = ['pdf', 'snapshot', 'other', 'none'];
 					fieldA = order.indexOf(fieldA.type || 'none') + (fieldA.exists ? 0 : 4);
 					fieldB = order.indexOf(fieldB.type || 'none') + (fieldB.exists ? 0 : 4);
-					return fieldB - fieldA;
+					return fieldA - fieldB;
 				}
 
 				if (sortField == 'callNumber') {
