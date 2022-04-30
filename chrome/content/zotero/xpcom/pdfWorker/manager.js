@@ -152,6 +152,8 @@ class PDFWorker {
 			if (!attachment.isPDFAttachment()) {
 				throw new Error('Item must be a PDF attachment');
 			}
+			let t = new Date();
+			Zotero.debug(`Exporting PDF for item ${attachment.libraryKey}`);
 			let items = attachment.getAnnotations();
 			items = items.filter(x => !x.annotationIsExternal);
 			let annotations = [];
@@ -199,6 +201,8 @@ class PDFWorker {
 			if (transfer) {
 				await Zotero.Items.erase(items.map(x => x.id));
 			}
+			
+			Zotero.debug(`Exported PDF with ${annotations.length} annotation(s) in ${new Date() - t} ms`);
 			
 			return annotations.length;
 		}, isPriority);
