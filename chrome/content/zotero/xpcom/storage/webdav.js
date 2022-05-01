@@ -84,7 +84,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
 								.getService(Components.interfaces.nsILoginManager);
 		
-		var logins = loginManager.findLogins({}, this._loginManagerHost, null, this._loginManagerRealm);
+		var logins = loginManager.findLogins(this._loginManagerHost, null, this._loginManagerRealm);
 		// Find user from returned array of nsILoginInfo objects
 		for (var i = 0; i < logins.length; i++) {
 			if (logins[i].username == username) {
@@ -93,7 +93,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		}
 		
 		// Pre-4.0.28.5 format, broken for findLogins and removeLogin in Fx41
-		logins = loginManager.findLogins({}, "chrome://zotero", "", null);
+		logins = loginManager.findLogins("chrome://zotero", "", null);
 		for (var i = 0; i < logins.length; i++) {
 			if (logins[i].username == username
 					&& logins[i].formSubmitURL == "Zotero Storage Server") {
@@ -120,7 +120,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		
 		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
 								.getService(Components.interfaces.nsILoginManager);
-		var logins = loginManager.findLogins({}, this._loginManagerHost, null, this._loginManagerRealm);
+		var logins = loginManager.findLogins(this._loginManagerHost, null, this._loginManagerRealm);
 		for (var i = 0; i < logins.length; i++) {
 			Zotero.debug('Clearing WebDAV passwords');
 			if (logins[i].httpRealm == this._loginManagerRealm) {
@@ -130,7 +130,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		}
 		
 		// Pre-4.0.28.5 format, broken for findLogins and removeLogin in Fx41
-		logins = loginManager.findLogins({}, this._loginManagerHost, "", null);
+		logins = loginManager.findLogins(this._loginManagerHost, "", null);
 		for (var i = 0; i < logins.length; i++) {
 			Zotero.debug('Clearing old WebDAV passwords');
 			if (logins[i].formSubmitURL == "Zotero Storage Server") {

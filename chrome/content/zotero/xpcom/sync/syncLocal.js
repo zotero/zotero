@@ -400,7 +400,6 @@ Zotero.Sync.Data.Local = {
 	_getAPIKeyLoginInfo: function () {
 		try {
 			var logins = Services.logins.findLogins(
-				{},
 				this._loginManagerHost,
 				null,
 				this._loginManagerRealm
@@ -449,7 +448,7 @@ Zotero.Sync.Data.Local = {
 		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
 			.getService(Components.interfaces.nsILoginManager);
 		try {
-			var logins = loginManager.findLogins({}, loginManagerHost, null, loginManagerRealm);
+			var logins = loginManager.findLogins(loginManagerHost, null, loginManagerRealm);
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -464,7 +463,7 @@ Zotero.Sync.Data.Local = {
 		}
 		
 		// Pre-4.0.28.5 format, broken for findLogins and removeLogin in Fx41,
-		var logins = loginManager.findLogins({}, loginManagerHost, "", null);
+		var logins = loginManager.findLogins(loginManagerHost, "", null);
 		for (let i = 0; i < logins.length; i++) {
 			if (logins[i].username == username
 					&& logins[i].formSubmitURL == "Zotero Sync Server") {
@@ -484,7 +483,7 @@ Zotero.Sync.Data.Local = {
 		var loginManager = Components.classes["@mozilla.org/login-manager;1"]
 			.getService(Components.interfaces.nsILoginManager);
 		try {
-			var logins = loginManager.findLogins({}, loginManagerHost, null, loginManagerRealm);
+			var logins = loginManager.findLogins(loginManagerHost, null, loginManagerRealm);
 		}
 		catch (e) {
 			Zotero.logError(e);
