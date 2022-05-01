@@ -3514,17 +3514,17 @@ Zotero.Schema = new function(){
 		var itemRE = /(?:(users)\/(\d+|local\/\w+)|(groups)\/(\d+))\/items\/([A-Z0-9]{8})/;
 		var report = "";
 		var groupLibraryIDMap = {};
-		var resolveLibrary = Zotero.Promise.coroutine(async function (usersOrGroups, id) {
+		var resolveLibrary = async function (usersOrGroups, id) {
 			if (usersOrGroups == 'users') return 1;
 			if (groupLibraryIDMap[id] !== undefined) return groupLibraryIDMap[id];
 			return groupLibraryIDMap[id] = (await Zotero.DB.valueQueryAsync("SELECT libraryID FROM groups WHERE groupID=?", id));
-		});
+		};
 		var predicateMap = {};
-		var resolvePredicate = Zotero.Promise.coroutine(async function (predicate) {
+		var resolvePredicate = async function (predicate) {
 			if (predicateMap[predicate]) return predicateMap[predicate];
 			await Zotero.DB.queryAsync("INSERT INTO relationPredicates (predicateID, predicate) VALUES (NULL, ?)", predicate);
 			return predicateMap[predicate] = Zotero.DB.valueQueryAsync("SELECT predicateID FROM relationPredicates WHERE predicate=?", predicate);
-		});
+		};
 		while (true) {
 			let rows = await Zotero.DB.queryAsync("SELECT subject, predicate, object FROM relations LIMIT ?, ?", [start, limit]);
 			if (!rows.length) {
