@@ -170,6 +170,25 @@ Zotero.Schema = new function(){
 		var updated;
 		await Zotero.DB.queryAsync("PRAGMA foreign_keys = false");
 		try {
+			// Auto-repair databases flagged for repair or coming from the DB Repair Tool
+			//
+			// If we need to run migration steps, skip the check until after the update, since
+			// the integrity check is expecting to run on the current data model.
+			let integrityCheckDone = false;
+			let toVersion = await _getSchemaSQLVersion('userdata');
+			if (integrityCheckRequired && userdata >= toVersion) {
+				await this.integrityCheck(true);
+				integrityCheckDone = true;
+			}
+			
+			// TEMP
+			try {
+				await _fixSciteValues();
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+			
 			updated = await Zotero.DB.executeTransaction(async function (conn) {
 				var updated = await _updateSchema('system');
 				
@@ -177,25 +196,6 @@ Zotero.Schema = new function(){
 				// place before user data migration
 				if (Zotero.DB.tableExists('customItemTypes')) {
 					await _updateCustomTables();
-				}
-				
-				// Auto-repair databases flagged for repair or coming from the DB Repair Tool
-				//
-				// If we need to run migration steps, skip the check until after the update, since
-				// the integrity check is expecting to run on the current data model.
-				var integrityCheckDone = false;
-				var toVersion = await _getSchemaSQLVersion('userdata');
-				if (integrityCheckRequired && userdata >= toVersion) {
-					await this.integrityCheck(true);
-					integrityCheckDone = true;
-				}
-				
-				// TEMP
-				try {
-					await _fixSciteValues();
-				}
-				catch (e) {
-					Zotero.logError(e);
 				}
 				
 				updated = await _migrateUserDataSchema(userdata, options);
@@ -206,13 +206,13 @@ Zotero.Schema = new function(){
 				// We do this again in case custom fields were changed during user data migration
 				await _updateCustomTables();
 				
-				// If we updated the DB, also do an integrity check for good measure
-				if (updated && !integrityCheckDone) {
-					await this.integrityCheck(true);
-				}
-				
 				return updated;
 			}.bind(this));
+			
+			// If we updated the DB, also do an integrity check for good measure
+			if (updated && !integrityCheckDone) {
+				await this.integrityCheck(true);
+			}
 			
 			// If bundled global schema file is newer than DB, apply it
 			if (bundledGlobalSchemaVersionCompare === 1) {
