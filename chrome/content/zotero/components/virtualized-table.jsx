@@ -799,8 +799,9 @@ class VirtualizedTable extends React.Component {
 			offset += resizingRect.width;
 		}
 		const widthSum = aRect.width + bRect.width;
-		const spacingOffset = COLUMN_MIN_WIDTH + COLUMN_PADDING;
-		const aColumnWidth = Math.min(widthSum - spacingOffset, Math.max(spacingOffset, event.clientX - (RESIZER_WIDTH / 2) - offset));
+		const aSpacingOffset = (aColumn.minWidth ? aColumn.minWidth : COLUMN_MIN_WIDTH) + COLUMN_PADDING;
+		const bSpacingOffset = (bColumn.minWidth ? bColumn.minWidth : COLUMN_MIN_WIDTH) + COLUMN_PADDING;
+		const aColumnWidth = Math.min(widthSum - bSpacingOffset, Math.max(aSpacingOffset, event.clientX - (RESIZER_WIDTH / 2) - offset));
 		const bColumnWidth = widthSum - aColumnWidth;
 		let onResizeData = {};
 		onResizeData[aColumn.dataKey] = aColumnWidth;
@@ -1477,10 +1478,13 @@ var Columns = class {
 				column.width = width;
 				prefs[dataKey] = this._getColumnPrefsToPersist(column);
 			}
-			if (column.fixedWidth && column.width) {
+			if (column.fixedWidth) {
+				width = column.width;
+			}
+			if (column.fixedWidth && column.width || column.staticWidth) {
 				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('flex', `0 0`, `important`);
-				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('max-width', `${column.width}px`, 'important');
-				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('min-width', `${column.width}px`, 'important');
+				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('max-width', `${width}px`, 'important');
+				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('min-width', `${width}px`, 'important');
 			} else {
 				width = (width - COLUMN_PADDING) * COLUMN_NORMALIZATION_WIDTH / headerWidth;
 				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('flex-basis', `${width}px`);

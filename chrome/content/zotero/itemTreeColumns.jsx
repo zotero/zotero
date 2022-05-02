@@ -38,6 +38,9 @@ const Icons = require('components/icons');
  * 	flex: number,					// Default: 1. When the column is added to the tree how much space it should occupy as a flex ratio
  * 	width: string,					// A column width instead of flex ratio. See above.
  * 	fixedWidth: boolean				// Default: false. Set to true to disable column resizing
+ * 	staticWidth: boolean			// Default: false. Set to true to prevent columns from changing width when
+ * 									// the width of the tree increases or decreases
+ * 	minWidth: number,				// Override the default [20px] column min-width for resizing
  *
  * 	label: string,					// The column label. Either a string or the id to an i18n string.
  * 	iconLabel: React.Component,		// Set an Icon label instead of a text-based one
@@ -86,6 +89,7 @@ const COLUMNS = [
 		defaultSort: -1,
 		label: "zotero.items.year_column",
 		flex: 1,
+		staticWidth: true,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
 	{
@@ -298,6 +302,8 @@ const COLUMNS = [
 		label: "zotero.tabs.notes.label",
 		iconLabel: <Icons.IconTreeitemNoteSmall />,
 		width: "14",
+		minWidth: 14,
+		staticWidth: true,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	}
 ];
