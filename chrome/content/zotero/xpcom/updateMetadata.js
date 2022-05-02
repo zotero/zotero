@@ -194,6 +194,9 @@ Zotero.UpdateMetadata = new function () {
 		await _processQueue();
 	};
 
+	// For testing purposes.
+	this._setRowFields = _setRowFields;
+
 	/**
 	 * Trigger dialog and toolbar icon update
 	 * @private
@@ -269,7 +272,7 @@ Zotero.UpdateMetadata = new function () {
 
 	/**
 	 * Format creators array to string
-	 * @param {Zotero.Creators[]} creators
+	 * @param {Zotero.Creator[]} creators
 	 * @param {Boolean} insertType - Append creator type after each creator
 	 * @returns {String}
 	 * @private
@@ -279,7 +282,7 @@ Zotero.UpdateMetadata = new function () {
 			let name = c.lastName && c.firstName && (c.firstName + ' ' + c.lastName)
 				|| c.lastName || c.firstName || '';
 
-			let type = insertType ? ` (${Zotero.CreatorTypes.getLocalizedString(c.creatorType)})` : '';
+			let type = insertType ? ` (${Zotero.CreatorTypes.getLocalizedString(c.creatorTypeID)})` : '';
 
 			// Use a non-breaking space to differentiate between
 			// single creator names (and type) and other creators
@@ -628,7 +631,7 @@ Zotero.UpdateMetadata = new function () {
 		let oldCreators = oldItem.getCreators();
 		let newCreators = newItem.getCreators();
 		for (let i = 0; i < Math.min(oldCreators.length, newCreators.length); i++) {
-			if (oldCreators[i].creatorType !== newCreators[i].creatorType) {
+			if (oldCreators[i].creatorTypeID !== newCreators[i].creatorTypeID) {
 				includeCreatorType = true;
 				break;
 			}

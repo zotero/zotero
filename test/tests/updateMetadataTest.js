@@ -1,4 +1,18 @@
 describe('Update Metadata', function () {
+	function getFields(oldItem, newItem) {
+		let row = {
+			itemID: oldItem.id,
+			status: Zotero.UpdateMetadata.ROW_QUEUED,
+			message: '',
+			title: oldItem.getField('title', false, true),
+			fields: [],
+			accepted: {},
+			isDone: false
+		};
+		Zotero.UpdateMetadata._setRowFields(row, oldItem, newItem);
+		return row.fields;
+	}
+
 	it('should disable all fields if potentially bad metadata is detected', function () {
 		let itemTests = [
 			// [oldItem, newItem, disabled?]
@@ -91,5 +105,58 @@ describe('Update Metadata', function () {
 		for (let test of extraTests) {
 			assert.equal(Zotero.UpdateMetadata.combineExtra(test[0], test[1]), test[2]);
 		}
+	});
+
+	it('should include creator types in labels when different', function () {
+		let oldItem = new Zotero.Item('book');
+		oldItem.setCreator(0, {
+			firstName: 'John',
+			lastName: 'Doe',
+			creatorType: 'author'
+		});
+
+		let newItem = {
+			itemType: 'book',
+			creators: [{
+				firstName: 'John',
+				lastName: 'Doe',
+				creatorType: 'editor'
+			}]
+		};
+
+		let fields = getFields(oldItem, newItem);
+		let creators = fields.find(field => field.fieldName === 'creators');
+		assert.ok(creators);
+		assert.include(creators.oldLabel, '(Author)');
+		assert.include(creators.newLabel, '(Editor)');
+	});
+
+	it('should not include creator types in labels when identical', function () {
+		let oldItem = new Zotero.Item('book');
+		oldItem.setCreator(0, {
+			firstName: 'John',
+			lastName: 'Doe',
+			creatorType: 'author'
+		});
+		oldItem.setCreator(1, {
+			firstName: 'John',
+			lastName: 'Smith',
+			creatorType: 'author'
+		});
+
+		let newItem = {
+			itemType: 'book',
+			creators: [{
+				firstName: 'John',
+				lastName: 'Doe',
+				creatorType: 'author'
+			}]
+		};
+
+		let fields = getFields(oldItem, newItem);
+		let creators = fields.find(field => field.fieldName === 'creators');
+		assert.ok(creators);
+		assert.notInclude(creators.oldLabel, '(');
+		assert.notInclude(creators.newLabel, '(');
 	});
 });
