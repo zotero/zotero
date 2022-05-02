@@ -74,7 +74,8 @@ var Zotero_Tabs = new function () {
 			id: tab.id,
 			type: tab.type,
 			title: tab.title,
-			selected: tab.id == this._selectedID
+			selected: tab.id == this._selectedID,
+			iconBackgroundImage: tab.iconBackgroundImage
 		})));
 		var { tab } = this._getTab(this._selectedID);
 		document.title = (tab.title.length ? tab.title + ' - ' : '') + 'Zotero';
@@ -195,7 +196,21 @@ var Zotero_Tabs = new function () {
 			return;
 		}
 		tab.title = title;
+		Zotero_Tabs.updateLibraryTabIcon();
 		this._update();
+	};
+
+	this.updateLibraryTabIcon = () => {
+		let index = ZoteroPane.collectionsView.selection.focused;
+		if (!ZoteroPane.collectionsView.getRow(index)) {
+			return;
+		}
+		let icon = ZoteroPane.collectionsView._getIcon(index);
+		var { tab } = this._getTab('zotero-pane');
+		if (!tab || !icon.style.backgroundImage) {
+			return;
+		}
+		tab.iconBackgroundImage = icon.style.backgroundImage;
 	};
 
 	/**

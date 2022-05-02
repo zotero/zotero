@@ -19,10 +19,6 @@
 		display: none;
 		box-shadow: none;
 
-		&.enabled {
-			display: flex;
-		}
-
 		.icon {
 			display: flex;
 		}
@@ -48,6 +44,27 @@
 		&.active {
 			border-left: 1px solid rgba(0, 0, 0, 0.2);
 			box-shadow: -1px 0 0 0 rgba(0,0,0,0.05);
+		}
+	}
+
+	.pinned-tabs {
+		display: none;
+		.tab {
+			max-width: 110px;
+		}
+	}
+
+	&.scrollable {
+		.tabs-wrapper > .tabs > :first-child {
+			display: none;
+		}
+
+		.scroll-start-arrow, .scroll-end-arrow {
+			display: flex;
+		}
+
+		.pinned-tabs {
+			display: block;
 		}
 	}
 }
@@ -117,6 +134,11 @@
 		position: relative;
 		top: -2px;
 		overflow-y: hidden;
+
+		.icon-bg {
+			margin-inline-end: 7px;
+			margin-top: -2px;
+		}
 	}
 
 	.tab-close {
@@ -141,7 +163,7 @@
 			background-color: rgba(0, 0, 0, 0.16);
 		}
 	}
-	
+
 	&:first-child .tab-close {
 		display: none;
 	}
