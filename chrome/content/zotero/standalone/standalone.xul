@@ -90,6 +90,7 @@
 		<key id="key_forward"/>
 	</keyset>
 	<keyset id="editMenuKeys"/>
+	<keyset id="sortSubmenuKeys"/>
 	
 	<menupopup id="contentAreaContextMenu">
 		<menuitem id="context-undo"
@@ -403,6 +404,19 @@
 										label="&zotero.general.reset;"
 										oncommand="ZoteroStandalone.onViewMenuItemClick(event); event.stopPropagation();"/>
 								</menupopup>
+							</menu>
+							<menuseparator class="menu-type-library" />
+							<menu id="column-picker-submenu"
+									class="menu-type-library"
+									label="&columns.label;"
+									onpopupshowing="ZoteroPane_Local.onColumnPickerSubmenuOpen()">
+								<menupopup/>
+							</menu>
+							<menu id="sort-submenu"
+									class="menu-type-library"
+									label="&sortBy.label;"
+									onpopupshowing="ZoteroPane_Local.onSortSubmenuOpen()">
+								<menupopup/>
 							</menu>
 							<menuseparator/>
 							<menuitem id="view-menuitem-recursive-collections"

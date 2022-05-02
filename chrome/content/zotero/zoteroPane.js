@@ -161,6 +161,17 @@ var ZoteroPane = new function()
 		
 		Zotero.Keys.windowInit(document);
 		
+		let sortSubmenuKeys = document.getElementById('sortSubmenuKeys');
+		for (let i = 0; i < 10; i++) {
+			let key = document.createElement('key');
+			key.id = 'key_sortCol' + i;
+			key.setAttribute('modifiers', Zotero.isMac ? 'accel alt control' : 'accel alt');
+			key.setAttribute('key', (i + 1) % 10);
+			// addListener('command', ...) doesn't trigger unless attached to a menuitem
+			key.setAttribute('oncommand', `ZoteroPane.itemsView.toggleSort(${i}, true)`);
+			sortSubmenuKeys.append(key);
+		}
+		
 		if (Zotero.restoreFromServer) {
 			Zotero.restoreFromServer = false;
 			
@@ -5488,6 +5499,25 @@ var ZoteroPane = new function()
 	this.updateItemTreeColumnWidths = function() {
 		if (!ZoteroPane.itemsView || !ZoteroPane.itemsView.tree) return;
 		ZoteroPane.itemsView.tree.updateColumnWidths();
+	};
+
+	this.onColumnPickerSubmenuOpen = function () {
+		let menuPopup = document.getElementById('column-picker-submenu').menupopup;
+		menuPopup.innerHTML = '';
+		this.itemsView?.buildColumnPickerMenu(menuPopup);
+	};
+
+	this.onSortSubmenuOpen = function () {
+		let menuPopup = document.getElementById('sort-submenu').menupopup;
+		menuPopup.innerHTML = '';
+		this.itemsView?.buildSortMenu(menuPopup);
+
+		for (let i = 0; i < 10; i++) {
+			if (!menuPopup.children[i]) {
+				break;
+			}
+			menuPopup.children[i].setAttribute('key', 'key_sortCol' + i);
+		}
 	};
 
 	/**

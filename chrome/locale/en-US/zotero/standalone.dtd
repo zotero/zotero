@@ -60,6 +60,8 @@
 <!ENTITY recursiveCollections.label     "Show Items from Subcollections">
 <!ENTITY fontSize.label                 "Font Size">
 <!ENTITY noteFontSize.label             "Note Font Size">
+<!ENTITY columns.label                  "Columns">
+<!ENTITY sortBy.label                   "Sort By">
 
 <!--TOOLS MENU-->
 <!ENTITY toolsMenu.label           "Tools"> 
