@@ -36,6 +36,9 @@ const { IconDownChevron, getDOMElement } = require('components/icons');
 const TYPING_TIMEOUT = 1000;
 const MINIMUM_ROW_HEIGHT = 20; // px
 const RESIZER_WIDTH = 5; // px
+const COLUMN_MIN_WIDTH = 20;
+const COLUMN_NORMALIZATION_WIDTH = 8192;
+const COLUMN_PADDING = 10; // N.B. MUST BE INLINE WITH CSS!!!
 
 const noop = () => 0;
 
@@ -760,21 +763,6 @@ class VirtualizedTable extends React.Component {
 	
 	// ------------------------ Column Methods ------------------------- //
 
-	/**
-	 * A public function to update the column CSS flex widths. To be used
-	 * upon window resize and similar. Especially important on macOS where
-	 * column borders are used and get out of sync with column headers.
-	 */
-	updateColumnWidths = Zotero.Utilities.debounce(() => {
-		let resizeData = {};
-		const columns = this._getVisibleColumns();
-		for (const column of columns) {
-			const elem = document.querySelector(`#${this.props.id} .virtualized-table-header .cell.${column.dataKey}`)
-			resizeData[column.dataKey] = elem.getBoundingClientRect().width;
-		}
-		this._columns.onResize(resizeData, true);
-	}, 200)
-	
 	_handleResizerDragStart = (index, event) => {
 		if (event.button !== 0) return false;
 		event.stopPropagation();
@@ -811,8 +799,8 @@ class VirtualizedTable extends React.Component {
 			offset += resizingRect.width;
 		}
 		const widthSum = aRect.width + bRect.width;
-		// Column min-width: 20px;
-		const aColumnWidth = Math.min(widthSum - 20, Math.max(20, event.clientX - (RESIZER_WIDTH / 2) - offset));
+		const spacingOffset = COLUMN_MIN_WIDTH + COLUMN_PADDING;
+		const aColumnWidth = Math.min(widthSum - spacingOffset, Math.max(spacingOffset, event.clientX - (RESIZER_WIDTH / 2) - offset));
 		const bColumnWidth = widthSum - aColumnWidth;
 		let onResizeData = {};
 		onResizeData[aColumn.dataKey] = aColumnWidth;
@@ -1477,6 +1465,8 @@ var Columns = class {
 		if (storePrefs) {
 			var prefs = this._getPrefs();
 		}
+		const header = document.querySelector(`#${this._styleKey} .virtualized-table-header`);
+		const headerWidth = header ? header.getBoundingClientRect().width : 300;
 		for (let [dataKey, width] of Object.entries(columnWidths)) {
 			if (typeof dataKey == "number") {
 				dataKey = this._columns[dataKey].dataKey;
@@ -1492,6 +1482,7 @@ var Columns = class {
 				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('max-width', `${column.width}px`, 'important');
 				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('min-width', `${column.width}px`, 'important');
 			} else {
+				width = (width - COLUMN_PADDING) * COLUMN_NORMALIZATION_WIDTH / headerWidth;
 				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('flex-basis', `${width}px`);
 			}
 		}
