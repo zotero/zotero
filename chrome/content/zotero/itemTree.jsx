@@ -1270,7 +1270,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				return Zotero.Items.getSortTitle(item.getDisplayTitle());
 			
 			case 'hasAttachment':
-				if (this._canCalculateAttachmentState(item)) {
+				if (this._canGetBestAttachmentState(item)) {
 					return item.getBestAttachmentStateCached();
 				}
 				else {
@@ -2749,7 +2749,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		// TEMP: For now, we use the blue bullet for all non-PDF attachments, but there's
 		// commented-out code for showing different icons for snapshots, files, and URL/DOI links
-		if (this._canCalculateAttachmentState(item)) {
+		if (this._canGetBestAttachmentState(item)) {
 			const { type, exists } = item.getBestAttachmentStateCached();
 			let icon = "";
 			let ariaLabel;
@@ -3514,7 +3514,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				let t = new Date();
 				for (let i = 0; i < this._rows.length; i++) {
 					let item = this.getRow(i).ref;
-					if (this._canCalculateAttachmentState(item)) {
+					if (this._canGetBestAttachmentState(item)) {
 						await item.getBestAttachmentState();
 					}
 				}
@@ -3789,7 +3789,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		return icon;
 	}
 
-	_canCalculateAttachmentState(item) {
+	_canGetBestAttachmentState(item) {
 		return (item.isRegularItem() && item.numAttachments())
 			|| (item.isAttachment() && item.isTopLevelItem());
 	}
