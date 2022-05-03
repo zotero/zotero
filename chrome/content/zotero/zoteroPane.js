@@ -108,7 +108,6 @@ var ZoteroPane = new function()
 			if (!tabsDeck || tabsDeck.getAttribute('selectedIndex') == 0) {
 				this.updateToolbarPosition();
 				this.updateTagsBoxSize();
-				this.updateItemTreeColumnWidths();
 			}
 		});
 		window.setTimeout(this.updateToolbarPosition.bind(this), 0);
@@ -5483,11 +5482,6 @@ var ZoteroPane = new function()
 				- 35; // a little padding
 			list.style.height = height + 'px';
 		}
-	};
-
-	this.updateItemTreeColumnWidths = function() {
-		if (!ZoteroPane.itemsView || !ZoteroPane.itemsView.tree) return;
-		ZoteroPane.itemsView.tree.updateColumnWidths();
 	};
 
 	/**

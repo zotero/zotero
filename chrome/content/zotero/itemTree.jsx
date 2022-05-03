@@ -2734,7 +2734,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		const depth = this.getLevel(index);
 		let firstChildIndent = 0;
 		if (column.ordinal == 0) {
-			firstChildIndent = 6;
+			firstChildIndent = 5;
 		}
 		span.style.paddingInlineStart = ((CHILD_INDENT * depth) + firstChildIndent) + 'px';
 
