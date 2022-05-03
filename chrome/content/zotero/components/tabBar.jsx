@@ -37,6 +37,7 @@ const TabBar = forwardRef(function (props, ref) {
 	const [dragMouseX, setDragMouseX] = useState(0);
 	const dragIDRef = useRef(null);
 	const dragGrabbedDeltaXRef = useRef();
+	const tabsInnerContainerRef = useRef();
 	const tabsRef = useRef();
 	const startArrowRef = useRef();
 	const endArrowRef = useRef();
@@ -85,17 +86,10 @@ const TabBar = forwardRef(function (props, ref) {
 	});
 
 	function updateScrollArrows() {
-		let enableArrows = tabsRef.current.scrollWidth !== tabsRef.current.clientWidth;
-		if (enableArrows) {
-			startArrowRef.current.classList.add('enabled');
-			endArrowRef.current.classList.add('enabled');
-		}
-		else {
-			startArrowRef.current.classList.remove('enabled');
-			endArrowRef.current.classList.remove('enabled');
-		}
+		let scrollable = tabsRef.current.scrollWidth !== tabsRef.current.clientWidth;
+		if (scrollable) {
+			tabsInnerContainerRef.current.classList.add('scrollable');
 
-		if (enableArrows) {
 			if (tabsRef.current.scrollLeft !== 0) {
 				startArrowRef.current.classList.add('active');
 			}
@@ -109,6 +103,9 @@ const TabBar = forwardRef(function (props, ref) {
 			else {
 				endArrowRef.current.classList.remove('active');
 			}
+		}
+		else {
+			tabsInnerContainerRef.current.classList.remove('scrollable');
 		}
 	}
 	
@@ -271,7 +268,7 @@ const TabBar = forwardRef(function (props, ref) {
 		event.preventDefault();
 	}
 
-	function renderTab({ id, title, selected }, index) {
+	function renderTab({ id, title, selected, iconBackgroundImage }, index) {
 		return (
 			<div
 				key={id}
@@ -285,7 +282,8 @@ const TabBar = forwardRef(function (props, ref) {
 				onDragStart={(event) => handleDragStart(event, id, index)}
 				onDragEnd={handleDragEnd}
 			>
-				<div className="tab-name">{title}</div>
+				<div className="tab-name">{iconBackgroundImage &&
+					<span className="icon-bg" style={{ backgroundImage: iconBackgroundImage }}/>}{title}</div>
 				<div
 					className="tab-close"
 					onClick={(event) => handleTabClose(event, id)}
@@ -298,7 +296,16 @@ const TabBar = forwardRef(function (props, ref) {
 
 	return (
 		<div>
-			<div className="tab-bar-inner-container" onWheel={handleWheel}>
+			<div
+				ref={tabsInnerContainerRef}
+				className="tab-bar-inner-container"
+				onWheel={handleWheel}
+			>
+				<div className="pinned-tabs">
+					<div className="tabs">
+						{tabs.length ? renderTab(tabs[0], 0) : null}
+					</div>
+				</div>
 				<div
 					ref={startArrowRef}
 					className="scroll-start-arrow"
