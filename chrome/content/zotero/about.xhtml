@@ -5,14 +5,14 @@
 <?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/about.dtd">
 
-<dialog
-	id="zotero-about"
+<window
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	orient="vertical"
-	buttons="accept"
-	buttonlabelaccept="&zotero.about.close;"
-	onload="moveToAlertPosition(); sizeToContent(); document.documentElement.getButton('accept').focus();"
-	ondialogaccept="return true;">
+	onload="moveToAlertPosition(); sizeToContent(); document.getElementById('zotero-about').getButton('accept').focus();">
+<dialog
+		id="zotero-about"
+		buttons="accept"
+		buttonlabelaccept="&zotero.about.close;"
+		ondialogaccept="return true;">
 	
 	<script src="include.js"/>
 	
@@ -84,3 +84,4 @@
 		</vbox>
 	</vbox>
 </dialog>
+</window>
