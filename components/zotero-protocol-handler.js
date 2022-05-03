@@ -33,7 +33,7 @@ const ZOTERO_PROTOCOL_CONTRACTID = "@mozilla.org/network/protocol;1?name=" + ZOT
 const ZOTERO_PROTOCOL_NAME = "Zotero Chrome Extension Protocol";
 
 Components.utils.import("resource://gre/modules/Services.jsm");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Components.utils.import("resource://gre/modules/ComponentUtils.jsm");
 Components.utils.import("resource://gre/modules/osfile.jsm")
 const { NetUtil } = ChromeUtils.import("resource://gre/modules/NetUtil.jsm");
 
@@ -1529,4 +1529,4 @@ AsyncChannel.prototype = {
 };
 
 
-var NSGetFactory = XPCOMUtils.generateNSGetFactory([ZoteroProtocolHandler]);
+var NSGetFactory = ComponentUtils.generateNSGetFactory([ZoteroProtocolHandler]);

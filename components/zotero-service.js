@@ -152,8 +152,8 @@ const xpcomFilesLocal = [
 	'connector/server_connectorIntegration',
 ];
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-Components.utils.import("resource://gre/modules/Services.jsm");
+Components.utils.import("resource://gre/modules/ComponentUtils.jsm");
+const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 var instanceID = (new Date()).getTime();
 var isFirstLoadThisSession = true;
@@ -439,8 +439,6 @@ function ZoteroService() {
 	}
 }
 ZoteroService.prototype = {
-	contractID: '@zotero.org/Zotero;1',
-	classDescription: 'Zotero',
 	classID: Components.ID('{e4c61080-ec2d-11da-8ad9-0800200c9a66}'),
 	QueryInterface: ChromeUtils.generateQI([])
 }
@@ -658,12 +656,10 @@ ZoteroCommandLineHandler.prototype = {
 		}
 	},
 	
-	contractID: "@mozilla.org/commandlinehandler/general-startup;1?type=zotero",
-	classDescription: "Zotero Command Line Handler",
 	classID: Components.ID("{531828f8-a16c-46be-b9aa-14845c3b010f}"),
 	service: true,
 	_xpcom_categories: [{category:"command-line-handler", entry:"m-zotero"}],
 	QueryInterface: ChromeUtils.generateQI([Components.interfaces.nsICommandLineHandler])
 };
 
-var NSGetFactory = XPCOMUtils.generateNSGetFactory([ZoteroService, ZoteroCommandLineHandler]);
+var NSGetFactory = ComponentUtils.generateNSGetFactory([ZoteroService, ZoteroCommandLineHandler]);

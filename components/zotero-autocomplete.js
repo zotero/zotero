@@ -23,15 +23,13 @@
     ***** END LICENSE BLOCK *****
 */
 
-const ZOTERO_AC_CONTRACTID = '@mozilla.org/autocomplete/search;1?name=zotero';
-const ZOTERO_AC_CLASSNAME = 'Zotero AutoComplete';
 const ZOTERO_AC_CID = Components.ID('{06a2ed11-d0a4-4ff0-a56f-a44545eee6ea}');
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Components.utils.import("resource://gre/modules/ComponentUtils.jsm");
 
 var Zotero = Components.classes["@zotero.org/Zotero;1"]
 	.getService(Components.interfaces.nsISupports)
@@ -353,12 +351,10 @@ ZoteroAutoComplete.prototype.stopSearch = function(){
 // XPCOM goop
 //
 
-ZoteroAutoComplete.prototype.classDescription = ZOTERO_AC_CLASSNAME;
 ZoteroAutoComplete.prototype.classID = ZOTERO_AC_CID;
-ZoteroAutoComplete.prototype.contractID = ZOTERO_AC_CONTRACTID;
 ZoteroAutoComplete.prototype.QueryInterface = ChromeUtils.generateQI([
 	Components.interfaces.nsIAutoCompleteSearch,
 	Components.interfaces.nsIAutoCompleteObserver
 ]);
 
-var NSGetFactory = XPCOMUtils.generateNSGetFactory([ZoteroAutoComplete]);
+var NSGetFactory = ComponentUtils.generateNSGetFactory([ZoteroAutoComplete]);
