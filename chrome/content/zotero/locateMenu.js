@@ -61,7 +61,7 @@ var Zotero_LocateMenu = new function() {
 					
 		// add separator at end if necessary
 		if(locateMenu.lastChild && locateMenu.lastChild.tagName !== "menuseparator") {
-			locateMenu.appendChild(document.createElement("menuseparator"));
+			locateMenu.appendChild(document.createXULElement("menuseparator"));
 		}
 		
 		// add installable locate menus, if there are any
@@ -73,7 +73,7 @@ var Zotero_LocateMenu = new function() {
 		
 		if(installableLocateEngines.length) {
 			for (let locateEngine of installableLocateEngines) {
-				var menuitem = document.createElement("menuitem");
+				var menuitem = document.createXULElement("menuitem");
 				menuitem.setAttribute("label", locateEngine.label);
 				menuitem.setAttribute("class", "menuitem-iconic");
 				menuitem.setAttribute("image", locateEngine.image);
@@ -84,7 +84,7 @@ var Zotero_LocateMenu = new function() {
 			}
 		}
 		
-		var menuitem = document.createElement("menuitem");
+		var menuitem = document.createXULElement("menuitem");
 		menuitem = _createMenuItem(Zotero.getString("locate.manageLocateEngines"), "zotero-manage-locate-menu");
 		menuitem.addEventListener("command", _openLocateEngineManager, false);
 		locateMenu.appendChild(menuitem);
@@ -110,7 +110,7 @@ var Zotero_LocateMenu = new function() {
 		var availableEngines = _getAvailableLocateEngines(selectedItems);
 		if(availableEngines.length) {
 			// if locate engines are available, make a new submenu
-			var submenu = document.createElement("menu");
+			var submenu = document.createXULElement("menu");
 			submenu.setAttribute("zotero-locate", "true");
 			submenu.setAttribute("label", Zotero.getString("locate.locateEngines"));
 			
@@ -170,7 +170,7 @@ var Zotero_LocateMenu = new function() {
 		}
 		
 		if(haveOptions) {
-			var sep = document.createElement("menuseparator");
+			var sep = document.createXULElement("menuseparator");
 			sep.setAttribute("zotero-locate", "true");
 			locateMenu.insertBefore(sep, lastNode);
 		}
@@ -234,7 +234,7 @@ var Zotero_LocateMenu = new function() {
 	 * Create a new menuitem XUL element
 	 */
 	function _createMenuItem( label, id, tooltiptext ) {
-		var menuitem = document.createElement("menuitem");
+		var menuitem = document.createXULElement("menuitem");
 		menuitem.setAttribute("label", label);
 		if(id) menuitem.setAttribute("id", id);
 		if(tooltiptext) menuitem.setAttribute("tooltiptext", tooltiptext);
