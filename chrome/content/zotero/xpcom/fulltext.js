@@ -850,8 +850,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		
 		if (!_idleObserverIsRegistered) {
 			Zotero.debug("Starting full-text content processor");
-			var idleService = Components.classes["@mozilla.org/widget/idleservice;1"]
-					.getService(Components.interfaces.nsIIdleService);
+			var idleService = Components.classes["@mozilla.org/widget/useridleservice;1"]
+					.getService(Components.interfaces.nsIUserIdleService);
 			idleService.addIdleObserver(this.idleObserver, _idleObserverDelay);
 			_idleObserverIsRegistered = true;
 		}
@@ -861,8 +861,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	this.unregisterContentProcessor = function () {
 		if (_idleObserverIsRegistered) {
 			Zotero.debug("Unregistering full-text content processor idle observer");
-			var idleService = Components.classes["@mozilla.org/widget/idleservice;1"]
-				.getService(Components.interfaces.nsIIdleService);
+			var idleService = Components.classes["@mozilla.org/widget/useridleservice;1"]
+				.getService(Components.interfaces.nsIUserIdleService);
 			idleService.removeIdleObserver(this.idleObserver, _idleObserverDelay);
 			_idleObserverIsRegistered = false;
 		}
@@ -894,8 +894,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	this.processUnprocessedContent = Zotero.Promise.coroutine(function* (itemIDs) {
 		// Idle observer can take a little while to trigger and may not cancel the setTimeout()
 		// in time, so check idle time directly
-		var idleService = Components.classes["@mozilla.org/widget/idleservice;1"]
-			.getService(Components.interfaces.nsIIdleService);
+		var idleService = Components.classes["@mozilla.org/widget/useridleservice;1"]
+			.getService(Components.interfaces.nsIUserIdleService);
 		if (idleService.idleTime < _idleObserverDelay * 1000) {
 			return;
 		}

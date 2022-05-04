@@ -1532,8 +1532,8 @@ Zotero.Items = function() {
 			}
 		};
 		
-		var idleService = Components.classes["@mozilla.org/widget/idleservice;1"].
-							getService(Components.interfaces.nsIIdleService);
+		var idleService = Components.classes["@mozilla.org/widget/useridleservice;1"].
+							getService(Components.interfaces.nsIUserIdleService);
 		idleService.addIdleObserver(this._emptyTrashIdleObserver, 305);
 	}
 	

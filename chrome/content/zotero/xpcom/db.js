@@ -1234,8 +1234,8 @@ Zotero.DBConnection.prototype._getConnectionAsync = async function (options) {
 		// Register idle observer for DB backup
 		Zotero.Schema.schemaUpdatePromise.then(() => {
 			Zotero.debug("Initializing DB backup idle observer");
-			var idleService = Components.classes["@mozilla.org/widget/idleservice;1"]
-				.getService(Components.interfaces.nsIIdleService);
+			var idleService = Components.classes["@mozilla.org/widget/useridleservice;1"]
+				.getService(Components.interfaces.nsIUserIdleService);
 			idleService.addIdleObserver(this, 300);
 		});
 	}
