@@ -4197,8 +4197,6 @@ var ZoteroPane = new function()
 			let item = items[i];
 			if (item.isRegularItem()) {
 				// Prefer local file attachments
-				var uri = Components.classes["@mozilla.org/network/standard-url;1"]
-							.createInstance(Components.interfaces.nsIURI);
 				let attachment = yield item.getBestAttachment();
 				if (attachment) {
 					yield this.viewAttachment(attachment.id, event);
