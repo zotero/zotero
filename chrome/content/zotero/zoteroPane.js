@@ -278,10 +278,10 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		var addMenu = document.getElementById('zotero-tb-add').firstChild;
+		var addMenu = document.getElementById('zotero-tb-add').firstElementChild;
 		
 		// Remove all nodes so we can regenerate
-		var options = addMenu.getElementsByAttribute("class", "zotero-tb-add");
+		var options = addMenu.querySelectorAll('.zotero-tb-add');
 		while (options.length) {
 			var p = options[0].parentNode;
 			p.removeChild(options[0]);
@@ -5377,7 +5377,7 @@ var ZoteroPane = new function()
 		catch (e) {
 			serializedValues = {};
 		}
-		for (let el of document.getElementsByAttribute("zotero-persist", "*")) {
+		for (let el of document.querySelectorAll("[zotero-persist]")) {
 			if (!el.getAttribute) continue;
 			var id = el.getAttribute("id");
 			if (!id) continue;
