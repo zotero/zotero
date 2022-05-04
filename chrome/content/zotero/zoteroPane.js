@@ -2665,7 +2665,8 @@ var ZoteroPane = new function()
 		x = x || event.clientX;
 		y = y || event.clientY;
 		document.getElementById('zotero-collectionmenu').openPopup(
-			null, null, x + 1, y + 1);
+			null, null, x + 1, y + 1,
+			/* isContextMenu */ true);
 	};
 	
 	
@@ -2677,7 +2678,8 @@ var ZoteroPane = new function()
 		x = x || event.clientX;
 		y = y || event.clientY;
 		document.getElementById('zotero-itemmenu').openPopup(
-			null, null, x + 1, y + 1);
+			null, null, x + 1, y + 1,
+			/* isContextMenu */ true);
 	};
 	
 	
@@ -3259,9 +3261,9 @@ var ZoteroPane = new function()
 								for (let attachment of attachmentsWithAnnotations) {
 									let menuitem = document.createElement('menuitem');
 									menuitem.setAttribute('label', attachment.getDisplayTitle());
-									menuitem.onclick = () => {
+									menuitem.addEventListener('command', () => {
 										ZoteroPane.createNoteFromAnnotationsForAttachment(attachment);
-									};
+									});
 									popup.appendChild(menuitem);
 								}
 							}

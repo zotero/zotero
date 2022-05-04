@@ -440,6 +440,9 @@
 								label.setAttribute("onclick", "ZoteroPane_Local.loadURI('" + doi + "', event)");
 								label.setAttribute("tooltiptext", Zotero.getString('pane.item.viewOnline.tooltip'));
 								valueElement.oncontextmenu = () => {
+									// Don't call with isContextMenu set to true;
+									// we're opening with no offset, so the item under
+									// the mouse would immediately be activated
 									this._id('zotero-doi-menu').openPopup(valueElement);
 								};
 								
@@ -808,6 +811,7 @@
 					if (this.editable && fieldMode == 0) {
 						firstlast.oncontextmenu = () => {
 							document.popupNode = firstlast;
+							// As with zotero-doi-menu, can't set isContextMenu
 							this._id('zotero-creator-transform-menu').openPopup(firstlast);
 						};
 					}
@@ -1381,6 +1385,7 @@
 								Zotero.ItemFields.isFieldOfBase(fieldID, 'publicationTitle'))) {
 							valueElement.oncontextmenu = () => {
 								document.popupNode = valueElement;
+								// As with zotero-doi-menu, can't set isContextMenu
 								this._id('zotero-field-transform-menu').openPopup(valueElement);
 							};
 						}
