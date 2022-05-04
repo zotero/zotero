@@ -2662,10 +2662,9 @@ var ZoteroPane = new function()
 	 */
 	this.onCollectionsContextMenuOpen = async function (event, x, y) {
 		await ZoteroPane.buildCollectionContextMenu();
-		x = x || event.clientX;
-		y = y || event.clientY;
-		document.getElementById('zotero-collectionmenu').openPopup(
-			null, null, x + 1, y + 1);
+		x = x || event.screenX;
+		y = y || event.screenY;
+		document.getElementById('zotero-collectionmenu').openPopupAtScreen(x + 1, y + 1, true);
 	};
 	
 	
@@ -2674,10 +2673,9 @@ var ZoteroPane = new function()
 	 */
 	this.onItemsContextMenuOpen = async function (event, x, y) {
 		await ZoteroPane.buildItemContextMenu();
-		x = x || event.clientX;
-		y = y || event.clientY;
-		document.getElementById('zotero-itemmenu').openPopup(
-			null, null, x + 1, y + 1);
+		x = x || event.screenX;
+		y = y || event.screenY;
+		document.getElementById('zotero-itemmenu').openPopupAtScreen(x + 1, y + 1, true);
 	};
 	
 	
