@@ -4859,7 +4859,7 @@ var ZoteroPane = new function()
 		);
 		
 		if (index == 0) {
-			this.relinkAttachment(item.itemID);
+			this.relinkAttachment(item.id);
 		}
 		else if (index == 2) {
 			this.loadURI(supportURL, { metaKey: true, shiftKey: true });
@@ -5507,7 +5507,7 @@ var ZoteroPane = new function()
 						.map(([i, p]) => i.relinkAttachmentFile(p)));
 					return true;
 				default:
-					await this.relinkAttachment(item.itemID);
+					await this.relinkAttachment(item.id);
 					return true;
 			}
 		}
