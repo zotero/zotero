@@ -1274,7 +1274,7 @@ describe("ZoteroPane", function() {
 		});
 	});
 
-	describe("#tryAutoRelinkAttachment()", function () {
+	describe("#checkForLinkedFilesToRelink()", function () {
 		it("should detect and relink a single attachment", async function () {
 			let item = await createDataObject('item');
 			let file = getTestDataDirectory();
@@ -1298,9 +1298,9 @@ describe("ZoteroPane", function() {
 			await OS.File.move(outsideFile, labdFile);
 			await assert.eventually.isFalse(attachment.fileExists());
 
-			let stub = sinon.stub(zp, 'showAttachmentFoundAutomaticallyDialog')
+			let stub = sinon.stub(zp, 'showLinkedFileFoundAutomaticallyDialog')
 				.returns('one');
-			await zp.tryAutoRelinkAttachment(attachment);
+			await zp.checkForLinkedFilesToRelink(attachment);
 			assert.ok(stub.calledOnce);
 			assert.ok(stub.calledWith(attachment, sinon.match.string, 0));
 
@@ -1340,9 +1340,9 @@ describe("ZoteroPane", function() {
 				await assert.eventually.isFalse(attachment1.fileExists());
 				await assert.eventually.isFalse(attachment2.fileExists());
 
-				let stub = sinon.stub(zp, 'showAttachmentFoundAutomaticallyDialog')
+				let stub = sinon.stub(zp, 'showLinkedFileFoundAutomaticallyDialog')
 					.returns(choice);
-				await zp.tryAutoRelinkAttachment(attachment1);
+				await zp.checkForLinkedFilesToRelink(attachment1);
 				assert.ok(stub.calledOnce);
 				assert.ok(stub.calledWith(attachment1, sinon.match.string, 1));
 
@@ -1384,10 +1384,10 @@ describe("ZoteroPane", function() {
 			await OS.File.move(outsideFile, labdFile);
 			await assert.eventually.isFalse(attachment.fileExists());
 
-			let dialogStub = sinon.stub(zp, 'showAttachmentFoundAutomaticallyDialog')
+			let dialogStub = sinon.stub(zp, 'showLinkedFileFoundAutomaticallyDialog')
 				.returns('one');
 			let existsSpy = sinon.spy(OS.File, 'exists');
-			await zp.tryAutoRelinkAttachment(attachment);
+			await zp.checkForLinkedFilesToRelink(attachment);
 			assert.ok(dialogStub.calledOnce);
 			assert.ok(dialogStub.calledWith(attachment, sinon.match.string, 0));
 			assert.ok(existsSpy.calledWith(OS.Path.join(labdDir, 'test.pdf')));
@@ -1417,9 +1417,9 @@ describe("ZoteroPane", function() {
 			await attachment.saveTx();
 			await assert.eventually.isFalse(attachment.fileExists());
 
-			let stub = sinon.stub(zp, 'showAttachmentFoundAutomaticallyDialog')
+			let stub = sinon.stub(zp, 'showLinkedFileFoundAutomaticallyDialog')
 				.returns('one');
-			await zp.tryAutoRelinkAttachment(attachment);
+			await zp.checkForLinkedFilesToRelink(attachment);
 			assert.ok(stub.calledOnce);
 			assert.ok(stub.calledWith(attachment, sinon.match.string, 0));
 

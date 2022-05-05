@@ -4472,7 +4472,7 @@ var ZoteroPane = new function()
 			let path = item.getFilePath();
 			if (!path) {
 				ZoteroPane_Local.showAttachmentNotFoundDialog(
-					item.id,
+					item,
 					path,
 					{
 						noLocate: true,
@@ -4561,7 +4561,7 @@ var ZoteroPane = new function()
 			
 			if (isLinkedFile || !fileSyncingEnabled) {
 				this.showAttachmentNotFoundDialog(
-					itemID,
+					item,
 					path,
 					{
 						noLocate: noLocateOnMissing,
@@ -4587,7 +4587,7 @@ var ZoteroPane = new function()
 			
 			if (!await item.getFilePathAsync()) {
 				ZoteroPane_Local.showAttachmentNotFoundDialog(
-					item.id,
+					item,
 					path,
 					{
 						noLocate: noLocateOnMissing,
@@ -4654,7 +4654,7 @@ var ZoteroPane = new function()
 		
 		if (!fileExists) {
 			this.showAttachmentNotFoundDialog(
-				attachment.id,
+				attachment,
 				path,
 				{
 					noLocate: noLocateOnMissing,
@@ -4800,9 +4800,13 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.showAttachmentNotFoundDialog = function (itemID, path, options = {}) {
+	this.showAttachmentNotFoundDialog = async function (item, path, options = {}) {
 		var { noLocate, notOnServer, linkedFile } = options;
-		
+
+		if (item.isLinkedFileAttachment() && await this.checkForLinkedFilesToRelink(item)) {
+			return;
+		}
+
 		var title = Zotero.getString('pane.item.attachments.fileNotFound.title');
 		var text = Zotero.getString(
 				'pane.item.attachments.fileNotFound.text1' + (path ? '.path' : '')
@@ -4855,7 +4859,7 @@ var ZoteroPane = new function()
 		);
 		
 		if (index == 0) {
-			this.relinkAttachment(itemID);
+			this.relinkAttachment(item.itemID);
 		}
 		else if (index == 2) {
 			this.loadURI(supportURL, { metaKey: true, shiftKey: true });
@@ -4872,18 +4876,19 @@ var ZoteroPane = new function()
 	 * @param {Number} numOthers If zero, "Relink All" option is not offered
 	 * @return {'one'|'all'|false}
 	 */
-	this.showAttachmentFoundAutomaticallyDialog = function (item, path, numOthers) {
+	this.showLinkedFileFoundAutomaticallyDialog = function (item, path, numOthers) {
 		let title = Zotero.getString('pane.item.attachments.autoRelink.title');
-		let text = Zotero.getString('pane.item.attachments.autoRelink.text1')
-			+ '\n\n'
-			+ path
-			+ '\n\n'
-			+ Zotero.getString(
-				'pane.item.attachments.autoRelink.text2.'
-					+ (numOthers ? 'others' : 'noOthers'),
-				[Zotero.appName, numOthers],
-				numOthers
-			);
+		let text1 = Zotero.getString(
+			'pane.item.attachments.autoRelink.text1',
+			[item.getFilePath(), path]
+		);
+		let text2 = Zotero.getString(
+			'pane.item.attachments.autoRelink.text2.'
+				+ (numOthers ? 'others' : 'noOthers'),
+			[Zotero.appName, numOthers],
+			numOthers
+		);
+		let text = text1 + '\n\n' + text2;
 
 		let ps = Services.prompt;
 
@@ -4896,8 +4901,8 @@ var ZoteroPane = new function()
 				text,
 				buttonFlags,
 				Zotero.getString('pane.item.attachments.autoRelink.relinkAll'),
-				Zotero.getString('pane.item.attachments.autoRelink.relinkOne'),
 				Zotero.getString('pane.item.attachments.autoRelink.locateManually'),
+				Zotero.getString('pane.item.attachments.autoRelink.relinkOne'),
 				null, {}
 			);
 			
@@ -4905,10 +4910,10 @@ var ZoteroPane = new function()
 				return 'all';
 			}
 			else if (index == 1) {
-				return 'one';
+				return false;
 			}
 			else {
-				return false;
+				return 'one';
 			}
 		}
 		else {
@@ -5433,18 +5438,24 @@ var ZoteroPane = new function()
 	 * Attempt to find a file in the LABD matching the passed attachment
 	 * by searching successive subdirectories. Prompt the user if a match is
 	 * found and offer to relink one or all matching files in the directory.
+	 * The user can also choose to relink manually, which opens a file picker.
 	 *
-	 * If the passed attachment has the path '/dir1/dir2/file' and the LABD
-	 * is '/linked/', check:
+	 * If the path is 'C:\Users\user\Documents\Dissertation\Files\Paper.pdf'
+	 * and the LABD is '/Users/user/Documents', check:
 	 *
-	 * 1. /linked/file
-	 * 2. /linked/dir2/file
-	 * 3. /linked/dir1/dir2/file
+	 * 1. /Users/user/Documents/Paper.pdf
+	 * 2. /Users/user/Documents/Dissertation/Paper.pdf
+	 * 3. /Users/user/Documents/Dissertation/Files/Paper.pdf
+	 *
+	 * Once we find the file, check for other linked files beginning with
+	 * C:\Users\user\Documents\Dissertation\Files and see if they exist relative
+	 * to /Users/user/Documents/Dissertation/Files, and prompt to relink them
+	 * all if so.
 	 *
 	 * @param {Zotero.Item} item
-	 * @return {Boolean} True if relinked successfully
+	 * @return {Promise<Boolean>} True if relinked successfully
 	 */
-	this.tryAutoRelinkAttachment = async function (item) {
+	this.checkForLinkedFilesToRelink = async function (item) {
 		let basePath = Zotero.Prefs.get('baseAttachmentPath');
 		if (!basePath) {
 			return false;
@@ -5456,6 +5467,11 @@ var ZoteroPane = new function()
 		}
 		originalPath = Zotero.File.normalizeToUnix(originalPath);
 
+		if (Zotero.File.directoryContains(basePath, originalPath)) {
+			// Already in the LABD - nothing to do
+			return false;
+		}
+
 		let parts = OS.Path.split(originalPath).components;
 		for (let i = 1; i <= parts.length; i++) {
 			let correctedPath = OS.Path.join(basePath, ...parts.slice(-i));
@@ -5464,7 +5480,7 @@ var ZoteroPane = new function()
 				continue;
 			}
 
-			let otherUnlinked = await Zotero.Items.getUnlinkedAttachmentItems(
+			let otherUnlinked = await Zotero.Items.findMissingLinkedFiles(
 				item.libraryID,
 				OS.Path.dirname(originalPath)
 			);
@@ -5480,7 +5496,7 @@ var ZoteroPane = new function()
 				}
 			}
 
-			let choice = this.showAttachmentFoundAutomaticallyDialog(item, correctedPath, othersToRelink.size);
+			let choice = this.showLinkedFileFoundAutomaticallyDialog(item, correctedPath, othersToRelink.size);
 			switch (choice) {
 				case 'one':
 					await item.relinkAttachmentFile(correctedPath);
@@ -5491,7 +5507,8 @@ var ZoteroPane = new function()
 						.map(([i, p]) => i.relinkAttachmentFile(p)));
 					return true;
 				default:
-					return false;
+					await this.relinkAttachment(item.itemID);
+					return true;
 			}
 		}
 
@@ -5510,10 +5527,6 @@ var ZoteroPane = new function()
 			throw new Error('Item ' + itemID + ' not found in ZoteroPane_Local.relinkAttachment()');
 		}
 
-		if (await this.tryAutoRelinkAttachment(item)) {
-			return;
-		}
-		
 		while (true) {
 			let fp = new FilePicker();
 			fp.init(window, Zotero.getString('pane.item.attachments.select'), fp.modeOpen);

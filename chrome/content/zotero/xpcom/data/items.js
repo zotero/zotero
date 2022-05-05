@@ -2063,15 +2063,15 @@ Zotero.Items = function() {
 	 * the passed `pathPrefix`.
 	 *
 	 * @param {Number} libraryID
-	 * @param {String} [pathPrefix='']
+	 * @param {String} pathPrefix
 	 * @return {Zotero.Item[]}
 	 */
-	this.getUnlinkedAttachmentItems = async function (libraryID, pathPrefix = '') {
-		let sql = "SELECT IA.itemID FROM itemAttachments IA LEFT JOIN items I USING (itemID) "
-			+ "WHERE IA.itemID NOT IN (SELECT itemID FROM deletedItems) "
-			+ `AND IA.linkMode=${Zotero.Attachments.LINK_MODE_LINKED_FILE} `
-			+ "AND IA.path LIKE ? ESCAPE '\\' "
-			+ "AND I.libraryID=?";
+	this.findMissingLinkedFiles = async function (libraryID, pathPrefix) {
+		let sql = "SELECT itemID FROM items JOIN itemAttachments USING (itemID) "
+			+ "WHERE itemID NOT IN (SELECT itemID FROM deletedItems) "
+			+ `AND linkMode=${Zotero.Attachments.LINK_MODE_LINKED_FILE} `
+			+ "AND path LIKE ? ESCAPE '\\' "
+			+ "AND libraryID=?";
 		let ids = await Zotero.DB.columnQueryAsync(sql, [Zotero.DB.escapeSQLExpression(pathPrefix) + '%', libraryID]);
 		let items = await this.getAsync(ids);
 		let missingItems = await Promise.all(
