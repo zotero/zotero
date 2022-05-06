@@ -3791,7 +3791,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	_canGetBestAttachmentState(item) {
 		return (item.isRegularItem() && item.numAttachments())
-			|| (item.isAttachment() && item.isTopLevelItem());
+			|| (item.isFileAttachment() && item.isTopLevelItem());
 	}
 	
 	_isOnlyEmoji(str) {

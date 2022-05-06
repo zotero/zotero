@@ -3740,7 +3740,7 @@ Zotero.Item.prototype.getBestAttachmentState = async function () {
 	else {
 		type = 'other';
 	}
-	var exists = !item.isFileAttachment() || await item.fileExists();
+	var exists = await item.fileExists();
 	return this._bestAttachmentState = { type, exists };
 };
 
