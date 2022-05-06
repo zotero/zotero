@@ -916,6 +916,178 @@ Zotero.Items = function() {
 		
 		// TODO: Other things as necessary
 	};
+
+
+	/**
+	 * Copy an item to another library, moving attachments, embedded images,
+	 * etc. and recording a link between the original and the copy.
+	 *
+	 * Requires a transaction.
+	 *
+	 * @param {Zotero.Item} item
+	 * @param {Number} targetLibraryID
+	 * @param {Object} options
+	 * @param {Boolean} [options.annotations]
+	 * @param {Boolean} [options.tags]
+	 * @param {Boolean} [options.childNotes]
+	 * @param {Boolean} [options.childLinks]
+	 * @param {Boolean} [options.childFileAttachments]
+	 * @return {Number | false} The ID of the copy, or false if the copy failed
+	 */
+	this.copyItemToLibrary = async function (item, targetLibraryID, options) {
+		Zotero.DB.requireTransaction();
+
+		var targetLibrary = Zotero.Libraries.get(targetLibraryID);
+		
+		// Check if there's already a copy of this item in the library
+		var linkedItem = await item.getLinkedItem(targetLibraryID, true);
+		if (linkedItem) {
+			// If linked item is in the trash, undelete it and remove it from collections
+			// (since it shouldn't be restored to previous collections)
+			if (linkedItem.deleted) {
+				linkedItem.setCollections();
+				linkedItem.deleted = false;
+				await linkedItem.save({
+					skipSelect: true
+				});
+			}
+			return linkedItem.id;
+			
+			/*
+			// TODO: support tags, related, attachments, etc.
+			
+			// Overlay source item fields on unsaved clone of linked item
+			var newItem = item.clone(false, linkedItem.clone(true));
+			newItem.setField('dateAdded', item.dateAdded);
+			newItem.setField('dateModified', item.dateModified);
+			
+			var diff = newItem.diff(linkedItem, false, ["dateAdded", "dateModified"]);
+			if (!diff) {
+				// Check if creators changed
+				var creatorsChanged = false;
+				
+				var creators = item.getCreators();
+				var linkedCreators = linkedItem.getCreators();
+				if (creators.length != linkedCreators.length) {
+					Zotero.debug('Creators have changed');
+					creatorsChanged = true;
+				}
+				else {
+					for (var i=0; i<creators.length; i++) {
+						if (!creators[i].ref.equals(linkedCreators[i].ref)) {
+							Zotero.debug('changed');
+							creatorsChanged = true;
+							break;
+						}
+					}
+				}
+				if (!creatorsChanged) {
+					Zotero.debug("Linked item hasn't changed -- skipping conflict resolution");
+					continue;
+				}
+			}
+			toReconcile.push([newItem, linkedItem]);
+			continue;
+			*/
+		}
+		
+		// Standalone attachment
+		if (item.isAttachment()) {
+			let linkMode = item.attachmentLinkMode;
+			
+			// Skip linked files
+			if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+				Zotero.debug("Skipping standalone linked file attachment on copy");
+				return false;
+			}
+			
+			if (!targetLibrary.filesEditable) {
+				Zotero.debug("Skipping standalone file attachment on copy");
+				return false;
+			}
+			
+			let newAttachment = Zotero.Attachments.copyAttachmentToLibrary(item, targetLibraryID);
+			if (options.annotations) {
+				await Zotero.Items.copyChildItems(item, newAttachment);
+			}
+			
+			return newAttachment.id;
+		}
+		
+		// Create new clone item in target library
+		var newItem = item.clone(targetLibraryID, { skipTags: !options.tags });
+		
+		var newItemID = await newItem.save({
+			skipSelect: true
+		});
+		
+		// Record link
+		await newItem.addLinkedItem(item);
+		
+		if (item.isNote()) {
+			if (targetLibrary.filesEditable) {
+				await Zotero.Notes.copyEmbeddedImages(item, newItem);
+			}
+			return newItemID;
+		}
+		
+		// For regular items, add child items if prefs and permissions allow
+		
+		// Child notes
+		if (options.childNotes) {
+			var noteIDs = item.getNotes();
+			var notes = Zotero.Items.get(noteIDs);
+			for (let note of notes) {
+				let newNote = note.clone(targetLibraryID, { skipTags: !options.tags });
+				newNote.parentID = newItemID;
+				await newNote.save({
+					skipSelect: true
+				})
+
+				if (Zotero.Libraries.get(newNote.libraryID).filesEditable) {
+					await Zotero.Notes.copyEmbeddedImages(note, newNote);
+				}
+				await newNote.addLinkedItem(note);
+			}
+		}
+		
+		// Child attachments
+		if (options.childLinks || options.childFileAttachments) {
+			var attachmentIDs = item.getAttachments();
+			var attachments = Zotero.Items.get(attachmentIDs);
+			for (let attachment of attachments) {
+				let linkMode = attachment.attachmentLinkMode;
+				
+				// Skip linked files
+				if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
+					Zotero.debug("Skipping child linked file attachment on copy");
+					continue;
+				}
+				
+				// Skip imported files if we don't have pref and permissions
+				if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
+					if (!options.childLinks) {
+						Zotero.debug("Skipping child link attachment on copy");
+						continue;
+					}
+				}
+				else if (!options.childFileAttachments
+						|| (!targetLibrary.filesEditable && !targetLibrary.libraryType == 'publications')) {
+					Zotero.debug("Skipping child file attachment on copy");
+					continue;
+				}
+				let newAttachment = await Zotero.Attachments.copyAttachmentToLibrary(
+					attachment, targetLibraryID, newItemID
+				);
+				
+				if (options.annotations) {
+					await Zotero.Items.copyChildItems(attachment, newAttachment);
+				}
+			}
+		}
+		
+		return newItemID;
+	};
 	
 	
 	/**
