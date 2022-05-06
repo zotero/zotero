@@ -1093,6 +1093,9 @@ Zotero.File = new function(){
 	 * Normalize to a Unix-style path, replacing backslashes (interpreted as
 	 * separators only on Windows) with forward slashes (interpreted as
 	 * separators everywhere)
+	 *
+	 * @param {String} path
+	 * @return {String}
 	 */
 	this.normalizeToUnix = function (path) {
 		// If we're on Windows, we need to normalize first and then replace

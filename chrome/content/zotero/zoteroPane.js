@@ -5461,13 +5461,13 @@ var ZoteroPane = new function()
 			return false;
 		}
 
-		let originalPath = item.getFilePath();
-		if (!originalPath) {
+		let normalizedPath = item.getFilePath();
+		if (!normalizedPath) {
 			return false;
 		}
-		originalPath = Zotero.File.normalizeToUnix(originalPath);
+		normalizedPath = Zotero.File.normalizeToUnix(normalizedPath);
 
-		if (Zotero.File.directoryContains(basePath, originalPath)) {
+		if (Zotero.File.directoryContains(basePath, normalizedPath)) {
 			// Already in the LABD - nothing to do
 			return false;
 		}
@@ -5484,9 +5484,9 @@ var ZoteroPane = new function()
 			unNormalizedDirname = unNormalizedDirname.substring(0, lastSlash + 1);
 		}
 
-		let parts = OS.Path.split(originalPath).components;
-		for (let i = 1; i <= parts.length; i++) {
-			let correctedPath = OS.Path.join(basePath, ...parts.slice(-i));
+		let parts = OS.Path.split(normalizedPath).components;
+		for (let segmentsFromEnd = 1; segmentsFromEnd <= parts.length; segmentsFromEnd++) {
+			let correctedPath = OS.Path.join(basePath, ...parts.slice(-segmentsFromEnd));
 
 			if (!(await OS.File.exists(correctedPath))) {
 				continue;
@@ -5502,7 +5502,7 @@ var ZoteroPane = new function()
 				let otherParts = otherItem.getFilePath()
 					.split(/[/\\]/)
 					// Slice as much off the beginning as when creating correctedPath
-					.slice(parts.length - i);
+					.slice(parts.length - segmentsFromEnd);
 				if (!otherParts.length) continue;
 				let otherCorrectedPath = OS.Path.join(basePath, ...otherParts);
 				if (await OS.File.exists(otherCorrectedPath)) {
