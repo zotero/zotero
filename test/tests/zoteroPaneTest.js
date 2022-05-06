@@ -1275,6 +1275,14 @@ describe("ZoteroPane", function() {
 	});
 
 	describe("#checkForLinkedFilesToRelink()", function () {
+		let labdDir;
+
+		this.beforeEach(async () => {
+			labdDir = await getTempDirectory();
+			Zotero.Prefs.set('baseAttachmentPath', labdDir);
+			Zotero.Prefs.set('saveRelativeAttachmentPath', true);
+		});
+
 		it("should detect and relink a single attachment", async function () {
 			let item = await createDataObject('item');
 			let file = getTestDataDirectory();
@@ -1282,9 +1290,6 @@ describe("ZoteroPane", function() {
 			let outsideStorageDir = await getTempDirectory();
 			let outsideFile = OS.Path.join(outsideStorageDir, 'test.pdf');
 
-			let labdDir = await getTempDirectory();
-			Zotero.Prefs.set('baseAttachmentPath', labdDir);
-			Zotero.Prefs.set('saveRelativeAttachmentPath', true);
 			let labdFile = OS.Path.join(labdDir, 'test.pdf');
 
 			await OS.File.copy(file.path, outsideFile);
@@ -1321,9 +1326,6 @@ describe("ZoteroPane", function() {
 				let outsideFile1 = OS.Path.join(outsideStorageDir, 'test.pdf');
 				let outsideFile2 = OS.Path.join(outsideStorageDir, 'empty.pdf');
 
-				let labdDir = await getTempDirectory();
-				Zotero.Prefs.set('baseAttachmentPath', labdDir);
-				Zotero.Prefs.set('saveRelativeAttachmentPath', true);
 				let labdFile1 = OS.Path.join(labdDir, 'test.pdf');
 				let labdFile2 = OS.Path.join(labdDir, 'empty.pdf');
 
@@ -1369,9 +1371,6 @@ describe("ZoteroPane", function() {
 			await OS.File.makeDir(outsideStorageDir);
 			let outsideFile = OS.Path.join(outsideStorageDir, 'test.pdf');
 
-			let labdDir = await getTempDirectory();
-			Zotero.Prefs.set('baseAttachmentPath', labdDir);
-			Zotero.Prefs.set('saveRelativeAttachmentPath', true);
 			let labdSubdir = OS.Path.join(labdDir, 'subdir');
 			await OS.File.makeDir(labdSubdir);
 			let labdFile = OS.Path.join(labdSubdir, 'test.pdf');
@@ -1402,30 +1401,39 @@ describe("ZoteroPane", function() {
 		});
 
 		it("should handle Windows paths", async function () {
-			let file = getTestDataDirectory();
-			file.append('test.pdf');
+			let filenames = [['test.pdf'], ['empty.pdf'], ['search', 'baz.pdf']];
+			let labdFiles = [];
+			let attachments = [];
 
-			let labdDir = await getTempDirectory();
-			Zotero.Prefs.set('baseAttachmentPath', labdDir);
-			Zotero.Prefs.set('saveRelativeAttachmentPath', true);
-			let labdFile = OS.Path.join(labdDir, 'test.pdf');
+			for (let parts of filenames) {
+				let file = getTestDataDirectory();
+				parts.forEach(part => file.append(part));
 
-			await OS.File.copy(file.path, labdFile);
+				await OS.File.makeDir(OS.Path.join(labdDir, ...parts.slice(0, -1)));
+				let labdFile = OS.Path.join(labdDir, ...parts);
+				await OS.File.copy(file.path, labdFile);
+				labdFiles.push(labdFile);
 
-			let attachment = await Zotero.Attachments.linkFromFile({ file });
-			attachment.attachmentPath = 'C:\\test\\test.pdf'; // Overwrite with Windows-style path
-			await attachment.saveTx();
-			await assert.eventually.isFalse(attachment.fileExists());
+				let attachment = await Zotero.Attachments.linkFromFile({ file });
+				attachment.attachmentPath = `C:\\test\\${parts.join('\\')}`;
+				await attachment.saveTx();
+				attachments.push(attachment);
+
+				await assert.eventually.isFalse(attachment.fileExists());
+			}
 
 			let stub = sinon.stub(zp, 'showLinkedFileFoundAutomaticallyDialog')
-				.returns('one');
-			await zp.checkForLinkedFilesToRelink(attachment);
+				.returns('all');
+			await zp.checkForLinkedFilesToRelink(attachments[0]);
 			assert.ok(stub.calledOnce);
-			assert.ok(stub.calledWith(attachment, sinon.match.string, 0));
+			assert.ok(stub.calledWith(attachments[0], sinon.match.string, filenames.length - 1));
 
-			await assert.eventually.isTrue(attachment.fileExists());
-			assert.equal(attachment.getFilePath(), labdFile);
-			assert.equal(attachment.attachmentPath, 'attachments:test.pdf');
+			for (let i = 0; i < filenames.length; i++) {
+				let attachment = attachments[i];
+				await assert.eventually.isTrue(attachment.fileExists());
+				assert.equal(attachment.getFilePath(), labdFiles[i]);
+				assert.equal(attachment.attachmentPath, 'attachments:' + OS.Path.join(...filenames[i]));
+			}
 
 			stub.restore();
 		});

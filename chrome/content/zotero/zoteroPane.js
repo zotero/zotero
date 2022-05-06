@@ -5472,6 +5472,18 @@ var ZoteroPane = new function()
 			return false;
 		}
 
+		// We can't use OS.Path.dirname because that function expects paths
+		// valid for the current platform, but we can't normalize first
+		// because we're going to be comparing it to other un-normalized paths
+		let unNormalizedDirname = item.getFilePath();
+		let lastSlash = Math.max(
+			unNormalizedDirname.lastIndexOf('/'),
+			unNormalizedDirname.lastIndexOf('\\')
+		);
+		if (lastSlash != -1) {
+			unNormalizedDirname = unNormalizedDirname.substring(0, lastSlash + 1);
+		}
+
 		let parts = OS.Path.split(originalPath).components;
 		for (let i = 1; i <= parts.length; i++) {
 			let correctedPath = OS.Path.join(basePath, ...parts.slice(-i));
@@ -5482,15 +5494,17 @@ var ZoteroPane = new function()
 
 			let otherUnlinked = await Zotero.Items.findMissingLinkedFiles(
 				item.libraryID,
-				OS.Path.dirname(originalPath)
+				unNormalizedDirname
 			);
 			let othersToRelink = new Map();
 			for (let otherItem of otherUnlinked) {
 				if (otherItem.id === item.id) continue;
-				let otherCorrectedPath = OS.Path.join(
-					basePath,
-					OS.Path.split(otherItem.getFilePath()).components.slice(-i)
-				);
+				let otherParts = otherItem.getFilePath()
+					.split(/[/\\]/)
+					// Slice as much off the beginning as when creating correctedPath
+					.slice(parts.length - i);
+				if (!otherParts.length) continue;
+				let otherCorrectedPath = OS.Path.join(basePath, ...otherParts);
 				if (await OS.File.exists(otherCorrectedPath)) {
 					othersToRelink.set(otherItem, otherCorrectedPath);
 				}
