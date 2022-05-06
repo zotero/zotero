@@ -26,7 +26,6 @@
 // Commonly used imports accessible anywhere
 Components.utils.importGlobalProperties(["XMLHttpRequest"]);
 Components.utils.import("resource://zotero/config.js");
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/osfile.jsm");
 Components.classes["@mozilla.org/net/osfileconstantsservice;1"]
@@ -53,7 +52,10 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.initialized = false;
 	this.skipLoading = false;
 	this.startupError;
-	this.__defineGetter__("startupErrorHandler", function() { return _startupErrorHandler; });
+	Object.defineProperty(this, 'startupErrorHandler', {
+		get: () => _startupErrorHandler,
+		enumerable: true
+    });
 	this.version;
 	this.platform;
 	this.locale;
@@ -87,20 +89,27 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 * @property	{Boolean}	locked		Whether all Zotero panes are locked
 	 *										with an overlay
 	 */
-	this.__defineGetter__('locked', function () { return _locked; });
-	this.__defineSetter__('locked', function (lock) {
-		var wasLocked = _locked;
-		_locked = lock;
-		
-		if (!wasLocked && lock) {
-			this.unlockDeferred = Zotero.Promise.defer();
-			this.unlockPromise = this.unlockDeferred.promise;
+	Object.defineProperty(
+		this,
+		'locked',
+		{
+			get: () => _locked,
+			set: (lock) => {
+				var wasLocked = _locked;
+				_locked = lock;
+				
+				if (!wasLocked && lock) {
+					this.unlockDeferred = Zotero.Promise.defer();
+					this.unlockPromise = this.unlockDeferred.promise;
+				}
+				else if (wasLocked && !lock) {
+					Zotero.debug("Running unlock callbacks");
+					this.unlockDeferred.resolve();
+				}
+			},
+			enumerable: true
 		}
-		else if (wasLocked && !lock) {
-			Zotero.debug("Running unlock callbacks");
-			this.unlockDeferred.resolve();
-		}
-	});
+	);
 	
 	/**
 	 * @property {Boolean} crashed - True if the application needs to be restarted
