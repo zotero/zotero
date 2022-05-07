@@ -170,7 +170,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 *
 	 * @return {Promise<Boolean>}
 	 */
-	this.init = Zotero.Promise.coroutine(function* (options) {
+	this.init = async function (options) {
 		if (this.initialized || this.skipLoading) {
 			return false;
 		}
@@ -215,7 +215,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 					deferred.resolve(addon.version);
 				}
 			);
-			var version = yield deferred.promise;
+			var version = await deferred.promise;
 		}
 		Zotero.version = version;
 		Zotero.isDevBuild = Zotero.version.includes('beta')
@@ -240,7 +240,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		Zotero.Intl.init();
 		if (this.restarting) return;
 		
-		yield Zotero.Prefs.init();
+		await Zotero.Prefs.init();
 		Zotero.Debug.init(options && options.forceDebugLog);
 		
 		// Make sure that Zotero Standalone is not running as root
@@ -251,7 +251,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		}
 		
 		try {
-			yield Zotero.DataDirectory.init();
+			await Zotero.DataDirectory.init();
 			if (this.restarting) {
 				return;
 			}
@@ -262,8 +262,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			if ((e instanceof OS.File.Error && e.becauseNoSuchFile) || e.name == 'NS_ERROR_FILE_NOT_FOUND') {
 				let foundInDefault = false;
 				try {
-					foundInDefault = (yield OS.File.exists(Zotero.DataDirectory.defaultDir))
-						&& (yield OS.File.exists(
+					foundInDefault = (await OS.File.exists(Zotero.DataDirectory.defaultDir))
+						&& (await OS.File.exists(
 							OS.Path.join(
 								Zotero.DataDirectory.defaultDir,
 								Zotero.DataDirectory.getDatabaseFilename()
@@ -351,21 +351,21 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		}
 		
 		if (!this.forceDataDir) {
-			yield Zotero.DataDirectory.checkForMigration(
+			await Zotero.DataDirectory.checkForMigration(
 				dataDir, Zotero.DataDirectory.defaultDir
 			);
 			if (this.skipLoading) {
 				return;
 			}
 			
-			yield Zotero.DataDirectory.checkForLostLegacy();
+			await Zotero.DataDirectory.checkForLostLegacy();
 			if (this.restarting) {
 				return;
 			}
 		}
 		
 		// Make sure data directory isn't in Dropbox, etc.
-		yield Zotero.DataDirectory.checkForUnsafeLocation(dataDir);
+		await Zotero.DataDirectory.checkForUnsafeLocation(dataDir);
 		
 		Services.obs.addObserver({
 			observe: function () {
@@ -412,7 +412,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			if (Zotero.isStandalone) Zotero.Standalone.init();
 			Zotero.initComplete();
 		})
-	});
+	};
 	
 	/**
 	 * Triggers events when initialization finishes
