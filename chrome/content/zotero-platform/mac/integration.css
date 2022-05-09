@@ -1,8 +1,3 @@
-/* Force use of Lucida for Catalina */
-html > body {
-	font-family: Lucida Grande, Lucida Sans Unicode, Lucida Sans, Geneva, -apple-system, sans-serif !important;
-}
-
 body {
 	line-height: 1.6em;
 	font-size: 15px;
