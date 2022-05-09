@@ -317,12 +317,12 @@
 <!ENTITY zotero.pdfReader.verticalScrolling "Navpično drsenje">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Vodoravno drsenje">
 <!ENTITY zotero.pdfReader.wrappedScrolling "Ovito drsenje">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
+<!ENTITY zotero.pdfReader.noSpreads "Ni tiska na razprtih zaporednih straneh">
+<!ENTITY zotero.pdfReader.oddSpreads "Tisk na sodih razprtih zaporednih straneh">
+<!ENTITY zotero.pdfReader.evenSpreads "Tisk na sodih razprtih zaporednih straneh">
 <!ENTITY zotero.pdfReader.zoomIn "Približaj">
 <!ENTITY zotero.pdfReader.zoomOut "Oddalji">
 <!ENTITY zotero.pdfReader.zoomAuto "Samodejno spremeni velikost">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Približaj na širino strani">
-<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Približaj na višino strani">
 <!ENTITY zotero.pdfReader.transferFromPDF "Uvozi zaznamke ...">

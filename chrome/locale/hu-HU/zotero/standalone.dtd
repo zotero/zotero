@@ -45,7 +45,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY goMenu.label "Go">
+<!ENTITY goMenu.label "Ugrás">
 
 
 <!ENTITY viewMenu.label "Nézet">
@@ -55,8 +55,8 @@
 <!ENTITY stackedView.label "Stacked View">
 <!ENTITY collectionsPane.label "Collections Pane">
 <!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
+<!ENTITY tagSelector.label "Címkeválasztó">
+<!ENTITY recursiveCollections.label "Elemek megjelenítése az algyűjteményekből">
 <!ENTITY fontSize.label "Betűméret">
 <!ENTITY noteFontSize.label "Jegyzet betűmérete">
 

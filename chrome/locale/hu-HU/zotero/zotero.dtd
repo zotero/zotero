@@ -8,7 +8,7 @@
 <!ENTITY zotero.general.delete "Törlés">
 <!ENTITY zotero.general.moveToTrash "Mozgatás a Kukába">
 <!ENTITY zotero.general.ok "OK">
-<!ENTITY zotero.general.cancel "Mégse">
+<!ENTITY zotero.general.cancel "Mégsem">
 <!ENTITY zotero.general.refresh "Újratöltés">
 <!ENTITY zotero.general.saveAs "Mentés másként…">
 <!ENTITY zotero.general.options "Beállítások">
@@ -155,7 +155,7 @@
 
 <!ENTITY zotero.selectitems.title "Elemek kiválasztása">
 <!ENTITY zotero.selectitems.intro.label "A könyvtárhoz hozzáadni kíván elemek kiválasztása">
-<!ENTITY zotero.selectitems.cancel.label "Mégse">
+<!ENTITY zotero.selectitems.cancel.label "Mégsem">
 <!ENTITY zotero.selectitems.select.label "OK">
 
 <!ENTITY zotero.bibliography.title "Bibliográfia létrehozása">
@@ -219,7 +219,7 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "Idézetek visszaállítása">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Könyvjelzők">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "A könyvjelzők megoszthatók a Word és a LibreOffice között, de hibákat okozhatnak, ha véletlenül módosítják őket, és nem illeszthetők be lábjegyzetekbe.">
 
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Hivatkozások automatikus frissítése">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "A függőben lévő, frissítésekkel ellátott idézetek kiemelésre kerülnek a dokumentumban">
@@ -257,7 +257,7 @@
 
 <!ENTITY zotero.proxy.recognized.title "Proxy felismerve">
 <!ENTITY zotero.proxy.recognized.warning "Csak a könyvtárból, iskolából vagy vállalati weboldalról linkelt proxy-t adható hozzá">
-<!ENTITY zotero.proxy.recognized.warning.secondary "Adding other proxies allows malicious sites to masquerade as sites you trust.">
+<!ENTITY zotero.proxy.recognized.warning.secondary "Más proxyk hozzáadása lehetővé teszi a rosszindulatú webhelyek számára, hogy megbízható webhelyeknek álcázzák magukat.">
 <!ENTITY zotero.proxy.recognized.disable.label "Ne irányítsa át automatikusan a kéréseket az előzőleg felismert proxyikra.">
 <!ENTITY zotero.proxy.recognized.ignore.label "Elutasít">
 
@@ -273,7 +273,7 @@
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "nap(ok)">
 
 <!ENTITY zotero.rtfScan.title "RTF átvizsgálása…">
-<!ENTITY zotero.rtfScan.cancel.label "Mégse">
+<!ENTITY zotero.rtfScan.cancel.label "Mégsem">
 <!ENTITY zotero.rtfScan.citation.label "Hivatkozás">
 <!ENTITY zotero.rtfScan.itemName.label "Elem neve">
 <!ENTITY zotero.rtfScan.unmappedCitations.label "Nem felismert hivatkozások">
@@ -302,9 +302,9 @@
 <!ENTITY zotero.attachLink.label.title "Cím:">
 
 <!ENTITY zotero.context.addChildNote "Elem jegyzetének hozzáadása">
-<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
-<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
-<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Elem jegyzet hozzáadása a jegyzetekből">
+<!ENTITY zotero.context.addStandaloneNote "Önálló jegyzet hozzáadása">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Önálló jegyzet hozzáadása jegyzetekből">
 <!ENTITY zotero.context.editInWindow "Szerkesztés külön ablakban">
 
 <!ENTITY zotero.pdfReader.firstPage "Első oldal">
@@ -313,16 +313,16 @@
 <!ENTITY zotero.pdfReader.forward "Előre">
 <!ENTITY zotero.pdfReader.rotateClockwise "Forgatás az óramutató járásával megegyező irányba">
 <!ENTITY zotero.pdfReader.rotateCounterclockwise "Forgatás az óramutató járásával ellentétes irányba">
-<!ENTITY zotero.pdfReader.handTool "Hand Tool">
+<!ENTITY zotero.pdfReader.handTool "Kéz eszköz">
 <!ENTITY zotero.pdfReader.verticalScrolling "Függőleges görgetés">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Vízszintes görgetés">
 <!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
+<!ENTITY zotero.pdfReader.noSpreads "Nincs oldaltapasztás">
+<!ENTITY zotero.pdfReader.oddSpreads "Oldalak összetapasztása: páratlan">
+<!ENTITY zotero.pdfReader.evenSpreads "Oldalak összetapasztása: páros">
 <!ENTITY zotero.pdfReader.zoomIn "Nagyítás">
 <!ENTITY zotero.pdfReader.zoomOut "Kicsinyítés">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatikus átméretezés">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Nagyítás oldalszélességre">
-<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
-<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Teljes oldal">
+<!ENTITY zotero.pdfReader.transferFromPDF "Jegyzetek importálása…">
