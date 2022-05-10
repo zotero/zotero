@@ -1,11 +1,8 @@
-﻿<!ENTITY preferencesCmd2.label       "Innstillingar">
-<!ENTITY preferencesCmd2.accesskey     "I">
-<!ENTITY preferencesCmdUnix.label       "Innstillingar">
-<!ENTITY preferencesCmdUnix.accesskey     "I">
-<!ENTITY quitApplicationCmdWin2.label       "Avslutt">
-<!ENTITY quitApplicationCmdWin2.accesskey   "t">
-<!ENTITY quitApplicationCmdWin2.tooltip     "Avslutt &brandShorterName;">
-<!ENTITY quitApplicationCmd.label       "Avslutt">
-<!ENTITY quitApplicationCmd.accesskey   "t">
-<!ENTITY quitApplicationCmdMac2.label   "Avslutt &brandShorterName;">
-<!ENTITY quitApplicationCmd.key         "Q">
+﻿<!ENTITY preferencesCmd2.label       "Options">
+<!ENTITY preferencesCmdUnix.label       "Preferences">
+<!ENTITY quitApplicationCmdWin2.label       "Exit">
+<!ENTITY quitApplicationCmdWin2.accesskey   "x">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Exit &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Quit">
+<!ENTITY quitApplicationCmd.accesskey   "Q">
+<!ENTITY quitApplicationCmdMac2.label   "Quit &brandShorterName;">

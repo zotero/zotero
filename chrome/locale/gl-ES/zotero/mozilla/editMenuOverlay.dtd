@@ -2,29 +2,6 @@
    - License, v. 2.0. If a copy of the MPL was not distributed with this
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 
-<!ENTITY editMenu.label            "Editar">
-<!ENTITY editMenu.accesskey        "E">
-<!ENTITY undoCmd.label             "Desfacer">
-<!ENTITY undoCmd.key               "Z">
-<!ENTITY undoCmd.accesskey         "D">
-<!ENTITY redoCmd.label             "Refacer">
-<!ENTITY redoCmd.key               "Y">
-<!ENTITY redoCmd.accesskey         "R">
-<!ENTITY cutCmd.label              "Cortar">
-<!ENTITY cutCmd.key                "X">
-<!ENTITY cutCmd.accesskey          "o">
-<!ENTITY copyCmd.label             "Copiar">
-<!ENTITY copyCmd.key               "C">
-<!ENTITY copyCmd.accesskey         "C">
-<!ENTITY pasteCmd.label            "Pegar">
-<!ENTITY pasteCmd.key              "V">
-<!ENTITY pasteCmd.accesskey        "P">
-<!ENTITY deleteCmd.label           "Eliminar">
-<!ENTITY deleteCmd.accesskey       "E">
-<!ENTITY selectAllCmd.label        "Seleccionar todo">
-<!ENTITY selectAllCmd.key          "A">
-<!ENTITY selectAllCmd.accesskey    "S">
-
 <!ENTITY findCmd.label             "Localizar">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "L">
@@ -32,5 +9,3 @@
 <!ENTITY findAgainCmd.key          "G">
 <!ENTITY findAgainCmd.key2         "VK_F3">
 <!ENTITY findAgainCmd.accesskey    "n">
-<!ENTITY findPreviousCmd.label     "Localizar anterior">
-<!ENTITY findPreviousCmd.accesskey "a">

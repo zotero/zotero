@@ -3,6 +3,55 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
+
+
+## Application Menu (macOS only)
+
+menu-application-preferences =
+    .label = Postavke
+menu-application-services =
+    .label = Usluge
+menu-application-hide-this =
+    .label = Sakrij { -brand-shorter-name }
+menu-application-hide-other =
+    .label = Sakrij ostale
+menu-application-show-all =
+    .label = Prikaži sve
+menu-application-touch-bar =
+    .label = Prilagodi traku dodira…
+
+##
+
+# These menu-quit strings are only used on Windows and Linux.
+menu-quit =
+    .label =
+        { PLATFORM() ->
+            [windows] Izlaz
+           *[other] Izlaz
+        }
+    .accesskey =
+        { PLATFORM() ->
+            [windows] I
+           *[other] I
+        }
+# This menu-quit-mac string is only used on macOS.
+menu-quit-mac =
+    .label = Zatvori { -brand-shorter-name }
+# This menu-quit-button string is only used on Linux.
+menu-quit-button =
+    .label = { menu-quit.label }
+# This menu-quit-button-win string is only used on Windows.
+menu-quit-button-win =
+    .label = { menu-quit.label }
+    .tooltip = Zatvori { -brand-shorter-name }
+menu-about =
+    .label = O { -brand-shorter-name }u
+    .accesskey = O
+
 ## File Menu
 
 menu-file =
@@ -50,7 +99,7 @@ menu-file-print =
     .label = Ispiši …
     .accesskey = p
 menu-file-import-from-another-browser =
-    .label = Uvoz iz drugog preglednika…
+    .label = Uvezi iz drugog preglednika …
     .accesskey = U
 menu-file-go-offline =
     .label = Izvanmrežni rad
@@ -61,11 +110,11 @@ menu-file-go-offline =
 menu-edit =
     .label = Uredi
     .accesskey = e
-menu-edit-find-on =
-    .label = Pronađi na ovoj stranici …
-    .accesskey = s
+menu-edit-find-in-page =
+    .label = Pronađi na stranici… (F)
+    .accesskey = F
 menu-edit-find-again =
-    .label = Ponovo pronađi
+    .label = Pronađi ponovo
     .accesskey = P
 menu-edit-bidi-switch-text-direction =
     .label = Promijeni smjer teksta
@@ -79,9 +128,9 @@ menu-view =
 menu-view-toolbars-menu =
     .label = Alatne trake
     .accesskey = t
-menu-view-customize-toolbar =
-    .label = Prilagodi …
-    .accesskey = l
+menu-view-customize-toolbar2 =
+    .label = Prilagodi alatnu traku… (C)
+    .accesskey = C
 menu-view-sidebar =
     .label = Bočna traka
     .accesskey = B
@@ -115,9 +164,6 @@ menu-view-page-style-no-style =
 menu-view-page-basic-style =
     .label = Osnovni stil stranice
     .accesskey = O
-menu-view-charset =
-    .label = Kodiranje teksta
-    .accesskey = k
 
 ## These should match what Safari and other Apple applications
 ## use on macOS.
@@ -149,7 +195,7 @@ menu-history =
 menu-history-show-all-history =
     .label = Prikaži svu povijest
 menu-history-clear-recent-history =
-    .label = Obriši nedavnu povijest…
+    .label = Izbriši nedavnu povijest …
 menu-history-synced-tabs =
     .label = Sinkronizirane kartice
 menu-history-restore-last-session =
@@ -160,16 +206,18 @@ menu-history-undo-menu =
     .label = Nedavno zatvorene kartice
 menu-history-undo-window-menu =
     .label = Nedavno zatvoreni prozori
+menu-history-reopen-all-tabs = Ponovno otvori sve kartice
+menu-history-reopen-all-windows = Ponovno otvori sve prozore
 
 ## Bookmarks Menu
 
 menu-bookmarks-menu =
     .label = Zabilješke
     .accesskey = b
-menu-bookmarks-show-all =
-    .label = Prikaži sve zabilješke
-menu-bookmark-this-page =
-    .label = Zabilježi ovu stranicu
+menu-bookmarks-manage =
+    .label = Upravljaj zabilješkama
+menu-bookmark-current-tab =
+    .label = Zabilježi trenutnu karticu
 menu-bookmark-edit =
     .label = Uredi ovu zabilješku
 menu-bookmarks-all-tabs =
@@ -189,40 +237,39 @@ menu-tools =
 menu-tools-downloads =
     .label = Preuzimanja
     .accesskey = r
-menu-tools-addons =
-    .label = Dodaci
+menu-tools-addons-and-themes =
+    .label = Dodaci i teme
     .accesskey = a
-menu-tools-fxa-sign-in =
-    .label = Prijavi se u { -brand-product-name } …
-    .accesskey = a
-menu-tools-turn-on-sync =
-    .label = Uključi { -sync-brand-short-name } …
-    .accesskey = u
+menu-tools-fxa-sign-in2 =
+    .label = Prijavi se (g)
+    .accesskey = g
+menu-tools-turn-on-sync2 =
+    .label = Uključi sinkronizaciju…
+    .accesskey = n
 menu-tools-sync-now =
     .label = Sinkroniziraj sada
     .accesskey = S
 menu-tools-fxa-re-auth =
     .label = Ponovno povezivanje na { -brand-product-name } …
     .accesskey = n
-menu-tools-web-developer =
-    .label = Web programer
-    .accesskey = W
+menu-tools-browser-tools =
+    .label = Alati preglednika
+    .accesskey = g
+menu-tools-task-manager =
+    .label = Upravljač zadataka
+    .accesskey = č
 menu-tools-page-source =
     .label = Izvorni kod stranice
     .accesskey = o
 menu-tools-page-info =
     .label = Informacije o stranici
     .accesskey = I
-menu-preferences =
-    .label =
-        { PLATFORM() ->
-            [windows] Mogućnosti
-           *[other] Postavke
-        }
+menu-settings =
+    .label = Postavke
     .accesskey =
         { PLATFORM() ->
-            [windows] M
-           *[other] P
+            [windows] s
+           *[other] k
         }
 menu-tools-layout-debugger =
     .label = Ispravljač grešaka rasporeda
@@ -237,38 +284,40 @@ menu-window-bring-all-to-front =
 
 ## Help Menu
 
+
+# NOTE: For Engineers, any additions or changes to Help menu strings should
+# also be reflected in the related strings in appmenu.ftl. Those strings, by
+# convention, will have the same ID as these, but prefixed with "app".
+# Example: appmenu-get-help
+#
+# These strings are duplicated to allow for different casing depending on
+# where the strings appear.
+
 menu-help =
     .label = Pomoć
     .accesskey = P
-menu-help-product =
-    .label = { -brand-shorter-name } pomoć
+menu-get-help =
+    .label = Potraži pomoć
     .accesskey = p
-menu-help-show-tour =
-    .label = { -brand-shorter-name } vodič
-    .accesskey = o
-menu-help-import-from-another-browser =
-    .label = Uvoz iz drugog preglednika…
-    .accesskey = l
-menu-help-keyboard-shortcuts =
-    .label = Tipkovnički prečaci
-    .accesskey = k
-menu-help-troubleshooting-info =
-    .label = Rješavanje problema
-    .accesskey = R
+menu-help-more-troubleshooting-info =
+    .label = Više informacija za rješavanje problema
+    .accesskey = v
+menu-help-report-site-issue =
+    .label = Prijavi problem sa stranicom …
 menu-help-feedback-page =
     .label = Pošalji povratne informacije …
     .accesskey = e
-menu-help-safe-mode-without-addons =
-    .label = Ponovo pokreni s isključenim dodacima …
-    .accesskey = v
-menu-help-safe-mode-with-addons =
-    .label = Ponovo pokreni s aktiviranim dodacima
-    .accesskey = v
+menu-help-enter-troubleshoot-mode2 =
+    .label = Način rada za rješavanje problema
+    .accesskey = m
+menu-help-exit-troubleshoot-mode =
+    .label = Isključi način rada za rješavanje problema
+    .accesskey = m
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = Prijavi obmanjujuću stranicu…
-    .accesskey = o
+    .accesskey = b
 menu-help-not-deceptive =
     .label = Ovo nije obmanjujuća stranica…
     .accesskey = d

@@ -1,11 +1,8 @@
-﻿<!ENTITY preferencesCmd2.label       "Настройки">
-<!ENTITY preferencesCmd2.accesskey     "Н">
-<!ENTITY preferencesCmdUnix.label       "Настройки">
-<!ENTITY preferencesCmdUnix.accesskey     "Н">
-<!ENTITY quitApplicationCmdWin2.label       "Выход">
-<!ENTITY quitApplicationCmdWin2.accesskey   "х">
-<!ENTITY quitApplicationCmdWin2.tooltip     "Выход из &brandShorterName;">
-<!ENTITY quitApplicationCmd.label       "Выход">
-<!ENTITY quitApplicationCmd.accesskey   "ы">
-<!ENTITY quitApplicationCmdMac2.label   "Завершить &brandShorterName;">
-<!ENTITY quitApplicationCmd.key         "Q">
+﻿<!ENTITY preferencesCmd2.label       "Options">
+<!ENTITY preferencesCmdUnix.label       "Preferences">
+<!ENTITY quitApplicationCmdWin2.label       "Exit">
+<!ENTITY quitApplicationCmdWin2.accesskey   "x">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Exit &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Quit">
+<!ENTITY quitApplicationCmd.accesskey   "Q">
+<!ENTITY quitApplicationCmdMac2.label   "Quit &brandShorterName;">

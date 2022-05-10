@@ -3,6 +3,55 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
+
+
+## Application Menu (macOS only)
+
+menu-application-preferences =
+    .label = Nuostatos
+menu-application-services =
+    .label = Paslaugos
+menu-application-hide-this =
+    .label = Nerodyti „{ -brand-shorter-name }“
+menu-application-hide-other =
+    .label = Nerodyti kitų
+menu-application-show-all =
+    .label = Rodyti viską
+menu-application-touch-bar =
+    .label = Tvarkyti lietimo juostą…
+
+##
+
+# These menu-quit strings are only used on Windows and Linux.
+menu-quit =
+    .label =
+        { PLATFORM() ->
+            [windows] Baigti darbą
+           *[other] Baigti darbą
+        }
+    .accesskey =
+        { PLATFORM() ->
+            [windows] B
+           *[other] B
+        }
+# This menu-quit-mac string is only used on macOS.
+menu-quit-mac =
+    .label = Baigti „{ -brand-shorter-name }“ darbą
+# This menu-quit-button string is only used on Linux.
+menu-quit-button =
+    .label = { menu-quit.label }
+# This menu-quit-button-win string is only used on Windows.
+menu-quit-button-win =
+    .label = { menu-quit.label }
+    .tooltip = Baigti „{ -brand-shorter-name }“ darbą
+menu-about =
+    .label = Apie „{ -brand-shorter-name }“
+    .accesskey = A
+
 ## File Menu
 
 menu-file =
@@ -31,6 +80,17 @@ menu-file-open-file =
 menu-file-close =
     .label = Užverti
     .accesskey = U
+# Variables:
+#  $tabCount (Number): the number of tabs that are affected by the action.
+menu-file-close-tab =
+    .label =
+        { $tabCount ->
+            [1] Užverti kortelę
+            [one] Užverti { $tabCount } kortelę
+            [few] Užverti { $tabCount } korteles
+           *[other] Užverti { $tabCount } kortelių
+        }
+    .accesskey = U
 menu-file-close-window =
     .label = Užverti langą
     .accesskey = g
@@ -40,6 +100,9 @@ menu-file-save-page =
 menu-file-email-link =
     .label = Išsiųsti saitą el. paštu…
     .accesskey = ų
+menu-file-share-url =
+    .label = Dalintis
+    .accesskey = l
 menu-file-print-setup =
     .label = Puslapio nuostatos…
     .accesskey = n
@@ -61,9 +124,9 @@ menu-file-go-offline =
 menu-edit =
     .label = Taisa
     .accesskey = T
-menu-edit-find-on =
-    .label = Ieškoti šiame tinklalapyje…
-    .accesskey = I
+menu-edit-find-in-page =
+    .label = Rasti tinklalapyje
+    .accesskey = R
 menu-edit-find-again =
     .label = Ieškoti toliau
     .accesskey = o
@@ -79,8 +142,8 @@ menu-view =
 menu-view-toolbars-menu =
     .label = Priemonių juostos
     .accesskey = j
-menu-view-customize-toolbar =
-    .label = Tvarkyti…
+menu-view-customize-toolbar2 =
+    .label = Tvarkyti priemonių juostą…
     .accesskey = T
 menu-view-sidebar =
     .label = Parankinė
@@ -115,8 +178,8 @@ menu-view-page-style-no-style =
 menu-view-page-basic-style =
     .label = Pagrindinis tinklalapio stilius
     .accesskey = P
-menu-view-charset =
-    .label = Teksto koduotė
+menu-view-repair-text-encoding =
+    .label = Sutvarkyti simbolių koduotę
     .accesskey = k
 
 ## These should match what Safari and other Apple applications
@@ -160,16 +223,18 @@ menu-history-undo-menu =
     .label = Paskiausiai užvertos kortelės
 menu-history-undo-window-menu =
     .label = Paskiausiai užverti langai
+menu-history-reopen-all-tabs = Įkelti visas korteles
+menu-history-reopen-all-windows = Įkelti visus langus
 
 ## Bookmarks Menu
 
 menu-bookmarks-menu =
     .label = Adresynas
     .accesskey = A
-menu-bookmarks-show-all =
-    .label = Rodyti visą adresyną
-menu-bookmark-this-page =
-    .label = Įrašyti į adresyną
+menu-bookmarks-manage =
+    .label = Tvarkyti adresyną
+menu-bookmark-current-tab =
+    .label = Įrašyti šią kortelę į adresyną
 menu-bookmark-edit =
     .label = Taisyti adresyno įrašą
 menu-bookmarks-all-tabs =
@@ -189,14 +254,14 @@ menu-tools =
 menu-tools-downloads =
     .label = Atsiuntimai
     .accesskey = s
-menu-tools-addons =
-    .label = Priedai
+menu-tools-addons-and-themes =
+    .label = Priedai ir grafiniai apvalkalai
     .accesskey = P
-menu-tools-fxa-sign-in =
-    .label = Prisijungti prie „{ -brand-product-name }“…
+menu-tools-fxa-sign-in2 =
+    .label = Prisijungti
     .accesskey = g
-menu-tools-turn-on-sync =
-    .label = Įjungti „{ -sync-brand-short-name }“…
+menu-tools-turn-on-sync2 =
+    .label = Įjungti sinchronizavimą…
     .accesskey = n
 menu-tools-sync-now =
     .label = Sinchronizuoti dabar
@@ -204,21 +269,20 @@ menu-tools-sync-now =
 menu-tools-fxa-re-auth =
     .label = Prisijungti prie „{ -brand-product-name }“ iš naujo…
     .accesskey = r
-menu-tools-web-developer =
-    .label = Saityno kūrėjams
-    .accesskey = k
+menu-tools-browser-tools =
+    .label = Naršyklės priemonės
+    .accesskey = N
+menu-tools-task-manager =
+    .label = Užduočių tvarkytuvė
+    .accesskey = t
 menu-tools-page-source =
     .label = Pirminis tekstas
     .accesskey = e
 menu-tools-page-info =
     .label = Informacija apie tinklalapį
     .accesskey = I
-menu-preferences =
-    .label =
-        { PLATFORM() ->
-            [windows] Nuostatos
-           *[other] Nuostatos
-        }
+menu-settings =
+    .label = Nuostatos
     .accesskey =
         { PLATFORM() ->
             [windows] N
@@ -237,33 +301,35 @@ menu-window-bring-all-to-front =
 
 ## Help Menu
 
+
+# NOTE: For Engineers, any additions or changes to Help menu strings should
+# also be reflected in the related strings in appmenu.ftl. Those strings, by
+# convention, will have the same ID as these, but prefixed with "app".
+# Example: appmenu-get-help
+#
+# These strings are duplicated to allow for different casing depending on
+# where the strings appear.
+
 menu-help =
     .label = Žinynas
     .accesskey = Ž
-menu-help-product =
-    .label = „{ -brand-shorter-name }“ žinynas
-    .accesskey = ž
-menu-help-show-tour =
-    .label = Įvadas į „{ -brand-shorter-name }“
-    .accesskey = v
-menu-help-import-from-another-browser =
-    .label = Importuoti iš kitos naršyklės…
-    .accesskey = I
-menu-help-keyboard-shortcuts =
-    .label = Spartieji klavišai
-    .accesskey = k
-menu-help-troubleshooting-info =
-    .label = Informacija problemų sprendimui
-    .accesskey = r
+menu-get-help =
+    .label = Žinynas ir pagalba
+    .accesskey = Ž
+menu-help-more-troubleshooting-info =
+    .label = Daugiau informacijos problemų sprendimui
+    .accesskey = p
+menu-help-report-site-issue =
+    .label = Pranešti apie svetainės problemą…
 menu-help-feedback-page =
     .label = Siųsti atsiliepimą…
     .accesskey = S
-menu-help-safe-mode-without-addons =
-    .label = Perleisti programą, išjungus priedus…
-    .accesskey = r
-menu-help-safe-mode-with-addons =
-    .label = Perleisti programą su išjungtais priedais
-    .accesskey = r
+menu-help-enter-troubleshoot-mode2 =
+    .label = Trikčių šalinimo veiksena…
+    .accesskey = v
+menu-help-exit-troubleshoot-mode =
+    .label = Išjungti problemų sprendimo veikseną
+    .accesskey = m
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =

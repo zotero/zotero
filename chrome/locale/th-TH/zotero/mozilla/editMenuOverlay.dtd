@@ -2,29 +2,6 @@
    - License, v. 2.0. If a copy of the MPL was not distributed with this
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 
-<!ENTITY editMenu.label            "แก้ไข">
-<!ENTITY editMenu.accesskey        "ก">
-<!ENTITY undoCmd.label             "เลิกทำ">
-<!ENTITY undoCmd.key               "Z">
-<!ENTITY undoCmd.accesskey         "ล">
-<!ENTITY redoCmd.label             "ทำซ้ำ">
-<!ENTITY redoCmd.key               "Y">
-<!ENTITY redoCmd.accesskey         "ท">
-<!ENTITY cutCmd.label              "ตัด">
-<!ENTITY cutCmd.key                "X">
-<!ENTITY cutCmd.accesskey          "ต">
-<!ENTITY copyCmd.label             "คัดลอก">
-<!ENTITY copyCmd.key               "C">
-<!ENTITY copyCmd.accesskey         "ค">
-<!ENTITY pasteCmd.label            "วาง">
-<!ENTITY pasteCmd.key              "V">
-<!ENTITY pasteCmd.accesskey        "ว">
-<!ENTITY deleteCmd.label           "ลบ">
-<!ENTITY deleteCmd.accesskey       "บ">
-<!ENTITY selectAllCmd.label        "เลือกทั้งหมด">
-<!ENTITY selectAllCmd.key          "A">
-<!ENTITY selectAllCmd.accesskey    "อ">
-
 <!ENTITY findCmd.label             "ค้นหา">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "น">
@@ -32,5 +9,3 @@
 <!ENTITY findAgainCmd.key          "G">
 <!ENTITY findAgainCmd.key2         "VK_F3">
 <!ENTITY findAgainCmd.accesskey    "ห">
-<!ENTITY findPreviousCmd.label     "ค้นหาก่อนหน้า">
-<!ENTITY findPreviousCmd.accesskey "น">

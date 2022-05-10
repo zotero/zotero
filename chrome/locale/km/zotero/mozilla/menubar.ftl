@@ -3,6 +3,55 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
+
+
+## Application Menu (macOS only)
+
+menu-application-services =
+    .label = សេវាកម្ម
+menu-application-hide-this =
+    .label = លាក់ { -brand-shorter-name }
+menu-application-hide-other =
+    .label = លាក់​ផ្សេងទៀត
+menu-application-show-all =
+    .label = បង្ហាញ​ទាំងអស់
+
+##
+
+# These menu-quit strings are only used on Windows and Linux.
+menu-quit =
+    .label =
+        { PLATFORM() ->
+            [windows] ចេញ
+           *[other] ចេញ
+        }
+    .accesskey =
+        { PLATFORM() ->
+            [windows] x
+           *[other] Q
+        }
+
+# This menu-quit-mac string is only used on macOS.
+menu-quit-mac =
+    .label = បិទ { -brand-shorter-name }
+
+# This menu-quit-button string is only used on Linux.
+menu-quit-button =
+    .label = { menu-quit.label }
+
+# This menu-quit-button-win string is only used on Windows.
+menu-quit-button-win =
+    .label = { menu-quit.label }
+    .tooltip = បិទ { -brand-shorter-name }
+
+menu-about =
+    .label = អំពី { -brand-shorter-name }
+    .accesskey = A
+
 ## File Menu
 
 menu-file =
@@ -58,9 +107,6 @@ menu-file-go-offline =
 menu-edit =
     .label = កែសម្រួល
     .accesskey = E
-menu-edit-find-on =
-    .label = ស្វែងរក​ក្នុង​ទំព័រ​នេះ...
-    .accesskey = F
 menu-edit-find-again =
     .label = រក​ម្ដងទៀត
     .accesskey = g
@@ -76,9 +122,6 @@ menu-view =
 menu-view-toolbars-menu =
     .label = របារ​ឧបករណ៍
     .accesskey = T
-menu-view-customize-toolbar =
-    .label = ប្ដូរ​តាម​តម្រូវ​ការ…
-    .accesskey = C
 menu-view-sidebar =
     .label = របារ​ចំហៀង
     .accesskey = e
@@ -109,9 +152,6 @@ menu-view-page-style-no-style =
 menu-view-page-basic-style =
     .label = រចនាប័ទ្ម​ទំព័រ​មូលដ្ឋាន
     .accesskey = b
-menu-view-charset =
-    .label = ការ​​​អុីន​កូដ​អត្ថបទ
-    .accesskey = c
 
 ## These should match what Safari and other Apple applications
 ## use on macOS.
@@ -160,10 +200,6 @@ menu-history-undo-window-menu =
 menu-bookmarks-menu =
     .label = ចំណាំ
     .accesskey = B
-menu-bookmarks-show-all =
-    .label = បង្ហាញ​ចំណាំ​ទាំងអស់
-menu-bookmark-this-page =
-    .label = ចំណាំ​ទំព័រ​នេះ
 menu-bookmark-edit =
     .label = កែ​សម្រួល​ចំណាំ​នេះ
 menu-bookmarks-all-tabs =
@@ -183,32 +219,15 @@ menu-tools =
 menu-tools-downloads =
     .label = ទាញ​យក
     .accesskey = D
-menu-tools-addons =
-    .label = កម្មវិធី​បន្ថែម
-    .accesskey = A
 menu-tools-sync-now =
     .label = ធ្វើ​សមកាលកម្ម​ឥឡូវ
     .accesskey = S
-menu-tools-web-developer =
-    .label = អ្នក​អភិវឌ្ឍន៍​បណ្ដាញ
-    .accesskey = W
 menu-tools-page-source =
     .label = ប្រភព​ទំព័រ
     .accesskey = o
 menu-tools-page-info =
     .label = ព័ត៌មាន​ទំព័រ
     .accesskey = I
-menu-preferences =
-    .label =
-        { PLATFORM() ->
-            [windows] ជម្រើស
-           *[other] ចំណូលចិត្ត
-        }
-    .accesskey =
-        { PLATFORM() ->
-            [windows] O
-           *[other] n
-        }
 menu-tools-layout-debugger =
     .label = កម្មវិធីបំបាត់កំហុសប្លង់
     .accesskey = L
@@ -222,30 +241,32 @@ menu-window-bring-all-to-front =
 
 ## Help Menu
 
+
+# NOTE: For Engineers, any additions or changes to Help menu strings should
+# also be reflected in the related strings in appmenu.ftl. Those strings, by
+# convention, will have the same ID as these, but prefixed with "app".
+# Example: appmenu-help-product
+#
+# These strings are duplicated to allow for different casing depending on
+# where the strings appear.
+
+
+# NOTE: For Engineers, any additions or changes to Help menu strings should
+# also be reflected in the related strings in appmenu.ftl. Those strings, by
+# convention, will have the same ID as these, but prefixed with "app".
+# Example: appmenu-get-help
+#
+# These strings are duplicated to allow for different casing depending on
+# where the strings appear.
+
 menu-help =
     .label = ជំនួយ
     .accesskey = H
-menu-help-product =
-    .label = ជំនួយ { -brand-shorter-name }
-    .accesskey = H
-menu-help-show-tour =
-    .label = ទេសចរណ៍ { -brand-shorter-name }
-    .accesskey = o
-menu-help-keyboard-shortcuts =
-    .label = គ្រាប់ចុច​ផ្លូវកាត់
-    .accesskey = K
-menu-help-troubleshooting-info =
-    .label = ព័ត៌មាន​អំពី​ដំណោះស្រាយ​បញ្ហា
-    .accesskey = T
+menu-help-report-site-issue =
+    .label = រាយការណ៍​បញ្ហា​គេហទំព័រ…
 menu-help-feedback-page =
     .label = ដាក់​ស្នើ​មតិកែលម្អ…
     .accesskey = S
-menu-help-safe-mode-without-addons =
-    .label = ចាប់ផ្ដើម​ឡើងវិញ​ដោយ​បិទ​ដំណើរការកម្មវិធី​បន្ថែម…
-    .accesskey = R
-menu-help-safe-mode-with-addons =
-    .label = ចាប់ផ្ដើម​ឡើងវិញ​ដោយ​បើកដំណើរការ​​កម្មវិធី​បន្ថែម
-    .accesskey = R
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =

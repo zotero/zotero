@@ -3,6 +3,55 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
+
+
+## Application Menu (macOS only)
+
+menu-application-preferences =
+    .label = ترجیحات
+menu-application-services =
+    .label = خدمات
+menu-application-hide-this =
+    .label = پنهان کردن { -brand-shorter-name }
+menu-application-hide-other =
+    .label = دیگر برنامه‌ها را مخفی کن
+menu-application-show-all =
+    .label = نشان دادن همه
+menu-application-touch-bar =
+    .label = سفارشی‌سازی نوار لمسی…
+
+##
+
+# These menu-quit strings are only used on Windows and Linux.
+menu-quit =
+    .label =
+        { PLATFORM() ->
+            [windows] خروج
+           *[other] ترک
+        }
+    .accesskey =
+        { PLATFORM() ->
+            [windows] خ
+           *[other] ت
+        }
+# This menu-quit-mac string is only used on macOS.
+menu-quit-mac =
+    .label = ترک { -brand-shorter-name }
+# This menu-quit-button string is only used on Linux.
+menu-quit-button =
+    .label = { menu-quit.label }
+# This menu-quit-button-win string is only used on Windows.
+menu-quit-button-win =
+    .label = { menu-quit.label }
+    .tooltip = خروج از { -brand-shorter-name }
+menu-about =
+    .label = دربارهٔ { -brand-shorter-name }
+    .accesskey = د
+
 ## File Menu
 
 menu-file =
@@ -31,6 +80,15 @@ menu-file-open-file =
 menu-file-close =
     .label = بستن
     .accesskey = س
+# Variables:
+#  $tabCount (Number): the number of tabs that are affected by the action.
+menu-file-close-tab =
+    .label =
+        { $tabCount ->
+            [1] بستن زبانه
+           *[other] بستن { $tabCount } زبانه
+        }
+    .accesskey = ب
 menu-file-close-window =
     .label = بستن پنجره
     .accesskey = پ
@@ -39,6 +97,9 @@ menu-file-save-page =
     .accesskey = ص
 menu-file-email-link =
     .label = ایمیل کردن پیوند...
+    .accesskey = ا
+menu-file-share-url =
+    .label = اشتراک‌گذاری
     .accesskey = ا
 menu-file-print-setup =
     .label = تنظیم صفحه…
@@ -61,9 +122,9 @@ menu-file-go-offline =
 menu-edit =
     .label = ویرایش
     .accesskey = و
-menu-edit-find-on =
-    .label = پیدا کردن در این صفحه…
-    .accesskey = پ
+menu-edit-find-in-page =
+    .label = پیدا کردن در صفحه…
+    .accesskey = F
 menu-edit-find-again =
     .label = پیدا کردن مجدد
     .accesskey = ج
@@ -79,9 +140,9 @@ menu-view =
 menu-view-toolbars-menu =
     .label = نوار ابزار
     .accesskey = ن
-menu-view-customize-toolbar =
-    .label = سفارشی‌سازی…
-    .accesskey = س
+menu-view-customize-toolbar2 =
+    .label = سفارشی‌سازی نوار ابزار…
+    .accesskey = C
 menu-view-sidebar =
     .label = نوار کناری
     .accesskey = ک
@@ -115,9 +176,9 @@ menu-view-page-style-no-style =
 menu-view-page-basic-style =
     .label = سبک ابتدایی صفحه
     .accesskey = ب
-menu-view-charset =
-    .label = کدگذاری متن
-    .accesskey = گ
+menu-view-repair-text-encoding =
+    .label = تعمیر رمزگذاری متن
+    .accesskey = ت
 
 ## These should match what Safari and other Apple applications
 ## use on macOS.
@@ -160,16 +221,18 @@ menu-history-undo-menu =
     .label = زبانه‌های تازه بسته شده
 menu-history-undo-window-menu =
     .label = پنجره‌های تازه بسته شده
+menu-history-reopen-all-tabs = بازآوری همهٔ زبانه‌ها
+menu-history-reopen-all-windows = بازآوری همهٔ پنجره‌ها
 
 ## Bookmarks Menu
 
 menu-bookmarks-menu =
     .label = نشانک‌ها
     .accesskey = ن
-menu-bookmarks-show-all =
-    .label = نمایش همهٔ نشانک‌ها
-menu-bookmark-this-page =
-    .label = نشانک‌گذاری این صفحه
+menu-bookmarks-manage =
+    .label = مدیریت نشانک‌ها
+menu-bookmark-current-tab =
+    .label = نشانک‌گذاری زبانهٔ فعلی
 menu-bookmark-edit =
     .label = ویرایش این نشانک
 menu-bookmarks-all-tabs =
@@ -189,40 +252,39 @@ menu-tools =
 menu-tools-downloads =
     .label = بارگیری‌ها
     .accesskey = ب
-menu-tools-addons =
-    .label = افزودنی‌ها
+menu-tools-addons-and-themes =
+    .label = افزونه‌ها و تم‌ها
     .accesskey = ا
-menu-tools-fxa-sign-in =
-    .label = ورود به { -brand-product-name }ٕ‍ٕ…
+menu-tools-fxa-sign-in2 =
+    .label = وارد شدن
     .accesskey = g
-menu-tools-turn-on-sync =
-    .label = روشن کردن { -sync-brand-short-name } ...
-    .accesskey = n
+menu-tools-turn-on-sync2 =
+    .label = روشن کردن همگام‌سازی…
+    .accesskey = ر
 menu-tools-sync-now =
     .label = انجام هم‌گام‌سازی
     .accesskey = ه
 menu-tools-fxa-re-auth =
     .label = اتصال مجدد به { -brand-product-name }…
     .accesskey = R
-menu-tools-web-developer =
-    .label = توسعه‌دهنده وب
-    .accesskey = و
+menu-tools-browser-tools =
+    .label = ابزارهای مرورگر
+    .accesskey = ب
+menu-tools-task-manager =
+    .label = مدیر وظایف
+    .accesskey = م
 menu-tools-page-source =
     .label = متن صفحه
     .accesskey = م
 menu-tools-page-info =
     .label = اطلاعات صفحه
     .accesskey = ا
-menu-preferences =
-    .label =
-        { PLATFORM() ->
-            [windows] گزینه‌ها
-           *[other] ترجیحات
-        }
+menu-settings =
+    .label = تنظیمات
     .accesskey =
         { PLATFORM() ->
-            [windows] گ
-           *[other] ت
+            [windows] s
+           *[other] n
         }
 menu-tools-layout-debugger =
     .label = اشکال‌زدای چیدمان
@@ -237,33 +299,35 @@ menu-window-bring-all-to-front =
 
 ## Help Menu
 
+
+# NOTE: For Engineers, any additions or changes to Help menu strings should
+# also be reflected in the related strings in appmenu.ftl. Those strings, by
+# convention, will have the same ID as these, but prefixed with "app".
+# Example: appmenu-get-help
+#
+# These strings are duplicated to allow for different casing depending on
+# where the strings appear.
+
 menu-help =
     .label = راهنما
     .accesskey = H
-menu-help-product =
-    .label = راهنمای { -brand-shorter-name }
+menu-get-help =
+    .label = دریافت کمک
     .accesskey = H
-menu-help-show-tour =
-    .label = تور معرفی { -brand-shorter-name }
-    .accesskey = o
-menu-help-import-from-another-browser =
-    .label = درون‌ریزی از مرورگری دیگر… (I)
-    .accesskey = I
-menu-help-keyboard-shortcuts =
-    .label = میانبرهای صفحه کلید
-    .accesskey = K
-menu-help-troubleshooting-info =
-    .label = اطلاعات رفع اشکال
-    .accesskey = T
+menu-help-more-troubleshooting-info =
+    .label = اطلاعات بیشتر
+    .accesskey = ب
+menu-help-report-site-issue =
+    .label = مشکل سایت را گزارش کنید…
 menu-help-feedback-page =
     .label = ارسال نظر…
-    .accesskey = S
-menu-help-safe-mode-without-addons =
-    .label = راه‌اندازی مجدد به همراه غیرفعال کردن افزودنی‌ها…
-    .accesskey = R
-menu-help-safe-mode-with-addons =
-    .label = راه‌اندازی مجدد به همراه غیرفعال کردن افزودنی‌ها
-    .accesskey = R
+    .accesskey = ن
+menu-help-enter-troubleshoot-mode2 =
+    .label = حالت عیب‌یابی…
+    .accesskey = ح
+menu-help-exit-troubleshoot-mode =
+    .label = خاموش کردن حالت عیب‌یابی
+    .accesskey = M
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =

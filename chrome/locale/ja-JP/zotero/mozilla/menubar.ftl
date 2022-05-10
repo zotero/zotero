@@ -2,6 +2,54 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
+
+## Application Menu (macOS only)
+
+menu-application-preferences =
+    .label = 設定
+menu-application-services =
+    .label = サービス
+menu-application-hide-this =
+    .label = { -brand-shorter-name } を隠す
+menu-application-hide-other =
+    .label = ほかを隠す
+menu-application-show-all =
+    .label = すべてを表示
+menu-application-touch-bar =
+    .label = タッチバーをカスタマイズ...
+
+##
+
+# These menu-quit strings are only used on Windows and Linux.
+menu-quit =
+    .label =
+        { PLATFORM() ->
+            [windows] 終了
+           *[other] 終了
+        }
+    .accesskey =
+        { PLATFORM() ->
+            [windows] x
+           *[other] Q
+        }
+# This menu-quit-mac string is only used on macOS.
+menu-quit-mac =
+    .label = { -brand-shorter-name } を終了
+# This menu-quit-button string is only used on Linux.
+menu-quit-button =
+    .label = { menu-quit.label }
+# This menu-quit-button-win string is only used on Windows.
+menu-quit-button-win =
+    .label = { menu-quit.label }
+    .tooltip = { -brand-shorter-name } を終了します
+menu-about =
+    .label = { -brand-shorter-name } について
+    .accesskey = A
+
 ## File Menu
 
 menu-file =
@@ -30,6 +78,15 @@ menu-file-open-file =
 menu-file-close =
     .label = 閉じる
     .accesskey = C
+# Variables:
+#  $tabCount (Number): the number of tabs that are affected by the action.
+menu-file-close-tab =
+    .label =
+        { $tabCount ->
+            [1] タブを閉じる
+           *[other] { $tabCount } 個のタブを閉じる
+        }
+    .accesskey = C
 menu-file-close-window =
     .label = ウィンドウを閉じる
     .accesskey = d
@@ -39,6 +96,9 @@ menu-file-save-page =
 menu-file-email-link =
     .label = ページの URL をメールで送信...
     .accesskey = E
+menu-file-share-url =
+    .label = 共有
+    .accesskey = h
 menu-file-print-setup =
     .label = ページ設定...
     .accesskey = u
@@ -60,8 +120,8 @@ menu-file-go-offline =
 menu-edit =
     .label = 編集
     .accesskey = E
-menu-edit-find-on =
-    .label = このページを検索...
+menu-edit-find-in-page =
+    .label = ページを検索...
     .accesskey = F
 menu-edit-find-again =
     .label = 次を検索
@@ -78,8 +138,8 @@ menu-view =
 menu-view-toolbars-menu =
     .label = ツールバー
     .accesskey = T
-menu-view-customize-toolbar =
-    .label = カスタマイズ...
+menu-view-customize-toolbar2 =
+    .label = ツールバーをカスタマイズ...
     .accesskey = C
 menu-view-sidebar =
     .label = サイドバー
@@ -114,8 +174,8 @@ menu-view-page-style-no-style =
 menu-view-page-basic-style =
     .label = 標準スタイルシート
     .accesskey = b
-menu-view-charset =
-    .label = テキストエンコーディング
+menu-view-repair-text-encoding =
+    .label = テキストエンコーディングを修復
     .accesskey = c
 
 ## These should match what Safari and other Apple applications
@@ -160,15 +220,18 @@ menu-history-undo-menu =
 menu-history-undo-window-menu =
     .label = 最近閉じたウィンドウ
 
+menu-history-reopen-all-tabs = タブをすべて開きなおす
+menu-history-reopen-all-windows = ウィンドウをすべて開きなおす
+
 ## Bookmarks Menu
 
 menu-bookmarks-menu =
     .label = ブックマーク
     .accesskey = B
-menu-bookmarks-show-all =
-    .label = すべてのブックマークを表示
-menu-bookmark-this-page =
-    .label = このページをブックマーク
+menu-bookmarks-manage =
+    .label = ブックマークを管理
+menu-bookmark-current-tab =
+    .label = 現在のタブをブックマーク
 menu-bookmark-edit =
     .label = このブックマークを編集
 menu-bookmarks-all-tabs =
@@ -188,39 +251,38 @@ menu-tools =
 menu-tools-downloads =
     .label = ダウンロード
     .accesskey = D
-menu-tools-addons =
-    .label = アドオン
+menu-tools-addons-and-themes =
+    .label = アドオンとテーマ
     .accesskey = A
-menu-tools-fxa-sign-in =
-    .label = { -brand-product-name } にログイン...
+menu-tools-fxa-sign-in2 =
+    .label = ログイン
     .accesskey = g
-menu-tools-turn-on-sync =
-    .label = { -sync-brand-short-name } をオンにする...
+menu-tools-turn-on-sync2 =
+    .label = 同期をオンにする...
     .accesskey = n
 menu-tools-sync-now =
     .label = 今すぐ同期
-    .accesskey = S
+    .accesskey = o
 menu-tools-fxa-re-auth =
     .label = { -brand-product-name } にログイン...
     .accesskey = R
-menu-tools-web-developer =
-    .label = ウェブ開発
-    .accesskey = W
+menu-tools-browser-tools =
+    .label = ブラウザーツール
+    .accesskey = B
+menu-tools-task-manager =
+    .label = タスクマネージャー
+    .accesskey = M
 menu-tools-page-source =
     .label = ページのソース
     .accesskey = o
 menu-tools-page-info =
     .label = ページの情報
     .accesskey = I
-menu-preferences =
-    .label =
-        { PLATFORM() ->
-            [windows] オプション
-           *[other] 設定
-        }
+menu-settings =
+    .label = 設定
     .accesskey =
         { PLATFORM() ->
-            [windows] O
+            [windows] S
            *[other] n
         }
 menu-tools-layout-debugger =
@@ -236,33 +298,37 @@ menu-window-bring-all-to-front =
 
 ## Help Menu
 
+# NOTE: For Engineers, any additions or changes to Help menu strings should
+# also be reflected in the related strings in appmenu.ftl. Those strings, by
+# convention, will have the same ID as these, but prefixed with "app".
+# Example: appmenu-get-help
+#
+# These strings are duplicated to allow for different casing depending on
+# where the strings appear.
+
 menu-help =
     .label = ヘルプ
     .accesskey = H
-menu-help-product =
-    .label = { -brand-shorter-name } ヘルプ
+menu-get-help =
+    .label = ヘルプを表示
     .accesskey = H
-menu-help-show-tour =
-    .label = { -brand-shorter-name } ツアー
-    .accesskey = o
-menu-help-import-from-another-browser =
-    .label = 他のブラウザーからインポート...
-    .accesskey = I
-menu-help-keyboard-shortcuts =
-    .label = キーボードショートカット
-    .accesskey = K
-menu-help-troubleshooting-info =
-    .label = トラブルシューティング情報...
+menu-help-more-troubleshooting-info =
+    .label = 他のトラブルシューティング情報
     .accesskey = T
+menu-help-report-site-issue =
+    .label = サイトの問題を報告...
 menu-help-feedback-page =
     .label = フィードバックを送信...
     .accesskey = S
-menu-help-safe-mode-without-addons =
-    .label = アドオンを無効にして再起動...
-    .accesskey = R
-menu-help-safe-mode-with-addons =
-    .label = アドオンを有効にして再起動
-    .accesskey = R
+menu-help-share-ideas =
+    .label = 意見とフィードバックを共有...
+    .accesskey = S
+menu-help-enter-troubleshoot-mode2 =
+    .label = トラブルシューティングモード...
+    .accesskey = M
+menu-help-exit-troubleshoot-mode =
+    .label = トラブルシューティングモードをオフにする
+    .accesskey = M
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =

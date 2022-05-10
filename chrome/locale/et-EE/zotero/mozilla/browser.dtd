@@ -1,11 +1,8 @@
-﻿<!ENTITY preferencesCmd2.label       "Sätted">
-<!ENTITY preferencesCmd2.accesskey     "S">
-<!ENTITY preferencesCmdUnix.label       "Eelistused">
-<!ENTITY preferencesCmdUnix.accesskey     "E">
-<!ENTITY quitApplicationCmdWin2.label       "Välju">
-<!ENTITY quitApplicationCmdWin2.accesskey   "j">
-<!ENTITY quitApplicationCmdWin2.tooltip     "Välju &brandShorterName;ist">
-<!ENTITY quitApplicationCmd.label       "Välju">
-<!ENTITY quitApplicationCmd.accesskey   "j">
-<!ENTITY quitApplicationCmdMac2.label   "Välju &brandShorterName;ist">
-<!ENTITY quitApplicationCmd.key         "Q">
+﻿<!ENTITY preferencesCmd2.label       "Options">
+<!ENTITY preferencesCmdUnix.label       "Preferences">
+<!ENTITY quitApplicationCmdWin2.label       "Exit">
+<!ENTITY quitApplicationCmdWin2.accesskey   "x">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Exit &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Quit">
+<!ENTITY quitApplicationCmd.accesskey   "Q">
+<!ENTITY quitApplicationCmdMac2.label   "Quit &brandShorterName;">

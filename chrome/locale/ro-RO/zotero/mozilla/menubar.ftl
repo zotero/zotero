@@ -3,6 +3,59 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
+
+
+## Application Menu (macOS only)
+
+menu-application-preferences =
+    .label = Preferințe
+menu-application-services =
+    .label = Servicii
+menu-application-hide-this =
+    .label = Ascunde { -brand-shorter-name }
+menu-application-hide-other =
+    .label = Ascunde-le pe celelalte
+menu-application-show-all =
+    .label = Afișează toate
+menu-application-touch-bar =
+    .label = Personalizează bara tactilă…
+
+##
+
+# These menu-quit strings are only used on Windows and Linux.
+menu-quit =
+    .label =
+        { PLATFORM() ->
+            [windows] Ieși
+           *[other] Ieși
+        }
+    .accesskey =
+        { PLATFORM() ->
+            [windows] x
+           *[other] Q
+        }
+
+# This menu-quit-mac string is only used on macOS.
+menu-quit-mac =
+    .label = Ieși din { -brand-shorter-name }
+
+# This menu-quit-button string is only used on Linux.
+menu-quit-button =
+    .label = { menu-quit.label }
+
+# This menu-quit-button-win string is only used on Windows.
+menu-quit-button-win =
+    .label = { menu-quit.label }
+    .tooltip = Ieși din { -brand-shorter-name }
+
+menu-about =
+    .label = Despre { -brand-shorter-name }
+    .accesskey = A
+
 ## File Menu
 
 menu-file =
@@ -61,7 +114,7 @@ menu-file-go-offline =
 menu-edit =
     .label = Editare
     .accesskey = E
-menu-edit-find-on =
+menu-edit-find-in-page =
     .label = Caută în pagină…
     .accesskey = F
 menu-edit-find-again =
@@ -79,8 +132,8 @@ menu-view =
 menu-view-toolbars-menu =
     .label = Bare de instrumente
     .accesskey = T
-menu-view-customize-toolbar =
-    .label = Personalizează…
+menu-view-customize-toolbar2 =
+    .label = Personalizează bara de instrumente…
     .accesskey = C
 menu-view-sidebar =
     .label = Bară laterală
@@ -115,18 +168,19 @@ menu-view-page-style-no-style =
 menu-view-page-basic-style =
     .label = Stilul de bază al paginii
     .accesskey = b
-menu-view-charset =
-    .label = Codare de text
-    .accesskey = C
+
+menu-view-repair-text-encoding =
+    .label = Repară codarea de text
+    .accesskey = c
 
 ## These should match what Safari and other Apple applications
 ## use on macOS.
 
 menu-view-enter-full-screen =
-    .label = Intră în modul de ecran complet
+    .label = Intră în modul ecran complet
     .accesskey = F
 menu-view-exit-full-screen =
-    .label = Ieși din modul de ecran complet
+    .label = Ieși din modul ecran complet
     .accesskey = F
 menu-view-full-screen =
     .label = Ecran complet
@@ -161,15 +215,18 @@ menu-history-undo-menu =
 menu-history-undo-window-menu =
     .label = Ferestre închise recent
 
+menu-history-reopen-all-tabs = Redeschide toate filele
+menu-history-reopen-all-windows = Redeschise toate ferestrele
+
 ## Bookmarks Menu
 
 menu-bookmarks-menu =
     .label = Marcaje
     .accesskey = B
-menu-bookmarks-show-all =
-    .label = Afișează toate marcajele
-menu-bookmark-this-page =
-    .label = Marchează pagina
+menu-bookmarks-manage =
+    .label = Gestionează marcajele
+menu-bookmark-current-tab =
+    .label = Marchează fila actuală
 menu-bookmark-edit =
     .label = Editează acest marcaj
 menu-bookmarks-all-tabs =
@@ -184,19 +241,19 @@ menu-bookmarks-mobile =
 ## Tools Menu
 
 menu-tools =
-    .label = Unelte
+    .label = Instrumente
     .accesskey = T
 menu-tools-downloads =
     .label = Descărcări
     .accesskey = D
-menu-tools-addons =
-    .label = Suplimente
+menu-tools-addons-and-themes =
+    .label = Suplimente și teme
     .accesskey = A
-menu-tools-fxa-sign-in =
-    .label = Autentifică-te în { -brand-product-name }…
+menu-tools-fxa-sign-in2 =
+    .label = Autentifică-te
     .accesskey = g
-menu-tools-turn-on-sync =
-    .label = Activare { -sync-brand-short-name }…
+menu-tools-turn-on-sync2 =
+    .label = Activează sincronizarea
     .accesskey = n
 menu-tools-sync-now =
     .label = Sincronizează acum
@@ -204,24 +261,23 @@ menu-tools-sync-now =
 menu-tools-fxa-re-auth =
     .label = Reconectare la { -brand-product-name }…
     .accesskey = R
-menu-tools-web-developer =
-    .label = Dezvoltator web
-    .accesskey = W
+menu-tools-browser-tools =
+    .label = Uneltele browserului
+    .accesskey = B
+menu-tools-task-manager =
+    .label = Manager de activități
+    .accesskey = M
 menu-tools-page-source =
     .label = Sursa paginii
     .accesskey = o
 menu-tools-page-info =
     .label = Informații despre pagină
     .accesskey = I
-menu-preferences =
-    .label =
-        { PLATFORM() ->
-            [windows] Opțiuni
-           *[other] Preferințe
-        }
+menu-settings =
+    .label = Setări
     .accesskey =
         { PLATFORM() ->
-            [windows] O
+            [windows] S
            *[other] n
         }
 menu-tools-layout-debugger =
@@ -237,33 +293,35 @@ menu-window-bring-all-to-front =
 
 ## Help Menu
 
+
+# NOTE: For Engineers, any additions or changes to Help menu strings should
+# also be reflected in the related strings in appmenu.ftl. Those strings, by
+# convention, will have the same ID as these, but prefixed with "app".
+# Example: appmenu-get-help
+#
+# These strings are duplicated to allow for different casing depending on
+# where the strings appear.
+
 menu-help =
     .label = Ajutor
     .accesskey = H
-menu-help-product =
-    .label = Ajutor { -brand-shorter-name }
+menu-get-help =
+    .label = Obține ajutor
     .accesskey = H
-menu-help-show-tour =
-    .label = Tur { -brand-shorter-name }
-    .accesskey = o
-menu-help-import-from-another-browser =
-    .label = Importă din alt browser…
-    .accesskey = I
-menu-help-keyboard-shortcuts =
-    .label = Comenzi rapide din tastatură
-    .accesskey = K
-menu-help-troubleshooting-info =
-    .label = Informații pentru depanare
+menu-help-more-troubleshooting-info =
+    .label = Mai multe informații de depanare
     .accesskey = T
+menu-help-report-site-issue =
+    .label = Raportează problemă cu site-ul…
 menu-help-feedback-page =
     .label = Trimite feedback…
     .accesskey = S
-menu-help-safe-mode-without-addons =
-    .label = Repornește cu suplimentele dezactivate…
-    .accesskey = R
-menu-help-safe-mode-with-addons =
-    .label = Repornește cu suplimentele activate
-    .accesskey = R
+menu-help-enter-troubleshoot-mode2 =
+    .label = Mod de depanare…
+    .accesskey = M
+menu-help-exit-troubleshoot-mode =
+    .label = Oprește modul de depanare
+    .accesskey = M
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =

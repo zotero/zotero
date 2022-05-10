@@ -3,6 +3,55 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
+
+
+## Application Menu (macOS only)
+
+menu-application-preferences =
+    .label = העדפות
+menu-application-services =
+    .label = שירותים
+menu-application-hide-this =
+    .label = הסתרת { -brand-shorter-name }
+menu-application-hide-other =
+    .label = הסתרת אחרים
+menu-application-show-all =
+    .label = הצגת הכל
+menu-application-touch-bar =
+    .label = התאמה אישית של סרגל המגע…
+
+##
+
+# These menu-quit strings are only used on Windows and Linux.
+menu-quit =
+    .label =
+        { PLATFORM() ->
+            [windows] יציאה
+           *[other] יציאה
+        }
+    .accesskey =
+        { PLATFORM() ->
+            [windows] צ
+           *[other] צ
+        }
+# This menu-quit-mac string is only used on macOS.
+menu-quit-mac =
+    .label = יציאה מ־{ -brand-shorter-name }
+# This menu-quit-button string is only used on Linux.
+menu-quit-button =
+    .label = { menu-quit.label }
+# This menu-quit-button-win string is only used on Windows.
+menu-quit-button-win =
+    .label = { menu-quit.label }
+    .tooltip = יציאה מ־{ -brand-shorter-name }
+menu-about =
+    .label = על אודות { -brand-shorter-name }
+    .accesskey = א
+
 ## File Menu
 
 menu-file =
@@ -31,6 +80,15 @@ menu-file-open-file =
 menu-file-close =
     .label = סגירה
     .accesskey = ג
+# Variables:
+#  $tabCount (Number): the number of tabs that are affected by the action.
+menu-file-close-tab =
+    .label =
+        { $tabCount ->
+            [1] סגירת לשונית
+           *[other] סגירת { $tabCount } לשוניות
+        }
+    .accesskey = ס
 menu-file-close-window =
     .label = סגירת חלון
     .accesskey = ס
@@ -40,6 +98,9 @@ menu-file-save-page =
 menu-file-email-link =
     .label = שליחת קישור בדוא״ל…
     .accesskey = ד
+menu-file-share-url =
+    .label = שיתוף
+    .accesskey = ש
 menu-file-print-setup =
     .label = הגדרת עמוד…
     .accesskey = ה
@@ -61,8 +122,8 @@ menu-file-go-offline =
 menu-edit =
     .label = עריכה
     .accesskey = ע
-menu-edit-find-on =
-    .label = חיפוש בדף זה…
+menu-edit-find-in-page =
+    .label = חיפוש בדף…
     .accesskey = ח
 menu-edit-find-again =
     .label = מצא שוב
@@ -79,8 +140,8 @@ menu-view =
 menu-view-toolbars-menu =
     .label = סרגלי כלים
     .accesskey = ם
-menu-view-customize-toolbar =
-    .label = התאמה אישית…
+menu-view-customize-toolbar2 =
+    .label = התאמה אישית של סרגל הכלים…
     .accesskey = ה
 menu-view-sidebar =
     .label = סרגל צד
@@ -115,8 +176,8 @@ menu-view-page-style-no-style =
 menu-view-page-basic-style =
     .label = סגנון דף בסיסי
     .accesskey = ס
-menu-view-charset =
-    .label = קידוד טקסט
+menu-view-repair-text-encoding =
+    .label = תיקון קידוד טקסט
     .accesskey = ק
 
 ## These should match what Safari and other Apple applications
@@ -160,16 +221,18 @@ menu-history-undo-menu =
     .label = לשוניות שנסגרו לאחרונה
 menu-history-undo-window-menu =
     .label = חלונות שנסגרו לאחרונה
+menu-history-reopen-all-tabs = פתיחת כל הלשוניות מחדש
+menu-history-reopen-all-windows = פתיחת כל החלונות מחדש
 
 ## Bookmarks Menu
 
 menu-bookmarks-menu =
     .label = סימניות
     .accesskey = ס
-menu-bookmarks-show-all =
-    .label = הצגת כל הסימניות
-menu-bookmark-this-page =
-    .label = יצירת סימנייה לדף זה
+menu-bookmarks-manage =
+    .label = ניהול סימניות
+menu-bookmark-current-tab =
+    .label = יצירת סימנייה ללשונית הנוכחית
 menu-bookmark-edit =
     .label = עריכת סימנייה זו
 menu-bookmarks-all-tabs =
@@ -189,40 +252,39 @@ menu-tools =
 menu-tools-downloads =
     .label = הורדות
     .accesskey = ד
-menu-tools-addons =
-    .label = תוספות
+menu-tools-addons-and-themes =
+    .label = תוספות וערכות נושא
     .accesskey = ת
-menu-tools-fxa-sign-in =
-    .label = כניסה אל { -brand-product-name }…
+menu-tools-fxa-sign-in2 =
+    .label = כניסה
     .accesskey = כ
-menu-tools-turn-on-sync =
-    .label = הפעלת { -sync-brand-short-name }…
-    .accesskey = ה
+menu-tools-turn-on-sync2 =
+    .label = הפעלת סנכרון
+    .accesskey = ס
 menu-tools-sync-now =
     .label = סנכרון כעת
     .accesskey = ס
 menu-tools-fxa-re-auth =
     .label = התחברות מחדש ל־{ -brand-product-name }…
     .accesskey = ת
-menu-tools-web-developer =
-    .label = כלי פיתוח
+menu-tools-browser-tools =
+    .label = כלי דפדפן
     .accesskey = כ
+menu-tools-task-manager =
+    .label = מנהל משימות
+    .accesskey = מ
 menu-tools-page-source =
     .label = מקור הדף
     .accesskey = ר
 menu-tools-page-info =
     .label = מידע על הדף
     .accesskey = מ
-menu-preferences =
-    .label =
-        { PLATFORM() ->
-            [windows] אפשרויות
-           *[other] העדפות
-        }
+menu-settings =
+    .label = הגדרות
     .accesskey =
         { PLATFORM() ->
-            [windows] א
-           *[other] ד
+            [windows] ג
+           *[other] ג
         }
 menu-tools-layout-debugger =
     .label = ניפוי שגיאות פריסה
@@ -237,33 +299,38 @@ menu-window-bring-all-to-front =
 
 ## Help Menu
 
+
+# NOTE: For Engineers, any additions or changes to Help menu strings should
+# also be reflected in the related strings in appmenu.ftl. Those strings, by
+# convention, will have the same ID as these, but prefixed with "app".
+# Example: appmenu-get-help
+#
+# These strings are duplicated to allow for different casing depending on
+# where the strings appear.
+
 menu-help =
     .label = עזרה
     .accesskey = ז
-menu-help-product =
-    .label = עזרה עבור { -brand-shorter-name }
+menu-get-help =
+    .label = קבלת עזרה
     .accesskey = ע
-menu-help-show-tour =
-    .label = סיור ב־{ -brand-shorter-name }
-    .accesskey = ס
-menu-help-import-from-another-browser =
-    .label = ייבוא מדפדפן אחר…
-    .accesskey = י
-menu-help-keyboard-shortcuts =
-    .label = קיצורי מקלדת
-    .accesskey = ק
-menu-help-troubleshooting-info =
-    .label = מידע לפתרון בעיות
+menu-help-more-troubleshooting-info =
+    .label = מידע נוסף לפתרון בעיות
     .accesskey = מ
+menu-help-report-site-issue =
+    .label = דיווח על בעיה באתר…
 menu-help-feedback-page =
     .label = שליחת משוב…
     .accesskey = ש
-menu-help-safe-mode-without-addons =
-    .label = הפעלה מחדש עם תוספות מנוטרלות…
-    .accesskey = מ
-menu-help-safe-mode-with-addons =
-    .label = הפעלה מחדש עם תוספות פעילות
-    .accesskey = ח
+menu-help-share-ideas =
+    .label = שיתוף רעיונות ומשוב…
+    .accesskey = ש
+menu-help-enter-troubleshoot-mode2 =
+    .label = מצב לפתרון בעיות…
+    .accesskey = פ
+menu-help-exit-troubleshoot-mode =
+    .label = כיבוי מצב לפתרון בעיות
+    .accesskey = פ
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =

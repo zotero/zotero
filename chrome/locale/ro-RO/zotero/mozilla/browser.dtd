@@ -1,11 +1,8 @@
-﻿<!ENTITY preferencesCmd2.label       "Opțiuni">
-<!ENTITY preferencesCmd2.accesskey     "O">
-<!ENTITY preferencesCmdUnix.label       "Preferințe">
-<!ENTITY preferencesCmdUnix.accesskey     "n">
-<!ENTITY quitApplicationCmdWin2.label       "Ieși">
+﻿<!ENTITY preferencesCmd2.label       "Options">
+<!ENTITY preferencesCmdUnix.label       "Preferences">
+<!ENTITY quitApplicationCmdWin2.label       "Exit">
 <!ENTITY quitApplicationCmdWin2.accesskey   "x">
-<!ENTITY quitApplicationCmdWin2.tooltip     "Ieși din &brandShorterName;">
-<!ENTITY quitApplicationCmd.label       "Ieși">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Exit &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Quit">
 <!ENTITY quitApplicationCmd.accesskey   "Q">
-<!ENTITY quitApplicationCmdMac2.label   "Ieși din &brandShorterName;">
-<!ENTITY quitApplicationCmd.key         "Q">
+<!ENTITY quitApplicationCmdMac2.label   "Quit &brandShorterName;">

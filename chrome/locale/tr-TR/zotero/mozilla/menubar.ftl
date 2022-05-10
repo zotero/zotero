@@ -3,6 +3,55 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
+
+
+## Application Menu (macOS only)
+
+menu-application-preferences =
+    .label = Tercihler
+menu-application-services =
+    .label = Servisler
+menu-application-hide-this =
+    .label = { -brand-shorter-name } uygulamasını gizle
+menu-application-hide-other =
+    .label = Diğerlerini gizle
+menu-application-show-all =
+    .label = Tümünü göster
+menu-application-touch-bar =
+    .label = Touch Bar’ı özelleştir…
+
+##
+
+# These menu-quit strings are only used on Windows and Linux.
+menu-quit =
+    .label =
+        { PLATFORM() ->
+            [windows] Çık
+           *[other] Çık
+        }
+    .accesskey =
+        { PLATFORM() ->
+            [windows] k
+           *[other] k
+        }
+# This menu-quit-mac string is only used on macOS.
+menu-quit-mac =
+    .label = { -brand-shorter-name } uygulamasından çık
+# This menu-quit-button string is only used on Linux.
+menu-quit-button =
+    .label = { menu-quit.label }
+# This menu-quit-button-win string is only used on Windows.
+menu-quit-button-win =
+    .label = { menu-quit.label }
+    .tooltip = { -brand-shorter-name } tarayıcısından çık
+menu-about =
+    .label = { -brand-shorter-name } hakkında
+    .accesskey = h
+
 ## File Menu
 
 menu-file =
@@ -31,6 +80,16 @@ menu-file-open-file =
 menu-file-close =
     .label = Kapat
     .accesskey = K
+# Variables:
+#  $tabCount (Number): the number of tabs that are affected by the action.
+menu-file-close-tab =
+    .label =
+        { $tabCount ->
+            [1] Sekmeyi kapat
+            [one] { $tabCount } sekmeyi kapat
+           *[other] { $tabCount } sekmeyi kapat
+        }
+    .accesskey = e
 menu-file-close-window =
     .label = Pencereyi kapat
     .accesskey = P
@@ -40,6 +99,9 @@ menu-file-save-page =
 menu-file-email-link =
     .label = Bağlantıyı e-postayla gönder…
     .accesskey = e
+menu-file-share-url =
+    .label = Paylaş
+    .accesskey = a
 menu-file-print-setup =
     .label = Sayfa düzeni…
     .accesskey = ü
@@ -61,9 +123,9 @@ menu-file-go-offline =
 menu-edit =
     .label = Düzen
     .accesskey = z
-menu-edit-find-on =
-    .label = Bu sayfada bul…
-    .accesskey = s
+menu-edit-find-in-page =
+    .label = Sayfada bul…
+    .accesskey = b
 menu-edit-find-again =
     .label = Sonrakini bul
     .accesskey = a
@@ -79,9 +141,9 @@ menu-view =
 menu-view-toolbars-menu =
     .label = Araç çubukları
     .accesskey = A
-menu-view-customize-toolbar =
-    .label = Özelleştir…
-    .accesskey = Ö
+menu-view-customize-toolbar2 =
+    .label = Araç çubuğunu özelleştir…
+    .accesskey = z
 menu-view-sidebar =
     .label = Kenar çubuğu
     .accesskey = K
@@ -115,9 +177,9 @@ menu-view-page-style-no-style =
 menu-view-page-basic-style =
     .label = Temel sayfa stili
     .accesskey = T
-menu-view-charset =
-    .label = Metin kodlaması
-    .accesskey = k
+menu-view-repair-text-encoding =
+    .label = Metin kodlamasını onar
+    .accesskey = M
 
 ## These should match what Safari and other Apple applications
 ## use on macOS.
@@ -160,16 +222,18 @@ menu-history-undo-menu =
     .label = Son kapatılan sekmeler
 menu-history-undo-window-menu =
     .label = Son kapatılan pencereler
+menu-history-reopen-all-tabs = Tüm sekmeleri yeniden aç
+menu-history-reopen-all-windows = Tüm pencereleri yeniden aç
 
 ## Bookmarks Menu
 
 menu-bookmarks-menu =
     .label = Yer imleri
     .accesskey = Y
-menu-bookmarks-show-all =
-    .label = Tüm yer imlerini göster
-menu-bookmark-this-page =
-    .label = Bu sayfayı yer imlerine ekle
+menu-bookmarks-manage =
+    .label = Yer imlerini yönet
+menu-bookmark-current-tab =
+    .label = Bu sekmeyi yer imlerine ekle
 menu-bookmark-edit =
     .label = Bu yer imini düzenle
 menu-bookmarks-all-tabs =
@@ -189,40 +253,39 @@ menu-tools =
 menu-tools-downloads =
     .label = İndirilenler
     .accesskey = d
-menu-tools-addons =
-    .label = Eklentiler
+menu-tools-addons-and-themes =
+    .label = Eklentiler ve temalar
+    .accesskey = a
+menu-tools-fxa-sign-in2 =
+    .label = Giriş yap
+    .accesskey = G
+menu-tools-turn-on-sync2 =
+    .label = Eşitlemeyi başlat…
     .accesskey = E
-menu-tools-fxa-sign-in =
-    .label = { -brand-product-name }’a giriş yap…
-    .accesskey = g
-menu-tools-turn-on-sync =
-    .label = { -sync-brand-short-name }’i etkinleştir…
-    .accesskey = n
 menu-tools-sync-now =
     .label = Şimdi eşitle
     .accesskey = m
 menu-tools-fxa-re-auth =
     .label = { -brand-product-name }’a yeniden bağlan…
     .accesskey = b
-menu-tools-web-developer =
-    .label = Web geliştirici
-    .accesskey = W
+menu-tools-browser-tools =
+    .label = Tarayıcı araçları
+    .accesskey = T
+menu-tools-task-manager =
+    .label = Görev yöneticisi
+    .accesskey = G
 menu-tools-page-source =
     .label = Sayfa kaynağı
     .accesskey = a
 menu-tools-page-info =
     .label = Sayfa bilgileri
     .accesskey = b
-menu-preferences =
-    .label =
-        { PLATFORM() ->
-            [windows] Seçenekler
-           *[other] Tercihler
-        }
+menu-settings =
+    .label = Ayarlar
     .accesskey =
         { PLATFORM() ->
-            [windows] S
-           *[other] T
+            [windows] A
+           *[other] r
         }
 menu-tools-layout-debugger =
     .label = Düzen hata ayıklayıcısı
@@ -237,33 +300,38 @@ menu-window-bring-all-to-front =
 
 ## Help Menu
 
+
+# NOTE: For Engineers, any additions or changes to Help menu strings should
+# also be reflected in the related strings in appmenu.ftl. Those strings, by
+# convention, will have the same ID as these, but prefixed with "app".
+# Example: appmenu-get-help
+#
+# These strings are duplicated to allow for different casing depending on
+# where the strings appear.
+
 menu-help =
     .label = Yardım
+    .accesskey = r
+menu-get-help =
+    .label = Yardım al
     .accesskey = Y
-menu-help-product =
-    .label = { -brand-shorter-name } yardımı
-    .accesskey = m
-menu-help-show-tour =
-    .label = { -brand-shorter-name } turu
-    .accesskey = u
-menu-help-import-from-another-browser =
-    .label = Başka bir tarayıcıdan içe aktar…
-    .accesskey = B
-menu-help-keyboard-shortcuts =
-    .label = Klavye kısayolları
-    .accesskey = K
-menu-help-troubleshooting-info =
+menu-help-more-troubleshooting-info =
     .label = Sorun giderme bilgileri
-    .accesskey = b
+    .accesskey = S
+menu-help-report-site-issue =
+    .label = Siteyle ilgili sorun bildir…
 menu-help-feedback-page =
     .label = Geri bildirim gönder…
     .accesskey = G
-menu-help-safe-mode-without-addons =
-    .label = Eklentileri devre dışı bırakıp başlat…
-    .accesskey = E
-menu-help-safe-mode-with-addons =
-    .label = Eklentileri etkinleştirip yeniden başlat
-    .accesskey = E
+menu-help-share-ideas =
+    .label = Fikir ve görüş paylaş…
+    .accesskey = F
+menu-help-enter-troubleshoot-mode2 =
+    .label = Sorun giderme modu…
+    .accesskey = o
+menu-help-exit-troubleshoot-mode =
+    .label = Sorun giderme modunu kapat
+    .accesskey = m
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =

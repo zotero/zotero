@@ -3,6 +3,55 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
+
+
+## Application Menu (macOS only)
+
+menu-application-preferences =
+    .label = Eelistused
+menu-application-services =
+    .label = Teenused
+menu-application-hide-this =
+    .label = Varja { -brand-shorter-name }
+menu-application-hide-other =
+    .label = Varja teised
+menu-application-show-all =
+    .label = Näita kõiki
+menu-application-touch-bar =
+    .label = Kohanda puuteriba…
+
+##
+
+# These menu-quit strings are only used on Windows and Linux.
+menu-quit =
+    .label =
+        { PLATFORM() ->
+            [windows] Välju
+           *[other] Välju
+        }
+    .accesskey =
+        { PLATFORM() ->
+            [windows] j
+           *[other] j
+        }
+# This menu-quit-mac string is only used on macOS.
+menu-quit-mac =
+    .label = Välju { -brand-shorter-name }ist
+# This menu-quit-button string is only used on Linux.
+menu-quit-button =
+    .label = { menu-quit.label }
+# This menu-quit-button-win string is only used on Windows.
+menu-quit-button-win =
+    .label = { menu-quit.label }
+    .tooltip = Välju { -brand-shorter-name }ist
+menu-about =
+    .label = { -brand-shorter-name }i teave
+    .accesskey = e
+
 ## File Menu
 
 menu-file =
@@ -31,6 +80,16 @@ menu-file-open-file =
 menu-file-close =
     .label = Sulge
     .accesskey = u
+# Variables:
+#  $tabCount (Number): the number of tabs that are affected by the action.
+menu-file-close-tab =
+    .label =
+        { $tabCount ->
+            [1] Sulge kaart
+            [one] Sulge kaart
+           *[other] Sulge { $tabCount } kaarti
+        }
+    .accesskey = S
 menu-file-close-window =
     .label = Sulge aken
     .accesskey = S
@@ -40,6 +99,9 @@ menu-file-save-page =
 menu-file-email-link =
     .label = Saada link e-postiga…
     .accesskey = d
+menu-file-share-url =
+    .label = Jaga
+    .accesskey = J
 menu-file-print-setup =
     .label = Lehekülje sätted…
     .accesskey = L
@@ -61,9 +123,9 @@ menu-file-go-offline =
 menu-edit =
     .label = Redigeerimine
     .accesskey = R
-menu-edit-find-on =
-    .label = Otsi sellelt lehelt...
-    .accesskey = s
+menu-edit-find-in-page =
+    .label = Otsi lehelt…
+    .accesskey = O
 menu-edit-find-again =
     .label = Otsi uuesti
     .accesskey = u
@@ -79,9 +141,9 @@ menu-view =
 menu-view-toolbars-menu =
     .label = Tööriistaribad
     .accesskey = T
-menu-view-customize-toolbar =
-    .label = Kohanda...
-    .accesskey = o
+menu-view-customize-toolbar2 =
+    .label = Kohanda tööriistariba…
+    .accesskey = K
 menu-view-sidebar =
     .label = Külgriba
     .accesskey = K
@@ -100,6 +162,9 @@ menu-view-full-zoom-enlarge =
 menu-view-full-zoom-reduce =
     .label = Vähenda
     .accesskey = V
+menu-view-full-zoom-actual-size =
+    .label = Tegelik suurus
+    .accesskey = T
 menu-view-full-zoom-toggle =
     .label = Suurenda ainult teksti
     .accesskey = t
@@ -112,9 +177,9 @@ menu-view-page-style-no-style =
 menu-view-page-basic-style =
     .label = Veebilehe baasstiil
     .accesskey = b
-menu-view-charset =
-    .label = Teksti kodeering
-    .accesskey = o
+menu-view-repair-text-encoding =
+    .label = Paranda teksti kodeering
+    .accesskey = P
 
 ## These should match what Safari and other Apple applications
 ## use on macOS.
@@ -157,16 +222,18 @@ menu-history-undo-menu =
     .label = Hiljuti suletud kaardid
 menu-history-undo-window-menu =
     .label = Hiljuti suletud aknad
+menu-history-reopen-all-tabs = Ava kõik kaardid uuesti
+menu-history-reopen-all-windows = Ava kõik aknad uuesti
 
 ## Bookmarks Menu
 
 menu-bookmarks-menu =
     .label = Järjehoidjad
     .accesskey = J
-menu-bookmarks-show-all =
-    .label = Kuva kõiki järjehoidjaid
-menu-bookmark-this-page =
-    .label = Lisa see veebileht järjehoidjatesse
+menu-bookmarks-manage =
+    .label = Halda järjehoidjaid
+menu-bookmark-current-tab =
+    .label = Lisa praegune kaart järjehoidjatesse
 menu-bookmark-edit =
     .label = Muuda seda järjehoidjat
 menu-bookmarks-all-tabs =
@@ -186,14 +253,14 @@ menu-tools =
 menu-tools-downloads =
     .label = Allalaadimised
     .accesskey = A
-menu-tools-addons =
-    .label = Lisad
+menu-tools-addons-and-themes =
+    .label = Lisad ja teemad
     .accesskey = L
-menu-tools-fxa-sign-in =
-    .label = Logi { -brand-product-name }i sisse…
-    .accesskey = L
-menu-tools-turn-on-sync =
-    .label = Lülita { -sync-brand-short-name } sisse…
+menu-tools-fxa-sign-in2 =
+    .label = Logi sisse
+    .accesskey = o
+menu-tools-turn-on-sync2 =
+    .label = Lülita Sync sisse…
     .accesskey = t
 menu-tools-sync-now =
     .label = Sünkroniseeri kohe
@@ -201,25 +268,24 @@ menu-tools-sync-now =
 menu-tools-fxa-re-auth =
     .label = Ühenda { -brand-product-name } uuesti…
     .accesskey = h
-menu-tools-web-developer =
-    .label = Veebiarendajale
-    .accesskey = b
+menu-tools-browser-tools =
+    .label = Brauseri tööriistad
+    .accesskey = B
+menu-tools-task-manager =
+    .label = Tegumihaldur
+    .accesskey = g
 menu-tools-page-source =
     .label = Veebilehe lähtekood
     .accesskey = l
 menu-tools-page-info =
     .label = Veebilehe info
     .accesskey = i
-menu-preferences =
-    .label =
-        { PLATFORM() ->
-            [windows] Sätted
-           *[other] Eelistused
-        }
+menu-settings =
+    .label = Sätted
     .accesskey =
         { PLATFORM() ->
             [windows] S
-           *[other] E
+           *[other] t
         }
 menu-tools-layout-debugger =
     .label = Layout Debugger
@@ -234,33 +300,40 @@ menu-window-bring-all-to-front =
 
 ## Help Menu
 
+
+# NOTE: For Engineers, any additions or changes to Help menu strings should
+# also be reflected in the related strings in appmenu.ftl. Those strings, by
+# convention, will have the same ID as these, but prefixed with "app".
+# Example: appmenu-get-help
+#
+# These strings are duplicated to allow for different casing depending on
+# where the strings appear.
+
 menu-help =
     .label = Abi
     .accesskey = b
-menu-help-product =
-    .label = { -brand-shorter-name }i käsiraamat
-    .accesskey = k
-menu-help-show-tour =
-    .label = { -brand-shorter-name }i ringkäik
-    .accesskey = r
-menu-help-keyboard-shortcuts =
-    .label = Kiirklahvid
+menu-get-help =
+    .label = Otsi abi
     .accesskey = i
-menu-help-troubleshooting-info =
-    .label = Probleemide lahendamise teave
-    .accesskey = P
+menu-help-more-troubleshooting-info =
+    .label = Rohkem probleemide lahendamise teavet
+    .accesskey = h
+menu-help-report-site-issue =
+    .label = Anna teada saidil olevast veast…
 menu-help-feedback-page =
     .label = Anna tagasisidet…
     .accesskey = A
-menu-help-safe-mode-without-addons =
-    .label = Taaskäivita koos lisade keelamisega…
-    .accesskey = T
-menu-help-safe-mode-with-addons =
-    .label = Taaskäivita koos lisade lubamisega
-    .accesskey = T
+menu-help-share-ideas =
+    .label = Jaga ideid ja tagasisidet…
+    .accesskey = J
+menu-help-enter-troubleshoot-mode2 =
+    .label = Probleemide lahendamise režiim…
+    .accesskey = m
+menu-help-exit-troubleshoot-mode =
+    .label = Lülita probleemide lahendamise režiim välja
+    .accesskey = d
 # Label of the Help menu item. Either this or
-# safeb.palm.notdeceptive.label from
-# phishing-afterload-warning-message.dtd is shown.
+# menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
     .label = Teata veebivõltsingust…
     .accesskey = T

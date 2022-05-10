@@ -3,6 +3,55 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
+
+
+## Application Menu (macOS only)
+
+menu-application-preferences =
+    .label = Preferències
+menu-application-services =
+    .label = Serveis
+menu-application-hide-this =
+    .label = Amaga el { -brand-shorter-name }
+menu-application-hide-other =
+    .label = Amaga altres
+menu-application-show-all =
+    .label = Mostra-ho tot
+menu-application-touch-bar =
+    .label = Personalitza la Touch Bar…
+
+##
+
+# These menu-quit strings are only used on Windows and Linux.
+menu-quit =
+    .label =
+        { PLATFORM() ->
+            [windows] Surt
+           *[other] Surt
+        }
+    .accesskey =
+        { PLATFORM() ->
+            [windows] u
+           *[other] u
+        }
+# This menu-quit-mac string is only used on macOS.
+menu-quit-mac =
+    .label = Surt del { -brand-shorter-name }
+# This menu-quit-button string is only used on Linux.
+menu-quit-button =
+    .label = { menu-quit.label }
+# This menu-quit-button-win string is only used on Windows.
+menu-quit-button-win =
+    .label = { menu-quit.label }
+    .tooltip = Surt del { -brand-shorter-name }
+menu-about =
+    .label = Quant al { -brand-shorter-name }
+    .accesskey = Q
+
 ## File Menu
 
 menu-file =
@@ -31,6 +80,16 @@ menu-file-open-file =
 menu-file-close =
     .label = Tanca
     .accesskey = c
+# Variables:
+#  $tabCount (Number): the number of tabs that are affected by the action.
+menu-file-close-tab =
+    .label =
+        { $tabCount ->
+            [1] Tanca les { $tabCount } pestanyes
+            [one] Tanca la pestanya
+           *[other] Tanca les { $tabCount } pestanyes
+        }
+    .accesskey = p
 menu-file-close-window =
     .label = Tanca la finestra
     .accesskey = f
@@ -40,6 +99,9 @@ menu-file-save-page =
 menu-file-email-link =
     .label = Envia l'enllaç per correu…
     .accesskey = E
+menu-file-share-url =
+    .label = Comparteix
+    .accesskey = C
 menu-file-print-setup =
     .label = Configuració de la pàgina…
     .accesskey = g
@@ -61,9 +123,9 @@ menu-file-go-offline =
 menu-edit =
     .label = Edita
     .accesskey = E
-menu-edit-find-on =
-    .label = Cerca en aquesta pàgina…
-    .accesskey = r
+menu-edit-find-in-page =
+    .label = Cerca a la pàgina…
+    .accesskey = C
 menu-edit-find-again =
     .label = Torna a cercar
     .accesskey = o
@@ -79,8 +141,8 @@ menu-view =
 menu-view-toolbars-menu =
     .label = Barres d'eines
     .accesskey = a
-menu-view-customize-toolbar =
-    .label = Personalitza…
+menu-view-customize-toolbar2 =
+    .label = Personalitza la barra d'eines…
     .accesskey = P
 menu-view-sidebar =
     .label = Barra lateral
@@ -115,9 +177,9 @@ menu-view-page-style-no-style =
 menu-view-page-basic-style =
     .label = Estil de pàgina bàsic
     .accesskey = b
-menu-view-charset =
-    .label = Codificació del text
-    .accesskey = C
+menu-view-repair-text-encoding =
+    .label = Repara la codificació del text
+    .accesskey = c
 
 ## These should match what Safari and other Apple applications
 ## use on macOS.
@@ -160,16 +222,18 @@ menu-history-undo-menu =
     .label = Pestanyes tancades recentment
 menu-history-undo-window-menu =
     .label = Finestres tancades recentment
+menu-history-reopen-all-tabs = Torna a obrir totes les pestanyes
+menu-history-reopen-all-windows = Torna a obrir totes les finestres
 
 ## Bookmarks Menu
 
 menu-bookmarks-menu =
     .label = Adreces d'interès
     .accesskey = r
-menu-bookmarks-show-all =
-    .label = Mostra totes les adreces d'interès
-menu-bookmark-this-page =
-    .label = Afegeix la pàgina a les adreces d'interès
+menu-bookmarks-manage =
+    .label = Gestiona les adreces d'interès
+menu-bookmark-current-tab =
+    .label = Afegeix la pestanya actual a les adreces d'interès
 menu-bookmark-edit =
     .label = Edita aquesta adreça d'interès
 menu-bookmarks-all-tabs =
@@ -189,40 +253,39 @@ menu-tools =
 menu-tools-downloads =
     .label = Baixades
     .accesskey = d
-menu-tools-addons =
-    .label = Complements
-    .accesskey = m
-menu-tools-fxa-sign-in =
-    .label = Inicia la sessió al { -brand-product-name }…
-    .accesskey = F
-menu-tools-turn-on-sync =
-    .label = Activa el { -sync-brand-short-name }…
-    .accesskey = n
+menu-tools-addons-and-themes =
+    .label = Complements i temes
+    .accesskey = C
+menu-tools-fxa-sign-in2 =
+    .label = Inicia la sessió
+    .accesskey = I
+menu-tools-turn-on-sync2 =
+    .label = Activa la sincronització…
+    .accesskey = s
 menu-tools-sync-now =
     .label = Sincronitza ara
     .accesskey = S
 menu-tools-fxa-re-auth =
     .label = Torna a connectar al { -brand-product-name }…
     .accesskey = T
-menu-tools-web-developer =
-    .label = Desenvolupador web
-    .accesskey = w
+menu-tools-browser-tools =
+    .label = Eines del navegador
+    .accesskey = E
+menu-tools-task-manager =
+    .label = Gestor de tasques
+    .accesskey = G
 menu-tools-page-source =
     .label = Codi font de la pàgina
     .accesskey = o
 menu-tools-page-info =
     .label = Informació de la pàgina
     .accesskey = I
-menu-preferences =
-    .label =
-        { PLATFORM() ->
-            [windows] Opcions
-           *[other] Preferències
-        }
+menu-settings =
+    .label = Paràmetres
     .accesskey =
         { PLATFORM() ->
-            [windows] O
-           *[other] n
+            [windows] P
+           *[other] m
         }
 menu-tools-layout-debugger =
     .label = Depurador de disposició
@@ -237,33 +300,35 @@ menu-window-bring-all-to-front =
 
 ## Help Menu
 
+
+# NOTE: For Engineers, any additions or changes to Help menu strings should
+# also be reflected in the related strings in appmenu.ftl. Those strings, by
+# convention, will have the same ID as these, but prefixed with "app".
+# Example: appmenu-get-help
+#
+# These strings are duplicated to allow for different casing depending on
+# where the strings appear.
+
 menu-help =
     .label = Ajuda
+    .accesskey = A
+menu-get-help =
+    .label = Obteniu ajuda
     .accesskey = j
-menu-help-product =
-    .label = Ajuda del { -brand-shorter-name }
-    .accesskey = j
-menu-help-show-tour =
-    .label = Visita guiada del { -brand-shorter-name }
-    .accesskey = V
-menu-help-import-from-another-browser =
-    .label = Importa d'un altre navegador…
-    .accesskey = I
-menu-help-keyboard-shortcuts =
-    .label = Dreceres de teclat
-    .accesskey = D
-menu-help-troubleshooting-info =
-    .label = Informació de resolució de problemes
-    .accesskey = r
+menu-help-more-troubleshooting-info =
+    .label = Més informació de resolució de problemes
+    .accesskey = i
+menu-help-report-site-issue =
+    .label = Informa d'un problema amb el lloc…
 menu-help-feedback-page =
     .label = Envia comentaris…
     .accesskey = E
-menu-help-safe-mode-without-addons =
-    .label = Reinicia amb els complements inhabilitats…
-    .accesskey = R
-menu-help-safe-mode-with-addons =
-    .label = Reinicia amb els complements habilitats
-    .accesskey = R
+menu-help-enter-troubleshoot-mode2 =
+    .label = Mode de resolució de problemes…
+    .accesskey = M
+menu-help-exit-troubleshoot-mode =
+    .label = Desactiva el mode de resolució de problemes
+    .accesskey = m
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =

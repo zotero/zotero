@@ -1,11 +1,8 @@
-﻿<!ENTITY preferencesCmd2.label       "Opcje">
-<!ENTITY preferencesCmd2.accesskey     "O">
-<!ENTITY preferencesCmdUnix.label       "Preferencje">
-<!ENTITY preferencesCmdUnix.accesskey     "r">
-<!ENTITY quitApplicationCmdWin2.label       "Zakończ">
-<!ENTITY quitApplicationCmdWin2.accesskey   "k">
-<!ENTITY quitApplicationCmdWin2.tooltip     "Zakończ program &brandShorterName;">
-<!ENTITY quitApplicationCmd.label       "Zakończ">
-<!ENTITY quitApplicationCmd.accesskey   "k">
-<!ENTITY quitApplicationCmdMac2.label   "Zakończ program &brandShorterName;">
-<!ENTITY quitApplicationCmd.key         "Q">
+﻿<!ENTITY preferencesCmd2.label       "Options">
+<!ENTITY preferencesCmdUnix.label       "Preferences">
+<!ENTITY quitApplicationCmdWin2.label       "Exit">
+<!ENTITY quitApplicationCmdWin2.accesskey   "x">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Exit &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Quit">
+<!ENTITY quitApplicationCmd.accesskey   "Q">
+<!ENTITY quitApplicationCmdMac2.label   "Quit &brandShorterName;">

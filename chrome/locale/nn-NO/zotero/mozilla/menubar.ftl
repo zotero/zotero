@@ -3,6 +3,55 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
+
+
+## Application Menu (macOS only)
+
+menu-application-preferences =
+    .label = Innstillingar
+menu-application-services =
+    .label = Tenester
+menu-application-hide-this =
+    .label = Gøym { -brand-shorter-name }
+menu-application-hide-other =
+    .label = Gøym andre
+menu-application-show-all =
+    .label = Vis alle
+menu-application-touch-bar =
+    .label = Tilpass Touch Bar…
+
+##
+
+# These menu-quit strings are only used on Windows and Linux.
+menu-quit =
+    .label =
+        { PLATFORM() ->
+            [windows] Avslutt
+           *[other] Avslutt
+        }
+    .accesskey =
+        { PLATFORM() ->
+            [windows] t
+           *[other] t
+        }
+# This menu-quit-mac string is only used on macOS.
+menu-quit-mac =
+    .label = Avslutt { -brand-shorter-name }
+# This menu-quit-button string is only used on Linux.
+menu-quit-button =
+    .label = { menu-quit.label }
+# This menu-quit-button-win string is only used on Windows.
+menu-quit-button-win =
+    .label = { menu-quit.label }
+    .tooltip = Avslutt { -brand-shorter-name }
+menu-about =
+    .label = Om { -brand-shorter-name }
+    .accesskey = O
+
 ## File Menu
 
 menu-file =
@@ -31,6 +80,15 @@ menu-file-open-file =
 menu-file-close =
     .label = Lat att
     .accesskey = L
+# Variables:
+#  $tabCount (Number): the number of tabs that are affected by the action.
+menu-file-close-tab =
+    .label =
+        { $tabCount ->
+            [1] Lat att fane
+           *[other] Lat att { $tabCount } faner
+        }
+    .accesskey = L
 menu-file-close-window =
     .label = Lat att vindauge
     .accesskey = L
@@ -39,6 +97,9 @@ menu-file-save-page =
     .accesskey = a
 menu-file-email-link =
     .label = Send lenke på e-post…
+    .accesskey = e
+menu-file-share-url =
+    .label = Del
     .accesskey = e
 menu-file-print-setup =
     .label = Utskriftsformat…
@@ -61,9 +122,9 @@ menu-file-go-offline =
 menu-edit =
     .label = Rediger
     .accesskey = R
-menu-edit-find-on =
-    .label = Søk på denne sida…
-    .accesskey = S
+menu-edit-find-in-page =
+    .label = Finn på sida…
+    .accesskey = F
 menu-edit-find-again =
     .label = Søk igjen
     .accesskey = ø
@@ -79,8 +140,8 @@ menu-view =
 menu-view-toolbars-menu =
     .label = Verktøylinjer
     .accesskey = V
-menu-view-customize-toolbar =
-    .label = Tilpass…
+menu-view-customize-toolbar2 =
+    .label = Tilpass verktøylinje…
     .accesskey = T
 menu-view-sidebar =
     .label = Sidestolpe
@@ -115,9 +176,9 @@ menu-view-page-style-no-style =
 menu-view-page-basic-style =
     .label = Vanleg
     .accesskey = V
-menu-view-charset =
-    .label = Teiknkoding
-    .accesskey = T
+menu-view-repair-text-encoding =
+    .label = Reparer tekstkoding
+    .accesskey = e
 
 ## These should match what Safari and other Apple applications
 ## use on macOS.
@@ -155,27 +216,29 @@ menu-history-synced-tabs =
 menu-history-restore-last-session =
     .label = Bygg oppatt siste programøkt
 menu-history-hidden-tabs =
-    .label = Skjulte faner
+    .label = Gøymde faner
 menu-history-undo-menu =
     .label = Nyleg attlatne faner
 menu-history-undo-window-menu =
     .label = Nyleg attlatne vindauge
+menu-history-reopen-all-tabs = Opne alle faner på nytt
+menu-history-reopen-all-windows = Opne alle vindauge på nytt
 
 ## Bookmarks Menu
 
 menu-bookmarks-menu =
     .label = Bokmerke
     .accesskey = B
-menu-bookmarks-show-all =
-    .label = Vis alle bokmerka
-menu-bookmark-this-page =
-    .label = Bokmerk denne sida
+menu-bookmarks-manage =
+    .label = Handsam bokmerke
+menu-bookmark-current-tab =
+    .label = Bokmerk gjeldande fane
 menu-bookmark-edit =
     .label = Rediger dette bokmerket
 menu-bookmarks-all-tabs =
     .label = Bokmerk alle faner…
 menu-bookmarks-toolbar =
-    .label = Bokmerke
+    .label = Bokmerkelinje
 menu-bookmarks-other =
     .label = Andre bokmerke
 menu-bookmarks-mobile =
@@ -189,14 +252,14 @@ menu-tools =
 menu-tools-downloads =
     .label = Nedlastingar
     .accesskey = N
-menu-tools-addons =
-    .label = Tillegg
+menu-tools-addons-and-themes =
+    .label = Tillegg og tema
     .accesskey = T
-menu-tools-fxa-sign-in =
-    .label = Logg inn på { -brand-product-name }…
-    .accesskey = g
-menu-tools-turn-on-sync =
-    .label = Slå på { -sync-brand-short-name }…
+menu-tools-fxa-sign-in2 =
+    .label = Logg inn
+    .accesskey = L
+menu-tools-turn-on-sync2 =
+    .label = Slå på synkronisering…
     .accesskey = S
 menu-tools-sync-now =
     .label = Synkroniser no
@@ -204,25 +267,24 @@ menu-tools-sync-now =
 menu-tools-fxa-re-auth =
     .label = Kople til { -brand-product-name } på nytt…
     .accesskey = K
-menu-tools-web-developer =
-    .label = Nettsideutvikling
+menu-tools-browser-tools =
+    .label = Nettlesarverktøy
     .accesskey = N
+menu-tools-task-manager =
+    .label = Oppgåvehandterar
+    .accesskey = O
 menu-tools-page-source =
     .label = Kjeldekode
     .accesskey = d
 menu-tools-page-info =
     .label = Sideinformasjon
     .accesskey = d
-menu-preferences =
-    .label =
-        { PLATFORM() ->
-            [windows] Innstillingar
-           *[other] Innstillingar
-        }
+menu-settings =
+    .label = Innstillingar
     .accesskey =
         { PLATFORM() ->
-            [windows] I
-           *[other] I
+            [windows] n
+           *[other] n
         }
 menu-tools-layout-debugger =
     .label = Feilsøk layout
@@ -237,32 +299,37 @@ menu-window-bring-all-to-front =
 
 ## Help Menu
 
+
+# NOTE: For Engineers, any additions or changes to Help menu strings should
+# also be reflected in the related strings in appmenu.ftl. Those strings, by
+# convention, will have the same ID as these, but prefixed with "app".
+# Example: appmenu-get-help
+#
+# These strings are duplicated to allow for different casing depending on
+# where the strings appear.
+
 menu-help =
     .label = Hjelp
     .accesskey = H
-menu-help-product =
-    .label = { -brand-shorter-name } Hjelp
-    .accesskey = H
-menu-help-show-tour =
-    .label = Omvising i { -brand-shorter-name }
-    .accesskey = m
-menu-help-import-from-another-browser =
-    .label = Importer frå ein annan nettlesar…
-    .accesskey = I
-menu-help-keyboard-shortcuts =
-    .label = Tastatursnarvegar
-    .accesskey = T
-menu-help-troubleshooting-info =
-    .label = Feilsøking
-    .accesskey = e
+menu-get-help =
+    .label = Få hjelp
+    .accesskey = F
+menu-help-more-troubleshooting-info =
+    .label = Meir feilsøkingsinformasjon
+    .accesskey = M
+menu-help-report-site-issue =
+    .label = Rapporter problem med nettstad…
 menu-help-feedback-page =
     .label = Gje tilbakemelding…
     .accesskey = G
-menu-help-safe-mode-without-addons =
-    .label = Start på nytt med avslåtte tillegg…
-    .accesskey = S
-menu-help-safe-mode-with-addons =
-    .label = Start på nytt med påslåtte tillegg
+menu-help-share-ideas =
+    .label = Del idear og tilbakemeldingar...
+    .accesskey = D
+menu-help-enter-troubleshoot-mode2 =
+    .label = Feilsøkingsmodus…
+    .accesskey = F
+menu-help-exit-troubleshoot-mode =
+    .label = Slå av feilsøkingsmodus
     .accesskey = S
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.

@@ -1,11 +1,8 @@
-﻿<!ENTITY preferencesCmd2.label       "Možnosti">
-<!ENTITY preferencesCmd2.accesskey     "M">
-<!ENTITY preferencesCmdUnix.label       "Nastavitve">
-<!ENTITY preferencesCmdUnix.accesskey     "n">
-<!ENTITY quitApplicationCmdWin2.label       "Izhod">
-<!ENTITY quitApplicationCmdWin2.accesskey   "h">
-<!ENTITY quitApplicationCmdWin2.tooltip     "Izhod iz &brandShorterName;a">
-<!ENTITY quitApplicationCmd.label       "Izhod">
-<!ENTITY quitApplicationCmd.accesskey   "I">
-<!ENTITY quitApplicationCmdMac2.label   "Izhod iz &brandShorterName;a">
-<!ENTITY quitApplicationCmd.key         "Q">
+﻿<!ENTITY preferencesCmd2.label       "Options">
+<!ENTITY preferencesCmdUnix.label       "Preferences">
+<!ENTITY quitApplicationCmdWin2.label       "Exit">
+<!ENTITY quitApplicationCmdWin2.accesskey   "x">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Exit &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Quit">
+<!ENTITY quitApplicationCmd.accesskey   "Q">
+<!ENTITY quitApplicationCmdMac2.label   "Quit &brandShorterName;">

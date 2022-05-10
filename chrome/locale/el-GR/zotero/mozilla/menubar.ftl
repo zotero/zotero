@@ -3,6 +3,55 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
+
+
+## Application Menu (macOS only)
+
+menu-application-preferences =
+    .label = Προτιμήσεις
+menu-application-services =
+    .label = Υπηρεσίες
+menu-application-hide-this =
+    .label = Απόκρυψη του { -brand-shorter-name }
+menu-application-hide-other =
+    .label = Απόκρυψη άλλων
+menu-application-show-all =
+    .label = Εμφάνιση όλων
+menu-application-touch-bar =
+    .label = Προσαρμογή γραμμής αφής…
+
+##
+
+# These menu-quit strings are only used on Windows and Linux.
+menu-quit =
+    .label =
+        { PLATFORM() ->
+            [windows] Έξοδος
+           *[other] Έξοδος
+        }
+    .accesskey =
+        { PLATFORM() ->
+            [windows] ξ
+           *[other] ξ
+        }
+# This menu-quit-mac string is only used on macOS.
+menu-quit-mac =
+    .label = Έξοδος από το { -brand-shorter-name }
+# This menu-quit-button string is only used on Linux.
+menu-quit-button =
+    .label = { menu-quit.label }
+# This menu-quit-button-win string is only used on Windows.
+menu-quit-button-win =
+    .label = { menu-quit.label }
+    .tooltip = Έξοδος από το { -brand-shorter-name }
+menu-about =
+    .label = Σχετικά με το { -brand-shorter-name }
+    .accesskey = τ
+
 ## File Menu
 
 menu-file =
@@ -12,8 +61,8 @@ menu-file-new-tab =
     .label = Νέα καρτέλα
     .accesskey = τ
 menu-file-new-container-tab =
-    .label = Νέα καρτέλα εντός περιβάλλοντος
-    .accesskey = β
+    .label = Νέα θεματική καρτέλα
+    .accesskey = θ
 menu-file-new-window =
     .label = Νέο παράθυρο
     .accesskey = Ν
@@ -31,6 +80,15 @@ menu-file-open-file =
 menu-file-close =
     .label = Κλείσιμο
     .accesskey = Κ
+# Variables:
+#  $tabCount (Number): the number of tabs that are affected by the action.
+menu-file-close-tab =
+    .label =
+        { $tabCount ->
+            [1] Κλείσιμο καρτέλας
+           *[other] Κλείσιμο { $tabCount } καρτελών
+        }
+    .accesskey = Κ
 menu-file-close-window =
     .label = Κλείσιμο παραθύρου
     .accesskey = θ
@@ -40,6 +98,9 @@ menu-file-save-page =
 menu-file-email-link =
     .label = Αποστολή συνδέσμου…
     .accesskey = λ
+menu-file-share-url =
+    .label = Κοινή χρήση
+    .accesskey = χ
 menu-file-print-setup =
     .label = Διαμόρφωση σελίδας…
     .accesskey = μ
@@ -50,20 +111,20 @@ menu-file-print =
     .label = Εκτύπωση…
     .accesskey = κ
 menu-file-import-from-another-browser =
-    .label = Εισαγωγή από άλλο πρόγραμμα περιήγησης…
+    .label = Εισαγωγή από άλλο φυλλομετρητή…
     .accesskey = Ε
 menu-file-go-offline =
-    .label = Εργασία χωρίς σύνδεση
-    .accesskey = χ
+    .label = Εργασία εκτός σύνδεσης
+    .accesskey = τ
 
 ## Edit Menu
 
 menu-edit =
     .label = Επεξεργασία
     .accesskey = Ε
-menu-edit-find-on =
+menu-edit-find-in-page =
     .label = Εύρεση στη σελίδα…
-    .accesskey = ρ
+    .accesskey = Ε
 menu-edit-find-again =
     .label = Εύρεση ξανά
     .accesskey = ξ
@@ -79,12 +140,12 @@ menu-view =
 menu-view-toolbars-menu =
     .label = Γραμμές εργαλείων
     .accesskey = ρ
-menu-view-customize-toolbar =
-    .label = Προσαρμογή…
+menu-view-customize-toolbar2 =
+    .label = Προσαρμογή γραμμής εργαλείων…
     .accesskey = Π
 menu-view-sidebar =
-    .label = Πλευρική στήλη
-    .accesskey = ε
+    .label = Πλαϊνή γραμμή
+    .accesskey = ν
 menu-view-bookmarks =
     .label = Σελιδοδείκτες
 menu-view-history-button =
@@ -115,9 +176,9 @@ menu-view-page-style-no-style =
 menu-view-page-basic-style =
     .label = Βασική μορφοποίηση σελίδας
     .accesskey = Β
-menu-view-charset =
-    .label = Κωδικοποίηση κειμένου
-    .accesskey = κ
+menu-view-repair-text-encoding =
+    .label = Επιδιόρθωση κωδικοποίησης κειμένου
+    .accesskey = δ
 
 ## These should match what Safari and other Apple applications
 ## use on macOS.
@@ -135,7 +196,7 @@ menu-view-full-screen =
 ##
 
 menu-view-show-all-tabs =
-    .label = Προβολή όλων των καρτελών
+    .label = Εμφάνιση όλων των καρτελών
     .accesskey = λ
 menu-view-bidi-switch-page-direction =
     .label = Αλλαγή κατεύθυνσης σελίδας
@@ -147,9 +208,9 @@ menu-history =
     .label = Ιστορικό
     .accesskey = Ι
 menu-history-show-all-history =
-    .label = Προβολή όλου του ιστορικού
+    .label = Εμφάνιση πλήρους ιστορικού
 menu-history-clear-recent-history =
-    .label = Εκκαθάριση πρόσφατου ιστορικού…
+    .label = Απαλοιφή πρόσφατου ιστορικού…
 menu-history-synced-tabs =
     .label = Συγχρονισμένες καρτέλες
 menu-history-restore-last-session =
@@ -160,16 +221,18 @@ menu-history-undo-menu =
     .label = Πρόσφατα κλεισμένες καρτέλες
 menu-history-undo-window-menu =
     .label = Πρόσφατα κλεισμένα παράθυρα
+menu-history-reopen-all-tabs = Επαναφορά όλων των καρτελών
+menu-history-reopen-all-windows = Επαναφορά όλων των παραθύρων
 
 ## Bookmarks Menu
 
 menu-bookmarks-menu =
     .label = Σελιδοδείκτες
     .accesskey = Σ
-menu-bookmarks-show-all =
-    .label = Προβολή όλων των σελιδοδεικτών
-menu-bookmark-this-page =
-    .label = Δημιουργία σελιδοδείκτη
+menu-bookmarks-manage =
+    .label = Διαχείριση σελιδοδεικτών
+menu-bookmark-current-tab =
+    .label = Προσθήκη καρτέλας στους σελιδοδείκτες
 menu-bookmark-edit =
     .label = Επεξεργασία σελιδοδείκτη
 menu-bookmarks-all-tabs =
@@ -189,44 +252,43 @@ menu-tools =
 menu-tools-downloads =
     .label = Λήψεις
     .accesskey = ψ
-menu-tools-addons =
-    .label = Πρόσθετα
-    .accesskey = θ
-menu-tools-fxa-sign-in =
-    .label = Σύνδεση στο { -brand-product-name }…
+menu-tools-addons-and-themes =
+    .label = Πρόσθετα και θέματα
+    .accesskey = Π
+menu-tools-fxa-sign-in2 =
+    .label = Σύνδεση
     .accesskey = δ
-menu-tools-turn-on-sync =
-    .label = Ενεργοποίηση { -sync-brand-short-name }…
-    .accesskey = ρ
+menu-tools-turn-on-sync2 =
+    .label = Ενεργοποίηση Sync…
+    .accesskey = ν
 menu-tools-sync-now =
     .label = Συγχρονισμός τώρα
     .accesskey = Σ
 menu-tools-fxa-re-auth =
     .label = Επανασύνδεση στο { -brand-product-name }…
     .accesskey = Ε
-menu-tools-web-developer =
-    .label = Προγραμματισμός ιστού
-    .accesskey = Π
+menu-tools-browser-tools =
+    .label = Εργαλεία προγράμματος περιήγησης
+    .accesskey = ρ
+menu-tools-task-manager =
+    .label = Διαχείριση εργασιών
+    .accesskey = Δ
 menu-tools-page-source =
-    .label = Κώδικας σελίδας
+    .label = Πηγαίος κώδικας σελίδας
     .accesskey = δ
 menu-tools-page-info =
     .label = Πληροφορίες σελίδας
     .accesskey = λ
-menu-preferences =
-    .label =
-        { PLATFORM() ->
-            [windows] Επιλογές
-           *[other] Προτιμήσεις
-        }
+menu-settings =
+    .label = Ρυθμίσεις
     .accesskey =
         { PLATFORM() ->
-            [windows] Ε
-           *[other] μ
+            [windows] Ρ
+           *[other] θ
         }
 menu-tools-layout-debugger =
-    .label = Αποσφαλμάτωση διάταξης
-    .accesskey = Δ
+    .label = Έλεγχος σφαλμάτων διάταξης
+    .accesskey = Έ
 
 ## Window Menu
 
@@ -237,38 +299,43 @@ menu-window-bring-all-to-front =
 
 ## Help Menu
 
+
+# NOTE: For Engineers, any additions or changes to Help menu strings should
+# also be reflected in the related strings in appmenu.ftl. Those strings, by
+# convention, will have the same ID as these, but prefixed with "app".
+# Example: appmenu-get-help
+#
+# These strings are duplicated to allow for different casing depending on
+# where the strings appear.
+
 menu-help =
-    .label = Βοηθεια
+    .label = Βοήθεια
     .accesskey = Β
-menu-help-product =
-    .label = Βοήθεια για το { -brand-shorter-name }
-    .accesskey = Β
-menu-help-show-tour =
-    .label = Ξενάγηση στο { -brand-shorter-name }
-    .accesskey = Ξ
-menu-help-import-from-another-browser =
-    .label = Εισαγωγή από άλλο πρόγραμμα περιήγησης…
-    .accesskey = Ε
-menu-help-keyboard-shortcuts =
-    .label = Συντομεύσεις πληκτρολογίου
-    .accesskey = υ
-menu-help-troubleshooting-info =
-    .label = Πληροφορίες αντιμετώπισης προβλημάτων
-    .accesskey = μ
+menu-get-help =
+    .label = Λήψη βοήθειας
+    .accesskey = Λ
+menu-help-more-troubleshooting-info =
+    .label = Πληροφορίες επίλυσης προβλημάτων
+    .accesskey = Π
+menu-help-report-site-issue =
+    .label = Αναφορά ζητήματος ιστοτόπου…
 menu-help-feedback-page =
     .label = Υποβολή σχολίων…
     .accesskey = λ
-menu-help-safe-mode-without-addons =
-    .label = Επανεκκίνηση με ανενεργά πρόσθετα…
-    .accesskey = π
-menu-help-safe-mode-with-addons =
-    .label = Επανεκκίνηση με ενεργά πρόσθετα
-    .accesskey = π
+menu-help-share-ideas =
+    .label = Κοινοποίηση ιδεών και σχολίων…
+    .accesskey = Κ
+menu-help-enter-troubleshoot-mode2 =
+    .label = Λειτουργία επίλυσης προβλημάτων…
+    .accesskey = Λ
+menu-help-exit-troubleshoot-mode =
+    .label = Απενεργοποίηση λειτουργίας επίλυσης προβλημάτων
+    .accesskey = ν
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
-    .label = Αναφορά παραπλανητικής σελίδας…
+    .label = Αναφορά παραπλανητικού ιστοτόπου…
     .accesskey = Α
 menu-help-not-deceptive =
-    .label = Αυτή δεν είναι μια παραπλανητική ιστοσελίδα…
+    .label = Αυτός δεν είναι παραπλανητικός ιστότοπος…
     .accesskey = δ

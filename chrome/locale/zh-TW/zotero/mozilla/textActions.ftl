@@ -5,45 +5,52 @@
 text-action-undo =
     .label = 復原
     .accesskey = U
-
 text-action-undo-shortcut =
     .key = Z
-
 text-action-redo =
     .label = 取消「復原」
     .accesskey = R
-
 text-action-redo-shortcut =
     .key = Y
-
 text-action-cut =
     .label = 剪下
     .accesskey = t
-
 text-action-cut-shortcut =
     .key = X
-
 text-action-copy =
     .label = 複製
     .accesskey = C
-
 text-action-copy-shortcut =
     .key = C
-
 text-action-paste =
     .label = 貼上
     .accesskey = P
-
 text-action-paste-shortcut =
     .key = V
-
 text-action-delete =
     .label = 刪除
     .accesskey = D
-
 text-action-select-all =
     .label = 全選
     .accesskey = A
-
 text-action-select-all-shortcut =
     .key = A
+text-action-spell-no-suggestions =
+    .label = 無拼字建議
+text-action-spell-add-to-dictionary =
+    .label = 新增到字典
+    .accesskey = o
+text-action-spell-undo-add-to-dictionary =
+    .label = 還原「新增到字典」
+    .accesskey = n
+text-action-spell-check-toggle =
+    .label = 檢查拼字
+    .accesskey = g
+text-action-spell-add-dictionaries =
+    .label = 新增字典…
+    .accesskey = A
+text-action-spell-dictionaries =
+    .label = 語言
+    .accesskey = L
+text-action-search-text-box-clear =
+    .title = 清除

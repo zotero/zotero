@@ -3,6 +3,55 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
+
+
+## Application Menu (macOS only)
+
+menu-application-preferences =
+    .label = Beállítások
+menu-application-services =
+    .label = Szolgáltatások
+menu-application-hide-this =
+    .label = A { -brand-shorter-name } elrejtése
+menu-application-hide-other =
+    .label = A több elrejtése
+menu-application-show-all =
+    .label = Mindet mutat
+menu-application-touch-bar =
+    .label = Érintősár testreszabása…
+
+##
+
+# These menu-quit strings are only used on Windows and Linux.
+menu-quit =
+    .label =
+        { PLATFORM() ->
+            [windows] Kilépés
+           *[other] Kilépés
+        }
+    .accesskey =
+        { PLATFORM() ->
+            [windows] K
+           *[other] K
+        }
+# This menu-quit-mac string is only used on macOS.
+menu-quit-mac =
+    .label = Kilépés a { -brand-shorter-name }ból
+# This menu-quit-button string is only used on Linux.
+menu-quit-button =
+    .label = { menu-quit.label }
+# This menu-quit-button-win string is only used on Windows.
+menu-quit-button-win =
+    .label = { menu-quit.label }
+    .tooltip = Kilépés a { -brand-shorter-name }ból
+menu-about =
+    .label = A { -brand-shorter-name } névjegye
+    .accesskey = A
+
 ## File Menu
 
 menu-file =
@@ -31,6 +80,16 @@ menu-file-open-file =
 menu-file-close =
     .label = Bezárás
     .accesskey = B
+# Variables:
+#  $tabCount (Number): the number of tabs that are affected by the action.
+menu-file-close-tab =
+    .label =
+        { $tabCount ->
+            [1] Lap bezárása
+            [one] Lap bezárása
+           *[other] { $tabCount } lap bezárása
+        }
+    .accesskey = b
 menu-file-close-window =
     .label = Ablak bezárása
     .accesskey = A
@@ -40,6 +99,9 @@ menu-file-save-page =
 menu-file-email-link =
     .label = Hivatkozás küldése e-mailben…
     .accesskey = d
+menu-file-share-url =
+    .label = Megosztás
+    .accesskey = M
 menu-file-print-setup =
     .label = Oldalbeállítás…
     .accesskey = O
@@ -61,9 +123,9 @@ menu-file-go-offline =
 menu-edit =
     .label = Szerkesztés
     .accesskey = z
-menu-edit-find-on =
-    .label = Keresés ezen az oldalon…
-    .accesskey = e
+menu-edit-find-in-page =
+    .label = Keresés az oldalon…
+    .accesskey = K
 menu-edit-find-again =
     .label = Következő keresése
     .accesskey = z
@@ -79,9 +141,9 @@ menu-view =
 menu-view-toolbars-menu =
     .label = Eszköztárak
     .accesskey = E
-menu-view-customize-toolbar =
-    .label = Testreszabás…
-    .accesskey = T
+menu-view-customize-toolbar2 =
+    .label = Eszköztár testreszabása…
+    .accesskey = t
 menu-view-sidebar =
     .label = Oldalsáv
     .accesskey = O
@@ -115,9 +177,9 @@ menu-view-page-style-no-style =
 menu-view-page-basic-style =
     .label = Alap oldalstílus
     .accesskey = A
-menu-view-charset =
-    .label = Szövegkódolás
-    .accesskey = d
+menu-view-repair-text-encoding =
+    .label = Szövegkódolás javítása
+    .accesskey = k
 
 ## These should match what Safari and other Apple applications
 ## use on macOS.
@@ -160,16 +222,18 @@ menu-history-undo-menu =
     .label = Nemrég bezárt lapok
 menu-history-undo-window-menu =
     .label = Nemrég bezárt ablakok
+menu-history-reopen-all-tabs = Összes lap újranyitása
+menu-history-reopen-all-windows = Összes ablak újranyitása
 
 ## Bookmarks Menu
 
 menu-bookmarks-menu =
     .label = Könyvjelzők
     .accesskey = K
-menu-bookmarks-show-all =
-    .label = Minden könyvjelző megjelenítése
-menu-bookmark-this-page =
-    .label = Oldal hozzáadása a könyvjelzőkhöz
+menu-bookmarks-manage =
+    .label = Könyvjelzők kezelése
+menu-bookmark-current-tab =
+    .label = Jelenlegi lap könyvjelzőzése
 menu-bookmark-edit =
     .label = Könyvjelző szerkesztése
 menu-bookmarks-all-tabs =
@@ -189,14 +253,14 @@ menu-tools =
 menu-tools-downloads =
     .label = Letöltések
     .accesskey = L
-menu-tools-addons =
-    .label = Kiegészítők
-    .accesskey = t
-menu-tools-fxa-sign-in =
-    .label = Bejelentkezés a { -brand-product-name }ba…
-    .accesskey = B
-menu-tools-turn-on-sync =
-    .label = { -sync-brand-short-name } bekapcsolása…
+menu-tools-addons-and-themes =
+    .label = Kiegészítők és témák
+    .accesskey = K
+menu-tools-fxa-sign-in2 =
+    .label = Bejelentkezés
+    .accesskey = j
+menu-tools-turn-on-sync2 =
+    .label = Szinkronizálás bekapcsolása…
     .accesskey = b
 menu-tools-sync-now =
     .label = Szinkronizálás
@@ -204,25 +268,24 @@ menu-tools-sync-now =
 menu-tools-fxa-re-auth =
     .label = Újrakapcsolódás a { -brand-product-name }hoz…
     .accesskey = j
-menu-tools-web-developer =
-    .label = Webfejlesztő
-    .accesskey = W
+menu-tools-browser-tools =
+    .label = Böngészőeszközök
+    .accesskey = B
+menu-tools-task-manager =
+    .label = Feladatkezelő
+    .accesskey = F
 menu-tools-page-source =
     .label = Oldal forrása
     .accesskey = r
 menu-tools-page-info =
     .label = Oldal adatai
     .accesskey = O
-menu-preferences =
-    .label =
-        { PLATFORM() ->
-            [windows] Beállítások
-           *[other] Beállítások
-        }
+menu-settings =
+    .label = Beállítások
     .accesskey =
         { PLATFORM() ->
-            [windows] e
-           *[other] e
+            [windows] B
+           *[other] B
         }
 menu-tools-layout-debugger =
     .label = Elrendezési hibakereső
@@ -237,33 +300,38 @@ menu-window-bring-all-to-front =
 
 ## Help Menu
 
+
+# NOTE: For Engineers, any additions or changes to Help menu strings should
+# also be reflected in the related strings in appmenu.ftl. Those strings, by
+# convention, will have the same ID as these, but prefixed with "app".
+# Example: appmenu-get-help
+#
+# These strings are duplicated to allow for different casing depending on
+# where the strings appear.
+
 menu-help =
     .label = Súgó
     .accesskey = S
-menu-help-product =
-    .label = { -brand-shorter-name } súgó
-    .accesskey = s
-menu-help-show-tour =
-    .label = { -brand-shorter-name } bemutató
-    .accesskey = u
-menu-help-import-from-another-browser =
-    .label = Importálás egy másik böngészőből…
-    .accesskey = I
-menu-help-keyboard-shortcuts =
-    .label = Gyorsbillentyűk
-    .accesskey = G
-menu-help-troubleshooting-info =
-    .label = Hibakeresési információ
-    .accesskey = H
+menu-get-help =
+    .label = Segítség kérése
+    .accesskey = S
+menu-help-more-troubleshooting-info =
+    .label = Több hibakeresési információ
+    .accesskey = T
+menu-help-report-site-issue =
+    .label = Hibás webhely bejelentése…
 menu-help-feedback-page =
     .label = Visszajelzés beküldése…
     .accesskey = V
-menu-help-safe-mode-without-addons =
-    .label = Újraindítás letiltott kiegészítőkkel…
-    .accesskey = r
-menu-help-safe-mode-with-addons =
-    .label = Újraindítás engedélyezett kiegészítőkkel
-    .accesskey = r
+menu-help-share-ideas =
+    .label = Ötletek és visszajelzések megosztása…
+    .accesskey = o
+menu-help-enter-troubleshoot-mode2 =
+    .label = Hibaelhárítási mód…
+    .accesskey = m
+menu-help-exit-troubleshoot-mode =
+    .label = Hibakeresési mód bekapcsolása
+    .accesskey = b
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =

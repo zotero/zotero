@@ -1,11 +1,8 @@
-﻿<!ENTITY preferencesCmd2.label       "选项">
-<!ENTITY preferencesCmd2.accesskey     "O">
-<!ENTITY preferencesCmdUnix.label       "首选项">
-<!ENTITY preferencesCmdUnix.accesskey     "n">
-<!ENTITY quitApplicationCmdWin2.label       "退出">
+﻿<!ENTITY preferencesCmd2.label       "Options">
+<!ENTITY preferencesCmdUnix.label       "Preferences">
+<!ENTITY quitApplicationCmdWin2.label       "Exit">
 <!ENTITY quitApplicationCmdWin2.accesskey   "x">
-<!ENTITY quitApplicationCmdWin2.tooltip     "退出 &brandShorterName;">
-<!ENTITY quitApplicationCmd.label       "退出">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Exit &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Quit">
 <!ENTITY quitApplicationCmd.accesskey   "Q">
-<!ENTITY quitApplicationCmdMac2.label   "退出 &brandShorterName;">
-<!ENTITY quitApplicationCmd.key         "Q">
+<!ENTITY quitApplicationCmdMac2.label   "Quit &brandShorterName;">

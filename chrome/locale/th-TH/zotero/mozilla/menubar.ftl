@@ -3,6 +3,55 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
+
+
+## Application Menu (macOS only)
+
+menu-application-preferences =
+    .label = การกำหนดลักษณะ
+menu-application-services =
+    .label = บริการ
+menu-application-hide-this =
+    .label = ซ่อน { -brand-shorter-name }
+menu-application-hide-other =
+    .label = ซ่อนอื่น ๆ
+menu-application-show-all =
+    .label = แสดงทั้งหมด
+menu-application-touch-bar =
+    .label = ปรับแต่งแถบสัมผัส…
+
+##
+
+# These menu-quit strings are only used on Windows and Linux.
+menu-quit =
+    .label =
+        { PLATFORM() ->
+            [windows] ออก
+           *[other] ออก
+        }
+    .accesskey =
+        { PLATFORM() ->
+            [windows] อ
+           *[other] อ
+        }
+# This menu-quit-mac string is only used on macOS.
+menu-quit-mac =
+    .label = ออกจาก { -brand-shorter-name }
+# This menu-quit-button string is only used on Linux.
+menu-quit-button =
+    .label = { menu-quit.label }
+# This menu-quit-button-win string is only used on Windows.
+menu-quit-button-win =
+    .label = { menu-quit.label }
+    .tooltip = ออกจาก { -brand-shorter-name }
+menu-about =
+    .label = เกี่ยวกับ { -brand-shorter-name }
+    .accesskey = ก
+
 ## File Menu
 
 menu-file =
@@ -31,6 +80,15 @@ menu-file-open-file =
 menu-file-close =
     .label = ปิด
     .accesskey = ป
+# Variables:
+#  $tabCount (Number): the number of tabs that are affected by the action.
+menu-file-close-tab =
+    .label =
+        { $tabCount ->
+            [1] ปิดแท็บ
+           *[other] ปิด { $tabCount } แท็บ
+        }
+    .accesskey = ป
 menu-file-close-window =
     .label = ปิดหน้าต่าง
     .accesskey = ป
@@ -40,6 +98,9 @@ menu-file-save-page =
 menu-file-email-link =
     .label = ส่งอีเมลลิงก์…
     .accesskey = ล
+menu-file-share-url =
+    .label = แบ่งปัน
+    .accesskey = h
 menu-file-print-setup =
     .label = ตั้งค่าหน้ากระดาษ…
     .accesskey = ร
@@ -61,8 +122,8 @@ menu-file-go-offline =
 menu-edit =
     .label = แก้ไข
     .accesskey = ก
-menu-edit-find-on =
-    .label = ค้นหาในหน้านี้…
+menu-edit-find-in-page =
+    .label = ค้นหาในหน้า…
     .accesskey = ค
 menu-edit-find-again =
     .label = ค้นหาอีกครั้ง
@@ -79,8 +140,8 @@ menu-view =
 menu-view-toolbars-menu =
     .label = แถบเครื่องมือ
     .accesskey = ถ
-menu-view-customize-toolbar =
-    .label = ปรับแต่ง…
+menu-view-customize-toolbar2 =
+    .label = ปรับแต่งแถบเครื่องมือ…
     .accesskey = ป
 menu-view-sidebar =
     .label = แถบข้าง
@@ -115,8 +176,8 @@ menu-view-page-style-no-style =
 menu-view-page-basic-style =
     .label = ลักษณะหน้าพื้นฐาน
     .accesskey = ล
-menu-view-charset =
-    .label = รหัสอักขระ
+menu-view-repair-text-encoding =
+    .label = ซ่อมแซมรหัสอักขระข้อความ
     .accesskey = ร
 
 ## These should match what Safari and other Apple applications
@@ -160,16 +221,18 @@ menu-history-undo-menu =
     .label = แท็บที่ปิดล่าสุด
 menu-history-undo-window-menu =
     .label = หน้าต่างที่ปิดล่าสุด
+menu-history-reopen-all-tabs = เปิดแท็บทั้งหมดใหม่
+menu-history-reopen-all-windows = เปิดหน้าต่างทั้งหมดใหม่
 
 ## Bookmarks Menu
 
 menu-bookmarks-menu =
     .label = ที่คั่นหน้า
     .accesskey = ท
-menu-bookmarks-show-all =
-    .label = แสดงที่คั่นหน้าทั้งหมด
-menu-bookmark-this-page =
-    .label = เพิ่มที่คั่นหน้าสำหรับหน้านี้
+menu-bookmarks-manage =
+    .label = จัดการที่คั่นหน้า
+menu-bookmark-current-tab =
+    .label = เพิ่มที่คั่นหน้าแท็บปัจจุบัน
 menu-bookmark-edit =
     .label = แก้ไขที่คั่นหน้านี้
 menu-bookmarks-all-tabs =
@@ -189,40 +252,39 @@ menu-tools =
 menu-tools-downloads =
     .label = การดาวน์โหลด
     .accesskey = ด
-menu-tools-addons =
-    .label = ส่วนเสริม
+menu-tools-addons-and-themes =
+    .label = ส่วนเสริมและชุดตกแต่ง
     .accesskey = ส
-menu-tools-fxa-sign-in =
-    .label = ลงชื่อเข้า { -brand-product-name }…
-    .accesskey = g
-menu-tools-turn-on-sync =
-    .label = เปิด { -sync-brand-short-name }…
-    .accesskey = n
+menu-tools-fxa-sign-in2 =
+    .label = ลงชื่อเข้า
+    .accesskey = ล
+menu-tools-turn-on-sync2 =
+    .label = เปิด Sync…
+    .accesskey = เ
 menu-tools-sync-now =
     .label = ซิงค์ตอนนี้
     .accesskey = ง
 menu-tools-fxa-re-auth =
     .label = เชื่อมต่อกับ { -brand-product-name }…
     .accesskey = R
-menu-tools-web-developer =
-    .label = นักพัฒนาเว็บ
-    .accesskey = พ
+menu-tools-browser-tools =
+    .label = เครื่องมือสำหรับเบราว์เซอร์
+    .accesskey = บ
+menu-tools-task-manager =
+    .label = ตัวจัดการงาน
+    .accesskey = ต
 menu-tools-page-source =
     .label = ต้นฉบับหน้า
     .accesskey = ต
 menu-tools-page-info =
     .label = ข้อมูลหน้า
     .accesskey = ข
-menu-preferences =
-    .label =
-        { PLATFORM() ->
-            [windows] ตัวเลือก
-           *[other] ค่ากำหนด
-        }
+menu-settings =
+    .label = การตั้งค่า
     .accesskey =
         { PLATFORM() ->
-            [windows] ต
-           *[other] ด
+            [windows] ก
+           *[other] า
         }
 menu-tools-layout-debugger =
     .label = ตัวดีบั๊กเค้าโครง
@@ -237,33 +299,38 @@ menu-window-bring-all-to-front =
 
 ## Help Menu
 
+
+# NOTE: For Engineers, any additions or changes to Help menu strings should
+# also be reflected in the related strings in appmenu.ftl. Those strings, by
+# convention, will have the same ID as these, but prefixed with "app".
+# Example: appmenu-get-help
+#
+# These strings are duplicated to allow for different casing depending on
+# where the strings appear.
+
 menu-help =
     .label = ช่วยเหลือ
     .accesskey = ช
-menu-help-product =
-    .label = ความช่วยเหลือของ { -brand-shorter-name }
+menu-get-help =
+    .label = รับความช่วยเหลือ
     .accesskey = ช
-menu-help-show-tour =
-    .label = เที่ยวชม { -brand-shorter-name }
-    .accesskey = ท
-menu-help-import-from-another-browser =
-    .label = นำเข้าจากเบราว์เซอร์อื่น…
-    .accesskey = I
-menu-help-keyboard-shortcuts =
-    .label = แป้นพิมพ์ลัด
-    .accesskey = ล
-menu-help-troubleshooting-info =
-    .label = ข้อมูลการแก้ไขปัญหา
-    .accesskey = ป
+menu-help-more-troubleshooting-info =
+    .label = ข้อมูลการแก้ไขปัญหาเพิ่มเติม
+    .accesskey = ข
+menu-help-report-site-issue =
+    .label = รายงานปัญหาไซต์…
 menu-help-feedback-page =
     .label = ส่งข้อคิดเห็น…
     .accesskey = ส
-menu-help-safe-mode-without-addons =
-    .label = เริ่มการทำงานใหม่พร้อมปิดใช้งานส่วนเสริม…
-    .accesskey = ร
-menu-help-safe-mode-with-addons =
-    .label = เริ่มการทำงานใหม่พร้อมเปิดใช้งานส่วนเสริม
-    .accesskey = ร
+menu-help-share-ideas =
+    .label = แบ่งปันแนวคิดและข้อเสนอแนะ…
+    .accesskey = S
+menu-help-enter-troubleshoot-mode2 =
+    .label = โหมดแก้ไขปัญหา…
+    .accesskey = ห
+menu-help-exit-troubleshoot-mode =
+    .label = ปิดโหมดแก้ไขปัญหา
+    .accesskey = ด
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =

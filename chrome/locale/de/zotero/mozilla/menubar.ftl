@@ -3,6 +3,55 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
+
+
+## Application Menu (macOS only)
+
+menu-application-preferences =
+    .label = Einstellungen
+menu-application-services =
+    .label = Dienste
+menu-application-hide-this =
+    .label = { -brand-shorter-name } ausblenden
+menu-application-hide-other =
+    .label = Andere ausblenden
+menu-application-show-all =
+    .label = Alle einblenden
+menu-application-touch-bar =
+    .label = Touch Bar anpassen…
+
+##
+
+# These menu-quit strings are only used on Windows and Linux.
+menu-quit =
+    .label =
+        { PLATFORM() ->
+            [windows] Beenden
+           *[other] Beenden
+        }
+    .accesskey =
+        { PLATFORM() ->
+            [windows] B
+           *[other] B
+        }
+# This menu-quit-mac string is only used on macOS.
+menu-quit-mac =
+    .label = { -brand-shorter-name } beenden
+# This menu-quit-button string is only used on Linux.
+menu-quit-button =
+    .label = { menu-quit.label }
+# This menu-quit-button-win string is only used on Windows.
+menu-quit-button-win =
+    .label = { menu-quit.label }
+    .tooltip = { -brand-shorter-name } beenden
+menu-about =
+    .label = Über { -brand-shorter-name }
+    .accesskey = e
+
 ## File Menu
 
 menu-file =
@@ -31,6 +80,15 @@ menu-file-open-file =
 menu-file-close =
     .label = Schließen
     .accesskey = c
+# Variables:
+#  $tabCount (Number): the number of tabs that are affected by the action.
+menu-file-close-tab =
+    .label =
+        { $tabCount ->
+            [1] Tab schließen
+           *[other] { $tabCount } Tabs schließen
+        }
+    .accesskey = c
 menu-file-close-window =
     .label = Fenster schließen
     .accesskey = h
@@ -40,6 +98,9 @@ menu-file-save-page =
 menu-file-email-link =
     .label = Link per E-Mail senden…
     .accesskey = s
+menu-file-share-url =
+    .label = Teilen
+    .accesskey = e
 menu-file-print-setup =
     .label = Seite einrichten…
     .accesskey = e
@@ -61,8 +122,8 @@ menu-file-go-offline =
 menu-edit =
     .label = Bearbeiten
     .accesskey = B
-menu-edit-find-on =
-    .label = Seite durchsuchen
+menu-edit-find-in-page =
+    .label = Seite durchsuchen…
     .accesskey = S
 menu-edit-find-again =
     .label = Weitersuchen
@@ -79,9 +140,9 @@ menu-view =
 menu-view-toolbars-menu =
     .label = Symbolleisten
     .accesskey = y
-menu-view-customize-toolbar =
-    .label = Anpassen…
-    .accesskey = A
+menu-view-customize-toolbar2 =
+    .label = Symbolleiste anpassen…
+    .accesskey = a
 menu-view-sidebar =
     .label = Sidebar
     .accesskey = b
@@ -115,8 +176,8 @@ menu-view-page-style-no-style =
 menu-view-page-basic-style =
     .label = Standard-Stil
     .accesskey = S
-menu-view-charset =
-    .label = Textkodierung
+menu-view-repair-text-encoding =
+    .label = Textkodierung reparieren
     .accesskey = T
 
 ## These should match what Safari and other Apple applications
@@ -160,16 +221,18 @@ menu-history-undo-menu =
     .label = Kürzlich geschlossene Tabs
 menu-history-undo-window-menu =
     .label = Kürzlich geschlossene Fenster
+menu-history-reopen-all-tabs = Alle Tabs wieder öffnen
+menu-history-reopen-all-windows = Alle Fenster wieder öffnen
 
 ## Bookmarks Menu
 
 menu-bookmarks-menu =
     .label = Lesezeichen
     .accesskey = L
-menu-bookmarks-show-all =
+menu-bookmarks-manage =
     .label = Lesezeichen verwalten
-menu-bookmark-this-page =
-    .label = Lesezeichen hinzufügen
+menu-bookmark-current-tab =
+    .label = Aktuellen Tab als Lesezeichen hinzufügen
 menu-bookmark-edit =
     .label = Lesezeichen bearbeiten
 menu-bookmarks-all-tabs =
@@ -189,14 +252,14 @@ menu-tools =
 menu-tools-downloads =
     .label = Downloads
     .accesskey = o
-menu-tools-addons =
-    .label = Add-ons
-    .accesskey = d
-menu-tools-fxa-sign-in =
-    .label = Bei { -brand-product-name } anmelden…
-    .accesskey = B
-menu-tools-turn-on-sync =
-    .label = { -sync-brand-short-name } aktivieren…
+menu-tools-addons-and-themes =
+    .label = Add-ons und Themes
+    .accesskey = A
+menu-tools-fxa-sign-in2 =
+    .label = Anmelden
+    .accesskey = m
+menu-tools-turn-on-sync2 =
+    .label = Synchronisation aktivieren…
     .accesskey = n
 menu-tools-sync-now =
     .label = Jetzt synchronisieren
@@ -204,21 +267,20 @@ menu-tools-sync-now =
 menu-tools-fxa-re-auth =
     .label = Wieder mit { -brand-product-name } verbinden…
     .accesskey = v
-menu-tools-web-developer =
-    .label = Web-Entwickler
-    .accesskey = W
+menu-tools-browser-tools =
+    .label = Browser-Werkzeuge
+    .accesskey = B
+menu-tools-task-manager =
+    .label = Task-Manager
+    .accesskey = M
 menu-tools-page-source =
     .label = Seitenquelltext anzeigen
     .accesskey = q
 menu-tools-page-info =
     .label = Seiteninformationen
     .accesskey = S
-menu-preferences =
-    .label =
-        { PLATFORM() ->
-            [windows] Einstellungen
-           *[other] Einstellungen
-        }
+menu-settings =
+    .label = Einstellungen
     .accesskey =
         { PLATFORM() ->
             [windows] E
@@ -237,33 +299,38 @@ menu-window-bring-all-to-front =
 
 ## Help Menu
 
+
+# NOTE: For Engineers, any additions or changes to Help menu strings should
+# also be reflected in the related strings in appmenu.ftl. Those strings, by
+# convention, will have the same ID as these, but prefixed with "app".
+# Example: appmenu-get-help
+#
+# These strings are duplicated to allow for different casing depending on
+# where the strings appear.
+
 menu-help =
     .label = Hilfe
     .accesskey = H
-menu-help-product =
-    .label = { -brand-shorter-name }-Hilfe
+menu-get-help =
+    .label = Hilfe erhalten
     .accesskey = H
-menu-help-show-tour =
-    .label = Tour durch { -brand-shorter-name }
-    .accesskey = o
-menu-help-import-from-another-browser =
-    .label = Daten aus einem anderen Browser importieren…
-    .accesskey = r
-menu-help-keyboard-shortcuts =
-    .label = Tastenkombinationen
-    .accesskey = T
-menu-help-troubleshooting-info =
-    .label = Informationen zur Fehlerbehebung
+menu-help-more-troubleshooting-info =
+    .label = Weitere Informationen zur Fehlerbehebung
     .accesskey = z
+menu-help-report-site-issue =
+    .label = Seitenproblem melden…
 menu-help-feedback-page =
     .label = Feedback senden…
     .accesskey = s
-menu-help-safe-mode-without-addons =
-    .label = Mit deaktivierten Add-ons neu starten…
-    .accesskey = A
-menu-help-safe-mode-with-addons =
-    .label = Mit aktivierten Add-ons neu starten
-    .accesskey = A
+menu-help-share-ideas =
+    .label = Ideen und Feedback teilen…
+    .accesskey = I
+menu-help-enter-troubleshoot-mode2 =
+    .label = Fehlerbehebungsmodus…
+    .accesskey = m
+menu-help-exit-troubleshoot-mode =
+    .label = Fehlerbehebungsmodus deaktivieren
+    .accesskey = m
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =

@@ -3,6 +3,55 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
+
+
+## Application Menu (macOS only)
+
+menu-application-preferences =
+    .label = Asetukset
+menu-application-services =
+    .label = Palvelut
+menu-application-hide-this =
+    .label = Kätke { -brand-shorter-name }
+menu-application-hide-other =
+    .label = Kätke muut
+menu-application-show-all =
+    .label = Näytä kaikki
+menu-application-touch-bar =
+    .label = Muokkaa Touch Baria…
+
+##
+
+# These menu-quit strings are only used on Windows and Linux.
+menu-quit =
+    .label =
+        { PLATFORM() ->
+            [windows] Sulje selain
+           *[other] Sulje selain
+        }
+    .accesskey =
+        { PLATFORM() ->
+            [windows] S
+           *[other] S
+        }
+# This menu-quit-mac string is only used on macOS.
+menu-quit-mac =
+    .label = Sulje { -brand-shorter-name }
+# This menu-quit-button string is only used on Linux.
+menu-quit-button =
+    .label = { menu-quit.label }
+# This menu-quit-button-win string is only used on Windows.
+menu-quit-button-win =
+    .label = { menu-quit.label }
+    .tooltip = Sulje { -brand-shorter-name }
+menu-about =
+    .label = Tietoja: { -brand-shorter-name }
+    .accesskey = T
+
 ## File Menu
 
 menu-file =
@@ -31,6 +80,15 @@ menu-file-open-file =
 menu-file-close =
     .label = Sulje
     .accesskey = S
+# Variables:
+#  $tabCount (Number): the number of tabs that are affected by the action.
+menu-file-close-tab =
+    .label =
+        { $tabCount ->
+            [1] Sulje välilehti
+           *[other] Sulje { $tabCount } välilehteä
+        }
+    .accesskey = S
 menu-file-close-window =
     .label = Sulje ikkuna
     .accesskey = i
@@ -40,6 +98,9 @@ menu-file-save-page =
 menu-file-email-link =
     .label = Lähetä linkki…
     .accesskey = L
+menu-file-share-url =
+    .label = Jaa
+    .accesskey = J
 menu-file-print-setup =
     .label = Sivun asetukset…
     .accesskey = e
@@ -61,8 +122,8 @@ menu-file-go-offline =
 menu-edit =
     .label = Muokkaa
     .accesskey = M
-menu-edit-find-on =
-    .label = Etsi tältä sivulta…
+menu-edit-find-in-page =
+    .label = Etsi sivulta…
     .accesskey = E
 menu-edit-find-again =
     .label = Etsi seuraava
@@ -79,8 +140,8 @@ menu-view =
 menu-view-toolbars-menu =
     .label = Työkalupalkit
     .accesskey = T
-menu-view-customize-toolbar =
-    .label = Muokkaa…
+menu-view-customize-toolbar2 =
+    .label = Muokkaa työkalupalkkia…
     .accesskey = M
 menu-view-sidebar =
     .label = Sivupaneeli
@@ -115,21 +176,21 @@ menu-view-page-style-no-style =
 menu-view-page-basic-style =
     .label = Oletustyyli
     .accesskey = O
-menu-view-charset =
-    .label = Merkistökoodaus
-    .accesskey = M
+menu-view-repair-text-encoding =
+    .label = Korjaa merkistökoodaus
+    .accesskey = m
 
 ## These should match what Safari and other Apple applications
 ## use on macOS.
 
 menu-view-enter-full-screen =
-    .label = Siirry kokoruututilaan
+    .label = Siirry koko näytön tilaan
     .accesskey = S
 menu-view-exit-full-screen =
-    .label = Poistu kokoruututilasta
+    .label = Poistu koko näytön tilasta
     .accesskey = P
 menu-view-full-screen =
-    .label = Kokoruututila
+    .label = Koko näytön tila
     .accesskey = K
 
 ##
@@ -160,16 +221,18 @@ menu-history-undo-menu =
     .label = Suljetut välilehdet
 menu-history-undo-window-menu =
     .label = Suljetut ikkunat
+menu-history-reopen-all-tabs = Avaa uudelleen kaikki välilehdet
+menu-history-reopen-all-windows = Avaa uudelleen kaikki ikkunat
 
 ## Bookmarks Menu
 
 menu-bookmarks-menu =
     .label = Kirjanmerkit
     .accesskey = K
-menu-bookmarks-show-all =
-    .label = Näytä kaikki kirjanmerkit
-menu-bookmark-this-page =
-    .label = Lisää sivu kirjanmerkkeihin
+menu-bookmarks-manage =
+    .label = Järjestele kirjanmerkkejä
+menu-bookmark-current-tab =
+    .label = Lisää nykyinen välilehti kirjanmerkkeihin
 menu-bookmark-edit =
     .label = Muokkaa kirjanmerkkiä
 menu-bookmarks-all-tabs =
@@ -189,14 +252,14 @@ menu-tools =
 menu-tools-downloads =
     .label = Lataukset
     .accesskey = L
-menu-tools-addons =
-    .label = Lisäosat
-    .accesskey = o
-menu-tools-fxa-sign-in =
-    .label = Kirjaudu { -brand-product-name }iin…
+menu-tools-addons-and-themes =
+    .label = Lisäosat ja teemat
+    .accesskey = L
+menu-tools-fxa-sign-in2 =
+    .label = Kirjaudu sisään
     .accesskey = K
-menu-tools-turn-on-sync =
-    .label = Ota { -sync-brand-short-name } käyttöön…
+menu-tools-turn-on-sync2 =
+    .label = Ota synkronointi käyttöön…
     .accesskey = O
 menu-tools-sync-now =
     .label = Synkronoi
@@ -204,21 +267,20 @@ menu-tools-sync-now =
 menu-tools-fxa-re-auth =
     .label = Yhdistä uudestaan { -brand-product-name }iin…
     .accesskey = Y
-menu-tools-web-developer =
-    .label = Web-työkalut (englanninkielisiä)
-    .accesskey = W
+menu-tools-browser-tools =
+    .label = Selaintyökalut
+    .accesskey = S
+menu-tools-task-manager =
+    .label = Tehtävienhallinta
+    .accesskey = T
 menu-tools-page-source =
     .label = Sivun lähdekoodi
     .accesskey = n
 menu-tools-page-info =
     .label = Tietoja sivusta
     .accesskey = T
-menu-preferences =
-    .label =
-        { PLATFORM() ->
-            [windows] Asetukset
-           *[other] Asetukset
-        }
+menu-settings =
+    .label = Asetukset
     .accesskey =
         { PLATFORM() ->
             [windows] A
@@ -237,41 +299,38 @@ menu-window-bring-all-to-front =
 
 ## Help Menu
 
+
+# NOTE: For Engineers, any additions or changes to Help menu strings should
+# also be reflected in the related strings in appmenu.ftl. Those strings, by
+# convention, will have the same ID as these, but prefixed with "app".
+# Example: appmenu-get-help
+#
+# These strings are duplicated to allow for different casing depending on
+# where the strings appear.
+
 menu-help =
     .label = Ohje
     .accesskey = O
-menu-help-product =
-    .label =
-        { -brand-shorter-name.case-status ->
-            [with-cases] { -brand-shorter-name(case: "genitive") } ohje
-           *[no-cases] Ohjelman ohje
-        }
-    .accesskey = o
-menu-help-show-tour =
-    .label =
-        { -brand-shorter-name.case-status ->
-            [with-cases] { -brand-shorter-name(case: "genitive") } esittely
-           *[no-cases] Ohjelman esittely
-        }
-    .accesskey = e
-menu-help-import-from-another-browser =
-    .label = Tuo toisesta selaimesta…
-    .accesskey = s
-menu-help-keyboard-shortcuts =
-    .label = Näppäinkomennot
-    .accesskey = N
-menu-help-troubleshooting-info =
-    .label = Tietoja ongelmatilanteisiin
-    .accesskey = T
+menu-get-help =
+    .label = Etsi ohjeita
+    .accesskey = h
+menu-help-more-troubleshooting-info =
+    .label = Lisää vianmääritystietoja
+    .accesskey = L
+menu-help-report-site-issue =
+    .label = Ilmoita sivuston ongelmasta…
 menu-help-feedback-page =
     .label = Anna palautetta…
     .accesskey = A
-menu-help-safe-mode-without-addons =
-    .label = Käynnistä uudelleen ilman lisäosia…
-    .accesskey = K
-menu-help-safe-mode-with-addons =
-    .label = Käynnistä uudelleen lisäosat päällä
-    .accesskey = K
+menu-help-share-ideas =
+    .label = Jaa ideoita ja palautetta…
+    .accesskey = d
+menu-help-enter-troubleshoot-mode2 =
+    .label = Vianmääritystila…
+    .accesskey = V
+menu-help-exit-troubleshoot-mode =
+    .label = Poista vianmääritystila käytöstä
+    .accesskey = P
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =

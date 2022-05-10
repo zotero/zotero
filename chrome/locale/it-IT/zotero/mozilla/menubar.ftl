@@ -3,6 +3,51 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
+
+
+## Application Menu (macOS only)
+
+menu-application-preferences =
+    .label = Preferenze
+menu-application-services =
+    .label = Servizi
+menu-application-hide-this =
+    .label = Nascondi { -brand-shorter-name }
+menu-application-hide-other =
+    .label = Nascondi altre
+menu-application-show-all =
+    .label = Mostra tutte
+menu-application-touch-bar =
+    .label = Personalizza Touch Bar…
+
+##
+
+# These menu-quit strings are only used on Windows and Linux.
+menu-quit =
+    .label = Esci
+    .accesskey = E
+
+# This menu-quit-mac string is only used on macOS.
+menu-quit-mac =
+    .label = Esci da { -brand-shorter-name }
+
+# This menu-quit-button string is only used on Linux.
+menu-quit-button =
+    .label = { menu-quit.label }
+
+# This menu-quit-button-win string is only used on Windows.
+menu-quit-button-win =
+    .label = { menu-quit.label }
+    .tooltip = Chiudi { -brand-shorter-name }
+
+menu-about =
+    .label = Informazioni su { -brand-shorter-name }
+    .accesskey = I
+
 ## File Menu
 
 menu-file =
@@ -15,7 +60,7 @@ menu-file-new-container-tab =
     .label = Nuova scheda contenitore
     .accesskey = c
 menu-file-new-window =
-    .label = Nuova finestra­
+    .label = Nuova finestra
     .accesskey = f
 menu-file-new-private-window =
     .label = Nuova finestra anonima
@@ -31,6 +76,15 @@ menu-file-open-file =
 menu-file-close =
     .label = Chiudi
     .accesskey = C
+# Variables:
+#  $tabCount (Number): the number of tabs that are affected by the action.
+menu-file-close-tab =
+    .label =
+        { $tabCount ->
+            [1] Chiudi scheda
+           *[other] Chiudi { $tabCount } schede
+        }
+    .accesskey = C
 menu-file-close-window =
     .label = Chiudi finestra
     .accesskey = d
@@ -40,6 +94,9 @@ menu-file-save-page =
 menu-file-email-link =
     .label = Invia link per email…
     .accesskey = I
+menu-file-share-url =
+    .label = Condividi
+    .accesskey = d
 menu-file-print-setup =
     .label = Imposta pagina…
     .accesskey = t
@@ -61,8 +118,8 @@ menu-file-go-offline =
 menu-edit =
     .label = Modifica
     .accesskey = M
-menu-edit-find-on =
-    .label = Trova in questa pagina…
+menu-edit-find-in-page =
+    .label = Trova nella pagina…
     .accesskey = v
 menu-edit-find-again =
     .label = Trova successivo
@@ -79,8 +136,8 @@ menu-view =
 menu-view-toolbars-menu =
     .label = Barre degli strumenti
     .accesskey = B
-menu-view-customize-toolbar =
-    .label = Personalizza…
+menu-view-customize-toolbar2 =
+    .label = Personalizza barra degli strumenti…
     .accesskey = P
 menu-view-sidebar =
     .label = Barra laterale
@@ -115,8 +172,9 @@ menu-view-page-style-no-style =
 menu-view-page-basic-style =
     .label = Stile pagina di base
     .accesskey = S
-menu-view-charset =
-    .label = Codifica del testo
+
+menu-view-repair-text-encoding =
+    .label = Correggi codifica testo
     .accesskey = C
 
 ## These should match what Safari and other Apple applications
@@ -129,7 +187,7 @@ menu-view-exit-full-screen =
     .label = Esci da schermo intero
     .accesskey = h
 menu-view-full-screen =
-    .label = Schermo intero­
+    .label = Schermo intero
     .accesskey = S
 
 ##
@@ -161,15 +219,18 @@ menu-history-undo-menu =
 menu-history-undo-window-menu =
     .label = Finestre chiuse di recente
 
+menu-history-reopen-all-tabs = Riapri tutte le schede
+menu-history-reopen-all-windows = Riapri tutte le finestre
+
 ## Bookmarks Menu
 
 menu-bookmarks-menu =
     .label = Segnalibri
     .accesskey = e
-menu-bookmarks-show-all =
-    .label = Visualizza tutti i segnalibri
-menu-bookmark-this-page =
-    .label = Aggiungi pagina ai segnalibri
+menu-bookmarks-manage =
+    .label = Gestisci segnalibri
+menu-bookmark-current-tab =
+    .label = Aggiungi scheda corrente ai segnalibri
 menu-bookmark-edit =
     .label = Modifica segnalibro
 menu-bookmarks-all-tabs =
@@ -189,14 +250,14 @@ menu-tools =
 menu-tools-downloads =
     .label = Download
     .accesskey = D
-menu-tools-addons =
-    .label = Componenti aggiuntivi
-    .accesskey = C
-menu-tools-fxa-sign-in =
-    .label = Accedi a { -brand-product-name }…
+menu-tools-addons-and-themes =
+    .label = Estensioni e temi
+    .accesskey = E
+menu-tools-fxa-sign-in2 =
+    .label = Accedi
     .accesskey = c
-menu-tools-turn-on-sync =
-    .label = Attiva { -sync-brand-short-name }…
+menu-tools-turn-on-sync2 =
+    .label = Attiva sincronizzazione…
     .accesskey = v
 menu-tools-sync-now =
     .label = Sincronizza adesso
@@ -204,24 +265,23 @@ menu-tools-sync-now =
 menu-tools-fxa-re-auth =
     .label = Riconnetti a { -brand-product-name }…
     .accesskey = R
-menu-tools-web-developer =
-    .label = Sviluppo web
-    .accesskey = v
+menu-tools-browser-tools =
+    .label = Strumenti del browser
+    .accesskey = w
+menu-tools-task-manager =
+    .label = Gestione attività
+    .accesskey = G
 menu-tools-page-source =
     .label = Sorgente pagina
     .accesskey = o
 menu-tools-page-info =
     .label = Informazioni sulla pagina
     .accesskey = I
-menu-preferences =
-    .label =
-        { PLATFORM() ->
-            [windows] Opzioni
-           *[other] Preferenze
-        }
+menu-settings =
+    .label = Impostazioni
     .accesskey =
         { PLATFORM() ->
-            [windows] O
+            [windows] o
            *[other] n
         }
 menu-tools-layout-debugger =
@@ -237,33 +297,47 @@ menu-window-bring-all-to-front =
 
 ## Help Menu
 
+
+# NOTE: For Engineers, any additions or changes to Help menu strings should
+# also be reflected in the related strings in appmenu.ftl. Those strings, by
+# convention, will have the same ID as these, but prefixed with "app".
+# Example: appmenu-help-product
+#
+# These strings are duplicated to allow for different casing depending on
+# where the strings appear.
+
+
+# NOTE: For Engineers, any additions or changes to Help menu strings should
+# also be reflected in the related strings in appmenu.ftl. Those strings, by
+# convention, will have the same ID as these, but prefixed with "app".
+# Example: appmenu-get-help
+#
+# These strings are duplicated to allow for different casing depending on
+# where the strings appear.
+
 menu-help =
     .label = Aiuto
     .accesskey = A
-menu-help-product =
-    .label = Guida di { -brand-shorter-name }
-    .accesskey = G
-menu-help-show-tour =
-    .label = Panoramica di { -brand-shorter-name }
-    .accesskey = o
-menu-help-import-from-another-browser =
-    .label = Importa da un altro browser…
-    .accesskey = b
-menu-help-keyboard-shortcuts =
-    .label = Scorciatoie da tastiera
-    .accesskey = S
-menu-help-troubleshooting-info =
-    .label = Risoluzione dei problemi
-    .accesskey = R
+menu-get-help =
+    .label = Ottieni assistenza
+    .accesskey = n
+menu-help-more-troubleshooting-info =
+    .label = Altre informazioni per la risoluzione di problemi
+    .accesskey = r
+menu-help-report-site-issue =
+    .label = Segnala problema con questo sito…
 menu-help-feedback-page =
     .label = Invia feedback…
     .accesskey = k
-menu-help-safe-mode-without-addons =
-    .label = Riavvia disattivando i componenti aggiuntivi…
-    .accesskey = d
-menu-help-safe-mode-with-addons =
-    .label = Riavvia attivando i componenti aggiuntivi
-    .accesskey = R
+menu-help-share-ideas =
+    .label = Condividi idee e feedback…
+    .accesskey = k
+menu-help-enter-troubleshoot-mode2 =
+    .label = Modalità risoluzione problemi…
+    .accesskey = M
+menu-help-exit-troubleshoot-mode =
+    .label = Disattiva Modalità risoluzione problemi
+    .accesskey = m
 # Label of the Help menu item. Either this or
 # safeb.palm.notdeceptive.label from
 # phishing-afterload-warning-message.dtd is shown.

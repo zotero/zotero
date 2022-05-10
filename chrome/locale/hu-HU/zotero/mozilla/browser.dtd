@@ -1,11 +1,8 @@
-﻿<!ENTITY preferencesCmd2.label       "Beállítások">
-<!ENTITY preferencesCmd2.accesskey     "e">
-<!ENTITY preferencesCmdUnix.label       "Beállítások">
-<!ENTITY preferencesCmdUnix.accesskey     "e">
-<!ENTITY quitApplicationCmdWin2.label       "Kilépés">
-<!ENTITY quitApplicationCmdWin2.accesskey   "K">
-<!ENTITY quitApplicationCmdWin2.tooltip     "Kilépés a &brandShorterName;ból">
-<!ENTITY quitApplicationCmd.label       "Kilépés">
-<!ENTITY quitApplicationCmd.accesskey   "K">
-<!ENTITY quitApplicationCmdMac2.label   "Kilépés a &brandShorterName;ból">
-<!ENTITY quitApplicationCmd.key         "Q">
+﻿<!ENTITY preferencesCmd2.label       "Options">
+<!ENTITY preferencesCmdUnix.label       "Preferences">
+<!ENTITY quitApplicationCmdWin2.label       "Exit">
+<!ENTITY quitApplicationCmdWin2.accesskey   "x">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Exit &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Quit">
+<!ENTITY quitApplicationCmd.accesskey   "Q">
+<!ENTITY quitApplicationCmdMac2.label   "Quit &brandShorterName;">

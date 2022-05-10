@@ -3,6 +3,55 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 
+# NOTE: For English locales, strings in this file should be in APA-style Title Case.
+# See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
+#
+# NOTE: For Engineers, please don't re-use these strings outside of the menubar.
+
+
+## Application Menu (macOS only)
+
+menu-application-preferences =
+    .label = Настройки
+menu-application-services =
+    .label = Услуги
+menu-application-hide-this =
+    .label = Скриване на { -brand-shorter-name }
+menu-application-hide-other =
+    .label = Скриване на другите
+menu-application-show-all =
+    .label = Показване на всички
+menu-application-touch-bar =
+    .label = Настройки на лентата за докосване…
+
+##
+
+# These menu-quit strings are only used on Windows and Linux.
+menu-quit =
+    .label =
+        { PLATFORM() ->
+            [windows] Изход
+           *[other] Изход
+        }
+    .accesskey =
+        { PLATFORM() ->
+            [windows] х
+           *[other] х
+        }
+# This menu-quit-mac string is only used on macOS.
+menu-quit-mac =
+    .label = Изход от { -brand-shorter-name }
+# This menu-quit-button string is only used on Linux.
+menu-quit-button =
+    .label = { menu-quit.label }
+# This menu-quit-button-win string is only used on Windows.
+menu-quit-button-win =
+    .label = { menu-quit.label }
+    .tooltip = Изход от { -brand-shorter-name }
+menu-about =
+    .label = Относно { -brand-shorter-name }
+    .accesskey = О
+
 ## File Menu
 
 menu-file =
@@ -40,6 +89,9 @@ menu-file-save-page =
 menu-file-email-link =
     .label = Препратка по имейл…
     .accesskey = е
+menu-file-share-url =
+    .label = Споделяне
+    .accesskey = С
 menu-file-print-setup =
     .label = Настройки на отпечатване…
     .accesskey = Н
@@ -61,7 +113,7 @@ menu-file-go-offline =
 menu-edit =
     .label = Редактиране
     .accesskey = Р
-menu-edit-find-on =
+menu-edit-find-in-page =
     .label = Търсене в страницата…
     .accesskey = Т
 menu-edit-find-again =
@@ -79,9 +131,9 @@ menu-view =
 menu-view-toolbars-menu =
     .label = Ленти с инструменти
     .accesskey = и
-menu-view-customize-toolbar =
-    .label = Персонализиране…
-    .accesskey = П
+menu-view-customize-toolbar2 =
+    .label = Приспособяване на лентата…
+    .accesskey = л
 menu-view-sidebar =
     .label = Странична лента
     .accesskey = С
@@ -115,9 +167,9 @@ menu-view-page-style-no-style =
 menu-view-page-basic-style =
     .label = Основен стил
     .accesskey = О
-menu-view-charset =
-    .label = Кодиране на текста
-    .accesskey = К
+menu-view-repair-text-encoding =
+    .label = Поправка на кодировката
+    .accesskey = к
 
 ## These should match what Safari and other Apple applications
 ## use on macOS.
@@ -160,16 +212,18 @@ menu-history-undo-menu =
     .label = Последно затворени раздели
 menu-history-undo-window-menu =
     .label = Последно затворени прозорци
+menu-history-reopen-all-tabs = Възстановяване на всички раздели
+menu-history-reopen-all-windows = Възстановяване на всички прозорци
 
 ## Bookmarks Menu
 
 menu-bookmarks-menu =
     .label = Отметки
     .accesskey = О
-menu-bookmarks-show-all =
-    .label = Показване на всички отметки
-menu-bookmark-this-page =
-    .label = Отмятане на страницата
+menu-bookmarks-manage =
+    .label = Управление на отметки
+menu-bookmark-current-tab =
+    .label = Отмятане на текущия раздел
 menu-bookmark-edit =
     .label = Промяна на отметка
 menu-bookmarks-all-tabs =
@@ -189,40 +243,39 @@ menu-tools =
 menu-tools-downloads =
     .label = Изтегляния
     .accesskey = т
-menu-tools-addons =
-    .label = Добавки
+menu-tools-addons-and-themes =
+    .label = Добавки и теми
     .accesskey = Д
-menu-tools-fxa-sign-in =
-    .label = Вписване в { -brand-product-name }…
-    .accesskey = с
-menu-tools-turn-on-sync =
-    .label = Включване на { -sync-brand-short-name }…
-    .accesskey = л
+menu-tools-fxa-sign-in2 =
+    .label = Вписване
+    .accesskey = В
+menu-tools-turn-on-sync2 =
+    .label = Включване на Sync…
+    .accesskey = н
 menu-tools-sync-now =
     .label = Синхронизиране
     .accesskey = С
 menu-tools-fxa-re-auth =
     .label = Повторно свързване с { -brand-product-name }…
     .accesskey = с
-menu-tools-web-developer =
-    .label = Разработчик
-    .accesskey = т
+menu-tools-browser-tools =
+    .label = Инструменти за четеца
+    .accesskey = И
+menu-tools-task-manager =
+    .label = Диспечер на задачи
+    .accesskey = Д
 menu-tools-page-source =
     .label = Изходен код на страницата
     .accesskey = к
 menu-tools-page-info =
     .label = Информация за страницата
     .accesskey = И
-menu-preferences =
-    .label =
-        { PLATFORM() ->
-            [windows] Настройки
-           *[other] Настройки
-        }
+menu-settings =
+    .label = Настройки
     .accesskey =
         { PLATFORM() ->
-            [windows] Н
-           *[other] Н
+            [windows] н
+           *[other] н
         }
 menu-tools-layout-debugger =
     .label = Отстраняване на грешки в оформлението
@@ -237,33 +290,35 @@ menu-window-bring-all-to-front =
 
 ## Help Menu
 
+
+# NOTE: For Engineers, any additions or changes to Help menu strings should
+# also be reflected in the related strings in appmenu.ftl. Those strings, by
+# convention, will have the same ID as these, but prefixed with "app".
+# Example: appmenu-get-help
+#
+# These strings are duplicated to allow for different casing depending on
+# where the strings appear.
+
 menu-help =
     .label = Помощ
     .accesskey = П
-menu-help-product =
-    .label = Помощ за { -brand-shorter-name }
+menu-get-help =
+    .label = Получете помощ
     .accesskey = П
-menu-help-show-tour =
-    .label = Обиколка на { -brand-shorter-name }
-    .accesskey = б
-menu-help-import-from-another-browser =
-    .label = Внасяне от друг мрежов четец…
-    .accesskey = В
-menu-help-keyboard-shortcuts =
-    .label = Клавишни комбинации
-    .accesskey = К
-menu-help-troubleshooting-info =
-    .label = Отстраняване на неизправности
-    .accesskey = И
+menu-help-more-troubleshooting-info =
+    .label = Повече информация за отстраняване на неизправности
+    .accesskey = т
+menu-help-report-site-issue =
+    .label = Докладване на проблем със страницата…
 menu-help-feedback-page =
     .label = Обратна връзка…
     .accesskey = в
-menu-help-safe-mode-without-addons =
-    .label = Рестартиране с изключени добавки…
-    .accesskey = д
-menu-help-safe-mode-with-addons =
-    .label = Рестартиране с включени добавки
-    .accesskey = д
+menu-help-enter-troubleshoot-mode2 =
+    .label = Режим за отстраняване на неизправности…
+    .accesskey = м
+menu-help-exit-troubleshoot-mode =
+    .label = Изкл. режим за отстраняване на неизправности
+    .accesskey = м
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =

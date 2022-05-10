@@ -2,29 +2,6 @@
    - License, v. 2.0. If a copy of the MPL was not distributed with this
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 
-<!ENTITY editMenu.label            "Editare">
-<!ENTITY editMenu.accesskey        "E">
-<!ENTITY undoCmd.label             "Anulează">
-<!ENTITY undoCmd.key               "Z">
-<!ENTITY undoCmd.accesskey         "u">
-<!ENTITY redoCmd.label             "Refă">
-<!ENTITY redoCmd.key               "Y">
-<!ENTITY redoCmd.accesskey         "R">
-<!ENTITY cutCmd.label              "Taie">
-<!ENTITY cutCmd.key                "X">
-<!ENTITY cutCmd.accesskey          "T">
-<!ENTITY copyCmd.label             "Copiază">
-<!ENTITY copyCmd.key               "C">
-<!ENTITY copyCmd.accesskey         "C">
-<!ENTITY pasteCmd.label            "Lipește">
-<!ENTITY pasteCmd.key              "v">
-<!ENTITY pasteCmd.accesskey        "p">
-<!ENTITY deleteCmd.label           "Șterge">
-<!ENTITY deleteCmd.accesskey       "g">
-<!ENTITY selectAllCmd.label        "Selectează tot">
-<!ENTITY selectAllCmd.key          "A">
-<!ENTITY selectAllCmd.accesskey    "a">
-
 <!ENTITY findCmd.label             "Caută">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "F">
@@ -32,5 +9,3 @@
 <!ENTITY findAgainCmd.key          "G">
 <!ENTITY findAgainCmd.key2         "VK_F3">
 <!ENTITY findAgainCmd.accesskey    "G">
-<!ENTITY findPreviousCmd.label     "Mergi la rezultatul anterior">
-<!ENTITY findPreviousCmd.accesskey "n">
