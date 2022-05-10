@@ -98,16 +98,7 @@ var Scaffold = new function () {
 				);
 			}
 		});
-				
-		// Set font size from general pref
-		Zotero.setFontSize(document.getElementById('scaffold-pane'));
-		
-		// Set font size of code editor
-		var size = Zotero.Prefs.get("scaffold.fontSize");
-		if (size) {
-			this.setFontSize(size);
-		}
-		
+
 		this.generateTranslatorID();
 		
 		// Add List fields help menu entries for all other item types
@@ -145,6 +136,15 @@ var Scaffold = new function () {
 		this.initImportEditor();
 		this.initCodeEditor();
 		this.initTestsEditor();
+
+		// Set font size from general pref
+		Zotero.setFontSize(document.getElementById('scaffold-pane'));
+
+		// Set font size of code editor
+		var size = Zotero.Prefs.get("scaffold.fontSize");
+		if (size) {
+			this.setFontSize(size);
+		}
 
 		// Listen for Scaffold coming to the foreground and reload translators
 		window.addEventListener('activate', () => this.reloadTranslators());
