@@ -640,7 +640,7 @@ class VirtualizedTable extends React.Component {
 			}
 		}
 		else {
-			for (let i = (this.selection.focused + 1) % rowCount; i != this.selection.focused; i = (i + 1) % rowCount) {
+			for (let i = (this.selection.focused) % rowCount; i != this.selection.focused - 1; i = (i + 1) % rowCount) {
 				let rowString = this.props.getRowString(i);
 				if (rowString.toLowerCase().indexOf(this._typingString) == 0) {
 					if (i != this.selection.focused) {
