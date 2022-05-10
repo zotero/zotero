@@ -2732,11 +2732,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		// Set depth indent
 		const depth = this.getLevel(index);
-		let firstChildIndent = 0;
-		if (column.ordinal == 0) {
-			firstChildIndent = 5;
-		}
-		span.style.paddingInlineStart = ((CHILD_INDENT * depth) + firstChildIndent) + 'px';
+		span.firstChild.style.paddingInlineStart = (CHILD_INDENT * depth) + 'px';
 
 		return span;
 	}
