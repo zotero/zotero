@@ -1486,7 +1486,8 @@ var Columns = class {
 				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('max-width', `${width}px`, 'important');
 				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('min-width', `${width}px`, 'important');
 			} else {
-				width = (width - COLUMN_PADDING) * COLUMN_NORMALIZATION_WIDTH / headerWidth;
+				width = (width - COLUMN_PADDING);
+				Zotero.debug(`Columns ${dataKey} width ${width}`);
 				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('flex-basis', `${width}px`);
 			}
 		}
