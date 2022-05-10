@@ -16,22 +16,24 @@
 	max-width: 31px;
 }
 
+/* TODO: Proper button styling */
+.zotero-tb-button {
+	border: 1px solid lightgray;
+	border-radius: 3px;
+}
+.zotero-tb-button:hover {
+	background: lightgray;
+}
+
 .zotero-tb-button,
 .zotero-tb-button:first-child,
 .zotero-tb-button:last-child {
   -moz-margin-start: 0 !important;
   -moz-margin-end: 3px !important;
-  -moz-padding-end: 10px !important;
-  background: url("chrome://zotero/skin/mac/menubutton-end.png") right center/auto 24px no-repeat;
 }
 
 .zotero-tb-button[type=menu] {
 	-moz-padding-end: 8px !important;
-}
-
-.zotero-tb-button > .toolbarbutton-icon {
-	background: url("chrome://zotero/skin/mac/menubutton-start.png") left center/auto 24px no-repeat;
-	padding: 4px 4px 4px 11px;
 }
 
 /* For menu buttons, decrease left padding by 1px */
@@ -49,19 +51,18 @@
 }
 
 .zotero-tb-button:-moz-window-inactive > .toolbarbutton-icon {
-	background: url("chrome://zotero/skin/mac/menubutton-start-inactive-window.png") left center/auto 24px no-repeat;
 }
 
 /* Use a darker background when inactive so the button itself doesn't get too dark at 50% */
 .zotero-tb-button:-moz-window-inactive,
 .zotero-tb-button:-moz-window-inactive:first-child,
 .zotero-tb-button:-moz-window-inactive:last-child {
-	background: url("chrome://zotero/skin/mac/menubutton-end-inactive-window.png") right center/auto 24px no-repeat;
+	/* TODO */
 }
 
 .zotero-tb-button[open="true"],
 .zotero-tb-button:not([disabled="true"]):hover:active {
-  background: url("chrome://zotero/skin/mac/menubutton-end-pressed.png") right center/auto 24px no-repeat;
+	/* TODO */
 }
 
 .zotero-tb-button > menupopup {
@@ -86,7 +87,7 @@
 
 .zotero-tb-button[open="true"] > .toolbarbutton-icon,
 .zotero-tb-button:not([disabled="true"]):hover:active > .toolbarbutton-icon {
-  background: url("chrome://zotero/skin/mac/menubutton-start-pressed.png") left center/auto 24px no-repeat;
+  /* TODO */
 }
 
 .zotero-tb-button > .toolbarbutton-text {
@@ -378,12 +379,6 @@ treechildren::-moz-tree-image {
 
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
 @media (min-resolution: 1.25dppx) {
-	.zotero-tb-button,.zotero-tb-button:first-child,.zotero-tb-button:last-child  { background: url("chrome://zotero/skin/mac/menubutton-end@2x.png") right center/auto 24px no-repeat; }
-	.zotero-tb-button > .toolbarbutton-icon  { background: url("chrome://zotero/skin/mac/menubutton-start@2x.png") left center/auto 24px no-repeat; }
-	.zotero-tb-button:-moz-window-inactive > .toolbarbutton-icon  { background: url("chrome://zotero/skin/mac/menubutton-start-inactive-window@2x.png") left center/auto 24px no-repeat; }
-	.zotero-tb-button:-moz-window-inactive,.zotero-tb-button:-moz-window-inactive:first-child,.zotero-tb-button:-moz-window-inactive:last-child  { background: url("chrome://zotero/skin/mac/menubutton-end-inactive-window@2x.png") right center/auto 24px no-repeat; }
-	.zotero-tb-button[open="true"],.zotero-tb-button:not([disabled="true"]):hover:active  { background: url("chrome://zotero/skin/mac/menubutton-end-pressed@2x.png") right center/auto 24px no-repeat; }
-	.zotero-tb-button[open="true"] > .toolbarbutton-icon,.zotero-tb-button:not([disabled="true"]):hover:active > .toolbarbutton-icon  { background: url("chrome://zotero/skin/mac/menubutton-start-pressed@2x.png") left center/auto 24px no-repeat; }
 	#zotero-collections-splitter[state=collapsed] > grippy, #zotero-items-splitter[state=collapsed] > grippy { background: url(chrome://zotero/skin/mac/vgrippy@2x.png) center/auto 8px no-repeat; }
 	#zotero-tags-splitter > grippy { background: url(chrome://zotero/skin/mac/hgrippy@2x.png) center/auto 8px no-repeat; }
 	#zotero-tb-advanced-search { list-style-image: url('chrome://zotero/skin/mac/toolbar-advanced-search@2x.png'); }
