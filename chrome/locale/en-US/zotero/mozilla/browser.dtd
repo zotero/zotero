@@ -1,4 +1,8 @@
 ﻿<!ENTITY preferencesCmd2.label       "Options">
-<!ENTITY preferencesCmd2.accesskey     "O">
 <!ENTITY preferencesCmdUnix.label       "Preferences">
-<!ENTITY preferencesCmdUnix.accesskey     "n"> 
+<!ENTITY quitApplicationCmdWin2.label       "Exit">
+<!ENTITY quitApplicationCmdWin2.accesskey   "x">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Exit &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Quit">
+<!ENTITY quitApplicationCmd.accesskey   "Q">
+<!ENTITY quitApplicationCmdMac2.label   "Quit &brandShorterName;">

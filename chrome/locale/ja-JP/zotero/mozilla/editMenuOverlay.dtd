@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label		"すべて選択">
 <!ENTITY selectAllCmd.key		"A">
 <!ENTITY selectAllCmd.accesskey		"a">
+
 <!ENTITY findCmd.label			"検索">
 <!ENTITY findCmd.key			"F">
 <!ENTITY findCmd.accesskey		"F">

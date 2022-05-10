@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "A">
 <!ENTITY preferencesCmdUnix.label       "Hobespenak">
 <!ENTITY preferencesCmdUnix.accesskey     "n">
+<!ENTITY quitApplicationCmdWin2.label       "Irten">
+<!ENTITY quitApplicationCmdWin2.accesskey   "I">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Irten &brandShorterName;(e)tik">
+<!ENTITY quitApplicationCmd.label       "Irten">
+<!ENTITY quitApplicationCmd.accesskey   "I">
+<!ENTITY quitApplicationCmdMac2.label   "Irten &brandShorterName;(e)tik">
+<!ENTITY quitApplicationCmd.key         "Q">

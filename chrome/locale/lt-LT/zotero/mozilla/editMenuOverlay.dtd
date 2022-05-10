@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label        "Pažymėti viską">
 <!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "v">
+
 <!ENTITY findCmd.label             "Ieškoti">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "I">

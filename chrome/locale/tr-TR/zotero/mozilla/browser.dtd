@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "S">
 <!ENTITY preferencesCmdUnix.label       "Tercihler">
 <!ENTITY preferencesCmdUnix.accesskey     "T">
+<!ENTITY quitApplicationCmdWin2.label       "Çık">
+<!ENTITY quitApplicationCmdWin2.accesskey   "k">
+<!ENTITY quitApplicationCmdWin2.tooltip     "&brandShorterName; tarayıcısından çık">
+<!ENTITY quitApplicationCmd.label       "Çık">
+<!ENTITY quitApplicationCmd.accesskey   "k">
+<!ENTITY quitApplicationCmdMac2.label   "&brandShorterName; uygulamasından çık">
+<!ENTITY quitApplicationCmd.key         "Q">

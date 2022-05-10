@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label        "เลือกทั้งหมด">
 <!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "อ">
+
 <!ENTITY findCmd.label             "ค้นหา">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "น">

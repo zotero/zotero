@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "O">
 <!ENTITY preferencesCmdUnix.label       "ចំណូលចិត្ត">
 <!ENTITY preferencesCmdUnix.accesskey     "n">
+<!ENTITY quitApplicationCmdWin2.label       "ចេញ">
+<!ENTITY quitApplicationCmdWin2.accesskey   "x">
+<!ENTITY quitApplicationCmdWin2.tooltip     "បិទ &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "ចេញ">
+<!ENTITY quitApplicationCmd.accesskey   "Q">
+<!ENTITY quitApplicationCmdMac2.label   "បិទ &brandShorterName;">
+<!ENTITY quitApplicationCmd.key         "Q">

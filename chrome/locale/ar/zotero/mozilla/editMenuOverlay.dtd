@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label        "اختر الكل">
 <!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "ك">
+
 <!ENTITY findCmd.label             "ابحث">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "ب">

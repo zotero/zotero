@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "O">
 <!ENTITY preferencesCmdUnix.label       "Tùy chỉnh">
 <!ENTITY preferencesCmdUnix.accesskey     "n">
+<!ENTITY quitApplicationCmdWin2.label       "Thoát">
+<!ENTITY quitApplicationCmdWin2.accesskey   "x">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Thoát &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Thoát">
+<!ENTITY quitApplicationCmd.accesskey   "Q">
+<!ENTITY quitApplicationCmdMac2.label   "Thoát &brandShorterName;">
+<!ENTITY quitApplicationCmd.key         "Q">

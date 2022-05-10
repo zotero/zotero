@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "о">
 <!ENTITY preferencesCmdUnix.label       "Поставке">
 <!ENTITY preferencesCmdUnix.accesskey     "П">
+<!ENTITY quitApplicationCmdWin2.label       "Изађи">
+<!ENTITY quitApplicationCmdWin2.accesskey   "И">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Изађи из &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Изађи">
+<!ENTITY quitApplicationCmd.accesskey   "И">
+<!ENTITY quitApplicationCmdMac2.label   "Изађи из &brandShorterName;">
+<!ENTITY quitApplicationCmd.key         "Q">

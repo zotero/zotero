@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "ต">
 <!ENTITY preferencesCmdUnix.label       "ค่ากำหนด">
 <!ENTITY preferencesCmdUnix.accesskey     "ด">
+<!ENTITY quitApplicationCmdWin2.label       "ออก">
+<!ENTITY quitApplicationCmdWin2.accesskey   "อ">
+<!ENTITY quitApplicationCmdWin2.tooltip     "ออกจาก &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "ออก">
+<!ENTITY quitApplicationCmd.accesskey   "อ">
+<!ENTITY quitApplicationCmdMac2.label   "ออกจาก &brandShorterName;">
+<!ENTITY quitApplicationCmd.key         "Q">

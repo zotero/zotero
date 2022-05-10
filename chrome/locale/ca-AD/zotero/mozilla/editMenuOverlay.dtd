@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label        "Selecciona-ho tot">
 <!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "a">
+
 <!ENTITY findCmd.label             "Cerca">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "r">

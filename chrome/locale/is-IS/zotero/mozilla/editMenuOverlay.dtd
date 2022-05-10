@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label        "Velja allt">
 <!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "j">
+
 <!ENTITY findCmd.label             "Leita">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "i">

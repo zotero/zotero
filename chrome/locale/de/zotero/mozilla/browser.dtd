@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "E">
 <!ENTITY preferencesCmdUnix.label       "Einstellungen">
 <!ENTITY preferencesCmdUnix.accesskey     "E">
+<!ENTITY quitApplicationCmdWin2.label       "Beenden">
+<!ENTITY quitApplicationCmdWin2.accesskey   "B">
+<!ENTITY quitApplicationCmdWin2.tooltip     "&brandShorterName; beenden">
+<!ENTITY quitApplicationCmd.label       "Beenden">
+<!ENTITY quitApplicationCmd.accesskey   "B">
+<!ENTITY quitApplicationCmdMac2.label   "&brandShorterName; beenden">
+<!ENTITY quitApplicationCmd.key         "Q">

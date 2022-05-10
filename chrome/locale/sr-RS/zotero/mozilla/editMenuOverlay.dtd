@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label        "Изабери све">
 <!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "е">
+
 <!ENTITY findCmd.label             "Тражење">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "Т">

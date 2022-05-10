@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label        "Minden kijelölése">
 <!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "d">
+
 <!ENTITY findCmd.label             "Keresés">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "e">

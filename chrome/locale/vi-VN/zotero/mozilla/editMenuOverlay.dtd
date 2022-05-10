@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label        "Chọn tất cả">
 <!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "a">
+
 <!ENTITY findCmd.label             "Tìm">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "F">

@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label        "Tümünü seç">
 <!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "ü">
+
 <!ENTITY findCmd.label             "Bul">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "B">

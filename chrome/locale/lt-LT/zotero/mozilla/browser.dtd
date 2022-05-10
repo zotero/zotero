@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "N">
 <!ENTITY preferencesCmdUnix.label       "Nuostatos">
 <!ENTITY preferencesCmdUnix.accesskey     "N">
+<!ENTITY quitApplicationCmdWin2.label       "Baigti darbą">
+<!ENTITY quitApplicationCmdWin2.accesskey   "B">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Baigti „&brandShorterName;“ darbą">
+<!ENTITY quitApplicationCmd.label       "Baigti darbą">
+<!ENTITY quitApplicationCmd.accesskey   "B">
+<!ENTITY quitApplicationCmdMac2.label   "Baigti „&brandShorterName;“ darbą">
+<!ENTITY quitApplicationCmd.key         "Q">

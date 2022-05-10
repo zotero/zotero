@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "O">
 <!ENTITY preferencesCmdUnix.label       "Preferències">
 <!ENTITY preferencesCmdUnix.accesskey     "n">
+<!ENTITY quitApplicationCmdWin2.label       "Surt">
+<!ENTITY quitApplicationCmdWin2.accesskey   "u">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Surt del &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Surt">
+<!ENTITY quitApplicationCmd.accesskey   "u">
+<!ENTITY quitApplicationCmdMac2.label   "Surt del &brandShorterName;">
+<!ENTITY quitApplicationCmd.key         "Q">

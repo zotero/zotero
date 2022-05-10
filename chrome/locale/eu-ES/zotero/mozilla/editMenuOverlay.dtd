@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label        "Hautatu dena">
 <!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "a">
+
 <!ENTITY findCmd.label             "Bilatu">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "B">

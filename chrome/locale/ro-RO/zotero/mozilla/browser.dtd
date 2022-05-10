@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "O">
 <!ENTITY preferencesCmdUnix.label       "Preferințe">
 <!ENTITY preferencesCmdUnix.accesskey     "n">
+<!ENTITY quitApplicationCmdWin2.label       "Ieși">
+<!ENTITY quitApplicationCmdWin2.accesskey   "x">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Ieși din &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Ieși">
+<!ENTITY quitApplicationCmd.accesskey   "Q">
+<!ENTITY quitApplicationCmdMac2.label   "Ieși din &brandShorterName;">
+<!ENTITY quitApplicationCmd.key         "Q">

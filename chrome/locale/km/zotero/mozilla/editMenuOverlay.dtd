@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label        "ជ្រើស​ទាំងអស់">
 <!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "អ">
+
 <!ENTITY findCmd.label             "រក">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "ក">

@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "O">
 <!ENTITY preferencesCmdUnix.label       "Préférences">
 <!ENTITY preferencesCmdUnix.accesskey     "f">
+<!ENTITY quitApplicationCmdWin2.label       "Quitter">
+<!ENTITY quitApplicationCmdWin2.accesskey   "Q">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Quitter &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Quitter">
+<!ENTITY quitApplicationCmd.accesskey   "Q">
+<!ENTITY quitApplicationCmdMac2.label   "Quitter &brandShorterName;">
+<!ENTITY quitApplicationCmd.key         "Q">

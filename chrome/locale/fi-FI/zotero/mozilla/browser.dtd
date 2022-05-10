@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "A">
 <!ENTITY preferencesCmdUnix.label       "Asetukset">
 <!ENTITY preferencesCmdUnix.accesskey     "A">
+<!ENTITY quitApplicationCmdWin2.label       "Sulje">
+<!ENTITY quitApplicationCmdWin2.accesskey   "S">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Sulje &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Sulje">
+<!ENTITY quitApplicationCmd.accesskey   "S">
+<!ENTITY quitApplicationCmdMac2.label   "Sulje &brandShorterName;">
+<!ENTITY quitApplicationCmd.key         "Q">

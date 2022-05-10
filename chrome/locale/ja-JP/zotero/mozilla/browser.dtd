@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey	"O">
 <!ENTITY preferencesCmdUnix.label	"設定">
 <!ENTITY preferencesCmdUnix.accesskey	"n">
+<!ENTITY quitApplicationCmdWin2.label		"終了">
+<!ENTITY quitApplicationCmdWin2.accesskey	"x">
+<!ENTITY quitApplicationCmdWin2.tooltip		"&brandShorterName; を終了します">
+<!ENTITY quitApplicationCmd.label		"終了">
+<!ENTITY quitApplicationCmd.accesskey		"Q">
+<!ENTITY quitApplicationCmdMac2.label		"&brandShorterName; を終了">
+<!ENTITY quitApplicationCmd.key			"Q">

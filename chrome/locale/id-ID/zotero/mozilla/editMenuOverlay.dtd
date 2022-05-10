@@ -2,8 +2,8 @@
    - License, v. 2.0. If a copy of the MPL was not distributed with this
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 
-<!ENTITY editMenu.label            "Ubah">
-<!ENTITY editMenu.accesskey        "U">
+<!ENTITY editMenu.label            "Edit">
+<!ENTITY editMenu.accesskey        "e">
 <!ENTITY undoCmd.label             "Urungkan">
 <!ENTITY undoCmd.key               "Z">
 <!ENTITY undoCmd.accesskey         "g">
@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label        "Pilih Semua">
 <!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "a">
+
 <!ENTITY findCmd.label             "Cari">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "C">

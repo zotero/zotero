@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label        "Επιλογή όλων">
 <!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "ο">
+
 <!ENTITY findCmd.label             "Εύρεση">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "ρ">

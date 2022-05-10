@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "گ">
 <!ENTITY preferencesCmdUnix.label       "ترجیحات">
 <!ENTITY preferencesCmdUnix.accesskey     "ت">
+<!ENTITY quitApplicationCmdWin2.label       "خروج">
+<!ENTITY quitApplicationCmdWin2.accesskey   "خ">
+<!ENTITY quitApplicationCmdWin2.tooltip     "خروج از &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "ترک">
+<!ENTITY quitApplicationCmd.accesskey   "ت">
+<!ENTITY quitApplicationCmdMac2.label   "ترک &brandShorterName;">
+<!ENTITY quitApplicationCmd.key         "Q">

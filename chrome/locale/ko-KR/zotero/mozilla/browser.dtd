@@ -1,4 +1,11 @@
-﻿<!ENTITY preferencesCmd2.label       "설정…">
+﻿<!ENTITY preferencesCmd2.label       "설정">
 <!ENTITY preferencesCmd2.accesskey     "O">
 <!ENTITY preferencesCmdUnix.label       "환경 설정">
 <!ENTITY preferencesCmdUnix.accesskey     "n">
+<!ENTITY quitApplicationCmdWin2.label       "종료">
+<!ENTITY quitApplicationCmdWin2.accesskey   "x">
+<!ENTITY quitApplicationCmdWin2.tooltip     "&brandShorterName; 종료">
+<!ENTITY quitApplicationCmd.label       "종료">
+<!ENTITY quitApplicationCmd.accesskey   "Q">
+<!ENTITY quitApplicationCmdMac2.label   "&brandShorterName; 종료">
+<!ENTITY quitApplicationCmd.key         "Q">

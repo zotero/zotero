@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label "Vali kõik">
 <!ENTITY selectAllCmd.key "A">
 <!ENTITY selectAllCmd.accesskey "I">
+
 <!ENTITY findCmd.label "Otsi">
 <!ENTITY findCmd.key "F">
 <!ENTITY findCmd.accesskey "O">

@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "Ε">
 <!ENTITY preferencesCmdUnix.label       "Προτιμήσεις">
 <!ENTITY preferencesCmdUnix.accesskey     "μ">
+<!ENTITY quitApplicationCmdWin2.label       "Έξοδος">
+<!ENTITY quitApplicationCmdWin2.accesskey   "ξ">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Έξοδος από το &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Έξοδος">
+<!ENTITY quitApplicationCmd.accesskey   "ξ">
+<!ENTITY quitApplicationCmdMac2.label   "Έξοδος από το &brandShorterName;">
+<!ENTITY quitApplicationCmd.key         "Q">

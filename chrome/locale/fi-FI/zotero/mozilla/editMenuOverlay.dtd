@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label         "Valitse kaikki">
 <!ENTITY selectAllCmd.key           "A">
 <!ENTITY selectAllCmd.accesskey     "V">
+
 <!ENTITY findCmd.label              "Etsi">
 <!ENTITY findCmd.key                "F">
 <!ENTITY findCmd.accesskey          "E">

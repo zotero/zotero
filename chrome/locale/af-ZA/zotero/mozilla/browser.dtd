@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "O">
 <!ENTITY preferencesCmdUnix.label       "Voorkeure">
 <!ENTITY preferencesCmdUnix.accesskey     "k">
+<!ENTITY quitApplicationCmdWin2.label       "Afsluit">
+<!ENTITY quitApplicationCmdWin2.accesskey   "s">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Sluit &brandShorterName; af">
+<!ENTITY quitApplicationCmd.label       "Afsluit">
+<!ENTITY quitApplicationCmd.accesskey   "A">
+<!ENTITY quitApplicationCmdMac2.label   "Sluit &brandShorterName; af">
+<!ENTITY quitApplicationCmd.key         "Q">

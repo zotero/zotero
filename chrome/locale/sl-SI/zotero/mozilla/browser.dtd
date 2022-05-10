@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "M">
 <!ENTITY preferencesCmdUnix.label       "Nastavitve">
 <!ENTITY preferencesCmdUnix.accesskey     "n">
+<!ENTITY quitApplicationCmdWin2.label       "Izhod">
+<!ENTITY quitApplicationCmdWin2.accesskey   "h">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Izhod iz &brandShorterName;a">
+<!ENTITY quitApplicationCmd.label       "Izhod">
+<!ENTITY quitApplicationCmd.accesskey   "I">
+<!ENTITY quitApplicationCmdMac2.label   "Izhod iz &brandShorterName;a">
+<!ENTITY quitApplicationCmd.key         "Q">

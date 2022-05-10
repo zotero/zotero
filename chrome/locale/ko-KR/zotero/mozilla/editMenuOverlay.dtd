@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label        "모두 선택">
 <!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "a">
+
 <!ENTITY findCmd.label             "찾기">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "F">

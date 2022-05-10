@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label        "Izberi vse">
 <!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "v">
+
 <!ENTITY findCmd.label             "Najdi">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "N">

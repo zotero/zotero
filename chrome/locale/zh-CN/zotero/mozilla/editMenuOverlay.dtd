@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label        "全选">
 <!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "A">
+
 <!ENTITY findCmd.label             "查找">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "F">

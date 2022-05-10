@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "g">
 <!ENTITY preferencesCmdUnix.label       "Pengaturan">
 <!ENTITY preferencesCmdUnix.accesskey     "g">
+<!ENTITY quitApplicationCmdWin2.label       "Keluar">
+<!ENTITY quitApplicationCmdWin2.accesskey   "K">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Keluar dari &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Keluar">
+<!ENTITY quitApplicationCmd.accesskey   "K">
+<!ENTITY quitApplicationCmdMac2.label   "Keluar dari &brandShorterName;">
+<!ENTITY quitApplicationCmd.key         "Q">

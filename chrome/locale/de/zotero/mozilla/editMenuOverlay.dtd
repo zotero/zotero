@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label        "Alles auswählen">
 <!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "u">
+
 <!ENTITY findCmd.label             "Suchen">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "S">

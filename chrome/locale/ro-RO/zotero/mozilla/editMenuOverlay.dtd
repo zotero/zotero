@@ -24,12 +24,13 @@
 <!ENTITY selectAllCmd.label        "Selectează tot">
 <!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "a">
+
 <!ENTITY findCmd.label             "Caută">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "F">
-<!ENTITY findAgainCmd.label        "Găsește din nou">
+<!ENTITY findAgainCmd.label        "Caută din nou">
 <!ENTITY findAgainCmd.key          "G">
 <!ENTITY findAgainCmd.key2         "VK_F3">
 <!ENTITY findAgainCmd.accesskey    "G">
-<!ENTITY findPreviousCmd.label     "Găsește anterior">
+<!ENTITY findPreviousCmd.label     "Mergi la rezultatul anterior">
 <!ENTITY findPreviousCmd.accesskey "n">

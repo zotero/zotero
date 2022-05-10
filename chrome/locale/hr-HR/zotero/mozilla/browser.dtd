@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "M">
 <!ENTITY preferencesCmdUnix.label       "Postavke">
 <!ENTITY preferencesCmdUnix.accesskey     "P">
+<!ENTITY quitApplicationCmdWin2.label       "Izlaz">
+<!ENTITY quitApplicationCmdWin2.accesskey   "I">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Zatvori &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Izlaz">
+<!ENTITY quitApplicationCmd.accesskey   "I">
+<!ENTITY quitApplicationCmdMac2.label   "Zatvori &brandShorterName;">
+<!ENTITY quitApplicationCmd.key         "Q">

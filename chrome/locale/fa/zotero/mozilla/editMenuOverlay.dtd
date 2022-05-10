@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label        "انتخاب همه">
 <!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "ه">
+
 <!ENTITY findCmd.label             "پیدا کردن">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "پ">

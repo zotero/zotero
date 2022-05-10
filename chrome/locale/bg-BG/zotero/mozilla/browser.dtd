@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "Н">
 <!ENTITY preferencesCmdUnix.label       "Настройки">
 <!ENTITY preferencesCmdUnix.accesskey     "Н">
+<!ENTITY quitApplicationCmdWin2.label       "Изход">
+<!ENTITY quitApplicationCmdWin2.accesskey   "х">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Изход от &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Изход">
+<!ENTITY quitApplicationCmd.accesskey   "х">
+<!ENTITY quitApplicationCmdMac2.label   "Изход от &brandShorterName;">
+<!ENTITY quitApplicationCmd.key         "Q">

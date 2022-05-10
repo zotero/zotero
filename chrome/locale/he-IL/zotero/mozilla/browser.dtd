@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "א">
 <!ENTITY preferencesCmdUnix.label       "העדפות">
 <!ENTITY preferencesCmdUnix.accesskey     "ד">
+<!ENTITY quitApplicationCmdWin2.label       "יציאה">
+<!ENTITY quitApplicationCmdWin2.accesskey   "צ">
+<!ENTITY quitApplicationCmdWin2.tooltip     "יציאה מ־&brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "יציאה">
+<!ENTITY quitApplicationCmd.accesskey   "צ">
+<!ENTITY quitApplicationCmdMac2.label   "יציאה מ־&brandShorterName;">
+<!ENTITY quitApplicationCmd.key         "Q">

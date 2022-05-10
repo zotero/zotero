@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "V">
 <!ENTITY preferencesCmdUnix.label       "Valkostir">
 <!ENTITY preferencesCmdUnix.accesskey     "V">
+<!ENTITY quitApplicationCmdWin2.label       "Hætta">
+<!ENTITY quitApplicationCmdWin2.accesskey   "H">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Hætta í &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Hætta">
+<!ENTITY quitApplicationCmd.accesskey   "H">
+<!ENTITY quitApplicationCmdMac2.label   "Hætta í &brandShorterName;">
+<!ENTITY quitApplicationCmd.key         "Q">

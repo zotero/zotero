@@ -24,6 +24,7 @@
 <!ENTITY selectAllCmd.label        "Merk alt">
 <!ENTITY selectAllCmd.key          "A">
 <!ENTITY selectAllCmd.accesskey    "M">
+
 <!ENTITY findCmd.label             "Søk">
 <!ENTITY findCmd.key               "F">
 <!ENTITY findCmd.accesskey         "S">

@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "O">
 <!ENTITY preferencesCmdUnix.label       "Preferências">
 <!ENTITY preferencesCmdUnix.accesskey     "f">
+<!ENTITY quitApplicationCmdWin2.label       "Sair">
+<!ENTITY quitApplicationCmdWin2.accesskey   "r">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Sair do &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Sair">
+<!ENTITY quitApplicationCmd.accesskey   "r">
+<!ENTITY quitApplicationCmdMac2.label   "Sair do &brandShorterName;">
+<!ENTITY quitApplicationCmd.key         "Q">

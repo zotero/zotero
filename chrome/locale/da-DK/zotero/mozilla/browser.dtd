@@ -2,3 +2,10 @@
 <!ENTITY preferencesCmd2.accesskey     "I">
 <!ENTITY preferencesCmdUnix.label       "Indstillinger">
 <!ENTITY preferencesCmdUnix.accesskey     "I">
+<!ENTITY quitApplicationCmdWin2.label       "Afslut">
+<!ENTITY quitApplicationCmdWin2.accesskey   "A">
+<!ENTITY quitApplicationCmdWin2.tooltip     "Afslut &brandShorterName;">
+<!ENTITY quitApplicationCmd.label       "Afslut">
+<!ENTITY quitApplicationCmd.accesskey   "A">
+<!ENTITY quitApplicationCmdMac2.label    "Afslut &brandShorterName;">
+<!ENTITY quitApplicationCmd.key         "Q">
