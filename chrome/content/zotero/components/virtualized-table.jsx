@@ -37,7 +37,6 @@ const TYPING_TIMEOUT = 1000;
 const MINIMUM_ROW_HEIGHT = 20; // px
 const RESIZER_WIDTH = 5; // px
 const COLUMN_MIN_WIDTH = 20;
-const COLUMN_NORMALIZATION_WIDTH = 8192;
 const COLUMN_PADDING = 10; // N.B. MUST BE INLINE WITH CSS!!!
 
 const noop = () => 0;
