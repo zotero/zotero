@@ -281,10 +281,9 @@ var ZoteroPane = new function()
 		var addMenu = document.getElementById('zotero-tb-add').firstElementChild;
 		
 		// Remove all nodes so we can regenerate
-		var options = addMenu.querySelectorAll('.zotero-tb-add');
+		var options = [...addMenu.querySelectorAll('.zotero-tb-add')];
 		while (options.length) {
-			var p = options[0].parentNode;
-			p.removeChild(options[0]);
+			options.shift().remove();
 		}
 		var moreMenu = document.getElementById('zotero-tb-add-more');
 		while (moreMenu.hasChildNodes()) {
@@ -308,7 +307,7 @@ var ZoteroPane = new function()
 			return collation.compareString(1, a.localized, b.localized);
 		});
 		for (let itemType of itemTypes) {
-			let menuitem = document.createElement("menuitem");
+			let menuitem = document.createXULElement("menuitem");
 			menuitem.setAttribute("label", itemType.localized);
 			menuitem.setAttribute("tooltiptext", "");
 			let type = itemType.id;
@@ -333,7 +332,7 @@ var ZoteroPane = new function()
 			return collation.compareString(1, a.localized, b.localized);
 		});
 		for (var i = 0; i<itemTypes.length; i++) {
-			var menuitem = document.createElement("menuitem");
+			var menuitem = document.createXULElement("menuitem");
 			menuitem.setAttribute("label", itemTypes[i].localized);
 			menuitem.setAttribute("tooltiptext", "");
 			let type = itemTypes[i].id;
