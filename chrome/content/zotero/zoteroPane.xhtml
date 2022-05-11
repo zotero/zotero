@@ -742,7 +742,12 @@
 							<toolbar id="zotero-toolbar" class="toolbar toolbar-primary">
 								<hbox id="zotero-collections-toolbar" align="center">
 									<toolbarbutton id="zotero-tb-collection-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
-									<toolbarbutton id="zotero-tb-library-add-menu" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newLibrary.label;" type="menu">
+									<toolbarbutton
+											id="zotero-tb-library-add-menu"
+											class="zotero-tb-button"
+											tooltiptext="&zotero.toolbar.newLibrary.label;"
+											type="menu"
+											wantdropmarker="true">
 										<menupopup id="zotero-tb-library-add-popup">
 											<menuitem id="zotero-tb-group-add" label="&zotero.toolbar.newGroup;" oncommand="ZoteroPane_Local.newGroup()"/>
 											<menu id="zotero-tb-feed-add-menu" label="&zotero.toolbar.feeds.new;">
@@ -758,7 +763,12 @@
 								</hbox>
 								
 								<hbox id="zotero-items-toolbar" align="center">
-									<toolbarbutton id="zotero-tb-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newItem.label;" type="menu"
+									<toolbarbutton
+											id="zotero-tb-add"
+											class="zotero-tb-button"
+											tooltiptext="&zotero.toolbar.newItem.label;"
+											type="menu"
+											wantdropmarker="true"
 											onmousedown="if (this.disabled) { event.preventDefault(); return; }">
 										<menupopup onpopupshowing="ZoteroPane_Local.updateNewItemTypes()">
 											<menuseparator/>
@@ -802,14 +812,21 @@
 									</panel>
 									
 									<!--<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.note.standalone;" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>-->
-									<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newNote;" type="menu"
+									<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newNote;"
+											type="menu"
+											wantdropmarker="true"
 											onmousedown="if (this.disabled) { event.preventDefault(); return; }">
 										<menupopup onpopupshowing="ZoteroPane_Local.updateNoteButtonMenu()">
 											<menuitem label="&zotero.toolbar.note.standalone;" command="cmd_zotero_newStandaloneNote"/>
 											<menuitem label="&zotero.toolbar.note.child;" command="cmd_zotero_newChildNote"/>
 										</menupopup>
 									</toolbarbutton>
-									<toolbarbutton id="zotero-tb-attachment-add" class="zotero-tb-button" tooltiptext="&zotero.items.menu.attach;" type="menu"
+									<toolbarbutton
+											id="zotero-tb-attachment-add"
+											class="zotero-tb-button"
+											tooltiptext="&zotero.items.menu.attach;"
+											type="menu"
+											wantdropmarker="true"
 											onmousedown="if (this.disabled) { event.preventDefault(); return; }">
 										<menupopup onpopupshowing="ZoteroPane_Local.updateAttachmentButtonMenu(this)">
 											<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link.uri;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromURI(true, itemID);"/>
@@ -829,7 +846,12 @@
 								
 								<hbox id="zotero-item-toolbar" flex="1" align="center" tooltip="html-tooltip">
 									<hbox align="center" pack="start" flex="1">
-										<toolbarbutton id="zotero-tb-locate" class="zotero-tb-button" tooltiptext="&zotero.toolbar.openURL.label;" type="menu">
+										<toolbarbutton
+												id="zotero-tb-locate"
+												class="zotero-tb-button"
+												tooltiptext="&zotero.toolbar.openURL.label;"
+												type="menu"
+												wantdropmarker="true">
 											<menupopup id="zotero-tb-locate-menu" onpopupshowing="Zotero_LocateMenu.buildLocateMenu()"/>
 										</toolbarbutton>
 									</hbox>
