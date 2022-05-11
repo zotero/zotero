@@ -48,6 +48,9 @@ var Zotero_Feed_Settings = new function() {
 	};
 	
 	this.init = Zotero.Promise.coroutine(function* () {
+		document.addEventListener('dialogaccept', this.accept.bind(this));
+		document.addEventListener('dialogcancel', this.cancel.bind(this));
+		
 		this.toggleAdvancedOptions(false);
 		
 		data = window.arguments[0];
@@ -99,7 +102,7 @@ var Zotero_Feed_Settings = new function() {
 		document.getElementById('feed-ttl').disabled = true;
 		document.getElementById('feed-cleanupReadAfter').disabled = true;
 		document.getElementById('feed-cleanupUnreadAfter').disabled = true;
-		document.documentElement.getButton('accept').disabled = true;
+		document.querySelector('dialog').getButton('accept').disabled = true;
 	};
 	
 	this.validateURL = Zotero.Promise.coroutine(function* () {
@@ -137,7 +140,7 @@ var Zotero_Feed_Settings = new function() {
 			ttl.disabled = false;
 			document.getElementById('feed-cleanupReadAfter').disabled = false;
 			document.getElementById('feed-cleanupUnreadAfter').disabled = false;
-			document.documentElement.getButton('accept').disabled = false;
+			document.querySelector('dialog').getButton('accept').disabled = false;
 		}
 		catch (e) {
 			Zotero.debug(e);

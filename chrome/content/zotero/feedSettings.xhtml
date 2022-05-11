@@ -5,16 +5,16 @@
 <!DOCTYPE window [
 	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd" > %zoteroDTD;
 ]>
-<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+<window type="child"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	title="&zotero.feedSettings.title;" buttons="cancel,accept"
 	buttonlabelaccept="&zotero.feedSettings.saveButton.label;"
-	ondialogaccept="return Zotero_Feed_Settings.accept()"
-	ondialogcancel="return Zotero_Feed_Settings.cancel()"
 	id="zotero-feed-settings"
 	onload="Zotero_Feed_Settings.init()">
-	
+<dialog>
 	<script src="include.js"/>
+	<script src="chrome://global/content/customElements.js"/>
 	<script src="feedSettings.js"/>
 	
 	<grid>
@@ -67,3 +67,4 @@
 		</vbox>
 	</vbox>
 </dialog>
+</window>

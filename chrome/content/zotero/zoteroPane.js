@@ -1086,7 +1086,7 @@ var ZoteroPane = new function()
 	
 	this.newFeedFromURL = Zotero.Promise.coroutine(function* () {
 		let data = {};
-		window.openDialog('chrome://zotero/content/feedSettings.xul', 
+		window.openDialog('chrome://zotero/content/feedSettings.xhtml',
 			null, 'centerscreen, modal', data);
 		if (!data.cancelled) {
 			let feed = new Zotero.Feed();
@@ -2203,7 +2203,7 @@ var ZoteroPane = new function()
 			cleanupUnreadAfter: feed.cleanupUnreadAfter
 		};
 		
-		window.openDialog('chrome://zotero/content/feedSettings.xul', 
+		window.openDialog('chrome://zotero/content/feedSettings.xhtml',
 			null, 'centerscreen, modal', data);
 		if (data.cancelled) return;
 		
