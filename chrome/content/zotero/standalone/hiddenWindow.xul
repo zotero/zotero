@@ -60,7 +60,7 @@
 		}
 	</script>
 	<commandset id="mainCommandSet">
-		<command id="cmd_quitApplication" oncommand="goQuitApplication();"/>
+		<command id="cmd_quitApplication" oncommand="goQuitApplication(event);"/>
 		<command id="cmd_close" disabled="true"/>
 		<command id="minimizeWindow" disabled="true"/>
 		<command id="zoomWindow" disabled="true"/>

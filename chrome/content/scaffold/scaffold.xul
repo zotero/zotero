@@ -55,7 +55,7 @@
 	<script src="chrome://global/content/contentAreaUtils.js"/>
 
 	<commandset id="mainCommandSet">
-		<command id="cmd_quitApplication" oncommand="goQuitApplication();"/>
+		<command id="cmd_quitApplication" oncommand="goQuitApplication(event);"/>
 		<command id="cmd_close" oncommand="window.close();"/>
 
 		<command id="cmd_undo" oncommand="Scaffold.trigger('undo', 'cmd_undo')"/>
