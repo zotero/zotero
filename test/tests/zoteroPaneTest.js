@@ -440,6 +440,28 @@ describe("ZoteroPane", function() {
 			assert.sameMembers(item1.relatedItems, [item2.key, item3.key]);
 		});
 	});
+
+
+	describe("#canDeleteSelectedItems()", function () {
+		it("should not allow items only in descendent collections to be removed", async function () {
+			Zotero.Prefs.set('recursiveCollections', true);
+			
+			var parentCollection = await createDataObject('collection');
+			var childCollection = await createDataObject('collection', { parentID: parentCollection.id });
+			var itemInParent = await createDataObject('item', { collections: [parentCollection.id] });
+			var itemInChild = await createDataObject('item', { collections: [childCollection.id] });
+
+			assert.isTrue(await zp.collectionsView.selectCollection(parentCollection.id));
+			await waitForItemsLoad(win);
+			assert.equal(await zp.itemsView.selectItem(itemInParent.id), 1);
+			assert.isTrue(zp.canDeleteSelectedItems(false)); // No force = remove
+			assert.isTrue(zp.canDeleteSelectedItems(true)); // Force = delete
+
+			assert.equal(await zp.itemsView.selectItem(itemInChild.id), 1);
+			assert.isFalse(zp.canDeleteSelectedItems(false));
+			assert.isTrue(zp.canDeleteSelectedItems(true));
+		});
+	});
 	
 	
 	describe("#deleteSelectedItems()", function () {

@@ -1792,9 +1792,11 @@ var ZoteroPane = new function()
 	 * Return whether every selected item can be deleted from the current
 	 * collection context (library, trash, collection, etc.).
 	 *
+	 * @param {Boolean} [force = false] Trash or delete even if in a collection or search,
+	 * 		or trash without prompt in library
 	 * @return {Boolean}
 	 */
-	this.canDeleteSelectedItems = function () {
+	this.canDeleteSelectedItems = function (force) {
 		let collectionTreeRow = this.getCollectionTreeRow();
 		if (collectionTreeRow.isTrash()) {
 			for (let index of this.itemsView.selection.selected) {
@@ -1808,6 +1810,19 @@ var ZoteroPane = new function()
 		}
 		else if (collectionTreeRow.isShare()) {
 			return false;
+		}
+		else if (collectionTreeRow.isCollection() && !force) {
+			let selected = this.itemsView.getSelectedItems();
+
+			// Ignore unmodified action if only child items are selected
+			if (selected.every(item => !item.isTopLevelItem())) {
+				return false;
+			}
+
+			if (selected.some(item => item.isTopLevelItem()
+						&& !item.inCollection(collectionTreeRow.ref.id))) {
+				return false;
+			}
 		}
 		return true;
 	};
@@ -1855,7 +1870,7 @@ var ZoteroPane = new function()
 			)
 		};
 
-		if (!this.canDeleteSelectedItems()) {
+		if (!this.canDeleteSelectedItems(force)) {
 			return;
 		}
 		
@@ -1877,12 +1892,6 @@ var ZoteroPane = new function()
 			var prompt = (force && !fromMenu) ? false : toTrash;
 		}
 		else if (collectionTreeRow.isCollection()) {
-			
-			// Ignore unmodified action if only child items are selected
-			if (!force && this.itemsView.getSelectedItems().every(item => !item.isTopLevelItem())) {
-				return;
-			}
-			
 			var prompt = force ? toTrash : toRemove;
 		}
 		else if (collectionTreeRow.isTrash() || collectionTreeRow.isBucket()) {
@@ -3087,7 +3096,7 @@ var ZoteroPane = new function()
 		if (isTrash) {
 			show.add(m.deleteFromLibrary);
 			show.add(m.restoreToLibrary);
-			if (!ZoteroPane_Local.canDeleteSelectedItems()) {
+			if (!ZoteroPane_Local.canDeleteSelectedItems(true)) {
 				disable.add(m.deleteFromLibrary);
 			}
 			if (!ZoteroPane_Local.canRestoreSelectedItems()) {
@@ -3427,6 +3436,10 @@ var ZoteroPane = new function()
 		if (collectionTreeRow.isCollection() && items.every(item => item.isTopLevelItem())) {
 			menu.childNodes[m.removeItems].setAttribute('label', Zotero.getString('pane.items.menu.remove' + multiple));
 			show.add(m.removeItems);
+
+			if (!this.canDeleteSelectedItems()) {
+				disable.add(m.removeItems);
+			}
 		}
 		else if (collectionTreeRow.isPublications()) {
 			menu.childNodes[m.removeItems].setAttribute('label', Zotero.getString('pane.items.menu.removeFromPublications' + multiple));
