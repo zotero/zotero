@@ -39,6 +39,7 @@
 <!DOCTYPE window [
 	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
 	<!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone.dtd" > %standaloneDTD;
+	<!ENTITY % editMenuOverlayDTD SYSTEM "chrome://zotero/locale/mozilla/editMenuOverlay.dtd" > %editMenuOverlayDTD;
 	<!ENTITY % brandDTD SYSTEM "chrome://branding/locale/brand.dtd" > %brandDTD;
 	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
 	<!ENTITY % dialogOverlayDTD SYSTEM "chrome://global/locale/dialogOverlay.dtd"> %dialogOverlayDTD;
@@ -59,9 +60,10 @@
 	
 	<html:script src="resource://zotero/require.js"></html:script>
 	<html:script src="standalone/standalone.js"></html:script>
+	
 	<html:script src="chrome://global/content/globalOverlay.js"></html:script>
+	<html:script src="chrome://global/content/editMenuOverlay.js"></html:script>
 	<html:script src="chrome://global/content/contentAreaUtils.js"></html:script>
-	<!--<html:script src="chrome://global/content/inlineSpellCheckUI.js"></html:script>-->
 	
 	<!-- Custom elements -->
 	<html:script src="chrome://global/content/customElements.js"></html:script>
@@ -87,7 +89,6 @@
 		<command id="cmd_close" oncommand="window.close();"/>
 		
 		<!--EDIT-->
-		<commandset id="editMenuCommands"/>
 		<command id="cmd_find"
 			oncommand="document.getElementById('zotero-tb-search').select()"/>
 	</commandset>
@@ -115,7 +116,36 @@
 		<key id="key_back"/>
 		<key id="key_forward"/>
 	</keyset>
-	<keyset id="editMenuKeys"/>
+    
+    <!--
+    
+    TODO: Customize per platform without ifdef?
+    
+    <keyset id="editMenuKeys">
+		<key id="key_undo" data-l10n-id="text-action-undo-shortcut" modifiers="accel" command="cmd_undo"/>
+		<key id="key_redo"
+		
+#ifdef XP_UNIX
+			data-l10n-id="text-action-undo-shortcut"
+			modifiers="accel,shift"
+#else
+			data-l10n-id="text-action-redo-shortcut"
+			modifiers="accel"
+#endif
+			command="cmd_redo"/>
+		<key id="key_cut" data-l10n-id="text-action-cut-shortcut" modifiers="accel" command="cmd_cut"/>
+		<key id="key_copy" data-l10n-id="text-action-copy-shortcut" modifiers="accel" command="cmd_copy"/>
+		<key id="key_paste" data-l10n-id="text-action-paste-shortcut" modifiers="accel" command="cmd_paste"/>
+		<key id="key_delete" keycode="VK_DELETE" command="cmd_delete"/>
+		<key id="key_selectAll" data-l10n-id="text-action-select-all-shortcut" modifiers="accel" command="cmd_selectAll"/>
+		<key id="key_find" key="&findCmd.key;" modifiers="accel" command="cmd_find"/>
+		<key id="key_findAgain" key="&findAgainCmd.key;" modifiers="accel" command="cmd_findAgain"/>
+		<key id="key_findPrevious" key="&findAgainCmd.key;" modifiers="shift,accel" command="cmd_findPrevious"/>
+		<key id="key_findAgain2" keycode="&findAgainCmd.key2;" command="cmd_findAgain"/>
+		<key id="key_findPrevious2" keycode="&findAgainCmd.key2;" modifiers="shift" command="cmd_findPrevious"/>
+	</keyset>
+  
+  -->
 	
 	<vbox id="titlebar">
 		<hbox id="titlebar-buttonbox-container" skipintoolbarset="true">
@@ -230,24 +260,37 @@
 									command="cmd_zotero_copyBibliography"
 									key="key_copyBibliography"
 									hidden="true"/>
-							<menuitem id="menu_paste"/>
-							<menuitem id="menu_delete"/>
-							<menuseparator class="menu-type-library"/>
-							<menuitem id="menu_selectAll" class="menu-type-library"/>
-							<menuseparator class="menu-type-library"/>
-							<menuitem id="menu_find" class="menu-type-library"/>
+							<menuitem id="menu_paste"
+									key="key_paste"
+									command="cmd_paste" data-l10n-id="text-action-paste"/>
+							<menuitem id="menu_delete"
+									key="key_delete"
+									command="cmd_delete" data-l10n-id="text-action-delete"/>
+							<menuseparator/>
+							<menuitem id="menu_selectAll"
+									key="key_selectAll"
+									command="cmd_selectAll" data-l10n-id="text-action-select-all"/>
+							<menuseparator/>
+							<menuitem id="menu_find" label="&findCmd.label;"
+									key="key_find" accesskey="&findCmd.accesskey;"
+									command="cmd_find"/>
 							<menuitem id="menu_advancedSearch"
-									class="menu-type-library"
 									label="&zotero.toolbar.advancedSearch;"
-									command="cmd_zotero_advancedSearch"
-									key="key_advancedSearch"/>
+									command="cmd_zotero_advancedSearch"/>
 							<menuseparator hidden="true" id="textfieldDirection-separator"/>
 							<menuitem id="textfieldDirection-swap"
 									command="cmd_switchTextDirection"
 									key="key_switchTextDirection"
-									label="&bidiSwitchTextDirectionItem.label;"
-									accesskey="&bidiSwitchTextDirectionItem.accesskey;"
-									hidden="true"/>
+									hidden="true" data-l10n-id="menu-edit-bidi-switch-text-direction"/>
+							<!--
+							#ifdef XP_UNIX
+							#ifndef XP_MACOSX
+							<menuseparator/>
+							<menuitem id="menu_preferences"
+								oncommand="Zotero.Utilities.Internal.openPreferences()" data-l10n-id="menu-preferences"/>
+							#endif
+							#endif
+							-->
 						</menupopup>
 					</menu>
 					
