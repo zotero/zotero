@@ -714,7 +714,7 @@ describe("Tag Selector", function () {
 			
 			assert.include(getRegularTags(), "a");
 			
-			var dialogPromise = waitForDialog(false, undefined, 'chrome://zotero/content/tagColorChooser.xul');
+			var dialogPromise = waitForDialog(false, undefined, 'chrome://zotero/content/tagColorChooser.xhtml');
 			var tagSelectorPromise = waitForTagSelector(win);
 			tagSelector.contextTag = {name: tag};
 			yield tagSelector.openColorPickerWindow();

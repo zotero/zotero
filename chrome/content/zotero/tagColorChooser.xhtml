@@ -28,17 +28,21 @@
 <?xml-stylesheet href="chrome://zotero/skin/tagColorChooser.css" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
-<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	title="&zotero.tagColorChooser.title;" buttons="cancel,accept"
-	id="tag-color-chooser"
+<window
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	title="&zotero.tagColorChooser.title;"
+	onload="Zotero_Tag_Color_Chooser.init()"
+	width="350"
+	height="140">
+<dialog
+	buttons="cancel,accept"
 	buttonlabelaccept="&zotero.tagColorChooser.setColor;"
 	buttonlabelextra1="&zotero.tagColorChooser.removeColor;"
 	ondialogaccept="Zotero_Tag_Color_Chooser.onDialogAccept()"
 	ondialogcancel="Zotero_Tag_Color_Chooser.onDialogCancel()"
 	ondialogextra1="Zotero_Tag_Color_Chooser.onDialogRemoveColor()"
-	onload="Zotero_Tag_Color_Chooser.init()"
-	width="350"
-	height="140">
+	>
 	
 	<script src="include.js"/>
 	<script src="tagColorChooser.js"/>
@@ -61,3 +65,4 @@
 		<separator class="thin"/>
 	</vbox>
 </dialog>
+</window>

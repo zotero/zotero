@@ -29,7 +29,7 @@ var Zotero_Tag_Color_Chooser = new function() {
 	var _io;
 	
 	this.init = function () {
-		var dialog = document.getElementById('tag-color-chooser');
+		var dialog = document.querySelector('dialog');
 		
 		try {
 			// Set font size from pref

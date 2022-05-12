@@ -620,7 +620,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		io.tagColors = tagColors;
 		
 		window.openDialog(
-			'chrome://zotero/content/tagColorChooser.xul',
+			'chrome://zotero/content/tagColorChooser.xhtml',
 			'zotero-tagSelector-colorChooser',
 			'chrome,modal,centerscreen', io
 		);
