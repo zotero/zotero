@@ -43,10 +43,6 @@ const ZoteroStandalone = new function() {
 		}
 		
 		if (Zotero.isMac) {
-			let elem = document.createElementNS('http://www.w3.org/1999/xhtml', 'script');
-			elem.src = 'chrome://global/content/macWindowMenu.js';
-			document.documentElement.appendChild(elem);
-			
 			// Create tab bar by default
 			document.documentElement.setAttribute('drawintitlebar', true);
 			document.documentElement.setAttribute('tabsintitlebar', true);

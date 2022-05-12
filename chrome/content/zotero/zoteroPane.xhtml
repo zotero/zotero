@@ -53,35 +53,44 @@
 		persist="screenX screenY width height sizemode"
 		xmlns:html="http://www.w3.org/1999/xhtml">
 	
-	<html:script src="include.js"></html:script>
 	
 	<html:link rel="localization" href="zotero/menubar.ftl"/>
 	<html:link rel="localization" href="zotero/textActions.ftl"/>
 	
-	<html:script src="resource://zotero/require.js"></html:script>
-	<html:script src="standalone/standalone.js"></html:script>
-	
-	<html:script src="chrome://global/content/globalOverlay.js"></html:script>
-	<html:script src="chrome://global/content/editMenuOverlay.js"></html:script>
-	<html:script src="chrome://global/content/contentAreaUtils.js"></html:script>
-	
-	<!-- Custom elements -->
-	<html:script src="chrome://global/content/customElements.js"></html:script>
-	<html:script src="elements/menulistItemTypes.js"></html:script>
-	<html:script src="elements/itemBox.js"></html:script>
-	
-	<html:script src="tabs.js"></html:script>
-	<html:script src="zoteroPane.js"></html:script>
-	<html:script src="itemPane.js"></html:script>
-	<html:script src="contextPane.js"></html:script>
-	<html:script src="fileInterface.js"></html:script>
-	<html:script src="reportInterface.js"></html:script>
-	<html:script src="timelineInterface.js"></html:script>
-	<html:script src="progressQueueDialog.js"></html:script>
-	<html:script src="lookup.js"></html:script>
-	<html:script src="locateMenu.js"></html:script>
-	<html:script src="tooltip.js"></html:script>
-	<html:script src="containers/tagSelectorContainer.js"></html:script>
+	<script>
+		var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
+		
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		
+		Services.scriptloader.loadSubScript("resource://zotero/require.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/standalone/standalone.js", this);
+		
+		// Mozilla scripts
+		Services.scriptloader.loadSubScript("chrome://global/content/globalOverlay.js", this);
+		Services.scriptloader.loadSubScript("chrome://global/content/editMenuOverlay.js", this);
+		Services.scriptloader.loadSubScript("chrome://global/content/contentAreaUtils.js", this);
+		if (Zotero.isMac) {
+			Services.scriptloader.loadSubScript("chrome://global/content/macWindowMenu.js", this);
+		}
+		
+		// Custom elements
+		Services.scriptloader.loadSubScript("chrome://global/content/customElements.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/menulistItemTypes.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/itemBox.js", this);
+		
+		Services.scriptloader.loadSubScript("chrome://zotero/content/tabs.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/zoteroPane.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/itemPane.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/contextPane.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/fileInterface.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/reportInterface.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/timelineInterface.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/progressQueueDialog.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/lookup.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/locateMenu.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/tooltip.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/containers/tagSelectorContainer.js", this);
+	</script>
 	
 	<commandset id="mainCommandSet">
 		<!--FILE-->
