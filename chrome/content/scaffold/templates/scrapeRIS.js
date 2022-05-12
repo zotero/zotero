@@ -1,4 +1,4 @@
-async function scrape(doc, url) {
+async function scrape(doc, url = doc.location.href) {
 	let DOI = url.match(/\/(10\.[^#?]+)/)[1];
 	// TODO adjust the URL here
 	let risURL = `http://citation-needed.services.springer.com/v2/references/${DOI}?format=refman&flavour=citation`;

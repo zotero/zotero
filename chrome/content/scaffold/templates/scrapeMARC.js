@@ -1,4 +1,4 @@
-async function scrape(doc, url) {
+async function scrape(doc, url = doc.location.href) {
 	// TODO adjust the selector for the lines here
 	let lines = doc.querySelectorAll('table#marcData tr');
 
