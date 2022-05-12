@@ -754,7 +754,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			if (!Zotero.startupError) {
 				Zotero.startupError = Zotero.getString('startupError', Zotero.appName) + "\n\n"
 					+ Zotero.getString('db.integrityCheck.reportInForums') + "\n\n"
-					+ (e.stack || e);
+					+ e.message ? (e.message + "\n\n" + e.stack) : e;
 			}
 			return false;
 		}
