@@ -538,7 +538,7 @@
 						&& Zotero.Utilities.isHTTPURL(val, true)) {
 					th.classList.add("pointer");
 					// TODO: make getFieldValue non-private and use below instead
-					th.setAttribute("onclick", "Zotero.launchURL(this.nextSibling.firstChild ? this.nextSibling.firstChild.nodeValue : this.nextSibling.value)");
+					th.setAttribute("onclick", "Zotero.launchURL(this.nextSibling.firstChild ? this.nextSibling.firstChild.textContent : this.nextSibling.value)");
 					th.setAttribute("tooltiptext", Zotero.getString('pane.item.viewOnline.tooltip'));
 				}
 				else if (fieldName == 'DOI' && val && typeof val == 'string') {
