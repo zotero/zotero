@@ -3744,7 +3744,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 		menupopup.appendChild(menuitem);
 		
 		document.children[0].appendChild(menupopup);
-		menupopup.openPopup(null, null, event.clientX + 2, event.clientY + 2);
+		menupopup.openPopupAtScreen(
+			window.screenX + event.clientX + 2,
+			window.screenY + event.clientY + 2,
+			true
+		);
 	}
 
 	_getSecondarySortField() {

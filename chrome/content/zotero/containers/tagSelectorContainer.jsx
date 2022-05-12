@@ -508,7 +508,11 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			tagContextMenu.childNodes[i].disabled = this.state.viewOnly;
 		}
 		ev.preventDefault();
-		tagContextMenu.openPopup(null, null, ev.clientX+2, ev.clientY+2);
+		tagContextMenu.openPopupAtScreen(
+			window.screenX + ev.clientX + 2,
+			window.screenY + ev.clientY + 2,
+			true
+		);
 		this.contextTag = tag;
 	}
 
