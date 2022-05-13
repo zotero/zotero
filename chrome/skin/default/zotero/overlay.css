@@ -619,11 +619,16 @@
 	background-color: #ececec;
 	position: fixed;
 	height: 100%;
+	display: flex;
+}
+
+#zotero-tab-cover.hidden {
+	display: none;
 }
 
 #zotero-tab-cover label {
 	padding-top: 30px;
-	display: flex;
+	flex-grow: 1;
 	text-align: center;
 }
 

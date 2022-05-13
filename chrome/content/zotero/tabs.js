@@ -165,7 +165,7 @@ var Zotero_Tabs = new function () {
 			throw new Error(`'onClose' should be a function (was ${typeof onClose})`);
 		}
 		var id = 'tab-' + Zotero.Utilities.randomString();
-		var container = document.createElement('vbox');
+		var container = document.createXULElement('vbox');
 		container.id = id;
 		this.deck.appendChild(container);
 		var tab = { id, type, title, data, onClose };
@@ -443,7 +443,7 @@ var Zotero_Tabs = new function () {
 		var { tabIndex } = this._getTab(id);
 		window.Zotero_Tooltip.stop();
 		let menuitem;
-		let popup = document.createElement('menupopup');
+		let popup = document.createXULElement('menupopup');
 		document.querySelector('popupset').appendChild(popup);
 		popup.addEventListener('popuphidden', function (event) {
 			if (event.target === popup) {
@@ -452,7 +452,7 @@ var Zotero_Tabs = new function () {
 		});
 		if (id !== 'zotero-pane') {
 			// Show in library
-			menuitem = document.createElement('menuitem');
+			menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('general.showInLibrary'));
 			menuitem.addEventListener('command', () => {
 				var reader = Zotero.Reader.getByTabID(id);
@@ -468,13 +468,13 @@ var Zotero_Tabs = new function () {
 			});
 			popup.appendChild(menuitem);
 			// Move tab
-			let menu = document.createElement('menu');
+			let menu = document.createXULElement('menu');
 			menu.setAttribute('label', Zotero.getString('tabs.move'));
-			let menupopup = document.createElement('menupopup');
+			let menupopup = document.createXULElement('menupopup');
 			menu.append(menupopup);
 			popup.appendChild(menu);
 			// Move to start
-			menuitem = document.createElement('menuitem');
+			menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('tabs.moveToStart'));
 			menuitem.setAttribute('disabled', tabIndex == 1);
 			menuitem.addEventListener('command', () => {
@@ -482,7 +482,7 @@ var Zotero_Tabs = new function () {
 			});
 			menupopup.appendChild(menuitem);
 			// Move to end
-			menuitem = document.createElement('menuitem');
+			menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('tabs.moveToEnd'));
 			menuitem.setAttribute('disabled', tabIndex == this._tabs.length - 1);
 			menuitem.addEventListener('command', () => {
@@ -490,7 +490,7 @@ var Zotero_Tabs = new function () {
 			});
 			menupopup.appendChild(menuitem);
 			// Move to new window
-			menuitem = document.createElement('menuitem');
+			menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('tabs.moveToWindow'));
 			menuitem.setAttribute('disabled', false);
 			menuitem.addEventListener('command', () => {
@@ -502,7 +502,7 @@ var Zotero_Tabs = new function () {
 			});
 			menupopup.appendChild(menuitem);
 			// Duplicate tab
-			menuitem = document.createElement('menuitem');
+			menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('tabs.duplicate'));
 			menuitem.addEventListener('command', () => {
 				var { tab, tabIndex } = this._getTab(id);
@@ -514,11 +514,11 @@ var Zotero_Tabs = new function () {
 			});
 			popup.appendChild(menuitem);
 			// Separator
-			popup.appendChild(document.createElement('menuseparator'));
+			popup.appendChild(document.createXULElement('menuseparator'));
 		}
 		// Close
 		if (id != 'zotero-pane') {
-			menuitem = document.createElement('menuitem');
+			menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('general.close'));
 			menuitem.addEventListener('command', () => {
 				this.close(id);
@@ -527,7 +527,7 @@ var Zotero_Tabs = new function () {
 		}
 		// Close other tabs
 		if (!(this._tabs.length == 2 && id != 'zotero-pane')) {
-			menuitem = document.createElement('menuitem');
+			menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('tabs.closeOther'));
 			menuitem.addEventListener('command', () => {
 				this.close(this._tabs.slice(1).filter(x => x.id != id).map(x => x.id));
@@ -535,7 +535,7 @@ var Zotero_Tabs = new function () {
 			popup.appendChild(menuitem);
 		}
 		// Undo close
-		menuitem = document.createElement('menuitem');
+		menuitem = document.createXULElement('menuitem');
 		menuitem.setAttribute(
 			'label',
 			Zotero.getString(

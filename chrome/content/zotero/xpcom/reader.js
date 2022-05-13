@@ -445,11 +445,11 @@ class ReaderInstance {
 	}
 
 	_openTagsPopup(item, selector) {
-		let menupopup = this._window.document.createElement('menupopup');
+		let menupopup = this._window.document.createXULElement('menupopup');
 		menupopup.className = 'tags-popup';
 		menupopup.style.minWidth = '300px';
 		menupopup.setAttribute('ignorekeys', true);
-		let tagsbox = this._window.document.createElement('tagsbox');
+		let tagsbox = this._window.document.createXULElement('tagsbox');
 		menupopup.appendChild(tagsbox);
 		tagsbox.setAttribute('flex', '1');
 		this._popupset.appendChild(menupopup);
@@ -463,38 +463,38 @@ class ReaderInstance {
 	}
 	
 	_openPagePopup(data) {
-		let popup = this._window.document.createElement('menupopup');
+		let popup = this._window.document.createXULElement('menupopup');
 		this._popupset.appendChild(popup);
 		popup.addEventListener('popuphidden', function () {
 			popup.remove();
 		});
 		let menuitem;
 		if (data.text) {
-			menuitem = this._window.document.createElement('menuitem');
+			menuitem = this._window.document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('general.copy'));
 			menuitem.addEventListener('command', () => {
 				this._window.document.getElementById('menu_copy').click();
 			});
 			popup.appendChild(menuitem);
 			// Separator
-			popup.appendChild(this._window.document.createElement('menuseparator'));
+			popup.appendChild(this._window.document.createXULElement('menuseparator'));
 		}
 		// Zoom in
-		menuitem = this._window.document.createElement('menuitem');
+		menuitem = this._window.document.createXULElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.zoomIn'));
 		menuitem.addEventListener('command', () => {
 			this._postMessage({ action: 'popupCmd', cmd: 'zoomIn' });
 		});
 		popup.appendChild(menuitem);
 		// Zoom out
-		menuitem = this._window.document.createElement('menuitem');
+		menuitem = this._window.document.createXULElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.zoomOut'));
 		menuitem.addEventListener('command', () => {
 			this._postMessage({ action: 'popupCmd', cmd: 'zoomOut' });
 		});
 		popup.appendChild(menuitem);
 		// Zoom 'Auto'
-		menuitem = this._window.document.createElement('menuitem');
+		menuitem = this._window.document.createXULElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.zoomAuto'));
 		menuitem.setAttribute('type', 'checkbox');
 		menuitem.setAttribute('checked', data.isZoomAuto);
@@ -503,7 +503,7 @@ class ReaderInstance {
 		});
 		popup.appendChild(menuitem);
 		// Zoom 'Page Width'
-		menuitem = this._window.document.createElement('menuitem');
+		menuitem = this._window.document.createXULElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.zoomPageWidth'));
 		menuitem.setAttribute('type', 'checkbox');
 		menuitem.setAttribute('checked', data.isZoomPageWidth);
@@ -512,7 +512,7 @@ class ReaderInstance {
 		});
 		popup.appendChild(menuitem);
 		// Zoom 'Page Height'
-		menuitem = this._window.document.createElement('menuitem');
+		menuitem = this._window.document.createXULElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.zoomPageHeight'));
 		menuitem.setAttribute('type', 'checkbox');
 		menuitem.setAttribute('checked', data.isZoomPageHeight);
@@ -521,9 +521,9 @@ class ReaderInstance {
 		});
 		popup.appendChild(menuitem);
 		// Separator
-		popup.appendChild(this._window.document.createElement('menuseparator'));
+		popup.appendChild(this._window.document.createXULElement('menuseparator'));
 		// Next page
-		menuitem = this._window.document.createElement('menuitem');
+		menuitem = this._window.document.createXULElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.nextPage'));
 		menuitem.setAttribute('disabled', !data.enableNextPage);
 		menuitem.addEventListener('command', () => {
@@ -531,7 +531,7 @@ class ReaderInstance {
 		});
 		popup.appendChild(menuitem);
 		// Previous page
-		menuitem = this._window.document.createElement('menuitem');
+		menuitem = this._window.document.createXULElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.previousPage'));
 		menuitem.setAttribute('disabled', !data.enablePrevPage);
 		menuitem.addEventListener('command', () => {
@@ -542,14 +542,14 @@ class ReaderInstance {
 	}
 
 	_openAnnotationPopup(data) {
-		let popup = this._window.document.createElement('menupopup');
+		let popup = this._window.document.createXULElement('menupopup');
 		this._popupset.appendChild(popup);
 		popup.addEventListener('popuphidden', function () {
 			popup.remove();
 		});
 		let menuitem;
 		// Add to note
-		menuitem = this._window.document.createElement('menuitem');
+		menuitem = this._window.document.createXULElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.addToNote'));
 		let hasActiveEditor = this._window.ZoteroContextPane && this._window.ZoteroContextPane.getActiveEditor();
 		menuitem.setAttribute('disabled', !hasActiveEditor || !data.enableAddToNote);
@@ -562,10 +562,10 @@ class ReaderInstance {
 		});
 		popup.appendChild(menuitem);
 		// Separator
-		popup.appendChild(this._window.document.createElement('menuseparator'));
+		popup.appendChild(this._window.document.createXULElement('menuseparator'));
 		// Colors
 		for (let color of data.colors) {
-			menuitem = this._window.document.createElement('menuitem');
+			menuitem = this._window.document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString(color[0]));
 			menuitem.className = 'menuitem-iconic';
 			menuitem.setAttribute('disabled', data.readOnly);
@@ -582,11 +582,11 @@ class ReaderInstance {
 		}
 		// Separator
 		if (data.enableEditPageNumber || data.enableEditHighlightedText) {
-			popup.appendChild(this._window.document.createElement('menuseparator'));
+			popup.appendChild(this._window.document.createXULElement('menuseparator'));
 		}
 		// Change page number
 		if (data.enableEditPageNumber) {
-			menuitem = this._window.document.createElement('menuitem');
+			menuitem = this._window.document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('pdfReader.editPageNumber'));
 			menuitem.setAttribute('disabled', data.readOnly);
 			menuitem.addEventListener('command', () => {
@@ -600,7 +600,7 @@ class ReaderInstance {
 		}
 		// Edit highlighted text
 		if (data.enableEditHighlightedText) {
-			menuitem = this._window.document.createElement('menuitem');
+			menuitem = this._window.document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('pdfReader.editHighlightedText'));
 			menuitem.setAttribute('disabled', data.readOnly);
 			menuitem.addEventListener('command', () => {
@@ -613,9 +613,9 @@ class ReaderInstance {
 			popup.appendChild(menuitem);
 		}
 		// Separator
-		popup.appendChild(this._window.document.createElement('menuseparator'));
+		popup.appendChild(this._window.document.createXULElement('menuseparator'));
 		// Delete
-		menuitem = this._window.document.createElement('menuitem');
+		menuitem = this._window.document.createXULElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('general.delete'));
 		menuitem.setAttribute('disabled', data.readOnly);
 		menuitem.addEventListener('command', () => {
@@ -637,14 +637,14 @@ class ReaderInstance {
 	}
 
 	_openColorPopup(data) {
-		let popup = this._window.document.createElement('menupopup');
+		let popup = this._window.document.createXULElement('menupopup');
 		this._popupset.appendChild(popup);
 		popup.addEventListener('popuphidden', function () {
 			popup.remove();
 		});
 		let menuitem;
 		for (let color of data.colors) {
-			menuitem = this._window.document.createElement('menuitem');
+			menuitem = this._window.document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString(color[0]));
 			menuitem.className = 'menuitem-iconic';
 			menuitem.setAttribute('image', this._getColorIcon(color[1], color[1] === data.selectedColor));
@@ -662,14 +662,14 @@ class ReaderInstance {
 	}
 
 	_openSelectorPopup(data) {
-		let popup = this._window.document.createElement('menupopup');
+		let popup = this._window.document.createXULElement('menupopup');
 		this._popupset.appendChild(popup);
 		popup.addEventListener('popuphidden', function () {
 			popup.remove();
 		});
 		let menuitem;
 		// Clear Selection
-		menuitem = this._window.document.createElement('menuitem');
+		menuitem = this._window.document.createXULElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('general.clearSelection'));
 		menuitem.setAttribute('disabled', !data.enableClearSelection);
 		menuitem.addEventListener('command', () => {
@@ -886,14 +886,15 @@ class ReaderInstance {
 		if (this._isReaderInitialized) {
 			return;
 		}
-		let n = 0;
-		while (!this._iframeWindow || !this._iframeWindow.eval('window.isReady')) {
-			if (n >= 500) {
-				throw new Error('Waiting for reader failed');
-			}
-			await Zotero.Promise.delay(10);
-			n++;
-		}
+		// let n = 0;
+		// while (!this._iframeWindow || !this._iframeWindow.eval('window.isReady')) {
+		// 	if (n >= 500) {
+		// 		throw new Error('Waiting for reader failed');
+		// 	}
+		// 	await Zotero.Promise.delay(10);
+		// 	n++;
+		// }
+		await Zotero.Promise.delay(300);
 		this._isReaderInitialized = true;
 	}
 
@@ -945,14 +946,14 @@ class ReaderTab extends ReaderInstance {
 		this.tabID = id;
 		this._tabContainer = container;
 		
-		this._iframe = this._window.document.createElement('browser');
+		this._iframe = this._window.document.createXULElement('browser');
 		this._iframe.setAttribute('class', 'reader');
 		this._iframe.setAttribute('flex', '1');
 		this._iframe.setAttribute('type', 'content');
 		this._iframe.setAttribute('src', 'resource://zotero/pdf-reader/viewer.html');
 		this._tabContainer.appendChild(this._iframe);
 		
-		this._popupset = this._window.document.createElement('popupset');
+		this._popupset = this._window.document.createXULElement('popupset');
 		this._tabContainer.appendChild(this._popupset);
 		
 		this._window.addEventListener('DOMContentLoaded', (event) => {

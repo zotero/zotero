@@ -732,15 +732,15 @@
 				<!-- A placeholder to persist pdf-reader sidebar collapse state to avoid introducing another pref -->
 				<box id="zotero-reader-sidebar-pane" hidden="true" collapsed="true" zotero-persist="collapsed width"/>
 				<hbox>
-					<box id="zotero-tab-cover" hidden="true">
-						<label pack="center">&zotero.general.loading;</label>
-					</box>
-					<box id="zotero-tab-toolbar" class="toolbar" hidden="true">
-						<div id="zotero-tb-split" xmlns="http://www.w3.org/1999/xhtml" class="split-button">
+					<div id="zotero-tab-cover" class="hidden" xmlns="http://www.w3.org/1999/xhtml">
+						<label>&zotero.general.loading;</label>
+					</div>
+					<div id="zotero-tab-toolbar" class="toolbar" hidden="true" xmlns="http://www.w3.org/1999/xhtml">
+						<div id="zotero-tb-split"  class="split-button">
 							<button id="zotero-tb-toggle-item-pane" class="toolbarButton item" title="&zotero.toolbar.context.item;" tabindex="-1"><span/></button>
 							<button id="zotero-tb-toggle-notes-pane" class="toolbarButton notes" title="&zotero.toolbar.context.notes;" tabindex="-1"><span/></button>
 						</div>
-					</box>
+					</div>
 					<deck id="tabs-deck" flex="1">
 						<vbox id="zotero-pane"
 							onkeydown="ZoteroPane_Local.handleKeyDown(event, this.id)"
