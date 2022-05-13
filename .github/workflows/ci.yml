@@ -3,6 +3,7 @@ on: [push, pull_request]
 jobs:
   build:
     name: Build, Upload, Test
+    if: false # temporarily disabled
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
