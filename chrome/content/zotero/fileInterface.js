@@ -1017,7 +1017,7 @@ var Zotero_File_Interface = new function() {
 			const arg = Components.classes["@mozilla.org/supports-string;1"]
 				.createInstance(Components.interfaces.nsISupportsString);
 			arg.data = uri;
-			win = ww.openWindow(null, "chrome://zotero/content/standalone/basicViewer.xul",
+			win = ww.openWindow(null, "chrome://zotero/content/standalone/basicViewer.xhtml",
 				"basicViewer", "chrome,dialog=yes,resizable,centerscreen,menubar,scrollbars", arg);
 		}
 

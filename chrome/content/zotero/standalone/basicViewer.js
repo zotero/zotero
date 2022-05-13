@@ -23,28 +23,44 @@
     ***** END LICENSE BLOCK *****
 */
 
-var browser;
-function loadURI() {
-	browser.loadURI.apply(browser, arguments);
-}
+/*const { E10SUtils } = ChromeUtils.import(
+	"resource://gre/modules/E10SUtils.jsm"
+);*/
 
-window.addEventListener("load", function() {
-	browser = document.getElementById('my-browser');
+var browser;
+
+window.addEventListener("load", /*async */function() {
+	browser = document.querySelector('browser');
+	
+	/*
+	browser.setAttribute("remote", "true");
+	//browser.setAttribute("remoteType", E10SUtils.EXTENSION_REMOTE_TYPE);
+	
+	await new Promise((resolve) => {
+		browser.addEventListener("XULFrameLoaderCreated", () => resolve());
+	});
+	*/
+	
+	/*browser.messageManager.loadFrameScript(
+		'chrome://zotero/content/standalone/basicViewerContent.js',
+		false
+	);*/
+	//browser.docShellIsActive = false;
 	
 	// align page title with title of shown document
 	browser.addEventListener("pageshow", function() {
-		document.title = (browser.contentDocument.title
-			? browser.contentDocument.title
-			: browser.contentDocument.location.href);
+		document.title = browser.contentDocument.title || browser.contentDocument.location.href;
 	}, false);
 	
-	// show document
-	browser.loadURI.apply(browser, window.arguments);
+	// Load URI passed in as nsISupports .data via openWindow()
+	browser.loadURI(
+		window.arguments[0],
+		{
+			triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal(),
+			//loadFlags: Ci.nsIWebNavigation.LOAD_FLAGS_STOP_CONTENT,
+		}
+	);
 	
-	// XXX Why is this necessary to make the scroll bars appear?
-	window.setTimeout(function() {
-		document.getElementById("my-browser").style.overflow = "auto";
-	}, 0);
 }, false);
 
 window.addEventListener("keypress", function (event) {

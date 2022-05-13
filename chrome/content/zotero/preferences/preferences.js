@@ -141,7 +141,7 @@ var Zotero_Preferences = {
 			if(win) {
 				win.loadURI(uri);
 			} else {
-				window.openDialog("chrome://zotero/content/standalone/basicViewer.xul",
+				window.openDialog("chrome://zotero/content/standalone/basicViewer.xhtml",
 					"basicViewer", "chrome,resizable,centerscreen,menubar,scrollbars", uri);
 			}
 		} else {
