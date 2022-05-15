@@ -4273,7 +4273,19 @@ var ZoteroPane = new function()
 					);
 					return;
 				}
+				// Try to open external reader to page number if specified
+				else {
+					let pageIndex = extraData?.location?.position?.pageIndex;
+					if (pageIndex !== undefined) {
+						await Zotero.OpenPDF.openToPage(
+							item,
+							parseInt(pageIndex) + 1
+						);
+						return;
+					}
+				}
 				// Custom PDF handler
+				// TODO: Remove this and unify with Zotero.OpenPDF
 				if (pdfHandler != 'system') {
 					try {
 						if (await OS.File.exists(pdfHandler)) {
