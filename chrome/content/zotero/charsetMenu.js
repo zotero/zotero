@@ -37,7 +37,7 @@ var Zotero_Charset_Menu = new function() {
 		var charsetMap = {};
 		
 		// get charset popup and charset RDF
-		var charsetPopup = document.createElement("menupopup");
+		var charsetPopup = document.createXULElement("menupopup");
 		charsetMenu.appendChild(charsetPopup);
 		
 		var charsets = [];
@@ -53,7 +53,7 @@ var Zotero_Charset_Menu = new function() {
 			for (let charset of charsets) {
 				let { label, value } = charset;
 	
-				let itemNode = document.createElement("menuitem");
+				let itemNode = document.createXULElement("menuitem");
 				itemNode.setAttribute("label", label);
 				itemNode.setAttribute("value", value);
 				
@@ -62,7 +62,7 @@ var Zotero_Charset_Menu = new function() {
 			}
 		}
 		else {
-			var charsetSeparator = document.createElement("menuseparator");
+			var charsetSeparator = document.createXULElement("menuseparator");
 			charsetPopup.appendChild(charsetSeparator);
 			
 			Components.utils.import("resource://gre/modules/CharsetMenu.jsm");
@@ -94,7 +94,7 @@ var Zotero_Charset_Menu = new function() {
 					label = charsets[i].label;
 	
 				// add element
-				var itemNode = document.createElement("menuitem");
+				var itemNode = document.createXULElement("menuitem");
 				itemNode.setAttribute("label", label);
 				itemNode.setAttribute("value", charset);
 				
@@ -109,7 +109,7 @@ var Zotero_Charset_Menu = new function() {
 				}
 			}
 			
-			var itemNode = document.createElement("menuitem");
+			var itemNode = document.createXULElement("menuitem");
 			itemNode.setAttribute("label", Zotero.getString("charset.autoDetect"));
 			itemNode.setAttribute("value", "auto");
 			charsetMap["auto"] = itemNode;

@@ -101,7 +101,7 @@ Zotero_File_Exporter.prototype.save = async function () {
 	
 	// present options dialog
 	var io = { translators, exportingNotes };
-	window.openDialog("chrome://zotero/content/exportOptions.xul",
+	window.openDialog("chrome://zotero/content/exportOptions.xhtml",
 		"_blank", "chrome,modal,centerscreen,resizable=no", io);
 	if(!io.selectedTranslator) {
 		return false;

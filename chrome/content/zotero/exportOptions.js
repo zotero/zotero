@@ -63,7 +63,7 @@ var Zotero_File_Interface_Export = new function() {
 		
 		// add styles to format popup
 		for(var i in translators) {
-			var itemNode = document.createElement("menuitem");
+			var itemNode = document.createXULElement("menuitem");
 			itemNode.setAttribute("label", translators[i].label);
 			formatPopup.appendChild(itemNode);
 			
@@ -91,7 +91,7 @@ var Zotero_File_Interface_Export = new function() {
 					// right now, option interface supports only boolean values, which
 					// it interprets as checkboxes
 					if(typeof(translators[i].displayOptions[option]) == "boolean") {
-						let checkbox = document.createElement("checkbox");
+						let checkbox = document.createXULElement("checkbox");
 						checkbox.setAttribute("id", OPTION_PREFIX+option);
 						checkbox.setAttribute("label", optionLabel);
 						optionsBox.insertBefore(checkbox, charsetBox);
@@ -102,7 +102,7 @@ var Zotero_File_Interface_Export = new function() {
 								setTimeout(() => this.updateAnnotationsCheckbox());
 							};
 							
-							checkbox = document.createElement("checkbox");
+							checkbox = document.createXULElement("checkbox");
 							checkbox.setAttribute("id", OPTION_PREFIX + 'includeAnnotations');
 							checkbox.setAttribute(
 								"label",
@@ -135,6 +135,9 @@ var Zotero_File_Interface_Export = new function() {
 		this.updateOptions(Zotero.Prefs.get(
 			exportingNotes ? "export.noteTranslatorSettings" : "export.translatorSettings"
 		));
+
+		document.addEventListener('dialogaccept', () => this.accept());
+		document.addEventListener('dialogcancel', () => this.cancel());
 	}
 	
 	/*
@@ -178,9 +181,9 @@ var Zotero_File_Interface_Export = new function() {
 						var isChecked = options[optionName];
 					} else {
 						// use defaults
-						var isChecked = (defValue ? "true" : "false");
+						isChecked = defValue;
 					}
-					node.setAttribute("checked", isChecked);
+					node.checked = isChecked;
 				}
 			} else {
 				// option should be disabled and unchecked to prevent confusion

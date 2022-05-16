@@ -6,13 +6,13 @@
 <!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd" >
 %zoteroDTD;
 ]>
-<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-	title="&zotero.exportOptions.title;" buttons="cancel,accept"
-	ondialogaccept="Zotero_File_Interface_Export.accept()"
-	ondialogcancel="Zotero_File_Interface_Export.cancel()"
-	id="zotero-export-options"
+	title="&zotero.exportOptions.title;"
 	onload="Zotero_File_Interface_Export.init()">
+<dialog
+	buttons="cancel,accept"
+	id="zotero-export-options">
 	
 	<script src="include.js"/>
 	<script src="charsetMenu.js"/>
@@ -43,3 +43,4 @@
 		</groupbox>
 	</vbox>
 </dialog>
+</window>
