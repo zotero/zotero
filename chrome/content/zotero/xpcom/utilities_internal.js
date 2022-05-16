@@ -1705,10 +1705,11 @@ Zotero.Utilities.Internal = {
 	createMenuForTarget: function(libraryOrCollection, elem, currentTarget, clickAction, disabledPred) {
 		var doc = elem.ownerDocument;
 		function _createMenuitem(label, value, icon, command, disabled) {
-			let menuitem = doc.createElement('menuitem');
+			let menuitem = doc.createXULElement('menuitem');
 			menuitem.setAttribute("label", label);
-			menuitem.setAttribute("type", "checkbox");
 			if (value == currentTarget) {
+				// type="checkbox" hides icon, so only set if checked
+				menuitem.setAttribute("type", "checkbox");
 				menuitem.setAttribute("checked", "true");
 			}
 			menuitem.setAttribute("value", value);
@@ -1720,7 +1721,7 @@ Zotero.Utilities.Internal = {
 		}	
 		
 		function _createMenu(label, value, icon, command) {
-			let menu = doc.createElement('menu');
+			let menu = doc.createXULElement('menu');
 			menu.setAttribute("label", label);
 			menu.setAttribute("value", value);
 			menu.setAttribute("image", icon);
@@ -1731,7 +1732,7 @@ Zotero.Utilities.Internal = {
 				}
 			});
 			menu.classList.add('menu-iconic');
-			let menupopup = doc.createElement('menupopup');
+			let menupopup = doc.createXULElement('menupopup');
 			menu.appendChild(menupopup);
 			return menu;
 		}
@@ -1774,7 +1775,7 @@ Zotero.Utilities.Internal = {
 		);
 		var menupopup = menu.firstChild;
 		menupopup.appendChild(menuitem);
-		menupopup.appendChild(doc.createElement('menuseparator'));
+		menupopup.appendChild(doc.createXULElement('menuseparator'));
 		for (let collection of collections) {
 			let collectionMenu = this.createMenuForTarget(
 				collection, elem, currentTarget, clickAction, disabledPred
