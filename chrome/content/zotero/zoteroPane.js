@@ -4824,9 +4824,11 @@ var ZoteroPane = new function()
 			return;
 		}
 		await Zotero.PDFWorker.import(attachment.id, true);
-		var note = await Zotero.EditorInstance.createNoteFromAnnotations(
-			attachment.getAnnotations().filter(x => x.annotationType != 'ink'), attachment.parentID
-		);
+		var annotations = attachment.getAnnotations().filter(x => x.annotationType != 'ink');
+		if (!annotations.length) {
+			return;
+		}
+		var note = await Zotero.EditorInstance.createNoteFromAnnotations(annotations, attachment.parentID);
 		if (!skipSelect) {
 			await this.selectItem(note.id);
 		}
@@ -4864,7 +4866,9 @@ var ZoteroPane = new function()
 					attachment,
 					{ skipSelect: true }
 				);
-				itemIDsToSelect.push(note.id);
+				if (note) {
+					itemIDsToSelect.push(note.id);
+				}
 			}
 		}
 		await this.selectItems(itemIDsToSelect);
