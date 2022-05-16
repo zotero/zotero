@@ -375,6 +375,9 @@ var TagEditorDialog = {
 			/>,
 			document.getElementById('tag-editor-container')
 		);
+
+		document.addEventListener('dialogcancel', () => this.cancel());
+		document.addEventListener('dialogaccept', () => this.save());
 	},
 
 	cancel() {

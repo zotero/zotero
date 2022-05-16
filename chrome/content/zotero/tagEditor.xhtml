@@ -5,17 +5,18 @@
 
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
+<window
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	onload="TagEditorDialog.init()"
+	minwidth="300">
 <dialog id="zotero-tag-editor-dialog"
-		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-		xmlns:html="http://www.w3.org/1999/xhtml"
 		buttons="accept,cancel"
-		minwidth="300"
-		onload="TagEditorDialog.init()"
-		ondialogcancel="TagEditorDialog.cancel()"
-		ondialogaccept="TagEditorDialog.save()">
+		style="width: 100%;">
 	
 	<script src="include.js"/>
 	<script src="tagEditor.js"/>
 	
 	<html:div id="tag-editor-container" />
 </dialog>
+</window>
