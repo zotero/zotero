@@ -4792,7 +4792,7 @@ var ZoteroPane = new function()
 			}
 
 			let io = { dataIn: { item }, dataOut: null };
-			window.openDialog('chrome://zotero/content/createParentDialog.xul', '', 'chrome,modal,centerscreen', io);
+			window.openDialog('chrome://zotero/content/createParentDialog.xhtml', '', 'chrome,modal,centerscreen', io);
 			if (!io.dataOut) {
 				return false;
 			}

@@ -29,7 +29,7 @@ var io;
 let createParent;
 
 function toggleAccept(enabled) {
-	document.documentElement.getButton("accept").disabled = !enabled;
+	document.querySelector('dialog').getButton("accept").disabled = !enabled;
 }
 
 function doLoad() {
@@ -45,6 +45,12 @@ function doLoad() {
 		item: io.dataIn.item,
 		toggleAccept
 	});
+
+	document.addEventListener('dialogaccept', (event) => {
+		doAccept();
+		event.preventDefault();
+	});
+	document.addEventListener('dialogextra2', doManualEntry);
 }
 
 function doUnload() {

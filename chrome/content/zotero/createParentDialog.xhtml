@@ -9,20 +9,19 @@
 		<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
 ]>
 
+<window
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	title="&zotero.createParent.title;"
+	onload="doLoad();"
+	onunload="doUnload();">
 <dialog
 	id="zotero-parent-dialog"
-	title="&zotero.createParent.title;"
 	orient="vertical"
 	buttons="cancel,accept,extra2"
 	buttondisabledaccept="true"
 	buttonlabelextra2="&zotero.createParent.button.manual;"
 	buttonlabelaccept="&zotero.createParent.title;"
-	ondialogaccept="doAccept();return false;"
-	ondialogextra2="doManualEntry();"
-	onload="doLoad();"
-	onunload="doUnload();"
-	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	xmlns:html="http://www.w3.org/1999/xhtml"
 	style="padding:20px 15px;width:400px;">
 
 	<script src="chrome://global/content/globalOverlay.js"/>
@@ -37,3 +36,4 @@
 		<html:div id="create-parent" />
 	</vbox>
 </dialog>
+</window>
