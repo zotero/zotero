@@ -185,7 +185,7 @@
 			
 			var s1 = document.createElement("link");
 			s1.rel = "stylesheet";
-			s1.href = "chrome://zotero-platform/content/itemBox.css";
+			s1.href = "chrome://zotero-platform/content/itembox.css";
 			shadow.append(s1);
 			
 			shadow.appendChild(document.importNode(this.content, true));
