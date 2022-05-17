@@ -904,7 +904,7 @@ function openRunJSWindow() {
 
 function openStyleEditor() {
 	openWindowByType(
-		'chrome://zotero/content/tools/csledit.xul',
+		'chrome://zotero/content/tools/csledit.xhtml',
 		'zotero:style-editor',
 		'chrome,width=950,height=700,resizable'
 	);

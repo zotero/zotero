@@ -648,7 +648,7 @@
 						<hbox>
 							<button id="openCSLEdit"
 								label="&zotero.preferences.styleEditor;"
-								oncommand="Zotero_Preferences.openInViewer('chrome://zotero/content/tools/csledit.xul', true)"/>
+								oncommand="Zotero_Preferences.openInViewer('chrome://zotero/content/tools/csledit.xhtml', true)"/>
 							<button id="openCSLPreview"
 								label="&zotero.preferences.stylePreview;"
 								oncommand="Zotero_Preferences.openInViewer('chrome://zotero/content/tools/cslpreview.xul', true)"/>
