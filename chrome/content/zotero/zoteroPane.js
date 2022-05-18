@@ -1433,12 +1433,6 @@ var ZoteroPane = new function()
 			
 			var tabs = document.getElementById('zotero-view-tabbox');
 			
-			// save note when switching from a note
-			if(document.getElementById('zotero-item-pane-content').selectedIndex == 2) {
-				// TODO: only try to save when selected item is different
-				yield document.getElementById('zotero-note-editor').save();
-			}
-			
 			var collectionTreeRow = this.getCollectionTreeRow();
 			// I don't think this happens in normal usage, but it can happen during tests
 			if (!collectionTreeRow) {
@@ -3777,7 +3771,7 @@ var ZoteroPane = new function()
 		}
 		
 		var io = { itemID: itemID, collectionID: col, parentItemKey: parentKey };
-		window.openDialog('chrome://zotero/content/note.xul', name, 'chrome,resizable,centerscreen,dialog=false', io);
+		window.openDialog('chrome://zotero/content/note.xhtml', name, 'chrome,resizable,centerscreen,dialog=false', io);
 	}
 	
 	

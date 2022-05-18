@@ -245,7 +245,7 @@ var ZoteroContextPane = new function () {
 			if (_panesDeck.selectedIndex == 1) {
 				var node = _notesPaneDeck.selectedPanel;
 				if (node.selectedIndex == 1) {
-					return node.querySelector('zoteronoteeditor');
+					return node.querySelector('note-editor');
 				}
 			}
 		}
@@ -273,7 +273,7 @@ var ZoteroContextPane = new function () {
 					return true;
 				}
 				else {
-					node.querySelector('zoteronoteeditor').focusFirst();
+					node.querySelector('note-editor').focusFirst();
 					return true;
 				}
 			}
@@ -415,7 +415,7 @@ var ZoteroContextPane = new function () {
 		var noteContainer = document.createXULElement('vbox');
 		var title = document.createXULElement('vbox');
 		title.className = 'zotero-context-pane-editor-parent-line';
-		var editor = document.createXULElement('zoteronoteeditor');
+		var editor = new (customElements.get('note-editor'));
 		editor.className = 'zotero-context-pane-pinned-note';
 		editor.setAttribute('flex', 1);
 		noteContainer.append(title, editor);

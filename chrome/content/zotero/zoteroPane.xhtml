@@ -77,7 +77,8 @@
 		Services.scriptloader.loadSubScript("chrome://global/content/customElements.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/menulistItemTypes.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/itemBox.js", this);
-		
+		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/noteEditor.js", this);
+
 		Services.scriptloader.loadSubScript("chrome://zotero/content/tabs.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/zoteroPane.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/itemPane.js", this);
@@ -1146,7 +1147,7 @@
 													'onerror' handler crashes the app on a save error to prevent typing in notes
 													while they're not being saved
 												-->
-												<zoteronoteeditor id="zotero-note-editor" flex="1" notitle="1"
+												<note-editor id="zotero-note-editor" flex="1" notitle="1"
 													previousfocus="zotero-items-tree"/>
 											</groupbox>
 											

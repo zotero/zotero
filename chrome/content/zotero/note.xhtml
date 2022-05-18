@@ -15,13 +15,17 @@
 	windowtype="zotero:note"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-	<script src="include.js"/>
-	<script src="note.js"/>
+	<script>
+		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/noteEditor.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/note.js", this);
+	</script>
 
 	<keyset>
 		<key id="key_close" key="W" modifiers="accel" command="cmd_close"/>
 	</keyset>
 	<command id="cmd_close" oncommand="window.close();"/>
 
-	<zoteronoteeditor id="zotero-note-editor" flex="1" onerror="return;onError()"/>
+	<note-editor id="zotero-note-editor" flex="1" onerror="return;onError()"/>
 </window>

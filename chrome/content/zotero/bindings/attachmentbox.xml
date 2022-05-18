@@ -631,7 +631,7 @@
 					</grid>
 				</vbox>
 				
-				<zoteronoteeditor id="attachment-note-editor" notitle="1" flex="1"/>
+				<note-editor id="attachment-note-editor" notitle="1" flex="1"/>
 				
 				<button id="select-button" hidden="true"/>
 			</vbox>

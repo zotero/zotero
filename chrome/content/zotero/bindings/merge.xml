@@ -340,7 +340,7 @@
 						
 						case 'note':
 							var type = Zotero.Libraries.get(this.libraryID).libraryType;
-							elementName = 'zoteronoteeditor';
+							elementName = 'note-editor';
 							break;
 						
 						case 'annotation':

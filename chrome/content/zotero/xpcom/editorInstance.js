@@ -679,15 +679,15 @@ class EditorInstance {
 			for (let itemGroup of itemGroups) {
 				for (let item of itemGroup) {
 					if (item.groups) {
-						let menu = parentNode.ownerDocument.createElement('menu');
+						let menu = parentNode.ownerDocument.createXULElement('menu');
 						menu.setAttribute('label', item.label);
-						let menupopup = parentNode.ownerDocument.createElement('menupopup');
+						let menupopup = parentNode.ownerDocument.createXULElement('menupopup');
 						menu.append(menupopup);
 						appendItems(menupopup, item.groups);
 						parentNode.appendChild(menu);
 					}
 					else {
-						let menuitem = parentNode.ownerDocument.createElement('menuitem');
+						let menuitem = parentNode.ownerDocument.createXULElement('menuitem');
 						menuitem.setAttribute('value', item.name);
 						menuitem.setAttribute('label', item.label);
 						menuitem.setAttribute('disabled', !item.enabled);
@@ -707,7 +707,7 @@ class EditorInstance {
 				}
 
 				if (itemGroups.indexOf(itemGroup) !== itemGroups.length - 1) {
-					let separator = parentNode.ownerDocument.createElement('menuseparator');
+					let separator = parentNode.ownerDocument.createXULElement('menuseparator');
 					parentNode.appendChild(separator);
 				}
 			}
@@ -742,10 +742,10 @@ class EditorInstance {
 		}
 		
 		// Separator
-		var separator = this._popup.ownerDocument.createElement('menuseparator');
+		var separator = this._popup.ownerDocument.createXULElement('menuseparator');
 		this._popup.appendChild(separator);
 		// Check Spelling
-		var menuitem = this._popup.ownerDocument.createElement('menuitem');
+		var menuitem = this._popup.ownerDocument.createXULElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('spellCheck.checkSpelling'));
 		menuitem.setAttribute('checked', spellChecker.enabled);
 		menuitem.setAttribute('type', 'checkbox');
@@ -757,11 +757,11 @@ class EditorInstance {
 
 		if (spellChecker.enabled) {
 			// Languages menu
-			var menu = this._popup.ownerDocument.createElement('menu');
+			var menu = this._popup.ownerDocument.createXULElement('menu');
 			menu.setAttribute('label', Zotero.getString('general.languages'));
 			this._popup.append(menu);
 			// Languages menu popup
-			var menupopup = this._popup.ownerDocument.createElement('menupopup');
+			var menupopup = this._popup.ownerDocument.createXULElement('menupopup');
 			menu.append(menupopup);
 			
 			spellChecker.addDictionaryListToMenu(menupopup, null);
@@ -778,10 +778,10 @@ class EditorInstance {
 			}
 			
 			// Separator
-			var separator = this._popup.ownerDocument.createElement('menuseparator');
+			var separator = this._popup.ownerDocument.createXULElement('menuseparator');
 			menupopup.appendChild(separator);
 			// Add Dictionaries
-			var menuitem = this._popup.ownerDocument.createElement('menuitem');
+			var menuitem = this._popup.ownerDocument.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('spellCheck.addRemoveDictionaries'));
 			menuitem.addEventListener('command', () => {
 				Services.ww.openWindow(null, "chrome://zotero/content/dictionaryManager.xul",
@@ -801,7 +801,7 @@ class EditorInstance {
 			let firstElementChild = this._popup.firstElementChild;
 			let suggestionCount = spellChecker.addSuggestionsToMenu(this._popup, firstElementChild, 5);
 			if (suggestionCount) {
-				let separator = this._popup.ownerDocument.createElement('menuseparator');
+				let separator = this._popup.ownerDocument.createXULElement('menuseparator');
 				this._popup.insertBefore(separator, firstElementChild);
 			}
 		}
@@ -810,13 +810,10 @@ class EditorInstance {
 	}
 
 	_getSpellChecker() {
-		let spellChecker = new InlineSpellChecker();
-		let editingSession = this._iframeWindow
-			.getInterface(Ci.nsIWebNavigation)
-			.QueryInterface(Ci.nsIInterfaceRequestor)
-			.getInterface(Ci.nsIEditingSession);
-		spellChecker.init(editingSession.getEditorForWindow(this._iframeWindow));
-		return spellChecker;
+		let editingSession = this._iframeWindow.docShell.editingSession;
+		return new InlineSpellChecker(
+			editingSession.getEditorForWindow(this._iframeWindow)
+		);
 	}
 
 	async _ensureNoteCreated() {
