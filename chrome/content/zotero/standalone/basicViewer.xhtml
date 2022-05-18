@@ -60,8 +60,13 @@
 		if (Zotero.isMac) {
 			Services.scriptloader.loadSubScript("chrome://global/content/macWindowMenu.js", this);
 		}
+		if(window.arguments?.[0] === 'mendeleyImport') {
+			Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/authViewer.js", this);
+		} else {
+			Services.scriptloader.loadSubScript("chrome://zotero/content/standalone/basicViewer.js", this);	
+		}
 		
-		Services.scriptloader.loadSubScript("chrome://zotero/content/standalone/basicViewer.js", this);
+		
 	</script>
 	
 	<commandset id="mainCommandSet">

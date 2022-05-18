@@ -386,7 +386,7 @@ var Zotero_File_Interface = new function() {
 		};
 		args.wrappedJSObject = args;
 		
-		Services.ww.openWindow(null, "chrome://zotero/content/import/importWizard.xul",
+		Services.ww.openWindow(null, "chrome://zotero/content/import/importWizard.xhtml",
 			"importFile", "chrome,dialog=yes,centerscreen,width=600,height=400,modal", args);
 	};
 	
@@ -981,71 +981,6 @@ var Zotero_File_Interface = new function() {
 			return false;
 		}
 	}
-
-	this.authenticateMendeleyOnlinePoll = function (win) {
-		if (win && win[0] && win[0].location) {
-			const matchResult = win[0].location.toString().match(/mendeley_oauth_redirect.html(?:.*?)(?:\?|&)code=(.*?)(?:&|$)/i);
-			if (matchResult) {
-				const mendeleyCode = matchResult[1];
-				Zotero.getMainWindow().setTimeout(() => this.showImportWizard({ mendeleyCode }), 0);
-				
-				// Clear all cookies to remove access
-				//
-				// This includes unrelated cookies in the central cookie store, but that's fine for
-				// the moment, since we're not purposely using cookies for anything else.
-				//
-				// TODO: Switch to removeAllSince() once >Fx60
-				try {
-					Cc["@mozilla.org/cookiemanager;1"]
-						.getService(Ci.nsICookieManager)
-						.removeAll();
-				}
-				catch (e) {
-					Zotero.logError(e);
-				}
-				
-				win.close();
-				return;
-			}
-		}
-
-		if (win && !win.closed) {
-			Zotero.getMainWindow().setTimeout(this.authenticateMendeleyOnlinePoll.bind(this, win), 200);
-		}
-	};
-
-	this.authenticateMendeleyOnline = function () {
-		const uri = `https://api.mendeley.com/oauth/authorize?client_id=5907&redirect_uri=https%3A%2F%2Fzotero-static.s3.amazonaws.com%2Fmendeley_oauth_redirect.html&response_type=code&state=&scope=all`;
-		var win = Services.wm.getMostRecentWindow("zotero:basicViewer");
-		if (win) {
-			win.loadURI(uri);
-		}
-		else {
-			const ww = Services.ww;
-			const arg = Components.classes["@mozilla.org/supports-string;1"]
-				.createInstance(Components.interfaces.nsISupportsString);
-			arg.data = uri;
-			win = ww.openWindow(null, "chrome://zotero/content/standalone/basicViewer.xhtml",
-				"basicViewer", "chrome,dialog=yes,resizable,centerscreen,menubar,scrollbars", arg);
-		}
-
-		let browser;
-		let func = function () {
-			win.removeEventListener("load", func);
-			browser = win.document.documentElement.getElementsByTagName('browser')[0];
-			browser.addEventListener("pageshow", innerFunc);
-		};
-		let innerFunc = function () {
-			browser.removeEventListener("pageshow", innerFunc);
-			win.outerWidth = Math.max(640, Math.min(1000, win.screen.availHeight));
-			win.outerHeight = Math.max(480, Math.min(800, win.screen.availWidth));
-		};
-
-		win.addEventListener("load", func);
-
-		// polling executed by the main window because current (wizard) window will be closed
-		Zotero.getMainWindow().setTimeout(this.authenticateMendeleyOnlinePoll.bind(this, win), 200);
-	};
 
 	/**
 	 * Generate an error string reporting a translation failure. Includes the

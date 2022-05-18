@@ -261,8 +261,15 @@ const ImportWizard = memo(({ mendeleyCode, libraryID }) => {
 	}, [folder]);
 
 	const beginOnlineImport = useCallback(() => {
-		Zotero_File_Interface.authenticateMendeleyOnline();
+		const arg = Components.classes["@mozilla.org/supports-string;1"]
+			.createInstance(Components.interfaces.nsISupportsString);
+		arg.data = 'mendeleyImport';
+
 		window.close();
+
+		Services.ww.openWindow(null, "chrome://zotero/content/standalone/basicViewer.xhtml",
+			"basicViewer", "chrome,dialog=yes,centerscreen,width=1000,height=700,modal", arg);
+		
 	}, []);
 
 	const startImport = useCallback(async () => {
