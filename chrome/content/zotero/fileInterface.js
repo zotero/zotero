@@ -301,8 +301,7 @@ var Zotero_File_Interface = new function() {
 				let text = obj.string;
 				// For Note HTML translator use body content only
 				if (translatorID == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
-					let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
-						.createInstance(Components.interfaces.nsIDOMParser);
+					let parser = new DOMParser();
 					let doc = parser.parseFromString(text, 'text/html');
 					text = doc.body.innerHTML;
 				}

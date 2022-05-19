@@ -942,8 +942,7 @@ Zotero.Utilities.Internal = {
 	 */
 	blobToHTMLDocument: async function (blob, url) {
 		var responseText = await Zotero.Utilities.Internal.blobToText(blob);
-		var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-			.createInstance(Components.interfaces.nsIDOMParser);
+		var parser = new DOMParser();
 		var doc = parser.parseFromString(responseText, 'text/html');
 		return Zotero.HTTP.wrapDocument(doc, url);
 	},

@@ -287,8 +287,7 @@ class EditorInstance {
 			else if (item.isNote()) {
 				let note = item.note;
 				
-				let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
-				.createInstance(Components.interfaces.nsIDOMParser);
+				let parser = new DOMParser();
 				let doc = parser.parseFromString(note, 'text/html');
 
 				// Get citationItems with itemData from note metadata
@@ -1054,8 +1053,7 @@ class EditorInstance {
 				// Zotero.debug('CI: getItems');
 				let note = that._item.note;
 
-				let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
-				.createInstance(Components.interfaces.nsIDOMParser);
+				let parser = new DOMParser();
 				let doc = parser.parseFromString(note, 'text/html');
 				
 				let metadataContainer = doc.querySelector('body > div[data-schema-version]');
@@ -1437,8 +1435,7 @@ class EditorInstanceUtilities {
 			}
 		}
 
-		let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
-		.createInstance(Components.interfaces.nsIDOMParser);
+		let parser = new DOMParser();
 		let doc = parser.parseFromString('', 'text/html');
 
 		// innerText transforms \n into <br>

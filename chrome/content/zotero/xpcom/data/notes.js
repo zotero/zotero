@@ -132,8 +132,7 @@ Zotero.Notes = new function() {
 		}
 		let note = item.getNote();
 		
-		let parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-			.createInstance(Components.interfaces.nsIDOMParser);
+		let parser = new DOMParser();
 		let doc = parser.parseFromString(note, 'text/html');
 		
 		// Make sure this is the new note
@@ -283,8 +282,7 @@ Zotero.Notes = new function() {
 		}
 
 		let note = toNote.note;
-		let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
-			.createInstance(Components.interfaces.nsIDOMParser);
+		let parser = new DOMParser();
 		let doc = parser.parseFromString(note, 'text/html');
 	
 		// Copy note image attachments and replace keys in the new note
@@ -326,8 +324,7 @@ Zotero.Notes = new function() {
 		}
 		
 		let note = item.getNote();
-		let parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-			.createInstance(Components.interfaces.nsIDOMParser);
+		let parser = new DOMParser();
 		let doc = parser.parseFromString(note, 'text/html');
 		
 		let keys = Array.from(doc.querySelectorAll('img[data-attachment-key]'))
@@ -342,8 +339,7 @@ Zotero.Notes = new function() {
 	};
 
 	this.hasSchemaVersion = function (note) {
-		let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
-		.createInstance(Components.interfaces.nsIDOMParser);
+		let parser = new DOMParser();
 		let doc = parser.parseFromString(note, 'text/html');
 		return !!doc.querySelector('body > div[data-schema-version]');
 	};
@@ -366,8 +362,7 @@ Zotero.Notes = new function() {
 	this.upgradeSchemaV1 = async function (item) {
 		let note = item.note;
 
-		let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
-		.createInstance(Components.interfaces.nsIDOMParser);
+		let parser = new DOMParser();
 		let doc = parser.parseFromString(note, 'text/html');
 
 		let metadataContainer = doc.querySelector('body > div[data-schema-version]');

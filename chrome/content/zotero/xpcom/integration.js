@@ -1528,8 +1528,7 @@ Zotero.Integration.Session.prototype._insertCitingResult = async function (field
  */
 Zotero.Integration.Session.prototype._processNote = async function (item) {
 	let text = await Zotero.Notes.getExportableNote(item);
-	let parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-		.createInstance(Components.interfaces.nsIDOMParser);
+	let parser = new DOMParser();
 	let doc = parser.parseFromString(text, "text/html");
 	let citationsElems = doc.querySelectorAll('.citation[data-citation]');
 	let citations = [];

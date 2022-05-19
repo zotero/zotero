@@ -2014,8 +2014,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 						// For Note HTML translator use body content only
 						if (format.id == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
 							// Use body content only
-							let parser = Cc['@mozilla.org/xmlextras/domparser;1']
-								.createInstance(Ci.nsIDOMParser);
+							let parser = new DOMParser();
 							let doc = parser.parseFromString(text, 'text/html');
 							text = doc.body.innerHTML;
 						}

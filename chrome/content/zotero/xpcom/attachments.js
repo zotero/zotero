@@ -894,7 +894,7 @@ Zotero.Attachments = new function(){
 			
 			if ((contentType === 'text/html' || contentType === 'application/xhtml+xml')
 					// Documents from XHR don't work here
-					&& Zotero.Translate.DOMWrapper.unwrap(document) instanceof Ci.nsIDOMDocument) {
+					&& Zotero.Translate.DOMWrapper.unwrap(document) instanceof Document) {
 				if (document.defaultView.window) {
 					// If we have a full hidden browser, use SingleFile
 					Zotero.debug('Getting snapshot with snapshotDocument()');
@@ -1011,8 +1011,7 @@ Zotero.Attachments = new function(){
 
 		// If no title was provided, pull it from the document
 		if (!title) {
-			let parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-				.createInstance(Components.interfaces.nsIDOMParser);
+			let parser = new DOMParser();
 			parser.init(null, Services.io.newURI(url));
 			let doc = parser.parseFromString(snapshotContent, 'text/html');
 			title = doc.title;
