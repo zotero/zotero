@@ -18,7 +18,7 @@ describe("Create Bibliography Dialog", function () {
 		
 		var deferred = Zotero.Promise.defer();
 		var called = false;
-		waitForWindow("chrome://zotero/content/bibliography.xul", function (dialog) {
+		waitForWindow("chrome://zotero/content/bibliography.xhtml", function (dialog) {
 			waitForWindow("chrome://zotero/content/preferences/preferences.xul", function (window) {
 				// Wait for pane switch
 				(async function () {

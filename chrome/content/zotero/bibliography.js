@@ -30,7 +30,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 // Class to provide options for bibliography
-// Used by rtfScan.xul, integrationDocPrefs.xul, and bibliography.xul
+// Used by rtfScan.xul, integrationDocPrefs.xul, and bibliography.xhtml
 
 Components.utils.import("resource://gre/modules/Services.jsm");
 var Zotero_File_Interface_Bibliography = new function() {
@@ -50,8 +50,10 @@ var Zotero_File_Interface_Bibliography = new function() {
 	 * @param {Object} [args] - Explicit arguments in place of window arguments
 	 */
 	this.init = Zotero.Promise.coroutine(function* (args = {}) {
+		window.addEventListener('dialogaccept', () => this.acceptSelection());
+
 		// Set font size from pref
-		// Affects bibliography.xul and integrationDocPrefs.xul
+		// Affects bibliography.xhtml and integrationDocPrefs.xul
 		var bibContainer = document.getElementById("zotero-bibliography-container");
 		if(bibContainer) {
 			Zotero.setFontSize(document.getElementById("zotero-bibliography-container"));
@@ -86,7 +88,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		var styles = Zotero.Styles.getVisible();
 		var selectIndex = null;
 		for (let i=0; i < styles.length; i++) {
-			var itemNode = document.createElement("listitem");
+			var itemNode = document.createXULElement("richlistitem");
 			itemNode.setAttribute("value", styles[i].styleID);
 			let title = styles[i].title;
 			// Add acronyms to APA and ASA to avoid confusion
@@ -94,7 +96,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 			title = title
 				.replace(/^American Psychological Association/, "American Psychological Association (APA)")
 				.replace(/^American Sociological Association/, "American Sociological Association (ASA)");
-			itemNode.setAttribute("label", title);
+			itemNode.append(title);
 			listbox.appendChild(itemNode);
 			
 			if(styles[i].styleID == _io.style) {
@@ -132,7 +134,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 			Zotero_File_Interface_Bibliography.styleChanged();
 		}, 0);
 		
-		// ONLY FOR bibliography.xul: export options
+		// ONLY FOR bibliography.xhtml: export options
 		if(document.getElementById("save-as-rtf")) {
 			var settings = Zotero.Prefs.get("export.bibliographySettings");
 			try {
@@ -245,7 +247,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		}
 		
 		//
-		// For bibliography.xul
+		// For bibliography.xhtml
 		//
 		
 		// Change label to "Citation" or "Note" depending on style class
@@ -320,7 +322,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 	
 	
 	this.manageStyles = function () {
-		document.documentElement.getButton('cancel').click();
+		document.querySelector('dialog').getButton('cancel').click();
 		var win = Zotero.Utilities.Internal.openPreferences('zotero-prefpane-cite', { tab: 'styles-tab' });
 		if (isDocPrefs) {
 			Zotero.Utilities.Internal.activate(win);

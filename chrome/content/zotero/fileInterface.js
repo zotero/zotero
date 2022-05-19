@@ -836,7 +836,7 @@ var Zotero_File_Interface = new function() {
 		}
 		
 		var io = new Object();
-		var newDialog = window.openDialog("chrome://zotero/content/bibliography.xul",
+		var newDialog = window.openDialog("chrome://zotero/content/bibliography.xhtml",
 			"_blank","chrome,modal,centerscreen", io);
 		
 		if(!io.method) return;
