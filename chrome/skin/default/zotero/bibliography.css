@@ -4,22 +4,12 @@
 	width: 325pt;
 }
 
-#style-listbox > richlistitem {
-	padding: 0.2em 0.4em;
+#manage-styles {
+	text-decoration: none;
 }
 
-groupbox > label:first-child {
-	margin-top: 0.5em;
-	font-size: 1.2em;
-}
-
-#locale-box .groupbox-body {
-	padding-top: 3px;
-}
-
-#locale-box label:first-child {
-	padding-top: 0;
-	padding-bottom: 0;
+#locale-box h2 {
+	font-size: 14px;
 }
 
 radio:not(:first-child)

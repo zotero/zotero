@@ -1,10 +1,12 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css"?>
 <?xml-stylesheet href="chrome://zotero/skin/bibliography.css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
 <window
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
 	title="&zotero.bibliography.title;"
 	onload="Zotero_File_Interface_Bibliography.init()">
 <dialog
@@ -16,28 +18,28 @@
 	
 	<vbox id="zotero-bibliography-container">
 		<groupbox>
-			<label>&zotero.bibliography.style.label;</label>
+			<label><html:h2>&zotero.bibliography.style.label;</html:h2></label>
 			<richlistbox id="style-listbox" onselect="Zotero_File_Interface_Bibliography.styleChanged()"/>
-			<hbox align="right">
+			<hbox pack="end">
 				<label id="manage-styles" class="text-link"
 					onclick="Zotero_File_Interface_Bibliography.manageStyles()">&zotero.bibliography.manageStyles;</label>
 			</hbox>
 		</groupbox>
-		<groupbox>
+		<groupbox id="locale-box">
 			<hbox align="center">
-				<label>&zotero.bibliography.locale.label;</label>
+				<label><html:h2>&zotero.bibliography.locale.label;</html:h2></label>
 				<menulist id="locale-menu" oncommand="Zotero_File_Interface_Bibliography.localeChanged(this.selectedItem.value)"/>
 			</hbox>
 		</groupbox>
 		<groupbox>
-			<label>&zotero.bibliography.outputMode;</label>
+			<label><html:h2>&zotero.bibliography.outputMode;</html:h2></label>
 			<radiogroup id="output-mode-radio">
 				<radio id="citations"/>
 				<radio id="bibliography" label="&zotero.bibliography.bibliography;"/>
 			</radiogroup>
 		</groupbox>
 		<groupbox>
-			<label>&zotero.bibliography.outputMethod;</label>
+			<label><html:h2>&zotero.bibliography.outputMethod;</html:h2></label>
 			<radiogroup id="output-method-radio">
 				<radio id="save-as-rtf" label="&zotero.bibliography.saveAsRTF.label;"/>
 				<radio id="save-as-html" label="&zotero.bibliography.saveAsHTML.label;"/>
