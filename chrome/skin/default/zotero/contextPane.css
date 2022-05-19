@@ -3,6 +3,7 @@
 }
 
 #zotero-context-pane {
+    display: flex;
     min-width: 360px;
 }
 

@@ -366,7 +366,7 @@ var ZoteroContextPane = new function () {
 			var height = 0;
 			if (Zotero.Prefs.get('layout') == 'stacked'
 				&& _contextPane.getAttribute('collapsed') != 'true') {
-				height = _contextPaneInner.boxObject.height;
+				height = _contextPaneInner.getBoundingClientRect().height;
 			}
 			Zotero.Reader.setBottomPlaceholderHeight(height);
 		}
@@ -475,9 +475,8 @@ var ZoteroContextPane = new function () {
 
 		var vbox = document.createXULElement('vbox');
 		vbox.style.flex = '1';
-		var input = document.createXULElement('textbox');
-		input.style.width = 'calc(100% - 42px)';
-		input.style.marginLeft = '12px';
+		var input = document.createXULElement('search-textbox');
+		input.style.margin = '4px 7px';
 		input.setAttribute('type', 'search');
 		input.setAttribute('timeout', '250');
 		input.addEventListener('command', () => {
@@ -831,8 +830,6 @@ var ZoteroContextPane = new function () {
 			_updateAddToNote();
 		});
 
-		tabbox.append(tabs, tabpanels);
-
 		// Info tab
 		var tabInfo = document.createXULElement('tab');
 		tabInfo.setAttribute('label', Zotero.Intl.strings['zotero.tabs.info.label']);
@@ -844,6 +841,7 @@ var ZoteroContextPane = new function () {
 		tabRelated.setAttribute('label', Zotero.Intl.strings['zotero.tabs.related.label']);
 
 		tabs.append(tabInfo, tabTags, tabRelated);
+		tabbox.append(tabs, tabpanels);
 
 		// Info panel
 		var panelInfo = document.createXULElement('tabpanel');
