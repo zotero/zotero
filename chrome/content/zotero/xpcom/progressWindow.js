@@ -125,7 +125,7 @@ Zotero.ProgressWindow = function(options = {}) {
 		
 		if (_window) {
 			_progressWindow = _window.openDialog("chrome://zotero/content/progressWindow.xul",
-				"", "chrome,dialog=no,titlebar=no,popup=yes");
+				"", "chrome,dialog=no,titlebar=no,alwaysontop=yes");
 			_window.addEventListener('close', () => {
 				this.close();
 			});
@@ -134,7 +134,7 @@ Zotero.ProgressWindow = function(options = {}) {
 			let ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 				.getService(Components.interfaces.nsIWindowWatcher);
 			_progressWindow = ww.openWindow(null, "chrome://zotero/content/progressWindow.xul",
-				"", "chrome,dialog=no,titlebar=no,popup=yes", null);
+				"", "chrome,dialog=no,titlebar=no,alwaysontop=yes", null);
 		}
 		_progressWindow.addEventListener("load", _onWindowLoaded, false);
 		_progressWindow.addEventListener("mouseover", _onMouseOver, false);
@@ -156,13 +156,13 @@ Zotero.ProgressWindow = function(options = {}) {
 			headline = doc.getElementById("zotero-progress-text-headline");
 		while(headline.hasChildNodes()) headline.removeChild(headline.firstChild);
 		
-		var preNode = doc.createElement("label");
+		var preNode = doc.createXULElement("label");
 		preNode.setAttribute("value", text);
 		preNode.setAttribute("crop", "end");
 		headline.appendChild(preNode);
 		
 		if(icon) {
-			var img = doc.createElement("image");
+			var img = doc.createXULElement("image");
 			img.width = 16;
 			img.height = 16;
 			img.setAttribute("src", icon);
@@ -170,7 +170,7 @@ Zotero.ProgressWindow = function(options = {}) {
 		}
 		
 		if(postText) {
-			var postNode = doc.createElement("label");
+			var postNode = doc.createXULElement("label");
 			postNode.style.marginLeft = 0;
 			postNode.setAttribute("value", " "+postText);
 			postNode.setAttribute("crop", "end");
@@ -202,9 +202,9 @@ Zotero.ProgressWindow = function(options = {}) {
 	 * <a> elements are turned into XUL links
 	 */
 	this.addDescription = _deferUntilWindowLoad(function addDescription(text) {
-		var newHB = _progressWindow.document.createElement("hbox");
+		var newHB = _progressWindow.document.createXULElement("hbox");
 		newHB.setAttribute("class", "zotero-progress-item-hbox");
-		var newDescription = _progressWindow.document.createElement("description");
+		var newDescription = _progressWindow.document.createXULElement("description");
 		
 		var parts = Zotero.Utilities.parseMarkup(text);
 		for (let part of parts) {
@@ -212,7 +212,7 @@ Zotero.ProgressWindow = function(options = {}) {
 				var elem = _progressWindow.document.createTextNode(part.text);
 			}
 			else if (part.type == 'link') {
-				var elem = _progressWindow.document.createElement('label');
+				var elem = _progressWindow.document.createXULElement('label');
 				elem.setAttribute('value', part.text);
 				elem.setAttribute('class', 'zotero-text-link');
 				for (var i in part.attributes) {
@@ -280,7 +280,7 @@ Zotero.ProgressWindow = function(options = {}) {
 	this.ItemProgress = _deferUntilWindowLoad(function(iconSrc, text, parentItemProgress) {
 		this.setText(text);
 		
-		this._image = _progressWindow.document.createElement("hbox");
+		this._image = _progressWindow.document.createXULElement("hbox");
 		this._image.setAttribute("class", "zotero-progress-item-icon");
 		this._image.setAttribute("flex", 0);
 		this._image.style.width = "16px";
@@ -288,7 +288,7 @@ Zotero.ProgressWindow = function(options = {}) {
 		this._image.style.backgroundSize = "auto 16px";
 		this.setIcon(iconSrc);
 		
-		this._hbox = _progressWindow.document.createElement("hbox");
+		this._hbox = _progressWindow.document.createXULElement("hbox");
 		this._hbox.setAttribute("class", "zotero-progress-item-hbox");
 		if(parentItemProgress) {
 			this._hbox.style.marginLeft = "16px";
@@ -346,7 +346,7 @@ Zotero.ProgressWindow = function(options = {}) {
 	
 	this.ItemProgress.prototype.setText = _deferUntilWindowLoad(function (text) {
 		if (!this._itemText) {
-			this._itemText = _progressWindow.document.createElement("description");
+			this._itemText = _progressWindow.document.createXULElement("description");
 		}
 		else {
 			this._itemText.textContent = '';
