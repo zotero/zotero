@@ -1143,9 +1143,9 @@ Zotero.Attachments = new function(){
 	 */
 	this.downloadPDFViaBrowser = async function (url, path, options = {}) {
 		Zotero.debug(`downloadPDFViaBrowser: Downloading file via browser from ${url}`);
-		const onLoadTimeout = 1e3;
+		const onLoadTimeout = Zotero.Prefs.get('downloadPDFViaBrowser.onLoadTimeout');
 		// Technically this is not a download, but the full operation timeout
-		const downloadTimeout = 60e3;
+		const downloadTimeout = Zotero.Prefs.get('downloadPDFViaBrowser.downloadTimeout');
 		let channelBrowser, hiddenBrowser;
 		let hiddenBrowserPDFFoundDeferred = Zotero.Promise.defer();
 		
