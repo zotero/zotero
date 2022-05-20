@@ -14,5 +14,8 @@
             <outline type="rss" text="A title 3" title="A title 3" url="http://example.com/feed3.rss"/>
             <outline type="rss" text="A title 4" title="A title 4" url="http://example.com/feed4.rss"/>
         </outline>
+        <outline text="Missing title">
+            <outline type="rss" text="" title="" xmlUrl="http://example.com/feed5.rss"/>
+        </outline>
     </body>
 </opml>

@@ -26,7 +26,8 @@ describe("Zotero.Feeds", function () {
 				"http://example.com/feed1.rss": "A title 1",
 				"http://example.com/feed2.rss": "A title 2",
 				"http://example.com/feed3.rss": "A title 3",
-				"http://example.com/feed4.rss": "A title 4"
+				"http://example.com/feed4.rss": "A title 4",
+				"http://example.com/feed5.rss": Zotero.getString('pane.collections.untitled')
 			};
 			yield Zotero.Feeds.importFromOPML(opmlString);
 			let feeds = Zotero.Feeds.getAll();
