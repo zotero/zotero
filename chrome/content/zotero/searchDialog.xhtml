@@ -3,6 +3,8 @@
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
 
+<!DOCTYPE bindings SYSTEM "chrome://zotero/locale/searchbox.dtd">
+
 <window
 	title="Search"
 	orient="vertical"
@@ -22,6 +24,13 @@
 	
 	<script src="include.js"/>
 	<script src="searchDialog.js"/>
+	
+	<popupset>
+		<panel is="autocomplete-richlistbox-popup"
+			id="search-autocomplete-popup"
+			type="autocomplete-richlistbox"
+			noautofocus="true"/>
+	</popupset>
 	
 	<vbox id="zotero-search-box-container" flex="1">
 		<hbox align="center">
