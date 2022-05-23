@@ -1678,7 +1678,7 @@ Zotero.Utilities.Internal = {
 		var selectedIndex = 0;
 		var i = 0;
 		for (let library of libraries) {
-			let menuitem = menulist.ownerDocument.createElement('menuitem');
+			let menuitem = menulist.ownerDocument.createXULElement('menuitem');
 			menuitem.value = library.libraryID;
 			menuitem.setAttribute('label', library.name);
 			menupopup.appendChild(menuitem);

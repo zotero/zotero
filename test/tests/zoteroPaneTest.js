@@ -73,7 +73,7 @@ describe("ZoteroPane", function() {
 				// TODO: Test changing a condition
 				function (dialog) {},
 				'accept',
-				'chrome://zotero/content/searchDialog.xul'
+				'chrome://zotero/content/searchDialog.xhtml'
 			);
 			var id = yield zp.newSearch();
 			yield promise;
@@ -86,7 +86,7 @@ describe("ZoteroPane", function() {
 			var promise = waitForDialog(
 				function (dialog) {},
 				'cancel',
-				'chrome://zotero/content/searchDialog.xul'
+				'chrome://zotero/content/searchDialog.xhtml'
 			);
 			var id = yield zp.newSearch();
 			yield promise;
@@ -770,7 +770,7 @@ describe("ZoteroPane", function() {
 	describe("#editSelectedCollection()", function () {
 		it("should edit a saved search", function* () {
 			var search = yield createDataObject('search');
-			var promise = waitForWindow('chrome://zotero/content/searchDialog.xul', function (win) {
+			var promise = waitForWindow('chrome://zotero/content/searchDialog.xhtml', function (win) {
 				let searchBox = win.document.getElementById('search-box');
 				var c = searchBox.search.getCondition(
 					searchBox.search.addCondition("title", "contains", "foo")
@@ -787,7 +787,7 @@ describe("ZoteroPane", function() {
 		it("should edit a saved search in a group", function* () {
 			var group = yield getGroup();
 			var search = yield createDataObject('search', { libraryID: group.libraryID });
-			var promise = waitForWindow('chrome://zotero/content/searchDialog.xul', function (win) {
+			var promise = waitForWindow('chrome://zotero/content/searchDialog.xhtml', function (win) {
 				let searchBox = win.document.getElementById('search-box');
 				var c = searchBox.search.getCondition(
 					searchBox.search.addCondition("title", "contains", "foo")
