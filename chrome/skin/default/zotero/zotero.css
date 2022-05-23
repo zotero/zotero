@@ -283,12 +283,11 @@ zoterosearch .menulist-icon {
 	max-width: 29.5em;
 }
 
-.zotero-advanced-options>.zotero-advanced-options-label>dropmarker {
-	list-style-image: url("chrome://browser/skin/toolbarbutton-dropdown-arrow.png");
+.zotero-advanced-options > .zotero-advanced-options-label > .toolbarbutton-menu-dropmarker {
 	transform: rotate(270deg);
 }
 
-.zotero-advanced-options[state=open]>.zotero-advanced-options-label>dropmarker {
+.zotero-advanced-options[state=open] > .zotero-advanced-options-label > .toolbarbutton-menu-dropmarker {
 	transform: none;
 }
 
@@ -321,6 +320,11 @@ zoterosearch .menulist-icon {
 
 #zotero-edit-bibliography-dialog #item-list .listcell-icon {
 	max-width: 16px;
+}
+
+.form-grid {
+	display: grid;
+	grid-template-columns: max-content 1fr;
 }
 
 
