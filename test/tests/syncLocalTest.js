@@ -57,7 +57,7 @@ describe("Zotero.Sync.Data.Local", function() {
 					.dispatchEvent(new Event('command'));
 				
 				handled = true;
-			}, 'accept', 'chrome://zotero/content/hardConfirmationDialog.xul');
+			}, 'accept', 'chrome://zotero/content/hardConfirmationDialog.xhtml');
 			var cont = yield Zotero.Sync.Data.Local.checkUser(window, 2, "B");
 			var resetDataDirFileExists = yield OS.File.exists(resetDataDirFile);
 			assert.isTrue(handled);
@@ -69,7 +69,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			yield Zotero.Users.setCurrentUserID(1);
 			yield Zotero.Users.setCurrentUsername("A");
 			
-			waitForDialog(false, 'cancel', 'chrome://zotero/content/hardConfirmationDialog.xul');
+			waitForDialog(false, 'cancel', 'chrome://zotero/content/hardConfirmationDialog.xhtml');
 			var cont = yield Zotero.Sync.Data.Local.checkUser(window, 2, "B");
 			var resetDataDirFileExists = yield OS.File.exists(resetDataDirFile);
 			assert.isFalse(cont);
@@ -85,7 +85,7 @@ describe("Zotero.Sync.Data.Local", function() {
 			yield Zotero.Users.setCurrentUserID(1);
 			yield Zotero.Users.setCurrentUsername("A");
 			
-			waitForDialog(null, 'extra1', 'chrome://zotero/content/hardConfirmationDialog.xul');
+			waitForDialog(null, 'extra1', 'chrome://zotero/content/hardConfirmationDialog.xhtml');
 			waitForDialog();
 			var cont = yield Zotero.Sync.Data.Local.checkUser(window, 2, "B");
 			var resetDataDirFileExists = yield OS.File.exists(resetDataDirFile);
@@ -110,7 +110,7 @@ describe("Zotero.Sync.Data.Local", function() {
 				item2.toJSON().relations[pred][0].startsWith('http://zotero.org/users/local/')
 			);
 			
-			waitForDialog(false, 'accept', 'chrome://zotero/content/hardConfirmationDialog.xul');
+			waitForDialog(false, 'accept', 'chrome://zotero/content/hardConfirmationDialog.xhtml');
 			yield Zotero.Sync.Data.Local.checkUser(window, 1, "A");
 			
 			assert.isTrue(

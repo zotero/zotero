@@ -25,10 +25,14 @@
 
 Zotero.HardConfirmationDialog = {
 	init: function() {
+		document.addEventListener('dialogaccept', () => Zotero.HardConfirmationDialog.onAccept());
+		document.addEventListener('dialogextra1', () => Zotero.HardConfirmationDialog.onExtra1());
+		document.addEventListener('dialogextra2', () => Zotero.HardConfirmationDialog.onExtra2());
+
 		this.io = window.arguments[0];
 		
-		Zotero.setFontSize(document.getElementById('zotero-hardConfirmationDialog'));
-		
+		Zotero.setFontSize(document.documentElement);
+		var dialog = document.getElementById('commonDialog');
 		var vbox = document.getElementById('infoContainer');
 		var sep = vbox.firstChild;
 		
@@ -56,25 +60,25 @@ Zotero.HardConfirmationDialog = {
 		}
 		
 		if (this.io.acceptLabel) {
-			document.documentElement.getButton('accept').label = this.io.acceptLabel
+			dialog.getButton('accept').label = this.io.acceptLabel
 		}
 		if (this.io.extra1Label) {
-			document.documentElement.buttons = document.documentElement.buttons + ',extra1';
-			document.documentElement.getButton('extra1').label = this.io.extra1Label
+			dialog.buttons = dialog.buttons + ',extra1';
+			dialog.getButton('extra1').label = this.io.extra1Label
 		}
 		if (this.io.extra2Label) {
-			document.documentElement.buttons = document.documentElement.buttons + ',extra2';
-			document.documentElement.getButton('extra2').label = this.io.extra2Label
+			dialog.buttons = dialog.buttons + ',extra2';
+			dialog.getButton('extra2').label = this.io.extra2Label
 		}
 	},
 	
 	onCheckbox: function(event) {
-		document.documentElement.getButton('accept').disabled = 
+		document.getElementById('commonDialog').getButton('accept').disabled = 
 			!document.getElementById('zotero-hardConfirmationDialog-checkbox').checked;
 	},
 	
 	onKeyUp: function(event) {
-		document.documentElement.getButton('accept').disabled = 
+		document.getElementById('commonDialog').getButton('accept').disabled = 
 			document.getElementById('zotero-hardConfirmationDialog-textbox').value != this.io.confirmationText;
 	},
 	
@@ -84,11 +88,11 @@ Zotero.HardConfirmationDialog = {
 	
 	onExtra1: function() {
 		this.io.extra1 = true;
-		document.documentElement.cancelDialog();
+		document.getElementById('commonDialog').cancelDialog();
 	},
 	
 	onExtra2: function() {
 		this.io.extra2 = true;
-		document.documentElement.cancelDialog();
+		document.getElementById('commonDialog').cancelDialog();
 	}
 };

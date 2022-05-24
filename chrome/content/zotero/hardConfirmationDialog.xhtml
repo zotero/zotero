@@ -32,36 +32,29 @@
 
 <!DOCTYPE overlay [ <!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD; ]>
 
-<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	title="" buttons="cancel,accept"
-	id="zotero-hardConfirmationDialog"
-	onload="Zotero.HardConfirmationDialog.init(); sizeToContent();"
-	ondialogaccept="Zotero.HardConfirmationDialog.onAccept();"
-	ondialogextra1="Zotero.HardConfirmationDialog.onExtra1();"
-	ondialogextra2="Zotero.HardConfirmationDialog.onExtra2();">
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		xmlns:html="http://www.w3.org/1999/xhtml"
+		title=""
+		onload="Zotero.HardConfirmationDialog.init(); sizeToContent();"
+		style="display: flex;">
+<dialog 
+	buttons="cancel,accept"
+	id="commonDialog">
 	
 	<script src="chrome://zotero/content/include.js"/>
 	<script src="hardConfirmationDialog.js"/>
 	
-	<grid>
-		<columns>
-			<column/>
-			<column flex="1"/>
-		</columns>
-		<rows>
-			<row>
-				<hbox id="iconContainer" align="start"><image id="info.icon" class="spaced alert-icon"/></hbox>
-				<vbox id="infoContainer">
-					<description id="infoTitle" hidden="true"/>
-					<description id="infoBody"/>
-					
-					<separator class="thin"/>
+	<hbox>
+		<hbox id="iconContainer" align="start"><image id="info.icon" class="spaced alert-icon"/></hbox>
+		<vbox id="infoContainer" flex="1">
+			<description id="infoTitle" hidden="true"/>
+			<description id="infoBody"/>
+			
+			<separator class="thin"/>
 
-					<checkbox id="zotero-hardConfirmationDialog-checkbox" hidden="true" oncommand="Zotero.HardConfirmationDialog.onCheckbox(event)"/>
-					<textbox id="zotero-hardConfirmationDialog-textbox" hidden="true" onkeyup="Zotero.HardConfirmationDialog.onKeyUp(event)"/>
-				</vbox>
-			</row>
-		</rows>
-	</grid>
-	
+			<checkbox id="zotero-hardConfirmationDialog-checkbox" hidden="true" oncommand="Zotero.HardConfirmationDialog.onCheckbox(event)"/>
+			<html:input id="zotero-hardConfirmationDialog-textbox" type="text" hidden="true" onkeyup="Zotero.HardConfirmationDialog.onKeyUp(event)"/>
+		</vbox>
+	</hbox>
 </dialog>
+</window>

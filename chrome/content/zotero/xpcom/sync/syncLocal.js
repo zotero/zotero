@@ -140,7 +140,7 @@ Zotero.Sync.Data.Local = {
 				acceptLabel: Zotero.getString('account.confirmDelete.button'),
 				extra2Label: Zotero.getString('general.moreInformation')
 			};
-			win.openDialog("chrome://zotero/content/hardConfirmationDialog.xul", "",
+			win.openDialog("chrome://zotero/content/hardConfirmationDialog.xhtml", "",
 				"chrome,dialog,modal,centerscreen", io);
 			
 			if (io.accept) {
