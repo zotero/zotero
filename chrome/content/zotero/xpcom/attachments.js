@@ -2842,9 +2842,8 @@ Zotero.Attachments = new function(){
 	
 	
 	this._getExtensionFromURL = function(url, contentType) {
-		var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
-					.createInstance(Components.interfaces.nsIURL);
-		nsIURL.spec = url;
+		var nsIURL = Services.io.newURI(url)
+			.QueryInterface(Ci.nsIURL);
 		return Zotero.MIME.getPrimaryExtension(contentType, nsIURL.fileExtension);
 	}
 	
