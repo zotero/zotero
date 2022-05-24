@@ -26,6 +26,10 @@
 "use strict";
 
 {
+	var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+
+	Services.scriptloader.loadSubScript("chrome://zotero/content/elements/shadowAutocompleteInput.js", this);
+
 	class ItemBox extends XULElement {
 		constructor() {
 			super();
@@ -1146,13 +1150,7 @@
 		}
 		
 		ensureElementIsVisible(elem) {
-			try {
-				var sbo = this.boxObject;
-				sbo.ensureElementIsVisible(elem);
-			}
-			catch (e) {
-				Zotero.logError(e);
-			}
+			elem.scrollIntoView();
 		}
 		
 		changeTypeTo(itemTypeID, menu) {
@@ -1441,7 +1439,7 @@
 		}
 		
 		showEditor(elem) {
-			return (async function () {
+			return (async () => {
 				Zotero.debug(`Showing editor for ${elem.getAttribute('fieldname')}`);
 				
 				var label = elem.closest('tr').querySelector('th');
@@ -1508,61 +1506,67 @@
 					}
 				}
 				
-				var t = document.createElement("input");
-				t.setAttribute('id', `itembox-field-textbox-${fieldName}`);
-				t.setAttribute('value', value);
-				t.setAttribute('fieldname', fieldName);
-				t.setAttribute('ztabindex', tabindex);
-				t.setAttribute('flex', '1');
-				
-				if (creatorField=='lastName') {
-					t.setAttribute('fieldMode', elem.getAttribute('fieldMode'));
-					t.setAttribute('newlines','pasteintact');
-				}
-				
+				var t;
 				if (Zotero.ItemFields.isMultiline(fieldName) || Zotero.ItemFields.isLong(fieldName)) {
-					t.setAttribute('multiline', true);
+					t = document.createElement("textarea");
 					t.setAttribute('rows', 8);
 				}
-				else {
-					// Add auto-complete for certain fields
-					if (Zotero.ItemFields.isAutocompleteField(fieldName)
-							|| fieldName == 'creator') {
-						t.setAttribute('type', 'autocomplete');
-						t.setAttribute('autocompletesearch', 'zotero');
+				// Add auto-complete for certain fields
+				else if (Zotero.ItemFields.isAutocompleteField(fieldName)
+						|| fieldName == 'creator') {
+					t = document.createElement("input", { is: 'shadow-autocomplete-input' });
+					t.setAttribute('autocompletesearch', 'zotero');
+					
+					let params = {
+						fieldName: fieldName,
+						libraryID: this.item.libraryID
+					};
+					if (field == 'creator') {
+						params.fieldMode = parseInt(elem.getAttribute('fieldMode'));
 						
-						let params = {
-							fieldName: fieldName,
-							libraryID: this.item.libraryID
-						};
-						if (field == 'creator') {
-							params.fieldMode = parseInt(elem.getAttribute('fieldMode'));
-							
-							// Include itemID and creatorTypeID so the autocomplete can
-							// avoid showing results for creators already set on the item
-							let row = elem.closest('tr');
-							let creatorTypeID = parseInt(
-								row.getElementsByClassName('creator-type-label')[0]
-								.getAttribute('typeid')
-							);
-							if (itemID) {
-								params.itemID = itemID;
-								params.creatorTypeID = creatorTypeID;
-							}
-							
-							// Return
-							t.setAttribute('ontextentered',
-								'this.handleCreatorAutoCompleteSelect(this, true)');
-							// Tab/Shift-Tab
-							t.setAttribute('onchange',
-								'this.handleCreatorAutoCompleteSelect(this)');
-						};
-						t.setAttribute(
-							'autocompletesearchparam', JSON.stringify(params)
+						// Include itemID and creatorTypeID so the autocomplete can
+						// avoid showing results for creators already set on the item
+						let row = elem.closest('tr');
+						let creatorTypeID = parseInt(
+							row.getElementsByClassName('creator-type-label')[0]
+							.getAttribute('typeid')
 						);
-						t.setAttribute('completeselectedindex', true);
+						if (itemID) {
+							params.itemID = itemID;
+							params.creatorTypeID = creatorTypeID;
+						}
+						
+						// Return
+						t.addEventListener('keydown', (event) => {
+							if (event.key == 'Enter') {
+								this.handleCreatorAutoCompleteSelect(t, true);
+							}
+						});
+						// Tab/Shift-Tab
+						t.setAttribute('onchange',
+							'this.handleCreatorAutoCompleteSelect(this)');
+						
+						if (creatorField == 'lastName') {
+							t.setAttribute('fieldMode', elem.getAttribute('fieldMode'));
+						}
 					}
+					t.setAttribute(
+						'autocompletesearchparam', JSON.stringify(params)
+					);
+					t.setAttribute('completeselectedindex', true);
 				}
+				
+				if (!t) {
+					t = document.createElement("input");
+				}
+
+				t.id = `itembox-field-textbox-${fieldName}`;
+				t.value = value;
+				t.dataset.originalValue = value;
+				t.style.mozBoxFlex = 1;
+				t.setAttribute('fieldname', fieldName);
+				t.setAttribute('ztabindex', tabindex);
+
 				var box = elem.parentNode;
 				box.replaceChild(t, elem);
 				
@@ -1597,7 +1601,7 @@
 				t.onkeypress = (event) => this.handleKeyPress(event);
 				
 				return t;
-			}.bind(this))();
+			})();
 		}
 		
 		
@@ -1701,7 +1705,7 @@
 					// Shift-enter adds new creator row
 					if (fieldname.indexOf('creator-') == 0 && event.shiftKey) {
 						// Value hasn't changed
-						if (target.getAttribute('value') == target.value) {
+						if (target.dataset.originalValue == target.value) {
 							Zotero.debug("Value hasn't changed");
 							// If + button is disabled, just focus next creator row
 							if (target.closest('tr').lastChild.lastChild.disabled) {
@@ -1732,7 +1736,7 @@
 					
 				case event.DOM_VK_ESCAPE:
 					// Reset field to original value
-					target.value = target.getAttribute('value');
+					target.value = target.dataset.originalValue;
 					
 					focused.blur();
 					

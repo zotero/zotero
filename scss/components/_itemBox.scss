@@ -25,6 +25,10 @@ td > [fieldname] {
   width: 100%;
 }
 
+.value.multiline {
+	white-space: pre-line;
+}
+
 /*td > vbox > description
 {
 	margin: 0 !important;
@@ -65,6 +69,10 @@ label[singleField=false]:after
 {
 	margin: 0;
 }*/
+
+textarea {
+	font: inherit;
+}
 
 /* metadata field names */
 th, .creator-type-label {
