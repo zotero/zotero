@@ -114,17 +114,16 @@ groupbox {
 	margin: 6px;
 }
 
-.groupbox-title {
+groupbox > label > h2 {
 	border-bottom: #b5b5b5 1px solid;
 }
 
-.groupbox-body {
-	-moz-appearance: groupbox;
+groupbox > .groupbox-body {
 	padding: 8px 8px 3px;
 	margin: 0;
 }
 
-caption {
+groupbox > label > h2, caption {
 	padding-inline-start: 4px;
 	padding-bottom: 1px;
 	font: caption;

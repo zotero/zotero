@@ -3,7 +3,7 @@ prefwindow .chromeclass-toolbar
 	display: -moz-box !important; /* Ignore toolbar collapse button on OS X */
 }
 
-prefwindow {
+window[windowtype="zotero:pref"] {
    min-width: 600px;
 }
 

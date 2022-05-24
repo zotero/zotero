@@ -42,32 +42,26 @@ To add a new preference:
 		in Zotero.Prefs.observe()
 
 -->
-<prefwindow
+<window
 	id="zotero-locate-manager-prefs"
 	title="&zotero.preferences.title;" onload="init()"
 	windowtype="zotero:pref"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
-	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	style="display: flex;">
+
+	<script src="include.js"></script>
+	<script src="locateManager.js"></script>
+
+	<groupbox flex="1">
+		<label><html:h2>&zotero.preferences.locate.locateEngineManager;</html:h2></label>
 		
-	<prefpane id="zotero-prefpane-locate"
-						label="&zotero.preferences.prefpane.locate;"
-						image="chrome://zotero/skin/prefs-styles.png"
-						flex="1">
-		<!-- TODO: pic for locate pane -->
-		<!-- TODO: create labels in dtd -->
-		
-		<preferences>
-			<preference id="pref-locate-activeEngines" name="extensions.zotero.locate.activeEngines" type="string"/>
-		</preferences>
-		
-		<groupbox flex="1">
-			<caption label="&zotero.preferences.locate.locateEngineManager;"/>
-			
-			<label id="locate-engine-description" width="45em" style="font-size: 12px"/>
+		<vbox class="groupbox-body" flex="1">
+			<label id="locate-engine-description" style="font-size: 12px; width: 45em;"/>
 			
 			<separator class="thin"/>
 			
-			<hbox class="virtualized-table-container" flex="1" height="100">
+			<hbox class="virtualized-table-container" flex="1" style="min-height: 100px;">
 				<html:div id="locateManager-tree"/>
 			</hbox>
 			
@@ -90,13 +84,10 @@ To add a new preference:
 				&zotero.preferences.locate.addDescription;
 			</label>
 			-->
-		</groupbox>
-	</prefpane>
-	
-	<script src="include.js"></script>
-	<script src="locateManager.js"/>
+		</vbox>
+	</groupbox>
 
 	<script>
 		document.getElementById('locate-engine-description').textContent = Zotero.getString('locate.locateEngineDescription', Zotero.appName);
 	</script>
-</prefwindow>
+</window>
