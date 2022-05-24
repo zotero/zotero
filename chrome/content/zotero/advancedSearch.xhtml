@@ -21,7 +21,8 @@
 	onunload="ZoteroAdvancedSearch.onUnload();"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
-	windowtype="zotero:search">
+	windowtype="zotero:search"
+	style="display: flex;">
 
 	<script>
 		var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
@@ -38,7 +39,7 @@
 			noautofocus="true"/>
 	</popupset>
 	
-	<vbox id="zotero-search-box-container" flex="1" style="width: 100%; height: 100vh;">
+	<vbox id="zotero-search-box-container" flex="1">
 		<vbox id="zotero-search-box-controls">
 			<zoterosearch id="zotero-search-box" oncommand="if (this.active) { ZoteroAdvancedSearch.search(); }" flex="1"/>
 			
