@@ -7,13 +7,14 @@
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	width="550" height="230"
 	onload="_init()"
-	id="zotero-progress">
+	id="zotero-progress"
+	style="display: flex;">
 	<script src="include.js"></script>
 	<script src="progressQueueDialog.js"/>
 	<vbox id="zotero-progress-box" style="padding:10px" flex="1">
 		<label id="label" control="progress-indicator" value=""/>
 		<hbox align="center">
-			<progressmeter id="progress-indicator" mode="determined" flex="1"/>
+			<html:progress id="progress-indicator" max="100" style="-moz-box-flex: 1;"/>
 			<button id="cancel-button" label="&zotero.general.cancel;"/>
 			<button id="minimize-button" label="&zotero.general.minimize;"/>
 			<button id="close-button" label="&zotero.general.close;"/>

@@ -21,7 +21,7 @@ function waitForDOMEvent(target, event, capture) {
 }
 
 async function waitForRecognizer() {
-	var win = await waitForWindow('chrome://zotero/content/progressQueueDialog.xul')
+	var win = await waitForWindow('chrome://zotero/content/progressQueueDialog.xhtml')
 	// Wait for status to show as complete
 	var completeStr = Zotero.getString("general.finished");
 	while (win.document.getElementById("label").value != completeStr) {

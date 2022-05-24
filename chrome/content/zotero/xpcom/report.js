@@ -198,6 +198,7 @@ Zotero.Report.HTML = new function () {
 				case 'tags':
 				case 'deleted':
 				case 'parentItem':
+				case 'inPublications':
 				
 				case 'charset':
 				case 'contentType':

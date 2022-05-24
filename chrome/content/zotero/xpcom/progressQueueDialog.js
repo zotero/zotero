@@ -44,11 +44,11 @@ Zotero.ProgressQueueDialog = function (progressQueue) {
 		
 		let win = Services.wm.getMostRecentWindow("navigator:browser");
 		if (win) {
-			_progressWindow = win.openDialog("chrome://zotero/content/progressQueueDialog.xul",
+			_progressWindow = win.openDialog("chrome://zotero/content/progressQueueDialog.xhtml",
 				"", "chrome,close=yes,resizable=yes,dependent,dialog,centerscreen", _io);
 		}
 		else {
-			_progressWindow = Services.ww.openWindow(null, "chrome://zotero/content/progressQueueDialog.xul",
+			_progressWindow = Services.ww.openWindow(null, "chrome://zotero/content/progressQueueDialog.xhtml",
 				"", "chrome,close=yes,resizable=yes,dependent,dialog,centerscreen", _io);
 		}
 		
