@@ -459,8 +459,11 @@ Zotero.File = new function(){
 		}
 		
 		var deferred = Zotero.Promise.defer();
-		const uri_ = NetUtil.ioService.newURI(uri);
-		const inputChannel = NetUtil.ioService.newChannelFromURI(uri_);
+		const uri_ = NetUtil.newURI(uri);
+		const inputChannel = NetUtil.newChannel({
+			uri: uri_,
+			loadUsingSystemPrincipal: true
+		});
 		const outputChannel = FileUtils.openSafeFileOutputStream(new FileUtils.File(path));
 		const pipe = Cc["@mozilla.org/pipe;1"].createInstance(Ci.nsIPipe);
 		pipe.init(true, true, 0, 0xffffffff, null);
