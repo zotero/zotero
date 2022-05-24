@@ -459,9 +459,8 @@ Zotero.File = new function(){
 		}
 		
 		var deferred = Zotero.Promise.defer();
-		const uri_ = NetUtil.newURI(uri);
 		const inputChannel = NetUtil.newChannel({
-			uri: uri_,
+			uri,
 			loadUsingSystemPrincipal: true
 		});
 		const outputChannel = FileUtils.openSafeFileOutputStream(new FileUtils.File(path));
