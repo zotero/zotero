@@ -30,40 +30,44 @@
 <?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
-<dialog
+
+<window
 	id="zotero-select-items-dialog"
 	windowtype="zotero:item-selector"
-	title="&zotero.selectitems.title;"
-	orient="vertical"
-	width="600" height="450"
-	buttons="cancel,accept"
-	ondialogaccept="doAccept();"
-	onload="doLoad();"
-	onunload="doUnload();"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
-	style="padding:2em"
-	persist="screenX screenY width height">
-	
-	<script src="include.js"/>
-	<script src="selectItemsDialog.js"/>
-	
-	<vbox id="zotero-select-items-container" flex="1">
-	
-	<hbox align="center" pack="end">
-		<textbox id="zotero-tb-search" type="search" timeout="250" oncommand="onSearch()" dir="reverse"
-				onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { if (this.value == '') { cancelDialog(); return false; } this.value = ''; this.doCommand('cmd_zotero_search'); return false; } return true;"/>
-	</hbox>
-	
-	<hbox flex="1">
-		<vbox id="zotero-collections-tree-container" class="virtualized-table-container" style="min-width: 200px">
-			<html:div id="zotero-collections-tree"></html:div>
-		</vbox>
+	onload="doLoad();"
+	onunload="doUnload();"
+	width="600"
+	height="450"
+	persist="screenX screenY width height"
+	style="display: flex"
+>
+	<dialog
+		orient="vertical"
+		buttons="cancel,accept"
+		style="padding: 2em"
+	>
+		<script src="include.js"/>
+		<script src="selectItemsDialog.js"/>
 
-		<hbox id="zotero-items-pane-content" class="virtualized-table-container" flex="1">
-			<html:div id="zotero-items-tree"></html:div>
+		<vbox id="zotero-select-items-container" flex="1">
+
+		<hbox align="center" pack="end">
+			<search-textbox id="zotero-tb-search" type="search" timeout="250" oncommand="onSearch()" dir="reverse"
+					onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { if (this.value == '') { cancelDialog(); return false; } this.value = ''; this.doCommand('cmd_zotero_search'); return false; } return true;"/>
 		</hbox>
-	</hbox>
-	
-	</vbox>
-</dialog>
+
+		<hbox flex="1">
+			<vbox id="zotero-collections-tree-container" class="virtualized-table-container" style="min-width: 200px">
+				<html:div id="zotero-collections-tree"></html:div>
+			</vbox>
+
+			<hbox id="zotero-items-pane-content" class="virtualized-table-container" flex="1">
+				<html:div id="zotero-items-tree"></html:div>
+			</hbox>
+		</hbox>
+
+		</vbox>
+	</dialog>
+</window>

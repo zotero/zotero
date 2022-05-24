@@ -79,6 +79,8 @@ var doLoad = async function () {
 	}
 	
 	Zotero.updateQuickSearchBox(document);
+
+	document.addEventListener('dialogaccept', doAccept);
 };
 
 function doUnload()
