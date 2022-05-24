@@ -191,6 +191,11 @@
 			s1.rel = "stylesheet";
 			s1.href = "chrome://zotero-platform/content/itemBox.css";
 			shadow.append(s1);
+
+			var s2 = document.createElement("link");
+			s2.rel = "stylesheet";
+			s2.href = "chrome://global/skin/global.css";
+			shadow.append(s2);
 			
 			shadow.appendChild(document.importNode(this.content, true));
 			
