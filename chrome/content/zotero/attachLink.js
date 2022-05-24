@@ -24,6 +24,14 @@
 */
 
 var Zotero_AttachLink = new function() {
+	this.load = function () {
+		document.addEventListener('dialogaccept', (event) => {
+			if (!this.submit()) {
+				event.preventDefault();
+			}
+		});
+	};
+
 	function getAttachFileLabel() {
 		return window.opener.document
 			.getElementById('zotero-tb-attachment-add-file-link')

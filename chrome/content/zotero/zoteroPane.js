@@ -3795,7 +3795,7 @@ var ZoteroPane = new function()
 		}
 		
 		var io = {};
-		window.openDialog('chrome://zotero/content/attachLink.xul',
+		window.openDialog('chrome://zotero/content/attachLink.xhtml',
 			'zotero-attach-uri-dialog', 'centerscreen, modal', io);
 		if (!io.out) return;
 		return Zotero.Attachments.linkFromURL({
