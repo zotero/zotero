@@ -317,9 +317,9 @@
 <!ENTITY zotero.pdfReader.verticalScrolling "Przewijanie pionowe">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Przewijanie poziome">
 <!ENTITY zotero.pdfReader.wrappedScrolling "Przewijanie zawinięte">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
+<!ENTITY zotero.pdfReader.noSpreads "Pojedyncza strona">
+<!ENTITY zotero.pdfReader.oddSpreads "Dwie strony - nieparzysta">
+<!ENTITY zotero.pdfReader.evenSpreads "Dwie strony - parzysta">
 <!ENTITY zotero.pdfReader.zoomIn "Powiększ">
 <!ENTITY zotero.pdfReader.zoomOut "Zmniejsz">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatycznie zmień rozmiar">
