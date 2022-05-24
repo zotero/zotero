@@ -3,8 +3,8 @@
 <!ENTITY zotero.preferences.default "Default:">
 <!ENTITY zotero.preferences.items "Item">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Settings">
-<!ENTITY zotero.preferences.custom "Custom…">
+<!ENTITY zotero.preferences.settings "Pengaturan">
+<!ENTITY zotero.preferences.custom "Kustom...">
 
 <!ENTITY zotero.preferences.prefpane.general "General">
 
@@ -14,7 +14,7 @@
 <!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
 <!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Buka PDF menggunakan">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
 
 <!ENTITY zotero.preferences.miscellaneous "Lain-lain">
@@ -30,11 +30,11 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Saat menyalin item antarperpustakaan, turut masukkan:">
 <!ENTITY zotero.preferences.groups.childNotes "catatan anak">
 <!ENTITY zotero.preferences.groups.childFiles "foto anak dan berkar terimpor">
-<!ENTITY zotero.preferences.groups.annotations "annotations">
+<!ENTITY zotero.preferences.groups.annotations "anotasi">
 <!ENTITY zotero.preferences.groups.childLinks "tautan anak">
 <!ENTITY zotero.preferences.groups.tags "tags">
 
-<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds "Umpan">
 <!ENTITY zotero.preferences.feeds.sorting.label "Sorting:">
 <!ENTITY zotero.preferences.feeds.sorting.newest "Newest items first">
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest items first">
@@ -61,7 +61,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sinkronisasikan berkas-berkas lampiran di dalam Perpustakaanku menggunakan">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "SInkronisasikan berkas-berkas lampiran di dalam perpustakaan Zotero menggunaan penyimpanan Zotero">
-<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Unduh file">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
