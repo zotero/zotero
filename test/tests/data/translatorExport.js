@@ -1382,7 +1382,7 @@
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
 		"archive": "Archive",
-		"archiveID": "Archive ID",
+		"archiveID": "3",
 		"archiveLocation": "Archive location",
 		"attachments": [],
 		"callNumber": "Call number",
