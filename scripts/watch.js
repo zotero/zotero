@@ -56,7 +56,7 @@ function getWatch() {
 				return;
 			}
 			for (var i = 0; i < scssFiles.length; i++) {
-				if (multimatch(path, scssFiles[i])) {
+				if (multimatch(path, scssFiles[i]).length) {
 					onSuccess(await getSass(scssFiles[i], { ignore: ignoreMask }));
 					onSuccess(await cleanUp(signatures));
 					return;

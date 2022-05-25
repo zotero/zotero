@@ -33,13 +33,13 @@ async function getSass(source, options, signatures={}) {
 			let newFileSignature = await getFileSignature(f);
 			let destFile = getPathRelativeTo(f, 'scss');
 			destFile = path.join(path.dirname(destFile), path.basename(destFile, '.scss') + '.css');
-			let dest = path.join.apply(this, ['build', 'chrome', 'skin', 'default', 'zotero', destFile]);
+			let dest = path.join('build', 'chrome', 'skin', 'default', 'zotero', destFile);
 
 			if (['win', 'mac', 'unix'].some(platform => f.endsWith(`-${platform}.scss`))) {
 				let platform = f.slice(f.lastIndexOf('-') + 1, f.lastIndexOf('.'));
 				destFile = destFile.slice(0, destFile.lastIndexOf('-'))
 				+ destFile.slice(destFile.lastIndexOf('-') + 1 + platform.length);
-				dest = path.join.apply(this, ['build', 'chrome', 'content', 'zotero-platform', platform, destFile]);
+				dest = path.join('build', 'chrome', 'content', 'zotero-platform', platform, destFile);
 			}
 
 			try {
