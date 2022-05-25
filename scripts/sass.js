@@ -11,11 +11,12 @@ const sassRender = universalify.fromCallback(sass.render);
 
 const ROOT = path.resolve(__dirname, '..');
 
-async function getSass(source, options, signatures={}) {
+async function getSass(source, options, signatures = {}) {
 	const t1 = Date.now();
 	const files = await globby(source, Object.assign({ cwd: ROOT }, options));
 	const totalCount = files.length;
-	var count = 0, shouldRebuild = false;
+	const outFiles = [];
+	var shouldRebuild = false;
 
 	for (const f of files) {
 		// if any file changed, rebuild all onSuccess
@@ -54,7 +55,7 @@ async function getSass(source, options, signatures={}) {
 				await fs.outputFile(`${dest}.map`, sass.map);
 				onProgress(f, dest, 'sass');
 				signatures[f] = newFileSignature;
-				count++;
+				outFiles.push(dest);
 			}
 			catch (err) {
 				throw new Error(`Failed on ${f}: ${err}`);
@@ -65,7 +66,8 @@ async function getSass(source, options, signatures={}) {
 	const t2 = Date.now();
 	return {
 		action: 'sass',
-		count,
+		count: outFiles.length,
+		outFiles,
 		totalCount,
 		processingTime: t2 - t1
 	};

@@ -1,8 +1,10 @@
 const path = require('path');
+const fs = require('fs-extra');
 const chokidar = require('chokidar');
 const multimatch = require('multimatch');
+const { exec } = require('child_process');
 const { dirs, jsFiles, scssFiles, ignoreMask, copyDirs, symlinkFiles } = require('./config');
-const { onSuccess, onError, getSignatures, writeSignatures, cleanUp, formatDirsForMatcher } = require('./utils');
+const { envCheckTrue, onSuccess, onError, getSignatures, writeSignatures, cleanUp, formatDirsForMatcher } = require('./utils');
 const getJS = require('./js');
 const getSass = require('./sass');
 const getCopy = require('./copy');
@@ -10,6 +12,9 @@ const getSymlinks = require('./symlinks');
 
 
 const ROOT = path.resolve(__dirname, '..');
+const addOmniExecPath = path.join(ROOT, '..', 'zotero-standalone-build', 'scripts', 'add_omni_file');
+let shouldAddOmni = false;
+
 const source = [
 	'chrome',
 	'components',
@@ -45,32 +50,69 @@ process.on('SIGINT', () => {
 	process.exit();
 });
 
-function getWatch() {
+async function addOmniFiles(relPaths) {
+	const t1 = Date.now();
+	const buildDirPath = path.join(ROOT, 'build');
+	const wrappedPaths = relPaths.map(relPath => `"${path.relative(buildDirPath, relPath)}"`);
+
+	await new Promise((resolve, reject) => {
+		const cmd = `"${addOmniExecPath}" ${wrappedPaths.join(' ')}`;
+		exec(cmd, { cwd: buildDirPath }, (error, output) => {
+			if (error) {
+				reject(error);
+			}
+			else {
+				process.env.NODE_ENV === 'debug' && console.log(`Executed:\n${cmd};\nOutput:\n${output}\n`);
+				resolve(output);
+			}
+		});
+	});
+
+	const t2 = Date.now();
+	
+	return {
+		action: 'add-omni-files',
+		count: relPaths.length,
+		totalCount: relPaths.length,
+		processingTime: t2 - t1
+	};
+}
+
+async function getWatch() {
+	try {
+		await fs.access(addOmniExecPath, fs.constants.F_OK);
+		shouldAddOmni = !envCheckTrue(process.env.SKIP_OMNI);
+	}
+	catch (_) {}
+
 	let watcher = chokidar.watch(source, { cwd: ROOT })
 	.on('change', async (path) => {
 		try {
-			var matched = false;
+			var result = false;
 			if (multimatch(path, jsFiles).length && !multimatch(path, ignoreMask).length) {
-				onSuccess(await getJS(path, { ignore: ignoreMask }, signatures));
+				result = await getJS(path, { ignore: ignoreMask }, signatures);
 				onSuccess(await cleanUp(signatures));
-				return;
 			}
-			for (var i = 0; i < scssFiles.length; i++) {
-				if (multimatch(path, scssFiles[i]).length) {
-					onSuccess(await getSass(scssFiles[i], { ignore: ignoreMask }));
-					onSuccess(await cleanUp(signatures));
-					return;
+			if (!result) {
+				for (var i = 0; i < scssFiles.length; i++) {
+					if (multimatch(path, scssFiles[i]).length) {
+						result = await getSass(scssFiles[i], { ignore: ignoreMask }); // eslint-disable-line no-await-in-loop
+						break;
+					}
 				}
 			}
-			if (multimatch(path, copyDirs.map(d => `${d}/**`)).length) {
-				onSuccess(await getCopy(path, {}, signatures));
-				onSuccess(await cleanUp(signatures));
-				return;
+			if (!result && multimatch(path, copyDirs.map(d => `${d}/**`)).length) {
+				result = await getCopy(path, {}, signatures);
 			}
-			if (multimatch(path, symlinks).length) {
-				onSuccess(await getSymlinks(path, { nodir: true }, signatures));
-				onSuccess(await cleanUp(signatures));
-				return;
+			if (!result && multimatch(path, symlinks).length) {
+				result = await getSymlinks(path, { nodir: true }, signatures);
+			}
+
+			onSuccess(result);
+			onSuccess(await cleanUp(signatures));
+
+			if (shouldAddOmni && result.outFiles?.length) {
+				onSuccess(await addOmniFiles(result.outFiles));
 			}
 		}
 		catch (err) {
@@ -83,7 +125,7 @@ function getWatch() {
 	});
 
 	watcher.add(source);
-	console.log('Watching files for changes...');
+	console.log(`Watching files for changes (omni updates ${shouldAddOmni ? 'enabled' : 'disabled'})...`);
 }
 
 module.exports = getWatch;

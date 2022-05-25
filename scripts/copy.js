@@ -12,7 +12,7 @@ async function getCopy(source, options, signatures) {
 	const t1 = Date.now();
 	const files = await globby(source, Object.assign({ cwd: ROOT }, options ));
 	const totalCount = files.length;
-	var count = 0;
+	const outFiles = [];
 	var f;
 
 	while ((f = files.pop()) != null) {
@@ -34,7 +34,7 @@ async function getCopy(source, options, signatures) {
 			await fs.copy(f, dest);
 			onProgress(f, dest, 'cp');
 			signatures[f] = newFileSignature;
-			count++;
+			outFiles.push(dest);
 		} catch (err) {
 			throw new Error(`Failed on ${f}: ${err}`);
 		}
@@ -43,7 +43,8 @@ async function getCopy(source, options, signatures) {
 	const t2 = Date.now();
 	return {
 		action: 'copy',
-		count,
+		count: outFiles.length,
+		outFiles,
 		totalCount,
 		processingTime: t2 - t1
 	};
