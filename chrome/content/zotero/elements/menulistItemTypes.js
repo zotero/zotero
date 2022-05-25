@@ -54,7 +54,7 @@
 			var itemTypes = [];
 			for (let i = 0; i < t.length; i++) {
 				itemTypes.push({
-					name: t[i].name,
+					id: t[i].id,
 					localized: Zotero.ItemTypes.getLocalizedString(t[i].id)
 				});
 			}
@@ -64,7 +64,7 @@
 			for (let i = 0; i < itemTypes.length; i++) {
 				let name = itemTypes[i].name;
 				if (name != 'attachment' && name != 'note' && name != 'annotation') {
-					this.appendItem(itemTypes[i].localized, itemTypes[i].name);
+					this.appendItem(itemTypes[i].localized, itemTypes[i].id);
 				}
 			}
 			

@@ -752,26 +752,28 @@
 		}
 		
 		addItemTypeMenu() {
+			var td = document.createElement('td');
 			var menulist = document.createXULElement("menulist", { is: "menulist-item-types" });
 			menulist.id = "item-type-menu";
 			menulist.className = "zotero-clicky";
-			menulist.onCommand = (event) => {
+			menulist.addEventListener('command', (event) => {
 				var target = event.target;
 				this.changeTypeTo(target.value, target);
-			};
-			menulist.onFocus = (event) => {
+			});
+			menulist.addEventListener('focus', () => {
 				this.ensureElementIsVisible(menulist);
-			};
-			menulist.onKeyPress = (event) => {
+			});
+			menulist.addEventListener('keypress', (event) => {
 				if (event.keyCode == event.DOM_VK_TAB) {
 					this.itemTypeMenuTab(event);
 				}
-			};
-			this._infoTable.firstChild.appendChild(menulist);
+			});
+			td.appendChild(menulist);
+			this._infoTable.firstChild.appendChild(td);
 		}
 		
 		updateItemTypeMenuSelection() {
-			this.itemTypeMenu.value = this.item.itemType;
+			this.itemTypeMenu.value = this.item.itemTypeID;
 		}
 		
 		addDynamicRow(label, value, beforeElement) {
