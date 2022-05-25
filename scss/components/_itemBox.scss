@@ -41,6 +41,9 @@ td > [fieldname] {
 	padding: 0 0 0 2px !important;
 	margin: 1px 5px 0 1px !important;
 	max-height: 1.5em !important;
+}
+
+#item-type-menu:not(:hover):not(:active) {
 	border: 1px solid transparent;	
 	background-color: transparent;
 }
@@ -72,6 +75,7 @@ label[singleField=false]:after
 
 textarea {
 	font: inherit;
+	resize: none;
 }
 
 /* metadata field names */
@@ -97,7 +101,7 @@ row label
 	-moz-user-focus: ignore;
 }*/
 
-.pointer:hover {
+.pointer:hover, .pointer:hover > label {
 	cursor: pointer !important;
 }
 
