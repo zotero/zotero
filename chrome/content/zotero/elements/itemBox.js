@@ -585,7 +585,7 @@
 						}
 						else {
 							this.getRootNode().host.toggleAbstractExpand(
-								this, this.closest('tr').querySelector('.value')
+								this.firstElementChild, this.closest('tr').querySelector('.value')
 							);
 						}
 					});
@@ -1264,14 +1264,14 @@
 				'abstractNote',
 				tabindex
 			);
-			valueElement.parentNode.replaceChild(newValueElement, valueElement);
+			valueElement.replaceWith(newValueElement);
 			
 			var text = Zotero.ItemFields.getLocalizedString('abstractNote');
 			// Add '(...)' before "Abstract" for collapsed abstracts
 			if (valueText && cur) {
 				text = '(\u2026) ' + text;
 			}
-			label.setAttribute('value', text);
+			label.textContent = text;
 		}
 		
 		disableButton(button) {
@@ -1401,23 +1401,25 @@
 			
 			valueElement.textContent = valueText;
 			
-			if ((firstSpace == -1 && valueText.length > 29 ) || firstSpace > 29
+			if (isMultiline) {
+				valueElement.classList.add('multiline');
+			}
+
+			if ((firstSpace == -1 && valueText.length > 29) || firstSpace > 29
 				|| (fieldName &&
-					(fieldName.substr(0, 7) == 'creator') || fieldName == 'abstractNote')) {
+					(fieldName.startsWith('creator') || (!isMultiline && fieldName == 'abstractNote')))) {
 				if (fieldName == 'abstractNote') {
 					valueText = valueText.replace(/[\t\n]/g, ' ');
 				}
 				valueElement.setAttribute('crop', 'end');
-			}
-			else if (isMultiline) {
-				valueElement.classList.add('multiline');
 			}
 			
 			// Allow toggling non-editable Abstract open and closed with click
 			if (fieldName == 'abstractNote' && !this.editable) {
 				valueElement.classList.add("pointer");
 				valueElement.addEventListener('click', () => {
-					this.toggleAbstractExpand(valueElement.previousSibling, valueElement);
+					let label = valueElement.parentElement.previousElementSibling.firstElementChild;
+					this.toggleAbstractExpand(label, valueElement);
 				});
 			}
 			
