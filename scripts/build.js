@@ -24,6 +24,11 @@ if (require.main === module) {
 				.concat([`!${formatDirsForMatcher(copyDirs)}/**`]);
 
 			const signatures = await getSignatures();
+
+			// Check if all files in signatures are still present in src; Needed to avoid a problem
+			// where what was a symlink before, now is compiled, resulting in polluting source files
+			onSuccess(await cleanUp(signatures));
+			
 			const results = await Promise.all([
 				getBrowserify(signatures),
 				getCopy(copyDirs.map(d => `${d}/**`), { ignore: ignoreMask }, signatures),
@@ -31,7 +36,6 @@ if (require.main === module) {
 				...scssFiles.map(scf => getSass(scf, { ignore: ignoreMask }, signatures)),
 				getSymlinks(symlinks, { nodir: true, ignore: ignoreMask }, signatures),
 				getSymlinks(symlinkDirs, { ignore: ignoreMask }, signatures),
-				cleanUp(signatures),
 				getPDFReader(signatures),
 				getPDFWorker(signatures),
 				getZoteroNoteEditor(signatures)

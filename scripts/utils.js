@@ -11,6 +11,7 @@ const NODE_ENV = process.env.NODE_ENV;
 
 
 function onError(err) {
+	console.log('\u0007'); //🔔
 	console.log(colors.red('Error:'), err);
 }
 
@@ -116,10 +117,13 @@ function comparePaths(actualPath, testedPath) {
 	return path.normalize(actualPath) === path.normalize(testedPath);
 }
 
+const envCheckTrue = env => !!(env && (parseInt(env) || env === true || env === "true"));
+
 module.exports = {
 	cleanUp,
 	comparePaths,
 	compareSignatures,
+	envCheckTrue,
 	formatDirsForMatcher,
 	getFileSignature,
 	getPathRelativeTo,

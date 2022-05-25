@@ -56,6 +56,7 @@ async function getSymlinks(source, options, signatures) {
 	return {
 		action: 'symlink',
 		count: filesProcessedCount,
+		outFiles: filesToProcess,
 		totalCount: files.length,
 		processingTime: t2 - t1
 	};

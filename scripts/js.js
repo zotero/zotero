@@ -14,7 +14,6 @@ async function getJS(source, options, signatures) {
 	const matchingJSFiles = await globby(source, Object.assign({ cwd: ROOT }, options));
 	const cpuCount = os.cpus().length;
 	const totalCount = matchingJSFiles.length;
-	var count = 0;
 	var isError = false;
 
 	cluster.setupMaster({
@@ -48,7 +47,8 @@ async function getJS(source, options, signatures) {
 		const t2 = Date.now();
 		return Promise.resolve({
 				action: 'js',
-				count,
+				count: 0,
+				outFiles: [],
 				totalCount,
 				processingTime: t2 - t1
 		});
@@ -56,6 +56,7 @@ async function getJS(source, options, signatures) {
 
 	// distribute processing among workers
 	const workerCount = Math.min(cpuCount, filesForProcessing.length);
+	const outFiles = [];
 	var workersActive = workerCount;
 	NODE_ENV == 'debug' && console.log(`Will process ${filesForProcessing.length} files using ${workerCount} processes`);
 	return new Promise((resolve, reject) => {
@@ -75,7 +76,7 @@ async function getJS(source, options, signatures) {
 					} else {
 						NODE_ENV == 'debug' && console.log(`process ${this.id} took ${ev.processingTime} ms to process ${ev.sourcefile} into ${ev.outfile}`);
 						NODE_ENV != 'debug' && onProgress(ev.sourcefile, ev.outfile, 'js');
-						count++;
+						outFiles.push(ev.outfile);
 					}
 				}
 
@@ -95,7 +96,8 @@ async function getJS(source, options, signatures) {
 						const t2 = Date.now();
 						resolve({
 							action: 'js',
-							count,
+							count: outFiles.length,
+							outFiles,
 							totalCount,
 							processingTime: t2 - t1
 						});

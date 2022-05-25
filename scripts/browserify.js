@@ -11,7 +11,7 @@ const ROOT = path.resolve(__dirname, '..');
 
 async function getBrowserify(signatures) {
 	const t1 = Date.now();
-	var count = 0;
+	const outFiles = [];
 	var config, f, totalCount;
 	
 	while ((config = browserifyConfigs.pop()) != null) {
@@ -48,7 +48,7 @@ async function getBrowserify(signatures) {
 
 				onProgress(f, dest, 'browserify');
 				signatures[f] = newFileSignature;
-				count++;
+				outFiles.push(dest);
 			} catch (err) {
 				throw new Error(`Failed on ${f}: ${err}`);
 			}
@@ -58,7 +58,8 @@ async function getBrowserify(signatures) {
 	const t2 = Date.now();
 	return {
 		action: 'browserify',
-		count,
+		count: outFiles.length,
+		outFiles,
 		totalCount,
 		processingTime: t2 - t1
 	};

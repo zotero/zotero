@@ -11,11 +11,12 @@ const sassRender = universalify.fromCallback(sass.render);
 
 const ROOT = path.resolve(__dirname, '..');
 
-async function getSass(source, options, signatures={}) {
+async function getSass(source, options, signatures = {}) {
 	const t1 = Date.now();
 	const files = await globby(source, Object.assign({ cwd: ROOT }, options));
 	const totalCount = files.length;
-	var count = 0, shouldRebuild = false;
+	const outFiles = [];
+	var shouldRebuild = false;
 
 	for (const f of files) {
 		// if any file changed, rebuild all onSuccess
@@ -33,13 +34,13 @@ async function getSass(source, options, signatures={}) {
 			let newFileSignature = await getFileSignature(f);
 			let destFile = getPathRelativeTo(f, 'scss');
 			destFile = path.join(path.dirname(destFile), path.basename(destFile, '.scss') + '.css');
-			let dest = path.join.apply(this, ['build', 'chrome', 'skin', 'default', 'zotero', destFile]);
+			let dest = path.join('build', 'chrome', 'skin', 'default', 'zotero', destFile);
 
 			if (['win', 'mac', 'unix'].some(platform => f.endsWith(`-${platform}.scss`))) {
 				let platform = f.slice(f.lastIndexOf('-') + 1, f.lastIndexOf('.'));
 				destFile = destFile.slice(0, destFile.lastIndexOf('-'))
 				+ destFile.slice(destFile.lastIndexOf('-') + 1 + platform.length);
-				dest = path.join.apply(this, ['build', 'chrome', 'content', 'zotero-platform', platform, destFile]);
+				dest = path.join('build', 'chrome', 'content', 'zotero-platform', platform, destFile);
 			}
 
 			try {
@@ -54,7 +55,7 @@ async function getSass(source, options, signatures={}) {
 				await fs.outputFile(`${dest}.map`, sass.map);
 				onProgress(f, dest, 'sass');
 				signatures[f] = newFileSignature;
-				count++;
+				outFiles.push(dest);
 			}
 			catch (err) {
 				throw new Error(`Failed on ${f}: ${err}`);
@@ -65,7 +66,8 @@ async function getSass(source, options, signatures={}) {
 	const t2 = Date.now();
 	return {
 		action: 'sass',
-		count,
+		count: outFiles.length,
+		outFiles,
 		totalCount,
 		processingTime: t2 - t1
 	};
