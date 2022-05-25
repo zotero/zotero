@@ -11,6 +11,7 @@ const NODE_ENV = process.env.NODE_ENV;
 
 
 function onError(err) {
+	console.log('\u0007'); //🔔
 	console.log(colors.red('Error:'), err);
 }
 
