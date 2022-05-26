@@ -26,10 +26,11 @@
 "use strict";
 
 {
-	var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
-
-	// Load specific element because customElements.js loads on element creation only
-	Services.scriptloader.loadSubScript("chrome://global/content/elements/autocomplete-input.js", this);
+	// The autocomplete-input CE is defined lazily. Create one now to get
+	// autocomplete-input defined, allowing us to inherit from it.
+	if (!customElements.get("autocomplete-input")) {
+		delete document.createXULElement("autocomplete-input");
+	}
 
 	/**
 	 * Extends AutocompleteInput to fix document.activeElement checks that
