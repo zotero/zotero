@@ -40,7 +40,7 @@ Cu.import("resource://gre/modules/osfile.jsm");
 const CHILD_INDENT = 12;
 const COLORED_TAGS_RE = new RegExp("^[0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1}$");
 const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
-const EMOJI_RE = /\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\p{Emoji_Presentation}|\p{Emoji}\uFE0F/gu;
+const EMOJI_RE = /\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\p{Emoji_Presentation}|\p{Emoji}|[\u200D\uFE0F]/gu;
 const ATTACHMENT_STATE_LOAD_DELAY = 150; //ms
 
 var ItemTree = class ItemTree extends LibraryTree {
@@ -3825,8 +3825,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 	
 	_isOnlyEmoji(str) {
-		// Remove emoji and zero-width joiner and see if anything's left
-		return !str.replace(EMOJI_RE, '').replace(/\u200D/g,'');
+		// Remove emoji, Zero Width Joiner, and Variation Selector-16 and see if anything's left
+		return !str.replace(EMOJI_RE, '');
 	}
 	
 	_getTagSwatch(tag, color) {
