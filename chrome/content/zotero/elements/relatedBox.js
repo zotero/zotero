@@ -135,7 +135,7 @@
 		}
 
 		refresh() {
-			this._id('related-add').hidden = this._mode == 'edit';
+			this._id('related-add').hidden = this._mode != 'edit';
 
 			let grid = this._id('related-grid');
 			grid.replaceChildren();
