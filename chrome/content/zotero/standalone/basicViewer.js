@@ -48,10 +48,10 @@ window.addEventListener("load", /*async */function() {
 	//browser.docShellIsActive = false;
 	
 	// align page title with title of shown document
-	browser.addEventListener("pageshow", function() {
-		document.title = browser.contentDocument.title || browser.contentDocument.location.href;
-	}, false);
-	
+	browser.addEventListener('pagetitlechanged', () => {
+		document.title = browser.contentTitle || browser.currentURI.spec;
+	});
+
 	// Load URI passed in as nsISupports .data via openWindow()
 	browser.loadURI(
 		window.arguments[0],
