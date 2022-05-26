@@ -269,7 +269,7 @@ var ZoteroContextPane = new function () {
 			else {
 				var node = _notesPaneDeck.selectedPanel;
 				if (node.selectedIndex == 0) {
-					node.querySelector('textbox').focus();
+					node.querySelector('search-textbox').focus();
 					return true;
 				}
 				else {
@@ -873,7 +873,7 @@ var ZoteroContextPane = new function () {
 		);
 		// Related panel
 		var panelRelated = document.createXULElement('tabpanel');
-		var relatedBox = document.createXULElement('relatedbox');
+		var relatedBox = new (customElements.get('related-box'));
 		relatedBox.setAttribute('flex', '1');
 		relatedBox.className = 'zotero-editpane-related';
 		panelRelated.addEventListener('click', (event) => {

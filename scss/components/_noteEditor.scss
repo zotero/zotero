@@ -1,0 +1,26 @@
+#links-box {
+	.grid {
+		display: grid;
+		grid-template-columns: auto 1fr;
+
+		& > * {
+			margin-top: 1px !important;
+			margin-bottom: 1px !important;
+			padding: 0 2px 0 2px !important;
+		}
+
+		.label {
+			color: #7f7f7f;
+			text-align: right;
+			font-weight: bold;
+			min-width: 62px;
+			border: 1px solid transparent;
+		}
+
+		.value {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap
+		}
+	}
+}

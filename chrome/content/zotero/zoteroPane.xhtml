@@ -79,6 +79,7 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/menulistItemTypes.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/itemBox.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/noteEditor.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/relatedBox.js", this);
 
 		Services.scriptloader.loadSubScript("chrome://zotero/content/tabs.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/zoteroPane.js", this);
@@ -1137,7 +1138,7 @@
 													</tabpanel>
 													
 													<tabpanel>
-														<relatedbox id="zotero-editpane-related" class="zotero-editpane-related" flex="1"/>
+														<related-box id="zotero-editpane-related" class="zotero-editpane-related" flex="1"/>
 													</tabpanel>
 												</tabpanels>
 											</tabbox>

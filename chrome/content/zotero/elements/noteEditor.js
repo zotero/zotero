@@ -1,7 +1,7 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
     
-    Copyright © 2020 Corporation for Digital Scholarship
+    Copyright © 2021 Corporation for Digital Scholarship
                      Vienna, Virginia, USA
                      https://www.zotero.org
     
@@ -30,49 +30,21 @@
 		constructor() {
 			super();
 
-			this.editable = false;
-			this.displayTags = false;
-			this.displayRelated = false;
-			this.displayButton = false;
-			this.hideLinksContainer = false;
-
-			this.buttonCaption = null;
-			this.parentClickHandler = null;
-			this.keyDownHandler = null;
-			this.commandHandler = null;
-			this.clickHandler = null;
-			this.navigateHandler = null;
-			this.returnHandler = null;
-
+			this._notitle = false;
 			this._mode = 'view';
-			this._destroyed = false;
-			this._noteEditorID = Zotero.Utilities.randomString();
+			this._item = null;
+			this._parentItem = null;
 			this._iframe = null;
 			this._initialized = true;
 			this._editorInstance = null;
-			this._item = null;
-			this._parentItem = null;
-			
-			this.clickable = false;
-			this.editable = false;
-			this.saveOnEdit = false;
-			this.showTypeMenu = false;
-			this.hideEmptyFields = false;
-			this.clickByRow = false;
-			this.clickByItem = false;
-			
-			this.clickHandler = null;
-			this.blurHandler = null;
-			this.eventHandlers = [];
-			
-			this._mode = 'view';
+			this._destroyed = false;
 
 			this.content = MozXULElement.parseXULToFragment(`
 				<box flex="1" tooltip="html-tooltip" style="display: flex" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 					<div id="note-editor" style="display: flex;flex-direction: column;flex-grow: 1;" xmlns="http://www.w3.org/1999/xhtml">
 						<iframe  id="editor-view" style="border: 0;width: 100%;flex-grow: 1;" src="resource://zotero/note-editor/editor.html" type="content"/>
 						<div id="links-container">
-							<div id="links-box"/>
+							<links-box id="links-box" style="display: flex" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"/>
 						</div>
 					</div>
 				</box>
@@ -81,10 +53,6 @@
 					<menupopup id="editor-menu"/>					
 				</popupset>
 			`, ['chrome://zotero/locale/zotero.dtd']);
-
-			this._destroyed = false;
-			this._noteEditorID = Zotero.Utilities.randomString();
-			this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'file'], 'noteeditor');
 		}
 		
 		connectedCallback() {
@@ -116,9 +84,10 @@
 				}, true);
 				this._initialized = true;
 			});
-			shadow.appendChild(content);
+			shadow.append(content);
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'itembox');
+			this.notitle = !!this.getAttribute('notitle');
 		}
 		
 		destroy() {
@@ -132,10 +101,7 @@
 		}
 		
 		disconnectedCallback() {
-			// Empty the DOM. We will rebuild if reconnected.
-			while (this.lastChild) {
-				this.removeChild(this.lastChild);
-			}
+			this.replaceChildren();
 			this.destroy();
 		}
 
@@ -147,11 +113,11 @@
 			if (this._editorInstance) {
 				this._editorInstance.saveSync();
 			}
-		}
+		};
 
 		getCurrentInstance = () => {
 			return this._editorInstance;
-		}
+		};
 
 		initEditor = async (state, reloaded) => {
 			if (this._editorInstance) {
@@ -160,7 +126,7 @@
 
 			// Automatically upgrade editable v1 note before it's loaded
 			// TODO: Remove this at some point
-			if (this.editable) {
+			if (this._mode == 'edit') {
 				await Zotero.Notes.upgradeSchemaV1(this._item);
 			}
 
@@ -173,35 +139,35 @@
 				popup: this._id('editor-menu'),
 				onNavigate: this._navigateHandler,
 				viewMode: this.viewMode,
-				readOnly: !this.editable,
-				disableUI: this._mode === 'merge',
+				readOnly: this._mode != 'edit',
+				disableUI: this._mode == 'merge',
 				onReturn: this._returnHandler,
 				placeholder: this.placeholder
 			});
 			if (this._onInitCallback) {
 				this._onInitCallback();
 			}
-		}
+		};
 
 		onInit = (callback) => {
 			if (this._editorInstance) {
 				return callback();
 			}
 			this._onInitCallback = callback;
-		}
+		};
 
 		notify = async (event, type, ids, extraData) => {
 			if (this._editorInstance) {
 				await this._editorInstance.notify(event, type, ids, extraData);
 			}
 
-			if (!this.item) {
+			if (!this._item) {
 				return;
 			}
 			// Try to use the state from the item save event
-			let id = this.item.id;
+			let id = this._item.id;
 			if (ids.includes(id)) {
-				if (event === 'delete') {
+				if (event == 'delete') {
 					if (this._returnHandler) {
 						this._returnHandler();
 					}
@@ -214,17 +180,23 @@
 						}
 					}
 					else {
-						let curValue = this.item.note;
+						let curValue = this._item.note;
 						if (curValue !== this._lastHtmlValue) {
 							this.initEditor(null, true);
 						}
 					}
-					this._lastHtmlValue = this.item.note;
+					this._lastHtmlValue = this._item.note;
 				}
 			}
 
-			// this._id('links-container').hidden = !(this.displayTags && this.displayRelated) || this._hideLinksContainer;
-			// this._id('links-box').refresh();
+			if (ids.includes(id) || this._parentItem && ids.includes(this._parentItem.id)) {
+				this._id('links-box').refresh();
+			}
+		};
+
+		set notitle(val) {
+			this._notitle = !!val;
+			this._id('links-box').notitle = val;
 		}
 
 		set navigateHandler(val) {
@@ -238,46 +210,28 @@
 			this._returnHandler = val;
 		}
 
-		//
-		// Public properties
-		//
-		
-		// Modes are predefined settings groups for particular tasks
 		get mode() {
 			return this._mode;
 		}
 		
 		set mode(val) {
-			// Duplicate default property settings here
-			this.editable = false;
-			this.displayTags = false;
-			this.displayRelated = false;
-			this.displayButton = false;
-
+			var displayLinks = true;
 			switch (val) {
-				case 'view':
 				case 'merge':
-					this.editable = false;
+					displayLinks = false;
+				case 'view':
 					break;
 
 				case 'edit':
-					this.editable = true;
-					this.parentClickHandler = this.selectParent;
-					this.keyDownHandler = this.handleKeyDown;
-					this.commandHandler = this.save;
-					this.displayTags = true;
-					this.displayRelated = true;
 					break;
 
 				default:
-					throw ("Invalid mode '" + val + "' in noteEditor.js");
+					throw new Error(`Invalid mode '${val}'`);
 			}
 
 			this._mode = val;
-			// document.getAnonymousNodes(this)[0].setAttribute('mode', val);
-			// this._id('links-box').mode = val;
-			// this._id('links-container').hidden = !(this.displayTags && this.displayRelated) || this._hideLinksContainer;
-			// this._id('links-box').refresh();
+			this._id('links-container').hidden = !displayLinks;
+			this._id('links-box').mode = val;
 		}
 		
 		get item() {
@@ -291,7 +245,7 @@
 				return;
 			}
 
-			if (this._item && this._item.id && this._item.id === val.id) {
+			if (this._item && this._item.id && this._item.id == val.id) {
 				return;
 			}
 
@@ -303,12 +257,12 @@
 			this._lastHtmlValue = val.note;
 			this._item = val;
 
-			// var parentKey = this._item.parentKey;
-			// if (parentKey) {
-			// 	this.parentItem = Zotero.Items.getByLibraryAndKey(this._item.libraryID, parentKey);
-			// }
+			var parentKey = this._item.parentKey;
+			if (parentKey) {
+				this.parentItem = Zotero.Items.getByLibraryAndKey(this._item.libraryID, parentKey);
+			}
 
-			// this._id('links-box').item = this._item;
+			this._id('links-box').item = this._item;
 
 			(async () => {
 				// `item` field can be set before the constructor is called
@@ -328,7 +282,7 @@
 				}
 
 				this.initEditor();
-				// this._id('links-box').item = this._item;
+				this._id('links-box').item = this._item;
 			})();
 		}
 
@@ -338,7 +292,7 @@
 
 		set parentItem(val) {
 			this._parentItem = val;
-			// this._id('links-box').parentItem = val;
+			this._id('links-box').parentItem = val;
 		}
 
 		async focus() {
@@ -370,4 +324,240 @@
 		}
 	}
 	customElements.define("note-editor", NoteEditor);
+}
+
+
+{
+	let TagsBoxContainer = require('containers/tagsBoxContainer').default;
+
+	class LinksBox extends XULElement {
+		constructor() {
+			super();
+
+			this._mode = 'view';
+			this._item = null;
+			this._parentItem = null;
+			this._destroyed = false;
+
+			this.content = MozXULElement.parseXULToFragment(`
+				<div id="links-box" xmlns="http://www.w3.org/1999/xhtml">
+					<div class="grid">
+						<div id="parent-label" class="label" hidden="true"/>
+						<div id="parent-value" class="value zotero-clicky" hidden="true"/>
+						
+						<div id="related-label" class="label"/>
+						<div id="related-value" class="value zotero-clicky"/>
+						
+						<div id="tags-label" class="label"/>
+						<div id="tags-value" class="value zotero-clicky"/>
+					</div>
+				</div>
+				<popupset xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+						<menupopup id="related-popup" width="300">
+							<related-box id="related"/>
+						</menupopup>
+						<menupopup id="tags-popup" width="300" ignorekeys="true">
+							<div style="display: flex" id="tags-box-container" xmlns="http://www.w3.org/1999/xhtml"/>
+						</menupopup>
+					</popupset>
+			`, ['chrome://zotero/locale/zotero.dtd']);
+		}
+
+		connectedCallback() {
+			this._destroyed = false;
+			window.addEventListener("unload", this.destroy);
+
+			var shadow = this.attachShadow({ mode: "open" });
+			var s1 = document.createElement("link");
+			s1.rel = "stylesheet";
+			s1.href = "chrome://zotero-platform/content/noteEditor.css";
+			shadow.append(s1);
+
+			var s2 = document.createElement("link");
+			s2.rel = "stylesheet";
+			s2.href = "chrome://global/skin/global.css";
+			shadow.append(s2);
+
+			shadow.append(document.importNode(this.content, true));
+
+			this._id('parent-value').addEventListener('click', this._parentClickHandler);
+			this._id('related-value').addEventListener('click', this._relatedClickHandler);
+			this._id('tags-value').addEventListener('click', this._tagsClickHandler);
+
+			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'itembox');
+		}
+
+		destroy() {
+			if (this._destroyed) {
+				return;
+			}
+			window.removeEventListener("unload", this.destroy);
+			this._destroyed = true;
+
+			Zotero.Notifier.unregisterObserver(this._notifierID);
+		}
+
+		disconnectedCallback() {
+			this.replaceChildren();
+			this.destroy();
+		}
+
+		set item(val) {
+			this._item = val;
+			this._id('related').item = this._item;
+
+			this.refresh();
+
+			// Hide popup to prevent it being visible out of the context or
+			// in some cases even invisible but still blocking the next click
+			this._id('related-popup').addEventListener('click', (event) => {
+				let target = event.originalTarget;
+				if (target.classList.contains('zotero-box-label')) {
+					this._id('related-popup').hidePopup();
+				}
+			});
+		}
+
+		set mode(val) {
+			this._mode = val;
+			this._id('related').mode = val;
+			this.refresh();
+		}
+
+		set notitle(val) {
+			this._notitle = val;
+			this.refresh();
+		}
+
+		set parentItem(val) {
+			this._parentItem = val;
+			this.refresh();
+		}
+
+		refresh() {
+			this._updateParentRow();
+			this._updateTagsSummary();
+			this._updateRelatedSummary();
+
+			// TODO: Update tagsBox container state via tagsBoxRef and imperative handle, instead of recreating it
+			let container = this._id('tags-box-container');
+			ReactDOM.unmountComponentAtNode(container);
+			if (this._item) {
+				var tagsBoxRef = React.createRef();
+				ReactDOM.render(
+					<TagsBoxContainer
+						key={'tagsBox-' + this._item.id}
+						item={this._item}
+						editable={this._mode == 'edit'}
+						ref={tagsBoxRef}
+					/>,
+					container
+				);
+			}
+		}
+
+		_updateParentRow() {
+			let hidden = !this._parentItem || !!this._notitle;
+			this._id('parent-value').hidden = hidden;
+			this._id('parent-label').hidden = hidden;
+			if (!hidden) {
+				this._id('parent-label').replaceChildren(Zotero.getString('pane.item.parentItem'));
+				this._id('parent-value').replaceChildren(document.createTextNode(this._parentItem.getDisplayTitle(true)));
+			}
+		}
+
+		_updateRelatedSummary() {
+			var r = '';
+			if (this._item) {
+				var keys = this._item.relatedItems;
+				if (keys.length) {
+					for (let key of keys) {
+						let item = Zotero.Items.getByLibraryAndKey(this._item.libraryID, key);
+						if (!item) {
+							Zotero.debug(`Related item ${this._item.libraryID}/${key} not found `
+								+ `for item ${this._item.libraryKey}`, 2);
+							continue;
+						}
+						r = r + item.getDisplayTitle() + ", ";
+					}
+					r = r.slice(0, -2);
+				}
+			}
+
+			let v = r;
+
+			if (!v || v == '') {
+				v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
+			}
+
+			this._id('related-label').innerText = Zotero.getString('itemFields.related')
+				+ Zotero.getString('punctuation.colon');
+			this._id('related-value').innerText = v;
+		}
+
+		_updateTagsSummary() {
+			var r = '';
+
+			if (this._item) {
+				var tags = this._item.getTags();
+
+				// Sort tags alphabetically
+				var collation = Zotero.getLocaleCollation();
+				tags.sort((a, b) => collation.compareString(1, a.tag, b.tag));
+
+				for (let i = 0; i < tags.length; i++) {
+					r = r + tags[i].tag + ", ";
+				}
+				r = r.slice(0, -2);
+			}
+
+			let v = r;
+
+			if (!v || v == '') {
+				v = "[" + Zotero.getString('pane.item.noteEditor.clickHere') + "]";
+			}
+
+			this._id('tags-label').innerText = Zotero.getString('itemFields.tags')
+				+ Zotero.getString('punctuation.colon');
+			this._id('tags-value').innerText = v;
+		}
+
+		_parentClickHandler = () => {
+			if (!this._item || !this._item.id) {
+				return;
+			}
+			var parentID = this._item.parentID;
+			var win = Zotero.getMainWindow();
+			if (win) {
+				win.ZoteroPane.selectItem(parentID);
+				win.Zotero_Tabs.select('zotero-pane');
+				win.focus();
+			}
+		};
+
+		_relatedClickHandler = (event) => {
+			var relatedList = this._item.relatedItems;
+			if (relatedList.length > 0) {
+				this._id('related-popup').openPopup(this, 'topleft topleft', 0, 0, false);
+			}
+			else if (this._mode == 'edit') {
+				this._id('related').add();
+			}
+		};
+
+		_tagsClickHandler = (event) => {
+			this._id('tags-popup').openPopup(this, 'topleft topleft', 0, 0, false);
+			// If editable and no existing tags, open new empty row
+			if (this._mode == 'edit' && !this._item.getTags().length) {
+				setTimeout(() => {
+					this._id('tags-popup').querySelector('.tags-box-header button').click();
+				});
+			}
+		};
+
+		_id(id) {
+			return this.shadowRoot.querySelector(`[id=${id}]`);
+		}
+	}
+	customElements.define("links-box", LinksBox);
 }

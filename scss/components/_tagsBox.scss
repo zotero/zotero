@@ -16,10 +16,6 @@
 	flex-grow: 1;
 	//width: 330px;
 	
-	// This is necessary for XUL layout to prevent children
-	// container to force its height for the parent
-	height: 0;
-	
 	.tags-box-header {
 		display: flex;
 		padding-left: 10px;
