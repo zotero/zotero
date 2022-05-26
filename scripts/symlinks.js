@@ -56,7 +56,7 @@ async function getSymlinks(source, options, signatures) {
 	return {
 		action: 'symlink',
 		count: filesProcessedCount,
-		outFiles: filesToProcess,
+		outFiles: files, // also includes files that has already been symlinked
 		totalCount: files.length,
 		processingTime: t2 - t1
 	};
