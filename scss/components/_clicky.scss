@@ -45,3 +45,12 @@
 	color: white;
 	background: rgb(89, 139, 236);
 }
+
+
+/* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
+@media (min-resolution: 1.25dppx) {
+	.zotero-clicky-minus  { background: url(chrome://zotero/skin/minus@2x.png) center/auto 18px no-repeat !important; }
+	.zotero-clicky-plus  { background: url(chrome://zotero/skin/plus@2x.png) center/auto 18px no-repeat !important; }
+	.zotero-clicky-minus:not([disabled=true]):active  { background-image: url('chrome://zotero/skin/minus-active@2x.png') !important; }
+	.zotero-clicky-plus:not([disabled=true]):active  { background-image: url('chrome://zotero/skin/plus-active@2x.png') !important; }
+}
