@@ -83,6 +83,7 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/tagsBox.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/relatedBox.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/attachmentBox.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/toolbarbuttonDropmarker.js", this);
 
 		Services.scriptloader.loadSubScript("chrome://zotero/content/tabs.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/zoteroPane.js", this);
@@ -758,6 +759,7 @@
 								<hbox id="zotero-collections-toolbar" align="center">
 									<toolbarbutton id="zotero-tb-collection-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
 									<toolbarbutton
+											is="toolbarbutton-dropmarker"
 											id="zotero-tb-library-add-menu"
 											class="zotero-tb-button"
 											tooltiptext="&zotero.toolbar.newLibrary.label;"
@@ -779,6 +781,7 @@
 								
 								<hbox id="zotero-items-toolbar" align="center">
 									<toolbarbutton
+											is="toolbarbutton-dropmarker"
 											id="zotero-tb-add"
 											class="zotero-tb-button"
 											tooltiptext="&zotero.toolbar.newItem.label;"
@@ -827,7 +830,9 @@
 									</panel>
 									
 									<!--<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.note.standalone;" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>-->
-									<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newNote;"
+									<toolbarbutton
+											is="toolbarbutton-dropmarker"
+											id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newNote;"
 											type="menu"
 											wantdropmarker="true"
 											onmousedown="if (this.disabled) { event.preventDefault(); return; }">
@@ -837,6 +842,7 @@
 										</menupopup>
 									</toolbarbutton>
 									<toolbarbutton
+											is="toolbarbutton-dropmarker"
 											id="zotero-tb-attachment-add"
 											class="zotero-tb-button"
 											tooltiptext="&zotero.items.menu.attach;"
@@ -862,6 +868,7 @@
 								<hbox id="zotero-item-toolbar" flex="1" align="center" tooltip="html-tooltip">
 									<hbox align="center" pack="start" flex="1">
 										<toolbarbutton
+												is="toolbarbutton-dropmarker"
 												id="zotero-tb-locate"
 												class="zotero-tb-button"
 												tooltiptext="&zotero.toolbar.openURL.label;"
