@@ -258,7 +258,7 @@
 				title.className = 'zotero-clicky';
 				
 				// For the time being, use a silly little popup
-				title.addEventListener('click', this.editTitle, false);
+				title.addEventListener('click', () => this.editTitle(), false);
 			}
 			
 			var isImportedURL = this.item.attachmentLinkMode ==
@@ -420,7 +420,7 @@
 				selectButton.label = this.buttonCaption;
 				selectButton.hidden = false;
 				selectButton.setAttribute('oncommand',
-					'document.getBindingParent(this).clickHandler(this)');
+					event => this.clickHandler(event.target));
 			}
 			else {
 				selectButton.hidden = true;
@@ -428,12 +428,11 @@
 		}
 
 		editTitle() {
-			return Zotero.spawn(async () => {
-				var item = document.getBindingParent(this).item;
+			return (async () => {
+				var item = this.item;
 				var oldTitle = item.getField('title');
 				
-				var nsIPS = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-						.getService(Components.interfaces.nsIPromptService);
+				var nsIPS = Services.prompt;
 				
 				var newTitle = { value: oldTitle };
 				var checkState = { value: Zotero.Prefs.get('lastRenameAssociatedFile') };
@@ -525,7 +524,7 @@
 					item.setField('title', newTitle.value);
 					await item.saveTx();
 				}
-			});
+			})();
 		}
 
 		onViewClick(event) {
@@ -537,7 +536,7 @@
 		}
 
 		updateItemIndexedState() {
-			return Zotero.spawn(async () => {
+			return (async () => {
 				var indexStatus = this._id('index-status');
 				var reindexButton = this._id('reindex');
 				
@@ -582,7 +581,7 @@
 				else {
 					reindexButton.setAttribute('hidden', true);
 				}
-			}, this);
+			})();
 		}
 
 		_id(id) {

@@ -383,8 +383,6 @@
 			this._id('parent-value').addEventListener('click', this._parentClickHandler);
 			this._id('related-value').addEventListener('click', this._relatedClickHandler);
 			this._id('tags-value').addEventListener('click', this._tagsClickHandler);
-
-			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'itembox');
 		}
 
 		destroy() {
@@ -393,8 +391,6 @@
 			}
 			window.removeEventListener("unload", this.destroy);
 			this._destroyed = true;
-
-			Zotero.Notifier.unregisterObserver(this._notifierID);
 		}
 
 		disconnectedCallback() {
