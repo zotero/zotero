@@ -1,0 +1,42 @@
+.header {
+	display: flex;
+	padding-left: 10px;
+	align-items: center;
+
+	label {
+		margin-right: 5px;
+	}
+
+	button {
+		min-width: 79px;
+		margin: 5px 6px 3px;
+		padding-top: 1px;
+		padding-bottom: 1px;
+		color: ButtonText;
+		text-shadow: none;
+		font-size: inherit;
+	}
+}
+
+.grid {
+	display: grid;
+	grid-template-columns: 1fr auto;
+
+	.box {
+		overflow: hidden;
+		display: flex;
+		margin-left: 5px;
+
+		img {
+			width: 16px;
+			height: 16px;
+		}
+
+		label {
+			margin-left: 3px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+}
