@@ -81,6 +81,7 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/noteEditor.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/notesBox.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/relatedBox.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/attachmentBox.js", this);
 
 		Services.scriptloader.loadSubScript("chrome://zotero/content/tabs.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/zoteroPane.js", this);
@@ -1144,7 +1145,7 @@
 											
 											<!-- Attachment item -->
 											<groupbox>
-												<zoteroattachmentbox id="zotero-attachment-box" flex="1"/>
+												<attachment-box id="zotero-attachment-box" flex="1"/>
 											</groupbox>
 											
 											<!-- Duplicate merging -->

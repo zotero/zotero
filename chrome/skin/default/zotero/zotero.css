@@ -31,16 +31,6 @@ textbox[type="styled"]
 	-moz-binding: url('chrome://zotero/content/bindings/styled-textbox.xml#styled-textbox');
 }
 
-zoteroattachmentbox
-{
-	-moz-binding: url('chrome://zotero/content/bindings/attachmentbox.xml#attachment-box');
-}
-
-zoterostoragefilebox
-{
-	-moz-binding: url('chrome://zotero/content/bindings/storagefilebox.xml#storage-file-box');
-}
-
 zoteronoteeditor
 {
 	-moz-binding: url('chrome://zotero/content/bindings/noteeditor.xml#note-editor');
