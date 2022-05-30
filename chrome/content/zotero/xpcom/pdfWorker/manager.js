@@ -473,21 +473,35 @@ class PDFWorker {
 			}
 
 			// Shift page index for other annotations
-			let notifierQueue = new Zotero.Notifier.Queue();
-			try {
-				for (let { id, position } of annotations) {
+			ids = [];
+			await Zotero.DB.executeTransaction(async function () {
+				let rows = await Zotero.DB.queryAsync('SELECT itemID, position FROM itemAnnotations WHERE parentItemID=?', itemID);
+				for (let { itemID, position } of rows) {
+					try {
+						position = JSON.parse(position);
+					}
+					catch (e) {
+						Zotero.logError(e);
+						continue;
+					}
+					// Find the count of deleted pages before the current annotation page
 					let shift = pageIndexes.reduce((prev, cur) => cur < position.pageIndex ? prev + 1 : prev, 0);
 					if (shift > 0) {
 						position.pageIndex -= shift;
-						var item = Zotero.Items.get(id);
-						item.annotationPosition = JSON.stringify(position);
-						await item.saveTx({ notifierQueue });
+						position = JSON.stringify(position);
+						await Zotero.DB.queryAsync('UPDATE itemAnnotations SET position=? WHERE itemID=?', [position, itemID]);
+						ids.push(itemID);
 					}
 				}
+			});
+			let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType('item');
+			let loadedObjects = objectsClass.getLoaded();
+			for (let object of loadedObjects) {
+				if (ids.includes(object.id)) {
+					await object.reload(null, true);
+				}
 			}
-			finally {
-				await Zotero.Notifier.commit(notifierQueue);
-			}
+			await Zotero.Notifier.trigger('modify', 'item', ids, {});
 
 			await OS.File.writeAtomic(path, new Uint8Array(modifiedBuf));
 			let mtime = Math.floor(await attachment.attachmentModificationTime / 1000);

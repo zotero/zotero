@@ -250,29 +250,18 @@ class ReaderInstance {
 		return !index;
 	}
 
-	promptToDeletePages() {
+	promptToDeletePages(num) {
 		let ps = Services.prompt;
 		let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
 		let index = ps.confirmEx(
 			null,
 			Zotero.getString('pdfReader.promptDeletePages.title'),
-			Zotero.getString('pdfReader.promptDeletePages.text'),
-			buttonFlags,
-			Zotero.getString('general.continue'),
-			null, null, null, {}
-		);
-		return !index;
-	}
-
-	promptToRotatePages() {
-		let ps = Services.prompt;
-		let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
-		let index = ps.confirmEx(
-			null,
-			Zotero.getString('pdfReader.promptRotatePages.title'),
-			Zotero.getString('pdfReader.promptRotatePages.text'),
+			Zotero.getString(
+				'pdfReader.promptDeletePages.text',
+				new Intl.NumberFormat().format(num),
+				num
+			),
 			buttonFlags,
 			Zotero.getString('general.continue'),
 			null, null, null, {}
@@ -710,33 +699,27 @@ class ReaderInstance {
 		menuitem = this._window.document.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.rotate90'));
 		menuitem.addEventListener('command', async () => {
-			if (this.promptToRotatePages()) {
-				this._postMessage({ action: 'reloading' });
-				await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 90, true);
-				await this.reload();
-			}
+			this._postMessage({ action: 'reloading' });
+			await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 90, true);
+			await this.reload();
 		});
 		popup.appendChild(menuitem);
 		// Rotate 180
 		menuitem = this._window.document.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.rotate180'));
 		menuitem.addEventListener('command', async () => {
-			if (this.promptToRotatePages()) {
-				this._postMessage({ action: 'reloading' });
-				await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 180, true);
-				await this.reload();
-			}
+			this._postMessage({ action: 'reloading' });
+			await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 180, true);
+			await this.reload();
 		});
 		popup.appendChild(menuitem);
 		// Rotate 270
 		menuitem = this._window.document.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.rotate270'));
 		menuitem.addEventListener('command', async () => {
-			if (this.promptToRotatePages()) {
-				this._postMessage({ action: 'reloading' });
-				await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 270, true);
-				await this.reload();
-			}
+			this._postMessage({ action: 'reloading' });
+			await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 270, true);
+			await this.reload();
 		});
 		popup.appendChild(menuitem);
 		// Separator
@@ -745,7 +728,7 @@ class ReaderInstance {
 		menuitem = this._window.document.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('general.delete'));
 		menuitem.addEventListener('command', async () => {
-			if (this.promptToDeletePages()) {
+			if (this.promptToDeletePages(data.pageIndexes.length)) {
 				this._postMessage({ action: 'reloading' });
 				await Zotero.PDFWorker.deletePages(this._itemID, data.pageIndexes, true);
 				await this.reload();
