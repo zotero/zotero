@@ -302,7 +302,10 @@ const TabBar = forwardRef(function (props, ref) {
 				onWheel={handleWheel}
 			>
 				<div className="pinned-tabs">
-					<div className="tabs">
+					<div
+						className="tabs"
+						onMouseOut={handleTabBarMouseOut}
+					>
 						{tabs.length ? renderTab(tabs[0], 0) : null}
 					</div>
 				</div>
