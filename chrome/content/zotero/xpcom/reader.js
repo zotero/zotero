@@ -730,7 +730,11 @@ class ReaderInstance {
 		menuitem.addEventListener('command', async () => {
 			if (this.promptToDeletePages(data.pageIndexes.length)) {
 				this._postMessage({ action: 'reloading' });
-				await Zotero.PDFWorker.deletePages(this._itemID, data.pageIndexes, true);
+				try {
+					await Zotero.PDFWorker.deletePages(this._itemID, data.pageIndexes, true);
+				}
+				catch (e) {
+				}
 				await this.reload();
 			}
 		});
