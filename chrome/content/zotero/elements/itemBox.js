@@ -448,7 +448,7 @@
 			}
 			if (this.showTypeMenu) {
 				this.updateItemTypeMenuSelection();
-				this.itemTypeMenu.parentNode.parentNode.style.display = 'initial';
+				this.itemTypeMenu.parentNode.parentNode.style.display = 'table-row';
 				this.itemTypeMenu.setAttribute('ztabindex', '0');
 			}
 			else {
