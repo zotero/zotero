@@ -502,6 +502,8 @@ ZoteroCommandLineHandler.prototype = {
 		}
 		
 		zInitOptions.forceDataDir = cmdLine.handleFlagWithParam("datadir", false);
+
+		// Placeholder for ZoterDevHelper, please do not remove, this line may be replaced with code during build
 		
 		// handler to open Zotero pane at startup in Zotero for Firefox
 		if (!isStandalone() && cmdLine.handleFlag("ZoteroPaneOpen", false)) {

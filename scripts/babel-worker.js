@@ -7,7 +7,7 @@ const babel = require('@babel/core');
 const multimatch = require('multimatch');
 const options = JSON.parse(fs.readFileSync('.babelrc'));
 const cluster = require('cluster');
-const { comparePaths } = require('./utils');
+const { comparePaths, envCheckTrue } = require('./utils');
 
 /* exported onmessage */
 async function babelWorker(ev) {
@@ -24,6 +24,7 @@ async function babelWorker(ev) {
 			error
 		});
 	};
+	const REWRITE_SRC = envCheckTrue(process.env.REWRITE_SRC);
 
 	var isSkipped = false;
 	var transformed;
@@ -59,6 +60,12 @@ async function babelWorker(ev) {
 			// issues with monkey-patching that singleFile does for default interfaces.
 			transformed = contents.replace('globalThis.Set', 'Set')
 				.replace('globalThis.Map', 'Map');
+		}
+		else if (REWRITE_SRC && sourcefile === 'components/zotero-service.js') {
+			transformed = contents.replace(
+				"// Placeholder for ZoterDevHelper, please do not remove, this line may be replaced with code during build",
+				"zInitOptions.devHelper = cmdLine.handleFlagWithParam('ZoteroDevHelper', false);"
+			);
 		}
 
 		else if ('ignore' in options && options.ignore.some(ignoreGlob => multimatch(sourcefile, ignoreGlob).length)) {

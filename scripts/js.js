@@ -3,10 +3,11 @@ const path = require('path');
 const os = require('os');
 const fs = require('fs-extra');
 const cluster = require('cluster');
-const { getSignatures, compareSignatures, getFileSignature, writeSignatures, cleanUp, onSuccess, onError, onProgress } = require('./utils');
+const { envCheckTrue, getSignatures, compareSignatures, getFileSignature, writeSignatures, cleanUp, onSuccess,
+onError, onProgress } = require('./utils');
 const { jsFiles, ignoreMask } = require('./config');
 
-const NODE_ENV = process.env.NODE_ENV;
+const DEBUG = envCheckTrue(process.env.DEBUG);
 const ROOT = path.resolve(__dirname, '..');
 
 async function getJS(source, options, signatures) {
@@ -58,7 +59,7 @@ async function getJS(source, options, signatures) {
 	const workerCount = Math.min(cpuCount, filesForProcessing.length);
 	const outFiles = [];
 	var workersActive = workerCount;
-	NODE_ENV == 'debug' && console.log(`Will process ${filesForProcessing.length} files using ${workerCount} processes`);
+	DEBUG && console.log(`Will process ${filesForProcessing.length} files using ${workerCount} processes`);
 	return new Promise((resolve, reject) => {
 		for (let i = 0; i < workerCount; i++) {
 			var worker = cluster.fork();
@@ -72,10 +73,10 @@ async function getJS(source, options, signatures) {
 					signatures[ev.sourcefile] = newFilesSignatures[ev.sourcefile];
 					
 					if (ev.isSkipped) {
-						NODE_ENV == 'debug' && console.log(`process ${this.id} SKIPPED ${ev.sourcefile}`);
+						DEBUG && console.log(`process ${this.id} SKIPPED ${ev.sourcefile}`);
 					} else {
-						NODE_ENV == 'debug' && console.log(`process ${this.id} took ${ev.processingTime} ms to process ${ev.sourcefile} into ${ev.outfile}`);
-						NODE_ENV != 'debug' && onProgress(ev.sourcefile, ev.outfile, 'js');
+						DEBUG && console.log(`process ${this.id} took ${ev.processingTime} ms to process ${ev.sourcefile} into ${ev.outfile}`);
+						!DEBUG && onProgress(ev.sourcefile, ev.outfile, 'js');
 						outFiles.push(ev.outfile);
 					}
 				}
@@ -83,7 +84,7 @@ async function getJS(source, options, signatures) {
 				let nextFile = filesForProcessing.pop();
 
 				if (!isError && nextFile) {
-					NODE_ENV == 'debug' && console.log(`process ${this.id} scheduled to process ${nextFile}`);
+					DEBUG && console.log(`process ${this.id} scheduled to process ${nextFile}`);
 					this.send({
 						file: nextFile
 					});
@@ -91,7 +92,7 @@ async function getJS(source, options, signatures) {
 					if (this.isConnected()) {
 						this.kill();
 					}
-					NODE_ENV == 'debug' && console.log(`process ${this.id} has terminated`);
+					DEBUG && console.log(`process ${this.id} has terminated`);
 					if (!--workersActive) {
 						const t2 = Date.now();
 						resolve({
@@ -106,7 +107,7 @@ async function getJS(source, options, signatures) {
 			});
 
 			let nextFile = filesForProcessing.pop();
-			NODE_ENV == 'debug' && console.log(`process ${worker.id} scheduled to process ${nextFile}`);
+			DEBUG && console.log(`process ${worker.id} scheduled to process ${nextFile}`);
 			worker.send({
 				file: nextFile
 			});

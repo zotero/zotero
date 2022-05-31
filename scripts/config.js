@@ -101,6 +101,8 @@ const ignoreMask = [
 	'chrome/content/zotero/xpcom/translate/README.md',
 	'chrome/content/zotero/xpcom/utilities/node_modules/**/*',
 	'chrome/content/zotero/xpcom/utilities/test/**/*',
+	'chrome/content/zotero/devHelper.xhtml',
+	'chrome/content/zotero/devHelper.js',
 ];
 
 const jsFiles = [
@@ -121,8 +123,19 @@ const scssFiles = [
 	'chrome/skin/default/zotero/**/*.scss'
 ];
 
+const rewriteSrcFiles = [
+	'chrome/**/*.xhtml'
+];
+
+const envDependentFiles = {
+	REWRITE_SRC: [
+		'components/zotero-service.js',
+		'chrome/content/zotero/devHelper.xhtml',
+		'chrome/content/zotero/devHelper.js',
+	]
+};
+
 const buildsURL = 'https://zotero-download.s3.amazonaws.com/ci/';
 
-module.exports = {
-	dirs, symlinkDirs, copyDirs, symlinkFiles, browserifyConfigs, jsFiles, scssFiles, ignoreMask, buildsURL
-};
+module.exports = { dirs, envDependentFiles, symlinkDirs, copyDirs, symlinkFiles, browserifyConfigs,
+	jsFiles, scssFiles, ignoreMask, buildsURL, rewriteSrcFiles };

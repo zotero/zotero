@@ -97,19 +97,19 @@ var require = (function() {
 		TextDecoder: TextDecoder,
 	};
 	Object.defineProperty(globals, 'Zotero', { get: getZotero });
-	var loader = Loader({
-		id: 'zotero/require',
-		paths: {
-			'': 'resource://zotero/',
-			'containers/': 'chrome://zotero/content/containers/',
-			'components/': 'chrome://zotero/content/components/',
-			'zotero/': 'chrome://zotero/content/',
-			// TEMP until plugins updated
-			// TODO: Possible to show a deprecation warning?
-			'zotero/filePicker': 'chrome://zotero/content/modules/filePicker',
-		},
-		globals
-	});
+	const makePath = chrPath => (win.Zotero?.devHelper
+			? `dev://${win.Zotero.devHelper}/chrome/${chrPath.replace('zotero/content/', 'content/zotero/')}`
+			: `chrome://${chrPath}`);
+	const paths = {
+		'': 'resource://zotero/',
+		'containers/': makePath('zotero/content/containers/'),
+		'components/': makePath('zotero/content/components/'),
+		'zotero/': makePath('zotero/content/'),
+		// TEMP until plugins updated
+		// TODO: Possible to show a deprecation warning?
+		'zotero/filePicker': 'chrome://zotero/content/modules/filePicker',
+	};
+	var loader = Loader({ id: 'zotero/require', paths, globals });
 	let require = Require(loader, requirer);
 	return require;
 })();

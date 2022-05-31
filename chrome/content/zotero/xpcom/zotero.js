@@ -201,6 +201,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			opts.filter(opt => options[opt]).forEach(opt => this[opt] = true);
 			
 			this.forceDataDir = options.forceDataDir;
+			this.devHelper = options.devHelper;
 		}
 		
 		this.mainThread = Services.tm.mainThread;
@@ -756,6 +757,14 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			Zotero.addShutdownListener(() => Zotero.Feeds.uninit());
 			
 			Zotero.Schema.schemaUpdatePromise.then(Zotero.purgeDataObjects.bind(Zotero));
+
+			if (Zotero.devHelper) {
+				Components.classes['@mozilla.org/embedcomp/window-watcher;1']
+					.getService(Components.interfaces.nsIWindowWatcher)
+					.openWindow(null, 'chrome://zotero/content/devHelper.xhtml',
+						"devHelper", "chrome,dialog=yes,resizable,centerscreen,menubar,scrollbars", null
+					);
+			}
 			
 			return true;
 		}

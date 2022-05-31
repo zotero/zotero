@@ -798,10 +798,18 @@ const Require = iced(function Require(loader, requirer) {
     // We also freeze module to prevent it from further changes
     // at runtime.
     if (!(uri in modules)) {
+      
+      // Special, non-existent protocol dev:// is used to load file:// and prevent all caching. This
+      // is only used by ZoteroDevHelper.
+      if (uri.startsWith('dev://')) {
+        module = Module(requirement, uri.replace('dev://', 'file://') + `?t=${Date.now()}`);
+        delete loader.sandboxes[uri];
+      } else {
       // Many of the loader's functionalities are dependent
       // on modules[uri] being set before loading, so we set it and
       // remove it if we have any errors.
-      module = modules[uri] = Module(requirement, uri);
+        module = modules[uri] = Module(requirement, uri);
+      }
       try {
         freeze(load(loader, module));
       }
