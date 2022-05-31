@@ -169,11 +169,8 @@
 				var row = typeBox.parentNode;
 				var fields = this.getCreatorFields(row);
 				fields.creatorTypeID = typeID;
-				typeBox.getElementsByTagName('label')[0].setAttribute(
-					'value',
-					Zotero.getString(
-						'creatorTypes.' + Zotero.CreatorTypes.getName(typeID)
-					)
+				typeBox.getElementsByTagName('label')[0].textContent = Zotero.getString(
+					'creatorTypes.' + Zotero.CreatorTypes.getName(typeID)
 				);
 				typeBox.setAttribute('typeid', typeID);
 				
