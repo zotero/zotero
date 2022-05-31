@@ -448,11 +448,11 @@
 			}
 			if (this.showTypeMenu) {
 				this.updateItemTypeMenuSelection();
-				this.itemTypeMenu.parentNode.hidden = false;
+				this.itemTypeMenu.parentNode.parentNode.style.display = 'initial';
 				this.itemTypeMenu.setAttribute('ztabindex', '0');
 			}
 			else {
-				this.itemTypeMenu.parentNode.hidden = true;
+				this.itemTypeMenu.parentNode.parentNode.style.display = 'none';
 			}
 			
 			//
@@ -630,7 +630,7 @@
 					var popup = button.appendChild(document.createXULElement("menupopup"));
 					
 					for (let v of this._fieldAlternatives[fieldName]) {
-						var menuitem = document.createXULElement("menuitem");
+						let menuitem = document.createXULElement("menuitem");
 						var sv = Zotero.Utilities.ellipsize(v, 60);
 						menuitem.setAttribute('label', sv);
 						if (v != sv) {
@@ -638,13 +638,13 @@
 						}
 						menuitem.setAttribute('fieldName', fieldName);
 						menuitem.setAttribute('originalValue', v);
-						menuitem.oncommand = () => {
+						menuitem.addEventListener('command', () => {
 							this.item.setField(
 								menuitem.getAttribute('fieldName'),
 								menuitem.getAttribute('originalValue')
 							);
 							this.refresh();
-						};
+						});
 						popup.appendChild(menuitem);
 					}
 					
