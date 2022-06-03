@@ -2651,15 +2651,7 @@ var ZoteroPane = new function()
 
 
 	function openPopup(popup, clientX, clientY) {
-		if (Zotero.rtl) {
-			// Use openPopupAtScreen because it behaves better in RTL mode
-			let screenX = clientX + window.screenX;
-			let screenY = clientY + window.screenY;
-			popup.openPopupAtScreen(screenX + 1, screenY + 1, true);
-		}
-		else {
-			popup.openPopup(null, '', clientX + 1, clientY + 1);
-		}
+		popup.openPopupAtScreen(clientX + 1, clientY + 1, true);
 	}
 	
 	

@@ -33,7 +33,7 @@
 		static get dropmarkerFragment() {
 			let frag = document.importNode(
 				MozXULElement.parseXULToFragment(`
-					<image src="chrome://zotero/skin/searchbar-dropmarker${Zotero.hiDPISuffix}.png" width="7" height="4"/>
+					<image src="chrome://zotero/skin/searchbar-dropmarker${Zotero.hiDPISuffix}.png" width="7" height="4" class="toolbarbutton-menu-dropmarker"/>
 				`),
 				true
 			);
