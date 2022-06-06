@@ -383,18 +383,18 @@ Zotero.CookieSandbox.Observer = new function() {
 			if(trackedBy) {
 				var cookiesForURI = trackedBy.getCookiesForURI(channel.URI);
 			}
-			
+
+			if(trackedBy.userAgent) {
+				channel.setRequestHeader("User-Agent", trackedBy.userAgent, false);
+			}
+
 			if(!trackedBy || !cookiesForURI) {
 				channel.setRequestHeader("Cookie", "", false);
 				channel.setRequestHeader("Cookie2", "", false);
 				Zotero.debug("CookieSandbox: Cleared cookies to be sent to "+channelURI, 5);
 				return;
 			}
-			
-			if(trackedBy.userAgent) {
-				channel.setRequestHeader("User-Agent", trackedBy.userAgent, false);
-			}
-			
+		
 			// add cookies to be sent to this domain
 			channel.setRequestHeader("Cookie", Zotero.CookieSandbox.generateCookieString(cookiesForURI), false);
 			Zotero.debug("CookieSandbox: Added cookies for request to "+channelURI, 5);
