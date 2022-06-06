@@ -108,7 +108,7 @@ Zotero.MIMETypeHandler = new function () {
 		else if (_typeHandlers[type]) {
 			var i = _typeHandlers[type].indexOf(handler);
 			if (i != -1) {
-				_typeHandlers.splice(i, 1);
+				_typeHandlers[type].splice(i, 1);
 			}
 		}
 	};
