@@ -27,7 +27,6 @@
 //  related with `require` not reusing the context
 var React = require('react');
 var ReactDOM = require('react-dom');
-var TagsBoxContainer = require('containers/tagsBoxContainer').default;
 var NotesList = require('components/itemPane/notesList').default;
 
 var ZoteroContextPane = new function () {
@@ -852,25 +851,11 @@ var ZoteroContextPane = new function () {
 		panelInfo.append(itemBox);
 		// Tags panel
 		var panelTags = document.createXULElement('tabpanel');
-		panelTags.setAttribute('orient', 'vertical');
-		panelTags.setAttribute('context', 'tags-context-menu');
-		panelTags.className = 'tags-pane';
-		panelTags.style.display = 'flex';
-		var div = document.createElementNS(HTML_NS, 'div');
-		div.className = 'tags-box-container';
-		div.style.display = 'flex';
-		div.style.flexGrow = '1';
-		panelTags.append(div);
-		var tagsBoxRef = React.createRef();
-		ReactDOM.render(
-			<TagsBoxContainer
-				key={'tagsBox-' + parentItem.id}
-				item={parentItem}
-				editable={!readOnly}
-				ref={tagsBoxRef}
-			/>,
-			div
-		);
+		var tagsBox = new (customElements.get('tags-box'));
+		tagsBox.setAttribute('flex', '1');
+		tagsBox.className = 'zotero-editpane-tags';
+		panelTags.append(tagsBox);
+
 		// Related panel
 		var panelRelated = document.createXULElement('tabpanel');
 		var relatedBox = new (customElements.get('related-box'));
@@ -889,6 +874,9 @@ var ZoteroContextPane = new function () {
 
 		itemBox.mode = readOnly ? 'view' : 'edit';
 		itemBox.item = parentItem;
+
+		tagsBox.mode = readOnly ? 'view' : 'edit';
+		tagsBox.item = parentItem;
 
 		relatedBox.mode = readOnly ? 'view' : 'edit';
 		relatedBox.item = parentItem;

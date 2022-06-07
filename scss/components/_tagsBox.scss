@@ -1,105 +1,72 @@
-.tags-pane {
+.tags-box-header {
 	display: flex;
+	padding-left: 10px;
+	align-items: center;
+
+	button {
+		min-width: 79px;
+		margin: 5px 6px 3px;
+		padding-top: 1px;
+		padding-bottom: 1px;
+		color: ButtonText;
+		text-shadow: none;
+		font-size: inherit;
+	}
 }
 
-.tags-box-container {
-	flex-grow: 1;
-	display: flex;
-}
+.tags-box-list {
+	list-style: none;
+	margin: 0;
+	padding: 2px 0 0; // Leave space for textbox border on top tag
 
-.tags-box {
-	$item-pane-width: 330px;
-	$icon-width: 16px;
-	$delete-button-width: 20px;
-	$li-side-margin: 6px;
-	
-	flex-grow: 1;
-	//width: 330px;
-	
-	.tags-box-header {
+	li {
 		display: flex;
-		padding-left: 10px;
-		align-items: center;
-		
-		button {
-			min-width: 79px;
-			margin: 5px 6px 3px;
-			padding-top: 1px;
-			padding-bottom: 1px;
-			color: ButtonText;
-			text-shadow: none;
-			font-size: inherit;
-		}
-	}
-	
-	.tags-box-count {
-		margin-right: 5px;
-	}
-	
-	ul.tags-box-list {
-		list-style: none;
-		margin: 0;
-		padding: 2px 0 0; // Leave space for textbox border on top tag
-	}
-	
-	ul.tags-box-list > li {
-		display: flex;
-		margin: 3px $li-side-margin;
+		margin: 3px 0;
+		margin-inline-start: 6px;
 		align-items: center;
 		height: 1.5em;
-		
+
+		// Shift-Enter
+		&.multiline {
+			align-items: start;
+			height: 9em;
+
+			textarea.editable {
+				resize: none;
+			}
+		}
+
+		&:not(.multiline) .editable {
+			padding: 0 1px;
+		}
+
+		.zotero-box-icon {
+			width: 16px;
+			height: 16px;
+		}
+
+		.zotero-box-label {
+			flex-grow: 1;
+			white-space: nowrap;
+			overflow-x: hidden;
+			text-overflow: ellipsis;
+			width: 0;
+		}
+
+		.editable {
+			font-family: inherit;
+			font-size: inherit;
+			flex-grow: 1;
+			margin: 0 2px;
+			width: 0;
+		}
+
 		button {
 			border: 0;
 			background: none;
 			padding: 0;
-			width: $delete-button-width;
+			width: 20px;
 			height: 18px;
 		}
-	}
-	
-	.editable-container {
-		flex-grow: 1;
-		margin: 0 2px;
-		// width: $item-pane-width - $icon-width - $delete-button-width - ($li-side-margin * 2);
-		
-		// This container shouldn't force any width for its parent,
-		// because tagsBox is used in more places than just item pane,
-		// and it can have smaller width than $item-pane-width
-		width: 0;
-	}
-	
-	ul.tags-box-list > li:not(.multiline) .editable-container {
-		padding: 0 1px;
-	}
-	
-	// Shift-Enter
-	ul.tags-box-list > li.multiline {
-		align-items: start;
-		height: 9em;
-		
-		.editable-container {
-			align-self: stretch;
-			display: flex;
-		}
-		
-		.editable, .input-group {
-			flex-grow: 1;
-			display: flex;
-			align-self: stretch;
-		}
-		
-		textarea.editable-control {
-			flex: 1;
-			resize: none;
-		}
-	}
-	
-	input.editable-control {
-		width: 100px; // Dummy value that somehow prevents field from going off screen at large font size
-		font-family: inherit;
-	}
-	
-	textarea.editable-control {
-		width: 100%; // DEBUG: This still runs off the screen at large font size, though it keeps the delete button visible
 	}
 }

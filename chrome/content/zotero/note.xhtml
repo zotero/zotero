@@ -3,7 +3,10 @@
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
 
-<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+<!DOCTYPE window [
+	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
+	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
+]>
 
 <window
     id="zotero-note-window"
@@ -20,12 +23,11 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
 		Services.scriptloader.loadSubScript("resource://zotero/require.js", this);
 
+		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/shadowAutocompleteInput.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/noteEditor.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/relatedBox.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/tagsBox.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/note.js", this);
-
-		var React = require('react');
-		var ReactDOM = require('react-dom');
 	</script>
 
 	<keyset>

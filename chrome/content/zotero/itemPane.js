@@ -44,11 +44,8 @@ var ZoteroItemPane = new function() {
 			return;
 		}
 
-		// Fake a ref
-		_tagsBox = {
-			current: null
-		};
 		_notesBox = document.getElementById('zotero-editpane-notes');
+		_tagsBox = document.getElementById('zotero-editpane-tags');
 		_relatedBox = document.getElementById('zotero-editpane-related');
 
 		this._unregisterID = Zotero.Notifier.registerObserver(this, ['item'], 'itemPane');
@@ -86,6 +83,10 @@ var ZoteroItemPane = new function() {
 				box.parentItem = item;
 				break;
 
+			case 2:
+				var box = _tagsBox;
+				break;
+
 			case 3:
 				var box = _relatedBox;
 				break;
@@ -100,11 +101,6 @@ var ZoteroItemPane = new function() {
 					//yield box.blurOpenField();
 					// DEBUG: Currently broken
 					//box.scrollToTop();
-					break;
-				
-				case 2:
-					// TEMP
-					//_tagsBox.current.blurOpenField();
 					break;
 			}
 		}
@@ -135,19 +131,6 @@ var ZoteroItemPane = new function() {
 				}	
 				this.setTranslateButton();
 			}
-		}
-		else if (index == 2) {
-			ReactDOM.render(
-				<TagsBoxContainer
-					key={"tagsBox-" + item.id}
-					item={item}
-					editable={mode != 'view'}
-					ref={_tagsBox}
-					onResetSelection={focusItemsList}
-				/>,
-				document.getElementById('tags-box-container'),
-				() => ZoteroPane.updateTagsBoxSize()
-			);
 		}
 		
 		if (box) {
@@ -186,7 +169,7 @@ var ZoteroItemPane = new function() {
 			break;
 			
 		case 2:
-			var box = _tagsBox.current;
+			var box = _tagsBox;
 			if (box) {
 				box.blurOpenField();
 			}

@@ -445,10 +445,16 @@ class ReaderInstance {
 
 	_openTagsPopup(item, selector) {
 		let menupopup = this._window.document.createXULElement('menupopup');
+		menupopup.addEventListener('popuphidden', function (event) {
+			if (event.target === menupopup) {
+				menupopup.remove();
+			}
+		});
 		menupopup.className = 'tags-popup';
+		menupopup.style.font = 'inherit';
 		menupopup.style.minWidth = '300px';
 		menupopup.setAttribute('ignorekeys', true);
-		let tagsbox = this._window.document.createXULElement('tagsbox');
+		let tagsbox = new (this._window.customElements.get('tags-box'));
 		menupopup.appendChild(tagsbox);
 		tagsbox.setAttribute('flex', '1');
 		this._popupset.appendChild(menupopup);
