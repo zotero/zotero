@@ -1261,7 +1261,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		sortFields.forEach(x => cache[x] = {});
 		
 		// Get the display field for a row (which might be a placeholder title)
-		function getField(field, row) {
+		let getField = (field, row) => {
 			var item = row.ref;
 			
 			switch (field) {
@@ -1269,23 +1269,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 				return Zotero.Items.getSortTitle(item.getDisplayTitle());
 			
 			case 'hasAttachment':
-				if (item.isFileAttachment()) {
-					var state = item.fileExistsCached() ? 1 : -1;
-				}
-				else if (item.isRegularItem()) {
-					var state = item.getBestAttachmentStateCached();
+				if (this._canGetBestAttachmentState(item)) {
+					return item.getBestAttachmentStateCached();
 				}
 				else {
 					return 0;
 				}
-				// Make sort order present, missing, empty when ascending
-				if (state === 1) {
-					state = 2;
-				}
-				else if (state === -1) {
-					state = 1;
-				}
-				return state;
 			
 			case 'numNotes':
 				return row.numNotes(false, true) || 0;
@@ -1349,7 +1338,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 				}
 				
 				if (sortField == 'hasAttachment') {
-					return fieldB - fieldA;
+					// PDFs at the top
+					const order = ['pdf', 'snapshot', 'other', 'none'];
+					fieldA = order.indexOf(fieldA.type || 'none') + (fieldA.exists ? 0 : 4);
+					fieldB = order.indexOf(fieldB.type || 'none') + (fieldB.exists ? 0 : 4);
+					return fieldA - fieldB;
 				}
 
 				if (sortField == 'callNumber') {
@@ -2748,93 +2741,60 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		// TEMP: For now, we use the blue bullet for all non-PDF attachments, but there's
 		// commented-out code for showing different icons for snapshots, files, and URL/DOI links
-		if (this.isContainer(index)) {
-			if (item.isRegularItem()) {
-				const { type, exists } = item.getBestAttachmentStateCached();
-				let icon = "";
-				let ariaLabel;
-				// If the item has a child attachment
-				if (type !== null && type != 'none') {
-					if (type == 'pdf') {
-						icon = getDOMElement('IconTreeitemAttachmentPDF');
-						ariaLabel = Zotero.getString('pane.item.attachments.hasPDF');
-						if (!exists) {
-							icon.classList.add('icon-missing-file');
-						}
-					}
-					else if (type == 'snapshot') {
-						//icon = getDOMElement('IconTreeitemAttachmentSnapshot');
-						icon = exists ? getDOMElement('IconBulletBlue') : getDOMElement('IconBulletBlueEmpty');
-						ariaLabel = Zotero.getString('pane.item.attachments.hasSnapshot');
-					}
-					else {
-						//icon = getDOMElement('IconTreeitem');
-						icon = exists ? getDOMElement('IconBulletBlue') : getDOMElement('IconBulletBlueEmpty');
-						ariaLabel = Zotero.getString('pane.item.attachments.has');
-					}
-					icon.classList.add('cell-icon');
-					//if (!exists) {
-					//	icon.classList.add('icon-missing-file');
-					//}
-				}
-				//else if (type == 'none') {
-				//	if (item.getField('url') || item.getField('DOI')) {
-				//		icon = getDOMElement('IconLink');
-				//		ariaLabel = Zotero.getString('pane.item.attachments.hasLink');
-				//		icon.classList.add('cell-icon');
-				//	}
-				//}
-				if (ariaLabel) {
-					icon.setAttribute('aria-label', ariaLabel + '.');
-					span.setAttribute('title', ariaLabel);
-				}
-				span.append(icon);
-
-				// Don't run this immediately since it might cause a db check and disk access
-				// but delay for some time and see if the item is still visible in the tree
-				// (i.e. if we haven't scrolled right past it)
-				setTimeout(() => {
-					if (!this.tree.rowIsVisible(index)) return;
-					item.getBestAttachmentState()
-						// Refresh cell when promise is fulfilled
-						.then(({ type: newType, exists: newExists }) => {
-							if (newType !== type || newExists !== exists) {
-								this.tree.invalidateRow(index);
-							}
-						});
-				}, ATTACHMENT_STATE_LOAD_DELAY);
-			}
-		}
-
-		if (item.isFileAttachment()) {
-			const exists = item.fileExistsCached();
+		if (this._canGetBestAttachmentState(item)) {
+			const { type, exists } = item.getBestAttachmentStateCached();
 			let icon = "";
-			if (exists !== null) {
-				if (item.isPDFAttachment()) {
+			let ariaLabel;
+			// If the item has a child attachment
+			if (type !== null && type != 'none') {
+				if (type == 'pdf') {
 					icon = getDOMElement('IconTreeitemAttachmentPDF');
+					ariaLabel = Zotero.getString('pane.item.attachments.hasPDF');
 					if (!exists) {
 						icon.classList.add('icon-missing-file');
 					}
 				}
-				else if (item.isSnapshotAttachment()) {
+				else if (type == 'snapshot') {
 					//icon = getDOMElement('IconTreeitemAttachmentSnapshot');
 					icon = exists ? getDOMElement('IconBulletBlue') : getDOMElement('IconBulletBlueEmpty');
+					ariaLabel = Zotero.getString('pane.item.attachments.hasSnapshot');
 				}
 				else {
 					//icon = getDOMElement('IconTreeitem');
 					icon = exists ? getDOMElement('IconBulletBlue') : getDOMElement('IconBulletBlueEmpty');
+					ariaLabel = Zotero.getString('pane.item.attachments.has');
 				}
 				icon.classList.add('cell-icon');
 				//if (!exists) {
 				//	icon.classList.add('icon-missing-file');
 				//}
 			}
+			//else if (type == 'none') {
+			//	if (item.getField('url') || item.getField('DOI')) {
+			//		icon = getDOMElement('IconLink');
+			//		ariaLabel = Zotero.getString('pane.item.attachments.hasLink');
+			//		icon.classList.add('cell-icon');
+			//	}
+			//}
+			if (ariaLabel) {
+				icon.setAttribute('aria-label', ariaLabel + '.');
+				span.setAttribute('title', ariaLabel);
+			}
 			span.append(icon);
 
-			item.fileExists()
-				// TODO: With no cell refreshing this is possibly somewhat inefficient
-				// Refresh cell when promise is fulfilled
-				.then(realExists => realExists != exists && this.tree.invalidateRow(index));
+			// Don't run this immediately since it might cause a db check and disk access
+			// but delay for some time and see if the item is still visible in the tree
+			// (i.e. if we haven't scrolled right past it)
+			setTimeout(() => {
+				if (!this.tree.rowIsVisible(index)) return;
+				item.getBestAttachmentState()
+					// Refresh cell when promise is fulfilled
+					.then(({ type: newType, exists: newExists }) => {
+						if (newType !== type || newExists !== exists) {
+							this.tree.invalidateRow(index);
+						}
+					});
+			}, ATTACHMENT_STATE_LOAD_DELAY);
 		}
 
 		return span;
@@ -3545,7 +3505,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				let t = new Date();
 				for (let i = 0; i < this._rows.length; i++) {
 					let item = this.getRow(i).ref;
-					if (item.isRegularItem()) {
+					if (this._canGetBestAttachmentState(item)) {
 						await item.getBestAttachmentState();
 					}
 				}
@@ -3822,6 +3782,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return document.createElement('span');
 		}
 		return icon;
+	}
+
+	_canGetBestAttachmentState(item) {
+		return (item.isRegularItem() && item.numAttachments())
+			|| (item.isFileAttachment() && item.isTopLevelItem());
 	}
 	
 	_isOnlyEmoji(str) {

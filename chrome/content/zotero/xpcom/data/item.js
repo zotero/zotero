@@ -3709,7 +3709,7 @@ Zotero.Item.prototype.getBestAttachments = Zotero.Promise.coroutine(function* ()
 
 
 /**
- * Return state of best attachment
+ * Return state of best attachment (or this item if it's a standalone attachment)
  *
  * @return {Promise<Object>} - Promise for object with string 'type' ('none'|'pdf'|'snapshot'|'other')
  *     and boolean 'exists'
@@ -3718,7 +3718,9 @@ Zotero.Item.prototype.getBestAttachmentState = async function () {
 	if (this._bestAttachmentState !== null) {
 		return this._bestAttachmentState;
 	}
-	var item = await this.getBestAttachment();
+	var item = this.isAttachment() && this.isTopLevelItem()
+		? this
+		: await this.getBestAttachment();
 	if (!item) {
 		return this._bestAttachmentState = {
 			type: 'none'

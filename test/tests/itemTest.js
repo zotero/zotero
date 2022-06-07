@@ -1169,6 +1169,15 @@ describe("Zotero.Item", function () {
 				{ type: 'other', exists: false }
 			);
 		})
+
+		it("should cache state for a standalone attachment", async function () {
+			var standaloneAttachment = await importPDFAttachment();
+			await standaloneAttachment.getBestAttachmentState();
+			assert.deepEqual(
+				standaloneAttachment.getBestAttachmentStateCached(),
+				{ type: 'pdf', exists: true }
+			);
+		});
 	})
 	
 	
