@@ -5,8 +5,17 @@
   "general_moreInfo": {
     "message": "Més informació…"
   },
+  "general_needHelp": {
+    "message": "Us cal ajuda?"
+  },
   "general_done": {
     "message": "Fet"
+  },
+  "general_yes": {
+    "message": "Sí"
+  },
+  "general_no": {
+    "message": "No"
   },
   "general_tryAgain": {
     "message": "Torna-ho a provar"
@@ -32,8 +41,14 @@
   "progressWindow_error_translation": {
     "message": "S'ha produït un error desar l'element. Vegeu $1 per a més informació. "
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "S'ha produït un error en desar l'element. $1 pot limitar el nombre d'elements que podeu desar cada vegada. Vegeu $2 per a més informació."
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Resolució d'incidències dels tradutors"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Límits d'accés al lloc"
   },
   "progressWindow_error_fallback": {
     "message": "S'ha produït un error desant $1. Es provarà de desar-ho fent servir $2."
@@ -49,6 +64,18 @@
   },
   "upgradeApp": {
     "message": "Actualitza $1"
+  },
+  "firstRun_title": {
+    "message": "Heu instal·lat el connector de $1!"
+  },
+  "firstRun_text1": {
+    "message": "El connector de $1 us permet <a href=\"$2\">desar elements al $1</a> des del vostre navegador amb un sol clic."
+  },
+  "firstRun_text2": {
+    "message": "Si no ho heu fet encara, <a href=\"$2\">baixeu</a> la versió d'escriptori del $1 per a gaudir d'una millor experiència."
+  },
+  "firstRun_acceptButton": {
+    "message": "Entesos"
   },
   "error_connection_isAppRunning": {
     "message": "Està executant-se el $1?"
@@ -91,6 +118,15 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "La integració de $1 no és disponible quan s'editen fitxers .docx de Microsoft Word directament a Google Docs. Trieu Fitxer → Desa com a Google Docs per a habilitar aquesta funcionalitat. <br/><br/>Si voleu transferir un document de Word amb citacions de $1 a Google Docs, consulteu <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Moure documents entre processadors de text</a>."
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "Les cites del document estan sent editades per un altre usuari del $1. Torneu-ho a provar més endavant."
+  },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "El $1 bloqueja el vostre document per a evitar que diferents usuaris puguin editar-hi cites al mateix moment. L'edició concurrent de cites en un mateix document pot portar a la seva corrupció. Circumstàncies no esperades, com ara problemes de  xarxa, poden provocar que el document quedi bloquejat de forma permanent. Si creieu que ha passat això, podeu sobreescriure el bloqueig. <br/><br/>Voleu sobreescriure el bloqueig del document?"
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "El compte de Google que heu seleccionat no té permisos per a editar el document. Torneu-ho a provar i assegureu-vos que trieu el compte amb accessos d'edició."
   },
   "integration_googleDocs_orphanedCitations_buttonTooltip": {
     "message": "Mostra cites de $1 no enllaçades"
