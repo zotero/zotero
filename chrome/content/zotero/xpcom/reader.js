@@ -249,6 +249,33 @@ class ReaderInstance {
 		);
 		return !index;
 	}
+
+	promptToDeletePages(num) {
+		let ps = Services.prompt;
+		let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
+		let index = ps.confirmEx(
+			null,
+			Zotero.getString('pdfReader.promptDeletePages.title'),
+			Zotero.getString(
+				'pdfReader.promptDeletePages.text',
+				new Intl.NumberFormat().format(num),
+				num
+			),
+			buttonFlags,
+			Zotero.getString('general.continue'),
+			null, null, null, {}
+		);
+		return !index;
+	}
+
+	async reload() {
+		let item = Zotero.Items.get(this._itemID);
+		let path = await item.getFilePathAsync();
+		let buf = await OS.File.read(path, {});
+		buf = new Uint8Array(buf).buffer;
+		this._postMessage({ action: 'reload', buf, }, [buf]);
+	}
 	
 	async menuCmd(cmd) {
 		if (cmd === 'transferFromPDF') {
@@ -661,6 +688,60 @@ class ReaderInstance {
 		popup.openPopup(element, 'after_start', 0, 0, true);
 	}
 
+	_openThumbnailPopup(data) {
+		let popup = this._window.document.createElement('menupopup');
+		this._popupset.appendChild(popup);
+		popup.addEventListener('popuphidden', function () {
+			popup.remove();
+		});
+		let menuitem;
+		// Rotate 90
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', Zotero.getString('pdfReader.rotate90'));
+		menuitem.addEventListener('command', async () => {
+			this._postMessage({ action: 'reloading' });
+			await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 90, true);
+			await this.reload();
+		});
+		popup.appendChild(menuitem);
+		// Rotate 180
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', Zotero.getString('pdfReader.rotate180'));
+		menuitem.addEventListener('command', async () => {
+			this._postMessage({ action: 'reloading' });
+			await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 180, true);
+			await this.reload();
+		});
+		popup.appendChild(menuitem);
+		// Rotate 270
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', Zotero.getString('pdfReader.rotate270'));
+		menuitem.addEventListener('command', async () => {
+			this._postMessage({ action: 'reloading' });
+			await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 270, true);
+			await this.reload();
+		});
+		popup.appendChild(menuitem);
+		// Separator
+		popup.appendChild(this._window.document.createElement('menuseparator'));
+		// Delete
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', Zotero.getString('general.delete'));
+		menuitem.addEventListener('command', async () => {
+			if (this.promptToDeletePages(data.pageIndexes.length)) {
+				this._postMessage({ action: 'reloading' });
+				try {
+					await Zotero.PDFWorker.deletePages(this._itemID, data.pageIndexes, true);
+				}
+				catch (e) {
+				}
+				await this.reload();
+			}
+		});
+		popup.appendChild(menuitem);
+		popup.openPopupAtScreen(data.x, data.y, true);
+	}
+
 	_openSelectorPopup(data) {
 		let popup = this._window.document.createElement('menupopup');
 		this._popupset.appendChild(popup);
@@ -797,6 +878,10 @@ class ReaderInstance {
 				}
 				case 'openColorPopup': {
 					this._openColorPopup(message.data);
+					return;
+				}
+				case 'openThumbnailPopup': {
+					this._openThumbnailPopup(message.data);
 					return;
 				}
 				case 'closePopup': {
