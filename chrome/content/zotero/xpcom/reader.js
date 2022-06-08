@@ -574,7 +574,8 @@ class ReaderInstance {
 			menuitem.setAttribute('label', Zotero.getString(color[0]));
 			menuitem.className = 'menuitem-iconic';
 			menuitem.setAttribute('disabled', data.readOnly);
-			menuitem.setAttribute('image', this._getColorIcon(color[1], color[1] === data.selectedColor));
+			menuitem.setAttribute('checked', color[1] === data.selectedColor);
+			menuitem.setAttribute('image', this._getColorIcon(color[1]));
 			menuitem.addEventListener('command', () => {
 				this._postMessage({
 					action: 'popupCmd',
@@ -633,7 +634,7 @@ class ReaderInstance {
 		popup.appendChild(menuitem);
 
 		if (data.x) {
-			popup.openPopupAtScreen(data.x, data.y, true);
+			popup.openPopupAtScreen(data.x, data.y, false);
 		}
 		else if (data.selector) {
 			let element = this._iframeWindow.document.querySelector(data.selector);
@@ -652,7 +653,8 @@ class ReaderInstance {
 			menuitem = this._window.document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString(color[0]));
 			menuitem.className = 'menuitem-iconic';
-			menuitem.setAttribute('image', this._getColorIcon(color[1], color[1] === data.selectedColor));
+			menuitem.setAttribute('checked', color[1] === data.selectedColor);
+			menuitem.setAttribute('image', this._getColorIcon(color[1]));
 			menuitem.addEventListener('command', () => {
 				this._postMessage({
 					action: 'popupCmd',
