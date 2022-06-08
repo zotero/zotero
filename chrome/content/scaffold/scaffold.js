@@ -342,7 +342,7 @@ var Scaffold = new function () {
 					});
 				}
 
-				return lenses;
+				return { lenses, dispose() {} };
 			},
 			resolveCodeLens: (_model, codeLens, _token) => codeLens
 		};
@@ -503,7 +503,7 @@ var Scaffold = new function () {
 					});
 				}
 
-				return lenses;
+				return { lenses, dispose() {} };
 			},
 			resolveCodeLens: (_model, codeLens, _token) => codeLens
 		};
