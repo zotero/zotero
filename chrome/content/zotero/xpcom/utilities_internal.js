@@ -405,6 +405,12 @@ Zotero.Utilities.Internal = {
 		return s;
 	},
 	
+	isOnlyEmoji: function (str) {
+		// Remove emoji and Variation Selector-16 and see if anything's left
+		const re = /\p{Extended_Pictographic}|\uFE0F/gu;
+		return !str.replace(re, '');
+	},
+	
 	/**
 	 * Display a prompt from an error with custom buttons and a callback
 	 */

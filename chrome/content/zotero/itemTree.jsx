@@ -40,7 +40,6 @@ Cu.import("resource://gre/modules/osfile.jsm");
 const CHILD_INDENT = 12;
 const COLORED_TAGS_RE = new RegExp("^[0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1}$");
 const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
-const EMOJI_RE = /\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\p{Emoji_Presentation}|\p{Emoji}|[\u200D\uFE0F]/gu;
 const ATTACHMENT_STATE_LOAD_DELAY = 150; //ms
 
 var ItemTree = class ItemTree extends LibraryTree {
@@ -3789,11 +3788,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 			|| (item.isFileAttachment() && item.isTopLevelItem());
 	}
 	
-	_isOnlyEmoji(str) {
-		// Remove emoji, Zero Width Joiner, and Variation Selector-16 and see if anything's left
-		return !str.replace(EMOJI_RE, '');
-	}
-	
 	_getTagSwatch(tag, color) {
 		let span = document.createElement('span');
 		span.className = 'tag-swatch';
@@ -3801,7 +3795,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		//
 		// TODO: Check for a maximum number of graphemes, which is hard to do
 		// https://stackoverflow.com/a/54369605
-		if (this._isOnlyEmoji(tag)) {
+		if (Zotero.Utilities.Internal.isOnlyEmoji(tag)) {
 			span.textContent = tag;
 		}
 		// Otherwise display color
