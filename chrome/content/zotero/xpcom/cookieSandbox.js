@@ -164,7 +164,7 @@ Zotero.CookieSandbox.prototype = {
 	 * @param {nsIInterfaceRequestor} ir
 	 */
 	"attachToInterfaceRequestor": function(ir) {
-		Zotero.CookieSandbox.Observer.trackedInterfaceRequestors.push(Components.utils.getWeakReference(ir.QueryInterface(Components.interfaces.nsIInterfaceRequestor)));
+		Zotero.CookieSandbox.Observer.trackedInterfaceRequestors.push(Cu.getWeakReference(ir.getInterface(Ci.nsIInterfaceRequestor)));
 		Zotero.CookieSandbox.Observer.trackedInterfaceRequestorSandboxes.push(this);
 	},
 	

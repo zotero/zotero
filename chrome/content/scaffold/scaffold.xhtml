@@ -30,10 +30,6 @@
 <?xml-stylesheet href="chrome://zotero-platform-version/content/style.css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
 
-<?xul-overlay href="chrome://zotero/content/containers/containers.xul"?>
-<?xul-overlay href="chrome://zotero/content/standalone/editMenuOverlay.xul"?>
-<?xul-overlay href="chrome://zotero-platform/content/standalone/menuOverlay.xul"?>
-
 <!DOCTYPE window [
 	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
 	<!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone.dtd" > %standaloneDTD;
@@ -44,15 +40,35 @@
 ]>
 
 <window id="scaffold" width="800" height="600" minheight="600" persist="screenX screenY width height"
- title="Scaffold"
- xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<script src="chrome://zotero/content/include.js"/>
-	<script src="chrome://zotero/content/xpcom/translate/testTranslators/translatorTester.js"/>
-	<script src="translators.js"/>
-	<script src="scaffold.js"/>
+	title="Scaffold"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	style="display: flex;">
 
-	<script src="chrome://global/content/globalOverlay.js"/>
-	<script src="chrome://global/content/contentAreaUtils.js"/>
+	<html:link rel="localization" href="zotero/menubar.ftl"/>
+	<html:link rel="localization" href="zotero/textActions.ftl"/>
+
+	<script>
+		var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
+		
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		
+		Services.scriptloader.loadSubScript("resource://zotero/require.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/xpcom/translate/testTranslators/translatorTester.js", this);
+		Services.scriptloader.loadSubScript("chrome://scaffold/content/translators.js", this);
+		Services.scriptloader.loadSubScript("chrome://scaffold/content/scaffold.js", this);
+		
+		// Mozilla scripts
+		Services.scriptloader.loadSubScript("chrome://global/content/globalOverlay.js", this);
+		Services.scriptloader.loadSubScript("chrome://global/content/editMenuOverlay.js", this);
+		Services.scriptloader.loadSubScript("chrome://global/content/contentAreaUtils.js", this);
+		if (Zotero.isMac) {
+			Services.scriptloader.loadSubScript("chrome://global/content/macWindowMenu.js", this);
+		}
+
+		// Custom elements
+		Services.scriptloader.loadSubScript("chrome://global/content/customElements.js", this);
+	</script>
 
 	<commandset id="mainCommandSet">
 		<command id="cmd_quitApplication" oncommand="goQuitApplication(event);"/>
@@ -100,10 +116,38 @@
 		<key modifiers="accel" key="9" oncommand="Scaffold.showTabNumbered(9)"/>
 	</keyset>
 
-	<keyset id="editMenuKeys"/>
+	<!--
+    
+    TODO: Customize per platform without ifdef?
+    
+    <keyset id="editMenuKeys">
+		<key id="key_undo" data-l10n-id="text-action-undo-shortcut" modifiers="accel" command="cmd_undo"/>
+		<key id="key_redo"
+		
+#ifdef XP_UNIX
+			data-l10n-id="text-action-undo-shortcut"
+			modifiers="accel,shift"
+#else
+			data-l10n-id="text-action-redo-shortcut"
+			modifiers="accel"
+#endif
+			command="cmd_redo"/>
+		<key id="key_cut" data-l10n-id="text-action-cut-shortcut" modifiers="accel" command="cmd_cut"/>
+		<key id="key_copy" data-l10n-id="text-action-copy-shortcut" modifiers="accel" command="cmd_copy"/>
+		<key id="key_paste" data-l10n-id="text-action-paste-shortcut" modifiers="accel" command="cmd_paste"/>
+		<key id="key_delete" keycode="VK_DELETE" command="cmd_delete"/>
+		<key id="key_selectAll" data-l10n-id="text-action-select-all-shortcut" modifiers="accel" command="cmd_selectAll"/>
+		<key id="key_find" key="&findCmd.key;" modifiers="accel" command="cmd_find"/>
+		<key id="key_findAgain" key="&findAgainCmd.key;" modifiers="accel" command="cmd_findAgain"/>
+		<key id="key_findPrevious" key="&findAgainCmd.key;" modifiers="shift,accel" command="cmd_findPrevious"/>
+		<key id="key_findAgain2" keycode="&findAgainCmd.key2;" command="cmd_findAgain"/>
+		<key id="key_findPrevious2" keycode="&findAgainCmd.key2;" modifiers="shift" command="cmd_findPrevious"/>
+	</keyset>
+  
+	-->
 
 	<popupset>
-		<menupopup id="testing-context-menue">
+		<menupopup id="testing-context-menu">
 			<menuitem label="&scaffold.testing.copyToClipboard;" tooltiptext="Copy the URL or data for the current test to the clipboard" oncommand="Scaffold.copyToClipboard()"/>
 			<menuitem id="testing_editImport" label="&scaffold.testing.edit;" tooltiptext="Edit the input data for the current test" oncommand="Scaffold.editImportFromTest()"/>
 			<menu id="testing_openURL" label="&scaffold.testing.openUrl;">
@@ -139,19 +183,44 @@
 				</menupopup>
 			</menu>
 
-			<menu id="menu_edit">
+			<menu id="menu_edit" data-l10n-id="menu-edit">
 				<menupopup id="menu_EditPopup">
-					<menuitem id="menu_undo" command="cmd_undo"/>
-					<menuitem id="menu_redo" command="cmd_redo"/>
+					<menuitem id="menu_undo"
+							key="key_undo"
+							command="cmd_undo" data-l10n-id="text-action-undo"/>
+					<menuitem id="menu_redo"
+							key="key_redo"
+							command="cmd_redo" data-l10n-id="text-action-redo"/>
 					<menuseparator/>
-					<menuitem id="menu_cut"/>
-					<menuitem id="menu_copy"/>
-					<menuitem id="menu_paste"/>
-					<menuitem id="menu_delete"/>
-					<menuseparator class="menu-type-library"/>
-					<menuitem id="menu_selectAll" class="menu-type-library" command="cmd_selectAll"/>
-					<menuseparator class="menu-type-library"/>
-					<menuitem id="menu_find" class="menu-type-library" command="cmd_find"/>
+					<menuitem id="menu_cut"
+							key="key_cut"
+							command="cmd_cut" data-l10n-id="text-action-cut"/>
+					<menuitem id="menu_copy"
+							key="key_copy"
+							command="cmd_copy" data-l10n-id="text-action-copy"/>
+					<menuitem id="menu_paste"
+							key="key_paste"
+							command="cmd_paste" data-l10n-id="text-action-paste"/>
+					<menuitem id="menu_delete"
+							key="key_delete"
+							command="cmd_delete" data-l10n-id="text-action-delete"/>
+					<menuseparator/>
+					<menuitem id="menu_selectAll"
+							key="key_selectAll"
+							command="cmd_selectAll" data-l10n-id="text-action-select-all"/>
+					<menuseparator/>
+					<menuitem id="menu_find" label="&findCmd.label;"
+							key="key_find" accesskey="&findCmd.accesskey;"
+							command="cmd_find"/>
+					<!--
+					#ifdef XP_UNIX
+					#ifndef XP_MACOSX
+					<menuseparator/>
+					<menuitem id="menu_preferences"
+						oncommand="Zotero.Utilities.Internal.openPreferences()" data-l10n-id="menu-preferences"/>
+					#endif
+					#endif
+					-->
 				</menupopup>
 			</menu>
 
@@ -197,11 +266,87 @@
 				</menupopup>
 			</menu>
 
+			<!-- ifdef mac -->
+			<commandset id="macCommandSet"> <!-- was mainCommandSet -->
+				<command id="minimizeWindow"
+						label="&minimizeWindow.label;"
+						oncommand="window.minimize();" />
+				<command id="zoomWindow"
+						label="&zoomWindow.label;"
+						oncommand="zoomWindow();" />
+			</commandset>
+
+			<keyset id="macKeyset">  <!-- was mainKeySet -->
+				<key id="key_minimizeWindow"
+						command="minimizeWindow"
+						key="&minimizeWindow.key;"
+						modifiers="accel"/>
+				
+				<!-- These are used to build the Application menu under Cocoa widgets -->
+				<key id="key_preferencesCmdMac"
+						key="&preferencesCmdMac.commandkey;"
+						modifiers="accel"/>
+				<key id="key_hideThisAppCmdMac"
+						key="&hideThisAppCmdMac.commandkey;"
+						modifiers="accel"/>
+				<key id="key_hideOtherAppsCmdMac"
+						key="&hideOtherAppsCmdMac.commandkey;"
+						modifiers="accel,alt"/>
+				<key id="key_quitApplication"
+						key="&quitApplicationCmdMac.key;"
+						command="cmd_quitApplication"
+						modifiers="accel"/>
+			</keyset>
+
+			<!-- nsMenuBarX hides these and uses them to build the Application menu. -->
+			<menupopup id="menu_FilePopup">
+				<menuitem id="menu_preferences"
+						label="&preferencesCmdMac.label;"
+						key="key_preferencesCmdMac"
+						oncommand="Zotero.Utilities.Internal.openPreferences()"/>
+				<menuitem id="menu_mac_services"
+						label="&servicesMenuMac.label;"/>
+				<menuitem id="menu_mac_hide_app"
+						label="&hideThisAppCmdMac.label;"
+						key="key_hideThisAppCmdMac"/>
+				<menuitem id="menu_mac_hide_others"
+						label="&hideOtherAppsCmdMac.label;"
+						key="key_hideOtherAppsCmdMac"/>
+				<menuitem id="menu_mac_show_all"
+						label="&showAllAppsCmdMac.label;"/>
+				<menuitem id="menu_FileQuitItem"
+						label="&quitApplicationCmdMac.label;"
+						key="key_quitApplication"
+						command="cmd_quitApplication"/>
+			</menupopup>
+
 			<menu id="windowMenu"
-				  label="&windowMenu.label;"
-				  onpopupshowing="macWindowMenuDidShow();"
-				  onpopuphidden="macWindowMenuDidHide();">
+					label="&windowMenu.label;"
+					datasources="rdf:window-mediator" ref="NC:WindowMediatorRoot"
+					onpopupshowing="macWindowMenuDidShow();"
+					onpopuphidden="macWindowMenuDidHide();"
+					hidden="false">
+				<template>
+					<rule>
+						<menupopup>
+							<menuitem uri="rdf:*"
+									label="rdf:http://home.netscape.com/NC-rdf#Name"
+									type="radio"
+									name="windowList"
+									oncommand="ShowWindowFromResource(event.target)"/>
+						</menupopup>
+					</rule>
+				</template>
+				<menupopup id="windowPopup">
+					<menuitem command="minimizeWindow" label="&minimizeWindow.label;" key="key_minimizeWindow"/>
+					<menuitem command="zoomWindow" label="&zoomWindow.label;"/>
+					<!-- decomment when "BringAllToFront" is implemented
+						<menuseparator/>
+						<menuitem label="&bringAllToFront.label;" disabled="true"/> -->
+					<menuseparator id="sep-window-list"/>
+				</menupopup>
 			</menu>
+			<!-- endif -->
 
 			<menu id="helpMenu" label="&helpMenu.label;" accesskey="&helpMenu.accesskey;">
 				<menupopup id="mb-help-popup">
@@ -251,88 +396,61 @@
 		</toolbar>
 		<hbox flex="1">
 			<tabbox id="left-tabbox" flex="2" width="300">
-				<tabs id="tabs" onselect="Scaffold.handleTabSelect(event)">
+				<tabs id="tabs">
 					<tab id="tab-metadata" label="&scaffold.tabs.metadata.label;"/>
 					<tab id="tab-code" label="&scaffold.tabs.code.label;"/>
 					<tab id="tab-tests" label="&scaffold.tabs.tests.label;"/>
 					<tab id="tab-browser" label="Browser"/>
 					<tab id="tab-import" label="&scaffold.tabs.import.label;"/>
 				</tabs>
-				<tabpanels flex="1">
+				<tabpanels flex="1" id="tabpanels">
 					<tabpanel flex="1" id="tabpanel-metadata">
-						<grid flex="1">
-							<columns>
-								<column/>
-								<column flex="1"/>
-							</columns>
+						<html:div id="metadata-grid">
+							<label class="label-metadata" value="&scaffold.metadata.translatorID.label;" control="textbox-translatorID"/>
+							<html:div class="button-row">
+								<html:input type="text" id="textbox-translatorID"/>
+								<button label="&scaffold.metadata.translatorID.generate;" oncommand="Scaffold.generateTranslatorID()"/>
+							</html:div>
 
-							<rows>
-								<row align="center">
-									<label class="label-metadata" value="&scaffold.metadata.translatorID.label;" control="textbox-translatorID"/>
-									<hbox>
-										<textbox id="textbox-translatorID" flex="1"/>
-										<button label="&scaffold.metadata.translatorID.generate;" oncommand="Scaffold.generateTranslatorID()"/>
-									</hbox>
-								</row>
+							<label class="label-metadata" value="&scaffold.metadata.label.label;" control="textbox-label"/>
+							<html:input type="text" id="textbox-label" flex="1" value="&scaffold.metadata.label.default;"/>
 
-								<row align="center">
-									<label class="label-metadata" value="&scaffold.metadata.label.label;" control="textbox-label"/>
-									<textbox id="textbox-label" flex="1" value="&scaffold.metadata.label.default;"/>
-								</row>
+							<label class="label-metadata" value="&scaffold.metadata.creator.label;" control="textbox-creator"/>
+							<html:input type="text" id="textbox-creator" flex="1"/>
 
-								<row align="center">
-									<label class="label-metadata" value="&scaffold.metadata.creator.label;" control="textbox-creator"/>
-									<textbox id="textbox-creator" flex="1"/>
-								</row>
+							<label class="label-metadata" value="&scaffold.metadata.target.label;" control="textbox-target"/>
+							<html:div class="button-row">
+								<html:input type="text" id="textbox-target" flex="1"/>
+								<button label="&scaffold.metadata.target.testRegex;" oncommand="Scaffold.logTargetRegex()"/>
+							</html:div>
 
-								<row align="center">
-									<label class="label-metadata" value="&scaffold.metadata.target.label;" control="textbox-target"/>
-									<hbox>
-										<textbox id="textbox-target" flex="1"/>
-										<button label="&scaffold.metadata.target.testRegex;" oncommand="Scaffold.logTargetRegex()"/>
-									</hbox>
-								</row>
+							<label class="label-metadata" value="&scaffold.metadata.targetAll.label;" control="textbox-target-all" style="display: none"/>
+							<html:input type="text" id="textbox-target-all" flex="1" style="display: none"/>
 
-								<row align="center">
-									<label class="label-metadata" value="&scaffold.metadata.targetAll.label;" control="textbox-target-all" style="display: none"/>
-									<textbox id="textbox-target-all" flex="1" style="display: none"/>
-								</row>
+							<label class="label-metadata" value="&scaffold.metadata.configOptions.label;" control="textbox-configOptions"/>
+							<html:input type="text" id="textbox-configOptions" flex="1"/>
 
-								<row align="center">
-									<label class="label-metadata" value="&scaffold.metadata.configOptions.label;" control="textbox-configOptions"/>
-									<textbox id="textbox-configOptions" flex="1"/>
-								</row>
+							<label class="label-metadata" value="&scaffold.metadata.displayOptions.label;" control="textbox-displayOptions"/>
+							<html:input type="text" id="textbox-displayOptions" flex="1"/>
 
-								<row align="center">
-									<label class="label-metadata" value="&scaffold.metadata.displayOptions.label;" control="textbox-displayOptions"/>
-									<textbox id="textbox-displayOptions" flex="1"/>
-								</row>
+							<label class="label-metadata" value="&scaffold.metadata.minVersion.label;" control="textbox-minVersion"/>
+							<html:div>
+								<html:input type="text" id="textbox-minVersion" flex="1" value="5.0"/>
+								<label class="label-metadata" value="&scaffold.metadata.priority.label;" control="textbox-priority"/>
+								<html:input type="text" id="textbox-priority" flex="1" value="&scaffold.metadata.priority.default;"/>
+							</html:div>
 
-								<row align="center">
-									<label class="label-metadata" value="&scaffold.metadata.minVersion.label;" control="textbox-minVersion"/>
-									<hbox>
-										<textbox id="textbox-minVersion" flex="1" value="5.0"/>
-										<label class="label-metadata" value="&scaffold.metadata.priority.label;" control="textbox-priority"/>
-										<textbox id="textbox-priority" flex="1" value="&scaffold.metadata.priority.default;"/>
-									</hbox>
-								</row>
+							<label class="label-metadata" value="&scaffold.metadata.hiddenPrefs.label;" control="textbox-hidden-prefs" style="display: none"/>
+							<html:input type="text" id="textbox-hidden-prefs" flex="1" style="display: none"/>
 
-								<row align="center">
-									<label class="label-metadata" value="&scaffold.metadata.hiddenPrefs.label;" control="textbox-hidden-prefs" style="display: none"/>
-									<textbox id="textbox-hidden-prefs" flex="1" style="display: none"/>
-								</row>
-
-								<row align="center">
-									<label class="label-metadata" value="&scaffold.metadata.translatorType.label;"/>
-									<hbox id="checkboxes-translatorType">
-										<checkbox id="checkbox-import" label="&scaffold.metadata.translatorType.import;"/>
-										<checkbox id="checkbox-export" label="&scaffold.metadata.translatorType.export;"/>
-										<checkbox id="checkbox-web" label="&scaffold.metadata.translatorType.web;" checked="true"/>
-										<checkbox id="checkbox-search" label="&scaffold.metadata.translatorType.search;"/>
-									</hbox>
-								</row>
-							</rows>
-						</grid>
+							<label class="label-metadata" value="&scaffold.metadata.translatorType.label;"/>
+							<html:div id="checkboxes-translatorType">
+								<checkbox id="checkbox-import" label="&scaffold.metadata.translatorType.import;"/>
+								<checkbox id="checkbox-export" label="&scaffold.metadata.translatorType.export;"/>
+								<checkbox id="checkbox-web" label="&scaffold.metadata.translatorType.web;" checked="true"/>
+								<checkbox id="checkbox-search" label="&scaffold.metadata.translatorType.search;"/>
+							</html:div>
+						</html:div>
 					</tabpanel>
 					<tabpanel flex="1" id="tabpanel-code">
 						<vbox flex="1">
@@ -342,24 +460,24 @@
 					<tabpanel flex="1" id="tabpanel-tests">
 						<vbox flex="1">
 							<vbox flex="1">
-								<hbox flex="1" context="testing-context-menue">
-									<keyset>
-										<key id="key-delete-tests" observes="validate-tests" keycode="VK_BACK" oncommand="Scaffold.deleteSelectedTests()"/>
-									</keyset>
+								<keyset>
+									<key id="key-delete-tests" observes="validate-tests" keycode="VK_BACK" oncommand="Scaffold.deleteSelectedTests()"/>
+								</keyset>
 
-									<listbox id="testing-listbox" observes="validate-tests" flex="1" seltype="multiple" onselect="Scaffold.handleTestSelect(event)">
-										<listhead>
-											<listheader label="&scaffold.testing.input.label;"/>
-											<listheader label="&scaffold.testing.status.label;"/>
-											<listheader label="&scaffold.testing.defer.label;"/>
-										</listhead>
-										<listcols>
-											<listcol flex="1"/>
-											<listcol class="listcol-testMessage"/>
-											<listcol/>
-										</listcols>
-									</listbox>
-								</hbox>
+								<listheader>
+									<treecol label="&scaffold.testing.input.label;" flex="1"/>
+									<treecol label="&scaffold.testing.status.label;" width="150"/>
+									<treecol label="&scaffold.testing.defer.label;"/>
+								</listheader>
+								<richlistbox
+									id="testing-listbox"
+									class="theme-listbox"
+									observes="validate-tests"
+									flex="1"
+									seltype="multiple"
+									onselect="Scaffold.handleTestSelect(event)"
+									context="testing-context-menu"
+								/>
 								<hbox>
 									<button observes="validate-tests" label="&scaffold.testing.delete;" tooltiptext="Delete the selected tests" oncommand="Scaffold.deleteSelectedTests()"/>
 									<button observes="validate-tests" label="&scaffold.testing.run;" tooltiptext="Run the selected tests" oncommand="Scaffold.runSelectedTests()"/>
@@ -374,13 +492,18 @@
 						<vbox flex="1">
 							<hbox align="center">
 								<label control="textbox-tabUrl" value="&scaffold.tabUrl.label;"/>
-								<menulist id="browser-url" editable="true" flex="1">
-									<menupopup></menupopup>
-								</menulist>
+								<html:input id="browser-url" style="-moz-box-flex: 1;"/>
 								<button observes="validate-tests" label="&scaffold.testing.create.web;" tooltiptext="Create a new test from the current page" oncommand="Scaffold.saveTestFromCurrent('web')"/>
 							</hbox>
 							
-							<browser id="browser" src="about:blank" type="content" flex="1"></browser>
+							<browser
+								id="browser"
+								type="content"
+								remote="false"
+								disablehistory="true"
+								src="about:blank"
+								maychangeremoteness="true"
+								flex="1"/>
 						</vbox>
 					</tabpanel>
 					<tabpanel flex="1" id="tabpanel-import">
@@ -397,13 +520,7 @@
 			<splitter resizeafter="farthest" />
 
 			<vbox id="right-pane" flex="1">
-				
-				<hbox id="hbox-testFrame" width="300">
-					<label control="menulist-testFrame" id="label-testFrame" value="&scaffold.testFrame.label;"/>
-					<menulist id="menulist-testFrame"/>
-				</hbox>
-				
-				<textbox flex="1" id="output" multiline="true" readonly="true"/>
+				<html:textarea style="-moz-box-flex: 1" id="output" readonly="true"/>
 			</vbox>
 		</hbox>
 
