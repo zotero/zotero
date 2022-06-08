@@ -406,8 +406,8 @@ Zotero.Utilities.Internal = {
 	},
 	
 	isOnlyEmoji: function (str) {
-		// Remove emoji and Variation Selector-16 and see if anything's left
-		const re = /\p{Extended_Pictographic}|\uFE0F/gu;
+		// Remove emoji, Zero Width Joiner, and Variation Selector-16 and see if anything's left
+		const re = /\p{Extended_Pictographic}|\u200D|\uFE0F/gu;
 		return !str.replace(re, '');
 	},
 	
