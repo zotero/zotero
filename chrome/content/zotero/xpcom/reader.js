@@ -1040,7 +1040,7 @@ class ReaderWindow extends ReaderInstance {
 		if (!win) return;
 
 		this._window = win.open(
-			'chrome://zotero/content/reader.xul', '', 'chrome,resizable'
+			'chrome://zotero/content/reader.xhtml', '', 'chrome,resizable'
 		);
 
 		this._window.addEventListener('DOMContentLoaded', (event) => {
