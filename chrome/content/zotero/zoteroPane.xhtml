@@ -941,8 +941,7 @@
 							</vbox>
 							
 							<popupset>
-								<!-- Allows to display a tooltip for 'title' attrbute for HTML nodes. Must be on an XUL node i.e. iframe or toolbar: "tooltip"="html-tooltip" -->
-								<tooltip id="html-tooltip" onpopupshowing="if (document.tooltipNode &amp;&amp; (tooltipTitleNode = document.tooltipNode.closest('div *[title], iframe *[title], browser *[title]'))) {this.setAttribute('label', tooltipTitleNode.getAttribute('title')); return true; } return false"/>
+								<tooltip id="html-tooltip" page="true"/>
 								<menupopup id="zotero-collectionmenu"
 										oncommand="ZoteroPane.onCollectionContextMenuSelect(event)">
 									<!-- Keep order in sync with buildCollectionContextMenu, which adds additional attributes -->
