@@ -526,7 +526,7 @@
 		};
 
 		_tagsClickHandler = (event) => {
-			this._id('tags-popup').openPopup(this, 'topleft topleft', 0, 0, false);
+			this._id('tags-popup').openPopup(this, 'topleft topleft', 0, 0, true);
 			// If editable and no existing tags, open new empty row
 			if (this._mode == 'edit' && !this._item.getTags().length) {
 				setTimeout(() => {
