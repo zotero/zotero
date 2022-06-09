@@ -238,7 +238,7 @@ ZoteroContext.prototype = {
 			var o = {};
 			Object.assign(o, zInitOptions);
 			Object.assign(o, options);
-			zContext.Zotero.init(o);
+			return zContext.Zotero.init(o);
 		});
 	}
 };
