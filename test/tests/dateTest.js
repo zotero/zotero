@@ -199,7 +199,9 @@ describe("Zotero.Date", function() {
 		it("should parse Chinese month", function () {
 			Zotero.locale = 'zh-CN';
 			Zotero.Date.init();
-			var o = Zotero.Date.strToDate("四月 26, 2010");
+			var o = Zotero.Date.strToDate(
+				String.fromCharCode(0x56DB) + String.fromCharCode(0x6708) + " 26, 2010"
+			);
 			assert.equal(o.month, 3);
 			assert.equal(o.day, 26);
 			assert.equal(o.year, 2010);
