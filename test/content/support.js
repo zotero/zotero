@@ -48,7 +48,28 @@ function loadWindow(winurl, argument) {
  * @return {Promise<ChromeWindow>}
  */
 function loadBrowserWindow() {
-	var win = window.openDialog("chrome://browser/content/browser.xul", "", "all,height=700,width=1000");
+	var win = window.openDialog("chrome://browser/content/browser.xhtml", "", "all,height=700,width=1000");
+	return waitForDOMEvent(win, "load").then(function() {
+		return new Zotero.Promise((resolve) => {
+			if (!browserWindowInitialized) {
+				setTimeout(function () {
+					browserWindowInitialized = true;
+					resolve(win);
+				}, 1000);
+				return;
+			}
+			resolve(win);
+		});
+	});
+}
+
+/**
+ * Open a Zotero window and return a promise for the window
+ *
+ * @return {Promise<ChromeWindow>}
+ */
+function loadZoteroWindow() {
+	var win = window.openDialog("chrome://zotero/content/zoteroPane.xhtml", "", "all,height=700,width=1000");
 	return waitForDOMEvent(win, "load").then(function() {
 		return new Zotero.Promise((resolve) => {
 			if (!browserWindowInitialized) {
@@ -70,7 +91,7 @@ function loadBrowserWindow() {
  */
 var loadZoteroPane = async function (win) {
 	if (!win) {
-		var win = await loadBrowserWindow();
+		var win = await loadZoteroWindow();
 	}
 	Zotero.Prefs.clear('lastViewedFolder');
 	
