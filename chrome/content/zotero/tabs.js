@@ -375,7 +375,10 @@ var Zotero_Tabs = new function () {
 			}
 		}, 500);
 		tab.timeSelected = Zotero.Date.getUnixTimestamp();
-		this.unloadUnusedTabs();
+		// Without `setTimeout` the tab closing that happens in `unloadUnusedTabs` results in
+		// tabs deck selection index bigger than the deck children count. It feels like something
+		// isn't update synchronously
+		setTimeout(() => this.unloadUnusedTabs());
 	};
 
 	this.unload = function (id) {
