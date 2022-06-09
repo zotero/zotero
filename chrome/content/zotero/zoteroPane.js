@@ -3507,6 +3507,9 @@ var ZoteroPane = new function()
 				throw new Error('collection must be null if createNew is true');
 			}
 			let id = await this.newCollection();
+			if (!id) {
+				return;
+			}
 			collection = Zotero.Collections.get(id);
 		}
 
