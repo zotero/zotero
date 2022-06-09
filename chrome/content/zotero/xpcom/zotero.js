@@ -54,7 +54,16 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.startupError;
 	Object.defineProperty(this, 'startupErrorHandler', {
 		get: () => _startupErrorHandler,
-		enumerable: true
+		enumerable: true,
+		configurable: true
+    });
+    Object.defineProperty(this, 'resourcesDir', {
+		get: () => {
+			// AChrome is app/chrome
+			return FileUtils.getDir('AChrom', []).parent.parent.path;
+		},
+		enumerable: true,
+		configurable: true
     });
 	this.version;
 	this.platform;
@@ -107,7 +116,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 					this.unlockDeferred.resolve();
 				}
 			},
-			enumerable: true
+			enumerable: true,
+			configurable: true
 		}
 	);
 	

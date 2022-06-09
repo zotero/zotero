@@ -557,11 +557,10 @@ function initPDFToolsPath() {
  * (i.e., test/tests/data)
  */
 function getTestDataDirectory() {
-	var resource = Services.io.getProtocolHandler("resource").
-	               QueryInterface(Components.interfaces.nsIResProtocolHandler),
-	    resURI = Services.io.newURI("resource://zotero-unit-tests/data", null, null);
-	return Services.io.newURI(resource.resolveURI(resURI), null, null).
-	       QueryInterface(Components.interfaces.nsIFileURL).file;
+	var file = Zotero.File.pathToFile(Zotero.resourcesDir);
+	file.append('tests');
+	file.append('data');
+	return file;
 }
 
 function getTestDataUrl(path) {
