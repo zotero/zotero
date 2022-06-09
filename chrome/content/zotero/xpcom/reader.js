@@ -187,27 +187,27 @@ class ReaderInstance {
 	}
 	
 	isHandToolActive() {
-		return this._iframeWindow.eval('PDFViewerApplication.pdfCursorTools.handTool.active');
+		return this._iframeWindow.wrappedJSObject.PDFViewerApplication.pdfCursorTools.handTool.active;
 	}
 	
 	isZoomAutoActive() {
-		return this._iframeWindow.eval('PDFViewerApplication.pdfViewer.currentScaleValue === "auto"');
+		return this._iframeWindow.wrappedJSObject.PDFViewerApplication.pdfViewer.currentScaleValue === 'auto';
 	}
 	
 	isZoomPageWidthActive() {
-		return this._iframeWindow.eval('PDFViewerApplication.pdfViewer.currentScaleValue === "page-width"');
+		return this._iframeWindow.wrappedJSObject.PDFViewerApplication.pdfViewer.currentScaleValue === 'page-width';
 	}
 
 	isZoomPageHeightActive() {
-		return this._iframeWindow.eval('PDFViewerApplication.pdfViewer.currentScaleValue === "page-fit"');
+		return this._iframeWindow.wrappedJSObject.PDFViewerApplication.pdfViewer.currentScaleValue === 'page-fit';
 	}
 	
 	allowNavigateFirstPage() {
-		return this._iframeWindow.eval('PDFViewerApplication.pdfViewer.currentPageNumber > 1');
+		return this._iframeWindow.wrappedJSObject.PDFViewerApplication.pdfViewer.currentPageNumber > 1;
 	}
 	
 	allowNavigateLastPage() {
-		return this._iframeWindow.eval('PDFViewerApplication.pdfViewer.currentPageNumber < PDFViewerApplication.pdfViewer.pagesCount');
+		return this._iframeWindow.wrappedJSObject.PDFViewerApplication.pdfViewer.currentPageNumber < this._iframeWindow.wrappedJSObject.PDFViewerApplication.pdfViewer.pagesCount;
 	}
 	
 	allowNavigateBack() {
@@ -893,15 +893,14 @@ class ReaderInstance {
 		if (this._isReaderInitialized) {
 			return;
 		}
-		// let n = 0;
-		// while (!this._iframeWindow || !this._iframeWindow.eval('window.isReady')) {
-		// 	if (n >= 500) {
-		// 		throw new Error('Waiting for reader failed');
-		// 	}
-		// 	await Zotero.Promise.delay(10);
-		// 	n++;
-		// }
-		await Zotero.Promise.delay(300);
+		let n = 0;
+		while (!this._iframeWindow || !this._iframeWindow.wrappedJSObject.isReady) {
+			if (n >= 500) {
+				throw new Error('Waiting for reader failed');
+			}
+			await Zotero.Promise.delay(10);
+			n++;
+		}
 		this._isReaderInitialized = true;
 	}
 
