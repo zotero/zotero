@@ -39,7 +39,7 @@
 	border: 1px solid rgb(109, 149, 224);
 }
 
-.zotero-clicky:not([disabled=true]):not(.disabled):active,
+.zotero-clicky:not([disabled=true]):not(.disabled):not(menulist):active,
 .zotero-clicky[selected="true"],
 .zotero-clicky.selected {
 	color: white;
