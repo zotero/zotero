@@ -784,7 +784,7 @@ class EditorInstance {
 			var menuitem = this._popup.ownerDocument.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('spellCheck.addRemoveDictionaries'));
 			menuitem.addEventListener('command', () => {
-				Services.ww.openWindow(null, "chrome://zotero/content/dictionaryManager.xul",
+				Services.ww.openWindow(null, "chrome://zotero/content/dictionaryManager.xhtml",
 					"dictionary-manager", "chrome,centerscreen", {});
 				
 			});
@@ -799,7 +799,7 @@ class EditorInstance {
 			}
 
 			let firstElementChild = this._popup.firstElementChild;
-			let suggestionCount = spellChecker.addSuggestionsToMenu(this._popup, firstElementChild, 5);
+			let suggestionCount = spellChecker.addSuggestionsToMenuOnParent(this._popup, firstElementChild, 5);
 			if (suggestionCount) {
 				let separator = this._popup.ownerDocument.createXULElement('menuseparator');
 				this._popup.insertBefore(separator, firstElementChild);
