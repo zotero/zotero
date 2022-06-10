@@ -560,7 +560,7 @@
 						&& Zotero.Utilities.isHTTPURL(val, true)) {
 					th.classList.add("pointer");
 					// TODO: make getFieldValue non-private and use below instead
-					th.setAttribute("onclick", "Zotero.launchURL(this.nextSibling.firstChild ? this.nextSibling.firstChild.textContent : this.nextSibling.value)");
+					th.setAttribute("onclick", "Zotero.launchURL(this.nextSibling.firstChild.value || this.nextSibling.firstChild.textContent)");
 					th.setAttribute("tooltiptext", Zotero.getString('pane.item.viewOnline.tooltip'));
 				}
 				else if (fieldName == 'DOI' && val && typeof val == 'string') {
@@ -593,8 +593,8 @@
 						th.classList.add("pointer");
 					}
 					th.addEventListener('click', function () {
-						if (this.nextSibling.inputField) {
-							this.nextSibling.inputField.blur();
+						if (this.nextSibling.querySelector('input, textarea')) {
+							this.nextSibling.querySelector('input, textarea').blur();
 						}
 						else {
 							this.getRootNode().host.toggleAbstractExpand(
@@ -604,8 +604,11 @@
 					});
 				}
 				else {
-					th.setAttribute("onclick",
-						"if (this.nextSibling.inputField) { this.nextSibling.inputField.blur(); }");
+					th.addEventListener('click', function () {
+						if (this.nextSibling.querySelector('input, textarea')) {
+							this.nextSibling.querySelector('input, textarea').blur();
+						}
+					});
 				}
 				
 				let td = document.createElement('td');
