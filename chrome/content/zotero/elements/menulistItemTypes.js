@@ -55,6 +55,7 @@
 			for (let i = 0; i < t.length; i++) {
 				itemTypes.push({
 					id: t[i].id,
+					name: t[i].name,
 					localized: Zotero.ItemTypes.getLocalizedString(t[i].id)
 				});
 			}
