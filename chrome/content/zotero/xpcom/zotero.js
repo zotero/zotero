@@ -2081,59 +2081,6 @@ Zotero.DragDrop = {
 }
 
 
-/**
- * Functions for creating and destroying hidden browser objects
- **/
-Zotero.Browser = new function() {
-	var nBrowsers = 0;
-	
-	this.createHiddenBrowser = function (win, options = {}) {
-		if (!win) {
-			win = Services.wm.getMostRecentWindow("navigator:browser");
-			if (!win) {
-				win = Services.ww.activeWindow;
-			}
-			// Use the hidden DOM window on macOS with the main window closed
-			if (!win) {
-				let appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"]
-					.getService(Components.interfaces.nsIAppShellService);
-				win = appShellService.hiddenDOMWindow;
-			}
-			if (!win) {
-				throw new Error("Parent window not available for hidden browser");
-			}
-		}
-		
-		// Create a hidden browser
-		var hiddenBrowser = win.document.createElement("browser");
-		hiddenBrowser.setAttribute('type', 'content');
-		hiddenBrowser.setAttribute('disableglobalhistory', 'true');
-		win.document.documentElement.appendChild(hiddenBrowser);
-		// Disable some features
-		hiddenBrowser.docShell.allowAuth = false;
-		hiddenBrowser.docShell.allowDNSPrefetch = false;
-		hiddenBrowser.docShell.allowImages = false;
-		hiddenBrowser.docShell.allowJavascript = options.allowJavaScript !== false
-		hiddenBrowser.docShell.allowMetaRedirects = false;
-		hiddenBrowser.docShell.allowPlugins = false;
-		Zotero.debug("Created hidden browser (" + (nBrowsers++) + ")");
-		return hiddenBrowser;
-	}
-	
-	this.deleteHiddenBrowser = function (myBrowsers) {
-		if(!(myBrowsers instanceof Array)) myBrowsers = [myBrowsers];
-		for(var i=0; i<myBrowsers.length; i++) {
-			var myBrowser = myBrowsers[i];
-			myBrowser.stop();
-			myBrowser.destroy();
-			myBrowser.parentNode.removeChild(myBrowser);
-			myBrowser = null;
-			Zotero.debug("Deleted hidden browser (" + (--nBrowsers) + ")");
-		}
-	}
-}
-
-
 /*
  * Implements nsIWebProgressListener
  */
