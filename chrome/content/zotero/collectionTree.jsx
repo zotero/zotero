@@ -839,6 +839,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	 * @param ids {String[]} list of row ids to be highlighted
 	 */
 	async setHighlightedRows(ids) {
+		if (this._editing) return;
 		try {
 			this._highlightedRows = new Set();
 			
