@@ -1225,6 +1225,49 @@
 							<menuseparator/>
 							<menuitem id="context-pane-list-move-to-trash" label="&zotero.general.moveToTrash;"/>
 						</menupopup>
+						<!-- Tag Selector -->
+						<menupopup id="tag-menu">
+							<menuitem label="&zotero.tagSelector.assignColor;"
+								oncommand="ZoteroPane.tagSelector.openColorPickerWindow(); event.stopPropagation();"/>
+							<menuitem label="&zotero.tagSelector.renameTag;"
+								oncommand="ZoteroPane.tagSelector.openRenamePrompt(); event.stopPropagation();"/>
+							<menuitem label="&zotero.tagSelector.deleteTag;"
+								oncommand="ZoteroPane.tagSelector.openDeletePrompt(); event.stopPropagation();"/>
+						</menupopup>
+						<menupopup id="tag-selector-view-settings-menu"
+							onpopupshowing="
+								document.getElementById('show-automatic').setAttribute('checked', ZoteroPane.tagSelector.showAutomatic);
+								document.getElementById('display-all-tags').setAttribute('checked', ZoteroPane.tagSelector.displayAllTags);
+								document.getElementById('num-selected').label = ZoteroPane.tagSelector.label;
+								(async function () {
+									var libraryID = ZoteroPane.tagSelector.libraryID;
+									var library = Zotero.Libraries.get(libraryID);
+									var enabled = false;
+									if (library.editable) {
+										if ((await Zotero.Tags.getAutomaticInLibrary(libraryID)).length) {
+											enabled = true;
+										}
+									}
+									document.getElementById('delete-automatic-tags').disabled = !enabled;
+								})();">
+							<menuitem id="num-selected" disabled="true"/>
+							<menuitem id="deselect-all" label="&zotero.tagSelector.clearAll;"
+								oncommand="ZoteroPane.tagSelector.deselectAll(); event.stopPropagation();"/>
+							<menuseparator/>
+							<menuitem id="show-automatic" label="&zotero.tagSelector.showAutomatic;" type="checkbox"
+								oncommand="ZoteroPane.tagSelector.toggleShowAutomatic(); event.stopPropagation();"/>
+							<menuitem
+								id="display-all-tags"
+								label="&zotero.tagSelector.displayAllInLibrary;"
+								type="checkbox"
+								oncommand="ZoteroPane.tagSelector.toggleDisplayAllTags(); event.stopPropagation();"
+							/>
+							<menuseparator/>
+							<menuitem id="delete-automatic-tags" label="&zotero.tagSelector.deleteAutomaticInLibrary;" type="checkbox"
+														oncommand="ZoteroPane.tagSelector.deleteAutomatic();
+															this.setAttribute('checked', false);
+															event.stopPropagation();"/>
+						</menupopup>
 					</popupset>
 				</hbox>
 				
@@ -1252,48 +1295,4 @@
 			</stack>
 		</vbox>
 	</hbox>
-	
-	<!-- Tag Selector -->
-	<menupopup id="tag-menu">
-		<menuitem label="&zotero.tagSelector.assignColor;"
-			oncommand="ZoteroPane.tagSelector.openColorPickerWindow(); event.stopPropagation();"/>
-		<menuitem label="&zotero.tagSelector.renameTag;"
-			oncommand="ZoteroPane.tagSelector.openRenamePrompt(); event.stopPropagation();"/>
-		<menuitem label="&zotero.tagSelector.deleteTag;"
-			oncommand="ZoteroPane.tagSelector.openDeletePrompt(); event.stopPropagation();"/>
-	</menupopup>
-	<menupopup id="tag-selector-view-settings-menu"
-		onpopupshowing="
-			document.getElementById('show-automatic').setAttribute('checked', ZoteroPane.tagSelector.showAutomatic);
-			document.getElementById('display-all-tags').setAttribute('checked', ZoteroPane.tagSelector.displayAllTags);
-			document.getElementById('num-selected').label = ZoteroPane.tagSelector.label;
-			(async function () {
-				var libraryID = ZoteroPane.tagSelector.libraryID;
-				var library = Zotero.Libraries.get(libraryID);
-				var enabled = false;
-				if (library.editable) {
-					if ((await Zotero.Tags.getAutomaticInLibrary(libraryID)).length) {
-						enabled = true;
-					}
-				}
-				document.getElementById('delete-automatic-tags').disabled = !enabled;
-			})();">
-		<menuitem id="num-selected" disabled="true"/>
-		<menuitem id="deselect-all" label="&zotero.tagSelector.clearAll;"
-			oncommand="ZoteroPane.tagSelector.deselectAll(); event.stopPropagation();"/>
-		<menuseparator/>
-		<menuitem id="show-automatic" label="&zotero.tagSelector.showAutomatic;" type="checkbox"
-			oncommand="ZoteroPane.tagSelector.toggleShowAutomatic(); event.stopPropagation();"/>
-		<menuitem
-			id="display-all-tags"
-			label="&zotero.tagSelector.displayAllInLibrary;"
-			type="checkbox"
-			oncommand="ZoteroPane.tagSelector.toggleDisplayAllTags(); event.stopPropagation();"
-		/>
-		<menuseparator/>
-		<menuitem id="delete-automatic-tags" label="&zotero.tagSelector.deleteAutomaticInLibrary;" type="checkbox"
-									oncommand="ZoteroPane.tagSelector.deleteAutomatic();
-										this.setAttribute('checked', false);
-										event.stopPropagation();"/>
-	</menupopup>
 </window>
