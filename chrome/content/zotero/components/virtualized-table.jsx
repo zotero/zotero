@@ -660,7 +660,12 @@ class VirtualizedTable extends React.Component {
 		this._isMouseDrag = true;
 	}
 	
-	_onDragEnd = () => {
+	_onDragEnd = async () => {
+		// macOS force-click sometimes causes a second mouseup event to be fired some time later
+		// causing a collection change on dragend, so we add a delay here. It shouldn't cause any issues
+		// because isMouseDrag is only used in mouseup handler to exactly prevent from accidentally switching
+		// selection after dragend.
+		await Zotero.Promise.delay(500);
 		this._isMouseDrag = false;
 	}
 	
