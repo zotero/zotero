@@ -1681,6 +1681,8 @@ Zotero.Utilities.Internal = {
 			let menuitem = menulist.ownerDocument.createXULElement('menuitem');
 			menuitem.value = library.libraryID;
 			menuitem.setAttribute('label', library.name);
+			menuitem.setAttribute('data-editable', library.editable ? 'true' : 'false');
+			menuitem.setAttribute('data-filesEditable', library.filesEditable ? 'true' : 'false');
 			menupopup.appendChild(menuitem);
 			if (library.libraryID == selectedLibraryID) {
 				selectedIndex = i;
@@ -1846,9 +1848,9 @@ Zotero.Utilities.Internal = {
 		}
 		if (!win) {
 			let args = [
-				'chrome://zotero/content/preferences/preferences.xul',
+				'chrome://zotero/content/preferences/preferences.xhtml',
 				'zotero-prefs',
-				'chrome,titlebar,toolbar,centerscreen',
+				'chrome,titlebar,centerscreen,resizable=yes',
 				io
 			];
 			

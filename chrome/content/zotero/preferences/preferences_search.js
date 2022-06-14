@@ -24,7 +24,6 @@
 */
 
 "use strict";
-Components.utils.import("resource://gre/modules/Services.jsm");
 
 Zotero_Preferences.Search = {
 	init: function () {
@@ -40,14 +39,14 @@ Zotero_Preferences.Search = {
 	
 	updateIndexStats: Zotero.Promise.coroutine(function* () {
 		var stats = yield Zotero.Fulltext.getIndexStats();
-		document.getElementById('fulltext-stats-indexed').
-			lastChild.setAttribute('value', stats.indexed);
-		document.getElementById('fulltext-stats-partial').
-			lastChild.setAttribute('value', stats.partial);
-		document.getElementById('fulltext-stats-unindexed').
-			lastChild.setAttribute('value', stats.unindexed);
-		document.getElementById('fulltext-stats-words').
-			lastChild.setAttribute('value', stats.words);
+		document.getElementById('fulltext-stats-indexed')
+			.setAttribute('value', stats.indexed);
+		document.getElementById('fulltext-stats-partial')
+			.setAttribute('value', stats.partial);
+		document.getElementById('fulltext-stats-unindexed')
+			.setAttribute('value', stats.unindexed);
+		document.getElementById('fulltext-stats-words')
+			.setAttribute('value', stats.words);
 	}),
 	
 	

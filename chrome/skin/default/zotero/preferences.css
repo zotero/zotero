@@ -1,3 +1,16 @@
+#prefs-outer-container, #prefs-inner-container {
+	height: 600px;
+}
+
+#prefs-content {
+	height: calc(600px - 60px);
+	overflow-y: scroll;
+}
+
+#prefs-search-container {
+	height: 60px;
+}
+
 prefwindow .chromeclass-toolbar
 {
 	display: -moz-box !important; /* Ignore toolbar collapse button on OS X */
@@ -23,6 +36,12 @@ checkbox[disabled="true"] {
 	color: gray !important;
 }
 
+menulist[disabled="true"] {
+	opacity: 75%;
+	/* Disable default hover styling */
+	pointer-events: none;
+}
+
 #export-citePaperJournalArticleURL
 {
 	font-size: .85em;
@@ -41,17 +60,22 @@ description label[class=zotero-text-link], label[class=zotero-text-link]
 	margin: 0;
 }
 
-/* General pane */
-grid row:not(:first-child)
-{
-	margin-top: .3em;
+.form-grid {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	row-gap: .3em;
 }
 
-grid row hbox:first-child
-{
+.form-grid > :nth-child(odd) {
 	-moz-box-pack: end; /* Right-justify left column */
 }
 
+richlistbox:not(:focus) > richlistitem[selected="true"] {
+	background-color: -moz-cellhighlight;
+	color: -moz-cellhighlighttext;
+}
+
+/* General pane */
 #zotero-prefpane-general .statusLine {
 	margin-left: .75em;
 }
@@ -64,35 +88,50 @@ grid row hbox:first-child
 	height: 16px;
 }
 
+#prefs-navigation {
+	width: 180px;
+}
+
+#prefs-search {
+	width: 15em;
+	-moz-box-pack: end;
+}
+
 /*
  * Sync pane
  */
  
 /* Settings tab */
-#zotero-prefpane-sync row, #zotero-prefpane-sync row hbox
-{
+#zotero-prefpane-sync .form-grid {
+	align-items: center;
+}
+
+#zotero-prefpane-sync .form-grid hbox {
 	-moz-box-align: center;
 }
-#zotero-prefpane-sync row label:first-child
+
+#zotero-prefpane-sync .form-grid label:nth-child(odd)
 {
 	text-align: right;
 }
-#zotero-prefpane-sync row hbox
+
+#zotero-prefpane-sync .form-grid hbox
 {
 	margin-left: 4px;
 }
-#zotero-prefpane-sync row hbox label:first-child,
-#zotero-prefpane-sync row hbox menulist:first-child
+
+#zotero-prefpane-sync .form-grid hbox label:first-child,
+#zotero-prefpane-sync .form-grid hbox menulist:first-child
 {
 	margin-left: 0;
 	margin-right: 0;
 }
-#zotero-prefpane-sync row hbox textbox
+#zotero-prefpane-sync .form-grid hbox textbox
 {
 	margin-left: 3px;
 	margin-right: 3px;
 }
-#zotero-prefpane-sync row hbox label:last-child
+#zotero-prefpane-sync .form-grid hbox label:last-child
 {
 	margin-left: 0;
 	margin-right: 10px;
@@ -166,7 +205,7 @@ grid row hbox:first-child
 	margin-top: 1em;
 }
 
-#sync-reset-library-menu-container {
+#sync-reset-library-menu-container > label {
 	font-weight: bold;
 	font-size: 15px;
 }
@@ -178,47 +217,45 @@ grid row hbox:first-child
 	height: 1.6em;
 }
 
-#sync-reset-list {
-	margin: 0;
-	padding: 0;
-	height: 9em;
+#sync-reset-radiogroup {
+	margin-bottom: 1.4em;
 }
 
-#sync-reset-list li {
+#sync-reset-radiogroup > div {
 	margin: 0;
-	margin-top: 1.6em;
 	padding: 0;
 	list-style: none;
-	height: 2.8em;
 }
 
 /* Allow a click between lines to select the radio */
-#sync-reset-list li label {
+#sync-reset-radiogroup > div label {
 	display: block;
 }
 
-#sync-reset-list li:first-child {
+#sync-reset-radiogroup > div:first-child {
 	margin-top: 1.4em;
 }
 
-#sync-reset-list li .sync-reset-option-name {
+#sync-reset-radiogroup > div radio .radio-label {
 	font-weight: bold;
-	display: block;
 	font-size: 15px;
 	margin-bottom: .2em;
 }
 
-#sync-reset-list li .sync-reset-option-desc {
+#sync-reset-radiogroup > div .sync-reset-option-desc {
 	font-size: 12px;
 }
 
-#sync-reset-list li input {
+#sync-reset-radiogroup > div radio {
 	float: left;
 	margin-top: 1em;
+}
+
+#sync-reset-radiogroup > div radio .radio-check {
 	margin-right: 1.05em;
 }
 
-#sync-reset-list li[disabled] span {
+#sync-reset-radiogroup > div[disabled] span {
 	color: gray;
 }
 
@@ -235,7 +272,7 @@ grid row hbox:first-child
 	margin-top: 0 !important;
 }
 
-#fulltext-stats row > label:first-child
+#fulltext-stats > label:nth-child(odd)
 {
 	text-align: right;
 }
@@ -288,28 +325,18 @@ grid row hbox:first-child
 }
 
 /* Shortcut Keys pane */
-#zotero-prefpane-advanced-keys-tab row
-{
-	-moz-box-align: center;
-}
-
-#zotero-prefpane-advanced-keys-tab textbox
+#zotero-prefpane-advanced-keys-tab input
 {
 	margin-left: -1px;
 }
 
-treechildren::-moz-tree-checkbox {
-  /* unchecked checkbox treecells. This style MUST come before treechildren::-moz-tree-checkbox(checked) otherwise it won't take effect.  */
-  list-style-image: none;
-}
-
-treechildren::-moz-tree-checkbox(checked){
-  /* css for checked cells. cbox-check.gif isn't available in Firefox 1, 2, and 3 on Mac OS X, so you should specify a URL to an image
-     in your extension or elsewhere. */
-  list-style-image: url("chrome://global/skin/checkbox/cbox-check.gif");
-}
-
 /* Advanced pane */
+#zotero-keys-grid {
+	display: grid;
+	align-items: center;
+	grid-template-columns: 1fr max-content max-content;
+}
+
 #command-line-data-dir description {
 	font-size: 12px;
 	cursor: text;
@@ -331,6 +358,17 @@ treechildren::-moz-tree-checkbox(checked){
 #zotero-prefpane-advanced-feeds-feedDefaults hbox {
 	display: flex;
 	align-items: center;
+}
+
+#baseAttachmentPath {
+	padding-inline-start: 24px;
+	/* Background set in JS */
+	background: none;
+	background-repeat: no-repeat;
+	background-size: 16px;
+	background-position: center left 4px;
+	appearance: none;
+	border: none;
 }
 
 

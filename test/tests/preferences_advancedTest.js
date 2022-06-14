@@ -16,7 +16,7 @@ describe("Advanced Preferences", function () {
 		
 		describe("Debug Output", function () {
 			it("should log output and submit to server", function* () {
-				var win = yield loadWindow("chrome://zotero/content/preferences/preferences.xul", {
+				var win = yield loadWindow("chrome://zotero/content/preferences/preferences.xhtml", {
 					pane: 'zotero-prefpane-advanced',
 					tabIndex: 0
 				});
@@ -64,7 +64,7 @@ describe("Advanced Preferences", function () {
 	describe("Files & Folders", function () {
 		describe("Linked Attachment Base Directory", function () {
 			var setBaseDirectory = Zotero.Promise.coroutine(function* (basePath) {
-				var win = yield loadWindow("chrome://zotero/content/preferences/preferences.xul", {
+				var win = yield loadWindow("chrome://zotero/content/preferences/preferences.xhtml", {
 					pane: 'zotero-prefpane-advanced',
 					tabIndex: 1
 				});
@@ -89,7 +89,7 @@ describe("Advanced Preferences", function () {
 			});
 			
 			var clearBaseDirectory = Zotero.Promise.coroutine(function* (basePath) {
-				var win = yield loadWindow("chrome://zotero/content/preferences/preferences.xul", {
+				var win = yield loadWindow("chrome://zotero/content/preferences/preferences.xhtml", {
 					pane: 'zotero-prefpane-advanced',
 					tabIndex: 1
 				});

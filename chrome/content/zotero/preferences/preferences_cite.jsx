@@ -41,11 +41,11 @@ Zotero_Preferences.Cite = {
 		'zoteroWinWordIntegration@zotero.org'
 	]),
 
-	init: Zotero.Promise.coroutine(function* () {
+	init: async function () {
 		Components.utils.import("resource://gre/modules/AddonManager.jsm");
 		this.updateWordProcessorInstructions();
-		yield this.refreshStylesList();
-	}),
+		await this.refreshStylesList();
+	},
 	
 	
 	/**

@@ -58,6 +58,21 @@ Zotero_Preferences.Advanced = {
 				document.getElementById('openurl-primary-popup').firstChild.setAttribute('label', name);
 			}
 		}
+
+		document.getElementById('baseAttachmentPath').addEventListener('syncfrompreference',
+			() => Zotero_Preferences.Attachment_Base_Directory.updateUI());
+		
+		document.getElementById('data-dir').addEventListener('syncfrompreference', (event) => {
+			event.target.value = this.onDataDirLoad();
+		});
+
+		document.getElementById('data-dir').addEventListener('synctopreference', (event) => {
+			this.onDataDirUpdate(event);
+		});
+
+		document.getElementById('data-dir-path').addEventListener('syncfrompreference', (event) => {
+			event.target.value = this.getDataDirPath();
+		});
 		
 		this.onDataDirLoad();
 		this.refreshLocale();
@@ -462,19 +477,19 @@ Zotero_Preferences.Advanced = {
 		var menupopup = openURLMenu.firstChild;
 		menupopup.innerHTML = '';
 		
-		var defaultMenuItem = document.createElement('menuitem');
+		var defaultMenuItem = document.createXULElement('menuitem');
 		defaultMenuItem.setAttribute('label', Zotero.getString('general.default'));
 		defaultMenuItem.setAttribute('value', this.DEFAULT_OPENURL_RESOLVER);
 		defaultMenuItem.setAttribute('type', 'checkbox');
 		menupopup.appendChild(defaultMenuItem);
 		
-		var customMenuItem = document.createElement('menuitem');
+		var customMenuItem = document.createXULElement('menuitem');
 		customMenuItem.setAttribute('label', Zotero.getString('general.custom'));
 		customMenuItem.setAttribute('value', 'custom');
 		customMenuItem.setAttribute('type', 'checkbox');
 		menupopup.appendChild(customMenuItem);
 		
-		menupopup.appendChild(document.createElement('menuseparator'));
+		menupopup.appendChild(document.createXULElement('menuseparator'));
 		
 		var selectedName;
 		var lastContinent;
@@ -484,22 +499,22 @@ Zotero_Preferences.Advanced = {
 		for (let r of this._openURLResolvers) {
 			// Create submenus for continents
 			if (r.continent != lastContinent) {
-				let menu = document.createElement('menu');
+				let menu = document.createXULElement('menu');
 				menu.setAttribute('label', r.continent);
 				openURLMenu.firstChild.appendChild(menu);
 				
-				currentContinentPopup = currentMenuPopup = document.createElement('menupopup');
+				currentContinentPopup = currentMenuPopup = document.createXULElement('menupopup');
 				menu.appendChild(currentContinentPopup);
 				lastContinent = r.continent;
 			}
 			if (r.country != lastCountry) {
 				// If there's a country, create a submenu for it
 				if (r.country) {
-					let menu = document.createElement('menu');
+					let menu = document.createXULElement('menu');
 					menu.setAttribute('label', r.country);
 					currentContinentPopup.appendChild(menu);
 					
-					let menupopup = document.createElement('menupopup');
+					let menupopup = document.createXULElement('menupopup');
 					menu.appendChild(menupopup);
 					currentMenuPopup = menupopup;
 				}
@@ -509,7 +524,7 @@ Zotero_Preferences.Advanced = {
 				}
 				lastCountry = r.country;
 			}
-			let menuitem = document.createElement('menuitem');
+			let menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('label', r.name);
 			menuitem.setAttribute('value', r.url);
 			menuitem.setAttribute('type', 'checkbox');
@@ -618,7 +633,7 @@ Zotero_Preferences.Advanced = {
 		menupopup.textContent = '';
 		// Show "Automatic (English)", "Automatic (Français)", etc.
 		menu.appendItem(autoLocaleName, 'automatic');
-		menu.menupopup.appendChild(document.createElement('menuseparator'));
+		menu.menupopup.appendChild(document.createXULElement('menuseparator'));
 		// Add all available locales
 		for (let locale in Zotero.Locale.availableLocales) {
 			menu.appendItem(Zotero.Locale.availableLocales[locale], locale);
@@ -943,50 +958,47 @@ Zotero_Preferences.Attachment_Base_Directory = {
 	}),
 	
 	
-	updateUI: Zotero.Promise.coroutine(function* () {
+	updateUI: async function () {
 		var filefield = document.getElementById('baseAttachmentPath');
 		var path = Zotero.Prefs.get('baseAttachmentPath');
 		Components.utils.import("resource://gre/modules/osfile.jsm");
-		if (yield OS.File.exists(path)) {
-			filefield.file = Zotero.File.pathToFile(path);
-			filefield.label = path;
+		if (await OS.File.exists(path)) {
+			filefield.style.backgroundImage = 'url(moz-icon://file://' + path + '?size=16)';
+			filefield.value = path;
 		}
 		else {
-			filefield.label = '';
+			filefield.value = '';
 		}
 		document.getElementById('resetBasePath').disabled = !path;
-	})
+	}
 };
 
 
 Zotero_Preferences.Keys = {
 	init: function () {
-		var rows = document.getElementById('zotero-prefpane-advanced-keys-tab').getElementsByTagName('row');
-		for (var i=0; i<rows.length; i++) {
+		for (let label of document.querySelectorAll('#zotero-keys-grid .modifier')) {
 			// Display the appropriate modifier keys for the platform
-			let label = rows[i].firstChild.nextSibling;
-			if (label.className == 'modifier') {
-				label.value = Zotero.isMac ? Zotero.getString('general.keys.cmdShift') : Zotero.getString('general.keys.ctrlShift');
-			}
+			label.value = Zotero.isMac ? Zotero.getString('general.keys.cmdShift') : Zotero.getString('general.keys.ctrlShift');
 		}
 		
-		var textboxes = document.getElementById('zotero-keys-rows').getElementsByTagName('textbox');
+		var textboxes = document.querySelectorAll('#zotero-keys-grid input');
 		for (let i=0; i<textboxes.length; i++) {
 			let textbox = textboxes[i];
 			textbox.value = textbox.value.toUpperCase();
 			// .value takes care of the initial value, and this takes care of direct pref changes
 			// while the window is open
-			textbox.setAttribute('onsyncfrompreference', 'return Zotero_Preferences.Keys.capitalizePref(this.id)');
-			textbox.setAttribute('oninput', 'this.value = this.value.toUpperCase()');
+			textbox.addEventListener('syncfrompreference', () => {
+				textbox.value = Zotero_Preferences.Keys.capitalizePref(textbox.id) || '';
+			});
+			textbox.addEventListener('input', () => {
+				textbox.value = textbox.value.toUpperCase();
+			});
 		}
 	},
 	
 	
 	capitalizePref: function (id) {
 		var elem = document.getElementById(id);
-		var pref = document.getElementById(elem.getAttribute('preference'));
-		if (pref.value) {
-			return pref.value.toUpperCase();
-		}
+		return Zotero.Prefs.get(elem.getAttribute('preference'), true).toUpperCase();
 	}
 };

@@ -39,12 +39,12 @@ Zotero_Preferences.Sync = {
 	checkmarkChar: '\u2705',
 	noChar: '\uD83D\uDEAB',
 	
-	init: Zotero.Promise.coroutine(function* () {
+	init: async function () {
 		this.updateStorageSettingsUI();
 		this.updateStorageSettingsGroupsUI();
 
 		var username = Zotero.Users.getCurrentUsername() || Zotero.Prefs.get('sync.server.username') || " ";
-		var apiKey = yield Zotero.Sync.Data.Local.getAPIKey();
+		var apiKey = await Zotero.Sync.Data.Local.getAPIKey();
 		this.displayFields(apiKey ? username : "");
 		
 		var pass = Zotero.Sync.Runner.getStorageController('webdav').password;
@@ -54,7 +54,7 @@ Zotero_Preferences.Sync = {
 		
 		if (apiKey) {
 			try {
-				var keyInfo = yield Zotero.Sync.Runner.checkAccess(
+				var keyInfo = await Zotero.Sync.Runner.checkAccess(
 					Zotero.Sync.Runner.getAPIClient({apiKey}),
 					{timeout: 5000}
 				);
@@ -75,9 +75,13 @@ Zotero_Preferences.Sync = {
 				}
 			}
 		}
+
+		document.getElementById('storage-url-prefix').addEventListener('synctopreference', () => {
+			this.unverifyStorageServer();
+		});
 		
 		this.initResetPane();
-	}),
+	},
 	
 	displayFields: function (username) {
 		document.getElementById('sync-unauthorized').hidden = !!username;
@@ -397,8 +401,8 @@ Zotero_Preferences.Sync = {
 	updateStorageSettingsUI: Zotero.Promise.coroutine(function* () {
 		this.unverifyStorageServer();
 		
-		var protocol = document.getElementById('pref-storage-protocol').value;
-		var enabled = document.getElementById('pref-storage-enabled').value;
+		var protocol = Zotero.Prefs.get('sync.storage.protocol');
+		var enabled = Zotero.Prefs.get('sync.storage.enabled');
 		
 		var storageSettings = document.getElementById('storage-settings');
 		var protocolMenu = document.getElementById('storage-protocol');
@@ -423,7 +427,7 @@ Zotero_Preferences.Sync = {
 	
 	updateStorageSettingsGroupsUI: function () {
 		setTimeout(() => {
-			var enabled = document.getElementById('pref-storage-groups-enabled').value;
+			var enabled = Zotero.Prefs.get('sync.storage.groups.enabled');
 			document.getElementById('storage-groups-download-mode').disabled = !enabled;
 			this.updateStorageTerms();
 		});
@@ -433,9 +437,9 @@ Zotero_Preferences.Sync = {
 	updateStorageTerms: function () {
 		var terms = document.getElementById('storage-terms');
 		
-		var libraryEnabled = document.getElementById('pref-storage-enabled').value;
-		var storageProtocol = document.getElementById('pref-storage-protocol').value;
-		var groupsEnabled = document.getElementById('pref-storage-groups-enabled').value;
+		var libraryEnabled = Zotero.Prefs.get('sync.storage.enabled');
+		var storageProtocol = Zotero.Prefs.get('sync.storage.protocol');
+		var groupsEnabled = Zotero.Prefs.get('sync.storage.groups.enabled');
 		
 		terms.hidden = !((libraryEnabled && storageProtocol == 'zotero') || groupsEnabled);
 	},
@@ -450,16 +454,14 @@ Zotero_Preferences.Sync = {
 	
 	onStorageSettingsChange: Zotero.Promise.coroutine(function* () {
 		// Clean URL
-		var urlPref = document.getElementById('pref-storage-url');
-		urlPref.value = urlPref.value.replace(/(^https?:\/\/|\/zotero\/?$|\/$)/g, '');
+		Zotero.Prefs.set('sync.storage.url', Zotero.Prefs.get('sync.storage.url')
+				.replace(/(^https?:\/\/|\/zotero\/?$|\/$)/g, ''));
 		
-		var oldProtocol = document.getElementById('pref-storage-protocol').value;
-		var oldEnabled = document.getElementById('pref-storage-enabled').value;
+		var oldProtocol = Zotero.Prefs.get('sync.storage.protocol');
 		
 		yield Zotero.Promise.delay(1);
 		
-		var newProtocol = document.getElementById('pref-storage-protocol').value;
-		var newEnabled = document.getElementById('pref-storage-enabled').value;
+		var newProtocol = Zotero.Prefs.get('sync.storage.protocol');
 		
 		if (oldProtocol != newProtocol) {
 			yield Zotero.Sync.Storage.Local.resetAllSyncStates(Zotero.Libraries.userLibraryID);
@@ -634,17 +636,18 @@ Zotero_Preferences.Sync = {
 			this.onResetLibraryChange(parseInt(event.target.value));
 		}
 		this.onResetLibraryChange(Zotero.Libraries.userLibraryID);
+		document.querySelectorAll('#sync-reset-radiogroup radio')
+			.forEach(radio => radio.removeAttribute('selected'));
 		var libraries = Zotero.Libraries.getAll()
 			.filter(x => x.libraryType == 'user' || x.libraryType == 'group');
-		Zotero.Utilities.Internal.buildLibraryMenuHTML(libraryMenu, libraries);
+		Zotero.Utilities.Internal.buildLibraryMenu(libraryMenu, libraries);
 		// Disable read-only libraries, at least until there are options that make sense for those
-		Array.from(libraryMenu.querySelectorAll('option'))
+		Array.from(libraryMenu.querySelectorAll('menuitem'))
 			.filter(x => x.getAttribute('data-editable') == 'false')
 			.forEach(x => x.disabled = true);
 		
-		var list = document.getElementById('sync-reset-list');
-		for (let li of document.querySelectorAll('#sync-reset-list li')) {
-			li.addEventListener('click', function (event) {
+		for (let row of document.querySelectorAll('#sync-reset-radiogroup > *')) {
+			row.addEventListener('click', function (event) {
 				// Ignore clicks if disabled
 				if (this.hasAttribute('disabled')) {
 					event.stopPropagation();
@@ -659,19 +662,19 @@ Zotero_Preferences.Sync = {
 	onResetLibraryChange: function (libraryID) {
 		var library = Zotero.Libraries.get(libraryID);
 		var section = document.getElementById('reset-file-sync-history');
-		var input = section.querySelector('input');
+		var radio = section.querySelector('radio');
 		if (library.filesEditable) {
 			section.removeAttribute('disabled');
-			input.disabled = false;
+			radio.disabled = false;
 		}
 		else {
 			section.setAttribute('disabled', '');
 			// If radio we're disabling is already selected, select the first one in the list
 			// instead
-			if (input.checked) {
-				document.querySelector('#sync-reset-list li:first-child input').checked = true;
+			if (radio.selected) {
+				document.querySelector('#sync-reset-radiogroup > div:first-child radio').selected = true;
 			}
-			input.disabled = true;
+			radio.disabled = true;
 		}
 	},
 	
@@ -690,14 +693,10 @@ Zotero_Preferences.Sync = {
 			return;
 		}
 		
-		var libraryID = parseInt(
-			Array.from(document.querySelectorAll('#sync-reset-library-menu option'))
-				.filter(x => x.selected)[0]
-				.value
-		);
+		var libraryID = document.getElementById('sync-reset-library-menu').value;
 		var library = Zotero.Libraries.get(libraryID);
-		var action = Array.from(document.querySelectorAll('#sync-reset-list input[name=sync-reset-radiogroup]'))
-			.filter(x => x.checked)[0]
+		var action = Array.from(document.querySelectorAll('#sync-reset-radiogroup radio'))
+			.filter(x => x.selected)[0]
 			.getAttribute('value');
 		
 		switch (action) {

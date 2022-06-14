@@ -116,6 +116,10 @@ Zotero_Preferences.General = {
 			}
 			customMenuItem.hidden = false;
 			menulist.selectedIndex = 2;
+
+			// There's almost certainly a better way to do this...
+			// but why doesn't the icon just behave by default?
+			menulist.shadowRoot.querySelector('[part="icon"]').style.height = '16px';
 		}
 		// Zotero
 		else {

@@ -564,7 +564,7 @@ Zotero.Styles = new function() {
 		for (let i=0; i<menulist.itemCount; i++) {
 			let item = menulist.getItemAtIndex(i);
 			if (item.getAttributeNS('zotero:', 'customLocale')) {
-				menulist.removeItemAt(i);
+				item.remove();
 				i--;
 				continue;
 			}
