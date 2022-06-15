@@ -669,7 +669,9 @@ class VirtualizedTable extends React.Component {
 		// causing a collection change on dragend, so we add a delay here. It shouldn't cause any issues
 		// because isMouseDrag is only used in mouseup handler to exactly prevent from accidentally switching
 		// selection after dragend.
-		await Zotero.Promise.delay(500);
+		if (Zotero.isMac) {
+			await Zotero.Promise.delay(500);
+		}
 		this._isMouseDrag = false;
 	}
 	
