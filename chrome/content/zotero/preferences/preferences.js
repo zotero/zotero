@@ -319,7 +319,7 @@ var Zotero_Preferences = {
 	/**
 	 * Search for the given term (case-insensitive) in the tree.
 	 *
-	 * @param {Node} root
+	 * @param {Element} root
 	 * @param {String} term
 	 * @return {Node[]}
 	 */
@@ -343,6 +343,38 @@ var Zotero_Preferences = {
 				}
 				else {
 					matched.add(currentNode);
+				}
+			}
+		}
+
+		for (let elem of root.querySelectorAll('[data-search-strings-raw], [data-search-strings]')) {
+			if (elem.hasAttribute('data-search-strings-raw')) {
+				let rawStrings = elem.getAttribute('data-search-strings-raw')
+					.split(',')
+					.map(s => s.trim().toLowerCase())
+					.filter(Boolean);
+				if (rawStrings.some(s => s.includes(term))) {
+					matched.add(elem);
+					continue;
+				}
+			}
+
+			if (elem.hasAttribute('data-search-strings')) {
+				let stringKeys = elem.getAttribute('data-search-strings')
+					.split(',')
+					.map(s => s.trim())
+					.filter(Boolean);
+				for (let key of stringKeys) {
+					if (Zotero.Intl.strings.hasOwnProperty(key)) {
+						if (Zotero.Intl.strings[key].toLowerCase().includes(term)) {
+							matched.add(elem);
+							break;
+						}
+					}
+					else if (Zotero.getString(key).toLowerCase().includes(term)) {
+						matched.add(elem);
+						break;
+					}
 				}
 			}
 		}

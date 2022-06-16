@@ -27,8 +27,10 @@
         <caption label="&zotero.preferences.search.fulltextCache;"/>
         
         <hbox>
-            <button id="fulltext-rebuildIndex" flex="1" oncommand="Zotero_Preferences.Search.rebuildIndexPrompt()"/>
-            <button id="fulltext-clearIndex" flex="1" oncommand="Zotero_Preferences.Search.clearIndexPrompt()"/>
+            <button id="fulltext-rebuildIndex" flex="1" oncommand="Zotero_Preferences.Search.rebuildIndexPrompt()"
+                data-search-strings="zotero.preferences.search.rebuildWarning"/>
+            <button id="fulltext-clearIndex" flex="1" oncommand="Zotero_Preferences.Search.clearIndexPrompt()"
+                data-search-strings="zotero.preferences.search.clearWarning"/>
         </hbox>
         
         <separator/>
