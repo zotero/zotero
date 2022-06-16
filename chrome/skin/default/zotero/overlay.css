@@ -647,6 +647,7 @@
 
 #item-box-container {
 	display: flex;
+	min-width: 0;
 }
 
 #retracted-items-banner, #sync-reminder-banner {
