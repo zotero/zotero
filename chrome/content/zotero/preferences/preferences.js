@@ -113,7 +113,11 @@ var Zotero_Preferences = {
 			}
 		}
 		else if (document.location.hash == "#cite") {
-			this.panes.get('zotero-prefpane-cite').show();
+			this.navigation.value = 'zotero-prefpane-cite';
+		}
+
+		if (!this.navigation.value) {
+			this.navigation.value = 'zotero-prefpane-general';
 		}
 	},
 	

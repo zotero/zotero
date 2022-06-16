@@ -239,7 +239,7 @@ Zotero_Preferences.Sync = {
 	
 	showLibrariesToSyncDialog: function() {
 		var io = {};
-		window.openDialog('chrome://zotero/content/preferences/librariesToSync.xul',
+		window.openDialog('chrome://zotero/content/preferences/librariesToSync.xhtml',
 			"zotero-preferences-librariesToSyncDialog", "chrome,modal,centerscreen", io);
 	},
 	
@@ -288,7 +288,7 @@ Zotero_Preferences.Sync = {
 				div.innerHTML = "";
 			}
 			else {
-				div = document.createElementNS("http://www.w3.org/1999/xhtml", 'div');
+				div = document.createElement('div');
 				div.className = "row";
 				div.addEventListener('dblclick', () => {
 					this.toggleLibraryToSync(index);
@@ -298,7 +298,7 @@ Zotero_Preferences.Sync = {
 
 			for (let column of columns) {
 				if (column.dataKey === 'checked') {
-					let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+					let span = document.createElement('span');
 					span.className = `cell ${column.className}`;
 					if (row.id != 'loading') {
 						span.innerText = row.checked ? this.checkmarkChar : this.noChar;

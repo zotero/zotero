@@ -29,7 +29,8 @@
 }
 
 #prefs-navigation > richlistitem {
-	padding: 1em 0.5em;
+	padding: 1em;
+	border-radius: 5px;
 	-moz-box-align: center;
 	font-size: 1.2em;
 	transition: background-color 0.2s ease;

@@ -26,18 +26,20 @@
 	<groupbox id="zotero-prefpane-file-handling-groupbox">
 		<html:label><html:h2>&zotero.preferences.fileHandling;</html:h2></html:label>
 		
-		<checkbox id="automaticSnapshots-checkbox"
-			label="&zotero.preferences.automaticSnapshots;"
-			preference="extensions.zotero.automaticSnapshots"/>
-		<checkbox label="&zotero.preferences.downloadAssociatedFiles;" preference="extensions.zotero.downloadAssociatedFiles"/>
-		<checkbox label="&zotero.preferences.autoRecognizeFiles;" preference="extensions.zotero.autoRecognizeFiles"/>
-		<checkbox label="&zotero.preferences.autoRenameFiles;"
-				preference="extensions.zotero.autoRenameFiles"
-				oncommand="Zotero_Preferences.General.updateAutoRenameFilesUI()"/>
-		<checkbox id="rename-linked-files" class="indented-pref"
-				label="&zotero.preferences.autoRenameFiles.renameLinked;"
-				preference="extensions.zotero.autoRenameFiles.linked"
-				oncommand="Zotero_Preferences.General.updateAutoRenameFilesUI()"/>
+		<vbox>
+			<checkbox id="automaticSnapshots-checkbox"
+				label="&zotero.preferences.automaticSnapshots;"
+				preference="extensions.zotero.automaticSnapshots"/>
+			<checkbox label="&zotero.preferences.downloadAssociatedFiles;" preference="extensions.zotero.downloadAssociatedFiles"/>
+			<checkbox label="&zotero.preferences.autoRecognizeFiles;" preference="extensions.zotero.autoRecognizeFiles"/>
+			<checkbox label="&zotero.preferences.autoRenameFiles;"
+					preference="extensions.zotero.autoRenameFiles"
+					oncommand="Zotero_Preferences.General.updateAutoRenameFilesUI()"/>
+			<checkbox id="rename-linked-files" class="indented-pref"
+					label="&zotero.preferences.autoRenameFiles.renameLinked;"
+					preference="extensions.zotero.autoRenameFiles.linked"
+					oncommand="Zotero_Preferences.General.updateAutoRenameFilesUI()"/>
+		</vbox>
 		
 		<hbox align="center">
 			<label value="&zotero.preferences.fileHandler.openPDFsUsing;" control="file-handler-pdf"/>
