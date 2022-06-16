@@ -30,6 +30,7 @@
 #prefs-navigation > richlistitem {
 	padding: 1em 0.5em;
 	-moz-box-align: center;
+	font-size: 1.2em;
 }
 
 #prefs-navigation > richlistitem[selected="true"] {
