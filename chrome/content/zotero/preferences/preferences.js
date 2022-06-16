@@ -27,6 +27,7 @@
 
 var Zotero_Preferences = {
 	init: function () {
+		this.observerSymbols = [];
 		this.panes = new Map();
 		this.navigation = document.getElementById('prefs-navigation');
 		this.content = document.getElementById('prefs-content');
@@ -126,6 +127,10 @@ var Zotero_Preferences = {
 	onUnload: function () {
 		if (Zotero_Preferences.Debug_Output) {
 			Zotero_Preferences.Debug_Output.onUnload();
+		}
+
+		while (this.observerSymbols.length) {
+			Zotero.Prefs.unregisterObserver(this.observerSymbols.shift());
 		}
 	},
 
@@ -428,8 +433,7 @@ var Zotero_Preferences = {
 				elem.dispatchEvent(new Event('synctopreference'));
 			});
 
-			// Set timeout so pane can add listeners first
-			setTimeout(() => {
+			let syncFromPref = () => {
 				let value = Zotero.Prefs.get(preference, true);
 				if (useChecked) {
 					elem.checked = value;
@@ -437,8 +441,13 @@ var Zotero_Preferences = {
 				else {
 					elem.value = value;
 				}
-	
 				elem.dispatchEvent(new Event('syncfrompreference'));
+			};
+
+			// Set timeout so pane can add listeners first
+			setTimeout(() => {
+				syncFromPref();
+				this.observerSymbols.push(Zotero.Prefs.registerObserver(preference, syncFromPref, true));
 			});
 		}
 
