@@ -27,9 +27,33 @@
 
 {
 	/**
-	 * Extends MozToolbarbutton to use our own dropmarker image.
+	 * Extends MozToolbarbutton to use our own dropmarker image and native menus.
 	 */
-	class ToolbarbuttonDropmarker extends customElements.get('toolbarbutton') {
+	class MenuToolbarbutton extends customElements.get('toolbarbutton') {
+		constructor() {
+			super();
+			this.addEventListener('mousedown', (event) => {
+				let popup = this.querySelector(':scope > menupopup');
+				if (popup && this.getAttribute('nonnativepopup') != 'true') {
+					event.preventDefault();
+
+					let rect = this.getBoundingClientRect();
+					popup.openPopupAtScreen(
+						window.screenX + rect.left,
+						window.screenY + rect.bottom,
+						true
+					);
+					this.setAttribute('open', true);
+
+					popup.addEventListener('popuphiding', (event) => {
+						if (event.target == popup) {
+							this.setAttribute('open', false);
+						}
+					}, { once: true });
+				}
+			});
+		}
+
 		static get dropmarkerFragment() {
 			let frag = document.importNode(
 				MozXULElement.parseXULToFragment(`
@@ -42,7 +66,7 @@
 		}
 	}
 
-	customElements.define("toolbarbutton-dropmarker", ToolbarbuttonDropmarker, {
+	customElements.define("menu-toolbarbutton", MenuToolbarbutton, {
 		extends: "toolbarbutton",
 	});
 }
