@@ -108,19 +108,8 @@ radio[pane][selected="true"]:-moz-window-inactive {
 	margin: 0 !important;
 }
 
-groupbox {
-	padding: 5px 1px 1px;
-	padding-inline-start: 0;
-	margin: 6px;
-}
-
 groupbox > label > h2 {
 	border-bottom: #b5b5b5 1px solid;
-}
-
-groupbox > .groupbox-body {
-	padding: 8px 8px 3px;
-	margin: 0;
 }
 
 groupbox > label > h2, caption {

@@ -32,9 +32,10 @@ var Zotero_Preferences = {
 		this.content = document.getElementById('prefs-content');
 
 		this.navigation.addEventListener('select', () => this.onNavigationSelect());
-		document.getElementById('prefs-search').addEventListener('input', (event) => {
-			this.search(event.target.value);
-		});
+		document.getElementById('prefs-search').addEventListener('input',
+			event => this.search(event.target.value));
+		document.getElementById('prefs-search').addEventListener('change',
+			event => this.search(event.target.value));
 
 		this.addPane({
 			id: 'general',
@@ -186,16 +187,48 @@ var Zotero_Preferences = {
 	},
 
 	search(term) {
+		// Initial housekeeping:
+
+		// Clear existing highlights
+		this._getSearchSelection().removeAllRanges();
+
+		// Remove existing tooltips
+		// Need to convert to array before iterating so elements being removed from the
+		// live collection doesn't mess with the iteration
+		for (let oldTooltipParent of [...this.content.getElementsByClassName('search-tooltip-parent')]) {
+			oldTooltipParent.replaceWith(oldTooltipParent.firstElementChild);
+		}
+
+		// Show hidden sections
+		for (let hidden of [...this.content.getElementsByClassName('hidden-by-search')]) {
+			hidden.classList.remove('hidden-by-search');
+			hidden.ariaHidden = false;
+		}
+
 		if (!term) {
 			if (this.navigation.selectedIndex == -1) {
 				this.navigation.selectedIndex = 0;
 			}
+			return;
 		}
-		else {
-			this.navigation.clearSelection();
-			for (let pane of this.panes.values()) {
-				pane.show(true);
+
+		// Replace <label value="abc"/> with <label>abc</label>
+		// This renders exactly the same and enables highlighting using ranges
+		for (let label of document.getElementsByTagNameNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'label')) {
+			if (label.getAttribute('value') && !label.textContent) {
+				label.textContent = label.getAttribute('value');
+				label.removeAttribute('value');
 			}
+		}
+
+		term = term.trim().toLowerCase();
+
+		// Clear pane selection
+		this.navigation.clearSelection();
+
+		// Make sure all panes are loaded into the DOM
+		for (let pane of this.panes.values()) {
+			pane.show(true);
 		}
 
 		for (let container of this.content.children) {
@@ -203,16 +236,124 @@ var Zotero_Preferences = {
 			if (!root) continue;
 
 			for (let child of root.children) {
-				if (!term || child.textContent.includes(term)) {
-					child.style.display = 'revert';
-					child.ariaHidden = false;
+				let matches = this._searchRecursively(child, term);
+				if (matches.length) {
+					let touchedTabPanels = new Set();
+					for (let node of matches) {
+						if (node.nodeType === Node.TEXT_NODE) {
+							// For text nodes, add a native highlight on the matched range
+							let value = node.nodeValue.toLowerCase();
+							let index = value.indexOf(term);
+							if (index == -1) continue; // Should not happen
+
+							let range = document.createRange();
+							range.setStart(node, index);
+							range.setEnd(node, index + term.length);
+							this._getSearchSelection().addRange(range);
+						}
+						else if (node.nodeType == Node.ELEMENT_NODE) {
+							// For element nodes, wrap the element and add a tooltip
+							// (So please don't use .parentElement etc. in event listeners)
+
+							// Structure:
+							// hbox.search-tooltip-parent
+							//   | <node>
+							//   | span.search-tooltip
+							//       | span
+							//           | <term>
+							let tooltipParent = document.createXULElement('hbox');
+							tooltipParent.className = 'search-tooltip-parent';
+							node.replaceWith(tooltipParent);
+							let tooltip = document.createElement('span');
+							tooltip.className = 'search-tooltip';
+							let tooltipText = document.createElement('span');
+							tooltipText.append(term);
+							tooltip.append(tooltipText);
+							tooltipParent.append(node, tooltip);
+
+							// https://searchfox.org/mozilla-central/rev/703391c381f92a73d9a938cbe0d33ca64d94583b/browser/components/preferences/findInPage.js#689-691
+							let tooltipRect = tooltip.getBoundingClientRect();
+							tooltip.style.left = `calc(50% - ${tooltipRect.width / 2}px)`;
+						}
+
+						let tabPanel = this._closest(node, 'tabpanels > tabpanel');
+						let tabPanels = tabPanel?.parentElement;
+						if (tabPanels && !touchedTabPanels.has(tabPanels)) {
+							let tab = tabPanels.getRelatedElement(tabPanel);
+							if (tab.control) {
+								tab.control.selectedItem = tab;
+								touchedTabPanels.add(tabPanels);
+							}
+						}
+					}
 				}
 				else {
-					child.style.display = 'none';
+					child.classList.add('hidden-by-search');
 					child.ariaHidden = true;
 				}
 			}
 		}
+	},
+
+	/**
+	 * Search for the given term (case-insensitive) in the tree.
+	 *
+	 * @param {Node} root
+	 * @param {String} term
+	 * @return {Node[]}
+	 */
+	_searchRecursively(root, term) {
+		const EXCLUDE_SELECTOR = 'input, [no-highlight]';
+
+		term = term.toLowerCase();
+		let matched = new Set();
+		let treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+		let currentNode;
+		while ((currentNode = treeWalker.nextNode())) {
+			if (this._closest(currentNode, EXCLUDE_SELECTOR)
+					|| !currentNode.nodeValue
+					|| currentNode.length < term.length) {
+				continue;
+			}
+			if (currentNode.nodeValue.toLowerCase().includes(term)) {
+				let unhighlightableParent = this._closest(currentNode, 'menulist, button');
+				if (unhighlightableParent) {
+					matched.add(unhighlightableParent);
+				}
+				else {
+					matched.add(currentNode);
+				}
+			}
+		}
+
+		return [...matched];
+	},
+
+	_getSearchSelection() {
+		// https://searchfox.org/mozilla-central/rev/703391c381f92a73d9a938cbe0d33ca64d94583b/browser/components/preferences/findInPage.js#226-239
+		let controller = window.docShell
+			.QueryInterface(Ci.nsIInterfaceRequestor)
+			.getInterface(Ci.nsISelectionDisplay)
+			.QueryInterface(Ci.nsISelectionController);
+		let selection = controller.getSelection(
+			Ci.nsISelectionController.SELECTION_FIND
+		);
+		selection.setColors('currentColor', '#ffe900', 'currentColor', '#003eaa');
+		return selection;
+	},
+
+	/**
+	 * Like {@link Element#closest} for all nodes.
+	 *
+	 * @param {Node} node
+	 * @param {String} selector
+	 * @return {Element | null}
+	 */
+	_closest(node, selector) {
+		while (node && node.nodeType != Node.ELEMENT_NODE) {
+			node = node.parentNode;
+		}
+		return node?.closest(selector);
 	},
 
 	initImportedNodes(root) {

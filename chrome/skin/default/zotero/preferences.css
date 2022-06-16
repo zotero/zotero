@@ -3,12 +3,76 @@
 }
 
 #prefs-content {
-	height: calc(600px - 60px);
+	height: calc(600px - 40px);
 	overflow-y: scroll;
 }
 
+#prefs-content > * {
+	margin: 5px 15px;
+}
+
 #prefs-search-container {
-	height: 60px;
+	height: 40px;
+	padding-right: 8px;
+}
+
+#prefs-search {
+	width: 16em;
+	-moz-box-pack: end;
+}
+
+/* Approach to search tooltips (mostly borrowed from Fx prefs): */
+.search-tooltip-parent {
+	position: relative;
+}
+
+.search-tooltip {
+	min-width: 20px;
+	max-width: 200px;
+	position: absolute;
+	bottom: 24px;
+	background-color: #ffe900;
+	border: 1px solid rgba(0, 0, 0, 40%);
+	padding: 2px 8px;
+	text-align: center;
+}
+
+.search-tooltip::before, .search-tooltip::after {
+	content: '';
+    position: absolute;
+	width: 0;
+    height: 0;
+    left: calc(50% - 3px);
+	border-right: 6px solid transparent;
+    border-left: 6px solid transparent;
+}
+
+.search-tooltip::before {
+	top: calc(100% + 1px);
+	border-top: 6px solid rgba(0, 0, 0, 40%);
+}
+
+.search-tooltip::after {
+	top: 100%;
+	border-top: 6px solid #ffe900;
+}
+
+.search-tooltip > span {
+	user-select: none;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.hidden-by-search {
+	clip: rect(1px, 1px, 1px, 1px);
+	clip-path: inset(50%);
+	height: 1px;
+	width: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
 }
 
 prefwindow .chromeclass-toolbar
@@ -90,11 +154,6 @@ richlistbox:not(:focus) > richlistitem[selected="true"] {
 
 #prefs-navigation {
 	width: 180px;
-}
-
-#prefs-search {
-	width: 15em;
-	-moz-box-pack: end;
 }
 
 /*
@@ -272,7 +331,7 @@ richlistbox:not(:focus) > richlistitem[selected="true"] {
 	margin-top: 0 !important;
 }
 
-#fulltext-stats > label:nth-child(odd)
+#fulltext-stats > .form-grid > label:nth-child(odd)
 {
 	text-align: right;
 }
