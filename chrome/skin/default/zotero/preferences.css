@@ -21,6 +21,26 @@
 	-moz-box-pack: end;
 }
 
+#prefs-navigation {
+	width: 180px;
+	appearance: none;
+	background: transparent;
+}
+
+#prefs-navigation > richlistitem {
+	padding: 1em 0.5em;
+	-moz-box-align: center;
+}
+
+#prefs-navigation > richlistitem[selected="true"] {
+	background-color: highlight;
+	color: highlighttext;
+}
+
+#prefs-navigation > richlistitem image {
+	width: 24px;
+}
+
 /* Approach to search tooltips (mostly borrowed from Fx prefs): */
 .search-tooltip-parent {
 	position: relative;
@@ -65,14 +85,7 @@
 }
 
 .hidden-by-search {
-	clip: rect(1px, 1px, 1px, 1px);
-	clip-path: inset(50%);
-	height: 1px;
-	width: 1px;
-	margin: -1px;
-	overflow: hidden;
-	padding: 0;
-	position: absolute;
+	display: none;
 }
 
 prefwindow .chromeclass-toolbar
@@ -134,11 +147,6 @@ description label[class=zotero-text-link], label[class=zotero-text-link]
 	-moz-box-pack: end; /* Right-justify left column */
 }
 
-richlistbox:not(:focus) > richlistitem[selected="true"] {
-	background-color: -moz-cellhighlight;
-	color: -moz-cellhighlighttext;
-}
-
 /* General pane */
 #zotero-prefpane-general .statusLine {
 	margin-left: .75em;
@@ -152,10 +160,6 @@ richlistbox:not(:focus) > richlistitem[selected="true"] {
 	height: 16px;
 }
 
-#prefs-navigation {
-	width: 180px;
-}
-
 /*
  * Sync pane
  */
@@ -165,32 +169,32 @@ richlistbox:not(:focus) > richlistitem[selected="true"] {
 	align-items: center;
 }
 
-#zotero-prefpane-sync .form-grid hbox {
+#zotero-prefpane-sync .form-grid > hbox {
 	-moz-box-align: center;
 }
 
-#zotero-prefpane-sync .form-grid label:nth-child(odd)
+#zotero-prefpane-sync .form-grid > label:nth-child(odd)
 {
 	text-align: right;
 }
 
-#zotero-prefpane-sync .form-grid hbox
+#zotero-prefpane-sync .form-grid > hbox
 {
 	margin-left: 4px;
 }
 
-#zotero-prefpane-sync .form-grid hbox label:first-child,
-#zotero-prefpane-sync .form-grid hbox menulist:first-child
+#zotero-prefpane-sync .form-grid > hbox label:first-child,
+#zotero-prefpane-sync .form-grid > hbox menulist:first-child
 {
 	margin-left: 0;
 	margin-right: 0;
 }
-#zotero-prefpane-sync .form-grid hbox textbox
+#zotero-prefpane-sync .form-grid > hbox textbox
 {
 	margin-left: 3px;
 	margin-right: 3px;
 }
-#zotero-prefpane-sync .form-grid hbox label:last-child
+#zotero-prefpane-sync .form-grid > hbox label:last-child
 {
 	margin-left: 0;
 	margin-right: 10px;

@@ -32,55 +32,59 @@ var Zotero_Preferences = {
 		this.content = document.getElementById('prefs-content');
 
 		this.navigation.addEventListener('select', () => this.onNavigationSelect());
-		document.getElementById('prefs-search').addEventListener('input',
-			event => this.search(event.target.value));
-		document.getElementById('prefs-search').addEventListener('change',
+		document.getElementById('prefs-search').addEventListener('command',
 			event => this.search(event.target.value));
 
 		this.addPane({
 			id: 'general',
-			title: 'General',
-			contentPath: 'chrome://zotero/content/preferences/preferences_general.xhtml',
+			label: 'zotero.preferences.prefpane.general',
+			image: 'chrome://zotero/skin/prefs-general.png',
+			src: 'chrome://zotero/content/preferences/preferences_general.xhtml',
 			onLoad() {
 				Zotero_Preferences.General.init();
 			}
 		});
 		this.addPane({
 			id: 'sync',
-			title: 'Sync',
-			contentPath: 'chrome://zotero/content/preferences/preferences_sync.xhtml',
+			label: 'zotero.preferences.prefpane.sync',
+			image: 'chrome://zotero/skin/prefs-sync.png',
+			src: 'chrome://zotero/content/preferences/preferences_sync.xhtml',
 			onLoad() {
 				Zotero_Preferences.Sync.init();
 			}
 		});
 		this.addPane({
 			id: 'search',
-			title: 'Search',
-			contentPath: 'chrome://zotero/content/preferences/preferences_search.xhtml',
+			label: 'zotero.preferences.prefpane.search',
+			image: 'chrome://zotero/skin/prefs-search.png',
+			src: 'chrome://zotero/content/preferences/preferences_search.xhtml',
 			onLoad() {
 				Zotero_Preferences.Search.init();
 			}
 		});
 		this.addPane({
 			id: 'export',
-			title: 'Export',
-			contentPath: 'chrome://zotero/content/preferences/preferences_export.xhtml',
+			label: 'zotero.preferences.prefpane.export',
+			image: 'chrome://zotero/skin/prefs-export.png',
+			src: 'chrome://zotero/content/preferences/preferences_export.xhtml',
 			onLoad() {
 				Zotero_Preferences.Export.init();
 			}
 		});
 		this.addPane({
 			id: 'cite',
-			title: 'Cite',
-			contentPath: 'chrome://zotero/content/preferences/preferences_cite.xhtml',
+			label: 'zotero.preferences.prefpane.cite',
+			image: 'chrome://zotero/skin/prefs-styles.png',
+			src: 'chrome://zotero/content/preferences/preferences_cite.xhtml',
 			onLoad() {
 				Zotero_Preferences.Cite.init();
 			}
 		});
 		this.addPane({
 			id: 'advanced',
-			title: 'Advanced',
-			contentPath: 'chrome://zotero/content/preferences/preferences_advanced.xhtml',
+			label: 'zotero.preferences.prefpane.advanced',
+			image: 'chrome://zotero/skin/prefs-advanced.png',
+			src: 'chrome://zotero/content/preferences/preferences_advanced.xhtml',
 			onLoad() {
 				Zotero_Preferences.Advanced.init();
 			}
@@ -136,11 +140,28 @@ var Zotero_Preferences = {
 	},
 
 	async addPane(options) {
-		let { id, title, iconPath, contentPath, onLoad } = options;
-		let titleButton = document.createXULElement('richlistitem');
-		titleButton.value = id;
-		titleButton.textContent = title;
-		this.navigation.append(titleButton);
+		let { id, label, image, src, onLoad } = options;
+
+		let listItem = document.createXULElement('richlistitem');
+		listItem.value = id;
+
+		if (image) {
+			let imageElem = document.createXULElement('image');
+			imageElem.src = image;
+			listItem.append(imageElem);
+		}
+
+		let labelElem = document.createXULElement('label');
+		if (Zotero.Intl.strings.hasOwnProperty(label)) {
+			label = Zotero.Intl.strings[label];
+		}
+		else {
+			label = Zotero.getString(label);
+		}
+		labelElem.value = label;
+
+		listItem.append(labelElem);
+		this.navigation.append(listItem);
 
 		let container = document.createXULElement('vbox');
 		container.id = id;
@@ -152,7 +173,7 @@ var Zotero_Preferences = {
 			show: (all) => {
 				if (!imported) {
 					let contentFragment = MozXULElement.parseXULToFragment(
-						Zotero.File.getContentsFromURL(contentPath),
+						Zotero.File.getContentsFromURL(src),
 						[
 							'chrome://zotero/locale/zotero.dtd',
 							'chrome://zotero/locale/preferences.dtd'
