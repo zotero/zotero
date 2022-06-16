@@ -78,6 +78,11 @@
 		Services.scriptloader.loadSubScript("chrome://global/content/customElements.js", this);
 	</script>
 
+	<keyset>
+		<key modifiers="accel" key="L" oncommand="document.getElementById('prefs-search').focus()"/>
+		<key id="key_find" modifiers="accel" key="F" oncommand="document.getElementById('prefs-search').focus()"/>
+	</keyset>
+
 	<hbox id="prefs-outer-container" flex="1">
 		<richlistbox id="prefs-navigation"></richlistbox>
 		<vbox id="prefs-inner-container" flex="1">

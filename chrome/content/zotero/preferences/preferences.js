@@ -119,6 +119,8 @@ var Zotero_Preferences = {
 		if (!this.navigation.value) {
 			this.navigation.value = 'zotero-prefpane-general';
 		}
+
+		document.getElementById('prefs-search').focus();
 	},
 	
 	onUnload: function () {
