@@ -23,15 +23,7 @@
     ***** END LICENSE BLOCK *****
 -->
 
-<vbox id="zotero-prefpane-export">
-	<preferences>
-		<preference id="pref-quickCopy-setting" name="extensions.zotero.export.quickCopy.setting" type="string"/>
-		<preference id="pref-quickCopy-dragLimit" name="extensions.zotero.export.quickCopy.dragLimit" type="int"/>
-		<preference id="pref-quickCopy-locale" name="extensions.zotero.export.quickCopy.locale" type="string"/>
-		<preference id="pref-noteQuickCopy-setting" name="extensions.zotero.export.noteQuickCopy.setting" type="string"/>
-		<preference id="pref-import-charset" name="extensions.zotero.import.charset" type="string"/>
-	</preferences>
-	
+<vbox id="zotero-prefpane-export">	
 	<groupbox id="zotero-prefpane-export-groupbox">
 		<caption label="&zotero.preferences.quickCopy.caption;"/>
 		
@@ -77,7 +69,7 @@
 		
 		<hbox align="center">
 			<label value="&zotero.preferences.quickCopy.dragLimit;"/>
-			<html:input type="text" preference="pref-quickCopy-dragLimit" size="3"/>
+			<html:input type="text" preference="extensions.zotero.export.quickCopy.dragLimit" size="3"/>
 			<label value="&zotero.preferences.items;" flex="1"/>
 		</hbox>
 	</groupbox>
@@ -87,7 +79,7 @@
 		
 		<hbox align="center">
 			<label value="&zotero.preferences.charset.importCharset;:" control="zotero-import-charsetMenu"/>
-			<menulist id="zotero-import-charsetMenu" preference="pref-import-charset"/>
+			<menulist id="zotero-import-charsetMenu" preference="extensions.zotero.import.charset"/>
 		</hbox>
 	</groupbox>
 </vbox>

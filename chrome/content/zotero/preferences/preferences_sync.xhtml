@@ -23,20 +23,6 @@
     ***** END LICENSE BLOCK *****
 -->
 <vbox id="zotero-prefpane-sync">
-    <preferences>
-        <preference id="pref-sync-autosync" name="extensions.zotero.sync.autoSync" type="bool"/>
-        <preference id="pref-sync-username" name="extensions.zotero.sync.server.username" type="unichar" instantApply="true"/>
-        <preference id="pref-sync-fulltext-enabled" name="extensions.zotero.sync.fulltext.enabled" type="bool"/>
-        <preference id="pref-storage-enabled" name="extensions.zotero.sync.storage.enabled" type="bool"/>
-        <preference id="pref-storage-protocol" name="extensions.zotero.sync.storage.protocol" type="string"/>
-        <preference id="pref-storage-scheme" name="extensions.zotero.sync.storage.scheme" type="string" instantApply="true"/>
-        <preference id="pref-storage-url" name="extensions.zotero.sync.storage.url" type="string"/>
-        <preference id="pref-storage-username" name="extensions.zotero.sync.storage.username" type="string"/>
-        <preference id="pref-storage-downloadMode-personal" name="extensions.zotero.sync.storage.downloadMode.personal" type="string"/>
-        <preference id="pref-storage-downloadMode-groups" name="extensions.zotero.sync.storage.downloadMode.groups" type="string"/>
-        <preference id="pref-storage-groups-enabled" name="extensions.zotero.sync.storage.groups.enabled" type="bool"/>
-    </preferences>
-    
     <tabbox>
         <tabs>
             <tab label="&zotero.preferences.settings;"/>
@@ -53,7 +39,7 @@
                             <html:div class="form-grid">
                                 <label value="&zotero.preferences.sync.username;"/>
                                 <textbox id="sync-username-textbox"
-                                    preference="pref-sync-username"
+                                    preference="extensions.zotero.sync.server.username"
                                     onblur="Zotero_Preferences.Sync.trimUsername()"
                                     oninput="Zotero_Preferences.Sync.credentialsChange(event)"
                                     onchange="Zotero_Preferences.Sync.credentialsChange(event)"
@@ -108,11 +94,11 @@
 
                             <box/>
                             <checkbox label="&zotero.preferences.sync.syncAutomatically;"
-                                        preference="pref-sync-autosync"/>
+                                        preference="extensions.zotero.sync.autoSync"/>
                             
                             <box/>
                             <checkbox label="&zotero.preferences.sync.syncFullTextContent;"
-                                    preference="pref-sync-fulltext-enabled"
+                                    preference="extensions.zotero.sync.fulltext.enabled"
                                     tooltiptext="&zotero.preferences.sync.syncFullTextContent.desc;"/>
 
                             <box/>
@@ -127,11 +113,11 @@
                         <!-- My Library -->
                         <hbox>
                             <checkbox label="&zotero.preferences.sync.fileSyncing.myLibrary;"
-                                    preference="pref-storage-enabled"
+                                    preference="extensions.zotero.sync.storage.enabled"
                                     oncommand="Zotero_Preferences.Sync.onStorageSettingsChange()"/>
                             <menulist id="storage-protocol" class="storage-personal"
                                     style="margin-left: .5em"
-                                    preference="pref-storage-protocol"
+                                    preference="extensions.zotero.sync.storage.protocol"
                                     oncommand="Zotero_Preferences.Sync.onStorageSettingsChange()">
                                 <menupopup>
                                     <menuitem label="Zotero" value="zotero"/>
@@ -155,7 +141,7 @@
                                     <label value="&zotero.preferences.sync.fileSyncing.url;"/>
                                     <hbox>
                                         <menulist id="storage-url-prefix"
-                                                preference="pref-storage-scheme"
+                                                preference="extensions.zotero.sync.storage.scheme"
                                                 style="padding: 0; width: 7em">
                                             <menupopup>
                                                 <menuitem label="https" value="https" style="padding: 0"/>
@@ -164,7 +150,7 @@
                                         </menulist>
                                         <label value="://"/>
                                         <textbox id="storage-url" flex="1"
-                                            preference="pref-storage-url"
+                                            preference="extensions.zotero.sync.storage.url"
                                             onkeypress="Zotero_Preferences.Sync.onStorageSettingsKeyPress(event)"
                                             onchange="Zotero_Preferences.Sync.onStorageSettingsChange()"/>
                                         <label value="/zotero/"/>
@@ -174,7 +160,7 @@
                                     <label value="&zotero.preferences.sync.username;"/>
                                     <hbox>
                                         <textbox id="storage-username"
-                                            preference="pref-storage-username"
+                                            preference="extensions.zotero.sync.storage.username"
                                             onkeypress="Zotero_Preferences.Sync.onStorageSettingsKeyPress(event)"
                                             onchange="Zotero_Preferences.Sync.onStorageSettingsChange()"/>
                                     </hbox>
@@ -206,7 +192,7 @@
                             <label value="&zotero.preferences.sync.fileSyncing.download;"/>
                             <menulist id="storage-user-download-mode"
                                     class="storage-mode"
-                                    preference="pref-storage-downloadMode-personal"
+                                    preference="extensions.zotero.sync.storage.downloadMode.personal"
                                     style="margin-left: 0">
                                 <menupopup>
                                     <menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
@@ -219,14 +205,14 @@
 
                         <!-- Group Libraries -->
                         <checkbox label="&zotero.preferences.sync.fileSyncing.groups;"
-                                preference="pref-storage-groups-enabled"
+                                preference="extensions.zotero.sync.storage.groups.enabled"
                                     oncommand="Zotero_Preferences.Sync.updateStorageSettingsGroupsUI()"/>
 
                         <hbox class="storage-settings-download-options" align="center">
                             <label value="&zotero.preferences.sync.fileSyncing.download;"/>
                             <menulist id="storage-groups-download-mode"
                                     class="storage-mode"
-                                    preference="pref-storage-downloadMode-groups"
+                                    preference="extensions.zotero.sync.storage.downloadMode.groups"
                                     style="margin-left: 0">
                                 <menupopup>
                                     <menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
