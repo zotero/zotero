@@ -45,11 +45,13 @@
 					);
 					this.setAttribute('open', true);
 
-					popup.addEventListener('popuphiding', (event) => {
+					let handler = (event) => {
 						if (event.target == popup) {
 							this.setAttribute('open', false);
+							popup.removeEventListener('popuphiding', handler);
 						}
-					}, { once: true });
+					};
+					popup.addEventListener('popuphiding', handler);
 				}
 			});
 		}
