@@ -1223,10 +1223,10 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 									let oldTag = Zotero.Tags.getName(oldTagID);
 									let dataOut = { result: null };
 									lastWin.openDialog(
-										'chrome://zotero/content/longTagFixer.xul',
+										'chrome://zotero/content/longTagFixer.xhtml',
 										'',
 										'chrome,modal,centerscreen',
-										oldTag,
+										{ oldTag, isLongTag: true },
 										dataOut
 									);
 									// If dialog was cancelled, stop
