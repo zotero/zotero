@@ -25,17 +25,23 @@
 	width: 180px;
 	appearance: none;
 	background: transparent;
+	margin: 6px;
 }
 
 #prefs-navigation > richlistitem {
 	padding: 1em 0.5em;
 	-moz-box-align: center;
 	font-size: 1.2em;
+	transition: background-color 0.2s ease;
 }
 
 #prefs-navigation > richlistitem[selected="true"] {
 	background-color: highlight;
 	color: highlighttext;
+}
+
+#prefs-navigation > richlistitem:not([selected="true"]):hover {
+	background-color: color-mix(in srgb, transparent 60%, highlight);
 }
 
 #prefs-navigation > richlistitem image {

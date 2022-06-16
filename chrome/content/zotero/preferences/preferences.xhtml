@@ -24,6 +24,8 @@
     ***** END LICENSE BLOCK *****
 -->
 <!DOCTYPE window [
+	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
+	<!ENTITY % editMenuOverlayDTD SYSTEM "chrome://zotero/locale/mozilla/editMenuOverlay.dtd" > %editMenuOverlayDTD;
 	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
 	<!ENTITY % preferencesDTD SYSTEM "chrome://zotero/locale/preferences.dtd"> %preferencesDTD;
 ]>
@@ -63,6 +65,14 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/preferences/preferences_export.js");
 		Services.scriptloader.loadSubScript("chrome://zotero/content/preferences/preferences_cite.js");
 		Services.scriptloader.loadSubScript("chrome://zotero/content/preferences/preferences_advanced.js");
+
+		// Mozilla scripts
+		Services.scriptloader.loadSubScript("chrome://global/content/globalOverlay.js", this);
+		Services.scriptloader.loadSubScript("chrome://global/content/editMenuOverlay.js", this);
+		Services.scriptloader.loadSubScript("chrome://global/content/contentAreaUtils.js", this);
+		if (Zotero.isMac) {
+			Services.scriptloader.loadSubScript("chrome://global/content/macWindowMenu.js", this);
+		}
 		
 		// Custom elements
 		Services.scriptloader.loadSubScript("chrome://global/content/customElements.js", this);

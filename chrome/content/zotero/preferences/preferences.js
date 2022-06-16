@@ -36,7 +36,7 @@ var Zotero_Preferences = {
 			event => this.search(event.target.value));
 
 		this.addPane({
-			id: 'general',
+			id: 'zotero-prefpane-general',
 			label: 'zotero.preferences.prefpane.general',
 			image: 'chrome://zotero/skin/prefs-general.png',
 			src: 'chrome://zotero/content/preferences/preferences_general.xhtml',
@@ -45,7 +45,7 @@ var Zotero_Preferences = {
 			}
 		});
 		this.addPane({
-			id: 'sync',
+			id: 'zotero-prefpane-sync',
 			label: 'zotero.preferences.prefpane.sync',
 			image: 'chrome://zotero/skin/prefs-sync.png',
 			src: 'chrome://zotero/content/preferences/preferences_sync.xhtml',
@@ -54,7 +54,7 @@ var Zotero_Preferences = {
 			}
 		});
 		this.addPane({
-			id: 'search',
+			id: 'zotero-prefpane-search',
 			label: 'zotero.preferences.prefpane.search',
 			image: 'chrome://zotero/skin/prefs-search.png',
 			src: 'chrome://zotero/content/preferences/preferences_search.xhtml',
@@ -63,7 +63,7 @@ var Zotero_Preferences = {
 			}
 		});
 		this.addPane({
-			id: 'export',
+			id: 'zotero-prefpane-export',
 			label: 'zotero.preferences.prefpane.export',
 			image: 'chrome://zotero/skin/prefs-export.png',
 			src: 'chrome://zotero/content/preferences/preferences_export.xhtml',
@@ -72,7 +72,7 @@ var Zotero_Preferences = {
 			}
 		});
 		this.addPane({
-			id: 'cite',
+			id: 'zotero-prefpane-cite',
 			label: 'zotero.preferences.prefpane.cite',
 			image: 'chrome://zotero/skin/prefs-styles.png',
 			src: 'chrome://zotero/content/preferences/preferences_cite.xhtml',
@@ -81,7 +81,7 @@ var Zotero_Preferences = {
 			}
 		});
 		this.addPane({
-			id: 'advanced',
+			id: 'zotero-prefpane-advanced',
 			label: 'zotero.preferences.prefpane.advanced',
 			image: 'chrome://zotero/skin/prefs-advanced.png',
 			src: 'chrome://zotero/content/preferences/preferences_advanced.xhtml',
@@ -90,46 +90,30 @@ var Zotero_Preferences = {
 			}
 		});
 
-		if(window.arguments) {
+		if (window.arguments) {
 			var io = window.arguments[0];
 			io = io.wrappedJSObject || io;
 			
-			if(io.pane) {
+			if (io.pane) {
 				let tabID = io.tab;
 				let tabIndex = io.tabIndex;
 				var pane = document.getElementById(io.pane);
-				document.getElementById('zotero-prefs').showPane(pane);
+				this.navigation.value = io.pane;
 				// Select tab within pane by tab id
 				if (tabID !== undefined) {
-					if (pane.loaded) {
-						let tab = document.querySelector('tab#' + tabID);
-						if (tab) {
-							document.getElementsByTagName('tabbox')[0].selectedTab = tab;
-						}
-					}
-					else {
-						pane.addEventListener('paneload', function () {
-							let tab = document.querySelector('tab#' + tabID);
-							if (tab) {
-								document.getElementsByTagName('tabbox')[0].selectedTab = tab;
-							}
-						})
+					let tab = document.getElementById(tabID);
+					if (tab) {
+						tab.control.selectedItem = tab;
 					}
 				}
 				// Select tab within pane by index
 				else if (tabIndex !== undefined) {
-					if (pane.loaded) {
-						document.getElementsByTagName('tabbox')[0].selectedIndex = tabIndex;
-					}
-					else {
-						pane.addEventListener('paneload', function () {
-							document.getElementsByTagName('tabbox')[0].selectedIndex = tabIndex;
-						})
-					}
+					pane.querySelector('tabbox').selectedIndex = tabIndex;
 				}
 			}
-		} else if(document.location.hash == "#cite") {
-			document.getElementById('zotero-prefs').showPane(document.getElementById("zotero-prefpane-cite"));
+		}
+		else if (document.location.hash == "#cite") {
+			this.panes.get('zotero-prefpane-cite').show();
 		}
 	},
 	
@@ -233,6 +217,14 @@ var Zotero_Preferences = {
 			return;
 		}
 
+		// Clear pane selection
+		this.navigation.clearSelection();
+
+		// Make sure all panes are loaded into the DOM
+		for (let pane of this.panes.values()) {
+			pane.show(true);
+		}
+
 		// Replace <label value="abc"/> with <label>abc</label>
 		// This renders exactly the same and enables highlighting using ranges
 		for (let label of document.getElementsByTagNameNS('http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'label')) {
@@ -242,15 +234,10 @@ var Zotero_Preferences = {
 			}
 		}
 
-		term = term.trim().toLowerCase();
-
-		// Clear pane selection
-		this.navigation.clearSelection();
-
-		// Make sure all panes are loaded into the DOM
-		for (let pane of this.panes.values()) {
-			pane.show(true);
-		}
+		// Clean the search term but keep the original -
+		//displaying with diacritics removed is confusing
+		let termForDisplay = Zotero.Utilities.trimInternal(term).toLowerCase();
+		term = this._normalizeSearch(term);
 
 		for (let container of this.content.children) {
 			let root = container.firstElementChild;
@@ -281,14 +268,14 @@ var Zotero_Preferences = {
 							//   | <node>
 							//   | span.search-tooltip
 							//       | span
-							//           | <term>
+							//           | <termForDisplay>
 							let tooltipParent = document.createXULElement('hbox');
 							tooltipParent.className = 'search-tooltip-parent';
 							node.replaceWith(tooltipParent);
 							let tooltip = document.createElement('span');
 							tooltip.className = 'search-tooltip';
 							let tooltipText = document.createElement('span');
-							tooltipText.append(term);
+							tooltipText.append(termForDisplay);
 							tooltip.append(tooltipText);
 							tooltipParent.append(node, tooltip);
 
@@ -320,13 +307,12 @@ var Zotero_Preferences = {
 	 * Search for the given term (case-insensitive) in the tree.
 	 *
 	 * @param {Element} root
-	 * @param {String} term
+	 * @param {String} term Must be normalized (normalizeSearch())
 	 * @return {Node[]}
 	 */
 	_searchRecursively(root, term) {
 		const EXCLUDE_SELECTOR = 'input, [no-highlight]';
 
-		term = term.toLowerCase();
 		let matched = new Set();
 		let treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
 		let currentNode;
@@ -336,8 +322,8 @@ var Zotero_Preferences = {
 					|| currentNode.length < term.length) {
 				continue;
 			}
-			if (currentNode.nodeValue.toLowerCase().includes(term)) {
-				let unhighlightableParent = this._closest(currentNode, 'menulist, button');
+			if (this._normalizeSearch(currentNode.nodeValue).includes(term)) {
+				let unhighlightableParent = this._closest(currentNode, 'menulist');
 				if (unhighlightableParent) {
 					matched.add(unhighlightableParent);
 				}
@@ -351,7 +337,7 @@ var Zotero_Preferences = {
 			if (elem.hasAttribute('data-search-strings-raw')) {
 				let rawStrings = elem.getAttribute('data-search-strings-raw')
 					.split(',')
-					.map(s => s.trim().toLowerCase())
+					.map(this._normalizeSearch)
 					.filter(Boolean);
 				if (rawStrings.some(s => s.includes(term))) {
 					matched.add(elem);
@@ -366,12 +352,13 @@ var Zotero_Preferences = {
 					.filter(Boolean);
 				for (let key of stringKeys) {
 					if (Zotero.Intl.strings.hasOwnProperty(key)) {
-						if (Zotero.Intl.strings[key].toLowerCase().includes(term)) {
+						if (this._normalizeSearch(Zotero.Intl.strings[key]).includes(term)) {
 							matched.add(elem);
 							break;
 						}
 					}
-					else if (Zotero.getString(key).toLowerCase().includes(term)) {
+					else if (this._normalizeSearch(Zotero.getString(key).replace(/%(\d+\$)?S/g, ''))
+							.includes(term)) {
 						matched.add(elem);
 						break;
 					}
@@ -380,6 +367,12 @@ var Zotero_Preferences = {
 		}
 
 		return [...matched];
+	},
+
+	_normalizeSearch(s) {
+		return Zotero.Utilities.removeDiacritics(
+			Zotero.Utilities.trimInternal(s).toLowerCase(),
+			true);
 	},
 
 	_getSearchSelection() {

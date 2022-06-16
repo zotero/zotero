@@ -1816,7 +1816,7 @@ Zotero.Utilities.Internal = {
 	
 	openPreferences: function (paneID, options = {}) {
 		if (typeof options == 'string') {
-			Zotero.debug("ZoteroPane.openPreferences() now takes an 'options' object -- update your code", 2);
+			Zotero.debug("openPreferences() now takes an 'options' object -- update your code", 2);
 			options = {
 				action: options
 			};
@@ -1839,8 +1839,7 @@ Zotero.Utilities.Internal = {
 				var win = enumerator.getNext();
 				win.focus();
 				if (paneID) {
-					var pane = win.document.getElementsByAttribute('id', paneID)[0];
-					pane.parentElement.showPane(pane);
+					win.Zotero_Preferences.navigation.value = paneID;
 					
 					// TODO: tab/action
 				}
