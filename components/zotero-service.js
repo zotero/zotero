@@ -576,7 +576,9 @@ ZoteroCommandLineHandler.prototype = {
 					const { DevToolsLoader } = ChromeUtils.import(
 						"resource://devtools/shared/loader/Loader.jsm"
 					);
-					const loader = new DevToolsLoader();
+					const loader = new DevToolsLoader({
+						freshCompartment: true,
+					});
 					const { DevToolsServer } = loader.require("devtools/server/devtools-server");
 					const { SocketListener } = loader.require("devtools/shared/security/socket");
 					
