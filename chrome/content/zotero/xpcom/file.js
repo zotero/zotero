@@ -57,8 +57,8 @@ Zotero.File = new function(){
 	}
 	
 	
-	this.pathToFileURI = function (path) {
-		var file = new FileUtils.File(path);
+	this.pathToFileURI = function (pathOrFile) {
+		var file = this.pathToFile(pathOrFile);
 		return Services.io.newFileURI(file).spec;
 	}
 	
