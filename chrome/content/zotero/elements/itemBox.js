@@ -908,9 +908,13 @@
 			}
 			
 			if (this.editable && fieldMode == 0) {
-				firstlast.oncontextmenu = () => {
+				firstlast.oncontextmenu = (event) => {
 					document.popupNode = firstlast;
-					this._id('zotero-creator-transform-menu').openPopup(firstlast);
+					this._id('zotero-creator-transform-menu').openPopupAtScreen(
+						event.screenX + 1,
+						event.screenY + 1,
+						true
+					);
 				};
 			}
 			
@@ -1404,9 +1408,14 @@
 				if (this.editable && (fieldName == 'seriesTitle' || fieldName == 'shortTitle' ||
 						Zotero.ItemFields.isFieldOfBase(fieldID, 'title') ||
 						Zotero.ItemFields.isFieldOfBase(fieldID, 'publicationTitle'))) {
-					valueElement.oncontextmenu = () => {
+					valueElement.setAttribute('context', 'zotero-field-transform-menu');
+					valueElement.oncontextmenu = (event) => {
 						document.popupNode = valueElement;
-						this._id('zotero-field-transform-menu').openPopup(valueElement);
+						this._id('zotero-field-transform-menu').openPopupAtScreen(
+							event.screenX + 1,
+							event.screenY + 1,
+							true
+						);
 					};
 				}
 			}
