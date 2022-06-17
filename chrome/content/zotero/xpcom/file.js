@@ -118,9 +118,9 @@ Zotero.File = new function(){
 	 * @param {nsIURI|nsIFile|string spec|nsIChannel|nsIInputStream} source - The source to read
 	 * @return {Promise}
 	 */
-	this.getSample = function (file) {
+	this.getSample = async function (file) {
 		var bytes = 200;
-		return this.getContentsAsync(file, null, bytes);
+		return this.getBinaryContentsAsync(file, bytes);
 	}
 	
 	

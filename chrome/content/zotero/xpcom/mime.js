@@ -35,21 +35,19 @@ Zotero.MIME = new function(){
 		["%PDF-", "application/pdf"],
 		["%!PS-Adobe-", 'application/postscript', 0],
 		["%! PS-Adobe-", 'application/postscript', 0],
-		["\uFFFD\uFFFD\x11\u0871\x1A\uFFFD\x00\x00", "application/msword", 0],
 		["From", 'text/plain', 0],
 		[">From", 'text/plain', 0],
 		["#!", 'text/plain', 0],
 		["<?xml", 'text/xml', 0],
 		["<!DOCTYPE html", 'text/html', 0],
 		["<html", 'text/html', 0],
-		["\uFFFD\uFFFD\uFFFD\uFFFD", 'image/jpeg', 0],
 		["GIF8", 'image/gif', 0],
-		["\uFFFDPNG", 'image/png', 0],
+		["\u0089PNG", 'image/png', 0],
+		["\u00FF\u00D8", 'image/jpeg', 0],
 		["JFIF", 'image/jpeg'],
 		["FLV", "video/x-flv", 0],
 		["\u0000\u0000\u0001\u0000", "image/vnd.microsoft.icon", 0],
-		["\u0053\u0051\u004C\u0069\u0074\u0065\u0020\u0066"
-			+ "\u006F\u0072\u006D\u0061\u0074\u0020\u0033\u0000", "application/x-sqlite3", 0]
+		["SQLite format 3\u0000", "application/x-sqlite3", 0],
 	];
 	
 	var _extensions = {
