@@ -487,7 +487,35 @@ Zotero.Utilities.Internal = {
 			cookieSandbox.attachToInterfaceRequestor(wbp.progressListener);
 		}
 		
-		wbp.saveURI(uri, null, null, null, null, headers, target, null);
+		// TODO: Check/fix cookie stuff
+		var cookieJarSettings = Cc["@mozilla.org/cookieJarSettings;1"]
+			.createInstance(Ci.nsICookieJarSettings);
+		//cookieJarSettings.initWithURI(uri, options.incognito);
+		
+		var loadContext = Cu.createLoadContext();
+		//loadContext.usePrivateBrowsing = true;
+		
+		wbp.saveURI(
+			uri,
+			// triggeringPrincipal
+			Services.scriptSecurityManager.createNullPrincipal({}),
+			// cacheKey
+			null,
+			// referrerInfo
+			null,
+			// cookieJarSettings
+			cookieJarSettings,
+			// postData
+			null,
+			// extraHeaders
+			headers,
+			// file
+			target,
+			// contentPolicyType
+			Ci.nsIContentPolicy.TYPE_DOCUMENT,
+			// privacyContext
+			loadContext
+		);
 	},
 	
 	
