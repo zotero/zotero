@@ -18,8 +18,8 @@ describe("Zotero.File", function () {
 				OS.Path.join(getTestDataDirectory().path, "charsets", "windows1252.txt"),
 				"windows-1252"
 			);
-			assert.lengthOf(contents, 1);
-			assert.equal(contents, "\u00E9");
+			assert.lengthOf(contents, 3);
+			assert.equal(contents, "\u201C\u00E9\u201D");
 		})
 		
 		it("should handle a GBK character", function* () {
@@ -27,8 +27,8 @@ describe("Zotero.File", function () {
 				OS.Path.join(getTestDataDirectory().path, "charsets", "gbk.txt"),
 				"gbk"
 			);
-			assert.lengthOf(contents, 1);
-			assert.equal(contents, "\u4e02");
+			assert.lengthOf(contents, 9);
+			assert.equal(contents, "这是一个测试文件。");
 		})
 		
 		it("should handle an invalid character", function* () {
