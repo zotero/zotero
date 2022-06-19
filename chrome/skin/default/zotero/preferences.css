@@ -49,6 +49,27 @@
 	width: 24px;
 }
 
+h1 {
+	margin: 0 0 4px 0;
+	font-size: 1.3em;
+	font-weight: normal;
+}
+
+.main-section {
+	margin-bottom: 16px;
+}
+
+.main-section:not([hidden]):not(.hidden-by-search) ~ .main-section {
+	padding-top: 16px;
+	margin-top: 32px;
+	border-top: 1px solid lightgray;
+}
+
+groupbox > label > h2, groupbox > * > label > h2 {
+	border-bottom: none;
+	font-weight: bold;
+}
+
 /* Approach to search tooltips (mostly borrowed from Fx prefs): */
 .search-tooltip-parent {
 	position: relative;

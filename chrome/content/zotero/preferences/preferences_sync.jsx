@@ -86,7 +86,7 @@ Zotero_Preferences.Sync = {
 	displayFields: function (username) {
 		document.getElementById('sync-unauthorized').hidden = !!username;
 		document.getElementById('sync-authorized').hidden = !username;
-		document.getElementById('sync-reset-tab').disabled = !username;
+		document.getElementById('sync-reset').hidden = !username;
 		document.getElementById('sync-username').value = username;
 		document.getElementById('sync-password').value = '';
 		document.getElementById('sync-username-textbox').value = Zotero.Prefs.get('sync.server.username');

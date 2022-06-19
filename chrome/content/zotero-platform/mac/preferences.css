@@ -10,12 +10,11 @@ window[windowtype="zotero:pref"] {
 	color: -moz-DialogText;
 }
 
-groupbox > label > h2 {
+groupbox > label > h2, groupbox > * > label > h2 {
 	border-bottom: #b5b5b5 1px solid;
 }
 
-groupbox > label > h2, caption {
-	padding-inline-start: 4px;
-	padding-bottom: 1px;
+groupbox > label > h2, groupbox > * > label > h2, caption {
+	padding-bottom: 0.2em;
 	font: caption;
 }
