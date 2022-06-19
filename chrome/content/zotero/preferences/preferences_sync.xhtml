@@ -33,7 +33,7 @@
                 <hbox>
                     <html:div class="form-grid">
                         <label value="&zotero.preferences.sync.username;"/>
-                        <textbox id="sync-username-textbox"
+                        <html:input id="sync-username-textbox"
                             preference="extensions.zotero.sync.server.username"
                             onblur="Zotero_Preferences.Sync.trimUsername()"
                             oninput="Zotero_Preferences.Sync.credentialsChange(event)"
@@ -41,7 +41,7 @@
                             onkeypress="Zotero_Preferences.Sync.credentialsKeyPress(event)"/>
                         
                         <label value="&zotero.preferences.sync.password;"/>
-                        <textbox id="sync-password" type="password"
+                        <html:input id="sync-password" type="password"
                             oninput="Zotero_Preferences.Sync.credentialsChange(event)"
                             onchange="Zotero_Preferences.Sync.credentialsChange(event)"
                             onkeypress="Zotero_Preferences.Sync.credentialsKeyPress(event)"/>
@@ -144,7 +144,7 @@
                                     </menupopup>
                                 </menulist>
                                 <label value="://"/>
-                                <textbox id="storage-url" flex="1"
+                                <html:input id="storage-url" style="-moz-box-flex: 1;"
                                     preference="extensions.zotero.sync.storage.url"
                                     onkeypress="Zotero_Preferences.Sync.onStorageSettingsKeyPress(event)"
                                     onchange="Zotero_Preferences.Sync.onStorageSettingsChange()"/>
@@ -154,7 +154,7 @@
                         <row>
                             <label value="&zotero.preferences.sync.username;"/>
                             <hbox>
-                                <textbox id="storage-username"
+                                <html:input id="storage-username"
                                     preference="extensions.zotero.sync.storage.username"
                                     onkeypress="Zotero_Preferences.Sync.onStorageSettingsKeyPress(event)"
                                     onchange="Zotero_Preferences.Sync.onStorageSettingsChange()"/>
@@ -163,7 +163,7 @@
                         <row>
                             <label value="&zotero.preferences.sync.password;"/>
                             <hbox>
-                                <textbox id="storage-password" flex="0" type="password"
+                                <html:input id="storage-password" style="-moz-box-flex: 0;" type="password"
                                     onkeypress="Zotero_Preferences.Sync.onStorageSettingsKeyPress(event)"
                                     onchange="Zotero_Preferences.Sync.onStorageSettingsChange()"/>
                             </hbox>

@@ -322,7 +322,7 @@ var Zotero_Preferences = {
 	 * @return {Node[]}
 	 */
 	_searchRecursively(root, term) {
-		const EXCLUDE_SELECTOR = 'input, [no-highlight]';
+		const EXCLUDE_SELECTOR = 'input, [hidden="true"], [no-highlight]';
 
 		let matched = new Set();
 		let treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -345,6 +345,10 @@ var Zotero_Preferences = {
 		}
 
 		for (let elem of root.querySelectorAll('[data-search-strings-raw], [data-search-strings]')) {
+			if (elem.closest(EXCLUDE_SELECTOR)) {
+				continue;
+			}
+
 			if (elem.hasAttribute('data-search-strings-raw')) {
 				let rawStrings = elem.getAttribute('data-search-strings-raw')
 					.split(',')
