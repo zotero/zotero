@@ -474,7 +474,6 @@ Zotero.File = new function(){
 				// NOTE: This noop callback is required, do not remove.
 			},
 			onStopRequest(request, status) {
-				const responseStatus = 'responseStatus' in request ? request.responseStatus : null;
 				pipe.outputStream.close();
 
 				if (!Components.isSuccessCode(status)) {
@@ -490,11 +489,14 @@ Zotero.File = new function(){
 					return;
 				}
 
-				if (isHTTP && responseStatus != 200) {
-					let msg = `Download failed with response code ${responseStatus}`;
-					Zotero.logError(msg);
-					deferred.reject(new Error(msg));
-					return;
+				if (isHTTP) {
+					let statusCode = request.QueryInterface(Ci.nsIHttpChannel).responseStatus;
+					if (statusCode != 200) {
+						let msg = `Download failed with response code ${responseStatus}`;
+						Zotero.logError(msg);
+						deferred.reject(new Error(msg));
+						return;
+					}
 				}
 			}
 		});
