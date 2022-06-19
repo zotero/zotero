@@ -1952,9 +1952,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				let uri;
 				if (!Zotero.isMac) {
 					Zotero.debug("Adding text/x-moz-url " + i);
-					let fph = Cc["@mozilla.org/network/protocol;1?name=file"]
-						.createInstance(Ci.nsIFileProtocolHandler);
-					uri = fph.getURLSpecFromFile(file);
+					uri = Zotero.File.pathToFileURI(file);
 					event.dataTransfer.mozSetDataAt("text/x-moz-url", uri + '\n' + file.leafName, i);
 				}
 

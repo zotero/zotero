@@ -676,18 +676,12 @@ Zotero.Translate.IO.Read.prototype = {
 	},
 	
 	"_initRDF":function() {
-		// get URI
-		var IOService = Components.classes['@mozilla.org/network/io-service;1']
-						.getService(Components.interfaces.nsIIOService);
-		var fileHandler = IOService.getProtocolHandler("file")
-						  .QueryInterface(Components.interfaces.nsIFileProtocolHandler);
-		var baseURI = fileHandler.getURLSpecFromFile(this.file);
-		
 		Zotero.debug("Translate: Initializing RDF data store");
 		this._dataStore = new Zotero.RDF.AJAW.IndexedFormula();
 		var parser = new Zotero.RDF.AJAW.RDFParser(this._dataStore);
 		try {
 			var nodes = Zotero.Translate.IO.parseDOMXML(this._rawStream, this._charset, this.file.fileSize);
+			let baseURI = Zotero.File.pathToFileURI(this.file);
 			parser.parse(nodes, baseURI);
 			
 			this.RDF = new Zotero.Translate.IO._RDFSandbox(this._dataStore);
