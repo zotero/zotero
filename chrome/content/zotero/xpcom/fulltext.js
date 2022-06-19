@@ -514,18 +514,18 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			return false;
 		}
 		
+		var maxLength = Zotero.Prefs.get('fulltext.textMaxLength');
+		if (!maxLength) {
+			Zotero.debug('fulltext.textMaxLength is 0 -- skipping indexing');
+			return false;
+		}
+		
 		if (contentType == 'application/pdf') {
 			return this.indexPDF(path, item.id, complete);
 		}
 		
 		if (!Zotero.MIME.isTextType(contentType)) {
 			Zotero.debug('File is not text in indexItem()', 2);
-			return false;
-		}
-		
-		var maxLength = Zotero.Prefs.get('fulltext.textMaxLength');
-		if (!maxLength) {
-			Zotero.debug('fulltext.textMaxLength is 0 -- skipping indexing');
 			return false;
 		}
 		
