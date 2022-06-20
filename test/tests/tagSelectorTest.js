@@ -657,13 +657,14 @@ describe("Tag Selector", function () {
 			yield promise;
 			
 			promise = waitForTagSelector(win);
-			var promptPromise = waitForWindow("chrome://global/content/commonDialog.xul", function (dialog) {
-				dialog.document.getElementById('loginTextbox').value = newTag;
-				dialog.document.documentElement.acceptDialog();
+			var promptPromise = waitForDialog(function (dialogWindow, dialog) {
+				dialogWindow.document.getElementById('loginTextbox').value = newTag;
+				dialog.acceptDialog();
 			})
 			tagSelector.contextTag = {name: tag};
 			yield tagSelector.openRenamePrompt();
 			yield promise;
+			yield promptPromise;
 			
 			var tags = getRegularTags();
 			assert.include(tags, newTag);
@@ -680,9 +681,9 @@ describe("Tag Selector", function () {
 			yield promise;
 			
 			promise = waitForTagSelector(win);
-			waitForWindow("chrome://global/content/commonDialog.xul", function (dialog) {
-				dialog.document.getElementById('loginTextbox').value = newTag;
-				dialog.document.documentElement.acceptDialog();
+			waitForDialog(function (dialogWindow, dialog) {
+				dialogWindow.document.getElementById('loginTextbox').value = newTag;
+				dialog.acceptDialog();
 			});
 			tagSelector.contextTag = {name: oldTag};
 			yield tagSelector.openRenamePrompt();
