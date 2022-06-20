@@ -174,7 +174,7 @@ function waitForWindow(uri, callback) {
 /**
  * Wait for an alert or confirmation dialog to pop up and then close it
  *
- * @param {Function} [onOpen] - Function that is passed the dialog once it is opened.
+ * @param {Function} [onOpen] - Function that is passed the window and dialog once it is opened.
  *                              Can be used to make assertions on the dialog contents
  *                              (e.g., with dialog.document.documentElement.textContent)
  * @param {String} [button='accept'] - Button in dialog to press (e.g., 'cancel', 'extra1')
@@ -182,10 +182,11 @@ function waitForWindow(uri, callback) {
  */
 function waitForDialog(onOpen, button='accept', url) {
 	return waitForWindow(url || "chrome://global/content/commonDialog.xhtml", Zotero.Promise.method(function (win) {
+		var dialog = win.document.querySelector('dialog');
 		var failure = false;
 		if (onOpen) {
 			try {
-				onOpen(win);
+				onOpen(win, dialog);
 			}
 			catch (e) {
 				failure = e;
@@ -200,13 +201,13 @@ function waitForDialog(onOpen, button='accept', url) {
 			let deferred = Zotero.Promise.defer();
 			function acceptWhenEnabled() {
 				// Handle delayed buttons
-				if (win.document.querySelector('dialog').getButton(button).disabled) {
+				if (dialog.getButton(button).disabled) {
 					win.setTimeout(function () {
 						acceptWhenEnabled();
 					}, 250);
 				}
 				else {
-					win.document.querySelector('dialog').getButton(button).click();
+					dialog.getButton(button).click();
 					if (failure) {
 						deferred.reject(failure);
 					}
@@ -219,7 +220,7 @@ function waitForDialog(onOpen, button='accept', url) {
 			return deferred.promise;
 		}
 		else {
-			win.document.querySelector('dialog').getButton(button).click();
+			dialog.getButton(button).click();
 			if (failure) {
 				throw failure;
 			}
