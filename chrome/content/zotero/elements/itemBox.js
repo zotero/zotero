@@ -212,7 +212,7 @@
 			this._id('creator-transform-swap-names').addEventListener('command',
 				event => this.swapNames(event));
 			
-			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'itembox');
+			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'itemBox');
 		}
 		
 		destroy() {

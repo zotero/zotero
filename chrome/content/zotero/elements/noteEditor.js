@@ -86,7 +86,7 @@
 			});
 			shadow.append(content);
 
-			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'itembox');
+			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'noteEditor');
 			this.notitle = !!this.getAttribute('notitle');
 		}
 		
