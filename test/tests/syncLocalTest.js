@@ -51,6 +51,8 @@ describe("Zotero.Sync.Data.Local", function() {
 				assert.equal(matches[1], "“B”");
 				assert.equal(matches[2], "“A”");
 				assert.equal(matches[3], "“A”");
+				// Checkbox
+				assert.equal(matches[4], "“A”");
 				
 				window.document.getElementById('zotero-hardConfirmationDialog-checkbox').checked = true;
 				window.document.getElementById('zotero-hardConfirmationDialog-checkbox')
