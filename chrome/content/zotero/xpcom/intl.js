@@ -38,7 +38,7 @@ Zotero.Intl = new function () {
 			let restart = false;
 			if (prevMatchOS === false && prevLocale) {
 				try {
-					Services.locale.setRequestedLocales([prevLocale]);
+					Services.locale.requestedLocales = [prevLocale];
 					restart = true;
 				}
 				catch (e) {
