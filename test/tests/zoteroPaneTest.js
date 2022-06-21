@@ -465,18 +465,15 @@ describe("ZoteroPane", function() {
 			var promise = waitForDialog();
 			var modifyPromise = waitForItemEvent('modify');
 			
-			var event = doc.createEvent("KeyboardEvent");
-			event.initKeyEvent(
+			var event = new KeyboardEvent(
 				"keypress",
-				true,
-				true,
-				window,
-				false,
-				false,
-				false,
-				false,
-				DELETE_KEY_CODE,
-				0
+				{
+					key: 'Delete',
+					code: 'Delete',
+					keyCode: DELETE_KEY_CODE,
+					bubbles: true,
+					cancelable: true
+				}
 			);
 			tree.dispatchEvent(event);
 			yield promise;
@@ -506,18 +503,17 @@ describe("ZoteroPane", function() {
 			var promise = waitForDialog();
 			var modifyPromise = waitForItemEvent('modify');
 			
-			var event = doc.createEvent("KeyboardEvent");
-			event.initKeyEvent(
+			var event = new KeyboardEvent(
 				"keypress",
-				true,
-				true,
-				window,
-				false,
-				false,
-				!Zotero.isMac, // shift
-				Zotero.isMac, // meta
-				DELETE_KEY_CODE,
-				0
+				{
+					key: 'Delete',
+					code: 'Delete',
+					keyCode: DELETE_KEY_CODE,
+					bubbles: true,
+					cancelable: true,
+					shiftKey: !Zotero.isMac,
+					metaKey: Zotero.isMac,
+				}
 			);
 			tree.dispatchEvent(event);
 			yield promise;
@@ -588,9 +584,9 @@ describe("ZoteroPane", function() {
 				{
 					key: 'Delete',
 					code: 'Delete',
+					keyCode: DELETE_KEY_CODE,
 					metaKey: Zotero.isMac,
 					shiftKey: !Zotero.isMac,
-					keyCode: DELETE_KEY_CODE,
 					bubbles: true,
 					cancelable: true
 				}
