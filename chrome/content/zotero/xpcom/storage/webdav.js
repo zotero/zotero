@@ -158,14 +158,14 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 		if (!this._rootURI) {
 			this._init();
 		}
-		return this._rootURI.clone();
+		return this._rootURI;
 	},
 	
 	get parentURI() {
 		if (!this._parentURI) {
 			this._init();
 		}
-		return this._parentURI.clone();
+		return this._parentURI;
 	},
 	
 	_init: function () {
@@ -1397,7 +1397,7 @@ Zotero.Sync.Storage.Mode.WebDAV.prototype = {
 			return 0;
 		});
 		
-		let deleteURI = this.rootURI.clone();
+		let deleteURI = this.rootURI;
 		// This should never happen, but let's be safe
 		if (!deleteURI.spec.match(/\/$/)) {
 			throw new Error("Root URI does not end in slash");
