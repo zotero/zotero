@@ -19,7 +19,7 @@ describe("ZoteroPane", function() {
 		it("should create an item and focus the title field", function* () {
 			yield zp.newItem(Zotero.ItemTypes.getID('book'), {}, null, true);
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var textboxes = doc.getAnonymousNodes(itemBox)[0].getElementsByTagName('textbox');
+			var textboxes = itemBox.shadowRoot.querySelectorAll('input, textarea');
 			assert.lengthOf(textboxes, 1);
 			assert.equal(textboxes[0].getAttribute('fieldname'), 'title');
 			textboxes[0].blur();
@@ -30,7 +30,7 @@ describe("ZoteroPane", function() {
 			var value = "Test";
 			var item = yield zp.newItem(Zotero.ItemTypes.getID('book'), {}, null, true);
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var textbox = doc.getAnonymousNodes(itemBox)[0].getElementsByTagName('textbox')[0];
+			var textbox = itemBox.shadowRoot.querySelector('textarea');
 			textbox.value = value;
 			yield itemBox.blurOpenField();
 			item = yield Zotero.Items.getAsync(item.id);

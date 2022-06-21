@@ -2293,7 +2293,7 @@
 		
 		blurOpenField() {
 			return (async function () {
-				var activeField = this._infoTable.querySelector('input');
+				var activeField = this._infoTable.querySelector('input, textarea');
 				if (!activeField) {
 					return false;
 				}
