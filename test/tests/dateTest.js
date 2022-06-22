@@ -196,6 +196,20 @@ describe("Zotero.Date", function() {
 			assert.notProperty(o, 'year');
 		});
 		
+		it("should parse English month before date", function () {
+			var o = Zotero.Date.strToDate("June 26, 2010");
+			assert.equal(o.month, 5);
+			assert.equal(o.day, 26);
+			assert.equal(o.year, 2010);
+		});
+		
+		it("should parse English month after date", function () {
+			var o = Zotero.Date.strToDate("26 June 2010");
+			assert.equal(o.month, 5);
+			assert.equal(o.day, 26);
+			assert.equal(o.year, 2010);
+		});
+		
 		it("should parse Chinese month", function () {
 			Zotero.locale = 'zh-CN';
 			Zotero.Date.init();
