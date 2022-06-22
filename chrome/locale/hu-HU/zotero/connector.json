@@ -89,8 +89,14 @@
   "integration_googleDocs_documentLocked": {
     "message": "A dokumentum hivatkozásait egy másik $1 felhasználó szerkeszti. Próbálja meg később."
   },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "A kiválasztott Google-fióknak nincs jogosultsága a dokumentum szerkesztésére. Kérjük, próbálja meg újra, és győződjön meg róla, hogy a szerkesztési jogosultsággal rendelkező fiókot választotta."
+  },
   "integration_googleDocs_orphanedCitations_buttonTooltip": {
     "message": "A$1jelenítse meg a nem linkelt hivatkozásokat"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "A szerkeszteni kívánt idézet nem kapcsolódik a(z) $1."
   },
   "integration_googleDocs_orphanedCitations_alertButton": {
     "message": "Hivatkozás újralinkelése"
