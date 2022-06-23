@@ -32,7 +32,7 @@ var Zotero_Preferences = {
 		this.navigation = document.getElementById('prefs-navigation');
 		this.content = document.getElementById('prefs-content');
 
-		this.navigation.addEventListener('select', () => this.onNavigationSelect());
+		this.navigation.addEventListener('select', () => this._onNavigationSelect());
 		document.getElementById('prefs-search').addEventListener('command',
 			event => this.search(event.target.value));
 
@@ -134,6 +134,18 @@ var Zotero_Preferences = {
 		}
 	},
 
+	/**
+	 * Add a pane to the left navigation sidebar. The pane XHTML (`src`) is
+	 * loaded as a fragment, not a full document, with XUL as the default
+	 * namespace and (X)HTML tags available under `html:`.
+	 *
+	 * @param {Object} options
+	 * @param {String} options.id Must be unique
+	 * @param {String} options.label A DTD/.properties key
+	 * @param {String} [options.image] URI of an icon (displayed in the navigation sidebar)
+	 * @param {String} options.src URI of an XHTML fragment
+	 * @param {Function} [options.onLoad]
+	 */
 	async addPane(options) {
 		let { id, label, image, src, onLoad } = options;
 
@@ -189,19 +201,16 @@ var Zotero_Preferences = {
 		});
 	},
 
-	onNavigationSelect() {
-		if (this.navigation.value) {
-			document.getElementById('prefs-search').value = '';
-			this.search('');
-			this.panes.get(this.navigation.value).show();
-		}
-		else {
-			for (let child of this.content.children) {
-				child.setAttribute('hidden', true);
-			}
-		}
-	},
-
+	/**
+	 * If term is falsy, clear the current search and show the first pane.
+	 * If term is truthy, execute a search:
+	 *   - Deselect the selected section
+	 *   - Show all preferences from all sections
+	 *   - Hide those not matching the search term (by full text and data-search-strings[-raw])
+	 *   - Highlight full-text matches and show tooltips by search string matches
+	 *
+	 * @param {String} [term]
+	 */
 	search(term) {
 		// Initial housekeeping:
 
@@ -384,12 +393,19 @@ var Zotero_Preferences = {
 		return [...matched];
 	},
 
+	/**
+	 * @param {String} s
+	 * @return {String}
+	 */
 	_normalizeSearch(s) {
 		return Zotero.Utilities.removeDiacritics(
 			Zotero.Utilities.trimInternal(s).toLowerCase(),
 			true);
 	},
 
+	/**
+	 * @return {Selection}
+	 */
 	_getSearchSelection() {
 		// https://searchfox.org/mozilla-central/rev/703391c381f92a73d9a938cbe0d33ca64d94583b/browser/components/preferences/findInPage.js#226-239
 		let controller = window.docShell
@@ -415,6 +431,19 @@ var Zotero_Preferences = {
 			node = node.parentNode;
 		}
 		return node?.closest(selector);
+	},
+
+	_onNavigationSelect() {
+		if (this.navigation.value) {
+			document.getElementById('prefs-search').value = '';
+			this.search('');
+			this.panes.get(this.navigation.value).show();
+		}
+		else {
+			for (let child of this.content.children) {
+				child.setAttribute('hidden', true);
+			}
+		}
 	},
 
 	initImportedNodes(root) {
