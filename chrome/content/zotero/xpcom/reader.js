@@ -1010,7 +1010,7 @@ class ReaderInstance {
 }
 
 class ReaderTab extends ReaderInstance {
-	constructor({ itemID, title, sidebarWidth, sidebarOpen, bottomPlaceholderHeight, index, background }) {
+	constructor({ itemID, title, sidebarWidth, sidebarOpen, bottomPlaceholderHeight, index, tabID, background }) {
 		super();
 		this._itemID = itemID;
 		this._sidebarWidth = sidebarWidth;
@@ -1019,6 +1019,7 @@ class ReaderTab extends ReaderInstance {
 		this._showItemPaneToggle = true;
 		this._window = Services.wm.getMostRecentWindow('navigator:browser');
 		let { id, container } = this._window.Zotero_Tabs.add({
+			id: tabID,
 			type: 'reader',
 			title: title || '',
 			index,
@@ -1053,20 +1054,24 @@ class ReaderTab extends ReaderInstance {
 		// events in PDF reader iframe when mouse up happens over another iframe
 		// i.e. note-editor. There should be a better way to solve this
 		this._window.addEventListener('pointerup', (event) => {
-			if (this._window.Zotero_Tabs.selectedID === this.tabID
-				&& this._iframeWindow
-				&& event.target
-				&& event.target.closest
-				&& !event.target.closest('#outerContainer')) {
-				let evt = new this._iframeWindow.CustomEvent('mouseup', { bubbles: false });
-				evt.clientX = event.clientX;
-				evt.clientY = event.clientY;
-				this._iframeWindow.dispatchEvent(evt);
+			try {
+				if (this._window.Zotero_Tabs.selectedID === this.tabID
+					&& this._iframeWindow
+					&& event.target
+					&& event.target.closest
+					&& !event.target.closest('#outerContainer')) {
+					let evt = new this._iframeWindow.CustomEvent('mouseup', { bubbles: false });
+					evt.clientX = event.clientX;
+					evt.clientY = event.clientY;
+					this._iframeWindow.dispatchEvent(evt);
 
-				evt = new this._iframeWindow.CustomEvent('pointerup', { bubbles: false });
-				evt.clientX = event.clientX;
-				evt.clientY = event.clientY;
-				this._iframeWindow.dispatchEvent(evt);
+					evt = new this._iframeWindow.CustomEvent('pointerup', { bubbles: false });
+					evt.clientX = event.clientX;
+					evt.clientY = event.clientY;
+					this._iframeWindow.dispatchEvent(evt);
+				}
+			}
+			catch(e) {
 			}
 		});
 	}
@@ -1355,7 +1360,7 @@ class Reader {
 		await this.open(item.id, location, options);
 	}
 
-	async open(itemID, location, { title, tabIndex, openInBackground, openInWindow, allowDuplicate } = {}) {
+	async open(itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate } = {}) {
 		this._loadSidebarState();
 		this.triggerAnnotationsImportCheck(itemID);
 		let reader;
@@ -1397,6 +1402,7 @@ class Reader {
 				itemID,
 				title,
 				index: tabIndex,
+				tabID,
 				background: openInBackground,
 				sidebarWidth: this._sidebarWidth,
 				sidebarOpen: this._sidebarOpen,
