@@ -69,14 +69,14 @@
 						id="search-box" flex="1" onkeypress="this.getRootNode().host.handleKeyPress(event)">
 					<hbox align="center">
 						<label value="&zotero.search.searchInLibrary;" control="libraryMenu"/>
-						<menulist id="libraryMenu" oncommand="this.getRootNode().host.updateLibrary();">
+						<menulist id="libraryMenu" oncommand="this.getRootNode().host.updateLibrary();" native="true">
 							<menupopup/>
 						</menulist>
 					</hbox>
 					<groupbox>
 						<caption align="center">
 							<label value="&zotero.search.joinMode.prefix;"/>
-							<menulist id="joinModeMenu" oncommand="this.getRootNode().host.updateJoinMode();">
+							<menulist id="joinModeMenu" oncommand="this.getRootNode().host.updateJoinMode();" native="true">
 								<menupopup>
 									<menuitem label="&zotero.search.joinMode.any;" value="any"/>
 									<menuitem label="&zotero.search.joinMode.all;" value="all" selected="true"/>
@@ -87,11 +87,11 @@
 						<vbox id="conditions"/>
 					</groupbox>
 					<hbox>
-						<checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="this.getRootNode().host.updateCheckbox('recursive');"/>
-						<checkbox id="noChildrenCheckbox" label="&zotero.search.noChildren;" oncommand="this.getRootNode().host.updateCheckbox('noChildren');"/>
+						<checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="this.getRootNode().host.updateCheckbox('recursive');" native="true"/>
+						<checkbox id="noChildrenCheckbox" label="&zotero.search.noChildren;" oncommand="this.getRootNode().host.updateCheckbox('noChildren');" native="true"/>
 					</hbox>
 					<hbox>
-						<checkbox id="includeParentsAndChildrenCheckbox" label="&zotero.search.includeParentsAndChildren;" oncommand="this.getRootNode().host.updateCheckbox('includeParentsAndChildren');"/>
+						<checkbox id="includeParentsAndChildrenCheckbox" label="&zotero.search.includeParentsAndChildren;" oncommand="this.getRootNode().host.updateCheckbox('includeParentsAndChildren');" native="true"/>
 					</hbox>
 				</vbox>
 			`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
@@ -255,18 +255,18 @@
 						flex="1">
 					<xul:popupset id="condition-tooltips"/>
 					
-					<xul:menulist id="conditionsmenu" oncommand="this.getRootNode().host.onConditionSelected(event.target.value); event.stopPropagation()">
+					<xul:menulist id="conditionsmenu" oncommand="this.getRootNode().host.onConditionSelected(event.target.value); event.stopPropagation()" native="true">
 						<xul:menupopup onpopupshown="this.getRootNode().host.revealSelectedCondition()">
 							<xul:menu id="more-conditions-menu" label="&zotero.general.more;">
 								<xul:menupopup/>
 							</xul:menu>
 						</xul:menupopup>
 					</xul:menulist>
-					<xul:menulist id="operatorsmenu" oncommand="this.getRootNode().host.onOperatorSelected(); event.stopPropagation()">
+					<xul:menulist id="operatorsmenu" oncommand="this.getRootNode().host.onOperatorSelected(); event.stopPropagation()" native="true">
 						<xul:menupopup/>
 					</xul:menulist>
 					<xul:zoterosearchtextbox id="valuefield" flex="1"/>
-					<xul:menulist id="valuemenu" flex="1" hidden="true">
+					<xul:menulist id="valuemenu" flex="1" hidden="true" native="true">
 						<xul:menupopup/>
 					</xul:menulist>
 					<xul:zoterosearchagefield id="value-date-age" hidden="true" flex="1"/>
@@ -947,7 +947,7 @@
 						xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 						xmlns:html="http://www.w3.org/1999/xhtml">
 					<html:input id="input" style="-moz-box-flex: 1"/>
-					<xul:menulist id="age-list">
+					<xul:menulist id="age-list" native="true">
 						<xul:menupopup flex="1">
 							<xul:menuitem label="&zotero.search.date.units.days;" value="days" selected="true"/>
 							<xul:menuitem label="&zotero.search.date.units.months;" value="months"/>
