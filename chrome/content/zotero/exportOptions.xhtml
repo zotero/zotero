@@ -8,6 +8,7 @@
 ]>
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:html="http://www.w3.org/1999/xhtml"
 	title="&zotero.exportOptions.title;"
 	onload="Zotero_File_Interface_Export.init()">
 <dialog
@@ -28,7 +29,7 @@
 	<vbox id="zotero-export-options-container" flex="1">
 		<hbox align="center">
 			<label value="&zotero.exportOptions.format.label;" control="format-menu"/>
-			<menulist id="format-menu" oncommand="Zotero_File_Interface_Export.updateOptions()">
+			<menulist id="format-menu" oncommand="Zotero_File_Interface_Export.updateOptions()" native="true">
 				<menupopup id="format-popup"/>
 			</menulist>
 		</hbox>
@@ -38,7 +39,7 @@
 			<vbox id="charset-box" hidden="true">
 				<separator class="thin"/>
 				<label value="&zotero.charset.label;:" control="charset-menu"/>
-				<menulist id="export-option-exportCharset"/>
+				<menulist id="export-option-exportCharset" native="true"/>
 			</vbox>
 		</groupbox>
 	</vbox>
