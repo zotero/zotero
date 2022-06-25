@@ -30,6 +30,10 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 import FilePicker from 'zotero/modules/filePicker';
 
 Zotero_Preferences.General = {
+	DEFAULT_OPENURL_RESOLVER: 'https://www.worldcat.org/registry/gateway',
+	
+	_openURLResolvers: null,
+
 	init: function () {
 		// JS-based strings
 		var checkbox = document.getElementById('launchNonNativeFiles-checkbox');
@@ -40,6 +44,14 @@ Zotero_Preferences.General = {
 		}
 		var menuitem = document.getElementById('fileHandler-internal');
 		menuitem.setAttribute('label', Zotero.appName);
+
+		// Set OpenURL resolver drop-down to last-known name
+		if (Zotero.Prefs.get('openURL.resolver')) {
+			let name = Zotero.Prefs.get('openURL.name');
+			if (name) {
+				document.getElementById('openurl-primary-popup').firstChild.setAttribute('label', name);
+			}
+		}
 		
 		this.refreshLocale();
 		this.updateAutoRenameFilesUI();
@@ -209,5 +221,164 @@ Zotero_Preferences.General = {
 			throw new Error(`Unknown file type ${type}`);
 		}
 		return 'fileHandler.pdf';
+	},
+
+	handleOpenURLPopupShowing: async function (event) {
+		if (event.target.id != 'openurl-primary-popup') {
+			return;
+		}
+		if (!this._openURLResolvers) {
+			let menupopup = document.getElementById('openurl-primary-popup');
+			menupopup.firstChild.setAttribute('label', Zotero.getString('general.loading'));
+			try {
+				this._openURLResolvers = await Zotero.Utilities.Internal.OpenURL.getResolvers();
+			}
+			catch (e) {
+				Zotero.logError(e);
+				menupopup.firstChild.setAttribute('label', "Error loading resolvers");
+				return;
+			}
+		}
+		this.updateOpenURLResolversMenu();
+	},
+	
+	
+	updateOpenURLResolversMenu: function () {
+		if (!this._openURLResolvers) {
+			Zotero.debug("Resolvers not loaded -- not updating menu");
+			return;
+		}
+		
+		var currentResolver = Zotero.Prefs.get('openURL.resolver');
+		
+		var openURLMenu = document.getElementById('openurl-menu');
+		var menupopup = openURLMenu.firstChild;
+		menupopup.innerHTML = '';
+		
+		var defaultMenuItem = document.createXULElement('menuitem');
+		defaultMenuItem.setAttribute('label', Zotero.getString('general.default'));
+		defaultMenuItem.setAttribute('value', this.DEFAULT_OPENURL_RESOLVER);
+		defaultMenuItem.setAttribute('type', 'checkbox');
+		menupopup.appendChild(defaultMenuItem);
+		
+		var customMenuItem = document.createXULElement('menuitem');
+		customMenuItem.setAttribute('label', Zotero.getString('general.custom'));
+		customMenuItem.setAttribute('value', 'custom');
+		customMenuItem.setAttribute('type', 'checkbox');
+		menupopup.appendChild(customMenuItem);
+		
+		menupopup.appendChild(document.createXULElement('menuseparator'));
+		
+		var selectedName;
+		var lastContinent;
+		var lastCountry;
+		var currentContinentPopup;
+		var currentMenuPopup;
+		for (let r of this._openURLResolvers) {
+			// Create submenus for continents
+			if (r.continent != lastContinent) {
+				let menu = document.createXULElement('menu');
+				menu.setAttribute('label', r.continent);
+				openURLMenu.firstChild.appendChild(menu);
+				
+				currentContinentPopup = currentMenuPopup = document.createXULElement('menupopup');
+				menu.appendChild(currentContinentPopup);
+				lastContinent = r.continent;
+			}
+			if (r.country != lastCountry) {
+				// If there's a country, create a submenu for it
+				if (r.country) {
+					let menu = document.createXULElement('menu');
+					menu.setAttribute('label', r.country);
+					currentContinentPopup.appendChild(menu);
+					
+					let menupopup = document.createXULElement('menupopup');
+					menu.appendChild(menupopup);
+					currentMenuPopup = menupopup;
+				}
+				// Otherwise use the continent popup
+				else {
+					currentMenuPopup = currentContinentPopup;
+				}
+				lastCountry = r.country;
+			}
+			let menuitem = document.createXULElement('menuitem');
+			menuitem.setAttribute('label', r.name);
+			menuitem.setAttribute('value', r.url);
+			menuitem.setAttribute('type', 'checkbox');
+			currentMenuPopup.appendChild(menuitem);
+			var checked = r.url == Zotero.Prefs.get('openURL.resolver');
+			menuitem.setAttribute('checked', checked);
+			if (checked) {
+				selectedName = r.name;
+			}
+		}
+		
+		// Default
+		if (currentResolver == this.DEFAULT_OPENURL_RESOLVER) {
+			openURLMenu.setAttribute('label', Zotero.getString('general.default'));
+			defaultMenuItem.setAttribute('checked', true);
+			Zotero.Prefs.clear('openURL.name');
+		}
+		else if (selectedName) {
+			openURLMenu.setAttribute('label', selectedName);
+			// If we found a match, update stored name
+			Zotero.Prefs.set('openURL.name', selectedName);
+		}
+		// Custom
+		else {
+			openURLMenu.setAttribute('label', Zotero.getString('general.custom'));
+			customMenuItem.setAttribute('checked', true);
+			Zotero.Prefs.clear('openURL.name');
+		}
+	},
+	
+	
+	handleOpenURLSelected: function (event) {
+		event.stopPropagation();
+		event.preventDefault();
+		
+		if (event.target.localName != 'menuitem') {
+			Zotero.debug("Ignoring click on " + event.target.localName);
+			return;
+		}
+		
+		var openURLMenu = document.getElementById('openurl-menu');
+		
+		var openURLServerField = document.getElementById('openURLServerField');
+		var openURLVersionMenu = document.getElementById('openURLVersionMenu');
+		
+		// Default
+		if (event.target.value == this.DEFAULT_OPENURL_RESOLVER) {
+			Zotero.Prefs.clear('openURL.name');
+			Zotero.Prefs.clear('openURL.resolver');
+			Zotero.Prefs.clear('openURL.version');
+			openURLServerField.value = this.DEFAULT_OPENURL_RESOLVER;
+		}
+		// If "Custom" selected, clear URL field
+		else if (event.target.value == "custom") {
+			Zotero.Prefs.clear('openURL.name');
+			Zotero.Prefs.set('openURL.resolver', '');
+			Zotero.Prefs.clear('openURL.version');
+			openURLServerField.value = '';
+			openURLServerField.focus();
+		}
+		else {
+			Zotero.Prefs.set('openURL.name', openURLServerField.value = event.target.label);
+			Zotero.Prefs.set('openURL.resolver', openURLServerField.value = event.target.value);
+			Zotero.Prefs.set('openURL.version', openURLVersionMenu.value = "1.0");
+		}
+		
+		openURLMenu.firstChild.hidePopup();
+		
+		setTimeout(() => {
+			this.updateOpenURLResolversMenu();
+		});
+	},
+	
+	onOpenURLCustomized: function () {
+		setTimeout(() => {
+			this.updateOpenURLResolversMenu();
+		});
 	}
 }

@@ -39,42 +39,6 @@
 			<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="extensions.zotero.reportTranslationFailure" native="true"/>
 		</groupbox>
 		
-		<groupbox>
-			<html:label><html:h2>OpenURL</html:h2></html:label>
-			
-			<hbox>
-				<menulist id="openurl-menu" native="true">
-					<menupopup
-							id="openurl-primary-popup"
-							onpopupshowing="Zotero_Preferences.Advanced.handleOpenURLPopupShowing(event)"
-							oncommand="Zotero_Preferences.Advanced.handleOpenURLSelected(event)">
-						<menuitem label="&zotero.preferences.openurl.choose;"/>
-					</menupopup>
-				</menulist>
-			</hbox>
-			
-			<hbox align="center">
-				<label value="&zotero.preferences.openurl.server;"/>
-				<html:input type="text" id="openURLServerField" style="-moz-box-flex: 1;"
-					oninput="Zotero_Preferences.Advanced.onOpenURLCustomized();"
-					preference="extensions.zotero.openURL.resolver"
-				/>
-			</hbox>
-		
-			<hbox align="center">
-				<label value="&zotero.preferences.openurl.version;" control="openURLVersionMenu"/>
-				<menulist id="openURLVersionMenu"
-						oncommand="Zotero_Preferences.Advanced.onOpenURLCustomized();"
-						preference="extensions.zotero.openURL.version"
-						native="true">
-					<menupopup>
-						<menuitem label="0.1" value="0.1"/>
-						<menuitem label="1.0" value="1.0"/>
-					</menupopup>
-				</menulist>
-			</hbox>
-		</groupbox>
-		
 		<groupbox id="zotero-prefpane-advanced-advancedConfiguration">
 			<html:label><html:h2>&zotero.preferences.advanced.advancedConfiguration;</html:h2></html:label>
 			
