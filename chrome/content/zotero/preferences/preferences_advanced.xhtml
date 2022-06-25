@@ -37,15 +37,6 @@
 			</hbox>
 			
 			<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="extensions.zotero.reportTranslationFailure" native="true"/>
-			
-			<hbox align="center">
-				<label value="&zotero.bibliography.locale.label;"/>
-				<menulist id="locale-menu"
-						onblur="if (!Zotero.isMac) Zotero_Preferences.Advanced.onLocaleChange()"
-						native="true">
-					<menupopup onpopuphidden="Zotero_Preferences.Advanced.onLocaleChange()"/>
-				</menulist>
-			</hbox>
 		</groupbox>
 		
 		<groupbox>

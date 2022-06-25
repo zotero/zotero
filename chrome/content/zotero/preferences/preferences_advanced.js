@@ -75,7 +75,6 @@ Zotero_Preferences.Advanced = {
 		});
 		
 		this.onDataDirLoad();
-		this.refreshLocale();
 	},
 	
 	
@@ -602,81 +601,6 @@ Zotero_Preferences.Advanced = {
 		setTimeout(() => {
 			this.updateOpenURLResolversMenu();
 		});
-	},
-	
-	
-	_getAutomaticLocaleMenuLabel: function () {
-		return Zotero.getString(
-			'zotero.preferences.locale.automaticWithLocale',
-			Zotero.Locale.availableLocales[Zotero.locale] || Zotero.locale
-		);
-	},
-	
-	
-	refreshLocale: function () {
-		var autoLocaleName, currentValue;
-		
-		// If matching OS, get the name of the current locale
-		if (Zotero.Prefs.get('intl.locale.requested', true) === '') {
-			autoLocaleName = this._getAutomaticLocaleMenuLabel();
-			currentValue = 'automatic';
-		}
-		// Otherwise get the name of the locale specified in the pref
-		else {
-			autoLocaleName = Zotero.getString('zotero.preferences.locale.automatic');
-			currentValue = Zotero.locale;
-		}
-		
-		// Populate menu
-		var menu = document.getElementById('locale-menu');
-		var menupopup = menu.firstChild;
-		menupopup.textContent = '';
-		// Show "Automatic (English)", "Automatic (Français)", etc.
-		menu.appendItem(autoLocaleName, 'automatic');
-		menu.menupopup.appendChild(document.createXULElement('menuseparator'));
-		// Add all available locales
-		for (let locale in Zotero.Locale.availableLocales) {
-			menu.appendItem(Zotero.Locale.availableLocales[locale], locale);
-		}
-		menu.value = currentValue;
-	},
-	
-	onLocaleChange: function () {
-		var requestedLocale = Services.locale.requestedLocale;
-		var menu = document.getElementById('locale-menu');
-		
-		if (menu.value == 'automatic') {
-			// Changed if not already set to automatic (unless we have the automatic locale name,
-			// meaning we just switched away to the same manual locale and back to automatic)
-			var changed = requestedLocale
-				&& requestedLocale == Zotero.locale
-				&& menu.label != this._getAutomaticLocaleMenuLabel();
-			Services.locale.requestedLocales = null;
-		}
-		else {
-			// Changed if moving to a locale other than the current one
-			var changed = requestedLocale != menu.value
-			Services.locale.requestedLocales = [menu.value];
-		}
-		
-		if (!changed) {
-			return;
-		}
-		
-		var ps = Services.prompt;
-		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
-		var index = ps.confirmEx(null,
-			Zotero.getString('general.restartRequired'),
-			Zotero.getString('general.restartRequiredForChange', Zotero.appName),
-			buttonFlags,
-			Zotero.getString('general.restartNow'),
-			Zotero.getString('general.restartLater'),
-			null, null, {});
-		
-		if (index == 0) {
-			Zotero.Utilities.Internal.quitZotero(true);
-		}
 	}
 };
 

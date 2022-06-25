@@ -8,6 +8,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general				"General">
 
+<!ENTITY zotero.preferences.interface				"Interface">
 <!ENTITY zotero.preferences.fileHandling				"File Handling">
 <!ENTITY zotero.preferences.automaticSnapshots			"Automatically take snapshots when creating items from web pages">
 <!ENTITY zotero.preferences.downloadAssociatedFiles		"Automatically attach associated PDFs and other files when saving items">

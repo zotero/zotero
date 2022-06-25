@@ -23,6 +23,19 @@
     ***** END LICENSE BLOCK *****
 -->
 <vbox id="zotero-prefpane-general">
+	<groupbox>
+		<html:label><html:h2>&zotero.preferences.interface;</html:h2></html:label>
+
+		<hbox align="center">
+			<label value="&zotero.bibliography.locale.label;"/>
+			<menulist id="locale-menu"
+					onblur="if (!Zotero.isMac) Zotero_Preferences.General.onLocaleChange()"
+					native="true">
+				<menupopup onpopuphidden="Zotero_Preferences.General.onLocaleChange()"/>
+			</menulist>
+		</hbox>
+	</groupbox>
+
 	<groupbox id="zotero-prefpane-file-handling-groupbox">
 		<html:label><html:h2>&zotero.preferences.fileHandling;</html:h2></html:label>
 		
