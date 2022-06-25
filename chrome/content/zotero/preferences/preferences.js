@@ -55,15 +55,6 @@ var Zotero_Preferences = {
 			}
 		});
 		this.addPane({
-			id: 'zotero-prefpane-search',
-			label: 'zotero.preferences.prefpane.search',
-			image: 'chrome://zotero/skin/prefs-search.png',
-			src: 'chrome://zotero/content/preferences/preferences_search.xhtml',
-			onLoad() {
-				Zotero_Preferences.Search.init();
-			}
-		});
-		this.addPane({
 			id: 'zotero-prefpane-export',
 			label: 'zotero.preferences.prefpane.export',
 			image: 'chrome://zotero/skin/prefs-export.png',

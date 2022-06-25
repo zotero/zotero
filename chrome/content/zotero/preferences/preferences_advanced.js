@@ -75,6 +75,15 @@ Zotero_Preferences.Advanced = {
 		});
 		
 		this.onDataDirLoad();
+
+		document.getElementById('fulltext-rebuildIndex').setAttribute('label',
+			Zotero.getString('zotero.preferences.search.rebuildIndex')
+				+ Zotero.getString('punctuation.ellipsis'));
+		document.getElementById('fulltext-clearIndex').setAttribute('label',
+			Zotero.getString('zotero.preferences.search.clearIndex')
+				+ Zotero.getString('punctuation.ellipsis'));
+		
+		this.updateIndexStats();
 	},
 	
 	
@@ -601,6 +610,100 @@ Zotero_Preferences.Advanced = {
 		setTimeout(() => {
 			this.updateOpenURLResolversMenu();
 		});
+	},
+
+	updateIndexStats: Zotero.Promise.coroutine(function* () {
+		var stats = yield Zotero.Fulltext.getIndexStats();
+		document.getElementById('fulltext-stats-indexed')
+			.setAttribute('value', stats.indexed);
+		document.getElementById('fulltext-stats-partial')
+			.setAttribute('value', stats.partial);
+		document.getElementById('fulltext-stats-unindexed')
+			.setAttribute('value', stats.unindexed);
+		document.getElementById('fulltext-stats-words')
+			.setAttribute('value', stats.words);
+	}),
+	
+	
+	rebuildIndexPrompt: async function () {
+		var buttons = [
+			document.getElementById('fulltext-rebuildIndex'),
+			document.getElementById('fulltext-clearIndex')
+		];
+		buttons.forEach(b => b.disabled = true);
+		
+		var ps = Services.prompt;
+		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
+			+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
+		
+		var index = ps.confirmEx(null,
+			Zotero.getString('zotero.preferences.search.rebuildIndex'),
+			Zotero.getString('zotero.preferences.search.rebuildWarning',
+				Zotero.getString('zotero.preferences.search.indexUnindexed')),
+			buttonFlags,
+			Zotero.getString('zotero.preferences.search.rebuildIndex'),
+			null,
+			// Position 2 because of https://bugzilla.mozilla.org/show_bug.cgi?id=345067
+			Zotero.getString('zotero.preferences.search.indexUnindexed'),
+			null, {});
+		
+		try {
+			if (index == 0) {
+				await Zotero.Fulltext.rebuildIndex();
+			}
+			else if (index == 2) {
+				await Zotero.Fulltext.rebuildIndex(true)
+			}
+			
+			await this.updateIndexStats();
+		}
+		catch (e) {
+			Zotero.alert(null, Zotero.getString('general.error'), e);
+		}
+		finally {
+			buttons.forEach(b => b.disabled = false);
+		}
+	},
+
+	clearIndexPrompt: async function () {
+		var buttons = [
+			document.getElementById('fulltext-rebuildIndex'),
+			document.getElementById('fulltext-clearIndex')
+		];
+		buttons.forEach(b => b.disabled = true);
+		
+		var ps = Services.prompt;
+		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
+			+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
+		
+		var index = ps.confirmEx(null,
+			Zotero.getString('zotero.preferences.search.clearIndex'),
+			Zotero.getString('zotero.preferences.search.clearWarning',
+				Zotero.getString('zotero.preferences.search.clearNonLinkedURLs')),
+			buttonFlags,
+			Zotero.getString('zotero.preferences.search.clearIndex'),
+			null,
+			// Position 2 because of https://bugzilla.mozilla.org/show_bug.cgi?id=345067
+			Zotero.getString('zotero.preferences.search.clearNonLinkedURLs'), null, {});
+		
+		try {
+			if (index == 0) {
+				await Zotero.Fulltext.clearIndex();
+			}
+			else if (index == 2) {
+				await Zotero.Fulltext.clearIndex(true);
+			}
+			
+			await this.updateIndexStats();
+		}
+		catch (e) {
+			Zotero.alert(null, Zotero.getString('general.error'), e);
+		}
+		finally {
+			buttons.forEach(b => b.disabled = false);
+		}
 	}
 };
 

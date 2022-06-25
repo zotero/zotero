@@ -249,4 +249,53 @@
 			</hbox>
 		</groupbox>
 	</vbox>
+
+	<vbox class="main-section">
+		<html:h1>&zotero.preferences.prefpane.search;</html:h1>
+
+		<groupbox>
+			<html:label><html:h2>&zotero.preferences.search.fulltextCache;</html:h2></html:label>
+			
+			<hbox>
+				<button id="fulltext-rebuildIndex" flex="1" oncommand="Zotero_Preferences.Advanced.rebuildIndexPrompt()"
+					data-search-strings="zotero.preferences.search.rebuildWarning"/>
+				<button id="fulltext-clearIndex" flex="1" oncommand="Zotero_Preferences.Advanced.clearIndexPrompt()"
+					data-search-strings="zotero.preferences.search.clearWarning"/>
+			</hbox>
+			
+			<separator/>
+			
+			<hbox align="center">
+				<label value="&zotero.preferences.fulltext.textMaxLength;"/>
+				<html:input type="text" size="10" preference="extensions.zotero.fulltext.textMaxLength"/>
+				<label value="(&zotero.preferences.default; 500000)"/>
+			</hbox>
+	
+			<separator class="thin"/>
+	
+			<hbox align="center">
+				<label value="&zotero.preferences.fulltext.pdfMaxPages;"/>
+				<html:input type="text" size="5" preference="extensions.zotero.fulltext.pdfMaxPages"/>
+				<label value="(&zotero.preferences.default; 100)"/>
+			</hbox>
+		</groupbox>
+		
+		<groupbox id="fulltext-stats">
+			<html:label><html:h2>&zotero.preferences.search.indexStats;</html:h2></html:label>
+			
+			<vbox class="form-grid">
+				<label value="&zotero.preferences.search.indexStats.indexed;"/>
+				<label id="fulltext-stats-indexed"/>
+	
+				<label value="&zotero.preferences.search.indexStats.partial;"/>
+				<label id="fulltext-stats-partial"/>
+	
+				<label value="&zotero.preferences.search.indexStats.unindexed;"/>
+				<label id="fulltext-stats-unindexed"/>
+	
+				<label value="&zotero.preferences.search.indexStats.words;"/>
+				<label id="fulltext-stats-words"/>
+			</vbox>
+		</groupbox>	
+	</vbox>
 </vbox>
