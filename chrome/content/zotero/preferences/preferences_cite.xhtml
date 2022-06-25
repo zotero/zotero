@@ -48,7 +48,7 @@
 		<groupbox>
 			<html:label><html:h2>&zotero.preferences.citationOptions.caption;</html:h2></html:label>
 			
-			<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="extensions.zotero.export.citePaperJournalArticleURL"/>
+			<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="extensions.zotero.export.citePaperJournalArticleURL" native="true"/>
 			<!-- This doesn't wrap without an explicit width, for some reason -->
 			<label id="export-citePaperJournalArticleURL" width="45em">
 				&zotero.preferences.export.citePaperJournalArticleURL.description;
@@ -79,6 +79,6 @@
 					oncommand="Zotero_Preferences.Cite.enableWordPlugins()"/>
 			</hbox>
 		</vbox>
-		<checkbox label="&zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog;" preference="extensions.zotero.integration.useClassicAddCitationDialog"/>
+		<checkbox label="&zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog;" preference="extensions.zotero.integration.useClassicAddCitationDialog" native="true"/>
 	</vbox>
 </vbox>

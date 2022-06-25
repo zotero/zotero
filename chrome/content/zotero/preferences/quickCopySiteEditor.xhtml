@@ -54,13 +54,13 @@
 		<separator class="thin"/>
 		
 		<label value="&zotero.preferences.quickCopy.siteEditor.format;" control="zotero-quickCopy-menu"/>
-		<menulist id="zotero-quickCopy-menu"/>
+		<menulist id="zotero-quickCopy-menu" native="true"/>
 		
 		<separator class="thin"/>
 		
 		<label id="zotero-quickCopy-locale-menu-label" value="&zotero.preferences.quickCopy.siteEditor.locale;" control="zotero-quickCopy-locale-menu"/>
 		<hbox align="center">
-			<menulist id="zotero-quickCopy-locale-menu" oncommand="Zotero_Preferences.Export._lastSelectedLocale = this.value"/>
+			<menulist id="zotero-quickCopy-locale-menu" oncommand="Zotero_Preferences.Export._lastSelectedLocale = this.value" native="true"/>
 		</hbox>
 		
 		<separator class="thin"/>
@@ -71,7 +71,8 @@
 				this.checked ? 'html' : '',
 				null,
 				io.translators
-			)"/>
+			)"
+			native="true"/>
 	</vbox>
 	
 	<script>

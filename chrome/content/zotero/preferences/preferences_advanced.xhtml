@@ -31,17 +31,18 @@
 			<html:label><html:h2>&zotero.preferences.miscellaneous;</html:h2></html:label>
 			
 			<hbox align="center">
-				<checkbox label="&zotero.preferences.autoUpdate;" preference="extensions.zotero.automaticScraperUpdates"/>
+				<checkbox label="&zotero.preferences.autoUpdate;" preference="extensions.zotero.automaticScraperUpdates" native="true"/>
 				<button id="updateButton" style="margin-top:0" label="&zotero.preferences.updateNow;"
 					oncommand="Zotero_Preferences.Advanced.updateTranslators()"/>
 			</hbox>
 			
-			<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="extensions.zotero.reportTranslationFailure"/>
+			<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="extensions.zotero.reportTranslationFailure" native="true"/>
 			
 			<hbox align="center">
 				<label value="&zotero.bibliography.locale.label;"/>
 				<menulist id="locale-menu"
-						onblur="if (!Zotero.isMac) Zotero_Preferences.Advanced.onLocaleChange()">
+						onblur="if (!Zotero.isMac) Zotero_Preferences.Advanced.onLocaleChange()"
+						native="true">
 					<menupopup onpopuphidden="Zotero_Preferences.Advanced.onLocaleChange()"/>
 				</menulist>
 			</hbox>
@@ -51,7 +52,7 @@
 			<html:label><html:h2>OpenURL</html:h2></html:label>
 			
 			<hbox>
-				<menulist id="openurl-menu">
+				<menulist id="openurl-menu" native="true">
 					<menupopup
 							id="openurl-primary-popup"
 							onpopupshowing="Zotero_Preferences.Advanced.handleOpenURLPopupShowing(event)"
@@ -73,7 +74,8 @@
 				<label value="&zotero.preferences.openurl.version;" control="openURLVersionMenu"/>
 				<menulist id="openURLVersionMenu"
 						oncommand="Zotero_Preferences.Advanced.onOpenURLCustomized();"
-						preference="extensions.zotero.openURL.version">
+						preference="extensions.zotero.openURL.version"
+						native="true">
 					<menupopup>
 						<menuitem label="0.1" value="0.1"/>
 						<menuitem label="1.0" value="1.0"/>
@@ -221,7 +223,7 @@
 			<hbox>
 				<hbox align="center">
 					<label value="&zotero.preferences.feeds.sorting.label;"/>
-					<menulist id="feed-sort" preference="extensions.zotero.keys.sortAscending">
+					<menulist id="feed-sort" preference="extensions.zotero.keys.sortAscending" native="true">
 						<menupopup>
 							<menuitem label="&zotero.preferences.feeds.sorting.newest;" value="false"/>
 							<menuitem label="&zotero.preferences.feeds.sorting.oldest;" value="true"/>

@@ -89,12 +89,14 @@
 
                     <box/>
                     <checkbox label="&zotero.preferences.sync.syncAutomatically;"
-                                preference="extensions.zotero.sync.autoSync"/>
+                                preference="extensions.zotero.sync.autoSync"
+                                native="true"/>
                     
                     <box/>
                     <checkbox label="&zotero.preferences.sync.syncFullTextContent;"
                             preference="extensions.zotero.sync.fulltext.enabled"
-                            tooltiptext="&zotero.preferences.sync.syncFullTextContent.desc;"/>
+                            tooltiptext="&zotero.preferences.sync.syncFullTextContent.desc;"
+                            native="true"/>
 
                     <box/>
                     <label class="zotero-text-link" value="&zotero.preferences.sync.about;" href="http://www.zotero.org/support/sync"/>
@@ -109,11 +111,13 @@
                 <hbox>
                     <checkbox label="&zotero.preferences.sync.fileSyncing.myLibrary;"
                             preference="extensions.zotero.sync.storage.enabled"
-                            oncommand="Zotero_Preferences.Sync.onStorageSettingsChange()"/>
+                            oncommand="Zotero_Preferences.Sync.onStorageSettingsChange()"
+                            native="true"/>
                     <menulist id="storage-protocol" class="storage-personal"
                             style="margin-left: .5em"
                             preference="extensions.zotero.sync.storage.protocol"
-                            oncommand="Zotero_Preferences.Sync.onStorageSettingsChange()">
+                            oncommand="Zotero_Preferences.Sync.onStorageSettingsChange()"
+                            native="true">
                         <menupopup>
                             <menuitem label="Zotero" value="zotero"/>
                             <menuitem label="WebDAV" value="webdav"/>
@@ -137,7 +141,8 @@
                             <hbox>
                                 <menulist id="storage-url-prefix"
                                         preference="extensions.zotero.sync.storage.scheme"
-                                        style="padding: 0; width: 7em">
+                                        style="padding: 0; width: 7em"
+                                        native="true">
                                     <menupopup>
                                         <menuitem label="https" value="https" style="padding: 0"/>
                                         <menuitem label="http" value="http" style="padding: 0"/>
@@ -188,7 +193,8 @@
                     <menulist id="storage-user-download-mode"
                             class="storage-mode"
                             preference="extensions.zotero.sync.storage.downloadMode.personal"
-                            style="margin-left: 0">
+                            style="margin-left: 0"
+                            native="true">
                         <menupopup>
                             <menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
                             <menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
@@ -201,14 +207,16 @@
                 <!-- Group Libraries -->
                 <checkbox label="&zotero.preferences.sync.fileSyncing.groups;"
                         preference="extensions.zotero.sync.storage.groups.enabled"
-                            oncommand="Zotero_Preferences.Sync.updateStorageSettingsGroupsUI()"/>
+                        oncommand="Zotero_Preferences.Sync.updateStorageSettingsGroupsUI()"
+                        native="true"/>
 
                 <hbox class="storage-settings-download-options" align="center">
                     <label value="&zotero.preferences.sync.fileSyncing.download;"/>
                     <menulist id="storage-groups-download-mode"
                             class="storage-mode"
                             preference="extensions.zotero.sync.storage.downloadMode.groups"
-                            style="margin-left: 0">
+                            style="margin-left: 0"
+                            native="true">
                         <menupopup>
                             <menuitem label="&zotero.preferences.sync.fileSyncing.download.onDemand;" value="on-demand"/>
                             <menuitem label="&zotero.preferences.sync.fileSyncing.download.atSyncTime;" value="on-sync"/>
@@ -239,7 +247,7 @@
                 xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
             <div id="sync-reset-library-menu-container">
                 <label for="sync-reset-library-menu">Library:</label>
-                <xul:menulist id="sync-reset-library-menu"><xul:menupopup/></xul:menulist>
+                <xul:menulist id="sync-reset-library-menu" native="true"><xul:menupopup/></xul:menulist>
             </div>
             
             <xul:radiogroup id="sync-reset-radiogroup">

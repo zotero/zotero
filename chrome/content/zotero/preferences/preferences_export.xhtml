@@ -34,22 +34,23 @@
 		<separator/>
 		
 		<label value="&zotero.preferences.quickCopy.itemFormat;" control="quickCopy-menu"/>
-		<menulist id="zotero-quickCopy-menu" label="&zotero.general.loading;"/>
+		<menulist id="zotero-quickCopy-menu" label="&zotero.general.loading;" native="true"/>
 		
 		<hbox align="center">
 			<label id="zotero-quickCopy-locale-menu-label" value="&zotero.bibliography.locale.label;" control="zotero-quickCopy-locale-menu"/>
-			<menulist id="zotero-quickCopy-locale-menu" oncommand="Zotero_Preferences.Export._lastSelectedLocale = this.value"/>
+			<menulist id="zotero-quickCopy-locale-menu" oncommand="Zotero_Preferences.Export._lastSelectedLocale = this.value" native="true"/>
 			
 			<separator orient="vertical" width="15px"/>
 			
 			<checkbox id="zotero-quickCopy-copyAsHTML" label="&zotero.preferences.quickCopy.copyAsHTML;"
-				oncommand="Zotero_Preferences.Export.onCopyAsHTMLChange(this.checked)"/>
+				oncommand="Zotero_Preferences.Export.onCopyAsHTMLChange(this.checked)"
+				native="true"/>
 		</hbox>
 		
 		<separator/>
 		
 		<label value="&zotero.preferences.quickCopy.noteFormat;" control="zotero-noteQuickCopy-menu"/>
-		<menulist id="zotero-noteQuickCopy-menu" label="&zotero.general.loading;"/>
+		<menulist id="zotero-noteQuickCopy-menu" label="&zotero.general.loading;" native="true"/>
 		
 		<separator/>
 		
@@ -79,7 +80,7 @@
 		
 		<hbox align="center">
 			<label value="&zotero.preferences.charset.importCharset;:" control="zotero-import-charsetMenu"/>
-			<menulist id="zotero-import-charsetMenu" preference="extensions.zotero.import.charset"/>
+			<menulist id="zotero-import-charsetMenu" preference="extensions.zotero.import.charset" native="true"/>
 		</hbox>
 	</groupbox>
 </vbox>
