@@ -25,7 +25,6 @@
 
 
 // Pulled from Fx63
-// TODO: Localize again
 const CHARSET_MENU_DATA = {
 	"pinnedCharsets": [
 		{
