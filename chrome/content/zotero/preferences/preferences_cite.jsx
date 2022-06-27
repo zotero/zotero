@@ -135,7 +135,12 @@ Zotero_Preferences.Cite = {
 					/>
 				</IntlProvider>
 			);
-			await new Promise(resolve => ReactDOM.render(elem, document.getElementById("styleManager"), resolve));
+
+			let styleManager = document.getElementById("styleManager");
+			await new Promise(resolve => ReactDOM.render(elem, styleManager, resolve));
+
+			// Fix style manager showing partially blank until scrolled
+			styleManager.dispatchEvent(new Event('scroll'));
 		}
 		else {
 			this._tree.invalidate();
