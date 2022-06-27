@@ -71,4 +71,9 @@
 		<key id="key_close" key="&closeCmd.key;" command="cmd_close" modifiers="accel"/>
 		<key id="key_mainWindow" key="0" command="cmd_mainWindow" modifiers="accel"/>
 	</keyset>
+
+	<!-- Fx102 change: No menubar here. nsMenuBarX constructs the Cocoa
+	     global application menu from the first menubar it finds with relevant
+		 menuitems, and we want to let zoteroPane.xhtml create those later.
+		 https://searchfox.org/mozilla-central/source/widget/cocoa/nsMenuBarX.mm#498 -->
 </window>
