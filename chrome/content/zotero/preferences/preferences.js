@@ -97,6 +97,7 @@ var Zotero_Preferences = {
 				Zotero_Preferences.Sync.initResetPane();
 			}
 		});
+		this._autoSeparator = true;
 
 		if (window.arguments) {
 			var io = window.arguments[0];
@@ -150,8 +151,10 @@ var Zotero_Preferences = {
 	 * @param {String} options.id Must be unique
 	 * @param {String} [options.parent] ID of parent pane (if provided, pane is hidden from the sidebar)
 	 * @param {String} [options.label] A DTD/.properties key (optional for panes with parents)
+	 * @param {String} [options.rawLabel] A raw string to use as the label if optios.label is not provided
 	 * @param {String} [options.image] URI of an icon (displayed in the navigation sidebar)
 	 * @param {String} options.src URI of an XHTML fragment
+	 * @param {String[]} [options.extraDTD] Array of URIs of DTD files to use for parsing the XHTML fragment
 	 * @param {Function} [options.onLoad]
 	 */
 	async addPane(options) {
@@ -182,6 +185,11 @@ var Zotero_Preferences = {
 			}
 			labelElem.value = label;
 			listItem.append(labelElem);
+		}
+
+		if (this._autoSeparator) {
+			this._autoSeparator = false;
+			this.navigation.append(document.createElement('hr'));
 		}
 
 		this.navigation.append(listItem);
@@ -221,7 +229,8 @@ var Zotero_Preferences = {
 				Zotero.File.getContentsFromURL(pane.src),
 				[
 					'chrome://zotero/locale/zotero.dtd',
-					'chrome://zotero/locale/preferences.dtd'
+					'chrome://zotero/locale/preferences.dtd',
+					...(pane.extraDTD || []),
 				]
 			);
 			contentFragment = document.importNode(contentFragment, true);

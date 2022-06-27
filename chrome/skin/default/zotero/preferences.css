@@ -45,6 +45,12 @@
 	width: 24px;
 }
 
+#prefs-navigation > hr {
+	margin: 8px 0;
+	border: none;
+	border-top: 1px solid lightgray;
+}
+
 h1 {
 	margin: 0 0 4px 0;
 	font-size: 1.3em;
