@@ -237,46 +237,8 @@
         </vbox>
     </vbox>
 
-    <vbox class="main-section" id="sync-reset">
+    <vbox class="main-section" id="sync-reset" align="start">
         <html:h1>&zotero.preferences.sync.reset;</html:h1>
-
-        <!-- This doesn't wrap without an explicit width, for some reason -->
-        <description id="reset-sync-warning" width="45em">&zotero.preferences.sync.reset.warning1;<label style="margin-left: 0; margin-right: 0" class="zotero-text-link" href="http://zotero.org/support/kb/sync_reset_options">&zotero.preferences.sync.reset.warning2;</label>&zotero.preferences.sync.reset.warning3;</description>
-        
-        <div id="sync-reset-form" xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-            <div id="sync-reset-library-menu-container">
-                <label for="sync-reset-library-menu">Library:</label>
-                <xul:menulist id="sync-reset-library-menu" native="true"><xul:menupopup/></xul:menulist>
-            </div>
-            
-            <xul:radiogroup id="sync-reset-radiogroup">
-                <!--<li>
-                    <p>&zotero.preferences.sync.reset.restoreFromServer;</p>
-                    <p>&zotero.preferences.sync.reset.restoreFromServer.desc;</p>
-                </li>-->
-                
-                <div id="restore-to-server">
-                    <xul:radio value="restore-to-server" label="&zotero.preferences.sync.reset.restoreToServer;"
-                        data-search-strings="zotero.preferences.sync.reset.restoreToServer"/>
-                    <span class="sync-reset-option-desc">&zotero.preferences.sync.reset.restoreToServer.desc;</span>
-                </div>
-                
-                <!--<li>
-                    <h2>&zotero.preferences.sync.reset.resetDataSyncHistory;</h2>
-                    <description>&zotero.preferences.sync.reset.resetDataSyncHistory.desc;</p>
-                </li>-->
-                
-                <div id="reset-file-sync-history">
-                    <xul:radio value="reset-file-sync-history" label="&zotero.preferences.sync.reset.resetFileSyncHistory;"
-                        data-search-strings="zotero.preferences.sync.reset.fileSyncHistory"/>
-                    <span class="sync-reset-option-desc">&zotero.preferences.sync.reset.resetFileSyncHistory.desc;</span>
-                </div>
-            </xul:radiogroup>
-            
-            <button id="sync-reset-button"
-                disabled="disabled"
-                onclick="Zotero_Preferences.Sync.reset()">&zotero.preferences.sync.reset.button;</button>
-        </div>
+        <button label="&zotero.preferences.sync.reset.showResetOptions;" oncommand="Zotero_Preferences.navigateToPane('zotero-subpane-reset-sync')"/>
     </vbox>
 </vbox>

@@ -35,6 +35,13 @@ var Zotero_Preferences = {
 		this.navigation.addEventListener('select', () => this._onNavigationSelect());
 		document.getElementById('prefs-search').addEventListener('command',
 			event => this.search(event.target.value));
+		
+		document.getElementById('prefs-subpane-back-button').addEventListener('command', () => {
+			let parent = this.panes.get(this.navigation.value).parent;
+			if (parent) {
+				this.navigation.value = parent;
+			}
+		});
 
 		this.addPane({
 			id: 'zotero-prefpane-general',
@@ -79,6 +86,15 @@ var Zotero_Preferences = {
 			src: 'chrome://zotero/content/preferences/preferences_advanced.xhtml',
 			onLoad() {
 				Zotero_Preferences.Advanced.init();
+			}
+		});
+		this.addPane({
+			id: 'zotero-subpane-reset-sync',
+			parent: 'zotero-prefpane-sync',
+			label: 'zotero.preferences.subpane.resetSync',
+			src: 'chrome://zotero/content/preferences/preferences_sync_reset.xhtml',
+			onLoad() {
+				Zotero_Preferences.Sync.initResetPane();
 			}
 		});
 
@@ -132,13 +148,14 @@ var Zotero_Preferences = {
 	 *
 	 * @param {Object} options
 	 * @param {String} options.id Must be unique
-	 * @param {String} options.label A DTD/.properties key
+	 * @param {String} [options.parent] ID of parent pane (if provided, pane is hidden from the sidebar)
+	 * @param {String} [options.label] A DTD/.properties key (optional for panes with parents)
 	 * @param {String} [options.image] URI of an icon (displayed in the navigation sidebar)
 	 * @param {String} options.src URI of an XHTML fragment
 	 * @param {Function} [options.onLoad]
 	 */
 	async addPane(options) {
-		let { id, label, image, src, onLoad } = options;
+		let { id, parent, label, image } = options;
 
 		let listItem = document.createXULElement('richlistitem');
 		listItem.value = id;
@@ -149,47 +166,76 @@ var Zotero_Preferences = {
 			listItem.append(imageElem);
 		}
 
-		let labelElem = document.createXULElement('label');
-		if (Zotero.Intl.strings.hasOwnProperty(label)) {
-			label = Zotero.Intl.strings[label];
+		// We still add a hidden richlistitem even if this is a subpane,
+		// so we can invisibly select it and prevent richlistbox from selecting
+		// its first visible child on focus (which would hide the visible subpane)
+		if (parent) {
+			listItem.hidden = true;
 		}
 		else {
-			label = Zotero.getString(label);
+			let labelElem = document.createXULElement('label');
+			if (Zotero.Intl.strings.hasOwnProperty(label)) {
+				label = Zotero.Intl.strings[label];
+			}
+			else {
+				label = Zotero.getString(label);
+			}
+			labelElem.value = label;
+			listItem.append(labelElem);
 		}
-		labelElem.value = label;
 
-		listItem.append(labelElem);
 		this.navigation.append(listItem);
 
 		let container = document.createXULElement('vbox');
 		container.id = id;
+		container.hidden = true;
 		this.content.append(container);
 
-		let imported = false;
-
 		this.panes.set(id, {
-			show: (all) => {
-				if (!imported) {
-					let contentFragment = MozXULElement.parseXULToFragment(
-						Zotero.File.getContentsFromURL(src),
-						[
-							'chrome://zotero/locale/zotero.dtd',
-							'chrome://zotero/locale/preferences.dtd'
-						]
-					);
-					contentFragment = document.importNode(contentFragment, true);
-					this.initImportedNodes(contentFragment);
-					container.append(contentFragment);
-					imported = true;
-
-					if (onLoad) onLoad();
-				}
-	
-				for (let child of this.content.children) {
-					child.setAttribute('hidden', !all && child.id != id);
-				}
-			}
+			...options,
+			imported: false,
+			container,
 		});
+	},
+
+	/**
+	 * Select a pane in the navigation sidebar, displaying its content.
+	 * Clears the current search and hides all other panes' content.
+	 *
+	 * @param {String} id
+	 */
+	navigateToPane(id) {
+		this.navigation.value = id;
+	},
+
+	/**
+	 * Display a pane's content, alongside any other panes already showing.
+	 * If the pane is not yet loaded, it will be loaded first.
+	 *
+	 * @param {String} id
+	 */
+	_loadAndDisplayPane(id) {
+		let pane = this.panes.get(id);
+		if (!pane.imported) {
+			let contentFragment = MozXULElement.parseXULToFragment(
+				Zotero.File.getContentsFromURL(pane.src),
+				[
+					'chrome://zotero/locale/zotero.dtd',
+					'chrome://zotero/locale/preferences.dtd'
+				]
+			);
+			contentFragment = document.importNode(contentFragment, true);
+			this._initImportedNodes(contentFragment);
+			pane.container.append(contentFragment);
+			pane.imported = true;
+
+			if (pane.onLoad) pane.onLoad();
+		}
+
+		pane.container.hidden = false;
+
+		let backButton = document.getElementById('prefs-subpane-back-button');
+		backButton.hidden = !pane.parent;
 	},
 
 	/**
@@ -231,9 +277,14 @@ var Zotero_Preferences = {
 		// Clear pane selection
 		this.navigation.clearSelection();
 
-		// Make sure all panes are loaded into the DOM
-		for (let pane of this.panes.values()) {
-			pane.show(true);
+		// Make sure all panes are loaded into the DOM and show top-level ones
+		for (let [id, pane] of this.panes) {
+			if (pane.parent) {
+				pane.container.hidden = true;
+			}
+			else {
+				this._loadAndDisplayPane(id);
+			}
 		}
 
 		// Replace <label value="abc"/> with <label>abc</label>
@@ -425,19 +476,17 @@ var Zotero_Preferences = {
 	},
 
 	_onNavigationSelect() {
+		for (let child of this.content.children) {
+			child.setAttribute('hidden', true);
+		}
 		if (this.navigation.value) {
 			document.getElementById('prefs-search').value = '';
 			this.search('');
-			this.panes.get(this.navigation.value).show();
-		}
-		else {
-			for (let child of this.content.children) {
-				child.setAttribute('hidden', true);
-			}
+			this._loadAndDisplayPane(this.navigation.value);
 		}
 	},
 
-	initImportedNodes(root) {
+	_initImportedNodes(root) {
 		// Activate `preference` attributes
 		for (let elem of root.querySelectorAll('[preference]')) {
 			let preference = elem.getAttribute('preference');

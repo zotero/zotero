@@ -79,8 +79,6 @@ Zotero_Preferences.Sync = {
 		document.getElementById('storage-url-prefix').addEventListener('synctopreference', () => {
 			this.unverifyStorageServer();
 		});
-		
-		this.initResetPane();
 	},
 	
 	displayFields: function (username) {
