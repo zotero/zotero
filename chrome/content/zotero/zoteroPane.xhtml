@@ -65,6 +65,7 @@
 		
 		Services.scriptloader.loadSubScript("resource://zotero/require.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/standalone/standalone.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/platformKeys.js", this);
 		
 		// Mozilla scripts
 		Services.scriptloader.loadSubScript("chrome://global/content/globalOverlay.js", this);
@@ -133,22 +134,10 @@
 		<key id="key_forward"/>
 	</keyset>
     
-    <!--
-    
-    TODO: Customize per platform without ifdef?
-    
     <keyset id="editMenuKeys">
 		<key id="key_undo" data-l10n-id="text-action-undo-shortcut" modifiers="accel" command="cmd_undo"/>
-		<key id="key_redo"
-		
-#ifdef XP_UNIX
-			data-l10n-id="text-action-undo-shortcut"
-			modifiers="accel,shift"
-#else
-			data-l10n-id="text-action-redo-shortcut"
-			modifiers="accel"
-#endif
-			command="cmd_redo"/>
+		<!-- l10n and modifiers set in platformKeys.js -->
+		<key id="key_redo" command="cmd_redo"/>
 		<key id="key_cut" data-l10n-id="text-action-cut-shortcut" modifiers="accel" command="cmd_cut"/>
 		<key id="key_copy" data-l10n-id="text-action-copy-shortcut" modifiers="accel" command="cmd_copy"/>
 		<key id="key_paste" data-l10n-id="text-action-paste-shortcut" modifiers="accel" command="cmd_paste"/>
@@ -160,8 +149,6 @@
 		<key id="key_findAgain2" keycode="&findAgainCmd.key2;" command="cmd_findAgain"/>
 		<key id="key_findPrevious2" keycode="&findAgainCmd.key2;" modifiers="shift" command="cmd_findPrevious"/>
 	</keyset>
-  
-  -->
 	
 	<vbox id="titlebar">
 		<hbox id="titlebar-buttonbox-container" skipintoolbarset="true">
