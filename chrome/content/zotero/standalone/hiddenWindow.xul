@@ -75,5 +75,5 @@
 	<!-- Fx102 change: No menubar here. nsMenuBarX constructs the Cocoa
 	     global application menu from the first menubar it finds with relevant
 		 menuitems, and we want to let zoteroPane.xhtml create those later.
-		 https://searchfox.org/mozilla-central/source/widget/cocoa/nsMenuBarX.mm#498 -->
+		 https://searchfox.org/mozilla-central/rev/5b2d2863bd315f232a3f769f76e0eb16cdca7cb0/widget/cocoa/nsMenuBarX.mm#498 -->
 </window>
