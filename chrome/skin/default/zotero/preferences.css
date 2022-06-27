@@ -1,9 +1,5 @@
-#prefs-outer-container, #prefs-inner-container {
-	height: 600px;
-}
-
 #prefs-content {
-	height: calc(600px - 40px);
+	min-height: 600px;
 	overflow-y: scroll;
 }
 

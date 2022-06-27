@@ -85,10 +85,16 @@
 	<hbox id="prefs-outer-container" flex="1">
 		<richlistbox id="prefs-navigation"></richlistbox>
 		<vbox id="prefs-inner-container" flex="1">
-			<hbox id="prefs-search-container" align="center" pack="end">
+			<hbox id="prefs-search-container" align="center">
+				<hbox flex="1" pack="start" align="center">
+					<button
+						id="prefs-subpane-back-button"
+						label="&zotero.pdfReader.back;"
+						hidden="true"/>
+				</hbox>
 				<search-textbox id="prefs-search" placeholder="&zotero.lookup.button.search;" timeout="1"/>
 			</hbox>
-			<vbox id="prefs-content"/>
+			<vbox id="prefs-content" flex="1"/>
 		</vbox>
 	</hbox>
 </window>
