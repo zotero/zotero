@@ -71,36 +71,4 @@
 		<key id="key_close" key="&closeCmd.key;" command="cmd_close" modifiers="accel"/>
 		<key id="key_mainWindow" key="0" command="cmd_mainWindow" modifiers="accel"/>
 	</keyset>
-
-	<menubar id="main-menubar">
-		<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
-			<menupopup id="menu_FilePopup">
-				<!-- This gets moved to the Application menu automatically -->
-				<menuitem id="aboutName"
-					accesskey="&aboutProduct.accesskey;"
-					label="&aboutProduct.label;"
-					oncommand="openAbout()"/>
-
-				<!-- Disabled Close line in File menu, just to show something -->
-                <menuitem id="menu_close"
-					label="&closeCmd.label;"
-					key="key_close"
-					command="cmd_close"/>
-			</menupopup>
-		</menu>
-	
-		<menu id="windowMenu" onpopupshowing="">
-			<menupopup>
-				<menuitem command="minimizeWindow" key="key_minimizeWindow"/>
-				<menuitem command="zoomWindow"/>
-				<menuseparator/>
-				<menuitem command="cmd_mainWindow" label="Zotero" key="key_mainWindow"/>
-				<!--
-					Prevent error from macWindowMenuDidShow(), which is called from a built-in
-					nWindowMenuShowing(), when opening menu
-				-->
-				<menuseparator id="sep-window-list" hidden="true"/>
-			</menupopup>
-		</menu>
-	</menubar>
 </window>
