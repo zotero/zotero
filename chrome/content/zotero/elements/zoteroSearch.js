@@ -27,75 +27,52 @@
 
 {
 	var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+
 	Services.scriptloader.loadSubScript("chrome://global/content/customElements.js", this);
+	Services.scriptloader.loadSubScript("chrome://zotero/content/elements/base.js", this);
 	Services.scriptloader.loadSubScript("chrome://zotero/content/elements/shadowAutocompleteInput.js", this);
 
-	let cssFiles = [
-		'chrome://global/skin/global.css',
-		'chrome://zotero-platform/content/zoteroSearch.css'
-	];
-
-	class SearchElementBase extends XULElement {
-		connectedCallback() {
-			var shadow = this.attachShadow({ mode: "open" });
-
-			for (let cssFile of cssFiles) {
-				var link = document.createElement("link");
-				link.rel = "stylesheet";
-				link.href = cssFile;
-				shadow.append(link);
-			}
-
-			if (this.content) {
-				let content = document.importNode(this.content, true);
-				shadow.appendChild(content);
-			}
-		}
-
-		disconnectedCallback() {
-			// Empty the DOM. We will rebuild if reconnected.
-			while (this.lastChild) {
-				this.removeChild(this.lastChild);
-			}
+	class SearchElementBase extends XULElementBase {
+		get stylesheets() {
+			return [
+				'chrome://global/skin/global.css',
+				'chrome://zotero-platform/content/zoteroSearch.css'
+			];
 		}
 	}
 
 	class ZoteroSearch extends SearchElementBase {
-		constructor() {
-			super();
-
-			this.content = MozXULElement.parseXULToFragment(`
-				<vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-						id="search-box" flex="1" onkeypress="this.getRootNode().host.handleKeyPress(event)">
-					<hbox align="center">
-						<label value="&zotero.search.searchInLibrary;" control="libraryMenu"/>
-						<menulist id="libraryMenu" oncommand="this.getRootNode().host.updateLibrary();" native="true">
-							<menupopup/>
+		content = MozXULElement.parseXULToFragment(`
+			<vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+					id="search-box" flex="1" onkeypress="this.getRootNode().host.handleKeyPress(event)">
+				<hbox align="center">
+					<label value="&zotero.search.searchInLibrary;" control="libraryMenu"/>
+					<menulist id="libraryMenu" oncommand="this.getRootNode().host.updateLibrary();" native="true">
+						<menupopup/>
+					</menulist>
+				</hbox>
+				<groupbox>
+					<caption align="center">
+						<label value="&zotero.search.joinMode.prefix;"/>
+						<menulist id="joinModeMenu" oncommand="this.getRootNode().host.updateJoinMode();" native="true">
+							<menupopup>
+								<menuitem label="&zotero.search.joinMode.any;" value="any"/>
+								<menuitem label="&zotero.search.joinMode.all;" value="all" selected="true"/>
+							</menupopup>
 						</menulist>
-					</hbox>
-					<groupbox>
-						<caption align="center">
-							<label value="&zotero.search.joinMode.prefix;"/>
-							<menulist id="joinModeMenu" oncommand="this.getRootNode().host.updateJoinMode();" native="true">
-								<menupopup>
-									<menuitem label="&zotero.search.joinMode.any;" value="any"/>
-									<menuitem label="&zotero.search.joinMode.all;" value="all" selected="true"/>
-								</menupopup>
-							</menulist>
-							<label value="&zotero.search.joinMode.suffix;"/>
-						</caption>
-						<vbox id="conditions"/>
-					</groupbox>
-					<hbox>
-						<checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="this.getRootNode().host.updateCheckbox('recursive');" native="true"/>
-						<checkbox id="noChildrenCheckbox" label="&zotero.search.noChildren;" oncommand="this.getRootNode().host.updateCheckbox('noChildren');" native="true"/>
-					</hbox>
-					<hbox>
-						<checkbox id="includeParentsAndChildrenCheckbox" label="&zotero.search.includeParentsAndChildren;" oncommand="this.getRootNode().host.updateCheckbox('includeParentsAndChildren');" native="true"/>
-					</hbox>
-				</vbox>
-			`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
-		}
+						<label value="&zotero.search.joinMode.suffix;"/>
+					</caption>
+					<vbox id="conditions"/>
+				</groupbox>
+				<hbox>
+					<checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="this.getRootNode().host.updateCheckbox('recursive');" native="true"/>
+					<checkbox id="noChildrenCheckbox" label="&zotero.search.noChildren;" oncommand="this.getRootNode().host.updateCheckbox('noChildren');" native="true"/>
+				</hbox>
+				<hbox>
+					<checkbox id="includeParentsAndChildrenCheckbox" label="&zotero.search.includeParentsAndChildren;" oncommand="this.getRootNode().host.updateCheckbox('includeParentsAndChildren');" native="true"/>
+				</hbox>
+			</vbox>
+		`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
 
 		get search() {
 			return this.searchRef;
@@ -247,38 +224,32 @@
 	customElements.define("zoterosearch", ZoteroSearch);
 
 	class ZoteroSearchCondition extends SearchElementBase {
-		constructor() {
-			super();
+		content = MozXULElement.parseXULToFragment(`
+			<xul:hbox id="search-condition" xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+					flex="1">
+				<xul:popupset id="condition-tooltips"/>
+				
+				<xul:menulist id="conditionsmenu" oncommand="this.getRootNode().host.onConditionSelected(event.target.value); event.stopPropagation()" native="true">
+					<xul:menupopup onpopupshown="this.getRootNode().host.revealSelectedCondition()">
+						<xul:menu id="more-conditions-menu" label="&zotero.general.more;">
+							<xul:menupopup/>
+						</xul:menu>
+					</xul:menupopup>
+				</xul:menulist>
+				<xul:menulist id="operatorsmenu" oncommand="this.getRootNode().host.onOperatorSelected(); event.stopPropagation()" native="true">
+					<xul:menupopup/>
+				</xul:menulist>
+				<xul:zoterosearchtextbox id="valuefield" flex="1"/>
+				<xul:menulist id="valuemenu" flex="1" hidden="true" native="true">
+					<xul:menupopup/>
+				</xul:menulist>
+				<xul:zoterosearchagefield id="value-date-age" hidden="true" flex="1"/>
+				<xul:label id="remove" class="zotero-clicky zotero-clicky-minus" value="-" onclick="this.getRootNode().host.onRemoveClicked(event)"/>
+				<xul:label id="add" class="zotero-clicky zotero-clicky-plus" value="+" onclick="this.getRootNode().host.onAddClicked(event)"/>
+			</xul:hbox>
+		`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
 
-			this.content = MozXULElement.parseXULToFragment(`
-				<xul:hbox id="search-condition" xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-						flex="1">
-					<xul:popupset id="condition-tooltips"/>
-					
-					<xul:menulist id="conditionsmenu" oncommand="this.getRootNode().host.onConditionSelected(event.target.value); event.stopPropagation()" native="true">
-						<xul:menupopup onpopupshown="this.getRootNode().host.revealSelectedCondition()">
-							<xul:menu id="more-conditions-menu" label="&zotero.general.more;">
-								<xul:menupopup/>
-							</xul:menu>
-						</xul:menupopup>
-					</xul:menulist>
-					<xul:menulist id="operatorsmenu" oncommand="this.getRootNode().host.onOperatorSelected(); event.stopPropagation()" native="true">
-						<xul:menupopup/>
-					</xul:menulist>
-					<xul:zoterosearchtextbox id="valuefield" flex="1"/>
-					<xul:menulist id="valuemenu" flex="1" hidden="true" native="true">
-						<xul:menupopup/>
-					</xul:menulist>
-					<xul:zoterosearchagefield id="value-date-age" hidden="true" flex="1"/>
-					<xul:label id="remove" class="zotero-clicky zotero-clicky-minus" value="-" onclick="this.getRootNode().host.onRemoveClicked(event)"/>
-					<xul:label id="add" class="zotero-clicky zotero-clicky-plus" value="+" onclick="this.getRootNode().host.onAddClicked(event)"/>
-				</xul:hbox>
-			`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
-		}
-
-		connectedCallback() {
-			super.connectedCallback();
-
+		init() {
 			var operators = [
 				'is',
 				'isNot',
@@ -796,35 +767,31 @@
 	customElements.define("zoterosearchcondition", ZoteroSearchCondition);
 
 	class ZoteroSearchTextbox extends SearchElementBase {
-		constructor() {
-			super();
-
-			this.content = MozXULElement.parseXULToFragment(`
-				<xul:stack
-						xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-						xmlns:html="http://www.w3.org/1999/xhtml"
-						flex="1">
-					<html:input id="search-textbox"
-						is="shadow-autocomplete-input"
-						autocompletesearch="zotero"
-						autocompletepopup="search-autocomplete-popup"
-						timeout="250"
-						type="search"/>
-					
-					<xul:toolbarbutton
-							id="textbox-button"
-							type="menu">
-						<dropmarker type="menu" class="toolbarbutton-menu-dropmarker"/>
-						<xul:menupopup id="textbox-fulltext-menu">
-							<xul:menuitem type="radio" label="&zotero.search.textModes.phrase;"/>
-							<xul:menuitem type="radio" label="&zotero.search.textModes.phraseBinary;"/>
-							<xul:menuitem type="radio" label="&zotero.search.textModes.regexp;"/>
-							<xul:menuitem type="radio" label="&zotero.search.textModes.regexpCS;"/>
-						</xul:menupopup>
-					</xul:toolbarbutton>
-				</xul:stack>
-			`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
-		}
+		content = MozXULElement.parseXULToFragment(`
+			<xul:stack
+					xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+					xmlns:html="http://www.w3.org/1999/xhtml"
+					flex="1">
+				<html:input id="search-textbox"
+					is="shadow-autocomplete-input"
+					autocompletesearch="zotero"
+					autocompletepopup="search-autocomplete-popup"
+					timeout="250"
+					type="search"/>
+				
+				<xul:toolbarbutton
+						id="textbox-button"
+						type="menu">
+					<dropmarker type="menu" class="toolbarbutton-menu-dropmarker"/>
+					<xul:menupopup id="textbox-fulltext-menu">
+						<xul:menuitem type="radio" label="&zotero.search.textModes.phrase;"/>
+						<xul:menuitem type="radio" label="&zotero.search.textModes.phraseBinary;"/>
+						<xul:menuitem type="radio" label="&zotero.search.textModes.regexp;"/>
+						<xul:menuitem type="radio" label="&zotero.search.textModes.regexpCS;"/>
+					</xul:menupopup>
+				</xul:toolbarbutton>
+			</xul:stack>
+		`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
 
 		get value() {
 			return this.shadowRoot.getElementById('search-textbox').value;
@@ -939,24 +906,20 @@
 	customElements.define("zoterosearchtextbox", ZoteroSearchTextbox);
 
 	class ZoteroSearchAgeField extends SearchElementBase {
-		constructor() {
-			super();
-
-			this.content = MozXULElement.parseXULToFragment(`
-				<xul:hbox id="search-in-the-last" flex="1"
-						xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-						xmlns:html="http://www.w3.org/1999/xhtml">
-					<html:input id="input" style="-moz-box-flex: 1"/>
-					<xul:menulist id="age-list" native="true">
-						<xul:menupopup flex="1">
-							<xul:menuitem label="&zotero.search.date.units.days;" value="days" selected="true"/>
-							<xul:menuitem label="&zotero.search.date.units.months;" value="months"/>
-							<xul:menuitem label="&zotero.search.date.units.years;" value="years"/>
-						</xul:menupopup>
-					</xul:menulist>
-				</xul:hbox>
-			`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
-		}
+		content = MozXULElement.parseXULToFragment(`
+			<xul:hbox id="search-in-the-last" flex="1"
+					xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+					xmlns:html="http://www.w3.org/1999/xhtml">
+				<html:input id="input" style="-moz-box-flex: 1"/>
+				<xul:menulist id="age-list" native="true">
+					<xul:menupopup flex="1">
+						<xul:menuitem label="&zotero.search.date.units.days;" value="days" selected="true"/>
+						<xul:menuitem label="&zotero.search.date.units.months;" value="months"/>
+						<xul:menuitem label="&zotero.search.date.units.years;" value="years"/>
+					</xul:menupopup>
+				</xul:menulist>
+			</xul:hbox>
+		`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
 
 		get value() {
 			var input = this.shadowRoot.getElementById('input');
