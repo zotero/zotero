@@ -180,11 +180,16 @@ var Zotero_QuickFormat = new function () {
 			// load citation data
 			if (io.citation.citationItems.length) {
 				// hack to get spacing right
-				var evt = qfiDocument.createEvent("KeyboardEvent");
-				evt.initKeyEvent("keypress", true, true, qfiWindow,
-					0, 0, 0, 0,
-					0, " ".charCodeAt(0));
-				qfe.dispatchEvent(evt);
+				let event = new KeyboardEvent(
+					"keypress",
+					{
+						key: " ",
+						code: "Space",
+						bubbles: true,
+						cancelable: true,
+					}
+				);
+				qfe.dispatchEvent(event);
 				await resizePromise;
 				var node = qfe.firstChild;
 				node.nodeValue = "";

@@ -501,6 +501,7 @@ class EditorInstance {
 				}
 				case 'subscribe': {
 					let { subscription } = message;
+					subscription = JSON.parse(JSON.stringify(subscription));
 					this._subscriptions.push(subscription);
 					if (subscription.type === 'image') {
 						await this._feedSubscription(subscription);
@@ -515,6 +516,7 @@ class EditorInstance {
 				// Called on note editor load
 				case 'updateCitationItemsList': {
 					let { list } = message;
+					list = list.slice();
 					let newList = [];
 					for (let item of list) {
 						let existingItem = this._citationItemsList

@@ -233,8 +233,8 @@ describe("Zotero.FeedItem", function () {
 			this.timeout(20000);
 			yield Zotero.Translators.init();
 			
-			// Needs an open window to be able to create a hidden window for translation
-			win = yield loadBrowserWindow();
+			// Needs an open window to be able to create a progress window
+			win = yield loadZoteroWindow();
 		});
 		
 		after(function () {

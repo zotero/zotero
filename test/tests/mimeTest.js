@@ -16,7 +16,7 @@ describe("Zotero.MIME", function () {
 		});
 		
 		it("should detect SQLite database", async function () {
-			await test('dev@zotero.org@www.mendeley.com.sqlite', 'application/x-sqlite3');
+			await test('test.sqlite', 'application/x-sqlite3');
 		});
 	});
 });

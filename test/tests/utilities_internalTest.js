@@ -397,7 +397,7 @@ describe("Zotero.Utilities.Internal", function () {
 		var availableLocales;
 		
 		before(function () {
-			availableLocales = Services.locale.getAvailableLocales();
+			availableLocales = Services.locale.availableLocales;
 		});
 		
 		function resolve(locale) {

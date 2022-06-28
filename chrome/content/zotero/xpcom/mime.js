@@ -344,9 +344,7 @@ Zotero.MIME = new function(){
 			var mimeType = xmlhttp.channel.contentType;
 		}
 		
-		var nsIURL = Components.classes["@mozilla.org/network/standard-url;1"]
-			.createInstance(Components.interfaces.nsIURL);
-		nsIURL.spec = url;
+		var nsIURL = Services.io.newURI(url).QueryInterface(Ci.nsIURL);
 		
 		// Override MIME type to application/pdf if extension is .pdf --
 		// workaround for sites that respond to the HEAD request with an

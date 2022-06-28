@@ -16,20 +16,20 @@ describe("Item pane", function () {
 			var id = yield item.saveTx();
 			
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var label = doc.getAnonymousNodes(itemBox)[0].getElementsByAttribute('fieldname', 'title')[1];
+			var label = itemBox.shadowRoot.querySelectorAll('[fieldname="title"]')[1];
 			assert.equal(label.textContent, '');
 			
 			item.setField('title', 'Test');
 			yield item.saveTx();
 			
-			var label = doc.getAnonymousNodes(itemBox)[0].getElementsByAttribute('fieldname', 'title')[1];
+			label = itemBox.shadowRoot.querySelectorAll('[fieldname="title"]')[1];
 			assert.equal(label.textContent, 'Test');
 			
 			yield Zotero.Items.erase(id);
 		})
 		
 		
-		it.skip("should swap creator names", function* () {
+		it("should swap creator names", async function () {
 			var item = new Zotero.Item('book');
 			item.setCreators([
 				{
@@ -38,15 +38,15 @@ describe("Item pane", function () {
 					creatorType: "author"
 				}
 			]);
-			yield item.saveTx();
+			await item.saveTx();
 			
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var label = doc.getAnonymousNodes(itemBox)[0].getElementsByAttribute('fieldname', 'creator-0-lastName')[0];
+			var label = itemBox.shadowRoot.querySelector('[fieldname="creator-0-lastName"]')
 			var parent = label.parentNode;
-			assert.isTrue(parent.hasAttribute('contextmenu'));
+			assert.property(parent, 'oncontextmenu');
+			assert.isFunction(label.parentNode.oncontextmenu);
 			
-			var menupopup = doc.getAnonymousNodes(itemBox)[0]
-				.getElementsByAttribute('id', 'zotero-creator-transform-menu')[0];
+			var menupopup = itemBox.shadowRoot.getElementById('zotero-creator-transform-menu');
 			// Fake a right-click
 			doc.popupNode = parent;
 			menupopup.openPopup(
@@ -54,7 +54,7 @@ describe("Item pane", function () {
 			);
 			var menuitem = menupopup.getElementsByTagName('menuitem')[0];
 			menuitem.click();
-			yield waitForItemEvent('modify');
+			await waitForItemEvent('modify');
 			
 			var creator = item.getCreators()[0];
 			assert.propertyVal(creator, 'firstName', 'Last');
@@ -73,8 +73,8 @@ describe("Item pane", function () {
 			yield item.saveTx();
 			
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var label = doc.getAnonymousNodes(itemBox)[0].getElementsByAttribute('fieldname', 'creator-0-lastName')[0];
-			assert.isFalse(label.parentNode.hasAttribute('contextmenu'));
+			var label = itemBox.shadowRoot.querySelector('[fieldname="creator-0-lastName"]');
+			assert.isNull(label.parentNode.oncontextmenu, null);
 		});
 		
 		
@@ -115,10 +115,10 @@ describe("Item pane", function () {
 			var item = await createDataObject('item');
 			
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var box = doc.getAnonymousNodes(itemBox)[0];
-			var label = box.querySelector('label[fieldname="accessDate"][class="zotero-clicky"]');
+			var box = itemBox.shadowRoot;
+			var label = box.querySelector('div[fieldname="accessDate"].zotero-clicky');
 			label.click();
-			var textbox = box.querySelector('textbox[fieldname="accessDate"]');
+			var textbox = box.querySelector('input[fieldname="accessDate"]');
 			textbox.value = 'now';
 			// Blur events don't necessarily trigger if window doesn't have focus
 			itemBox.hideEditor(textbox);
@@ -156,13 +156,14 @@ describe("Item pane", function () {
 			
 			var tabs = doc.getElementById('zotero-editpane-tabs');
 			var notesTab = doc.getElementById('zotero-editpane-notes-tab');
-			var noteRows = doc.getElementById('zotero-editpane-dynamic-notes');
+			var noteRows = doc.getElementById('zotero-editpane-notes');
+			var grid = noteRows.shadowRoot.getElementById('grid');
 			tabs.selectedItem = notesTab;
 			// Wait for note list to update
 			do {
 				yield Zotero.Promise.delay(1);
 			}
-			while (noteRows.childNodes.length !== 2);
+			while (grid.querySelectorAll('div.box > label').length !== 2);
 			
 			// Update note text
 			note2.setNote('C');
@@ -172,7 +173,7 @@ describe("Item pane", function () {
 			do {
 				yield Zotero.Promise.delay(1);
 			}
-			while (Array.from(noteRows.querySelectorAll('label.zotero-box-label')).every(label => label.value != 'C'));
+			while ([...grid.querySelectorAll('div.box > label')].every(label => label.textContent != 'C'));
 		});
 		
 		it("should refresh on child note trash", function* () {
@@ -196,24 +197,25 @@ describe("Item pane", function () {
 			
 			var tabs = doc.getElementById('zotero-editpane-tabs');
 			var notesTab = doc.getElementById('zotero-editpane-notes-tab');
-			var noteRows = doc.getElementById('zotero-editpane-dynamic-notes');
+			var noteRows = doc.getElementById('zotero-editpane-notes');
+			var grid = noteRows.shadowRoot.getElementById('grid');
 			tabs.selectedItem = notesTab;
 			// Wait for note list to update
 			do {
 				yield Zotero.Promise.delay(1);
 			}
-			while (noteRows.childNodes.length !== 2);
+			while (grid.querySelectorAll('div.box > label').length !== 2);
 			
 			// Click "-" in first note
 			var promise = waitForDialog();
-			noteRows.childNodes[0].lastChild.click();
+			grid.querySelector(".zotero-clicky-minus").click();
 			yield promise;
 			
 			// Wait for note list to update
 			do {
 				yield Zotero.Promise.delay(1);
 			}
-			while (noteRows.childNodes.length !== 1);
+			while (grid.querySelectorAll('div.box > label').length !== 1);
 		});
 		
 		it("should refresh on child note delete", function* () {
@@ -237,13 +239,14 @@ describe("Item pane", function () {
 			
 			var tabs = doc.getElementById('zotero-editpane-tabs');
 			var notesTab = doc.getElementById('zotero-editpane-notes-tab');
-			var noteRows = doc.getElementById('zotero-editpane-dynamic-notes');
+			var noteRows = doc.getElementById('zotero-editpane-notes');
+			var grid = noteRows.shadowRoot.getElementById('grid');
 			tabs.selectedItem = notesTab;
 			// Wait for note list to update
 			do {
 				yield Zotero.Promise.delay(1);
 			}
-			while (noteRows.childNodes.length !== 2);
+			while (grid.querySelectorAll('div.box > label').length !== 2);
 			
 			yield note2.eraseTx();
 			
@@ -251,7 +254,7 @@ describe("Item pane", function () {
 			do {
 				yield Zotero.Promise.delay(1);
 			}
-			while (noteRows.childNodes.length !== 1);
+			while (grid.querySelectorAll('div.box > label').length !== 1);
 		});
 	});
 	

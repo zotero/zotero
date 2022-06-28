@@ -4,7 +4,7 @@ var sandbox = sinon.createSandbox();
 
 describe("Dictionaries", function () {
 	var win;
-	var enUKXPIOld, frFRv1XPI, unKNXPI, enUKXPINew, frFRv2XPI;
+	var enGBXPIOld, frFRv1XPI, unKNXPI, enGBXPINew, frFRv2XPI;
 	
 	async function makeFakeDictionary({ id, locale, version }) {
 		var dir = await getTempDirectory();
@@ -39,9 +39,9 @@ describe("Dictionaries", function () {
 	
 	before(async function () {
 		// Make fake installed dictionaries
-		enUKXPIOld = await makeFakeDictionary({
-			id: '@fake-en-UK-dictionary',
-			locale: 'en-UK',
+		enGBXPIOld = await makeFakeDictionary({
+			id: '@fake-en-GB-dictionary',
+			locale: 'en-GB',
 			version: 5,
 			name: "Fake English UK Dictionary"
 		});
@@ -58,9 +58,9 @@ describe("Dictionaries", function () {
 			name: "Fake Unknown Dictionary"
 		});
 		// Make fake updated dictionaries
-		enUKXPINew = await makeFakeDictionary({
-			id: '@another-fake-en-UK-dictionary',
-			locale: 'en-UK',
+		enGBXPINew = await makeFakeDictionary({
+			id: '@another-fake-en-GB-dictionary',
+			locale: 'en-GB',
 			version: 1,
 			name: "Another Fake English UK Dictionary"
 		});
@@ -79,8 +79,8 @@ describe("Dictionaries", function () {
 		
 		sandbox.stub(Zotero.File, 'download').callsFake(async (url, downloadPath) => {
 			Zotero.debug("Fake downloading " + url);
-			if (url.includes('en-UK')) {
-				return OS.File.copy(enUKXPIOld, downloadPath);
+			if (url.includes('en-GB')) {
+				return OS.File.copy(enGBXPIOld, downloadPath);
 			}
 			if (url.includes('fr-FR')) {
 				return OS.File.copy(frFRv1XPI, downloadPath);
@@ -90,7 +90,7 @@ describe("Dictionaries", function () {
 			}
 			throw new Error("Unexpected URL " + url);
 		});
-		await Zotero.Dictionaries.install('@fake-en-UK-dictionary', "5");
+		await Zotero.Dictionaries.install('@fake-en-GB-dictionary', "5");
 		await Zotero.Dictionaries.install('@fake-fr-FR-dictionary', "1");
 		await Zotero.Dictionaries.install('@fake-xx-UN-dictionary', "5");
 		sandbox.restore();
@@ -99,8 +99,8 @@ describe("Dictionaries", function () {
 		sandbox.stub(Zotero.Dictionaries, 'fetchDictionariesList')
 			.resolves([
 				{
-					id: '@another-fake-en-UK-dictionary',
-					locale: 'en-UK',
+					id: '@another-fake-en-GB-dictionary',
+					locale: 'en-GB',
 					name: "English (UK)",
 					version: 1
 				},
@@ -114,8 +114,8 @@ describe("Dictionaries", function () {
 		
 		sandbox.stub(Zotero.File, 'download').callsFake(async (url, downloadPath) => {
 			Zotero.debug("Fake downloading " + url);
-			if (url.includes('en-UK') && url.includes("-1.xpi")) {
-				return OS.File.copy(enUKXPINew, downloadPath);
+			if (url.includes('en-GB') && url.includes("-1.xpi")) {
+				return OS.File.copy(enGBXPINew, downloadPath);
 			}
 			if (url.includes('fr-FR') && url.includes("-2.xpi")) {
 				return OS.File.copy(frFRv2XPI, downloadPath);
@@ -134,8 +134,8 @@ describe("Dictionaries", function () {
 				var numDictionaries = Zotero.Dictionaries.dictionaries.length;
 				function updated() {
 					return !!(
-						!Zotero.Dictionaries.dictionaries.find(x => x.id == '@fake-en-UK-dictionary')
-							&& Zotero.Dictionaries.dictionaries.find(x => x.id == '@another-fake-en-UK-dictionary')
+						!Zotero.Dictionaries.dictionaries.find(x => x.id == '@fake-en-GB-dictionary')
+							&& Zotero.Dictionaries.dictionaries.find(x => x.id == '@another-fake-en-GB-dictionary')
 							// Version update happens too
 							&& !Zotero.Dictionaries.dictionaries.find(x => x.id == '@fake-fr-FR-dictionary' && x.version == 1)
 							&& Zotero.Dictionaries.dictionaries.find(x => x.id == '@fake-fr-FR-dictionary' && x.version == 2)
@@ -153,7 +153,7 @@ describe("Dictionaries", function () {
 		beforeEach(async function () {
 			win = Services.ww.openWindow(
 				null,
-				'chrome://zotero/content/dictionaryManager.xul',
+				'chrome://zotero/content/dictionaryManager.xhtml',
 				'dictionary-manager',
 				'chrome,centerscreen',
 				{}
@@ -177,8 +177,8 @@ describe("Dictionaries", function () {
 			var numDictionaries = Zotero.Dictionaries.dictionaries.length;
 			function updated() {
 				return !!(
-					!Zotero.Dictionaries.dictionaries.find(x => x.id == '@fake-en-UK-dictionary')
-						&& Zotero.Dictionaries.dictionaries.find(x => x.id == '@another-fake-en-UK-dictionary')
+					!Zotero.Dictionaries.dictionaries.find(x => x.id == '@fake-en-GB-dictionary')
+						&& Zotero.Dictionaries.dictionaries.find(x => x.id == '@another-fake-en-GB-dictionary')
 						// Version update happens too
 						&& !Zotero.Dictionaries.dictionaries.find(x => x.id == '@fake-fr-FR-dictionary' && x.version == 1)
 						&& Zotero.Dictionaries.dictionaries.find(x => x.id == '@fake-fr-FR-dictionary' && x.version == 2)
