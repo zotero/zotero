@@ -21,43 +21,53 @@
 
 	<script src="resource://zotero/vs/loader.js"></script>
 	<script>
-		var container = document.getElementById('container');
-		var editor, globalEditor;
+		/**
+		 * @param {Object} [params = {}]
+		 * @return {Promise<void>}
+		 */
+		function loadMonaco(params = {}) {
+			let container = document.getElementById('container');
 
-		require.config({ paths: { vs: 'resource://zotero/vs' } });
+			require.config({ paths: { vs: 'resource://zotero/vs' } });
 
-		let proxy = URL.createObjectURL(
-			new Blob(
-			    [`
-					self.MonacoEnvironment = {
-						baseUrl: 'resource://zotero/'
-					};
-					importScripts('resource://zotero/vs/base/worker/workerMain.js');
-				`],
-			    { type: "text/javascript" }
-		    )
-		);
-		window.MonacoEnvironment = { getWorkerUrl: () => proxy };
+			let proxy = URL.createObjectURL(
+				new Blob(
+					[`
+						self.MonacoEnvironment = {
+							baseUrl: 'resource://zotero/'
+						};
+						importScripts('resource://zotero/vs/base/worker/workerMain.js');
+					`],
+					{ type: "text/javascript" }
+				)
+			);
+			window.MonacoEnvironment = { getWorkerUrl: () => proxy };
 
-		require(['vs/editor/editor.main'], function () {
-			globalEditor = monaco;
+			return new Promise(resolve => require(['vs/editor/editor.main'], function () {
+				globalEditor = monaco;
 
-			monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-				target: monaco.languages.typescript.ScriptTarget.ES6,
-				allowNonTsExtensions: true // needed for peeking definitions from in-memory models to work
-			});
+				monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+					target: monaco.languages.typescript.ScriptTarget.ES6,
+					allowNonTsExtensions: true // needed for peeking definitions from in-memory models to work
+				});
 
-			editor = monaco.editor.create(container, {
-				theme: 'vs-dark',
-				language: 'javascript',
-				scrollBeyondLastLine: false,
-				minimap: { enabled: false }
-			});
+				editor = monaco.editor.create(container, {
+					theme: 'vs-dark',
+					language: 'javascript',
+					scrollBeyondLastLine: false,
+					minimap: { enabled: false },
+					// Clicking links doesn't actually work, so disable them (for now)
+					links: false,
+					...params
+				});
 
-			window.onresize = function () {
-				editor.layout();
-			};
-		});
+				window.onresize = function () {
+					editor.layout();
+				};
+
+				resolve({ monaco, editor });
+			}));
+		}
 	</script>
 	
 </body>

@@ -21,11 +21,6 @@
 }
 
 /* Bindings */
-textbox[multiline="true"][type="timed"]
-{
-	-moz-binding: url('chrome://zotero/content/bindings/timedtextarea.xml#timed-textarea');
-}
-
 textbox[type="styled"]
 {
 	-moz-binding: url('chrome://zotero/content/bindings/styled-textbox.xml#styled-textbox');

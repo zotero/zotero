@@ -142,13 +142,21 @@ var Scaffold = new function () {
 		var importWin = document.getElementById("editor-import").contentWindow;
 		var codeWin = document.getElementById("editor-code").contentWindow;
 		var testsWin = document.getElementById("editor-tests").contentWindow;
-		
-		_editors.import = importWin.editor;
-		_editors.importGlobal = importWin.globalEditor;
-		_editors.code = codeWin.editor;
-		_editors.codeGlobal = codeWin.globalEditor;
-		_editors.tests = testsWin.editor;
-		_editors.testsGlobal = testsWin.globalEditor;
+
+		await Promise.all([
+			importWin.loadMonaco({ language: 'plaintext' }).then(({ monaco, editor }) => {
+				_editors.importGlobal = monaco;
+				_editors.import = editor;
+			}),
+			codeWin.loadMonaco({ language: 'javascript' }).then(({ monaco, editor }) => {
+				_editors.codeGlobal = monaco;
+				_editors.code = editor;
+			}),
+			testsWin.loadMonaco({ language: 'json' }).then(({ monaco, editor }) => {
+				_editors.testsGlobal = monaco;
+				_editors.tests = editor;
+			}),
+		]);
 
 		this.initImportEditor();
 		this.initCodeEditor();
@@ -257,7 +265,7 @@ var Scaffold = new function () {
 
 	this.initImportEditor = function () {
 		let monaco = _editors.importGlobal, editor = _editors.import;
-		monaco.editor.setModelLanguage(editor.getModel(), 'plaintext');
+		// Nothing to do here
 	};
 
 	this.initCodeEditor = async function () {
@@ -269,8 +277,6 @@ var Scaffold = new function () {
 
 		editor.updateOptions({
 			lineNumbers: num => num + _linesOfMetadata - 1,
-			// clicking links doesn't actually work, so disable them (for now)
-			links: false
 		});
 
 		monaco.languages.registerCodeLensProvider('javascript', this.createRunCodeLensProvider(monaco, editor));
@@ -294,8 +300,6 @@ var Scaffold = new function () {
 			trailingCommas: false,
 			schemaValidation: 'error'
 		});
-
-		monaco.editor.setModelLanguage(editor.getModel(), 'json');
 
 		editor.getModel().updateOptions({
 			insertSpaces: false
