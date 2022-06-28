@@ -65,7 +65,10 @@ var Zotero_CSL_Editor = new function() {
 		pageList.selectedIndex = 0;
 
 		let editorWin = document.getElementById("zotero-csl-editor-iframe").contentWindow;
-		let { monaco: _monaco, editor: _editor } = await editorWin.loadMonaco({ language: 'xml' });
+		let { monaco: _monaco, editor: _editor } = await editorWin.loadMonaco({
+			language: 'xml',
+			theme: 'vs-light'
+		});
 		monaco = _monaco;
 		editor = _editor;
 
@@ -144,8 +147,12 @@ var Zotero_CSL_Editor = new function() {
 		return styleObject;
 	}
 	
-	this.onStyleModified = function(str) {
-		document.getElementById('zotero-csl-list').selectedIndex = -1;
+	this.onStyleModified = function () {
+		let xml = editor.getValue();
+		let cslList = document.getElementById('zotero-csl-list');
+		if (xml !== Zotero.Styles.get(cslList.value)?.getXML()) {
+			cslList.selectedIndex = -1;
+		}
 		
 		let styleObject = this.loadStyleFromEditor();
 		
