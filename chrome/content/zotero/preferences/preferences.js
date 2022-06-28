@@ -489,6 +489,7 @@ var Zotero_Preferences = {
 			child.setAttribute('hidden', true);
 		}
 		if (this.navigation.value) {
+			this.content.scrollTop = 0;
 			document.getElementById('prefs-search').value = '';
 			this.search('');
 			this._loadAndDisplayPane(this.navigation.value);
