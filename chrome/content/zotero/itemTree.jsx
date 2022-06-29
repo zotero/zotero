@@ -3588,15 +3588,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	_displayColumnPickerMenu = (event) => {
 		if (!this.props.columnPicker) return;
-		const ns = 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul';
 		const prefix = 'zotero-column-picker-';
 		const doc = document;
+		const popupset = doc.getElementById('trees-popupset');
 		
-		const menupopup = doc.createElementNS(ns, 'menupopup');
+		const menupopup = doc.createXULElement('menupopup');
 		menupopup.id = 'zotero-column-picker';
 		menupopup.addEventListener('popuphiding', (event) => {
 			if (event.target.id == menupopup.id) {
-				document.children[0].removeChild(menupopup);
+				popupset.removeChild(menupopup);
 			}
 		});
 		
@@ -3607,7 +3607,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			const column = columns[i];
 			if (column.ignoreInColumnPicker === true) continue;
 			let label = formatColumnName(column);
-			let menuitem = doc.createElementNS(ns, 'menuitem');
+			let menuitem = doc.createXULElement('menuitem');
 			menuitem.setAttribute('type', 'checkbox');
 			menuitem.setAttribute('label', label);
 			menuitem.setAttribute('colindex', i);
@@ -3626,11 +3626,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 			// More Columns menu
 			let id = prefix + 'more-menu';
 			
-			let moreMenu = doc.createElementNS(ns, 'menu');
+			let moreMenu = doc.createXULElement('menu');
 			moreMenu.setAttribute('label', Zotero.getString('pane.items.columnChooser.moreColumns'));
 			moreMenu.setAttribute('anonid', id);
 			
-			let moreMenuPopup = doc.createElementNS(ns, 'menupopup');
+			let moreMenuPopup = doc.createXULElement('menupopup');
 			moreMenuPopup.setAttribute('anonid', id + '-popup');
 
 			let moreItems = [];
@@ -3650,7 +3650,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				moreMenuPopup.appendChild(menupopup.removeChild(elem));
 			});
 
-			let sep = doc.createElementNS(ns, 'menuseparator');
+			let sep = doc.createXULElement('menuseparator');
 			menupopup.appendChild(sep);
 			moreMenu.appendChild(moreMenuPopup);
 			menupopup.appendChild(moreMenu);
@@ -3675,12 +3675,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 				
 				const primaryFieldLabel = formatColumnName(columns.find(c => c.dataKey == primaryField));
 				
-				const sortMenu = doc.createElementNS(ns, 'menu');
+				const sortMenu = doc.createXULElement('menu');
 				sortMenu.setAttribute('label',
 					Zotero.getString('pane.items.columnChooser.secondarySort', primaryFieldLabel));
 				sortMenu.setAttribute('anonid', id);
 				
-				const sortMenuPopup = doc.createElementNS(ns, 'menupopup');
+				const sortMenuPopup = doc.createXULElement('menupopup');
 				sortMenuPopup.setAttribute('anonid', id + '-popup');
 				
 				// Generate menuitems
@@ -3703,7 +3703,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					let column = columns.find(c => c.dataKey == field);
 					let label = formatColumnName(column);
 					
-					let sortMenuItem = doc.createElementNS(ns, 'menuitem');
+					let sortMenuItem = doc.createXULElement('menuitem');
 					sortMenuItem.setAttribute('fieldName', field);
 					sortMenuItem.setAttribute('label', label);
 					sortMenuItem.setAttribute('type', 'checkbox');
@@ -3727,20 +3727,20 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 		
-		let sep = doc.createElementNS(ns, 'menuseparator');
+		let sep = doc.createXULElement('menuseparator');
 		// sep.setAttribute('anonid', prefix + 'sep');
 		menupopup.appendChild(sep);
 		
 		//
 		// Restore Default Column Order
 		//
-		let menuitem = doc.createElementNS(ns, 'menuitem');
+		let menuitem = doc.createXULElement('menuitem');
 		menuitem.setAttribute('label', Zotero.Intl.strings['zotero.items.restoreColumnOrder.label']);
 		menuitem.setAttribute('anonid', prefix + 'restore-order');
 		menuitem.addEventListener('command', () => this.tree._columns.restoreDefaultOrder());
 		menupopup.appendChild(menuitem);
 		
-		document.children[0].appendChild(menupopup);
+		popupset.appendChild(menupopup);
 		menupopup.openPopupAtScreen(
 			window.screenX + event.clientX + 2,
 			window.screenY + event.clientY + 2,
