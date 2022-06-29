@@ -30,8 +30,6 @@ var ReactDOM = require('react-dom');
 var NotesList = require('components/itemPane/notesList').default;
 
 var ZoteroContextPane = new function () {
-	const HTML_NS = 'http://www.w3.org/1999/xhtml';
-	
 	var _tabCover;
 	var _contextPane;
 	var _contextPaneInner;
@@ -489,7 +487,7 @@ var ZoteroContextPane = new function () {
 		var listBox = document.createXULElement('vbox');
 		listBox.style.display = 'flex';
 		listBox.setAttribute('flex', '1');
-		var listInner = document.createElementNS(HTML_NS, 'div');
+		var listInner = document.createElement('div');
 		listInner.className = 'notes-list-container';
 		// Otherwise it can be focused with tab
 		listInner.tabIndex = -1;
@@ -742,11 +740,11 @@ var ZoteroContextPane = new function () {
 			node.querySelector('.zotero-context-pane-editor-parent-line').innerHTML = '';
 			var parentItem = item.parentItem;
 			if (parentItem) {
-				var container = document.createElementNS(HTML_NS, 'div');
-				var img = document.createElementNS(HTML_NS, 'img');
+				var container = document.createElement('div');
+				var img = document.createElement('img');
 				img.src = Zotero.ItemTypes.getImageSrc(parentItem.itemType);
 				img.className = 'parent-item-type';
-				var title = document.createElementNS(HTML_NS, 'div');
+				var title = document.createElement('div');
 				title.append(parentItem.getDisplayTitle());
 				title.className = 'parent-title';
 				container.append(img, title);

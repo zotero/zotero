@@ -68,7 +68,7 @@ module.exports = class {
 	 */
 	initialize() {
 		const { targetElement } = this;
-		this.innerElem = document.createElementNS("http://www.w3.org/1999/xhtml", 'div');
+		this.innerElem = document.createElement('div');
 		this.innerElem.className = "windowed-list";
 
 		targetElement.appendChild(this.innerElem);

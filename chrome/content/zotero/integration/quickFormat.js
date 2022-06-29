@@ -122,7 +122,7 @@ var Zotero_QuickFormat = new function () {
 					var locatorLabel = Zotero.getString('citation.locator.'+locator.replace(/\s/g,''));
 
 					// add to list of labels
-					var child = document.createElement("menuitem");
+					var child = document.createXULElement("menuitem");
 					child.setAttribute("value", locator);
 					child.setAttribute("label", locatorLabel);
 					labelList.appendChild(child);
@@ -620,7 +620,7 @@ var Zotero_QuickFormat = new function () {
 			
 			var publicationTitle = item.getField("publicationTitle", false, true);
 			if(publicationTitle) {
-				var label = document.createElement("label");
+				var label = document.createXULElement("label");
 				label.setAttribute("value", publicationTitle);
 				label.setAttribute("crop", "end");
 				label.style.fontStyle = "italic";
@@ -652,7 +652,7 @@ var Zotero_QuickFormat = new function () {
 				if(i != 0) str += ", ";
 
 				if(typeof node === "object") {
-					var label = document.createElement("label");
+					var label = document.createXULElement("label");
 					label.setAttribute("value", str);
 					label.setAttribute("crop", "end");
 					infoHbox.appendChild(label);
@@ -666,7 +666,7 @@ var Zotero_QuickFormat = new function () {
 			if(nodes.length && (!str.length || str[str.length-1] !== ".")) str += ".";	
 		}
 		
-		var label = document.createElement("label");
+		var label = document.createXULElement("label");
 		label.setAttribute("value", str);
 		label.setAttribute("crop", "end");
 		label.setAttribute("flex", "1");
@@ -677,13 +677,13 @@ var Zotero_QuickFormat = new function () {
 	 * Creates an item to be added to the item list
 	 */
 	function _buildListItem(item) {
-		var titleNode = document.createElement("label");
+		var titleNode = document.createXULElement("label");
 		titleNode.setAttribute("class", "citation-dialog title");
 		titleNode.setAttribute("flex", "1");
 		titleNode.setAttribute("crop", "end");
 		titleNode.setAttribute("value", item.getDisplayTitle());
 		
-		var infoNode = document.createElement("hbox");
+		var infoNode = document.createXULElement("hbox");
 		infoNode.setAttribute("class", "citation-dialog info");
 		_buildItemDescription(item, infoNode);
 		
@@ -703,7 +703,7 @@ var Zotero_QuickFormat = new function () {
 	 * Creates a list separator to be added to the item list
 	 */
 	function _buildListSeparator(labelText, loading) {
-		var titleNode = document.createElement("label");
+		var titleNode = document.createXULElement("label");
 		titleNode.setAttribute("class", "citation-dialog separator-title");
 		titleNode.setAttribute("flex", "1");
 		titleNode.setAttribute("crop", "end");

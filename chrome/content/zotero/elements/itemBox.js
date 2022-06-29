@@ -2331,8 +2331,6 @@
 			// don't overlap.
 			if (!this._updateRetracted) {
 				this._updateRetracted = Zotero.serial(async function (item) {
-					var htmlNS = 'http://www.w3.org/1999/xhtml';
-					
 					var show = Zotero.Retractions.isRetracted(item);
 					if (!show) {
 						this._id('retraction-box').hidden = true;
@@ -2363,8 +2361,8 @@
 						elem.hidden = false;
 						elem.textContent = '';
 						for (let reason of data.reasons) {
-							let dt = document.createElementNS(htmlNS, 'dt');
-							let dd = document.createElementNS(htmlNS, 'dd');
+							let dt = document.createElement('dt');
+							let dd = document.createElement('dd');
 							
 							dt.textContent = reason;
 							dd.textContent = Zotero.Retractions.getReasonDescription(reason);
@@ -2385,7 +2383,7 @@
 					if (data.doi || data.pmid) {
 						let div = this._id('retraction-notice');
 						div.textContent = '';
-						let a = document.createElementNS(htmlNS, 'a');
+						let a = document.createElement('a');
 						a.textContent = Zotero.getString('retraction.notice');
 						if (data.doi) {
 							a.href = 'https://doi.org/' + data.doi;
@@ -2405,13 +2403,13 @@
 						div.hidden = false;
 						div.textContent = '';
 						
-						let p = document.createElementNS(htmlNS, 'p');
+						let p = document.createElement('p');
 						p.textContent = Zotero.getString('retraction.details');
 						
-						let ul = document.createElementNS(htmlNS, 'ul');
+						let ul = document.createElement('ul');
 						for (let url of data.urls) {
-							let li = document.createElementNS(htmlNS, 'li');
-							let a = document.createElementNS(htmlNS, 'a');
+							let li = document.createElement('li');
+							let a = document.createElement('a');
 							url = url.replace(/^http:/, 'https:');
 							a.href = url;
 							a.textContent = url;
@@ -2438,7 +2436,7 @@
 								creditElem.appendChild(document.createTextNode(part.text));
 							}
 							else if (part.type == 'link') {
-								let a = document.createElementNS(htmlNS, 'a');
+								let a = document.createElement('a');
 								a.href = part.attributes.href;
 								a.textContent = part.text;
 								creditElem.appendChild(a);

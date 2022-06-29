@@ -79,7 +79,7 @@ window.addEventListener(
 );
 
 function createContentAreaContextMenuItem(name) {
-	let item = document.createElement('menuitem');
+	let item = document.createXULElement('menuitem');
 	item.id = 'context-' + name.toLowerCase();
 	item.setAttribute('label', Zotero.Intl.strings[name + 'Cmd.label']);
 	item.setAttribute('accesskey', Zotero.Intl.strings[name + 'Cmd.accesskey']);
@@ -88,18 +88,18 @@ function createContentAreaContextMenuItem(name) {
 }
 
 function createContentAreaContextMenu() {
-	let menupopup = document.createElement('menupopup');
+	let menupopup = document.createXULElement('menupopup');
 	menupopup.id = 'contentAreaContextMenu';
 
 	menupopup.appendChild(createContentAreaContextMenuItem('undo'));
-	let undoSep = document.createElement('menuseparator');
+	let undoSep = document.createXULElement('menuseparator');
 	undoSep.id = 'context-sep-undo';
 	menupopup.appendChild(undoSep);
 	menupopup.appendChild(createContentAreaContextMenuItem('cut'));
 	menupopup.appendChild(createContentAreaContextMenuItem('copy'));
 	menupopup.appendChild(createContentAreaContextMenuItem('paste'));
 	menupopup.appendChild(createContentAreaContextMenuItem('delete'));
-	let pasteSep = document.createElement('menuseparator');
+	let pasteSep = document.createXULElement('menuseparator');
 	pasteSep.id = 'context-sep-paste';
 	menupopup.appendChild(pasteSep);
 	menupopup.appendChild(createContentAreaContextMenuItem('selectAll'));

@@ -1453,8 +1453,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 * @return	void
 	 */
 	this.showZoteroPaneProgressMeter = function (msg, determinate, icon, modalOnly) {
-		const HTML_NS = "http://www.w3.org/1999/xhtml"
-		
 		// If msg is undefined, keep any existing message. If false/null/"", clear.
 		// The message is also cleared when the meters are hidden.
 		_progressMessage = msg = (msg === undefined ? _progressMessage : msg) || "";
@@ -1489,7 +1487,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			let id = 'zotero-pane-progressmeter';
 			let progressMeter = doc.getElementById(id);
 			if (!progressMeter) {
-				progressMeter = doc.createElementNS(HTML_NS, 'progress');
+				progressMeter = doc.createElement('progress');
 				progressMeter.id = id;
 			}
 			if (determinate) {
@@ -1647,10 +1645,10 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		button.id = 'zotero-tb-search-menu-button';
 		button.setAttribute('type', 'menu');
 		
-		var menupopup = document.createElement('menupopup');
+		var menupopup = document.createXULElement('menupopup');
 		
 		for (var i in modes) {
-			var menuitem = document.createElement('menuitem');
+			var menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('id', prefix + i);
 			menuitem.setAttribute('label', modes[i].label);
 			menuitem.setAttribute('name', 'searchMode');

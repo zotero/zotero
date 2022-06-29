@@ -32,7 +32,6 @@ if (!Zotero.Sync) {
 // Initialized as Zotero.Sync.Runner in zotero.js
 Zotero.Sync.Runner_Module = function (options = {}) {
 	const stopOnError = false;
-	const HTML_NS = 'http://www.w3.org/1999/xhtml';
 	
 	Zotero.defineProperty(this, 'enabled', {
 		get: () => {
@@ -1692,7 +1691,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		if (_tooltipMessages.length) {
 			_currentTooltipMessages.textContent = '';
 			for (let message of _tooltipMessages) {
-				let elem = _currentTooltipMessages.ownerDocument.createElementNS(HTML_NS, 'p');
+				let elem = _currentTooltipMessages.ownerDocument.createElement('p');
 				elem.textContent = message;
 				_currentTooltipMessages.appendChild(elem);
 			}

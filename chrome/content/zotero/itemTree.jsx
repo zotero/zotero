@@ -41,7 +41,6 @@ const CHILD_INDENT = 12;
 const COLORED_TAGS_RE = new RegExp("^[0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1}$");
 const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
 const EMOJI_RE = /\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\p{Emoji_Presentation}|\p{Emoji}\uFE0F/gu;
-const HTML_NS = "http://www.w3.org/1999/xhtml";
 const ATTACHMENT_STATE_LOAD_DELAY = 150; //ms
 
 var ItemTree = class ItemTree extends LibraryTree {
@@ -132,7 +131,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._itemTreeLoadingDeferred.resolve();
 		// Create an element where we can create drag images to be displayed next to the cursor while dragging
 		// since for multiple item drags we need to display all the elements
-		let elem = this._dragImageContainer = document.createElementNS(HTML_NS, "div");
+		let elem = this._dragImageContainer = document.createElement("div");
 		elem.style.width = "100%";
 		elem.style.height = "2000px";
 		elem.style.position = "absolute";
@@ -2621,7 +2620,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			if (this._titleMarkup.hasOwnProperty(token)) {
 				let markup = this._titleMarkup[token];
 				if (markup.beginsTag) {
-					let node = document.createElementNS(HTML_NS, markup.beginsTag);
+					let node = document.createElement(markup.beginsTag);
 					if (markup.style) {
 						Object.assign(node.style, markup.style);
 					}
@@ -2663,14 +2662,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	_renderPrimaryCell(index, data, column) {
-		let span = document.createElementNS(HTML_NS, 'span');
+		let span = document.createElement('span');
 		span.className = `cell ${column.className}`;
 		span.classList.add('primary');
 
 		// Add twisty, icon, tag swatches and retraction indicator
 		let twisty;
 		if (this.isContainerEmpty(index)) {
-			twisty = document.createElementNS(HTML_NS, 'span');
+			twisty = document.createElement('span');
 			twisty.classList.add("spacer-twisty");
 		}
 		else {
@@ -2716,7 +2715,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			Zotero.debug(e, 1);
 		}
 		
-		let textSpan = document.createElementNS(HTML_NS, 'span');
+		let textSpan = document.createElement('span');
 		let textWithFullStop = this._renderItemTitle(data, textSpan);
 		if (!textWithFullStop.match(/\.$/)) {
 			textWithFullStop += '.';
@@ -2735,7 +2734,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	_renderHasAttachmentCell(index, data, column) {
-		let span = document.createElementNS(HTML_NS, 'span');
+		let span = document.createElement('span');
 		span.className = `cell ${column.className}`;
 
 		if (this.collectionTreeRow.isTrash()) return span;
@@ -2865,7 +2864,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			div.innerHTML = "";
 		}
 		else {
-			div = document.createElementNS(HTML_NS, 'div');
+			div = document.createElement('div');
 			div.className = "row";
 		}
 
@@ -2878,7 +2877,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (this._dropRow == index) {
 			let span;
 			if (Zotero.DragDrop.currentOrientation != 0) {
-				span = document.createElementNS(HTML_NS, 'span');
+				span = document.createElement('span');
 				span.className = Zotero.DragDrop.currentOrientation < 0 ? "drop-before" : "drop-after";
 				div.appendChild(span);
 			} else {
@@ -3252,13 +3251,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		if (this.collectionTreeRow && !this.rowCount) {
 			let doc = this._ownerDocument;
-			let ns = 'http://www.w3.org/1999/xhtml';
 			let div;
 
 			// My Library and no groups
 			if (this.collectionTreeRow.isLibrary() && !Zotero.Groups.getAll().length) {
-				div = doc.createElementNS(ns, 'div');
-				let p = doc.createElementNS(ns, 'p');
+				div = doc.createElement('div');
+				let p = doc.createElement('p');
 				let html = Zotero.getString(
 					'pane.items.intro.text1',
 					[
@@ -3271,7 +3269,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				p.innerHTML = html;
 				div.appendChild(p);
 
-				p = doc.createElementNS(ns, 'p');
+				p = doc.createElement('p');
 				html = Zotero.getString(
 					'pane.items.intro.text2',
 					[
@@ -3290,7 +3288,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				p.innerHTML = html;
 				div.appendChild(p);
 
-				p = doc.createElementNS(ns, 'p');
+				p = doc.createElement('p');
 				html = Zotero.getString('pane.items.intro.text3', [Zotero.clientName]);
 				// Encode special chars, which shouldn't exist
 				html = Zotero.Utilities.htmlSpecialChars(html);
@@ -3323,17 +3321,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			// My Publications
 			else if (this.collectionTreeRow.isPublications()) {
-				div = doc.createElementNS(ns, 'div');
+				div = doc.createElement('div');
 				div.className = 'publications';
-				let p = doc.createElementNS(ns, 'p');
+				let p = doc.createElement('p');
 				p.textContent = Zotero.getString('publications.intro.text1', window.ZOTERO_CONFIG.DOMAIN_NAME);
 				div.appendChild(p);
 
-				p = doc.createElementNS(ns, 'p');
+				p = doc.createElement('p');
 				p.textContent = Zotero.getString('publications.intro.text2');
 				div.appendChild(p);
 
-				p = doc.createElementNS(ns, 'p');
+				p = doc.createElement('p');
 				let html = Zotero.getString('publications.intro.text3');
 				// Convert <b> tags to placeholders
 				html = html.replace('<b>', ':b:').replace('</b>', ':/b:');
@@ -3821,7 +3819,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		var icon = getDOMElement(iconClsName);
 		if (!icon) {
 			Zotero.debug('Could not find tree icon for "' + itemType + '"');
-			return document.createElementNS(HTML_NS, 'span');
+			return document.createElement('span');
 		}
 		return icon;
 	}
@@ -3832,7 +3830,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 	
 	_getTagSwatch(tag, color) {
-		let span = document.createElementNS(HTML_NS, 'span');
+		let span = document.createElement('span');
 		span.className = 'tag-swatch';
 		// If only emoji, display directly
 		//

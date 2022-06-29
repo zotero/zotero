@@ -286,7 +286,7 @@
 			var label = this.createValueElement(name, tabindex);
 
 			if (this.editable) {
-				var remove = document.createElement("label");
+				var remove = document.createXULElement("label");
 				remove.setAttribute('value', '-');
 				remove.setAttribute('class', 'zotero-clicky zotero-clicky-minus');
 				remove.setAttribute('tabindex', -1);
@@ -371,7 +371,7 @@
 
 
 		createValueElement(valueText, tabindex) {
-			var valueElement = document.createElement("label");
+			var valueElement = document.createXULElement("label");
 			valueElement.setAttribute('fieldname', 'tag');
 			valueElement.setAttribute('flex', 1);
 			valueElement.className = 'zotero-box-label';

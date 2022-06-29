@@ -1678,7 +1678,7 @@ Zotero.Utilities.Internal = {
 		var selectedIndex = 0;
 		var i = 0;
 		for (let library of libraries) {
-			let menuitem = menulist.ownerDocument.createElement('menuitem');
+			let menuitem = menulist.ownerDocument.createXULElement('menuitem');
 			menuitem.value = library.libraryID;
 			menuitem.setAttribute('label', library.name);
 			menupopup.appendChild(menuitem);
@@ -1694,14 +1694,13 @@ Zotero.Utilities.Internal = {
 	
 	
 	buildLibraryMenuHTML: function (select, libraries, selectedLibraryID) {
-		var namespaceURI = 'http://www.w3.org/1999/xhtml';
 		while (select.hasChildNodes()) {
 			select.removeChild(select.firstChild);
 		}
 		var selectedIndex = 0;
 		var i = 0;
 		for (let library of libraries) {
-			let option = select.ownerDocument.createElementNS(namespaceURI, 'option');
+			let option = select.ownerDocument.createElement('option');
 			option.setAttribute('value', library.libraryID);
 			option.setAttribute('data-editable', library.editable ? 'true' : 'false');
 			option.setAttribute('data-filesEditable', library.filesEditable ? 'true' : 'false');

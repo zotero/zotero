@@ -124,7 +124,7 @@ var Scaffold = new function () {
 		var primaryTypes = ['book', 'bookSection', 'conferencePaper', 'journalArticle', 'magazineArticle', 'newspaperArticle'];
 		for (let type of types) {
 			if (primaryTypes.includes(type)) continue;
-			var menuitem = document.createElement('menuitem');
+			var menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('label', type);
 			menuitem.addEventListener('command', () => {
 				Scaffold.addTemplate('templateNewItem', type);
