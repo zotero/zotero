@@ -2401,7 +2401,7 @@ var ZoteroPane = new function()
 				return;
 			}
 			else {
-				Zotero_File_Interface.exportItemsToClipboard(items, format.id);
+				Zotero_File_Interface.exportItemsToClipboard(items, format);
 			}
 		}
 	}
