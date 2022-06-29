@@ -269,6 +269,9 @@ Zotero.QuickCopy = new function() {
 			// Allow to reuse items array
 			translation.setItems(items.slice());
 			translation.setTranslator(format.id);
+			if (format.options) {
+				translation.setDisplayOptions(format.options);
+			}
 			translation.setHandler("done", callback);
 			translation.translate();
 			return true;
@@ -325,8 +328,8 @@ Zotero.QuickCopy = new function() {
 		// If virtual "Markdown + Rich Text" translator is selected, preload Note Markdown and
 		// Note HTML translators
 		if (format.id == Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
-			await _preloadFormat({ mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN });
-			await _preloadFormat({ mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_HTML });
+			await _preloadFormat({ mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN, options: format.markdownOptions });
+			await _preloadFormat({ mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_HTML, options: format.htmlOptions });
 			return;
 		}
 		return _preloadFormat(format);

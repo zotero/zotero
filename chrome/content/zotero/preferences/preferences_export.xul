@@ -71,9 +71,27 @@
 			
 			<label value="&zotero.preferences.quickCopy.noteFormat;" control="zotero-noteQuickCopy-menu"/>
 			<menulist id="zotero-noteQuickCopy-menu" label="&zotero.general.loading;"/>
-			
+
+			<vbox id="zotero-noteQuickCopy-markdown-options">
+				<label value="&zotero.preferences.quickCopy.markdown;"/>
+				<vbox style="margin-left: 2em">
+					<checkbox id="zotero-noteQuickCopy-markdown-includeAppLinks"
+							  label="Include App Links"
+							  oncommand="Zotero_Preferences.Export.onUpdateNoteExportOptions()"/>
+				</vbox>
+			</vbox>
+
+			<vbox id="zotero-noteQuickCopy-html-options">
+				<label value="&zotero.preferences.quickCopy.html;"/>
+				<vbox style="margin-left: 2em">
+					<checkbox id="zotero-noteQuickCopy-html-includeAppLinks"
+							  label="Include App Links"
+							  oncommand="Zotero_Preferences.Export.onUpdateNoteExportOptions()"/>
+				</vbox>
+			</vbox>
+
 			<separator/>
-			
+
 			<label value="&zotero.preferences.quickCopy.siteEditor.setings;" control="quickCopy-siteSettings"/>
 			<hbox class="virtualized-table-container" flex="1" height="120px">
 				<html:div id="quickCopy-siteSettings"/>

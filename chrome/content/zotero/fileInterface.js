@@ -238,26 +238,29 @@ var Zotero_File_Interface = new function() {
 	/*
 	 * exports items to clipboard
 	 */
-	function exportItemsToClipboard(items, translatorID) {
-		function _translate(items, translatorID, callback) {
+	function exportItemsToClipboard(items, format) {
+		function _translate(items, format, callback) {
 			let translation = new Zotero.Translate.Export();
 			translation.setItems(items.slice());
-			translation.setTranslator(translatorID);
+			translation.setTranslator(format.id);
+			if (format.options) {
+				translation.setDisplayOptions(format.options);
+			}
 			translation.setHandler("done", callback);
 			translation.translate();
 		}
 		
 		// If translating with virtual "Markdown + Rich Text" translator, use Note Markdown and
 		// Note HTML instead
-		if (translatorID == Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
-			translatorID = Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN;
-			_translate(items, translatorID, (obj, worked) => {
+		if (format.id == Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
+			let markdownFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN, options: format.markdownOptions };
+			let htmlFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_HTML, options: format.htmlOptions };
+			_translate(items, markdownFormat, (obj, worked) => {
 				if (!worked) {
 					Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
 					return;
 				}
-				translatorID = Zotero.Translators.TRANSLATOR_ID_NOTE_HTML;
-				_translate(items, translatorID, (obj2, worked) => {
+				_translate(items, htmlFormat, (obj2, worked) => {
 					if (!worked) {
 						Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
 						return;
@@ -293,14 +296,14 @@ var Zotero_File_Interface = new function() {
 			});
 		}
 		else {
-			_translate(items, translatorID, (obj, worked) => {
+			_translate(items, format, (obj, worked) => {
 				if (!worked) {
 					Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
 					return;
 				}
 				let text = obj.string;
 				// For Note HTML translator use body content only
-				if (translatorID == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
+				if (format.id == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
 					let parser = Components.classes['@mozilla.org/xmlextras/domparser;1']
 						.createInstance(Components.interfaces.nsIDOMParser);
 					let doc = parser.parseFromString(text, 'text/html');

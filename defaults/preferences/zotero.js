@@ -129,7 +129,7 @@ pref("extensions.zotero.rtfScan.lastOutputFile", "");
 pref("extensions.zotero.export.quickCopy.setting", "bibliography=http://www.zotero.org/styles/chicago-note-bibliography");
 pref("extensions.zotero.export.quickCopy.dragLimit", 50);
 
-pref("extensions.zotero.export.noteQuickCopy.setting", '{"mode": "export", "id": "a45eca67-1ee8-45e5-b4c6-23fb8a852873"}');
+pref("extensions.zotero.export.noteQuickCopy.setting", '{"mode":"export","id":"a45eca67-1ee8-45e5-b4c6-23fb8a852873","markdownOptions":{"includeAppLinks":true},"htmlOptions":{"includeAppLinks":false}}');
 
 // Integration settings
 pref("extensions.zotero.integration.port", 50001);
