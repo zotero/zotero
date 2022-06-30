@@ -48,7 +48,28 @@ function loadWindow(winurl, argument) {
  * @return {Promise<ChromeWindow>}
  */
 function loadBrowserWindow() {
-	var win = window.openDialog("chrome://browser/content/browser.xul", "", "all,height=700,width=1000");
+	var win = window.openDialog("chrome://browser/content/browser.xhtml", "", "all,height=700,width=1000");
+	return waitForDOMEvent(win, "load").then(function() {
+		return new Zotero.Promise((resolve) => {
+			if (!browserWindowInitialized) {
+				setTimeout(function () {
+					browserWindowInitialized = true;
+					resolve(win);
+				}, 1000);
+				return;
+			}
+			resolve(win);
+		});
+	});
+}
+
+/**
+ * Open a Zotero window and return a promise for the window
+ *
+ * @return {Promise<ChromeWindow>}
+ */
+function loadZoteroWindow() {
+	var win = window.openDialog("chrome://zotero/content/zoteroPane.xhtml", "", "all,height=700,width=1000");
 	return waitForDOMEvent(win, "load").then(function() {
 		return new Zotero.Promise((resolve) => {
 			if (!browserWindowInitialized) {
@@ -70,7 +91,7 @@ function loadBrowserWindow() {
  */
 var loadZoteroPane = async function (win) {
 	if (!win) {
-		var win = await loadBrowserWindow();
+		var win = await loadZoteroWindow();
 	}
 	Zotero.Prefs.clear('lastViewedFolder');
 	
@@ -115,16 +136,14 @@ function waitForWindow(uri, callback) {
 		Zotero.debug("Window opened: " + ev.target.location.href);
 		
 		if (ev.target.location.href != uri) {
-			Zotero.debug(`Ignoring window ${uri} in waitForWindow()`);
+			Zotero.debug(`Ignoring window ${ev.target.location.href} in waitForWindow()`);
 			return;
 		}
 		
 		Services.ww.unregisterNotification(winobserver);
-		var win = ev.target.docShell
-			.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-			.getInterface(Components.interfaces.nsIDOMWindow);
+		var win = ev.target.ownerGlobal;
 		// Give window code time to run on load
-		 win.setTimeout(function () {
+		win.setTimeout(function () {
 			if (callback) {
 				try {
 					// If callback returns a promise, wait for it
@@ -146,8 +165,7 @@ function waitForWindow(uri, callback) {
 	};
 	var winobserver = {"observe":function(subject, topic, data) {
 		if(topic != "domwindowopened") return;
-		var win = subject.QueryInterface(Components.interfaces.nsIDOMWindow);
-		win.addEventListener("load", loadobserver, false);
+		subject.addEventListener("load", loadobserver, false);
 	}};
 	Services.ww.registerNotification(winobserver);
 	return deferred.promise;
@@ -156,18 +174,19 @@ function waitForWindow(uri, callback) {
 /**
  * Wait for an alert or confirmation dialog to pop up and then close it
  *
- * @param {Function} [onOpen] - Function that is passed the dialog once it is opened.
+ * @param {Function} [onOpen] - Function that is passed the window and dialog once it is opened.
  *                              Can be used to make assertions on the dialog contents
  *                              (e.g., with dialog.document.documentElement.textContent)
  * @param {String} [button='accept'] - Button in dialog to press (e.g., 'cancel', 'extra1')
  * @return {Promise}
  */
 function waitForDialog(onOpen, button='accept', url) {
-	return waitForWindow(url || "chrome://global/content/commonDialog.xul", Zotero.Promise.method(function (dialog) {
+	return waitForWindow(url || "chrome://global/content/commonDialog.xhtml", Zotero.Promise.method(function (win) {
+		var dialog = win.document.querySelector('dialog');
 		var failure = false;
 		if (onOpen) {
 			try {
-				onOpen(dialog);
+				onOpen(win, dialog);
 			}
 			catch (e) {
 				failure = e;
@@ -182,13 +201,13 @@ function waitForDialog(onOpen, button='accept', url) {
 			let deferred = Zotero.Promise.defer();
 			function acceptWhenEnabled() {
 				// Handle delayed buttons
-				if (dialog.document.documentElement.getButton(button).disabled) {
-					dialog.setTimeout(function () {
+				if (dialog.getButton(button).disabled) {
+					win.setTimeout(function () {
 						acceptWhenEnabled();
 					}, 250);
 				}
 				else {
-					dialog.document.documentElement.getButton(button).click();
+					dialog.getButton(button).click();
 					if (failure) {
 						deferred.reject(failure);
 					}
@@ -201,7 +220,7 @@ function waitForDialog(onOpen, button='accept', url) {
 			return deferred.promise;
 		}
 		else {
-			dialog.document.documentElement.getButton(button).click();
+			dialog.getButton(button).click();
 			if (failure) {
 				throw failure;
 			}
@@ -557,11 +576,10 @@ function initPDFToolsPath() {
  * (i.e., test/tests/data)
  */
 function getTestDataDirectory() {
-	var resource = Services.io.getProtocolHandler("resource").
-	               QueryInterface(Components.interfaces.nsIResProtocolHandler),
-	    resURI = Services.io.newURI("resource://zotero-unit-tests/data", null, null);
-	return Services.io.newURI(resource.resolveURI(resURI), null, null).
-	       QueryInterface(Components.interfaces.nsIFileURL).file;
+	var file = Zotero.File.pathToFile(Zotero.resourcesDir);
+	file.append('tests');
+	file.append('data');
+	return file;
 }
 
 function getTestDataUrl(path) {

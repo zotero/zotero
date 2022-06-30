@@ -73,7 +73,7 @@ Zotero.Debug = new function () {
 		if (Zotero.isStandalone) {
 			// Enable dump() from window (non-XPCOM) scopes when terminal or viewer logging is enabled.
 			// (These will always go to the terminal, even in viewer mode.)
-			Zotero.Prefs.set('browser.dom.window.dump.enabled', _console || _consoleViewer, true);
+			Zotero.Prefs.set('browser.dom.window.dump.enabled', _console || _consoleViewer || Zotero.test, true);
 			
 			if (_consoleViewer) {
 				setTimeout(function () {

@@ -3253,7 +3253,7 @@ var ZoteroPane = new function()
 							if (eligibleAttachments.length > 1) {
 								show.add(m.createNoteFromAnnotationsMenu);
 								for (let attachment of attachmentsWithAnnotations) {
-									let menuitem = document.createElement('menuitem');
+									let menuitem = document.createXULElement('menuitem');
 									menuitem.setAttribute('label', attachment.getDisplayTitle());
 									menuitem.onclick = () => {
 										ZoteroPane.createNoteFromAnnotationsForAttachment(attachment);
@@ -3631,7 +3631,7 @@ var ZoteroPane = new function()
 		if (typeof content == 'string') {
 			let contentParts = content.split("\n\n");
 			for (let part of contentParts) {
-				let desc = document.createElement('description');
+				let desc = document.createXULElement('description');
 				desc.appendChild(document.createTextNode(part));
 				elem.appendChild(desc);
 			}

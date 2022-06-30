@@ -26,9 +26,11 @@
 import FilePicker from 'zotero/modules/filePicker';
 
 var Zotero_CSL_Editor = new function() {
+	let monaco, editor;
+
 	this.init = init;
-	this.handleKeyPress = handleKeyPress;
 	this.loadCSL = loadCSL;
+
 	async function init() {
 		await Zotero.Schema.schemaUpdatePromise;
 		
@@ -52,11 +54,6 @@ var Zotero_CSL_Editor = new function() {
 			}
 		}
 		
-		if (currentStyle) {
-			// Call asynchronously, see note in Zotero.Styles
-			window.setTimeout(this.onStyleSelected.bind(this, currentStyle.styleID), 1);
-		}
-		
 		var pageList = document.getElementById('zotero-csl-page-type');
 		var locators = Zotero.Cite.labels;
 		for (let type of locators) {
@@ -66,6 +63,23 @@ var Zotero_CSL_Editor = new function() {
 		}
 		
 		pageList.selectedIndex = 0;
+
+		let editorWin = document.getElementById("zotero-csl-editor-iframe").contentWindow;
+		let { monaco: _monaco, editor: _editor } = await editorWin.loadMonaco({
+			language: 'xml',
+			theme: 'vs-light'
+		});
+		monaco = _monaco;
+		editor = _editor;
+
+		editor.getModel().onDidChangeContent(Zotero.Utilities.debounce(() => {
+			this.onStyleModified();
+		}, 250));
+
+		if (currentStyle) {
+			// Call asynchronously, see note in Zotero.Styles
+			window.setTimeout(this.onStyleSelected.bind(this, currentStyle.styleID), 1);
+		}
 	}
 	
 	this.onStyleSelected = function(styleID) {
@@ -84,10 +98,11 @@ var Zotero_CSL_Editor = new function() {
 	this.refresh = function() {
 		this.generateBibliography(this.loadStyleFromEditor());
 	}
+
+	this.refreshDebounced = Zotero.Utilities.debounce(this.refresh, 250);
 	
 	this.save = async function () {
-		var editor = document.getElementById('zotero-csl-editor');
-		var style = editor.value;
+		var style = editor.getValue();
 		var fp = new FilePicker();
 		fp.init(window, Zotero.getString('styles.editor.save'), fp.modeSave);
 		fp.appendFilter("Citation Style Language", "*.csl");
@@ -109,21 +124,9 @@ var Zotero_CSL_Editor = new function() {
 		}
 	};
 	
-	function handleKeyPress(event) {
-		if (event.keyCode == 9 &&
-				(!event.shiftKey && !event.metaKey && !event.altKey && !event.ctrlKey)) {
-			_insertText("\t");
-			event.preventDefault();
-		}
-	}
-	
-	
 	function loadCSL(cslID) {
-		var editor = document.getElementById('zotero-csl-editor');
 		var style = Zotero.Styles.get(cslID);
-		editor.value = style.getXML();
-		editor.cslID = cslID;
-		editor.doCommand();
+		editor.setValue(style.getXML());
 		document.getElementById('zotero-csl-list').value = cslID;
 	}
 	
@@ -131,7 +134,7 @@ var Zotero_CSL_Editor = new function() {
 		var styleObject;
 		try {
 			styleObject = new Zotero.Style(
-				document.getElementById('zotero-csl-editor').value
+				editor.getValue()
 			);
 		} catch(e) {
 			document.getElementById('zotero-csl-preview-box')
@@ -144,8 +147,12 @@ var Zotero_CSL_Editor = new function() {
 		return styleObject;
 	}
 	
-	this.onStyleModified = function(str) {
-		document.getElementById('zotero-csl-list').selectedIndex = -1;
+	this.onStyleModified = function () {
+		let xml = editor.getValue();
+		let cslList = document.getElementById('zotero-csl-list');
+		if (xml !== Zotero.Styles.get(cslList.value)?.getXML()) {
+			cslList.selectedIndex = -1;
+		}
 		
 		let styleObject = this.loadStyleFromEditor();
 		
@@ -159,7 +166,6 @@ var Zotero_CSL_Editor = new function() {
 	
 	this.generateBibliography = function(style) {
 		var iframe = document.getElementById('zotero-csl-preview-box');
-		var editor = document.getElementById('zotero-csl-editor');
 		
 		var items = Zotero.getActiveZoteroPane().getSelectedItems();
 		if (items.length == 0) {

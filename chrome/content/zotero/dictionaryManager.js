@@ -27,8 +27,6 @@
 
 // eslint-disable-next-line camelcase, no-unused-vars
 var Zotero_Dictionary_Manager = new function () {
-	const HTML_NS = 'http://www.w3.org/1999/xhtml';
-	
 	var installed;
 	var updateMap;
 	
@@ -72,10 +70,10 @@ var Zotero_Dictionary_Manager = new function () {
 		var listbox = document.getElementById('dictionaries');
 		for (let d of list) {
 			let name = d.name;
-			let li = document.createElement('richlistitem');
-			let div = document.createElementNS(HTML_NS, 'div');
+			let li = document.createXULElement('richlistitem');
+			let div = document.createElement('div');
 			
-			let checkbox = document.createElementNS(HTML_NS, 'input');
+			let checkbox = document.createElement('input');
 			checkbox.type = 'checkbox';
 			checkbox.id = d.locale;
 			// Store properties on element
@@ -91,7 +89,7 @@ var Zotero_Dictionary_Manager = new function () {
 			}
 			checkbox.setAttribute('tabindex', -1);
 			
-			let label = document.createElementNS(HTML_NS, 'label');
+			let label = document.createElement('label');
 			label.setAttribute('for', d.locale);
 			// Add " (update available)"
 			if (updateMap.has(d.id)) {

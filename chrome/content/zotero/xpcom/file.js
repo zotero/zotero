@@ -37,8 +37,6 @@ Zotero.File = new function(){
 	this.putContents = putContents;
 	this.getValidFileName = getValidFileName;
 	this.truncateFileName = truncateFileName;
-	this.getCharsetFromFile = getCharsetFromFile;
-	this.addCharsetListener = addCharsetListener;
 	
 	
 	this.pathToFile = function (pathOrFile) {
@@ -57,8 +55,8 @@ Zotero.File = new function(){
 	}
 	
 	
-	this.pathToFileURI = function (path) {
-		var file = new FileUtils.File(path);
+	this.pathToFileURI = function (pathOrFile) {
+		var file = this.pathToFile(pathOrFile);
 		return Services.io.newFileURI(file).spec;
 	}
 	
@@ -120,9 +118,9 @@ Zotero.File = new function(){
 	 * @param {nsIURI|nsIFile|string spec|nsIChannel|nsIInputStream} source - The source to read
 	 * @return {Promise}
 	 */
-	this.getSample = function (file) {
+	this.getSample = async function (file) {
 		var bytes = 200;
-		return this.getContentsAsync(file, null, bytes);
+		return this.getBinaryContentsAsync(file, bytes);
 	}
 	
 	
@@ -476,7 +474,6 @@ Zotero.File = new function(){
 				// NOTE: This noop callback is required, do not remove.
 			},
 			onStopRequest(request, status) {
-				const responseStatus = 'responseStatus' in request ? request.responseStatus : null;
 				pipe.outputStream.close();
 
 				if (!Components.isSuccessCode(status)) {
@@ -492,11 +489,14 @@ Zotero.File = new function(){
 					return;
 				}
 
-				if (isHTTP && responseStatus != 200) {
-					let msg = `Download failed with response code ${responseStatus}`;
-					Zotero.logError(msg);
-					deferred.reject(new Error(msg));
-					return;
+				if (isHTTP) {
+					let statusCode = request.QueryInterface(Ci.nsIHttpChannel).responseStatus;
+					if (statusCode != 200) {
+						let msg = `Download failed with response code ${responseStatus}`;
+						Zotero.logError(msg);
+						deferred.reject(new Error(msg));
+						return;
+					}
 				}
 			}
 		});
@@ -1304,91 +1304,6 @@ Zotero.File = new function(){
 		}
 		
 		return name + ext;
-	}
-	
-	/*
-	 * Not implemented, but it'd sure be great if it were
-	 */
-	function getCharsetFromByteArray(arr) {
-		
-	}
-	
-	
-	/*
-	 * An extraordinarily inelegant way of getting the character set of a
-	 * text file using a hidden browser
-	 *
-	 * I'm quite sure there's a better way
-	 *
-	 * Note: This is for text files -- don't run on other files
-	 *
-	 * 'callback' is the function to pass the charset (and, if provided, 'args')
-	 * to after detection is complete
-	 */
-	function getCharsetFromFile(file, mimeType, callback, args){
-		if (!file || !file.exists()){
-			callback(false, args);
-			return;
-		}
-		
-		if (mimeType.substr(0, 5) != 'text/' ||
-				!Zotero.MIME.hasInternalHandler(mimeType, this.getExtension(file))) {
-			callback(false, args);
-			return;
-		}
-		
-		var browser = Zotero.Browser.createHiddenBrowser();
-		
-		var url = Components.classes["@mozilla.org/network/protocol;1?name=file"]
-				.getService(Components.interfaces.nsIFileProtocolHandler)
-				.getURLSpecFromFile(file);
-		
-		this.addCharsetListener(browser, function (charset, args) {
-			callback(charset, args);
-			Zotero.Browser.deleteHiddenBrowser(browser);
-		}, args);
-		
-		browser.loadURI(url);
-	}
-	
-	
-	/*
-	 * Attach a load listener to a browser object to perform charset detection
-	 *
-	 * We make sure the universal character set detector is set to the
-	 * universal_charset_detector (temporarily changing it if not--shhhh)
-	 *
-	 * 'callback' is the function to pass the charset (and, if provided, 'args')
-	 * to after detection is complete
-	 */
-	function addCharsetListener(browser, callback, args){
-		var prefService = Components.classes["@mozilla.org/preferences-service;1"]
-							.getService(Components.interfaces.nsIPrefBranch);
-		var oldPref = prefService.getCharPref('intl.charset.detector');
-		var newPref = 'universal_charset_detector';
-		//Zotero.debug("Default character detector is " + (oldPref ? oldPref : '(none)'));
-		
-		if (oldPref != newPref){
-			//Zotero.debug('Setting character detector to universal_charset_detector');
-			prefService.setCharPref('intl.charset.detector', 'universal_charset_detector');
-		}
-		
-		var onpageshow = function(){
-			// ignore spurious about:blank loads
-			if(browser.contentDocument.location.href == "about:blank") return;
-
-			browser.removeEventListener("pageshow", onpageshow, false);
-			
-			var charset = browser.contentDocument.characterSet;
-			Zotero.debug("Detected character set '" + charset + "'");
-			
-			//Zotero.debug('Resetting character detector to ' + (oldPref ? oldPref : '(none)'));
-			prefService.setCharPref('intl.charset.detector', oldPref);
-			
-			callback(charset, args);
-		};
-		
-		browser.addEventListener("pageshow", onpageshow, false);
 	}
 	
 	

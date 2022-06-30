@@ -1009,7 +1009,7 @@ class VirtualizedTable extends React.Component {
 			xulElem.setAttribute('tooltip', 'html-tooltip');
 		}
 		if (document.querySelector('tooltip#html-tooltip')) return;
-		let tooltip = document.createElement('tooltip');
+		let tooltip = document.createXULElement('tooltip');
 		tooltip.id = 'html-tooltip';
 		tooltip.addEventListener('popupshowing', function(e) {
 			let tooltipTitleNode = document.tooltipNode.closest('div *[title], iframe *[title], browser *[title]');
@@ -1019,7 +1019,13 @@ class VirtualizedTable extends React.Component {
 			}
 			e.preventDefault();
 		});
-		document.documentElement.appendChild(tooltip);
+
+		let popupset = document.querySelector('popupset');
+		if (!popupset) {
+			popupset = document.createXULElement('popupset');
+			document.documentElement.appendChild(popupset);
+		}
+		popupset.appendChild(tooltip);
 	}
 	
 	_setAlternatingRows() {
@@ -1250,7 +1256,7 @@ class VirtualizedTable extends React.Component {
 	}
 
 	_getRenderedTextHeight() {
-		let div = document.createElementNS("http://www.w3.org/1999/xhtml", 'div');
+		let div = document.createElement('div');
 		div.style.visibility = "hidden";
 		div.textContent = "Zotero";
 		document.documentElement.appendChild(div);
@@ -1423,7 +1429,7 @@ var Columns = class {
 				this._columnStyleMap[column.dataKey] = ruleIndex;
 			}
 		} else {
-			this._stylesheet = document.createElementNS("http://www.w3.org/1999/xhtml", 'style');
+			this._stylesheet = document.createElement('style');
 			this._stylesheet.className = stylesheetClass;
 			document.children[0].appendChild(this._stylesheet);
 			this._columnStyleMap = {};
@@ -1583,7 +1589,7 @@ var Columns = class {
 };
 
 function renderCell(index, data, column, dir = null) {
-	let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+	let span = document.createElement('span');
 	span.className = `cell ${column.className}`;
 	span.innerText = data;
 	if (dir) span.dir = dir;
@@ -1591,7 +1597,7 @@ function renderCell(index, data, column, dir = null) {
 }
 
 function renderCheckboxCell(index, data, column, dir = null) {
-	let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+	let span = document.createElement('span');
 	span.className = `cell checkbox ${column.className}`;
 	if (dir) span.dir = dir;
 	span.setAttribute('role', 'checkbox');
@@ -1610,7 +1616,7 @@ function makeRowRenderer(getRowData) {
 			div.innerHTML = "";
 		}
 		else {
-			div = document.createElementNS("http://www.w3.org/1999/xhtml", 'div');
+			div = document.createElement('div');
 			div.className = "row";
 		}
 

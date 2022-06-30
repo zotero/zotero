@@ -345,7 +345,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	}
 	
 	getFontInfo() {
-		var elem = document.createElementNS("http://www.w3.org/1999/xhtml", "div");
+		var elem = document.createElement("div");
 		elem.className = 'tag-selector-item';
 		elem.style.position = 'absolute';
 		elem.style.opacity = 0;
@@ -381,7 +381,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	 */
 	getTextWidth(text, font) {
 		// re-use canvas object for better performance
-		var canvas = this.canvas || (this.canvas = document.createElementNS("http://www.w3.org/1999/xhtml", "canvas"));
+		var canvas = this.canvas || (this.canvas = document.createElement("canvas"));
 		var context = canvas.getContext("2d");
 		context.font = font;
 		// Add a little more to make sure we don't crop
@@ -508,9 +508,10 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			tagContextMenu.childNodes[i].disabled = this.state.viewOnly;
 		}
 		ev.preventDefault();
+		
 		tagContextMenu.openPopupAtScreen(
-			window.screenX + ev.clientX + 2,
-			window.screenY + ev.clientY + 2,
+			ev.screenX + 1,
+			ev.screenY + 1,
 			true
 		);
 		this.contextTag = tag;

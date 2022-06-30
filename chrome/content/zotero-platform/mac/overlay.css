@@ -34,6 +34,11 @@
 	padding: 4px 4px 4px 11px;
 }
 
+.zotero-tb-button > .toolbarbutton-icon {
+	background: url("chrome://zotero/skin/mac/menubutton-start.png") left center/auto 24px no-repeat;
+	padding: 4px 4px 4px 11px;
+}
+
 /* For menu buttons, decrease left padding by 1px */
 .zotero-tb-button[type=menu] > .toolbarbutton-icon {
 	padding-left: 9px;
@@ -388,6 +393,8 @@ treechildren::-moz-tree-image {
 	list-style-image: url('chrome://zotero/skin/mac/toolbar-note-add.png');
 }
 
+/* Hide icons on macOS. We use :is() to work around weird behavior in Fx101 where a regular child
+   selector doesn't match the first time the menu is opened. */
 :is(#zotero-collectionmenu, #zotero-itemmenu) > :is(.menuitem-iconic, .menu-iconic) {
 	list-style-image: none !important;
 }

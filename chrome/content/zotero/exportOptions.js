@@ -94,6 +94,7 @@ var Zotero_File_Interface_Export = new function() {
 						let checkbox = document.createXULElement("checkbox");
 						checkbox.setAttribute("id", OPTION_PREFIX+option);
 						checkbox.setAttribute("label", optionLabel);
+						checkbox.setAttribute("native", true);
 						optionsBox.insertBefore(checkbox, charsetBox);
 						
 						// Add "Include Annotations" after "Export Files"
@@ -108,6 +109,7 @@ var Zotero_File_Interface_Export = new function() {
 								"label",
 								Zotero.getString('exportOptions.includeAnnotations')
 							);
+							checkbox.setAttribute("native", true);
 							optionsBox.insertBefore(checkbox, charsetBox);
 						}
 					}

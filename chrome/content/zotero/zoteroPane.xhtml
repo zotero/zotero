@@ -55,6 +55,7 @@
 		style="display: flex;">
 	
 	
+	<html:link rel="localization" href="branding/brand.ftl"/>
 	<html:link rel="localization" href="zotero/menubar.ftl"/>
 	<html:link rel="localization" href="zotero/textActions.ftl"/>
 	
@@ -65,6 +66,7 @@
 		
 		Services.scriptloader.loadSubScript("resource://zotero/require.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/standalone/standalone.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/platformKeys.js", this);
 		
 		// Mozilla scripts
 		Services.scriptloader.loadSubScript("chrome://global/content/globalOverlay.js", this);
@@ -80,9 +82,10 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/itemBox.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/noteEditor.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/notesBox.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/tagsBox.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/relatedBox.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/attachmentBox.js", this);
-		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/toolbarbuttonDropmarker.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/menuToolbarbutton.js", this);
 
 		Services.scriptloader.loadSubScript("chrome://zotero/content/tabs.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/zoteroPane.js", this);
@@ -132,22 +135,10 @@
 		<key id="key_forward"/>
 	</keyset>
     
-    <!--
-    
-    TODO: Customize per platform without ifdef?
-    
     <keyset id="editMenuKeys">
 		<key id="key_undo" data-l10n-id="text-action-undo-shortcut" modifiers="accel" command="cmd_undo"/>
-		<key id="key_redo"
-		
-#ifdef XP_UNIX
-			data-l10n-id="text-action-undo-shortcut"
-			modifiers="accel,shift"
-#else
-			data-l10n-id="text-action-redo-shortcut"
-			modifiers="accel"
-#endif
-			command="cmd_redo"/>
+		<!-- l10n and modifiers set in platformKeys.js -->
+		<key id="key_redo" command="cmd_redo"/>
 		<key id="key_cut" data-l10n-id="text-action-cut-shortcut" modifiers="accel" command="cmd_cut"/>
 		<key id="key_copy" data-l10n-id="text-action-copy-shortcut" modifiers="accel" command="cmd_copy"/>
 		<key id="key_paste" data-l10n-id="text-action-paste-shortcut" modifiers="accel" command="cmd_paste"/>
@@ -159,8 +150,6 @@
 		<key id="key_findAgain2" keycode="&findAgainCmd.key2;" command="cmd_findAgain"/>
 		<key id="key_findPrevious2" keycode="&findAgainCmd.key2;" modifiers="shift" command="cmd_findPrevious"/>
 	</keyset>
-  
-  -->
 	
 	<vbox id="titlebar">
 		<hbox id="titlebar-buttonbox-container" skipintoolbarset="true">
@@ -581,17 +570,21 @@
 						<!-- These are used to build the Application menu under Cocoa widgets -->
 						<key id="key_preferencesCmdMac"
 								key="&preferencesCmdMac.commandkey;"
-								modifiers="accel"/>
+								modifiers="accel"
+								internal="true"/>
 						<key id="key_hideThisAppCmdMac"
 								key="&hideThisAppCmdMac.commandkey;"
-								modifiers="accel"/>
+								modifiers="accel"
+								internal="true"/>
 						<key id="key_hideOtherAppsCmdMac"
 								key="&hideOtherAppsCmdMac.commandkey;"
-								modifiers="accel,alt"/>
+								modifiers="accel,alt"
+								internal="true"/>
 						<key id="key_quitApplication"
 								key="&quitApplicationCmdMac.key;"
 								command="cmd_quitApplication"
-								modifiers="accel"/>
+								modifiers="accel"
+								internal="true"/>
 					</keyset>
 					
 					<!-- nsMenuBarX hides these and uses them to build the Application menu. -->
@@ -758,7 +751,7 @@
 								<hbox id="zotero-collections-toolbar" align="center">
 									<toolbarbutton id="zotero-tb-collection-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newCollection.label;" command="cmd_zotero_newCollection"/>
 									<toolbarbutton
-											is="toolbarbutton-dropmarker"
+											is="menu-toolbarbutton"
 											id="zotero-tb-library-add-menu"
 											class="zotero-tb-button"
 											tooltiptext="&zotero.toolbar.newLibrary.label;"
@@ -780,7 +773,7 @@
 								
 								<hbox id="zotero-items-toolbar" align="center">
 									<toolbarbutton
-											is="toolbarbutton-dropmarker"
+											is="menu-toolbarbutton"
 											id="zotero-tb-add"
 											class="zotero-tb-button"
 											tooltiptext="&zotero.toolbar.newItem.label;"
@@ -806,31 +799,29 @@
 											onpopupshown="Zotero_Lookup.onShown(event)"
 											onpopuphidden="Zotero_Lookup.onHidden(event)"
 									>
-										<html:div>
-											<html:label>&zotero.lookup.description;</html:label>
-											<html:div id="zotero-lookup-singleLine">
-												<stack>
-													<progressmeter id="zotero-lookup-progress" mode="determined"/>
-													<html:input id="zotero-lookup-textbox"
-														onkeypress="return Zotero_Lookup.onKeyPress(event, this)"
-														oninput="Zotero_Lookup.onInput(event, this)"/>
-												</stack>
-											</html:div>
-											<html:div id="zotero-lookup-multiline" hidden="">
-												<html:input id="zotero-lookup-multiline-textbox" onkeypress="return Zotero_Lookup.onKeyPress(event, this)" rows="5"/> <!-- wrap="off" flex="1"/> -->
-												<html:div id="zotero-lookup-buttons" class="zotero-button-clear-image"> <!-- align="start"  -->
-													<html:button align="start" onclick="Zotero_Lookup.accept(document.getElementById('zotero-lookup-multiline-textbox'))">
-														&zotero.lookup.button.search;
-													</html:button>
-													<progressmeter id="zotero-lookup-multiline-progress" mode="determined" flex="1" hidden="true"/>
-												</html:div>
-											</html:div>
-										</html:div>
+										<vbox>
+											<label>&zotero.lookup.description;</label>
+											<vbox id="zotero-lookup-multiline">
+												<html:textarea
+													id="zotero-lookup-multiline-textbox"
+													onkeypress="Zotero_Lookup.onKeyPress(event, this)"
+													oninput="Zotero_Lookup.onInput(event, this)"
+													rows="1"
+													wrap="off"/>
+												<hbox id="zotero-lookup-buttons" align="start" hidden="true">
+													<button
+														align="start"
+														oncommand="Zotero_Lookup.accept(document.getElementById('zotero-lookup-multiline-textbox'))"
+														label="&zotero.lookup.button.search;"/>
+													<html:progress id="zotero-lookup-multiline-progress" value="0" hidden="true" style="-moz-box-flex: 1"/>
+												</hbox>
+											</vbox>
+										</vbox>
 									</panel>
 									
 									<!--<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.note.standalone;" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>-->
 									<toolbarbutton
-											is="toolbarbutton-dropmarker"
+											is="menu-toolbarbutton"
 											id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.newNote;"
 											type="menu"
 											wantdropmarker="true"
@@ -841,7 +832,7 @@
 										</menupopup>
 									</toolbarbutton>
 									<toolbarbutton
-											is="toolbarbutton-dropmarker"
+											is="menu-toolbarbutton"
 											id="zotero-tb-attachment-add"
 											class="zotero-tb-button"
 											tooltiptext="&zotero.items.menu.attach;"
@@ -867,7 +858,7 @@
 								<hbox id="zotero-item-toolbar" flex="1" align="center" tooltip="html-tooltip">
 									<hbox align="center" pack="start" flex="1">
 										<toolbarbutton
-												is="toolbarbutton-dropmarker"
+												is="menu-toolbarbutton"
 												id="zotero-tb-locate"
 												class="zotero-tb-button"
 												tooltiptext="&zotero.toolbar.openURL.label;"
@@ -946,9 +937,8 @@
 								</div>
 							</vbox>
 							
-							<popupset>
-								<!-- Allows to display a tooltip for 'title' attrbute for HTML nodes. Must be on an XUL node i.e. iframe or toolbar: "tooltip"="html-tooltip" -->
-								<tooltip id="html-tooltip" onpopupshowing="if (document.tooltipNode &amp;&amp; (tooltipTitleNode = document.tooltipNode.closest('div *[title], iframe *[title], browser *[title]'))) {this.setAttribute('label', tooltipTitleNode.getAttribute('title')); return true; } return false"/>
+							<popupset id="trees-popupset">
+								<tooltip id="html-tooltip" page="true"/>
 								<menupopup id="zotero-collectionmenu"
 										oncommand="ZoteroPane.onCollectionContextMenuSelect(event)">
 									<!-- Keep order in sync with buildCollectionContextMenu, which adds additional attributes -->
@@ -1130,8 +1120,8 @@
 														<notes-box id="zotero-editpane-notes" class="zotero-editpane-notes" flex="1"/>
 													</tabpanel>
 													
-													<tabpanel id="tags-pane" class="tags-pane" orient="vertical" context="tags-context-menu">
-														<html:div id="tags-box-container" class="tags-box-container"></html:div>
+													<tabpanel>
+														<tags-box id="zotero-editpane-tags" class="zotero-editpane-tags" flex="1"/>
 													</tabpanel>
 													
 													<tabpanel>
@@ -1164,13 +1154,13 @@
 												<groupbox id="zotero-duplicates-merge-version-select">
 													<description>&zotero.duplicatesMerge.versionSelect;</description>
 													<hbox>
-														<listbox id="zotero-duplicates-merge-original-date" onselect="Zotero_Duplicates_Pane.setMaster(this.selectedIndex)" rows="0"/>
+														<richlistbox id="zotero-duplicates-merge-original-date" onselect="Zotero_Duplicates_Pane.setMaster(this.selectedIndex)" rows="0"/>
 													</hbox>
 												</groupbox>
 												
 												<groupbox flex="1">
 													<description id="zotero-duplicates-merge-field-select">&zotero.duplicatesMerge.fieldSelect;</description>
-													<zoteroitembox id="zotero-duplicates-merge-item-box" flex="1"/>
+													<item-box id="zotero-duplicates-merge-item-box" flex="1"/>
 												</groupbox>
 											</vbox>
 										</deck>
@@ -1232,6 +1222,49 @@
 							<menuseparator/>
 							<menuitem id="context-pane-list-move-to-trash" label="&zotero.general.moveToTrash;"/>
 						</menupopup>
+						<!-- Tag Selector -->
+						<menupopup id="tag-menu">
+							<menuitem label="&zotero.tagSelector.assignColor;"
+								oncommand="ZoteroPane.tagSelector.openColorPickerWindow(); event.stopPropagation();"/>
+							<menuitem label="&zotero.tagSelector.renameTag;"
+								oncommand="ZoteroPane.tagSelector.openRenamePrompt(); event.stopPropagation();"/>
+							<menuitem label="&zotero.tagSelector.deleteTag;"
+								oncommand="ZoteroPane.tagSelector.openDeletePrompt(); event.stopPropagation();"/>
+						</menupopup>
+						<menupopup id="tag-selector-view-settings-menu"
+							onpopupshowing="
+								document.getElementById('show-automatic').setAttribute('checked', ZoteroPane.tagSelector.showAutomatic);
+								document.getElementById('display-all-tags').setAttribute('checked', ZoteroPane.tagSelector.displayAllTags);
+								document.getElementById('num-selected').label = ZoteroPane.tagSelector.label;
+								(async function () {
+									var libraryID = ZoteroPane.tagSelector.libraryID;
+									var library = Zotero.Libraries.get(libraryID);
+									var enabled = false;
+									if (library.editable) {
+										if ((await Zotero.Tags.getAutomaticInLibrary(libraryID)).length) {
+											enabled = true;
+										}
+									}
+									document.getElementById('delete-automatic-tags').disabled = !enabled;
+								})();">
+							<menuitem id="num-selected" disabled="true"/>
+							<menuitem id="deselect-all" label="&zotero.tagSelector.clearAll;"
+								oncommand="ZoteroPane.tagSelector.deselectAll(); event.stopPropagation();"/>
+							<menuseparator/>
+							<menuitem id="show-automatic" label="&zotero.tagSelector.showAutomatic;" type="checkbox"
+								oncommand="ZoteroPane.tagSelector.toggleShowAutomatic(); event.stopPropagation();"/>
+							<menuitem
+								id="display-all-tags"
+								label="&zotero.tagSelector.displayAllInLibrary;"
+								type="checkbox"
+								oncommand="ZoteroPane.tagSelector.toggleDisplayAllTags(); event.stopPropagation();"
+							/>
+							<menuseparator/>
+							<menuitem id="delete-automatic-tags" label="&zotero.tagSelector.deleteAutomaticInLibrary;" type="checkbox"
+														oncommand="ZoteroPane.tagSelector.deleteAutomatic();
+															this.setAttribute('checked', false);
+															event.stopPropagation();"/>
+						</menupopup>
 					</popupset>
 				</hbox>
 				
@@ -1243,7 +1276,7 @@
 				<stack id="zotero-pane-overlay" flex="1" hidden="true">
 					<box style="background: black; opacity: .3" flex="1"/>
 					
-					<deck id="zotero-pane-overlay-deck" flex="1">
+					<deck id="zotero-pane-overlay-deck" style="display: flex; justify-content: center;">
 						<box id="zotero-pane-progress" flex="1" align="center" pack="center">
 							<box style="background: white; border-radius: 1px; box-shadow: gray 4px 6px 4px;" width="300" height="30">
 								<vbox id="zotero-pane-progressmeter-container" style="padding:10px" flex="1">
@@ -1259,57 +1292,4 @@
 			</stack>
 		</vbox>
 	</hbox>
-	
-	<!-- Tag Selector -->
-	<menupopup id="tag-menu">
-		<menuitem label="&zotero.tagSelector.assignColor;"
-			oncommand="ZoteroPane.tagSelector.openColorPickerWindow(); event.stopPropagation();"/>
-		<menuitem label="&zotero.tagSelector.renameTag;"
-			oncommand="ZoteroPane.tagSelector.openRenamePrompt(); event.stopPropagation();"/>
-		<menuitem label="&zotero.tagSelector.deleteTag;"
-			oncommand="ZoteroPane.tagSelector.openDeletePrompt(); event.stopPropagation();"/>
-	</menupopup>
-	<menupopup id="tag-selector-view-settings-menu"
-		onpopupshowing="
-			document.getElementById('show-automatic').setAttribute('checked', ZoteroPane.tagSelector.showAutomatic);
-			document.getElementById('display-all-tags').setAttribute('checked', ZoteroPane.tagSelector.displayAllTags);
-			document.getElementById('num-selected').label = ZoteroPane.tagSelector.label;
-			(async function () {
-				var libraryID = ZoteroPane.tagSelector.libraryID;
-				var library = Zotero.Libraries.get(libraryID);
-				var enabled = false;
-				if (library.editable) {
-					if ((await Zotero.Tags.getAutomaticInLibrary(libraryID)).length) {
-						enabled = true;
-					}
-				}
-				document.getElementById('delete-automatic-tags').disabled = !enabled;
-			})();">
-		<menuitem id="num-selected" disabled="true"/>
-		<menuitem id="deselect-all" label="&zotero.tagSelector.clearAll;"
-			oncommand="ZoteroPane.tagSelector.deselectAll(); event.stopPropagation();"/>
-		<menuseparator/>
-		<menuitem id="show-automatic" label="&zotero.tagSelector.showAutomatic;" type="checkbox"
-			oncommand="ZoteroPane.tagSelector.toggleShowAutomatic(); event.stopPropagation();"/>
-		<menuitem
-			id="display-all-tags"
-			label="&zotero.tagSelector.displayAllInLibrary;"
-			type="checkbox"
-			oncommand="ZoteroPane.tagSelector.toggleDisplayAllTags(); event.stopPropagation();"
-		/>
-		<menuseparator/>
-		<menuitem id="delete-automatic-tags" label="&zotero.tagSelector.deleteAutomaticInLibrary;" type="checkbox"
-									oncommand="ZoteroPane.tagSelector.deleteAutomatic();
-										this.setAttribute('checked', false);
-										event.stopPropagation();"/>
-	</menupopup>
-	
-	<!-- Tags Box -->
-	<popupset>
-		<menupopup id="tags-context-menu"
-				onpopupshowing="return ZoteroItemPane.onTagsContextPopupShowing()">
-			<menuitem id="remove-all-item-tags" label="&zotero.item.tags.removeAll;"
-				oncommand="ZoteroItemPane.removeAllTags()"/>
-		</menupopup>
-	</popupset>
 </window>

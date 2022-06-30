@@ -19,7 +19,7 @@ describe("ZoteroPane", function() {
 		it("should create an item and focus the title field", function* () {
 			yield zp.newItem(Zotero.ItemTypes.getID('book'), {}, null, true);
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var textboxes = doc.getAnonymousNodes(itemBox)[0].getElementsByTagName('textbox');
+			var textboxes = itemBox.shadowRoot.querySelectorAll('input, textarea');
 			assert.lengthOf(textboxes, 1);
 			assert.equal(textboxes[0].getAttribute('fieldname'), 'title');
 			textboxes[0].blur();
@@ -30,7 +30,7 @@ describe("ZoteroPane", function() {
 			var value = "Test";
 			var item = yield zp.newItem(Zotero.ItemTypes.getID('book'), {}, null, true);
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var textbox = doc.getAnonymousNodes(itemBox)[0].getElementsByTagName('textbox')[0];
+			var textbox = itemBox.shadowRoot.querySelector('textarea');
 			textbox.value = value;
 			yield itemBox.blurOpenField();
 			item = yield Zotero.Items.getAsync(item.id);
@@ -465,18 +465,15 @@ describe("ZoteroPane", function() {
 			var promise = waitForDialog();
 			var modifyPromise = waitForItemEvent('modify');
 			
-			var event = doc.createEvent("KeyboardEvent");
-			event.initKeyEvent(
+			var event = new KeyboardEvent(
 				"keypress",
-				true,
-				true,
-				window,
-				false,
-				false,
-				false,
-				false,
-				DELETE_KEY_CODE,
-				0
+				{
+					key: 'Delete',
+					code: 'Delete',
+					keyCode: DELETE_KEY_CODE,
+					bubbles: true,
+					cancelable: true
+				}
 			);
 			tree.dispatchEvent(event);
 			yield promise;
@@ -506,18 +503,17 @@ describe("ZoteroPane", function() {
 			var promise = waitForDialog();
 			var modifyPromise = waitForItemEvent('modify');
 			
-			var event = doc.createEvent("KeyboardEvent");
-			event.initKeyEvent(
+			var event = new KeyboardEvent(
 				"keypress",
-				true,
-				true,
-				window,
-				false,
-				false,
-				!Zotero.isMac, // shift
-				Zotero.isMac, // meta
-				DELETE_KEY_CODE,
-				0
+				{
+					key: 'Delete',
+					code: 'Delete',
+					keyCode: DELETE_KEY_CODE,
+					bubbles: true,
+					cancelable: true,
+					shiftKey: !Zotero.isMac,
+					metaKey: Zotero.isMac,
+				}
 			);
 			tree.dispatchEvent(event);
 			yield promise;
@@ -588,9 +584,9 @@ describe("ZoteroPane", function() {
 				{
 					key: 'Delete',
 					code: 'Delete',
+					keyCode: DELETE_KEY_CODE,
 					metaKey: Zotero.isMac,
 					shiftKey: !Zotero.isMac,
-					keyCode: DELETE_KEY_CODE,
 					bubbles: true,
 					cancelable: true
 				}

@@ -256,8 +256,7 @@ var Zotero_Import_Wizard = {
 		catch (e) {
 			if (e.message == 'Encrypted Mendeley database') {
 				let url = 'https://www.zotero.org/support/kb/mendeley_import';
-				let HTML_NS = 'http://www.w3.org/1999/xhtml'
-				let elem = document.createElementNS(HTML_NS, 'div');
+				let elem = document.createElement('div');
 				elem.innerHTML = `The selected Mendeley database cannot be read, likely because it `
 					+ `is encrypted. See <a href="${url}" class="text-link">How do I import a `
 					+ `Mendeley library into Zotero?</a> for more information.`

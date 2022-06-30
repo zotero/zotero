@@ -33,10 +33,10 @@
 	}
 
 	/**
-	 * Extends AutocompleteInput to fix document.activeElement checks that
-	 * don't work in a shadow DOM context.
+	 * Extend AutocompleteInput to work around issues with shadow DOM
 	 */
 	class ShadowAutocompleteInput extends customElements.get('autocomplete-input') {
+		// Fix document.activeElement checks that don't work in a shadow DOM context
 		get focused() {
 			// document.activeElement by itself doesn't traverse shadow DOMs; see
 			// https://www.abeautifulsite.net/posts/finding-the-active-element-in-a-shadow-root/
@@ -52,6 +52,21 @@
 			}
 
 			return this === activeElement(document);
+		}
+
+		// Look for `autocompletepopup` popup id inside the current shadow root.
+		// `autocomplete-input` itself can create an autocomplete popup inside the top DOM,
+		// but it appears behind the tagsBox popup, because the z order of popups messes up
+		get popup() {
+			let rootNode = this.getRootNode();
+			if (rootNode && rootNode instanceof ShadowRoot) {
+				let id = this.getAttribute('autocompletepopup');
+				let popup = rootNode.getElementById(id);
+				if (popup) {
+					return popup;
+				}
+			}
+			return super.popup;
 		}
 	}
 

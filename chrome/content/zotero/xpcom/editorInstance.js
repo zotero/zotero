@@ -501,6 +501,7 @@ class EditorInstance {
 				}
 				case 'subscribe': {
 					let { subscription } = message;
+					subscription = JSON.parse(JSON.stringify(subscription));
 					this._subscriptions.push(subscription);
 					if (subscription.type === 'image') {
 						await this._feedSubscription(subscription);
@@ -515,6 +516,7 @@ class EditorInstance {
 				// Called on note editor load
 				case 'updateCitationItemsList': {
 					let { list } = message;
+					list = list.slice();
 					let newList = [];
 					for (let item of list) {
 						let existingItem = this._citationItemsList
@@ -784,7 +786,7 @@ class EditorInstance {
 			var menuitem = this._popup.ownerDocument.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('spellCheck.addRemoveDictionaries'));
 			menuitem.addEventListener('command', () => {
-				Services.ww.openWindow(null, "chrome://zotero/content/dictionaryManager.xul",
+				Services.ww.openWindow(null, "chrome://zotero/content/dictionaryManager.xhtml",
 					"dictionary-manager", "chrome,centerscreen", {});
 				
 			});
@@ -799,7 +801,7 @@ class EditorInstance {
 			}
 
 			let firstElementChild = this._popup.firstElementChild;
-			let suggestionCount = spellChecker.addSuggestionsToMenu(this._popup, firstElementChild, 5);
+			let suggestionCount = spellChecker.addSuggestionsToMenuOnParent(this._popup, firstElementChild, 5);
 			if (suggestionCount) {
 				let separator = this._popup.ownerDocument.createXULElement('menuseparator');
 				this._popup.insertBefore(separator, firstElementChild);

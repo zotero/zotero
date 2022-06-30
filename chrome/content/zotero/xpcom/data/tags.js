@@ -826,7 +826,7 @@ Zotero.Tags = new function() {
 			.getService(Components.interfaces.nsIAppShellService)
 			.hiddenDOMWindow;
 		var doc = win.document;
-		var canvas = doc.createElementNS('http://www.w3.org/1999/xhtml', 'canvas');
+		var canvas = doc.createElement('canvas');
 		
 		var width = extraImageWidth
 			+ (retracted

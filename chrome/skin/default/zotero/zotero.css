@@ -21,11 +21,6 @@
 }
 
 /* Bindings */
-textbox[multiline="true"][type="timed"]
-{
-	-moz-binding: url('chrome://zotero/content/bindings/timedtextarea.xml#timed-textarea');
-}
-
 textbox[type="styled"]
 {
 	-moz-binding: url('chrome://zotero/content/bindings/styled-textbox.xml#styled-textbox');
@@ -111,7 +106,11 @@ zoterofilesyncstatus {
 
 richlistitem {
 	padding: 0.2em 0.4em;
+}
+
+richlistitem, richlistitem > * {
 	overflow-x: hidden;
+	white-space: nowrap;
 	text-overflow: ellipsis;
 }
 

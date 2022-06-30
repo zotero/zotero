@@ -105,7 +105,9 @@ Zotero.Schema = new function(){
 			Zotero.debug('Database does not exist -- creating\n');
 			return _initializeSchema()
 			.then(function() {
-				(Zotero.isStandalone ? Zotero.uiReadyPromise : Zotero.initializationPromise)
+				// Don't load bundled files until after UI is ready, unless this is a test run,
+				// in which case tests can run without a window open
+				(!Zotero.test ? Zotero.uiReadyPromise : Zotero.initializationPromise)
 				.delay(1000)
 				.then(async function () {
 					await this.updateBundledFiles();
@@ -294,9 +296,8 @@ Zotero.Schema = new function(){
 		// Reset sync queue tries if new version
 		await _checkClientVersion();
 		
-		// In Standalone, don't load bundled files until after UI is ready. In Firefox, load them as
-		// soon initialization is done so that translation works before the Zotero pane is opened.
-		(Zotero.isStandalone ? Zotero.uiReadyPromise : Zotero.initializationPromise)
+		// See above
+		(!Zotero.test ? Zotero.uiReadyPromise : Zotero.initializationPromise)
 		.then(() => {
 			setTimeout(async function () {
 				try {
@@ -847,11 +848,12 @@ Zotero.Schema = new function(){
 		await Zotero.SearchConditions.init();
 		
 		// Update item type menus in every open window
+		// TODO: Remove?
 		Zotero.Schema.schemaUpdatePromise.then(function () {
 			var enumerator = Services.wm.getEnumerator("navigator:browser");
 			while (enumerator.hasMoreElements()) {
 				let win = enumerator.getNext();
-				win.document.getElementById('zotero-editpane-item-box').buildItemTypeMenu();
+				//win.document.getElementById('zotero-editpane-item-box').buildItemTypeMenu();
 			}
 		});
 	}

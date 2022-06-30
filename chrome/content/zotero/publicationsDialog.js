@@ -280,21 +280,21 @@ var Zotero_Publications_Dialog = new function () {
 			var div = currentPage.getElementsByAttribute('class', 'license-description')[0];
 		}
 		else {
-			let hbox = document.createElement('hbox');
+			let hbox = document.createXULElement('hbox');
 			hbox.align = "center";
 			groupbox.appendChild(hbox);
 			
-			var icon = document.createElement('image');
+			var icon = document.createXULElement('image');
 			icon.className = 'license-icon';
 			icon.setAttribute('style', 'width: 88px');
 			hbox.appendChild(icon);
 			
-			let sep = document.createElement('separator');
+			let sep = document.createXULElement('separator');
 			sep.orient = 'vertical';
 			sep.setAttribute('style', 'width: 10px');
 			hbox.appendChild(sep);
 			
-			var div = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
+			var div = document.createElement('div');
 			div.className = 'license-description';
 			div.setAttribute('style', 'width: 400px');
 			hbox.appendChild(div);

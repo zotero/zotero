@@ -26,7 +26,7 @@
 /**
  * @namespace Singleton to interface with the browser when ingesting data
  */
-var Zotero_Ingester_Interface_SelectItems = function() {}
+var Zotero_Ingester_Interface_SelectItems = function () {};
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -38,7 +38,10 @@ var Zotero_Ingester_Interface_SelectItems = function() {}
  * Presents items to select in the select box. Assumes window.arguments[0].dataIn is an object with
  * URLs as keys and descriptions as values
  */
-Zotero_Ingester_Interface_SelectItems.init = function() {
+Zotero_Ingester_Interface_SelectItems.init = function () {
+	document.addEventListener('dialogaccept',
+		() => Zotero_Ingester_Interface_SelectItems.acceptSelection());
+
 	// Set font size from pref
 	var sbc = document.getElementById('zotero-select-items-container');
 	Zotero.setFontSize(sbc);
@@ -46,59 +49,66 @@ Zotero_Ingester_Interface_SelectItems.init = function() {
 	this.io = window.arguments[0];
 	var listbox = document.getElementById("zotero-selectitems-links");
 	
-	for(var i in this.io.dataIn) {	// we could use a tree for this if we wanted to
+	for (var i in this.io.dataIn) {	// we could use a tree for this if we wanted to
 		var item = this.io.dataIn[i];
 
 		var title, checked = false;
-		if(item && typeof(item) == "object" && item.title !== undefined) {
+		if (item && typeof item == "object" && item.title !== undefined) {
 			title = item.title;
 			checked = !!item.checked;
-		} else {
+		}
+		else {
 			title = item;
 		}
 
-		var itemNode = document.createElement("listitem");
-		itemNode.setAttribute("type", "checkbox");
+		let itemNode = document.createXULElement("richlistitem");
+		let checkbox = document.createXULElement("checkbox");
+		checkbox.checked = checked;
+		checkbox.label = title;
 		itemNode.setAttribute("value", i);
-		itemNode.setAttribute("label", title);
-		itemNode.setAttribute("checked", checked);
-		listbox.appendChild(itemNode);
+		itemNode.append(checkbox);
+		itemNode.addEventListener('click', (event) => {
+			if (event.target == itemNode) {
+				checkbox.checked = !checkbox.checked;
+			}
+		});
+		listbox.append(itemNode);
 	}
 	
 	// Check item if there is only one
 	if (listbox.itemCount === 1) {
-		listbox.getItemAtIndex(0).setAttribute("checked", true);
+		listbox.getItemAtIndex(0).firstElementChild.checked = true;
 	}
-}
+};
 
 /**
  * Selects or deselects all items
  * @param {Boolean} deselect If true, deselect all items instead of selecting all items
  */
-Zotero_Ingester_Interface_SelectItems.selectAll = function(deselect) {
+Zotero_Ingester_Interface_SelectItems.selectAll = function (deselect) {
 	var listbox = document.getElementById("zotero-selectitems-links");
-	for (var i=0; i<listbox.childNodes.length; i++){
-		listbox.childNodes[i].setAttribute('checked', !deselect);
+	for (var i = 0; i < listbox.childNodes.length; i++) {
+		listbox.childNodes[i].firstElementChild.checked = !deselect;
 	}
-}
+};
 
 /**
  * Called when "OK" button is pressed to populate window.arguments[0].dataOut with selected items
  */
-Zotero_Ingester_Interface_SelectItems.acceptSelection = function() {
+Zotero_Ingester_Interface_SelectItems.acceptSelection = function () {
 	var listbox = document.getElementById("zotero-selectitems-links");
 	
 	var returnObject = false;
-	this.io.dataOut = new Object();
+	this.io.dataOut = {};
 	
 	// collect scrapeURLList from listbox
-	for(var i=0; i<listbox.childNodes.length; i++) {
+	for (var i = 0; i < listbox.childNodes.length; i++) {
 		var itemNode = listbox.childNodes[i];
-		if(itemNode.getAttribute("checked") == "true") {
-			this.io.dataOut[itemNode.getAttribute("value")] = itemNode.getAttribute("label");
+		if (itemNode.firstElementChild.checked) {
+			this.io.dataOut[itemNode.getAttribute("value")] = itemNode.firstElementChild.getAttribute("label");
 			returnObject = true;
 		}
 	}
 	
-	if(!returnObject) this.io.dataOut = null;
-}
+	if (!returnObject) this.io.dataOut = null;
+};

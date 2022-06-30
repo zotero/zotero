@@ -191,14 +191,14 @@ ZoteroPluginInstaller.prototype = {
 	showPreferences: function(document) {
 		this.prefPaneDoc = document;
 		var isInstalled = this.isInstalled(),
-			groupbox = document.createElement("groupbox");
+			groupbox = document.createXULElement("groupbox");
 		groupbox.id = this._addon.EXTENSION_DIR;
 
-		var caption = document.createElement("caption");
+		var caption = document.createXULElement("caption");
 		caption.setAttribute("label", this._addon.APP);
 		groupbox.appendChild(caption);
 
-		var description = document.createElement("description");
+		var description = document.createXULElement("description");
 		description.style.width = "45em";
 		description.appendChild(document.createTextNode(
 			isInstalled ?
@@ -206,9 +206,9 @@ ZoteroPluginInstaller.prototype = {
 				Zotero.getString('zotero.preferences.wordProcessors.notInstalled', this._addon.APP)));
 		groupbox.appendChild(description);
 
-		var hbox = document.createElement("hbox");
+		var hbox = document.createXULElement("hbox");
 		hbox.setAttribute("pack", "center");
-		var button = document.createElement("button"),
+		var button = document.createXULElement("button"),
 			addon = this._addon;
 		button.setAttribute("label", 
 			(isInstalled ?

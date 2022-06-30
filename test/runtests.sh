@@ -15,18 +15,18 @@ function makePath {
 	eval $__assignTo="'$__path'"
 }
 
-if [ -z "$FX_EXECUTABLE" ]; then
+if [ -z "$Z_EXECUTABLE" ]; then
 	if [ "`uname`" == "Darwin" ]; then
-		FX_EXECUTABLE="$( dirname "$ROOT_DIR" )/zotero-standalone-build/xulrunner/Firefox.app/Contents/MacOS/firefox"
+		Z_EXECUTABLE="$( dirname "$ROOT_DIR" )/zotero-standalone-build/staging/Zotero.app/Contents/MacOS/zotero"
 	else
-		FX_EXECUTABLE="$( dirname "$ROOT_DIR" )/zotero-standalone-build/xulrunner/firefox-x86_64/firefox"
+		Z_EXECUTABLE="$( dirname "$ROOT_DIR" )/zotero-standalone-build/staging/Zotero-x86_64/zotero"
 	fi
 fi
 
 if [ -z "$DISPLAY" ]; then
-	FX_ARGS=""
+	Z_ARGS=""
 else
-	FX_ARGS="--class=ZTestFirefox"
+	Z_ARGS="--class=ZTestFirefox"
 fi
 
 function usage {
@@ -42,7 +42,7 @@ Options
  -h                  display this help
  -s TEST             start at the given test
  -t                  generate test data and quit
- -x FX_EXECUTABLE    path to Firefox executable (default: $FX_EXECUTABLE)
+ -x EXECUTABLE       path to Zotero executable (default: $Z_EXECUTABLE)
  TESTS               set of tests to run (default: all)
 DONE
 	exit 1
@@ -53,10 +53,10 @@ DEBUG_LEVEL=5
 while getopts "bcd:e:fg:hs:tx:" opt; do
 	case $opt in
         b)
-        	FX_ARGS="$FX_ARGS -ZoteroSkipBundledFiles"
+        	Z_ARGS="$Z_ARGS -ZoteroSkipBundledFiles"
         	;;
 		c)
-			FX_ARGS="$FX_ARGS -jsconsole -noquit"
+			Z_ARGS="$Z_ARGS -jsconsole -noquit"
 			;;
 		d)
 			DEBUG=true
@@ -66,10 +66,10 @@ while getopts "bcd:e:fg:hs:tx:" opt; do
 			if [[ -z "$OPTARG" ]] || [[ ${OPTARG:0:1} = "-" ]]; then
 				usage
 			fi
-			FX_ARGS="$FX_ARGS -stopAtTestFile $OPTARG"
+			Z_ARGS="$Z_ARGS -stopAtTestFile $OPTARG"
 			;;
 		f)
-			FX_ARGS="$FX_ARGS -bail"
+			Z_ARGS="$Z_ARGS -bail"
 			;;
 		g)
 			GREP="$OPTARG"
@@ -81,13 +81,13 @@ while getopts "bcd:e:fg:hs:tx:" opt; do
 			if [[ -z "$OPTARG" ]] || [[ ${OPTARG:0:1} = "-" ]]; then
 				usage
 			fi
-			FX_ARGS="$FX_ARGS -startAtTestFile $OPTARG"
+			Z_ARGS="$Z_ARGS -startAtTestFile $OPTARG"
 			;;
 		t)
-			FX_ARGS="$FX_ARGS -makeTestData"
+			Z_ARGS="$Z_ARGS -makeTestData"
 			;;
 		x)
-			FX_EXECUTABLE="$OPTARG"
+			Z_EXECUTABLE="$OPTARG"
 			;;
 		*)
 			usage
@@ -115,13 +115,9 @@ ulimit -n 4096
 # Set up profile directory
 TEMPDIR="`mktemp -d 2>/dev/null || mktemp -d -t 'zotero-unit'`"
 PROFILE="$TEMPDIR/profile"
-mkdir -p "$PROFILE/extensions"
+mkdir -p "$PROFILE"
 
 makePath ZOTERO_PATH "$ROOT_DIR/build"
-echo "$ZOTERO_PATH" > "$PROFILE/extensions/zotero@chnm.gmu.edu"
-
-makePath ZOTERO_UNIT_PATH "$ZOTERO_PATH/test"
-echo "$ZOTERO_UNIT_PATH" > "$PROFILE/extensions/zotero-unit@zotero.org"
 
 # Create data directory
 mkdir "$TEMPDIR/Zotero"
@@ -144,9 +140,7 @@ if [ ! -f "$PDF_TOOLS_CACHE_DIR/$PDF_TOOLS_VERSION" ]; then
 fi
 cp -R $PDF_TOOLS_CACHE_DIR $PDF_TOOLS_DIR
 
-# Add default prefs, which are apparently no longer read from extensions in Firefox 60
-cat "$ZOTERO_PATH/defaults/preferences/zotero.js" | sed 's/^pref/user_pref/g' > "$PROFILE/prefs.js"
-
+touch "$PROFILE/prefs.js"
 cat <<EOF >> "$PROFILE/prefs.js"
 user_pref("app.update.enabled", false);
 user_pref("extensions.autoDisableScopes", 0);
@@ -181,11 +175,11 @@ EOF
 
 # -v flag on Windows makes Firefox process hang
 if [ -z $IS_CYGWIN ]; then
-	echo "`MOZ_NO_REMOTE=1 NO_EM_RESTART=1 \"$FX_EXECUTABLE\" -v`"
+	echo "`MOZ_NO_REMOTE=1 NO_EM_RESTART=1 \"$Z_EXECUTABLE\" -v`"
 fi
 
 if [ -n "$CI" ]; then
-	FX_ARGS="$FX_ARGS -ZoteroAutomatedTest -ZoteroTestTimeout 15000"
+	Z_ARGS="$Z_ARGS -ZoteroAutomatedTest -ZoteroTestTimeout 15000"
 fi
 
 # Clean up on exit
@@ -201,9 +195,11 @@ if [[ -z "$CI" ]] && ! ps | grep scripts/build.js | grep -v grep > /dev/null; th
 	echo
 fi
 
+ZOTERO_INCLUDE_TESTS=1 $( dirname "$ROOT_DIR" )/zotero-standalone-build/scripts/dir_build -q
+
 makePath FX_PROFILE "$PROFILE"
-MOZ_NO_REMOTE=1 NO_EM_RESTART=1 "$FX_EXECUTABLE" -profile "$FX_PROFILE" \
-    -chrome chrome://zotero-unit/content/runtests.html -test "$TESTS" -grep "$GREP" -ZoteroTest $FX_ARGS
+MOZ_NO_REMOTE=1 NO_EM_RESTART=1 "$Z_EXECUTABLE" -profile "$FX_PROFILE" -jsconsole \
+    -chrome chrome://zotero-unit/content/runtests.html -test "$TESTS" -grep "$GREP" -ZoteroTest $Z_ARGS
 
 # Check for success
 test -e "$PROFILE/success"

@@ -43,17 +43,19 @@ describe("Zotero.Sync.Data.Local", function() {
 			yield Zotero.Users.setCurrentUsername("A");
 			
 			var handled = false;
-			waitForDialog(function (dialog) {
-				var text = dialog.document.documentElement.textContent;
+			waitForDialog(function (window) {
+				var text = window.document.documentElement.textContent;
 				var matches = text.match(/“[^”]*”/g);
-				assert.equal(matches.length, 4);
+				assert.equal(matches.length, 5);
 				assert.equal(matches[0], "“A”");
 				assert.equal(matches[1], "“B”");
 				assert.equal(matches[2], "“A”");
 				assert.equal(matches[3], "“A”");
+				// Checkbox
+				assert.equal(matches[4], "“A”");
 				
-				dialog.document.getElementById('zotero-hardConfirmationDialog-checkbox').checked = true;
-				dialog.document.getElementById('zotero-hardConfirmationDialog-checkbox')
+				window.document.getElementById('zotero-hardConfirmationDialog-checkbox').checked = true;
+				window.document.getElementById('zotero-hardConfirmationDialog-checkbox')
 					.dispatchEvent(new Event('command'));
 				
 				handled = true;

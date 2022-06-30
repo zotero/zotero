@@ -128,7 +128,7 @@ var Zotero_Tag_Color_Chooser = new function() {
 		var msg = Zotero.getString('tagColorChooser.numberKeyInstructions');
 		var matches = msg.match(/(.+)\$NUMBER(.+)/);
 		
-		var num = document.createElement('label');
+		var num = document.createXULElement('label');
 		num.id = 'number-key';
 		num.setAttribute('value', parseInt(tagPosition.value) + 1);
 		

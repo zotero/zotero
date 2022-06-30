@@ -131,7 +131,7 @@ Zotero.Attachments = new function(){
 				await attachmentItem.save(saveOptions);
 			}.bind(this));
 			try {
-				yield _postProcessFile(attachmentItem, newFile, contentType);
+				yield _postProcessFile(attachmentItem);
 			}
 			catch (e) {
 				Zotero.logError(e);
@@ -194,7 +194,7 @@ Zotero.Attachments = new function(){
 			saveOptions
 		});
 		try {
-			yield _postProcessFile(item, file, contentType);
+			yield _postProcessFile(item);
 		}
 		catch (e) {
 			Zotero.logError(e);
@@ -258,7 +258,7 @@ Zotero.Attachments = new function(){
 		var file = this.resolveRelativePath(path);
 		if (file && await OS.File.exists(file)) {
 			try {
-				await _postProcessFile(item, file, contentType);
+				await _postProcessFile(item);
 			}
 			catch (e) {
 				Zotero.logError(e);
@@ -334,12 +334,7 @@ Zotero.Attachments = new function(){
 				}
 			}.bind(this));
 			try {
-				yield _postProcessFile(
-					attachmentItem,
-					Zotero.File.pathToFile(newPath),
-					contentType,
-					charset
-				);
+				yield _postProcessFile(attachmentItem);
 			}
 			catch (e) {
 				Zotero.logError(e);
@@ -2912,115 +2907,15 @@ Zotero.Attachments = new function(){
 	/**
 	 * If necessary/possible, detect the file charset and index the file
 	 *
-	 * Since we have to load the content into the browser to get the
-	 * character set (at least until we figure out a better way to get
-	 * at the native detectors), we create the item above and update
-	 * asynchronously after the fact
+	 * Since we have to load the content into the browser to get the character set, we create the
+	 * item above and update asynchronously after the fact
 	 *
 	 * @return {Promise}
 	 */
-	var _postProcessFile = Zotero.Promise.coroutine(function* (item, file, contentType) {
-		// Don't try to process if MIME type is unknown
-		if (!contentType) {
-			return;
-		}
-		
-		// Items with content types that get cached by the fulltext indexer can just be indexed,
-		// since a charset isn't necessary
-		if (Zotero.Fulltext.isCachedMIMEType(contentType)) {
-			return Zotero.Fulltext.indexItems([item.id]);
-		}
-		
-		// Ignore non-text types
-		var ext = Zotero.File.getExtension(file);
-		if (!Zotero.MIME.hasInternalHandler(contentType, ext) || !Zotero.MIME.isTextType(contentType)) {
-			return;
-		}
-		
-		// If the charset is already set, index item directly
-		if (item.attachmentCharset) {
-			return Zotero.Fulltext.indexItems([item.id]);
-		}
-		
-		// Otherwise, load in a hidden browser to get the charset, and then index the document
-		return new Zotero.Promise(function (resolve, reject) {
-			var browser = Zotero.Browser.createHiddenBrowser(
-				null,
-				// Disable JavaScript, since it can cause imports that include HTML files to hang
-				// (from network requests that fail?)
-				{ allowJavaScript: false }
-			);
-			
-			var pageshown = false;
-			
-			if (item.attachmentCharset) {
-				var onpageshow = async function () {
-					// ignore spurious about:blank loads
-					if(browser.contentDocument.location.href == "about:blank") return;
-					
-					pageshown = true;
-					
-					browser.removeEventListener("pageshow", onpageshow, false);
-					
-					try {
-						await Zotero.Fulltext.indexDocument(browser.contentDocument, itemID);
-						resolve();
-					}
-					catch (e) {
-						reject(e);
-					}
-					finally {
-						Zotero.Browser.deleteHiddenBrowser(browser);
-					}
-				};
-				browser.addEventListener("pageshow", onpageshow, false);
-			}
-			else {
-				let callback = async function (charset, args) {
-					// ignore spurious about:blank loads
-					if(browser.contentDocument.location.href == "about:blank") return;
-					
-					pageshown = true;
-					
-					try {
-						if (charset) {
-							charset = Zotero.CharacterSets.toCanonical(charset);
-							if (charset) {
-								item.attachmentCharset = charset;
-								await item.saveTx({
-									skipNotifier: true
-								});
-							}
-						}
-						
-						await Zotero.Fulltext.indexDocument(browser.contentDocument, item.id);
-						resolve();
-					}
-					catch (e) {
-						reject(e);
-					}
-					finally {
-						Zotero.Browser.deleteHiddenBrowser(browser);
-					}
-				};
-				Zotero.File.addCharsetListener(browser, callback, item.id);
-			}
-			
-			var url = Components.classes["@mozilla.org/network/protocol;1?name=file"]
-						.getService(Components.interfaces.nsIFileProtocolHandler)
-						.getURLSpecFromFile(file);
-			browser.loadURI(url);
-			
-			// Avoid a hang if a pageshow is never called on the hidden browser (which can happen
-			// if a .pdf file is really HTML, which can also result in the file being launched,
-			// which we should try to fix)
-			setTimeout(function () {
-				if (!pageshown) {
-					reject(new Error("pageshow not called in hidden browser"));
-				}
-			}, 5000);
-		});
-	});
+	var _postProcessFile = async function (item) {
+		return Zotero.Fulltext.indexItems([item.id]);
+	};
+	
 	
 	/**
 	 * Determines if a given document is an instance of PDFJS

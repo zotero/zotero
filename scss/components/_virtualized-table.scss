@@ -121,8 +121,8 @@
 		}
 
 		&.selected:not(.highlighted) {
-			background-color: highlight;
-			color: highlighttext;
+			background-color: SelectedItem;
+			color: SelectedItemText;
 		}
 
 		&.highlighted {

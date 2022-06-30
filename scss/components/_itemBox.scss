@@ -1,18 +1,40 @@
+:host {
+	display: flex;
+	min-width: 0;
+	width: 100%;
+}
+
 #item-box {
 	display: flex;
 	/*overflow: auto;*/
 	margin-top: 8px;
+	align-items: start;
+	width: 100%;
 }
 
-th, td {
-	min-height: 1em;
+#info-table {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	grid-auto-rows: minmax(1.8em, auto);
+	align-items: center;
+	width: 100%;
+}
+
+tr {
+	display: contents;
 }
 
 td {
 	display: flex;
+	min-width: 0;
+	align-self: stretch;
 }
 
-th > label, td > [fieldname] {
+td > input {
+	align-self: stretch;
+}
+
+th > label {
 	margin-top: 1px !important;
 	margin-bottom: 1px !important;
 	-moz-box-pack: start;
@@ -25,6 +47,12 @@ td > [fieldname] {
   width: 100%;
 }
 
+.value:not(.multiline) {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
 .value.multiline {
 	white-space: pre-line;
 }
@@ -35,13 +63,10 @@ td > [fieldname] {
 }*/
 
 #item-type-menu {
-	-moz-appearance: none;
 	height: 1.5em !important;
 	min-height: 1.5em !important;
 	padding: 0 !important;
-	padding-inline-start: 2px !important;
-	margin: 1px 0 0 0 !important;
-	margin-inline-start: 1px !important;
+	margin: 0 !important;
 	margin-inline-end: 5px !important;
 	max-height: 1.5em !important;
 }

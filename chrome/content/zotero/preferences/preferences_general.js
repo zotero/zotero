@@ -95,9 +95,7 @@ Zotero_Preferences.General = {
 		else if (handler) {
 			let icon;
 			try {
-				let fph = Services.io.getProtocolHandler("file")
-					.QueryInterface(Components.interfaces.nsIFileProtocolHandler);
-				let urlspec = fph.getURLSpecFromFile(Zotero.File.pathToFile(handler));
+				let urlspec = Zotero.File.pathToFileURI(handler);
 				icon = "moz-icon://" + urlspec + "?size=16";
 			}
 			catch (e) {

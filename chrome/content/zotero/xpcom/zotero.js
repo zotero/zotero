@@ -54,7 +54,16 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.startupError;
 	Object.defineProperty(this, 'startupErrorHandler', {
 		get: () => _startupErrorHandler,
-		enumerable: true
+		enumerable: true,
+		configurable: true
+    });
+    Object.defineProperty(this, 'resourcesDir', {
+		get: () => {
+			// AChrome is app/chrome
+			return FileUtils.getDir('AChrom', []).parent.parent.path;
+		},
+		enumerable: true,
+		configurable: true
     });
 	this.version;
 	this.platform;
@@ -107,7 +116,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 					this.unlockDeferred.resolve();
 				}
 			},
-			enumerable: true
+			enumerable: true,
+			configurable: true
 		}
 	);
 	
@@ -1443,8 +1453,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 * @return	void
 	 */
 	this.showZoteroPaneProgressMeter = function (msg, determinate, icon, modalOnly) {
-		const HTML_NS = "http://www.w3.org/1999/xhtml"
-		
 		// If msg is undefined, keep any existing message. If false/null/"", clear.
 		// The message is also cleared when the meters are hidden.
 		_progressMessage = msg = (msg === undefined ? _progressMessage : msg) || "";
@@ -1479,7 +1487,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			let id = 'zotero-pane-progressmeter';
 			let progressMeter = doc.getElementById(id);
 			if (!progressMeter) {
-				progressMeter = doc.createElementNS(HTML_NS, 'progress');
+				progressMeter = doc.createElement('progress');
 				progressMeter.id = id;
 			}
 			if (determinate) {
@@ -1637,10 +1645,10 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		button.id = 'zotero-tb-search-menu-button';
 		button.setAttribute('type', 'menu');
 		
-		var menupopup = document.createElement('menupopup');
+		var menupopup = document.createXULElement('menupopup');
 		
 		for (var i in modes) {
-			var menuitem = document.createElement('menuitem');
+			var menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('id', prefix + i);
 			menuitem.setAttribute('label', modes[i].label);
 			menuitem.setAttribute('name', 'searchMode');
@@ -2067,59 +2075,6 @@ Zotero.DragDrop = {
 			}
 		}
 		return false;
-	}
-}
-
-
-/**
- * Functions for creating and destroying hidden browser objects
- **/
-Zotero.Browser = new function() {
-	var nBrowsers = 0;
-	
-	this.createHiddenBrowser = function (win, options = {}) {
-		if (!win) {
-			win = Services.wm.getMostRecentWindow("navigator:browser");
-			if (!win) {
-				win = Services.ww.activeWindow;
-			}
-			// Use the hidden DOM window on macOS with the main window closed
-			if (!win) {
-				let appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"]
-					.getService(Components.interfaces.nsIAppShellService);
-				win = appShellService.hiddenDOMWindow;
-			}
-			if (!win) {
-				throw new Error("Parent window not available for hidden browser");
-			}
-		}
-		
-		// Create a hidden browser
-		var hiddenBrowser = win.document.createElement("browser");
-		hiddenBrowser.setAttribute('type', 'content');
-		hiddenBrowser.setAttribute('disableglobalhistory', 'true');
-		win.document.documentElement.appendChild(hiddenBrowser);
-		// Disable some features
-		hiddenBrowser.docShell.allowAuth = false;
-		hiddenBrowser.docShell.allowDNSPrefetch = false;
-		hiddenBrowser.docShell.allowImages = false;
-		hiddenBrowser.docShell.allowJavascript = options.allowJavaScript !== false
-		hiddenBrowser.docShell.allowMetaRedirects = false;
-		hiddenBrowser.docShell.allowPlugins = false;
-		Zotero.debug("Created hidden browser (" + (nBrowsers++) + ")");
-		return hiddenBrowser;
-	}
-	
-	this.deleteHiddenBrowser = function (myBrowsers) {
-		if(!(myBrowsers instanceof Array)) myBrowsers = [myBrowsers];
-		for(var i=0; i<myBrowsers.length; i++) {
-			var myBrowser = myBrowsers[i];
-			myBrowser.stop();
-			myBrowser.destroy();
-			myBrowser.parentNode.removeChild(myBrowser);
-			myBrowser = null;
-			Zotero.debug("Deleted hidden browser (" + (--nBrowsers) + ")");
-		}
 	}
 }
 

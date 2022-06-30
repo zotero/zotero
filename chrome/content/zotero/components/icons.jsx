@@ -211,7 +211,7 @@ module.exports.getDOMElement = function (icon) {
 		Zotero.debug(`Attempting to get non-existant icon ${icon}`);
 		return "";
 	}
-	let div = document.createElementNS("http://www.w3.org/1999/xhtml", 'div');
+	let div = document.createElement('div');
 	div.innerHTML = renderToStaticMarkup(React.createElement(module.exports[icon]));
 	domElementCache[icon] = div.firstChild;
 	return domElementCache[icon].cloneNode(true);

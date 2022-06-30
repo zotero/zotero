@@ -702,7 +702,7 @@ var Zotero_RTFScan = new function() {
 			div.innerHTML = "";
 		}
 		else {
-			div = document.createElementNS("http://www.w3.org/1999/xhtml", 'div');
+			div = document.createElement('div');
 			div.className = "row";
 		}
 
@@ -721,15 +721,15 @@ var Zotero_RTFScan = new function() {
 						{ passive: true });
 				}
 				else {
-					twisty = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+					twisty = document.createElement('span');
 					twisty.classList.add("spacer-twisty");
 				}
 				
-				let textSpan = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+				let textSpan = document.createElement('span');
 				textSpan.className = "cell-text";
 				textSpan.innerText = row[column.dataKey] || "";
 				
-				let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+				let span = document.createElement('span');
 				span.className = `cell primary ${column.className}`;
 				span.appendChild(twisty);
 				span.appendChild(textSpan);
@@ -737,7 +737,7 @@ var Zotero_RTFScan = new function() {
 				div.appendChild(span);
 			}
 			else if (column.dataKey == 'action') {
-				let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+				let span = document.createElement('span');
 				span.className = `cell action ${column.className}`;
 				if (row.parent) {
 					if (row.action) {
@@ -753,7 +753,7 @@ var Zotero_RTFScan = new function() {
 				div.appendChild(span);
 			}
 			else {
-				let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+				let span = document.createElement('span');
 				span.className = `cell ${column.className}`;
 				span.innerText = row[column.dataKey] || "";
 				div.appendChild(span);

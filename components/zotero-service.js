@@ -238,7 +238,7 @@ ZoteroContext.prototype = {
 			var o = {};
 			Object.assign(o, zInitOptions);
 			Object.assign(o, options);
-			zContext.Zotero.init(o);
+			return zContext.Zotero.init(o);
 		});
 	}
 };
@@ -494,6 +494,12 @@ ZoteroCommandLineHandler.prototype = {
 		else if (cmdLine.handleFlag("ZoteroDebugText", false)) {
 			zInitOptions.forceDebugLog = 1;
 		}
+		// Pressing Ctrl-C via the terminal is interpreted as a crash, and after three crashes
+		// Firefox starts up in automatic safe mode. To avoid this, we clear the crash counter when
+		// using one of the debug-logging flags, which generally imply terminal usage.
+		if (zInitOptions.forceDebugLog) {
+			Services.prefs.getBranch("toolkit.startup.").clearUserPref('recent_crashes');
+		}
 		
 		zInitOptions.forceDataDir = cmdLine.handleFlagWithParam("datadir", false);
 		
@@ -576,7 +582,9 @@ ZoteroCommandLineHandler.prototype = {
 					const { DevToolsLoader } = ChromeUtils.import(
 						"resource://devtools/shared/loader/Loader.jsm"
 					);
-					const loader = new DevToolsLoader();
+					const loader = new DevToolsLoader({
+						freshCompartment: true,
+					});
 					const { DevToolsServer } = loader.require("devtools/server/devtools-server");
 					const { SocketListener } = loader.require("devtools/shared/security/socket");
 					

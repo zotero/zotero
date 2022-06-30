@@ -4,31 +4,44 @@
 <?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
 
-<?xul-overlay href="chrome://zotero/content/standalone/editMenuOverlay.xul"?>
-<?xul-overlay href="chrome://zotero-platform/content/standalone/menuOverlay.xul"?>
-
 <!DOCTYPE window [
-		<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
-		<!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone.dtd" > %standaloneDTD;
-		<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
-		]>
+	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
+	<!ENTITY % editMenuOverlayDTD SYSTEM "chrome://zotero/locale/mozilla/editMenuOverlay.dtd" > %editMenuOverlayDTD;
+	<!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone.dtd" > %standaloneDTD;
+	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
+]>
 
 <window
-		id="pdf-reader"
-		windowtype="zotero:reader"
-		orient="vertical"
-		width="1300"
-		height="800"
-		persist="screenX screenY width height"
-		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	id="pdf-reader"
+	windowtype="zotero:reader"
+	orient="vertical"
+	width="1300"
+	height="800"
+	persist="screenX screenY width height"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
 >
+	<html:link rel="localization" href="zotero/menubar.ftl"/>
+	<html:link rel="localization" href="zotero/textActions.ftl"/>
+
 	<script type="application/javascript">
-		Components.utils.import('resource://gre/modules/Services.jsm');
+		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		Services.scriptloader.loadSubScript("resource://zotero/require.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/platformKeys.js", this);
+
+		// Mozilla scripts
+		Services.scriptloader.loadSubScript("chrome://global/content/globalOverlay.js", this);
+		Services.scriptloader.loadSubScript("chrome://global/content/editMenuOverlay.js", this);
+		Services.scriptloader.loadSubScript("chrome://global/content/contentAreaUtils.js", this);
+		if (Zotero.isMac) {
+			Services.scriptloader.loadSubScript("chrome://global/content/macWindowMenu.js", this);
+		}
+
+		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/shadowAutocompleteInput.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/tagsBox.js", this);
 	</script>
-	<script type="application/javascript" src="chrome://global/content/globalOverlay.js"/>
-	<script type="application/javascript" src="chrome://global/content/contentAreaUtils.js"/>
-	<script type="application/javascript" src="chrome://global/content/inlineSpellCheckUI.js"/>
-	<script src="include.js"/>
+
 	<commandset id="mainCommandSet">
 		<!--FILE-->
 		<command id="cmd_quitApplication" oncommand="goQuitApplication(event);"/>
@@ -38,15 +51,43 @@
 		<commandset id="editMenuCommands"/>
 		<command id="cmd_find"
 			oncommand="document.getElementById('zotero-tb-search').select()"/>
+
+		<!--WINDOW-->
+		<command id="minimizeWindow"
+				 label="&minimizeWindow.label;"
+				 oncommand="window.minimize();" />
+		<command id="zoomWindow"
+				 label="&zoomWindow.label;"
+				 oncommand="zoomWindow();" />
 	</commandset>
 	
 	<keyset id="mainKeyset">
 		<key id="key_back"/>
 		<key id="key_forward"/>
+		<key id="key_minimizeWindow"
+			 command="minimizeWindow"
+			 key="&minimizeWindow.key;"
+			 modifiers="accel"/>
+	</keyset>
+
+	<keyset id="editMenuKeys">
+		<key id="key_undo" data-l10n-id="text-action-undo-shortcut" modifiers="accel" command="cmd_undo"/>
+		<!-- l10n and modifiers set in platformKeys.js -->
+		<key id="key_redo" command="cmd_redo"/>
+		<key id="key_cut" data-l10n-id="text-action-cut-shortcut" modifiers="accel" command="cmd_cut"/>
+		<key id="key_copy" data-l10n-id="text-action-copy-shortcut" modifiers="accel" command="cmd_copy"/>
+		<key id="key_paste" data-l10n-id="text-action-paste-shortcut" modifiers="accel" command="cmd_paste"/>
+		<key id="key_delete" keycode="VK_DELETE" command="cmd_delete"/>
+		<key id="key_selectAll" data-l10n-id="text-action-select-all-shortcut" modifiers="accel" command="cmd_selectAll"/>
+		<key id="key_find" key="&findCmd.key;" modifiers="accel" command="cmd_find"/>
+		<key id="key_findAgain" key="&findAgainCmd.key;" modifiers="accel" command="cmd_findAgain"/>
+		<key id="key_findPrevious" key="&findAgainCmd.key;" modifiers="shift,accel" command="cmd_findPrevious"/>
+		<key id="key_findAgain2" keycode="&findAgainCmd.key2;" command="cmd_findAgain"/>
+		<key id="key_findPrevious2" keycode="&findAgainCmd.key2;" modifiers="shift" command="cmd_findPrevious"/>
 	</keyset>
 	
 	<!-- TODO: Localize -->
-	<tooltip id="iframeTooltip" onpopupshowing="if (tooltipTitleNode = document.tooltipNode.closest('*[title]')) {this.setAttribute('label', tooltipTitleNode.getAttribute('title')); return true; } return false"/>
+	<tooltip id="iframeTooltip" page="true"/>
 	<menubar>
 		<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
 			<menupopup id="menu_FilePopup">
@@ -60,15 +101,31 @@
 			</menupopup>
 		</menu>
 
-		<menu id="menu_edit">
+		<menu id="edit-menu"  data-l10n-id="menu-edit">
 			<menupopup id="menu_EditPopup">
-				<menuitem id="menu_undo"/>
-				<menuitem id="menu_redo"/>
+				<menuitem id="menu_undo"
+						  key="key_undo"
+						  command="cmd_undo" data-l10n-id="text-action-undo"/>
+				<menuitem id="menu_redo"
+						  key="key_redo"
+						  command="cmd_redo" data-l10n-id="text-action-redo"/>
 				<menuseparator/>
-				<menuitem id="menu_cut"/>
-				<menuitem id="menu_copy"/>
-				<menuitem id="menu_paste"/>
-				<menuitem id="menu_delete"/>
+				<menuitem id="menu_cut"
+						  key="key_cut"
+						  command="cmd_cut" data-l10n-id="text-action-cut"/>
+				<menuitem id="menu_copy"
+						  key="key_copy"
+						  command="cmd_copy" data-l10n-id="text-action-copy"/>
+				<menuitem id="menu_paste"
+						  key="key_paste"
+						  command="cmd_paste" data-l10n-id="text-action-paste"/>
+				<menuitem id="menu_delete"
+						  key="key_delete"
+						  command="cmd_delete" data-l10n-id="text-action-delete"/>
+				<menuseparator/>
+				<menuitem id="menu_selectAll"
+						  key="key_selectAll"
+						  command="cmd_selectAll" data-l10n-id="text-action-select-all"/>
 			</menupopup>
 		</menu>
 		<menu label="View" onpopupshowing="onViewMenuOpen()">
@@ -201,9 +258,29 @@
 		</menu>
 		<menu id="windowMenu"
 			  label="&windowMenu.label;"
+			  datasources="rdf:window-mediator" ref="NC:WindowMediatorRoot"
 			  onpopupshowing="macWindowMenuDidShow();"
 			  onpopuphidden="macWindowMenuDidHide();"
-		>
+			  hidden="false">
+			<template>
+				<rule>
+					<menupopup>
+						<menuitem uri="rdf:*"
+								  label="rdf:http://home.netscape.com/NC-rdf#Name"
+								  type="radio"
+								  name="windowList"
+								  oncommand="ShowWindowFromResource(event.target)"/>
+					</menupopup>
+				</rule>
+			</template>
+			<menupopup id="windowPopup">
+				<menuitem command="minimizeWindow" label="&minimizeWindow.label;" key="key_minimizeWindow"/>
+				<menuitem command="zoomWindow" label="&zoomWindow.label;"/>
+				<!-- decomment when "BringAllToFront" is implemented
+                    <menuseparator/>
+                    <menuitem label="&bringAllToFront.label;" disabled="true"/> -->
+				<menuseparator id="sep-window-list"/>
+			</menupopup>
 		</menu>
 	</menubar>
 

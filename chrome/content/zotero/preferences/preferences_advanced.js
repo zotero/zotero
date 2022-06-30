@@ -627,7 +627,7 @@ Zotero_Preferences.Advanced = {
 	},
 	
 	onLocaleChange: function () {
-		var requestedLocale = Services.locale.getRequestedLocale();
+		var requestedLocale = Services.locale.requestedLocale;
 		var menu = document.getElementById('locale-menu');
 		
 		if (menu.value == 'automatic') {
@@ -636,12 +636,12 @@ Zotero_Preferences.Advanced = {
 			var changed = requestedLocale
 				&& requestedLocale == Zotero.locale
 				&& menu.label != this._getAutomaticLocaleMenuLabel();
-			Services.locale.setRequestedLocales(null);
+			Services.locale.requestedLocales = null;
 		}
 		else {
 			// Changed if moving to a locale other than the current one
 			var changed = requestedLocale != menu.value
-			Services.locale.setRequestedLocales([menu.value]);
+			Services.locale.requestedLocales = [menu.value];
 		}
 		
 		if (!changed) {

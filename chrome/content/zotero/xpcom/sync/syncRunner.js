@@ -32,7 +32,6 @@ if (!Zotero.Sync) {
 // Initialized as Zotero.Sync.Runner in zotero.js
 Zotero.Sync.Runner_Module = function (options = {}) {
 	const stopOnError = false;
-	const HTML_NS = 'http://www.w3.org/1999/xhtml';
 	
 	Zotero.defineProperty(this, 'enabled', {
 		get: () => {
@@ -1502,8 +1501,8 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		}
 		
 		for (let e of errors) {
-			var box = doc.createElement('vbox');
-			var label = doc.createElement('label');
+			var box = doc.createXULElement('vbox');
+			var label = doc.createXULElement('label');
 			if (e.libraryID !== undefined) {
 				label.className = "zotero-sync-error-panel-library-name";
 				if (e.libraryID == 0) {
@@ -1515,15 +1514,15 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				}
 				label.setAttribute('value', libraryName);
 			}
-			var content = doc.createElement('vbox');
-			var buttons = doc.createElement('hbox');
+			var content = doc.createXULElement('vbox');
+			var buttons = doc.createXULElement('hbox');
 			buttons.pack = 'end';
 			box.appendChild(label);
 			box.appendChild(content);
 			box.appendChild(buttons);
 			
 			if (e.dialogHeader) {
-				let header = doc.createElement('description');
+				let header = doc.createXULElement('description');
 				header.className = 'error-header';
 				header.textContent = e.dialogHeader;
 				content.appendChild(header);
@@ -1542,7 +1541,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				msg = e.message;
 			}
 			
-			var desc = doc.createElement('description');
+			var desc = doc.createXULElement('description');
 			desc.textContent = msg;
 			// Make the text selectable
 			desc.setAttribute('style', '-moz-user-select: text; cursor: text');
@@ -1566,7 +1565,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					var buttonCallback = e.dialogButtonCallback;
 				}
 				
-				let button = doc.createElement('button');
+				let button = doc.createXULElement('button');
 				button.setAttribute('label', buttonText);
 				button.onclick = function () {
 					buttonCallback();
@@ -1579,7 +1578,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					buttonText = e.dialogButton2Text;
 					buttonCallback = e.dialogButton2Callback;
 					
-					let button2 = doc.createElement('button');
+					let button2 = doc.createXULElement('button');
 					button2.setAttribute('label', buttonText);
 					button2.onclick = () => {
 						buttonCallback();
@@ -1692,7 +1691,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 		if (_tooltipMessages.length) {
 			_currentTooltipMessages.textContent = '';
 			for (let message of _tooltipMessages) {
-				let elem = _currentTooltipMessages.ownerDocument.createElementNS(HTML_NS, 'p');
+				let elem = _currentTooltipMessages.ownerDocument.createElement('p');
 				elem.textContent = message;
 				_currentTooltipMessages.appendChild(elem);
 			}

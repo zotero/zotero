@@ -475,7 +475,7 @@ class PDFRenderer {
 		return new Promise((resolve) => {
 			this._browser = Zotero.Browser.createHiddenBrowser();
 			let doc = this._browser.ownerDocument;
-			let container = doc.createElement('hbox');
+			let container = doc.createXULElement('hbox');
 			container.style.position = 'fixed';
 			container.style.zIndex = '-1';
 			container.append(this._browser);

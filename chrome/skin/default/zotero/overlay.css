@@ -278,6 +278,12 @@
 	list-style-image: url('chrome://zotero/skin/toolbar-lookup.png');
 }
 
+#zotero-lookup-textbox, #zotero-lookup-multiline-textbox {
+	margin: 4px;
+	padding: 2px;
+	-moz-box-flex: 1;
+}
+
 #zotero-lookup-multiline-progress
 {
 	height: 2em;
@@ -634,6 +640,7 @@
 
 #item-box-container {
 	display: flex;
+	min-width: 0;
 }
 
 #retracted-items-banner, #sync-reminder-banner {

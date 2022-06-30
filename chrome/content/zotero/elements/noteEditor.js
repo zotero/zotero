@@ -86,7 +86,7 @@
 			});
 			shadow.append(content);
 
-			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'itembox');
+			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'noteEditor');
 			this.notitle = !!this.getAttribute('notitle');
 		}
 		
@@ -328,8 +328,6 @@
 
 
 {
-	let TagsBoxContainer = require('containers/tagsBoxContainer').default;
-
 	class LinksBox extends XULElement {
 		constructor() {
 			super();
@@ -357,7 +355,7 @@
 							<related-box id="related"/>
 						</menupopup>
 						<menupopup id="tags-popup" width="300" ignorekeys="true">
-							<div style="display: flex" id="tags-box-container" xmlns="http://www.w3.org/1999/xhtml"/>
+							<tags-box id="tags"/>
 						</menupopup>
 					</popupset>
 			`, ['chrome://zotero/locale/zotero.dtd']);
@@ -401,6 +399,7 @@
 		set item(val) {
 			this._item = val;
 			this._id('related').item = this._item;
+			this._id('tags').item = this._item;
 
 			this.refresh();
 
@@ -417,6 +416,7 @@
 		set mode(val) {
 			this._mode = val;
 			this._id('related').mode = val;
+			this._id('tags').mode = val;
 			this.refresh();
 		}
 
@@ -434,22 +434,6 @@
 			this._updateParentRow();
 			this._updateTagsSummary();
 			this._updateRelatedSummary();
-
-			// TODO: Update tagsBox container state via tagsBoxRef and imperative handle, instead of recreating it
-			let container = this._id('tags-box-container');
-			ReactDOM.unmountComponentAtNode(container);
-			if (this._item) {
-				var tagsBoxRef = React.createRef();
-				ReactDOM.render(
-					<TagsBoxContainer
-						key={'tagsBox-' + this._item.id}
-						item={this._item}
-						editable={this._mode == 'edit'}
-						ref={tagsBoxRef}
-					/>,
-					container
-				);
-			}
 		}
 
 		_updateParentRow() {
@@ -542,11 +526,11 @@
 		};
 
 		_tagsClickHandler = (event) => {
-			this._id('tags-popup').openPopup(this, 'topleft topleft', 0, 0, false);
+			this._id('tags-popup').openPopup(this, 'topleft topleft', 0, 0, true);
 			// If editable and no existing tags, open new empty row
 			if (this._mode == 'edit' && !this._item.getTags().length) {
 				setTimeout(() => {
-					this._id('tags-popup').querySelector('.tags-box-header button').click();
+					this._id('tags').addNew();
 				});
 			}
 		};

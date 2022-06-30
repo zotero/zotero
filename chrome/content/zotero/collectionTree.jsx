@@ -223,7 +223,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		const treeRow = this.getRow(index);
 		
 		// Div creation and content
-		let div = oldDiv || document.createElementNS("http://www.w3.org/1999/xhtml", 'div');
+		let div = oldDiv || document.createElement('div');
 		div.innerHTML = "";
 		
 		// Classes
@@ -245,13 +245,13 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		div.style.paddingInlineStart = (CHILD_INDENT * depth) + 'px';
 		
 		// Create a single-cell for the row (for the single-column layout)
-		let cell = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+		let cell = document.createElement('span');
 		cell.className = "cell label primary";
 		
 		// Twisty/spacer
 		let twisty;
 		if (this.isContainerEmpty(index)) {
-			twisty = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+			twisty = document.createElement('span');
 			if (Zotero.isMac && treeRow.isHeader()) {
 				twisty.classList.add("spacer-header");
 			}
@@ -275,7 +275,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		icon.classList.add('cell-icon');
 		
 		// Label
-		let label = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+		let label = document.createElement('span');
 		label.innerText = treeRow.getName();
 		label.className = 'cell-text';
 		label.dir = 'auto';
@@ -283,7 +283,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		// Editing input
 		div.classList.toggle('editing', treeRow == this._editing);
 		if (treeRow == this._editing) {
-			label = document.createElementNS("http://www.w3.org/1999/xhtml", 'input');
+			label = document.createElement('input');
 			label.className = 'cell-text';
 			label.setAttribute("size", 5);
 			label.value = treeRow.editingName;
@@ -2117,12 +2117,12 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		iconClsName = iconClsName || "IconTreesource" + collectionType;
 
 		if (collectionType == 'Separator') {
-			return document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+			return document.createElement('span');
 		}
 		
 		var icon = getDOMIcon(iconClsName);
 		if (!icon) {
-			return document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+			return document.createElement('span');
 		}
 		return icon;
 	}

@@ -41,7 +41,7 @@ function getImageByStatus(status) {
 	else if (status === Zotero.ProgressQueue.ROW_SUCCEEDED) {
 		return getDOMElement('IconTick');
 	}
-	return document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+	return document.createElement('span');
 }
 
 const ProgressQueueTable = ({ onActivate = noop, progressQueue }) => {
@@ -59,7 +59,7 @@ const ProgressQueueTable = ({ onActivate = noop, progressQueue }) => {
 			div.innerHTML = "";
 		}
 		else {
-			div = document.createElementNS("http://www.w3.org/1999/xhtml", 'div');
+			div = document.createElement('div');
 			div.className = "row";
 		}
 
@@ -67,7 +67,7 @@ const ProgressQueueTable = ({ onActivate = noop, progressQueue }) => {
 
 		for (let column of columns) {
 			if (column.dataKey === 'success') {
-				let span = document.createElementNS("http://www.w3.org/1999/xhtml", 'span');
+				let span = document.createElement('span');
 				span.className = `cell icon ${column.className}`;
 				span.appendChild(getImageByStatus(row.status));
 				div.appendChild(span);

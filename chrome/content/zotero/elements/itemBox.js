@@ -62,91 +62,15 @@
 			this.content = MozXULElement.parseXULToFragment(`
 				<div id="item-box" xmlns="http://www.w3.org/1999/xhtml">
 					<popupset xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-						<menupopup id="creator-type-menu" position="after_start"
-							onpopupshowing="var typeBox = document.popupNode.localName == 'hbox' ? document.popupNode : document.popupNode.parentNode;
-									var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
-									
-									var item = this.item;
-									var exists = item.hasCreatorAt(index);
-									var moreCreators = item.numCreators() > index + 1;
-									
-									var hideMoveToTop = !exists || index &lt; 2;
-									var hideMoveUp = !exists || index == 0;
-									var hideMoveDown = !exists || !moreCreators;
-									var hideMoveSep = hideMoveUp &amp;&amp; hideMoveDown;
-									
-									document.getElementById('zotero-creator-move-sep').setAttribute('hidden', hideMoveSep);
-									document.getElementById('zotero-creator-move-to-top').setAttribute('hidden', hideMoveToTop);
-									document.getElementById('zotero-creator-move-up').setAttribute('hidden', hideMoveUp);
-									document.getElementById('zotero-creator-move-down').setAttribute('hidden', hideMoveDown);"
-							oncommand="return async function () {
-								var typeBox = document.popupNode.localName == 'hbox' ? document.popupNode : document.popupNode.parentNode;
-								var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
-								
-								if (event.explicitOriginalTarget.className == 'zotero-creator-move') {
-									let dir;
-									switch (event.explicitOriginalTarget.id) {
-									case 'zotero-creator-move-to-top':
-										dir = 'top';
-										break;
-									
-									case 'zotero-creator-move-up':
-										dir = 'up';
-										break;
-									
-									case 'zotero-creator-move-down':
-										dir = 'down';
-										break;
-									}
-									this.moveCreator(index, dir);
-									return;
-								}
-								
-								var typeID = event.explicitOriginalTarget.getAttribute('typeid');
-								var row = typeBox.parentNode;
-								var fields = this.getCreatorFields(row);
-								fields.creatorTypeID = typeID;
-								typeBox.getElementsByTagName('label')[0].setAttribute(
-									'value',
-									Zotero.getString(
-										'creatorTypes.' + Zotero.CreatorTypes.getName(typeID)
-									)
-								);
-								typeBox.setAttribute('typeid', typeID);
-								
-								/* If a creator textbox is already open, we need to
-								change its autocomplete parameters so that it
-								completes on a creator with a different creator type */
-								var changedParams = {
-									creatorTypeID: typeID
-								};
-								this._updateAutoCompleteParams(row, changedParams);
-								
-								this.modifyCreator(index, fields);
-								if (this.saveOnEdit) {
-									await this.blurOpenField();
-									await this.item.saveTx();
-								}
-							}.bind(this)();"/>
+						<menupopup id="creator-type-menu" position="after_start"/>
 						<menupopup id="zotero-field-transform-menu">
-							<menuitem label="&zotero.item.textTransform.titlecase;" class="menuitem-non-iconic"
-								oncommand="this.textTransform(document.popupNode, 'title')"/>
-							<menuitem label="&zotero.item.textTransform.sentencecase;" class="menuitem-non-iconic"
-								oncommand="this.textTransform(document.popupNode, 'sentence')"/>
+							<menuitem id="creator-transform-title-case" label="&zotero.item.textTransform.titlecase;"
+								class="menuitem-non-iconic"/>
+							<menuitem id="creator-transform-sentence-case" label="&zotero.item.textTransform.sentencecase;"
+								class="menuitem-non-iconic"/>
 						</menupopup>
-						<menupopup id="zotero-creator-transform-menu"
-							onpopupshowing="var row = document.popupNode.closest('tr');
-								var typeBox = row.querySelector('.creator-type-label');
-								var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
-								var item = this.item;
-								var exists = item.hasCreatorAt(index);
-								if (exists) {
-									var fieldMode = item.getCreator(index).name !== undefined ? 1 : 0;
-								}
-								var hideTransforms = !exists || !!fieldMode;
-								return !hideTransforms;">
-							<menuitem label="&zotero.item.creatorTransform.nameSwap;"
-								oncommand="this.swapNames(event);"/>
+						<menupopup id="zotero-creator-transform-menu">
+							<menuitem id="creator-transform-swap-names" label="&zotero.item.creatorTransform.nameSwap;"/>
 						</menupopup>
 						<menupopup id="zotero-doi-menu">
 							<menuitem id="zotero-doi-menu-view-online" label="&zotero.item.viewOnline;"/>
@@ -198,8 +122,97 @@
 			shadow.append(s2);
 			
 			shadow.appendChild(document.importNode(this.content, true));
+
+			this._creatorTypeMenu.addEventListener('popupshowing', () => {
+				var typeBox = document.popupNode.localName == 'th' ? document.popupNode : document.popupNode.parentNode;
+				var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
+				
+				var item = this.item;
+				var exists = item.hasCreatorAt(index);
+				var moreCreators = item.numCreators() > index + 1;
+				
+				var hideMoveToTop = !exists || index < 2;
+				var hideMoveUp = !exists || index == 0;
+				var hideMoveDown = !exists || !moreCreators;
+				var hideMoveSep = hideMoveUp && hideMoveDown;
+				
+				this._id('zotero-creator-move-sep').setAttribute('hidden', hideMoveSep);
+				this._id('zotero-creator-move-to-top').setAttribute('hidden', hideMoveToTop);
+				this._id('zotero-creator-move-up').setAttribute('hidden', hideMoveUp);
+				this._id('zotero-creator-move-down').setAttribute('hidden', hideMoveDown);
+			});
+
+			this._creatorTypeMenu.addEventListener('command', async (event) => {
+				var typeBox = document.popupNode.localName == 'th' ? document.popupNode : document.popupNode.parentNode;
+				var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
+				
+				if (event.explicitOriginalTarget.className == 'zotero-creator-move') {
+					let dir;
+					switch (event.explicitOriginalTarget.id) {
+						case 'zotero-creator-move-to-top':
+							dir = 'top';
+							break;
+						
+						case 'zotero-creator-move-up':
+							dir = 'up';
+							break;
+						
+						case 'zotero-creator-move-down':
+							dir = 'down';
+							break;
+					}
+					this.moveCreator(index, dir);
+					return;
+				}
+				
+				var typeID = event.explicitOriginalTarget.getAttribute('typeid');
+				var row = typeBox.parentNode;
+				var fields = this.getCreatorFields(row);
+				fields.creatorTypeID = typeID;
+				typeBox.getElementsByTagName('label')[0].textContent = Zotero.getString(
+					'creatorTypes.' + Zotero.CreatorTypes.getName(typeID)
+				);
+				typeBox.setAttribute('typeid', typeID);
+				
+				/* If a creator textbox is already open, we need to
+				change its autocomplete parameters so that it
+				completes on a creator with a different creator type */
+				var changedParams = {
+					creatorTypeID: typeID
+				};
+				this._updateAutoCompleteParams(row, changedParams);
+				
+				this.modifyCreator(index, fields);
+				if (this.saveOnEdit) {
+					await this.blurOpenField();
+					await this.item.saveTx();
+				}
+			});
+
+			this._id('creator-transform-title-case').addEventListener('command',
+				() => this.textTransform(document.popupNode, 'title'));
+			this._id('creator-transform-sentence-case').addEventListener('command',
+				() => this.textTransform(document.popupNode, 'sentence'));
 			
-			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'itembox');
+			this._id('zotero-creator-transform-menu').addEventListener('popupshowing', (event) => {
+				var row = document.popupNode.closest('tr');
+				var typeBox = row.querySelector('.creator-type-label');
+				var index = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
+				var item = this.item;
+				var exists = item.hasCreatorAt(index);
+				if (exists) {
+					var fieldMode = item.getCreator(index).name !== undefined ? 1 : 0;
+				}
+				var hideTransforms = !exists || !!fieldMode;
+				if (hideTransforms) {
+					event.preventDefault();
+				}
+			});
+
+			this._id('creator-transform-swap-names').addEventListener('command',
+				event => this.swapNames(event));
+			
+			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'itemBox');
 		}
 		
 		destroy() {
@@ -432,11 +445,11 @@
 			}
 			if (this.showTypeMenu) {
 				this.updateItemTypeMenuSelection();
-				this.itemTypeMenu.parentNode.hidden = false;
+				this.itemTypeMenu.parentNode.parentNode.style.display = 'contents';
 				this.itemTypeMenu.setAttribute('ztabindex', '0');
 			}
 			else {
-				this.itemTypeMenu.parentNode.hidden = true;
+				this.itemTypeMenu.parentNode.parentNode.style.display = 'none';
 			}
 			
 			//
@@ -547,7 +560,7 @@
 						&& Zotero.Utilities.isHTTPURL(val, true)) {
 					th.classList.add("pointer");
 					// TODO: make getFieldValue non-private and use below instead
-					th.setAttribute("onclick", "Zotero.launchURL(this.nextSibling.firstChild ? this.nextSibling.firstChild.textContent : this.nextSibling.value)");
+					th.setAttribute("onclick", "Zotero.launchURL(this.nextSibling.firstChild.value || this.nextSibling.firstChild.textContent)");
 					th.setAttribute("tooltiptext", Zotero.getString('pane.item.viewOnline.tooltip'));
 				}
 				else if (fieldName == 'DOI' && val && typeof val == 'string') {
@@ -580,8 +593,8 @@
 						th.classList.add("pointer");
 					}
 					th.addEventListener('click', function () {
-						if (this.nextSibling.inputField) {
-							this.nextSibling.inputField.blur();
+						if (this.nextSibling.querySelector('input, textarea')) {
+							this.nextSibling.querySelector('input, textarea').blur();
 						}
 						else {
 							this.getRootNode().host.toggleAbstractExpand(
@@ -591,8 +604,11 @@
 					});
 				}
 				else {
-					th.setAttribute("onclick",
-						"if (this.nextSibling.inputField) { this.nextSibling.inputField.blur(); }");
+					th.addEventListener('click', function () {
+						if (this.nextSibling.querySelector('input, textarea')) {
+							this.nextSibling.querySelector('input, textarea').blur();
+						}
+					});
 				}
 				
 				let td = document.createElement('td');
@@ -610,11 +626,12 @@
 					button.className = 'zotero-field-version-button';
 					button.setAttribute('image', 'chrome://zotero/skin/treesource-duplicates.png');
 					button.setAttribute('type', 'menu');
+					button.setAttribute('wantdropmarker', true);
 					
 					var popup = button.appendChild(document.createXULElement("menupopup"));
 					
 					for (let v of this._fieldAlternatives[fieldName]) {
-						var menuitem = document.createXULElement("menuitem");
+						let menuitem = document.createXULElement("menuitem");
 						var sv = Zotero.Utilities.ellipsize(v, 60);
 						menuitem.setAttribute('label', sv);
 						if (v != sv) {
@@ -622,13 +639,13 @@
 						}
 						menuitem.setAttribute('fieldName', fieldName);
 						menuitem.setAttribute('originalValue', v);
-						menuitem.oncommand = () => {
+						menuitem.addEventListener('command', () => {
 							this.item.setField(
 								menuitem.getAttribute('fieldName'),
 								menuitem.getAttribute('originalValue')
 							);
 							this.refresh();
-						};
+						});
 						popup.appendChild(menuitem);
 					}
 					
@@ -687,9 +704,9 @@
 			// Place, in order of preference, after title, after type,
 			// or at beginning
 			var titleFieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(this.item.itemTypeID, 'title');
-			var field = this._infoTable.getElementsByAttribute('fieldname', Zotero.ItemFields.getName(titleFieldID)).item(0);
+			var field = this._infoTable.querySelector(`[fieldname="${Zotero.ItemFields.getName(titleFieldID)}"]`);
 			if (!field) {
-				var field = this._infoTable.getElementsByAttribute('fieldname', 'itemType').item(0);
+				var field = this._infoTable.querySelector('[fieldName="itemType"]');
 			}
 			if (field) {
 				this._beforeRow = field.parentNode.nextSibling;
@@ -832,15 +849,20 @@
 				? Zotero.CreatorTypes.getID(creatorTypeIDOrName)
 				: this._creatorTypeMenu.childNodes[0].getAttribute('typeid');
 			
+			var rowIndex = this._creatorCount;
+			
 			var th = document.createElement("th");
 			th.setAttribute("typeid", typeID);
-			th.setAttribute("popup", "creator-type-menu");
-			th.setAttribute("fieldname", 'creator-' + this._creatorCount + '-typeID');
+			th.setAttribute("fieldname", 'creator-' + rowIndex + '-typeID');
 			if (this.editable) {
 				th.className = 'creator-type-label zotero-clicky';
 				let span = document.createElement('span');
 				span.className = 'creator-type-dropmarker';
 				th.appendChild(span);
+				th.addEventListener('click', () => {
+					document.popupNode = th;
+					this._creatorTypeMenu.openPopup(th);
+				});
 			}
 			else {
 				th.className = 'creator-type-label';
@@ -858,8 +880,8 @@
 			var firstlast = document.createElement("span");
 			firstlast.className = 'creator-name-box';
 			firstlast.setAttribute("flex","1");
-			var tabindex = this._tabIndexMinCreators + (this._creatorCount * 2);
-			var fieldName = 'creator-' + this._creatorCount + '-lastName';
+			var tabindex = this._tabIndexMinCreators + (rowIndex * 2);
+			var fieldName = 'creator-' + rowIndex + '-lastName';
 			var lastNameElem = firstlast.appendChild(
 				this.createValueElement(
 					lastName,
@@ -874,7 +896,7 @@
 			comma.className = 'comma';
 			firstlast.appendChild(comma);
 			
-			var fieldName = 'creator-' + this._creatorCount + '-firstName';
+			var fieldName = 'creator-' + rowIndex + '-firstName';
 			firstlast.appendChild(
 				this.createValueElement(
 					firstName,
@@ -887,9 +909,13 @@
 			}
 			
 			if (this.editable && fieldMode == 0) {
-				firstlast.oncontextmenu = () => {
+				firstlast.oncontextmenu = (event) => {
 					document.popupNode = firstlast;
-					this._id('zotero-creator-transform-menu').openPopup(firstlast);
+					this._id('zotero-creator-transform-menu').openPopupAtScreen(
+						event.screenX + 1,
+						event.screenY + 1,
+						true
+					);
 				};
 			}
 			
@@ -900,7 +926,7 @@
 			// Single/double field toggle
 			var toggleButton = document.createElement('span');
 			toggleButton.setAttribute('fieldname',
-				'creator-' + this._creatorCount + '-fieldMode');
+				'creator-' + rowIndex + '-fieldMode');
 			toggleButton.className = 'zotero-field-toggle zotero-clicky';
 			td.appendChild(toggleButton);
 			
@@ -913,10 +939,9 @@
 				this.disableButton(removeButton);
 			}
 			else {
-				removeButton.setAttribute("onclick",
-					"this.removeCreator("
-					+ this._creatorCount
-					+ ", this.parentNode.parentNode)");
+				removeButton.addEventListener("click", () => {
+					this.removeCreator(rowIndex, td.parentNode);
+				});
 			}
 			td.appendChild(removeButton);
 			
@@ -1276,23 +1301,22 @@
 		
 		disableButton(button) {
 			button.setAttribute('disabled', true);
-			button.setAttribute('onclick', false); 
+			button.setAttribute('onclick', false);
 		}
 		
 		_enablePlusButton(button, creatorTypeID, fieldMode) {
 			button.setAttribute('disabled', false);
-			button.onclick = function () {
-				var parent = this;
-				parent.disableButton(this);
-				parent.addCreatorRow(null, creatorTypeID, true);
+			button.onclick = () => {
+				this.disableButton(button);
+				this.addCreatorRow(null, creatorTypeID, true);
 			};
 		}
 		
 		disableCreatorAddButtons() {
 			// Disable the "+" button on all creator rows
-			var elems = this._infoTable.getElementsByAttribute('value', '+');
-			for (var i = 0, len = elems.length; i < len; i++) {
-				this.disableButton(elems[i]);
+			var elems = this._infoTable.getElementsByClassName('zotero-clicky-plus');
+			for (let elem of elems) {
+				this.disableButton(elem);
 			}
 		}
 		
@@ -1385,9 +1409,14 @@
 				if (this.editable && (fieldName == 'seriesTitle' || fieldName == 'shortTitle' ||
 						Zotero.ItemFields.isFieldOfBase(fieldID, 'title') ||
 						Zotero.ItemFields.isFieldOfBase(fieldID, 'publicationTitle'))) {
-					valueElement.oncontextmenu = () => {
+					valueElement.setAttribute('context', 'zotero-field-transform-menu');
+					valueElement.oncontextmenu = (event) => {
 						document.popupNode = valueElement;
-						this._id('zotero-field-transform-menu').openPopup(valueElement);
+						this._id('zotero-field-transform-menu').openPopupAtScreen(
+							event.screenX + 1,
+							event.screenY + 1,
+							true
+						);
 					};
 				}
 			}
@@ -1433,7 +1462,7 @@
 					labelToDelete.parentNode.removeChild(labelToDelete);
 					
 					// Enable the "+" button on the previous row
-					var elems = this._infoTable.getElementsByAttribute('value', '+');
+					var elems = this._infoTable.getElementsByClassName('zotero-clicky-plus');
 					var button = elems[elems.length-1];
 					var creatorFields = this.getCreatorFields(button.closest('tr'));
 					this._enablePlusButton(button, creatorFields.creatorTypeID, creatorFields.fieldMode);
@@ -1552,8 +1581,9 @@
 							}
 						});
 						// Tab/Shift-Tab
-						t.setAttribute('onchange',
-							'this.handleCreatorAutoCompleteSelect(this)');
+						t.addEventListener('change', () => {
+							this.handleCreatorAutoCompleteSelect(t, true);
+						});
 						
 						if (creatorField == 'lastName') {
 							t.setAttribute('fieldMode', elem.getAttribute('fieldMode'));
@@ -2021,43 +2051,41 @@
 		/**
 		 * TODO: work with textboxes too
 		 */
-		textTransform(label, mode) {
-			return (async function () {
-				var val = this._getFieldValue(label);
-				switch (mode) {
-					case 'title':
-						var newVal = Zotero.Utilities.capitalizeTitle(val.toLowerCase(), true);
-						break;
-					case 'sentence':
-						// capitalize the first letter, including after beginning punctuation
-						// capitalize after ?, ! and remove space(s) before those as well as colon analogous to capitalizeTitle function
-						// also deal with initial punctuation here - open quotes and Spanish beginning punctuation marks
-						newVal = val.toLowerCase().replace(/\s*:/, ":");
-						newVal = newVal.replace(/(([\?!]\s*|^)([\'\"¡¿“‘„«\s]+)?[^\s])/g, function (x) {
-							return x.replace(/\s+/m, " ").toUpperCase();});
-						break;
-					default:
-						throw ("Invalid transform mode '" + mode + "' in zoteroitembox.textTransform()");
-				}
-				this._setFieldValue(label, newVal);
-				var fieldName = label.getAttribute('fieldname');
-				this._modifyField(fieldName, newVal);
-				
-				// If this is a title field, convert the Short Title too
-				var isTitle = Zotero.ItemFields.getBaseIDFromTypeAndField(
-					this.item.itemTypeID, fieldName) == Zotero.ItemFields.getID('title');
-				var shortTitleVal = this.item.getField('shortTitle');
-				if (isTitle && newVal.toLowerCase().startsWith(shortTitleVal.toLowerCase())) {
-					this._modifyField('shortTitle', newVal.substr(0, shortTitleVal.length));
-				}
-				
-				if (this.saveOnEdit) {
-					// If a field is open, blur it, which will trigger a save and cause
-					// the saveTx() to be a no-op
-					await this.blurOpenField();
-					await this.item.saveTx();
-				}
-			});
+		async textTransform(label, mode) {
+			var val = this._getFieldValue(label);
+			switch (mode) {
+				case 'title':
+					var newVal = Zotero.Utilities.capitalizeTitle(val.toLowerCase(), true);
+					break;
+				case 'sentence':
+					// capitalize the first letter, including after beginning punctuation
+					// capitalize after ?, ! and remove space(s) before those as well as colon analogous to capitalizeTitle function
+					// also deal with initial punctuation here - open quotes and Spanish beginning punctuation marks
+					newVal = val.toLowerCase().replace(/\s*:/, ":");
+					newVal = newVal.replace(/(([\?!]\s*|^)([\'\"¡¿“‘„«\s]+)?[^\s])/g, function (x) {
+						return x.replace(/\s+/m, " ").toUpperCase();});
+					break;
+				default:
+					throw new Error("Invalid transform mode '" + mode + "' in ItemBox.textTransform()");
+			}
+			this._setFieldValue(label, newVal);
+			var fieldName = label.getAttribute('fieldname');
+			this._modifyField(fieldName, newVal);
+			
+			// If this is a title field, convert the Short Title too
+			var isTitle = Zotero.ItemFields.getBaseIDFromTypeAndField(
+				this.item.itemTypeID, fieldName) == Zotero.ItemFields.getID('title');
+			var shortTitleVal = this.item.getField('shortTitle');
+			if (isTitle && newVal.toLowerCase().startsWith(shortTitleVal.toLowerCase())) {
+				this._modifyField('shortTitle', newVal.substr(0, shortTitleVal.length));
+			}
+			
+			if (this.saveOnEdit) {
+				// If a field is open, blur it, which will trigger a save and cause
+				// the saveTx() to be a no-op
+				await this.blurOpenField();
+				await this.item.saveTx();
+			}
 		}
 		
 		getCreatorFields(row) {
@@ -2266,7 +2294,7 @@
 		
 		blurOpenField() {
 			return (async function () {
-				var activeField = this._infoTable.querySelector('input');
+				var activeField = this._infoTable.querySelector('input, textarea');
 				if (!activeField) {
 					return false;
 				}
@@ -2304,8 +2332,6 @@
 			// don't overlap.
 			if (!this._updateRetracted) {
 				this._updateRetracted = Zotero.serial(async function (item) {
-					var htmlNS = 'http://www.w3.org/1999/xhtml';
-					
 					var show = Zotero.Retractions.isRetracted(item);
 					if (!show) {
 						this._id('retraction-box').hidden = true;
@@ -2336,8 +2362,8 @@
 						elem.hidden = false;
 						elem.textContent = '';
 						for (let reason of data.reasons) {
-							let dt = document.createElementNS(htmlNS, 'dt');
-							let dd = document.createElementNS(htmlNS, 'dd');
+							let dt = document.createElement('dt');
+							let dd = document.createElement('dd');
 							
 							dt.textContent = reason;
 							dd.textContent = Zotero.Retractions.getReasonDescription(reason);
@@ -2358,7 +2384,7 @@
 					if (data.doi || data.pmid) {
 						let div = this._id('retraction-notice');
 						div.textContent = '';
-						let a = document.createElementNS(htmlNS, 'a');
+						let a = document.createElement('a');
 						a.textContent = Zotero.getString('retraction.notice');
 						if (data.doi) {
 							a.href = 'https://doi.org/' + data.doi;
@@ -2378,13 +2404,13 @@
 						div.hidden = false;
 						div.textContent = '';
 						
-						let p = document.createElementNS(htmlNS, 'p');
+						let p = document.createElement('p');
 						p.textContent = Zotero.getString('retraction.details');
 						
-						let ul = document.createElementNS(htmlNS, 'ul');
+						let ul = document.createElement('ul');
 						for (let url of data.urls) {
-							let li = document.createElementNS(htmlNS, 'li');
-							let a = document.createElementNS(htmlNS, 'a');
+							let li = document.createElement('li');
+							let a = document.createElement('a');
 							url = url.replace(/^http:/, 'https:');
 							a.href = url;
 							a.textContent = url;
@@ -2411,7 +2437,7 @@
 								creditElem.appendChild(document.createTextNode(part.text));
 							}
 							else if (part.type == 'link') {
-								let a = document.createElementNS(htmlNS, 'a');
+								let a = document.createElement('a');
 								a.href = part.attributes.href;
 								a.textContent = part.text;
 								creditElem.appendChild(a);
@@ -2434,7 +2460,7 @@
 		}
 		
 		_id(id) {
-			return this.shadowRoot.querySelector(`[id=${id}]`);
+			return this.shadowRoot.getElementById(id);
 		}
 	}
 	customElements.define("item-box", ItemBox);

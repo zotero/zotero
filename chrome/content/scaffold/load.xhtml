@@ -25,24 +25,23 @@
 -->
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://scaffold/skin/scaffold.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
 
 <!DOCTYPE window SYSTEM "chrome://scaffold/locale/scaffold.dtd">
-<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	title="&scaffold.load.title;" width="400" height="330" buttons="cancel,accept"
-	ondialogaccept="Scaffold_Load.accept()" onload="Scaffold_Load.onLoad()"
+<window
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+    title="&scaffold.load.title;" width="400" height="330"
+    onload="Scaffold_Load.onLoad()">
+<dialog buttons="cancel,accept"
 	id="scaffold-load">
 	
 	<script src="chrome://zotero/content/include.js"/>
 	<script src="load.js"/>
 	
-	<listbox id="listbox" flex="1">
-		<listhead>
-			<listheader label="&scaffold.load.label.label;"/>
-			<listheader label="&scaffold.load.creator.label;"/>
-		</listhead>
-		<listcols>
-			<listcol flex="1"/>
-			<listcol width="130"/>
-		</listcols>
-	</listbox>
+    <listheader>
+        <treecol flex="1" label="&scaffold.load.label.label;"/>
+		<treecol width="130" label="&scaffold.load.creator.label;"/>
+    </listheader>
+	<richlistbox id="listbox" flex="1"/>
 </dialog>
+</window>

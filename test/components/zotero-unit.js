@@ -23,7 +23,7 @@
     
     ***** END LICENSE BLOCK *****
 */
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Components.utils.import("resource://gre/modules/ComponentUtils.jsm");
 
 function ZoteroUnit() {
 	this.wrappedJSObject = this;
@@ -56,4 +56,4 @@ ZoteroUnit.prototype = {
 };
 
 
-var NSGetFactory = XPCOMUtils.generateNSGetFactory([ZoteroUnit]);
+var NSGetFactory = ComponentUtils.generateNSGetFactory([ZoteroUnit]);

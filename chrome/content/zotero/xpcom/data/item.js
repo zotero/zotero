@@ -2941,15 +2941,11 @@ Zotero.Item.prototype.getLocalFileURL = function() {
 	if (!this.isAttachment()) {
 		throw ("getLocalFileURL() can only be called on attachment items");
 	}
-	
-	var file = this.getFile();
+	var file = this.getFilePath();
 	if (!file) {
 		return false;
 	}
-	
-	var nsIFPH = Components.classes["@mozilla.org/network/protocol;1?name=file"]
-			.getService(Components.interfaces.nsIFileProtocolHandler);
-	return nsIFPH.getURLSpecFromFile(file);
+	return Zotero.File.pathToFileURI(file);
 }
 
 
