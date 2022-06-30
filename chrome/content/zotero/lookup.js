@@ -122,7 +122,7 @@ var Zotero_Lookup = new function () {
 		let newItems = await Zotero_Lookup.addItemsFromIdentifier(
 			textBox,
 			false,
-			on => Zotero_Lookup.toggleProgress(on)
+			on => Zotero_Lookup.setShowProgress(on)
 		);
 
 		if (newItems) {
@@ -163,7 +163,7 @@ var Zotero_Lookup = new function () {
 		// Ignore context menu
 		if (event.originalTarget.id != 'zotero-lookup-panel') return;
 		
-		this.getActivePanel().querySelector('input').focus();
+		this.getActivePanel().querySelector('textarea').focus();
 	}
 	
 	
@@ -174,12 +174,11 @@ var Zotero_Lookup = new function () {
 		// Ignore context menu
 		if (event.originalTarget.id != 'zotero-lookup-panel') return;
 		
-		document.getElementById("zotero-lookup-textbox").value = "";
 		document.getElementById("zotero-lookup-multiline-textbox").value = "";
-		Zotero_Lookup.toggleProgress(false);
+		Zotero_Lookup.setShowProgress(false);
 		
 		// Revert to single-line when closing
-		this.toggleMultiline(false);
+		this.setMultiline(false);
 	}
 	
 	
@@ -203,63 +202,37 @@ var Zotero_Lookup = new function () {
 	/**
 	 * Handles a key press
 	 */
-	this.onKeyPress = function(event, textBox) {
+	this.onKeyPress = function (event, textBox) {
 		var keyCode = event.keyCode;
 		//use enter to start search, shift+enter to insert a new line. Flipped in multiline mode
-		var multiline = textBox.getAttribute('multiline');
+		var multiline = textBox.rows > 1;
 		var search = multiline ? event.shiftKey : !event.shiftKey;
 		if(keyCode === 13 || keyCode === 14) {
 			if(search) {
 				Zotero_Lookup.accept(textBox);
 				event.stopImmediatePropagation();
-			} else if(!multiline) {	//switch to multiline
-				var mlTextbox = Zotero_Lookup.toggleMultiline(true);
-				mlTextbox.value = mlTextbox.value.trim() !== '' ? mlTextbox.value + '\n' : '';
+			} else if(!multiline) {	// switch to multiline
+				Zotero_Lookup.setMultiline(true);
 			}
 		} else if(keyCode == event.DOM_VK_ESCAPE) {
 			document.getElementById("zotero-lookup-panel").hidePopup();
 		}
-		return true;
 	}
 	
 	
-	this.onInput = function (event, textbox) {
-		this.adjustTextbox(textbox);
+	this.onInput = function (event, textBox) {
+		if (/[\r\n]/.test(textBox.value)) {
+			this.setMultiline(true);
+		}
 	};
 	
 	
-	/**
-	 * Converts the textbox to multiline if newlines are detected
-	 */
-	this.adjustTextbox = function (textbox) {
-		if (textbox.value.trim().match(/[\r\n]/)) {
-			Zotero_Lookup.toggleMultiline(true);
-		}
-		// Since we ignore trailing and leading newlines, we should also trim them for display
-		// can't use trim, because then we cannot add leading/trailing spaces to the single line textbox
-		else {
-			textbox.value = textbox.value.replace(/^([ \t]*[\r\n]+[ \t]*)+|([ \t]*[\r\n]+[ \t]*)+$/g,"");
-		}
-	}
-	
-	
-	/**
-	 * Performs the switch to multiline textbox and returns that textbox
-	 */
-	this.toggleMultiline = function(on) {
-		var mlPanel = document.getElementById("zotero-lookup-multiline");
+	this.setMultiline = function (on) {
 		var mlTxtBox = document.getElementById("zotero-lookup-multiline-textbox");
-		var slPanel = document.getElementById("zotero-lookup-singleLine");
-		var slTxtBox = document.getElementById("zotero-lookup-textbox");
-		var source = on ? slTxtBox : mlTxtBox;
-		var dest = on ? mlTxtBox : slTxtBox;
+		var mlButtons = document.getElementById('zotero-lookup-buttons');
 
-		//copy over the value
-		dest.value = source.value;
-
-		//switch textboxes
-		mlPanel.setAttribute("collapsed", !on);
-		slPanel.setAttribute("collapsed", !!on);
+		mlTxtBox.rows = on ? 5 : 1;
+		mlButtons.hidden = !on;
 
 		// Resize arrow box to fit content -- also done in onShowing()
 		if(Zotero.isMac) {
@@ -267,27 +240,22 @@ var Zotero_Lookup = new function () {
 			var box = panel.firstChild;
 			panel.sizeTo(box.scrollWidth, box.scrollHeight);
 		}
-		
-		dest.focus();
-		return dest;
-	}
 
-	this.toggleProgress = function(on) {
+		return mlTxtBox;
+	};
+
+	this.setShowProgress = function (on) {
 		// In Firefox 52.6.0, progressmeters burn CPU at idle on Linux when undetermined, even
 		// if they're hidden. (Being hidden is enough on macOS.)
-		var mode = on ? 'undetermined' : 'determined';
 		
-		//single line
-		var txtBox = document.getElementById("zotero-lookup-textbox");
-		txtBox.style.opacity = on ? 0.5 : 1;
-		txtBox.disabled = !!on;
-		var p1 = document.getElementById("zotero-lookup-progress");
-		p1.mode = mode;
-
-		//multiline
 		document.getElementById("zotero-lookup-multiline-textbox").disabled = !!on;
-		var p2 = document.getElementById("zotero-lookup-multiline-progress");
-		p2.mode = mode;
-		p2.hidden = !on;
-	}
+		var p = document.getElementById("zotero-lookup-multiline-progress");
+		if (on) {
+			p.removeAttribute('value');
+		}
+		else {
+			p.setAttribute('value', 0);
+		}
+		p.hidden = !on;
+	};
 }

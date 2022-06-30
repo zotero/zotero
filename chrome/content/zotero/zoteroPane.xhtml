@@ -799,26 +799,24 @@
 											onpopupshown="Zotero_Lookup.onShown(event)"
 											onpopuphidden="Zotero_Lookup.onHidden(event)"
 									>
-										<html:div>
-											<html:label>&zotero.lookup.description;</html:label>
-											<html:div id="zotero-lookup-singleLine">
-												<stack>
-													<progressmeter id="zotero-lookup-progress" mode="determined"/>
-													<html:input id="zotero-lookup-textbox"
-														onkeypress="return Zotero_Lookup.onKeyPress(event, this)"
-														oninput="Zotero_Lookup.onInput(event, this)"/>
-												</stack>
-											</html:div>
-											<html:div id="zotero-lookup-multiline" hidden="">
-												<html:input id="zotero-lookup-multiline-textbox" onkeypress="return Zotero_Lookup.onKeyPress(event, this)" rows="5"/> <!-- wrap="off" flex="1"/> -->
-												<html:div id="zotero-lookup-buttons" class="zotero-button-clear-image"> <!-- align="start"  -->
-													<html:button align="start" onclick="Zotero_Lookup.accept(document.getElementById('zotero-lookup-multiline-textbox'))">
-														&zotero.lookup.button.search;
-													</html:button>
-													<progressmeter id="zotero-lookup-multiline-progress" mode="determined" flex="1" hidden="true"/>
-												</html:div>
-											</html:div>
-										</html:div>
+										<vbox>
+											<label>&zotero.lookup.description;</label>
+											<vbox id="zotero-lookup-multiline">
+												<html:textarea
+													id="zotero-lookup-multiline-textbox"
+													onkeypress="Zotero_Lookup.onKeyPress(event, this)"
+													oninput="Zotero_Lookup.onInput(event, this)"
+													rows="1"
+													wrap="off"/>
+												<hbox id="zotero-lookup-buttons" align="start" hidden="true">
+													<button
+														align="start"
+														oncommand="Zotero_Lookup.accept(document.getElementById('zotero-lookup-multiline-textbox'))"
+														label="&zotero.lookup.button.search;"/>
+													<html:progress id="zotero-lookup-multiline-progress" value="0" hidden="true" style="-moz-box-flex: 1"/>
+												</hbox>
+											</vbox>
+										</vbox>
 									</panel>
 									
 									<!--<toolbarbutton id="zotero-tb-note-add" class="zotero-tb-button" tooltiptext="&zotero.toolbar.note.standalone;" oncommand="ZoteroPane_Local.newNote(event.shiftKey);"/>-->
