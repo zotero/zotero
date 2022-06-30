@@ -53,7 +53,8 @@ var ZoteroContextPane = new function () {
 	var _notesContexts = [];
 
 	var _globalDeckIndex = [];
-	
+	var _preventGlobalDeckChange = false;
+
 	// Using attribute instead of property to set 'selectedIndex'
 	// is more reliable
 	
@@ -204,10 +205,13 @@ var ZoteroContextPane = new function () {
 					_tabCover.hidden = true;
 				}
 				else if (Zotero_Tabs.selectedType == 'reader') {
-					if (_panesDeck.selectedIndex == 1 && _notesPaneDeck.selectedPanel.selectedIndex != 2) {
+					if (_panesDeck.selectedIndex == 1
+						&& _notesPaneDeck.selectedPanel.selectedIndex != 2
+						&& !_preventGlobalDeckChange) {
 						let libraryID = _notesPaneDeck.selectedPanel.getAttribute('data-library-id');
 						_globalDeckIndex[libraryID] = _notesPaneDeck.selectedPanel.selectedIndex;
 					}
+					_preventGlobalDeckChange = false;
 
 					var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 					if (reader) {
@@ -802,6 +806,7 @@ var ZoteroContextPane = new function () {
 					_notesPaneDeck.selectedPanel.setAttribute('selectedIndex', 0);
 					vbox.remove();
 					_updateAddToNote();
+					_preventGlobalDeckChange = true;
 				};
 
 				_notesPaneDeck.selectedPanel.setAttribute('selectedIndex', 2);
