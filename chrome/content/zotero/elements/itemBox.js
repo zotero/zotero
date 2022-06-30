@@ -626,6 +626,7 @@
 					button.className = 'zotero-field-version-button';
 					button.setAttribute('image', 'chrome://zotero/skin/treesource-duplicates.png');
 					button.setAttribute('type', 'menu');
+					button.setAttribute('wantdropmarker', true);
 					
 					var popup = button.appendChild(document.createXULElement("menupopup"));
 					

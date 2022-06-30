@@ -75,9 +75,12 @@
 	font-size: 13px;
 }
 
-#zotero-duplicates-merge-pane > groupbox
-{
-	margin: 0;
+#zotero-duplicates-merge-pane > groupbox {
+	margin: 8px 0 0 0;
+}
+
+#zotero-duplicates-merge-item-box {
+	overflow-y: scroll;
 }
 
 #zotero-duplicates-merge-item-box row
