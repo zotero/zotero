@@ -181,7 +181,7 @@ var ZoteroContextPane = new function () {
 				setTimeout(() => {
 					var contextNodes = Array.from(_notesPaneDeck.children);
 					for (let contextNode of contextNodes) {
-						var nodes = Array.from(contextNode.children[2].children);
+						var nodes = Array.from(contextNode.querySelector('.zotero-context-pane-tab-notes-deck').children);
 						for (let node of nodes) {
 							var tabID = node.getAttribute('data-tab-id');
 							if (!document.getElementById(tabID)) {
@@ -230,7 +230,7 @@ var ZoteroContextPane = new function () {
 								notesContext.updateFromCache();
 							}
 
-							let tabNotesDeck = _notesPaneDeck.selectedPanel.children[2];
+							let tabNotesDeck = _notesPaneDeck.selectedPanel.querySelector('.zotero-context-pane-tab-notes-deck');
 							let selectedIndex = Array.from(tabNotesDeck.children).findIndex(x => x.getAttribute('data-tab-id') == ids[0]);
 							if (selectedIndex != -1) {
 								tabNotesDeck.setAttribute('selectedIndex', selectedIndex);
@@ -453,12 +453,16 @@ var ZoteroContextPane = new function () {
 		editor.setAttribute('flex', 1);
 		noteContainer.append(title, editor);
 
+		var tabNotesContainer = document.createElement('vbox');
+		var title = document.createElement('vbox');
+		title.className = 'zotero-context-pane-editor-parent-line';
 		let tabNotesDeck = document.createElement('deck');
 		tabNotesDeck.className = 'zotero-context-pane-tab-notes-deck';
 		tabNotesDeck.setAttribute('flex', 1);
+		tabNotesContainer.append(title, tabNotesDeck);
 		
 		let contextNode = document.createXULElement('deck');
-		contextNode.append(list, noteContainer, tabNotesDeck);
+		contextNode.append(list, noteContainer, tabNotesContainer);
 		_notesPaneDeck.append(contextNode);
 		
 		contextNode.className = 'context-node';
@@ -781,7 +785,8 @@ var ZoteroContextPane = new function () {
 				}
 			}
 
-			var tabNotesDeck = _notesPaneDeck.selectedPanel.children[2];
+			var tabNotesDeck = _notesPaneDeck.selectedPanel.querySelector('.zotero-context-pane-tab-notes-deck');
+			var parentTitleContainer;
 			if (isChild) {
 				var vbox = document.createElement('vbox');
 				vbox.setAttribute('data-tab-id', Zotero_Tabs.selectedID);
@@ -807,17 +812,21 @@ var ZoteroContextPane = new function () {
 
 				_notesPaneDeck.selectedPanel.setAttribute('selectedIndex', 2);
 				tabNotesDeck.setAttribute('selectedIndex', tabNotesDeck.children.length - 1);
+
+				parentTitleContainer = _notesPaneDeck.selectedPanel.children[2].querySelector('.zotero-context-pane-editor-parent-line');
 			}
 			else {
 				node.setAttribute('selectedIndex', 1);
 				editor.mode = readOnly ? 'view' : 'edit';
 				editor.item = item;
 				editor.parentItem = null;
+
+				parentTitleContainer = node.querySelector('.zotero-context-pane-editor-parent-line');
 			}
 
 			editor.focus();
-			
-			node.querySelector('.zotero-context-pane-editor-parent-line').innerHTML = '';
+
+			parentTitleContainer.innerHTML = '';
 			var parentItem = item.parentItem;
 			if (parentItem) {
 				var container = document.createElement('div');
@@ -828,7 +837,7 @@ var ZoteroContextPane = new function () {
 				title.append(parentItem.getDisplayTitle());
 				title.className = 'parent-title';
 				container.append(img, title);
-				node.querySelector('.zotero-context-pane-editor-parent-line').append(container);
+				parentTitleContainer.append(container);
 			}
 			_updateAddToNote();
 		}
