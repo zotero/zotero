@@ -499,8 +499,9 @@ var Zotero_LocateMenu = new function() {
 		this.useExternalViewer = true;
 		
 		this.canHandleItem = Zotero.Promise.coroutine(function* (item) {
-			return (this.useExternalViewer ^ Zotero.Prefs.get('launchNonNativeFiles'))
-				&& (yield _getBestNonNativeAttachment(item));
+			//return (this.useExternalViewer ^ Zotero.Prefs.get('launchNonNativeFiles'))
+			//	&& (yield _getBestNonNativeAttachment(item));
+			return false;
 		});
 		
 		this.handleItems = Zotero.Promise.coroutine(function* (items, event) {
