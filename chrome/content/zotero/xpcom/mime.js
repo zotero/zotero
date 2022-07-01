@@ -28,7 +28,6 @@ Zotero.MIME = new function(){
 	this.getPrimaryExtension = getPrimaryExtension;
 	this.sniffForBinary = sniffForBinary;
 	this.hasNativeHandler = hasNativeHandler;
-	this.hasInternalHandler = hasInternalHandler;
 	
 	// Magic numbers
 	var _snifferEntries = [
@@ -382,47 +381,6 @@ Zotero.MIME = new function(){
 		}
 		return false;
 	}
-	
-	
-	/*
-	 * Determine if a MIME type can be handled internally
-	 * or if it needs to be passed off to an external helper app
-	 *
-	 * Similar to hasNativeHandler() but also includes plugins
-	 */
-	function hasInternalHandler(mimeType, ext) {
-		if (hasNativeHandler(mimeType, ext)) {
-			return true;
-		}
-		
-		if(mimeType === "application/pdf"
-				&& "@mozilla.org/streamconv;1?from=application/pdf&to=*/*" in Components.classes) {
-			// PDF can be handled internally if pdf.js is installed
-			return true;
-		}
-		
-		// Is there a better way to get to navigator?
-		var types = Components.classes["@mozilla.org/appshell/appShellService;1"]
-				.getService(Components.interfaces.nsIAppShellService)
-				.hiddenDOMWindow.navigator.mimeTypes;
-		
-		for (let type of types) {
-			if (type.type && type.type == mimeType) {
-				Zotero.debug('MIME type ' + mimeType + ' can be handled by plugins');
-				return true;
-			}
-		}
-		
-		Zotero.debug('MIME type ' + mimeType + ' cannot be handled internally');
-		return false;
-	}
-	
-	
-	this.fileHasInternalHandler = Zotero.Promise.coroutine(function* (file){
-		var mimeType = yield this.getMIMETypeFromFile(file);
-		var ext = Zotero.File.getExtension(file);
-		return hasInternalHandler(mimeType, ext);
-	});
 	
 	
 	/*
