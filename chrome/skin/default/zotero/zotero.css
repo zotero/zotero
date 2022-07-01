@@ -21,14 +21,6 @@ textbox[type="styled"]
 	-moz-binding: url('chrome://zotero/content/bindings/styled-textbox.xml#styled-textbox');
 }
 
-customcolorpicker {
-	-moz-binding: url(chrome://zotero/content/bindings/customcolorpicker.xml#custom-colorpicker);
-}
-
-customcolorpicker[type=button] {
-	-moz-binding: url(chrome://zotero/content/bindings/customcolorpicker.xml#custom-colorpicker-button);
-}
-
 zoteromergegroup {
 	-moz-binding: url('chrome://zotero/content/bindings/merge.xml#merge-group');
 }

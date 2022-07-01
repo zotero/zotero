@@ -38,19 +38,22 @@
 <dialog
 	buttons="cancel,accept"
 	buttonlabelaccept="&zotero.tagColorChooser.setColor;"
-	buttonlabelextra1="&zotero.tagColorChooser.removeColor;"
-	ondialogaccept="Zotero_Tag_Color_Chooser.onDialogAccept()"
-	ondialogcancel="Zotero_Tag_Color_Chooser.onDialogCancel()"
-	ondialogextra1="Zotero_Tag_Color_Chooser.onDialogRemoveColor()"
-	>
-	
-	<script src="include.js"/>
-	<script src="tagColorChooser.js"/>
+	buttonlabelextra1="&zotero.tagColorChooser.removeColor;">
+
+	<script>
+		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/tagColorChooser.js", this);
+
+		// Custom elements
+		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/colorPicker.js", this);
+	</script>
 	
 	<vbox id="tag-color-chooser-container">
 		<hbox align="center">
 			<label value="&zotero.tagColorChooser.color;" control="color-picker"/>
-			<customcolorpicker id="color-picker" type="button" disabled="true"/>
+			<color-picker id="color-picker" disabled="true"/>
 			<separator width="20"/>
 			<label value="&zotero.tagColorChooser.position;" control="tag-position" disabled="true"/>
 			<menulist id="tag-position" disabled="true" sizetopopup="always"

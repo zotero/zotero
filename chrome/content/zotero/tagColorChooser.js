@@ -30,6 +30,10 @@ var Zotero_Tag_Color_Chooser = new function() {
 	
 	this.init = function () {
 		var dialog = document.querySelector('dialog');
+
+		window.addEventListener('dialogaccept', () => Zotero_Tag_Color_Chooser.onDialogAccept());
+		window.addEventListener('dialogcancel', () => Zotero_Tag_Color_Chooser.onDialogCancel());
+		window.addEventListener('dialogextra1', () => Zotero_Tag_Color_Chooser.onDialogRemoveColor());
 		
 		try {
 			// Set font size from pref
