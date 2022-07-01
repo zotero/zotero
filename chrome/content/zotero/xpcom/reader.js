@@ -695,9 +695,18 @@ class ReaderInstance {
 			popup.remove();
 		});
 		let menuitem;
-		// Rotate 90
+		// Rotate Left
 		menuitem = this._window.document.createElement('menuitem');
-		menuitem.setAttribute('label', Zotero.getString('pdfReader.rotate90'));
+		menuitem.setAttribute('label', Zotero.getString('pdfReader.rotateLeft'));
+		menuitem.addEventListener('command', async () => {
+			this._postMessage({ action: 'reloading' });
+			await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 270, true);
+			await this.reload();
+		});
+		popup.appendChild(menuitem);
+		// Rotate Right
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', Zotero.getString('pdfReader.rotateRight'));
 		menuitem.addEventListener('command', async () => {
 			this._postMessage({ action: 'reloading' });
 			await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 90, true);
@@ -710,15 +719,6 @@ class ReaderInstance {
 		menuitem.addEventListener('command', async () => {
 			this._postMessage({ action: 'reloading' });
 			await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 180, true);
-			await this.reload();
-		});
-		popup.appendChild(menuitem);
-		// Rotate 270
-		menuitem = this._window.document.createElement('menuitem');
-		menuitem.setAttribute('label', Zotero.getString('pdfReader.rotate270'));
-		menuitem.addEventListener('command', async () => {
-			this._postMessage({ action: 'reloading' });
-			await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 270, true);
 			await this.reload();
 		});
 		popup.appendChild(menuitem);
