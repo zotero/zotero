@@ -68,6 +68,10 @@
     background-color: #d2d8e2;
 }
 
+.zotero-context-pane-editor-parent-line {
+    border-bottom: 1px solid #d9d9d9;
+}
+
 .zotero-context-pane-editor-parent-line > div {
     display: flex;
     align-items: center;
