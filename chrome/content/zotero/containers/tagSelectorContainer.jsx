@@ -643,7 +643,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	}
 
 	async openTagSplitterWindow() {
-		const oldTag = this.contextTag.name;
+		const oldTagName = this.contextTag.name; // contextTag contains { name, width, color }
 		const dataIn = {
 			oldTag: this.contextTag.name,
 			isLongTag: false
@@ -661,27 +661,25 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			return;
 		}
 
-		const oldTagID = Zotero.Tags.getID(oldTag);
+		const oldTagID = Zotero.Tags.getID(oldTagName);
+		const automaticTagIDs = await Zotero.Tags.getAutomaticInLibrary(this.libraryID);
+		const tagType = automaticTagIDs.includes(oldTagID) ? 1 : 0;
 
-		switch (dataOut.result.op) {
-			case 'split':
-				for (const library of Zotero.Libraries.getAll().filter(lib => lib.editable)) {
-					const itemIDs = await Zotero.Tags.getTagItems(library.id, oldTagID);
-					await Zotero.DB.executeTransaction(async () => {
-						for (const itemID of itemIDs) {
-							const item = await Zotero.Items.getAsync(itemID);
-							for (const tag of dataOut.result.tags) {
-								item.addTag(tag);
-							}
-							item.removeTag(oldTag);
-							await item.save();
-						}
-						await Zotero.Tags.purge(oldTagID);
-					});
+		if (dataOut.result.op === 'split') {
+			const itemIDs = await Zotero.Tags.getTagItems(this.libraryID, oldTagID);
+			await Zotero.DB.executeTransaction(async () => {
+				for (const itemID of itemIDs) {
+					const item = await Zotero.Items.getAsync(itemID);
+					for (const newTagName of dataOut.result.tags) {
+						item.addTag(newTagName, tagType);
+					}
+					item.removeTag(oldTagName);
+					await item.save();
 				}
-				break;
-			default:
-				throw new Error('Unsupported op: ' + dataOut.result.op);
+				await Zotero.Tags.purge(oldTagID);
+			});
+		} else {
+			throw new Error('Unsupported op: ' + dataOut.result.op);
 		}
 	}
 
