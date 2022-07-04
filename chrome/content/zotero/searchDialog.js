@@ -41,6 +41,8 @@ function doLoad()
 	searchBox.groups = io.dataIn.groups;
 	searchBox.search = io.dataIn.search;
 	document.getElementById('search-name').value = io.dataIn.name;
+
+	document.addEventListener('dialogaccept', doAccept);
 }
 
 function doUnload()

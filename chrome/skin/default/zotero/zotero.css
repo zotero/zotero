@@ -60,28 +60,6 @@ relatedbox
 	-moz-user-focus: ignore;
 }
 
-zoterosearch
-{
-	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-box');
-}
-
-
-zoterosearchcondition
-{
-	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-condition');
-}
-
-zoterosearchtextbox
-{
-	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-textbox');
-}
-
-
-zoterosearchagefield
-{
-	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-in-the-last');
-}
-
 zoteromergegroup {
 	-moz-binding: url('chrome://zotero/content/bindings/merge.xml#merge-group');
 }

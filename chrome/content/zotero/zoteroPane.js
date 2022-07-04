@@ -1124,7 +1124,7 @@ var ZoteroPane = new function()
 		);
 		
 		var io = { dataIn: { search: s, name }, dataOut: null };
-		window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
+		window.openDialog('chrome://zotero/content/searchDialog.xhtml','','chrome,modal',io);
 		if (!io.dataOut) {
 			return false;
 		}
@@ -1155,7 +1155,7 @@ var ZoteroPane = new function()
 		s.addCondition('title', 'contains', '');
 		
 		var io = {dataIn: {search: s}, dataOut: null};
-		window.openDialog('chrome://zotero/content/advancedSearch.xul', '', 'chrome,dialog=no,centerscreen', io);
+		window.openDialog('chrome://zotero/content/advancedSearch.xhtml', '', 'chrome,dialog=no,centerscreen', io);
 	};
 
 	this.initItemsTree = async function () {
@@ -2161,7 +2161,7 @@ var ZoteroPane = new function()
 					},
 					dataOut: null
 				};
-				window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
+				window.openDialog('chrome://zotero/content/searchDialog.xhtml','','chrome,modal',io);
 				if (io.dataOut) {
 					row.ref.fromJSON(io.dataOut.json);
 					yield row.ref.saveTx();

@@ -5,25 +5,39 @@
 
 <!DOCTYPE bindings SYSTEM "chrome://zotero/locale/searchbox.dtd">
 
-<dialog
-	id="zotero-search-dialog"
+<window
 	title="Search"
 	orient="vertical"
-	buttons="cancel,accept"
-	ondialogaccept="doAccept();"
 	onload="doLoad();"
 	onunload="doUnload();"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
 	style="padding:2em">
+<dialog
+	id="zotero-search-dialog"
+	buttons="cancel,accept">
+
+	<script>
+		var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
+		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/zoteroSearch.js", this);
+	</script>
 	
 	<script src="include.js"/>
 	<script src="searchDialog.js"/>
 	
+	<popupset>
+		<panel is="autocomplete-richlistbox-popup"
+			id="search-autocomplete-popup"
+			type="autocomplete-richlistbox"
+			noautofocus="true"/>
+	</popupset>
+	
 	<vbox id="zotero-search-box-container" flex="1">
 		<hbox align="center">
 			<label value="&zotero.search.name;"/>
-			<textbox id="search-name" width="275" maxlength="80"/>
+			<html:input id="search-name" type="text" width="275" maxlength="80"/>
 		</hbox>
 		<zoterosearch id="search-box" flex="1"/>
 	</vbox>
 </dialog>
+</window>
