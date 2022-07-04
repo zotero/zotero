@@ -662,14 +662,13 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		}
 
 		const oldTagID = Zotero.Tags.getID(oldTagName);
-		const automaticTagIDs = await Zotero.Tags.getAutomaticInLibrary(this.libraryID);
-		const tagType = automaticTagIDs.includes(oldTagID) ? 1 : 0;
 
 		if (dataOut.result.op === 'split') {
 			const itemIDs = await Zotero.Tags.getTagItems(this.libraryID, oldTagID);
 			await Zotero.DB.executeTransaction(async () => {
 				for (const itemID of itemIDs) {
 					const item = await Zotero.Items.getAsync(itemID);
+					const tagType = item.getTagType(oldTagName);
 					for (const newTagName of dataOut.result.tags) {
 						item.addTag(newTagName, tagType);
 					}

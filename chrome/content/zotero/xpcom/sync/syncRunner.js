@@ -1214,62 +1214,54 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 							   .getService(Components.interfaces.nsIWindowMediator);
 							var lastWin = wm.getMostRecentWindow("navigator:browser");
 							
-							// Open long tag fixer for every long tag in every editable library we're syncing
-							var editableLibraries = options.libraries
-								.filter(x => Zotero.Libraries.get(x).editable);
-							for (let libraryID of editableLibraries) {
-								let oldTagIDs = yield Zotero.Tags.getLongTagsInLibrary(libraryID);
-								for (let oldTagID of oldTagIDs) {
-									let oldTag = Zotero.Tags.getName(oldTagID);
-									let dataOut = { result: null };
-									lastWin.openDialog(
-										'chrome://zotero/content/longTagFixer.xhtml',
-										'',
-										'chrome,modal,centerscreen',
-										{ oldTag, isLongTag: true },
-										dataOut
-									);
-									// If dialog was cancelled, stop
-									if (!dataOut.result) {
-										return;
-									}
-									switch (dataOut.result.op) {
+							// Open long tag fixer for library we're syncing
+							let oldTagIDs = yield Zotero.Tags.getLongTagsInLibrary(object.libraryID);
+							
+							for (let oldTagID of oldTagIDs) {
+								let oldTag = Zotero.Tags.getName(oldTagID);
+								let dataOut = { result: null };
+								lastWin.openDialog(
+									'chrome://zotero/content/longTagFixer.xhtml',
+									'',
+									'chrome,modal,centerscreen',
+									{ oldTag, isLongTag: true },
+									dataOut
+								);
+								// If dialog was cancelled, stop
+								if (!dataOut.result) {
+									return;
+								}
+								const itemIDs = yield Zotero.Tags.getTagItems(object.libraryID, oldTagID);
+
+								switch (dataOut.result.op) {
 									case 'split':
-										for (let libraryID of editableLibraries) {
-											let itemIDs = yield Zotero.Tags.getTagItems(libraryID, oldTagID);
-											yield Zotero.DB.executeTransaction(async function () {
-												for (let itemID of itemIDs) {
-													let item = await Zotero.Items.getAsync(itemID);
-													for (let tag of dataOut.result.tags) {
-														item.addTag(tag);
-													}
-													item.removeTag(oldTag);
-													await item.save();
+										yield Zotero.DB.executeTransaction(async function () {
+											for (let itemID of itemIDs) {
+												let item = await Zotero.Items.getAsync(itemID);
+												let tagType = item.getTagType(oldTag);
+												for (let tag of dataOut.result.tags) {
+													item.addTag(tag, tagType);
 												}
-												await Zotero.Tags.purge(oldTagID);
-											});
-										}
+												item.removeTag(oldTag);
+												await item.save();
+											}
+											await Zotero.Tags.purge(oldTagID);
+										});
 										break;
 									
 									case 'edit':
-										for (let libraryID of editableLibraries) {
-											let itemIDs = yield Zotero.Tags.getTagItems(libraryID, oldTagID);
-											yield Zotero.DB.executeTransaction(async function () {
-												for (let itemID of itemIDs) {
-													let item = await Zotero.Items.getAsync(itemID);
-													item.replaceTag(oldTag, dataOut.result.tag);
-													await item.save();
-												}
-											});
-										}
+										yield Zotero.DB.executeTransaction(async function () {
+											for (let itemID of itemIDs) {
+												let item = await Zotero.Items.getAsync(itemID);
+												item.replaceTag(oldTag, dataOut.result.tag);
+												await item.save();
+											}
+										});
 										break;
 									
 									case 'delete':
-										for (let libraryID of editableLibraries) {
-											yield Zotero.Tags.removeFromLibrary(libraryID, oldTagID);
-										}
+										yield Zotero.Tags.removeFromLibrary(object.libraryID, oldTagID);
 										break;
-									}
 								}
 							}
 							
