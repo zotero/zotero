@@ -25,7 +25,7 @@
 
 const HTML_NS = 'http://www.w3.org/1999/xhtml';
 
-const Zotero_Long_Tag_Fixer = new function () { // eslint-disable-line camelcase, no-unused-vars
+var Zotero_Long_Tag_Fixer = new function () { // eslint-disable-line camelcase, no-unused-vars
 	const { oldTag, isLongTag } = window.arguments?.[0] ?? { isLongTag: true, oldTag: '' };
 	const dataOut = window.arguments?.[1] || {};
 	
