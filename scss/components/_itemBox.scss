@@ -6,6 +6,7 @@
 
 #item-box {
 	display: flex;
+	flex-direction: column;
 	/*overflow: auto;*/
 	margin-top: 8px;
 	align-items: start;
