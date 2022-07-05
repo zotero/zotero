@@ -1,0 +1,10 @@
+#zotero-tb-search-menu-button {
+	list-style-image: none; /* Dropmarker added automatically on Linux */
+	-moz-appearance: toolbarbutton-dropdown !important;
+	width: 12px;
+	height: 12px;
+}
+
+#zotero-tb-search .textbox-search-icon {
+	visibility: hidden;
+}

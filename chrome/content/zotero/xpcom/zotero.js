@@ -1591,99 +1591,11 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	
 	
 	this.updateQuickSearchBox = function (document) {
-		// TEMP: Fx78 -- search box is now <search-textbox> custom element. We may need to extend it
-		// to add a mode menu
-		return;
-		
-		
 		var searchBox = document.getElementById('zotero-tb-search');
-		if(!searchBox) return;
-		
-		var mode = Zotero.Prefs.get("search.quicksearch-mode");
-		var prefix = 'zotero-tb-search-mode-';
-		var prefixLen = prefix.length;
-		
-		var modes = {
-			titleCreatorYear: {
-				label: Zotero.getString('quickSearch.mode.titleCreatorYear')
-			},
-			
-			fields: {
-				label: Zotero.getString('quickSearch.mode.fieldsAndTags')
-			},
-			
-			everything: {
-				label: Zotero.getString('quickSearch.mode.everything')
-			}
-		};
-		
-		if (!modes[mode]) {
-			Zotero.Prefs.set("search.quicksearch-mode", "fields");
-			mode = 'fields';
+		if (searchBox) {
+			searchBox.updateMode();
 		}
-		
-		var hbox = document.getAnonymousNodes(searchBox)[0];
-		var input = hbox.getElementsByAttribute('class', 'textbox-input')[0];
-		
-		// Already initialized, so just update selection
-		var button = hbox.getElementsByAttribute('id', 'zotero-tb-search-menu-button');
-		if (button.length) {
-			button = button[0];
-			var menupopup = button.firstChild;
-			for (let menuitem of menupopup.childNodes) {
-				if (menuitem.id.substr(prefixLen) == mode) {
-					menuitem.setAttribute('checked', true);
-					searchBox.placeholder = modes[mode].label;
-					return;
-				}
-			}
-			return;
-		}
-		
-		// Otherwise, build menu
-		button = document.createElement('button');
-		button.id = 'zotero-tb-search-menu-button';
-		button.setAttribute('type', 'menu');
-		
-		var menupopup = document.createXULElement('menupopup');
-		
-		for (var i in modes) {
-			var menuitem = document.createXULElement('menuitem');
-			menuitem.setAttribute('id', prefix + i);
-			menuitem.setAttribute('label', modes[i].label);
-			menuitem.setAttribute('name', 'searchMode');
-			menuitem.setAttribute('type', 'radio');
-			//menuitem.setAttribute("tooltiptext", "");
-			
-			menupopup.appendChild(menuitem);
-			
-			if (mode == i) {
-				menuitem.setAttribute('checked', true);
-				menupopup.selectedItem = menuitem;
-			}
-		}
-		
-		menupopup.addEventListener("command", function(event) {
-			var mode = event.target.id.substr(22);
-			Zotero.Prefs.set("search.quicksearch-mode", mode);
-			if (document.getElementById("zotero-tb-search").value == "") {
-				event.stopPropagation();
-			}
-		}, false);
-		
-		button.appendChild(menupopup);
-		hbox.insertBefore(button, input);
-		
-		searchBox.placeholder = modes[mode].label;
-		
-		// If Alt-Up/Down, show popup
-		searchBox.addEventListener("keypress", function(event) {
-			if (event.altKey && (event.keyCode == event.DOM_VK_UP || event.keyCode == event.DOM_VK_DOWN)) {
-				document.getElementById('zotero-tb-search-menu-button').open = true;
-				event.stopPropagation();
-			}
-		}, false);
-	}
+	};
 	
 	
 	/*

@@ -1,9 +1,4 @@
 /* Font sizes */
-*[zoteroFontSize=medium] #zotero-tb-search, *[zoteroFontSize=large] #zotero-tb-search
-{
-	font-size: 1em !important;
-}
-
 *[zoteroFontSize=medium] treechildren::-moz-tree-row
 {
 	height: 1.5em;

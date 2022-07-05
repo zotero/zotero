@@ -579,26 +579,6 @@
 	color: gray;
 }
 
-#zotero-tb-search
-{
-	font-size: 11px !important;
-	margin-right: 0;
-	width: 172px;
-}
-
-#zotero-tb-search-menu-button {
-	margin: 0;
-	padding: 0;
-	-moz-appearance: none;
-	min-width: 0;
-	cursor: default;
-	list-style-image: url("chrome://zotero/skin/searchbar-dropmarker.png");
-}
-
-#zotero-tb-search-menu-button .button-icon {
-	width: 7px;
-}
-
 #zotero-toolbar
 {
 	visibility: visible !important;
@@ -759,5 +739,4 @@
 	#zotero-tb-sync-error[state=warning]  { list-style-image: url(chrome://zotero/skin/warning@2x.png); }
 	#zotero-tb-sync  { list-style-image: url(chrome://zotero/skin/arrow_rotate_static@2x.png); }
 	#zotero-tb-sync[status=animate]  { list-style-image: url(chrome://zotero/skin/arrow_rotate_animated@2x.png); }
-	#zotero-tb-search-menu-button  { list-style-image: url("chrome://zotero/skin/searchbar-dropmarker@2x.png"); }
 }
