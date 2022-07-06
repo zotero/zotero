@@ -276,9 +276,14 @@ var ZoteroContextPane = new function () {
 
 		if (splitter.getAttribute('state') != 'collapsed') {
 			if (_panesDeck.selectedIndex == 1) {
-				var node = _notesPaneDeck.selectedPanel;
-				if (node.selectedIndex == 1) {
-					return node.querySelector('note-editor');
+				var libraryContext = _notesPaneDeck.selectedPanel;
+				// Global note
+				if (libraryContext.selectedIndex == 1) {
+					return libraryContext.querySelector('note-editor');
+				}
+				// Tab specific child note
+				else if (libraryContext.selectedIndex == 2) {
+					return libraryContext.querySelector('.zotero-context-pane-tab-notes-deck').selectedPanel.querySelector('zoteronoteeditor');
 				}
 			}
 		}
