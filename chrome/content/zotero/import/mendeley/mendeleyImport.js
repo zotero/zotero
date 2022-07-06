@@ -289,10 +289,8 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 };
 
 Zotero_Import_Mendeley.prototype._removeTemporaryFile = async function (file) {
-	const containingDir = OS.Path.dirname(file);
 	try {
 		await Zotero.File.removeIfExists(file);
-		await OS.File.removeEmptyDir(containingDir);
 	}
 	catch (e) {
 		Zotero.logError(e);
