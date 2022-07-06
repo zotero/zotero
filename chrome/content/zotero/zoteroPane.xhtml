@@ -918,23 +918,23 @@
 							</toolbar>
 		
 							<vbox id="sync-reminder-container" collapsed="true">
-								<div xmlns="http://www.w3.org/1999/xhtml" id="sync-reminder-banner">
-									<div id="sync-reminder-message"/>
-									<a id="sync-reminder-action" class="sync-reminder-link"/>
-									<a id="sync-reminder-learn-more" class="sync-reminder-link"/>
-									<div id="sync-reminder-spacer"/>
-									<a id="sync-reminder-disable" class="sync-reminder-link"/>
-									<a id="sync-reminder-remind" class="sync-reminder-link"/>
-									<div id="sync-reminder-close">×</div>
-								</div>
+								<html:div id="sync-reminder-banner">
+									<html:div id="sync-reminder-message"/>
+									<html:a id="sync-reminder-action" class="sync-reminder-link"/>
+									<html:a id="sync-reminder-learn-more" class="sync-reminder-link"/>
+									<html:div id="sync-reminder-spacer"/>
+									<html:a id="sync-reminder-disable" class="sync-reminder-link"/>
+									<html:a id="sync-reminder-remind" class="sync-reminder-link"/>
+									<label is="text-link" id="sync-reminder-close">×</label>
+								</html:div>
 							</vbox>
 							
 							<vbox id="retracted-items-container" collapsed="true">
-								<div xmlns="http://www.w3.org/1999/xhtml" id="retracted-items-banner">
-									<div id="retracted-items-message"/>
-									<div id="retracted-items-link"/>
-									<div id="retracted-items-close">×</div>
-								</div>
+								<html:div id="retracted-items-banner">
+									<html:div id="retracted-items-message"/>
+									<label is="text-link" id="retracted-items-link"/>
+									<label is="text-link" id="retracted-items-close">×</label>
+								</html:div>
 							</vbox>
 							
 							<popupset id="trees-popupset">
