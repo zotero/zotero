@@ -1012,8 +1012,8 @@ class VirtualizedTable extends React.Component {
 		let tooltip = document.createXULElement('tooltip');
 		tooltip.id = 'html-tooltip';
 		tooltip.addEventListener('popupshowing', function(e) {
-			let tooltipTitleNode = document.tooltipNode.closest('div *[title], iframe *[title], browser *[title]');
-			if (document.tooltipNode && tooltipTitleNode) {
+			let tooltipTitleNode = tooltip.triggerNode?.closest('div *[title], iframe *[title], browser *[title]');
+			if (tooltipTitleNode) {
 				this.setAttribute('label', tooltipTitleNode.getAttribute('title'));
 				return;
 			}
