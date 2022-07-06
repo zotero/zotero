@@ -20,10 +20,27 @@ var Zotero_Import_Mendeley = function () {
 	this._db;
 	this._file;
 	this._saveOptions = null;
-	this._itemDone;
+	this._itemDone = () => {};
 	this._progress = 0;
-	this._progressMax;
+	this._progressMax = 0;
 	this._tmpFilesToDelete = [];
+	this._caller = null;
+	this._interrupted = false;
+	this._totalSize = 0;
+	this._interruptChecker = (tickProgress = false) => {
+		if (this._interrupted) {
+			throw new Error(`Mendeley Import interrupted!
+				Progress: ${this._progress} / ${this._progressMax}
+				New items created: ${this.newItems.length}
+				Total size of files to download: ${Math.round(this._totalSize / 1024)}KB
+			`);
+		}
+
+		if (tickProgress) {
+			this._progress++;
+			this._itemDone();
+		}
+	};
 };
 
 Zotero_Import_Mendeley.prototype.setLocation = function (file) {
@@ -94,7 +111,7 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 	if (this._file) {
 		this._db = new Zotero.DBConnection(this._file);
 	}
-	
+
 	try {
 		if (this._file && !await this._isValidDatabase()) {
 			throw new Error("Not a valid Mendeley database");
@@ -108,14 +125,22 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 			throw new Error("Missing import token");
 		}
 
+		// we don't know how long the import will be but want to show progress to give
+		// feedback that import has started so we arbitrary set progress at 2%
+		this._progress = 1;
+		this._progressMax = 50;
+		this._itemDone();
+
 		const folders = this._tokens
 			? await this._getFoldersAPI(mendeleyGroupID)
 			: await this._getFoldersDB(mendeleyGroupID);
 
 		const collectionJSON = this._foldersToAPIJSON(folders, rootCollectionKey);
 		const folderKeys = this._getFolderKeys(collectionJSON);
+
 		await this._saveCollections(libraryID, collectionJSON, folderKeys);
 		
+		this._interruptChecker(true);
 		//
 		// Items
 		//
@@ -123,39 +148,58 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 			? await this._getDocumentsAPI(mendeleyGroupID)
 			: await this._getDocumentsDB(mendeleyGroupID);
 
-		this._progressMax = documents.length;
+		// Update progress to reflect items to import and remaining meta data stages
+		// We arbitrary set progress at approx 4%. We then add 8, one "tick" for each remaining meta data download.
+		this._progress = Math.max(Math.floor(0.04 * documents.length), 2);
+		this._progressMax = documents.length + this._progress + 8;
 		// Get various attributes mapped to document ids
 		let urls = this._tokens
 			? await this._getDocumentURLsAPI(documents)
 			: await this._getDocumentURLsDB(mendeleyGroupID);
 
+		this._interruptChecker(true);
+
 		let creators = this._tokens
 			? await this._getDocumentCreatorsAPI(documents)
 			: await this._getDocumentCreatorsDB(mendeleyGroupID, map.creatorTypes);
+
+		this._interruptChecker(true);
 
 		let tags = this._tokens
 			? await this._getDocumentTagsAPI(documents)
 			: await this._getDocumentTagsDB(mendeleyGroupID);
 
+		this._interruptChecker(true);
+
 		let collections = this._tokens
 			? await this._getDocumentCollectionsAPI(documents, rootCollectionKey, folderKeys)
 			: await this._getDocumentCollectionsDB(mendeleyGroupID, documents, rootCollectionKey, folderKeys);
 
+		this._interruptChecker(true);
+		
 		let files = this._tokens
 			? await this._getDocumentFilesAPI(documents)
 			: await this._getDocumentFilesDB(mendeleyGroupID);
-		
+
+		this._interruptChecker(true);
+
 		let annotations = this._tokens
 			? await this._getDocumentAnnotationsAPI(mendeleyGroupID)
 			: await this._getDocumentAnnotationsDB(mendeleyGroupID);
+
+		this._interruptChecker(true);
 
 		let profile = this._tokens
 			? await this._getProfileAPI()
 			: await this._getProfileDB();
 
+		this._interruptChecker(true);
+
 		let groups = this._tokens
 			? await this._getGroupsAPI()
 			: await this._getGroupsDB();
+
+		this._interruptChecker(true);
 
 		const fileHashLookup = new Map();
 
@@ -164,7 +208,6 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 				fileHashLookup.set(fileEntry.hash, documentID);
 			}
 		}
-
 
 		for (let group of groups) {
 			let groupAnnotations = this._tokens
@@ -263,18 +306,17 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 				);
 			}
 			this.newItems.push(Zotero.Items.get(documentIDMap.get(document.id)));
-			this._progress++;
-			if (this._itemDone) {
-				this._itemDone();
-			}
+			this._interruptChecker(true);
 		}
-	}
-	finally {
+	} catch (e) {
+		Zotero.logError(e);
+	} finally {
 		try {
 			if (this._file) {
 				await this._db.closeDatabase();
 			}
 			if (this._tokens) {
+				Zotero.debug(`Clearing ${this._tmpFilesToDelete.length} temporary files after Mendeley Import`);
 				await Promise.all(
 					this._tmpFilesToDelete.map(f => this._removeTemporaryFile(f))
 				);
@@ -288,12 +330,20 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 	}
 };
 
+Zotero_Import_Mendeley.prototype.interrupt = function () {
+	this._interrupted = true;
+	
+	if (this._caller) {
+		this._caller.stop();
+	}
+};
+
 Zotero_Import_Mendeley.prototype._removeTemporaryFile = async function (file) {
 	try {
 		await Zotero.File.removeIfExists(file);
 	}
 	catch (e) {
-		Zotero.logError(e);
+		Zotero.logError("Error while removing temporary file " + file + ": " + e);
 	}
 };
 
@@ -343,7 +393,7 @@ Zotero_Import_Mendeley.prototype._getFoldersAPI = async function (groupID) {
 	if (groupID && groupID !== 0) {
 		params.group_id = groupID; //eslint-disable-line camelcase
 	}
-	return (await getAll(this._tokens, 'folders', params, headers)).map(f => ({
+	return (await getAll(this._tokens, 'folders', params, headers, {}, this._interruptChecker)).map(f => ({
 		id: f.id,
 		uuid: f.id,
 		name: f.name,
@@ -490,7 +540,7 @@ Zotero_Import_Mendeley.prototype._getDocumentsAPI = async function (groupID) {
 	}
 	
 
-	return (await getAll(this._tokens, 'documents', params, headers)).map(d => ({
+	return (await getAll(this._tokens, 'documents', params, headers, {}, this._interruptChecker)).map(d => ({
 		...d,
 		uuid: d.id,
 		remoteUuid: d.id
@@ -691,12 +741,13 @@ Zotero_Import_Mendeley.prototype._fetchFile = async function (fileID, filePath) 
 Zotero_Import_Mendeley.prototype._getDocumentFilesAPI = async function (documents) {
 	const map = new Map();
 	
-	let totalSize = 0;
+	this._totalSize = 0;
 
 	Components.utils.import("resource://zotero/concurrentCaller.js");
-	var caller = new ConcurrentCaller({
+	this._caller = new ConcurrentCaller({
 		numConcurrent: 6,
 		onError: e => Zotero.logError(e),
+		logger: Zotero.debug,
 		Promise: Zotero.Promise
 	});
 
@@ -710,7 +761,7 @@ Zotero_Import_Mendeley.prototype._getDocumentFilesAPI = async function (document
 			let tmpFile = OS.Path.join(Zotero.getTempDirectory().path, `m-api-${file.id}.${ext}`);
 			
 			this._tmpFilesToDelete.push(tmpFile);
-			caller.add(this._fetchFile.bind(this, file.id, tmpFile));
+			this._caller.add(this._fetchFile.bind(this, file.id, tmpFile));
 			files.push({
 				fileURL: OS.Path.toFileURI(tmpFile),
 				title: file.file_name || '',
@@ -718,13 +769,14 @@ Zotero_Import_Mendeley.prototype._getDocumentFilesAPI = async function (document
 				hash: file.filehash,
 				fileBaseName
 			});
-			totalSize += file.size;
+			this._totalSize += file.size;
 			this._progressMax += 1;
 		}
 		map.set(doc.id, files);
 	}
 	// TODO: check if enough space available totalSize
-	await caller.runAll();
+	await this._caller.runAll();
+	this._caller = null;
 	return map;
 };
 
@@ -821,7 +873,7 @@ Zotero_Import_Mendeley.prototype._getDocumentAnnotationsAPI = async function (gr
 	}
 
 	const map = new Map();
-	(await getAll(this._tokens, 'annotations', params, { Accept: 'application/vnd.mendeley-annotation.1+json' }))
+	(await getAll(this._tokens, 'annotations', params, { Accept: 'application/vnd.mendeley-annotation.1+json' }, {}, this._interruptChecker))
 		.forEach((a) => {
 			if (profileID !== null && a.profile_id !== profileID) {
 				// optionally filter annotations by profile id
@@ -883,7 +935,7 @@ Zotero_Import_Mendeley.prototype._getGroupsAPI = async function () {
 	const params = { type: 'all' };
 	const headers = { Accept: 'application/vnd.mendeley-group-list+json' };
 	
-	return getAll(this._tokens, 'groups/v2', params, headers);
+	return getAll(this._tokens, 'groups/v2', params, headers, {}, this._interruptChecker);
 };
 
 Zotero_Import_Mendeley.prototype._getGroupsDB = async function () {
