@@ -478,7 +478,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 			for (let id of ids) {
 				var split = id.split('-');
 				// Skip if not an item in this collection
-				if (split[0] != collectionTreeRow.ref.id) {
+				if (split[0] != collectionTreeRow.ref.id
+							&& !collectionTreeRow.ref.getDescendents(false, 'collection').some(c => split[0] == c.id)) {
 					continue;
 				}
 				splitIDs.push(split[1]);
@@ -1740,8 +1741,21 @@ var ItemTree = class ItemTree extends LibraryTree {
 				await Zotero.Items.trashTx(ids);
 			}
 			else if (collectionTreeRow.isCollection()) {
+				let collectionIDs = [collectionTreeRow.ref.id];
+				if (Zotero.Prefs.get('recursiveCollections')) {
+					collectionIDs.push(...collectionTreeRow.ref.getDescendents(false, 'collection').map(c => c.id));
+				}
+
 				await Zotero.DB.executeTransaction(async () => {
-					await collectionTreeRow.ref.removeItems(ids);
+					for (let itemID of ids) {
+						for (let collectionID of collectionIDs) {
+							let item = Zotero.Items.get(itemID);
+							item.removeFromCollection(collectionID);
+							await item.save({
+								skipDateModifiedUpdate: true
+							});
+						}
+					}
 				});
 			}
 			else if (collectionTreeRow.isPublications()) {

@@ -1877,13 +1877,39 @@ var ZoteroPane = new function()
 			var prompt = (force && !fromMenu) ? false : toTrash;
 		}
 		else if (collectionTreeRow.isCollection()) {
-			
-			// Ignore unmodified action if only child items are selected
-			if (!force && this.itemsView.getSelectedItems().every(item => !item.isTopLevelItem())) {
-				return;
+			if (force) {
+				var prompt = toTrash;
 			}
-			
-			var prompt = force ? toTrash : toRemove;
+			else {
+				// Ignore unmodified action if only child items are selected
+				if (this.itemsView.getSelectedItems().every(item => !item.isTopLevelItem())) {
+					return;
+				}
+
+				// If unmodified, recursiveCollections is true, and items are in
+				// descendant collections (even if also in the selected collection),
+				// prompt to remove from all
+				if (Zotero.Prefs.get('recursiveCollections')) {
+					let descendants = collectionTreeRow.ref.getDescendents(false, 'collection');
+					let inSubcollection = descendants
+						.some(({ id }) => this.itemsView.getSelectedItems()
+							.some(item => item.inCollection(id)));
+					if (inSubcollection) {
+						var prompt = {
+							title: Zotero.getString('pane.items.removeRecursive.title'),
+							text: Zotero.getString(
+								'pane.items.removeRecursive' + (this.itemsView.selection.count > 1 ? '.multiple' : '')
+							)
+						};
+					}
+					else {
+						var prompt = toRemove;
+					}
+				}
+				else {
+					var prompt = toRemove;
+				}
+			}
 		}
 		else if (collectionTreeRow.isTrash() || collectionTreeRow.isBucket()) {
 			var prompt = toDelete;
