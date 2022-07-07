@@ -1,11 +1,13 @@
-/* global map:false, mendeleyOnlineMappings:false, mendeleyAPIUtils:false */
-var EXPORTED_SYMBOLS = ["Zotero_Import_Mendeley"];
+/* eslint-disable no-await-in-loop, camelcase */
+/* global mendeleyDBMaps:false, mendeleyOnlineMappings:false, mendeleyAPIUtils:false */
+var EXPORTED_SYMBOLS = ["Zotero_Import_Mendeley"]; //eslint-disable-line no-unused-vars
 
 Components.utils.import("resource://gre/modules/Services.jsm");
 Components.utils.import("resource://gre/modules/osfile.jsm");
 Services.scriptloader.loadSubScript("chrome://zotero/content/include.js");
 Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/mendeleyOnlineMappings.js");
 Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/mendeleyAPIUtils.js");
+Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/mendeleySchemaMap.js");
 
 const { apiTypeToDBType, apiFieldToDBField } = mendeleyOnlineMappings;
 const { apiFetch, get, getAll, getTokens } = mendeleyAPIUtils;
@@ -17,8 +19,8 @@ var Zotero_Import_Mendeley = function () {
 	this.mendeleyCode = null;
 	
 	this._tokens = null;
-	this._db;
-	this._file;
+	this._db = null;
+	this._file = null;
 	this._saveOptions = null;
 	this._itemDone = () => {};
 	this._progress = 0;
@@ -49,9 +51,9 @@ Zotero_Import_Mendeley.prototype.setLocation = function (file) {
 
 Zotero_Import_Mendeley.prototype.setHandler = function (name, handler) {
 	switch (name) {
-	case 'itemDone':
-		this._itemDone = handler;
-		break;
+		case 'itemDone':
+			this._itemDone = handler;
+			break;
 	}
 };
 
@@ -74,25 +76,6 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 		...(options.saveOptions || {})
 	};
 	
-	if (true) {
-		Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/mendeleySchemaMap.js");
-	}
-	// TEMP: Load uncached from ~/zotero-client for development
-	else {
-		Components.utils.import("resource://gre/modules/FileUtils.jsm");
-		let file = FileUtils.getDir("Home", []);
-		file = OS.Path.join(file.path, 'zotero-client', 'chrome', 'content', 'zotero', 'import', 'mendeley', 'mendeleySchemaMap.js');
-		let fileURI = OS.Path.toFileURI(file);
-		let xmlhttp = await Zotero.HTTP.request(
-			'GET',
-			fileURI,
-			{
-				noCache: true,
-				responseType: 'text'
-			}
-		);
-		eval(xmlhttp.response);
-	}
 	
 	const libraryID = options.libraryID || Zotero.Libraries.userLibraryID;
 	const { key: rootCollectionKey } = options.collections
@@ -101,7 +84,7 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 	
 	// TODO: Get appropriate version based on schema version
 	const mapVersion = 83;
-	map = map[mapVersion];
+	const map = mendeleyDBMaps[mapVersion];
 	
 	const mendeleyGroupID = 0;
 	
@@ -308,9 +291,11 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 			this.newItems.push(Zotero.Items.get(documentIDMap.get(document.id)));
 			this._interruptChecker(true);
 		}
-	} catch (e) {
+	}
+	catch (e) {
 		Zotero.logError(e);
-	} finally {
+	}
+	finally {
 		try {
 			if (this._file) {
 				await this._db.closeDatabase();
@@ -413,11 +398,11 @@ Zotero_Import_Mendeley.prototype._foldersToAPIJSON = function (folderRows, paren
 };
 
 Zotero_Import_Mendeley.prototype._getFolderDescendents = function (folderID, folderKey, folderRows, maxDepth) {
-	if (maxDepth == 0) return []
+	if (maxDepth == 0) return [];
 	var descendents = [];
 	var children = folderRows
 		.filter(f => f.parentId == folderID)
-		.map(f => {
+		.map((f) => {
 			let c = {
 				folderID: f.id,
 				remoteUUID: f.remoteUuid,
@@ -1035,14 +1020,14 @@ Zotero_Import_Mendeley.prototype._documentToAPIJSON = async function (map, docum
 	
 	for (let field in parent) {
 		switch (field) {
-		case 'itemType':
-		case 'key':
-		case 'parentItem':
-		case 'note':
-		case 'creators':
-		case 'dateAdded':
-		case 'dateModified':
-			continue;
+			case 'itemType':
+			case 'key':
+			case 'parentItem':
+			case 'note':
+			case 'creators':
+			case 'dateAdded':
+			case 'dateModified':
+				continue;
 		}
 		
 		// Move unknown/invalid fields to Extra
@@ -1085,7 +1070,7 @@ Zotero_Import_Mendeley.prototype._documentToAPIJSON = async function (map, docum
 			// seriesEditor isn't valid on some item types (e.g., book)
 			if (creator.creatorType == 'seriesEditor'
 					&& !Zotero.CreatorTypes.isValidForItemType(
-							Zotero.CreatorTypes.getID('seriesEditor'), itemTypeID)) {
+						Zotero.CreatorTypes.getID('seriesEditor'), itemTypeID)) {
 				creator.creatorType = 'editor';
 			}
 		}
@@ -1210,7 +1195,6 @@ Zotero_Import_Mendeley.prototype._processField = function (parent, children, zFi
 			}
 			else {
 				Zotero.warn(`Unknown function subfield: ${subfield}`);
-				return;
 			}
 		}
 		else {
@@ -1248,13 +1232,14 @@ Zotero_Import_Mendeley.prototype._addExtraField = function (extra, field, val) {
 		field = field[0].toUpperCase() + field.substr(1);
 		field = field.replace(/([a-z])([A-Z][a-z])/, "$1 $2");
 	}
+
 	return extra + `${field}: ${val}`;
 };
 
 Zotero_Import_Mendeley.prototype._convertNote = function (note) {
 	return note
 		// Add newlines after <br>
-		.replace(/<br\s*\/>/g, '<br\/>\n')
+		.replace(/<br\s*\/>/g, '<br/>\n')
 		//
 		// Legacy pre-HTML stuff
 		//
@@ -1410,7 +1395,7 @@ Zotero_Import_Mendeley.prototype._findExistingItem = async function (libraryID, 
 	Zotero.debug(`Found existing item ${existingItem.libraryKey} for `
 		+ `${predicate} ${itemJSON.relations[predicate]}`);
 	return existingItem;
-}
+};
 
 
 Zotero_Import_Mendeley.prototype._getItemByRelation = async function (libraryID, predicate, object) {
@@ -1493,7 +1478,7 @@ Zotero_Import_Mendeley.prototype._saveFilesAndAnnotations = async function (file
 			Zotero.logError(e);
 		}
 	}
-}
+};
 
 
 Zotero_Import_Mendeley.prototype._findExistingFile = function (parentItemID, file) {
@@ -1510,7 +1495,7 @@ Zotero_Import_Mendeley.prototype._findExistingFile = function (parentItemID, fil
 		}
 	}
 	return false;
-}
+};
 
 Zotero_Import_Mendeley.prototype._isDownloadedFile = function (path) {
 	var parentDir = OS.Path.dirname(path);
@@ -1518,7 +1503,7 @@ Zotero_Import_Mendeley.prototype._isDownloadedFile = function (path) {
 		|| parentDir.endsWith(OS.Path.join('Local', 'Mendeley Ltd', 'Mendeley Desktop', 'Downloaded'))
 		|| parentDir.endsWith(OS.Path.join('Local', 'Mendeley Ltd.', 'Mendeley Desktop', 'Downloaded'))
 		|| parentDir.endsWith(OS.Path.join('data', 'Mendeley Ltd.', 'Mendeley Desktop', 'Downloaded'));
-}
+};
 
 Zotero_Import_Mendeley.prototype._isTempDownloadedFile = function (path) {
 	return path.startsWith(OS.Path.join(Zotero.getTempDirectory().path, 'm-api'));
@@ -1548,7 +1533,7 @@ Zotero_Import_Mendeley.prototype._getRealFilePath = async function (path) {
 		return altPath;
 	}
 	return false;
-}
+};
 
 Zotero_Import_Mendeley.prototype._saveAnnotations = async function (annotations, parentItemID, attachmentItemID, fileHash) {
 	if (!annotations.length) return;
@@ -1557,7 +1542,6 @@ Zotero_Import_Mendeley.prototype._saveAnnotations = async function (annotations,
 	var libraryID = parentItem.libraryID;
 	if (attachmentItemID) {
 		var attachmentItem = Zotero.Items.get(attachmentItemID);
-		var attachmentURIPath = Zotero.API.getLibraryPrefix(libraryID) + '/items/' + attachmentItem.key;
 		
 		if (attachmentItem) {
 			let file = await attachmentItem.getFilePathAsync();
@@ -1666,7 +1650,7 @@ Zotero_Import_Mendeley.prototype._saveAnnotations = async function (annotations,
 		});
 	}
 	note.setNote('<h1>' + Zotero.getString('extractedAnnotations') + '</h1>\n' + noteStrings.join('\n'));
-	return note.saveTx(this._saveOptions);
+	await note.saveTx(this._saveOptions);
 };
 
 
@@ -1683,17 +1667,7 @@ Zotero_Import_Mendeley.prototype._updateParentKeys = function (objectType, json,
 			break;
 		}
 	}
-}
-
-Zotero_Import_Mendeley.prototype._updateItemCollectionKeys = function (json, oldKey, newKey) {
-	for (; i < json.length; i++) {
-		let x = json[i];
-		if (x[prop] == oldKey) {
-			x[prop] = newKey;
-		}
-	}
-}
-
+};
 
 //
 // Clean up extra files created <5.0.51
