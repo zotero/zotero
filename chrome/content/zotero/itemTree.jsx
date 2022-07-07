@@ -474,15 +474,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 				return;
 			}
 
+			var visibleSubcollections = Zotero.Prefs.get('recursiveCollections')
+				? collectionTreeRow.ref.getDescendents(false, 'collection')
+				: [];
 			var splitIDs = [];
 			for (let id of ids) {
 				var split = id.split('-');
-				// Skip if not an item in this collection
-				if (split[0] != collectionTreeRow.ref.id
-							&& !collectionTreeRow.ref.getDescendents(false, 'collection').some(c => split[0] == c.id)) {
-					continue;
+				// Include if an item in this collection or a visible subcollection
+				if (split[0] == collectionTreeRow.ref.id
+						|| visibleSubcollections.some(c => split[0] == c.id)) {
+					splitIDs.push(split[1]);
 				}
-				splitIDs.push(split[1]);
 			}
 			ids = splitIDs;
 		}
@@ -1748,13 +1750,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 				await Zotero.DB.executeTransaction(async () => {
 					for (let itemID of ids) {
+						let item = Zotero.Items.get(itemID);
 						for (let collectionID of collectionIDs) {
-							let item = Zotero.Items.get(itemID);
 							item.removeFromCollection(collectionID);
-							await item.save({
-								skipDateModifiedUpdate: true
-							});
 						}
+						await item.save({
+							skipDateModifiedUpdate: true
+						});
 					}
 				});
 			}
