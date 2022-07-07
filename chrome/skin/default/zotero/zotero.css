@@ -59,7 +59,6 @@ groupbox > label > h2, groupbox > * > label > h2 {
 }
 
 label.zotero-text-link {
-	-moz-binding: url('chrome://zotero/content/bindings/text-link.xml#text-link');
 	-moz-user-focus: normal;
 	color: -moz-nativehyperlinktext;
 	text-decoration: underline;
