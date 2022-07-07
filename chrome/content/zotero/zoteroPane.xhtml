@@ -175,7 +175,29 @@
 					the children can be modified. All non-menu nodes are ignored
 				-->
 				<menubar id="main-menubar"
-				style="border:0px;padding:0px;margin:0px;-moz-appearance:none">
+				style="border:0px;padding:0px;margin:0px;-moz-appearance:none">		
+					<!-- nsMenuBarX hides these and uses them to build the Application menu. -->
+					<menupopup id="mac_application_menu">
+						<menuitem id="menu_preferences"
+								label="&preferencesCmdMac.label;"
+								key="key_preferencesCmdMac"
+								oncommand="Zotero.Utilities.Internal.openPreferences()"/>
+						<menuitem id="menu_mac_services"
+								label="&servicesMenuMac.label;"/>
+						<menuitem id="menu_mac_hide_app"
+								label="&hideThisAppCmdMac.label;"
+								key="key_hideThisAppCmdMac"/>
+						<menuitem id="menu_mac_hide_others"
+								label="&hideOtherAppsCmdMac.label;"
+								key="key_hideOtherAppsCmdMac"/>
+						<menuitem id="menu_mac_show_all"
+								label="&showAllAppsCmdMac.label;"/>
+						<menuitem id="menu_FileQuitItem"
+								label="&quitApplicationCmdMac.label;"
+								key="key_quitApplication"
+								command="cmd_quitApplication"/>
+					</menupopup>
+
 					<!-- File menu -->
 					<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;"
 							onpopupshowing="ZoteroStandalone.onFileMenuOpen()">
@@ -217,15 +239,11 @@
 									command="cmd_zotero_importFromClipboard" key="key_importFromClipboard"/>
 							<menuitem id="menu_exportLibrary" class="menu-type-library" label="&zotero.toolbar.export.label;"
 									command="cmd_zotero_exportLibrary"/>
-							<!--
-							#ifdef XP_WIN
-							<menuseparator/>
-							<menuitem id="menu_FileQuitItem"
+							<menuseparator id="menu_NonMacFileQuitSeparator"/>
+							<menuitem id="menu_NonMacFileQuitItem"
 									label="&quitApplicationCmdWin.label;"
 									key="key_quitApplication"
 									command="cmd_quitApplication"/>
-							#endif
-							-->
 						</menupopup>
 					</menu>
 					
@@ -287,15 +305,9 @@
 									command="cmd_switchTextDirection"
 									key="key_switchTextDirection"
 									hidden="true" data-l10n-id="menu-edit-bidi-switch-text-direction"/>
-							<!--
-							#ifdef XP_UNIX
-							#ifndef XP_MACOSX
-							<menuseparator/>
-							<menuitem id="menu_preferences"
-								oncommand="Zotero.Utilities.Internal.openPreferences()" data-l10n-id="menu-preferences"/>
-							#endif
-							#endif
-							-->
+							<menuseparator id="menu_EditPreferencesSeparator"/>
+							<menuitem id="menu_EditPreferencesItem"
+								oncommand="Zotero.Utilities.Internal.openPreferences()" data-l10n-id="menu-settings"/>
 						</menupopup>
 					</menu>
 					
@@ -548,7 +560,6 @@
 						</menupopup>
 					</menu>
 					
-<!-- ifdef mac -->
 					<commandset id="macCommandSet"> <!-- was mainCommandSet -->
 						<command id="minimizeWindow"
 								label="&minimizeWindow.label;"
@@ -588,28 +599,6 @@
 								internal="true"/>
 					</keyset>
 					
-					<!-- nsMenuBarX hides these and uses them to build the Application menu. -->
-					<menupopup id="menu_FilePopup">
-						<menuitem id="menu_preferences"
-								label="&preferencesCmdMac.label;"
-								key="key_preferencesCmdMac"
-								oncommand="Zotero.Utilities.Internal.openPreferences()"/>
-						<menuitem id="menu_mac_services"
-								label="&servicesMenuMac.label;"/>
-						<menuitem id="menu_mac_hide_app"
-								label="&hideThisAppCmdMac.label;"
-								key="key_hideThisAppCmdMac"/>
-						<menuitem id="menu_mac_hide_others"
-								label="&hideOtherAppsCmdMac.label;"
-								key="key_hideOtherAppsCmdMac"/>
-						<menuitem id="menu_mac_show_all"
-								label="&showAllAppsCmdMac.label;"/>
-						<menuitem id="menu_FileQuitItem"
-								label="&quitApplicationCmdMac.label;"
-								key="key_quitApplication"
-								command="cmd_quitApplication"/>
-					</menupopup>
-					
 					<menu id="windowMenu"
 							label="&windowMenu.label;"
 							datasources="rdf:window-mediator" ref="NC:WindowMediatorRoot"
@@ -636,7 +625,6 @@
 							<menuseparator id="sep-window-list"/>
 						</menupopup>
 					</menu>
-<!-- endif -->
 					
 					<menu id="helpMenu"
 							label="&helpMenu.label;"
