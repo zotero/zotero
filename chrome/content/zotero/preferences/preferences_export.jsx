@@ -36,12 +36,6 @@ Zotero_Preferences.Export = {
 		this.updateQuickCopyInstructions();
 		yield this.populateQuickCopyList();
 		yield this.populateNoteQuickCopyList();
-		
-		var charsetMenu = document.getElementById("zotero-import-charsetMenu");
-		var charsetMap = Zotero_Charset_Menu.populate(charsetMenu, false);
-		charsetMenu.selectedItem =
-			charsetMap[Zotero.Prefs.get("import.charset")] ?
-				charsetMap[Zotero.Prefs.get("import.charset")] : charsetMap["auto"];
 	}),
 	
 	

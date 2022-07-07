@@ -24,118 +24,6 @@
 */
 
 
-// Pulled from Fx63
-const CHARSET_MENU_DATA = {
-	"pinnedCharsets": [
-		{
-			"label": "Unicode",
-			"value": "UTF-8"
-		},
-		{
-			"label": "Western",
-			"value": "windows-1252"
-		}
-	],
-	"otherCharsets": [
-		{
-			"label": "Arabic (Windows)",
-			"value": "windows-1256"
-		},
-		{
-			"label": "Arabic (ISO)",
-			"value": "ISO-8859-6"
-		},
-		{
-			"label": "Baltic (Windows)",
-			"value": "windows-1257"
-		},
-		{
-			"label": "Baltic (ISO)",
-			"value": "ISO-8859-4"
-		},
-		{
-			"label": "Central European (Windows)",
-			"value": "windows-1250"
-		},
-		{
-			"label": "Central European (ISO)",
-			"value": "ISO-8859-2"
-		},
-		{
-			"label": "Chinese, Simplified",
-			"value": "GBK"
-		},
-		{
-			"label": "Chinese, Traditional",
-			"value": "Big5"
-		},
-		{
-			"label": "Cyrillic (Windows)",
-			"value": "windows-1251"
-		},
-		{
-			"label": "Cyrillic (KOI8-U)",
-			"value": "KOI8-U"
-		},
-		{
-			"label": "Cyrillic (KOI8-R)",
-			"value": "KOI8-R"
-		},
-		{
-			"label": "Cyrillic (ISO)",
-			"value": "ISO-8859-5"
-		},
-		{
-			"label": "Cyrillic (DOS)",
-			"value": "IBM866"
-		},
-		{
-			"label": "Greek (Windows)",
-			"value": "windows-1253"
-		},
-		{
-			"label": "Greek (ISO)",
-			"value": "ISO-8859-7"
-		},
-		{
-			"label": "Hebrew, Visual",
-			"value": "ISO-8859-8"
-		},
-		{
-			"label": "Hebrew",
-			"value": "windows-1255"
-		},
-		{
-			"label": "Japanese (Shift_JIS)",
-			"value": "Shift_JIS"
-		},
-		{
-			"label": "Japanese (ISO-2022-JP)",
-			"value": "ISO-2022-JP"
-		},
-		{
-			"label": "Japanese (EUC-JP)",
-			"value": "EUC-JP"
-		},
-		{
-			"label": "Korean",
-			"value": "EUC-KR"
-		},
-		{
-			"label": "Thai",
-			"value": "windows-874"
-		},
-		{
-			"label": "Turkish",
-			"value": "windows-1254"
-		},
-		{
-			"label": "Vietnamese",
-			"value": "windows-1258"
-		}
-	]
-};
-
 var Zotero_Charset_Menu = new function() {
 	this.populate = populate;
 	
@@ -177,30 +65,16 @@ var Zotero_Charset_Menu = new function() {
 		else {
 			var charsetSeparator = document.createXULElement("menuseparator");
 			charsetPopup.appendChild(charsetSeparator);
+
+			charsets = [
+				{ "label": "Unicode (UTF-8)", "value": "UTF-8" },
+				{ "label": "Western", "value": "windows-1252" },
+				{ "label": "UTF-16LE", "value": "UTF-16LE" },
+				{ "label": "UTF-16BE", "value": "UTF-16BE" },
+				{ "label": "Western (IBM-850)", "value": "IBM850" },
+				{ "label": "Western (MacRoman)", "value": "macintosh" }
+			];
 			
-			var cmData = CHARSET_MENU_DATA;
-			for (let charsetList of [cmData.pinnedCharsets, cmData.otherCharsets]) {
-				for (let charsetInfo of charsetList) {
-					if(charsetInfo.value == "UTF-8") {
-						charsets.push({
-							"label":"Unicode (UTF-8)",
-							"value":"UTF-8"
-						});
-					} else {
-						charsets.push({
-							"label":charsetInfo.label,
-							"value":charsetInfo.value
-						});
-					}
-				}
-			}
-			charsets = charsets.concat([
-				{"label":"UTF-16LE", "value":"UTF-16LE"},
-				{"label":"UTF-16BE", "value":"UTF-16BE"},
-				{"label":"Western (IBM-850)", "value":"IBM850"},
-				{"label":"Western (MacRoman)", "value":"macintosh"}
-			]);
-		
 			for(var i=0; i<charsets.length; i++) {
 				var charset = charsets[i].value,
 					label = charsets[i].label;
