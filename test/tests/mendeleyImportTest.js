@@ -174,8 +174,7 @@ describe('Zotero_Import_Mendeley', function () {
 
 			// identifiers
 			assert.equal(journal.getField('DOI'), '10.1111');
-			assert.include(journal.getField('extra'), 'PMID: 11111111');
-			assert.include(journal.getField('extra'), 'arXiv: 1111.2222');
+			assert.sameMembers(journal.getField('extra').split('\n'), ['PMID: 11111111', 'arXiv: 1111.2222']);
 
 			// attachment & annotations
 			assert.lengthOf(withpdf.getAttachments(), 1);

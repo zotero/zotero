@@ -1241,7 +1241,7 @@ Zotero_Import_Mendeley.prototype._makeCreator = function (creatorType, firstName
 Zotero_Import_Mendeley.prototype._addExtraField = function (extra, field, val) {
 	// Strip the field if it appears at the beginning of the value (to avoid "DOI: DOI: 10...")
 	if (typeof val == 'string') {
-		val = val.replace(new RegExp(`^${field}:\s*`, 'i'), "");
+		val = val.replace(new RegExp(`^${field}:\\s*`, 'i'), "");
 	}
 	extra = extra ? extra + '\n' : '';
 	if (field != 'arXiv') {
