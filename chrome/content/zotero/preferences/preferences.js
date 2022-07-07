@@ -126,7 +126,11 @@ var Zotero_Preferences = {
 		}
 
 		if (!this.navigation.value) {
-			this.navigation.value = 'zotero-prefpane-general';
+			this.navigation.value = Zotero.Prefs.get('lastSelectedPrefPane');
+			// If no last selected pane or ID is invalid, select General
+			if (!this.navigation.value) {
+				this.navigation.value = 'zotero-prefpane-general';
+			}
 		}
 
 		document.getElementById('prefs-search').focus();
@@ -488,12 +492,14 @@ var Zotero_Preferences = {
 		for (let child of this.content.children) {
 			child.setAttribute('hidden', true);
 		}
-		if (this.navigation.value) {
+		let paneID = this.navigation.value;
+		if (paneID) {
 			this.content.scrollTop = 0;
 			document.getElementById('prefs-search').value = '';
 			this.search('');
-			this._loadAndDisplayPane(this.navigation.value);
+			this._loadAndDisplayPane(paneID);
 		}
+		Zotero.Prefs.set('lastSelectedPrefPane', paneID);
 	},
 
 	_initImportedNodes(root) {
