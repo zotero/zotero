@@ -29,9 +29,11 @@ var Zotero_Import_Mendeley = function () {
 	this._caller = null;
 	this._interrupted = false;
 	this._totalSize = 0;
+	this._started = Date.now();
 	this._interruptChecker = (tickProgress = false) => {
 		if (this._interrupted) {
-			throw new Error(`Mendeley Import interrupted!
+			throw new Error(`Mendeley import interrupted!
+				Started: ${this._started} (${Math.round((Date.now() - this._started) / 1000)}s ago)
 				Progress: ${this._progress} / ${this._progressMax}
 				New items created: ${this.newItems.length}
 				Total size of files to download: ${Math.round(this._totalSize / 1024)}KB
@@ -76,11 +78,12 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 		...(options.saveOptions || {})
 	};
 	
-	
 	const libraryID = options.libraryID || Zotero.Libraries.userLibraryID;
 	const { key: rootCollectionKey } = options.collections
 		? Zotero.Collections.getLibraryAndKeyFromID(options.collections[0])
 		: {};
+
+	Zotero.debug(`Begining Mendeley import at ${this._started}. libraryID: ${libraryID}, linkFiles: ${this.linkFiles}, rootCollectionKey: ${rootCollectionKey}`);
 	
 	// TODO: Get appropriate version based on schema version
 	const mapVersion = 83;
@@ -291,6 +294,7 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 			this.newItems.push(Zotero.Items.get(documentIDMap.get(document.id)));
 			this._interruptChecker(true);
 		}
+		Zotero.debug(`Completed Mendeley import in ${Math.round((Date.now() - this._started) / 1000)}s. (Started: ${this._started})`);
 	}
 	catch (e) {
 		Zotero.logError(e);
@@ -301,7 +305,7 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 				await this._db.closeDatabase();
 			}
 			if (this._tokens) {
-				Zotero.debug(`Clearing ${this._tmpFilesToDelete.length} temporary files after Mendeley Import`);
+				Zotero.debug(`Clearing ${this._tmpFilesToDelete.length} temporary files after Mendeley import`);
 				await Promise.all(
 					this._tmpFilesToDelete.map(f => this._removeTemporaryFile(f))
 				);
