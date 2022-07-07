@@ -1995,7 +1995,7 @@ Zotero.Utilities.Internal = {
 	 */
 	setFontSize: function (rootElement) {
 		var size = Zotero.Prefs.get('fontSize');
-		rootElement.style.fontSize = size + 'em';
+		rootElement.style.fontSize = rootElement.style['--zotero-font-size'] = size + 'em';
 		if (size <= 1) {
 			size = 'small';
 		}

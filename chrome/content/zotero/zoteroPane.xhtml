@@ -86,6 +86,7 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/relatedBox.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/attachmentBox.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/menuToolbarbutton.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/quickSearchTextbox.js", this);
 
 		Services.scriptloader.loadSubScript("chrome://zotero/content/tabs.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/zoteroPane.js", this);
@@ -849,7 +850,7 @@
 									<toolbarbutton id="zotero-tb-advanced-search" class="zotero-tb-button" tooltiptext="&zotero.toolbar.advancedSearch;" command="cmd_zotero_advancedSearch"/>
 									<spacer flex="1"/>
 									<image id="zotero-tb-search-spinner" class="zotero-spinner-14" style="display: none"/>
-									<search-textbox id="zotero-tb-search" timeout="250"
+									<quick-search-textbox id="zotero-tb-search" timeout="250"
 											onkeypress="ZoteroPane_Local.handleSearchKeypress(this, event)"
 											oninput="ZoteroPane_Local.handleSearchInput(this, event)"
 											oncommand="ZoteroPane_Local.search()"/>

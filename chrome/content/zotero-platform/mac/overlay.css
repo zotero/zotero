@@ -69,11 +69,6 @@
   margin-top: -4px;
 }
 
-#zotero-tb-search-menu-button {
-	margin: -6px 0 -6px -16px;
-	padding: 6px 0 6px 15px;
-}
-
 #zotero-tb-sync > .toolbarbutton-icon {
   -moz-padding-start: 8px;
   padding-top: 1px;
