@@ -151,6 +151,40 @@ describe("Zotero.ItemTree", function() {
 		})
 	})
 	
+	describe("#getSortFields()", function () {
+		before(async function () {
+			itemsView = zp.itemsView;
+			
+			// Sort by title
+			const colIndex = itemsView.tree._getColumns().findIndex(column => column.dataKey == 'title');
+			await itemsView.tree._columns.toggleSort(colIndex);
+		});
+		
+		after(function () {
+			Zotero.Prefs.clear('fallbackSort');
+		});
+		
+		it("should ignore invalid secondary-sort field", function () {
+			Zotero.Prefs.set('secondarySort.title', 'invalidField');
+			var fields = itemsView.getSortFields();
+			assert.isUndefined(Zotero.Prefs.get('secondarySort.title'));
+			// fallbackSort pref with title moved to beginning
+			assert.sameMembers(['title', 'firstCreator', 'date', 'dateAdded'], fields);
+			
+			Zotero.Prefs.clear('secondarySort.title');
+		});
+		
+		it("should ignore invalid fallback-sort field", function () {
+			Zotero.Prefs.clear('fallbackSort');
+			var originalFallback = Zotero.Prefs.get('fallbackSort');
+			Zotero.Prefs.set('fallbackSort', 'invalidField,' + originalFallback);
+			var fields = itemsView.getSortFields();
+			assert.equal(Zotero.Prefs.get('fallbackSort'), originalFallback);
+			// fallbackSort pref with title moved to beginning
+			assert.sameMembers(['title', 'firstCreator', 'date', 'dateAdded'], fields);
+		});
+	});
+	
 	describe("#notify()", function () {
 		beforeEach(function () {
 			sinon.spy(win.ZoteroPane, "itemSelected");
