@@ -4,8 +4,9 @@
 }
 
 .search .search-cancel-button {
-	background-image: url(chrome://global/skin/icons/searchfield-cancel.svg);
+	background-image: url(resource://gre-resources/searchfield-cancel.svg);
 	width: 14px;
 	height: 14px;
-	top: 6px;
+	top: 10px;
+	right: 8px;
 }
