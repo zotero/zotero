@@ -10,6 +10,11 @@ describe("Zotero.Cite", function () {
 			assert.equal(Zotero.Cite.getLocatorString('sub-verbo'), 'Sub verbo');
 		});
 		
+		it("should get 'timestamp' in en-US", function () {
+			Zotero.locale = 'en-US';
+			assert.equal(Zotero.Cite.getLocatorString('timestamp'), 'Timestamp');
+		});
+		
 		it("should get 'book' in fr-FR", function () {
 			Zotero.locale = 'fr-FR';
 			assert.equal(Zotero.Cite.getLocatorString('book'), 'Livre');
