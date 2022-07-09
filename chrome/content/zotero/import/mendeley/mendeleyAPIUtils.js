@@ -64,16 +64,18 @@ const get = async (tokens, endPoint, params = {}, headers = {}, options = {}) =>
 	return JSON.parse(response.responseText);
 };
 
-const getAll = async (tokens, endPoint, params = {}, headers = {}, options = {}) => {
+const getAll = async (tokens, endPoint, params = {}, headers = {}, options = {}, interruptChecker = () => {}) => {
 	const PER_PAGE = endPoint === 'annotations' ? 200 : 500;
 	const response = await apiFetch(tokens, endPoint, { ...params, limit: PER_PAGE }, headers, options);
 	var next = getNextLinkFromResponse(response);
 	var data = JSON.parse(response.responseText);
+	interruptChecker();
 	
 	while (next) {
 		const response = await apiFetchUrl(tokens, next, headers, options); //eslint-disable-line no-await-in-loop
 		data = [...data, ...JSON.parse(response.responseText)];
 		next = getNextLinkFromResponse(response);
+		interruptChecker();
 	}
 
 	return data;

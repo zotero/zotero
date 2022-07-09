@@ -57,7 +57,12 @@ var Zotero_Import_Wizard = {
 		
 		Zotero.Translators.init(); // async
 	},
-	
+
+	onCancel: function () {
+		if (this._translation && this._translation.interrupt) {
+			this._translation.interrupt();
+		}
+	},
 	
 	onModeChosen: async function () {
 		var wizard = this._wizard;

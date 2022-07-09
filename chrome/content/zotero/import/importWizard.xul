@@ -10,6 +10,7 @@
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 		xmlns:html="http://www.w3.org/1999/xhtml"
 		title="&zotero.import;"
+		onwizardcancel="Zotero_Import_Wizard.onCancel()"
 		onload="Zotero_Import_Wizard.init()">
 	
 	<script src="../include.js"/>
