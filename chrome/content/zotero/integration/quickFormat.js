@@ -116,10 +116,9 @@ var Zotero_QuickFormat = new function () {
 
 				// add labels to popup
 				var locators = Zotero.Cite.labels;
-				var menu = document.getElementById("locator-label");
 				var labelList = document.getElementById("locator-label-popup");
 				for(var locator of locators) {
-					var locatorLabel = Zotero.getString('citation.locator.'+locator.replace(/\s/g,''));
+					let locatorLabel = Zotero.Cite.getLocatorString(locator);
 
 					// add to list of labels
 					var child = document.createXULElement("menuitem");
@@ -127,7 +126,6 @@ var Zotero_QuickFormat = new function () {
 					child.setAttribute("label", locatorLabel);
 					labelList.appendChild(child);
 				}
-				menu.selectedIndex = 0;
 
 			}
 			
@@ -1090,15 +1088,16 @@ var Zotero_QuickFormat = new function () {
 		let citationItem = JSON.parse(target.dataset.citationItem);
 		panelPrefix.value = citationItem["prefix"] ? citationItem["prefix"] : "";
 		panelSuffix.value = citationItem["suffix"] ? citationItem["suffix"] : "";
+		var pageOption = panelLocatorLabel.getElementsByAttribute("value", "page")[0];
 		if(citationItem["label"]) {
 			var option = panelLocatorLabel.getElementsByAttribute("value", citationItem["label"]);
 			if(option.length) {
 				panelLocatorLabel.selectedItem = option[0];
 			} else {
-				panelLocatorLabel.selectedIndex = 0;
+				panelLocatorLabel.selectedItem = pageOption;
 			}
 		} else {
-			panelLocatorLabel.selectedIndex = 0;
+			panelLocatorLabel.selectedItem = pageOption;
 		}
 		panelLocator.value = citationItem["locator"] ? citationItem["locator"] : "";
 		panelSuppressAuthor.checked = !!citationItem["suppress-author"];
