@@ -5,6 +5,12 @@
   "general_done": {
     "message": "Klaar"
   },
+  "general_yes": {
+    "message": "Ja"
+  },
+  "general_no": {
+    "message": "Nee"
+  },
   "general_tryAgain": {
     "message": "Opnieuw proberen"
   },
@@ -16,6 +22,9 @@
   },
   "general_pleaseWait": {
     "message": "Wachten a.u.b."
+  },
+  "general_copyToClipboard": {
+    "message": "Kopieer naar klembord"
   },
   "progressWindow_savingTo": {
     "message": "Opslaan in"

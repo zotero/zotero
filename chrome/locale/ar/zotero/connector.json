@@ -5,6 +5,12 @@
   "general_done": {
     "message": "تم"
   },
+  "general_yes": {
+    "message": "نعم"
+  },
+  "general_no": {
+    "message": "لا"
+  },
   "general_tryAgain": {
     "message": "حاول مرة أخرى"
   },
@@ -13,6 +19,9 @@
   },
   "general_cancel": {
     "message": "إلغاء"
+  },
+  "general_copyToClipboard": {
+    "message": "انسخ إلى الحافظة"
   },
   "progressWindow_savingTo": {
     "message": "الحفظ في"

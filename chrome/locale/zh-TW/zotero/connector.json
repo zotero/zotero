@@ -2,8 +2,20 @@
   "general_more": {
     "message": "更多..."
   },
+  "general_moreInfo": {
+    "message": "更多信息..."
+  },
+  "general_needHelp": {
+    "message": "需要帮助？"
+  },
   "general_done": {
     "message": "完成"
+  },
+  "general_yes": {
+    "message": "要"
+  },
+  "general_no": {
+    "message": "不要"
   },
   "general_tryAgain": {
     "message": "再試一次"
@@ -17,6 +29,9 @@
   "general_pleaseWait": {
     "message": "請等待…"
   },
+  "general_copyToClipboard": {
+    "message": "複製到剪貼簿"
+  },
   "progressWindow_savingTo": {
     "message": "儲存至…"
   },
@@ -26,8 +41,14 @@
   "progressWindow_error_translation": {
     "message": "儲存此項目時出錯。見 $1 以得更多資訊。"
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "保存该条目时出现一个错误。$1可能限制你单次保存条目的数量。查阅$2来获取更多信息。"
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "找出轉譯器問題所在"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "网站访问限制"
   },
   "progressWindow_error_fallback": {
     "message": "以 $1 儲存時出錯。改嘗試以 $2 儲存。"
@@ -44,6 +65,18 @@
   "upgradeApp": {
     "message": "升級 $1"
   },
+  "firstRun_title": {
+    "message": "你已经安装了$1连接器！"
+  },
+  "firstRun_text1": {
+    "message": "$1连接器允许你从你的浏览器中通过单击<a href=\"$2\">保存条目到$1</a>。"
+  },
+  "firstRun_text2": {
+    "message": "如果你还没有下载，请<a href=\"$2\">下载</a>独立的$1应用来获得最好的体验。"
+  },
+  "firstRun_acceptButton": {
+    "message": "明白"
+  },
   "error_connection_isAppRunning": {
     "message": "$1 正在執行？"
   },
@@ -56,14 +89,56 @@
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "啟用儲存至線上文獻庫"
   },
+  "reports_report_submitted": {
+    "message": "您的错误报告已提交\n\n报告 ID: $1\n\n请在Zetero论坛发布问题，问题请包含该错误报告ID，问题描述，以及任何比较的步骤以重现该问题。\n\n未在论坛提交的错误报告将不会处理。"
+  },
+  "reports_debug_output_submitted": {
+    "message": "你的debug输出已经提交。Debug ID是 $1。"
+  },
+  "reports_submission_failed": {
+    "message": "提交报告时产生错误\n\n$1\n\n请检查您的网络连接。如果错误重复出现，请在Zotero论坛发帖。"
+  },
   "integration_error_clientUpgrade": {
     "message": "引用網站資料庫的文獻，需要 $1 或更新的版本。"
   },
   "integration_error_connection": {
     "message": "$1 無法與 $2 桌面應用程式溝通。$2 一定得開啟，才能引用網站資料庫的文獻。"
   },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "此文档包含有效的 Zotero 引文，该引文将在下载的副本中显示为 zotero.org 链接"
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "为生成易于共享的版本，从文件菜单中选择<b>复制……</b>，在新文档中从 Zotero 菜单中选择<b>未链接引文</b>，然后下载未链接版本。保留原始链接文档以防你需要进一步更改。"
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "无论何时下载已链接版本"
+  },
   "integration_googleDocs_updating": {
     "message": "$1正在更新您的文件。"
+  },
+  "integration_googleDocs_docxAlert": {
+    "message": "当在 Google Docs 中直接编辑 Microsoft Word .docx 文件时，$1整合无法使用。选择文件 → 储存为 Google Docs 来允许该功能。<br/><br/>如果你想把有$1引用的 Word 文档转换为Google Docs 时，请查阅<a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">在文档编辑器间移动文档</a>。"
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "该文档的引用正被另外一个$1用户编辑。请稍后再试。"
+  },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1锁住了你的文档来防止多个用户同时编辑引用。当前文档中的引用编辑可能会引起引用或文档的损坏。一些如网络故障等无法预见的情况可能会使得你的文档被持续锁定。如果你相信这已经发生了，你可以覆盖锁定。<br/><br/>你想要覆盖文档锁定么？"
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "你所选择的Google账户没有编辑该文档的权限。请再次尝试，并确保所选择的账号有编辑权限。"
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "显示未链接的 $1 引文"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "你正在编辑的引文已经从 $1.断开链接"
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "重新链接引文"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "该引文已  <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">从 $1断开</a>。您需要重新链接后，引文方可在参考文献部分更新或出现。"
   },
   "general_saveTo": {
     "message": "儲存至 $1"

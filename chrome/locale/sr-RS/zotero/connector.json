@@ -8,6 +8,9 @@
   "general_done": {
     "message": "Готово"
   },
+  "general_no": {
+    "message": "Не"
+  },
   "general_tryAgain": {
     "message": "Покушај поново"
   },

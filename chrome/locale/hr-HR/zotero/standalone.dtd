@@ -1,4 +1,4 @@
-<!ENTITY preferencesCmdMac.label "Preferences…">
+<!ENTITY preferencesCmdMac.label "Preferences...">
 <!ENTITY preferencesCmdMac.commandkey ",">
 <!ENTITY servicesMenuMac.label "Services">
 <!ENTITY hideThisAppCmdMac.label "Hide &brandShortName;">
@@ -25,7 +25,7 @@
 <!ENTITY closeCmd.accesskey "C">
 <!ENTITY manageAttachments.label "Manage Attachments">
 <!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
-<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.label "Import...">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Import from Clipboard">
 <!ENTITY quitApplicationCmdWin.label "Exit">
@@ -92,7 +92,7 @@
 <!ENTITY helpFeedbackPage.label "Discussion Forums">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
+<!ENTITY helpReportErrors.label "Report Errors...">
 <!ENTITY helpReportErrors.accesskey "R">
 
 <!ENTITY debugOutputLogging.label "Debug Output Logging">

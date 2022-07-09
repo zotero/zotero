@@ -8,6 +8,12 @@
   "general_done": {
     "message": "Klar"
   },
+  "general_yes": {
+    "message": "Ja"
+  },
+  "general_no": {
+    "message": "Nej"
+  },
   "general_tryAgain": {
     "message": "Försök igen"
   },

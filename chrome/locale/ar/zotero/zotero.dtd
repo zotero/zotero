@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "إلغاء تحديد الكل">
 <!ENTITY zotero.general.edit "تحرير">
 <!ENTITY zotero.general.delete "حذف">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "نقل لسلة المحذوفات">
 <!ENTITY zotero.general.ok "موافق">
 <!ENTITY zotero.general.cancel "الغاء">
 <!ENTITY zotero.general.refresh "اعادة تحميل">
@@ -307,7 +307,7 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.firstPage "الصفحة الأولى">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">

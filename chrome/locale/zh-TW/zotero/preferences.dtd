@@ -40,7 +40,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "舊的項目在前">
 <!ENTITY zotero.preferences.feeds.feedDefaults "新聞源預設值">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
+<!ENTITY zotero.preferences.openurl.choose "选择解析器">
 <!ENTITY zotero.preferences.openurl.custom "自訂...">
 <!ENTITY zotero.preferences.openurl.server "解析器：">
 <!ENTITY zotero.preferences.openurl.version "版本：">
@@ -67,7 +67,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "驗證伺服器">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "使用 Zotero 本機儲存時，您同意遵守它的">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "條款與條件">
-<!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
+<!ENTITY zotero.preferences.sync.librariesToSync "要同步的文献库">
 <!ENTITY zotero.preferences.sync.librariesToSync.button "選擇文獻庫...">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "同步">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "文獻庫">
@@ -81,7 +81,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "取代線上文獻庫">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "以本地端 Zotero 資料覆蓋線上文獻庫的資料。">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "重設檔案同步歷史">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "将所有附件文件与存储服务中的进行比较">
 <!ENTITY zotero.preferences.sync.reset "回復預設值">
 <!ENTITY zotero.preferences.sync.reset.button "重設...">
 
@@ -106,7 +106,7 @@
 
 <!ENTITY zotero.preferences.quickCopy.caption "快速複製">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "項目格式">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "笔记格式：">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "複製成 HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "針對特定網站的設定：">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "網域/路徑">
@@ -172,7 +172,7 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "論文查詢引擎管理器">
 <!ENTITY zotero.preferences.locate.description "描述">
 <!ENTITY zotero.preferences.locate.name "名稱">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
+<!ENTITY zotero.preferences.locate.addDescription "若要添加一个列表中不存在的搜索引擎，请先在浏览器中访问该搜索引擎，然后在 Zotero 的菜单中点击“添加”。">
 <!ENTITY zotero.preferences.locate.restoreDefaults "回復預設值">
 
 <!ENTITY zotero.preferences.charset "字元編碼">
@@ -183,7 +183,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "使用 Zotero 的個人設定檔目錄">
 <!ENTITY zotero.preferences.dataDir.custom "自訂：">
 <!ENTITY zotero.preferences.dataDir.choose "選擇…">
-<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(通过 command line 指定)">
 <!ENTITY zotero.preferences.dataDir.reveal "顯示資料目錄">
 <!ENTITY zotero.preferences.dataDir.migrate "轉移到新的預設位置...">
 
