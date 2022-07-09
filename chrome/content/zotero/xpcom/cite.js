@@ -47,6 +47,11 @@ Zotero.Cite = {
 	 * @return {String} - Localized string (e.g., 'Livre')
 	 */
 	getLocatorString: function (locator) {
+		// 'timestamp' not included in CSL locales
+		if (locator == 'timestamp') {
+			return Zotero.getString('citation.locator.timestamp');
+		}
+		
 		// Get the best CSL locale for the current Zotero locale
 		var cslLocale = Zotero.Utilities.Internal.resolveLocale(
 			Zotero.locale,
