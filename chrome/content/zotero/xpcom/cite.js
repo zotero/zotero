@@ -8,9 +8,105 @@ Zotero.Cite = {
 	/**
 	 * Locator labels
 	 */
-	"labels":["page", "book", "chapter", "column", "figure", "folio",
-		"issue", "line", "note", "opus", "paragraph", "part", "section", "sub verbo",
-		"volume", "verse"],
+	"labels": [
+		"act",
+		"appendix",
+		"article-locator",
+		"book",
+		"canon",
+		"chapter",
+		"column",
+		"elocation",
+		"equation",
+		"figure",
+		"folio",
+		"issue",
+		"line",
+		"note",
+		"opus",
+		"page",
+		"paragraph",
+		"part",
+		"rule",
+		"scene",
+		"section",
+		"sub-verbo",
+		"table",
+		//"timestamp",
+		"title-locator",
+		"verse",
+		"volume"
+	],
+	
+	_locatorStrings: new Map(),
+	
+	/**
+	 * Get localized string for locator
+	 *
+	 * @param {String} locator - Locator name (e.g., 'book')
+	 * @return {String} - Localized string (e.g., 'Livre')
+	 */
+	getLocatorString: function (locator) {
+		// Get the best CSL locale for the current Zotero locale
+		var cslLocale = Zotero.Utilities.Internal.resolveLocale(
+			Zotero.locale,
+			Object.keys(Zotero.Styles.locales)
+		);
+		
+		// If locator strings are already cached for the current locale, use that
+		if (this._locatorStrings.has(cslLocale)) {
+			return this._locatorStrings.get(cslLocale).get(locator);
+		}
+		var map = new Map();
+		this._locatorStrings.set(cslLocale, map);
+		
+		var localeXML = Zotero.Cite.Locale.get(cslLocale);
+		var parser;
+		if (Zotero.platformMajorVersion > 60) {
+			parser = new DOMParser();
+		}
+		else {
+			parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+				.createInstance(Components.interfaces.nsIDOMParser);
+		}
+		var doc = parser.parseFromString(localeXML, 'text/xml');
+		var englishDoc;
+		// Cache all locators for the current locale
+		for (let locator of this.labels) {
+			let elem = doc.querySelector(`term[name="${locator}"]:not([form="short"]) > single`);
+			if (!elem) {
+				// If locator not found, get from the U.S. English locale
+				if (cslLocale != 'en-US') {
+					Zotero.logError(`Locator '${locator}' not found in ${cslLocale} locale -- trying en-US`);
+					if (!englishDoc) {
+						englishDoc = parser.parseFromString(Zotero.Cite.Locale.get('en-US'), 'text/xml');
+					}
+					elem = englishDoc.querySelector(`term[name="${locator}"]:not([form="short"]) > single`);
+					if (!elem) {
+						Zotero.logError(`Locator '${locator}' not found in en-US locale -- using name`);
+					}
+				}
+				else {
+					Zotero.logError(`Locator '${locator}' not found in en-US locale -- using name`);
+				}
+				// If still not found, use the locator name directly
+				if (!elem) {
+					map.set(locator, Zotero.Utilities.capitalize(locator));
+					continue;
+				}
+			}
+			// If <single> is empty, use the locator name directly
+			let str = elem.textContent;
+			if (!str) {
+				Zotero.logError(`Locator '${locator}' is empty in ${cslLocale} locale -- using name`);
+				map.set(locator, Zotero.Utilities.capitalize(locator));
+				continue;
+			}
+			map.set(locator, Zotero.Utilities.capitalize(str));
+		}
+		
+		return map.get(locator);
+	},
 	
 	/**
 	 * Remove specified item IDs in-place from a citeproc-js bibliography object returned

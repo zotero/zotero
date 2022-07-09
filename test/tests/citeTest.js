@@ -1,4 +1,21 @@
 describe("Zotero.Cite", function () {
+	describe("#getLocatorString()", function () {
+		it("should get 'book' in en-US", function () {
+			Zotero.locale = 'en-US';
+			assert.equal(Zotero.Cite.getLocatorString('book'), 'Book');
+		});
+		
+		it("should get 'sub-verbo' in en-US", function () {
+			Zotero.locale = 'en-US';
+			assert.equal(Zotero.Cite.getLocatorString('sub-verbo'), 'Sub verbo');
+		});
+		
+		it("should get 'book' in fr-FR", function () {
+			Zotero.locale = 'fr-FR';
+			assert.equal(Zotero.Cite.getLocatorString('book'), 'Livre');
+		});
+	});
+	
 	describe("#extraToCSL()", function () {
 		it("should convert Extra field values to the more restrictive citeproc-js cheater syntax", function () {
 			var str1 = 'Original Date: 2017\n' // uppercase/spaces converted to lowercase/hyphens
