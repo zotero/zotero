@@ -3,7 +3,7 @@
 <!ENTITY zotero.general.optional "(Optional)">
 <!ENTITY zotero.general.note "Note:">
 <!ENTITY zotero.general.selectAll "Select All">
-<!ENTITY zotero.general.deselectAll "Deselect All">
+<!ENTITY zotero.general.deselectAll "Deselect all">
 <!ENTITY zotero.general.edit "Edit">
 <!ENTITY zotero.general.delete "Delete">
 <!ENTITY zotero.general.moveToTrash "Move to Trash">
@@ -57,8 +57,8 @@
 
 <!ENTITY zotero.items.itemType "Item Type">
 <!ENTITY zotero.items.creator_column "Creator">
-<!ENTITY zotero.items.year_column "Year">
-<!ENTITY zotero.items.dateModified_column "Date Modified">
+<!ENTITY zotero.items.year_column "Godina">
+<!ENTITY zotero.items.dateModified_column "Datum izmjene">
 <!ENTITY zotero.items.moreColumns.label "More Columns">
 <!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 

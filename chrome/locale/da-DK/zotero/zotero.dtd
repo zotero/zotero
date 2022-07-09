@@ -6,14 +6,14 @@
 <!ENTITY zotero.general.deselectAll "Fravælg alle">
 <!ENTITY zotero.general.edit "Rediger">
 <!ENTITY zotero.general.delete "Slet">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Flyt til papirkurv">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Annullér">
 <!ENTITY zotero.general.refresh "Opdatér">
 <!ENTITY zotero.general.saveAs "Gem som...">
 <!ENTITY zotero.general.options "Indstillinger">
 <!ENTITY zotero.general.advancedOptions.label "Avancerede indstillinger">
-<!ENTITY zotero.general.tools "Tools">
+<!ENTITY zotero.general.tools "Værktøj">
 <!ENTITY zotero.general.more "Mere">
 <!ENTITY zotero.general.loading "Indlæser...">
 <!ENTITY zotero.general.close "Luk">
@@ -21,7 +21,7 @@
 <!ENTITY zotero.general.other "Andet...">
 <!ENTITY zotero.general.bigger "Bigger">
 <!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.reset "Nulstil">
 
 
 <!ENTITY zotero.errorReport.title "Zotero fejlrapport">
@@ -128,8 +128,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Gem kopi af filen...">
 <!ENTITY zotero.toolbar.attachment.weblink "Gem link til den aktuelle side">
 <!ENTITY zotero.toolbar.attachment.snapshot "Tag kopi af den aktuelle side">
-<!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.item "Element">
+<!ENTITY zotero.toolbar.context.notes "Noter">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Der er ingen mærker at vise">
 <!ENTITY zotero.tagSelector.loadingTags "Indlæser mærker...">
@@ -150,7 +150,7 @@
 <!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
 <!ENTITY zotero.lookup.button.search "Søg">
 
-<!ENTITY zotero.createParent.title "Create Parent Item">
+<!ENTITY zotero.createParent.title "Opret moder-element">
 <!ENTITY zotero.createParent.button.manual "Manual Entry">
 
 <!ENTITY zotero.selectitems.title "Vælg elementer">
@@ -307,7 +307,7 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.firstPage "Første side">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">

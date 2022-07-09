@@ -5,6 +5,12 @@
   "general_done": {
     "message": "완료"
   },
+  "general_yes": {
+    "message": "예"
+  },
+  "general_no": {
+    "message": "아니오"
+  },
   "general_tryAgain": {
     "message": "다시 시도"
   },
@@ -13,6 +19,9 @@
   },
   "general_cancel": {
     "message": "취소"
+  },
+  "general_copyToClipboard": {
+    "message": "클립보드로 복사"
   },
   "progressWindow_savingTo": {
     "message": "저장 위치"

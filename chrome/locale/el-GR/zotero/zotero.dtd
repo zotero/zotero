@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Αποεπιλογή όλων">
 <!ENTITY zotero.general.edit "Επεξεργασία">
 <!ENTITY zotero.general.delete "Διαγραφή">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Μετακίνηση στον Κάδο απορριμμάτων">
 <!ENTITY zotero.general.ok "ΟΚ">
 <!ENTITY zotero.general.cancel "Ακύρωση">
 <!ENTITY zotero.general.refresh "Ανανέωση">
@@ -128,8 +128,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Αποθήκευση αντιγράφου του αρχείου...">
 <!ENTITY zotero.toolbar.attachment.weblink "Αποθήκευση Συνδέσμου στην Τρέχουσα Σελίδα">
 <!ENTITY zotero.toolbar.attachment.snapshot "Λήψη Στιγμιότυπου της Τρέχουσας Σελίδας">
-<!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.item "Είδος">
+<!ENTITY zotero.toolbar.context.notes "Σημείωση">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Δεν υπάρχουν ετικέτες προς εμφάνιση">
 <!ENTITY zotero.tagSelector.loadingTags "Φόρτωση ετικετών...">
@@ -307,7 +307,7 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.firstPage "Πρώτη Σελίδα">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">

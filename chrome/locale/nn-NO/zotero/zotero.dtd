@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Fjern merking">
 <!ENTITY zotero.general.edit "Endre">
 <!ENTITY zotero.general.delete "Slett">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Flytt til søppelkorga">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Avbryt">
 <!ENTITY zotero.general.refresh "Frisk opp">
@@ -17,11 +17,11 @@
 <!ENTITY zotero.general.more "Meir">
 <!ENTITY zotero.general.loading "Lastar …">
 <!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.minimize "Minimer">
 <!ENTITY zotero.general.other "Other…">
 <!ENTITY zotero.general.bigger "Bigger">
 <!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.reset "Nullstill">
 
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
@@ -93,7 +93,7 @@
 <!ENTITY zotero.toolbar.import.label "Importer …">
 <!ENTITY zotero.toolbar.importFromClipboard "Importer frå utklippstavla">
 <!ENTITY zotero.toolbar.export.label "Eksporter bibliotek …">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF-skann">
 <!ENTITY zotero.toolbar.timeline.label "Lag tidslinje">
 <!ENTITY zotero.toolbar.preferences.label "Innstillingar …">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Støtte og dokumentasjon">
@@ -129,7 +129,7 @@
 <!ENTITY zotero.toolbar.attachment.weblink "Lagre lenkje til gjeldande side">
 <!ENTITY zotero.toolbar.attachment.snapshot "Lag snapshot av gjeldande side">
 <!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.notes "Notat">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Ingen taggar finst">
 <!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
@@ -177,7 +177,7 @@
 
 <!ENTITY zotero.progress.title "Framgang">
 
-<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import "Importer">
 <!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
 <!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
 <!ENTITY zotero.import.importing "Importing…">
@@ -307,7 +307,7 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.firstPage "Første side">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">

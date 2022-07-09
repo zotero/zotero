@@ -25,9 +25,9 @@
 <!ENTITY closeCmd.accesskey "C">
 <!ENTITY manageAttachments.label "Manage Attachments">
 <!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
-<!ENTITY importCmd.label "Import…">
+<!ENTITY importCmd.label "นำเข้า...">
 <!ENTITY importCmd.key "I">
-<!ENTITY importFromClipboardCmd.label "Import from Clipboard">
+<!ENTITY importFromClipboardCmd.label "นำเข้าจากคลิปบอร์ด">
 <!ENTITY quitApplicationCmdWin.label "ออกจากโปรแกรม">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
 <!ENTITY quitApplicationCmd.label "เลิกใช้">
@@ -92,14 +92,14 @@
 <!ENTITY helpFeedbackPage.label "Discussion Forums">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Report Errors…">
+<!ENTITY helpReportErrors.label "รายงานความผิดพลาด...">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "Debug Output Logging">
+<!ENTITY debugOutputLogging.label "บันทึกการส่งออกการแก้จุดบกพร่อง">
 <!ENTITY debugOutputLogging.accesskey "L">
 <!ENTITY debugOutputLogging.submit "Submit Output">
-<!ENTITY debugOutputLogging.view "View Output">
-<!ENTITY debugOutputLogging.clear "Clear Output">
+<!ENTITY debugOutputLogging.view "ดูผลลัพธ์">
+<!ENTITY debugOutputLogging.clear "ล้างผลลัพธ์">
 <!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
 
 <!ENTITY helpCheckForUpdates.label "ตรวจสอบรุ่นล่าสุด...">

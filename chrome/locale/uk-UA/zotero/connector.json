@@ -5,14 +5,29 @@
   "general_done": {
     "message": "Готово"
   },
+  "general_yes": {
+    "message": "Так"
+  },
+  "general_no": {
+    "message": "Ні"
+  },
   "general_tryAgain": {
     "message": "Спробувати знову"
+  },
+  "general_warning": {
+    "message": "Попередження"
   },
   "general_cancel": {
     "message": "Відмінити"
   },
+  "general_copyToClipboard": {
+    "message": "Скопіювати в буфер обміну"
+  },
   "progressWindow_savingTo": {
     "message": "Збереження в"
+  },
+  "progressWindow_error_troubleshootingTranslatorIssues": {
+    "message": "Виявлення помилок з транслятором"
   },
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "остання версія"

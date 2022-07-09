@@ -8,6 +8,12 @@
   "general_done": {
     "message": "Hoàn thành"
   },
+  "general_yes": {
+    "message": "Đồng ý"
+  },
+  "general_no": {
+    "message": "Bỏ qua"
+  },
   "general_tryAgain": {
     "message": "Thử lại"
   },

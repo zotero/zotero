@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Deselect All">
 <!ENTITY zotero.general.edit "Edit">
 <!ENTITY zotero.general.delete "Delete">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Move to Bin">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Cancel">
 <!ENTITY zotero.general.refresh "Refresh">

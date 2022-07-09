@@ -5,6 +5,21 @@
   "general_done": {
     "message": "انجام شد"
   },
+  "general_yes": {
+    "message": "بله"
+  },
+  "general_no": {
+    "message": "خیر"
+  },
+  "general_warning": {
+    "message": "اخطار"
+  },
+  "general_cancel": {
+    "message": "انصراف"
+  },
+  "general_copyToClipboard": {
+    "message": "رونوشت به حافظه"
+  },
   "progressWindow_savingTo": {
     "message": "ذخیره در"
   },

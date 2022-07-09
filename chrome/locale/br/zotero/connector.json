@@ -23,6 +23,9 @@
   "general_pleaseWait": {
     "message": "Gortozit mar plij..."
   },
+  "general_copyToClipboard": {
+    "message": "Eilañ er golver"
+  },
   "progressWindow_savingTo": {
     "message": "Enrollañ e-barzh"
   },

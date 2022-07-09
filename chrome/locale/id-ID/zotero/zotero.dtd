@@ -1,5 +1,5 @@
-<!ENTITY zotero.general.yes "Yes">
-<!ENTITY zotero.general.no "No">
+<!ENTITY zotero.general.yes "Iya">
+<!ENTITY zotero.general.no "Tidak">
 <!ENTITY zotero.general.optional "(Opsional)">
 <!ENTITY zotero.general.note "Catatan:">
 <!ENTITY zotero.general.selectAll "Pilih Semua">
@@ -13,11 +13,11 @@
 <!ENTITY zotero.general.saveAs "Simpan sebagai...">
 <!ENTITY zotero.general.options "Options">
 <!ENTITY zotero.general.advancedOptions.label "Pengaturan lanjutan">
-<!ENTITY zotero.general.tools "Tools">
-<!ENTITY zotero.general.more "More">
+<!ENTITY zotero.general.tools "Perkakas">
+<!ENTITY zotero.general.more "Lainnya">
 <!ENTITY zotero.general.loading "Memuat...">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.close "Tutup">
+<!ENTITY zotero.general.minimize "Kecilkan">
 <!ENTITY zotero.general.other "Other…">
 <!ENTITY zotero.general.bigger "Bigger">
 <!ENTITY zotero.general.smaller "Lebih kecil">
@@ -114,7 +114,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Title Case">
 <!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
-<!ENTITY zotero.item.viewOnline "View Online">
+<!ENTITY zotero.item.viewOnline "Lihat secaraDaring">
 <!ENTITY zotero.item.copyAsURL "Salin sebagai URL">
 <!ENTITY zotero.item.deletePermanently "Hapus secara permanen...">
 
@@ -129,7 +129,7 @@
 <!ENTITY zotero.toolbar.attachment.weblink "Simpan Tautan ke Laman Ini">
 <!ENTITY zotero.toolbar.attachment.snapshot "Ambil Snapshot Laman Ini">
 <!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.notes "Catatan">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Tidak ada tag untuk ditampilkan">
 <!ENTITY zotero.tagSelector.loadingTags "Memuat tag...">
@@ -177,7 +177,7 @@
 
 <!ENTITY zotero.progress.title "Progres">
 
-<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import "Impor">
 <!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
 <!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
 <!ENTITY zotero.import.importing "Importing…">
@@ -309,7 +309,7 @@
 
 <!ENTITY zotero.pdfReader.firstPage "Halaman Pertama">
 <!ENTITY zotero.pdfReader.lastPage "Halaman Terakhir">
-<!ENTITY zotero.pdfReader.back "Back">
+<!ENTITY zotero.pdfReader.back "Kembali">
 <!ENTITY zotero.pdfReader.forward "Forward">
 <!ENTITY zotero.pdfReader.rotateClockwise "Rotate Clockwise">
 <!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotate Counterclockwise">

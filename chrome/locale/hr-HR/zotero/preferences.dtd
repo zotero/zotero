@@ -164,7 +164,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Advanced">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "Shortcut Keys">
 
 <!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
 
