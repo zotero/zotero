@@ -152,7 +152,7 @@ describe("Zotero.ItemTree", function() {
 	})
 	
 	describe("#getSortFields()", function () {
-		before(async function () {
+		beforeEach(async function () {
 			itemsView = zp.itemsView;
 			
 			// Sort by title
@@ -182,6 +182,15 @@ describe("Zotero.ItemTree", function() {
 			assert.equal(Zotero.Prefs.get('fallbackSort'), originalFallback);
 			// fallbackSort pref with title moved to beginning
 			assert.sameMembers(['title', 'firstCreator', 'date', 'dateAdded'], fields);
+		});
+		
+		it("should sort by item type", async function () {
+			// Sort by item type
+			const colIndex = itemsView.tree._getColumns().findIndex(column => column.dataKey == 'itemType');
+			await itemsView.tree._columns.toggleSort(colIndex);
+			
+			var fields = itemsView.getSortFields();
+			assert.sameMembers(['itemType', 'firstCreator', 'date', 'title', 'dateAdded'], fields);
 		});
 	});
 	
