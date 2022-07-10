@@ -394,7 +394,7 @@ Zotero_Preferences.Export = {
 						onSelectionChange={handleSelectionChange}
 						onKeyDown={handleKeyDown}
 						getRowString={index => this._rows[index].domain}
-						onActivate={(event, indices) => Zotero_Preferences.Export.showQuickCopySiteEditor()}
+						onActivate={(event, indices) => Zotero_Preferences.Export.showQuickCopySiteEditor(true)}
 					/>
 				</IntlProvider>
 			);
