@@ -1825,6 +1825,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	getSortFields() {
 		var fields = [this.getSortField()];
+		if (!this._isValidSortField(fields[0])) {
+			Zotero.logError(`'${fields[0]}' is not a valid sort field -- skipping`);
+			fields.shift();
+		}
 		var secondaryField = this._getSecondarySortField();
 		if (secondaryField) {
 			fields.push(secondaryField);
@@ -1848,12 +1852,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 			fallbackFields = Zotero.Prefs.get('fallbackSort').split(',');
 		}
 		fields = Zotero.Utilities.arrayUnique(fields.concat(fallbackFields));
-		var validFields = fields.filter(x => this._isValidSortField(x));
-		if (validFields.length) {
-			fields = validFields;
-		}
 		// If no valid fields, use default fallback
-		else {
+		if (!fields.length) {
 			Zotero.logError(`No valid fields in getSortFields() (${fields.join(',')}) `
 				+ '-- resetting');
 			Zotero.Prefs.clear('fallbackSort');
@@ -1873,7 +1873,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 	
 	_isValidSortField(field) {
-		return field == 'year'
+		return field == 'itemType'
+			|| field == 'year'
+			|| field == 'id' // feeds
 			|| !!Zotero.ItemFields.getID(field)
 			|| Zotero.Items.primaryFields.includes(field);
 	}
