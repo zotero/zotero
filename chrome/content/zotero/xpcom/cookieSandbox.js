@@ -384,10 +384,10 @@ Zotero.CookieSandbox.Observer = new function() {
 				var cookiesForURI = trackedBy.getCookiesForURI(channel.URI);
 			}
 
-			if(trackedBy.userAgent) {
+			if (trackedBy && trackedBy.userAgent) {
 				channel.setRequestHeader("User-Agent", trackedBy.userAgent, false);
 			}
-
+			
 			if(!trackedBy || !cookiesForURI) {
 				channel.setRequestHeader("Cookie", "", false);
 				channel.setRequestHeader("Cookie2", "", false);
