@@ -77,7 +77,7 @@ pref("extensions.zotero.sortCreatorAsString", false);
 pref("extensions.zotero.tagSelector.showAutomatic", true);
 pref("extensions.zotero.tagSelector.displayAllTags", false);
 
-pref("extensions.zotero.downloadPDFViaBrowser.onLoadTimeout", 1500);
+pref("extensions.zotero.downloadPDFViaBrowser.onLoadTimeout", 3000);
 pref("extensions.zotero.downloadPDFViaBrowser.downloadTimeout", 60000);
 
 // Keyboard shortcuts
