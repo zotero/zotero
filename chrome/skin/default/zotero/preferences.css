@@ -51,6 +51,24 @@
 	border-top: 1px solid lightgray;
 }
 
+#prefs-subpane-back-button {
+	appearance: none;
+	font-size: 32px;
+	min-width: auto;
+	padding: 8px;
+	color: -moz-dialogtext;
+	background-color: transparent;
+	transition: color 0.1s ease;
+}
+
+#prefs-subpane-back-button:hover {
+	color: color-mix(in srgb, -moz-dialogtext 30%, SelectedItem);
+}
+
+#prefs-subpane-back-button:hover:active {
+	color: SelectedItem;
+}
+
 h1 {
 	margin: 0 0 4px 0;
 	font-size: 1.3em;
