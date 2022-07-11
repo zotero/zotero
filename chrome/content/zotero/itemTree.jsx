@@ -1874,11 +1874,17 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 	
 	_isValidSortField(field) {
-		return field == 'itemType'
-			|| field == 'year'
-			|| field == 'id' // feeds
-			|| !!Zotero.ItemFields.getID(field)
-			|| Zotero.Items.primaryFields.includes(field);
+		switch (field) {
+			// Non-standard columns
+			case 'itemType':
+			case 'year':
+			case 'hasAttachment':
+			case 'numNotes':
+			// Feed items
+			case 'id':
+				return true;
+		}
+		return !!Zotero.ItemFields.getID(field) || Zotero.Items.primaryFields.includes(field);
 	}
 	
 	/**
