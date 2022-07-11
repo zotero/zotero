@@ -151,49 +151,6 @@ describe("Zotero.ItemTree", function() {
 		})
 	})
 	
-	describe("#getSortFields()", function () {
-		beforeEach(async function () {
-			itemsView = zp.itemsView;
-			
-			// Sort by title
-			const colIndex = itemsView.tree._getColumns().findIndex(column => column.dataKey == 'title');
-			await itemsView.tree._columns.toggleSort(colIndex);
-		});
-		
-		after(function () {
-			Zotero.Prefs.clear('fallbackSort');
-		});
-		
-		it("should ignore invalid secondary-sort field", function () {
-			Zotero.Prefs.set('secondarySort.title', 'invalidField');
-			var fields = itemsView.getSortFields();
-			assert.isUndefined(Zotero.Prefs.get('secondarySort.title'));
-			// fallbackSort pref with title moved to beginning
-			assert.sameMembers(['title', 'firstCreator', 'date', 'dateAdded'], fields);
-			
-			Zotero.Prefs.clear('secondarySort.title');
-		});
-		
-		it("should ignore invalid fallback-sort field", function () {
-			Zotero.Prefs.clear('fallbackSort');
-			var originalFallback = Zotero.Prefs.get('fallbackSort');
-			Zotero.Prefs.set('fallbackSort', 'invalidField,' + originalFallback);
-			var fields = itemsView.getSortFields();
-			assert.equal(Zotero.Prefs.get('fallbackSort'), originalFallback);
-			// fallbackSort pref with title moved to beginning
-			assert.sameMembers(['title', 'firstCreator', 'date', 'dateAdded'], fields);
-		});
-		
-		it("should sort by item type", async function () {
-			// Sort by item type
-			const colIndex = itemsView.tree._getColumns().findIndex(column => column.dataKey == 'itemType');
-			await itemsView.tree._columns.toggleSort(colIndex);
-			
-			var fields = itemsView.getSortFields();
-			assert.sameMembers(['itemType', 'firstCreator', 'date', 'title', 'dateAdded'], fields);
-		});
-	});
-	
 	describe("#notify()", function () {
 		beforeEach(function () {
 			sinon.spy(win.ZoteroPane, "itemSelected");
@@ -625,10 +582,7 @@ describe("Zotero.ItemTree", function() {
 			var item3 = await createDataObject('item', { title: title + " 5" });
 			var item4 = await createDataObject('item', { title: title + " 7" });
 
-			// Sort by creator and then title, to make sure we're sorting by title ascending
-			var colIndex = itemsView.tree._getColumns().findIndex(column => column.dataKey == 'firstCreator');
-			await itemsView.tree._columns.toggleSort(colIndex);
-			colIndex = itemsView.tree._getColumns().findIndex(column => column.dataKey == 'title');
+			const colIndex = itemsView.tree._getColumns().findIndex(column => column.dataKey == 'title');
 			await itemsView.tree._columns.toggleSort(colIndex);
 			
 			// Check initial sort order
