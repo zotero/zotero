@@ -1820,41 +1820,24 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	getSortFields() {
 		var fields = [this.getSortField()];
-		if (!this._isValidSortField(fields[0])) {
-			Zotero.logError(`'${fields[0]}' is not a valid sort field -- skipping`);
-			fields.shift();
-		}
 		var secondaryField = this._getSecondarySortField();
 		if (secondaryField) {
 			fields.push(secondaryField);
 		}
-		var fallbackFields;
 		try {
-			fallbackFields = Zotero.Prefs.get('fallbackSort')
+			var fallbackFields = Zotero.Prefs.get('fallbackSort')
 				.split(',')
-				.map(x => x.trim())
-				.filter(x => x !== '');
-			for (let field of fallbackFields) {
-				if (!this._isValidSortField(field)) {
-					// eslint-disable-next-line no-throw-literal
-					throw `'${field}' is not a valid field in fallbackSort -- resetting`;
-				}
-			}
+				.map((x) => x.trim())
+				.filter((x) => x !== '');
 		}
 		catch (e) {
+			Zotero.debug(e, 1);
 			Zotero.logError(e);
-			Zotero.Prefs.clear('fallbackSort');
-			fallbackFields = Zotero.Prefs.get('fallbackSort').split(',');
+			// This should match the default value for the fallbackSort pref
+			var fallbackFields = ['firstCreator', 'date', 'title', 'dateAdded'];
 		}
 		fields = Zotero.Utilities.arrayUnique(fields.concat(fallbackFields));
-		// If no valid fields, use default fallback
-		if (!fields.length) {
-			Zotero.logError(`No valid fields in getSortFields() (${fields.join(',')}) `
-				+ '-- resetting');
-			Zotero.Prefs.clear('fallbackSort');
-			fields = Zotero.Prefs.get('fallbackSort').split(',');
-		}
-		
+
 		// If date appears after year, remove it, unless it's the explicit secondary sort
 		var yearPos = fields.indexOf('year');
 		if (yearPos != -1) {
@@ -1866,21 +1849,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		return fields;
 	}
-	
-	_isValidSortField(field) {
-		switch (field) {
-			// Non-standard columns
-			case 'itemType':
-			case 'year':
-			case 'hasAttachment':
-			case 'numNotes':
-			// Feed items
-			case 'id':
-				return true;
-		}
-		return !!Zotero.ItemFields.getID(field) || Zotero.Items.primaryFields.includes(field);
-	}
-	
+
 	/**
 	 * @param index {Integer}
 	 * @param selectAll {Boolean} Whether the selection is part of a select-all event
@@ -3751,13 +3720,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 		var primaryField = this.getSortField();
 		var secondaryField = Zotero.Prefs.get('secondarySort.' + primaryField);
 		if (!secondaryField || secondaryField == primaryField) {
-			return false;
-		}
-		// Make sure specified field is valid
-		if (!this._isValidSortField(secondaryField)) {
-			Zotero.logError(`'${secondaryField}' is not a valid field in `
-				+ `secondarySort.${primaryField} -- resetting`);
-			Zotero.Prefs.clear('secondarySort.' + primaryField);
 			return false;
 		}
 		return secondaryField;
