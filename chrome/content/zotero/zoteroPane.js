@@ -77,7 +77,7 @@ var ZoteroPane = new function()
 		let progressQueueButtons = document.getElementById('zotero-pq-buttons');
 		let progressQueues = Zotero.ProgressQueues.getAll();
 		for (let progressQueue of progressQueues) {
-			let button = document.createElement('toolbarbutton');
+			let button = document.createXULElement('toolbarbutton');
 			button.id = 'zotero-tb-pq-' + progressQueue.getID();
 			button.hidden = progressQueue.getTotal() < 1;
 			button.addEventListener('command', function () {
