@@ -1428,18 +1428,27 @@ var ItemTree = class ItemTree extends LibraryTree {
 		var openItemIDs = this._saveOpenState(true);
 		
 		// Sort specific items
-		if (itemIDs) {
-			let idsToSort = new Set(itemIDs);
-			this._rows.sort((a, b) => {
-				// Don't re-sort existing items. This assumes a stable sort(), which is the case in Firefox
-				// but not Chrome/v8.
-				if (!idsToSort.has(a.ref.id) && !idsToSort.has(b.ref.id)) return 0;
-				return rowSort(a, b) * order;
-			});
+		try {
+			if (itemIDs) {
+				let idsToSort = new Set(itemIDs);
+				this._rows.sort((a, b) => {
+					// Don't re-sort existing items. This assumes a stable sort(), which is the case in Firefox
+					// but not Chrome/v8.
+					if (!idsToSort.has(a.ref.id) && !idsToSort.has(b.ref.id)) return 0;
+					return rowSort(a, b) * order;
+				});
+			}
+			// Full sort
+			else {
+				this._rows.sort((a, b) => rowSort(a, b) * order);
+			}
 		}
-		// Full sort
-		else {
-			this._rows.sort((a, b) => rowSort(a, b) * order);
+		catch (e) {
+			Zotero.logError("Error sorting fields: " + e.message);
+			Zotero.debug(e, 1);
+			// Clear anything that might be contributing to the error
+			Zotero.Prefs.clear('secondarySort.' + this.getSortField());
+			Zotero.Prefs.clear('fallbackSort');
 		}
 		
 		this._refreshRowMap();
