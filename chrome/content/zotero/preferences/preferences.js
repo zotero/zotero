@@ -43,61 +43,11 @@ var Zotero_Preferences = {
 			}
 		});
 
-		this.addPane({
-			id: 'zotero-prefpane-general',
-			label: 'zotero.preferences.prefpane.general',
-			image: 'chrome://zotero/skin/prefs-general.png',
-			src: 'chrome://zotero/content/preferences/preferences_general.xhtml',
-			onLoad() {
-				Zotero_Preferences.General.init();
-			}
-		});
-		this.addPane({
-			id: 'zotero-prefpane-sync',
-			label: 'zotero.preferences.prefpane.sync',
-			image: 'chrome://zotero/skin/prefs-sync.png',
-			src: 'chrome://zotero/content/preferences/preferences_sync.xhtml',
-			onLoad() {
-				Zotero_Preferences.Sync.init();
-			}
-		});
-		this.addPane({
-			id: 'zotero-prefpane-export',
-			label: 'zotero.preferences.prefpane.export',
-			image: 'chrome://zotero/skin/prefs-export.png',
-			src: 'chrome://zotero/content/preferences/preferences_export.xhtml',
-			onLoad() {
-				Zotero_Preferences.Export.init();
-			}
-		});
-		this.addPane({
-			id: 'zotero-prefpane-cite',
-			label: 'zotero.preferences.prefpane.cite',
-			image: 'chrome://zotero/skin/prefs-styles.png',
-			src: 'chrome://zotero/content/preferences/preferences_cite.xhtml',
-			onLoad() {
-				Zotero_Preferences.Cite.init();
-			}
-		});
-		this.addPane({
-			id: 'zotero-prefpane-advanced',
-			label: 'zotero.preferences.prefpane.advanced',
-			image: 'chrome://zotero/skin/prefs-advanced.png',
-			src: 'chrome://zotero/content/preferences/preferences_advanced.xhtml',
-			onLoad() {
-				Zotero_Preferences.Advanced.init();
-			}
-		});
-		this.addPane({
-			id: 'zotero-subpane-reset-sync',
-			parent: 'zotero-prefpane-sync',
-			label: 'zotero.preferences.subpane.resetSync',
-			src: 'chrome://zotero/content/preferences/preferences_sync_reset.xhtml',
-			onLoad() {
-				Zotero_Preferences.Sync.initResetPane();
-			}
-		});
-		this._autoSeparator = true;
+		Zotero.PreferencePanes.builtInPanes.forEach(pane => this.addPane(pane));
+		if (Zotero.PreferencePanes.pluginPanes.length) {
+			this.navigation.append(document.createElement('hr'));
+			Zotero.PreferencePanes.pluginPanes.forEach(pane => this.addPane(pane));
+		}
 
 		if (window.arguments) {
 			var io = window.arguments[0];
@@ -159,7 +109,7 @@ var Zotero_Preferences = {
 	 * @param {String} [options.image] URI of an icon (displayed in the navigation sidebar)
 	 * @param {String} options.src URI of an XHTML fragment
 	 * @param {String[]} [options.extraDTD] Array of URIs of DTD files to use for parsing the XHTML fragment
-	 * @param {Function} [options.onLoad]
+	 * @param {String[]} [options.scripts] Array of URIs of scripts to load along with the pane
 	 */
 	async addPane(options) {
 		let { id, parent, label, image } = options;
@@ -189,11 +139,6 @@ var Zotero_Preferences = {
 			}
 			labelElem.value = label;
 			listItem.append(labelElem);
-		}
-
-		if (this._autoSeparator) {
-			this._autoSeparator = false;
-			this.navigation.append(document.createElement('hr'));
 		}
 
 		this.navigation.append(listItem);
@@ -229,6 +174,11 @@ var Zotero_Preferences = {
 	_loadAndDisplayPane(id) {
 		let pane = this.panes.get(id);
 		if (!pane.imported) {
+			if (pane.scripts) {
+				for (let script of pane.scripts) {
+					Services.scriptloader.loadSubScript(script, this);
+				}
+			}
 			let contentFragment = MozXULElement.parseXULToFragment(
 				Zotero.File.getContentsFromURL(pane.src),
 				[
@@ -238,11 +188,10 @@ var Zotero_Preferences = {
 				]
 			);
 			contentFragment = document.importNode(contentFragment, true);
-			this._initImportedNodes(contentFragment);
 			pane.container.append(contentFragment);
 			pane.imported = true;
 
-			if (pane.onLoad) pane.onLoad();
+			this._initImportedNodes(pane.container);
 		}
 
 		pane.container.hidden = false;
@@ -546,7 +495,9 @@ var Zotero_Preferences = {
 			elem.oncommand = elem.getAttribute('oncommand');
 		}
 
-		root.dispatchEvent(new Event('paneload'));
+		for (let child of root.children) {
+			child.dispatchEvent(new Event('load'));
+		}
 	},
 	
 	openURL: function (url, windowName) {
