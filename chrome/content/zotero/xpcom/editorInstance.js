@@ -1358,7 +1358,8 @@ class EditorInstanceUtilities {
 
 			let vars = {
 				color: annotation.color || '',
-				highlight: (attrs) => attrs.quotes === 'true' ? quotedHighlightHTML : highlightHTML,
+				// Include quotation marks by default, but allow to disable with `quotes='false'`
+				highlight: (attrs) => attrs.quotes === 'false' ? highlightHTML : quotedHighlightHTML,
 				comment: commentHTML,
 				citation: citationHTML,
 				image: imageHTML,
