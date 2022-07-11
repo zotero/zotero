@@ -271,10 +271,6 @@ var Scaffold = new function () {
 	this.initCodeEditor = async function () {
 		let monaco = _editors.codeGlobal, editor = _editors.code;
 
-		editor.getModel().updateOptions({
-			insertSpaces: false
-		});
-
 		editor.updateOptions({
 			lineNumbers: num => num + _linesOfMetadata - 1,
 		});
