@@ -614,8 +614,13 @@ describe("Zotero.ItemTree", function() {
 			var item3 = await createDataObject('item', { title: title + " 5" });
 			var item4 = await createDataObject('item', { title: title + " 7" });
 
-			const colIndex = itemsView.tree._getColumns().findIndex(column => column.dataKey == 'title');
+			// Sort by title
+			var colIndex = itemsView.tree._getColumns().findIndex(column => column.dataKey == 'firstCreator');
 			await itemsView.tree._columns.toggleSort(colIndex);
+			await waitForItemsLoad(win);
+			colIndex = itemsView.tree._getColumns().findIndex(column => column.dataKey == 'title');
+			await itemsView.tree._columns.toggleSort(colIndex);
+			await waitForItemsLoad(win);
 			
 			// Check initial sort order
 			assert.equal(itemsView.getRow(0).ref.getField('title'), title + " 1");
