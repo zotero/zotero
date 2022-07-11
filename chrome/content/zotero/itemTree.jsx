@@ -1243,20 +1243,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 				? `for ${itemIDs.length} ` + Zotero.Utilities.pluralize(itemIDs.length, ['item', 'items'])
 				: ""));
 		
-		// Set whether rows with empty values should be displayed last,
-		// which may be different for primary and secondary sorting.
-		var emptyFirst = {};
-		switch (primaryField) {
-		case 'title':
-			emptyFirst.title = true;
-			break;
-		
-		// When sorting by title we want empty titles at the top, but if not
-		// sorting by title, empty titles should sort to the bottom so that new
-		// empty items don't get sorted to the middle of the items list.
-		default:
-			emptyFirst.title = false;
-		}
+		// Set whether rows with empty values should sort at the beginning
+		var emptyFirst = {
+			title: true,
+			
+			// Date columns start descending, so put empty rows at end
+			date: true,
+			year: true,
+		};
 		
 		// Cache primary values while sorting, since base-field-mapped getField()
 		// calls are relatively expensive
