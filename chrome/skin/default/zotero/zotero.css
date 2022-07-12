@@ -21,38 +21,12 @@ textbox[type="styled"]
 	-moz-binding: url('chrome://zotero/content/bindings/styled-textbox.xml#styled-textbox');
 }
 
-zoteronoteeditor
-{
-	-moz-binding: url('chrome://zotero/content/bindings/noteeditor.xml#note-editor');
-}
-
-linksbox
-{
-	-moz-binding: url('chrome://zotero/content/bindings/noteeditor.xml#links-box');
-}
-
-tagsbox
-{
-	-moz-binding: url('chrome://zotero/content/bindings/tagsbox.xml#tags-box');
-}
-
-tagsbox row
-{
-	-moz-box-align:center;
-}
-
 customcolorpicker {
 	-moz-binding: url(chrome://zotero/content/bindings/customcolorpicker.xml#custom-colorpicker);
 }
 
 customcolorpicker[type=button] {
 	-moz-binding: url(chrome://zotero/content/bindings/customcolorpicker.xml#custom-colorpicker-button);
-}
-
-relatedbox
-{
-	-moz-binding: url('chrome://zotero/content/bindings/relatedbox.xml#related-box');
-	-moz-user-focus: ignore;
 }
 
 zoteromergegroup {
