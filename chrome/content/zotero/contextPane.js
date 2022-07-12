@@ -247,7 +247,10 @@ var ZoteroContextPane = new function () {
 					}
 				
 					_contextPaneSplitter.setAttribute('hidden', false);
-					// It seems that on heavy load (i.e. syncing) the line below doesn't set the correct value
+
+					_contextPane.setAttribute('collapsed', !(_contextPaneSplitter.getAttribute('state') != 'collapsed'));
+					// It seems that on heavy load (i.e. syncing) the line below doesn't set the correct value,
+					// therefore we repeat the same operation at the end of JS message queue
 					setTimeout(() => {
 						_contextPane.setAttribute('collapsed', !(_contextPaneSplitter.getAttribute('state') != 'collapsed'));
 					});
