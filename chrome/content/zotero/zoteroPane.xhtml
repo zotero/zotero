@@ -861,22 +861,6 @@
 											tooltiptext="&zotero.sync.stop;"
 											oncommand="this.hidden = true; Zotero.Sync.Runner.stop()"
 											hidden="true"/>
-										<hbox id="zotero-tb-sync-progress-box" hidden="true" align="center">
-											<!-- TODO: localize -->
-											<toolbarbutton id="zotero-tb-sync-storage-cancel"
-												tooltiptext="Stop sync"
-												oncommand="Zotero.Sync.Runner.stop()"/>
-											<progressmeter id="zotero-tb-sync-progress" mode="determined"
-												value="0" tooltip="zotero-tb-sync-progress-tooltip">
-											</progressmeter>
-											<tooltip id="zotero-tb-sync-progress-tooltip" noautohide="true">
-												<hbox id="zotero-tb-sync-progress-tooltip-progress">
-													<label value="&zotero.sync.storage.progress;"/>
-													<label/>
-												</hbox>
-												<zoterofilesyncstatus id="zotero-tb-sync-progress-status"/>
-											</tooltip>
-										</hbox>
 									</hbox>
 				
 									<hbox id="zotero-pq-buttons">

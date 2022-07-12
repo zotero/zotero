@@ -73,10 +73,6 @@ zoteroguidancepanel
 	-moz-binding: url('chrome://zotero/content/bindings/guidancepanel.xml#guidancepanel');
 }
 
-zoterofilesyncstatus {
-	-moz-binding: url('chrome://zotero/content/bindings/filesyncstatus.xml#file-sync-status');
-}
-
 richlistitem {
 	padding: 0.2em 0.4em;
 }
