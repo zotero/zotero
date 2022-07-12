@@ -1356,6 +1356,14 @@ class EditorInstanceUtilities {
 				template = '<p>{{image}}<br/>{{citation}} {{comment}}</p>';
 			}
 
+			Zotero.debug('Using note template:');
+			Zotero.debug(template);
+
+			template = template.replace(
+				/(<blockquote>[^<>]*?)({{highlight}})([\s\S]*?<\/blockquote>)/g,
+				(match, p1, p2, p3) => p1 + "{{highlight quotes='false'}}" + p3
+			);
+
 			let vars = {
 				color: annotation.color || '',
 				// Include quotation marks by default, but allow to disable with `quotes='false'`
@@ -1365,8 +1373,7 @@ class EditorInstanceUtilities {
 				image: imageHTML,
 				tags: (attrs) => (annotation.tags && annotation.tags.map(tag => tag.name) || []).join(attrs.join || ' ')
 			};
-			Zotero.debug('Using note template:');
-			Zotero.debug(template);
+
 			let templateHTML = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
 			// Remove some spaces at the end of paragraph
 			templateHTML = templateHTML.replace(/([\s]*)(<\/p)/g, '$2');
