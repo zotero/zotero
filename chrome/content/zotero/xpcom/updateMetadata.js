@@ -238,13 +238,30 @@ Zotero.UpdateMetadata = new function () {
 				let newItem = await Zotero.Utilities.Internal.getUpdatedItemMetadata(oldItem);
 				if (newItem) {
 					_setRowFields(row, oldItem, newItem);
-					row.newItem = newItem;
 					row.status = Zotero.UpdateMetadata.ROW_SUCCEEDED;
 					row.message = '';
 				}
 				else {
-					row.status = Zotero.UpdateMetadata.ROW_NO_METADATA;
-					row.message = Zotero.getString('updateMetadata.noMetadata');
+					newItem = oldItem.clone();
+					let { itemType, fields, creators, extra } = Zotero.Utilities.Internal
+						.extractExtraFields(newItem.getField('extra'), newItem);
+					if (itemType || fields.size || creators.length) {
+						if (itemType) newItem.setType(Zotero.ItemTypes.getID(itemType));
+						for (let [field, value] of fields.entries()) {
+							newItem.setField(field, value);
+						}
+						for (let creator of creators) {
+							newItem.addCreator(creator);
+						}
+						newItem.setField('extra', extra);
+						_setRowFields(row, oldItem, newItem);
+						row.status = Zotero.UpdateMetadata.ROW_SUCCEEDED;
+						row.message = '';
+					}
+					else {
+						row.status = Zotero.UpdateMetadata.ROW_NO_METADATA;
+						row.message = Zotero.getString('updateMetadata.noMetadata');
+					}
 				}
 			}
 			catch (e) {
@@ -403,10 +420,9 @@ Zotero.UpdateMetadata = new function () {
 	 * @private
 	 */
 	function _isFieldDisabled(fieldName, oldValue, newValue, itemProps = {}) {
-		let { isNewlyPublished } = itemProps;
 		return (
 			// Field disappears (is emptied or disappears because of the item type change)
-			!newValue && !(fieldName === 'extra' && isNewlyPublished)
+			!newValue && fieldName !== 'extra'
 
 			// Call Number
 			|| fieldName === 'callNumber'
@@ -553,17 +569,23 @@ Zotero.UpdateMetadata = new function () {
 	 * Compare old and new item and set row fields that are different
 	 * @param {Object} row
 	 * @param {Zotero.Item} oldItem - The existing item
-	 * @param {Object} newItem - Item metadata in translator format
+	 * @param {Object | Zotero.Item} newItem - Item metadata in translator format or as Zotero.Item.
+	 * 		Will not be modified.
 	 * @private
 	 */
 	function _setRowFields(row, oldItem, newItem) {
 		let oldItemTypeID = oldItem.itemTypeID;
 		let combinedFields = [];
 
-		// Convert `newItem` to Zotero.Item through API JSON format
-		let tmpItem = new Zotero.Item;
-		tmpItem.fromJSON(_itemToAPIJSON(newItem));
-		newItem = tmpItem;
+		if (newItem instanceof Zotero.Item) {
+			newItem = newItem.clone();
+		}
+		else {
+			// Convert `newItem` to Zotero.Item through API JSON format
+			let tmpItem = new Zotero.Item();
+			tmpItem.fromJSON(_itemToAPIJSON(newItem));
+			newItem = tmpItem;
+		}
 
 		// Check if metadata is not potentially bad
 		let isMetadataDisabled = _isMetadataDisabled(oldItem, newItem);
