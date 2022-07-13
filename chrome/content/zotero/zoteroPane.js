@@ -1946,8 +1946,9 @@ var ZoteroPane = new function()
 	this.deleteSelectedCollection = function (deleteItems) {
 		var collectionTreeRow = this.getCollectionTreeRow();
 		
-		// Don't allow deleting libraries
-		if (collectionTreeRow.isLibrary(true) && !collectionTreeRow.isFeed()) {
+		// Don't allow deleting libraries or My Publications
+		if (collectionTreeRow.isLibrary(true) && !collectionTreeRow.isFeed()
+				|| collectionTreeRow.isPublications()) {
 			return;
 		}
 		
