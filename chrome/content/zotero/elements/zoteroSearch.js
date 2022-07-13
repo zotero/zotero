@@ -91,6 +91,8 @@
 			}
 			this.updateLibrary();
 
+			this.shadowRoot.getElementById('joinModeMenu').removeAttribute('condition');
+			this.shadowRoot.getElementById('joinModeMenu').value = 'all';
 
 			var conditionsBox = this.shadowRoot.getElementById('conditions');
 			while (conditionsBox.hasChildNodes())
