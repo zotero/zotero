@@ -422,7 +422,7 @@ Zotero.UpdateMetadata = new function () {
 	function _isFieldDisabled(fieldName, oldValue, newValue, itemProps = {}) {
 		return (
 			// Field disappears (is emptied or disappears because of the item type change)
-			!newValue && fieldName !== 'extra'
+			!newValue
 
 			// Call Number
 			|| fieldName === 'callNumber'
