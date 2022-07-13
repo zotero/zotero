@@ -140,7 +140,7 @@ Zotero_Preferences.Cite = {
 			await new Promise(resolve => ReactDOM.render(elem, styleManager, resolve));
 
 			// Fix style manager showing partially blank until scrolled
-			styleManager.dispatchEvent(new Event('resize'));
+			setTimeout(() => this._tree.invalidate());
 		}
 		else {
 			this._tree.invalidate();
