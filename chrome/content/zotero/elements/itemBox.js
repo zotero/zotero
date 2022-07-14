@@ -58,6 +58,8 @@
 			this._tabIndexMinFields = 1000;
 			this._tabIndexMaxFields = 0;
 			this._initialVisibleCreators = 5;
+
+			this._languageDisplayNames = new Intl.DisplayNames(Zotero.locale, { type: 'language' });
 			
 			this.content = MozXULElement.parseXULToFragment(`
 				<div id="item-box" xmlns="http://www.w3.org/1999/xhtml">
@@ -1399,8 +1401,7 @@
 				case 'language':
 					valueText = this.item.getField('language');
 					try {
-						valueText = new Intl.DisplayNames(Zotero.locale, { type: 'language' })
-							.of(valueText);
+						valueText = this._languageDisplayNames.of(valueText);
 					}
 					catch (e) {
 						// Ignore invalid locale code errors
