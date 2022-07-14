@@ -733,7 +733,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		return true;
 	}
 
-	if (field == 'language') {
+	if (!loadIn && field == 'language') {
 		value = Zotero.Utilities.Item.languageToISO6391(value);
 	}
 	
