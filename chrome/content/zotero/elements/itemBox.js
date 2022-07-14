@@ -1395,6 +1395,17 @@
 						}
 					}
 					break;
+				
+				case 'language':
+					valueText = this.item.getField('language');
+					try {
+						valueText = new Intl.DisplayNames(Zotero.locale, { type: 'language' })
+							.of(valueText);
+					}
+					catch (e) {
+						// Ignore invalid locale code errors
+					}
+					break;
 			}
 			
 			if (fieldID) {

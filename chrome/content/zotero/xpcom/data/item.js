@@ -732,6 +732,10 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		}
 		return true;
 	}
+
+	if (field == 'language') {
+		value = Zotero.Utilities.Item.languageToISO6391(value);
+	}
 	
 	// Normalize values
 	if (typeof value == 'number') {
