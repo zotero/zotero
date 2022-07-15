@@ -49,6 +49,7 @@ pref("extensions.zotero.viewOnDoubleClick", true);
 pref("extensions.zotero.firstRunGuidance", true);
 pref("extensions.zotero.showConnectorVersionWarning", true);
 pref("extensions.zotero.reopenPanesOnRestart", true);
+pref("extensions.zotero.locate.maxItems", 20);
 
 pref("extensions.zotero.groups.copyChildLinks", true);
 pref("extensions.zotero.groups.copyChildFileAttachments", true);

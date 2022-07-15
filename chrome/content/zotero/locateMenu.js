@@ -100,8 +100,8 @@ var Zotero_LocateMenu = new function() {
 		// get selected items
 		var selectedItems = _getSelectedItems();
 		
-		// if no items selected or >20 items selected, stop now
-		if(!selectedItems.length || selectedItems.length > 20) return;
+		// if no items selected or too many items selected, stop now
+		if(!selectedItems.length || selectedItems.length > Zotero.Prefs.get('locate.maxItems')) return;
 		
 		// add view options
 		yield _addViewOptions(menu, selectedItems, showIcons);
@@ -324,16 +324,10 @@ var Zotero_LocateMenu = new function() {
 	}
 	
 	/**
-	 * Get the first 50 selected items
+	 * Get selected items that can potentially be located
 	 */
 	function _getSelectedItems() {
-		var allSelectedItems = ZoteroPane_Local.getSelectedItems();
-		var selectedItems = [];
-		while(selectedItems.length < 50 && allSelectedItems.length) {
-			var item = allSelectedItems.shift();
-			if(!item.isNote()) selectedItems.push(item);
-		}
-		return selectedItems;
+		return ZoteroPane_Local.getSelectedItems().filter(item => !item.isNote());
 	}
 	
 	var ViewOptions = {};
