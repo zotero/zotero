@@ -89,6 +89,25 @@ class EditorInstance {
 			return doc.execCommand(command, ui, value);
 		};
 
+		// Translate note HTML into Markdown, for setting it as text/plain in clipboard (on text copy/drag)
+		this._iframeWindow.wrappedJSObject.zoteroTranslateToMarkdown = (html) => {
+			let item = new Zotero.Item('note');
+			item.libraryID = this._item.libraryID;
+			item.setNote(html);
+			let text = '';
+			var translation = new Zotero.Translate.Export;
+			translation.noWait = true;
+			translation.setItems([item]);
+			translation.setTranslator(Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN);
+			translation.setHandler("done", (obj, worked) => {
+				if (worked) {
+					text = obj.string.replace(/\r\n/g, '\n');
+				}
+			});
+			translation.translate();
+			return text;
+		};
+
 		this._iframeWindow.addEventListener('message', this._messageHandler);
 		this._iframeWindow.addEventListener('error', (event) => {
 			Zotero.logError(event.error);
