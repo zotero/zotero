@@ -148,6 +148,26 @@ var ZoteroPane = new function()
 		Zotero.hiDPI = window.devicePixelRatio > 1;
 		Zotero.hiDPISuffix = Zotero.hiDPI ? "@2x" : "";
 		
+		// Show warning in toolbar for 'dev' channel builds
+		try {
+			let isDevBuild = Zotero.version.includes('-dev');
+			// Uncomment to test
+			//isDevBuild = isDevBuild || Zotero.version.includes('.SOURCE');
+			if (isDevBuild) {
+				let label = document.createElement('label');
+				label.setAttribute('value', 'TEST BUILD — DO NOT USE');
+				label.setAttribute('style', 'font-weight: bold; color: red; cursor: pointer');
+				label.onclick = function () {
+					Zotero.launchURL('https://www.zotero.org/support/kb/test_builds');
+				};
+				let syncStop = document.getElementById('zotero-tb-sync-stop');
+				syncStop.parentNode.insertBefore(label, syncStop);
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+			
 		Zotero_Tabs.init();
 		ZoteroContextPane.init();
 		await ZoteroPane.initCollectionsTree();
