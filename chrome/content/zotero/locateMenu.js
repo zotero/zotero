@@ -100,8 +100,8 @@ var Zotero_LocateMenu = new function() {
 		// get selected items
 		var selectedItems = _getSelectedItems();
 		
-		// if no items selected or too many items selected, stop now
-		if(!selectedItems.length || selectedItems.length > Zotero.Prefs.get('locate.maxItems')) return;
+		// if no items selected, stop now
+		if(!selectedItems.length) return;
 		
 		// add view options
 		yield _addViewOptions(menu, selectedItems, showIcons);
@@ -123,16 +123,22 @@ var Zotero_LocateMenu = new function() {
 	});
 	
 	function _addViewOption(selectedItems, optionName, optionObject, showIcons) {
-		var menuitem = _createMenuItem(Zotero.getString("locate."+optionName+".label"),
-			null, null);
+		let label = Zotero.getString("locate." + optionName + ".label");
+		var menuitem = _createMenuItem(label, null, null);
 		if(showIcons) {
 			menuitem.setAttribute("class", "menuitem-iconic");
 			menuitem.style.listStyleImage = "url('"+optionObject.icon+"')";
 		}
 		menuitem.setAttribute("zotero-locate", "true");
 		
-		menuitem.addEventListener("command", function(event) {
-			optionObject.handleItems(selectedItems, event);
+		menuitem.addEventListener("command", async function (event) {
+			let viewableItems = (await Promise.all(
+				selectedItems.map(async item => await optionObject.canHandleItem(item) && item)
+			)).filter(Boolean);
+			let needsPrompt = viewableItems.length > 20;
+			if (!needsPrompt || ZoteroPane_Local.confirmViewingItems(label, viewableItems.length)) {
+				optionObject.handleItems(selectedItems, event);
+			}
 		}, false)
 		return menuitem;
 	}
