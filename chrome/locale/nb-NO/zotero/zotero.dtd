@@ -85,7 +85,7 @@
 <!ENTITY zotero.toolbar.newCollection.label "Ny samling...">
 <!ENTITY zotero.toolbar.markFeedRead.label "Merk nyhetsstrøm som lest">
 <!ENTITY zotero.toolbar.newGroup "Ny gruppe...">
-<!ENTITY zotero.toolbar.newSubcollection.label "Ny undersamling...">
+<!ENTITY zotero.toolbar.newSubcollection.label "Ny under-samling...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nytt lagret søk...">
 <!ENTITY zotero.toolbar.emptyTrash.label "Tøm søppelkorg">
 <!ENTITY zotero.toolbar.tagSelector.label "Vis/skjul emneordsamling">

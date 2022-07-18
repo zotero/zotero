@@ -7,7 +7,7 @@
 <!ENTITY zotero.search.joinMode.all "alle">
 <!ENTITY zotero.search.joinMode.suffix "av følgende:">
 
-<!ENTITY zotero.search.recursive.label "Søk i undermapper">
+<!ENTITY zotero.search.recursive.label "Søk i under-samlinger">
 <!ENTITY zotero.search.noChildren "Vis kun overordnede elementer">
 <!ENTITY zotero.search.includeParentsAndChildren "Inkluder under- og overordnede elementer">
 
