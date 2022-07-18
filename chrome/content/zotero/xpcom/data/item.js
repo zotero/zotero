@@ -733,10 +733,6 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 		return true;
 	}
 
-	if (!loadIn && field == 'language') {
-		value = Zotero.Utilities.Item.languageToISO6391(value);
-	}
-	
 	// Normalize values
 	if (typeof value == 'number') {
 		value = "" + value;
@@ -828,6 +824,10 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 					return false;
 				}
 			}
+		}
+		// Parse language name to ISO 639-1 code
+		else if (fieldID == Zotero.ItemFields.getID('language')) {
+			value = Zotero.Utilities.Item.languageToISO6391(value);
 		}
 		
 		// If existing value, make sure it's actually changing
