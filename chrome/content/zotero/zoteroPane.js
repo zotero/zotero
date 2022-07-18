@@ -3552,7 +3552,7 @@ var ZoteroPane = new function()
 			ZoteroPane.viewItems([items[0]], event);
 		}
 		// Keyboard event
-		else if (items.length <= 20 || this.confirmViewingItems(Zotero.getString('locate.confirm.genericTitle'), items.length)) {
+		else if (items.length <= 20 || this.confirmViewingItems(Zotero.getString('locate.confirm.genericAction'), items.length)) {
 			ZoteroPane_Local.viewItems(items, event);
 		}
 	};
