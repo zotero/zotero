@@ -33,7 +33,7 @@ const getNextLinkFromResponse = (response) => {
 
 const apiFetchUrl = async (tokens, url, headers = {}, options = {}) => {
 	headers = { ...headers, Authorization: `Bearer ${tokens.access_token}` };
-	options = { ...options, headers };
+	options = { ...options, headers, timeout: 60000 };
 	const method = 'GET';
 
 	// Run the request. If we see 401 or 403, try to refresh tokens and run the request again
