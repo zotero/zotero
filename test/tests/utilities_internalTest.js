@@ -567,4 +567,31 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.equal(html, 'yes1yes2 yes3');
 		});
 	});
+
+	describe("#getItemIdentifiers()", function () {
+		it("should extract an arXiv ID from a preprint", function () {
+			let item = new Zotero.Item('preprint');
+			item.setField('repository', 'arXiv');
+			item.setField('archiveID', 'arXiv:1401.0094');
+			assert.deepEqual(Zotero.Utilities.Internal.getItemIdentifiers(item), [{ arXiv: '1401.0094' }]);
+		});
+
+		it("should extract an arXiv ID from a journal article", function () {
+			let item = new Zotero.Item('journalArticle');
+			item.setField('extra', 'arXiv:1401.0094 [gr-qc]');
+			assert.deepEqual(Zotero.Utilities.Internal.getItemIdentifiers(item), [{ arXiv: '1401.0094' }]);
+		});
+
+		it("should extract an ADS Bibcode from a journal article", function () {
+			let item = new Zotero.Item('journalArticle');
+			item.setField('extra', 'ADS Bibcode: 2017ApJ...837...41B');
+			assert.deepEqual(Zotero.Utilities.Internal.getItemIdentifiers(item), [{ adsBibcode: '2017ApJ...837...41B' }]);
+		});
+
+		it("should extract a DOI from extra", function () {
+			let item = new Zotero.Item('book');
+			item.setField('extra', 'DOI: 10.1234/foo.bar');
+			assert.deepEqual(Zotero.Utilities.Internal.getItemIdentifiers(item), [{ DOI: '10.1234/foo.bar' }]);
+		});
+	});
 })

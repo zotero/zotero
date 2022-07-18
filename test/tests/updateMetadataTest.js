@@ -18,7 +18,8 @@ describe('Update Metadata', function () {
 			// [oldItem, newItem, disabled?]
 			[{ itemType: 'journalArticle' }, { itemType: 'webpage' }, true],
 			[{ itemType: 'journalArticle', title: 'One title about something' }, { itemType: 'journalArticle', title: 'Another completely unrelated title' }, true],
-			[{ itemType: 'journalArticle', title: 'This is the main title' }, { itemType: 'journalArticle', title: 'This is the main title: and subtitle' }, false]
+			[{ itemType: 'journalArticle', title: 'This is the main title' }, { itemType: 'journalArticle', title: 'This is the main title: and subtitle' }, false],
+			[{ itemType: 'journalArticle', extra: 'arXiv: abcdef' }, { itemType: 'journalArticle', DOI: 'something with arXiv in it' }, true],
 		];
 
 		for (let test of itemTests) {

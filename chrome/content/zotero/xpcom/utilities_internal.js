@@ -1507,28 +1507,48 @@ Zotero.Utilities.Internal = {
 	 * @return {Object[]} Identifiers
 	 */
 	getItemIdentifiers: function (item) {
+		// extractExtraFields() only extracts known valid Zotero item fields,
+		// but we need to extract identifiers that don't map to a real field.
+		// So we split lines in extra ourselves here
+		let parsedExtra = new Map();
+		for (let line of item.getField('extra').split(/\n/g)) {
+			let [key, value] = this.splitExtraLine(line, false);
+			if (!key || !value) {
+				if (line.startsWith('arXiv:')) {
+					parsedExtra.set('arXiv', line);
+				}
+				continue;
+			}
+			parsedExtra.set(key, value);
+		}
+
 		let identifiers = [];
-		let DOI = item.getField('DOI') || item.getExtraField('DOI');
+
+		let arXiv = parsedExtra.get('arXiv') || parsedExtra.get('arXiv ID')
+				|| (item.getField('repository').toLowerCase() == 'arxiv' && item.getField('archiveID'));
+		// Use extractIdentifiers() to clean
+		if (arXiv) arXiv = Zotero.Utilities.extractIdentifiers(arXiv).find(x => x.arXiv);
+		if (arXiv) {
+			identifiers.push(arXiv);
+		}
+
+		let DOI = item.getField('DOI') || parsedExtra.get('DOI');
 		if (DOI) {
 			identifiers.push({ DOI });
 		}
 
-		let ISBN = item.getField('ISBN') || item.getExtraField('ISBN');
+		let ISBN = item.getField('ISBN') || parsedExtra.get('ISBN');
 		if (ISBN) {
 			identifiers.push({ ISBN });
 		}
 
-		let PMID = item.getField('PMID') || item.getExtraField('PMID');
+		let PMID = parsedExtra.get('PMID')
+				|| (item.getField('repository').toLowerCase() == 'pubmed' && item.getField('archiveID'));
 		if (PMID) {
 			identifiers.push({ PMID });
 		}
 
-		let arXiv = item.getField('arXiv') || item.getExtraField('arXiv') || item.getExtraField('arXiv ID');
-		if (arXiv) {
-			identifiers.push({ arXiv });
-		}
-
-		let adsBibcode = item.getExtraField('ADS Bibcode');
+		let adsBibcode = parsedExtra.get('ADS Bibcode');
 		if (adsBibcode) {
 			identifiers.push({ adsBibcode });
 		}

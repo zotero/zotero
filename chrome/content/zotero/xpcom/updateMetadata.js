@@ -407,6 +407,9 @@ Zotero.UpdateMetadata = new function () {
 
 			// Item type changes to `webpage`, since it might be a redirected page
 			|| oldItem.itemTypeID !== newItem.itemTypeID && newItem.itemType === 'webpage'
+
+			// DOI metadata for an arXiv preprint
+			|| newItem.itemType === 'journalArticle' && newItem.getField('DOI').toLowerCase().includes('arxiv')
 		);
 	}
 
