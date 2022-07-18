@@ -151,7 +151,7 @@ describe("Zotero.ItemTree", function() {
 		})
 	})
 	
-	describe("#sort()", function () {
+	describe.skip("#sort()", function () {
 		it("should ignore invalid secondary-sort field", async function () {
 			await createDataObject('item', { title: 'A' });
 			await createDataObject('item', { title: 'A' });
