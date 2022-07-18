@@ -621,6 +621,7 @@
 #item-box-container {
 	display: flex;
 	min-width: 0;
+	min-height: 0;
 }
 
 #retracted-items-banner, #sync-reminder-banner {
