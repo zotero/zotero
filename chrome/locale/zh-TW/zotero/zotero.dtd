@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "全不選">
 <!ENTITY zotero.general.edit "編輯">
 <!ENTITY zotero.general.delete "刪除">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "移到垃圾筒">
 <!ENTITY zotero.general.ok "確定">
 <!ENTITY zotero.general.cancel "取消">
 <!ENTITY zotero.general.refresh "重新整理">
@@ -128,8 +128,8 @@
 <!ENTITY zotero.toolbar.attachment.add "儲存檔案副本…">
 <!ENTITY zotero.toolbar.attachment.weblink "儲存目前網頁連結">
 <!ENTITY zotero.toolbar.attachment.snapshot "製作目前網頁快照">
-<!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.item "項目">
+<!ENTITY zotero.toolbar.context.notes "筆記">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "沒有標籤可顯示">
 <!ENTITY zotero.tagSelector.loadingTags "正在載入標籤...">
@@ -147,11 +147,11 @@
 <!ENTITY zotero.tagColorChooser.setColor "設定顏色">
 <!ENTITY zotero.tagColorChooser.removeColor "移除顏色">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
+<!ENTITY zotero.lookup.description "输入ISBN、DOI、PMID、arXiv ID或ADS条码导入条目到文库中：">
 <!ENTITY zotero.lookup.button.search "搜尋">
 
 <!ENTITY zotero.createParent.title "建立上層項目">
-<!ENTITY zotero.createParent.button.manual "Manual Entry">
+<!ENTITY zotero.createParent.button.manual "手动录入">
 
 <!ENTITY zotero.selectitems.title "選取項目">
 <!ENTITY zotero.selectitems.intro.label "選取要加到您的文獻庫的項目">
@@ -196,7 +196,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "令來源保持排序">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
+<!ENTITY zotero.citation.suppressAuthor.label "省略作者">
 <!ENTITY zotero.citation.prefix.label "前綴：">
 <!ENTITY zotero.citation.suffix.label "後綴：">
 <!ENTITY zotero.citation.editorWarning.label "警告：若是在編輯器中編輯引用文獻，Zotero 就不會更新以反應文獻庫或引用文獻樣式中的變更。">
@@ -301,28 +301,28 @@
 <!ENTITY zotero.attachLink.label.link "連結：">
 <!ENTITY zotero.attachLink.label.title "標題：">
 
-<!ENTITY zotero.context.addChildNote "Add Item Note">
-<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
-<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
-<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
-<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
+<!ENTITY zotero.context.addChildNote "添加条目笔记">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "通过注释添加条目笔记">
+<!ENTITY zotero.context.addStandaloneNote "添加独立注释">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "通过注释添加独立笔记">
+<!ENTITY zotero.context.editInWindow "在单独窗口编辑">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
-<!ENTITY zotero.pdfReader.lastPage "Last Page">
-<!ENTITY zotero.pdfReader.back "Back">
-<!ENTITY zotero.pdfReader.forward "Forward">
-<!ENTITY zotero.pdfReader.rotateClockwise "Rotate Clockwise">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotate Counterclockwise">
-<!ENTITY zotero.pdfReader.handTool "Hand Tool">
-<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
-<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
-<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
-<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
-<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
-<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
-<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">
+<!ENTITY zotero.pdfReader.firstPage "起始頁">
+<!ENTITY zotero.pdfReader.lastPage "尾页">
+<!ENTITY zotero.pdfReader.back "后退">
+<!ENTITY zotero.pdfReader.forward "前进">
+<!ENTITY zotero.pdfReader.rotateClockwise "顺时针旋转">
+<!ENTITY zotero.pdfReader.rotateCounterclockwise "逆时针旋转">
+<!ENTITY zotero.pdfReader.handTool "手形工具">
+<!ENTITY zotero.pdfReader.verticalScrolling "垂直滚动">
+<!ENTITY zotero.pdfReader.horizontalScrolling "水平滚动">
+<!ENTITY zotero.pdfReader.wrappedScrolling "覆盖滚动">
+<!ENTITY zotero.pdfReader.noSpreads "无分布">
+<!ENTITY zotero.pdfReader.oddSpreads "奇数分布">
+<!ENTITY zotero.pdfReader.evenSpreads "偶数分布">
+<!ENTITY zotero.pdfReader.zoomIn "放大">
+<!ENTITY zotero.pdfReader.zoomOut "缩小">
+<!ENTITY zotero.pdfReader.zoomAuto "自动调整大小">
+<!ENTITY zotero.pdfReader.zoomPageWidth "适应页面宽度">
+<!ENTITY zotero.pdfReader.zoomPageHeight "适应页面高度">
+<!ENTITY zotero.pdfReader.transferFromPDF "导入注释……">

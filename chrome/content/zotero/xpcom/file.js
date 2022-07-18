@@ -448,10 +448,11 @@ Zotero.File = new function(){
 
 	this.download = async function (uri, path) {
 		var uriStr = uri.spec || uri;
+		const isHTTP = uriStr.startsWith('http');
 		
 		Zotero.debug(`Saving ${uriStr} to ${path.pathQueryRef || path}`);
 		
-		if (Zotero.HTTP.browserIsOffline()) {
+		if (isHTTP && Zotero.HTTP.browserIsOffline()) {
 			let msg = `Download failed: ${Zotero.appName} is currently offline`;
 			Zotero.debug(msg, 2);
 			throw new Error(msg);
@@ -488,7 +489,8 @@ Zotero.File = new function(){
 					deferred.reject(new Error(msg));
 					return;
 				}
-				if (responseStatus != 200) {
+
+				if (isHTTP && responseStatus != 200) {
 					let msg = `Download failed with response code ${responseStatus}`;
 					Zotero.logError(msg);
 					deferred.reject(new Error(msg));

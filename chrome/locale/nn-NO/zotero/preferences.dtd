@@ -3,7 +3,7 @@
 <!ENTITY zotero.preferences.default "Standard:">
 <!ENTITY zotero.preferences.items "items">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Settings">
+<!ENTITY zotero.preferences.settings "Innstillingar">
 <!ENTITY zotero.preferences.custom "Custom…">
 
 <!ENTITY zotero.preferences.prefpane.general "Generelt">
@@ -69,8 +69,8 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "vilkåra for bruk">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
 <!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
-<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
+<!ENTITY zotero.preferences.sync.librariesToSync.sync "Synkroniser">
+<!ENTITY zotero.preferences.sync.librariesToSync.library "Bibliotek">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Dei følgjande handlingane er berre meint å brukast i sjeldne, spesifikke situasjonar og bør ikkje brukast i alminneleg feilsøking. I mange tilfelle vil tilbakestilling skapa nye problem. Sjå">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Nullstill synkronisering">
 <!ENTITY zotero.preferences.sync.reset.warning3 "for meir informasjon.">
@@ -136,7 +136,7 @@
 <!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopier dei valde siteringane til utklipptavla.">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopier dei valde elementa til utklipptavla.">
-<!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
+<!ENTITY zotero.preferences.keys.importFromClipboard "Importer frå utklippstavla">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect after restart">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Mellomtenarar">
@@ -164,7 +164,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Avansert">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "Snøggtastar">
 
 <!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
 
@@ -175,7 +175,7 @@
 <!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Restore Defaults">
 
-<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset "Teiknsett">
 <!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
 <!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
 

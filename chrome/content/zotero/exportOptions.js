@@ -72,15 +72,20 @@ var Zotero_File_Interface_Export = new function() {
 				if(!addedOptions[option]) {		// if this option is not already
 												// presented to the user
 					// get readable name for option
+					let optionLabel;
 					try {
 						if (option == 'includeAppLinks') {
-							var optionLabel = Zotero.getString("exportOptions." + option, Zotero.appName);
+							optionLabel = Zotero.getString("exportOptions." + option, Zotero.appName);
 						}
 						else {
-							var optionLabel = Zotero.getString("exportOptions." + option);
+							optionLabel = Zotero.getString("exportOptions." + option);
 						}
-					} catch(e) {
-						var optionLabel = option;
+						if (optionLabel == "exportOptions." + option) {
+							optionLabel = option;
+						}
+					}
+					catch (e) {
+						optionLabel = option;
 					}
 					
 					// right now, option interface supports only boolean values, which

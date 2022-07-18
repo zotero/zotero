@@ -22261,7 +22261,7 @@ CSL.Output.Formats.prototype.text = {
         return "\n"+str;
     },
     "@display/left-margin": function (state, str) {
-        return str;
+        return str + " ";
     },
     "@display/right-inline": function (state, str) {
         return str;

@@ -196,7 +196,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "保持源分类">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
+<!ENTITY zotero.citation.suppressAuthor.label "省略作者">
 <!ENTITY zotero.citation.prefix.label "前缀:">
 <!ENTITY zotero.citation.suffix.label "后缀:">
 <!ENTITY zotero.citation.editorWarning.label "警告: 如果你在编辑器中编辑引文, 引文将无法与数据库或引文样式同步更新.">
@@ -323,6 +323,6 @@
 <!ENTITY zotero.pdfReader.zoomIn "放大">
 <!ENTITY zotero.pdfReader.zoomOut "缩小">
 <!ENTITY zotero.pdfReader.zoomAuto "自动调整大小">
-<!ENTITY zotero.pdfReader.zoomPageWidth "适应宽度">
-<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">
+<!ENTITY zotero.pdfReader.zoomPageWidth "适应页面宽度">
+<!ENTITY zotero.pdfReader.zoomPageHeight "适应页面高度">
+<!ENTITY zotero.pdfReader.transferFromPDF "导入注释……">

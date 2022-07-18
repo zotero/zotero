@@ -2,8 +2,20 @@
   "general_more": {
     "message": "その他..."
   },
+  "general_moreInfo": {
+    "message": "詳細情報..."
+  },
+  "general_needHelp": {
+    "message": "助けが必要？"
+  },
   "general_done": {
     "message": "完了"
+  },
+  "general_yes": {
+    "message": "はい"
+  },
+  "general_no": {
+    "message": "いいえ"
   },
   "general_tryAgain": {
     "message": "もう一度試す"
@@ -14,6 +26,12 @@
   "general_cancel": {
     "message": "キャンセル"
   },
+  "general_pleaseWait": {
+    "message": "しばらくお待ちください..."
+  },
+  "general_copyToClipboard": {
+    "message": "クリップボードにコピー"
+  },
   "progressWindow_savingTo": {
     "message": "保存先は"
   },
@@ -23,8 +41,14 @@
   "progressWindow_error_translation": {
     "message": "アイテムの保存中にエラーが発生しました。 さらに詳しくは $1 をご確認ください。"
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "このアイテムの保存中にエラーが発生しました。 $1 は、一度に保存できるアイテムの数を制限する場合があります。 詳細については、$2 を参照してください。"
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "トランスレータの不具合を解決"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "サイトアクセス制限"
   },
   "progressWindow_error_fallback": {
     "message": "$1 の保存中にエラーが発生しました。代わりに $2 を使用して保存を試みてください。"
@@ -41,6 +65,18 @@
   "upgradeApp": {
     "message": "バージョン $1 にアップグレード"
   },
+  "firstRun_title": {
+    "message": "$1 コネクタをインストールしました。"
+  },
+  "firstRun_text1": {
+    "message": "$1 コネクタを使用すると、ブラウザからワンクリックで<a href=\"$2\">アイテムを $1に保存</a>できます。"
+  },
+  "firstRun_text2": {
+    "message": "まだの方は、スタンドアロンの $1 アプリケーションを<a href=\"$2\">ダウンロードして</a>、最高の体験をお楽しみください。"
+  },
+  "firstRun_acceptButton": {
+    "message": "了解しました"
+  },
   "error_connection_isAppRunning": {
     "message": " $1 が実行中ですか？"
   },
@@ -52,6 +88,15 @@
   },
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "オンライン・ライブラリへの保存を有効にする"
+  },
+  "reports_report_submitted": {
+    "message": "エラーレポートが送信されました。\n\nレポート ID: $1\n\nこのレポート ID、問題の説明、再現に必要な手順を Zotero フォーラムに投稿してください。\n\nフォーラムで参照されない限り、エラーレポートはレビューされません。"
+  },
+  "reports_debug_output_submitted": {
+    "message": "デバッグ出力が送信されました。\n\nデバッグ ID は $1 です、"
+  },
+  "reports_submission_failed": {
+    "message": "下記のレポートの送信中にエラーが発生しました。\n\n$1\n\nインターネット接続を確認してください。 問題が解決しない場合は、Zotero フォーラムにメッセージを投稿してください。"
   },
   "integration_error_clientUpgrade": {
     "message": "ウェブベースの引用にはバージョン $1 以上が必要です。"
@@ -68,7 +113,34 @@
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "リンクされたバージョンを強制的にダウンロード"
   },
+  "integration_googleDocs_updating": {
+    "message": "$1 が文書を更新しています。"
+  },
+  "integration_googleDocs_docxAlert": {
+    "message": "Microsoft Word の.docx ファイルを Google Docs で直接編集する場合、$1 との連携機能は利用できません。この機能を有効にするには、[ファイル] → [Googleドキュメントとして保存] を選択します。<br/><br/>$1 の引用を含む Word 文書を Google ドキュメントに転送する場合は、「<a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">ワープロソフト間で文書を移動する</a>」を参照してください。"
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "別のユーザー $1 が文書の引用を編集中です。 後でもう一度やり直してください。"
+  },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1 は、複数のユーザーが同時に引用を編集できないように、文書をロックします。文書内で引用編集を同時に行うと、引用や文書の破損につながる可能性があります。ネットワーク障害など、予期せぬ事態により、文書が永久にロックされる場合があります。このようなことが起こったと思われる場合は、ロックを無効にすることができます。<br/><br/>文書のロックを無効にしますか？"
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "選択した Google アカウントには、この文書を編集する権限がありません。編集権限のあるアカウントを選択し、再度お試しください。"
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "リンクされていない $1 の引用を表示する"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "編集しようとしている引用が $1 からリンク解除されました。"
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "引用を再リンクする"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "これらの引用は <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">$1 からリンク解除</a>されました。更新したり、参考文献目録に表示したりする前に、再リンクする必要があります。"
+  },
   "general_saveTo": {
-    "message": "$1 へと保存する"
+    "message": "$1 に保存する"
   }
 }

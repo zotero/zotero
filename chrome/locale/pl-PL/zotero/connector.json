@@ -71,6 +71,9 @@
   "firstRun_text1": {
     "message": "$1 Connector umożliwia ci <a href=\"$2\">zapisywanie elementów do $1</a> z twojej przeglądarki tylko jednym kliknięciem."
   },
+  "firstRun_text2": {
+    "message": "Jeśli jeszcze nie próbowałeś(aś), <a href=\"$2\">pobierz</a> samodzielną aplikację $1."
+  },
   "firstRun_acceptButton": {
     "message": "Rozumiem"
   },
@@ -119,8 +122,23 @@
   "integration_googleDocs_documentLocked": {
     "message": "Cytowania w dokumencie są właśnie edytowane przez innego użytkownika $1. Proszę spróbuj ponownie później."
   },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1 blokuje dokument, aby uniemożliwić wielu użytkownikom edycję cytatów w tym samym czasie. Jednoczesna edycja cytatów w dokumencie może prowadzić do uszkodzenia dokumentu lub cytowań. Pewne nieprzewidywalne okoliczności, takie jak awarie sieci, mogą spowodować trwałe zablokowanie dokumentu. Jeśli uważasz, że tak się stało, możesz obejść blokadę. <br/><br/>Czy chcesz ominąć blokadę dokumentu?"
+  },
   "integration_googleDocs_documentPermissionError": {
     "message": "Konto Google, które zostało wybrane, nie ma dostępu do edycji tego dokumentu. Proszę, spróbuj ponownie i upewnij się, że wybrano konto z dostępem do edycji."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "Pokaż niepołączone $1 cytowania"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "Cytowanie, które próbujesz edytować, zostało odłączone od $1."
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Połącz ponownie cytowanie"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "Te cytaty zostały <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">odłączone od $1</a>. Musisz ponownie połączyć je, zanim zostaną zaktualizowane lub pojawią się w Twojej bibliografii."
   },
   "general_saveTo": {
     "message": "Zapisz w $1"

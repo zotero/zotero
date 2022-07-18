@@ -5,6 +5,12 @@
   "general_done": {
     "message": "Færdig"
   },
+  "general_yes": {
+    "message": "Ja"
+  },
+  "general_no": {
+    "message": "Nej"
+  },
   "general_tryAgain": {
     "message": "Prøv igen"
   },
@@ -13,6 +19,9 @@
   },
   "general_cancel": {
     "message": "Annullér"
+  },
+  "general_copyToClipboard": {
+    "message": "Kopiér til udklipsholderen"
   },
   "progressWindow_savingTo": {
     "message": "Gemmer i"

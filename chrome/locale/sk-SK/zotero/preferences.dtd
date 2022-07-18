@@ -30,7 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Pri kopírovaní záznamov medzi knižnicami, zahrnúť:">
 <!ENTITY zotero.preferences.groups.childNotes "vložené poznámky">
 <!ENTITY zotero.preferences.groups.childFiles "vložené snímky a importované súbory">
-<!ENTITY zotero.preferences.groups.annotations "annotations">
+<!ENTITY zotero.preferences.groups.annotations "anotácie">
 <!ENTITY zotero.preferences.groups.childLinks "vložené odkazy">
 <!ENTITY zotero.preferences.groups.tags "značky">
 
@@ -105,8 +105,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Keď táto voľba nie je vybraná, Zotero vloží URL adresy pri citovaní článkov (z odborných a populárnych časopisov alebo novín) iba v prípade, ak článok nemá špecifikovaný rozsah strán.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Rýchle kopírovanie">
-<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Formát záznamu:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Formát poznámky:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopírovať ako HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Nastavenia pre jednotlivé sídla:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "doména/cesta">

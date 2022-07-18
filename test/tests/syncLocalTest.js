@@ -747,6 +747,58 @@ describe("Zotero.Sync.Data.Local", function() {
 			assert.propertyVal(cacheJSON.data, "name", changedName);
 		});
 		
+		it("should remove creators that were removed remotely and change existing", async function () {
+			var libraryID = Zotero.Libraries.userLibraryID;
+			
+			let item = await createDataObject(
+				'item',
+				{
+					version: 5,
+					creators: [
+						{
+							name: "A",
+							creatorType: "author"
+						},
+						{
+							name: "B",
+							creatorType: "author"
+						},
+						{
+							name: "C",
+							creatorType: "author"
+						}
+					]
+				}
+			);
+			let data = item.toJSON();
+			await Zotero.Sync.Data.Local.saveCacheObjects('item', libraryID, [data]);
+			
+			var newCreators = [
+				{
+					name: "D",
+					creatorType: "author"
+				}
+			];
+			
+			// Create remote version with removed creators
+			data.version = 10;
+			data.creators = newCreators;
+			let json = {
+				key: item.key,
+				version: 10,
+				data
+			};
+			await Zotero.Sync.Data.Local.processObjectsFromJSON(
+				'item', libraryID, [json], { stopOnError: true }
+			);
+			assert.equal(item.version, 10);
+			var creatorJSON = item.getCreatorsJSON();
+			assert.sameDeepMembers(creatorJSON, newCreators);
+			// Sync cache should match remote
+			var cacheJSON = await Zotero.Sync.Data.Local.getCacheObject('item', libraryID, data.key, data.version);
+			assert.sameDeepMembers(cacheJSON.data.creators, newCreators);
+		});
+		
 		it("should delete older versions in sync cache after processing", function* () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			

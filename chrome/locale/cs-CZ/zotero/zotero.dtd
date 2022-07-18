@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Odznačit vše">
 <!ENTITY zotero.general.edit "Editovat">
 <!ENTITY zotero.general.delete "Smazat">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Přesunout do Koše">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Zrušit">
 <!ENTITY zotero.general.refresh "Obnovit">
@@ -128,8 +128,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Uložit kopii souboru...">
 <!ENTITY zotero.toolbar.attachment.weblink "Uložit odkaz na aktuální stránku">
 <!ENTITY zotero.toolbar.attachment.snapshot "Vytvořit snímek aktuální stránky">
-<!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.item "Položka">
+<!ENTITY zotero.toolbar.context.notes "Poznámky">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Žádné štítky k zobrazení">
 <!ENTITY zotero.tagSelector.loadingTags "Nahrávám štítky...">
@@ -307,7 +307,7 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.firstPage "První strana">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">
@@ -324,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

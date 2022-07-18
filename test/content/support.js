@@ -453,6 +453,9 @@ function createUnsavedDataObject(objectType, params = {}) {
 		if (params.title !== undefined || params.setTitle) {
 			obj.setField('title', params.title !== undefined ? params.title : Zotero.Utilities.randomString());
 		}
+		if (params.creators !== undefined) {
+			obj.setCreators(params.creators);
+		}
 		if (params.collections !== undefined) {
 			obj.setCollections(params.collections);
 		}
@@ -771,7 +774,7 @@ var generateItemJSONData = Zotero.Promise.coroutine(function* generateItemJSONDa
 	
 	for (let itemName in items) {
 		let zItem = yield Zotero.Items.getAsync(items[itemName].id);
-		jsonData[itemName] = zItem.toJSON(options);
+		jsonData[itemName] = zItem.toJSON(options || {});
 
 		// Don't replace some fields that _always_ change (e.g. item keys)
 		// as long as it follows expected format

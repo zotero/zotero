@@ -166,13 +166,10 @@ const ZoteroStandalone = new function() {
 					&& !(item.deleted || item.parentItem && item.parentItem.deleted)) {
 				let annotations = item.getAnnotations();
 				let canTransferFromPDF = annotations.find(x => x.annotationIsExternal);
-				let canTransferToPDF = annotations.find(x => !x.annotationIsExternal);
 				this.updateMenuItemEnabled('menu_transferFromPDF', canTransferFromPDF);
-				this.updateMenuItemEnabled('menu_transferToPDF', canTransferToPDF);
 			}
 			else {
 				this.updateMenuItemEnabled('menu_transferFromPDF', false);
-				this.updateMenuItemEnabled('menu_transferToPDF', false);
 			}
 		}
 		
@@ -182,7 +179,7 @@ const ZoteroStandalone = new function() {
 			let sep = menuitem.nextSibling;
 			
 			let zp = Zotero.getActiveZoteroPane();
-			if (zp) {
+			if (zp && !reader) {
 				let numFiles = zp.getSelectedItems().reduce((num, item) => {
 					if (item.isPDFAttachment()) {
 						return num + 1;
@@ -410,6 +407,7 @@ const ZoteroStandalone = new function() {
 			this.updateMenuItemCheckmark('view-menuitem-hand-tool', reader.isHandToolActive());
 			this.updateMenuItemCheckmark('view-menuitem-zoom-auto', reader.isZoomAutoActive());
 			this.updateMenuItemCheckmark('view-menuitem-zoom-page-width', reader.isZoomPageWidthActive());
+			this.updateMenuItemCheckmark('view-menuitem-zoom-page-height', reader.isZoomPageHeightActive());
 		}
 	
 		// Layout mode
@@ -534,7 +532,6 @@ const ZoteroStandalone = new function() {
 			
 			case 'note-font-size-reset':
 				Zotero.Prefs.clear('note.fontSize');
-				this.promptForRestart();
 				break;
 			
 			case 'recursive-collections':

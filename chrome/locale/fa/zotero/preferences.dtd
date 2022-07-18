@@ -41,7 +41,7 @@
 <!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
 
 <!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
-<!ENTITY zotero.preferences.openurl.custom "Custom…">
+<!ENTITY zotero.preferences.openurl.custom "سفارشی...">
 <!ENTITY zotero.preferences.openurl.server "تشخیص‌دهنده (resolver):">
 <!ENTITY zotero.preferences.openurl.version "نگارش:">
 
@@ -164,7 +164,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "پیشرفته">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "پرونده‌ها و پوشه‌ها">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "کلیدهای میان‌بر">
 
 <!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
 
@@ -182,7 +182,7 @@
 <!ENTITY zotero.preferences.dataDir "محل ذخیره اطلاعات">
 <!ENTITY zotero.preferences.dataDir.useProfile "استفاده از پوشه پروفایل فایرفاکس">
 <!ENTITY zotero.preferences.dataDir.custom "محل دلخواه:">
-<!ENTITY zotero.preferences.dataDir.choose "Choose…">
+<!ENTITY zotero.preferences.dataDir.choose "انتخاب...">
 <!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
 <!ENTITY zotero.preferences.dataDir.reveal "نمایش محل ذخیره اطلاعات">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">

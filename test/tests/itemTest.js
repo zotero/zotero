@@ -1169,6 +1169,15 @@ describe("Zotero.Item", function () {
 				{ type: 'other', exists: false }
 			);
 		})
+
+		it("should cache state for a standalone attachment", async function () {
+			var standaloneAttachment = await importPDFAttachment();
+			await standaloneAttachment.getBestAttachmentState();
+			assert.deepEqual(
+				standaloneAttachment.getBestAttachmentStateCached(),
+				{ type: 'pdf', exists: true }
+			);
+		});
 	})
 	
 	
@@ -1750,6 +1759,19 @@ describe("Zotero.Item", function () {
 			);
 			assert.lengthOf(annotationIDs, 1);
 		});
+		
+		it("should set username as name if not set for library item", async function () {
+			await Zotero.Users.setCurrentUserID(1);
+			var username = Zotero.Utilities.randomString();
+			await Zotero.Users.setCurrentUsername(username);
+			await Zotero.DB.queryAsync("DELETE FROM users");
+			
+			var group = await createGroup();
+			var libraryID = group.libraryID;
+			var item = await createDataObject('item', { libraryID });
+			
+			assert.equal(Zotero.Users.getCurrentName(), username);
+		});
 	})
 	
 	
@@ -2084,9 +2106,35 @@ describe("Zotero.Item", function () {
 						assert.propertyVal(json, name, item[name]);
 					}
 					assert.deepEqual(json.annotationPosition, item.annotationPosition);
+					assert.doesNotHaveAnyKeys(json.relations);
 					assert.notProperty(json, 'collections');
-					assert.notProperty(json, 'relations');
 					assert.notProperty(json, 'annotationIsExternal');
+				});
+				
+				it("should include Mendeley annotation relation", async function () {
+					var item = createUnsavedDataObject(
+						'item', { itemType: 'annotation', parentKey: attachment.key }
+					);
+					item.annotationType = 'highlight';
+					item.annotationText = "Foo";
+					item.annotationComment = "";
+					item.annotationColor = "#ffec00";
+					item.annotationPageLabel = "15";
+					item.annotationSortIndex = "00015|002431|00000";
+					item.annotationPosition = JSON.stringify({
+						"pageIndex": 1,
+						"rects": [
+							[231.284, 402.126, 293.107, 410.142]
+						]
+					});
+					item.setRelations({
+						'mendeleyDB:annotationUUID': '13e4ec18-f49a-47fb-93f6-fda915d3a1c2'
+					});
+					var json = item.toJSON();
+					assert.sameMembers(
+						json.relations['mendeleyDB:annotationUUID'],
+						item.getRelations()['mendeleyDB:annotationUUID']
+					);
 				});
 				
 				describe("#annotationIsExternal", function () {
@@ -2265,6 +2313,38 @@ describe("Zotero.Item", function () {
 			assert.strictEqual(item.getField('title'), 'Test');
 			assert.strictEqual(item.getField('date'), '');
 			assert.strictEqual(item.getField('accessDate'), '');
+		});
+		
+		it("should remove missing creators and change existing", function () {
+			var item = new Zotero.Item('book');
+			item.setCreators(
+				[
+					{
+						name: "A",
+						creatorType: "author"
+					},
+					{
+						name: "B",
+						creatorType: "author"
+					},
+					{
+						name: "C",
+						creatorType: "author"
+					}
+				]
+			);
+			var json = item.toJSON();
+			// Remove creators, which should cause them to be cleared in fromJSON()
+			var newCreators = [
+				{
+					name: "D",
+					creatorType: "author"
+				}
+			];
+			json.creators = newCreators;
+			
+			item.fromJSON(json);
+			assert.sameDeepMembers(item.getCreatorsJSON(), newCreators);
 		});
 		
 		it("should remove item from collection if 'collections' property not provided", function* () {

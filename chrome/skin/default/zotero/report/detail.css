@@ -170,3 +170,25 @@ ul.attachments div.note {
 ul.attachments div.note p:first-child {
 	margin-top: .75em;
 }
+
+div table {
+	border-collapse: collapse;
+}
+
+div table td, div table th {
+	border: 1px #ccc solid;
+	border-collapse: collapse;
+	word-break: break-all;
+}
+
+div table td p:empty::after, div table th p:empty::after {
+	content: "\00a0";
+}
+
+div table td *:first-child, div table th *:first-child {
+	margin-top: 0;
+}
+
+div table td *:last-child, div table th *:last-child {
+	margin-bottom: 0;
+}

@@ -57,7 +57,7 @@ async function doWeb(doc, url) {
 		if (items) {
 			await Promise.all(
 				Object.keys(items)
-					.map(url => requestDocument(url).then(doc => scrape(doc, url)))
+					.map(url => requestDocument(url).then(scrape))
 			);
 		}
 	}
@@ -65,3 +65,8 @@ async function doWeb(doc, url) {
 		await scrape(doc, url);
 	}
 }
+
+function scrape(doc, url = doc.location.href) {
+	// TODO: implement or add a scrape function template
+}
+

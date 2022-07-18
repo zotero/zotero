@@ -151,6 +151,38 @@ describe("Zotero.ItemTree", function() {
 		})
 	})
 	
+	describe("#sort()", function () {
+		it("should ignore invalid secondary-sort field", async function () {
+			await createDataObject('item', { title: 'A' });
+			await createDataObject('item', { title: 'A' });
+			
+			// Set invalid field as secondary sort for title
+			Zotero.Prefs.set('secondarySort.title', 'invalidField');
+			
+			// Sort by title
+			var colIndex = itemsView.tree._getColumns().findIndex(column => column.dataKey == 'title');
+			await itemsView.tree._columns.toggleSort(colIndex);
+			
+			var e = await getPromiseError(zp.itemsView.sort());
+			assert.isFalse(e);
+			assert.isUndefined(Zotero.Prefs.get('secondarySort.title'));
+		});
+		
+		it("should ignore invalid fallback-sort field", async function () {
+			Zotero.Prefs.clear('fallbackSort');
+			var originalFallback = Zotero.Prefs.get('fallbackSort');
+			Zotero.Prefs.set('fallbackSort', 'invalidField,' + originalFallback);
+			
+			// Sort by title
+			var colIndex = itemsView.tree._getColumns().findIndex(column => column.dataKey == 'title');
+			await itemsView.tree._columns.toggleSort(colIndex);
+			
+			var e = await getPromiseError(zp.itemsView.sort());
+			assert.isFalse(e);
+			assert.equal(Zotero.Prefs.get('fallbackSort'), originalFallback);
+		});
+	});
+	
 	describe("#notify()", function () {
 		beforeEach(function () {
 			sinon.spy(win.ZoteroPane, "itemSelected");
@@ -582,8 +614,13 @@ describe("Zotero.ItemTree", function() {
 			var item3 = await createDataObject('item', { title: title + " 5" });
 			var item4 = await createDataObject('item', { title: title + " 7" });
 
-			const colIndex = itemsView.tree._getColumns().findIndex(column => column.dataKey == 'title');
+			// Sort by title
+			var colIndex = itemsView.tree._getColumns().findIndex(column => column.dataKey == 'firstCreator');
 			await itemsView.tree._columns.toggleSort(colIndex);
+			await waitForItemsLoad(win);
+			colIndex = itemsView.tree._getColumns().findIndex(column => column.dataKey == 'title');
+			await itemsView.tree._columns.toggleSort(colIndex);
+			await waitForItemsLoad(win);
 			
 			// Check initial sort order
 			assert.equal(itemsView.getRow(0).ref.getField('title'), title + " 1");

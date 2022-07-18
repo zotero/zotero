@@ -324,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Zooma ut">
 <!ENTITY zotero.pdfReader.zoomAuto "Anpassa storlek automatiskt">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Anpassa till sidbredd">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

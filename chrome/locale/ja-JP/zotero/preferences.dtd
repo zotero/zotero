@@ -30,7 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "アイテムをライブラリ間でコピーするときは次を含む:">
 <!ENTITY zotero.preferences.groups.childNotes "子メモ">
 <!ENTITY zotero.preferences.groups.childFiles "子スナップショットおよびインポートされたファイル">
-<!ENTITY zotero.preferences.groups.annotations "annotations">
+<!ENTITY zotero.preferences.groups.annotations "注釈">
 <!ENTITY zotero.preferences.groups.childLinks "子リンク">
 <!ENTITY zotero.preferences.groups.tags "タグ">
 
@@ -40,7 +40,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "最古のアイテムを最初に表示">
 <!ENTITY zotero.preferences.feeds.feedDefaults "デフォルトのフィード">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
+<!ENTITY zotero.preferences.openurl.choose "リゾルバの選択...">
 <!ENTITY zotero.preferences.openurl.custom "カスタム...">
 <!ENTITY zotero.preferences.openurl.server "リンク・リゾルバ:">
 <!ENTITY zotero.preferences.openurl.version "バージョン:">
@@ -105,8 +105,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "この機能が無効化されていると、Zotero はページ範囲が指定されていない文献に限り、学術雑誌、雑誌論文、新聞記事を引用する際に、URL アドレスを含みます。">
 
 <!ENTITY zotero.preferences.quickCopy.caption "クィックコピー">
-<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "アイテムのフォーマット">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "メモのフォーマット">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "HTMLとしてコピー">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "サイト固有の設定:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "ドメイン／パス">

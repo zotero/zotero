@@ -84,8 +84,8 @@
 			</box>
 			<box id="zotero-tab-toolbar" class="toolbar" hidden="true">
 				<div id="zotero-tb-split" xmlns="http://www.w3.org/1999/xhtml" class="split-button">
-					<div id="zotero-tb-toggle-item-pane" class="toolbarButton item" title="&zotero.toolbar.context.item;"><span/></div>
-					<div id="zotero-tb-toggle-notes-pane" class="toolbarButton notes" title="&zotero.toolbar.context.notes;"><span/></div>
+					<button id="zotero-tb-toggle-item-pane" class="toolbarButton item" title="&zotero.toolbar.context.item;" tabindex="-1"><span/></button>
+					<button id="zotero-tb-toggle-notes-pane" class="toolbarButton notes" title="&zotero.toolbar.context.notes;" tabindex="-1"><span/></button>
 				</div>
 			</box>
 			<deck id="tabs-deck" flex="1">
@@ -388,7 +388,7 @@
 							</splitter>
 		
 							<!-- itemPane.xul -->
-							<vbox id="zotero-item-pane" zotero-persist="width height"/>
+							<vbox id="zotero-item-pane" zotero-persist="width height" height="300"/>
 						</box>
 					</hbox>
 				</vbox>
@@ -418,7 +418,7 @@
 							  orient="vertical"
 							  collapse="after"
 							  zotero-persist="state"
-							  resizebefore="clsest"
+							  resizebefore="closest"
 							  resizeafter="closest"
 							  onmousemove="ZoteroContextPane.update()"
 							  oncommand="ZoteroContextPane.update()"

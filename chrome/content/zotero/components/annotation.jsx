@@ -48,7 +48,7 @@ function AnnotationBox({ data }) {
 				<div className="title">{Zotero.getString('itemTypes.annotation')}</div>
 				<div className="container">
 					<div className="header">
-						<div>{Zotero.getString('citation.locator.page')} {data.pageLabel}</div>
+						<div>{Zotero.Cite.getLocatorString('page')} {data.pageLabel}</div>
 					</div>
 					{data.text !== undefined
 						? <div className="text" style={textStyle}>{data.text}</div>

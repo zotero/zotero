@@ -34,8 +34,10 @@ const { injectIntl } = require('react-intl');
 const { IconDownChevron, getDOMElement } = require('components/icons');
 
 const TYPING_TIMEOUT = 1000;
-const DEFAULT_ROW_HEIGHT = 20; // px
+const MINIMUM_ROW_HEIGHT = 20; // px
 const RESIZER_WIDTH = 5; // px
+const COLUMN_MIN_WIDTH = 20;
+const COLUMN_PADDING = 10; // N.B. MUST BE INLINE WITH CSS!!!
 
 const noop = () => 0;
 
@@ -59,7 +61,7 @@ class TreeSelection {
 		this._tree = tree;
 		Object.assign(this, {
 			pivot: 0,
-			_focused: 0,
+			focused: 0,
 			selected: new Set([]),
 			_selectEventsSuppressed: false
 		});
@@ -92,12 +94,12 @@ class TreeSelection {
 
 		if (this.selectEventsSuppressed) return;
 
-		let previousPivot = this.pivot;
+		let previousFocused = this.focused;
 		this.pivot = index;
-		this._focused = index;
+		this.focused = index;
 		if (this._tree.invalidate) {
 			this._tree.invalidateRow(index);
-			this._tree.invalidateRow(previousPivot);
+			this._tree.invalidateRow(previousFocused);
 		}
 		this._updateTree(shouldDebounce);
 	}
@@ -121,15 +123,15 @@ class TreeSelection {
 	select(index, shouldDebounce) {
 		if (!this._tree.props.isSelectable(index)) return;
 		index = Math.max(0, index);
-		if (this.selected.size == 1 && this._focused == index && this.pivot == index) {
+		if (this.selected.size == 1 && this.isSelected(index)) {
 			return false;
 		}
 
 		let toInvalidate = new Set(this.selected);
 		toInvalidate.add(index);
-		toInvalidate.add(this.pivot);
+		toInvalidate.add(this.focused);
 		this.selected = new Set([index]);
-		this._focused = index;
+		this.focused = index;
 		this.pivot = index;
 
 		if (this.selectEventsSuppressed) return true;
@@ -174,17 +176,22 @@ class TreeSelection {
 	/**
 	 * Performs a shift-select from current pivot to provided index. Updates focused item to index.
 	 * @param index {Number} The index is 0-clamped.
+	 * @param augment {Boolean} Adds to existing selection if true
 	 * @param shouldDebounce {Boolean} Whether the update to the tree should be debounced
 	 */
-	shiftSelect(index, shouldDebounce) {
+	shiftSelect(index, augment, shouldDebounce) {
 		if (!this._tree.props.isSelectable(index)) return;
 		
 		index = Math.max(0, index);
 		let from = Math.min(index, this.pivot);
 		let to = Math.max(index, this.pivot);
-		this._focused = index;
+		let oldFocused = this.focused;
+		this.focused = index;
 		let oldSelected = this.selected;
-		this._rangedSelect(from, to);
+		if (augment) {
+			oldSelected = new Set(oldSelected);
+		}
+		this._rangedSelect(from, to, augment);
 
 		if (this.selectEventsSuppressed) return;
 
@@ -199,6 +206,7 @@ class TreeSelection {
 			for (let index of oldSelected) {
 				this._tree.invalidateRow(index);
 			}
+			this._tree.invalidateRow(oldFocused);
 		}
 		this._updateTree(shouldDebounce);
 	}
@@ -216,29 +224,6 @@ class TreeSelection {
 
 	get count() {
 		return this.selected.size;
-	}
-
-	get focused() {
-		return this._focused;
-	}
-
-	set focused(index) {
-		index = Math.max(0, index);
-		let previousFocused = this._focused;
-		let previousPivot = this.pivot;
-		this.pivot = index;
-		this._focused = index;
-
-		if (this.selectEventsSuppressed) return;
-
-		this._updateTree();
-		if (this._tree.invalidate) {
-			this._tree.invalidateRow(previousFocused);
-			if (previousPivot != previousFocused) {
-				this._tree.invalidateRow(previousPivot);
-			}
-			this._tree.invalidateRow(index);
-		}
 	}
 
 	get selectEventsSuppressed() {
@@ -300,13 +285,9 @@ class VirtualizedTable extends React.Component {
 		
 		this._columns = new Columns(this);
 		
-		this._rowHeight = props.rowHeight || DEFAULT_ROW_HEIGHT;
-		if (!props.disableFontSizeScaling) {
-			this._rowHeight *= Zotero.Prefs.get('fontSize');
-		}
-		
+		this._renderedTextHeight = this._getRenderedTextHeight();
+		this._rowHeight = this._getRowHeight();
 		this.selection = new TreeSelection(this);
-		
 
 		// Due to how the Draggable element works dragging (for column dragging and for resizing)
 		// is not handled via React events but via native ones attached on `document`
@@ -329,6 +310,7 @@ class VirtualizedTable extends React.Component {
 	static defaultProps = {
 		label: '',
 		role: 'grid',
+		linesPerRow: 1,
 
 		showHeader: false,
 		// Array of column objects like the ones in itemTreeColumns.js
@@ -375,8 +357,9 @@ class VirtualizedTable extends React.Component {
 		getRowCount: PropTypes.func.isRequired,
 		
 		renderItem: PropTypes.func,
-		rowHeight: PropTypes.number,
-		// Use rowHeight or default row height without adjusting for current UI font size
+		// Row height specified as lines of text per row. Defaults to 1
+		linesPerRow: PropTypes.number,
+		// Do not adjust for Zotero-defined font scaling
 		disableFontSizeScaling: PropTypes.bool,
 		// An array of two elements for alternating row colors
 		alternatingRowColors: PropTypes.array,
@@ -391,6 +374,7 @@ class VirtualizedTable extends React.Component {
 		onColumnSort: PropTypes.func,
 		getColumnPrefs: PropTypes.func,
 		storeColumnPrefs: PropTypes.func,
+		getDefaultColumnOrder: PropTypes.func,
 		// Makes columns unmovable, unsortable, etc
 		staticColumns: PropTypes.bool,
 		// Used for initial column widths calculation
@@ -485,17 +469,17 @@ class VirtualizedTable extends React.Component {
 	 * @param {Integer} direction - -1 for up, 1 for down
 	 * @param {Boolean} selectTo
 	 */
-	_onJumpSelect(direction, selectTo) {
+	_onJumpSelect(direction, selectTo, toggleSelection) {
 		if (direction == 1) {
 			const lastVisible = this._jsWindow.getLastVisibleRow();
 			if (this.selection.focused != lastVisible) {
-				return this.onSelection(lastVisible, selectTo);
+				return this.onSelection(lastVisible, selectTo, toggleSelection);
 			}
 		}
 		else {
 			const firstVisible = this._jsWindow.getFirstVisibleRow();
 			if (this.selection.focused != firstVisible) {
-				return this.onSelection(firstVisible, selectTo);
+				return this.onSelection(firstVisible, selectTo, toggleSelection);
 			}
 		}
 		const height = document.getElementById(this._jsWindowID).clientHeight;
@@ -504,7 +488,7 @@ class VirtualizedTable extends React.Component {
 		const rowCount = this.props.getRowCount();
 		destination = Math.min(destination, rowCount - 1);
 		destination = Math.max(0, destination);
-		return this.onSelection(destination, selectTo);
+		return this.onSelection(destination, selectTo, toggleSelection);
 	}
 
 	/**
@@ -520,7 +504,8 @@ class VirtualizedTable extends React.Component {
 		if (e.altKey) return;
 		
 		const shiftSelect = e.shiftKey;
-		const movePivot = Zotero.isMac ? e.metaKey : e.ctrlKey;
+		const moveFocused = Zotero.isMac ? e.metaKey : e.ctrlKey;
+		const toggleSelection = shiftSelect && moveFocused;
 		const rowCount = this.props.getRowCount();
 
 		switch (e.key) {
@@ -530,7 +515,7 @@ class VirtualizedTable extends React.Component {
 				prevSelect--;
 			}
 			prevSelect = Math.max(0, prevSelect);
-			this.onSelection(prevSelect, shiftSelect, false, movePivot, e.repeat);
+			this.onSelection(prevSelect, shiftSelect, toggleSelection, moveFocused, e.repeat);
 			break;
 
 		case "ArrowDown":
@@ -539,20 +524,20 @@ class VirtualizedTable extends React.Component {
 				nextSelect++;
 			}
 			nextSelect = Math.min(nextSelect, rowCount - 1);
-			this.onSelection(nextSelect, shiftSelect, false, movePivot, e.repeat);
+			this.onSelection(nextSelect, shiftSelect, toggleSelection, moveFocused, e.repeat);
 			break;
 
 		case "Home":
-			this.onSelection(0, shiftSelect, false, movePivot);
+			this.onSelection(0, shiftSelect, toggleSelection, moveFocused);
 			break;
 
 		case "End":
-			this.onSelection(rowCount - 1, shiftSelect, false, movePivot);
+			this.onSelection(rowCount - 1, shiftSelect, toggleSelection, moveFocused);
 			break;
 			
 		case "PageUp":
 			if (!Zotero.isMac) {
-				this._onJumpSelect(-1, shiftSelect, e.repeat);
+				this._onJumpSelect(-1, shiftSelect, toggleSelection, e.repeat);
 			}
 			else {
 				this._jsWindow.scrollTo(this._jsWindow.scrollOffset - this._jsWindow.getWindowHeight() + this._rowHeight);
@@ -561,7 +546,7 @@ class VirtualizedTable extends React.Component {
 			
 		case "PageDown":
 			if (!Zotero.isMac) {
-				this._onJumpSelect(1, shiftSelect, e.repeat);
+				this._onJumpSelect(1, shiftSelect, toggleSelection, e.repeat);
 			}
 			else {
 				this._jsWindow.scrollTo(this._jsWindow.scrollOffset + this._jsWindow.getWindowHeight() - this._rowHeight);
@@ -600,7 +585,7 @@ class VirtualizedTable extends React.Component {
 			this._handleTyping(e.key);
 		}
 		
-		if (shiftSelect || movePivot) return;
+		if (shiftSelect || moveFocused) return;
 		
 		switch (e.key) {
 		case "ArrowLeft":
@@ -641,11 +626,11 @@ class VirtualizedTable extends React.Component {
 		}
 		const rowCount = this.props.getRowCount();
 		if (allSameChar) {
-			for (let i = this.selection.pivot + 1, checked = 0; checked < rowCount; i++, checked++) {
+			for (let i = this.selection.focused + 1, checked = 0; checked < rowCount; i++, checked++) {
 				i %= rowCount;
 				let rowString = this.props.getRowString(i);
 				if (rowString.toLowerCase().indexOf(char) == 0) {
-					if (i != this.selection.pivot) {
+					if (i != this.selection.focused) {
 						this.scrollToRow(i);
 						this.onSelection(i);
 					}
@@ -654,10 +639,10 @@ class VirtualizedTable extends React.Component {
 			}
 		}
 		else {
-			for (let i = 0; i < rowCount; i++) {
+			for (let i = (this.selection.focused) % rowCount; i != this.selection.focused - 1; i = (i + 1) % rowCount) {
 				let rowString = this.props.getRowString(i);
 				if (rowString.toLowerCase().indexOf(this._typingString) == 0) {
-					if (i != this.selection.pivot) {
+					if (i != this.selection.focused) {
 						this.scrollToRow(i);
 						this.onSelection(i);
 					}
@@ -675,7 +660,14 @@ class VirtualizedTable extends React.Component {
 		this._isMouseDrag = true;
 	}
 	
-	_onDragEnd = () => {
+	_onDragEnd = async () => {
+		// macOS force-click sometimes causes a second mouseup event to be fired some time later
+		// causing a collection change on dragend, so we add a delay here. It shouldn't cause any issues
+		// because isMouseDrag is only used in mouseup handler to exactly prevent from accidentally switching
+		// selection after dragend.
+		if (Zotero.isMac) {
+			await Zotero.Promise.delay(500);
+		}
 		this._isMouseDrag = false;
 	}
 	
@@ -696,13 +688,13 @@ class VirtualizedTable extends React.Component {
 	
 	_handleMouseUp = async (e, index) => {
 		const shiftSelect = e.shiftKey;
-		const toggleSelection = e.ctrlKey || e.metaKey;
+		const augment = e.ctrlKey || e.metaKey;
 		if (this._isMouseDrag || e.button != 0) {
 			// other mouse buttons are ignored
 			this._isMouseDrag = false;
 			return;
 		}
-		this._onSelection(index, shiftSelect, toggleSelection);
+		this._onSelection(index, shiftSelect, augment);
 		this.focus();
 	}
 
@@ -734,38 +726,38 @@ class VirtualizedTable extends React.Component {
 	 * 		  If true will select from focused up to index (does not update pivot)
 	 * @param {Boolean} toggleSelection
 	 * 		  If true will add to selection
-	 * @param {Boolean} movePivot
-	 * 		  Will move pivot without adding anything to the selection
+	 * @param {Boolean} moveFocused
+	 * 		  Will move focus without adding anything to the selection
 	 */
-	_onSelection = (index, shiftSelect, toggleSelection, movePivot, shouldDebounce) => {
+	_onSelection = (index, shiftSelect, toggleSelection, moveFocused, shouldDebounce) => {
 		if (this.selection.selectEventsSuppressed) return;
 		
-		if (movePivot) {
-			if (!this.props.multiSelect) return;
-			let previousPivot = this.selection.pivot;
-			this.selection._focused = index;
+		if (!this.props.multiSelect && (shiftSelect || toggleSelection || moveFocused)) {
+			return;
+		}
+		else if (shiftSelect) {
+			this.selection.shiftSelect(index, toggleSelection, shouldDebounce);
+		}
+		else if (toggleSelection) {
+			this.selection.toggleSelect(index, shouldDebounce);
+		}
+		else if (moveFocused) {
+			let previousFocused = this.selection.focused;
+			this.selection.focused = index;
 			this.selection.pivot = index;
-			this.invalidateRow(previousPivot);
+			this.invalidateRow(previousFocused);
 			this.invalidateRow(index);
 		}
 		// Normal selection
-		else if (!shiftSelect && !toggleSelection) {
+		else if (!toggleSelection) {
 			if (index > 0 && !this.props.isSelectable(index)) {
 				return;
 			}
 			this.selection.select(index, shouldDebounce);
 		}
-		// Range selection
-		else if (shiftSelect && this.props.multiSelect) {
-			this.selection.shiftSelect(index, shouldDebounce);
-		}
 		// If index is not selectable and this is not normal selection we return
 		else if (!this.props.isSelectable(index)) {
 			return;
-		}
-		// Additive selection
-		else if (this.props.multiSelect) {
-			this.selection.toggleSelect(index, shouldDebounce);
 		}
 		// None of the previous conditions were satisfied, so nothing changes
 		else {
@@ -776,7 +768,7 @@ class VirtualizedTable extends React.Component {
 	}
 	
 	// ------------------------ Column Methods ------------------------- //
-	
+
 	_handleResizerDragStart = (index, event) => {
 		if (event.button !== 0) return false;
 		event.stopPropagation();
@@ -813,8 +805,9 @@ class VirtualizedTable extends React.Component {
 			offset += resizingRect.width;
 		}
 		const widthSum = aRect.width + bRect.width;
-		// Column min-width: 20px;
-		const aColumnWidth = Math.min(widthSum - 20, Math.max(20, event.clientX - (RESIZER_WIDTH / 2) - offset));
+		const aSpacingOffset = (aColumn.minWidth ? aColumn.minWidth : COLUMN_MIN_WIDTH) + COLUMN_PADDING;
+		const bSpacingOffset = (bColumn.minWidth ? bColumn.minWidth : COLUMN_MIN_WIDTH) + COLUMN_PADDING;
+		const aColumnWidth = Math.min(widthSum - bSpacingOffset, Math.max(aSpacingOffset, event.clientX - (RESIZER_WIDTH / 2) - offset));
 		const bColumnWidth = widthSum - aColumnWidth;
 		let onResizeData = {};
 		onResizeData[aColumn.dataKey] = aColumnWidth;
@@ -1066,6 +1059,7 @@ class VirtualizedTable extends React.Component {
 			node.addEventListener('dblclick', e => this._activateNode(e, [index]), { passive: true });
 		}
 		node.style.height = this._rowHeight + 'px';
+		node.style.lineHeight = this._rowHeight + 'px';
 		node.id = this.props.id + "-row-" + index;
 		if (!node.hasAttribute('role')) {
 			node.setAttribute('role', 'row');
@@ -1225,13 +1219,43 @@ class VirtualizedTable extends React.Component {
 				+ "disabled. Change the prop instead.");
 			return;
 		}
-		this._rowHeight = this.props.rowHeight || DEFAULT_ROW_HEIGHT;
-		this._rowHeight *= Zotero.Prefs.get('fontSize');
+		this._rowHeight = this._getRowHeight();
 		
 		if (!this._jsWindow) return;
 		this._jsWindow.update(this._getWindowedListOptions());
 		this._setAlternatingRows();
 		this._jsWindow.invalidate();
+	}
+	
+	_getRowHeight() {
+		let rowHeight = this.props.linesPerRow * this._renderedTextHeight;
+		if (!this.props.disableFontSizeScaling) {
+			rowHeight *= Zotero.Prefs.get('fontSize');
+		}
+		// padding
+		// This is weird, but Firefox trees always had different amount of padding on
+		// different OSes
+		if (Zotero.isMac) {
+			rowHeight *= 1.4;
+		}
+		else if (Zotero.isWin) {
+			rowHeight *= 1.2;
+		}
+		else {
+			rowHeight *= 1.1;
+		}
+		rowHeight = Math.round(Math.max(MINIMUM_ROW_HEIGHT, rowHeight));
+		return rowHeight;
+	}
+
+	_getRenderedTextHeight() {
+		let div = document.createElementNS("http://www.w3.org/1999/xhtml", 'div');
+		div.style.visibility = "hidden";
+		div.textContent = "Zotero";
+		document.documentElement.appendChild(div);
+		let height = window.getComputedStyle(div).height;
+		document.documentElement.removeChild(div);
+		return parseFloat(height.split('px')[0]);
 	}
 	
 	_debouncedRerender = Zotero.Utilities.debounce(this.rerender, 200);
@@ -1332,6 +1356,11 @@ var Columns = class {
 
 		let columns = this._columns = [];
 		for (let column of virtualizedTable.props.columns) {
+			// Fixed width columns can sometimes somehow obtain a width property
+			// this fixes it for users that may have run into the bug
+			if (column.fixedWidth && typeof columnsSettings[column.dataKey] == "object") {
+				delete columnsSettings[column.dataKey].width;;
+			}
 			column = Object.assign({}, column, columnsSettings[column.dataKey]);
 			column.className = cx(column.className, column.dataKey, column.dataKey + this._cssSuffix,
 				{ 'fixed-width': column.fixedWidth });
@@ -1443,21 +1472,28 @@ var Columns = class {
 		if (storePrefs) {
 			var prefs = this._getPrefs();
 		}
+		const header = document.querySelector(`#${this._styleKey} .virtualized-table-header`);
+		const headerWidth = header ? header.getBoundingClientRect().width : 300;
 		for (let [dataKey, width] of Object.entries(columnWidths)) {
 			if (typeof dataKey == "number") {
 				dataKey = this._columns[dataKey].dataKey;
 			}
 			const column = this._columns.find(column => column.dataKey == dataKey);
 			const styleIndex = this._columnStyleMap[dataKey];
-			if (storePrefs && (!column.fixedWidth || (column.zoteroPersist && !column.zoteroPersist.has('width')))) {
-				prefs[dataKey] = prefs[dataKey] || {};
-				prefs[dataKey].width = width;
+			if (storePrefs && !column.fixedWidth) {
+				column.width = width;
+				prefs[dataKey] = this._getColumnPrefsToPersist(column);
 			}
-			if (column.fixedWidth && column.width) {
+			if (column.fixedWidth) {
+				width = column.width;
+			}
+			if (column.fixedWidth && column.width || column.staticWidth) {
 				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('flex', `0 0`, `important`);
-				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('max-width', `${column.width}px`, 'important');
-				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('min-width', `${column.width}px`, 'important');
+				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('max-width', `${width}px`, 'important');
+				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('min-width', `${width}px`, 'important');
 			} else {
+				width = (width - COLUMN_PADDING);
+				Zotero.debug(`Columns ${dataKey} width ${width}`);
 				this._stylesheet.sheet.cssRules[styleIndex].style.setProperty('flex-basis', `${width}px`);
 			}
 		}
@@ -1487,10 +1523,19 @@ var Columns = class {
 	
 	restoreDefaultOrder = () => {
 		let prefs = this._getPrefs();
-		for (const column of this._columns) {
-			column.ordinal = this._virtualizedTable.props.columns.findIndex(
-				col => col.dataKey == column.dataKey);
-			prefs[column.dataKey].ordinal = column.ordinal;
+		if (this._virtualizedTable.props.getDefaultColumnOrder) {
+			let defaultOrder = this._virtualizedTable.props.getDefaultColumnOrder();
+			for (const column of this._columns) {
+				column.ordinal = defaultOrder[column.dataKey];
+				prefs[column.dataKey].ordinal = defaultOrder[column.dataKey];
+			}
+		}
+		else {
+			for (const column of this._columns) {
+				column.ordinal = this._virtualizedTable.props.columns.findIndex(
+					col => col.dataKey == column.dataKey);
+				prefs[column.dataKey].ordinal = column.ordinal;
+			}
 		}
 		this._columns.sort((a, b) => a.ordinal - b.ordinal);
 		this._storePrefs(prefs);
@@ -1567,7 +1612,7 @@ function makeRowRenderer(getRowData) {
 		}
 
 		div.classList.toggle('selected', selection.isSelected(index));
-		div.classList.toggle('pivot', selection.pivot == index);
+		div.classList.toggle('focused', selection.focused == index);
 		const rowData = getRowData(index);
 		
 		for (let column of columns) {
@@ -1591,7 +1636,10 @@ function formatColumnName(column) {
 	}
 	else if (/^[^\s]+\w\.\w[^\s]+$/.test(column.label)) {
 		try {
-			return Zotero.getString(column.label);
+			let labelString = Zotero.getString(column.label);
+			if (labelString !== column.label) {
+				return labelString;
+			}
 		}
 		catch (e) {
 			// ignore missing string

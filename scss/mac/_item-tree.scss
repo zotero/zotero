@@ -4,6 +4,9 @@
 		.row.selected {
 			background: #dcdcdc;
 			color: initial;
+			.twisty svg {
+				fill: #888;
+			}
 		}
 	}
 }

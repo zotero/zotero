@@ -99,6 +99,8 @@ const ignoreMask = [
 	'resource/schema/global/scripts/*',
 	'chrome/content/zotero/xpcom/translate/example/**/*',
 	'chrome/content/zotero/xpcom/translate/README.md',
+	'chrome/content/zotero/xpcom/utilities/node_modules/**/*',
+	'chrome/content/zotero/xpcom/utilities/test/**/*',
 ];
 
 const jsFiles = [

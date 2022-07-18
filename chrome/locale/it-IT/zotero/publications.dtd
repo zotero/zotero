@@ -3,17 +3,17 @@
 <!ENTITY zotero.publications.intro "Gli elementi aggiunti a &quot;Le mie pubblicazioni&quot; verranno mostrati sulla tua pagina profilo su zotero.org. Se scegli di includere dei file allegati, questi verranno resi disponibili pubblicamente con la licenza da te specificata. Aggiungi soltanto lavori che tu stesso hai creato e includi i file solo se hai i diritti per distribuirli ed è ciò che desideri fare.">
 <!ENTITY zotero.publications.include.checkbox.files "Includi i file">
 <!ENTITY zotero.publications.include.checkbox.notes "Includi le note">
-<!ENTITY zotero.publications.include.adjustAtAnyTime "Puoi decidere che cosa desideri mostrare nella sezione &quot;Le mie pubblicazioni&quot; in qualsiasi momento.">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "Puoi decidere che cosa desideri mostrare nella collezione &quot;Le mie pubblicazioni&quot; in qualsiasi momento.">
 
 <!ENTITY zotero.publications.sharing.title "Scegli il metodo di condivisione della tua opera">
-<!ENTITY zotero.publications.sharing.text "Puoi decidere se conservare i pieni diritti di copyright sulla tua opera, se pubblicarla sotto licenza Creative Commons oppure se destinarla al pubblico dominio. In qualsiasi caso, però, la tua opera verrà messa a disposizione del pubblico tramite zotero.org.">
-<!ENTITY zotero.publications.sharing.prompt "Permetti che la tua opera sia condivisa da altri?">
+<!ENTITY zotero.publications.sharing.text "Puoi decidere di riservare tutti i diritti della tua opera, di pubblicarla sotto licenza Creative Commons oppure di destinarla al pubblico dominio. In ogni caso, tieni presente che la tua opera verrà messa a disposizione del pubblico tramite zotero.org.">
+<!ENTITY zotero.publications.sharing.prompt "Vuoi permettere che la tua opera sia condivisibile da altri?">
 <!ENTITY zotero.publications.sharing.cc "Sì, con una licenza Creative Commons">
-<!ENTITY zotero.publications.sharing.cc0 "Sì, collocando la mia opera nel pubblico dominio">
+<!ENTITY zotero.publications.sharing.cc0 "Sì, assegnando la mia opera al pubblico dominio">
 <!ENTITY zotero.publications.sharing.reserved "No, pubblica la mia opera solo su zotero.org">
 
 <!ENTITY zotero.publications.chooseLicense.title "Scegli una licenza Creative Commons">
-<!ENTITY zotero.publications.chooseLicense.text "Una licenza Creative Commons permette ad altri di copiare e redistribuire la tua opera purché riconoscano correttamente chi è l'autore, forniscano un link alla licenza e indichino se hanno apportato modifiche. Ulteriori condizioni possono essere specificate qui sotto.">
-<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Permetti che adattamenti della tua opera siano condivisi?">
+<!ENTITY zotero.publications.chooseLicense.text "Una licenza Creative Commons permette ad altri di copiare e ridistribuire la tua opera purché riconoscano correttamente chi è l'autore, forniscano un link alla licenza e indichino se hanno apportato modifiche. Ulteriori condizioni possono essere specificate qui sotto.">
+<!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Vuoi permettere che adattamenti della tua opera siano condivisi?">
 <!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Sì, purché gli altri li condividano con la stessa licenza">
-<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Permetti usi commerciali della tua opera?">
+<!ENTITY zotero.publications.chooseLicense.commercial.prompt "Vuoi permettere usi commerciali della tua opera?">

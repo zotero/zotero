@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "選択をすべて解除">
 <!ENTITY zotero.general.edit "編集">
 <!ENTITY zotero.general.delete "削除">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "ゴミ箱に移動する">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "キャンセル">
 <!ENTITY zotero.general.refresh "再読み込み">
@@ -19,8 +19,8 @@
 <!ENTITY zotero.general.close "閉じる">
 <!ENTITY zotero.general.minimize "最小化する">
 <!ENTITY zotero.general.other "その他...">
-<!ENTITY zotero.general.bigger "Bigger">
-<!ENTITY zotero.general.smaller "Smaller">
+<!ENTITY zotero.general.bigger "拡大">
+<!ENTITY zotero.general.smaller "縮小">
 <!ENTITY zotero.general.reset "リセット">
 
 
@@ -53,7 +53,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "重複アイテムを表示">
 <!ENTITY zotero.collections.showUnfiledItems "未整理のアイテムを表示">
-<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
+<!ENTITY zotero.collections.showRetractedItems "取り消し済みのアイテムを表示">
 
 <!ENTITY zotero.items.itemType "アイテムの種類">
 <!ENTITY zotero.items.creator_column "編著者名">
@@ -128,8 +128,8 @@
 <!ENTITY zotero.toolbar.attachment.add "ファイルのコピーを保存...">
 <!ENTITY zotero.toolbar.attachment.weblink "現在のページへのリンクを保存">
 <!ENTITY zotero.toolbar.attachment.snapshot "現在のページのスナップショットを撮る">
-<!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.item "アイテム">
+<!ENTITY zotero.toolbar.context.notes "メモ">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "表示するタグがありません">
 <!ENTITY zotero.tagSelector.loadingTags "タグを読込中...">
@@ -147,11 +147,11 @@
 <!ENTITY zotero.tagColorChooser.setColor "色を指定">
 <!ENTITY zotero.tagColorChooser.removeColor "色を取り除く">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
+<!ENTITY zotero.lookup.description "ISBN、DOI、PMID、arXiv ID、ADS Bibcodes を入力して、ライブラリに追加します。">
 <!ENTITY zotero.lookup.button.search "検索">
 
-<!ENTITY zotero.createParent.title "Create Parent Item">
-<!ENTITY zotero.createParent.button.manual "Manual Entry">
+<!ENTITY zotero.createParent.title "親アイテムを作成">
+<!ENTITY zotero.createParent.button.manual "手動入力">
 
 <!ENTITY zotero.selectitems.title "アイテムを選択">
 <!ENTITY zotero.selectitems.intro.label "ライブラリに追加したいアイテムを選択してください">
@@ -196,7 +196,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "参考文献の順序を維持">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
+<!ENTITY zotero.citation.suppressAuthor.label "著者名を省略">
 <!ENTITY zotero.citation.prefix.label "接頭辞:">
 <!ENTITY zotero.citation.suffix.label "接尾辞:">
 <!ENTITY zotero.citation.editorWarning.label "警告: エディタの中で出典表記を編集すると、データベース側、または引用スタイルの変更を反映した自動更新が行われなくなります。">
@@ -228,7 +228,7 @@
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "MEDLINEの略誌名を使用する">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "「雑誌略誌名」のフィールドは無視されます。">
 
-<!ENTITY zotero.integration.prefs.exportDocument "別のワード・プロセッサに切り替える...">
+<!ENTITY zotero.integration.prefs.exportDocument "別のワープロソフトに切り替える...">
 
 <!ENTITY zotero.integration.showEditor.label "エディタを表示">
 <!ENTITY zotero.integration.classicView.label "クラシック表示">
@@ -301,28 +301,28 @@
 <!ENTITY zotero.attachLink.label.link "リンク:">
 <!ENTITY zotero.attachLink.label.title "題:">
 
-<!ENTITY zotero.context.addChildNote "Add Item Note">
-<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
-<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
-<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
-<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
+<!ENTITY zotero.context.addChildNote "アイテム メモを追加">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "注釈からアイテム メモを追加">
+<!ENTITY zotero.context.addStandaloneNote "独立メモを追加">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "注釈から独立メモを追加">
+<!ENTITY zotero.context.editInWindow "別ウィンドウで編集">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
-<!ENTITY zotero.pdfReader.lastPage "Last Page">
-<!ENTITY zotero.pdfReader.back "Back">
-<!ENTITY zotero.pdfReader.forward "Forward">
-<!ENTITY zotero.pdfReader.rotateClockwise "Rotate Clockwise">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotate Counterclockwise">
-<!ENTITY zotero.pdfReader.handTool "Hand Tool">
-<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
-<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
-<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
-<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
-<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
-<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
-<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">
+<!ENTITY zotero.pdfReader.firstPage "最初のページ">
+<!ENTITY zotero.pdfReader.lastPage "最後のページ">
+<!ENTITY zotero.pdfReader.back "戻る">
+<!ENTITY zotero.pdfReader.forward "進む">
+<!ENTITY zotero.pdfReader.rotateClockwise "時計回りに回転">
+<!ENTITY zotero.pdfReader.rotateCounterclockwise "反時計回りに回転">
+<!ENTITY zotero.pdfReader.handTool "てのひらツール">
+<!ENTITY zotero.pdfReader.verticalScrolling "垂直スクロール">
+<!ENTITY zotero.pdfReader.horizontalScrolling "水平スクロール">
+<!ENTITY zotero.pdfReader.wrappedScrolling "折り返しスクロール">
+<!ENTITY zotero.pdfReader.noSpreads "スプレッドなし ">
+<!ENTITY zotero.pdfReader.oddSpreads "奇数スプレッド">
+<!ENTITY zotero.pdfReader.evenSpreads "偶数スプレッド">
+<!ENTITY zotero.pdfReader.zoomIn "拡大表示">
+<!ENTITY zotero.pdfReader.zoomOut "縮小表示">
+<!ENTITY zotero.pdfReader.zoomAuto "自動的にサイズ変更">
+<!ENTITY zotero.pdfReader.zoomPageWidth "ページ幅に合わせる">
+<!ENTITY zotero.pdfReader.zoomPageHeight "ページの高さに合わせる">
+<!ENTITY zotero.pdfReader.transferFromPDF "注釈のインポート…">

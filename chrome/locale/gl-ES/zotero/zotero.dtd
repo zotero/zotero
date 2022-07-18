@@ -320,9 +320,9 @@
 <!ENTITY zotero.pdfReader.noSpreads "Sen axustar">
 <!ENTITY zotero.pdfReader.oddSpreads "Impares axustadas">
 <!ENTITY zotero.pdfReader.evenSpreads "Pares axustadas">
-<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
-<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
-<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
-<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomIn "Ampliar">
+<!ENTITY zotero.pdfReader.zoomOut "Alonxar">
+<!ENTITY zotero.pdfReader.zoomAuto "Axuste automático">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Ampliar ao ancho de páxina">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

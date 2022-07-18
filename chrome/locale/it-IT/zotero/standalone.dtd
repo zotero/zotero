@@ -36,7 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "Copia la citazione">
 <!ENTITY copyBibliographyCmd.label "Copia la bibliografia">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyNoteCmd.label "Copia nota">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Inverti l'orientamento della pagina">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
@@ -45,25 +45,25 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY goMenu.label "Go">
+<!ENTITY goMenu.label "Vai">
 
 
 <!ENTITY viewMenu.label "Aspetto">
 <!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "Disposizione">
-<!ENTITY standardView.label "Aspetto standard">
-<!ENTITY stackedView.label "Aspetto a catasta">
-<!ENTITY collectionsPane.label "Riquadro delle sezioni">
-<!ENTITY itemPane.label "Riquadro dell'elemento">
-<!ENTITY tagSelector.label "Selettore dei tag">
-<!ENTITY recursiveCollections.label "Mostra gli oggetti delle sottosezioni">
+<!ENTITY standardView.label "Vista standard">
+<!ENTITY stackedView.label "Vista impilata">
+<!ENTITY collectionsPane.label "Riquadro delle collezioni">
+<!ENTITY itemPane.label "Riquadro degli elementi">
+<!ENTITY tagSelector.label "Riquadro dei tag">
+<!ENTITY recursiveCollections.label "Mostra gli oggetti delle sottocollezioni">
 <!ENTITY fontSize.label "Dimensione del font">
 <!ENTITY noteFontSize.label "Dimensione del font nelle note">
 
 
 <!ENTITY toolsMenu.label "Strumenti">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "Installa il connettore per il browser">
+<!ENTITY installConnector.label "Installa Zotero Connector per il browser">
 <!ENTITY installConnector.accesskey "C">
 <!ENTITY addons.label "Estensioni">
 <!ENTITY developer.label "Sviluppatore">
@@ -92,14 +92,14 @@
 <!ENTITY helpFeedbackPage.label "Forum di discussione">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Segnala errori e bug…">
+<!ENTITY helpReportErrors.label "Segnala errori...">
 <!ENTITY helpReportErrors.accesskey "R">
 
 <!ENTITY debugOutputLogging.label "Registro dei messaggi di debug">
 <!ENTITY debugOutputLogging.accesskey "L">
 <!ENTITY debugOutputLogging.submit "Invia il messaggio di debug">
-<!ENTITY debugOutputLogging.view "Vedi il messaggio di debug">
-<!ENTITY debugOutputLogging.clear "Elimina il messaggio di debug">
+<!ENTITY debugOutputLogging.view "Vedi il registro di debug">
+<!ENTITY debugOutputLogging.clear "Cancella il registro di debug">
 <!ENTITY debugOutputLogging.restartWithLoggingEnabled "Riavvia con registro abilitato…">
 
 <!ENTITY helpCheckForUpdates.label "Controlla gli aggiornamenti…">

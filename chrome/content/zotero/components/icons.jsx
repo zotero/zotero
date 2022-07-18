@@ -80,6 +80,22 @@ i('Twisty', (
 		<path d="M8 13.4c-.5 0-.9-.2-1.2-.6L.4 5.2C0 4.7-.1 4.3.2 3.7S1 3 1.6 3h12.8c.6 0 1.2.1 1.4.7.3.6.2 1.1-.2 1.6l-6.4 7.6c-.3.4-.7.5-1.2.5z"/>
 	</svg>
 ));
+i('ArrowLeft', (
+	/* This Source Code Form is subject to the terms of the Mozilla Public
+	 * License, v. 2.0. If a copy of the MPL was not distributed with this
+	 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+		<path d="m5.001 8.352 5.465 5.466a.626.626 0 0 0 .884-.886L6.416 7.999l4.933-4.932a.626.626 0 0 0-.885-.885L5 7.647l.001.705z"/>
+	</svg>
+));
+i('ArrowRight', (
+	/* This Source Code Form is subject to the terms of the Mozilla Public
+	 * License, v. 2.0. If a copy of the MPL was not distributed with this
+	 * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+		<path d="m10.999 8.352-5.465 5.466a.626.626 0 0 1-.884-.886l4.935-4.934-4.934-4.931a.626.626 0 0 1 .885-.885L11 7.647l-.001.705z"/>
+	</svg>
+));
 i('Cross', "chrome://zotero/skin/cross.png");
 i('Tick', "chrome://zotero/skin/tick.png");
 i('ArrowRefresh', "chrome://zotero/skin/arrow_refresh.png");
@@ -131,6 +147,7 @@ i('TreeitemNoteSmall', 'chrome://zotero/skin/treeitem-note-small.png');
 i('TreeitemPatent', 'chrome://zotero/skin/treeitem-patent.png');
 i('Treeitem', 'chrome://zotero/skin/treeitem.png');
 i('TreeitemPodcast', 'chrome://zotero/skin/treeitem-podcast.png', false);
+i('TreeitemPreprint', 'chrome://zotero/skin/treeitem-preprint.png');
 i('TreeitemPresentation', 'chrome://zotero/skin/treeitem-presentation.png');
 i('TreeitemRadioBroadcast', 'chrome://zotero/skin/treeitem-radioBroadcast.png', false);
 i('TreeitemReport', 'chrome://zotero/skin/treeitem-report.png');

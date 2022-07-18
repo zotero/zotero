@@ -170,6 +170,25 @@ Zotero.Schema = new function(){
 		var updated;
 		await Zotero.DB.queryAsync("PRAGMA foreign_keys = false");
 		try {
+			// Auto-repair databases flagged for repair or coming from the DB Repair Tool
+			//
+			// If we need to run migration steps, skip the check until after the update, since
+			// the integrity check is expecting to run on the current data model.
+			let integrityCheckDone = false;
+			let toVersion = await _getSchemaSQLVersion('userdata');
+			if (integrityCheckRequired && userdata >= toVersion) {
+				await this.integrityCheck(true);
+				integrityCheckDone = true;
+			}
+			
+			// TEMP
+			try {
+				await _fixSciteValues();
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+			
 			updated = await Zotero.DB.executeTransaction(async function (conn) {
 				var updated = await _updateSchema('system');
 				
@@ -177,17 +196,6 @@ Zotero.Schema = new function(){
 				// place before user data migration
 				if (Zotero.DB.tableExists('customItemTypes')) {
 					await _updateCustomTables();
-				}
-				
-				// Auto-repair databases flagged for repair or coming from the DB Repair Tool
-				//
-				// If we need to run migration steps, skip the check until after the update, since
-				// the integrity check is expecting to run on the current data model.
-				var integrityCheckDone = false;
-				var toVersion = await _getSchemaSQLVersion('userdata');
-				if (integrityCheckRequired && userdata >= toVersion) {
-					await this.integrityCheck(true);
-					integrityCheckDone = true;
 				}
 				
 				updated = await _migrateUserDataSchema(userdata, options);
@@ -198,13 +206,13 @@ Zotero.Schema = new function(){
 				// We do this again in case custom fields were changed during user data migration
 				await _updateCustomTables();
 				
-				// If we updated the DB, also do an integrity check for good measure
-				if (updated && !integrityCheckDone) {
-					await this.integrityCheck(true);
-				}
-				
 				return updated;
 			}.bind(this));
+			
+			// If we updated the DB, also do an integrity check for good measure
+			if (updated && !integrityCheckDone) {
+				await this.integrityCheck(true);
+			}
 			
 			// If bundled global schema file is newer than DB, apply it
 			if (bundledGlobalSchemaVersionCompare === 1) {
@@ -843,7 +851,6 @@ Zotero.Schema = new function(){
 			var enumerator = Services.wm.getEnumerator("navigator:browser");
 			while (enumerator.hasMoreElements()) {
 				let win = enumerator.getNext();
-				win.ZoteroPane.buildItemTypeSubMenu();
 				win.document.getElementById('zotero-editpane-item-box').buildItemTypeMenu();
 			}
 		});
@@ -3507,17 +3514,17 @@ Zotero.Schema = new function(){
 		var itemRE = /(?:(users)\/(\d+|local\/\w+)|(groups)\/(\d+))\/items\/([A-Z0-9]{8})/;
 		var report = "";
 		var groupLibraryIDMap = {};
-		var resolveLibrary = Zotero.Promise.coroutine(async function (usersOrGroups, id) {
+		var resolveLibrary = async function (usersOrGroups, id) {
 			if (usersOrGroups == 'users') return 1;
 			if (groupLibraryIDMap[id] !== undefined) return groupLibraryIDMap[id];
 			return groupLibraryIDMap[id] = (await Zotero.DB.valueQueryAsync("SELECT libraryID FROM groups WHERE groupID=?", id));
-		});
+		};
 		var predicateMap = {};
-		var resolvePredicate = Zotero.Promise.coroutine(async function (predicate) {
+		var resolvePredicate = async function (predicate) {
 			if (predicateMap[predicate]) return predicateMap[predicate];
 			await Zotero.DB.queryAsync("INSERT INTO relationPredicates (predicateID, predicate) VALUES (NULL, ?)", predicate);
 			return predicateMap[predicate] = Zotero.DB.valueQueryAsync("SELECT predicateID FROM relationPredicates WHERE predicate=?", predicate);
-		});
+		};
 		while (true) {
 			let rows = await Zotero.DB.queryAsync("SELECT subject, predicate, object FROM relations LIMIT ?, ?", [start, limit]);
 			if (!rows.length) {
@@ -3679,4 +3686,25 @@ Zotero.Schema = new function(){
 		await Zotero.DB.queryAsync("INSERT OR IGNORE INTO itemRelations SELECT ISA.itemID, " + predicateID + ", 'http://zotero.org/' || (CASE WHEN G.libraryID IS NULL THEN 'users/' || IFNULL((SELECT value FROM settings WHERE setting='account' AND key='userID'), 'local/' || (SELECT value FROM settings WHERE setting='account' AND key='localUserKey')) ELSE 'groups/' || G.groupID END) || '/items/' || I.key FROM itemSeeAlso ISA JOIN items I ON (ISA.linkedItemID=I.itemID) LEFT JOIN groups G USING (libraryID)");
 		await Zotero.DB.queryAsync("DROP TABLE itemSeeAlso");
 	};
+	
+	async function _fixSciteValues() {
+		// See if there are any bad values
+		var badData = await Zotero.DB.rowQueryAsync("SELECT 1 FROM itemDataValues WHERE value=0 LIMIT 1");
+		if (!badData) {
+			return;
+		}
+		
+		var replacementValueID = await Zotero.DB.valueQueryAsync("SELECT valueID FROM itemDataValues WHERE value='INVALID_SCITE_VALUE'");
+		// We already replaced some rows
+		if (replacementValueID) {
+			let invalidValueID = await Zotero.DB.valueQueryAsync("SELECT valueID FROM itemDataValues WHERE value=0");
+			await Zotero.DB.queryAsync("UPDATE itemData SET valueID=? WHERE valueID=?", [replacementValueID, invalidValueID]);
+			await Zotero.DB.queryAsync("DELETE FROM itemDataValues WHERE valueID=?", invalidValueID);
+			await Zotero.DB.queryAsync("DELETE FROM itemData WHERE fieldID=(SELECT fieldID FROM fields WHERE fieldName='accessDate') AND valueID=?", replacementValueID);
+		}
+		else {
+			await Zotero.DB.queryAsync("UPDATE itemDataValues SET value='INVALID_SCITE_VALUE' WHERE value=0");
+			await Zotero.DB.queryAsync("DELETE FROM itemData WHERE fieldID=(SELECT fieldID FROM fields WHERE fieldName='accessDate') AND valueID=(SELECT valueID FROM itemDataValues WHERE value='INVALID_SCITE_VALUE')");
+		}
+	}
 }

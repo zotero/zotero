@@ -163,6 +163,9 @@ Zotero.Tags = new function() {
 		if (libraryID) {
 			sql += "JOIN items USING (itemID) WHERE libraryID = ? ";
 			params.push(libraryID);
+			// TEMP: Don't show annotation tags in tag selector
+			sql += "AND itemTypeID != ? ";
+			params.push(Zotero.ItemTypes.getID('annotation'));
 		}
 		else {
 			sql += "WHERE 1 ";
@@ -588,6 +591,8 @@ Zotero.Tags = new function() {
 		}
 		
 		var tagColors = Zotero.SyncedSettings.get(libraryID, 'tagColors') || [];
+		// Normalize tags from DB, which might not have been normalized properly previously
+		tagColors.forEach(x => x.name = x.name.normalize());
 		_libraryColors[libraryID] = tagColors;
 		_libraryColorsByName[libraryID] = new Map;
 		
@@ -616,7 +621,7 @@ Zotero.Tags = new function() {
 		this.getColors(libraryID);
 		var tagColors = _libraryColors[libraryID];
 		
-		name = name.trim();
+		name = name.trim().normalize();
 		
 		// Unset
 		if (!color) {

@@ -73,3 +73,18 @@ jobs:
       
       - name: Run tests
         run: xvfb-run test/runtests.sh -x firefox-x86_64/firefox -f
+
+      - name: Cache utilities Node modules
+        id: utilities-node-cache
+        uses: actions/cache@v2
+        with:
+          path: chrome/content/zotero/xpcom/utilities/node_modules
+          key: utilities-node-modules-${{ hashFiles('chrome/content/zotero/xpcom/utilities/package-lock.json') }}
+
+      - name: Install utilities Node modules
+        if: steps.utilities-node-cache.outputs.cache-hit != 'true'
+        run: npm install --prefix chrome/content/zotero/xpcom/utilities
+
+      - name: Run utilities tests
+        run: |
+          npm test --prefix chrome/content/zotero/xpcom/utilities -- -j resource/schema/global/schema.json

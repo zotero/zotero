@@ -57,7 +57,6 @@ var Scaffold = new function () {
 	var _translatorsLoadedPromise;
 	var _translatorProvider = null;
 	var _lastModifiedTime = 0;
-	var _lastHadFocus = true;
 	
 	var _editors = {};
 
@@ -78,10 +77,10 @@ var Scaffold = new function () {
 		if (e.target !== document) return;
 		_document = document;
 
-		if (Zotero.isWin) {
-			// Hack to fix Windows toolbar
+		if (!Zotero.isMac) {
+			// Hack to fix Windows/Linux toolbar
 			let toolbar = document.getElementById('zotero-toolbar');
-			toolbar.className = '';
+			toolbar.className = 'toolbar-scaffold-small';
 		}
 		
 		_browser = document.getElementById('browser');
@@ -99,16 +98,7 @@ var Scaffold = new function () {
 				);
 			}
 		});
-				
-		// Set font size from general pref
-		Zotero.setFontSize(document.getElementById('scaffold-pane'));
-		
-		// Set font size of code editor
-		var size = Zotero.Prefs.get("scaffold.fontSize");
-		if (size) {
-			this.setFontSize(size);
-		}
-		
+
 		this.generateTranslatorID();
 		
 		// Add List fields help menu entries for all other item types
@@ -147,22 +137,17 @@ var Scaffold = new function () {
 		this.initCodeEditor();
 		this.initTestsEditor();
 
-		// Listen for Scaffold coming to the foreground and reload translators.
-		// We can't just set a focus listener on the <window> because it'll fire
-		// when focus switches between the root window and any of the iframes.
-		setInterval(() => {
-			let hasFocus = document.hasFocus();
-			if (_lastHadFocus == hasFocus) {
-				return;
-			}
+		// Set font size from general pref
+		Zotero.setFontSize(document.getElementById('scaffold-pane'));
 
-			if (hasFocus) {
-				this.reloadTranslators();
-			}
+		// Set font size of code editor
+		var size = Zotero.Prefs.get("scaffold.fontSize");
+		if (size) {
+			this.setFontSize(size);
+		}
 
-			_lastHadFocus = hasFocus;
-		}, 1000);
-
+		// Listen for Scaffold coming to the foreground and reload translators
+		window.addEventListener('activate', () => this.reloadTranslators());
 
 		Scaffold_Translators.setLoadListener({
 			onLoadBegin: () => {
@@ -1056,9 +1041,17 @@ var Scaffold = new function () {
 	 * logs item output
 	 */
 	function _myItemDone(obj, item) {
-		item = _sanitizeItem(item);
-
-		_logOutput("Returned item:\n" + Zotero_TranslatorTester._generateDiff(item, Zotero_TranslatorTester._sanitizeItem(item, true)));
+		if (Array.isArray(item.attachments)) {
+			for (let attachment of item.attachments) {
+				if (attachment.document) {
+					attachment.document = '[object Document]';
+					attachment.mimeType = 'text/html';
+				}
+				delete attachment.url;
+				delete attachment.complete;
+			}
+		}
+		_logOutput("Returned item:\n" + Zotero_TranslatorTester._generateDiff(item, _sanitizeItemForDisplay(item)));
 	}
 
 	/*
@@ -1266,20 +1259,163 @@ var Scaffold = new function () {
 		_writeToEditor(_editors.tests, _stringifyTests(tests));
 	}
 
-	/* turns an item into a test-safe item
-	 * does not check if all fields are valid
+	/**
+	 * Mimics most of the behavior of Zotero.Item#fromJSON. Most importantly,
+	 * extracts valid fields from item.extra and inserts invalid fields into
+	 * item.extra.
+	 *
+	 * For example,
+	 *   { itemType: 'journalArticle', extra: 'DOI: foo' }
+	 * becomes
+	 *   { itemType: 'journalArticle', DOI: 'foo' }
+	 * and
+	 *   { itemType: 'book', DOI: 'foo' }
+	 * becomes
+	 *   { itemType: 'book', extra: 'DOI: foo' }
+	 *
+	 * @param {any} item
+	 * @return {any}
 	 */
-	function _sanitizeItem(item) {
-		// Clear attachment document objects
-		if (item && item.attachments && item.attachments.length) {
-			for (var i = 0; i < item.attachments.length; i++) {
-				if (item.attachments[i].document) item.attachments[i].document = "[object]";
+	function _sanitizeItemForDisplay(item) {
+		// try to convert to JSON and back to get rid of undesirable undeletable elements; this may fail
+		try {
+			item = JSON.parse(JSON.stringify(item));
+		}
+		catch (e) {}
+		
+		let itemTypeID = Zotero.ItemTypes.getID(item.itemType);
+		
+		var setFields = new Set();
+		var { itemType, fields: extraFields, /* creators: extraCreators, */ extra }
+			= Zotero.Utilities.Internal.extractExtraFields(
+				item.extra || '',
+				null,
+				Object.keys(item)
+					// TEMP until we move creator lines to real creators
+					.concat('creators')
+			);
+		// If a different item type was parsed out of Extra, use that instead
+		if (itemType && item.itemType != itemType) {
+			item.itemType = itemType;
+			itemTypeID = Zotero.ItemTypes.getID(itemType);
+		}
+		
+		for (let [field, value] of extraFields) {
+			item[field] = value;
+			setFields.add(field);
+			extraFields.delete(field);
+		}
+		
+		for (let [field, val] of Object.entries(item)) {
+			switch (field) {
+				case 'itemType':
+				case 'accessDate':
+				case 'creators':
+				case 'attachments':
+				case 'notes':
+				case 'seeAlso':
+					break;
+
+				case 'extra':
+					// We set this later
+					delete item[field];
+					break;
+
+				case 'tags':
+					item[field] = Zotero.Translate.Base.prototype._cleanTags(val);
+					break;
+
+				// Item fields
+				default: {
+					let fieldID = Zotero.ItemFields.getID(field);
+					if (!fieldID) {
+						if (typeof val == 'string') {
+							extraFields.set(field, val);
+							break;
+						}
+						delete item[field];
+						continue;
+					}
+					// Convert to base-mapped field if necessary, so that setFields has the base-mapped field
+					// when it's checked for values from getUsedFields() below
+					let origFieldID = fieldID;
+					let origField = field;
+					fieldID = Zotero.ItemFields.getFieldIDFromTypeAndBase(itemTypeID, fieldID) || fieldID;
+					if (origFieldID != fieldID) {
+						field = Zotero.ItemFields.getName(fieldID);
+					}
+					if (!Zotero.ItemFields.isValidForType(fieldID, itemTypeID)) {
+						extraFields.set(field, val);
+						delete item[field];
+						continue;
+					}
+					if (origFieldID != fieldID) {
+						item[field] = item[origField];
+						delete item[origField];
+					}
+					setFields.add(field);
+				}
 			}
 		}
 		
-		if (item && item.tags) {
-			item.tags = Zotero.Utilities.arrayUnique(item.tags).sort();
+		if (extraFields.size) {
+			for (let field of setFields.keys()) {
+				let baseField;
+				if (Zotero.ItemFields.isBaseField(field)) {
+					baseField = field;
+				}
+				else if (Zotero.ItemFields.isValidForType(Zotero.ItemFields.getID(field), itemTypeID)) {
+					let baseFieldID = Zotero.ItemFields.getBaseIDFromTypeAndField(itemTypeID, field);
+					if (baseFieldID) {
+						baseField = baseFieldID;
+					}
+				}
+
+				if (baseField) {
+					let mappedFieldNames = Zotero.ItemFields.getTypeFieldsFromBase(baseField, true);
+					for (let mappedField of mappedFieldNames) {
+						if (extraFields.has(mappedField)) {
+							extraFields.delete(mappedField);
+						}
+					}
+				}
+			}
+			
+			//
+			// Deduplicate remaining Extra fields
+			//
+			// For each invalid-for-type base field, remove any mapped fields with the same value
+			let baseFields = [];
+			for (let field of extraFields.keys()) {
+				if (Zotero.ItemFields.getID(field) && Zotero.ItemFields.isBaseField(field)) {
+					baseFields.push(field);
+				}
+			}
+			for (let baseField of baseFields) {
+				let value = extraFields.get(baseField);
+				let mappedFieldNames = Zotero.ItemFields.getTypeFieldsFromBase(baseField, true);
+				for (let mappedField of mappedFieldNames) {
+					if (extraFields.has(mappedField) && extraFields.get(mappedField) === value) {
+						extraFields.delete(mappedField);
+					}
+				}
+			}
+			
+			// Remove Type-mapped fields from Extra, since 'Type' is mapped to Item Type by citeproc-js
+			// and Type values mostly aren't going to be useful for item types without a Type-mapped field.
+			let typeFieldNames = Zotero.ItemFields.getTypeFieldsFromBase('type', true)
+				.concat('audioFileType');
+			for (let typeFieldName of typeFieldNames) {
+				if (extraFields.has(typeFieldName)) {
+					extraFields.delete(typeFieldName);
+				}
+			}
 		}
+		
+		if (extra || extraFields.size) {
+			item.extra = Zotero.Utilities.Internal.combineExtraFields(extra, extraFields);
+		}
+		
 		return item;
 	}
 	
@@ -1520,6 +1656,11 @@ var Scaffold = new function () {
 			let status = document.createElement('listcell');
 			status.setAttribute('label', oldStatuses[testString] || 'Not run');
 			item.appendChild(status);
+
+			let defer = document.createElement('listcell');
+			defer.setAttribute('type', 'checkbox');
+			defer.setAttribute('checked', test.defer);
+			item.appendChild(defer);
 
 			item.setUserData('test-string', testString, null);
 			item.setUserData('test-type', test.type);

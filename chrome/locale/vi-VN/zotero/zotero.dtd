@@ -13,15 +13,15 @@
 <!ENTITY zotero.general.saveAs "Lưu là...">
 <!ENTITY zotero.general.options "Options">
 <!ENTITY zotero.general.advancedOptions.label "Các tùy chỉnh nâng cao">
-<!ENTITY zotero.general.tools "Tools">
-<!ENTITY zotero.general.more "More">
+<!ENTITY zotero.general.tools "Các công cụ">
+<!ENTITY zotero.general.more "Khác">
 <!ENTITY zotero.general.loading "Đang nạp...">
 <!ENTITY zotero.general.close "Đóng">
 <!ENTITY zotero.general.minimize "Thu nhỏ">
 <!ENTITY zotero.general.other "Other…">
 <!ENTITY zotero.general.bigger "Bigger">
 <!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.reset "Thiết lập lại">
 
 
 <!ENTITY zotero.errorReport.title "Báo cáo lỗi Zotero">
@@ -129,7 +129,7 @@
 <!ENTITY zotero.toolbar.attachment.weblink "Lưu Đường dẫn tới Trang hiện tại">
 <!ENTITY zotero.toolbar.attachment.snapshot "Tạo Bản lưu trang Web của Trang hiện tại">
 <!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.notes "Ghi chép">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Không có thẻ nào để hiển thị">
 <!ENTITY zotero.tagSelector.loadingTags "Đang nạp các tag...">
@@ -177,7 +177,7 @@
 
 <!ENTITY zotero.progress.title "Tiến triển">
 
-<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import "Nhập khẩu">
 <!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
 <!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
 <!ENTITY zotero.import.importing "Importing…">
@@ -185,7 +185,7 @@
 <!ENTITY zotero.import.lastModified "Last Modified">
 <!ENTITY zotero.import.size "Size">
 <!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.fileHandling "Xử lý tập tin">
 
 <!ENTITY zotero.exportOptions.title "Xuất khẩu...">
 <!ENTITY zotero.exportOptions.format.label "Định dạng:">
@@ -246,8 +246,8 @@
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
 <!ENTITY zotero.sync.longTagFixer.split "Split">
 <!ENTITY zotero.sync.longTagFixer.splitAtThe "Split at the">
-<!ENTITY zotero.sync.longTagFixer.character "character">
-<!ENTITY zotero.sync.longTagFixer.characters "characters">
+<!ENTITY zotero.sync.longTagFixer.character "ký tự">
+<!ENTITY zotero.sync.longTagFixer.characters "các ký tự">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
 
@@ -307,7 +307,7 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.firstPage "Trang đầu">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">
@@ -324,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

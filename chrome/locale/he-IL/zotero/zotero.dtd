@@ -1,328 +1,328 @@
-<!ENTITY zotero.general.yes "Yes">
-<!ENTITY zotero.general.no "No">
-<!ENTITY zotero.general.optional "(Optional)">
-<!ENTITY zotero.general.note "פתק:">
-<!ENTITY zotero.general.selectAll "בחר הכל">
-<!ENTITY zotero.general.deselectAll "Deselect All">
-<!ENTITY zotero.general.edit "ערוך">
-<!ENTITY zotero.general.delete "מחק">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
-<!ENTITY zotero.general.ok "OK">
-<!ENTITY zotero.general.cancel "Cancel">
-<!ENTITY zotero.general.refresh "Refresh">
-<!ENTITY zotero.general.saveAs "Save As…">
-<!ENTITY zotero.general.options "Options">
-<!ENTITY zotero.general.advancedOptions.label "Advanced Options">
-<!ENTITY zotero.general.tools "Tools">
-<!ENTITY zotero.general.more "More">
-<!ENTITY zotero.general.loading "Loading…">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
-<!ENTITY zotero.general.other "Other…">
-<!ENTITY zotero.general.bigger "Bigger">
-<!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.yes "כן">
+<!ENTITY zotero.general.no "לא">
+<!ENTITY zotero.general.optional "(רשות)">
+<!ENTITY zotero.general.note "הערה:">
+<!ENTITY zotero.general.selectAll "לבחור בהכול">
+<!ENTITY zotero.general.deselectAll "לבטל את הבחירה">
+<!ENTITY zotero.general.edit "עריכה">
+<!ENTITY zotero.general.delete "מחיקה">
+<!ENTITY zotero.general.moveToTrash "העברה לאשפה">
+<!ENTITY zotero.general.ok "אישור">
+<!ENTITY zotero.general.cancel "ביטול">
+<!ENTITY zotero.general.refresh "רענון">
+<!ENTITY zotero.general.saveAs "שמירה בשם…">
+<!ENTITY zotero.general.options "אפשרויות">
+<!ENTITY zotero.general.advancedOptions.label "אפשרויות מתקדמות">
+<!ENTITY zotero.general.tools "כלים">
+<!ENTITY zotero.general.more "עוד">
+<!ENTITY zotero.general.loading "בטעינה…">
+<!ENTITY zotero.general.close "סגירה">
+<!ENTITY zotero.general.minimize "מזעור">
+<!ENTITY zotero.general.other "אחר…">
+<!ENTITY zotero.general.bigger "גדול יותר">
+<!ENTITY zotero.general.smaller "קטן יותר">
+<!ENTITY zotero.general.reset "איפוס">
 
 
-<!ENTITY zotero.errorReport.title "Zotero Error Report">
-<!ENTITY zotero.errorReport.submissionInProgress "Please wait while the error report is submitted.">
-<!ENTITY zotero.errorReport.submitted "Your error report has been submitted.">
-<!ENTITY zotero.errorReport.reportID "Report ID:">
-<!ENTITY zotero.errorReport.postToForums "Please post a message to the Zotero forums (forums.zotero.org) with this Report ID, a description of the problem, and any steps necessary to reproduce it.">
-<!ENTITY zotero.errorReport.notReviewed "Error reports are generally not reviewed unless referred to in the forums.">
+<!ENTITY zotero.errorReport.title "דוח שגיאה של Zotero">
+<!ENTITY zotero.errorReport.submissionInProgress "נא להמתין להגשת דוח השגיאה.">
+<!ENTITY zotero.errorReport.submitted "דוח השגיאה שלך הוגש.">
+<!ENTITY zotero.errorReport.reportID "מס׳ הדוח:">
+<!ENTITY zotero.errorReport.postToForums "נא לפרסם הודעה בפורומים של Zotero‏ (forums.zotero.org) עם מספר השגיאה הזה, תיאור של התקלה והצעדים הנחוצים לשחזורה.">
+<!ENTITY zotero.errorReport.notReviewed "דוחות שגיאה בדרך כלל לא זוכים לטיפול אלא אם כן דנים עליהם בפורום.">
 
-<!ENTITY zotero.upgrade.title "Zotero Upgrade Wizard">
-<!ENTITY zotero.upgrade.newVersionInstalled "You have installed a new version of Zotero.">
-<!ENTITY zotero.upgrade.upgradeRequired "Your Zotero database must be upgraded to work with the new version.">
-<!ENTITY zotero.upgrade.autoBackup "Your existing database will be backed up automatically before any changes are made.">
-<!ENTITY zotero.upgrade.majorUpgrade "This is a major upgrade.">
-<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "Be sure you have reviewed the">
-<!ENTITY zotero.upgrade.majorUpgradeLink "upgrade instructions">
-<!ENTITY zotero.upgrade.majorUpgradeAfterLink "before continuing.">
-<!ENTITY zotero.upgrade.upgradeInProgress "Please wait for the upgrade process to finish. This may take a few minutes.">
-<!ENTITY zotero.upgrade.upgradeSucceeded "Your Zotero database has been successfully upgraded.">
-<!ENTITY zotero.upgrade.changeLogBeforeLink "Please see">
-<!ENTITY zotero.upgrade.changeLogLink "the changelog">
-<!ENTITY zotero.upgrade.changeLogAfterLink "to find out what's new.">
+<!ENTITY zotero.upgrade.title "אשף השדרוג של Zotero">
+<!ENTITY zotero.upgrade.newVersionInstalled "התקנת גירסה חדשה של Zotero.">
+<!ENTITY zotero.upgrade.upgradeRequired "יש לשדרג את מסד הנתונים של ה־Zotero שלך כדי שיעבוד עם הגירסה החדשה.">
+<!ENTITY zotero.upgrade.autoBackup "מסד הנתונים הנוכחי שלך יגובה אוטומטית בטרם ביצוע שינויים כלשהם.">
+<!ENTITY zotero.upgrade.majorUpgrade "זה עדכון משמעותי.">
+<!ENTITY zotero.upgrade.majorUpgradeBeforeLink "נא לוודא שעברת על">
+<!ENTITY zotero.upgrade.majorUpgradeLink "הנחיות ההתקנה">
+<!ENTITY zotero.upgrade.majorUpgradeAfterLink "בטרם המשך התהליך.">
+<!ENTITY zotero.upgrade.upgradeInProgress "נא להמתין לסיום תהליך השדרוג. עשוי לארוך מספר דקות.">
+<!ENTITY zotero.upgrade.upgradeSucceeded "מסד הנתונים של ה־Zotero שלך שודרג בהצלחה.">
+<!ENTITY zotero.upgrade.changeLogBeforeLink "נא לעיין">
+<!ENTITY zotero.upgrade.changeLogLink "ביומן השינויים">
+<!ENTITY zotero.upgrade.changeLogAfterLink "כדי ללמוד מה חדש">
 
-<!ENTITY zotero.tabs.info.label "Info">
-<!ENTITY zotero.tabs.notes.label "Notes">
+<!ENTITY zotero.tabs.info.label "מידע">
+<!ENTITY zotero.tabs.notes.label "הערות">
 <!ENTITY zotero.tabs.attachments.label "צרופות">
 <!ENTITY zotero.tabs.tags.label "תגיות">
-<!ENTITY zotero.tabs.related.label "Related">
+<!ENTITY zotero.tabs.related.label "קשור">
 
-<!ENTITY zotero.toolbar.duplicate.label "הצג כפילויות">
-<!ENTITY zotero.collections.showUnfiledItems "Show Unfiled Items">
-<!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
+<!ENTITY zotero.toolbar.duplicate.label "הצגת כפילויות">
+<!ENTITY zotero.collections.showUnfiledItems "הצגת פריטים שלא תויקו">
+<!ENTITY zotero.collections.showRetractedItems "הצגת פריטים שנסוגו">
 
-<!ENTITY zotero.items.itemType "Item Type">
+<!ENTITY zotero.items.itemType "סוג פריט">
 <!ENTITY zotero.items.creator_column "יוצר">
 <!ENTITY zotero.items.year_column "שנה">
 <!ENTITY zotero.items.dateModified_column "תאריך שינוי">
-<!ENTITY zotero.items.moreColumns.label "More Columns">
-<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
+<!ENTITY zotero.items.moreColumns.label "עמודות נוספות">
+<!ENTITY zotero.items.restoreColumnOrder.label "שחזור סדר העמודות">
 
-<!ENTITY zotero.items.menu.showInLibrary "הצג בספרייה">
-<!ENTITY zotero.items.menu.attach.note "הוסף פתק">
-<!ENTITY zotero.items.menu.attach "Add Attachment">
-<!ENTITY zotero.items.menu.attach.link.uri "Attach Link to URI…">
-<!ENTITY zotero.items.menu.attach.file "Attach Stored Copy of File...">
-<!ENTITY zotero.items.menu.attach.fileLink "Attach Link to File...">
+<!ENTITY zotero.items.menu.showInLibrary "הצגה בספרייה">
+<!ENTITY zotero.items.menu.attach.note "הוספת הערה">
+<!ENTITY zotero.items.menu.attach "צירוף קובץ">
+<!ENTITY zotero.items.menu.attach.link.uri "צירוף קישור לכתובת…">
+<!ENTITY zotero.items.menu.attach.file "צירוף עותק מאוחסן של קובץ…">
+<!ENTITY zotero.items.menu.attach.fileLink "צירוף קישור לקובץ…">
 
-<!ENTITY zotero.items.menu.restoreToLibrary "Restore to Library">
-<!ENTITY zotero.items.menu.duplicateItem "Duplicate Item">
-<!ENTITY zotero.items.menu.mergeItems "Merge Items…">
-<!ENTITY zotero.items.menu.unrecognize "Undo Retrieve Metadata">
+<!ENTITY zotero.items.menu.restoreToLibrary "שחזור לספרייה">
+<!ENTITY zotero.items.menu.duplicateItem "שכפול פריט">
+<!ENTITY zotero.items.menu.mergeItems "מיזוג פריטים…">
+<!ENTITY zotero.items.menu.unrecognize "ביטול משיכת נתוני־על">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "Choose the version of the item to use as the master item:">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.versionSelect "נא לבחור את מספר הפריט שישמש בתור פריט ההורה:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "נא לבחור שדות לשמירה מגירסאות אחרות של הפריט:">
 
 <!ENTITY zotero.toolbar.newItem.label "פריט חדש">
-<!ENTITY zotero.toolbar.moreItemTypes.label "More">
-<!ENTITY zotero.toolbar.lookup.label "Add Item(s) by Identifier">
-<!ENTITY zotero.toolbar.removeItem.label "הסר פריט">
-<!ENTITY zotero.toolbar.newLibrary.label "New Library">
-<!ENTITY zotero.toolbar.newCollection.label "...אוסף חדש">
-<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
-<!ENTITY zotero.toolbar.newGroup "New Group...">
-<!ENTITY zotero.toolbar.newSubcollection.label "New Subcollection...">
-<!ENTITY zotero.toolbar.newSavedSearch.label "...חיפוש שמור חדש">
-<!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
-<!ENTITY zotero.toolbar.tagSelector.label "Show/Hide Tag Selector">
-<!ENTITY zotero.toolbar.actions.label "Actions">
-<!ENTITY zotero.toolbar.import.label "Import...">
-<!ENTITY zotero.toolbar.importFromClipboard "Import from Clipboard">
-<!ENTITY zotero.toolbar.export.label "Export Library...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
-<!ENTITY zotero.toolbar.timeline.label "Create Timeline">
-<!ENTITY zotero.toolbar.preferences.label "...העדפות">
-<!ENTITY zotero.toolbar.supportAndDocumentation "Support and Documentation">
-<!ENTITY zotero.toolbar.about.label "About Zotero">
+<!ENTITY zotero.toolbar.moreItemTypes.label "עוד">
+<!ENTITY zotero.toolbar.lookup.label "הוספת פריטים לפי מזהה">
+<!ENTITY zotero.toolbar.removeItem.label "הסרת פריט…">
+<!ENTITY zotero.toolbar.newLibrary.label "ספרייה חדשה">
+<!ENTITY zotero.toolbar.newCollection.label "אוסף חדש…">
+<!ENTITY zotero.toolbar.markFeedRead.label "סימון ערוץ העדכונים כנקרא">
+<!ENTITY zotero.toolbar.newGroup "קבוצה חדשה…">
+<!ENTITY zotero.toolbar.newSubcollection.label "תת־אוסף חדש…">
+<!ENTITY zotero.toolbar.newSavedSearch.label "חיפוש שמור חדש…">
+<!ENTITY zotero.toolbar.emptyTrash.label "פינוי האשפה">
+<!ENTITY zotero.toolbar.tagSelector.label "הצגת/הסתרת בורר התגיות">
+<!ENTITY zotero.toolbar.actions.label "פעולות">
+<!ENTITY zotero.toolbar.import.label "ייבוא…">
+<!ENTITY zotero.toolbar.importFromClipboard "ייבוא מלוח הגזירים">
+<!ENTITY zotero.toolbar.export.label "ייצוא ספרייה…">
+<!ENTITY zotero.toolbar.rtfScan.label "סריקת RTF">
+<!ENTITY zotero.toolbar.timeline.label "יצירת ציר זמן">
+<!ENTITY zotero.toolbar.preferences.label "העדפות…">
+<!ENTITY zotero.toolbar.supportAndDocumentation "תמיכה ותיעוד">
+<!ENTITY zotero.toolbar.about.label "על Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "חיפוש מתקדם">
-<!ENTITY zotero.toolbar.openURL.label "Locate">
-<!ENTITY zotero.toolbar.openURL.tooltip "Find through your local library">
+<!ENTITY zotero.toolbar.openURL.label "חיפוש">
+<!ENTITY zotero.toolbar.openURL.tooltip "חיפוש בספרייה המקומית שלך">
 
-<!ENTITY zotero.toolbar.feeds.new "New Feed">
-<!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
-<!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
-<!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
-<!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
+<!ENTITY zotero.toolbar.feeds.new "ערוץ עדכונים חדש">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "מכתובת…">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "מ־OPML…">
+<!ENTITY zotero.toolbar.feeds.refresh "רענון ערוץ העדכונים">
+<!ENTITY zotero.toolbar.feeds.edit "עריכת ערוץ העדכונים…">
 
 <!ENTITY zotero.item.add "הוספה">
-<!ENTITY zotero.item.attachment.file.show "הצג קובץ">
-<!ENTITY zotero.item.textTransform "Transform Text">
-<!ENTITY zotero.item.textTransform.titlecase "Title Case">
-<!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
-<!ENTITY zotero.item.viewOnline "View Online">
-<!ENTITY zotero.item.copyAsURL "Copy as URL">
-<!ENTITY zotero.item.deletePermanently "Delete Permanently…">
+<!ENTITY zotero.item.attachment.file.show "הצגת קובץ">
+<!ENTITY zotero.item.textTransform "התמרת טקסט">
+<!ENTITY zotero.item.textTransform.titlecase "מצב רישיות כותרת">
+<!ENTITY zotero.item.textTransform.sentencecase "מצב רישיות משפט">
+<!ENTITY zotero.item.creatorTransform.nameSwap "החלפת שמות ראשון/משפחה">
+<!ENTITY zotero.item.viewOnline "הצגה באינטרנט">
+<!ENTITY zotero.item.copyAsURL "העתקה ככתובת">
+<!ENTITY zotero.item.deletePermanently "מחיקה לצמיתות…">
 
-<!ENTITY zotero.item.tags.removeAll "Remove All Tags…">
+<!ENTITY zotero.item.tags.removeAll "הסרת כל התגיות…">
 
-<!ENTITY zotero.toolbar.newNote "פתק חדש">
-<!ENTITY zotero.toolbar.note.standalone "New Standalone Note">
-<!ENTITY zotero.toolbar.note.child "Add Child Note">
-<!ENTITY zotero.toolbar.lookup "Lookup by Identifier...">
-<!ENTITY zotero.toolbar.attachment.linked "קישור לקובץ...">
-<!ENTITY zotero.toolbar.attachment.add "Store Copy of File...">
-<!ENTITY zotero.toolbar.attachment.weblink "שמור קישור לעמוד נוכחי">
-<!ENTITY zotero.toolbar.attachment.snapshot "Take Snapshot of Current Page">
-<!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.newNote "הערה חדשה">
+<!ENTITY zotero.toolbar.note.standalone "הערה עצמאית חדשה">
+<!ENTITY zotero.toolbar.note.child "הוספת הערת צאצא">
+<!ENTITY zotero.toolbar.lookup "חיפוש לפי מזהה…">
+<!ENTITY zotero.toolbar.attachment.linked "קישור לקובץ…">
+<!ENTITY zotero.toolbar.attachment.add "אחסון עותק של קובץ…">
+<!ENTITY zotero.toolbar.attachment.weblink "שמירת קישור לעמוד נוכחי">
+<!ENTITY zotero.toolbar.attachment.snapshot "לכידת תמונת מצב של העמוד הנוכחי">
+<!ENTITY zotero.toolbar.context.item "פריט">
+<!ENTITY zotero.toolbar.context.notes "הערות">
 
-<!ENTITY zotero.tagSelector.noTagsToDisplay "No tags to display">
-<!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
-<!ENTITY zotero.tagSelector.showAutomatic "Show automatic">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Display all tags in this library">
-<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Delete Automatic Tags in This Library…">
-<!ENTITY zotero.tagSelector.clearAll "Deselect all">
-<!ENTITY zotero.tagSelector.assignColor "Assign Color…">
-<!ENTITY zotero.tagSelector.renameTag "Rename Tag...">
-<!ENTITY zotero.tagSelector.deleteTag "מחק תג...">
+<!ENTITY zotero.tagSelector.noTagsToDisplay "אין תגיות להצגה">
+<!ENTITY zotero.tagSelector.loadingTags "התגיות נטענות…">
+<!ENTITY zotero.tagSelector.showAutomatic "להציג אוטומטית">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "הצגת כל התגיות בספרייה הזאת">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "מחיקת תגיות אוטומטית בספרייה הזאת…">
+<!ENTITY zotero.tagSelector.clearAll "ביטול בחירה">
+<!ENTITY zotero.tagSelector.assignColor "הקצאת צבע…">
+<!ENTITY zotero.tagSelector.renameTag "שינוי שם תגית…">
+<!ENTITY zotero.tagSelector.deleteTag "מחיקת תגית…">
 
-<!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
-<!ENTITY zotero.tagColorChooser.color "Color:">
-<!ENTITY zotero.tagColorChooser.position "Position:">
-<!ENTITY zotero.tagColorChooser.setColor "Set Color">
-<!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
+<!ENTITY zotero.tagColorChooser.title "בחירת צבע ומיקום תגית">
+<!ENTITY zotero.tagColorChooser.color "צבע:">
+<!ENTITY zotero.tagColorChooser.position "מיקום:">
+<!ENTITY zotero.tagColorChooser.setColor "הגדרת צבע">
+<!ENTITY zotero.tagColorChooser.removeColor "הסרת צבע">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
-<!ENTITY zotero.lookup.button.search "Search">
+<!ENTITY zotero.lookup.description "נא למלא מסת״ב, מזהה עצם דיגיטלי (DOI), מזהה ב־arXiv או ADS Bibcodes להוספה לספרייה שלך:">
+<!ENTITY zotero.lookup.button.search "חיפוש">
 
-<!ENTITY zotero.createParent.title "Create Parent Item">
-<!ENTITY zotero.createParent.button.manual "Manual Entry">
+<!ENTITY zotero.createParent.title "יצירת פריט הורה">
+<!ENTITY zotero.createParent.button.manual "מילוי ידני">
 
-<!ENTITY zotero.selectitems.title "Select Items">
-<!ENTITY zotero.selectitems.intro.label "Select which items you'd like to add to your library">
-<!ENTITY zotero.selectitems.cancel.label "בטל">
+<!ENTITY zotero.selectitems.title "בחירת פריטים">
+<!ENTITY zotero.selectitems.intro.label "נא לבחור את הפריטים שברצונך להוסיף לספרייה שלך">
+<!ENTITY zotero.selectitems.cancel.label "ביטול">
 <!ENTITY zotero.selectitems.select.label "אישור">
 
-<!ENTITY zotero.bibliography.title "צור ביבליוגרפיה">
-<!ENTITY zotero.bibliography.style.label "סגנון ציטוט">
-<!ENTITY zotero.bibliography.manageStyles "Manage Styles…">
-<!ENTITY zotero.bibliography.locale.label "Language:">
-<!ENTITY zotero.bibliography.outputMode "Output Mode:">
-<!ENTITY zotero.bibliography.bibliography "Bibliography">
-<!ENTITY zotero.bibliography.outputMethod "Output Method:">
-<!ENTITY zotero.bibliography.saveAsRTF.label "שמור כ-RTF">
-<!ENTITY zotero.bibliography.saveAsHTML.label "שמור כ-HTML">
-<!ENTITY zotero.bibliography.copyToClipboard.label "Copy to Clipboard">
+<!ENTITY zotero.bibliography.title "יצירת ציטוט/ביבליוגרפיה">
+<!ENTITY zotero.bibliography.style.label "סגנון ציטוט:">
+<!ENTITY zotero.bibliography.manageStyles "ניהול סגנונות…">
+<!ENTITY zotero.bibliography.locale.label "שפה:">
+<!ENTITY zotero.bibliography.outputMode "שיטת פלט:">
+<!ENTITY zotero.bibliography.bibliography "ביבליוגרפיה">
+<!ENTITY zotero.bibliography.outputMethod "שיטת פלט:">
+<!ENTITY zotero.bibliography.saveAsRTF.label "שמירה כ־RTF">
+<!ENTITY zotero.bibliography.saveAsHTML.label "שמירה כ־HTML">
+<!ENTITY zotero.bibliography.copyToClipboard.label "העתקה ללוח הגזירים">
 <!ENTITY zotero.bibliography.print.label "הדפסה">
 
-<!ENTITY zotero.integration.docPrefs.title "Document Preferences">
-<!ENTITY zotero.integration.addEditCitation.title "Add/Edit Citation">
-<!ENTITY zotero.integration.editBibliography.title "ערוך ביבליוגרפיה">
-<!ENTITY zotero.integration.quickFormatDialog.title "Quick Format Citation">
+<!ENTITY zotero.integration.docPrefs.title "העדפות מסמך">
+<!ENTITY zotero.integration.addEditCitation.title "הוספת/עריכת ציטוט">
+<!ENTITY zotero.integration.editBibliography.title "עריכת ביבליוגרפיה">
+<!ENTITY zotero.integration.quickFormatDialog.title "עיצוב ציטוט מהיר">
 
-<!ENTITY zotero.progress.title "Progress">
+<!ENTITY zotero.progress.title "תהליך">
 
-<!ENTITY zotero.import "Import">
-<!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
-<!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.importing "Importing…">
-<!ENTITY zotero.import.database "Database">
-<!ENTITY zotero.import.lastModified "Last Modified">
-<!ENTITY zotero.import.size "Size">
-<!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import "ייבוא">
+<!ENTITY zotero.import.whereToImportFrom "מאיפה לייבא?">
+<!ENTITY zotero.import.source.file "קובץ (BibTeX,‏ RIS,‏ Zotero RDF וכו׳)">
+<!ENTITY zotero.import.importing "מתבצע ייבוא…">
+<!ENTITY zotero.import.database "מסד נתונים">
+<!ENTITY zotero.import.lastModified "שינוי אחרון">
+<!ENTITY zotero.import.size "גודל">
+<!ENTITY zotero.import.createCollection "העברת האוספים והפריטים המיובאים לאוסף חדש">
+<!ENTITY zotero.import.fileHandling "טיפול בקבצים">
 
-<!ENTITY zotero.exportOptions.title "Export...">
-<!ENTITY zotero.exportOptions.format.label "פורמט:">
+<!ENTITY zotero.exportOptions.title "ייצוא…">
+<!ENTITY zotero.exportOptions.format.label "עיצוב:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "אפשרויות תרגום">
 
-<!ENTITY zotero.charset.label "Character Encoding">
-<!ENTITY zotero.moreEncodings.label "More Encodings">
+<!ENTITY zotero.charset.label "קידוד תווים">
+<!ENTITY zotero.moreEncodings.label "קידודים נוספים">
 
-<!ENTITY zotero.citation.keepSorted.label "Keep Sources Sorted">
+<!ENTITY zotero.citation.keepSorted.label "לשמור על המקורות מסודרים">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
-<!ENTITY zotero.citation.prefix.label "Prefix:">
-<!ENTITY zotero.citation.suffix.label "Suffix:">
-<!ENTITY zotero.citation.editorWarning.label "Warning: If you edit a citation in the editor it will no longer update to reflect changes in your database or the citation style.">
+<!ENTITY zotero.citation.suppressAuthor.label "השמטת המחבר">
+<!ENTITY zotero.citation.prefix.label "קידומת:">
+<!ENTITY zotero.citation.suffix.label "סיומת:">
+<!ENTITY zotero.citation.editorWarning.label "אזהרה: עריכת ציטוט בעורך תוביל לכך שהוא לא יתעדכן עוד בשינויים במסד הנתונים או בסגנון הציטוטים.">
 
-<!ENTITY zotero.richText.italic.label "Italic">
+<!ENTITY zotero.richText.italic.label "נטוי">
 <!ENTITY zotero.richText.bold.label "מודגש">
 <!ENTITY zotero.richText.underline.label "קו תחתי">
-<!ENTITY zotero.richText.superscript.label "Superscript">
-<!ENTITY zotero.richText.subscript.label "Subscript">
+<!ENTITY zotero.richText.superscript.label "כתב עילי">
+<!ENTITY zotero.richText.subscript.label "כתב תחתי">
 
-<!ENTITY zotero.annotate.toolbar.add.label "Add Annotation">
-<!ENTITY zotero.annotate.toolbar.collapse.label "Collapse All Annotations">
-<!ENTITY zotero.annotate.toolbar.expand.label "Expand All Annotations">
-<!ENTITY zotero.annotate.toolbar.highlight.label "Highlight Text">
-<!ENTITY zotero.annotate.toolbar.unhighlight.label "Unhighlight Text">
+<!ENTITY zotero.annotate.toolbar.add.label "הוספת הסבר">
+<!ENTITY zotero.annotate.toolbar.collapse.label "צמצום כל ההסברים">
+<!ENTITY zotero.annotate.toolbar.expand.label "הרחבת כל ההסברים">
+<!ENTITY zotero.annotate.toolbar.highlight.label "הדגשת טקסט">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "ביטול הדגשת טקסט">
 
-<!ENTITY zotero.integration.prefs.displayAs.label "Display Citations As:">
-<!ENTITY zotero.integration.prefs.footnotes.label "Footnotes">
-<!ENTITY zotero.integration.prefs.endnotes.label "Endnotes">
+<!ENTITY zotero.integration.prefs.displayAs.label "הצגת ציטוטים בתור:">
+<!ENTITY zotero.integration.prefs.footnotes.label "הערות שוליים">
+<!ENTITY zotero.integration.prefs.endnotes.label "הערות סיום">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Store Citations as:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "אחסון ציטוטים בתור:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "סימניות">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "Bookmarks can be shared between Word and LibreOffice, but may cause errors if accidentally modified and cannot be inserted into footnotes.">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "אפשר לשתף סימניות בין Word ו־LibreOffice אך עשויות להתעורר תקלות אם הן נערכו ואי אפשר להכניס אותן להערות שוליים.">
 
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "Automatically update citations">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "Citations with pending updates will be highlighted in the document">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "Disabling updates can speed up citation insertion in large documents. Click Refresh to update citations manually.">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "לעדכן ציטוטים אוטומטית">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "ציטוטים עם עדכונים ממתינים יודגשו במסמך">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "השבתת עדכונים יכולה להאיץ את הוספת הציטוטים במסמכים גדולים. לחיצה על רענון תעדכן את הציטוטים ידנית.">
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "להשתמש בקיצורי יומן MEDLINE">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "השדה „Journal Abbr” (קיצורי יומן) לא יעבור עיבוד.">
 
-<!ENTITY zotero.integration.prefs.exportDocument "Switch to a Different Word Processor…">
+<!ENTITY zotero.integration.prefs.exportDocument "מעבר למעבד תמלילים אחר…">
 
-<!ENTITY zotero.integration.showEditor.label "הצג עורך">
-<!ENTITY zotero.integration.classicView.label "תצוגה קלאסית">
+<!ENTITY zotero.integration.showEditor.label "הצגת עורך">
+<!ENTITY zotero.integration.classicView.label "תצוגה קלסית">
 
-<!ENTITY zotero.integration.references.label "References in Bibliography">
+<!ENTITY zotero.integration.references.label "סימוכין בביבליוגרפיה">
 
-<!ENTITY zotero.sync.stop "Stop Sync">
-<!ENTITY zotero.sync.error "Sync Error">
+<!ENTITY zotero.sync.stop "עצירת סנכרון">
+<!ENTITY zotero.sync.error "שגיאת סנכרון">
 <!ENTITY zotero.sync.storage.progress "התקדמות:">
 <!ENTITY zotero.sync.storage.downloads "הורדות:">
-<!ENTITY zotero.sync.storage.uploads "Uploads:">
+<!ENTITY zotero.sync.storage.uploads "העלאות:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "The following tag in your Zotero library is too long to sync to the server:">
-<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synced tags must be shorter than 256 characters.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
-<!ENTITY zotero.sync.longTagFixer.split "Split">
-<!ENTITY zotero.sync.longTagFixer.splitAtThe "Split at the">
-<!ENTITY zotero.sync.longTagFixer.character "character">
-<!ENTITY zotero.sync.longTagFixer.characters "characters">
-<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "התגית הבאה בספריית ה־Zotero שלך ארוכה מכדי להסתנכרן מול השרת:">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "על התגיות המסונכרנות לא לעלות על 256 תווים.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "אפשר לפצל את התגית למספר תגיות, לערוך את התגית ידנית ולקצר אותה או למחוק אותה.">
+<!ENTITY zotero.sync.longTagFixer.split "פיצול">
+<!ENTITY zotero.sync.longTagFixer.splitAtThe "פיצול ב־">
+<!ENTITY zotero.sync.longTagFixer.character "תו">
+<!ENTITY zotero.sync.longTagFixer.characters "תווים">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "תגיות שלא סומנו לא יישמרו.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "התגית תימחק מכל הפריטים.">
 
-<!ENTITY zotero.merge.title "Conflict Resolution">
-<!ENTITY zotero.merge.of "of">
-<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.title "פתרון סתירות">
+<!ENTITY zotero.merge.of "מתוך">
+<!ENTITY zotero.merge.deleted "נמחק">
 
-<!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
-<!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
-<!ENTITY zotero.proxy.recognized.warning.secondary "Adding other proxies allows malicious sites to masquerade as sites you trust.">
-<!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
-<!ENTITY zotero.proxy.recognized.ignore.label "התעלם">
+<!ENTITY zotero.proxy.recognized.title "המתווך זוהה">
+<!ENTITY zotero.proxy.recognized.warning "יש להוסיף מתווכים שמקושרים מאתרי הספרייה, בית הספר או החברה שלך בלבד">
+<!ENTITY zotero.proxy.recognized.warning.secondary "הוספת מתווכים נוספים מאפשרת לאתרים זדוניים להתחזות לאתרים מהימנים.">
+<!ENTITY zotero.proxy.recognized.disable.label "לא להפנות אוטומטית בקשות דרך מתווכים שזוהו בעבר">
+<!ENTITY zotero.proxy.recognized.ignore.label "התעלמות">
 
-<!ENTITY zotero.feedSettings.title "Feed Settings">
-<!ENTITY zotero.feedSettings.saveButton.label "Save">
-<!ENTITY zotero.feedSettings.url.label "URL:">
-<!ENTITY zotero.feedSettings.title.label "Title:">
-<!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
-<!ENTITY zotero.feedSettings.refresh.label2 "hour(s)">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remove unread feed items after">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "day(s)">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Remove read feed items after">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "day(s)">
+<!ENTITY zotero.feedSettings.title "הגדרות ערוץ עדכונים">
+<!ENTITY zotero.feedSettings.saveButton.label "שמירה">
+<!ENTITY zotero.feedSettings.url.label "כתובת:">
+<!ENTITY zotero.feedSettings.title.label "כותרת:">
+<!ENTITY zotero.feedSettings.refresh.label1 "לעדכן את ערוץ העדכונים כל">
+<!ENTITY zotero.feedSettings.refresh.label2 "שעות">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "להסיר פריטים שלא נקראו מערוץ העדכונים לאחר">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "ימים">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "להסיר פריטים שנקראו מערוץ העדכונים לאחר">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "ימים">
 
-<!ENTITY zotero.rtfScan.title "RTF Scan">
-<!ENTITY zotero.rtfScan.cancel.label "בטל">
+<!ENTITY zotero.rtfScan.title "סריקת RTF">
+<!ENTITY zotero.rtfScan.cancel.label "ביטול">
 <!ENTITY zotero.rtfScan.citation.label "ציטוט">
-<!ENTITY zotero.rtfScan.itemName.label "Item Name">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "Unmapped Citations">
-<!ENTITY zotero.rtfScan.ambiguousCitations.label "Ambiguous Citations">
-<!ENTITY zotero.rtfScan.mappedCitations.label "Mapped Citations">
-<!ENTITY zotero.rtfScan.introPage.label "Introduction">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.">
-<!ENTITY zotero.rtfScan.introPage.description2 "To get started, select an RTF input file and an output file below:">
+<!ENTITY zotero.rtfScan.itemName.label "שם פריט">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "ציטוטים לא ממופים">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "ציטוטים מעורפלים">
+<!ENTITY zotero.rtfScan.mappedCitations.label "ציטוטים ממופים">
+<!ENTITY zotero.rtfScan.introPage.label "היכרות">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero יכול לחלץ ולעצב ציטוטים מחדש ולהוסיף ביבליוגרפיה לקובצי RTF. יכולת סריקת ה־RTF תומכת בציטוטים כרגע עם הגוונים לפי התצורות הבאות:">
+<!ENTITY zotero.rtfScan.introPage.description2 "כדי להתחיל, יש לבחור קובץ קלט RTF וקובץ פלט להלן:">
 <!ENTITY zotero.rtfScan.scanPage.label "סורק אחר ציטוטים">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero is scanning your document for citations. Please be patient.">
-<!ENTITY zotero.rtfScan.citationsPage.label "Verify Cited Items">
-<!ENTITY zotero.rtfScan.citationsPage.description "Please review the list of recognized citations below to ensure that Zotero has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.">
-<!ENTITY zotero.rtfScan.stylePage.label "Document Formatting">
-<!ENTITY zotero.rtfScan.formatPage.label "Formatting Citations">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero is processing and formatting your RTF file. Please be patient.">
-<!ENTITY zotero.rtfScan.completePage.label "RTF Scan Complete">
-<!ENTITY zotero.rtfScan.completePage.description "Your document has now been scanned and processed. Please ensure that it is formatted correctly.">
-<!ENTITY zotero.rtfScan.inputFile.label "Input File">
-<!ENTITY zotero.rtfScan.outputFile.label "Output File">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero מחפש ציטוטים במסמך שלך. נא להתאזר בסבלנות.">
+<!ENTITY zotero.rtfScan.citationsPage.label "אימות פריטים מצוטטים">
+<!ENTITY zotero.rtfScan.citationsPage.description "נא לסקור את רשימת הציטוטים המזוהים להלן כדי לוודא ש־Zotero בחר את הפריטים המתאימים כראוי. ציטוטים בלתי ממופים או מעורפלים יש לפתור בטרם מעבר לשלב הבא.">
+<!ENTITY zotero.rtfScan.stylePage.label "עיצוב מסמך">
+<!ENTITY zotero.rtfScan.formatPage.label "עיצוב ציטוטים">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero מעבד ומעצב את קובץ ה־RTF שלך. נא להתאזר בסבלנות.">
+<!ENTITY zotero.rtfScan.completePage.label "סקירת ה־RTF הושלמה">
+<!ENTITY zotero.rtfScan.completePage.description "המסמך שלך נסרק ועבר עיבוד כעת. נא לוודא שהוא מעוצב כראוי.">
+<!ENTITY zotero.rtfScan.inputFile.label "קובץ קלט">
+<!ENTITY zotero.rtfScan.outputFile.label "קובץ פלט">
 
-<!ENTITY zotero.file.choose.label "Choose File...">
-<!ENTITY zotero.file.noneSelected.label "No file selected">
+<!ENTITY zotero.file.choose.label "בחירת קובץ…">
+<!ENTITY zotero.file.noneSelected.label "לא נבחר קובץ">
 
-<!ENTITY zotero.attachLink.title "Attach Link to URI">
-<!ENTITY zotero.attachLink.label.link "Link:">
-<!ENTITY zotero.attachLink.label.title "Title:">
+<!ENTITY zotero.attachLink.title "צירוף קישור לכתובת">
+<!ENTITY zotero.attachLink.label.link "קישור:">
+<!ENTITY zotero.attachLink.label.title "כותרת:">
 
-<!ENTITY zotero.context.addChildNote "Add Item Note">
-<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
-<!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
-<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
-<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
+<!ENTITY zotero.context.addChildNote "הוספת הערה לפריט">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "הוספת הערת פריט מההסברים">
+<!ENTITY zotero.context.addStandaloneNote "הוספת הערה בודדת">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "הוספת הערה בודדת מההסברים">
+<!ENTITY zotero.context.editInWindow "עריכה בחלון נפרד">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
-<!ENTITY zotero.pdfReader.lastPage "Last Page">
-<!ENTITY zotero.pdfReader.back "Back">
-<!ENTITY zotero.pdfReader.forward "Forward">
-<!ENTITY zotero.pdfReader.rotateClockwise "Rotate Clockwise">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotate Counterclockwise">
-<!ENTITY zotero.pdfReader.handTool "Hand Tool">
-<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
-<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
-<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
-<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
-<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
-<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
-<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">
+<!ENTITY zotero.pdfReader.firstPage "עמוד ראשון">
+<!ENTITY zotero.pdfReader.lastPage "עמוד אחרון">
+<!ENTITY zotero.pdfReader.back "אחורה">
+<!ENTITY zotero.pdfReader.forward "קדימה">
+<!ENTITY zotero.pdfReader.rotateClockwise "סיבוב עם כיוון השעון">
+<!ENTITY zotero.pdfReader.rotateCounterclockwise "סיבוב נגד כיוון השעון">
+<!ENTITY zotero.pdfReader.handTool "כלי יד">
+<!ENTITY zotero.pdfReader.verticalScrolling "גלילה אנכית">
+<!ENTITY zotero.pdfReader.horizontalScrolling "גלילה אופקית">
+<!ENTITY zotero.pdfReader.wrappedScrolling "גלילה גולשת">
+<!ENTITY zotero.pdfReader.noSpreads "ללא התפשטות">
+<!ENTITY zotero.pdfReader.oddSpreads "התפשטות אי־זוגיים">
+<!ENTITY zotero.pdfReader.evenSpreads "התפשטות זוגיים">
+<!ENTITY zotero.pdfReader.zoomIn "התקרבות">
+<!ENTITY zotero.pdfReader.zoomOut "התרחקות">
+<!ENTITY zotero.pdfReader.zoomAuto "שינוי גודל אוטומטי">
+<!ENTITY zotero.pdfReader.zoomPageWidth "התאמת התקריב לרוחב העמוד">
+<!ENTITY zotero.pdfReader.zoomPageHeight "התאמת התקריב לגובה העמוד">
+<!ENTITY zotero.pdfReader.transferFromPDF "ייבוא הסברים…">

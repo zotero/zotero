@@ -444,7 +444,7 @@ Zotero.Styles = new function() {
 			Components.utils.import("resource://gre/modules/Services.jsm");
 			var shouldInstall = Services.prompt.confirmEx(null,
 				Zotero.getString('styles.install.title'),
-				Zotero.getString('styles.validationWarning', origin),
+				Zotero.getString('styles.validationWarning', [origin, Zotero.appName]),
 				(Services.prompt.BUTTON_POS_0) * (Services.prompt.BUTTON_TITLE_OK)
 				+ (Services.prompt.BUTTON_POS_1) * (Services.prompt.BUTTON_TITLE_CANCEL)
 				+ Services.prompt.BUTTON_POS_1_DEFAULT + Services.prompt.BUTTON_DELAY_ENABLE,

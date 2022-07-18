@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Diziuzañ pep-tra">
 <!ENTITY zotero.general.edit "Aozañ">
 <!ENTITY zotero.general.delete "Dilemel">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Kas d'ar pod-lastez">
 <!ENTITY zotero.general.ok "Mat eo">
 <!ENTITY zotero.general.cancel "Nullañ">
 <!ENTITY zotero.general.refresh "Freskaat">
@@ -129,7 +129,7 @@
 <!ENTITY zotero.toolbar.attachment.weblink "Enrollañ al liamm d'ar bajenn a-vremañ">
 <!ENTITY zotero.toolbar.attachment.snapshot "Kemer un dapadenn-skramm eus ar bajenn a-vremañ">
 <!ENTITY zotero.toolbar.context.item "Elfenn">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.notes "Notennoù">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Baliz ebet da ziskouez">
 <!ENTITY zotero.tagSelector.loadingTags "O kargañ ar balizoù...">
@@ -307,9 +307,9 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.firstPage "Pajenn gentañ">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
-<!ENTITY zotero.pdfReader.back "Back">
+<!ENTITY zotero.pdfReader.back "Distreiñ">
 <!ENTITY zotero.pdfReader.forward "Forward">
 <!ENTITY zotero.pdfReader.rotateClockwise "Rotate Clockwise">
 <!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotate Counterclockwise">
@@ -320,9 +320,9 @@
 <!ENTITY zotero.pdfReader.noSpreads "No Spreads">
 <!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
 <!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
-<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
-<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
+<!ENTITY zotero.pdfReader.zoomIn "Zoumañ">
+<!ENTITY zotero.pdfReader.zoomOut "Dizoumañ">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

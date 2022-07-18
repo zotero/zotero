@@ -74,6 +74,15 @@ listbox {
 	margin-bottom: 3px;
 }
 
+#zotero-toolbar.toolbar-scaffold-small {
+	-moz-appearance: none !important;
+	padding: 3px;
+}
+
+#zotero-toolbar.toolbar-scaffold-small .toolbarbutton-icon {
+	max-width: 16px;
+}
+
 #zotero-toolbar toolbarseparator {
 	height: 18px;
 }

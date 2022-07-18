@@ -36,7 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "复制引文">
 <!ENTITY copyBibliographyCmd.label "复制引文目录">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyNoteCmd.label "复制笔记">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "切换页面方向">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
@@ -100,7 +100,7 @@
 <!ENTITY debugOutputLogging.submit "提交输出文件">
 <!ENTITY debugOutputLogging.view "查看输出文件">
 <!ENTITY debugOutputLogging.clear "清除输出文件">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "重新启动时启用登录">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "以启用日志模式重新启动...">
 
 <!ENTITY helpCheckForUpdates.label "检查更新…">
 <!ENTITY helpCheckForUpdates.accesskey "U">

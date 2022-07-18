@@ -2,8 +2,20 @@
   "general_more": {
     "message": "Mais…"
   },
+  "general_moreInfo": {
+    "message": "Mais informação..."
+  },
+  "general_needHelp": {
+    "message": "Precisa de ajuda?"
+  },
   "general_done": {
     "message": "Feito"
+  },
+  "general_yes": {
+    "message": "Sim"
+  },
+  "general_no": {
+    "message": "Não"
   },
   "general_tryAgain": {
     "message": "Tentar Novamente"
@@ -17,6 +29,9 @@
   "general_pleaseWait": {
     "message": "Por favor aguarde…"
   },
+  "general_copyToClipboard": {
+    "message": "Copiar para a Área de Transferência"
+  },
   "progressWindow_savingTo": {
     "message": "Guardando para"
   },
@@ -26,8 +41,14 @@
   "progressWindow_error_translation": {
     "message": "Ocorreu um erro ao guardar este item. Ver $1 para mais informação."
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "Um erro ocorreu ao guardar este item. $1 pode limitar o número de itens que pode guardar de uma só vez. Veja $2 para mais informações."
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Resolvendo Problemas com o Tradutor"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Limites de Acesso ao Sítio"
   },
   "progressWindow_error_fallback": {
     "message": "Ocorreu um erro a guardar com $1. Tentando alternativamente guardar com $2."
@@ -44,6 +65,18 @@
   "upgradeApp": {
     "message": "Actualizar para o $1"
   },
+  "firstRun_title": {
+    "message": "Instalou o Connector $1!"
+  },
+  "firstRun_text1": {
+    "message": "O Conector $1 permite-lhe <a href=\"$2\">guardar itens no $1 </a> a partir do seu navegador com um único clique."
+  },
+  "firstRun_text2": {
+    "message": "Se ainda não o fez, <a href=\"$2\">descarregue</a> a aplicação independente $1 para uma melhor experiência."
+  },
+  "firstRun_acceptButton": {
+    "message": "Percebi"
+  },
   "error_connection_isAppRunning": {
     "message": "O $1 está em Execução?"
   },
@@ -55,6 +88,15 @@
   },
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Activar Guardar na Biblioteca em Linha"
+  },
+  "reports_report_submitted": {
+    "message": "O seu relatório de erro foi submetido.\n\nID do relatório: $1\n\nPor favor, poste uma mensagem nos Fórums do Zotero com o ID do relatório, uma descrição do problema e quaisquer passos necessários para o reproduzir.\n\nOs relatórios de erro não são revistos a não ser que sejam referenciados nos fóruns."
+  },
+  "reports_debug_output_submitted": {
+    "message": "As suas saídas de depuração foram submetidas.\n\nO ID de Depuração é $1."
+  },
+  "reports_submission_failed": {
+    "message": "Ocurreu um erro ao submeter o seu relatório.\n\n$1\n\nPor favor, verifique sua ligação à internet. Se o problema persistir, poste uma mensagem nos Fórums do Zotero."
   },
   "integration_error_clientUpgrade": {
     "message": "A citação baseada na Web requer o $1 ou mais recente."
@@ -76,6 +118,27 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "A integração $1 não está disponível quando se edita directamente no Google Docs ficheiros .docx do Microsoft Word. Escolha Ficheiro → Guardar como Google Docs para activar esta funcionalidade.<br/><br/>Se quiser transferir para o Google Docs um documento Word com citações $1, veja <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Movendo Documentos Entre Processadores de Texto</a>."
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "As citações do documento estão a ser editadas por outro utilizador $1. Por favor, tente novamente mais tarde."
+  },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1 bloqueia o seu documento para prevenir múltiplos utilizadores de editarem citações ao mesmo tempo. A edição de citação em simultâneo no documento pode levar à corrupção da citação ou do documento. Alguns imprevistos, como falhas de rede, podem levar a que o seu documento fique permanentemente bloqueado. Se crê que isto aconteceu, pode sobrepor-se ao bloqueio. <br/><br/>Deseja sobrepor-se o bloqueio do documento?"
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "A conta Google que selecionou não tem permissão para editar este documento. Por favor, tente novamente e assegure-se de que escolheu uma conta com acesso à edição"
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "Mostrar $1 citações desligadas"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "A citação que está a tentar editar foi desligada de $1."
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Religar Citação"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "Estas citações foram desligadas<a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">de$1</a>. Terá de religá-las antes que elas sejam atualizadas ou apareçam na sua bibliografia."
   },
   "general_saveTo": {
     "message": "Guardar para $1"

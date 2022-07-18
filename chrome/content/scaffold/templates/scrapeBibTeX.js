@@ -1,4 +1,4 @@
-async function scrape(doc, url) {
+async function scrape(doc, url = doc.location.href) {
 	// TODO adjust the url building
 	let m = url.match(/FId=([\w\d]+)&/);
 	if (m) {

@@ -1,27 +1,27 @@
-<!ENTITY zotero.general.yes "Yes">
-<!ENTITY zotero.general.no "No">
+<!ENTITY zotero.general.yes "Jah">
+<!ENTITY zotero.general.no "Ei">
 <!ENTITY zotero.general.optional "(Valikuline)">
 <!ENTITY zotero.general.note "Märkus:">
 <!ENTITY zotero.general.selectAll "Valida kõik">
 <!ENTITY zotero.general.deselectAll "Tühistada kõik valikud">
 <!ENTITY zotero.general.edit "Toimetada">
 <!ENTITY zotero.general.delete "Kustutada">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Liiguta Prahi hulka">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Tühistada">
 <!ENTITY zotero.general.refresh "Värskenda">
 <!ENTITY zotero.general.saveAs "Salvestada kui...">
 <!ENTITY zotero.general.options "Options">
 <!ENTITY zotero.general.advancedOptions.label "Advanced Options">
-<!ENTITY zotero.general.tools "Tools">
-<!ENTITY zotero.general.more "More">
+<!ENTITY zotero.general.tools "Tööriistad">
+<!ENTITY zotero.general.more "Veel">
 <!ENTITY zotero.general.loading "Loading…">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.close "Sulge">
+<!ENTITY zotero.general.minimize "Minimeerida">
 <!ENTITY zotero.general.other "Other…">
 <!ENTITY zotero.general.bigger "Bigger">
 <!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.reset "Lähtestamine">
 
 
 <!ENTITY zotero.errorReport.title "Zotero vearaport">
@@ -93,7 +93,7 @@
 <!ENTITY zotero.toolbar.import.label "Import...">
 <!ENTITY zotero.toolbar.importFromClipboard "Lõikepuhvrist importimine">
 <!ENTITY zotero.toolbar.export.label "Raamatukogu eksport...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF Skänn">
 <!ENTITY zotero.toolbar.timeline.label "Ajajoone loomine">
 <!ENTITY zotero.toolbar.preferences.label "Eelistused...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Abi ja dokumentatsioon">
@@ -129,7 +129,7 @@
 <!ENTITY zotero.toolbar.attachment.weblink "Salvestada link käesolevale leheküljele">
 <!ENTITY zotero.toolbar.attachment.snapshot "Teha käesolevast leheküljest momentülesvõte">
 <!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.notes "Märkused">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Lipikud puuduvad">
 <!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
@@ -264,7 +264,7 @@
 <!ENTITY zotero.feedSettings.title "Feed Settings">
 <!ENTITY zotero.feedSettings.saveButton.label "Save">
 <!ENTITY zotero.feedSettings.url.label "URL:">
-<!ENTITY zotero.feedSettings.title.label "Title:">
+<!ENTITY zotero.feedSettings.title.label "Pealkiri:">
 <!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
 <!ENTITY zotero.feedSettings.refresh.label2 "hour(s)">
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remove unread feed items after">
@@ -307,7 +307,7 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.firstPage "Esimene lehekülg">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">
@@ -324,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

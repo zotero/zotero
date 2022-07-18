@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Selectie ongedaan maken">
 <!ENTITY zotero.general.edit "Bewerken">
 <!ENTITY zotero.general.delete "Verwijderen">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Naar Prullenbak verplaatsen">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Annuleren">
 <!ENTITY zotero.general.refresh "Vernieuwen">
@@ -129,7 +129,7 @@
 <!ENTITY zotero.toolbar.attachment.weblink "Koppeling naar huidige webpagina bewaren">
 <!ENTITY zotero.toolbar.attachment.snapshot "Maak snapshot van huidige webpagina">
 <!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.notes "Aantekeningen">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Geen labels om te tonen">
 <!ENTITY zotero.tagSelector.loadingTags "Labels laden…">
@@ -307,7 +307,7 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.firstPage "Eerste pagina">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">
@@ -324,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

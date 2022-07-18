@@ -405,6 +405,12 @@ Zotero.Utilities.Internal = {
 		return s;
 	},
 	
+	isOnlyEmoji: function (str) {
+		// Remove emoji, Zero Width Joiner, and Variation Selector-16 and see if anything's left
+		const re = /\p{Extended_Pictographic}|\u200D|\uFE0F/gu;
+		return !str.replace(re, '');
+	},
+	
 	/**
 	 * Display a prompt from an error with custom buttons and a callback
 	 */
@@ -2528,7 +2534,24 @@ Zotero.Utilities.Internal = {
 				}
 				if (['if', 'elseif'].includes(operator)) {
 					if (!level.executed) {
-						level.condition = level.parentCondition && (args[2] ? vars[args[0]].toLowerCase() == args[2].toLowerCase() : !!vars[args[0]]);
+						level.condition = level.parentCondition && (
+							args[2]
+								// If string variable is equal to the provided string
+								? vars[args[0]].toLowerCase() == args[2].toLowerCase()
+								: (
+									Array.isArray(vars[args[0]])
+										// Is array non empty
+										? !!vars[args[0]].length
+										: (
+											typeof vars[args[0]] === 'function'
+												// If function returns a value (only string is supported)
+												// Note: To keep things simple, this doesn't support function attributes
+												? !!vars[args[0]]({})
+												// If string variable exists
+												: !!vars[args[0]]
+										)
+								)
+						);
 						level.executed = level.condition;
 					}
 					else {

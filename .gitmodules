@@ -1,14 +1,14 @@
 [submodule "translators"]
 	path = translators
-	url = git://github.com/zotero/translators.git
+	url = https://github.com/zotero/translators.git
 	branch = master
 [submodule "chrome/content/zotero/locale/csl"]
 	path = chrome/content/zotero/locale/csl
-	url = git://github.com/citation-style-language/locales.git
+	url = https://github.com/citation-style-language/locales.git
 	branch = master
 [submodule "styles"]
 	path = styles
-	url = git://github.com/zotero/bundled-styles.git
+	url = https://github.com/zotero/bundled-styles.git
 	branch = master
 [submodule "test/resource/chai"]
 	path = test/resource/chai
@@ -24,7 +24,7 @@
 	branch = master
 [submodule "resource/schema/global"]
 	path = resource/schema/global
-	url = git://github.com/zotero/zotero-schema.git
+	url = https://github.com/zotero/zotero-schema.git
 	branch = master
 [submodule "resource/SingleFile"]
 	path = resource/SingleFile

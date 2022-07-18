@@ -160,12 +160,6 @@
 								label="&zotero.pdfReader.transferFromPDF;"
 								oncommand="ZoteroStandalone.onReaderCmd('transferFromPDF')"
 							/>
-							<menuitem
-								id="menu_transferToPDF"
-								class="menu-type-reader"
-								label="&zotero.pdfReader.transferToPDF;"
-								oncommand="ZoteroStandalone.onReaderCmd('transferToPDF')"
-							/>
 							<menuseparator class="menu-type-reader"/>
 							<menuitem id="menu_export_file" class="menu-type-reader"
 									label="&zotero.general.saveAs;"
@@ -231,7 +225,7 @@
 									label="&zotero.toolbar.advancedSearch;"
 									command="cmd_zotero_advancedSearch"
 									key="key_advancedSearch"/>
-							<menuseparator class="menu-type-library" hidden="true" id="textfieldDirection-separator"/>
+							<menuseparator hidden="true" id="textfieldDirection-separator"/>
 							<menuitem id="textfieldDirection-swap"
 									command="cmd_switchTextDirection"
 									key="key_switchTextDirection"
@@ -335,6 +329,13 @@
 								label="&zotero.pdfReader.zoomPageWidth;"
 								oncommand="ZoteroStandalone.onReaderCmd('zoomPageWidth')"
 							/>
+							<menuitem
+								id="view-menuitem-zoom-page-height"
+								class="menu-type-reader"
+								type="checkbox"
+								label="&zotero.pdfReader.zoomPageHeight;"
+								oncommand="ZoteroStandalone.onReaderCmd('zoomPageHeight')"
+							/>
 							<menuseparator class="menu-type-reader"/>
 
 							<menu id="layout-menu" label="&layout.label;">
@@ -396,7 +397,7 @@
 									<menuitem label="64" type="checkbox"/>
 									<menuitem label="72" type="checkbox"/>
 									<menuitem label="96" type="checkbox"/>
-									<menuitem/>
+									<menuseparator/>
 									<menuitem
 										id="view-menuitem-note-font-size-reset"
 										label="&zotero.general.reset;"
@@ -456,11 +457,10 @@
 									command="cmd_zotero_rtfScan"/>
 							<menuseparator/>
 							<menuitem id="installConnector"
-									class="menu-type-library"
 									accessKey="&installConnector.accesskey;"
 									label="&installConnector.label;"
 									oncommand="ZoteroStandalone.openHelp('connectors');"/>
-							<menuitem id="menu_addons" class="menu-type-library" label="&addons.label;"
+							<menuitem id="menu_addons" label="&addons.label;"
 									oncommand="Zotero.openInViewer('chrome://mozapps/content/extensions/extensions.xul', ZoteroStandalone.updateAddonsPane)"/>
 							<menu id="developer-menu"
 									label="&developer.label;">

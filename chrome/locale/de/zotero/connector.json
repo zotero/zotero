@@ -5,8 +5,17 @@
   "general_moreInfo": {
     "message": "Weitere Informationen…"
   },
+  "general_needHelp": {
+    "message": "Brauchen Sie Hilfe?"
+  },
   "general_done": {
     "message": "Erledigt"
+  },
+  "general_yes": {
+    "message": "Ja"
+  },
+  "general_no": {
+    "message": "Nein"
   },
   "general_tryAgain": {
     "message": "Versuchen Sie es erneut"
@@ -32,8 +41,14 @@
   "progressWindow_error_translation": {
     "message": "Ein Fehler ist aufgetreten beim Versuch, diesen Eintrag zu speichern. Siehe $1 für weitere Informationen."
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "Während des Speicherns dieses Eintrags ist ein Fehler aufgetreten. $1 beschränkt möglicherweise die Anzahl an Einträgen, die Sie gleichzeitig speichern können. Siehe $2 für mehr Informationen."
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Problembehebung für Übersetzer"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Seitenzugriffsbeschränkungen"
   },
   "progressWindow_error_fallback": {
     "message": "Ein Fehler ist aufgetreten beim Speichern mit $1. Es wird versucht stattdessen $2 zu nutzen."
@@ -49,6 +64,18 @@
   },
   "upgradeApp": {
     "message": "Upgrade $1"
+  },
+  "firstRun_title": {
+    "message": "Sie haben den $1 Connector installiert!"
+  },
+  "firstRun_text1": {
+    "message": "Der $1 Connector ermöglicht Ihnen das <a href=\"$2\">Speichern von Einträgen in $1</a> aus Ihrem Browser mit nur einem Klick."
+  },
+  "firstRun_text2": {
+    "message": "Falls Sie es noch nicht getan haben, <a href=\"$2\">laden Sie</a> für das optimale Benutzererlebnis die eigenständige $1-Anwendung herunter."
+  },
+  "firstRun_acceptButton": {
+    "message": "Alles klar"
   },
   "error_connection_isAppRunning": {
     "message": "Läuft $1?"
@@ -78,19 +105,40 @@
     "message": "Die $1 war nicht in der Lage mit der $2 Desktop Applikation zu kommunizieren. $2 muss geöffnet sein zum web-basierten Zitieren."
   },
   "integration_googleDocs_unlinkBeforeSaving_warning": {
-    "message": "Dieses Dokument enthält aktive Zitate aus Zotero, die als zotero.org-Links in einer heruntergeladenen Kopie erscheinen."
+    "message": "Dieses Dokument enthält aktive Zitationen aus Zotero, die in einer heruntergeladenen Kopie als zotero.org-Links erscheinen."
   },
   "integration_googleDocs_unlinkBeforeSaving_instructions": {
     "message": "Um eine zum Teilen geeignete Version zu erzeugen, wählen Sie im Menü Datei den Befehl <b>Kopie erstellen…</b>, wählen Sie <b>Unlink Citations</b> aus dem Menü Zotero und laden Sie dann die unverknüpfte Version herunter. Bewahren Sie dieses Originaldokument mit den Verknüpfungen auf, falls Sie weitere Änderungen vornehmen müssen."
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
-    "message": "Verlinkte Version trotzdem herunterladen"
+    "message": "Verknüpfte Version trotzdem herunterladen"
   },
   "integration_googleDocs_updating": {
     "message": "$1 aktualisiert Ihr Dokument."
   },
   "integration_googleDocs_docxAlert": {
     "message": "$1 Integration ist nicht verfügbar, wenn Sie direkt eine Microsoft-Word- Datei (.docx) in Google Docs bearbeiten. Wählen Sie Datei → Speichern als Google Doc um diese Funktionalität zu aktivieren.<br/><br/>Wenn Sie ein Word Dokument mit $1 Zitationen in Google Docs überführen möchten, vgl. <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Moving Documents Between Word Processors</a>."
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "Die Zitationen im Dokument werden aktuell von einem anderen $1 Benutzer bearbeitet. Versuchen Sie es später nochmal."
+  },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1 sperrt Ihr Dokument, um zu verhindern, dass mehrere Nutzer gleichzeitig Zitationen bearbeiten. Das gleichzeitige gemeinsame Bearbeiten kann zu Fehlern in Zitationen oder Beschädigungen des Dokuments führen. Bestimmte unvorhersehbare Umstände wie Netzwerkprobleme können dazu führen, dass Ihr Dokument dauerhaft gesperrt ist. Wenn Sie glauben, dass das der Fall ist, können Sie die Sperre entfernen.<br/><br/>Möchten Sie die Dokumentensperre aufheben?"
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "Das Google-Konto, das Sie gewählt haben, ist nicht berechtigt, dieses Dokument zu bearbeiten. Versuchen Sie es noch einmal und stellen Sie sicher, dass Sie ein Konto mit Bearbeitungserlaubnis ausgewählt haben."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "Getrennte $1-Zitationen anzeigen"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "Die Zitation, die Sie bearbeiten wollen, wurde von $1 getrennt."
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Zitation erneut verknüpfen"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "Diese Zitationen wurden <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">von $1 getrennt</a>. Sie müssen sie erneut verknüpfen, damit sie aktualisiert werden oder in Ihrem Literaturverzeichnis erscheinen können."
   },
   "general_saveTo": {
     "message": "Speichern nach $1"

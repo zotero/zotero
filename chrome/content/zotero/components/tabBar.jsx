@@ -25,9 +25,11 @@
 
 'use strict';
 
-import React, { forwardRef, useState, useRef, useImperativeHandle, useLayoutEffect } from 'react';
+import React, { forwardRef, useState, useRef, useImperativeHandle, useEffect, useLayoutEffect } from 'react';
 import cx from 'classnames';
-const { IconXmark } = require('./icons');
+const { IconXmark, IconArrowLeft, IconArrowRight } = require('./icons');
+
+const SCROLL_ARROW_SCROLL_BY = 222;
 
 const TabBar = forwardRef(function (props, ref) {
 	const [tabs, setTabs] = useState([]);
@@ -35,12 +37,25 @@ const TabBar = forwardRef(function (props, ref) {
 	const [dragMouseX, setDragMouseX] = useState(0);
 	const dragIDRef = useRef(null);
 	const dragGrabbedDeltaXRef = useRef();
+	const tabsInnerContainerRef = useRef();
 	const tabsRef = useRef();
+	const startArrowRef = useRef();
+	const endArrowRef = useRef();
 	// Used to throttle mouse movement
 	const mouseMoveWaitUntil = useRef(0);
 	
 	useImperativeHandle(ref, () => ({ setTabs }));
-	
+
+	useEffect(() => {
+		let handleResize = () => updateScrollArrows();
+		window.addEventListener('resize', handleResize);
+		return () => {
+			window.removeEventListener('resize', handleResize);
+		};
+	}, []);
+
+	useLayoutEffect(() => updateScrollArrows());
+
 	// Use offsetLeft and offsetWidth to calculate and translate tab X position
 	useLayoutEffect(() => {
 		if (!dragIDRef.current) return;
@@ -69,6 +84,30 @@ const TabBar = forwardRef(function (props, ref) {
 			tab.style.transform = dragging ? `translateX(${x}px)` : 'unset';
 		}
 	});
+
+	function updateScrollArrows() {
+		let scrollable = tabsRef.current.scrollWidth !== tabsRef.current.clientWidth;
+		if (scrollable) {
+			tabsInnerContainerRef.current.classList.add('scrollable');
+
+			if (tabsRef.current.scrollLeft !== 0) {
+				startArrowRef.current.classList.add('active');
+			}
+			else {
+				startArrowRef.current.classList.remove('active');
+			}
+
+			if (tabsRef.current.scrollWidth - tabsRef.current.clientWidth !== Math.abs(tabsRef.current.scrollLeft)) {
+				endArrowRef.current.classList.add('active');
+			}
+			else {
+				endArrowRef.current.classList.remove('active');
+			}
+		}
+		else {
+			tabsInnerContainerRef.current.classList.remove('scrollable');
+		}
+	}
 	
 	function handleTabMouseDown(event, id) {
 		if (event.button === 2) {
@@ -194,7 +233,42 @@ const TabBar = forwardRef(function (props, ref) {
 		window.Zotero_Tooltip.stop();
 	}
 
-	function renderTab({ id, title, selected }, index) {
+	function handleWheel(event) {
+		// Normalize wheel speed
+		let x = event.deltaX;
+		if (x && event.deltaMode) {
+			if (event.deltaMode === 1) {
+				x *= 20;
+			}
+			else {
+				x *= 400;
+			}
+		}
+		window.requestAnimationFrame(() => {
+			tabsRef.current.scrollLeft += x;
+		});
+	}
+
+	function handleClickScrollStart() {
+		tabsRef.current.scrollTo({
+			left: tabsRef.current.scrollLeft - (SCROLL_ARROW_SCROLL_BY * (Zotero.rtl ? -1 : 1)),
+			behavior: 'smooth'
+		});
+	}
+
+	function handleClickScrollEnd() {
+		tabsRef.current.scrollTo({
+			left: tabsRef.current.scrollLeft + (SCROLL_ARROW_SCROLL_BY * (Zotero.rtl ? -1 : 1)),
+			behavior: 'smooth'
+		});
+	}
+
+	// Prevent maximizing/minimizing window
+	function handleScrollArrowDoubleClick(event) {
+		event.preventDefault();
+	}
+
+	function renderTab({ id, title, selected, iconBackgroundImage }, index) {
 		return (
 			<div
 				key={id}
@@ -204,10 +278,12 @@ const TabBar = forwardRef(function (props, ref) {
 				onMouseMove={() => handleTabMouseMove(title)}
 				onMouseDown={(event) => handleTabMouseDown(event, id)}
 				onClick={(event) => handleTabClick(event, id)}
+				onAuxClick={(event) => handleTabClick(event, id)}
 				onDragStart={(event) => handleDragStart(event, id, index)}
 				onDragEnd={handleDragEnd}
 			>
-				<div className="tab-name">{title}</div>
+				<div className="tab-name">{iconBackgroundImage &&
+					<span className="icon-bg" style={{ backgroundImage: iconBackgroundImage }}/>}{title}</div>
 				<div
 					className="tab-close"
 					onClick={(event) => handleTabClose(event, id)}
@@ -219,13 +295,46 @@ const TabBar = forwardRef(function (props, ref) {
 	}
 
 	return (
-		<div
-			ref={tabsRef}
-			className="tabs"
-			onDragOver={handleTabBarDragOver}
-			onMouseOut={handleTabBarMouseOut}
-		>
-			{tabs.map((tab, index) => renderTab(tab, index))}
+		<div>
+			<div
+				ref={tabsInnerContainerRef}
+				className="tab-bar-inner-container"
+				onWheel={handleWheel}
+			>
+				<div className="pinned-tabs">
+					<div
+						className="tabs"
+						onMouseOut={handleTabBarMouseOut}
+					>
+						{tabs.length ? renderTab(tabs[0], 0) : null}
+					</div>
+				</div>
+				<div
+					ref={startArrowRef}
+					className="scroll-start-arrow"
+					style={{ transform: Zotero.rtl ? 'scaleX(-1)' : undefined }}
+					onClick={handleClickScrollStart}
+					onDoubleClick={handleScrollArrowDoubleClick}
+				><IconArrowLeft/></div>
+				<div className="tabs-wrapper">
+					<div
+						ref={tabsRef}
+						className="tabs"
+						onDragOver={handleTabBarDragOver}
+						onMouseOut={handleTabBarMouseOut}
+						onScroll={updateScrollArrows}
+					>
+						{tabs.map((tab, index) => renderTab(tab, index))}
+					</div>
+				</div>
+				<div
+					ref={endArrowRef}
+					className="scroll-end-arrow"
+					style={{ transform: Zotero.rtl ? 'scaleX(-1)' : undefined }}
+					onClick={handleClickScrollEnd}
+					onDoubleClick={handleScrollArrowDoubleClick}
+				><IconArrowRight/></div>
+			</div>
 		</div>
 	);
 });

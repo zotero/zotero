@@ -1,0 +1,418 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CitaviExchangeData Version="6.11.0.0" ConnectionIdentifier="test-project-v2.ctv6" Changeset="2">
+  <ProjectSettings>
+    <AttachmentsFolderPath></AttachmentsFolderPath>
+    <ColorScheme><![CDATA[Blue]]></ColorScheme>
+    <CustomFields>
+      <CustomFieldSettings>
+        <CompareType>Text</CompareType>
+        <DefaultValue />
+        <DropDownStyle>None</DropDownStyle>
+        <PropertyName>CustomField1</PropertyName>
+      </CustomFieldSettings>
+      <CustomFieldSettings>
+        <CompareType>Text</CompareType>
+        <DefaultValue />
+        <DropDownStyle>None</DropDownStyle>
+        <PropertyName>CustomField2</PropertyName>
+      </CustomFieldSettings>
+      <CustomFieldSettings>
+        <CompareType>Text</CompareType>
+        <DefaultValue />
+        <DropDownStyle>None</DropDownStyle>
+        <PropertyName>CustomField3</PropertyName>
+      </CustomFieldSettings>
+      <CustomFieldSettings>
+        <CompareType>Text</CompareType>
+        <DefaultValue />
+        <DropDownStyle>None</DropDownStyle>
+        <PropertyName>CustomField4</PropertyName>
+      </CustomFieldSettings>
+      <CustomFieldSettings>
+        <CompareType>Text</CompareType>
+        <DefaultValue />
+        <DropDownStyle>None</DropDownStyle>
+        <PropertyName>CustomField5</PropertyName>
+      </CustomFieldSettings>
+      <CustomFieldSettings>
+        <CompareType>Text</CompareType>
+        <DefaultValue />
+        <DropDownStyle>None</DropDownStyle>
+        <PropertyName>CustomField6</PropertyName>
+      </CustomFieldSettings>
+      <CustomFieldSettings>
+        <CompareType>Text</CompareType>
+        <DefaultValue />
+        <DropDownStyle>None</DropDownStyle>
+        <PropertyName>CustomField7</PropertyName>
+      </CustomFieldSettings>
+      <CustomFieldSettings>
+        <CompareType>Text</CompareType>
+        <DefaultValue />
+        <DropDownStyle>None</DropDownStyle>
+        <PropertyName>CustomField8</PropertyName>
+      </CustomFieldSettings>
+      <CustomFieldSettings>
+        <CompareType>Text</CompareType>
+        <DefaultValue />
+        <DropDownStyle>None</DropDownStyle>
+        <PropertyName>CustomField9</PropertyName>
+      </CustomFieldSettings>
+    </CustomFields>
+    <Description><![CDATA[]]></Description>
+    <IsUtc>true</IsUtc>
+    <LastChangeTime>30/03/2022 12:23:58</LastChangeTime>
+  </ProjectSettings>
+  <ProjectUserSettings>
+    <LastReferenceId>e54210c0-4909-4113-b0fe-2a3eddb41cb9</LastReferenceId>
+    <ShowCategoryClassification>true</ShowCategoryClassification>
+    <SortOrder>
+      <SortProperty>
+        <ReferencePropertyId>AuthorsOrEditorsOrOrganizations</ReferencePropertyId>
+        <SortDirection>Ascending</SortDirection>
+      </SortProperty>
+      <SortProperty>
+        <ReferencePropertyId>YearResolved</ReferencePropertyId>
+        <SortDirection>Ascending</SortDirection>
+      </SortProperty>
+      <SortProperty>
+        <ReferencePropertyId>Title</ReferencePropertyId>
+        <SortDirection>Ascending</SortDirection>
+      </SortProperty>
+      <SortProperty>
+        <ReferencePropertyId>Volume</ReferencePropertyId>
+        <SortDirection>Ascending</SortDirection>
+      </SortProperty>
+      <SortProperty>
+        <ReferencePropertyId>Number</ReferencePropertyId>
+        <SortDirection>Ascending</SortDirection>
+      </SortProperty>
+    </SortOrder>
+    <SortOrderImport>
+      <SortProperty>
+        <ReferencePropertyId>AuthorsOrEditorsOrOrganizations</ReferencePropertyId>
+        <SortDirection>Ascending</SortDirection>
+      </SortProperty>
+      <SortProperty>
+        <ReferencePropertyId>YearResolved</ReferencePropertyId>
+        <SortDirection>Ascending</SortDirection>
+      </SortProperty>
+      <SortProperty>
+        <ReferencePropertyId>Title</ReferencePropertyId>
+        <SortDirection>Ascending</SortDirection>
+      </SortProperty>
+      <SortProperty>
+        <ReferencePropertyId>Volume</ReferencePropertyId>
+        <SortDirection>Ascending</SortDirection>
+      </SortProperty>
+      <SortProperty>
+        <ReferencePropertyId>Number</ReferencePropertyId>
+        <SortDirection>Ascending</SortDirection>
+      </SortProperty>
+    </SortOrderImport>
+  </ProjectUserSettings>
+  <Keywords>
+    <Keyword id="7a9841cc-5800-4444-8e0a-b4bda7282fa5">
+      <CreatedBy>_Vexli</CreatedBy>
+      <CreatedOn>2022-02-18T17:25:29</CreatedOn>
+      <ModifiedBy>_Vexli</ModifiedBy>
+      <ModifiedOn>2022-02-18T17:25:29</ModifiedOn>
+      <Name>blue</Name>
+      <Protected>false</Protected>
+      <SortFullName>blue</SortFullName>
+      <UniqueFullName>9b736a9739934a4acd0d222f5edab3ab0209f008</UniqueFullName>
+    </Keyword>
+    <Keyword id="8e2887cd-7124-4278-b285-58bd0637a2ee">
+      <CreatedBy>_Vexli</CreatedBy>
+      <CreatedOn>2022-02-18T17:26:03</CreatedOn>
+      <ModifiedBy>_Vexli</ModifiedBy>
+      <ModifiedOn>2022-02-18T17:26:03</ModifiedOn>
+      <Name>comment</Name>
+      <Protected>false</Protected>
+      <SortFullName>comment</SortFullName>
+      <UniqueFullName>60fcdfd0c330a0636db449998f8c8f58c7522826</UniqueFullName>
+    </Keyword>
+    <Keyword id="2db290bf-52e6-4475-95ea-077161c8e2d0">
+      <CreatedBy>_Vexli</CreatedBy>
+      <CreatedOn>2022-02-18T17:24:22</CreatedOn>
+      <ModifiedBy>_Vexli</ModifiedBy>
+      <ModifiedOn>2022-02-18T17:24:22</ModifiedOn>
+      <Name>red</Name>
+      <Protected>false</Protected>
+      <SortFullName>red</SortFullName>
+      <UniqueFullName>31a0d7054359216efe7213aea1e910eefc934b74</UniqueFullName>
+    </Keyword>
+  </Keywords>
+  <Persons>
+    <Person id="3a7b2137-cfb8-4613-adf0-1762eba33929">
+      <CreatedBy>_Vexli</CreatedBy>
+      <CreatedOn>2022-02-18T17:24:05</CreatedOn>
+      <ModifiedBy>_Vexli</ModifiedBy>
+      <ModifiedOn>2022-02-18T17:24:05</ModifiedOn>
+      <LastName>Satoshi Nakamoto</LastName>
+      <Protected>false</Protected>
+      <Sex>0</Sex>
+      <SortFullName>satoshi nakamoto</SortFullName>
+      <UniqueFullName>f1130583fb990563e3e5c23c120140f2dfc011ac</UniqueFullName>
+    </Person>
+  </Persons>
+  <References>
+    <Reference id="e54210c0-4909-4113-b0fe-2a3eddb41cb9">
+      <CreatedBy>_Vexli</CreatedBy>
+      <CreatedOn>2022-02-18T17:15:05</CreatedOn>
+      <ModifiedBy>_Vexli</ModifiedBy>
+      <ModifiedOn>2022-03-30T10:16:42</ModifiedOn>
+      <AbstractComplexity>0</AbstractComplexity>
+      <AbstractSourceTextFormat>0</AbstractSourceTextFormat>
+      <CitationKeyUpdateType>0</CitationKeyUpdateType>
+      <CoverPath>{"$type":"SwissAcademic.Citavi.LinkedResource, SwissAcademic.Citavi","LinkedResourceType":1,"UriString":"d2e3vn4p.jpg","LinkedResourceStatus":8,"Properties":{"$type":"SwissAcademic.Citavi.LinkedResourceProperties, SwissAcademic.Citavi"},"SyncFolderType":0,"IsLocalCloudProjectFileLink":false,"IsCloudRestore":false,"IsCloudCopy":false,"AttachmentFolderWasInFallbackMode":false}</CoverPath>
+      <EvaluationComplexity>0</EvaluationComplexity>
+      <EvaluationSourceTextFormat>0</EvaluationSourceTextFormat>
+      <HasLabel1>false</HasLabel1>
+      <HasLabel2>false</HasLabel2>
+      <PageCount>&lt;c&gt;9&lt;/c&gt;&#xD;
+&lt;in&gt;true&lt;/in&gt;&#xD;
+&lt;os&gt;9&lt;/os&gt;&#xD;
+&lt;ps&gt;9&lt;/ps&gt;</PageCount>
+      <PageRangeNumber>-1</PageRangeNumber>
+      <Rating>0</Rating>
+      <ReferenceType>JournalArticle</ReferenceType>
+      <ShortTitle>Satoshi Nakamoto – Bitcoin: A Peer-to-Peer Electronic Cash</ShortTitle>
+      <ShortTitleUpdateType>0</ShortTitleUpdateType>
+      <StaticIDs>["8657ab2f-a833-4354-92cb-39e8a72a6ec7"]</StaticIDs>
+      <TableOfContentsComplexity>0</TableOfContentsComplexity>
+      <TableOfContentsSourceTextFormat>0</TableOfContentsSourceTextFormat>
+      <Title>Bitcoin: A Peer-to-Peer Electronic Cash System</Title>
+    </Reference>
+  </References>
+  <ReferenceAuthors>
+    <OnetoN>e54210c0-4909-4113-b0fe-2a3eddb41cb9;3a7b2137-cfb8-4613-adf0-1762eba33929</OnetoN>
+  </ReferenceAuthors>
+  <Locations>
+    <Location id="724c9b68-c466-4c5f-a349-4d52d6b61419">
+      <CreatedBy>_Vexli</CreatedBy>
+      <CreatedOn>2022-02-18T17:17:22</CreatedOn>
+      <ModifiedBy>_Vexli</ModifiedBy>
+      <ModifiedOn>2022-03-30T10:16:42</ModifiedOn>
+      <Address>{"$id":"1","$type":"SwissAcademic.Citavi.LinkedResource, SwissAcademic.Citavi","LinkedResourceType":1,"UriString":"recognizePDF_test_title.pdf","LinkedResourceStatus":8}</Address>
+      <LocationType>0</LocationType>
+      <PreviewBehaviour>0</PreviewBehaviour>
+      <ReferenceID>e54210c0-4909-4113-b0fe-2a3eddb41cb9</ReferenceID>
+    </Location>
+  </Locations>
+  <Annotations>
+    <Annotation id="b1b35e86-1ba7-410a-a7ed-474526d6a5bb">
+      <CreatedBy>_Vexli</CreatedBy>
+      <CreatedOn>2022-02-18T17:25:35</CreatedOn>
+      <ModifiedBy>_Vexli</ModifiedBy>
+      <ModifiedOn>2022-02-18T17:25:35</ModifiedOn>
+      <LocationID>724c9b68-c466-4c5f-a349-4d52d6b61419</LocationID>
+      <Quads>[{"IsContainer":false,"PageIndex":1,"X1":254.51480000000004,"X2":316.46209999999974,"Y1":532.840598,"Y2":539.67870199999993},{"IsContainer":true,"PageIndex":1,"X1":254.51480000000004,"X2":316.46209999999974,"Y1":532.840598,"Y2":539.67870199999993}]</Quads>
+      <Visible>false</Visible>
+    </Annotation>
+    <Annotation id="3dc77d5e-ad7f-4f28-a666-39e610027e36">
+      <CreatedBy>_Vexli</CreatedBy>
+      <CreatedOn>2022-02-18T17:24:15</CreatedOn>
+      <ModifiedBy>_Vexli</ModifiedBy>
+      <ModifiedOn>2022-02-18T17:24:15</ModifiedOn>
+      <LocationID>724c9b68-c466-4c5f-a349-4d52d6b61419</LocationID>
+      <Quads>[{"IsContainer":false,"PageIndex":1,"X1":230.20219999999998,"X2":275.47790585937497,"Y1":578.879472,"Y2":585.816528},{"IsContainer":true,"PageIndex":1,"X1":230.20219999999998,"X2":275.47790585937497,"Y1":578.879472,"Y2":585.816528}]</Quads>
+      <Visible>false</Visible>
+    </Annotation>
+    <Annotation id="7125732b-bf3f-4195-85ee-945cd2a0457c">
+      <CreatedBy>_Vexli</CreatedBy>
+      <CreatedOn>2022-02-18T17:25:56</CreatedOn>
+      <ModifiedBy>_Vexli</ModifiedBy>
+      <ModifiedOn>2022-02-18T17:25:56</ModifiedOn>
+      <LocationID>724c9b68-c466-4c5f-a349-4d52d6b61419</LocationID>
+      <Quads>[{"IsContainer":false,"PageIndex":1,"X1":146.3,"X2":199.49469218750005,"Y1":429.340598,"Y2":436.178702},{"IsContainer":true,"PageIndex":1,"X1":146.3,"X2":199.49469218750005,"Y1":429.340598,"Y2":436.178702}]</Quads>
+      <Visible>false</Visible>
+    </Annotation>
+    <Annotation id="e23cf096-d249-4607-a16e-13885d42e44a">
+      <CreatedBy>_Vexli</CreatedBy>
+      <CreatedOn>2022-02-18T17:25:17</CreatedOn>
+      <ModifiedBy>_Vexli</ModifiedBy>
+      <ModifiedOn>2022-02-18T17:25:17</ModifiedOn>
+      <LocationID>724c9b68-c466-4c5f-a349-4d52d6b61419</LocationID>
+      <Quads>[{"IsContainer":false,"PageIndex":1,"X1":228.3353,"X2":461.75599999999912,"Y1":475.340598,"Y2":482.178702},{"IsContainer":false,"PageIndex":1,"X1":146.3,"X2":437.5108999999992,"Y1":463.840598,"Y2":470.678702},{"IsContainer":true,"PageIndex":1,"X1":146.3,"X2":461.75599999999912,"Y1":463.840598,"Y2":482.178702}]</Quads>
+      <Visible>false</Visible>
+    </Annotation>
+    <Annotation id="53af7081-5ae2-4a91-bee7-fd6f7e094413">
+      <CreatedBy>_Vexli</CreatedBy>
+      <CreatedOn>2022-03-30T10:15:37</CreatedOn>
+      <ModifiedBy>_Vexli</ModifiedBy>
+      <ModifiedOn>2022-03-30T10:15:37</ModifiedOn>
+      <LocationID>724c9b68-c466-4c5f-a349-4d52d6b61419</LocationID>
+      <Quads>[{"IsContainer":false,"PageIndex":3,"X1":133.3,"X2":185.2685,"Y1":330.92415,"Y2":340.29434999999995},{"IsContainer":true,"PageIndex":3,"X1":133.3,"X2":185.2685,"Y1":330.92415,"Y2":340.29434999999995}]</Quads>
+      <Visible>false</Visible>
+    </Annotation>
+  </Annotations>
+  <KnowledgeItems>
+    <KnowledgeItem id="b96887ad-e3cd-4861-b502-6bb002a91a0e">
+      <CreatedBy>_Vexli</CreatedBy>
+      <CreatedOn>2022-02-18T17:24:15</CreatedOn>
+      <ModifiedBy>_Vexli</ModifiedBy>
+      <ModifiedOn>2022-02-18T17:24:24</ModifiedOn>
+      <CoreStatement>peer-to-peer</CoreStatement>
+      <CoreStatementUpdateType>1</CoreStatementUpdateType>
+      <KnowledgeItemType>0</KnowledgeItemType>
+      <PageRangeNumber>-1</PageRangeNumber>
+      <QuotationIndex>0</QuotationIndex>
+      <QuotationType>6</QuotationType>
+      <ReferenceID>e54210c0-4909-4113-b0fe-2a3eddb41cb9</ReferenceID>
+      <Relevance>0</Relevance>
+      <SortFullName>peer-to-peer</SortFullName>
+      <StaticIDs>["52cbbd8c-80d2-4848-9374-6b435d4719bf"]</StaticIDs>
+      <TextSourceTextFormat>0</TextSourceTextFormat>
+      <TextComplexity>0</TextComplexity>
+    </KnowledgeItem>
+    <KnowledgeItem id="de2dc289-fa66-4614-9ede-2c8abcb850d8">
+      <CreatedBy>_Vexli</CreatedBy>
+      <CreatedOn>2022-02-18T17:25:17</CreatedOn>
+      <ModifiedBy>_Vexli</ModifiedBy>
+      <ModifiedOn>2022-02-18T17:25:29</ModifiedOn>
+      <CoreStatement>CPU power is controlled by nodes that are …</CoreStatement>
+      <CoreStatementUpdateType>0</CoreStatementUpdateType>
+      <KnowledgeItemType>0</KnowledgeItemType>
+      <PageRangeNumber>-1</PageRangeNumber>
+      <QuotationIndex>1</QuotationIndex>
+      <QuotationType>1</QuotationType>
+      <ReferenceID>e54210c0-4909-4113-b0fe-2a3eddb41cb9</ReferenceID>
+      <Relevance>0</Relevance>
+      <SortFullName>cpu power is controlled by nodes that are …</SortFullName>
+      <StaticIDs>["427b6a09-a648-4453-8317-d7735ec2e83e"]</StaticIDs>
+      <TextSourceTextFormat>0</TextSourceTextFormat>
+      <Text>CPU power is controlled by nodes that are not cooperating to attack the network, they'll generate the longest chain and outpace attackers.</Text>
+      <TextComplexity>0</TextComplexity>
+    </KnowledgeItem>
+    <KnowledgeItem id="e319aee8-104b-4480-89ac-e4adf0407fb1">
+      <CreatedBy>_Vexli</CreatedBy>
+      <CreatedOn>2022-02-18T17:25:35</CreatedOn>
+      <ModifiedBy>_Vexli</ModifiedBy>
+      <ModifiedOn>2022-02-18T17:25:35</ModifiedOn>
+      <CoreStatementUpdateType>0</CoreStatementUpdateType>
+      <KnowledgeItemType>0</KnowledgeItemType>
+      <PageRangeNumber>-1</PageRangeNumber>
+      <QuotationIndex>2</QuotationIndex>
+      <QuotationType>5</QuotationType>
+      <ReferenceID>e54210c0-4909-4113-b0fe-2a3eddb41cb9</ReferenceID>
+      <Relevance>0</Relevance>
+      <SortFullName>_</SortFullName>
+      <StaticIDs>["77efd7da-f246-44dd-80a2-82e9c372b267"]</StaticIDs>
+      <TextSourceTextFormat>0</TextSourceTextFormat>
+      <TextComplexity>0</TextComplexity>
+    </KnowledgeItem>
+    <KnowledgeItem id="d14b7f83-8cda-4d70-a89f-95a9eca94903">
+      <CreatedBy>_Vexli</CreatedBy>
+      <CreatedOn>2022-02-18T17:25:56</CreatedOn>
+      <ModifiedBy>_Vexli</ModifiedBy>
+      <ModifiedOn>2022-02-18T17:26:15</ModifiedOn>
+      <CoreStatement>proof-of-work</CoreStatement>
+      <CoreStatementUpdateType>1</CoreStatementUpdateType>
+      <KnowledgeItemType>0</KnowledgeItemType>
+      <PageRangeNumber>-1</PageRangeNumber>
+      <QuotationIndex>3</QuotationIndex>
+      <QuotationType>4</QuotationType>
+      <ReferenceID>e54210c0-4909-4113-b0fe-2a3eddb41cb9</ReferenceID>
+      <Relevance>0</Relevance>
+      <SortFullName>proof-of-work</SortFullName>
+      <StaticIDs>["fab8e0a8-f7a6-4785-ad47-5da0d03d64b6"]</StaticIDs>
+      <TextSourceTextFormat>0</TextSourceTextFormat>
+      <Text>This is a comment</Text>
+      <TextComplexity>0</TextComplexity>
+    </KnowledgeItem>
+    <KnowledgeItem id="87b7745e-4156-410a-83b5-678f1d22f7a4">
+      <CreatedBy>_Vexli</CreatedBy>
+      <CreatedOn>2022-03-30T10:15:37</CreatedOn>
+      <ModifiedBy>_Vexli</ModifiedBy>
+      <ModifiedOn>2022-03-30T10:23:56</ModifiedOn>
+      <CoreStatement>Network</CoreStatement>
+      <CoreStatementUpdateType>1</CoreStatementUpdateType>
+      <KnowledgeItemType>0</KnowledgeItemType>
+      <PageRange><![CDATA[<sp>
+  <ns>Omit</ns>
+  <os>gibberish</os>
+  <ps>gibberish</ps>
+</sp>
+<os>gibberish</os>]]></PageRange>
+      <PageRangeNumber>2147483647</PageRangeNumber>
+      <PageRangeNumeralSystem>100</PageRangeNumeralSystem>
+      <QuotationIndex>4</QuotationIndex>
+      <QuotationType>3</QuotationType>
+      <ReferenceID>e54210c0-4909-4113-b0fe-2a3eddb41cb9</ReferenceID>
+      <Relevance>0</Relevance>
+      <SortFullName>network</SortFullName>
+      <StaticIDs>["154047bb-c681-4ba3-898d-d39335ea8b8e"]</StaticIDs>
+      <TextSourceTextFormat>0</TextSourceTextFormat>
+      <Text>This is a green highlight on page 3</Text>
+      <TextComplexity>0</TextComplexity>
+    </KnowledgeItem>
+  </KnowledgeItems>
+  <KnowledgeItemKeywords>
+    <OnetoN>b96887ad-e3cd-4861-b502-6bb002a91a0e;2db290bf-52e6-4475-95ea-077161c8e2d0:0</OnetoN>
+    <OnetoN>de2dc289-fa66-4614-9ede-2c8abcb850d8;7a9841cc-5800-4444-8e0a-b4bda7282fa5:0</OnetoN>
+    <OnetoN>d14b7f83-8cda-4d70-a89f-95a9eca94903;8e2887cd-7124-4278-b285-58bd0637a2ee:0</OnetoN>
+  </KnowledgeItemKeywords>
+  <EntityLinks>
+    <EntityLink id="8b26de48-316e-4ebc-8005-8ac52a045bdf">
+      <CreatedBy>_Vexli</CreatedBy>
+      <CreatedOn>2022-02-18T17:25:35</CreatedOn>
+      <ModifiedBy>_Vexli</ModifiedBy>
+      <ModifiedOn>2022-02-18T17:25:35</ModifiedOn>
+      <Indication>PdfKnowledgeItem</Indication>
+      <RelationType>0</RelationType>
+      <SourceID>e319aee8-104b-4480-89ac-e4adf0407fb1</SourceID>
+      <SourceType>KnowledgeItem</SourceType>
+      <TargetID>b1b35e86-1ba7-410a-a7ed-474526d6a5bb</TargetID>
+      <TargetType>Annotation</TargetType>
+    </EntityLink>
+    <EntityLink id="e367d9fb-4088-4eb3-8da7-10484c4e49d7">
+      <CreatedBy>_Vexli</CreatedBy>
+      <CreatedOn>2022-02-18T17:24:15</CreatedOn>
+      <ModifiedBy>_Vexli</ModifiedBy>
+      <ModifiedOn>2022-02-18T17:24:15</ModifiedOn>
+      <Indication>PdfKnowledgeItem</Indication>
+      <RelationType>0</RelationType>
+      <SourceID>b96887ad-e3cd-4861-b502-6bb002a91a0e</SourceID>
+      <SourceType>KnowledgeItem</SourceType>
+      <TargetID>3dc77d5e-ad7f-4f28-a666-39e610027e36</TargetID>
+      <TargetType>Annotation</TargetType>
+    </EntityLink>
+    <EntityLink id="6d3444a8-fad8-4df0-887c-934b9272da0a">
+      <CreatedBy>_Vexli</CreatedBy>
+      <CreatedOn>2022-02-18T17:25:56</CreatedOn>
+      <ModifiedBy>_Vexli</ModifiedBy>
+      <ModifiedOn>2022-02-18T17:25:56</ModifiedOn>
+      <Indication>PdfKnowledgeItem</Indication>
+      <RelationType>0</RelationType>
+      <SourceID>d14b7f83-8cda-4d70-a89f-95a9eca94903</SourceID>
+      <SourceType>KnowledgeItem</SourceType>
+      <TargetID>7125732b-bf3f-4195-85ee-945cd2a0457c</TargetID>
+      <TargetType>Annotation</TargetType>
+    </EntityLink>
+    <EntityLink id="ba09076d-d622-4132-ad60-4cba7caa4148">
+      <CreatedBy>_Vexli</CreatedBy>
+      <CreatedOn>2022-02-18T17:25:17</CreatedOn>
+      <ModifiedBy>_Vexli</ModifiedBy>
+      <ModifiedOn>2022-02-18T17:25:17</ModifiedOn>
+      <Indication>PdfKnowledgeItem</Indication>
+      <RelationType>0</RelationType>
+      <SourceID>de2dc289-fa66-4614-9ede-2c8abcb850d8</SourceID>
+      <SourceType>KnowledgeItem</SourceType>
+      <TargetID>e23cf096-d249-4607-a16e-13885d42e44a</TargetID>
+      <TargetType>Annotation</TargetType>
+    </EntityLink>
+    <EntityLink id="8eb91a94-3747-4493-a235-111d50544c5d">
+      <CreatedBy>_Vexli</CreatedBy>
+      <CreatedOn>2022-03-30T10:15:37</CreatedOn>
+      <ModifiedBy>_Vexli</ModifiedBy>
+      <ModifiedOn>2022-03-30T10:15:37</ModifiedOn>
+      <Indication>PdfKnowledgeItem</Indication>
+      <RelationType>0</RelationType>
+      <SourceID>87b7745e-4156-410a-83b5-678f1d22f7a4</SourceID>
+      <SourceType>KnowledgeItem</SourceType>
+      <TargetID>53af7081-5ae2-4a91-bee7-fd6f7e094413</TargetID>
+      <TargetType>Annotation</TargetType>
+    </EntityLink>
+  </EntityLinks>
+</CitaviExchangeData>

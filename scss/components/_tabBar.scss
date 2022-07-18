@@ -2,8 +2,79 @@
 	min-height: 30px;
 }
 
+.tab-bar-inner-container {
+	display: flex;
+
+	.tabs-wrapper {
+		position: relative;
+		flex-grow: 1;
+	}
+
+	.scroll-start-arrow, .scroll-end-arrow {
+		height: 30px;
+		padding: 0 3px;
+		align-items: center;
+		z-index: 1;
+		color: #bebebe;
+		display: none;
+		box-shadow: none;
+
+		.icon {
+			display: flex;
+		}
+
+		&.active {
+			color: #505050;
+			&:hover {
+				background-color: rgba(0, 0, 0, 0.08);
+			}
+		}
+	}
+
+	.scroll-start-arrow {
+		border-right: 1px solid transparent;
+		&.active {
+			border-right: 1px solid rgba(0, 0, 0, 0.2);
+			box-shadow: 1px 0 0 0 rgba(0,0,0,0.05);
+		}
+	}
+
+	.scroll-end-arrow {
+		border-left: 1px solid transparent;
+		&.active {
+			border-left: 1px solid rgba(0, 0, 0, 0.2);
+			box-shadow: -1px 0 0 0 rgba(0,0,0,0.05);
+		}
+	}
+
+	.pinned-tabs {
+		display: none;
+		.tab {
+			max-width: 110px;
+		}
+	}
+
+	&.scrollable {
+		.tabs-wrapper > .tabs > :first-child {
+			display: none;
+		}
+
+		.scroll-start-arrow, .scroll-end-arrow {
+			display: flex;
+		}
+
+		.pinned-tabs {
+			display: block;
+		}
+	}
+}
+
 .tabs {
 	display: flex;
+	position: absolute;
+	overflow: hidden;
+	left: 0;
+	right: 0;
 
 	&:before {
 		content: "";
@@ -35,7 +106,8 @@
 	border-top: 2px solid transparent;
 	color: #000;
 	text-align: center;
-	padding: 0 30px;
+	padding: 0 22px;
+	min-width: 110px;
 	
 	&:not(:last-child) {
 		border-inline-end: $tab-border;
@@ -62,6 +134,11 @@
 		position: relative;
 		top: -2px;
 		overflow-y: hidden;
+
+		.icon-bg {
+			margin-inline-end: 7px;
+			margin-top: -2px;
+		}
 	}
 
 	.tab-close {
@@ -73,6 +150,10 @@
 		text-align: center;
 		line-height: 16px;
 		border-radius: 3px;
+
+		.icon {
+			display: flex;
+		}
 		
 		&:hover {
 			background-color: rgba(0, 0, 0, 0.08);
@@ -82,7 +163,7 @@
 			background-color: rgba(0, 0, 0, 0.16);
 		}
 	}
-	
+
 	&:first-child .tab-close {
 		display: none;
 	}

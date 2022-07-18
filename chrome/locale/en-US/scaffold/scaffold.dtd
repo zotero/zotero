@@ -68,6 +68,7 @@
 
 <!ENTITY scaffold.testing.input.label					"Input">
 <!ENTITY scaffold.testing.status.label					"Status">
+<!ENTITY scaffold.testing.defer.label					"Defer">
 <!ENTITY scaffold.testing.populate						"Populate">
 <!ENTITY scaffold.testing.save							"Save">
 <!ENTITY scaffold.testing.delete						"Delete">

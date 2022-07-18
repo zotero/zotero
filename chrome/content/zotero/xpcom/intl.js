@@ -128,7 +128,13 @@ Zotero.Intl = new function () {
 			else if (e.name != 'NS_ERROR_FAILURE') {
 				Zotero.logError(e);
 			}
-			throw new Error('Localized string not available for ' + name);
+			let msg = 'Localized string not available for ' + name;
+			if (Zotero.locale == 'en-US') {
+				throw new Error(msg);
+			}
+			// In non-English locales, just return key if string is unavailable
+			Zotero.debug(msg, 1);
+			return name;
 		}
 		return l10n;
 	};

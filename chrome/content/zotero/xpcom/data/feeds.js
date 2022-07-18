@@ -133,8 +133,9 @@ Zotero.Feeds = new function() {
 		for (let feedElem of feedElems) {
 			let url = feedElem.getAttribute('xmlUrl');
 			if (!url) url = feedElem.getAttribute('url');
-			let name = feedElem.getAttribute('title');
-			if (!name) name = feedElem.getAttribute('text');
+			let name = feedElem.getAttribute('title')
+				|| feedElem.getAttribute('text')
+				|| Zotero.getString('pane.collections.untitled');
 			if (Zotero.Feeds.existsByURL(url) || registeredUrls.has(url)) {
 				Zotero.debug("Feed Import from OPML: Feed " + name + " : " + url + " already exists. Skipping");
 				continue;

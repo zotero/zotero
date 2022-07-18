@@ -39,10 +39,6 @@
 		}
 	}
 	
-	.cell:first-child {
-		padding-inline-start: 6px;
-	}
-
 	.cell {
 		min-width: 30px;
 		cursor: default;
@@ -63,7 +59,7 @@
 				flex-shrink: 1;
 				text-overflow: ellipsis;
 				overflow: hidden;
-				margin-inline-start: 6px;
+				margin-inline-start: 5px;
 			}
 
 			.twisty + .cell-text, .spacer-twisty + .cell-text {
@@ -138,11 +134,12 @@
 
 .virtualized-table.multi-select:focus {
 
-	.row.pivot {
+	.row.focused {
 		border: 1px dotted highlight;
 		box-sizing: initial;
 		margin: -1px 0;
 		width: calc(100% - 2px);
+		z-index: 10000;
 
 		> *:first-child {
 			margin-inline-start: -1px;
@@ -177,6 +174,7 @@
 		position: relative;
 		height: 100%;
 		align-items: center;
+		padding: 0 5px;
 
 		&:hover {
 			background: #fff;
@@ -198,7 +196,7 @@
 		}
 
 		.label {
-			margin-inline-start: 10px;
+			margin-inline-start: 5px;
 			overflow: hidden;
 			text-overflow: ellipsis;
 			flex: 1;
@@ -233,10 +231,16 @@
 	overflow: auto;
 
 	.cell {
-		padding: 2px 5px;
+		padding: 0 5px;
 		text-overflow: ellipsis;
 		overflow: hidden;
 		max-height: 100%;
+		// TEMP: Disables tooltip display for truncated cells, but without this rule
+		// you cannot drag items before selecting them first because the ondrag event is
+		// not called if any children under the drag element are removed for which 
+		// pointer-events are enabled, and we need to rerender the rows for selection
+		// before dragging.
+		pointer-events: none;
 	}
 }
 

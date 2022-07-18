@@ -1,202 +1,202 @@
-<!ENTITY zotero.preferences.title "Zotero העדפות">
+<!ENTITY zotero.preferences.title "העדפות Zotero">
 
-<!ENTITY zotero.preferences.default ":ברירת מחדל">
-<!ENTITY zotero.preferences.items "items">
+<!ENTITY zotero.preferences.default "ברירת מחדל:">
+<!ENTITY zotero.preferences.items "פריטים">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Settings">
-<!ENTITY zotero.preferences.custom "Custom…">
+<!ENTITY zotero.preferences.settings "הגדרות">
+<!ENTITY zotero.preferences.custom "התאמה אישית…">
 
 <!ENTITY zotero.preferences.prefpane.general "כללי">
 
-<!ENTITY zotero.preferences.fileHandling "File Handling">
-<!ENTITY zotero.preferences.automaticSnapshots "Automatically take snapshots when creating items from web pages">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Automatically attach associated PDFs and other files when saving items">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
-<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
-<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+<!ENTITY zotero.preferences.fileHandling "טיפול בקבצים">
+<!ENTITY zotero.preferences.automaticSnapshots "ללכוד תמונת מצב אוטומטית בעת יצירת פריטים מאתרים">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "לצרף אוטומטית PDFים וקבצים אחרים משויכים בעת שמירת פריטים">
+<!ENTITY zotero.preferences.autoRecognizeFiles "למשוך נתוני על ל־PDFים אוטומטית">
+<!ENTITY zotero.preferences.autoRenameFiles "לשנות שמות של קובצי צרופות אוטומטית בעת שימוש בנתוני העל של ההורה">
+<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "שינוי שמות של קבצים מקושרים">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "פתיחת PDFים באמצעות">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "ברירת המחדל של המערכת">
 
 <!ENTITY zotero.preferences.miscellaneous "שונות">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
-<!ENTITY zotero.preferences.updateNow "עדכן עכשיו">
-<!ENTITY zotero.preferences.reportTranslationFailure "דווח על מתרגמי אתרים פגומים">
-<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
-<!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
+<!ENTITY zotero.preferences.autoUpdate "לבדוק אוטומטית אם יש מתרגמים וסגנונות עדכניים">
+<!ENTITY zotero.preferences.updateNow "לעדכן עכשיו">
+<!ENTITY zotero.preferences.reportTranslationFailure "דיווח על מתרגמי אתרים פגומים">
+<!ENTITY zotero.preferences.parseRISRefer "להשתמש ב־Zotero לטובת קובצי BibTeX/RIS/Refer שהתקבלו">
+<!ENTITY zotero.preferences.automaticTags "לתייג פריטים עם מילות מפתח וכותרות נושא אוטומטית">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPre "להסיר אוטומטית פריטים מהאשפה שנמחקו לפני למעלה מ־">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "ימים">
 
-<!ENTITY zotero.preferences.groups "Groups">
-<!ENTITY zotero.preferences.groups.whenCopyingInclude "When copying items between libraries, include:">
-<!ENTITY zotero.preferences.groups.childNotes "child notes">
-<!ENTITY zotero.preferences.groups.childFiles "child snapshots and imported files">
-<!ENTITY zotero.preferences.groups.annotations "annotations">
-<!ENTITY zotero.preferences.groups.childLinks "child links">
-<!ENTITY zotero.preferences.groups.tags "tags">
+<!ENTITY zotero.preferences.groups "קבוצות">
+<!ENTITY zotero.preferences.groups.whenCopyingInclude "בעת העתקת פריטים בין ספריות, לכלול:">
+<!ENTITY zotero.preferences.groups.childNotes "הערות על צאצאים">
+<!ENTITY zotero.preferences.groups.childFiles "תמונות מצב של צאצאים וקבצים שייובאו">
+<!ENTITY zotero.preferences.groups.annotations "הסברים">
+<!ENTITY zotero.preferences.groups.childLinks "קישורי צאצאים">
+<!ENTITY zotero.preferences.groups.tags "תגיות">
 
-<!ENTITY zotero.preferences.feeds "Feeds">
-<!ENTITY zotero.preferences.feeds.sorting.label "Sorting:">
-<!ENTITY zotero.preferences.feeds.sorting.newest "Newest items first">
-<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest items first">
-<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+<!ENTITY zotero.preferences.feeds "ערוצי עדכונים">
+<!ENTITY zotero.preferences.feeds.sorting.label "מיון:">
+<!ENTITY zotero.preferences.feeds.sorting.newest "פריטים חדשים תחילה">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "פריטים ישנים תחילה">
+<!ENTITY zotero.preferences.feeds.feedDefaults "ברירות המחדל של ערוץ העדכונים">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
-<!ENTITY zotero.preferences.openurl.custom "Custom…">
-<!ENTITY zotero.preferences.openurl.server "Resolver:">
+<!ENTITY zotero.preferences.openurl.choose "בחירת מפענח…">
+<!ENTITY zotero.preferences.openurl.custom "התאמה אישית…">
+<!ENTITY zotero.preferences.openurl.server "מפענח">
 <!ENTITY zotero.preferences.openurl.version "גירסה:">
 
-<!ENTITY zotero.preferences.prefpane.sync "Sync">
+<!ENTITY zotero.preferences.prefpane.sync "סנכרון">
 <!ENTITY zotero.preferences.sync.username "שם משתמש:">
 <!ENTITY zotero.preferences.sync.password "סיסמה:">
-<!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
-<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
-<!ENTITY zotero.preferences.sync.createAccount "נוצר חשבון">
-<!ENTITY zotero.preferences.sync.lostPassword "Lost Password?">
-<!ENTITY zotero.preferences.sync.syncAutomatically "Sync automatically">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
-<!ENTITY zotero.preferences.sync.about "About Syncing">
-<!ENTITY zotero.preferences.sync.fileSyncing "File Syncing">
-<!ENTITY zotero.preferences.sync.fileSyncing.url "קישור:">
-<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sync attachment files in My Library using">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups "Sync attachment files in group libraries using Zotero storage">
-<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
-<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "By using Zotero storage, you agree to become bound by its">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "terms and conditions">
-<!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
-<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
-<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
-<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
-<!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overwrite online library with local Zotero data">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reset File Sync History">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compare all attachment files with the storage service">
-<!ENTITY zotero.preferences.sync.reset "Reset">
-<!ENTITY zotero.preferences.sync.reset.button "Reset…">
+<!ENTITY zotero.preferences.sync.syncServer "סנכרון נתונים">
+<!ENTITY zotero.preferences.sync.setUpSync "הקמת סנכרון">
+<!ENTITY zotero.preferences.sync.unlinkAccount "ניתוק חשבון…">
+<!ENTITY zotero.preferences.sync.createAccount "יצירת חשבון">
+<!ENTITY zotero.preferences.sync.lostPassword "איבדת סיסמה?">
+<!ENTITY zotero.preferences.sync.syncAutomatically "סנכרון אוטומטית">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "סנכרון תוכן טקסט מלא">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero יכול לסנכרן את התוכן בטקסט מלא של הקבצים בספריות ה־Zotero שלך מול zotero.org ומכשירים מקושרים נוספים, מה שמאפשר לך לחפש את הקבצים שלך בקלות מכל מקום שהוא. תוכן הטקסט המלא של הקבצים שלך לא ישותף לציבור.">
+<!ENTITY zotero.preferences.sync.about "על הסנכרון">
+<!ENTITY zotero.preferences.sync.fileSyncing "סנכרון קבצים">
+<!ENTITY zotero.preferences.sync.fileSyncing.url "כתובת:">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "סנכרון קובצי הצרופות בספרייה שלי עם">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "סנכרון קובצי הצרופות בספריות הקבוצה עם האחסון של Zotero">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "להוריד קבצים">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "בזמן הסנכרון">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "לפי הצורך">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "אימות השרת">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "השימוש באחסון של Zotero דורש את הסכמתך לעמוד">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos2 "בתנאים">
+<!ENTITY zotero.preferences.sync.librariesToSync "ספריות לסנכרון">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "בחירת ספריות…">
+<!ENTITY zotero.preferences.sync.librariesToSync.sync "סנכרון">
+<!ENTITY zotero.preferences.sync.librariesToSync.library "ספרייה">
+<!ENTITY zotero.preferences.sync.reset.warning1 "הפעולות הבאות מיועדות לשימוש במצבים נדירים ומסוימים ואינן מיועדות לפתרון תקלות כללי. במקרים רבים, איפוס יגרום לבעיות נוספות. ניתן לעיין">
+<!ENTITY zotero.preferences.sync.reset.warning2 "באפשרויות איפוס סנכרון">
+<!ENTITY zotero.preferences.sync.reset.warning3 "למידע נוסף.">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "היסטוריית איפוס סנכרון נתונים">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "מיזוג הנתונים המקומיים עם הנתונים המרוחקים תוך התעלמות מהיסטוריית הסנכרון">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer "שחזור מתיקייה מקוונת">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "לשכתב על הנתונים המקומיים של Zotero עם נתונים מהספרייה המקוונת.">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "החלפת הספרייה המרוחקת">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "שכתוב הספרייה המרוחקת עם הנתונים המקומיים של Zotero">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "איפוס היסטוריית סנכרון קבצים">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "השוואת כל קובצי הצרופות עם שירות האחסון">
+<!ENTITY zotero.preferences.sync.reset "איפוס">
+<!ENTITY zotero.preferences.sync.reset.button "איפוס…">
 
 
 <!ENTITY zotero.preferences.prefpane.search "חיפוש">
-<!ENTITY zotero.preferences.search.fulltextCache "Full-Text Cache">
+<!ENTITY zotero.preferences.search.fulltextCache "מטמון טקסט מלא">
 <!ENTITY zotero.preferences.search.indexStats "סטטיסטיקות אינדקס">
 
-<!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
+<!ENTITY zotero.preferences.search.indexStats.indexed "באינדקס:">
 <!ENTITY zotero.preferences.search.indexStats.partial "חלקי:">
-<!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "לא באינדקס:">
 <!ENTITY zotero.preferences.search.indexStats.words "מילים:">
 
-<!ENTITY zotero.preferences.fulltext.textMaxLength "Maximum characters to index per file:">
-<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximum pages to index per file:">
+<!ENTITY zotero.preferences.fulltext.textMaxLength "מס׳ התווים המרבי להוספה לאינדקס לכל קובץ:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "מספר העמודים המרבי להוספה לאינקדס לכל קובץ:">
 
-<!ENTITY zotero.preferences.prefpane.export "יצוא">
+<!ENTITY zotero.preferences.prefpane.export "ייצוא">
 
 <!ENTITY zotero.preferences.citationOptions.caption "אפשרויות ציטוט">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "לכלול כתובות של מאמרי נייר בהפניות">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "כאשר אפשרות זו מושבתת, Zotero כולל כתובות בעת ציטוט מכתבי עת, מגזינים וכתבות בעתון רק אם לא צוין טווח עמודים למאמר.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "העתקה מהירה">
-<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
-<!ENTITY zotero.preferences.quickCopy.copyAsHTML "העתק בתור HTML">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Site-Specific Settings:">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g., wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
-<!ENTITY zotero.preferences.quickCopy.dragLimit "Disable Quick Copy when dragging more than">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "עיצוב הפריט:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "עיצוב ההערה:">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "העתקה בתור HTML">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "הגדרות נקודתיות לאתר:">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "שם תחום/נתיב">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(למשל: wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "עיצוב">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "שפה">
+<!ENTITY zotero.preferences.quickCopy.dragLimit "השבתת ההעתקה המהירה בעת גרירה של יותר מ־">
 
-<!ENTITY zotero.preferences.prefpane.cite "צטט">
+<!ENTITY zotero.preferences.prefpane.cite "ציטוט">
 <!ENTITY zotero.preferences.cite.styles "סגנונות">
 <!ENTITY zotero.preferences.cite.wordProcessors "מעבדי תמלילים">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Use classic Add Citation dialog">
-<!ENTITY zotero.preferences.styleEditor "Style Editor">
-<!ENTITY zotero.preferences.stylePreview "Style Preview">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "להשתמש בחלונית הוספת הציטוט הקלסית">
+<!ENTITY zotero.preferences.styleEditor "עורך סגנונות">
+<!ENTITY zotero.preferences.stylePreview "תצוגה מקדימה של סגנון">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "מנהל סגנונות">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "כותרת">
-<!ENTITY zotero.preferences.cite.styles.styleManager.updated "Updated">
-<!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
+<!ENTITY zotero.preferences.cite.styles.styleManager.updated "עודכן">
+<!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL (שפת סגנון ציטוטים)">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "משיכת סגנונות נוספים…">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "Focus Libraries Pane">
+<!ENTITY zotero.preferences.keys.saveToZotero "שמירה ל־Zotero (סמל שורת כתובת)">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "התמקדות על חלונית הספריות">
 <!ENTITY zotero.preferences.keys.quicksearch "חיפוש מהיר">
-<!ENTITY zotero.preferences.keys.newItem "Create a New Item">
-<!ENTITY zotero.preferences.keys.newNote "Create a New Note">
-<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
-<!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect after restart">
+<!ENTITY zotero.preferences.keys.newItem "יצירת פריט חדש">
+<!ENTITY zotero.preferences.keys.newNote "יצירת הערה חדשה">
+<!ENTITY zotero.preferences.keys.toggleAllRead "סימון כל הפריטים בערוץ העדכונים כנקראו/לא נקראו">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "העתקת ציטוטי הפריט הנבחר ללוח הגזירים">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "העתקת הפריטים הנבחרים ללוח הגזירים">
+<!ENTITY zotero.preferences.keys.importFromClipboard "ייבוא מלוח הגזירים">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "השינויים יוחלו אחרי הפעלה מחדש">
 
-<!ENTITY zotero.preferences.prefpane.proxies "Proxies">
+<!ENTITY zotero.preferences.prefpane.proxies "מתווכים">
 
-<!ENTITY zotero.preferences.proxies.proxyOptions "Proxy Options">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero will transparently redirect requests through saved proxies. See the">
-<!ENTITY zotero.preferences.proxies.desc_link "proxy documentation">
-<!ENTITY zotero.preferences.proxies.desc_after_link "for more information.">
-<!ENTITY zotero.preferences.proxies.transparent "Transparently redirect requests through previously used proxies">
-<!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
-<!ENTITY zotero.preferences.proxies.disableByDomain "Disable proxy redirection when my domain name contains ">
-<!ENTITY zotero.preferences.proxies.configured "Configured Proxies">
-<!ENTITY zotero.preferences.proxies.hostname "Hostname">
-<!ENTITY zotero.preferences.proxies.scheme "Scheme">
+<!ENTITY zotero.preferences.proxies.proxyOptions "אפשרויות מתווך">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero יפנה בקשות באופן שקוף דרך המתווכים שנשמרו. כדאי לעיין">
+<!ENTITY zotero.preferences.proxies.desc_link "בתיעוד על המתווכים">
+<!ENTITY zotero.preferences.proxies.desc_after_link "למידע נוסף.">
+<!ENTITY zotero.preferences.proxies.transparent "הפעלת הפניית מתווך">
+<!ENTITY zotero.preferences.proxies.autoRecognize "לזהות משאבים שתווכו אוטומטית">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "הצגת התראה כשמתבצעת הפניה דרך מתווך">
+<!ENTITY zotero.preferences.proxies.disableByDomain "השבתת הפניה דרך מתווכים כאשר שם התחום מכיל">
+<!ENTITY zotero.preferences.proxies.configured "מתווכים מוגדרים">
+<!ENTITY zotero.preferences.proxies.hostname "שם מארח">
+<!ENTITY zotero.preferences.proxies.scheme "סכמה">
 
-<!ENTITY zotero.preferences.proxies.multiSite "Multi-Site">
-<!ENTITY zotero.preferences.proxies.autoAssociate "Automatically associate new hosts">
-<!ENTITY zotero.preferences.proxies.variables "You may use the following variables in your proxy scheme:">
-<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - The hostname of the proxied site (e.g., www.zotero.org)">
-<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - The path of the proxied page excluding the leading slash (e.g., about/index.html)">
-<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - The directory path (e.g., about/)">
-<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - The filename (e.g., index.html)">
-<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Any string">
+<!ENTITY zotero.preferences.proxies.multiSite "ריבוי אתרים">
+<!ENTITY zotero.preferences.proxies.autoAssociate "הקצאת מארחים חדשים אוטומטית">
+<!ENTITY zotero.preferences.proxies.variables "אפשר להשתמש במשתנים הבאים בסכמת התיווך שלך:">
+<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - שם המארח של האתר המתווך (למשל: www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - נתיב העמוד המתווך ללא הלוכסן בהתחלה (למשל: about/index.html)">
+<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - נתיב התיקייה (למשל: about/‎)">
+<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - שם הקובץ (למשל: index.html)">
+<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - כל מחרוזת שהיא">
 
 <!ENTITY zotero.preferences.prefpane.advanced "מתקדם">
-<!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.filesAndFolders "קבצים ותיקיות">
+<!ENTITY zotero.preferences.advanced.keys "צירופי מקשים">
 
-<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "הגדרות מתקדמות">
 
-<!ENTITY zotero.preferences.prefpane.locate "Locate">
-<!ENTITY zotero.preferences.locate.locateEngineManager "Article Lookup Engine Manager">
-<!ENTITY zotero.preferences.locate.description "Description">
-<!ENTITY zotero.preferences.locate.name "Name">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
-<!ENTITY zotero.preferences.locate.restoreDefaults "Restore Defaults">
+<!ENTITY zotero.preferences.prefpane.locate "איתור">
+<!ENTITY zotero.preferences.locate.locateEngineManager "מנהל מנוע חיפוש כתבות">
+<!ENTITY zotero.preferences.locate.description "תיאור">
+<!ENTITY zotero.preferences.locate.name "שם">
+<!ENTITY zotero.preferences.locate.addDescription "כדי להוסיף מנוע חיפוש שאינו ברשימה, יש לבקר במנוע החיפוש הרצוי דרך הדפדפן שלך ולבחור ב„הוספה” מתפריט האיתור של Zotero.">
+<!ENTITY zotero.preferences.locate.restoreDefaults "שחזור ברירות מחדל">
 
-<!ENTITY zotero.preferences.charset "Character Encoding">
-<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
-<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+<!ENTITY zotero.preferences.charset "קידוד תווים">
+<!ENTITY zotero.preferences.charset.importCharset "ייבוא קידוד תווים">
+<!ENTITY zotero.preferences.charset.displayExportOption "הצגת אפשרות קידוד תווים בייצוא">
 
-<!ENTITY zotero.preferences.dataDir "מיקום אחסון">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
+<!ENTITY zotero.preferences.dataDir "מיקום תיקיית נתונים">
+<!ENTITY zotero.preferences.dataDir.useProfile "להשתמש בתיקיית הפרופיל">
 <!ENTITY zotero.preferences.dataDir.custom "מותאם אישית:">
-<!ENTITY zotero.preferences.dataDir.choose "Choose…">
-<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
-<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
-<!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
+<!ENTITY zotero.preferences.dataDir.choose "בחירה…">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(צוין דרך שורת הפקודה)">
+<!ENTITY zotero.preferences.dataDir.reveal "הצגת תיקיית הנתונים">
+<!ENTITY zotero.preferences.dataDir.migrate "הסבה למיקום ברירת מחדל חדש…">
 
-<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
-<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
-<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
-<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "תיקיית בסיס לצרופה מקושרת">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero ישתמש בנתיבים יחסיים לקובצי צרופות מקושרים בתוך תיקיית הבסיס, מה שמאפשר לך לגשת לקבצים במחשבים אחרים כל עוד מבנה הקבצים בתיקיית הבסיס נשאר זהה.">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "תיקיית בסיס:">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "בחירה…">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "העברה לנתיבים מוחלטים…">
 
-<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "בדוק שלמות מסד נתונים">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
+<!ENTITY zotero.preferences.dbMaintenance "תחזוקת מסד נתונים">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "בדיקת שלמות מסד נתונים">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "איפוס מתרגמים וסגנונות…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "איפוס מתרגמים…">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "איפוס סגנונות…">
 
-<!ENTITY zotero.preferences.configEditor "Config Editor">
+<!ENTITY zotero.preferences.configEditor "עורך הגדרות">

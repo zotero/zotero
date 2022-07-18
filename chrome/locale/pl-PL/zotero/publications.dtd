@@ -1,6 +1,6 @@
 <!ENTITY zotero.publications.my_publications "Moje publikacje">
 
-<!ENTITY zotero.publications.intro "Elementy dodane do Moich Publikacji będą wyświetlone na twojej stronie na zotero.org. Jeśli wybierzesz „dołącz pliki”, zostaną one upublicznione na określonej przez ciebie licencji. Pamiętaj, by dodać tu tylko te prace, których jesteś autorem oraz tylko te pliki, które masz prawo i chęć udostępnić.">
+<!ENTITY zotero.publications.intro "Elementy dodane do Moich Publikacji będą wyświetlone na twojej stronie na zotero.org. Jeśli wybierzesz dołączenie plików, zostaną one upublicznione na określonej przez ciebie licencji. Pamiętaj, by dodać tu tylko te prace, których jesteś autorem oraz tylko te pliki, które masz prawo i chęć udostępnić.">
 <!ENTITY zotero.publications.include.checkbox.files "Dołącz pliki">
 <!ENTITY zotero.publications.include.checkbox.notes "Dołącz notatki">
 <!ENTITY zotero.publications.include.adjustAtAnyTime "Możesz określić co chcesz pokazać z poziomu kolekcji Moje Publikacje.">

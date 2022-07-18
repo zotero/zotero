@@ -423,7 +423,7 @@
 							label.classList.add("pointer");
 							// TODO: make getFieldValue non-private and use below instead
 							label.setAttribute("onclick", "Zotero.launchURL(this.nextSibling.firstChild ? this.nextSibling.firstChild.nodeValue : this.nextSibling.value)");
-							label.setAttribute("tooltiptext", Zotero.getString('locate.online.tooltip'));
+							label.setAttribute("tooltiptext", Zotero.getString('pane.item.viewOnline.tooltip'));
 						}
 						else if (fieldName == 'DOI' && val && typeof val == 'string') {
 							// Pull out DOI, in case there's a prefix
@@ -438,7 +438,7 @@
 										.replace(/"/g, '%22');
 								label.classList.add("pointer");
 								label.setAttribute("onclick", "ZoteroPane_Local.loadURI('" + doi + "', event)");
-								label.setAttribute("tooltiptext", Zotero.getString('locate.online.tooltip'));
+								label.setAttribute("tooltiptext", Zotero.getString('pane.item.viewOnline.tooltip'));
 								valueElement.oncontextmenu = () => {
 									this._id('zotero-doi-menu').openPopup(valueElement);
 								};
@@ -1821,6 +1821,12 @@
 				<parameter name="textbox"/>
 				<body><![CDATA[
 				return (async function () {
+					// Handle cases where creator autocomplete doesn't trigger
+					// the textentered and change events handled in showEditor
+					if (textbox.getAttribute('fieldname').startsWith('creator-')) {
+						this.handleCreatorAutoCompleteSelect(textbox);
+					}
+
 					Zotero.debug(`Hiding editor for ${textbox.getAttribute('fieldname')}`);
 					
 					var label = Zotero.getAncestorByTagName(textbox, 'row').querySelector('label');

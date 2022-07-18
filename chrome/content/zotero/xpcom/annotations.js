@@ -103,7 +103,7 @@ Zotero.Annotations = new function () {
 			parts.push('library');
 		}
 		else if (library.libraryType == 'group') {
-			parts.push('groups', library.groupID);
+			parts.push('groups', library.groupID + '');
 		}
 		else {
 			throw new Error(`Unexpected library type '${library.libraryType}'`);
