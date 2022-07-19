@@ -1630,8 +1630,8 @@ var Scaffold = new function () {
 		function wrapWithHBox(elem, { flex = undefined, width = undefined } = {}) {
 			let hbox = document.createXULElement('hbox');
 			hbox.append(elem);
-			hbox.setAttribute('flex', flex);
-			hbox.setAttribute('width', width);
+			if (flex !== undefined) hbox.setAttribute('flex', flex);
+			if (width !== undefined) hbox.setAttribute('width', width);
 			return hbox;
 		}
 
@@ -1685,7 +1685,7 @@ var Scaffold = new function () {
 			let defer = document.createXULElement('checkbox');
 			defer.checked = test.defer;
 			defer.disabled = true;
-			hbox.appendChild(wrapWithHBox(defer));
+			hbox.appendChild(wrapWithHBox(defer, { width: 30 }));
 
 			item.appendChild(hbox);
 
