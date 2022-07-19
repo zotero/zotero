@@ -25,6 +25,7 @@
 
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { E10SUtils } = ChromeUtils.import("resource://gre/modules/E10SUtils.jsm");
+var { Subprocess } = ChromeUtils.import("resource://gre/modules/Subprocess.jsm");
 
 import FilePicker from 'zotero/modules/filePicker';
 
@@ -2147,22 +2148,23 @@ var Scaffold = new function () {
 		let eslintPath = await getESLintPath();
 		if (!eslintPath) return [];
 
-		let outputFile = OS.Path.join(
-			Zotero.getTempDirectory().path,
-			`lint_output_${Zotero.Utilities.randomString()}.json`
-		);
-
-		Zotero.debug(`Running ESLint`);
+		Zotero.debug('Running ESLint');
 		try {
-			await Zotero.Utilities.Internal.exec(eslintPath, ['-o', outputFile, '--', translatorPath]);
+			let proc = await Subprocess.call({
+				command: eslintPath,
+				arguments: ['-o', '-', '--', translatorPath],
+			});
+			let lintOutput = '';
+			let chunk;
+			while ((chunk = await proc.stdout.readString())) {
+				lintOutput += chunk;
+			}
+			return JSON.parse(lintOutput);
 		}
 		catch (e) {
-			// ignore non-zero exit code (which just means that there were lint errors in the translator)
+			Zotero.logError(e);
 		}
-
-		let lintOutput = await Zotero.File.getContentsAsync(outputFile);
-		Zotero.File.removeIfExists(outputFile);
-		return JSON.parse(lintOutput);
+		return [];
 	}
 
 	function eslintOutputToModelMarkers(output) {
