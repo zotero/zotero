@@ -598,11 +598,10 @@ Zotero.Utilities.Internal = {
 
 		const SCRIPTS = [
 			// This first script replace in the INDEX_SCRIPTS from the single file cli loader
-			"dist/single-file.js",
+			"lib/single-file.js",
 
 			// Web SCRIPTS
-			"dist/web/hooks/hooks-frames-web.js",
-			"dist/web/hooks/hooks-web.js",
+			"lib/single-file-hooks-frames.js",
 		];
 
 		const { loadSubScript } = Components.classes['@mozilla.org/moz/jssubscript-loader;1']
@@ -628,8 +627,8 @@ Zotero.Utilities.Internal = {
 		// List of scripts from:
 		// resource/SingleFile/extension/lib/single-file/core/bg/scripts.js
 		const frameScripts = [
-			"dist/web/hooks/hooks-frames-web.js",
-			"dist/single-file-frames.js",
+			"lib/single-file-hooks-frames.js",
+			"lib/single-file-frames.js",
 		];
 
 		// Create sandboxes for all the frames we find
@@ -681,7 +680,7 @@ Zotero.Utilities.Internal = {
 		// Mostly copied from:
 		// resources/SingleFile/extension/lib/single-file/fetch/bg/fetch.js::fetchResource
 		sandbox.coFetch = Components.utils.exportFunction(
-			function (url, onDone) {
+			function (url, options, onDone) {
 				const xhrRequest = new XMLHttpRequest();
 				xhrRequest.withCredentials = true;
 				xhrRequest.responseType = "arraybuffer";
@@ -707,6 +706,11 @@ Zotero.Utilities.Internal = {
 					}
 				};
 				xhrRequest.open("GET", url, true);
+				if (options && options.headers) {
+					for (const entry of Object.entries(options.headers)) {
+						xhrRequest.setRequestHeader(entry[0], entry[1]);
+					}
+				}
 				xhrRequest.send();
 			},
 			sandbox
@@ -717,14 +721,14 @@ Zotero.Utilities.Internal = {
 		// resources/SingleFile/extension/lib/single-file/fetch/content/content-fetch.js::fetch
 		Components.utils.evalInSandbox(
 			`
-			ZoteroFetch = async function (url) {
+			ZoteroFetch = async function (url, options) {
 				try {
-					let response = await fetch(url, { cache: "force-cache" });
+					let response = await fetch(url, { cache: "force-cache", headers: options.headers });
 					return response;
 				}
 				catch (error) {
 					let response = await new Promise((resolve, reject) => {
-						coFetch(url, (response) => {
+						coFetch(url, { headers: options.headers }, (response) => {
 							if (response.error) {
 								Zotero.debug("Error retrieving url: " + url);
 								Zotero.debug(response);

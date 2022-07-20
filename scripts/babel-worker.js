@@ -48,7 +48,7 @@ async function babelWorker(ev) {
 				.replace('document.body.removeChild(scrollDiv)', 'document.documentElement.removeChild(scrollDiv)');
 		}
 		// Patch single-file
-		else if (sourcefile === 'resource/SingleFile/dist/single-file.js') {
+		else if (sourcefile === 'resource/SingleFile/lib/single-file.js') {
 			// Change for what I assume is a bug in Firefox. We create a singlefile
 			// sandbox which is based on a document.defaultView of a hidden browser.
 			// The minified single-file then uses globalThis.Set which for some reason
