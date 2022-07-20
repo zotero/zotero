@@ -192,12 +192,9 @@ const ZoteroStandalone = new function() {
 				if (numFiles) {
 					menuitem.hidden = false;
 					sep.hidden = false;
-					if (numFiles == 1) {
-						menuitem.label = 'Export PDF…';
-					}
-					else {
-						menuitem.label = 'Export PDFs…';
-					}
+					menuitem.label = Zotero.getString(
+						'pane.items.menu.exportPDF' + (numFiles == 1 ? '' : '.multiple')
+					);
 				}
 				else {
 					menuitem.hidden = true;
