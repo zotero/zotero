@@ -3036,6 +3036,7 @@ var ZoteroPane = new function()
 			'sep3',
 			'toggleRead',
 			'addToCollection',
+			'addTag',
 			'removeItems',
 			'duplicateItem',
 			'restoreToLibrary',
@@ -3405,13 +3406,16 @@ var ZoteroPane = new function()
 			}
 		}
 
-		// Add to collection
+		// Add to collection & add tag
 		if (!collectionTreeRow.isFeed()
 			&& collectionTreeRow.editable
 			&& Zotero.Items.keepParents(items).every(item => item.isTopLevelItem())
 		) {
 			menu.childNodes[m.addToCollection].setAttribute('label', Zotero.getString('pane.items.menu.addToCollection'));
 			show.add(m.addToCollection);
+
+			menu.childNodes[m.addTag].setAttribute('label', Zotero.getString('pane.items.menu.addTag'));
+			show.add(m.addTag);
 		}
 		
 		// Remove from collection
@@ -3503,6 +3507,23 @@ var ZoteroPane = new function()
 
 		await Zotero.DB.executeTransaction(
 			() => collection.addItems(items.map(item => item.id)));
+	};
+
+
+	this.addTagToSelectedItems = function () {
+		let items = Zotero.Items.keepParents(this.getSelectedItems());
+		let out = { value: null };
+		let result = Services.prompt.prompt(
+			window,
+			Zotero.getString('pane.addTags.title'),
+			Zotero.getString('pane.addTags.text', [], items.length),
+			out,
+			null,
+			{}
+		);
+		if (result) {
+			items.forEach(item => item.addTag(out.value));
+		}
 	};
 
 	
