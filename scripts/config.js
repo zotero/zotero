@@ -37,8 +37,8 @@ const symlinkFiles = [
 	// Only include dist directory of singleFile
 	// Also do a little bit of manipulation similar to React
 	'!resource/SingleFile/**/*',
-	'resource/SingleFile/dist/**/*',
-	'!resource/SingleFile/dist/single-file.js',
+	'resource/SingleFile/lib/**/*',
+	'!resource/SingleFile/lib/single-file.js',
 	// We only need a couple Ace Editor files
 	'!resource/ace/**/*',
 	'resource/ace/ace.js',
@@ -112,7 +112,7 @@ const jsFiles = [
 	'resource/react.js',
 	'resource/react-dom.js',
 	'resource/react-virtualized.js',
-	'resource/SingleFile/dist/single-file.js',
+	'resource/SingleFile/lib/single-file.js',
 	'resource/citeproc_rs_wasm.js',
 ];
 
