@@ -1217,9 +1217,10 @@ Zotero.HTTP = new function() {
 	 * @param {Boolean} dontDelete Don't delete the hidden browser upon completion; calling function
 	 *                             must call deleteHiddenBrowser itself.
 	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
+	 * @param {Object} [docShellPrefs] See Zotero.Browser.createHiddenBrowser
 	 * @return {browser} Hidden browser used for loading
 	 */
-	this.loadDocuments = function (urls, processor, onDone, onError, dontDelete, cookieSandbox) {
+	this.loadDocuments = function (urls, processor, onDone, onError, dontDelete, cookieSandbox, docShellPrefs={}) {
 		// (Approximately) how many seconds to wait if the document is left in the loading state and
 		// pageshow is called before we call pageshow with an incomplete document
 		const LOADING_STATE_TIMEOUT = 120;
@@ -1342,6 +1343,9 @@ Zotero.HTTP = new function() {
 			currentURL = 0;
 		for(var i=0; i<urls.length; i++) {
 			let hiddenBrowser = Zotero.Browser.createHiddenBrowser();
+			for (let pref in docShellPrefs) {
+				hiddenBrowser.docShell[pref] = docShellPrefs[pref];
+			}
 			if (cookieSandbox) {
 				cookieSandbox.attachToBrowser(hiddenBrowser);
 			}
