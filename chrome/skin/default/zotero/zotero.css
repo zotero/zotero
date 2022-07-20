@@ -42,11 +42,6 @@ dialog[resizable="true"]
 	-moz-binding: url('chrome://zotero/content/bindings/resizabledialog.xml#resizabledialog');
 }
 
-zoteroguidancepanel
-{
-	-moz-binding: url('chrome://zotero/content/bindings/guidancepanel.xml#guidancepanel');
-}
-
 richlistitem {
 	padding: 0.2em 0.4em;
 }

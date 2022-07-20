@@ -29,6 +29,7 @@
 	var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 	Services.scriptloader.loadSubScript("chrome://zotero/content/elements/shadowAutocompleteInput.js", this);
+	Services.scriptloader.loadSubScript("chrome://zotero/content/elements/guidancePanel.js", this);
 
 	class ItemBox extends XULElement {
 		constructor() {
@@ -76,7 +77,7 @@
 							<menuitem id="zotero-doi-menu-view-online" label="&zotero.item.viewOnline;"/>
 							<menuitem id="zotero-doi-menu-copy" label="&zotero.item.copyAsURL;"/>
 						</menupopup>
-						<zoteroguidancepanel id="zotero-author-guidance" about="authorMenu" position="after_end" x="-25"/>
+						<guidance-panel id="zotero-author-guidance" about="authorMenu" position="after_end" x="-25"/>
 					</popupset>
 					<div id="retraction-box" hidden="hidden">
 						<div id="retraction-header">
@@ -1916,12 +1917,11 @@
 				// Reset creator mode settings here so that flex attribute gets reset
 				this.switchCreatorMode(row, (otherFields.fieldMode ? 1 : 0), true);
 				if (Zotero.ItemTypes.getName(this.item.itemTypeID) === "bookSection") {
-					var creatorTypeLabels = this.getElementsByClassName("creator-type-label");
+					var creatorTypeLabels = this.shadowRoot.querySelectorAll(".creator-type-label");
 					Zotero.debug(creatorTypeLabels[creatorTypeLabels.length-1] + "");
-					// fx-compat TODO: Re-enable this
-					// document.getElementById("zotero-author-guidance").show({
-					// 	forEl: creatorTypeLabels[creatorTypeLabels.length-1]
-					// });
+					this._id("zotero-author-guidance").show({
+						forEl: creatorTypeLabels[creatorTypeLabels.length - 1]
+					});
 				}
 			}
 			
