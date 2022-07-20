@@ -558,7 +558,8 @@ Zotero.Attachments = new function(){
 						reject(e);
 					},
 					true,
-					cookieSandbox
+					cookieSandbox,
+					{ allowImages: true }
 				);
 			});
 		};
