@@ -241,7 +241,7 @@ var ZoteroContextPane = new function () {
 							}
 							else {
 								let libraryID = _notesPaneDeck.selectedPanel.getAttribute('data-library-id');
-								_notesPaneDeck.selectedPanel.setAttribute('selectedIndex', _globalDeckIndex[libraryID]);
+								_notesPaneDeck.selectedPanel.setAttribute('selectedIndex', _globalDeckIndex[libraryID] || 0);
 							}
 						})();
 					}
