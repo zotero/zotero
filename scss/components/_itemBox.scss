@@ -47,6 +47,11 @@ td > [fieldname] {
 	width: 100%;
 }
 
+.value {
+	min-height: 14px;
+	align-self: center;
+}
+
 .value:not(.multiline) {
 	white-space: nowrap;
 	overflow: hidden;
