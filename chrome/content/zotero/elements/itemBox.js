@@ -880,7 +880,6 @@
 			// Name
 			var firstlast = document.createElement("span");
 			firstlast.className = 'creator-name-box';
-			firstlast.setAttribute("flex","1");
 			var tabindex = this._tabIndexMinCreators + (rowIndex * 2);
 			var fieldName = 'creator-' + rowIndex + '-lastName';
 			var lastNameElem = firstlast.appendChild(

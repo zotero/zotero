@@ -145,8 +145,20 @@ row label
 }
 
 .creator-name-box {
-	display: flex;
 	flex: 1;
+	min-width: 0;
+	display: flex;
+	align-items: baseline;
+
+	& > input {
+		flex: 1;
+		width: 100%;
+	}
+
+	& > div {
+		flex-shrink: 1;
+		min-width: 10px;
+	}
 }
 
 .creator-type-label > label
