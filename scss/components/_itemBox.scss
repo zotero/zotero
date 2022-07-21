@@ -152,8 +152,10 @@ row label
 }
  
 .creator-type-dropmarker {
+	display: inline-block;
 	margin: 0 1em 1px;
 	background-image: url('chrome://zotero/skin/arrow-down.gif');
+	background-size: cover;
 	width: 11px;
 	height: 6px;
 }
