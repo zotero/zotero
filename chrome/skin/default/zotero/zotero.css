@@ -250,6 +250,16 @@ zoterosearch .menulist-icon {
 	max-width: 16px;
 }
 
+#zotero-add-tag-panel {
+	width: 400px;
+	height: 450px;
+	padding: 10px;
+}
+
+#zotero-add-tag-panel tags-box {
+	overflow: scroll;
+}
+
 
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
 @media (min-resolution: 1.25dppx) {

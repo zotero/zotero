@@ -38,7 +38,7 @@
 			this._tagColors = [];
 			this._notifierID = null;
 			this._mode = 'view';
-			this._item = null;
+			this._items = [];
 
 			this.content = MozXULElement.parseXULToFragment(`
 				<box flex="1" tooltip="html-tooltip" style="display: flex" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
@@ -106,10 +106,16 @@
 
 			let removeAllItemTags = this._id('remove-all-item-tags');
 			this._id('remove-all-item-tags').addEventListener('command', this.removeAll);
-			this._id('tags-box').addEventListener('contextmenu', (event) => {
-				removeAllItemTags.disabled = !this.count;
-				this._id('tags-context-menu').openPopupAtScreen(event.screenX, event.screenY, true);
-			});
+
+			// Don't allow the context menu to be opened if we're in a popup -
+			// Remove All shows a confirmation dialog, which can't be opened from a popup,
+			// and it's not clear to the user what action it would perform
+			if (!this.closest('panel')) {
+				this._id('tags-box').addEventListener('contextmenu', (event) => {
+					removeAllItemTags.disabled = !this.count;
+					this._id('tags-context-menu').openPopupAtScreen(event.screenX, event.screenY, true);
+				});
+			}
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item-tag', 'setting'], 'tagsBox');
 		}
@@ -157,23 +163,67 @@
 			this._mode = val;
 		}
 
-		get item() {
-			return this._item;
+		get items() {
+			return Object.freeze([...this._items]);
 		}
 
-		set item(val) {
-			// Don't reload if item hasn't changed
-			if (this._item == val) {
-				return;
-			}
-			this._item = val;
+		set items(val) {
+			this._items = [...val];
 			this._lastTabIndex = false;
 			this.reload();
 		}
 
+		get item() {
+			return this._items.length == 1 ? this._items[0] : null;
+		}
+
+		set item(val) {
+			// Don't reload if item hasn't changed
+			if (this._items.length == 1 && this._items[0] == val) {
+				return;
+			}
+			this._items = [val];
+			this._lastTabIndex = false;
+			this.reload();
+		}
+
+		/**
+		 * Get tags in common between all items. If a tag is marked as manual in
+		 * at least one item, it will be marked as manual in the returned array,
+		 * even if other items have an automatic tag with the same name.
+		 *
+		 * @return {Object[]}
+		 */
+		get visibleTags() {
+			if (this._items.length == 1) {
+				return this._items[0].getTags();
+			}
+			else {
+				// Calculate intersection of all tag lists
+				let tags = new Map();
+				for (let item of this._items) {
+					for (let tag of item.getTags()) {
+						if (tags.has(tag.tag)) {
+							let data = tags.get(tag.tag);
+							if (data.mode == 1 && tag.mode == 0) {
+								data.mode = 0;
+							}
+							data.count++;
+						}
+						else {
+							tags.set(tag.tag, { ...tag, count: 1 });
+						}
+					}
+				}
+				return [...tags.values()]
+					.filter(data => data.count == this._items.length)
+					.map(data => ({ tag: data.tag, mode: data.mode }));
+			}
+		}
+
 		notify(event, type, ids, extraData) {
 			if (type == 'setting') {
-				if (ids.some(val => val.split("/")[1] == 'tagColors') && this.item) {
+				if (ids.some(val => val.split("/")[1] == 'tagColors') && this._items.length) {
 					this.reload();
 					return;
 				}
@@ -183,7 +233,7 @@
 
 				for (let i = 0; i < ids.length; i++) {
 					[itemID, tagID] = ids[i].split('-').map(x => parseInt(x));
-					if (!this.item || itemID != this.item.id) {
+					if (!this._items.length || !this._items.some(item => itemID == item.id)) {
 						continue;
 					}
 					let data = extraData[ids[i]];
@@ -247,12 +297,12 @@
 
 			this._id('add').hidden = !this.editable;
 
-			this._tagColors = Zotero.Tags.getColors(this.item.libraryID);
+			this._tagColors = Zotero.Tags.getColors(this._items[0].libraryID);
 
 			let tagRows = this._id('rows');
 			tagRows.replaceChildren();
 
-			var tags = this.item.getTags();
+			let tags = this.visibleTags;
 
 			// Sort tags alphabetically
 			var collation = Zotero.getLocaleCollation();
@@ -344,15 +394,16 @@
 				remove.addEventListener('click', async (event) => {
 					this._lastTabIndex = false;
 					if (tagData) {
-						let item = this.item;
 						this.remove(tagName);
-						try {
-							item.removeTag(tagName);
-							await item.saveTx();
-						}
-						catch (e) {
-							this.reload();
-							throw e;
+						for (let item of this._items) {
+							try {
+								item.removeTag(tagName);
+								await item.saveTx();
+							}
+							catch (e) {
+								this.reload();
+								throw e;
+							}
 						}
 					}
 					// Remove empty textbox row
@@ -416,6 +467,9 @@
 		}
 
 		showEditor(elem, rows, value) {
+			if (this.closest('panel')) {
+				this.closest('panel').setAttribute('ignorekeys', true);
+			}
 
 			// Blur any active fields
 			/*
@@ -429,7 +483,7 @@
 			var fieldName = 'tag';
 			var tabindex = elem.getAttribute('ztabindex');
 
-			var itemID = this._item.id;
+			var itemID = this._item?.id;
 
 			var t = document.createElement(rows > 1 ? 'textarea' : 'input', { is: 'shadow-autocomplete-input' });
 			t.setAttribute('class', 'editable');
@@ -448,7 +502,7 @@
 				t.setAttribute('autocompletesearch', 'zotero');
 				let params = {
 					fieldName: fieldName,
-					libraryID: this.item.libraryID
+					libraryID: this._items[0].libraryID
 				};
 				params.itemID = itemID ? itemID : '';
 				t.setAttribute(
@@ -606,6 +660,10 @@
 		}
 
 		hideEditor = async (event) => {
+			if (this.closest('panel')) {
+				this.closest('panel').setAttribute('ignorekeys', false);
+			}
+
 			var textbox = event.target;
 
 			Zotero.debug('Hiding editor');
@@ -648,8 +706,10 @@
 							this._focusField();
 						}
 						try {
-							this.item.replaceTag(oldValue, value);
-							await this.item.saveTx();
+							for (let item of this._items) {
+								item.replaceTag(oldValue, value);
+								await item.saveTx();
+							}
 						}
 						catch (e) {
 							this.reload();
@@ -664,8 +724,10 @@
 						if (event.type != 'blur') {
 							this._focusField();
 						}
-						this.item.removeTag(oldValue);
-						await this.item.saveTx();
+						for (let item of this._items) {
+							item.removeTag(oldValue);
+							await item.saveTx();
+						}
 					}
 					catch (e) {
 						this.reload();
@@ -680,7 +742,9 @@
 				if (!isNew) {
 					// If old tag isn't in array, remove it
 					if (tags.indexOf(oldValue) == -1) {
-						this.item.removeTag(oldValue);
+						for (let item of this._items) {
+							item.removeTag(oldValue);
+						}
 					}
 					// If old tag is staying, restore the textbox
 					// immediately. This isn't strictly necessary, but it
@@ -691,11 +755,13 @@
 					}
 				}
 
-				tags.forEach(tag => this.item.addTag(tag));
-				await this.item.saveTx();
+				for (let item of this._items) {
+					tags.forEach(tag => item.addTag(tag));
+					await item.saveTx();
+				}
 
 				if (lastTag) {
-					this._lastTabIndex = this.item.getTags().length;
+					this._lastTabIndex = this.visibleTags.length;
 				}
 
 				this.reload();
@@ -709,13 +775,15 @@
 					textbox.value = '';
 				}
 				this.add(value);
-				this.item.addTag(value);
-				try {
-					await this.item.saveTx();
-				}
-				catch (e) {
-					this.reload();
-					throw e;
+				for (let item of this._items) {
+					item.addTag(value);
+					try {
+						await item.saveTx();
+					}
+					catch (e) {
+						this.reload();
+						throw e;
+					}
 				}
 			}
 		};
@@ -848,20 +916,29 @@
 			return origTabIndex;
 		}
 
-		removeAll = () => {
+		removeAll = async () => {
 			if (Services.prompt.confirm(null, "", Zotero.getString('pane.item.tags.removeAll'))) {
-				this.item.setTags([]);
-				this.item.saveTx();
+				if (this._items.length == 1) {
+					this._items[0].setTags([]);
+					this._items[0].saveTx();
+				}
+				else {
+					let tags = this.visibleTags.map(tag => tag.tag);
+					for (let item of this._items) {
+						item.setTags(item.getTags().filter(tag => !tags.includes(tag.tag)));
+						await item.saveTx();
+					}
+				}
 			}
 		};
 
 		updateCount(count) {
-			if (!this.item) {
+			if (!this._items.length) {
 				return;
 			}
 
 			if (typeof count == 'undefined') {
-				var tags = this.item.getTags();
+				var tags = this.visibleTags;
 				if (tags) {
 					count = tags.length;
 				}
@@ -870,7 +947,16 @@
 				}
 			}
 
-			this._id('count').replaceChildren(Zotero.getString('pane.item.tags.count', count, count));
+			let itemCount = this._items.length;
+			if (itemCount == 1) {
+				this._id('count').replaceChildren(Zotero.getString('pane.item.tags.count', count, count));
+			}
+			else {
+				let string = Zotero.getString('pane.item.tags.multipleItems.count', count, count)
+					+ ' '
+					+ Zotero.getString('pane.item.tags.multipleItems.itemCount', itemCount, itemCount);
+				this._id('count').replaceChildren(string);
+			}
 			this.count = count;
 		}
 

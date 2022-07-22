@@ -3036,7 +3036,7 @@ var ZoteroPane = new function()
 			'sep3',
 			'toggleRead',
 			'addToCollection',
-			'addTag',
+			'manageTags',
 			'removeItems',
 			'duplicateItem',
 			'restoreToLibrary',
@@ -3414,8 +3414,8 @@ var ZoteroPane = new function()
 			menu.childNodes[m.addToCollection].setAttribute('label', Zotero.getString('pane.items.menu.addToCollection'));
 			show.add(m.addToCollection);
 
-			menu.childNodes[m.addTag].setAttribute('label', Zotero.getString('pane.items.menu.addTag'));
-			show.add(m.addTag);
+			menu.childNodes[m.manageTags].setAttribute('label', Zotero.getString('pane.items.menu.manageTags'));
+			show.add(m.manageTags);
 		}
 		
 		// Remove from collection
@@ -3510,20 +3510,16 @@ var ZoteroPane = new function()
 	};
 
 
-	this.addTagToSelectedItems = function () {
+	this.manageTagsForSelectedItems = async function () {
 		let items = Zotero.Items.keepParents(this.getSelectedItems());
-		let out = { value: null };
-		let result = Services.prompt.prompt(
-			window,
-			Zotero.getString('pane.addTags.title'),
-			Zotero.getString('pane.addTags.text', [], items.length),
-			out,
-			null,
-			{}
-		);
-		if (result) {
-			items.forEach(item => item.addTag(out.value));
-		}
+		let panel = document.getElementById('zotero-add-tag-panel');
+		let tagsBox = panel.firstElementChild;
+		tagsBox.mode = 'edit';
+		tagsBox.items = items;
+
+		let x = window.screenX + (window.outerWidth - 400) / 2;
+		let y = window.screenY + (window.outerHeight - 450) / 2;
+		panel.openPopupAtScreen(x, y);
 	};
 
 	
