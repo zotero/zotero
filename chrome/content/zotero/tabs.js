@@ -128,12 +128,23 @@ var Zotero_Tabs = new function () {
 			}
 			else if (tab.type === 'reader') {
 				if (Zotero.Items.exists(tab.data.itemID)) {
-					this.add({
-						type: 'reader-unloaded',
-						title: tab.title,
-						index: i,
-						data: tab.data
-					});
+					if (tab.selected) {
+						Zotero.Reader.open(tab.data.itemID,
+							null,
+							{
+								title: tab.title,
+								openInBackground: !tab.selected
+							}
+						);
+					}
+					else {
+						this.add({
+							type: 'reader-unloaded',
+							title: tab.title,
+							index: i,
+							data: tab.data
+						});
+					}
 				}
 			}
 		}
