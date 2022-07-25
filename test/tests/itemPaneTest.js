@@ -307,7 +307,11 @@ describe("Item pane", function () {
 			// Wait for asynchronous editor update
 			do {
 				yield Zotero.Promise.delay(10);
-			} while(noteEditor._editorInstance._iframeWindow.wrappedJSObject.getDataSync().html.replace(/\n/g,'') != `<div data-schema-version="${Zotero.EditorInstance.SCHEMA_VERSION}"><p>Test</p></div>`);
+			} while (
+				!/<div data-schema-version=".*"><p>Test<\/p><\/div>/.test(
+					noteEditor._editorInstance._iframeWindow.wrappedJSObject.getDataSync().html.replace(/\n/g, '')
+				)
+			);
 		});
 	});
 	

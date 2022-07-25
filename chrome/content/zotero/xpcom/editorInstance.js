@@ -43,9 +43,6 @@ const DOWNLOADED_IMAGE_TYPE = [
 	'image/png'
 ];
 
-// Schema version here has to be the same as in note-editor!
-const SCHEMA_VERSION = 8;
-
 class EditorInstance {
 	constructor() {
 		this.instanceID = Zotero.Utilities.randomString();
@@ -1258,7 +1255,9 @@ class EditorInstance {
 		let { html: serializedHTML, citationItems } = Zotero.EditorInstanceUtilities.serializeAnnotations(jsonAnnotations, true);
 		html += serializedHTML;
 		citationItems = encodeURIComponent(JSON.stringify(citationItems));
-		html = `<div data-citation-items="${citationItems}" data-schema-version="${SCHEMA_VERSION}">${html}</div>`;
+		// Note: Update schema version only if using new features
+		let schemaVersion = 8;
+		html = `<div data-citation-items="${citationItems}" data-schema-version="${schemaVersion}">${html}</div>`;
 		note.setNote(html);
 		await note.saveTx();
 		return note;
@@ -1552,5 +1551,4 @@ class EditorInstanceUtilities {
 }
 
 Zotero.EditorInstance = EditorInstance;
-Zotero.EditorInstance.SCHEMA_VERSION = SCHEMA_VERSION;
 Zotero.EditorInstanceUtilities = new EditorInstanceUtilities();
