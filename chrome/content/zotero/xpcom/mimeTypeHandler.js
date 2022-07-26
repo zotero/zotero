@@ -55,20 +55,22 @@ Zotero.MIMETypeHandler = new function () {
 		_observers = [];
 		
 		// Install styles from the Cite preferences
-		this.addHandler("application/vnd.citationstyles.style+xml", async function (blob, origin) {
-			let win = Services.wm.getMostRecentWindow("zotero:basicViewer");
-			var data = await Zotero.Utilities.Internal.blobToText(blob);
-			try {
-				await Zotero.Styles.install(data, origin, true);
-			}
-			catch (e) {
-				Zotero.logError(e);
-				(new Zotero.Exception.Alert("styles.install.unexpectedError",
-					origin, "styles.install.title", e)).present();
-			}
-			// Close styles page in basic viewer after installing a style
-			if (win) {
-				win.close();
+		this.addHandlers("application/vnd.citationstyles.style+xml", {
+			onContent: async function (blob, origin) {
+				let win = Services.wm.getMostRecentWindow("zotero:basicViewer");
+				var data = await Zotero.Utilities.Internal.blobToText(blob);
+				try {
+					await Zotero.Styles.install(data, origin, true);
+				}
+				catch (e) {
+					Zotero.logError(e);
+					(new Zotero.Exception.Alert("styles.install.unexpectedError",
+						origin, "styles.install.title", e)).present();
+				}
+				// Close styles page in basic viewer after installing a style
+				if (win) {
+					win.close();
+				}
 			}
 		}, true);
 	};
@@ -76,17 +78,25 @@ Zotero.MIMETypeHandler = new function () {
 	/**
 	 * Adds a handler to handle a specific MIME type
 	 * @param {String} type MIME type to handle
-	 * @param {Function} fn Function to call to handle type - fn(string, uri)
+	 * @param {Object} handlers
+	 * 	- handlers.onContent - function to call when content is received
+	 * 	- handlers.onStartRequest - function to call when response for content type is first received
 	 * @param {Boolean} ignoreContentDisposition If true, ignores the Content-Disposition header,
 	 *	which is often used to force a file to download rather than let it be handled by the web
 	 *	browser
 	 */
-	this.addHandler = function (type, fn, ignoreContentDisposition) {
+	this.addHandlers = function (type, handlers, ignoreContentDisposition) {
+		if (typeof handlers == 'function') {
+			handlers = {
+				onContent: handlers
+			};
+			Zotero.debug('MIMETypeHandler.addHandler: second parameter function is deprecated. Pass an object', 1)
+		}
 		if (_typeHandlers[type]) {
-			_typeHandlers[type].push(fn);
+			_typeHandlers[type].push(handlers);
 		}
 		else {
-			_typeHandlers[type] = [fn];
+			_typeHandlers[type] = [handlers];
 		}
 		if (ignoreContentDisposition) {
 			_ignoreContentDispositionTypes.add(type);
@@ -96,17 +106,17 @@ Zotero.MIMETypeHandler = new function () {
 	/**
 	 * Removes a handler for a specific MIME type
 	 * @param {String} type MIME type to handle
-	 * @param {Function} handler Function handler to remove
+	 * @param {Object} handlers Function handlers to remove
 	 */
-	this.removeHandler = function (type, handler) {
+	this.removeHandlers = function (type, handlers) {
 		// If no handler specified or this is the last handler for the type
 		// stop monitoring the content type completely.
-		if (!handler || _typeHandlers[type] && _typeHandlers[type].length <= 1) {
+		if (!handlers || _typeHandlers[type] && _typeHandlers[type].length <= 1) {
 			delete _typeHandlers[type];
 			_ignoreContentDispositionTypes.delete(type);
 		}
 		else if (_typeHandlers[type]) {
-			var i = _typeHandlers[type].indexOf(handler);
+			var i = _typeHandlers[type].indexOf(handlers);
 			if (i != -1) {
 				_typeHandlers[type].splice(i, 1);
 			}
@@ -214,10 +224,27 @@ Zotero.MIMETypeHandler = new function () {
 	}
 	
 	/**
-	 * Called when the request is started; we ignore this
+	 * Called when the request is started
 	 */
-	_StreamListener.prototype.onStartRequest = function(channel, context) {}
-	
+	_StreamListener.prototype.onStartRequest = async function(channel, context) {
+		try {
+			if (!_typeHandlers[this._contentType]) return;
+			for (let handlers of _typeHandlers[this._contentType]) {
+				if (!handlers.onStartRequest) continue;
+				let maybePromise = handlers.onStartRequest(
+					this._request.name ? this._request.name : null,
+					this._contentType,
+					channel
+				);
+				if (maybePromise && maybePromise.then) {
+					maybePromise = await maybePromise;
+				}
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+	}
 
 	/**
 	 * Called when there's data available; we collect this data and keep it until the request is
@@ -259,14 +286,16 @@ Zotero.MIMETypeHandler = new function () {
 		
 		var handled = false;
 		try {
-			for (let handler of _typeHandlers[this._contentType]) {
-				let maybePromise = handler(
+			if (!_typeHandlers[this._contentType]) return;
+			for (let handlers of _typeHandlers[this._contentType]) {
+				if (!handlers.onContent) continue;
+				let maybePromise = handlers.onContent(
 					blob,
 					this._request.name ? this._request.name : null,
 					this._contentType,
 					channel
 				);
-				if (maybePromise.then) {
+				if (maybePromise && maybePromise.then) {
 					maybePromise = await maybePromise;
 				}
 				handled = handled || maybePromise;
