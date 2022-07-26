@@ -673,7 +673,7 @@ Zotero.Integration.Interface.prototype.addEditCitation = async function (docFiel
 };
 
 /**
- * Edits the citation at the cursor position if one exists, or else adds a new one.
+ * Adds a note to the current document.
  * @return {Promise}
  */
 Zotero.Integration.Interface.prototype.addNote = async function () {

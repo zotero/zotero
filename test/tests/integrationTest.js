@@ -112,10 +112,10 @@ describe("Zotero.Integration", function () {
 		 * @param {String[]} codes
 		 * @param {String[]} placeholderIDs - the order of placeholders to be replaced
 		 * @param {Number} noteType - controls whether citations should be in-text or in footnotes/endnotes
-		 * @param {Number} fieldType
+		 * @param {String} fieldType
 		 * @return {Field[]}
 		 */
-		convertPlaceholdersToFields: function (codes, noteType, fieldType) {
+		convertPlaceholdersToFields: function (codes, placeholderIDs, noteType, fieldType) {
 			return codes.map(code => {
 				let field = new DocumentPluginDummy.Field(this);
 				field.code = code;
