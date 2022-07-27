@@ -3955,6 +3955,28 @@ Zotero.Item.prototype.getAnnotations = function (includeTrashed) {
 };
 
 
+/**
+ * Determine if the item is a PDF attachment that exists on disk and contains
+ * embedded annotations.
+ *
+ * @return {Promise<Boolean>}
+ */
+Zotero.Item.prototype.hasEmbeddedAnnotations = async function () {
+	if (!this.isPDFAttachment()) {
+		return false;
+	}
+
+	let path = await this.getFilePathAsync();
+	if (!path) {
+		return false;
+	}
+
+	let contents = await Zotero.File.getContentsAsync(path);
+	let re = /\/Type\s+\/Annot\s/;
+	return re.test(contents);
+};
+
+
 
 //
 // Methods dealing with item tags
