@@ -3957,7 +3957,7 @@ Zotero.Item.prototype.getAnnotations = function (includeTrashed) {
 
 /**
  * Determine if the item is a PDF attachment that exists on disk and contains
- * embedded annotations.
+ * embedded markup annotations.
  *
  * @return {Promise<Boolean>}
  */
@@ -3972,10 +3972,26 @@ Zotero.Item.prototype.hasEmbeddedAnnotations = async function () {
 	}
 
 	let contents = await Zotero.File.getContentsAsync(path);
-	let re = /\/Type\s+\/Annot\s/;
-	return re.test(contents);
+	let objects = contents.split(/\s(obj|endobj)\s/);
+	for (let i = 0; i < objects.length - 1; i++) {
+		if (objects[i] === 'obj') {
+			let object = objects[i + 1];
+			if (/\s\/Type\s+\/Annot\s/.test(object)) {
+				// We have an /annot object; check to make sure it's a "markup" annotation per the PDF spec
+				// https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/PDF32000_2008.pdf, p. 390
+				let nonMarkupSubtypeRe
+					= /\s\/Subtype\s+\/(Link|Popup|Movie|Widget|Screen|PrinterMark|TrapNet|Watermark|3D)/;
+				if (!nonMarkupSubtypeRe.test(object)) {
+					// Annotation object didn't include a non-markup subtype,
+					// so we consider the file annotated
+					return true;
+				}
+			}
+			i++;
+		}
+	}
+	return false;
 };
-
 
 
 //
