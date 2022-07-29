@@ -235,7 +235,7 @@ const TabBar = forwardRef(function (props, ref) {
 
 	function handleWheel(event) {
 		// Normalize wheel speed
-		let x = event.deltaX;
+		let x = event.deltaX || event.deltaY;
 		if (x && event.deltaMode) {
 			if (event.deltaMode === 1) {
 				x *= 20;
