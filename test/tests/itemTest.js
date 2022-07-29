@@ -1475,6 +1475,23 @@ describe("Zotero.Item", function () {
 				assert.sameMembers(items, [annotation1, annotation2]);
 			});
 		});
+
+		describe("#hasEmbeddedAnnotations()", function () {
+			it("should recognize a highlight annotation", async function () {
+				let attachment = await importFileAttachment('duplicatesMerge_annotated_1.pdf');
+				assert.isTrue(await attachment.hasEmbeddedAnnotations());
+			});
+
+			it("should recognize a strikeout annotation", async function () {
+				let attachment = await importFileAttachment('duplicatesMerge_annotated_2.pdf');
+				assert.isTrue(await attachment.hasEmbeddedAnnotations());
+			});
+
+			it("should not recognize a link annotation", async function () {
+				let attachment = await importFileAttachment('duplicatesMerge_notAnnotated.pdf');
+				assert.isFalse(await attachment.hasEmbeddedAnnotations());
+			});
+		});
 		
 		describe("#isEditable()", function () {
 			var group;
