@@ -155,7 +155,7 @@ class DiskUsageTable extends React.Component {
 		let columns = [
 			{
 				dataKey: "displayTitle",
-				label: "zotero.items.title_column",
+				label: "itemFields.title",
 				primary: true,
 			},
 			{
