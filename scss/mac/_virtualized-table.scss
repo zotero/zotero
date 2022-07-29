@@ -8,7 +8,7 @@
 		}
 	}
 
-	.focused:not(.highlighted) .twisty svg {
+	.selected:not(.highlighted) .twisty svg {
 		fill: #fff;
 	}
 
@@ -23,13 +23,10 @@
 
 .virtualized-table-body, .drag-image-container{
 	.cell:not(:first-child) {
-		border-inline-start: 1px solid #ddd;
-		
-		// A hack to make empty cells have a content, otherwise the border applied
-		// above has a height of a few pixels in empty cells.
-		&::after {
-			content: " ";
-			border-inline-start: 1px solid transparent;
-		}
+		background-image: linear-gradient(#ddd, #ddd);
+		background-size: 1px 80%;
+		background-position: left;
+		background-repeat: no-repeat;
+		height: 100%;
 	}
 }

@@ -5,8 +5,17 @@
   "general_moreInfo": {
     "message": "更多信息..."
   },
+  "general_needHelp": {
+    "message": "需要帮助？"
+  },
   "general_done": {
     "message": "完成"
+  },
+  "general_yes": {
+    "message": "是"
+  },
+  "general_no": {
+    "message": "否"
   },
   "general_tryAgain": {
     "message": "请重试"
@@ -32,8 +41,14 @@
   "progressWindow_error_translation": {
     "message": "保存此条目时发生错误。查看 $1 获取更多信息。"
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "保存该条目时出现一个错误。$1可能限制你单次保存条目的数量。查阅$2来获取更多信息。"
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "排除翻译人员问题"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "网站访问限制"
   },
   "progressWindow_error_fallback": {
     "message": "使用 $1保存时发生错误。尝试使用 $2 保存。"
@@ -49,6 +64,18 @@
   },
   "upgradeApp": {
     "message": "升级 $1"
+  },
+  "firstRun_title": {
+    "message": "你已经安装了$1连接器！"
+  },
+  "firstRun_text1": {
+    "message": "$1连接器允许你从你的浏览器中通过单击<a href=\"$2\">保存条目到$1</a>。"
+  },
+  "firstRun_text2": {
+    "message": "如果你还没有下载，请<a href=\"$2\">下载</a>独立的$1应用来获得最好的体验。"
+  },
+  "firstRun_acceptButton": {
+    "message": "明白"
   },
   "error_connection_isAppRunning": {
     "message": "$1正在运行吗？"
@@ -91,6 +118,15 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "当在 Google Docs 中直接编辑 Microsoft Word .docx 文件时，$1整合无法使用。选择文件 → 储存为 Google Docs 来允许该功能。<br/><br/>如果你想把有$1引用的 Word 文档转换为Google Docs 时，请查阅<a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">在文档编辑器间移动文档</a>。"
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "该文档的引用正被另外一个$1用户编辑。请稍后再试。"
+  },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1锁住了你的文档来防止多个用户同时编辑引用。当前文档中的引用编辑可能会引起引用或文档的损坏。一些如网络故障等无法预见的情况可能会使得你的文档被持续锁定。如果你相信这已经发生了，你可以覆盖锁定。<br/><br/>你想要覆盖文档锁定么？"
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "你所选择的Google账户没有编辑该文档的权限。请再次尝试，并确保所选择的账号有编辑权限。"
   },
   "integration_googleDocs_orphanedCitations_buttonTooltip": {
     "message": "显示未链接的 $1 引文"

@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Visa återtagna källor">
 
 <!ENTITY zotero.items.itemType "Källtyp">
-<!ENTITY zotero.items.type_column "Källtyp">
-<!ENTITY zotero.items.title_column "Titel">
 <!ENTITY zotero.items.creator_column "Skapare">
-<!ENTITY zotero.items.date_column "Datum">
 <!ENTITY zotero.items.year_column "År">
-<!ENTITY zotero.items.publisher_column "Förlag">
-<!ENTITY zotero.items.publication_column "Tidskriftens namn">
-<!ENTITY zotero.items.journalAbbr_column "Tidskriftens förkortning">
-<!ENTITY zotero.items.language_column "Språk">
-<!ENTITY zotero.items.accessDate_column "Hämtdatum">
-<!ENTITY zotero.items.libraryCatalog_column "Bokkatalog">
-<!ENTITY zotero.items.callNumber_column "Hyllkod">
-<!ENTITY zotero.items.rights_column "Rättigheter">
-<!ENTITY zotero.items.dateAdded_column "Tillagt datum">
 <!ENTITY zotero.items.dateModified_column "Ändrat datum">
-<!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Arkiv">
-<!ENTITY zotero.items.archiveLocation_column "Hitta i arkiv">
-<!ENTITY zotero.items.place_column "Plats">
-<!ENTITY zotero.items.volume_column "Volym">
-<!ENTITY zotero.items.edition_column "Upplaga">
-<!ENTITY zotero.items.pages_column "Sidor">
-<!ENTITY zotero.items.issue_column "Tidskriftsnummer">
-<!ENTITY zotero.items.series_column "Bokserie">
-<!ENTITY zotero.items.seriesTitle_column "Bokseriens titel">
-<!ENTITY zotero.items.court_column "Domstol">
-<!ENTITY zotero.items.medium_column "Media/format">
-<!ENTITY zotero.items.genre_column "Genre">
-<!ENTITY zotero.items.system_column "System">
 <!ENTITY zotero.items.moreColumns.label "Fler kolumner">
 <!ENTITY zotero.items.restoreColumnOrder.label "Återställ kolumnordning">
 
@@ -350,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Zooma ut">
 <!ENTITY zotero.pdfReader.zoomAuto "Anpassa storlek automatiskt">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Anpassa till sidbredd">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

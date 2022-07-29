@@ -68,6 +68,25 @@ describe("Zotero.Utilities.Internal", function () {
 	});
 	
 	
+	describe("#isOnlyEmoji()", function () {
+		it("should return true for emoji", function () {
+			assert.isTrue(Zotero.Utilities.Internal.isOnlyEmoji("🐩"));
+		});
+		
+		it("should return true for emoji with text representation that use Variation Selector-16", function () {
+			assert.isTrue(Zotero.Utilities.Internal.isOnlyEmoji("⭐️"));
+		});
+		
+		it("should return true for emoji made up of multiple characters with ZWJ", function () {
+			assert.isTrue(Zotero.Utilities.Internal.isOnlyEmoji("👨‍🌾"));
+		});
+		
+		it("should return false for integer", function () {
+			assert.isFalse(Zotero.Utilities.Internal.isOnlyEmoji("0"));
+		});
+	});
+	
+	
 	describe("#delayGenerator", function () {
 		var spy;
 		
@@ -528,12 +547,16 @@ describe("Zotero.Utilities.Internal", function () {
 			var vars = {
 				v1: '1',
 				v2: (pars) => pars.a1 + pars.a2 + pars.a3,
-				v3: () => undefined,
+				v3: () => '',
+				v5: () => 'something',
+				ar1: [],
+				ar2: [1, 2]
 			};
-			var template = `{{ v1}}{{v2 a1= 1  a2 =' 2' a3 = "3 "}}{{v3}}{{v4}}`;
+			var template = `{{ v1}}{{v2 a1= 1  a2 =' 2' a3 = "3 "}}{{v3}}{{v4}}{{if ar1}}ar1{{endif}}{{if ar2}}{{ar2}}{{endif}}{{if v5}}yes{{endif}}{{if v3}}no{{endif}}{{if v2}}no{{endif}}`;
 			var html = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
-			assert.equal(html, '11 23 ');
+			assert.equal(html, '11 23 1,2yes');
 		});
+
 		it("should support nested 'if' statements", function () {
 			var vars = {
 				v1: '1',

@@ -1,5 +1,5 @@
 .virtualized-table {
-	border: 1px solid #ccc;
+	border: 1px solid ThreeDShadow;
 }
 .virtualized-table, .drag-image-container {
 	.twisty {
@@ -10,18 +10,33 @@
 	}
 }
 .virtualized-table-header {
-	background-image: linear-gradient(#fff, #fafafa);
+	background-image: linear-gradient(-moz-field, -moz-dialog 120%);
+	border-bottom: 1px solid ThreeDShadow;
+	border-inline-end: 1px solid ThreeDShadow;
 
-	&.dragging {
-		color: #666;
-		background: #f8f8f8;
-	}
+	.cell {
+		&:hover {
+			background: -moz-field;
+		}
 
-	.cell .sort-indicator {
-		transform: scale(1.25);
+		&.dragging {
+			background: -moz-dialog;
+		}
 
-		&.ascending {
-			transform: scale(1.25) rotate(180deg);
+		.resizer {
+			background: linear-gradient(ThreeDShadow, ThreeDShadow) no-repeat center/1px 80%;
+		}
+		
+		.sort-indicator {
+			transform: scale(1.25);
+
+			&.ascending {
+				transform: scale(1.25) rotate(180deg);
+			}
 		}
 	}
+}
+
+.twisty svg {
+	fill: WindowText;
 }

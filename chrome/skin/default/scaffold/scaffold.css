@@ -1,72 +1,56 @@
 @namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
 @namespace html url("http://www.w3.org/1999/xhtml");
 
-toolbar {
-	height: 32px;
-	padding-left: 6px;
-}
-
-.toolbarbutton-text {
-	margin:0 2px;
-}
-.toolbarbutton-menu-dropmarker {
-	margin-right:4px;
-}
-.toolbarbutton-text {
-	margin:0;
-}
-.toolbarbutton-icon {
-	height: 16px;
-}
-
-toolbarseparator {
-	height: 24px;
+#tb-new {
+	list-style-image: url('chrome://scaffold/skin/new.png');
 }
 
 #tb-load {
 	list-style-image: url('chrome://scaffold/skin/load.png');
 }
+
 #tb-save {
 	list-style-image: url('chrome://scaffold/skin/save.png');
 }
+
 #tb-saveToZotero {
 	list-style-image: url('chrome://scaffold/skin/saveToZotero.png');
 }
+
 #tb-template {
 	list-style-image: url('chrome://scaffold/skin/add.png');
 }
+
 #tb-import {
 	list-style-image: url('chrome://scaffold/skin/import.png');
 }
+
 #tb-export {
 	list-style-image: url('chrome://scaffold/skin/export.png');
 }
+
 #tb-copy {
 	list-style-image: url('chrome://scaffold/skin/copy.png');
 }
-#tb-checkSyntax {
-	list-style-image: url('chrome://scaffold/skin/checkSyntax.png');
-}
-#tb-detectWeb {
+
+#tb-detect {
 	list-style-image: url('chrome://scaffold/skin/detectWeb.png');
 }
-#tb-doWeb {
+
+#tb-do {
 	list-style-image: url('chrome://scaffold/skin/doWeb.png');
 }
-#tb-detectImport {
-	list-style-image: url('chrome://scaffold/skin/detectImport.png');
-}
-#tb-doImport {
-	list-style-image: url('chrome://scaffold/skin/doImport.png');
-}
+
 #tb-setTranslatorsDir {
 	list-style-image: url('chrome://scaffold/skin/setTranslatorsDir.png');
 }
-#tb-reference {
-	list-style-image: url('chrome://scaffold/skin/reference.png');
-}
+
 #tb-fields {
 	list-style-image: url('chrome://scaffold/skin/fields.png');
+}
+
+#tb-template {
+	list-style-image: url('chrome://scaffold/skin/add.png');
 }
 
 #tabpanel-metadata textbox {
@@ -85,18 +69,53 @@ listbox {
 	min-width:200px;
 }
 
-#editor-toolbar {
+#zotero-toolbar {
+	border-top: .5px solid darkgray;
 	margin-bottom: 3px;
 }
 
-#editor-external-box {
-	margin-top: 5px;
+#zotero-toolbar.toolbar-scaffold-small {
+	-moz-appearance: none !important;
+	padding: 3px;
 }
 
-#editor-external-box label {
-	margin-left: 1px;
+#zotero-toolbar.toolbar-scaffold-small .toolbarbutton-icon {
+	max-width: 16px;
+}
+
+#zotero-toolbar toolbarseparator {
+	height: 18px;
 }
 
 browser {
 	background: white;
+}
+
+vbox > splitter {
+	cursor: row-resize;
+}
+
+listbox[disabled], toolbarbutton[disabled] {
+	opacity: 0.6;
+	pointer-events: none;
+}
+
+dialog listbox > listitem[disabled] {
+	font-weight: 600;
+}
+
+#left-tabbox {
+	margin-top: 5px;
+}
+
+#checkboxes-translatorType checkbox {
+	margin-right: 10px;
+}
+
+#tabpanel-metadata label:first-child {
+	text-align: right;
+}
+
+.listcol-testMessage {
+	width: 200px;
 }

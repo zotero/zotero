@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Fjern merking">
 <!ENTITY zotero.general.edit "Endre">
 <!ENTITY zotero.general.delete "Slett">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Flytt til søppelkorga">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Avbryt">
 <!ENTITY zotero.general.refresh "Frisk opp">
@@ -17,11 +17,11 @@
 <!ENTITY zotero.general.more "Meir">
 <!ENTITY zotero.general.loading "Lastar …">
 <!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.minimize "Minimer">
 <!ENTITY zotero.general.other "Other…">
 <!ENTITY zotero.general.bigger "Bigger">
 <!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.reset "Nullstill">
 
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Type">
-<!ENTITY zotero.items.type_column "Type">
-<!ENTITY zotero.items.title_column "Tittel">
 <!ENTITY zotero.items.creator_column "Namn">
-<!ENTITY zotero.items.date_column "Dato">
 <!ENTITY zotero.items.year_column "År">
-<!ENTITY zotero.items.publisher_column "Utgjevar">
-<!ENTITY zotero.items.publication_column "Publikasjon">
-<!ENTITY zotero.items.journalAbbr_column "Tidsskriftforkorting">
-<!ENTITY zotero.items.language_column "Språk">
-<!ENTITY zotero.items.accessDate_column "Sist opna">
-<!ENTITY zotero.items.libraryCatalog_column "Bibliotek-katalog">
-<!ENTITY zotero.items.callNumber_column "Plass-signatur">
-<!ENTITY zotero.items.rights_column "Rettar">
-<!ENTITY zotero.items.dateAdded_column "Lagt til">
 <!ENTITY zotero.items.dateModified_column "Sist endra">
-<!ENTITY zotero.items.extra_column "Ekstra">
-<!ENTITY zotero.items.archive_column "Arkiv">
-<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
-<!ENTITY zotero.items.place_column "Stad">
-<!ENTITY zotero.items.volume_column "Volume">
-<!ENTITY zotero.items.edition_column "Utgåve">
-<!ENTITY zotero.items.pages_column "Sider">
-<!ENTITY zotero.items.issue_column "Nummer">
-<!ENTITY zotero.items.series_column "Serie">
-<!ENTITY zotero.items.seriesTitle_column "Serietittel">
-<!ENTITY zotero.items.court_column "Court">
-<!ENTITY zotero.items.medium_column "Medium/format">
-<!ENTITY zotero.items.genre_column "Sjanger">
-<!ENTITY zotero.items.system_column "System">
 <!ENTITY zotero.items.moreColumns.label "Fleire kolonner">
 <!ENTITY zotero.items.restoreColumnOrder.label "Gjenopprett kolonnerekkefølgje">
 
@@ -119,7 +93,7 @@
 <!ENTITY zotero.toolbar.import.label "Importer …">
 <!ENTITY zotero.toolbar.importFromClipboard "Importer frå utklippstavla">
 <!ENTITY zotero.toolbar.export.label "Eksporter bibliotek …">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF-skann">
 <!ENTITY zotero.toolbar.timeline.label "Lag tidslinje">
 <!ENTITY zotero.toolbar.preferences.label "Innstillingar …">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Støtte og dokumentasjon">
@@ -155,7 +129,7 @@
 <!ENTITY zotero.toolbar.attachment.weblink "Lagre lenkje til gjeldande side">
 <!ENTITY zotero.toolbar.attachment.snapshot "Lag snapshot av gjeldande side">
 <!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.notes "Notat">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Ingen taggar finst">
 <!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
@@ -203,7 +177,7 @@
 
 <!ENTITY zotero.progress.title "Framgang">
 
-<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import "Importer">
 <!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
 <!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
 <!ENTITY zotero.import.importing "Importing…">
@@ -333,7 +307,7 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.firstPage "Første side">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">
@@ -350,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

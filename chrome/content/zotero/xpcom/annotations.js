@@ -26,6 +26,7 @@
 "use strict";
 
 Zotero.Annotations = new function () {
+	Zotero.defineProperty(this, 'ANNOTATION_POSITION_MAX_SIZE', { value: 65000 });
 	// Keep in sync with items.js::loadAnnotations()
 	Zotero.defineProperty(this, 'ANNOTATION_TYPE_HIGHLIGHT', { value: 1 });
 	Zotero.defineProperty(this, 'ANNOTATION_TYPE_NOTE', { value: 2 });
@@ -102,7 +103,7 @@ Zotero.Annotations = new function () {
 			parts.push('library');
 		}
 		else if (library.libraryType == 'group') {
-			parts.push('groups', library.groupID);
+			parts.push('groups', library.groupID + '');
 		}
 		else {
 			throw new Error(`Unexpected library type '${library.libraryType}'`);
@@ -233,5 +234,110 @@ Zotero.Annotations = new function () {
 		await item.saveTx(saveOptions);
 		
 		return item;
+	};
+
+	/**
+	 * Split annotation if position exceed the limit
+	 *
+	 * @param {Object} annotation
+	 * @returns {Array<Object>} annotations
+	 */
+	this.splitAnnotationJSON = function (annotation) {
+		let splitAnnotations = [];
+		let tmpAnnotation = null;
+		let totalLength = 0;
+		if (annotation.position.rects) {
+			for (let i = 0; i < annotation.position.rects.length; i++) {
+				let rect = annotation.position.rects[i];
+				if (!tmpAnnotation) {
+					tmpAnnotation = JSON.parse(JSON.stringify(annotation));
+					tmpAnnotation.key = Zotero.DataObjectUtilities.generateKey();
+					tmpAnnotation.position.rects = [];
+					totalLength = JSON.stringify(tmpAnnotation.position).length;
+				}
+				// [],
+				let length = rect.join(',').length + 3;
+				if (totalLength + length <= this.ANNOTATION_POSITION_MAX_SIZE) {
+					tmpAnnotation.position.rects.push(rect);
+					totalLength += length;
+				}
+				else if (!tmpAnnotation.position.rects.length) {
+					throw new Error(`Cannot fit single 'rect' into 'position'`);
+				}
+				else {
+					splitAnnotations.push(tmpAnnotation);
+					tmpAnnotation = null;
+					i--;
+				}
+			}
+			if (tmpAnnotation) {
+				splitAnnotations.push(tmpAnnotation);
+			}
+		}
+		else if (annotation.position.paths) {
+			for (let i = 0; i < annotation.position.paths.length; i++) {
+				let path = annotation.position.paths[i];
+				for (let j = 0; j < path.length; j += 2) {
+					if (!tmpAnnotation) {
+						tmpAnnotation = JSON.parse(JSON.stringify(annotation));
+						tmpAnnotation.key = Zotero.DataObjectUtilities.generateKey();
+						tmpAnnotation.position.paths = [[]];
+						totalLength = JSON.stringify(tmpAnnotation.position).length;
+					}
+					let point = [path[j], path[j + 1]];
+					// 1,2,
+					let length = point.join(',').length + 1;
+					if (totalLength + length <= this.ANNOTATION_POSITION_MAX_SIZE) {
+						tmpAnnotation.position.paths[tmpAnnotation.position.paths.length - 1].push(...point);
+						totalLength += length;
+					}
+					else if (tmpAnnotation.position.paths.length === 1
+						&& !tmpAnnotation.position.paths[tmpAnnotation.position.paths.length - 1].length) {
+						throw new Error(`Cannot fit single point into 'position'`);
+					}
+					else {
+						splitAnnotations.push(tmpAnnotation);
+						tmpAnnotation = null;
+						j -= 2;
+					}
+				}
+				// If not the last path
+				if (i !== annotation.position.paths.length - 1) {
+					// [],
+					totalLength += 3;
+					tmpAnnotation.position.paths.push([]);
+				}
+			}
+			if (tmpAnnotation) {
+				splitAnnotations.push(tmpAnnotation);
+			}
+		}
+		return splitAnnotations;
+	};
+
+	/**
+	 * Split annotations
+	 *
+	 * @param {Zotero.Item[]} items
+	 * @returns {Promise<void>}
+	 */
+	this.splitAnnotations = async function (items) {
+		if (!Array.isArray(items)) {
+			items = [items];
+		}
+		if (!items.every(item => item.isAnnotation())) {
+			throw new Error('All items must be annotations');
+		}
+		for (let item of items) {
+			if (item.annotationPosition.length <= this.ANNOTATION_POSITION_MAX_SIZE) {
+				continue;
+			}
+			let annotation = await this.toJSON(item);
+			let splitAnnotations = this.splitAnnotationJSON(annotation);
+			for (let splitAnnotation of splitAnnotations) {
+				await this.saveFromJSON(item.parentItem, splitAnnotation);
+			}
+			await item.eraseTx();
+		}
 	};
 };

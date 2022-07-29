@@ -14,7 +14,8 @@ const symlinkDirs = [
 	'chrome/content/zotero/xpcom/rdf',
 	'chrome/content/zotero/xpcom/translate/src',
 	'styles',
-	'translators'
+	'translators',
+	'resource/vs'
 ];
 
 // list of folders which are copied to the build folder
@@ -36,8 +37,8 @@ const symlinkFiles = [
 	// Only include dist directory of singleFile
 	// Also do a little bit of manipulation similar to React
 	'!resource/SingleFile/**/*',
-	'resource/SingleFile/dist/**/*',
-	'!resource/SingleFile/dist/single-file.js',
+	'resource/SingleFile/lib/**/*',
+	'!resource/SingleFile/lib/single-file.js',
 	// We only need a couple Ace Editor files
 	'!resource/ace/**/*',
 	'resource/ace/ace.js',
@@ -98,6 +99,8 @@ const ignoreMask = [
 	'resource/schema/global/scripts/*',
 	'chrome/content/zotero/xpcom/translate/example/**/*',
 	'chrome/content/zotero/xpcom/translate/README.md',
+	'chrome/content/zotero/xpcom/utilities/node_modules/**/*',
+	'chrome/content/zotero/xpcom/utilities/test/**/*',
 ];
 
 const jsFiles = [
@@ -109,7 +112,7 @@ const jsFiles = [
 	'resource/react.js',
 	'resource/react-dom.js',
 	'resource/react-virtualized.js',
-	'resource/SingleFile/dist/single-file.js',
+	'resource/SingleFile/lib/single-file.js',
 	'resource/citeproc_rs_wasm.js',
 ];
 

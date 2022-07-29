@@ -6,22 +6,22 @@
 <!ENTITY zotero.general.deselectAll "Velja ekkert">
 <!ENTITY zotero.general.edit "Breyta">
 <!ENTITY zotero.general.delete "Eyða">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Færa í ruslið">
 <!ENTITY zotero.general.ok "Í lagi">
 <!ENTITY zotero.general.cancel "Hætta við">
 <!ENTITY zotero.general.refresh "Endurnýja">
 <!ENTITY zotero.general.saveAs "Vista sem…">
 <!ENTITY zotero.general.options "Options">
 <!ENTITY zotero.general.advancedOptions.label "Ítarlegir valkostir">
-<!ENTITY zotero.general.tools "Tools">
+<!ENTITY zotero.general.tools "Verkfæri">
 <!ENTITY zotero.general.more "Meira">
 <!ENTITY zotero.general.loading "Hleð inn…">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.close "Loka">
+<!ENTITY zotero.general.minimize "Minnka">
 <!ENTITY zotero.general.other "Other…">
 <!ENTITY zotero.general.bigger "Bigger">
 <!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.reset "Endurræsa">
 
 
 <!ENTITY zotero.errorReport.title "Zotero villutilkynning">
@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Tegund færslu">
-<!ENTITY zotero.items.type_column "Tegund færslu">
-<!ENTITY zotero.items.title_column "Titill">
 <!ENTITY zotero.items.creator_column "Höfundur">
-<!ENTITY zotero.items.date_column "Dagsetning">
 <!ENTITY zotero.items.year_column "Ár">
-<!ENTITY zotero.items.publisher_column "Útgefandi">
-<!ENTITY zotero.items.publication_column "Útgáfa">
-<!ENTITY zotero.items.journalAbbr_column "Skammstöfun tímarits">
-<!ENTITY zotero.items.language_column "Tungumál">
-<!ENTITY zotero.items.accessDate_column "Sótt">
-<!ENTITY zotero.items.libraryCatalog_column "Færslusafnskrá">
-<!ENTITY zotero.items.callNumber_column "Kallnúmer">
-<!ENTITY zotero.items.rights_column "Réttindi">
-<!ENTITY zotero.items.dateAdded_column "Dagsetning viðbótar">
 <!ENTITY zotero.items.dateModified_column "Dagsetning breytingar">
-<!ENTITY zotero.items.extra_column "Auka">
-<!ENTITY zotero.items.archive_column "Safnvista">
-<!ENTITY zotero.items.archiveLocation_column "Staðsetning í safnvistu">
-<!ENTITY zotero.items.place_column "Staður">
-<!ENTITY zotero.items.volume_column "Bindi">
-<!ENTITY zotero.items.edition_column "Útgáfa">
-<!ENTITY zotero.items.pages_column "Síður">
-<!ENTITY zotero.items.issue_column "Hefti">
-<!ENTITY zotero.items.series_column "Ritröð">
-<!ENTITY zotero.items.seriesTitle_column "Titill ritraðar">
-<!ENTITY zotero.items.court_column "Dómur">
-<!ENTITY zotero.items.medium_column "Miðill/snið">
-<!ENTITY zotero.items.genre_column "Kynslóð">
-<!ENTITY zotero.items.system_column "Kerfi">
 <!ENTITY zotero.items.moreColumns.label "Fleiri dálkar">
 <!ENTITY zotero.items.restoreColumnOrder.label "Endurheimta röðun dálka">
 
@@ -119,7 +93,7 @@
 <!ENTITY zotero.toolbar.import.label "Flytja inn…">
 <!ENTITY zotero.toolbar.importFromClipboard "Flytja inn af klippispjaldi">
 <!ENTITY zotero.toolbar.export.label "Flytja út færslusafn…">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
+<!ENTITY zotero.toolbar.rtfScan.label "RTF skönnun">
 <!ENTITY zotero.toolbar.timeline.label "Búa til tímalínu">
 <!ENTITY zotero.toolbar.preferences.label "Kjörstillingar…">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Stuðningur og leiðbeiningar">
@@ -155,7 +129,7 @@
 <!ENTITY zotero.toolbar.attachment.weblink "Vista slóð til þessarar síðu">
 <!ENTITY zotero.toolbar.attachment.snapshot "Taka flýtimynd af þessari síðu">
 <!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.notes "Minnisblað">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Engin merki til að sýna">
 <!ENTITY zotero.tagSelector.loadingTags "Hleð inn merkjum…">
@@ -176,7 +150,7 @@
 <!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
 <!ENTITY zotero.lookup.button.search "Leita">
 
-<!ENTITY zotero.createParent.title "Create Parent Item">
+<!ENTITY zotero.createParent.title "Búa til móðurfærslu">
 <!ENTITY zotero.createParent.button.manual "Manual Entry">
 
 <!ENTITY zotero.selectitems.title "Veldu færslur">
@@ -203,10 +177,10 @@
 
 <!ENTITY zotero.progress.title "Framvinda">
 
-<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import "Flytja inn">
 <!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
 <!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.importing "Importing…">
+<!ENTITY zotero.import.importing "Flyt inn…">
 <!ENTITY zotero.import.database "Database">
 <!ENTITY zotero.import.lastModified "Last Modified">
 <!ENTITY zotero.import.size "Size">
@@ -333,7 +307,7 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.firstPage "Fyrsta síða">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">
@@ -350,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

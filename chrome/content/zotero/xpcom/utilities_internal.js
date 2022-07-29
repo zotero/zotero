@@ -405,6 +405,12 @@ Zotero.Utilities.Internal = {
 		return s;
 	},
 	
+	isOnlyEmoji: function (str) {
+		// Remove emoji, Zero Width Joiner, and Variation Selector-16 and see if anything's left
+		const re = /\p{Extended_Pictographic}|\u200D|\uFE0F/gu;
+		return !str.replace(re, '');
+	},
+	
 	/**
 	 * Display a prompt from an error with custom buttons and a callback
 	 */
@@ -564,11 +570,10 @@ Zotero.Utilities.Internal = {
 
 		const SCRIPTS = [
 			// This first script replace in the INDEX_SCRIPTS from the single file cli loader
-			"dist/single-file.js",
+			"lib/single-file.js",
 
 			// Web SCRIPTS
-			"dist/web/hooks/hooks-frames-web.js",
-			"dist/web/hooks/hooks-web.js",
+			"lib/single-file-hooks-frames.js",
 		];
 
 		const { loadSubScript } = Components.classes['@mozilla.org/moz/jssubscript-loader;1']
@@ -594,8 +599,8 @@ Zotero.Utilities.Internal = {
 		// List of scripts from:
 		// resource/SingleFile/extension/lib/single-file/core/bg/scripts.js
 		const frameScripts = [
-			"dist/web/hooks/hooks-frames-web.js",
-			"dist/single-file-frames.js",
+			"lib/single-file-hooks-frames.js",
+			"lib/single-file-frames.js",
 		];
 
 		// Create sandboxes for all the frames we find
@@ -647,7 +652,7 @@ Zotero.Utilities.Internal = {
 		// Mostly copied from:
 		// resources/SingleFile/extension/lib/single-file/fetch/bg/fetch.js::fetchResource
 		sandbox.coFetch = Components.utils.exportFunction(
-			function (url, onDone) {
+			function (url, options, onDone) {
 				const xhrRequest = new XMLHttpRequest();
 				xhrRequest.withCredentials = true;
 				xhrRequest.responseType = "arraybuffer";
@@ -673,6 +678,11 @@ Zotero.Utilities.Internal = {
 					}
 				};
 				xhrRequest.open("GET", url, true);
+				if (options && options.headers) {
+					for (const entry of Object.entries(options.headers)) {
+						xhrRequest.setRequestHeader(entry[0], entry[1]);
+					}
+				}
 				xhrRequest.send();
 			},
 			sandbox
@@ -683,14 +693,14 @@ Zotero.Utilities.Internal = {
 		// resources/SingleFile/extension/lib/single-file/fetch/content/content-fetch.js::fetch
 		Components.utils.evalInSandbox(
 			`
-			ZoteroFetch = async function (url) {
+			ZoteroFetch = async function (url, options) {
 				try {
-					let response = await fetch(url, { cache: "force-cache" });
+					let response = await fetch(url, { cache: "force-cache", headers: options.headers });
 					return response;
 				}
 				catch (error) {
 					let response = await new Promise((resolve, reject) => {
-						coFetch(url, (response) => {
+						coFetch(url, { headers: options.headers }, (response) => {
 							if (response.error) {
 								Zotero.debug("Error retrieving url: " + url);
 								Zotero.debug(response);
@@ -1693,16 +1703,19 @@ Zotero.Utilities.Internal = {
 	 * Create a libraryOrCollection DOM tree to place in <menupopup> element.
 	 * If has no children, returns a <menuitem> element, otherwise <menu>.
 	 * 
-	 * @param {Library/Collection} libraryOrCollection
-	 * @param {Node<menupopup>} elem parent element
-	 * @param {function} clickAction function to execute on clicking the menuitem.
+	 * @param {Library|Collection} libraryOrCollection
+	 * @param {Node<menupopup>} elem Parent element
+	 * @param {Zotero.Library|Zotero.Collection} currentTarget Currently selected item (displays as checked)
+	 * @param {Function} clickAction function to execute on clicking the menuitem.
 	 * 		Receives the event and libraryOrCollection for given item.
+	 * @param {Function} disabledPred If provided, called on each library/collection
+	 * 		to determine whether disabled
 	 * 
-	 * @return {Node<menuitem>/Node<menu>} appended node
+	 * @return {Node<menuitem>|Node<menu>} appended node
 	 */
-	createMenuForTarget: function(libraryOrCollection, elem, currentTarget, clickAction) {
+	createMenuForTarget: function(libraryOrCollection, elem, currentTarget, clickAction, disabledPred) {
 		var doc = elem.ownerDocument;
-		function _createMenuitem(label, value, icon, command) {
+		function _createMenuitem(label, value, icon, command, disabled) {
 			let menuitem = doc.createElement('menuitem');
 			menuitem.setAttribute("label", label);
 			menuitem.setAttribute("type", "checkbox");
@@ -1711,6 +1724,7 @@ Zotero.Utilities.Internal = {
 			}
 			menuitem.setAttribute("value", value);
 			menuitem.setAttribute("image", icon);
+			menuitem.setAttribute("disabled", disabled);
 			menuitem.addEventListener('command', command);
 			menuitem.classList.add('menuitem-iconic');
 			return menuitem
@@ -1722,7 +1736,11 @@ Zotero.Utilities.Internal = {
 			menu.setAttribute("value", value);
 			menu.setAttribute("image", icon);
 			// Allow click on menu itself to select a target
-			menu.addEventListener('click', command);
+			menu.addEventListener('click', (event) => {
+				if (event.target == menu) {
+					command(event);
+				}
+			});
 			menu.classList.add('menu-iconic');
 			let menupopup = doc.createElement('menupopup');
 			menu.appendChild(menupopup);
@@ -1739,7 +1757,8 @@ Zotero.Utilities.Internal = {
 			imageSrc,
 			function (event) {
 				clickAction(event, libraryOrCollection);
-			}
+			},
+			disabledPred && disabledPred(libraryOrCollection)
 		);
 		
 		var collections;
@@ -1769,7 +1788,7 @@ Zotero.Utilities.Internal = {
 		menupopup.appendChild(doc.createElement('menuseparator'));
 		for (let collection of collections) {
 			let collectionMenu = this.createMenuForTarget(
-				collection, elem, currentTarget, clickAction
+				collection, elem, currentTarget, clickAction, disabledPred
 			);
 			menupopup.appendChild(collectionMenu);
 		}
@@ -2261,7 +2280,24 @@ Zotero.Utilities.Internal = {
 				}
 				if (['if', 'elseif'].includes(operator)) {
 					if (!level.executed) {
-						level.condition = level.parentCondition && (args[2] ? vars[args[0]].toLowerCase() == args[2].toLowerCase() : !!vars[args[0]]);
+						level.condition = level.parentCondition && (
+							args[2]
+								// If string variable is equal to the provided string
+								? vars[args[0]].toLowerCase() == args[2].toLowerCase()
+								: (
+									Array.isArray(vars[args[0]])
+										// Is array non empty
+										? !!vars[args[0]].length
+										: (
+											typeof vars[args[0]] === 'function'
+												// If function returns a value (only string is supported)
+												// Note: To keep things simple, this doesn't support function attributes
+												? !!vars[args[0]]({})
+												// If string variable exists
+												: !!vars[args[0]]
+										)
+								)
+						);
 						level.executed = level.condition;
 					}
 					else {

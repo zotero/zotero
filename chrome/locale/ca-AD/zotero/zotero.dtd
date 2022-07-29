@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Mostra els elements retractats">
 
 <!ENTITY zotero.items.itemType "Tipus d'element">
-<!ENTITY zotero.items.type_column "Tipus d'element">
-<!ENTITY zotero.items.title_column "Títol">
 <!ENTITY zotero.items.creator_column "Creador">
-<!ENTITY zotero.items.date_column "Data">
 <!ENTITY zotero.items.year_column "Any">
-<!ENTITY zotero.items.publisher_column "Editorial">
-<!ENTITY zotero.items.publication_column "Publicació">
-<!ENTITY zotero.items.journalAbbr_column "Abreviatura de la revista">
-<!ENTITY zotero.items.language_column "Llengua">
-<!ENTITY zotero.items.accessDate_column "Data d'accés">
-<!ENTITY zotero.items.libraryCatalog_column "Catàleg de la biblioteca">
-<!ENTITY zotero.items.callNumber_column "Codi del catàleg">
-<!ENTITY zotero.items.rights_column "Drets">
-<!ENTITY zotero.items.dateAdded_column "Data d&apos;incorporació">
 <!ENTITY zotero.items.dateModified_column "Data de modificació">
-<!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Arxiu">
-<!ENTITY zotero.items.archiveLocation_column "Ubicació a l'arxiu">
-<!ENTITY zotero.items.place_column "Lloc">
-<!ENTITY zotero.items.volume_column "Volum">
-<!ENTITY zotero.items.edition_column "Edició">
-<!ENTITY zotero.items.pages_column "Nre. de pàgines">
-<!ENTITY zotero.items.issue_column "Número">
-<!ENTITY zotero.items.series_column "Sèrie">
-<!ENTITY zotero.items.seriesTitle_column "Títol de la sèrie">
-<!ENTITY zotero.items.court_column "Tribunal">
-<!ENTITY zotero.items.medium_column "Medi/format">
-<!ENTITY zotero.items.genre_column "Gènere">
-<!ENTITY zotero.items.system_column "Sistema">
 <!ENTITY zotero.items.moreColumns.label "Més columnes">
 <!ENTITY zotero.items.restoreColumnOrder.label "Restableix l'ordre de les columnes">
 
@@ -350,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

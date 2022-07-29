@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Geri Çekilmiş Eserleri Göster">
 
 <!ENTITY zotero.items.itemType "Eser Türü">
-<!ENTITY zotero.items.type_column "Eser Türü">
-<!ENTITY zotero.items.title_column "Başlık">
 <!ENTITY zotero.items.creator_column "Yaratan">
-<!ENTITY zotero.items.date_column "Tarih">
 <!ENTITY zotero.items.year_column "Yıl">
-<!ENTITY zotero.items.publisher_column "Yayıncı">
-<!ENTITY zotero.items.publication_column "Yayın">
-<!ENTITY zotero.items.journalAbbr_column "Dergi Kısaltması">
-<!ENTITY zotero.items.language_column "Dil">
-<!ENTITY zotero.items.accessDate_column "Erişildi">
-<!ENTITY zotero.items.libraryCatalog_column "Kütüphane Kataloğu">
-<!ENTITY zotero.items.callNumber_column "Yer Numarası">
-<!ENTITY zotero.items.rights_column "Telif">
-<!ENTITY zotero.items.dateAdded_column "Eklendiği Tarih">
 <!ENTITY zotero.items.dateModified_column "Değiştirildiği Tarih">
-<!ENTITY zotero.items.extra_column "İlave">
-<!ENTITY zotero.items.archive_column "Arşiv">
-<!ENTITY zotero.items.archiveLocation_column "Arşivdeki Yeri">
-<!ENTITY zotero.items.place_column "Yayın Yeri">
-<!ENTITY zotero.items.volume_column "Cilt">
-<!ENTITY zotero.items.edition_column "Baskı">
-<!ENTITY zotero.items.pages_column "Sayfalar">
-<!ENTITY zotero.items.issue_column "Sayı">
-<!ENTITY zotero.items.series_column "Seriler">
-<!ENTITY zotero.items.seriesTitle_column "Seri Başlığı">
-<!ENTITY zotero.items.court_column "Mahkeme">
-<!ENTITY zotero.items.medium_column "Ortam/Biçim">
-<!ENTITY zotero.items.genre_column "Tür">
-<!ENTITY zotero.items.system_column "Sistem">
 <!ENTITY zotero.items.moreColumns.label "Diğer Sütunlar">
 <!ENTITY zotero.items.restoreColumnOrder.label "Sütun Sırasını Geri Yükle">
 
@@ -350,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Uzaklaştır">
 <!ENTITY zotero.pdfReader.zoomAuto "Otomatik Olarak Yeniden Boyutlandır">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Sayfa Genişliğine Yakınlaştır">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Sayfa Yüksekliğine Yakınlaştır">
 <!ENTITY zotero.pdfReader.transferFromPDF "Ek Açıklamaları İçeri Aktar...">
-<!ENTITY zotero.pdfReader.transferToPDF "Ek Açıklamaları Dosya İçinde Kaydet...">

@@ -600,6 +600,35 @@ describe("ZoteroPane", function() {
 			
 			assert.isTrue(item.deleted);
 		});
+
+		it("should prompt to remove an item from subcollections when recursiveCollections enabled", async function () {
+			Zotero.Prefs.set('recursiveCollections', true);
+
+			let collection1 = await createDataObject('collection');
+			let collection2 = await createDataObject('collection', { parentID: collection1.id });
+			let item = await createDataObject('item', { collections: [collection2.id] });
+			assert.ok(await zp.collectionsView.selectCollection(collection1.id));
+
+			await waitForItemsLoad(win);
+
+			let iv = zp.itemsView;
+			assert.ok(await iv.selectItem(item.id));
+
+			await Zotero.Promise.delay(1);
+
+			let promise = waitForDialog();
+			let modifyPromise = waitForItemEvent('modify');
+
+			await zp.deleteSelectedItems(false);
+
+			let dialog = await promise;
+			await modifyPromise;
+
+			assert.include(dialog.document.documentElement.textContent, Zotero.getString('pane.items.removeRecursive'));
+			assert.isFalse(item.inCollection(collection2.id));
+
+			Zotero.Prefs.clear('recursiveCollections');
+		});
 	});
 	
 	describe("#deleteSelectedCollection()", function () {

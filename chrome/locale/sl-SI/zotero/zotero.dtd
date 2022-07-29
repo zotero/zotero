@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Pokaži povlečene vnose">
 
 <!ENTITY zotero.items.itemType "Vrsta vnosa">
-<!ENTITY zotero.items.type_column "Vrsta vnosa">
-<!ENTITY zotero.items.title_column "Naslov">
 <!ENTITY zotero.items.creator_column "Ustvaril">
-<!ENTITY zotero.items.date_column "Datum">
 <!ENTITY zotero.items.year_column "Leto">
-<!ENTITY zotero.items.publisher_column "Izdajatelj">
-<!ENTITY zotero.items.publication_column "Publikacija">
-<!ENTITY zotero.items.journalAbbr_column "Okrajšava revije">
-<!ENTITY zotero.items.language_column "Jezik">
-<!ENTITY zotero.items.accessDate_column "Dostopano">
-<!ENTITY zotero.items.libraryCatalog_column "Knjižnični katalog">
-<!ENTITY zotero.items.callNumber_column "Številka klica">
-<!ENTITY zotero.items.rights_column "Pravice">
-<!ENTITY zotero.items.dateAdded_column "Dodano dne">
 <!ENTITY zotero.items.dateModified_column "Datum spremembe">
-<!ENTITY zotero.items.extra_column "Dodatno">
-<!ENTITY zotero.items.archive_column "Arhiv">
-<!ENTITY zotero.items.archiveLocation_column "Mesto v arhivu">
-<!ENTITY zotero.items.place_column "Mesto">
-<!ENTITY zotero.items.volume_column "Zvezek">
-<!ENTITY zotero.items.edition_column "Izdaja">
-<!ENTITY zotero.items.pages_column "Strani">
-<!ENTITY zotero.items.issue_column "Številka">
-<!ENTITY zotero.items.series_column "Zbirka">
-<!ENTITY zotero.items.seriesTitle_column "Naslov zbirke">
-<!ENTITY zotero.items.court_column "Sodišče">
-<!ENTITY zotero.items.medium_column "Medij/format">
-<!ENTITY zotero.items.genre_column "Zvrst">
-<!ENTITY zotero.items.system_column "Sistem">
 <!ENTITY zotero.items.moreColumns.label "Več stolpcev">
 <!ENTITY zotero.items.restoreColumnOrder.label "Obnovi zaporedje stolpcev">
 
@@ -343,12 +317,12 @@
 <!ENTITY zotero.pdfReader.verticalScrolling "Navpično drsenje">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Vodoravno drsenje">
 <!ENTITY zotero.pdfReader.wrappedScrolling "Ovito drsenje">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
+<!ENTITY zotero.pdfReader.noSpreads "Ni tiska na razprtih zaporednih straneh">
+<!ENTITY zotero.pdfReader.oddSpreads "Tisk na sodih razprtih zaporednih straneh">
+<!ENTITY zotero.pdfReader.evenSpreads "Tisk na sodih razprtih zaporednih straneh">
 <!ENTITY zotero.pdfReader.zoomIn "Približaj">
 <!ENTITY zotero.pdfReader.zoomOut "Oddalji">
 <!ENTITY zotero.pdfReader.zoomAuto "Samodejno spremeni velikost">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Približaj na širino strani">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Približaj na višino strani">
 <!ENTITY zotero.pdfReader.transferFromPDF "Uvozi zaznamke ...">
-<!ENTITY zotero.pdfReader.transferToPDF "Shrani zaznamke v datoteko ...">

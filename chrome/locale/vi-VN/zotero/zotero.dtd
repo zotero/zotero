@@ -13,15 +13,15 @@
 <!ENTITY zotero.general.saveAs "Lưu là...">
 <!ENTITY zotero.general.options "Options">
 <!ENTITY zotero.general.advancedOptions.label "Các tùy chỉnh nâng cao">
-<!ENTITY zotero.general.tools "Tools">
-<!ENTITY zotero.general.more "More">
+<!ENTITY zotero.general.tools "Các công cụ">
+<!ENTITY zotero.general.more "Khác">
 <!ENTITY zotero.general.loading "Đang nạp...">
 <!ENTITY zotero.general.close "Đóng">
 <!ENTITY zotero.general.minimize "Thu nhỏ">
 <!ENTITY zotero.general.other "Other…">
 <!ENTITY zotero.general.bigger "Bigger">
 <!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.reset "Thiết lập lại">
 
 
 <!ENTITY zotero.errorReport.title "Báo cáo lỗi Zotero">
@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Loại tham khảo">
-<!ENTITY zotero.items.type_column "Loại tham khảo">
-<!ENTITY zotero.items.title_column "Tiêu đề">
 <!ENTITY zotero.items.creator_column "Người tạo lập">
-<!ENTITY zotero.items.date_column "Ngày">
 <!ENTITY zotero.items.year_column "Năm">
-<!ENTITY zotero.items.publisher_column "Nhà xuất bản">
-<!ENTITY zotero.items.publication_column "Ấn phẩm">
-<!ENTITY zotero.items.journalAbbr_column "Tên tạp chí viết tắt">
-<!ENTITY zotero.items.language_column "Ngôn ngữ">
-<!ENTITY zotero.items.accessDate_column "Truy cập">
-<!ENTITY zotero.items.libraryCatalog_column "Loại thư viện">
-<!ENTITY zotero.items.callNumber_column "Ký hiệu xếp giá">
-<!ENTITY zotero.items.rights_column "Quyền hạn">
-<!ENTITY zotero.items.dateAdded_column "Ngày tạo lập">
 <!ENTITY zotero.items.dateModified_column "Ngày thay đổi">
-<!ENTITY zotero.items.extra_column "Mở rộng">
-<!ENTITY zotero.items.archive_column "Lưu">
-<!ENTITY zotero.items.archiveLocation_column "Vị trí lưu">
-<!ENTITY zotero.items.place_column "Nơi xuất bản">
-<!ENTITY zotero.items.volume_column "Tập">
-<!ENTITY zotero.items.edition_column "Ấn bản">
-<!ENTITY zotero.items.pages_column "Trang">
-<!ENTITY zotero.items.issue_column "Lần phát hành">
-<!ENTITY zotero.items.series_column "Tùng thư">
-<!ENTITY zotero.items.seriesTitle_column "Tiêu đề tùng thư">
-<!ENTITY zotero.items.court_column "Court">
-<!ENTITY zotero.items.medium_column "Định dạng">
-<!ENTITY zotero.items.genre_column "Thể loại">
-<!ENTITY zotero.items.system_column "Hệ thống">
 <!ENTITY zotero.items.moreColumns.label "Thêm cột">
 <!ENTITY zotero.items.restoreColumnOrder.label "Phục hồi thứ tự cột">
 
@@ -155,7 +129,7 @@
 <!ENTITY zotero.toolbar.attachment.weblink "Lưu Đường dẫn tới Trang hiện tại">
 <!ENTITY zotero.toolbar.attachment.snapshot "Tạo Bản lưu trang Web của Trang hiện tại">
 <!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.notes "Ghi chép">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Không có thẻ nào để hiển thị">
 <!ENTITY zotero.tagSelector.loadingTags "Đang nạp các tag...">
@@ -203,7 +177,7 @@
 
 <!ENTITY zotero.progress.title "Tiến triển">
 
-<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import "Nhập khẩu">
 <!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
 <!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
 <!ENTITY zotero.import.importing "Importing…">
@@ -211,7 +185,7 @@
 <!ENTITY zotero.import.lastModified "Last Modified">
 <!ENTITY zotero.import.size "Size">
 <!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.fileHandling "Xử lý tập tin">
 
 <!ENTITY zotero.exportOptions.title "Xuất khẩu...">
 <!ENTITY zotero.exportOptions.format.label "Định dạng:">
@@ -272,8 +246,8 @@
 <!ENTITY zotero.sync.longTagFixer.splitEditDelete "You can either split the tag into multiple tags, edit the tag manually to shorten it, or delete it.">
 <!ENTITY zotero.sync.longTagFixer.split "Split">
 <!ENTITY zotero.sync.longTagFixer.splitAtThe "Split at the">
-<!ENTITY zotero.sync.longTagFixer.character "character">
-<!ENTITY zotero.sync.longTagFixer.characters "characters">
+<!ENTITY zotero.sync.longTagFixer.character "ký tự">
+<!ENTITY zotero.sync.longTagFixer.characters "các ký tự">
 <!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Unchecked tags will not be saved.">
 <!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "The tag will be deleted from all items.">
 
@@ -333,7 +307,7 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.firstPage "Trang đầu">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">
@@ -350,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

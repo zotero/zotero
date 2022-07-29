@@ -47,6 +47,9 @@
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Resolução de problemas do tradutor"
   },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Limites de Acesso ao Sítio"
+  },
   "progressWindow_error_fallback": {
     "message": "Erro ao salvar com $1. Tentando salvar usando $2."
   },
@@ -70,6 +73,9 @@
   },
   "firstRun_text2": {
     "message": "Se você ainda não o fez, <a href=\"$2\">baixe </a> a aplicação $1 standalone para uma melhor experiência."
+  },
+  "firstRun_acceptButton": {
+    "message": "Percebi"
   },
   "error_connection_isAppRunning": {
     "message": "$1 está rodando?"

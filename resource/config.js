@@ -21,6 +21,7 @@ var ZOTERO_CONFIG = {
 	QUICK_START_URL: "https://www.zotero.org/support/quick_start_guide",
 	PDF_TOOLS_URL: "https://www.zotero.org/download/xpdf/",
 	SUPPORT_URL: "https://www.zotero.org/support/",
+	SYNC_INFO_URL: "https://www.zotero.org/support/sync",
 	TROUBLESHOOTING_URL: "https://www.zotero.org/support/getting_help",
 	FEEDBACK_URL: "https://forums.zotero.org/",
 	CONNECTORS_URL: "https://www.zotero.org/download/connectors",

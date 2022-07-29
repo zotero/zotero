@@ -7,7 +7,7 @@
 <!ENTITY hideOtherAppsCmdMac.commandkey "ا">
 <!ENTITY showAllAppsCmdMac.label "عرض الكل">
 <!ENTITY quitApplicationCmdMac.label "خروج من زوتيرو">
-<!ENTITY quitApplicationCmdMac.key "خ">
+<!ENTITY quitApplicationCmdMac.key "Q">
 
 
 <!ENTITY fileMenu.label "ملف">

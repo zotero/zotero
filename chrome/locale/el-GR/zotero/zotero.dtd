@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Αποεπιλογή όλων">
 <!ENTITY zotero.general.edit "Επεξεργασία">
 <!ENTITY zotero.general.delete "Διαγραφή">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Μετακίνηση στον Κάδο απορριμμάτων">
 <!ENTITY zotero.general.ok "ΟΚ">
 <!ENTITY zotero.general.cancel "Ακύρωση">
 <!ENTITY zotero.general.refresh "Ανανέωση">
@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Εμφάνιση Ανακληθέντων Στοιχείων">
 
 <!ENTITY zotero.items.itemType "Τύπος στοιχείου">
-<!ENTITY zotero.items.type_column "Τύπος στοιχείου">
-<!ENTITY zotero.items.title_column "Τίτλος">
 <!ENTITY zotero.items.creator_column "Δημιουργός">
-<!ENTITY zotero.items.date_column "Ημερομηνία">
 <!ENTITY zotero.items.year_column "Έτος">
-<!ENTITY zotero.items.publisher_column "Εκδότης">
-<!ENTITY zotero.items.publication_column "Έκδοση">
-<!ENTITY zotero.items.journalAbbr_column "Συντομογραφία περιοδικού">
-<!ENTITY zotero.items.language_column "Γλώσσα">
-<!ENTITY zotero.items.accessDate_column "Πρόσβαση">
-<!ENTITY zotero.items.libraryCatalog_column "Κατάλογος βιβλιοθήκης">
-<!ENTITY zotero.items.callNumber_column "Τηλεφωνικός αριθμός">
-<!ENTITY zotero.items.rights_column "Δικαιώματα">
-<!ENTITY zotero.items.dateAdded_column "Ημερομηνία προσθήκης">
 <!ENTITY zotero.items.dateModified_column "Ημερομηνία τροποποίησης">
-<!ENTITY zotero.items.extra_column "Επιπλέον">
-<!ENTITY zotero.items.archive_column "Αρχείο">
-<!ENTITY zotero.items.archiveLocation_column "Θέση στο Αρχείο">
-<!ENTITY zotero.items.place_column "Τόπο">
-<!ENTITY zotero.items.volume_column "Τόμο">
-<!ENTITY zotero.items.edition_column "Έκδοση">
-<!ENTITY zotero.items.pages_column "Σελίδες">
-<!ENTITY zotero.items.issue_column "Τεύχος">
-<!ENTITY zotero.items.series_column "Σειρά">
-<!ENTITY zotero.items.seriesTitle_column "Τίτλος σειράς">
-<!ENTITY zotero.items.court_column "Αίθουσα">
-<!ENTITY zotero.items.medium_column "Μέσο/Μορφή">
-<!ENTITY zotero.items.genre_column "Είδος">
-<!ENTITY zotero.items.system_column "Σύστημα">
 <!ENTITY zotero.items.moreColumns.label "Περισσότερες στήλες">
 <!ENTITY zotero.items.restoreColumnOrder.label "Αποκατάσταση διάταξης στηλών">
 
@@ -154,8 +128,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Αποθήκευση αντιγράφου του αρχείου...">
 <!ENTITY zotero.toolbar.attachment.weblink "Αποθήκευση Συνδέσμου στην Τρέχουσα Σελίδα">
 <!ENTITY zotero.toolbar.attachment.snapshot "Λήψη Στιγμιότυπου της Τρέχουσας Σελίδας">
-<!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.item "Είδος">
+<!ENTITY zotero.toolbar.context.notes "Σημείωση">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Δεν υπάρχουν ετικέτες προς εμφάνιση">
 <!ENTITY zotero.tagSelector.loadingTags "Φόρτωση ετικετών...">
@@ -333,7 +307,7 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.firstPage "Πρώτη Σελίδα">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">
@@ -350,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

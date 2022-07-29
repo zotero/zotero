@@ -1113,12 +1113,12 @@ Zotero.Item.prototype.setCreator = function (orderIndex, data, options = {}) {
  * @param {Object[]} data - An array of creator data in internal or API JSON format
  */
 Zotero.Item.prototype.setCreators = function (data, options = {}) {
-	// If empty array, clear all existing creators
-	if (!data.length) {
-		while (this.hasCreatorAt(0)) {
-			this.removeCreator(0);
+	// Clear existing creators beyond the number of provided ones
+	var numCreators = this.numCreators();
+	if (data.length < numCreators) {
+		while (this.hasCreatorAt(data.length)) {
+			this.removeCreator(data.length);
 		}
-		return;
 	}
 	
 	for (let i = 0; i < data.length; i++) {
@@ -1375,15 +1375,37 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			//}
 		}
 		if (createdByUserID || lastModifiedByUserID) {
-			let sql = "REPLACE INTO groupItems VALUES (?, ?, ?)";
-			yield Zotero.DB.queryAsync(
-				sql,
-				[
-					itemID,
-					createdByUserID || null,
-					lastModifiedByUserID || null
-				]
-			);
+			try {
+				let sql = "REPLACE INTO groupItems VALUES (?, ?, ?)";
+				yield Zotero.DB.queryAsync(
+					sql,
+					[
+						itemID,
+						createdByUserID || null,
+						lastModifiedByUserID || null
+					]
+				);
+			}
+			// TODO: Use schema update step to add username to users table if group library
+			// and no current name
+			catch (e) {
+				let username = yield Zotero.DB.valueQueryAsync(
+					"SELECT value FROM settings WHERE setting='account' AND key='username'"
+				);
+				if (username) {
+					yield Zotero.Users.setCurrentName(username);
+					
+					let sql = "REPLACE INTO groupItems VALUES (?, ?, ?)";
+					yield Zotero.DB.queryAsync(
+						sql,
+						[
+							itemID,
+							createdByUserID || null,
+							lastModifiedByUserID || null
+						]
+					);
+				}
+			}
 		}
 	}
 	
@@ -2918,7 +2940,7 @@ Zotero.Item.prototype.deleteAttachmentFile = Zotero.Promise.coroutine(function* 
  * Return a file:/// URL path to files and snapshots
  */
 Zotero.Item.prototype.getLocalFileURL = function() {
-	if (!this.isAttachment) {
+	if (!this.isAttachment()) {
 		throw ("getLocalFileURL() can only be called on attachment items");
 	}
 	
@@ -3504,7 +3526,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentHash', {
  * @return {Promise<String>} - A promise for attachment text or empty string if unavailable
  */
 Zotero.defineProperty(Zotero.Item.prototype, 'attachmentText', {
-	get: Zotero.Promise.coroutine(function* () {
+	get: async function () {
 		if (!this.isAttachment()) {
 			return undefined;
 		}
@@ -3513,63 +3535,65 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentText', {
 			return null;
 		}
 		
-		var file = this.getFile();
-		
-		if (!(yield OS.File.exists(file.path))) {
-			file = false;
-		}
-		
-		var cacheFile = Zotero.Fulltext.getItemCacheFile(this);
-		if (!file) {
-			if (cacheFile.exists()) {
-				var str = yield Zotero.File.getContentsAsync(cacheFile);
-				
-				return str.trim();
-			}
-			return '';
-		}
+		var path = await this.getFilePathAsync();
 		
 		var contentType = this.attachmentContentType;
 		if (!contentType) {
-			contentType = yield Zotero.MIME.getMIMETypeFromFile(file);
-			if (contentType) {
-				this.attachmentContentType = contentType;
-				yield this.save();
+			if (!path) {
+				Zotero.debug(`Can't get attachment text for item ${this.libraryKey}`);
+				return '';
 			}
+			contentType = await Zotero.MIME.getMIMETypeFromFile(path);
 		}
 		
 		var str;
 		if (Zotero.Fulltext.isCachedMIMEType(contentType)) {
-			var reindex = false;
-			
-			if (!cacheFile.exists()) {
-				Zotero.debug("Regenerating item " + this.id + " full-text cache file");
-				reindex = true;
+			// If no cache file or not fully indexed, get text on-demand
+			let cacheFile = Zotero.Fulltext.getItemCacheFile(this);
+			if (!cacheFile.exists() || !await Zotero.FullText.isFullyIndexed(this)) {
+				// Use processor cache file if it exists
+				let processorCacheFile = Zotero.FullText.getItemProcessorCacheFile(this).path;
+				if (await OS.File.exists(processorCacheFile)) {
+					let json = await Zotero.File.getContentsAsync(processorCacheFile);
+					let data = JSON.parse(json);
+					str = data.text;
+				}
+				// Otherwise extract text to temporary file and read that
+				else if (contentType == 'application/pdf') {
+					let tmpCacheFile = OS.Path.join(
+						Zotero.getTempDirectory().path, Zotero.Utilities.randomString()
+					);
+					let { exec, args } = Zotero.FullText.getPDFConverterExecAndArgs();
+					args.push(
+						'-nopgbrk',
+						path,
+						tmpCacheFile
+					);
+					await Zotero.Utilities.Internal.exec(exec, args);
+					if (!await OS.File.exists(tmpCacheFile)) {
+						Zotero.logError("Cache file not found after running PDF converter");
+						return '';
+					}
+					str = await Zotero.File.getContentsAsync(tmpCacheFile);
+					await OS.File.remove(tmpCacheFile);
+				}
+				else {
+					Zotero.logError("Unsupported cached file type in .attachmentText");
+					return '';
+				}
 			}
-			// Fully index item if it's not yet
-			else if (!(yield Zotero.Fulltext.isFullyIndexed(this))) {
-				Zotero.debug("Item " + this.id + " is not fully indexed -- caching now");
-				reindex = true;
+			else {
+				str = await Zotero.File.getContentsAsync(cacheFile);
 			}
-			
-			if (reindex) {
-				yield Zotero.Fulltext.indexItems(this.id, false);
-			}
-			
-			if (!cacheFile.exists()) {
-				Zotero.debug("Cache file doesn't exist after indexing -- returning empty .attachmentText");
-				return '';
-			}
-			str = yield Zotero.File.getContentsAsync(cacheFile);
 		}
 		
 		else if (contentType == 'text/html') {
-			str = yield Zotero.File.getContentsAsync(file);
+			str = await Zotero.File.getContentsAsync(path);
 			str = Zotero.Utilities.unescapeHTML(str);
 		}
 		
 		else if (contentType == 'text/plain') {
-			str = yield Zotero.File.getContentsAsync(file);
+			str = await Zotero.File.getContentsAsync(path);
 		}
 		
 		else {
@@ -3577,7 +3601,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentText', {
 		}
 		
 		return str.trim();
-	})
+	}
 });
 
 
@@ -3691,7 +3715,7 @@ Zotero.Item.prototype.getBestAttachments = Zotero.Promise.coroutine(function* ()
 
 
 /**
- * Return state of best attachment
+ * Return state of best attachment (or this item if it's a standalone attachment)
  *
  * @return {Promise<Object>} - Promise for object with string 'type' ('none'|'pdf'|'snapshot'|'other')
  *     and boolean 'exists'
@@ -3700,7 +3724,9 @@ Zotero.Item.prototype.getBestAttachmentState = async function () {
 	if (this._bestAttachmentState !== null) {
 		return this._bestAttachmentState;
 	}
-	var item = await this.getBestAttachment();
+	var item = this.isAttachment() && this.isTopLevelItem()
+		? this
+		: await this.getBestAttachment();
 	if (!item) {
 		return this._bestAttachmentState = {
 			type: 'none'
@@ -5357,10 +5383,6 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 	}
 	
 	var json = this._postToJSON(env);
-	
-	if (this.isAnnotation()) {
-		delete json.relations;
-	}
 	
 	// TODO: Remove once we stop clearing props from the cached JSON in patch mode
 	if (options.skipStorageProperties) {

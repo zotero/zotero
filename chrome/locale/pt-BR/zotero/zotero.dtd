@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Mostrar itens Retratados">
 
 <!ENTITY zotero.items.itemType "Tipo do item">
-<!ENTITY zotero.items.type_column "Tipo do item">
-<!ENTITY zotero.items.title_column "Título">
 <!ENTITY zotero.items.creator_column "Autor">
-<!ENTITY zotero.items.date_column "Data">
 <!ENTITY zotero.items.year_column "Ano">
-<!ENTITY zotero.items.publisher_column "Editor">
-<!ENTITY zotero.items.publication_column "Publicação">
-<!ENTITY zotero.items.journalAbbr_column "Abrev. do periódico">
-<!ENTITY zotero.items.language_column "Idioma">
-<!ENTITY zotero.items.accessDate_column "Acessado em">
-<!ENTITY zotero.items.libraryCatalog_column "Catálogo de biblioteca">
-<!ENTITY zotero.items.callNumber_column "Número de chamada">
-<!ENTITY zotero.items.rights_column "Direitos">
-<!ENTITY zotero.items.dateAdded_column "Data de adição">
 <!ENTITY zotero.items.dateModified_column "Data de modificação">
-<!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Arquivo">
-<!ENTITY zotero.items.archiveLocation_column "Localização no arquivo">
-<!ENTITY zotero.items.place_column "Lugar">
-<!ENTITY zotero.items.volume_column "Volume">
-<!ENTITY zotero.items.edition_column "Edição">
-<!ENTITY zotero.items.pages_column "Páginas">
-<!ENTITY zotero.items.issue_column "Edição">
-<!ENTITY zotero.items.series_column "Série">
-<!ENTITY zotero.items.seriesTitle_column "Título da série">
-<!ENTITY zotero.items.court_column "Corte">
-<!ENTITY zotero.items.medium_column "Meio/Formato">
-<!ENTITY zotero.items.genre_column "Gênero">
-<!ENTITY zotero.items.system_column "Sistema">
 <!ENTITY zotero.items.moreColumns.label "Mais colunas">
 <!ENTITY zotero.items.restoreColumnOrder.label "Restaurar a ordem das colunas">
 
@@ -350,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Diminuir o zoom">
 <!ENTITY zotero.pdfReader.zoomAuto "Zoom automático">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Largura da página">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Ampliar à Altura da Página">
 <!ENTITY zotero.pdfReader.transferFromPDF "Importar anotações...">
-<!ENTITY zotero.pdfReader.transferToPDF "Armazenar anotações no arquivo...">

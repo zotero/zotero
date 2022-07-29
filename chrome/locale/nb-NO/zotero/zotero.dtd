@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Vis elementer som er trukket tilbake">
 
 <!ENTITY zotero.items.itemType "Elementtype">
-<!ENTITY zotero.items.type_column "Elementtype">
-<!ENTITY zotero.items.title_column "Tittel">
 <!ENTITY zotero.items.creator_column "Opphaver">
-<!ENTITY zotero.items.date_column "Dato">
 <!ENTITY zotero.items.year_column "År">
-<!ENTITY zotero.items.publisher_column "Utgiver">
-<!ENTITY zotero.items.publication_column "Publikasjon">
-<!ENTITY zotero.items.journalAbbr_column "Tidsskriftsforkortelse">
-<!ENTITY zotero.items.language_column "Språk">
-<!ENTITY zotero.items.accessDate_column "Sist åpnet">
-<!ENTITY zotero.items.libraryCatalog_column "Bibliotekskatalog">
-<!ENTITY zotero.items.callNumber_column "Plass-signatur">
-<!ENTITY zotero.items.rights_column "Rettigheter">
-<!ENTITY zotero.items.dateAdded_column "Dato lagt til">
 <!ENTITY zotero.items.dateModified_column "Sist endret">
-<!ENTITY zotero.items.extra_column "Ekstra">
-<!ENTITY zotero.items.archive_column "Arkiv">
-<!ENTITY zotero.items.archiveLocation_column "Hylle i arkiv">
-<!ENTITY zotero.items.place_column "Sted">
-<!ENTITY zotero.items.volume_column "Volum">
-<!ENTITY zotero.items.edition_column "Utgave">
-<!ENTITY zotero.items.pages_column "Sider">
-<!ENTITY zotero.items.issue_column "Nummer">
-<!ENTITY zotero.items.series_column "Serie">
-<!ENTITY zotero.items.seriesTitle_column "Serietittel">
-<!ENTITY zotero.items.court_column "Rett">
-<!ENTITY zotero.items.medium_column "Medium/Format">
-<!ENTITY zotero.items.genre_column "Sjanger">
-<!ENTITY zotero.items.system_column "System">
 <!ENTITY zotero.items.moreColumns.label "Flere kolonner">
 <!ENTITY zotero.items.restoreColumnOrder.label "Gjenopprett rekkefølge for kolonner">
 
@@ -111,7 +85,7 @@
 <!ENTITY zotero.toolbar.newCollection.label "Ny samling...">
 <!ENTITY zotero.toolbar.markFeedRead.label "Merk nyhetsstrøm som lest">
 <!ENTITY zotero.toolbar.newGroup "Ny gruppe...">
-<!ENTITY zotero.toolbar.newSubcollection.label "Ny undersamling...">
+<!ENTITY zotero.toolbar.newSubcollection.label "Ny under-samling...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nytt lagret søk...">
 <!ENTITY zotero.toolbar.emptyTrash.label "Tøm søppelkorg">
 <!ENTITY zotero.toolbar.tagSelector.label "Vis/skjul emneordsamling">
@@ -350,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Zoom ut">
 <!ENTITY zotero.pdfReader.zoomAuto "Endre størrelse automatisk">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom til sidebredde">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom til sidehøyde">
 <!ENTITY zotero.pdfReader.transferFromPDF "Importer merknader…">
-<!ENTITY zotero.pdfReader.transferToPDF "Lagre merknader i fil…">

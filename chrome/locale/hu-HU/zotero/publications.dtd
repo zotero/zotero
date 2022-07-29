@@ -15,5 +15,5 @@
 <!ENTITY zotero.publications.chooseLicense.title "Válasszon egy Creative Commons licencet.">
 <!ENTITY zotero.publications.chooseLicense.text "A Creative Commons license allows others to copy and redistribute your work as long as they give appropriate credit, provide a link to the license, and indicate if changes were made. Additional conditions can be specified below.">
 <!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Engedélyezi az átdolgozott műveinek megosztását?">
-<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Yes, as long as others share alike">
+<!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Igen, amíg mások is hasonlóan osztják meg.">
 <!ENTITY zotero.publications.chooseLicense.commercial.prompt "Engedélyezi kereskedelmi használatra a munkáját?">

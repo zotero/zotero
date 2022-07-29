@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Nieko nežymėti">
 <!ENTITY zotero.general.edit "Redaguoti">
 <!ENTITY zotero.general.delete "Šalinti">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Perkelti į šiukšlinę">
 <!ENTITY zotero.general.ok "Gerai">
 <!ENTITY zotero.general.cancel "Atšaukti">
 <!ENTITY zotero.general.refresh "Atnaujinti">
@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Rodyti atšauktus įrašus">
 
 <!ENTITY zotero.items.itemType "Įrašo tipas">
-<!ENTITY zotero.items.type_column "Įrašo tipas">
-<!ENTITY zotero.items.title_column "Pavadinimas">
 <!ENTITY zotero.items.creator_column "Autorius">
-<!ENTITY zotero.items.date_column "Data">
 <!ENTITY zotero.items.year_column "Metai">
-<!ENTITY zotero.items.publisher_column "Leidėjas">
-<!ENTITY zotero.items.publication_column "Leidinys">
-<!ENTITY zotero.items.journalAbbr_column "Žurnalo santrumpa">
-<!ENTITY zotero.items.language_column "Kalba">
-<!ENTITY zotero.items.accessDate_column "Žiūrėta">
-<!ENTITY zotero.items.libraryCatalog_column "Išteklius">
-<!ENTITY zotero.items.callNumber_column "Šifras">
-<!ENTITY zotero.items.rights_column "Teisės">
-<!ENTITY zotero.items.dateAdded_column "Pridėta">
 <!ENTITY zotero.items.dateModified_column "Keitimo laikas">
-<!ENTITY zotero.items.extra_column "Papildoma">
-<!ENTITY zotero.items.archive_column "Archyvas">
-<!ENTITY zotero.items.archiveLocation_column "Vieta archyve">
-<!ENTITY zotero.items.place_column "Vieta">
-<!ENTITY zotero.items.volume_column "Tomas">
-<!ENTITY zotero.items.edition_column "Leidimas, Nr.">
-<!ENTITY zotero.items.pages_column "Puslapiai">
-<!ENTITY zotero.items.issue_column "Numeris">
-<!ENTITY zotero.items.series_column "Serija">
-<!ENTITY zotero.items.seriesTitle_column "Serijos pavadinimas">
-<!ENTITY zotero.items.court_column "Teismas">
-<!ENTITY zotero.items.medium_column "Laikmena/formatas">
-<!ENTITY zotero.items.genre_column "Žanras">
-<!ENTITY zotero.items.system_column "Sistema">
 <!ENTITY zotero.items.moreColumns.label "Daugiau stulpelių">
 <!ENTITY zotero.items.restoreColumnOrder.label "Atstatyti stulpelių tvarką">
 
@@ -154,8 +128,8 @@
 <!ENTITY zotero.toolbar.attachment.add "Patalpinti failo kopiją...">
 <!ENTITY zotero.toolbar.attachment.weblink "Įrašyti nuorodą į šį puslapį">
 <!ENTITY zotero.toolbar.attachment.snapshot "Sukurti šio tinklalapio momentinę kopiją">
-<!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.item "Įrašas">
+<!ENTITY zotero.toolbar.context.notes "Pastabos">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Nėra rodytinų gairių">
 <!ENTITY zotero.tagSelector.loadingTags "Įkeliamos gairės...">
@@ -176,7 +150,7 @@
 <!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
 <!ENTITY zotero.lookup.button.search "Ieškoti">
 
-<!ENTITY zotero.createParent.title "Create Parent Item">
+<!ENTITY zotero.createParent.title "Sukurti aukštesnio lygio įrašą">
 <!ENTITY zotero.createParent.button.manual "Manual Entry">
 
 <!ENTITY zotero.selectitems.title "Pasirinkti įrašus">
@@ -333,7 +307,7 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.firstPage "Pirmas puslapis">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">
@@ -350,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

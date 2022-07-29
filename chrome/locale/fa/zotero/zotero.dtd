@@ -1,27 +1,27 @@
-<!ENTITY zotero.general.yes "Yes">
-<!ENTITY zotero.general.no "No">
+<!ENTITY zotero.general.yes "بله">
+<!ENTITY zotero.general.no "خیر">
 <!ENTITY zotero.general.optional "(اختیاری)">
 <!ENTITY zotero.general.note "یادداشت:">
 <!ENTITY zotero.general.selectAll "انتخاب همه">
 <!ENTITY zotero.general.deselectAll "انتخاب هیچ‌کدام">
 <!ENTITY zotero.general.edit "ویرایش">
 <!ENTITY zotero.general.delete "حذف">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "انتقال به سطل بازیافت">
 <!ENTITY zotero.general.ok "تایید">
 <!ENTITY zotero.general.cancel "انصراف">
 <!ENTITY zotero.general.refresh "Refresh">
 <!ENTITY zotero.general.saveAs "Save As…">
 <!ENTITY zotero.general.options "Options">
 <!ENTITY zotero.general.advancedOptions.label "Advanced Options">
-<!ENTITY zotero.general.tools "Tools">
-<!ENTITY zotero.general.more "More">
+<!ENTITY zotero.general.tools "ابزارها">
+<!ENTITY zotero.general.more "بیشتر">
 <!ENTITY zotero.general.loading "Loading…">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.close "بستن">
+<!ENTITY zotero.general.minimize "کوچک‌ کردن">
 <!ENTITY zotero.general.other "Other…">
 <!ENTITY zotero.general.bigger "Bigger">
 <!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.reset "تنظیم مجدد">
 
 
 <!ENTITY zotero.errorReport.title "گزارش خطا در زوترو">
@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "نوع آیتم">
-<!ENTITY zotero.items.type_column "نوع آیتم">
-<!ENTITY zotero.items.title_column "عنوان‌">
 <!ENTITY zotero.items.creator_column "پدیدآورنده">
-<!ENTITY zotero.items.date_column "تاریخ">
 <!ENTITY zotero.items.year_column "سال">
-<!ENTITY zotero.items.publisher_column "ناشر">
-<!ENTITY zotero.items.publication_column "انتشار">
-<!ENTITY zotero.items.journalAbbr_column "نام مختصر مجله">
-<!ENTITY zotero.items.language_column "زبان">
-<!ENTITY zotero.items.accessDate_column "تاریخ دسترسی">
-<!ENTITY zotero.items.libraryCatalog_column "فهرست کتابخانه">
-<!ENTITY zotero.items.callNumber_column "شماره فراخوانی">
-<!ENTITY zotero.items.rights_column "حقوق">
-<!ENTITY zotero.items.dateAdded_column "تاریخ افزودن">
 <!ENTITY zotero.items.dateModified_column "تاریخ تغییر">
-<!ENTITY zotero.items.extra_column "اضافی">
-<!ENTITY zotero.items.archive_column "بایگانی">
-<!ENTITY zotero.items.archiveLocation_column "Loc. in Archive">
-<!ENTITY zotero.items.place_column "مکان">
-<!ENTITY zotero.items.volume_column "جلد">
-<!ENTITY zotero.items.edition_column "ویرایش">
-<!ENTITY zotero.items.pages_column "صفحات">
-<!ENTITY zotero.items.issue_column "شماره">
-<!ENTITY zotero.items.series_column "سری">
-<!ENTITY zotero.items.seriesTitle_column "عنوان سری">
-<!ENTITY zotero.items.court_column "دادگاه">
-<!ENTITY zotero.items.medium_column "رسانه / قالب">
-<!ENTITY zotero.items.genre_column "ژانر">
-<!ENTITY zotero.items.system_column "سیستم">
 <!ENTITY zotero.items.moreColumns.label "ستون‌های بیشتر">
 <!ENTITY zotero.items.restoreColumnOrder.label "بازیابی نظم ستون">
 
@@ -119,7 +93,7 @@
 <!ENTITY zotero.toolbar.import.label "درون‌برد...">
 <!ENTITY zotero.toolbar.importFromClipboard "درون‌برد از حافظه">
 <!ENTITY zotero.toolbar.export.label "صدور کتابخانه...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
+<!ENTITY zotero.toolbar.rtfScan.label "پیمایش RTF">
 <!ENTITY zotero.toolbar.timeline.label "ساخت Time Line">
 <!ENTITY zotero.toolbar.preferences.label "تنظیمات...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "پشتیبانی و راهنما">
@@ -140,7 +114,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "حروف اول بزرگ">
 <!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
-<!ENTITY zotero.item.viewOnline "View Online">
+<!ENTITY zotero.item.viewOnline "نمایش نسخه برخط">
 <!ENTITY zotero.item.copyAsURL "Copy as URL">
 <!ENTITY zotero.item.deletePermanently "Delete Permanently…">
 
@@ -155,7 +129,7 @@
 <!ENTITY zotero.toolbar.attachment.weblink "ذخیره پیوند به صفحه جاری">
 <!ENTITY zotero.toolbar.attachment.snapshot "گرفتن تصویر لحظه‌ای از صفحه جاری">
 <!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.notes "یادداشت‌ها">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "هیچ برچسبی برای نمایش وجود ندارد">
 <!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
@@ -203,7 +177,7 @@
 
 <!ENTITY zotero.progress.title "پیشرفت">
 
-<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import "درون‌برد">
 <!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
 <!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
 <!ENTITY zotero.import.importing "Importing…">
@@ -289,8 +263,8 @@
 
 <!ENTITY zotero.feedSettings.title "Feed Settings">
 <!ENTITY zotero.feedSettings.saveButton.label "Save">
-<!ENTITY zotero.feedSettings.url.label "URL:">
-<!ENTITY zotero.feedSettings.title.label "Title:">
+<!ENTITY zotero.feedSettings.url.label "آدرس:">
+<!ENTITY zotero.feedSettings.title.label "عنوان:">
 <!ENTITY zotero.feedSettings.refresh.label1 "Update feed every">
 <!ENTITY zotero.feedSettings.refresh.label2 "hour(s)">
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Remove unread feed items after">
@@ -333,7 +307,7 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.firstPage "صفحه اول">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">
@@ -350,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

@@ -20,6 +20,27 @@ describe("Duplicate Items", function () {
 	after(function () {
 		win.close();
 	});
+
+	async function merge(itemID) {
+		var userLibraryID = Zotero.Libraries.userLibraryID;
+			
+		var selected = await cv.selectByID('D' + userLibraryID);
+		assert.ok(selected);
+		await waitForItemsLoad(win);
+		
+		// Select the first item, which should select both
+		var iv = zp.itemsView;
+		var row = iv.getRowIndexByID(itemID);
+		var promise = iv.waitForSelect();
+		clickOnItemsRow(win, iv, row);
+		await promise;
+		
+		// Click merge button
+		var button = win.document.getElementById('zotero-duplicates-merge-button');
+		button.click();
+		
+		await waitForNotifierEvent('refresh', 'trash');
+	}
 	
 	describe("Merging", function () {
 		it("should merge two items in duplicates view", function* () {
@@ -28,28 +49,10 @@ describe("Duplicate Items", function () {
 			yield item2.saveTx();
 			var uri2 = Zotero.URI.getItemURI(item2);
 			
-			var userLibraryID = Zotero.Libraries.userLibraryID;
-			
-			var selected = yield cv.selectByID('D' + userLibraryID);
-			assert.ok(selected);
-			yield waitForItemsLoad(win);
-			
-			// Select the first item, which should select both
-			var iv = zp.itemsView;
-			var row = iv.getRowIndexByID(item1.id);
-			assert.isNumber(row);
-			var promise = iv.waitForSelect();
-			clickOnItemsRow(win, iv, row);
-			assert.equal(iv.selection.count, 2);
-			yield promise;
-			
-			// Click merge button
-			var button = win.document.getElementById('zotero-duplicates-merge-button');
-			button.click();
-			
-			yield waitForNotifierEvent('refresh', 'trash');
+			yield merge(item1.id);
 			
 			// Items should be gone
+			var iv = zp.itemsView;
 			assert.isFalse(iv.getRowIndexByID(item1.id));
 			assert.isFalse(iv.getRowIndexByID(item2.id));
 			assert.isTrue(item2.deleted);
@@ -67,27 +70,11 @@ describe("Duplicate Items", function () {
 			var item2 = item1.clone();
 			item2.setCollections([collection2.id]);
 			yield item2.saveTx();
-			
-			var userLibraryID = Zotero.Libraries.userLibraryID;
-			
-			var selected = yield cv.selectByID('D' + userLibraryID);
-			assert.ok(selected);
-			yield waitForItemsLoad(win);
-			
-			// Select the first item, which should select both
-			var iv = zp.itemsView;
-			var row = iv.getRowIndexByID(item1.id);
-			var promise = iv.waitForSelect();
-			clickOnItemsRow(win, iv, row);
-			yield promise;
-			
-			// Click merge button
-			var button = win.document.getElementById('zotero-duplicates-merge-button');
-			button.click();
-			
-			yield waitForNotifierEvent('refresh', 'trash');
+
+			yield merge(item1.id);
 			
 			// Items should be gone
+			var iv = zp.itemsView;
 			assert.isFalse(iv.getRowIndexByID(item1.id));
 			assert.isFalse(iv.getRowIndexByID(item2.id));
 			assert.isTrue(item2.deleted);

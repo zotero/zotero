@@ -24,7 +24,7 @@
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "B">
 <!ENTITY manageAttachments.label "Csatolmányok kezelése">
-<!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
+<!ENTITY convertToStored.label "Hivatkozott fájlok átalakítása tárolt fájlokká...">
 <!ENTITY importCmd.label "Importálás...">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Importálás Vágólapról">
@@ -45,18 +45,18 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY goMenu.label "Go">
+<!ENTITY goMenu.label "Ugrás">
 
 
 <!ENTITY viewMenu.label "Nézet">
 <!ENTITY viewMenu.accesskey "V">
-<!ENTITY layout.label "Layout">
+<!ENTITY layout.label "Elrendezés">
 <!ENTITY standardView.label "Alapértelmezett nézet">
-<!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
-<!ENTITY itemPane.label "Item Pane">
-<!ENTITY tagSelector.label "Tag Selector">
-<!ENTITY recursiveCollections.label "Show Items from Subcollections">
+<!ENTITY stackedView.label "Kombinált nézet">
+<!ENTITY collectionsPane.label "Gyűjtemények ablak">
+<!ENTITY itemPane.label "Elem ablak">
+<!ENTITY tagSelector.label "Címkeválasztó">
+<!ENTITY recursiveCollections.label "Elemek megjelenítése az algyűjteményekből">
 <!ENTITY fontSize.label "Betűméret">
 <!ENTITY noteFontSize.label "Jegyzet betűmérete">
 

@@ -108,7 +108,6 @@ const xpcomFilesLocal = [
 	'locale',
 	'locateManager',
 	'mime',
-	'noteBackups',
 	'notifier',
 	'openPDF',
 	'reader',

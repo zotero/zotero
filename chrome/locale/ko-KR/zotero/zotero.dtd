@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "모두 선택 해제">
 <!ENTITY zotero.general.edit "편집">
 <!ENTITY zotero.general.delete "삭제">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "휴지통으로 이동">
 <!ENTITY zotero.general.ok "확인">
 <!ENTITY zotero.general.cancel "취소">
 <!ENTITY zotero.general.refresh "새로고침">
@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "철회된 항목 표시">
 
 <!ENTITY zotero.items.itemType "항목 형식">
-<!ENTITY zotero.items.type_column "항목 형식">
-<!ENTITY zotero.items.title_column "제목">
 <!ENTITY zotero.items.creator_column "창작자">
-<!ENTITY zotero.items.date_column "날짜">
 <!ENTITY zotero.items.year_column "연도">
-<!ENTITY zotero.items.publisher_column "출판사">
-<!ENTITY zotero.items.publication_column "출판">
-<!ENTITY zotero.items.journalAbbr_column "저널 약어">
-<!ENTITY zotero.items.language_column "언어">
-<!ENTITY zotero.items.accessDate_column "접근일">
-<!ENTITY zotero.items.libraryCatalog_column "라이브러리 카탈로그">
-<!ENTITY zotero.items.callNumber_column "호출 번호">
-<!ENTITY zotero.items.rights_column "권리">
-<!ENTITY zotero.items.dateAdded_column "입력일">
 <!ENTITY zotero.items.dateModified_column "변경일">
-<!ENTITY zotero.items.extra_column "추가사항">
-<!ENTITY zotero.items.archive_column "아카이브">
-<!ENTITY zotero.items.archiveLocation_column "아카이브 위치">
-<!ENTITY zotero.items.place_column "발행지">
-<!ENTITY zotero.items.volume_column "권">
-<!ENTITY zotero.items.edition_column "판본">
-<!ENTITY zotero.items.pages_column "쪽">
-<!ENTITY zotero.items.issue_column "호">
-<!ENTITY zotero.items.series_column "시리즈">
-<!ENTITY zotero.items.seriesTitle_column "시리즈 제목">
-<!ENTITY zotero.items.court_column "법원">
-<!ENTITY zotero.items.medium_column "매체/">
-<!ENTITY zotero.items.genre_column "장르">
-<!ENTITY zotero.items.system_column "시스템">
 <!ENTITY zotero.items.moreColumns.label "추가 열">
 <!ENTITY zotero.items.restoreColumnOrder.label "열 순서 복원">
 
@@ -154,8 +128,8 @@
 <!ENTITY zotero.toolbar.attachment.add "파일의 사본을 보존...">
 <!ENTITY zotero.toolbar.attachment.weblink "현재 페이지로 링크 저장">
 <!ENTITY zotero.toolbar.attachment.snapshot "현재 페이지의 스냅샷을 촬영">
-<!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.item "항목">
+<!ENTITY zotero.toolbar.context.notes "노트">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "표시할 태그가 없음">
 <!ENTITY zotero.tagSelector.loadingTags "태그 불러오는 중...">
@@ -333,7 +307,7 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.firstPage "첫 페이지">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">
@@ -350,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

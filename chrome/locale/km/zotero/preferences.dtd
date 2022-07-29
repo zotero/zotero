@@ -62,15 +62,15 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "ធ្វើសមកាលកម្មឯកសារកម្ជាប់ក្នុងស្វ័យបណ្ណាល័យ">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "ធ្វើសមកាលកម្មមឯកសារភ្ជាប់នៅក្នុងបណ្ណាល័យក្រុមដោយប្រើបន្ទុកហ្ស៊ូតេរ៉ូ">
 <!ENTITY zotero.preferences.sync.fileSyncing.download "ទាញយកឯកសារ">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "នៅដំណាក់កាលសមកាលកម្មណាមួយ">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "តាមការចាំបាច់">
 <!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "តាមរយៈការប្រើបន្ទុកហ្ស៊ូតេរ៉ូ អ្នកត្រូវគោរពទៅតាម">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "លក្ខខណ្ឌ​ និង ខសន្យា។">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
 <!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
-<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
+<!ENTITY zotero.preferences.sync.librariesToSync.sync "សមកាលកម្ម">
+<!ENTITY zotero.preferences.sync.librariesToSync.library "បណ្ណាល័យ">
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
 <!ENTITY zotero.preferences.sync.reset.warning3 "សម្រាប់ព័ត៌មានបន្ថែម។">
@@ -111,8 +111,8 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "កំណត់គេហទំព័រជាក់លាក់:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "វិស័យ/ផ្លូវ">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g., wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "ទម្រង់">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "ភាសា">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "ចម្លងលឿនមិនអាចដំណើរការបាន នៅពេលទាញយកឯកសារច្រើនជាង">
 
 <!ENTITY zotero.preferences.prefpane.cite "អាគតដ្ឋាន">
@@ -164,7 +164,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "ជាន់ខ្ពស់">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "ឯកសារនិងថតឯកសារ">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "ផ្លូវកាត់">
 
 <!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
 
@@ -182,7 +182,7 @@
 <!ENTITY zotero.preferences.dataDir "ទីតាំងថតទិន្នន័យ">
 <!ENTITY zotero.preferences.dataDir.useProfile "ប្រើថតទម្រង់ហ្វៃអ៊ើហ្វក់ស៍">
 <!ENTITY zotero.preferences.dataDir.custom "ធម្មតា:">
-<!ENTITY zotero.preferences.dataDir.choose "Choose…">
+<!ENTITY zotero.preferences.dataDir.choose "ជ្រើសរើស...">
 <!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
 <!ENTITY zotero.preferences.dataDir.reveal "បង្ហាញថតទិន្នន័យ">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">

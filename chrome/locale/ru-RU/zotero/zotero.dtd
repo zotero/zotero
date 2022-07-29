@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Показать отозванные записи">
 
 <!ENTITY zotero.items.itemType "Тип записи">
-<!ENTITY zotero.items.type_column "Тип записи">
-<!ENTITY zotero.items.title_column "Название">
 <!ENTITY zotero.items.creator_column "Автор">
-<!ENTITY zotero.items.date_column "Дата">
 <!ENTITY zotero.items.year_column "Год">
-<!ENTITY zotero.items.publisher_column "Издатель">
-<!ENTITY zotero.items.publication_column "Издание">
-<!ENTITY zotero.items.journalAbbr_column "Сокращ. журнала">
-<!ENTITY zotero.items.language_column "Язык">
-<!ENTITY zotero.items.accessDate_column "Дата доступа">
-<!ENTITY zotero.items.libraryCatalog_column "Библ. каталог">
-<!ENTITY zotero.items.callNumber_column "Шифр">
-<!ENTITY zotero.items.rights_column "Права">
-<!ENTITY zotero.items.dateAdded_column "Добавлен">
 <!ENTITY zotero.items.dateModified_column "Изменен">
-<!ENTITY zotero.items.extra_column "Дополнительно">
-<!ENTITY zotero.items.archive_column "Архив">
-<!ENTITY zotero.items.archiveLocation_column "Место в архиве">
-<!ENTITY zotero.items.place_column "Место">
-<!ENTITY zotero.items.volume_column "Том">
-<!ENTITY zotero.items.edition_column "Издание">
-<!ENTITY zotero.items.pages_column "Страницы">
-<!ENTITY zotero.items.issue_column "Выпуск">
-<!ENTITY zotero.items.series_column "Серия">
-<!ENTITY zotero.items.seriesTitle_column "Название серии">
-<!ENTITY zotero.items.court_column "Суд">
-<!ENTITY zotero.items.medium_column "Источник/формат">
-<!ENTITY zotero.items.genre_column "Жанр">
-<!ENTITY zotero.items.system_column "Система">
 <!ENTITY zotero.items.moreColumns.label "Дополнительные столбцы">
 <!ENTITY zotero.items.restoreColumnOrder.label "Восстановить порядок столбцов">
 
@@ -350,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Уменьшить">
 <!ENTITY zotero.pdfReader.zoomAuto "Масштабировать автоматически">
 <!ENTITY zotero.pdfReader.zoomPageWidth "По ширине страницы">
+<!ENTITY zotero.pdfReader.zoomPageHeight "По высоте страницы">
 <!ENTITY zotero.pdfReader.transferFromPDF "Импортировать аннотации…">
-<!ENTITY zotero.pdfReader.transferToPDF "Сохранить аннотации в файл…">

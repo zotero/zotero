@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Deselectează tot">
 <!ENTITY zotero.general.edit "Editare">
 <!ENTITY zotero.general.delete "Ștergere">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Mută în coșul de gunoi">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Anulare">
 <!ENTITY zotero.general.refresh "Reîmprospătare">
@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Afișează itemii retrași">
 
 <!ENTITY zotero.items.itemType "Tip înregistrare">
-<!ENTITY zotero.items.type_column "Tip de înregistrare">
-<!ENTITY zotero.items.title_column "Titlu">
 <!ENTITY zotero.items.creator_column "Creator">
-<!ENTITY zotero.items.date_column "Dată">
 <!ENTITY zotero.items.year_column "An">
-<!ENTITY zotero.items.publisher_column "Editură">
-<!ENTITY zotero.items.publication_column "Publicație">
-<!ENTITY zotero.items.journalAbbr_column "Abrev. revistă">
-<!ENTITY zotero.items.language_column "Limbă">
-<!ENTITY zotero.items.accessDate_column "Data accesării">
-<!ENTITY zotero.items.libraryCatalog_column "Catalogul bibliotecii">
-<!ENTITY zotero.items.callNumber_column "Număr de telefon">
-<!ENTITY zotero.items.rights_column "Drepturi">
-<!ENTITY zotero.items.dateAdded_column "Data adăugării">
 <!ENTITY zotero.items.dateModified_column "Data modificării">
-<!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Arhivă">
-<!ENTITY zotero.items.archiveLocation_column "Loc. în arhivă">
-<!ENTITY zotero.items.place_column "Loc">
-<!ENTITY zotero.items.volume_column "Volume">
-<!ENTITY zotero.items.edition_column "Ediție">
-<!ENTITY zotero.items.pages_column "Pagini">
-<!ENTITY zotero.items.issue_column "Număr">
-<!ENTITY zotero.items.series_column "Colecție">
-<!ENTITY zotero.items.seriesTitle_column "Titlu colecție">
-<!ENTITY zotero.items.court_column "Curte">
-<!ENTITY zotero.items.medium_column "Medium/Formatare">
-<!ENTITY zotero.items.genre_column "Gen">
-<!ENTITY zotero.items.system_column "Sistem">
 <!ENTITY zotero.items.moreColumns.label "Mai multe coloane">
 <!ENTITY zotero.items.restoreColumnOrder.label "Restaurare ordine coloane">
 
@@ -155,7 +129,7 @@
 <!ENTITY zotero.toolbar.attachment.weblink "Salvează legătura la pagina curentă">
 <!ENTITY zotero.toolbar.attachment.snapshot "Creează un instantaneu al paginii curente">
 <!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.notes "Note">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Nicio etichetă pentru afişare">
 <!ENTITY zotero.tagSelector.loadingTags "Încarcă etichete...">
@@ -333,7 +307,7 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.firstPage "Prima pagină">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">
@@ -350,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

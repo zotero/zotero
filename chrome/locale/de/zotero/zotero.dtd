@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Zurückgezogene Einträge anzeigen">
 
 <!ENTITY zotero.items.itemType "Eintragsart">
-<!ENTITY zotero.items.type_column "Eintragsart">
-<!ENTITY zotero.items.title_column "Titel">
 <!ENTITY zotero.items.creator_column "Ersteller">
-<!ENTITY zotero.items.date_column "Datum">
 <!ENTITY zotero.items.year_column "Jahr">
-<!ENTITY zotero.items.publisher_column "Verlag">
-<!ENTITY zotero.items.publication_column "Publikation">
-<!ENTITY zotero.items.journalAbbr_column "Abkürzung der Zeitschrift">
-<!ENTITY zotero.items.language_column "Sprache">
-<!ENTITY zotero.items.accessDate_column "Zugriffsdatum">
-<!ENTITY zotero.items.libraryCatalog_column "Bibliothekskatalog">
-<!ENTITY zotero.items.callNumber_column "Signatur">
-<!ENTITY zotero.items.rights_column "Rechte">
-<!ENTITY zotero.items.dateAdded_column "hinzugefügt am">
 <!ENTITY zotero.items.dateModified_column "geändert am">
-<!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Archiv">
-<!ENTITY zotero.items.archiveLocation_column "Standort im Archiv">
-<!ENTITY zotero.items.place_column "Ort">
-<!ENTITY zotero.items.volume_column "Band">
-<!ENTITY zotero.items.edition_column "Auflage">
-<!ENTITY zotero.items.pages_column "Seiten">
-<!ENTITY zotero.items.issue_column "Ausgabe">
-<!ENTITY zotero.items.series_column "Reihe">
-<!ENTITY zotero.items.seriesTitle_column "Titel der Reihe">
-<!ENTITY zotero.items.court_column "Gericht">
-<!ENTITY zotero.items.medium_column "Medium/Format">
-<!ENTITY zotero.items.genre_column "Genre">
-<!ENTITY zotero.items.system_column "System">
 <!ENTITY zotero.items.moreColumns.label "Weitere Spalten">
 <!ENTITY zotero.items.restoreColumnOrder.label "Spaltenordnung wiederherstellen">
 
@@ -173,7 +147,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Farbe zuweisen">
 <!ENTITY zotero.tagColorChooser.removeColor "Farbe entfernen">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
+<!ENTITY zotero.lookup.description "Geben Sie ISBNs, DOIs, PMIDs, arXiv IDs oder ADS Bibcodes ein, um diese zu Ihrer Bibliothek hinzuzufügen:">
 <!ENTITY zotero.lookup.button.search "Suche">
 
 <!ENTITY zotero.createParent.title "Übergeordneten Eintrag erstellen">
@@ -222,7 +196,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Quellen sortiert halten">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
+<!ENTITY zotero.citation.suppressAuthor.label "Autor auslassen">
 <!ENTITY zotero.citation.prefix.label "Präfix:">
 <!ENTITY zotero.citation.suffix.label "Suffix:">
 <!ENTITY zotero.citation.editorWarning.label "Achtung: Wenn Sie eine Zitation im Editor bearbeiten, wird diese nicht mehr geupdatet, wenn Sie Änderungen an der Datenbank oder dem Zitationsstil vornehmen.">
@@ -293,9 +267,9 @@
 <!ENTITY zotero.feedSettings.title.label "Titel:">
 <!ENTITY zotero.feedSettings.refresh.label1 "Feed aktualisieren alle">
 <!ENTITY zotero.feedSettings.refresh.label2 "Stunde(n)">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Lösche ungelesene Feed Einträge nach">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Lösche ungelesene Feed-Einträge nach">
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "Tag(en)">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Lösche gelesene Feed Einträge nach">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "Lösche gelesene Feed-Einträge nach">
 <!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "Tag(en)">
 
 <!ENTITY zotero.rtfScan.title "RTF-Scan">
@@ -337,18 +311,18 @@
 <!ENTITY zotero.pdfReader.lastPage "Letzte Seite">
 <!ENTITY zotero.pdfReader.back "Zurück">
 <!ENTITY zotero.pdfReader.forward "Vorwärts">
-<!ENTITY zotero.pdfReader.rotateClockwise "Drehe im Uhrzeigersinn">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Drehe gegen den Uhrzeigersinn">
-<!ENTITY zotero.pdfReader.handTool "Hand Tool">
-<!ENTITY zotero.pdfReader.verticalScrolling "Vertikales Scrollen">
-<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontales Scrollen">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
-<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
-<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
-<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
-<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
-<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">
+<!ENTITY zotero.pdfReader.rotateClockwise "Im Uhrzeigersinn drehen">
+<!ENTITY zotero.pdfReader.rotateCounterclockwise "Gegen den Uhrzeigersinn drehen">
+<!ENTITY zotero.pdfReader.handTool "Hand-Werkzeug">
+<!ENTITY zotero.pdfReader.verticalScrolling "Vertikale Seitenanordnung">
+<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontale Seitenanordnung">
+<!ENTITY zotero.pdfReader.wrappedScrolling "Kombinierte Seitenanordnung">
+<!ENTITY zotero.pdfReader.noSpreads "Einzelne Seiten">
+<!ENTITY zotero.pdfReader.oddSpreads "Ungerade + gerade Seite">
+<!ENTITY zotero.pdfReader.evenSpreads "Gerade + ungerade Seite">
+<!ENTITY zotero.pdfReader.zoomIn "Vergrößern">
+<!ENTITY zotero.pdfReader.zoomOut "Verkleinern">
+<!ENTITY zotero.pdfReader.zoomAuto "Automatisch Größe anpassen">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Auf Fensterbreite skalieren">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Auf Fensterhöhe skalieren">
+<!ENTITY zotero.pdfReader.transferFromPDF "Anmerkungen importieren…">

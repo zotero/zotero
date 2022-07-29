@@ -164,6 +164,13 @@ describe("Zotero.Date", function() {
 	})
 	
 	describe("#strToDate()", function () {
+		beforeEach(function () {
+			if (Zotero.locale != 'en-US') {
+				Zotero.locale = 'en-US';
+				Zotero.Date.init();
+			}
+		});
+		
 		it("should return object without date parts for null", function () {
 			var o = Zotero.Date.strToDate(null);
 			assert.notProperty(o, 'year');
@@ -187,6 +194,31 @@ describe("Zotero.Date", function() {
 		it("should return object without date parts for blank string", function () {
 			var o = Zotero.Date.strToDate(' ');
 			assert.notProperty(o, 'year');
+		});
+		
+		it("should parse English month before date", function () {
+			var o = Zotero.Date.strToDate("June 26, 2010");
+			assert.equal(o.month, 5);
+			assert.equal(o.day, 26);
+			assert.equal(o.year, 2010);
+		});
+		
+		it("should parse English month after date", function () {
+			var o = Zotero.Date.strToDate("26 June 2010");
+			assert.equal(o.month, 5);
+			assert.equal(o.day, 26);
+			assert.equal(o.year, 2010);
+		});
+		
+		it("should parse Chinese month", function () {
+			Zotero.locale = 'zh-CN';
+			Zotero.Date.init();
+			var o = Zotero.Date.strToDate(
+				String.fromCharCode(0x56DB) + String.fromCharCode(0x6708) + " 26, 2010"
+			);
+			assert.equal(o.month, 3);
+			assert.equal(o.day, 26);
+			assert.equal(o.year, 2010);
 		});
 		
 		it("should parse two- and three-digit dates with leading zeros", function () {

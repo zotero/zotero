@@ -219,6 +219,7 @@ Zotero.Integration = new function() {
 	 */
 	this.execCommand = async function(agent, command, docId, templateVersion=0) {
 		var document, session, documentImported;
+		Zotero.debug(`Integration: ${agent}-${command}${docId ? `:'${docId}'` : ''} invoked`)
 		if (Zotero.Integration.warnOutdatedTemplate(agent, templateVersion)) return;
 
 		if (Zotero.Integration.currentDoc) {
@@ -230,7 +231,6 @@ Zotero.Integration = new function() {
 			return;
 		}
 		Zotero.Integration.currentDoc = true;
-		Zotero.debug(`Integration: ${agent}-${command}${docId ? `:'${docId}'` : ''} invoked`)
 
 		var startTime = (new Date()).getTime();
 
@@ -263,16 +263,19 @@ Zotero.Integration = new function() {
 		}
 		catch (e) {
 			if (!(e instanceof Zotero.Exception.UserCancelled)) {
-				Zotero.Integration._handleCommandError(document, session, e);
+				await Zotero.Integration._handleCommandError(document, session, e);
 			}
 			else {
 				if (session) {
 					// If user cancels we should still write the currently assigned session ID
-					await document.setDocumentData(session.data.serialize());
-					// And any citations marked for processing (like retraction warning ignore flag changes)
-					if (Object.keys(session.processIndices).length) {
-						session.updateDocument(FORCE_CITATIONS_FALSE, false, false);
-					}
+					try {
+						await document.setDocumentData(session.data.serialize());
+						// And any citations marked for processing (like retraction warning ignore flag changes)
+						if (Object.keys(session.processIndices).length) {
+							session.updateDocument(FORCE_CITATIONS_FALSE, false, false);
+						}
+					// Since user cancelled we can ignore if processor fails here.
+					} catch(e) {}
 				}
 			}
 		}
@@ -366,16 +369,24 @@ Zotero.Integration = new function() {
 			
 			Zotero.Utilities.Internal.activate();
 			let ps = Services.prompt;
-			let index = ps.confirm(null, Zotero.getString('integration.error.title'), displayError);
-			if (index == 1) {
-				Zotero.launchURL(supportURL);
+			if (e instanceof Zotero.Exception.Alert) {
+				ps.alert(null, Zotero.getString('integration.error.title'), displayError);
+			}
+			else {
+				let index = ps.confirm(null, Zotero.getString('integration.error.title'), displayError);
+				if (index == 1) {
+					Zotero.launchURL(supportURL);
+				}
 			}
 			
-			// If the driver panicked we cannot reuse it
-			if (e instanceof Zotero.CiteprocRs.CiteprocRsDriverError) {
-				session.style.free(true);
-				delete Zotero.Integration.sessions[session.id];
-			}
+			// CiteprocRsDriverError available only if citeproc-rs is enabled
+			try {
+				// If the driver panicked we cannot reuse it
+				if (e instanceof Zotero.CiteprocRs.CiteprocRsDriverError) {
+					session.style.free(true);
+					delete Zotero.Integration.sessions[session.id];
+				}
+			} catch (e) {}
 		}
 		finally {
 			Zotero.logError(e);
@@ -1428,22 +1439,20 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 	);
 	Zotero.debug(`Editing citation:`);
 	Zotero.debug(JSON.stringify(citation.toJSON()));
-	
-	if (Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
+
+	var mode = (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')
+		? 'popup' : 'alwaysRaised')+',resizable=false';
+	if (addNote) {
+		Zotero.Integration.displayDialog('chrome://zotero/content/integration/insertNoteDialog.xul',
+			mode, io);
+	}
+	else if (Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
 		Zotero.Integration.displayDialog('chrome://zotero/content/integration/addCitationDialog.xul',
 			'alwaysRaised,resizable', io);
 	}
 	else {
-		var mode = (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')
-			? 'popup' : 'alwaysRaised')+',resizable=false';
-		if (addNote) {
-			Zotero.Integration.displayDialog('chrome://zotero/content/integration/insertNoteDialog.xul',
-				mode, io);
-		}
-		else {
-			Zotero.Integration.displayDialog('chrome://zotero/content/integration/quickFormat.xul',
-				mode, io);
-		}
+		Zotero.Integration.displayDialog('chrome://zotero/content/integration/quickFormat.xul',
+			mode, io);
 	}
 
 	// -------------------

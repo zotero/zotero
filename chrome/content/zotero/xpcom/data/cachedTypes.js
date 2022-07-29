@@ -485,6 +485,7 @@ Zotero.ItemTypes = new function() {
 			case 'newspaperArticle':
 			case 'note':
 			case 'patent':
+			case 'preprint':
 			case 'presentation':
 			case 'report':
 			case 'statute':

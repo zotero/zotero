@@ -41,6 +41,7 @@ pref("extensions.zotero.attachmentRenameFormatString", "{%c - }{%y - }{%t{50}}")
 pref("extensions.zotero.capitalizeTitles", false);
 pref("extensions.zotero.launchNonNativeFiles", false);
 pref("extensions.zotero.sortNotesChronologically", false);
+pref("extensions.zotero.sortNotesChronologically.reader", true);
 pref("extensions.zotero.sortAttachmentsChronologically", false);
 pref("extensions.zotero.showTrashWhenEmpty", true);
 pref("extensions.zotero.trashAutoEmptyDays", 30);
@@ -77,6 +78,9 @@ pref("extensions.zotero.sortCreatorAsString", false);
 pref("extensions.zotero.tagSelector.showAutomatic", true);
 pref("extensions.zotero.tagSelector.displayAllTags", false);
 
+pref("extensions.zotero.downloadPDFViaBrowser.onLoadTimeout", 3000);
+pref("extensions.zotero.downloadPDFViaBrowser.downloadTimeout", 60000);
+
 // Keyboard shortcuts
 pref("extensions.zotero.keys.saveToZotero", "S");
 pref("extensions.zotero.keys.newItem", "N");
@@ -100,6 +104,7 @@ pref("extensions.zotero.search.useLeftBound", true);
 pref("extensions.zotero.note.fontFamily", "Lucida Grande, Tahoma, Verdana, Helvetica, sans-serif");
 pref("extensions.zotero.note.fontSize", "14");
 pref("extensions.zotero.note.css", "");
+pref("extensions.zotero.note.smartQuotes", true);
 
 // Reports
 pref("extensions.zotero.report.includeAllChildItems", true);
@@ -160,6 +165,10 @@ pref("extensions.zotero.sync.storage.groups.enabled", true);
 pref("extensions.zotero.sync.storage.downloadMode.personal", "on-sync");
 pref("extensions.zotero.sync.storage.downloadMode.groups", "on-sync");
 pref("extensions.zotero.sync.fulltext.enabled", true);
+pref("extensions.zotero.sync.reminder.setUp.enabled", true);
+pref("extensions.zotero.sync.reminder.setUp.lastDisplayed", 0);
+pref("extensions.zotero.sync.reminder.autoSync.enabled", true);
+pref("extensions.zotero.sync.reminder.autoSync.lastDisplayed", 0);
 
 // Proxy
 pref("extensions.zotero.proxies.autoRecognize", true);
@@ -196,5 +205,8 @@ pref("extensions.zotero.retractions.recentItems", "[]");
 
 // Annotations
 pref("extensions.zotero.annotations.noteTemplates.title", "<h1>{{title}}<br/>({{date}})</h1>");
-pref("extensions.zotero.annotations.noteTemplates.highlight", "<p>{{highlight quotes='true'}} {{citation}} {{comment}}</p>");
+pref("extensions.zotero.annotations.noteTemplates.highlight", "<p>{{highlight}} {{citation}} {{comment}}</p>");
 pref("extensions.zotero.annotations.noteTemplates.note", "<p>{{citation}} {{comment}}</p>");
+
+// Scaffold
+pref("extensions.zotero.scaffold.eslint.enabled", true);

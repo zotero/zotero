@@ -84,8 +84,8 @@
 			</box>
 			<box id="zotero-tab-toolbar" class="toolbar" hidden="true">
 				<div id="zotero-tb-split" xmlns="http://www.w3.org/1999/xhtml" class="split-button">
-					<div id="zotero-tb-toggle-item-pane" class="toolbarButton item" title="&zotero.toolbar.context.item;"><span/></div>
-					<div id="zotero-tb-toggle-notes-pane" class="toolbarButton notes" title="&zotero.toolbar.context.notes;"><span/></div>
+					<button id="zotero-tb-toggle-item-pane" class="toolbarButton item" title="&zotero.toolbar.context.item;" tabindex="-1"><span/></button>
+					<button id="zotero-tb-toggle-notes-pane" class="toolbarButton notes" title="&zotero.toolbar.context.notes;" tabindex="-1"><span/></button>
 				</div>
 			</box>
 			<deck id="tabs-deck" flex="1">
@@ -221,7 +221,7 @@
 							<panel id="zotero-sync-error-panel" type="arrow"/>
 							
 							<toolbarbutton id="zotero-tb-sync" class="zotero-tb-button" tooltip="_child"
-									oncommand="Zotero.Sync.Server.canAutoResetClient = true; Zotero.Sync.Server.manualSyncRequired = false; Zotero.Sync.Runner.sync()">
+									oncommand="ZoteroPane.sync()">
 								<tooltip
 										id="zotero-tb-sync-tooltip"
 										onpopupshowing="Zotero.Sync.Runner.registerSyncStatus(this)"
@@ -235,6 +235,18 @@
 							</toolbarbutton>
 						</hbox>
 					</toolbar>
+
+					<vbox id="sync-reminder-container" collapsed="true">
+						<div xmlns="http://www.w3.org/1999/xhtml" id="sync-reminder-banner">
+							<div id="sync-reminder-message"/>
+							<a id="sync-reminder-action" class="sync-reminder-link"/>
+							<a id="sync-reminder-learn-more" class="sync-reminder-link"/>
+							<div id="sync-reminder-spacer"/>
+							<a id="sync-reminder-disable" class="sync-reminder-link"/>
+							<a id="sync-reminder-remind" class="sync-reminder-link"/>
+							<div id="sync-reminder-close">×</div>
+						</div>
+					</vbox>
 					
 					<vbox id="retracted-items-container" collapsed="true">
 						<div xmlns="http://www.w3.org/1999/xhtml" id="retracted-items-banner">
@@ -298,8 +310,14 @@
 							<menuitem class="menuitem-iconic zotero-menuitem-find-pdf" oncommand="ZoteroPane.findPDFForSelectedItems()"/>
 							<menuseparator/>
 							<menuitem class="menuitem-iconic zotero-menuitem-toggle-read-item" oncommand="ZoteroPane_Local.toggleSelectedItemsRead();"/>
-							<menuitem class="menuitem-iconic zotero-menuitem-duplicate-item" label="&zotero.items.menu.duplicateItem;" oncommand="ZoteroPane_Local.duplicateSelectedItem().done();"/>
+							<menu class="menuitem-iconic zotero-menuitem-add-to-collection">
+								<menupopup id="zotero-add-to-collection-popup" onpopupshowing="ZoteroPane_Local.buildAddToCollectionMenu(event)">
+									<menuitem id="zotero-add-to-new-collection" label="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane_Local.addSelectedItemsToCollection(null, true)"/>
+									<menuseparator id="zotero-add-to-collection-separator"/>
+								</menupopup>
+							</menu>
 							<menuitem class="menuitem-iconic zotero-menuitem-remove-items" oncommand="ZoteroPane_Local.deleteSelectedItems();"/>
+							<menuitem class="menuitem-iconic zotero-menuitem-duplicate-item" label="&zotero.items.menu.duplicateItem;" oncommand="ZoteroPane_Local.duplicateSelectedItem().done();"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-restore-to-library" label="&zotero.items.menu.restoreToLibrary;" oncommand="ZoteroPane_Local.restoreSelectedItems();"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-move-to-trash" oncommand="ZoteroPane_Local.deleteSelectedItems(true, true);"/>
 							<menuitem class="menuitem-iconic zotero-menuitem-delete-from-lib" oncommand="ZoteroPane_Local.deleteSelectedItems(false, true)"/>
@@ -369,7 +387,7 @@
 							</splitter>
 		
 							<!-- itemPane.xul -->
-							<vbox id="zotero-item-pane" zotero-persist="width height"/>
+							<vbox id="zotero-item-pane" zotero-persist="width height" height="300"/>
 						</box>
 					</hbox>
 				</vbox>
@@ -399,7 +417,7 @@
 							  orient="vertical"
 							  collapse="after"
 							  zotero-persist="state"
-							  resizebefore="clsest"
+							  resizebefore="closest"
 							  resizeafter="closest"
 							  onmousemove="ZoteroContextPane.update()"
 							  oncommand="ZoteroContextPane.update()"

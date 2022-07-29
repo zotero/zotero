@@ -113,9 +113,10 @@ var Zotero_Citation_Dialog = new function () {
 		var menu = document.getElementById("label");
 		var label_list = document.getElementById("locator-type-popup");
 		var i = 0;
+		var pageLocatorIndex;
 		for(var value in locators) {
 			var locator = locators[value];
-			var locatorLabel = Zotero.getString('citation.locator.'+locator.replace(/\s/g,''));
+			let locatorLabel = Zotero.Cite.getLocatorString(locator);
 			// add to list of labels
 			var child = document.createElement("menuitem");
 			child.setAttribute("value", value);
@@ -124,9 +125,12 @@ var Zotero_Citation_Dialog = new function () {
 			// add to array
 			_locatorIndexArray[locator] = i;
 			_locatorNameArray[i] = locator;
+			if (locator == 'page') {
+				pageLocatorIndex = i;
+			}
 			i++;
 		}
-		menu.selectedIndex = 0;
+		menu.selectedIndex = pageLocatorIndex;
 		
 		// load (from selectItemsDialog.js)
 		yield doLoad();
@@ -376,9 +380,9 @@ var Zotero_Citation_Dialog = new function () {
 	this.add = Zotero.Promise.coroutine(function* (first_item) {
 		
 		var pos, len;
-		var item = itemsView.getSelectedItems()[0]; // treeview from xpcom/itemTreeView.js
+		var items = itemsView.getSelectedItems(); // treeview from xpcom/itemTreeView.js
 		
-		if (!item) {
+		if (!items.length) {
 			yield sortCitation();
 			_updateAccept();
 			_updatePreview();
@@ -386,9 +390,11 @@ var Zotero_Citation_Dialog = new function () {
 		}
 
 		// Add to selection list and generate a new itemDataID for this cite.
-		var selectionNode = _addItem(item);
-		var itemDataID = selectionNode.getAttribute("value");
-		document.getElementById("add").disabled = !itemDataID;
+		for (let item of items) {
+			var selectionNode = _addItem(item);
+			var itemDataID = selectionNode.getAttribute("value");
+			document.getElementById("add").disabled = !itemDataID;
+		}
 
 		// Save existing locator and affix field content, if any.
 		if (first_item) {

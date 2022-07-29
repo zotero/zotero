@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Erakutsi erretiratutako elementuak">
 
 <!ENTITY zotero.items.itemType "Elementu mota">
-<!ENTITY zotero.items.type_column "Elementu mota">
-<!ENTITY zotero.items.title_column "Izenburua">
 <!ENTITY zotero.items.creator_column "Egilea">
-<!ENTITY zotero.items.date_column "Data">
 <!ENTITY zotero.items.year_column "Urtea">
-<!ENTITY zotero.items.publisher_column "Argitaratzailea">
-<!ENTITY zotero.items.publication_column "Argitalpena">
-<!ENTITY zotero.items.journalAbbr_column "Aldizkaria labur">
-<!ENTITY zotero.items.language_column "Hizkuntza">
-<!ENTITY zotero.items.accessDate_column "Sartua">
-<!ENTITY zotero.items.libraryCatalog_column "Liburutegi katalogoa">
-<!ENTITY zotero.items.callNumber_column "Dei Zbk">
-<!ENTITY zotero.items.rights_column "Jabetza">
-<!ENTITY zotero.items.dateAdded_column "Noiz gehitua">
 <!ENTITY zotero.items.dateModified_column "Noiz aldatua">
-<!ENTITY zotero.items.extra_column "Estra">
-<!ENTITY zotero.items.archive_column "Artxiboa">
-<!ENTITY zotero.items.archiveLocation_column "Kok. artxiboan">
-<!ENTITY zotero.items.place_column "Tokia">
-<!ENTITY zotero.items.volume_column "Liburukia">
-<!ENTITY zotero.items.edition_column "Edizioa">
-<!ENTITY zotero.items.pages_column "Orrialdeak">
-<!ENTITY zotero.items.issue_column "Zenbakia">
-<!ENTITY zotero.items.series_column "Bilduma">
-<!ENTITY zotero.items.seriesTitle_column "Bildumaren izenburua">
-<!ENTITY zotero.items.court_column "Auzitegia">
-<!ENTITY zotero.items.medium_column "Bitartekoa/formatua">
-<!ENTITY zotero.items.genre_column "Generoa">
-<!ENTITY zotero.items.system_column "Sistema">
 <!ENTITY zotero.items.moreColumns.label "Zutabe gehiago">
 <!ENTITY zotero.items.restoreColumnOrder.label "Zutabeen ordena berrezarri">
 
@@ -350,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Urrundu">
 <!ENTITY zotero.pdfReader.zoomAuto "Tamaina automatikoki egokitu">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Orrialdearen zabalerara zoom egin">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Oharpenak inportatu">
-<!ENTITY zotero.pdfReader.transferToPDF "Oharpenak fitxategian gorde...">

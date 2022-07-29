@@ -157,7 +157,7 @@ var ZoteroAdvancedSearch = new function() {
 		
 		var s = _searchBox.search.clone();
 		s.name = name.value;
-		yield s.save();
+		yield s.saveTx();
 		
 		window.close();
 	});

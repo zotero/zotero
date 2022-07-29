@@ -89,10 +89,7 @@ var Zotero_Duplicates_Pane = new function () {
 		if (alternatives) {
 			// Populate menulist with Date Added values from all items
 			var dateList = document.getElementById('zotero-duplicates-merge-original-date');
-			
-			while (dateList.itemCount) {
-				dateList.removeItemAt(0);
-			}
+			dateList.innerHTML = '';
 			
 			var numRows = 0;
 			for (let item of items) {

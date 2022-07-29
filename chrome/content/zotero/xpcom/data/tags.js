@@ -163,6 +163,9 @@ Zotero.Tags = new function() {
 		if (libraryID) {
 			sql += "JOIN items USING (itemID) WHERE libraryID = ? ";
 			params.push(libraryID);
+			// TEMP: Don't show annotation tags in tag selector
+			sql += "AND itemTypeID != ? ";
+			params.push(Zotero.ItemTypes.getID('annotation'));
 		}
 		else {
 			sql += "WHERE 1 ";
@@ -588,6 +591,8 @@ Zotero.Tags = new function() {
 		}
 		
 		var tagColors = Zotero.SyncedSettings.get(libraryID, 'tagColors') || [];
+		// Normalize tags from DB, which might not have been normalized properly previously
+		tagColors.forEach(x => x.name = x.name.normalize());
 		_libraryColors[libraryID] = tagColors;
 		_libraryColorsByName[libraryID] = new Map;
 		
@@ -616,7 +621,7 @@ Zotero.Tags = new function() {
 		this.getColors(libraryID);
 		var tagColors = _libraryColors[libraryID];
 		
-		name = name.trim();
+		name = name.trim().normalize();
 		
 		// Unset
 		if (!color) {
@@ -944,9 +949,11 @@ Zotero.Tags = new function() {
 	/**
 	 * Compare two API JSON tag objects
 	 */
-	this.equals = function (data1, data2) {
-		data1 = this.cleanData(data1);
-		data2 = this.cleanData(data2);
+	this.equals = function (data1, data2, options = {}) {
+		if (!options.skipClean) {
+			data1 = this.cleanData(data1);
+			data2 = this.cleanData(data2);
+		}
 		return data1.tag === data2.tag
 			&& ((!data1.type && !data2.type) || data1.type === data2.type);
 	},

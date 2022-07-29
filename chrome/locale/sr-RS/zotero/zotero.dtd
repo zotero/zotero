@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Прикажи повучене ставке">
 
 <!ENTITY zotero.items.itemType "Врста ставке">
-<!ENTITY zotero.items.type_column "Врста ставке">
-<!ENTITY zotero.items.title_column "Наслов">
 <!ENTITY zotero.items.creator_column "Аутор">
-<!ENTITY zotero.items.date_column "Датум">
 <!ENTITY zotero.items.year_column "Година">
-<!ENTITY zotero.items.publisher_column "Издавач">
-<!ENTITY zotero.items.publication_column "Издање">
-<!ENTITY zotero.items.journalAbbr_column "Скраћеница часописа">
-<!ENTITY zotero.items.language_column "Језик">
-<!ENTITY zotero.items.accessDate_column "Приступљено">
-<!ENTITY zotero.items.libraryCatalog_column "Каталог библиотеке">
-<!ENTITY zotero.items.callNumber_column "Сигнатура">
-<!ENTITY zotero.items.rights_column "Права">
-<!ENTITY zotero.items.dateAdded_column "Датум додавања">
 <!ENTITY zotero.items.dateModified_column "Датум промене">
-<!ENTITY zotero.items.extra_column "Додатно">
-<!ENTITY zotero.items.archive_column "Архива">
-<!ENTITY zotero.items.archiveLocation_column "Место у архиви">
-<!ENTITY zotero.items.place_column "Место">
-<!ENTITY zotero.items.volume_column "Том">
-<!ENTITY zotero.items.edition_column "Едиција">
-<!ENTITY zotero.items.pages_column "Странице">
-<!ENTITY zotero.items.issue_column "Бр. издања">
-<!ENTITY zotero.items.series_column "Серија">
-<!ENTITY zotero.items.seriesTitle_column "Наслов серије">
-<!ENTITY zotero.items.court_column "Суд">
-<!ENTITY zotero.items.medium_column "Медијум/формат">
-<!ENTITY zotero.items.genre_column "Жанр">
-<!ENTITY zotero.items.system_column "Систем">
 <!ENTITY zotero.items.moreColumns.label "Још колона">
 <!ENTITY zotero.items.restoreColumnOrder.label "Врати редослед колона">
 
@@ -333,9 +307,9 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Додај самосталну белешку из напомена">
 <!ENTITY zotero.context.editInWindow "Уреди у засебном прозору">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.firstPage "Прва страница">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
-<!ENTITY zotero.pdfReader.back "Back">
+<!ENTITY zotero.pdfReader.back "Назад">
 <!ENTITY zotero.pdfReader.forward "Forward">
 <!ENTITY zotero.pdfReader.rotateClockwise "Rotate Clockwise">
 <!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotate Counterclockwise">
@@ -350,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

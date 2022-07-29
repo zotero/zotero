@@ -1,58 +1,113 @@
 <?xml version="1.0"?>
 <!--
-    ***** BEGIN LICENSE BLOCK *****
-    
-    Copyright © 2011 Center for History and New Media
-                     George Mason University, Fairfax, Virginia, USA
-                     http://zotero.org
-    
-    This file is part of Zotero.
-    
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-    
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
-    
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-    
-    ***** END LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
+	
+	Copyright © 2011 Center for History and New Media
+					 George Mason University, Fairfax, Virginia, USA
+					 http://zotero.org
+	
+	This file is part of Zotero.
+	
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+	
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+	
+	***** END LICENSE BLOCK *****
 -->
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <?xml-stylesheet href="chrome://scaffold/skin/scaffold.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform-version/content/style.css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
 
-<!DOCTYPE window SYSTEM "chrome://scaffold/locale/scaffold.dtd">
+<?xul-overlay href="chrome://zotero/content/containers/containers.xul"?>
+<?xul-overlay href="chrome://zotero/content/standalone/editMenuOverlay.xul"?>
+<?xul-overlay href="chrome://zotero-platform/content/standalone/menuOverlay.xul"?>
 
-<window id="scaffold" width="600" height="600" minheight="600" persist="screenX screenY width height"
+<!DOCTYPE window [
+	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
+	<!ENTITY % textcontextDTD SYSTEM "chrome://global/locale/textcontext.dtd" > %textcontextDTD;
+	<!ENTITY % standaloneDTD SYSTEM "chrome://zotero/locale/standalone.dtd" > %standaloneDTD;
+	<!ENTITY % editMenuOverlayDTD SYSTEM "chrome://zotero/locale/mozilla/editMenuOverlay.dtd" > %editMenuOverlayDTD;
+	<!ENTITY % brandDTD SYSTEM "chrome://branding/locale/brand.dtd" > %brandDTD;
+	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
+	<!ENTITY % scaffoldDTD SYSTEM "chrome://scaffold/locale/scaffold.dtd"> %scaffoldDTD;
+]>
+
+<window id="scaffold" width="800" height="600" minheight="600" persist="screenX screenY width height"
  title="Scaffold"
  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<script src="chrome://zotero/content/include.js"/>
 	<script src="chrome://zotero/content/xpcom/translate/testTranslators/translatorTester.js"/>
 	<script src="translators.js"/>
 	<script src="scaffold.js"/>
+
+	<script src="chrome://global/content/globalOverlay.js"/>
+	<script src="chrome://global/content/contentAreaUtils.js"/>
+
+	<commandset id="mainCommandSet">
+		<command id="cmd_quitApplication" oncommand="goQuitApplication();"/>
+		<command id="cmd_close" oncommand="window.close();"/>
+
+		<command id="cmd_undo" oncommand="Scaffold.trigger('undo', 'cmd_undo')"/>
+		<command id="cmd_redo" oncommand="Scaffold.trigger('redo', 'cmd_redo')"/>
+		<command id="cmd_find" oncommand="Scaffold.trigger('actions.find', 'cmd_find')"/>
+		<command id="cmd_selectAll" oncommand="Scaffold.trigger('editor.selectAll', 'cmd_selectAll')"/>
+
+		<command id="cmd_new" oncommand="Scaffold.newTranslator()"/>
+		<command id="cmd_load" oncommand="Scaffold.load()" disabled="true"/>
+		<command id="cmd_run_translator_or_tests" oncommand="Scaffold.runTranslatorOrTests()"/>
+		<command id="cmd_run_detect" oncommand="Scaffold.run('detect')"/>
+		<command id="cmd_save" oncommand="Scaffold.save()"/>
+		<command id="cmd_save_to_zotero" oncommand="Scaffold.save(true)"/>
+
+		<command id="cmd_increase_font_size" oncommand="Scaffold.increaseFontSize()"/>
+		<command id="cmd_decrease_font_size" oncommand="Scaffold.decreaseFontSize()"/>
+		<command id="cmd_restore_font_size" oncommand="Scaffold.setFontSize(11)"/>
+		
+		<commandset id="editMenuCommands"/>
+	</commandset>
 	
 	<keyset>
-		<key id="run-do-web" modifiers="accel" key="R" oncommand="Scaffold.runTranslatorOrTests()"/>
-		<key id="detect-web" modifiers="accel" key="T" oncommand="Scaffold.run('detect')"/>
-		<key id="save" modifiers="accel" key="S" oncommand="Scaffold.save()"/>
-		<key id="increase-font-size" modifiers="accel" key="+" oncommand="Scaffold.increaseFontSize()"/>
-		<key id="increase-font-size" modifiers="accel" key="=" oncommand="Scaffold.increaseFontSize()"/>
-		<key id="decrease-font-size" modifiers="accel" key="-" oncommand="Scaffold.decreaseFontSize()"/>
-		<key id="restore-font-size" modifiers="accel" key="0" oncommand="Scaffold.setFontSize(11)"/>
+		<key id="new" modifiers="accel" key="N" command="cmd_new"/>
+		<key id="load" modifiers="accel" key="O" command="cmd_load"/>
+		<key id="run-do-web" modifiers="accel" key="R" command="cmd_run_translator_or_tests"/>
+		<key id="detect-web" modifiers="accel" key="T" command="cmd_run_detect"/>
+		<key id="save" modifiers="accel" key="S" command="cmd_save"/>
+		<key id="save-to-zotero" modifiers="accel alt" key="S" command="cmd_save"/>
+		<key id="increase-font-size" modifiers="accel" key="+" command="cmd_increase_font_size"/>
+		<key id="increase-font-size" modifiers="accel" key="=" command="cmd_increase_font_size"/>
+		<key id="decrease-font-size" modifiers="accel" key="-" command="cmd_decrease_font_size"/>
+		<key id="restore-font-size" modifiers="accel" key="0" command="cmd_restore_font_size"/>
+
+		<key modifiers="accel" key="1" oncommand="Scaffold.showTabNumbered(1)"/>
+		<key modifiers="accel" key="2" oncommand="Scaffold.showTabNumbered(2)"/>
+		<key modifiers="accel" key="3" oncommand="Scaffold.showTabNumbered(3)"/>
+		<key modifiers="accel" key="4" oncommand="Scaffold.showTabNumbered(4)"/>
+		<key modifiers="accel" key="5" oncommand="Scaffold.showTabNumbered(5)"/>
+		<key modifiers="accel" key="6" oncommand="Scaffold.showTabNumbered(6)"/>
+		<key modifiers="accel" key="7" oncommand="Scaffold.showTabNumbered(7)"/>
+		<key modifiers="accel" key="8" oncommand="Scaffold.showTabNumbered(8)"/>
+		<key modifiers="accel" key="9" oncommand="Scaffold.showTabNumbered(9)"/>
 	</keyset>
+
+	<keyset id="editMenuKeys"/>
 
 	<popupset>
 		<menupopup id="testing-context-menue">
-			<menuitem label="&scaffold.testing.edit.import;" tooltiptext="Edit the input data for the current test" oncommand="Scaffold.editImportFromTest()"/>
 			<menuitem label="&scaffold.testing.copyToClipboard;" tooltiptext="Copy the URL or data for the current test to the clipboard" oncommand="Scaffold.copyToClipboard()"/>
-			<menu label="&scaffold.testing.openUrl;">
+			<menuitem id="testing_editImport" label="&scaffold.testing.edit;" tooltiptext="Edit the input data for the current test" oncommand="Scaffold.editImportFromTest()"/>
+			<menu id="testing_openURL" label="&scaffold.testing.openUrl;">
 				<menupopup>
 					<menuitem label="&scaffold.testing.openUrl.internally;" tooltiptext="Open the URL for the current test in the Scaffold browser" oncommand="Scaffold.openURL(false)"/>
 					<menuitem label="&scaffold.testing.openUrl.externally;" tooltiptext="Open the URL for the current test in your default browser" oncommand="Scaffold.openURL(true)"/>
@@ -61,10 +116,95 @@
 		</menupopup>
 	</popupset>
 
+	<broadcasterset>
+		<broadcaster id="code-tab-only" disabled="true"/>
+		<broadcaster id="validate-tests"/>
+	</broadcasterset>
+
 	<vbox flex="1" id="scaffold-pane">
 		
 		<menubar id="mb">
-			<menu id="mb-help" label="&scaffold.menu.help;">
+			<menu id="mb-file" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
+				<menupopup id="mb-file-popup">
+					<menuitem id="mb-file-new" label="&scaffold.menu.new;" key="new" command="cmd_new"/>
+					<menuitem id="mb-file-load" label="&scaffold.menu.open;" key="load" command="cmd_load"/>
+					<menuitem id="mb-file-setTranslatorsDirectory" label="&scaffold.menu.setTranslatorsDirectory;" oncommand="Scaffold.promptForTranslatorsDirectory()"/>
+					<menuseparator/>
+					<menuitem id="mb-file-save" label="&scaffold.toolbar.save.label;" key="save" command="cmd_save"/>
+					<menuitem id="mb-file-saveToZotero" label="&scaffold.toolbar.saveToZotero.label;" key="save-to-zotero" command="cmd_save_to_zotero"/>
+					<menuseparator/>
+					<menuitem id="mb-file-runDetect" label="&scaffold.menu.runDetect;" key="detect-web" command="cmd_run_detect"/>
+					<menuitem id="mb-file-runDo" label="&scaffold.menu.runDo;" key="run-do-web" command="cmd_run_translator_or_tests"/>
+					<menuseparator/>
+					<menuitem id="menu_close" label="&closeCmd.label;" key="key_close" accesskey="&closeCmd.accesskey;" command="cmd_close"/>
+				</menupopup>
+			</menu>
+
+			<menu id="menu_edit">
+				<menupopup id="menu_EditPopup">
+					<menuitem id="menu_undo" command="cmd_undo"/>
+					<menuitem id="menu_redo" command="cmd_redo"/>
+					<menuseparator/>
+					<menuitem id="menu_cut"/>
+					<menuitem id="menu_copy"/>
+					<menuitem id="menu_paste"/>
+					<menuitem id="menu_delete"/>
+					<menuseparator class="menu-type-library"/>
+					<menuitem id="menu_selectAll" class="menu-type-library" command="cmd_selectAll"/>
+					<menuseparator class="menu-type-library"/>
+					<menuitem id="menu_find" class="menu-type-library" command="cmd_find"/>
+				</menupopup>
+			</menu>
+
+			<menu id="mb-view" label="&viewMenu.label;">
+				<menupopup id="mb-view-popup">
+					<menu id="mb-font-size-fields" label="&fontSize.label;">
+						<menupopup id="mb-help-fields-popup">
+							<menuitem id="mb-view-biggerFont" label="&zotero.general.bigger;" key="increase-font-size" command="cmd_increase_font_size"/>
+							<menuitem id="mb-view-smallerFont" label="&zotero.general.smaller;" key="decrease-font-size" command="cmd_decrease_font_size"/>
+							<menuseparator/>
+							<menuitem id="mb-view-restoreFont" label="&zotero.general.reset;" key="restore-font-size" command="restore-font-size"/>
+						</menupopup>
+					</menu>
+				</menupopup>
+			</menu>
+
+			<menu id="toolsMenu" label="&toolsMenu.label;" accesskey="&toolsMenu.accesskey;">
+				<menupopup id="menu_ToolsPopup">
+					<menu id="menu_template"
+							label="&scaffold.menu.template;"
+							observes="code-tab-only">
+						<menupopup>
+								<menuitem label="&scaffold.toolbar.template.newWeb.label;" oncommand="Scaffold.addTemplate('newWeb')"/>
+								<menu label="&scaffold.toolbar.template.scrape.label;">
+									<menupopup id="menu_template_scrapePopup">
+										<menuitem id="tb-template-scrape-em" label="Embedded Metadata" oncommand="Scaffold.addTemplate('scrapeEM')"/>
+										<menuitem id="tb-template-scrape-ris" label="RIS" oncommand="Scaffold.addTemplate('scrapeRIS')"/>
+										<menuitem id="tb-template-scrape-bibtex" label="BibTeX" oncommand="Scaffold.addTemplate('scrapeBibTeX')"/>
+										<menuitem id="tb-template-scrape-marc" label="MARC" oncommand="Scaffold.addTemplate('scrapeMARC')"/>
+									</menupopup>
+								</menu>
+						</menupopup>
+					</menu>
+					<menuseparator/>
+					<menu id="linter-menu"
+							label="&scaffold.menu.linter;"
+							onpopupshowing="Scaffold.populateLinterMenu()">
+						<menupopup>
+							<menuitem id="menu_eslintStatus" disabled="true"/>
+							<menuitem id="menu_toggleESLint" oncommand="Scaffold.toggleESLint()"/>
+						</menupopup>
+					</menu>
+				</menupopup>
+			</menu>
+
+			<menu id="windowMenu"
+				  label="&windowMenu.label;"
+				  onpopupshowing="macWindowMenuDidShow();"
+				  onpopuphidden="macWindowMenuDidHide();">
+			</menu>
+
+			<menu id="helpMenu" label="&helpMenu.label;" accesskey="&helpMenu.accesskey;">
 				<menupopup id="mb-help-popup">
 					<menuitem id="mb-help-types" label="&scaffold.toolbar.template.itemTypes.label;" oncommand="Scaffold.addTemplate('templateAllTypes')"/>
 					<menu id="mb-help-fields" label="&scaffold.toolbar.template.newItem.label;">
@@ -82,162 +222,153 @@
 							</menu>
 						</menupopup>
 					</menu>
-					<menuitem id="mb-help-shortcuts" label="&scaffold.toolbar.help.shortcuts;" oncommand="Scaffold.addTemplate('shortcuts')"/>
 				</menupopup>
 			</menu>
 		</menubar>
-		
-		<toolbar id="tb" align="center">
-			<toolbarbutton id="tb-load" tooltiptext="&scaffold.toolbar.load.label;" oncommand="Scaffold.load()" />
-			<toolbarbutton id="tb-save" tooltiptext="&scaffold.toolbar.save.label;" oncommand="Scaffold.save()" />
-			<toolbarbutton id="tb-saveToZotero" tooltiptext="&scaffold.toolbar.saveToZotero.label;" oncommand="Scaffold.save(true)" />
-			<toolbarseparator/>
-			<toolbarbutton id="tb-detectWeb" tooltiptext="&scaffold.toolbar.detectWeb.label;" oncommand="Scaffold.run('detectWeb')" />
-			<toolbarbutton id="tb-doWeb" tooltiptext="&scaffold.toolbar.doWeb.label;" oncommand="Scaffold.run('doWeb')" />
-			<toolbarseparator/>
-			<toolbarbutton id="tb-detectImport" tooltiptext="&scaffold.toolbar.detectImport.label;" oncommand="Scaffold.run('detectImport')" />
-			<toolbarbutton id="tb-doImport" tooltiptext="&scaffold.toolbar.doImport.label;" oncommand="Scaffold.run('doImport')" />
-			<toolbarseparator/>
-			<toolbarbutton id="tb-setTranslatorsDir" tooltiptext="&scaffold.toolbar.setTranslatorsDir.label;" oncommand="Scaffold.promptForTranslatorsDirectory()" />
+
+		<toolbar id="zotero-toolbar" class="toolbar toolbar-primary">
+			<hbox id="scaffold-toolbar" align="center">
+				<toolbarbutton id="tb-load" tooltiptext="&scaffold.toolbar.load.label;" command="cmd_load" class="zotero-tb-button" />
+				<toolbarbutton id="tb-save" tooltiptext="&scaffold.toolbar.save.label;" oncommand="Scaffold.save()" class="zotero-tb-button" />
+				<toolbarbutton id="tb-saveToZotero" tooltiptext="&scaffold.toolbar.saveToZotero.label;" oncommand="Scaffold.save(true)" class="zotero-tb-button" />
+				<toolbarseparator/>
+				<toolbarbutton id="tb-detect" tooltiptext="&scaffold.toolbar.detect.label;" oncommand="Scaffold.run('detect')" class="zotero-tb-button" />
+				<toolbarbutton id="tb-do" tooltiptext="&scaffold.toolbar.do.label;" oncommand="Scaffold.run('do')" class="zotero-tb-button" />
+				<toolbarseparator/>
+				<toolbarbutton id="tb-template" observes="code-tab-only" tooltiptext="&scaffold.toolbar.template.label;" class="zotero-tb-button" type="menu">
+					<menupopup>
+						<menuitem label="&scaffold.toolbar.template.newWeb.label;" oncommand="Scaffold.addTemplate('newWeb')"/>
+						<menu label="&scaffold.toolbar.template.scrape.label;">
+							<menupopup id="menu_template_scrapePopup">
+								<menuitem id="tb-template-scrape-em" label="Embedded Metadata" oncommand="Scaffold.addTemplate('scrapeEM')"/>
+								<menuitem id="tb-template-scrape-ris" label="RIS" oncommand="Scaffold.addTemplate('scrapeRIS')"/>
+								<menuitem id="tb-template-scrape-bibtex" label="BibTeX" oncommand="Scaffold.addTemplate('scrapeBibTeX')"/>
+								<menuitem id="tb-template-scrape-marc" label="MARC" oncommand="Scaffold.addTemplate('scrapeMARC')"/>
+							</menupopup>
+						</menu>
+					</menupopup>
+				</toolbarbutton>
+			</hbox>
 		</toolbar>
 		<hbox flex="1">
-			<tabbox id="left-tabbox" flex="1" width="300">
+			<tabbox id="left-tabbox" flex="2" width="300">
 				<tabs id="tabs" onselect="Scaffold.handleTabSelect(event)">
 					<tab id="tab-metadata" label="&scaffold.tabs.metadata.label;"/>
 					<tab id="tab-code" label="&scaffold.tabs.code.label;"/>
-					<tab id="tab-import" label="&scaffold.tabs.import.label;"/>
 					<tab id="tab-tests" label="&scaffold.tabs.tests.label;"/>
-					<tab id="tab-testing" label="&scaffold.tabs.testing.label;"/>
 					<tab id="tab-browser" label="Browser"/>
+					<tab id="tab-import" label="&scaffold.tabs.import.label;"/>
 				</tabs>
 				<tabpanels flex="1">
 					<tabpanel flex="1" id="tabpanel-metadata">
-						<vbox flex="1">
-							<hbox>
-								<label class="label-metadata" value="&scaffold.metadata.translatorID.label;" control="textbox-translatorID"/>
-								<textbox id="textbox-translatorID" flex="1"/>
-								<button label="&scaffold.metadata.translatorID.generate;" oncommand="Scaffold.generateTranslatorID()"/>
-							</hbox>
-							<hbox>
-								<label class="label-metadata" value="&scaffold.metadata.label.label;" control="textbox-label"/>
-								<textbox id="textbox-label" flex="1" value="&scaffold.metadata.label.default;"/>
-							</hbox>
-							<hbox>
-								<label class="label-metadata" value="&scaffold.metadata.creator.label;" control="textbox-creator"/>
-								<textbox id="textbox-creator" flex="1"/>
-							</hbox>
-							<hbox>
-								<label class="label-metadata" value="&scaffold.metadata.target.label;" control="textbox-target"/>
-								<textbox id="textbox-target" flex="1"/>
-								<button label="&scaffold.metadata.target.testRegex;" oncommand="Scaffold.logTargetRegex()"/>
-							</hbox>
-							<hbox style="display:none">
-								<label class="label-metadata" value="&scaffold.metadata.targetAll.label;" control="textbox-target-all"/>
-								<textbox id="textbox-target-all" flex="1"/>
-							</hbox>
-							<hbox>
-								<label class="label-metadata" value="&scaffold.metadata.configOptions.label;" control="textbox-configOptions"/>
-								<textbox id="textbox-configOptions" flex="1"/>
-							</hbox>
-							<hbox>
-								<label class="label-metadata" value="&scaffold.metadata.displayOptions.label;" control="textbox-displayOptions"/>
-								<textbox id="textbox-displayOptions" flex="1"/>
-							</hbox>
-							<hbox>
-								<label class="label-metadata" value="&scaffold.metadata.minVersion.label;" control="textbox-minVersion"/>
-								<textbox id="textbox-minVersion" flex="1" value="3.0"/>
-								<label class="label-metadata" value="&scaffold.metadata.maxVersion.label;" control="textbox-maxVersion"/>
-								<textbox id="textbox-maxVersion" flex="1"/>
-								<label class="label-metadata" value="&scaffold.metadata.priority.label;" control="textbox-priority"/>
-								<textbox id="textbox-priority" flex="1" value="&scaffold.metadata.priority.default;"/>
-							</hbox>
-							<hbox style="display:none">
-								<label class="label-metadata" value="&scaffold.metadata.hiddenPrefs.label;" control="textbox-hidden-prefs"/>
-								<textbox id="textbox-hidden-prefs" flex="1"/>
-							</hbox>
-							<grid flex="1">
-								<columns>
-									<column flex="2"/>
-									<column flex="1"/>
-								</columns>
-							<rows><row><groupbox>
-								<caption label="&scaffold.metadata.translatorType.label;"/>
-								<checkbox id="checkbox-import" label="&scaffold.metadata.translatorType.import;"/>
-								<checkbox id="checkbox-export" label="&scaffold.metadata.translatorType.export;"/>
-								<checkbox id="checkbox-web" label="&scaffold.metadata.translatorType.web;" checked="true"/>
-								<checkbox id="checkbox-search" label="&scaffold.metadata.translatorType.search;"/>
-							</groupbox>
-							<groupbox>
-								<caption label="&scaffold.metadata.browserSupport.label;"/>
-								<checkbox id="checkbox-gecko" label="&scaffold.metadata.browserSupport.gecko;" checked="true"/>
-								<checkbox id="checkbox-chrome" label="&scaffold.metadata.browserSupport.chrome;" checked="true"/>
-								<checkbox id="checkbox-safari" label="&scaffold.metadata.browserSupport.safari;" checked="true"/>
-								<checkbox id="checkbox-ie" label="&scaffold.metadata.browserSupport.ie;" checked="true"/>
-								<checkbox id="checkbox-bookmarklet" label="&scaffold.metadata.browserSupport.bookmarklet;" checked="true"/>
-								<checkbox id="checkbox-server" label="&scaffold.metadata.browserSupport.server;" checked="true"/>
-							</groupbox></row></rows>
-							</grid>
-						</vbox>
+						<grid flex="1">
+							<columns>
+								<column/>
+								<column flex="1"/>
+							</columns>
+
+							<rows>
+								<row align="center">
+									<label class="label-metadata" value="&scaffold.metadata.translatorID.label;" control="textbox-translatorID"/>
+									<hbox>
+										<textbox id="textbox-translatorID" flex="1"/>
+										<button label="&scaffold.metadata.translatorID.generate;" oncommand="Scaffold.generateTranslatorID()"/>
+									</hbox>
+								</row>
+
+								<row align="center">
+									<label class="label-metadata" value="&scaffold.metadata.label.label;" control="textbox-label"/>
+									<textbox id="textbox-label" flex="1" value="&scaffold.metadata.label.default;"/>
+								</row>
+
+								<row align="center">
+									<label class="label-metadata" value="&scaffold.metadata.creator.label;" control="textbox-creator"/>
+									<textbox id="textbox-creator" flex="1"/>
+								</row>
+
+								<row align="center">
+									<label class="label-metadata" value="&scaffold.metadata.target.label;" control="textbox-target"/>
+									<hbox>
+										<textbox id="textbox-target" flex="1"/>
+										<button label="&scaffold.metadata.target.testRegex;" oncommand="Scaffold.logTargetRegex()"/>
+									</hbox>
+								</row>
+
+								<row align="center">
+									<label class="label-metadata" value="&scaffold.metadata.targetAll.label;" control="textbox-target-all" style="display: none"/>
+									<textbox id="textbox-target-all" flex="1" style="display: none"/>
+								</row>
+
+								<row align="center">
+									<label class="label-metadata" value="&scaffold.metadata.configOptions.label;" control="textbox-configOptions"/>
+									<textbox id="textbox-configOptions" flex="1"/>
+								</row>
+
+								<row align="center">
+									<label class="label-metadata" value="&scaffold.metadata.displayOptions.label;" control="textbox-displayOptions"/>
+									<textbox id="textbox-displayOptions" flex="1"/>
+								</row>
+
+								<row align="center">
+									<label class="label-metadata" value="&scaffold.metadata.minVersion.label;" control="textbox-minVersion"/>
+									<hbox>
+										<textbox id="textbox-minVersion" flex="1" value="5.0"/>
+										<label class="label-metadata" value="&scaffold.metadata.priority.label;" control="textbox-priority"/>
+										<textbox id="textbox-priority" flex="1" value="&scaffold.metadata.priority.default;"/>
+									</hbox>
+								</row>
+
+								<row align="center">
+									<label class="label-metadata" value="&scaffold.metadata.hiddenPrefs.label;" control="textbox-hidden-prefs" style="display: none"/>
+									<textbox id="textbox-hidden-prefs" flex="1" style="display: none"/>
+								</row>
+
+								<row align="center">
+									<label class="label-metadata" value="&scaffold.metadata.translatorType.label;"/>
+									<hbox id="checkboxes-translatorType">
+										<checkbox id="checkbox-import" label="&scaffold.metadata.translatorType.import;"/>
+										<checkbox id="checkbox-export" label="&scaffold.metadata.translatorType.export;"/>
+										<checkbox id="checkbox-web" label="&scaffold.metadata.translatorType.web;" checked="true"/>
+										<checkbox id="checkbox-search" label="&scaffold.metadata.translatorType.search;"/>
+									</hbox>
+								</row>
+							</rows>
+						</grid>
 					</tabpanel>
 					<tabpanel flex="1" id="tabpanel-code">
 						<vbox flex="1">
-						<hbox id="editor-toolbar" align="center">
-							<toolbarbutton id="tb-template" tooltiptext="&scaffold.toolbar.template.label;" type="menu">
-								<menupopup id="tb-template-popup">
-									<menuitem id="tb-template-new-web-add" label="&scaffold.toolbar.template.newWeb.label;" oncommand="Scaffold.addTemplate('newWeb')"/>
-									<menu id="tb-template-scrape-add" label="&scaffold.toolbar.template.scrape.label;">
-										<menupopup id="tb-template-scrape-popup">
-											<menuitem id="tb-template-scrape-em" label="Embedded Metadata" oncommand="Scaffold.addTemplate('scrapeEM')"/>
-											<menuitem id="tb-template-scrape-ris" label="RIS" oncommand="Scaffold.addTemplate('scrapeRIS')"/>
-											<menuitem id="tb-template-scrape-bibtex" label="BibTeX" oncommand="Scaffold.addTemplate('scrapeBibTeX')"/>
-											<menuitem id="tb-template-scrape-marc" label="MARC" oncommand="Scaffold.addTemplate('scrapeMARC')"/>
-										</menupopup>
-									</menu>
-								</menupopup>
-							</toolbarbutton>
-						</hbox>
-						<iframe src="chrome://zotero/content/ace/ace.html" id="editor-code" flex="1"/>
-						<hbox id="editor-external-box" align="center">
-							<checkbox id="checkbox-editor-external"/>
-							<label class="label-metadata" value="&scaffold.editor.external.label;" control="checkbox-editor-external"/>
-						</hbox>
+							<iframe src="monaco/monaco.html" id="editor-code" flex="1" onmousedown="this.focus()"/>
 						</vbox>
 					</tabpanel>
-					<tabpanel flex="1" id="tabpanel-import">
-						<iframe src="chrome://zotero/content/ace/ace.html" id="editor-import" flex="1"/>
-					</tabpanel>
 					<tabpanel flex="1" id="tabpanel-tests">
-						<iframe src="chrome://zotero/content/ace/ace.html" id="editor-tests" flex="1"/>
-					</tabpanel>
-					<tabpanel flex="1" id="tabpanel-testing">
-						<keyset>
-							<key id="key-delete-tests" keycode="VK_BACK" oncommand="Scaffold.deleteSelectedTests()"/>
-						</keyset>
+						<vbox flex="1">
+							<vbox flex="1">
+								<hbox flex="1" context="testing-context-menue">
+									<keyset>
+										<key id="key-delete-tests" observes="validate-tests" keycode="VK_BACK" oncommand="Scaffold.deleteSelectedTests()"/>
+									</keyset>
 
-						<vbox flex="1"><hbox><description>&scaffold.testing.description;</description></hbox>
-							<hbox flex="1" context="testing-context-menue">
-								<listbox id="testing-listbox" flex="1" seltype="multiple">
-									<listhead>
-										<listheader label="&scaffold.testing.input.label;"/>
-										<listheader label="&scaffold.testing.status.label;"/>
-									</listhead>
-									<listcols>
-										<listcol flex="1"/>
-										<listcol/>
-									</listcols>
-								</listbox>
-							</hbox>
-							<hbox>
-								<button label="&scaffold.testing.populate;" tooltiptext="Load test definitions from the current translator" oncommand="Scaffold.populateTests()"/>
-								<button label="&scaffold.testing.save;" tooltiptext="Save the above test definitions into the current translator, and save the translator"  oncommand="Scaffold.saveTests()"/>
-								<button label="&scaffold.testing.delete;" tooltiptext="Delete the selected tests"  oncommand="Scaffold.deleteSelectedTests()"/>
-								<button label="&scaffold.testing.run;" tooltiptext="Run the selected tests"  oncommand="Scaffold.runSelectedTests()"/>
-							</hbox>
-							<hbox>
-								<button label="&scaffold.testing.update;" tooltiptext="Update a test to match current item"  oncommand="Scaffold.updateSelectedTests()"/>
-								<button label="&scaffold.testing.new;" tooltiptext="Create a new test from the current page"  oncommand="Scaffold.newTestFromCurrent('web')" />
-								<button label="&scaffold.testing.new.import;" tooltiptext="Create a new test from the current import"  oncommand="Scaffold.newTestFromCurrent('import')" />
-							</hbox>
+									<listbox id="testing-listbox" observes="validate-tests" flex="1" seltype="multiple" onselect="Scaffold.handleTestSelect(event)">
+										<listhead>
+											<listheader label="&scaffold.testing.input.label;"/>
+											<listheader label="&scaffold.testing.status.label;"/>
+											<listheader label="&scaffold.testing.defer.label;"/>
+										</listhead>
+										<listcols>
+											<listcol flex="1"/>
+											<listcol class="listcol-testMessage"/>
+											<listcol/>
+										</listcols>
+									</listbox>
+								</hbox>
+								<hbox>
+									<button observes="validate-tests" label="&scaffold.testing.delete;" tooltiptext="Delete the selected tests" oncommand="Scaffold.deleteSelectedTests()"/>
+									<button observes="validate-tests" label="&scaffold.testing.run;" tooltiptext="Run the selected tests" oncommand="Scaffold.runSelectedTests()"/>
+									<button observes="validate-tests" label="&scaffold.testing.update;" tooltiptext="Run the selected tests and update the test definitions with the latest data" oncommand="Scaffold.updateSelectedTests()"/>
+								</hbox>
+							</vbox>
+							<splitter resizeafter="farthest"/>
+							<iframe src="monaco/monaco.html" id="editor-tests" flex="2" onmousedown="this.focus()"/>
 						</vbox>
 					</tabpanel>
 					<tabpanel>
@@ -247,14 +378,24 @@
 								<menulist id="browser-url" editable="true" flex="1">
 									<menupopup></menupopup>
 								</menulist>
+								<button observes="validate-tests" label="&scaffold.testing.create.web;" tooltiptext="Create a new test from the current page" oncommand="Scaffold.saveTestFromCurrent('web')"/>
 							</hbox>
 							
-							<browser src="about:blank" type="content" flex="1"></browser>
+							<browser id="browser" src="about:blank" type="content" flex="1"></browser>
+						</vbox>
+					</tabpanel>
+					<tabpanel flex="1" id="tabpanel-import">
+						<vbox flex="1">
+							<hbox align="right">
+								<button observes="validate-tests" label="&scaffold.testing.create.import;" tooltiptext="Create a new test from the current import data" oncommand="Scaffold.saveTestFromCurrent('import')" />
+								<button observes="validate-tests" label="&scaffold.testing.create.search;" tooltiptext="Create a new test from the current search data" oncommand="Scaffold.saveTestFromCurrent('search')" />
+							</hbox>
+							<iframe src="monaco/monaco.html" id="editor-import" flex="1" onmousedown="this.focus()"/>
 						</vbox>
 					</tabpanel>
 				</tabpanels>
 			</tabbox>
-			<splitter resizeafter="farthest" oncommand="Scaffold.onResize();" />
+			<splitter resizeafter="farthest" />
 
 			<vbox id="right-pane" flex="1">
 				

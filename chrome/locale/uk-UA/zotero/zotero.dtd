@@ -6,22 +6,22 @@
 <!ENTITY zotero.general.deselectAll "Відмінити вибір">
 <!ENTITY zotero.general.edit "Редагувати">
 <!ENTITY zotero.general.delete "Видалити">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Перемістити в Кошик">
 <!ENTITY zotero.general.ok "Гаразд">
 <!ENTITY zotero.general.cancel "Відміна">
 <!ENTITY zotero.general.refresh "Оновити">
 <!ENTITY zotero.general.saveAs "Зберегти як...">
 <!ENTITY zotero.general.options "Options">
 <!ENTITY zotero.general.advancedOptions.label "Розширені налаштування">
-<!ENTITY zotero.general.tools "Tools">
+<!ENTITY zotero.general.tools "Інструменти">
 <!ENTITY zotero.general.more "Більше">
 <!ENTITY zotero.general.loading "Завантаження">
-<!ENTITY zotero.general.close "Close">
-<!ENTITY zotero.general.minimize "Minimize">
+<!ENTITY zotero.general.close "Закрити">
+<!ENTITY zotero.general.minimize "Згорнути">
 <!ENTITY zotero.general.other "Other…">
 <!ENTITY zotero.general.bigger "Bigger">
 <!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.reset "Скинути">
 
 
 <!ENTITY zotero.errorReport.title "Звіт про помилку в Zotero">
@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Show Retracted Items">
 
 <!ENTITY zotero.items.itemType "Тип документу">
-<!ENTITY zotero.items.type_column "Тип документа">
-<!ENTITY zotero.items.title_column "Назва">
 <!ENTITY zotero.items.creator_column "Автор">
-<!ENTITY zotero.items.date_column "Дата">
 <!ENTITY zotero.items.year_column "Рік">
-<!ENTITY zotero.items.publisher_column "Видавник">
-<!ENTITY zotero.items.publication_column "Публікація">
-<!ENTITY zotero.items.journalAbbr_column "Журнал скор.">
-<!ENTITY zotero.items.language_column "Мова">
-<!ENTITY zotero.items.accessDate_column "Дата доступу">
-<!ENTITY zotero.items.libraryCatalog_column "Архів">
-<!ENTITY zotero.items.callNumber_column "Шифр">
-<!ENTITY zotero.items.rights_column "Права">
-<!ENTITY zotero.items.dateAdded_column "Дата додавання">
 <!ENTITY zotero.items.dateModified_column "Дата зміни">
-<!ENTITY zotero.items.extra_column "Додатково">
-<!ENTITY zotero.items.archive_column "Архів">
-<!ENTITY zotero.items.archiveLocation_column "Місце в архіві">
-<!ENTITY zotero.items.place_column "Місце">
-<!ENTITY zotero.items.volume_column "Том">
-<!ENTITY zotero.items.edition_column "Видання">
-<!ENTITY zotero.items.pages_column "Сторінки">
-<!ENTITY zotero.items.issue_column "Випуск">
-<!ENTITY zotero.items.series_column "Серія">
-<!ENTITY zotero.items.seriesTitle_column "Назва серії">
-<!ENTITY zotero.items.court_column "Суд">
-<!ENTITY zotero.items.medium_column "Джерело/формат">
-<!ENTITY zotero.items.genre_column "Жанр">
-<!ENTITY zotero.items.system_column "Система">
 <!ENTITY zotero.items.moreColumns.label "Додаткові стовпці">
 <!ENTITY zotero.items.restoreColumnOrder.label "Відновити порядок стовпців">
 
@@ -119,7 +93,7 @@
 <!ENTITY zotero.toolbar.import.label "Імпортувати...">
 <!ENTITY zotero.toolbar.importFromClipboard "Імпортувати з буферу обміну">
 <!ENTITY zotero.toolbar.export.label "Експортувати бібліотеку...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
+<!ENTITY zotero.toolbar.rtfScan.label "Сканування RTF">
 <!ENTITY zotero.toolbar.timeline.label "Створити шкалу часу">
 <!ENTITY zotero.toolbar.preferences.label "Налаштування...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Підтримка і документація">
@@ -155,7 +129,7 @@
 <!ENTITY zotero.toolbar.attachment.weblink "Зберегти посилання на поточну сторінку">
 <!ENTITY zotero.toolbar.attachment.snapshot "Зробити знімок поточної сторінки">
 <!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.notes "Примітки">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Немає тегів для відображення">
 <!ENTITY zotero.tagSelector.loadingTags "Завантажуємо теги...">
@@ -176,7 +150,7 @@
 <!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
 <!ENTITY zotero.lookup.button.search "Пошук">
 
-<!ENTITY zotero.createParent.title "Create Parent Item">
+<!ENTITY zotero.createParent.title "Створити батьківський документ">
 <!ENTITY zotero.createParent.button.manual "Manual Entry">
 
 <!ENTITY zotero.selectitems.title "Вибрати документи">
@@ -203,10 +177,10 @@
 
 <!ENTITY zotero.progress.title "Хід виконання">
 
-<!ENTITY zotero.import "Import">
+<!ENTITY zotero.import "Імпорт">
 <!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
 <!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.importing "Importing…">
+<!ENTITY zotero.import.importing "Імпортування...">
 <!ENTITY zotero.import.database "Database">
 <!ENTITY zotero.import.lastModified "Last Modified">
 <!ENTITY zotero.import.size "Size">
@@ -333,7 +307,7 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.firstPage "Перша стор.">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">
@@ -350,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

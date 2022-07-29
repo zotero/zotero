@@ -46,11 +46,6 @@ zoteronoteeditor
 	-moz-binding: url('chrome://zotero/content/bindings/noteeditor.xml#note-editor');
 }
 
-oldzoteronoteeditor
-{
-	-moz-binding: url('chrome://zotero/content/bindings/oldnoteeditor.xml#note-editor');
-}
-
 linksbox
 {
 	-moz-binding: url('chrome://zotero/content/bindings/noteeditor.xml#links-box');

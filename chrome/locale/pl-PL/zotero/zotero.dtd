@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Pokaż wycofane elementy">
 
 <!ENTITY zotero.items.itemType "Typ elementu">
-<!ENTITY zotero.items.type_column "Typ elementu">
-<!ENTITY zotero.items.title_column "Tytuł">
 <!ENTITY zotero.items.creator_column "Twórca">
-<!ENTITY zotero.items.date_column "Data">
 <!ENTITY zotero.items.year_column "Rok">
-<!ENTITY zotero.items.publisher_column "Wydawca">
-<!ENTITY zotero.items.publication_column "Publikacja">
-<!ENTITY zotero.items.journalAbbr_column "Skrót czasopisma">
-<!ENTITY zotero.items.language_column "Język">
-<!ENTITY zotero.items.accessDate_column "Dostęp">
-<!ENTITY zotero.items.libraryCatalog_column "Katalog biblioteczny">
-<!ENTITY zotero.items.callNumber_column "Numer klasyfikacyjny">
-<!ENTITY zotero.items.rights_column "Prawa autorskie">
-<!ENTITY zotero.items.dateAdded_column "Data dodania">
 <!ENTITY zotero.items.dateModified_column "Data modyfikacji">
-<!ENTITY zotero.items.extra_column "Ekstra">
-<!ENTITY zotero.items.archive_column "Archiwum">
-<!ENTITY zotero.items.archiveLocation_column "Miejsce w archiwum">
-<!ENTITY zotero.items.place_column "Miejsce">
-<!ENTITY zotero.items.volume_column "Tom">
-<!ENTITY zotero.items.edition_column "Wydanie">
-<!ENTITY zotero.items.pages_column "Strony">
-<!ENTITY zotero.items.issue_column "Numer">
-<!ENTITY zotero.items.series_column "Seria">
-<!ENTITY zotero.items.seriesTitle_column "Tytuł serii">
-<!ENTITY zotero.items.court_column "Sąd">
-<!ENTITY zotero.items.medium_column "Nośnik/Format">
-<!ENTITY zotero.items.genre_column "Rodzaj">
-<!ENTITY zotero.items.system_column "System">
 <!ENTITY zotero.items.moreColumns.label "Więcej kolumn">
 <!ENTITY zotero.items.restoreColumnOrder.label "Przywróć porządek kolumn">
 
@@ -105,7 +79,7 @@
 
 <!ENTITY zotero.toolbar.newItem.label "Nowy element">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Więcej">
-<!ENTITY zotero.toolbar.lookup.label "Dodaj element za pomocą identyfikatora">
+<!ENTITY zotero.toolbar.lookup.label "Dodaj element(y) za pomocą identyfikatora">
 <!ENTITY zotero.toolbar.removeItem.label "Usuń element...">
 <!ENTITY zotero.toolbar.newLibrary.label "Nowa biblioteka">
 <!ENTITY zotero.toolbar.newCollection.label "Nowa kolekcja...">
@@ -222,7 +196,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Zachowuj źródła posortowane">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
+<!ENTITY zotero.citation.suppressAuthor.label "Pomiń autora">
 <!ENTITY zotero.citation.prefix.label "Prefiks:">
 <!ENTITY zotero.citation.suffix.label "Sufiks:">
 <!ENTITY zotero.citation.editorWarning.label "Ostrzeżenie: Jeżeli edytujesz cytowanie w edytorze, nie będzie ono więcej aktualizowane z twojej bazy danych ani stylu cytowania.">
@@ -343,12 +317,12 @@
 <!ENTITY zotero.pdfReader.verticalScrolling "Przewijanie pionowe">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Przewijanie poziome">
 <!ENTITY zotero.pdfReader.wrappedScrolling "Przewijanie zawinięte">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
+<!ENTITY zotero.pdfReader.noSpreads "Pojedyncza strona">
+<!ENTITY zotero.pdfReader.oddSpreads "Dwie strony - nieparzysta">
+<!ENTITY zotero.pdfReader.evenSpreads "Dwie strony - parzysta">
 <!ENTITY zotero.pdfReader.zoomIn "Powiększ">
 <!ENTITY zotero.pdfReader.zoomOut "Zmniejsz">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatycznie zmień rozmiar">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Powiększ do szerokości strony">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Powiększ do wysokości strony">
 <!ENTITY zotero.pdfReader.transferFromPDF "Importuj adnotacje...">
-<!ENTITY zotero.pdfReader.transferToPDF "Zachowaj adnotacje w pliku...">

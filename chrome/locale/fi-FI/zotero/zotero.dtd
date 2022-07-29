@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Näytä takaisinvedetyt nimikkeet">
 
 <!ENTITY zotero.items.itemType "Nimikkeen tyyppi">
-<!ENTITY zotero.items.type_column "Nimikkeen tyyppi">
-<!ENTITY zotero.items.title_column "Otsikko">
 <!ENTITY zotero.items.creator_column "Luoja">
-<!ENTITY zotero.items.date_column "Päiväys">
 <!ENTITY zotero.items.year_column "Vuosi">
-<!ENTITY zotero.items.publisher_column "Julkaisija">
-<!ENTITY zotero.items.publication_column "Julkaisu">
-<!ENTITY zotero.items.journalAbbr_column "Lehden lyhenne">
-<!ENTITY zotero.items.language_column "Kieli">
-<!ENTITY zotero.items.accessDate_column "Viittaus noudettu">
-<!ENTITY zotero.items.libraryCatalog_column "Kirjastokatalogi">
-<!ENTITY zotero.items.callNumber_column "Kirjastoluokka">
-<!ENTITY zotero.items.rights_column "Oikeudet">
-<!ENTITY zotero.items.dateAdded_column "Lisätty">
 <!ENTITY zotero.items.dateModified_column "Muokattu">
-<!ENTITY zotero.items.extra_column "Ylimääräistä">
-<!ENTITY zotero.items.archive_column "Arkisto">
-<!ENTITY zotero.items.archiveLocation_column "Paik. arkistossa">
-<!ENTITY zotero.items.place_column "Paikka">
-<!ENTITY zotero.items.volume_column "Vuosikerta">
-<!ENTITY zotero.items.edition_column "Painos">
-<!ENTITY zotero.items.pages_column "Sivut">
-<!ENTITY zotero.items.issue_column "Numero">
-<!ENTITY zotero.items.series_column "Sarja">
-<!ENTITY zotero.items.seriesTitle_column "Sarjan nimi">
-<!ENTITY zotero.items.court_column "Tuomioistuin">
-<!ENTITY zotero.items.medium_column "Formaatti">
-<!ENTITY zotero.items.genre_column "Genre">
-<!ENTITY zotero.items.system_column "Järjestelmä">
 <!ENTITY zotero.items.moreColumns.label "Lisää sarakkeita">
 <!ENTITY zotero.items.restoreColumnOrder.label "Palauta sarakejärjestys">
 
@@ -350,5 +324,5 @@
 <!ENTITY zotero.pdfReader.zoomOut "Loitonna">
 <!ENTITY zotero.pdfReader.zoomAuto "Säädä kokoa automaattisesti">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Koko sivun leveys">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Koko sivun korkeus">
 <!ENTITY zotero.pdfReader.transferFromPDF "Tuo huomautukset...">
-<!ENTITY zotero.pdfReader.transferToPDF "Tallenna huomautukset tiedostoon...">

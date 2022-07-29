@@ -511,7 +511,7 @@ Zotero.HTTP = new function() {
 				
 				if (xmlhttp.status == 0) {
 					try {
-						this.checkSecurity(channel);
+						this.checkSecurity(channel, { isProxyAuthRequest: options.isProxyAuthRequest });
 					}
 					catch (e) {
 						deferred.reject(e);
@@ -1011,14 +1011,15 @@ Zotero.HTTP = new function() {
 						Zotero.debug("Proxy required for " + uri + " -- making HEAD request to trigger auth prompt");
 						yield Zotero.HTTP.request("HEAD", uri, {
 							foreground: true,
-							noCache: true
+							noCache: true,
+							isProxyAuthRequest: true
 						})
 						.catch(function (e) {
+							Zotero.logError("Error connecting to proxy -- proxied requests may not work");
+							Zotero.logError(e);
+							
 							// Show error icon at startup
-							if (!e.dialogHeader) {
-								e.dialogHeader = Zotero.getString('networkError.errorViaProxy');
-							}
-							e.message += "\n\n" + Zotero.getString('startupError.internetFunctionalityMayNotWork');
+							e.dialogHeader = Zotero.getString('networkError.errorViaProxy');
 							if (!e.dialogButtonText) {
 								e.dialogButtonText = Zotero.getString('general.moreInformation');
 								e.dialogButtonCallback = () => {
@@ -1026,9 +1027,6 @@ Zotero.HTTP = new function() {
 								};
 							}
 							Zotero.proxyFailure = e;
-							Zotero.logError(e);
-							let msg = "Error connecting to proxy -- proxied requests may not work";
-							Zotero.logError(msg);
 						});
 						break;
 					}
@@ -1219,9 +1217,10 @@ Zotero.HTTP = new function() {
 	 * @param {Boolean} dontDelete Don't delete the hidden browser upon completion; calling function
 	 *                             must call deleteHiddenBrowser itself.
 	 * @param {Zotero.CookieSandbox} [cookieSandbox] Cookie sandbox object
+	 * @param {Object} [docShellPrefs] See Zotero.Browser.createHiddenBrowser
 	 * @return {browser} Hidden browser used for loading
 	 */
-	this.loadDocuments = function (urls, processor, onDone, onError, dontDelete, cookieSandbox) {
+	this.loadDocuments = function (urls, processor, onDone, onError, dontDelete, cookieSandbox, docShellPrefs={}) {
 		// (Approximately) how many seconds to wait if the document is left in the loading state and
 		// pageshow is called before we call pageshow with an incomplete document
 		const LOADING_STATE_TIMEOUT = 120;
@@ -1344,6 +1343,9 @@ Zotero.HTTP = new function() {
 			currentURL = 0;
 		for(var i=0; i<urls.length; i++) {
 			let hiddenBrowser = Zotero.Browser.createHiddenBrowser();
+			for (let pref in docShellPrefs) {
+				hiddenBrowser.docShell[pref] = docShellPrefs[pref];
+			}
 			if (cookieSandbox) {
 				cookieSandbox.attachToBrowser(hiddenBrowser);
 			}
@@ -1417,7 +1419,7 @@ Zotero.HTTP = new function() {
 	}
 	
 	
-	this.checkSecurity = function (channel) {
+	this.checkSecurity = function (channel, { isProxyAuthRequest } = {}) {
 		if (!channel) {
 			return;
 		}
@@ -1433,6 +1435,15 @@ Zotero.HTTP = new function() {
 				// Show actual error from the networking stack, with the hyperlink around the
 				// error code removed
 				msg = Zotero.Utilities.unescapeHTML(secInfo.errorMessage);
+				if (msg.includes('.' + ZOTERO_CONFIG.DOMAIN_NAME + ' ')
+						|| msg.includes(ZOTERO_CONFIG.PROXY_AUTH_URL.match(/^https:\/\/([^\/]+)\//)[1] + ' ')) {
+					msg = Zotero.getString('networkError.connectionMonitored', Zotero.appName)
+						+ "\n\n"
+						+ (isProxyAuthRequest
+							? Zotero.getString('startupError.internetFunctionalityMayNotWork') + "\n\n"
+							: "")
+						+ Zotero.getString('general.error') + ": " + msg.split(/\n/)[0];
+				}
 				dialogButtonText = Zotero.getString('general.moreInformation');
 				dialogButtonCallback = function () {
 					Zotero.launchURL('https://www.zotero.org/support/kb/ssl_certificate_error');

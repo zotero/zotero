@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "Mostrar elementos descartados">
 
 <!ENTITY zotero.items.itemType "Tipo de elemento">
-<!ENTITY zotero.items.type_column "Tipo de elemento">
-<!ENTITY zotero.items.title_column "Título">
 <!ENTITY zotero.items.creator_column "Creador">
-<!ENTITY zotero.items.date_column "Data">
 <!ENTITY zotero.items.year_column "Ano">
-<!ENTITY zotero.items.publisher_column "Editorial">
-<!ENTITY zotero.items.publication_column "Publicación">
-<!ENTITY zotero.items.journalAbbr_column "Abrev da revista">
-<!ENTITY zotero.items.language_column "Lingua">
-<!ENTITY zotero.items.accessDate_column "Consultado">
-<!ENTITY zotero.items.libraryCatalog_column "Catálogo de biblioteca">
-<!ENTITY zotero.items.callNumber_column "Número localización">
-<!ENTITY zotero.items.rights_column "Dereitos">
-<!ENTITY zotero.items.dateAdded_column "Data de alta">
 <!ENTITY zotero.items.dateModified_column "Data de modificación">
-<!ENTITY zotero.items.extra_column "Extra">
-<!ENTITY zotero.items.archive_column "Arquivo">
-<!ENTITY zotero.items.archiveLocation_column "Loc. no Arquivo">
-<!ENTITY zotero.items.place_column "Lugar">
-<!ENTITY zotero.items.volume_column "Volume">
-<!ENTITY zotero.items.edition_column "Edición">
-<!ENTITY zotero.items.pages_column "Páxinas">
-<!ENTITY zotero.items.issue_column "Número">
-<!ENTITY zotero.items.series_column "Serie">
-<!ENTITY zotero.items.seriesTitle_column "Título da serie">
-<!ENTITY zotero.items.court_column "Tribunal">
-<!ENTITY zotero.items.medium_column "Medio/Formato">
-<!ENTITY zotero.items.genre_column "Xénero">
-<!ENTITY zotero.items.system_column "Sistema">
 <!ENTITY zotero.items.moreColumns.label "Máis columnas">
 <!ENTITY zotero.items.restoreColumnOrder.label "Reiniciar a orde das columnas">
 
@@ -346,9 +320,9 @@
 <!ENTITY zotero.pdfReader.noSpreads "Sen axustar">
 <!ENTITY zotero.pdfReader.oddSpreads "Impares axustadas">
 <!ENTITY zotero.pdfReader.evenSpreads "Pares axustadas">
-<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
-<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
-<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
-<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
+<!ENTITY zotero.pdfReader.zoomIn "Ampliar">
+<!ENTITY zotero.pdfReader.zoomOut "Alonxar">
+<!ENTITY zotero.pdfReader.zoomAuto "Axuste automático">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Ampliar ao ancho de páxina">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">

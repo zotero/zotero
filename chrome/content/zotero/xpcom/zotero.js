@@ -711,7 +711,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			yield Zotero.Groups.init();
 			yield Zotero.Relations.init();
 			yield Zotero.Retractions.init();
-			yield Zotero.NoteBackups.init();
 			yield Zotero.Dictionaries.init();
 			Zotero.Reader.init();
 			
@@ -2099,7 +2098,7 @@ Zotero.Browser = new function() {
 		hiddenBrowser.docShell.allowJavascript = options.allowJavaScript !== false
 		hiddenBrowser.docShell.allowMetaRedirects = false;
 		hiddenBrowser.docShell.allowPlugins = false;
-		Zotero.debug("Created hidden browser (" + (nBrowsers++) + ")");
+		Zotero.debug("Created hidden browser (" + (++nBrowsers) + ")");
 		return hiddenBrowser;
 	}
 	

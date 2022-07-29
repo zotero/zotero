@@ -1,32 +1,146 @@
 {
   "general_more": {
-    "message": "עוד... "
+    "message": "עוד…"
+  },
+  "general_moreInfo": {
+    "message": "מידע נוסף…"
+  },
+  "general_needHelp": {
+    "message": "אפשר להציע לך עזרה?"
   },
   "general_done": {
     "message": "בוצע"
   },
+  "general_yes": {
+    "message": "כן"
+  },
+  "general_no": {
+    "message": "לא"
+  },
+  "general_tryAgain": {
+    "message": "לנסות שוב"
+  },
+  "general_warning": {
+    "message": "אזהרה"
+  },
   "general_cancel": {
     "message": "ביטול"
   },
+  "general_pleaseWait": {
+    "message": "נא להמתין…"
+  },
+  "general_copyToClipboard": {
+    "message": "העתקה ללוח הגזירים"
+  },
   "progressWindow_savingTo": {
-    "message": "שמור בשם"
+    "message": "שמירה בשם"
   },
   "progressWindow_tagPlaceholder": {
     "message": "תגיות (מופרדות בפסיקים)"
   },
+  "progressWindow_error_translation": {
+    "message": "קרתה שגיאה בשמירת הפריט. למידע נוסף: $1."
+  },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "אירעה שגיאה בשמירת הפריט הזה. $1 עשוי להגביל את מספר הפריטים שניתן לשמור בו־זמנית. למידע נוסף: $2."
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
-    "message": "פותר בעיית מתרגם"
+    "message": "פתרון בעיות מתרגם"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "מגבלת גישה לאתר"
   },
   "progressWindow_error_fallback": {
-    "message": "תקלה התרחשה בעת שמירה באמצעות $1. מנסה לשמור באמצעות $2במקום זאת."
+    "message": "קרתה תקלה בעת שמירה באמצעות $1. מתבצע ניסיון לשמור באמצעות $2במקום זאת."
+  },
+  "progressWindow_error_upgradeClient": {
+    "message": "יכולת זו לא נתמכת על ידי גירסת ה־$1 שלך. נא לשדרג לגירסה $2."
   },
   "progressWindow_error_upgradeClient_latestVersion": {
-    "message": "גרסה אחרונה"
+    "message": "גירסה אחרונה"
+  },
+  "appConnector": {
+    "message": "מגשר $1"
+  },
+  "upgradeApp": {
+    "message": "שדרוג $1"
+  },
+  "firstRun_title": {
+    "message": "התקנת את המגשר $1!"
+  },
+  "firstRun_text1": {
+    "message": "מגשר $1 מאפשר לך <a href=\"$2\">לשמור פריטים אל $1</a> מהדפדפן שלך בלחיצה אחת."
+  },
+  "firstRun_text2": {
+    "message": "אם טרם עשית זאת, יש <a href=\"$2\">להוריד</a> את היישום העצמאי $1 לחוויה מיטבית."
+  },
+  "firstRun_acceptButton": {
+    "message": "הבנתי"
+  },
+  "error_connection_isAppRunning": {
+    "message": "האם $1 פעיל?"
+  },
+  "error_connection_save": {
+    "message": "ל־$1 לא הייתה אפשרות לתקשר עם יישום שולחן העבודה $2. המגשר יכול לשמור חלק מהדפים ישירות בחשבון שלך אצל $3 אך לקבל תוצאות מיטביות עליך לוודא ש־$2 פתוח בטרם ניסיון השמירה."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "אפשר <a href=\"$1\">להוריד את $2</a> או <a href=\"$3\">לטפל בבעיות החיבור</a> במידת הצורך."
+  },
+  "error_connection_enableSavingToOnlineLibrary": {
+    "message": "הפעלת שמירה לספרייה מקוונת"
+  },
+  "reports_report_submitted": {
+    "message": "דוח השגיאה שלך הוגש.\n\nמס׳ הדוח: $1\n\nנא לפרסם הודעה בפורומים של Zotero עם מס׳ הדוח הזה, תיאור התקלה והצעדים הנחוצים לשחזורה.\n\nדוחות שגיאה אינם נסקרים אלמלא נדונו בפורומים."
+  },
+  "reports_debug_output_submitted": {
+    "message": "דוח ניפוי השגיאות שלך הוגש.\n\nמס׳ דוח ניפוי השגיאות הוא $1."
+  },
+  "reports_submission_failed": {
+    "message": "אירעה שגיאה בהגשת הדוח שלך.\n\n$1\n\nנא לוודא שהחיבור שלך לאינטרנט תקין. אם עדיין יש תקלה, יש לפרסם הודעה בפורומים של Zotero."
   },
   "integration_error_clientUpgrade": {
-    "message": "ציטוט מבוסס רשת דורש $1או מתקדם יותר"
+    "message": "ציטוט מבוסס רשת דורש $1 ומעלה."
+  },
+  "integration_error_connection": {
+    "message": "ל־$1 לא הייתה אפשרות לתקשר עם יישום שולחן העבודה $2. $2 חייב להיות פתוח כדי להשתמש בציטוט מבוסס רשת."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_warning": {
+    "message": "מסמך זה מכיל ציטוטים פעילים של Zotero שיופיעו כקישורים אל zotero.org בעותק שמורידים."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_instructions": {
+    "message": "כדי לייצר גירסה שאפשר לשתף, יש לבחור ב<b>יצירת עותק…</b> מתפריט קובץ, לבחור ב<b>ניתוק ציטוטים</b> מתפריט Zotero במסמך החדש, ואז להוריד את הגירסה המנותקת. כדאי לשמור על המסמך המקושר המקורי הזה למקרה שנדרשים שינויים נוספים."
+  },
+  "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
+    "message": "להוריד את הגירסה המקושרת בכל מקרה"
+  },
+  "integration_googleDocs_updating": {
+    "message": "$1 מעדכן את המסמך שלך."
+  },
+  "integration_googleDocs_docxAlert": {
+    "message": "השילוב מול $1 אינו זמין כשעורכים קובצי ‎.docx של Microsoft Word ישירות ב־Google Docs. נא לגשת אל קובץ ← שמירה בתור Google Docs כדי להפעיל את היכולת הזאת.<br/><br/>כדי להעביר מסמך Word עם ציטוטי $1 ל־Google Docs, יש לעיין ב<a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">העברת מסמכים בין מעבדי תמלילים</a>."
+  },
+  "integration_googleDocs_documentLocked": {
+    "message": "ציטוטי המסמך נערכים על ידי משתמש אחר ב־$1. נא לנסות שוב בהמשך."
+  },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1 נועל את המסמך שלך כדי למנוע ממספר משתמשים לערוך ציטוטים בו־זמנית. עריכת ציטוטים במקביל במסמך עשויה להוביל למסמך או ציטוטים פגומים. נסיבות בלתי נשלטות כגון תקלות תקשורת עשויים לגרום למסמך שלך להפוך לנעול לצמיתות. אם לדעתך זה מה שקרה אפשר לעקוף את הנעילה.<br/><br/>לעקוף את נעילת המסמך?"
+  },
+  "integration_googleDocs_documentPermissionError": {
+    "message": "לחשבון ה־Google שבחרת אין הרשאה לערוך את המסמך הזה. נא לנסות שוב ולוודא שבחרת חשבון עם גישה לעריכה."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "הצגת $1 ציטוטים לא מקושרים"
+  },
+  "integration_googleDocs_orphanedCitations_alert": {
+    "message": "הציטוט המיועד לעריכה נותק מ־$1."
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "קישור ציטוט מחדש"
+  },
+  "integration_googleDocs_orphanedCitations_disclaimer": {
+    "message": "הציטוטים האלו <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">נותקו מ־$1</a>. יהיה עליך לקשר אותם מחדש בטרם יעודכנו או יופיעו בביבליוגרפיה שלך."
   },
   "general_saveTo": {
-    "message": "שמור בשם $1"
+    "message": "שמירה אל $1"
   }
 }

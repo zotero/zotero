@@ -338,4 +338,69 @@ describe("Zotero.Annotations", function() {
 			assert.isNull(annotation.annotationPageLabel);
 		});
 	});
+
+	describe("#splitAnnotations()", function () {
+		it("should split a highlight annotation", async function () {
+			await Zotero.Items.erase(attachment.getAnnotations().map(x => x.id));
+			let annotation = await createAnnotation('highlight', attachment);
+			let position = {
+				pageIndex: 1,
+				rects: []
+			};
+			for (let i = 0; i < 10000; i++) {
+				position.rects.push([100, 200, 100, 200]);
+			}
+			annotation.annotationPosition = JSON.stringify(position);
+			annotation.annotationText = 'test';
+			await annotation.saveTx();
+
+			await Zotero.Annotations.splitAnnotations([annotation]);
+
+			let splitAnnotations = attachment.getAnnotations();
+			assert.equal(splitAnnotations.length, 3);
+			assert.equal(splitAnnotations[0].annotationPosition.length, 64987);
+			assert.equal(splitAnnotations[1].annotationPosition.length, 64987);
+			assert.equal(splitAnnotations[2].annotationPosition.length, 50101);
+			assert.equal(splitAnnotations[0].annotationText, 'test');
+			assert.equal(splitAnnotations[1].annotationText, 'test');
+			assert.equal(splitAnnotations[2].annotationText, 'test');
+
+			assert.equal(Zotero.Items.get(annotation.id), false);
+			await Zotero.Items.erase(splitAnnotations.map(x => x.id));
+		});
+
+		it("should split an ink annotation", async function () {
+			await Zotero.Items.erase(attachment.getAnnotations().map(x => x.id));
+			let annotation = await createAnnotation('ink', attachment);
+			let position = {
+				pageIndex: 1,
+				width: 2,
+				paths: []
+			};
+			for (let i = 0; i < 100; i++) {
+				let path = [];
+				for (let j = 0; j < 200; j++) {
+					path.push(100, 200);
+				}
+				position.paths.push(path);
+			}
+			annotation.annotationPosition = JSON.stringify(position);
+			annotation.annotationComment = 'test';
+			await annotation.saveTx();
+
+			await Zotero.Annotations.splitAnnotations([annotation]);
+
+			let splitAnnotations = attachment.getAnnotations();
+			assert.equal(splitAnnotations.length, 3);
+			assert.equal(splitAnnotations[0].annotationPosition.length, 64957);
+			assert.equal(splitAnnotations[1].annotationPosition.length, 64951);
+			assert.equal(splitAnnotations[2].annotationPosition.length, 30401);
+			assert.equal(splitAnnotations[0].annotationComment, 'test');
+			assert.equal(splitAnnotations[1].annotationComment, 'test');
+			assert.equal(splitAnnotations[2].annotationComment, 'test');
+
+			assert.equal(Zotero.Items.get(annotation.id), false);
+			await Zotero.Items.erase(splitAnnotations.map(x => x.id));
+		});
+	});
 })

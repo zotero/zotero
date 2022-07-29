@@ -167,10 +167,18 @@ ZoteroPluginInstaller.prototype = {
 		this._errorDisplayed = true;
 		var addon = this._addon;
 		setTimeout(function() {
-			Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-				.getService(Components.interfaces.nsIPromptService)
-				.alert(null, addon.EXTENSION_STRING,
-				(error ? error : Zotero.getString("zotero.preferences.wordProcessors.installationError", [addon.APP, Zotero.appName])));
+			var ps = Services.prompt;
+			var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_OK
+				+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING);
+			var result = ps.confirmEx(null,
+				addon.EXTENSION_STRING,
+				(error ? error : Zotero.getString("zotero.preferences.wordProcessors.installationError", [addon.APP, Zotero.appName])),
+				buttonFlags, null,
+				Zotero.getString('zotero.preferences.wordProcessors.manualInstallation.button'),
+				null, null, {});
+			if (result == 1) {
+				Zotero.launchURL("https://www.zotero.org/support/word_processor_plugin_manual_installation");
+			}	
 		}, 0);
 	},
 	

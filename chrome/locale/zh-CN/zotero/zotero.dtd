@@ -56,35 +56,9 @@
 <!ENTITY zotero.collections.showRetractedItems "显示已撤稿的条目">
 
 <!ENTITY zotero.items.itemType "条目类型">
-<!ENTITY zotero.items.type_column "条目类型">
-<!ENTITY zotero.items.title_column "标题">
 <!ENTITY zotero.items.creator_column "创建者">
-<!ENTITY zotero.items.date_column "日期">
 <!ENTITY zotero.items.year_column "年">
-<!ENTITY zotero.items.publisher_column "出版社">
-<!ENTITY zotero.items.publication_column "期刊">
-<!ENTITY zotero.items.journalAbbr_column "刊名缩写">
-<!ENTITY zotero.items.language_column "语言">
-<!ENTITY zotero.items.accessDate_column "访问时间">
-<!ENTITY zotero.items.libraryCatalog_column "馆藏目录">
-<!ENTITY zotero.items.callNumber_column "索取号">
-<!ENTITY zotero.items.rights_column "版权">
-<!ENTITY zotero.items.dateAdded_column "添加日期">
 <!ENTITY zotero.items.dateModified_column "修改日期">
-<!ENTITY zotero.items.extra_column "其它">
-<!ENTITY zotero.items.archive_column "归档">
-<!ENTITY zotero.items.archiveLocation_column "归档位置">
-<!ENTITY zotero.items.place_column "地点">
-<!ENTITY zotero.items.volume_column "卷">
-<!ENTITY zotero.items.edition_column "版">
-<!ENTITY zotero.items.pages_column "页">
-<!ENTITY zotero.items.issue_column "期">
-<!ENTITY zotero.items.series_column "系列">
-<!ENTITY zotero.items.seriesTitle_column "系列标题">
-<!ENTITY zotero.items.court_column "法庭">
-<!ENTITY zotero.items.medium_column "媒介/格式">
-<!ENTITY zotero.items.genre_column "流派">
-<!ENTITY zotero.items.system_column "系统">
 <!ENTITY zotero.items.moreColumns.label "更多列">
 <!ENTITY zotero.items.restoreColumnOrder.label "恢复列顺序">
 
@@ -222,7 +196,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "保持源分类">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
+<!ENTITY zotero.citation.suppressAuthor.label "省略作者">
 <!ENTITY zotero.citation.prefix.label "前缀:">
 <!ENTITY zotero.citation.suffix.label "后缀:">
 <!ENTITY zotero.citation.editorWarning.label "警告: 如果你在编辑器中编辑引文, 引文将无法与数据库或引文样式同步更新.">
@@ -349,6 +323,6 @@
 <!ENTITY zotero.pdfReader.zoomIn "放大">
 <!ENTITY zotero.pdfReader.zoomOut "缩小">
 <!ENTITY zotero.pdfReader.zoomAuto "自动调整大小">
-<!ENTITY zotero.pdfReader.zoomPageWidth "适应宽度">
-<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.transferToPDF "Store Annotations in File…">
+<!ENTITY zotero.pdfReader.zoomPageWidth "适应页面宽度">
+<!ENTITY zotero.pdfReader.zoomPageHeight "适应页面高度">
+<!ENTITY zotero.pdfReader.transferFromPDF "导入注释……">
