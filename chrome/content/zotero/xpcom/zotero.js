@@ -1184,7 +1184,9 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			lineNumber != undefined ? lineNumber : null, 
 			columnNumber != undefined ? columnNumber : null,
 			flags,
-			'component javascript'
+			'system javascript',
+			false,
+			true
 		);
 		Services.console.logMessage(scriptError);
 	}
