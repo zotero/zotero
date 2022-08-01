@@ -578,8 +578,12 @@
 						th.classList.add("pointer");
 						th.addEventListener('click', event => ZoteroPane_Local.loadURI(doi, event));
 						th.setAttribute("tooltiptext", Zotero.getString('pane.item.viewOnline.tooltip'));
-						valueElement.oncontextmenu = () => {
-							this._id('zotero-doi-menu').openPopup(valueElement);
+						valueElement.oncontextmenu = (event) => {
+							this._id('zotero-doi-menu').openPopupAtScreen(
+								event.screenX + 1,
+								event.screenY + 1,
+								true
+							);
 						};
 						
 						var openURLMenuItem = this._id('zotero-doi-menu-view-online');
