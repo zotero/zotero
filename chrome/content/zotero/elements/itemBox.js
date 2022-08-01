@@ -562,7 +562,7 @@
 					th.classList.add("pointer");
 					// TODO: make getFieldValue non-private and use below instead
 					th.addEventListener('click', () => Zotero.launchURL(th.nextSibling.firstChild.value || th.nextSibling.firstChild.textContent));
-					th.setAttribute("tooltiptext", Zotero.getString('pane.item.viewOnline.tooltip'));
+					th.setAttribute('title', Zotero.getString('pane.item.viewOnline.tooltip'));
 				}
 				else if (fieldName == 'DOI' && val && typeof val == 'string') {
 					// Pull out DOI, in case there's a prefix
@@ -577,7 +577,7 @@
 								.replace(/"/g, '%22');
 						th.classList.add("pointer");
 						th.addEventListener('click', event => ZoteroPane_Local.loadURI(doi, event));
-						th.setAttribute("tooltiptext", Zotero.getString('pane.item.viewOnline.tooltip'));
+						th.setAttribute('title', Zotero.getString('pane.item.viewOnline.tooltip'));
 						valueElement.oncontextmenu = (event) => {
 							this._id('zotero-doi-menu').openPopupAtScreen(
 								event.screenX + 1,
@@ -1043,7 +1043,7 @@
 			// Switch to single-field mode
 			if (fieldMode == 1) {
 				button.style.background = `url("chrome://zotero/skin/textfield-dual${Zotero.hiDPISuffix}.png") center/21px auto no-repeat`;
-				button.setAttribute('tooltiptext', Zotero.getString('pane.item.switchFieldMode.two'));
+				button.setAttribute('title', Zotero.getString('pane.item.switchFieldMode.two'));
 				lastName.setAttribute('fieldMode', '1');
 				button.setAttribute('onclick', "this.getRootNode().host.switchCreatorMode(this.closest('tr'), 0, false, true)");
 				lastName.setAttribute('flex', '1');
@@ -1083,7 +1083,7 @@
 			// Switch to two-field mode
 			else {
 				button.style.background = `url("chrome://zotero/skin/textfield-single${Zotero.hiDPISuffix}.png") center/21px auto no-repeat`;
-				button.setAttribute('tooltiptext', Zotero.getString('pane.item.switchFieldMode.one'));
+				button.setAttribute('title', Zotero.getString('pane.item.switchFieldMode.one'));
 				lastName.setAttribute('fieldMode', '0');
 				button.setAttribute('onclick', "this.getRootNode().host.switchCreatorMode(this.closest('tr'), 1, false, true)");
 				lastName.setAttribute('flex', '0');
@@ -1403,7 +1403,7 @@
 				// Display the SQL date as a tooltip for date fields
 				// TEMP - filingDate
 				if (Zotero.ItemFields.isFieldOfBase(fieldID, 'date') || fieldName == 'filingDate') {
-					valueElement.setAttribute('tooltiptext',
+					valueElement.setAttribute('title',
 						Zotero.Date.multipartToSQL(this.item.getField(fieldName, true)));
 				}
 				
