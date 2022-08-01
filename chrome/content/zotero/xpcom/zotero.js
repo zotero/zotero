@@ -41,8 +41,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	// Privileged (public) methods
 	this.getStorageDirectory = getStorageDirectory;
 	this.debug = debug;
-	this.log = log;
-	this.logError = logError;
 	this.setFontSize = setFontSize;
 	this.flattenArguments = flattenArguments;
 	this.getAncestorByTagName = getAncestorByTagName;
@@ -1168,7 +1166,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 * |type| is a string with one of the flag types in nsIScriptError:
 	 *    'error', 'warning', 'exception', 'strict'
 	 */
-	function log(message, type, sourceName, sourceLine, lineNumber, columnNumber) {
+	this.log = function (message, type, sourceName, sourceLine, lineNumber, columnNumber) {
 		var scriptError = Components.classes["@mozilla.org/scripterror;1"]
 			.createInstance(Components.interfaces.nsIScriptError);
 		
@@ -1189,15 +1187,15 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			true
 		);
 		Services.console.logMessage(scriptError);
-	}
+	};
 	
 	/**
 	 * Log a JS error to the Mozilla error console and debug output
 	 * @param {Exception} err
 	 */
-	function logError(err) {
+	this.logError = function (err) {
 		Zotero.debug(err, 1);
-		log(err.message ? err.message : err.toString(), "error",
+		this.log(err.message ? err.message : err.toString(), "error",
 			err.fileName ? err.fileName : (err.filename ? err.filename : null), null,
 			err.lineNumber ? err.lineNumber : null, null);
 	}
@@ -1205,7 +1203,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	
 	this.warn = function (err) {
 		Zotero.debug(err + "\n\n" + Zotero.Utilities.Internal.filterStack(new Error().stack), 2);
-		log(err.message ? err.message : err.toString(), "warning",
+		this.log(err.message ? err.message : err.toString(), "warning",
 			err.fileName ? err.fileName : (err.filename ? err.filename : null), null,
 			err.lineNumber ? err.lineNumber : null, null);
 	}
