@@ -68,6 +68,7 @@
 
 			let dropmarker = document.createXULElement('button');
 			dropmarker.id = "zotero-tb-search-menu-button";
+			dropmarker.tabIndex = -1;
 			dropmarker.setAttribute("type", "menu");
 			dropmarker.append(this.searchModePopup);
 
