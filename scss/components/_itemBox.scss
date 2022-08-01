@@ -16,7 +16,7 @@
 #info-table {
 	display: grid;
 	grid-template-columns: max-content 1fr;
-	grid-auto-rows: minmax(1.8em, auto);
+	grid-auto-rows: min-content;
 	align-items: center;
 	width: 100%;
 }
@@ -112,6 +112,7 @@ textarea {
 
 /* metadata field names */
 th {
+	align-self: stretch;
 	font-weight: normal;
 	text-align: right;
 	margin-left: 5px !important;
