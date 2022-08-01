@@ -561,12 +561,12 @@
 						&& Zotero.Utilities.isHTTPURL(val, true)) {
 					th.classList.add("pointer");
 					// TODO: make getFieldValue non-private and use below instead
-					th.setAttribute("onclick", "Zotero.launchURL(this.nextSibling.firstChild.value || this.nextSibling.firstChild.textContent)");
+					th.addEventListener('click', () => Zotero.launchURL(th.nextSibling.firstChild.value || th.nextSibling.firstChild.textContent));
 					th.setAttribute("tooltiptext", Zotero.getString('pane.item.viewOnline.tooltip'));
 				}
 				else if (fieldName == 'DOI' && val && typeof val == 'string') {
 					// Pull out DOI, in case there's a prefix
-					var doi = Zotero.Utilities.cleanDOI(val);
+					let doi = Zotero.Utilities.cleanDOI(val);
 					if (doi) {
 						doi = "https://doi.org/"
 							// Encode some characters that are technically valid in DOIs,
@@ -576,17 +576,17 @@
 								.replace(/%/g, '%25')
 								.replace(/"/g, '%22');
 						th.classList.add("pointer");
-						th.setAttribute("onclick", "ZoteroPane_Local.loadURI('" + doi + "', event)");
+						th.addEventListener('click', event => ZoteroPane_Local.loadURI(doi, event));
 						th.setAttribute("tooltiptext", Zotero.getString('pane.item.viewOnline.tooltip'));
 						valueElement.oncontextmenu = () => {
 							this._id('zotero-doi-menu').openPopup(valueElement);
 						};
 						
 						var openURLMenuItem = this._id('zotero-doi-menu-view-online');
-						openURLMenuItem.setAttribute("oncommand", "ZoteroPane_Local.loadURI('" + doi + "', event)");
+						openURLMenuItem.addEventListener('command', event => ZoteroPane_Local.loadURI(doi, event));
 						
 						var copyMenuItem = this._id('zotero-doi-menu-copy');
-						copyMenuItem.setAttribute("oncommand", "Zotero.Utilities.Internal.copyTextToClipboard('" + doi + "')");
+						copyMenuItem.addEventListener('command', () => Zotero.Utilities.Internal.copyTextToClipboard(doi));
 					}
 				}
 				else if (fieldName == 'abstractNote') {
