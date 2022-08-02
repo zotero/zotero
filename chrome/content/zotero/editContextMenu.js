@@ -1,133 +1,137 @@
-/*
-    ***** BEGIN LICENSE BLOCK *****
+// Adapted from Mozilla editMenuOverlay.js
+// Modified to wrap <menupopup> in a <popupset>
 
-    Copyright © 2021 Corporation for Digital Scholarship
-                     Vienna, Virginia, USA
-                     https://www.zotero.org
+// -*- indent-tabs-mode: nil; js-indent-level: 2 -*-
 
-    This file is part of Zotero.
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+// update menu items that rely on focus or on the current selection
+function goUpdateGlobalEditMenuItems(force) {
+  // Don't bother updating the edit commands if they aren't visible in any way
+  // (i.e. the Edit menu isn't open, nor is the context menu open, nor have the
+  // cut, copy, and paste buttons been added to the toolbars) for performance.
+  // This only works in applications/on platforms that set the gEditUIVisible
+  // flag, so we check to see if that flag is defined before using it.
+  if (!force && typeof gEditUIVisible != "undefined" && !gEditUIVisible) {
+    return;
+  }
 
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
+  goUpdateCommand("cmd_undo");
+  goUpdateCommand("cmd_redo");
+  goUpdateCommand("cmd_cut");
+  goUpdateCommand("cmd_copy");
+  goUpdateCommand("cmd_paste");
+  goUpdateCommand("cmd_selectAll");
+  goUpdateCommand("cmd_delete");
+  goUpdateCommand("cmd_switchTextDirection");
+}
 
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+// update menu items that relate to undo/redo
+function goUpdateUndoEditMenuItems() {
+  goUpdateCommand("cmd_undo");
+  goUpdateCommand("cmd_redo");
+}
 
-    ***** END LICENSE BLOCK *****
-*/
+// update menu items that depend on clipboard contents
+function goUpdatePasteMenuItems() {
+  goUpdateCommand("cmd_paste");
+}
 
-// Support context menus on HTML text boxes
-//
-// Adapted from editMenuOverlay.js in Fx68
-// This entire file can be replaced with that file when Zotero upgrades.
-//
-// Currently it requires both:
-// `chrome://global/content/editMenuOverlay.js`
-// `chrome://global/content/globalOverlay.js`
-
+// Inject the commandset here instead of relying on preprocessor to share this across documents.
 window.addEventListener(
-	"DOMContentLoaded",
-	() => {
-		let commands = document.createElement('commandset');
+  "DOMContentLoaded",
+  () => {
+    let container =
+      document.querySelector("commandset") || document.documentElement;
+    let fragment = MozXULElement.parseXULToFragment(`
+      <commandset id="editMenuCommands">
+        <commandset id="editMenuCommandSetAll" commandupdater="true" events="focus,select" />
+        <commandset id="editMenuCommandSetUndo" commandupdater="true" events="undo" />
+        <commandset id="editMenuCommandSetPaste" commandupdater="true" events="clipboard" />
+        <command id="cmd_undo" internal="true"/>
+        <command id="cmd_redo" internal="true" />
+        <command id="cmd_cut" internal="true" />
+        <command id="cmd_copy" internal="true" />
+        <command id="cmd_paste" internal="true" />
+        <command id="cmd_delete" />
+        <command id="cmd_selectAll" internal="true" />
+        <command id="cmd_switchTextDirection" />
+      </commandset>
+    `);
 
-		let commandSetAll = document.createElement('commandset');
-		commandSetAll.id = 'editMenuCommandSetAll';
-		commandSetAll.setAttribute('commandupdater', 'true');
-		commandSetAll.setAttribute('events', 'focus,select');
-		commandSetAll.setAttribute('oncommandupdate', 'goUpdateGlobalEditMenuItems()');
-		commands.appendChild(commandSetAll);
+    let editMenuCommandSetAll = fragment.querySelector(
+      "#editMenuCommandSetAll"
+    );
+    editMenuCommandSetAll.addEventListener("commandupdate", function() {
+      goUpdateGlobalEditMenuItems();
+    });
 
-		let commandSetUndo = document.createElement('commandset');
-		commandSetUndo.id = 'editMenuCommandSetUndo';
-		commandSetUndo.setAttribute('commandupdater', 'true');
-		commandSetUndo.setAttribute('events', 'undo');
-		commandSetUndo.setAttribute('oncommandupdate', 'goUpdateUndoEditMenuItems()');
-		commands.appendChild(commandSetUndo);
+    let editMenuCommandSetUndo = fragment.querySelector(
+      "#editMenuCommandSetUndo"
+    );
+    editMenuCommandSetUndo.addEventListener("commandupdate", function() {
+      goUpdateUndoEditMenuItems();
+    });
 
-		let commandSetPaste = document.createElement('commandset');
-		commandSetPaste.id = 'editMenuCommandSetPaste';
-		commandSetPaste.setAttribute('commandupdater', 'true');
-		commandSetPaste.setAttribute('events', 'clipboard');
-		commandSetPaste.setAttribute('oncommandupdate', 'goUpdatePasteMenuItems()');
-		commands.appendChild(commandSetPaste);
+    let editMenuCommandSetPaste = fragment.querySelector(
+      "#editMenuCommandSetPaste"
+    );
+    editMenuCommandSetPaste.addEventListener("commandupdate", function() {
+      goUpdatePasteMenuItems();
+    });
 
-		const createCommand = function (name) {
-			let command = document.createElement('command');
-			command.id = `cmd_${name}`;
-			command.setAttribute('oncommand', `goDoCommand('cmd_${name}')`);
-			return command;
-		};
+    fragment.firstElementChild.addEventListener("command", event => {
+      let commandID = event.target.id;
+      goDoCommand(commandID);
+    });
 
-		commands.appendChild(createCommand('undo'));
-		commands.appendChild(createCommand('cut'));
-		commands.appendChild(createCommand('copy'));
-		commands.appendChild(createCommand('paste'));
-		commands.appendChild(createCommand('delete'));
-		commands.appendChild(createCommand('selectAll'));
-
-		let container = document.querySelector("commandset") || document.documentElement;
-		container.appendChild(commands);
-	},
-	{ once: true }
+    container.appendChild(fragment);
+  },
+  { once: true }
 );
 
-function createContentAreaContextMenuItem(name) {
-	let item = document.createXULElement('menuitem');
-	item.id = 'context-' + name.toLowerCase();
-	item.setAttribute('label', Zotero.Intl.strings[name + 'Cmd.label']);
-	item.setAttribute('accesskey', Zotero.Intl.strings[name + 'Cmd.accesskey']);
-	item.setAttribute('command', 'cmd_' + name);
-	return item;
-}
-
-function createContentAreaContextMenu() {
-	let menupopup = document.createXULElement('menupopup');
-	menupopup.id = 'contentAreaContextMenu';
-
-	menupopup.appendChild(createContentAreaContextMenuItem('undo'));
-	let undoSep = document.createXULElement('menuseparator');
-	undoSep.id = 'context-sep-undo';
-	menupopup.appendChild(undoSep);
-	menupopup.appendChild(createContentAreaContextMenuItem('cut'));
-	menupopup.appendChild(createContentAreaContextMenuItem('copy'));
-	menupopup.appendChild(createContentAreaContextMenuItem('paste'));
-	menupopup.appendChild(createContentAreaContextMenuItem('delete'));
-	let pasteSep = document.createXULElement('menuseparator');
-	pasteSep.id = 'context-sep-paste';
-	menupopup.appendChild(pasteSep);
-	menupopup.appendChild(createContentAreaContextMenuItem('selectAll'));
-
-	document.documentElement.appendChild(menupopup);
-	return menupopup;
-}
-
+// Support context menus on html textareas in the parent process:
 window.addEventListener("contextmenu", e => {
-	const HTML_NS = "http://www.w3.org/1999/xhtml";
-	let needsContextMenu =
-		e.target.ownerDocument == document &&
-		!e.defaultPrevented &&
-		e.target.parentNode.nodeName != "moz-input-box" &&
-		((["textarea", "input"].includes(e.target.localName) &&
-			e.target.namespaceURI == HTML_NS) ||
-			e.target.closest("search-textbox"));
+  const HTML_NS = "http://www.w3.org/1999/xhtml";
+  let needsContextMenu =
+    e.composedTarget.ownerDocument == document &&
+    !e.defaultPrevented &&
+    e.composedTarget.parentNode.nodeName != "moz-input-box" &&
+    ((["textarea", "input"].includes(e.composedTarget.localName) &&
+      e.composedTarget.namespaceURI == HTML_NS) ||
+      e.composedTarget.closest("search-textbox"));
 
-	if (!needsContextMenu) {
-		return;
-	}
+  if (!needsContextMenu) {
+    return;
+  }
 
-	let popup = document.getElementById("contentAreaContextMenu")
-		|| createContentAreaContextMenu();
+  let popup = document.getElementById("textbox-contextmenu");
+  if (!popup) {
+    MozXULElement.insertFTLIfNeeded("toolkit/global/textActions.ftl");
+    document.documentElement.appendChild(
+      MozXULElement.parseXULToFragment(`
+	  <popupset>
+        <menupopup id="textbox-contextmenu" class="textbox-contextmenu">
+          <menuitem data-l10n-id="text-action-undo" command="cmd_undo"></menuitem>
+          <menuitem data-l10n-id="text-action-redo" command="cmd_redo"></menuitem>
+          <menuseparator></menuseparator>
+          <menuitem data-l10n-id="text-action-cut" command="cmd_cut"></menuitem>
+          <menuitem data-l10n-id="text-action-copy" command="cmd_copy"></menuitem>
+          <menuitem data-l10n-id="text-action-paste" command="cmd_paste"></menuitem>
+          <menuitem data-l10n-id="text-action-delete" command="cmd_delete"></menuitem>
+          <menuitem data-l10n-id="text-action-select-all" command="cmd_selectAll"></menuitem>
+        </menupopup>
+	  </popupset>
+    `)
+    );
+    popup = document.documentElement.lastElementChild.firstElementChild;
+  }
 
-	goUpdateGlobalEditMenuItems(true);
-	popup.openPopupAtScreen(e.screenX, e.screenY, true);
-	// Don't show any other context menu at the same time. There can be a
-	// context menu from an ancestor too but we only want to show this one.
-	e.preventDefault();
+  goUpdateGlobalEditMenuItems(true);
+  popup.openPopupAtScreen(e.screenX, e.screenY, true, e);
+  // Don't show any other context menu at the same time. There can be a
+  // context menu from an ancestor too but we only want to show this one.
+  e.preventDefault();
 });
