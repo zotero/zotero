@@ -1816,7 +1816,6 @@
 			Zotero.debug(`Hiding editor for ${textbox.getAttribute('fieldname')}`);
 			
 			var label = textbox.closest('tr').querySelector('th');
-			this._lastTabIndex = -1;
 			
 			// Prevent autocomplete breakage in Firefox 3
 			if (textbox.mController) {
