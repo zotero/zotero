@@ -375,7 +375,7 @@
 		 * An array of field names in the order they should appear
 		 * in the list; empty spaces can be created with null
 		 */
-		set fieldOrder(vale) {
+		set fieldOrder(val) {
 			if (val.constructor.name != 'Array') {
 				throw ('fieldOrder must be an array in <itembox>.fieldOrder');
 			}
