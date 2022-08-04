@@ -1033,12 +1033,11 @@
 		
 		switchCreatorMode(row, fieldMode, initial, updatePref) {
 			// Change if button position changes
-			// row->hbox->label->label->toolbarbutton
 			var button = row.lastChild.lastChild.previousSibling.previousSibling;
-			var hbox = button.previousSibling;
-			var lastName = hbox.firstChild;
-			var comma = hbox.firstChild.nextSibling;
-			var firstName = hbox.lastChild;
+			var creatorNameBox = button.previousSibling;
+			var lastName = creatorNameBox.firstChild;
+			var comma = creatorNameBox.firstChild.nextSibling;
+			var firstName = creatorNameBox.lastChild;
 			
 			// Switch to single-field mode
 			if (fieldMode == 1) {
@@ -1918,10 +1917,8 @@
 				newVal = val;
 				
 				// Reset creator mode settings here so that flex attribute gets reset
-				this.switchCreatorMode(row, (otherFields.fieldMode ? 1 : 0), true);
 				if (Zotero.ItemTypes.getName(this.item.itemTypeID) === "bookSection") {
 					var creatorTypeLabels = this.shadowRoot.querySelectorAll(".creator-type-label");
-					Zotero.debug(creatorTypeLabels[creatorTypeLabels.length-1] + "");
 					this._id("zotero-author-guidance").show({
 						forEl: creatorTypeLabels[creatorTypeLabels.length - 1]
 					});
@@ -1997,11 +1994,14 @@
 				fieldName,
 				tabindex
 			);
-			var box = textbox.parentNode;
-			box.replaceChild(elem, textbox);
+			textbox.replaceWith(elem);
 			
 			// Disassociate textbox from label
 			label.setAttribute('control', elem.getAttribute('id'));
+			
+			if (field == 'creator') {
+				this.switchCreatorMode(row, (otherFields.fieldMode ? 1 : 0), true);
+			}
 			
 			if (this.saveOnEdit) {
 				await this.item.saveTx();
