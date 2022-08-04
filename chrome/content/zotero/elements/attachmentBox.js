@@ -81,6 +81,12 @@
 					<note-editor id="attachment-note-editor" notitle="1" flex="1"/>
 					
 					<button id="select-button" hidden="true"/>
+					
+					<popupset>
+						<menupopup id="url-menu">
+							<menuitem id="url-menuitem-copy"/>
+						</menupopup>
+					</popupset>
 				</vbox>
 			`, ['chrome://zotero/locale/zotero.dtd']);
 		}
@@ -194,6 +200,16 @@
 				}
 			});
 
+			this._id('url').addEventListener('contextmenu', (event) => {
+				this._id('url-menu').openPopupAtScreen(event.screenX, event.screenY, true);
+			});
+
+			let copyMenuitem = this._id('url-menuitem-copy');
+			copyMenuitem.label = Zotero.getString('general.copy');
+			copyMenuitem.addEventListener('command', () => {
+				navigator.clipboard.writeText(this.item.getField('url'));
+			});
+
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'attachmentbox');
 		}
 
@@ -279,7 +295,9 @@
 					urlField.setAttribute('hidden', false);
 					if (this.clickableLink) {
 						urlField.onclick = function (event) {
-							ZoteroPane_Local.loadURI(this.value, event);
+							if (event.button == 0) {
+								ZoteroPane_Local.loadURI(this.value, event);
+							}
 						};
 						urlField.className = 'zotero-text-link';
 					}
