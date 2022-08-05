@@ -1156,17 +1156,17 @@
 				Zotero.Prefs.set('lastCreatorFieldMode', fieldMode);
 			}
 			
-			if (!initial)
-			{
+			if (!initial) {
 				var index = button.getAttribute('fieldname').split('-')[1];
 				var fields = this.getCreatorFields(row);
 				fields.fieldMode = fieldMode;
 				this.modifyCreator(index, fields);
 				if (this.saveOnEdit) {
-					let activeField = this._infoTable.querySelector('textbox');
+					let activeField = this._infoTable.querySelector('input, textarea');
 					if (activeField !== null && activeField !== firstName && activeField !== lastName) {
 						this.blurOpenField();
-					} else {
+					}
+					else {
 						this.item.saveTx();
 					}
 				}
@@ -1443,7 +1443,6 @@
 				this._creatorCount--;
 				return;
 			}
-			this._lastTabIndex = -1;
 			await this.blurOpenField();
 			this.item.removeCreator(index);
 			await this.item.saveTx();
@@ -1457,7 +1456,7 @@
 			
 			// If a field is open, hide it before selecting the new field, which might
 			// trigger a refresh
-			var activeField = this._infoTable.querySelector('input');
+			var activeField = this._infoTable.querySelector('input, textarea');
 			if (activeField) {
 				this._refreshed = false;
 				await this.blurOpenField();
@@ -1614,7 +1613,7 @@
 								this._tabDirection = tabDirectionBuffer;
 								this._addCreatorRow = (creatorsToShift == 0) ? addCreatorRowBuffer : false;
 								if (this._tabDirection == 1) {
-									this._lastTabIndex = parseInt(tabIndexBuffer, 10) + 2 * (nameArray.length - 1);
+									this._lastTabIndex = tabIndexBuffer + 2 * (nameArray.length - 1);
 									if (newCreator.fieldMode == 0) {
 										this._lastTabIndex++;
 									}
@@ -1862,6 +1861,7 @@
 			Zotero.debug(`Hiding editor for ${textbox.getAttribute('fieldname')}`);
 			
 			var label = textbox.closest('tr').querySelector('th');
+			this._lastTabIndex = -1;
 			
 			// Prevent autocomplete breakage in Firefox 3
 			if (textbox.mController) {
@@ -1990,10 +1990,7 @@
 			}
 			
 			if (this.saveOnEdit) {
-				let savedTabIndex = this._lastTabIndex;
-				this._lastTabIndex = -1;
 				await this.item.saveTx();
-				this._lastTabIndex = savedTabIndex;
 			}
 		}
 		
@@ -2014,16 +2011,20 @@
 		}
 		
 		_getFieldValue(label) {
-			return label.firstChild
-				? label.firstChild.nodeValue : label.value;
+			return label.firstChild?.nodeValue
+				|| label.value
+				|| label.textContent;
 		}
 		
 		_setFieldValue(label, value) {
 			if (label.firstChild) {
 				label.firstChild.nodeValue = value;
 			}
-			else {
+			else if (label instanceof HTMLInputElement || label instanceof HTMLTextAreaElement) {
 				label.value = value;
+			}
+			else {
+				label.textContent = value;
 			}
 		}
 		
