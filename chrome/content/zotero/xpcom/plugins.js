@@ -28,29 +28,31 @@ Zotero.Plugins = new function () {
 	var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 	var scopes = new Map();
 	
+	const REASONS = {
+		APP_STARTUP: 1,
+		APP_SHUTDOWN: 2,
+		ADDON_ENABLE: 3,
+		ADDON_DISABLE: 4,
+		ADDON_INSTALL: 5,
+		ADDON_UNINSTALL: 6,
+		ADDON_UPGRADE: 7, // TODO
+		ADDON_DOWNGRADE: 8 // TODO
+	};
 	
 	this.init = async function () {
 		this._addonObserver.init();
 		
 		var { addons } = await AddonManager.getActiveAddons(["extension"]);
 		for (let addon of addons) {
-			await _callMethod(addon, 'startup');
+			await _callMethod(addon, 'startup', REASONS.APP_STARTUP);
 		}
 		
 		Zotero.addShutdownListener(async () => {
 			var { addons } = await AddonManager.getActiveAddons(["extension"]);
 			for (let addon of addons) {
-				await _callMethod(addon, 'shutdown');
+				await _callMethod(addon, 'shutdown', REASONS.APP_SHUTDOWN);
 			}
 		});
-	};
-	
-	
-	this.shutDown = async function () {
-		var { addons } = await AddonManager.getActiveAddons(["extension"]);
-		for (let addon of addons) {
-			await _callMethod(addon, 'shutdown');
-		}
 	};
 	
 	
@@ -82,7 +84,10 @@ Zotero.Plugins = new function () {
 				]
 			}
 		);
-		Object.assign(scope, { Services, Worker, Zotero });
+		for (let name in REASONS) {
+			scope[name] = REASONS[name];
+		}
+		Object.assign(scope, { Services, Worker, ChromeWorker, Zotero });
 		scopes.set(addon.id, scope);
 		
 		var uri = addon.getResourceURI().spec + 'bootstrap.js';
@@ -95,7 +100,7 @@ Zotero.Plugins = new function () {
 	 *
 	 * https://searchfox.org/mozilla-esr60/source/toolkit/mozapps/extensions/internal/XPIProvider.jsm#4343
 	 */
-	async function _callMethod(addon, method) {
+	async function _callMethod(addon, method, reason) {
 		try {
 			let id = addon.id;
 			Zotero.debug(`Calling bootstrap method '${method}' for plugin ${id} version ${addon.version}`);
@@ -120,9 +125,8 @@ Zotero.Plugins = new function () {
 			let params = {
 				id: addon.id,
 				version: addon.version,
-				resourceURI: addon.getResourceURI().spec,
+				rootURI: addon.getResourceURI().spec
 			};
-			let reason = '';
 			let result;
 			try {
 				result = func.call(scope, params, reason);
@@ -174,7 +178,8 @@ Zotero.Plugins = new function () {
 				return;
 			}
 			Zotero.debug("Installed plugin " + addon.id);
-			await _callMethod(addon, 'installed');
+			await _callMethod(addon, 'install');
+			await _callMethod(addon, 'startup', REASONS.ADDON_INSTALL);
 		},
 		
 		async onEnabling(addon) {
@@ -182,7 +187,7 @@ Zotero.Plugins = new function () {
 				return;
 			}
 			Zotero.debug("Enabling plugin " + addon.id);
-			await _callMethod(addon, 'startup');
+			await _callMethod(addon, 'startup', REASONS.ADDON_ENABLE);
 		},
 		
 		async onDisabled(addon) {
@@ -190,7 +195,7 @@ Zotero.Plugins = new function () {
 				return;
 			}
 			Zotero.debug("Disabling plugin " + addon.id);
-			await _callMethod(addon, 'shutdown');
+			await _callMethod(addon, 'shutdown', REASONS.ADDON_DISABLE);
 		},
 		
 		async onUninstalling(addon) {
@@ -199,8 +204,8 @@ Zotero.Plugins = new function () {
 		
 		async onUninstalled(addon) {
 			Zotero.debug("Uninstalled plugin " + addon.id);
-			await _callMethod(addon, 'shutdown');
-			await _callMethod(addon, 'uninstalled');
+			await _callMethod(addon, 'shutdown', REASONS.ADDON_UNINSTALL);
+			await _callMethod(addon, 'uninstall');
 		},
 	};
 };
