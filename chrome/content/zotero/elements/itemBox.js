@@ -295,6 +295,7 @@
 			}
 			
 			this._item = val;
+			this.scrollToTop();
 			this.refresh();
 		}
 		
@@ -1173,19 +1174,11 @@
 		}
 		
 		scrollToTop() {
-			// DEBUG: Valid nsIScrollBoxObject but methods return errors
-			try {
-				var sbo = this.boxObject;
-				sbo.QueryInterface(Components.interfaces.nsIScrollBoxObject);
-				sbo.scrollTo(0,0);
-			}
-			catch (e) {
-				Zotero.logError(e);
-			}
+			this.scrollTop = 0;
 		}
 		
 		ensureElementIsVisible(elem) {
-			elem.scrollIntoView();
+			elem.scrollIntoView({ block: 'nearest' });
 		}
 		
 		async changeTypeTo(itemTypeID, menu) {
@@ -2274,7 +2267,6 @@
 			else {
 				var visElem = next;
 			}
-			// DEBUG: This doesn't seem to work anymore
 			this.ensureElementIsVisible(visElem);
 			
 			return true;
