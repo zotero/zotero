@@ -1932,8 +1932,6 @@
 						
 						newVal = val;
 						
-						// Reset creator mode settings here so that flex attribute gets reset
-						this.switchCreatorMode(row, (otherFields.fieldMode ? 1 : 0), true);
 						if (Zotero.ItemTypes.getName(this.item.itemTypeID) === "bookSection") {
 							var creatorTypeLabels = document.getAnonymousNodes(this)[0].getElementsByClassName("creator-type-label");
 							Zotero.debug(creatorTypeLabels[creatorTypeLabels.length-1] + "");
@@ -2017,6 +2015,11 @@
 					
 					// Disassociate textbox from label
 					label.setAttribute('control', elem.getAttribute('id'));
+					
+					if (field == 'creator') {
+						// Set correct flex settings and fieldMode attribute
+						this.switchCreatorMode(row, (otherFields.fieldMode ? 1 : 0), true);
+					}
 					
 					if (this.saveOnEdit) {
 						await this.item.saveTx();
