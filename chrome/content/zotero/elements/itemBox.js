@@ -1336,10 +1336,6 @@
 				&& Zotero.ItemFields.isMultiline(fieldName);
 			
 			var valueElement = document.createElement("div");
-			/*if (useVbox) {
-				valueElement.style.display = 'flex';
-				valueElement.style.flexDirection = 'column';
-			}*/
 			
 			valueElement.setAttribute('id', `itembox-field-value-${fieldName}`);
 			valueElement.className = 'value';
@@ -1422,27 +1418,10 @@
 				}
 			}
 			
-			
-			if (fieldName && fieldName.indexOf('firstName') != -1) {
-				valueElement.setAttribute('flex', '1');
-			}
-			
-			var firstSpace = valueText.indexOf(" ");
-			
 			valueElement.textContent = valueText;
 			
 			if (isMultiline) {
 				valueElement.classList.add('multiline');
-			}
-
-			if ((firstSpace == -1 && valueText.length > 29) || firstSpace > 29
-				|| (fieldName &&
-					(fieldName.startsWith('creator') || (!isMultiline && fieldName == 'abstractNote')))) {
-				if (fieldName == 'abstractNote') {
-					// TODO this does nothing - do we want it to do something?
-					valueText = valueText.replace(/[\t\n]/g, ' ');
-				}
-				valueElement.setAttribute('crop', 'end');
 			}
 			
 			// Allow toggling non-editable Abstract open and closed with click
