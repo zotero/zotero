@@ -29,6 +29,7 @@ td {
 	display: flex;
 	min-width: 0;
 	align-self: stretch;
+	margin-inline-end: 5px;
 }
 
 td > input {
@@ -71,8 +72,17 @@ td > [fieldname] {
 	height: 1.5em !important;
 	min-height: 1.5em !important;
 	padding: 0 !important;
-	margin: 0 5px 0 0 !important;
+	margin: 0 !important;
 	max-height: 1.5em !important;
+	flex: 1;
+	
+	&::part(dropmarker) {
+		display: none;
+	}
+	
+	&::part(label) {
+		margin-inline-start: 0;
+	}
 }
 
 #item-type-menu:not(:hover):not(:active) {
@@ -87,10 +97,6 @@ td > [fieldname] {
 #item-type-menu > .menulist-label-box, #item-type-menu > .menulist-label-box > .menulist-label {
 	margin: 0 !important;
 	padding: 0 !important;
-}
-
-#item-type-menu > .menulist-dropmarker {
-	display: none;
 }
 
 /* DEBUG: this doesn't seem to work, unfortunately
