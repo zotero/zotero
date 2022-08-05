@@ -2323,7 +2323,9 @@
 					if (back) {
 						Zotero.debug('Looking for previous tabindex before ' + tabindex, 4);
 						for (let i = tabbableFields.length - 1; i >= 0; i--) {
-							if (parseInt(tabbableFields[i].getAttribute('ztabindex')) < tabindex) {
+							let field = tabbableFields[i];
+							let tabIndexHere = parseInt(field.getAttribute('ztabindex'));
+							if (tabIndexHere !== -1 && tabIndexHere < tabindex) {
 								next = tabbableFields[i];
 								break;
 							}
@@ -2332,7 +2334,9 @@
 					else {
 						Zotero.debug('Looking for tabindex ' + tabindex, 4);
 						for (var pos = 0; pos < tabbableFields.length; pos++) {
-							if (parseInt(tabbableFields[pos].getAttribute('ztabindex')) >= tabindex) {
+							let field = tabbableFields[pos];
+							let tabIndexHere = parseInt(field.getAttribute('ztabindex'));
+							if (tabIndexHere !== -1 && tabIndexHere >= tabindex) {
 								next = tabbableFields[pos];
 								break;
 							}
