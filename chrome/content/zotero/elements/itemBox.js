@@ -1439,6 +1439,7 @@
 				|| (fieldName &&
 					(fieldName.startsWith('creator') || (!isMultiline && fieldName == 'abstractNote')))) {
 				if (fieldName == 'abstractNote') {
+					// TODO this does nothing - do we want it to do something?
 					valueText = valueText.replace(/[\t\n]/g, ' ');
 				}
 				valueElement.setAttribute('crop', 'end');
@@ -1579,6 +1580,78 @@
 					
 					if (creatorField == 'lastName') {
 						t.setAttribute('fieldMode', elem.getAttribute('fieldMode'));
+						t.addEventListener('paste', (event) => {
+							let lastName = event.clipboardData.getData('text').trim();
+							// Handle \n\r and \n delimited entries and a single line containing a tab
+							var rawNameArray = lastName.split(/\r\n?|\n/);
+							if (rawNameArray.length > 1 || rawNameArray[0].includes('\t')) {
+								// Pasting multiple authors; first make sure we prevent normal paste behavior
+								event.preventDefault();
+								
+								// Save tab direction and add creator flags since they are reset in the
+								// process of adding multiple authors
+								var tabDirectionBuffer = this._tabDirection;
+								var addCreatorRowBuffer = this._addCreatorRow;
+								var tabIndexBuffer = this._lastTabIndex;
+								this._tabDirection = false;
+								this._addCreatorRow = false;
+
+								// Filter out bad names
+								var nameArray = rawNameArray.filter(name => name);
+
+								// If not adding names at the end of the creator list, make new creator
+								// entries and then shift down existing creators.
+								var initNumCreators = this.item.numCreators();
+								var creatorsToShift = initNumCreators - creatorIndex;
+								if (creatorsToShift > 0) {
+									// Add extra creators with dummy values
+									for (let i = 0; i < nameArray.length; i++) {
+										this.modifyCreator(i + initNumCreators, {
+											firstName: '',
+											lastName: '',
+											fieldMode: 0,
+											creatorTypeID
+										});
+									}
+
+									// Shift existing creators
+									for (let i = initNumCreators - 1; i >= creatorIndex; i--) {
+										let shiftedCreatorData = this.item.getCreator(i);
+										this.item.setCreator(nameArray.length + i, shiftedCreatorData);
+									}
+								}
+
+								let currentIndex = creatorIndex;
+								let newCreator = { creatorTypeID };
+								// Add the creators in lastNameArray one at a time
+								for (let tempName of nameArray) {
+									// Check for tab to determine creator name format
+									newCreator.fieldMode = (tempName.indexOf('\t') == -1) ? 1 : 0;
+									if (newCreator.fieldMode == 0) {
+										newCreator.lastName = tempName.split('\t')[0];
+										newCreator.firstName = tempName.split('\t')[1];
+									}
+									else {
+										newCreator.lastName = tempName;
+										newCreator.firstName = '';
+									}
+									this.modifyCreator(currentIndex, newCreator);
+									currentIndex++;
+								}
+								this._tabDirection = tabDirectionBuffer;
+								this._addCreatorRow = (creatorsToShift == 0) ? addCreatorRowBuffer : false;
+								if (this._tabDirection == 1) {
+									this._lastTabIndex = parseInt(tabIndexBuffer, 10) + 2 * (nameArray.length - 1);
+									if (newCreator.fieldMode == 0) {
+										this._lastTabIndex++;
+									}
+								}
+								
+								if (this.saveOnEdit) {
+									this.item.saveTx();
+								}
+							}
+						});
 					}
 				}
 				t.setAttribute(
@@ -1838,66 +1911,7 @@
 				
 				var otherFields = this.getCreatorFields(row);
 				otherFields[creatorField] = value;
-				var lastName = otherFields.lastName.trim();
-				
-				//Handle \n\r and \n delimited entries and a single line containing a tab
-				var rawNameArray = lastName.split(/\r\n?|\n/);
-				if (rawNameArray.length > 1 || rawNameArray[0].includes('\t')) {
-					//Save tab direction and add creator flags since they are reset in the 
-					//process of adding multiple authors
-					var tabDirectionBuffer = this._tabDirection;
-					var addCreatorRowBuffer = this._addCreatorRow;
-					var tabIndexBuffer = this._lastTabIndex;
-					this._tabDirection = false;
-					this._addCreatorRow = false;
-					
-					//Filter out bad names
-					var nameArray = rawNameArray.filter(name => name);
-					
-					//If not adding names at the end of the creator list, make new creator 
-					//entries and then shift down existing creators.
-					var initNumCreators = this.item.numCreators();
-					var creatorsToShift = initNumCreators - creatorIndex;
-					if (creatorsToShift > 0) { 
-						//Add extra creators
-						for (var i=0;i<nameArray.length;i++) {
-							this.modifyCreator(i + initNumCreators, otherFields);
-						}
-						
-						//Shift existing creators
-						for (var i=initNumCreators-1; i>=creatorIndex; i--) {
-							let shiftedCreatorData = this.item.getCreator(i);
-							this.item.setCreator(nameArray.length + i, shiftedCreatorData);
-						}
-					}
-					
-					//Add the creators in lastNameArray one at a time
-					for (let tempName of nameArray) {
-						// Check for tab to determine creator name format
-						otherFields.fieldMode = (tempName.indexOf('\t') == -1) ? 1 : 0;
-						if (otherFields.fieldMode == 0) {
-							otherFields.lastName=tempName.split('\t')[0];
-							otherFields.firstName=tempName.split('\t')[1];
-						} 
-						else {
-							otherFields.lastName=tempName;
-							otherFields.firstName='';
-						}
-						this.modifyCreator(creatorIndex, otherFields);
-						creatorIndex++;
-					}
-					this._tabDirection = tabDirectionBuffer;
-					this._addCreatorRow = (creatorsToShift==0) ? addCreatorRowBuffer : false;
-					if (this._tabDirection == 1) {
-						this._lastTabIndex = parseInt(tabIndexBuffer,10) + 2*(nameArray.length-1);
-						if (otherFields.fieldMode == 0) {
-							this._lastTabIndex++;
-						}
-					}
-				}
-				else {
-					this.modifyCreator(creatorIndex, otherFields);
-				}
+				this.modifyCreator(creatorIndex, otherFields);
 				
 				var val = this.item.getCreator(creatorIndex);
 				val = val ? val[creatorField] : null;
