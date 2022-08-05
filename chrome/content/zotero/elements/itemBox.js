@@ -1471,8 +1471,9 @@
 				this._creatorCount--;
 				return;
 			}
-			this.item.removeCreator(index);
+			this._lastTabIndex = -1;
 			await this.blurOpenField();
+			this.item.removeCreator(index);
 			await this.item.saveTx();
 		}
 		
