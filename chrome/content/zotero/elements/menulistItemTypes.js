@@ -70,20 +70,15 @@
 			}
 			
 			if (this._preconnectedValue) {
-				Zotero.debug("SETTING PRECONNECT");
 				this.value = this._preconnectedValue;
 			}
 		}
 		
 		set value(value) {
 			if (!this.itemCount) {
-				Zotero.debug("STORING PRECONNECT");
 				this._preconnectedValue = value;
 			}
 			else {
-				Zotero.debug("SETTING VAL NOW " + value);
-				Zotero.debug(this.itemCount);
-				Zotero.debug(value);
 				super.value = value;
 			}
 		}
