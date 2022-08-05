@@ -1372,6 +1372,17 @@ class Reader {
 		this.triggerAnnotationsImportCheck(itemID);
 		let reader;
 
+		if (!allowDuplicate) {
+			let win = Zotero.getMainWindow();
+			if (win) {
+				let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
+				if (existingTabID) {
+					win.Zotero_Tabs.select(existingTabID);
+					return;
+				}
+			}
+		}
+
 		if (openInWindow) {
 			reader = this._readers.find(r => r._itemID === itemID && (r instanceof ReaderWindow));
 		}

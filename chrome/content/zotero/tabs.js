@@ -84,6 +84,11 @@ var Zotero_Tabs = new function () {
 		window.Zotero_Tooltip.stop();
 	};
 
+	this.getTabIDByItemID = function (itemID) {
+		let tab = this._tabs.find(tab => tab.data && tab.data.itemID === itemID);
+		return tab && tab.id;
+	};
+
 	this.init = function () {
 		ReactDOM.render(
 			<TabBar
