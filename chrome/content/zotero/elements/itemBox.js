@@ -1997,7 +1997,10 @@
 			}
 			
 			if (this.saveOnEdit) {
+				let savedTabIndex = this._lastTabIndex;
+				this._lastTabIndex = -1;
 				await this.item.saveTx();
+				this._lastTabIndex = savedTabIndex;
 			}
 		}
 		
