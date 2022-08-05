@@ -411,21 +411,19 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			Services.console.unregisterListener(ConsoleListener);
 		});
 		
-		return _initFull()
-		.then(function (success) {
-			if (!success) {
-				return false;
-			}
+		var success = await _initFull();
+		if (!success) {
+			return false;
+		}
 			
-			if (Zotero.isStandalone) Zotero.Standalone.init();
-			Zotero.initComplete();
-		})
+		if (Zotero.isStandalone) Zotero.Standalone.init();
+		await Zotero.initComplete();
 	};
 	
 	/**
 	 * Triggers events when initialization finishes
 	 */
-	this.initComplete = function() {
+	this.initComplete = async function() {
 		if(Zotero.initialized) return;
 		
 		Zotero.debug("Running initialization callbacks");
@@ -446,6 +444,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		
 		Zotero.debug('Triggering "zotero-loaded" event');
 		Services.obs.notifyObservers(Zotero, "zotero-loaded", null);
+		
+		await Zotero.Plugins.init();
 	}
 	
 	
@@ -887,13 +887,16 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			Zotero.closing = true;
 			
 			// run shutdown listener
+			let shutdownPromises = [];
 			for (let listener of _shutdownListeners) {
 				try {
-					listener();
-				} catch(e) {
+					shutdownPromises.push(listener());
+				}
+				catch(e) {
 					Zotero.logError(e);
 				}
 			}
+			yield Promise.all(shutdownPromises);
 			
 			// remove temp directory
 			yield Zotero.removeTempDirectory();

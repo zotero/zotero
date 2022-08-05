@@ -110,6 +110,7 @@ const xpcomFilesLocal = [
 	'mime',
 	'notifier',
 	'openPDF',
+	'plugins',
 	'reader',
 	'progressQueue',
 	'progressQueueDialog',
