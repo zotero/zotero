@@ -30,6 +30,7 @@ var ZOTERO_CONFIG = {
 	LICENSING_URL: 'https://www.zotero.org/support/licensing',
 	GET_INVOLVED_URL: 'https://www.zotero.org/getinvolved',
 	DICTIONARIES_URL: 'https://download.zotero.org/dictionaries/',
+	PLUGINS_URL: 'https://www.zotero.org/support/plugins',
 };
 
 if (typeof process === 'object' && process + '' === '[object process]'){

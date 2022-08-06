@@ -625,6 +625,22 @@ const ZoteroStandalone = new function() {
 	this.updateAddonsPane = function (doc) {
 		//var rootWindow = doc.ownerGlobal.windowRoot.ownerGlobal;
 		
+		// Update message when no plugins installed
+		setTimeout(() => {
+			var emptyListMessage = doc.getElementById('empty-list-message');
+			emptyListMessage.innerHTML = Zotero.Utilities.htmlSpecialChars(
+					Zotero.getString("addons.emptyListMessage")
+				).replace(
+					/\[([^\]]+)]/,
+					`<a href="${ZOTERO_CONFIG.PLUGINS_URL}">$1</a>`
+				);
+			emptyListMessage.addEventListener('click', (event) => {
+				Zotero.launchURL(ZOTERO_CONFIG.PLUGINS_URL);
+				event.preventDefault();
+				event.stopPropagation();
+			});
+		});
+		
 		// Make our own removal prompt instead of using BrowserAddonUI.promptRemoveExtension() from
 		// browser-addons.js
 		doc.ownerGlobal.promptRemoveExtension = function (addon) {
