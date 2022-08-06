@@ -127,6 +127,7 @@ var Zotero_Citation_Dialog = new function () {
 			_locatorNameArray[i] = locator;
 			if (locator == 'page') {
 				pageLocatorIndex = i;
+				_preserveData.label[1] = i;
 			}
 			i++;
 		}
