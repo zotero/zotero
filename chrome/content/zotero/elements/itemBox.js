@@ -1046,7 +1046,6 @@
 				button.setAttribute('title', Zotero.getString('pane.item.switchFieldMode.two'));
 				lastName.setAttribute('fieldMode', '1');
 				button.setAttribute('onclick', "this.getRootNode().host.switchCreatorMode(this.closest('tr'), 0, false, true)");
-				lastName.setAttribute('flex', '1');
 				delete lastName.style.width;
 				delete lastName.style.maxWidth;
 				
@@ -1086,7 +1085,6 @@
 				button.setAttribute('title', Zotero.getString('pane.item.switchFieldMode.one'));
 				lastName.setAttribute('fieldMode', '0');
 				button.setAttribute('onclick', "this.getRootNode().host.switchCreatorMode(this.closest('tr'), 1, false, true)");
-				lastName.setAttribute('flex', '0');
 				
 				// appropriately truncate lastName
 				
