@@ -131,6 +131,29 @@ describe("Item pane", function () {
 				5000
 			);
 		});
+
+		it("should persist fieldMode after hiding a creator name editor", async function () {
+			let item = new Zotero.Item('book');
+			item.setCreators([
+				{
+					name: "First Last",
+					creatorType: "author",
+					fieldMode: 1
+				}
+			]);
+			await item.saveTx();
+			
+			let itemBox = doc.getElementById('zotero-editpane-item-box');
+			let box = doc.getAnonymousNodes(itemBox)[0];
+			
+			box.querySelector('label[fieldname="creator-0-lastName"]').click();
+			itemBox.hideEditor(box.querySelector('textbox[fieldname="creator-0-lastName"]'));
+			
+			assert.equal(
+				box.querySelector('label[fieldname="creator-0-lastName"]').getAttribute('fieldMode'),
+				'1'
+			);
+		});
 	})
 	
 	
