@@ -1,5 +1,5 @@
 var ZOTERO_CONFIG = {
-	GUID: 'zotero@chnm.gmu.edu',
+	GUID: 'zotero@zotero.org',
 	ID: 'zotero', // used for db filename, etc.
 	CLIENT_NAME: 'Zotero',
 	DOMAIN_NAME: 'zotero.org',
