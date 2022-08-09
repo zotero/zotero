@@ -112,7 +112,7 @@ var Zotero_Preferences = {
 	 * @param {String[]} [options.scripts] Array of URIs of scripts to load along with the pane
 	 */
 	async addPane(options) {
-		let { id, parent, label, image } = options;
+		let { id, parent, label, rawLabel, image } = options;
 
 		let listItem = document.createXULElement('richlistitem');
 		listItem.value = id;
@@ -131,13 +131,15 @@ var Zotero_Preferences = {
 		}
 		else {
 			let labelElem = document.createXULElement('label');
-			if (Zotero.Intl.strings.hasOwnProperty(label)) {
-				label = Zotero.Intl.strings[label];
+			if (rawLabel) {
+				labelElem.value = rawLabel;
+			}
+			else if (Zotero.Intl.strings.hasOwnProperty(label)) {
+				labelElem.value = Zotero.Intl.strings[label];
 			}
 			else {
-				label = Zotero.getString(label);
+				labelElem.value = Zotero.getString(label);
 			}
-			labelElem.value = label;
 			listItem.append(labelElem);
 		}
 

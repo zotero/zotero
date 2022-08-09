@@ -159,6 +159,23 @@ Zotero.Plugins = new function () {
 	};
 	
 	
+	this.getName = async function (id) {
+		var addon = await AddonManager.getAddonByID(id);
+		return addon.name;
+	};
+
+
+	/**
+	 * @param {String} id
+	 * @param {Number} idealSize In logical pixels (scaled automatically on hiDPI displays)
+	 * @returns {Promise<String | null>}
+	 */
+	this.getIconURI = async function (id, idealSize) {
+		var addon = await AddonManager.getAddonByID(id);
+		return AddonManager.getPreferredIconURL(addon, idealSize, globalThis);
+	};
+	
+	
 	this._addonObserver = {
 		initialized: false,
 		
