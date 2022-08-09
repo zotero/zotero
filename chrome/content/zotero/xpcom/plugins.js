@@ -172,7 +172,7 @@ Zotero.Plugins = new function () {
 	 */
 	this.getIconURI = async function (id, idealSize) {
 		var addon = await AddonManager.getAddonByID(id);
-		return AddonManager.getPreferredIconURL(addon, idealSize, globalThis);
+		return AddonManager.getPreferredIconURL(addon, idealSize * (Zotero.hiDPI ? 2 : 1));
 	};
 	
 	
