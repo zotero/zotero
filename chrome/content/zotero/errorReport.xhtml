@@ -6,10 +6,18 @@
 
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
-<wizard xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	id="zotero-error-report" title="&zotero.errorReport.title;"
-	width="550" height="450">
-	
+<window
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	onload="Zotero_Error_Report.init()">
+
+<linkset>
+	<html:link rel="localization" href="toolkit/global/wizard.ftl"/>
+</linkset>
+
+<script src="chrome://global/content/customElements.js"/>
+
+<wizard title="&zotero.errorReport.title;" width="550" height="450">
 	<script>
 	<![CDATA[
 		Components.utils.import("resource://zotero/config.js");
@@ -25,7 +33,10 @@
 			
 			
 			this.init = Zotero.Promise.coroutine(function* () {
-				var wizard = document.getElementById('zotero-error-report');
+				// Allow Continue button to be populated
+				yield Zotero.Promise.delay(100);
+				
+				var wizard = document.querySelector('wizard');
 				var continueButton = wizard.getButton('next');
 				continueButton.disabled = true;
 				
@@ -52,10 +63,13 @@
 					'errorReport.advanceMessage', continueButton.getAttribute('label')
 				);
 				document.getElementById('zotero-advance-message').setAttribute('value', str);
+				
+				var pageSending = document.querySelector('wizardpage[pageid="report-sending"]');
+				pageSending.addEventListener('pageshow', () => Zotero_Error_Report.sendErrorReport());
 			});
 			
 			this.sendErrorReport = Zotero.Promise.coroutine(function* () {
-				var wizard = document.getElementById('zotero-error-report');
+				var wizard = document.querySelector('wizard');
 				var continueButton = wizard.getButton('next');
 				continueButton.disabled = true;
 				
@@ -85,7 +99,7 @@
 			
 			
 			function _sendErrorReportCallback(xmlhttp) {
-				var wizard = document.getElementById('zotero-error-report');
+				var wizard = document.querySelector('wizard');
 				if (!wizard) {
 					return;
 				}
@@ -145,23 +159,39 @@
 	]]>
 	</script>
 	
-	<wizardpage onpageshow="Zotero_Error_Report.init()" label=" ">
+	<wizardpage
+			id="report-start"
+			pageid="report-start"
+			next="report-sending"
+			data-header-label-id="">
 		<description id="zotero-failure-message"/>
-		<textbox id="zotero-error-message" class="plain" readonly="true" multiline="true" flex="1"/>
+		<html:textarea
+				id="zotero-error-message"
+				class="plain"
+				readonly="true"
+				multiline="true"
+		/>
 		<description id="zotero-advance-message"/>
 	</wizardpage>
 	
-	<wizardpage onpageshow="Zotero_Error_Report.sendErrorReport()" label=" ">
+	<wizardpage
+			pageid="report-sending"
+			next="report-submitted"
+			onpageshow="Zotero_Error_Report.sendErrorReport()"
+			data-header-label-id="">
 		<description>&zotero.errorReport.submissionInProgress;</description>
 	</wizardpage>
 	
-	<wizardpage label=" ">
+	<wizardpage
+			pageid="report-submitted"
+			data-header-label-id="">
 		<description>&zotero.errorReport.submitted;</description>
 		<description id="zotero-report-result" hidden="true">
 			&zotero.errorReport.reportID;
-			<textbox id="zotero-report-id" class="plain" readonly="true"/>
+			<html:input id="zotero-report-id" type="text" class="plain" readonly="true"/>
 		</description>
 		<description>&zotero.errorReport.postToForums;</description>
 		<description>&zotero.errorReport.notReviewed;</description>
 	</wizardpage>
 </wizard>
+</window>

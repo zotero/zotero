@@ -5165,7 +5165,7 @@ var ZoteroPane = new function()
 			askForSteps: true
 		};
 		var io = { wrappedJSObject: { Zotero: Zotero, data:  data } };
-		var win = ww.openWindow(null, "chrome://zotero/content/error/errorReport.xhtml",
+		var win = ww.openWindow(null, "chrome://zotero/content/errorReport.xhtml",
 					"zotero-error-report", "chrome,centerscreen,modal", io);
 	}
 	
