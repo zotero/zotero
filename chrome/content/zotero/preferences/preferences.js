@@ -46,7 +46,9 @@ var Zotero_Preferences = {
 		Zotero.PreferencePanes.builtInPanes.forEach(pane => this.addPane(pane));
 		if (Zotero.PreferencePanes.pluginPanes.length) {
 			this.navigation.append(document.createElement('hr'));
-			Zotero.PreferencePanes.pluginPanes.forEach(pane => this.addPane(pane));
+			Zotero.PreferencePanes.pluginPanes
+				.sort((a, b) => Zotero.localeCompare(a.rawLabel, b.rawLabel))
+				.forEach(pane => this.addPane(pane));
 		}
 
 		if (window.arguments) {
