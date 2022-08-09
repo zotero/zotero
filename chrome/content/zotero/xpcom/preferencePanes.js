@@ -79,6 +79,8 @@ Zotero.PreferencePanes = {
 	 * is loaded as a fragment, not a full document, with XUL as the default
 	 * namespace and (X)HTML tags available under `html:`.
 	 *
+	 * Plugins must call #unregister(id) in their shutdown() method.
+	 *
 	 * @param {Object} options
 	 * @param {String} options.id Represents the pane and must be unique
 	 * @param {String} options.pluginID ID of the plugin registering the pane
@@ -109,5 +111,14 @@ Zotero.PreferencePanes = {
 		};
 
 		this.pluginPanes.push(addPaneOptions);
+	},
+
+	/**
+	 * Unregister a pane due to plugin shutdown.
+	 *
+	 * @param {String} id
+	 */
+	unregister: function (id) {
+		this.pluginPanes = this.pluginPanes.filter(p => p.id !== id);
 	},
 };
