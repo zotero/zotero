@@ -99,9 +99,8 @@ var Zotero_Preferences = {
 	},
 
 	/**
-	 * Add a pane to the left navigation sidebar. The pane XHTML (`src`) is
-	 * loaded as a fragment, not a full document, with XUL as the default
-	 * namespace and (X)HTML tags available under `html:`.
+	 * Add a pane to the left navigation sidebar. The pane source (`src`) is
+	 * loaded as a fragment, not a full document.
 	 *
 	 * @param {Object} options
 	 * @param {String} options.id Must be unique
@@ -112,6 +111,10 @@ var Zotero_Preferences = {
 	 * @param {String} options.src URI of an XHTML fragment
 	 * @param {String[]} [options.extraDTD] Array of URIs of DTD files to use for parsing the XHTML fragment
 	 * @param {String[]} [options.scripts] Array of URIs of scripts to load along with the pane
+	 * @param {Boolean} [options.defaultXUL] If true, parse the markup at `src` as XUL instead of XHTML:
+	 * 		whitespace-only text nodes are ignored, XUL is the default namespace, and HTML tags are
+	 * 		namespaced under `html:`. Default behavior is the opposite: whitespace nodes are preserved,
+	 * 		HTML is the default namespace, and XUL tags are under `xul:`.
 	 */
 	async addPane(options) {
 		let { id, parent, label, rawLabel, image } = options;
@@ -183,14 +186,15 @@ var Zotero_Preferences = {
 					Services.scriptloader.loadSubScript(script, this);
 				}
 			}
-			let contentFragment = MozXULElement.parseXULToFragment(
-				Zotero.File.getContentsFromURL(pane.src),
-				[
-					'chrome://zotero/locale/zotero.dtd',
-					'chrome://zotero/locale/preferences.dtd',
-					...(pane.extraDTD || []),
-				]
-			);
+			let markup = Zotero.File.getContentsFromURL(pane.src);
+			let dtdFiles = [
+				'chrome://zotero/locale/zotero.dtd',
+				'chrome://zotero/locale/preferences.dtd',
+				...(pane.extraDTD || []),
+			];
+			let contentFragment = pane.defaultXUL
+				? MozXULElement.parseXULToFragment(markup, dtdFiles)
+				: this.parseXHTMLToFragment(markup, dtdFiles);
 			contentFragment = document.importNode(contentFragment, true);
 			pane.container.append(contentFragment);
 			pane.imported = true;
@@ -202,6 +206,36 @@ var Zotero_Preferences = {
 
 		let backButton = document.getElementById('prefs-subpane-back-button');
 		backButton.hidden = !pane.parent;
+	},
+	
+	parseXHTMLToFragment(str, entities = []) {
+		// Adapted from MozXULElement.parseXULToFragment
+
+		/* eslint-disable indent */
+		let parser = new DOMParser();
+		parser.forceEnableXULXBL();
+		let doc = parser.parseFromSafeString(
+			`
+${entities.length
+		? `<!DOCTYPE bindings [ ${entities.reduce((preamble, url, index) => {
+				return preamble + `<!ENTITY % _dtd-${index} SYSTEM "${url}"> %_dtd-${index}; `;
+			}, '')}]>`
+		: ""}
+<div xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+${str}
+</div>`, "application/xml");
+		/* eslint-enable indent */
+
+		if (doc.documentElement.localName === 'parsererror') {
+			throw new Error('not well-formed XHTML');
+		}
+
+		// We use a range here so that we don't access the inner DOM elements from
+		// JavaScript before they are imported and inserted into a document.
+		let range = doc.createRange();
+		range.selectNodeContents(doc.querySelector('div'));
+		return range.extractContents();
 	},
 
 	/**

@@ -33,42 +33,48 @@ Zotero.PreferencePanes = {
 			label: 'zotero.preferences.prefpane.general',
 			image: 'chrome://zotero/skin/prefs-general.png',
 			src: 'chrome://zotero/content/preferences/preferences_general.xhtml',
-			scripts: ['chrome://zotero/content/preferences/preferences_general.js']
+			scripts: ['chrome://zotero/content/preferences/preferences_general.js'],
+			defaultXUL: true,
 		},
 		{
 			id: 'zotero-prefpane-sync',
 			label: 'zotero.preferences.prefpane.sync',
 			image: 'chrome://zotero/skin/prefs-sync.png',
 			src: 'chrome://zotero/content/preferences/preferences_sync.xhtml',
-			scripts: ['chrome://zotero/content/preferences/preferences_sync.js']
+			scripts: ['chrome://zotero/content/preferences/preferences_sync.js'],
+			defaultXUL: true,
 		},
 		{
 			id: 'zotero-prefpane-export',
 			label: 'zotero.preferences.prefpane.export',
 			image: 'chrome://zotero/skin/prefs-export.png',
 			src: 'chrome://zotero/content/preferences/preferences_export.xhtml',
-			scripts: ['chrome://zotero/content/preferences/preferences_export.js']
+			scripts: ['chrome://zotero/content/preferences/preferences_export.js'],
+			defaultXUL: true,
 		},
 		{
 			id: 'zotero-prefpane-cite',
 			label: 'zotero.preferences.prefpane.cite',
 			image: 'chrome://zotero/skin/prefs-styles.png',
 			src: 'chrome://zotero/content/preferences/preferences_cite.xhtml',
-			scripts: ['chrome://zotero/content/preferences/preferences_cite.js']
+			scripts: ['chrome://zotero/content/preferences/preferences_cite.js'],
+			defaultXUL: true,
 		},
 		{
 			id: 'zotero-prefpane-advanced',
 			label: 'zotero.preferences.prefpane.advanced',
 			image: 'chrome://zotero/skin/prefs-advanced.png',
 			src: 'chrome://zotero/content/preferences/preferences_advanced.xhtml',
-			scripts: ['chrome://zotero/content/preferences/preferences_advanced.js']
+			scripts: ['chrome://zotero/content/preferences/preferences_advanced.js'],
+			defaultXUL: true,
 		},
 		{
 			id: 'zotero-subpane-reset-sync',
 			parent: 'zotero-prefpane-sync',
 			label: 'zotero.preferences.subpane.resetSync',
 			src: 'chrome://zotero/content/preferences/preferences_sync_reset.xhtml',
-			scripts: ['chrome://zotero/content/preferences/preferences_sync.js']
+			scripts: ['chrome://zotero/content/preferences/preferences_sync.js'],
+			defaultXUL: true,
 		}
 	]),
 
@@ -107,7 +113,8 @@ Zotero.PreferencePanes = {
 			image: options.image || await Zotero.Plugins.getIconURI(options.pluginID, 24),
 			src: options.src,
 			extraDTD: options.extraDTD,
-			scripts: options.scripts
+			scripts: options.scripts,
+			defaultXUL: false,
 		};
 
 		this.pluginPanes.push(addPaneOptions);
