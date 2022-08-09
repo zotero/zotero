@@ -2142,8 +2142,8 @@ Zotero.PreferencePanes = {
 		let addPaneOptions = {
 			id: options.id,
 			parent: options.parent,
-			rawLabel: options.label || await Zotero.Plugins.getName(id),
-			image: options.image || await Zotero.Plugins.getIconURI(id, 24),
+			rawLabel: options.label || await Zotero.Plugins.getName(options.pluginID),
+			image: options.image || await Zotero.Plugins.getIconURI(options.pluginID, 24),
 			src: options.src,
 			extraDTD: options.extraDTD,
 			scripts: options.scripts
