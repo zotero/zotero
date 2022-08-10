@@ -140,7 +140,10 @@ Zotero.Plugins = new function () {
 			for (let observer of observers) {
 				if (observer[method]) {
 					try {
-						observer[method](params, reason);
+						let maybePromise = observer[method](params, reason);
+						if (maybePromise.then) {
+							await maybePromise;
+						}
 					}
 					catch (e) {
 						Zotero.logError(e);
