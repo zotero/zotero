@@ -205,7 +205,3 @@ pref("extensions.zotero.annotations.noteTemplates.note", "<p>{{citation}} {{comm
 
 // Scaffold
 pref("extensions.zotero.scaffold.eslint.enabled", true);
-
-// Preferences UI
-pref("extensions.zotero.lastSelectedPrefPane", "");
-
