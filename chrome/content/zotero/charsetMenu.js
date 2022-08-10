@@ -23,6 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
+
 var Zotero_Charset_Menu = new function() {
 	this.populate = populate;
 	
@@ -64,31 +65,16 @@ var Zotero_Charset_Menu = new function() {
 		else {
 			var charsetSeparator = document.createXULElement("menuseparator");
 			charsetPopup.appendChild(charsetSeparator);
+
+			charsets = [
+				{ "label": "Unicode (UTF-8)", "value": "UTF-8" },
+				{ "label": "Western", "value": "windows-1252" },
+				{ "label": "UTF-16LE", "value": "UTF-16LE" },
+				{ "label": "UTF-16BE", "value": "UTF-16BE" },
+				{ "label": "Western (IBM-850)", "value": "IBM850" },
+				{ "label": "Western (MacRoman)", "value": "macintosh" }
+			];
 			
-			Components.utils.import("resource://gre/modules/CharsetMenu.jsm");
-			var cmData = CharsetMenu.getData();
-			for (let charsetList of [cmData.pinnedCharsets, cmData.otherCharsets]) {
-				for (let charsetInfo of charsetList) {
-					if(charsetInfo.value == "UTF-8") {
-						charsets.push({
-							"label":"Unicode (UTF-8)",
-							"value":"UTF-8"
-						});
-					} else {
-						charsets.push({
-							"label":charsetInfo.label,
-							"value":charsetInfo.value
-						});
-					}
-				}
-			}
-			charsets = charsets.concat([
-				{"label":"UTF-16LE", "value":"UTF-16LE"},
-				{"label":"UTF-16BE", "value":"UTF-16BE"},
-				{"label":"Western (IBM-850)", "value":"IBM850"},
-				{"label":"Western (MacRoman)", "value":"macintosh"}
-			]);
-		
 			for(var i=0; i<charsets.length; i++) {
 				var charset = charsets[i].value,
 					label = charsets[i].label;

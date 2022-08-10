@@ -41,11 +41,11 @@ Zotero_Preferences.Cite = {
 		'zoteroWinWordIntegration@zotero.org'
 	]),
 
-	init: Zotero.Promise.coroutine(function* () {
+	init: async function () {
 		Components.utils.import("resource://gre/modules/AddonManager.jsm");
 		this.updateWordProcessorInstructions();
-		yield this.refreshStylesList();
-	}),
+		await this.refreshStylesList();
+	},
 	
 	
 	/**
@@ -129,13 +129,18 @@ Zotero_Preferences.Cite = {
 						columns={columns}
 						staticColumns={true}
 						disableFontSizeScaling={true}
-						onSelectionChange={() => document.getElementById('styleManager-delete').disabled = undefined}
+						onSelectionChange={selection => document.getElementById('styleManager-delete').disabled = !selection.count}
 						onKeyDown={handleKeyDown}
 						getRowString={index => this.styles[index].title}
 					/>
 				</IntlProvider>
 			);
-			await new Promise(resolve => ReactDOM.render(elem, document.getElementById("styleManager"), resolve));
+
+			let styleManager = document.getElementById("styleManager");
+			await new Promise(resolve => ReactDOM.render(elem, styleManager, resolve));
+
+			// Fix style manager showing partially blank until scrolled
+			setTimeout(() => this._tree.invalidate());
 		}
 		else {
 			this._tree.invalidate();
@@ -146,6 +151,9 @@ Zotero_Preferences.Cite = {
 			if (index != -1) {
 				this._tree.selection.select(index);
 			}
+		}
+		else if ([...this._tree.selection.selected].some(i => i >= this.styles.length)) {
+			this._tree.selection.clearSelection();
 		}
 	},
 	
@@ -228,7 +236,6 @@ Zotero_Preferences.Cite = {
 			}
 			
 			yield this.refreshStylesList();
-			document.getElementById('styleManager-delete').disabled = true;
 		}
 	}),
 	

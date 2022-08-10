@@ -52,14 +52,13 @@ richlistitem, richlistitem > * {
 	text-overflow: ellipsis;
 }
 
-groupbox > label > h2 {
+groupbox > label > h2, groupbox > * > label > h2 {
 	font-size: 14px;
 	margin-top: 1em;
 	margin-bottom: .3em;
 }
 
 label.zotero-text-link {
-	-moz-binding: url('chrome://zotero/content/bindings/text-link.xml#text-link');
 	-moz-user-focus: normal;
 	color: -moz-nativehyperlinktext;
 	text-decoration: underline;

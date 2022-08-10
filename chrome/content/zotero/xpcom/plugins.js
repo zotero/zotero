@@ -27,6 +27,7 @@
 Zotero.Plugins = new function () {
 	var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 	var scopes = new Map();
+	var observers = new Set();
 	
 	const REASONS = {
 		APP_STARTUP: 1,
@@ -135,7 +136,21 @@ Zotero.Plugins = new function () {
 				Zotero.logError(`Error running bootstrap method '${method}' on ${id}`);
 				Zotero.logError(e);
 			}
-			
+
+			for (let observer of observers) {
+				if (observer[method]) {
+					try {
+						let maybePromise = observer[method](params, reason);
+						if (maybePromise && maybePromise.then) {
+							await maybePromise;
+						}
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
+				}
+			}
+
 			// TODO: Needed?
 			/*if (method == "startup") {
 				activeAddon.startupPromise = Promise.resolve(result);
@@ -156,6 +171,42 @@ Zotero.Plugins = new function () {
 	this.getResourceURI = async function (id) {
 		var addon = await AddonManager.getAddonByID(id);
 		return addon.getResourceURI().spec;
+	};
+	
+	
+	this.getName = async function (id) {
+		var addon = await AddonManager.getAddonByID(id);
+		return addon.name;
+	};
+
+
+	/**
+	 * @param {String} id
+	 * @param {Number} idealSize In logical pixels (scaled automatically on hiDPI displays)
+	 * @returns {Promise<String | null>}
+	 */
+	this.getIconURI = async function (id, idealSize) {
+		var addon = await AddonManager.getAddonByID(id);
+		return AddonManager.getPreferredIconURL(addon, idealSize, Services.appShell.hiddenDOMWindow);
+	};
+
+
+	/**
+	 * Add an observer to be notified of lifecycle events on all plugins.
+	 *
+	 * @param observer
+	 * @param {Function} [observer.install]
+	 * @param {Function} [observer.startup]
+	 * @param {Function} [observer.shutdown]
+	 * @param {Function} [observer.uninstall]
+	 */
+	this.addObserver = function (observer) {
+		observers.add(observer);
+	};
+	
+	
+	this.removeObserver = function (observer) {
+		observers.delete(observer);
 	};
 	
 	
