@@ -141,7 +141,7 @@ Zotero.Plugins = new function () {
 				if (observer[method]) {
 					try {
 						let maybePromise = observer[method](params, reason);
-						if (maybePromise.then) {
+						if (maybePromise && maybePromise.then) {
 							await maybePromise;
 						}
 					}
