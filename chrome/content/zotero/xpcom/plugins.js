@@ -186,8 +186,17 @@ Zotero.Plugins = new function () {
 		var addon = await AddonManager.getAddonByID(id);
 		return AddonManager.getPreferredIconURL(addon, idealSize, Services.appShell.hiddenDOMWindow);
 	};
-	
-	
+
+
+	/**
+	 * Add an observer to be notified of lifecycle events on all plugins.
+	 *
+	 * @param observer
+	 * @param {Function} [observer.install]
+	 * @param {Function} [observer.startup]
+	 * @param {Function} [observer.shutdown]
+	 * @param {Function} [observer.uninstall]
+	 */
 	this.addObserver = function (observer) {
 		observers.add(observer);
 	};
@@ -196,15 +205,6 @@ Zotero.Plugins = new function () {
 	this.removeObserver = function (observer) {
 		observers.delete(observer);
 	};
-	
-	
-	function notifyObservers(fnName, id) {
-		for (let observer of observers) {
-			if (observer[fnName]) {
-				observer[fnName](id);
-			}
-		}
-	}
 	
 	
 	this._addonObserver = {
