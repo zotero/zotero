@@ -803,10 +803,16 @@ Zotero.Style.prototype.getCiteProc = function(locale, format, automaticJournalAb
 	}
 };
 
+/**
+ * Temporarily substitute `event-title` for `event`
+ *
+ * Until https://github.com/citation-style-language/styles/issues/6151
+ */
 Zotero.Style.prototype._eventToEventTitle = function (xml) {
 	var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
 		.createInstance(Components.interfaces.nsIDOMParser);
 	var doc = parser.parseFromString(xml, "text/xml");
+	// Ignore styles that already include `event-title`
 	if (doc.querySelector('[variable*="event-title"]')) {
 		return xml;
 	}
@@ -817,6 +823,7 @@ Zotero.Style.prototype._eventToEventTitle = function (xml) {
 	var changed = false;
 	for (let elem of elems) {
 		let variable = elem.getAttribute('variable');
+		// Must be "event" or "event foo", not, say, "event-place"
 		if (!/event( |$)/.test(variable)) {
 			continue;
 		}
