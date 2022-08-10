@@ -139,7 +139,12 @@ Zotero.Plugins = new function () {
 
 			for (let observer of observers) {
 				if (observer[method]) {
-					observer[method](params, reason);
+					try {
+						observer[method](params, reason);
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
 				}
 			}
 
