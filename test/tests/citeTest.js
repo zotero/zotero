@@ -1,4 +1,8 @@
 describe("Zotero.Cite", function () {
+	after(function () {
+		Zotero.locale = 'en-US';
+	});
+	
 	describe("#getLocatorString()", function () {
 		it("should get 'book' in en-US", function () {
 			Zotero.locale = 'en-US';
