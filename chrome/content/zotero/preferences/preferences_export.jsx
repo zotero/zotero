@@ -172,13 +172,6 @@ Zotero_Preferences.Export = {
 		menulist.selectedItem = null;
 		menulist.removeAllItems();
 		
-		// Prevent Cmd-w from setting "Wikipedia"
-		menulist.onkeydown = function (event) {
-			if ((Zotero.isMac && event.metaKey) || event.ctrlKey) {
-				event.preventDefault();
-			}
-		}
-		
 		var popup = document.createXULElement('menupopup');
 		menulist.appendChild(popup);
 		
