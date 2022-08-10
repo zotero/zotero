@@ -98,7 +98,9 @@ describe("Zotero.Styles", function() {
 			<layout>
 			  <text variable="event"/>
 			  <text value=" - "/>
-			  <text variable="event event-place"/>
+			  <text variable="event foo"/>
+			  <text value=" - "/>
+			  <text variable="event-place"/>
 			</layout>
 		  </bibliography>
 		</style>
@@ -113,6 +115,7 @@ describe("Zotero.Styles", function() {
 				}
 			);
 			item.setField('conferenceName', 'Conference');
+			item.setField('place', 'Place');
 			await item.saveTx();
 		});
 		
@@ -121,7 +124,7 @@ describe("Zotero.Styles", function() {
 			var cslEngine = style.getCiteProc('en-US', 'text');
 			var text = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, [item], "text");
 			cslEngine.free();
-			assert.equal(text, 'Conference - Conference\n');
+			assert.equal(text, 'Conference - Conference - Place\n');
 		});
 	});
 });
