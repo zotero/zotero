@@ -758,6 +758,8 @@ Zotero.Style.prototype.getCiteProc = function(locale, format, automaticJournalAb
 		var xml = this.getXML();
 	}
 	
+	xml = this._eventToEventTitle(xml);
+	
 	try {
 		var citeproc;
 		if (Zotero.Prefs.get('cite.useCiteprocRs')) {
@@ -795,6 +797,32 @@ Zotero.Style.prototype.getCiteProc = function(locale, format, automaticJournalAb
 		Zotero.logError(e);
 		throw e;
 	}
+};
+
+Zotero.Style.prototype._eventToEventTitle = function (xml) {
+	var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
+		.createInstance(Components.interfaces.nsIDOMParser);
+	var doc = parser.parseFromString(xml, "text/xml");
+	if (doc.querySelector('[variable*="event-title"]')) {
+		return xml;
+	}
+	var elems = doc.querySelectorAll('[variable*="event"]');
+	if (!elems.length) {
+		return xml;
+	}
+	var changed = false;
+	for (let elem of elems) {
+		let variable = elem.getAttribute('variable');
+		if (!/event( |$)/.test(variable)) {
+			continue;
+		}
+		elem.setAttribute('variable', variable.replace(/event(?= |$)/, 'event-title'));
+		changed = true;
+	}
+	if (changed) {
+		xml = doc.documentElement.outerHTML;
+	}
+	return xml;
 };
 
 Zotero.Style.prototype.__defineGetter__("class",
