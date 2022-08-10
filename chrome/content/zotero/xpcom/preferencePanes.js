@@ -118,6 +118,7 @@ Zotero.PreferencePanes = {
 		};
 
 		this.pluginPanes.push(addPaneOptions);
+		this._refreshPreferences();
 	},
 
 	/**
@@ -127,5 +128,12 @@ Zotero.PreferencePanes = {
 	 */
 	unregister: function (id) {
 		this.pluginPanes = this.pluginPanes.filter(p => p.id !== id);
+		this._refreshPreferences();
 	},
+	
+	_refreshPreferences() {
+		for (let win of Services.wm.getEnumerator("zotero:pref")) {
+			win.Zotero_Preferences.initPanes();
+		}
+	}
 };

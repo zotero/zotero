@@ -43,6 +43,22 @@ var Zotero_Preferences = {
 			}
 		});
 
+		document.getElementById('prefs-search').focus();
+		
+		this.initPanes();
+	},
+	
+	initPanes: function () {
+		// Save positions and clear content in case we're reinitializing
+		// because of a plugin lifecycle event
+		let navigationValue = this.navigation.value;
+		let navigationScrollTop = this.navigation.scrollTop;
+		let navigationScrollLeft = this.navigation.scrollLeft;
+		this.navigation.replaceChildren();
+		let contentScrollTop = this.content.scrollTop;
+		let contentScrollLeft = this.content.scrollLeft;
+		this.content.replaceChildren();
+		
 		Zotero.PreferencePanes.builtInPanes.forEach(pane => this.addPane(pane));
 		if (Zotero.PreferencePanes.pluginPanes.length) {
 			this.navigation.append(document.createElement('hr'));
@@ -51,10 +67,17 @@ var Zotero_Preferences = {
 				.forEach(pane => this.addPane(pane));
 		}
 
-		if (window.arguments) {
+		if (navigationValue) {
+			this.navigation.value = navigationValue;
+			this.navigation.scrollTop = navigationScrollTop;
+			this.navigation.scrollLeft = navigationScrollLeft;
+			this.content.scrollTop = contentScrollTop;
+			this.content.scrollLeft = contentScrollLeft;
+		}
+		else if (window.arguments) {
 			var io = window.arguments[0];
 			io = io.wrappedJSObject || io;
-			
+
 			if (io.pane) {
 				let tabID = io.tab;
 				let tabIndex = io.tabIndex;
@@ -84,8 +107,6 @@ var Zotero_Preferences = {
 				this.navigation.value = 'zotero-prefpane-general';
 			}
 		}
-
-		document.getElementById('prefs-search').focus();
 	},
 	
 	onUnload: function () {
