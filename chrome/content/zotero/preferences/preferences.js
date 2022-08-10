@@ -125,6 +125,7 @@ var Zotero_Preferences = {
 	 *
 	 * @param {Object} options
 	 * @param {String} options.id Must be unique
+	 * @param {String} [options.pluginID] ID of the plugin that registered the pane
 	 * @param {String} [options.parent] ID of parent pane (if provided, pane is hidden from the sidebar)
 	 * @param {String} [options.label] A DTD/.properties key (optional for panes with parents)
 	 * @param {String} [options.rawLabel] A raw string to use as the label if optios.label is not provided

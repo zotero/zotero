@@ -85,7 +85,8 @@ Zotero.PreferencePanes = {
 	 * is loaded as a fragment, not a full document, with XUL as the default
 	 * namespace and (X)HTML tags available under `html:`.
 	 *
-	 * Plugins must call #unregister(id) in their shutdown() method.
+	 * The pane will be unregistered automatically when the registering plugin
+	 * shuts down.
 	 *
 	 * @param {Object} options
 	 * @param {String} options.id Represents the pane and must be unique
@@ -101,6 +102,9 @@ Zotero.PreferencePanes = {
 	 * @return {Promise<void>}
 	 */
 	register: async function (options) {
+		if (!options.id || !options.pluginID || !options.src) {
+			throw new Error('id, pluginID, and src must be provided');
+		}
 		if (this.builtInPanes.some(p => p.id === options.id)
 			|| this.pluginPanes.some(p => p.id === options.id)) {
 			throw new Error(`Pane with ID ${options.id} already registered`);
@@ -108,6 +112,7 @@ Zotero.PreferencePanes = {
 
 		let addPaneOptions = {
 			id: options.id,
+			pluginID: options.pluginID,
 			parent: options.parent,
 			rawLabel: options.label || await Zotero.Plugins.getName(options.pluginID),
 			image: options.image || await Zotero.Plugins.getIconURI(options.pluginID, 24),
@@ -118,11 +123,13 @@ Zotero.PreferencePanes = {
 		};
 
 		this.pluginPanes.push(addPaneOptions);
+		Zotero.debug(`Plugin ${options.pluginID} registered preference pane ${options.id} ("${addPaneOptions.rawLabel}")`);
 		this._refreshPreferences();
+		this._ensureObserverAdded();
 	},
 
 	/**
-	 * Unregister a pane due to plugin shutdown.
+	 * Called automatically on plugin shutdown.
 	 *
 	 * @param {String} id
 	 */
@@ -135,5 +142,23 @@ Zotero.PreferencePanes = {
 		for (let win of Services.wm.getEnumerator("zotero:pref")) {
 			win.Zotero_Preferences.initPanes();
 		}
+	},
+	
+	_ensureObserverAdded() {
+		if (this._observerAdded) {
+			return;
+		}
+		
+		Zotero.Plugins.addObserver({
+			shutdown({ id: pluginID }) {
+				let beforeLength = this.pluginPanes.length;
+				this.pluginPanes = this.pluginPanes.filter(pane => pane.pluginID !== pluginID);
+				if (this.pluginPanes.length !== beforeLength) {
+					Zotero.debug(`Preference panes registered by plugin ${pluginID} unregistered due to shutdown`);
+					this._refreshPreferences();
+				}
+			}
+		});
+		this._observerAdded = true;
 	}
 };

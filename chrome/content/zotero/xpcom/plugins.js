@@ -27,6 +27,7 @@
 Zotero.Plugins = new function () {
 	var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
 	var scopes = new Map();
+	var observers = new Set();
 	
 	const REASONS = {
 		APP_STARTUP: 1,
@@ -135,7 +136,13 @@ Zotero.Plugins = new function () {
 				Zotero.logError(`Error running bootstrap method '${method}' on ${id}`);
 				Zotero.logError(e);
 			}
-			
+
+			for (let observer of observers) {
+				if (observer[method]) {
+					observer[method](params, reason);
+				}
+			}
+
 			// TODO: Needed?
 			/*if (method == "startup") {
 				activeAddon.startupPromise = Promise.resolve(result);
@@ -174,6 +181,25 @@ Zotero.Plugins = new function () {
 		var addon = await AddonManager.getAddonByID(id);
 		return AddonManager.getPreferredIconURL(addon, idealSize, Services.appShell.hiddenDOMWindow);
 	};
+	
+	
+	this.addObserver = function (observer) {
+		observers.add(observer);
+	};
+	
+	
+	this.removeObserver = function (observer) {
+		observers.delete(observer);
+	};
+	
+	
+	function notifyObservers(fnName, id) {
+		for (let observer of observers) {
+			if (observer[fnName]) {
+				observer[fnName](id);
+			}
+		}
+	}
 	
 	
 	this._addonObserver = {
