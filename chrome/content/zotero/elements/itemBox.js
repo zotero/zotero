@@ -1900,7 +1900,6 @@
 				
 				newVal = val;
 				
-				// Reset creator mode settings here so that flex attribute gets reset
 				if (Zotero.ItemTypes.getName(this.item.itemTypeID) === "bookSection") {
 					var creatorTypeLabels = this.shadowRoot.querySelectorAll(".creator-type-label");
 					this._id("zotero-author-guidance").show({
@@ -1984,6 +1983,7 @@
 			label.setAttribute('control', elem.getAttribute('id'));
 			
 			if (field == 'creator') {
+				// Set correct flex settings and fieldMode attribute
 				this.switchCreatorMode(row, (otherFields.fieldMode ? 1 : 0), true);
 			}
 			
