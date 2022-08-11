@@ -4318,7 +4318,8 @@ var ZoteroPane = new function()
 						extraData && extraData.location,
 						{
 							openInWindow: (event && event.shiftKey)
-								|| (extraData && extraData.forceOpenPDFInWindow)
+								|| (extraData && extraData.forceOpenPDFInWindow),
+							allowDuplicate: event && event.shiftKey
 						}
 					);
 					return;
