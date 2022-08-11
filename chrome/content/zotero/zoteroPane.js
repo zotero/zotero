@@ -1808,6 +1808,55 @@ var ZoteroPane = new function()
 	});
 	
 
+	this.duplicateAndConvertSelectedItem = async function () {
+		if (this.getSelectedItems().length != 1
+				|| !['book', 'bookSection'].includes(this.getSelectedItems()[0].itemType)) {
+			throw new Error('duplicateAndConvertSelectedItem requires a single book or bookSection to be selected');
+		}
+
+		let authorCreatorType = Zotero.CreatorTypes.getID('author');
+		let bookAuthorCreatorType = Zotero.CreatorTypes.getID('bookAuthor');
+
+		let original = this.getSelectedItems()[0];
+		let duplicate = await this.duplicateSelectedItem();
+		if (!duplicate) return null;
+
+		if (duplicate.itemType == 'book') {
+			duplicate.setType(Zotero.ItemTypes.getID('bookSection'));
+			for (let i = 0; i < duplicate.numCreators(); i++) {
+				let creator = duplicate.getCreator(i);
+				if (creator.creatorTypeID == authorCreatorType) {
+					creator.creatorTypeID = bookAuthorCreatorType;
+				}
+				duplicate.setCreator(i, creator);
+			}
+		}
+		else {
+			duplicate.setField('title', false); // So bookTitle becomes title
+			duplicate.setType(Zotero.ItemTypes.getID('book'));
+			// Get creators from the original item because setType() will have changed the types
+			let creators = original.getCreators()
+				// Remove authors of the individual book section
+				.filter(creator => creator.creatorTypeID !== authorCreatorType);
+			for (let creator of creators) {
+				if (creator.creatorTypeID == bookAuthorCreatorType) {
+					creator.creatorTypeID = authorCreatorType;
+				}
+			}
+			duplicate.setCreators(creators);
+		}
+
+		duplicate.addRelatedItem(original);
+		original.addRelatedItem(duplicate);
+
+		await original.saveTx({ skipDateModifiedUpdate: true });
+		await duplicate.saveTx();
+
+		document.getElementById('zotero-editpane-item-box').focusField('title');
+		return duplicate;
+	};
+
+
 	/**
 	 * Return whether every selected item can be deleted from the current
 	 * collection context (library, trash, collection, etc.).
@@ -3093,6 +3142,7 @@ var ZoteroPane = new function()
 			'toggleRead',
 			'addToCollection',
 			'removeItems',
+			'duplicateAndConvert',
 			'duplicateItem',
 			'restoreToLibrary',
 			'moveToTrash',
@@ -3372,6 +3422,12 @@ var ZoteroPane = new function()
 						}
 					}
 					else if (!collectionTreeRow.isPublications()) {
+						if (item.itemType == 'book' || item.itemType == 'bookSection') {
+							menu.childNodes[m.duplicateAndConvert].setAttribute('label', Zotero.getString('pane.items.menu.duplicateAndConvert.'
+								+ (item.itemType == 'book' ? 'toBookSection' : 'toBook')));
+							show.add(m.duplicateAndConvert);
+						}
+
 						show.add(m.duplicateItem);
 					}
 				}

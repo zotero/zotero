@@ -2298,6 +2298,18 @@
 			</method>
 			
 			
+			<method name="focusField">
+				<parameter name="fieldName"/>
+				<body>
+				<![CDATA[
+					let field = document.getAnonymousNodes(this)[0].querySelector(`[fieldname="${fieldName}"][ztabindex]`);
+					if (!field) return false;
+					return this._focusNextField(field.getAttribute('ztabindex'));
+				]]>
+				</body>
+			</method>
+			
+			
 			<!-- 
 				Advance the field focus forward or backward
 				
