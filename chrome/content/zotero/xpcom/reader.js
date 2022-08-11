@@ -891,6 +891,10 @@ class ReaderInstance {
 					this._openThumbnailPopup(message.data);
 					return;
 				}
+				case 'openSelectorPopup': {
+					this._openSelectorPopup(message.data);
+					return;
+				}
 				case 'closePopup': {
 					// Note: This currently only closes tags popup when annotations are
 					// disappearing from pdf-reader sidebar
