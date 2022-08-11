@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.SingleFile = {
+Zotero.SingleFile = Object.assign(Zotero.SingleFile || {}, {
 	// These are defaults from SingleFile
 	// Located in: zotero/resources/SingleFile/extension/core/bg/config.js
 	CONFIG: {
@@ -95,4 +95,4 @@ Zotero.SingleFile = {
 		insertSingleFileComment: true,
 		blockMixedContent: false,
 	}
-};
+});
