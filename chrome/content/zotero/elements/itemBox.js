@@ -2198,6 +2198,12 @@
 			this._focusNextField(1);
 		}
 		
+		focusField(fieldName) {
+			let field = this.shadowRoot.querySelector(`[fieldname="${fieldName}"][ztabindex]`);
+			if (!field) return false;
+			return this._focusNextField(field.getAttribute('ztabindex'));
+		}
+		
 		/**
 		 * Advance the field focus forward or backward
 		 * 
