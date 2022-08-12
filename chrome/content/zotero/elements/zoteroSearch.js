@@ -26,13 +26,16 @@
 "use strict";
 
 {
-	var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+	class SearchElementBase extends XULElementBase {
+		get stylesheets() {
+			return [
+				'chrome://global/skin/global.css',
+				'chrome://zotero-platform/content/zoteroSearch.css'
+			];
+		}
+	}
 
-	Services.scriptloader.loadSubScript("chrome://global/content/customElements.js", this);
-	Services.scriptloader.loadSubScript("chrome://zotero/content/elements/base.js", this);
-	Services.scriptloader.loadSubScript("chrome://zotero/content/elements/shadowAutocompleteInput.js", this);
-
-	class ZoteroSearch extends XULElementBase {
+	class ZoteroSearch extends SearchElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 					id="search-box" flex="1" onkeypress="this.closest('zoterosearch').handleKeyPress(event)">
