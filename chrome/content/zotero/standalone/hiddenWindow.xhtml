@@ -38,16 +38,14 @@
 <window id="main-window" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<script type="application/javascript">
 		Components.utils.import("resource://gre/modules/Services.jsm");
+		var { AppConstants } = ChromeUtils.import("resource://gre/modules/AppConstants.jsm");
 	</script>
 	<script type="application/javascript" src="chrome://global/content/globalOverlay.js"/>
 	<script>
 		// Equivalent to Zotero.openMainWindow()
 		function openMainWindow() {
-			var prefService = Components.classes["@mozilla.org/preferences-service;1"]
-				.getService(Components.interfaces.nsIPrefBranch);
-			var chromeURI = prefService.getCharPref('toolkit.defaultChromeURI');
-			var flags = prefService.getCharPref("toolkit.defaultChromeFeatures", "chrome,dialog=no,all");
-			
+			var chromeURI = AppConstants.BROWSER_CHROME_URL;
+			var flags = "chrome,all,dialog=no";
 			var ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
 				.getService(Components.interfaces.nsIWindowWatcher);
 			ww.openWindow(null, chromeURI, '_blank', flags, null);
@@ -57,6 +55,17 @@
 			var ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
 				.getService(Components.interfaces.nsIWindowWatcher);
 			ww.openWindow(null, 'chrome://zotero/content/about.xhtml', 'about', 'chrome,dialog=yes', null);
+		}
+		
+		// Equivalent to Zotero.Utilities.Internal.openPreferences()
+		function openPreferences() {
+			Services.ww.openWindow(
+				null,
+				'chrome://zotero/content/preferences/preferences.xhtml',
+				'zotero-prefs',
+				'chrome,titlebar,centerscreen,resizable=yes',
+				null
+			);
 		}
 	</script>
 	<commandset id="mainCommandSet">
@@ -70,10 +79,76 @@
 	<keyset id="mainKeyset">
 		<key id="key_close" key="&closeCmd.key;" command="cmd_close" modifiers="accel"/>
 		<key id="key_mainWindow" key="0" command="cmd_mainWindow" modifiers="accel"/>
+		<key id="key_preferencesCmdMac"
+				key="&preferencesCmdMac.commandkey;"
+				modifiers="accel"
+				internal="true"/>
+		<key id="key_hideThisAppCmdMac"
+				key="&hideThisAppCmdMac.commandkey;"
+				modifiers="accel"
+				internal="true"/>
+		<key id="key_hideOtherAppsCmdMac"
+				key="&hideOtherAppsCmdMac.commandkey;"
+				modifiers="accel,alt"
+				internal="true"/>
+		<key id="key_quitApplication"
+				key="&quitApplicationCmdMac.key;"
+				command="cmd_quitApplication"
+				modifiers="accel"
+				internal="true"/>
+		<key id="key_minimizeWindow"
+				command="minimizeWindow"
+				key="&minimizeWindow.key;"
+				modifiers="accel"/>
 	</keyset>
 
-	<!-- Fx102 change: No menubar here. nsMenuBarX constructs the Cocoa
-	     global application menu from the first menubar it finds with relevant
-		 menuitems, and we want to let zoteroPane.xhtml create those later.
-		 https://searchfox.org/mozilla-central/rev/5b2d2863bd315f232a3f769f76e0eb16cdca7cb0/widget/cocoa/nsMenuBarX.mm#498 -->
+	<menubar id="main-menubar">
+		<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
+			<menupopup id="menu_FilePopup">
+				<!-- This gets moved to the Application menu automatically -->
+				<menuitem id="aboutName"
+						accesskey="&aboutProduct.accesskey;"
+						label="&aboutProduct.label;"
+						oncommand="openAbout()"/>
+				<menuitem id="menu_preferences"
+						label="&preferencesCmdMac.label;"
+						key="key_preferencesCmdMac"
+						oncommand="openPreferences()"/>
+				<menuitem id="menu_mac_services"
+						label="&servicesMenuMac.label;"/>
+				<menuitem id="menu_mac_hide_app"
+						label="&hideThisAppCmdMac.label;"
+						key="key_hideThisAppCmdMac"/>
+				<menuitem id="menu_mac_hide_others"
+						label="&hideOtherAppsCmdMac.label;"
+						key="key_hideOtherAppsCmdMac"/>
+				<menuitem id="menu_mac_show_all"
+						label="&showAllAppsCmdMac.label;"/>
+				<menuitem id="menu_FileQuitItem"
+						label="&quitApplicationCmdMac.label;"
+						key="key_quitApplication"
+						command="cmd_quitApplication"/>
+
+				<!-- Disabled Close line in File menu, just to show something -->
+				<menuitem id="menu_close"
+						label="&closeCmd.label;"
+						key="key_close"
+						command="cmd_close"/>
+			</menupopup>
+		</menu>
+
+		<menu id="windowMenu" label="&windowMenu.label;">
+			<menupopup>
+				<menuitem command="minimizeWindow" label="&minimizeWindow.label;" key="key_minimizeWindow"/>
+				<menuitem command="zoomWindow" label="&zoomWindow.label;"/>
+				<menuseparator/>
+				<menuitem command="cmd_mainWindow" label="&brandShortName;" key="key_mainWindow"/>
+				<!--
+					Prevent error from macWindowMenuDidShow(), which is called from a built-in
+					nWindowMenuShowing(), when opening menu
+				-->
+				<menuseparator id="sep-window-list" hidden="true"/>
+			</menupopup>
+		</menu>
+	</menubar>
 </window>

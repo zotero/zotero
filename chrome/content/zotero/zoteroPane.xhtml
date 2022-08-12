@@ -177,28 +177,6 @@
 				-->
 				<menubar id="main-menubar"
 				style="border:0px;padding:0px;margin:0px;-moz-appearance:none">		
-					<!-- nsMenuBarX hides these and uses them to build the Application menu. -->
-					<menupopup id="mac_application_menu">
-						<menuitem id="menu_preferences"
-								label="&preferencesCmdMac.label;"
-								key="key_preferencesCmdMac"
-								oncommand="Zotero.Utilities.Internal.openPreferences()"/>
-						<menuitem id="menu_mac_services"
-								label="&servicesMenuMac.label;"/>
-						<menuitem id="menu_mac_hide_app"
-								label="&hideThisAppCmdMac.label;"
-								key="key_hideThisAppCmdMac"/>
-						<menuitem id="menu_mac_hide_others"
-								label="&hideOtherAppsCmdMac.label;"
-								key="key_hideOtherAppsCmdMac"/>
-						<menuitem id="menu_mac_show_all"
-								label="&showAllAppsCmdMac.label;"/>
-						<menuitem id="menu_FileQuitItem"
-								label="&quitApplicationCmdMac.label;"
-								key="key_quitApplication"
-								command="cmd_quitApplication"/>
-					</menupopup>
-
 					<!-- File menu -->
 					<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;"
 							onpopupshowing="ZoteroStandalone.onFileMenuOpen()">
@@ -579,20 +557,6 @@
 								oncommand="ZoteroStandalone.openHelp();"
 								key="&helpMac.commandkey;"
 								modifiers="accel"/>
-						
-						<!-- These are used to build the Application menu under Cocoa widgets -->
-						<key id="key_preferencesCmdMac"
-								key="&preferencesCmdMac.commandkey;"
-								modifiers="accel"
-								internal="true"/>
-						<key id="key_hideThisAppCmdMac"
-								key="&hideThisAppCmdMac.commandkey;"
-								modifiers="accel"
-								internal="true"/>
-						<key id="key_hideOtherAppsCmdMac"
-								key="&hideOtherAppsCmdMac.commandkey;"
-								modifiers="accel,alt"
-								internal="true"/>
 						<key id="key_quitApplication"
 								key="&quitApplicationCmdMac.key;"
 								command="cmd_quitApplication"

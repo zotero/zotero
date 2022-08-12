@@ -953,13 +953,11 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	
 	
 	this.openMainWindow = function () {
-		var prefService = Components.classes["@mozilla.org/preferences-service;1"]
-			.getService(Components.interfaces.nsIPrefBranch);
-		var chromeURI = prefService.getCharPref('toolkit.defaultChromeURI');
-		var flags = prefService.getCharPref("toolkit.defaultChromeFeatures", "chrome,dialog=no,all");
+		var chromeURI = AppConstants.BROWSER_CHROME_URL;
+		var flags = "chrome,all,dialog=no";
 		var ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
 			.getService(Components.interfaces.nsIWindowWatcher);
-		return ww.openWindow(null, chromeURI, '_blank', flags, null);
+		ww.openWindow(null, chromeURI, '_blank', flags, null);
 	}
 	
 	
