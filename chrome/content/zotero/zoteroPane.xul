@@ -313,7 +313,6 @@
 							<menu class="menuitem-iconic zotero-menuitem-add-to-collection">
 								<menupopup id="zotero-add-to-collection-popup" onpopupshowing="ZoteroPane_Local.buildAddToCollectionMenu(event)">
 									<menuitem id="zotero-add-to-new-collection" label="&zotero.toolbar.newCollection.label;" oncommand="ZoteroPane_Local.addSelectedItemsToCollection(null, true)"/>
-									<menuseparator id="zotero-add-to-collection-separator"/>
 								</menupopup>
 							</menu>
 							<menuitem class="menuitem-iconic zotero-menuitem-remove-items" oncommand="ZoteroPane_Local.deleteSelectedItems();"/>

@@ -1709,7 +1709,7 @@ Zotero.Utilities.Internal = {
 	 * @param {Function} clickAction function to execute on clicking the menuitem.
 	 * 		Receives the event and libraryOrCollection for given item.
 	 * @param {Function} disabledPred If provided, called on each library/collection
-	 * 		to determine whether disabled
+	 * 		to determine whether disabled. Can return a boolean or a promise.
 	 * 
 	 * @return {Node<menuitem>|Node<menu>} appended node
 	 */
@@ -1724,7 +1724,7 @@ Zotero.Utilities.Internal = {
 			}
 			menuitem.setAttribute("value", value);
 			menuitem.setAttribute("image", icon);
-			menuitem.setAttribute("disabled", disabled);
+			Promise.resolve(disabled).then(d => menuitem.setAttribute("disabled", d));
 			menuitem.addEventListener('command', command);
 			menuitem.classList.add('menuitem-iconic');
 			return menuitem
@@ -1765,7 +1765,7 @@ Zotero.Utilities.Internal = {
 		if (libraryOrCollection.objectType == 'collection') {
 			collections = Zotero.Collections.getByParent(libraryOrCollection.id);
 		} else {
-			collections = Zotero.Collections.getByLibrary(libraryOrCollection.id);
+			collections = Zotero.Collections.getByLibrary(libraryOrCollection.libraryID);
 		}
 		
 		// If no subcollections, place menuitem for target directly in containing men

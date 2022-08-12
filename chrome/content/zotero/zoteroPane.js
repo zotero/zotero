@@ -3574,13 +3574,20 @@ var ZoteroPane = new function()
 		if (event.target.id !== 'zotero-add-to-collection-popup') return;
 
 		let popup = document.getElementById('zotero-add-to-collection-popup');
-		let separator = document.getElementById('zotero-add-to-collection-separator');
-		while (popup.childElementCount > 2) {
+		while (popup.childElementCount > 1) {
 			popup.removeChild(popup.lastElementChild);
 		}
 
 		let items = Zotero.Items.keepParents(this.getSelectedItems());
+		if (!items.length) {
+			// Just in case
+			return;
+		}
+
 		let collections = Zotero.Collections.getByLibrary(this.getSelectedLibraryID());
+		if (collections.length) {
+			popup.append(document.createElement('menuseparator'));
+		}
 		for (let col of collections) {
 			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
 				col,
@@ -3597,7 +3604,62 @@ var ZoteroPane = new function()
 			popup.append(menuItem);
 		}
 
-		separator.setAttribute('hidden', !collections.length);
+		let libraries = Zotero.Libraries.getAll()
+			.filter(lib => lib.libraryID != items[0].libraryID
+				// copyItemToLibrary will skip attachments if not filesEditable
+				&& lib.editable);
+		if (libraries.length) {
+			popup.append(document.createElement('menuseparator'));
+		}
+		for (let lib of libraries) {
+			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
+				lib,
+				popup,
+				null,
+				async (event, libOrCollection) => {
+					event.stopPropagation();
+
+					if (event.target.tagName != 'menuitem') {
+						return;
+					}
+
+					let copyOptions = {
+						tags: Zotero.Prefs.get('groups.copyTags'),
+						childNotes: Zotero.Prefs.get('groups.copyChildNotes'),
+						childLinks: Zotero.Prefs.get('groups.copyChildLinks'),
+						childFileAttachments: Zotero.Prefs.get('groups.copyChildFileAttachments'),
+						annotations: Zotero.Prefs.get('groups.copyAnnotations'),
+					};
+
+					await Zotero.DB.executeTransaction(async () => {
+						for (let item of items) {
+							let newID = await Zotero.Items.copyItemToLibrary(
+								item, libOrCollection.libraryID, copyOptions);
+							if (newID && libOrCollection.objectType == 'collection') {
+								let item = await Zotero.Items.get(newID);
+								item.addToCollection(libOrCollection.id);
+								await item.save();
+							}
+						}
+					});
+				},
+				async (libOrCollection) => {
+					for (let item of items) {
+						let linked = await item.getLinkedItem(libOrCollection.libraryID, true);
+						if (linked
+							&& (libOrCollection.objectType == 'library'
+								// Fine if the library contains a copy of this item
+								// but the collection doesn't - it won't be duplicated
+								|| libOrCollection.hasItem(linked))) {
+							return true;
+						}
+					}
+					return false;
+				}
+			);
+
+			popup.append(menuItem);
+		}
 	};
 
 
