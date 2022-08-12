@@ -104,7 +104,7 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "在参考文献里包含文章 URL 链接">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "禁用此项后, Zotero 引用期刊, 杂志和报纸文章时仅当这些文章没有指定页码范围时才会包含 URL 链接.">
 
-<!ENTITY zotero.preferences.quickCopy.caption "便捷复制">
+<!ENTITY zotero.preferences.quickCopy.caption "快速复制">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "项目格式：">
 <!ENTITY zotero.preferences.quickCopy.noteFormat "笔记格式：">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "复制为 HTML">
@@ -113,7 +113,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(比如 wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.format "格式">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "语言">
-<!ENTITY zotero.preferences.quickCopy.dragLimit "禁用便捷复制, 当拖动项超过">
+<!ENTITY zotero.preferences.quickCopy.dragLimit "禁用快速复制, 当拖动项超过">
 
 <!ENTITY zotero.preferences.prefpane.cite "引用">
 <!ENTITY zotero.preferences.cite.styles "样式">
@@ -195,8 +195,8 @@
 
 <!ENTITY zotero.preferences.dbMaintenance "数据库维护">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "数据库完整性检查">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "重置翻译器和样式……">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "重置翻译器……">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "重置转换器和样式……">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "重置转换器……">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "重置样式……">
 
 <!ENTITY zotero.preferences.configEditor "设置编辑器">

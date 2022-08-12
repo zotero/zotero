@@ -1,0 +1,263 @@
+{
+  "zbib.about.CTA": {
+    "string": "Awesome! Let’s start!"
+  },
+  "zbib.about.feature1.paragraph": {
+    "string": "Simply find what you’re looking for in another browser tab and copy the page URL to the ZoteroBib search bar. ZoteroBib can automatically pull in data from newspaper and magazine articles, library catalogs, journal articles, sites like Amazon and Google Books, and much more. You can also paste or type in an ISBN, DOI, PMID, or arXiv ID, or you can search by title."
+  },
+  "zbib.about.feature1.title": {
+    "string": "Adding a bibliography entry"
+  },
+  "zbib.about.feature10.paragraph": {
+    "string": "If you want to edit your bibliography on another device, share it with someone else, or switch to another bibliography, you can generate a link to a copy of the current version on zbib.org. Use the link to retrieve your bibliography later."
+  },
+  "zbib.about.feature10.title": {
+    "string": "Link to this version"
+  },
+  "zbib.about.feature2.paragraph": {
+    "string": "If automatic import doesn’t find what you’re looking for or you’re entering something without a URL or identifier, you can enter the reference information by hand."
+  },
+  "zbib.about.feature2.title": {
+    "string": "Manual entry"
+  },
+  "zbib.about.feature3.paragraph": {
+    "string": "To rename your bibliography, just click its title. A title can be useful if you’re switching between multiple projects or sharing a bibliography with others."
+  },
+  "zbib.about.feature3.title": {
+    "string": "Bibliography title"
+  },
+  "zbib.about.feature4.paragraph": {
+    "string": "You might need to add or change a few fields after adding an item. Click on a bibliography entry to make manual changes."
+  },
+  "zbib.about.feature4.title": {
+    "string": "Editing an item"
+  },
+  "zbib.about.feature5.paragraph": {
+    "string": "Click the { deleteIcon } next to a bibliography entry to delete it. To start a new bibliography, click <i>Delete All</i> to remove all entries."
+  },
+  "zbib.about.feature5.title": {
+    "string": "Deleting items"
+  },
+  "zbib.about.feature6.paragraph": {
+    "string": "Format your bibliography using APA, MLA, Chicago / Turabian, Harvard, or any of the {citationStylesCount, plural, other {#+ other <link>CSL</link> styles} }."
+  },
+  "zbib.about.feature6.title": {
+    "string": "Style selection"
+  },
+  "zbib.about.feature7.paragraph": {
+    "string": "As you’re writing, you can quickly generate parenthetical citations or footnotes /endnotes to paste into your document without typing names or dates by hand."
+  },
+  "zbib.about.feature7.title": {
+    "string": "Copy Citation / Note"
+  },
+  "zbib.about.feature8.paragraph": {
+    "string": "When you’re done, you can copy a formatted bibliography to the clipboard and paste it into your document. You can also export HTML to add to a webpage, an RTF document to open in a word processor, or a RIS or BibTeX file to import into a reference manager."
+  },
+  "zbib.about.feature8.title": {
+    "string": "Export"
+  },
+  "zbib.about.feature9.paragraph": {
+    "string": "ZoteroBib automatically saves your bibliography to your browser’s local storage — you can close the page and return to it anytime. (If you’re using private / incognito mode in your browser, your bibliography will be cleared when you close the window.)"
+  },
+  "zbib.about.feature9.title": {
+    "string": "Autosave"
+  },
+  "zbib.about.questionsFaq": {
+    "string": "<block>Still have questions?</block> Check the <link>FAQ</link>."
+  },
+  "zbib.about.summary": {
+    "string": "ZoteroBib helps you build a bibliography instantly from any computer or device, without creating an account or installing any software. It’s brought to you by the team behind <link>Zotero</link>, the powerful open-source research tool recommended by thousands of universities worldwide, so you can trust it to help you seamlessly add sources and produce perfect bibliographies. If you need to reuse sources across multiple projects or build a shared research library, we recommend using Zotero instead."
+  },
+  "zbib.about.title": {
+    "string": "Cite anything"
+  },
+  "zbib.bibliography.deleteAll": {
+    "string": "Delete All"
+  },
+  "zbib.bibliography.edit": {
+    "string": "Edit Bibliography"
+  },
+  "zbib.bibliography.emptyLead": {
+    "string": "<i>T</i>o add a source, paste or type its URL, ISBN, DOI, PMID, arXiv ID, or title into the search box above"
+  },
+  "zbib.bibliography.emptyTitle": {
+    "string": "<i>Y</i>our bibliography is empty."
+  },
+  "zbib.bibliography.override": {
+    "string": "There is an existing bibliography with {localCitationsCount, plural, one {# entry} other {# entries} } in the editor. If you continue, the existing bibliography will be replaced with this one."
+  },
+  "zbib.citation.copiedFeedback": {
+    "string": "Copied!"
+  },
+  "zbib.citation.copyCitation": {
+    "string": "Copy Citation"
+  },
+  "zbib.citation.copyNote": {
+    "string": "Copy Note"
+  },
+  "zbib.citation.moveDown": {
+    "string": "Move Down"
+  },
+  "zbib.citation.moveToTop": {
+    "string": "Move to Top"
+  },
+  "zbib.citation.moveUp": {
+    "string": "Move Up"
+  },
+  "zbib.citation.omitAuthor": {
+    "string": "Omit Author"
+  },
+  "zbib.citation.preview": {
+    "string": "Preview:"
+  },
+  "zbib.citePrompt": {
+    "string": "Enter a URL, ISBN, DOI, PMID, arXiv ID, or title"
+  },
+  "zbib.confirmCase.confirm": {
+    "string": "OK, I’ll Edit Them"
+  },
+  "zbib.confirmCase.conversionExample": {
+    "string": "<b>ZoteroBib conversion:</b> <i>Circadian mood variations in twitter content</i>"
+  },
+  "zbib.confirmCase.explanation": {
+    "string": "The style you’ve selected requires titles to be in sentence case rather than title case. When you use this style, ZoteroBib will convert the titles of entries to sentence case for you, but you’ll need to manually edit some entries to capitalize proper nouns:"
+  },
+  "zbib.confirmCase.sentenceCaseExample": {
+    "string": "<b>Sentence case:</b> <i>Circadian mood variations in <r>T</r>witter content</i>"
+  },
+  "zbib.confirmCase.title": {
+    "string": "Converting Titles to Sentence Case"
+  },
+  "zbib.confirmCase.titleCaseExample": {
+    "string": "<b>Title case:</b> <i>Circadian Mood Variations in Twitter Content</i>"
+  },
+  "zbib.confirmDeleteAll.confirm": {
+    "string": "Delete"
+  },
+  "zbib.confirmDeleteAll.prompt": {
+    "string": "{bibliographyCount, plural, one {# entry} other {# entries} } will be deleted."
+  },
+  "zbib.confirmDeleteAll.title": {
+    "string": "Clear Bibliography?"
+  },
+  "zbib.creator.moveDown": {
+    "string": "Move Down"
+  },
+  "zbib.creator.moveToTop": {
+    "string": "Move to Top"
+  },
+  "zbib.creator.moveUp": {
+    "string": "Move Up"
+  },
+  "zbib.creator.placeholderDual": {
+    "string": "last name, first name"
+  },
+  "zbib.creator.placeholderSingle": {
+    "string": "name"
+  },
+  "zbib.dialog.confirmAddThisCitation": {
+    "string": "Add this citation to your bibliography?"
+  },
+  "zbib.editor.title": {
+    "string": "Item Editor"
+  },
+  "zbib.error.fetchMetadata": {
+    "string": "Failed to obtain metadata. Please check your connection and try again."
+  },
+  "zbib.export": {
+    "string": "Export"
+  },
+  "zbib.export.copiedFeedback": {
+    "string": "Copied!"
+  },
+  "zbib.footer.follow": {
+    "string": "Stay in touch! Follow <link>@zotero</link> on Twitter."
+  },
+  "zbib.general.add": {
+    "string": "Add"
+  },
+  "zbib.general.cancel": {
+    "string": "Cancel"
+  },
+  "zbib.general.cite": {
+    "string": "Cite"
+  },
+  "zbib.general.close": {
+    "string": "Close"
+  },
+  "zbib.general.delete": {
+    "string": "Delete"
+  },
+  "zbib.general.done": {
+    "string": "Done"
+  },
+  "zbib.general.edit": {
+    "string": "Edit"
+  },
+  "zbib.help": {
+    "string": "Help"
+  },
+  "zbib.linkToThis": {
+    "string": "Link to this version"
+  },
+  "zbib.manualEntry": {
+    "string": "Manual Entry"
+  },
+  "zbib.multipleChoice.more": {
+    "string": "More…"
+  },
+  "zbib.multipleChoice.prompt": {
+    "string": "Please select a citation from the list"
+  },
+  "zbib.multipleItems.confirm": {
+    "string": "Add Selected"
+  },
+  "zbib.multipleItems.prompt": {
+    "string": "Please select a citation from the list"
+  },
+  "zbib.permalink.copyFeedback": {
+    "string": "Copied!"
+  },
+  "zbib.permalink.copyURL": {
+    "string": "Copy URL"
+  },
+  "zbib.permalink.create": {
+    "string": "Create"
+  },
+  "zbib.permalink.view": {
+    "string": "View"
+  },
+  "zbib.review.newItem": {
+    "string": "New item…"
+  },
+  "zbib.saveToZotero.message": {
+    "string": "Once you’ve <a>installed Zotero and the Zotero Connector</a>, you can export your bibliography to Zotero by clicking the “Save to Zotero” button in your browser’s toolbar."
+  },
+  "zbib.saveToZotero.title": {
+    "string": "Save to Zotero"
+  },
+  "zbib.styleInstaller.active": {
+    "string": "Active"
+  },
+  "zbib.styleInstaller.add": {
+    "string": "Add"
+  },
+  "zbib.styleInstaller.default": {
+    "string": "Default"
+  },
+  "zbib.styleInstaller.remove": {
+    "string": "Remove"
+  },
+  "zbib.styleInstaller.searchPlaceholder": {
+    "string": "Enter three or more characters to search"
+  },
+  "zbib.styleInstaller.title": {
+    "string": "Add a Citation Style"
+  },
+  "zbib.styleSelector.otherStyles": {
+    "string": "{citationStylesCount, plural, other {#+ other styles} } available…"
+  },
+  "zbib.whatsThis": {
+    "string": "What’s this?"
+  }
+}

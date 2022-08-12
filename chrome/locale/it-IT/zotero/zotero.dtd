@@ -65,7 +65,7 @@
 <!ENTITY zotero.items.menu.showInLibrary "Mostra nella biblioteca">
 <!ENTITY zotero.items.menu.attach.note "Aggiungi nota">
 <!ENTITY zotero.items.menu.attach "Aggiungi un allegato">
-<!ENTITY zotero.items.menu.attach.link.uri "Aggiungi un collegamento all'URI…">
+<!ENTITY zotero.items.menu.attach.link.uri "Allega un collegamento all'URI…">
 <!ENTITY zotero.items.menu.attach.file "Allega una copia archiviata del file…">
 <!ENTITY zotero.items.menu.attach.fileLink "Allega collegamento al file...">
 
@@ -125,7 +125,7 @@
 <!ENTITY zotero.toolbar.note.child "Aggiungi una nota figlia">
 <!ENTITY zotero.toolbar.lookup "Cerca per identificatore…">
 <!ENTITY zotero.toolbar.attachment.linked "Collegamento al file…">
-<!ENTITY zotero.toolbar.attachment.add "Archivia una copia del file…">
+<!ENTITY zotero.toolbar.attachment.add "Salva una copia del file…">
 <!ENTITY zotero.toolbar.attachment.weblink "Salva collegamento alla pagina attuale">
 <!ENTITY zotero.toolbar.attachment.snapshot "Salva una copia della pagina web (snapshot)">
 <!ENTITY zotero.toolbar.context.item "Elemento">
@@ -217,7 +217,7 @@
 <!ENTITY zotero.integration.prefs.footnotes.label "Note a piè di pagina">
 <!ENTITY zotero.integration.prefs.endnotes.label "Note finali">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "Archivia le citazioni come…">
+<!ENTITY zotero.integration.prefs.formatUsing.label "Salva le citazioni come…">
 <!ENTITY zotero.integration.prefs.bookmarks.label "Segnalibri">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "I segnalibri possono essere condivisi tra Word e LibreOffice, ma possono causare errori se modificati accidentalmente e non possono essere inseriti nelle note a piè di pagina.">
 

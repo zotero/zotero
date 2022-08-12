@@ -19,10 +19,10 @@
 
 <!ENTITY zotero.preferences.miscellaneous "Varie">
 <!ENTITY zotero.preferences.autoUpdate "Controlla automaticamente gli aggiornamenti dei programmi traduttori e degli stili">
-<!ENTITY zotero.preferences.updateNow "Aggiorna subito">
+<!ENTITY zotero.preferences.updateNow "Aggiorna ora">
 <!ENTITY zotero.preferences.reportTranslationFailure "Segnala programmi traduttori non funzionanti">
 <!ENTITY zotero.preferences.parseRISRefer "Usa Zotero per i file BibTeX/RIS/Refer scaricati">
-<!ENTITY zotero.preferences.automaticTags "Aggiungi automaticamente dei tag agli elementi usando parole chiave e soggetti">
+<!ENTITY zotero.preferences.automaticTags "Aggiungi automaticamente uno o più tag agli elementi usando parole chiave e soggetti">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Elimina automaticamente gli elementi nel cestino cancellati più di">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "giorni fa">
 
