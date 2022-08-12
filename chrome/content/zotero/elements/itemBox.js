@@ -970,20 +970,6 @@
 				removeButton.hidden = true;
 				addButton.hidden = true;
 			}
-			else {
-				// Alt+Up/Down to open the type menu
-				td.addEventListener('keydown', (event) => {
-					if ((event.key == 'ArrowUp' || event.key == 'ArrowDown') && event.altKey) {
-						document.popupNode = th;
-						this._creatorTypeMenu.openPopup(th);
-						// Stop propagation during capture phase so we prevent the event from showing the
-						// autocomplete field's popup
-						event.stopPropagation();
-					}
-				}, true);
-			}
-			
-			td.ariaLabel = `${Zotero.getString('searchConditions.creator')}: ${label.textContent}`;
 			
 			this.addDynamicRow(th, td, true);
 			
