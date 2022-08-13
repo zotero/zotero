@@ -891,6 +891,24 @@ describe("Zotero.CollectionTree", function() {
 				return group.eraseTx();
 			});
 			
+			it("should copy a standalone attachment to a group", async function () {
+				await Zotero.Users.setCurrentUserID(1);
+				await Zotero.Users.setName(1, 'Name 1');
+				await Zotero.Users.setName(12345, 'Name 2');
+				
+				var group = await createGroup();
+				
+				var item = await importPDFAttachment();
+				
+				var ids = (await onDrop('item', 'L' + group.libraryID, [item.id])).ids;
+				var newItem = Zotero.Items.get(ids[0]);
+				
+				assert.equal(newItem.libraryID, group.libraryID);
+				assert.isTrue(newItem.isPDFAttachment());
+				
+				return group.eraseTx();
+			});
+			
 			it("should not copy an item or its attachment to a group twice", function* () {
 				var group = yield getGroup();
 				
