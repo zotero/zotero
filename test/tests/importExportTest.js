@@ -94,5 +94,51 @@ describe("Import/Export", function () {
 			assert.sameMembers(newNote1.relatedItems, [newNote2]);
 			assert.sameMembers(newNote2.relatedItems, [newNote1]);
 		});
+		
+		it("should import standalone PDF attachment", async function () {
+			var rdf = `<rdf:RDF
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:z="http://www.zotero.org/namespaces/export#"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:dcterms="http://purl.org/dc/terms/"
+ xmlns:link="http://purl.org/rss/1.0/modules/link/"
+ xmlns:bib="http://purl.org/net/biblio#"
+ xmlns:foaf="http://xmlns.com/foaf/0.1/"
+ xmlns:prism="http://prismstandard.org/namespaces/1.2/basic/">
+    <z:Attachment rdf:about="#item_66055">
+        <z:itemType>attachment</z:itemType>
+        <rdf:resource rdf:resource="files/1234/test.pdf"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://example.com</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2022-07-22 06:36:31</dcterms:dateSubmitted>
+        <dc:title>Test PDF</dc:title>
+        <z:linkMode>1</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+</rdf:RDF>
+`;
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var tempDir = await getTempDirectory();
+			var file = OS.Path.join(tempDir, 'export.rdf');
+			await Zotero.File.putContentsAsync(file, rdf);
+			var folder = OS.Path.join(tempDir, 'files', '1234');
+			await OS.File.makeDir(folder, { from: tempDir });
+			await OS.File.copy(
+				OS.Path.join(OS.Path.join(getTestDataDirectory().path, 'test.pdf')),
+				OS.Path.join(folder, 'test.pdf')
+			);
+			
+			var translation = new Zotero.Translate.Import();
+			translation.setLocation(Zotero.File.pathToFile(file));
+			let translators = await translation.getTranslators();
+			translation.setTranslator(translators[0]);
+			var newItem = (await translation.translate({ libraryID }))[0];
+			assert.equal(newItem.itemType, 'attachment');
+			assert.equal(newItem.getField('title'), 'Test PDF');
+			assert.ok(await newItem.getFilePathAsync());
+		});
 	});
 });

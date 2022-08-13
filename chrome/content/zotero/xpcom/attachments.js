@@ -270,7 +270,7 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
-	 * @param {Object} options - 'file', 'url', 'title', 'contentType', 'charset', 'parentItemID', 'singleFile'
+	 * @param {Object} options - 'file', 'url', 'title', 'contentType', 'charset', 'libraryID', 'parentItemID', 'singleFile'
 	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
 	 * @return {Promise<Zotero.Item>}
 	 */
@@ -287,10 +287,22 @@ Zotero.Attachments = new function(){
 		var title = options.title;
 		var contentType = options.contentType;
 		var charset = options.charset;
+		var libraryID = options.libraryID;
 		var parentItemID = options.parentItemID;
 		var saveOptions = options.saveOptions;
 		
-		if (!parentItemID) {
+		if (parentItemID) {
+			libraryID = Zotero.Items.getLibraryAndKeyFromID(parentItemID).libraryID;
+		}
+		else if (contentType == 'text/html') {
+			throw new Error("parentItemID not provided");
+		}
+		else if (!libraryID) {
+			throw new Error("parentItemID or libraryID must be provided");
+		}
+		
+		// Webpage snapshots must have parent items
+		if (!parentItemID && contentType == 'text/html') {
 			throw new Error("parentItemID not provided");
 		}
 		
@@ -299,7 +311,6 @@ Zotero.Attachments = new function(){
 			yield Zotero.DB.executeTransaction(function* () {
 				// Create a new attachment
 				attachmentItem = new Zotero.Item('attachment');
-				let {libraryID, key: parentKey} = Zotero.Items.getLibraryAndKeyFromID(parentItemID);
 				attachmentItem.libraryID = libraryID;
 				attachmentItem.setField('title', title);
 				attachmentItem.setField('url', url);
