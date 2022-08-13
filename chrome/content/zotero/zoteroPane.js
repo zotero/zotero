@@ -1813,7 +1813,9 @@ var ZoteroPane = new function()
 		let original = this.getSelectedItems()[0];
 		let duplicate = await this.duplicateSelectedItem();
 		if (!duplicate) return null;
-
+		
+		// TODO: Move this logic to duplicateSelectedItem() with a `targetItemType` flag to avoid
+		// extra saves?
 		if (duplicate.itemType == 'book') {
 			duplicate.setType(Zotero.ItemTypes.getID('bookSection'));
 			for (let i = 0; i < duplicate.numCreators(); i++) {
@@ -1822,6 +1824,18 @@ var ZoteroPane = new function()
 					creator.creatorTypeID = bookAuthorCreatorType;
 				}
 				duplicate.setCreator(i, creator);
+			}
+			// Remove related-item relations to other book sections of this book
+			for (let relItemKey of [...duplicate.relatedItems]) {
+				let relItem = await Zotero.Items.getByLibraryAndKeyAsync(
+					duplicate.libraryID, relItemKey
+				);
+				if (relItem.itemType == 'bookSection'
+						&& relItem.getField('bookTitle') == original.getField('title')) {
+					duplicate.removeRelatedItem(relItem);
+					relItem.removeRelatedItem(duplicate);
+					await relItem.saveTx();
+				}
 			}
 		}
 		else {
