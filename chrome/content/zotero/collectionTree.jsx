@@ -1615,7 +1615,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					return false;
 				}
 				
-				let newAttachment = Zotero.Attachments.copyAttachmentToLibrary(item, targetLibraryID);
+				let newAttachment = await Zotero.Attachments.copyAttachmentToLibrary(item, targetLibraryID);
 				if (options.annotations) {
 					await Zotero.Items.copyChildItems(item, newAttachment);
 				}
