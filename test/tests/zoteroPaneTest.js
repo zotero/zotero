@@ -442,6 +442,34 @@ describe("ZoteroPane", function() {
 	});
 	
 	
+	describe("#duplicateAndConvertSelectedItem()", function () {
+		describe("book to book section", function () {
+			it("should not add relations to other book sections for the same book", async function () {
+				await selectLibrary(win);
+				var bookItem = await createDataObject('item', { itemType: 'book', title: "Book Title" });
+				
+				// Relate book to another book section with a different title
+				var otherBookSection = createUnsavedDataObject('item', { itemType: 'bookSection', setTitle: true })
+				otherBookSection.setField('bookTitle', "Another Book Title");
+				await otherBookSection.saveTx();
+				bookItem.addRelatedItem(otherBookSection);
+				await bookItem.saveTx();
+				otherBookSection.addRelatedItem(bookItem);
+				await otherBookSection.saveTx();
+				
+				await zp.selectItem(bookItem.id);
+				var bookSectionItem1 = await zp.duplicateAndConvertSelectedItem();
+				await zp.selectItem(bookItem.id);
+				var bookSectionItem2 = await zp.duplicateAndConvertSelectedItem();
+				
+				// Book sections should only be related to parent
+				assert.sameMembers(bookSectionItem1.relatedItems, [bookItem.key, otherBookSection.key]);
+				assert.sameMembers(bookSectionItem2.relatedItems, [bookItem.key, otherBookSection.key]);
+			});
+		});
+	});
+	
+	
 	describe("#deleteSelectedItems()", function () {
 		const DELETE_KEY_CODE = 46;
 		
