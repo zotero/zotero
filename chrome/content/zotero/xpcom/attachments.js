@@ -297,9 +297,6 @@ Zotero.Attachments = new function(){
 		else if (contentType == 'text/html') {
 			throw new Error("parentItemID not provided");
 		}
-		else if (!libraryID) {
-			throw new Error("parentItemID or libraryID must be provided");
-		}
 		
 		// Webpage snapshots must have parent items
 		if (!parentItemID && contentType == 'text/html') {
@@ -311,7 +308,9 @@ Zotero.Attachments = new function(){
 			yield Zotero.DB.executeTransaction(async function () {
 				// Create a new attachment
 				attachmentItem = new Zotero.Item('attachment');
-				attachmentItem.libraryID = libraryID;
+				if (libraryID) {
+					attachmentItem.libraryID = libraryID;
+				}
 				attachmentItem.setField('title', title);
 				attachmentItem.setField('url', url);
 				attachmentItem.parentID = parentItemID;
