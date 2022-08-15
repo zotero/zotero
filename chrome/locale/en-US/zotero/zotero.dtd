@@ -180,6 +180,8 @@
 <!ENTITY zotero.import                                 "Import">
 <!ENTITY zotero.import.whereToImportFrom               "Where do you want to import from?">
 <!ENTITY zotero.import.source.file                     "A file (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.source.folder                   "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport                    "online import">
 <!ENTITY zotero.import.importing                       "Importing…">
 <!ENTITY zotero.import.database                        "Database">
 <!ENTITY zotero.import.lastModified                    "Last Modified">

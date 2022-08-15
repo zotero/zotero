@@ -2,7 +2,22 @@ var EXPORTED_SYMBOLS = ["Zotero_Import_Folder"]; // eslint-disable-line no-unuse
 
 Components.utils.import("resource://gre/modules/Services.jsm");
 Services.scriptloader.loadSubScript("chrome://zotero/content/include.js");
-const multimatch = require('multimatch');
+
+// matches "*" and "?" wildcards of a glob pattern, case-insensitive
+function simpleGlobMatch(filename, patterns) {
+	for (const pattern of patterns) {
+		// Convert glob pattern to regex pattern
+		const regexPattern = pattern
+			.replace(/[.+^${}()|[\]\\]/g, '\\$&') // Escape special regex characters
+			.replace(/\*/g, '.*') // Replace * with regex equivalent
+			.replace(/\?/g, '.'); // Replace ? with regex equivalent
+
+		if (new RegExp(`^${regexPattern}$`, 'i').test(filename)) {
+			return true;
+		}
+	}
+	return false;
+}
 
 const collectFilesRecursive = async (dirPath, parents = [], files = []) => {
 	await Zotero.File.iterateDirectory(dirPath, async ({ isDir, _isSymlink, name, path }) => {
@@ -97,7 +112,7 @@ class Zotero_Import_Folder { // eslint-disable-line camelcase,no-unused-vars
 			async ({ name, path }, index) => {
 				const contentType = mimeTypes[index];
 				this._progress++;
-				if (!(this.types.includes(contentType) || multimatch(name, this.fileTypes, { nocase: true }).length > 0)) {
+				if (!(this.types.includes(contentType) || simpleGlobMatch(name, this.fileTypes))) {
 					// don't bother calculating a hash for file that will be ignored
 					return null;
 				}
@@ -165,12 +180,12 @@ class Zotero_Import_Folder { // eslint-disable-line camelcase,no-unused-vars
 
 				let attachmentItem = null;
 				
-				if ((this.types.includes(mimeType) || multimatch(name, this.fileTypes, { nocase: true }).length > 0)) {
+				if ((this.types.includes(mimeType) || simpleGlobMatch(name, this.fileTypes))) {
 					const existingItem = await findItemByHash(libraryID, hash);
 
 					if (existingItem) {
 						existingItem.setCollections([...existingItem.getCollections(), ...parentCollectionIDs]);
-						existingItem.saveTx({ skipSelect: true });
+						await existingItem.saveTx({ skipSelect: true });
 					}
 					else {
 						if (linkFiles) {
@@ -233,9 +248,9 @@ class Zotero_Import_Folder { // eslint-disable-line camelcase,no-unused-vars
 		finally {
 			recognizeQueue.removeListener('rowupdated', processRecognizedItem);
 		}
-		
-		await Zotero.Promise.all(
-			itemsToSavePostRecognize.map(async item => item.saveTx({ skipSelect: true }))
-		);
+
+		for (const item of itemsToSavePostRecognize) {
+			await item.saveTx({ skipSelect: true });
+		}
 	}
 }

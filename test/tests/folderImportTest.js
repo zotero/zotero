@@ -2,7 +2,7 @@
 
 describe('Zotero_Import_Folder', function () {
 	var tmpDir;
-	const uc = (name) => 'Zotero_Import_Folder_' + name;
+	const uc = name => 'Zotero_Import_Folder_' + name;
 
 	before(async () => {
 		tmpDir = await getTempDirectory();
@@ -111,7 +111,7 @@ describe('Zotero_Import_Folder', function () {
 			const importer = new Zotero_Import_Folder({
 				folder: tmpDir,
 				recreateStructure: false,
-				fileTypes: '*.png,*.txt',
+				fileTypes: '*.png,*.TXT', // should match case-insensitively
 				mimeTypes: []
 			});
 			
