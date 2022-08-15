@@ -805,8 +805,7 @@ Zotero.Style.prototype.getCiteProc = function(locale, format, automaticJournalAb
  * Until https://github.com/citation-style-language/styles/issues/6151
  */
 Zotero.Style.prototype._eventToEventTitle = function (xml) {
-	var parser = Components.classes["@mozilla.org/xmlextras/domparser;1"]
-		.createInstance(Components.interfaces.nsIDOMParser);
+	var parser = new DOMParser();
 	var doc = parser.parseFromString(xml, "text/xml");
 	// Ignore styles that already include `event-title`
 	if (doc.querySelector('[variable*="event-title"]')) {
