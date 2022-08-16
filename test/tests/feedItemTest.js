@@ -93,6 +93,7 @@ describe("Zotero.FeedItem", function () {
 	describe("#fromJSON()", function() {
 		it("should attempt to parse non ISO-8601 dates", function* () {
 			Zotero.locale = 'en-US';
+			Zotero.Date.init();
 			var data = [
 				{
 					itemType: "journalArticle",

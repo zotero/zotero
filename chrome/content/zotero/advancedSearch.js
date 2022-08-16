@@ -96,6 +96,8 @@ var ZoteroAdvancedSearch = new function() {
 			ref: _searchBox.search,
 			isSearchMode: () => true,
 			getItems: async function () {
+				await Zotero.Libraries.get(_libraryID).waitForDataLoad('item');
+
 				var search = _searchBox.search.clone();
 				search.libraryID = _libraryID;
 				var ids = await search.search();

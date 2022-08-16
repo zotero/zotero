@@ -48,14 +48,22 @@
 		buttons="cancel,accept"
 		style="padding: 2em"
 	>
-		<script src="include.js"/>
-		<script src="selectItemsDialog.js"/>
+		<script>
+			var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
+			
+			Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+
+			Services.scriptloader.loadSubScript("chrome://zotero/content/selectItemsDialog.js", this);
+			
+			// Custom elements
+			Services.scriptloader.loadSubScript("chrome://global/content/customElements.js", this);
+			Services.scriptloader.loadSubScript("chrome://zotero/content/elements/quickSearchTextbox.js", this);
+		</script>
 
 		<vbox id="zotero-select-items-container" flex="1">
 
 		<hbox align="center" pack="end">
-			<search-textbox id="zotero-tb-search" type="search" timeout="250" oncommand="onSearch()" dir="reverse"
-					onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { if (this.value == '') { cancelDialog(); return false; } this.value = ''; this.doCommand('cmd_zotero_search'); return false; } return true;"/>
+			<quick-search-textbox id="zotero-tb-search" timeout="250" oncommand="onSearch()" dir="reverse"/>
 		</hbox>
 
 		<hbox flex="1">

@@ -5,6 +5,12 @@
   "general_done": {
     "message": "Hotovo"
   },
+  "general_yes": {
+    "message": "Ano"
+  },
+  "general_no": {
+    "message": "Ne"
+  },
   "general_tryAgain": {
     "message": "Zkusit znovu"
   },
@@ -13,6 +19,9 @@
   },
   "general_cancel": {
     "message": "Zrušit"
+  },
+  "general_copyToClipboard": {
+    "message": "Kopírovat do schránky"
   },
   "progressWindow_savingTo": {
     "message": "Ukládám do"

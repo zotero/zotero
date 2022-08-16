@@ -58,7 +58,7 @@
 <!ENTITY zotero.items.itemType "Tipe item">
 <!ENTITY zotero.items.creator_column "Skepper">
 <!ENTITY zotero.items.year_column "Jaar">
-<!ENTITY zotero.items.dateModified_column "Date Modified">
+<!ENTITY zotero.items.dateModified_column "Datum gewysig">
 <!ENTITY zotero.items.moreColumns.label "More Columns">
 <!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
 
@@ -129,7 +129,7 @@
 <!ENTITY zotero.toolbar.attachment.weblink "Save Link to Current Page">
 <!ENTITY zotero.toolbar.attachment.snapshot "Take Snapshot of Current Page">
 <!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.notes "Notas">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "No tags to display">
 <!ENTITY zotero.tagSelector.loadingTags "Loading tags…">
@@ -148,7 +148,7 @@
 <!ENTITY zotero.tagColorChooser.removeColor "Remove Color">
 
 <!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
-<!ENTITY zotero.lookup.button.search "Search">
+<!ENTITY zotero.lookup.button.search "Soek">
 
 <!ENTITY zotero.createParent.title "Create Parent Item">
 <!ENTITY zotero.createParent.button.manual "Manual Entry">

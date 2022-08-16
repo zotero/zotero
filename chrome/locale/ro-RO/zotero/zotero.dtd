@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Deselectează tot">
 <!ENTITY zotero.general.edit "Editare">
 <!ENTITY zotero.general.delete "Ștergere">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Mută în coșul de gunoi">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Anulare">
 <!ENTITY zotero.general.refresh "Reîmprospătare">
@@ -129,7 +129,7 @@
 <!ENTITY zotero.toolbar.attachment.weblink "Salvează legătura la pagina curentă">
 <!ENTITY zotero.toolbar.attachment.snapshot "Creează un instantaneu al paginii curente">
 <!ENTITY zotero.toolbar.context.item "Item">
-<!ENTITY zotero.toolbar.context.notes "Notes">
+<!ENTITY zotero.toolbar.context.notes "Note">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Nicio etichetă pentru afişare">
 <!ENTITY zotero.tagSelector.loadingTags "Încarcă etichete...">
@@ -307,7 +307,7 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.firstPage "Prima pagină">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">

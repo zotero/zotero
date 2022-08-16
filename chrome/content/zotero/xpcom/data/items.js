@@ -1034,6 +1034,29 @@ Zotero.Items = function() {
 		for (let otherItem of otherItems) {
 			let mergedMasterAttachments = new Set();
 
+			let doMerge = async (fromAttachment, toAttachment) => {
+				mergedMasterAttachments.add(toAttachment.id);
+	
+				await this.moveChildItems(fromAttachment, toAttachment, true);
+				await this._moveEmbeddedNote(fromAttachment, toAttachment);
+				await this._moveRelations(fromAttachment, toAttachment);
+	
+				fromAttachment.deleted = true;
+				await fromAttachment.save();
+	
+				// Later on, when processing notes, we'll use this to remap
+				// URLs pointing to the old attachment.
+				remapAttachmentKeys.set(fromAttachment.key, toAttachment.key);
+	
+				// Items can only have one replaced item predicate
+				if (!toAttachment.getRelationsByPredicate(Zotero.Relations.replacedItemPredicate)) {
+					toAttachment.addRelation(Zotero.Relations.replacedItemPredicate,
+						Zotero.URI.getItemURI(fromAttachment));
+				}
+	
+				await toAttachment.save();
+			};
+
 			for (let otherAttachment of await this.getAsync(otherItem.getAttachments(true))) {
 				if (!otherAttachment.isPDFAttachment()) {
 					continue;
@@ -1064,13 +1087,12 @@ Zotero.Items = function() {
 					await otherAttachment.save();
 					continue;
 				}
-				mergedMasterAttachments.add(masterAttachmentID);
 
 				let masterAttachment = await this.getAsync(masterAttachmentID);
 
 				if (masterAttachment.attachmentContentType !== otherAttachment.attachmentContentType) {
 					Zotero.debug(`Master attachment ${masterAttachment.key} matches ${otherAttachment.key}, `
-						+ 'but content types differ - moving');
+						+ 'but content types differ - keeping both');
 					otherAttachment.parentItemID = item.id;
 					await otherAttachment.save();
 					continue;
@@ -1079,31 +1101,35 @@ Zotero.Items = function() {
 				if (!((masterAttachment.isImportedAttachment() && otherAttachment.isImportedAttachment())
 						|| (masterAttachment.isLinkedFileAttachment() && otherAttachment.isLinkedFileAttachment()))) {
 					Zotero.debug(`Master attachment ${masterAttachment.key} matches ${otherAttachment.key}, `
-						+ 'but link modes differ - moving');
+						+ 'but link modes differ - keeping both');
 					otherAttachment.parentItemID = item.id;
 					await otherAttachment.save();
 					continue;
 				}
 
-				Zotero.debug(`Master attachment ${masterAttachment.key} matches ${otherAttachment.key} - merging`);
-				await this.moveChildItems(otherAttachment, masterAttachment, true);
-				await this._moveEmbeddedNote(otherAttachment, masterAttachment);
-				await this._moveRelations(otherAttachment, masterAttachment);
-
-				otherAttachment.deleted = true;
-				await otherAttachment.save();
-
-				// Later on, when processing notes, we'll use this to remap
-				// URLs pointing to the old attachment.
-				remapAttachmentKeys.set(otherAttachment.key, masterAttachment.key);
-
-				// Items can only have one replaced item predicate
-				if (!masterAttachment.getRelationsByPredicate(Zotero.Relations.replacedItemPredicate)) {
-					masterAttachment.addRelation(Zotero.Relations.replacedItemPredicate,
-						Zotero.URI.getItemURI(otherAttachment));
+				// Check whether master and other have embedded annotations
+				// Master yes, other yes -> keep both
+				// Master yes, other no -> keep master
+				// Master no, other yes -> keep other
+				if (await otherAttachment.hasEmbeddedAnnotations()) {
+					if (await masterAttachment.hasEmbeddedAnnotations()) {
+						Zotero.debug(`Master attachment ${masterAttachment.key} matches ${otherAttachment.key}, `
+							+ 'but both have embedded annotations - keeping both');
+						otherAttachment.parentItemID = item.id;
+						await otherAttachment.save();
+					}
+					else {
+						Zotero.debug(`Master attachment ${masterAttachment.key} matches ${otherAttachment.key}, `
+							+ 'but other has embedded annotations - merging into other');
+						await doMerge(masterAttachment, otherAttachment);
+						otherAttachment.parentItemID = item.id;
+						await otherAttachment.save();
+					}
+					continue;
 				}
 
-				await masterAttachment.save();
+				Zotero.debug(`Master attachment ${masterAttachment.key} matches ${otherAttachment.key} - merging into master`);
+				await doMerge(otherAttachment, masterAttachment);
 			}
 		}
 

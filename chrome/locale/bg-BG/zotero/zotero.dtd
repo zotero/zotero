@@ -6,7 +6,7 @@
 <!ENTITY zotero.general.deselectAll "Отказ на всички">
 <!ENTITY zotero.general.edit "Редактиране">
 <!ENTITY zotero.general.delete "Изтриване">
-<!ENTITY zotero.general.moveToTrash "Move to Trash">
+<!ENTITY zotero.general.moveToTrash "Премества в кошчето за боклук">
 <!ENTITY zotero.general.ok "OK">
 <!ENTITY zotero.general.cancel "Отказ">
 <!ENTITY zotero.general.refresh "Опресняване">
@@ -21,7 +21,7 @@
 <!ENTITY zotero.general.other "Други...">
 <!ENTITY zotero.general.bigger "Bigger">
 <!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.reset "Нулиране">
 
 
 <!ENTITY zotero.errorReport.title "Зотеро доклад за проблем">
@@ -93,7 +93,7 @@
 <!ENTITY zotero.toolbar.import.label "Внасяне...">
 <!ENTITY zotero.toolbar.importFromClipboard "Внасяне от клипборда">
 <!ENTITY zotero.toolbar.export.label "Изнасяне на библиотека...">
-<!ENTITY zotero.toolbar.rtfScan.label "RTF Scan">
+<!ENTITY zotero.toolbar.rtfScan.label "Сканиране на RTF">
 <!ENTITY zotero.toolbar.timeline.label "Създаване на хронология">
 <!ENTITY zotero.toolbar.preferences.label "Предпочитания...">
 <!ENTITY zotero.toolbar.supportAndDocumentation "Подръжка и документация">
@@ -128,7 +128,7 @@
 <!ENTITY zotero.toolbar.attachment.add "Запазване на копие от файл">
 <!ENTITY zotero.toolbar.attachment.weblink "Запазване на връзка към настоящата страница">
 <!ENTITY zotero.toolbar.attachment.snapshot "Направи &quot;моментна снимка&quot; на настоящата страница">
-<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.item "Елемент">
 <!ENTITY zotero.toolbar.context.notes "Notes">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Няма маркери, които да бъдат показани">
@@ -185,7 +185,7 @@
 <!ENTITY zotero.import.lastModified "Променено за последно">
 <!ENTITY zotero.import.size "Размер">
 <!ENTITY zotero.import.createCollection "Поместване на внесените колекции и записи в нова колекция">
-<!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.fileHandling "Обработка на файловете">
 
 <!ENTITY zotero.exportOptions.title "Изнасяне...">
 <!ENTITY zotero.exportOptions.format.label "Формат:">
@@ -307,7 +307,7 @@
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
-<!ENTITY zotero.pdfReader.firstPage "First Page">
+<!ENTITY zotero.pdfReader.firstPage "Първа страница">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">

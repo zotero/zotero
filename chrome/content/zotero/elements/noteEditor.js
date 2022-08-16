@@ -306,13 +306,13 @@
 		}
 
 		async focusFirst() {
-			let n = 0;
-			while (!this._editorInstance && n++ < 100) {
-				await Zotero.Promise.delay(10);
-			}
-			await this._editorInstance._initPromise;
-			this._iframe.focus();
 			try {
+				let n = 0;
+				while (!this._editorInstance && n++ < 100) {
+					await Zotero.Promise.delay(10);
+				}
+				await this._editorInstance._initPromise;
+				this._iframe.focus();
 				this._editorInstance._iframeWindow.document.querySelector('.toolbar-button-return').focus();
 			}
 			catch(e) {

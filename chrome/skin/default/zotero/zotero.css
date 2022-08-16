@@ -1,9 +1,4 @@
 /* Font sizes */
-*[zoteroFontSize=medium] #zotero-tb-search, *[zoteroFontSize=large] #zotero-tb-search
-{
-	font-size: 1em !important;
-}
-
 *[zoteroFontSize=medium] treechildren::-moz-tree-row
 {
 	height: 1.5em;
@@ -26,60 +21,12 @@ textbox[type="styled"]
 	-moz-binding: url('chrome://zotero/content/bindings/styled-textbox.xml#styled-textbox');
 }
 
-zoteronoteeditor
-{
-	-moz-binding: url('chrome://zotero/content/bindings/noteeditor.xml#note-editor');
-}
-
-linksbox
-{
-	-moz-binding: url('chrome://zotero/content/bindings/noteeditor.xml#links-box');
-}
-
-tagsbox
-{
-	-moz-binding: url('chrome://zotero/content/bindings/tagsbox.xml#tags-box');
-}
-
-tagsbox row
-{
-	-moz-box-align:center;
-}
-
 customcolorpicker {
 	-moz-binding: url(chrome://zotero/content/bindings/customcolorpicker.xml#custom-colorpicker);
 }
 
 customcolorpicker[type=button] {
 	-moz-binding: url(chrome://zotero/content/bindings/customcolorpicker.xml#custom-colorpicker-button);
-}
-
-relatedbox
-{
-	-moz-binding: url('chrome://zotero/content/bindings/relatedbox.xml#related-box');
-	-moz-user-focus: ignore;
-}
-
-zoterosearch
-{
-	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-box');
-}
-
-
-zoterosearchcondition
-{
-	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-condition');
-}
-
-zoterosearchtextbox
-{
-	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-textbox');
-}
-
-
-zoterosearchagefield
-{
-	-moz-binding: url('chrome://zotero/content/bindings/zoterosearch.xml#search-in-the-last');
 }
 
 zoteromergegroup {
@@ -95,15 +42,6 @@ dialog[resizable="true"]
 	-moz-binding: url('chrome://zotero/content/bindings/resizabledialog.xml#resizabledialog');
 }
 
-zoteroguidancepanel
-{
-	-moz-binding: url('chrome://zotero/content/bindings/guidancepanel.xml#guidancepanel');
-}
-
-zoterofilesyncstatus {
-	-moz-binding: url('chrome://zotero/content/bindings/filesyncstatus.xml#file-sync-status');
-}
-
 richlistitem {
 	padding: 0.2em 0.4em;
 }
@@ -114,14 +52,13 @@ richlistitem, richlistitem > * {
 	text-overflow: ellipsis;
 }
 
-groupbox > label > h2 {
+groupbox > label > h2, groupbox > * > label > h2 {
 	font-size: 14px;
 	margin-top: 1em;
 	margin-bottom: .3em;
 }
 
 label.zotero-text-link {
-	-moz-binding: url('chrome://zotero/content/bindings/text-link.xml#text-link');
 	-moz-user-focus: normal;
 	color: -moz-nativehyperlinktext;
 	text-decoration: underline;

@@ -143,6 +143,10 @@ treechildren::-moz-tree-row {
   background-image: none;
 }
 
+richlistitem hbox {
+	overflow: hidden;
+}
+
 richlistitem[selected] menulist:focus-visible {
   outline-offset: -2px;
 }

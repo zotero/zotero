@@ -52,7 +52,8 @@
 		width="1000" height="600"
 		persist="screenX screenY width height sizemode"
 		xmlns:html="http://www.w3.org/1999/xhtml"
-		style="display: flex;">
+		style="display: flex;"
+		tooltip="html-tooltip">
 	
 	
 	<html:link rel="localization" href="branding/brand.ftl"/>
@@ -67,10 +68,10 @@
 		Services.scriptloader.loadSubScript("resource://zotero/require.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/standalone/standalone.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/platformKeys.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/editMenuOverlay.js", this);
 		
 		// Mozilla scripts
 		Services.scriptloader.loadSubScript("chrome://global/content/globalOverlay.js", this);
-		Services.scriptloader.loadSubScript("chrome://global/content/editMenuOverlay.js", this);
 		Services.scriptloader.loadSubScript("chrome://global/content/contentAreaUtils.js", this);
 		if (Zotero.isMac) {
 			Services.scriptloader.loadSubScript("chrome://global/content/macWindowMenu.js", this);
@@ -86,6 +87,7 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/relatedBox.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/attachmentBox.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/menuToolbarbutton.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/quickSearchTextbox.js", this);
 
 		Services.scriptloader.loadSubScript("chrome://zotero/content/tabs.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/zoteroPane.js", this);
@@ -144,6 +146,7 @@
 		<key id="key_paste" data-l10n-id="text-action-paste-shortcut" modifiers="accel" command="cmd_paste"/>
 		<key id="key_delete" keycode="VK_DELETE" command="cmd_delete"/>
 		<key id="key_selectAll" data-l10n-id="text-action-select-all-shortcut" modifiers="accel" command="cmd_selectAll"/>
+		<key id="key_switchTextDirection" data-l10n-id="bidi-switch-direction-shortcut" command="cmd_switchTextDirection" modifiers="accel,shift" />
 		<key id="key_find" key="&findCmd.key;" modifiers="accel" command="cmd_find"/>
 		<key id="key_findAgain" key="&findAgainCmd.key;" modifiers="accel" command="cmd_findAgain"/>
 		<key id="key_findPrevious" key="&findAgainCmd.key;" modifiers="shift,accel" command="cmd_findPrevious"/>
@@ -174,7 +177,7 @@
 					the children can be modified. All non-menu nodes are ignored
 				-->
 				<menubar id="main-menubar"
-				style="border:0px;padding:0px;margin:0px;-moz-appearance:none">
+				style="border:0px;padding:0px;margin:0px;-moz-appearance:none">		
 					<!-- File menu -->
 					<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;"
 							onpopupshowing="ZoteroStandalone.onFileMenuOpen()">
@@ -216,15 +219,11 @@
 									command="cmd_zotero_importFromClipboard" key="key_importFromClipboard"/>
 							<menuitem id="menu_exportLibrary" class="menu-type-library" label="&zotero.toolbar.export.label;"
 									command="cmd_zotero_exportLibrary"/>
-							<!--
-							#ifdef XP_WIN
-							<menuseparator/>
-							<menuitem id="menu_FileQuitItem"
+							<menuseparator id="menu_NonMacFileQuitSeparator"/>
+							<menuitem id="menu_NonMacFileQuitItem"
 									label="&quitApplicationCmdWin.label;"
 									key="key_quitApplication"
 									command="cmd_quitApplication"/>
-							#endif
-							-->
 						</menupopup>
 					</menu>
 					
@@ -286,15 +285,9 @@
 									command="cmd_switchTextDirection"
 									key="key_switchTextDirection"
 									hidden="true" data-l10n-id="menu-edit-bidi-switch-text-direction"/>
-							<!--
-							#ifdef XP_UNIX
-							#ifndef XP_MACOSX
-							<menuseparator/>
-							<menuitem id="menu_preferences"
-								oncommand="Zotero.Utilities.Internal.openPreferences()" data-l10n-id="menu-preferences"/>
-							#endif
-							#endif
-							-->
+							<menuseparator id="menu_EditPreferencesSeparator"/>
+							<menuitem id="menu_EditPreferencesItem"
+								oncommand="Zotero.Utilities.Internal.openPreferences()" data-l10n-id="menu-settings"/>
 						</menupopup>
 					</menu>
 					
@@ -524,7 +517,7 @@
 									label="&installConnector.label;"
 									oncommand="ZoteroStandalone.openHelp('connectors');"/>
 							<menuitem id="menu_addons" label="&addons.label;"
-									oncommand="Zotero.openInViewer('chrome://mozapps/content/extensions/extensions.xul', ZoteroStandalone.updateAddonsPane)"/>
+									oncommand="Zotero.openInViewer('chrome://mozapps/content/extensions/aboutaddons.html', ZoteroStandalone.updateAddonsPane)"/>
 							<menu id="developer-menu"
 									label="&developer.label;">
 								<menupopup>
@@ -547,7 +540,6 @@
 						</menupopup>
 					</menu>
 					
-<!-- ifdef mac -->
 					<commandset id="macCommandSet"> <!-- was mainCommandSet -->
 						<command id="minimizeWindow"
 								label="&minimizeWindow.label;"
@@ -566,48 +558,12 @@
 								oncommand="ZoteroStandalone.openHelp();"
 								key="&helpMac.commandkey;"
 								modifiers="accel"/>
-						
-						<!-- These are used to build the Application menu under Cocoa widgets -->
-						<key id="key_preferencesCmdMac"
-								key="&preferencesCmdMac.commandkey;"
-								modifiers="accel"
-								internal="true"/>
-						<key id="key_hideThisAppCmdMac"
-								key="&hideThisAppCmdMac.commandkey;"
-								modifiers="accel"
-								internal="true"/>
-						<key id="key_hideOtherAppsCmdMac"
-								key="&hideOtherAppsCmdMac.commandkey;"
-								modifiers="accel,alt"
-								internal="true"/>
 						<key id="key_quitApplication"
 								key="&quitApplicationCmdMac.key;"
 								command="cmd_quitApplication"
 								modifiers="accel"
 								internal="true"/>
 					</keyset>
-					
-					<!-- nsMenuBarX hides these and uses them to build the Application menu. -->
-					<menupopup id="menu_FilePopup">
-						<menuitem id="menu_preferences"
-								label="&preferencesCmdMac.label;"
-								key="key_preferencesCmdMac"
-								oncommand="Zotero.Utilities.Internal.openPreferences()"/>
-						<menuitem id="menu_mac_services"
-								label="&servicesMenuMac.label;"/>
-						<menuitem id="menu_mac_hide_app"
-								label="&hideThisAppCmdMac.label;"
-								key="key_hideThisAppCmdMac"/>
-						<menuitem id="menu_mac_hide_others"
-								label="&hideOtherAppsCmdMac.label;"
-								key="key_hideOtherAppsCmdMac"/>
-						<menuitem id="menu_mac_show_all"
-								label="&showAllAppsCmdMac.label;"/>
-						<menuitem id="menu_FileQuitItem"
-								label="&quitApplicationCmdMac.label;"
-								key="key_quitApplication"
-								command="cmd_quitApplication"/>
-					</menupopup>
 					
 					<menu id="windowMenu"
 							label="&windowMenu.label;"
@@ -635,7 +591,6 @@
 							<menuseparator id="sep-window-list"/>
 						</menupopup>
 					</menu>
-<!-- endif -->
 					
 					<menu id="helpMenu"
 							label="&helpMenu.label;"
@@ -849,13 +804,13 @@
 									<toolbarbutton id="zotero-tb-advanced-search" class="zotero-tb-button" tooltiptext="&zotero.toolbar.advancedSearch;" command="cmd_zotero_advancedSearch"/>
 									<spacer flex="1"/>
 									<image id="zotero-tb-search-spinner" class="zotero-spinner-14" style="display: none"/>
-									<search-textbox id="zotero-tb-search" timeout="250"
+									<quick-search-textbox id="zotero-tb-search" timeout="250"
 											onkeypress="ZoteroPane_Local.handleSearchKeypress(this, event)"
 											oninput="ZoteroPane_Local.handleSearchInput(this, event)"
 											oncommand="ZoteroPane_Local.search()"/>
 								</hbox>
 								
-								<hbox id="zotero-item-toolbar" flex="1" align="center" tooltip="html-tooltip">
+								<hbox id="zotero-item-toolbar" flex="1" align="center">
 									<hbox align="center" pack="start" flex="1">
 										<toolbarbutton
 												is="menu-toolbarbutton"
@@ -872,22 +827,6 @@
 											tooltiptext="&zotero.sync.stop;"
 											oncommand="this.hidden = true; Zotero.Sync.Runner.stop()"
 											hidden="true"/>
-										<hbox id="zotero-tb-sync-progress-box" hidden="true" align="center">
-											<!-- TODO: localize -->
-											<toolbarbutton id="zotero-tb-sync-storage-cancel"
-												tooltiptext="Stop sync"
-												oncommand="Zotero.Sync.Runner.stop()"/>
-											<progressmeter id="zotero-tb-sync-progress" mode="determined"
-												value="0" tooltip="zotero-tb-sync-progress-tooltip">
-											</progressmeter>
-											<tooltip id="zotero-tb-sync-progress-tooltip" noautohide="true">
-												<hbox id="zotero-tb-sync-progress-tooltip-progress">
-													<label value="&zotero.sync.storage.progress;"/>
-													<label/>
-												</hbox>
-												<zoterofilesyncstatus id="zotero-tb-sync-progress-status"/>
-											</tooltip>
-										</hbox>
 									</hbox>
 				
 									<hbox id="zotero-pq-buttons">
@@ -917,24 +856,24 @@
 								</hbox>
 							</toolbar>
 		
-							<vbox id="sync-reminder-container" collapsed="true">
-								<div xmlns="http://www.w3.org/1999/xhtml" id="sync-reminder-banner">
-									<div id="sync-reminder-message"/>
-									<a id="sync-reminder-action" class="sync-reminder-link"/>
-									<a id="sync-reminder-learn-more" class="sync-reminder-link"/>
-									<div id="sync-reminder-spacer"/>
-									<a id="sync-reminder-disable" class="sync-reminder-link"/>
-									<a id="sync-reminder-remind" class="sync-reminder-link"/>
-									<div id="sync-reminder-close">×</div>
-								</div>
+							<vbox id="sync-reminder-container" collapsed="true" role="status">
+								<html:div id="sync-reminder-banner">
+									<html:div id="sync-reminder-message"/>
+									<html:a id="sync-reminder-action" class="sync-reminder-link"/>
+									<html:a id="sync-reminder-learn-more" class="sync-reminder-link"/>
+									<html:div id="sync-reminder-spacer"/>
+									<html:a id="sync-reminder-disable" class="sync-reminder-link"/>
+									<html:a id="sync-reminder-remind" class="sync-reminder-link"/>
+									<label is="text-link" id="sync-reminder-close">×</label>
+								</html:div>
 							</vbox>
 							
-							<vbox id="retracted-items-container" collapsed="true">
-								<div xmlns="http://www.w3.org/1999/xhtml" id="retracted-items-banner">
-									<div id="retracted-items-message"/>
-									<div id="retracted-items-link"/>
-									<div id="retracted-items-close">×</div>
-								</div>
+							<vbox id="retracted-items-container" collapsed="true" role="status">
+								<html:div id="retracted-items-banner">
+									<html:div id="retracted-items-message"/>
+									<label is="text-link" id="retracted-items-link"/>
+									<label is="text-link" id="retracted-items-close">×</label>
+								</html:div>
 							</vbox>
 							
 							<popupset id="trees-popupset">
@@ -997,6 +936,7 @@
 										</menupopup>
 									</menu>
 									<menuitem class="menuitem-iconic zotero-menuitem-remove-items" oncommand="ZoteroPane_Local.deleteSelectedItems();"/>
+									<menuitem class="menuitem-iconic zotero-menuitem-duplicate-and-convert" oncommand="ZoteroPane_Local.duplicateAndConvertSelectedItem();"/>
 									<menuitem class="menuitem-iconic zotero-menuitem-duplicate-item" label="&zotero.items.menu.duplicateItem;" oncommand="ZoteroPane_Local.duplicateSelectedItem().done();"/>
 									<menuitem class="menuitem-iconic zotero-menuitem-restore-to-library" label="&zotero.items.menu.restoreToLibrary;" oncommand="ZoteroPane_Local.restoreSelectedItems();"/>
 									<menuitem class="menuitem-iconic zotero-menuitem-move-to-trash" oncommand="ZoteroPane_Local.deleteSelectedItems(true, true);"/>

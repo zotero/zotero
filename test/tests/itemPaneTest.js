@@ -131,6 +131,29 @@ describe("Item pane", function () {
 				5000
 			);
 		});
+
+		it("should persist fieldMode after hiding a creator name editor", async function () {
+			let item = new Zotero.Item('book');
+			item.setCreators([
+				{
+					name: "First Last",
+					creatorType: "author",
+					fieldMode: 1
+				}
+			]);
+			await item.saveTx();
+			
+			let itemBox = doc.getElementById('zotero-editpane-item-box');
+			let box = doc.getAnonymousNodes(itemBox)[0];
+			
+			box.querySelector('label[fieldname="creator-0-lastName"]').click();
+			itemBox.hideEditor(box.querySelector('textbox[fieldname="creator-0-lastName"]'));
+			
+			assert.equal(
+				box.querySelector('label[fieldname="creator-0-lastName"]').getAttribute('fieldMode'),
+				'1'
+			);
+		});
 	})
 	
 	
@@ -307,7 +330,11 @@ describe("Item pane", function () {
 			// Wait for asynchronous editor update
 			do {
 				yield Zotero.Promise.delay(10);
-			} while(noteEditor._editorInstance._iframeWindow.wrappedJSObject.getDataSync().html.replace(/\n/g,'') != `<div data-schema-version="${Zotero.EditorInstance.SCHEMA_VERSION}"><p>Test</p></div>`);
+			} while (
+				!/<div data-schema-version=".*"><p>Test<\/p><\/div>/.test(
+					noteEditor._editorInstance._iframeWindow.wrappedJSObject.getDataSync().html.replace(/\n/g, '')
+				)
+			);
 		});
 	});
 	

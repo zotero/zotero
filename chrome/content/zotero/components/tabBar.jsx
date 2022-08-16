@@ -235,7 +235,7 @@ const TabBar = forwardRef(function (props, ref) {
 
 	function handleWheel(event) {
 		// Normalize wheel speed
-		let x = event.deltaX;
+		let x = event.deltaX || event.deltaY;
 		if (x && event.deltaMode) {
 			if (event.deltaMode === 1) {
 				x *= 20;
@@ -302,7 +302,10 @@ const TabBar = forwardRef(function (props, ref) {
 				onWheel={handleWheel}
 			>
 				<div className="pinned-tabs">
-					<div className="tabs">
+					<div
+						className="tabs"
+						onMouseOut={handleTabBarMouseOut}
+					>
 						{tabs.length ? renderTab(tabs[0], 0) : null}
 					</div>
 				</div>

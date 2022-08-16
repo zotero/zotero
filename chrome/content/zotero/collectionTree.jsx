@@ -840,6 +840,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	 * @param ids {String[]} list of row ids to be highlighted
 	 */
 	async setHighlightedRows(ids) {
+		if (this._editing) return;
 		try {
 			this._highlightedRows = new Set();
 			
@@ -1615,7 +1616,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					return false;
 				}
 				
-				let newAttachment = Zotero.Attachments.copyAttachmentToLibrary(item, targetLibraryID);
+				let newAttachment = await Zotero.Attachments.copyAttachmentToLibrary(item, targetLibraryID);
 				if (options.annotations) {
 					await Zotero.Items.copyChildItems(item, newAttachment);
 				}

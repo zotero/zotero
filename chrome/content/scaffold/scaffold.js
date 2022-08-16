@@ -25,6 +25,7 @@
 
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { E10SUtils } = ChromeUtils.import("resource://gre/modules/E10SUtils.jsm");
+var { Subprocess } = ChromeUtils.import("resource://gre/modules/Subprocess.jsm");
 
 import FilePicker from 'zotero/modules/filePicker';
 
@@ -104,15 +105,6 @@ var Scaffold = new function () {
 				});
 			}
 		});
-				
-		// Set font size from general pref
-		Zotero.setFontSize(document.getElementById('scaffold-pane'));
-		
-		// Set font size of code editor
-		var size = Zotero.Prefs.get("scaffold.fontSize");
-		if (size) {
-			this.setFontSize(size);
-		}
 
 		document.getElementById('tabpanels').addEventListener('select', event => Scaffold.handleTabSelect(event));
 		
@@ -161,6 +153,15 @@ var Scaffold = new function () {
 		this.initImportEditor();
 		this.initCodeEditor();
 		this.initTestsEditor();
+
+		// Set font size from general pref
+		Zotero.setFontSize(document.getElementById('scaffold-pane'));
+
+		// Set font size of code editor
+		var size = Zotero.Prefs.get("scaffold.fontSize");
+		if (size) {
+			this.setFontSize(size);
+		}
 
 		// Listen for Scaffold coming to the foreground and reload translators
 		window.addEventListener('activate', () => this.reloadTranslators());
@@ -270,10 +271,6 @@ var Scaffold = new function () {
 
 	this.initCodeEditor = async function () {
 		let monaco = _editors.codeGlobal, editor = _editors.code;
-
-		editor.getModel().updateOptions({
-			insertSpaces: false
-		});
 
 		editor.updateOptions({
 			lineNumbers: num => num + _linesOfMetadata - 1,
@@ -1634,8 +1631,8 @@ var Scaffold = new function () {
 		function wrapWithHBox(elem, { flex = undefined, width = undefined } = {}) {
 			let hbox = document.createXULElement('hbox');
 			hbox.append(elem);
-			hbox.setAttribute('flex', flex);
-			hbox.setAttribute('width', width);
+			if (flex !== undefined) hbox.setAttribute('flex', flex);
+			if (width !== undefined) hbox.setAttribute('width', width);
 			return hbox;
 		}
 
@@ -1689,7 +1686,7 @@ var Scaffold = new function () {
 			let defer = document.createXULElement('checkbox');
 			defer.checked = test.defer;
 			defer.disabled = true;
-			hbox.appendChild(wrapWithHBox(defer));
+			hbox.appendChild(wrapWithHBox(defer, { width: 30 }));
 
 			item.appendChild(hbox);
 
@@ -2151,22 +2148,23 @@ var Scaffold = new function () {
 		let eslintPath = await getESLintPath();
 		if (!eslintPath) return [];
 
-		let outputFile = OS.Path.join(
-			Zotero.getTempDirectory().path,
-			`lint_output_${Zotero.Utilities.randomString()}.json`
-		);
-
-		Zotero.debug(`Running ESLint`);
+		Zotero.debug('Running ESLint');
 		try {
-			await Zotero.Utilities.Internal.exec(eslintPath, ['-o', outputFile, '--', translatorPath]);
+			let proc = await Subprocess.call({
+				command: eslintPath,
+				arguments: ['-o', '-', '--', translatorPath],
+			});
+			let lintOutput = '';
+			let chunk;
+			while ((chunk = await proc.stdout.readString())) {
+				lintOutput += chunk;
+			}
+			return JSON.parse(lintOutput);
 		}
 		catch (e) {
-			// ignore non-zero exit code (which just means that there were lint errors in the translator)
+			Zotero.logError(e);
 		}
-
-		let lintOutput = await Zotero.File.getContentsAsync(outputFile);
-		Zotero.File.removeIfExists(outputFile);
-		return JSON.parse(lintOutput);
+		return [];
 	}
 
 	function eslintOutputToModelMarkers(output) {

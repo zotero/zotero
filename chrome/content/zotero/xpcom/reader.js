@@ -249,6 +249,33 @@ class ReaderInstance {
 		);
 		return !index;
 	}
+
+	promptToDeletePages(num) {
+		let ps = Services.prompt;
+		let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
+		let index = ps.confirmEx(
+			null,
+			Zotero.getString('pdfReader.promptDeletePages.title'),
+			Zotero.getString(
+				'pdfReader.promptDeletePages.text',
+				new Intl.NumberFormat().format(num),
+				num
+			),
+			buttonFlags,
+			Zotero.getString('general.continue'),
+			null, null, null, {}
+		);
+		return !index;
+	}
+
+	async reload() {
+		let item = Zotero.Items.get(this._itemID);
+		let path = await item.getFilePathAsync();
+		let buf = await OS.File.read(path, {});
+		buf = new Uint8Array(buf).buffer;
+		this._postMessage({ action: 'reload', buf, }, [buf]);
+	}
 	
 	async menuCmd(cmd) {
 		if (cmd === 'transferFromPDF') {
@@ -668,6 +695,60 @@ class ReaderInstance {
 		popup.openPopup(element, 'after_start', 0, 0, true);
 	}
 
+	_openThumbnailPopup(data) {
+		let popup = this._window.document.createElement('menupopup');
+		this._popupset.appendChild(popup);
+		popup.addEventListener('popuphidden', function () {
+			popup.remove();
+		});
+		let menuitem;
+		// Rotate Left
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', Zotero.getString('pdfReader.rotateLeft'));
+		menuitem.addEventListener('command', async () => {
+			this._postMessage({ action: 'reloading' });
+			await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 270, true);
+			await this.reload();
+		});
+		popup.appendChild(menuitem);
+		// Rotate Right
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', Zotero.getString('pdfReader.rotateRight'));
+		menuitem.addEventListener('command', async () => {
+			this._postMessage({ action: 'reloading' });
+			await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 90, true);
+			await this.reload();
+		});
+		popup.appendChild(menuitem);
+		// Rotate 180
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', Zotero.getString('pdfReader.rotate180'));
+		menuitem.addEventListener('command', async () => {
+			this._postMessage({ action: 'reloading' });
+			await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 180, true);
+			await this.reload();
+		});
+		popup.appendChild(menuitem);
+		// Separator
+		popup.appendChild(this._window.document.createElement('menuseparator'));
+		// Delete
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', Zotero.getString('general.delete'));
+		menuitem.addEventListener('command', async () => {
+			if (this.promptToDeletePages(data.pageIndexes.length)) {
+				this._postMessage({ action: 'reloading' });
+				try {
+					await Zotero.PDFWorker.deletePages(this._itemID, data.pageIndexes, true);
+				}
+				catch (e) {
+				}
+				await this.reload();
+			}
+		});
+		popup.appendChild(menuitem);
+		popup.openPopupAtScreen(data.x, data.y, true);
+	}
+
 	_openSelectorPopup(data) {
 		let popup = this._window.document.createXULElement('menupopup');
 		this._popupset.appendChild(popup);
@@ -806,6 +887,14 @@ class ReaderInstance {
 					this._openColorPopup(message.data);
 					return;
 				}
+				case 'openThumbnailPopup': {
+					this._openThumbnailPopup(message.data);
+					return;
+				}
+				case 'openSelectorPopup': {
+					this._openSelectorPopup(message.data);
+					return;
+				}
 				case 'closePopup': {
 					// Note: This currently only closes tags popup when annotations are
 					// disappearing from pdf-reader sidebar
@@ -932,7 +1021,7 @@ class ReaderInstance {
 }
 
 class ReaderTab extends ReaderInstance {
-	constructor({ itemID, title, sidebarWidth, sidebarOpen, bottomPlaceholderHeight, index, background }) {
+	constructor({ itemID, title, sidebarWidth, sidebarOpen, bottomPlaceholderHeight, index, tabID, background }) {
 		super();
 		this._itemID = itemID;
 		this._sidebarWidth = sidebarWidth;
@@ -941,6 +1030,7 @@ class ReaderTab extends ReaderInstance {
 		this._showItemPaneToggle = true;
 		this._window = Services.wm.getMostRecentWindow('navigator:browser');
 		let { id, container } = this._window.Zotero_Tabs.add({
+			id: tabID,
 			type: 'reader',
 			title: title || '',
 			index,
@@ -975,20 +1065,24 @@ class ReaderTab extends ReaderInstance {
 		// events in PDF reader iframe when mouse up happens over another iframe
 		// i.e. note-editor. There should be a better way to solve this
 		this._window.addEventListener('pointerup', (event) => {
-			if (this._window.Zotero_Tabs.selectedID === this.tabID
-				&& this._iframeWindow
-				&& event.target
-				&& event.target.closest
-				&& !event.target.closest('#outerContainer')) {
-				let evt = new this._iframeWindow.CustomEvent('mouseup', { bubbles: false });
-				evt.clientX = event.clientX;
-				evt.clientY = event.clientY;
-				this._iframeWindow.dispatchEvent(evt);
+			try {
+				if (this._window.Zotero_Tabs.selectedID === this.tabID
+					&& this._iframeWindow
+					&& event.target
+					&& event.target.closest
+					&& !event.target.closest('#outerContainer')) {
+					let evt = new this._iframeWindow.CustomEvent('mouseup', { bubbles: false });
+					evt.clientX = event.clientX;
+					evt.clientY = event.clientY;
+					this._iframeWindow.dispatchEvent(evt);
 
-				evt = new this._iframeWindow.CustomEvent('pointerup', { bubbles: false });
-				evt.clientX = event.clientX;
-				evt.clientY = event.clientY;
-				this._iframeWindow.dispatchEvent(evt);
+					evt = new this._iframeWindow.CustomEvent('pointerup', { bubbles: false });
+					evt.clientX = event.clientX;
+					evt.clientY = event.clientY;
+					this._iframeWindow.dispatchEvent(evt);
+				}
+			}
+			catch(e) {
 			}
 		});
 	}
@@ -1277,10 +1371,21 @@ class Reader {
 		await this.open(item.id, location, options);
 	}
 
-	async open(itemID, location, { title, tabIndex, openInBackground, openInWindow, allowDuplicate } = {}) {
+	async open(itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate } = {}) {
 		this._loadSidebarState();
 		this.triggerAnnotationsImportCheck(itemID);
 		let reader;
+
+		if (!allowDuplicate) {
+			let win = Zotero.getMainWindow();
+			if (win) {
+				let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
+				if (existingTabID) {
+					win.Zotero_Tabs.select(existingTabID);
+					return;
+				}
+			}
+		}
 
 		if (openInWindow) {
 			reader = this._readers.find(r => r._itemID === itemID && (r instanceof ReaderWindow));
@@ -1319,6 +1424,7 @@ class Reader {
 				itemID,
 				title,
 				index: tabIndex,
+				tabID,
 				background: openInBackground,
 				sidebarWidth: this._sidebarWidth,
 				sidebarOpen: this._sidebarOpen,

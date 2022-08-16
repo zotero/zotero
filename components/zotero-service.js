@@ -61,6 +61,7 @@ const xpcomFilesAll = [
 	'translate/src/tlds',
 	'translation/translate_firefox',
 	'isbn',
+	'preferencePanes',
 ];
 
 /** XPCOM files to be loaded only for local translation and DB access **/
@@ -110,6 +111,7 @@ const xpcomFilesLocal = [
 	'mime',
 	'notifier',
 	'openPDF',
+	'plugins',
 	'reader',
 	'progressQueue',
 	'progressQueueDialog',
@@ -457,10 +459,7 @@ var _isStandalone = null;
  * Determine whether Zotero Standalone is running
  */
 function isStandalone() {
-	if(_isStandalone === null) {
-		_isStandalone = Services.appinfo.ID === 'zotero@chnm.gmu.edu';
-	}
-	return _isStandalone;
+	return true;
 }
 
 function getOS() {

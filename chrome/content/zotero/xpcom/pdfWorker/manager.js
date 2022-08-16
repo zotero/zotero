@@ -410,6 +410,162 @@ class PDFWorker {
 		}
 		await Promise.all(promises);
 	}
+
+	/**
+	 * Delete pages from PDF attachment
+	 *
+	 * @param {Integer} itemID Attachment item id
+	 * @param {Array} pageIndexes
+	 * @param {Boolean} [isPriority]
+	 * @param {String} [password]
+	 * @returns {Promise}
+	 */
+	async deletePages(itemID, pageIndexes, isPriority, password) {
+		return this._enqueue(async () => {
+			let attachment = await Zotero.Items.getAsync(itemID);
+
+			Zotero.debug(`Deleting [${pageIndexes.join(', ')}] pages for item ${attachment.libraryKey}`);
+			let t = new Date();
+
+			if (!attachment.isPDFAttachment()) {
+				throw new Error('Item must be a PDF attachment');
+			}
+
+			let annotations = attachment
+				.getAnnotations()
+				.map(annotation => ({
+					id: annotation.id,
+					position: JSON.parse(annotation.annotationPosition)
+				}));
+
+			let path = await attachment.getFilePathAsync();
+			let buf = await OS.File.read(path, {});
+			buf = new Uint8Array(buf).buffer;
+
+			try {
+				var { buf: modifiedBuf } = await this._query('deletePages', {
+					buf, pageIndexes, password
+				}, [buf]);
+			}
+			catch (e) {
+				let error = new Error(`Worker 'deletePages' failed: ${JSON.stringify({ error: e.message })}`);
+				try {
+					error.name = JSON.parse(e.message).name;
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+				Zotero.logError(error);
+				throw error;
+			}
+
+			// Delete annotations from deleted pages
+			let ids = [];
+			for (let i = annotations.length - 1; i >= 0; i--) {
+				let { id, position } = annotations[i];
+				if (pageIndexes.includes(position.pageIndex)) {
+					ids.push(id);
+					annotations.splice(i, 1);
+				}
+			}
+			if (ids.length) {
+				await Zotero.Items.erase(ids);
+			}
+
+			// Shift page index for other annotations
+			ids = [];
+			await Zotero.DB.executeTransaction(async function () {
+				let rows = await Zotero.DB.queryAsync('SELECT itemID, position FROM itemAnnotations WHERE parentItemID=?', itemID);
+				for (let { itemID, position } of rows) {
+					try {
+						position = JSON.parse(position);
+					}
+					catch (e) {
+						Zotero.logError(e);
+						continue;
+					}
+					// Find the count of deleted pages before the current annotation page
+					let shift = pageIndexes.reduce((prev, cur) => cur < position.pageIndex ? prev + 1 : prev, 0);
+					if (shift > 0) {
+						position.pageIndex -= shift;
+						position = JSON.stringify(position);
+						await Zotero.DB.queryAsync('UPDATE itemAnnotations SET position=? WHERE itemID=?', [position, itemID]);
+						ids.push(itemID);
+					}
+				}
+			});
+			let objectsClass = Zotero.DataObjectUtilities.getObjectsClassForObjectType('item');
+			let loadedObjects = objectsClass.getLoaded();
+			for (let object of loadedObjects) {
+				if (ids.includes(object.id)) {
+					await object.reload(null, true);
+				}
+			}
+			await Zotero.Notifier.trigger('modify', 'item', ids, {});
+
+			await OS.File.writeAtomic(path, new Uint8Array(modifiedBuf));
+			let mtime = Math.floor(await attachment.attachmentModificationTime / 1000);
+			attachment.attachmentLastProcessedModificationTime = mtime;
+			await attachment.saveTx({
+				skipAll: true
+			});
+
+			Zotero.debug(`Deleted pages for item ${attachment.libraryKey} in ${new Date() - t} ms`);
+		}, isPriority);
+	}
+
+	/**
+	 * Rotate pages in PDF attachment
+	 *
+	 * @param {Integer} itemID Attachment item id
+	 * @param {Array} pageIndexes
+	 * @param {Integer} degrees 90, 180, 270
+	 * @param {Boolean} [isPriority]
+	 * @param {String} [password]
+	 * @returns {Promise}
+	 */
+	async rotatePages(itemID, pageIndexes, degrees, isPriority, password) {
+		return this._enqueue(async () => {
+			let attachment = await Zotero.Items.getAsync(itemID);
+
+			Zotero.debug(`Rotating [${pageIndexes.join(', ')}] pages for item ${attachment.libraryKey}`);
+			let t = new Date();
+
+			if (!attachment.isPDFAttachment()) {
+				throw new Error('Item must be a PDF attachment');
+			}
+
+			let path = await attachment.getFilePathAsync();
+			let buf = await OS.File.read(path, {});
+			buf = new Uint8Array(buf).buffer;
+
+			try {
+				var { buf: modifiedBuf } = await this._query('rotatePages', {
+					buf, pageIndexes, degrees, password
+				}, [buf]);
+			}
+			catch (e) {
+				let error = new Error(`Worker 'rotatePages' failed: ${JSON.stringify({ error: e.message })}`);
+				try {
+					error.name = JSON.parse(e.message).name;
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+				Zotero.logError(error);
+				throw error;
+			}
+
+			await OS.File.writeAtomic(path, new Uint8Array(modifiedBuf));
+			let mtime = Math.floor(await attachment.attachmentModificationTime / 1000);
+			attachment.attachmentLastProcessedModificationTime = mtime;
+			await attachment.saveTx({
+				skipAll: true
+			});
+
+			Zotero.debug(`Rotated pages for item ${attachment.libraryKey} in ${new Date() - t} ms`);
+		}, isPriority);
+	}
 }
 
 Zotero.PDFWorker = new PDFWorker();

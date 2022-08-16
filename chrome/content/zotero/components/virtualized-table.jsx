@@ -664,7 +664,14 @@ class VirtualizedTable extends React.Component {
 		this._isMouseDrag = true;
 	}
 	
-	_onDragEnd = () => {
+	_onDragEnd = async () => {
+		// macOS force-click sometimes causes a second mouseup event to be fired some time later
+		// causing a collection change on dragend, so we add a delay here. It shouldn't cause any issues
+		// because isMouseDrag is only used in mouseup handler to exactly prevent from accidentally switching
+		// selection after dragend.
+		if (Zotero.isMac) {
+			await Zotero.Promise.delay(500);
+		}
 		this._isMouseDrag = false;
 	}
 	
@@ -1012,8 +1019,8 @@ class VirtualizedTable extends React.Component {
 		let tooltip = document.createXULElement('tooltip');
 		tooltip.id = 'html-tooltip';
 		tooltip.addEventListener('popupshowing', function(e) {
-			let tooltipTitleNode = document.tooltipNode.closest('div *[title], iframe *[title], browser *[title]');
-			if (document.tooltipNode && tooltipTitleNode) {
+			let tooltipTitleNode = tooltip.triggerNode?.closest('div *[title], iframe *[title], browser *[title]');
+			if (tooltipTitleNode) {
 				this.setAttribute('label', tooltipTitleNode.getAttribute('title'));
 				return;
 			}

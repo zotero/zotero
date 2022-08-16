@@ -43,9 +43,6 @@ const DOWNLOADED_IMAGE_TYPE = [
 	'image/png'
 ];
 
-// Schema version here has to be the same as in note-editor!
-const SCHEMA_VERSION = 8;
-
 class EditorInstance {
 	constructor() {
 		this.instanceID = Zotero.Utilities.randomString();
@@ -87,6 +84,25 @@ class EditorInstance {
 				return;
 			}
 			return doc.execCommand(command, ui, value);
+		};
+
+		// Translate note HTML into Markdown, for setting it as text/plain in clipboard (on text copy/drag)
+		this._iframeWindow.wrappedJSObject.zoteroTranslateToMarkdown = (html) => {
+			let item = new Zotero.Item('note');
+			item.libraryID = this._item.libraryID;
+			item.setNote(html);
+			let text = '';
+			var translation = new Zotero.Translate.Export;
+			translation.noWait = true;
+			translation.setItems([item]);
+			translation.setTranslator(Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN);
+			translation.setHandler("done", (obj, worked) => {
+				if (worked) {
+					text = obj.string.replace(/\r\n/g, '\n');
+				}
+			});
+			translation.translate();
+			return text;
 		};
 
 		this._iframeWindow.addEventListener('message', this._messageHandler);
@@ -1239,7 +1255,9 @@ class EditorInstance {
 		let { html: serializedHTML, citationItems } = Zotero.EditorInstanceUtilities.serializeAnnotations(jsonAnnotations, true);
 		html += serializedHTML;
 		citationItems = encodeURIComponent(JSON.stringify(citationItems));
-		html = `<div data-citation-items="${citationItems}" data-schema-version="${SCHEMA_VERSION}">${html}</div>`;
+		// Note: Update schema version only if using new features
+		let schemaVersion = 8;
+		html = `<div data-citation-items="${citationItems}" data-schema-version="${schemaVersion}">${html}</div>`;
 		note.setNote(html);
 		await note.saveTx();
 		return note;
@@ -1356,16 +1374,24 @@ class EditorInstanceUtilities {
 				template = '<p>{{image}}<br/>{{citation}} {{comment}}</p>';
 			}
 
+			Zotero.debug('Using note template:');
+			Zotero.debug(template);
+
+			template = template.replace(
+				/(<blockquote>[^<>]*?)({{highlight}})([\s\S]*?<\/blockquote>)/g,
+				(match, p1, p2, p3) => p1 + "{{highlight quotes='false'}}" + p3
+			);
+
 			let vars = {
 				color: annotation.color || '',
-				highlight: (attrs) => attrs.quotes === 'true' ? quotedHighlightHTML : highlightHTML,
+				// Include quotation marks by default, but allow to disable with `quotes='false'`
+				highlight: (attrs) => attrs.quotes === 'false' ? highlightHTML : quotedHighlightHTML,
 				comment: commentHTML,
 				citation: citationHTML,
 				image: imageHTML,
 				tags: (attrs) => (annotation.tags && annotation.tags.map(tag => tag.name) || []).join(attrs.join || ' ')
 			};
-			Zotero.debug('Using note template:');
-			Zotero.debug(template);
+
 			let templateHTML = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
 			// Remove some spaces at the end of paragraph
 			templateHTML = templateHTML.replace(/([\s]*)(<\/p)/g, '$2');
@@ -1525,5 +1551,4 @@ class EditorInstanceUtilities {
 }
 
 Zotero.EditorInstance = EditorInstance;
-Zotero.EditorInstance.SCHEMA_VERSION = SCHEMA_VERSION;
 Zotero.EditorInstanceUtilities = new EditorInstanceUtilities();

@@ -906,6 +906,59 @@ describe("Zotero.Items", function () {
 			assert.isFalse(attachment2.deleted);
 			assert.equal(attachment2.parentItemID, item1.id);
 		});
+
+		it("should not merge two matching PDF attachments with embedded annotations", async function () {
+			let item1 = await createDataObject('item', { setTitle: true });
+			let attachment1 = await importFileAttachment('duplicatesMerge_annotated_1.pdf', { parentID: item1.id });
+
+			let item2 = item1.clone();
+			await item2.saveTx();
+			let attachment2 = await importFileAttachment('duplicatesMerge_annotated_2.pdf', { parentID: item2.id });
+
+			await Zotero.Items.merge(item1, [item2]);
+
+			assert.isFalse(item1.deleted);
+			assert.isFalse(attachment1.deleted);
+			assert.equal(item1.numAttachments(true), 2);
+			assert.isTrue(item2.deleted);
+			assert.isFalse(attachment2.deleted);
+			assert.equal(attachment2.parentItemID, item1.id);
+		});
+
+		it("should merge a non-master PDF without embedded annotations into a master PDF with embedded annotations", async function () {
+			let item1 = await createDataObject('item', { setTitle: true });
+			let attachment1 = await importFileAttachment('duplicatesMerge_annotated_1.pdf', { parentID: item1.id });
+
+			let item2 = item1.clone();
+			await item2.saveTx();
+			let attachment2 = await importFileAttachment('duplicatesMerge_notAnnotated.pdf', { parentID: item2.id });
+
+			await Zotero.Items.merge(item1, [item2]);
+
+			assert.isFalse(item1.deleted);
+			assert.isFalse(attachment1.deleted);
+			assert.equal(item1.numAttachments(true), 1);
+			assert.isTrue(item2.deleted);
+			assert.isTrue(attachment2.deleted);
+		});
+
+		it("should merge a master PDF without embedded annotations into a non-master PDF with embedded annotations", async function () {
+			let item1 = await createDataObject('item', { setTitle: true });
+			let attachment1 = await importFileAttachment('duplicatesMerge_notAnnotated.pdf', { parentID: item1.id });
+
+			let item2 = item1.clone();
+			await item2.saveTx();
+			let attachment2 = await importFileAttachment('duplicatesMerge_annotated_1.pdf', { parentID: item2.id });
+
+			await Zotero.Items.merge(item1, [item2]);
+
+			assert.isFalse(item1.deleted);
+			assert.isTrue(attachment1.deleted);
+			assert.equal(item1.numAttachments(false), 1); // Don't count the deleted attachment
+			assert.isTrue(item2.deleted);
+			assert.isFalse(attachment2.deleted);
+			assert.equal(attachment2.parentItemID, item1.id);
+		});
 	})
 	
 	

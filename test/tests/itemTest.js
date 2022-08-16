@@ -1169,6 +1169,15 @@ describe("Zotero.Item", function () {
 				{ type: 'other', exists: false }
 			);
 		})
+
+		it("should cache state for a standalone attachment", async function () {
+			var standaloneAttachment = await importPDFAttachment();
+			await standaloneAttachment.getBestAttachmentState();
+			assert.deepEqual(
+				standaloneAttachment.getBestAttachmentStateCached(),
+				{ type: 'pdf', exists: true }
+			);
+		});
 	})
 	
 	
@@ -1464,6 +1473,23 @@ describe("Zotero.Item", function () {
 			it("should return annotations in trash if includeTrashed=true", async function () {
 				var items = attachment.getAnnotations(true);
 				assert.sameMembers(items, [annotation1, annotation2]);
+			});
+		});
+
+		describe("#hasEmbeddedAnnotations()", function () {
+			it("should recognize a highlight annotation", async function () {
+				let attachment = await importFileAttachment('duplicatesMerge_annotated_1.pdf');
+				assert.isTrue(await attachment.hasEmbeddedAnnotations());
+			});
+
+			it("should recognize a strikeout annotation", async function () {
+				let attachment = await importFileAttachment('duplicatesMerge_annotated_2.pdf');
+				assert.isTrue(await attachment.hasEmbeddedAnnotations());
+			});
+
+			it("should not recognize a link annotation", async function () {
+				let attachment = await importFileAttachment('duplicatesMerge_notAnnotated.pdf');
+				assert.isFalse(await attachment.hasEmbeddedAnnotations());
 			});
 		});
 		

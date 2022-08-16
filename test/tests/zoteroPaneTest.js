@@ -73,7 +73,7 @@ describe("ZoteroPane", function() {
 				// TODO: Test changing a condition
 				function (dialog) {},
 				'accept',
-				'chrome://zotero/content/searchDialog.xul'
+				'chrome://zotero/content/searchDialog.xhtml'
 			);
 			var id = yield zp.newSearch();
 			yield promise;
@@ -86,7 +86,7 @@ describe("ZoteroPane", function() {
 			var promise = waitForDialog(
 				function (dialog) {},
 				'cancel',
-				'chrome://zotero/content/searchDialog.xul'
+				'chrome://zotero/content/searchDialog.xhtml'
 			);
 			var id = yield zp.newSearch();
 			yield promise;
@@ -442,6 +442,34 @@ describe("ZoteroPane", function() {
 	});
 	
 	
+	describe("#duplicateAndConvertSelectedItem()", function () {
+		describe("book to book section", function () {
+			it("should not add relations to other book sections for the same book", async function () {
+				await selectLibrary(win);
+				var bookItem = await createDataObject('item', { itemType: 'book', title: "Book Title" });
+				
+				// Relate book to another book section with a different title
+				var otherBookSection = createUnsavedDataObject('item', { itemType: 'bookSection', setTitle: true })
+				otherBookSection.setField('bookTitle', "Another Book Title");
+				await otherBookSection.saveTx();
+				bookItem.addRelatedItem(otherBookSection);
+				await bookItem.saveTx();
+				otherBookSection.addRelatedItem(bookItem);
+				await otherBookSection.saveTx();
+				
+				await zp.selectItem(bookItem.id);
+				var bookSectionItem1 = await zp.duplicateAndConvertSelectedItem();
+				await zp.selectItem(bookItem.id);
+				var bookSectionItem2 = await zp.duplicateAndConvertSelectedItem();
+				
+				// Book sections should only be related to parent
+				assert.sameMembers(bookSectionItem1.relatedItems, [bookItem.key, otherBookSection.key]);
+				assert.sameMembers(bookSectionItem2.relatedItems, [bookItem.key, otherBookSection.key]);
+			});
+		});
+	});
+	
+	
 	describe("#deleteSelectedItems()", function () {
 		const DELETE_KEY_CODE = 46;
 		
@@ -595,6 +623,35 @@ describe("ZoteroPane", function() {
 			await modifyPromise;
 			
 			assert.isTrue(item.deleted);
+		});
+
+		it("should prompt to remove an item from subcollections when recursiveCollections enabled", async function () {
+			Zotero.Prefs.set('recursiveCollections', true);
+
+			let collection1 = await createDataObject('collection');
+			let collection2 = await createDataObject('collection', { parentID: collection1.id });
+			let item = await createDataObject('item', { collections: [collection2.id] });
+			assert.ok(await zp.collectionsView.selectCollection(collection1.id));
+
+			await waitForItemsLoad(win);
+
+			let iv = zp.itemsView;
+			assert.ok(await iv.selectItem(item.id));
+
+			await Zotero.Promise.delay(1);
+
+			let promise = waitForDialog();
+			let modifyPromise = waitForItemEvent('modify');
+
+			await zp.deleteSelectedItems(false);
+
+			let dialog = await promise;
+			await modifyPromise;
+
+			assert.include(dialog.document.documentElement.textContent, Zotero.getString('pane.items.removeRecursive'));
+			assert.isFalse(item.inCollection(collection2.id));
+
+			Zotero.Prefs.clear('recursiveCollections');
 		});
 	});
 	
@@ -766,7 +823,7 @@ describe("ZoteroPane", function() {
 	describe("#editSelectedCollection()", function () {
 		it("should edit a saved search", function* () {
 			var search = yield createDataObject('search');
-			var promise = waitForWindow('chrome://zotero/content/searchDialog.xul', function (win) {
+			var promise = waitForWindow('chrome://zotero/content/searchDialog.xhtml', function (win) {
 				let searchBox = win.document.getElementById('search-box');
 				var c = searchBox.search.getCondition(
 					searchBox.search.addCondition("title", "contains", "foo")
@@ -783,7 +840,7 @@ describe("ZoteroPane", function() {
 		it("should edit a saved search in a group", function* () {
 			var group = yield getGroup();
 			var search = yield createDataObject('search', { libraryID: group.libraryID });
-			var promise = waitForWindow('chrome://zotero/content/searchDialog.xul', function (win) {
+			var promise = waitForWindow('chrome://zotero/content/searchDialog.xhtml', function (win) {
 				let searchBox = win.document.getElementById('search-box');
 				var c = searchBox.search.getCondition(
 					searchBox.search.addCondition("title", "contains", "foo")

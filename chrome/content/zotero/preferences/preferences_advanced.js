@@ -26,11 +26,7 @@
 Components.utils.import("resource://gre/modules/Services.jsm");
 import FilePicker from 'zotero/modules/filePicker';
 
-Zotero_Preferences.Advanced = {
-	DEFAULT_OPENURL_RESOLVER: 'https://www.worldcat.org/registry/gateway',
-	
-	_openURLResolvers: null,
-	
+Zotero_Preferences.Advanced = {	
 	init: function () {
 		Zotero_Preferences.Keys.init();
 		
@@ -51,16 +47,31 @@ Zotero_Preferences.Advanced = {
 			input.value = Zotero.Prefs.get(preferenceName);
 		}
 		
-		// Set OpenURL resolver drop-down to last-known name
-		if (Zotero.Prefs.get('openURL.resolver')) {
-			let name = Zotero.Prefs.get('openURL.name');
-			if (name) {
-				document.getElementById('openurl-primary-popup').firstChild.setAttribute('label', name);
-			}
-		}
+		document.getElementById('baseAttachmentPath').addEventListener('syncfrompreference',
+			() => Zotero_Preferences.Attachment_Base_Directory.updateUI());
+		
+		document.getElementById('data-dir').addEventListener('syncfrompreference', (event) => {
+			event.target.value = this.onDataDirLoad();
+		});
+
+		document.getElementById('data-dir').addEventListener('synctopreference', (event) => {
+			this.onDataDirUpdate(event);
+		});
+
+		document.getElementById('data-dir-path').addEventListener('syncfrompreference', (event) => {
+			event.target.value = this.getDataDirPath();
+		});
 		
 		this.onDataDirLoad();
-		this.refreshLocale();
+
+		document.getElementById('fulltext-rebuildIndex').setAttribute('label',
+			Zotero.getString('zotero.preferences.search.rebuildIndex')
+				+ Zotero.getString('punctuation.ellipsis'));
+		document.getElementById('fulltext-clearIndex').setAttribute('label',
+			Zotero.getString('zotero.preferences.search.clearIndex')
+				+ Zotero.getString('punctuation.ellipsis'));
+		
+		this.updateIndexStats();
 	},
 	
 	
@@ -429,238 +440,97 @@ Zotero_Preferences.Advanced = {
 		return false;
 	},
 	
-	
-	handleOpenURLPopupShowing: async function (event) {
-		if (event.target.id != 'openurl-primary-popup') {
-			return;
-		}
-		if (!this._openURLResolvers) {
-			let menupopup = document.getElementById('openurl-primary-popup');
-			menupopup.firstChild.setAttribute('label', Zotero.getString('general.loading'));
-			try {
-				this._openURLResolvers = await Zotero.Utilities.Internal.OpenURL.getResolvers();
-			}
-			catch (e) {
-				Zotero.logError(e);
-				menupopup.firstChild.setAttribute('label', "Error loading resolvers");
-				return;
-			}
-		}
-		this.updateOpenURLResolversMenu();
-	},
+	updateIndexStats: Zotero.Promise.coroutine(function* () {
+		var stats = yield Zotero.Fulltext.getIndexStats();
+		document.getElementById('fulltext-stats-indexed')
+			.setAttribute('value', stats.indexed);
+		document.getElementById('fulltext-stats-partial')
+			.setAttribute('value', stats.partial);
+		document.getElementById('fulltext-stats-unindexed')
+			.setAttribute('value', stats.unindexed);
+		document.getElementById('fulltext-stats-words')
+			.setAttribute('value', stats.words);
+	}),
 	
 	
-	updateOpenURLResolversMenu: function () {
-		if (!this._openURLResolvers) {
-			Zotero.debug("Resolvers not loaded -- not updating menu");
-			return;
-		}
-		
-		var currentResolver = Zotero.Prefs.get('openURL.resolver');
-		
-		var openURLMenu = document.getElementById('openurl-menu');
-		var menupopup = openURLMenu.firstChild;
-		menupopup.innerHTML = '';
-		
-		var defaultMenuItem = document.createElement('menuitem');
-		defaultMenuItem.setAttribute('label', Zotero.getString('general.default'));
-		defaultMenuItem.setAttribute('value', this.DEFAULT_OPENURL_RESOLVER);
-		defaultMenuItem.setAttribute('type', 'checkbox');
-		menupopup.appendChild(defaultMenuItem);
-		
-		var customMenuItem = document.createElement('menuitem');
-		customMenuItem.setAttribute('label', Zotero.getString('general.custom'));
-		customMenuItem.setAttribute('value', 'custom');
-		customMenuItem.setAttribute('type', 'checkbox');
-		menupopup.appendChild(customMenuItem);
-		
-		menupopup.appendChild(document.createElement('menuseparator'));
-		
-		var selectedName;
-		var lastContinent;
-		var lastCountry;
-		var currentContinentPopup;
-		var currentMenuPopup;
-		for (let r of this._openURLResolvers) {
-			// Create submenus for continents
-			if (r.continent != lastContinent) {
-				let menu = document.createElement('menu');
-				menu.setAttribute('label', r.continent);
-				openURLMenu.firstChild.appendChild(menu);
-				
-				currentContinentPopup = currentMenuPopup = document.createElement('menupopup');
-				menu.appendChild(currentContinentPopup);
-				lastContinent = r.continent;
-			}
-			if (r.country != lastCountry) {
-				// If there's a country, create a submenu for it
-				if (r.country) {
-					let menu = document.createElement('menu');
-					menu.setAttribute('label', r.country);
-					currentContinentPopup.appendChild(menu);
-					
-					let menupopup = document.createElement('menupopup');
-					menu.appendChild(menupopup);
-					currentMenuPopup = menupopup;
-				}
-				// Otherwise use the continent popup
-				else {
-					currentMenuPopup = currentContinentPopup;
-				}
-				lastCountry = r.country;
-			}
-			let menuitem = document.createElement('menuitem');
-			menuitem.setAttribute('label', r.name);
-			menuitem.setAttribute('value', r.url);
-			menuitem.setAttribute('type', 'checkbox');
-			currentMenuPopup.appendChild(menuitem);
-			var checked = r.url == Zotero.Prefs.get('openURL.resolver');
-			menuitem.setAttribute('checked', checked);
-			if (checked) {
-				selectedName = r.name;
-			}
-		}
-		
-		// Default
-		if (currentResolver == this.DEFAULT_OPENURL_RESOLVER) {
-			openURLMenu.setAttribute('label', Zotero.getString('general.default'));
-			defaultMenuItem.setAttribute('checked', true);
-			Zotero.Prefs.clear('openURL.name');
-		}
-		else if (selectedName) {
-			openURLMenu.setAttribute('label', selectedName);
-			// If we found a match, update stored name
-			Zotero.Prefs.set('openURL.name', selectedName);
-		}
-		// Custom
-		else {
-			openURLMenu.setAttribute('label', Zotero.getString('general.custom'));
-			customMenuItem.setAttribute('checked', true);
-			Zotero.Prefs.clear('openURL.name');
-		}
-	},
-	
-	
-	handleOpenURLSelected: function (event) {
-		event.stopPropagation();
-		event.preventDefault();
-		
-		if (event.target.localName != 'menuitem') {
-			Zotero.debug("Ignoring click on " + event.target.localName);
-			return;
-		}
-		
-		var openURLMenu = document.getElementById('openurl-menu');
-		
-		var openURLServerField = document.getElementById('openURLServerField');
-		var openURLVersionMenu = document.getElementById('openURLVersionMenu');
-		
-		// Default
-		if (event.target.value == this.DEFAULT_OPENURL_RESOLVER) {
-			Zotero.Prefs.clear('openURL.name');
-			Zotero.Prefs.clear('openURL.resolver');
-			Zotero.Prefs.clear('openURL.version');
-			openURLServerField.value = this.DEFAULT_OPENURL_RESOLVER;
-		}
-		// If "Custom" selected, clear URL field
-		else if (event.target.value == "custom") {
-			Zotero.Prefs.clear('openURL.name');
-			Zotero.Prefs.set('openURL.resolver', '');
-			Zotero.Prefs.clear('openURL.version');
-			openURLServerField.value = '';
-			openURLServerField.focus();
-		}
-		else {
-			Zotero.Prefs.set('openURL.name', openURLServerField.value = event.target.label);
-			Zotero.Prefs.set('openURL.resolver', openURLServerField.value = event.target.value);
-			Zotero.Prefs.set('openURL.version', openURLVersionMenu.value = "1.0");
-		}
-		
-		openURLMenu.firstChild.hidePopup();
-		
-		setTimeout(() => {
-			this.updateOpenURLResolversMenu();
-		});
-	},
-	
-	onOpenURLCustomized: function () {
-		setTimeout(() => {
-			this.updateOpenURLResolversMenu();
-		});
-	},
-	
-	
-	_getAutomaticLocaleMenuLabel: function () {
-		return Zotero.getString(
-			'zotero.preferences.locale.automaticWithLocale',
-			Zotero.Locale.availableLocales[Zotero.locale] || Zotero.locale
-		);
-	},
-	
-	
-	refreshLocale: function () {
-		var autoLocaleName, currentValue;
-		
-		// If matching OS, get the name of the current locale
-		if (Zotero.Prefs.get('intl.locale.requested', true) === '') {
-			autoLocaleName = this._getAutomaticLocaleMenuLabel();
-			currentValue = 'automatic';
-		}
-		// Otherwise get the name of the locale specified in the pref
-		else {
-			autoLocaleName = Zotero.getString('zotero.preferences.locale.automatic');
-			currentValue = Zotero.locale;
-		}
-		
-		// Populate menu
-		var menu = document.getElementById('locale-menu');
-		var menupopup = menu.firstChild;
-		menupopup.textContent = '';
-		// Show "Automatic (English)", "Automatic (Français)", etc.
-		menu.appendItem(autoLocaleName, 'automatic');
-		menu.menupopup.appendChild(document.createElement('menuseparator'));
-		// Add all available locales
-		for (let locale in Zotero.Locale.availableLocales) {
-			menu.appendItem(Zotero.Locale.availableLocales[locale], locale);
-		}
-		menu.value = currentValue;
-	},
-	
-	onLocaleChange: function () {
-		var requestedLocale = Services.locale.requestedLocale;
-		var menu = document.getElementById('locale-menu');
-		
-		if (menu.value == 'automatic') {
-			// Changed if not already set to automatic (unless we have the automatic locale name,
-			// meaning we just switched away to the same manual locale and back to automatic)
-			var changed = requestedLocale
-				&& requestedLocale == Zotero.locale
-				&& menu.label != this._getAutomaticLocaleMenuLabel();
-			Services.locale.requestedLocales = null;
-		}
-		else {
-			// Changed if moving to a locale other than the current one
-			var changed = requestedLocale != menu.value
-			Services.locale.requestedLocales = [menu.value];
-		}
-		
-		if (!changed) {
-			return;
-		}
+	rebuildIndexPrompt: async function () {
+		var buttons = [
+			document.getElementById('fulltext-rebuildIndex'),
+			document.getElementById('fulltext-clearIndex')
+		];
+		buttons.forEach(b => b.disabled = true);
 		
 		var ps = Services.prompt;
 		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
-			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
-		var index = ps.confirmEx(null,
-			Zotero.getString('general.restartRequired'),
-			Zotero.getString('general.restartRequiredForChange', Zotero.appName),
-			buttonFlags,
-			Zotero.getString('general.restartNow'),
-			Zotero.getString('general.restartLater'),
-			null, null, {});
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
+			+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
 		
-		if (index == 0) {
-			Zotero.Utilities.Internal.quitZotero(true);
+		var index = ps.confirmEx(null,
+			Zotero.getString('zotero.preferences.search.rebuildIndex'),
+			Zotero.getString('zotero.preferences.search.rebuildWarning',
+				Zotero.getString('zotero.preferences.search.indexUnindexed')),
+			buttonFlags,
+			Zotero.getString('zotero.preferences.search.rebuildIndex'),
+			null,
+			// Position 2 because of https://bugzilla.mozilla.org/show_bug.cgi?id=345067
+			Zotero.getString('zotero.preferences.search.indexUnindexed'),
+			null, {});
+		
+		try {
+			if (index == 0) {
+				await Zotero.Fulltext.rebuildIndex();
+			}
+			else if (index == 2) {
+				await Zotero.Fulltext.rebuildIndex(true)
+			}
+			
+			await this.updateIndexStats();
+		}
+		catch (e) {
+			Zotero.alert(null, Zotero.getString('general.error'), e);
+		}
+		finally {
+			buttons.forEach(b => b.disabled = false);
+		}
+	},
+
+	clearIndexPrompt: async function () {
+		var buttons = [
+			document.getElementById('fulltext-rebuildIndex'),
+			document.getElementById('fulltext-clearIndex')
+		];
+		buttons.forEach(b => b.disabled = true);
+		
+		var ps = Services.prompt;
+		var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
+			+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
+		
+		var index = ps.confirmEx(null,
+			Zotero.getString('zotero.preferences.search.clearIndex'),
+			Zotero.getString('zotero.preferences.search.clearWarning',
+				Zotero.getString('zotero.preferences.search.clearNonLinkedURLs')),
+			buttonFlags,
+			Zotero.getString('zotero.preferences.search.clearIndex'),
+			null,
+			// Position 2 because of https://bugzilla.mozilla.org/show_bug.cgi?id=345067
+			Zotero.getString('zotero.preferences.search.clearNonLinkedURLs'), null, {});
+		
+		try {
+			if (index == 0) {
+				await Zotero.Fulltext.clearIndex();
+			}
+			else if (index == 2) {
+				await Zotero.Fulltext.clearIndex(true);
+			}
+			
+			await this.updateIndexStats();
+		}
+		catch (e) {
+			Zotero.alert(null, Zotero.getString('general.error'), e);
+		}
+		finally {
+			buttons.forEach(b => b.disabled = false);
 		}
 	}
 };
@@ -943,50 +813,47 @@ Zotero_Preferences.Attachment_Base_Directory = {
 	}),
 	
 	
-	updateUI: Zotero.Promise.coroutine(function* () {
+	updateUI: async function () {
 		var filefield = document.getElementById('baseAttachmentPath');
 		var path = Zotero.Prefs.get('baseAttachmentPath');
 		Components.utils.import("resource://gre/modules/osfile.jsm");
-		if (yield OS.File.exists(path)) {
-			filefield.file = Zotero.File.pathToFile(path);
-			filefield.label = path;
+		if (await OS.File.exists(path)) {
+			filefield.style.backgroundImage = 'url(moz-icon://file://' + path + '?size=16)';
+			filefield.value = path;
 		}
 		else {
-			filefield.label = '';
+			filefield.value = '';
 		}
 		document.getElementById('resetBasePath').disabled = !path;
-	})
+	}
 };
 
 
 Zotero_Preferences.Keys = {
 	init: function () {
-		var rows = document.getElementById('zotero-prefpane-advanced-keys-tab').getElementsByTagName('row');
-		for (var i=0; i<rows.length; i++) {
+		for (let label of document.querySelectorAll('#zotero-keys-grid .modifier')) {
 			// Display the appropriate modifier keys for the platform
-			let label = rows[i].firstChild.nextSibling;
-			if (label.className == 'modifier') {
-				label.value = Zotero.isMac ? Zotero.getString('general.keys.cmdShift') : Zotero.getString('general.keys.ctrlShift');
-			}
+			label.value = Zotero.isMac ? Zotero.getString('general.keys.cmdShift') : Zotero.getString('general.keys.ctrlShift');
 		}
 		
-		var textboxes = document.getElementById('zotero-keys-rows').getElementsByTagName('textbox');
+		var textboxes = document.querySelectorAll('#zotero-keys-grid input');
 		for (let i=0; i<textboxes.length; i++) {
 			let textbox = textboxes[i];
 			textbox.value = textbox.value.toUpperCase();
 			// .value takes care of the initial value, and this takes care of direct pref changes
 			// while the window is open
-			textbox.setAttribute('onsyncfrompreference', 'return Zotero_Preferences.Keys.capitalizePref(this.id)');
-			textbox.setAttribute('oninput', 'this.value = this.value.toUpperCase()');
+			textbox.addEventListener('syncfrompreference', () => {
+				textbox.value = Zotero_Preferences.Keys.capitalizePref(textbox.id) || '';
+			});
+			textbox.addEventListener('input', () => {
+				textbox.value = textbox.value.toUpperCase();
+			});
 		}
 	},
 	
 	
 	capitalizePref: function (id) {
 		var elem = document.getElementById(id);
-		var pref = document.getElementById(elem.getAttribute('preference'));
-		if (pref.value) {
-			return pref.value.toUpperCase();
-		}
+		return Zotero.Prefs.get(elem.getAttribute('preference'), true).toUpperCase();
 	}
 };

@@ -83,4 +83,48 @@ describe("Zotero.Styles", function() {
 			assert.equal(o.text, '1. Foo bar: baz qux. 2019; \n');
 		});
 	});
+	
+	describe("event-title replacement", function () {
+		var item;
+		var eventStyleXML = `<?xml version="1.0" encoding="utf-8"?>
+		<style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" version="1.0">
+		  <info>
+			<title>Test</title>
+			<id>http://www.zotero.org/styles/test</id>
+			<link href="http://www.zotero.org/styles/test" rel="self"/>
+			<updated>2022-04-14T13:48:43+00:00</updated>
+		  </info>
+		  <bibliography>
+			<layout>
+			  <text variable="event"/>
+			  <text value=" - "/>
+			  <text variable="event foo"/>
+			  <text value=" - "/>
+			  <text variable="event-place"/>
+			</layout>
+		  </bibliography>
+		</style>
+		`;
+		
+		before(async function () {
+			item = createUnsavedDataObject(
+				'item',
+				{
+					itemType: 'conferencePaper',
+					title: 'Conference Paper'
+				}
+			);
+			item.setField('conferenceName', 'Conference');
+			item.setField('place', 'Place');
+			await item.saveTx();
+		});
+		
+		it("should substitute `event-title` in style using `event`", function () {
+			var style = new Zotero.Style(eventStyleXML);
+			var cslEngine = style.getCiteProc('en-US', 'text');
+			var text = Zotero.Cite.makeFormattedBibliographyOrCitationList(cslEngine, [item], "text");
+			cslEngine.free();
+			assert.equal(text, 'Conference - Conference - Place\n');
+		});
+	});
 });

@@ -5,11 +5,23 @@
   "general_done": {
     "message": "Готово"
   },
+  "general_yes": {
+    "message": "Да"
+  },
+  "general_no": {
+    "message": "Не"
+  },
   "general_tryAgain": {
     "message": "Опитайте отново"
   },
+  "general_warning": {
+    "message": "Предупреждение"
+  },
   "general_cancel": {
     "message": "Отказ"
+  },
+  "general_copyToClipboard": {
+    "message": "Копиране в клипборда"
   },
   "progressWindow_savingTo": {
     "message": "Записване в"

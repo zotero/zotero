@@ -3,8 +3,8 @@
 <!ENTITY zotero.preferences.default "Default:">
 <!ENTITY zotero.preferences.items "Item">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Settings">
-<!ENTITY zotero.preferences.custom "Custom…">
+<!ENTITY zotero.preferences.settings "Pengaturan">
+<!ENTITY zotero.preferences.custom "Kustom...">
 
 <!ENTITY zotero.preferences.prefpane.general "General">
 
@@ -14,7 +14,7 @@
 <!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
 <!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Buka PDF menggunakan">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
 
 <!ENTITY zotero.preferences.miscellaneous "Lain-lain">
@@ -30,18 +30,18 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Saat menyalin item antarperpustakaan, turut masukkan:">
 <!ENTITY zotero.preferences.groups.childNotes "catatan anak">
 <!ENTITY zotero.preferences.groups.childFiles "foto anak dan berkar terimpor">
-<!ENTITY zotero.preferences.groups.annotations "annotations">
+<!ENTITY zotero.preferences.groups.annotations "anotasi">
 <!ENTITY zotero.preferences.groups.childLinks "tautan anak">
 <!ENTITY zotero.preferences.groups.tags "tags">
 
-<!ENTITY zotero.preferences.feeds "Feeds">
+<!ENTITY zotero.preferences.feeds "Umpan">
 <!ENTITY zotero.preferences.feeds.sorting.label "Sorting:">
 <!ENTITY zotero.preferences.feeds.sorting.newest "Newest items first">
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest items first">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
 
 <!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
-<!ENTITY zotero.preferences.openurl.custom "Custom…">
+<!ENTITY zotero.preferences.openurl.custom "Kustom...">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Versi:">
 
@@ -61,16 +61,16 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sinkronisasikan berkas-berkas lampiran di dalam Perpustakaanku menggunakan">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "SInkronisasikan berkas-berkas lampiran di dalam perpustakaan Zotero menggunaan penyimpanan Zotero">
-<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Unduh file">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "pada waktu sinkronisasi">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "sebagaimana dibutuhkan">
 <!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Dengan menggunakan penyimpanan Zotero, Anda sepakat untuk terikat dengan ">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "syarat dan ketentuan di dalamnya">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
 <!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
-<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
+<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sinkronisasi">
+<!ENTITY zotero.preferences.sync.librariesToSync.library "Perpustakaan">
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
 <!ENTITY zotero.preferences.sync.reset.warning3 " for more information.">
@@ -112,7 +112,7 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Rute">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g., wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Bahasa">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "Matikan fitur Salin Cepat saat menarik lebih dari">
 
 <!ENTITY zotero.preferences.prefpane.cite "Mengutip">
@@ -164,7 +164,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "Lebih Lanjut">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "Files and Folders">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "Shortcut">
 
 <!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
 

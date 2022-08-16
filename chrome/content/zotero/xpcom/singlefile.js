@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.SingleFile = {
+Zotero.SingleFile = Object.assign(Zotero.SingleFile || {}, {
 	// These are defaults from SingleFile
 	// Located in: zotero/resources/SingleFile/extension/core/bg/config.js
 	CONFIG: {
@@ -32,7 +32,9 @@ Zotero.SingleFile = {
 		removeUnusedFonts: true,
 		removeFrames: true,
 		removeImports: true,
-		removeScripts: true,
+		blockScripts: true,
+		blockVideos: true,
+		blockAudios: true,
 		compressHTML: true,
 		compressCSS: false,
 		loadDeferredImages: true,
@@ -58,8 +60,6 @@ Zotero.SingleFile = {
 		progressBarEnabled: true,
 		maxResourceSizeEnabled: false,
 		maxResourceSize: 10,
-		removeAudioSrc: true,
-		removeVideoSrc: true,
 		displayInfobar: true,
 		displayStats: false,
 		backgroundSave: true,
@@ -95,4 +95,4 @@ Zotero.SingleFile = {
 		insertSingleFileComment: true,
 		blockMixedContent: false,
 	}
-};
+});

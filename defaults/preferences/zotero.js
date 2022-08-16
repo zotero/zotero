@@ -4,7 +4,6 @@
 // http://www.zotero.org/documentation/hidden_prefs
 
 pref("extensions.zotero.firstRun2", true);
-pref("extensions.zotero@chnm.gmu.edu.description", "chrome://zotero/locale/zotero.properties");
 
 pref("extensions.zotero.saveRelativeAttachmentPath", false);
 pref("extensions.zotero.baseAttachmentPath", "");
@@ -78,6 +77,9 @@ pref("extensions.zotero.sortCreatorAsString", false);
 pref("extensions.zotero.tagSelector.showAutomatic", true);
 pref("extensions.zotero.tagSelector.displayAllTags", false);
 
+pref("extensions.zotero.downloadPDFViaBrowser.onLoadTimeout", 3000);
+pref("extensions.zotero.downloadPDFViaBrowser.downloadTimeout", 60000);
+
 // Keyboard shortcuts
 pref("extensions.zotero.keys.saveToZotero", "S");
 pref("extensions.zotero.keys.newItem", "N");
@@ -118,7 +120,6 @@ pref("extensions.zotero.export.displayCharsetOption", true);
 pref("extensions.zotero.export.citePaperJournalArticleURL", false);
 pref("extensions.zotero.cite.automaticJournalAbbreviations", true);
 pref("extensions.zotero.cite.useCiteprocRs", false);
-pref("extensions.zotero.import.charset", "auto");
 pref("extensions.zotero.import.createNewCollection.fromFileOpenHandler", true);
 pref("extensions.zotero.rtfScan.lastInputFile", "");
 pref("extensions.zotero.rtfScan.lastOutputFile", "");
@@ -202,7 +203,7 @@ pref("extensions.zotero.retractions.recentItems", "[]");
 
 // Annotations
 pref("extensions.zotero.annotations.noteTemplates.title", "<h1>{{title}}<br/>({{date}})</h1>");
-pref("extensions.zotero.annotations.noteTemplates.highlight", "<p>{{highlight quotes='true'}} {{citation}} {{comment}}</p>");
+pref("extensions.zotero.annotations.noteTemplates.highlight", "<p>{{highlight}} {{citation}} {{comment}}</p>");
 pref("extensions.zotero.annotations.noteTemplates.note", "<p>{{citation}} {{comment}}</p>");
 
 // Scaffold

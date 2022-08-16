@@ -68,6 +68,25 @@ describe("Zotero.Utilities.Internal", function () {
 	});
 	
 	
+	describe("#isOnlyEmoji()", function () {
+		it("should return true for emoji", function () {
+			assert.isTrue(Zotero.Utilities.Internal.isOnlyEmoji("🐩"));
+		});
+		
+		it("should return true for emoji with text representation that use Variation Selector-16", function () {
+			assert.isTrue(Zotero.Utilities.Internal.isOnlyEmoji("⭐️"));
+		});
+		
+		it("should return true for emoji made up of multiple characters with ZWJ", function () {
+			assert.isTrue(Zotero.Utilities.Internal.isOnlyEmoji("👨‍🌾"));
+		});
+		
+		it("should return false for integer", function () {
+			assert.isFalse(Zotero.Utilities.Internal.isOnlyEmoji("0"));
+		});
+	});
+	
+	
 	describe("#delayGenerator", function () {
 		var spy;
 		

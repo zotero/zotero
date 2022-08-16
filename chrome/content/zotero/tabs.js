@@ -84,6 +84,11 @@ var Zotero_Tabs = new function () {
 		window.Zotero_Tooltip.stop();
 	};
 
+	this.getTabIDByItemID = function (itemID) {
+		let tab = this._tabs.find(tab => tab.data && tab.data.itemID === itemID);
+		return tab && tab.id;
+	};
+
 	this.init = function () {
 		ReactDOM.render(
 			<TabBar
@@ -128,12 +133,23 @@ var Zotero_Tabs = new function () {
 			}
 			else if (tab.type === 'reader') {
 				if (Zotero.Items.exists(tab.data.itemID)) {
-					this.add({
-						type: 'reader-unloaded',
-						title: tab.title,
-						index: i,
-						data: tab.data
-					});
+					if (tab.selected) {
+						Zotero.Reader.open(tab.data.itemID,
+							null,
+							{
+								title: tab.title,
+								openInBackground: !tab.selected
+							}
+						);
+					}
+					else {
+						this.add({
+							type: 'reader-unloaded',
+							title: tab.title,
+							index: i,
+							data: tab.data
+						});
+					}
 				}
 			}
 		}
@@ -152,7 +168,7 @@ var Zotero_Tabs = new function () {
 	 * @param {Function} onClose
 	 * @return {{ id: string, container: XULElement}} id - tab id, container - a new tab container created in the deck
 	 */
-	this.add = function ({ type, data, title, index, select, onClose }) {
+	this.add = function ({ id, type, data, title, index, select, onClose }) {
 		if (typeof type != 'string') {
 		}
 		if (typeof title != 'string') {
@@ -164,7 +180,7 @@ var Zotero_Tabs = new function () {
 		if (onClose !== undefined && typeof onClose != 'function') {
 			throw new Error(`'onClose' should be a function (was ${typeof onClose})`);
 		}
-		var id = 'tab-' + Zotero.Utilities.randomString();
+		id = id || 'tab-' + Zotero.Utilities.randomString();
 		var container = document.createXULElement('vbox');
 		container.id = id;
 		this.deck.appendChild(container);
@@ -251,7 +267,7 @@ var Zotero_Tabs = new function () {
 			closedIDs.push(id);
 		}
 		this._history.push(historyEntry);
-		Zotero.Notifier.trigger('close', 'tab', [closedIDs]);
+		Zotero.Notifier.trigger('close', 'tab', [closedIDs], true);
 		this._update();
 	};
 
@@ -333,6 +349,7 @@ var Zotero_Tabs = new function () {
 		if (tab.type === 'reader-unloaded') {
 			this.close(tab.id);
 			Zotero.Reader.open(tab.data.itemID, null, {
+				tabID: tab.id,
 				title: tab.title,
 				tabIndex,
 				allowDuplicate: true
@@ -388,6 +405,7 @@ var Zotero_Tabs = new function () {
 		}
 		this.close(tab.id);
 		this.add({
+			id: tab.id,
 			type: 'reader-unloaded',
 			title: tab.title,
 			index: tabIndex,

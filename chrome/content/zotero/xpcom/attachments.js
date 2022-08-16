@@ -270,7 +270,7 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
-	 * @param {Object} options - 'file', 'url', 'title', 'contentType', 'charset', 'parentItemID', 'singleFile'
+	 * @param {Object} options - 'file', 'url', 'title', 'contentType', 'charset', 'libraryID', 'parentItemID', 'singleFile'
 	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
 	 * @return {Promise<Zotero.Item>}
 	 */
@@ -287,10 +287,19 @@ Zotero.Attachments = new function(){
 		var title = options.title;
 		var contentType = options.contentType;
 		var charset = options.charset;
+		var libraryID = options.libraryID;
 		var parentItemID = options.parentItemID;
 		var saveOptions = options.saveOptions;
 		
-		if (!parentItemID) {
+		if (parentItemID) {
+			libraryID = Zotero.Items.getLibraryAndKeyFromID(parentItemID).libraryID;
+		}
+		else if (contentType == 'text/html') {
+			throw new Error("parentItemID not provided");
+		}
+		
+		// Webpage snapshots must have parent items
+		if (!parentItemID && contentType == 'text/html') {
 			throw new Error("parentItemID not provided");
 		}
 		
@@ -299,8 +308,9 @@ Zotero.Attachments = new function(){
 			yield Zotero.DB.executeTransaction(async function () {
 				// Create a new attachment
 				attachmentItem = new Zotero.Item('attachment');
-				let {libraryID, key: parentKey} = Zotero.Items.getLibraryAndKeyFromID(parentItemID);
-				attachmentItem.libraryID = libraryID;
+				if (libraryID) {
+					attachmentItem.libraryID = libraryID;
+				}
 				attachmentItem.setField('title', title);
 				attachmentItem.setField('url', url);
 				attachmentItem.parentID = parentItemID;
@@ -558,7 +568,8 @@ Zotero.Attachments = new function(){
 						reject(e);
 					},
 					true,
-					cookieSandbox
+					cookieSandbox,
+					{ allowImages: true }
 				);
 			});
 		};
@@ -1137,67 +1148,82 @@ Zotero.Attachments = new function(){
 	 */
 	this.downloadPDFViaBrowser = async function (url, path, options = {}) {
 		Zotero.debug(`downloadPDFViaBrowser: Downloading file via browser from ${url}`);
-		const onLoadTimeout = 1e3;
+		const onLoadTimeout = Zotero.Prefs.get('downloadPDFViaBrowser.onLoadTimeout');
 		// Technically this is not a download, but the full operation timeout
-		const downloadTimeout = 60e3;
+		const downloadTimeout = Zotero.Prefs.get('downloadPDFViaBrowser.downloadTimeout');
 		let channelBrowser, hiddenBrowser;
 		let hiddenBrowserPDFFoundDeferred = Zotero.Promise.defer();
-		
-		var pdfMIMETypeHandler = async (blob, name, _, channel) => {
-			Zotero.debug(`downloadPDFViaBrowser: Sniffing a PDF loaded at ${name}`);
-			
-			let isOurPDF = false;
-			// try the browser
-			try {
-				channelBrowser = channel.notificationCallbacks.getInterface(Ci.nsIWebNavigation)
-					.QueryInterface(Ci.nsIDocShell).chromeEventHandler;
-			}
-			catch (e) {}
-			if (channelBrowser) {
-				isOurPDF = hiddenBrowser === channelBrowser;
-			}
-			else {
-				// try the document for the load group
+
+		let isOurPDF = false;
+		var pdfMIMETypeHandler = {
+			onStartRequest: function (name, _, channel) {
+				Zotero.debug(`downloadPDFViaBrowser: Sniffing a PDF loaded at ${name}`);
+				// try the browser
 				try {
-					channelBrowser = channel.loadGroup.notificationCallbacks.getInterface(Ci.nsIWebNavigation)
+					channelBrowser = channel.notificationCallbacks.getInterface(Ci.nsIWebNavigation)
 						.QueryInterface(Ci.nsIDocShell).chromeEventHandler;
 				}
-				catch(e) {}
+				catch (e) {}
 				if (channelBrowser) {
 					isOurPDF = hiddenBrowser === channelBrowser;
 				}
-			}
-
-			if (isOurPDF) {
-				Zotero.debug(`downloadPDFViaBrowser: Found our PDF at ${name}`);
-				await Zotero.File.putContentsAsync(path, blob);
-				hiddenBrowserPDFFoundDeferred.resolve();
-				return true;
-			}
-			else {
-				Zotero.debug(`downloadPDFViaBrowser: Not our PDF at ${name}`);
-				return false;
+				else {
+					// try the document for the load group
+					try {
+						channelBrowser = channel.loadGroup.notificationCallbacks.getInterface(Ci.nsIWebNavigation)
+							.QueryInterface(Ci.nsIDocShell).chromeEventHandler;
+					}
+					catch(e) {}
+					if (channelBrowser) {
+						isOurPDF = hiddenBrowser === channelBrowser;
+					}
+				}
+			},
+			onContent: async (blob, name, _, channel) => {
+				if (isOurPDF) {
+					Zotero.debug(`downloadPDFViaBrowser: Found our PDF at ${name}`);
+					await Zotero.File.putContentsAsync(path, blob);
+					hiddenBrowserPDFFoundDeferred.resolve();
+					return true;
+				}
+				else {
+					Zotero.debug(`downloadPDFViaBrowser: Not our PDF at ${name}`);
+					return false;
+				}
 			}
 		};
 		try {
-			Zotero.MIMETypeHandler.addHandler("application/pdf", pdfMIMETypeHandler, true);
-			let noop = () => 0;
+			Zotero.MIMETypeHandler.addHandlers("application/pdf", pdfMIMETypeHandler, true);
+			function noop() {};
 			hiddenBrowser = Zotero.HTTP.loadDocuments([url], noop, noop, noop, true, options.cookieSandbox);
 			let onLoadTimeoutDeferred = Zotero.Promise.defer();
-			hiddenBrowser.addEventListener("load", async function onLoad() {
-				Zotero.debug(`downloadPDFViaBrowser: Page with potential JS redirect loaded, giving it ${onLoadTimeout}ms to process`);
-				hiddenBrowser.addEventListener("unload", () => {
-					Zotero.debug(`downloadPDFViaBrowser: A JS redirect occurred, short timeout cancelled`);
-					hiddenBrowser.removeEventListener('load', onLoad);
-				});
-				await Zotero.Promise.delay(onLoadTimeout);
-				onLoadTimeoutDeferred.reject(`Loading PDF via browser timed out on the JS challenge page after ${onLoadTimeout}ms`);
-			}, true);
+			let currentUrl = "";
+			hiddenBrowser.addProgressListener({
+				QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIWebProgressListener,
+					Components.interfaces.nsISupportsWeakReference]),
+				onProgressChange: noop,
+				onStateChange: noop,
+				onStatusChange: noop,
+				onSecurityChange: noop,
+				async onLocationChange() {
+					let url = hiddenBrowser.contentDocument.location.href;
+					if (currentUrl) {
+						Zotero.debug(`downloadPDFViaBrowser: A JS redirect occurred to ${hiddenBrowser.contentDocument.location.href}`);
+					}
+					currentUrl = url;
+					Zotero.debug(`downloadPDFViaBrowser: Page with potential JS redirect loaded, giving it ${onLoadTimeout}ms to process`);
+					await Zotero.Promise.delay(onLoadTimeout);
+					// If URL changed that means we got redirected and the onLoadTimeout needs to restart
+					if (currentUrl === url && !isOurPDF) {
+						onLoadTimeoutDeferred.reject(new Error(`downloadPDFViaBrowser: Loading PDF via browser timed out on the JS challenge page after ${onLoadTimeout}ms`));
+					}
+				}
+			});
 			await Zotero.Promise.race([
 				onLoadTimeoutDeferred.promise,
 				Zotero.Promise.delay(downloadTimeout).then(() => {
-					if (!hiddenBrowserPDFFoundDeferred.promise.isResolved()) {
-						throw new Error(`Loading PDF via browser timed out after ${downloadTimeout}ms`);
+					if (!isOurPDF) {
+						throw new Error(`downloadPDFViaBrowser: Loading PDF via browser timed out after ${downloadTimeout}ms`);
 					}
 				}),
 				hiddenBrowserPDFFoundDeferred.promise
@@ -1207,13 +1233,13 @@ Zotero.Attachments = new function(){
 			try {
 				await OS.File.remove(path, { ignoreAbsent: true });
 			}
-			catch (e) {
-				Zotero.logError(e, 1);
+			catch (err) {
+				Zotero.logError(err);
 			}
 			throw e;
 		}
 		finally {
-			Zotero.MIMETypeHandler.removeHandler('application/pdf', pdfMIMETypeHandler);
+			Zotero.MIMETypeHandler.removeHandlers('application/pdf', pdfMIMETypeHandler);
 			if (hiddenBrowser) {
 				Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
 			}

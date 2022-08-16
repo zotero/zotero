@@ -113,9 +113,10 @@ var Zotero_Citation_Dialog = new function () {
 		var menu = document.getElementById("label");
 		var label_list = document.getElementById("locator-type-popup");
 		var i = 0;
+		var pageLocatorIndex;
 		for(var value in locators) {
 			var locator = locators[value];
-			var locatorLabel = Zotero.getString('citation.locator.'+locator.replace(/\s/g,''));
+			let locatorLabel = Zotero.Cite.getLocatorString(locator);
 			// add to list of labels
 			var child = document.createXULElement("menuitem");
 			child.setAttribute("value", value);
@@ -124,9 +125,13 @@ var Zotero_Citation_Dialog = new function () {
 			// add to array
 			_locatorIndexArray[locator] = i;
 			_locatorNameArray[i] = locator;
+			if (locator == 'page') {
+				pageLocatorIndex = i;
+				_preserveData.label[1] = i;
+			}
 			i++;
 		}
-		menu.selectedIndex = 0;
+		menu.selectedIndex = pageLocatorIndex;
 		
 		// load (from selectItemsDialog.js)
 		yield doLoad();

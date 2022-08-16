@@ -579,26 +579,6 @@
 	color: gray;
 }
 
-#zotero-tb-search
-{
-	font-size: 11px !important;
-	margin-right: 0;
-	width: 172px;
-}
-
-#zotero-tb-search-menu-button {
-	margin: 0;
-	padding: 0;
-	-moz-appearance: none;
-	min-width: 0;
-	cursor: default;
-	list-style-image: url("chrome://zotero/skin/searchbar-dropmarker.png");
-}
-
-#zotero-tb-search-menu-button .button-icon {
-	width: 7px;
-}
-
 #zotero-toolbar
 {
 	visibility: visible !important;
@@ -641,6 +621,7 @@
 #item-box-container {
 	display: flex;
 	min-width: 0;
+	min-height: 0;
 }
 
 #retracted-items-banner, #sync-reminder-banner {
@@ -672,15 +653,17 @@
 	flex: 1;
 }
 
+#retracted-items-link, .sync-reminder-link, #retracted-items-close, #sync-reminder-close {
+	color: inherit;
+	border: none;
+	margin: 0;
+}
+
 #retracted-items-link {
-	text-decoration: underline;
 	margin-left: .3em;
-	cursor: pointer;
 }
 
 .sync-reminder-link {
-	text-decoration: underline;
-	cursor: pointer;
 	padding-left: 0.5em;
 	padding-right: 0.5em;
 }
@@ -694,6 +677,7 @@
 }
 
 #retracted-items-close, #sync-reminder-close {
+	text-decoration: none;
 	position: absolute;
 	cursor: pointer;
 	top: -2px;
@@ -759,5 +743,4 @@
 	#zotero-tb-sync-error[state=warning]  { list-style-image: url(chrome://zotero/skin/warning@2x.png); }
 	#zotero-tb-sync  { list-style-image: url(chrome://zotero/skin/arrow_rotate_static@2x.png); }
 	#zotero-tb-sync[status=animate]  { list-style-image: url(chrome://zotero/skin/arrow_rotate_animated@2x.png); }
-	#zotero-tb-search-menu-button  { list-style-image: url("chrome://zotero/skin/searchbar-dropmarker@2x.png"); }
 }

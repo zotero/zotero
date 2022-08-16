@@ -668,6 +668,7 @@ Zotero.Translate.ItemSaver.prototype = {
 					title: attachment.title,
 					contentType: attachment.mimeType,
 					charset: attachment.charset,
+					libraryID: this._libraryID,
 					parentItemID,
 					collections: !parentItemID ? this._collections : undefined,
 					saveOptions: this._saveOptions,
@@ -678,6 +679,7 @@ Zotero.Translate.ItemSaver.prototype = {
 				newItem = yield Zotero.Attachments.importFromFile({
 					file: file,
 					parentItemID,
+					libraryID: this._libraryID,
 					collections: !parentItemID ? this._collections : undefined,
 					saveOptions: this._saveOptions,
 				});

@@ -110,7 +110,7 @@ var loadZoteroPane = async function (win) {
 
 var loadPrefPane = Zotero.Promise.coroutine(function* (paneName) {
 	var id = 'zotero-prefpane-' + paneName;
-	var win = yield loadWindow("chrome://zotero/content/preferences/preferences.xul", {
+	var win = yield loadWindow("chrome://zotero/content/preferences/preferences.xhtml", {
 		pane: id
 	});
 	var doc = win.document;

@@ -77,7 +77,7 @@ var ZoteroPane = new function()
 		let progressQueueButtons = document.getElementById('zotero-pq-buttons');
 		let progressQueues = Zotero.ProgressQueues.getAll();
 		for (let progressQueue of progressQueues) {
-			let button = document.createElement('toolbarbutton');
+			let button = document.createXULElement('toolbarbutton');
 			button.id = 'zotero-tb-pq-' + progressQueue.getID();
 			button.hidden = progressQueue.getTotal() < 1;
 			button.addEventListener('command', function () {
@@ -148,6 +148,26 @@ var ZoteroPane = new function()
 		Zotero.hiDPI = window.devicePixelRatio > 1;
 		Zotero.hiDPISuffix = Zotero.hiDPI ? "@2x" : "";
 		
+		// Show warning in toolbar for 'dev' channel builds
+		try {
+			let isDevBuild = Zotero.version.includes('-dev');
+			// Uncomment to test
+			//isDevBuild = isDevBuild || Zotero.version.includes('.SOURCE');
+			if (isDevBuild) {
+				let label = document.createElement('label');
+				label.setAttribute('value', 'TEST BUILD — DO NOT USE');
+				label.setAttribute('style', 'font-weight: bold; color: red; cursor: pointer');
+				label.onclick = function () {
+					Zotero.launchURL('https://www.zotero.org/support/kb/test_builds');
+				};
+				let syncStop = document.getElementById('zotero-tb-sync-stop');
+				syncStop.parentNode.insertBefore(label, syncStop);
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+			
 		Zotero_Tabs.init();
 		ZoteroContextPane.init();
 		await ZoteroPane.initCollectionsTree();
@@ -1124,7 +1144,7 @@ var ZoteroPane = new function()
 		);
 		
 		var io = { dataIn: { search: s, name }, dataOut: null };
-		window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
+		window.openDialog('chrome://zotero/content/searchDialog.xhtml','','chrome,modal',io);
 		if (!io.dataOut) {
 			return false;
 		}
@@ -1155,7 +1175,7 @@ var ZoteroPane = new function()
 		s.addCondition('title', 'contains', '');
 		
 		var io = {dataIn: {search: s}, dataOut: null};
-		window.openDialog('chrome://zotero/content/advancedSearch.xul', '', 'chrome,dialog=no,centerscreen', io);
+		window.openDialog('chrome://zotero/content/advancedSearch.xhtml', '', 'chrome,dialog=no,centerscreen', io);
 	};
 
 	this.initItemsTree = async function () {
@@ -1781,6 +1801,69 @@ var ZoteroPane = new function()
 	});
 	
 
+	this.duplicateAndConvertSelectedItem = async function () {
+		if (this.getSelectedItems().length != 1
+				|| !['book', 'bookSection'].includes(this.getSelectedItems()[0].itemType)) {
+			throw new Error('duplicateAndConvertSelectedItem requires a single book or bookSection to be selected');
+		}
+
+		let authorCreatorType = Zotero.CreatorTypes.getID('author');
+		let bookAuthorCreatorType = Zotero.CreatorTypes.getID('bookAuthor');
+		
+		let original = this.getSelectedItems()[0];
+		let duplicate = await this.duplicateSelectedItem();
+		if (!duplicate) return null;
+		
+		// TODO: Move this logic to duplicateSelectedItem() with a `targetItemType` flag to avoid
+		// extra saves?
+		if (duplicate.itemType == 'book') {
+			duplicate.setType(Zotero.ItemTypes.getID('bookSection'));
+			for (let i = 0; i < duplicate.numCreators(); i++) {
+				let creator = duplicate.getCreator(i);
+				if (creator.creatorTypeID == authorCreatorType) {
+					creator.creatorTypeID = bookAuthorCreatorType;
+				}
+				duplicate.setCreator(i, creator);
+			}
+			// Remove related-item relations to other book sections of this book
+			for (let relItemKey of [...duplicate.relatedItems]) {
+				let relItem = await Zotero.Items.getByLibraryAndKeyAsync(
+					duplicate.libraryID, relItemKey
+				);
+				if (relItem.itemType == 'bookSection'
+						&& relItem.getField('bookTitle') == original.getField('title')) {
+					duplicate.removeRelatedItem(relItem);
+					relItem.removeRelatedItem(duplicate);
+					await relItem.saveTx();
+				}
+			}
+		}
+		else {
+			duplicate.setField('title', false); // So bookTitle becomes title
+			duplicate.setType(Zotero.ItemTypes.getID('book'));
+			// Get creators from the original item because setType() will have changed the types
+			let creators = original.getCreators()
+				// Remove authors of the individual book section
+				.filter(creator => creator.creatorTypeID !== authorCreatorType);
+			for (let creator of creators) {
+				if (creator.creatorTypeID == bookAuthorCreatorType) {
+					creator.creatorTypeID = authorCreatorType;
+				}
+			}
+			duplicate.setCreators(creators);
+		}
+		
+		duplicate.addRelatedItem(original);
+		original.addRelatedItem(duplicate);
+		
+		await original.saveTx({ skipDateModifiedUpdate: true });
+		await duplicate.saveTx();
+		
+		document.getElementById('zotero-editpane-item-box').focusField('title');
+		return duplicate;
+	};
+	
+
 	/**
 	 * Return whether every selected item can be deleted from the current
 	 * collection context (library, trash, collection, etc.).
@@ -1870,13 +1953,39 @@ var ZoteroPane = new function()
 			var prompt = (force && !fromMenu) ? false : toTrash;
 		}
 		else if (collectionTreeRow.isCollection()) {
-			
-			// Ignore unmodified action if only child items are selected
-			if (!force && this.itemsView.getSelectedItems().every(item => !item.isTopLevelItem())) {
-				return;
+			if (force) {
+				var prompt = toTrash;
 			}
-			
-			var prompt = force ? toTrash : toRemove;
+			else {
+				// Ignore unmodified action if only child items are selected
+				if (this.itemsView.getSelectedItems().every(item => !item.isTopLevelItem())) {
+					return;
+				}
+
+				// If unmodified, recursiveCollections is true, and items are in
+				// descendant collections (even if also in the selected collection),
+				// prompt to remove from all
+				if (Zotero.Prefs.get('recursiveCollections')) {
+					let descendants = collectionTreeRow.ref.getDescendents(false, 'collection');
+					let inSubcollection = descendants
+						.some(({ id }) => this.itemsView.getSelectedItems()
+							.some(item => item.inCollection(id)));
+					if (inSubcollection) {
+						var prompt = {
+							title: Zotero.getString('pane.items.removeRecursive.title'),
+							text: Zotero.getString(
+								'pane.items.removeRecursive' + (this.itemsView.selection.count > 1 ? '.multiple' : '')
+							)
+						};
+					}
+					else {
+						var prompt = toRemove;
+					}
+				}
+				else {
+					var prompt = toRemove;
+				}
+			}
 		}
 		else if (collectionTreeRow.isTrash() || collectionTreeRow.isBucket()) {
 			var prompt = toDelete;
@@ -1913,8 +2022,9 @@ var ZoteroPane = new function()
 	this.deleteSelectedCollection = function (deleteItems) {
 		var collectionTreeRow = this.getCollectionTreeRow();
 		
-		// Don't allow deleting libraries
-		if (collectionTreeRow.isLibrary(true) && !collectionTreeRow.isFeed()) {
+		// Don't allow deleting libraries or My Publications
+		if (collectionTreeRow.isLibrary(true) && !collectionTreeRow.isFeed()
+				|| collectionTreeRow.isPublications()) {
 			return;
 		}
 		
@@ -2161,7 +2271,7 @@ var ZoteroPane = new function()
 					},
 					dataOut: null
 				};
-				window.openDialog('chrome://zotero/content/searchDialog.xul','','chrome,modal',io);
+				window.openDialog('chrome://zotero/content/searchDialog.xhtml','','chrome,modal',io);
 				if (io.dataOut) {
 					row.ref.fromJSON(io.dataOut.json);
 					yield row.ref.saveTx();
@@ -3042,6 +3152,7 @@ var ZoteroPane = new function()
 			'toggleRead',
 			'addToCollection',
 			'removeItems',
+			'duplicateAndConvert',
 			'duplicateItem',
 			'restoreToLibrary',
 			'moveToTrash',
@@ -3321,6 +3432,12 @@ var ZoteroPane = new function()
 						}
 					}
 					else if (!collectionTreeRow.isPublications()) {
+						if (item.itemType == 'book' || item.itemType == 'bookSection') {
+							menu.childNodes[m.duplicateAndConvert].setAttribute('label', Zotero.getString('pane.items.menu.duplicateAndConvert.'
+								+ (item.itemType == 'book' ? 'toBookSection' : 'toBook')));
+							show.add(m.duplicateAndConvert);
+						}
+
 						show.add(m.duplicateItem);
 					}
 				}
@@ -3503,6 +3620,9 @@ var ZoteroPane = new function()
 				throw new Error('collection must be null if createNew is true');
 			}
 			let id = await this.newCollection();
+			if (!id) {
+				return;
+			}
 			collection = Zotero.Collections.get(id);
 		}
 
@@ -4273,12 +4393,25 @@ var ZoteroPane = new function()
 						extraData && extraData.location,
 						{
 							openInWindow: (event && event.shiftKey)
-								|| (extraData && extraData.forceOpenPDFInWindow)
+								|| (extraData && extraData.forceOpenPDFInWindow),
+							allowDuplicate: event && event.shiftKey
 						}
 					);
 					return;
 				}
+				// Try to open external reader to page number if specified
+				else {
+					let pageIndex = extraData?.location?.position?.pageIndex;
+					if (pageIndex !== undefined) {
+						await Zotero.OpenPDF.openToPage(
+							item,
+							parseInt(pageIndex) + 1
+						);
+						return;
+					}
+				}
 				// Custom PDF handler
+				// TODO: Remove this and unify with Zotero.OpenPDF
 				if (pdfHandler != 'system') {
 					try {
 						if (await OS.File.exists(pdfHandler)) {
@@ -4817,9 +4950,11 @@ var ZoteroPane = new function()
 			return;
 		}
 		await Zotero.PDFWorker.import(attachment.id, true);
-		var note = await Zotero.EditorInstance.createNoteFromAnnotations(
-			attachment.getAnnotations().filter(x => x.annotationType != 'ink'), attachment.parentID
-		);
+		var annotations = attachment.getAnnotations().filter(x => x.annotationType != 'ink');
+		if (!annotations.length) {
+			return;
+		}
+		var note = await Zotero.EditorInstance.createNoteFromAnnotations(annotations, attachment.parentID);
 		if (!skipSelect) {
 			await this.selectItem(note.id);
 		}
@@ -4857,7 +4992,9 @@ var ZoteroPane = new function()
 					attachment,
 					{ skipSelect: true }
 				);
-				itemIDsToSelect.push(note.id);
+				if (note) {
+					itemIDsToSelect.push(note.id);
+				}
 			}
 		}
 		await this.selectItems(itemIDsToSelect);

@@ -19,7 +19,7 @@ describe("Advanced Search", function () {
 	it("should perform a search", function* () {
 		var item = yield createDataObject('item', { setTitle: true });
 		
-		var promise = waitForWindow('chrome://zotero/content/advancedSearch.xul');
+		var promise = waitForWindow('chrome://zotero/content/advancedSearch.xhtml');
 		zp.openAdvancedSearchWindow();
 		var searchWin = yield promise;
 		
@@ -51,7 +51,7 @@ describe("Advanced Search", function () {
 		var searchWin, searchBox, conditions;
 		
 		before(function* () {
-			var promise = waitForWindow('chrome://zotero/content/advancedSearch.xul');
+			var promise = waitForWindow('chrome://zotero/content/advancedSearch.xhtml');
 			zp.openAdvancedSearchWindow();
 			searchWin = yield promise;
 			searchBox = searchWin.document.getElementById('zotero-search-box');

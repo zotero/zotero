@@ -94,5 +94,85 @@ describe("Import/Export", function () {
 			assert.sameMembers(newNote1.relatedItems, [newNote2]);
 			assert.sameMembers(newNote2.relatedItems, [newNote1]);
 		});
+		
+		describe("standalone attachments", function () {
+			var rdf = `<rdf:RDF
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:z="http://www.zotero.org/namespaces/export#"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:dcterms="http://purl.org/dc/terms/"
+ xmlns:link="http://purl.org/rss/1.0/modules/link/"
+ xmlns:bib="http://purl.org/net/biblio#"
+ xmlns:foaf="http://xmlns.com/foaf/0.1/"
+ xmlns:prism="http://prismstandard.org/namespaces/1.2/basic/">
+    <z:Attachment rdf:about="#item_1234">
+        <z:itemType>attachment</z:itemType>
+        <rdf:resource rdf:resource="files/1234/test1.pdf"/>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://example.com</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2022-07-22 06:36:31</dcterms:dateSubmitted>
+        <dc:title>Test 1</dc:title>
+        <z:linkMode>1</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+	<z:Attachment rdf:about="#item_2345">
+        <z:itemType>attachment</z:itemType>
+        <rdf:resource rdf:resource="files/2345/test2.pdf"/>
+        <dc:title>Test 2</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+</rdf:RDF>
+`;
+			async function doImport(libraryID) {
+				var tempDir = await getTempDirectory();
+				var file = OS.Path.join(tempDir, 'export.rdf');
+				await Zotero.File.putContentsAsync(file, rdf);
+				var folder1 = OS.Path.join(tempDir, 'files', '1234');
+				var folder2 = OS.Path.join(tempDir, 'files', '2345');
+				await OS.File.makeDir(folder1, { from: tempDir });
+				await OS.File.makeDir(folder2, { from: tempDir });
+				await OS.File.copy(
+					OS.Path.join(OS.Path.join(getTestDataDirectory().path, 'test.pdf')),
+					OS.Path.join(folder1, 'test1.pdf')
+				);
+				await OS.File.copy(
+					OS.Path.join(OS.Path.join(getTestDataDirectory().path, 'test.pdf')),
+					OS.Path.join(folder2, 'test2.pdf')
+				);
+				
+				var translation = new Zotero.Translate.Import();
+				translation.setLocation(Zotero.File.pathToFile(file));
+				let translators = await translation.getTranslators();
+				translation.setTranslator(translators[0]);
+				var newItems = await translation.translate({ libraryID });
+				
+				var newItem1 = newItems.filter(x => x.getField('title') == 'Test 1')[0];
+				assert.equal(newItem1.itemType, 'attachment');
+				assert.ok(await newItem1.getFilePathAsync());
+				
+				var newItem2 = newItems.filter(x => x.getField('title') == 'Test 2')[0];
+				assert.equal(newItem2.itemType, 'attachment');
+				assert.ok(await newItem1.getFilePathAsync());
+				
+				return [newItem1, newItem2];
+			}
+			
+			it("should import into My Library", async function () {
+				var libraryID = Zotero.Libraries.userLibraryID;
+				var [newItem1, newItem2] = await doImport(libraryID);
+				assert.equal(newItem1.libraryID, libraryID);
+				assert.equal(newItem2.libraryID, libraryID);
+			});
+			
+			it("should import into group library", async function () {
+				var libraryID = (await getGroup()).libraryID;
+				var [newItem1, newItem2] = await doImport(libraryID);
+				assert.equal(newItem1.libraryID, libraryID);
+				assert.equal(newItem2.libraryID, libraryID);
+			});
+		});
 	});
 });

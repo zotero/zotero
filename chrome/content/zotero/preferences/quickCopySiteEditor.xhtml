@@ -35,11 +35,13 @@
   %common;
 ]>
 
-<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-	title="" buttons="cancel,accept"
-	id="zotero-quickCopySiteEditor"
-	onload="Zotero_QuickCopySiteEditor.onLoad(); Zotero_Preferences.Export.updateQuickCopyUI(); sizeToContent()"
-	ondialogaccept="Zotero_QuickCopySiteEditor.onAccept();">
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	title=""
+	onload="Zotero_QuickCopySiteEditor.onLoad(); Zotero_Preferences.Export.updateQuickCopyUI(); sizeToContent()">
+<dialog 
+	buttons="cancel,accept"
+	id="zotero-quickCopySiteEditor">
 	
 	<script src="chrome://zotero/content/include.js"/>
 	<script src="preferences.js"/>
@@ -47,18 +49,18 @@
 	
 	<vbox id="zotero-preferences-quickCopySiteEditor">
 		<label value="&zotero.preferences.quickCopy.siteEditor.domainPath; &zotero.preferences.quickCopy.siteEditor.domainPath.example;" control="zotero-quickCopy-domain"/>
-		<textbox id="zotero-quickCopy-domain" oninput="Zotero_QuickCopySiteEditor.onDomainInput(event)"/>
+		<html:input type="text" id="zotero-quickCopy-domain" oninput="Zotero_QuickCopySiteEditor.onDomainInput(event)"/>
 		
 		<separator class="thin"/>
 		
 		<label value="&zotero.preferences.quickCopy.siteEditor.format;" control="zotero-quickCopy-menu"/>
-		<menulist id="zotero-quickCopy-menu"/>
+		<menulist id="zotero-quickCopy-menu" native="true"/>
 		
 		<separator class="thin"/>
 		
 		<label id="zotero-quickCopy-locale-menu-label" value="&zotero.preferences.quickCopy.siteEditor.locale;" control="zotero-quickCopy-locale-menu"/>
 		<hbox align="center">
-			<menulist id="zotero-quickCopy-locale-menu" oncommand="Zotero_Preferences.Export._lastSelectedLocale = this.value"/>
+			<menulist id="zotero-quickCopy-locale-menu" oncommand="Zotero_Preferences.Export._lastSelectedLocale = this.value" native="true"/>
 		</hbox>
 		
 		<separator class="thin"/>
@@ -69,17 +71,20 @@
 				this.checked ? 'html' : '',
 				null,
 				io.translators
-			)"/>
+			)"
+			native="true"/>
 	</vbox>
 	
 	<script>
 	<![CDATA[
+		document.addEventListener('dialogaccept', () => Zotero_QuickCopySiteEditor.onAccept());
+
 		var Zotero_QuickCopySiteEditor = new function () {
 			var menu = document.getElementById('zotero-quickCopy-menu');
 			
 			this.onLoad = function () {
 				// Hide OK button initially if domain field is empty
-				document.documentElement.getButton('accept').disabled
+				document.getElementById('zotero-quickCopySiteEditor').getButton('accept').disabled
 					= document.getElementById('zotero-quickCopy-domain').value.trim() === '';
 			};
 			
@@ -98,7 +103,7 @@
 			
 			this.onDomainInput = function (event) {
 				// Hide OK button if domain field is empty
-				document.documentElement.getButton('accept').disabled = event.target.value.trim() === '';
+				document.getElementById('zotero-quickCopySiteEditor').getButton('accept').disabled = event.target.value.trim() === '';
 				
 				// Auto-select Wikipedia Citation Templates
 				if (event.target.value == 'wikipedia.org') {
@@ -125,3 +130,4 @@
 	]]>
 	</script>
 </dialog>
+</window>

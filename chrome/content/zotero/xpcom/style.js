@@ -564,7 +564,7 @@ Zotero.Styles = new function() {
 		for (let i=0; i<menulist.itemCount; i++) {
 			let item = menulist.getItemAtIndex(i);
 			if (item.getAttributeNS('zotero:', 'customLocale')) {
-				menulist.removeItemAt(i);
+				item.remove();
 				i--;
 				continue;
 			}
@@ -758,6 +758,8 @@ Zotero.Style.prototype.getCiteProc = function(locale, format, automaticJournalAb
 		var xml = this.getXML();
 	}
 	
+	xml = this._eventToEventTitle(xml);
+	
 	try {
 		var citeproc;
 		if (Zotero.Prefs.get('cite.useCiteprocRs')) {
@@ -795,6 +797,38 @@ Zotero.Style.prototype.getCiteProc = function(locale, format, automaticJournalAb
 		Zotero.logError(e);
 		throw e;
 	}
+};
+
+/**
+ * Temporarily substitute `event-title` for `event`
+ *
+ * Until https://github.com/citation-style-language/styles/issues/6151
+ */
+Zotero.Style.prototype._eventToEventTitle = function (xml) {
+	var parser = new DOMParser();
+	var doc = parser.parseFromString(xml, "text/xml");
+	// Ignore styles that already include `event-title`
+	if (doc.querySelector('[variable*="event-title"]')) {
+		return xml;
+	}
+	var elems = doc.querySelectorAll('[variable*="event"]');
+	if (!elems.length) {
+		return xml;
+	}
+	var changed = false;
+	for (let elem of elems) {
+		let variable = elem.getAttribute('variable');
+		// Must be "event" or "event foo", not, say, "event-place"
+		if (!/event( |$)/.test(variable)) {
+			continue;
+		}
+		elem.setAttribute('variable', variable.replace(/event(?= |$)/, 'event-title'));
+		changed = true;
+	}
+	if (changed) {
+		xml = doc.documentElement.outerHTML;
+	}
+	return xml;
 };
 
 Zotero.Style.prototype.__defineGetter__("class",

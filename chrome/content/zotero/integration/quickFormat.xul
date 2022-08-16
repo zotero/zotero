@@ -121,6 +121,6 @@
 			<button id="citation-properties-library-link" onclick="Zotero_QuickFormat.showInLibrary()"/>
 		</vbox>
 	</panel>
-	<zoteroguidancepanel class="citation-dialog guidance" about="quickFormat"
-						 for="zotero-icon" x="26"/>
+	<guidance-panel class="citation-dialog guidance" about="quickFormat"
+						 for="zotero-icon" x="26"/> <!-- fx-compat TODO: pull in chrome://zotero/content/elements/guidancePanel.js for this -->
 </window>

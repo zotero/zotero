@@ -192,12 +192,9 @@ const ZoteroStandalone = new function() {
 				if (numFiles) {
 					menuitem.hidden = false;
 					sep.hidden = false;
-					if (numFiles == 1) {
-						menuitem.label = 'Export PDF…';
-					}
-					else {
-						menuitem.label = 'Export PDFs…';
-					}
+					menuitem.label = Zotero.getString(
+						'pane.items.menu.exportPDF' + (numFiles == 1 ? '' : '.multiple')
+					);
 				}
 				else {
 					menuitem.hidden = true;
@@ -623,30 +620,44 @@ const ZoteroStandalone = new function() {
 	
 	
 	this.updateAddonsPane = function (doc) {
-		// Unsigned add-on warnings are hidden by default in extensions.css (via style rules added
-		// by fetch_xulrunner.sh), but allow other warnings
-		function updateExtensions () {
-			var addonList = doc.getElementById('addon-list');
-			
-			for (let i = 0; i < addonList.itemCount; i++) {
-				let richListItem = addonList.getItemAtIndex(i);
-				let container = doc.getAnonymousElementByAttribute(
-					richListItem, 'anonid', 'warning-container'
+		//var rootWindow = doc.ownerGlobal.windowRoot.ownerGlobal;
+		
+		// Update message when no plugins installed
+		setTimeout(() => {
+			var emptyListMessage = doc.getElementById('empty-list-message');
+			emptyListMessage.innerHTML = Zotero.Utilities.htmlSpecialChars(
+					Zotero.getString("addons.emptyListMessage")
+				).replace(
+					/\[([^\]]+)]/,
+					`<a href="${ZOTERO_CONFIG.PLUGINS_URL}">$1</a>`
 				);
-				if (container) {
-					let link = doc.getAnonymousElementByAttribute(
-						richListItem, 'anonid', 'warning-link'
-					);
-					if (link) {
-						if (!link.href.includes('unsigned-addons')) {
-							container.classList.add('allowed-warning');
-						}
-					}
-				}
-			}
-		}
-		doc.getElementById('category-extension').onclick = updateExtensions;
-		setTimeout(updateExtensions);
+			emptyListMessage.addEventListener('click', (event) => {
+				Zotero.launchURL(ZOTERO_CONFIG.PLUGINS_URL);
+				event.preventDefault();
+				event.stopPropagation();
+			});
+		});
+		
+		// Make our own removal prompt instead of using BrowserAddonUI.promptRemoveExtension() from
+		// browser-addons.js
+		doc.ownerGlobal.promptRemoveExtension = function (addon) {
+			var { name } = addon;
+			var ps = Services.prompt;
+			var buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
+			var result = ps.confirmEx(
+				doc.ownerGlobal,
+				Zotero.getString('addons.remove.title', name),
+				Zotero.getString('addons.remove.text', [name, Zotero.appName]),
+				buttonFlags,
+				Zotero.getString('general.remove'),
+				null,
+				null,
+				"",
+				{}
+			);
+			return { remove: result === 0, report: null };
+		};
 	}
 	
 	/**

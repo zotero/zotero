@@ -37,6 +37,7 @@
 .zotero-view-item > tabpanel > *
 {
 	overflow: auto;
+	min-width: 0;
 }
 
 .zotero-view-item:not([selectedIndex="0"]) > tabpanel > * {
@@ -47,11 +48,6 @@
 {
 	overflow: auto;
 	margin-left: 5px;
-}
-
-/* Context pane */
-.zotero-context-pane-pinned-note {
-	border-top: 1px solid #d9d9d9;
 }
 
 /*.zotero-editpane-tabs {*/

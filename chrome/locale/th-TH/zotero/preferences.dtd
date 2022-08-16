@@ -69,8 +69,8 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "เงื่อนไขและข้อกำหนด">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
 <!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
-<!ENTITY zotero.preferences.sync.librariesToSync.sync "Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.library "Library">
+<!ENTITY zotero.preferences.sync.librariesToSync.sync "ประสานข้อมูล">
+<!ENTITY zotero.preferences.sync.librariesToSync.library "ไลบรารี่">
 <!ENTITY zotero.preferences.sync.reset.warning1 "การดำเนินการต่อไปนี้ใช้ในบางกรณีเท่านั้น สถานการณ์เฉพาะและไม่ควรใช้สำหรับแก้ปัญหาทั่วไป ในหลายกรณีการเริ่มต้นใหม่จะก่อให้เกิดปัญหามากขึ้น ดูที่">
 <!ENTITY zotero.preferences.sync.reset.warning2 "ตัวเลือกตั้งค่าประสานข้อมูลใหม่">
 <!ENTITY zotero.preferences.sync.reset.warning3 "สำหรับข้อมูลเพิ่มเติม">
@@ -111,8 +111,8 @@
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "ตั้งค่าที่ตั้งเฉพาะ:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "โดเมน/พาธ">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(e.g., wikipedia.org)">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.format "Format">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "Language">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.format "รูปแบบ">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.locale "ภาษา">
 <!ENTITY zotero.preferences.quickCopy.dragLimit "ไม่ใช้การสำเนาแบบเร็วเมื่อลากรายการมากกว่า ">
 
 <!ENTITY zotero.preferences.prefpane.cite "อ้างอิง">
@@ -164,7 +164,7 @@
 
 <!ENTITY zotero.preferences.prefpane.advanced "ขั้นสูง">
 <!ENTITY zotero.preferences.advanced.filesAndFolders "แฟ้มและโฟลเดอร์">
-<!ENTITY zotero.preferences.advanced.keys "Shortcuts">
+<!ENTITY zotero.preferences.advanced.keys "คีย์ลัด">
 
 <!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
 
@@ -182,7 +182,7 @@
 <!ENTITY zotero.preferences.dataDir "ที่ตั้งของพื้นที่เก็บข้อมูล">
 <!ENTITY zotero.preferences.dataDir.useProfile "ใช้ไดเรคทอรีของโพรไฟล์">
 <!ENTITY zotero.preferences.dataDir.custom "กำหนดเอง:">
-<!ENTITY zotero.preferences.dataDir.choose "Choose…">
+<!ENTITY zotero.preferences.dataDir.choose "เลือก...">
 <!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
 <!ENTITY zotero.preferences.dataDir.reveal "แสดงไดเรคทอรีข้อมูล">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">

@@ -35,7 +35,8 @@
 				<script><![CDATA[
 					Components.utils.import("resource://zotero/config.js");
 					
-					document.getElementById('changelog').href = ZOTERO_CONFIG.CHANGELOG_URL;
+					document.getElementById('changelog').onclick =
+						() => Zotero.launchURL(ZOTERO_CONFIG.CHANGELOG_URL);
 					
 					// Replace [links] in localized strings with spans with onclick handlers
 					//

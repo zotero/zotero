@@ -60,7 +60,7 @@
 <!ENTITY zotero.items.year_column "Év">
 <!ENTITY zotero.items.dateModified_column "Módosítás dátuma">
 <!ENTITY zotero.items.moreColumns.label "Több oszlop">
-<!ENTITY zotero.items.restoreColumnOrder.label "Restore Column Order">
+<!ENTITY zotero.items.restoreColumnOrder.label "Oszlopok sorrendjének visszaállítása">
 
 <!ENTITY zotero.items.menu.showInLibrary "Megjelenítés a könyvtárban">
 <!ENTITY zotero.items.menu.attach.note "Jegyzet hozzáadása">
@@ -75,7 +75,7 @@
 <!ENTITY zotero.items.menu.unrecognize "Beolvasott metaadatok visszavonása">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "Válassza ki azt az elemverziót, amit mester elemnek kíván használni: ">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "Select fields to keep from other versions of the item:">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "Válassza ki az elem más verzióiból megtartandó mezőket:">
 
 <!ENTITY zotero.toolbar.newItem.label "Új elem">
 <!ENTITY zotero.toolbar.moreItemTypes.label "Egyéb...">
@@ -196,7 +196,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Források sorbarendezése">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
+<!ENTITY zotero.citation.suppressAuthor.label "Szerző kihagyása">
 <!ENTITY zotero.citation.prefix.label "Előtag:">
 <!ENTITY zotero.citation.suffix.label "Utótag:">
 <!ENTITY zotero.citation.editorWarning.label "Figyelmeztetés: Ha a szerkesztőben szerkeszt egy hivatkozást, akkor nem fog frissülni és nem fogja megjeleníteni az adatbázis vagy a hivatkozási stílus változásait.">
@@ -225,8 +225,8 @@
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "A függőben lévő, frissítésekkel ellátott idézetek kiemelésre kerülnek a dokumentumban">
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "A frissítések letiltása felgyorsíthatja a hivatkozások beillesztését a nagy dokumentumokba. A hivatkozások manuális frissítéséhez kattintson a Frissítés gombra.">
 
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Use MEDLINE journal abbreviations">
-<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "The “Journal Abbr” field will be ignored.">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "Használja a MEDLINE folyóirat rövidítéseket">
+<!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "A &quot;Journal Abbr&quot; mező figyelmen kívül hagyása">
 
 <!ENTITY zotero.integration.prefs.exportDocument "Váltson egy másik szövegszerkesztőre…">
 
