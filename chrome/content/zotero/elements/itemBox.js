@@ -1410,7 +1410,25 @@
 			}
 			
 			valueElement.textContent = valueText;
+
+			// Attempt to make bidi things work automatically:
+			// If we have text to work off of, let the layout engine try to guess the text direction
+			if (valueText) {
+				valueElement.dir = 'auto';
+			}
+			// If not, assume it follows the locale's direction
+			else {
+				valueElement.dir = Zotero.dir;
+			}
 			
+			// Regardless, align the text in the label consistently, following the locale's direction
+			if (Zotero.rtl) {
+				valueElement.style.textAlign = 'right';
+			}
+			else {
+				valueElement.style.textAlign = 'left';
+			}
+
 			if (isMultiline) {
 				valueElement.classList.add('multiline');
 			}
@@ -1640,6 +1658,9 @@
 			t.style.mozBoxFlex = 1;
 			t.setAttribute('fieldname', fieldName);
 			t.setAttribute('ztabindex', tabindex);
+			// We set dir in createValueElement(), so figure out what it was computed as
+			// and then propagate to the new text field
+			t.dir = getComputedStyle(elem).direction;
 
 			var box = elem.parentNode;
 			box.replaceChild(t, elem);
