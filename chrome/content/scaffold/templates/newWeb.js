@@ -22,7 +22,7 @@
 */
 
 
-async function detectWeb(doc, url) {
+function detectWeb(doc, url) {
 	// TODO: adjust the logic here
 	if ($$CURSOR$$url.includes('/article/')) {
 		return 'newspaperArticle';
@@ -52,7 +52,7 @@ function getSearchResults(doc, checkOnly) {
 }
 
 async function doWeb(doc, url) {
-	if (await detectWeb(doc, url) == 'multiple') {
+	if (detectWeb(doc, url) == 'multiple') {
 		let items = await Zotero.selectItems(getSearchResults(doc, false));
 		if (items) {
 			await Promise.all(
@@ -66,7 +66,7 @@ async function doWeb(doc, url) {
 	}
 }
 
-function scrape(doc, url = doc.location.href) {
+async function scrape(doc, url = doc.location.href) {
 	// TODO: implement or add a scrape function template
 }
 
