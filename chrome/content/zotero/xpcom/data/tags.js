@@ -163,9 +163,6 @@ Zotero.Tags = new function() {
 		if (libraryID) {
 			sql += "JOIN items USING (itemID) WHERE libraryID = ? ";
 			params.push(libraryID);
-			// TEMP: Don't show annotation tags in tag selector
-			sql += "AND itemTypeID != ? ";
-			params.push(Zotero.ItemTypes.getID('annotation'));
 		}
 		else {
 			sql += "WHERE 1 ";
@@ -174,7 +171,11 @@ Zotero.Tags = new function() {
 			if (libraryID) {
 				throw new Error("tmpTable and libraryID are mutually exclusive");
 			}
-			sql += "AND itemID IN (SELECT itemID FROM " + tmpTable + ") ";
+			sql += "AND itemID IN (SELECT itemID FROM " + tmpTable;
+			// TEMP: Match parent attachments for annotation tags
+			sql += " UNION SELECT itemID FROM itemAnnotations WHERE parentItemID IN "
+				+ "(SELECT itemID FROM " + tmpTable + ")";
+			sql += ") ";
 		}
 		if (types && types.length) {
 			sql += "AND type IN (" + new Array(types.length).fill('?').join(', ') + ") ";

@@ -218,6 +218,23 @@ describe("Zotero.Search", function() {
 				});
 			});
 			
+			describe("tag", function () {
+				// TEMP
+				it("should match parent attachments for annotation tags", async function () {
+					var attachment = await importPDFAttachment();
+					var annotation = await createAnnotation('highlight', attachment);
+					var tag = Zotero.Utilities.randomString();
+					annotation.addTag(tag);
+					await annotation.saveTx();
+					
+					var s = new Zotero.Search();
+					s.libraryID = userLibraryID;
+					s.addCondition('tag', 'is', tag);
+					var matches = await s.search();
+					assert.sameMembers(matches, [attachment.id]);
+				});
+			});
+			
 			describe("dateAdded", function () {
 				it("should handle 'today'", async function () {
 					var item = await createDataObject('item');
@@ -371,7 +388,8 @@ describe("Zotero.Search", function() {
 					s.addCondition('joinMode', 'any');
 					s.addCondition('annotationText', 'contains', str);
 					var matches = await s.search();
-					assert.sameMembers(matches, [annotation.id]);
+					// TEMP: Match parent attachment
+					assert.sameMembers(matches, [attachment.id]);
 				});
 			});
 			
@@ -386,7 +404,8 @@ describe("Zotero.Search", function() {
 					s.addCondition('joinMode', 'any');
 					s.addCondition('annotationComment', 'contains', str);
 					var matches = await s.search();
-					assert.sameMembers(matches, [annotation.id]);
+					// TEMP: Match parent attachment
+					assert.sameMembers(matches, [attachment.id]);
 				});
 			});
 			
@@ -523,6 +542,40 @@ describe("Zotero.Search", function() {
 					var matches = yield s.search();
 					assert.include(matches, item1.id);
 					assert.notInclude(matches, item2.id);
+				});
+			});
+			
+			describe("Quick search", function () {
+				describe("All Fields & Tags", function () {
+					it("should match parent attachment for annotation tag", async function () {
+						var attachment = await importPDFAttachment();
+						var annotation = await createAnnotation('highlight', attachment);
+						var tag = Zotero.Utilities.randomString();
+						annotation.addTag(tag);
+						await annotation.saveTx();
+						
+						var s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						s.addCondition('quicksearch-fields', 'contains', tag);
+						var matches = await s.search();
+						// TEMP: Match parent attachment
+						assert.sameMembers(matches, [attachment.id]);
+					});
+				})
+				
+				describe("Everything", function () {
+					it("should match parent attachment for annotation comment", async function () {
+						var attachment = await importPDFAttachment();
+						var annotation = await createAnnotation('highlight', attachment);
+						var comment = annotation.annotationComment;
+						
+						var s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						s.addCondition('quicksearch-everything', 'contains', comment);
+						var matches = await s.search();
+						// TEMP: Match parent attachment
+						assert.sameMembers(matches, [attachment.id]);
+					});
 				});
 			});
 		});
