@@ -38,11 +38,23 @@ const ImportCitaviAnnotatons = async (translation) => {
 		const quadsRaw = ZU.xpathText(annotationNodes[i], './Quads');
 		const locationID = ZU.xpathText(annotationNodes[i], './LocationID');
 
-		const location = ZU.xpath(doc, `//Locations/Location[@${isCitavi5 ? 'ID' : 'id'}='${locationID}']`)[0];
+		const location = ZU.xpath(doc, `//Locations/Location[@id='${locationID}']|//Locations/Location[@ID='${locationID}']`)[0];
+
+		if (!location) {
+			Zotero.debug(`Missing <Location> entry for annotation ${id}, skipping...`);
+			continue;
+		}
+
 		const referenceID = ZU.xpathText(location, './ReferenceID');
 		const entityLink = ZU.xpath(doc, `//EntityLinks/EntityLink[TargetID='${id}']`)[0];
+
+		if (!entityLink) {
+			Zotero.debug(`Missing <EntityLink> entry for annotation ${id}, skipping...`);
+			continue;
+		}
+
 		const entitySourceID = ZU.xpathText(entityLink, './SourceID');
-		const knowledgeItem = ZU.xpath(doc, `//KnowledgeItems/KnowledgeItem[@${isCitavi5 ? 'ID' : 'id'}='${entitySourceID}']`)[0];
+		const knowledgeItem = ZU.xpath(doc, `//KnowledgeItems/KnowledgeItem[@id='${entitySourceID}']|//KnowledgeItems/KnowledgeItem[@ID='${entitySourceID}']`)[0];
 		const keywordsIDsText = ZU.xpathText(doc, `//KnowledgeItemKeywords/OnetoN[starts-with(text(), "${entitySourceID}")]`);
 		const keywords = keywordsIDsText
 			? keywordsIDsText
@@ -137,16 +149,22 @@ const ImportCitaviAnnotatons = async (translation) => {
 
 			annotations.push(annotation);
 		});
-		
-		annotations = await Zotero.PDFWorker.processCitaviAnnotations(
-			itemAttachment.getFilePath(), annotations
-		);
-		
-		annotations.forEach((annotation) => {
-			promises.push(Zotero.Annotations.saveFromJSON(
-				itemAttachment, annotation, { skipSelect: true }
-			));
-		});
+
+
+		try {
+			// eslint-disable-next-line no-await-in-loop
+			annotations = await Zotero.PDFWorker.processCitaviAnnotations(
+				itemAttachment.getFilePath(), annotations
+			);
+			annotations.forEach((annotation) => {
+				promises.push(Zotero.Annotations.saveFromJSON(
+					itemAttachment, annotation, { skipSelect: true }
+				));
+			});
+		}
+		catch (e) {
+			Zotero.debug(`Could not process annotations for attachment item ${itemAttachment.key} (file path: ${itemAttachment.getFilePath()})`);
+		}
 
 		progress = baseProgress + Math.ceil((i / annotationNodes.length) * stageProgress);
 		translation._runHandler('itemDone', []);
