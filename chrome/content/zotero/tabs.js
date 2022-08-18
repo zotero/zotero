@@ -337,7 +337,7 @@ var Zotero_Tabs = new function () {
 	 * @param {String} id
 	 * @param {Boolean} reopening
 	 */
-	this.select = function (id, reopening) {
+	this.select = function (id, reopening, options) {
 		var { tab, tabIndex } = this._getTab(id);
 		if (!tab || tab.id === this._selectedID) {
 			return;
@@ -348,7 +348,7 @@ var Zotero_Tabs = new function () {
 		}
 		if (tab.type === 'reader-unloaded') {
 			this.close(tab.id);
-			Zotero.Reader.open(tab.data.itemID, null, {
+			Zotero.Reader.open(tab.data.itemID, options && options.location, {
 				tabID: tab.id,
 				title: tab.title,
 				tabIndex,
