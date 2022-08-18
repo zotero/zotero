@@ -9,6 +9,9 @@ const parseCitavi5Quads = (quadsRaw) => {
 const ImportCitaviAnnotatons = async (translation) => {
 	const IDMap = translation._itemSaver._IDMap;
 	const ZU = translation._sandboxZotero.Utilities;
+	
+	// stream might be closed by now, re-init to make sure getXML() works
+	translation._io.init('xml/dom');
 	const doc = translation._sandboxZotero.getXML();
 	const isCitavi5 = ZU.xpathText(doc, '//CitaviExchangeData/@Version').startsWith('5');
 	var annotationNodes = ZU.xpath(doc, '//Annotations/Annotation');
@@ -29,7 +32,7 @@ const ImportCitaviAnnotatons = async (translation) => {
 	const stageProgress = 50;
 	let progress = baseProgress;
 	translation.getProgress = () => progress;
-	
+
 	for (var i = 0, n = annotationNodes.length; i < n; i++) {
 		const id = ZU.xpathText(annotationNodes[i], '@id');
 		const quadsRaw = ZU.xpathText(annotationNodes[i], './Quads');
