@@ -1376,7 +1376,9 @@ class Reader {
 		this.triggerAnnotationsImportCheck(itemID);
 		let reader;
 
-		if (!allowDuplicate) {
+		// If duplicating is not allowed, and no reader instance is loaded for itemID,
+		// try to find an unloaded tab and select it. Zotero.Reader.open will then be called again
+		if (!allowDuplicate && !this._readers.find(r => r._itemID === itemID)) {
 			let win = Zotero.getMainWindow();
 			if (win) {
 				let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
