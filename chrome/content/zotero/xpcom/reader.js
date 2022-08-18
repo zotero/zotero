@@ -1376,7 +1376,7 @@ class Reader {
 			if (win) {
 				let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
 				if (existingTabID) {
-					win.Zotero_Tabs.select(existingTabID);
+					win.Zotero_Tabs.select(existingTabID, false, { location });
 					return;
 				}
 			}
