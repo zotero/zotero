@@ -1258,8 +1258,57 @@ class EditorInstance {
 		html += '\n';
 
 		await editorInstance.importImages(jsonAnnotations);
-		let { html: serializedHTML, citationItems } = Zotero.EditorInstanceUtilities.serializeAnnotations(jsonAnnotations, true);
-		html += serializedHTML;
+
+		let multipleParentParent = false;
+		let lastParentParentID;
+		let lastParentID;
+		// Group annotations per attachment
+		let groups = [];
+		for (let i = 0; i < annotations.length; i++) {
+			let annotation = annotations[i];
+			let jsonAnnotation = jsonAnnotations[i];
+			let parentParentID = annotation.parentItem.parentID;
+			let parentID = annotation.parentID;
+			if (groups.length) {
+				if (parentParentID !== lastParentParentID) {
+					// Multiple top level regular items detected, allow including their titles
+					multipleParentParent = true;
+				}
+			}
+			if (!groups.length || parentID !== lastParentID) {
+				groups.push({
+					parentTitle: annotation.parentItem.getDisplayTitle(),
+					parentParentID,
+					parentParentTitle: annotation.parentItem.parentItem && annotation.parentItem.parentItem.getDisplayTitle(),
+					jsonAnnotations: [jsonAnnotation]
+				});
+			}
+			else {
+				let group = groups[groups.length - 1];
+				group.jsonAnnotations.push(jsonAnnotation);
+			}
+			lastParentParentID = parentParentID;
+			lastParentID = parentID;
+		}
+		let citationItems = [];
+		lastParentParentID = null;
+		for (let group of groups) {
+			if (multipleParentParent && group.parentParentTitle && lastParentParentID !== group.parentParentID) {
+				html += `<h2>${group.parentParentTitle}</h2>\n`;
+			}
+			lastParentParentID = group.parentParentID;
+			// If attachment doesn't have a parent or there are more attachments with the same parent, show attachment title
+			if (!group.parentParentID || groups.filter(x => x.parentParentID === group.parentParentID).length > 1) {
+				html += `<h3>${group.parentTitle}</h3>\n`;
+			}
+			let { html: _html, citationItems: _citationItems } = Zotero.EditorInstanceUtilities.serializeAnnotations(group.jsonAnnotations, true);
+			html += _html + '\n';
+			for (let _citationItem of _citationItems) {
+				if (!citationItems.find(item => item.uris.some(uri => _citationItem.uris.includes(uri)))) {
+					citationItems.push(_citationItem);
+				}
+			}
+		}
 		citationItems = encodeURIComponent(JSON.stringify(citationItems));
 		// Note: Update schema version only if using new features
 		let schemaVersion = 8;
