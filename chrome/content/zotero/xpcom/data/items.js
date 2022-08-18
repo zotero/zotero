@@ -1722,7 +1722,9 @@ Zotero.Items = function() {
 			if (matches.length === 2) {
 				let a = matches[0];
 				let b = matches[1];
-				return Zotero.getString('general.andJoiner', [a.lastName, b.lastName]);
+				// \u2068 FIRST STRONG ISOLATE: Isolates the directionality of characters that follow
+				// \u2069 POP DIRECTIONAL ISOLATE: Pops the above isolation
+				return Zotero.getString('general.andJoiner', [`\u2068${a.lastName}\u2069`, `\u2068${b.lastName}\u2069`]);
 			}
 			if (matches.length >= 3) {
 				return matches[0].lastName + " " + Zotero.getString('general.etAl');
@@ -1788,12 +1790,14 @@ Zotero.Items = function() {
 				"SELECT PRINTF(" +
 					`'${localizedAnd}'` +
 					", " +
-					"(SELECT lastName FROM itemCreators IC NATURAL JOIN creators " +
+					// \u2068 FIRST STRONG ISOLATE: Isolates the directionality of characters that follow
+					// \u2069 POP DIRECTIONAL ISOLATE: Pops the above isolation
+					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators IC NATURAL JOIN creators " +
 					"LEFT JOIN itemTypeCreatorTypes ITCT " +
 					"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
 					"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1)" +
 					", " +
-					"(SELECT lastName FROM itemCreators IC NATURAL JOIN creators " +
+					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators IC NATURAL JOIN creators " +
 					"LEFT JOIN itemTypeCreatorTypes ITCT " +
 					"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
 					"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1,1)" +
@@ -1823,11 +1827,11 @@ Zotero.Items = function() {
 				"SELECT PRINTF(" +
 					`'${localizedAnd}'` +
 					", " +
-					"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
+					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators NATURAL JOIN creators " +
 					`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} ` +
 					"ORDER BY orderIndex LIMIT 1)" +
 					", " +
-					"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
+					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators NATURAL JOIN creators " +
 					`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} ` +
 					"ORDER BY orderIndex LIMIT 1,1) " +
 				")" +
@@ -1855,11 +1859,11 @@ Zotero.Items = function() {
 				"SELECT PRINTF(" +
 					`'${localizedAnd}'` +
 					", " +
-					"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
+					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators NATURAL JOIN creators " +
 					`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID} ` +
 					"ORDER BY orderIndex LIMIT 1)" +
 					", " +
-					"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
+					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators NATURAL JOIN creators " +
 					`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID} ` +
 					"ORDER BY orderIndex LIMIT 1,1) " +
 				")" +
