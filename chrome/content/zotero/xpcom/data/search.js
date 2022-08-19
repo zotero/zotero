@@ -1082,14 +1082,15 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	}
 	
 	if (unfiled) {
-		sql += " AND (itemID NOT IN (SELECT itemID FROM collectionItems) "
+		sql += " AND (itemID NOT IN ("
+			+ "SELECT itemID FROM collectionItems "
 			// Exclude children
-			+ "AND itemID NOT IN "
-			+ "(SELECT itemID FROM itemAttachments WHERE parentItemID IS NOT NULL "
-			+ "UNION SELECT itemID FROM itemNotes WHERE parentItemID IS NOT NULL)"
-			+ ") "
+			+ "UNION SELECT itemID FROM itemAttachments WHERE parentItemID IS NOT NULL "
+			+ "UNION SELECT itemID FROM itemNotes WHERE parentItemID IS NOT NULL "
+			+ "UNION SELECT itemID FROM itemAnnotations "
 			// Exclude My Publications
-			+ "AND itemID NOT IN (SELECT itemID FROM publicationsItems)";
+			+ "UNION SELECT itemID FROM publicationsItems "
+			+ "))";
 	}
 	
 	if (retracted) {

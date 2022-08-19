@@ -170,6 +170,18 @@ describe("Zotero.Search", function() {
 					assert.sameMembers(matches, [item.id]);
 				});
 				
+				it("should match child attachment", async function () {
+					var col = await createDataObject('collection');
+					var item = await createDataObject('item', { collections: [col.id] });
+					var attachment = await importPDFAttachment(item);
+					
+					var s = new Zotero.Search();
+					s.libraryID = item.libraryID;
+					s.addCondition('collection', 'is', col.key);
+					var matches = await s.search();
+					assert.sameMembers(matches, [item.id, attachment.id]);
+				});
+				
 				it("should find items not in collection", function* () {
 					var col = yield createDataObject('collection');
 					var item = yield createDataObject('item', { collections: [col.id] });
