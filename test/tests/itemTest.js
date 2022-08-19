@@ -1465,6 +1465,10 @@ describe("Zotero.Item", function () {
 				await annotation2.saveTx();
 			});
 			
+			after(async function () {
+				await annotation2.eraseTx();
+			});
+			
 			it("should return annotations not in trash", async function () {
 				var items = attachment.getAnnotations();
 				assert.sameMembers(items, [annotation1]);

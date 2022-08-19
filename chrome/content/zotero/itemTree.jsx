@@ -447,11 +447,20 @@ var ItemTree = class ItemTree extends LibraryTree {
 					let row = this.getRowIndexByID(id);
 					if (row === false) continue;
 					let item = Zotero.Items.get(id);
-					if (!item.deleted && !item.numChildren()) {
+					// Remove parent row if it isn't deleted and doesn't have any deleted children
+					// (shown by the numChildren including deleted being the same as numChildren not including deleted)
+					if (!item.deleted && (!item.isRegularItem() || item.numChildren(true) == item.numChildren(false))) {
 						rows.push(row);
+						// And all its children in the tree
+						for (let child = row + 1; child < this.rowCount && this.getLevel(child) > this.getLevel(row); child++) {
+							rows.push(child);
+						}
 					}
 				}
-				this._removeRows(rows);
+				if (rows.length) {
+					this._removeRows(rows);
+					this.tree.invalidate();
+				}
 			}
 
 			return;
