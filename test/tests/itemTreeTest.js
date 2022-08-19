@@ -684,7 +684,7 @@ describe("Zotero.ItemTree", function() {
 		});
 		
 		describe("Trash", function () {
-			it.skip("should remove untrashed parent item when last trashed child is deleted", function* () {
+			it("should remove untrashed parent item when last trashed child is deleted", function* () {
 				var userLibraryID = Zotero.Libraries.userLibraryID;
 				var item = yield createDataObject('item');
 				var note = yield createDataObject(

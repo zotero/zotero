@@ -640,11 +640,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			this.tree.invalidate();
 			return;
 		}
-		if (action == 'refresh') {
-			// If trash is refreshed, we probably need to update the icon from full to empty
-			if (type == 'trash') {
-				this.tree.invalidate();
-			}
+		if (action == 'refresh' && type != 'trash') {
+			// Trash handled below
 			return;
 		}
 		if (type == 'feed' && (action == 'unreadCountUpdated' || action == 'statusChanged')) {
@@ -825,6 +822,11 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 						break;
 				}
 			}
+		}
+		else if (action == 'refresh' && type == 'trash') {
+			// We need to update the trash's status (full or empty), and if empty,
+			// the row might be removed
+			await this.reload();
 		}
 
 		this.forceUpdate();
@@ -2307,7 +2309,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		}
 		
 		if (showTrash) {
-			let deletedItems = await Zotero.Items.getDeleted(libraryID);
+			let deletedItems = await Zotero.Items.getDeleted(libraryID, true);
 			if (deletedItems.length || Zotero.Prefs.get("showTrashWhenEmpty")) {
 				var ref = {
 					libraryID: libraryID

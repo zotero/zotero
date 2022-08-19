@@ -1502,6 +1502,7 @@ Zotero.Items = function() {
 				);
 			}
 			Zotero.debug("Emptied " + deleted.length + " item(s) from trash in " + (new Date() - t) + " ms");
+			Zotero.Notifier.trigger('refresh', 'trash', libraryID);
 		}
 		
 		return deleted.length;
