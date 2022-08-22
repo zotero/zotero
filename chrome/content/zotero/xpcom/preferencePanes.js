@@ -89,29 +89,29 @@ Zotero.PreferencePanes = {
 	 * shuts down.
 	 *
 	 * @param {Object} options
-	 * @param {String} options.id Represents the pane and must be unique
 	 * @param {String} options.pluginID ID of the plugin registering the pane
+	 * @param {String} options.src URI of an XHTML fragment
+	 * @param {String} [options.id] Represents the pane and must be unique. Automatically generated if not provided
 	 * @param {String} [options.parent] ID of parent pane (if provided, pane is hidden from the sidebar)
 	 * @param {String} [options.label] Displayed as the pane's label in the sidebar.
 	 * 		If not provided, the plugin's name is used
 	 * @param {String} [options.image] URI of an icon to be displayed in the navigation sidebar.
 	 * 		If not provided, the plugin's icon (from manifest.json) is used
-	 * @param {String} options.src URI of an XHTML fragment
 	 * @param {String[]} [options.extraDTD] Array of URIs of DTD files to use for parsing the XHTML fragment
 	 * @param {String[]} [options.scripts] Array of URIs of scripts to load along with the pane
-	 * @return {Promise<void>}
+	 * @return {Promise<String>} Resolves to the ID of the pane if successfully added
 	 */
 	register: async function (options) {
-		if (!options.id || !options.pluginID || !options.src) {
-			throw new Error('id, pluginID, and src must be provided');
+		if (!options.pluginID || !options.src) {
+			throw new Error('pluginID and src must be provided');
 		}
-		if (this.builtInPanes.some(p => p.id === options.id)
-			|| this.pluginPanes.some(p => p.id === options.id)) {
+		if (options.id && (this.builtInPanes.some(p => p.id === options.id)
+				|| this.pluginPanes.some(p => p.id === options.id))) {
 			throw new Error(`Pane with ID ${options.id} already registered`);
 		}
 
 		let addPaneOptions = {
-			id: options.id,
+			id: options.id || `plugin-pane-${Zotero.Utilities.randomString()}-${options.pluginID}`,
 			pluginID: options.pluginID,
 			parent: options.parent,
 			rawLabel: options.label || await Zotero.Plugins.getName(options.pluginID),
@@ -123,9 +123,10 @@ Zotero.PreferencePanes = {
 		};
 
 		this.pluginPanes.push(addPaneOptions);
-		Zotero.debug(`Plugin ${options.pluginID} registered preference pane ${options.id} ("${addPaneOptions.rawLabel}")`);
+		Zotero.debug(`Plugin ${addPaneOptions.pluginID} registered preference pane ${addPaneOptions.id} ("${addPaneOptions.rawLabel}")`);
 		this._refreshPreferences();
 		this._ensureObserverAdded();
+		return addPaneOptions.id;
 	},
 
 	/**
