@@ -59,6 +59,42 @@ describe("Zotero.DataObjectUtilities", function() {
 			// place was already empty, so it shouldn't be included
 			assert.notProperty(obj, 'place');
 		});
+		
+		it("shouldn't include relations that haven't changed", function () {
+			var patchBase = {
+				title: "Old Title",
+				relations: {
+					"mendeleyDB:documentUUID": "6b97abe6-8e23-4471-b963-234cf26808b9"
+				}
+			};
+			var obj = {
+				title: "New Title",
+				relations: {
+					"mendeleyDB:documentUUID": "6b97abe6-8e23-4471-b963-234cf26808b9"
+				}
+			}
+			obj = Zotero.DataObjectUtilities.patch(patchBase, obj);
+			assert.notProperty(obj, 'relations');
+		});
+		
+		it("shouldn't include relations that only switched from string to array", function () {
+			var patchBase = {
+				title: "Old Title",
+				relations: {
+					"mendeleyDB:documentUUID": "6b97abe6-8e23-4471-b963-234cf26808b9"
+				}
+			};
+			var obj = {
+				title: "New Title",
+				relations: {
+					"mendeleyDB:documentUUID": [
+						"6b97abe6-8e23-4471-b963-234cf26808b9"
+					]
+				}
+			}
+			obj = Zotero.DataObjectUtilities.patch(patchBase, obj);
+			assert.notProperty(obj, 'relations');
+		});
 	})
 	
 	describe("#diff()", function () {
