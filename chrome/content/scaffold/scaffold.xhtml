@@ -358,7 +358,8 @@
 						observes="code-tab-only"
 						tooltiptext="&scaffold.toolbar.template.label;"
 						class="zotero-tb-button"
-						type="menu">
+						type="menu"
+						wantdropmarker="true">
 					<menupopup>
 						<menuitem label="&scaffold.toolbar.template.newWeb.label;" oncommand="Scaffold.addTemplate('newWeb')"/>
 						<menu label="&scaffold.toolbar.template.scrape.label;">
@@ -424,10 +425,10 @@
 
 							<label class="label-metadata" value="&scaffold.metadata.translatorType.label;"/>
 							<html:div id="checkboxes-translatorType">
-								<checkbox id="checkbox-import" label="&scaffold.metadata.translatorType.import;"/>
-								<checkbox id="checkbox-export" label="&scaffold.metadata.translatorType.export;"/>
-								<checkbox id="checkbox-web" label="&scaffold.metadata.translatorType.web;" checked="true"/>
-								<checkbox id="checkbox-search" label="&scaffold.metadata.translatorType.search;"/>
+								<checkbox id="checkbox-import" label="&scaffold.metadata.translatorType.import;" native="true"/>
+								<checkbox id="checkbox-export" label="&scaffold.metadata.translatorType.export;" native="true"/>
+								<checkbox id="checkbox-web" label="&scaffold.metadata.translatorType.web;" checked="true" native="true"/>
+								<checkbox id="checkbox-search" label="&scaffold.metadata.translatorType.search;" native="true"/>
 							</html:div>
 						</html:div>
 					</tabpanel>
