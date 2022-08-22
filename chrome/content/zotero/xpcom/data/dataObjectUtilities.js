@@ -275,7 +275,7 @@ Zotero.DataObjectUtilities = {
 		var pred2 = Object.keys(data2);
 		pred2.sort();
 		if (!Zotero.Utilities.arrayEquals(pred1, pred2)) return true;
-		for (let pred in pred1) {
+		for (let pred of pred1) {
 			let vals1 = typeof data1[pred] == 'string' ? [data1[pred]] : data1[pred];
 			let vals2 = (!data2[pred] || data2[pred] === '')
 				? []
