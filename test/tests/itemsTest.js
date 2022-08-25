@@ -1234,6 +1234,17 @@ describe("Zotero.Items", function () {
 				[item1, item4, item6].map(item => item.id)
 			);
 		});
+		
+		it("shouldn't return parent item more than once when two child items are selected", async function () {
+			var item1 = await createDataObject('item');
+			var item2 = await createDataObject('item', { itemType: 'note', parentItemID: item1.id });
+			var item3 = await createDataObject('item', { itemType: 'note', parentItemID: item1.id });
+			var items = Zotero.Items.keepParents([item2, item3]);
+			assert.sameMembers(
+				items.map(item => item.id),
+				[item2.id, item3.id]
+			)
+		});
 	});
 	
 	describe("#_loadChildItems()", function () {

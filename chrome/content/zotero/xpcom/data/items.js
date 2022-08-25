@@ -1747,22 +1747,29 @@ Zotero.Items = function() {
 	
 	
 	/**
-	 * Returns an array of items with children of selected parents removed
+	 * Return an array of items with descendants of selected top-level items removed
 	 *
+	 * Non-top-level items that aren't descendents of selected items are kept.
+	 *
+	 * @param {Zotero.Item[]}
 	 * @return {Zotero.Item[]}
 	 */
-	this.keepParents = function (items) {
-		var parentItems = new Set(
-			items
-				.filter(item => item.isTopLevelItem())
-				.map(item => item.id)
+	this.keepTopLevel = function (items) {
+		var topLevelItems = new Set(
+			items.filter(item => item.isTopLevelItem())
 		);
-		return items.filter(item => {
-			var parentItemID = item.parentItemID;
+		return items.filter((item) => {
+			var topLevelItem = !item.isTopLevelItem() && item.topLevelItem;
 			// Not a child item or not a child of one of the passed items
-			return !parentItemID || !parentItems.has(parentItemID);
+			return !topLevelItem || !topLevelItems.has(topLevelItem);
 		});
-	}
+	};
+	
+	
+	this.keepParents = function (items) {
+		Zotero.debug("Zotero.Items.keepParents() is deprecated -- use Zotero.Items.keepTopLevel() instead");
+		return this.keepTopLevel(items);
+	};
 	
 	
 	/*
