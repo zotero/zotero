@@ -1807,6 +1807,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 		return this._rows.map(row => asIDs ? row.ref.id : row.ref);
 	}
 
+	/**
+	 * Get the current sort order of the items list
+	 *
+	 * @return {Number} - -1 for descending, 1 for ascending
+	 */
 	getSortDirection(sortFields) {
 		sortFields = sortFields || this.getSortFields();
 		if (this.collectionTreeRow.isFeed()) {
