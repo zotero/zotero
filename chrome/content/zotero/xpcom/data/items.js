@@ -1735,6 +1735,17 @@ Zotero.Items = function() {
 	
 	
 	/**
+	 * Get the top-level items of all passed items
+	 *
+	 * @param {Zotero.Item[]} items
+	 * @return {Zotero.Item[]}
+	 */
+	this.getTopLevel = function (items) {
+		return [...new Set(items.map(item => item.topLevelItem))];
+	};
+	
+	
+	/**
 	 * Returns an array of items with children of selected parents removed
 	 *
 	 * @return {Zotero.Item[]}
