@@ -1853,6 +1853,8 @@ var ZoteroPane = new function()
 			duplicate.setCreators(creators);
 		}
 		
+		duplicate.setField('abstractNote', '');
+
 		duplicate.addRelatedItem(original);
 		original.addRelatedItem(duplicate);
 		
