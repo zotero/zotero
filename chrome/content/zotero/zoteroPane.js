@@ -1860,12 +1860,14 @@ var ZoteroPane = new function()
 			duplicate.setCreators(creators);
 		}
 
+		duplicate.setField('abstractNote', '');
+
 		duplicate.addRelatedItem(original);
 		original.addRelatedItem(duplicate);
 
 		await original.saveTx({ skipDateModifiedUpdate: true });
 		await duplicate.saveTx();
-
+		
 		document.getElementById('zotero-editpane-item-box').focusField('title');
 		return duplicate;
 	};
