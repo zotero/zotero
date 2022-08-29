@@ -166,46 +166,48 @@ Zotero.HTTP = new function() {
 						if (e.xmlhttp.status == 503 && await _checkRetry(e.xmlhttp)) {
 							continue;
 						}
+						// Don't retry if errorDelayMax is 0
+						if (options.errorDelayMax === 0) {
+							throw e;
+						}
 						// Automatically retry other 5xx errors by default
-						if (options.errorDelayMax !== 0) {
-							if (!errorDelayGenerator) {
-								// Keep trying for up to an hour
-								errorDelayGenerator = Zotero.Utilities.Internal.delayGenerator(
-									options.errorDelayIntervals || _errorDelayIntervals,
-									options.errorDelayMax !== undefined
-										? options.errorDelayMax
-										: _errorDelayMax
-								);
+						if (!errorDelayGenerator) {
+							// Keep trying for up to an hour
+							errorDelayGenerator = Zotero.Utilities.Internal.delayGenerator(
+								options.errorDelayIntervals || _errorDelayIntervals,
+								options.errorDelayMax !== undefined
+									? options.errorDelayMax
+									: _errorDelayMax
+							);
+						}
+						let delayPromise = errorDelayGenerator.next().value;
+						let keepGoing;
+						// Provide caller with a callback to cancel while waiting to retry
+						if (options.cancellerReceiver) {
+							let resolve;
+							let reject;
+							let cancelPromise = new Zotero.Promise((res, rej) => {
+								resolve = res;
+								reject = function () {
+									rej(new Zotero.HTTP.CancelledException);
+								};
+							});
+							options.cancellerReceiver(reject);
+							try {
+								keepGoing = await Promise.race([delayPromise, cancelPromise]);
 							}
-							let delayPromise = errorDelayGenerator.next().value;
-							let keepGoing;
-							// Provide caller with a callback to cancel while waiting to retry
-							if (options.cancellerReceiver) {
-								let resolve;
-								let reject;
-								let cancelPromise = new Zotero.Promise((res, rej) => {
-									resolve = res;
-									reject = function () {
-										rej(new Zotero.HTTP.CancelledException);
-									};
-								});
-								options.cancellerReceiver(reject);
-								try {
-									keepGoing = await Promise.race([delayPromise, cancelPromise]);
-								}
-								catch (e) {
-									Zotero.debug("Request cancelled");
-									throw e;
-								}
-								resolve();
-							}
-							else {
-								keepGoing = await delayPromise;
-							}
-							if (!keepGoing) {
-								Zotero.logError("Failed too many times");
+							catch (e) {
+								Zotero.debug("Request cancelled");
 								throw e;
 							}
+							resolve();
+						}
+						else {
+							keepGoing = await delayPromise;
+						}
+						if (!keepGoing) {
+							Zotero.logError("Failed too many times");
+							throw e;
 						}
 						continue;
 					}
