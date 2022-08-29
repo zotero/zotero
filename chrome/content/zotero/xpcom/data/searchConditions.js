@@ -114,6 +114,14 @@ Zotero.SearchConditions = new function(){
 					false: true
 				}
 			},
+
+			{
+				name: 'feed',
+				operators: {
+					true: true,
+					false: true
+				}
+			},
 			
 			{
 				name: 'includeParentsAndChildren',

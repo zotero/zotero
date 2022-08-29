@@ -1253,4 +1253,60 @@ describe("Zotero.CollectionTree", function() {
 			})
 		})
 	})
+
+	describe("Feeds pseudo-library", function () {
+		beforeEach(async function () {
+			for (let feed of Zotero.Feeds.getAll()) {
+				await feed.eraseTx();
+			}
+		});
+		
+		it("should contain feed items from all feeds", async function () {
+			let feed1 = await createFeed();
+			let feed2 = await createFeed();
+			let feedItem1 = await createDataObject('feedItem', { libraryID: feed1.libraryID }, { skipSelect: true });
+			let feedItem2 = await createDataObject('feedItem', { libraryID: feed2.libraryID }, { skipSelect: true });
+			await cv.selectFeeds();
+			await waitForItemsLoad(win);
+			
+			let itemsView = zp.itemsView;
+			assert.equal(itemsView.rowCount, 2);
+			assert.equal(itemsView.getRow(0).ref.id, feedItem2.id);
+			assert.equal(itemsView.getRow(1).ref.id, feedItem1.id);
+		});
+
+		it("should be filterable", async function () {
+			let feed1 = await createFeed();
+			let feed2 = await createFeed();
+			let feedItem1 = await createDataObject('feedItem', { libraryID: feed1.libraryID, setTitle: true }, { skipSelect: true });
+			let feedItem2 = await createDataObject('feedItem', { libraryID: feed2.libraryID, setTitle: true }, { skipSelect: true });
+			await cv.selectFeeds();
+			await waitForItemsLoad(win);
+
+			var quickSearch = win.document.getElementById('zotero-tb-search');
+			quickSearch.value = feedItem1.getField('title');
+			quickSearch.doCommand();
+
+			let itemsView = zp.itemsView;
+			await itemsView._refreshPromise;
+			assert.equal(itemsView.rowCount, 1);
+			assert.equal(itemsView.getRow(0).ref.id, feedItem1.id);
+		});
+
+		it("should be bold if any feed items are unread", async function () {
+			let feed1 = await createFeed();
+			let feed2 = await createFeed();
+			let feedItem1 = await createDataObject('feedItem', { libraryID: feed1.libraryID, setTitle: true }, { skipSelect: true });
+			let feedItem2 = await createDataObject('feedItem', { libraryID: feed2.libraryID, setTitle: true }, { skipSelect: true });
+			
+			await feedItem1.toggleRead(true);
+			
+			// Unread count is automatically updated on feed refresh, but we need to do it manually here
+			await feed1.updateUnreadCount();
+			await feed2.updateUnreadCount();
+			
+			assert.equal(cv.getRow(cv.getRowIndexByID('F0')).ref.unreadCount, 1);
+			assert.lengthOf(win.document.querySelectorAll('#zotero-collections-tree .row.unread'), 2);
+		});
+	});
 })

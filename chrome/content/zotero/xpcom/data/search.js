@@ -1034,6 +1034,10 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 				case 'publications':
 					var publications = condition.operator == 'true';
 					continue;
+
+				case 'feed':
+					var feed = condition.operator == 'true';
+					continue;
 				
 				// Search subcollections
 				case 'recursive':
@@ -1133,6 +1137,10 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	
 	if (publications) {
 		sql += " AND (itemID IN (SELECT itemID FROM publicationsItems))";
+	}
+
+	if (feed) {
+		sql += " AND (itemID IN (SELECT itemID FROM feedItems))";
 	}
 	
 	// Limit to library search belongs to

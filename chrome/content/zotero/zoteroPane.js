@@ -921,7 +921,7 @@ var ZoteroPane = new function()
 					break;
 				case 'saveToZotero':
 					var collectionTreeRow = this.getCollectionTreeRow();
-					if (collectionTreeRow.isFeed()) {
+					if (collectionTreeRow.isFeedOrFeeds()) {
 						ZoteroItemPane.translateSelectedItems();
 					} else {
 						Zotero.debug(command + ' does not do anything in non-feed views')
@@ -936,7 +936,7 @@ var ZoteroPane = new function()
 				case 'toggleRead':
 					// Toggle read/unread
 					let row = this.getCollectionTreeRow();
-					if (!row || !row.isFeed()) return;
+					if (!row || !row.isFeedOrFeeds()) return;
 					this.toggleSelectedItemsRead();
 					if (itemReadPromise) {
 						itemReadPromise.cancel();
@@ -1308,7 +1308,7 @@ var ZoteroPane = new function()
 				ZoteroPane_Local.tagSelector.setMode('view');
 			}
 			ZoteroPane_Local.tagSelector.onItemViewChanged({
-				libraryID: collectionTreeRow.ref.libraryID,
+				libraryID: collectionTreeRow.ref && collectionTreeRow.ref.libraryID,
 				collectionTreeRow
 			});
 		}
@@ -1351,11 +1351,23 @@ var ZoteroPane = new function()
 
 			// If item data not yet loaded for library, load it now.
 			// Other data types are loaded at startup
-			var library = Zotero.Libraries.get(collectionTreeRow.ref.libraryID);
-			if (!library.getDataLoaded('item')) {
-				Zotero.debug("Waiting for items to load for library " + library.libraryID);
-				ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
-				await library.waitForDataLoad('item');
+			if (collectionTreeRow.isFeeds()) {
+				var feedsToLoad = Zotero.Feeds.getAll().filter(feed => !feed.getDataLoaded('item'));
+				if (feedsToLoad.length) {
+					Zotero.debug("Waiting for items to load for feeds " + feedsToLoad.map(feed => feed.libraryID));
+					ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
+					for (let feed of feedsToLoad) {
+						await feed.waitForDataLoad('item');
+					}
+				}
+			}
+			else {
+				var library = Zotero.Libraries.get(collectionTreeRow.ref.libraryID);
+				if (!library.getDataLoaded('item')) {
+					Zotero.debug("Waiting for items to load for library " + library.libraryID);
+					ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
+					await library.waitForDataLoad('item');
+				}
 			}
 			
 			this.itemsView.changeCollectionTreeRow(collectionTreeRow);
@@ -1521,7 +1533,7 @@ var ZoteroPane = new function()
 			}
 			// Zero or multiple items selected
 			else {
-				if (collectionTreeRow.isFeed()) {
+				if (collectionTreeRow.isFeedOrFeeds()) {
 					this.updateReadLabel();
 				}
 				
@@ -1647,7 +1659,7 @@ var ZoteroPane = new function()
 		
 		// Feed buttons
 		document.getElementById('zotero-item-pane-top-buttons-feed').hidden
-			= !this.getCollectionTreeRow().isFeed()
+			= !this.getCollectionTreeRow().isFeedOrFeeds()
 	};
 	
 	
@@ -2047,7 +2059,7 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		if (!this.canEdit() && !collectionTreeRow.isFeed()) {
+		if (!this.canEdit() && !collectionTreeRow.isFeedOrFeeds()) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
@@ -2291,9 +2303,11 @@ var ZoteroPane = new function()
 		var row = this.getCollectionTreeRow();
 		if (!row) return;
 
-		let feed = row.ref;
-		let feedItemIDs = yield Zotero.FeedItems.getAll(feed.libraryID, true, false, true);
-		yield Zotero.FeedItems.toggleReadByID(feedItemIDs, true);
+		let feeds = row.isFeeds() ? Zotero.Feeds.getAll() : [row.ref];
+		for (let feed of feeds) {
+			let feedItemIDs = yield Zotero.FeedItems.getAll(feed.libraryID, true, false, true);
+			yield Zotero.FeedItems.toggleReadByID(feedItemIDs, true);
+		}
 	});
 
 	
@@ -2796,7 +2810,7 @@ var ZoteroPane = new function()
 	
 	// menuitem configuration
 	//
-	// This has to be kept in sync with zotero-collectionmenu in zoteroPane.xul. We could do this
+	// This has to be kept in sync with zotero-collectionmenu in zoteroPane.xhtml. We could do this
 	// entirely in JS, but various localized strings are only in zotero.dtd, and they're used in
 	// standalone.xul as well, so for now they have to remain as XML entities.
 	var _collectionContextMenuOptions = [
@@ -2866,6 +2880,9 @@ var ZoteroPane = new function()
 		{
 			id: "editSelectedFeed",
 			oncommand: () => this.editSelectedFeed()
+		},
+		{
+			id: 'addFeed'
 		},
 		{
 			id: "deleteCollection",
@@ -3008,7 +3025,25 @@ var ZoteroPane = new function()
 			}
 			
 			// Adjust labels
+			m.refreshFeed.setAttribute('label', Zotero.getString('pane.collections.menu.refresh.feed'));
+			m.markReadFeed.setAttribute('label', Zotero.getString('pane.collections.menu.markAsRead.feed'));
 			m.deleteCollectionAndItems.setAttribute('label', Zotero.getString('pane.collections.menu.delete.feedAndItems'));
+		}
+		else if (collectionTreeRow.isFeeds()) {
+			show = [
+				'refreshFeed',
+				'sep2',
+				'markReadFeed',
+				'addFeed',
+			];
+
+			if (collectionTreeRow.ref.unreadCount == 0) {
+				disable = ['markReadFeed'];
+			}
+
+			// Adjust labels
+			m.refreshFeed.setAttribute('label', Zotero.getString('pane.collections.menu.refresh.allFeeds'));
+			m.markReadFeed.setAttribute('label', Zotero.getString('pane.collections.menu.markAsRead.allFeeds'));
 		}
 		else if (collectionTreeRow.isSearch()) {
 			show = [
@@ -3198,11 +3233,11 @@ var ZoteroPane = new function()
 				disable.add(m.restoreToLibrary);
 			}
 		}
-		else if (!collectionTreeRow.isFeed()) {
+		else if (!collectionTreeRow.isFeedOrFeeds()) {
 			show.add(m.moveToTrash);
 		}
 
-		if(!collectionTreeRow.isFeed()) {
+		if(!collectionTreeRow.isFeedOrFeeds()) {
 			show.add(m.sep4);
 			show.add(m.exportItems);
 			show.add(m.createBib);
@@ -3221,7 +3256,7 @@ var ZoteroPane = new function()
 					canRecognize = true,
 					canUnrecognize = true,
 					canRename = true;
-				var canMarkRead = collectionTreeRow.isFeed();
+				var canMarkRead = collectionTreeRow.isFeedOrFeeds();
 				var markUnread = true;
 				
 				for (let i = 0; i < items.length; i++) {
@@ -3280,7 +3315,7 @@ var ZoteroPane = new function()
 				// "Add/Create Note from Annotations" and "Find Available PDFs"
 				if (collectionTreeRow.filesEditable
 						&& !collectionTreeRow.isDuplicates()
-						&& !collectionTreeRow.isFeed()) {
+						&& !collectionTreeRow.isFeedOrFeeds()) {
 					if (items.some(item => attachmentsWithExtractableAnnotations(item).length)
 							|| items.some(item => isAttachmentWithExtractableAnnotations(item))) {
 						let menuitem = menu.childNodes[m.createNoteFromAnnotations];
@@ -3514,7 +3549,7 @@ var ZoteroPane = new function()
 			show.delete(m.createBib);
 		}
 		
-		if ((!collectionTreeRow.editable || collectionTreeRow.isPublications()) && !collectionTreeRow.isFeed()) {
+		if ((!collectionTreeRow.editable || collectionTreeRow.isPublications()) && !collectionTreeRow.isFeedOrFeeds()) {
 			for (let i in m) {
 				// Still allow some options for non-editable views
 				switch (i) {
@@ -3545,7 +3580,7 @@ var ZoteroPane = new function()
 		}
 
 		// Add to collection
-		if (!collectionTreeRow.isFeed()
+		if (!collectionTreeRow.isFeedOrFeeds()
 			&& collectionTreeRow.editable
 			&& Zotero.Items.keepParents(items).every(item => item.isTopLevelItem())
 		) {
@@ -3561,6 +3596,14 @@ var ZoteroPane = new function()
 		else if (collectionTreeRow.isPublications()) {
 			menu.childNodes[m.removeItems].setAttribute('label', Zotero.getString('pane.items.menu.removeFromPublications' + multiple));
 			show.add(m.removeItems);
+		}
+		
+		// Show in library
+		if (collectionTreeRow.isFeeds()) {
+			menu.childNodes[m.showInLibrary].setAttribute('label', Zotero.getString('pane.items.menu.showInFeed'));
+		}
+		else {
+			menu.childNodes[m.showInLibrary].setAttribute('label', Zotero.getString('general.showInLibrary'));
 		}
 		
 		// Set labels, plural if necessary

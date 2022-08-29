@@ -65,12 +65,15 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('id', function () {
 		case 'trash':
 			return 'T' + this.ref.libraryID;
 		
+		case 'feeds':
+			// The "0" is kind of weird, but we need the ID to be a one-character prefix + a number
+			// and there's only one set of feeds
+			return 'F0';
+		
 		case 'header':
 			switch (this.ref.id) {
 				case 'group-libraries-header':
 					return "HG";
-				case 'feed-libraries-header':
-					return "HF";
 			}
 			break;
 	}
@@ -133,6 +136,14 @@ Zotero.CollectionTreeRow.prototype.isFeed = function() {
 	return this.type == 'feed';
 }
 
+Zotero.CollectionTreeRow.prototype.isFeeds = function() {
+	return this.type == 'feeds';
+}
+
+Zotero.CollectionTreeRow.prototype.isFeedOrFeeds = function() {
+	return this.isFeed() || this.isFeeds();
+}
+
 Zotero.CollectionTreeRow.prototype.isSeparator = function () {
 	return this.type == 'separator';
 }
@@ -148,7 +159,7 @@ Zotero.CollectionTreeRow.prototype.isShare = function()
 }
 
 Zotero.CollectionTreeRow.prototype.isContainer = function() {
-	return this.isLibrary(true) || this.isCollection() || this.isPublications() || this.isBucket();
+	return this.isLibrary(true) || this.isCollection() || this.isPublications() || this.isBucket() || this.isFeeds();
 }
 
 
@@ -171,7 +182,7 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('editable', function () {
 	if (this.isTrash() || this.isShare() || this.isBucket()) {
 		return false;
 	}
-	if (this.isGroup() || this.isFeed()) {
+	if (this.isGroup() || this.isFeedOrFeeds()) {
 		return this.ref.editable;
 	}
 	if (!this.isWithinGroup() || this.isPublications()) {
@@ -214,7 +225,7 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('filesEditable', function ()
 });
 
 
-Zotero.CollectionTreeRow.visibilityGroups = {'feed': 'feed'};
+Zotero.CollectionTreeRow.visibilityGroups = {'feed': 'feed', 'feeds': 'feed'};
 
 
 Zotero.CollectionTreeRow.prototype.__defineGetter__('visibilityGroup', function() {
@@ -230,6 +241,9 @@ Zotero.CollectionTreeRow.prototype.getName = function()
 		
 		case 'publications':
 			return Zotero.getString('pane.collections.publications');
+		
+		case 'feeds':
+			return Zotero.getString('pane.collections.feedLibraries');
 		
 		case 'trash':
 			return Zotero.getString('pane.collections.trash');
@@ -251,6 +265,9 @@ Zotero.CollectionTreeRow.prototype.getChildren = function () {
 	}
 	else if (this.isCollection()) {
 		return Zotero.Collections.getByParent(this.ref.id);
+	}
+	else if (this.isFeeds()) {
+		return Zotero.Feeds.getAll().sort((a, b) => Zotero.localeCompare(a.name, b.name));
 	}
 }
 
@@ -350,7 +367,9 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 	}
 	else {
 		var s = new Zotero.Search();
-		s.addCondition('libraryID', 'is', this.ref.libraryID);
+		if (!this.isFeeds()) {
+			s.addCondition('libraryID', 'is', this.ref.libraryID);
+		}
 		// Library root
 		if (this.isLibrary(true)) {
 			s.addCondition('noChildren', 'true');
@@ -372,6 +391,9 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 		else if (this.isTrash()) {
 			s.addCondition('deleted', 'true');
 		}
+		else if (this.isFeeds()) {
+			s.addCondition('feed', 'true');
+		}
 		else {
 			throw new Error('Invalid search mode ' + this.type);
 		}
@@ -379,7 +401,12 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 	
 	// Create the outer (filter) search
 	var s2 = new Zotero.Search();
-	s2.addCondition('libraryID', 'is', this.ref.libraryID);
+	if (this.isFeeds()) {
+		s2.addCondition('feed', true);
+	}
+	else {
+		s2.addCondition('libraryID', 'is', this.ref.libraryID);
+	}
 	
 	if (this.isTrash()) {
 		s2.addCondition('deleted', 'true');
@@ -419,6 +446,9 @@ Zotero.CollectionTreeRow.prototype.getTags = async function (types, tagIDs) {
 			return [];
 		
 		case 'bucket':
+			return [];
+			
+		case 'feeds':
 			return [];
 	}
 	var results = await this.getSearchResults(true);
