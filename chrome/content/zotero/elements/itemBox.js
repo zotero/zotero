@@ -72,6 +72,7 @@
 						</menupopup>
 						<menupopup id="zotero-creator-transform-menu">
 							<menuitem id="creator-transform-swap-names" label="&zotero.item.creatorTransform.nameSwap;"/>
+							<menuitem id="creator-transform-capitalize" label="&zotero.item.creatorTransform.capitalize;"/>
 						</menupopup>
 						<menupopup id="zotero-doi-menu">
 							<menuitem id="zotero-doi-menu-view-online" label="&zotero.item.viewOnline;"/>
@@ -212,6 +213,9 @@
 
 			this._id('creator-transform-swap-names').addEventListener('command',
 				event => this.swapNames(event));
+
+			this._id('creator-transform-capitalize').addEventListener('command',
+					event => this.capitalizeCreatorName(event));
 			
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'itemBox');
 		}
@@ -2124,6 +2128,24 @@
 			var firstName = fields.firstName;
 			fields.lastName = firstName;
 			fields.firstName = lastName;
+			this.modifyCreator(creatorIndex, fields);
+			if (this.saveOnEdit) {
+				// See note in transformText()
+				await this.blurOpenField();
+				await this.item.saveTx();
+			}
+		}
+
+		/**
+		 * @return {Promise}
+		 */
+		async capitalizeCreatorName(event) {
+			var row = document.popupNode.closest('tr');
+			var typeBox = row.querySelector('.creator-type-label');
+			var creatorIndex = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
+			var fields = this.getCreatorFields(row);
+			fields.firstName = fields.firstName && Zotero.Utilities.capitalizeName(fields.firstName.toUpperCase());
+			fields.lastName = fields.lastName && Zotero.Utilities.capitalizeName(fields.lastName.toUpperCase());
 			this.modifyCreator(creatorIndex, fields);
 			if (this.saveOnEdit) {
 				// See note in transformText()
