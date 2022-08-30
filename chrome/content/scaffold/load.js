@@ -37,6 +37,12 @@ var Scaffold_Load = new function() {
 			window.close();
 		});
 		
+		listbox.addEventListener('keydown', (e) => {
+			if (e.key == ' ') {
+				e.preventDefault();
+			}
+		});
+		
 		var translators = {};		
 
 		// Get the matching translators		
