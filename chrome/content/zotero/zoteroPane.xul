@@ -293,11 +293,7 @@
 							<!-- with icon: <menuitem class="menuitem-iconic" id="zotero-menuitem-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane_Local.newNote(false, this.parentNode.getAttribute('itemID'))"/>-->
 							<menuitem class="menuitem-iconic zotero-menuitem-attach-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane_Local.newNote(false, this.parentNode.getAttribute('itemKey'))"/>
 							
-							<menuitem class="menuitem-iconic zotero-menuitem-create-note-from-annotations"
-									oncommand="ZoteroPane.createNoteFromAnnotationsFromSelected()"/>
-							<menu class="menuitem-iconic zotero-menuitem-create-note-from-annotations">
-								<menupopup id="create-note-from-annotations-popup"/>
-							</menu>
+							<menuitem class="menuitem-iconic zotero-menuitem-create-note-from-annotations"/>
 							
 							<menu class="menu-iconic zotero-menuitem-attach" label="&zotero.items.menu.attach;">
 								<menupopup id="zotero-add-attachment-popup">

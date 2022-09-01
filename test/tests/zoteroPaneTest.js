@@ -338,6 +338,204 @@ describe("ZoteroPane", function() {
 	})
 	
 	
+	describe("#addNoteFromAnnotationsFromSelected()", function () {
+		it("should create a single note within a selected regular item for all child attachments", async function () {
+			var item = await createDataObject('item');
+			var attachment1 = await importPDFAttachment(item);
+			var attachment2 = await importPDFAttachment(item);
+			var annotation1 = await createAnnotation('highlight', attachment1);
+			var annotation2 = await createAnnotation('highlight', attachment1);
+			var annotation3 = await createAnnotation('highlight', attachment2);
+			var annotation4 = await createAnnotation('highlight', attachment2);
+			await zp.selectItems([item.id]);
+			await zp.addNoteFromAnnotationsFromSelected();
+			var newItems = zp.getSelectedItems();
+			assert.lengthOf(newItems, 1);
+			var note = newItems[0];
+			assert.equal(note.itemType, 'note');
+			assert.equal(note.parentID, item.id);
+			var dp = new DOMParser();
+			var doc = dp.parseFromString(note.getNote(), 'text/html');
+			assert.sameMembers(
+				[...doc.querySelectorAll('h3')].map(x => x.textContent),
+				[attachment1.attachmentFilename, attachment2.attachmentFilename]
+			);
+			assert.lengthOf([...doc.querySelectorAll('h3 + p')], 2);
+			assert.lengthOf([...doc.querySelectorAll('span.highlight')], 4);
+		});
+		
+		it("should create a single note within the parent for all selected sibling attachments", async function () {
+			var item = await createDataObject('item');
+			var attachment1 = await importPDFAttachment(item);
+			var attachment2 = await importPDFAttachment(item);
+			var annotation1 = await createAnnotation('highlight', attachment1);
+			var annotation2 = await createAnnotation('highlight', attachment1);
+			var annotation3 = await createAnnotation('highlight', attachment2);
+			var annotation4 = await createAnnotation('highlight', attachment2);
+			await zp.selectItems([attachment1.id, attachment2.id]);
+			await zp.addNoteFromAnnotationsFromSelected();
+			var newItems = zp.getSelectedItems();
+			assert.lengthOf(newItems, 1);
+			var note = newItems[0];
+			assert.equal(note.parentID, item.id);
+			var dp = new DOMParser();
+			var doc = dp.parseFromString(note.getNote(), 'text/html');
+			assert.sameMembers(
+				[...doc.querySelectorAll('h3')].map(x => x.textContent),
+				[attachment1.attachmentFilename, attachment2.attachmentFilename]
+			);
+			// No item titles
+			assert.lengthOf([...doc.querySelectorAll('h2 + p')], 0);
+			// Just attachment titles
+			assert.lengthOf([...doc.querySelectorAll('h3 + p')], 2);
+			assert.lengthOf([...doc.querySelectorAll('span.highlight')], 4);
+		});
+		
+		it("should ignore top-level item if child attachment is also selected", async function () {
+			var item = await createDataObject('item');
+			var attachment1 = await importPDFAttachment(item);
+			var attachment2 = await importPDFAttachment(item);
+			await createAnnotation('highlight', attachment1);
+			await createAnnotation('highlight', attachment1);
+			await createAnnotation('highlight', attachment2);
+			await zp.selectItems([item.id, attachment1.id]);
+			await zp.addNoteFromAnnotationsFromSelected();
+			var newItems = zp.getSelectedItems();
+			assert.lengthOf(newItems, 1);
+			var note = newItems[0];
+			var dp = new DOMParser();
+			var doc = dp.parseFromString(note.getNote(), 'text/html');
+			// No titles
+			assert.lengthOf([...doc.querySelectorAll('h2 + p')], 0);
+			assert.lengthOf([...doc.querySelectorAll('h3 + p')], 0);
+			assert.lengthOf([...doc.querySelectorAll('span.highlight')], 2);
+		});
+		
+		it("shouldn't do anything if parent item and child note is selected", async function () {
+			var item = await createDataObject('item');
+			var attachment = await importPDFAttachment(item);
+			var note = await createDataObject('item', { itemType: 'note', parentID: item.id });
+			await createAnnotation('highlight', attachment);
+			await zp.selectItems([item.id, note.id]);
+			await zp.addNoteFromAnnotationsFromSelected();
+			var selectedItems = zp.getSelectedItems();
+			assert.lengthOf(selectedItems, 2);
+			assert.sameMembers(selectedItems, [item, note]);
+		});
+	});
+	
+	
+	describe("#createStandaloneNoteFromAnnotationsFromSelected()", function () {
+		it("should create a single standalone note for all child attachments of selected regular items", async function () {
+			var collection = await createDataObject('collection');
+			var item1 = await createDataObject('item', { setTitle: true, collections: [collection.id] });
+			var item2 = await createDataObject('item', { setTitle: true, collections: [collection.id] });
+			var attachment1 = await importPDFAttachment(item1);
+			var attachment2 = await importPDFAttachment(item1);
+			var attachment3 = await importPDFAttachment(item2);
+			var attachment4 = await importPDFAttachment(item2);
+			await createAnnotation('highlight', attachment1);
+			await createAnnotation('highlight', attachment1);
+			await createAnnotation('highlight', attachment2);
+			await createAnnotation('highlight', attachment2);
+			await createAnnotation('highlight', attachment3);
+			await createAnnotation('highlight', attachment3);
+			await createAnnotation('highlight', attachment4);
+			await createAnnotation('highlight', attachment4);
+			await zp.selectItems([item1.id, item2.id]);
+			await zp.createStandaloneNoteFromAnnotationsFromSelected();
+			var newItems = zp.getSelectedItems();
+			assert.lengthOf(newItems, 1);
+			var note = newItems[0];
+			assert.equal(note.itemType, 'note');
+			assert.isFalse(note.parentID);
+			assert.isTrue(collection.hasItem(note));
+			var dp = new DOMParser();
+			var doc = dp.parseFromString(note.getNote(), 'text/html');
+			assert.sameMembers(
+				[...doc.querySelectorAll('h2')].map(x => x.textContent),
+				[item1.getDisplayTitle(), item2.getDisplayTitle()]
+			);
+			assert.sameMembers(
+				[...doc.querySelectorAll('h3')].map(x => x.textContent),
+				[
+					attachment1.attachmentFilename,
+					attachment2.attachmentFilename,
+					attachment3.attachmentFilename,
+					attachment4.attachmentFilename
+				]
+			);
+			assert.lengthOf([...doc.querySelectorAll('h3 + p')], 4);
+			assert.lengthOf([...doc.querySelectorAll('span.highlight')], 8);
+		});
+		
+		it("should create a single standalone note for all selected attachments", async function () {
+			var collection = await createDataObject('collection');
+			var item1 = await createDataObject('item', { setTitle: true, collections: [collection.id] });
+			var item2 = await createDataObject('item', { setTitle: true, collections: [collection.id] });
+			var attachment1 = await importPDFAttachment(item1);
+			var attachment2 = await importPDFAttachment(item1);
+			var attachment3 = await importPDFAttachment(item2);
+			var attachment4 = await importPDFAttachment(item2);
+			await createAnnotation('highlight', attachment1);
+			await createAnnotation('highlight', attachment1);
+			await createAnnotation('highlight', attachment2);
+			await createAnnotation('highlight', attachment2);
+			await createAnnotation('highlight', attachment3);
+			await createAnnotation('highlight', attachment3);
+			await createAnnotation('highlight', attachment4);
+			await createAnnotation('highlight', attachment4);
+			await zp.selectItems([attachment1.id, attachment3.id]);
+			await zp.createStandaloneNoteFromAnnotationsFromSelected();
+			var newItems = zp.getSelectedItems();
+			assert.lengthOf(newItems, 1);
+			var note = newItems[0];
+			assert.isFalse(note.parentID);
+			assert.isTrue(collection.hasItem(note));
+			var dp = new DOMParser();
+			var doc = dp.parseFromString(note.getNote(), 'text/html');
+			assert.sameMembers(
+				[...doc.querySelectorAll('h2')].map(x => x.textContent),
+				[item1.getDisplayTitle(), item2.getDisplayTitle()]
+			);
+			assert.lengthOf([...doc.querySelectorAll('h2 + p')], 2);
+			assert.lengthOf([...doc.querySelectorAll('h3')], 0);
+			assert.lengthOf([...doc.querySelectorAll('span.highlight')], 4);
+		});
+		
+		it("should ignore top-level item if child attachment is also selected", async function () {
+			var item1 = await createDataObject('item', { setTitle: true });
+			var item2 = await createDataObject('item', { setTitle: true });
+			var attachment1 = await importPDFAttachment(item1);
+			var attachment2 = await importPDFAttachment(item1);
+			var attachment3 = await importPDFAttachment(item2);
+			var attachment4 = await importPDFAttachment(item2);
+			await createAnnotation('highlight', attachment1);
+			await createAnnotation('highlight', attachment1);
+			await createAnnotation('highlight', attachment2);
+			await createAnnotation('highlight', attachment2);
+			await createAnnotation('highlight', attachment3);
+			await createAnnotation('highlight', attachment3);
+			await createAnnotation('highlight', attachment4);
+			await createAnnotation('highlight', attachment4);
+			await zp.selectItems([item1.id, attachment1.id, attachment3.id]);
+			await zp.createStandaloneNoteFromAnnotationsFromSelected();
+			var newItems = zp.getSelectedItems();
+			assert.lengthOf(newItems, 1);
+			var note = newItems[0];
+			var dp = new DOMParser();
+			var doc = dp.parseFromString(note.getNote(), 'text/html');
+			assert.sameMembers(
+				[...doc.querySelectorAll('h2')].map(x => x.textContent),
+				[item1.getDisplayTitle(), item2.getDisplayTitle()]
+			);
+			assert.lengthOf([...doc.querySelectorAll('h2 + p')], 2);
+			assert.lengthOf([...doc.querySelectorAll('h3')], 0);
+			assert.lengthOf([...doc.querySelectorAll('span.highlight')], 4);
+		});
+	});
+	
+	
 	describe("#renameSelectedAttachmentsFromParents()", function () {
 		it("should rename a linked file", async function () {
 			var oldFilename = 'old.png';
