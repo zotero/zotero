@@ -38,6 +38,7 @@ var { renderCell } = VirtualizedTable;
 Zotero_Preferences.Sync = {
 	checkmarkChar: '\u2705',
 	noChar: '\uD83D\uDEAB',
+	syncOnClose: false,
 	
 	init: async function () {
 		this.updateStorageSettingsUI();
@@ -182,6 +183,19 @@ Zotero_Preferences.Sync = {
 			Zotero.Sync.Runner.deleteAPIKey();
 			return;
 		}
+		
+		// It shouldn't be possible for a sync to be in progress if the user wasn't logged in,
+		// but check to be sure
+		if (!Zotero.Sync.Runner.syncInProgress) {
+			// Clear any displayed sync errors
+			Zotero.Sync.Runner.updateIcons([]);
+		}
+		window.addEventListener('beforeunload', () => {
+			if (!Zotero.Sync.Runner.syncInProgress) {
+				Zotero.Sync.Runner.sync();
+			}
+		});
+		
 		this.displayFields(json.username);
 	}),
 

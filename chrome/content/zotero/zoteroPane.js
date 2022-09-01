@@ -202,7 +202,7 @@ var ZoteroPane = new function()
 				if (index == 0) {
 					Zotero.Sync.Server.sync({
 						onSuccess: function () {
-							Zotero.Sync.Runner.updateIcons();
+							Zotero.Sync.Runner.updateIcons([]);
 							
 							ps.alert(
 								null,
