@@ -497,7 +497,12 @@ var ZoteroContextPane = new function () {
 			if (!annotations.length) {
 				return;
 			}
-			var note = await Zotero.EditorInstance.createNoteFromAnnotations(annotations, child && attachment.parentID);
+			var note = await Zotero.EditorInstance.createNoteFromAnnotations(
+				annotations,
+				{
+					parentID: child && attachment.parentID
+				}
+			);
 
 			_updateAddToNote();
 
