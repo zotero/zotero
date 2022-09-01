@@ -4952,7 +4952,12 @@ var ZoteroPane = new function()
 		if (!annotations.length) {
 			return;
 		}
-		var note = await Zotero.EditorInstance.createNoteFromAnnotations(annotations, attachment.parentID);
+		var note = await Zotero.EditorInstance.createNoteFromAnnotations(
+			annotations,
+			{
+				parentID: attachment.parentID
+			}
+		);
 		if (!skipSelect) {
 			await this.selectItem(note.id);
 		}
