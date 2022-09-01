@@ -766,6 +766,9 @@ class EditorInstance {
 						}
 						menuitem.setAttribute('checked', item.checked);
 						menuitem.addEventListener('command', () => {
+							if (item.name === 'insertImage') {
+								return this._iframeWindow.eval('openImageFilePicker()');
+							}
 							this._postMessage({
 								action: 'contextMenuAction',
 								ctxAction: item.name,
