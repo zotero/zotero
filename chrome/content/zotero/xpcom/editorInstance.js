@@ -1212,10 +1212,12 @@ class EditorInstance {
 	 * Create note from annotations
 	 *
 	 * @param {Zotero.Item[]} annotations
-	 * @param {Integer} parentID Creates standalone note if not provided
+	 * @param {Object} options
+	 * @param {Integer} options.parentID - Creates standalone note if not provided
+	 * @param {Integer} options.collectionID - Only valid if parentID not provided
 	 * @returns {Promise<Zotero.Item>}
 	 */
-	static async createNoteFromAnnotations(annotations, parentID) {
+	static async createNoteFromAnnotations(annotations, { parentID, collectionID } = {}) {
 		if (!annotations.length) {
 			throw new Error("No annotations provided");
 		}
@@ -1236,7 +1238,12 @@ class EditorInstance {
 
 		let note = new Zotero.Item('note');
 		note.libraryID = annotations[0].libraryID;
-		note.parentID = parentID;
+		if (parentID) {
+			note.parentID = parentID;
+		}
+		else if (collectionID) {
+			note.addToCollection(collectionID);
+		}
 		await note.saveTx();
 		let editorInstance = new EditorInstance();
 		editorInstance._item = note;
