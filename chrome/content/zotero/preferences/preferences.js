@@ -88,7 +88,7 @@ var Zotero_Preferences = {
 			if (io.pane) {
 				let tabID = io.tab;
 				let tabIndex = io.tabIndex;
-				var pane = document.getElementById(io.pane);
+				var pane = this.panes.get(io.pane);
 				this.navigation.value = io.pane;
 				// Select tab within pane by tab id
 				if (tabID !== undefined) {
@@ -99,7 +99,7 @@ var Zotero_Preferences = {
 				}
 				// Select tab within pane by index
 				else if (tabIndex !== undefined) {
-					let tabBox = pane.querySelector('tabbox');
+					let tabBox = pane.container.querySelector('tabbox');
 					if (tabBox) {
 						tabBox.selectedIndex = tabIndex;
 					}
@@ -233,7 +233,6 @@ var Zotero_Preferences = {
 		this.navigation.append(listItem);
 
 		let container = document.createXULElement('vbox');
-		container.id = id;
 		container.hidden = true;
 		this.content.append(container);
 
