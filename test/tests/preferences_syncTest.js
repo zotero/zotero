@@ -3,18 +3,10 @@ describe("Sync Preferences", function () {
 	before(function* () {
 		// Load prefs with sync pane
 		win = yield loadWindow("chrome://zotero/content/preferences/preferences.xhtml", {
-			pane: 'zotero-prefpane-sync',
-			tabIndex: 0
+			pane: 'zotero-prefpane-sync'
 		});
 		doc = win.document;
-		let defer = Zotero.Promise.defer();
-		let pane = doc.getElementById('zotero-prefpane-sync');
-		if (!pane.loaded) {
-			pane.addEventListener('paneload', function () {
-				defer.resolve();
-			});
-			yield defer.promise;
-		}
+		yield win.Zotero_Preferences.waitForFirstPaneLoad();
 	});
 
 	after(function() {

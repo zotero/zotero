@@ -141,7 +141,7 @@ Zotero.PreferencePanes = {
 	
 	_refreshPreferences() {
 		for (let win of Services.wm.getEnumerator("zotero:pref")) {
-			win.Zotero_Preferences.initPanes();
+			win.Zotero_Preferences.clearAndAddPanes();
 		}
 	},
 	

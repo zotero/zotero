@@ -26,15 +26,18 @@
 "use strict";
 
 var Zotero_Preferences = {
+	panes: new Map(),
+	
+	_firstPaneLoadDeferred: Zotero.Promise.defer(),
+	
 	init: function () {
-		this.observerSymbols = [];
-		this.panes = new Map();
+		this._observerSymbols = [];
 		this.navigation = document.getElementById('prefs-navigation');
 		this.content = document.getElementById('prefs-content');
 
 		this.navigation.addEventListener('select', () => this._onNavigationSelect());
 		document.getElementById('prefs-search').addEventListener('command',
-			event => this.search(event.target.value));
+			event => this._search(event.target.value));
 		
 		document.getElementById('prefs-subpane-back-button').addEventListener('command', () => {
 			let parent = this.panes.get(this.navigation.value).parent;
@@ -45,10 +48,14 @@ var Zotero_Preferences = {
 
 		document.getElementById('prefs-search').focus();
 		
-		this.initPanes();
+		this.clearAndAddPanes();
 	},
-	
-	initPanes: function () {
+
+	/**
+	 * (Re)initialize the preference window, adding all panes registered with Zotero.PreferencePanes.
+	 * Current selected pane and scroll position are saved and restored after load.
+	 */
+	clearAndAddPanes: function () {
 		// Save positions and clear content in case we're reinitializing
 		// because of a plugin lifecycle event
 		let navigationValue = this.navigation.value;
@@ -59,12 +66,12 @@ var Zotero_Preferences = {
 		let contentScrollLeft = this.content.scrollLeft;
 		this.content.replaceChildren();
 		
-		Zotero.PreferencePanes.builtInPanes.forEach(pane => this.addPane(pane));
+		Zotero.PreferencePanes.builtInPanes.forEach(pane => this._addPane(pane));
 		if (Zotero.PreferencePanes.pluginPanes.length) {
 			this.navigation.append(document.createElement('hr'));
 			Zotero.PreferencePanes.pluginPanes
 				.sort((a, b) => Zotero.localeCompare(a.rawLabel, b.rawLabel))
-				.forEach(pane => this.addPane(pane));
+				.forEach(pane => this._addPane(pane));
 		}
 
 		if (navigationValue) {
@@ -92,7 +99,10 @@ var Zotero_Preferences = {
 				}
 				// Select tab within pane by index
 				else if (tabIndex !== undefined) {
-					pane.querySelector('tabbox').selectedIndex = tabIndex;
+					let tabBox = pane.querySelector('tabbox');
+					if (tabBox) {
+						tabBox.selectedIndex = tabIndex;
+					}
 				}
 			}
 		}
@@ -110,13 +120,63 @@ var Zotero_Preferences = {
 	},
 	
 	onUnload: function () {
-		if (Zotero_Preferences.Debug_Output) {
-			Zotero_Preferences.Debug_Output.onUnload();
+		while (this._observerSymbols.length) {
+			Zotero.Prefs.unregisterObserver(this._observerSymbols.shift());
 		}
+	},
+	
+	waitForFirstPaneLoad: async function () {
+		await this._firstPaneLoadDeferred.promise;
+	},
 
-		while (this.observerSymbols.length) {
-			Zotero.Prefs.unregisterObserver(this.observerSymbols.shift());
+	/**
+	 * Select a pane in the navigation sidebar, displaying its content.
+	 * Clears the current search and hides all other panes' content.
+	 *
+	 * @param {String} id
+	 */
+	navigateToPane(id) {
+		this.navigation.value = id;
+	},
+
+	openHelpLink: function () {
+		// TODO: Re-add help and update this for new preferences architecture
+
+		var url = "http://www.zotero.org/support/preferences/";
+		var helpTopic = document.getElementsByTagName("prefwindow")[0].currentPane.helpTopic;
+		url += helpTopic;
+
+		Zotero.launchURL(url);
+	},
+
+	/**
+	 * Opens a URI in the basic viewer
+	 */
+	openInViewer: function (uri) {
+		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+			.getService(Components.interfaces.nsIWindowMediator);
+		var win = wm.getMostRecentWindow("zotero:basicViewer");
+		if (win) {
+			win.loadURI(uri);
 		}
+		else {
+			window.openDialog("chrome://zotero/content/standalone/basicViewer.xhtml",
+				"basicViewer", "chrome,resizable,centerscreen,menubar,scrollbars", uri);
+		}
+	},
+
+	_onNavigationSelect() {
+		for (let child of this.content.children) {
+			child.setAttribute('hidden', true);
+		}
+		let paneID = this.navigation.value;
+		if (paneID) {
+			this.content.scrollTop = 0;
+			document.getElementById('prefs-search').value = '';
+			this._search('');
+			this._loadAndDisplayPane(paneID);
+		}
+		Zotero.Prefs.set('lastSelectedPrefPane', paneID);
 	},
 
 	/**
@@ -138,7 +198,7 @@ var Zotero_Preferences = {
 	 * 		namespaced under `html:`. Default behavior is the opposite: whitespace nodes are preserved,
 	 * 		HTML is the default namespace, and XUL tags are under `xul:`.
 	 */
-	async addPane(options) {
+	_addPane(options) {
 		let { id, parent, label, rawLabel, image } = options;
 
 		let listItem = document.createXULElement('richlistitem');
@@ -185,16 +245,6 @@ var Zotero_Preferences = {
 	},
 
 	/**
-	 * Select a pane in the navigation sidebar, displaying its content.
-	 * Clears the current search and hides all other panes' content.
-	 *
-	 * @param {String} id
-	 */
-	navigateToPane(id) {
-		this.navigation.value = id;
-	},
-
-	/**
 	 * Display a pane's content, alongside any other panes already showing.
 	 * If the pane is not yet loaded, it will be loaded first.
 	 *
@@ -216,7 +266,7 @@ var Zotero_Preferences = {
 			];
 			let contentFragment = pane.defaultXUL
 				? MozXULElement.parseXULToFragment(markup, dtdFiles)
-				: this.parseXHTMLToFragment(markup, dtdFiles);
+				: this._parseXHTMLToFragment(markup, dtdFiles);
 			contentFragment = document.importNode(contentFragment, true);
 			pane.container.append(contentFragment);
 			pane.imported = true;
@@ -230,7 +280,7 @@ var Zotero_Preferences = {
 		backButton.hidden = !pane.parent;
 	},
 	
-	parseXHTMLToFragment(str, entities = []) {
+	_parseXHTMLToFragment(str, entities = []) {
 		// Adapted from MozXULElement.parseXULToFragment
 
 		/* eslint-disable indent */
@@ -260,6 +310,59 @@ ${str}
 		return range.extractContents();
 	},
 
+	_initImportedNodes(root) {
+		// Activate `preference` attributes
+		for (let elem of root.querySelectorAll('[preference]')) {
+			let preference = elem.getAttribute('preference');
+			if (root.querySelector('preferences > preference#' + preference)) {
+				Zotero.warn('<preference> is deprecated -- `preference` attribute values '
+					+ 'should be full preference keys, not <preference> IDs');
+				preference = root.querySelector('preferences > preference#' + preference)
+					.getAttribute('name');
+			}
+
+			let useChecked = (elem instanceof HTMLInputElement && elem.type == 'checkbox')
+				|| elem.tagName == 'checkbox';
+
+			elem.addEventListener(elem instanceof XULElement ? 'command' : 'input', () => {
+				let value = useChecked ? elem.checked : elem.value;
+				Zotero.Prefs.set(preference, value, true);
+				elem.dispatchEvent(new Event('synctopreference'));
+			});
+
+			let syncFromPref = () => {
+				let value = Zotero.Prefs.get(preference, true);
+				if (useChecked) {
+					elem.checked = value;
+				}
+				else {
+					elem.value = value;
+				}
+				elem.dispatchEvent(new Event('syncfrompreference'));
+			};
+
+			// Set timeout so pane can add listeners first
+			setTimeout(() => {
+				syncFromPref();
+				this._observerSymbols.push(Zotero.Prefs.registerObserver(preference, syncFromPref, true));
+
+				// If this is the first pane to be loaded, notify anyone waiting
+				// (for tests)
+				this._firstPaneLoadDeferred.resolve();
+			});
+		}
+
+		// parseXULToFragment() doesn't convert oncommand attributes into actual
+		// listeners, so we'll do it here
+		for (let elem of root.querySelectorAll('[oncommand]')) {
+			elem.oncommand = elem.getAttribute('oncommand');
+		}
+
+		for (let child of root.children) {
+			child.dispatchEvent(new Event('load'));
+		}
+	},
+
 	/**
 	 * If term is falsy, clear the current search and show the first pane.
 	 * If term is truthy, execute a search:
@@ -270,7 +373,7 @@ ${str}
 	 *
 	 * @param {String} [term]
 	 */
-	search(term) {
+	_search(term) {
 		// Initial housekeeping:
 
 		// Clear existing highlights
@@ -328,7 +431,7 @@ ${str}
 			if (!root) continue;
 
 			for (let child of root.children) {
-				let matches = this._searchRecursively(child, term);
+				let matches = this._findNodesMatching(child, term);
 				if (matches.length) {
 					let touchedTabPanels = new Set();
 					for (let node of matches) {
@@ -394,7 +497,7 @@ ${str}
 	 * @param {String} term Must be normalized (normalizeSearch())
 	 * @return {Node[]}
 	 */
-	_searchRecursively(root, term) {
+	_findNodesMatching(root, term) {
 		const EXCLUDE_SELECTOR = 'input, [hidden="true"], [no-highlight]';
 
 		let matched = new Set();
@@ -496,142 +599,12 @@ ${str}
 		}
 		return node?.closest(selector);
 	},
-
-	_onNavigationSelect() {
-		for (let child of this.content.children) {
-			child.setAttribute('hidden', true);
-		}
-		let paneID = this.navigation.value;
-		if (paneID) {
-			this.content.scrollTop = 0;
-			document.getElementById('prefs-search').value = '';
-			this.search('');
-			this._loadAndDisplayPane(paneID);
-		}
-		Zotero.Prefs.set('lastSelectedPrefPane', paneID);
-	},
-
-	_initImportedNodes(root) {
-		// Activate `preference` attributes
-		for (let elem of root.querySelectorAll('[preference]')) {
-			let preference = elem.getAttribute('preference');
-			if (root.querySelector('preferences > preference#' + preference)) {
-				Zotero.debug('<preference> is deprecated -- `preference` attribute values '
-					+ 'should be full preference keys, not <preference> IDs');
-				preference = root.querySelector('preferences > preference#' + preference)
-					.getAttribute('name');
-			}
-
-			let useChecked = (elem instanceof HTMLInputElement && elem.type == 'checkbox')
-				|| elem.tagName == 'checkbox';
-			
-			elem.addEventListener(elem instanceof XULElement ? 'command' : 'input', () => {
-				let value = useChecked ? elem.checked : elem.value;
-				Zotero.Prefs.set(preference, value, true);
-				elem.dispatchEvent(new Event('synctopreference'));
-			});
-
-			let syncFromPref = () => {
-				let value = Zotero.Prefs.get(preference, true);
-				if (useChecked) {
-					elem.checked = value;
-				}
-				else {
-					elem.value = value;
-				}
-				elem.dispatchEvent(new Event('syncfrompreference'));
-			};
-
-			// Set timeout so pane can add listeners first
-			setTimeout(() => {
-				syncFromPref();
-				this.observerSymbols.push(Zotero.Prefs.registerObserver(preference, syncFromPref, true));
-			});
-		}
-
-		// parseXULToFragment() doesn't convert oncommand attributes into actual
-		// listeners, so we'll do it here
-		for (let elem of root.querySelectorAll('[oncommand]')) {
-			elem.oncommand = elem.getAttribute('oncommand');
-		}
-
-		for (let child of root.children) {
-			child.dispatchEvent(new Event('load'));
-		}
-	},
-	
-	openURL: function (url, windowName) {
-		// Non-instantApply prefwindows are usually modal, so we can't open in the topmost window,
-		// since it's probably behind the window
-		var instantApply = Zotero.Prefs.get("browser.preferences.instantApply", true);
-		
-		if (instantApply) {
-			window.opener.ZoteroPane_Local.loadURI(url, { shiftKey: true, metaKey: true });
-		}
-		else {
-			if (Zotero.isStandalone) {
-				var io = Components.classes['@mozilla.org/network/io-service;1']
-							.getService(Components.interfaces.nsIIOService);
-				var uri = io.newURI(url, null, null);
-				var handler = Components.classes['@mozilla.org/uriloader/external-protocol-service;1']
-							.getService(Components.interfaces.nsIExternalProtocolService)
-							.getProtocolHandlerInfo('http');
-				handler.preferredAction = Components.interfaces.nsIHandlerInfo.useSystemDefault;
-				handler.launchWithURI(uri, null);
-			}
-			else {
-				var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-							.getService(Components.interfaces.nsIWindowWatcher);
-				var win = ww.openWindow(
-					window,
-					url,
-					windowName ? windowName : null,
-					"chrome=no,menubar=yes,location=yes,toolbar=yes,personalbar=yes,resizable=yes,scrollbars=yes,status=yes",
-					null
-				);
-			}
-		}
-	},
-	
-	openHelpLink: function () {
-		var url = "http://www.zotero.org/support/preferences/";
-		var helpTopic = document.getElementsByTagName("prefwindow")[0].currentPane.helpTopic;
-		url += helpTopic;
-		
-		this.openURL(url, "helpWindow");
-	},
-	
 	
 	/**
-	 * Opens a URI in the basic viewer in Standalone, or a new window in Firefox
+	 * @deprecated Use {@link Zotero.launchURL}
 	 */
-	openInViewer: function (uri, newTab) {
-		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-			.getService(Components.interfaces.nsIWindowMediator);
-		const features = "menubar=yes,toolbar=no,location=no,scrollbars,centerscreen,resizable";
-		
-		if(Zotero.isStandalone) {
-			var win = wm.getMostRecentWindow("zotero:basicViewer");
-			if(win) {
-				win.loadURI(uri);
-			} else {
-				window.openDialog("chrome://zotero/content/standalone/basicViewer.xhtml",
-					"basicViewer", "chrome,resizable,centerscreen,menubar,scrollbars", uri);
-			}
-		} else {
-			var win = wm.getMostRecentWindow("navigator:browser");
-			if(win) {
-				if(newTab) {
-					win.gBrowser.selectedTab = win.gBrowser.addTab(uri);
-				} else {
-					win.open(uri, null, features);
-				}
-			}
-			else {
-				var ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
-							.getService(Components.interfaces.nsIWindowWatcher);
-				var win = ww.openWindow(null, uri, null, features + ",width=775,height=575", null);
-			}
-		}
+	openURL: function (url) {
+		Zotero.warn("Zotero_Preferences.openURL() is deprecated -- use Zotero.launchURL()");
+		Zotero.launchURL(url);
 	}
 };
