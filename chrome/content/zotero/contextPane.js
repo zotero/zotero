@@ -663,7 +663,7 @@ var ZoteroContextPane = new function () {
 			updateFromCache: () => _updateNotesList(true)
 		};
 		
-		function _handleListPopupClick(id, event) {
+		function _handleListPopupCommand(id, event) {
 			switch (event.originalTarget.id) {
 				case 'context-pane-list-show-in-library':
 					ZoteroPane_Local.selectItem(id);
@@ -686,7 +686,7 @@ var ZoteroContextPane = new function () {
 			}
 		}
 		
-		function _handleAddChildNotePopupClick(event) {
+		function _handleAddChildNotePopupCommand(event) {
 			if (readOnly) {
 				return;
 			}
@@ -703,7 +703,7 @@ var ZoteroContextPane = new function () {
 			}
 		}
 
-		function _handleAddStandaloneNotePopupClick(event) {
+		function _handleAddStandaloneNotePopupCommand(event) {
 			if (readOnly) {
 				return;
 			}
@@ -732,21 +732,21 @@ var ZoteroContextPane = new function () {
 				onContextMenu={(id, event) => {
 					document.getElementById('context-pane-list-move-to-trash').setAttribute('disabled', readOnly);
 					var popup = document.getElementById('context-pane-list-popup');
-					popup.onclick = (event) => _handleListPopupClick(id, event);
-					popup.openPopupAtScreen(event.screenX, event.screenY);
+					popup.addEventListener('command', (event) => _handleListPopupCommand(id, event));
+					popup.openPopupAtScreen(event.screenX, event.screenY, true);
 				}}
 				onAddChildButtonDown={(event) => {
 					document.getElementById('context-pane-add-child-note').setAttribute('disabled', readOnly);
 					document.getElementById('context-pane-add-child-note-from-annotations').setAttribute('disabled', readOnly);
 					var popup = document.getElementById('context-pane-add-child-note-button-popup');
-					popup.onclick = _handleAddChildNotePopupClick;
+					popup.addEventListener('command', _handleAddChildNotePopupCommand);
 					popup.openPopup(event.target, 'after_end');
 				}}
 				onAddStandaloneButtonDown={(event) => {
 					document.getElementById('context-pane-add-standalone-note').setAttribute('disabled', readOnly);
 					document.getElementById('context-pane-add-standalone-note-from-annotations').setAttribute('disabled', readOnly);
 					var popup = document.getElementById('context-pane-add-standalone-note-button-popup');
-					popup.onclick = _handleAddStandaloneNotePopupClick;
+					popup.addEventListener('command', _handleAddStandaloneNotePopupCommand);
 					popup.openPopup(event.target, 'after_end');
 				}}
 			/>,
