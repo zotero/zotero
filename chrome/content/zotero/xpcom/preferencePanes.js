@@ -35,6 +35,7 @@ Zotero.PreferencePanes = {
 			src: 'chrome://zotero/content/preferences/preferences_general.xhtml',
 			scripts: ['chrome://zotero/content/preferences/preferences_general.js'],
 			defaultXUL: true,
+			helpURL: 'https://www.zotero.org/support/preferences/general',
 		},
 		{
 			id: 'zotero-prefpane-sync',
@@ -43,6 +44,7 @@ Zotero.PreferencePanes = {
 			src: 'chrome://zotero/content/preferences/preferences_sync.xhtml',
 			scripts: ['chrome://zotero/content/preferences/preferences_sync.js'],
 			defaultXUL: true,
+			helpURL: 'https://www.zotero.org/support/preferences/sync',
 		},
 		{
 			id: 'zotero-prefpane-export',
@@ -51,6 +53,7 @@ Zotero.PreferencePanes = {
 			src: 'chrome://zotero/content/preferences/preferences_export.xhtml',
 			scripts: ['chrome://zotero/content/preferences/preferences_export.js'],
 			defaultXUL: true,
+			helpURL: 'https://www.zotero.org/support/preferences/export',
 		},
 		{
 			id: 'zotero-prefpane-cite',
@@ -59,6 +62,7 @@ Zotero.PreferencePanes = {
 			src: 'chrome://zotero/content/preferences/preferences_cite.xhtml',
 			scripts: ['chrome://zotero/content/preferences/preferences_cite.js'],
 			defaultXUL: true,
+			helpURL: 'https://www.zotero.org/support/preferences/cite',
 		},
 		{
 			id: 'zotero-prefpane-advanced',
@@ -67,6 +71,7 @@ Zotero.PreferencePanes = {
 			src: 'chrome://zotero/content/preferences/preferences_advanced.xhtml',
 			scripts: ['chrome://zotero/content/preferences/preferences_advanced.js'],
 			defaultXUL: true,
+			helpURL: 'https://www.zotero.org/support/preferences/advanced',
 		},
 		{
 			id: 'zotero-subpane-reset-sync',
@@ -75,6 +80,7 @@ Zotero.PreferencePanes = {
 			src: 'chrome://zotero/content/preferences/preferences_sync_reset.xhtml',
 			scripts: ['chrome://zotero/content/preferences/preferences_sync.js'],
 			defaultXUL: true,
+			helpURL: 'https://www.zotero.org/support/preferences/sync#reset',
 		}
 	]),
 
@@ -99,6 +105,8 @@ Zotero.PreferencePanes = {
 	 * 		If not provided, the plugin's icon (from manifest.json) is used
 	 * @param {String[]} [options.extraDTD] Array of URIs of DTD files to use for parsing the XHTML fragment
 	 * @param {String[]} [options.scripts] Array of URIs of scripts to load along with the pane
+	 * @param {String[]} [options.helpURL] If provided, a help button will be displayed under the pane
+	 * 		and the provided URL will open when it is clicked
 	 * @return {Promise<String>} Resolves to the ID of the pane if successfully added
 	 */
 	register: async function (options) {
@@ -120,6 +128,7 @@ Zotero.PreferencePanes = {
 			extraDTD: options.extraDTD,
 			scripts: options.scripts,
 			defaultXUL: false,
+			helpURL: options.helpURL,
 		};
 
 		this.pluginPanes.push(addPaneOptions);

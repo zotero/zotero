@@ -34,6 +34,7 @@ var Zotero_Preferences = {
 		this._observerSymbols = [];
 		this.navigation = document.getElementById('prefs-navigation');
 		this.content = document.getElementById('prefs-content');
+		this.helpContainer = document.getElementById('prefs-help-container');
 
 		this.navigation.addEventListener('select', () => this._onNavigationSelect());
 		document.getElementById('prefs-search').addEventListener('command',
@@ -64,7 +65,8 @@ var Zotero_Preferences = {
 		this.navigation.replaceChildren();
 		let contentScrollTop = this.content.scrollTop;
 		let contentScrollLeft = this.content.scrollLeft;
-		this.content.replaceChildren();
+		// Remove all children besides the help container
+		this.content.replaceChildren(this.helpContainer);
 		
 		Zotero.PreferencePanes.builtInPanes.forEach(pane => this._addPane(pane));
 		if (Zotero.PreferencePanes.pluginPanes.length) {
@@ -140,13 +142,10 @@ var Zotero_Preferences = {
 	},
 
 	openHelpLink: function () {
-		// TODO: Re-add help and update this for new preferences architecture
-
-		var url = "http://www.zotero.org/support/preferences/";
-		var helpTopic = document.getElementsByTagName("prefwindow")[0].currentPane.helpTopic;
-		url += helpTopic;
-
-		Zotero.launchURL(url);
+		let helpURL = this.panes.get(this.navigation.value)?.helpURL;
+		if (helpURL) {
+			Zotero.launchURL(helpURL);
+		}
 	},
 
 	/**
@@ -167,7 +166,9 @@ var Zotero_Preferences = {
 
 	_onNavigationSelect() {
 		for (let child of this.content.children) {
-			child.setAttribute('hidden', true);
+			if (child !== this.helpContainer) {
+				child.setAttribute('hidden', true);
+			}
 		}
 		let paneID = this.navigation.value;
 		if (paneID) {
@@ -197,6 +198,8 @@ var Zotero_Preferences = {
 	 * 		whitespace-only text nodes are ignored, XUL is the default namespace, and HTML tags are
 	 * 		namespaced under `html:`. Default behavior is the opposite: whitespace nodes are preserved,
 	 * 		HTML is the default namespace, and XUL tags are under `xul:`.
+	 * @param {String} [options.helpURL] If provided, a help button will be displayed under the pane
+	 * 		and the provided URL will open when it is clicked
 	 */
 	_addPane(options) {
 		let { id, parent, label, rawLabel, image } = options;
@@ -234,7 +237,7 @@ var Zotero_Preferences = {
 
 		let container = document.createXULElement('vbox');
 		container.hidden = true;
-		this.content.append(container);
+		this.helpContainer.before(container);
 
 		this.panes.set(id, {
 			...options,
@@ -395,11 +398,15 @@ ${str}
 			if (this.navigation.selectedIndex == -1) {
 				this.navigation.selectedIndex = 0;
 			}
+			this.helpContainer.hidden = !this.panes.get(this.navigation.value)?.helpURL;
 			return;
 		}
 
 		// Clear pane selection
 		this.navigation.clearSelection();
+		
+		// Don't show help button when searching
+		this.helpContainer.hidden = true;
 
 		// Make sure all panes are loaded into the DOM and show top-level ones
 		for (let [id, pane] of this.panes) {
