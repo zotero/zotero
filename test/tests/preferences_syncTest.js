@@ -112,7 +112,6 @@ describe("Sync Preferences", function () {
 
 				getAPIKeyFromCredentialsStub.resolves(apiResponse);
 				await setCredentials("Username", "correctPassword");
-				
 				assert.isTrue(syncError.hidden);
 			});
 		})
