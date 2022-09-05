@@ -38,7 +38,6 @@ var { renderCell } = VirtualizedTable;
 Zotero_Preferences.Sync = {
 	checkmarkChar: '\u2705',
 	noChar: '\uD83D\uDEAB',
-	syncOnClose: false,
 	
 	init: async function () {
 		this.updateStorageSettingsUI();
