@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+import FilePicker from 'zotero/modules/filePicker';
+
 class ReaderInstance {
 	constructor() {
 		this.pdfStateFileName = '.zotero-pdf-state';
@@ -395,6 +397,54 @@ class ReaderInstance {
 			);
 			return !index;
 		};
+
+		this._iframeWindow.wrappedJSObject.zoteroCopyImage = async (dataURL) => {
+			let parts = dataURL.split(',');
+			if (!parts[0].includes('base64')) {
+				return;
+			}
+			let bstr = atob(parts[1]);
+			let n = bstr.length;
+			let u8arr = new Uint8Array(n);
+			while (n--) {
+				u8arr[n] = bstr.charCodeAt(n);
+			}
+			let imgTools = Components.classes["@mozilla.org/image/tools;1"]
+				.getService(Components.interfaces.imgITools);
+			let transferable = Components.classes['@mozilla.org/widget/transferable;1']
+				.createInstance(Components.interfaces.nsITransferable);
+			let clipboardService = Components.classes['@mozilla.org/widget/clipboard;1']
+				.getService(Components.interfaces.nsIClipboard);
+			let imgPtr = Components.classes["@mozilla.org/supports-interface-pointer;1"]
+				.createInstance(Components.interfaces.nsISupportsInterfacePointer);
+			let mimeType = `image/png`;
+			imgPtr.data = imgTools.decodeImageFromArrayBuffer(u8arr.buffer, mimeType);
+			transferable.init(null);
+			transferable.addDataFlavor(mimeType);
+			transferable.setTransferData(mimeType, imgPtr, 0);
+			clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
+		};
+
+		this._iframeWindow.wrappedJSObject.zoteroSaveImageAs = async (dataURL) => {
+			let fp = new FilePicker();
+			fp.init(this._iframeWindow, Zotero.getString('pdfReader.saveImageAs'), fp.modeSave);
+			fp.appendFilter("PNG", "*.png");
+			fp.defaultString = Zotero.getString('fileTypes.image').toLowerCase() + '.png';
+			let rv = await fp.show();
+			if (rv === fp.returnOK || rv === fp.returnReplace) {
+				let outputPath = fp.file;
+				let parts = dataURL.split(',');
+				if (parts[0].includes('base64')) {
+					let bstr = atob(parts[1]);
+					let n = bstr.length;
+					let u8arr = new Uint8Array(n);
+					while (n--) {
+						u8arr[n] = bstr.charCodeAt(n);
+					}
+					await OS.File.writeAtomic(outputPath, u8arr);
+				}
+			}
+		};
 	}
 
 	async _setState(state) {
@@ -647,6 +697,26 @@ class ReaderInstance {
 		}
 		// Separator
 		popup.appendChild(this._window.document.createXULElement('menuseparator'));
+
+		if (data.enableImageOptions) {
+			// Copy Image
+			menuitem = this._window.document.createXULElement('menuitem');
+			menuitem.setAttribute('label', Zotero.getString('pdfReader.copyImage'));
+			menuitem.addEventListener('command', () => {
+				this._postMessage({ action: 'popupCmd', cmd: 'copyImage', data });
+			});
+			popup.appendChild(menuitem);
+			// Save Image As…
+			menuitem = this._window.document.createXULElement('menuitem');
+			menuitem.setAttribute('label', Zotero.getString('pdfReader.saveImageAs'));
+			menuitem.addEventListener('command', () => {
+				this._postMessage({ action: 'popupCmd', cmd: 'saveImageAs', data });
+			});
+			popup.appendChild(menuitem);
+			// Separator
+			popup.appendChild(this._window.document.createXULElement('menuseparator'));
+		}
+
 		// Delete
 		menuitem = this._window.document.createXULElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('general.delete'));
