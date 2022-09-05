@@ -25,6 +25,8 @@
 
 Components.utils.import("resource://gre/modules/InlineSpellChecker.jsm");
 
+import FilePicker from 'zotero/modules/filePicker';
+
 // Note: TinyMCE is automatically doing some meaningless corrections to
 // note-editor produced HTML. Which might result to more
 // conflicts, especially in group libraries
@@ -103,6 +105,57 @@ class EditorInstance {
 			});
 			translation.translate();
 			return text;
+		};
+
+		this._iframeWindow.wrappedJSObject.zoteroCopyImage = async (dataURL) => {
+			let parts = dataURL.split(',');
+			if (!parts[0].includes('base64')) {
+				return;
+			}
+			let mime = parts[0].match(/:(.*?);/)[1];
+			let bstr = atob(parts[1]);
+			let n = bstr.length;
+			let u8arr = new Uint8Array(n);
+			while (n--) {
+				u8arr[n] = bstr.charCodeAt(n);
+			}
+			let imgTools = Components.classes["@mozilla.org/image/tools;1"]
+				.getService(Components.interfaces.imgITools);
+			let transferable = Components.classes['@mozilla.org/widget/transferable;1']
+				.createInstance(Components.interfaces.nsITransferable);
+			let clipboardService = Components.classes['@mozilla.org/widget/clipboard;1']
+				.getService(Components.interfaces.nsIClipboard);
+			let imgPtr = Components.classes["@mozilla.org/supports-interface-pointer;1"]
+				.createInstance(Components.interfaces.nsISupportsInterfacePointer);
+			imgPtr.data = imgTools.decodeImageFromArrayBuffer(u8arr.buffer, mime);
+			transferable.init(null);
+			transferable.addDataFlavor(mime);
+			transferable.setTransferData(mime, imgPtr, 0);
+			clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
+		};
+
+		this._iframeWindow.wrappedJSObject.zoteroSaveImageAs = async (dataURL) => {
+			let parts = dataURL.split(',');
+			if (!parts[0].includes('base64')) {
+				return;
+			}
+			let mime = parts[0].match(/:(.*?);/)[1];
+			let bstr = atob(parts[1]);
+			let n = bstr.length;
+			let u8arr = new Uint8Array(n);
+			while (n--) {
+				u8arr[n] = bstr.charCodeAt(n);
+			}
+			let ext = Zotero.MIME.getPrimaryExtension(mime, '');
+			let fp = new FilePicker();
+			fp.init(this._iframeWindow, Zotero.getString('noteEditor.saveImageAs'), fp.modeSave);
+			fp.appendFilters(fp.filterImages);
+			fp.defaultString = Zotero.getString('fileTypes.image').toLowerCase() + '.' + ext;
+			let rv = await fp.show();
+			if (rv === fp.returnOK || rv === fp.returnReplace) {
+				let outputPath = fp.file;
+				await OS.File.writeAtomic(outputPath, u8arr);
+			}
 		};
 
 		this._iframeWindow.addEventListener('message', this._messageHandler);
