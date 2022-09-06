@@ -1279,6 +1279,7 @@ Zotero.Attachments = new function(){
 	
 	this.canFindPDFForItem = function (item) {
 		return item.isRegularItem()
+			&& !item.isFeedItem
 			&& (!!item.getField('DOI') || !!item.getField('url') || !!item.getExtraField('DOI'))
 			&& item.numPDFAttachments() == 0;
 	};
