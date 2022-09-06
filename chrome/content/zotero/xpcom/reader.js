@@ -403,6 +403,7 @@ class ReaderInstance {
 			if (!parts[0].includes('base64')) {
 				return;
 			}
+			let mime = parts[0].match(/:(.*?);/)[1];
 			let bstr = atob(parts[1]);
 			let n = bstr.length;
 			let u8arr = new Uint8Array(n);
@@ -415,13 +416,11 @@ class ReaderInstance {
 				.createInstance(Components.interfaces.nsITransferable);
 			let clipboardService = Components.classes['@mozilla.org/widget/clipboard;1']
 				.getService(Components.interfaces.nsIClipboard);
-			let imgPtr = Components.classes["@mozilla.org/supports-interface-pointer;1"]
-				.createInstance(Components.interfaces.nsISupportsInterfacePointer);
-			let mimeType = `image/png`;
-			imgPtr.data = imgTools.decodeImageFromArrayBuffer(u8arr.buffer, mimeType);
+			let img = imgTools.decodeImageFromArrayBuffer(u8arr.buffer, mime);
 			transferable.init(null);
-			transferable.addDataFlavor(mimeType);
-			transferable.setTransferData(mimeType, imgPtr, 0);
+			let kNativeImageMime = 'application/x-moz-nativeimage';
+			transferable.addDataFlavor(kNativeImageMime);
+			transferable.setTransferData(kNativeImageMime, img);
 			clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
 		};
 

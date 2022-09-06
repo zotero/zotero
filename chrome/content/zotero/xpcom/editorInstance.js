@@ -125,12 +125,11 @@ class EditorInstance {
 				.createInstance(Components.interfaces.nsITransferable);
 			let clipboardService = Components.classes['@mozilla.org/widget/clipboard;1']
 				.getService(Components.interfaces.nsIClipboard);
-			let imgPtr = Components.classes["@mozilla.org/supports-interface-pointer;1"]
-				.createInstance(Components.interfaces.nsISupportsInterfacePointer);
-			imgPtr.data = imgTools.decodeImageFromArrayBuffer(u8arr.buffer, mime);
+			let img = imgTools.decodeImageFromArrayBuffer(u8arr.buffer, mime);
 			transferable.init(null);
-			transferable.addDataFlavor(mime);
-			transferable.setTransferData(mime, imgPtr, 0);
+			let kNativeImageMime = 'application/x-moz-nativeimage';
+			transferable.addDataFlavor(kNativeImageMime);
+			transferable.setTransferData(kNativeImageMime, img);
 			clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
 		};
 
