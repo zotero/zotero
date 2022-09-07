@@ -286,7 +286,7 @@ var ZoteroContextPane = new function () {
 				}
 				// Tab specific child note
 				else if (libraryContext.selectedIndex == 2) {
-					return libraryContext.querySelector('.zotero-context-pane-tab-notes-deck').selectedPanel.querySelector('zoteronoteeditor');
+					return libraryContext.querySelector('.zotero-context-pane-tab-notes-deck').selectedPanel.querySelector('note-editor');
 				}
 			}
 		}
@@ -461,10 +461,10 @@ var ZoteroContextPane = new function () {
 		editor.setAttribute('flex', 1);
 		noteContainer.append(title, editor);
 
-		var tabNotesContainer = document.createElement('vbox');
-		var title = document.createElement('vbox');
+		var tabNotesContainer = document.createXULElement('vbox');
+		var title = document.createXULElement('vbox');
 		title.className = 'zotero-context-pane-editor-parent-line';
-		let tabNotesDeck = document.createElement('deck');
+		let tabNotesDeck = document.createXULElement('deck');
 		tabNotesDeck.className = 'zotero-context-pane-tab-notes-deck';
 		tabNotesDeck.setAttribute('flex', 1);
 		tabNotesContainer.append(title, tabNotesDeck);
@@ -796,11 +796,11 @@ var ZoteroContextPane = new function () {
 			var tabNotesDeck = _notesPaneDeck.selectedPanel.querySelector('.zotero-context-pane-tab-notes-deck');
 			var parentTitleContainer;
 			if (isChild) {
-				var vbox = document.createElement('vbox');
+				var vbox = document.createXULElement('vbox');
 				vbox.setAttribute('data-tab-id', Zotero_Tabs.selectedID);
 				vbox.style.display = 'flex';
 
-				editor = document.createElement('zoteronoteeditor');
+				editor = new (customElements.get('note-editor'));
 				editor.style.display = 'flex';
 				editor.style.width = '100%';
 				vbox.append(editor);
