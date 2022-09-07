@@ -1601,12 +1601,12 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	 *
 	 * If no label passed, unregister current label
 	 *
-	 * @param {Tooltip} [tooltip]
+	 * @param {π} [tooltip]
 	 */
 	this.registerSyncStatus = function (tooltip) {
 		if (tooltip) {
-			_currentSyncStatusLabel = tooltip.firstChild.nextSibling;
-			_currentLastSyncLabel = tooltip.firstChild.nextSibling.nextSibling;
+			_currentSyncStatusLabel = tooltip.querySelector('.sync-button-tooltip-status');
+			_currentLastSyncLabel = tooltip.querySelector('.sync-button-tooltip-last-sync');
 			_currentTooltipMessages = tooltip.querySelector('.sync-button-tooltip-messages');
 		}
 		else {
