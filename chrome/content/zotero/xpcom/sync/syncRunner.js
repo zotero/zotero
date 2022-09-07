@@ -1601,7 +1601,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 	 *
 	 * If no label passed, unregister current label
 	 *
-	 * @param {π} [tooltip]
+	 * @param {Tooltip} [tooltip]
 	 */
 	this.registerSyncStatus = function (tooltip) {
 		if (tooltip) {
