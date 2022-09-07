@@ -35,7 +35,7 @@
 			this._item = null;
 			this._parentItem = null;
 			this._iframe = null;
-			this._initialized = true;
+			this._initialized = false;
 			this._editorInstance = null;
 			this._destroyed = false;
 
