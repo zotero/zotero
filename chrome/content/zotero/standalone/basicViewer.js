@@ -53,14 +53,7 @@ window.addEventListener("load", /*async */function() {
 	});
 
 	// Load URI passed in as nsISupports .data via openWindow()
-	browser.loadURI(
-		window.arguments[0],
-		{
-			triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal(),
-			//loadFlags: Ci.nsIWebNavigation.LOAD_FLAGS_STOP_CONTENT,
-		}
-	);
-	
+	loadURI(window.arguments[0]);
 }, false);
 
 window.addEventListener("keypress", function (event) {
@@ -79,3 +72,13 @@ window.addEventListener("click", function (event) {
 		Zotero.launchURL(event.originalTarget.getAttribute('href'));
 	}
 });
+
+function loadURI(uri) {
+	browser.loadURI(
+		uri,
+		{
+			triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal(),
+			//loadFlags: Ci.nsIWebNavigation.LOAD_FLAGS_STOP_CONTENT,
+		}
+	);
+}
