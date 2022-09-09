@@ -1226,7 +1226,7 @@ function ZoteroProtocolHandler() {
  */
 ZoteroProtocolHandler.prototype = {
 	get scheme() {
-		return PROTOCOL_SCHEME;
+		return ZOTERO_SCHEME;
 	},
 	get protocolFlags() {
 		/*Components.interfaces.nsIProtocolHandler.URI_NORELATIVE |
