@@ -99,6 +99,7 @@ var ZoteroPane = new function()
 		
 		var zp = document.getElementById('zotero-pane');
 		Zotero.setFontSize(zp);
+		Zotero.setFontSize(document.getElementById('zotero-context-pane'));
 		ZoteroPane_Local.updateLayout();
 		ZoteroPane_Local.updateToolbarPosition();
 		this.updateWindow();

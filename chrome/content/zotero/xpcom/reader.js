@@ -85,6 +85,7 @@ class ReaderInstance {
 			sidebarOpen: this._sidebarOpen,
 			bottomPlaceholderHeight: this._bottomPlaceholderHeight,
 			rtl: Zotero.rtl,
+			fontSize: Zotero.Prefs.get('fontSize'),
 			localizedStrings: {
 				...Zotero.Intl.getPrefixedStrings('general.'),
 				...Zotero.Intl.getPrefixedStrings('pdfReader.')
@@ -92,7 +93,16 @@ class ReaderInstance {
 		}, [buf]);
 		// Set title once again, because `ReaderWindow` isn't loaded the first time
 		this.updateTitle();
+
+		this._prefObserverIDs = [
+			Zotero.Prefs.registerObserver('fontSize', this._handleFontSizeChange)
+		];
+
 		return true;
+	}
+
+	uninit() {
+		this._prefObserverIDs.forEach(id => Zotero.Prefs.unregisterObserver(id));
 	}
 	
 	get itemID() {
@@ -498,6 +508,10 @@ class ReaderInstance {
 			|| item.deleted
 			|| item.parentItem && item.parentItem.deleted;
 	}
+
+	_handleFontSizeChange = () => {
+		this._postMessage({ action: 'setFontSize', fontSize: Zotero.Prefs.get('fontSize') });
+	};
 
 	_dataURLtoBlob(dataurl) {
 		let parts = dataurl.split(',');
@@ -1369,6 +1383,7 @@ class Reader {
 				for (let id of ids) {
 					let reader = Zotero.Reader.getByTabID(id);
 					if (reader) {
+						reader.uninit();
 						this._readers.splice(this._readers.indexOf(reader), 1);
 					}
 				}
