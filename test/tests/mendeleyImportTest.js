@@ -179,11 +179,53 @@ describe('Zotero_Import_Mendeley', function () {
 			// attachment & annotations
 			assert.lengthOf(withpdf.getAttachments(), 1);
 			assert.equal(pdf.parentID, withpdf.id);
+
+			const yellowHighlight = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:annotationUUID', '339d0202-d99f-48a2-aa0d-9b0c5631af26'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+			const redHighlight = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:annotationUUID', '885615a7-170e-4613-af80-0227ea76ae55'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+			const blueNote = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:annotationUUID', 'bfbdb972-171d-4b21-8ae6-f156ac9a2b41'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+			const greenNote = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:annotationUUID', '734743eb-2be3-49ef-b1ac-3f1e84fea2f2'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+			const orangeNote = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:annotationUUID', 'c436932f-b14b-4580-a649-4587a5cdc2c3'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+			const purpleGroupNote = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:annotationUUID', '656fd591-451a-4bb0-8d5f-30c36c135fc9'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+
+			assert.equal(blueNote.annotationComment, 'blue note 2');
+			assert.equal(greenNote.annotationComment, 'green note');
+			assert.equal(orangeNote.annotationComment, 'orange note1');
+			assert.equal(purpleGroupNote.annotationComment, 'note by me');
+			
+			// map yellow	rgb(255, 245, 173) -> #ffd400'
+			assert.equal(yellowHighlight.annotationColor, '#ffd400');
+			// map red:		rgb(255, 181, 182) -> #ff6666
+			assert.equal(redHighlight.annotationColor, '#ff6666');
+			// map blue:	rgb(186, 226, 255) -> '#2ea8e5'
+			assert.equal(blueNote.annotationColor, '#2ea8e5');
+			// map purple:	rgb(211, 194, 255) -> '#a28ae5'
+			assert.equal(purpleGroupNote.annotationColor, '#a28ae5');
+			// map green:	rgb(220, 255, 176) -> #5fb236
+			assert.equal(greenNote.annotationColor, '#5fb236');
+			// preserve other colors rgb(255, 222, 180) stays as #ffdeb4
+			assert.equal(orangeNote.annotationColor, '#ffdeb4');
+
+			// group annotations by others and mismatched annotations are not included
 			const annotations = await pdf.getAnnotations();
-			assert.equal(annotations.length, 5);
-			assert.isTrue(annotations.some(a => a.annotationComment === 'blue note 2'));
-			assert.isTrue(annotations.some(a => a.annotationComment === 'orange note1'));
-			assert.isTrue(annotations.some(a => a.annotationComment === 'note by me'));
+			assert.equal(annotations.length, 6);
 			assert.isFalse(annotations.some(a => a.annotationComment === 'note by other'));
 			assert.isFalse(annotations.some(a => a.annotationComment === 'mismatched note'));
 
