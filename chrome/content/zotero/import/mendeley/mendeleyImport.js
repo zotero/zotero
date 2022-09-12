@@ -12,6 +12,18 @@ Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/men
 const { apiTypeToDBType, apiFieldToDBField } = mendeleyOnlineMappings;
 const { apiFetch, get, getAll, getTokens } = mendeleyAPIUtils;
 
+const colorMap = new Map();
+colorMap.set('rgb(255, 245, 173)', '#ffd400');
+colorMap.set('#fff5ad', '#ffd400');
+colorMap.set('rgb(255, 181, 182)', '#ff6666');
+colorMap.set('#ffb5b6', '#ff6666');
+colorMap.set('rgb(186, 226, 255)', '#2ea8e5');
+colorMap.set('#bae2ff', '#2ea8e5');
+colorMap.set('rgb(211, 194, 255)', '#a28ae5');
+colorMap.set('#d3c2ff', '#a28ae5');
+colorMap.set('rgb(220, 255, 176)', '#5fb236');
+colorMap.set('#dcffb0', '#5fb236');
+
 var Zotero_Import_Mendeley = function () {
 	this.createNewCollection = null;
 	this.linkFiles = null;
@@ -1568,6 +1580,10 @@ Zotero_Import_Mendeley.prototype._saveAnnotations = async function (annotations,
 				}
 				// PDFWorker needs 'id'
 				annotations.forEach(annotation => annotation.id = annotation.uuid);
+				annotations.forEach(annotation => (colorMap.has(annotation.color)
+					? annotation.color = colorMap.get(annotation.color)
+					: annotation.color
+				));
 				// Returns 'id', 'position', 'type', 'pageLabel', 'sortIndex', 'text' (for highlight)
 				Zotero.debug("Processing annotations in " + file);
 				annotations = await Zotero.PDFWorker.processMendeleyAnnotations(file, annotations);
