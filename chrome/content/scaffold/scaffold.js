@@ -271,6 +271,10 @@ var Scaffold = new function () {
 
 	this.initCodeEditor = async function () {
 		let monaco = _editors.codeGlobal, editor = _editors.code;
+		
+		// For some reason, even if we explicitly re-set the default model's language to JavaScript,
+		// Monaco still treats it as TypeScript. Recreating the model manually fixes the issue.
+		editor.setModel(monaco.editor.createModel('', 'javascript', monaco.Uri.parse('inmemory:///translator.js')));
 
 		editor.updateOptions({
 			lineNumbers: num => num + _linesOfMetadata - 1,
@@ -2180,7 +2184,7 @@ var Scaffold = new function () {
 			severity: message.severity * 4,
 			source: 'ESLint',
 			tags: [
-				message.ruleId
+				message.ruleId || '-'
 			]
 		}));
 	}
