@@ -148,7 +148,8 @@ var Zotero_CSL_Editor = new function() {
 	this.onStyleModified = function () {
 		let xml = editor.getValue();
 		let cslList = document.getElementById('zotero-csl-list');
-		if (xml !== Zotero.Styles.get(cslList.value)?.getXML()) {
+		let savedStyle = Zotero.Styles.get(cslList.value);
+		if (!savedStyle || xml !== savedStyle?.getXML()) {
 			cslList.selectedIndex = -1;
 		}
 		
