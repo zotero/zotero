@@ -52,6 +52,42 @@ class ReaderInstance {
 		}
 	}
 
+	async migrateMendeleyColors(libraryID, annotations) {
+		let colorMap = new Map();
+		colorMap.set('#fff5ad', '#ffd400');
+		colorMap.set('#ffb5b6', '#ff6666');
+		colorMap.set('#bae2ff', '#2ea8e5');
+		colorMap.set('#d3c2ff', '#a28ae5');
+		colorMap.set('#dcffb0', '#5fb236');
+		let updatedAnnotations = [];
+		for (let annotation of annotations) {
+			let color = colorMap.get(annotation.color);
+			if (color) {
+				annotation.color = color;
+				updatedAnnotations.push(annotation);
+			}
+		}
+		if (!updatedAnnotations.length) {
+			return false;
+		}
+		Zotero.debug('Migrating Mendeley colors');
+		let notifierQueue = new Zotero.Notifier.Queue();
+		try {
+			for (let annotation of updatedAnnotations) {
+				let { id: key, color } = annotation;
+				let item = Zotero.Items.getByLibraryAndKey(libraryID, key);
+				if (item && item.isEditable()) {
+					item.annotationColor = color;
+					await item.saveTx({ skipDateModifiedUpdate: true, notifierQueue });
+				}
+			}
+		}
+		finally {
+			await Zotero.Notifier.commit(notifierQueue);
+		}
+		return true;
+	}
+
 	async open({ itemID, state, location }) {
 		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
 		let library = Zotero.Libraries.get(libraryID);
@@ -70,6 +106,15 @@ class ReaderInstance {
 		buf = new Uint8Array(buf).buffer;
 		let annotationItems = item.getAnnotations();
 		let annotations = (await Promise.all(annotationItems.map(x => this._getAnnotation(x)))).filter(x => x);
+
+		// TODO: Remove after some time
+		// Migrate Mendeley colors to Zotero PDF reader colors
+		let migrated = await this.migrateMendeleyColors(libraryID, annotations);
+		if (migrated) {
+			annotationItems = item.getAnnotations();
+			annotations = (await Promise.all(annotationItems.map(x => this._getAnnotation(x)))).filter(x => x);
+		}
+
 		this.annotationItemIDs = annotationItems.map(x => x.id);
 		state = state || await this._getState();
 		this._postMessage({
