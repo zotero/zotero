@@ -3,7 +3,6 @@ on: [push, pull_request]
 jobs:
   build:
     name: Build, Upload, Test
-    if: false # temporarily disabled
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -18,7 +17,8 @@ jobs:
       
       # On GitHub
       - name: Install xvfb
-        if: env.ACT != 'true'
+        if: false # temporarily disabled
+        #if: env.ACT != 'true'
         run: sudo apt update && sudo apt install -y xvfb
       
       # Local via act
@@ -27,6 +27,7 @@ jobs:
         run: apt update && apt install -y zstd xvfb dbus-x11 libgtk-3-0 libx11-xcb1 libdbus-glib-1-2 libxt6
       
       - name: Cache Firefox
+        if: false # temporarily disabled
         id: firefox-cache
         uses: actions/cache@v2
         with:
@@ -34,11 +35,13 @@ jobs:
           key: firefox-60.9.0esr
       
       - name: Download Firefox
-        if: steps.firefox-cache.outputs.cache-hit != 'true'
+        if: false # temporarily disabled
+        #if: steps.firefox-cache.outputs.cache-hit != 'true'
         run: wget -O tarball "https://zotero-download.s3.us-east-1.amazonaws.com/dev/firefox-60.9.0esr-x86_64-modified.tar.gz"
       
       - name: Extract Firefox
-        if: steps.firefox-cache.outputs.cache-hit != 'true'
+        if: false # temporarily disabled
+        #if: steps.firefox-cache.outputs.cache-hit != 'true'
         run: tar xvf tarball
       
       - name: Cache Node modules
@@ -60,7 +63,7 @@ jobs:
           env.ACT != 'true'
           && github.repository == 'zotero/zotero'
           && github.event_name == 'push'
-          && (github.ref == 'refs/heads/master' || endsWith(github.ref, '-hotfix') || github.ref == 'refs/heads/gh-actions-ci-test')
+          && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/fx102' || endsWith(github.ref, '-hotfix') || github.ref == 'refs/heads/gh-actions-ci-test')
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -73,6 +76,7 @@ jobs:
           dpl --provider=s3 --bucket=zotero-download --local-dir=build-zip --upload-dir=ci/client --acl=public-read --skip_cleanup=true
       
       - name: Run tests
+        if: false # temporarily disabled
         run: xvfb-run test/runtests.sh -x firefox-x86_64/firefox -f
 
       - name: Cache utilities Node modules
