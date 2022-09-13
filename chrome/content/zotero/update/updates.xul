@@ -1,0 +1,197 @@
+<?xml version="1.0"?>
+
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://mozapps/content/update/updates.css"?>
+<?xml-stylesheet href="chrome://mozapps/skin/update/updates.css"?>
+
+<!DOCTYPE wizard [
+<!ENTITY % updateDTD SYSTEM "chrome://mozapps/locale/update/updates.dtd">
+<!ENTITY % brandDTD SYSTEM "chrome://branding/locale/brand.dtd">
+%updateDTD;
+%brandDTD;
+#if defined(XP_MACOSX) && MOZ_BUILD_APP == browser
+#include ../../../../browser/base/content/browser-doctype.inc
+#endif
+]>
+
+<wizard id="updates"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        xmlns:html="http://www.w3.org/1999/xhtml"
+        title="&updateWizard.title;"
+        windowtype="Update:Wizard"
+        style="width: auto; height: auto"
+        onload="gUpdates.onLoad();"
+        onunload="gUpdates.onUnload();">
+
+  <script src="chrome://global/content/contentAreaUtils.js"/>
+  <script src="chrome://mozapps/content/update/updates.js"/>
+  <script src="chrome://global/content/globalOverlay.js"/>
+  <script src="chrome://global/content/editMenuOverlay.js"/>
+
+#if defined(XP_MACOSX) && MOZ_BUILD_APP == browser
+#include ../../../../browser/base/content/macWindow.inc.xul
+#endif
+
+  <stringbundleset id="updateSet">
+    <stringbundle id="brandStrings" src="chrome://branding/locale/brand.properties"/>
+    <stringbundle id="updateStrings" src="chrome://mozapps/locale/update/updates.properties"/>
+  </stringbundleset>
+
+  <wizardpage id="dummy" pageid="dummy" firstpage="true"/>
+
+  <wizardpage id="checking" pageid="checking" next="noupdatesfound"
+              object="gCheckingPage">
+    <updateheader label="&checking.title;"/>
+    <vbox class="update-content" flex="1">
+      <label>&updateCheck.label;</label>
+      <separator class="thin"/>
+      <html:progress id="checkingProgress"/>
+    </vbox>
+  </wizardpage>
+
+  <wizardpage id="noupdatesfound" pageid="noupdatesfound"
+              object="gNoUpdatesPage">
+    <updateheader label="&noupdatesfound.title;"/>
+    <vbox class="update-content" flex="1">
+      <label id="noUpdatesAutoEnabled" hidden="true">&noupdatesautoenabled.intro;</label>
+      <label id="noUpdatesAutoDisabled" hidden="true">&noupdatesautodisabled.intro;</label>
+    </vbox>
+  </wizardpage>
+
+  <wizardpage id="manualUpdate" pageid="manualUpdate" object="gManualUpdatePage">
+    <updateheader label="&manualUpdate.title;"/>
+    <vbox class="update-content" flex="1">
+      <label id="manualUpdateDesc">&manualUpdate.desc;</label>
+      <label id="manualUpdateSpaceDesc"
+             hidden="true">&manualUpdate.space.desc;</label>
+      <separator class="thin"/>
+      <label>&manualUpdateGetMsg.label;</label>
+      <hbox>
+        <label id="manualUpdateLinkLabel" value="" is="text-link"
+               onclick="openUpdateURL(event);"/>
+      </hbox>
+    </vbox>
+  </wizardpage>
+
+  <wizardpage id="unsupported" pageid="unsupported"
+              object="gUnsupportedPage">
+    <updateheader label="&unsupported.title;"/>
+    <vbox class="update-content" flex="1">
+      <description flex="1">&unsupported.label;
+        <label id="unsupportedLinkLabel" class="inline-link" onclick="openUpdateURL(event);" is="text-link">
+          &unsupportedLink.label;
+        </label>
+      </description>
+    </vbox>
+  </wizardpage>
+
+  <wizardpage id="updatesfoundbasic" pageid="updatesfoundbasic"
+              object="gUpdatesFoundBasicPage" next="downloading">
+    <updateheader id="updatesFoundBasicHeader" label=""/>
+    <vbox class="update-content" flex="1">
+      <label id="updatesFoundInto"/>
+      <separator class="thin"/>
+      <label id="updateName" crop="right" value=""/>
+      <separator id="updateNameSep" class="thin"/>
+      <label id="upgradeEvangelism">&evangelism.desc;</label>
+      <separator id="upgradeEvangelismSep" flex="1"/>
+      <vbox flex="1">
+        <hbox id="moreInfoURL">
+          <label id="updateMoreInfoURL" is="text-link"
+                 value="&clickHere.label;" onclick="openUpdateURL(event);"/>
+        </hbox>
+      </vbox>
+    </vbox>
+  </wizardpage>
+
+  <wizardpage id="downloading" pageid="downloading"
+              object="gDownloadingPage">
+    <updateheader label="&downloadPage.title;"/>
+    <vbox class="update-content" flex="1">
+      <hbox id="downloadStatusProgress">
+        <html:progress id="downloadProgress" max="100"/>
+      </hbox>
+      <separator class="thin"/>
+      <hbox id="downloadStatusLine">
+        <label id="downloadStatus" flex="1">&connecting.label;</label>
+      </hbox>
+      <separator/>
+      <hbox id="verificationFailed" align="start" hidden="true">
+        <image id="verificationFailedIcon"/>
+        <label flex="1">&verificationFailedText.label;</label>
+      </hbox>
+    </vbox>
+  </wizardpage>
+
+  <wizardpage id="errors" pageid="errors" object="gErrorsPage">
+    <updateheader label="&error.title;"/>
+    <vbox class="update-content" flex="1">
+      <label id="errorIntro">&error.label;</label>
+      <separator/>
+      <html:textarea class="plain" readonly="readonly" id="errorReason" rows="3"/>
+      <separator/>
+      <label id="errorManual">&errorManual.label;</label>
+      <hbox>
+        <label id="errorLinkLabel" value="" is="text-link"
+               onclick="openUpdateURL(event);"/>
+      </hbox>
+    </vbox>
+  </wizardpage>
+
+  <wizardpage id="errorextra" pageid="errorextra"
+              object="gErrorExtraPage">
+    <updateheader label="&error.title;"/>
+    <vbox class="update-content" flex="1">
+      <label id="bgErrorLabel">&genericBackgroundError.label;</label>
+      <hbox>
+        <label id="errorExtraLinkLabel" is="text-link"
+               value="" onclick="openUpdateURL(event);"/>
+      </hbox>
+    </vbox>
+  </wizardpage>
+
+  <wizardpage id="errorpatching" pageid="errorpatching" next="downloading"
+              object="gErrorPatchingPage">
+    <updateheader label="&error.title;"/>
+    <vbox class="update-content" flex="1">
+      <label>&errorpatching.intro;</label>
+    </vbox>
+  </wizardpage>
+
+  <wizardpage id="finished" pageid="finished" object="gFinishedPage">
+    <updateheader label="&finishedPage.title;"/>
+    <vbox class="update-content" flex="1">
+      <label>&finishedPage.text;</label>
+    </vbox>
+  </wizardpage>
+
+  <wizardpage id="finishedBackground" pageid="finishedBackground"
+              object="gFinishedPage">
+    <updateheader label="&finishedPage.title;"/>
+    <vbox class="update-content" flex="1">
+      <label>&finishedBackgroundPage.text;</label>
+      <separator/>
+      <hbox align="center">
+        <label>&finishedBackground.name;</label>
+        <label id="updateFinishedName" flex="1" crop="right" value=""/>
+        <label id="finishedBackgroundLink" disabled="true" is="text-link"
+               value="&details.link;" onclick="openUpdateURL(event);"/>
+      </hbox>
+      <spacer flex="1"/>
+      <label id="finishedBackgroundMore">&finishedBackground.more;</label>
+      <label id="finishedBackgroundMoreElevated"
+             hidden="true">&finishedBackground.moreElevated;</label>
+      <label id="finishedBackgroundMoreElevatedLink"
+             hidden="true">&errorManual.label;</label>
+      <hbox>
+        <label id="finishedBackgroundMoreElevatedLinkLabel" is="text-link"
+               value="" onclick="openUpdateURL(event);" hidden="true"/>
+      </hbox>
+    </vbox>
+  </wizardpage>
+
+</wizard>
