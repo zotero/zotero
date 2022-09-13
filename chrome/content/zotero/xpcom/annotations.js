@@ -177,7 +177,7 @@ Zotero.Annotations = new function () {
 			o.tags = tags;
 		}
 		
-		o.dateModified = item.dateModified;
+		o.dateModified = Zotero.Date.sqlToISO8601(item.dateModified);
 		return o;
 	};
 	
