@@ -904,8 +904,6 @@ var Scaffold = new function () {
 		_logOutput(`Running ${functionToRun}`);
 		
 		let input = await _getInput(functionToRun);
-		Zotero.debug('got input')
-		Zotero.debug(input)
 
 		if (functionToRun.endsWith('Export')) {
 			let numItems = Zotero.getActiveZoteroPane().getSelectedItems().length;
