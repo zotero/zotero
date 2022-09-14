@@ -5,20 +5,16 @@
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
-<?xml-stylesheet href="chrome://mozapps/content/update/updates.css"?>
-<?xml-stylesheet href="chrome://mozapps/skin/update/updates.css"?>
+<?xml-stylesheet href="chrome://zotero/content/update/updates.css"?>
 
 <!DOCTYPE wizard [
-<!ENTITY % updateDTD SYSTEM "chrome://mozapps/locale/update/updates.dtd">
+<!ENTITY % updateDTD SYSTEM "chrome://zotero/locale/mozilla/updates.dtd">
 <!ENTITY % brandDTD SYSTEM "chrome://branding/locale/brand.dtd">
 %updateDTD;
 %brandDTD;
-#if defined(XP_MACOSX) && MOZ_BUILD_APP == browser
-#include ../../../../browser/base/content/browser-doctype.inc
-#endif
 ]>
 
-<wizard id="updates"
+<window id="updates"
         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         xmlns:html="http://www.w3.org/1999/xhtml"
         title="&updateWizard.title;"
@@ -27,25 +23,30 @@
         onload="gUpdates.onLoad();"
         onunload="gUpdates.onUnload();">
 
-  <script src="chrome://global/content/contentAreaUtils.js"/>
-  <script src="chrome://mozapps/content/update/updates.js"/>
-  <script src="chrome://global/content/globalOverlay.js"/>
-  <script src="chrome://global/content/editMenuOverlay.js"/>
+<script src="chrome://global/content/customElements.js"/>
+<script src="chrome://global/content/contentAreaUtils.js"/>
+<script src="chrome://global/content/globalOverlay.js"/>
+<script src="chrome://zotero/content/editMenuOverlay.js"/>
+<script src="chrome://zotero/content/update/updates.js"/>
+<script src="chrome://zotero/content/update/update-header.js"/>
 
-#if defined(XP_MACOSX) && MOZ_BUILD_APP == browser
-#include ../../../../browser/base/content/macWindow.inc.xul
-#endif
-
+<wizard>
+  <linkset>
+    <html:link rel="localization" href="toolkit/global/wizard.ftl"/>
+  </linkset>
+  
   <stringbundleset id="updateSet">
     <stringbundle id="brandStrings" src="chrome://branding/locale/brand.properties"/>
-    <stringbundle id="updateStrings" src="chrome://mozapps/locale/update/updates.properties"/>
+    <stringbundle id="updateStrings" src="chrome://zotero/locale/mozilla/updates.properties"/>
   </stringbundleset>
 
-  <wizardpage id="dummy" pageid="dummy" firstpage="true"/>
+  <!-- Disabled to prevent wizard accessMethod from being set to 'sequential'
+       due to lack of "next" attribute. Unclear how this worked in Firefox... -->
+  <!--<wizardpage id="dummy" pageid="dummy" firstpage="true"/>-->
 
   <wizardpage id="checking" pageid="checking" next="noupdatesfound"
               object="gCheckingPage">
-    <updateheader label="&checking.title;"/>
+    <update-header label="&checking.title;"/>
     <vbox class="update-content" flex="1">
       <label>&updateCheck.label;</label>
       <separator class="thin"/>
@@ -55,7 +56,7 @@
 
   <wizardpage id="noupdatesfound" pageid="noupdatesfound"
               object="gNoUpdatesPage">
-    <updateheader label="&noupdatesfound.title;"/>
+    <update-header label="&noupdatesfound.title;"/>
     <vbox class="update-content" flex="1">
       <label id="noUpdatesAutoEnabled" hidden="true">&noupdatesautoenabled.intro;</label>
       <label id="noUpdatesAutoDisabled" hidden="true">&noupdatesautodisabled.intro;</label>
@@ -63,7 +64,7 @@
   </wizardpage>
 
   <wizardpage id="manualUpdate" pageid="manualUpdate" object="gManualUpdatePage">
-    <updateheader label="&manualUpdate.title;"/>
+    <update-header label="&manualUpdate.title;"/>
     <vbox class="update-content" flex="1">
       <label id="manualUpdateDesc">&manualUpdate.desc;</label>
       <label id="manualUpdateSpaceDesc"
@@ -79,7 +80,7 @@
 
   <wizardpage id="unsupported" pageid="unsupported"
               object="gUnsupportedPage">
-    <updateheader label="&unsupported.title;"/>
+    <update-header label="&unsupported.title;"/>
     <vbox class="update-content" flex="1">
       <description flex="1">&unsupported.label;
         <label id="unsupportedLinkLabel" class="inline-link" onclick="openUpdateURL(event);" is="text-link">
@@ -91,7 +92,7 @@
 
   <wizardpage id="updatesfoundbasic" pageid="updatesfoundbasic"
               object="gUpdatesFoundBasicPage" next="downloading">
-    <updateheader id="updatesFoundBasicHeader" label=""/>
+    <update-header id="updatesFoundBasicHeader" label=""/>
     <vbox class="update-content" flex="1">
       <label id="updatesFoundInto"/>
       <separator class="thin"/>
@@ -110,7 +111,7 @@
 
   <wizardpage id="downloading" pageid="downloading"
               object="gDownloadingPage">
-    <updateheader label="&downloadPage.title;"/>
+    <update-header label="&downloadPage.title;"/>
     <vbox class="update-content" flex="1">
       <hbox id="downloadStatusProgress">
         <html:progress id="downloadProgress" max="100"/>
@@ -128,7 +129,7 @@
   </wizardpage>
 
   <wizardpage id="errors" pageid="errors" object="gErrorsPage">
-    <updateheader label="&error.title;"/>
+    <update-header label="&error.title;"/>
     <vbox class="update-content" flex="1">
       <label id="errorIntro">&error.label;</label>
       <separator/>
@@ -144,7 +145,7 @@
 
   <wizardpage id="errorextra" pageid="errorextra"
               object="gErrorExtraPage">
-    <updateheader label="&error.title;"/>
+    <update-header label="&error.title;"/>
     <vbox class="update-content" flex="1">
       <label id="bgErrorLabel">&genericBackgroundError.label;</label>
       <hbox>
@@ -156,14 +157,14 @@
 
   <wizardpage id="errorpatching" pageid="errorpatching" next="downloading"
               object="gErrorPatchingPage">
-    <updateheader label="&error.title;"/>
+    <update-header label="&error.title;"/>
     <vbox class="update-content" flex="1">
       <label>&errorpatching.intro;</label>
     </vbox>
   </wizardpage>
 
   <wizardpage id="finished" pageid="finished" object="gFinishedPage">
-    <updateheader label="&finishedPage.title;"/>
+    <update-header label="&finishedPage.title;"/>
     <vbox class="update-content" flex="1">
       <label>&finishedPage.text;</label>
     </vbox>
@@ -171,7 +172,7 @@
 
   <wizardpage id="finishedBackground" pageid="finishedBackground"
               object="gFinishedPage">
-    <updateheader label="&finishedPage.title;"/>
+    <update-header label="&finishedPage.title;"/>
     <vbox class="update-content" flex="1">
       <label>&finishedBackgroundPage.text;</label>
       <separator/>
@@ -195,3 +196,4 @@
   </wizardpage>
 
 </wizard>
+</window>

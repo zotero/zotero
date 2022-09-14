@@ -688,7 +688,7 @@ const ZoteroStandalone = new function() {
 	 * Checks for updates
 	 */
 	this.checkForUpdates = function() {
-		window.open('chrome://mozapps/content/update/updates.xul', 'updateChecker', 'chrome,centerscreen');
+		window.open('chrome://zotero/content/update/updates.xhtml', 'updateChecker', 'chrome,centerscreen');
 	}
 	
 	/**

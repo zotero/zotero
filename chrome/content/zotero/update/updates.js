@@ -8,21 +8,14 @@
 /* import-globals-from ../../../content/contentAreaUtils.js */
 
 /* globals DownloadUtils, Services, AUSTLMY */
-ChromeUtils.import("resource://gre/modules/DownloadUtils.jsm", this);
-ChromeUtils.import("resource://gre/modules/Services.jsm", this);
-ChromeUtils.import("resource://gre/modules/UpdateTelemetry.jsm", this);
-ChromeUtils.defineModuleGetter(
-  this,
-  "UpdateUtils",
-  "resource://gre/modules/UpdateUtils.jsm"
-);
+const { Zotero } = ChromeUtils.import("chrome://zotero/content/include.jsm");
 
-XPCOMUtils.defineLazyServiceGetter(
-  this,
-  "gAUS",
-  "@mozilla.org/updates/update-service;1",
-  "nsIApplicationUpdateService"
+const { DownloadUtils } = ChromeUtils.import(
+  "resource://gre/modules/DownloadUtils.jsm"
 );
+const { UpdateUtils } = ChromeUtils.import("resource://gre/modules/UpdateUtils.jsm");
+
+const gAUS = Cc["@mozilla.org/updates/update-service;1"].getService(Ci.nsIApplicationUpdateService);
 
 const XMLNS_XUL =
   "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
@@ -35,7 +28,7 @@ const PREF_APP_UPDATE_NOTIFIEDUNSUPPORTED = "app.update.notifiedUnsupported";
 const PREF_APP_UPDATE_URL_MANUAL = "app.update.url.manual";
 
 const URI_UPDATES_PROPERTIES =
-  "chrome://mozapps/locale/update/updates.properties";
+  "chrome://zotero/locale/mozilla/updates.properties";
 
 const STATE_DOWNLOADING = "downloading";
 const STATE_PENDING = "pending";
@@ -72,10 +65,7 @@ var gUpdatesFoundPageId;
  *          The string to write to the error console..
  */
 function LOG(module, string) {
-  if (gLogEnabled) {
-    dump("*** AUS:UI " + module + ":" + string + "\n");
-    Services.console.logStringMessage("AUS:UI " + module + ":" + string);
-  }
+  Zotero.debug("AUS:UI " + module + ":" + string);
 }
 
 /**
@@ -119,15 +109,6 @@ var gUpdates = {
    * exits the wizard via onWizardCancel or onWizardFinish.
    */
   _runUnload: true,
-
-  /**
-   * Submit on close telemtry values for the update wizard.
-   * @param  pageID
-   *         The page id for the last page displayed.
-   */
-  _submitTelemetry(aPageID) {
-    AUSTLMY.pingWizLastPageCode(aPageID);
-  },
 
   /**
    * Helper function for setButtons
@@ -247,11 +228,10 @@ var gUpdates = {
    */
   onWizardFinish() {
     this._runUnload = false;
-    var pageid = document.documentElement.currentPage.pageid;
+    var pageid = document.querySelector('wizard').currentPage.pageid;
     if ("onWizardFinish" in this._pages[pageid]) {
       this._pages[pageid].onWizardFinish();
     }
-    this._submitTelemetry(pageid);
   },
 
   /**
@@ -260,11 +240,10 @@ var gUpdates = {
    */
   onWizardCancel() {
     this._runUnload = false;
-    var pageid = document.documentElement.currentPage.pageid;
+    var pageid = document.querySelector('wizard').currentPage.pageid;
     if ("onWizardCancel" in this._pages[pageid]) {
       this._pages[pageid].onWizardCancel();
     }
-    this._submitTelemetry(pageid);
   },
 
   /**
@@ -272,7 +251,7 @@ var gUpdates = {
    * the function call to the selected page.
    */
   onWizardNext() {
-    var cp = document.documentElement.currentPage;
+    var cp = document.querySelector('wizard').currentPage;
     if (!cp) {
       return;
     }
@@ -310,7 +289,7 @@ var gUpdates = {
    * Called when the wizard UI is loaded.
    */
   onLoad() {
-    this.wiz = document.documentElement;
+    this.wiz = document.querySelector('wizard');
 
     gLogEnabled = Services.prefs.getBoolPref(PREF_APP_UPDATE_LOG, false);
 
@@ -426,6 +405,9 @@ var gUpdates = {
       .addEventListener("extra2", function() {
         gFinishedPage.onExtra2();
       });
+
+    // Hide default wizard header ("Introduction")
+    gUpdates.wiz.shadowRoot.querySelector('.wizard-header').hidden = true;
 
     // Advance to the Start page.
     this.getStartPageID(function(startPageID) {
@@ -633,8 +615,8 @@ var gCheckingPage = {
     /**
      * See nsIUpdateCheckListener
      */
-    onCheckComplete(request, updates, updateCount) {
-      gUpdates.setUpdate(gAUS.selectUpdate(updates, updates.length));
+    async onCheckComplete(request, updates) {
+      gUpdates.setUpdate(gAUS.selectUpdate(updates));
       if (gUpdates.update) {
         LOG("gCheckingPage", "onCheckComplete - update found");
         if (gUpdates.update.unsupported) {
@@ -666,7 +648,7 @@ var gCheckingPage = {
     /**
      * See nsIUpdateCheckListener
      */
-    onError(request, update) {
+    async onError(request, update) {
       LOG("gCheckingPage", "onError - proceeding to error page");
       gUpdates.setUpdate(update);
       gUpdates.wiz.goTo("errors");
@@ -1210,7 +1192,7 @@ var gErrorExtraPage = {
       Services.prefs.clearUserPref(PREF_APP_UPDATE_BACKGROUNDERRORS);
     }
 
-    document.getElementById("genericBackgroundErrorLabel").hidden = false;
+    document.getElementById("bgErrorLabel").hidden = false;
     let manualURL = Services.urlFormatter.formatURLPref(
       PREF_APP_UPDATE_URL_MANUAL
     );
