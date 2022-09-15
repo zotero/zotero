@@ -1065,18 +1065,17 @@ class ReaderInstance {
 					return;
 				}
 				case 'focusSplitButton': {
-					let win = Zotero.getMainWindow();
-					if (win) {
-						win.document.getElementById('zotero-tb-toggle-item-pane').focus();
+					if (this instanceof ReaderTab) {
+						let win = Zotero.getMainWindow();
+						if (win) {
+							win.document.getElementById('zotero-tb-toggle-item-pane').focus();
+						}
 					}
 					return;
 				}
 				case 'focusContextPane': {
-					let win = Zotero.getMainWindow();
-					if (win) {
-						if (!this._window.ZoteroContextPane.focus()) {
-							this.focusFirst();
-						}
+					if (this instanceof ReaderWindow || !this._window.ZoteroContextPane.focus()) {
+						this.focusFirst();
 					}
 					return;
 				}
