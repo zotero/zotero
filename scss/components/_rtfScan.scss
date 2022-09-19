@@ -1,0 +1,85 @@
+.rtfscan-wizard {
+	wizardpage {
+		display: flex;
+		flex-direction: column;
+
+		> div {
+			display: block;
+		}
+	}
+
+	p {
+		display: inline;
+	}
+
+	.example, .page-start-1, .page-start-2, .file-input-label {
+		display: block;
+	}
+
+	.example {
+		line-height: 1.5em
+	}
+
+	.page-start-1 {
+		margin-bottom: 1em;
+	}
+
+	.page-start-2 {
+		margin-top: 1em;
+	}
+
+	.file-input-label {
+		margin: 1em $space-xs $space-min;
+	}
+
+	.file-input-container {
+		background-color: $input-group-background-color;
+		border-radius: $border-radius-base;
+		border: 1px solid $input-group-border-color;
+		display: flex;
+		margin: auto $space-min auto;
+		padding: .5em;
+
+		> input {
+			flex: 1 0 auto;
+		}
+
+		> button {
+			flex: 0 1 auto;
+			margin-left: 1em;
+		}
+	}
+
+	.citations-page-description {
+		margin-bottom: 1em;
+	}
+
+	.citations-page > .wizard-body {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.table-container {
+		display: flex;
+		height: 0;
+		flex-direction: column;
+		flex: 1 0 auto;
+		margin-top: 1.5em;
+
+		>div {
+			display: flex;
+			flex: 1 0 auto;
+			background-color: -moz-field;
+			overflow: hidden;
+			position: relative;
+		}
+
+		.virtualized-table-body {
+			display: flex;
+
+			.windowed-list {
+				flex: 1 0 auto;
+			}
+		}
+	}
+}

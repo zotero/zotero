@@ -58,6 +58,11 @@ class XULElementBase extends XULElement {
 			shadow.append(content);
 		}
 
+		MozXULElement.insertFTLIfNeeded("zotero.ftl");
+		if (document.l10n) {
+			document.l10n.connectRoot(this.shadowRoot);
+		}
+
 		this.init();
 	}
 

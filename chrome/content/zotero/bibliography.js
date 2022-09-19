@@ -225,7 +225,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		updateLocaleMenu(selectedStyleObj);
 		
 		//
-		// For integrationDocPrefs.xul and rtfScan.xul
+		// For integrationDocPrefs.xul and rtfScan.xhtml
 		//
 		if (isDocPrefs) {
 			// update status of displayAs box based on style class

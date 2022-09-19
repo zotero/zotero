@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
+
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		xmlns:html="http://www.w3.org/1999/xhtml"
+		onload="Zotero_RTFScan.init()"
+>
+	<linkset>
+		<html:link rel="localization" href="zotero.ftl" />
+	</linkset>
+	
+	<script src="chrome://global/content/customElements.js" />
+	
+	<wizard id="rtfscan-wizard" class="rtfscan-wizard" width="700" height="550" data-l10n-id="rtfScan-wizard">
+		<wizardpage pageid="page-start" data-l10n-id="rtfScan-intro-page">
+			<div>
+				<span class="page-start-1" data-l10n-id="rtfScan-introPage-description" />
+				<span class="example">{Smith, 2009}</span>
+				<span class="example">Smith {2009}</span>
+				<span class="example">{Smith et al., 2009}</span>
+				<span class="example">{John Smith, 2009}</span>
+				<span class="example">{Smith, 2009, 10-14}</span>
+				<span class="example">{Smith, &quot;Title,&quot; 2009}</span>
+				<span class="example">{Jones, 2005; Smith, 2009}</span>
+				<span class="page-start-2" data-l10n-id="rtfScan-introPage-description2" />
+			</div>
+			<div>
+				<label for="choose-input-file" class="file-input-label" data-l10n-id="rtfScan-input-file" />
+				<div class="file-input-container">
+					<html:input type="text" data-l10n-id="zotero-file-none-selected" id="input-path" readonly="true" />
+					<button id="choose-input-file" data-l10n-id="zotero-file-choose" />
+				</div>
+			</div>
+			<div>
+				<label for="choose-output-file" class="file-input-label" data-l10n-id="rtfScan-output-file" />
+				<div class="file-input-container">
+					<html:input type="text" data-l10n-id="zotero-file-none-selected" id="output-path" readonly="true" />
+					<button id="choose-output-file" data-l10n-id="zotero-file-choose" />
+				</div>
+			</div>
+		</wizardpage>
+		<wizardpage pageid="scan-page" data-l10n-id="rtfScan-scan-page" >
+			<p data-l10n-id="rtfScan-scanPage-description" />
+			<html:progress id="scan-progress" />
+		</wizardpage>
+		<wizardpage class="citations-page" pageid="citations-page" data-l10n-id="rtfScan-citations-page">
+			<p class="citations-page-description" data-l10n-id="rtfScan-citations-page-description" />
+			<div class="table-container">
+				<div id="tree" />
+			</div>
+		</wizardpage>
+		<wizardpage pageid="style-page" data-l10n-id="rtfScan-style-page">
+			<div class="style-selector-container">
+				<style-configurator id="style-configurator" />
+			</div>
+		</wizardpage>
+		<wizardpage pageid="format-page" data-l10n-id="rtfScan-format-page">
+			<p data-l10n-id="rtfScan-format-page-description" />
+			<html:progress id="format-progress" />
+		</wizardpage>
+		<wizardpage pageid="complete-page" data-l10n-id="rtfScan-complete-page">
+			<p data-l10n-id="rtfScan-complete-page-description" />
+		</wizardpage>
+	</wizard>
+	<script src="include.js" />
+	<script src="fileInterface.js" />
+	<script src="rtfScan.js" />
+</window>
