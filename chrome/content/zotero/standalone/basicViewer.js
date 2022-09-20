@@ -73,12 +73,36 @@ window.addEventListener("click", function (event) {
 	}
 });
 
+function ensureBrowserType(type) {
+	let oldBrowser = document.querySelector('browser');
+	if (oldBrowser.getAttribute('type') != type) {
+		let newBrowser = document.createXULElement('browser');
+		let attrs = {
+			type,
+			flex: 1,
+			remote: false,
+			maychangeremoteness: true,
+			disableglobalhistory: true,
+		};
+		for (let [attr, value] of Object.entries(attrs)) {
+			newBrowser.setAttribute(attr, value);
+		}
+		oldBrowser.replaceWith(newBrowser);
+		return newBrowser;
+	}
+	else {
+		return oldBrowser;
+	}
+}
+
 function loadURI(uri) {
-	browser.loadURI(
+	// The zotero protocol handler will not load in a type="content" browser
+	// As a temporary fix, replace the browser with one of the correct type if necessary
+	// (The type attribute can't be changed after the browser is created)
+	ensureBrowserType(uri.startsWith('zotero:') ? 'chrome' : 'content').loadURI(
 		uri,
 		{
 			triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal(),
-			//loadFlags: Ci.nsIWebNavigation.LOAD_FLAGS_STOP_CONTENT,
 		}
 	);
 }
