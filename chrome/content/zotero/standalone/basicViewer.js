@@ -30,7 +30,7 @@
 var browser;
 
 window.addEventListener("load", /*async */function() {
-	browser = document.querySelector('browser');
+	ensureBrowserType('content');
 	
 	/*
 	browser.setAttribute("remote", "true");
@@ -46,11 +46,6 @@ window.addEventListener("load", /*async */function() {
 		false
 	);*/
 	//browser.docShellIsActive = false;
-	
-	// align page title with title of shown document
-	browser.addEventListener('pagetitlechanged', () => {
-		document.title = browser.contentTitle || browser.currentURI.spec;
-	});
 
 	// Load URI passed in as nsISupports .data via openWindow()
 	loadURI(window.arguments[0]);
@@ -74,9 +69,9 @@ window.addEventListener("click", function (event) {
 });
 
 function ensureBrowserType(type) {
-	let oldBrowser = document.querySelector('browser');
-	if (oldBrowser.getAttribute('type') != type) {
-		let newBrowser = document.createXULElement('browser');
+	let oldBrowser = browser;
+	if (!oldBrowser || oldBrowser.getAttribute('type') != type) {
+		browser = document.createXULElement('browser');
 		let attrs = {
 			type,
 			flex: 1,
@@ -85,10 +80,18 @@ function ensureBrowserType(type) {
 			disableglobalhistory: true,
 		};
 		for (let [attr, value] of Object.entries(attrs)) {
-			newBrowser.setAttribute(attr, value);
+			browser.setAttribute(attr, value);
 		}
-		oldBrowser.replaceWith(newBrowser);
-		return newBrowser;
+		if (oldBrowser) {
+			oldBrowser.replaceWith(browser);
+		}
+		else {
+			document.querySelector('#appcontent').append(browser);
+		}
+		browser.addEventListener('pagetitlechanged', () => {
+			document.title = browser.contentTitle || browser.currentURI.spec;
+		});
+		return browser;
 	}
 	else {
 		return oldBrowser;
