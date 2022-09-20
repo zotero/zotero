@@ -146,6 +146,14 @@ label.zotero-text-link {
 	border: 1px solid transparent;
 }
 
+.zotero-focusable {
+	-moz-user-focus: normal;
+}
+
+.zotero-focusable:focus {
+	outline: 1px solid -moz-mac-focusring;
+}
+
 /* Minus and plus buttons with clicky glow effect */
 .zotero-clicky-minus, .zotero-clicky-plus
 {

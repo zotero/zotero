@@ -719,7 +719,7 @@
 				<![CDATA[
 					// getCreatorFields(), switchCreatorMode() and handleCreatorAutoCompleteSelect()
 					// may need need to be adjusted if this DOM structure changes
-					
+					var tabindex = this._tabIndexMinCreators + (this._creatorCount * 6);
 					var fieldMode = Zotero.Prefs.get('lastCreatorFieldMode');
 					var firstName = '';
 					var lastName = '';
@@ -757,9 +757,15 @@
 					}
 					typeBox.setAttribute("fieldname", 'creator-' + this._creatorCount + '-typeID');
 					if (this.editable) {
-						typeBox.className = 'creator-type-label zotero-clicky';
+						typeBox.className = 'creator-type-label zotero-clicky zotero-focusable';
+						typeBox.setAttribute('ztabindex', tabindex - 1);
+						typeBox.setAttribute('role', 'listbox');
+						typeBox.addEventListener('focus', ev => {
+							this._lastTabIndex = parseInt(ev.target.getAttribute('ztabindex'));
+						});
 						var img = document.createElement('image');
 						typeBox.appendChild(img);
+						typeBox.setAttribute('onkeypress', 'return document.getBindingParent(this).handleKeyPress(event)');
 					}
 					else {
 						typeBox.className = 'creator-type-label';
@@ -772,12 +778,18 @@
 					
 					var hbox = document.createElement("hbox");
 					hbox.className = 'creator-type-value';
+
+					hbox.addEventListener('focusin', ev => {
+						if(ev.target.classList.contains('zotero-focusable')) {
+							this._lastTabIndex = parseInt(ev.target.getAttribute('ztabindex'));
+						}
+					});
 					
 					// Name
 					var firstlast = document.createElement("hbox");
 					firstlast.className = 'creator-name-box';
 					firstlast.setAttribute("flex","1");
-					var tabindex = this._tabIndexMinCreators + (this._creatorCount * 2);
+					
 					var fieldName = 'creator-' + this._creatorCount + '-lastName';
 					var lastNameLabel = firstlast.appendChild(
 						this.createValueElement(
@@ -820,29 +832,40 @@
 					var toggleButton = document.createElement('label');
 					toggleButton.setAttribute('fieldname',
 						'creator-' + this._creatorCount + '-fieldMode');
-					toggleButton.className = 'zotero-field-toggle zotero-clicky';
+					toggleButton.setAttribute('ztabindex', tabindex + 2);
+					toggleButton.setAttribute('role', 'button');
+					toggleButton.className = 'zotero-field-toggle zotero-focusable zotero-clicky';
+					toggleButton.setAttribute('onkeypress', 'return document.getBindingParent(this).handleKeyPress(event)');
 					hbox.appendChild(toggleButton);
 					
 					// Minus (-) button
 					var removeButton = document.createElement('label');
+					removeButton.setAttribute('ztabindex', tabindex + 3);
+					removeButton.setAttribute('role', 'button');
+					removeButton.setAttribute('aria-label', Zotero.getString('general.delete'));
 					removeButton.setAttribute("value","-");
-					removeButton.setAttribute("class","zotero-clicky zotero-clicky-minus");
+					removeButton.setAttribute('class','zotero-clicky zotero-focusable zotero-clicky-minus');
+					removeButton.setAttribute('onkeypress', 'return document.getBindingParent(this).handleKeyPress(event)');
 					// If default first row, don't let user remove it
 					if (defaultRow) {
 						this.disableButton(removeButton);
 					}
 					else {
-						removeButton.setAttribute("onclick",
-							"document.getBindingParent(this).removeCreator("
-							+ this._creatorCount
-							+ ", this.parentNode.parentNode)");
+						let index = this._creatorCount;
+						removeButton.onclick = (ev) => {
+							document.getBindingParent(ev.currentTarget)
+								.removeCreator(index, ev.currentTarget.parentNode.parentNode);
+						}
 					}
 					hbox.appendChild(removeButton);
 					
 					// Plus (+) button
 					var addButton = document.createElement('label');
+					addButton.setAttribute('ztabindex', tabindex + 4);
 					addButton.setAttribute("value","+");
-					addButton.setAttribute("class", "zotero-clicky zotero-clicky-plus");
+					addButton.setAttribute('role', 'button');
+					addButton.setAttribute('class', 'zotero-clicky zotero-focusable zotero-clicky-plus');
+					addButton.setAttribute('onkeypress', 'return document.getBindingParent(this).handleKeyPress(event)');
 					// If row isn't saved, don't let user add more
 					if (unsaved) {
 						this.disableButton(addButton);
@@ -958,7 +981,11 @@
 						button.style.background = `url("chrome://zotero/skin/textfield-dual${Zotero.hiDPISuffix}.png") center/21px auto no-repeat`;
 						button.setAttribute('tooltiptext', Zotero.getString('pane.item.switchFieldMode.two'));
 						lastName.setAttribute('fieldMode', '1');
-						button.setAttribute('onclick', "document.getBindingParent(this).switchCreatorMode(Zotero.getAncestorByTagName(this, 'row'), 0, false, true)");
+						button.onclick = (ev) => {
+							document
+								.getBindingParent(ev.currentTarget)
+								.switchCreatorMode(Zotero.getAncestorByTagName(ev.currentTarget, 'row'), 0, false, true);
+						};
 						lastName.setAttribute('flex', '1');
 						delete lastName.style.width;
 						delete lastName.style.maxWidth;
@@ -998,7 +1025,11 @@
 						button.style.background = `url("chrome://zotero/skin/textfield-single${Zotero.hiDPISuffix}.png") center/21px auto no-repeat`;
 						button.setAttribute('tooltiptext', Zotero.getString('pane.item.switchFieldMode.one'));
 						lastName.setAttribute('fieldMode', '0');
-						button.setAttribute('onclick', "document.getBindingParent(this).switchCreatorMode(Zotero.getAncestorByTagName(this, 'row'), 1, false, true)");
+						button.onclick = (ev) => {
+							document
+								.getBindingParent(ev.currentTarget)
+								.switchCreatorMode(Zotero.getAncestorByTagName(ev.currentTarget, 'row'), 1, false, true)
+						};
 						lastName.setAttribute('flex', '0');
 						
 						// appropriately truncate lastName
@@ -1720,6 +1751,18 @@
 				<![CDATA[
 					var target = event.target;
 					var focused = document.commandDispatcher.focusedElement;
+
+					if (event.key === 'ArrowDown' && target.classList.contains('creator-type-label')) {
+						event.preventDefault();
+						target.click();
+						return true;
+					}
+
+					if (event.key === ' ' && target.classList.contains('zotero-focusable')) {
+						event.preventDefault();
+						target.click();
+						return true;
+					}
 					
 					switch (event.keyCode)
 					{
@@ -2327,7 +2370,7 @@
 					tabindex = parseInt(tabindex);
 					
 					// Get all fields with ztabindex attributes
-					var tabbableFields = box.querySelectorAll('*[ztabindex]');
+					var tabbableFields = box.querySelectorAll('*[ztabindex]:not([disabled=true])');
 					
 					if (!tabbableFields.length) {
 						Zotero.debug("No tabbable fields found");
@@ -2344,7 +2387,7 @@
 								next = tabbableFields[i];
 								break;
 							}
-						}
+						} 
 					}
 					else {
 						Zotero.debug('Looking for tabindex ' + tabindex, 4);
@@ -2364,7 +2407,7 @@
 					}
 					
 					// Drop-down needs to be focused
-					if (next.id == 'item-type-menu') {
+					if (next.id == 'item-type-menu' || next.classList.contains('zotero-focusable')) {
 						next.focus();
 					}
 					// Fields need to be clicked
