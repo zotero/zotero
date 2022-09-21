@@ -1751,6 +1751,18 @@
 				<![CDATA[
 					var target = event.target;
 					var focused = document.commandDispatcher.focusedElement;
+
+					if(event.key === 'ArrowDown' && target.classList.contains('creator-type-label')) {
+						event.preventDefault();
+						target.click();
+						return true;
+					}
+
+					if(event.key === ' ' && target.classList.contains('zotero-focusable')) {
+						event.preventDefault();
+						target.click();
+						return true;
+					}
 					
 					switch (event.keyCode)
 					{
@@ -1758,12 +1770,6 @@
 							var fieldname = target.getAttribute('fieldname');
 							// Use shift-enter as the save action for the larger fields
 							if (Zotero.ItemFields.isMultiline(fieldname) && !event.shiftKey) {
-								break;
-							}
-
-							if(target.classList.contains('zotero-focusable')) {
-								event.preventDefault();
-								target.click();
 								break;
 							}
 							
