@@ -65,9 +65,9 @@
 <!ENTITY zotero.items.menu.showInLibrary "Vis i bibliotek">
 <!ENTITY zotero.items.menu.attach.note "Legg til notat">
 <!ENTITY zotero.items.menu.attach "Legg til vedlegg">
-<!ENTITY zotero.items.menu.attach.link.uri "Legg til kobling til URI…">
+<!ENTITY zotero.items.menu.attach.link.uri "Legg til lenke til URI…">
 <!ENTITY zotero.items.menu.attach.file "Legg til lagret kopi av fil...">
-<!ENTITY zotero.items.menu.attach.fileLink "Legg til kobling til fil...">
+<!ENTITY zotero.items.menu.attach.fileLink "Legg til lenke til fil...">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "Gjenopprett til bibliotek">
 <!ENTITY zotero.items.menu.duplicateItem "Dupliser det valgte elementet">
@@ -126,7 +126,7 @@
 <!ENTITY zotero.toolbar.lookup "Oppslag ved hjelp av identifikator...">
 <!ENTITY zotero.toolbar.attachment.linked "Lenke til fil...">
 <!ENTITY zotero.toolbar.attachment.add "Lagre kopi av fil...">
-<!ENTITY zotero.toolbar.attachment.weblink "Lagre kobling til gjeldende side">
+<!ENTITY zotero.toolbar.attachment.weblink "Lagre lenke til gjeldende side">
 <!ENTITY zotero.toolbar.attachment.snapshot "Lag øyeblikksbilde av gjeldende side">
 <!ENTITY zotero.toolbar.context.item "Element">
 <!ENTITY zotero.toolbar.context.notes "Notater">
@@ -276,11 +276,11 @@
 <!ENTITY zotero.rtfScan.cancel.label "Avbryt">
 <!ENTITY zotero.rtfScan.citation.label "Henvisning">
 <!ENTITY zotero.rtfScan.itemName.label "Elementnavn">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "Ikke kartlagte henvisninger">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "Ikke tilordnede henvisninger">
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Tvetydige henvisninger">
-<!ENTITY zotero.rtfScan.mappedCitations.label "Kartlagte henvisninger">
+<!ENTITY zotero.rtfScan.mappedCitations.label "Tilordnede henvisninger">
 <!ENTITY zotero.rtfScan.introPage.label "Introduksjon">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero kan automatisk trekke ut og reformatere henvisninger og sette inn en bibliografi i RTF filer. RTF skann støtter for øyeblikket henvisninger i variasjoner av følgende formater:">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero kan automatisk hente ut og reformatere henvisninger og sette inn en bibliografi i RTF filer. RTF skann støtter for øyeblikket henvisninger i variasjoner av følgende formater:">
 <!ENTITY zotero.rtfScan.introPage.description2 "For å komme i gang, velg en RTF inndata fil og en utdata fil nedenfor:">
 <!ENTITY zotero.rtfScan.scanPage.label "Skanner etter henvisninger">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero ser gjennom ditt dokumentet etter henvisninger. Vær tålmodig.">
@@ -297,8 +297,8 @@
 <!ENTITY zotero.file.choose.label "Velg fil...">
 <!ENTITY zotero.file.noneSelected.label "Ingen fil valgt">
 
-<!ENTITY zotero.attachLink.title "Legg til kobling til URI">
-<!ENTITY zotero.attachLink.label.link "Kobling:">
+<!ENTITY zotero.attachLink.title "Legg til lenke til URI">
+<!ENTITY zotero.attachLink.label.link "Lenke:">
 <!ENTITY zotero.attachLink.label.title "Tittel:">
 
 <!ENTITY zotero.context.addChildNote "Legg til notat til element">

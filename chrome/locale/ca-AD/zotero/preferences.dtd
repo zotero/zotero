@@ -30,7 +30,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Quan copiïs elements entre les biblioteques, inclou-hi:">
 <!ENTITY zotero.preferences.groups.childNotes "notes descendents">
 <!ENTITY zotero.preferences.groups.childFiles "instantànies descendents i fitxers importats">
-<!ENTITY zotero.preferences.groups.annotations "annotations">
+<!ENTITY zotero.preferences.groups.annotations "anotacions">
 <!ENTITY zotero.preferences.groups.childLinks "enllaços descendents">
 <!ENTITY zotero.preferences.groups.tags "etiquetes">
 
@@ -40,7 +40,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Els elements més antics primer">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Paràmetres per defecte dels canals">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
+<!ENTITY zotero.preferences.openurl.choose "Trieu un resolutor:">
 <!ENTITY zotero.preferences.openurl.custom "Personalitza…">
 <!ENTITY zotero.preferences.openurl.server "Resolutor:">
 <!ENTITY zotero.preferences.openurl.version "Versió:">
@@ -105,8 +105,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Quan aquesta opció està deshabilitada, el Zotero inclou les URL quan se citen articles de premsa, revistes i revistes acadèmiques només si l'article no té un ran dge pàgines assignat.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Còpia ràpida">
-<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Format d'element:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Format de nota:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copia com a HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Configuració específica per a llocs web:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domini/Ruta">

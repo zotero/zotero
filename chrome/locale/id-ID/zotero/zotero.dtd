@@ -253,7 +253,7 @@
 
 <!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.merge.of "of">
-<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.deleted "Dihapus">
 
 <!ENTITY zotero.proxy.recognized.title "Proksi Dikenali">
 <!ENTITY zotero.proxy.recognized.warning "Hanya tambahkan proksi yang ditautkan dari website perpustakaan, sekolah, atau perusahaan Anda">

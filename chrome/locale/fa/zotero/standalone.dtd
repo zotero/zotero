@@ -36,7 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "کپی ارجاع‌دهی">
 <!ENTITY copyBibliographyCmd.label "کپی کتاب‌شناسی">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyNoteCmd.label "کپی یادداشت">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Switch Page Direction">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
@@ -45,7 +45,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
 
-<!ENTITY goMenu.label "Go">
+<!ENTITY goMenu.label "برو">
 
 
 <!ENTITY viewMenu.label "نمایش">

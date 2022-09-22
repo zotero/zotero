@@ -31,7 +31,7 @@
 <!ENTITY zotero.preferences.groups.childNotes "Underordnede notater">
 <!ENTITY zotero.preferences.groups.childFiles "Underordnede øyblikksbilder og importerte filer">
 <!ENTITY zotero.preferences.groups.annotations "merknader">
-<!ENTITY zotero.preferences.groups.childLinks "Underordnede koblinger">
+<!ENTITY zotero.preferences.groups.childLinks "Underordnede lenker">
 <!ENTITY zotero.preferences.groups.tags "Emneord">
 
 <!ENTITY zotero.preferences.feeds "Nyhetsstrømmer">
@@ -60,7 +60,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing "Filsynkronisering">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Synkroniser vedlegg i Mitt bibliotek ved å bruke">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups "Synkroniser vedlegg i gruppebibliotek ved å bruke Zotero lagring på nett">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "Synkroniser vedlegg i gruppebibliotek ved å bruke Zotero lagring">
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Nedlastede filer">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "under synkronisering">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "ved behov">
@@ -169,10 +169,10 @@
 <!ENTITY zotero.preferences.advanced.advancedConfiguration "Avansert oppsett">
 
 <!ENTITY zotero.preferences.prefpane.locate "Lokaliser">
-<!ENTITY zotero.preferences.locate.locateEngineManager "Søkemotorer for å finne artikler på nett">
+<!ENTITY zotero.preferences.locate.locateEngineManager "Behandler for oppslagsmotor for artikler">
 <!ENTITY zotero.preferences.locate.description "Beskrivelse">
 <!ENTITY zotero.preferences.locate.name "Navn">
-<!ENTITY zotero.preferences.locate.addDescription "For å legge til en søkemotor som ikke er på listen, besøk nettside for ønsket søkemotor in din nettleser og velg &quot;Legg til&quot; fra Zotero's Lokaliser meny.">
+<!ENTITY zotero.preferences.locate.addDescription "For å legge til en oppslagsmotor som ikke er på listen, besøk nettsiden for ønsket søkemotor i din nettleser og velg &quot;Legg til&quot; fra Lokaliser menyen i Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Gjenopprett standardvalg">
 
 <!ENTITY zotero.preferences.charset "Tegnkoding">

@@ -13,7 +13,7 @@
 <!ENTITY zotero.publications.sharing.reserved "Nei, kun publiser mitt arbeid på zotero.org">
 
 <!ENTITY zotero.publications.chooseLicense.title "Velg en Creative Commons lisens">
-<!ENTITY zotero.publications.chooseLicense.text "En Creative Commons lisens tillater andre å kopiere og videredistribuere arbeidet ditt så lenge de gir deg passende kreditt, angir en kobling til lisensen, og gjør oppmerksom på om det er gjort endringer. Tilleggsbetingelser kan bli angitt nedenfor.">
+<!ENTITY zotero.publications.chooseLicense.text "En Creative Commons lisens tillater andre å kopiere og videredistribuere arbeidet ditt så lenge de gir deg passende kreditt, angir en lenke til lisensen, og gjør oppmerksom på om det er gjort endringer. Tilleggsbetingelser kan bli angitt nedenfor.">
 <!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Tillat deling av bearbeidinger av ditt arbeid">
 <!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Ja, så lenge andre deler på samme vis">
 <!ENTITY zotero.publications.chooseLicense.commercial.prompt "Tillat kommersiell bruk av ditt arbeid?">
