@@ -25,6 +25,12 @@ row > label:first-child, .creator-type-label, #more-creators-label
 	max-height: 7px;
 }
 
+.zotero-focusable:focus {
+	/* At least in Fx60, the color doesn't quite match Monterey's native textbox outline,
+	   but it will have to do for now */
+	outline: 2px solid -moz-mac-focusring !important;
+}
+
 textbox
 {
 	margin: -1px 5px -1px 0;
