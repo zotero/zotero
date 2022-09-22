@@ -598,7 +598,7 @@ class ReaderInstance {
 		}
 	}
 	
-	_openPagePopup(data) {
+	_openPagePopup(data, secondView) {
 		let popup = this._window.document.createElement('menupopup');
 		this._popupset.appendChild(popup);
 		popup.addEventListener('popuphidden', function () {
@@ -619,14 +619,14 @@ class ReaderInstance {
 		menuitem = this._window.document.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.zoomIn'));
 		menuitem.addEventListener('command', () => {
-			this._postMessage({ action: 'popupCmd', cmd: 'zoomIn' });
+			this._postMessage({ action: 'popupCmd', cmd: 'zoomIn' }, [], secondView);
 		});
 		popup.appendChild(menuitem);
 		// Zoom out
 		menuitem = this._window.document.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.zoomOut'));
 		menuitem.addEventListener('command', () => {
-			this._postMessage({ action: 'popupCmd', cmd: 'zoomOut' });
+			this._postMessage({ action: 'popupCmd', cmd: 'zoomOut' }, [], secondView);
 		});
 		popup.appendChild(menuitem);
 		// Zoom 'Auto'
@@ -635,7 +635,7 @@ class ReaderInstance {
 		menuitem.setAttribute('type', 'checkbox');
 		menuitem.setAttribute('checked', data.isZoomAuto);
 		menuitem.addEventListener('command', () => {
-			this._postMessage({ action: 'popupCmd', cmd: 'zoomAuto' });
+			this._postMessage({ action: 'popupCmd', cmd: 'zoomAuto' }, [], secondView);
 		});
 		popup.appendChild(menuitem);
 		// Zoom 'Page Width'
@@ -644,7 +644,7 @@ class ReaderInstance {
 		menuitem.setAttribute('type', 'checkbox');
 		menuitem.setAttribute('checked', data.isZoomPageWidth);
 		menuitem.addEventListener('command', () => {
-			this._postMessage({ action: 'popupCmd', cmd: 'zoomPageWidth' });
+			this._postMessage({ action: 'popupCmd', cmd: 'zoomPageWidth' }, [], secondView);
 		});
 		popup.appendChild(menuitem);
 		// Zoom 'Page Height'
@@ -653,7 +653,39 @@ class ReaderInstance {
 		menuitem.setAttribute('type', 'checkbox');
 		menuitem.setAttribute('checked', data.isZoomPageHeight);
 		menuitem.addEventListener('command', () => {
-			this._postMessage({ action: 'popupCmd', cmd: 'zoomPageHeight' });
+			this._postMessage({ action: 'popupCmd', cmd: 'zoomPageHeight' }, [], secondView);
+		});
+		popup.appendChild(menuitem);
+		// Separator
+		popup.appendChild(this._window.document.createElement('menuseparator'));
+		// Split Vertically
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', Zotero.getString('pdfReader.splitVertically'));
+		menuitem.setAttribute('type', 'checkbox');
+		let verticalSplitEnabled = this._iframeWindow.wrappedJSObject.getSplitType() === 'vertical';
+		menuitem.setAttribute('checked', verticalSplitEnabled);
+		menuitem.addEventListener('command', () => {
+			if (verticalSplitEnabled) {
+				this._iframeWindow.wrappedJSObject.unsplitView();
+			}
+			else {
+				this._iframeWindow.wrappedJSObject.splitView();
+			}
+		});
+		popup.appendChild(menuitem);
+		// Split Horizontally
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', Zotero.getString('pdfReader.splitHorizontally'));
+		menuitem.setAttribute('type', 'checkbox');
+		let horizontalSplitEnabled = this._iframeWindow.wrappedJSObject.getSplitType() === 'horizontal';
+		menuitem.setAttribute('checked', horizontalSplitEnabled);
+		menuitem.addEventListener('command', () => {
+			if (horizontalSplitEnabled) {
+				this._iframeWindow.wrappedJSObject.unsplitView();
+			}
+			else {
+				this._iframeWindow.wrappedJSObject.splitView(true);
+			}
 		});
 		popup.appendChild(menuitem);
 		// Separator
@@ -663,7 +695,7 @@ class ReaderInstance {
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.nextPage'));
 		menuitem.setAttribute('disabled', !data.enableNextPage);
 		menuitem.addEventListener('command', () => {
-			this._postMessage({ action: 'popupCmd', cmd: 'nextPage' });
+			this._postMessage({ action: 'popupCmd', cmd: 'nextPage' }, [], secondView);
 		});
 		popup.appendChild(menuitem);
 		// Previous page
@@ -671,7 +703,7 @@ class ReaderInstance {
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.previousPage'));
 		menuitem.setAttribute('disabled', !data.enablePrevPage);
 		menuitem.addEventListener('command', () => {
-			this._postMessage({ action: 'popupCmd', cmd: 'prevPage' });
+			this._postMessage({ action: 'popupCmd', cmd: 'prevPage' }, [], secondView);
 		});
 		popup.appendChild(menuitem);
 		popup.openPopupAtScreen(data.x, data.y, true);
@@ -893,25 +925,39 @@ class ReaderInstance {
 		popup.openPopupAtScreen(data.x, data.y, true);
 	}
 
-	async _postMessage(message, transfer) {
+	async _postMessage(message, transfer, secondView) {
 		await this._waitForReader();
-		this._iframeWindow.postMessage({ itemID: this._itemID, message }, this._iframeWindow.origin, transfer);
+		this._iframeWindow.postMessage({ itemID: this._itemID, message, secondView }, this._iframeWindow.origin, transfer);
 	}
 
 	_handleMessage = async (event) => {
 		let message;
+		let secondViewIframeWindow = this._iframeWindow.document.getElementById('secondViewIframe');
+		if (secondViewIframeWindow) {
+			secondViewIframeWindow = secondViewIframeWindow.contentWindow;
+		}
 		try {
-			if (event.source !== this._iframeWindow) {
+			if (event.source !== this._iframeWindow
+			&& event.source !== secondViewIframeWindow) {
 				return;
 			}
 			// Clone data to avoid the dead object error when the window is closed
 			let data = JSON.parse(JSON.stringify(event.data));
+			let { secondView } = data;
 			// Filter messages coming from previous reader instances,
 			// except for `setAnnotation` to still allow saving it
 			if (data.itemID !== this._itemID && data.message.action !== 'setAnnotation') {
 				return;
 			}
 			message = data.message;
+
+			if (secondView) {
+				switch (message.action) {
+					case 'openPagePopup': break;
+					default: return;
+				}
+			}
+
 			switch (message.action) {
 				case 'initialized': {
 					this._resolveInitPromise();
@@ -998,7 +1044,7 @@ class ReaderInstance {
 					return;
 				}
 				case 'openPagePopup': {
-					this._openPagePopup(message.data);
+					this._openPagePopup(message.data, secondView);
 					return;
 				}
 				case 'openAnnotationPopup': {
