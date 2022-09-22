@@ -150,8 +150,14 @@ label.zotero-text-link {
 	-moz-user-focus: normal;
 }
 
+/* This isn't quite the right color (at least for Win11), but we can fix in fx102 */
 .zotero-focusable:focus {
-	outline: 1px solid -moz-mac-focusring;
+	outline: 1px dotted darkgray;
+}
+
+/* Don't show focus ring for clicky on hover, since we already show a background */
+.zotero-clicky.zotero-focusable:focus:hover {
+	outline: none;
 }
 
 /* Minus and plus buttons with clicky glow effect */

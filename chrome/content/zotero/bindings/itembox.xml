@@ -1752,7 +1752,8 @@
 					var target = event.target;
 					var focused = document.commandDispatcher.focusedElement;
 
-					if (event.key === 'ArrowDown' && target.classList.contains('creator-type-label')) {
+					if ((event.key == 'ArrowUp' || event.key === 'ArrowDown')
+							&& target.classList.contains('creator-type-label')) {
 						event.preventDefault();
 						target.click();
 						return true;
