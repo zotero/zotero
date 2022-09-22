@@ -1752,13 +1752,13 @@
 					var target = event.target;
 					var focused = document.commandDispatcher.focusedElement;
 
-					if(event.key === 'ArrowDown' && target.classList.contains('creator-type-label')) {
+					if (event.key === 'ArrowDown' && target.classList.contains('creator-type-label')) {
 						event.preventDefault();
 						target.click();
 						return true;
 					}
 
-					if(event.key === ' ' && target.classList.contains('zotero-focusable')) {
+					if (event.key === ' ' && target.classList.contains('zotero-focusable')) {
 						event.preventDefault();
 						target.click();
 						return true;
