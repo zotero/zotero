@@ -155,12 +155,12 @@ var ZoteroPane = new function()
 			// Uncomment to test
 			//isDevBuild = isDevBuild || Zotero.version.includes('.SOURCE');
 			if (isDevBuild) {
-				let label = document.createElement('label');
-				label.setAttribute('value', 'TEST BUILD — DO NOT USE');
-				label.setAttribute('style', 'font-weight: bold; color: red; cursor: pointer');
+				let label = document.createElement('span');
+				label.setAttribute('style', 'font-weight: bold; color: red; cursor: pointer; margin-right: .5em');
 				label.onclick = function () {
 					Zotero.launchURL('https://www.zotero.org/support/kb/test_builds');
 				};
+				label.textContent = 'TEST BUILD — DO NOT USE';
 				let syncStop = document.getElementById('zotero-tb-sync-stop');
 				syncStop.parentNode.insertBefore(label, syncStop);
 			}
