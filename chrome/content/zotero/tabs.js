@@ -89,6 +89,12 @@ var Zotero_Tabs = new function () {
 		return tab && tab.id;
 	};
 
+	this.setSecondViewState = function (tabID, state) {
+		let { tab } = this._getTab(tabID);
+		tab.data.secondViewState = state;
+		Zotero.Session.debounceSave();
+	};
+
 	this.init = function () {
 		ReactDOM.render(
 			<TabBar
@@ -138,7 +144,8 @@ var Zotero_Tabs = new function () {
 							null,
 							{
 								title: tab.title,
-								openInBackground: !tab.selected
+								openInBackground: !tab.selected,
+								secondViewState: tab.data.secondViewState
 							}
 						);
 					}
@@ -352,7 +359,8 @@ var Zotero_Tabs = new function () {
 				tabID: tab.id,
 				title: tab.title,
 				tabIndex,
-				allowDuplicate: true
+				allowDuplicate: true,
+				secondViewState: tab.data.secondViewState
 			});
 			return;
 		}

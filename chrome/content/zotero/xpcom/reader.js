@@ -52,6 +52,11 @@ class ReaderInstance {
 		}
 	}
 
+	getSecondViewState() {
+		let state = this._iframeWindow.wrappedJSObject.getSecondViewState();
+		return state ? JSON.parse(JSON.stringify(state)) : undefined;
+	}
+
 	async migrateMendeleyColors(libraryID, annotations) {
 		let colorMap = new Map();
 		colorMap.set('#fff5ad', '#ffd400');
@@ -88,7 +93,7 @@ class ReaderInstance {
 		return true;
 	}
 
-	async open({ itemID, state, location }) {
+	async open({ itemID, state, location, secondViewState }) {
 		let { libraryID } = Zotero.Items.getLibraryAndKeyFromID(itemID);
 		let library = Zotero.Libraries.get(libraryID);
 		await library.waitForDataLoad('item');
@@ -122,6 +127,7 @@ class ReaderInstance {
 			buf,
 			annotations,
 			state,
+			secondViewState,
 			location,
 			readOnly: this._isReadOnly(),
 			authorName: item.library.libraryType === 'group' ? Zotero.Users.getCurrentName() : '',
@@ -671,6 +677,7 @@ class ReaderInstance {
 			else {
 				this._iframeWindow.wrappedJSObject.splitView();
 			}
+			setTimeout(() => this._updateSecondViewState(), 500);
 		});
 		popup.appendChild(menuitem);
 		// Split Horizontally
@@ -686,6 +693,7 @@ class ReaderInstance {
 			else {
 				this._iframeWindow.wrappedJSObject.splitView(true);
 			}
+			setTimeout(() => this._updateSecondViewState(), 500);
 		});
 		popup.appendChild(menuitem);
 		// Separator
@@ -930,6 +938,15 @@ class ReaderInstance {
 		this._iframeWindow.postMessage({ itemID: this._itemID, message, secondView }, this._iframeWindow.origin, transfer);
 	}
 
+	_updateSecondViewState() {
+		if (this.tabID) {
+			let win = Zotero.getMainWindow();
+			if (win) {
+				win.Zotero_Tabs.setSecondViewState(this.tabID, this.getSecondViewState());
+			}
+		}
+	}
+
 	_handleMessage = async (event) => {
 		let message;
 		let secondViewIframeWindow = this._iframeWindow.document.getElementById('secondViewIframe');
@@ -954,6 +971,10 @@ class ReaderInstance {
 			if (secondView) {
 				switch (message.action) {
 					case 'openPagePopup': break;
+					case 'setState': {
+						this._updateSecondViewState();
+						return;
+					}
 					default: return;
 				}
 			}
@@ -1407,7 +1428,7 @@ class Reader {
 		await Zotero.uiReadyPromise;
 		Zotero.Session.state.windows
 			.filter(x => x.type == 'reader' && Zotero.Items.exists(x.itemID))
-			.forEach(x => this.open(x.itemID, null, { title: x.title, openInWindow: true }));
+			.forEach(x => this.open(x.itemID, null, { title: x.title, openInWindow: true, secondViewState: x.secondViewState }));
 	}
 	
 	_loadSidebarState() {
@@ -1530,7 +1551,12 @@ class Reader {
 	getWindowStates() {
 		return this._readers
 			.filter(r => r instanceof ReaderWindow)
-			.map(r => ({ type: 'reader', itemID: r._itemID, title: r._title }));
+			.map(r => ({
+				type: 'reader',
+				itemID: r._itemID,
+				title: r._title,
+				secondViewState: r.getSecondViewState()
+			}));
 	}
 
 	async openURI(itemURI, location, options) {
@@ -1539,7 +1565,7 @@ class Reader {
 		await this.open(item.id, location, options);
 	}
 
-	async open(itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate } = {}) {
+	async open(itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, secondViewState } = {}) {
 		this._loadSidebarState();
 		this.triggerAnnotationsImportCheck(itemID);
 		let reader;
@@ -1580,7 +1606,7 @@ class Reader {
 				bottomPlaceholderHeight: this._bottomPlaceholderHeight
 			});
 			this._readers.push(reader);
-			if (!(await reader.open({ itemID, location }))) {
+			if (!(await reader.open({ itemID, location, secondViewState }))) {
 				return;
 			}
 			Zotero.Session.debounceSave();
@@ -1601,7 +1627,7 @@ class Reader {
 				bottomPlaceholderHeight: this._bottomPlaceholderHeight
 			});
 			this._readers.push(reader);
-			if (!(await reader.open({ itemID, location }))) {
+			if (!(await reader.open({ itemID, location, secondViewState }))) {
 				return;
 			}
 			reader.onChangeSidebarWidth = (width) => {
