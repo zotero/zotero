@@ -264,6 +264,14 @@ class ReaderInstance {
 	isZoomPageHeightActive() {
 		return this._iframeWindow.eval('PDFViewerApplication.pdfViewer.currentScaleValue === "page-fit"');
 	}
+
+	isSplitVerticallyActive() {
+		return this._iframeWindow.wrappedJSObject.getSplitType() === 'vertical';
+	}
+
+	isSplitHorizontallyActive() {
+		return this._iframeWindow.wrappedJSObject.getSplitType() === 'horizontal';
+	}
 	
 	allowNavigateFirstPage() {
 		return this._iframeWindow.eval('PDFViewerApplication.pdfViewer.currentPageNumber > 1');
@@ -370,6 +378,12 @@ class ReaderInstance {
 				win.focus();
 			}
 			return;
+		}
+		else if (cmd === 'splitVertically') {
+			this._splitVertically();
+		}
+		else if (cmd === 'splitHorizontally') {
+			this._splitHorizontally();
 		}
 
 		let data = {
@@ -586,6 +600,26 @@ class ReaderInstance {
 		return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect shape-rendering="geometricPrecision" fill="${fill}" stroke-width="2" x="2" y="2" stroke="${stroke}" width="12" height="12" rx="3"/></svg>`;
 	}
 
+	_splitVertically() {
+		if (this.isSplitVerticallyActive()) {
+			this._iframeWindow.wrappedJSObject.unsplitView();
+		}
+		else {
+			this._iframeWindow.wrappedJSObject.splitView();
+		}
+		setTimeout(() => this._updateSecondViewState(), 500);
+	}
+
+	_splitHorizontally() {
+		if (this.isSplitHorizontallyActive()) {
+			this._iframeWindow.wrappedJSObject.unsplitView();
+		}
+		else {
+			this._iframeWindow.wrappedJSObject.splitView(true);
+		}
+		setTimeout(() => this._updateSecondViewState(), 500);
+	}
+
 	_openTagsPopup(item, selector) {
 		let menupopup = this._window.document.createElement('menupopup');
 		menupopup.className = 'tags-popup';
@@ -668,33 +702,15 @@ class ReaderInstance {
 		menuitem = this._window.document.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.splitVertically'));
 		menuitem.setAttribute('type', 'checkbox');
-		let verticalSplitEnabled = this._iframeWindow.wrappedJSObject.getSplitType() === 'vertical';
-		menuitem.setAttribute('checked', verticalSplitEnabled);
-		menuitem.addEventListener('command', () => {
-			if (verticalSplitEnabled) {
-				this._iframeWindow.wrappedJSObject.unsplitView();
-			}
-			else {
-				this._iframeWindow.wrappedJSObject.splitView();
-			}
-			setTimeout(() => this._updateSecondViewState(), 500);
-		});
+		menuitem.setAttribute('checked', this.isSplitVerticallyActive());
+		menuitem.addEventListener('command', () => this._splitVertically());
 		popup.appendChild(menuitem);
 		// Split Horizontally
 		menuitem = this._window.document.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.splitHorizontally'));
 		menuitem.setAttribute('type', 'checkbox');
-		let horizontalSplitEnabled = this._iframeWindow.wrappedJSObject.getSplitType() === 'horizontal';
-		menuitem.setAttribute('checked', horizontalSplitEnabled);
-		menuitem.addEventListener('command', () => {
-			if (horizontalSplitEnabled) {
-				this._iframeWindow.wrappedJSObject.unsplitView();
-			}
-			else {
-				this._iframeWindow.wrappedJSObject.splitView(true);
-			}
-			setTimeout(() => this._updateSecondViewState(), 500);
-		});
+		menuitem.setAttribute('checked', this.isSplitHorizontallyActive());
+		menuitem.addEventListener('command', () => this._splitHorizontally());
 		popup.appendChild(menuitem);
 		// Separator
 		popup.appendChild(this._window.document.createElement('menuseparator'));
@@ -1369,6 +1385,8 @@ class ReaderWindow extends ReaderInstance {
 		this._window.document.getElementById('view-menuitem-zoom-auto').setAttribute('checked', this.isZoomAutoActive());
 		this._window.document.getElementById('view-menuitem-zoom-page-width').setAttribute('checked', this.isZoomPageWidthActive());
 		this._window.document.getElementById('view-menuitem-zoom-page-height').setAttribute('checked', this.isZoomPageHeightActive());
+		this._window.document.getElementById('view-menuitem-split-vertically').setAttribute('checked', this.isSplitVerticallyActive());
+		this._window.document.getElementById('view-menuitem-split-horizontally').setAttribute('checked', this.isSplitHorizontallyActive());
 	}
 
 	_onGoMenuOpen() {
