@@ -158,12 +158,12 @@
 <!ENTITY zotero.selectitems.cancel.label "取消">
 <!ENTITY zotero.selectitems.select.label "确定">
 
-<!ENTITY zotero.bibliography.title "创建引文目录">
-<!ENTITY zotero.bibliography.style.label "引文样式:">
+<!ENTITY zotero.bibliography.title "创建引注/参考文献表">
+<!ENTITY zotero.bibliography.style.label "参考文献样式:">
 <!ENTITY zotero.bibliography.manageStyles "管理样式...">
 <!ENTITY zotero.bibliography.locale.label "语言：">
 <!ENTITY zotero.bibliography.outputMode "输出模式:">
-<!ENTITY zotero.bibliography.bibliography "引文目录">
+<!ENTITY zotero.bibliography.bibliography "参考文献表">
 <!ENTITY zotero.bibliography.outputMethod "输出方法:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "另存为 RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "另存为 HTML">
@@ -171,9 +171,9 @@
 <!ENTITY zotero.bibliography.print.label "打印">
 
 <!ENTITY zotero.integration.docPrefs.title "文档首选项">
-<!ENTITY zotero.integration.addEditCitation.title "添加/编辑引文">
-<!ENTITY zotero.integration.editBibliography.title "编辑引文目录">
-<!ENTITY zotero.integration.quickFormatDialog.title "快速格式化引文">
+<!ENTITY zotero.integration.addEditCitation.title "添加/编辑引注">
+<!ENTITY zotero.integration.editBibliography.title "编辑参考文献表">
+<!ENTITY zotero.integration.quickFormatDialog.title "快速格式化引注">
 
 <!ENTITY zotero.progress.title "进度">
 
@@ -199,7 +199,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "省略作者">
 <!ENTITY zotero.citation.prefix.label "前缀:">
 <!ENTITY zotero.citation.suffix.label "后缀:">
-<!ENTITY zotero.citation.editorWarning.label "警告: 如果你在编辑器中编辑引文, 引文将无法与数据库或引文样式同步更新.">
+<!ENTITY zotero.citation.editorWarning.label "警告: 如果你在编辑器中编辑引注, 引注将无法与数据库或参考文献样式同步更新.">
 
 <!ENTITY zotero.richText.italic.label "斜体">
 <!ENTITY zotero.richText.bold.label "粗体">
@@ -213,17 +213,17 @@
 <!ENTITY zotero.annotate.toolbar.highlight.label "高亮文本">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "取消文本高亮">
 
-<!ENTITY zotero.integration.prefs.displayAs.label "引文显示为:">
+<!ENTITY zotero.integration.prefs.displayAs.label "引注显示为:">
 <!ENTITY zotero.integration.prefs.footnotes.label "脚注">
 <!ENTITY zotero.integration.prefs.endnotes.label "尾注">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "引文存储为:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "引注存储为:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "书签">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "书签可以在 Word 与 LibreOffice 之间共享，但如果不小心被修改，可能会导致错误，并且不能插入脚注。">
 
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "自动更新引文">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "有待更新的引文将在文档中突出显示">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "禁用更新可以加速大文档中的引文的插入。单击刷新手动更新引文。">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "自动更新引注">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "有待更新的引注将在文档中突出显示">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "禁用更新可以加速大文档中的引注的插入。单击刷新手动更新引注。">
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "使用 MEDLINE 期刊缩写">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "“期刊缩写”字段将被忽略。">
@@ -233,7 +233,7 @@
 <!ENTITY zotero.integration.showEditor.label "显示编辑器">
 <!ENTITY zotero.integration.classicView.label "经典视图">
 
-<!ENTITY zotero.integration.references.label "引文目录中的参考文献">
+<!ENTITY zotero.integration.references.label "参考文献表中的文献">
 
 <!ENTITY zotero.sync.stop "停止同步">
 <!ENTITY zotero.sync.error "同步错误">
@@ -274,20 +274,20 @@
 
 <!ENTITY zotero.rtfScan.title "RTF 扫描">
 <!ENTITY zotero.rtfScan.cancel.label "取消">
-<!ENTITY zotero.rtfScan.citation.label "引文">
+<!ENTITY zotero.rtfScan.citation.label "引注">
 <!ENTITY zotero.rtfScan.itemName.label "条目名称">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "未映射引文">
-<!ENTITY zotero.rtfScan.ambiguousCitations.label "含糊的引文">
-<!ENTITY zotero.rtfScan.mappedCitations.label "已映射的引文">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "未映射引注">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "含糊的引注">
+<!ENTITY zotero.rtfScan.mappedCitations.label "已映射的引注">
 <!ENTITY zotero.rtfScan.introPage.label "介绍">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero 可以自动提取, 格式化引文并将引文目录插入到 RTF 文件中. RTF 扫描功能目前支持下列格式的引文变量:">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero 可以自动提取、格式化引注并将参考文献表插入到 RTF 文件中. RTF 扫描功能目前支持下列格式的引注:">
 <!ENTITY zotero.rtfScan.introPage.description2 "要启动, 请选择 RTF 输入文件和输出文件:">
-<!ENTITY zotero.rtfScan.scanPage.label "扫描引文">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero 正在扫描引文, 请耐心等待.">
+<!ENTITY zotero.rtfScan.scanPage.label "扫描引注">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero 正在扫描引注, 请耐心等待.">
 <!ENTITY zotero.rtfScan.citationsPage.label "校验已引用的条目">
-<!ENTITY zotero.rtfScan.citationsPage.description "请检查下列引文以确保 Zotero 已经正确地选择了相关条目.在进行下一步之前, 请更正任何未映射的或不明确的引文.">
+<!ENTITY zotero.rtfScan.citationsPage.description "请检查下列引注以确保 Zotero 已经正确地选择了相关条目.在进行下一步之前, 请更正任何未映射的或不明确的引注.">
 <!ENTITY zotero.rtfScan.stylePage.label "文档格式化中">
-<!ENTITY zotero.rtfScan.formatPage.label "正在格式化引文">
+<!ENTITY zotero.rtfScan.formatPage.label "正在格式化引注">
 <!ENTITY zotero.rtfScan.formatPage.description "Zotero正在处理并格式化您的 RTF 文件, 请耐心等待.">
 <!ENTITY zotero.rtfScan.completePage.label "RTF 扫描完成">
 <!ENTITY zotero.rtfScan.completePage.description "文档处理完成, 请确保格式正确.">

@@ -100,7 +100,7 @@
 
 <!ENTITY zotero.preferences.prefpane.export "导出">
 
-<!ENTITY zotero.preferences.citationOptions.caption "引文选项">
+<!ENTITY zotero.preferences.citationOptions.caption "引注选项">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "在参考文献里包含文章 URL 链接">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "禁用此项后, Zotero 引用期刊, 杂志和报纸文章时仅当这些文章没有指定页码范围时才会包含 URL 链接.">
 
@@ -118,7 +118,7 @@
 <!ENTITY zotero.preferences.prefpane.cite "引用">
 <!ENTITY zotero.preferences.cite.styles "样式">
 <!ENTITY zotero.preferences.cite.wordProcessors "文字处理软件">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "使用添加引用的经典对话框">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "使用添加引注的经典对话框">
 <!ENTITY zotero.preferences.styleEditor "样式编辑器">
 <!ENTITY zotero.preferences.stylePreview "样式预览">
 
@@ -134,7 +134,7 @@
 <!ENTITY zotero.preferences.keys.newItem "新建条目">
 <!ENTITY zotero.preferences.keys.newNote "新建笔记">
 <!ENTITY zotero.preferences.keys.toggleAllRead "标记全部订阅项目为 读/未读">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "复制选定条目的引文到剪贴板">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "复制选定条目的引注到剪贴板">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "复制选定的条目到剪贴板">
 <!ENTITY zotero.preferences.keys.importFromClipboard "从剪贴板导入">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "所做更改会在重启后生效">

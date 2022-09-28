@@ -34,8 +34,8 @@
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY copyCitationCmd.label "复制引文">
-<!ENTITY copyBibliographyCmd.label "复制引文目录">
+<!ENTITY copyCitationCmd.label "复制引注">
+<!ENTITY copyBibliographyCmd.label "复制参考文献表">
 <!ENTITY copyNoteCmd.label "复制笔记">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "切换页面方向">

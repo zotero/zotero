@@ -183,7 +183,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Firefox profilkönyvtár">
 <!ENTITY zotero.preferences.dataDir.custom "Egyéni:">
 <!ENTITY zotero.preferences.dataDir.choose "T   History  1  allózás...">
-<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(parancssoron keresztül megadva)">
 <!ENTITY zotero.preferences.dataDir.reveal "Az adatkönyvtár mutatása">
 <!ENTITY zotero.preferences.dataDir.migrate "Áttérés az új alapértelmezett helyre…">
 
