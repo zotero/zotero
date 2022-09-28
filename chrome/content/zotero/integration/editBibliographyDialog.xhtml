@@ -31,34 +31,40 @@
 <?xml-stylesheet href="chrome://zotero/skin/integration.css" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
-<dialog
-	id="zotero-edit-bibliography-dialog"
+<window
 	orient="vertical"
 	title="&zotero.integration.editBibliography.title;"
 	width="750" height="450"
 	onload="Zotero_Bibliography_Dialog.load();"
-	ondialogaccept="Zotero_Bibliography_Dialog.accept();"
-	ondialogcancel="Zotero_Bibliography_Dialog.close();"
 	onclose="Zotero_Bibliography_Dialog.close();"
 	onunload="doUnload();"
-	buttons="extra1,extra2,accept,cancel" buttonpack="end"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	persist="screenX screenY width height"
-	resizable="true"
-	ondialogextra1="Zotero_Bibliography_Dialog.revert()"
-	ondialogextra2="Zotero_Bibliography_Dialog.revertAll()">
+	resizable="true">
+<dialog
+	id="zotero-edit-bibliography-dialog"
+	buttons="extra1,extra2,accept,cancel" buttonpack="end">
 	
-	<script src="../include.js"/>
-	<script src="../selectItemsDialog.js"/>
-	<script src="editBibliographyDialog.js"/>
+	<script>
+		var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
+
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+
+		Services.scriptloader.loadSubScript("chrome://zotero/content/selectItemsDialog.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/integration/editBibliographyDialog.js", this);
+
+		// Custom elements
+		Services.scriptloader.loadSubScript("chrome://global/content/customElements.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/quickSearchTextbox.js", this);
+	</script>
 	
 	<vbox id="zotero-select-items-container" flex="1">
 		<vbox flex="1">
 			<hbox flex="1">
 				<vbox align="stretch" flex="1">
 					<hbox align="center" pack="end">
-						<textbox id="zotero-tb-search" type="search" timeout="250" oncommand="onSearch()" dir="reverse" onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { this.value = ''; this.doCommand('cmd_zotero_search'); return false; } return true;"/>
+						<quick-search-textbox id="zotero-tb-search" timeout="250" oncommand="onSearch()" dir="reverse"/>
 					</hbox>
 					<hbox flex="1" style="margin-top: 5px">
 						<vbox id="zotero-collections-tree-container" class="virtualized-table-container" style="min-width: 150px">
@@ -78,7 +84,7 @@
 					</vbox>
 					<vbox>
 						<label value="&zotero.integration.references.label;"/>
-						<listbox id="item-list" flex="1" align="stretch" seltype="multiple"
+						<richlistbox id="item-list" flex="1" align="stretch" seltype="multiple"
 							style="width: 250px;" onselect="Zotero_Bibliography_Dialog.listItemSelected();"
 							onchanged="Zotero_Bibliography_Dialog.textChanged()"/>
 					</vbox>
@@ -86,7 +92,8 @@
 			</hbox>
 		</vbox>
 		
-		<textbox id="editor" type="styled" mode="integration" flex="1"/>
+		<iframe id="editor" src="simpleEditor.html" flex="1" type="content" remote="false" maychangeremoteness="false"/>
 		<description id="zotero-editor-warning" style="margin: 9px 1px 0">&zotero.citation.editorWarning.label;</description>
 	</vbox>
 </dialog>
+</window>

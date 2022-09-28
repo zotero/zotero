@@ -52,6 +52,11 @@ richlistitem, richlistitem > * {
 	text-overflow: ellipsis;
 }
 
+richlistcheckbox[selected=true] {
+	background-color: -moz-cellhighlight;
+	color: -moz-cellhighlighttext;	
+}
+
 groupbox > label > h2, groupbox > * > label > h2 {
 	font-size: 14px;
 	margin-top: 1em;

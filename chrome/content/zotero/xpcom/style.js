@@ -594,8 +594,11 @@ Zotero.Styles = new function() {
 		
 		// Make sure the locale we want to select is in the menulist
 		if (availableLocales.indexOf(selectLocale) == -1) {
-			let customLocale = menulist.insertItemAt(0, selectLocale, selectLocale);
-			customLocale.setAttributeNS('zotero:', 'customLocale', true);
+			var menuitem = menulist.ownerDocument.createXULElement('menuitem');
+			menuitem.setAttribute('label', selectLocale);
+			menuitem.setAttribute('value', selectLocale);
+			menuitem.setAttributeNS('zotero:', 'customLocale', true);
+			menulist.append(menuitem);
 		}
 		
 		return menulist.value = selectLocale;

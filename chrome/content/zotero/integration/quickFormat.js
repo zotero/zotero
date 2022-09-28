@@ -22,7 +22,8 @@
     
     ***** END LICENSE BLOCK *****
 */
-Components.utils.import("resource://gre/modules/Services.jsm");
+var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+Services.scriptloader.loadSubScript("chrome://zotero/content/elements/guidancePanel.js", this);
 
 var Zotero_QuickFormat = new function () {
 	const pixelRe = /^([0-9]+)px$/
@@ -686,7 +687,7 @@ var Zotero_QuickFormat = new function () {
 		_buildItemDescription(item, infoNode);
 		
 		// add to rich list item
-		var rll = document.createElement("richlistitem");
+		var rll = document.createXULElement("richlistitem");
 		rll.setAttribute("orient", "vertical");
 		rll.setAttribute("class", "citation-dialog item");
 		rll.setAttribute("zotero-item", item.cslItemID ? item.cslItemID : item.id);
@@ -708,7 +709,7 @@ var Zotero_QuickFormat = new function () {
 		titleNode.setAttribute("value", labelText);
 		
 		// add to rich list item
-		var rll = document.createElement("richlistitem");
+		var rll = document.createXULElement("richlistitem");
 		rll.setAttribute("orient", "vertical");
 		rll.setAttribute("disabled", true);
 		rll.setAttribute("class", loading ? "citation-dialog loading" : "citation-dialog separator");
@@ -947,7 +948,7 @@ var Zotero_QuickFormat = new function () {
 			}
 			
 			if(!panelFrameHeight) {
-				panelFrameHeight = referencePanel.boxObject.height - referencePanel.clientHeight;
+				panelFrameHeight = referencePanel.getBoundingClientRect().height - referencePanel.clientHeight;
 				var computedStyle = window.getComputedStyle(referenceBox, null);
 				for(var attr of ["border-top-width", "border-bottom-width"]) {
 					var val = computedStyle.getPropertyValue(attr);
@@ -1124,11 +1125,10 @@ var Zotero_QuickFormat = new function () {
 	 * Called when progress changes
 	 */
 	function _onProgress(percent) {
-		var meter = document.querySelector(".citation-dialog .progress-meter");
+		var meter = document.querySelector(".citation-dialog.progress-meter");
 		if(percent === null) {
-			meter.mode = "undetermined";
+			meter.removeAttribute('value');
 		} else {
-			meter.mode = "determined";
 			meter.value = Math.round(percent);
 		}
 	}
@@ -1507,7 +1507,7 @@ var Zotero_QuickFormat = new function () {
 		_updateCitationObject();
 		var newWindow = window.newWindow = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 			.getService(Components.interfaces.nsIWindowWatcher)
-			.openWindow(null, 'chrome://zotero/content/integration/addCitationDialog.xul',
+			.openWindow(null, 'chrome://zotero/content/integration/addCitationDialog.xhtml',
 			'', 'chrome,centerscreen,resizable', io);
 		newWindow.addEventListener("focus", function() {
 			newWindow.removeEventListener("focus", arguments.callee, true);

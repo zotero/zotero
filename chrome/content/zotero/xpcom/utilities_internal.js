@@ -2362,8 +2362,7 @@ Zotero.Utilities.Internal.activate = new function() {
 	 * Bring a window to the foreground by interfacing directly with X11
 	 */
 	function _X11BringToForeground(win, intervalID) {
-		var windowTitle = win.QueryInterface(Ci.nsIInterfaceRequestor)
-			.getInterface(Ci.nsIWebNavigation).QueryInterface(Ci.nsIBaseWindow).title;
+		var windowTitle = win.getInterface(Ci.nsIWebNavigation).title;
 		
 		var x11Window = _X11FindWindow(_x11RootWindow, windowTitle);
 		if(!x11Window) return;

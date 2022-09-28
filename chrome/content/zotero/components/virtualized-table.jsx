@@ -1592,15 +1592,16 @@ var Columns = class {
 };
 
 function renderCell(index, data, column) {
+	column = column || { columnName: "" }
 	let span = document.createElement('span');
 	span.className = `cell ${column.className}`;
 	span.innerText = data;
 	return span;
 }
 
-function renderCheckboxCell(index, data, column) {
+function renderCheckboxCell(index, data, columnName) {
 	let span = document.createElement('span');
-	span.className = `cell checkbox ${column.className}`;
+	span.className = `cell checkbox ${columnName}`;
 	span.setAttribute('role', 'checkbox');
 	span.setAttribute('aria-checked', data);
 	if (data) {
@@ -1625,15 +1626,20 @@ function makeRowRenderer(getRowData) {
 		div.classList.toggle('focused', selection.focused == index);
 		const rowData = getRowData(index);
 		
-		for (let column of columns) {
-			if (column.hidden) continue;
+		if (columns.length) {
+			for (let column of columns) {
+				if (column.hidden) continue;
 
-			if (column.type === 'checkbox') {
-				div.appendChild(renderCheckboxCell(index, rowData[column.dataKey], column));
+				if (column.type === 'checkbox') {
+					div.appendChild(renderCheckboxCell(index, rowData[column.dataKey], column));
+				}
+				else {
+					div.appendChild(renderCell(index, rowData[column.dataKey], column));
+				}
 			}
-			else {
-				div.appendChild(renderCell(index, rowData[column.dataKey], column));
-			}
+		}
+		else {
+			div.appendChild(renderCell(index, rowData));
 		}
 
 		return div;

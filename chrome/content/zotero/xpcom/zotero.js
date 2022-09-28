@@ -445,6 +445,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		Zotero.debug('Triggering "zotero-loaded" event');
 		Services.obs.notifyObservers(Zotero, "zotero-loaded", null);
 		
+		Zotero.debug('Initializing Word Processor plugins');
+		Zotero.Integration.init();
 		await Zotero.Plugins.init();
 	}
 	

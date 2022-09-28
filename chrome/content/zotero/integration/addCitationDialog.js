@@ -52,6 +52,7 @@ var Zotero_Citation_Dialog = new function () {
 	var _sortCheckbox;
 	var _citationList;
 	var _originalHTML;
+	var _editor;
 	var serial_number;
 	var io;
 	
@@ -85,16 +86,21 @@ var Zotero_Citation_Dialog = new function () {
 			}
 		}, 0);
 		
-		document.documentElement.getButton("extra1").label = Zotero.getString("citation.multipleSources");
-		document.documentElement.getButton("extra2").label = Zotero.getString("citation.showEditor");
 		
 		io = window.arguments[0].wrappedJSObject;
 		
 		// find accept button
-		_acceptButton = document.getElementById("zotero-add-citation-dialog").getButton("accept");
-		_multipleSourceButton = document.documentElement.getButton("extra1");
+		_acceptButton = document.querySelector('dialog').getButton("accept");
+		_multipleSourceButton = document.querySelector('dialog').getButton("extra1");
+		_multipleSourceButton.label = Zotero.getString("citation.multipleSources")
+		document.querySelector('dialog').getButton("extra2").label = Zotero.getString("citation.showEditor");
 		_autoRegeneratePref = Zotero.Prefs.get("integration.autoRegenerate");
-		_citationList = document.getElementById("citation-list");
+		_citationList = document.getElementById("item-list");
+		
+		window.addEventListener('dialogaccept', () => Zotero_Citation_Dialog.accept());
+		window.addEventListener('dialogcancel', () => Zotero_Citation_Dialog.cancel());
+		window.addEventListener('dialogextra1', () => Zotero_Citation_Dialog.toggleMultipleSources());
+		window.addEventListener('dialogextra2', () => Zotero_Citation_Dialog.toggleEditor());
 		
 		// Manipulated by _addItem().  Discriminates between cite instances
 		// based on the same item in the same citation.  Internal throwaway variable,
@@ -137,7 +143,7 @@ var Zotero_Citation_Dialog = new function () {
 		yield doLoad();
 		
 		// if we already have a citation, load data from it
-		document.getElementById('editor').format = "RTF";
+		_editor = document.querySelector('#editor').contentWindow.editor;
 		if(io.citation.citationItems.length) {
 			if(io.citation.citationItems.length === 1) {
 				// single citation
@@ -217,7 +223,7 @@ var Zotero_Citation_Dialog = new function () {
 		}
 		_multipleSourcesOn = !_multipleSourcesOn;
 		var popup = document.defaultView;
-		var dialog = document.getElementById("zotero-add-citation-dialog");
+		var dialog = document.documentElement;
 		if (dialog.getAttribute("height") == 1) {
 			 popup.sizeToContent();
 		}
@@ -287,7 +293,7 @@ var Zotero_Citation_Dialog = new function () {
 
 			// turn off highlight in selected item list
 			_suppressNextListSelect = true;
-			document.getElementById("citation-list").selectedIndex = -1;
+			document.getElementById("item-list").selectedIndex = -1;
 
 			// disable all fields
 
@@ -515,7 +521,7 @@ var Zotero_Citation_Dialog = new function () {
 	 * Ask whether to modify the preview
 	 */
 	function confirmRegenerate(focusShifted) {
-		if(document.getElementById('editor').value == _originalHTML || _originalHTML === undefined) {
+		if(_editor.getContent() == _originalHTML || _originalHTML === undefined) {
 			// no changes; just update without asking
 			_updatePreview();
 			return;
@@ -563,26 +569,24 @@ var Zotero_Citation_Dialog = new function () {
 		_previewShown = !_previewShown;
 		
 		if(_previewShown) {
-			document.documentElement.getButton("extra2").label = Zotero.getString("citation.hideEditor");		
+			document.querySelector('dialog').getButton("extra2").label = Zotero.getString("citation.hideEditor");		
 			if (!text && _customHTML) {
 				text = _customHTML;
 			}
 			if(text) {
 				io.preview().then(function(preview) {
 					_originalHTML = preview;
-					editor.value = text;
+					_editor.setContent(text, true);
 				}).done();
 			} else {
 				_updatePreview();
 			}
 		} else {
-			if (editor.initialized) {
-				if (editor.value) {
-					_customHTML = editor.value;
-				}
-			}
-			document.documentElement.getButton("extra2").label = Zotero.getString("citation.showEditor");		
+			_customHTML = _editor.getContent(true);
+			document.querySelector('dialog').getButton("extra2").label = Zotero.getString("citation.showEditor");		
 		}
+		// To resize virtualized-tables
+		window.dispatchEvent(new Event('resize'));
 	}
 	
 	/*
@@ -594,10 +598,10 @@ var Zotero_Citation_Dialog = new function () {
 		_getCitation();
 		var isCustom = _previewShown && io.citation.citationItems.length	// if a citation is selected
 				&& _originalHTML
-				&& document.getElementById('editor').value != _originalHTML	// and citation has been edited
+				&& _editor.getContent(true) != _originalHTML	// and citation has been edited
 		
 		if(isCustom) {	
-			var citation = document.getElementById('editor').value;
+			var citation = _editor.getContent(true);
 			if(Zotero.Utilities.trim(citation) == "") {				
 				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 							.getService(Components.interfaces.nsIPromptService);
@@ -664,23 +668,17 @@ var Zotero_Citation_Dialog = new function () {
 	 */
 	function _updatePreview() {
 		if(_previewShown) {
-			var editor = document.getElementById('editor');
 			_getCitation();
 			
-			editor.readonly = !io.citation.citationItems.length;
-			if(io.citation.citationItems.length) {
-				io.preview().then(function(preview) {
-					editor.value = preview;
-					
-					if (editor.initialized) {
-						_originalHTML = editor.value;
-					}
-					else {
-						editor.onInit(() => _originalHTML = editor.value);
-					}
+			_editor.setEnabled(io.citation.citationItems.length);
+			if (io.citation.citationItems.length) {
+				io.preview().then((preview) => {
+					_editor.setContent(preview, true);
+
+					_originalHTML = _editor.getContent(true);
 				});
 			} else {
-				editor.value = "";
+				_editor.setContent("");
 				_originalHTML = "";
 			}
 		}
@@ -818,7 +816,7 @@ var Zotero_Citation_Dialog = new function () {
 	 * Add an item to the item list (multiple sources only)
 	 */
 	function _addItem(item, forceID) {
-		var itemNode = document.createElement("listitem");
+		var itemNode = document.createXULElement("richlistitem");
 
 		var itemDataID;
 		if (!forceID) {
@@ -829,9 +827,11 @@ var Zotero_Citation_Dialog = new function () {
 		}
 
 		itemNode.setAttribute("value", itemDataID);
-		itemNode.setAttribute("label", item.getDisplayTitle());
+		let image = document.createXULElement('image');
+		image.src = item.getImageSrc();
+		itemNode.append(image);
 		itemNode.setAttribute("class", "listitem-iconic");
-		itemNode.setAttribute("image", item.getImageSrc());
+		itemNode.append(item.getDisplayTitle());
 		_citationList.appendChild(itemNode);
 		return itemNode;
 	}
