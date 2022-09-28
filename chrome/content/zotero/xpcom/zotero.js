@@ -1339,9 +1339,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		});
 		var addons = [];
 		for (let addon of installed) {
-			switch (addon.id) {
-				case "{972ce4c6-7e08-4474-a285-3208198ce6fd}": // Default theme
-					continue;
+			if (addon.type == "theme") {
+				continue;
 			}
 			
 			addons.push(addon.name + " (" + addon.version
