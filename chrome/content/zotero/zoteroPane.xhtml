@@ -393,6 +393,21 @@
 								oncommand="ZoteroStandalone.onReaderCmd('zoomPageHeight')"
 							/>
 							<menuseparator class="menu-type-reader"/>
+							<menuitem
+									id="view-menuitem-split-vertically"
+									class="menu-type-reader"
+									type="checkbox"
+									label="&zotero.pdfReader.splitVertically;"
+									oncommand="ZoteroStandalone.onReaderCmd('splitVertically')"
+							/>
+							<menuitem
+									id="view-menuitem-split-horizontally"
+									class="menu-type-reader"
+									type="checkbox"
+									label="&zotero.pdfReader.splitHorizontally;"
+									oncommand="ZoteroStandalone.onReaderCmd('splitHorizontally')"
+							/>
+							<menuseparator class="menu-type-reader"/>
 
 							<menu id="layout-menu" label="&layout.label;">
 								<menupopup oncommand="ZoteroStandalone.onViewMenuItemClick(event)">

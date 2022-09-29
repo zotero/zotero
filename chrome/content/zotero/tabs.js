@@ -89,6 +89,12 @@ var Zotero_Tabs = new function () {
 		return tab && tab.id;
 	};
 
+	this.setSecondViewState = function (tabID, state) {
+		let { tab } = this._getTab(tabID);
+		tab.data.secondViewState = state;
+		Zotero.Session.debounceSave();
+	};
+
 	this.init = function () {
 		ReactDOM.render(
 			<TabBar
@@ -138,7 +144,8 @@ var Zotero_Tabs = new function () {
 							null,
 							{
 								title: tab.title,
-								openInBackground: !tab.selected
+								openInBackground: !tab.selected,
+								secondViewState: tab.data.secondViewState
 							}
 						);
 					}
@@ -352,7 +359,8 @@ var Zotero_Tabs = new function () {
 				tabID: tab.id,
 				title: tab.title,
 				tabIndex,
-				allowDuplicate: true
+				allowDuplicate: true,
+				secondViewState: tab.data.secondViewState
 			});
 			return;
 		}
@@ -461,7 +469,7 @@ var Zotero_Tabs = new function () {
 	};
 
 	this._openMenu = function (x, y, id) {
-		var { tabIndex } = this._getTab(id);
+		var { tab, tabIndex } = this._getTab(id);
 		window.Zotero_Tooltip.stop();
 		let menuitem;
 		let popup = document.createXULElement('menupopup');
@@ -518,7 +526,8 @@ var Zotero_Tabs = new function () {
 				var reader = Zotero.Reader.getByTabID(id);
 				if (reader) {
 					this.close(id);
-					Zotero.Reader.open(reader.itemID, null, { openInWindow: true });
+					let { secondViewState } = tab.data;
+					Zotero.Reader.open(reader.itemID, null, { openInWindow: true, secondViewState });
 				}
 			});
 			menupopup.appendChild(menuitem);
@@ -526,11 +535,10 @@ var Zotero_Tabs = new function () {
 			menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('tabs.duplicate'));
 			menuitem.addEventListener('command', () => {
-				var { tab, tabIndex } = this._getTab(id);
 				if (tab.data.itemID) {
 					tabIndex++;
-					Zotero.Reader.open(tab.data.itemID, null, { tabIndex, allowDuplicate: true });
-
+					let { secondViewState } = tab.data;
+					Zotero.Reader.open(tab.data.itemID, null, { tabIndex, allowDuplicate: true, secondViewState });
 				}
 			});
 			popup.appendChild(menuitem);
