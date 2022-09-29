@@ -678,6 +678,25 @@ Zotero.Library.prototype._finalizeErase = Zotero.Promise.coroutine(function* (en
 	this._disabled = true;
 });
 
+Zotero.Library.prototype.toResponseJSON = function (options = {}) {
+	let uri = Zotero.URI.getLibraryURI(this.libraryID);
+	return {
+		type: this.libraryType,
+		id: this.id,
+		name: this.name,
+		links: {
+			self: {
+				href: Zotero.URI.toAPIURL(uri, options.apiURL),
+				type: 'application/json'
+			},
+			alternate: {
+				href: Zotero.URI.toWebURL(uri),
+				type: 'text/html'
+			}
+		}
+	};
+};
+
 Zotero.Library.prototype.hasCollections = function () {
 	if (this._hasCollections === null) {
 		throw new Error("Collection data has not been loaded");

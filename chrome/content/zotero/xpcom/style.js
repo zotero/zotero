@@ -710,7 +710,7 @@ Zotero.Style.prototype.getCiteProc = function(locale, format, automaticJournalAb
 		if(!parentStyle) {
 			throw new Error(
 				'Style references ' + this.source + ', but this style is not installed',
-				Zotero.Utilities.pathToFileURI(this.path)
+				Zotero.File.pathToFileURI(this.path)
 			);
 		}
 		var version = parentStyle._version;

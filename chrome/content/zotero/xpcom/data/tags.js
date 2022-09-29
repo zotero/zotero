@@ -75,7 +75,7 @@ Zotero.Tags = new function() {
 	/**
 	 * Returns the tagID matching given fields, or false if none
 	 *
-	 * @param {String} name - Tag data in API JSON format
+	 * @param {String} name - Tag name
 	 * @return {Integer} tagID
 	 */
 	this.getID = function (name) {
@@ -99,7 +99,7 @@ Zotero.Tags = new function() {
 	 *
 	 * Requires a wrapping transaction
 	 *
-	 * @param {String} name - Tag data in API JSON format
+	 * @param {String} name - Tag name
 	 * @return {Promise<Integer>} tagID
 	 */
 	this.create = Zotero.Promise.coroutine(function* (name) {
@@ -219,6 +219,52 @@ Zotero.Tags = new function() {
 		var rows = yield Zotero.DB.queryAsync(sql, str ? '%' + str + '%' : undefined);
 		return rows.map((row) => this.cleanData(row));
 	});
+
+
+	/**
+	 * Convert tags (a single tag or an array) in API JSON format to API response JSON format.
+	 *
+	 * @param {Number} libraryID
+	 * @param {Object[]} tags
+	 * @param {Object} [options]
+	 * @return {Promise<Object[]>}
+	 */
+	this.toResponseJSON = function (libraryID, tags, options = {}) {
+		return Promise.all(tags.map(async (tag) => {
+			tag = { ...this.cleanData(tag), type: tag.type };
+			let numItems;
+			if (tag.type == 0 || tag.type == 1) {
+				let sql = "SELECT COUNT(itemID) "
+					+ "FROM tags JOIN itemTags USING (tagID) JOIN items USING (itemID) "
+					+ `WHERE tagID = ? AND type = ? AND libraryID = ?`;
+				numItems = await Zotero.DB.valueQueryAsync(sql, [this.getID(tag.tag), tag.type, libraryID]);
+			}
+			else {
+				let sql = "SELECT COUNT(itemID) "
+					+ "FROM tags JOIN itemTags USING (tagID) JOIN items USING (itemID) "
+					+ `WHERE tagID = ? AND libraryID = ?`;
+				numItems = await Zotero.DB.valueQueryAsync(sql, [this.getID(tag.tag), libraryID]);
+			}
+			let uri = Zotero.URI.getTagURI(libraryID, tag.tag);
+			return {
+				tag: tag.tag,
+				links: {
+					self: {
+						href: Zotero.URI.toAPIURL(uri),
+						type: 'application/json'
+					},
+					alternate: {
+						href: uri, // No toWebURL - match dataserver behavior
+						type: 'text/html'
+					}
+				},
+				meta: {
+					type: tag.type || 0,
+					numItems
+				}
+			};
+		}));
+	};
 	
 	
 	/**

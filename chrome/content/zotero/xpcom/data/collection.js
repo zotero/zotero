@@ -716,6 +716,21 @@ Zotero.Collection.prototype.serialize = function(nested) {
 }
 
 
+Zotero.Collection.prototype.toResponseJSON = function (options = {}) {
+	let json = this.constructor._super.prototype.toResponseJSON.call(this, options);
+	json.meta.numCollections = this.getChildCollections(true).length;
+	json.meta.numItems = this.getChildItems(true).length;
+	if (this.parentID) {
+		json.links.up = {
+			href: Zotero.URI.getCollectionURI(Zotero.Collections.get(this.parentID))
+				.replace(ZOTERO_CONFIG.BASE_URI, options.apiURL || ZOTERO_CONFIG.API_URL),
+			type: 'application/json'
+		};
+	}
+	return json;
+};
+
+
 /**
  * Populate the object's data from an API JSON data object
  *

@@ -239,6 +239,40 @@ Zotero.Group.prototype._finalizeErase = Zotero.Promise.coroutine(function* (env)
 	yield Zotero.Group._super.prototype._finalizeErase.call(this, env);
 });
 
+Zotero.Group.prototype.toResponseJSON = function (options = {}) {
+	if (options.includeGroupDetails) {
+		let uri = Zotero.URI.getGroupURI(this);
+		return {
+			id: this.id,
+			version: this.version,
+			links: {
+				self: {
+					href: Zotero.URI.toAPIURL(uri, options.apiURL),
+					type: 'application/json'
+				},
+				alternate: {
+					href: Zotero.URI.toWebURL(uri),
+					type: 'text/html'
+				}
+			},
+			meta: {
+				// created
+				// lastModified
+				// numItems
+			},
+			data: {
+				id: this.id,
+				version: this.version,
+				name: this.name,
+				description: this.description
+			}
+		};
+	}
+	else {
+		return Zotero.Group._super.prototype.toResponseJSON.call(this, options);
+	}
+};
+
 Zotero.Group.prototype.fromJSON = function (json, userID) {
 	if (json.name !== undefined) this.name = json.name;
 	if (json.description !== undefined) this.description = json.description;
