@@ -35,6 +35,10 @@
 			var params = {};
 			var missingParams = {};
 			
+			if (!rule.allowMissingParams && rule.parts.length != pathParts.length) {
+				return false;
+			}
+
 			// Parse path components
 			for (var i = 0; i < rule.parts.length; i++) {
 				var rulePart = rule.parts[i];
@@ -71,11 +75,12 @@
 		}
 		
 		return {
-			add: function (route, handler, autoPopulateOnMatch) {
+			add: function (route, handler, autoPopulateOnMatch = true, allowMissingParams = true) {
 				this.rules.push({
 					parts: route.replace(/^\//, '').split('/'),
 					handler: handler,
-					autoPopulateOnMatch: autoPopulateOnMatch === undefined || autoPopulateOnMatch
+					autoPopulateOnMatch,
+					allowMissingParams
 				});
 			},
 			

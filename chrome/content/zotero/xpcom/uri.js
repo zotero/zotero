@@ -145,7 +145,7 @@ Zotero.URI = new function () {
 	 * Return URI of item, which might be a local URI if user hasn't synced
 	 */
 	this.getItemURI = function (item) {
-		return this._getObjectURI(item);
+		return this.getObjectURI(item);
 	}
 	
 	
@@ -169,7 +169,7 @@ Zotero.URI = new function () {
 	 * Return URI of collection, which might be a local URI if user hasn't synced
 	 */
 	this.getCollectionURI = function (collection) {
-		return this._getObjectURI(collection);
+		return this.getObjectURI(collection);
 	}
 	
 	
@@ -195,16 +195,30 @@ Zotero.URI = new function () {
 	
 	
 	/**
-	 * @param	{Zotero.Group}		group
-	 * @return	{String}
+	 * @param {Zotero.Group} group
+	 * @param {Boolean} webRoot
+	 * @return {String}
 	 */
 	this.getGroupURI = function (group, webRoot) {
-		var uri = this._getObjectURI(group);
+		var uri = this.getObjectURI(group);
 		if (webRoot) {
-			uri = uri.replace(ZOTERO_CONFIG.BASE_URI, ZOTERO_CONFIG.WWW_BASE_URL);
+			this.toWebURL(uri);
 		}
 		return uri;
 	}
+
+	/**
+	 * @param {Zotero.Search} search
+	 * @param {Boolean} webRoot
+	 * @return {String}
+	 */
+	this.getSearchURI = function (search, webRoot) {
+		var uri = this.getObjectURI(search);
+		if (webRoot) {
+			uri = this.toWebURL(uri);
+		}
+		return uri;
+	};
 	
 	this._getObjectPath = function(obj) {
 		let path = this.getLibraryPath(obj.libraryID);
@@ -219,13 +233,30 @@ Zotero.URI = new function () {
 		if (obj instanceof Zotero.Collection) {
 			return path + '/collections/' + obj.key;
 		}
+
+		if (obj instanceof Zotero.Search) {
+			return path + '/searches/' + obj.key;
+		}
 		
 		throw new Error("Unsupported object type '" + obj._objectType + "'");
 	}
-	
-	this._getObjectURI = function(obj) {
+
+	/**
+	 * @param {Zotero.Item | Zotero.Collection | Zotero.Group | Zotero.Search} obj
+	 * @return {String}
+	 */
+	this.getObjectURI = function(obj) {
 		return this.defaultPrefix + this._getObjectPath(obj);
-	}
+	};
+
+	/**
+	 * @param {Number} libraryID
+	 * @param {String | Object} tag Tag name or tag object
+	 */
+	this.getTagURI = function (libraryID, tag) {
+		return this.getLibraryURI(libraryID) + '/tags/'
+			+ encodeURIComponent(tag.tag || tag).replaceAll('%20', '+');
+	};
 	
 	/**
 	 * Convert an item URI into an item
@@ -319,6 +350,24 @@ Zotero.URI = new function () {
 	this.getURIFeed = function (feedURI) {
 		return this._getURIObjectLibrary(feedURI, 'feed');
 	}
+
+	/**
+	 * @param {String} uri
+	 * @param {String} [apiURL]
+	 */
+	this.toAPIURL = function (uri, apiURL) {
+		if (!apiURL) {
+			apiURL = ZOTERO_CONFIG.API_URL;
+		}
+		return uri.replace(ZOTERO_CONFIG.BASE_URI, apiURL);
+	};
+
+	/**
+	 * @param {String} uri
+	 */
+	this.toWebURL = function (uri) {
+		return uri.replace(ZOTERO_CONFIG.BASE_URI, ZOTERO_CONFIG.WWW_BASE_URL);
+	};
 	
 	
 	/**
