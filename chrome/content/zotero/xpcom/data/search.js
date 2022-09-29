@@ -1135,6 +1135,8 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 		sql += " AND (itemID NOT IN (SELECT itemID FROM itemNotes "
 			+ "WHERE parentItemID IS NOT NULL) AND itemID NOT IN "
 			+ "(SELECT itemID FROM itemAttachments "
+			+ "WHERE parentItemID IS NOT NULL) AND itemID NOT IN "
+			+ "(SELECT itemID FROM itemAnnotations "
 			+ "WHERE parentItemID IS NOT NULL))";
 	}
 	
