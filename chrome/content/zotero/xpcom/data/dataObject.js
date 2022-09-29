@@ -1325,19 +1325,35 @@ Zotero.DataObject.prototype._finalizeErase = Zotero.Promise.coroutine(function* 
 
 
 Zotero.DataObject.prototype.toResponseJSON = function (options = {}) {
-	// TODO: library block?
-	
+	let uri = Zotero.URI.getObjectURI(this);
 	var json = {
 		key: this.key,
 		version: this.version,
+		library: this.library.toResponseJSON({ ...options, includeGroupDetails: false }),
+		links: {
+			self: {
+				href: Zotero.URI.toAPIURL(uri, options.apiURL),
+				type: 'application/json'
+			},
+			alternate: {
+				href: Zotero.URI.toWebURL(uri),
+				type: 'text/html'
+			}
+		},
 		meta: {},
 		data: this.toJSON(options)
 	};
 	if (options.version) {
 		json.version = json.data.version = options.version;
 	}
+	if (this.parentID) {
+		json.links.up = {
+			href: Zotero.URI.toAPIURL(Zotero.URI.getObjectURI(this.ObjectsClass.get(this.parentID)), options.apiURL),
+			type: 'application/json'
+		};
+	}
 	return json;
-}
+};
 
 
 Zotero.DataObject.prototype._preToJSON = function (options) {

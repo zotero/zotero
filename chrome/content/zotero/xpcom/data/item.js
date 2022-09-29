@@ -5499,6 +5499,15 @@ Zotero.Item.prototype.toResponseJSON = function (options = {}) {
 	if (this.isRegularItem()) {
 		json.meta.numChildren = this.numChildren();
 	}
+	
+	if (this.isImportedAttachment()) {
+		json.links.enclosure = {
+			href: this.getLocalFileURL(),
+			type: this.attachmentContentType,
+			title: this.attachmentFilename
+		};
+	}
+	
 	return json;
 };
 

@@ -139,67 +139,6 @@ Zotero.Items = function() {
 	});
 	
 	
-	/**
-	 * Return item data in web API format
-	 *
-	 * var data = Zotero.Items.getAPIData(0, 'collections/NF3GJ38A/items');
-	 *
-	 * @param {Number} libraryID
-	 * @param {String} [apiPath='items'] - Web API style
-	 * @return {Promise<String>}.
-	 */
-	this.getAPIData = Zotero.Promise.coroutine(function* (libraryID, apiPath) {
-		var gen = this.getAPIDataGenerator(...arguments);
-		var data = "";
-		while (true) {
-			var result = gen.next();
-			if (result.done) {
-				break;
-			}
-			var val = yield result.value;
-			if (typeof val == 'string') {
-				data += val;
-			}
-			else if (val === undefined) {
-				continue;
-			}
-			else {
-				throw new Error("Invalid return value from generator");
-			}
-		}
-		return data;
-	});
-	
-	
-	/**
-	 * Zotero.Utilities.Internal.getAsyncInputStream-compatible generator that yields item data
-	 * in web API format as strings
-	 *
-	 * @param {Object} params - Request parameters from Zotero.API.parsePath()
-	 */
-	this.apiDataGenerator = function* (params) {
-		Zotero.debug(params);
-		var s = new Zotero.Search;
-		s.addCondition('libraryID', 'is', params.libraryID);
-		if (params.scopeObject == 'collections') {
-			s.addCondition('collection', 'is', params.scopeObjectKey);
-		}
-		s.addCondition('title', 'contains', 'test');
-		var ids = yield s.search();
-		
-		yield '[\n';
-		
-		for (let i=0; i<ids.length; i++) {
-			let prefix = i > 0 ? ',\n' : '';
-			let item = yield this.getAsync(ids[i], { noCache: true });
-			var json = item.toResponseJSON();
-			yield prefix + JSON.stringify(json, null, 4);
-		}
-		
-		yield '\n]';
-	};
-	
-	
 	//
 	// Bulk data loading functions
 	//
