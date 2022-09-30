@@ -270,10 +270,10 @@ var Zotero_Preferences = {
 				? MozXULElement.parseXULToFragment(markup, dtdFiles)
 				: this._parseXHTMLToFragment(markup, dtdFiles);
 			contentFragment = document.importNode(contentFragment, true);
+			this._initImportedNodesPreInsert(contentFragment);
 			pane.container.append(contentFragment);
 			pane.imported = true;
-
-			this._initImportedNodes(pane.container);
+			this._initImportedNodesPostInsert(pane.container);
 		}
 
 		pane.container.hidden = false;
@@ -312,14 +312,41 @@ ${str}
 		return range.extractContents();
 	},
 
-	_initImportedNodes(root) {
+	/**
+	 * To be called before insertion into the document tree:
+	 * Move all processing instructions (XML <?...?>) found in the imported fragment into the document root
+	 * so that they actually have an effect. This essentially "activates" <?xml-stylesheet?> nodes.
+	 *
+	 * @param {DocumentFragment} fragment
+	 * @private
+	 */
+	_initImportedNodesPreInsert(fragment) {
+		let processingInstrWalker = document.createTreeWalker(fragment, NodeFilter.SHOW_PROCESSING_INSTRUCTION);
+		let processingInstr = processingInstrWalker.currentNode;
+		while (processingInstr) {
+			document.insertBefore(document.createProcessingInstruction(processingInstr.target, processingInstr.data), document.firstChild);
+			if (processingInstr.parentNode) {
+				processingInstr.parentNode.removeChild(processingInstr);
+			}
+			processingInstr = processingInstrWalker.nextNode();
+		}
+	},
+
+	/**
+	 * To be called after insertion into the document tree:
+	 * Activates `preference` attributes and inline oncommand handlers and dispatches a load event at the end.
+	 *
+	 * @param {Element} container
+	 * @private
+	 */
+	_initImportedNodesPostInsert(container) {
 		// Activate `preference` attributes
-		for (let elem of root.querySelectorAll('[preference]')) {
+		for (let elem of container.querySelectorAll('[preference]')) {
 			let preference = elem.getAttribute('preference');
-			if (root.querySelector('preferences > preference#' + preference)) {
+			if (container.querySelector('preferences > preference#' + preference)) {
 				Zotero.warn('<preference> is deprecated -- `preference` attribute values '
 					+ 'should be full preference keys, not <preference> IDs');
-				preference = root.querySelector('preferences > preference#' + preference)
+				preference = container.querySelector('preferences > preference#' + preference)
 					.getAttribute('name');
 			}
 
@@ -356,11 +383,11 @@ ${str}
 
 		// parseXULToFragment() doesn't convert oncommand attributes into actual
 		// listeners, so we'll do it here
-		for (let elem of root.querySelectorAll('[oncommand]')) {
+		for (let elem of container.querySelectorAll('[oncommand]')) {
 			elem.oncommand = elem.getAttribute('oncommand');
 		}
 
-		for (let child of root.children) {
+		for (let child of container.children) {
 			child.dispatchEvent(new Event('load'));
 		}
 	},
