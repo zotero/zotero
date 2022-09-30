@@ -377,7 +377,9 @@ Zotero.Server.LocalAPI.Items = class extends LocalAPIEndpoint {
 
 		Zotero.debug('Executing local API search');
 		Zotero.debug(search.toJSON());
-		let items = await Zotero.Items.getAsync(await search.search());
+		// Searches sometimes return duplicate IDs; de-duplicate first
+		let uniqueResultIDs = [...new Set(await search.search())];
+		let items = await Zotero.Items.getAsync(uniqueResultIDs);
 		
 		if (pathParams.itemKey) {
 			// Filter out the parent, as promised
@@ -397,6 +399,14 @@ Zotero.Server.LocalAPI.Items = class extends LocalAPIEndpoint {
 		);
 		
 		if (isTags) {
+			let unique = new Set();
+			for (let item of items) {
+				if (unique.has(item.id)) {
+					Zotero.debug('NOT UNIQUE:')
+					Zotero.debug(item)
+				}
+				unique.add(item.id)
+			}
 			let tmpTable = await Zotero.Search.idsToTempTable(items.map(item => item.id));
 			let tags = await Zotero.Tags.getAllWithin({ tmpTable });
 			
