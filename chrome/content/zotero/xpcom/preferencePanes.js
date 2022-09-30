@@ -127,7 +127,7 @@ Zotero.PreferencePanes = {
 			src: options.src,
 			extraDTD: options.extraDTD,
 			scripts: options.scripts,
-			defaultXUL: false,
+			defaultXUL: true,
 			helpURL: options.helpURL,
 		};
 
