@@ -399,31 +399,27 @@ Zotero.Server.LocalAPI.Items = class extends LocalAPIEndpoint {
 		);
 		
 		if (isTags) {
-			let unique = new Set();
-			for (let item of items) {
-				if (unique.has(item.id)) {
-					Zotero.debug('NOT UNIQUE:')
-					Zotero.debug(item)
-				}
-				unique.add(item.id)
-			}
 			let tmpTable = await Zotero.Search.idsToTempTable(items.map(item => item.id));
-			let tags = await Zotero.Tags.getAllWithin({ tmpTable });
-			
-			let tagQ = searchParams.get('q');
-			if (tagQ) {
-				let pred = searchParams.get('qmode') == 'startsWith'
-					? (tag => tag.tag.startsWith(tagQ))
-					: (tag => tag.tag.includes(tagQ));
-				tags = tags.filter(pred);
+			try {
+				let tags = await Zotero.Tags.getAllWithin({ tmpTable });
+				
+				let tagQ = searchParams.get('q');
+				if (tagQ) {
+					let pred = searchParams.get('qmode') == 'startsWith'
+						? (tag => tag.tag.startsWith(tagQ))
+						: (tag => tag.tag.includes(tagQ));
+					tags = tags.filter(pred);
+				}
+				
+				// getAllWithin() calls cleanData(), which discards type fields when they are 0
+				// But we always want them, so add them back if necessary
+				let json = await Zotero.Tags.toResponseJSON(libraryID,
+					tags.map(tag => ({ ...tag, type: tag.type || 0 })));
+				return [200, 'application/json', JSON.stringify(json, null, 4)];
 			}
-			
-			// getAllWithin() calls cleanData(), which discards type fields when they are 0
-			// But we always want them, so add them back if necessary
-			let json = await Zotero.Tags.toResponseJSON(libraryID,
-				tags.map(tag => ({ ...tag, type: tag.type || 0 })));
-			await Zotero.DB.queryAsync("DROP TABLE IF EXISTS " + tmpTable, [], { noCache: true });
-			return [200, 'application/json', JSON.stringify(json, null, 4)];
+			finally {
+				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS " + tmpTable, [], { noCache: true });
+			}
 		}
 		
 		return { data: items };
