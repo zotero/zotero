@@ -30,8 +30,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 import FilePicker from 'zotero/modules/filePicker';
 
 Zotero_Preferences.General = {
-	DEFAULT_OPENURL_RESOLVER: 'https://www.worldcat.org/registry/gateway',
-	
 	_openURLResolvers: null,
 
 	init: function () {
@@ -255,12 +253,6 @@ Zotero_Preferences.General = {
 		var menupopup = openURLMenu.firstChild;
 		menupopup.innerHTML = '';
 		
-		var defaultMenuItem = document.createXULElement('menuitem');
-		defaultMenuItem.setAttribute('label', Zotero.getString('general.default'));
-		defaultMenuItem.setAttribute('value', this.DEFAULT_OPENURL_RESOLVER);
-		defaultMenuItem.setAttribute('type', 'checkbox');
-		menupopup.appendChild(defaultMenuItem);
-		
 		var customMenuItem = document.createXULElement('menuitem');
 		customMenuItem.setAttribute('label', Zotero.getString('general.custom'));
 		customMenuItem.setAttribute('value', 'custom');
@@ -314,13 +306,8 @@ Zotero_Preferences.General = {
 			}
 		}
 		
-		// Default
-		if (currentResolver == this.DEFAULT_OPENURL_RESOLVER) {
-			openURLMenu.setAttribute('label', Zotero.getString('general.default'));
-			defaultMenuItem.setAttribute('checked', true);
-			Zotero.Prefs.clear('openURL.name');
-		}
-		else if (selectedName) {
+		// From directory
+		if (selectedName) {
 			openURLMenu.setAttribute('label', selectedName);
 			// If we found a match, update stored name
 			Zotero.Prefs.set('openURL.name', selectedName);
@@ -348,15 +335,8 @@ Zotero_Preferences.General = {
 		var openURLServerField = document.getElementById('openURLServerField');
 		var openURLVersionMenu = document.getElementById('openURLVersionMenu');
 		
-		// Default
-		if (event.target.value == this.DEFAULT_OPENURL_RESOLVER) {
-			Zotero.Prefs.clear('openURL.name');
-			Zotero.Prefs.clear('openURL.resolver');
-			Zotero.Prefs.clear('openURL.version');
-			openURLServerField.value = this.DEFAULT_OPENURL_RESOLVER;
-		}
 		// If "Custom" selected, clear URL field
-		else if (event.target.value == "custom") {
+		if (event.target.value == "custom") {
 			Zotero.Prefs.clear('openURL.name');
 			Zotero.Prefs.set('openURL.resolver', '');
 			Zotero.Prefs.clear('openURL.version');
