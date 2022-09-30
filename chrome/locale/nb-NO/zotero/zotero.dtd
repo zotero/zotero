@@ -325,4 +325,6 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Endre størrelse automatisk">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom til sidebredde">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Zoom til sidehøyde">
+<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
+<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
 <!ENTITY zotero.pdfReader.transferFromPDF "Importer merknader…">

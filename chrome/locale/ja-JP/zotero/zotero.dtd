@@ -325,4 +325,6 @@
 <!ENTITY zotero.pdfReader.zoomAuto "自動的にサイズ変更">
 <!ENTITY zotero.pdfReader.zoomPageWidth "ページ幅に合わせる">
 <!ENTITY zotero.pdfReader.zoomPageHeight "ページの高さに合わせる">
+<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
+<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
 <!ENTITY zotero.pdfReader.transferFromPDF "注釈のインポート…">

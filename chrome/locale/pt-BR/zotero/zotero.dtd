@@ -325,4 +325,6 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Zoom automático">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Largura da página">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Ampliar à Altura da Página">
+<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
+<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
 <!ENTITY zotero.pdfReader.transferFromPDF "Importar anotações...">

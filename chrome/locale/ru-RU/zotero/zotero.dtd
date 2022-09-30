@@ -325,4 +325,6 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Масштабировать автоматически">
 <!ENTITY zotero.pdfReader.zoomPageWidth "По ширине страницы">
 <!ENTITY zotero.pdfReader.zoomPageHeight "По высоте страницы">
+<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
+<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
 <!ENTITY zotero.pdfReader.transferFromPDF "Импортировать аннотации…">

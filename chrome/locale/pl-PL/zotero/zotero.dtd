@@ -325,4 +325,6 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Automatycznie zmień rozmiar">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Powiększ do szerokości strony">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Powiększ do wysokości strony">
+<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
+<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
 <!ENTITY zotero.pdfReader.transferFromPDF "Importuj adnotacje...">

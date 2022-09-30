@@ -325,4 +325,6 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Samodejno spremeni velikost">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Približaj na širino strani">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Približaj na višino strani">
+<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
+<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
 <!ENTITY zotero.pdfReader.transferFromPDF "Uvozi zaznamke ...">

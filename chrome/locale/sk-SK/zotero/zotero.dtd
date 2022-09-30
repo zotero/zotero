@@ -325,4 +325,6 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Automaticky upraviť veľkosť">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Prispôsobiť na šírku stránky">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Prispôsobiť na výšku stránky">
+<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
+<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
 <!ENTITY zotero.pdfReader.transferFromPDF "Importovať anotácie...">

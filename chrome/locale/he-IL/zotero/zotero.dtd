@@ -325,4 +325,6 @@
 <!ENTITY zotero.pdfReader.zoomAuto "שינוי גודל אוטומטי">
 <!ENTITY zotero.pdfReader.zoomPageWidth "התאמת התקריב לרוחב העמוד">
 <!ENTITY zotero.pdfReader.zoomPageHeight "התאמת התקריב לגובה העמוד">
+<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
+<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
 <!ENTITY zotero.pdfReader.transferFromPDF "ייבוא הסברים…">

@@ -325,4 +325,6 @@
 <!ENTITY zotero.pdfReader.zoomAuto "自动调整大小">
 <!ENTITY zotero.pdfReader.zoomPageWidth "适应页面宽度">
 <!ENTITY zotero.pdfReader.zoomPageHeight "适应页面高度">
+<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
+<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
 <!ENTITY zotero.pdfReader.transferFromPDF "导入注释……">

@@ -325,4 +325,6 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Anpassa storlek automatiskt">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Anpassa till sidbredd">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
+<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
+<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
