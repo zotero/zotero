@@ -5032,6 +5032,12 @@ var ZoteroPane = new function()
 		
 		var annotations = [];
 		for (let attachment of attachments) {
+			try {
+				await Zotero.PDFWorker.import(attachment.id, true);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
 			annotations.push(...attachment.getAnnotations());
 		}
 		var note = await Zotero.EditorInstance.createNoteFromAnnotations(
@@ -5122,6 +5128,12 @@ var ZoteroPane = new function()
 				continue;
 			}
 			for (let attachment of attachments) {
+				try {
+					await Zotero.PDFWorker.import(attachment.id, true);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
 				annotations.push(...attachment.getAnnotations());
 			}
 		}
