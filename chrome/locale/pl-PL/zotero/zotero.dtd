@@ -301,8 +301,8 @@
 <!ENTITY zotero.attachLink.label.link "Odnośnik:">
 <!ENTITY zotero.attachLink.label.title "Tytuł:">
 
-<!ENTITY zotero.context.addChildNote "Add Item Note">
-<!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
+<!ENTITY zotero.context.addChildNote "Dodaj notatkę do elementu">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Dodaj notatkę do elementu z adnotacji">
 <!ENTITY zotero.context.addStandaloneNote "Dodaj osobną notatkę">
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Dodaj osobną notatkę z adnotacji">
 <!ENTITY zotero.context.editInWindow "Edytuj w oddzielnym oknie">
@@ -325,6 +325,6 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Automatycznie zmień rozmiar">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Powiększ do szerokości strony">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Powiększ do wysokości strony">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
+<!ENTITY zotero.pdfReader.splitVertically "Podziel pionowo">
+<!ENTITY zotero.pdfReader.splitHorizontally "Podziel poziomo">
 <!ENTITY zotero.pdfReader.transferFromPDF "Importuj adnotacje...">
