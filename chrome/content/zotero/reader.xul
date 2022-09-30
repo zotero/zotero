@@ -167,7 +167,7 @@
 				<menuitem
 						id="view-menuitem-split-horizontally"
 						type="checkbox"
-						label="aaa &zotero.pdfReader.splitHorizontally;"
+						label="&zotero.pdfReader.splitHorizontally;"
 						oncommand="menuCmd('splitHorizontally')"
 				/>
 				<menuitem
