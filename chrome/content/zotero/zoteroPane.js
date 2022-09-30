@@ -5038,7 +5038,7 @@ var ZoteroPane = new function()
 			catch (e) {
 				Zotero.logError(e);
 			}
-			annotations.push(...attachment.getAnnotations());
+			annotations.push(...attachment.getAnnotations().filter(x => x.annotationType != 'ink'));
 		}
 		var note = await Zotero.EditorInstance.createNoteFromAnnotations(
 			annotations,
@@ -5134,7 +5134,7 @@ var ZoteroPane = new function()
 				catch (e) {
 					Zotero.logError(e);
 				}
-				annotations.push(...attachment.getAnnotations());
+				annotations.push(...attachment.getAnnotations().filter(x => x.annotationType != 'ink'));
 			}
 		}
 		

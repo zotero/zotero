@@ -1394,7 +1394,8 @@ class EditorInstanceUtilities {
 
 			if (!annotation.text
 				&& !annotation.comment
-				&& !annotation.imageAttachmentKey) {
+				&& !annotation.imageAttachmentKey
+				|| annotation.type === 'ink') {
 				continue;
 			}
 
