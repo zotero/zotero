@@ -589,9 +589,23 @@ var Zotero_LocateMenu = new function() {
 		this.icon = "chrome://zotero/skin/locate-library-lookup.png";
 		this.canHandleItem = function (item) { return Zotero.Promise.resolve(item.isRegularItem()); };
 		this.handleItems = Zotero.Promise.method(function (items, event) {
-			// If no resolver configured, just switch to the default
+			// If no resolver configured, show error
 			if (!Zotero.Prefs.get('openURL.resolver')) {
-				Zotero.Prefs.clear('openURL.resolver')
+				let ps = Services.prompt;
+				let buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+					+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_CANCEL);
+				let index = ps.confirmEx(
+					null,
+					Zotero.getString('locate.libraryLookup.noResolver.title'),
+					Zotero.getString('locate.libraryLookup.noResolver.text', Zotero.appName),
+					buttonFlags,
+					Zotero.getString('general.openPreferences'),
+					null, null, null, {}
+				);
+				if (index == 0) {
+					Zotero.Utilities.Internal.openPreferences('zotero-prefpane-advanced');
+				}
+				return;
 			}
 			var urls = [];
 			for (let item of items) {
