@@ -751,6 +751,7 @@ class VirtualizedTable extends React.Component {
 			this.selection.pivot = index;
 			this.invalidateRow(previousFocused);
 			this.invalidateRow(index);
+			this.selection._updateTree(shouldDebounce);
 		}
 		// Normal selection
 		else if (!toggleSelection) {
