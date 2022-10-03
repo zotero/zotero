@@ -92,7 +92,15 @@
 				</hbox>
 				<search-textbox id="prefs-search" placeholder="&zotero.lookup.button.search;" timeout="1"/>
 			</hbox>
-			<vbox id="prefs-content" flex="1"/>
+			<vbox id="prefs-content" flex="1">
+				<hbox id="prefs-help-container" pack="end">
+					<button
+						oncommand="Zotero_Preferences.openHelpLink()"
+						label="&zotero.preferences.helpButton.label;"
+						class="help-button" 
+						align="end"/>
+				</hbox>
+			</vbox>
 		</vbox>
 	</hbox>
 </window>

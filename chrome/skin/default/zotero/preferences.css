@@ -1,6 +1,7 @@
 #prefs-content {
 	min-height: 600px;
 	overflow-y: scroll;
+	padding-bottom: 10px;
 }
 
 #prefs-content > * {
