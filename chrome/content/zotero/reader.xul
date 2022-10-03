@@ -82,15 +82,6 @@
 <!--				<menuitem label="Switch to Presentation Mode" oncommand="menuCmd('presentationmode')"/>-->
 <!--				<menuseparator/>-->
 				<menuitem
-					label="&zotero.pdfReader.rotateClockwise;"
-					oncommand="menuCmd('rotatecw')"
-				/>
-				<menuitem
-					label="&zotero.pdfReader.rotateCounterclockwise;"
-					oncommand="menuCmd('rotateccw')"
-				/>
-				<menuseparator/>
-				<menuitem
 					id="view-menuitem-hand-tool"
 					label="&zotero.pdfReader.handTool;"
 					type="checkbox"
