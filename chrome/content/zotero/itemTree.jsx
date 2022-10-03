@@ -989,7 +989,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 					onItemContextMenu: (...args) => this.props.onContextMenu(...args),
 					
-					role: 'treegrid',
+					role: 'tree',
 					label: Zotero.getString('pane.items.title'),
 				}
 			);
@@ -2903,7 +2903,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		// Accessibility
-		div.setAttribute('role', 'row');
+		div.setAttribute('role', 'treeitem');
 		div.setAttribute('aria-level', this.getLevel(index) + 1);
 		if (!this.isContainerEmpty(index)) {
 			div.setAttribute('aria-expanded', this.isContainerOpen(index));
