@@ -340,12 +340,12 @@ class ReaderInstance {
 		return !index;
 	}
 
-	async reload() {
+	async reload(data) {
 		let item = Zotero.Items.get(this._itemID);
 		let path = await item.getFilePathAsync();
 		let buf = await OS.File.read(path, {});
 		buf = new Uint8Array(buf).buffer;
-		this._postMessage({ action: 'reload', buf, }, [buf]);
+		this._postMessage({ action: 'reload', buf, data }, [buf]);
 	}
 	
 	async menuCmd(cmd) {
@@ -886,7 +886,7 @@ class ReaderInstance {
 		menuitem.addEventListener('command', async () => {
 			this._postMessage({ action: 'reloading' });
 			await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 270, true);
-			await this.reload();
+			await this.reload({ rotatedPageIndexes: data.pageIndexes });
 		});
 		popup.appendChild(menuitem);
 		// Rotate Right
@@ -895,7 +895,7 @@ class ReaderInstance {
 		menuitem.addEventListener('command', async () => {
 			this._postMessage({ action: 'reloading' });
 			await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 90, true);
-			await this.reload();
+			await this.reload({ rotatedPageIndexes: data.pageIndexes });
 		});
 		popup.appendChild(menuitem);
 		// Rotate 180
@@ -904,7 +904,7 @@ class ReaderInstance {
 		menuitem.addEventListener('command', async () => {
 			this._postMessage({ action: 'reloading' });
 			await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 180, true);
-			await this.reload();
+			await this.reload({ rotatedPageIndexes: data.pageIndexes });
 		});
 		popup.appendChild(menuitem);
 		// Separator
@@ -1020,23 +1020,19 @@ class ReaderInstance {
 
 							// Note: annotation.image is always saved separately from the rest
 							// of annotation properties
-
-							let item = Zotero.Items.getByLibraryAndKey(attachment.libraryID, annotation.key);
-							// Save image for read-only annotation.
-							if (item
-								&& !item.isEditable()
-								&& annotation.image
-								&& !await Zotero.Annotations.hasCacheImage(item)
-							) {
-								let blob = this._dataURLtoBlob(annotation.image);
-								await Zotero.Annotations.saveCacheImage(item, blob);
-								continue;
-							}
-
-							let savedAnnotation = await Zotero.Annotations.saveFromJSON(attachment, annotation, saveOptions);
-							if (annotation.image && !await Zotero.Annotations.hasCacheImage(savedAnnotation)) {
-								let blob = this._dataURLtoBlob(annotation.image);
-								await Zotero.Annotations.saveCacheImage(savedAnnotation, blob);
+							if (annotation.image) {
+								if (this._isReadOnly()) {
+									let item = Zotero.Items.getByLibraryAndKey(attachment.libraryID, annotation.key);
+									if (item) {
+										let blob = this._dataURLtoBlob(annotation.image);
+										await Zotero.Annotations.saveCacheImage(item, blob);
+									}
+								}
+								else {
+									let savedAnnotation = await Zotero.Annotations.saveFromJSON(attachment, annotation, saveOptions);
+									let blob = this._dataURLtoBlob(annotation.image);
+									await Zotero.Annotations.saveCacheImage(savedAnnotation, blob);
+								}
 							}
 						}
 					}
