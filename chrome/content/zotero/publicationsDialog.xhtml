@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2022 Center for History and New Media
+                     George Mason University, Fairfax, Virginia, USA
+                     https://www.zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+-->
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		xmlns:html="http://www.w3.org/1999/xhtml"
+		onload="Zotero_Publications_Dialog.init()"
+>
+	<linkset>
+		<html:link rel="localization" href="zotero.ftl" />
+	</linkset>
+	
+	<script src="chrome://global/content/customElements.js" />
+	<script src="chrome://zotero/content/elements/publicationsLicenseInfo.js" />
+
+	<wizard 
+		id="publications-dialog-wizard"
+		class="publications-dialog-wizard"
+		width="600" height="550"
+	>
+		<wizardpage pageid="intro" data-l10n-id="publications-intro-page">
+			<p class="description" data-l10n-id="publications-intro" />
+			<checkbox native="true" id="include-files" data-l10n-id="publications-include-checkbox-files" />
+			<checkbox native="true" id="include-notes" data-l10n-id="publications-include-checkbox-notes" />
+			<p class="description" data-l10n-id="publications-include-adjust-at-any-time" />
+			<div class="confirm-authorship-checkbox">
+				<checkbox native="true" id="confirm-authorship-checkbox" data-l10n-id="publications-intro-authorship" />
+			</div>
+		</wizardpage>
+		
+		<wizardpage pageid="choose-sharing" data-l10n-id="publications-sharing-page">
+			<div id="keep-rights">
+				<checkbox native="true" id="keep-rights-checkbox" data-l10n-id="publications-sharing-keep-rights-field" />
+			</div>
+			<div id="choose-sharing-options">
+				<p class="description" data-l10n-id="publications-sharing-text" />
+				<p class="description" data-l10n-id="publications-sharing-prompt" />
+				<radiogroup id="sharing-radiogroup" align="start">
+					<radio value="reserved" data-l10n-id="publications-sharing-reserved" />
+					<radio value="cc" data-l10n-id="publications-sharing-cc" />
+					<radio value="cc0" data-l10n-id="publications-sharing-cc0" />
+				</radiogroup>
+				<publications-license-info license="reserved" id="sharing-license-info" />
+			</div>
+		</wizardpage>
+		
+		<wizardpage pageid="choose-license" data-l10n-id="publications-license-page">
+			<p class="description" data-l10n-id="publications-choose-license-text" />
+			<h2 data-l10n-id="publications-choose-license-adaptations-prompt" />
+			<radiogroup id="choose-adaptations" align="start">
+				<radio value="no" data-l10n-id="publications-choose-license-no" />
+				<radio value="sharealike" data-l10n-id="publications-choose-license-sharealike" />
+				<radio value="yes" data-l10n-id="publications-choose-license-yes" />
+			</radiogroup>
+			
+			<h2 data-l10n-id="publications-choose-license-commercial-prompt" />
+			<radiogroup id="choose-commercial" align="start">
+				<radio value="no" data-l10n-id="publications-choose-license-no" />
+				<radio value="yes" data-l10n-id="publications-choose-license-yes" />
+			</radiogroup>
+			<publications-license-info license="cc-by-nc-nd" id="final-license-info" />
+		</wizardpage>
+	</wizard>
+	
+	<script src="include.js" />
+	<script src="publicationsDialog.js" />
+</window>
