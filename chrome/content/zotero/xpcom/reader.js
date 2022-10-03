@@ -702,19 +702,19 @@ class ReaderInstance {
 		popup.appendChild(menuitem);
 		// Separator
 		popup.appendChild(this._window.document.createXULElement('menuseparator'));
-		// Split Vertically
-		menuitem = this._window.document.createXULElement('menuitem');
-		menuitem.setAttribute('label', Zotero.getString('pdfReader.splitVertically'));
-		menuitem.setAttribute('type', 'checkbox');
-		menuitem.setAttribute('checked', this.isSplitVerticallyActive());
-		menuitem.addEventListener('command', () => this._splitVertically());
-		popup.appendChild(menuitem);
 		// Split Horizontally
 		menuitem = this._window.document.createXULElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.splitHorizontally'));
 		menuitem.setAttribute('type', 'checkbox');
 		menuitem.setAttribute('checked', this.isSplitHorizontallyActive());
 		menuitem.addEventListener('command', () => this._splitHorizontally());
+		popup.appendChild(menuitem);
+		// Split Vertically
+		menuitem = this._window.document.createXULElement('menuitem');
+		menuitem.setAttribute('label', Zotero.getString('pdfReader.splitVertically'));
+		menuitem.setAttribute('type', 'checkbox');
+		menuitem.setAttribute('checked', this.isSplitVerticallyActive());
+		menuitem.addEventListener('command', () => this._splitVertically());
 		popup.appendChild(menuitem);
 		// Separator
 		popup.appendChild(this._window.document.createXULElement('menuseparator'));
