@@ -1240,7 +1240,9 @@ ZoteroProtocolHandler.prototype = {
 		
 		return Ci.nsIProtocolHandler.URI_NORELATIVE
 			| Ci.nsIProtocolHandler.URI_IS_LOCAL_RESOURCE
-			| Ci.nsIProtocolHandler.URI_DANGEROUS_TO_LOAD;
+			// URI_IS_UI_RESOURCE: more secure than URI_LOADABLE_BY_ANYONE, less secure than URI_DANGEROUS_TO_LOAD
+			// This is the security level used by the chrome:// protocol
+			| Ci.nsIProtocolHandler.URI_IS_UI_RESOURCE;
 	},
 	get defaultPort() {
 		return -1;
