@@ -72,7 +72,7 @@ ZoteroPluginInstaller.prototype = {
 		Zotero.debug("PluginInstaller: addon info fetched");
 		
 		try {
-			this._version = await Zotero.File.getContentsFromURLAsync(this._addon.VERSION_FILE);
+			this._version = await Zotero.File.getContentsFromURLAsync(this._addon.VERSION_FILE).trim();
 			var version = this.prefBranch.getCharPref("version");
 			if (this.force || (Services.vc.compare(version, this._addon.LAST_INSTALLED_FILE_UPDATE) < 0
 					&& !this.prefBranch.getBoolPref("skipInstallation"))) {
