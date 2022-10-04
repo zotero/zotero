@@ -160,8 +160,7 @@ const ZoteroStandalone = new function() {
 			let item = Zotero.Items.get(reader.itemID);
 			let library = Zotero.Libraries.get(item.libraryID);
 			if (item
-					// Don't allow annotation transfer in group libraries
-					&& library.libraryType == 'user'
+					&& library.filesEditable
 					&& library.editable
 					&& !(item.deleted || item.parentItem && item.parentItem.deleted)) {
 				let annotations = item.getAnnotations();
