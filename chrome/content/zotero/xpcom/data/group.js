@@ -258,7 +258,6 @@ Zotero.Group.prototype.toResponseJSON = function (options = {}) {
 			meta: {
 				// created
 				// lastModified
-				// numItems
 			},
 			data: {
 				id: this.id,
@@ -271,6 +270,15 @@ Zotero.Group.prototype.toResponseJSON = function (options = {}) {
 	else {
 		return Zotero.Group._super.prototype.toResponseJSON.call(this, options);
 	}
+};
+
+Zotero.Group.prototype.toResponseJSONAsync = async function (options = {}) {
+	let json = this.toResponseJSON(options);
+	if (options.includeGroupDetails) {
+		json.meta.numItems = await Zotero.DB.valueQueryAsync(
+			"SELECT COUNT(*) FROM items WHERE libraryID = ?", this.libraryID);
+	}
+	return json;
 };
 
 Zotero.Group.prototype.fromJSON = function (json, userID) {
