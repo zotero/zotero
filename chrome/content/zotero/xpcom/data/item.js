@@ -2345,7 +2345,7 @@ Zotero.Item.prototype.isAttachment = function() {
 }
 
 /**
- * @return {Promise<Boolean>}
+ * @return {Boolean}
  */
 Zotero.Item.prototype.isImportedAttachment = function() {
 	if (!this.isAttachment()) {
@@ -2361,7 +2361,7 @@ Zotero.Item.prototype.isImportedAttachment = function() {
 }
 
 /**
- * @return {Promise<Boolean>}
+ * @return {Boolean}
  */
 Zotero.Item.prototype.isStoredFileAttachment = function() {
 	if (!this.isAttachment()) {
@@ -2371,7 +2371,7 @@ Zotero.Item.prototype.isStoredFileAttachment = function() {
 }
 
 /**
- * @return {Promise<Boolean>}
+ * @return {Boolean}
  */
 Zotero.Item.prototype.isWebAttachment = function() {
 	if (!this.isAttachment()) {
@@ -5499,6 +5499,9 @@ Zotero.Item.prototype.toResponseJSON = function (options = {}) {
 	if (this.isRegularItem()) {
 		json.meta.numChildren = this.numChildren();
 	}
+	else {
+		json.meta.numChildren = false;
+	}
 	
 	if (this.isImportedAttachment()) {
 		json.links.enclosure = {
@@ -5508,6 +5511,25 @@ Zotero.Item.prototype.toResponseJSON = function (options = {}) {
 		};
 	}
 	
+	return json;
+};
+
+
+Zotero.Item.prototype.toResponseJSONAsync = async function (options = {}) {
+	let json = this.toResponseJSON(options);
+	if (this.isRegularItem()) {
+		let bestAttachment = await this.getBestAttachment();
+		if (bestAttachment) {
+			json.links.attachment = {
+				href: Zotero.URI.toAPIURL(Zotero.URI.getItemURI(bestAttachment), options.apiURL),
+				type: 'application/json',
+				attachmentType: bestAttachment.attachmentContentType
+			};
+		}
+	}
+	else if (this.isImportedAttachment()) {
+		json.links.enclosure.length = await Zotero.Attachments.getTotalFileSize(this);
+	}
 	return json;
 };
 

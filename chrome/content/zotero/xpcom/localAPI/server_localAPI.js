@@ -30,32 +30,36 @@ Endpoints are accessible on the local server (localhost:23119 by default) under 
 
 Limitations compared to api.zotero.org:
 
-- Only API version 3 (https://www.zotero.org/support/dev/web_api/v3/basics) is supported,
-  and only one API version will ever be supported at a time. If a new API version is released
-  and your client needs to maintain support for older versions, first query /api/ and read the
+- Only API version 3 (https://www.zotero.org/support/dev/web_api/v3/basics) is supported, and only
+  one API version will ever be supported at a time. If a new API version is released and your
+  client needs to maintain support for older versions, first query /api/ and read the
   Zotero-API-Version response header, then make requests conditionally.
 - Write access is not yet supported.
 - No authentication.
-- No access to user data for users other than the local logged-in user. Use user ID 0
-  or the user's actual API user ID (https://www.zotero.org/settings/keys).
+- No access to user data for users other than the local logged-in user. Use user ID 0 or the user's
+  actual API user ID (https://www.zotero.org/settings/keys).
 - Minimal access to metadata about groups.
 - Atom is not supported.
-- Pagination and limits are not supported.
-- If your code relies on any undefined behavior or especially unusual corner cases in the
-  web API, it'll probably work differently when using the local API. This implementation is
-  primarily concerned with matching the web API's spec and secondarily with matching its
-  observed behavior, but it does not make any attempt to replicate implementation details
-  that your code might rely on. Sort orders might differ, quicksearch results will probably
-  differ, and JSON you get from the local API is never going to be exactly identical to what
-  you would get from the web API.
+- Item type/field endpoints (https://www.zotero.org/support/dev/web_api/v3/types_and_fields) will
+  return localized names in the user's locale. The locale query parameter is not supported. The
+  single exception is /api/creatorFields, which follows the web API's behavior in always returning
+  results in English, *not* the user's locale.
+- If your code relies on any undefined behavior or especially unusual corner cases in the web API,
+  it'll probably work differently when using the local API. This implementation is primarily
+  concerned with matching the web API's spec and secondarily with matching its observed behavior,
+  but it does not make any attempt to replicate implementation details that your code might rely on.
+  Sort orders might differ, quicksearch results will probably differ, and JSON you get from the
+  local API is never going to be exactly identical to what you would get from the web API.
 
 That said, there are benefits:
 
-- No pagination is needed because the API doesn't mind sending you many megabytes of data
-  at a time - nothing ever touches the network.
+- Pagination is often unnecessary because the API doesn't mind sending you many megabytes of data
+  at a time - nothing ever touches the network. For that reason, returned results are not limited
+  by default (unlike in the web API, which has a default limit of 25 and will not return more than
+  100 results at a time).
 - For the same reason, no rate limits, and it's really fast.
-- <userOrGroupPrefix>/searches/:searchKey/items returns the set of items matching a saved
-  search. The web API doesn't support actually executing searches.
+- <userOrGroupPrefix>/searches/:searchKey/items returns the set of items matching a saved search
+  (unlike in the web API, which doesn't support actually executing searches).
 
 */
 
@@ -160,7 +164,27 @@ class LocalAPIEndpoint {
 				});
 			}
 			
-			return this.makeDataObjectResponse(requestData, response.data);
+			let totalResults = 1;
+			let links;
+			if (Array.isArray(response.data)) {
+				totalResults = response.data.length;
+				let start = parseInt(requestData.searchParams.get('start')) || 0;
+				if (start < 0) start = 0;
+				if (start >= response.data.length) start = response.data.length;
+				let limit = parseInt(requestData.searchParams.get('limit')) || response.data.length - start;
+				if (limit < 0) limit = 0;
+				response.data = response.data.slice(start, start + limit);
+				
+				links = this.buildLinks(requestData, start, limit, totalResults);
+			}
+			else {
+				links = this.buildLinks(requestData, 0, 0, 1);
+			}
+			
+			return this.makeDataObjectResponse(requestData, response.data, {
+				'Total-Results': totalResults,
+				'Link': Object.entries(links).map(([rel, url]) => `<${url}>; rel="${rel}"`).join(', ')
+			});
 		}
 		else {
 			return this.makeResponse(...response);
@@ -168,11 +192,90 @@ class LocalAPIEndpoint {
 	}
 
 	/**
-	 * @param requestData Passed to {@link init}
-	 * @param dataObjectOrObjects
+	 * Build an object mapping link 'rel' attributes to URLs for the given request data and response info.
+	 *
+	 * @param {Object} requestData
+	 * @param {Number} start
+	 * @param {Number} limit
+	 * @param {Number} totalResults
+	 * @returns {Object}
+	 */
+	buildLinks(requestData, start, limit, totalResults) {
+		let links = {};
+		
+		let buildURL = (searchParams) => {
+			let url = new URL(requestData.pathname, 'http://' + requestData.headers['Host']);
+			url.search = searchParams.toString();
+			return url.toString();
+		};
+
+		// Logic adapted from https://github.com/zotero/dataserver/blob/18443360/model/API.inc.php#L588-L642
+		// first
+		if (start) {
+			let p = new URLSearchParams(requestData.searchParams);
+			p.delete('start');
+			links.first = buildURL(p);
+		}
+		// prev
+		if (start) {
+			let p = new URLSearchParams(requestData.searchParams);
+			let prevStart = start - limit;
+			if (prevStart <= 0) {
+				p.delete('start');
+			}
+			else {
+				p.set('start', prevStart.toString());
+			}
+			links.prev = buildURL(p);
+		}
+		// last
+		if (!start && limit >= totalResults) {
+			let p = new URLSearchParams(requestData.searchParams);
+			links.last = buildURL(p);
+		}
+		else if (limit) {
+			let lastStart;
+			if (start >= totalResults) {
+				lastStart = totalResults - limit;
+			}
+			else {
+				lastStart = totalResults - totalResults % limit;
+				if (lastStart == totalResults) {
+					lastStart = totalResults - limit;
+				}
+			}
+			let p = new URLSearchParams(requestData.searchParams);
+			if (lastStart > 0) {
+				p.set('start', lastStart.toString());
+			}
+			else {
+				p.delete('start');
+			}
+			links.last = buildURL(p);
+
+			// next
+			let nextStart = start + limit;
+			if (nextStart < totalResults) {
+				p.set('start', nextStart.toString());
+				links.next = buildURL(p);
+			}
+		}
+
+		// alternate: cut off '/api/', replace userID 0 with current user's ID
+		links.alternate = ZOTERO_CONFIG.WWW_BASE_URL
+			+ requestData.pathname.substring(5)
+				.replace('users/0/', `users/${Zotero.Users.getCurrentUserID()}/`);
+		
+		return links;
+	}
+
+	/**
+	 * @param {Object} requestData Passed to {@link init}
+	 * @param {Zotero.DataObject | Zotero.DataObject[]} dataObjectOrObjects
+	 * @param {Object} headers
 	 * @returns {Promise} A response to be returned from {@link init}
 	 */
-	async makeDataObjectResponse(requestData, dataObjectOrObjects) {
+	async makeDataObjectResponse(requestData, dataObjectOrObjects, headers) {
 		let contentType;
 		let body;
 		switch (requestData.searchParams.get('format')) {
@@ -187,8 +290,7 @@ class LocalAPIEndpoint {
 					return this.makeResponse(400, 'text/plain', 'Only multi-object requests can output keys');
 				}
 				contentType = 'text/plain';
-				body = dataObjectOrObjects.map(o => o.key)
-					.join('\n');
+				body = dataObjectOrObjects.map(o => o.key).join('\n');
 				break;
 			case 'versions':
 				if (!Array.isArray(dataObjectOrObjects)) {
@@ -211,7 +313,7 @@ class LocalAPIEndpoint {
 					return this.makeResponse(400, 'text/plain', `Invalid 'format' value '${requestData.searchParams.get('format')}'`);
 				}
 		}
-		return this.makeResponse(200, contentType, body);
+		return this.makeResponse(200, { ...headers, 'Content-Type': contentType }, body);
 	}
 
 	/**
@@ -259,6 +361,111 @@ Zotero.Server.LocalAPI.Root = class extends LocalAPIEndpoint {
 	}
 };
 Zotero.Server.Endpoints["/api/"] = Zotero.Server.LocalAPI.Root;
+
+
+Zotero.Server.LocalAPI.Schema = class extends LocalAPIEndpoint {
+	supportedMethods = ['GET'];
+
+	async run(_) {
+		return [200, 'application/json', await Zotero.File.getContentsFromURLAsync('resource://zotero/schema/global/schema.json')];
+	}
+};
+Zotero.Server.Endpoints["/api/schema"] = Zotero.Server.LocalAPI.Schema;
+
+Zotero.Server.LocalAPI.ItemTypes = class extends LocalAPIEndpoint {
+	supportedMethods = ['GET'];
+
+	run(_) {
+		let itemTypes = Zotero.ItemTypes.getAll().map((type) => {
+			return {
+				itemType: type.name,
+				localized: Zotero.ItemTypes.getLocalizedString(type.name)
+			};
+		});
+		return [200, 'application/json', JSON.stringify(itemTypes, null, 4)];
+	}
+};
+Zotero.Server.Endpoints["/api/itemTypes"] = Zotero.Server.LocalAPI.ItemTypes;
+
+Zotero.Server.LocalAPI.ItemFields = class extends LocalAPIEndpoint {
+	supportedMethods = ['GET'];
+
+	run(_) {
+		let itemFields = Zotero.ItemFields.getAll().map((field) => {
+			return {
+				field: field.name,
+				localized: Zotero.ItemFields.getLocalizedString(field.name)
+			};
+		});
+		return [200, 'application/json', JSON.stringify(itemFields, null, 4)];
+	}
+};
+Zotero.Server.Endpoints["/api/itemFields"] = Zotero.Server.LocalAPI.ItemFields;
+
+Zotero.Server.LocalAPI.ItemTypeFields = class extends LocalAPIEndpoint {
+	supportedMethods = ['GET'];
+
+	run({ searchParams }) {
+		let itemType = searchParams.get('itemType');
+		if (!itemType || !Zotero.ItemTypes.getID(itemType)) {
+			return [400, 'text/plain', "Invalid or missing 'itemType' value"];
+		}
+		let itemFields = Zotero.ItemFields.getItemTypeFields(Zotero.ItemTypes.getID(itemType))
+			.map((fieldID) => {
+				return {
+					field: Zotero.ItemFields.getName(fieldID),
+					localized: Zotero.ItemFields.getLocalizedString(fieldID)
+				};
+			});
+		return [200, 'application/json', JSON.stringify(itemFields, null, 4)];
+	}
+};
+Zotero.Server.Endpoints["/api/itemTypeFields"] = Zotero.Server.LocalAPI.ItemTypeFields;
+
+Zotero.Server.LocalAPI.ItemTypeCreatorTypes = class extends LocalAPIEndpoint {
+	supportedMethods = ['GET'];
+
+	run({ searchParams }) {
+		let itemType = searchParams.get('itemType');
+		if (!itemType || !Zotero.ItemTypes.getID(itemType)) {
+			return [400, 'text/plain', "Invalid or missing 'itemType' value"];
+		}
+		let creatorTypes = Zotero.CreatorTypes.getTypesForItemType(Zotero.ItemTypes.getID(itemType))
+			.map((creatorType) => {
+				return {
+					creatorType: creatorType.name,
+					localized: creatorType.localizedName
+				};
+			});
+		return [200, 'application/json', JSON.stringify(creatorTypes, null, 4)];
+	}
+};
+Zotero.Server.Endpoints["/api/itemTypeCreatorTypes"] = Zotero.Server.LocalAPI.ItemTypeCreatorTypes;
+
+Zotero.Server.LocalAPI.CreatorFields = class extends LocalAPIEndpoint {
+	supportedMethods = ['GET'];
+
+	run(_) {
+		let creatorFields = [
+			{ field: 'firstName', localized: 'First' },
+			{ field: 'lastName', localized: 'Last' },
+			{ field: 'name', localized: 'Name' }
+		];
+		return [200, 'application/json', JSON.stringify(creatorFields, null, 4)];
+	}
+};
+Zotero.Server.Endpoints["/api/creatorFields"] = Zotero.Server.LocalAPI.CreatorFields;
+
+
+Zotero.Server.LocalAPI.Settings = class extends LocalAPIEndpoint {
+	supportedMethods = ['GET'];
+
+	run(_) {
+		return [200, 'application/json', '{}'];
+	}
+};
+Zotero.Server.Endpoints["/api/users/:userID/settings"] = Zotero.Server.LocalAPI.Settings;
+
 
 Zotero.Server.LocalAPI.Collections = class extends LocalAPIEndpoint {
 	supportedMethods = ['GET'];
@@ -415,7 +622,7 @@ Zotero.Server.LocalAPI.Items = class extends LocalAPIEndpoint {
 				// But we always want them, so add them back if necessary
 				let json = await Zotero.Tags.toResponseJSON(libraryID,
 					tags.map(tag => ({ ...tag, type: tag.type || 0 })));
-				return [200, 'application/json', JSON.stringify(json, null, 4)];
+				return { data: json };
 			}
 			finally {
 				await Zotero.DB.queryAsync("DROP TABLE IF EXISTS " + tmpTable, [], { noCache: true });
@@ -467,6 +674,29 @@ Zotero.Server.Endpoints["/api/users/:userID/items/:itemKey"] = Zotero.Server.Loc
 Zotero.Server.Endpoints["/api/groups/:groupID/items/:itemKey"] = Zotero.Server.LocalAPI.Item;
 
 
+Zotero.Server.LocalAPI.ItemFile = class extends LocalAPIEndpoint {
+	supportedMethods = ['GET'];
+
+	run({ pathname, pathParams, libraryID }) {
+		let item = Zotero.Items.getByLibraryAndKey(libraryID, pathParams.itemKey);
+		if (!item) return _404;
+		if (!item.isFileAttachment()) {
+			return [400, 'text/plain', `Not a file attachment: ${item.key}`];
+		}
+		if (pathname.endsWith('/url')) {
+			return [200, 'text/plain', item.getLocalFileURL()];
+		}
+		return [302, { 'Location': item.getLocalFileURL() }, ''];
+	}
+};
+Zotero.Server.Endpoints["/api/users/:userID/items/:itemKey/file"] = Zotero.Server.LocalAPI.ItemFile;
+Zotero.Server.Endpoints["/api/groups/:groupID/items/:itemKey/file"] = Zotero.Server.LocalAPI.ItemFile;
+Zotero.Server.Endpoints["/api/users/:userID/items/:itemKey/file/view"] = Zotero.Server.LocalAPI.ItemFile;
+Zotero.Server.Endpoints["/api/groups/:groupID/items/:itemKey/file/view"] = Zotero.Server.LocalAPI.ItemFile;
+Zotero.Server.Endpoints["/api/users/:userID/items/:itemKey/file/view/url"] = Zotero.Server.LocalAPI.ItemFile;
+Zotero.Server.Endpoints["/api/groups/:groupID/items/:itemKey/file/view/url"] = Zotero.Server.LocalAPI.ItemFile;
+
+
 Zotero.Server.LocalAPI.Searches = class extends LocalAPIEndpoint {
 	supportedMethods = ['GET'];
 
@@ -497,7 +727,7 @@ Zotero.Server.LocalAPI.Tags = class extends LocalAPIEndpoint {
 	async run({ libraryID }) {
 		let tags = await Zotero.Tags.getAll(libraryID);
 		let json = await Zotero.Tags.toResponseJSON(libraryID, tags);
-		return [200, 'application/json', JSON.stringify(json, null, 4)];
+		return { data: json };
 	}
 };
 Zotero.Server.Endpoints["/api/users/:userID/tags"] = Zotero.Server.LocalAPI.Tags;
@@ -510,7 +740,7 @@ Zotero.Server.LocalAPI.Tag = class extends LocalAPIEndpoint {
 		let tag = decodeURIComponent(pathParams.tag.replaceAll('+', '%20'));
 		let json = await Zotero.Tags.toResponseJSON(libraryID, [{ tag }]);
 		if (!json) return _404;
-		return [200, 'application/json', JSON.stringify(json, null, 4)];
+		return { data: json };
 	}
 };
 Zotero.Server.Endpoints["/api/users/:userID/tags/:tag"] = Zotero.Server.LocalAPI.Tag;
@@ -532,10 +762,12 @@ async function toResponseJSON(dataObjectOrObjects, searchParams) {
 	
 	// Ask the data object for its response JSON representation, updating URLs to point to localhost
 	let dataObject = dataObjectOrObjects;
-	let responseJSON = dataObject.toResponseJSON({
-		apiURL: `http://localhost:${Zotero.Prefs.get('httpServer.port')}/api/`,
-		includeGroupDetails: true
-	});
+	let responseJSON = dataObject.toResponseJSONAsync
+		? await dataObject.toResponseJSONAsync({
+			apiURL: `http://localhost:${Zotero.Prefs.get('httpServer.port')}/api/`,
+			includeGroupDetails: true
+		})
+		: dataObject;
 	
 	// Add includes and remove 'data' if not requested
 	let include = searchParams.has('include') ? searchParams.get('include') : 'data';
