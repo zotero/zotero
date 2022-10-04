@@ -28,6 +28,7 @@
  * @namespace
  */
 var Zotero_Lookup = new function () {
+	this._button = null;
 	/**
 	 * Performs a lookup by DOI, PMID, or ISBN on the given textBox value
 	 * and adds any items it can.
@@ -135,6 +136,7 @@ var Zotero_Lookup = new function () {
 	this.showPanel = function (button) {
 		var panel = document.getElementById('zotero-lookup-panel');
 		panel.openPopup(button, "after_start", 16, -2, false, false);
+		this._button = button;
 	}
 	
 	
@@ -200,6 +202,15 @@ var Zotero_Lookup = new function () {
 			document.getElementById("zotero-lookup-panel").hidePopup();
 		}
 		return true;
+	}
+
+	this.onFocusOut = function(event) {
+		if (this._button && event.relatedTarget === null) {
+			event.preventDefault();
+			event.stopPropagation();
+			this._button.focus();
+			this._button = null;
+		}
 	}
 	
 	

@@ -63,3 +63,7 @@ tab {
 	background-color: #ececec;
 	border-top: 1px solid hsla(0, 0%, 0%, 0.2);
 }
+
+.zotero-tb-button:focus {
+	border: 1px dotted #999;
+}

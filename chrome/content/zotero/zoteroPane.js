@@ -55,6 +55,10 @@ var ZoteroPane = new function()
 	this.clearItemsPaneMessage = clearItemsPaneMessage;
 	this.viewSelectedAttachment = viewSelectedAttachment;
 	this.reportErrors = reportErrors;
+
+	// from https://github.com/zotero/web-library/blob/master/src/js/hooks/use-focus-manager.js
+	const modifierIsNotShift = ev => ev.getModifierState("Meta") || ev.getModifierState("Alt") ||
+		ev.getModifierState("Control") || ev.getModifierState("OS");
 	
 	this.document = document;
 	
@@ -134,10 +138,168 @@ var ZoteroPane = new function()
 		observerService.addObserver(_reloadObserver, "zotero-before-reload", false);
 		this.addReloadListener(_loadPane);
 		
+		setupToolbar();
 		// continue loading pane
 		_loadPane();
 	};
-	
+
+	function setupToolbar() {
+		const toolbar = this.document.getElementById("zotero-toolbar");
+		const collectionsToolbar = document.getElementById("zotero-collections-toolbar");
+		const itemsToolbar = document.getElementById("zotero-items-toolbar");
+		const itemToolbar = document.getElementById("zotero-item-toolbar");
+		const lookupButton = document.getElementById("zotero-tb-lookup"); // needs special treatment
+
+		const zoneOne = {
+			start: () => collectionsToolbar.getElementsByClassName("zotero-tb-button")[0],
+			children: () => [ 
+				...collectionsToolbar.getElementsByClassName("zotero-tb-button"),
+				...itemsToolbar.getElementsByClassName("zotero-tb-button") ],
+		}
+
+		const zoneTwo = {
+			start: () => itemToolbar.getElementsByClassName("zotero-tb-button")[0],
+			children: () => [...itemToolbar.getElementsByClassName("zotero-tb-button")],
+			after: () => document.getElementById("collection-tree"),
+			before: () => document.getElementById("zotero-tb-search")
+		}
+		
+		const toolbarState = new class {
+			zone = null
+			current = null;
+			enter(zone) { 
+				this.zone = zone;
+			}
+			exit() { 
+				this.zone = null;
+				this.current = null;
+			}
+			moveFocus(n = 0) {
+				const children = this.zone.children();
+				let currentIndex = children.indexOf(this.current);
+				if (currentIndex === -1) {
+					throw new Error("Cannot move focus from an element not part of the current toolbar zone.");
+				}
+				if (currentIndex + n < 0 || currentIndex + n >= children.length) return;
+				else children[currentIndex + n].focus();
+			}
+		};
+
+		zoneOne.start().setAttribute("tabindex", "0");
+		zoneTwo.start().setAttribute("tabindex", "0");
+
+		toolbar.addEventListener("focusin", (event) => { 
+			if (toolbarState.zone) {
+				if (toolbarState.current === event.target) return;
+				if (toolbarState.zone.children().indexOf(toolbarState.current) > -1) {
+					toolbarState.current = event.target;
+					return;
+				}
+			}
+			let pos = zoneOne.children().indexOf(event.target);
+			if (pos >= 0) {
+				toolbarState.enter(zoneOne);
+				toolbarState.current = event.target;
+				return;
+			}
+			pos = zoneTwo.children().indexOf(event.target);
+			if (pos >= 0) {
+				toolbarState.enter(zoneTwo);
+				toolbarState.current = event.target;
+				return;
+			}
+		});
+
+		toolbar.addEventListener("focusout", (event) => {
+			if (toolbarState.zone && toolbarState.zone.children().indexOf(event.relatedTarget) === -1) {
+				toolbarState.exit();
+			}
+		});
+
+		toolbar.addEventListener("keydown", (event) => {
+			// only handle events inside a zone
+			if (!toolbarState.zone) return;
+
+			if (!Zotero.rtl && event.key === 'ArrowRight'
+					|| Zotero.rtl && event.key === 'ArrowLeft') {
+				event.preventDefault();
+				event.stopPropagation();
+				toolbarState.moveFocus(1);
+				return;
+			} 
+			else if (!Zotero.rtl && event.key === 'ArrowLeft'
+					|| Zotero.rtl && event.key === 'ArrowRight') {
+				event.preventDefault();
+				event.stopPropagation();
+				toolbarState.moveFocus(-1);
+				return;
+			} 
+			/* manually trigger on space and enter */
+			else if (event.key === ' ' || event.key === 'Enter') {
+				if (event.target.disabled) return;
+
+				if (event.target === lookupButton) {
+					event.preventDefault();
+					event.stopPropagation();
+					Zotero_Lookup.showPanel(event.target);
+				} 
+				else if (event.target.getAttribute('type') === 'menu') {
+					event.preventDefault();
+					event.stopPropagation();
+					const popup = event.target.querySelector("menupopup");
+					if (popup !== null && !event.target.disabled) {
+						popup.showPopup();
+					}
+				}
+			}
+			/* activate menus and popups on ArrowDown and ArrowUp, otherwise prepare for a focus change */
+			else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+				if (event.target === lookupButton && !event.target.disabled) {
+					event.preventDefault();
+					event.stopPropagation();
+					Zotero_Lookup.showPanel(event.target);
+				} 
+				else if (event.target.getAttribute('type') === 'menu' && !event.target.disabled) {
+					event.preventDefault();
+					event.stopPropagation();
+					const popup = event.target.querySelector("menupopup");
+					if (popup !== null && !event.target.disabled) {
+						popup.showPopup();
+					}
+				}
+				/* prepare for a focus change */
+				else if (toolbarState.zone) {
+					if (event.key === 'ArrowDown' && toolbarState.zone.after) {
+						toolbarState.zone.after().focus();
+						toolbarState.exit();
+						event.preventDefault();
+						event.stopPropagation();
+					}
+					else if (event.key === 'ArrowUp' && toolbarState.zone.before) {
+						toolbarState.zone.before().focus();
+						toolbarState.exit();
+						event.preventDefault();
+						event.stopPropagation();
+					}
+					/* 
+					if neither before nor after have been manually set, 
+					focus the first element of the zone and let the default
+					behavior proceed
+					*/
+					else {
+						toolbarState.current = toolbarState.zone.start();
+						toolbarState.current.focus();
+					}
+				}
+			}
+			else if (toolbarState.zone && event.key === 'Tab' && !modifierIsNotShift(event)) {
+				toolbarState.current = toolbarState.zone.start();
+				toolbarState.current.focus();
+				// let the default tab/shift+tab behavior proceed
+			}
+		});
+	}
+
 	/**
 	 * Called on window load or when pane has been reloaded after switching into or out of connector
 	 * mode
