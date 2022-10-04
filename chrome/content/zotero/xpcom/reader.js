@@ -1029,6 +1029,8 @@ class ReaderInstance {
 									}
 								}
 								else {
+									// Delete authorName to prevent overwriting the existing annotationAuthorName value
+									delete annotation.authorName;
 									let savedAnnotation = await Zotero.Annotations.saveFromJSON(attachment, annotation, saveOptions);
 									let blob = this._dataURLtoBlob(annotation.image);
 									await Zotero.Annotations.saveCacheImage(savedAnnotation, blob);
