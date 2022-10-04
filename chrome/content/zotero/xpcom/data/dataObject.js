@@ -1356,6 +1356,17 @@ Zotero.DataObject.prototype.toResponseJSON = function (options = {}) {
 };
 
 
+/**
+ * Subclasses can override to provide more information that requires awaiting promises.
+ * Delegates to {@link Zotero.DataObject#toResponseJSON} by default.
+ *
+ * @returns {Promise<Object>}
+ */
+Zotero.DataObject.prototype.toResponseJSONAsync = async function (options = {}) {
+	return this.toResponseJSON(options);
+};
+
+
 Zotero.DataObject.prototype._preToJSON = function (options) {
 	var env = { options };
 	env.mode = options.mode || 'new';

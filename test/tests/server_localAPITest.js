@@ -131,6 +131,18 @@ describe("Local API Server", function () {
 				assert.isTrue(response.links.up.href.includes('/api/'));
 				assert.isTrue(response.links.enclosure.href.startsWith('file:'));
 			});
+
+			it("should return file URL from /file/view/url", async function () {
+				let { response } = await apiGet(`/users/0/items/${subcollectionAttachment.key}/file/view/url`, { responseType: 'text' });
+				assert.isTrue(response.startsWith('file:'));
+			});
+
+			// followRedirects: false not working?
+			it.skip("should redirect to file URL from /file/view", async function () {
+				let request = await apiGet(`/users/0/items/${subcollectionAttachment.key}/file/view`,
+					{ responseType: 'text', followRedirects: false });
+				assert.isTrue(request.getResponseHeader('Location').startsWith('file:'));
+			});
 		});
 		
 		describe("?itemType", function () {
