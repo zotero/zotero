@@ -5492,7 +5492,8 @@ Zotero.Item.prototype.toResponseJSON = function (options = {}) {
 	// parsedDate
 	var parsedDate = Zotero.Date.multipartToSQL(this.getField('date', true, true));
 	if (parsedDate) {
-		// 0000?
+		// Trim off trailing -00 segments
+		parsedDate = parsedDate.replace(/(-00)+$/, '');
 		json.meta.parsedDate = parsedDate;
 	}
 	// numChildren

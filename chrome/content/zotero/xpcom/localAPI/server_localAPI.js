@@ -530,10 +530,14 @@ Zotero.Server.LocalAPI.Items = class extends LocalAPIEndpoint {
 			// Cut it off so other .endsWith() checks work
 			pathname = pathname.slice(0, -5);
 		}
+		let isTop = pathname.endsWith('/top');
+		if (isTop) {
+			pathname = pathname.slice(0, -4);
+		}
 
 		let search = new Zotero.Search();
 		search.libraryID = libraryID;
-		search.addCondition('noChildren', pathname.endsWith('/top') ? 'true' : 'false');
+		search.addCondition('noChildren', isTop ? 'true' : 'false');
 		if (pathParams.collectionKey) {
 			search.addCondition('collectionID', 'is',
 				Zotero.Collections.getIDFromLibraryAndKey(libraryID, pathParams.collectionKey));
@@ -634,11 +638,13 @@ Zotero.Server.LocalAPI.Items = class extends LocalAPIEndpoint {
 };
 
 // Add basic library-wide item endpoints
-for (let topTrashPart of ['', '/top', '/trash']) {
-	for (let tagsPart of ['', '/tags']) {
-		for (let userGroupPart of ['/api/users/:userID', '/api/groups/:groupID']) {
-			let path = userGroupPart + '/items' + topTrashPart + tagsPart;
-			Zotero.Server.Endpoints[path] = Zotero.Server.LocalAPI.Items;
+for (let trashPart of ['', '/trash']) {
+	for (let topPart of ['', '/top']) {
+		for (let tagsPart of ['', '/tags']) {
+			for (let userGroupPart of ['/api/users/:userID', '/api/groups/:groupID']) {
+				let path = userGroupPart + '/items' + trashPart + topPart + tagsPart;
+				Zotero.Server.Endpoints[path] = Zotero.Server.LocalAPI.Items;
+			}
 		}
 	}
 }
@@ -657,6 +663,7 @@ for (let topPart of ['', '/top']) {
 Zotero.Server.Endpoints["/api/users/:userID/items/:itemKey/children"] = Zotero.Server.LocalAPI.Items;
 Zotero.Server.Endpoints["/api/groups/:groupID/items/:itemKey/children"] = Zotero.Server.LocalAPI.Items;
 Zotero.Server.Endpoints["/api/users/:userID/publications/items"] = Zotero.Server.LocalAPI.Items;
+Zotero.Server.Endpoints["/api/users/:userID/publications/items/top"] = Zotero.Server.LocalAPI.Items;
 Zotero.Server.Endpoints["/api/users/:userID/publications/items/tags"] = Zotero.Server.LocalAPI.Items;
 Zotero.Server.Endpoints["/api/users/:userID/searches/:searchKey/items"] = Zotero.Server.LocalAPI.Items;
 Zotero.Server.Endpoints["/api/groups/:groupID/searches/:searchKey/items"] = Zotero.Server.LocalAPI.Items;
