@@ -32,7 +32,7 @@
 	/**
 	 * Extend richlistbox for checkbox inputs since we use them in multiple places
 	 */
-	class RichlistCheckbox extends customElements.get('richlistitem') {
+	class RichListCheckbox extends customElements.get('richlistitem') {
 		connectedCallback() {
 			this._checkbox = document.createXULElement('checkbox');
 			this._checkbox.setAttribute('native', 'true');
@@ -81,5 +81,5 @@
 		}
 	}
 	
-	customElements.define("richlistcheckbox", RichlistCheckbox);
+	customElements.define("richlistcheckbox", RichListCheckbox);
 }

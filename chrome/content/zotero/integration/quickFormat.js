@@ -1204,7 +1204,7 @@ var Zotero_QuickFormat = new function () {
 		var offset = range.startOffset,
 			childNodes = qfe.childNodes,
 			node = childNodes[offset-(right ? 0 : 1)];
-		if (node && node.dataset.citationItem) return node;
+		if (node && node.dataset && node.dataset.citationItem) return node;
 		return null;
 	}
 

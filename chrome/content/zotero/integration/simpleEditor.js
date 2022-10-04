@@ -20,10 +20,10 @@
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
 	
-	***** END LICENSE BLOCK *****
-*/
+	*****************************
 
-/*
+	Based on https://github.com/jaredreich/pell/blob/master/src/pell.js,
+	which is covered by the following copyright and permission notice:
 	The MIT License (MIT)
 
 	Copyright (c) Jared Reich
@@ -41,9 +41,10 @@
 	IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 	WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+	 
+	***** END LICENSE BLOCK *****
 */
 
-// Based on https://github.com/jaredreich/pell/blob/master/src/pell.js
 // Simple WYSIWYG editor using contenteditable
 
 (function() {

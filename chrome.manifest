@@ -80,6 +80,6 @@ locale  scaffold   en-US     chrome/locale/en-US/scaffold/
 skin    scaffold   default   chrome/skin/default/scaffold/
 
 # Word Plugins
-manifest	integration-plugins/libreoffice/chrome.manifest
-manifest	integration-plugins/word-for-windows/chrome.manifest
-manifest	integration-plugins/word-for-mac/chrome.manifest
+manifest	integration/libreoffice/chrome.manifest
+manifest	integration/word-for-windows/chrome.manifest
+manifest	integration/word-for-mac/chrome.manifest

@@ -69,12 +69,10 @@ ZoteroPluginInstaller.prototype = {
 	init: async function() {
 		if (this._initialized) return;
 		Zotero.debug("PluginInstaller: fetching addon info");
-		this.manifest = JSON.parse(await Zotero.File.getContentsFromURLAsync(this._addon.MANIFEST_JSON));
 		Zotero.debug("PluginInstaller: addon info fetched");
 		
 		try {
-			this._version = this.manifest.version;
-
+			this._version = await Zotero.File.getContentsFromURLAsync(this._addon.VERSION_FILE);
 			var version = this.prefBranch.getCharPref("version");
 			if (this.force || (Services.vc.compare(version, this._addon.LAST_INSTALLED_FILE_UPDATE) < 0
 					&& !this.prefBranch.getBoolPref("skipInstallation"))) {
