@@ -162,7 +162,7 @@ Zotero.PreferencePanes = {
 		}
 		
 		Zotero.Plugins.addObserver({
-			shutdown({ id: pluginID }) {
+			shutdown: ({ id: pluginID }) => {
 				let beforeLength = this.pluginPanes.length;
 				this.pluginPanes = this.pluginPanes.filter(pane => pane.pluginID !== pluginID);
 				if (this.pluginPanes.length !== beforeLength) {
