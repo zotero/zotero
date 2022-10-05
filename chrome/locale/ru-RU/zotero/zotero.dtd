@@ -311,8 +311,6 @@
 <!ENTITY zotero.pdfReader.lastPage "Последняя страница">
 <!ENTITY zotero.pdfReader.back "Назад">
 <!ENTITY zotero.pdfReader.forward "Вперед">
-<!ENTITY zotero.pdfReader.rotateClockwise "Повернуть по часовой стрелке">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Повернуть против часовой стрелки">
 <!ENTITY zotero.pdfReader.handTool "Курсор-«рука»">
 <!ENTITY zotero.pdfReader.verticalScrolling "Страницы по вертикали">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Страницы по горизонтали">

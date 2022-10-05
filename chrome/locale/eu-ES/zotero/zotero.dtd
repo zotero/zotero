@@ -311,8 +311,6 @@
 <!ENTITY zotero.pdfReader.lastPage "Azken orrialdea">
 <!ENTITY zotero.pdfReader.back "Atzera">
 <!ENTITY zotero.pdfReader.forward "Aurrera">
-<!ENTITY zotero.pdfReader.rotateClockwise "Erlojuaren orratzen noranzkoan biratu">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Erlojuaren orratzen kontrako noranzkoan biratu">
 <!ENTITY zotero.pdfReader.handTool "Esku tresna">
 <!ENTITY zotero.pdfReader.verticalScrolling "Desplazamendu bertikala">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Desplazamendu horizontala">

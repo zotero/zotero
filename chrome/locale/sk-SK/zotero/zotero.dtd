@@ -311,8 +311,6 @@
 <!ENTITY zotero.pdfReader.lastPage "Posledná strana">
 <!ENTITY zotero.pdfReader.back "Späť">
 <!ENTITY zotero.pdfReader.forward "Ďalej">
-<!ENTITY zotero.pdfReader.rotateClockwise "Otočiť doprava">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Otočiť doľava">
 <!ENTITY zotero.pdfReader.handTool "Náradie">
 <!ENTITY zotero.pdfReader.verticalScrolling "Zvislé posúvanie">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Vodorovné posúvanie">

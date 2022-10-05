@@ -311,8 +311,6 @@
 <!ENTITY zotero.pdfReader.lastPage "最後のページ">
 <!ENTITY zotero.pdfReader.back "戻る">
 <!ENTITY zotero.pdfReader.forward "進む">
-<!ENTITY zotero.pdfReader.rotateClockwise "時計回りに回転">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "反時計回りに回転">
 <!ENTITY zotero.pdfReader.handTool "てのひらツール">
 <!ENTITY zotero.pdfReader.verticalScrolling "垂直スクロール">
 <!ENTITY zotero.pdfReader.horizontalScrolling "水平スクロール">

@@ -311,8 +311,6 @@
 <!ENTITY zotero.pdfReader.lastPage "Zadnja stran">
 <!ENTITY zotero.pdfReader.back "Nazaj">
 <!ENTITY zotero.pdfReader.forward "Naprej">
-<!ENTITY zotero.pdfReader.rotateClockwise "Zavrti v SUK">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Zavrti v nasprotni SUK">
 <!ENTITY zotero.pdfReader.handTool "Ročno orodje">
 <!ENTITY zotero.pdfReader.verticalScrolling "Navpično drsenje">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Vodoravno drsenje">
@@ -325,6 +323,6 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Samodejno spremeni velikost">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Približaj na širino strani">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Približaj na višino strani">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
+<!ENTITY zotero.pdfReader.splitVertically "Razdeli navpično">
+<!ENTITY zotero.pdfReader.splitHorizontally "Razdeli vodoravno">
 <!ENTITY zotero.pdfReader.transferFromPDF "Uvozi zaznamke ...">

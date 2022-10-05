@@ -311,8 +311,6 @@
 <!ENTITY zotero.pdfReader.lastPage "עמוד אחרון">
 <!ENTITY zotero.pdfReader.back "אחורה">
 <!ENTITY zotero.pdfReader.forward "קדימה">
-<!ENTITY zotero.pdfReader.rotateClockwise "סיבוב עם כיוון השעון">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "סיבוב נגד כיוון השעון">
 <!ENTITY zotero.pdfReader.handTool "כלי יד">
 <!ENTITY zotero.pdfReader.verticalScrolling "גלילה אנכית">
 <!ENTITY zotero.pdfReader.horizontalScrolling "גלילה אופקית">

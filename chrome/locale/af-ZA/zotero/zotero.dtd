@@ -311,8 +311,6 @@
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">
-<!ENTITY zotero.pdfReader.rotateClockwise "Rotate Clockwise">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotate Counterclockwise">
 <!ENTITY zotero.pdfReader.handTool "Hand Tool">
 <!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">

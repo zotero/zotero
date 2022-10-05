@@ -311,8 +311,6 @@
 <!ENTITY zotero.pdfReader.lastPage "Son Sayfa">
 <!ENTITY zotero.pdfReader.back "Geri">
 <!ENTITY zotero.pdfReader.forward "İleri">
-<!ENTITY zotero.pdfReader.rotateClockwise "Saat Yönünde Döndür">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Saat Yönünün Tersine Döndür">
 <!ENTITY zotero.pdfReader.handTool "El Aracı">
 <!ENTITY zotero.pdfReader.verticalScrolling "Dikey Kaydırma">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Yatay Kaydırma">
@@ -325,6 +323,6 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Otomatik Olarak Yeniden Boyutlandır">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Sayfa Genişliğine Yakınlaştır">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Sayfa Yüksekliğine Yakınlaştır">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
+<!ENTITY zotero.pdfReader.splitVertically "Dikey Olarak Böl">
+<!ENTITY zotero.pdfReader.splitHorizontally "Yatay Olarak Böl">
 <!ENTITY zotero.pdfReader.transferFromPDF "Ek Açıklamaları İçeri Aktar...">

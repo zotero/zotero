@@ -311,8 +311,6 @@
 <!ENTITY zotero.pdfReader.lastPage "Siste side">
 <!ENTITY zotero.pdfReader.back "Tilbake">
 <!ENTITY zotero.pdfReader.forward "Fremover">
-<!ENTITY zotero.pdfReader.rotateClockwise "Roter med klokken">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Roter mot klokken">
 <!ENTITY zotero.pdfReader.handTool "Håndverktøy">
 <!ENTITY zotero.pdfReader.verticalScrolling "Vertikal rulling">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Horisontal rulling">

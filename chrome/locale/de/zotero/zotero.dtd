@@ -301,18 +301,16 @@
 <!ENTITY zotero.attachLink.label.link "Link:">
 <!ENTITY zotero.attachLink.label.title "Titel:">
 
-<!ENTITY zotero.context.addChildNote "Notiz zum Eintrag hinzufügen">
-<!ENTITY zotero.context.addChildNoteFromAnnotations "Aus Annotationen Notiz zum Eintrag hinzufügen">
+<!ENTITY zotero.context.addChildNote "Eintragsnotiz hinzufügen">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "Eintragsnotiz aus Anmerkungen hinzufügen">
 <!ENTITY zotero.context.addStandaloneNote "Eigenständige Notiz hinzufügen">
-<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Aus Annotationen eigenständige Notiz hinzufügen">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Eigenständige Notiz aus Anmerkungen hinzufügen">
 <!ENTITY zotero.context.editInWindow "In einem neuen Fenster bearbeiten">
 
 <!ENTITY zotero.pdfReader.firstPage "Erste Seite">
 <!ENTITY zotero.pdfReader.lastPage "Letzte Seite">
 <!ENTITY zotero.pdfReader.back "Zurück">
 <!ENTITY zotero.pdfReader.forward "Vorwärts">
-<!ENTITY zotero.pdfReader.rotateClockwise "Im Uhrzeigersinn drehen">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Gegen den Uhrzeigersinn drehen">
 <!ENTITY zotero.pdfReader.handTool "Hand-Werkzeug">
 <!ENTITY zotero.pdfReader.verticalScrolling "Vertikale Seitenanordnung">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Horizontale Seitenanordnung">
@@ -325,6 +323,6 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Automatisch Größe anpassen">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Auf Fensterbreite skalieren">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Auf Fensterhöhe skalieren">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
+<!ENTITY zotero.pdfReader.splitVertically "Vertikal aufteilen">
+<!ENTITY zotero.pdfReader.splitHorizontally "Horizontal aufteilen">
 <!ENTITY zotero.pdfReader.transferFromPDF "Anmerkungen importieren…">

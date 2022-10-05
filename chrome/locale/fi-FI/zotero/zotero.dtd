@@ -311,8 +311,6 @@
 <!ENTITY zotero.pdfReader.lastPage "Viimeinen sivu">
 <!ENTITY zotero.pdfReader.back "Takaisin">
 <!ENTITY zotero.pdfReader.forward "Seuraava">
-<!ENTITY zotero.pdfReader.rotateClockwise "Kierrä myötäpäivään">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Kierrä vastapäivään">
 <!ENTITY zotero.pdfReader.handTool "Käsityökalu">
 <!ENTITY zotero.pdfReader.verticalScrolling "Pystyvieritys">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Vaakavieritys">

@@ -311,8 +311,6 @@
 <!ENTITY zotero.pdfReader.lastPage "Darrera pàgina">
 <!ENTITY zotero.pdfReader.back "Enrere">
 <!ENTITY zotero.pdfReader.forward "Endavant">
-<!ENTITY zotero.pdfReader.rotateClockwise "Gira en les agulles del rellotge">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Gira al revés de les agulles del rellotge">
 <!ENTITY zotero.pdfReader.handTool "Eina de mà">
 <!ENTITY zotero.pdfReader.verticalScrolling "Desplaçament vertical">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Desplaçament horitzontal">

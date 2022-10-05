@@ -311,8 +311,6 @@
 <!ENTITY zotero.pdfReader.lastPage "Utolsó oldal">
 <!ENTITY zotero.pdfReader.back "Vissza">
 <!ENTITY zotero.pdfReader.forward "Előre">
-<!ENTITY zotero.pdfReader.rotateClockwise "Forgatás az óramutató járásával megegyező irányba">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Forgatás az óramutató járásával ellentétes irányba">
 <!ENTITY zotero.pdfReader.handTool "Kéz eszköz">
 <!ENTITY zotero.pdfReader.verticalScrolling "Függőleges görgetés">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Vízszintes görgetés">

@@ -311,8 +311,6 @@
 <!ENTITY zotero.pdfReader.lastPage "尾页">
 <!ENTITY zotero.pdfReader.back "后退">
 <!ENTITY zotero.pdfReader.forward "前进">
-<!ENTITY zotero.pdfReader.rotateClockwise "顺时针旋转">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "逆时针旋转">
 <!ENTITY zotero.pdfReader.handTool "手形工具">
 <!ENTITY zotero.pdfReader.verticalScrolling "垂直滚动">
 <!ENTITY zotero.pdfReader.horizontalScrolling "水平滚动">

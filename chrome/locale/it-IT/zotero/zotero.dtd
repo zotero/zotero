@@ -311,8 +311,6 @@
 <!ENTITY zotero.pdfReader.lastPage "Ultima pagina">
 <!ENTITY zotero.pdfReader.back "Indietro">
 <!ENTITY zotero.pdfReader.forward "Avanti">
-<!ENTITY zotero.pdfReader.rotateClockwise "Ruota in senso orario">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Ruota in senso antiorario">
 <!ENTITY zotero.pdfReader.handTool "Spostamento libero">
 <!ENTITY zotero.pdfReader.verticalScrolling "Scorrimento verticale">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Scorrimento orizzontale">
@@ -325,6 +323,6 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Ridimensiona automaticamente">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Adatta alla larghezza della pagina">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Adatta all'altezza della pagina">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
+<!ENTITY zotero.pdfReader.splitVertically "Dividi verticalmente">
+<!ENTITY zotero.pdfReader.splitHorizontally "Dividi orizzontalmente">
 <!ENTITY zotero.pdfReader.transferFromPDF "Importa le annotazioni...">
