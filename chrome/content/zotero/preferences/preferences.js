@@ -49,25 +49,6 @@ var Zotero_Preferences = {
 
 		document.getElementById('prefs-search').focus();
 		
-		this.clearAndAddPanes();
-	},
-
-	/**
-	 * (Re)initialize the preference window, adding all panes registered with Zotero.PreferencePanes.
-	 * Current selected pane and scroll position are saved and restored after load.
-	 */
-	clearAndAddPanes: function () {
-		// Save positions and clear content in case we're reinitializing
-		// because of a plugin lifecycle event
-		let navigationValue = this.navigation.value;
-		let navigationScrollTop = this.navigation.scrollTop;
-		let navigationScrollLeft = this.navigation.scrollLeft;
-		this.navigation.replaceChildren();
-		let contentScrollTop = this.content.scrollTop;
-		let contentScrollLeft = this.content.scrollLeft;
-		// Remove all children besides the help container
-		this.content.replaceChildren(this.helpContainer);
-		
 		Zotero.PreferencePanes.builtInPanes.forEach(pane => this._addPane(pane));
 		if (Zotero.PreferencePanes.pluginPanes.length) {
 			this.navigation.append(document.createElement('hr'));
@@ -76,14 +57,7 @@ var Zotero_Preferences = {
 				.forEach(pane => this._addPane(pane));
 		}
 
-		if (navigationValue) {
-			this.navigation.value = navigationValue;
-			this.navigation.scrollTop = navigationScrollTop;
-			this.navigation.scrollLeft = navigationScrollLeft;
-			this.content.scrollTop = contentScrollTop;
-			this.content.scrollLeft = contentScrollLeft;
-		}
-		else if (window.arguments) {
+		if (window.arguments) {
 			var io = window.arguments[0];
 			io = io.wrappedJSObject || io;
 
@@ -189,11 +163,12 @@ var Zotero_Preferences = {
 	 * @param {String} [options.pluginID] ID of the plugin that registered the pane
 	 * @param {String} [options.parent] ID of parent pane (if provided, pane is hidden from the sidebar)
 	 * @param {String} [options.label] A DTD/.properties key (optional for panes with parents)
-	 * @param {String} [options.rawLabel] A raw string to use as the label if optios.label is not provided
+	 * @param {String} [options.rawLabel] A raw string to use as the label if options.label is not provided
 	 * @param {String} [options.image] URI of an icon (displayed in the navigation sidebar)
 	 * @param {String} options.src URI of an XHTML fragment
 	 * @param {String[]} [options.extraDTD] Array of URIs of DTD files to use for parsing the XHTML fragment
 	 * @param {String[]} [options.scripts] Array of URIs of scripts to load along with the pane
+	 * @param {String[]} [options.stylesheets] Array of URIs of CSS stylesheets to load along with the pane
 	 * @param {Boolean} [options.defaultXUL] If true, parse the markup at `src` as XUL instead of XHTML:
 	 * 		whitespace-only text nodes are ignored, XUL is the default namespace, and HTML tags are
 	 * 		namespaced under `html:`. Default behavior is the opposite: whitespace nodes are preserved,
@@ -260,6 +235,14 @@ var Zotero_Preferences = {
 					Services.scriptloader.loadSubScript(script, this);
 				}
 			}
+			if (pane.stylesheets) {
+				for (let stylesheet of pane.stylesheets) {
+					document.insertBefore(
+						document.createProcessingInstruction('xml-stylesheet', `href="${stylesheet}"`),
+						document.firstChild
+					);
+				}
+			}
 			let markup = Zotero.File.getContentsFromURL(pane.src);
 			let dtdFiles = [
 				'chrome://zotero/locale/zotero.dtd',
@@ -324,7 +307,10 @@ ${str}
 		let processingInstrWalker = document.createTreeWalker(fragment, NodeFilter.SHOW_PROCESSING_INSTRUCTION);
 		let processingInstr = processingInstrWalker.currentNode;
 		while (processingInstr) {
-			document.insertBefore(document.createProcessingInstruction(processingInstr.target, processingInstr.data), document.firstChild);
+			document.insertBefore(
+				document.createProcessingInstruction(processingInstr.target, processingInstr.data),
+				document.firstChild
+			);
 			if (processingInstr.parentNode) {
 				processingInstr.parentNode.removeChild(processingInstr);
 			}

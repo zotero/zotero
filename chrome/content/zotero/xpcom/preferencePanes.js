@@ -105,6 +105,7 @@ Zotero.PreferencePanes = {
 	 * 		If not provided, the plugin's icon (from manifest.json) is used
 	 * @param {String[]} [options.extraDTD] Array of URIs of DTD files to use for parsing the XHTML fragment
 	 * @param {String[]} [options.scripts] Array of URIs of scripts to load along with the pane
+	 * @param {String[]} [options.stylesheets] Array of URIs of CSS stylesheets to load along with the pane
 	 * @param {String[]} [options.helpURL] If provided, a help button will be displayed under the pane
 	 * 		and the provided URL will open when it is clicked
 	 * @return {Promise<String>} Resolves to the ID of the pane if successfully added
@@ -127,8 +128,9 @@ Zotero.PreferencePanes = {
 			src: options.src,
 			extraDTD: options.extraDTD,
 			scripts: options.scripts,
-			defaultXUL: true,
+			stylesheets: options.stylesheets,
 			helpURL: options.helpURL,
+			defaultXUL: true,
 		};
 
 		this.pluginPanes.push(addPaneOptions);
@@ -150,7 +152,7 @@ Zotero.PreferencePanes = {
 	
 	_refreshPreferences() {
 		for (let win of Services.wm.getEnumerator("zotero:pref")) {
-			win.Zotero_Preferences.clearAndAddPanes();
+			win.location.reload();
 		}
 	},
 	
