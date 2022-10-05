@@ -359,12 +359,13 @@ Zotero.Prefs = new function(){
 		delete _observersBySymbol[symbol];
 		
 		var [name, handler] = obs;
-		var i = obs.indexOf(handler);
+		var handlers = _observers[name];
+		var i = handlers.indexOf(handler);
 		if (i == -1) {
 			Zotero.debug("Handler was not registered for preference " + name, 2);
 			return;
 		}
-		obs.splice(i, 1);
+		handlers.splice(i, 1);
 	}
 	
 	
