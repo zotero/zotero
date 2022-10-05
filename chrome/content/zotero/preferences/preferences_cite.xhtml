@@ -29,7 +29,7 @@
 
 		<groupbox flex="1">
 			<!-- HTML needs to be wrapped in an hbox to isolate from XUL box layout -->
-			<hbox><html:label><html:h2>&zotero.preferences.cite.styles.styleManager;</html:h2></html:label></hbox>
+			<hbox><label><html:h2>&zotero.preferences.cite.styles.styleManager;</html:h2></label></hbox>
 			
 			<hbox class="virtualized-table-container" flex="1" height="300px">
 				<html:div id="styleManager"/>
@@ -46,7 +46,7 @@
 		</groupbox>
 		
 		<groupbox>
-			<html:label><html:h2>&zotero.preferences.citationOptions.caption;</html:h2></html:label>
+			<label><html:h2>&zotero.preferences.citationOptions.caption;</html:h2></label>
 			
 			<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="extensions.zotero.export.citePaperJournalArticleURL" native="true"/>
 			<!-- This doesn't wrap without an explicit width, for some reason -->
@@ -56,7 +56,7 @@
 		</groupbox>
 		
 		<groupbox>
-			<html:label><html:h2>&zotero.general.tools;</html:h2></html:label>
+			<label><html:h2>&zotero.general.tools;</html:h2></label>
 			
 			<hbox>
 				<button id="openCSLEdit"
