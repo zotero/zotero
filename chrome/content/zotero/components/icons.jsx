@@ -170,6 +170,7 @@ i('TreesourceShare', 'chrome://zotero/skin/treesource-share.png', false);
 i('TreesourceTrashFull', 'chrome://zotero/skin/treesource-trash-full.png');
 i('TreesourceTrash', 'chrome://zotero/skin/treesource-trash.png');
 i('TreesourceUnfiled', 'chrome://zotero/skin/treesource-unfiled.png');
+i('TreesourceRecentlyRead', 'chrome://zotero/skin/treesource-recentlyRead.png');
 
 if (Zotero.isMac) {
 	i('TreesourceCollection', 'chrome://zotero-platform/content/treesource-collection.png', true);

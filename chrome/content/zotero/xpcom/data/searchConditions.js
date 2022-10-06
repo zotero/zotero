@@ -303,6 +303,19 @@ Zotero.SearchConditions = new function(){
 				field: 'dateModified'
 			},
 			
+			{
+				name: 'dateLastOpened',
+				operators: {
+					is: true,
+					isNot: true,
+					isBefore: true,
+					isAfter: true,
+					isInTheLast: true
+				},
+				table: 'itemAttachments',
+				field: 'dateLastOpened'
+			},
+
 			// Deprecated
 			{
 				name: 'itemTypeID',

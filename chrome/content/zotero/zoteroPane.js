@@ -1962,6 +1962,7 @@ var ZoteroPane = new function()
 		else if (collectionTreeRow.isLibrary(true)
 				|| collectionTreeRow.isSearch()
 				|| collectionTreeRow.isUnfiled()
+				|| collectionTreeRow.isRecentlyRead()
 				|| collectionTreeRow.isRetracted()
 				|| collectionTreeRow.isDuplicates()) {
 			// In library, don't prompt if meta key was pressed
@@ -2051,6 +2052,11 @@ var ZoteroPane = new function()
 		// Remove virtual unfiled collection
 		else if (collectionTreeRow.isUnfiled()) {
 			this.setVirtual(collectionTreeRow.ref.libraryID, 'unfiled', false);
+			return;
+		}
+		// Remove virtual recently read collection
+		else if (collectionTreeRow.isRecentlyRead()) {
+			this.setVirtual(collectionTreeRow.ref.libraryID, 'recentlyRead', false);
 			return;
 		}
 		// Remove virtual retracted collection
@@ -2860,6 +2866,12 @@ var ZoteroPane = new function()
 			}
 		},
 		{
+			id: "showRecentlyRead",
+			oncommand: () => {
+				this.setVirtual(this.getSelectedLibraryID(), 'recentlyRead', true, true);
+			}
+		},
+		{
 			id: "showRetracted",
 			oncommand: () => {
 				this.setVirtual(this.getSelectedLibraryID(), 'retracted', true, true);
@@ -3072,7 +3084,8 @@ var ZoteroPane = new function()
 		else if (collectionTreeRow.isTrash()) {
 			show = ['emptyTrash'];
 		}
-		else if (collectionTreeRow.isDuplicates() || collectionTreeRow.isUnfiled() || collectionTreeRow.isRetracted()) {
+		else if (collectionTreeRow.isDuplicates() || collectionTreeRow.isUnfiled() || collectionTreeRow.isRecentlyRead()
+				|| collectionTreeRow.isRetracted()) {
 			show = ['deleteCollection'];
 			
 			m.deleteCollection.setAttribute('label', Zotero.getString('general.hide'));
@@ -3103,10 +3116,13 @@ var ZoteroPane = new function()
 			let unfiled = Zotero.Prefs.getVirtualCollectionStateForLibrary(
 				libraryID, 'unfiled'
 			);
+			let recentlyRead = Zotero.Prefs.getVirtualCollectionStateForLibrary(
+				libraryID, 'recentlyRead'
+			);
 			let retracted = Zotero.Prefs.getVirtualCollectionStateForLibrary(
 				libraryID, 'retracted'
 			);
-			if (!duplicates || !unfiled || !retracted) {
+			if (!duplicates || !unfiled || !recentlyRead || !retracted) {
 				if (!library.archived) {
 					show.push('sep2');
 				}
@@ -3115,6 +3131,9 @@ var ZoteroPane = new function()
 				}
 				if (!unfiled) {
 					show.push('showUnfiled');
+				}
+				if (!recentlyRead && libraryID == Zotero.Libraries.userLibraryID) {
+					show.push('showRecentlyRead');
 				}
 				if (!retracted) {
 					show.push('showRetracted');
@@ -4428,66 +4447,74 @@ var ZoteroPane = new function()
 		
 		if(typeof itemIDs != "object") itemIDs = [itemIDs];
 		
-		var launchFile = async (path, contentType, itemID) => {
-			// Fix blank PDF attachment MIME type
-			if (!contentType) {
-				let item = await Zotero.Items.getAsync(itemID);
-				let path = await item.getFilePathAsync();
-				let type = 'application/pdf';
-				if (Zotero.MIME.sniffForMIMEType(await Zotero.File.getSample(path)) == type) {
-					contentType = type;
-					item.attachmentContentType = type;
-					await item.saveTx();
-				}
-			}
-			if (contentType === 'application/pdf') {
-				let item = await Zotero.Items.getAsync(itemID);
-				let library = Zotero.Libraries.get(item.libraryID);
-				let pdfHandler  = Zotero.Prefs.get("fileHandler.pdf");
-				// Zotero PDF reader
-				if (!pdfHandler) {
-					let openInWindow = Zotero.Prefs.get('openReaderInNewWindow');
-					let useAlternateWindowBehavior = event?.shiftKey || extraData?.forceAlternateWindowBehavior;
-					if (useAlternateWindowBehavior) {
-						openInWindow = !openInWindow;
+		var launchFile = async (path, contentType, item) => {
+			try {
+				// Fix blank PDF attachment MIME type
+				if (!contentType) {
+					let path = await item.getFilePathAsync();
+					let type = 'application/pdf';
+					if (Zotero.MIME.sniffForMIMEType(await Zotero.File.getSample(path)) == type) {
+						contentType = type;
+						item.attachmentContentType = type;
+						await item.saveTx();
 					}
-					await Zotero.Reader.open(
-						itemID,
-						extraData && extraData.location,
-						{
-							openInWindow,
-							allowDuplicate: openInWindow
-						}
-					);
-					return;
 				}
-				// Try to open external reader to page number if specified
-				else {
-					let pageIndex = extraData?.location?.position?.pageIndex;
-					if (pageIndex !== undefined) {
-						await Zotero.OpenPDF.openToPage(
-							item,
-							parseInt(pageIndex) + 1
+				if (contentType === 'application/pdf') {
+					let library = Zotero.Libraries.get(item.libraryID);
+					let pdfHandler = Zotero.Prefs.get("fileHandler.pdf");
+					// Zotero PDF reader
+					if (!pdfHandler) {
+						let openInWindow = Zotero.Prefs.get('openReaderInNewWindow');
+						let useAlternateWindowBehavior = event?.shiftKey || extraData?.forceAlternateWindowBehavior;
+						if (useAlternateWindowBehavior) {
+							openInWindow = !openInWindow;
+						}
+						await Zotero.Reader.open(
+							item.id,
+							extraData && extraData.location,
+							{
+								openInWindow,
+								allowDuplicate: openInWindow
+							}
 						);
 						return;
 					}
-				}
-				// Custom PDF handler
-				// TODO: Remove this and unify with Zotero.OpenPDF
-				if (pdfHandler != 'system') {
-					try {
-						if (await OS.File.exists(pdfHandler)) {
-							Zotero.launchFileWithApplication(path, pdfHandler);
+					// Try to open external reader to page number if specified
+					else {
+						let pageIndex = extraData?.location?.position?.pageIndex;
+						if (pageIndex !== undefined) {
+							await Zotero.OpenPDF.openToPage(
+								item,
+								parseInt(pageIndex) + 1
+							);
 							return;
 						}
 					}
-					catch (e) {
-						Zotero.logError(e);
+					// Custom PDF handler
+					// TODO: Remove this and unify with Zotero.OpenPDF
+					if (pdfHandler != 'system') {
+						try {
+							if (await OS.File.exists(pdfHandler)) {
+								Zotero.launchFileWithApplication(path, pdfHandler);
+								return;
+							}
+						}
+						catch (e) {
+							Zotero.logError(e);
+						}
+						Zotero.logError(`${pdfHandler} not found -- launching file normally`);
 					}
-					Zotero.logError(`${pdfHandler} not found -- launching file normally`);
+				}
+				Zotero.launchFile(path);
+			}
+			finally {
+				// Do not set dateLastOpened in a group library
+				if (item.libraryID == Zotero.Libraries.userLibraryID) {
+					Zotero.debug('Updating dateLastOpened');
+					item.attachmentDateLastOpened = Zotero.Date.dateToSQL(new Date(), true);
+					await item.saveTx({ skipDateModifiedUpdate: true });
 				}
 			}
-			Zotero.launchFile(path);
 		};
 		
 		for (let i = 0; i < itemIDs.length; i++) {
@@ -4531,7 +4558,7 @@ var ZoteroPane = new function()
 				let iCloudPath = Zotero.File.getEvictedICloudPath(path);
 				if (await OS.File.exists(iCloudPath)) {
 					Zotero.debug("Triggering download of iCloud file");
-					await launchFile(iCloudPath, item.attachmentContentType, itemID);
+					await launchFile(iCloudPath, item.attachmentContentType, item);
 					let time = new Date();
 					let maxTime = 5000;
 					let revealed = false;
@@ -4591,7 +4618,7 @@ var ZoteroPane = new function()
 			if (fileExists && !redownload) {
 				Zotero.debug("Opening " + path);
 				Zotero.Notifier.trigger('open', 'file', item.id);
-				await launchFile(path, item.attachmentContentType, item.id);
+				await launchFile(path, item.attachmentContentType, item);
 				continue;
 			}
 			
@@ -4637,7 +4664,7 @@ var ZoteroPane = new function()
 			
 			Zotero.debug("Opening " + path);
 			Zotero.Notifier.trigger('open', 'file', item.id);
-			await launchFile(path, item.attachmentContentType, item.id);
+			await launchFile(path, item.attachmentContentType, item);
 		}
 	});
 	

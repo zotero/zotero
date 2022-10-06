@@ -1190,8 +1190,16 @@ function ZoteroProtocolHandler() {
 				}
 			}
 			
+			// Update attachmentDateLastOpened like ZoteroPane does
+			if (opened) {
+				if (item.libraryID == Zotero.Libraries.userLibraryID) {
+					Zotero.debug('Updating dateLastOpened');
+					item.attachmentDateLastOpened = Zotero.Date.dateToSQL(new Date(), true);
+					await item.saveTx({ skipDateModifiedUpdate: true });
+				}
+			}
 			// If something went wrong, just open PDF without page
-			if (!opened) {
+			else {
 				Zotero.debug("Launching PDF without page number");
 				let zp = Zotero.getActiveZoteroPane();
 				// TODO: Open pane if closed (macOS)

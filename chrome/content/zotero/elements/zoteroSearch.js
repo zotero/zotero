@@ -361,6 +361,7 @@
 				case 'date':
 				case 'dateAdded':
 				case 'dateModified':
+				case 'dateLastOpened':
 				case 'itemType':
 				case 'fileTypeID':
 				case 'publicationTitle':

@@ -3414,6 +3414,11 @@ Zotero.Schema = new function(){
 				}
 			}
 			
+			else if (i == 121) {
+				await Zotero.DB.queryAsync("ALTER TABLE itemAttachments ADD COLUMN dateLastOpened TIMESTAMP");
+				await Zotero.DB.queryAsync("CREATE INDEX itemAttachments_dateLastOpened ON itemAttachments(dateLastOpened)");
+			}
+			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
 		}
 		

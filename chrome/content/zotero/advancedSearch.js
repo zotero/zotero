@@ -77,6 +77,8 @@ var ZoteroAdvancedSearch = new function() {
 			isFeed: () => false,
 			isFeeds: () => false,
 			isFeedsOrFeed: () => false,
+			isRecentlyRead: () => false,
+			isSortable: () => true,
 			isShare: () => false,
 			isTrash: () => false
 		};
@@ -113,6 +115,8 @@ var ZoteroAdvancedSearch = new function() {
 			isFeed: () => false,
 			isFeeds: () => false,
 			isFeedsOrFeed: () => false,
+			isRecentlyRead: () => false,
+			isSortable: () => true,
 			isShare: () => false,
 			isTrash: () => false
 		};

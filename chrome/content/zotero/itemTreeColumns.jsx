@@ -31,8 +31,10 @@ const Icons = require('components/icons');
  * @type Column {
  * 	dataKey: string,				// Required, see use in ItemTree#_getRowData()
  *
- * 	defaultIn: Set<string>,			// Types of trees the column is default in. Can be [default, feed];
+ * 	defaultIn: Set<string>,			// Types of trees the column is default in. Can be [default, feeds, feed, recentlyRead];
  * 	disabledIn: Set<string>,		// Types of trees where the column is not available
+ *  dependsOnChildren: boolean,		// Default: false. Set to true if the column depends on child item data
+ *  								// (e.g. numNotes, dateLastOpened) and so needs to be updated when children are modified
  * 	defaultSort: number				// Default: 1. -1 for descending sort
  *
  * 	flex: number,					// Default: 1. When the column is added to the tree how much space it should occupy as a flex ratio
@@ -56,7 +58,7 @@ const COLUMNS = [
 	{
 		dataKey: "title",
 		primary: true,
-		defaultIn: new Set(["default", "feeds", "feed"]),
+		defaultIn: new Set(["default", "feeds", "feed", "recentlyRead"]),
 		label: "itemFields.title",
 		ignoreInColumnPicker: true,
 		flex: 4,
@@ -64,7 +66,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "firstCreator",
-		defaultIn: new Set(["default", "feeds", "feed"]),
+		defaultIn: new Set(["default", "feeds", "feed", "recentlyRead"]),
 		label: "zotero.items.creator_column",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
@@ -165,6 +167,16 @@ const COLUMNS = [
 		disabledIn: ["feeds", "feed"],
 		label: "zotero.items.dateModified_column",
 		flex: 1,
+		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+	},
+	{
+		dataKey: "dateLastOpened",
+		defaultSort: -1,
+		defaultIn: new Set(["recentlyRead"]),
+		disabledIn: "feed",
+		dependsOnChildren: true,
+		label: "pane.items.columns.dateLastOpened",
+		flex: 2,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
 	{
@@ -298,6 +310,7 @@ const COLUMNS = [
 		dataKey: "hasAttachment",
 		defaultIn: new Set(["default"]),
 		disabledIn: ["feeds", "feed"],
+		dependsOnChildren: true,
 		label: "zotero.tabs.attachments.label",
 		iconLabel: <Icons.IconAttachSmall />,
 		fixedWidth: true,
@@ -307,6 +320,7 @@ const COLUMNS = [
 	{
 		dataKey: "numNotes",
 		disabledIn: ["feeds", "feed"],
+		dependsOnChildren: true,
 		label: "zotero.tabs.notes.label",
 		iconLabel: <Icons.IconTreeitemNoteSmall />,
 		width: "14",

@@ -683,6 +683,35 @@ describe("Zotero.ItemTree", function() {
 			assert.isFalse(zp.itemsView.getRowIndexByID(item.id));
 		});
 		
+		it("should re-sort by Date Last Opened when child attachmentDateLastOpened is updated", async function () {
+			let userLibraryID = Zotero.Libraries.userLibraryID;
+			let item1 = await createDataObject('item');
+			let attachment1 = await importPDFAttachment(item1);
+			let item2 = await createDataObject('item');
+			let attachment2 = await importPDFAttachment(item2);
+			assert.notOk(item1.getItemLastOpened());
+			assert.notOk(item2.getItemLastOpened());
+			
+			// attachment2 is more recently opened
+			attachment1.attachmentDateLastOpened = Zotero.Date.dateToSQL(new Date(Date.now() - 1000), true);
+			attachment2.attachmentDateLastOpened = Zotero.Date.dateToSQL(new Date(), true);
+			await attachment1.saveTx();
+			await attachment2.saveTx();
+
+			await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
+			assert.equal(zp.getCollectionTreeRow().id, 'Y' + userLibraryID);
+			await waitForItemsLoad(win);
+			assert.equal(zp.itemsView.getRowIndexByID(item1.id), 1);
+			assert.equal(zp.itemsView.getRowIndexByID(item2.id), 0);
+
+			// Now make attachment2 much less recently opened
+			attachment2.attachmentDateLastOpened = Zotero.Date.dateToSQL(new Date(Date.now() - 1000 * 60), true);
+			await attachment2.saveTx();
+
+			assert.equal(zp.itemsView.getRowIndexByID(item1.id), 0);
+			assert.equal(zp.itemsView.getRowIndexByID(item2.id), 1);
+		});
+		
 		describe("Trash", function () {
 			it("should remove untrashed parent item when last trashed child is deleted", function* () {
 				var userLibraryID = Zotero.Libraries.userLibraryID;
