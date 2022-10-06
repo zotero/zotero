@@ -76,7 +76,7 @@ WindowDraggingElement.prototype = {
     return true;
   },
   isPanel : function() {
-    return this._elem instanceof Components.interfaces.nsIDOMXULElement &&
+    return this._elem instanceof XULElement &&
            this._elem.localName == "panel";
   },
   handleEvent: function(aEvent) {

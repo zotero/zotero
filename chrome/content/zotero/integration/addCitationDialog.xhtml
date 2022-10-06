@@ -32,36 +32,42 @@
 <?xml-stylesheet href="chrome://zotero/skin/integration.css" type="text/css"?>
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
-<dialog
-	id="zotero-add-citation-dialog"
+<window
 	windowtype="zotero:item-selector"
 	orient="vertical"
 	title="&zotero.integration.addEditCitation.title;"
 	width="600" height="450"
 	onload="Zotero_Citation_Dialog.load();"
 	onunload="doUnload();"
-	ondialogaccept="return Zotero_Citation_Dialog.accept();"
-	ondialogcancel="Zotero_Citation_Dialog.cancel();"
 	onclose="Zotero_Citation_Dialog.cancel();"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	persist="screenX screenY width height"
-	resizable="true"
-	buttons="extra1,extra2,accept,cancel"
-	ondialogextra2="Zotero_Citation_Dialog.toggleEditor()"
-	ondialogextra1="Zotero_Citation_Dialog.toggleMultipleSources()">
+	resizable="true">
+<dialog
+	id="zotero-add-citation-dialog"
+	buttons="extra1,extra2,accept,cancel">
 	
-	<script src="../include.js"/>
-	<script src="../selectItemsDialog.js"/>
-	<script src="addCitationDialog.js"/>
-	
+	<script>
+		var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
+
+		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+
+		Services.scriptloader.loadSubScript("chrome://zotero/content/selectItemsDialog.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/integration/addCitationDialog.js", this);
+
+		// Custom elements
+		Services.scriptloader.loadSubScript("chrome://global/content/customElements.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/quickSearchTextbox.js", this);
+	</script>
+
+
 	<vbox id="zotero-select-items-container" flex="1">
 		<vbox flex="1">
 			<hbox flex="1">
-				<vbox align="stretch" flex="1">
+				<vbox align="stretch" flex="1" style="min-width: 500px">
 					<hbox align="center" pack="end">
-						<textbox id="zotero-tb-search" type="search" timeout="250" oncommand="onSearch()" tabindex="1"
-								onkeypress="if(event.keyCode == event.DOM_VK_ESCAPE) { if (this.value == '') { cancelDialog(); return false; } this.value = ''; onSearch(); return false; } return true;"/>
+						<quick-search-textbox id="zotero-tb-search" timeout="250" oncommand="onSearch()" dir="reverse"/>
 					</hbox>
 					<hbox flex="1" style="margin-top: 5px">
 						<vbox id="zotero-collections-tree-container" class="virtualized-table-container" style="min-width: 200px">
@@ -82,8 +88,8 @@
 						<toolbarbutton id="down" oncommand="Zotero_Citation_Dialog.down()" disabled="true"/>
 					</vbox>
 					<vbox align="left">
-						<checkbox id="keepSorted" hidden="true" checked="false" oncommand="Zotero_Citation_Dialog.citationSortUnsort()" label="&zotero.citation.keepSorted.label;"/>
-						<listbox id="citation-list" flex="1" align="stretch" seltype="single"
+						<checkbox id="keepSorted" hidden="true" checked="false" oncommand="Zotero_Citation_Dialog.citationSortUnsort()" label="&zotero.citation.keepSorted.label;" native="true"/>
+						<richlistbox id="item-list" flex="1" align="stretch" seltype="single" style="width: 250px;"
 							onselect="Zotero_Citation_Dialog.listItemSelected();"/>
 					</vbox>
 				</hbox>
@@ -93,29 +99,34 @@
 				<vbox flex="1">
 					<hbox align="center">
 						<label value="&zotero.citation.prefix.label;"/>
-						<textbox oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" class="fix" id="prefix" align="stretch" flex="1" tabindex="3"/>
+						<html:input type="text" class="fix" id="prefix" tabindex="3"
+									oninput="Zotero_Citation_Dialog.confirmRegenerate(false)"
+									onchange="Zotero_Citation_Dialog.confirmRegenerate(true)"/>
 					</hbox>
 					<hbox align="center">
 						<label value="&zotero.citation.suffix.label;"/>
-						<textbox oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" class="fix" id="suffix" align="stretch" flex="1" tabindex="4"/>
+						<html:input type="text" class="fix" id="suffix" tabindex="4"
+									oninput="Zotero_Citation_Dialog.confirmRegenerate(false)"
+									onchange="Zotero_Citation_Dialog.confirmRegenerate(true)"/>
 					</hbox>
 					<spacer flex="1"/>
 				</vbox>
 				<separator flex="4"/>
 				<vbox flex="1">
 					<hbox align="stretch">
-						<menulist onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="label" tabindex="5">
+						<menulist onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="label" tabindex="5" native="true">
 							<menupopup id="locator-type-popup"/>
 						</menulist>
 						<textbox oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="locator" tabindex="2" flex="1"/>
 					</hbox>
 					<separator style="height: 2px" flex="1"/>
-					<checkbox oncommand="Zotero_Citation_Dialog.confirmRegenerate(true)" id="suppress-author" label="&zotero.citation.suppressAuthor.label;" tabindex="6"/>
+					<checkbox oncommand="Zotero_Citation_Dialog.confirmRegenerate(true)" id="suppress-author" label="&zotero.citation.suppressAuthor.label;" tabindex="6" native="true"/>
 				</vbox>
 			</hbox>
 		</vbox>
-		
-		<textbox id="editor" type="styled" mode="integration" hidden="true" flex="1"/>
+
+		<iframe id="editor" src="simpleEditor.html" hidden="true" flex="1" type="content" remote="false" maychangeremoteness="false"/>
 		<description id="zotero-editor-warning" style="margin: 9px 1px 0" hidden="true">&zotero.citation.editorWarning.label;</description>
 	</vbox>
 </dialog>
+</window>

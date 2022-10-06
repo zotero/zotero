@@ -74,10 +74,6 @@
 	padding: 0 !important;
 }
 
-#prefix, #suffix {
-	width: 200px;
-}
-
 #tree-locator {
 	width: 60px;
 }
@@ -89,6 +85,12 @@
 #editor {
 	margin-top: 10px;
 	max-height: 100px;
+}
+
+#item-list richlistitem image {
+	margin-right: 5px;
+	height: 16px;
+	vertical-align: top;
 }
 
 .citation-dialog.title {
@@ -144,11 +146,13 @@
 	height: 9999px;
 }
 
-body {
+.citation-dialog.editor {
 	padding: 0 2px 0 2px;
 	margin: 0;
 	font: -moz-field;
 	overflow: hidden;
+	outline: none;
+	line-height: 2em;
 }
 
 .citation-dialog.spinner {
@@ -190,6 +194,10 @@ richlistitem[selected="true"] {
 	-moz-user-focus: ignore;
 }
 
+.citation-dialog.reference-panel:is(panel, menupopup)::part(content) {
+	display: contents;
+}
+
 .citation-dialog.reference-list {
 	margin: 0;
 	padding: 0;
@@ -211,6 +219,10 @@ richlistitem[selected="true"] {
 	height: 16px;
 	padding: 0;
 	margin: 0;
+}
+
+#citation-properties:is(panel, menupopup)::part(content) {
+	padding: 10px;
 }
 
 #citation-properties #suppress-author {
@@ -235,6 +247,46 @@ richlistitem[selected="true"] {
 
 #citation-properties-info {
 	margin-bottom: 3px;
+}
+
+#citation-properties-grid {
+	display: grid;
+	align-items: center;
+	grid-template-columns: max-content 1fr;
+}
+
+.zotero-simpleEditor {
+	box-sizing: border-box;
+	font-size: 14px;
+	height: 100%;
+}
+
+.zotero-simpleEditor-content {
+	box-sizing: border-box;
+	outline: 0;
+	overflow-y: auto;
+	padding: 36px 10px 10px 10px;
+}
+
+.zotero-simpleEditor-actionbar {
+	background-color: #fff;
+	border-bottom: 1px solid rgba(10, 10, 10, 0.1);
+	position: fixed;
+	width: 100%;
+}
+
+.zotero-simpleEditor-button {
+	background-color: transparent;
+	border: none;
+	cursor: pointer;
+	height: 30px;
+	outline: 0;
+	width: 30px;
+	vertical-align: bottom;
+}
+
+.zotero-simpleEditor-button-selected {
+	background-color: #f0f0f0;
 }
 
 panel button .button-text {

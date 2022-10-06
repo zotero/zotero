@@ -51,6 +51,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 	 */
 	this.init = Zotero.Promise.coroutine(function* (args = {}) {
 		window.addEventListener('dialogaccept', () => this.acceptSelection());
+		window.addEventListener('dialoghelp', () => this.openHelpLink());
 
 		// Set font size from pref
 		// Affects bibliography.xhtml and integrationDocPrefs.xul
@@ -267,7 +268,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 	this.exportDocument = function () {
 		if (Zotero.Integration.confirmExportDocument()) {
 			_io.exportDocument = true;
-			document.documentElement.acceptDialog();
+			document.querySelector('dialog').acceptDialog();
 		}
 	}
 	
@@ -322,7 +323,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 	
 	
 	this.manageStyles = function () {
-		document.querySelector('dialog').getButton('cancel').click();
+		document.querySelector('dialog').cancelDialog();
 		var win = Zotero.Utilities.Internal.openPreferences('zotero-prefpane-cite', { tab: 'styles-tab' });
 		if (isDocPrefs) {
 			Zotero.Utilities.Internal.activate(win);

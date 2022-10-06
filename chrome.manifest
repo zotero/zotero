@@ -78,3 +78,8 @@ contract	@mozilla.org/network/protocol;1?name=zotero 	{9BC3D762-9038-486A-9D70-C
 content scaffold             chrome/content/scaffold/
 locale  scaffold   en-US     chrome/locale/en-US/scaffold/
 skin    scaffold   default   chrome/skin/default/scaffold/
+
+# Word Plugins
+manifest	integration/libreoffice/chrome.manifest
+manifest	integration/word-for-windows/chrome.manifest
+manifest	integration/word-for-mac/chrome.manifest
