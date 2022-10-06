@@ -38,6 +38,8 @@ Zotero.Library = function(params = {}) {
 	this._hasSearches = null;
 	this._storageDownloadNeeded = false;
 	
+	this._lastReadItemInSession = null;
+	
 	Zotero.Utilities.Internal.assignProps(
 		this,
 		params,
@@ -124,6 +126,11 @@ Zotero.defineProperty(Zotero.Library.prototype, 'id', {
 Zotero.defineProperty(Zotero.Library.prototype, 'libraryType', {
 	get: function() { return this._get('_libraryType'); },
 	set: function(v) { return this._set('_libraryType', v); }
+});
+
+Zotero.defineProperty(Zotero.Library.prototype, 'lastReadItemInSession', {
+	get() { return this._lastReadItemInSession; },
+	set(val) { this._lastReadItemInSession = val; }
 });
 
 /**

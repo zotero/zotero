@@ -3455,7 +3455,12 @@ Zotero.Schema = new function(){
 				await Zotero.DB.queryAsync("REPLACE INTO fileTypeMIMETypes VALUES(8, 'application/epub')");
 			}
 			
-			// TEMP: When adding 123, check whether IA.authorName fix in items.js::_loadAnnotations()
+			else if (i == 123) {
+				await Zotero.DB.queryAsync("ALTER TABLE itemAttachments ADD COLUMN lastRead INT");
+				await Zotero.DB.queryAsync("CREATE INDEX itemAttachments_lastRead ON itemAttachments(lastRead)");
+			}
+			
+			// TEMP: When adding 124, check whether IA.authorName fix in items.js::_loadAnnotations()
 			// can be updated due to update steps being indempodent
 			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom

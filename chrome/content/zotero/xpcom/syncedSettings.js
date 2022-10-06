@@ -300,6 +300,10 @@ Zotero.SyncedSettings = (function () {
 			var currentValue = this.get(libraryID, setting);
 			var hasCurrentValue = currentValue !== null;
 			
+			if (!hasCurrentValue) {
+				return false;
+			}
+			
 			var id = libraryID + '/' + setting;
 			
 			var extraData = {};

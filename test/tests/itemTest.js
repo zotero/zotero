@@ -1946,6 +1946,20 @@ describe("Zotero.Item", function () {
 			
 			assert.equal(Zotero.Users.getCurrentName(), username);
 		});
+		
+		it("should save a group attachment's attachmentLastRead to the database", async function () {
+			let group = await createGroup();
+			let libraryID = group.libraryID;
+			let item = await createDataObject('item', { libraryID });
+			let attachment = await importPDFAttachment(item);
+			attachment.attachmentLastRead = 1674668111;
+			await attachment.saveTx();
+
+			await assert.eventually.equal(
+				Zotero.DB.valueQueryAsync("SELECT lastRead FROM itemAttachments WHERE itemID=?", attachment.id),
+				attachment.attachmentLastRead
+			);
+		});
 	})
 	
 	
@@ -2243,6 +2257,23 @@ describe("Zotero.Item", function () {
 					assert.notProperty(json, 'note');
 					assert.notProperty(json, 'charset');
 					assert.notProperty(json, 'path');
+				});
+
+				it("should output lastRead for a user library item", async function () {
+					let attachment = await createDataObject('item', { itemType: 'attachment' });
+					attachment.attachmentLastRead = 123450000;
+					let json = attachment.toJSON();
+					assert.equal(json.lastRead, 123450000);
+				});
+
+				it("shouldn't output lastRead for a group item", async function () {
+					let group = await createGroup();
+					let attachment = await createDataObject('item', { itemType: 'attachment', libraryID: group.libraryID });
+					attachment.attachmentLastRead = 123450000;
+					assert.equal(attachment.attachmentLastRead, 123450000);
+					let json = attachment.toJSON();
+					assert.notProperty(json, 'lastRead');
+					await group.eraseTx();
 				});
 			});
 			

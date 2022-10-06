@@ -492,6 +492,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			}
 			this._virtualCollectionLibraries.unfiled =
 					Zotero.Prefs.getVirtualCollectionState('unfiled');
+			this._virtualCollectionLibraries.recentlyRead =
+				Zotero.Prefs.getVirtualCollectionState('recentlyRead');
 			this._virtualCollectionLibraries.retracted =
 				Zotero.Prefs.getVirtualCollectionState('retracted');
 			
@@ -1208,7 +1210,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 
 	/**
-	 * Toggle virtual collection (duplicates/unfiled) visibility
+	 * Toggle virtual collection (duplicates/unfiled/recently read/retracted) visibility
 	 *
 	 * @param libraryID {Number}
 	 * @param type {String}
@@ -1219,7 +1221,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		const types = {
 			duplicates: 'D',
 			unfiled: 'U',
-			retracted: 'R'
+			recentlyRead: 'Y',
+			retracted: 'R',
 		};
 		if (!(type in types)) {
 			throw new Error("Invalid virtual collection type '" + type + "'");
@@ -1364,6 +1367,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 
 			case 'feeds':
 				icon = 'feed-library';
+				break;
+			
+			case 'recentlyRead':
+				icon = 'duplicates'; // TODO: TEMP
 				break;
 
 			case 'header':
@@ -2744,6 +2751,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			var showDuplicates = this.props.hideSources.indexOf('duplicates') == -1
 					&& this._virtualCollectionLibraries.duplicates[libraryID] !== false;
 			var showUnfiled = this._virtualCollectionLibraries.unfiled[libraryID] !== false;
+			var showRecentlyRead = this._virtualCollectionLibraries.recentlyRead[libraryID] !== false;
 			var showRetracted = this._virtualCollectionLibraries.retracted[libraryID] !== false
 				&& Zotero.Retractions.libraryHasRetractedItems(libraryID);
 			var showPublications = libraryID == Zotero.Libraries.userLibraryID;
@@ -2753,6 +2761,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			var savedSearches = [];
 			var showDuplicates = false;
 			var showUnfiled = false;
+			var showRecentlyRead = false;
 			var showRetracted = false;
 			var showPublications = false;
 			var showTrash = false;
@@ -2767,7 +2776,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			return 0;
 		}
 
-		var startOpen = !!(collections.length || savedSearches.length || showDuplicates || showUnfiled || showRetracted || showTrash);
+		var startOpen = !!(collections.length || savedSearches.length || showDuplicates || showUnfiled || showRecentlyRead || showRetracted || showTrash);
 		
 		// If this isn't a manual open, set the initial state depending on whether
 		// there are child nodes
@@ -2781,6 +2790,18 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		
 		var newRows = 0;
 		
+		// Recently Read
+		if (showRecentlyRead) {
+			let s = new Zotero.Search();
+			s.libraryID = libraryID;
+			s.name = Zotero.getString('pane.collections.recentlyRead');
+			s.addCondition('libraryID', 'is', libraryID);
+			s.addCondition('lastRead', 'isInTheLast', '14 days');
+			rows.splice(row + 1 + newRows, 0,
+				new Zotero.CollectionTreeRow(this, 'recentlyRead', s, level + 1));
+			newRows++;
+		}
+
 		// Add collections
 		for (var i = 0, len = collections.length; i < len; i++) {
 			// Skip collections in trash

@@ -2229,6 +2229,7 @@ var ZoteroPane = new function()
 		else if (collectionTreeRow.isLibrary(true)
 				|| collectionTreeRow.isSearch()
 				|| collectionTreeRow.isUnfiled()
+				|| collectionTreeRow.isRecentlyRead()
 				|| collectionTreeRow.isRetracted()
 				|| collectionTreeRow.isDuplicates()) {
 			// In library, don't prompt if meta key was pressed
@@ -2309,6 +2310,11 @@ var ZoteroPane = new function()
 		// Remove virtual unfiled collection
 		else if (collectionTreeRow.isUnfiled()) {
 			this.setVirtual(collectionTreeRow.ref.libraryID, 'unfiled', false);
+			return;
+		}
+		// Remove virtual recently read collection
+		else if (collectionTreeRow.isRecentlyRead()) {
+			this.setVirtual(collectionTreeRow.ref.libraryID, 'recentlyRead', false);
 			return;
 		}
 		// Remove virtual retracted collection
@@ -3119,6 +3125,12 @@ var ZoteroPane = new function()
 			}
 		},
 		{
+			id: "showRecentlyRead",
+			oncommand: () => {
+				this.setVirtual(this.getSelectedLibraryID(), 'recentlyRead', true, true);
+			}
+		},
+		{
 			id: "showRetracted",
 			oncommand: () => {
 				this.setVirtual(this.getSelectedLibraryID(), 'retracted', true, true);
@@ -3333,7 +3345,8 @@ var ZoteroPane = new function()
 		else if (collectionTreeRow.isTrash()) {
 			show = ['emptyTrash'];
 		}
-		else if (collectionTreeRow.isDuplicates() || collectionTreeRow.isUnfiled() || collectionTreeRow.isRetracted()) {
+		else if (collectionTreeRow.isDuplicates() || collectionTreeRow.isUnfiled() || collectionTreeRow.isRecentlyRead()
+				|| collectionTreeRow.isRetracted()) {
 			show = ['deleteCollection'];
 			
 			m.deleteCollection.setAttribute('label', Zotero.getString('general.hide'));
@@ -3365,10 +3378,13 @@ var ZoteroPane = new function()
 			let unfiled = Zotero.Prefs.getVirtualCollectionStateForLibrary(
 				libraryID, 'unfiled'
 			);
+			let recentlyRead = Zotero.Prefs.getVirtualCollectionStateForLibrary(
+				libraryID, 'recentlyRead'
+			);
 			let retracted = Zotero.Prefs.getVirtualCollectionStateForLibrary(
 				libraryID, 'retracted'
 			);
-			if (!duplicates || !unfiled || !retracted) {
+			if (!duplicates || !unfiled || !recentlyRead || !retracted) {
 				if (!library.archived) {
 					show.push('sep2');
 				}
@@ -3377,6 +3393,9 @@ var ZoteroPane = new function()
 				}
 				if (!unfiled) {
 					show.push('showUnfiled');
+				}
+				if (!recentlyRead) {
+					show.push('showRecentlyRead');
 				}
 				if (!retracted) {
 					show.push('showRetracted');

@@ -412,6 +412,7 @@ Zotero.Prefs = new function() {
 		const prefKeys = {
 			duplicates: 'duplicateLibraries',
 			unfiled: 'unfiledLibraries',
+			recentlyRead: 'recentlyReadLibraries',
 			retracted: 'retractedLibraries'
 		};
 		let prefKey = prefKeys[type];
@@ -445,6 +446,7 @@ Zotero.Prefs = new function() {
 		const prefKeys = {
 			duplicates: 'duplicateLibraries',
 			unfiled: 'unfiledLibraries',
+			recentlyRead: 'recentlyReadLibraries',
 			retracted: 'retractedLibraries'
 		};
 		let prefKey = prefKeys[type];
