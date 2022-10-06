@@ -15,10 +15,6 @@
     "test/resource/*.js"
   ],
   "plugins": [
-    "@babel/plugin-proposal-class-properties",
-    "@babel/plugin-proposal-object-rest-spread",
-    "@babel/plugin-proposal-optional-chaining",
-    "@babel/plugin-proposal-unicode-property-regex",
     [
       "transform-es2015-modules-commonjs",
       {
