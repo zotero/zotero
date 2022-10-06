@@ -1034,19 +1034,22 @@ class ReaderInstance {
 								saveOptions.notifierData.autoSyncDelay = Zotero.Notes.AUTO_SYNC_DELAY;
 							}
 
-							if (annotation.image && this._isReadOnly()) {
-								let item = Zotero.Items.getByLibraryAndKey(attachment.libraryID, annotation.key);
-								if (item) {
-									let blob = this._dataURLtoBlob(annotation.image);
-									await Zotero.Annotations.saveCacheImage(item, blob);
-								}
-							}
-							// Delete authorName to prevent setting annotationAuthorName unnecessarily
-							delete annotation.authorName;
-							let savedAnnotation = await Zotero.Annotations.saveFromJSON(attachment, annotation, saveOptions);
-							if (annotation.image) {
+							let item = Zotero.Items.getByLibraryAndKey(attachment.libraryID, annotation.key);
+							// If annotation isn't editable, only save image to cache.
+							// This is the only case when saving can be triggered for non-editable annotation
+							if (annotation.image && item && !item.isEditable()) {
 								let blob = this._dataURLtoBlob(annotation.image);
-								await Zotero.Annotations.saveCacheImage(savedAnnotation, blob);
+								await Zotero.Annotations.saveCacheImage(item, blob);
+							}
+							// Save annotation, and save image to cache
+							else {
+								// Delete authorName to prevent setting annotationAuthorName unnecessarily
+								delete annotation.authorName;
+								let savedAnnotation = await Zotero.Annotations.saveFromJSON(attachment, annotation, saveOptions);
+								if (annotation.image) {
+									let blob = this._dataURLtoBlob(annotation.image);
+									await Zotero.Annotations.saveCacheImage(savedAnnotation, blob);
+								}
 							}
 						}
 					}
