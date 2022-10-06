@@ -107,6 +107,14 @@ class ReaderInstance {
 		// Set `ReaderTab` title as fast as possible
 		this.updateTitle();
 		let path = await item.getFilePathAsync();
+		// Check file size, otherwise we get uncatchable error:
+		// JavaScript error: resource://gre/modules/osfile/osfile_native.jsm, line 60: RangeError: invalid array length
+		// See more https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Invalid_array_length
+		let fileSize = (await OS.File.stat(path)).size;
+		// Max ArrayBuffer size before fx89 is 2GB-1 bytes
+		if (fileSize > Math.pow(2, 31) - 1) {
+			throw new Error(`The file "${path}" is too large`);
+		}
 		let buf = await OS.File.read(path, {});
 		buf = new Uint8Array(buf).buffer;
 		let annotationItems = item.getAnnotations();
@@ -153,7 +161,9 @@ class ReaderInstance {
 	}
 
 	uninit() {
-		this._prefObserverIDs.forEach(id => Zotero.Prefs.unregisterObserver(id));
+		if (this._prefObserverIDs) {
+			this._prefObserverIDs.forEach(id => Zotero.Prefs.unregisterObserver(id));
+		}
 	}
 	
 	get itemID() {
