@@ -899,6 +899,7 @@ class ReaderInstance {
 		// Rotate Left
 		menuitem = this._window.document.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.rotateLeft'));
+		menuitem.setAttribute('disabled', this._isReadOnly());
 		menuitem.addEventListener('command', async () => {
 			this._postMessage({ action: 'reloading' });
 			await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 270, true);
@@ -908,6 +909,7 @@ class ReaderInstance {
 		// Rotate Right
 		menuitem = this._window.document.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.rotateRight'));
+		menuitem.setAttribute('disabled', this._isReadOnly());
 		menuitem.addEventListener('command', async () => {
 			this._postMessage({ action: 'reloading' });
 			await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 90, true);
@@ -917,6 +919,7 @@ class ReaderInstance {
 		// Rotate 180
 		menuitem = this._window.document.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.rotate180'));
+		menuitem.setAttribute('disabled', this._isReadOnly());
 		menuitem.addEventListener('command', async () => {
 			this._postMessage({ action: 'reloading' });
 			await Zotero.PDFWorker.rotatePages(this._itemID, data.pageIndexes, 180, true);
@@ -928,6 +931,7 @@ class ReaderInstance {
 		// Delete
 		menuitem = this._window.document.createElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('general.delete'));
+		menuitem.setAttribute('disabled', this._isReadOnly());
 		menuitem.addEventListener('command', async () => {
 			if (this.promptToDeletePages(data.pageIndexes.length)) {
 				this._postMessage({ action: 'reloading' });
