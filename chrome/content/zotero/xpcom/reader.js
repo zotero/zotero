@@ -1028,23 +1028,19 @@ class ReaderInstance {
 								saveOptions.notifierData.autoSyncDelay = Zotero.Notes.AUTO_SYNC_DELAY;
 							}
 
-							// Note: annotation.image is always saved separately from the rest
-							// of annotation properties
-							if (annotation.image) {
-								if (this._isReadOnly()) {
-									let item = Zotero.Items.getByLibraryAndKey(attachment.libraryID, annotation.key);
-									if (item) {
-										let blob = this._dataURLtoBlob(annotation.image);
-										await Zotero.Annotations.saveCacheImage(item, blob);
-									}
-								}
-								else {
-									// Delete authorName to prevent overwriting the existing annotationAuthorName value
-									delete annotation.authorName;
-									let savedAnnotation = await Zotero.Annotations.saveFromJSON(attachment, annotation, saveOptions);
+							if (annotation.image && this._isReadOnly()) {
+								let item = Zotero.Items.getByLibraryAndKey(attachment.libraryID, annotation.key);
+								if (item) {
 									let blob = this._dataURLtoBlob(annotation.image);
-									await Zotero.Annotations.saveCacheImage(savedAnnotation, blob);
+									await Zotero.Annotations.saveCacheImage(item, blob);
 								}
+							}
+							// Delete authorName to prevent setting annotationAuthorName unnecessarily
+							delete annotation.authorName;
+							let savedAnnotation = await Zotero.Annotations.saveFromJSON(attachment, annotation, saveOptions);
+							if (annotation.image) {
+								let blob = this._dataURLtoBlob(annotation.image);
+								await Zotero.Annotations.saveCacheImage(savedAnnotation, blob);
 							}
 						}
 					}
