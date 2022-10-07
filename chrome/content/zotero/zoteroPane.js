@@ -4920,12 +4920,7 @@ var ZoteroPane = new function()
 			null, null, null, null, {}
 		);
 		
-		if (index == 0) {
-			return 'all';
-		}
-		else {
-			return 'one';
-		}
+		return index == 0 ? 'all' : 'one';
 	};
 	
 	
