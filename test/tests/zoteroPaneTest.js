@@ -1389,8 +1389,8 @@ describe("ZoteroPane", function() {
 			await zp.checkForLinkedFilesToRelink(attachment);
 			assert.ok(dialogStub.calledOnce);
 			assert.ok(dialogStub.calledWith(attachment, sinon.match.string, 0));
-			assert.ok(existsSpy.calledWith(OS.Path.join(labdDir, 'test.pdf')));
 			assert.ok(existsSpy.calledWith(OS.Path.join(labdSubdir, 'test.pdf')));
+			assert.notOk(existsSpy.calledWith(OS.Path.join(labdDir, 'test.pdf'))); // Should never get there
 
 			await assert.eventually.isTrue(attachment.fileExists());
 			assert.equal(attachment.getFilePath(), labdFile);
