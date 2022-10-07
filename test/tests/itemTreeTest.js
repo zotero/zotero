@@ -683,7 +683,7 @@ describe("Zotero.ItemTree", function() {
 			assert.isFalse(zp.itemsView.getRowIndexByID(item.id));
 		});
 		
-		it("should re-sort by Date Last Opened when child attachmentDateLastOpened is updated", async function () {
+		it("should re-sort by Last Opened when child attachmentDateLastOpened is updated", async function () {
 			let userLibraryID = Zotero.Libraries.userLibraryID;
 			let item1 = await createDataObject('item');
 			let attachment1 = await importPDFAttachment(item1);
