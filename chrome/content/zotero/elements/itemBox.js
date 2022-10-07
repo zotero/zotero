@@ -191,10 +191,15 @@
 				}
 			});
 
+			this._id('zotero-field-transform-menu').addEventListener('popupshowing', () => {
+				this._id('creator-transform-title-case').disabled = !this.canTextTransformField(document.popupNode, 'title');
+				this._id('creator-transform-sentence-case').disabled = !this.canTextTransformField(document.popupNode, 'sentence');
+			});
+
 			this._id('creator-transform-title-case').addEventListener('command',
-				() => this.textTransform(document.popupNode, 'title'));
+				() => this.textTransformField(document.popupNode, 'title'));
 			this._id('creator-transform-sentence-case').addEventListener('command',
-				() => this.textTransform(document.popupNode, 'sentence'));
+				() => this.textTransformField(document.popupNode, 'sentence'));
 			
 			this._id('zotero-creator-transform-menu').addEventListener('popupshowing', (event) => {
 				var row = document.popupNode.closest('tr');
@@ -215,7 +220,7 @@
 				event => this.swapNames(event));
 
 			this._id('creator-transform-capitalize').addEventListener('command',
-					event => this.capitalizeCreatorName(event));
+				event => this.capitalizeCreatorName(event));
 			
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'itemBox');
 		}
@@ -917,9 +922,11 @@
 				firstlast.lastChild.hidden = true;
 			}
 			
-			if (this.editable && fieldMode == 0) {
+			if (this.editable) {
 				firstlast.oncontextmenu = (event) => {
 					document.popupNode = firstlast;
+					this._id('creator-transform-swap-names').hidden = fieldMode > 0;
+					this._id('creator-transform-capitalize').disabled = !this.canCapitalizeCreatorName(td.parentNode);
 					this._id('zotero-creator-transform-menu').openPopupAtScreen(
 						event.screenX + 1,
 						event.screenY + 1,
@@ -2030,26 +2037,34 @@
 			}
 		}
 		
-		/**
-		 * TODO: work with textboxes too
-		 */
-		async textTransform(label, mode) {
-			var val = this._getFieldValue(label);
+		textTransformString(val, mode) {
 			switch (mode) {
 				case 'title':
-					var newVal = Zotero.Utilities.capitalizeTitle(val.toLowerCase(), true);
-					break;
+					return Zotero.Utilities.capitalizeTitle(val.toLowerCase(), true);
 				case 'sentence':
 					// capitalize the first letter, including after beginning punctuation
 					// capitalize after ?, ! and remove space(s) before those as well as colon analogous to capitalizeTitle function
 					// also deal with initial punctuation here - open quotes and Spanish beginning punctuation marks
-					newVal = val.toLowerCase().replace(/\s*:/, ":");
-					newVal = newVal.replace(/(([\?!]\s*|^)([\'\"¡¿“‘„«\s]+)?[^\s])/g, function (x) {
+					val = val.toLowerCase().replace(/\s*:/, ":");
+					val = val.replace(/(([\?!]\s*|^)([\'\"¡¿“‘„«\s]+)?[^\s])/g, function (x) {
 						return x.replace(/\s+/m, " ").toUpperCase();});
-					break;
+					return val;
 				default:
-					throw new Error("Invalid transform mode '" + mode + "' in ItemBox.textTransform()");
+					throw new Error("Invalid transform mode '" + mode + "' in ItemBox.textTransformString()");
 			}
+		}
+		
+		canTextTransformField(label, mode) {
+			let val = this._getFieldValue(label);
+			return this.textTransformString(val, mode) != val;
+		}
+		
+		/**
+		 * TODO: work with textboxes too
+		 */
+		async textTransformField(label, mode) {
+			var val = this._getFieldValue(label);
+			var newVal = this.textTransformString(val, mode);
 			this._setFieldValue(label, newVal);
 			var fieldName = label.getAttribute('fieldname');
 			this._modifyField(fieldName, newVal);
@@ -2135,6 +2150,12 @@
 				await this.item.saveTx();
 			}
 		}
+		
+		canCapitalizeCreatorName(row) {
+			var fields = this.getCreatorFields(row);
+			return fields.firstName && Zotero.Utilities.capitalizeName(fields.firstName) != fields.firstName
+				|| fields.lastName && Zotero.Utilities.capitalizeName(fields.lastName) != fields.lastName;
+		}
 
 		/**
 		 * @return {Promise}
@@ -2144,8 +2165,8 @@
 			var typeBox = row.querySelector('.creator-type-label');
 			var creatorIndex = parseInt(typeBox.getAttribute('fieldname').split('-')[1]);
 			var fields = this.getCreatorFields(row);
-			fields.firstName = fields.firstName && Zotero.Utilities.capitalizeName(fields.firstName.toUpperCase());
-			fields.lastName = fields.lastName && Zotero.Utilities.capitalizeName(fields.lastName.toUpperCase());
+			fields.firstName = fields.firstName && Zotero.Utilities.capitalizeName(fields.firstName);
+			fields.lastName = fields.lastName && Zotero.Utilities.capitalizeName(fields.lastName);
 			this.modifyCreator(creatorIndex, fields);
 			if (this.saveOnEdit) {
 				// See note in transformText()
