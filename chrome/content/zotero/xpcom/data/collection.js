@@ -722,8 +722,7 @@ Zotero.Collection.prototype.toResponseJSON = function (options = {}) {
 	json.meta.numItems = this.getChildItems(true).length;
 	if (this.parentID) {
 		json.links.up = {
-			href: Zotero.URI.getCollectionURI(Zotero.Collections.get(this.parentID))
-				.replace(ZOTERO_CONFIG.BASE_URI, options.apiURL || ZOTERO_CONFIG.API_URL),
+			href: Zotero.URI.toAPIURL(Zotero.URI.getCollectionURI(Zotero.Collections.get(this.parentID)), options.apiURL),
 			type: 'application/json'
 		};
 	}
