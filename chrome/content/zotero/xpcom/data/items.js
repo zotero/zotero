@@ -2058,8 +2058,7 @@ Zotero.Items = function() {
 
 
 	/**
-	 * Find attachment items whose paths point to missing files and begin with
-	 * the passed `pathPrefix`.
+	 * Find attachment items whose paths begin with the passed `pathPrefix` and don't exist on disk
 	 *
 	 * @param {Number} libraryID
 	 * @param {String} pathPrefix

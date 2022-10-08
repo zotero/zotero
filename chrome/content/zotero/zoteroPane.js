@@ -4870,7 +4870,7 @@ var ZoteroPane = new function()
 
 		let title = Zotero.getString('pane.item.attachments.autoRelink.title');
 		let text = Zotero.getString('pane.item.attachments.autoRelink.text1') + '\n\n'
-			+ Zotero.getString('pane.item.attachments.autoRelink.text2', item.getFilePath()) + '\n'
+			+ Zotero.getString('pane.item.attachments.autoRelink.text2', item.getFilePath()) + '\n\n'
 			+ Zotero.getString('pane.item.attachments.autoRelink.text3', path) + '\n\n'
 			+ Zotero.getString('pane.item.attachments.autoRelink.text4', Zotero.appName);
 		let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
@@ -4902,11 +4902,18 @@ var ZoteroPane = new function()
 
 		title = Zotero.getString('pane.item.attachments.autoRelinkOthers.title');
 		text = Zotero.getString('pane.item.attachments.autoRelinkOthers.text', numOthers, numOthers);
+		buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
 		index = ps.confirmEx(null,
 			title,
 			text,
-			ps.STD_YES_NO_BUTTONS,
-			null, null, null, null, {}
+			buttonFlags,
+			Zotero.getString(
+				numOthers == 1
+					? 'pane.item.attachments.autoRelink.relink'
+					: 'pane.item.attachments.autoRelink.relinkAll'
+			),
+			null, null, null, {}
 		);
 		
 		return index == 0 ? 'all' : 'one';
