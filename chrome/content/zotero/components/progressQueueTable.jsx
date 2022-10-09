@@ -27,7 +27,7 @@ import PropTypes from 'prop-types';
 import { getDOMElement } from 'components/icons';
 
 import VirtualizedTable, { renderCell } from 'components/virtualized-table';
-import { noop } from './utils';
+import { nextHTMLID, noop } from './utils';
 
 
 function getImageByStatus(status) {
@@ -45,8 +45,9 @@ function getImageByStatus(status) {
 
 const ProgressQueueTable = ({ onActivate = noop, progressQueue }) => {
 	const treeRef = useRef(null);
+	const htmlID = useRef(nextHTMLID());
 	
-	const getRowCount = useCallback(() => progressQueue.getRows().length, [progressQueue]);
+	const getRowCount = useCallback(() => progressQueue.getTotal(), [progressQueue]);
 	
 	const rowToTreeItem = useCallback((index, selection, oldDiv = null, columns) => {
 		let rows = progressQueue.getRows();
@@ -92,6 +93,7 @@ const ProgressQueueTable = ({ onActivate = noop, progressQueue }) => {
 		progressQueue.addListener('rowadded', refreshTree);
 		progressQueue.addListener('rowupdated', refreshTree);
 		progressQueue.addListener('rowdeleted', refreshTree);
+
 		return () => {
 			progressQueue.removeListener('rowadded', refreshTree);
 			progressQueue.removeListener('rowupdated', refreshTree);
@@ -103,7 +105,7 @@ const ProgressQueueTable = ({ onActivate = noop, progressQueue }) => {
 		<VirtualizedTable
 			getRowCount={ getRowCount }
 			ref={ treeRef }
-			id="progress-queue-table"
+			id={ htmlID.current + '-progress-queue-table' }
 			renderItem={ rowToTreeItem }
 			showHeader={ true }
 			columns={ tableColumns }
