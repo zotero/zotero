@@ -1678,6 +1678,7 @@ class Reader {
 		if (!openInBackground) {
 			reader._window.focus();
 		}
+		return reader;
 	}
 
 	/**
