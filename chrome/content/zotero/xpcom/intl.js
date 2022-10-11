@@ -89,9 +89,9 @@ Zotero.Intl = new function () {
 		// Automatically register l10n sources for enabled plugins.
 		
 		// A Fluent file located at
-		//   [plugin root]/locale/en-US/make-it-red/strings.ftl
+		//   [plugin root]/locale/en-US/make-it-red.ftl
 		// could be included in an XHTML file as
-		//   <link rel="localization" href="make-it-red/strings.ftl"/>
+		//   <link rel="localization" href="make-it-red.ftl"/>
 		
 		// If a plugin doesn't have a subdirectory for the active locale, en-US strings
 		// will be used as a fallback.
