@@ -162,7 +162,8 @@ input {
 
 /* This seems to be necessary to center the tabs. Not sure why. */
 .zotero-editpane-tabs > tab:last-of-type > hbox .tab-text {
-	margin: 2px 9px 2px 9px !important;
+	margin-left: 9px !important;
+	margin-right: 9px !important;
 }
 
 .zotero-editpane-tabs > tab[selected=true] > hbox .tab-text {
