@@ -547,6 +547,7 @@ class ReaderInstance {
 		this.state = state;
 		let item = Zotero.Items.get(this._itemID);
 		if (item) {
+			let pageChanged = item.getAttachmentLastPageIndex() != state.pageIndex;
 			item.setAttachmentLastPageIndex(state.pageIndex);
 			let file = Zotero.Attachments.getStorageDirectory(item);
 			if (!await OS.File.exists(file.path)) {
@@ -556,6 +557,16 @@ class ReaderInstance {
 			// Using `writeAtomic` instead of `putContentsAsync` to avoid
 			// using temp file that causes conflicts on simultaneous writes (on slow systems)
 			await OS.File.writeAtomic(file.path, JSON.stringify(state));
+			
+			if (pageChanged) {
+				let fiveMinutesAgo = new Date();
+				fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
+				if (item.library.lastAccessedItemInSession !== item.id
+						|| Zotero.Date.sqlToDate(item.attachmentLastAccessed, true) < fiveMinutesAgo) {
+					item.attachmentLastAccessed = Zotero.Date.dateToSQL(new Date(), true);
+					await item.saveTx({ skipDateModifiedUpdate: true });
+				}
+			}
 		}
 	}
 

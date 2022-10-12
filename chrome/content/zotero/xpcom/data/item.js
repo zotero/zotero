@@ -3372,6 +3372,12 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentLastAccessed', {
 		}
 		this._changed.attachmentData.lastAccessed = true;
 		this._attachmentLastAccessed = val;
+		if (this.library) {
+			let lastAccessedItem = Zotero.Items.get(this.library.lastAccessedItemInSession);
+			if (!lastAccessedItem || lastAccessedItem.attachmentLastAccessed < val) {
+				this.library.lastAccessedItemInSession = this.id;
+			}
+		}
 	}
 });
 
