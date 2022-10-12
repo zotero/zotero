@@ -1190,13 +1190,11 @@ function ZoteroProtocolHandler() {
 				}
 			}
 			
-			// Update attachmentDateLastOpened like ZoteroPane does
+			// Update attachmentLastAccessed like ZoteroPane does
 			if (opened) {
-				if (item.libraryID == Zotero.Libraries.userLibraryID) {
-					Zotero.debug('Updating dateLastOpened');
-					item.attachmentDateLastOpened = Zotero.Date.dateToSQL(new Date(), true);
-					await item.saveTx({ skipDateModifiedUpdate: true });
-				}
+				Zotero.debug('Updating lastAccessed');
+				item.attachmentLastAccessed = Zotero.Date.dateToSQL(new Date(), true);
+				await item.saveTx({ skipDateModifiedUpdate: true });
 			}
 			// If something went wrong, just open PDF without page
 			else {

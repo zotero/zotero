@@ -2206,8 +2206,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			var showDuplicates = this.hideSources.indexOf('duplicates') == -1
 					&& this._virtualCollectionLibraries.duplicates[libraryID] !== false;
 			var showUnfiled = this._virtualCollectionLibraries.unfiled[libraryID] !== false;
-			var showRecentlyRead = this._virtualCollectionLibraries.recentlyRead[libraryID] !== false
-				&& libraryID == Zotero.Libraries.userLibraryID;
+			var showRecentlyRead = this._virtualCollectionLibraries.recentlyRead[libraryID] !== false;
 			var showRetracted = this._virtualCollectionLibraries.retracted[libraryID] !== false
 				&& Zotero.Retractions.libraryHasRetractedItems(libraryID);
 			var showPublications = libraryID == Zotero.Libraries.userLibraryID;
@@ -2311,7 +2310,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			s.libraryID = libraryID;
 			s.name = Zotero.getString('pane.collections.recentlyRead');
 			s.addCondition('libraryID', 'is', libraryID);
-			s.addCondition('dateLastOpened', 'isInTheLast', '14 days');
+			s.addCondition('lastAccessed', 'isInTheLast', '14 days');
 			rows.splice(row + 1 + newRows, 0,
 				new Zotero.CollectionTreeRow(this, 'recentlyRead', s, level + 1));
 			newRows++;

@@ -3132,7 +3132,7 @@ var ZoteroPane = new function()
 				if (!unfiled) {
 					show.push('showUnfiled');
 				}
-				if (!recentlyRead && libraryID == Zotero.Libraries.userLibraryID) {
+				if (!recentlyRead) {
 					show.push('showRecentlyRead');
 				}
 				if (!retracted) {
@@ -4508,12 +4508,9 @@ var ZoteroPane = new function()
 				Zotero.launchFile(path);
 			}
 			finally {
-				// Do not set dateLastOpened in a group library
-				if (item.libraryID == Zotero.Libraries.userLibraryID) {
-					Zotero.debug('Updating dateLastOpened');
-					item.attachmentDateLastOpened = Zotero.Date.dateToSQL(new Date(), true);
-					await item.saveTx({ skipDateModifiedUpdate: true });
-				}
+				Zotero.debug('Updating lastAccessed');
+				item.attachmentLastAccessed = Zotero.Date.dateToSQL(new Date(), true);
+				await item.saveTx({ skipDateModifiedUpdate: true });
 			}
 		};
 		

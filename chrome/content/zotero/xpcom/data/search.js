@@ -1440,7 +1440,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 					// need to be handled specially
 					if ((condition['name']=='dateAdded' ||
 							condition['name']=='dateModified' ||
-							condition['name']=='dateLastOpened' ||
+							condition['name']=='lastAccessed' ||
 							condition['name']=='datefield') &&
 							!Zotero.Date.isSQLDateTime(condition['value'])){
 						
