@@ -381,8 +381,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		}
 		
 		if (!charset) {
-			Zotero.logError(`Item ${itemID} didn't have a charset`);
-			return false;
+			Zotero.debug(`Item ${itemID} doesn't have a charset set -- using 'utf-8'`);
+			charset = 'utf-8';
 		}
 		
 		var maxLength = Zotero.Prefs.get('fulltext.textMaxLength');
