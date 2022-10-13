@@ -406,7 +406,7 @@ const ZoteroStandalone = new function() {
 			this.updateMenuItemCheckmark('view-menuitem-zoom-page-height', reader.isZoomPageHeightActive());
 			this.updateMenuItemCheckmark('view-menuitem-split-vertically', reader.isSplitVerticallyActive());
 			this.updateMenuItemCheckmark('view-menuitem-split-horizontally', reader.isSplitHorizontallyActive());
-			this.updateMenuItemCheckmark('view-menuitem-show-annotations', Zotero.Prefs.get('reader.showAnnotations'));
+			this.updateMenuItemCheckmark('view-menuitem-show-annotations', Zotero.Prefs.get('pdfReader.showAnnotations'));
 		}
 	
 		// Layout mode

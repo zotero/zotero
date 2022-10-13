@@ -173,7 +173,7 @@
 						class="menu-type-reader"
 						type="checkbox"
 						label="&zotero.pdfReader.showAnnotations;"
-						oncommand="Zotero.Prefs.set('reader.showAnnotations', !Zotero.Prefs.get('reader.showAnnotations'))"
+						oncommand="Zotero.Prefs.set('pdfReader.showAnnotations', !Zotero.Prefs.get('pdfReader.showAnnotations'))"
 				/>
 			</menupopup>
 		</menu>

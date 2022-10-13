@@ -204,7 +204,7 @@ pref("extensions.zotero.retractions.enabled", true);
 pref("extensions.zotero.retractions.recentItems", "[]");
 
 // PDF Reader
-pref("extensions.zotero.reader.showAnnotations", true);
+pref("extensions.zotero.pdfReader.showAnnotations", true);
 
 // Annotations
 pref("extensions.zotero.annotations.noteTemplates.title", "<h1>{{title}}<br/>({{date}})</h1>");
