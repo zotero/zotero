@@ -123,17 +123,17 @@ var Zotero_LocateMenu = new function() {
 	});
 	
 	function _addViewOption(selectedItems, optionName, optionObject, showIcons) {
-		var menuitem = _createMenuItem(Zotero.getString("locate."+optionName+".label"),
+		var menuitem = _createMenuItem(optionObject.label || Zotero.getString(`locate.${optionName}.label`),
 			null, null);
-		if(showIcons) {
+		if (showIcons) {
 			menuitem.setAttribute("class", "menuitem-iconic");
-			menuitem.style.listStyleImage = "url('"+optionObject.icon+"')";
+			menuitem.style.listStyleImage = `url('${optionObject.icon}')`;
 		}
 		menuitem.setAttribute("zotero-locate", "true");
 		
-		menuitem.addEventListener("command", function(event) {
+		menuitem.addEventListener("command", function (event) {
 			optionObject.handleItems(selectedItems, event);
-		}, false)
+		}, false);
 		return menuitem;
 	}
 	
@@ -344,16 +344,30 @@ var Zotero_LocateMenu = new function() {
 	 * Should appear only when the item is a PDF, or a linked or attached file or web attachment is
 	 * a PDF
 	 */
-	function ViewPDF(inNewWindow) {
+	function ViewPDF(alternateWindowBehavior) {
 		this.icon = "chrome://zotero/skin/treeitem-attachment-pdf.png";
 		this._mimeTypes = ["application/pdf"];
 
-		// Don't show "Open PDF in New Window" in toolbar Locate menu
-		this.hideInToolbar = inNewWindow;
+		// Don't show alternate-behavior option ("in New Window" when openReaderInNewWindow is false,
+		// "in New Tab" when it's true) in toolbar Locate menu
+		this.hideInToolbar = alternateWindowBehavior;
+		
+		Object.defineProperty(this, 'label', {
+			get() {
+				if (alternateWindowBehavior) {
+					return Zotero.getString(Zotero.Prefs.get('openReaderInNewWindow')
+						? 'locate.pdfNewTab.label'
+						: 'locate.pdfNewWindow.label');
+				}
+				else {
+					return Zotero.getString('locate.pdf.label');
+				}
+			}
+		});
 		
 		this.canHandleItem = async function (item) {
-			// Don't show "Open PDF in New Window" when using an external PDF viewer
-			if (inNewWindow && Zotero.Prefs.get("fileHandler.pdf")) {
+			// Don't show alternate-behavior option when using an external PDF viewer
+			if (alternateWindowBehavior && Zotero.Prefs.get("fileHandler.pdf")) {
 				return false;
 			}
 			return _getFirstAttachmentWithMIMEType(item, this._mimeTypes).then((item) => !!item);
@@ -367,7 +381,7 @@ var Zotero_LocateMenu = new function() {
 			}
 			
 			ZoteroPane_Local.viewAttachment(attachments, event, false,
-				{ forceOpenPDFInWindow: inNewWindow });
+				{ forceAlternateWindowBehavior: alternateWindowBehavior });
 		});
 		
 		var _getFirstAttachmentWithMIMEType = Zotero.Promise.coroutine(function* (item, mimeTypes) {
@@ -384,7 +398,7 @@ var Zotero_LocateMenu = new function() {
 	}
 
 	ViewOptions.pdf = new ViewPDF(false);
-	ViewOptions.pdfNewWindow = new ViewPDF(true);
+	ViewOptions.pdfAlternateWindowBehavior = new ViewPDF(true);
 	
 	/**
 	 * "View Online" option

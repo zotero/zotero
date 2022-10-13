@@ -19,6 +19,7 @@
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked  "Rename linked files">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDF reader in new window">
 
 <!ENTITY zotero.preferences.miscellaneous				"Miscellaneous">
 <!ENTITY zotero.preferences.autoUpdate					"Automatically check for updated translators and styles">
