@@ -190,9 +190,7 @@ Zotero_Preferences.Sync = {
 			Zotero.Sync.Runner.updateIcons([]);
 		}
 		window.addEventListener('beforeunload', () => {
-			if (!Zotero.Sync.Runner.syncInProgress) {
-				Zotero.Sync.Runner.sync();
-			}
+			Zotero.Sync.Runner.setSyncTimeout(1);
 		});
 		
 		this.displayFields(json.username);
