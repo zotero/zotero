@@ -567,8 +567,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			}
 			
 			if (!charset) {
-				Zotero.logError(`Could not detect character set for ${item.libraryKey} -- skipping indexing`);
-				return false;
+				Zotero.debug(`Couldn't detect character set for ${item.libraryKey} -- using UTF-8`);
+				charset = 'utf-8';
 			}
 		}
 		
