@@ -412,9 +412,23 @@ class ReaderInstance {
 		}
 		else if (cmd === 'splitVertically') {
 			this._splitVertically();
+			return;
 		}
 		else if (cmd === 'splitHorizontally') {
 			this._splitHorizontally();
+			return;
+		}
+		else if (cmd === 'setDefaultState') {
+			let defaultState = {
+				scale: this.state.scale,
+				scrollMode: this.state.scrollMode,
+				spreadMode: this.state.scrollMode
+			};
+			if (typeof defaultState.scale !== 'string') {
+				defaultState.scale = 'page-width';
+			}
+			Zotero.Prefs.set('pdfReader.defaultState', JSON.stringify(defaultState));
+			return;
 		}
 
 		let data = {
@@ -582,20 +596,16 @@ class ReaderInstance {
 		catch (e) {
 			Zotero.logError(e);
 		}
-
+		if (!state) {
+			state = JSON.parse(Zotero.Prefs.get('pdfReader.defaultState'));
+		}
 		let pageIndex = item.getAttachmentLastPageIndex();
-		if (state) {
-			if (Number.isInteger(pageIndex) && state.pageIndex !== pageIndex) {
-				state.pageIndex = pageIndex;
-				delete state.top;
-				delete state.left;
-			}
-			return state;
+		if (Number.isInteger(pageIndex) && state.pageIndex !== pageIndex) {
+			state.pageIndex = pageIndex;
+			delete state.top;
+			delete state.left;
 		}
-		else if (Number.isInteger(pageIndex)) {
-			return { pageIndex };
-		}
-		return null;
+		return state;
 	}
 
 	_isReadOnly() {
