@@ -30,7 +30,9 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 import TabBar from 'components/tabBar';
 
-const MAX_LOADED_TABS = 5;
+// Reduce loaded tabs limit if the system has 8 GB or less memory.
+// TODO: Revise this after upgrading to Zotero 7
+const MAX_LOADED_TABS = Services.sysinfo.getProperty("memsize") / 1024 / 1024 / 1024 <= 8 ? 2 : 5;
 const UNLOAD_UNUSED_AFTER = 86400; // 24h
 
 var Zotero_Tabs = new function () {
