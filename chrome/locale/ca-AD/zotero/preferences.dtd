@@ -96,7 +96,7 @@
 <!ENTITY zotero.preferences.search.indexStats.words "Paraules:">
 
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Nombre màxim de caràcters indexats per fitxer:">
-<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Nombe màxim de pàgines indexades per fitxer:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Nombre màxim de pàgines indexades per fitxer:">
 
 <!ENTITY zotero.preferences.prefpane.export "Exporta">
 

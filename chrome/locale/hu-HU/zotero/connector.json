@@ -41,6 +41,9 @@
   "progressWindow_error_translation": {
     "message": "Hiba történt az elem mentése közben. Lásd a $1 további információért"
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "Hiba történt az elem mentése közben. $1 korlátozhatja az egyszerre menthető elemek számát. További információkért lásd $2."
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Ismert konverter hibák"
   },
@@ -62,6 +65,9 @@
   "firstRun_title": {
     "message": "Telepítette a$1Connector-t!"
   },
+  "firstRun_text2": {
+    "message": "Ha még nem tette meg, <a href=\"$2\">töltse</a> le a standalone $1 alkalmazást a legjobb élményért."
+  },
   "firstRun_acceptButton": {
     "message": "Értem"
   },
@@ -73,6 +79,9 @@
   },
   "reports_debug_output_submitted": {
     "message": "A hibakeresés eredménye elküldve.\n\nA hibaazonosító$1."
+  },
+  "reports_submission_failed": {
+    "message": "Hiba történt a jelentés elküldése közben.\n\n$1\n\nKérjük, ellenőrizze az internetkapcsolatát. Ha a probléma továbbra is fennáll, írjon üzenetet a Zotero Fórumára."
   },
   "integration_error_clientUpgrade": {
     "message": "A webalapú hivatkozáshoz szükség van $1 vagy későbbire."

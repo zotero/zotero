@@ -323,6 +323,6 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Säädä kokoa automaattisesti">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Koko sivun leveys">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Koko sivun korkeus">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
+<!ENTITY zotero.pdfReader.splitVertically "Jaa pystysuunnassa">
+<!ENTITY zotero.pdfReader.splitHorizontally "Jaa vaakasuunnassa">
 <!ENTITY zotero.pdfReader.transferFromPDF "Tuo huomautukset...">
