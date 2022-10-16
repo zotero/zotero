@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
-<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
 
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
@@ -30,6 +30,7 @@
 			data-header-label-id="import-online-intro-title"
 		>
 			<div 
+				id="import-online-intro"
 				class="mendeley-online-intro"
 				data-l10n-id="import-online-intro"
 				data-l10n-args='{"targetAppOnline": "Mendeley Reference Manager", "targetApp": "Mendeley"}'></div>
@@ -37,6 +38,17 @@
 				class="mendeley-online-intro"
 				data-l10n-id="import-online-intro2"
 				data-l10n-args='{"targetApp": "Mendeley"}'></div>
+			<fieldset id="mendeley-login">
+				<div class="field">
+					<html:label for="mendeley-username"  data-l10n-id="import-mendeley-username" />
+					<html:input type="text" id="mendeley-username" />
+				</div>
+				<div class="field">
+					<html:label for="mendeley-password" data-l10n-id="import-mendeley-password" />
+					<html:input type="password" id="mendeley-password" />
+				</div>
+			</fieldset>
+			<div id="mendeley-online-login-feedback" data-l10n-id="import-online-wrong-credentials" />
 		</wizardpage>
 		<wizardpage
 			pageid="page-options"
@@ -65,6 +77,9 @@
 					<radio id="link" data-l10n-id="import-file-handling-link" />
 				</radiogroup>
 				<div class="page-options-file-handling-description" data-l10n-id="import-fileHandling-description"></div>
+			</div>
+			<div class="options-group" id="page-options-mendeley">
+				<checkbox native="true" id="new-items-only-checkbox" data-l10n-id="import-online-new" checked="true" />
 			</div>
 		</wizardpage>
 		<wizardpage pageid="page-progress" data-header-label-id="import-importing">

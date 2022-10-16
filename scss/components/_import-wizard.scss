@@ -106,6 +106,46 @@
 		}
 	}
 
+	#mendeley-login {
+		padding: 1.5em 1em 0;
+		font-size: 13px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		border: none;
+
+		.field {
+			display: flex;
+			max-width: 300px;
+			line-height: 1.5em;
+			align-items: center;
+		}
+
+		.field+.field {
+			margin-top: .5em;
+		}
+
+		label {
+			flex: 0 0 90px;
+			width: 90px;
+			margin-right: 8px;
+			text-align: right;
+		}
+
+		input {
+			flex: 1 1 auto;
+			font-size: 13px;
+		}
+	}
+
+	#mendeley-online-login-feedback {
+		text-align: center;
+		font-size: 13px;
+		margin-top: 1.3em;
+		color: red;
+		font-weight: bold;
+	}
+
 	#import-progress {
 		margin-top: 1em;
 	}

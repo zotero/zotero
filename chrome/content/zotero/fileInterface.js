@@ -444,10 +444,12 @@ var Zotero_File_Interface = new function() {
 		
 		var translation;
 		
-		if (options.mendeleyCode) {
+		if (options.mendeleyAuth || options.mendeleyCode) {
 			translation = yield _getMendeleyTranslation();
 			translation.createNewCollection = createNewCollection;
+			translation.mendeleyAuth = options.mendeleyAuth;
 			translation.mendeleyCode = options.mendeleyCode;
+			translation.newItemsOnly = options.newItemsOnly;
 		}
 		else if (options.folder) {
 			Components.utils.import("chrome://zotero/content/import/folderImport.js");

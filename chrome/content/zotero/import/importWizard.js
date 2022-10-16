@@ -1,7 +1,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
     
-	Copyright © 2022 Corporation for Digital Scholarship
+	Copyright © 2023 Corporation for Digital Scholarship
 					 Vienna, Virginia, USA
 					 https://www.zotero.org
     
@@ -22,23 +22,28 @@
     
 	***** END LICENSE BLOCK *****
 */
+/* eslint camelcase: ["error", {allow: ["Zotero_File_Interface", "Zotero_Import_Wizard"]} ] */
+/* global Zotero_File_Interface: false, mendeleyAPIUtils: false */
 
 import FilePicker from 'zotero/filePicker';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ProgressQueueTable from 'components/progressQueueTable';
 
-/* eslint camelcase: ["error", {allow: ["Zotero_File_Interface", "Zotero_Import_Wizard"]} ] */
-/* global Zotero_File_Interface: false */
+Components.utils.import("resource://gre/modules/Services.jsm");
+Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/mendeleyAPIUtils.js");
+const { directAuth } = mendeleyAPIUtils;
 
 
 const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
-	wizard: null,
-	folder: null,
 	file: null,
-	mendeleyCode: null,
+	folder: null,
 	libraryID: null,
+	mendeleyAuth: null,
+	mendeleyCode: null,
+	mendeleyHasPreviouslyImported: false,
 	translation: null,
+	wizard: null,
 
 	async getShouldCreateCollection() {
 		const sql = "SELECT ROWID FROM collections WHERE libraryID=?1 "
@@ -57,15 +62,22 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		const { mendeleyCode, libraryID } = window.arguments[0].wrappedJSObject ?? {};
 
 		this.libraryID = libraryID;
-		this.mendeleyCode = mendeleyCode;
+
+		const predicateID = Zotero.RelationPredicates.getID('mendeleyDB:documentUUID');
+		if (predicateID) {
+			const relSQL = 'SELECT ROWID FROM itemRelations WHERE predicateID = ? LIMIT 1';
+			this.mendeleyHasPreviouslyImported = !!(await Zotero.DB.valueQueryAsync(relSQL, predicateID));
+		}
 
 		this.wizard = document.getElementById('import-wizard');
 		this.wizard.getPageById('page-start')
 			.addEventListener('pageadvanced', this.onImportSourceAdvance.bind(this));
 		this.wizard.getPageById('page-mendeley-online-intro')
+			.addEventListener('pageshow', this.onMendeleyOnlineShow.bind(this));
+		this.wizard.getPageById('page-mendeley-online-intro')
 			.addEventListener('pagerewound', this.goToStart.bind(this));
 		this.wizard.getPageById('page-mendeley-online-intro')
-			.addEventListener('pageadvanced', this.openMendeleyAuthWindow.bind(this));
+			.addEventListener('pageadvanced', this.onMendeleyOnlineAdvance.bind(this));
 		this.wizard.getPageById('page-options')
 			.addEventListener('pageshow', this.onOptionsPageShow.bind(this));
 		this.wizard.getPageById('page-options')
@@ -90,6 +102,10 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		document
 			.querySelector('#page-done-error > button')
 			.addEventListener('keydown', this.onReportErrorInteract.bind(this));
+		document
+			.getElementById('mendeley-username').addEventListener('keyup', this.onMendeleyAuthKeyUp.bind(this));
+		document
+			.getElementById('mendeley-password').addEventListener('keyup', this.onMendeleyAuthKeyUp.bind(this));
 
 		this.wizard.addEventListener('pageshow', this.updateFocus.bind(this));
 		this.wizard.addEventListener('wizardcancel', this.onCancel.bind(this));
@@ -101,7 +117,8 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		this.wizard.shadowRoot
 			.querySelector('.wizard-header-label').style.fontSize = '16px';
 
-		if (mendeleyCode) {
+		if (mendeleyCode && Zotero.Prefs.get("import.mendeleyUseOAuth")) {
+			this.mendeleyCode = mendeleyCode;
 			this.wizard.goTo('page-options');
 		}
 	},
@@ -194,6 +211,50 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		this.wizard.goTo('page-options');
 	},
 
+	async onMendeleyOnlineShow() {
+		document.getElementById('import-online-intro').l10nId = Zotero.Prefs.get("import.mendeleyUseOAuth")
+			? 'import-online-intro'
+			: 'import-online-form-intro';
+		document.getElementById('mendeley-login').style.display = Zotero.Prefs.get("import.mendeleyUseOAuth") ? 'none' : '';
+		document.getElementById('mendeley-online-login-feedback').style.display = 'none';
+
+		// If we use oAuth, form doesn't show and we can advance, otherwise need to fill-in form first so disable
+		this.wizard.canAdvance = Zotero.Prefs.get("import.mendeleyUseOAuth");
+	},
+
+	async onMendeleyOnlineAdvance(ev) {
+		ev.preventDefault();
+
+		if (Zotero.Prefs.get("import.mendeleyUseOAuth")) {
+			this.openMendeleyAuthWindow();
+		}
+		else {
+			const userNameEl = document.getElementById('mendeley-username');
+			const passwordEl = document.getElementById('mendeley-password');
+			userNameEl.disabled = true;
+			passwordEl.disabled = true;
+			try {
+				this.mendeleyAuth = await directAuth(userNameEl.value, passwordEl.value);
+				this.wizard.goTo('page-options');
+			}
+			catch (e) {
+				const feedbackEl = document.getElementById('mendeley-online-login-feedback');
+				feedbackEl.style.display = '';
+				this.wizard.canAdvance = false; // change to either of the inputs will reset thi
+			}
+			finally {
+				userNameEl.disabled = false;
+				passwordEl.disabled = false;
+			}
+		}
+	},
+
+	onMendeleyAuthKeyUp() {
+		document.getElementById('mendeley-online-login-feedback').style.display = 'none';
+		this.wizard.canAdvance = document.getElementById('mendeley-username').value.length > 0
+			&& document.getElementById('mendeley-password').value.length > 0;
+	},
+
 	async onImportSourceAdvance(ev) {
 		const selectedMode = document.getElementById('import-source-group').selectedItem.value;
 		ev.preventDefault();
@@ -226,13 +287,16 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 
 	onOptionsPageShow() {
 		document.getElementById('page-options-folder-import').style.display = this.folder ? 'block' : 'none';
-		document.getElementById('page-options-file-handling').style.display = this.mendeleyCode ? 'none' : 'block';
+		document.getElementById('page-options-file-handling').style.display = (this.mendeleyCode || this.mendeleyAuth) ? 'none' : 'block';
+		const hideExtraMendeleyOptions = !this.mendeleyHasPreviouslyImported || !(this.mendeleyAuth || this.mendeleyCode);
+		document.getElementById('page-options-mendeley').style.display = hideExtraMendeleyOptions ? 'none' : 'block';
+		if (hideExtraMendeleyOptions) {
+			document.getElementById('new-items-only-checkbox').checked = false;
+		}
 		this.wizard.canRewind = false;
 	},
 
-	openMendeleyAuthWindow(ev) {
-		ev.preventDefault();
-
+	openMendeleyAuthWindow() {
 		const arg = Components.classes["@mozilla.org/supports-string;1"]
 			.createInstance(Components.interfaces.nsISupportsString);
 		arg.data = 'mendeleyImport';
@@ -317,6 +381,7 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		const fileTypes = document.getElementById('import-other').checked
 			? document.getElementById('other-files').value
 			: null;
+		const newItemsOnly = document.getElementById('new-items-only-checkbox').checked;
 		
 		try {
 			const result = await Zotero_File_Interface.importFile({
@@ -325,8 +390,10 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 				fileTypes,
 				folder: this.folder,
 				linkFiles,
+				mendeleyAuth: this.mendeleyAuth,
 				mendeleyCode: this.mendeleyCode,
 				mimeTypes,
+				newItemsOnly,
 				onBeforeImport: this.onBeforeImport.bind(this),
 				recreateStructure
 			});
@@ -345,12 +412,12 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		}
 		catch (e) {
 			if (e.message == 'Encrypted Mendeley database') {
-				this.skipToDonePage('general.error', [], false, true);
+				this.skipToDonePage('general-error', [], false, true);
 			}
 			else {
 				const translatorLabel = this.translation?.translator?.[0]?.label;
 				this.skipToDonePage(
-					'general.error',
+					'general-error',
 					translatorLabel
 						? ['file-interface-import-error-translator', { translator: translatorLabel }]
 						: 'file-interface-import-error',

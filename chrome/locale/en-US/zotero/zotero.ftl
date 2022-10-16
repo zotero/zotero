@@ -38,6 +38,10 @@ import-file-handling-store =
 import-file-handling-link = 
     .label = Link to files in original location
 import-fileHandling-description = Linked files cannot be synced by { -app-name }.
+import-online-new =
+    .label = Download new items only; don’t update previously imported items
+import-mendeley-username = Username
+import-mendeley-password = Password
 
 general-error = Error
 file-interface-import-error = An error occurred while trying to import the selected file. Please ensure that the file is valid and try again.
@@ -52,11 +56,10 @@ import-mendeley-encrypted = The selected Mendeley database cannot be read, likel
                             
 file-interface-import-error-translator = An error occurred importing the selected file with “{ $translator }”. Please ensure that the file is valid and try again.
 
-# Variables:
-#   $targetAppOnline (String)
-#   $targetApp (String)
 import-online-intro=In the next step you will be asked to log in to { $targetAppOnline } and grant { -app-name } access. This is necessary to import your { $targetApp } library into { -app-name }.
 import-online-intro2={ -app-name } will never see or store your { $targetApp } password.
+import-online-form-intro = Please enter your credentials to log in to { $targetAppOnline }. This is necessary to import your { $targetApp } library into { -app-name }.
+import-online-wrong-credentials = Login to { $targetApp } failed. Please re-enter credentials and try again.
 
 report-error =
     .label = Report Error…
