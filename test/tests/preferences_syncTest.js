@@ -98,7 +98,22 @@ describe("Sync Preferences", function () {
 				yield assert.eventually.equal(Zotero.Sync.Data.Local.getAPIKey(), apiKey);
 				assert.equal(doc.getElementById('sync-unauthorized').getAttribute('hidden'), 'true');
 			});
+			
+			it("should clear sync errors from the toolbar after logging in", async function () {
+				let win = await loadZoteroPane();
+				after(function () {
+					win.close();
+				});
+				
+				let syncError = win.document.getElementById('zotero-tb-sync-error');
+				
+				Zotero.Sync.Runner.updateIcons(new Error("a sync error"));
+				assert.isFalse(syncError.hidden);
 
+				getAPIKeyFromCredentialsStub.resolves(apiResponse);
+				await setCredentials("Username", "correctPassword");
+				assert.isTrue(syncError.hidden);
+			});
 		})
 	})
 })
