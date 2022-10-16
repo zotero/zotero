@@ -1,12 +1,17 @@
+/* global mendeleyAPIUtils:false */
 import FilePicker from 'zotero/modules/filePicker';
+Components.utils.import("resource://gre/modules/Services.jsm");
+Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/mendeleyAPIUtils.js");
+const { directAuth } = mendeleyAPIUtils;
 
 var Zotero_Import_Wizard = {
 	_wizard: null,
 	_dbs: null,
 	_file: null,
 	_translation: null,
-	_mendeleyOnlineRedirectURLWithCode: null,
 	_mendeleyCode: null,
+	_mendeleyAuth: null,
+	_mendeleyHasPreviouslyImported: false,
 	
 	
 	init: async function () {
@@ -15,6 +20,13 @@ var Zotero_Import_Wizard = {
 		if (dbs.length) {
 			// Local import disabled
 			//document.getElementById('radio-import-source-mendeley').hidden = false;
+		}
+
+		const predicateID = Zotero.RelationPredicates.getID('mendeleyDB:documentUUID');
+
+		if (predicateID) {
+			const relSQL = 'SELECT ROWID FROM itemRelations WHERE predicateID = ? LIMIT 1';
+			this._mendeleyHasPreviouslyImported = !!(await Zotero.DB.valueQueryAsync(relSQL, predicateID));
 		}
 		
 		// If no existing collections or non-trash items in the library, don't create a new
@@ -35,7 +47,7 @@ var Zotero_Import_Wizard = {
 			}
 		}
 
-		if (args && args.mendeleyCode) {
+		if (args && args.mendeleyCode && Zotero.Prefs.get("import.mendeleyUseOAuth")) {
 			this._mendeleyCode = args.mendeleyCode;
 			this._wizard.goTo('page-options');
 		}
@@ -54,6 +66,14 @@ var Zotero_Import_Wizard = {
 			'import.fileHandling.description',
 			Zotero.appName
 		);
+			
+		// Set up Mendeley username/password fields
+		document.querySelector('label[for="mendeley-username"]').textContent
+			= Zotero.Utilities.Internal.stringWithColon(Zotero.getString('general.username'));
+		document.querySelector('label[for="mendeley-password"]').textContent
+			= Zotero.Utilities.Internal.stringWithColon(Zotero.getString('general.password'));
+		document.getElementById('mendeley-username').addEventListener('keyup', this.onMendeleyAuthKeyUp.bind(this));
+		document.getElementById('mendeley-password').addEventListener('keyup', this.onMendeleyAuthKeyUp.bind(this));
 		
 		Zotero.Translators.init(); // async
 	},
@@ -108,19 +128,48 @@ var Zotero_Import_Wizard = {
 	},
 
 	onMendeleyOnlineShow: async function () {
-		document.getElementById('mendeley-online-description').textContent = Zotero.getString(
-			'import.online.intro', [Zotero.appName, 'Mendeley Reference Manager', 'Mendeley']
-		);
+		document.getElementById('mendeley-online-description').textContent = Zotero.Prefs.get("import.mendeleyUseOAuth")
+			? Zotero.getString('import.online.intro', [Zotero.appName, 'Mendeley Reference Manager', 'Mendeley'])
+			: Zotero.getString('import.online.formIntro', [Zotero.appName, 'Mendeley Reference Manager', 'Mendeley']);
 		document.getElementById('mendeley-online-description2').textContent = Zotero.getString(
 			'import.online.intro2', [Zotero.appName, 'Mendeley']
 		);
+		document.getElementById('mendeley-login').style.display = Zotero.Prefs.get("import.mendeleyUseOAuth") ? 'none' : '';
+		document.getElementById('mendeley-online-login-feedback').style.display = 'none';
+		this._wizard.canAdvance = Zotero.Prefs.get("import.mendeleyUseOAuth");
 	},
 
-	onMendeleyOnlineAdvance: function () {
-		if (!this._mendeleyOnlineRedirectURLWithCode) {
+	onMendeleyOnlineAdvance: async function () {
+		if (Zotero.Prefs.get("import.mendeleyUseOAuth")) {
 			Zotero_File_Interface.authenticateMendeleyOnline();
 			window.close();
 		}
+		else {
+			const userNameEl = document.getElementById('mendeley-username');
+			const passwordEl = document.getElementById('mendeley-password');
+			userNameEl.disabled = true;
+			passwordEl.disabled = true;
+			try {
+				this._mendeleyAuth = await directAuth(userNameEl.value, passwordEl.value);
+				this._wizard.goTo('page-options');
+			}
+			catch (e) {
+				const feedbackEl = document.getElementById('mendeley-online-login-feedback');
+				feedbackEl.textContent = Zotero.getString('import.online.wrongCredentials', ['Mendeley']);
+				feedbackEl.style.display = '';
+				this._wizard.canAdvance = false; // change to either of the inputs will reset thi
+			}
+			finally {
+				userNameEl.disabled = false;
+				passwordEl.disabled = false;
+			}
+		}
+	},
+
+	onMendeleyAuthKeyUp: function () {
+		document.getElementById('mendeley-online-login-feedback').style.display = 'none';
+		this._wizard.canAdvance = document.getElementById('mendeley-username').value.length > 0
+			&& document.getElementById('mendeley-password').value.length > 0;
 	},
 	
 	goToStart: function () {
@@ -201,7 +250,12 @@ var Zotero_Import_Wizard = {
 	
 	
 	onOptionsShown: function () {
-		document.getElementById('file-handling-options').hidden = !!this._mendeleyCode;
+		document.getElementById('file-handling-options').hidden = !!(this._mendeleyAuth || this._mendeleyCode);
+		const hideExtraMendeleyOptions = !this._mendeleyHasPreviouslyImported || !(this._mendeleyAuth || this._mendeleyCode);
+		document.getElementById('mendeley-options').hidden = hideExtraMendeleyOptions;
+		if (hideExtraMendeleyOptions) {
+			document.getElementById('new-items-only-checkbox').removeAttribute('checked');
+		}
 	},
 	
 	
@@ -228,7 +282,7 @@ var Zotero_Import_Wizard = {
 	
 	
 	onImportStart: async function () {
-		if (!this._file && !this._mendeleyCode) {
+		if (!this._file && !(this._mendeleyAuth || this._mendeleyCode)) {
 			let index = document.getElementById('file-list').selectedIndex;
 			this._file = this._dbs[index].path;
 		}
@@ -243,7 +297,9 @@ var Zotero_Import_Wizard = {
 				addToLibraryRoot: !document.getElementById('create-collection-checkbox')
 					.hasAttribute('checked'),
 				linkFiles: document.getElementById('file-handling-radio').selectedIndex == 1,
-				mendeleyCode: this._mendeleyCode
+				mendeleyAuth: this._mendeleyAuth,
+				mendeleyCode: this._mendeleyCode,
+				newItemsOnly: document.getElementById('new-items-only-checkbox').hasAttribute('checked')
 			});
 			
 			// Cancelled by user or due to error

@@ -10,7 +10,7 @@ Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/men
 Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/mendeleySchemaMap.js");
 
 const { apiTypeToDBType, apiFieldToDBField } = mendeleyOnlineMappings;
-const { apiFetch, get, getAll, getTokens } = mendeleyAPIUtils;
+const { apiFetch, codeAuth, directAuth, get, getAll } = mendeleyAPIUtils;
 
 const colorMap = new Map();
 colorMap.set('rgb(255, 245, 173)', '#ffd400');
@@ -28,7 +28,9 @@ var Zotero_Import_Mendeley = function () {
 	this.createNewCollection = null;
 	this.linkFiles = null;
 	this.newItems = [];
-	this.mendeleyCode = null;
+	this.newCollections = [];
+	this.mendeleyAuth = null;
+	this.newItemsOnly = false;
 	
 	this._tokens = null;
 	this._db = null;
@@ -115,8 +117,11 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 			throw new Error("Not a valid Mendeley database");
 		}
 
-		if (this.mendeleyCode) {
-			this._tokens = await getTokens(this.mendeleyCode);
+		if (this.mendeleyAuth) {
+			this._tokens = this.mendeleyAuth;
+		}
+		else if (this.mendeleyCode) {
+			this._tokens = await codeAuth(this.mendeleyCode);
 		}
 
 		if (!this._file && !this._tokens) {
@@ -303,8 +308,12 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 					annotations.get(document.id)
 				);
 			}
-			this.newItems.push(Zotero.Items.get(documentIDMap.get(document.id)));
 			this._interruptChecker(true);
+		}
+		if (this.newItemsOnly && rootCollectionKey && this.newItems.length === 0) {
+			Zotero.debug(`Mendeley Import detected no new items, removing import collection containing ${this.newCollections.length} collections created during the import`);
+			const rootCollection = await Zotero.Collections.getAsync(options.collections[0]);
+			await rootCollection.eraseTx(this._saveOptions);
 		}
 		Zotero.debug(`Completed Mendeley import in ${Math.round((Date.now() - this._started) / 1000)}s. (Started: ${this._started})`);
 	}
@@ -480,6 +489,7 @@ Zotero_Import_Mendeley.prototype._saveCollections = async function (libraryID, j
 				collection.key = collectionJSON.key;
 				await collection.loadPrimaryData();
 			}
+			this.newCollections.push(collection);
 		}
 		
 		// Remove external ids before saving
@@ -541,11 +551,19 @@ Zotero_Import_Mendeley.prototype._getDocumentsAPI = async function (groupID) {
 	}
 	
 
-	return (await getAll(this._tokens, 'documents', params, headers, {}, this._interruptChecker)).map(d => ({
-		...d,
-		uuid: d.id,
-		remoteUuid: d.id
-	}));
+	return (await getAll(this._tokens, 'documents', params, headers, {}, this._interruptChecker)).map(d => {
+		const processedDocument = { ...d, remoteUuid: d.id };
+
+		try {
+			const clientData = JSON.parse(d.client_data);
+			processedDocument.uuid = clientData.desktop_id ? clientData.desktop_id : d.id;
+		}
+		catch (_) {
+			processedDocument.uuid = d.id;
+		}
+
+		return processedDocument;
+	});
 };
 
 /**
@@ -1279,10 +1297,12 @@ Zotero_Import_Mendeley.prototype._saveItems = async function (libraryID, json) {
 	var lastExistingParentItem;
 	for (let i = 0; i < json.length; i++) {
 		let itemJSON = json[i];
+		let isMappedToExisting = false;
 		
 		// Check if the item has been previously imported
 		let item = await this._findExistingItem(libraryID, itemJSON, lastExistingParentItem);
 		if (item) {
+			isMappedToExisting = true;
 			if (item.isRegularItem()) {
 				lastExistingParentItem = item;
 				
@@ -1310,8 +1330,25 @@ Zotero_Import_Mendeley.prototype._saveItems = async function (libraryID, json) {
 		// Remove external id before save
 		let toSave = Object.assign({}, itemJSON);
 		delete toSave.documentID;
-		
-		item.fromJSON(toSave);
+
+		if ((this.newItemsOnly && !isMappedToExisting) || !this.newItemsOnly) {
+			if (isMappedToExisting) {
+				// dateAdded shouldn't change on an updated item. See #2881
+				delete toSave.dateAdded;
+			}
+			item.fromJSON(toSave);
+			this.newItems.push(item);
+		}
+		else if (isMappedToExisting && toSave.relations) {
+			const predicate = 'mendeleyDB:documentUUID';
+			const existingRels = item.getRelationsByPredicate(predicate);
+			const newRel = toSave.relations[predicate];
+			if (existingRels.length && newRel && existingRels[0] !== newRel) {
+				Zotero.debug(`Migrating relation ${predicate} for existing item ${item.key} from ${existingRels[0]} to ${newRel}`);
+				item.removeRelation(predicate, existingRels[0]);
+				item.addRelation(predicate, newRel);
+			}
+		}
 		await item.saveTx({
 			skipDateModifiedUpdate: true,
 			...this._saveOptions

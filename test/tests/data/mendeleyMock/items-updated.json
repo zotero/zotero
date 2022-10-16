@@ -2,10 +2,11 @@
     {
         "authored": false,
         "confirmed": true,
-        "created": "2021-11-04T11:53:10.353Z",
+        "created": "2021-12-05T12:00:00.000Z",
         "file_attached": false,
         "hidden": false,
         "id": "07a74c26-28d1-4d9f-a60d-3f3bc5ef76ef",
+        "client_data": "{\"desktop_id\":\"616ec6d1-8d23-4414-8b6e-7bb129677577\"}",
         "last_modified": "2021-11-05T11:53:10.353Z",
         "private_publication": false,
         "profile_id": "8dbf0832-8723-4c48-b532-20c0b7f6e01a",
@@ -15,5 +16,23 @@
         "type": "journal",
         "source": "lorem ipsum",
         "year": 2002
+    },
+    {
+        "authored": false,
+        "confirmed": true,
+        "created": "2021-11-05T12:33:18.353Z",
+        "file_attached": false,
+        "hidden": false,
+        "id": "31a8251f-88b0-497b-9d30-1b2516771057",
+        "client_data": "{\"desktop_id\":\"86e56a00-5ae5-4fe8-a977-9298a03b16d6\"}",
+        "last_modified": "2021-11-05T12:33:18.353Z",
+        "private_publication": false,
+        "profile_id": "8dbf0832-8723-4c48-b532-20c0b7f6e01a",
+        "read": false,
+        "starred": true,
+        "title": "Completely new item",
+        "type": "book",
+        "source": "lorem ipsum",
+        "year": 1999
     }
 ]

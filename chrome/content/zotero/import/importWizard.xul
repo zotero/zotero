@@ -37,6 +37,17 @@
 	>
 		<description id="mendeley-online-description" />
 		<description id="mendeley-online-description2" />
+		<html:fieldset id="mendeley-login">
+			<html:div class="field">
+				<html:label for="mendeley-username"/>
+				<html:input type="text" id="mendeley-username" />
+			</html:div>
+			<html:div class="field">
+				<html:label for="mendeley-password"/>
+				<html:input type="password" id="mendeley-password" />
+			</html:div>
+		</html:fieldset>
+		<description id="mendeley-online-login-feedback" />
 	</wizardpage>
 	
 	<wizardpage pageid="page-file-list"
@@ -76,6 +87,9 @@
 				<radio id="file-handling-link"/>
 			</radiogroup>
 			<description id="file-handling-description"/>
+		</vbox>
+		<vbox id="mendeley-options">
+			<checkbox id="new-items-only-checkbox" label="&zotero.import.online.newItemsOnly;" checked="true" />
 		</vbox>
 	</wizardpage>
 	
