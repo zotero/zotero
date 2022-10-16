@@ -479,12 +479,16 @@
 							</menu>
 							<menuseparator/>
 							<menu id="manage-attachments-menu" class="menu-type-library" label="&manageAttachments.label;"
-									onpopupshowing="ZoteroStandalone.onManageAttachmentsMenuOpen()"
-									oncommand="ZoteroStandalone.onManageAttachmentsMenuItemClick(event)">
+									onpopupshowing="ZoteroStandalone.onManageAttachmentsMenuOpen()">
 								<menupopup id="manage-attachments-menupopup">
 									<menuitem
 											id="file-menuitem-convert-to-stored"
-											label="&convertToStored.label;"/>
+											label="&convertToStored.label;"
+											oncommand="ZoteroPane.convertLinkedFilesToStoredFiles()"/>
+									<menuitem
+											id="tools-menuitem-disk-usage"
+											label="&zotero.diskUsageDialog.title;"
+											oncommand="ZoteroStandalone.openDiskUsage()"/>
 								</menupopup>
 							</menu>
 						</menupopup>

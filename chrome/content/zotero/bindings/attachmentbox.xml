@@ -60,6 +60,7 @@
 					this.synchronous = false;
 					this.displayURL = false;
 					this.displayFileName = false;
+					this.displayFileSize = false;
 					this.clickableLink = false;
 					this.displayAccessed = false;
 					this.displayPages = false;
@@ -72,6 +73,7 @@
 						case 'view':
 							this.displayURL = true;
 							this.displayFileName = true;
+							this.displayFileSize = true;
 							this.clickableLink = true;
 							this.displayAccessed = true;
 							this.displayPages = true;
@@ -84,6 +86,7 @@
 							this.editable = true;
 							this.displayURL = true;
 							this.displayFileName = true;
+							this.displayFileSize = true;
 							this.clickableLink = true;
 							this.displayAccessed = true;
 							this.displayPages = true;
@@ -97,6 +100,7 @@
 							this.synchronous = true;
 							this.displayURL = true;
 							this.displayFileName = true;
+							this.displayFileSize = true;
 							this.displayAccessed = true;
 							this.displayNote = true;
 							this.displayDateModified = true;
@@ -107,6 +111,7 @@
 							this.editable = true;
 							this.displayURL = true;
 							this.displayFileName = true;
+							this.displayFileSize = true;
 							this.displayAccessed = true;
 							this.displayNote = true;
 							// Notes aren't currently editable in mergeedit pane
@@ -118,6 +123,7 @@
 							this.synchronous = true;
 							this.displayURL = true;
 							this.displayFileName = true;
+							this.displayFileSize = true;
 							this.displayDateModified = true;
 							break;
 						
@@ -190,6 +196,7 @@
 					var attachmentBox = document.getAnonymousNodes(this)[0];
 					var title = this._id('title');
 					var fileNameRow = this._id('fileNameRow');
+					var fileSizeRow = this._id('fileSizeRow');
 					var urlField = this._id('url');
 					var accessed = this._id('accessedRow');
 					var pagesRow = this._id('pagesRow');
@@ -301,6 +308,28 @@
 					}
 					else {
 						fileNameRow.hidden = true;
+					}
+
+					if (this.item.isFileAttachment() && this.displayFileSize) {
+						this._id("fileSize-label").value = Zotero.getString('pane.item.attachments.fileSize')
+							+ Zotero.getString('punctuation.colon');
+
+						let fileSizeCached = this.item.getFileSizeCached();
+						this._id("fileSize").value = fileSizeCached !== null
+							? Zotero.File.formatFileSize(fileSizeCached)
+							: Zotero.getString('general.loading');
+						fileSizeRow.hidden = false;
+						this.item.getFileSize().then(async (fileSize) => {
+							if (fileSize === 0 && !await this.item.fileExists()) {
+								this._id("fileSize").value = Zotero.getString('recognizePDF.fileNotFound');
+							}
+							else if (fileSize !== fileSizeCached) {
+								this._id("fileSize").value = Zotero.File.formatFileSize(fileSize);
+							}
+						});
+					}
+					else {
+						fileSizeRow.hidden = true;
 					}
 					
 					// Page count
@@ -607,6 +636,10 @@
 							<row id="fileNameRow">
 								<label id="fileName-label"/>
 								<label id="fileName" crop="end"/>
+							</row>
+							<row id="fileSizeRow">
+								<label id="fileSize-label"/>
+								<label id="fileSize"/>
 							</row>
 							<row id="accessedRow">
 								<label id="accessed-label"/>

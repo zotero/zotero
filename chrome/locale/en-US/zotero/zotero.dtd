@@ -326,3 +326,6 @@
 <!ENTITY zotero.pdfReader.splitVertically					"Split Vertically">
 <!ENTITY zotero.pdfReader.splitHorizontally					"Split Horizontally">
 <!ENTITY zotero.pdfReader.transferFromPDF					"Import Annotations…">
+
+<!ENTITY zotero.diskUsageDialog.title						"Disk Usage">
+<!ENTITY zotero.diskUsageDialog.noItems						"No items">

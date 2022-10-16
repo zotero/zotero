@@ -567,4 +567,28 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.equal(html, 'yes1yes2 yes3');
 		});
 	});
+
+	describe("#insertSorted()", function () {
+		it("should insert at the correct point in a sorted array", function () {
+			let a = [1, 2, 4, 5];
+			ZUI.insertSorted(a, 3);
+			assert.deepEqual(a, [1, 2, 3, 4, 5]);
+		});
+
+		it("should insert at the correct point in a reverse-sorted array", function () {
+			let a = [10, 9, 2, 1, -5];
+			ZUI.insertSorted(a, 3, x => -x);
+			assert.deepEqual(a, [10, 9, 3, 2, 1, -5]);
+			ZUI.insertSorted(a, -10, x => -x);
+			assert.deepEqual(a, [10, 9, 3, 2, 1, -5, -10]);
+		});
+
+		it("should insert at the correct point in a sorted array using a key function", function () {
+			let a = [{ n: 5 }, { n: 15 }];
+			ZUI.insertSorted(a, { n: 10 }, x => x.n);
+			assert.deepEqual(a, [{ n: 5 }, { n: 10 }, { n: 15 }]);
+			ZUI.insertSorted(a, { n: 20 }, x => x.n);
+			assert.deepEqual(a, [{ n: 5 }, { n: 10 }, { n: 15 }, { n: 20 }]);
+		});
+	});
 })

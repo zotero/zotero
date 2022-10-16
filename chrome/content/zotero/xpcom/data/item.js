@@ -82,7 +82,8 @@ Zotero.Item = function(itemTypeOrID) {
 	
 	this._bestAttachmentState = null;
 	this._fileExists = null;
-	
+	this._fileSize = null;
+
 	this._hasNote = null;
 	
 	this._noteAccessTime = null;
@@ -2065,6 +2066,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			let parentItem = yield this.ObjectsClass.getAsync(parseInt(parentItemID));
 			yield parentItem.reload(['primaryData', 'childItems'], true);
 			parentItem.clearBestAttachmentState();
+			parentItem.clearFileSize();
 		}
 	}
 	
@@ -3770,6 +3772,45 @@ Zotero.Item.prototype.clearBestAttachmentState = function () {
 }
 
 
+Zotero.Item.prototype.getFileSize = async function () {
+	if (this._fileSize !== null) {
+		return this._fileSize;
+	}
+
+	if (this.isFileAttachment()) {
+		this._fileSize = Zotero.Attachments.getTotalFileSize(this)
+			// getTotalFileSize() throws when file is gone/unreadable
+			.catch(_ => 0);
+		return this._fileSize;
+	}
+
+	let childIDs = [
+		...(this.isAttachment() ? [] : this.getAttachments(true)),
+		...(this.isNote() ? [] : this.getNotes(true))
+	];
+	let children = await Zotero.Items.getAsync(childIDs);
+	let childFileSizes = await Promise.all(children.map(item => item.getFileSize()));
+	this._fileSize = childFileSizes.reduce((accum, x) => accum + x, 0);
+	return this._fileSize;
+};
+
+
+Zotero.Item.prototype.getFileSizeCached = function () {
+	return this._fileSize;
+};
+
+
+Zotero.Item.prototype.clearFileSize = async function () {
+	this._fileSize = null;
+	let childIDs = [
+		...(this.isAttachment() ? [] : this.getAttachments(true)),
+		...(this.isNote() ? [] : this.getNotes(true))
+	];
+	let children = await Zotero.Items.getAsync(childIDs);
+	await Promise.all(children.map(child => child.clearFileSize()));
+};
+
+
 ////////////////////////////////////////////////////////
 //
 //
@@ -4889,6 +4930,7 @@ Zotero.Item.prototype._eraseData = Zotero.Promise.coroutine(function* (env) {
 	if (parentItem && !env.options.skipParentRefresh) {
 		yield parentItem.reload(['primaryData', 'childItems'], true);
 		parentItem.clearBestAttachmentState();
+		parentItem.clearFileSize();
 	}
 	
 	Zotero.Prefs.set('purge.items', true);

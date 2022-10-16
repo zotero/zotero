@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/overlay.css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
+
+<!DOCTYPE window [
+    <!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
+    <!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
+]>
+
+<window
+    id="disk-usage-dialog"
+    title="&zotero.diskUsageDialog.title;"
+    width="400"
+    height="500"
+    orient="vertical"
+    onload="Zotero.DiskUsage.onLoad()"
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+    xmlns:html="http://www.w3.org/1999/xhtml"
+    windowtype="zotero:diskUsage">
+    
+    <script src="include.js"/>
+    <script src="diskUsage.js"/>
+
+    <hbox align="center">
+        <menulist id="disk-usage-library-list" flex="1">
+            <menupopup/>
+        </menulist>
+        <vbox style="margin: 2px;">
+            <image id="loading-spinner" class="zotero-spinner-14" hidden="false"/>
+        </vbox>
+    </hbox>
+    
+    <hbox class="virtualized-table-container" flex="1"><html:div id="disk-usage-container"/></hbox>
+    
+    <keyset>
+        <key id="key_close" key="W" modifiers="accel" oncommand="window.close()"/>
+    </keyset>
+</window>

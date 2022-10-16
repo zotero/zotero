@@ -3780,38 +3780,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 	
 	_getIcon(index) {
 		var item = this.getRow(index).ref;
-		var itemType = Zotero.ItemTypes.getName(item.itemTypeID);
-		if (itemType == 'attachment') {
-			var linkMode = item.attachmentLinkMode;
-			
-			if (item.attachmentContentType == 'application/pdf' && item.isFileAttachment()) {
-				if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-					itemType += 'PDFLink';
-				}
-				else {
-					itemType += 'PDF';
-				}
-			}
-			else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
-				itemType += "File";
-			}
-			else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-				itemType += "Link";
-			}
-			else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_URL) {
-				itemType += "Snapshot";
-			}
-			else if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_URL) {
-				itemType += "WebLink";
-			}
-		}
-		let iconClsName = "IconTreeitem" + Zotero.Utilities.capitalize(itemType);
-		if (!Icons[iconClsName]) {
-			iconClsName = "IconTreeitem";
-		}
-		var icon = getDOMElement(iconClsName);
+		var iconClass = Zotero.Utilities.Internal.getTreeItemIconClass(item);
+		var icon = Icons.getDOMElement(iconClass);
 		if (!icon) {
-			Zotero.debug('Could not find tree icon for "' + itemType + '"');
+			Zotero.debug('Could not find tree icon for "' + item.itemType + '"');
 			return document.createElementNS(HTML_NS, 'span');
 		}
 		return icon;

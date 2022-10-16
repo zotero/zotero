@@ -1534,4 +1534,32 @@ Zotero.File = new function(){
 			}
 		}
 	});
+
+
+	/**
+	 * Format the given file size using locale suffixes
+	 *
+	 * @param {Number} size Size in bytes
+	 * @return {String}
+	 */
+	this.formatFileSize = function (size) {
+		let suffixString = 'Bytes';
+		let base = Zotero.isWin ? 1024 : 1000;
+		if (size > base ** 3) {
+			suffixString = 'Gigabytes';
+			size /= base ** 3;
+			size = size.toFixed(2);
+		}
+		else if (size > base ** 2) {
+			suffixString = 'Megabytes';
+			size /= base ** 2;
+			size = size.toFixed(1);
+		}
+		else if (size > base) {
+			suffixString = 'Kilobytes';
+			size /= base;
+			size = size.toFixed(0);
+		}
+		return Zotero.getString(`general.n${suffixString}`, size);
+	};
 }

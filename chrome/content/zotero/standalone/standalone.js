@@ -141,19 +141,6 @@ const ZoteroStandalone = new function() {
 	};
 	
 	this.onFileMenuOpen = function () {
-		var active = false;
-		try {
-			let zp = Zotero.getActiveZoteroPane();
-			if (zp) {
-				active = !!zp.getSelectedItems().filter((item) => {
-					return item.isAttachment()
-						|| (item.isRegularItem() && item.getAttachments().length);
-				}).length;
-			}
-		}
-		catch (e) {}
-		this.updateMenuItemEnabled('manage-attachments-menu', active);
-		
 		// PDF annotation transfer ("Import Annotation"/"Store Annotations in File")
 		let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 		if (reader) {
@@ -276,22 +263,14 @@ const ZoteroStandalone = new function() {
 		catch (e) {}
 		this.updateMenuItemEnabled('file-menuitem-convert-to-stored', active);
 	};
-	
-	
-	this.onManageAttachmentsMenuItemClick = function (event) {
-		var menuitem = event.originalTarget;
-		var id = menuitem.id;
-		var prefix = 'file-menuitem-';
-		if (menuitem.disabled || !id.startsWith(prefix)) {
-			return;
-		}
-		id = id.substr(prefix.length);
-		
-		switch (id) {
-			case 'convert-to-stored':
-				ZoteroPane.convertLinkedFilesToStoredFiles();
-				break;
-		}
+
+
+	this.openDiskUsage = function () {
+		openWindowByType(
+			'chrome://zotero/content/diskUsage.xul',
+			'zotero:diskUsage',
+			'chrome,resizable,centerscreen'
+		);
 	};
 	
 	
