@@ -126,6 +126,25 @@
 				<menuitem id="menu_selectAll"
 						  key="key_selectAll"
 						  command="cmd_selectAll" data-l10n-id="text-action-select-all"/>
+				<menuseparator class="menu-type-reader"/>
+				<menuitem
+						id="edit-menuitem-rotate-left"
+						class="menu-type-reader"
+						label="&zotero.pdfReader.rotateLeft;"
+						oncommand="menuCmd('rotateLeft')"
+				/>
+				<menuitem
+						id="edit-menuitem-rotate-right"
+						class="menu-type-reader"
+						label="&zotero.pdfReader.rotateRight;"
+						oncommand="menuCmd('rotateRight')"
+				/>
+				<menuitem
+						id="edit-menuitem-rotate-180"
+						class="menu-type-reader"
+						label="&zotero.pdfReader.rotate180;"
+						oncommand="menuCmd('rotate180')"
+				/>
 			</menupopup>
 		</menu>
 		<menu label="View" onpopupshowing="onViewMenuOpen()">
