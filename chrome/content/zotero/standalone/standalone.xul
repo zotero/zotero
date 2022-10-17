@@ -232,6 +232,25 @@
 									label="&bidiSwitchTextDirectionItem.label;"
 									accesskey="&bidiSwitchTextDirectionItem.accesskey;"
 									hidden="true"/>
+							<menuseparator class="menu-type-reader"/>
+							<menuitem
+									id="edit-menuitem-rotate-left"
+									class="menu-type-reader"
+									label="&zotero.pdfReader.rotateLeft;"
+									oncommand="ZoteroStandalone.onReaderCmd('rotateLeft')"
+							/>
+							<menuitem
+									id="edit-menuitem-rotate-right"
+									class="menu-type-reader"
+									label="&zotero.pdfReader.rotateRight;"
+									oncommand="ZoteroStandalone.onReaderCmd('rotateRight')"
+							/>
+							<menuitem
+									id="edit-menuitem-rotate-180"
+									class="menu-type-reader"
+									label="&zotero.pdfReader.rotate180;"
+									oncommand="ZoteroStandalone.onReaderCmd('rotate180')"
+							/>
 						</menupopup>
 					</menu>
 

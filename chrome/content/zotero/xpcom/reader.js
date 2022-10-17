@@ -389,6 +389,18 @@ class ReaderInstance {
 			}
 			return;
 		}
+		else if (cmd === 'rotateLeft') {
+			await this._rotateCurrentPage(270);
+			return;
+		}
+		else if (cmd === 'rotateRight') {
+			await this._rotateCurrentPage(90);
+			return;
+		}
+		else if (cmd === 'rotate180') {
+			await this._rotateCurrentPage(180);
+			return;
+		}
 		else if (cmd === 'splitVertically') {
 			this._splitVertically();
 		}
@@ -608,6 +620,13 @@ class ReaderInstance {
 		let stroke = selected ? 'lightgray' : 'transparent';
 		let fill = '%23' + color.slice(1);
 		return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect shape-rendering="geometricPrecision" fill="${fill}" stroke-width="2" x="2" y="2" stroke="${stroke}" width="12" height="12" rx="3"/></svg>`;
+	}
+
+	async _rotateCurrentPage(degrees) {
+		let pageIndex = this._iframeWindow.wrappedJSObject.PDFViewerApplication.pdfViewer.currentPageNumber - 1;
+		this._postMessage({ action: 'reloading' });
+		await Zotero.PDFWorker.rotatePages(this._itemID, [pageIndex], degrees, true);
+		await this.reload({ rotatedPageIndexes: [pageIndex] });
 	}
 
 	_splitVertically() {
