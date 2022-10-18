@@ -245,12 +245,12 @@
 									label="&zotero.pdfReader.rotatePageRight;"
 									oncommand="ZoteroStandalone.onReaderCmd('rotateRight')"
 							/>
-							<menuitem
+							<!--<menuitem
 									id="edit-menuitem-rotate-180"
 									class="menu-type-reader"
 									label="&zotero.pdfReader.rotatePage180;"
 									oncommand="ZoteroStandalone.onReaderCmd('rotate180')"
-							/>
+							/>-->
 						</menupopup>
 					</menu>
 
