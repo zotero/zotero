@@ -236,19 +236,19 @@
 							<menuitem
 									id="edit-menuitem-rotate-left"
 									class="menu-type-reader"
-									label="&zotero.pdfReader.rotateLeft;"
+									label="&zotero.pdfReader.rotatePageLeft;"
 									oncommand="ZoteroStandalone.onReaderCmd('rotateLeft')"
 							/>
 							<menuitem
 									id="edit-menuitem-rotate-right"
 									class="menu-type-reader"
-									label="&zotero.pdfReader.rotateRight;"
+									label="&zotero.pdfReader.rotatePageRight;"
 									oncommand="ZoteroStandalone.onReaderCmd('rotateRight')"
 							/>
 							<menuitem
 									id="edit-menuitem-rotate-180"
 									class="menu-type-reader"
-									label="&zotero.pdfReader.rotate180;"
+									label="&zotero.pdfReader.rotatePage180;"
 									oncommand="ZoteroStandalone.onReaderCmd('rotate180')"
 							/>
 						</menupopup>
