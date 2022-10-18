@@ -61,6 +61,7 @@ Zotero.HTTPIntegrationClient.Application = function() {
 	this.supportedNotes = ['footnotes'];
 	this.supportsImportExport = false;
 	this.supportsTextInsertion = false;
+	this.supportsCitationMerging = false;
 	this.processorName = "HTTP Integration";
 };
 Zotero.HTTPIntegrationClient.Application.prototype = {
@@ -70,6 +71,7 @@ Zotero.HTTPIntegrationClient.Application.prototype = {
 		this.supportedNotes = result.supportedNotes || this.supportedNotes;
 		this.supportsImportExport = result.supportsImportExport || this.supportsImportExport;
 		this.supportsTextInsertion = result.supportsTextInsertion || this.supportsTextInsertion;
+		this.supportsCitationMerging = result.supportsCitationMerging || this.supportsCitationMerging;
 		this.processorName = result.processorName || this.processorName;
 		return new Zotero.HTTPIntegrationClient.Document(result.documentID, this.processorName);
 	}
@@ -168,6 +170,10 @@ Zotero.HTTPIntegrationClient.Field = function(documentID, json) {
 	this._code = json.code;
 	this._text = json.text;
 	this._noteIndex = json.noteIndex;
+	this._adjacent = json.adjacent;
+	if (this._adjacent !== 'undefined') {
+		this.isAdjacentToNextField = this._isAdjacentToNextField;
+	}
 };
 Zotero.HTTPIntegrationClient.Field.prototype = {};
 
@@ -202,3 +208,6 @@ Zotero.HTTPIntegrationClient.Field.prototype.getNoteIndex = async function() {
 Zotero.HTTPIntegrationClient.Field.prototype.equals = async function(arg) {
 	return this._id === arg._id;
 };
+Zotero.HTTPIntegrationClient.Field.prototype._isAdjacentToNextField = async function() {
+	return this._adjacent;
+}
