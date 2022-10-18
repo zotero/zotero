@@ -1126,15 +1126,22 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 				// Special table handling
 				//
 				if (condition.table) {
+					let negationOperators = ['isNot', 'doesNotContain'];
+					let isNegationOperator = negationOperators.includes(condition.operator);
+					
 					condSelectSQL += 'itemID '
-					switch (condition.operator) {
-						case 'isNot':
-						case 'doesNotContain':
-							condSelectSQL += 'NOT ';
-							break;
+					if (isNegationOperator) {
+						condSelectSQL += 'NOT ';
 					}
 					condSelectSQL += 'IN (';
 					selectOpenParens = 1;
+					
+					// TEMP: Don't match annotations for negation operators, since it would result in
+					// all parent attachments being returned
+					if (isNegationOperator) {
+						condSelectSQL += "SELECT itemID FROM items WHERE itemTypeID="
+							+ Zotero.ItemTypes.getID('annotation') + " UNION ";
+					}
 					
 					switch (condition.name) {
 						// TEMP: Match parent attachments of matching annotations
