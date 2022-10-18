@@ -326,3 +326,6 @@
 <!ENTITY zotero.pdfReader.splitVertically "Razdeli navpično">
 <!ENTITY zotero.pdfReader.splitHorizontally "Razdeli vodoravno">
 <!ENTITY zotero.pdfReader.transferFromPDF "Uvozi zaznamke ...">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
+<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
+<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">

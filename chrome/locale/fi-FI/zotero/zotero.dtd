@@ -326,3 +326,6 @@
 <!ENTITY zotero.pdfReader.splitVertically "Jaa pystysuunnassa">
 <!ENTITY zotero.pdfReader.splitHorizontally "Jaa vaakasuunnassa">
 <!ENTITY zotero.pdfReader.transferFromPDF "Tuo huomautukset...">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
+<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
+<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">

@@ -326,3 +326,6 @@
 <!ENTITY zotero.pdfReader.splitVertically "Del vertikalt">
 <!ENTITY zotero.pdfReader.splitHorizontally "Del horisontalt">
 <!ENTITY zotero.pdfReader.transferFromPDF "Importer merknader…">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
+<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
+<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">
