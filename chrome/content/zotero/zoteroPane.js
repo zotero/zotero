@@ -56,7 +56,6 @@ var ZoteroPane = new function()
 	this.viewSelectedAttachment = viewSelectedAttachment;
 	this.reportErrors = reportErrors;
 
-	// from https://github.com/zotero/web-library/blob/master/src/js/hooks/use-focus-manager.js
 	const modifierIsNotShift = ev => ev.getModifierState("Meta") || ev.getModifierState("Alt") ||
 		ev.getModifierState("Control") || ev.getModifierState("OS");
 	
@@ -138,100 +137,118 @@ var ZoteroPane = new function()
 		observerService.addObserver(_reloadObserver, "zotero-before-reload", false);
 		this.addReloadListener(_loadPane);
 		
-		setupToolbar();
 		// continue loading pane
 		_loadPane();
+		setUpToolbar();
 	};
 
-	function setupToolbar() {
+	function setUpToolbar() {
+		/* constants, state, and helper functions */
 		const toolbar = this.document.getElementById("zotero-toolbar");
-		const collectionsToolbar = document.getElementById("zotero-collections-toolbar");
-		const itemsToolbar = document.getElementById("zotero-items-toolbar");
-		const itemToolbar = document.getElementById("zotero-item-toolbar");
 		const lookupButton = document.getElementById("zotero-tb-lookup"); // needs special treatment
+		let zone = null;
+		let current = null;
 
-		const zoneOne = {
-			start: () => collectionsToolbar.getElementsByClassName("zotero-tb-button")[0],
-			children: () => [ 
-				...collectionsToolbar.getElementsByClassName("zotero-tb-button"),
-				...itemsToolbar.getElementsByClassName("zotero-tb-button") ],
-		}
-
-		const zoneTwo = {
-			start: () => itemToolbar.getElementsByClassName("zotero-tb-button")[0],
-			children: () => [...itemToolbar.getElementsByClassName("zotero-tb-button")],
-			after: () => document.getElementById("collection-tree"),
-			before: () => document.getElementById("zotero-tb-search")
+		class TbFocusZone {
+			constructor(node, before, after) {
+				this.node = node;
+				this.before = before;
+				this.after = after;
+			}
+			enter(targetButton) {
+				zone = this;
+				current = targetButton;
+			}
+			exit() {
+				zone = null;
+				current = null;
+			}
+			getButtons() {
+				return Array.from(this.node.getElementsByClassName("zotero-tb-button"));
+			}
+			get firstButton() {
+				return this.getButtons()[0];
+			}
+			contains(target) {
+				return this.node.contains(target);
+			}
 		}
 		
-		const toolbarState = new class {
-			zone = null
-			current = null;
-			enter(zone) { 
-				this.zone = zone;
+		function moveFocus(n = 0) {
+			const children = zone.getButtons();
+			let currentIndex = children.indexOf(current);
+			if (currentIndex === -1) {
+				throw new Error("Cannot move focus from an element not part of the current toolbar zone.");
 			}
-			exit() { 
-				this.zone = null;
-				this.current = null;
-			}
-			moveFocus(n = 0) {
-				const children = this.zone.children();
-				let currentIndex = children.indexOf(this.current);
-				if (currentIndex === -1) {
-					throw new Error("Cannot move focus from an element not part of the current toolbar zone.");
-				}
-				if (currentIndex + n < 0 || currentIndex + n >= children.length) return;
-				else children[currentIndex + n].focus();
-			}
-		};
+			if (currentIndex + n < 0 || currentIndex + n >= children.length) return;
+			children[currentIndex + n].focus();
+		}
+		
+		const isTbButton = (node) => node && node.classList && node.classList.contains("zotero-tb-button");
+		
+		/* set up toolbar */
 
-		zoneOne.start().setAttribute("tabindex", "0");
-		zoneTwo.start().setAttribute("tabindex", "0");
+		const zones = [
+			new TbFocusZone(document.getElementById("zotero-collections-toolbar") ),
+			new TbFocusZone(document.getElementById("zotero-items-toolbar"),
+								() => zones[0].firstButton,
+								() => document.getElementById("zotero-tb-search-menu-button")),
+			new TbFocusZone(document.getElementById("zotero-item-toolbar"),
+								() => document.getElementById("collection-tree"),
+								() => document.getElementById("zotero-tb-search"))
+		];
 
-		toolbar.addEventListener("focusin", (event) => { 
-			if (toolbarState.zone) {
-				if (toolbarState.current === event.target) return;
-				if (toolbarState.zone.children().indexOf(toolbarState.current) > -1) {
-					toolbarState.current = event.target;
+		for (const zone of zones) {
+			zone.firstButton.setAttribute("tabindex", "0");
+		}
+
+		toolbar.addEventListener("focusin", (event) => {
+			if (!isTbButton(event.target)) {
+				return;
+			}
+			else if (zone) {
+				if (current === event.target) return;
+				if (zone.contains(event.target)) {
+					current = event.target;
 					return;
 				}
 			}
-			let pos = zoneOne.children().indexOf(event.target);
-			if (pos >= 0) {
-				toolbarState.enter(zoneOne);
-				toolbarState.current = event.target;
-				return;
-			}
-			pos = zoneTwo.children().indexOf(event.target);
-			if (pos >= 0) {
-				toolbarState.enter(zoneTwo);
-				toolbarState.current = event.target;
-				return;
+			else {
+				for (const zone of zones) {
+					if (zone.contains(event.target)) {
+						zone.enter(event.target);
+					}
+				}
 			}
 		});
 
 		toolbar.addEventListener("focusout", (event) => {
-			if (toolbarState.zone && toolbarState.zone.children().indexOf(event.relatedTarget) === -1) {
-				toolbarState.exit();
+			if (zone) {
+				if (!(zone.contains(event.relatedTarget))) {
+					zone.exit();
+				}
+				else if (!(isTbButton(event.relatedTarget))) {
+					zone.exit();
+				}
 			}
 		});
 
 		toolbar.addEventListener("keydown", (event) => {
-			// only handle events inside a zone
-			if (!toolbarState.zone) return;
+			// only handle events on a zotero-tb-button inside a zone
+			if (!zone || !isTbButton(event.target)) return;
 
 			if (!Zotero.rtl && event.key === 'ArrowRight'
 					|| Zotero.rtl && event.key === 'ArrowLeft') {
 				event.preventDefault();
 				event.stopPropagation();
-				toolbarState.moveFocus(1);
+				moveFocus(1);
 				return;
 			} 
 			else if (!Zotero.rtl && event.key === 'ArrowLeft'
 					|| Zotero.rtl && event.key === 'ArrowRight') {
 				event.preventDefault();
 				event.stopPropagation();
-				toolbarState.moveFocus(-1);
+				moveFocus(-1);
 				return;
 			} 
 			/* manually trigger on space and enter */
@@ -268,33 +285,31 @@ var ZoteroPane = new function()
 					}
 				}
 				/* prepare for a focus change */
-				else if (toolbarState.zone) {
-					if (event.key === 'ArrowDown' && toolbarState.zone.after) {
-						toolbarState.zone.after().focus();
-						toolbarState.exit();
+				else if (event.key === 'ArrowDown' && zone.after) {
+						zone.after().focus();
+						zone.exit();
 						event.preventDefault();
 						event.stopPropagation();
-					}
-					else if (event.key === 'ArrowUp' && toolbarState.zone.before) {
-						toolbarState.zone.before().focus();
-						toolbarState.exit();
+				}
+				else if (event.key === 'ArrowUp' && zone.before) {
+						zone.before().focus();
+						zone.exit();
 						event.preventDefault();
 						event.stopPropagation();
-					}
-					/* 
-					if neither before nor after have been manually set, 
-					focus the first element of the zone and let the default
-					behavior proceed
-					*/
-					else {
-						toolbarState.current = toolbarState.zone.start();
-						toolbarState.current.focus();
-					}
+				}
+				/* 
+				if neither before nor after have been manually set, 
+				focus the first element of the zone and let the default
+				behavior proceed
+				*/
+				else {
+					current = zone.firstButton;
+					current.focus();
 				}
 			}
-			else if (toolbarState.zone && event.key === 'Tab' && !modifierIsNotShift(event)) {
-				toolbarState.current = toolbarState.zone.start();
-				toolbarState.current.focus();
+			else if (event.key === 'Tab' && !modifierIsNotShift(event)) {
+				current = zone.firstButton;
+				current.focus();
 				// let the default tab/shift+tab behavior proceed
 			}
 		});
