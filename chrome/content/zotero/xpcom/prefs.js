@@ -49,7 +49,7 @@ Zotero.Prefs = new function(){
 		if (!fromVersion) {
 			fromVersion = 0;
 		}
-		var toVersion = 5;
+		var toVersion = 6;
 		if (fromVersion < toVersion) {
 			for (var i = fromVersion + 1; i <= toVersion; i++) {
 				switch (i) {
@@ -84,6 +84,24 @@ Zotero.Prefs = new function(){
 					
 					case 5:
 						this.clear('extensions.spellcheck.inline.max-misspellings', true);
+						break;
+					
+					// If the note Quick Copy setting was set to Markdown + Rich Text but in a
+					// non-default way (e.g., because of whitespace differences), clear the pref
+					// to pick up the new app-link options
+					case 6:
+						var o = this.get('export.noteQuickCopy.setting');
+						try {
+							o = JSON.parse(o);
+							if (o.mode == 'export'
+									&& o.id == Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
+								this.clear('export.noteQuickCopy.setting');
+							}
+						}
+						catch (e) {
+							Zotero.logError(e);
+							this.clear('export.noteQuickCopy.setting');
+						}
 						break;
 				}
 			}
