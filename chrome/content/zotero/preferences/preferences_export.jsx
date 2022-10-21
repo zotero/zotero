@@ -89,6 +89,8 @@ Zotero_Preferences.Export = {
 	 * Builds the note Quick Copy drop-down from the current global pref
 	 */
 	populateNoteQuickCopyList: async function () {
+		document.getElementById('noteQuickCopy-format-options').removeAttribute('hidden');
+		
 		// Initialize default format drop-down
 		var format = Zotero.Prefs.get("export.noteQuickCopy.setting");
 		format = Zotero.QuickCopy.unserializeSetting(format);
@@ -202,10 +204,10 @@ Zotero_Preferences.Export = {
 		var format = document.getElementById('zotero-noteQuickCopy-menu').value;
 		format = JSON.parse(format);
 
-		var markdownOptions = document.getElementById('zotero-noteQuickCopy-markdown-options');
-		var htmlOptions = document.getElementById('zotero-noteQuickCopy-html-options');
-		var markdownIncludeAppLinks = document.getElementById("zotero-noteQuickCopy-markdown-includeAppLinks");
-		var htmlIncludeAppLinks = document.getElementById("zotero-noteQuickCopy-html-includeAppLinks");
+		var markdownOptions = document.getElementById('noteQuickCopy-markdown-options');
+		var htmlOptions = document.getElementById('noteQuickCopy-html-options');
+		var markdownIncludeAppLinks = document.getElementById("noteQuickCopy-markdown-includeAppLinks");
+		var htmlIncludeAppLinks = document.getElementById("noteQuickCopy-html-includeAppLinks");
 
 		markdownIncludeAppLinks.label = Zotero.getString('exportOptions.includeAppLinks', Zotero.appName);
 		htmlIncludeAppLinks.label = Zotero.getString('exportOptions.includeAppLinks', Zotero.appName);
@@ -229,8 +231,8 @@ Zotero_Preferences.Export = {
 
 	onUpdateNoteExportOptions() {
 		var menulist = document.getElementById("zotero-noteQuickCopy-menu");
-		var markdownIncludeAppLinks = document.getElementById("zotero-noteQuickCopy-markdown-includeAppLinks");
-		var htmlIncludeAppLinks = document.getElementById("zotero-noteQuickCopy-html-includeAppLinks");
+		var markdownIncludeAppLinks = document.getElementById("noteQuickCopy-markdown-includeAppLinks");
+		var htmlIncludeAppLinks = document.getElementById("noteQuickCopy-html-includeAppLinks");
 
 		for (let i = 0; i < menulist.itemCount; i++) {
 			let item = menulist.getItemAtIndex(i);
