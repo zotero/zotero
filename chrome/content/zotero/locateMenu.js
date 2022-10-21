@@ -34,9 +34,7 @@ var Zotero_LocateMenu = new function() {
   	/**
   	 * Clear and build the locate menu
   	 */
-	this.buildLocateMenu = function() {
-		var locateMenu = document.getElementById('zotero-tb-locate-menu');
-		
+	this.buildLocateMenu = function(locateMenu) {		
 		// clear menu
 		while(locateMenu.childElementCount > 0) {
 			locateMenu.removeChild(locateMenu.firstChild);

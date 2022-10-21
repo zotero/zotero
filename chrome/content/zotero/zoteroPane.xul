@@ -75,6 +75,56 @@
 		<command id="cmd_zotero_newChildNote" oncommand="ZoteroPane_Local.newChildNote(event.shiftKey);"/>
 	</commandset>
 	
+	<menubar id="main-menubar">
+		<menu id="fileMenu">
+			<menupopup id="menu_FilePopup">
+				<menu id="menu_NewNote" class="menu-type-library" label="&zotero.toolbar.newNote;" insertafter="menu_newItem">
+					<menupopup onpopupshowing="ZoteroPane_Local.updateNoteButtonMenu()">
+						<menuitem label="&zotero.toolbar.note.standalone;" command="cmd_zotero_newStandaloneNote"/>
+						<menuitem label="&zotero.toolbar.note.child;" command="cmd_zotero_newChildNote"/>
+					</menupopup>
+				</menu>
+				<menu id="menu_newLibrary" class="menu-type-library" label="&zotero.toolbar.newLibrary.label;" insertafter="menu_newCollection">
+					<menupopup id="menu_NewLibraryPopup">
+						<menuitem id="zotero-menu-group-add" label="&zotero.toolbar.newGroup;" oncommand="ZoteroPane_Local.newGroup()"/>
+						<menu id="zotero-menu-feed-add-menu" label="&zotero.toolbar.feeds.new;">
+							<menupopup>
+								<menuitem id="zotero-menu-feed-add-fromURL" label="&zotero.toolbar.feeds.new.fromURL;" 
+									command="cmd_zotero_newFeed_fromURL"/>
+								<menuitem id="zotero-menu-feed-add-fromOPML" label="&zotero.toolbar.feeds.new.fromOPML;" 
+									oncommand="ZoteroPane_Local.importFeedsFromOPML()"/>
+							</menupopup>
+						</menu>
+					</menupopup>
+				</menu>
+			</menupopup>
+		</menu>
+		<menu id="menu_edit">
+			<menupopup id="menu_EditPopup">
+				<menuseparator id="menu_edit_lookup_separator" class="menu-type-library" insertafter="menu_selectAll" />
+				<menu id="menu_AddAttachment" class="menu-type-library" label="&zotero.items.menu.attach;" insertafter="menu_edit_lookup_separator">
+					<menupopup onpopupshowing="ZoteroPane_Local.updateAttachmentButtonMenu(this)">
+						<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link.uri;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromURI(true, itemID);"/>
+						<menuitem class="menuitem-iconic zotero-menuitem-attachments-file" label="&zotero.items.menu.attach.file;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(false, itemID);"/>
+						<menuitem class="menuitem-iconic zotero-menuitem-attachments-link" label="&zotero.items.menu.attach.fileLink;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromDialog(true, itemID);" id="zotero-tb-attachment-add-file-link"/>
+					</menupopup>
+				</menu>
+				<menuitem id="menu_lookup" class="menu-type-library" label="&zotero.toolbar.lookup.label;" 
+							oncommand="Zotero_Lookup.showPanel()"
+							insertafter="menu_AddAttachment" />
+		
+			</menupopup>
+		</menu>
+		<menu id="view-menu">
+			<menupopup id="menu_viewPopup">
+				<menuseparator class="menu-type-library" />
+				<menu id="menu_locate" class="menu-type-library" label="&zotero.toolbar.openURL.label;" position="0">
+					<menupopup id="menu_locatePopup" onpopupshowing="Zotero_LocateMenu.buildLocateMenu(this)"/>
+				</menu>
+			</menupopup>
+		</menu>
+	</menubar>
+
 	<stack id="zotero-pane-stack">
 		<!-- A placeholder to persist pdf-reader sidebar collapse state to avoid introducing another pref -->
 		<box id="zotero-reader-sidebar-pane" hidden="true" collapsed="true" zotero-persist="collapsed width"/>
