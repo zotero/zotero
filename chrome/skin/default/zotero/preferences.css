@@ -264,6 +264,12 @@ grid row hbox:first-child
 	min-height: 1.5em; /* Fix collapse on Windows */
 }
 
+#noteQuickCopy-format-options th {
+	font-weight: normal;
+	text-align: right;
+	max-width: 3.6em;
+}
+
 /*
  * Cite pane
  */

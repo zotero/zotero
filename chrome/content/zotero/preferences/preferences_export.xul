@@ -72,23 +72,34 @@
 			<label value="&zotero.preferences.quickCopy.noteFormat;" control="zotero-noteQuickCopy-menu"/>
 			<menulist id="zotero-noteQuickCopy-menu" label="&zotero.general.loading;"/>
 
-			<vbox id="zotero-noteQuickCopy-markdown-options">
-				<label value="&zotero.preferences.quickCopy.markdown;"/>
-				<vbox style="margin-left: 2em">
-					<checkbox id="zotero-noteQuickCopy-markdown-includeAppLinks"
-							  label="Include App Links"
-							  oncommand="Zotero_Preferences.Export.onUpdateNoteExportOptions()"/>
-				</vbox>
-			</vbox>
+			<table id="noteQuickCopy-format-options"
+					xmlns="http://www.w3.org/1999/xhtml"
+					xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+					hidden="hidden">
+				<tbody id="noteQuickCopy-markdown-options">
+					<tr>
+						<th>
+							<xul:label value="&zotero.preferences.quickCopy.markdown;"/>
+						</th>
+						<td>
+							<xul:checkbox id="noteQuickCopy-markdown-includeAppLinks"
+									oncommand="Zotero_Preferences.Export.onUpdateNoteExportOptions()"/>
+						</td>
+					</tr>
+				</tbody>
 
-			<vbox id="zotero-noteQuickCopy-html-options">
-				<label value="&zotero.preferences.quickCopy.html;"/>
-				<vbox style="margin-left: 2em">
-					<checkbox id="zotero-noteQuickCopy-html-includeAppLinks"
-							  label="Include App Links"
-							  oncommand="Zotero_Preferences.Export.onUpdateNoteExportOptions()"/>
-				</vbox>
-			</vbox>
+				<tbody id="noteQuickCopy-html-options">
+					<tr>
+						<th>
+							<xul:label value="&zotero.preferences.quickCopy.html;"/>
+						</th>
+						<td>
+							<xul:checkbox id="noteQuickCopy-html-includeAppLinks"
+									oncommand="Zotero_Preferences.Export.onUpdateNoteExportOptions()"/>
+						</td>
+					</tr>
+				</tbody>
+			</table>
 
 			<separator/>
 
