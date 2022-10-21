@@ -798,7 +798,8 @@ Zotero.Integration.Interface.prototype.addEditBibliography = Zotero.Promise.coro
  * @return {Promise}
  */
 Zotero.Integration.Interface.prototype.refresh = async function() {
-	await this._session.init(true, false)
+	await this._session.init(true, false);
+	this._session.shouldMerge = true;
 	
 	this._session.reload = this._session.reload || this._session.data.prefs.delayCitationUpdates;
 	await this._session.updateFromDocument(FORCE_CITATIONS_REGENERATE);
@@ -1067,15 +1068,24 @@ Zotero.Integration.Session.prototype._processFields = async function () {
 	if (!this._fields) {
 		throw new Error("_processFields called without fetching fields first");
 	}
-	
+
+	let adjacentCitations = [];
 	for (var i = 0; i < this._fields.length; i++) {
 		let field = await Zotero.Integration.Field.loadExisting(this._fields[i]);
 		if (field.type === INTEGRATION_TYPE_ITEM) {
 			var noteIndex = await field.getNoteIndex(),
 				data = await field.unserialize(),
 				citation = new Zotero.Integration.Citation(field, data, noteIndex);
-			
-			await this.addCitation(i, noteIndex, citation);
+
+			if (this.shouldMerge && typeof field.isAdjacentToNextField === 'function' && await field.isAdjacentToNextField()) {
+				adjacentCitations.push(citation);
+				this._deleteFields[i] = true;
+				continue;
+			}
+			await this.addCitation(i, noteIndex, citation, adjacentCitations);
+			if (adjacentCitations.length) {
+				adjacentCitations = [];
+			}
 		} else if (field.type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
 			if (this.ignoreEmptyBibliography && (await field.getText()).trim() === "") {
 				this._removeCodeFields[i] = true;
@@ -1957,8 +1967,16 @@ Zotero.Integration.Session.prototype.importDocument = async function() {
 /**
  * Adds a citation to the arrays representing the document
  */
-Zotero.Integration.Session.prototype.addCitation = async function (index, noteIndex, citation) {
+Zotero.Integration.Session.prototype.addCitation = async function (index, noteIndex, citation, adjacentCitations=[]) {
 	index = parseInt(index, 10);
+	
+	if (adjacentCitations.length) {
+		Zotero.debug(`Merging adjacent citations ${adjacentCitations.map(c => c.citationID)} to citation ${citation.citationID}`);
+		for (let adjacentCitation of adjacentCitations) {
+			citation.mergeCitation(adjacentCitation);
+		}
+		this.updateIndices[index] = true;
+	}
 	
 	var action = await citation.loadItemData();
 	
@@ -2623,7 +2641,7 @@ Zotero.Integration.Field = class {
 			throw new Error("Trying to instantiate Integration.Field with Integration.Field, not doc field");
 		}
 		for (let func of Zotero.Integration.Field.INTERFACE) {
-			if (!(func in this)) {
+			if (!(func in this) && (func in field)) {
 				this[func] = field[func].bind(field);
 			}
 		}
@@ -2682,7 +2700,7 @@ Zotero.Integration.Field = class {
 	}
 };
 Zotero.Integration.Field.INTERFACE = ['delete', 'removeCode', 'select', 'setText',
-	'getText', 'setCode', 'getCode', 'equals', 'getNoteIndex'];
+	'getText', 'setCode', 'getCode', 'equals', 'getNoteIndex', 'isAdjacentToNextField'];
 
 /**
  * Load existing field in document and return correct instance of field type
@@ -2919,6 +2937,23 @@ Zotero.Integration.Citation = class {
 		this.properties.noteIndex = noteIndex;
 
 		this._field = citationField;
+	}
+
+	/**
+	 * Merge citation items and remove duplicates, unless the items have different
+	 * @param citation {Citation}
+	 */
+	mergeCitation(citation) {
+		let items = this.citationItems.concat(citation.citationItems);
+		let addedItems = new Set();
+		this.citationItems = []
+		for (let item of items) {
+			if (addedItems.has(item.id)) {
+				continue;
+			}
+			addedItems.add(item.id);
+			this.citationItems.push(item);
+		}
 	}
 
 	/**
