@@ -89,12 +89,16 @@ Zotero_Preferences.Export = {
 	 * Builds the note Quick Copy drop-down from the current global pref
 	 */
 	populateNoteQuickCopyList: async function () {
+		document.getElementById('noteQuickCopy-format-options').removeAttribute('hidden');
+		
 		// Initialize default format drop-down
 		var format = Zotero.Prefs.get("export.noteQuickCopy.setting");
 		format = Zotero.QuickCopy.unserializeSetting(format);
 		var menulist = document.getElementById("zotero-noteQuickCopy-menu");
 		menulist.setAttribute('preference', "pref-noteQuickCopy-setting");
-		
+		menulist.removeEventListener('command', this.updateNoteQuickCopyUI);
+		menulist.addEventListener('command', this.updateNoteQuickCopyUI);
+
 		if (!format) {
 			format = menulist.value;
 		}
@@ -149,11 +153,42 @@ Zotero_Preferences.Export = {
 				return;
 			}
 
-			var val = JSON.stringify({ mode: 'export', id: translator.translatorID });
+			var value = { mode: 'export', id: translator.translatorID };
+			if (translator.translatorID == format.id) {
+				value = format;
+			}
+			else if (translator.translatorID == Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
+				value = {
+					mode: 'export',
+					id: translator.translatorID,
+					markdownOptions: {
+						includeAppLinks: true
+					},
+					htmlOptions: {
+						includeAppLinks: false
+					}
+				};
+				if (format.id == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML && format.options) {
+					value.htmlOptions = format.options;
+				}
+			}
+			else if (translator.translatorID == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
+				value = {
+					mode: 'export',
+					id: translator.translatorID,
+					options: {
+						includeAppLinks: false
+					}
+				};
+				if (format.id == Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT && format.htmlOptions) {
+					value.options = format.htmlOptions;
+				}
+			}
+
+			value = JSON.stringify(value);
 			var itemNode = document.createElement('menuitem');
-			itemNode.setAttribute('value', val);
+			itemNode.setAttribute('value', value);
 			itemNode.setAttribute('label', translator.label);
-			// itemNode.setAttribute('oncommand', 'Zotero_Preferences.Export.updateQuickCopyUI()');
 			popup.appendChild(itemNode);
 
 			if (format.mode == 'export' && format.id == translator.translatorID) {
@@ -162,6 +197,70 @@ Zotero_Preferences.Export = {
 		});
 
 		menulist.click();
+		this.updateNoteQuickCopyUI();
+	},
+
+	updateNoteQuickCopyUI: () => {
+		var format = document.getElementById('zotero-noteQuickCopy-menu').value;
+		format = JSON.parse(format);
+
+		var markdownOptions = document.getElementById('noteQuickCopy-markdown-options');
+		var htmlOptions = document.getElementById('noteQuickCopy-html-options');
+		var markdownIncludeAppLinks = document.getElementById("noteQuickCopy-markdown-includeAppLinks");
+		var htmlIncludeAppLinks = document.getElementById("noteQuickCopy-html-includeAppLinks");
+
+		markdownIncludeAppLinks.label = Zotero.getString('exportOptions.includeAppLinks', Zotero.appName);
+		htmlIncludeAppLinks.label = Zotero.getString('exportOptions.includeAppLinks', Zotero.appName);
+
+		if (format.id == Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
+			markdownOptions.hidden = false;
+			htmlOptions.hidden = false;
+			markdownIncludeAppLinks.checked = format.markdownOptions && format.markdownOptions.includeAppLinks;
+			htmlIncludeAppLinks.checked = format.htmlOptions && format.htmlOptions.includeAppLinks;
+		}
+		else if (format.id == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
+			markdownOptions.hidden = true;
+			htmlOptions.hidden = false;
+			htmlIncludeAppLinks.checked = format.options && format.options.includeAppLinks;
+		}
+		else {
+			markdownOptions.hidden = true;
+			htmlOptions.hidden = true;
+		}
+	},
+
+	onUpdateNoteExportOptions() {
+		var menulist = document.getElementById("zotero-noteQuickCopy-menu");
+		var markdownIncludeAppLinks = document.getElementById("noteQuickCopy-markdown-includeAppLinks");
+		var htmlIncludeAppLinks = document.getElementById("noteQuickCopy-html-includeAppLinks");
+
+		for (let i = 0; i < menulist.itemCount; i++) {
+			let item = menulist.getItemAtIndex(i);
+			let format = JSON.parse(item.getAttribute('value'));
+			if (format.id == Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
+				if (!format.markdownOptions) {
+					format.markdownOptions = {};
+				}
+				if (!format.htmlOptions) {
+					format.htmlOptions = {};
+				}
+				format.markdownOptions.includeAppLinks = markdownIncludeAppLinks.checked;
+				format.htmlOptions.includeAppLinks = htmlIncludeAppLinks.checked;
+			}
+			else if (format.id == Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
+				if (!format.options) {
+					format.options = {};
+				}
+				format.options.includeAppLinks = htmlIncludeAppLinks.checked;
+			}
+			else {
+				continue;
+			}
+			item.value = JSON.stringify(format);
+		}
+		// After updating menulist item value we have to wait a bit before doing click(), to avoid anomalies
+		// like an empty row in menulist. 0 in setTimeout is not enough
+		setTimeout(() => menulist.click(), 50);
 	},
 	
 	

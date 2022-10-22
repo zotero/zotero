@@ -2012,8 +2012,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 				// If exporting with virtual "Markdown + Rich Text" translator, call Note Markdown
 				// and Note HTML translators instead
 				if (format.id === Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
-					let markdownFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN };
-					let htmlFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_HTML };
+					let markdownFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN, options: format.markdownOptions };
+					let htmlFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_HTML, options: format.htmlOptions };
 					Zotero.QuickCopy.getContentFromItems(items, markdownFormat, (obj, worked) => {
 						if (!worked) {
 							Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
