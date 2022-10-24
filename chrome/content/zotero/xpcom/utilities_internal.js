@@ -1587,6 +1587,18 @@ Zotero.Utilities.Internal = {
 	},
 	
 	
+	/**
+	 * Adds a localized colon to a string (which is usually just a colon, but, e.g., in French
+	 * there's a space before it)
+	 *
+	 * @param {String}
+	 * @return {String}
+	 */
+	stringWithColon: function (str) {
+		return Zotero.getString('punctuation.colon.withString', str);
+	},
+	
+	
 	resolveLocale: function (locale, locales) {
 		// If the locale exists as-is, use it
 		if (locales.includes(locale)) {
