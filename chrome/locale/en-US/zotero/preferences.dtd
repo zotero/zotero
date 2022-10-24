@@ -111,8 +111,6 @@
 <!ENTITY zotero.preferences.quickCopy.caption				"Quick Copy">
 <!ENTITY zotero.preferences.quickCopy.itemFormat       		"Item Format:">
 <!ENTITY zotero.preferences.quickCopy.noteFormat       		"Note Format:">
-<!ENTITY zotero.preferences.quickCopy.markdown       		"Markdown:">
-<!ENTITY zotero.preferences.quickCopy.html       		    "Rich Text/HTML:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML			"Copy as HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings 	"Site-Specific Settings:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">
