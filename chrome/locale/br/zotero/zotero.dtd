@@ -45,7 +45,7 @@
 <!ENTITY zotero.upgrade.changeLogLink "renabl ar cheñchamantoù">
 <!ENTITY zotero.upgrade.changeLogAfterLink "evit dizoloiñ ar pezh a zo nevez.">
 
-<!ENTITY zotero.tabs.info.label "Titou">
+<!ENTITY zotero.tabs.info.label "Titou.">
 <!ENTITY zotero.tabs.notes.label "Notennoù">
 <!ENTITY zotero.tabs.attachments.label "Pezhioù-stag">
 <!ENTITY zotero.tabs.tags.label "Balizoù">
@@ -147,7 +147,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Termeniñ al liv">
 <!ENTITY zotero.tagColorChooser.removeColor "Dilemel al liv">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
+<!ENTITY zotero.lookup.description "Ebarzhiñ anaouadurioù ISBNoù, DOIoù, PMIDs, arXiv pe c'hoazh bibcodes ADS evit gellout ouzhpennañ d'ho levraoueg:">
 <!ENTITY zotero.lookup.button.search "Klask">
 
 <!ENTITY zotero.createParent.title "Krouiñ un elfenn kar">
@@ -196,7 +196,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Mirout ar mammennoù rummet">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
+<!ENTITY zotero.citation.suppressAuthor.label "Lezel a-gostez an Aozer">
 <!ENTITY zotero.citation.prefix.label "Rakger:">
 <!ENTITY zotero.citation.suffix.label "Lostger:">
 <!ENTITY zotero.citation.editorWarning.label "Kemenn-diwall: Ma aozit un arroudenn en aozer, ne vo ket gouest ken da velezouriñ ar cheñchadurioù en ho tiaz-roadennoù pe ar stil arroudenniñ.">

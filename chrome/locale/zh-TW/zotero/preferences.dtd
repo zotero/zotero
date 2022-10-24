@@ -4,17 +4,17 @@
 <!ENTITY zotero.preferences.items "項目">
 <!ENTITY zotero.preferences.period "。">
 <!ENTITY zotero.preferences.settings "設定">
-<!ENTITY zotero.preferences.custom "自訂...">
+<!ENTITY zotero.preferences.custom "自訂……">
 
 <!ENTITY zotero.preferences.prefpane.general "一般">
 
 <!ENTITY zotero.preferences.fileHandling "檔案處理">
 <!ENTITY zotero.preferences.automaticSnapshots "從網頁建立項目時自動建立快照">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "儲存項目時自動附加相關的 PDF 檔與其他檔">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "儲存項目時自動附加相關的 PDF 檔與其他檔案">
 <!ENTITY zotero.preferences.autoRecognizeFiles "自動為 PDF 檔取得屬性資料">
-<!ENTITY zotero.preferences.autoRenameFiles "自動使用上層屬性資料重新命名附加檔">
+<!ENTITY zotero.preferences.autoRenameFiles "自動使用上層屬性資料重新命名附加檔案">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "重新命名連結的檔案">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "開啟 PDFs 使用">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "開啟 PDF檔 使用">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "系統預設">
 
 <!ENTITY zotero.preferences.miscellaneous "雜項">
@@ -22,7 +22,7 @@
 <!ENTITY zotero.preferences.updateNow "立刻更新">
 <!ENTITY zotero.preferences.reportTranslationFailure "回報有問題的網站轉譯器">
 <!ENTITY zotero.preferences.parseRISRefer "用 Zotero 處理下載的 BibTeX/RIS/Refer 檔">
-<!ENTITY zotero.preferences.automaticTags "自動以關鍵字與主標題作為項目的標籤">
+<!ENTITY zotero.preferences.automaticTags "自動以關鍵字與主題標目作為項目的標籤">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "自動移除刪入垃圾筒且超過">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "天的項目">
 
@@ -30,83 +30,83 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "在各文獻庫之間複製項目時，需包括：">
 <!ENTITY zotero.preferences.groups.childNotes "子筆記">
 <!ENTITY zotero.preferences.groups.childFiles "子快照與匯入的檔案">
-<!ENTITY zotero.preferences.groups.annotations "備註">
+<!ENTITY zotero.preferences.groups.annotations "標註">
 <!ENTITY zotero.preferences.groups.childLinks "子連結">
 <!ENTITY zotero.preferences.groups.tags "標籤">
 
-<!ENTITY zotero.preferences.feeds "新聞源">
+<!ENTITY zotero.preferences.feeds "新聞來源">
 <!ENTITY zotero.preferences.feeds.sorting.label "排序：">
 <!ENTITY zotero.preferences.feeds.sorting.newest "新的項目在前">
 <!ENTITY zotero.preferences.feeds.sorting.oldest "舊的項目在前">
-<!ENTITY zotero.preferences.feeds.feedDefaults "新聞源預設值">
+<!ENTITY zotero.preferences.feeds.feedDefaults "預設新聞來源">
 
-<!ENTITY zotero.preferences.openurl.choose "选择解析器">
-<!ENTITY zotero.preferences.openurl.custom "自訂...">
+<!ENTITY zotero.preferences.openurl.choose "選擇解析器……">
+<!ENTITY zotero.preferences.openurl.custom "自訂……">
 <!ENTITY zotero.preferences.openurl.server "解析器：">
 <!ENTITY zotero.preferences.openurl.version "版本：">
 
 <!ENTITY zotero.preferences.prefpane.sync "同步">
 <!ENTITY zotero.preferences.sync.username "使用者名稱：">
 <!ENTITY zotero.preferences.sync.password "密碼：">
-<!ENTITY zotero.preferences.sync.syncServer "資料同步中">
+<!ENTITY zotero.preferences.sync.syncServer "資料同步">
 <!ENTITY zotero.preferences.sync.setUpSync "設定同步">
-<!ENTITY zotero.preferences.sync.unlinkAccount "登出帳號...">
+<!ENTITY zotero.preferences.sync.unlinkAccount "登出帳號……">
 <!ENTITY zotero.preferences.sync.createAccount "建立帳號">
-<!ENTITY zotero.preferences.sync.lostPassword "遺失密碼？">
+<!ENTITY zotero.preferences.sync.lostPassword "忘記密碼？">
 <!ENTITY zotero.preferences.sync.syncAutomatically "自動同步">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "同步全文內容">
 <!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero 能以 zotero.org 和其他連結的裝置同步文獻庫中的檔案之全文內容，讓您無論身處何處，都能容易搜尋檔案。檔案之全文內容不會公開分享給他人。">
 <!ENTITY zotero.preferences.sync.about "關於同步">
-<!ENTITY zotero.preferences.sync.fileSyncing "檔案同步中">
+<!ENTITY zotero.preferences.sync.fileSyncing "檔案同步">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "同步我的文獻庫中的附加檔">
-<!ENTITY zotero.preferences.sync.fileSyncing.groups "用 Zotero 本機儲存同步群組文獻庫中的附加檔">
+<!ENTITY zotero.preferences.sync.fileSyncing.groups "用 Zotero 的儲存空間同步群組文獻庫中的附加檔">
 <!ENTITY zotero.preferences.sync.fileSyncing.download "下載檔案">
-<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "於同步時間">
+<!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "於同步時">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "依所需">
 <!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "驗證伺服器">
-<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "使用 Zotero 本機儲存時，您同意遵守它的">
+<!ENTITY zotero.preferences.sync.fileSyncing.tos1 "使用 Zotero 的儲存空間時，您同意遵守它的">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "條款與條件">
-<!ENTITY zotero.preferences.sync.librariesToSync "要同步的文献库">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "選擇文獻庫...">
+<!ENTITY zotero.preferences.sync.librariesToSync "要同步的文獻庫">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "選擇文獻庫……">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "同步">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "文獻庫">
-<!ENTITY zotero.preferences.sync.reset.warning1 "後面操作只在極少與特定情況可用，不該作為解決問題的一般方法。於許多情況，回復預設值會導致更多問題。請參見 ">
+<!ENTITY zotero.preferences.sync.reset.warning1 "以下動作只建議在極少以及特定狀況下使用，不該作為解決問題的一般方法。大部分狀況下，回復預設值會導致更多問題。請參見">
 <!ENTITY zotero.preferences.sync.reset.warning2 "同步回復預設值選項">
-<!ENTITY zotero.preferences.sync.reset.warning3 " 以得更多資訊。">
+<!ENTITY zotero.preferences.sync.reset.warning3 " 以獲得更多資訊。">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "重設資料同步歷史">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "將本機的資料與遠端的資料合併，忽略同步歷史">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "從線上文獻庫還原">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "以線上文獻庫的資料覆蓋本地端 Zotero 資料。">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "取代線上文獻庫">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "以本地端 Zotero 資料覆蓋線上文獻庫的資料。">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "以本機 Zotero 資料覆蓋線上文獻庫的資料。">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "重設檔案同步歷史">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "将所有附件文件与存储服务中的进行比较">
-<!ENTITY zotero.preferences.sync.reset "回復預設值">
-<!ENTITY zotero.preferences.sync.reset.button "重設...">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "將所有附件檔案與儲存空間中的進行比較">
+<!ENTITY zotero.preferences.sync.reset "重設">
+<!ENTITY zotero.preferences.sync.reset.button "重設……">
 
 
 <!ENTITY zotero.preferences.prefpane.search "搜尋">
 <!ENTITY zotero.preferences.search.fulltextCache "全文快取">
-<!ENTITY zotero.preferences.search.indexStats "索引之統計">
+<!ENTITY zotero.preferences.search.indexStats "索引量統計">
 
 <!ENTITY zotero.preferences.search.indexStats.indexed "已建立索引：">
 <!ENTITY zotero.preferences.search.indexStats.partial "部分索引：">
 <!ENTITY zotero.preferences.search.indexStats.unindexed "尚未建立索引：">
 <!ENTITY zotero.preferences.search.indexStats.words "字詞數：">
 
-<!ENTITY zotero.preferences.fulltext.textMaxLength "每個檔案索引的最大字元數：">
-<!ENTITY zotero.preferences.fulltext.pdfMaxPages "每個檔案索引的最大頁數：">
+<!ENTITY zotero.preferences.fulltext.textMaxLength "每個檔案的索引最大字元數：">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "每個檔案的索引最大頁數：">
 
 <!ENTITY zotero.preferences.prefpane.export "匯出">
 
 <!ENTITY zotero.preferences.citationOptions.caption "引用文獻選項">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "包括參考文獻中論文文章的 URL">
-<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "停用此選項，則引用期刊、雜誌、報紙文章時，只在沒有指定文章的頁數範圍時，Zotero 才包含 URL。">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "若停用此選項，在引用期刊、雜誌、報紙文章時，只在沒有指定文章的頁數範圍時，Zotero 才包含 URL。">
 
 <!ENTITY zotero.preferences.quickCopy.caption "快速複製">
 <!ENTITY zotero.preferences.quickCopy.itemFormat "項目格式">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "笔记格式：">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "筆記格式：">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "複製成 HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "針對特定網站的設定：">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "網域/路徑">
@@ -117,24 +117,24 @@
 
 <!ENTITY zotero.preferences.prefpane.cite "引用">
 <!ENTITY zotero.preferences.cite.styles "樣式">
-<!ENTITY zotero.preferences.cite.wordProcessors "文書處理器">
+<!ENTITY zotero.preferences.cite.wordProcessors "文件編輯器">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "使用傳統新增引用文獻對話框">
-<!ENTITY zotero.preferences.styleEditor "格式編輯器">
-<!ENTITY zotero.preferences.stylePreview "格式預覽">
+<!ENTITY zotero.preferences.styleEditor "樣式編輯器">
+<!ENTITY zotero.preferences.stylePreview "樣式預覽">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "樣式管理器">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "標題">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "已更新">
-<!ENTITY zotero.preferences.cite.styles.styleManager.csl "文獻條樣式語言 CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "獲取額外的樣式…">
+<!ENTITY zotero.preferences.cite.styles.styleManager.csl "引用文獻樣式語言 CSL">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "獲得額外的樣式……">
 
 <!ENTITY zotero.preferences.keys.saveToZotero "儲存到 Zotero (網址列圖示)">
-<!ENTITY zotero.preferences.keys.focusLibrariesPane "轉至文獻庫窗格">
+<!ENTITY zotero.preferences.keys.focusLibrariesPane "聚焦到文獻庫窗格">
 <!ENTITY zotero.preferences.keys.quicksearch "快速搜尋">
 <!ENTITY zotero.preferences.keys.newItem "新增項目">
 <!ENTITY zotero.preferences.keys.newNote "新增筆記">
-<!ENTITY zotero.preferences.keys.toggleAllRead "所有新聞源項目標示成已讀或未讀">
-<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "複製選擇項目的引用文獻到剪貼簿">
+<!ENTITY zotero.preferences.keys.toggleAllRead "將所有新聞來源項目標示成已讀/未讀">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "複製所選項目的引用文獻到剪貼簿">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "複製所選項目到剪貼簿">
 <!ENTITY zotero.preferences.keys.importFromClipboard "從剪貼簿匯入">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "重新啟動後改變才會生效">
@@ -142,24 +142,24 @@
 <!ENTITY zotero.preferences.prefpane.proxies "代理伺服器">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "代理伺服器選項">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero 會透明地透過已儲存的代理伺服器轉導請求。請參見">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero 會透明地透過已儲存的代理伺服器重新導向請求。請參見">
 <!ENTITY zotero.preferences.proxies.desc_link "代理伺服器文件">
-<!ENTITY zotero.preferences.proxies.desc_after_link "以得更多資訊。">
-<!ENTITY zotero.preferences.proxies.transparent "啟用代理伺服器轉導向">
-<!ENTITY zotero.preferences.proxies.autoRecognize "自動識別接受透過代理伺服器的資源">
+<!ENTITY zotero.preferences.proxies.desc_after_link "以獲得更多資訊。">
+<!ENTITY zotero.preferences.proxies.transparent "啟用代理伺服器重新導向">
+<!ENTITY zotero.preferences.proxies.autoRecognize "自動辨識透過代理伺服器的資源">
 <!ENTITY zotero.preferences.proxies.showRedirectNotification "當由伺服器重新導向時顯示通知訊息">
-<!ENTITY zotero.preferences.proxies.disableByDomain "停用代理伺服器轉導向，若我的網域名稱含 ">
+<!ENTITY zotero.preferences.proxies.disableByDomain "停用代理伺服器重新導向，當我的網域名稱含 ">
 <!ENTITY zotero.preferences.proxies.configured "已設定的代理伺服器">
 <!ENTITY zotero.preferences.proxies.hostname "主機名稱">
 <!ENTITY zotero.preferences.proxies.scheme "架構式">
 
 <!ENTITY zotero.preferences.proxies.multiSite "多重網站">
-<!ENTITY zotero.preferences.proxies.autoAssociate "自動關聯到新主機">
-<!ENTITY zotero.preferences.proxies.variables "可使用後面變數於代理伺服器架構式：">
-<!ENTITY zotero.preferences.proxies.h_variable "&#37;h  - 透過 proxy 連接之網站的主機名稱 (例如：www.zotero.org)">
-<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - 透過 proxy 連接之網頁的路徑名稱，需去除開頭的斜線 (例如：about/index.html)">
+<!ENTITY zotero.preferences.proxies.autoAssociate "自動與新主機產生關聯">
+<!ENTITY zotero.preferences.proxies.variables "您或可使用以下變數於代理伺服器架構式：">
+<!ENTITY zotero.preferences.proxies.h_variable "&#37;h  - 透過代理伺服器連接之網站的主機名稱 (例如：www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - 透過代理伺服器連接之網頁的路徑名稱，需去除開頭的斜線 (例如：about/index.html)">
 <!ENTITY zotero.preferences.proxies.d_variable "&#37;d - 資料夾路徑 (例如：about/)">
-<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - 檔名 (例如：index.html)">
+<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - 檔案名稱 (例如：index.html)">
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - 任何字串">
 
 <!ENTITY zotero.preferences.prefpane.advanced "進階">
@@ -172,31 +172,31 @@
 <!ENTITY zotero.preferences.locate.locateEngineManager "論文查詢引擎管理器">
 <!ENTITY zotero.preferences.locate.description "描述">
 <!ENTITY zotero.preferences.locate.name "名稱">
-<!ENTITY zotero.preferences.locate.addDescription "若要添加一个列表中不存在的搜索引擎，请先在浏览器中访问该搜索引擎，然后在 Zotero 的菜单中点击“添加”。">
+<!ENTITY zotero.preferences.locate.addDescription "如果要新增一個列表中沒有的搜尋引擎，請先在瀏覽器中前往該搜尋引擎，然後在Zotero的選單中點選「新增」。">
 <!ENTITY zotero.preferences.locate.restoreDefaults "回復預設值">
 
 <!ENTITY zotero.preferences.charset "字元編碼">
 <!ENTITY zotero.preferences.charset.importCharset "匯入字元編碼">
 <!ENTITY zotero.preferences.charset.displayExportOption "匯出時顯示字元編碼的選項">
 
-<!ENTITY zotero.preferences.dataDir "資料目錄所在">
+<!ENTITY zotero.preferences.dataDir "資料目錄所在位置">
 <!ENTITY zotero.preferences.dataDir.useProfile "使用 Zotero 的個人設定檔目錄">
 <!ENTITY zotero.preferences.dataDir.custom "自訂：">
-<!ENTITY zotero.preferences.dataDir.choose "選擇…">
-<!ENTITY zotero.preferences.dataDir.viaCommandLine "(通过 command line 指定)">
+<!ENTITY zotero.preferences.dataDir.choose "選擇……">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(透過 command line 指定)">
 <!ENTITY zotero.preferences.dataDir.reveal "顯示資料目錄">
-<!ENTITY zotero.preferences.dataDir.migrate "轉移到新的預設位置...">
+<!ENTITY zotero.preferences.dataDir.migrate "轉移到新的預設位置……">
 
-<!ENTITY zotero.preferences.attachmentBaseDir.caption "連到的附加檔庫目錄">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero 會使用連到的附加檔庫目錄內的相對路徑，讓你可在不同電腦存取檔案，只要庫目錄內的檔案結構保持不變即可。">
-<!ENTITY zotero.preferences.attachmentBaseDir.basePath "庫目錄：">
-<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "選擇…">
-<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "復原成絕對路徑…">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "連結的附加檔來源目錄">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero 會使用連到的附加檔來源目錄內的相對路徑，讓您可在不同電腦存取檔案，只要來源目錄內的檔案結構保持不變即可。">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "來源目錄：">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "選擇……">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "還原成絕對路徑……">
 
-<!ENTITY zotero.preferences.dbMaintenance "資料庫檢修">
+<!ENTITY zotero.preferences.dbMaintenance "資料庫維護">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "檢查資料庫完整性">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "重設轉譯器與樣式...">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "重設轉譯器...">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "重設樣式...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "重設轉譯器與樣式……">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "重設轉譯器……">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "重設樣式……">
 
 <!ENTITY zotero.preferences.configEditor "設定編輯器">

@@ -75,7 +75,7 @@
 <!ENTITY zotero.items.menu.unrecognize "撤消检索元数据">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "选择作为主条目的条目版本.">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "选择需要保留的域, 防止被其它版本的域覆盖.">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "选择需要保留的域, 防止被其他版本的域覆盖.">
 
 <!ENTITY zotero.toolbar.newItem.label "新建条目">
 <!ENTITY zotero.toolbar.moreItemTypes.label "更多">

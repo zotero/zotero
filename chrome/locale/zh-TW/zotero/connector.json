@@ -1,12 +1,12 @@
 {
   "general_more": {
-    "message": "更多..."
+    "message": "更多……"
   },
   "general_moreInfo": {
-    "message": "更多信息..."
+    "message": "更多資訊……"
   },
   "general_needHelp": {
-    "message": "需要帮助？"
+    "message": "需要協助？"
   },
   "general_done": {
     "message": "完成"
@@ -15,7 +15,7 @@
     "message": "要"
   },
   "general_no": {
-    "message": "不要"
+    "message": "不用"
   },
   "general_tryAgain": {
     "message": "再試一次"
@@ -27,28 +27,28 @@
     "message": "取消"
   },
   "general_pleaseWait": {
-    "message": "請等待…"
+    "message": "請稍等……"
   },
   "general_copyToClipboard": {
     "message": "複製到剪貼簿"
   },
   "progressWindow_savingTo": {
-    "message": "儲存至…"
+    "message": "儲存至……"
   },
   "progressWindow_tagPlaceholder": {
     "message": "標籤(可用逗號分隔)"
   },
   "progressWindow_error_translation": {
-    "message": "儲存此項目時出錯。見 $1 以得更多資訊。"
+    "message": "儲存此項目時出錯。參閱 $1 以獲得更多資訊。"
   },
   "progressWindow_error_siteAccessLimitsError": {
-    "message": "保存该条目时出现一个错误。$1可能限制你单次保存条目的数量。查阅$2来获取更多信息。"
+    "message": "儲存此項目時出現錯誤。$1可能限制了您單次可儲存項目的數量。參閱$2來獲得更多資訊。"
   },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "找出轉譯器問題所在"
   },
   "progressWindow_error_siteAccessLimits": {
-    "message": "网站访问限制"
+    "message": "網站存取限制"
   },
   "progressWindow_error_fallback": {
     "message": "以 $1 儲存時出錯。改嘗試以 $2 儲存。"
@@ -57,31 +57,31 @@
     "message": "您的 $1 版未支援此功能。請升級至 $2 版。"
   },
   "progressWindow_error_upgradeClient_latestVersion": {
-    "message": "最新版"
+    "message": "最新版本"
   },
   "appConnector": {
-    "message": "$1 連結器"
+    "message": "$1 Connector"
   },
   "upgradeApp": {
     "message": "升級 $1"
   },
   "firstRun_title": {
-    "message": "你已经安装了$1连接器！"
+    "message": "您已經安裝$1Connector了！"
   },
   "firstRun_text1": {
-    "message": "$1连接器允许你从你的浏览器中通过单击<a href=\"$2\">保存条目到$1</a>。"
+    "message": "$1Connector能夠在您的瀏覽器中利用單次點擊<a href=\"$2\">儲存項目到$1</a>。"
   },
   "firstRun_text2": {
-    "message": "如果你还没有下载，请<a href=\"$2\">下载</a>独立的$1应用来获得最好的体验。"
+    "message": "如果您尚未下載，請<a href=\"$2\">下載</a>獨立的$1應用程式來獲得最好的體驗。"
   },
   "firstRun_acceptButton": {
-    "message": "明白"
+    "message": "明白了"
   },
   "error_connection_isAppRunning": {
     "message": "$1 正在執行？"
   },
   "error_connection_save": {
-    "message": "$1 無法與 $2 桌面應用程式溝通。連結器能直接儲存某些頁面到$3 帳戶，但若要得到最佳結果，在嘗試儲存前，得先確認 $2 已開啟。"
+    "message": "$1 無法與 $2 桌面應用程式溝通。Connector 能直接儲存某些頁面到$3 帳戶，但若要得到最佳結果，在嘗試儲存前，得先確認 $2 已開啟。"
   },
   "error_connection_downloadOrTroubleshoot": {
     "message": "如有需要，您可 <a href=\"$1\">下載 $2</a> 或 <a href=\"$3\">檢查連結上的問題</a>。"
@@ -90,13 +90,13 @@
     "message": "啟用儲存至線上文獻庫"
   },
   "reports_report_submitted": {
-    "message": "您的错误报告已提交\n\n报告 ID: $1\n\n请在Zetero论坛发布问题，问题请包含该错误报告ID，问题描述，以及任何比较的步骤以重现该问题。\n\n未在论坛提交的错误报告将不会处理。"
+    "message": "您的錯誤報告已送出。\n\n報告 ID: $1\n\n請在Zotero論壇發文，文章內容請包含此報告ID、描述發生的問題以及任何可重現問題的步驟。\n\n不會處理未於論壇發文的錯誤報告。"
   },
   "reports_debug_output_submitted": {
-    "message": "你的debug输出已经提交。Debug ID是 $1。"
+    "message": "您的debug輸出結果已送出。Debug ID是 $1。"
   },
   "reports_submission_failed": {
-    "message": "提交报告时产生错误\n\n$1\n\n请检查您的网络连接。如果错误重复出现，请在Zotero论坛发帖。"
+    "message": "提交報告時發生錯誤。\n\n$1\n\n請檢查您的網路連線。如果錯誤重複出現，請在Zotero論壇發文。"
   },
   "integration_error_clientUpgrade": {
     "message": "引用網站資料庫的文獻，需要 $1 或更新的版本。"
@@ -105,40 +105,40 @@
     "message": "$1 無法與 $2 桌面應用程式溝通。$2 一定得開啟，才能引用網站資料庫的文獻。"
   },
   "integration_googleDocs_unlinkBeforeSaving_warning": {
-    "message": "此文档包含有效的 Zotero 引文，该引文将在下载的副本中显示为 zotero.org 链接"
+    "message": "此文件包含有效的 Zotero 引文，此引文將於下載的副本中顯示為 zotero.org 連結"
   },
   "integration_googleDocs_unlinkBeforeSaving_instructions": {
-    "message": "为生成易于共享的版本，从文件菜单中选择<b>复制……</b>，在新文档中从 Zotero 菜单中选择<b>未链接引文</b>，然后下载未链接版本。保留原始链接文档以防你需要进一步更改。"
+    "message": "為了要生成較為適合分享的版本，從檔案選單中選擇<b>複製……</b>，在新文件中從Zotero選單中選擇<b>未連結引文</b>，然後下載未連結版本。保留原始連結文件以防你有需要做任何後續的變動。"
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
-    "message": "无论何时下载已链接版本"
+    "message": "無論如何都下載已連結的版本"
   },
   "integration_googleDocs_updating": {
     "message": "$1正在更新您的文件。"
   },
   "integration_googleDocs_docxAlert": {
-    "message": "当在 Google Docs 中直接编辑 Microsoft Word .docx 文件时，$1整合无法使用。选择文件 → 储存为 Google Docs 来允许该功能。<br/><br/>如果你想把有$1引用的 Word 文档转换为Google Docs 时，请查阅<a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">在文档编辑器间移动文档</a>。"
+    "message": "在 Google Docs中直接編輯 Microsoft Word .docx 檔案時，若$1元件無法使用。選擇檔案 → 儲存為 Google Docs 來啟用此功能。<br/><br/>如果你想將具有$1引用的 Word 文件轉換為Google Docs 時，請參閱<a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">在文件編輯器移動文件</a>。"
   },
   "integration_googleDocs_documentLocked": {
-    "message": "该文档的引用正被另外一个$1用户编辑。请稍后再试。"
+    "message": "此文件的引文正被另一個$1使用者編輯。請稍後再試。"
   },
   "integration_googleDocs_documentLocked_moreInfo": {
-    "message": "$1锁住了你的文档来防止多个用户同时编辑引用。当前文档中的引用编辑可能会引起引用或文档的损坏。一些如网络故障等无法预见的情况可能会使得你的文档被持续锁定。如果你相信这已经发生了，你可以覆盖锁定。<br/><br/>你想要覆盖文档锁定么？"
+    "message": "$1鎖定了您的文件來避免多位使用者同時編輯引文。目前文件中的引文編輯可能會導致引文或文件損壞。例如網路錯誤之類無法預測的狀況可能會讓您的文件持續被鎖定。如果您確定這種狀況發生，您可以解除鎖定狀態。<br/><br/>您想要解除文件鎖定狀態嗎？"
   },
   "integration_googleDocs_documentPermissionError": {
-    "message": "你所选择的Google账户没有编辑该文档的权限。请再次尝试，并确保所选择的账号有编辑权限。"
+    "message": "您所選擇的Google帳號沒有編輯該文件的權限。請再試一次，並確保您所選擇的帳號有編輯權限。"
   },
   "integration_googleDocs_orphanedCitations_buttonTooltip": {
-    "message": "显示未链接的 $1 引文"
+    "message": "顯示未連結的 $1 引文"
   },
   "integration_googleDocs_orphanedCitations_alert": {
-    "message": "你正在编辑的引文已经从 $1.断开链接"
+    "message": "您正在編輯的引文已經從 $1斷開連結。"
   },
   "integration_googleDocs_orphanedCitations_alertButton": {
-    "message": "重新链接引文"
+    "message": "重新連結引文"
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
-    "message": "该引文已  <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">从 $1断开</a>。您需要重新链接后，引文方可在参考文献部分更新或出现。"
+    "message": "這些引文已  <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">從 $1斷開連結</a>。您需要先重新連結，引文才能在參考資料中更新或出現。"
   },
   "general_saveTo": {
     "message": "儲存至 $1"

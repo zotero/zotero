@@ -243,7 +243,7 @@
 
 <!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Zotero kitaplığınızda bulunan bu etiket sunucuya eşitlenmek için çok uzundur:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Eşitlenecek etiketler 256 karakterden daha kısa olmalıdır.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Bir etiketi birden fazla etikete bölebilirsiniz. etiketi kısaltmak için düzenleyiniz veya siliniz.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Bir etiketi birden fazla etikete bölebilirsiniz, etiketi kısaltmak için düzenleyebilirsiniz, ya da silebilirsiniz.">
 <!ENTITY zotero.sync.longTagFixer.split "Böl">
 <!ENTITY zotero.sync.longTagFixer.splitAtThe "Böl">
 <!ENTITY zotero.sync.longTagFixer.character "karaktere">

@@ -10,7 +10,7 @@
 
 <!ENTITY zotero.preferences.fileHandling "文件处理">
 <!ENTITY zotero.preferences.automaticSnapshots "从 Web 页面创建条目时自动生成快照">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "保存条目时自动附加相关的 PDF 文档及其它文件">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "保存条目时自动附加相关的 PDF 文档及其他文件">
 <!ENTITY zotero.preferences.autoRecognizeFiles "自动检索 PDF 的元数据">
 <!ENTITY zotero.preferences.autoRenameFiles "使用父类元数据自动重命名附件文件">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "重命名链接的文件">
@@ -55,7 +55,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "忘记密码?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "自动同步">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "同步全文内容">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero能够将Zotero文献库里文件的全文内容同步到zotero.org及其它连接的设备. 启用这一功能后, 无论您在什么地方, 都可以方便地搜索您的文件. 您的文件的全文内容不会共享给公众。">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero能够将Zotero文献库里文件的全文内容同步到zotero.org及其他连接的设备. 启用这一功能后, 无论您在什么地方, 都可以方便地搜索您的文件. 您的文件的全文内容不会共享给公众。">
 <!ENTITY zotero.preferences.sync.about "关于同步">
 <!ENTITY zotero.preferences.sync.fileSyncing "文件同步">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -71,7 +71,7 @@
 <!ENTITY zotero.preferences.sync.librariesToSync.button "选择文献库...">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "同步">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "文献库">
-<!ENTITY zotero.preferences.sync.reset.warning1 "下列操作仅限于一些极少出现的, 特定的情况, 请不要在常见问题中使用. 多数情况下, 重置会引发一系列其它问题. 浏览">
+<!ENTITY zotero.preferences.sync.reset.warning1 "下列操作仅限于一些极少出现的, 特定的情况, 请不要在常见问题中使用. 多数情况下, 重置会引发一系列其他问题. 浏览">
 <!ENTITY zotero.preferences.sync.reset.warning2 "同步重置选项">
 <!ENTITY zotero.preferences.sync.reset.warning3 "以获取更多的信息.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "重置数据同步历史">
