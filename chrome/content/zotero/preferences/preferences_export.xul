@@ -79,7 +79,7 @@
 				<tbody id="noteQuickCopy-markdown-options">
 					<tr>
 						<th>
-							<xul:label value="&zotero.preferences.quickCopy.markdown;"/>
+							<xul:label/>
 						</th>
 						<td>
 							<xul:checkbox id="noteQuickCopy-markdown-includeAppLinks"
@@ -91,7 +91,7 @@
 				<tbody id="noteQuickCopy-html-options">
 					<tr>
 						<th>
-							<xul:label value="&zotero.preferences.quickCopy.html;"/>
+							<xul:label/>
 						</th>
 						<td>
 							<xul:checkbox id="noteQuickCopy-html-includeAppLinks"

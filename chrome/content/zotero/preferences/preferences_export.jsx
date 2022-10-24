@@ -206,12 +206,18 @@ Zotero_Preferences.Export = {
 
 		var markdownOptions = document.getElementById('noteQuickCopy-markdown-options');
 		var htmlOptions = document.getElementById('noteQuickCopy-html-options');
+		var markdownOptionsLabel = document.querySelector('#noteQuickCopy-markdown-options label');
+		var htmlOptionsLabel = document.querySelector('#noteQuickCopy-html-options label');
 		var markdownIncludeAppLinks = document.getElementById("noteQuickCopy-markdown-includeAppLinks");
 		var htmlIncludeAppLinks = document.getElementById("noteQuickCopy-html-includeAppLinks");
-
+		
+		markdownOptionsLabel.value = Zotero.Utilities.Internal.stringWithColon("Markdown");
+		htmlOptionsLabel.value = Zotero.Utilities.Internal.stringWithColon(
+			Zotero.getString('zotero.preferences.export.quickCopy.note.htmlOptions.label')
+		);
 		markdownIncludeAppLinks.label = Zotero.getString('exportOptions.includeAppLinks', Zotero.appName);
 		htmlIncludeAppLinks.label = Zotero.getString('exportOptions.includeAppLinks', Zotero.appName);
-
+		
 		if (format.id == Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
 			markdownOptions.hidden = false;
 			htmlOptions.hidden = false;
