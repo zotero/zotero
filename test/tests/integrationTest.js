@@ -938,6 +938,27 @@ describe("Zotero.Integration", function () {
 				assert.isTrue(displayDialogStub.lastCall.args[0].includes('editBibliographyDialog'));
 			});
 		});
+		
+		describe('#refresh', function() {
+			var docID = this.fullTitle();
+			it ('should properly disambiguate author after editing in the database', async function () {
+				let testItem1 = await createDataObject('item', {libraryID: Zotero.Libraries.userLibraryID});
+				testItem1.setField('title', `title1`);
+				testItem1.setCreator(0, {creatorType: 'author', firstName: "Foo", lastName: "Bar"});
+				testItem1.setField('date', '2022-01-01');
+				let testItem2 = await createDataObject('item', {libraryID: Zotero.Libraries.userLibraryID});
+				testItem2.setField('title', `title2`);
+				testItem2.setCreator(0, {creatorType: 'author', firstName: "Foo", lastName: "Bar"});
+				testItem2.setField('date', '2022-01-01');
+				setAddEditItems([testItem1, testItem2]);
+				await initDoc(docID);
+				await execCommand('addEditCitation', docID);
+				assert.equal(applications[docID].doc.fields[0].text, '(Bar, 2022a, 2022b)');
+				testItem2.setCreator(0, {creatorType: 'author', firstName: "Foo F", lastName: "Bar"});
+				await execCommand('refresh', docID);
+				assert.equal(applications[docID].doc.fields[0].text, '(F. Bar, 2022; F. F. Bar, 2022)');
+			});
+		});
 	});
 	
 	describe("DocumentData", function() {

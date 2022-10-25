@@ -1038,6 +1038,10 @@ Zotero.Integration.Session.prototype.updateFromDocument = Zotero.Promise.corouti
 	this.progressBar.start();
 	if (forceCitations) {
 		this.regenAll = true;
+		// See Session.restoreProcessorState() for a comment
+		if (!Zotero.Prefs.get('cite.useCiteprocRs')) {
+			this.reload = true;
+		}
 	}
 	yield this._processFields();
 	try {
@@ -2174,6 +2178,12 @@ Zotero.Integration.Session.prototype.restoreProcessorState = function() {
 		if(this.citationsByIndex[i] && !this.newIndices[i]) {
 			citations.push(this.citationsByIndex[i]);
 		}
+	}
+	if (!Zotero.Prefs.get('cite.useCiteprocRs')) {
+		// Due to a bug in citeproc-js there are disambiguation issues after changing items in Zotero library
+		// and rebuilding the processor state, so we reinitialize the processor altogether
+		let style = Zotero.Styles.get(this.data.style.styleID);
+		this.style = style.getCiteProc(this.data.style.locale, this.outputFormat, this.data.prefs.automaticJournalAbbreviations);
 	}
 	this.style.rebuildProcessorState(citations, this.outputFormat, uncited);
 }
