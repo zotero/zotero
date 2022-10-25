@@ -94,7 +94,7 @@ class LocalAPIEndpoint {
 		);
 		// Only allow mismatched version on /api/ no-op endpoint
 		if (apiVersion !== LOCAL_API_VERSION && requestData.pathname != '/api/') {
-			return this.makeResponse(501, 'text/plain', `API version not implemented: ${parseInt(apiVersion)}`);
+			return this.makeResponse(501, 'text/plain', `API version not implemented: ${apiVersion}`);
 		}
 		
 		let userID = requestData.pathParams.userID && parseInt(requestData.pathParams.userID);
@@ -110,7 +110,8 @@ class LocalAPIEndpoint {
 		
 		let response = await this.run(requestData);
 		if (response.data) {
-			if (requestData.searchParams.has('since')) {
+			let dataIsArray = Array.isArray(response.data);
+			if (dataIsArray && requestData.searchParams.has('since')) {
 				let since = parseInt(requestData.searchParams.get('since'));
 				if (Number.isNaN(since)) {
 					return this.makeResponse(400, 'text/plain', `Invalid 'since' value '${requestData.searchParams.get('since')}'`);
@@ -118,7 +119,7 @@ class LocalAPIEndpoint {
 				response.data = response.data.filter(dataObject => dataObject.version > since);
 			}
 			
-			if (Array.isArray(response.data) && response.data.length > 1) {
+			if (dataIsArray && response.data.length > 1) {
 				let sort = requestData.searchParams.get('sort') || 'dateModified';
 				if (!['dateAdded', 'dateModified', 'title', 'creator', 'itemType', 'date', 'publisher', 'publicationTitle', 'journalAbbreviation', 'language', 'accessDate', 'libraryCatalog', 'callNumber', 'rights', 'addedBy', 'numItems']
 						.includes(sort)) {
@@ -166,7 +167,7 @@ class LocalAPIEndpoint {
 			
 			let totalResults = 1;
 			let links;
-			if (Array.isArray(response.data)) {
+			if (dataIsArray) {
 				totalResults = response.data.length;
 				let start = parseInt(requestData.searchParams.get('start')) || 0;
 				if (start < 0) start = 0;
@@ -181,10 +182,21 @@ class LocalAPIEndpoint {
 				links = this.buildLinks(requestData, 0, 0, 1);
 			}
 			
-			return this.makeDataObjectResponse(requestData, response.data, {
+			let headers = {
 				'Total-Results': totalResults,
 				'Link': Object.entries(links).map(([rel, url]) => `<${url}>; rel="${rel}"`).join(', ')
-			});
+			};
+			let lastModifiedVersion = dataIsArray
+				? Zotero.Libraries.get(requestData.libraryID).libraryVersion
+				: response.data.version;
+			if (lastModifiedVersion !== undefined) {
+				headers['Last-Modified-Version'] = lastModifiedVersion;
+			}
+			if (requestData.headers['If-Modified-Since-Version']
+					&& lastModifiedVersion <= parseInt(requestData.headers['If-Modified-Since-Version'])) {
+				return this.makeResponse(304, headers, '');
+			}
+			return this.makeDataObjectResponse(requestData, response.data, headers);
 		}
 		else {
 			return this.makeResponse(...response);
