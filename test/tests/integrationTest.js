@@ -25,6 +25,7 @@ describe("Zotero.Integration", function () {
 		this.supportsImportExport = true;
 		// Will allow inserting notes
 		this.supportsTextInsertion = true;
+		this.supportsCitationMerging = false;
 		this.fields = [];
 	};
 	DocumentPluginDummy.Application.prototype = {
@@ -186,6 +187,7 @@ describe("Zotero.Integration", function () {
 		// insertBibliography will fail if there is no placeholder text.
 		this.text = '{Placeholder}';
 		this.idx = idx;
+		this.adjacent = false;
 		this.wrappedJSObject = this;
 	};
 	DocumentPluginDummy.Field.noteIndex = 0;
@@ -235,6 +237,12 @@ describe("Zotero.Integration", function () {
 		 * @returns {Number}
 		 */
 		getNoteIndex: () => 0,
+		
+		/**
+		 * Whether this field is adjacent to the next field (meaning they can be merged).
+		 * @returns {boolean}
+		 */
+		isAdjacentToNextField: function() { return this.adjacent },
 	};
 
 	// Processing functions for logging and promisification
@@ -335,6 +343,28 @@ describe("Zotero.Integration", function () {
 			io._acceptDeferred.resolve(() => {});
 		};
 	}
+	
+	async function insertMultipleCitations() {
+		var docID = this.test.fullTitle();
+		if (!(docID in applications)) await initDoc(docID);
+		var doc = applications[docID].doc;
+
+		setAddEditItems(testItems[0]);
+		await execCommand('addEditCitation', docID);
+		assert.equal(doc.fields.length, 1);
+		var citation = await (new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)).unserialize();
+		assert.equal(citation.citationItems.length, 1);
+		assert.equal(citation.citationItems[0].id, testItems[0].id);
+
+		setAddEditItems(testItems.slice(1, 3));
+		await execCommand('addEditCitation', docID);
+		assert.equal(doc.fields.length, 2);
+		citation = await (new Zotero.Integration.CitationField(doc.fields[1], doc.fields[1].code)).unserialize();
+		assert.equal(citation.citationItems.length, 2);
+		for (let i = 1; i < 3; i++) {
+			assert.equal(citation.citationItems[i-1].id, testItems[i].id);
+		}
+	};
 	
 	before(function* () {
 		yield Zotero.Styles.init();
@@ -489,27 +519,6 @@ describe("Zotero.Integration", function () {
 		});
 		
 		describe('#addEditCitation', function() {
-			var insertMultipleCitations = Zotero.Promise.coroutine(function *() {
-				var docID = this.test.fullTitle();
-				if (!(docID in applications)) yield initDoc(docID);
-				var doc = applications[docID].doc;
-
-				setAddEditItems(testItems[0]);
-				yield execCommand('addEditCitation', docID);
-				assert.equal(doc.fields.length, 1);
-				var citation = yield (new Zotero.Integration.CitationField(doc.fields[0], doc.fields[0].code)).unserialize();
-				assert.equal(citation.citationItems.length, 1);
-				assert.equal(citation.citationItems[0].id, testItems[0].id);
-
-				setAddEditItems(testItems.slice(1, 3));
-				yield execCommand('addEditCitation', docID);
-				assert.equal(doc.fields.length, 2);
-				citation = yield (new Zotero.Integration.CitationField(doc.fields[1], doc.fields[1].code)).unserialize();
-				assert.equal(citation.citationItems.length, 2);
-				for (let i = 1; i < 3; i++) {
-					assert.equal(citation.citationItems[i-1].id, testItems[i].id);
-				}
-			});
 			it('should insert citation if not in field', insertMultipleCitations);
 
 			it('should edit citation if in citation field', function* () {
@@ -940,8 +949,8 @@ describe("Zotero.Integration", function () {
 		});
 		
 		describe('#refresh', function() {
-			var docID = this.fullTitle();
 			it ('should properly disambiguate author after editing in the database', async function () {
+				var docID = this.test.fullTitle();
 				let testItem1 = await createDataObject('item', {libraryID: Zotero.Libraries.userLibraryID});
 				testItem1.setField('title', `title1`);
 				testItem1.setCreator(0, {creatorType: 'author', firstName: "Foo", lastName: "Bar"});
@@ -954,9 +963,24 @@ describe("Zotero.Integration", function () {
 				await initDoc(docID);
 				await execCommand('addEditCitation', docID);
 				assert.equal(applications[docID].doc.fields[0].text, '(Bar, 2022a, 2022b)');
+				
 				testItem2.setCreator(0, {creatorType: 'author', firstName: "Foo F", lastName: "Bar"});
 				await execCommand('refresh', docID);
 				assert.equal(applications[docID].doc.fields[0].text, '(F. Bar, 2022; F. F. Bar, 2022)');
+				
+				testItem2.setCreator(0, {creatorType: 'author', firstName: "Foo", lastName: "Bar"});
+				await execCommand('refresh', docID);
+				assert.equal(applications[docID].doc.fields[0].text, '(Bar, 2022a, 2022b)');
+			});
+			
+			it ('should merge adjacent fields', async function () {
+				await insertMultipleCitations.call(this);
+				var docID = this.test.fullTitle();
+				assert.equal(applications[docID].doc.fields.length, 2);
+				
+				applications[docID].doc.fields[0].adjacent = true;
+				await execCommand('refresh', docID);
+				assert.equal(applications[docID].doc.fields.length, 1);
 			});
 		});
 	});
