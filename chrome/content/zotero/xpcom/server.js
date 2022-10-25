@@ -30,6 +30,7 @@ Zotero.Server = new function() {
 		201:"Created",
 		204:"No Content",
 		300:"Multiple Choices",
+		304:"Not Modified",
 		400:"Bad Request",
 		403:"Forbidden",
 		404:"Not Found",
