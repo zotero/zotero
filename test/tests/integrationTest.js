@@ -353,7 +353,7 @@ describe("Zotero.Integration", function () {
 		displayDialogStub = sinon.stub(Zotero.Integration, 'displayDialog');
 		displayDialogStub.callsFake(async function(dialogName, prefs, io) {
 			Zotero.debug(`Display dialog: ${dialogName}`, 2);
-			var ioResult = dialogResults[dialogName.substring(dialogName.lastIndexOf('/')+1, dialogName.length-4)];
+			var ioResult = dialogResults[dialogName.substring(dialogName.lastIndexOf('/')+1, dialogName.length-6)];
 			if (typeof ioResult == 'function') {
 				await ioResult(dialogName, io);
 			} else {
