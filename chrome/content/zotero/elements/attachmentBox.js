@@ -207,7 +207,7 @@
 			let copyMenuitem = this._id('url-menuitem-copy');
 			copyMenuitem.label = Zotero.getString('general.copy');
 			copyMenuitem.addEventListener('command', () => {
-				navigator.clipboard.writeText(this.item.getField('url'));
+				Zotero.Utilities.Internal.copyTextToClipboard(this.item.getField('url'));
 			});
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'attachmentbox');
