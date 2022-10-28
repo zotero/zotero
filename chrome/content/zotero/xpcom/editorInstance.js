@@ -1487,7 +1487,7 @@ class EditorInstanceUtilities {
 				template = Zotero.Prefs.get('annotations.noteTemplates.note');
 			}
 			else if (annotation.type === 'image') {
-				template = '<p>{{image}}<br/>{{citation}} {{comment}}</p>';
+				template = Zotero.Prefs.get('annotations.noteTemplates.image');
 			}
 
 			Zotero.debug('Using note template:');
