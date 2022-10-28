@@ -727,9 +727,7 @@ var Zotero_QuickFormat = new function () {
 		
 		// Title, if no creator (getDisplayTitle in order to get case, e-mail, statute which don't have a title field)
 		title = item.getDisplayTitle();
-		if (item.isNote()) {
-			title = title.substr(0, 24) + '…';
-		}
+		title = title.substr(0, 32) + (title.length > 32 ? "…" : "");
  		if (!str) {
 			str = Zotero.getString("punctuation.openingQMark") + title + Zotero.getString("punctuation.closingQMark");
 		}
@@ -756,15 +754,17 @@ var Zotero_QuickFormat = new function () {
 		
 		// Prefix
 		if(citationItem.prefix && Zotero.CiteProc.CSL.ENDSWITH_ROMANESQUE_REGEXP) {
-			str = citationItem.prefix
+			let prefix = citationItem.prefix.substr(0, 10) + (citationItem.prefix.length > 10 ? "…" : "")
+			str = prefix
 				+(Zotero.CiteProc.CSL.ENDSWITH_ROMANESQUE_REGEXP.test(citationItem.prefix) ? " " : "")
 				+str;
 		}
 		
 		// Suffix
 		if(citationItem.suffix && Zotero.CiteProc.CSL.STARTSWITH_ROMANESQUE_REGEXP) {
+			let suffix = citationItem.suffix.substr(0, 10) + (citationItem.suffix.length > 10 ? "…" : "")
 			str += (Zotero.CiteProc.CSL.STARTSWITH_ROMANESQUE_REGEXP.test(citationItem.suffix) ? " " : "")
-				+citationItem.suffix;
+				+ suffix;
 		}
 		
 		return str;
@@ -776,9 +776,6 @@ var Zotero_QuickFormat = new function () {
 	function _insertBubble(citationItem, nextNode) {
 		var str = _buildBubbleString(citationItem);
 		
-		// It's entirely unintuitive why, but after trying a bunch of things, it looks like using
-		// a XUL label for these things works best. A regular span causes issues with moving the
-		// cursor.
 		var bubble = qfiDocument.createElement("span");
 		bubble.setAttribute("class", "citation-dialog bubble");
 		bubble.setAttribute("draggable", "true");
