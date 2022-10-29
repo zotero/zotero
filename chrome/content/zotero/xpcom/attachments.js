@@ -2085,7 +2085,9 @@ Zotero.Attachments = new function(){
 									nextURL,
 									{
 										responseType: 'blob',
-										followRedirects: false
+										followRedirects: false,
+										// Use our own error handling
+										errorDelayMax: 0
 									}
 								);
 							}
@@ -2096,11 +2098,13 @@ Zotero.Attachments = new function(){
 									noDelay = false;
 									continue;
 								}
-								throw e;
 							}
 							break;
 						}
 						afterRequest(nextURL);
+						if (!req) {
+							break;
+						}
 						if ([301, 302, 303, 307].includes(req.status)) {
 							let location = req.getResponseHeader('Location');
 							if (!location) {
@@ -2158,7 +2162,7 @@ Zotero.Attachments = new function(){
 					}
 					
 					// If DOI resolves directly to a PDF, save it to disk
-					if (contentType.startsWith('application/pdf')) {
+					if (contentType && contentType.startsWith('application/pdf')) {
 						Zotero.debug("URL resolves directly to PDF");
 						await Zotero.File.putContentsAsync(path, blob);
 						await _enforcePDF(path);
@@ -2174,7 +2178,7 @@ Zotero.Attachments = new function(){
 					continue;
 				}
 				if (!url) {
-					Zotero.debug(`No PDF found on ${responseURL}`);
+					Zotero.debug(`No PDF found on ${responseURL || pageURL}`);
 					continue;
 				}
 				if (isTriedURL(url)) {
