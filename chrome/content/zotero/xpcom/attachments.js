@@ -1286,7 +1286,7 @@ Zotero.Attachments = new function(){
 	
 	
 	/**
-	 * Look for an available PDF for an item and add it as an attachment
+	 * Get the PDF resolvers that can be used for a given item based on the available fields
 	 *
 	 * @param {Zotero.Item} item
 	 * @param {String[]} [methods=['doi', 'url', 'oa', 'custom']]
