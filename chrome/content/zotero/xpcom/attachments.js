@@ -2038,7 +2038,7 @@ Zotero.Attachments = new function(){
 				addTriedURL(url);
 				// Backoff loop
 				let tries = 3;
-				while (tries-- >= 0) {
+				while (tries-- > 0) {
 					try {
 						await beforeRequest(url);
 						await this.downloadFile(url, path, options);
@@ -2077,7 +2077,7 @@ Zotero.Attachments = new function(){
 						
 						// Backoff loop
 						let tries = 3;
-						while (tries-- >= 0) {
+						while (tries-- > 0) {
 							try {
 								await beforeRequest(nextURL, noDelay);
 								req = await Zotero.HTTP.request(
