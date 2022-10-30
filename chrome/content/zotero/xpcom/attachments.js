@@ -2064,7 +2064,15 @@ Zotero.Attachments = new function(){
 					let contentType;
 					let skip = false;
 					let domains = new Set();
+					let redirectLimit = 10;
+					let redirectURLTries = new Map();
 					while (true) {
+						if (redirectLimit == 0) {
+							Zotero.debug("Too many redirects -- stopping");
+							skip = true;
+							break;
+						}
+						
 						let domain = urlToDomain(nextURL);
 						let noDelay = domains.has(domain);
 						domains.add(domain);
@@ -2104,12 +2112,27 @@ Zotero.Attachments = new function(){
 							if (!location) {
 								throw new Error("Location header not provided");
 							}
+							
+							let currentURL = nextURL;
+							
 							nextURL = Services.io.newURI(nextURL, null, null).resolve(location);
 							if (isTriedURL(nextURL)) {
 								Zotero.debug("Redirect URL has already been tried -- skipping");
 								skip = true;
 								break;
 							}
+							
+							// Keep track of tries for each redirect URL, and stop if too many
+							let maxTriesPerRedirectURL = 2;
+							let tries = (redirectURLTries.get(currentURL) || 0) + 1;
+							if (tries > maxTriesPerRedirectURL) {
+								Zotero.debug(`Too many redirects to ${currentURL} -- stopping`);
+								skip = true;
+								break;
+							}
+							redirectURLTries.set(currentURL, tries);
+							// And keep track of total redirects for this chain
+							redirectLimit--;
 							continue;
 						}
 						
