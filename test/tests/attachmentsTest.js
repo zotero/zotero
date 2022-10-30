@@ -679,6 +679,24 @@ describe("Zotero.Attachments", function() {
 					// DOI 6 redirects to page 8, which is on a different domain and has a PDF
 					[doiPrefix + doi6, pageURL8, true],
 					[pageURL8, pageURL8, true],
+					
+					// Redirect loop
+					['http://website/redirect_loop1', 'http://website/redirect_loop2', false],
+					['http://website/redirect_loop2', 'http://website/redirect_loop3', false],
+					['http://website/redirect_loop3', 'http://website/redirect_loop1', false],
+					
+					// Too many total redirects
+					['http://website/too_many_redirects1', 'http://website/too_many_redirects2', false],
+					['http://website/too_many_redirects2', 'http://website/too_many_redirects3', false],
+					['http://website/too_many_redirects3', 'http://website/too_many_redirects4', false],
+					['http://website/too_many_redirects4', 'http://website/too_many_redirects5', false],
+					['http://website/too_many_redirects5', 'http://website/too_many_redirects6', false],
+					['http://website/too_many_redirects6', 'http://website/too_many_redirects7', false],
+					['http://website/too_many_redirects7', 'http://website/too_many_redirects8', false],
+					['http://website/too_many_redirects8', 'http://website/too_many_redirects9', false],
+					['http://website/too_many_redirects9', 'http://website/too_many_redirects10', false],
+					['http://website/too_many_redirects10', 'http://website/too_many_redirects11', false],
+					['http://website/too_many_redirects11', pageURL1, true],
 				];
 				for (let route of routes) {
 					let [expectedURL, responseURL, includePDF] = route;
@@ -1090,6 +1108,24 @@ describe("Zotero.Attachments", function() {
 			assert.equal(json.contentType, 'application/pdf');
 			assert.equal(json.filename, 'Test.pdf');
 			assert.equal(await OS.File.stat(attachment.getFilePath()).size, pdfSize);
+		});
+		
+		it("should stop after too many redirects to the same URL", async function () {
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('url', 'http://website/redirect_loop1');
+			await item.saveTx();
+			var attachment = await Zotero.Attachments.addAvailablePDF(item);
+			assert.isFalse(attachment);
+			assert.equal(requestStub.callCount, 7);
+		});
+		
+		it("should stop after too many total redirects for a given page URL", async function () {
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('url', 'http://website/too_many_redirects1');
+			await item.saveTx();
+			var attachment = await Zotero.Attachments.addAvailablePDF(item);
+			assert.isFalse(attachment);
+			assert.equal(requestStub.callCount, 10);
 		});
 		
 		it("should handle a custom resolver in HTML mode", async function () {
