@@ -38,7 +38,7 @@ const { Cc, Ci, Cu } = require('chrome');
 Cu.import("resource://gre/modules/osfile.jsm");
 
 const CHILD_INDENT = 12;
-const COLORED_TAGS_RE = new RegExp("^[0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1}$");
+const COLORED_TAGS_RE = new RegExp("^(?:Numpad|Digit)([0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1})$");
 const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
 const HTML_NS = "http://www.w3.org/1999/xhtml";
 const ATTACHMENT_STATE_LOAD_DELAY = 150; //ms
@@ -870,9 +870,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			return false;
 		}
-		if (!event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey && COLORED_TAGS_RE.test(event.key)) {
+		if (!event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey && COLORED_TAGS_RE.test(event.code)) {
 			let libraryID = this.collectionTreeRow.ref.libraryID;
-			let position = parseInt(event.key) - 1;
+			let position = COLORED_TAGS_RE.exec(event.code)[1] - 1;
 			// When 0 is pressed, remove all colored tags
 			if (position == -1) {
 				let items = this.getSelectedItems();
