@@ -70,7 +70,7 @@ describe("PDF Reader", function () {
 			var reader = await Zotero.Reader.open(attachment.itemID);
 			// TODO: Implement a promise that would be resolved when pdf-reader is completely loaded
 			var n = 0;
-			while ((!reader._iframeWindow || !reader._iframeWindow.wrappedJSObject.PDFViewerApplication.pdfDocument) && n++ < 50) {
+			while ((!reader._iframeWindow || !reader._iframeWindow.wrappedJSObject.PDFViewerApplication.pdfDocument) && n++ < 150) {
 				await Zotero.Promise.delay(100);
 			}
 			await reader._iframeWindow.wrappedJSObject.viewerInstance._viewer._pdfjsPromise;
