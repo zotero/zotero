@@ -45,7 +45,7 @@
     "message": "儲存此項目時出現錯誤。$1可能限制了您單次可儲存項目的數量。參閱$2來獲得更多資訊。"
   },
   "progressWindow_error_troubleshootingTranslatorIssues": {
-    "message": "找出轉譯器問題所在"
+    "message": "找出翻譯器問題所在"
   },
   "progressWindow_error_siteAccessLimits": {
     "message": "網站存取限制"

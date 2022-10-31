@@ -41,7 +41,7 @@
 <!ENTITY zotero.preferences.feeds.feedDefaults "Impostazioni predefinite dei feed">
 
 <!ENTITY zotero.preferences.openurl.choose "Scegli un resolver:">
-<!ENTITY zotero.preferences.openurl.custom "Personalizza…">
+<!ENTITY zotero.preferences.openurl.custom "Personalizzato…">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Versione:">
 
@@ -59,7 +59,7 @@
 <!ENTITY zotero.preferences.sync.about "Informazioni sulla sincronizzazione">
 <!ENTITY zotero.preferences.sync.fileSyncing "Sincronizzazione dei file">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
-<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sincronizza gli allegati nella mia biblioteca con">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sincronizza gli allegati nella Biblioteca personale con">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Sincronizza gli allegati nelle biblioteche dei gruppi tramite Zotero Storage">
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Scarica i file">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "durante la sincronizzazione">
@@ -71,13 +71,13 @@
 <!ENTITY zotero.preferences.sync.librariesToSync.button "Seleziona le biblioteche…">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Sincronizza">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Biblioteca">
-<!ENTITY zotero.preferences.sync.reset.warning1 "Le operazioni elencate qui di seguito sono da utilizzare solo in situazioni specifiche e rare. Non dovrebbero essere usate per risolvere problemi generici. In molti casi, un ripristino comporterà ulteriori problemi. Vedi">
+<!ENTITY zotero.preferences.sync.reset.warning1 "Le operazioni elencate qui di seguito sono da utilizzare solo in particolari e rare situazioni. Non dovrebbero essere usate per risolvere problemi generici. In molti casi, un ripristino comporterà ulteriori problemi. Vedi">
 <!ENTITY zotero.preferences.sync.reset.warning2 "Opzioni di ripristino della sincronizzazione">
 <!ENTITY zotero.preferences.sync.reset.warning3 "per maggiori informazioni.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Ripristina la cronologia di sincronizzazione dei dati">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Unisci i dati in locale con i dati in remoto ignorando la cronologia di sincronizzazione">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Ripristina dalla biblioteca online">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Sovrascrivi i dati in locale di Zotero con i dati della biblioteca online.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Sovrascrivi i dati di Zotero in locale con i dati della biblioteca online.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Sostituisci la biblioteca online">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Sovrascrivi la biblioteca online con i dati in locale di Zotero">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Azzera la cronologia di sincronizzazione dei file">

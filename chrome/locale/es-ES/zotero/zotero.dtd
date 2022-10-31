@@ -326,6 +326,6 @@
 <!ENTITY zotero.pdfReader.splitVertically "Dividir verticalmente">
 <!ENTITY zotero.pdfReader.splitHorizontally "Dividir horizontalmente">
 <!ENTITY zotero.pdfReader.transferFromPDF "Importar anotaciones...">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
-<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Girar la página a la izquierda">
+<!ENTITY zotero.pdfReader.rotatePageRight "Girar la página a la derecha">
+<!ENTITY zotero.pdfReader.rotatePage180 "Girar la página  180°">

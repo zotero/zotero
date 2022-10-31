@@ -1,13 +1,13 @@
 <!ENTITY zotero.version "хувилбар">
-<!ENTITY zotero.whatsNew "What’s new">
+<!ENTITY zotero.whatsNew "Шинэ мэдээ">
 <!ENTITY zotero.createdby "Зохион бүтээгч">
-<!ENTITY zotero.director "Director:">
+<!ENTITY zotero.director "Захирал">
 <!ENTITY zotero.directors "Захиралууд">
 <!ENTITY zotero.developers "Хөгжүүлэгчид">
 <!ENTITY zotero.alumni "Жил">
 <!ENTITY zotero.about.localizations "Нутагшуулалтууд">
-<!ENTITY zotero.about.additionalSoftware "Third-Party Software:">
+<!ENTITY zotero.about.additionalSoftware "Гуравдагч талын програм хангамж:">
 <!ENTITY zotero.thanks "Тусгайлан баярлалаа.">
 <!ENTITY zotero.about.close "Хаах">
-<!ENTITY zotero.moreCreditsAndAcknowledgements "More Credits &amp; Acknowledgements">
-<!ENTITY zotero.citationProcessing "Citation &amp; Bibliography Processing">
+<!ENTITY zotero.moreCreditsAndAcknowledgements "Илүү нэр дурдах &amp; Батламжлах">
+<!ENTITY zotero.citationProcessing "Иш татах &amp; Номзүйн боловсруулалт">

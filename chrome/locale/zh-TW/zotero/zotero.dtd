@@ -60,7 +60,7 @@
 <!ENTITY zotero.items.year_column "年">
 <!ENTITY zotero.items.dateModified_column "修改日期">
 <!ENTITY zotero.items.moreColumns.label "更多行">
-<!ENTITY zotero.items.restoreColumnOrder.label "還原行的次序">
+<!ENTITY zotero.items.restoreColumnOrder.label "還原欄的次序">
 
 <!ENTITY zotero.items.menu.showInLibrary "在文獻庫中顯示">
 <!ENTITY zotero.items.menu.attach.note "新增筆記">
@@ -189,7 +189,7 @@
 
 <!ENTITY zotero.exportOptions.title "匯出……">
 <!ENTITY zotero.exportOptions.format.label "格式：">
-<!ENTITY zotero.exportOptions.translatorOptions.label "轉譯器選項">
+<!ENTITY zotero.exportOptions.translatorOptions.label "翻譯器選項">
 
 <!ENTITY zotero.charset.label "字元編碼">
 <!ENTITY zotero.moreEncodings.label "更多編碼">
@@ -326,6 +326,6 @@
 <!ENTITY zotero.pdfReader.splitVertically "垂直分割">
 <!ENTITY zotero.pdfReader.splitHorizontally "水平分割">
 <!ENTITY zotero.pdfReader.transferFromPDF "匯入標註……">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
-<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">
+<!ENTITY zotero.pdfReader.rotatePageLeft "將頁面向左旋轉">
+<!ENTITY zotero.pdfReader.rotatePageRight "將頁面向右旋轉">
+<!ENTITY zotero.pdfReader.rotatePage180 "將頁面旋轉180°">

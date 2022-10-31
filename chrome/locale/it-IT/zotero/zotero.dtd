@@ -29,7 +29,7 @@
 <!ENTITY zotero.errorReport.submitted "La tua segnalazione di errore è stata inviata.">
 <!ENTITY zotero.errorReport.reportID "ID della segnalazione:">
 <!ENTITY zotero.errorReport.postToForums "Ti preghiamo di pubblicare un messaggio sul forum di Zotero (forums.zotero.org) contenente l'ID della segnalazione, una descrizione del problema e tutti i passaggi necessari a ricrearlo.">
-<!ENTITY zotero.errorReport.notReviewed "Le segnalazioni di errore non saranno revisionate a meno che non vengano espressamente menzionate nel forum.">
+<!ENTITY zotero.errorReport.notReviewed "Le segnalazioni di errore non saranno revisionate a meno che non vengano espressamente segnalate nel forum.">
 
 <!ENTITY zotero.upgrade.title "Assistente per l'aggiornamento di Zotero">
 <!ENTITY zotero.upgrade.newVersionInstalled "Nuova versione di Zotero installata correttamente.">
@@ -53,7 +53,7 @@
 
 <!ENTITY zotero.toolbar.duplicate.label "Mostra i duplicati">
 <!ENTITY zotero.collections.showUnfiledItems "Mostra gli oggetti non classificati">
-<!ENTITY zotero.collections.showRetractedItems "Mostra gli elementi ritrattati">
+<!ENTITY zotero.collections.showRetractedItems "Mostra gli elementi ritirati dalla pubblicazione">
 
 <!ENTITY zotero.items.itemType "Tipo di elemento">
 <!ENTITY zotero.items.creator_column "Autore">
@@ -133,7 +133,7 @@
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "Nessun tag da visualizzare">
 <!ENTITY zotero.tagSelector.loadingTags "Caricamento dei tag in corso…">
-<!ENTITY zotero.tagSelector.showAutomatic "Mostra automaticamente">
+<!ENTITY zotero.tagSelector.showAutomatic "Mostra Tag automatici">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Mostra tutti i tag di questa biblioteca">
 <!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Elimina i tag automatici da questa biblioteca…">
 <!ENTITY zotero.tagSelector.clearAll "Deseleziona tutto">
@@ -243,7 +243,7 @@
 
 <!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Il tag mostrato di seguito è troppo lungo per essere sincronizzato sul server:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "I tag devono essere più corti di 256 caratteri per poter essere sincronizzati.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Puoi dividere il tag in tag multipli, modificarlo a mano per accorciarlo o eliminarlo.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Puoi dividere il tag in tag multipli, modificarlo a mano per accorciarlo oppure eliminarlo.">
 <!ENTITY zotero.sync.longTagFixer.split "Dividi">
 <!ENTITY zotero.sync.longTagFixer.splitAtThe "Dividi al">
 <!ENTITY zotero.sync.longTagFixer.character "carattere">
@@ -255,10 +255,10 @@
 <!ENTITY zotero.merge.of "di">
 <!ENTITY zotero.merge.deleted "Eliminati">
 
-<!ENTITY zotero.proxy.recognized.title "Proxy identificato">
+<!ENTITY zotero.proxy.recognized.title "Proxy riconosciuto">
 <!ENTITY zotero.proxy.recognized.warning "Aggiungi solo proxy collegati dalla tua biblioteca, scuola o azienda.">
 <!ENTITY zotero.proxy.recognized.warning.secondary "Aggiungere proxy differenti potrebbe permettere a siti dannosi di camuffarsi da siti affidabili.">
-<!ENTITY zotero.proxy.recognized.disable.label "Blocca il reindirizzamento automatico delle richieste via proxy già identificate.">
+<!ENTITY zotero.proxy.recognized.disable.label "Blocca il reindirizzamento automatico delle richieste via dei proxy riconosciuti in precedenza">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignora">
 
 <!ENTITY zotero.feedSettings.title "Impostazioni dei feed">
@@ -283,14 +283,14 @@
 <!ENTITY zotero.rtfScan.introPage.description "Zotero può estrarre e riformattare automaticamente le citazioni e inserire una bibliografia all'interno di un file RTF. La funzionalità di scansione RTF attualmente supporta citazioni con variazioni nei seguenti formati:">
 <!ENTITY zotero.rtfScan.introPage.description2 "Per iniziare, seleziona un file RTF e un file di destinazione qui sotto:">
 <!ENTITY zotero.rtfScan.scanPage.label "Sto cercando citazioni">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero sta cercando citazioni nel tuo documento. Ti preghiamo di attendere.">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero sta esaminando il documento per individuare citazioni. Ti preghiamo di attendere.">
 <!ENTITY zotero.rtfScan.citationsPage.label "Verifica gli oggetti citati.">
-<!ENTITY zotero.rtfScan.citationsPage.description "Ti preghiamo di controllare la lista delle citazioni riconosciute qui sotto e di assicurarti che Zotero abbia selezionato correttamente i relativi riferimenti. Le citazioni non corrispondenti o ambigue devono essere perfezionate prima di procedere al passaggio successivo.">
+<!ENTITY zotero.rtfScan.citationsPage.description "Ti preghiamo di controllare la lista qui sotto delle citazioni individuate e di assicurarti che Zotero abbia selezionato correttamente gli elementi corrispondenti. Le citazioni senza corrispondenza o ambigue devono essere corrette prima di procedere al passaggio successivo.">
 <!ENTITY zotero.rtfScan.stylePage.label "Formattazione del documento">
 <!ENTITY zotero.rtfScan.formatPage.label "Formattazione delle citazioni">
 <!ENTITY zotero.rtfScan.formatPage.description "Zotero sta elaborando e formattando il tuo documento. Ti preghiamo di attendere.">
 <!ENTITY zotero.rtfScan.completePage.label "Elaborazione RTF completata.">
-<!ENTITY zotero.rtfScan.completePage.description "Il tuo documento è stato elaborato. Ti preghiamo di assicurarti che sia stato formattato correttamente.">
+<!ENTITY zotero.rtfScan.completePage.description "Il tuo documento è stato elaborato. Per favore assicurati che sia stato formattato correttamente.">
 <!ENTITY zotero.rtfScan.inputFile.label "File da elaborare">
 <!ENTITY zotero.rtfScan.outputFile.label "File di destinazione">
 
