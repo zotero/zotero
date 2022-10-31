@@ -152,7 +152,7 @@ i('TreeitemThesis', 'chrome://zotero/skin/treeitem-thesis.png');
 i('TreeitemTvBroadcast', 'chrome://zotero/skin/treeitem-tvBroadcast.png', false);
 i('TreeitemVideoRecording', 'chrome://zotero/skin/treeitem-videoRecording.png', false);
 i('TreeitemWebpageGray', 'chrome://zotero/skin/treeitem-webpage-gray.png');
-i('TreeitemWebpage', 'chrome://zotero/skin/treeitem-webpage.png', false);
+i('TreeitemWebpage', 'chrome://zotero/skin/treeitem-webpage.png');
 
 // Treesource
 i('TreesourceBucket', 'chrome://zotero/skin/treesource-bucket.png', false);
