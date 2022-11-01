@@ -37,8 +37,8 @@ var Scaffold_Load = new function() {
 			window.close();
 		});
 		
-		listbox.addEventListener('keydown', (e) => {
-			if (e.key == ' ') {
+		listbox.addEventListener('keypress', (e) => {
+			if (e.key == ' ' && e.target == listbox) {
 				e.preventDefault();
 			}
 		});
