@@ -1759,6 +1759,9 @@ var Scaffold = new function () {
 		var url = item.getElementsByTagName("label")[0].getAttribute("value");
 		var test = JSON.parse(item.dataset.testString);
 		var urlOrData = (test.input !== undefined) ? test.input : url;
+		if (typeof urlOrData !== 'string') {
+			urlOrData = JSON.stringify(urlOrData, null, '\t');
+		}
 		Zotero.Utilities.Internal.copyTextToClipboard(urlOrData);
 	};
 	
