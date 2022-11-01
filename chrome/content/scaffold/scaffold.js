@@ -57,6 +57,7 @@ var Scaffold = new function () {
 	var _translatorsLoadedPromise;
 	var _translatorProvider = null;
 	var _lastModifiedTime = 0;
+	var _needRebuildTranslatorSuggestions = true;
 	
 	var _editors = {};
 
@@ -156,6 +157,7 @@ var Scaffold = new function () {
 
 			onLoadComplete: () => {
 				document.getElementById('cmd_load').removeAttribute('disabled');
+				_needRebuildTranslatorSuggestions = true;
 			}
 		});
 		
@@ -267,6 +269,7 @@ var Scaffold = new function () {
 
 		monaco.languages.registerCodeLensProvider('javascript', this.createRunCodeLensProvider(monaco, editor));
 		monaco.languages.registerHoverProvider('javascript', this.createHoverProvider(monaco, editor));
+		monaco.languages.registerCompletionItemProvider('javascript', this.createCompletionProvider(monaco, editor));
 
 		let tsLib = await Zotero.File.getContentsAsync(
 			OS.Path.join(Scaffold_Translators.getDirectory(), 'index.d.ts'));
@@ -498,6 +501,43 @@ var Scaffold = new function () {
 				return lenses;
 			},
 			resolveCodeLens: (_model, codeLens, _token) => codeLens
+		};
+	};
+	
+	this.createCompletionProvider = function (monaco, editor) {
+		let suggestions = null;
+		return {
+			provideCompletionItems(model, position) {
+				let prefixText = model.getValueInRange({
+					startLineNumber: position.lineNumber,
+					startColumn: 1,
+					endLineNumber: position.lineNumber,
+					endColumn: position.column
+				});
+				if (/setTranslator\([^)]*$/.test(prefixText)) {
+					let word = model.getWordUntilPosition(position);
+					let range = {
+						startLineNumber: position.lineNumber,
+						endLineNumber: position.lineNumber,
+						startColumn: word.startColumn,
+						endColumn: word.endColumn
+					};
+					if (!suggestions || _needRebuildTranslatorSuggestions) {
+						// Cache the suggestions minus the range field
+						suggestions = [...Scaffold_Translators._translators.entries()].map(([id, meta]) => {
+							return {
+								label: `${meta.translator.label}: '${id}'`,
+								kind: monaco.languages.CompletionItemKind.Constant,
+								insertText: `'${id}'`
+							};
+						});
+						_needRebuildTranslatorSuggestions = false;
+					}
+					// Add the range to each suggestion before returning
+					return { suggestions: suggestions.map(s => ({ ...s, range })) };
+				}
+				return { suggestions: [] };
+			}
 		};
 	};
 
