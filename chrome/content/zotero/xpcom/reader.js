@@ -909,14 +909,14 @@ class ReaderInstance {
 	}
 
 	_openThumbnailPopup(data) {
-		let popup = this._window.document.createElement('menupopup');
+		let popup = this._window.document.createXULElement('menupopup');
 		this._popupset.appendChild(popup);
 		popup.addEventListener('popuphidden', function () {
 			popup.remove();
 		});
 		let menuitem;
 		// Rotate Left
-		menuitem = this._window.document.createElement('menuitem');
+		menuitem = this._window.document.createXULElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.rotateLeft'));
 		menuitem.setAttribute('disabled', this._isReadOnly());
 		menuitem.addEventListener('command', async () => {
@@ -926,7 +926,7 @@ class ReaderInstance {
 		});
 		popup.appendChild(menuitem);
 		// Rotate Right
-		menuitem = this._window.document.createElement('menuitem');
+		menuitem = this._window.document.createXULElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.rotateRight'));
 		menuitem.setAttribute('disabled', this._isReadOnly());
 		menuitem.addEventListener('command', async () => {
@@ -936,7 +936,7 @@ class ReaderInstance {
 		});
 		popup.appendChild(menuitem);
 		// Rotate 180
-		menuitem = this._window.document.createElement('menuitem');
+		menuitem = this._window.document.createXULElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('pdfReader.rotate180'));
 		menuitem.setAttribute('disabled', this._isReadOnly());
 		menuitem.addEventListener('command', async () => {
@@ -946,9 +946,9 @@ class ReaderInstance {
 		});
 		popup.appendChild(menuitem);
 		// Separator
-		popup.appendChild(this._window.document.createElement('menuseparator'));
+		popup.appendChild(this._window.document.createXULElement('menuseparator'));
 		// Delete
-		menuitem = this._window.document.createElement('menuitem');
+		menuitem = this._window.document.createXULElement('menuitem');
 		menuitem.setAttribute('label', Zotero.getString('general.delete'));
 		menuitem.setAttribute('disabled', this._isReadOnly());
 		menuitem.addEventListener('command', async () => {
