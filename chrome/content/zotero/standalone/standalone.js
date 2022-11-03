@@ -308,6 +308,7 @@ const ZoteroStandalone = new function() {
 		var selected = [];
 
 		let win = Zotero.getMainWindow();
+		let localLinkType = 'select';
 		if (win) {
 			if (win.Zotero_Tabs.selectedID == 'zotero-pane') {
 				try {
@@ -324,6 +325,7 @@ const ZoteroStandalone = new function() {
 					selected = item.parentItem && [item.parentItem] || [];
 					item = item.parentItem || item;
 					win.ZoteroPane.updateQuickCopyCommands([item]);
+					localLinkType = reader.type;
 				}
 			}
 		}
@@ -335,20 +337,37 @@ const ZoteroStandalone = new function() {
 		}
 		format = Zotero.QuickCopy.unserializeSetting(format);
 		
+		var copyAs = document.getElementById('menu_copyAs');
 		var copyCitation = document.getElementById('menu_copyCitation');
 		var copyBibliography = document.getElementById('menu_copyBibliography');
 		var copyExport = document.getElementById('menu_copyExport');
 		var copyNote = document.getElementById('menu_copyNote');
+		var copyLocalLink = document.getElementById('menu_copyLocalLink');
+		var copyWebLibraryLink = document.getElementById('menu_copyWebLibraryLink');
 		
 		copyCitation.hidden = !selected.length || format.mode != 'bibliography';
 		copyBibliography.hidden = !selected.length || format.mode != 'bibliography';
 		copyExport.hidden = !selected.length || format.mode != 'export' || exportingNotes;
 		copyNote.hidden = !selected.length || format.mode != 'export' || !exportingNotes;
+		copyLocalLink.hidden = !selected.length;
+		copyWebLibraryLink.hidden = !selected.length;
+		copyWebLibraryLink.disabled = false;
+		
+		// In the background, query the API to check whether any of the selected items haven't yet been synced.
+		// If a connection error occurs, we log it and leave the menu item enabled.
+		Zotero.Utilities.Internal.checkItemsExistRemotely(selected)
+			.then((allExist) => {
+				if (!allExist) {
+					copyWebLibraryLink.disabled = true;
+				}
+			})
+			.catch(e => Zotero.logError(e));
+		
 		if (format.mode == 'export') {
 			try {
 				let obj = Zotero.Translators.get(format.id);
 				if (obj) {
-					copyExport.label = Zotero.getString('quickCopy.copyAs', obj.label);
+					copyExport.label = obj.label;
 				}
 				else {
 					copyExport.hidden = true;
@@ -361,6 +380,16 @@ const ZoteroStandalone = new function() {
 				copyExport.hidden = true;
 			}
 		}
+		document.l10n.setAttributes(copyLocalLink, 'menu-copy-local-link', {
+			linkType: localLinkType,
+			numItems: selected.length
+		});
+		document.l10n.setAttributes(copyWebLibraryLink, 'menu-copy-web-library-link', {
+			numItems: selected.length
+		});
+		
+		copyAs.disabled = copyCitation.hidden && copyBibliography.hidden && copyExport.hidden && copyNote.hidden
+			&& copyLocalLink.hidden && copyWebLibraryLink.hidden;
 	};
 	
 	

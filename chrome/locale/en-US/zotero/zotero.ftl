@@ -724,3 +724,21 @@ mac-word-plugin-install-remind-later-button =
     .label = { general-remind-me-later }
 mac-word-plugin-install-dont-ask-again-button =
     .label = { general-dont-ask-again }
+
+menu-copy-as =
+    .label = Copy As
+menu-copy-local-link =
+    .label = {$linkType ->
+        *[select] Select
+        [pdf] PDF
+        [epub] EPUB
+        [snapshot] Snapshot
+    } {$numItems ->
+        [one] Link
+        *[other] Links
+    }
+menu-copy-web-library-link =
+    .label = Online Library {$numItems ->
+        [one] Link
+        *[other] Links
+    }
