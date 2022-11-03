@@ -147,6 +147,57 @@ Zotero.URI = new function () {
 	this.getItemURI = function (item) {
 		return this._getObjectURI(item);
 	}
+
+
+	/**
+	 * Construct a web library URL for the given library. Null if the user isn't logged in or a feed library
+	 * (which can't be displayed in the web library) is passed.
+	 *
+	 * @param {Zotero.Library} library
+	 * @return {String | null}
+	 */
+	this.getLibraryWebURL = function (library) {
+		// https://github.com/zotero/dataserver/blob/97267cbee6441350b66baff4c34e1f8f9833118a/model/Utilities.inc.php#L88-L100
+		let slugify = s => s
+			.trim()
+			.toLowerCase()
+			.replace(/[^a-z0-9 ._-]/g, '')
+			.replace(/ /g, '_');
+
+		if (library.isFeed) {
+			return null;
+		}
+		else if (library.isGroup) {
+			return `${ZOTERO_CONFIG.WWW_BASE_URL}groups/${library.groupID}/${slugify(library.name)}`;
+		}
+		else {
+			let username = Zotero.Users.getCurrentUsername();
+			if (!username) {
+				return null;
+			}
+			return ZOTERO_CONFIG.WWW_BASE_URL + slugify(username);
+		}
+	};
+	
+
+	/**
+	 * Construct a web library URL for the given item. Null if the user isn't logged in or a feed item
+	 * (which can't be displayed in the web library) is passed.
+	 *
+	 * If the item hasn't yet been synced, a URL is still returned, but it will fall back to displaying the library root
+	 * when loaded in the browser. Call {@link Zotero.Utilities.Internal.checkItemsExistRemotely} first if you need to
+	 * know whether the item has been synced.
+	 *
+	 * @param {Zotero.Item} item
+	 * @return {String | null}
+	 */
+	this.getItemWebURL = function (item) {
+		let libraryURL = this.getLibraryWebURL(item.library);
+		if (libraryURL === null) {
+			return null;
+		}
+		return `${libraryURL}/items/${item.key}`;
+	};
 	
 	
 	/**
