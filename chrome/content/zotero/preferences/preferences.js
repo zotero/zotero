@@ -30,8 +30,9 @@ var Zotero_Preferences = {
 	
 	_firstPaneLoadDeferred: Zotero.Promise.defer(),
 	
+	_observerSymbols: new Map(),
+
 	init: function () {
-		this._observerSymbols = [];
 		this.navigation = document.getElementById('prefs-navigation');
 		this.content = document.getElementById('prefs-content');
 		this.helpContainer = document.getElementById('prefs-help-container');
@@ -96,9 +97,10 @@ var Zotero_Preferences = {
 	},
 	
 	onUnload: function () {
-		while (this._observerSymbols.length) {
-			Zotero.Prefs.unregisterObserver(this._observerSymbols.shift());
+		for (let symbol of this._observerSymbols.values()) {
+			Zotero.Prefs.unregisterObserver(symbol);
 		}
+		this._observerSymbols.clear();
 	},
 	
 	waitForFirstPaneLoad: async function () {
@@ -326,6 +328,49 @@ ${str}
 	 * @private
 	 */
 	_initImportedNodesPostInsert(container) {
+		let useChecked = elem => (
+			(elem instanceof HTMLInputElement && elem.type == 'checkbox')
+				|| elem.tagName == 'checkbox'
+		);
+		
+		let syncFromPref = (elem, preference) => {
+			let value = Zotero.Prefs.get(preference, true);
+			if (useChecked(elem)) {
+				elem.checked = value;
+			}
+			else {
+				elem.value = value;
+			}
+			elem.dispatchEvent(new Event('syncfrompreference'));
+		};
+		
+		// We use a single listener function shared between all elements so we can easily detach it later
+		let syncToPrefOnModify = (event) => {
+			if (event.currentTarget.getAttribute('preference')) {
+				let value = useChecked(event.currentTarget) ? event.currentTarget.checked : event.currentTarget.value;
+				Zotero.Prefs.set(event.currentTarget.getAttribute('preference'), value, true);
+				event.currentTarget.dispatchEvent(new Event('synctopreference'));
+			}
+		};
+		
+		let attachToPreference = (elem, preference) => {
+			Zotero.debug(`Attaching <${elem.tagName}> element to ${preference}`);
+			let symbol = Zotero.Prefs.registerObserver(
+				preference,
+				() => syncFromPref(elem, preference),
+				true
+			);
+			this._observerSymbols.set(elem, symbol);
+		};
+		
+		let detachFromPreference = (elem) => {
+			if (this._observerSymbols.has(elem)) {
+				Zotero.debug(`Detaching <${elem.tagName}> element from preference`);
+				Zotero.Prefs.unregisterObserver(this._observerSymbols.get(elem));
+				this._observerSymbols.delete(elem);
+			}
+		};
+
 		// Activate `preference` attributes
 		for (let elem of container.querySelectorAll('[preference]')) {
 			let preference = elem.getAttribute('preference');
@@ -336,36 +381,47 @@ ${str}
 					.getAttribute('name');
 			}
 
-			let useChecked = (elem instanceof HTMLInputElement && elem.type == 'checkbox')
-				|| elem.tagName == 'checkbox';
+			attachToPreference(elem, preference);
 
-			elem.addEventListener(elem instanceof XULElement ? 'command' : 'input', () => {
-				let value = useChecked ? elem.checked : elem.value;
-				Zotero.Prefs.set(preference, value, true);
-				elem.dispatchEvent(new Event('synctopreference'));
-			});
+			elem.addEventListener(elem instanceof XULElement ? 'command' : 'input', syncToPrefOnModify);
 
-			let syncFromPref = () => {
-				let value = Zotero.Prefs.get(preference, true);
-				if (useChecked) {
-					elem.checked = value;
-				}
-				else {
-					elem.value = value;
-				}
-				elem.dispatchEvent(new Event('syncfrompreference'));
-			};
-
-			// Set timeout so pane can add listeners first
+			// Set timeout before populating the value so the pane can add listeners first
 			setTimeout(() => {
-				syncFromPref();
-				this._observerSymbols.push(Zotero.Prefs.registerObserver(preference, syncFromPref, true));
+				syncFromPref(elem, preference);
 
 				// If this is the first pane to be loaded, notify anyone waiting
 				// (for tests)
 				this._firstPaneLoadDeferred.resolve();
 			});
 		}
+		
+		new MutationObserver((mutations) => {
+			for (let mutation of mutations) {
+				if (mutation.type == 'attributes') {
+					let target = mutation.target;
+					detachFromPreference(target);
+					if (target.hasAttribute('preference')) {
+						attachToPreference(target, target.getAttribute('preference'));
+						target.addEventListener(target instanceof XULElement ? 'command' : 'input', syncToPrefOnModify);
+					}
+				}
+				else if (mutation.type == 'childList') {
+					for (let node of mutation.removedNodes) {
+						detachFromPreference(node);
+					}
+					for (let node of mutation.addedNodes) {
+						if (node.nodeType == Node.ELEMENT_NODE && node.hasAttribute('preference')) {
+							attachToPreference(node);
+							node.addEventListener(node instanceof XULElement ? 'command' : 'input', syncToPrefOnModify);
+						}
+					}
+				}
+			}
+		}).observe(container, {
+			childList: true,
+			subtree: true,
+			attributeFilter: ['preference']
+		});
 
 		// parseXULToFragment() doesn't convert oncommand attributes into actual
 		// listeners, so we'll do it here
