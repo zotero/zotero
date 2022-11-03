@@ -598,6 +598,10 @@ class ReaderInstance {
 		return this._item.id;
 	}
 
+	get selectedAnnotationKeys() {
+		return Array.from(this._internalReader._state.selectedAnnotationIDs);
+	}
+
 	async updateTitle() {
 		this._title = await this._item.getTabTitle();
 		this._setTitleValue(this._title);

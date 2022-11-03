@@ -1998,8 +1998,8 @@ var ZoteroPane = new function()
 	
 	/**
 	 * Update the <command> elements that control the shortcut keys and the enabled state of the
-	 * "Copy Citation"/"Copy Bibliography"/"Copy as"/"Copy Note" menu options. When disabled, the shortcuts are
-	 * still caught in handleKeyPress so that we can show an alert about not having references selected.
+	 * Copy As menu options. When disabled, the shortcuts are still caught in handleKeyPress so
+	 * that we can show an alert about not having references selected.
 	 */
 	this.updateQuickCopyCommands = function (selectedItems) {
 		let canCopy = false;
@@ -2705,6 +2705,79 @@ var ZoteroPane = new function()
 			}
 		}
 	}
+	
+
+	/**
+	 * @param {Object} [options]
+	 * @param {'item' | 'reader'} [options.type]
+	 * @param {Boolean} [options.toWebLibrary]
+	 */
+	this.copySelectedItemLinksToClipboard = function (options) {
+		let { type = 'item', toWebLibrary = false } = options || {};
+		
+		if (type !== 'item' && toWebLibrary) {
+			// TODO: Support web library reader links?
+			throw new Error('toWebLibrary is only valid for item links');
+		}
+		
+		let items = [];
+		let selectedAnnotation = null;
+		if (Zotero_Tabs.selectedID != 'zotero-pane') {
+			var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
+			if (reader) {
+				let item = Zotero.Items.get(reader.itemID);
+				items = [item];
+
+				let selectedAnnotationKeys = reader.selectedAnnotationKeys;
+				if (selectedAnnotationKeys.length === 1) {
+					selectedAnnotation = Zotero.Items.getByLibraryAndKey(item.libraryID, selectedAnnotationKeys[0]);
+				}
+			}
+		}
+		else {
+			let itemIDs = this.getSelectedItems(true);
+			// Get selected item IDs in the item tree order
+			itemIDs = this.getSortedItems(true)
+				.filter(id => itemIDs.includes(id));
+			items = Zotero.Items.get(itemIDs);
+		}
+
+		if (!items.length) {
+			return;
+		}
+
+		let links;
+		if (toWebLibrary) {
+			links = items.map(item => Zotero.URI.getItemWebURL(item));
+		}
+		else {
+			links = items.map((item) => {
+				let itemPath = Zotero.API.getLibraryPrefix(item.libraryID) + '/items/' + item.key;
+				if (type === 'reader') {
+					if (items.length === 1 && selectedAnnotation && selectedAnnotation.annotationPosition) {
+						let { annotationPosition, key } = selectedAnnotation;
+						annotationPosition = JSON.parse(annotationPosition);
+						// See Note HTML/Markdown translators
+						if (annotationPosition.type === 'FragmentSelector') {
+							itemPath += '?cfi=' + encodeURIComponent(annotationPosition.value);
+						}
+						else if (annotationPosition.type === 'CssSelector') {
+							itemPath += '?sel=' + encodeURIComponent(annotationPosition.value);
+						}
+						else {
+							itemPath += '?page=' + (annotationPosition.pageIndex + 1);
+						}
+						itemPath += '&annotation=' + key;
+					}
+					return 'zotero://open/' + itemPath;
+				}
+				else {
+					return 'zotero://select/' + itemPath;
+				}
+			});
+		}
+		Zotero.Utilities.Internal.copyTextToClipboard(links.join('\n'));
+	};
 	
 	
 	this.clearQuicksearch = Zotero.Promise.coroutine(function* () {
