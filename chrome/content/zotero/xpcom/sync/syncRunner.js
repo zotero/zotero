@@ -1501,7 +1501,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			panel.removeChild(panel.firstChild);
 		}
 		
-		for (let e of errors) {
+		for (let [index, e] of errors.entries()) {
 			var box = doc.createElement('vbox');
 			var label = doc.createElement('label');
 			if (e.libraryID !== undefined) {
@@ -1526,6 +1526,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 				let header = doc.createElement('description');
 				header.className = 'error-header';
 				header.textContent = e.dialogHeader;
+				header.setAttribute("control", `zotero-sync-error-panel-button-${index}`);
 				content.appendChild(header);
 			}
 			
@@ -1544,6 +1545,7 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 			
 			var desc = doc.createElement('description');
 			desc.textContent = msg;
+			desc.setAttribute("control", `zotero-sync-error-panel-button-${index}`);
 			// Make the text selectable
 			desc.setAttribute('style', '-moz-user-select: text; cursor: text');
 			content.appendChild(desc);
@@ -1565,13 +1567,26 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					var buttonText = e.dialogButtonText;
 					var buttonCallback = e.dialogButtonCallback;
 				}
+
+				function addEventHandlers(button, cb) {
+					button.addEventListener("click", () => {
+						cb();
+						panel.hidePopup();
+					});
+
+					button.addEventListener("keydown", (event) => {
+						if (event.key !== ' ' && event.key !== 'Enter') return;
+						cb();
+						panel.hidePopup();
+					});
+				}
+
+
 				
 				let button = doc.createElement('button');
+				button.setAttribute("id", `zotero-sync-error-panel-button-${index}`);
 				button.setAttribute('label', buttonText);
-				button.onclick = function () {
-					buttonCallback();
-					panel.hidePopup();
-				};
+				addEventHandlers(button, buttonCallback);
 				buttons.appendChild(button);
 				
 				// Second button
@@ -1581,10 +1596,9 @@ Zotero.Sync.Runner_Module = function (options = {}) {
 					
 					let button2 = doc.createElement('button');
 					button2.setAttribute('label', buttonText);
-					button2.onclick = () => {
-						buttonCallback();
-						panel.hidePopup();
-					};
+					button2.setAttribute("id", `zotero-sync-error-panel-button-${index}`);
+					button.removeAttribute("id");
+					addEventHandlers(button2, buttonCallback);
 					buttons.insertBefore(button2, button);
 				}
 			}

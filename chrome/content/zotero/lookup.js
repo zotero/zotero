@@ -218,7 +218,9 @@ var Zotero_Lookup = new function () {
 			event.stopPropagation();
 			this._button.focus();
 			this._button = null;
-		} else this._button = null;
+		} else {
+			this._button = null;
+		}
 	}
 	
 	
