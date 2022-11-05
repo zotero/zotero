@@ -143,112 +143,147 @@ var ZoteroPane = new function()
 	};
 
 	function setUpToolbar() {
-		/* constants, state, and helper functions */
-		const toolbar = this.document.getElementById("zotero-toolbar");
-		const lookupButton = document.getElementById("zotero-tb-lookup"); // needs special treatment
-		let zone = null;
-		let current = null;
-
 		class TbFocusZone {
-			constructor(node, before, after) {
-				this.node = node;
+			constructor(start, before, after) {
+				this.start = start;
 				this.before = before;
 				this.after = after;
 			}
-			enter(targetButton) {
-				zone = this;
-				current = targetButton;
-			}
-			exit() {
-				zone = null;
-				current = null;
-			}
-			getButtons() {
-				return Array.from(this.node.getElementsByClassName("zotero-tb-button"));
-			}
-			get firstButton() {
-				return this.getButtons()[0];
-			}
-			contains(target) {
-				return this.node.contains(target);
-			}
 		}
 		
-		function moveFocus(n = 0) {
-			const children = zone.getButtons();
-			let currentIndex = children.indexOf(current);
-			if (currentIndex === -1) {
-				throw new Error("Cannot move focus from an element not part of the current toolbar zone.");
-			}
-			if (currentIndex + n < 0 || currentIndex + n >= children.length) return;
-			children[currentIndex + n].focus();
-		}
-		
-		const isTbButton = (node) => node && node.classList && node.classList.contains("zotero-tb-button");
-		
-		/* set up toolbar */
+		// if the hidden property is ever set on a grandparent or more distant
+		// ancestor this will need to be updated
+		const isVisible = (b) => !b.hidden && !b.parentElement.hidden;
+		const isTbButton = (node) => node && node.tagName === "toolbarbutton";
 
+		function nextVisible(id, field = "after") {
+			let b = document.getElementById(id);
+			while (!isVisible(b)) {
+				const mapData = focusMap.get(b.id);
+				b = document.getElementById(mapData[field]);
+			}
+			return b;
+		}
+
+		/* constants */
+		const toolbar = this.document.getElementById("zotero-toolbar");
+
+		// assumes no toolbarbuttons are dynamically added, just hidden
+		// or revealed. If this changes, the observer will have to monitor
+		// changes to the childList for each hbox in the toolbar which might
+		// have dynamic children
+		const buttons = toolbar.getElementsByTagName("toolbarbutton");
+		const focusMap = new Map();
 		const zones = [
-			new TbFocusZone(document.getElementById("zotero-collections-toolbar") ),
-			new TbFocusZone(document.getElementById("zotero-items-toolbar"),
-								() => zones[0].firstButton,
-								() => document.getElementById("zotero-tb-search-menu-button")),
-			new TbFocusZone(document.getElementById("zotero-item-toolbar"),
-								() => document.getElementById("collection-tree"),
-								() => document.getElementById("zotero-tb-search"))
+			new TbFocusZone(
+				"zotero-tb-collection-add", 
+				null, 
+				"zotero-tb-search-menu-button"),
+			new TbFocusZone(
+				"zotero-tb-locate", 
+				"zotero-tb-search",
+				null)
 		];
 
-		for (const zone of zones) {
-			zone.firstButton.setAttribute("tabindex", "0");
+		/* 
+			observe buttons and containers for changes in the "hidden"
+			attribute
+		*/
+		const observer = new MutationObserver((mutations, _) => {
+			for (const mutation of mutations) {
+				if (mutation.target.hidden
+						&& (document.activeElement === mutation.target 
+							|| mutation.target.contains(document.activeElement))
+					) {
+					const next = nextVisible(document.activeElement.id, "before");
+					next.focus();
+				}
+			}
+		});
+
+		/* 
+			build a chain which connects all the <toolbarbutton>s,
+			except for zotero-tb-locate and zotero-tb-advanced-search
+			which is where the chain breaks
+		*/
+		let prev = null;
+		let _zone = zones[0];
+		for (const button of buttons) {
+			focusMap.set(button.id, {
+				before: prev, 
+				after: null,
+				zone: _zone
+			});
+
+			/* observe each button for changes to "hidden" */
+			observer.observe(button, {
+				attributes: true,
+				attributeFilter: ["hidden"]
+			});
+
+			if (focusMap.has(prev)) {
+				focusMap.get(prev).after = button.id; 
+			}
+			
+			prev = button.id;
+			
+			// break the chain at zotero-tb-advanced-search
+			if (button.id === "zotero-tb-advanced-search") {
+				_zone = zones[1];
+				prev = null;
+			}
 		}
 
-		toolbar.addEventListener("focusin", (event) => {
-			if (!isTbButton(event.target)) {
-				return;
-			}
-			else if (zone) {
-				if (current === event.target) return;
-				if (zone.contains(event.target)) {
-					current = event.target;
-					return;
-				}
-			}
-			else {
-				for (const zone of zones) {
-					if (zone.contains(event.target)) {
-						zone.enter(event.target);
-					}
-				}
-			}
+		/* this container sets "hidden" to hide its children, so we have to observe it too */
+		observer.observe(document.getElementById("zotero-tb-sync-progress-box"), {
+			attributes: true,
+			attributeFilter: ["hidden"]		
 		});
 
-		toolbar.addEventListener("focusout", (event) => {
-			if (zone) {
-				if (!(zone.contains(event.relatedTarget))) {
-					zone.exit();
-				}
-				else if (!(isTbButton(event.relatedTarget))) {
-					zone.exit();
-				}
-			}
-		});
+		// lookupButton and syncErrorButton show popup panels, and so need special treatment
+		const lookupButton = document.getElementById("zotero-tb-lookup"); 
+		const syncErrorButton = document.getElementById("zotero-tb-sync-error");
+
+
+		for (const zone of zones) {
+			document.getElementById(zone.start).setAttribute("tabindex", "0");
+		}
 
 		toolbar.addEventListener("keydown", (event) => {
-			// only handle events on a zotero-tb-button inside a zone
-			if (!zone || !isTbButton(event.target)) return;
+			if (event.key === 'Tab' && event.shiftKey 
+					&& !modifierIsNotShift(event) 
+					&& event.originalTarget
+					&& event.originalTarget.id == "zotero-tb-search-menu-button") {
+				event.preventDefault();
+				event.stopPropagation();
+				document.getElementById(zones[0].start).focus();
+				return;
+			}
+			// only handle events on a toolbarbutton inside a zone
+			if (!isTbButton(event.target)) return;
+
+			const mapData = focusMap.get(event.target.id);
 
 			if (!Zotero.rtl && event.key === 'ArrowRight'
 					|| Zotero.rtl && event.key === 'ArrowLeft') {
 				event.preventDefault();
 				event.stopPropagation();
-				moveFocus(1);
+				// moveFocus(forwards);
+				if (mapData.after) {
+					nextVisible(mapData.after, "after").focus();
+				}
 				return;
-			} 
+			}
 			else if (!Zotero.rtl && event.key === 'ArrowLeft'
 					|| Zotero.rtl && event.key === 'ArrowRight') {
 				event.preventDefault();
 				event.stopPropagation();
-				moveFocus(-1);
+
+				if (mapData.before) {
+					nextVisible(mapData.before, "before").focus();
+				}
+
+				// moveFocus(backwards);
 				return;
 			} 
 			/* manually trigger on space and enter */
@@ -260,6 +295,13 @@ var ZoteroPane = new function()
 					event.stopPropagation();
 					Zotero_Lookup.showPanel(event.target);
 				} 
+				else if (event.target === syncErrorButton) {
+					event.preventDefault();
+					event.stopPropagation();
+					syncErrorButton.dispatchEvent(new MouseEvent("click", {
+						target: event.target
+					}));
+				}
 				else if (event.target.getAttribute('type') === 'menu') {
 					event.preventDefault();
 					event.stopPropagation();
@@ -285,17 +327,15 @@ var ZoteroPane = new function()
 					}
 				}
 				/* prepare for a focus change */
-				else if (event.key === 'ArrowDown' && zone.after) {
-						zone.after().focus();
-						zone.exit();
-						event.preventDefault();
-						event.stopPropagation();
+				else if (event.key === 'ArrowDown' && mapData.zone.before) {
+					document.getElementById(mapData.zone.before).focus();
+					event.preventDefault();
+					event.stopPropagation();
 				}
-				else if (event.key === 'ArrowUp' && zone.before) {
-						zone.before().focus();
-						zone.exit();
-						event.preventDefault();
-						event.stopPropagation();
+				else if (event.key === 'ArrowUp' && mapData.zone.after) {
+					document.getElementById(mapData.zone.after).focus();
+					event.preventDefault();
+					event.stopPropagation();
 				}
 				/* 
 				if neither before nor after have been manually set, 
@@ -303,13 +343,11 @@ var ZoteroPane = new function()
 				behavior proceed
 				*/
 				else {
-					current = zone.firstButton;
-					current.focus();
+					document.getElementById(mapData.zone.start).focus();
 				}
 			}
 			else if (event.key === 'Tab' && !modifierIsNotShift(event)) {
-				current = zone.firstButton;
-				current.focus();
+				document.getElementById(mapData.zone.start).focus();
 				// let the default tab/shift+tab behavior proceed
 			}
 		});

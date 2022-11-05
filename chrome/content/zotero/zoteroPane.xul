@@ -188,12 +188,14 @@
 							</hbox>
 							<hbox align="center" pack="end">
 								<toolbarbutton tabindex="-1" id="zotero-tb-sync-stop"
+									style="-moz-user-focus: normal;"
 									tooltiptext="&zotero.sync.stop;"
 									oncommand="this.hidden = true; Zotero.Sync.Runner.stop()"
 									hidden="true"/>
 								<hbox id="zotero-tb-sync-progress-box" hidden="true" align="center">
 									<!-- TODO: localize -->
 									<toolbarbutton tabindex="-1" id="zotero-tb-sync-storage-cancel"
+										style="-moz-user-focus: normal;"
 										tooltiptext="Stop sync"
 										oncommand="Zotero.Sync.Runner.stop()"/>
 									<progressmeter id="zotero-tb-sync-progress" mode="determined"
@@ -211,14 +213,19 @@
 		
 							<hbox id="zotero-pq-buttons">
 							</hbox>
-		
-							<toolbarbutton tabindex="-1" id="zotero-tb-sync-error" hidden="true"/>
+
+							<!-- TODO needs label for screenreaders -->
+							<toolbarbutton tabindex="-1" id="zotero-tb-sync-error" hidden="true" style="-moz-user-focus: normal;" />
 							
 							<!--
 								We put this here, but it can be used wherever
 								Zotero.Sync.Runner.updateErrorPanel() puts it
 							-->
-							<panel id="zotero-sync-error-panel" type="arrow"/>
+							<panel id="zotero-sync-error-panel" type="arrow" onpopupshown="
+								const buttons = this.getElementsByTagName('button');
+								if (buttons[0]) {
+									buttons[0].focus();
+								}" />
 							
 							<toolbarbutton tabindex="-1" id="zotero-tb-sync" class="zotero-tb-button" tooltip="_child"
 									oncommand="ZoteroPane.sync()">
