@@ -1600,9 +1600,9 @@ function renderCell(index, data, column) {
 	return span;
 }
 
-function renderCheckboxCell(index, data, columnName) {
+function renderCheckboxCell(index, data, column) {
 	let span = document.createElement('span');
-	span.className = `cell checkbox ${columnName}`;
+	span.className = `cell checkbox ${column.className}`;
 	span.setAttribute('role', 'checkbox');
 	span.setAttribute('aria-checked', data);
 	if (data) {
