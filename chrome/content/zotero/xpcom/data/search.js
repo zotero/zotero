@@ -961,7 +961,8 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	var conditions = [];
 	
 	let lastCondition;
-	for (let condition of Object.values(this._conditions)) {
+	let conditionsToProcess = Object.values(this._conditions);
+	for (let condition of conditionsToProcess) {
 		let name = condition.condition;
 		let conditionData = Zotero.SearchConditions.get(name);
 		
@@ -1054,6 +1055,39 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 					continue;
 				case 'blockEnd':
 					conditions.push({name:'blockEnd'});
+					continue;
+				
+				case 'anyField':
+					// We expand this condition to the same underlying set of conditions as 'quicksearch-fields'
+					// (although we don't detect keys or split into quoted and unquoted segments). 'quicksearch-fields'
+					// is expanded in addCondition(), but we can't do that with this condition because we don't want
+					// to save the conditions it expands to in the search object
+					conditionsToProcess.push({ condition: 'blockStart' });
+					conditionsToProcess.push({
+						condition: 'field',
+						operator: condition.operator,
+						value: condition.value,
+						required: false
+					});
+					conditionsToProcess.push({
+						condition: 'tag',
+						operator: condition.operator,
+						value: condition.value,
+						required: false
+					});
+					conditionsToProcess.push({
+						condition: 'note',
+						operator: condition.operator,
+						value: condition.value,
+						required: false
+					});
+					conditionsToProcess.push({
+						condition: 'creator',
+						operator: condition.operator,
+						value: condition.value,
+						required: false
+					});
+					conditionsToProcess.push({ condition: 'blockEnd' });
 					continue;
 			}
 			
