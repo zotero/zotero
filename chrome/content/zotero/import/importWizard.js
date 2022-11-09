@@ -12,7 +12,7 @@ var Zotero_Import_Wizard = {
 	_mendeleyCode: null,
 	_mendeleyAuth: null,
 	_mendeleyHasPreviouslyImported: false,
-	
+	_isZotfileInstalled: false,
 	
 	init: async function () {
 		this._wizard = document.getElementById('import-wizard');
@@ -21,6 +21,9 @@ var Zotero_Import_Wizard = {
 			// Local import disabled
 			//document.getElementById('radio-import-source-mendeley').hidden = false;
 		}
+
+		const extensions = await Zotero.getInstalledExtensions();
+		this._isZotfileInstalled = !!extensions.find(extName => extName.match(/^ZotFile((?!disabled).)*$/));
 
 		const predicateID = Zotero.RelationPredicates.getID('mendeleyDB:documentUUID');
 
@@ -95,6 +98,14 @@ var Zotero_Import_Wizard = {
 				break;
 
 			case 'radio-import-source-mendeley-online':
+					if (this._isZotfileInstalled) {
+						this._onDone(
+							Zotero.getString('general.error'),
+							Zotero.getString('import.online.blockedByPlugin', 'ZotFile'),
+							false
+						);
+						return;
+					}
 				wizard.goTo('mendeley-online-explanation');
 				wizard.canRewind = true;
 			break;
