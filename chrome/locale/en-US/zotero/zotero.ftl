@@ -60,6 +60,7 @@ import-online-intro=In the next step you will be asked to log in to { $targetApp
 import-online-intro2={ -app-name } will never see or store your { $targetApp } password.
 import-online-form-intro = Please enter your credentials to log in to { $targetAppOnline }. This is necessary to import your { $targetApp } library into { -app-name }.
 import-online-wrong-credentials = Login to { $targetApp } failed. Please re-enter credentials and try again.
+import-online-blocked-by-plugin = The import cannot continue with { $plugin } installed. Please disable this plugin and try again.
 
 report-error =
     .label = Report Error…

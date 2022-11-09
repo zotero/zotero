@@ -38,6 +38,7 @@ const { directAuth } = mendeleyAPIUtils;
 const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 	file: null,
 	folder: null,
+	isZotfileInstalled: false,
 	libraryID: null,
 	mendeleyAuth: null,
 	mendeleyCode: null,
@@ -68,6 +69,9 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 			const relSQL = 'SELECT ROWID FROM itemRelations WHERE predicateID = ? LIMIT 1';
 			this.mendeleyHasPreviouslyImported = !!(await Zotero.DB.valueQueryAsync(relSQL, predicateID));
 		}
+
+		const extensions = await Zotero.getInstalledExtensions();
+		this.isZotfileInstalled = !!extensions.find(extName => extName.match(/^ZotFile((?!disabled).)*$/));
 
 		this.wizard = document.getElementById('import-wizard');
 		this.wizard.getPageById('page-start')
@@ -272,6 +276,13 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 				case 'mendeleyOnline':
 					this.file = null;
 					this.folder = null;
+					if (this.isZotfileInstalled) {
+						this.skipToDonePage(
+							'general-error',
+							['import-online-blocked-by-plugin', { plugin: 'ZotFile' }]
+						);
+						return;
+					}
 					this.wizard.goTo('page-mendeley-online-intro');
 					this.wizard.canRewind = true;
 					break;
