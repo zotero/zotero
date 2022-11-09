@@ -505,6 +505,7 @@ Zotero.Integration = new function() {
 			session._removeCodeFields = {};
 			session._deleteFields = {};
 			session._bibliographyFields = [];
+			session._shouldMerge = false;
 
 			if (dataString == EXPORTED_DOCUMENT_MARKER) {
 				Zotero.Integration.currentSession = session;
@@ -799,7 +800,7 @@ Zotero.Integration.Interface.prototype.addEditBibliography = Zotero.Promise.coro
  */
 Zotero.Integration.Interface.prototype.refresh = async function() {
 	await this._session.init(true, false);
-	this._session.shouldMerge = true;
+	this._session._shouldMerge = true;
 	
 	this._session.reload = this._session.reload || this._session.data.prefs.delayCitationUpdates;
 	await this._session.updateFromDocument(FORCE_CITATIONS_REGENERATE);
@@ -1081,7 +1082,7 @@ Zotero.Integration.Session.prototype._processFields = async function () {
 				data = await field.unserialize(),
 				citation = new Zotero.Integration.Citation(field, data, noteIndex);
 
-			if (this.shouldMerge && typeof field.isAdjacentToNextField === 'function' && await field.isAdjacentToNextField()) {
+			if (this._shouldMerge && typeof field.isAdjacentToNextField === 'function' && await field.isAdjacentToNextField()) {
 				adjacentCitations.push(citation);
 				this._deleteFields[i] = true;
 				continue;
