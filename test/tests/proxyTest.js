@@ -15,7 +15,7 @@ describe("Zotero.Proxies", function(){
 			let proxies = Zotero.Proxies.getPotentialProxies(url);
 			let expectedProxies = {};
 			expectedProxies[url] = null;
-			expectedProxies["https://www.example.com"] = {scheme: "https://%h.proxy.example.com/%p", dotsToHyphens: false};
+			expectedProxies["https://www.example.com"] = {scheme: "https://%h.proxy.example.com/%p"};
 			assert.deepEqual(proxies, expectedProxies);
 		});
 		
@@ -24,7 +24,7 @@ describe("Zotero.Proxies", function(){
 			let proxies = Zotero.Proxies.getPotentialProxies(url);
 			let expectedProxies = {};
 			expectedProxies[url] = null;
-			expectedProxies["https://www.example.com"] = {scheme: "https://%h.proxy.example.com/%p", dotsToHyphens: true};
+			expectedProxies["https://www.example.com"] = {scheme: "https://%h.proxy.example.com/%p"};
 			assert.deepEqual(proxies, expectedProxies);
 		});
 	});

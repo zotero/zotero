@@ -237,7 +237,7 @@ describe("Connector Server", function () {
 					}
 				],
 				uri: "https://www-example-com.proxy.example.com/path",
-				proxy: {scheme: 'https://%h.proxy.example.com/%p', dotsToHyphens: true}
+				proxy: {scheme: 'https://%h.proxy.example.com/%p'}
 			};
 			
 			var promise = waitForItemEvent('add');
