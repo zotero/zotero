@@ -415,7 +415,7 @@ const TagsBox = React.forwardRef((props, ref) => {
 		<div className="tags-box" ref={rootRef} onClick={blurOpenField}>
 			<div className="tags-box-header">
 				<div className="tags-box-count">{renderCount()}</div>
-				{ props.editable && <div><button onClick={handleAddTag}>Add</button></div> }
+				{ props.editable && <div><button onClick={handleAddTag} id="tags-box-add-button">Add</button></div> }
 			</div>
 			<div className="tags-box-list-container">
 				<ul className="tags-box-list">

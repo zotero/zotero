@@ -142,15 +142,7 @@ var ZoteroPane = new function()
 		setUpToolbar();
 	};
 
-	function setUpToolbar() {
-		class TbFocusZone {
-			constructor(start, before, after) {
-				this.start = start;
-				this.before = before;
-				this.after = after;
-			}
-		}
-		
+	function setUpToolbar() {		
 		// if the hidden property is ever set on a grandparent or more distant
 		// ancestor this will need to be updated
 		const isVisible = (b) => !b.hidden && !b.parentElement.hidden;
@@ -175,14 +167,60 @@ var ZoteroPane = new function()
 		const buttons = toolbar.getElementsByTagName("toolbarbutton");
 		const focusMap = new Map();
 		const zones = [
-			new TbFocusZone(
-				"zotero-tb-collection-add", 
-				null, 
-				"zotero-tb-search-menu-button"),
-			new TbFocusZone(
-				"zotero-tb-locate", 
-				"zotero-tb-search",
-				null)
+			{
+				get start() { return document.getElementById("zotero-tb-collection-add"); },
+				focusBefore() {
+					// need to check if the itembox is open
+					const pane = document.getElementById("zotero-item-pane-content");
+					if (pane.selectedIndex === "0") {
+						document.getElementById("item-tree-main-default").focus();
+					}
+					else {
+						const tabBox = document.getElementById("zotero-view-tabbox");
+						if (tabBox.selectedIndex === 0) {
+							const itembox = document.getElementById("zotero-editpane-item-box");
+							itembox.focusLastField();
+						}
+						else if (tabBox.selectedIndex === 1) {
+							const notes = document.getElementById("zotero-editpane-notes");
+							const nodes = notes.querySelectorAll("button");
+							const node = nodes[nodes.length - 1];
+							node.focus();
+							// TODO: the notes are currently inaccessible to the keyboard
+						}
+						else if (tabBox.selectedIndex === 2) {
+							const tagContainer = document.getElementById("tags-box-container");
+							const tags = tagContainer.querySelectorAll("#tags-box-add-button,.zotero-clicky");
+							const next = tags[tags.length - 1];
+							if (next.id === "tags-box-add-button") {
+								next.focus();
+							}
+							else {
+								next.click();
+							}
+						}
+						else if (tabBox.selectedIndex === 3) {
+							const related = tabBox.querySelector("relatedbox");
+							related.receiveKeyboardFocus();
+						}
+						else {
+							throw new Error("This error should be unreachable — the selectedIndex should always be between 1 and 4");
+						}
+					}
+				},
+				focusAfter() {
+					document.getElementById("zotero-tb-search-menu-button").focus(); 
+				}
+			},
+			{
+				get start() { return document.getElementById("zotero-tb-locate"); },
+				focusBefore() { 
+					document.getElementById("zotero-tb-search").focus();
+				},
+				focusAfter() { 
+					document.getElementById("collection-tree").focus();
+				}
+			}
 		];
 
 		/* 
@@ -244,22 +282,24 @@ var ZoteroPane = new function()
 		const lookupButton = document.getElementById("zotero-tb-lookup"); 
 		const syncErrorButton = document.getElementById("zotero-tb-sync-error");
 
-
+		/* buttons at the start of zones need tabindex=0 */
 		for (const zone of zones) {
-			document.getElementById(zone.start).setAttribute("tabindex", "0");
+			zone.start.setAttribute("tabindex", "0");
 		}
 
 		toolbar.addEventListener("keydown", (event) => {
+			// manually move focus when Shift+Tabbing from the search-menu-button
 			if (event.key === 'Tab' && event.shiftKey 
 					&& !modifierIsNotShift(event) 
 					&& event.originalTarget
 					&& event.originalTarget.id == "zotero-tb-search-menu-button") {
 				event.preventDefault();
 				event.stopPropagation();
-				document.getElementById(zones[0].start).focus();
+				zones[0].start.focus();
 				return;
 			}
-			// only handle events on a toolbarbutton inside a zone
+			
+			// only handle events on a <toolbarbutton>
 			if (!isTbButton(event.target)) return;
 
 			const mapData = focusMap.get(event.target.id);
@@ -268,7 +308,6 @@ var ZoteroPane = new function()
 					|| Zotero.rtl && event.key === 'ArrowLeft') {
 				event.preventDefault();
 				event.stopPropagation();
-				// moveFocus(forwards);
 				if (mapData.after) {
 					nextVisible(mapData.after, "after").focus();
 				}
@@ -282,8 +321,6 @@ var ZoteroPane = new function()
 				if (mapData.before) {
 					nextVisible(mapData.before, "before").focus();
 				}
-
-				// moveFocus(backwards);
 				return;
 			} 
 
@@ -328,28 +365,26 @@ var ZoteroPane = new function()
 					}
 				}
 				/* prepare for a focus change */
-				else if (event.key === 'ArrowDown' && mapData.zone.before) {
-					document.getElementById(mapData.zone.before).focus();
+				else if (event.key === 'ArrowDown') {
 					event.preventDefault();
 					event.stopPropagation();
+					mapData.zone.focusBefore();
 				}
-				else if (event.key === 'ArrowUp' && mapData.zone.after) {
-					document.getElementById(mapData.zone.after).focus();
+				else if (event.key === 'ArrowUp') {
 					event.preventDefault();
 					event.stopPropagation();
-				}
-				/* 
-				if neither before nor after have been manually set, 
-				focus the first element of the zone and let the default
-				behavior proceed
-				*/
-				else {
-					document.getElementById(mapData.zone.start).focus();
+					mapData.zone.focusAfter();
 				}
 			}
 			else if (event.key === 'Tab' && !modifierIsNotShift(event)) {
-				document.getElementById(mapData.zone.start).focus();
-				// let the default tab/shift+tab behavior proceed
+				event.preventDefault();
+				event.stopPropagation();			
+				if (event.shiftKey) {
+					mapData.zone.focusBefore();
+				}
+				else {
+					mapData.zone.focusAfter();
+				}
 			}
 		});
 	}
