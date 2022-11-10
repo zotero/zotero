@@ -1508,7 +1508,7 @@ describe("Zotero.Translate", function() {
 				var itemSaver = new Zotero.Translate.ItemSaver({
 					libraryID: Zotero.Libraries.userLibraryID,
 					attachmentMode: Zotero.Translate.ItemSaver.ATTACHMENT_MODE_FILE,
-					proxy: new Zotero.Proxy({scheme: 'https://%h.proxy.example.com/%p', dotsToHyphens: true})
+					proxy: new Zotero.Proxy({scheme: 'https://%h.proxy.example.com/%p'})
 				});
 				var itemDeferred = Zotero.Promise.defer();
 				var attachmentDeferred = Zotero.Promise.defer();
