@@ -78,6 +78,7 @@ class EditorInstance {
 			Zotero.Prefs.registerObserver('note.css', this._handleStyleChange),
 			Zotero.Prefs.registerObserver('layout.spellcheckDefault', this._handleSpellCheckChange, true)
 		];
+		this._spellChecker = null;
 		
 		// Run Cut/Copy/Paste with chrome privileges
 		this._iframeWindow.wrappedJSObject.zoteroExecCommand = function (doc, command, ui, value) {
@@ -872,8 +873,31 @@ class EditorInstance {
 			}
 
 			let firstElementChild = this._popup.firstElementChild;
+			let showSeparator = false;
 			let suggestionCount = spellChecker.addSuggestionsToMenuOnParent(this._popup, firstElementChild, 5);
 			if (suggestionCount) {
+				showSeparator = true;
+			}
+			if (spellChecker.overMisspelling) {
+				let addToDictionary = this._popup.ownerDocument.createXULElement('menuitem');
+				addToDictionary.setAttribute('data-l10n-id', 'text-action-spell-add-to-dictionary');
+				addToDictionary.addEventListener('command', () => {
+					spellChecker.addToDictionary();
+				});
+				this._popup.insertBefore(addToDictionary, firstElementChild);
+				showSeparator = true;
+			}
+			if (spellChecker.canUndo()) {
+				let undo = this._popup.ownerDocument.createXULElement('menuitem');
+				undo.setAttribute('data-l10n-id', 'text-action-spell-undo-add-to-dictionary');
+				undo.addEventListener('command', () => {
+					spellChecker.undoAddToDictionary();
+				});
+				this._popup.insertBefore(undo, firstElementChild);
+				showSeparator = true;
+			}
+			
+			if (showSeparator) {
 				let separator = this._popup.ownerDocument.createXULElement('menuseparator');
 				this._popup.insertBefore(separator, firstElementChild);
 			}
@@ -883,10 +907,13 @@ class EditorInstance {
 	}
 
 	_getSpellChecker() {
-		let editingSession = this._iframeWindow.docShell.editingSession;
-		return new InlineSpellChecker(
-			editingSession.getEditorForWindow(this._iframeWindow)
-		);
+		if (!this._spellChecker) {
+			let editingSession = this._iframeWindow.docShell.editingSession;
+			this._spellChecker = new InlineSpellChecker(
+				editingSession.getEditorForWindow(this._iframeWindow)
+			);
+		}
+		return this._spellChecker;
 	}
 
 	async _ensureNoteCreated() {

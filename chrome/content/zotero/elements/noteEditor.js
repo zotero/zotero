@@ -60,6 +60,8 @@
 			window.addEventListener("unload", this.destroy);
 
 			var shadow = this.attachShadow({ mode: "open" });
+			MozXULElement.insertFTLIfNeeded('mozilla/textActions.ftl');
+			document.l10n.connectRoot(shadow);
 			
 			// var s1 = document.createElement("link");
 			// s1.rel = "stylesheet";
