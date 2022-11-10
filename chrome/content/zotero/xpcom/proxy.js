@@ -458,7 +458,7 @@ Zotero.Proxy.prototype.toProper = function(m) {
 			m = match;
 		}
 	}
-	let protocol = this.scheme.indexOf('https') == -1 ? 'http://' : 'https://';
+	let protocol = m[0].indexOf('https') == -1 ? 'http://' : 'https://';
 	if(this.multiHost) {
 		var properURL = protocol+m[this.parameters.indexOf("%h")+1]+"/";
 	} else {
