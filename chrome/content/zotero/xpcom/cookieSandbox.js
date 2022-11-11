@@ -317,10 +317,17 @@ Zotero.CookieSandbox.Observer = new function() {
 					this.trackedInterfaceRequestors.splice(i, 1);
 					this.trackedInterfaceRequestorSandboxes.splice(i, 1);
 					i--;
-				} else if(ir == notificationCallbacks) {
-					// We are tracking this interface requestor
-					trackedBy = this.trackedInterfaceRequestorSandboxes[i];
-					break;
+				} else {
+					let tracked = ir === notificationCallbacks;
+					try {
+						tracked = ir === notificationCallbacks.getInterface(Ci.nsIWebBrowserPersist);
+					} catch (e) { }
+					
+					if (tracked) {
+						// We are tracking this interface requestor
+						trackedBy = this.trackedInterfaceRequestorSandboxes[i];
+						break;
+					}
 				}
 			}
 			
@@ -350,12 +357,6 @@ Zotero.CookieSandbox.Observer = new function() {
 							notificationCallbacks.QueryInterface(Components.interfaces.nsIXMLHttpRequest);
 							tested = true;
 						} catch(e) {}
-						if(!tested) {
-							try {
-								notificationCallbacks.QueryInterface(Components.interfaces.nsIWebBrowserPersist);
-								tested = true;
-							} catch(e) {}
-						}
 					}
 				}
 			}
