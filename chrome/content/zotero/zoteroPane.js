@@ -170,7 +170,7 @@ var ZoteroPane = new function()
 			{
 				get start() { return document.getElementById("zotero-tb-collection-add"); },
 				focusBefore() {
-					// need to check if the itembox is open
+					// If no item is selected, focus items list.
 					const pane = document.getElementById("zotero-item-pane-content");
 					if (pane.selectedIndex === "0") {
 						document.getElementById("item-tree-main-default").focus();
@@ -191,20 +191,20 @@ var ZoteroPane = new function()
 						else if (tabBox.selectedIndex === 2) {
 							const tagContainer = document.getElementById("tags-box-container");
 							const tags = tagContainer.querySelectorAll("#tags-box-add-button,.zotero-clicky");
-							const next = tags[tags.length - 1];
-							if (next.id === "tags-box-add-button") {
-								next.focus();
+							const last = tags[tags.length - 1];
+							if (last.id === "tags-box-add-button") {
+								last.focus();
 							}
 							else {
-								next.click();
+								last.click();
 							}
 						}
 						else if (tabBox.selectedIndex === 3) {
 							const related = tabBox.querySelector("relatedbox");
-							related.receiveKeyboardFocus();
+							related.receiveKeyboardFocus("end");
 						}
 						else {
-							throw new Error("This error should be unreachable — the selectedIndex should always be between 1 and 4");
+							throw new Error("The selectedIndex should always be between 1 and 4");
 						}
 					}
 				},

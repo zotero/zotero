@@ -2344,14 +2344,14 @@
 			<method name="focusLastField">
 				<body><![CDATA[
 					const tabbableFields = this._dynamicFields.querySelectorAll('*[ztabindex]:not([disabled=true])');
-					const next = tabbableFields[tabbableFields.length - 1];
+					const last = tabbableFields[tabbableFields.length - 1];
 					
-					if (next.id == 'item-type-menu' || next.classList.contains('zotero-focusable')) {
-						next.focus();
+					if (last.classList.contains('zotero-focusable')) {
+						last.focus();
 					}
 					// Fields need to be clicked
 					else {
-						next.click();
+						last.click();
 					}
 				]]></body>
 			</method>			
