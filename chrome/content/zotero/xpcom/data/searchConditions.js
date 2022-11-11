@@ -451,6 +451,18 @@ Zotero.SearchConditions = new function(){
 					+ "'section','seriesNumber','issue')"),
 				template: true // mark for special handling
 			},
+
+			{
+				name: 'anyField',
+				operators: {
+					is: true,
+					isNot: true,
+					contains: true,
+					doesNotContain: true,
+					beginsWith: true
+				},
+				special: false
+			},
 			
 			{
 				name: 'datefield',
@@ -652,6 +664,10 @@ Zotero.SearchConditions = new function(){
 		
 		var collation = Zotero.getLocaleCollation();
 		_standardConditions.sort(function(a, b) {
+			// Sort Any Field to the top
+			if (a.name == 'anyField') {
+				return -1;
+			}
 			return collation.compareString(1, a.localized, b.localized);
 		});
 	});

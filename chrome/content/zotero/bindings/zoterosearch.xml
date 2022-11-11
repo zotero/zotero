@@ -407,6 +407,7 @@
 				<parameter name="condition"/>
 				<body><![CDATA[
 				switch (condition) {
+				case 'anyField':
 				case 'collection':
 				case 'creator':
 				case 'title':
