@@ -135,8 +135,11 @@ var Zotero_Lookup = new function () {
 
 	this.showPanel = function (button) {
 		var panel = document.getElementById('zotero-lookup-panel');
-		panel.openPopup(button, "after_start", 16, -2, false, false);
 		this._button = button;
+		if (!button) {
+			button = document.getElementById("zotero-tb-lookup");
+		}
+		panel.openPopup(button, "after_start", 16, -2, false, false);
 	}
 	
 	
