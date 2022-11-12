@@ -97,11 +97,7 @@
 						</menu>
 					</menupopup>
 				</menu>
-			</menupopup>
-		</menu>
-		<menu id="menu_edit">
-			<menupopup id="menu_EditPopup">
-				<menuseparator id="menu_edit_lookup_separator" class="menu-type-library" insertafter="menu_selectAll" />
+				<menuseparator id="menu_edit_lookup_separator" class="menu-type-library" />
 				<menu id="menu_AddAttachment" class="menu-type-library" label="&zotero.items.menu.attach;" insertafter="menu_edit_lookup_separator">
 					<menupopup onpopupshowing="ZoteroPane_Local.updateAttachmentButtonMenu(this)">
 						<menuitem class="menuitem-iconic zotero-menuitem-attachments-web-link" label="&zotero.items.menu.attach.link.uri;" oncommand="var itemID = ZoteroPane_Local.getSelectedItems()[0].id; ZoteroPane_Local.addAttachmentFromURI(true, itemID);"/>
@@ -112,15 +108,17 @@
 				<menuitem id="menu_lookup" class="menu-type-library" label="&zotero.toolbar.lookup.label;" 
 							oncommand="Zotero_Lookup.showPanel()"
 							insertafter="menu_AddAttachment" />
-		
-			</menupopup>
-		</menu>
-		<menu id="view-menu">
-			<menupopup id="menu_viewPopup">
-				<menuseparator class="menu-type-library" />
+				<menuseparator />
 				<menu id="menu_locate" class="menu-type-library" label="&zotero.toolbar.openURL.label;" position="0">
 					<menupopup id="menu_locatePopup" onpopupshowing="Zotero_LocateMenu.buildLocateMenu(this)"/>
 				</menu>
+			</menupopup>
+		</menu>
+		<menu id="toolsMenu">
+			<menupopup id="menu_ToolsPopup">
+				<menuitem id="menu_syncNow" class="menu-type-library" label="&zotero.sync.syncNow;" 
+							oncommand="ZoteroPane.sync()" insertbefore="menu_createTimeline" />
+				<menuseparator class="menu-type-library" insertafter="menu_syncNow" />
 			</menupopup>
 		</menu>
 	</menubar>
@@ -233,7 +231,7 @@
 						<hbox id="zotero-item-toolbar" flex="1" align="center" tooltip="html-tooltip">
 							<hbox align="center" pack="start" flex="1">
 								<toolbarbutton id="zotero-tb-locate" class="zotero-tb-button" tooltiptext="&zotero.toolbar.openURL.label;" type="menu">
-									<menupopup id="zotero-tb-locate-menu" onpopupshowing="Zotero_LocateMenu.buildLocateMenu()"/>
+									<menupopup id="zotero-tb-locate-menu" onpopupshowing="Zotero_LocateMenu.buildLocateMenu(this)"/>
 								</toolbarbutton>
 							</hbox>
 							<hbox align="center" pack="end">
