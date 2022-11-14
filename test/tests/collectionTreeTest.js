@@ -1305,7 +1305,7 @@ describe("Zotero.CollectionTree", function() {
 			await feed1.updateUnreadCount();
 			await feed2.updateUnreadCount();
 			
-			assert.equal(cv.getRow(cv.getRowIndexByID('F0')).ref.unreadCount, 1);
+			assert.equal(cv.getRow(cv.getRowIndexByID('F1')).ref.unreadCount, 1);
 			assert.lengthOf(win.document.querySelectorAll('#zotero-collections-tree .row.unread'), 2);
 		});
 	});

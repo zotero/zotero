@@ -68,7 +68,7 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('id', function () {
 		case 'feeds':
 			// The "0" is kind of weird, but we need the ID to be a one-character prefix + a number
 			// and there's only one set of feeds
-			return 'F0';
+			return 'F1';
 		
 		case 'header':
 			switch (this.ref.id) {

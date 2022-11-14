@@ -547,7 +547,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	}
 	
 	async selectFeeds() {
-		return this.selectByID('F0');
+		return this.selectByID('F1');
 	}
 
 	async selectItem(itemID, inLibraryRoot) {
@@ -700,7 +700,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				// If a feed was removed and there are no more, remove the 'Feeds' row
 				// (and the splitter before it)
 				if (feedDeleted && !Zotero.Feeds.haveFeeds()) {
-					let row = this._rowMap['F0'];
+					let row = this._rowMap['F1'];
 					this._removeRow(row);
 					this._removeRow(row - 1);
 				}
