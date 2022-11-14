@@ -156,6 +156,8 @@ Zotero.ItemFields = new function() {
 			case 'dateModified':
 			case 'itemType':
 				return Zotero.Schema.globalSchemaLocale.fields[field];
+			case 'feed':
+				return Zotero.getString('itemFields.feed');
 		}
 		
 		// TODO: different labels for different item types

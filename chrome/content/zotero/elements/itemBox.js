@@ -489,8 +489,14 @@
 				for (var i=0; i<fields.length; i++) {
 					fieldNames.push(Zotero.ItemFields.getName(fields[i]));
 				}
-				
-				if (!(this.item instanceof Zotero.FeedItem)) {
+
+				if (this.item instanceof Zotero.FeedItem) {
+					let row = ZoteroPane_Local.getCollectionTreeRow();
+					if (row && row.isFeeds()) {
+						fieldNames.unshift("feed");
+					}
+				}
+				else {
 					fieldNames.push("dateAdded", "dateModified");
 				}
 			}
@@ -515,6 +521,11 @@
 					// and converts it to a localized string for display
 					if (fieldName == 'itemType') {
 						val = this.item.itemTypeID;
+					}
+					// Fake "field" in the feeds global view that displays the name
+					// of the containing feed
+					else if (fieldName == 'feed') {
+						val = Zotero.Feeds.get(this.item.libraryID)?.name;
 					}
 					else {
 						val = this.item.getField(fieldName);
