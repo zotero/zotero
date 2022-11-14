@@ -223,7 +223,7 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('filesEditable', function ()
 });
 
 
-Zotero.CollectionTreeRow.visibilityGroups = {'feed': 'feed', 'feeds': 'feed'};
+Zotero.CollectionTreeRow.visibilityGroups = {'feed': 'feed', 'feeds': 'feeds'};
 
 
 Zotero.CollectionTreeRow.prototype.__defineGetter__('visibilityGroup', function() {

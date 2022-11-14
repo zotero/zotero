@@ -1304,6 +1304,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 					}
 				}
 				return val;
+				
+			case 'feed':
+				return (row.ref.isFeedItem && Zotero.Feeds.get(row.ref.libraryID).name) || "";
 			
 			default:
 				return row.ref.getField(field, false, true);
@@ -3032,6 +3035,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 		row.numNotes = treeRow.numNotes() || "";
+		row.feed = (treeRow.ref.isFeedItem && Zotero.Feeds.get(treeRow.ref.libraryID).name) || "";
 		row.title = treeRow.ref.getDisplayTitle();
 		
 		const columns = this.getColumns();
