@@ -186,6 +186,7 @@
 <!ENTITY zotero.import.size "Dydis">
 <!ENTITY zotero.import.createCollection "Importuotą rinkinį ir įrašus patalpinti naujame rinkinyje">
 <!ENTITY zotero.import.fileHandling "Rinkmenų tvarkymas">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Eksportuoti...">
 <!ENTITY zotero.exportOptions.format.label "Formatas:">

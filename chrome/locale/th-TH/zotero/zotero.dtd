@@ -186,6 +186,7 @@
 <!ENTITY zotero.import.size "Size">
 <!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 <!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "ส่งออก...">
 <!ENTITY zotero.exportOptions.format.label "รูปแบบ:">

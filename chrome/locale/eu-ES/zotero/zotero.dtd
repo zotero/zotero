@@ -186,6 +186,7 @@
 <!ENTITY zotero.import.size "Tamaina">
 <!ENTITY zotero.import.createCollection "Inportatutako bilduma eta elementuak bilduma berri batean kokatu">
 <!ENTITY zotero.import.fileHandling "Fitxategien erabilera">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Esportatu...">
 <!ENTITY zotero.exportOptions.format.label "Formatua:">

@@ -53,7 +53,7 @@
 <!ENTITY layout.label "Layout">
 <!ENTITY standardView.label "Standard View">
 <!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Collections Pane">
+<!ENTITY collectionsPane.label "Түүврүүдийн жагсаалт">
 <!ENTITY itemPane.label "Item Pane">
 <!ENTITY tagSelector.label "Tag Selector">
 <!ENTITY recursiveCollections.label "Show Items from Subcollections">
@@ -89,7 +89,7 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Алдааг олж засварлах мэдээлэл">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Discussion Forums">
+<!ENTITY helpFeedbackPage.label "Хэлэлцүүлгийн форумууд">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
 <!ENTITY helpReportErrors.label "Алдаануудыг илгээх...">

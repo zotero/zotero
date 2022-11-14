@@ -186,6 +186,7 @@
 <!ENTITY zotero.import.size "Grootte">
 <!ENTITY zotero.import.createCollection "Geïmporteerde verzamelingen en items in een nieuwe verzameling plaatsen">
 <!ENTITY zotero.import.fileHandling "Verwerking van bestanden">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Exporteren…">
 <!ENTITY zotero.exportOptions.format.label "Formaat:">

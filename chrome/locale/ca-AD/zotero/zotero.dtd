@@ -186,6 +186,7 @@
 <!ENTITY zotero.import.size "Mida">
 <!ENTITY zotero.import.createCollection "Col·loca les col·leccions importades i elements en una col·lecció nova">
 <!ENTITY zotero.import.fileHandling "Gestió de fitxers">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Exporta...">
 <!ENTITY zotero.exportOptions.format.label "Format:">

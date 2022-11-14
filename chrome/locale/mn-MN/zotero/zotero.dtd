@@ -21,7 +21,7 @@
 <!ENTITY zotero.general.other "Other…">
 <!ENTITY zotero.general.bigger "Bigger">
 <!ENTITY zotero.general.smaller "Smaller">
-<!ENTITY zotero.general.reset "Reset">
+<!ENTITY zotero.general.reset "Тохируулах">
 
 
 <!ENTITY zotero.errorReport.title "Zotero Error Report">
@@ -82,10 +82,10 @@
 <!ENTITY zotero.toolbar.lookup.label "Add Item(s) by Identifier">
 <!ENTITY zotero.toolbar.removeItem.label "Remove Item...">
 <!ENTITY zotero.toolbar.newLibrary.label "New Library">
-<!ENTITY zotero.toolbar.newCollection.label "New Collection...">
+<!ENTITY zotero.toolbar.newCollection.label "Шинэ түүвэр...">
 <!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
 <!ENTITY zotero.toolbar.newGroup "New Group...">
-<!ENTITY zotero.toolbar.newSubcollection.label "New Subcollection...">
+<!ENTITY zotero.toolbar.newSubcollection.label "Шинэ дэд түүвэр...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "New Saved Search...">
 <!ENTITY zotero.toolbar.emptyTrash.label "Empty Trash">
 <!ENTITY zotero.toolbar.tagSelector.label "Show/Hide Tag Selector">
@@ -106,7 +106,7 @@
 <!ENTITY zotero.toolbar.feeds.new.fromURL "From URL…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "From OPML…">
 <!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
-<!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
+<!ENTITY zotero.toolbar.feeds.edit "Мэдэгдлийг засварлах...">
 
 <!ENTITY zotero.item.add "Нэм">
 <!ENTITY zotero.item.attachment.file.show "Файлыг харуулах">
@@ -128,7 +128,7 @@
 <!ENTITY zotero.toolbar.attachment.add "Store Copy of File...">
 <!ENTITY zotero.toolbar.attachment.weblink "Save Link to Current Page">
 <!ENTITY zotero.toolbar.attachment.snapshot "Take Snapshot of Current Page">
-<!ENTITY zotero.toolbar.context.item "Item">
+<!ENTITY zotero.toolbar.context.item "Зүйл">
 <!ENTITY zotero.toolbar.context.notes "Тэмдэглэлүүд">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "No tags to display">
@@ -186,6 +186,7 @@
 <!ENTITY zotero.import.size "Size">
 <!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 <!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Экспорт...">
 <!ENTITY zotero.exportOptions.format.label "Формат:">
@@ -305,11 +306,11 @@
 <!ENTITY zotero.context.addChildNoteFromAnnotations "Add Item Note from Annotations">
 <!ENTITY zotero.context.addStandaloneNote "Add Standalone Note">
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "Add Standalone Note from Annotations">
-<!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
+<!ENTITY zotero.context.editInWindow "Тусдаа цонхонд засах">
 
 <!ENTITY zotero.pdfReader.firstPage "Эхний хуудас">
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
-<!ENTITY zotero.pdfReader.back "Back">
+<!ENTITY zotero.pdfReader.back "Буцах">
 <!ENTITY zotero.pdfReader.forward "Forward">
 <!ENTITY zotero.pdfReader.handTool "Hand Tool">
 <!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">

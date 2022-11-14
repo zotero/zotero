@@ -186,6 +186,7 @@
 <!ENTITY zotero.import.size "Boyut">
 <!ENTITY zotero.import.createCollection "İçeri aktarılmış dermeler ve eserleri yeni bir dermeye yerleştir">
 <!ENTITY zotero.import.fileHandling "Dosyaların İdare Edilmesi">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Dışarı Aktar...">
 <!ENTITY zotero.exportOptions.format.label "Biçim">
@@ -326,6 +327,6 @@
 <!ENTITY zotero.pdfReader.splitVertically "Dikey Olarak Böl">
 <!ENTITY zotero.pdfReader.splitHorizontally "Yatay Olarak Böl">
 <!ENTITY zotero.pdfReader.transferFromPDF "Ek Açıklamaları İçeri Aktar...">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
-<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Sayfayı Sola Döndür">
+<!ENTITY zotero.pdfReader.rotatePageRight "Sayfayı Sağa Döndür">
+<!ENTITY zotero.pdfReader.rotatePage180 "Sayfayı 180° Döndür">

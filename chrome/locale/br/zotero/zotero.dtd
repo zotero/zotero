@@ -186,6 +186,7 @@
 <!ENTITY zotero.import.size "Ment">
 <!ENTITY zotero.import.createCollection "Plasit an dastumadegoù hag an teuliadoù emporzhiet e-barzh un dastumadeg nevez">
 <!ENTITY zotero.import.fileHandling "Meradur ar restroù">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Ezporzhiañ...">
 <!ENTITY zotero.exportOptions.format.label "Stumm:">

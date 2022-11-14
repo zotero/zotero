@@ -7,7 +7,7 @@
 <!ENTITY zotero.search.joinMode.all "бүх">
 <!ENTITY zotero.search.joinMode.suffix "дараагийн">
 
-<!ENTITY zotero.search.recursive.label "Дэд хавтасууд хайх">
+<!ENTITY zotero.search.recursive.label "Дэд түүврүүдээс хайх">
 <!ENTITY zotero.search.noChildren "Зөвхөн дээд түвшиний бүтээлүүдийг харуулах">
 <!ENTITY zotero.search.includeParentsAndChildren "Олдсон үр дүнгийн эх сурвалж, дагавар бүтээлийг багтаана">
 

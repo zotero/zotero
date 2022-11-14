@@ -186,6 +186,7 @@
 <!ENTITY zotero.import.size "Größe">
 <!ENTITY zotero.import.createCollection "Importierte Sammlungen und Einträge in neue Sammlungen einstellen">
 <!ENTITY zotero.import.fileHandling "Dateiverarbeitung">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Exportieren...">
 <!ENTITY zotero.exportOptions.format.label "Format:">
@@ -323,8 +324,8 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Automatisch Größe anpassen">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Auf Fensterbreite skalieren">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Auf Fensterhöhe skalieren">
-<!ENTITY zotero.pdfReader.splitVertically "Vertikal aufteilen">
-<!ENTITY zotero.pdfReader.splitHorizontally "Horizontal aufteilen">
+<!ENTITY zotero.pdfReader.splitVertically "Vertikal teilen">
+<!ENTITY zotero.pdfReader.splitHorizontally "Horizontal teilen">
 <!ENTITY zotero.pdfReader.transferFromPDF "Anmerkungen importieren…">
 <!ENTITY zotero.pdfReader.rotatePageLeft "Seite links drehen">
 <!ENTITY zotero.pdfReader.rotatePageRight "Seite rechts drehen">

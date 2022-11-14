@@ -186,6 +186,7 @@
 <!ENTITY zotero.import.size "Величина">
 <!ENTITY zotero.import.createCollection "Постави увезене збирке и ставке у нову збирку">
 <!ENTITY zotero.import.fileHandling "Рад са датотекама">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Извоз…">
 <!ENTITY zotero.exportOptions.format.label "Формат:">

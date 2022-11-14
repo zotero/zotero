@@ -186,6 +186,7 @@
 <!ENTITY zotero.import.size "Méret">
 <!ENTITY zotero.import.createCollection "Importált elemek és gyűjtemények áthelyezése új gyűjteménybe">
 <!ENTITY zotero.import.fileHandling "Fájlkezelés">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Exportálás...">
 <!ENTITY zotero.exportOptions.format.label "Formátum:">
@@ -326,6 +327,6 @@
 <!ENTITY zotero.pdfReader.splitVertically "Függőlegesen osztva">
 <!ENTITY zotero.pdfReader.splitHorizontally "Vízszintesen osztva">
 <!ENTITY zotero.pdfReader.transferFromPDF "Jegyzetek importálása…">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
-<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Oldal elforgatása balra">
+<!ENTITY zotero.pdfReader.rotatePageRight "Oldal elforgatása jobbra">
+<!ENTITY zotero.pdfReader.rotatePage180 "Oldal elforgatása 180°-kal">

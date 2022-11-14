@@ -186,6 +186,7 @@
 <!ENTITY zotero.import.size "حجم">
 <!ENTITY zotero.import.createCollection "ضع المجموعات المستوردة والمواد في مجموعة جديدة">
 <!ENTITY zotero.import.fileHandling "معاملة الملف">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "تصدير...">
 <!ENTITY zotero.exportOptions.format.label "الصياغة:">

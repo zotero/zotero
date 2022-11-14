@@ -186,6 +186,7 @@
 <!ENTITY zotero.import.size "Dimensione">
 <!ENTITY zotero.import.createCollection "Inserisci le collezioni e gli elementi importati all'interno di una nuova collezione">
 <!ENTITY zotero.import.fileHandling "Gestione dei file">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Esporta">
 <!ENTITY zotero.exportOptions.format.label "Formato:">
@@ -326,6 +327,6 @@
 <!ENTITY zotero.pdfReader.splitVertically "Dividi verticalmente">
 <!ENTITY zotero.pdfReader.splitHorizontally "Dividi orizzontalmente">
 <!ENTITY zotero.pdfReader.transferFromPDF "Importa le annotazioni...">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
-<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Ruota la pagina a sinistra">
+<!ENTITY zotero.pdfReader.rotatePageRight "Ruota la pagina a destra">
+<!ENTITY zotero.pdfReader.rotatePage180 "Ruota la pagina di 180°">

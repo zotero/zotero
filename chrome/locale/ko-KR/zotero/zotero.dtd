@@ -186,6 +186,7 @@
 <!ENTITY zotero.import.size "크기">
 <!ENTITY zotero.import.createCollection "컬렉션 및 항목을 새 컬렉션으로 불러오기">
 <!ENTITY zotero.import.fileHandling "파일 처리 방법">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "내보내기...">
 <!ENTITY zotero.exportOptions.format.label "형식:">

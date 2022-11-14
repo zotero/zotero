@@ -186,6 +186,7 @@
 <!ENTITY zotero.import.size "大小">
 <!ENTITY zotero.import.createCollection "将导入的集合和项目放入新集合中">
 <!ENTITY zotero.import.fileHandling "处理文件">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "导出...">
 <!ENTITY zotero.exportOptions.format.label "格式:">

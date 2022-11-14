@@ -186,6 +186,7 @@
 <!ENTITY zotero.import.size "גודל">
 <!ENTITY zotero.import.createCollection "העברת האוספים והפריטים המיובאים לאוסף חדש">
 <!ENTITY zotero.import.fileHandling "טיפול בקבצים">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "ייצוא…">
 <!ENTITY zotero.exportOptions.format.label "עיצוב:">
