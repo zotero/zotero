@@ -4446,13 +4446,17 @@ var ZoteroPane = new function()
 				let pdfHandler  = Zotero.Prefs.get("fileHandler.pdf");
 				// Zotero PDF reader
 				if (!pdfHandler) {
+					let openInWindow = Zotero.Prefs.get('openReaderInNewWindow');
+					let useAlternateWindowBehavior = event?.shiftKey || extraData?.forceAlternateWindowBehavior;
+					if (useAlternateWindowBehavior) {
+						openInWindow = !openInWindow;
+					}
 					await Zotero.Reader.open(
 						itemID,
 						extraData && extraData.location,
 						{
-							openInWindow: (event && event.shiftKey)
-								|| (extraData && extraData.forceOpenPDFInWindow),
-							allowDuplicate: event && event.shiftKey
+							openInWindow,
+							allowDuplicate: openInWindow
 						}
 					);
 					return;

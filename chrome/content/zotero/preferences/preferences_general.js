@@ -170,11 +170,13 @@ Zotero_Preferences.General = {
 		var handler = Zotero.Prefs.get('fileHandler.pdf');
 		var menulist = document.getElementById('fileHandler-pdf');
 		var customMenuItem = document.getElementById('fileHandler-custom');
+		var inNewWindowCheckbox = document.getElementById('open-reader-in-new-window');
 		
 		// System default
 		if (handler == 'system') {
 			customMenuItem.hidden = true;
 			menulist.selectedIndex = 1;
+			inNewWindowCheckbox.disabled = true;
 		}
 		// Custom handler
 		else if (handler) {
@@ -201,6 +203,7 @@ Zotero_Preferences.General = {
 			}
 			customMenuItem.hidden = false;
 			menulist.selectedIndex = 2;
+			inNewWindowCheckbox.disabled = true;
 
 			// There's almost certainly a better way to do this...
 			// but why doesn't the icon just behave by default?
@@ -211,6 +214,7 @@ Zotero_Preferences.General = {
 			let menuitem = document.getElementById('fileHandler-internal');
 			menulist.selectedIndex = 0;
 			customMenuItem.hidden = true;
+			inNewWindowCheckbox.disabled = false;
 		}
 	},
 	
