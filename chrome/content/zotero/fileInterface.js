@@ -444,10 +444,12 @@ var Zotero_File_Interface = new function() {
 		
 		var translation;
 		
-		if (options.mendeleyCode) {
+		if (options.mendeleyAuth || options.mendeleyCode) {
 			translation = yield _getMendeleyTranslation();
 			translation.createNewCollection = createNewCollection;
+			translation.mendeleyAuth = options.mendeleyAuth;
 			translation.mendeleyCode = options.mendeleyCode;
+			translation.newItemsOnly = options.newItemsOnly;
 		}
 		else {
 			// Check if the file is an SQLite database
@@ -983,7 +985,7 @@ var Zotero_File_Interface = new function() {
 			if (matchResult) {
 				const mendeleyCode = matchResult[1];
 				Zotero.getMainWindow().setTimeout(() => this.showImportWizard({ mendeleyCode }), 0);
-				
+
 				// Clear all cookies to remove access
 				//
 				// This includes unrelated cookies in the central cookie store, but that's fine for
@@ -998,7 +1000,7 @@ var Zotero_File_Interface = new function() {
 				catch (e) {
 					Zotero.logError(e);
 				}
-				
+
 				win.close();
 				return;
 			}

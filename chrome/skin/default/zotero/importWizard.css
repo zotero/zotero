@@ -3,6 +3,40 @@
 	font-weight: bold;
 }
 
+#mendeley-login {
+	padding: 1.5em 1em 0;
+	font-size: 13px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	border: none;
+}
+
+#mendeley-login .field {
+	display: flex;
+	max-width: 300px;
+	line-height: 1.5em;
+	align-items: center;
+}
+
+#mendeley-login .field + .field {
+	margin-top: .5em;
+}
+
+#mendeley-login label {
+	flex: 0 0 90px;
+	width: 90px;
+	margin-right: 8px;
+	text-align: right;
+}
+
+#mendeley-login input {
+	flex: 1 1 auto;
+	font-size: 13px;
+}
+
+
+
 /* Start */
 wizard[currentpageid="page-start"] .wizard-header-label {
 	padding-top: 24px;
@@ -79,4 +113,12 @@ button, checkbox {
 #result-report-error {
 	margin-top: 13px;
 	margin-left: 0;
+}
+
+#mendeley-online-login-feedback {
+	text-align: center;
+	font-size: 13px;
+	margin-top: 1.3em;
+	color: red;
+	font-weight: bold;
 }

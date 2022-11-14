@@ -28,6 +28,7 @@ var mendeleyOnlineMappings = {
 		arxiv: 'arxivId',
 		accessed: 'dateAccessed',
 		authors: false, // all author types handled separately
+		client_data: false, // desktop_id extraction handled separately
 		citation_key: 'citationKey',
 		created: 'added',
 		edition: 'edition',
