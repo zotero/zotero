@@ -921,7 +921,7 @@ var ZoteroPane = new function()
 					break;
 				case 'saveToZotero':
 					var collectionTreeRow = this.getCollectionTreeRow();
-					if (collectionTreeRow.isFeedOrFeeds()) {
+					if (collectionTreeRow.isFeedsOrFeed()) {
 						ZoteroItemPane.translateSelectedItems();
 					} else {
 						Zotero.debug(command + ' does not do anything in non-feed views')
@@ -936,7 +936,7 @@ var ZoteroPane = new function()
 				case 'toggleRead':
 					// Toggle read/unread
 					let row = this.getCollectionTreeRow();
-					if (!row || !row.isFeedOrFeeds()) return;
+					if (!row || !row.isFeedsOrFeed()) return;
 					this.toggleSelectedItemsRead();
 					if (itemReadPromise) {
 						itemReadPromise.cancel();
@@ -1533,7 +1533,7 @@ var ZoteroPane = new function()
 			}
 			// Zero or multiple items selected
 			else {
-				if (collectionTreeRow.isFeedOrFeeds()) {
+				if (collectionTreeRow.isFeedsOrFeed()) {
 					this.updateReadLabel();
 				}
 				
@@ -1659,7 +1659,7 @@ var ZoteroPane = new function()
 		
 		// Feed buttons
 		document.getElementById('zotero-item-pane-top-buttons-feed').hidden
-			= !this.getCollectionTreeRow().isFeedOrFeeds()
+			= !this.getCollectionTreeRow().isFeedsOrFeed()
 	};
 	
 	
@@ -2059,7 +2059,7 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		if (!this.canEdit() && !collectionTreeRow.isFeedOrFeeds()) {
+		if (!this.canEdit() && !collectionTreeRow.isFeedsOrFeed()) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
@@ -3233,11 +3233,11 @@ var ZoteroPane = new function()
 				disable.add(m.restoreToLibrary);
 			}
 		}
-		else if (!collectionTreeRow.isFeedOrFeeds()) {
+		else if (!collectionTreeRow.isFeedsOrFeed()) {
 			show.add(m.moveToTrash);
 		}
 
-		if(!collectionTreeRow.isFeedOrFeeds()) {
+		if(!collectionTreeRow.isFeedsOrFeed()) {
 			show.add(m.sep4);
 			show.add(m.exportItems);
 			show.add(m.createBib);
@@ -3256,7 +3256,7 @@ var ZoteroPane = new function()
 					canRecognize = true,
 					canUnrecognize = true,
 					canRename = true;
-				var canMarkRead = collectionTreeRow.isFeedOrFeeds();
+				var canMarkRead = collectionTreeRow.isFeedsOrFeed();
 				var markUnread = true;
 				
 				for (let i = 0; i < items.length; i++) {
@@ -3315,7 +3315,7 @@ var ZoteroPane = new function()
 				// "Add/Create Note from Annotations" and "Find Available PDFs"
 				if (collectionTreeRow.filesEditable
 						&& !collectionTreeRow.isDuplicates()
-						&& !collectionTreeRow.isFeedOrFeeds()) {
+						&& !collectionTreeRow.isFeedsOrFeed()) {
 					if (items.some(item => attachmentsWithExtractableAnnotations(item).length)
 							|| items.some(item => isAttachmentWithExtractableAnnotations(item))) {
 						let menuitem = menu.childNodes[m.createNoteFromAnnotations];
@@ -3549,7 +3549,7 @@ var ZoteroPane = new function()
 			show.delete(m.createBib);
 		}
 		
-		if ((!collectionTreeRow.editable || collectionTreeRow.isPublications()) && !collectionTreeRow.isFeedOrFeeds()) {
+		if ((!collectionTreeRow.editable || collectionTreeRow.isPublications()) && !collectionTreeRow.isFeedsOrFeed()) {
 			for (let i in m) {
 				// Still allow some options for non-editable views
 				switch (i) {
@@ -3580,7 +3580,7 @@ var ZoteroPane = new function()
 		}
 
 		// Add to collection
-		if (!collectionTreeRow.isFeedOrFeeds()
+		if (!collectionTreeRow.isFeedsOrFeed()
 			&& collectionTreeRow.editable
 			&& Zotero.Items.keepParents(items).every(item => item.isTopLevelItem())
 		) {

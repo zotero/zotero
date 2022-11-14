@@ -138,8 +138,8 @@ Zotero.CollectionTreeRow.prototype.isFeeds = function() {
 	return this.type == 'feeds';
 }
 
-Zotero.CollectionTreeRow.prototype.isFeedOrFeeds = function() {
-	return this.isFeed() || this.isFeeds();
+Zotero.CollectionTreeRow.prototype.isFeedsOrFeed = function() {
+	return this.isFeeds() || this.isFeed();
 }
 
 Zotero.CollectionTreeRow.prototype.isSeparator = function () {
@@ -180,7 +180,7 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('editable', function () {
 	if (this.isTrash() || this.isShare() || this.isBucket()) {
 		return false;
 	}
-	if (this.isGroup() || this.isFeedOrFeeds()) {
+	if (this.isGroup() || this.isFeedsOrFeed()) {
 		return this.ref.editable;
 	}
 	if (!this.isWithinGroup() || this.isPublications()) {

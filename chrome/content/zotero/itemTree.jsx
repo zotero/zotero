@@ -369,7 +369,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		const collectionTreeRow = this.collectionTreeRow;
 
-		if (collectionTreeRow.isFeedOrFeeds() && action == 'modify') {
+		if (collectionTreeRow.isFeedsOrFeed() && action == 'modify') {
 			for (const id of ids) {
 				this.tree.invalidateRow(this._rowMap[id]);
 			}
@@ -555,7 +555,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					sort = true;
 				}
 			}
-			else if (collectionTreeRow.isFeedOrFeeds()) {
+			else if (collectionTreeRow.isFeedsOrFeed()) {
 				window.ZoteroPane.updateReadLabel();
 			}
 			// If not a search, process modifications manually
@@ -962,7 +962,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					showHeader: true,
 					columns: this._getColumns(),
 					onColumnPickerMenu: this._displayColumnPickerMenu,
-					onColumnSort: this.collectionTreeRow.isFeedOrFeeds() ? null : this._handleColumnSort,
+					onColumnSort: this.collectionTreeRow.isFeedsOrFeed() ? null : this._handleColumnSort,
 					getColumnPrefs: this._getColumnPrefs,
 					storeColumnPrefs: this._storeColumnPrefs,
 					getDefaultColumnOrder: this._getDefaultColumnOrder,
@@ -1814,7 +1814,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 */
 	getSortDirection(sortFields) {
 		sortFields = sortFields || this.getSortFields();
-		if (this.collectionTreeRow.isFeedOrFeeds()) {
+		if (this.collectionTreeRow.isFeedsOrFeed()) {
 			return Zotero.Prefs.get('feeds.sortAscending') ? 1 : -1;
 		}
 		const columns = this._getColumns();
@@ -1828,7 +1828,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	getSortField() {
-		if (this.collectionTreeRow.isFeedOrFeeds()) {
+		if (this.collectionTreeRow.isFeedsOrFeed()) {
 			return 'id';
 		}
 		var column = this._sortedColumn;
@@ -3049,7 +3049,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			case 'dateModified':
 			case 'accessDate':
 			case 'date':
-				if (key == 'date' && !this.collectionTreeRow.isFeedOrFeeds()) {
+				if (key == 'date' && !this.collectionTreeRow.isFeedsOrFeed()) {
 					break;
 				}
 				if (val) {
@@ -3653,7 +3653,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		//
 		// Secondary Sort menu
 		//
-		if (!this.collectionTreeRow.isFeedOrFeeds()) {
+		if (!this.collectionTreeRow.isFeedsOrFeed()) {
 			try {
 				const id = prefix + 'sort-menu';
 				const primaryField = this.getSortField();
