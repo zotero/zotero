@@ -66,8 +66,6 @@ Zotero.CollectionTreeRow.prototype.__defineGetter__('id', function () {
 			return 'T' + this.ref.libraryID;
 		
 		case 'feeds':
-			// The "0" is kind of weird, but we need the ID to be a one-character prefix + a number
-			// and there's only one set of feeds
 			return 'F1';
 		
 		case 'header':
