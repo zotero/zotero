@@ -236,10 +236,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		// Depth indent
 		let depth = treeRow.level;
 		// The arrow on macOS is a full icon's width.
-		// For non-userLibrary items that are drawn under headers
+		// For non-userLibrary/feed items that are drawn under headers
 		// we do not draw the arrow and need to move all items 1 level up
-		if (Zotero.isMac && !treeRow.isHeader() && treeRow.ref
-			&& treeRow.ref.libraryID != Zotero.Libraries.userLibraryID) {
+		if (Zotero.isMac && !treeRow.isHeader() && !treeRow.isFeed()
+				&& treeRow.ref && treeRow.ref.libraryID != Zotero.Libraries.userLibraryID) {
 			depth--;
 		}
 		div.style.paddingInlineStart = (CHILD_INDENT * depth) + 'px';
