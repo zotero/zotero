@@ -253,6 +253,10 @@ Zotero.Feeds = new function() {
 		
 		return !!Object.keys(this._cache.urlByLibraryID).length
 	}
+	
+	this.totalUnreadCount = function () {
+		return this.getAll().reduce((prev, feed) => prev + feed.unreadCount, 0);
+	};
 
 	let globalFeedCheckDelay = Zotero.Promise.resolve();
 	this.scheduleNextFeedCheck = Zotero.Promise.coroutine(function* () {

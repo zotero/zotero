@@ -56,7 +56,7 @@ const COLUMNS = [
 	{
 		dataKey: "title",
 		primary: true,
-		defaultIn: new Set(["default", "feed"]),
+		defaultIn: new Set(["default", "feeds", "feed"]),
 		label: "itemFields.title",
 		ignoreInColumnPicker: true,
 		flex: 4,
@@ -64,7 +64,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "firstCreator",
-		defaultIn: new Set(["default", "feed"]),
+		defaultIn: new Set(["default", "feeds", "feed"]),
 		label: "zotero.items.creator_column",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
@@ -77,7 +77,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "date",
-		defaultIn: new Set(["feed"]),
+		defaultIn: new Set(["feeds", "feed"]),
 		defaultSort: -1,
 		label: "itemFields.date",
 		flex: 1,
@@ -85,7 +85,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "year",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		defaultSort: -1,
 		label: "zotero.items.year_column",
 		flex: 1,
@@ -106,7 +106,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "journalAbbreviation",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		submenu: true,
 		label: "itemFields.journalAbbreviation",
 		flex: 1,
@@ -121,7 +121,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "accessDate",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		defaultSort: -1,
 		submenu: true,
 		label: "itemFields.accessDate",
@@ -130,7 +130,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "libraryCatalog",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		submenu: true,
 		label: "itemFields.libraryCatalog",
 		flex: 1,
@@ -138,7 +138,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "callNumber",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		submenu: true,
 		label: "itemFields.callNumber",
 		flex: 1,
@@ -154,7 +154,7 @@ const COLUMNS = [
 	{
 		dataKey: "dateAdded",
 		defaultSort: -1,
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		label: "itemFields.dateAdded",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
@@ -162,14 +162,14 @@ const COLUMNS = [
 	{
 		dataKey: "dateModified",
 		defaultSort: -1,
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		label: "zotero.items.dateModified_column",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
 	{
 		dataKey: "archive",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		submenu: true,
 		label: "itemFields.archive",
 		flex: 1,
@@ -177,7 +177,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "archiveLocation",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		submenu: true,
 		label: "itemFields.archiveLocation",
 		flex: 1,
@@ -185,7 +185,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "place",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		submenu: true,
 		label: "itemFields.place",
 		flex: 1,
@@ -193,7 +193,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "volume",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		submenu: true,
 		label: "itemFields.volume",
 		flex: 1,
@@ -201,7 +201,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "edition",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		submenu: true,
 		label: "itemFields.edition",
 		flex: 1,
@@ -209,7 +209,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "number",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		submenu: true,
 		label: "itemFields.number",
 		flex: 1,
@@ -217,7 +217,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "pages",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		submenu: true,
 		label: "itemFields.pages",
 		flex: 1,
@@ -225,7 +225,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "issue",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		submenu: true,
 		label: "itemFields.issue",
 		flex: 1,
@@ -233,7 +233,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "series",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		submenu: true,
 		label: "itemFields.series",
 		flex: 1,
@@ -241,7 +241,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "seriesTitle",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		submenu: true,
 		label: "itemFields.seriesTitle",
 		flex: 1,
@@ -249,7 +249,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "court",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		submenu: true,
 		label: "itemFields.court",
 		flex: 1,
@@ -257,7 +257,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "medium",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		submenu: true,
 		label: "itemFields.medium",
 		flex: 1,
@@ -265,7 +265,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "genre",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		submenu: true,
 		label: "itemFields.genre",
 		flex: 1,
@@ -273,7 +273,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "system",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		submenu: true,
 		label: "itemFields.system",
 		flex: 1,
@@ -281,7 +281,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "shortTitle",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		submenu: true,
 		label: "itemFields.shortTitle",
 		flex: 2,
@@ -289,7 +289,7 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "extra",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		label: "itemFields.extra",
 		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
@@ -297,7 +297,7 @@ const COLUMNS = [
 	{
 		dataKey: "hasAttachment",
 		defaultIn: new Set(["default"]),
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		label: "zotero.tabs.attachments.label",
 		iconLabel: <Icons.IconAttachSmall />,
 		fixedWidth: true,
@@ -306,12 +306,19 @@ const COLUMNS = [
 	},
 	{
 		dataKey: "numNotes",
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		label: "zotero.tabs.notes.label",
 		iconLabel: <Icons.IconTreeitemNoteSmall />,
 		width: "14",
 		minWidth: 14,
 		staticWidth: true,
+		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+	},
+	{
+		dataKey: "feed",
+		disabledIn: ["default", "feed"],
+		label: "itemFields.feed",
+		flex: 1,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	}
 ];

@@ -107,7 +107,12 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 			loaded: true
 		};
 		if (prevLibraryID != libraryID) {
-			newState.tagColors = Zotero.Tags.getColors(libraryID);
+			if (libraryID) {
+				newState.tagColors = Zotero.Tags.getColors(libraryID);
+			}
+			else {
+				newState.tagColors = new Map();
+			}
 		}
 		var { tags, scope } = await this.getTagsAndScope();
 		newState.tags = tags;

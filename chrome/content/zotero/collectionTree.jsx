@@ -236,10 +236,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		// Depth indent
 		let depth = treeRow.level;
 		// The arrow on macOS is a full icon's width.
-		// For non-userLibrary items that are drawn under headers
+		// For non-userLibrary/feed items that are drawn under headers
 		// we do not draw the arrow and need to move all items 1 level up
-		if (Zotero.isMac && !treeRow.isHeader() && treeRow.ref
-			&& treeRow.ref.libraryID != Zotero.Libraries.userLibraryID) {
+		if (Zotero.isMac && !treeRow.isHeader() && !treeRow.isFeed()
+				&& treeRow.ref && treeRow.ref.libraryID != Zotero.Libraries.userLibraryID) {
 			depth--;
 		}
 		div.style.paddingInlineStart = (CHILD_INDENT * depth) + 'px';
@@ -425,31 +425,24 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			}
 			
 			// Add feeds
-			if (this.hideSources.indexOf('feeds') == -1) {
-				var feeds = Zotero.Feeds.getAll();
-				
-				// Alphabetize
-				var collation = Zotero.getLocaleCollation();
-				feeds.sort(function (a, b) {
-					return collation.compareString(1, a.name, b.name);
-				});
-				
-				if (feeds.length) {
-					newRows.splice(added++, 0,
-						new Zotero.CollectionTreeRow(this, 'separator', false),
-					);
-					let feedHeader = new Zotero.CollectionTreeRow(this, 'header', {
-						id: "feed-libraries-header",
-						label: Zotero.getString('pane.collections.feedLibraries'),
-						libraryID: -1
-					});
-					newRows.splice(added++, 0, feedHeader);
-					for (let feed of feeds) {
-						newRows.splice(added++, 0,
-							new Zotero.CollectionTreeRow(this, 'feed', feed, 1)
-						);
-					}
-				}
+			if (this.hideSources.indexOf('feeds') == -1 && Zotero.Feeds.haveFeeds()) {
+				newRows.splice(added++, 0,
+					new Zotero.CollectionTreeRow(this, 'separator', false),
+				);
+				newRows.splice(added++, 0,
+					new Zotero.CollectionTreeRow(this, 'feeds', {
+						get unreadCount() {
+							return Zotero.Feeds.totalUnreadCount();
+						},
+						
+						async updateFeed() {
+							for (let feed of Zotero.Feeds.getAll()) {
+								await feed.updateFeed();
+							}
+						}
+					})
+				);
+				added += await this._expandRow(newRows, added - 1);
 			}
 			
 			this.selection.selectEventsSuppressed = true;
@@ -551,6 +544,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 
 	selectSearch(id) {
 		return this.selectByID('S' + id);
+	}
+	
+	async selectFeeds() {
+		return this.selectByID('F1');
 	}
 
 	async selectItem(itemID, inLibraryRoot) {
@@ -700,10 +697,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					this._removeRow(row);
 				}
 				
-				// If a feed was removed and there are no more, remove the 'Feeds' header
+				// If a feed was removed and there are no more, remove the 'Feeds' row
 				// (and the splitter before it)
 				if (feedDeleted && !Zotero.Feeds.haveFeeds()) {
-					let row = this._rowMap['HF'];
+					let row = this._rowMap['F1'];
 					this._removeRow(row);
 					this._removeRow(row - 1);
 				}
@@ -993,7 +990,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		this.selection.selectEventsSuppressed = true;
 		var count = 0;
 		var treeRow = this.getRow(index);
-		if (treeRow.isLibrary(true) || treeRow.isCollection()) {
+		if (treeRow.isLibrary(true) || treeRow.isCollection() || treeRow.isFeeds()) {
 			count = await this._expandRow(this._rows, index, true);
 		}
 		if (this.selection.focused > index) {
@@ -2039,6 +2036,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		if (treeRow.isCollection()) {
 			return !treeRow.ref.hasChildCollections();
 		}
+		else if (treeRow.isFeeds()) {
+			// Hidden when empty
+			return false;
+		}
 		return true;
 	}
 	
@@ -2093,13 +2094,14 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					collectionType += 'Full';
 				}
 				break;
+				
+			case 'feeds':
+				collectionType = 'FeedLibrary';
+				break;
 			
 			case 'header':
 				if (treeRow.ref.id == 'group-libraries-header') {
 					collectionType = 'Groups';
-				}
-				else if (treeRow.ref.id == 'feed-libraries-header') {
-					collectionType = 'FeedLibrary';
 				}
 				else if (treeRow.ref.id == 'commons-header') {
 					collectionType = 'Commons';
@@ -2186,6 +2188,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		var level = rows[row].level;
 		var isLibrary = treeRow.isLibrary(true);
 		var isCollection = treeRow.isCollection();
+		var isFeeds = treeRow.isFeeds();
 		var libraryID = treeRow.ref.libraryID;
 		
 		if (treeRow.isPublications() || treeRow.isFeed()) {
@@ -2244,7 +2247,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			
 			let beforeRow = row + 1 + newRows;
 			rows.splice(beforeRow, 0,
-				new Zotero.CollectionTreeRow(this, 'collection', collections[i], level + 1));
+				new Zotero.CollectionTreeRow(this, isFeeds ? 'feed' : 'collection', collections[i], level + 1));
 			newRows++;
 			// Recursively expand child collections that should be open
 			newRows += await this._expandRow(rows, beforeRow);

@@ -911,15 +911,23 @@
 									<menuitem class="zotero-menuitem-new-collection" label="&zotero.toolbar.newCollection.label;"/>
 									<menuitem class="zotero-menuitem-new-saved-search" label="&zotero.toolbar.newSavedSearch.label;"/>
 									<menuitem class="zotero-menuitem-new-collection" label="&zotero.toolbar.newSubcollection.label;"/>
-									<menuitem class="zotero-menuitem-refresh-feed" label="&zotero.toolbar.feeds.refresh;"/>
+									<menuitem class="zotero-menuitem-refresh-feed"/>
 									<menuseparator/>
 									<menuitem class="zotero-menuitem-show-duplicates" label="&zotero.toolbar.duplicate.label;"/>
 									<menuitem class="zotero-menuitem-show-unfiled" label="&zotero.collections.showUnfiledItems;"/>
 									<menuitem class="zotero-menuitem-show-retracted" label="&zotero.collections.showRetractedItems;"/>
 									<menuitem class="zotero-menuitem-edit-collection"/>
 									<menuitem class="zotero-menuitem-duplicate-collection"/>
-									<menuitem class="zotero-menuitem-mark-read-feed" label="&zotero.toolbar.markFeedRead.label;"/>
+									<menuitem class="zotero-menuitem-mark-read-feed"/>
 									<menuitem class="zotero-menuitem-edit-feed" label="&zotero.toolbar.feeds.edit;"/>
+									<menu class="zotero-collectionmenu-feed-add-menu" label="&zotero.toolbar.feeds.new;">
+										<menupopup>
+											<menuitem label="&zotero.toolbar.feeds.new.fromURL;"
+													command="cmd_zotero_newFeed_fromURL"/>
+											<menuitem label="&zotero.toolbar.feeds.new.fromOPML;"
+													oncommand="ZoteroPane_Local.importFeedsFromOPML()"/>
+										</menupopup>
+									</menu>
 									<menuitem class="zotero-menuitem-delete-collection"/>
 									<menuitem class="zotero-menuitem-move-to-trash"/>
 									<menuseparator/>
@@ -932,7 +940,7 @@
 								</menupopup>
 								<menupopup id="zotero-itemmenu">
 									<!-- Keep order in sync with buildItemContextMenu -->
-									<menuitem class="menuitem-iconic zotero-menuitem-show-in-library" label="&zotero.items.menu.showInLibrary;" oncommand="ZoteroPane.selectItem(parseInt(this.parentNode.getAttribute('itemID')), true)"/>
+									<menuitem class="menuitem-iconic zotero-menuitem-show-in-library" oncommand="ZoteroPane.selectItem(parseInt(this.parentNode.getAttribute('itemID')), true)"/>
 									<menuseparator/>
 									<!-- with icon: <menuitem class="menuitem-iconic" id="zotero-menuitem-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane_Local.newNote(false, this.parentNode.getAttribute('itemID'))"/>-->
 									<menuitem class="menuitem-iconic zotero-menuitem-attach-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane_Local.newNote(false, this.parentNode.getAttribute('itemKey'))"/>
