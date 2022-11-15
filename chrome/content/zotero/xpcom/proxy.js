@@ -458,7 +458,12 @@ Zotero.Proxy.prototype.erase = Zotero.Promise.coroutine(function* () {
 Zotero.Proxy.prototype.toProper = function(m) {
 	if (!Array.isArray(m)) {
 		// make sure url has a trailing slash
-		m = new URL(m).href;
+		if (typeof URL === 'undefined') {
+			m = new (Services.wm.getMostRecentWindow("navigator:browser")).URL(m).href;
+		}
+		else {
+			m = new URL(m).href;
+		}
 		let match = this.regexp.exec(m);
 		if (!match) {
 			return m
