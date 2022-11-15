@@ -179,8 +179,10 @@ Zotero.Proxies = new function() {
 	 * @returns {Object} Unproxied url to proxy object
 	 */
 	this.getPotentialProxies = function(url) {
-		// make sure url has a trailing slash
-		url = new URL(url).href;
+		try {
+			// make sure url has a trailing slash
+			url = new URL(url).href;
+		} catch (e) { }
 		var urlToProxy = {};
 		// If it's a known proxied URL just return it
 		if (Zotero.Proxies.transparent) {
