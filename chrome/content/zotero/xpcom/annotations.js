@@ -231,6 +231,10 @@ Zotero.Annotations = new function () {
 			}
 		}
 		
+		// Don't try to select annotation, which would clear an active quick search (at least
+		// until annotations are visible in the items list)
+		saveOptions.skipSelect = true;
+		
 		await item.saveTx(saveOptions);
 		
 		return item;
