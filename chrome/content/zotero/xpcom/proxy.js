@@ -138,6 +138,8 @@ Zotero.Proxies = new function() {
 	 * @type String
 	 */
 	this.proxyToProper = function(url, onlyReturnIfProxied) {
+		 // make sure url has a trailing slash
+		url = new URL(url).href;
 		for (let proxy of Zotero.Proxies.proxies) {
 			if(proxy.regexp) {
 				var m = proxy.regexp.exec(url);
@@ -173,16 +175,18 @@ Zotero.Proxies = new function() {
 	 * Check the url for potential proxies and deproxify, providing a scheme to build
 	 * a proxy object.
 	 * 
-	 * @param URL
+	 * @param url
 	 * @returns {Object} Unproxied url to proxy object
 	 */
-	this.getPotentialProxies = function(URL) {
+	this.getPotentialProxies = function(url) {
+		// make sure url has a trailing slash
+		url = new URL(url).href;
 		var urlToProxy = {};
 		// If it's a known proxied URL just return it
 		if (Zotero.Proxies.transparent) {
 			for (var proxy of Zotero.Proxies.proxies) {
 				if (proxy.regexp) {
-					var m = proxy.regexp.exec(URL);
+					var m = proxy.regexp.exec(url);
 					if (m) {
 						let proper = proxy.toProper(m);
 						urlToProxy[proper] = proxy.toJSON();
@@ -191,12 +195,12 @@ Zotero.Proxies = new function() {
 				}
 			}
 		}
-		urlToProxy[URL] = null;
+		urlToProxy[url] = null;
 		
 		// if there is a subdomain that is also a TLD, also test against URI with the domain
 		// dropped after the TLD
 		// (i.e., www.nature.com.mutex.gmu.edu => www.nature.com)
-		var m = /^(https?:\/\/)([^\/]+)/i.exec(URL);
+		var m = /^(https?:\/\/)([^\/]+)/i.exec(url);
 		if (m) {
 			// First, drop the 0- if it exists (this is an III invention)
 			var host = m[2];
@@ -217,7 +221,7 @@ Zotero.Proxies = new function() {
 					if (TLDS[parts[j].toLowerCase()]) {
 						var properHost = parts.slice(0, j+1).join(".");
 						// protocol + properHost + /path
-						var properURL = m[1]+properHost+URL.substr(m[0].length);
+						var properURL = m[1]+properHost+url.substr(m[0].length);
 						var proxyHost = parts.slice(j+1).join('.');
 						urlToProxy[properURL] = {scheme: m[1] + '%h.' + proxyHost + '/%p'};
 					}
@@ -451,6 +455,8 @@ Zotero.Proxy.prototype.erase = Zotero.Promise.coroutine(function* () {
  */
 Zotero.Proxy.prototype.toProper = function(m) {
 	if (!Array.isArray(m)) {
+		// make sure url has a trailing slash
+		m = new URL(m).href;
 		let match = this.regexp.exec(m);
 		if (!match) {
 			return m
