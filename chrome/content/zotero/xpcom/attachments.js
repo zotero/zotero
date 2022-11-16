@@ -1432,6 +1432,12 @@ Zotero.Attachments = new function(){
 										? elem.getAttribute(attribute)
 										: elem.textContent;
 									if (!val) return [];
+									
+									// Handle relative paths
+									val = Services.io.newURI(
+										val, null, Services.io.newURI(url)
+									).spec;
+									
 									return [{
 										accessMethod: name,
 										url: val,

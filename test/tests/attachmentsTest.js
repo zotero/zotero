@@ -835,6 +835,24 @@ describe("Zotero.Attachments", function() {
 				Zotero.File.pathToFile(OS.Path.join(getTestDataDirectory().path, 'test.pdf'))
 			);
 			
+			// Generate a page with a relative PDF URL
+			httpd.registerPathHandler(
+				"/" + doi4,
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 200, "OK");
+						response.write(`<html>
+							<head>
+								<title>Page Title</title>
+							</head>
+							<body>
+								<a id="pdf-link" href="/article1/pdf">Download PDF</a>
+							</body>
+						</html>`);
+					}
+				}
+			);
+			
 			requestStubCallTimes = [];
 		});
 		
@@ -1156,6 +1174,44 @@ describe("Zotero.Attachments", function() {
 			assert.isTrue(call.calledWith('POST', ZOTERO_CONFIG.SERVICES_URL + 'oa/search'));
 			call = requestStub.getCall(3);
 			assert.isTrue(call.calledWith('GET', pageURL5));
+			
+			assert.ok(attachment);
+			var json = attachment.toJSON();
+			assert.equal(json.url, pdfURL);
+			assert.equal(json.contentType, 'application/pdf');
+			assert.equal(json.filename, 'Test.pdf');
+			assert.equal(await OS.File.stat(attachment.getFilePath()).size, pdfSize);
+		});
+		
+		it("should handle a custom resolver with a relative PDF path in HTML mode", async function () {
+			var doi = doi4;
+			var item = createUnsavedDataObject('item', { itemType: 'journalArticle' });
+			item.setField('title', 'Test');
+			item.setField('DOI', doi);
+			await item.saveTx();
+			
+			var resolvers = [{
+				name: 'Custom',
+				method: 'get',
+				// Registered with httpd.js in beforeEach()
+				url: baseURL + "{doi}",
+				mode: 'html',
+				selector: '#pdf-link',
+				attribute: 'href'
+			}];
+			Zotero.Prefs.set('findPDFs.resolvers', JSON.stringify(resolvers));
+			
+			var attachment = await Zotero.Attachments.addAvailablePDF(item);
+			
+			assert.equal(requestStub.callCount, 4);
+			var call = requestStub.getCall(0);
+			assert.isTrue(call.calledWith('GET', 'https://doi.org/' + doi));
+			var call = requestStub.getCall(1);
+			assert.isTrue(call.calledWith('GET', pageURL4));
+			call = requestStub.getCall(2);
+			assert.isTrue(call.calledWith('POST', ZOTERO_CONFIG.SERVICES_URL + 'oa/search'));
+			var call = requestStub.getCall(3);
+			assert.isTrue(call.calledWith('GET', baseURL + doi4));
 			
 			assert.ok(attachment);
 			var json = attachment.toJSON();
