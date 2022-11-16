@@ -574,7 +574,7 @@ describe("Zotero.Attachments", function() {
 		});
 	});
 	
-	describe("PDF Retrieval", function () {
+	describe("Find Available PDF", function () {
 		var doiPrefix = 'https://doi.org/';
 		var doi1 = '10.1111/abcd';
 		var doi2 = '10.2222/bcde';
