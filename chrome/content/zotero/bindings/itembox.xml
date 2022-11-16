@@ -111,6 +111,7 @@
 					}
 					
 					this._item = val;
+					this._lastTabIndex = null;
 					this.refresh();
 				]]></setter>
 			</property>
@@ -616,7 +617,7 @@
 						this.disableCreatorAddButtons();
 					}
 					
-					// Move to next or previous field if (shift-)tab was pressed
+					// Refocus on last stored tab index. This is required e.g. when remote change triggers refresh.
 					if (this._lastTabIndex && this._lastTabIndex != -1) {
 						this._focusNextField(this._lastTabIndex);
 					}
