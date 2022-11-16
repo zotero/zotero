@@ -815,7 +815,7 @@ describe("Zotero.Attachments", function() {
 						status: 200,
 						response,
 						getResponseHeader: makeGetResponseHeader({
-							'Content-Type': 'application/pdf'
+							'Content-Type': 'application/json'
 						})
 					};
 				}
