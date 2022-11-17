@@ -1279,13 +1279,14 @@ Zotero.Attachments = new function(){
 	
 	this.canFindPDFForItem = function (item) {
 		return item.isRegularItem()
+			&& !item.isFeedItem
 			&& (!!item.getField('DOI') || !!item.getField('url') || !!item.getExtraField('DOI'))
 			&& item.numPDFAttachments() == 0;
 	};
 	
 	
 	/**
-	 * Look for an available PDF for an item and add it as an attachment
+	 * Get the PDF resolvers that can be used for a given item based on the available fields
 	 *
 	 * @param {Zotero.Item} item
 	 * @param {String[]} [methods=['doi', 'url', 'oa', 'custom']]
@@ -2031,7 +2032,7 @@ Zotero.Attachments = new function(){
 				addTriedURL(url);
 				// Backoff loop
 				let tries = 3;
-				while (tries-- >= 0) {
+				while (tries-- > 0) {
 					try {
 						await beforeRequest(url);
 						await this.downloadFile(url, path, options);
@@ -2063,14 +2064,22 @@ Zotero.Attachments = new function(){
 					let contentType;
 					let skip = false;
 					let domains = new Set();
+					let redirectLimit = 10;
+					let redirectURLTries = new Map();
 					while (true) {
+						if (redirectLimit == 0) {
+							Zotero.debug("Too many redirects -- stopping");
+							skip = true;
+							break;
+						}
+						
 						let domain = urlToDomain(nextURL);
 						let noDelay = domains.has(domain);
 						domains.add(domain);
 						
 						// Backoff loop
 						let tries = 3;
-						while (tries-- >= 0) {
+						while (tries-- > 0) {
 							try {
 								await beforeRequest(nextURL, noDelay);
 								req = await Zotero.HTTP.request(
@@ -2078,7 +2087,9 @@ Zotero.Attachments = new function(){
 									nextURL,
 									{
 										responseType: 'blob',
-										followRedirects: false
+										followRedirects: false,
+										// Use our own error handling
+										errorDelayMax: 0
 									}
 								);
 							}
@@ -2089,22 +2100,39 @@ Zotero.Attachments = new function(){
 									noDelay = false;
 									continue;
 								}
-								throw e;
 							}
 							break;
 						}
 						afterRequest(nextURL);
+						if (!req) {
+							break;
+						}
 						if ([301, 302, 303, 307].includes(req.status)) {
 							let location = req.getResponseHeader('Location');
 							if (!location) {
 								throw new Error("Location header not provided");
 							}
+							
+							let currentURL = nextURL;
+							
 							nextURL = Services.io.newURI(nextURL, null, null).resolve(location);
 							if (isTriedURL(nextURL)) {
 								Zotero.debug("Redirect URL has already been tried -- skipping");
 								skip = true;
 								break;
 							}
+							
+							// Keep track of tries for each redirect URL, and stop if too many
+							let maxTriesPerRedirectURL = 2;
+							let tries = (redirectURLTries.get(currentURL) || 0) + 1;
+							if (tries > maxTriesPerRedirectURL) {
+								Zotero.debug(`Too many redirects to ${currentURL} -- stopping`);
+								skip = true;
+								break;
+							}
+							redirectURLTries.set(currentURL, tries);
+							// And keep track of total redirects for this chain
+							redirectLimit--;
 							continue;
 						}
 						
@@ -2151,7 +2179,7 @@ Zotero.Attachments = new function(){
 					}
 					
 					// If DOI resolves directly to a PDF, save it to disk
-					if (contentType.startsWith('application/pdf')) {
+					if (contentType && contentType.startsWith('application/pdf')) {
 						Zotero.debug("URL resolves directly to PDF");
 						await Zotero.File.putContentsAsync(path, blob);
 						await _enforcePDF(path);
@@ -2167,7 +2195,7 @@ Zotero.Attachments = new function(){
 					continue;
 				}
 				if (!url) {
-					Zotero.debug(`No PDF found on ${responseURL}`);
+					Zotero.debug(`No PDF found on ${responseURL || pageURL}`);
 					continue;
 				}
 				if (isTriedURL(url)) {

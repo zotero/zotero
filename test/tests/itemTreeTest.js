@@ -696,7 +696,7 @@ describe("Zotero.ItemTree", function() {
 				var promise = waitForDialog();
 				yield zp.emptyTrash();
 				yield promise;
-				assert.isFalse(zp.itemsView.getRowIndexByID(item.id));
+				assert.equal(zp.itemsView.rowCount, 0);
 			});
 		});
 		

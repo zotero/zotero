@@ -948,7 +948,11 @@ Zotero.Search.idsToTempTable = Zotero.Promise.coroutine(function* (ids) {
 Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	this._requireData('conditions');
 	
-	var sql = 'SELECT itemID FROM items';
+	// TEMP: Match parent attachment for annotation matches
+	// var sql = 'SELECT itemID FROM items';
+	var sql = "SELECT COALESCE(IA.parentItemID, itemID) AS itemID FROM items "
+		+ "LEFT JOIN itemAnnotations IA USING (itemID)";
+	
 	var sqlParams = [];
 	// Separate ANY conditions for 'required' condition support
 	var anySQL = '';
@@ -957,12 +961,14 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	var conditions = [];
 	
 	let lastCondition;
-	for (let condition of Object.values(this._conditions)) {
+	let conditionsToProcess = Object.values(this._conditions);
+	for (let condition of conditionsToProcess) {
 		let name = condition.condition;
 		let conditionData = Zotero.SearchConditions.get(name);
 		
 		// Has a table (or 'savedSearch', which doesn't have a table but isn't special)
-		if (conditionData.table || name == 'savedSearch' || name == 'tempTable') {
+		// TEMP: Or 'tag', which needs to match annotation parents
+		if (conditionData.table || name == 'savedSearch' || name == 'tempTable' || name == 'tag') {
 			// For conditions with an inline filter using 'is'/'isNot', combine with last condition
 			// if the same
 			if (lastCondition
@@ -1028,6 +1034,10 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 				case 'publications':
 					var publications = condition.operator == 'true';
 					continue;
+
+				case 'feed':
+					var feed = condition.operator == 'true';
+					continue;
 				
 				// Search subcollections
 				case 'recursive':
@@ -1049,6 +1059,39 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 					continue;
 				case 'blockEnd':
 					conditions.push({name:'blockEnd'});
+					continue;
+				
+				case 'anyField':
+					// We expand this condition to the same underlying set of conditions as 'quicksearch-fields'
+					// (although we don't detect keys or split into quoted and unquoted segments). 'quicksearch-fields'
+					// is expanded in addCondition(), but we can't do that with this condition because we don't want
+					// to save the conditions it expands to in the search object
+					conditionsToProcess.push({ condition: 'blockStart' });
+					conditionsToProcess.push({
+						condition: 'field',
+						operator: condition.operator,
+						value: condition.value,
+						required: false
+					});
+					conditionsToProcess.push({
+						condition: 'tag',
+						operator: condition.operator,
+						value: condition.value,
+						required: false
+					});
+					conditionsToProcess.push({
+						condition: 'note',
+						operator: condition.operator,
+						value: condition.value,
+						required: false
+					});
+					conditionsToProcess.push({
+						condition: 'creator',
+						operator: condition.operator,
+						value: condition.value,
+						required: false
+					});
+					conditionsToProcess.push({ condition: 'blockEnd' });
 					continue;
 			}
 			
@@ -1077,14 +1120,15 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	}
 	
 	if (unfiled) {
-		sql += " AND (itemID NOT IN (SELECT itemID FROM collectionItems) "
+		sql += " AND (itemID NOT IN ("
+			+ "SELECT itemID FROM collectionItems "
 			// Exclude children
-			+ "AND itemID NOT IN "
-			+ "(SELECT itemID FROM itemAttachments WHERE parentItemID IS NOT NULL "
-			+ "UNION SELECT itemID FROM itemNotes WHERE parentItemID IS NOT NULL)"
-			+ ") "
+			+ "UNION SELECT itemID FROM itemAttachments WHERE parentItemID IS NOT NULL "
+			+ "UNION SELECT itemID FROM itemNotes WHERE parentItemID IS NOT NULL "
+			+ "UNION SELECT itemID FROM itemAnnotations "
 			// Exclude My Publications
-			+ "AND itemID NOT IN (SELECT itemID FROM publicationsItems)";
+			+ "UNION SELECT itemID FROM publicationsItems "
+			+ "))";
 	}
 	
 	if (retracted) {
@@ -1093,6 +1137,10 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	
 	if (publications) {
 		sql += " AND (itemID IN (SELECT itemID FROM publicationsItems))";
+	}
+
+	if (feed) {
+		sql += " AND (itemID IN (SELECT itemID FROM feedItems))";
 	}
 	
 	// Limit to library search belongs to
@@ -1119,22 +1167,42 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 				//
 				// Special table handling
 				//
-				if (condition['table']){
-					switch (condition['table']){
-						default:
-							condSelectSQL += 'itemID '
-							switch (condition['operator']){
-								case 'isNot':
-								case 'doesNotContain':
-									condSelectSQL += 'NOT ';
-									break;
-							}
-							condSelectSQL += 'IN (';
-							selectOpenParens = 1;
-							condSQL += 'SELECT itemID FROM ' +
-								condition['table'] + ' WHERE (';
-							openParens = 1;
+				if (condition.table) {
+					let negationOperators = ['isNot', 'doesNotContain'];
+					let isNegationOperator = negationOperators.includes(condition.operator);
+					
+					condSelectSQL += 'itemID '
+					if (isNegationOperator) {
+						condSelectSQL += 'NOT ';
 					}
+					condSelectSQL += 'IN (';
+					selectOpenParens = 1;
+					
+					// TEMP: Don't match annotations for negation operators, since it would result in
+					// all parent attachments being returned
+					if (isNegationOperator) {
+						condSelectSQL += "SELECT itemID FROM items WHERE itemTypeID="
+							+ Zotero.ItemTypes.getID('annotation') + " UNION ";
+					}
+					
+					switch (condition.name) {
+						// TEMP: Match parent attachments of matching annotations
+						case 'tag':
+							condSQL += "SELECT COALESCE(IAnT.parentItemID, itemID) FROM itemTags "
+								+ "LEFT JOIN itemAnnotations IAnT USING (itemID) WHERE (";
+							break;
+						
+						// TEMP: Match parent attachments of matching annotations
+						case 'annotationText':
+						case 'annotationComment':
+							condSQL += `SELECT parentItemID FROM ${condition.table} WHERE (`
+							break;
+							
+						default:
+							condSQL += `SELECT itemID FROM ${condition.table} WHERE (`;
+					}
+					
+					openParens = 1;
 				}
 				
 				//
@@ -1709,7 +1777,11 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 		
 		// Add on quicksearch conditions
 		if (quicksearchSQLSet) {
-			sql = "SELECT itemID FROM items WHERE itemID IN (" + sql + ") "
+			// TEMP: Match parent attachments for annotations
+			//sql = "SELECT itemID FROM items WHERE itemID IN (" + sql + ") "
+			sql = "SELECT COALESCE(IAn.parentItemID, itemID) AS itemID FROM items "
+				+ "LEFT JOIN itemAnnotations IAn USING (itemID) "
+				+ "WHERE itemID IN (" + sql + ") "
 				+ "AND ((" + quicksearchSQLSet.join(') AND (') + "))";
 			
 			for (var k=0; k<quicksearchParamsSet.length; k++) {

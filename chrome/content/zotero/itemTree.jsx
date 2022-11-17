@@ -38,7 +38,7 @@ const { Cc, Ci, Cu } = require('chrome');
 Cu.import("resource://gre/modules/osfile.jsm");
 
 const CHILD_INDENT = 12;
-const COLORED_TAGS_RE = new RegExp("^[0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1}$");
+const COLORED_TAGS_RE = new RegExp("^(?:Numpad|Digit)([0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1})$");
 const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
 const ATTACHMENT_STATE_LOAD_DELAY = 150; //ms
 
@@ -369,7 +369,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		const collectionTreeRow = this.collectionTreeRow;
 
-		if (collectionTreeRow.isFeed() && action == 'modify') {
+		if (collectionTreeRow.isFeedsOrFeed() && action == 'modify') {
 			for (const id of ids) {
 				this.tree.invalidateRow(this._rowMap[id]);
 			}
@@ -446,11 +446,20 @@ var ItemTree = class ItemTree extends LibraryTree {
 					let row = this.getRowIndexByID(id);
 					if (row === false) continue;
 					let item = Zotero.Items.get(id);
-					if (!item.deleted && !item.numChildren()) {
+					// Remove parent row if it isn't deleted and doesn't have any deleted children
+					// (shown by the numChildren including deleted being the same as numChildren not including deleted)
+					if (!item.deleted && (!item.isRegularItem() || item.numChildren(true) == item.numChildren(false))) {
 						rows.push(row);
+						// And all its children in the tree
+						for (let child = row + 1; child < this.rowCount && this.getLevel(child) > this.getLevel(row); child++) {
+							rows.push(child);
+						}
 					}
 				}
-				this._removeRows(rows);
+				if (rows.length) {
+					this._removeRows(rows);
+					this.tree.invalidate();
+				}
 			}
 
 			return;
@@ -546,7 +555,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					sort = true;
 				}
 			}
-			else if (collectionTreeRow.isFeed()) {
+			else if (collectionTreeRow.isFeedsOrFeed()) {
 				window.ZoteroPane.updateReadLabel();
 			}
 			// If not a search, process modifications manually
@@ -860,9 +869,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			return false;
 		}
-		if (!event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey && COLORED_TAGS_RE.test(event.key)) {
+		if (!event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey && COLORED_TAGS_RE.test(event.code)) {
 			let libraryID = this.collectionTreeRow.ref.libraryID;
-			let position = parseInt(event.key) - 1;
+			let position = COLORED_TAGS_RE.exec(event.code)[1] - 1;
 			// When 0 is pressed, remove all colored tags
 			if (position == -1) {
 				let items = this.getSelectedItems();
@@ -953,7 +962,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					showHeader: true,
 					columns: this._getColumns(),
 					onColumnPickerMenu: this._displayColumnPickerMenu,
-					onColumnSort: this.collectionTreeRow.isFeed() ? null : this._handleColumnSort,
+					onColumnSort: this.collectionTreeRow.isFeedsOrFeed() ? null : this._handleColumnSort,
 					getColumnPrefs: this._getColumnPrefs,
 					storeColumnPrefs: this._storeColumnPrefs,
 					getDefaultColumnOrder: this._getDefaultColumnOrder,
@@ -979,7 +988,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 					onItemContextMenu: (...args) => this.props.onContextMenu(...args),
 					
-					role: 'treegrid',
+					role: 'tree',
 					label: Zotero.getString('pane.items.title'),
 				}
 			);
@@ -1295,6 +1304,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 					}
 				}
 				return val;
+				
+			case 'feed':
+				return (row.ref.isFeedItem && Zotero.Feeds.get(row.ref.libraryID).name) || "";
 			
 			default:
 				return row.ref.getField(field, false, true);
@@ -1775,9 +1787,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 		return this._rows.map(row => asIDs ? row.ref.id : row.ref);
 	}
 
+	/**
+	 * Get the current sort order of the items list
+	 *
+	 * @return {Number} - -1 for descending, 1 for ascending
+	 */
 	getSortDirection(sortFields) {
 		sortFields = sortFields || this.getSortFields();
-		if (this.collectionTreeRow.isFeed()) {
+		if (this.collectionTreeRow.isFeedsOrFeed()) {
 			return Zotero.Prefs.get('feeds.sortAscending') ? 1 : -1;
 		}
 		const columns = this._getColumns();
@@ -1791,7 +1808,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	getSortField() {
-		if (this.collectionTreeRow.isFeed()) {
+		if (this.collectionTreeRow.isFeedsOrFeed()) {
 			return 'id';
 		}
 		var column = this._sortedColumn;
@@ -1972,8 +1989,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 				// If exporting with virtual "Markdown + Rich Text" translator, call Note Markdown
 				// and Note HTML translators instead
 				if (format.id === Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
-					let markdownFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN };
-					let htmlFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_HTML };
+					let markdownFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN, options: format.markdownOptions };
+					let htmlFormat = { mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_HTML, options: format.htmlOptions };
 					Zotero.QuickCopy.getContentFromItems(items, markdownFormat, (obj, worked) => {
 						if (!worked) {
 							Zotero.log(Zotero.getString('fileInterface.exportError'), 'warning');
@@ -2863,7 +2880,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 
 		// Accessibility
-		div.setAttribute('role', 'row');
+		div.setAttribute('role', 'treeitem');
 		div.setAttribute('aria-level', this.getLevel(index) + 1);
 		if (!this.isContainerEmpty(index)) {
 			div.setAttribute('aria-expanded', this.isContainerOpen(index));
@@ -2996,6 +3013,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 		row.numNotes = treeRow.numNotes() || "";
+		row.feed = (treeRow.ref.isFeedItem && Zotero.Feeds.get(treeRow.ref.libraryID).name) || "";
 		row.title = treeRow.ref.getDisplayTitle();
 		
 		const columns = this.getColumns();
@@ -3013,7 +3031,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			case 'dateModified':
 			case 'accessDate':
 			case 'date':
-				if (key == 'date' && !this.collectionTreeRow.isFeed()) {
+				if (key == 'date' && !this.collectionTreeRow.isFeedsOrFeed()) {
 					break;
 				}
 				if (val) {
@@ -3617,7 +3635,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		//
 		// Secondary Sort menu
 		//
-		if (!this.collectionTreeRow.isFeed()) {
+		if (!this.collectionTreeRow.isFeedsOrFeed()) {
 			try {
 				const id = prefix + 'sort-menu';
 				const primaryField = this.getSortField();

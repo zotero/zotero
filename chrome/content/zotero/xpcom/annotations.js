@@ -177,7 +177,7 @@ Zotero.Annotations = new function () {
 			o.tags = tags;
 		}
 		
-		o.dateModified = item.dateModified;
+		o.dateModified = Zotero.Date.sqlToISO8601(item.dateModified);
 		return o;
 	};
 	
@@ -230,6 +230,10 @@ Zotero.Annotations = new function () {
 				item.addRelation(predicate, json.relations[predicate]);
 			}
 		}
+		
+		// Don't try to select annotation, which would clear an active quick search (at least
+		// until annotations are visible in the items list)
+		saveOptions.skipSelect = true;
 		
 		await item.saveTx(saveOptions);
 		

@@ -92,8 +92,6 @@ Zotero_Preferences.Sync = {
 		var img = document.getElementById('sync-status-indicator');
 		img.removeAttribute('verified');
 		img.removeAttribute('animated');
-		
-		window.sizeToContent();
 	},
 
 
@@ -184,6 +182,17 @@ Zotero_Preferences.Sync = {
 			Zotero.Sync.Runner.deleteAPIKey();
 			return;
 		}
+		
+		// It shouldn't be possible for a sync to be in progress if the user wasn't logged in,
+		// but check to be sure
+		if (!Zotero.Sync.Runner.syncInProgress) {
+			// Clear any displayed sync errors
+			Zotero.Sync.Runner.updateIcons([]);
+		}
+		window.addEventListener('beforeunload', () => {
+			Zotero.Sync.Runner.setSyncTimeout(1);
+		});
+		
 		this.displayFields(json.username);
 	}),
 

@@ -305,7 +305,7 @@ function makeZoteroContext(isConnector) {
 		catch (e) {
 			dump("Error loading " + xpcomFile + ".js\n\n");
 			dump(e + "\n\n");
-			Components.utils.reportError("Error loading " + xpcomFile + ".js", zContext);
+			Components.utils.reportError("Error loading " + xpcomFile + ".js");
 			throw (e);
 		}
 	}

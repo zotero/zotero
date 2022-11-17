@@ -30,9 +30,8 @@ var Zotero_Report_Interface = new function() {
 	 */
 	this.loadCollectionReport = function () {
 		var sortColumn = ZoteroPane_Local.getSortField();
-		var sortDirection = ZoteroPane_Local.getSortDirection();
 		var queryString = '?sort=' + sortColumn
-			+ '&direction=' + (sortDirection == 'ascending' ? 'asc' : 'desc');
+			+ '&direction=' + (ZoteroPane.getSortDirection() == 1 ? 'asc' : 'desc');
 		
 		var url = 'zotero://report/';
 		

@@ -26,7 +26,7 @@
 <vbox id="zotero-prefpane-export" onload="Zotero_Preferences.Export.init()">	
 	<groupbox id="zotero-prefpane-export-groupbox">
 		<vbox>
-			<html:label><html:h2>&zotero.preferences.quickCopy.caption;</html:h2></html:label>
+			<label><html:h2>&zotero.preferences.quickCopy.caption;</html:h2></label>
 		</vbox>
 		
 		<label id="quickCopy-instructions"/>
@@ -53,6 +53,35 @@
 		
 		<label value="&zotero.preferences.quickCopy.noteFormat;" control="zotero-noteQuickCopy-menu"/>
 		<menulist id="zotero-noteQuickCopy-menu" label="&zotero.general.loading;" native="true"/>
+		
+		<table id="noteQuickCopy-format-options"
+				xmlns="http://www.w3.org/1999/xhtml"
+				xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+				hidden="hidden">
+			<tbody id="noteQuickCopy-markdown-options">
+				<tr>
+					<th>
+						<xul:label/>
+					</th>
+					<td>
+						<xul:checkbox id="noteQuickCopy-markdown-includeAppLinks"
+								oncommand="Zotero_Preferences.Export.onUpdateNoteExportOptions()"/>
+					</td>
+				</tr>
+			</tbody>
+
+			<tbody id="noteQuickCopy-html-options">
+				<tr>
+					<th>
+						<xul:label/>
+					</th>
+					<td>
+						<xul:checkbox id="noteQuickCopy-html-includeAppLinks"
+								oncommand="Zotero_Preferences.Export.onUpdateNoteExportOptions()"/>
+					</td>
+				</tr>
+			</tbody>
+		</table>
 		
 		<separator/>
 		

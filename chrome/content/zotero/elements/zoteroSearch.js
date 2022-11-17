@@ -354,6 +354,7 @@
 
 		isPrimaryCondition(condition) {
 			switch (condition) {
+				case 'anyField':
 				case 'collection':
 				case 'creator':
 				case 'title':

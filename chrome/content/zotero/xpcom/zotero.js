@@ -445,6 +445,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		Zotero.debug('Triggering "zotero-loaded" event');
 		Services.obs.notifyObservers(Zotero, "zotero-loaded", null);
 		
+		Zotero.debug('Initializing Word Processor plugins');
+		Zotero.Integration.init();
 		await Zotero.Plugins.init();
 	}
 	
@@ -1339,9 +1341,8 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		});
 		var addons = [];
 		for (let addon of installed) {
-			switch (addon.id) {
-				case "{972ce4c6-7e08-4474-a285-3208198ce6fd}": // Default theme
-					continue;
+			if (addon.type == "theme") {
+				continue;
 			}
 			
 			addons.push(addon.name + " (" + addon.version

@@ -160,8 +160,7 @@ const ZoteroStandalone = new function() {
 			let item = Zotero.Items.get(reader.itemID);
 			let library = Zotero.Libraries.get(item.libraryID);
 			if (item
-					// Don't allow annotation transfer in group libraries
-					&& library.libraryType == 'user'
+					&& library.filesEditable
 					&& library.editable
 					&& !(item.deleted || item.parentItem && item.parentItem.deleted)) {
 				let annotations = item.getAnnotations();
@@ -405,6 +404,8 @@ const ZoteroStandalone = new function() {
 			this.updateMenuItemCheckmark('view-menuitem-zoom-auto', reader.isZoomAutoActive());
 			this.updateMenuItemCheckmark('view-menuitem-zoom-page-width', reader.isZoomPageWidthActive());
 			this.updateMenuItemCheckmark('view-menuitem-zoom-page-height', reader.isZoomPageHeightActive());
+			this.updateMenuItemCheckmark('view-menuitem-split-vertically', reader.isSplitVerticallyActive());
+			this.updateMenuItemCheckmark('view-menuitem-split-horizontally', reader.isSplitHorizontallyActive());
 		}
 	
 		// Layout mode
@@ -688,7 +689,7 @@ const ZoteroStandalone = new function() {
 	 * Checks for updates
 	 */
 	this.checkForUpdates = function() {
-		window.open('chrome://mozapps/content/update/updates.xul', 'updateChecker', 'chrome,centerscreen');
+		window.open('chrome://zotero/content/update/updates.xhtml', 'updateChecker', 'chrome,centerscreen');
 	}
 	
 	/**

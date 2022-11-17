@@ -269,6 +269,9 @@ Zotero.QuickCopy = new function() {
 			// Allow to reuse items array
 			translation.setItems(items.slice());
 			translation.setTranslator(format.id);
+			if (format.options) {
+				translation.setDisplayOptions(format.options);
+			}
 			translation.setHandler("done", callback);
 			translation.translate();
 			return true;
@@ -322,14 +325,19 @@ Zotero.QuickCopy = new function() {
 	var _loadNoteOutputFormat = async function () {
 		var format = Zotero.Prefs.get("export.noteQuickCopy.setting");
 		format = Zotero.QuickCopy.unserializeSetting(format);
-		// If virtual "Markdown + Rich Text" translator is selected, preload Note Markdown and
-		// Note HTML translators
-		if (format.id == Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT) {
-			await _preloadFormat({ mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN });
-			await _preloadFormat({ mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_HTML });
-			return;
+		
+		// Always preload Note Markdown and Note HTML translators. They're both needed for note
+		// dragging if the format is "Markdown + Rich Text", HTML is needed for note dragging if
+		// the format is "HTML", and they're both needed for copying or dragging from the note
+		// editor, which uses `noWait`.
+		await _preloadFormat({ mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_MARKDOWN });
+		await _preloadFormat({ mode: 'export', id: Zotero.Translators.TRANSLATOR_ID_NOTE_HTML });
+		
+		// If there's another format, preload it for note item dragging
+		if (format.id != Zotero.Translators.TRANSLATOR_ID_MARKDOWN_AND_RICH_TEXT
+				&& format.id != Zotero.Translators.TRANSLATOR_ID_NOTE_HTML) {
+			await _preloadFormat(format);
 		}
-		return _preloadFormat(format);
 	};
 	
 	

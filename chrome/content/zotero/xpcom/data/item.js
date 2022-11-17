@@ -153,7 +153,16 @@ Zotero.defineProperty(Zotero.Item.prototype, 'parentItemKey', {
 Zotero.defineProperty(Zotero.Item.prototype, 'parentItem', {
 	get: function() { return Zotero.Items.get(this.parentID) || undefined; },
 });
-
+Zotero.defineProperty(Zotero.Item.prototype, 'topLevelItem', {
+	get: function () {
+		var item = this; // eslint-disable-line consistent-this
+		var parentItem;
+		while ((parentItem = item.parentItem)) {
+			item = parentItem;
+		}
+		return item;
+	}
+});
 
 Zotero.defineProperty(Zotero.Item.prototype, 'firstCreator', {
 	get: function() { return this._firstCreator; }
@@ -768,7 +777,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 	
 	if (value !== false && !Zotero.ItemFields.isValidForType(fieldID, itemTypeID)) {
 		let msg = "'" + field + "' is not a valid field for type '"
-			+ Zotero.ItemFields.getName(itemTypeID) + "'";
+			+ Zotero.ItemTypes.getName(itemTypeID) + "'";
 		
 		if (loadIn) {
 			Zotero.debug(msg + " -- ignoring value '" + value + "'", 2);

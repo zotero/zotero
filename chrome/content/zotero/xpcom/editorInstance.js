@@ -25,6 +25,8 @@
 
 Components.utils.import("resource://gre/modules/InlineSpellChecker.jsm");
 
+import FilePicker from 'zotero/modules/filePicker';
+
 // Note: TinyMCE is automatically doing some meaningless corrections to
 // note-editor produced HTML. Which might result to more
 // conflicts, especially in group libraries
@@ -76,6 +78,7 @@ class EditorInstance {
 			Zotero.Prefs.registerObserver('note.css', this._handleStyleChange),
 			Zotero.Prefs.registerObserver('layout.spellcheckDefault', this._handleSpellCheckChange, true)
 		];
+		this._spellChecker = null;
 		
 		// Run Cut/Copy/Paste with chrome privileges
 		this._iframeWindow.wrappedJSObject.zoteroExecCommand = function (doc, command, ui, value) {
@@ -103,6 +106,56 @@ class EditorInstance {
 			});
 			translation.translate();
 			return text;
+		};
+
+		this._iframeWindow.wrappedJSObject.zoteroCopyImage = async (dataURL) => {
+			let parts = dataURL.split(',');
+			if (!parts[0].includes('base64')) {
+				return;
+			}
+			let mime = parts[0].match(/:(.*?);/)[1];
+			let bstr = atob(parts[1]);
+			let n = bstr.length;
+			let u8arr = new Uint8Array(n);
+			while (n--) {
+				u8arr[n] = bstr.charCodeAt(n);
+			}
+			let imgTools = Components.classes["@mozilla.org/image/tools;1"]
+				.getService(Components.interfaces.imgITools);
+			let transferable = Components.classes['@mozilla.org/widget/transferable;1']
+				.createInstance(Components.interfaces.nsITransferable);
+			let clipboardService = Components.classes['@mozilla.org/widget/clipboard;1']
+				.getService(Components.interfaces.nsIClipboard);
+			let img = imgTools.decodeImageFromArrayBuffer(u8arr.buffer, mime);
+			transferable.init(null);
+			let kNativeImageMime = 'application/x-moz-nativeimage';
+			transferable.addDataFlavor(kNativeImageMime);
+			transferable.setTransferData(kNativeImageMime, img);
+			clipboardService.setData(transferable, null, Components.interfaces.nsIClipboard.kGlobalClipboard);
+		};
+
+		this._iframeWindow.wrappedJSObject.zoteroSaveImageAs = async (dataURL) => {
+			let parts = dataURL.split(',');
+			if (!parts[0].includes('base64')) {
+				return;
+			}
+			let mime = parts[0].match(/:(.*?);/)[1];
+			let bstr = atob(parts[1]);
+			let n = bstr.length;
+			let u8arr = new Uint8Array(n);
+			while (n--) {
+				u8arr[n] = bstr.charCodeAt(n);
+			}
+			let ext = Zotero.MIME.getPrimaryExtension(mime, '');
+			let fp = new FilePicker();
+			fp.init(this._iframeWindow, Zotero.getString('noteEditor.saveImageAs'), fp.modeSave);
+			fp.appendFilters(fp.filterImages);
+			fp.defaultString = Zotero.getString('fileTypes.image').toLowerCase() + '.' + ext;
+			let rv = await fp.show();
+			if (rv === fp.returnOK || rv === fp.returnReplace) {
+				let outputPath = fp.file;
+				await OS.File.writeAtomic(outputPath, u8arr);
+			}
 		};
 
 		this._iframeWindow.addEventListener('message', this._messageHandler);
@@ -714,6 +767,9 @@ class EditorInstance {
 						}
 						menuitem.setAttribute('checked', item.checked);
 						menuitem.addEventListener('command', () => {
+							if (item.name === 'insertImage') {
+								return this._iframeWindow.eval('openImageFilePicker()');
+							}
 							this._postMessage({
 								action: 'contextMenuAction',
 								ctxAction: item.name,
@@ -817,8 +873,31 @@ class EditorInstance {
 			}
 
 			let firstElementChild = this._popup.firstElementChild;
+			let showSeparator = false;
 			let suggestionCount = spellChecker.addSuggestionsToMenuOnParent(this._popup, firstElementChild, 5);
 			if (suggestionCount) {
+				showSeparator = true;
+			}
+			if (spellChecker.overMisspelling) {
+				let addToDictionary = this._popup.ownerDocument.createXULElement('menuitem');
+				addToDictionary.setAttribute('data-l10n-id', 'text-action-spell-add-to-dictionary');
+				addToDictionary.addEventListener('command', () => {
+					spellChecker.addToDictionary();
+				});
+				this._popup.insertBefore(addToDictionary, firstElementChild);
+				showSeparator = true;
+			}
+			if (spellChecker.canUndo()) {
+				let undo = this._popup.ownerDocument.createXULElement('menuitem');
+				undo.setAttribute('data-l10n-id', 'text-action-spell-undo-add-to-dictionary');
+				undo.addEventListener('command', () => {
+					spellChecker.undoAddToDictionary();
+				});
+				this._popup.insertBefore(undo, firstElementChild);
+				showSeparator = true;
+			}
+			
+			if (showSeparator) {
 				let separator = this._popup.ownerDocument.createXULElement('menuseparator');
 				this._popup.insertBefore(separator, firstElementChild);
 			}
@@ -828,10 +907,13 @@ class EditorInstance {
 	}
 
 	_getSpellChecker() {
-		let editingSession = this._iframeWindow.docShell.editingSession;
-		return new InlineSpellChecker(
-			editingSession.getEditorForWindow(this._iframeWindow)
-		);
+		if (!this._spellChecker) {
+			let editingSession = this._iframeWindow.docShell.editingSession;
+			this._spellChecker = new InlineSpellChecker(
+				editingSession.getEditorForWindow(this._iframeWindow)
+			);
+		}
+		return this._spellChecker;
 	}
 
 	async _ensureNoteCreated() {
@@ -1206,10 +1288,12 @@ class EditorInstance {
 	 * Create note from annotations
 	 *
 	 * @param {Zotero.Item[]} annotations
-	 * @param {Integer} parentID Creates standalone note if not provided
+	 * @param {Object} options
+	 * @param {Integer} options.parentID - Creates standalone note if not provided
+	 * @param {Integer} options.collectionID - Only valid if parentID not provided
 	 * @returns {Promise<Zotero.Item>}
 	 */
-	static async createNoteFromAnnotations(annotations, parentID) {
+	static async createNoteFromAnnotations(annotations, { parentID, collectionID } = {}) {
 		if (!annotations.length) {
 			throw new Error("No annotations provided");
 		}
@@ -1230,7 +1314,12 @@ class EditorInstance {
 
 		let note = new Zotero.Item('note');
 		note.libraryID = annotations[0].libraryID;
-		note.parentID = parentID;
+		if (parentID) {
+			note.parentID = parentID;
+		}
+		else if (collectionID) {
+			note.addToCollection(collectionID);
+		}
 		await note.saveTx();
 		let editorInstance = new EditorInstance();
 		editorInstance._item = note;
@@ -1252,8 +1341,57 @@ class EditorInstance {
 		html += '\n';
 
 		await editorInstance.importImages(jsonAnnotations);
-		let { html: serializedHTML, citationItems } = Zotero.EditorInstanceUtilities.serializeAnnotations(jsonAnnotations, true);
-		html += serializedHTML;
+
+		let multipleParentParent = false;
+		let lastParentParentID;
+		let lastParentID;
+		// Group annotations per attachment
+		let groups = [];
+		for (let i = 0; i < annotations.length; i++) {
+			let annotation = annotations[i];
+			let jsonAnnotation = jsonAnnotations[i];
+			let parentParentID = annotation.parentItem.parentID;
+			let parentID = annotation.parentID;
+			if (groups.length) {
+				if (parentParentID !== lastParentParentID) {
+					// Multiple top level regular items detected, allow including their titles
+					multipleParentParent = true;
+				}
+			}
+			if (!groups.length || parentID !== lastParentID) {
+				groups.push({
+					parentTitle: annotation.parentItem.getDisplayTitle(),
+					parentParentID,
+					parentParentTitle: annotation.parentItem.parentItem && annotation.parentItem.parentItem.getDisplayTitle(),
+					jsonAnnotations: [jsonAnnotation]
+				});
+			}
+			else {
+				let group = groups[groups.length - 1];
+				group.jsonAnnotations.push(jsonAnnotation);
+			}
+			lastParentParentID = parentParentID;
+			lastParentID = parentID;
+		}
+		let citationItems = [];
+		lastParentParentID = null;
+		for (let group of groups) {
+			if (multipleParentParent && group.parentParentTitle && lastParentParentID !== group.parentParentID) {
+				html += `<h2>${group.parentParentTitle}</h2>\n`;
+			}
+			lastParentParentID = group.parentParentID;
+			// If attachment doesn't have a parent or there are more attachments with the same parent, show attachment title
+			if (!group.parentParentID || groups.filter(x => x.parentParentID === group.parentParentID).length > 1) {
+				html += `<h3>${group.parentTitle}</h3>\n`;
+			}
+			let { html: _html, citationItems: _citationItems } = Zotero.EditorInstanceUtilities.serializeAnnotations(group.jsonAnnotations, true);
+			html += _html + '\n';
+			for (let _citationItem of _citationItems) {
+				if (!citationItems.find(item => item.uris.some(uri => _citationItem.uris.includes(uri)))) {
+					citationItems.push(_citationItem);
+				}
+			}
+		}
 		citationItems = encodeURIComponent(JSON.stringify(citationItems));
 		// Note: Update schema version only if using new features
 		let schemaVersion = 8;
@@ -1283,7 +1421,8 @@ class EditorInstanceUtilities {
 
 			if (!annotation.text
 				&& !annotation.comment
-				&& !annotation.imageAttachmentKey) {
+				&& !annotation.imageAttachmentKey
+				|| annotation.type === 'ink') {
 				continue;
 			}
 

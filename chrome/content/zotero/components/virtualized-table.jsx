@@ -751,6 +751,7 @@ class VirtualizedTable extends React.Component {
 			this.selection.pivot = index;
 			this.invalidateRow(previousFocused);
 			this.invalidateRow(index);
+			this.selection._updateTree(shouldDebounce);
 		}
 		// Normal selection
 		else if (!toggleSelection) {
@@ -1596,6 +1597,7 @@ var Columns = class {
 };
 
 function renderCell(index, data, column, dir = null) {
+	column = column || { columnName: "" };
 	let span = document.createElement('span');
 	span.className = `cell ${column.className}`;
 	span.innerText = data;
@@ -1631,15 +1633,20 @@ function makeRowRenderer(getRowData) {
 		div.classList.toggle('focused', selection.focused == index);
 		const rowData = getRowData(index);
 		
-		for (let column of columns) {
-			if (column.hidden) continue;
+		if (columns.length) {
+			for (let column of columns) {
+				if (column.hidden) continue;
 
-			if (column.type === 'checkbox') {
-				div.appendChild(renderCheckboxCell(index, rowData[column.dataKey], column));
+				if (column.type === 'checkbox') {
+					div.appendChild(renderCheckboxCell(index, rowData[column.dataKey], column));
+				}
+				else {
+					div.appendChild(renderCell(index, rowData[column.dataKey], column));
+				}
 			}
-			else {
-				div.appendChild(renderCell(index, rowData[column.dataKey], column));
-			}
+		}
+		else {
+			div.appendChild(renderCell(index, rowData));
 		}
 
 		return div;

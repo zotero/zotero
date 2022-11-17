@@ -210,7 +210,7 @@ var Zotero_Lookup = new function () {
 		if(keyCode === 13 || keyCode === 14) {
 			if(search) {
 				Zotero_Lookup.accept(textBox);
-				event.stopImmediatePropagation();
+				event.preventDefault();
 			} else if(!multiline) {	// switch to multiline
 				Zotero_Lookup.setMultiline(true);
 			}

@@ -21,8 +21,8 @@
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 >
-	<html:link rel="localization" href="zotero/menubar.ftl"/>
-	<html:link rel="localization" href="zotero/textActions.ftl"/>
+	<html:link rel="localization" href="mozilla/menubar.ftl"/>
+	<html:link rel="localization" href="mozilla/textActions.ftl"/>
 
 	<script type="application/javascript">
 		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
@@ -126,6 +126,25 @@
 				<menuitem id="menu_selectAll"
 						  key="key_selectAll"
 						  command="cmd_selectAll" data-l10n-id="text-action-select-all"/>
+				<menuseparator class="menu-type-reader"/>
+				<menuitem
+						id="edit-menuitem-rotate-left"
+						class="menu-type-reader"
+						label="&zotero.pdfReader.rotatePageLeft;"
+						oncommand="menuCmd('rotateLeft')"
+				/>
+				<menuitem
+						id="edit-menuitem-rotate-right"
+						class="menu-type-reader"
+						label="&zotero.pdfReader.rotatePageRight;"
+						oncommand="menuCmd('rotateRight')"
+				/>
+				<!--<menuitem
+						id="edit-menuitem-rotate-180"
+						class="menu-type-reader"
+						label="&zotero.pdfReader.rotatePage180;"
+						oncommand="menuCmd('rotate180')"
+				/>-->
 			</menupopup>
 		</menu>
 		<menu label="View" onpopupshowing="onViewMenuOpen()">
@@ -138,15 +157,6 @@
 				-->
 <!--				<menuitem label="Switch to Presentation Mode" oncommand="menuCmd('presentationmode')"/>-->
 <!--				<menuseparator/>-->
-				<menuitem
-					label="&zotero.pdfReader.rotateClockwise;"
-					oncommand="menuCmd('rotatecw')"
-				/>
-				<menuitem
-					label="&zotero.pdfReader.rotateCounterclockwise;"
-					oncommand="menuCmd('rotateccw')"
-				/>
-				<menuseparator/>
 				<menuitem
 					id="view-menuitem-hand-tool"
 					label="&zotero.pdfReader.handTool;"
@@ -219,6 +229,19 @@
 					type="checkbox"
 					label="&zotero.pdfReader.zoomPageHeight;"
 					oncommand="menuCmd('zoomPageHeight')"
+				/>
+				<menuseparator class="menu-type-reader"/>
+				<menuitem
+						id="view-menuitem-split-horizontally"
+						type="checkbox"
+						label="&zotero.pdfReader.splitHorizontally;"
+						oncommand="menuCmd('splitHorizontally')"
+				/>
+				<menuitem
+						id="view-menuitem-split-vertically"
+						type="checkbox"
+						label="&zotero.pdfReader.splitVertically;"
+						oncommand="menuCmd('splitVertically')"
 				/>
 			</menupopup>
 		</menu>

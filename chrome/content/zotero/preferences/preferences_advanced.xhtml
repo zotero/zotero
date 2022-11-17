@@ -28,7 +28,7 @@
 		<html:h1>&zotero.preferences.prefpane.general;</html:h1>
 
 		<groupbox id="zotero-prefpane-advanced-miscellaneous">
-			<html:label><html:h2>&zotero.preferences.miscellaneous;</html:h2></html:label>
+			<label><html:h2>&zotero.preferences.miscellaneous;</html:h2></label>
 			
 			<hbox align="center">
 				<checkbox label="&zotero.preferences.autoUpdate;" preference="extensions.zotero.automaticScraperUpdates" native="true"/>
@@ -40,7 +40,7 @@
 		</groupbox>
 		
 		<groupbox id="zotero-prefpane-advanced-advancedConfiguration">
-			<html:label><html:h2>&zotero.preferences.advanced.advancedConfiguration;</html:h2></html:label>
+			<label><html:h2>&zotero.preferences.advanced.advancedConfiguration;</html:h2></label>
 			
 			<hbox id="zotero-prefpane-advanced-openbuttons" align="center" style="display: block">
 				<button id="config-editor"
@@ -58,7 +58,7 @@
 		<html:h1>&zotero.preferences.advanced.filesAndFolders;</html:h1>
 
 		<groupbox>
-			<html:label><html:h2>&zotero.preferences.attachmentBaseDir.caption;</html:h2></html:label>
+			<label><html:h2>&zotero.preferences.attachmentBaseDir.caption;</html:h2></label>
 			
 			<!-- This doesn't wrap without an explicit width -->
 			<vbox>
@@ -87,7 +87,7 @@
 		</groupbox>
 		
 		<groupbox>
-			<html:label><html:h2>&zotero.preferences.dataDir;</html:h2></html:label>
+			<label><html:h2>&zotero.preferences.dataDir;</html:h2></label>
 			
 			<radiogroup id="data-dir"
 					preference="extensions.zotero.useDataDir">
@@ -115,7 +115,7 @@
 		</groupbox>
 		
 		<groupbox>
-			<html:label><html:h2>&zotero.preferences.dbMaintenance;</html:h2></html:label>
+			<label><html:h2>&zotero.preferences.dbMaintenance;</html:h2></label>
 			
 			<hbox style="display: block">
 				<button label="&zotero.preferences.dbMaintenance.integrityCheck;"
@@ -189,7 +189,7 @@
 		</groupbox>
 		
 		<groupbox id="zotero-prefpane-advanced-feeds-feedDefaults">
-			<html:label><html:h2>&zotero.preferences.feeds.feedDefaults;</html:h2></html:label>
+			<label><html:h2>&zotero.preferences.feeds.feedDefaults;</html:h2></label>
 			<hbox>
 				<hbox align="center">
 					<label value="&zotero.feedSettings.refresh.label1;"/>
@@ -218,7 +218,7 @@
 		<html:h1>&zotero.preferences.prefpane.search;</html:h1>
 
 		<groupbox>
-			<html:label><html:h2>&zotero.preferences.search.fulltextCache;</html:h2></html:label>
+			<label><html:h2>&zotero.preferences.search.fulltextCache;</html:h2></label>
 			
 			<hbox>
 				<button id="fulltext-rebuildIndex" flex="1" oncommand="Zotero_Preferences.Advanced.rebuildIndexPrompt()"
@@ -245,7 +245,7 @@
 		</groupbox>
 		
 		<groupbox id="fulltext-stats">
-			<html:label><html:h2>&zotero.preferences.search.indexStats;</html:h2></html:label>
+			<label><html:h2>&zotero.preferences.search.indexStats;</html:h2></label>
 			
 			<vbox class="form-grid">
 				<label value="&zotero.preferences.search.indexStats.indexed;"/>

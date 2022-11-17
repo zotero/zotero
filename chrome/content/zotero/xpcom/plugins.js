@@ -168,7 +168,7 @@ Zotero.Plugins = new function () {
 	}
 	
 	
-	this.getResourceURI = async function (id) {
+	this.getRootURI = async function (id) {
 		var addon = await AddonManager.getAddonByID(id);
 		return addon.getResourceURI().spec;
 	};

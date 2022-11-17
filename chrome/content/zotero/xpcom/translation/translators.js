@@ -263,8 +263,9 @@ Zotero.Translators = new function() {
 	});
 	
 	
-	this.reinit = function (options = {}) {
-		return this.init(Object.assign({}, options, { reinit: true }));
+	this.reinit = async function (options = {}) {
+		await this.init(Object.assign({}, options, { reinit: true }));
+		await Zotero.QuickCopy.init();
 	};
 	
 	

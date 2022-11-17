@@ -99,6 +99,7 @@ var ZoteroPane = new function()
 		
 		var zp = document.getElementById('zotero-pane');
 		Zotero.setFontSize(zp);
+		Zotero.setFontSize(document.getElementById('zotero-context-pane'));
 		ZoteroPane_Local.updateLayout();
 		ZoteroPane_Local.updateToolbarPosition();
 		this.updateWindow();
@@ -154,12 +155,12 @@ var ZoteroPane = new function()
 			// Uncomment to test
 			//isDevBuild = isDevBuild || Zotero.version.includes('.SOURCE');
 			if (isDevBuild) {
-				let label = document.createElement('label');
-				label.setAttribute('value', 'TEST BUILD — DO NOT USE');
-				label.setAttribute('style', 'font-weight: bold; color: red; cursor: pointer');
+				let label = document.createElement('span');
+				label.setAttribute('style', 'font-weight: bold; color: red; cursor: pointer; margin-right: .5em');
 				label.onclick = function () {
 					Zotero.launchURL('https://www.zotero.org/support/kb/test_builds');
 				};
+				label.textContent = 'TEST BUILD — DO NOT USE';
 				let syncStop = document.getElementById('zotero-tb-sync-stop');
 				syncStop.parentNode.insertBefore(label, syncStop);
 			}
@@ -202,7 +203,7 @@ var ZoteroPane = new function()
 				if (index == 0) {
 					Zotero.Sync.Server.sync({
 						onSuccess: function () {
-							Zotero.Sync.Runner.updateIcons();
+							Zotero.Sync.Runner.updateIcons([]);
 							
 							ps.alert(
 								null,
@@ -920,7 +921,7 @@ var ZoteroPane = new function()
 					break;
 				case 'saveToZotero':
 					var collectionTreeRow = this.getCollectionTreeRow();
-					if (collectionTreeRow.isFeed()) {
+					if (collectionTreeRow.isFeedsOrFeed()) {
 						ZoteroItemPane.translateSelectedItems();
 					} else {
 						Zotero.debug(command + ' does not do anything in non-feed views')
@@ -935,7 +936,7 @@ var ZoteroPane = new function()
 				case 'toggleRead':
 					// Toggle read/unread
 					let row = this.getCollectionTreeRow();
-					if (!row || !row.isFeed()) return;
+					if (!row || !row.isFeedsOrFeed()) return;
 					this.toggleSelectedItemsRead();
 					if (itemReadPromise) {
 						itemReadPromise.cancel();
@@ -1307,7 +1308,7 @@ var ZoteroPane = new function()
 				ZoteroPane_Local.tagSelector.setMode('view');
 			}
 			ZoteroPane_Local.tagSelector.onItemViewChanged({
-				libraryID: collectionTreeRow.ref.libraryID,
+				libraryID: collectionTreeRow.ref && collectionTreeRow.ref.libraryID,
 				collectionTreeRow
 			});
 		}
@@ -1350,11 +1351,23 @@ var ZoteroPane = new function()
 
 			// If item data not yet loaded for library, load it now.
 			// Other data types are loaded at startup
-			var library = Zotero.Libraries.get(collectionTreeRow.ref.libraryID);
-			if (!library.getDataLoaded('item')) {
-				Zotero.debug("Waiting for items to load for library " + library.libraryID);
-				ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
-				await library.waitForDataLoad('item');
+			if (collectionTreeRow.isFeeds()) {
+				var feedsToLoad = Zotero.Feeds.getAll().filter(feed => !feed.getDataLoaded('item'));
+				if (feedsToLoad.length) {
+					Zotero.debug("Waiting for items to load for feeds " + feedsToLoad.map(feed => feed.libraryID));
+					ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
+					for (let feed of feedsToLoad) {
+						await feed.waitForDataLoad('item');
+					}
+				}
+			}
+			else {
+				var library = Zotero.Libraries.get(collectionTreeRow.ref.libraryID);
+				if (!library.getDataLoaded('item')) {
+					Zotero.debug("Waiting for items to load for library " + library.libraryID);
+					ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
+					await library.waitForDataLoad('item');
+				}
 			}
 			
 			this.itemsView.changeCollectionTreeRow(collectionTreeRow);
@@ -1520,7 +1533,7 @@ var ZoteroPane = new function()
 			}
 			// Zero or multiple items selected
 			else {
-				if (collectionTreeRow.isFeed()) {
+				if (collectionTreeRow.isFeedsOrFeed()) {
 					this.updateReadLabel();
 				}
 				
@@ -1646,7 +1659,7 @@ var ZoteroPane = new function()
 		
 		// Feed buttons
 		document.getElementById('zotero-item-pane-top-buttons-feed').hidden
-			= !this.getCollectionTreeRow().isFeed()
+			= !this.getCollectionTreeRow().isFeedsOrFeed()
 	};
 	
 	
@@ -1853,6 +1866,8 @@ var ZoteroPane = new function()
 			duplicate.setCreators(creators);
 		}
 		
+		duplicate.setField('abstractNote', '');
+
 		duplicate.addRelatedItem(original);
 		original.addRelatedItem(duplicate);
 		
@@ -2044,7 +2059,7 @@ var ZoteroPane = new function()
 			return;
 		}
 		
-		if (!this.canEdit() && !collectionTreeRow.isFeed()) {
+		if (!this.canEdit() && !collectionTreeRow.isFeedsOrFeed()) {
 			this.displayCannotEditLibraryMessage();
 			return;
 		}
@@ -2288,9 +2303,11 @@ var ZoteroPane = new function()
 		var row = this.getCollectionTreeRow();
 		if (!row) return;
 
-		let feed = row.ref;
-		let feedItemIDs = yield Zotero.FeedItems.getAll(feed.libraryID, true, false, true);
-		yield Zotero.FeedItems.toggleReadByID(feedItemIDs, true);
+		let feeds = row.isFeeds() ? Zotero.Feeds.getAll() : [row.ref];
+		for (let feed of feeds) {
+			let feedItemIDs = yield Zotero.FeedItems.getAll(feed.libraryID, true, false, true);
+			yield Zotero.FeedItems.toggleReadByID(feedItemIDs, true);
+		}
 	});
 
 	
@@ -2391,7 +2408,7 @@ var ZoteroPane = new function()
 				return;
 			}
 			else {
-				Zotero_File_Interface.exportItemsToClipboard(items, format.id);
+				Zotero_File_Interface.exportItemsToClipboard(items, format);
 			}
 		}
 	}
@@ -2798,7 +2815,7 @@ var ZoteroPane = new function()
 	
 	// menuitem configuration
 	//
-	// This has to be kept in sync with zotero-collectionmenu in zoteroPane.xul. We could do this
+	// This has to be kept in sync with zotero-collectionmenu in zoteroPane.xhtml. We could do this
 	// entirely in JS, but various localized strings are only in zotero.dtd, and they're used in
 	// standalone.xul as well, so for now they have to remain as XML entities.
 	var _collectionContextMenuOptions = [
@@ -2868,6 +2885,9 @@ var ZoteroPane = new function()
 		{
 			id: "editSelectedFeed",
 			oncommand: () => this.editSelectedFeed()
+		},
+		{
+			id: 'addFeed'
 		},
 		{
 			id: "deleteCollection",
@@ -3010,7 +3030,25 @@ var ZoteroPane = new function()
 			}
 			
 			// Adjust labels
+			m.refreshFeed.setAttribute('label', Zotero.getString('pane.collections.menu.refresh.feed'));
+			m.markReadFeed.setAttribute('label', Zotero.getString('pane.collections.menu.markAsRead.feed'));
 			m.deleteCollectionAndItems.setAttribute('label', Zotero.getString('pane.collections.menu.delete.feedAndItems'));
+		}
+		else if (collectionTreeRow.isFeeds()) {
+			show = [
+				'refreshFeed',
+				'sep2',
+				'markReadFeed',
+				'addFeed',
+			];
+
+			if (collectionTreeRow.ref.unreadCount == 0) {
+				disable = ['markReadFeed'];
+			}
+
+			// Adjust labels
+			m.refreshFeed.setAttribute('label', Zotero.getString('pane.collections.menu.refresh.allFeeds'));
+			m.markReadFeed.setAttribute('label', Zotero.getString('pane.collections.menu.markAsRead.allFeeds'));
 		}
 		else if (collectionTreeRow.isSearch()) {
 			show = [
@@ -3144,7 +3182,6 @@ var ZoteroPane = new function()
 			'sep1',
 			'addNote',
 			'createNoteFromAnnotations',
-			'createNoteFromAnnotationsMenu',
 			'addAttachments',
 			'sep2',
 			'findPDF',
@@ -3201,11 +3238,11 @@ var ZoteroPane = new function()
 				disable.add(m.restoreToLibrary);
 			}
 		}
-		else if (!collectionTreeRow.isFeed()) {
+		else if (!collectionTreeRow.isFeedsOrFeed()) {
 			show.add(m.moveToTrash);
 		}
 
-		if(!collectionTreeRow.isFeed()) {
+		if(!collectionTreeRow.isFeedsOrFeed()) {
 			show.add(m.sep4);
 			show.add(m.exportItems);
 			show.add(m.createBib);
@@ -3224,7 +3261,7 @@ var ZoteroPane = new function()
 					canRecognize = true,
 					canUnrecognize = true,
 					canRename = true;
-				var canMarkRead = collectionTreeRow.isFeed();
+				var canMarkRead = collectionTreeRow.isFeedsOrFeed();
 				var markUnread = true;
 				
 				for (let i = 0; i < items.length; i++) {
@@ -3280,12 +3317,33 @@ var ZoteroPane = new function()
 					}
 				}
 				
-				// "Add Notes from Annotation" and "Find Available PDFs"
+				// "Add/Create Note from Annotations" and "Find Available PDFs"
 				if (collectionTreeRow.filesEditable
 						&& !collectionTreeRow.isDuplicates()
-						&& !collectionTreeRow.isFeed()) {
-					if (items.some(item => attachmentsWithExtractableAnnotations(item).length)) {
+						&& !collectionTreeRow.isFeedsOrFeed()) {
+					if (items.some(item => attachmentsWithExtractableAnnotations(item).length)
+							|| items.some(item => isAttachmentWithExtractableAnnotations(item))) {
+						let menuitem = menu.childNodes[m.createNoteFromAnnotations];
 						show.add(m.createNoteFromAnnotations);
+						let key;
+						// If all from a single item, show "Add Note from Annotations"
+						if (Zotero.Items.getTopLevel(items).length == 1) {
+							key = 'addNoteFromAnnotations';
+							menuitem.onclick = async () => {
+								return this.addNoteFromAnnotationsFromSelected();
+							};
+						}
+						// Otherwise show "Create Note from Annotations"
+						else {
+							key = 'createNoteFromAnnotations';
+							menuitem.onclick = async () => {
+								return this.createStandaloneNoteFromAnnotationsFromSelected();
+							};
+						}
+						menuitem.setAttribute(
+							'label',
+							Zotero.getString('pane.items.menu.' + key)
+						);
 						show.add(m.sep3);
 					}
 					
@@ -3345,42 +3403,41 @@ var ZoteroPane = new function()
 						show.add(m.sep1);
 					}
 					
+					// Show "Add Note from Annotations" on parent item with any extractable annotations
 					if (item.isRegularItem() && !item.isFeedItem) {
 						show.add(m.addNote);
 						show.add(m.addAttachments);
 						show.add(m.sep2);
 						
-						// Create Note from Annotations
-						let popup = document.getElementById('create-note-from-annotations-popup');
-						popup.textContent = '';
-						let eligibleAttachments = Zotero.Items.get(item.getAttachments())
-							.filter(item => item.isPDFAttachment());
-						let attachmentsWithAnnotations = eligibleAttachments
+						let attachmentsWithAnnotations = Zotero.Items.get(item.getAttachments())
 							.filter(item => isAttachmentWithExtractableAnnotations(item));
 						if (attachmentsWithAnnotations.length) {
-							// Display submenu if there's more than one PDF attachment, even if
-							// there's only attachment with annotations, so it's clear which one
-							// the annotations are coming from
-							if (eligibleAttachments.length > 1) {
-								show.add(m.createNoteFromAnnotationsMenu);
-								for (let attachment of attachmentsWithAnnotations) {
-									let menuitem = document.createXULElement('menuitem');
-									menuitem.setAttribute('label', attachment.getDisplayTitle());
-									menuitem.onclick = () => {
-										ZoteroPane.createNoteFromAnnotationsForAttachment(attachment);
-									};
-									popup.appendChild(menuitem);
-								}
-							}
-							// Single attachment with annotations
-							else {
-								show.add(m.createNoteFromAnnotations);
-							}
+							show.add(m.createNoteFromAnnotations);
 						}
 					}
-					else if (isAttachmentWithExtractableAnnotations(item) && !item.isTopLevelItem()) {
+					// Show "(Create|Add) Note from Annotations" on attachment with extractable annotations
+					else if (isAttachmentWithExtractableAnnotations(item)) {
 						show.add(m.createNoteFromAnnotations);
 						show.add(m.sep2);
+					}
+					if (show.has(m.createNoteFromAnnotations)) {
+						let menuitem = menu.childNodes[m.createNoteFromAnnotations];
+						let str;
+						// Show "Create" on standalone attachments
+						if (item.isAttachment() && item.isTopLevelItem()) {
+							str = 'pane.items.menu.createNoteFromAnnotations';
+							menuitem.onclick = async () => {
+								return this.createStandaloneNoteFromAnnotationsFromSelected();
+							};
+						}
+						// And "Add" otherwise
+						else {
+							str = 'pane.items.menu.addNoteFromAnnotations';
+							menuitem.onclick = async () => {
+								return this.addNoteFromAnnotationsFromSelected();
+							};
+						}
+						menuitem.setAttribute('label', Zotero.getString(str));
 					}
 					
 					if (Zotero.Attachments.canFindPDFForItem(item)) {
@@ -3497,7 +3554,7 @@ var ZoteroPane = new function()
 			show.delete(m.createBib);
 		}
 		
-		if ((!collectionTreeRow.editable || collectionTreeRow.isPublications()) && !collectionTreeRow.isFeed()) {
+		if ((!collectionTreeRow.editable || collectionTreeRow.isPublications()) && !collectionTreeRow.isFeedsOrFeed()) {
 			for (let i in m) {
 				// Still allow some options for non-editable views
 				switch (i) {
@@ -3528,7 +3585,7 @@ var ZoteroPane = new function()
 		}
 
 		// Add to collection
-		if (!collectionTreeRow.isFeed()
+		if (!collectionTreeRow.isFeedsOrFeed()
 			&& collectionTreeRow.editable
 			&& Zotero.Items.keepParents(items).every(item => item.isTopLevelItem())
 		) {
@@ -3546,9 +3603,15 @@ var ZoteroPane = new function()
 			show.add(m.removeItems);
 		}
 		
+		// Show in library
+		if (collectionTreeRow.isFeeds()) {
+			menu.childNodes[m.showInLibrary].setAttribute('label', Zotero.getString('pane.items.menu.showInFeed'));
+		}
+		else {
+			menu.childNodes[m.showInLibrary].setAttribute('label', Zotero.getString('general.showInLibrary'));
+		}
+		
 		// Set labels, plural if necessary
-		menu.childNodes[m.createNoteFromAnnotations].setAttribute('label', Zotero.getString('pane.items.menu.addNoteFromAnnotations' + multiple));
-		menu.childNodes[m.createNoteFromAnnotationsMenu].setAttribute('label', Zotero.getString('pane.items.menu.addNoteFromAnnotations' + multiple));
 		menu.childNodes[m.findPDF].setAttribute('label', Zotero.getString('pane.items.menu.findAvailablePDF' + multiple));
 		menu.childNodes[m.moveToTrash].setAttribute('label', Zotero.getString('pane.items.menu.moveToTrash' + multiple));
 		menu.childNodes[m.deleteFromLibrary].setAttribute('label', Zotero.getString('pane.items.menu.delete'));
@@ -4388,13 +4451,17 @@ var ZoteroPane = new function()
 				let pdfHandler  = Zotero.Prefs.get("fileHandler.pdf");
 				// Zotero PDF reader
 				if (!pdfHandler) {
+					let openInWindow = Zotero.Prefs.get('openReaderInNewWindow');
+					let useAlternateWindowBehavior = event?.shiftKey || extraData?.forceAlternateWindowBehavior;
+					if (useAlternateWindowBehavior) {
+						openInWindow = !openInWindow;
+					}
 					await Zotero.Reader.open(
 						itemID,
 						extraData && extraData.location,
 						{
-							openInWindow: (event && event.shiftKey)
-								|| (extraData && extraData.forceOpenPDFInWindow),
-							allowDuplicate: event && event.shiftKey
+							openInWindow,
+							allowDuplicate: openInWindow
 						}
 					);
 					return;
@@ -4446,7 +4513,7 @@ var ZoteroPane = new function()
 			let path = item.getFilePath();
 			if (!path) {
 				ZoteroPane_Local.showAttachmentNotFoundDialog(
-					item.id,
+					item,
 					path,
 					{
 						noLocate: true,
@@ -4535,7 +4602,7 @@ var ZoteroPane = new function()
 			
 			if (isLinkedFile || !fileSyncingEnabled) {
 				this.showAttachmentNotFoundDialog(
-					itemID,
+					item,
 					path,
 					{
 						noLocate: noLocateOnMissing,
@@ -4561,7 +4628,7 @@ var ZoteroPane = new function()
 			
 			if (!await item.getFilePathAsync()) {
 				ZoteroPane_Local.showAttachmentNotFoundDialog(
-					item.id,
+					item,
 					path,
 					{
 						noLocate: noLocateOnMissing,
@@ -4628,7 +4695,7 @@ var ZoteroPane = new function()
 		
 		if (!fileExists) {
 			this.showAttachmentNotFoundDialog(
-				attachment.id,
+				attachment,
 				path,
 				{
 					noLocate: noLocateOnMissing,
@@ -4774,9 +4841,13 @@ var ZoteroPane = new function()
 	}
 	
 	
-	this.showAttachmentNotFoundDialog = function (itemID, path, options = {}) {
+	this.showAttachmentNotFoundDialog = async function (item, path, options = {}) {
 		var { noLocate, notOnServer, linkedFile } = options;
-		
+
+		if (item.isLinkedFileAttachment() && await this.checkForLinkedFilesToRelink(item)) {
+			return;
+		}
+
 		var title = Zotero.getString('pane.item.attachments.fileNotFound.title');
 		var text = Zotero.getString(
 				'pane.item.attachments.fileNotFound.text1' + (path ? '.path' : '')
@@ -4791,7 +4862,7 @@ var ZoteroPane = new function()
 					),
 				[ZOTERO_CONFIG.CLIENT_NAME, ZOTERO_CONFIG.DOMAIN_NAME]
 			);
-		var supportURL = options.linkedFile
+		var supportURL = linkedFile
 			? 'https://www.zotero.org/support/kb/missing_linked_file'
 			: 'https://www.zotero.org/support/kb/files_not_syncing';
 		
@@ -4829,12 +4900,76 @@ var ZoteroPane = new function()
 		);
 		
 		if (index == 0) {
-			this.relinkAttachment(itemID);
+			this.relinkAttachment(item.id);
 		}
 		else if (index == 2) {
 			this.loadURI(supportURL, { metaKey: true, shiftKey: true });
 		}
 	}
+
+
+	/**
+	 * Prompt the user to relink one or all of the attachment files found in
+	 * the LABD.
+	 *
+	 * @param {Zotero.Item} item
+	 * @param {String} path Path to the file matching `item`
+	 * @param {Number} numOthers If zero, "Relink All" option is not offered
+	 * @return {'one' | 'all' | 'manual' | 'cancel'}
+	 */
+	this.showLinkedFileFoundAutomaticallyDialog = function (item, path, numOthers) {
+		let ps = Services.prompt;
+
+		let title = Zotero.getString('pane.item.attachments.autoRelink.title');
+		let text = Zotero.getString('pane.item.attachments.autoRelink.text1') + '\n\n'
+			+ Zotero.getString('pane.item.attachments.autoRelink.text2', item.getFilePath()) + '\n\n'
+			+ Zotero.getString('pane.item.attachments.autoRelink.text3', path) + '\n\n'
+			+ Zotero.getString('pane.item.attachments.autoRelink.text4', Zotero.appName);
+		let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL
+			+ ps.BUTTON_POS_2 * ps.BUTTON_TITLE_IS_STRING;
+		let index = ps.confirmEx(null,
+			title,
+			text,
+			buttonFlags,
+			Zotero.getString('pane.item.attachments.autoRelink.relink'),
+			null,
+			Zotero.getString('pane.item.attachments.autoRelink.locateManually'),
+			null, {}
+		);
+		
+		if (index == 1) {
+			// Cancel
+			return 'cancel';
+		}
+		else if (index == 2) {
+			// Locate Manually...
+			return 'manual';
+		}
+		
+		// Relink
+		if (!numOthers) {
+			return 'one';
+		}
+
+		title = Zotero.getString('pane.item.attachments.autoRelinkOthers.title');
+		text = Zotero.getString('pane.item.attachments.autoRelinkOthers.text', numOthers, numOthers);
+		buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
+		index = ps.confirmEx(null,
+			title,
+			text,
+			buttonFlags,
+			Zotero.getString(
+				numOthers == 1
+					? 'pane.item.attachments.autoRelink.relink'
+					: 'pane.item.attachments.autoRelink.relinkAll'
+			),
+			null, null, null, {}
+		);
+		
+		return index == 0 ? 'all' : 'one';
+	};
 	
 	
 	this.syncAlert = function (e) {
@@ -4944,7 +5079,7 @@ var ZoteroPane = new function()
 	};
 	
 	
-	this.createNoteFromAnnotationsForAttachment = async function (attachment, { skipSelect } = {}) {
+	this.addNoteFromAnnotationsForAttachment = async function (attachment, { skipSelect } = {}) {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
@@ -4954,7 +5089,12 @@ var ZoteroPane = new function()
 		if (!annotations.length) {
 			return;
 		}
-		var note = await Zotero.EditorInstance.createNoteFromAnnotations(annotations, attachment.parentID);
+		var note = await Zotero.EditorInstance.createNoteFromAnnotations(
+			annotations,
+			{
+				parentID: attachment.parentID
+			}
+		);
 		if (!skipSelect) {
 			await this.selectItem(note.id);
 		}
@@ -4962,7 +5102,81 @@ var ZoteroPane = new function()
 	};
 	
 	
-	this.createNoteFromAnnotationsFromSelected = async function () {
+	/**
+	 * Add a single child note with the annotations from all selected items, including from all
+	 * child attachments of a selected regular item
+	 *
+	 * Selected items must all have the same top-level item
+	 */
+	this.addNoteFromAnnotationsFromSelected = async function () {
+		if (!this.canEdit()) {
+			this.displayCannotEditLibraryMessage();
+			return;
+		}
+		var items = this.getSelectedItems();
+		var topLevelItems = [...new Set(Zotero.Items.getTopLevel(items))];
+		if (topLevelItems.length > 1) {
+			throw new Error("Can't create child attachment from different top-level items");
+		}
+		var topLevelItem = topLevelItems[0];
+		if (!topLevelItem.isRegularItem()) {
+			throw new Error("Can't add note to standalone attachment");
+		}
+		
+		// Ignore top-level item if specific child items are also selected
+		if (items.length > 1) {
+			items = items.filter(item => !item.isRegularItem());
+		}
+		
+		var attachments = [];
+		for (let item of items) {
+			if (item.isRegularItem()) {
+				// Find all child items with extractable annotations
+				attachments.push(
+					...Zotero.Items.get(item.getAttachments())
+						.filter(item => isAttachmentWithExtractableAnnotations(item))
+				);
+			}
+			else if (isAttachmentWithExtractableAnnotations(item)) {
+				attachments.push(item);
+			}
+			else {
+				continue;
+			}
+		}
+		
+		if (!attachments.length) {
+			Zotero.debug("No attachments found", 2);
+			return;
+		}
+		
+		var annotations = [];
+		for (let attachment of attachments) {
+			try {
+				await Zotero.PDFWorker.import(attachment.id, true);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+			annotations.push(...attachment.getAnnotations().filter(x => x.annotationType != 'ink'));
+		}
+		var note = await Zotero.EditorInstance.createNoteFromAnnotations(
+			annotations,
+			{
+				parentID: topLevelItem.id
+			}
+		);
+		await this.selectItem(note.id);
+	};
+	
+	
+	/**
+	 * Create separate child notes for each selected item, including all child attachments of
+	 * selected regular items
+	 *
+	 * No longer exposed via UI
+	 */
+	this.addNotesFromAnnotationsFromSelected = async function () {
 		if (!this.canEdit()) {
 			this.displayCannotEditLibraryMessage();
 			return;
@@ -4988,7 +5202,7 @@ var ZoteroPane = new function()
 				continue;
 			}
 			for (let attachment of attachments) {
-				let note = await this.createNoteFromAnnotationsForAttachment(
+				let note = await this.addNoteFromAnnotationsForAttachment(
 					attachment,
 					{ skipSelect: true }
 				);
@@ -4999,6 +5213,65 @@ var ZoteroPane = new function()
 		}
 		await this.selectItems(itemIDsToSelect);
 	};
+	
+	
+	this.createStandaloneNoteFromAnnotationsFromSelected = async function () {
+		if (!this.canEdit()) {
+			this.displayCannotEditLibraryMessage();
+			return;
+		}
+		var items = this.getSelectedItems();
+		
+		// Ignore selected top-level items if any descendant items are also selected
+		var topLevelOfSelectedDescendants = new Set();
+		for (let item of items) {
+			if (!item.isTopLevelItem()) {
+				topLevelOfSelectedDescendants.add(item.topLevelItem);
+			}
+		}
+		items = items.filter(item => !topLevelOfSelectedDescendants.has(item));
+		
+		var annotations = [];
+		for (let item of items) {
+			let attachments = [];
+			if (item.isRegularItem()) {
+				// Find all child attachments with extractable annotations
+				attachments.push(
+					...Zotero.Items.get(item.getAttachments())
+						.filter(item => isAttachmentWithExtractableAnnotations(item))
+				);
+			}
+			else if (isAttachmentWithExtractableAnnotations(item)) {
+				attachments.push(item);
+			}
+			else {
+				continue;
+			}
+			for (let attachment of attachments) {
+				try {
+					await Zotero.PDFWorker.import(attachment.id, true);
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+				annotations.push(...attachment.getAnnotations().filter(x => x.annotationType != 'ink'));
+			}
+		}
+		
+		if (!annotations.length) {
+			Zotero.debug("No annotations found", 2);
+			return;
+		}
+		
+		var note = await Zotero.EditorInstance.createNoteFromAnnotations(
+			annotations,
+			{
+				collectionID: this.getSelectedCollection(true)
+			}
+		);
+		await this.selectItem(note.id);
+	};
+	
 	
 	this.createEmptyParent = async function (item) {
 		await Zotero.DB.executeTransaction(async function () {
@@ -5193,6 +5466,120 @@ var ZoteroPane = new function()
 			}
 		}
 	};
+
+
+	/**
+	 * Attempt to find a file in the LABD matching the passed attachment
+	 * by searching successive subdirectories. Prompt the user if a match is
+	 * found and offer to relink one or all matching files in the directory.
+	 * The user can also choose to relink manually, which opens a file picker.
+	 *
+	 * If the synced path is 'C:\Users\user\Documents\Dissertation\Files\Paper.pdf',
+	 * the LABD is '/Users/user/Documents', and the (not yet known) correct local
+	 * path is '/Users/user/Documents/Dissertation/Files/Paper.pdf', check:
+	 *
+	 * 1. /Users/user/Documents/Users/user/Documents/Dissertation/Files/Paper.pdf
+	 * 2. /Users/user/Documents/user/Documents/Dissertation/Files/Paper.pdf
+	 * 3. /Users/user/Documents/Documents/Dissertation/Files/Paper.pdf
+	 * 4. /Users/user/Documents/Dissertation/Files/Paper.pdf
+	 *
+	 * If line 4 had not been the correct local path (in other words, if no file
+	 * existed at that path), we would have continued on to check
+	 * '/Users/user/Documents/Dissertation/Paper.pdf'. If that did not match,
+	 * with no more segments in the synced path to drop, we would have given up.
+	 *
+	 * Once we find the file, check for other linked files beginning with
+	 * C:\Users\user\Documents\Dissertation\Files and see if they exist relative
+	 * to /Users/user/Documents/Dissertation/Files, and prompt to relink them
+	 * all if so.
+	 *
+	 * @param {Zotero.Item} item
+	 * @return {Promise<Boolean>} True if relinked successfully or canceled
+	 */
+	this.checkForLinkedFilesToRelink = async function (item) {
+		Zotero.debug('Attempting to relink automatically');
+		
+		let basePath = Zotero.Prefs.get('baseAttachmentPath');
+		if (!basePath) {
+			Zotero.debug('No LABD');
+			return false;
+		}
+		Zotero.debug('LABD path: ' + basePath);
+
+		let syncedPath = item.getFilePath();
+		if (!syncedPath) {
+			Zotero.debug('No synced path');
+			return false;
+		}
+		syncedPath = Zotero.File.normalizeToUnix(syncedPath);
+		Zotero.debug('Synced path: ' + syncedPath);
+
+		if (Zotero.File.directoryContains(basePath, syncedPath)) {
+			// Already in the LABD - nothing to do
+			Zotero.debug('Synced path is already within LABD');
+			return false;
+		}
+
+		// We can't use OS.Path.dirname because that function expects paths valid for the current platform...
+		// but we can't normalize first because we're going to be comparing it to other un-normalized paths
+		let unNormalizedDirname = item.getFilePath();
+		let lastSlash = Math.max(
+			unNormalizedDirname.lastIndexOf('/'),
+			unNormalizedDirname.lastIndexOf('\\')
+		);
+		if (lastSlash != -1) {
+			unNormalizedDirname = unNormalizedDirname.substring(0, lastSlash + 1);
+		}
+
+		let parts = OS.Path.split(syncedPath).components;
+		for (let segmentsToDrop = 0; segmentsToDrop < parts.length; segmentsToDrop++) {
+			let correctedPath = OS.Path.join(basePath, ...parts.slice(segmentsToDrop));
+
+			if (!(await OS.File.exists(correctedPath))) {
+				Zotero.debug('Does not exist: ' + correctedPath);
+				continue;
+			}
+			Zotero.debug('Exists! ' + correctedPath);
+
+			let otherUnlinked = await Zotero.Items.findMissingLinkedFiles(
+				item.libraryID,
+				unNormalizedDirname
+			);
+			let othersToRelink = new Map();
+			for (let otherItem of otherUnlinked) {
+				if (otherItem.id === item.id) continue;
+				let otherParts = otherItem.getFilePath()
+					.split(/[/\\]/)
+					// Slice as much off the beginning as when creating correctedPath
+					.slice(segmentsToDrop);
+				if (!otherParts.length) continue;
+				let otherCorrectedPath = OS.Path.join(basePath, ...otherParts);
+				if (await OS.File.exists(otherCorrectedPath)) {
+					othersToRelink.set(otherItem, otherCorrectedPath);
+				}
+			}
+
+			let choice = this.showLinkedFileFoundAutomaticallyDialog(item, correctedPath, othersToRelink.size);
+			switch (choice) {
+				case 'one':
+					await item.relinkAttachmentFile(correctedPath);
+					return true;
+				case 'all':
+					await item.relinkAttachmentFile(correctedPath);
+					await Promise.all([...othersToRelink]
+						.map(([i, p]) => i.relinkAttachmentFile(p)));
+					return true;
+				case 'manual':
+					await this.relinkAttachment(item.id);
+					return true;
+				case 'cancel':
+					return true;
+			}
+		}
+		
+		Zotero.debug('No segments left to drop; match not found in LABD');
+		return false;
+	};
 	
 	
 	this.relinkAttachment = async function (itemID) {
@@ -5205,7 +5592,7 @@ var ZoteroPane = new function()
 		if (!item) {
 			throw new Error('Item ' + itemID + ' not found in ZoteroPane_Local.relinkAttachment()');
 		}
-		
+
 		while (true) {
 			let fp = new FilePicker();
 			fp.init(window, Zotero.getString('pane.item.attachments.select'), fp.modeOpen);
@@ -5218,7 +5605,13 @@ var ZoteroPane = new function()
 			
 			var dir = await Zotero.File.getClosestDirectory(file);
 			if (dir) {
-				fp.displayDirectory = dir;
+				try {
+					fp.displayDirectory = dir;
+				}
+				catch (e) {
+					// Directory is invalid; ignore and go with the home directory
+					fp.displayDirectory = OS.Constants.Path.homeDir;
+				}
 			}
 			
 			fp.appendFilters(fp.filterAll);
@@ -5307,7 +5700,7 @@ var ZoteroPane = new function()
 			askForSteps: true
 		};
 		var io = { wrappedJSObject: { Zotero: Zotero, data:  data } };
-		var win = ww.openWindow(null, "chrome://zotero/content/errorReport.xul",
+		var win = ww.openWindow(null, "chrome://zotero/content/errorReport.xhtml",
 					"zotero-error-report", "chrome,centerscreen,modal", io);
 	}
 	

@@ -1502,6 +1502,7 @@ Zotero.Items = function() {
 				);
 			}
 			Zotero.debug("Emptied " + deleted.length + " item(s) from trash in " + (new Date() - t) + " ms");
+			Zotero.Notifier.trigger('refresh', 'trash', libraryID);
 		}
 		
 		return deleted.length;
@@ -1736,22 +1737,40 @@ Zotero.Items = function() {
 	
 	
 	/**
-	 * Returns an array of items with children of selected parents removed
+	 * Get the top-level items of all passed items
 	 *
+	 * @param {Zotero.Item[]} items
 	 * @return {Zotero.Item[]}
 	 */
-	this.keepParents = function (items) {
-		var parentItems = new Set(
-			items
-				.filter(item => item.isTopLevelItem())
-				.map(item => item.id)
+	this.getTopLevel = function (items) {
+		return [...new Set(items.map(item => item.topLevelItem))];
+	};
+	
+	
+	/**
+	 * Return an array of items with descendants of selected top-level items removed
+	 *
+	 * Non-top-level items that aren't descendents of selected items are kept.
+	 *
+	 * @param {Zotero.Item[]}
+	 * @return {Zotero.Item[]}
+	 */
+	this.keepTopLevel = function (items) {
+		var topLevelItems = new Set(
+			items.filter(item => item.isTopLevelItem())
 		);
-		return items.filter(item => {
-			var parentItemID = item.parentItemID;
+		return items.filter((item) => {
+			var topLevelItem = !item.isTopLevelItem() && item.topLevelItem;
 			// Not a child item or not a child of one of the passed items
-			return !parentItemID || !parentItems.has(parentItemID);
+			return !topLevelItem || !topLevelItems.has(topLevelItem);
 		});
-	}
+	};
+	
+	
+	this.keepParents = function (items) {
+		Zotero.debug("Zotero.Items.keepParents() is deprecated -- use Zotero.Items.keepTopLevel() instead");
+		return this.keepTopLevel(items);
+	};
 	
 	
 	/*
@@ -2048,6 +2067,28 @@ Zotero.Items = function() {
 			title = title.replace(re, '');
 		}
 		return title.trim();
+	};
+
+
+	/**
+	 * Find attachment items whose paths begin with the passed `pathPrefix` and don't exist on disk
+	 *
+	 * @param {Number} libraryID
+	 * @param {String} pathPrefix
+	 * @return {Zotero.Item[]}
+	 */
+	this.findMissingLinkedFiles = async function (libraryID, pathPrefix) {
+		let sql = "SELECT itemID FROM items JOIN itemAttachments USING (itemID) "
+			+ "WHERE itemID NOT IN (SELECT itemID FROM deletedItems) "
+			+ `AND linkMode=${Zotero.Attachments.LINK_MODE_LINKED_FILE} `
+			+ "AND path LIKE ? ESCAPE '\\' "
+			+ "AND libraryID=?";
+		let ids = await Zotero.DB.columnQueryAsync(sql, [Zotero.DB.escapeSQLExpression(pathPrefix) + '%', libraryID]);
+		let items = await this.getAsync(ids);
+		let missingItems = await Promise.all(
+			items.map(async item => (await item.fileExists() ? false : item))
+		);
+		return missingItems.filter(Boolean);
 	};
 	
 	

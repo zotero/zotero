@@ -608,7 +608,7 @@ describe("Zotero.Items", function () {
 			await item2.saveTx();
 			let attachment2 = await importPDFAttachment(item2);
 			let annotation2 = await createAnnotation('highlight', attachment2);
-			let annotation2Note = await Zotero.EditorInstance.createNoteFromAnnotations([annotation2], item2.id);
+			let annotation2Note = await Zotero.EditorInstance.createNoteFromAnnotations([annotation2], { parentID: item2.id });
 
 			assert.include(annotation2Note.getNote(), attachment2.key);
 
@@ -651,7 +651,7 @@ describe("Zotero.Items", function () {
 			for (let filename of attachmentFilenames) {
 				let attachment = await importFileAttachment(filename, { parentID: item2.id });
 				let annotation = await createAnnotation('highlight', attachment);
-				let note = await Zotero.EditorInstance.createNoteFromAnnotations([annotation], item2.id);
+				let note = await Zotero.EditorInstance.createNoteFromAnnotations([annotation], { parentID: item2.id });
 				attachments2.push(attachment);
 				annotations2.push(annotation);
 				notes2.push(note);
@@ -1233,6 +1233,17 @@ describe("Zotero.Items", function () {
 				items.map(item => item.id),
 				[item1, item4, item6].map(item => item.id)
 			);
+		});
+		
+		it("shouldn't return parent item more than once when two child items are selected", async function () {
+			var item1 = await createDataObject('item');
+			var item2 = await createDataObject('item', { itemType: 'note', parentItemID: item1.id });
+			var item3 = await createDataObject('item', { itemType: 'note', parentItemID: item1.id });
+			var items = Zotero.Items.keepParents([item2, item3]);
+			assert.sameMembers(
+				items.map(item => item.id),
+				[item2.id, item3.id]
+			)
 		});
 	});
 	

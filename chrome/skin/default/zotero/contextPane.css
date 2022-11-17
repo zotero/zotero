@@ -35,6 +35,7 @@
 #zotero-context-pane-inner {
     width: 0;
     font: message-box;
+    font-size: inherit;
     min-height: 100px;
     height: 100%;
     pointer-events: auto;

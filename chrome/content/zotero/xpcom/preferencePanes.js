@@ -35,6 +35,7 @@ Zotero.PreferencePanes = {
 			src: 'chrome://zotero/content/preferences/preferences_general.xhtml',
 			scripts: ['chrome://zotero/content/preferences/preferences_general.js'],
 			defaultXUL: true,
+			helpURL: 'https://www.zotero.org/support/preferences/general',
 		},
 		{
 			id: 'zotero-prefpane-sync',
@@ -43,6 +44,7 @@ Zotero.PreferencePanes = {
 			src: 'chrome://zotero/content/preferences/preferences_sync.xhtml',
 			scripts: ['chrome://zotero/content/preferences/preferences_sync.js'],
 			defaultXUL: true,
+			helpURL: 'https://www.zotero.org/support/preferences/sync',
 		},
 		{
 			id: 'zotero-prefpane-export',
@@ -51,6 +53,7 @@ Zotero.PreferencePanes = {
 			src: 'chrome://zotero/content/preferences/preferences_export.xhtml',
 			scripts: ['chrome://zotero/content/preferences/preferences_export.js'],
 			defaultXUL: true,
+			helpURL: 'https://www.zotero.org/support/preferences/export',
 		},
 		{
 			id: 'zotero-prefpane-cite',
@@ -59,6 +62,7 @@ Zotero.PreferencePanes = {
 			src: 'chrome://zotero/content/preferences/preferences_cite.xhtml',
 			scripts: ['chrome://zotero/content/preferences/preferences_cite.js'],
 			defaultXUL: true,
+			helpURL: 'https://www.zotero.org/support/preferences/cite',
 		},
 		{
 			id: 'zotero-prefpane-advanced',
@@ -67,6 +71,7 @@ Zotero.PreferencePanes = {
 			src: 'chrome://zotero/content/preferences/preferences_advanced.xhtml',
 			scripts: ['chrome://zotero/content/preferences/preferences_advanced.js'],
 			defaultXUL: true,
+			helpURL: 'https://www.zotero.org/support/preferences/advanced',
 		},
 		{
 			id: 'zotero-subpane-reset-sync',
@@ -75,6 +80,7 @@ Zotero.PreferencePanes = {
 			src: 'chrome://zotero/content/preferences/preferences_sync_reset.xhtml',
 			scripts: ['chrome://zotero/content/preferences/preferences_sync.js'],
 			defaultXUL: true,
+			helpURL: 'https://www.zotero.org/support/preferences/sync#reset',
 		}
 	]),
 
@@ -89,29 +95,32 @@ Zotero.PreferencePanes = {
 	 * shuts down.
 	 *
 	 * @param {Object} options
-	 * @param {String} options.id Represents the pane and must be unique
 	 * @param {String} options.pluginID ID of the plugin registering the pane
+	 * @param {String} options.src URI of an XHTML fragment
+	 * @param {String} [options.id] Represents the pane and must be unique. Automatically generated if not provided
 	 * @param {String} [options.parent] ID of parent pane (if provided, pane is hidden from the sidebar)
 	 * @param {String} [options.label] Displayed as the pane's label in the sidebar.
 	 * 		If not provided, the plugin's name is used
 	 * @param {String} [options.image] URI of an icon to be displayed in the navigation sidebar.
 	 * 		If not provided, the plugin's icon (from manifest.json) is used
-	 * @param {String} options.src URI of an XHTML fragment
 	 * @param {String[]} [options.extraDTD] Array of URIs of DTD files to use for parsing the XHTML fragment
 	 * @param {String[]} [options.scripts] Array of URIs of scripts to load along with the pane
-	 * @return {Promise<void>}
+	 * @param {String[]} [options.stylesheets] Array of URIs of CSS stylesheets to load along with the pane
+	 * @param {String[]} [options.helpURL] If provided, a help button will be displayed under the pane
+	 * 		and the provided URL will open when it is clicked
+	 * @return {Promise<String>} Resolves to the ID of the pane if successfully added
 	 */
 	register: async function (options) {
-		if (!options.id || !options.pluginID || !options.src) {
-			throw new Error('id, pluginID, and src must be provided');
+		if (!options.pluginID || !options.src) {
+			throw new Error('pluginID and src must be provided');
 		}
-		if (this.builtInPanes.some(p => p.id === options.id)
-			|| this.pluginPanes.some(p => p.id === options.id)) {
+		if (options.id && (this.builtInPanes.some(p => p.id === options.id)
+				|| this.pluginPanes.some(p => p.id === options.id))) {
 			throw new Error(`Pane with ID ${options.id} already registered`);
 		}
 
 		let addPaneOptions = {
-			id: options.id,
+			id: options.id || `plugin-pane-${Zotero.Utilities.randomString()}-${options.pluginID}`,
 			pluginID: options.pluginID,
 			parent: options.parent,
 			rawLabel: options.label || await Zotero.Plugins.getName(options.pluginID),
@@ -119,13 +128,16 @@ Zotero.PreferencePanes = {
 			src: options.src,
 			extraDTD: options.extraDTD,
 			scripts: options.scripts,
-			defaultXUL: false,
+			stylesheets: options.stylesheets,
+			helpURL: options.helpURL,
+			defaultXUL: true,
 		};
 
 		this.pluginPanes.push(addPaneOptions);
-		Zotero.debug(`Plugin ${options.pluginID} registered preference pane ${options.id} ("${addPaneOptions.rawLabel}")`);
+		Zotero.debug(`Plugin ${addPaneOptions.pluginID} registered preference pane ${addPaneOptions.id} ("${addPaneOptions.rawLabel}")`);
 		this._refreshPreferences();
 		this._ensureObserverAdded();
+		return addPaneOptions.id;
 	},
 
 	/**
@@ -140,7 +152,7 @@ Zotero.PreferencePanes = {
 	
 	_refreshPreferences() {
 		for (let win of Services.wm.getEnumerator("zotero:pref")) {
-			win.Zotero_Preferences.initPanes();
+			win.location.reload();
 		}
 	},
 	
@@ -150,7 +162,7 @@ Zotero.PreferencePanes = {
 		}
 		
 		Zotero.Plugins.addObserver({
-			shutdown({ id: pluginID }) {
+			shutdown: ({ id: pluginID }) => {
 				let beforeLength = this.pluginPanes.length;
 				this.pluginPanes = this.pluginPanes.filter(pane => pane.pluginID !== pluginID);
 				if (this.pluginPanes.length !== beforeLength) {

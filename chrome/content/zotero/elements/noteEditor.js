@@ -35,12 +35,12 @@
 			this._item = null;
 			this._parentItem = null;
 			this._iframe = null;
-			this._initialized = true;
+			this._initialized = false;
 			this._editorInstance = null;
 			this._destroyed = false;
 
 			this.content = MozXULElement.parseXULToFragment(`
-				<box flex="1" tooltip="html-tooltip" style="display: flex" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+				<box flex="1" tooltip="html-tooltip" style="display: flex; flex-grow: 1" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 					<div id="note-editor" style="display: flex;flex-direction: column;flex-grow: 1;" xmlns="http://www.w3.org/1999/xhtml">
 						<iframe  id="editor-view" style="border: 0;width: 100%;flex-grow: 1;" src="resource://zotero/note-editor/editor.html" type="content"/>
 						<div id="links-container">
@@ -60,6 +60,8 @@
 			window.addEventListener("unload", this.destroy);
 
 			var shadow = this.attachShadow({ mode: "open" });
+			MozXULElement.insertFTLIfNeeded('mozilla/textActions.ftl');
+			document.l10n.connectRoot(shadow);
 			
 			// var s1 = document.createElement("link");
 			// s1.rel = "stylesheet";

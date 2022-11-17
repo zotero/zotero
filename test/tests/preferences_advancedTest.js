@@ -65,21 +65,11 @@ describe("Advanced Preferences", function () {
 		describe("Linked Attachment Base Directory", function () {
 			var setBaseDirectory = Zotero.Promise.coroutine(function* (basePath) {
 				var win = yield loadWindow("chrome://zotero/content/preferences/preferences.xhtml", {
-					pane: 'zotero-prefpane-advanced',
-					tabIndex: 1
+					pane: 'zotero-prefpane-advanced'
 				});
 				
 				// Wait for tab to load
-				var doc = win.document;
-				var prefwindow = doc.documentElement;
-				var defer = Zotero.Promise.defer();
-				var pane = doc.getElementById('zotero-prefpane-advanced');
-				if (!pane.loaded) {
-					pane.addEventListener('paneload', function () {
-						defer.resolve();
-					})
-					yield defer.promise;
-				}
+				yield win.Zotero_Preferences.waitForFirstPaneLoad();
 				
 				var promise = waitForDialog();
 				yield win.Zotero_Preferences.Attachment_Base_Directory.changePath(basePath);
@@ -95,16 +85,7 @@ describe("Advanced Preferences", function () {
 				});
 				
 				// Wait for tab to load
-				var doc = win.document;
-				var prefwindow = doc.documentElement;
-				var defer = Zotero.Promise.defer();
-				var pane = doc.getElementById('zotero-prefpane-advanced');
-				if (!pane.loaded) {
-					pane.addEventListener('paneload', function () {
-						defer.resolve();
-					})
-					yield defer.promise;
-				}
+				yield win.Zotero_Preferences.waitForFirstPaneLoad();
 				
 				var promise = waitForDialog();
 				yield win.Zotero_Preferences.Attachment_Base_Directory.clearPath();

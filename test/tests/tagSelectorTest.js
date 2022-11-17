@@ -95,6 +95,21 @@ describe("Tag Selector", function () {
 		assert.sameMembers(tags, ['A', 'B']);
 	});
 	
+	it("should show tags from annotations for attachments in scope", async function () {
+		var collection = await createDataObject('collection');
+		var item = await createDataObject('item', { collections: [collection.id] });
+		var attachment = await importPDFAttachment(item);
+		var annotation = await createAnnotation('highlight', attachment);
+		var tag = Zotero.Utilities.randomString();
+		annotation.addTag(tag);
+		var promise = waitForTagSelector(win)
+		await annotation.saveTx();
+		await promise;
+		
+		var tags = getRegularTags();
+		assert.sameMembers(tags, [tag]);
+	});
+	
 	describe("#handleSearch()", function () {
 		it("should filter to tags matching the search", function* () {
 			var collection = yield createDataObject('collection');

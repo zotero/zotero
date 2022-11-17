@@ -73,6 +73,28 @@ Zotero.Integration = new function() {
 	this.currentWindow = false;
 	this.sessions = {};
 	var upgradeTemplateNotNowTime = 0;
+
+	/**
+	 * Initialize LibreOffice, Word for Mac and Word for Windows plugin components.
+	 */
+	this.init = function () {
+		if (Zotero.test) return;
+		let classNames = ["@zotero.org/Zotero/integration/initializer?agent=LibreOffice;1"];
+		if (Zotero.isMac) {
+			classNames.push("@zotero.org/Zotero/integration/installer?agent=MacWord;1")
+		} else if (Zotero.isWindows) {
+			classNames.push("@zotero.org/Zotero/integration/installer?agent=WinWord;1")
+		}
+		for (let className of classNames) {
+			try {
+				Components.classes[className]
+					.getService(Components.interfaces.nsISupports);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}	
+		}
+	}
 	
 	/**
 	 * Begin listening for integration commands on the given pipe
@@ -798,7 +820,8 @@ Zotero.Integration.Interface.prototype.addEditBibliography = Zotero.Promise.coro
  * @return {Promise}
  */
 Zotero.Integration.Interface.prototype.refresh = async function() {
-	await this._session.init(true, false)
+	await this._session.init(true, false);
+	this._session.shouldMerge = true;
 	
 	this._session.reload = this._session.reload || this._session.data.prefs.delayCitationUpdates;
 	await this._session.updateFromDocument(FORCE_CITATIONS_REGENERATE);
@@ -1037,6 +1060,10 @@ Zotero.Integration.Session.prototype.updateFromDocument = Zotero.Promise.corouti
 	this.progressBar.start();
 	if (forceCitations) {
 		this.regenAll = true;
+		// See Session.restoreProcessorState() for a comment
+		if (!Zotero.Prefs.get('cite.useCiteprocRs')) {
+			this.reload = true;
+		}
 	}
 	yield this._processFields();
 	try {
@@ -1067,15 +1094,24 @@ Zotero.Integration.Session.prototype._processFields = async function () {
 	if (!this._fields) {
 		throw new Error("_processFields called without fetching fields first");
 	}
-	
+
+	let adjacentCitations = [];
 	for (var i = 0; i < this._fields.length; i++) {
 		let field = await Zotero.Integration.Field.loadExisting(this._fields[i]);
 		if (field.type === INTEGRATION_TYPE_ITEM) {
 			var noteIndex = await field.getNoteIndex(),
 				data = await field.unserialize(),
 				citation = new Zotero.Integration.Citation(field, data, noteIndex);
-			
-			await this.addCitation(i, noteIndex, citation);
+
+			if (this.shouldMerge && typeof field.isAdjacentToNextField === 'function' && await field.isAdjacentToNextField()) {
+				adjacentCitations.push(citation);
+				this._deleteFields[i] = true;
+				continue;
+			}
+			await this.addCitation(i, noteIndex, citation, adjacentCitations);
+			if (adjacentCitations.length) {
+				adjacentCitations = [];
+			}
 		} else if (field.type === INTEGRATION_TYPE_BIBLIOGRAPHY) {
 			if (this.ignoreEmptyBibliography && (await field.getText()).trim() === "") {
 				this._removeCodeFields[i] = true;
@@ -1443,15 +1479,15 @@ Zotero.Integration.Session.prototype.cite = async function (field, addNote=false
 	var mode = (!Zotero.isMac && Zotero.Prefs.get('integration.keepAddCitationDialogRaised')
 		? 'popup' : 'alwaysRaised')+',resizable=false';
 	if (addNote) {
-		Zotero.Integration.displayDialog('chrome://zotero/content/integration/insertNoteDialog.xul',
+		Zotero.Integration.displayDialog('chrome://zotero/content/integration/insertNoteDialog.xhtml',
 			mode, io);
 	}
 	else if (Zotero.Prefs.get("integration.useClassicAddCitationDialog")) {
-		Zotero.Integration.displayDialog('chrome://zotero/content/integration/addCitationDialog.xul',
+		Zotero.Integration.displayDialog('chrome://zotero/content/integration/addCitationDialog.xhtml',
 			'alwaysRaised,resizable', io);
 	}
 	else {
-		Zotero.Integration.displayDialog('chrome://zotero/content/integration/quickFormat.xul',
+		Zotero.Integration.displayDialog('chrome://zotero/content/integration/quickFormat.xhtml',
 			mode, io);
 	}
 
@@ -1836,7 +1872,7 @@ Zotero.Integration.Session.prototype.setDocPrefs = async function (showImportExp
 	
 	// Make sure styles are initialized for new docs
 	await Zotero.Styles.init();
-	await Zotero.Integration.displayDialog('chrome://zotero/content/integration/integrationDocPrefs.xul', '', io);
+	await Zotero.Integration.displayDialog('chrome://zotero/content/integration/integrationDocPrefs.xhtml', '', io);
 
 	if (io.exportDocument) {
 		return this.exportDocument();
@@ -1956,8 +1992,16 @@ Zotero.Integration.Session.prototype.importDocument = async function() {
 /**
  * Adds a citation to the arrays representing the document
  */
-Zotero.Integration.Session.prototype.addCitation = async function (index, noteIndex, citation) {
+Zotero.Integration.Session.prototype.addCitation = async function (index, noteIndex, citation, adjacentCitations=[]) {
 	index = parseInt(index, 10);
+	
+	if (adjacentCitations.length) {
+		Zotero.debug(`Merging adjacent citations ${adjacentCitations.map(c => c.citationID)} to citation ${citation.citationID}`);
+		for (let adjacentCitation of adjacentCitations) {
+			citation.mergeCitation(adjacentCitation);
+		}
+		this.updateIndices[index] = true;
+	}
 	
 	var action = await citation.loadItemData();
 	
@@ -2156,6 +2200,12 @@ Zotero.Integration.Session.prototype.restoreProcessorState = function() {
 			citations.push(this.citationsByIndex[i]);
 		}
 	}
+	if (!Zotero.Prefs.get('cite.useCiteprocRs')) {
+		// Due to a bug in citeproc-js there are disambiguation issues after changing items in Zotero library
+		// and rebuilding the processor state, so we reinitialize the processor altogether
+		let style = Zotero.Styles.get(this.data.style.styleID);
+		this.style = style.getCiteProc(this.data.style.locale, this.outputFormat, this.data.prefs.automaticJournalAbbreviations);
+	}
 	this.style.rebuildProcessorState(citations, this.outputFormat, uncited);
 }
 
@@ -2292,20 +2342,23 @@ Zotero.Integration.Session.prototype.promptForRetraction = function (citedItem, 
  * Edits integration bibliography
  * @param {Zotero.Integration.Bibliography} bibliography
  */
-Zotero.Integration.Session.prototype.editBibliography = Zotero.Promise.coroutine(function *(bibliography) {
+Zotero.Integration.Session.prototype.editBibliography = async function (bibliography) {
 	if (!Object.keys(this.citationsByIndex).length) {
 		throw new Error('Integration.Session.editBibliography: called without loaded citations');	
 	}
-	yield bibliography.loadItemData();
+	// Update citeproc with citations in the doc
+	await this._updateCitations();
+	await bibliography.loadItemData();
+	await bibliography.getCiteprocBibliography(this.style);
 	
 	var bibliographyEditor = new Zotero.Integration.BibliographyEditInterface(bibliography, this.citationsByItemID, this.style);
 	
-	yield Zotero.Integration.displayDialog('chrome://zotero/content/integration/editBibliographyDialog.xul', 'resizable', bibliographyEditor);
+	await Zotero.Integration.displayDialog('chrome://zotero/content/integration/editBibliographyDialog.xhtml', 'resizable', bibliographyEditor);
 	if (bibliographyEditor.cancelled) throw new Zotero.Exception.UserCancelled("bibliography editing");
 	
 	this.bibliographyDataHasChanged = this.bibliographyHasChanged = true;
 	this.bibliography = bibliographyEditor.bibliography;
-});
+};
 
 /**
  * @class Interface for bibliography editor to alter document bibliography
@@ -2321,9 +2374,10 @@ Zotero.Integration.BibliographyEditInterface = function(bibliography, citationsB
 	this._update();
 }
 
-Zotero.Integration.BibliographyEditInterface.prototype._update = Zotero.Promise.coroutine(function* () {
+
+Zotero.Integration.BibliographyEditInterface.prototype._update = function () {
 	this.bib = this.bibliography.getCiteprocBibliography(this.citeproc);
-});
+};
 
 /**
  * Reverts the text of an individual bibliography entry
@@ -2336,12 +2390,12 @@ Zotero.Integration.BibliographyEditInterface.prototype.revert = function(itemID)
 /**
  * Reverts bibliography to condition in which no edits have been made
  */
-Zotero.Integration.BibliographyEditInterface.prototype.revertAll = Zotero.Promise.coroutine(function* () {
+Zotero.Integration.BibliographyEditInterface.prototype.revertAll = function () {
 	this.bibliography.customEntryText = {};
 	this.bibliography.uncitedItemIDs.clear();
 	this.bibliography.omittedItemIDs.clear();
 	return this._update();
-});
+};
 
 /**
  * Reverts bibliography to condition before BibliographyEditInterface was opened
@@ -2621,7 +2675,7 @@ Zotero.Integration.Field = class {
 			throw new Error("Trying to instantiate Integration.Field with Integration.Field, not doc field");
 		}
 		for (let func of Zotero.Integration.Field.INTERFACE) {
-			if (!(func in this)) {
+			if (!(func in this) && (func in field)) {
 				this[func] = field[func].bind(field);
 			}
 		}
@@ -2680,7 +2734,7 @@ Zotero.Integration.Field = class {
 	}
 };
 Zotero.Integration.Field.INTERFACE = ['delete', 'removeCode', 'select', 'setText',
-	'getText', 'setCode', 'getCode', 'equals', 'getNoteIndex'];
+	'getText', 'setCode', 'getCode', 'equals', 'getNoteIndex', 'isAdjacentToNextField'];
 
 /**
  * Load existing field in document and return correct instance of field type
@@ -2920,6 +2974,23 @@ Zotero.Integration.Citation = class {
 	}
 
 	/**
+	 * Merge citation items and remove duplicates, unless the items have different
+	 * @param citation {Citation}
+	 */
+	mergeCitation(citation) {
+		let items = this.citationItems.concat(citation.citationItems);
+		let addedItems = new Set();
+		this.citationItems = []
+		for (let item of items) {
+			if (addedItems.has(item.id)) {
+				continue;
+			}
+			addedItems.add(item.id);
+			this.citationItems.push(item);
+		}
+	}
+
+	/**
 	 * Load citation item data
 	 * @param {Boolean} [promptToReselect=true] - will throw a MissingItemException if false
 	 * @returns {Promise{Number}}
@@ -3052,7 +3123,7 @@ Zotero.Integration.Citation = class {
 		io.addBorder = Zotero.isWin;
 		io.singleSelection = true;
 		
-		await Zotero.Integration.displayDialog('chrome://zotero/content/selectItemsDialog.xul', 'resizable', io);
+		await Zotero.Integration.displayDialog('chrome://zotero/content/selectItemsDialog.xhtml', 'resizable', io);
 			
 		if (io.dataOut && io.dataOut.length) {
 			return Zotero.Items.get(io.dataOut[0]);
@@ -3374,7 +3445,7 @@ Zotero.Integration.Progress = class {
 		io.isNote = this.isNote;
 		this.window = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 			.getService(Components.interfaces.nsIWindowWatcher)
-			.openWindow(null, 'chrome://zotero/content/integration/progressBar.xul', '', options, io);
+			.openWindow(null, 'chrome://zotero/content/integration/progressBar.xhtml', '', options, io);
 		Zotero.Utilities.Internal.activate(this.window);
 	}
 	async hide(fast=false) {

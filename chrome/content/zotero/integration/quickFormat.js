@@ -22,7 +22,8 @@
     
     ***** END LICENSE BLOCK *****
 */
-Components.utils.import("resource://gre/modules/Services.jsm");
+var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+Services.scriptloader.loadSubScript("chrome://zotero/content/elements/guidancePanel.js", this);
 
 var Zotero_QuickFormat = new function () {
 	const pixelRe = /^([0-9]+)px$/
@@ -686,7 +687,7 @@ var Zotero_QuickFormat = new function () {
 		_buildItemDescription(item, infoNode);
 		
 		// add to rich list item
-		var rll = document.createElement("richlistitem");
+		var rll = document.createXULElement("richlistitem");
 		rll.setAttribute("orient", "vertical");
 		rll.setAttribute("class", "citation-dialog item");
 		rll.setAttribute("zotero-item", item.cslItemID ? item.cslItemID : item.id);
@@ -708,7 +709,7 @@ var Zotero_QuickFormat = new function () {
 		titleNode.setAttribute("value", labelText);
 		
 		// add to rich list item
-		var rll = document.createElement("richlistitem");
+		var rll = document.createXULElement("richlistitem");
 		rll.setAttribute("orient", "vertical");
 		rll.setAttribute("disabled", true);
 		rll.setAttribute("class", loading ? "citation-dialog loading" : "citation-dialog separator");
@@ -732,9 +733,7 @@ var Zotero_QuickFormat = new function () {
 		
 		// Title, if no creator (getDisplayTitle in order to get case, e-mail, statute which don't have a title field)
 		title = item.getDisplayTitle();
-		if (item.isNote()) {
-			title = title.substr(0, 24) + '…';
-		}
+		title = title.substr(0, 32) + (title.length > 32 ? "…" : "");
  		if (!str) {
 			str = Zotero.getString("punctuation.openingQMark") + title + Zotero.getString("punctuation.closingQMark");
 		}
@@ -761,15 +760,17 @@ var Zotero_QuickFormat = new function () {
 		
 		// Prefix
 		if(citationItem.prefix && Zotero.CiteProc.CSL.ENDSWITH_ROMANESQUE_REGEXP) {
-			str = citationItem.prefix
+			let prefix = citationItem.prefix.substr(0, 10) + (citationItem.prefix.length > 10 ? "…" : "")
+			str = prefix
 				+(Zotero.CiteProc.CSL.ENDSWITH_ROMANESQUE_REGEXP.test(citationItem.prefix) ? " " : "")
 				+str;
 		}
 		
 		// Suffix
 		if(citationItem.suffix && Zotero.CiteProc.CSL.STARTSWITH_ROMANESQUE_REGEXP) {
+			let suffix = citationItem.suffix.substr(0, 10) + (citationItem.suffix.length > 10 ? "…" : "")
 			str += (Zotero.CiteProc.CSL.STARTSWITH_ROMANESQUE_REGEXP.test(citationItem.suffix) ? " " : "")
-				+citationItem.suffix;
+				+ suffix;
 		}
 		
 		return str;
@@ -781,9 +782,6 @@ var Zotero_QuickFormat = new function () {
 	function _insertBubble(citationItem, nextNode) {
 		var str = _buildBubbleString(citationItem);
 		
-		// It's entirely unintuitive why, but after trying a bunch of things, it looks like using
-		// a XUL label for these things works best. A regular span causes issues with moving the
-		// cursor.
 		var bubble = qfiDocument.createElement("span");
 		bubble.setAttribute("class", "citation-dialog bubble");
 		bubble.setAttribute("draggable", "true");
@@ -947,7 +945,7 @@ var Zotero_QuickFormat = new function () {
 			}
 			
 			if(!panelFrameHeight) {
-				panelFrameHeight = referencePanel.boxObject.height - referencePanel.clientHeight;
+				panelFrameHeight = referencePanel.getBoundingClientRect().height - referencePanel.clientHeight;
 				var computedStyle = window.getComputedStyle(referenceBox, null);
 				for(var attr of ["border-top-width", "border-bottom-width"]) {
 					var val = computedStyle.getPropertyValue(attr);
@@ -1124,11 +1122,10 @@ var Zotero_QuickFormat = new function () {
 	 * Called when progress changes
 	 */
 	function _onProgress(percent) {
-		var meter = document.querySelector(".citation-dialog .progress-meter");
+		var meter = document.querySelector(".citation-dialog.progress-meter");
 		if(percent === null) {
-			meter.mode = "undetermined";
+			meter.removeAttribute('value');
 		} else {
-			meter.mode = "determined";
 			meter.value = Math.round(percent);
 		}
 	}
@@ -1204,7 +1201,7 @@ var Zotero_QuickFormat = new function () {
 		var offset = range.startOffset,
 			childNodes = qfe.childNodes,
 			node = childNodes[offset-(right ? 0 : 1)];
-		if (node && node.dataset.citationItem) return node;
+		if (node && node.dataset && node.dataset.citationItem) return node;
 		return null;
 	}
 
@@ -1507,7 +1504,7 @@ var Zotero_QuickFormat = new function () {
 		_updateCitationObject();
 		var newWindow = window.newWindow = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 			.getService(Components.interfaces.nsIWindowWatcher)
-			.openWindow(null, 'chrome://zotero/content/integration/addCitationDialog.xul',
+			.openWindow(null, 'chrome://zotero/content/integration/addCitationDialog.xhtml',
 			'', 'chrome,centerscreen,resizable', io);
 		newWindow.addEventListener("focus", function() {
 			newWindow.removeEventListener("focus", arguments.callee, true);

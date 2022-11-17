@@ -18,3 +18,8 @@ groupbox > label > h2, groupbox > * > label > h2, caption {
 	padding-bottom: 0.2em;
 	font: caption;
 }
+
+.help-button {
+	appearance: auto;
+	-moz-default-appearance: -moz-mac-help-button;	
+}

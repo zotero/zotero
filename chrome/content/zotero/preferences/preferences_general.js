@@ -30,8 +30,6 @@ Components.utils.import("resource://gre/modules/osfile.jsm");
 import FilePicker from 'zotero/modules/filePicker';
 
 Zotero_Preferences.General = {
-	DEFAULT_OPENURL_RESOLVER: 'https://www.worldcat.org/registry/gateway',
-	
 	_openURLResolvers: null,
 
 	init: function () {
@@ -172,11 +170,13 @@ Zotero_Preferences.General = {
 		var handler = Zotero.Prefs.get('fileHandler.pdf');
 		var menulist = document.getElementById('fileHandler-pdf');
 		var customMenuItem = document.getElementById('fileHandler-custom');
+		var inNewWindowCheckbox = document.getElementById('open-reader-in-new-window');
 		
 		// System default
 		if (handler == 'system') {
 			customMenuItem.hidden = true;
 			menulist.selectedIndex = 1;
+			inNewWindowCheckbox.disabled = true;
 		}
 		// Custom handler
 		else if (handler) {
@@ -203,6 +203,7 @@ Zotero_Preferences.General = {
 			}
 			customMenuItem.hidden = false;
 			menulist.selectedIndex = 2;
+			inNewWindowCheckbox.disabled = true;
 
 			// There's almost certainly a better way to do this...
 			// but why doesn't the icon just behave by default?
@@ -213,6 +214,7 @@ Zotero_Preferences.General = {
 			let menuitem = document.getElementById('fileHandler-internal');
 			menulist.selectedIndex = 0;
 			customMenuItem.hidden = true;
+			inNewWindowCheckbox.disabled = false;
 		}
 	},
 	
@@ -254,12 +256,6 @@ Zotero_Preferences.General = {
 		var openURLMenu = document.getElementById('openurl-menu');
 		var menupopup = openURLMenu.firstChild;
 		menupopup.innerHTML = '';
-		
-		var defaultMenuItem = document.createXULElement('menuitem');
-		defaultMenuItem.setAttribute('label', Zotero.getString('general.default'));
-		defaultMenuItem.setAttribute('value', this.DEFAULT_OPENURL_RESOLVER);
-		defaultMenuItem.setAttribute('type', 'checkbox');
-		menupopup.appendChild(defaultMenuItem);
 		
 		var customMenuItem = document.createXULElement('menuitem');
 		customMenuItem.setAttribute('label', Zotero.getString('general.custom'));
@@ -314,13 +310,8 @@ Zotero_Preferences.General = {
 			}
 		}
 		
-		// Default
-		if (currentResolver == this.DEFAULT_OPENURL_RESOLVER) {
-			openURLMenu.setAttribute('label', Zotero.getString('general.default'));
-			defaultMenuItem.setAttribute('checked', true);
-			Zotero.Prefs.clear('openURL.name');
-		}
-		else if (selectedName) {
+		// From directory
+		if (selectedName) {
 			openURLMenu.setAttribute('label', selectedName);
 			// If we found a match, update stored name
 			Zotero.Prefs.set('openURL.name', selectedName);
@@ -348,15 +339,8 @@ Zotero_Preferences.General = {
 		var openURLServerField = document.getElementById('openURLServerField');
 		var openURLVersionMenu = document.getElementById('openURLVersionMenu');
 		
-		// Default
-		if (event.target.value == this.DEFAULT_OPENURL_RESOLVER) {
-			Zotero.Prefs.clear('openURL.name');
-			Zotero.Prefs.clear('openURL.resolver');
-			Zotero.Prefs.clear('openURL.version');
-			openURLServerField.value = this.DEFAULT_OPENURL_RESOLVER;
-		}
 		// If "Custom" selected, clear URL field
-		else if (event.target.value == "custom") {
+		if (event.target.value == "custom") {
 			Zotero.Prefs.clear('openURL.name');
 			Zotero.Prefs.set('openURL.resolver', '');
 			Zotero.Prefs.clear('openURL.version');

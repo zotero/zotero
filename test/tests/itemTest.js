@@ -483,6 +483,26 @@ describe("Zotero.Item", function () {
 		});
 	});
 	
+	describe("#topLevelItem", function () {
+		it("should return self for top-level item", async function () {
+			var item = await createDataObject('item');
+			assert.equal(item, item.topLevelItem);
+		});
+		
+		it("should return parent item for note", async function () {
+			var item = await createDataObject('item');
+			var note = await createDataObject('item', { itemType: 'note', parentItemID: item.id });
+			assert.equal(item, note.topLevelItem);
+		});
+		
+		it("should return top-level item for annotation", async function () {
+			var item = await createDataObject('item');
+			var attachment = await importPDFAttachment(item);
+			var annotation = await createAnnotation('highlight', attachment);
+			assert.equal(item, annotation.topLevelItem);
+		});
+	});
+	
 	describe("#getCreators()", function () {
 		it("should update after creators are removed", function* () {
 			var item = createUnsavedDataObject('item');
@@ -1463,6 +1483,10 @@ describe("Zotero.Item", function () {
 				annotation2 = await createAnnotation('highlight', attachment);
 				annotation2.deleted = true;
 				await annotation2.saveTx();
+			});
+			
+			after(async function () {
+				await annotation2.eraseTx();
 			});
 			
 			it("should return annotations not in trash", async function () {

@@ -5,8 +5,8 @@
         "color":
         {
             "r": 255,
-            "g": 181,
-            "b": 182
+            "g": 245,
+            "b": 173
         },
         "profile_id": "8dbf0832-8723-4c48-b532-20c0b7f6e01a",
         "positions":
@@ -37,8 +37,8 @@
         "color":
         {
             "r": 255,
-            "g": 196,
-            "b": 251
+            "g": 181,
+            "b": 182
         },
         "profile_id": "8dbf0832-8723-4c48-b532-20c0b7f6e01a",
         "positions":
@@ -123,6 +123,35 @@
             }
         ],
         "text": "orange note1",
+        "created": "2021-11-09T10:26:16.640Z",
+        "last_modified": "2021-11-09T10:26:16.640Z",
+        "privacy_level": "private",
+        "filehash": "cc22c6611277df346ff8dc7386ba3880b2bafa15",
+        "document_id": "c54b0c6f-c4ce-4706-8742-bc7d032df862"
+    },
+    {
+        "id": "734743eb-2be3-49ef-b1ac-3f1e84fea2f2",
+        "type": "sticky_note",
+        "color": {
+            "r": 220,
+            "g": 255,
+            "b": 176
+        },
+        "profile_id": "8dbf0832-8723-4c48-b532-20c0b7f6e01a",
+        "positions": [
+            {
+                "top_left": {
+                    "x": 287.4041774203229,
+                    "y": 662.2221955464859
+                },
+                "bottom_right": {
+                    "x": 287.4041774203229,
+                    "y": 662.2221955464859
+                },
+                "page": 1
+            }
+        ],
+        "text": "green note",
         "created": "2021-11-09T10:26:16.640Z",
         "last_modified": "2021-11-09T10:26:16.640Z",
         "privacy_level": "private",

@@ -403,4 +403,79 @@ describe("Zotero.Annotations", function() {
 			await Zotero.Items.erase(splitAnnotations.map(x => x.id));
 		});
 	});
-})
+});
+
+describe("Create a note from annotations from multiple items and attachments", function () {
+	it("should create a note from single PDF file containing multiple annotations", async function () {
+		let annotations = [];
+		let attachment = await importPDFAttachment();
+		let annotation1 = await createAnnotation('highlight', attachment);
+		annotations.push(annotation1);
+		let annotation2 = await createAnnotation('highlight', attachment);
+		annotations.push(annotation2);
+		let note = await Zotero.EditorInstance.createNoteFromAnnotations(annotations);
+		assert.equal(note.note.split('test.pdf').length - 1, 1);
+		assert.equal(note.note.split(annotation1.annotationText).length - 1, 1);
+		assert.equal(note.note.split(annotation2.annotationText).length - 1, 1);
+	});
+
+	it("should create a note from multiple PDF files containing single annotation", async function () {
+		let annotations = [];
+		let item = await createDataObject('item', { setTitle: true });
+		let attachment1 = await importPDFAttachment(item);
+		let attachment2 = await importPDFAttachment(item);
+		let annotation1 = await createAnnotation('highlight', attachment1);
+		annotations.push(annotation1);
+		let annotation2 = await createAnnotation('highlight', attachment2);
+		annotations.push(annotation2);
+		let note = await Zotero.EditorInstance.createNoteFromAnnotations(annotations);
+		assert.equal(note.note.split('test.pdf').length - 1, 2);
+		assert.equal(note.note.split('>' + item.getField('title') + '<').length - 1, 0);
+		assert.equal(note.note.split(annotation1.annotationText).length - 1, 1);
+		assert.equal(note.note.split(annotation2.annotationText).length - 1, 1);
+	});
+
+	it("should create a note from multiple parent items containing single PDF file with single annotation", async function () {
+		let annotations = [];
+		let item1 = await createDataObject('item', { setTitle: true });
+		let item2 = await createDataObject('item', { setTitle: true });
+		let attachment1 = await importPDFAttachment(item1);
+		let attachment2 = await importPDFAttachment(item2);
+		let annotation1 = await createAnnotation('highlight', attachment1);
+		annotations.push(annotation1);
+		let annotation2 = await createAnnotation('highlight', attachment2);
+		annotations.push(annotation2);
+		let note = await Zotero.EditorInstance.createNoteFromAnnotations(annotations);
+		assert.equal(note.note.split('test.pdf').length - 1, 0);
+		assert.equal(note.note.split('>' + item1.getField('title') + '<').length - 1, 1);
+		assert.equal(note.note.split('>' + item2.getField('title') + '<').length - 1, 1);
+		assert.equal(note.note.split(annotation1.annotationText).length - 1, 1);
+		assert.equal(note.note.split(annotation2.annotationText).length - 1, 1);
+	});
+
+	it("should create a note from multiple parent items containing multiple PDF files with multiple annotations", async function () {
+		let annotations = [];
+		let item1 = await createDataObject('item', { setTitle: true });
+		let item2 = await createDataObject('item', { setTitle: true });
+		let attachment1 = await importPDFAttachment(item1);
+		let attachment2 = await importPDFAttachment(item2);
+		let attachment3 = await importPDFAttachment(item2);
+		let annotation1 = await createAnnotation('highlight', attachment1);
+		annotations.push(annotation1);
+		let annotation2 = await createAnnotation('highlight', attachment2);
+		annotations.push(annotation2);
+		let annotation3 = await createAnnotation('highlight', attachment3);
+		annotations.push(annotation3);
+		let annotation4 = await createAnnotation('highlight', attachment3);
+		annotations.push(annotation4);
+		let note = await Zotero.EditorInstance.createNoteFromAnnotations(annotations);
+		Zotero.debug(note.note);
+		assert.equal(note.note.split('test.pdf').length - 1, 2);
+		assert.equal(note.note.split('>' + item1.getField('title') + '<').length - 1, 1);
+		assert.equal(note.note.split('>' + item2.getField('title') + '<').length - 1, 1);
+		assert.equal(note.note.split(annotation1.annotationText).length - 1, 1);
+		assert.equal(note.note.split(annotation2.annotationText).length - 1, 1);
+		// Check item URIs count
+		assert.equal(note.note.split('zotero.org').length - 1, 16);
+	});
+});

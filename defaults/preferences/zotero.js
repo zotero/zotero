@@ -22,7 +22,7 @@ pref("extensions.zotero.automaticScraperUpdates",true);
 pref("extensions.zotero.triggerProxyAuthentication", true);
 // Proxy auth URLs should respond successfully to HEAD requests over HTTP and HTTPS (in case of forced HTTPS requests)
 pref("extensions.zotero.proxyAuthenticationURLs", "https://www.acm.org,https://www.ebscohost.com,https://www.sciencedirect.com,https://ieeexplore.ieee.org,https://www.jstor.org,http://www.ovid.com,https://link.springer.com,https://www.tandfonline.com");
-pref("extensions.zotero.openURL.resolver","https://www.worldcat.org/registry/gateway");
+pref("extensions.zotero.openURL.resolver","");
 pref("extensions.zotero.openURL.version","1.0");
 pref("extensions.zotero.automaticSnapshots",true);
 pref("extensions.zotero.downloadAssociatedFiles",true);
@@ -127,7 +127,7 @@ pref("extensions.zotero.rtfScan.lastOutputFile", "");
 pref("extensions.zotero.export.quickCopy.setting", "bibliography=http://www.zotero.org/styles/chicago-note-bibliography");
 pref("extensions.zotero.export.quickCopy.dragLimit", 50);
 
-pref("extensions.zotero.export.noteQuickCopy.setting", '{"mode": "export", "id": "a45eca67-1ee8-45e5-b4c6-23fb8a852873"}');
+pref("extensions.zotero.export.noteQuickCopy.setting", '{"mode":"export","id":"a45eca67-1ee8-45e5-b4c6-23fb8a852873","markdownOptions":{"includeAppLinks":true},"htmlOptions":{"includeAppLinks":false}}');
 
 // Integration settings
 pref("extensions.zotero.integration.port", 50001);
@@ -184,8 +184,8 @@ pref("extensions.zotero.purge.tags", false);
 // Zotero pane persistent data
 pref("extensions.zotero.pane.persist", "");
 
-// Custom file handlers
 pref("extensions.zotero.fileHandler.pdf", "");
+pref("extensions.zotero.openReaderInNewWindow", false);
 
 // File/URL opening executable if launch() fails
 pref("extensions.zotero.fallbackLauncher.unix", "/usr/bin/xdg-open");

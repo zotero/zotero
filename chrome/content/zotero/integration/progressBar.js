@@ -81,9 +81,8 @@ var Zotero_ProgressBar = new function () {
 	function _onProgress(percent) {
 		var meter = document.querySelector(".citation-dialog.progress-meter");
 		if(percent === null) {
-			meter.mode = "undetermined";
+			meter.removeAttribute('value');
 		} else {
-			meter.mode = "determined";
 			meter.value = Math.round(percent);
 		}
 	}

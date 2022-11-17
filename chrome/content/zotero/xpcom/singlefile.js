@@ -42,6 +42,7 @@ Zotero.SingleFile = Object.assign(Zotero.SingleFile || {}, {
 		loadDeferredImagesBlockCookies: false,
 		loadDeferredImagesBlockStorage: false,
 		loadDeferredImagesKeepZoomLevel: false,
+		loadDeferredImagesNativeTimeout: true, // See https://github.com/gildas-lormeau/SingleFile/issues/1026
 		filenameTemplate: "{page-title} ({date-iso} {time-locale}).html",
 		infobarTemplate: "",
 		includeInfobar: false,

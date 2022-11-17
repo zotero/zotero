@@ -60,6 +60,7 @@ var Scaffold = new function () {
 	var _translatorsLoadedPromise;
 	var _translatorProvider = null;
 	var _lastModifiedTime = 0;
+	var _needRebuildTranslatorSuggestions = true;
 
 	this.browser = () => _browser;
 	
@@ -173,6 +174,7 @@ var Scaffold = new function () {
 
 			onLoadComplete: () => {
 				document.getElementById('cmd_load').removeAttribute('disabled');
+				_needRebuildTranslatorSuggestions = true;
 			}
 		});
 		
@@ -271,6 +273,10 @@ var Scaffold = new function () {
 
 	this.initCodeEditor = async function () {
 		let monaco = _editors.codeGlobal, editor = _editors.code;
+		
+		// For some reason, even if we explicitly re-set the default model's language to JavaScript,
+		// Monaco still treats it as TypeScript. Recreating the model manually fixes the issue.
+		editor.setModel(monaco.editor.createModel('', 'javascript', monaco.Uri.parse('inmemory:///translator.js')));
 
 		editor.updateOptions({
 			lineNumbers: num => num + _linesOfMetadata - 1,
@@ -278,6 +284,7 @@ var Scaffold = new function () {
 
 		monaco.languages.registerCodeLensProvider('javascript', this.createRunCodeLensProvider(monaco, editor));
 		monaco.languages.registerHoverProvider('javascript', this.createHoverProvider(monaco, editor));
+		monaco.languages.registerCompletionItemProvider('javascript', this.createCompletionProvider(monaco, editor));
 
 		let tsLib = await Zotero.File.getContentsAsync(
 			OS.Path.join(Scaffold_Translators.getDirectory(), 'index.d.ts'));
@@ -507,6 +514,43 @@ var Scaffold = new function () {
 				return { lenses, dispose() {} };
 			},
 			resolveCodeLens: (_model, codeLens, _token) => codeLens
+		};
+	};
+	
+	this.createCompletionProvider = function (monaco, editor) {
+		let suggestions = null;
+		return {
+			provideCompletionItems(model, position) {
+				let prefixText = model.getValueInRange({
+					startLineNumber: position.lineNumber,
+					startColumn: 1,
+					endLineNumber: position.lineNumber,
+					endColumn: position.column
+				});
+				if (/setTranslator\([^)]*$/.test(prefixText)) {
+					let word = model.getWordUntilPosition(position);
+					let range = {
+						startLineNumber: position.lineNumber,
+						endLineNumber: position.lineNumber,
+						startColumn: word.startColumn,
+						endColumn: word.endColumn
+					};
+					if (!suggestions || _needRebuildTranslatorSuggestions) {
+						// Cache the suggestions minus the range field
+						suggestions = [...Scaffold_Translators._translators.entries()].map(([id, meta]) => {
+							return {
+								label: `${meta.translator.label}: '${id}'`,
+								kind: monaco.languages.CompletionItemKind.Constant,
+								insertText: `'${id}'`
+							};
+						});
+						_needRebuildTranslatorSuggestions = false;
+					}
+					// Add the range to each suggestion before returning
+					return { suggestions: suggestions.map(s => ({ ...s, range })) };
+				}
+				return { suggestions: [] };
+			}
 		};
 	};
 
@@ -900,8 +944,6 @@ var Scaffold = new function () {
 		_logOutput(`Running ${functionToRun}`);
 		
 		let input = await _getInput(functionToRun);
-		Zotero.debug('got input')
-		Zotero.debug(input)
 
 		if (functionToRun.endsWith('Export')) {
 			let numItems = Zotero.getActiveZoteroPane().getSelectedItems().length;
@@ -1757,6 +1799,9 @@ var Scaffold = new function () {
 		var url = item.getElementsByTagName("label")[0].getAttribute("value");
 		var test = JSON.parse(item.dataset.testString);
 		var urlOrData = (test.input !== undefined) ? test.input : url;
+		if (typeof urlOrData !== 'string') {
+			urlOrData = JSON.stringify(urlOrData, null, '\t');
+		}
 		Zotero.Utilities.Internal.copyTextToClipboard(urlOrData);
 	};
 	
@@ -2180,7 +2225,7 @@ var Scaffold = new function () {
 			severity: message.severity * 4,
 			source: 'ESLint',
 			tags: [
-				message.ruleId
+				message.ruleId || '-'
 			]
 		}));
 	}

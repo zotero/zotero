@@ -1,0 +1,34 @@
+/* Hide the wizard's header so the size of the billboard can size the window
+   on creation. A custom header will be used in its place when a header is
+   needed. */
+.wizard-header {
+  display: none;
+}
+
+/* Display the custom header */
+.update-header {
+  display: -moz-box !important;
+}
+
+/* Custom header implementation based on the Wizard's header. This allows the
+   size of the billboard's remotecontent to size the window since it does not
+   have an updateheader on the billboard page. */
+updateheader {
+  -moz-binding: url("chrome://mozapps/content/update/updates.xml#updateheader");
+  display: -moz-box;
+  -moz-box-orient: horizontal;
+}
+
+#downloadProgress {
+  -moz-box-flex: 1;
+}
+
+/* Update History Window */
+richlistitem.update {
+  display: -moz-box;
+  -moz-box-orient: vertical;
+}
+
+.update-name {
+  -moz-box-flex: 1;
+}

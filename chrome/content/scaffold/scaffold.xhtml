@@ -45,8 +45,8 @@
 	xmlns:html="http://www.w3.org/1999/xhtml"
 	style="display: flex;">
 
-	<html:link rel="localization" href="zotero/menubar.ftl"/>
-	<html:link rel="localization" href="zotero/textActions.ftl"/>
+	<html:link rel="localization" href="mozilla/menubar.ftl"/>
+	<html:link rel="localization" href="mozilla/textActions.ftl"/>
 
 	<script>
 		var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
@@ -54,13 +54,14 @@
 		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
 		
 		Services.scriptloader.loadSubScript("resource://zotero/require.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/platformKeys.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/editMenuOverlay.js", this);
 		Services.scriptloader.loadSubScript("chrome://zotero/content/xpcom/translate/testTranslators/translatorTester.js", this);
 		Services.scriptloader.loadSubScript("chrome://scaffold/content/translators.js", this);
 		Services.scriptloader.loadSubScript("chrome://scaffold/content/scaffold.js", this);
 		
 		// Mozilla scripts
 		Services.scriptloader.loadSubScript("chrome://global/content/globalOverlay.js", this);
-		Services.scriptloader.loadSubScript("chrome://global/content/editMenuOverlay.js", this);
 		Services.scriptloader.loadSubScript("chrome://global/content/contentAreaUtils.js", this);
 		if (Zotero.isMac) {
 			Services.scriptloader.loadSubScript("chrome://global/content/macWindowMenu.js", this);
@@ -68,10 +69,10 @@
 
 		// Custom elements
 		Services.scriptloader.loadSubScript("chrome://global/content/customElements.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/menuToolbarbutton.js", this);
 	</script>
 
 	<commandset id="mainCommandSet">
-		<command id="cmd_quitApplication" oncommand="goQuitApplication(event);"/>
 		<command id="cmd_close" oncommand="window.close();"/>
 
 		<command id="cmd_undo" oncommand="Scaffold.trigger('undo', 'cmd_undo')"/>
@@ -116,35 +117,18 @@
 		<key modifiers="accel" key="9" oncommand="Scaffold.showTabNumbered(9)"/>
 	</keyset>
 
-	<!--
-    
-    TODO: Customize per platform without ifdef?
-    
-    <keyset id="editMenuKeys">
+	<keyset id="editMenuKeys">
 		<key id="key_undo" data-l10n-id="text-action-undo-shortcut" modifiers="accel" command="cmd_undo"/>
-		<key id="key_redo"
-		
-#ifdef XP_UNIX
-			data-l10n-id="text-action-undo-shortcut"
-			modifiers="accel,shift"
-#else
-			data-l10n-id="text-action-redo-shortcut"
-			modifiers="accel"
-#endif
-			command="cmd_redo"/>
+		<!-- l10n and modifiers set in platformKeys.js -->
+		<key id="key_redo" command="cmd_redo"/>
 		<key id="key_cut" data-l10n-id="text-action-cut-shortcut" modifiers="accel" command="cmd_cut"/>
 		<key id="key_copy" data-l10n-id="text-action-copy-shortcut" modifiers="accel" command="cmd_copy"/>
 		<key id="key_paste" data-l10n-id="text-action-paste-shortcut" modifiers="accel" command="cmd_paste"/>
 		<key id="key_delete" keycode="VK_DELETE" command="cmd_delete"/>
 		<key id="key_selectAll" data-l10n-id="text-action-select-all-shortcut" modifiers="accel" command="cmd_selectAll"/>
+		<key id="key_switchTextDirection" data-l10n-id="bidi-switch-direction-shortcut" command="cmd_switchTextDirection" modifiers="accel,shift" />
 		<key id="key_find" key="&findCmd.key;" modifiers="accel" command="cmd_find"/>
-		<key id="key_findAgain" key="&findAgainCmd.key;" modifiers="accel" command="cmd_findAgain"/>
-		<key id="key_findPrevious" key="&findAgainCmd.key;" modifiers="shift,accel" command="cmd_findPrevious"/>
-		<key id="key_findAgain2" keycode="&findAgainCmd.key2;" command="cmd_findAgain"/>
-		<key id="key_findPrevious2" keycode="&findAgainCmd.key2;" modifiers="shift" command="cmd_findPrevious"/>
 	</keyset>
-  
-	-->
 
 	<popupset>
 		<menupopup id="testing-context-menu">
@@ -266,7 +250,6 @@
 				</menupopup>
 			</menu>
 
-			<!-- ifdef mac -->
 			<commandset id="macCommandSet"> <!-- was mainCommandSet -->
 				<command id="minimizeWindow"
 						label="&minimizeWindow.label;"
@@ -281,21 +264,11 @@
 						command="minimizeWindow"
 						key="&minimizeWindow.key;"
 						modifiers="accel"/>
-				
-				<!-- These are used to build the Application menu under Cocoa widgets -->
-				<key id="key_preferencesCmdMac"
-						key="&preferencesCmdMac.commandkey;"
-						modifiers="accel"/>
-				<key id="key_hideThisAppCmdMac"
-						key="&hideThisAppCmdMac.commandkey;"
-						modifiers="accel"/>
-				<key id="key_hideOtherAppsCmdMac"
-						key="&hideOtherAppsCmdMac.commandkey;"
-						modifiers="accel,alt"/>
 				<key id="key_quitApplication"
 						key="&quitApplicationCmdMac.key;"
 						command="cmd_quitApplication"
-						modifiers="accel"/>
+						modifiers="accel"
+						internal="true"/>
 			</keyset>
 
 			<!-- nsMenuBarX hides these and uses them to build the Application menu. -->
@@ -379,7 +352,14 @@
 				<toolbarbutton id="tb-detect" tooltiptext="&scaffold.toolbar.detect.label;" oncommand="Scaffold.run('detect')" class="zotero-tb-button" />
 				<toolbarbutton id="tb-do" tooltiptext="&scaffold.toolbar.do.label;" oncommand="Scaffold.run('do')" class="zotero-tb-button" />
 				<toolbarseparator/>
-				<toolbarbutton id="tb-template" observes="code-tab-only" tooltiptext="&scaffold.toolbar.template.label;" class="zotero-tb-button" type="menu">
+				<toolbarbutton
+						is="menu-toolbarbutton"
+						id="tb-template"
+						observes="code-tab-only"
+						tooltiptext="&scaffold.toolbar.template.label;"
+						class="zotero-tb-button"
+						type="menu"
+						wantdropmarker="true">
 					<menupopup>
 						<menuitem label="&scaffold.toolbar.template.newWeb.label;" oncommand="Scaffold.addTemplate('newWeb')"/>
 						<menu label="&scaffold.toolbar.template.scrape.label;">
@@ -445,10 +425,10 @@
 
 							<label class="label-metadata" value="&scaffold.metadata.translatorType.label;"/>
 							<html:div id="checkboxes-translatorType">
-								<checkbox id="checkbox-import" label="&scaffold.metadata.translatorType.import;"/>
-								<checkbox id="checkbox-export" label="&scaffold.metadata.translatorType.export;"/>
-								<checkbox id="checkbox-web" label="&scaffold.metadata.translatorType.web;" checked="true"/>
-								<checkbox id="checkbox-search" label="&scaffold.metadata.translatorType.search;"/>
+								<checkbox id="checkbox-import" label="&scaffold.metadata.translatorType.import;" native="true"/>
+								<checkbox id="checkbox-export" label="&scaffold.metadata.translatorType.export;" native="true"/>
+								<checkbox id="checkbox-web" label="&scaffold.metadata.translatorType.web;" checked="true" native="true"/>
+								<checkbox id="checkbox-search" label="&scaffold.metadata.translatorType.search;" native="true"/>
 							</html:div>
 						</html:div>
 					</tabpanel>

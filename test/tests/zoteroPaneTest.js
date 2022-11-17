@@ -338,6 +338,204 @@ describe("ZoteroPane", function() {
 	})
 	
 	
+	describe("#addNoteFromAnnotationsFromSelected()", function () {
+		it("should create a single note within a selected regular item for all child attachments", async function () {
+			var item = await createDataObject('item');
+			var attachment1 = await importPDFAttachment(item);
+			var attachment2 = await importPDFAttachment(item);
+			var annotation1 = await createAnnotation('highlight', attachment1);
+			var annotation2 = await createAnnotation('highlight', attachment1);
+			var annotation3 = await createAnnotation('highlight', attachment2);
+			var annotation4 = await createAnnotation('highlight', attachment2);
+			await zp.selectItems([item.id]);
+			await zp.addNoteFromAnnotationsFromSelected();
+			var newItems = zp.getSelectedItems();
+			assert.lengthOf(newItems, 1);
+			var note = newItems[0];
+			assert.equal(note.itemType, 'note');
+			assert.equal(note.parentID, item.id);
+			var dp = new DOMParser();
+			var doc = dp.parseFromString(note.getNote(), 'text/html');
+			assert.sameMembers(
+				[...doc.querySelectorAll('h3')].map(x => x.textContent),
+				[attachment1.attachmentFilename, attachment2.attachmentFilename]
+			);
+			assert.lengthOf([...doc.querySelectorAll('h3 + p')], 2);
+			assert.lengthOf([...doc.querySelectorAll('span.highlight')], 4);
+		});
+		
+		it("should create a single note within the parent for all selected sibling attachments", async function () {
+			var item = await createDataObject('item');
+			var attachment1 = await importPDFAttachment(item);
+			var attachment2 = await importPDFAttachment(item);
+			var annotation1 = await createAnnotation('highlight', attachment1);
+			var annotation2 = await createAnnotation('highlight', attachment1);
+			var annotation3 = await createAnnotation('highlight', attachment2);
+			var annotation4 = await createAnnotation('highlight', attachment2);
+			await zp.selectItems([attachment1.id, attachment2.id]);
+			await zp.addNoteFromAnnotationsFromSelected();
+			var newItems = zp.getSelectedItems();
+			assert.lengthOf(newItems, 1);
+			var note = newItems[0];
+			assert.equal(note.parentID, item.id);
+			var dp = new DOMParser();
+			var doc = dp.parseFromString(note.getNote(), 'text/html');
+			assert.sameMembers(
+				[...doc.querySelectorAll('h3')].map(x => x.textContent),
+				[attachment1.attachmentFilename, attachment2.attachmentFilename]
+			);
+			// No item titles
+			assert.lengthOf([...doc.querySelectorAll('h2 + p')], 0);
+			// Just attachment titles
+			assert.lengthOf([...doc.querySelectorAll('h3 + p')], 2);
+			assert.lengthOf([...doc.querySelectorAll('span.highlight')], 4);
+		});
+		
+		it("should ignore top-level item if child attachment is also selected", async function () {
+			var item = await createDataObject('item');
+			var attachment1 = await importPDFAttachment(item);
+			var attachment2 = await importPDFAttachment(item);
+			await createAnnotation('highlight', attachment1);
+			await createAnnotation('highlight', attachment1);
+			await createAnnotation('highlight', attachment2);
+			await zp.selectItems([item.id, attachment1.id]);
+			await zp.addNoteFromAnnotationsFromSelected();
+			var newItems = zp.getSelectedItems();
+			assert.lengthOf(newItems, 1);
+			var note = newItems[0];
+			var dp = new DOMParser();
+			var doc = dp.parseFromString(note.getNote(), 'text/html');
+			// No titles
+			assert.lengthOf([...doc.querySelectorAll('h2 + p')], 0);
+			assert.lengthOf([...doc.querySelectorAll('h3 + p')], 0);
+			assert.lengthOf([...doc.querySelectorAll('span.highlight')], 2);
+		});
+		
+		it("shouldn't do anything if parent item and child note is selected", async function () {
+			var item = await createDataObject('item');
+			var attachment = await importPDFAttachment(item);
+			var note = await createDataObject('item', { itemType: 'note', parentID: item.id });
+			await createAnnotation('highlight', attachment);
+			await zp.selectItems([item.id, note.id]);
+			await zp.addNoteFromAnnotationsFromSelected();
+			var selectedItems = zp.getSelectedItems();
+			assert.lengthOf(selectedItems, 2);
+			assert.sameMembers(selectedItems, [item, note]);
+		});
+	});
+	
+	
+	describe("#createStandaloneNoteFromAnnotationsFromSelected()", function () {
+		it("should create a single standalone note for all child attachments of selected regular items", async function () {
+			var collection = await createDataObject('collection');
+			var item1 = await createDataObject('item', { setTitle: true, collections: [collection.id] });
+			var item2 = await createDataObject('item', { setTitle: true, collections: [collection.id] });
+			var attachment1 = await importPDFAttachment(item1);
+			var attachment2 = await importPDFAttachment(item1);
+			var attachment3 = await importPDFAttachment(item2);
+			var attachment4 = await importPDFAttachment(item2);
+			await createAnnotation('highlight', attachment1);
+			await createAnnotation('highlight', attachment1);
+			await createAnnotation('highlight', attachment2);
+			await createAnnotation('highlight', attachment2);
+			await createAnnotation('highlight', attachment3);
+			await createAnnotation('highlight', attachment3);
+			await createAnnotation('highlight', attachment4);
+			await createAnnotation('highlight', attachment4);
+			await zp.selectItems([item1.id, item2.id]);
+			await zp.createStandaloneNoteFromAnnotationsFromSelected();
+			var newItems = zp.getSelectedItems();
+			assert.lengthOf(newItems, 1);
+			var note = newItems[0];
+			assert.equal(note.itemType, 'note');
+			assert.isFalse(note.parentID);
+			assert.isTrue(collection.hasItem(note));
+			var dp = new DOMParser();
+			var doc = dp.parseFromString(note.getNote(), 'text/html');
+			assert.sameMembers(
+				[...doc.querySelectorAll('h2')].map(x => x.textContent),
+				[item1.getDisplayTitle(), item2.getDisplayTitle()]
+			);
+			assert.sameMembers(
+				[...doc.querySelectorAll('h3')].map(x => x.textContent),
+				[
+					attachment1.attachmentFilename,
+					attachment2.attachmentFilename,
+					attachment3.attachmentFilename,
+					attachment4.attachmentFilename
+				]
+			);
+			assert.lengthOf([...doc.querySelectorAll('h3 + p')], 4);
+			assert.lengthOf([...doc.querySelectorAll('span.highlight')], 8);
+		});
+		
+		it("should create a single standalone note for all selected attachments", async function () {
+			var collection = await createDataObject('collection');
+			var item1 = await createDataObject('item', { setTitle: true, collections: [collection.id] });
+			var item2 = await createDataObject('item', { setTitle: true, collections: [collection.id] });
+			var attachment1 = await importPDFAttachment(item1);
+			var attachment2 = await importPDFAttachment(item1);
+			var attachment3 = await importPDFAttachment(item2);
+			var attachment4 = await importPDFAttachment(item2);
+			await createAnnotation('highlight', attachment1);
+			await createAnnotation('highlight', attachment1);
+			await createAnnotation('highlight', attachment2);
+			await createAnnotation('highlight', attachment2);
+			await createAnnotation('highlight', attachment3);
+			await createAnnotation('highlight', attachment3);
+			await createAnnotation('highlight', attachment4);
+			await createAnnotation('highlight', attachment4);
+			await zp.selectItems([attachment1.id, attachment3.id]);
+			await zp.createStandaloneNoteFromAnnotationsFromSelected();
+			var newItems = zp.getSelectedItems();
+			assert.lengthOf(newItems, 1);
+			var note = newItems[0];
+			assert.isFalse(note.parentID);
+			assert.isTrue(collection.hasItem(note));
+			var dp = new DOMParser();
+			var doc = dp.parseFromString(note.getNote(), 'text/html');
+			assert.sameMembers(
+				[...doc.querySelectorAll('h2')].map(x => x.textContent),
+				[item1.getDisplayTitle(), item2.getDisplayTitle()]
+			);
+			assert.lengthOf([...doc.querySelectorAll('h2 + p')], 2);
+			assert.lengthOf([...doc.querySelectorAll('h3')], 0);
+			assert.lengthOf([...doc.querySelectorAll('span.highlight')], 4);
+		});
+		
+		it("should ignore top-level item if child attachment is also selected", async function () {
+			var item1 = await createDataObject('item', { setTitle: true });
+			var item2 = await createDataObject('item', { setTitle: true });
+			var attachment1 = await importPDFAttachment(item1);
+			var attachment2 = await importPDFAttachment(item1);
+			var attachment3 = await importPDFAttachment(item2);
+			var attachment4 = await importPDFAttachment(item2);
+			await createAnnotation('highlight', attachment1);
+			await createAnnotation('highlight', attachment1);
+			await createAnnotation('highlight', attachment2);
+			await createAnnotation('highlight', attachment2);
+			await createAnnotation('highlight', attachment3);
+			await createAnnotation('highlight', attachment3);
+			await createAnnotation('highlight', attachment4);
+			await createAnnotation('highlight', attachment4);
+			await zp.selectItems([item1.id, attachment1.id, attachment3.id]);
+			await zp.createStandaloneNoteFromAnnotationsFromSelected();
+			var newItems = zp.getSelectedItems();
+			assert.lengthOf(newItems, 1);
+			var note = newItems[0];
+			var dp = new DOMParser();
+			var doc = dp.parseFromString(note.getNote(), 'text/html');
+			assert.sameMembers(
+				[...doc.querySelectorAll('h2')].map(x => x.textContent),
+				[item1.getDisplayTitle(), item2.getDisplayTitle()]
+			);
+			assert.lengthOf([...doc.querySelectorAll('h2 + p')], 2);
+			assert.lengthOf([...doc.querySelectorAll('h3')], 0);
+			assert.lengthOf([...doc.querySelectorAll('span.highlight')], 4);
+		});
+	});
+	
+	
 	describe("#renameSelectedAttachmentsFromParents()", function () {
 		it("should rename a linked file", async function () {
 			var oldFilename = 'old.png';
@@ -466,6 +664,16 @@ describe("ZoteroPane", function() {
 				assert.sameMembers(bookSectionItem1.relatedItems, [bookItem.key, otherBookSection.key]);
 				assert.sameMembers(bookSectionItem2.relatedItems, [bookItem.key, otherBookSection.key]);
 			});
+		});
+		
+		it("should not copy abstracts", async function() {
+			await selectLibrary(win);
+			var bookItem = await createDataObject('item', { itemType: 'book', title: "Book Title" });
+			bookItem.setField('abstractNote', 'An abstract');
+			bookItem.saveTx();
+
+			var bookSectionItem = await zp.duplicateAndConvertSelectedItem();
+			assert.isEmpty(bookSectionItem.getField('abstractNote'));
 		});
 	});
 	
@@ -1059,6 +1267,171 @@ describe("ZoteroPane", function() {
 			assert.isFalse(attachment1.deleted);
 			assert.isFalse(attachment2.deleted);
 			assert.isFalse(attachment3.deleted);
+		});
+	});
+
+	describe("#checkForLinkedFilesToRelink()", function () {
+		let labdDir;
+
+		this.beforeEach(async () => {
+			labdDir = await getTempDirectory();
+			Zotero.Prefs.set('baseAttachmentPath', labdDir);
+			Zotero.Prefs.set('saveRelativeAttachmentPath', true);
+		});
+
+		it("should detect and relink a single attachment", async function () {
+			let item = await createDataObject('item');
+			let file = getTestDataDirectory();
+			file.append('test.pdf');
+			let outsideStorageDir = await getTempDirectory();
+			let outsideFile = OS.Path.join(outsideStorageDir, 'test.pdf');
+
+			let labdFile = OS.Path.join(labdDir, 'test.pdf');
+
+			await OS.File.copy(file.path, outsideFile);
+
+			let attachment = await Zotero.Attachments.linkFromFile({
+				file: outsideFile,
+				parentItemID: item.id
+			});
+
+			await assert.eventually.isTrue(attachment.fileExists());
+			await OS.File.move(outsideFile, labdFile);
+			await assert.eventually.isFalse(attachment.fileExists());
+
+			let stub = sinon.stub(zp, 'showLinkedFileFoundAutomaticallyDialog')
+				.returns('one');
+			await zp.checkForLinkedFilesToRelink(attachment);
+			assert.ok(stub.calledOnce);
+			assert.ok(stub.calledWith(attachment, sinon.match.string, 0));
+
+			await assert.eventually.isTrue(attachment.fileExists());
+			assert.equal(attachment.getFilePath(), labdFile);
+			assert.equal(attachment.attachmentPath, 'attachments:test.pdf');
+
+			stub.restore();
+		});
+
+		it("should detect and relink multiple attachments when user chooses", async function () {
+			for (let choice of ['one', 'all']) {
+				let file1 = getTestDataDirectory();
+				file1.append('test.pdf');
+				let file2 = getTestDataDirectory();
+				file2.append('empty.pdf');
+				let outsideStorageDir = await getTempDirectory();
+				let outsideFile1 = OS.Path.join(outsideStorageDir, 'test.pdf');
+				let outsideFile2 = OS.Path.join(outsideStorageDir, 'empty.pdf');
+
+				let labdFile1 = OS.Path.join(labdDir, 'test.pdf');
+				let labdFile2 = OS.Path.join(labdDir, 'empty.pdf');
+
+				await OS.File.copy(file1.path, outsideFile1);
+				await OS.File.copy(file2.path, outsideFile2);
+
+				let attachment1 = await Zotero.Attachments.linkFromFile({ file: outsideFile1 });
+				let attachment2 = await Zotero.Attachments.linkFromFile({ file: outsideFile2 });
+
+				await assert.eventually.isTrue(attachment1.fileExists());
+				await assert.eventually.isTrue(attachment2.fileExists());
+				await OS.File.move(outsideFile1, labdFile1);
+				await OS.File.move(outsideFile2, labdFile2);
+				await assert.eventually.isFalse(attachment1.fileExists());
+				await assert.eventually.isFalse(attachment2.fileExists());
+
+				let stub = sinon.stub(zp, 'showLinkedFileFoundAutomaticallyDialog')
+					.returns(choice);
+				await zp.checkForLinkedFilesToRelink(attachment1);
+				assert.ok(stub.calledOnce);
+				assert.ok(stub.calledWith(attachment1, sinon.match.string, 1));
+
+				await assert.eventually.isTrue(attachment1.fileExists());
+				await assert.eventually.equal(attachment2.fileExists(), choice === 'all');
+				assert.equal(attachment1.getFilePath(), labdFile1);
+				assert.equal(attachment1.attachmentPath, 'attachments:test.pdf');
+				if (choice === 'all') {
+					assert.equal(attachment2.getFilePath(), labdFile2);
+					assert.equal(attachment2.attachmentPath, 'attachments:empty.pdf');
+				}
+				else {
+					assert.equal(attachment2.getFilePath(), outsideFile2);
+				}
+
+				stub.restore();
+			}
+		});
+
+		it("should use subdirectories of original path", async function () {
+			let file = getTestDataDirectory();
+			file.append('test.pdf');
+			let outsideStorageDir = OS.Path.join(await getTempDirectory(), 'subdir');
+			await OS.File.makeDir(outsideStorageDir);
+			let outsideFile = OS.Path.join(outsideStorageDir, 'test.pdf');
+
+			let labdSubdir = OS.Path.join(labdDir, 'subdir');
+			await OS.File.makeDir(labdSubdir);
+			let labdFile = OS.Path.join(labdSubdir, 'test.pdf');
+
+			await OS.File.copy(file.path, outsideFile);
+
+			let attachment = await Zotero.Attachments.linkFromFile({ file: outsideFile });
+
+			await assert.eventually.isTrue(attachment.fileExists());
+			await OS.File.move(outsideFile, labdFile);
+			await assert.eventually.isFalse(attachment.fileExists());
+
+			let dialogStub = sinon.stub(zp, 'showLinkedFileFoundAutomaticallyDialog')
+				.returns('one');
+			let existsSpy = sinon.spy(OS.File, 'exists');
+			await zp.checkForLinkedFilesToRelink(attachment);
+			assert.ok(dialogStub.calledOnce);
+			assert.ok(dialogStub.calledWith(attachment, sinon.match.string, 0));
+			assert.ok(existsSpy.calledWith(OS.Path.join(labdSubdir, 'test.pdf')));
+			assert.notOk(existsSpy.calledWith(OS.Path.join(labdDir, 'test.pdf'))); // Should never get there
+
+			await assert.eventually.isTrue(attachment.fileExists());
+			assert.equal(attachment.getFilePath(), labdFile);
+			assert.equal(attachment.attachmentPath, 'attachments:subdir/test.pdf');
+
+			dialogStub.restore();
+			existsSpy.restore();
+		});
+
+		it("should handle Windows paths", async function () {
+			let filenames = [['test.pdf'], ['empty.pdf'], ['search', 'baz.pdf']];
+			let labdFiles = [];
+			let attachments = [];
+
+			for (let parts of filenames) {
+				let file = getTestDataDirectory();
+				parts.forEach(part => file.append(part));
+
+				await OS.File.makeDir(OS.Path.join(labdDir, ...parts.slice(0, -1)));
+				let labdFile = OS.Path.join(labdDir, ...parts);
+				await OS.File.copy(file.path, labdFile);
+				labdFiles.push(labdFile);
+
+				let attachment = await Zotero.Attachments.linkFromFile({ file });
+				attachment.attachmentPath = `C:\\test\\${parts.join('\\')}`;
+				await attachment.saveTx();
+				attachments.push(attachment);
+
+				await assert.eventually.isFalse(attachment.fileExists());
+			}
+
+			let stub = sinon.stub(zp, 'showLinkedFileFoundAutomaticallyDialog')
+				.returns('all');
+			await zp.checkForLinkedFilesToRelink(attachments[0]);
+			assert.ok(stub.calledOnce);
+			assert.ok(stub.calledWith(attachments[0], sinon.match.string, filenames.length - 1));
+
+			for (let i = 0; i < filenames.length; i++) {
+				let attachment = attachments[i];
+				await assert.eventually.isTrue(attachment.fileExists());
+				assert.equal(attachment.getFilePath(), labdFiles[i]);
+				assert.equal(attachment.attachmentPath, 'attachments:' + OS.Path.join(...filenames[i]));
+			}
+
+			stub.restore();
 		});
 	});
 })

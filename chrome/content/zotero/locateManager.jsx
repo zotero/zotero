@@ -50,6 +50,7 @@ function init() {
 				showHeader={true}
 				multiSelect={true}
 				columns={columns}
+				onColumnSort={null}
 				disableFontSizeScaling={true}
 				getRowString={index => getRowData(index).name}
 				onActivate={handleActivate}

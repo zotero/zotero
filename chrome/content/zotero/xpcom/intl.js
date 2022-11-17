@@ -85,6 +85,30 @@ Zotero.Intl = new function () {
 				this.strings[regexpResult[1]] = regexpResult[2];
 			}
 		}
+		
+		// Automatically register l10n sources for enabled plugins.
+		
+		// A Fluent file located at
+		//   [plugin root]/locale/en-US/make-it-red.ftl
+		// could be included in an XHTML file as
+		//   <link rel="localization" href="make-it-red.ftl"/>
+		
+		// If a plugin doesn't have a subdirectory for the active locale, en-US strings
+		// will be used as a fallback.
+		Zotero.Plugins.addObserver({
+			startup({ id: pluginID, rootURI }) {
+				let source = new L10nFileSource(
+					pluginID, 'app',
+					Services.locale.availableLocales,
+					rootURI + 'locale/{locale}/',
+				);
+				L10nRegistry.getInstance().registerSources([source]);
+			},
+			
+			shutdown({ id: pluginID }) {
+				L10nRegistry.getInstance().removeSources([pluginID]);
+			}
+		});
 	};
 
 

@@ -24,7 +24,7 @@
 -->
 <vbox id="zotero-prefpane-general" onload="Zotero_Preferences.General.init()">
 	<groupbox>
-		<html:label><html:h2>&zotero.preferences.interface;</html:h2></html:label>
+		<label><html:h2>&zotero.preferences.interface;</html:h2></label>
 
 		<hbox align="center">
 			<label value="&zotero.bibliography.locale.label;"/>
@@ -37,7 +37,7 @@
 	</groupbox>
 
 	<groupbox id="zotero-prefpane-file-handling-groupbox">
-		<html:label><html:h2>&zotero.preferences.fileHandling;</html:h2></html:label>
+		<label><html:h2>&zotero.preferences.fileHandling;</html:h2></label>
 		
 		<vbox>
 			<checkbox id="automaticSnapshots-checkbox"
@@ -55,24 +55,30 @@
 					oncommand="Zotero_Preferences.General.updateAutoRenameFilesUI()" native="true"/>
 		</vbox>
 		
-		<hbox align="center">
-			<label value="&zotero.preferences.fileHandler.openPDFsUsing;" control="file-handler-pdf"/>
-			<menulist id="fileHandler-pdf" class="fileHandler-menu" native="true">
-				<menupopup>
-					<menuitem id="fileHandler-internal"
-							oncommand="Zotero_Preferences.General.setFileHandler('pdf', '')"/>
-					<menuitem label="&zotero.preferences.fileHandler.systemDefault;"
-							oncommand="Zotero_Preferences.General.setFileHandler('pdf', 'system')"/>
-					<menuitem id="fileHandler-custom"/>
-					<menuitem label="&zotero.preferences.custom;"
-							oncommand="Zotero_Preferences.General.chooseFileHandler('pdf')"/>
-				</menupopup>
-			</menulist>
-		</hbox>
+		<vbox>
+			<hbox align="center">
+				<label value="&zotero.preferences.fileHandler.openPDFsUsing;" control="file-handler-pdf"/>
+				<menulist id="fileHandler-pdf" class="fileHandler-menu" native="true">
+					<menupopup>
+						<menuitem id="fileHandler-internal"
+								oncommand="Zotero_Preferences.General.setFileHandler('pdf', '')"/>
+						<menuitem label="&zotero.preferences.fileHandler.systemDefault;"
+								oncommand="Zotero_Preferences.General.setFileHandler('pdf', 'system')"/>
+						<menuitem id="fileHandler-custom"/>
+						<menuitem label="&zotero.preferences.custom;"
+								oncommand="Zotero_Preferences.General.chooseFileHandler('pdf')"/>
+					</menupopup>
+				</menulist>
+			</hbox>
+			<checkbox id="open-reader-in-new-window" class="indented-pref"
+					label="&zotero.preferences.fileHandler.openReaderInNewWindow;"
+					preference="extensions.zotero.openReaderInNewWindow"
+					native="true"/>
+		</vbox>
 	</groupbox>
 
 	<groupbox>
-		<html:label><html:h2>&zotero.preferences.prefpane.locate;</html:h2></html:label>
+		<label><html:h2>&zotero.preferences.prefpane.locate;</html:h2></label>
 		
 		<hbox>
 			<menulist id="openurl-menu" native="true">
@@ -108,7 +114,7 @@
 	</groupbox>
 	
 	<groupbox id="zotero-prefpane-miscellaneous-groupbox">
-		<html:label><html:h2>&zotero.preferences.miscellaneous;</html:h2></html:label>
+		<label><html:h2>&zotero.preferences.miscellaneous;</html:h2></label>
 		
 		<checkbox label="&zotero.preferences.automaticTags;" preference="extensions.zotero.automaticTags" native="true"/>
 		<hbox align="center">
@@ -119,7 +125,7 @@
 	</groupbox>
 	
 	<groupbox>
-		<html:label><html:h2>&zotero.preferences.groups;</html:h2></html:label>
+		<label><html:h2>&zotero.preferences.groups;</html:h2></label>
 		
 		<label value="&zotero.preferences.groups.whenCopyingInclude;"/>
 		<vbox style="margin-left: 2em">

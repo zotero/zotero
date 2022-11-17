@@ -30,7 +30,9 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 import TabBar from 'components/tabBar';
 
-const MAX_LOADED_TABS = 5;
+// Reduce loaded tabs limit if the system has 8 GB or less memory.
+// TODO: Revise this after upgrading to Zotero 7
+const MAX_LOADED_TABS = Services.sysinfo.getProperty("memsize") / 1024 / 1024 / 1024 <= 8 ? 2 : 5;
 const UNLOAD_UNUSED_AFTER = 86400; // 24h
 
 var Zotero_Tabs = new function () {
@@ -89,6 +91,12 @@ var Zotero_Tabs = new function () {
 		return tab && tab.id;
 	};
 
+	this.setSecondViewState = function (tabID, state) {
+		let { tab } = this._getTab(tabID);
+		tab.data.secondViewState = state;
+		Zotero.Session.debounceSave();
+	};
+
 	this.init = function () {
 		ReactDOM.render(
 			<TabBar
@@ -138,7 +146,8 @@ var Zotero_Tabs = new function () {
 							null,
 							{
 								title: tab.title,
-								openInBackground: !tab.selected
+								openInBackground: !tab.selected,
+								secondViewState: tab.data.secondViewState
 							}
 						);
 					}
@@ -337,7 +346,7 @@ var Zotero_Tabs = new function () {
 	 * @param {String} id
 	 * @param {Boolean} reopening
 	 */
-	this.select = function (id, reopening) {
+	this.select = function (id, reopening, options) {
 		var { tab, tabIndex } = this._getTab(id);
 		if (!tab || tab.id === this._selectedID) {
 			return;
@@ -348,11 +357,12 @@ var Zotero_Tabs = new function () {
 		}
 		if (tab.type === 'reader-unloaded') {
 			this.close(tab.id);
-			Zotero.Reader.open(tab.data.itemID, null, {
+			Zotero.Reader.open(tab.data.itemID, options && options.location, {
 				tabID: tab.id,
 				title: tab.title,
 				tabIndex,
-				allowDuplicate: true
+				allowDuplicate: true,
+				secondViewState: tab.data.secondViewState
 			});
 			return;
 		}
@@ -461,7 +471,7 @@ var Zotero_Tabs = new function () {
 	};
 
 	this._openMenu = function (x, y, id) {
-		var { tabIndex } = this._getTab(id);
+		var { tab, tabIndex } = this._getTab(id);
 		window.Zotero_Tooltip.stop();
 		let menuitem;
 		let popup = document.createXULElement('menupopup');
@@ -518,7 +528,8 @@ var Zotero_Tabs = new function () {
 				var reader = Zotero.Reader.getByTabID(id);
 				if (reader) {
 					this.close(id);
-					Zotero.Reader.open(reader.itemID, null, { openInWindow: true });
+					let { secondViewState } = tab.data;
+					Zotero.Reader.open(reader.itemID, null, { openInWindow: true, secondViewState });
 				}
 			});
 			menupopup.appendChild(menuitem);
@@ -526,11 +537,10 @@ var Zotero_Tabs = new function () {
 			menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('tabs.duplicate'));
 			menuitem.addEventListener('command', () => {
-				var { tab, tabIndex } = this._getTab(id);
 				if (tab.data.itemID) {
 					tabIndex++;
-					Zotero.Reader.open(tab.data.itemID, null, { tabIndex, allowDuplicate: true });
-
+					let { secondViewState } = tab.data;
+					Zotero.Reader.open(tab.data.itemID, null, { tabIndex, allowDuplicate: true, secondViewState });
 				}
 			});
 			popup.appendChild(menuitem);

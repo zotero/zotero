@@ -7,8 +7,16 @@ description {
 	background: #FFF;
 }
 
-#zotero-error-message .textbox-textarea {
-	padding: 5px !important
+#report-start {
+	display: flex;
+	flex-direction: column;
+}
+
+#zotero-error-message {
+	padding: 5px !important;
+	outline: 0;
+	flex: 1;
+	margin-bottom: 1em !important;
 }
 
 #zotero-unrelated-message {
@@ -41,4 +49,6 @@ description {
 #zotero-report-id {
 	color: red;
 	font-weight: bold;
+	outline: 0;
+	background: none;
 }

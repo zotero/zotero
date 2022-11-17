@@ -57,12 +57,12 @@
 		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 		
 		Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
-		Services.scriptloader.loadSubScript("chrome://zotero/content/charsetMenu.js");
-		Services.scriptloader.loadSubScript("chrome://zotero/content/preferences/preferences.js");
+		Services.scriptloader.loadSubScript("chrome://zotero/content/charsetMenu.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/preferences/preferences.js", this);
+		Services.scriptloader.loadSubScript("chrome://zotero/content/editMenuOverlay.js", this);
 
 		// Mozilla scripts
 		Services.scriptloader.loadSubScript("chrome://global/content/globalOverlay.js", this);
-		Services.scriptloader.loadSubScript("chrome://global/content/editMenuOverlay.js", this);
 		Services.scriptloader.loadSubScript("chrome://global/content/contentAreaUtils.js", this);
 		if (Zotero.isMac) {
 			Services.scriptloader.loadSubScript("chrome://global/content/macWindowMenu.js", this);
@@ -92,7 +92,15 @@
 				</hbox>
 				<search-textbox id="prefs-search" placeholder="&zotero.lookup.button.search;" timeout="1"/>
 			</hbox>
-			<vbox id="prefs-content" flex="1"/>
+			<vbox id="prefs-content" flex="1">
+				<hbox id="prefs-help-container" pack="end">
+					<button
+						oncommand="Zotero_Preferences.openHelpLink()"
+						label="&zotero.preferences.helpButton.label;"
+						class="help-button" 
+						align="end"/>
+				</hbox>
+			</vbox>
 		</vbox>
 	</hbox>
 </window>

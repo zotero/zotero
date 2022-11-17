@@ -271,6 +271,10 @@ class PDFWorker {
 			}));
 
 			let path = await attachment.getFilePathAsync();
+			let fileSize = (await OS.File.stat(path)).size;
+			if (fileSize > Math.pow(2, 31) - 1) {
+				throw new Error(`The file "${path}" is too large`);
+			}
 			let buf = await OS.File.read(path, {});
 			buf = new Uint8Array(buf).buffer;
 
@@ -341,6 +345,10 @@ class PDFWorker {
 
 	async processCitaviAnnotations(pdfPath, citaviAnnotations, isPriority, password) {
 		return this._enqueue(async () => {
+			let fileSize = (await OS.File.stat(pdfPath)).size;
+			if (fileSize > Math.pow(2, 31) - 1) {
+				throw new Error(`The file "${pdfPath}" is too large`);
+			}
 			let buf = await OS.File.read(pdfPath, {});
 			buf = new Uint8Array(buf).buffer;
 			try {
@@ -371,6 +379,10 @@ class PDFWorker {
 	 */
 	async processMendeleyAnnotations(pdfPath, mendeleyAnnotations, isPriority, password) {
 		return this._enqueue(async () => {
+			let fileSize = (await OS.File.stat(pdfPath)).size;
+			if (fileSize > Math.pow(2, 31) - 1) {
+				throw new Error(`The file "${pdfPath}" is too large`);
+			}
 			let buf = await OS.File.read(pdfPath, {});
 			buf = new Uint8Array(buf).buffer;
 			try {

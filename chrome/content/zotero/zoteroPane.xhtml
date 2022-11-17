@@ -57,8 +57,8 @@
 	
 	
 	<html:link rel="localization" href="branding/brand.ftl"/>
-	<html:link rel="localization" href="zotero/menubar.ftl"/>
-	<html:link rel="localization" href="zotero/textActions.ftl"/>
+	<html:link rel="localization" href="mozilla/menubar.ftl"/>
+	<html:link rel="localization" href="mozilla/textActions.ftl"/>
 	
 	<script>
 		var {Services} = ChromeUtils.import("resource://gre/modules/Services.jsm");
@@ -273,6 +273,25 @@
 							<menuitem id="menu_selectAll"
 									key="key_selectAll"
 									command="cmd_selectAll" data-l10n-id="text-action-select-all"/>
+							<menuseparator class="menu-type-reader"/>
+							<menuitem
+									id="edit-menuitem-rotate-left"
+									class="menu-type-reader"
+									label="&zotero.pdfReader.rotatePageLeft;"
+									oncommand="ZoteroStandalone.onReaderCmd('rotateLeft')"
+							/>
+							<menuitem
+									id="edit-menuitem-rotate-right"
+									class="menu-type-reader"
+									label="&zotero.pdfReader.rotatePageRight;"
+									oncommand="ZoteroStandalone.onReaderCmd('rotateRight')"
+							/>
+							<!--<menuitem
+									id="edit-menuitem-rotate-180"
+									class="menu-type-reader"
+									label="&zotero.pdfReader.rotatePage180;"
+									oncommand="ZoteroStandalone.onReaderCmd('rotate180')"
+							/>-->
 							<menuseparator/>
 							<menuitem id="menu_find" label="&findCmd.label;"
 									key="key_find" accesskey="&findCmd.accesskey;"
@@ -296,17 +315,6 @@
 							accesskey="&viewMenu.accesskey;"
 							onpopupshowing="ZoteroStandalone.onViewMenuOpen()">
 						<menupopup id="menu_viewPopup">
-							<menuitem
-								class="menu-type-reader"
-								label="&zotero.pdfReader.rotateClockwise;"
-								oncommand="ZoteroStandalone.onReaderCmd('rotatecw')"
-							/>
-							<menuitem
-								class="menu-type-reader"
-								label="&zotero.pdfReader.rotateCounterclockwise;"
-								oncommand="ZoteroStandalone.onReaderCmd('rotateccw')"
-							/>
-							<menuseparator class="menu-type-reader"/>
 							<menuitem
 								id="view-menuitem-hand-tool"
 								class="menu-type-reader"
@@ -393,6 +401,21 @@
 								oncommand="ZoteroStandalone.onReaderCmd('zoomPageHeight')"
 							/>
 							<menuseparator class="menu-type-reader"/>
+							<menuitem
+									id="view-menuitem-split-horizontally"
+									class="menu-type-reader"
+									type="checkbox"
+									label="&zotero.pdfReader.splitHorizontally;"
+									oncommand="ZoteroStandalone.onReaderCmd('splitHorizontally')"
+							/>
+							<menuitem
+									id="view-menuitem-split-vertically"
+									class="menu-type-reader"
+									type="checkbox"
+									label="&zotero.pdfReader.splitVertically;"
+									oncommand="ZoteroStandalone.onReaderCmd('splitVertically')"
+							/>
+							<menuseparator class="menu-type-reader"/>
 
 							<menu id="layout-menu" label="&layout.label;">
 								<menupopup oncommand="ZoteroStandalone.onViewMenuItemClick(event)">
@@ -446,6 +469,8 @@
 									<menuitem label="12" type="checkbox"/>
 									<menuitem label="13" type="checkbox"/>
 									<menuitem label="14" type="checkbox"/>
+									<menuitem label="15" type="checkbox"/>
+									<menuitem label="16" type="checkbox"/>
 									<menuitem label="18" type="checkbox"/>
 									<menuitem label="24" type="checkbox"/>
 									<menuitem label="36" type="checkbox"/>
@@ -848,8 +873,8 @@
 												onpopuphiding="Zotero.Sync.Runner.registerSyncStatus()"
 												noautohide="true">
 											<label id="zotero-tb-sync-label"/>
-											<label id="zotero-tb-sync-status" hidden="true"/>
-											<label id="zotero-tb-sync-last-sync"/>
+											<label id="zotero-tb-sync-status" class="sync-button-tooltip-status" hidden="true"/>
+											<label id="zotero-tb-sync-last-sync" class="sync-button-tooltip-last-sync"/>
 											<div xmlns="http://www.w3.org/1999/xhtml" class="sync-button-tooltip-messages"/>
 										</tooltip>
 									</toolbarbutton>
@@ -886,15 +911,23 @@
 									<menuitem class="zotero-menuitem-new-collection" label="&zotero.toolbar.newCollection.label;"/>
 									<menuitem class="zotero-menuitem-new-saved-search" label="&zotero.toolbar.newSavedSearch.label;"/>
 									<menuitem class="zotero-menuitem-new-collection" label="&zotero.toolbar.newSubcollection.label;"/>
-									<menuitem class="zotero-menuitem-refresh-feed" label="&zotero.toolbar.feeds.refresh;"/>
+									<menuitem class="zotero-menuitem-refresh-feed"/>
 									<menuseparator/>
 									<menuitem class="zotero-menuitem-show-duplicates" label="&zotero.toolbar.duplicate.label;"/>
 									<menuitem class="zotero-menuitem-show-unfiled" label="&zotero.collections.showUnfiledItems;"/>
 									<menuitem class="zotero-menuitem-show-retracted" label="&zotero.collections.showRetractedItems;"/>
 									<menuitem class="zotero-menuitem-edit-collection"/>
 									<menuitem class="zotero-menuitem-duplicate-collection"/>
-									<menuitem class="zotero-menuitem-mark-read-feed" label="&zotero.toolbar.markFeedRead.label;"/>
+									<menuitem class="zotero-menuitem-mark-read-feed"/>
 									<menuitem class="zotero-menuitem-edit-feed" label="&zotero.toolbar.feeds.edit;"/>
+									<menu class="zotero-collectionmenu-feed-add-menu" label="&zotero.toolbar.feeds.new;">
+										<menupopup>
+											<menuitem label="&zotero.toolbar.feeds.new.fromURL;"
+													command="cmd_zotero_newFeed_fromURL"/>
+											<menuitem label="&zotero.toolbar.feeds.new.fromOPML;"
+													oncommand="ZoteroPane_Local.importFeedsFromOPML()"/>
+										</menupopup>
+									</menu>
 									<menuitem class="zotero-menuitem-delete-collection"/>
 									<menuitem class="zotero-menuitem-move-to-trash"/>
 									<menuseparator/>
@@ -907,16 +940,12 @@
 								</menupopup>
 								<menupopup id="zotero-itemmenu">
 									<!-- Keep order in sync with buildItemContextMenu -->
-									<menuitem class="menuitem-iconic zotero-menuitem-show-in-library" label="&zotero.items.menu.showInLibrary;" oncommand="ZoteroPane.selectItem(parseInt(this.parentNode.getAttribute('itemID')), true)"/>
+									<menuitem class="menuitem-iconic zotero-menuitem-show-in-library" oncommand="ZoteroPane.selectItem(parseInt(this.parentNode.getAttribute('itemID')), true)"/>
 									<menuseparator/>
 									<!-- with icon: <menuitem class="menuitem-iconic" id="zotero-menuitem-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane_Local.newNote(false, this.parentNode.getAttribute('itemID'))"/>-->
 									<menuitem class="menuitem-iconic zotero-menuitem-attach-note" label="&zotero.items.menu.attach.note;" oncommand="ZoteroPane_Local.newNote(false, this.parentNode.getAttribute('itemKey'))"/>
 									
-									<menuitem class="menuitem-iconic zotero-menuitem-create-note-from-annotations"
-											oncommand="ZoteroPane.createNoteFromAnnotationsFromSelected()"/>
-									<menu class="menuitem-iconic zotero-menuitem-create-note-from-annotations">
-										<menupopup id="create-note-from-annotations-popup"/>
-									</menu>
+									<menuitem class="menuitem-iconic zotero-menuitem-create-note-from-annotations"/>
 									
 									<menu class="menu-iconic zotero-menuitem-attach" label="&zotero.items.menu.attach;">
 										<menupopup id="zotero-add-attachment-popup">

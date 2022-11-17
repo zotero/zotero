@@ -147,8 +147,13 @@ var Zotero_CSL_Editor = new function() {
 	
 	this.onStyleModified = function () {
 		let xml = editor.getValue();
+		Zotero.Styles.validate(xml).then(
+			() => this.updateMarkers(''),
+			rawErrors => this.updateMarkers(rawErrors)
+		);
 		let cslList = document.getElementById('zotero-csl-list');
-		if (xml !== Zotero.Styles.get(cslList.value)?.getXML()) {
+		let savedStyle = Zotero.Styles.get(cslList.value);
+		if (!savedStyle || xml !== savedStyle?.getXML()) {
 			cslList.selectedIndex = -1;
 		}
 		
@@ -237,18 +242,26 @@ var Zotero_CSL_Editor = new function() {
 		}
 		styleEngine.free();
 	}
-	
-	
-	// From http://kb.mozillazine.org/Inserting_text_at_cursor
-	function _insertText(text) {
-		var command = "cmd_insertText";
-		var controller = document.commandDispatcher.getControllerForCommand(command);
-		if (controller && controller.isCommandEnabled(command)) {
-			controller = controller.QueryInterface(Components.interfaces.nsICommandController);
-			var params = Components.classes["@mozilla.org/embedcomp/command-params;1"];
-			params = params.createInstance(Components.interfaces.nsICommandParams);
-			params.setStringValue("state_data", "\t");
-			controller.doCommandWithParams(command, params);
-		}
-	}
+
+	this.updateMarkers = function (rawErrors) {
+		let model = editor.getModel();
+		let errors = rawErrors ? rawErrors.split('\n') : [];
+		let markers = errors.map((error) => {
+			let matches = error.match(/^[^:]*:(?<line>[^:]*):(?<column>[^:]*): error: (?<message>.+)/);
+			if (!matches) return null;
+			let { line, message } = matches.groups;
+			line = parseInt(line);
+			return {
+				startLineNumber: line,
+				endLineNumber: line,
+				// The error message doesn't give us an end column, so using its
+				// start column looks weird. Just highlight the whole line.
+				startColumn: model.getLineFirstNonWhitespaceColumn(line),
+				endColumn: model.getLineMaxColumn(line),
+				message,
+				severity: 8
+			};
+		}).filter(Boolean);
+		monaco.editor.setModelMarkers(model, 'csl-validator', markers);
+	};
 }();

@@ -35,48 +35,32 @@ var { makeRowRenderer } = VirtualizedTable;
 
 Zotero_Preferences.Cite = {
 	styles: [],
-	wordPluginIDs: new Set([
-		'zoteroOpenOfficeIntegration@zotero.org',
-		'zoteroMacWordIntegration@zotero.org',
-		'zoteroWinWordIntegration@zotero.org'
-	]),
+	wordPluginResourcePaths: {
+		libreOffice: 'zotero-libreoffice-integration',
+		macWord: 'zotero-macword-integration',
+		winWord: 'zotero-winword-integration'
+	},
 
 	init: async function () {
-		Components.utils.import("resource://gre/modules/AddonManager.jsm");
-		this.updateWordProcessorInstructions();
-		await this.refreshStylesList();
-	},
-	
-	
-	/**
-	 * Determines if any word processors are disabled and if so, shows a message in the pref pane
-	 */
-	updateWordProcessorInstructions: async function () {
-		var someDisabled = false;
-		await new Promise(function(resolve) {
-			AddonManager.getAllAddons(function(addons) {
-				for (let addon of addons) {
-					if (Zotero_Preferences.Cite.wordPluginIDs.has(addon.id) && addon.userDisabled) {
-						someDisabled = true;
-					}
-				}
-				resolve();
-			});
-		});
-		if (someDisabled) {
-			document.getElementById("wordProcessors-somePluginsDisabled").hidden = undefined;
+		// Init word plugin sections
+		let wordPlugins = ['libreOffice'];
+		if (Zotero.isWindows) {
+			wordPlugins.push('winWord');
 		}
-	},
-	
-	enableWordPlugins: function () {
-		AddonManager.getAllAddons(function(addons) {
-			for (let addon of addons) {
-				if (Zotero_Preferences.Cite.wordPluginIDs.has(addon.id) && addon.userDisabled) {
-					addon.userDisabled = false;
-				}
+		else if (Zotero.isMac) {
+			wordPlugins.push('macWord');
+		}
+		await Zotero.Promise.delay();
+		for (let wordPlugin of wordPlugins) {
+			// This is the weirdest indirect code, but let's not fix what's not broken
+			try {
+				var installer = Components.utils.import(`resource://${this.wordPluginResourcePaths[wordPlugin]}/installer.jsm`).Installer;
+				(new installer(true)).showPreferences(document);
+			} catch(e) {
+				Zotero.logError(e);
 			}
-			return Zotero.Utilities.Internal.quit(true);
-		});
+		}
+		await this.refreshStylesList();
 	},
 	
 	
