@@ -10,7 +10,7 @@
 
 #prefs-search-container {
 	height: 40px;
-	padding-right: 8px;
+	padding-inline-end: 8px;
 }
 
 #prefs-search {
@@ -113,8 +113,7 @@ groupbox > label > h2, groupbox > * > label > h2 {
 	width: 0;
     height: 0;
     left: calc(50% - 3px);
-	border-right: 6px solid transparent;
-    border-left: 6px solid transparent;
+	border-inline: 6px solid transparent;
 }
 
 .search-tooltip::before {
@@ -199,11 +198,11 @@ description label[class=zotero-text-link], label[class=zotero-text-link]
 
 /* General pane */
 #zotero-prefpane-general .statusLine {
-	margin-left: .75em;
+	margin-inline-start: .75em;
 }
 
 .indented-pref {
-	margin-left: 2em;
+	margin-inline-start: 2em;
 }
 
 .fileHandler-menu .menulist-icon {
@@ -230,28 +229,26 @@ description label[class=zotero-text-link], label[class=zotero-text-link]
 
 #zotero-prefpane-sync .form-grid > hbox
 {
-	margin-left: 4px;
+	margin-inline-start: 4px;
 }
 
 #zotero-prefpane-sync .form-grid > hbox label:first-child,
 #zotero-prefpane-sync .form-grid > hbox menulist:first-child
 {
-	margin-left: 0;
-	margin-right: 0;
+	margin-inline: 0;
 }
 #zotero-prefpane-sync .form-grid > hbox textbox
 {
-	margin-left: 3px;
-	margin-right: 3px;
+	margin-inline: 3px;
 }
 #zotero-prefpane-sync .form-grid > hbox label:last-child
 {
-	margin-left: 0;
-	margin-right: 10px;
+	margin-inline-start: 0;
+	margin-inline-end: 10px;
 }
 
 #zotero-prefpane-sync #sync-auth-button {
-	margin-left: 0;
+	margin-inline-start: 0;
 }
 
 #zotero-prefpane-sync #sync-status-indicator
@@ -280,34 +277,34 @@ description label[class=zotero-text-link], label[class=zotero-text-link]
 
 .storage-settings-download-options
 {
-	margin-left: 40px;
+	margin-inline-start: 40px;
 }
 
 #storage-verify, #storage-abort, #storage-clean
 {
-	margin-left: 0;
+	margin-inline-start: 0;
 	min-width: 8em;
 }
 
 #storage-terms label
 {
-	margin-left: 0;
+	margin-inline-start: 0;
 	font-size: .9em;
 }
 
 #storage-terms label:first-child
 {
-	margin-right: .25em;
+	margin-inline-end: .25em;
 }
 
 #storage-terms label[class=zotero-text-link]
 {
-	margin-right: 0;
+	margin-inline-end: 0;
 }
 
 /* Reset tab */
 #sync-reset-form {
-	margin-left: 1em;
+	margin-inline-start: 1em;
 }
 
 #reset-sync-warning {
@@ -325,7 +322,7 @@ description label[class=zotero-text-link], label[class=zotero-text-link]
 
 #sync-reset-library-menu {
 	width: 14em;
-	margin-left: .25em;
+	margin-inline-start: .25em;
 	font-size: 15px;
 	height: 1.6em;
 }
@@ -365,7 +362,7 @@ description label[class=zotero-text-link], label[class=zotero-text-link]
 }
 
 #sync-reset-radiogroup > div radio .radio-check {
-	margin-right: 1.05em;
+	margin-inline-end: 1.05em;
 }
 
 #sync-reset-radiogroup > div[disabled] span {
@@ -446,7 +443,7 @@ description label[class=zotero-text-link], label[class=zotero-text-link]
 /* Shortcut Keys pane */
 #zotero-prefpane-advanced-keys-tab input
 {
-	margin-left: -1px;
+	margin-inline-start: -1px;
 }
 
 /* Advanced pane */
