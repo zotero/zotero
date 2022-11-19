@@ -2240,6 +2240,10 @@ Zotero.Item.prototype.setNote = function(text) {
 		throw ("updateNote() can only be called on notes and attachments");
 	}
 	
+	if (this.isEmbeddedImageAttachment()) {
+		throw new Error("setNote() cannot be called on embedded-image attachments")
+	}
+	
 	if (typeof text != 'string') {
 		throw ("text must be a string in Zotero.Item.setNote() (was " + typeof text + ")");
 	}
