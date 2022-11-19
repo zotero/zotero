@@ -2241,7 +2241,7 @@ Zotero.Item.prototype.setNote = function(text) {
 	}
 	
 	if (this.isEmbeddedImageAttachment()) {
-		throw new Error("setNote() cannot be called on embedded-image attachments")
+		throw new Error("setNote() cannot be called on embedded-image attachments");
 	}
 	
 	if (typeof text != 'string') {
@@ -5227,7 +5227,7 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 		let parentKey = json.parentItem;
 		this.parentKey = parentKey ? parentKey : false;
 		
-		if (!this.isAnnotation()) {
+		if (!this.isAnnotation() && !this.isEmbeddedImageAttachment()) {
 			let note = json.note;
 			this.setNote(note !== undefined ? note : "");
 		}
