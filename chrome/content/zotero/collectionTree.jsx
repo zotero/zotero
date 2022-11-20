@@ -278,6 +278,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		let label = document.createElement('span');
 		label.innerText = treeRow.getName();
 		label.className = 'cell-text';
+		label.dir = 'auto';
 
 		// Editing input
 		div.classList.toggle('editing', treeRow == this._editing);

@@ -1,10 +1,10 @@
 #zotero-items-toolbar[state=collapsed]
 {
-	margin-left: -8px !important;
+	margin-inline-start: -8px !important;
 }
 
 #zotero-pane toolbarseparator {
-	margin-left: 7px;
+	margin-inline-start: 7px;
 }
 
 #zotero-tb-sync-stop .toolbarbutton-icon,
@@ -19,14 +19,19 @@
 .zotero-tb-button,
 .zotero-tb-button:first-child,
 .zotero-tb-button:last-child {
-  -moz-margin-start: 0 !important;
-  -moz-margin-end: 3px !important;
-  -moz-padding-end: 10px !important;
+  margin-inline-start: 0 !important;
+  margin-inline-end: 3px !important;
+  padding-right: 10px !important;
   background: url("chrome://zotero/skin/mac/menubutton-end.png") right center/auto 24px no-repeat;
 }
 
 .zotero-tb-button[type=menu] {
-	-moz-padding-end: 8px !important;
+	padding-inline-end: 8px !important;
+}
+
+.zotero-tb-button > .toolbarbutton-icon {
+	background: url("chrome://zotero/skin/mac/menubutton-start.png") left center/auto 24px no-repeat;
+	padding: 4px 4px 4px 11px;
 }
 
 .zotero-tb-button > .toolbarbutton-icon {
@@ -36,12 +41,35 @@
 
 /* For menu buttons, decrease left padding by 1px */
 .zotero-tb-button[type=menu] > .toolbarbutton-icon {
-	-moz-padding-start: 9px;
+	padding-left: 9px;
 	max-width: 29px;
 }
 
+/* A decent hack: reverse the effective order of the dropmarker and icon in RTL
+   mode so that the above CSS, which places the menubutton-start.png background
+   on the toolbarbutton-icon, will make sense. (Otherwise the dropmarker appears
+   outside the button.) Then just flip the entire thing horizontally! We want to
+   do that anyway so that the Locate button will point to the left and Sync will
+   rotate counter-clockwise.
+
+   The other way to do this would be to set direction: ltr on buttons in the
+   RTL toolbar, but that breaks popup positioning. */
+#zotero-pane[dir=rtl] .zotero-tb-button > .toolbarbutton-menu-dropmarker {
+	-moz-box-ordinal-group: 0;
+}
+
+#zotero-pane[dir=rtl] .zotero-tb-button > .toolbarbutton-icon {
+	-moz-box-ordinal-group: 1;
+}
+
+#zotero-pane[dir=rtl] .zotero-tb-button,
+#zotero-pane[dir=rtl] .zotero-tb-button:first-child,
+#zotero-pane[dir=rtl] .zotero-tb-button:last-child {
+	transform: scaleX(-1);
+}
+
 #zotero-collections-toolbar {
-	padding-left: 0;
+	padding-inline-start: 0;
 }
 
 .zotero-tb-button:-moz-window-inactive {

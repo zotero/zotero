@@ -9,7 +9,7 @@ row > vbox
 
 row vbox[fieldname]
 {
-	margin-left: 1px;
+	margin-inline-start: 1px;
 }
 
 .creator-type-label image {
@@ -17,12 +17,16 @@ row vbox[fieldname]
 }
 
 input {
-	padding: 2px 2px 2px 2px;
-	margin: -1px 0 -1px 1px;
+	padding: 2px;
+	margin: -1px 0;
+	margin-inline-start: 1px;
 }
 
 #item-type-menu
 {
-	padding: 0 0 0 1px !important;
-	margin: 0 5px 0 1px !important;
+	padding: 0 !important;
+	padding-inline-start: 1px !important;
+	margin: 0 !important;
+	margin-inline-start: 1px !important;
+	margin-inline-end: 5px !important;
 }

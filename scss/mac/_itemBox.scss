@@ -24,8 +24,11 @@ th > label, .creator-type-label, #more-creators-label {
 	max-height: 7px;
 }
 
-td > input, .creator-name-box > input {
-	margin: -1px 5px -2.5px 0;
+td > input {
+	margin-top: -1px;
+	margin-bottom: -2.5px;
+	margin-inline-start: 0;
+	margin-inline-end: 5px;
 	padding: 0;
 }
 

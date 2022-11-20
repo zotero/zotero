@@ -40,9 +40,10 @@ td > input {
 th > label {
 	margin-top: 1px !important;
 	margin-bottom: 1px !important;
-	-moz-margin-start: 1px !important;
-	-moz-margin-end: 5px !important;
-	padding: 0 2px 0 2px;
+	-moz-box-pack: start;
+	margin-inline-start: 1px !important;
+	margin-inline-end: 5px !important;
+	padding: 0 2px;
 }
 
 td > [fieldname] {
@@ -74,6 +75,7 @@ td > [fieldname] {
 	min-height: 1.5em !important;
 	padding: 0 !important;
 	margin: 0 !important;
+	margin-inline-end: 5px !important;
 	max-height: 1.5em !important;
 	flex: 1;
 	
@@ -122,8 +124,8 @@ th {
 	align-self: stretch;
 	font-weight: normal;
 	text-align: right;
-	margin-left: 5px !important;
-	margin-right: 2px !important;
+	margin-inline-start: 5px !important;
+	margin-inline-end: 2px !important;
 }
 
 #more-creators-label
@@ -149,7 +151,7 @@ row label
 
 .creator-type-label, .creator-type-value {
 	-moz-box-align: center;
-	-moz-box-pack: end;
+	-moz-box-pack: right;
 }
 
 .creator-name-box {
@@ -171,8 +173,9 @@ row label
 
 .creator-type-label > label
 {
-	margin: 1px 4px 1px 0 !important;
-	padding-right: 2px !important;
+	margin: 1px 0 !important;
+	margin-inline-end: 4px !important;
+	padding-inline-end: 2px !important;
 }
  
 .creator-type-dropmarker {
@@ -185,17 +188,21 @@ row label
 }
 
 .creator-name-box, .date-box > span {
-	margin: 1px 0 1px 0;
+	margin: 1px 0 !important;
+	margin-inline-start: 1px !important;
 }
 
 .comma {
-	margin: 1px 3px 1px 0 !important;
+	margin: 1px 0 !important;
+	margin-inline-end: 3px !important;
 }
 
 #zotero-date-field-status
 {
 	color: #666;
-	padding: 0 10px 0 1px !important;
+	padding: 0 !important;
+	padding-inline-start: 1px !important;
+	padding-inline-end: 10px !important;
 	white-space: nowrap;
 }
 
@@ -205,7 +212,8 @@ row label
 	max-width: 27px !important;
 	min-width: 27px !important;
 	height: 14px;
-	margin: 0 5px 0 0 !important;
+	margin: 0 !important;
+	margin-inline-end: 5px !important;
 	background-repeat: no-repeat !important;
 	background-position: center !important;
 	border-width: 0 !important;

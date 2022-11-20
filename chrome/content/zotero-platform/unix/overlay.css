@@ -17,6 +17,10 @@
 	margin-right: 4px;
 }
 
+#zotero-pane[dir=rtl] .zotero-tb-button > .toolbarbutton-icon {
+	transform: scaleX(-1);
+}
+
 /* Fixes tabs missing styling on (GTK 3.20) Ubuntu 16.10. See https://bugzilla.mozilla.org/show_bug.cgi?id=1306425 */
 tabpanels {
 	-moz-appearance: none;

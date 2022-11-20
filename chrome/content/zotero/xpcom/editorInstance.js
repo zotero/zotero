@@ -1628,7 +1628,9 @@ class EditorInstanceUtilities {
 			else if (authors.length === 2) {
 				let a = authors[0].family || authors[0].literal;
 				let b = authors[1].family || authors[1].literal;
-				str = a + ' ' + Zotero.getString('general.and') + ' ' + b;
+				// \u2068 FIRST STRONG ISOLATE: Isolates the directionality of characters that follow
+				// \u2069 POP DIRECTIONAL ISOLATE: Pops the above isolation
+				str = Zotero.getString('general.andJoiner', [`\u2068${a}\u2069`, `\u2068${b}\u2069`]);
 			}
 			else if (authors.length >= 3) {
 				str = (authors[0].family || authors[0].literal) + ' ' + Zotero.getString('general.etAl');

@@ -1373,17 +1373,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 		
 		var creatorSortCache = {};
 		
-		// Regexp to extract the whole string up to an optional "and" or "et al."
-		var andEtAlRegExp = new RegExp(
-			// Extract the beginning of the string in non-greedy mode
-			"^.+?"
-			// up to either the end of the string, "et al." at the end of string
-			+ "(?=(?: " + Zotero.getString('general.etAl').replace('.', '\\.') + ")?$"
-			// or ' and '
-			+ "| " + Zotero.getString('general.and').replace('.', '\\.') + " "
-			+ ")"
-		);
-		
 		function creatorSort(a, b) {
 			var itemA = a.ref;
 			var itemB = b.ref;
@@ -1401,24 +1390,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 			var sortStringB = itemB[prop];
 			if (fieldA === undefined) {
 				let firstCreator = Zotero.Items.getSortTitle(sortStringA);
-				if (sortCreatorAsString) {
-					var fieldA = firstCreator;
-				}
-				else {
-					var matches = andEtAlRegExp.exec(firstCreator);
-					fieldA = matches ? matches[0] : '';
-				}
+				fieldA = firstCreator;
 				creatorSortCache[aItemID] = fieldA;
 			}
 			if (fieldB === undefined) {
 				let firstCreator = Zotero.Items.getSortTitle(sortStringB);
-				if (sortCreatorAsString) {
-					var fieldB = firstCreator;
-				}
-				else {
-					matches = andEtAlRegExp.exec(firstCreator);
-					fieldB = matches ? matches[0] : '';
-				}
+				fieldB = firstCreator;
 				creatorSortCache[bItemID] = fieldB;
 			}
 			
@@ -2750,6 +2727,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		let textSpanAriaLabel = [textWithFullStop, itemTypeAriaLabel, tagAriaLabel, retractedAriaLabel].join(' ');
 		textSpan.className = "cell-text";
+		textSpan.dir = 'auto';
 		textSpan.setAttribute('aria-label', textSpanAriaLabel);
 
 		span.append(twisty, icon, retracted, ...tagSpans, textSpan);

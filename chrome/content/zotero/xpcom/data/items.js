@@ -1723,7 +1723,9 @@ Zotero.Items = function() {
 			if (matches.length === 2) {
 				let a = matches[0];
 				let b = matches[1];
-				return a.lastName + " " + Zotero.getString('general.and') + " " + b.lastName;
+				// \u2068 FIRST STRONG ISOLATE: Isolates the directionality of characters that follow
+				// \u2069 POP DIRECTIONAL ISOLATE: Pops the above isolation
+				return Zotero.getString('general.andJoiner', [`\u2068${a.lastName}\u2069`, `\u2068${b.lastName}\u2069`]);
 			}
 			if (matches.length >= 3) {
 				return matches[0].lastName + " " + Zotero.getString('general.etAl');
@@ -1786,8 +1788,8 @@ Zotero.Items = function() {
 		var contributorCreatorTypeID = Zotero.CreatorTypes.getID('contributor');
 		
 		/* This whole block is to get the firstCreator */
-		var localizedAnd = Zotero.getString('general.and');
-		var localizedEtAl = Zotero.getString('general.etAl'); 
+		var localizedAnd = Zotero.getString('general.andJoiner').replace(/%S/g, '%s');
+		var localizedEtAl = Zotero.getString('general.etAl');
 		var sql = "COALESCE(" +
 			// First try for primary creator types
 			"CASE (" +
@@ -1804,16 +1806,21 @@ Zotero.Items = function() {
 				"WHERE itemID=O.itemID AND primaryField=1" +
 			") " +
 			"WHEN 2 THEN (" +
-				"SELECT " +
-				"(SELECT lastName FROM itemCreators IC NATURAL JOIN creators " +
-				"LEFT JOIN itemTypeCreatorTypes ITCT " +
-				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
-				"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1)" +
-				" || ' " + localizedAnd + " ' || " +
-				"(SELECT lastName FROM itemCreators IC NATURAL JOIN creators " +
-				"LEFT JOIN itemTypeCreatorTypes ITCT " +
-				"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
-				"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1,1)" +
+				"SELECT PRINTF(" +
+					`'${localizedAnd}'` +
+					", " +
+					// \u2068 FIRST STRONG ISOLATE: Isolates the directionality of characters that follow
+					// \u2069 POP DIRECTIONAL ISOLATE: Pops the above isolation
+					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators IC NATURAL JOIN creators " +
+					"LEFT JOIN itemTypeCreatorTypes ITCT " +
+					"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
+					"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1)" +
+					", " +
+					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators IC NATURAL JOIN creators " +
+					"LEFT JOIN itemTypeCreatorTypes ITCT " +
+					"ON (IC.creatorTypeID=ITCT.creatorTypeID AND ITCT.itemTypeID=O.itemTypeID) " +
+					"WHERE itemID=O.itemID AND primaryField=1 ORDER BY orderIndex LIMIT 1,1)" +
+				")" +
 			") " +
 			"ELSE (" +
 				"SELECT " +
@@ -1836,14 +1843,17 @@ Zotero.Items = function() {
 				`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID}` +
 			") " +
 			"WHEN 2 THEN (" +
-				"SELECT " +
-				"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} ` +
-				"ORDER BY orderIndex LIMIT 1)" +
-				" || ' " + localizedAnd + " ' || " +
-				"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} ` +
-				"ORDER BY orderIndex LIMIT 1,1) " +
+				"SELECT PRINTF(" +
+					`'${localizedAnd}'` +
+					", " +
+					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators NATURAL JOIN creators " +
+					`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} ` +
+					"ORDER BY orderIndex LIMIT 1)" +
+					", " +
+					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators NATURAL JOIN creators " +
+					`WHERE itemID=O.itemID AND creatorTypeID=${editorCreatorTypeID} ` +
+					"ORDER BY orderIndex LIMIT 1,1) " +
+				")" +
 			") " +
 			"ELSE (" +
 				"SELECT " +
@@ -1865,14 +1875,17 @@ Zotero.Items = function() {
 				`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID}` +
 			") " +
 			"WHEN 2 THEN (" +
-				"SELECT " +
-				"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID} ` +
-				"ORDER BY orderIndex LIMIT 1)" +
-				" || ' " + localizedAnd + " ' || " +
-				"(SELECT lastName FROM itemCreators NATURAL JOIN creators " +
-				`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID} ` +
-				"ORDER BY orderIndex LIMIT 1,1) " +
+				"SELECT PRINTF(" +
+					`'${localizedAnd}'` +
+					", " +
+					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators NATURAL JOIN creators " +
+					`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID} ` +
+					"ORDER BY orderIndex LIMIT 1)" +
+					", " +
+					"(SELECT '\u2068' || lastName || '\u2069' FROM itemCreators NATURAL JOIN creators " +
+					`WHERE itemID=O.itemID AND creatorTypeID=${contributorCreatorTypeID} ` +
+					"ORDER BY orderIndex LIMIT 1,1) " +
+				")" +
 			") " +
 			"ELSE (" +
 				"SELECT " +

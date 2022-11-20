@@ -207,12 +207,12 @@
 }
 
 #zotero-collections-toolbar {
-	margin-right: 10px; /* Set to width of splitter for visual aesthetics */
-	padding-left: 2px;
+	margin-inline-end: 10px; /* Set to width of splitter for visual aesthetics */
+	padding-inline-start: 2px;
 }
 
 #zotero-items-toolbar {
-	margin-right: 10px;
+	margin-inline-end: 10px;
 }
 
 .zotero-tb-button {
@@ -223,18 +223,18 @@
 }
 
 .zotero-tb-button:first-child {
-	margin-left: 0 !important;
+	margin-inline-start: 0 !important;
 }
 
 .zotero-tb-button:last-child {
-	margin-right: 0 !important;
+	margin-inline-end: 0 !important;
 }
 
 .zotero-tb-button[type="menu"] {
-	padding-left: 3px;
-	padding-right: 3px;
-	margin-left: 4px;
-	margin-right: 2px;
+	padding-inline-start: 3px;
+	padding-inline-end: 3px;
+	margin-inline-start: 4px;
+	margin-inline-end: 2px;
 }
 
 .zotero-tb-button:hover:active {
@@ -480,7 +480,7 @@
 #zotero-tb-sync-stop
 {
 	list-style-image: url(chrome://zotero/skin/control_stop_blue.png);
-	margin-right: 0;
+	margin-inline-end: 0;
 }
 
 #zotero-tb-sync-progress
@@ -488,7 +488,7 @@
 	min-width: 50px;
 	width: 50px;
 	height: 10px;
-	margin-left: 0;
+	margin-inline-start: 0;
 }
 
 #zotero-tb-sync-progress-tooltip-progress {
@@ -532,7 +532,7 @@
 
 /* Sync error panel */
 #zotero-sync-error-panel, #zotero-sync-reminder-panel {
-	margin-right: 0;
+	margin-inline-end: 0;
 }
 
 #zotero-sync-error-panel .error-header, #zotero-sync-reminder-panel .header {
@@ -561,9 +561,9 @@
 
 #zotero-tb-sync {
 	list-style-image: url(chrome://zotero/skin/arrow_rotate_static.png);
-	margin-left: -6px;
-	margin-right: -2px;
-	padding-right: 6px;
+	margin-inline-start: -6px;
+	margin-inline-end: -2px;
+	padding-inline-end: 6px;
 }
 
 #zotero-tb-sync .toolbarbutton-icon {
@@ -606,7 +606,7 @@
 }
 
 .zotero-box {
-	margin-left: 5px;
+	margin-inline-start: 5px;
 }
 
 .zotero-box-icon {
@@ -615,7 +615,7 @@
 }
 
 .zotero-box-label {
-	margin-left: 3px !important;
+	margin-inline-start: 3px !important;
 }
 
 #item-box-container {
