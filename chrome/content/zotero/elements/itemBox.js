@@ -304,6 +304,7 @@
 			}
 			
 			this._item = val;
+			this._lastTabIndex = null;
 			this.scrollToTop();
 			this.refresh();
 		}
