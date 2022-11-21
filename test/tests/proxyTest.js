@@ -3,7 +3,7 @@
 describe("Zotero.Proxies", function(){
 	describe("#getPotentialProxies", function() {
 		it("should return the provided url mapped to null when url is not proxied", function() {
-			let url = "http://www.example.com";
+			let url = "http://www.example.com/";
 			let proxies = Zotero.Proxies.getPotentialProxies(url);
 			let expectedProxies = {};
 			expectedProxies[url] = null;
