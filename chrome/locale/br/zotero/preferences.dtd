@@ -1,5 +1,7 @@
 <!ENTITY zotero.preferences.title "Arventennoù Zotero">
 
+<!ENTITY zotero.preferences.helpButton.label "Help">
+
 <!ENTITY zotero.preferences.default "Dre-ziouer:">
 <!ENTITY zotero.preferences.items "elfennoù">
 <!ENTITY zotero.preferences.period ".">
@@ -8,6 +10,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Hollek">
 
+<!ENTITY zotero.preferences.interface "Interface">
 <!ENTITY zotero.preferences.fileHandling "Meradur ar restroù">
 <!ENTITY zotero.preferences.automaticSnapshots "Em-dapout skeudenn ar bajenn da vare krouidigezh elfennoù diwar pajennoù Web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Em-stagañ ar PDFoù kevelet da vare enrolladur elfennoù">
@@ -16,6 +19,7 @@
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Adenvel ar restroù liammet">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Digeriñ ar PDFoù gant">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Sistem dre-ziouer">
+<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "A bep seurt">
 <!ENTITY zotero.preferences.autoUpdate "Em-wiriañ hizivadurioù an troerioù hag ar stiloù">
@@ -83,6 +87,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Adloc'hañ roll-istor sinkro ar restroù">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Keñveriañ an holl restroù kenstag gant ar servijer stokañ">
 <!ENTITY zotero.preferences.sync.reset "Adderaouekaat">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
 <!ENTITY zotero.preferences.sync.reset.button "Adderaouekaat...">
 
 

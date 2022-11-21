@@ -1,5 +1,7 @@
 <!ENTITY zotero.preferences.title "Innstillinger for Zotero">
 
+<!ENTITY zotero.preferences.helpButton.label "Help">
+
 <!ENTITY zotero.preferences.default "Standard:">
 <!ENTITY zotero.preferences.items "elementer">
 <!ENTITY zotero.preferences.period ".">
@@ -8,6 +10,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Generelt">
 
+<!ENTITY zotero.preferences.interface "Interface">
 <!ENTITY zotero.preferences.fileHandling "Filbehandling">
 <!ENTITY zotero.preferences.automaticSnapshots "Ta øyeblikksbilde automatisk når du oppretter elementer fra nettsider">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Lagre tilknyttede PDF-filer og andre filer når du lagrer elementer">
@@ -16,6 +19,7 @@
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Gi nytt navn til lenkede filer">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Åpne PDF-er ved hjelp av">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Standardprogram">
+<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "Diverse">
 <!ENTITY zotero.preferences.autoUpdate "Se automatisk etter oppdaterte oversettere og stiler">
@@ -83,6 +87,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Tilbakestill filsynkroniseringshistorikk">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Sammenlign alle vedlegg med lagringstjeneste">
 <!ENTITY zotero.preferences.sync.reset "Tilbakestill">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
 <!ENTITY zotero.preferences.sync.reset.button "Tilbakestill...">
 
 

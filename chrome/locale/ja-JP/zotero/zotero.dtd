@@ -83,7 +83,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "アイテムを削除...">
 <!ENTITY zotero.toolbar.newLibrary.label "新しいライブラリ">
 <!ENTITY zotero.toolbar.newCollection.label "新規コレクション...">
-<!ENTITY zotero.toolbar.markFeedRead.label "フィードを既読にする">
 <!ENTITY zotero.toolbar.newGroup "新規グループ...">
 <!ENTITY zotero.toolbar.newSubcollection.label "新規サブコレクション...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "新規検索条件の保存...">
@@ -105,7 +104,6 @@
 <!ENTITY zotero.toolbar.feeds.new "新しいフィード">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "URLから...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "OPMLから...">
-<!ENTITY zotero.toolbar.feeds.refresh "フィードを更新する">
 <!ENTITY zotero.toolbar.feeds.edit "フィードを編集する...">
 
 <!ENTITY zotero.item.add "追加">
@@ -114,6 +112,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "各単語の先頭を大文字に">
 <!ENTITY zotero.item.textTransform.sentencecase "各文の先頭を大文字に">
 <!ENTITY zotero.item.creatorTransform.nameSwap "姓と名を入れ替える">
+<!ENTITY zotero.item.creatorTransform.capitalize "Capitalize">
 <!ENTITY zotero.item.viewOnline "オンラインで閲覧する">
 <!ENTITY zotero.item.copyAsURL "URLとしてコピーする">
 <!ENTITY zotero.item.deletePermanently "永久に削除する...">
@@ -311,8 +310,6 @@
 <!ENTITY zotero.pdfReader.lastPage "最後のページ">
 <!ENTITY zotero.pdfReader.back "戻る">
 <!ENTITY zotero.pdfReader.forward "進む">
-<!ENTITY zotero.pdfReader.rotateClockwise "時計回りに回転">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "反時計回りに回転">
 <!ENTITY zotero.pdfReader.handTool "てのひらツール">
 <!ENTITY zotero.pdfReader.verticalScrolling "垂直スクロール">
 <!ENTITY zotero.pdfReader.horizontalScrolling "水平スクロール">
@@ -325,4 +322,9 @@
 <!ENTITY zotero.pdfReader.zoomAuto "自動的にサイズ変更">
 <!ENTITY zotero.pdfReader.zoomPageWidth "ページ幅に合わせる">
 <!ENTITY zotero.pdfReader.zoomPageHeight "ページの高さに合わせる">
+<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
+<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
 <!ENTITY zotero.pdfReader.transferFromPDF "注釈のインポート…">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
+<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
+<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">

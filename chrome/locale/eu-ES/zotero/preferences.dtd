@@ -1,5 +1,7 @@
 <!ENTITY zotero.preferences.title "Zotero hobespenak">
 
+<!ENTITY zotero.preferences.helpButton.label "Help">
+
 <!ENTITY zotero.preferences.default "Lehenetsia:">
 <!ENTITY zotero.preferences.items "elementu">
 <!ENTITY zotero.preferences.period ".">
@@ -8,6 +10,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Orokorra">
 
+<!ENTITY zotero.preferences.interface "Interface">
 <!ENTITY zotero.preferences.fileHandling "Fitxategien kudeaketa">
 <!ENTITY zotero.preferences.automaticSnapshots "Gorde pantaila-irudiak automatikoki web orri batetik elementu bat sortzerakoan">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automatikoki erantsi erlazionatutako PDF eta bestelako fitxategiak elementuak gordetzerakoan">
@@ -16,6 +19,7 @@
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Berrizendatu estekatutako fitxategiak">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Ireki PDFak honakoa erabiliz">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Sistemako lehenetsia">
+<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "Bestelakoak">
 <!ENTITY zotero.preferences.autoUpdate "Automatikoki egiaztatu itzultzaile eta estiloen eguneraketan">
@@ -83,6 +87,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Garbitu Sync kronika">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Alderatu eranskin fitxategi guztiak biltegi zerbitzuarekin">
 <!ENTITY zotero.preferences.sync.reset "Berrezarri">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
 <!ENTITY zotero.preferences.sync.reset.button "Berrezarri...">
 
 

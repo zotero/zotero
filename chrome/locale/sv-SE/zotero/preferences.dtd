@@ -1,5 +1,7 @@
 <!ENTITY zotero.preferences.title "Inställningar i Zotero">
 
+<!ENTITY zotero.preferences.helpButton.label "Help">
+
 <!ENTITY zotero.preferences.default "Standardvärde:">
 <!ENTITY zotero.preferences.items "källor">
 <!ENTITY zotero.preferences.period ".">
@@ -8,6 +10,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Allmänt">
 
+<!ENTITY zotero.preferences.interface "Interface">
 <!ENTITY zotero.preferences.fileHandling "Filhantering">
 <!ENTITY zotero.preferences.automaticSnapshots "Ta automatiskt lokala kopior när källor skapas av hemsidor">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Bifoga automatiskt associerade PDF:er och andra filer när källor sparas">
@@ -16,6 +19,7 @@
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Byt namn på länkade filer">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Öppna PDF:er med">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Systemets standardval">
+<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "Övrigt">
 <!ENTITY zotero.preferences.autoUpdate "Kolla automatiskt efter uppdaterade källfångare och stilar">
@@ -83,6 +87,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Återställ filsynkroniseringshistorik">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Jämför alla bifogade filer med lagringstjänsten">
 <!ENTITY zotero.preferences.sync.reset "Återställ">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
 <!ENTITY zotero.preferences.sync.reset.button "Återställ...">
 
 

@@ -83,7 +83,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "Elementua kendu...">
 <!ENTITY zotero.toolbar.newLibrary.label "Liburutegi berria...">
 <!ENTITY zotero.toolbar.newCollection.label "Bilduma berria...">
-<!ENTITY zotero.toolbar.markFeedRead.label "Jarioa irakurritzat eman">
 <!ENTITY zotero.toolbar.newGroup "Talde berria...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Azpi-bilduma berria...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Gordetako bilaketa berria...">
@@ -105,7 +104,6 @@
 <!ENTITY zotero.toolbar.feeds.new "Jario berria">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "URL batetik...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "OPML bitartez...">
-<!ENTITY zotero.toolbar.feeds.refresh "Freskatu jarioa">
 <!ENTITY zotero.toolbar.feeds.edit "Editatu jarioa...">
 
 <!ENTITY zotero.item.add "Gehitu">
@@ -114,6 +112,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Hitz Bakoitza Letra Larriz">
 <!ENTITY zotero.item.textTransform.sentencecase "Lehen letra letra larriz">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Izen-abizenak trukatu">
+<!ENTITY zotero.item.creatorTransform.capitalize "Capitalize">
 <!ENTITY zotero.item.viewOnline "Linean ikusi">
 <!ENTITY zotero.item.copyAsURL "Kopiatu URL gisa">
 <!ENTITY zotero.item.deletePermanently "Betirako ezabatu...">
@@ -311,8 +310,6 @@
 <!ENTITY zotero.pdfReader.lastPage "Azken orrialdea">
 <!ENTITY zotero.pdfReader.back "Atzera">
 <!ENTITY zotero.pdfReader.forward "Aurrera">
-<!ENTITY zotero.pdfReader.rotateClockwise "Erlojuaren orratzen noranzkoan biratu">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Erlojuaren orratzen kontrako noranzkoan biratu">
 <!ENTITY zotero.pdfReader.handTool "Esku tresna">
 <!ENTITY zotero.pdfReader.verticalScrolling "Desplazamendu bertikala">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Desplazamendu horizontala">
@@ -325,4 +322,9 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Tamaina automatikoki egokitu">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Orrialdearen zabalerara zoom egin">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
+<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
+<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
 <!ENTITY zotero.pdfReader.transferFromPDF "Oharpenak inportatu">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
+<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
+<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">

@@ -1,5 +1,7 @@
 <!ENTITY zotero.preferences.title "Предпочитания на Зотеро">
 
+<!ENTITY zotero.preferences.helpButton.label "Help">
+
 <!ENTITY zotero.preferences.default "По подразбиране:">
 <!ENTITY zotero.preferences.items "записи">
 <!ENTITY zotero.preferences.period ".">
@@ -8,6 +10,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Общи">
 
+<!ENTITY zotero.preferences.interface "Interface">
 <!ENTITY zotero.preferences.fileHandling "Обработка на файловете">
 <!ENTITY zotero.preferences.automaticSnapshots "Автоматична &quot;моментна снимка&quot; при направата записи от интернет страници">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Автоматично прикачване на свързаните PDF и други файлове при съхранението на записите">
@@ -16,6 +19,7 @@
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Отворяне на  PDF документи с">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Програмата по подразбиране на операционната система">
+<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "Разни">
 <!ENTITY zotero.preferences.autoUpdate "Автоматично проверяване за актуализирани стилове и програми за извличане на данни">
@@ -83,6 +87,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Изтриване на историята на предходните файлови синхронизации">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Сравняване на всички прикачени файлове с тези в сървъра">
 <!ENTITY zotero.preferences.sync.reset "Нулиране">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
 <!ENTITY zotero.preferences.sync.reset.button "Нулиране...">
 
 

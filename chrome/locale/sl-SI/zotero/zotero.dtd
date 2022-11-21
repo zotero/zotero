@@ -83,7 +83,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "Odstrani vnos ...">
 <!ENTITY zotero.toolbar.newLibrary.label "Nova knjižnica ">
 <!ENTITY zotero.toolbar.newCollection.label "Nova zbirka ...">
-<!ENTITY zotero.toolbar.markFeedRead.label "Označi vir kot prebran">
 <!ENTITY zotero.toolbar.newGroup "Nova skupina ...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nova podzbirka ...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Novo shranjeno iskanje ...">
@@ -105,7 +104,6 @@
 <!ENTITY zotero.toolbar.feeds.new "Nov vir ">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Z URL ...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Iz OPML ...">
-<!ENTITY zotero.toolbar.feeds.refresh "Osveži vir">
 <!ENTITY zotero.toolbar.feeds.edit "Uredi vir ...">
 
 <!ENTITY zotero.item.add "Dodaj">
@@ -114,6 +112,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Velike Začetnice">
 <!ENTITY zotero.item.textTransform.sentencecase "Kot v stavku">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Zamenjaj ime/priimek">
+<!ENTITY zotero.item.creatorTransform.capitalize "Capitalize">
 <!ENTITY zotero.item.viewOnline "Pokaži na spletu">
 <!ENTITY zotero.item.copyAsURL "Kopiraj kot URL">
 <!ENTITY zotero.item.deletePermanently "Izbriši trajno ...">
@@ -311,8 +310,6 @@
 <!ENTITY zotero.pdfReader.lastPage "Zadnja stran">
 <!ENTITY zotero.pdfReader.back "Nazaj">
 <!ENTITY zotero.pdfReader.forward "Naprej">
-<!ENTITY zotero.pdfReader.rotateClockwise "Zavrti v SUK">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Zavrti v nasprotni SUK">
 <!ENTITY zotero.pdfReader.handTool "Ročno orodje">
 <!ENTITY zotero.pdfReader.verticalScrolling "Navpično drsenje">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Vodoravno drsenje">
@@ -325,4 +322,9 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Samodejno spremeni velikost">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Približaj na širino strani">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Približaj na višino strani">
+<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
+<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
 <!ENTITY zotero.pdfReader.transferFromPDF "Uvozi zaznamke ...">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
+<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
+<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">

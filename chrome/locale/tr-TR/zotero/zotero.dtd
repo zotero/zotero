@@ -83,7 +83,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "Eseri Kaldır...">
 <!ENTITY zotero.toolbar.newLibrary.label "Yeni Kitaplık">
 <!ENTITY zotero.toolbar.newCollection.label "Yeni Derme...">
-<!ENTITY zotero.toolbar.markFeedRead.label "Beslemeyi Okunmuş İşaretle">
 <!ENTITY zotero.toolbar.newGroup "Yeni Grup...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Yeni Alt Derme...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Yeni Kaydedilen Arama...">
@@ -105,7 +104,6 @@
 <!ENTITY zotero.toolbar.feeds.new "Yeni Besleme">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "URL'den...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "OPML'den...">
-<!ENTITY zotero.toolbar.feeds.refresh "Beslemeyi Yenile">
 <!ENTITY zotero.toolbar.feeds.edit "Beslemeyi Düzenle...">
 
 <!ENTITY zotero.item.add "Ekle">
@@ -114,6 +112,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Başlık Biçimi">
 <!ENTITY zotero.item.textTransform.sentencecase "Cümle Biçimi">
 <!ENTITY zotero.item.creatorTransform.nameSwap "İlk ve Soyadları Takas Et">
+<!ENTITY zotero.item.creatorTransform.capitalize "Capitalize">
 <!ENTITY zotero.item.viewOnline "Çevrimiçi Göster">
 <!ENTITY zotero.item.copyAsURL "URL'i Kopyala">
 <!ENTITY zotero.item.deletePermanently "Kalıcı Olarak Sil...">
@@ -311,8 +310,6 @@
 <!ENTITY zotero.pdfReader.lastPage "Son Sayfa">
 <!ENTITY zotero.pdfReader.back "Geri">
 <!ENTITY zotero.pdfReader.forward "İleri">
-<!ENTITY zotero.pdfReader.rotateClockwise "Saat Yönünde Döndür">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Saat Yönünün Tersine Döndür">
 <!ENTITY zotero.pdfReader.handTool "El Aracı">
 <!ENTITY zotero.pdfReader.verticalScrolling "Dikey Kaydırma">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Yatay Kaydırma">
@@ -325,4 +322,9 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Otomatik Olarak Yeniden Boyutlandır">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Sayfa Genişliğine Yakınlaştır">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Sayfa Yüksekliğine Yakınlaştır">
+<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
+<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
 <!ENTITY zotero.pdfReader.transferFromPDF "Ek Açıklamaları İçeri Aktar...">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
+<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
+<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">

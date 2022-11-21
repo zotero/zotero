@@ -83,7 +83,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "Poista nimike...">
 <!ENTITY zotero.toolbar.newLibrary.label "Uusi kirjasto">
 <!ENTITY zotero.toolbar.newCollection.label "Uusi kokoelma...">
-<!ENTITY zotero.toolbar.markFeedRead.label "Merkitse syöte luetuksi">
 <!ENTITY zotero.toolbar.newGroup "Uusi ryhmä...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Uusi alakokoelma...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Uusi tallennettu haku...">
@@ -105,7 +104,6 @@
 <!ENTITY zotero.toolbar.feeds.new "Uusi syöte">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "URL-osoitteesta...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "OPML-tiedostosta...">
-<!ENTITY zotero.toolbar.feeds.refresh "Päivitä syöte">
 <!ENTITY zotero.toolbar.feeds.edit "Muokkaa syötettä...">
 
 <!ENTITY zotero.item.add "Lisää">
@@ -114,6 +112,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Otsikon aakkoslaji">
 <!ENTITY zotero.item.textTransform.sentencecase "Lauseen aakkoslaji">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Vaihda etu- ja sukunimien järjestys">
+<!ENTITY zotero.item.creatorTransform.capitalize "Capitalize">
 <!ENTITY zotero.item.viewOnline "Katso verkossa">
 <!ENTITY zotero.item.copyAsURL "Kopioi URL-osoitteena">
 <!ENTITY zotero.item.deletePermanently "Poista lopullisesti...">
@@ -311,8 +310,6 @@
 <!ENTITY zotero.pdfReader.lastPage "Viimeinen sivu">
 <!ENTITY zotero.pdfReader.back "Takaisin">
 <!ENTITY zotero.pdfReader.forward "Seuraava">
-<!ENTITY zotero.pdfReader.rotateClockwise "Kierrä myötäpäivään">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Kierrä vastapäivään">
 <!ENTITY zotero.pdfReader.handTool "Käsityökalu">
 <!ENTITY zotero.pdfReader.verticalScrolling "Pystyvieritys">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Vaakavieritys">
@@ -325,4 +322,9 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Säädä kokoa automaattisesti">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Koko sivun leveys">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Koko sivun korkeus">
+<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
+<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
 <!ENTITY zotero.pdfReader.transferFromPDF "Tuo huomautukset...">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
+<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
+<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">

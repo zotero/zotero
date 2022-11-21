@@ -1,5 +1,7 @@
 <!ENTITY zotero.preferences.title "Προτιμήσεις Zotero">
 
+<!ENTITY zotero.preferences.helpButton.label "Help">
+
 <!ENTITY zotero.preferences.default "Αρχικές">
 <!ENTITY zotero.preferences.items "στοιχεία">
 <!ENTITY zotero.preferences.period ".">
@@ -8,6 +10,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Γενικές">
 
+<!ENTITY zotero.preferences.interface "Interface">
 <!ENTITY zotero.preferences.fileHandling "Χειρισμός Αρχείου">
 <!ENTITY zotero.preferences.automaticSnapshots "Αυτόματη λήψη φωτογραφικού στιγμιότυπου όταν δημιουργούνται στοιχεία από ιστοσελίδες">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Αυτόματη προσάρτηση των συνοδευτικών PDF και άλλων αρχείων όταν αποθηκεύονται στοιχεία">
@@ -16,6 +19,7 @@
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Μετονομασία συνδεδεμένων αρχείων">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Άνοιγμα PDF χρησιμοποιώντας">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Προεπιλογή Συστήματος">
+<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "Διάφορα">
 <!ENTITY zotero.preferences.autoUpdate "Αυτόματος έλεγχος για ενημερωμένους μεταφραστές και στυλ">
@@ -83,6 +87,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Μηδενισμός του ιστορικού συγχρονισμού αρχείων">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Σύγκριση όλων των συνημμένων αρχείων με την υπηρεσία αποθήκευσης">
 <!ENTITY zotero.preferences.sync.reset "Επαναφορά">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
 <!ENTITY zotero.preferences.sync.reset.button "Επαναφορά...">
 
 

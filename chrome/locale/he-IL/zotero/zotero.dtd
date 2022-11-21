@@ -83,7 +83,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "הסרת פריט…">
 <!ENTITY zotero.toolbar.newLibrary.label "ספרייה חדשה">
 <!ENTITY zotero.toolbar.newCollection.label "אוסף חדש…">
-<!ENTITY zotero.toolbar.markFeedRead.label "סימון ערוץ העדכונים כנקרא">
 <!ENTITY zotero.toolbar.newGroup "קבוצה חדשה…">
 <!ENTITY zotero.toolbar.newSubcollection.label "תת־אוסף חדש…">
 <!ENTITY zotero.toolbar.newSavedSearch.label "חיפוש שמור חדש…">
@@ -105,7 +104,6 @@
 <!ENTITY zotero.toolbar.feeds.new "ערוץ עדכונים חדש">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "מכתובת…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "מ־OPML…">
-<!ENTITY zotero.toolbar.feeds.refresh "רענון ערוץ העדכונים">
 <!ENTITY zotero.toolbar.feeds.edit "עריכת ערוץ העדכונים…">
 
 <!ENTITY zotero.item.add "הוספה">
@@ -114,6 +112,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "מצב רישיות כותרת">
 <!ENTITY zotero.item.textTransform.sentencecase "מצב רישיות משפט">
 <!ENTITY zotero.item.creatorTransform.nameSwap "החלפת שמות ראשון/משפחה">
+<!ENTITY zotero.item.creatorTransform.capitalize "Capitalize">
 <!ENTITY zotero.item.viewOnline "הצגה באינטרנט">
 <!ENTITY zotero.item.copyAsURL "העתקה ככתובת">
 <!ENTITY zotero.item.deletePermanently "מחיקה לצמיתות…">
@@ -311,8 +310,6 @@
 <!ENTITY zotero.pdfReader.lastPage "עמוד אחרון">
 <!ENTITY zotero.pdfReader.back "אחורה">
 <!ENTITY zotero.pdfReader.forward "קדימה">
-<!ENTITY zotero.pdfReader.rotateClockwise "סיבוב עם כיוון השעון">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "סיבוב נגד כיוון השעון">
 <!ENTITY zotero.pdfReader.handTool "כלי יד">
 <!ENTITY zotero.pdfReader.verticalScrolling "גלילה אנכית">
 <!ENTITY zotero.pdfReader.horizontalScrolling "גלילה אופקית">
@@ -325,4 +322,9 @@
 <!ENTITY zotero.pdfReader.zoomAuto "שינוי גודל אוטומטי">
 <!ENTITY zotero.pdfReader.zoomPageWidth "התאמת התקריב לרוחב העמוד">
 <!ENTITY zotero.pdfReader.zoomPageHeight "התאמת התקריב לגובה העמוד">
+<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
+<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
 <!ENTITY zotero.pdfReader.transferFromPDF "ייבוא הסברים…">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
+<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
+<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">

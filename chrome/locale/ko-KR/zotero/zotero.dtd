@@ -83,7 +83,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "항목 삭제...">
 <!ENTITY zotero.toolbar.newLibrary.label "새 라이브러리">
 <!ENTITY zotero.toolbar.newCollection.label "새 컬렉션...">
-<!ENTITY zotero.toolbar.markFeedRead.label "피드를 읽은 것으로 표시">
 <!ENTITY zotero.toolbar.newGroup "새 그룹...">
 <!ENTITY zotero.toolbar.newSubcollection.label "새 하위 컬렉션...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "새 저장된 검색...">
@@ -105,7 +104,6 @@
 <!ENTITY zotero.toolbar.feeds.new "새 피드">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "URL에서...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "OPML에서...">
-<!ENTITY zotero.toolbar.feeds.refresh "피드 새로고침">
 <!ENTITY zotero.toolbar.feeds.edit "피드 편집...">
 
 <!ENTITY zotero.item.add "추가">
@@ -114,6 +112,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "글차 첫머리는 대문자">
 <!ENTITY zotero.item.textTransform.sentencecase "문장 첫머리는 대문자">
 <!ENTITY zotero.item.creatorTransform.nameSwap "성/이름 맞바꾸기">
+<!ENTITY zotero.item.creatorTransform.capitalize "Capitalize">
 <!ENTITY zotero.item.viewOnline "온라인으로 보기">
 <!ENTITY zotero.item.copyAsURL "URL로 복사">
 <!ENTITY zotero.item.deletePermanently "완전히 삭제...">
@@ -311,8 +310,6 @@
 <!ENTITY zotero.pdfReader.lastPage "Last Page">
 <!ENTITY zotero.pdfReader.back "Back">
 <!ENTITY zotero.pdfReader.forward "Forward">
-<!ENTITY zotero.pdfReader.rotateClockwise "Rotate Clockwise">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Rotate Counterclockwise">
 <!ENTITY zotero.pdfReader.handTool "Hand Tool">
 <!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
@@ -325,4 +322,9 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
+<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
+<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
+<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
+<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">

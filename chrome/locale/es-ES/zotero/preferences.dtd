@@ -1,5 +1,7 @@
 <!ENTITY zotero.preferences.title "Preferencias de Zotero">
 
+<!ENTITY zotero.preferences.helpButton.label "Help">
+
 <!ENTITY zotero.preferences.default "Predeterminado:">
 <!ENTITY zotero.preferences.items "elementos">
 <!ENTITY zotero.preferences.period ",">
@@ -8,6 +10,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "General">
 
+<!ENTITY zotero.preferences.interface "Interface">
 <!ENTITY zotero.preferences.fileHandling "Gestión de archivos">
 <!ENTITY zotero.preferences.automaticSnapshots "Tomar instantáneas automáticamente al crear elementos a partir de páginas webs">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Adjuntar automáticamente los archivos PDFs y otros archivos al guardar elementos">
@@ -16,6 +19,7 @@
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Renombrar archivos enlazados">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Abrir PDFs usando">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Predeterminados del sistema">
+<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscelánea">
 <!ENTITY zotero.preferences.autoUpdate "Comprobar automáticamente si hay traductores y estilos actualizados ">
@@ -83,6 +87,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Restablecer el historial de sincronización de archivos">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Comparar todos los archivos adjuntos con el servicio de almacenamiento">
 <!ENTITY zotero.preferences.sync.reset "Restablecer">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
 <!ENTITY zotero.preferences.sync.reset.button "Restablecer...">
 
 

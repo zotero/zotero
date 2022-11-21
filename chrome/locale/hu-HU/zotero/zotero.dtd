@@ -83,7 +83,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "Elem törlése...">
 <!ENTITY zotero.toolbar.newLibrary.label "Könyvtár létrehozása">
 <!ENTITY zotero.toolbar.newCollection.label "Új gyűjtemény...">
-<!ENTITY zotero.toolbar.markFeedRead.label "Mark Feed as Read">
 <!ENTITY zotero.toolbar.newGroup "Új csoport...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Új algyűjtemény...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Új mentett keresés...">
@@ -105,7 +104,6 @@
 <!ENTITY zotero.toolbar.feeds.new "New Feed">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "URL-ből…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "OPML-ből…">
-<!ENTITY zotero.toolbar.feeds.refresh "Refresh Feed">
 <!ENTITY zotero.toolbar.feeds.edit "Edit Feed…">
 
 <!ENTITY zotero.item.add "Hozzáadás">
@@ -114,6 +112,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Szókezdő">
 <!ENTITY zotero.item.textTransform.sentencecase "Mondatkezdő">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Keresztnév/Vezetéknév felcserélése">
+<!ENTITY zotero.item.creatorTransform.capitalize "Capitalize">
 <!ENTITY zotero.item.viewOnline "Online megtekintés">
 <!ENTITY zotero.item.copyAsURL "Másolás URL-ként">
 <!ENTITY zotero.item.deletePermanently "Végleges törlés…">
@@ -311,8 +310,6 @@
 <!ENTITY zotero.pdfReader.lastPage "Utolsó oldal">
 <!ENTITY zotero.pdfReader.back "Vissza">
 <!ENTITY zotero.pdfReader.forward "Előre">
-<!ENTITY zotero.pdfReader.rotateClockwise "Forgatás az óramutató járásával megegyező irányba">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Forgatás az óramutató járásával ellentétes irányba">
 <!ENTITY zotero.pdfReader.handTool "Kéz eszköz">
 <!ENTITY zotero.pdfReader.verticalScrolling "Függőleges görgetés">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Vízszintes görgetés">
@@ -325,4 +322,9 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Automatikus átméretezés">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Nagyítás oldalszélességre">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Teljes oldal">
+<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
+<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
 <!ENTITY zotero.pdfReader.transferFromPDF "Jegyzetek importálása…">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
+<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
+<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">

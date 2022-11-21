@@ -83,7 +83,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "移除条目...">
 <!ENTITY zotero.toolbar.newLibrary.label "新建文献库">
 <!ENTITY zotero.toolbar.newCollection.label "新建分类…">
-<!ENTITY zotero.toolbar.markFeedRead.label "标记订阅为已读">
 <!ENTITY zotero.toolbar.newGroup "新建群组...">
 <!ENTITY zotero.toolbar.newSubcollection.label "新建子分类…">
 <!ENTITY zotero.toolbar.newSavedSearch.label "新建搜索...">
@@ -105,7 +104,6 @@
 <!ENTITY zotero.toolbar.feeds.new "新建订阅">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "来自 URL…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "来自 OPML…">
-<!ENTITY zotero.toolbar.feeds.refresh "刷新订阅">
 <!ENTITY zotero.toolbar.feeds.edit "编辑订阅…">
 
 <!ENTITY zotero.item.add "添加">
@@ -114,6 +112,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "标题大写">
 <!ENTITY zotero.item.textTransform.sentencecase "句首大写">
 <!ENTITY zotero.item.creatorTransform.nameSwap "交换 首/尾 名称">
+<!ENTITY zotero.item.creatorTransform.capitalize "Capitalize">
 <!ENTITY zotero.item.viewOnline "在线查看">
 <!ENTITY zotero.item.copyAsURL "复制为 URL">
 <!ENTITY zotero.item.deletePermanently "永久删除…">
@@ -311,8 +310,6 @@
 <!ENTITY zotero.pdfReader.lastPage "尾页">
 <!ENTITY zotero.pdfReader.back "后退">
 <!ENTITY zotero.pdfReader.forward "前进">
-<!ENTITY zotero.pdfReader.rotateClockwise "顺时针旋转">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "逆时针旋转">
 <!ENTITY zotero.pdfReader.handTool "手形工具">
 <!ENTITY zotero.pdfReader.verticalScrolling "垂直滚动">
 <!ENTITY zotero.pdfReader.horizontalScrolling "水平滚动">
@@ -325,4 +322,9 @@
 <!ENTITY zotero.pdfReader.zoomAuto "自动调整大小">
 <!ENTITY zotero.pdfReader.zoomPageWidth "适应页面宽度">
 <!ENTITY zotero.pdfReader.zoomPageHeight "适应页面高度">
+<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
+<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
 <!ENTITY zotero.pdfReader.transferFromPDF "导入注释……">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
+<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
+<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">

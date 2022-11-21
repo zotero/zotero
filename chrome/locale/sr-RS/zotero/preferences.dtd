@@ -1,5 +1,7 @@
 <!ENTITY zotero.preferences.title "Подешавања Зотера">
 
+<!ENTITY zotero.preferences.helpButton.label "Help">
+
 <!ENTITY zotero.preferences.default "Подразумевано:">
 <!ENTITY zotero.preferences.items "ставке">
 <!ENTITY zotero.preferences.period ".">
@@ -8,6 +10,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Опште">
 
+<!ENTITY zotero.preferences.interface "Interface">
 <!ENTITY zotero.preferences.fileHandling "Рад са датотекама">
 <!ENTITY zotero.preferences.automaticSnapshots "Самостално узми снимак када се прави ставка са веб странице">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Самостално приложи повезане PDF и друге датотека када чуваш ставке">
@@ -16,6 +19,7 @@
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Преименуј повезане датотеке">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Отварај ПДФ помоћу">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Подразумевано на систему">
+<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "Остале поставке">
 <!ENTITY zotero.preferences.autoUpdate "Аутоматски потражи нова ажурирања превода и стилова">
@@ -83,6 +87,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Поништи историју усклађивања">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Упореди све приложене датотеке са онима на остави">
 <!ENTITY zotero.preferences.sync.reset "Враћање података">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
 <!ENTITY zotero.preferences.sync.reset.button "Врати…">
 
 

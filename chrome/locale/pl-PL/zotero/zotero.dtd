@@ -83,7 +83,6 @@
 <!ENTITY zotero.toolbar.removeItem.label "Usuń element...">
 <!ENTITY zotero.toolbar.newLibrary.label "Nowa biblioteka">
 <!ENTITY zotero.toolbar.newCollection.label "Nowa kolekcja...">
-<!ENTITY zotero.toolbar.markFeedRead.label "Oznacz kanał jako przeczytany">
 <!ENTITY zotero.toolbar.newGroup "Nowa grupa...">
 <!ENTITY zotero.toolbar.newSubcollection.label "Nowa subkolekcja...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nowe zapisane wyszukiwanie...">
@@ -105,7 +104,6 @@
 <!ENTITY zotero.toolbar.feeds.new "Nowy kanał">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Z URL...">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Z OPML...">
-<!ENTITY zotero.toolbar.feeds.refresh "Odśwież kanał">
 <!ENTITY zotero.toolbar.feeds.edit "Edytuj kanał...">
 
 <!ENTITY zotero.item.add "Dodaj">
@@ -114,6 +112,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Kapitaliki">
 <!ENTITY zotero.item.textTransform.sentencecase "Jak w zdaniu">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Zamień imię i nazwisko">
+<!ENTITY zotero.item.creatorTransform.capitalize "Capitalize">
 <!ENTITY zotero.item.viewOnline "Pokaż online">
 <!ENTITY zotero.item.copyAsURL "Kopiuj jako URL">
 <!ENTITY zotero.item.deletePermanently "Usuń trwale...">
@@ -311,8 +310,6 @@
 <!ENTITY zotero.pdfReader.lastPage "Ostatnia strona">
 <!ENTITY zotero.pdfReader.back "Wstecz">
 <!ENTITY zotero.pdfReader.forward "Naprzód">
-<!ENTITY zotero.pdfReader.rotateClockwise "Obróć zgodnie z ruchem wskazówek zegara">
-<!ENTITY zotero.pdfReader.rotateCounterclockwise "Obróć przeciwnie do ruchu wskazówek zegara">
 <!ENTITY zotero.pdfReader.handTool "Narzędzie rączka">
 <!ENTITY zotero.pdfReader.verticalScrolling "Przewijanie pionowe">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Przewijanie poziome">
@@ -325,4 +322,9 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Automatycznie zmień rozmiar">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Powiększ do szerokości strony">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Powiększ do wysokości strony">
+<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
+<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
 <!ENTITY zotero.pdfReader.transferFromPDF "Importuj adnotacje...">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
+<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
+<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">
