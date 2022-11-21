@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+Components.utils.importGlobalProperties(["URL"]);
+
 /**
  * A singleton to handle URL rewriting proxies
  * @namespace
@@ -139,12 +141,7 @@ Zotero.Proxies = new function() {
 	 */
 	this.proxyToProper = function(url, onlyReturnIfProxied) {
 		// make sure url has a trailing slash
-		if (typeof URL === 'undefined') {
-			url = new (Services.wm.getMostRecentWindow("navigator:browser")).URL(url).href;
-		}
-		else {
-			url = new URL(url).href;
-		}
+		url = new URL(url).href;
 		for (let proxy of Zotero.Proxies.proxies) {
 			if(proxy.regexp) {
 				var m = proxy.regexp.exec(url);
@@ -185,12 +182,7 @@ Zotero.Proxies = new function() {
 	 */
 	this.getPotentialProxies = function(url) {
 		// make sure url has a trailing slash
-		if (typeof URL === 'undefined') {
-			url = new (Services.wm.getMostRecentWindow("navigator:browser")).URL(url).href;
-		}
-		else {
-			url = new URL(url).href;
-		}
+		url = new URL(url).href;
 		var urlToProxy = {};
 		// If it's a known proxied URL just return it
 		if (Zotero.Proxies.transparent) {
@@ -466,12 +458,7 @@ Zotero.Proxy.prototype.erase = Zotero.Promise.coroutine(function* () {
 Zotero.Proxy.prototype.toProper = function(m) {
 	if (!Array.isArray(m)) {
 		// make sure url has a trailing slash
-		if (typeof URL === 'undefined') {
-			m = new (Services.wm.getMostRecentWindow("navigator:browser")).URL(m).href;
-		}
-		else {
-			m = new URL(m).href;
-		}
+		m = new URL(m).href;
 		let match = this.regexp.exec(m);
 		if (!match) {
 			return m
