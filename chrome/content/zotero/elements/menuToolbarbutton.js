@@ -58,9 +58,11 @@
 		}
 
 		static get dropmarkerFragment() {
+			// Zotero.hiDPI[Suffix] may not have been initialized yet, so calculate it ourselves
+			let hiDPISuffix = window.devicePixelRatio > 1 ? '@2x' : '';
 			let frag = document.importNode(
 				MozXULElement.parseXULToFragment(`
-					<image src="chrome://zotero/skin/searchbar-dropmarker${Zotero.hiDPISuffix}.png" width="7" height="4" class="toolbarbutton-menu-dropmarker"/>
+					<image src="chrome://zotero/skin/searchbar-dropmarker${hiDPISuffix}.png" width="7" height="4" class="toolbarbutton-menu-dropmarker"/>
 				`),
 				true
 			);
