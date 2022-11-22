@@ -38,10 +38,9 @@
         windowtype="alert:alert">
 		
 	<vbox id="zotero-progress-text-box" flex="1" style="padding: 10px">
-		<hbox align="stretch">
+		<hbox id="zotero-progress-text-headline" align="stretch">
 			<label id="progress-label" flex="1"/>
 		</hbox>
-		<html:progress id="progress-indicator" max="100"/>
 	</vbox>
 	<script>
 		window.addEventListener("DOMContentLoaded", () => window.sizeToContent())

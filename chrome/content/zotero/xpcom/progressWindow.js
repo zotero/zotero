@@ -124,7 +124,7 @@ Zotero.ProgressWindow = function(options = {}) {
 		}
 		
 		if (_window) {
-			_progressWindow = _window.openDialog("chrome://zotero/content/progressWindow.xul",
+			_progressWindow = _window.openDialog("chrome://zotero/content/progressWindow.xhtml",
 				"", "chrome,dialog=no,titlebar=no,alwaysontop=yes");
 			_window.addEventListener('close', () => {
 				this.close();
@@ -133,7 +133,7 @@ Zotero.ProgressWindow = function(options = {}) {
 		else {
 			let ww = Components.classes["@mozilla.org/embedcomp/window-watcher;1"]
 				.getService(Components.interfaces.nsIWindowWatcher);
-			_progressWindow = ww.openWindow(null, "chrome://zotero/content/progressWindow.xul",
+			_progressWindow = ww.openWindow(null, "chrome://zotero/content/progressWindow.xhtml",
 				"", "chrome,dialog=no,titlebar=no,alwaysontop=yes", null);
 		}
 		_progressWindow.addEventListener("load", _onWindowLoaded, false);
