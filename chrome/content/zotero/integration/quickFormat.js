@@ -1426,11 +1426,12 @@ var Zotero_QuickFormat = new function () {
 		event.preventDefault();
 
 		var str = Zotero.Utilities.Internal.getClipboard("text/unicode");
-		if(str) {
+		if (str) {
+			isPaste = true;
 			var selection = qfiWindow.getSelection();
 			var range = selection.getRangeAt(0);
 			range.deleteContents();
-			range.insertNode(document.createTextNode(str.replace(/[\r\n]/g, " ").trim()));
+			range.insertNode(qfiDocument.createTextNode(str.replace(/[\r\n]/g, " ").trim()));
 			range.collapse(false);
 			_resetSearchTimer();
 		}
