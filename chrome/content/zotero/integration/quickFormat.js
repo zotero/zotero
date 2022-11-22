@@ -37,7 +37,8 @@ var Zotero_QuickFormat = new function () {
 		keepSorted, showEditor, referencePanel, referenceBox, referenceHeight = 0,
 		separatorHeight = 0, currentLocator, currentLocatorLabel, currentSearchTime, dragging,
 		panel, panelPrefix, panelSuffix, panelSuppressAuthor, panelLocatorLabel, panelLocator,
-		panelLibraryLink, panelInfo, panelRefersToBubble, panelFrameHeight = 0, accepted = false;
+		panelLibraryLink, panelInfo, panelRefersToBubble, panelFrameHeight = 0, accepted = false,
+		isPaste = false;
 	var locatorLocked = true;
 	var locatorNode = null;
 	var _searchPromise;
@@ -215,10 +216,10 @@ var Zotero_QuickFormat = new function () {
 
 		// Range could be referenced to the body element
 		if(node === qfe) {
-			var offset = range.startOffset;
-			if(offset !== range.endOffset) return false;
-			node = qfe.childNodes[Math.min(qfe.childNodes.length-1, offset)];
-			if(node.nodeType === Node.TEXT_NODE) return node;
+			for (let i = qfe.childNodes.length - 1; i >= 0; i--) {
+				node = qfe.childNodes[i];
+				if(node.nodeType === Node.TEXT_NODE) return node;
+			}
 		}
 		return false;
 	}
@@ -238,7 +239,7 @@ var Zotero_QuickFormat = new function () {
 	 * @return {String} str without locator
 	 */
 	function _updateLocator(str) {
-		m = locatorRe.exec(str);
+		m = !isPaste && locatorRe.exec(str);
 		if(m && (m[1] || m[2] || m[3].length !== 4) && m.index > 0) {
 			currentLocator = m[3];
 			str = str.substr(0, m.index)+str.substring(m.index+m[0].length);
@@ -866,6 +867,7 @@ var Zotero_QuickFormat = new function () {
 		// handling to maintain the correct locator node in
 		// _showCitation()
 		var bubble = locatorNode = _insertBubble(citationItem, node);
+		isPaste = false;
 		_clearEntryList();
 		yield _previewAndSort();
 		_refocusQfe();
@@ -1352,6 +1354,7 @@ var Zotero_QuickFormat = new function () {
 				event.preventDefault();
 			}
 		} else {
+			isPaste = false;
 			_resetSearchTimer();
 		}
 	});
