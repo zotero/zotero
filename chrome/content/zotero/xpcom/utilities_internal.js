@@ -2339,6 +2339,39 @@ Zotero.Utilities.Internal = {
 			}
 		}
 		return html;
+	},
+
+	/**
+	 * Open an element's <menupopup> child as a native context menu.
+	 *
+	 * @param {XULElement} element
+	 * @return {Boolean} If a <menupopup> child was found and opened
+	 */
+	showNativeElementPopup(element) {
+		let popup = element.querySelector(':scope > menupopup');
+		if (popup) {
+			let rect = element.getBoundingClientRect();
+			let win = element.ownerDocument.defaultView;
+			let dir = win.getComputedStyle(element).direction;
+			popup.openPopupAtScreen(
+				win.screenX + (dir == 'rtl' ? rect.right : rect.left),
+				win.screenY + rect.bottom,
+				true
+			);
+			element.setAttribute('open', true);
+
+			let handler = (event) => {
+				if (event.target == popup) {
+					element.setAttribute('open', false);
+					popup.removeEventListener('popuphiding', handler);
+				}
+			};
+			popup.addEventListener('popuphiding', handler);
+			
+			return true;
+		}
+		
+		return false;
 	}
 }
 

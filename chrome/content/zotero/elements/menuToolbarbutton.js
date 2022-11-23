@@ -33,26 +33,9 @@
 		constructor() {
 			super();
 			this.addEventListener('mousedown', (event) => {
-				let popup = this.querySelector(':scope > menupopup');
-				if (popup && this.getAttribute('nonnativepopup') != 'true') {
+				if (this.getAttribute('nonnativepopup') != 'true'
+						&& Zotero.Utilities.Internal.showNativeElementPopup(this)) {
 					event.preventDefault();
-
-					let rect = this.getBoundingClientRect();
-					let dir = getComputedStyle(this).direction;
-					popup.openPopupAtScreen(
-						window.screenX + (dir == 'rtl' ? rect.right : rect.left),
-						window.screenY + rect.bottom,
-						true
-					);
-					this.setAttribute('open', true);
-
-					let handler = (event) => {
-						if (event.target == popup) {
-							this.setAttribute('open', false);
-							popup.removeEventListener('popuphiding', handler);
-						}
-					};
-					popup.addEventListener('popuphiding', handler);
 				}
 			});
 		}

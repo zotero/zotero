@@ -703,6 +703,15 @@
 	color: HighlightText;
 }
 
+.split-menu-button, .split-menu-button [anonid="dropmarker-box"] {
+	/* Hide the dropmarker if the button overflows */
+	overflow: hidden;
+}
+
+.split-menu-button .split-menu-button-dropmarker {
+	margin-inline: 5px;
+}
+
 
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
 @media (min-resolution: 1.25dppx) {
