@@ -49,6 +49,12 @@
 					event.preventDefault();
 				}
 			});
+			
+			this.addEventListener('keydown', (event) => {
+				if (event.key == 'ArrowDown' && Zotero.Utilities.Internal.showNativeElementPopup(this)) {
+					event.preventDefault();
+				}
+			});
 		}
 
 		connectedCallback() {
@@ -73,6 +79,13 @@
 			);
 			Object.defineProperty(this, "dropmarkerFragment", { value: frag });
 			return frag;
+		}
+
+		_handleClick() {
+			super._handleClick();
+			if (!this.disabled) {
+				this.doCommand();
+			}
 		}
 	}
 
