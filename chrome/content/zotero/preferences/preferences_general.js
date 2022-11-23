@@ -102,7 +102,7 @@ Zotero_Preferences.General = {
 			var changed = requestedLocale
 				&& requestedLocale == Zotero.locale
 				&& menu.label != this._getAutomaticLocaleMenuLabel();
-			Services.locale.requestedLocales = null;
+			Services.locale.requestedLocales = [];
 		}
 		else {
 			// Changed if moving to a locale other than the current one
