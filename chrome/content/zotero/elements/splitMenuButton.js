@@ -27,17 +27,37 @@
 
 {
 	/**
-	 * Extends MozToolbarbutton to use our own dropmarker image and native menus.
+	 * Extends MozButton to provide a split menubutton with a clickable left side and a dropmarker that opens a menu.
 	 */
-	class MenuToolbarbutton extends customElements.get('toolbarbutton') {
+	class SplitMenuButton extends customElements.get('button') {
 		constructor() {
 			super();
+
+			// Just in case, make sure this button does NOT appear as a standard <button type="menu">
+			// We don't want the entire button to open the menu and we don't want the standard dropmarker
+			this.removeAttribute('type');
+			
+			// For easier CSS targeting
+			this.classList.add('split-menu-button');
+
+			// Pointer events don't reach the button's children, so check mousedown positions manually and open
+			// the popup if over the end side of the button
 			this.addEventListener('mousedown', (event) => {
-				if (this.getAttribute('nonnativepopup') != 'true'
+				let rect = this.querySelector('[anonid="dropmarker-box"]').getBoundingClientRect();
+				if (event.x >= rect.left && event.x <= rect.right
 						&& Zotero.Utilities.Internal.showNativeElementPopup(this)) {
 					event.preventDefault();
 				}
 			});
+		}
+
+		connectedCallback() {
+			if (this.delayConnectedCallback() || this._hasConnected) {
+				return;
+			}
+			super.connectedCallback();
+
+			this.querySelector('[anonid="button-box"]').after(this.constructor.dropmarkerFragment);
 		}
 
 		static get dropmarkerFragment() {
@@ -45,7 +65,9 @@
 			let hiDPISuffix = window.devicePixelRatio > 1 ? '@2x' : '';
 			let frag = document.importNode(
 				MozXULElement.parseXULToFragment(`
-					<image src="chrome://zotero/skin/searchbar-dropmarker${hiDPISuffix}.png" width="7" height="4" class="toolbarbutton-menu-dropmarker"/>
+					<hbox align="center" anonid="dropmarker-box">
+						<image src="chrome://zotero/skin/searchbar-dropmarker${hiDPISuffix}.png" width="7" height="4" class="split-menu-button-dropmarker"/>
+					</hbox>
 				`),
 				true
 			);
@@ -54,7 +76,7 @@
 		}
 	}
 
-	customElements.define("menu-toolbarbutton", MenuToolbarbutton, {
-		extends: "toolbarbutton",
+	customElements.define("split-menu-button", SplitMenuButton, {
+		extends: "button",
 	});
 }
