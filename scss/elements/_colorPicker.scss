@@ -25,7 +25,8 @@ color-picker {
 		gap: 2px;
 	}
 
-	.grid-tile:hover {
+	.grid-tile, .grid-tile:hover {
+		appearance: none;
 		border: 0;
 	}
 
