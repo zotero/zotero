@@ -610,6 +610,36 @@ describe("Zotero.Search", function() {
 					});
 				});
 			});
+			
+			describe("deleted", function () {
+				describe("if not present", function () {
+					it("should not match regular items in trash with annotated child attachments", async function () {
+						var item = await createDataObject('item');
+						item.deleted = true;
+						await item.saveTx();
+						var attachment = await importPDFAttachment(item);
+						await createAnnotation('highlight', attachment);
+						
+						var s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						var matches = await s.search();
+						assert.notInclude(matches, attachment.id);
+					});
+					
+					it("should not match regular items with annotated child attachments in trash", async function () {
+						var item = await createDataObject('item');
+						var attachment = await importPDFAttachment(item);
+						attachment.deleted = true;
+						await attachment.saveTx();
+						await createAnnotation('highlight', attachment);
+						
+						var s = new Zotero.Search();
+						s.libraryID = userLibraryID;
+						var matches = await s.search();
+						assert.notInclude(matches, attachment.id);
+					});
+				});
+			});
 		});
 	});
 	

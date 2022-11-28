@@ -1097,16 +1097,24 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 	
 	// Exclude deleted items (and their child items) by default
 	let not = deleted ? "" : "NOT ";
-	let op = deleted ? "OR" : "AND";
-	sql += " WHERE ("
-		+ `itemID ${not} IN (SELECT itemID FROM deletedItems) `
-		+ `${op} itemID ${not}IN (SELECT itemID FROM itemNotes `
+	sql += ` WHERE (itemID ${not} IN (`
+			// Deleted items
+			+ "SELECT itemID FROM deletedItems "
+			// Child notes of deleted items
+			+ "UNION SELECT itemID FROM itemNotes "
 				+ "WHERE parentItemID IS NOT NULL AND "
-				+ "parentItemID IN (SELECT itemID FROM deletedItems)) "
-		+ `${op} itemID ${not}IN (SELECT itemID FROM itemAttachments `
+				+ "parentItemID IN (SELECT itemID FROM deletedItems) "
+			// Child attachments of deleted items
+			+ "UNION SELECT itemID FROM itemAttachments "
 				+ "WHERE parentItemID IS NOT NULL AND "
-				+ "parentItemID IN (SELECT itemID FROM deletedItems))"
-		+ ")";
+				+ "parentItemID IN (SELECT itemID FROM deletedItems)"
+			// Annotations of deleted attachments
+			+ "UNION SELECT itemID FROM itemAnnotations "
+				+ "WHERE parentItemID IN (SELECT itemID FROM deletedItems)"
+			// Annotations of attachments of deleted items
+			+ "UNION SELECT itemID FROM itemAnnotations "
+				+ "WHERE parentItemID IN (SELECT itemID FROM itemAttachments WHERE parentItemID IN (SELECT itemID FROM deletedItems))"
+		+ "))";
 	
 	if (noChildren){
 		sql += " AND (itemID NOT IN (SELECT itemID FROM itemNotes "
