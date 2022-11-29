@@ -65,6 +65,8 @@ const NOTE_CITATION_PLACEHOLDER_LINK = 'https://www.zotero.org/?';
 
 const TEMPLATE_VERSION = 1;
 
+const MENDELEY_URI_RE = /^http:\/\/www\.mendeley\.com\/documents\/\?uuid=(.*)/;
+
 
 Zotero.Integration = new function() {
 	Components.utils.import("resource://gre/modules/Services.jsm");
@@ -2593,7 +2595,7 @@ Zotero.Integration.URIMap.prototype.getURIsForItemID = function(id) {
 /**
  * Gets Zotero item for a given set of URIs
  */
-Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = Zotero.Promise.coroutine(function* (uris) {
+Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = async function (uris) {
 	var zoteroItem = false;
 	var needUpdate = false;
 	var embeddedItem = false;;
@@ -2608,43 +2610,52 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = Zotero.Promise.corout
 		
 		// Next try getting URI directly
 		try {
-			zoteroItem = yield Zotero.URI.getURIItem(uri);
-			if(zoteroItem) {
-				// Ignore items in the trash
-				if(zoteroItem.deleted) {
-					zoteroItem = false;
-				} else {
-					break;
-				}
+			var replacer = await Zotero.URI.getURIItem(uri);
+			if (replacer && !replacer.deleted) {
+				zoteroItem = replacer;
+				break;
 			}
 		} catch(e) {}
 		
 		// Try merged item mapping
-		var replacer = yield Zotero.Relations.getByPredicateAndObject(
+		var replacer = await Zotero.Relations.getByPredicateAndObject(
 			'item', Zotero.Relations.replacedItemPredicate, uri
 		);
 		if (replacer.length && !replacer[0].deleted) {
 			zoteroItem = replacer[0];
+			break;
 		}
 		
-		if(zoteroItem) break;
+		// Check if it's a mendeley URI and if we have imported the item
+		let m = MENDELEY_URI_RE.exec(uri);
+		if (m) {
+			replacer = await Zotero.Relations.getByPredicateAndObject(
+				'item', 'mendeleyDB:documentUUID', m[1]
+			);
+			if (replacer.length && !replacer[0].deleted) {
+				zoteroItem = replacer[0];
+				break;
+			}
+		}
+		
 	}
 	
-	if(zoteroItem) {
+	if (zoteroItem) {
 		// make sure URI is up to date (in case user just began syncing)
 		var newURI = Zotero.URI.getItemURI(zoteroItem);
-		if(newURI != uris[i]) {
-			uris[i] = newURI;
+		if (!uris.includes(newURI)) {
+			uris.push(newURI);
 			needUpdate = true;
 		}
 		// cache uris
-		this.itemIDURIs[zoteroItem.id] = uris;
-	} else if(embeddedItem) {
+		this.add(zoteroItem.id, uris)
+	}
+	else if (embeddedItem) {
 		return [embeddedItem, false];
 	}
 	
 	return [zoteroItem, needUpdate];
-});
+};
 
 Zotero.Integration.Field = class {
 	constructor(field, rawCode) {
@@ -2823,8 +2834,13 @@ Zotero.Integration.CitationField = class extends Zotero.Integration.Field {
 				}
 
 				// for update from Zotero 2.1 or earlier
-				if(citationItem.uri) {
-					citationItem.uris = citationItem.uri;
+				if (citationItem.uri) {
+					if (Array.isArray(citationItem.uris)) {
+						citationItem.uris.push(citationItem.uri);
+					}
+					else {
+						citationItem.uris = [citationItem.uri];
+					}
 					delete citationItem.uri;
 				}
 			}

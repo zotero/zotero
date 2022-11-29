@@ -720,11 +720,35 @@ describe("Zotero.Integration", function () {
 					assert.isNotOk(citation.properties.dontUpdate);
 				});
 			});
+
+			it('should detect items cited with Mendeley if they are imported into Zotero', async function() {
+				var docID = this.test.fullTitle();
+				if (!(docID in applications)) await initDoc(docID);
+				var doc = applications[docID].doc;
+
+				let testItem = await createDataObject('item', {libraryID: Zotero.Libraries.userLibraryID});
+				testItem.setField('title', `Mendeley imported`);
+				testItem.setCreator(0, {creatorType: 'author', name: `Mendeleev, Dmitri `});
+				testItem.addRelation('mendeleyDB:documentUUID', 'e213167f-af42-4ff1-95e8-a9aa6b0b3e1b');
+				await testItem.saveTx();
+
+				setAddEditItems(testItem);
+				await execCommand('addEditCitation', docID);
+
+				let uri = doc.fields[0].code.match(/"uris":\[([^\]]*)]/)[1];
+				doc.fields[0].code = doc.fields[0].code.replace(/"uris":\[[^\]]*]/, `"uris":["http://www.mendeley.com/documents/?uuid=e213167f-af42-4ff1-95e8-a9aa6b0b3e1b"]`);
+
+				sinon.stub(doc, 'canInsertField').resolves(false);
+				sinon.stub(doc, 'cursorInField').resolves(doc.fields[0]);
+				await execCommand('addEditCitation', docID);
+				assert.include(doc.fields[0].code, 'http://www.mendeley.com/documents/?uuid=e213167f-af42-4ff1-95e8-a9aa6b0b3e1b');
+				assert.include(doc.fields[0].code, Zotero.URI.getItemURI(testItem));
+			});
 			
 			describe('when there are copy-pasted citations', function() {
 				it('should resolve duplicate citationIDs and mark both as new citations', async function() {
 					var docID = this.test.fullTitle();
-					if (!(docID in applications)) initDoc(docID);
+					if (!(docID in applications)) await initDoc(docID);
 					var doc = applications[docID].doc;
 
 					setAddEditItems(testItems[0]);
@@ -754,7 +778,7 @@ describe("Zotero.Integration", function () {
 				
 				it('should successfully process citations copied in from another doc', async function() {
 					var docID = this.test.fullTitle();
-					if (!(docID in applications)) initDoc(docID);
+					if (!(docID in applications)) await initDoc(docID);
 					var doc = applications[docID].doc;
 
 					setAddEditItems(testItems[0]);
@@ -790,7 +814,7 @@ describe("Zotero.Integration", function () {
 				
 				it('should successfully insert a citation after canceled citation insert', async function () {
 					var docID = this.test.fullTitle();
-					if (!(docID in applications)) initDoc(docID);
+					if (!(docID in applications)) await initDoc(docID);
 					var doc = applications[docID].doc;
 
 					setAddEditItems(testItems[0]);
