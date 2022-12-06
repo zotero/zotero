@@ -639,7 +639,10 @@ class VirtualizedTable extends React.Component {
 			}
 		}
 		else {
-			for (let i = (this.selection.focused) % rowCount; i != this.selection.focused - 1; i = (i + 1) % rowCount) {
+			// Stop at the row before the selection's focus
+			// but don't set a negative stop point, or we'll loop infinitely
+			let stopRow = Math.max(this.selection.focused - 1, 0);
+			for (let i = (this.selection.focused) % rowCount; i != stopRow; i = (i + 1) % rowCount) {
 				let rowString = this.props.getRowString(i);
 				if (rowString.toLowerCase().indexOf(this._typingString) == 0) {
 					if (i != this.selection.focused) {
