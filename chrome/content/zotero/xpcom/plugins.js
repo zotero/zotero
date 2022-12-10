@@ -89,6 +89,10 @@ Zotero.Plugins = new function () {
 			scope[name] = REASONS[name];
 		}
 		Object.assign(scope, { Services, Worker, ChromeWorker, Zotero });
+		// Add additional global functions
+		scope.setTimeout = Zotero.setTimeout;
+		scope.clearTimeout = Zotero.clearTimeout;
+		
 		scopes.set(addon.id, scope);
 		
 		var uri = addon.getResourceURI().spec + 'bootstrap.js';
