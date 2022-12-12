@@ -1127,8 +1127,12 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			let browser
 			let func = function () {
 				win.removeEventListener("load", func);
-				browser = win.document.documentElement.getElementsByTagName('browser')[0];
-				browser.addEventListener("pageshow", innerFunc);
+				// <browser> is created in basicViewer.js in a window load event, so we have to
+				// wait for that
+				setTimeout(() => {
+					browser = win.document.documentElement.getElementsByTagName('browser')[0];
+					browser.addEventListener("pageshow", innerFunc);
+				});
 			};
 			let innerFunc = function () {
 				browser.removeEventListener("pageshow", innerFunc);
