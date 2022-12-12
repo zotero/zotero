@@ -1753,16 +1753,16 @@
 					var target = event.target;
 					var focused = document.commandDispatcher.focusedElement;
 
-					if ((event.key == 'ArrowUp' || event.key === 'ArrowDown')
-							&& target.classList.contains('creator-type-label')) {
+					if ((event.key == 'ArrowUp' || event.key === 'ArrowDown' || event.key === ' ')
+							&& (target.classList.contains('creator-type-label')
+							|| target.id == 'item-type-menu')) {
 						event.preventDefault();
-						target.click();
-						return true;
-					}
 
-					if (event.key === ' ' && target.classList.contains('zotero-focusable')) {
-						event.preventDefault();
-						target.click();
+						if(target.id == 'item-type-menu') {
+							this.itemTypeMenu.menupopup.openPopup(this.itemTypeMenu, "before_start", 0, 0);
+						} else {
+							target.click();
+						}
 						return true;
 					}
 					
@@ -1826,6 +1826,11 @@
 							return false;
 							
 						case event.DOM_VK_TAB:
+							if(target.id === 'item-type-menu') {
+								this.itemTypeMenuTab(event);
+								return;
+							}
+							
 							if (event.shiftKey) {
 								this._focusNextField(this._lastTabIndex, true);
 							}
@@ -1837,6 +1842,12 @@
 								this._focusNextField(++this._lastTabIndex);
 							}
 							return false;
+
+						default:
+							if(target.id === 'item-type-menu') {
+								// ignore other keys that would trigger value change without opening the menu
+								event.preventDefault();
+							}
 					}
 					
 					return true;
@@ -2757,10 +2768,12 @@
 					<rows id="dynamic-fields" flex="1">
 						<row class="zotero-item-first-row">
 							<label value="&zotero.items.itemType;"/>
-							<menulist class="zotero-clicky" id="item-type-menu" oncommand="document.getBindingParent(this).changeTypeTo(this.value, this)" flex="1"
+							<menulist class="zotero-clicky" id="item-type-menu" flex="1"
 								onfocus="document.getBindingParent(this).ensureElementIsVisible(this)"
-								onkeypress="if (event.keyCode == event.DOM_VK_TAB) { document.getBindingParent(this).itemTypeMenuTab(event); }">
-								<menupopup/>
+								onkeypress="document.getBindingParent(this).handleKeyPress(event)"
+								onpopuphiding="document.getBindingParent(this).changeTypeTo(this.value, this)"
+							>
+								<menupopup />
 							</menulist>
 						</row>
 					</rows>
