@@ -186,7 +186,7 @@
 <!ENTITY zotero.import.size "Størrelse">
 <!ENTITY zotero.import.createCollection "Legg importerte samlinger og elementer i en ny samling">
 <!ENTITY zotero.import.fileHandling "Filbehandling">
-<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.newItemsOnly "Last kun ned nye elementer, ikke oppdater allerede importerte elementer">
 
 <!ENTITY zotero.exportOptions.title "Eksporter...">
 <!ENTITY zotero.exportOptions.format.label "Format:">

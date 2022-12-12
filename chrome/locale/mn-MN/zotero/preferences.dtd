@@ -1,32 +1,32 @@
-<!ENTITY zotero.preferences.title "Zotero Preferences">
+<!ENTITY zotero.preferences.title "Зотерогийн давуу эрх">
 
 <!ENTITY zotero.preferences.default "Анхдагч">
-<!ENTITY zotero.preferences.items "items">
+<!ENTITY zotero.preferences.items "Зүйлүүд">
 <!ENTITY zotero.preferences.period ".">
-<!ENTITY zotero.preferences.settings "Settings">
-<!ENTITY zotero.preferences.custom "Custom…">
+<!ENTITY zotero.preferences.settings "Тохиргоонууд">
+<!ENTITY zotero.preferences.custom "Бусад...">
 
 <!ENTITY zotero.preferences.prefpane.general "Ерөнхий">
 
-<!ENTITY zotero.preferences.fileHandling "File Handling">
-<!ENTITY zotero.preferences.automaticSnapshots "Automatically take snapshots when creating items from web pages">
-<!ENTITY zotero.preferences.downloadAssociatedFiles "Automatically attach associated PDFs and other files when saving items">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
-<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
-<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
-<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+<!ENTITY zotero.preferences.fileHandling "Файлтай харьцах">
+<!ENTITY zotero.preferences.automaticSnapshots "Вэб хуудсуудаас зүйл үүсгэх үед автоматаар агшин зуурын зураг авах">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Зүйлүүдийг хадгалахдаа холбосон PDF болон бусад файлуудыг автоматаар хавсаргана">
+<!ENTITY zotero.preferences.autoRecognizeFiles "PDF файлын мета өгөгдлийг автоматаар сэргээх">
+<!ENTITY zotero.preferences.autoRenameFiles "Үндсэн мета өгөгдлийг ашиглан хавсралт файлын нэрийг автоматаар өөрчлөх">
+<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Холбогдсон файлын нэрийг өөрчлөх">
+<!ENTITY zotero.preferences.fileHandler.openPDFsUsing "PDF файлуудыг нээнэ үү">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "Системийн анхдагч">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscellaneous">
 <!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
-<!ENTITY zotero.preferences.updateNow "Update now">
+<!ENTITY zotero.preferences.updateNow "Одоо сэргээ">
 <!ENTITY zotero.preferences.reportTranslationFailure "Report broken site translators">
 <!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
 <!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
-<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
+<!ENTITY zotero.preferences.trashAutoEmptyDaysPost "өдрийн өмнө">
 
-<!ENTITY zotero.preferences.groups "Groups">
+<!ENTITY zotero.preferences.groups "Бүлгүүд">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "When copying items between libraries, include:">
 <!ENTITY zotero.preferences.groups.childNotes "child notes">
 <!ENTITY zotero.preferences.groups.childFiles "child snapshots and imported files">
@@ -46,8 +46,8 @@
 <!ENTITY zotero.preferences.openurl.version "Хувилбар">
 
 <!ENTITY zotero.preferences.prefpane.sync "Sync">
-<!ENTITY zotero.preferences.sync.username "Username:">
-<!ENTITY zotero.preferences.sync.password "Password:">
+<!ENTITY zotero.preferences.sync.username "Хэрэглэгчийн нэр:">
+<!ENTITY zotero.preferences.sync.password "Нууц үг:">
 <!ENTITY zotero.preferences.sync.syncServer "Data Syncing">
 <!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
 <!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
@@ -61,7 +61,7 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
 <!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "Sync attachment files in My Library using">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "Sync attachment files in group libraries using Zotero storage">
-<!ENTITY zotero.preferences.sync.fileSyncing.download "Download files">
+<!ENTITY zotero.preferences.sync.fileSyncing.download "Хавтаснуудыг тат">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "at sync time">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "as needed">
 <!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
@@ -100,7 +100,7 @@
 
 <!ENTITY zotero.preferences.prefpane.export "Е">
 
-<!ENTITY zotero.preferences.citationOptions.caption "Citation Options">
+<!ENTITY zotero.preferences.citationOptions.caption "Эшлэлийн тохиргоонууд">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
 
@@ -142,13 +142,13 @@
 <!ENTITY zotero.preferences.prefpane.proxies "Proxies">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "Proxy Options">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero will transparently redirect requests through saved proxies. See the">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero нь хадгалсан проксигээр дамжуулан хүсэлтийг ил тод байдлаар дахин чиглүүлэх болно. -г үзнэ үү">
 <!ENTITY zotero.preferences.proxies.desc_link "proxy documentation">
 <!ENTITY zotero.preferences.proxies.desc_after_link "for more information.">
-<!ENTITY zotero.preferences.proxies.transparent "Transparently redirect requests through previously used proxies">
+<!ENTITY zotero.preferences.proxies.transparent "Өмнө нь ашигласан проксигээр дамжуулан хүсэлтийг ил тод дахин чиглүүлэх">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Automatically recognize proxied resources">
 <!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
-<!ENTITY zotero.preferences.proxies.disableByDomain "Disable proxy redirection when my domain name contains ">
+<!ENTITY zotero.preferences.proxies.disableByDomain "Миний домэйн нэр орсон үед прокси дахин чиглүүлэхийг идэвхгүй болгох">
 <!ENTITY zotero.preferences.proxies.configured "Configured Proxies">
 <!ENTITY zotero.preferences.proxies.hostname "Hostname">
 <!ENTITY zotero.preferences.proxies.scheme "Scheme">
@@ -158,7 +158,7 @@
 <!ENTITY zotero.preferences.proxies.variables "You may use the following variables in your proxy scheme:">
 <!ENTITY zotero.preferences.proxies.h_variable "&#37;h - The hostname of the proxied site (e.g., www.zotero.org)">
 <!ENTITY zotero.preferences.proxies.p_variable "&#37;p - The path of the proxied page excluding the leading slash (e.g., about/index.html)">
-<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - The directory path (e.g., about/)">
+<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - Лавлах зам (жишээ нь: тухай/)">
 <!ENTITY zotero.preferences.proxies.f_variable "&#37;f - The filename (e.g., index.html)">
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Any string">
 
@@ -179,17 +179,17 @@
 <!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
 <!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
 
-<!ENTITY zotero.preferences.dataDir "Storage Location">
-<!ENTITY zotero.preferences.dataDir.useProfile "Use profile directory">
+<!ENTITY zotero.preferences.dataDir "хадгалах байршил">
+<!ENTITY zotero.preferences.dataDir.useProfile "Хувийн хэргийн лавлахыг ашиглана уу">
 <!ENTITY zotero.preferences.dataDir.custom "Custom:">
 <!ENTITY zotero.preferences.dataDir.choose "Choose…">
 <!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
-<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
+<!ENTITY zotero.preferences.dataDir.reveal "Өгөгдлийн лавлахыг харуулах">
 <!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
 
-<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
-<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Холбогдсон хавсралтын үндсэн лавлах">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero үндсэн директор доторх холбогдсон файлын хавсралтуудын хувьд харьцангуй замыг ашиглах бөгөөд үндсэн директор доторх файлын бүтэц ижил хэвээр байвал өөр өөр компьютер дээрх файлуудад хандах боломжийг танд олгоно.">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "үндсэн лавлах:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
 <!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
 

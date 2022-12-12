@@ -186,7 +186,7 @@
 <!ENTITY zotero.import.size "Boyut">
 <!ENTITY zotero.import.createCollection "İçeri aktarılmış dermeler ve eserleri yeni bir dermeye yerleştir">
 <!ENTITY zotero.import.fileHandling "Dosyaların İdare Edilmesi">
-<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.newItemsOnly "Yalnızca yeni eserleri indir; daha önce içeri aktarılmış olan eserleri güncelleme">
 
 <!ENTITY zotero.exportOptions.title "Dışarı Aktar...">
 <!ENTITY zotero.exportOptions.format.label "Biçim">

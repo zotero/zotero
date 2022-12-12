@@ -315,7 +315,7 @@
 <!ENTITY zotero.pdfReader.handTool "Kéz eszköz">
 <!ENTITY zotero.pdfReader.verticalScrolling "Függőleges görgetés">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Vízszintes görgetés">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
+<!ENTITY zotero.pdfReader.wrappedScrolling "Rácsos görgetés">
 <!ENTITY zotero.pdfReader.noSpreads "Nincs oldaltapasztás">
 <!ENTITY zotero.pdfReader.oddSpreads "Oldalak összetapasztása: páratlan">
 <!ENTITY zotero.pdfReader.evenSpreads "Oldalak összetapasztása: páros">

@@ -186,7 +186,7 @@
 <!ENTITY zotero.import.size "サイズ">
 <!ENTITY zotero.import.createCollection "インポートされたコレクションやアイテムを新しいコレクションに格納する">
 <!ENTITY zotero.import.fileHandling "ファイルの取り扱い">
-<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.newItemsOnly "新しいアイテムをダウンロードすることだけです；インポートしたアイテムを更新することをしないでください。">
 
 <!ENTITY zotero.exportOptions.title "エクスポート...">
 <!ENTITY zotero.exportOptions.format.label "フォーマット:">
@@ -324,9 +324,9 @@
 <!ENTITY zotero.pdfReader.zoomAuto "自動的にサイズ変更">
 <!ENTITY zotero.pdfReader.zoomPageWidth "ページ幅に合わせる">
 <!ENTITY zotero.pdfReader.zoomPageHeight "ページの高さに合わせる">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
+<!ENTITY zotero.pdfReader.splitVertically "垂直方向に分割する">
+<!ENTITY zotero.pdfReader.splitHorizontally "水平方向に分割する">
 <!ENTITY zotero.pdfReader.transferFromPDF "注釈のインポート…">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
-<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">
+<!ENTITY zotero.pdfReader.rotatePageLeft "ページを左に回転する">
+<!ENTITY zotero.pdfReader.rotatePageRight "ページを右に回転する">
+<!ENTITY zotero.pdfReader.rotatePage180 "ページを180度に回転する">

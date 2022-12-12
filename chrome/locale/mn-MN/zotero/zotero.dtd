@@ -259,7 +259,7 @@
 <!ENTITY zotero.proxy.recognized.title "Proxy Recognized">
 <!ENTITY zotero.proxy.recognized.warning "Only add proxies linked from your library, school, or corporate website">
 <!ENTITY zotero.proxy.recognized.warning.secondary "Adding other proxies allows malicious sites to masquerade as sites you trust.">
-<!ENTITY zotero.proxy.recognized.disable.label "Do not automatically redirect requests through previously recognized proxies">
+<!ENTITY zotero.proxy.recognized.disable.label "Өмнө нь хүлээн зөвшөөрөгдсөн проксигээр дамжуулан хүсэлтийг автоматаар бүү шилжүүл">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignore">
 
 <!ENTITY zotero.feedSettings.title "Feed Settings">

@@ -3,7 +3,7 @@
     "message": "更多…"
   },
   "general_moreInfo": {
-    "message": "更多信息..."
+    "message": "更多信息…"
   },
   "general_needHelp": {
     "message": "需要帮助？"
@@ -18,7 +18,7 @@
     "message": "否"
   },
   "general_tryAgain": {
-    "message": "请重试"
+    "message": "重试"
   },
   "general_warning": {
     "message": "警告"
@@ -27,7 +27,7 @@
     "message": "取消"
   },
   "general_pleaseWait": {
-    "message": "请稍等……"
+    "message": "请稍等…"
   },
   "general_copyToClipboard": {
     "message": "复制到剪贴板"
@@ -69,7 +69,7 @@
     "message": "你已经安装了$1连接器！"
   },
   "firstRun_text1": {
-    "message": "$1连接器允许你从你的浏览器中通过单击<a href=\"$2\">保存条目到$1</a>。"
+    "message": "有了 $1 连接器，您就可以从浏览器中单击来<a href=\"$2\">保存条目到 $1</a>。"
   },
   "firstRun_text2": {
     "message": "如果你还没有下载，请<a href=\"$2\">下载</a>独立的$1应用来获得最好的体验。"
@@ -108,7 +108,7 @@
     "message": "此文档包含有效的 Zotero 引注，该引注将在下载的副本中显示为 zotero.org 链接"
   },
   "integration_googleDocs_unlinkBeforeSaving_instructions": {
-    "message": "为生成易于共享的版本，从文件菜单中选择<b>复制……</b>，在新文档中从 Zotero 菜单中选择<b>未链接引注</b>，然后下载未链接版本。保留原始链接文档以防你需要进一步更改。"
+    "message": "为生成易于共享的版本，从文件菜单中选择<b>复制…</b>，在新文档中从 Zotero 菜单中选择<b>未链接引注</b>，然后下载未链接版本。保留原始链接文档以防你需要进一步更改。"
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "无论何时下载已链接版本"
@@ -123,7 +123,7 @@
     "message": "该文档的引注正被另外一个$1用户编辑。请稍后再试。"
   },
   "integration_googleDocs_documentLocked_moreInfo": {
-    "message": "$1锁住了你的文档来防止多个用户同时编辑参考文献。同时编辑文档中的参考文献可能会导致参考文献或文档的损坏。一些如网络故障等无法预见的情况可能会使得你的文档被持续锁定。如果你相信这已经发生了，你可以覆盖锁定。<br/><br/>你想要覆盖文档锁定么？"
+    "message": "$1 锁定了您的文档以避免多名用户同时编辑参考文献。同时编辑文档中的参考文献可能导致参考文献或文档的损坏。网络故障等某些无法预见的情况可能会导致您的文档被持续锁定。如果您确信当前情况属异常误判，您可以忽略此锁定。<br/><br/>是否忽略文档锁定？"
   },
   "integration_googleDocs_documentPermissionError": {
     "message": "你所选择的Google账户没有编辑该文档的权限。请再次尝试，并确保所选择的账号有编辑权限。"
@@ -132,13 +132,13 @@
     "message": "显示未链接的 $1 引注"
   },
   "integration_googleDocs_orphanedCitations_alert": {
-    "message": "你正在编辑的引注已经从 $1.断开链接"
+    "message": "您正在编辑的引注已断开与 $1 的链接。"
   },
   "integration_googleDocs_orphanedCitations_alertButton": {
     "message": "重新链接引注"
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
-    "message": "该引注已  <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">从 $1断开</a>。您需要重新链接后，引注方可在参考文献表更新或出现。"
+    "message": "该引注已<a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">与 $1断开</a>。您需要重新链接，否则参考文献表中的该引注不会更新或出现。"
   },
   "general_saveTo": {
     "message": "保存到 $1"

@@ -5,7 +5,7 @@
 <!ENTITY hideThisAppCmdMac.commandkey "H">
 <!ENTITY hideOtherAppsCmdMac.label "Бусдыг нуух">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
-<!ENTITY showAllAppsCmdMac.label "Show All">
+<!ENTITY showAllAppsCmdMac.label "Бүгдийг харуулах">
 <!ENTITY quitApplicationCmdMac.label "Зотерог хаах">
 <!ENTITY quitApplicationCmdMac.key "Q">
 

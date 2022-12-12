@@ -1,19 +1,19 @@
 <!ENTITY zotero.publications.my_publications "Publikasi saya">
 
-<!ENTITY zotero.publications.intro "Items you add to My Publications will be shown on your profile page on zotero.org. If you choose to include attached files, they will be made publicly available under the license you specify. Only add work you yourself have created, and only include files if you have the rights to distribute them and wish to do so.">
+<!ENTITY zotero.publications.intro "Item yang Anda tambahkan ke Publikasi Saya akan ditampilkan di halaman profil Anda di zotero.org. Jika Anda memilih untuk menyertakan file lampiran, file tersebut akan tersedia untuk umum di bawah lisensi yang Anda tentukan. Hanya tambahkan karya yang Anda buat sendiri, dan hanya sertakan file jika Anda memiliki hak untuk mendistribusikannya dan ingin melakukannya.">
 <!ENTITY zotero.publications.include.checkbox.files "Masukkan file">
 <!ENTITY zotero.publications.include.checkbox.notes "Masukkan catatan">
-<!ENTITY zotero.publications.include.adjustAtAnyTime "You can adjust what to show at any time from the My Publications collection.">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "Anda dapat menyesuaikan apa yang akan ditampilkan kapan saja dari koleksi Publikasi Saya.">
 
-<!ENTITY zotero.publications.sharing.title "Choose how your work may be shared">
-<!ENTITY zotero.publications.sharing.text "You can reserve all rights to your work, license it under a Creative Commons license, or dedicate it to the public domain. In all cases, the work will be made publicly available via zotero.org.">
-<!ENTITY zotero.publications.sharing.prompt "Would you like to allow your work to be shared by others?">
+<!ENTITY zotero.publications.sharing.title "Atur bagaimana karya Anda dapat dibagikan">
+<!ENTITY zotero.publications.sharing.text "Anda dapat menjaga semua hak atas karya Anda, melisensikannya di bawah lisensi Creative Commons, atau mendedikasikannya ke domain publik. Dalam semua kasus, karya tersebut akan tersedia untuk umum melalui zotero.org.">
+<!ENTITY zotero.publications.sharing.prompt "Apakah Anda ingin karya Anda dibagikan oleh orang lain?">
 <!ENTITY zotero.publications.sharing.cc "Ya, di bawah lisensi Creative Commons">
 <!ENTITY zotero.publications.sharing.cc0 "Ya, dan tempatkan karya saya di domain publik">
 <!ENTITY zotero.publications.sharing.reserved "Tidak, hanya terbitkan karya saya di zotero.org">
 
 <!ENTITY zotero.publications.chooseLicense.title "Pilih lisensi Creative Commons">
-<!ENTITY zotero.publications.chooseLicense.text "A Creative Commons license allows others to copy and redistribute your work as long as they give appropriate credit, provide a link to the license, and indicate if changes were made. Additional conditions can be specified below.">
+<!ENTITY zotero.publications.chooseLicense.text "Lisensi Creative Commons mengizinkan orang lain untuk menyalin dan mendistribusikan ulang karya Anda selama mereka memberikan kredit yang sesuai, memberikan tautan ke lisensi, dan menunjukkan jika ada perubahan yang dilakukan. Ketentuan tambahan dapat ditentukan di bawah ini.">
 <!ENTITY zotero.publications.chooseLicense.adaptations.prompt "Izinkan adaptasi karya anda untuk dibagikan?">
 <!ENTITY zotero.publications.chooseLicense.adaptations.sharealike "Ya, selama orang lain berbagi serupa">
 <!ENTITY zotero.publications.chooseLicense.commercial.prompt "Izinkan pengunaan komersial dari karya anda?">

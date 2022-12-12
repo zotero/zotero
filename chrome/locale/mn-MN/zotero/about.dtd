@@ -1,10 +1,10 @@
 <!ENTITY zotero.version "хувилбар">
 <!ENTITY zotero.whatsNew "Шинэ мэдээ">
 <!ENTITY zotero.createdby "Зохион бүтээгч">
-<!ENTITY zotero.director "Захирал">
-<!ENTITY zotero.directors "Захиралууд">
+<!ENTITY zotero.director "Лавлах:">
+<!ENTITY zotero.directors "Лавлахууд:">
 <!ENTITY zotero.developers "Хөгжүүлэгчид">
-<!ENTITY zotero.alumni "Жил">
+<!ENTITY zotero.alumni "Төгсөгч:">
 <!ENTITY zotero.about.localizations "Нутагшуулалтууд">
 <!ENTITY zotero.about.additionalSoftware "Гуравдагч талын програм хангамж:">
 <!ENTITY zotero.thanks "Тусгайлан баярлалаа.">

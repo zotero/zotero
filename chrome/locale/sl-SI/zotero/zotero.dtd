@@ -186,7 +186,7 @@
 <!ENTITY zotero.import.size "Velikost">
 <!ENTITY zotero.import.createCollection "Postavi uvožene zbirke in elemente v novo zbirko">
 <!ENTITY zotero.import.fileHandling "Ravnanje z datotekami">
-<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.newItemsOnly "Prenesi le nove elemente; ne posodobi poprej uvoženih elementov">
 
 <!ENTITY zotero.exportOptions.title "Izvozi ...">
 <!ENTITY zotero.exportOptions.format.label "Vrsta datoteke:">

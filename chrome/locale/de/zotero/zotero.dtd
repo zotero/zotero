@@ -186,7 +186,7 @@
 <!ENTITY zotero.import.size "Größe">
 <!ENTITY zotero.import.createCollection "Importierte Sammlungen und Einträge in neue Sammlungen einstellen">
 <!ENTITY zotero.import.fileHandling "Dateiverarbeitung">
-<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.newItemsOnly "Nur neue Einträge herunterladen; zuvor importierte Einträge nicht aktualisieren">
 
 <!ENTITY zotero.exportOptions.title "Exportieren...">
 <!ENTITY zotero.exportOptions.format.label "Format:">
