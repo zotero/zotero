@@ -2931,7 +2931,7 @@ Zotero.Integration.CitationField = class extends Zotero.Integration.Field {
 		Zotero.Integration.currentDoc.activate();
 		var result = await Zotero.Integration.currentSession.displayAlert(msg, DIALOG_ICON_CAUTION, DIALOG_BUTTONS_YES_NO_CANCEL);
 		if (result == 0) { // Cancel
-			return new Zotero.Exception.UserCancelled("corrupt citation resolution");
+			throw new Zotero.Exception.UserCancelled("corrupt citation resolution");
 		} else if (result == 1) {		// No
 			return false;
 		} else { // Yes
