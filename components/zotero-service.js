@@ -53,6 +53,7 @@ const xpcomFilesAll = [
 	'mimeTypeHandler',
 	'pdfWorker/manager',
 	'ipc',
+	'prompt',
 	'profile',
 	'progressWindow',
 	'proxy',
