@@ -9,6 +9,7 @@ Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/men
 Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/mendeleyAPIUtils.js");
 Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/mendeleySchemaMap.js");
 
+const importerVersion = 1;
 const { apiTypeToDBType, apiFieldToDBField } = mendeleyOnlineMappings;
 const { apiFetch, codeAuth, directAuth, get, getAll } = mendeleyAPIUtils;
 
@@ -315,6 +316,9 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 			const rootCollection = await Zotero.Collections.getAsync(options.collections[0]);
 			await rootCollection.eraseTx(this._saveOptions);
 		}
+		
+		await Zotero.DB.queryAsync("REPLACE INTO settings VALUES ('mendeleyImport', 'version', ?)", importerVersion);
+		
 		Zotero.debug(`Completed Mendeley import in ${Math.round((Date.now() - this._started) / 1000)}s. (Started: ${this._started})`);
 	}
 	catch (e) {
