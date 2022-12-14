@@ -49,6 +49,10 @@ var Zotero_Import_Wizard = {
 				document.getElementById('create-collection-checkbox').removeAttribute('checked');
 			}
 		}
+		
+		if (args && args.pageID) {
+			this._wizard.goTo(args.pageID);
+		}
 
 		if (args && args.mendeleyCode && Zotero.Prefs.get("import.mendeleyUseOAuth")) {
 			this._mendeleyCode = args.mendeleyCode;
