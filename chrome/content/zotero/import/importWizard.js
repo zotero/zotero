@@ -61,7 +61,7 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 	},
 
 	async init() {
-		const { mendeleyCode, libraryID } = window.arguments[0].wrappedJSObject ?? {};
+		const { mendeleyCode, libraryID, pageID } = window.arguments[0].wrappedJSObject ?? {};
 
 		this.libraryID = libraryID;
 
@@ -124,6 +124,10 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		// wizard.shadowRoot content isn't exposed to our css
 		this.wizard.shadowRoot
 			.querySelector('.wizard-header-label').style.fontSize = '16px';
+
+		if (pageID) {
+			this.wizard.goTo(pageID);
+		}
 
 		if (mendeleyCode && Zotero.Prefs.get("import.mendeleyUseOAuth")) {
 			this.mendeleyCode = mendeleyCode;

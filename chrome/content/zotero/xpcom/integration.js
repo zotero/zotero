@@ -2655,11 +2655,42 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = async function (uris)
 			replacer = await Zotero.Relations.getByPredicateAndObject(
 				'item', 'mendeleyDB:documentUUID', m[1]
 			);
-			if (replacer.length && !replacer[0].deleted) {
-				zoteroItem = replacer[0];
-				break;
+			if (replacer.length) {
+				if (!replacer[0].deleted) {
+					zoteroItem = replacer[0];
+					break;
+				}
 			}
-		}
+			// If not blocked by user having pressed skip in this session,
+			// or user having checked the checkbox to not be prompted about this,
+			// or user having imported their library with the new version of importer
+			else if (!(this.session.dontPromptForMendeley
+				|| Zotero.Prefs.get('integration.dontPromptMendeleyImport')
+				|| await Zotero.DB.valueQueryAsync("SELECT value FROM settings WHERE setting='mendeleyImport' AND key='version'")
+			)) {
+				// Prompt user to (re)import their mendeley database which might make us recognize
+				// these items
+				let checkbox = {};
+				let result = Zotero.Prompt.confirm({
+					title: Zotero.getString('integration.mendeleyImport.title'),
+					text: Zotero.getString('integration.mendeleyImport.description', [Zotero.appName]),
+					button0: Zotero.getString('integration.mendeleyImport.openImporter'),
+					button1: Zotero.getString('general.skip'),
+					checkLabel: Zotero.getString('general.dontAskAgain'),
+					checkbox
+				});
+				if (result === 0) {
+					setTimeout(() => Zotero.getMainWindow().Zotero_File_Interface.showImportWizard({ pageID: 'page-mendeley-online-intro' }));
+					throw new Zotero.Exception.UserCancelled("Importing mendeley citations");
+				}
+				else {
+					this.session.dontPromptForMendeley = true;
+				}
+				if (checkbox.value) {
+					Zotero.Prefs.set('integration.dontPromptMendeleyImport', true);
+				}
+			}
+		};
 		
 	}
 	
