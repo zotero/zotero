@@ -3353,7 +3353,10 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentLastRead', {
 	},
 	set: function (val) {
 		if (!this.isAttachment()) {
-			throw new Error("attachmentLastRead can only be set for attachment items");
+			throw new Error('attachmentLastRead can only be set for attachment items');
+		}
+		if (this.libraryID && this.libraryID != Zotero.Libraries.userLibraryID) {
+			throw new Error('attachmentLastRead can only be set on items in My Library');
 		}
 		
 		if (val !== null && typeof val != 'number') {
@@ -5351,8 +5354,7 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 				obj.filename = this.attachmentFilename;
 			}
 			
-			// Exclude attachmentLastRead from group syncs
-			if (this.attachmentLastRead && !this.library.isGroup) {
+			if (this.attachmentLastRead) {
 				obj.lastRead = this.attachmentLastRead;
 			}
 			
