@@ -2653,6 +2653,7 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = async function (uris)
 					text: Zotero.getString('integration.mendeleyImport.description', [Zotero.appName]),
 					button0: Zotero.getString('integration.mendeleyImport.openImporter'),
 					button1: Zotero.getString('general.skip'),
+					button2: Zotero.getString('general.moreInformation'),
 					checkLabel: Zotero.getString('general.dontAskAgain'),
 					checkbox
 				});
@@ -2660,8 +2661,11 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = async function (uris)
 					setTimeout(() => Zotero.getMainWindow().Zotero_File_Interface.showImportWizard({ pageID: 'mendeley-online-explanation' }));
 					throw new Zotero.Exception.UserCancelled("Importing mendeley citations");
 				}
-				else {
+				else if (result == 1) {
 					this.session.dontPromptForMendeley = true;
+				}
+				else {
+					Zotero.launchURL("https://www.zotero.org/support/kb/mendeley_import#using_mendeley_citations");
 				}
 				if (checkbox.value) {
 					Zotero.Prefs.set('integration.dontPromptMendeleyImport', true);
