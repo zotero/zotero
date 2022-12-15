@@ -122,3 +122,7 @@ button, checkbox {
 	color: red;
 	font-weight: bold;
 }
+
+[disabled="true"] .checkbox-label {
+	opacity: .5;
+}

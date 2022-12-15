@@ -32,6 +32,7 @@ var Zotero_Import_Mendeley = function () {
 	this.newCollections = [];
 	this.mendeleyAuth = null;
 	this.newItemsOnly = false;
+	this.relinkOnly = false;
 	
 	this._tokens = null;
 	this._db = null;
@@ -92,13 +93,15 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 		skipSelect: true,
 		...(options.saveOptions || {})
 	};
+
+	this.newItemsOnly = this.newItemsOnly || this.relinkOnly;
 	
 	const libraryID = options.libraryID || Zotero.Libraries.userLibraryID;
 	const { key: rootCollectionKey } = options.collections
 		? Zotero.Collections.getLibraryAndKeyFromID(options.collections[0])
 		: {};
 
-	Zotero.debug(`Begining Mendeley import at ${this._started}. libraryID: ${libraryID}, linkFiles: ${this.linkFiles}, rootCollectionKey: ${rootCollectionKey}`);
+	Zotero.debug(`Begining Mendeley import at ${this._started}. libraryID: ${libraryID}, linkFiles: ${this.linkFiles}, rootCollectionKey: ${rootCollectionKey}, newItemsOnly: ${this.newItemsOnly}, relinkOnly: ${this.relinkOnly}`);
 	
 	// TODO: Get appropriate version based on schema version
 	const mapVersion = 83;
@@ -135,14 +138,17 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 		this._progressMax = 50;
 		this._itemDone();
 
-		const folders = this._tokens
-			? await this._getFoldersAPI(mendeleyGroupID)
-			: await this._getFoldersDB(mendeleyGroupID);
+		let folderKeys = new Map();
+		if(!this.relinkOnly) {
+			const folders = this._tokens
+				? await this._getFoldersAPI(mendeleyGroupID)
+				: await this._getFoldersDB(mendeleyGroupID);
 
-		const collectionJSON = this._foldersToAPIJSON(folders, rootCollectionKey);
-		const folderKeys = this._getFolderKeys(collectionJSON);
+			const collectionJSON = this._foldersToAPIJSON(folders, rootCollectionKey);
+			folderKeys = this._getFolderKeys(collectionJSON);
 
-		await this._saveCollections(libraryID, collectionJSON, folderKeys);
+			await this._saveCollections(libraryID, collectionJSON, folderKeys);
+		}
 		
 		this._interruptChecker(true);
 		//
@@ -175,13 +181,13 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 
 		this._interruptChecker(true);
 
-		let collections = this._tokens
+		let collections = this.relinkOnly ? new Map() : this._tokens
 			? await this._getDocumentCollectionsAPI(documents, rootCollectionKey, folderKeys)
 			: await this._getDocumentCollectionsDB(mendeleyGroupID, documents, rootCollectionKey, folderKeys);
 
 		this._interruptChecker(true);
-		
-		let files = this._tokens
+
+		let files = this.relinkOnly ? new Map() : this._tokens
 			? await this._getDocumentFilesAPI(documents)
 			: await this._getDocumentFilesDB(mendeleyGroupID);
 
@@ -1329,6 +1335,10 @@ Zotero_Import_Mendeley.prototype._saveItems = async function (libraryID, json) {
 				item.key = itemJSON.key;
 				await item.loadPrimaryData();
 			}
+		}
+
+		if(this.relinkOnly && !isMappedToExisting) {
+			continue;
 		}
 		
 		// Remove external id before save
