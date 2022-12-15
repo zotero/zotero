@@ -450,6 +450,7 @@ var Zotero_File_Interface = new function() {
 			translation.mendeleyAuth = options.mendeleyAuth;
 			translation.mendeleyCode = options.mendeleyCode;
 			translation.newItemsOnly = options.newItemsOnly;
+			translation.relinkOnly = options.relinkOnly;
 		}
 		else {
 			// Check if the file is an SQLite database

@@ -78,6 +78,11 @@
 			onpageshow="Zotero_Import_Wizard.onOptionsShown()"
 			onpagerewound="return Zotero_Import_Wizard.goToStart()"
 			onpageadvanced="Zotero_Import_Wizard.onImportStart()">
+
+		<vbox id="relink-only-wrapper">
+			<checkbox id="relink-only-checkbox" label="&zotero.import.online.relinkOnly;" />
+		</vbox>
+
 		<checkbox id="create-collection-checkbox" label="&zotero.import.createCollection;" checked="true" />
 		
 		<vbox id="file-handling-options">
