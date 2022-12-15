@@ -42,6 +42,10 @@
 		margin: 0;
 	}
 
+	[disabled="true"] .checkbox-label {
+		opacity: .5;
+	}
+
 	#other-files {
 		margin-left: -1px;
 		width: 400px;

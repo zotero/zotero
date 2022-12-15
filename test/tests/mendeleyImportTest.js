@@ -402,5 +402,56 @@ describe('Zotero_Import_Mendeley', function () {
 			assert.equal(report.getField('title'), 'Sample Report');
 			assert.equal(report.getRelations()['mendeleyDB:documentUUID'], '616ec6d1-8d23-4414-8b6e-7bb129677577');
 		});
+
+		it("should only correct IDs and not add new items if \"relinkOnly\" is configured", async () => {
+			setHTTPResponse(server, 'https://api.mendeley.com/', {
+				method: 'GET',
+				url: `documents?view=all&limit=500`,
+				status: 200,
+				headers: {},
+				json: JSON.parse(
+					await Zotero.File.getContentsFromURLAsync('resource://zotero-unit-tests/data/mendeleyMock/items-simple-no-desktop-id.json')
+				)
+			});
+			const importer1 = getImporter();
+			await importer1.translate({
+				libraryID: Zotero.Libraries.userLibraryID,
+				collections: null,
+				linkFiles: false,
+			});
+
+			const report = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:remoteDocumentUUID', '07a74c26-28d1-4d9f-a60d-3f3bc5ef76ef'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+
+			assert.equal(report.getField('title'), 'Sample Report');
+			assert.equal(report.getRelations()['mendeleyDB:documentUUID'], '07a74c26-28d1-4d9f-a60d-3f3bc5ef76ef');
+			
+			setHTTPResponse(server, 'https://api.mendeley.com/', {
+				method: 'GET',
+				url: `documents?view=all&limit=500`,
+				status: 200,
+				headers: {},
+				json: JSON.parse(
+					await Zotero.File.getContentsFromURLAsync('resource://zotero-unit-tests/data/mendeleyMock/items-updated.json')
+				)
+			});
+
+			const importer2 = getImporter();
+			importer2.relinkOnly = true;
+			await importer2.translate({
+				libraryID: Zotero.Libraries.userLibraryID,
+				collections: null,
+				linkFiles: false,
+			});
+
+			assert.equal(report.getField('title'), 'Sample Report');
+			assert.equal(report.getRelations()['mendeleyDB:documentUUID'], '616ec6d1-8d23-4414-8b6e-7bb129677577');
+
+			const noNewItemHere = await Zotero.Relations.getByPredicateAndObject('item', 'mendeleyDB:documentUUID', '86e56a00-5ae5-4fe8-a977-9298a03b16d6');
+			assert.lengthOf(noNewItemHere, 0);
+
+		});
 	});
 });

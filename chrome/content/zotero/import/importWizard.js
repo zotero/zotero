@@ -43,6 +43,7 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 	mendeleyAuth: null,
 	mendeleyCode: null,
 	mendeleyHasPreviouslyImported: false,
+	mendeleyImporterVersion: 0,
 	translation: null,
 	wizard: null,
 
@@ -72,6 +73,7 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 
 		const extensions = await Zotero.getInstalledExtensions();
 		this.isZotfileInstalled = !!extensions.find(extName => extName.match(/^ZotFile((?!disabled).)*$/));
+		this.mendeleyImporterVersion = parseInt((await Zotero.DB.valueQueryAsync("SELECT value FROM settings WHERE setting='mendeleyImport' AND key='version'")) || 0);
 
 		this.wizard = document.getElementById('import-wizard');
 		this.wizard.getPageById('page-start')
@@ -110,6 +112,8 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 			.getElementById('mendeley-username').addEventListener('keyup', this.onMendeleyAuthKeyUp.bind(this));
 		document
 			.getElementById('mendeley-password').addEventListener('keyup', this.onMendeleyAuthKeyUp.bind(this));
+		document
+			.getElementById('relink-only-checkbox').addEventListener('command', this.onRelinkOnlyChange.bind(this));
 
 		this.wizard.addEventListener('pageshow', this.updateFocus.bind(this));
 		this.wizard.addEventListener('wizardcancel', this.onCancel.bind(this));
@@ -301,6 +305,7 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		document.getElementById('page-options-file-handling').style.display = (this.mendeleyCode || this.mendeleyAuth) ? 'none' : 'block';
 		const hideExtraMendeleyOptions = !this.mendeleyHasPreviouslyImported || !(this.mendeleyAuth || this.mendeleyCode);
 		document.getElementById('page-options-mendeley').style.display = hideExtraMendeleyOptions ? 'none' : 'block';
+		document.getElementById('page-options-relink-only').style.display = (hideExtraMendeleyOptions || this.mendeleyImporterVersion > 0) ? 'none' : null;
 		if (hideExtraMendeleyOptions) {
 			document.getElementById('new-items-only-checkbox').checked = false;
 		}
@@ -354,6 +359,16 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		}
 	},
 
+	onRelinkOnlyChange() {
+		if (document.getElementById('relink-only-checkbox').checked) {
+			document.getElementById('new-items-only-checkbox').checked = true;
+			document.getElementById('create-collection').checked = false;
+		}
+
+		document.getElementById('new-items-only-checkbox').disabled = document.getElementById('relink-only-checkbox').checked;
+		document.getElementById('create-collection').disabled = document.getElementById('relink-only-checkbox').checked;
+	},
+
 	onURLInteract(ev) {
 		if (ev.type === 'click' || (ev.type === 'keydown' && ev.key === ' ')) {
 			Zotero.launchURL(ev.currentTarget.getAttribute('href'));
@@ -393,6 +408,7 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 			? document.getElementById('other-files').value
 			: null;
 		const newItemsOnly = document.getElementById('new-items-only-checkbox').checked;
+		const relinkOnly = document.getElementById('relink-only-checkbox').checked;
 		
 		try {
 			const result = await Zotero_File_Interface.importFile({
@@ -406,7 +422,8 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 				mimeTypes,
 				newItemsOnly,
 				onBeforeImport: this.onBeforeImport.bind(this),
-				recreateStructure
+				recreateStructure,
+				relinkOnly
 			});
 
 			// Cancelled by user or due to error
