@@ -34,7 +34,7 @@ const Icons = require('components/icons');
  * 	defaultIn: Set<string>,			// Types of trees the column is default in. Can be [default, feeds, feed, recentlyRead];
  * 	disabledIn: Set<string>,		// Types of trees where the column is not available
  *  dependsOnChildren: boolean,		// Default: false. Set to true if the column depends on child item data
- *  								// (e.g. numNotes, lastAccessed) and so needs to be updated when children are modified
+ *  								// (e.g. numNotes, lastRead) and so needs to be updated when children are modified
  * 	defaultSort: number				// Default: 1. -1 for descending sort
  *
  * 	flex: number,					// Default: 1. When the column is added to the tree how much space it should occupy as a flex ratio
@@ -170,12 +170,12 @@ const COLUMNS = [
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},
 	{
-		dataKey: "lastAccessed",
+		dataKey: "lastRead",
 		defaultSort: -1,
 		defaultIn: new Set(["recentlyRead"]),
 		disabledIn: "feed",
 		dependsOnChildren: true,
-		label: "pane.items.columns.lastAccessed",
+		label: "pane.items.columns.lastRead",
 		flex: 2,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	},

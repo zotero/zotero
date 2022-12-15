@@ -2310,7 +2310,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			s.libraryID = libraryID;
 			s.name = Zotero.getString('pane.collections.recentlyRead');
 			s.addCondition('libraryID', 'is', libraryID);
-			s.addCondition('lastAccessed', 'isInTheLast', '14 days');
+			s.addCondition('lastRead', 'isInTheLast', '14 days');
 			rows.splice(row + 1 + newRows, 0,
 				new Zotero.CollectionTreeRow(this, 'recentlyRead', s, level + 1));
 			newRows++;

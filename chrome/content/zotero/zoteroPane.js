@@ -4447,71 +4447,66 @@ var ZoteroPane = new function()
 		
 		if(typeof itemIDs != "object") itemIDs = [itemIDs];
 		
-		var launchFile = async (path, contentType, item) => {
-			try {
-				// Fix blank PDF attachment MIME type
-				if (!contentType) {
-					let path = await item.getFilePathAsync();
-					let type = 'application/pdf';
-					if (Zotero.MIME.sniffForMIMEType(await Zotero.File.getSample(path)) == type) {
-						contentType = type;
-						item.attachmentContentType = type;
-						await item.saveTx();
-					}
+		var launchFile = async (path, contentType, itemID) => {
+			// Fix blank PDF attachment MIME type
+			if (!contentType) {
+				let item = await Zotero.Items.getAsync(itemID);
+				let path = await item.getFilePathAsync();
+				let type = 'application/pdf';
+				if (Zotero.MIME.sniffForMIMEType(await Zotero.File.getSample(path)) == type) {
+					contentType = type;
+					item.attachmentContentType = type;
+					await item.saveTx();
 				}
-				if (contentType === 'application/pdf') {
-					let library = Zotero.Libraries.get(item.libraryID);
-					let pdfHandler = Zotero.Prefs.get("fileHandler.pdf");
-					// Zotero PDF reader
-					if (!pdfHandler) {
-						let openInWindow = Zotero.Prefs.get('openReaderInNewWindow');
-						let useAlternateWindowBehavior = event?.shiftKey || extraData?.forceAlternateWindowBehavior;
-						if (useAlternateWindowBehavior) {
-							openInWindow = !openInWindow;
+			}
+			if (contentType === 'application/pdf') {
+				let item = await Zotero.Items.getAsync(itemID);
+				let library = Zotero.Libraries.get(item.libraryID);
+				let pdfHandler  = Zotero.Prefs.get("fileHandler.pdf");
+				// Zotero PDF reader
+				if (!pdfHandler) {
+					let openInWindow = Zotero.Prefs.get('openReaderInNewWindow');
+					let useAlternateWindowBehavior = event?.shiftKey || extraData?.forceAlternateWindowBehavior;
+					if (useAlternateWindowBehavior) {
+						openInWindow = !openInWindow;
+					}
+					await Zotero.Reader.open(
+						itemID,
+						extraData && extraData.location,
+						{
+							openInWindow,
+							allowDuplicate: openInWindow
 						}
-						await Zotero.Reader.open(
-							item.id,
-							extraData && extraData.location,
-							{
-								openInWindow,
-								allowDuplicate: openInWindow
-							}
+					);
+					return;
+				}
+				// Try to open external reader to page number if specified
+				else {
+					let pageIndex = extraData?.location?.position?.pageIndex;
+					if (pageIndex !== undefined) {
+						await Zotero.OpenPDF.openToPage(
+							item,
+							parseInt(pageIndex) + 1
 						);
 						return;
 					}
-					// Try to open external reader to page number if specified
-					else {
-						let pageIndex = extraData?.location?.position?.pageIndex;
-						if (pageIndex !== undefined) {
-							await Zotero.OpenPDF.openToPage(
-								item,
-								parseInt(pageIndex) + 1
-							);
+				}
+				// Custom PDF handler
+				// TODO: Remove this and unify with Zotero.OpenPDF
+				if (pdfHandler != 'system') {
+					try {
+						if (await OS.File.exists(pdfHandler)) {
+							Zotero.launchFileWithApplication(path, pdfHandler);
 							return;
 						}
 					}
-					// Custom PDF handler
-					// TODO: Remove this and unify with Zotero.OpenPDF
-					if (pdfHandler != 'system') {
-						try {
-							if (await OS.File.exists(pdfHandler)) {
-								Zotero.launchFileWithApplication(path, pdfHandler);
-								return;
-							}
-						}
-						catch (e) {
-							Zotero.logError(e);
-						}
-						Zotero.logError(`${pdfHandler} not found -- launching file normally`);
+					catch (e) {
+						Zotero.logError(e);
 					}
+					Zotero.logError(`${pdfHandler} not found -- launching file normally`);
 				}
-				Zotero.launchFile(path);
 			}
-			finally {
-				Zotero.debug('Updating lastAccessed');
-				item.attachmentLastAccessed = Zotero.Date.dateToSQL(new Date(), true);
-				await item.saveTx({ skipDateModifiedUpdate: true });
-			}
+			Zotero.launchFile(path);
 		};
 		
 		for (let i = 0; i < itemIDs.length; i++) {
@@ -4555,7 +4550,7 @@ var ZoteroPane = new function()
 				let iCloudPath = Zotero.File.getEvictedICloudPath(path);
 				if (await OS.File.exists(iCloudPath)) {
 					Zotero.debug("Triggering download of iCloud file");
-					await launchFile(iCloudPath, item.attachmentContentType, item);
+					await launchFile(iCloudPath, item.attachmentContentType, itemID);
 					let time = new Date();
 					let maxTime = 5000;
 					let revealed = false;
@@ -4615,7 +4610,7 @@ var ZoteroPane = new function()
 			if (fileExists && !redownload) {
 				Zotero.debug("Opening " + path);
 				Zotero.Notifier.trigger('open', 'file', item.id);
-				await launchFile(path, item.attachmentContentType, item);
+				await launchFile(path, item.attachmentContentType, item.id);
 				continue;
 			}
 			
@@ -4661,7 +4656,7 @@ var ZoteroPane = new function()
 			
 			Zotero.debug("Opening " + path);
 			Zotero.Notifier.trigger('open', 'file', item.id);
-			await launchFile(path, item.attachmentContentType, item);
+			await launchFile(path, item.attachmentContentType, item.id);
 		}
 	});
 	

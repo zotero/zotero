@@ -1190,14 +1190,8 @@ function ZoteroProtocolHandler() {
 				}
 			}
 			
-			// Update attachmentLastAccessed like ZoteroPane does
-			if (opened) {
-				Zotero.debug('Updating lastAccessed');
-				item.attachmentLastAccessed = Zotero.Date.dateToSQL(new Date(), true);
-				await item.saveTx({ skipDateModifiedUpdate: true });
-			}
 			// If something went wrong, just open PDF without page
-			else {
+			if (!opened) {
 				Zotero.debug("Launching PDF without page number");
 				let zp = Zotero.getActiveZoteroPane();
 				// TODO: Open pane if closed (macOS)

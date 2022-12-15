@@ -50,7 +50,7 @@ Zotero.Item = function(itemTypeOrID) {
 	this._attachmentSyncedModificationTime = null;
 	this._attachmentSyncedHash = null;
 	this._attachmentLastProcessedModificationTime = null;
-	this._attachmentLastAccessed = null;
+	this._attachmentLastRead = null;
 	
 	// loadCreators
 	this._creators = [];
@@ -352,7 +352,7 @@ Zotero.Item.prototype._parseRowData = function(row) {
 			case 'attachmentSyncedModificationTime':
 			case 'attachmentSyncedHash':
 			case 'attachmentLastProcessedModificationTime':
-			case 'attachmentLastAccessed':
+			case 'attachmentLastRead':
 			case 'createdByUserID':
 			case 'lastModifiedByUserID':
 				break;
@@ -1842,7 +1842,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		let sql = "";
 		let cols = [
 			'parentItemID', 'linkMode', 'contentType', 'charsetID', 'path', 'syncState',
-			'storageModTime', 'storageHash', 'lastProcessedModificationTime', 'lastAccessed'
+			'storageModTime', 'storageHash', 'lastProcessedModificationTime', 'lastRead'
 		];
 		// TODO: Replace with UPSERT after SQLite 3.24.0
 		if (isNew) {
@@ -1863,7 +1863,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		let storageModTime = this.attachmentSyncedModificationTime;
 		let storageHash = this.attachmentSyncedHash;
 		let lastProcessedModificationTime = this.attachmentLastProcessedModificationTime;
-		let lastAccessed = this.attachmentLastAccessed;
+		let lastRead = this.attachmentLastRead;
 		
 		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE && libraryType != 'user') {
 			throw new Error("Linked files can only be added to user library");
@@ -1879,7 +1879,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			storageModTime !== undefined ? storageModTime : null,
 			storageHash || null,
 			lastProcessedModificationTime || null,
-			lastAccessed || null,
+			lastRead || null,
 		];
 		if (isNew) {
 			params.unshift(itemID);
@@ -3344,38 +3344,38 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentSyncedHash', {
 });
 
 
-Zotero.defineProperty(Zotero.Item.prototype, 'attachmentLastAccessed', {
+Zotero.defineProperty(Zotero.Item.prototype, 'attachmentLastRead', {
 	get: function () {
 		if (!this.isAttachment()) {
 			return undefined;
 		}
-		return this._attachmentLastAccessed;
+		return this._attachmentLastRead;
 	},
 	set: function (val) {
 		if (!this.isAttachment()) {
-			throw new Error("attachmentLastAccessed can only be set for attachment items");
+			throw new Error("attachmentLastRead can only be set for attachment items");
 		}
 		
-		if (val !== null && typeof val != 'string') {
-			throw new Error('attachmentLastAccessed must be a string');
+		if (val !== null && typeof val != 'number') {
+			throw new Error('attachmentLastRead must be a number');
 		}
-		if (val !== null && !Zotero.Date.isSQLDateTime(val)) {
-			throw new Error('attachmentLastAccessed must be an SQL datetime');
+		if (val != parseInt(val)) {
+			throw new Error('attachmentLastRead must be an integer timestamp in seconds');
 		}
 		
-		if (val == this._attachmentLastAccessed) {
+		if (val == this._attachmentLastRead) {
 			return;
 		}
 
 		if (!this._changed.attachmentData) {
 			this._changed.attachmentData = {};
 		}
-		this._changed.attachmentData.lastAccessed = true;
-		this._attachmentLastAccessed = val;
+		this._changed.attachmentData.lastRead = true;
+		this._attachmentLastRead = val;
 		if (this.library) {
-			let lastAccessedItem = Zotero.Items.get(this.library.lastAccessedItemInSession);
-			if (!lastAccessedItem || lastAccessedItem.attachmentLastAccessed < val) {
-				this.library.lastAccessedItemInSession = this.id;
+			let lastReadItem = Zotero.Items.get(this.library.lastReadItemInSession);
+			if (!lastReadItem || lastReadItem.attachmentLastRead < val) {
+				this.library.lastReadItemInSession = this.id;
 			}
 		}
 	}
@@ -3808,15 +3808,15 @@ Zotero.Item.prototype.clearBestAttachmentState = function () {
 }
 
 
-Zotero.Item.prototype.getItemLastAccessed = function () {
+Zotero.Item.prototype.getItemLastRead = function () {
 	if (this.isAttachment()) {
-		return this.attachmentLastAccessed;
+		return this.attachmentLastRead;
 	}
 	else {
 		let max = null;
 		for (let attachment of Zotero.Items.get(this.getAttachments(false))) {
-			if (!max || attachment.attachmentLastAccessed > max) {
-				max = attachment.attachmentLastAccessed;
+			if (!max || attachment.attachmentLastRead > max) {
+				max = attachment.attachmentLastRead;
 			}
 		}
 		return max;
@@ -5041,7 +5041,6 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 		
 		case 'dateAdded':
 		case 'dateModified':
-		case 'lastAccessed':
 			if (val) {
 				let d = Zotero.Date.isoToDate(val);
 				if (!d) {
@@ -5052,6 +5051,16 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 			}
 			this[field] = val;
 			break;
+		
+		case 'lastRead':
+			if (val) {
+				let i = parseInt(val, 10);
+				if (!Number.isInteger(i)) {
+					Zotero.logError(`Discarding invalid ${field} '${val}' for item ${this.libraryKey}`);
+				}
+				val = i;
+			}
+			this.attachmentLastRead = val;
 		
 		case 'creators':
 			//this.setCreators(json.creators.concat(extraCreators), options);
@@ -5342,9 +5351,9 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 				obj.filename = this.attachmentFilename;
 			}
 			
-			// Exclude attachmentLastAccessed from group syncs
-			if (this.attachmentLastAccessed && !this.library.isGroup) {
-				obj.lastAccessed = Zotero.Date.sqlToISO8601(this.attachmentLastAccessed);
+			// Exclude attachmentLastRead from group syncs
+			if (this.attachmentLastRead && !this.library.isGroup) {
+				obj.lastRead = this.attachmentLastRead;
 			}
 			
 			if (this.isStoredFileAttachment() && !options.skipStorageProperties) {

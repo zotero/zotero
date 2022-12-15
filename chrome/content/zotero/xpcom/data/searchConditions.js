@@ -304,7 +304,7 @@ Zotero.SearchConditions = new function(){
 			},
 			
 			{
-				name: 'lastAccessed',
+				name: 'lastRead',
 				operators: {
 					is: true,
 					isNot: true,
@@ -313,7 +313,7 @@ Zotero.SearchConditions = new function(){
 					isInTheLast: true
 				},
 				table: 'itemAttachments',
-				field: 'lastAccessed'
+				field: 'lastRead'
 			},
 
 			// Deprecated

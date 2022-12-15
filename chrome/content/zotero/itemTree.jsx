@@ -1329,8 +1329,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 			case 'feed':
 				return (row.ref.isFeedItem && Zotero.Feeds.get(row.ref.libraryID).name) || "";
 
-			case 'lastAccessed':
-				return item.getItemLastAccessed();
+			case 'lastRead':
+				return item.getItemLastRead();
 			
 			default:
 				return row.ref.getField(field, false, true);
@@ -1863,7 +1863,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			return 'id';
 		}
 		if (this.collectionTreeRow.isRecentlyRead()) {
-			return 'lastAccessed';
+			return 'lastRead';
 		}
 		var column = this._sortedColumn;
 		if (!column) {
@@ -3067,7 +3067,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		row.numNotes = treeRow.numNotes() || "";
 		row.feed = (treeRow.ref.isFeedItem && Zotero.Feeds.get(treeRow.ref.libraryID).name) || "";
-		row.lastAccessed = treeRow.ref.getItemLastAccessed();
+		row.lastRead = treeRow.ref.getItemLastRead();
 		row.title = treeRow.ref.getDisplayTitle();
 		
 		const columns = this.getColumns();
@@ -3083,7 +3083,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 			// (e.g. "4/4/07 14:27:23")
 			case 'dateAdded':
 			case 'dateModified':
-			case 'lastAccessed':
 			case 'accessDate':
 			case 'date':
 				if (key == 'date' && !this.collectionTreeRow.isFeedsOrFeed()) {
@@ -3105,6 +3104,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 						val = '';
 					}
 				}
+				break;
+			case 'lastRead':
+				if (val) {
+					let date = new Date(val * 1000);
+					val = date.toLocaleString();
+				}
+				break;
 			}
 			row[key] = val;
 		}

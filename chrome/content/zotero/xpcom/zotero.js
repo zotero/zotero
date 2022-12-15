@@ -730,6 +730,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			yield Zotero.Retractions.init();
 			yield Zotero.Dictionaries.init();
 			Zotero.Reader.init();
+			Zotero.ReadObserver.init();
 			
 			// Migrate fields from Extra that can be moved to item fields after a schema update
 			yield Zotero.Schema.migrateExtraFields();

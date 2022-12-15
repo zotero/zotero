@@ -559,13 +559,7 @@ class ReaderInstance {
 			await OS.File.writeAtomic(file.path, JSON.stringify(state));
 			
 			if (pageChanged) {
-				let fiveMinutesAgo = new Date();
-				fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
-				if (item.library.lastAccessedItemInSession !== item.id
-						|| Zotero.Date.sqlToDate(item.attachmentLastAccessed, true) < fiveMinutesAgo) {
-					item.attachmentLastAccessed = Zotero.Date.dateToSQL(new Date(), true);
-					await item.saveTx({ skipDateModifiedUpdate: true });
-				}
+				Zotero.Notifier.trigger('pageChange', 'file', item.id);
 			}
 		}
 	}

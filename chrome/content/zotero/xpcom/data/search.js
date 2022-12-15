@@ -1440,7 +1440,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 					// need to be handled specially
 					if ((condition['name']=='dateAdded' ||
 							condition['name']=='dateModified' ||
-							condition['name']=='lastAccessed' ||
+							condition['name']=='lastRead' ||
 							condition['name']=='datefield') &&
 							!Zotero.Date.isSQLDateTime(condition['value'])){
 						
@@ -1484,7 +1484,13 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						// It'd be nice not to deal with time zones here at all,
 						// but otherwise searching for the date part of a field
 						// stored as UTC that wraps midnight would be unsuccessful
-						if (condition['name']=='dateAdded' ||
+						//
+						// lastRead is a UNIX timestamp in seconds, so we need to
+						// explicitly pass 'unixepoch'
+						if (condition['name'] == 'lastRead') {
+							condSQL += "DATE(" + condition['field'] + ", 'unixepoch', 'localtime')";
+						}
+						else if (condition['name']=='dateAdded' ||
 								condition['name']=='dateModified' ||
 								condition['alias']=='accessDate'){
 							condSQL += "DATE(" + condition['field'] + ", 'localtime')";

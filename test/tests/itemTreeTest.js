@@ -683,18 +683,18 @@ describe("Zotero.ItemTree", function() {
 			assert.isFalse(zp.itemsView.getRowIndexByID(item.id));
 		});
 		
-		it("should re-sort by Last Read when child attachmentLastAccessed is updated", async function () {
+		it("should re-sort by Last Read when child attachmentLastRead is updated", async function () {
 			let userLibraryID = Zotero.Libraries.userLibraryID;
 			let item1 = await createDataObject('item');
 			let attachment1 = await importPDFAttachment(item1);
 			let item2 = await createDataObject('item');
 			let attachment2 = await importPDFAttachment(item2);
-			assert.notOk(item1.getItemLastAccessed());
-			assert.notOk(item2.getItemLastAccessed());
+			assert.notOk(item1.getItemLastRead());
+			assert.notOk(item2.getItemLastRead());
 			
 			// attachment2 is more recently opened
-			attachment1.attachmentLastAccessed = Zotero.Date.dateToSQL(new Date(Date.now() - 1000), true);
-			attachment2.attachmentLastAccessed = Zotero.Date.dateToSQL(new Date(), true);
+			attachment1.attachmentLastRead = Math.round(Date.now() / 1000) - 5;
+			attachment2.attachmentLastRead = Math.round(Date.now() / 1000);
 			await attachment1.saveTx();
 			await attachment2.saveTx();
 
@@ -705,7 +705,7 @@ describe("Zotero.ItemTree", function() {
 			assert.equal(zp.itemsView.getRowIndexByID(item2.id), 0);
 
 			// Now make attachment2 much less recently opened
-			attachment2.attachmentLastAccessed = Zotero.Date.dateToSQL(new Date(Date.now() - 1000 * 60), true);
+			attachment2.attachmentLastRead = Math.round(Date.now() / 1000) - 60;
 			await attachment2.saveTx();
 
 			assert.equal(zp.itemsView.getRowIndexByID(item1.id), 0);

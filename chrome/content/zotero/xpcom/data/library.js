@@ -38,7 +38,7 @@ Zotero.Library = function(params = {}) {
 	this._hasSearches = null;
 	this._storageDownloadNeeded = false;
 	
-	this._lastAccessedItemInSession = null;
+	this._lastReadItemInSession = null;
 	
 	Zotero.Utilities.Internal.assignProps(
 		this,
@@ -128,9 +128,9 @@ Zotero.defineProperty(Zotero.Library.prototype, 'libraryType', {
 	set: function(v) { return this._set('_libraryType', v); }
 });
 
-Zotero.defineProperty(Zotero.Library.prototype, 'lastAccessedItemInSession', {
-	get() { return this._lastAccessedItemInSession; },
-	set(val) { this._lastAccessedItemInSession = val; }
+Zotero.defineProperty(Zotero.Library.prototype, 'lastReadItemInSession', {
+	get() { return this._lastReadItemInSession; },
+	set(val) { this._lastReadItemInSession = val; }
 });
 
 /**
