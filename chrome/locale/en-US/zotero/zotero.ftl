@@ -50,6 +50,10 @@ file-interface-items-were-imported = { $numItems ->
     [one] item was imported
     *[other] { $numItems } items were imported
     }
+file-interface-items-were-relinked = { $numRelinked ->
+    [one] item was relinked
+    *[other] { $numRelinked } items were relinked
+    }
 
 import-mendeley-encrypted = The selected Mendeley database cannot be read, likely because it is encrypted.
                             See <a data-l10n-name="mendeley-import-kb">How do I import a Mendeley library into Zotero?</a> for more information.
@@ -63,6 +67,7 @@ import-online-wrong-credentials = Login to { $targetApp } failed. Please re-ente
 import-online-blocked-by-plugin = The import cannot continue with { $plugin } installed. Please disable this plugin and try again.
 import-online-relink-only =
     .label = Relink Mendeley Desktop citations
+import-online-relink-kb = More Information
 
 report-error =
     .label = Report Error…

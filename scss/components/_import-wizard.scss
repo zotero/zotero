@@ -92,6 +92,14 @@
 		}
 	}
 
+	#page-options-relink-only {
+		display: flex;
+
+		a {
+			margin: 4px 1em 4px;
+		}
+	}
+
 	.page-options-file-handling-description {
 		margin-top: .6em;
 		font-size: 11px;

@@ -2680,7 +2680,14 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = async function (uris)
 					checkbox
 				});
 				if (result === 0) {
-					setTimeout(() => Zotero.getMainWindow().Zotero_File_Interface.showImportWizard({ pageID: 'page-mendeley-online-intro' }));
+					setTimeout(
+						() => Zotero.getMainWindow().Zotero_File_Interface.showImportWizard(
+							{
+								pageID: 'page-mendeley-online-intro',
+								relinkOnly: true
+							}
+						)
+					);
 					throw new Zotero.Exception.UserCancelled("Importing mendeley citations");
 				}
 				else {

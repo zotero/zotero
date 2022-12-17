@@ -61,7 +61,7 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 	},
 
 	async init() {
-		const { mendeleyCode, libraryID, pageID } = window.arguments[0].wrappedJSObject ?? {};
+		const { mendeleyCode, libraryID, pageID, relinkOnly } = window.arguments[0].wrappedJSObject ?? {};
 
 		this.libraryID = libraryID;
 
@@ -97,10 +97,10 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 				document.getElementById('import-other').checked = ev.currentTarget.value.length > 0;
 			});
 		document
-			.querySelector('#page-done-error-mendeley > a')
+			.querySelector('a')
 			.addEventListener('click', this.onURLInteract.bind(this));
 		document
-			.querySelector('#page-done-error-mendeley > a')
+			.querySelector('a')
 			.addEventListener('keydown', this.onURLInteract.bind(this));
 		document
 			.querySelector('#page-done-error > button')
@@ -124,6 +124,11 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 		// wizard.shadowRoot content isn't exposed to our css
 		this.wizard.shadowRoot
 			.querySelector('.wizard-header-label').style.fontSize = '16px';
+
+		if (relinkOnly) {
+			document.getElementById('relink-only-checkbox').checked = true;
+			this.onRelinkOnlyChange();
+		}
 
 		if (pageID) {
 			this.wizard.goTo(pageID);
@@ -437,9 +442,12 @@ const Zotero_Import_Wizard = { // eslint-disable-line no-unused-vars
 			}
 
 			const numItems = this.translation.newItems.length;
+			const numRelinked = this.translation.numRelinked;
 			this.skipToDonePage(
 				'file-interface-import-complete',
-				['file-interface-items-were-imported', { numItems }]
+				document.getElementById('relink-only-checkbox').checked
+					? ['file-interface-items-were-relinked', { numRelinked }]
+					: ['file-interface-items-were-imported', { numItems }]
 			);
 		}
 		catch (e) {
