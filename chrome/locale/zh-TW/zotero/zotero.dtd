@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "進階選項">
 <!ENTITY zotero.general.tools "工具">
 <!ENTITY zotero.general.more "更多">
+<!ENTITY zotero.general.moreInformation "More Information">
 <!ENTITY zotero.general.loading "載入中……">
 <!ENTITY zotero.general.close "關閉">
 <!ENTITY zotero.general.minimize "最小化">
@@ -187,6 +188,7 @@
 <!ENTITY zotero.import.createCollection "將匯入的文獻集與項目放入新的文獻集">
 <!ENTITY zotero.import.fileHandling "檔案處理中">
 <!ENTITY zotero.import.online.newItemsOnly "僅下載新項目；不更新之前匯入的項目">
+<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
 
 <!ENTITY zotero.exportOptions.title "匯出……">
 <!ENTITY zotero.exportOptions.format.label "格式：">

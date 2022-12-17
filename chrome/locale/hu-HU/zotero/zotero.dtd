@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Haladó beállítások">
 <!ENTITY zotero.general.tools "Eszközök">
 <!ENTITY zotero.general.more " Egyéb...">
+<!ENTITY zotero.general.moreInformation "More Information">
 <!ENTITY zotero.general.loading "Betöltés…">
 <!ENTITY zotero.general.close "Bezárás">
 <!ENTITY zotero.general.minimize "Kis méret">
@@ -187,6 +188,7 @@
 <!ENTITY zotero.import.createCollection "Importált elemek és gyűjtemények áthelyezése új gyűjteménybe">
 <!ENTITY zotero.import.fileHandling "Fájlkezelés">
 <!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
 
 <!ENTITY zotero.exportOptions.title "Exportálás...">
 <!ENTITY zotero.exportOptions.format.label "Formátum:">

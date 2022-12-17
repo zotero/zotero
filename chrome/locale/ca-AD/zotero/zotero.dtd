@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Opcions avançades">
 <!ENTITY zotero.general.tools "Eines">
 <!ENTITY zotero.general.more "Més">
+<!ENTITY zotero.general.moreInformation "More Information">
 <!ENTITY zotero.general.loading "S'està carregant…">
 <!ENTITY zotero.general.close "Tanca">
 <!ENTITY zotero.general.minimize "Minimitza">
@@ -187,6 +188,7 @@
 <!ENTITY zotero.import.createCollection "Col·loca les col·leccions importades i elements en una col·lecció nova">
 <!ENTITY zotero.import.fileHandling "Gestió de fitxers">
 <!ENTITY zotero.import.online.newItemsOnly "Baixa només els elements nous; no actualitzis els elements importats anteriorment">
+<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
 
 <!ENTITY zotero.exportOptions.title "Exporta...">
 <!ENTITY zotero.exportOptions.format.label "Format:">

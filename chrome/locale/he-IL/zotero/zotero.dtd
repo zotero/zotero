@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "אפשרויות מתקדמות">
 <!ENTITY zotero.general.tools "כלים">
 <!ENTITY zotero.general.more "עוד">
+<!ENTITY zotero.general.moreInformation "More Information">
 <!ENTITY zotero.general.loading "בטעינה…">
 <!ENTITY zotero.general.close "סגירה">
 <!ENTITY zotero.general.minimize "מזעור">
@@ -187,6 +188,7 @@
 <!ENTITY zotero.import.createCollection "העברת האוספים והפריטים המיובאים לאוסף חדש">
 <!ENTITY zotero.import.fileHandling "טיפול בקבצים">
 <!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
 
 <!ENTITY zotero.exportOptions.title "ייצוא…">
 <!ENTITY zotero.exportOptions.format.label "עיצוב:">

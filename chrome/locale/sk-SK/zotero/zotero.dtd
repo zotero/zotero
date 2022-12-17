@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Rozšírené možnosti">
 <!ENTITY zotero.general.tools "Nástroje">
 <!ENTITY zotero.general.more "Viac">
+<!ENTITY zotero.general.moreInformation "More Information">
 <!ENTITY zotero.general.loading "Nahrávam...">
 <!ENTITY zotero.general.close "Zavrieť">
 <!ENTITY zotero.general.minimize "Minimalizovať">
@@ -187,6 +188,7 @@
 <!ENTITY zotero.import.createCollection "Vložte naimportované kolekcie a záznamy do novej kolekcie">
 <!ENTITY zotero.import.fileHandling "Spracovanie súborov">
 <!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
 
 <!ENTITY zotero.exportOptions.title "Export...">
 <!ENTITY zotero.exportOptions.format.label "Formát:">

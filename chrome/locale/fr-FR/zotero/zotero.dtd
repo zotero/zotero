@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Options avancées">
 <!ENTITY zotero.general.tools "Outils">
 <!ENTITY zotero.general.more "Plus">
+<!ENTITY zotero.general.moreInformation "More Information">
 <!ENTITY zotero.general.loading "Chargement…">
 <!ENTITY zotero.general.close "Fermer">
 <!ENTITY zotero.general.minimize "Minimiser">
@@ -187,6 +188,7 @@
 <!ENTITY zotero.import.createCollection "Placer les collections et les documents importés dans une nouvelle collection">
 <!ENTITY zotero.import.fileHandling "Gestion des fichiers">
 <!ENTITY zotero.import.online.newItemsOnly "Télécharger uniquement les nouveaux documents ; ne pas mettre à jour les documents importés précédemment">
+<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
 
 <!ENTITY zotero.exportOptions.title "Exporter…">
 <!ENTITY zotero.exportOptions.format.label "Format :">

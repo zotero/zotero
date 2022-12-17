@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Avancerade alternativ">
 <!ENTITY zotero.general.tools "Verktyg">
 <!ENTITY zotero.general.more "Mera">
+<!ENTITY zotero.general.moreInformation "More Information">
 <!ENTITY zotero.general.loading "Laddar...">
 <!ENTITY zotero.general.close "Stäng">
 <!ENTITY zotero.general.minimize "Minimera">
@@ -187,6 +188,7 @@
 <!ENTITY zotero.import.createCollection "Lägg importerade samlingar och källor i en ny samling">
 <!ENTITY zotero.import.fileHandling "Filhantering">
 <!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
 
 <!ENTITY zotero.exportOptions.title "Exportera...">
 <!ENTITY zotero.exportOptions.format.label "Format:">

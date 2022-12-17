@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Napredne možnosti">
 <!ENTITY zotero.general.tools "Orodja">
 <!ENTITY zotero.general.more "Dodatno">
+<!ENTITY zotero.general.moreInformation "More Information">
 <!ENTITY zotero.general.loading "Nalaganje ...">
 <!ENTITY zotero.general.close "Zapri">
 <!ENTITY zotero.general.minimize "Skrči">
@@ -187,6 +188,7 @@
 <!ENTITY zotero.import.createCollection "Postavi uvožene zbirke in elemente v novo zbirko">
 <!ENTITY zotero.import.fileHandling "Ravnanje z datotekami">
 <!ENTITY zotero.import.online.newItemsOnly "Prenesi le nove elemente; ne posodobi poprej uvoženih elementov">
+<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
 
 <!ENTITY zotero.exportOptions.title "Izvozi ...">
 <!ENTITY zotero.exportOptions.format.label "Vrsta datoteke:">

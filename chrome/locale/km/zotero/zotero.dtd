@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Advanced Options">
 <!ENTITY zotero.general.tools "ឧបករណ៏">
 <!ENTITY zotero.general.more "ជម្រើសប្រភេទឯកសារផ្សេងៗ">
+<!ENTITY zotero.general.moreInformation "More Information">
 <!ENTITY zotero.general.loading "Loading…">
 <!ENTITY zotero.general.close "បិទ">
 <!ENTITY zotero.general.minimize "អប្បបរមានីយកម្ម">
@@ -187,6 +188,7 @@
 <!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 <!ENTITY zotero.import.fileHandling "File Handling">
 <!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
 
 <!ENTITY zotero.exportOptions.title "នាំចេញ...">
 <!ENTITY zotero.exportOptions.format.label "ទ្រង់ទ្រាយ:">

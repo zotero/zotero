@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Gelişmiş Seçenekler">
 <!ENTITY zotero.general.tools "Araçlar">
 <!ENTITY zotero.general.more "Daha Başka">
+<!ENTITY zotero.general.moreInformation "More Information">
 <!ENTITY zotero.general.loading "Yükleniyor...">
 <!ENTITY zotero.general.close "Kapat">
 <!ENTITY zotero.general.minimize "Küçült">
@@ -187,6 +188,7 @@
 <!ENTITY zotero.import.createCollection "İçeri aktarılmış dermeler ve eserleri yeni bir dermeye yerleştir">
 <!ENTITY zotero.import.fileHandling "Dosyaların İdare Edilmesi">
 <!ENTITY zotero.import.online.newItemsOnly "Yalnızca yeni eserleri indir; daha önce içeri aktarılmış olan eserleri güncelleme">
+<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
 
 <!ENTITY zotero.exportOptions.title "Dışarı Aktar...">
 <!ENTITY zotero.exportOptions.format.label "Biçim">

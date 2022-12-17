@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Pengaturan lanjutan">
 <!ENTITY zotero.general.tools "Perkakas">
 <!ENTITY zotero.general.more "Lainnya">
+<!ENTITY zotero.general.moreInformation "More Information">
 <!ENTITY zotero.general.loading "Memuat...">
 <!ENTITY zotero.general.close "Tutup">
 <!ENTITY zotero.general.minimize "Kecilkan">
@@ -187,6 +188,7 @@
 <!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 <!ENTITY zotero.import.fileHandling "File Handling">
 <!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
 
 <!ENTITY zotero.exportOptions.title "Ekspor...">
 <!ENTITY zotero.exportOptions.format.label "Format:">

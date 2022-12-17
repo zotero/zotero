@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "خيارات متقدمة">
 <!ENTITY zotero.general.tools "أدوات">
 <!ENTITY zotero.general.more "المزيد">
+<!ENTITY zotero.general.moreInformation "More Information">
 <!ENTITY zotero.general.loading "التحميل">
 <!ENTITY zotero.general.close "أغلق">
 <!ENTITY zotero.general.minimize "تصغير">
@@ -187,6 +188,7 @@
 <!ENTITY zotero.import.createCollection "ضع المجموعات المستوردة والمواد في مجموعة جديدة">
 <!ENTITY zotero.import.fileHandling "معاملة الملف">
 <!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
 
 <!ENTITY zotero.exportOptions.title "تصدير...">
 <!ENTITY zotero.exportOptions.format.label "الصياغة:">

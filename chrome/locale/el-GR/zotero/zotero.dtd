@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Προχωρημένες επιλογές">
 <!ENTITY zotero.general.tools "Εργαλεία">
 <!ENTITY zotero.general.more "Περισσότερα">
+<!ENTITY zotero.general.moreInformation "More Information">
 <!ENTITY zotero.general.loading "Φόρτωση...">
 <!ENTITY zotero.general.close "Κλείσιμο">
 <!ENTITY zotero.general.minimize "Ελαχιστοποίηση">
@@ -187,6 +188,7 @@
 <!ENTITY zotero.import.createCollection "Τοποθετήστε τις εισαγόμενες συλλογές και τα αντικείμενα σε νέα συλλογή">
 <!ENTITY zotero.import.fileHandling "Χειρισμός Αρχείων">
 <!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
 
 <!ENTITY zotero.exportOptions.title "Εξαγωγή...">
 <!ENTITY zotero.exportOptions.format.label "Μορφή:">

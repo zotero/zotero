@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "高度なオプション">
 <!ENTITY zotero.general.tools "ツール">
 <!ENTITY zotero.general.more "その他">
+<!ENTITY zotero.general.moreInformation "More Information">
 <!ENTITY zotero.general.loading "読み込み中...">
 <!ENTITY zotero.general.close "閉じる">
 <!ENTITY zotero.general.minimize "最小化する">
@@ -187,6 +188,7 @@
 <!ENTITY zotero.import.createCollection "インポートされたコレクションやアイテムを新しいコレクションに格納する">
 <!ENTITY zotero.import.fileHandling "ファイルの取り扱い">
 <!ENTITY zotero.import.online.newItemsOnly "新しいアイテムをダウンロードすることだけです；インポートしたアイテムを更新することをしないでください。">
+<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
 
 <!ENTITY zotero.exportOptions.title "エクスポート...">
 <!ENTITY zotero.exportOptions.format.label "フォーマット:">

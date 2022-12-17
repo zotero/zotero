@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Kitos parinktys">
 <!ENTITY zotero.general.tools "Priemonės">
 <!ENTITY zotero.general.more "Daugiau">
+<!ENTITY zotero.general.moreInformation "More Information">
 <!ENTITY zotero.general.loading "Įkeliama...">
 <!ENTITY zotero.general.close "Užverti">
 <!ENTITY zotero.general.minimize "Suskleisti">
@@ -187,6 +188,7 @@
 <!ENTITY zotero.import.createCollection "Importuotą rinkinį ir įrašus patalpinti naujame rinkinyje">
 <!ENTITY zotero.import.fileHandling "Rinkmenų tvarkymas">
 <!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
 
 <!ENTITY zotero.exportOptions.title "Eksportuoti...">
 <!ENTITY zotero.exportOptions.format.label "Formatas:">

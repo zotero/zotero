@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Напредне опције">
 <!ENTITY zotero.general.tools "Алати">
 <!ENTITY zotero.general.more "Више">
+<!ENTITY zotero.general.moreInformation "More Information">
 <!ENTITY zotero.general.loading "Учитавам…">
 <!ENTITY zotero.general.close "Затвори">
 <!ENTITY zotero.general.minimize "Умањи">
@@ -187,6 +188,7 @@
 <!ENTITY zotero.import.createCollection "Постави увезене збирке и ставке у нову збирку">
 <!ENTITY zotero.import.fileHandling "Рад са датотекама">
 <!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
 
 <!ENTITY zotero.exportOptions.title "Извоз…">
 <!ENTITY zotero.exportOptions.format.label "Формат:">

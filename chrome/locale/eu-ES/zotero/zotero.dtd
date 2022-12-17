@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Aukera aurreratuak">
 <!ENTITY zotero.general.tools "Tresnak">
 <!ENTITY zotero.general.more "Gehiago">
+<!ENTITY zotero.general.moreInformation "More Information">
 <!ENTITY zotero.general.loading "Kargatzen...">
 <!ENTITY zotero.general.close "Itxi">
 <!ENTITY zotero.general.minimize "Minimizatu">
@@ -187,6 +188,7 @@
 <!ENTITY zotero.import.createCollection "Inportatutako bilduma eta elementuak bilduma berri batean kokatu">
 <!ENTITY zotero.import.fileHandling "Fitxategien erabilera">
 <!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
 
 <!ENTITY zotero.exportOptions.title "Esportatu...">
 <!ENTITY zotero.exportOptions.format.label "Formatua:">

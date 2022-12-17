@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Dibarzhioù araokaet">
 <!ENTITY zotero.general.tools "Ostilhoù">
 <!ENTITY zotero.general.more "Muioc'h">
+<!ENTITY zotero.general.moreInformation "More Information">
 <!ENTITY zotero.general.loading "O kargañ...">
 <!ENTITY zotero.general.close "Serriñ">
 <!ENTITY zotero.general.minimize "Bihanaat">
@@ -187,6 +188,7 @@
 <!ENTITY zotero.import.createCollection "Plasit an dastumadegoù hag an teuliadoù emporzhiet e-barzh un dastumadeg nevez">
 <!ENTITY zotero.import.fileHandling "Meradur ar restroù">
 <!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
+<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
 
 <!ENTITY zotero.exportOptions.title "Ezporzhiañ...">
 <!ENTITY zotero.exportOptions.format.label "Stumm:">
