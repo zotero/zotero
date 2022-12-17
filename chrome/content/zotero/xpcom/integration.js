@@ -2658,7 +2658,14 @@ Zotero.Integration.URIMap.prototype.getZoteroItemForURIs = async function (uris)
 					checkbox
 				});
 				if (result === 0) {
-					setTimeout(() => Zotero.getMainWindow().Zotero_File_Interface.showImportWizard({ pageID: 'mendeley-online-explanation' }));
+					setTimeout(
+						() => Zotero.getMainWindow().Zotero_File_Interface.showImportWizard(
+							{
+								pageID: 'mendeley-online-explanation',
+								relinkOnly: true
+							}
+						)
+					);
 					throw new Zotero.Exception.UserCancelled("Importing mendeley citations");
 				}
 				else if (result == 1) {

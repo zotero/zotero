@@ -33,6 +33,7 @@ var Zotero_Import_Mendeley = function () {
 	this.mendeleyAuth = null;
 	this.newItemsOnly = false;
 	this.relinkOnly = false;
+	this.numRelinked = 0;
 	
 	this._tokens = null;
 	this._db = null;
@@ -1319,6 +1320,7 @@ Zotero_Import_Mendeley.prototype._saveItems = async function (libraryID, json) {
 				// Update any child items to point to the existing item's key instead of the
 				// new generated one
 				this._updateParentKeys('item', json, i + 1, itemJSON.key, item.key);
+				this.numRelinked++;
 				
 				// Leave item in any collections it's in
 				itemJSON.collections = item.getCollections()

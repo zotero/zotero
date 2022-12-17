@@ -80,7 +80,10 @@
 			onpageadvanced="Zotero_Import_Wizard.onImportStart()">
 
 		<vbox id="relink-only-wrapper">
-			<checkbox id="relink-only-checkbox" label="&zotero.import.online.relinkOnly;" />
+			<hbox align="center">
+				<checkbox id="relink-only-checkbox" label="&zotero.import.online.relinkOnly;" />
+				<label id="relink-only-more-info" class="zotero-text-link" value="&zotero.general.moreInformation;"/>
+			</hbox>
 		</vbox>
 
 		<checkbox id="create-collection-checkbox" label="&zotero.import.createCollection;" checked="true" />

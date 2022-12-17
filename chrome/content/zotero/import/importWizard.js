@@ -86,6 +86,11 @@ var Zotero_Import_Wizard = {
 		document.getElementById('mendeley-password').addEventListener('keyup', this.onMendeleyAuthKeyUp.bind(this));
 		
 		document.getElementById('relink-only-checkbox').addEventListener('command', this.onRelinkOnlyChange.bind(this));
+		// Set from integration.js prompt
+		if (args && args.relinkOnly) {
+			document.getElementById('relink-only-checkbox').checked = true;
+			this.onRelinkOnlyChange();
+		}
 		
 		Zotero.Translators.init(); // async
 	},
@@ -284,6 +289,10 @@ var Zotero_Import_Wizard = {
 		const hideExtraMendeleyOptions = !this._mendeleyHasPreviouslyImported || !(this._mendeleyAuth || this._mendeleyCode);
 		document.getElementById('mendeley-options').hidden = hideExtraMendeleyOptions;
 		document.getElementById('relink-only-wrapper').hidden = hideExtraMendeleyOptions || this._mendeleyImporterVersion > 0;
+		document.getElementById('relink-only-more-info').addEventListener('click', function () {
+			Zotero.launchURL('https://www.zotero.org/support/kb/mendeley_import#using_mendeley_citations');
+			window.close();
+		});
 		if (hideExtraMendeleyOptions) {
 			document.getElementById('new-items-only-checkbox').removeAttribute('checked');
 		}
@@ -340,9 +349,12 @@ var Zotero_Import_Wizard = {
 			}
 			
 			let numItems = this._translation.newItems.length;
+			let numRelinked = this._translation.numRelinked;
 			this._onDone(
 				Zotero.getString('fileInterface.importComplete'),
-				Zotero.getString(`fileInterface.itemsWereImported`, numItems, numItems)
+				document.getElementById('relink-only-checkbox').checked
+					? Zotero.getString(`fileInterface.itemsWereRelinked`, numRelinked, numRelinked)
+					: Zotero.getString(`fileInterface.itemsWereImported`, numItems, numItems)
 			);
 		}
 		catch (e) {
