@@ -2647,4 +2647,136 @@ describe("Connector Server", function () {
 			assert.equal(item.libraryID, Zotero.Libraries.userLibraryID);
 		});
 	});
+	
+	describe('/connector/request', function () {
+		let endpoint;
+		
+		before(function () {
+			endpoint = connectorServerPath + '/connector/request';
+		});
+		
+		beforeEach(function () {
+			Zotero.Server.Connector.Request.validateURLs = true;
+		});
+		
+		it('should reject GET requests', async function () {
+			let req = await Zotero.HTTP.request(
+				'GET',
+				endpoint,
+				{
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({
+						method: 'GET',
+						url: 'https://www.example.com/'
+					}),
+					successCodes: false
+				}
+			);
+			assert.equal(req.status, 400);
+			assert.include(req.responseText, 'Endpoint does not support method');
+		});
+
+		it('should not make requests to the port that the server is bound to', async function () {
+			let req = await Zotero.HTTP.request(
+				'POST',
+				endpoint,
+				{
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({
+						method: 'GET',
+						url: `http://localhost:${Zotero.Prefs.get('httpServer.port')}/`
+					}),
+					successCodes: false
+				}
+			);
+			assert.equal(req.status, 400);
+			assert.include(req.responseText, 'Unsupported URL');
+		});
+
+		it('should not make requests to its own pathname', async function () {
+			let req = await Zotero.HTTP.request(
+				'POST',
+				endpoint,
+				{
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({
+						method: 'GET',
+						url: `https://nonexistent.example.com/connector/request`
+					}),
+					successCodes: false
+				}
+			);
+			assert.equal(req.status, 400);
+			assert.include(req.responseText, 'Unsupported URL');
+		});
+
+		it('should return response in translator request() format with lowercase headers', async function () {
+			let testEndpointPath = '/test/header';
+			
+			httpd.registerPathHandler(
+				testEndpointPath,
+				{
+					handle: function (request, response) {
+						response.setStatusLine(null, 200, 'OK');
+						response.setHeader('X-Some-Header', 'Header value');
+						response.write('body');
+					}
+				}
+			);
+			
+			Zotero.Server.Connector.Request.validateURLs = false;
+			let req = await Zotero.HTTP.request(
+				'POST',
+				endpoint,
+				{
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({
+						method: 'GET',
+						url: testServerPath + testEndpointPath
+					}),
+					responseType: 'json'
+				}
+			);
+			
+			assert.equal(req.response.status, 200);
+			assert.equal(req.response.headers['x-some-header'], 'Header value');
+			assert.equal(req.response.body, 'body');
+		});
+
+		it('should set Referer', async function () {
+			let testEndpointPath = '/test/referer';
+			let referer = 'https://www.example.com/';
+
+			httpd.registerPathHandler(
+				testEndpointPath,
+				{
+					handle: function (request, response) {
+						assert.equal(request.getHeader('Referer'), referer);
+						response.setStatusLine(null, 200, 'OK');
+						response.write('');
+					}
+				}
+			);
+
+			Zotero.Server.Connector.Request.validateURLs = false;
+			let req = await Zotero.HTTP.request(
+				'POST',
+				endpoint,
+				{
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({
+						method: 'GET',
+						url: testServerPath + testEndpointPath,
+						options: {
+							headers: {
+								Referer: referer
+							}
+						}
+					})
+				}
+			);
+
+			assert.equal(req.response.status, 200);
+		});
+	});
 });
