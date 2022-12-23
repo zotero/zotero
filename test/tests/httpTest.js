@@ -45,6 +45,20 @@ describe("Zotero.HTTP", function () {
 				}
 			}
 		);
+		httpd.registerPathHandler(
+			'/requireJSON',
+			{
+				handle(request, response) {
+					if (request.getHeader('Content-Type') == 'application/json') {
+						response.setStatusLine(null, 200, "OK");
+					}
+					else {
+						response.setStatusLine(null, 400, "Bad Request");
+					}
+					response.write('JSON required');
+				}
+			}
+		);
 	});
 	
 	beforeEach(function () {
@@ -122,6 +136,20 @@ describe("Zotero.HTTP", function () {
 			
 			assert.instanceOf(e, Zotero.HTTP.CancelledException);
 			server.respond();
+		});
+		
+		it("should process headers case insensitively", async function () {
+			Zotero.HTTP.mock = null;
+			var req = await Zotero.HTTP.request(
+				'GET',
+				baseURL + 'requireJSON',
+				{
+					headers: {
+						'content-type': 'application/json'
+					}
+				}
+			);
+			assert.equal(req.status, 200);
 		});
 		
 		describe("Retries", function () {
