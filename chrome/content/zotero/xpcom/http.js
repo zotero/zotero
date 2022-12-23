@@ -117,7 +117,7 @@ Zotero.HTTP = new function() {
 	 * @param {nsIURI|String} url - URL to request
 	 * @param {Object} [options] Options for HTTP request:
 	 * @param {String} [options.body] - The body of a POST request
-	 * @param {Object} [options.headers] - Object of HTTP headers to send with the request
+	 * @param {Object | Headers} [options.headers] - HTTP headers to send with the request
 	 * @param {Boolean} [options.followRedirects = true] - Object of HTTP headers to send with the
 	 *     request
 	 * @param {Zotero.CookieSandbox} [options.cookieSandbox] - The sandbox from which cookies should
@@ -343,22 +343,19 @@ Zotero.HTTP = new function() {
 		}
 		
 		// Send headers
-		var headers = {};
-		if (options && options.headers) {
-			Object.assign(headers, options.headers);
-		}
+		var headers = new Headers(options?.headers || {});
 		var compressedBody = false;
 		if (options.body) {
-			if (!headers["Content-Type"]) {
-				headers["Content-Type"] = "application/x-www-form-urlencoded";
+			if (!headers.get("Content-Type")) {
+				headers.set("Content-Type", "application/x-www-form-urlencoded");
 			}
-			else if (headers["Content-Type"] == 'multipart/form-data') {
+			else if (headers.get("Content-Type") == 'multipart/form-data') {
 				// Allow XHR to set Content-Type with boundary for multipart/form-data
-				delete headers["Content-Type"];
+				headers.delete("Content-Type");
 			}
 			
 			if (options.compressBody && this.isWriteMethod(method)) {
-				headers['Content-Encoding'] = 'gzip';
+				headers.set('Content-Encoding', 'gzip');
 				compressedBody = await Zotero.Utilities.Internal.gzip(options.body);
 				
 				let oldLen = options.body.length;
@@ -368,23 +365,17 @@ Zotero.HTTP = new function() {
 			}
 		}
 		if (options.debug) {
-			if (headers["Zotero-API-Key"]) {
-				let dispHeaders = {};
-				Object.assign(dispHeaders, headers);
-				if (dispHeaders["Zotero-API-Key"]) {
-					dispHeaders["Zotero-API-Key"] = "[Not shown]";
-				}
-				Zotero.debug(dispHeaders);
+			if (headers.has("Zotero-API-Key")) {
+				let dispHeaders = new Headers(headers);
+				dispHeaders.set("Zotero-API-Key", "[Not shown]");
+				Zotero.debug({ ...dispHeaders.entries() });
 			}
 			else {
-				Zotero.debug(headers);
+				Zotero.debug({ ...headers.entries() });
 			}
 		}
-		for (var header in headers) {
+		for (var [header, value] of headers) {
 			// Convert numbers to string to make Sinon happy
-			let value = typeof headers[header] == 'number'
-				? headers[header].toString()
-				: headers[header]
 			xmlhttp.setRequestHeader(header, value);
 		}
 
