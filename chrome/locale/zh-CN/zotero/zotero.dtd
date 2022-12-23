@@ -15,7 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "高级选项">
 <!ENTITY zotero.general.tools "工具">
 <!ENTITY zotero.general.more "更多">
-<!ENTITY zotero.general.moreInformation "More Information">
+<!ENTITY zotero.general.moreInformation "更多信息">
 <!ENTITY zotero.general.loading "加载…">
 <!ENTITY zotero.general.close "关闭">
 <!ENTITY zotero.general.minimize "最小化">
@@ -134,7 +134,7 @@
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "无标签可显示">
 <!ENTITY zotero.tagSelector.loadingTags "加载标记…">
-<!ENTITY zotero.tagSelector.showAutomatic "自动显示">
+<!ENTITY zotero.tagSelector.showAutomatic "显示自动标签">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "显示文献库里的所有标签">
 <!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "删除此文献库中的自动标签…">
 <!ENTITY zotero.tagSelector.clearAll "取消全选">
@@ -183,12 +183,12 @@
 <!ENTITY zotero.import.source.file "文件（BibTeX，RIS，Zotero RDF等）">
 <!ENTITY zotero.import.importing "导入…">
 <!ENTITY zotero.import.database "数据库">
-<!ENTITY zotero.import.lastModified "上一次更改">
+<!ENTITY zotero.import.lastModified "最后修改">
 <!ENTITY zotero.import.size "大小">
 <!ENTITY zotero.import.createCollection "将导入的分类和条目放入新分类">
 <!ENTITY zotero.import.fileHandling "处理文件">
 <!ENTITY zotero.import.online.newItemsOnly "仅下载新条目，不更新之前已导入的条目">
-<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
+<!ENTITY zotero.import.online.relinkOnly "重新連結Mendeley桌面應用程式引文">
 
 <!ENTITY zotero.exportOptions.title "导出…">
 <!ENTITY zotero.exportOptions.format.label "格式:">

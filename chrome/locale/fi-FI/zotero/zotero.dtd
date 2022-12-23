@@ -15,7 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Lisäasetukset">
 <!ENTITY zotero.general.tools "Työkalut">
 <!ENTITY zotero.general.more "Lisää">
-<!ENTITY zotero.general.moreInformation "More Information">
+<!ENTITY zotero.general.moreInformation "Lisätietoja">
 <!ENTITY zotero.general.loading "Ladataan...">
 <!ENTITY zotero.general.close "Sulje">
 <!ENTITY zotero.general.minimize "Pienennä">
@@ -188,7 +188,7 @@
 <!ENTITY zotero.import.createCollection "Sijoita tuodut kokoelmat ja nimikkeet uuteen kokoelmaan.">
 <!ENTITY zotero.import.fileHandling "Tiedostojen käsittely">
 <!ENTITY zotero.import.online.newItemsOnly "Lataa vain uudet kohteet; älä päivitä aikaisemmin tuotuja kohteita">
-<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
+<!ENTITY zotero.import.online.relinkOnly "Linkitä uudelleen Mendeley Desktopin viittaukset">
 
 <!ENTITY zotero.exportOptions.title "Vie...">
 <!ENTITY zotero.exportOptions.format.label "Muoto:">

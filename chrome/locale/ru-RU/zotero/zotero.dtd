@@ -15,7 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Расширенные настройки">
 <!ENTITY zotero.general.tools "Инструменты">
 <!ENTITY zotero.general.more "Ещё">
-<!ENTITY zotero.general.moreInformation "More Information">
+<!ENTITY zotero.general.moreInformation "Дополнительные сведения">
 <!ENTITY zotero.general.loading "Загрузка...">
 <!ENTITY zotero.general.close "Закрыть">
 <!ENTITY zotero.general.minimize "Свернуть">

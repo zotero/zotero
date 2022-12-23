@@ -9,27 +9,27 @@
 <!ENTITY zotero.preferences.prefpane.general "常规">
 
 <!ENTITY zotero.preferences.fileHandling "文件处理">
-<!ENTITY zotero.preferences.automaticSnapshots "从 Web 页面创建条目时自动生成快照">
+<!ENTITY zotero.preferences.automaticSnapshots "从网页创建条目时自动抓取网页快照">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "保存条目时自动附加相关的 PDF 文档及其他文件">
 <!ENTITY zotero.preferences.autoRecognizeFiles "自动检索 PDF 的元数据">
-<!ENTITY zotero.preferences.autoRenameFiles "使用父类元数据自动重命名附件文件">
+<!ENTITY zotero.preferences.autoRenameFiles "自动依父条目的元数据重命名附件文件">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "重命名链接的文件">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "打开 PDF 使用">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "系统默认">
 
 <!ENTITY zotero.preferences.miscellaneous "杂项">
-<!ENTITY zotero.preferences.autoUpdate "自动检查更新的转换器和样式">
-<!ENTITY zotero.preferences.updateNow "立刻更新">
-<!ENTITY zotero.preferences.reportTranslationFailure "报告失效的网站转换器">
-<!ENTITY zotero.preferences.parseRISRefer "使用 Zotero 来处理下载的 RIS/Refer 文件">
-<!ENTITY zotero.preferences.automaticTags "使用关键词和标题自动给条目添加标签">
+<!ENTITY zotero.preferences.autoUpdate "自动检查转换器及样式的更新">
+<!ENTITY zotero.preferences.updateNow "立即更新">
+<!ENTITY zotero.preferences.reportTranslationFailure "报告网站转换器的故障">
+<!ENTITY zotero.preferences.parseRISRefer "使用 Zotero 处理下载的 BibTeX/RIS/Refer 文件">
+<!ENTITY zotero.preferences.automaticTags "基于关键词和主题词自动为条目添加标签">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "自动删除回收站内时间超过">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "天前的条目">
 
 <!ENTITY zotero.preferences.groups "群组">
-<!ENTITY zotero.preferences.groups.whenCopyingInclude "跨文献库复制条目时, 包括:">
+<!ENTITY zotero.preferences.groups.whenCopyingInclude "跨文献库复制条目时，包含：">
 <!ENTITY zotero.preferences.groups.childNotes "子笔记">
-<!ENTITY zotero.preferences.groups.childFiles "子网页截图和导入的文件">
+<!ENTITY zotero.preferences.groups.childFiles "子网页快照和导入的文件">
 <!ENTITY zotero.preferences.groups.annotations "注释">
 <!ENTITY zotero.preferences.groups.childLinks "子链接">
 <!ENTITY zotero.preferences.groups.tags "标签">
@@ -49,7 +49,7 @@
 <!ENTITY zotero.preferences.sync.username "用户名:">
 <!ENTITY zotero.preferences.sync.password "密码:">
 <!ENTITY zotero.preferences.sync.syncServer "数据同步">
-<!ENTITY zotero.preferences.sync.setUpSync "设置同步">
+<!ENTITY zotero.preferences.sync.setUpSync "启用同步">
 <!ENTITY zotero.preferences.sync.unlinkAccount "退出账户…">
 <!ENTITY zotero.preferences.sync.createAccount "创建账户">
 <!ENTITY zotero.preferences.sync.lostPassword "忘记密码?">
@@ -59,7 +59,7 @@
 <!ENTITY zotero.preferences.sync.about "关于同步">
 <!ENTITY zotero.preferences.sync.fileSyncing "文件同步">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "网址:">
-<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "同步文献库中的附件, 使用:">
+<!ENTITY zotero.preferences.sync.fileSyncing.myLibrary "“我的文献”附件同步方式：">
 <!ENTITY zotero.preferences.sync.fileSyncing.groups "使用 Zotero 云存储同步群组文献库中的附件">
 <!ENTITY zotero.preferences.sync.fileSyncing.download "下载文件">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "在同步时">
@@ -78,7 +78,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "将本地数据与远程数据合并，忽略同步历史">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "从在线文献库恢复">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "用在线文献库中的数据覆盖本地 Zotero 数据。">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "替换在线文库">
+<!ENTITY zotero.preferences.sync.reset.restoreToServer "替换在线文献库">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "使用本地 Zotero 数据覆盖在线文献库">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "重置文件同步历史">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "将所有附件文件与存储服务中的进行比较">
@@ -93,10 +93,10 @@
 <!ENTITY zotero.preferences.search.indexStats.indexed "已索引:">
 <!ENTITY zotero.preferences.search.indexStats.partial "部分索引:">
 <!ENTITY zotero.preferences.search.indexStats.unindexed "未索引:">
-<!ENTITY zotero.preferences.search.indexStats.words "字:">
+<!ENTITY zotero.preferences.search.indexStats.words "字/词:">
 
-<!ENTITY zotero.preferences.fulltext.textMaxLength "单个文件索引的最多字符数:">
-<!ENTITY zotero.preferences.fulltext.pdfMaxPages "单个文件索引的最多页数:">
+<!ENTITY zotero.preferences.fulltext.textMaxLength "单个文件最多索引字符数:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "单个文件最多索引页数:">
 
 <!ENTITY zotero.preferences.prefpane.export "导出">
 
@@ -105,20 +105,20 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "如果禁用此项，Zotero 生成期刊、杂志或报纸文章的引用时，仅为没有指定页码范围的文章加入网址。">
 
 <!ENTITY zotero.preferences.quickCopy.caption "快速复制">
-<!ENTITY zotero.preferences.quickCopy.itemFormat "项目格式：">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "条目格式：">
 <!ENTITY zotero.preferences.quickCopy.noteFormat "笔记格式：">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "复制为 HTML">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "网站专属性设置:">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "网站专属设置:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "域/路径">
-<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(比如 wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(例如 wikipedia.org)">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.format "格式">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.locale "语言">
-<!ENTITY zotero.preferences.quickCopy.dragLimit "禁用快速复制, 当拖动项超过">
+<!ENTITY zotero.preferences.quickCopy.dragLimit "禁用快速复制，当拖动超过">
 
 <!ENTITY zotero.preferences.prefpane.cite "引用">
 <!ENTITY zotero.preferences.cite.styles "样式">
-<!ENTITY zotero.preferences.cite.wordProcessors "文字处理软件">
-<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "使用添加引注的经典对话框">
+<!ENTITY zotero.preferences.cite.wordProcessors "文档编辑软件">
+<!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "使用经典版“添加引注”对话框">
 <!ENTITY zotero.preferences.styleEditor "样式编辑器">
 <!ENTITY zotero.preferences.stylePreview "样式预览">
 
@@ -128,7 +128,7 @@
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
 <!ENTITY zotero.preferences.export.getAdditionalStyles "获取更多样式…">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "保存到Zotero (地址栏图标)">
+<!ENTITY zotero.preferences.keys.saveToZotero "保存到 Zotero (地址栏图标)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "聚焦文献库面板">
 <!ENTITY zotero.preferences.keys.quicksearch "快速搜索">
 <!ENTITY zotero.preferences.keys.newItem "新建条目">
@@ -142,24 +142,24 @@
 <!ENTITY zotero.preferences.prefpane.proxies "代理">
 
 <!ENTITY zotero.preferences.proxies.proxyOptions "代理选项">
-<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero 将通过保存的代理透明的重新定向请求. 请参见">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero 将通过已保存的代理无需介入地重定向请求。参见">
 <!ENTITY zotero.preferences.proxies.desc_link "代理文档">
 <!ENTITY zotero.preferences.proxies.desc_after_link "以获取更多信息。">
-<!ENTITY zotero.preferences.proxies.transparent "启用代理转接">
+<!ENTITY zotero.preferences.proxies.transparent "启用代理重定向">
 <!ENTITY zotero.preferences.proxies.autoRecognize "自动识别代理的资源">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "当通过代理重定向时显示通知">
-<!ENTITY zotero.preferences.proxies.disableByDomain "禁用代理转接, 当域名包含">
-<!ENTITY zotero.preferences.proxies.configured "已设置的代理">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "通过代理重定向时显示通知">
+<!ENTITY zotero.preferences.proxies.disableByDomain "禁用代理重定向，如果我的域名包含">
+<!ENTITY zotero.preferences.proxies.configured "代理配置">
 <!ENTITY zotero.preferences.proxies.hostname "域名">
 <!ENTITY zotero.preferences.proxies.scheme "规则">
 
 <!ENTITY zotero.preferences.proxies.multiSite "多站点">
 <!ENTITY zotero.preferences.proxies.autoAssociate "自动关联新域名">
-<!ENTITY zotero.preferences.proxies.variables "代理规则中, 您可以使用以下变量:">
-<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - 代理站点域名 (如 www.zotero.org)">
-<!ENTITY zotero.preferences.proxies.p_variable "&#37;p -  代理页面的路径, 不包含开头的斜杆 (如 about/index.html)">
-<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - 目录路径 (如 about/ )">
-<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - 文件名 (如 index.html)">
+<!ENTITY zotero.preferences.proxies.variables "代理规则中可以使用以下变量：">
+<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - 代理站点的域名 (如 www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.p_variable "&#37;p -  代理页面的路径，无需斜杆开头（如 about/index.html）">
+<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - 目录路径（如 about/）">
+<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - 文件名（如 index.html）">
 <!ENTITY zotero.preferences.proxies.a_variable "&#37;a -  任意字符串">
 
 <!ENTITY zotero.preferences.prefpane.advanced "高级">
@@ -183,20 +183,20 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "使用配置目录">
 <!ENTITY zotero.preferences.dataDir.custom "自定义:">
 <!ENTITY zotero.preferences.dataDir.choose "选择…">
-<!ENTITY zotero.preferences.dataDir.viaCommandLine "(通过 command line 指定)">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "（已由命令行指定）">
 <!ENTITY zotero.preferences.dataDir.reveal "打开数据文件夹">
 <!ENTITY zotero.preferences.dataDir.migrate "迁移到新的默认位置…">
 
-<!ENTITY zotero.preferences.attachmentBaseDir.caption "链接附件的根目录">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "在根目录中, Zotero 对链接附件使用相对路径, 因此只要文件结构相同, 您可以在不同的电脑上访问这些附件.">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "已链接附件的根目录">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero 会为位于根目录（及其子目录）内的已链接附件使用相对路径，因此只要目录结构相同，您可以在不同电脑上照常访问这些附件。">
 <!ENTITY zotero.preferences.attachmentBaseDir.basePath "根目录:">
 <!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "选择…">
-<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "恢复使用绝对路径…">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "改为使用绝对路径…">
 
 <!ENTITY zotero.preferences.dbMaintenance "数据库维护">
-<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "数据库完整性检查">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "检查数据库完整性">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "重置转换器和样式…">
 <!ENTITY zotero.preferences.dbMaintenance.resetTranslators "重置转换器…">
 <!ENTITY zotero.preferences.dbMaintenance.resetStyles "重置样式…">
 
-<!ENTITY zotero.preferences.configEditor "设置编辑器">
+<!ENTITY zotero.preferences.configEditor "编辑器">

@@ -11,17 +11,17 @@
 <!ENTITY zotero.preferences.fileHandling "File Handling">
 <!ENTITY zotero.preferences.automaticSnapshots "Ambil foto secara automatis ketika menyusun item dari laman web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Lampirkan PDF dan berkas terkait lainnya secara automatis saat menyimpan item">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
-<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
+<!ENTITY zotero.preferences.autoRecognizeFiles "Secara otomatis mengambil metadata untuk PDF">
+<!ENTITY zotero.preferences.autoRenameFiles "Secara otomatis mengganti nama file lampiran menggunakan metadata induk">
+<!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Ganti nama file yang ditautkan">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Buka PDF menggunakan">
-<!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
+<!ENTITY zotero.preferences.fileHandler.systemDefault "Default Sistem">
 
 <!ENTITY zotero.preferences.miscellaneous "Lain-lain">
-<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators and styles">
+<!ENTITY zotero.preferences.autoUpdate "Secara otomatis memeriksa penerjemah dan gaya yang diperbarui">
 <!ENTITY zotero.preferences.updateNow "Mutakhirkan sekarang">
 <!ENTITY zotero.preferences.reportTranslationFailure "Laporkan kerusakan translator situs">
-<!ENTITY zotero.preferences.parseRISRefer "Use Zotero for downloaded BibTeX/RIS/Refer files">
+<!ENTITY zotero.preferences.parseRISRefer "Gunakan Zotero untuk mengunduh file BibTeX/RIS/Refer">
 <!ENTITY zotero.preferences.automaticTags "Berikan tag pada item dengan kata kunci dan bagian utama subjek secara automatis">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Buang item-item di dalam kantung sampah yang telah dihapus lebih dari">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "hari yang lalu secara automatis">
@@ -35,12 +35,12 @@
 <!ENTITY zotero.preferences.groups.tags "tags">
 
 <!ENTITY zotero.preferences.feeds "Umpan">
-<!ENTITY zotero.preferences.feeds.sorting.label "Sorting:">
-<!ENTITY zotero.preferences.feeds.sorting.newest "Newest items first">
-<!ENTITY zotero.preferences.feeds.sorting.oldest "Oldest items first">
-<!ENTITY zotero.preferences.feeds.feedDefaults "Feed Defaults">
+<!ENTITY zotero.preferences.feeds.sorting.label "Penyortiran:">
+<!ENTITY zotero.preferences.feeds.sorting.newest "Item terbaru terlebih dahulu">
+<!ENTITY zotero.preferences.feeds.sorting.oldest "Item terlama terlebih dahulu">
+<!ENTITY zotero.preferences.feeds.feedDefaults "Umpan Default">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
+<!ENTITY zotero.preferences.openurl.choose "Pilih resolver...">
 <!ENTITY zotero.preferences.openurl.custom "Kustom...">
 <!ENTITY zotero.preferences.openurl.server "Resolver:">
 <!ENTITY zotero.preferences.openurl.version "Versi:">
@@ -49,12 +49,12 @@
 <!ENTITY zotero.preferences.sync.username "Nama pengguna:">
 <!ENTITY zotero.preferences.sync.password "Password:">
 <!ENTITY zotero.preferences.sync.syncServer "Sinkronisasi data">
-<!ENTITY zotero.preferences.sync.setUpSync "Set Up Syncing">
-<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Account…">
+<!ENTITY zotero.preferences.sync.setUpSync "Atur sinkronisasi">
+<!ENTITY zotero.preferences.sync.unlinkAccount "Unlink Akun...">
 <!ENTITY zotero.preferences.sync.createAccount "Buat Akun">
 <!ENTITY zotero.preferences.sync.lostPassword "Kehilangan Password?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "SInkronisasikan secara automatis">
-<!ENTITY zotero.preferences.sync.syncFullTextContent "Sync full-text content">
+<!ENTITY zotero.preferences.sync.syncFullTextContent "Sinkronisasi konten teks lengkap">
 <!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
 <!ENTITY zotero.preferences.sync.about "Tentang Sinkronisasi">
 <!ENTITY zotero.preferences.sync.fileSyncing "Sinkronisasi Berkas">
@@ -64,11 +64,11 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.download "Unduh file">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.atSyncTime "pada waktu sinkronisasi">
 <!ENTITY zotero.preferences.sync.fileSyncing.download.onDemand "sebagaimana dibutuhkan">
-<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verify Server">
+<!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verifikasi Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Dengan menggunakan penyimpanan Zotero, Anda sepakat untuk terikat dengan ">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "syarat dan ketentuan di dalamnya">
 <!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
-<!ENTITY zotero.preferences.sync.librariesToSync.button "Choose Libraries…">
+<!ENTITY zotero.preferences.sync.librariesToSync.button "Pilih perpustakaan...">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Sinkronisasi">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Perpustakaan">
 <!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">

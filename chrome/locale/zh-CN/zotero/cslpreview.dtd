@@ -6,4 +6,4 @@
 <!ENTITY styles.preview.citationFormat.authorDate "作者-日期">
 <!ENTITY styles.preview.citationFormat.label "标签">
 <!ENTITY styles.preview.citationFormat.note "注释">
-<!ENTITY styles.preview.citationFormat.numeric "顺序编码制">
+<!ENTITY styles.preview.citationFormat.numeric "序号">

@@ -52,7 +52,7 @@
 <!ENTITY viewMenu.accesskey "V">
 <!ENTITY layout.label "布局">
 <!ENTITY standardView.label "标准视图">
-<!ENTITY stackedView.label "堆栈视图">
+<!ENTITY stackedView.label "堆叠视图">
 <!ENTITY collectionsPane.label "分类面板">
 <!ENTITY itemPane.label "条目面板">
 <!ENTITY tagSelector.label "标签选择器">
@@ -63,9 +63,9 @@
 
 <!ENTITY toolsMenu.label "工具">
 <!ENTITY toolsMenu.accesskey "T">
-<!ENTITY installConnector.label "安装浏览器插件">
+<!ENTITY installConnector.label "安装浏览器扩展">
 <!ENTITY installConnector.accesskey "C">
-<!ENTITY addons.label "插件">
+<!ENTITY addons.label "附加组件">
 <!ENTITY developer.label "开发者">
 
 
@@ -95,12 +95,12 @@
 <!ENTITY helpReportErrors.label "报告错误…">
 <!ENTITY helpReportErrors.accesskey "R">
 
-<!ENTITY debugOutputLogging.label "输出日志排错">
+<!ENTITY debugOutputLogging.label "调试日志">
 <!ENTITY debugOutputLogging.accesskey "L">
-<!ENTITY debugOutputLogging.submit "提交输出文件">
-<!ENTITY debugOutputLogging.view "查看输出文件">
-<!ENTITY debugOutputLogging.clear "清除输出文件">
-<!ENTITY debugOutputLogging.restartWithLoggingEnabled "以启用日志模式重新启动…">
+<!ENTITY debugOutputLogging.submit "提交输出日志">
+<!ENTITY debugOutputLogging.view "查看输出日志">
+<!ENTITY debugOutputLogging.clear "清空输出日志">
+<!ENTITY debugOutputLogging.restartWithLoggingEnabled "重启为启用日志模式…">
 
 <!ENTITY helpCheckForUpdates.label "检查更新…">
 <!ENTITY helpCheckForUpdates.accesskey "U">

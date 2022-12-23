@@ -15,7 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "고급 ">
 <!ENTITY zotero.general.tools "도구">
 <!ENTITY zotero.general.more "더 보기">
-<!ENTITY zotero.general.moreInformation "More Information">
+<!ENTITY zotero.general.moreInformation "정보 더 보기">
 <!ENTITY zotero.general.loading "불러오는 중...">
 <!ENTITY zotero.general.close "닫기">
 <!ENTITY zotero.general.minimize "최소화">
