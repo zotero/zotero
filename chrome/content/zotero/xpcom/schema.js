@@ -2339,6 +2339,7 @@ Zotero.Schema = new function(){
 		var styleUpdates = xmlhttp.responseXML.getElementsByTagName('style');
 		
 		_showRepositoryMessage(xmlhttp.responseXML);
+		_checkRepositoryPrefs(xmlhttp.responseXML);
 		
 		if (!translatorUpdates.length && !styleUpdates.length){
 			await Zotero.DB.executeTransaction(async function (conn) {
@@ -2486,6 +2487,59 @@ Zotero.Schema = new function(){
 					_hiddenNoticesWithoutIDs.set(text, now + 86400);
 				}
 			}, 500);
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+	}
+	
+	
+	/**
+	 * Check for remotely set preferences
+	 *
+	 * Format:
+	 *
+	 * <prefs>
+	 *     <prefset version="1">
+	 *         <pref name="extensions.zotero.import.mendeleyUseOAuth" value="true" />
+	 *     </prefset>
+	 * </prefs>
+	 *
+	 * Prefsets must be in increasing order
+	 *
+	 * @param {XMLDocument} responseXML - Response document from repository
+	 */
+	function _checkRepositoryPrefs(responseXML) {
+		const allowedPrefs = new Set([
+			'extensions.zotero.import.mendeleyUseOAuth'
+		]);
+		try {
+			var prefsElem = responseXML.querySelector('prefs');
+			if (!prefsElem) {
+				return;
+			}
+			var prefsets = prefsElem.querySelectorAll('prefset');
+			for (let prefset of prefsets) {
+				let version = parseInt(prefset.getAttribute('version'));
+				let pref = prefset.querySelector('pref');
+				if (!pref) {
+					Zotero.logError('<pref> not found within <prefset>');
+					continue;
+				}
+				if (version <= Zotero.Prefs.get('prefVersion.remote')) {
+					break;
+				}
+				let name = pref.getAttribute('name');
+				if (!allowedPrefs.has(name)) {
+					Zotero.logError(`${name} cannot be set remotely`);
+					continue;
+				}
+				let value = pref.getAttribute('value');
+				if (value == "true") value = true;
+				if (value == "false") value = false;
+				Zotero.Prefs.set(name, value, true);
+				Zotero.Prefs.set('prefVersion.remote', version);
+			}
 		}
 		catch (e) {
 			Zotero.logError(e);
