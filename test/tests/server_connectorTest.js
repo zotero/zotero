@@ -2656,7 +2656,11 @@ describe("Connector Server", function () {
 		});
 		
 		beforeEach(function () {
-			Zotero.Server.Connector.Request.validateHosts = true;
+			Zotero.Server.Connector.Request.enableValidation = true;
+		});
+
+		after(function () {
+			Zotero.Server.Connector.Request.enableValidation = true;
 		});
 		
 		it('should reject GET requests', async function () {
@@ -2708,6 +2712,26 @@ describe("Connector Server", function () {
 			assert.include(req.responseText, 'Unsupported URL');
 		});
 
+		it('should reject requests with non-Mozilla/ user agents', async function () {
+			let req = await Zotero.HTTP.request(
+				'POST',
+				endpoint,
+				{
+					headers: {
+						'content-type': 'application/json',
+						'user-agent': 'BadBrowser/1.0'
+					},
+					body: JSON.stringify({
+						method: 'GET',
+						url: `https://www.worldcat.org/api/nonexistent`
+					}),
+					successCodes: false
+				}
+			);
+			assert.equal(req.status, 400);
+			assert.include(req.responseText, 'Unsupported User-Agent');
+		});
+
 		it('should allow a request to an allowed host', async function () {
 			let stub = sinon.stub(Zotero.HTTP, 'request');
 			// First call: call original
@@ -2726,7 +2750,7 @@ describe("Connector Server", function () {
 					headers: { 'content-type': 'application/json' },
 					body: JSON.stringify({
 						method: 'GET',
-						url: `http://www.worldcat.org/api/nonexistent`
+						url: `https://www.worldcat.org/api/nonexistent`
 					})
 				}
 			);
@@ -2750,7 +2774,7 @@ describe("Connector Server", function () {
 				}
 			);
 			
-			Zotero.Server.Connector.Request.validateHosts = false;
+			Zotero.Server.Connector.Request.enableValidation = false;
 			let req = await Zotero.HTTP.request(
 				'POST',
 				endpoint,
@@ -2784,7 +2808,7 @@ describe("Connector Server", function () {
 				}
 			);
 
-			Zotero.Server.Connector.Request.validateHosts = false;
+			Zotero.Server.Connector.Request.enableValidation = false;
 			let req = await Zotero.HTTP.request(
 				'POST',
 				endpoint,

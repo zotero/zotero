@@ -1870,7 +1870,7 @@ Zotero.Server.Connector.Request.allowedHosts = ['www.worldcat.org'];
 /**
  * For testing: allow disabling validation so we can make requests to the server.
  */
-Zotero.Server.Connector.Request.validateHosts = true;
+Zotero.Server.Connector.Request.enableValidation = false;
 
 Zotero.Server.Endpoints["/connector/request"] = Zotero.Server.Connector.Request;
 Zotero.Server.Connector.Request.prototype = {
@@ -1896,13 +1896,18 @@ Zotero.Server.Connector.Request.prototype = {
 			return [400, 'text/plain', 'Unsupported scheme'];
 		}
 
-		if (Zotero.Server.Connector.Request.validateHosts
-				&& !Zotero.Server.Connector.Request.allowedHosts.includes(uri.host)) {
-			return [
-				400,
-				'text/plain',
-				`Unsupported URL: host was ${uri.host}, expected one of [${Zotero.Server.Connector.Request.allowedHosts.join(', ')}]`
-			];
+		if (Zotero.Server.Connector.Request.enableValidation) {
+			if (!Zotero.Server.Connector.Request.allowedHosts.includes(uri.host)) {
+				return [
+					400,
+					'text/plain',
+					`Unsupported URL: host was ${uri.host}, expected one of [${Zotero.Server.Connector.Request.allowedHosts.join(', ')}]`
+				];
+			}
+
+			if (req.headers['User-Agent'] && !req.headers['User-Agent'].startsWith('Mozilla/')) {
+				return [400, 'text/plain', 'Unsupported User-Agent'];
+			}
 		}
 		
 		options = options || {};
