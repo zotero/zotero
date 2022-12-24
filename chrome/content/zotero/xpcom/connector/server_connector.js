@@ -1901,11 +1901,11 @@ Zotero.Server.Connector.Request.prototype = {
 				return [
 					400,
 					'text/plain',
-					`Unsupported URL: host was ${uri.host}, expected one of [${Zotero.Server.Connector.Request.allowedHosts.join(', ')}]`
+					'Unsupported URL'
 				];
 			}
 
-			if (req.headers['User-Agent'] && !req.headers['User-Agent'].startsWith('Mozilla/')) {
+			if (!req.headers['User-Agent'] || !req.headers['User-Agent'].startsWith('Mozilla/')) {
 				return [400, 'text/plain', 'Unsupported User-Agent'];
 			}
 		}
