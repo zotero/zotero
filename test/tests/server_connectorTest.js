@@ -2656,7 +2656,7 @@ describe("Connector Server", function () {
 		});
 		
 		beforeEach(function () {
-			Zotero.Server.Connector.Request.validateURLs = true;
+			Zotero.Server.Connector.Request.validateHosts = true;
 		});
 		
 		it('should reject GET requests', async function () {
@@ -2676,7 +2676,7 @@ describe("Connector Server", function () {
 			assert.include(req.responseText, 'Endpoint does not support method');
 		});
 
-		it('should not make requests to the port that the server is bound to', async function () {
+		it('should not make requests to arbitrary hosts', async function () {
 			let req = await Zotero.HTTP.request(
 				'POST',
 				endpoint,
@@ -2691,9 +2691,34 @@ describe("Connector Server", function () {
 			);
 			assert.equal(req.status, 400);
 			assert.include(req.responseText, 'Unsupported URL');
+
+			req = await Zotero.HTTP.request(
+				'POST',
+				endpoint,
+				{
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({
+						method: 'GET',
+						url: `http://www.example.com/`
+					}),
+					successCodes: false
+				}
+			);
+			assert.equal(req.status, 400);
+			assert.include(req.responseText, 'Unsupported URL');
 		});
 
-		it('should not make requests to its own pathname', async function () {
+		it('should allow a request to an allowed host', async function () {
+			let stub = sinon.stub(Zotero.HTTP, 'request');
+			// First call: call original
+			stub.callThrough();
+			// Second call (call from within /connector/request handler): return the following
+			stub.onSecondCall().returns({
+				status: 200,
+				getAllResponseHeaders: () => '',
+				response: 'it went through'
+			});
+			
 			let req = await Zotero.HTTP.request(
 				'POST',
 				endpoint,
@@ -2701,13 +2726,14 @@ describe("Connector Server", function () {
 					headers: { 'content-type': 'application/json' },
 					body: JSON.stringify({
 						method: 'GET',
-						url: `https://nonexistent.example.com/connector/request`
-					}),
-					successCodes: false
+						url: `http://www.worldcat.org/api/nonexistent`
+					})
 				}
 			);
-			assert.equal(req.status, 400);
-			assert.include(req.responseText, 'Unsupported URL');
+			assert.equal(req.status, 200);
+			assert.equal(JSON.parse(req.responseText).body, 'it went through');
+			
+			stub.restore();
 		});
 
 		it('should return response in translator request() format with lowercase headers', async function () {
@@ -2724,7 +2750,7 @@ describe("Connector Server", function () {
 				}
 			);
 			
-			Zotero.Server.Connector.Request.validateURLs = false;
+			Zotero.Server.Connector.Request.validateHosts = false;
 			let req = await Zotero.HTTP.request(
 				'POST',
 				endpoint,
@@ -2758,7 +2784,7 @@ describe("Connector Server", function () {
 				}
 			);
 
-			Zotero.Server.Connector.Request.validateURLs = false;
+			Zotero.Server.Connector.Request.validateHosts = false;
 			let req = await Zotero.HTTP.request(
 				'POST',
 				endpoint,
@@ -2776,7 +2802,7 @@ describe("Connector Server", function () {
 				}
 			);
 
-			assert.equal(req.response.status, 200);
+			assert.equal(JSON.parse(req.response).status, 200);
 		});
 	});
 });

@@ -1861,15 +1861,21 @@ Zotero.Server.Connector.IEHack.prototype = {
  *			body - The response body, as a string
  */
 Zotero.Server.Connector.Request = function () {};
+
+/**
+ * The list of allowed hosts. Intentionally hardcoded.
+ */
+Zotero.Server.Connector.Request.allowedHosts = ['www.worldcat.org'];
+
+/**
+ * For testing: allow disabling validation so we can make requests to the server.
+ */
+Zotero.Server.Connector.Request.validateHosts = true;
+
 Zotero.Server.Endpoints["/connector/request"] = Zotero.Server.Connector.Request;
 Zotero.Server.Connector.Request.prototype = {
 	supportedMethods: ["POST"],
 	supportedDataTypes: ["application/json"],
-
-	/**
-	 * For testing: allow disabling URL validation so we can make requests to the server.
-	 */
-	validateURLs: true,
 
 	init: async function (req) {
 		let { method, url, options } = req.data;
@@ -1890,14 +1896,13 @@ Zotero.Server.Connector.Request.prototype = {
 			return [400, 'text/plain', 'Unsupported scheme'];
 		}
 
-		// Through heuristics, attempt to prevent:
-		//   - recursive requests to this endpoint, which will deadlock the server until they time out
-		//   - requests to the local network, which shouldn't be necessary from the connector and pose a security risk
-		if (this.validateURLs
-			&& (uri.port == Zotero.Prefs.get('httpServer.port')
-				|| uri.filePath == '/connector/request'
-				|| Services.io.hostnameIsLocalIPAddress(uri))) {
-			return [400, 'text/plain', 'Unsupported URL'];
+		if (Zotero.Server.Connector.Request.validateHosts
+				&& !Zotero.Server.Connector.Request.allowedHosts.includes(uri.host)) {
+			return [
+				400,
+				'text/plain',
+				`Unsupported URL: host was ${uri.host}, expected one of [${Zotero.Server.Connector.Request.allowedHosts.join(', ')}]`
+			];
 		}
 		
 		options = options || {};
