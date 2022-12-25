@@ -2650,7 +2650,7 @@ describe("Connector Server", function () {
 		});
 	});
 	
-	describe('/connector/request', function () {
+	describe.skip('/connector/request', function () {
 		let endpoint;
 		
 		before(function () {
