@@ -245,7 +245,9 @@
 							urlField.setAttribute('hidden', false);
 							if (this.clickableLink) {
 								 urlField.onclick = function (event) {
-									ZoteroPane_Local.loadURI(this.value, event)
+									if (event.button != 2) {
+										ZoteroPane_Local.loadURI(this.value, event)
+									}
 								};
 								urlField.className = 'zotero-text-link';
 							}
