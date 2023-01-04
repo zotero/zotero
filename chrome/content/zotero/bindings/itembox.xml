@@ -844,6 +844,7 @@
 					removeButton.setAttribute('ztabindex', tabindex + 3);
 					removeButton.setAttribute('role', 'button');
 					removeButton.setAttribute('aria-label', Zotero.getString('general.delete'));
+					removeButton.setAttribute('tooltiptext', Zotero.getString('general.delete'));
 					removeButton.setAttribute("value","-");
 					removeButton.setAttribute('class','zotero-clicky zotero-focusable zotero-clicky-minus');
 					removeButton.setAttribute('onkeypress', 'return document.getBindingParent(this).handleKeyPress(event)');
@@ -865,6 +866,8 @@
 					addButton.setAttribute('ztabindex', tabindex + 4);
 					addButton.setAttribute("value","+");
 					addButton.setAttribute('role', 'button');
+					addButton.setAttribute('aria-label', Zotero.getString('general.create'));
+					addButton.setAttribute('tooltiptext', Zotero.getString('general.create'));
 					addButton.setAttribute('class', 'zotero-clicky zotero-focusable zotero-clicky-plus');
 					addButton.setAttribute('onkeypress', 'return document.getBindingParent(this).handleKeyPress(event)');
 					// If row isn't saved, don't let user add more
