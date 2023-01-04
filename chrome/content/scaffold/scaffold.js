@@ -1577,6 +1577,16 @@ var Scaffold = new function () {
 		return str + "\n}";
 	}
 	
+	// open the URL from the URL field
+	this.openURLField = async function () {
+		let _browser = document.getElementById('browser');
+		let browserUrl = document.getElementById("browser-url");
+		_browser.loadURIWithFlags(
+			browserUrl.value,
+			Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE
+		);
+	};
+
 	/*
 	 * adds a new test from the current input/translator
 	 * web or import only for now
@@ -1780,7 +1790,7 @@ var Scaffold = new function () {
 	 * the system's default browser).
 	 * @param {boolean} openExternally whether to open in the default browser
 	**/
-	this.openURL = function (openExternally) {
+	this.openURLInTests = function (openExternally) {
 		var listbox = document.getElementById("testing-listbox");
 		var item = listbox.selectedItems[0];
 		var url = item.getElementsByTagName("listcell")[0].getAttribute("label");
