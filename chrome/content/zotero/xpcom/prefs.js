@@ -164,13 +164,6 @@ Zotero.Prefs = new function(){
 				case branch.PREF_BOOL:
 					return branch.setBoolPref(pref, value);
 				case branch.PREF_STRING:
-					// Pre-Fx59
-					if (!branch.setStringPref) {
-						let str = Cc["@mozilla.org/supports-string;1"]
-							.createInstance(Ci.nsISupportsString);
-						str.data = value;
-						return branch.setComplexValue(pref, Ci.nsISupportsString, str);
-					}
 					return branch.setStringPref(pref, value);
 				case branch.PREF_INT:
 					return branch.setIntPref(pref, value);
@@ -183,13 +176,6 @@ Zotero.Prefs = new function(){
 					}
 					if (typeof value == 'string') {
 						Zotero.debug("Creating string pref '" + pref + "'");
-						// Pre-Fx59
-						if (!branch.setStringPref) {
-							let str = Cc["@mozilla.org/supports-string;1"]
-								.createInstance(Ci.nsISupportsString);
-							str.data = value;
-							return branch.setComplexValue(pref, Ci.nsISupportsString, str);
-						}
 						return branch.setStringPref(pref, value);
 					}
 					if (parseInt(value) == value) {
