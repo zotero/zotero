@@ -5456,6 +5456,11 @@ var ZoteroPane = new function()
 	 * @return {Promise<Boolean>} True if relinked successfully or canceled
 	 */
 	this.checkForLinkedFilesToRelink = async function (item) {
+		// Naive split and join implementations that split on any separator and join using forward slashes
+		// OS.Path methods have different behavior depending on the platform, and a naive approach is good enough here
+		let split = path => path.split(/[/\\]/);
+		let join = (...segments) => segments.join('/');
+		
 		Zotero.debug('Attempting to relink automatically');
 		
 		let basePath = Zotero.Prefs.get('baseAttachmentPath');
@@ -5463,6 +5468,7 @@ var ZoteroPane = new function()
 			Zotero.debug('No LABD');
 			return false;
 		}
+		basePath = Zotero.File.normalizeToUnix(basePath);
 		Zotero.debug('LABD path: ' + basePath);
 
 		let syncedPath = item.getFilePath();
@@ -5490,15 +5496,20 @@ var ZoteroPane = new function()
 			unNormalizedDirname = unNormalizedDirname.substring(0, lastSlash + 1);
 		}
 
-		let parts = OS.Path.split(syncedPath).components;
+		let parts = split(syncedPath);
 		for (let segmentsToDrop = 0; segmentsToDrop < parts.length; segmentsToDrop++) {
-			let correctedPath = OS.Path.join(basePath, ...parts.slice(segmentsToDrop));
+			let correctedPath = join(basePath, ...parts.slice(segmentsToDrop));
 
 			if (!(await OS.File.exists(correctedPath))) {
 				Zotero.debug('Does not exist: ' + correctedPath);
 				continue;
 			}
 			Zotero.debug('Exists! ' + correctedPath);
+			
+			if (Zotero.isWin) {
+				correctedPath = correctedPath.replace(/\//g, '\\');
+				Zotero.debug('Converted back to Windows path: ' + correctedPath);
+			}
 
 			let otherUnlinked = await Zotero.Items.findMissingLinkedFiles(
 				item.libraryID,
@@ -5507,13 +5518,15 @@ var ZoteroPane = new function()
 			let othersToRelink = new Map();
 			for (let otherItem of otherUnlinked) {
 				if (otherItem.id === item.id) continue;
-				let otherParts = otherItem.getFilePath()
-					.split(/[/\\]/)
+				let otherParts = split(otherItem.getFilePath())
 					// Slice as much off the beginning as when creating correctedPath
 					.slice(segmentsToDrop);
 				if (!otherParts.length) continue;
-				let otherCorrectedPath = OS.Path.join(basePath, ...otherParts);
+				let otherCorrectedPath = join(basePath, ...otherParts);
 				if (await OS.File.exists(otherCorrectedPath)) {
+					if (Zotero.isWin) {
+						otherCorrectedPath = otherCorrectedPath.replace(/\//g, '\\');
+					}
 					othersToRelink.set(otherItem, otherCorrectedPath);
 				}
 			}
