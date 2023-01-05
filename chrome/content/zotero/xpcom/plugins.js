@@ -45,6 +45,7 @@ Zotero.Plugins = new function () {
 		
 		var { addons } = await AddonManager.getActiveAddons(["extension"]);
 		for (let addon of addons) {
+			setDefaultPrefs(addon);
 			await _callMethod(addon, 'startup', REASONS.APP_STARTUP);
 		}
 		
@@ -193,8 +194,64 @@ Zotero.Plugins = new function () {
 		var addon = await AddonManager.getAddonByID(id);
 		return AddonManager.getPreferredIconURL(addon, idealSize, Services.appShell.hiddenDOMWindow);
 	};
-
-
+	
+	
+	function setDefaultPrefs(addon) {
+		var branch = Services.prefs.getDefaultBranch("");
+		var obj = {
+			pref(pref, value) {
+				switch (typeof value) {
+					case 'boolean':
+						branch.setBoolPref(pref, value);
+						break;
+					case 'string':
+						branch.setStringPref(pref, value);
+						break;
+					case 'number':
+						branch.setIntPref(pref, value);
+						break;
+					default:
+						Zotero.logError(`Invalid type '${typeof(value)}' for pref '${pref}'`);
+				}
+			}
+		};
+		try {
+			Services.scriptloader.loadSubScript(
+				addon.getResourceURI("prefs.js").spec,
+				obj
+			);
+		}
+		catch (e) {
+			if (!e.toString().startsWith('Error opening input stream')) {
+				Zotero.logError(e);
+			}
+		}
+	}
+	
+	
+	function clearDefaultPrefs(addon) {
+		var branch = Services.prefs.getDefaultBranch("");
+		var obj = {
+			pref(pref, value) {
+				if (!branch.prefHasUserValue(pref)) {
+					branch.deleteBranch(pref);
+				}
+			}
+		};
+		try {
+			Services.scriptloader.loadSubScript(
+				addon.getResourceURI("prefs.js").spec,
+				obj
+			);
+		}
+		catch (e) {
+			if (!e.toString().startsWith('Error opening input stream')) {
+				Zotero.logError(e);
+			}
+		}
+	}
+	
+	
 	/**
 	 * Add an observer to be notified of lifecycle events on all plugins.
 	 *
@@ -233,6 +290,7 @@ Zotero.Plugins = new function () {
 				return;
 			}
 			Zotero.debug("Installed plugin " + addon.id);
+			setDefaultPrefs(addon);
 			await _callMethod(addon, 'install');
 			await _callMethod(addon, 'startup', REASONS.ADDON_INSTALL);
 		},
@@ -242,6 +300,7 @@ Zotero.Plugins = new function () {
 				return;
 			}
 			Zotero.debug("Enabling plugin " + addon.id);
+			setDefaultPrefs(addon);
 			await _callMethod(addon, 'startup', REASONS.ADDON_ENABLE);
 		},
 		
@@ -251,6 +310,7 @@ Zotero.Plugins = new function () {
 			}
 			Zotero.debug("Disabling plugin " + addon.id);
 			await _callMethod(addon, 'shutdown', REASONS.ADDON_DISABLE);
+			clearDefaultPrefs(addon);
 		},
 		
 		async onUninstalling(addon) {
@@ -261,6 +321,7 @@ Zotero.Plugins = new function () {
 			Zotero.debug("Uninstalled plugin " + addon.id);
 			await _callMethod(addon, 'shutdown', REASONS.ADDON_UNINSTALL);
 			await _callMethod(addon, 'uninstall');
+			clearDefaultPrefs(addon);
 		},
 	};
 };
