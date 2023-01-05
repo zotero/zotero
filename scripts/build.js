@@ -9,7 +9,7 @@ const getPDFReader = require('./pdf-reader');
 const getPDFWorker = require('./pdf-worker');
 const getZoteroNoteEditor = require('./note-editor');
 const { formatDirsForMatcher, getSignatures, writeSignatures, cleanUp, onSuccess, onError} = require('./utils');
-const { dirs, symlinkDirs, copyDirs, symlinkFiles, jsFiles, scssFiles, ignoreMask } = require('./config');
+const { dirs, symlinkDirs, copyDirs, copyExts, symlinkFiles, jsFiles, scssFiles, ignoreMask, extsIgnoreMask } = require('./config');
 
 if (require.main === module) {
 	(async () => {
@@ -27,6 +27,7 @@ if (require.main === module) {
 			const results = await Promise.all([
 				getBrowserify(signatures),
 				getCopy(copyDirs.map(d => `${d}/**`), { ignore: ignoreMask }, signatures),
+				getCopy(copyExts.map(ext => `**/**.${ext}`), { ignore: extsIgnoreMask }, signatures),
 				getJS(jsFiles, { ignore: ignoreMask }, signatures),
 				...scssFiles.map(scf => getSass(scf, { ignore: ignoreMask }, signatures)),
 				getSymlinks(symlinks, { nodir: true, ignore: ignoreMask }, signatures),

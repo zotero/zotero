@@ -24,6 +24,11 @@ const copyDirs = [
 						// triggering false-positive test results with mismatched URIs
 ];
 
+// list of file extensions which are copied to the build folder
+const copyExts = [
+	'dtd', 'properties', 'xul', 'html', 'xml', 'css'
+];
+
 // list of files from root folder to symlink
 const symlinkFiles = [
 	'chrome.manifest',
@@ -103,6 +108,13 @@ const ignoreMask = [
 	'chrome/content/zotero/xpcom/utilities/test/**/*',
 ];
 
+const extsIgnoreMask = [
+	'**/node_modules/**',
+	'**/tmp/**',
+	'**/build/**',
+	'**/pdf.js/**',
+];
+
 const jsFiles = [
 	`{${dirs.join(',')}}/**/*.js`,
 	`{${dirs.join(',')}}/**/*.jsx`,
@@ -124,5 +136,5 @@ const scssFiles = [
 const buildsURL = 'https://zotero-download.s3.amazonaws.com/ci/';
 
 module.exports = {
-	dirs, symlinkDirs, copyDirs, symlinkFiles, browserifyConfigs, jsFiles, scssFiles, ignoreMask, buildsURL
+	dirs, symlinkDirs, copyDirs, copyExts, symlinkFiles, browserifyConfigs, jsFiles, scssFiles, ignoreMask, extsIgnoreMask, buildsURL
 };
