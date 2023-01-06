@@ -2164,6 +2164,17 @@ Zotero.Item.prototype.numNotes = function(includeTrashed, includeEmbedded) {
 
 
 /**
+ * Returns number of collection of item
+ *
+ * @return	{Integer}
+ */
+Zotero.Item.prototype.numCollection = function() {
+	this._requireData('collections');
+	return this._collections.length;
+}
+
+
+/**
  * Get the first line of the note for display in the items list
  *
  * @return	{String}

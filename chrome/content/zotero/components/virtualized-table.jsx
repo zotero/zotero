@@ -870,6 +870,7 @@ class VirtualizedTable extends React.Component {
 	_handleMouseOver = (event) => {
 		let elem = event.target;
 		if (!elem.classList.contains('cell') || elem.classList.contains('cell-icon')) return;
+		if (!elem.classList.contains('numNotes') || elem.classList.contains('numCollection')) return; // Note: Avoid unexpected clearing. How to do it correctly?
 		let textElem = elem.querySelector('.label, .cell-text');
 		// .label is used in the header, .cell-text on primary cells,
 		// otherwise the .cell element if its immediate child is a text node

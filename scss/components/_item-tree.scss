@@ -50,7 +50,11 @@
 		}
 	}
 	
-	.cell.numNotes {
+	.cell.numNotes, .cell.numCollection {
 		text-align: center;
+	}
+
+	.cell[title] {
+		pointer-events: auto;
 	}
 }

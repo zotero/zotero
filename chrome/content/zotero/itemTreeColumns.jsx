@@ -313,6 +313,16 @@ const COLUMNS = [
 		minWidth: 14,
 		staticWidth: true,
 		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+	},
+	{
+		dataKey: "numCollection",
+		disabledIn: "",
+		label: "pane.item.collection.header",
+		iconLabel: <Icons.IconTreeitemCollectionsSmall />,
+		width: "14",
+		minWidth: 14,
+		staticWidth: true,
+		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
 	}
 ];
 

@@ -859,7 +859,7 @@ describe("Zotero.Item", function () {
 		
 		// TODO: Fix numNotes(false, true) updating after child attachment note is added or removed
 	});
-	
+	// TODO: describe("#numCollection()", function () {
 	
 	describe("#getNotes()", function () {
 		it("#should return child notes", function* () {

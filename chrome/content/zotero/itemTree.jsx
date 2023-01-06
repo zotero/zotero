@@ -1285,6 +1285,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 			case 'numNotes':
 				return row.numNotes(false, true) || 0;
 			
+			case 'numCollection':
+				return row.numCollection() || 0;
+						
 			// Use unformatted part of date strings (YYYY-MM-DD) for sorting
 			case 'date':
 				var val = row.ref.getField('date', true, true);
@@ -2836,6 +2839,16 @@ var ItemTree = class ItemTree extends LibraryTree {
 		return span;
 	}
 
+	_renderCollectionList(index, data, column) {
+		const item = this.getRow(index).ref;
+		const collectionsIds = item.getCollections();
+		const collectionsNames = collectionsIds.map((Id) => {
+			let col = Zotero.Collections.get(Id);
+			return col ? col.name : null;
+		});
+		return collectionsNames;
+	}
+
 	_renderCell(index, data, column) {
 		if (column.primary) {
 			return this._renderPrimaryCell(index, data, column);
@@ -2846,6 +2859,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		let cell = renderCell.apply(this, arguments);
 		if (column.dataKey === 'numNotes' && data) {
 			cell.setAttribute('aria-label', Zotero.getString('pane.item.notes.count', data, data) + '.');
+		}
+		if (column.dataKey === 'numCollection' && data) {
+			cell.setAttribute('aria-label', Zotero.getString('pane.item.collection.count', data, data) + '.');
+			let list = this._renderCollectionList(index, data, column);
+			let tip = Zotero.getString('pane.item.collection.tooltip', data, data) + list.join('\n');
+			cell.setAttribute('title', tip);
 		}
 		else if (column.dataKey === 'itemType') {
 			cell.setAttribute('aria-hidden', true);
@@ -3036,6 +3055,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		}
 		row.numNotes = treeRow.numNotes() || "";
+		row.numCollection = treeRow.numCollection() || 0;
 		row.title = treeRow.ref.getDisplayTitle();
 		
 		const columns = this.getColumns();
@@ -3861,6 +3881,10 @@ ItemTreeRow.prototype.numNotes = function() {
 		return this.ref.note !== '' ? 1 : 0;
 	}
 	return this.ref.numNotes(false, true) || 0;
+}
+
+ItemTreeRow.prototype.numCollection = function() {
+	return this.ref.numCollection(false, true) || 0;
 }
 
 Zotero.Utilities.Internal.makeClassEventDispatcher(ItemTree);
