@@ -1211,6 +1211,12 @@
 							fieldNames += "\n - " +
 								Zotero.ItemFields.getLocalizedString(fieldsToDelete[i]);
 						}
+						var fieldsPair = new Map();
+						for (let fieldId of fieldsToDelete) {
+							//let fieldName = Zotero.ItemFields.getName(fieldId);
+							let fieldValue = this.item.getField(fieldId);
+							fieldsPair.set(fieldId, fieldValue);
+						}
 						
 						var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 							.getService(Components.interfaces.nsIPromptService);
@@ -1222,6 +1228,16 @@
 								Zotero.getString('pane.item.changeType.text') + "\n" + fieldNames)) {
 						this.item.setType(itemTypeID);
 						
+						let addedExtra = "";
+						for (let [fieldId, value] of fieldsPair) {
+							let fieldLocalizedName = Zotero.ItemFields.getLocalizedString(fieldId);
+							addedExtra += fieldLocalizedName + ": " + value + "\n";
+						}
+						addedExtra += "\n";
+						let oldExtra = this.item.getField("extra");
+						let newExtra = addedExtra + oldExtra;
+						this.item.setField("extra", newExtra);
+
 						if (this.saveOnEdit) {
 							// See note in transformText()
 							await this.blurOpenField();
