@@ -124,11 +124,6 @@ row > vbox > description
 	padding: 0 !important;
 }
 
-#item-type-menu > .menulist-dropmarker
-{
-	display: none;
-}
-
 .zotero-field-toggle
 {
 	width: 27px !important;
