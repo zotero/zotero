@@ -327,7 +327,8 @@ Zotero.Sync.Storage.Engine.prototype.queueItem = Zotero.Promise.coroutine(functi
 			return;
 		
 		default:
-			throw new Error("Invalid sync state " + item.attachmentSyncState);
+			throw new Error("Invalid sync state " + item.attachmentSyncState + " for item "
+				+ item.libraryKey);
 	}
 	
 	if (type == 'upload') {
