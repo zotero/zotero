@@ -1584,8 +1584,7 @@
 					}
 					else {
 						// Add auto-complete for certain fields
-						if (Zotero.ItemFields.isAutocompleteField(fieldName)
-								|| fieldName == 'creator') {
+						if (field == 'creator' || Zotero.ItemFields.isAutocompleteField(fieldName)) {
 							t.setAttribute('type', 'autocomplete');
 							t.setAttribute('autocompletesearch', 'zotero');
 							

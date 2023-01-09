@@ -347,7 +347,11 @@ Zotero.ItemFields = new function() {
 	
 	
 	this.isAutocompleteField = function (field) {
-		field = this.getName(field);
+		var fieldName = this.getName(field);
+		if (!fieldName) {
+			Zotero.logError(`Can't check autocomplete for invalid field '${field}'`);
+			return false;
+		}
 		
 		var autoCompleteFields = [
 			'journalAbbreviation',
@@ -377,7 +381,7 @@ Zotero.ItemFields = new function() {
 			autoCompleteFields = autoCompleteFields.concat(add);
 		}
 		
-		return autoCompleteFields.indexOf(field) != -1;
+		return autoCompleteFields.includes(fieldName);
 	}
 	
 	
