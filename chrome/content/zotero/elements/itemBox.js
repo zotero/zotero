@@ -1573,8 +1573,7 @@
 				t.setAttribute('rows', 8);
 			}
 			// Add auto-complete for certain fields
-			else if (Zotero.ItemFields.isAutocompleteField(fieldName)
-					|| fieldName == 'creator') {
+			else if (field == 'creator' || Zotero.ItemFields.isAutocompleteField(fieldName)) {
 				t = document.createElement("input", { is: 'shadow-autocomplete-input' });
 				t.setAttribute('autocompletesearch', 'zotero');
 				
