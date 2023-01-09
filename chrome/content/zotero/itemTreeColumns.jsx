@@ -173,7 +173,7 @@ const COLUMNS = [
 		dataKey: "lastRead",
 		defaultSort: -1,
 		defaultIn: new Set(["recentlyRead"]),
-		disabledIn: "feed",
+		disabledIn: ["feeds", "feed"],
 		dependsOnChildren: true,
 		label: "pane.items.columns.lastRead",
 		flex: 2,
