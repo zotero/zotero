@@ -119,3 +119,13 @@ dialog listbox > listitem[disabled] {
 .listcol-testMessage {
 	width: 200px;
 }
+
+#browser-open {
+	height: 25px;
+	margin: 1px 0px 2px -5px;
+	min-width: 2em;
+}
+#browser-open>.button-box {
+	margin-top: -1px;
+}
+

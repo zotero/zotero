@@ -378,7 +378,7 @@
 								<menulist id="browser-url" editable="true" flex="1">
 									<menupopup></menupopup>
 								</menulist>
-								<button label="&scaffold.browser.open;" tooltiptext="Open url in build-in browser" oncommand="Scaffold.openURLField()"/>
+								<button id="browser-open" label="&scaffold.browser.open;" tooltiptext="Open url in build-in browser" oncommand="Scaffold.openURLField()"/>
 								<button observes="validate-tests" label="&scaffold.testing.create.web;" tooltiptext="Create a new test from the current page" oncommand="Scaffold.saveTestFromCurrent('web')"/>
 							</hbox>
 							
