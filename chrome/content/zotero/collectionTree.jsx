@@ -2206,7 +2206,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			var showDuplicates = this.hideSources.indexOf('duplicates') == -1
 					&& this._virtualCollectionLibraries.duplicates[libraryID] !== false;
 			var showUnfiled = this._virtualCollectionLibraries.unfiled[libraryID] !== false;
-			var showRecentlyRead = this._virtualCollectionLibraries.recentlyRead[libraryID] !== false;
+			var showRecentlyRead = libraryID == Zotero.Libraries.userLibraryID
+				&& this._virtualCollectionLibraries.recentlyRead[libraryID] !== false;
 			var showRetracted = this._virtualCollectionLibraries.retracted[libraryID] !== false
 				&& Zotero.Retractions.libraryHasRetractedItems(libraryID);
 			var showPublications = libraryID == Zotero.Libraries.userLibraryID;

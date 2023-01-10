@@ -2111,6 +2111,23 @@ describe("Zotero.Item", function () {
 					assert.notProperty(json, 'charset');
 					assert.notProperty(json, 'path');
 				});
+
+				it("should output lastRead for a user library item", async function () {
+					let attachment = await createDataObject('item', { itemType: 'attachment' });
+					attachment.setAttachmentLastRead(123450000);
+					let json = attachment.toJSON();
+					assert.equal(json.lastRead, 123450000);
+				});
+
+				it("shouldn't output lastRead for a group item", async function () {
+					let group = await createGroup();
+					let attachment = await createDataObject('item', { itemType: 'attachment', libraryID: group.libraryID });
+					await attachment.setAttachmentLastRead(123450000);
+					assert.equal(attachment.getAttachmentLastRead(), 123450000);
+					let json = attachment.toJSON();
+					assert.notProperty(json, 'lastRead');
+					await group.eraseTx();
+				});
 			});
 			
 			describe("Annotations", function () {

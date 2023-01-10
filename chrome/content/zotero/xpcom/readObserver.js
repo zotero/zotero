@@ -39,12 +39,12 @@ Zotero.ReadObserver = {
 	 * @param {Zotero.Item} item
 	 */
 	async updateAttachmentLastRead(item) {
-		// Limit to My Library
-		if (item.libraryID != Zotero.Libraries.userLibraryID) {
+		// Limit to My Library and groups
+		if (item.libraryID != Zotero.Libraries.userLibraryID && !item.library.isGroup) {
 			return;
 		}
 		
-		item.attachmentLastRead = Math.round(new Date().getTime() / 1000);
+		await item.setAttachmentLastRead(Math.round(new Date().getTime() / 1000));
 		await item.saveTx({ skipDateModifiedUpdate: true });
 	},
 	
@@ -64,7 +64,7 @@ Zotero.ReadObserver = {
 				fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
 				for (let item of items) {
 					if (item.library.lastReadItemInSession !== item.id
-							|| new Date(item.attachmentLastRead * 1000) < fiveMinutesAgo) {
+							|| new Date(item.getAttachmentLastRead() * 1000) < fiveMinutesAgo) {
 						await this.updateAttachmentLastRead(item);
 					}
 				}

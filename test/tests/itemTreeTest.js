@@ -683,7 +683,7 @@ describe("Zotero.ItemTree", function() {
 			assert.isFalse(zp.itemsView.getRowIndexByID(item.id));
 		});
 		
-		it("should re-sort by Last Read when child attachmentLastRead is updated", async function () {
+		it("should re-sort by Last Read when child attachmentLastRead is updated in the user library", async function () {
 			let userLibraryID = Zotero.Libraries.userLibraryID;
 			let item1 = await createDataObject('item');
 			let attachment1 = await importPDFAttachment(item1);
@@ -693,8 +693,8 @@ describe("Zotero.ItemTree", function() {
 			assert.notOk(item2.getItemLastRead());
 			
 			// attachment2 is more recently opened
-			attachment1.attachmentLastRead = Math.round(Date.now() / 1000) - 5;
-			attachment2.attachmentLastRead = Math.round(Date.now() / 1000);
+			attachment1.setAttachmentLastRead(Math.round(Date.now() / 1000) - 5);
+			attachment2.setAttachmentLastRead(Math.round(Date.now() / 1000));
 			await attachment1.saveTx();
 			await attachment2.saveTx();
 
@@ -705,7 +705,37 @@ describe("Zotero.ItemTree", function() {
 			assert.equal(zp.itemsView.getRowIndexByID(item2.id), 0);
 
 			// Now make attachment2 much less recently opened
-			attachment2.attachmentLastRead = Math.round(Date.now() / 1000) - 60;
+			attachment2.setAttachmentLastRead(Math.round(Date.now() / 1000) - 60);
+			await attachment2.saveTx();
+
+			assert.equal(zp.itemsView.getRowIndexByID(item1.id), 0);
+			assert.equal(zp.itemsView.getRowIndexByID(item2.id), 1);
+		});
+
+		it("should re-sort by Last Read when child attachmentLastRead is updated in a group library", async function () {
+			
+			let groupLibraryID = Zotero.Libraries.userLibraryID;
+			let item1 = await createDataObject('item');
+			let attachment1 = await importPDFAttachment(item1);
+			let item2 = await createDataObject('item');
+			let attachment2 = await importPDFAttachment(item2);
+			assert.notOk(item1.getItemLastRead());
+			assert.notOk(item2.getItemLastRead());
+
+			// attachment2 is more recently opened
+			attachment1.setAttachmentLastRead(Math.round(Date.now() / 1000) - 5);
+			attachment2.setAttachmentLastRead(Math.round(Date.now() / 1000));
+			await attachment1.saveTx();
+			await attachment2.saveTx();
+
+			await zp.setVirtual(groupLibraryID, 'recentlyRead', true, true);
+			assert.equal(zp.getCollectionTreeRow().id, 'Y' + groupLibraryID);
+			await waitForItemsLoad(win);
+			assert.equal(zp.itemsView.getRowIndexByID(item1.id), 1);
+			assert.equal(zp.itemsView.getRowIndexByID(item2.id), 0);
+
+			// Now make attachment2 much less recently opened
+			attachment2.setAttachmentLastRead(Math.round(Date.now() / 1000) - 60);
 			await attachment2.saveTx();
 
 			assert.equal(zp.itemsView.getRowIndexByID(item1.id), 0);

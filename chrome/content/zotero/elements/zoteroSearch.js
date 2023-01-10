@@ -621,7 +621,7 @@
 				this.dontupdate = false;
 			}
 			
-			this.onConditionSelected(menu.value);
+			this.onLibraryChange();
 			
 			this.shadowRoot.getElementById('conditionsmenu').focus();
 		}
@@ -733,13 +733,36 @@
 				this.onConditionSelected(this.selectedCondition, true);
 				break;
 			}
+			
+			// Iterate items in the More submenu, too
+			for (let item of this.shadowRoot.getElementById('conditionsmenu').querySelectorAll('menuitem')) {
+				let condition = Zotero.SearchConditions.get(item.value);
+				if (!condition) continue;
+				let types = condition.supportedLibraryTypes;
+				item.disabled = types && !types.has(Zotero.Libraries.get(this.parent.search.libraryID).libraryType);
+				
+				if (item.value == this.selectedCondition) {
+					this.removeSafely();
+					break;
+				}
+			}
+		}
+
+		/**
+		 * Remove, replacing with a new condition if the search becomes empty
+		 */
+		removeSafely() {
+			if (this.parent) {
+				this.parent.removeCondition(this.conditionID);
+				if (!this.parent.search.getConditions().length) {
+					this.parent.addCondition();
+				}
+				window.sizeToContent();
+			}
 		}
 
 		onRemoveClicked() {
-			if (this.parent){
-				this.parent.removeCondition(this.conditionID);
-				window.sizeToContent()
-			}
+			this.removeSafely();
 		}
 
 		onAddClicked() {
