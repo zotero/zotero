@@ -997,6 +997,11 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 			};
 			conditions.push(lastCondition);
 			
+			// lastRead requires group data
+			if (lastCondition.name == 'lastRead') {
+				sql += " LEFT JOIN groups USING (libraryID)";
+			}
+			
 			this._hasPrimaryConditions = true;
 		}
 		
@@ -1488,7 +1493,20 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						// lastRead is a UNIX timestamp in seconds, so we need to
 						// explicitly pass 'unixepoch'
 						if (condition['name'] == 'lastRead') {
-							condSQL += "DATE(" + condition['field'] + ", 'unixepoch', 'localtime')";
+							condSQL += "DATE("
+									+ "CASE "
+										// Group library: stored as synced setting
+										+ "WHEN groupID IS NOT NULL THEN ("
+											+ "SELECT CAST(s.value AS int) FROM syncedSettings AS s "
+											+ "WHERE s.libraryID=? "
+											// See Zotero.Item#_getLastReadSettingKey()
+											+ "AND s.setting=('lastRead_g' || groupID || '_' || key)"
+										+ ") "
+										// User library: stored directly in the itemAttachments table
+										+ "ELSE " + condition['field'] + " "
+									+ "END"
+								+ ", 'unixepoch', 'localtime')";
+							condSQLParams.push(Zotero.Libraries.userLibraryID);
 						}
 						else if (condition['name']=='dateAdded' ||
 								condition['name']=='dateModified' ||

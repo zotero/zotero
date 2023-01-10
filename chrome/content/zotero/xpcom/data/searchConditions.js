@@ -313,8 +313,7 @@ Zotero.SearchConditions = new function(){
 					isInTheLast: true
 				},
 				table: 'itemAttachments',
-				field: 'lastRead',
-				supportedLibraryTypes: new Set(['user'])
+				field: 'lastRead'
 			},
 
 			// Deprecated
