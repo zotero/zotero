@@ -853,6 +853,7 @@ Zotero.Utilities.Internal = {
 		var delay;
 		var totalTime = 0;
 		var last = false;
+		intervals = intervals.slice();
 		while (true) {
 			let interval = intervals.shift();
 			if (interval) {

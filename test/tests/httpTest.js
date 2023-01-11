@@ -260,6 +260,29 @@ describe("Zotero.HTTP", function () {
 				assert.approximately(delayStub.args[0][0], 5 * 1000, 5);
 				assert.approximately(delayStub.args[1][0], 10 * 1000, 5);
 			});
+			
+			it("should start with first interval on new request() call", async function () {
+				var called = 0;
+				server.respond(function (req) {
+					if (req.method == "GET" && req.url.startsWith(baseURL + "error")) {
+						if (called < 1) {
+							req.respond(500, {}, "");
+						}
+						else {
+							req.respond(200, {}, "");
+						}
+					}
+					called++;
+				});
+				spy = sinon.spy(Zotero.HTTP, "_requestInternal");
+				var errorDelayIntervals = [20];
+				await Zotero.HTTP.request("GET", baseURL + "error1", { errorDelayIntervals })
+				called = 0;
+				await Zotero.HTTP.request("GET", baseURL + "error2", { errorDelayIntervals }),
+				assert.equal(4, spy.callCount);
+				assert.equal(delayStub.args[0][0], 20);
+				assert.equal(delayStub.args[1][0], 20);
+			});
 		});
 	});
 	
