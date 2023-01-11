@@ -887,7 +887,14 @@ Zotero.Utilities.Internal = {
 				delay = interval;
 			}
 			
+			// Be safe
+			if (!delay) {
+				Zotero.logError(`Incorrect delay ${delay} -- stopping`);
+				yield Zotero.Promise.resolve(false);
+			}
+			
 			if (maxTime && (totalTime + delay) > maxTime) {
+				Zotero.debug(`Total delay time exceeds ${maxTime} -- stopping`);
 				yield Zotero.Promise.resolve(false);
 			}
 			
