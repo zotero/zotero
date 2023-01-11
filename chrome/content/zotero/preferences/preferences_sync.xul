@@ -288,15 +288,15 @@
 						
 						<ul id="sync-reset-list">
 							<!--<li>
-								<p>&zotero.preferences.sync.reset.restoreFromServer;</p>
-								<p>&zotero.preferences.sync.reset.restoreFromServer.desc;</p>
+								<p>&zotero.preferences.sync.reset.restoreFromOnlineLibrary;</p>
+								<p>&zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc;</p>
 							</li>-->
 							
 							<li id="restore-to-server">
 								<label>
 									<input name="sync-reset-radiogroup" value="restore-to-server" type="radio"/>
-									<span class="sync-reset-option-name">&zotero.preferences.sync.reset.restoreToServer;</span>
-									<span class="sync-reset-option-desc">&zotero.preferences.sync.reset.restoreToServer.desc;</span>
+									<span class="sync-reset-option-name">&zotero.preferences.sync.reset.restoreToOnlineLibrary;</span>
+									<span class="sync-reset-option-desc">&zotero.preferences.sync.reset.restoreToOnlineLibrary.desc;</span>
 								</label>
 							</li>
 							

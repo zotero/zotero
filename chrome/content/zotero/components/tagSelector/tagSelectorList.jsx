@@ -25,7 +25,6 @@
 
 const React = require('react');
 const PropTypes = require('prop-types');
-const { FormattedMessage } = require('react-intl');
 var { Collection } = require('react-virtualized');
 
 // See also .tag-selector-item in _tag-selector.scss
@@ -191,14 +190,14 @@ class TagList extends React.PureComponent {
 		if (!this.props.loaded) {
 			tagList = (
 				<div className="tag-selector-message">
-					<FormattedMessage id="zotero.tagSelector.loadingTags" />
+					{Zotero.getString('zotero.tagSelector.loadingTags')}
 				</div>
 			);
 		}
 		else if (tagCount == 0) {
 			tagList = (
 				<div className="tag-selector-message">
-					<FormattedMessage id="zotero.tagSelector.noTagsToDisplay" />
+					{Zotero.getString('zotero.tagSelector.noTagsToDisplay')}
 				</div>
 			);
 		}

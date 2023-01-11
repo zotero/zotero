@@ -31,7 +31,6 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
 const PropTypes = require('prop-types');
-const { IntlProvider } = require('react-intl');
 const TagSelector = require('components/tagSelector.js');
 const defaults = {
 	tagColors: new Map(),
@@ -762,9 +761,7 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	static init(domEl, opts) {
 		var ref;
 		let elem = (
-			<IntlProvider locale={Zotero.locale} messages={Zotero.Intl.strings}>
-				<TagSelectorContainer ref={c => ref = c } {...opts} />
-			</IntlProvider>
+			<TagSelectorContainer ref={c => ref = c } {...opts} />
 		);
 		ReactDOM.render(elem, domEl);
 		ref.domEl = domEl;

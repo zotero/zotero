@@ -29,7 +29,6 @@ import React, { memo } from 'react';
 import ReactDOM from "react-dom";
 import PropTypes from 'prop-types';
 import cx from 'classnames';
-import { IntlProvider, FormattedMessage } from "react-intl";
 
 // This is a quick reimplementation of the annotation for use in the conflict resolution window.
 // We'll want to replace this with a single component shared between the PDF reader and the rest
@@ -40,31 +39,26 @@ function AnnotationBox({ data }) {
 	};
 	
 	return (
-		<IntlProvider
-			locale={ Zotero.locale }
-			messages={ Zotero.Intl.strings }
-		>
-			<div className="AnnotationBox">
-				<div className="title">{Zotero.getString('itemTypes.annotation')}</div>
-				<div className="container">
-					<div className="header">
-						<div>{Zotero.Cite.getLocatorString('page')} {data.pageLabel}</div>
-					</div>
-					{data.text !== undefined
-						? <div className="text" style={textStyle}>{data.text}</div>
-						: ''}
-					{data.type == 'image'
-						// TODO: Localize
-						// TODO: Render from PDF based on position, if file is the same? Or don't
-						// worry about it?
-						? <div className="image-placeholder">[image not shown]</div>
-						: ''}
-					{data.comment !== undefined
-						? <div className="comment">{data.comment}</div>
-						: ''}
+		<div className="AnnotationBox">
+			<div className="title">{Zotero.getString('itemTypes.annotation')}</div>
+			<div className="container">
+				<div className="header">
+					<div>{Zotero.Cite.getLocatorString('page')} {data.pageLabel}</div>
 				</div>
+				{data.text !== undefined
+					? <div className="text" style={textStyle}>{data.text}</div>
+					: ''}
+				{data.type == 'image'
+					// TODO: Localize
+					// TODO: Render from PDF based on position, if file is the same? Or don't
+					// worry about it?
+					? <div className="image-placeholder">[image not shown]</div>
+					: ''}
+				{data.comment !== undefined
+					? <div className="comment">{data.comment}</div>
+					: ''}
 			</div>
-		</IntlProvider>
+		</div>
 	);
 }
 

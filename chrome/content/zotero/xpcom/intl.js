@@ -82,6 +82,13 @@ Zotero.Intl = new function () {
 			let regexp = /<!ENTITY ([^\s]+)\s+"([^"]+)/g;
 			let regexpResult;
 			while (regexpResult = regexp.exec(localeXML)) {
+				let bundleString;
+				try {
+					bundleString = bundle.GetStringFromName(regexpResult[1]);
+				} catch (e) {}
+				if (bundleString) {
+					throw new Error(`Found a duplicate string ${regexpResult[1]} for both bundle and dtd strings`)
+				}
 				this.strings[regexpResult[1]] = regexpResult[2];
 			}
 		}
@@ -104,6 +111,9 @@ Zotero.Intl = new function () {
 					params = [params];
 				}
 				l10n = bundle.formatStringFromName(name, params, params.length);
+			}
+			else if (Zotero.Intl.strings[name]) {
+				return Zotero.Intl.strings[name];
 			}
 			else {
 				l10n = bundle.GetStringFromName(name);
