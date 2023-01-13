@@ -8,7 +8,7 @@
 <!ENTITY zotero.publications.sharing.title "选择你分享论文的方式">
 <!ENTITY zotero.publications.sharing.text "您可以保留您作品的所有权利，可以在知识共享许可下获得许可，也可以将其专用于公共领域。 在所有情况下，这些作品都可以通过zotero.org公开获得。">
 <!ENTITY zotero.publications.sharing.prompt "您想允许他人共享您的作品吗？">
-<!ENTITY zotero.publications.sharing.cc "是的，根据知识共享许可">
+<!ENTITY zotero.publications.sharing.cc "是的，使用“知识共享”许可协议">
 <!ENTITY zotero.publications.sharing.cc0 "是的，将我的工作放在公共领域">
 <!ENTITY zotero.publications.sharing.reserved "不，仅在zotero.org上发布我的作品">
 

@@ -188,7 +188,7 @@
 <!ENTITY zotero.import.createCollection "Coloca colecciones y elementos importados en una nueva colección">
 <!ENTITY zotero.import.fileHandling "Manejo de archivos">
 <!ENTITY zotero.import.online.newItemsOnly "Descargar solo los elementos nuevos; no actualizar los elementos previamente importados">
-<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
+<!ENTITY zotero.import.online.relinkOnly "Volver a vincular las citas de Mendeley Desktop">
 
 <!ENTITY zotero.exportOptions.title "Exportar...">
 <!ENTITY zotero.exportOptions.format.label "Formato:">

@@ -100,7 +100,7 @@
 <!ENTITY zotero.toolbar.supportAndDocumentation "支持与文档">
 <!ENTITY zotero.toolbar.about.label "关于 Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "高级搜索">
-<!ENTITY zotero.toolbar.openURL.label "定位">
+<!ENTITY zotero.toolbar.openURL.label "检索">
 <!ENTITY zotero.toolbar.openURL.tooltip "在本地文献库里查找">
 
 <!ENTITY zotero.toolbar.feeds.new "新建订阅">
@@ -148,7 +148,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "设置颜色">
 <!ENTITY zotero.tagColorChooser.removeColor "移除颜色">
 
-<!ENTITY zotero.lookup.description "输入ISBN、DOI、PMID、arXiv ID或ADS条码导入条目到文库中：">
+<!ENTITY zotero.lookup.description "输入 ISBN、DOI、PMID、arXiv ID 或 ADS 条码来添加条目到您的文库：">
 <!ENTITY zotero.lookup.button.search "搜索">
 
 <!ENTITY zotero.createParent.title "创建父条目">
@@ -283,15 +283,15 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "含糊的引注">
 <!ENTITY zotero.rtfScan.mappedCitations.label "已映射的引注">
 <!ENTITY zotero.rtfScan.introPage.label "介绍">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero 可以自动提取、格式化引注并将参考文献表插入到 RTF 文件中. RTF 扫描功能目前支持下列格式的引注:">
-<!ENTITY zotero.rtfScan.introPage.description2 "要启动, 请选择 RTF 输入文件和输出文件:">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero 可以自动提取、格式化引注并将参考文献表插入 RTF 文件。RTF 扫描功能目前支持下列格式的引注：">
+<!ENTITY zotero.rtfScan.introPage.description2 "如要开始，请选择 RTF 输入文件和输出文件：">
 <!ENTITY zotero.rtfScan.scanPage.label "扫描引注">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero 正在扫描引注, 请耐心等待.">
 <!ENTITY zotero.rtfScan.citationsPage.label "校验已引用的条目">
 <!ENTITY zotero.rtfScan.citationsPage.description "请检查下列引注以确保 Zotero 已经正确地选择了相关条目.在进行下一步之前, 请更正任何未映射的或不明确的引注.">
 <!ENTITY zotero.rtfScan.stylePage.label "文档格式化中">
 <!ENTITY zotero.rtfScan.formatPage.label "正在格式化引注">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero正在处理并格式化您的 RTF 文件, 请耐心等待.">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero 正在处理和格式化您的 RTF 文件，请耐心等待。">
 <!ENTITY zotero.rtfScan.completePage.label "RTF 扫描完成">
 <!ENTITY zotero.rtfScan.completePage.description "文档处理完成, 请确保格式正确.">
 <!ENTITY zotero.rtfScan.inputFile.label "输入文件">

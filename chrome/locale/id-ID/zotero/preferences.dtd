@@ -55,7 +55,7 @@
 <!ENTITY zotero.preferences.sync.lostPassword "Kehilangan Password?">
 <!ENTITY zotero.preferences.sync.syncAutomatically "SInkronisasikan secara automatis">
 <!ENTITY zotero.preferences.sync.syncFullTextContent "Sinkronisasi konten teks lengkap">
-<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero can sync the full-text content of files in your Zotero libraries with zotero.org and other linked devices, allowing you to easily search for your files wherever you are. The full-text content of your files will not be shared publicly.">
+<!ENTITY zotero.preferences.sync.syncFullTextContent.desc "Zotero dapat menyinkronkan konten teks lengkap file di perpustakaan Zotero Anda dengan zotero.org dan perangkat lain yang ditautkan, memungkinkan Anda untuk dengan mudah mencari file Anda di mana pun Anda berada. Konten teks lengkap file Anda tidak akan dibagikan secara publik.">
 <!ENTITY zotero.preferences.sync.about "Tentang Sinkronisasi">
 <!ENTITY zotero.preferences.sync.fileSyncing "Sinkronisasi Berkas">
 <!ENTITY zotero.preferences.sync.fileSyncing.url "URL:">
@@ -67,15 +67,15 @@
 <!ENTITY zotero.preferences.sync.fileSyncing.verifyServer "Verifikasi Server">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos1 "Dengan menggunakan penyimpanan Zotero, Anda sepakat untuk terikat dengan ">
 <!ENTITY zotero.preferences.sync.fileSyncing.tos2 "syarat dan ketentuan di dalamnya">
-<!ENTITY zotero.preferences.sync.librariesToSync "Libraries to Sync">
+<!ENTITY zotero.preferences.sync.librariesToSync "Perpustakaan untuk Disinkronkan">
 <!ENTITY zotero.preferences.sync.librariesToSync.button "Pilih perpustakaan...">
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Sinkronisasi">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Perpustakaan">
-<!ENTITY zotero.preferences.sync.reset.warning1 "The following operations are for use only in rare, specific situations and should not be used for general troubleshooting. In many cases, resetting will cause additional problems. See ">
-<!ENTITY zotero.preferences.sync.reset.warning2 "Sync Reset Options">
+<!ENTITY zotero.preferences.sync.reset.warning1 "Pengoperasian berikut ini hanya untuk digunakan dalam situasi spesifik yang jarang terjadi, dan tidak boleh digunakan untuk pemecahan masalah umum. Dalam banyak kasus, pengaturan ulang akan menyebabkan masalah tambahan. Lihat">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Opsi Pengaturan Ulang Sinkronisasi">
 <!ENTITY zotero.preferences.sync.reset.warning3 "untuk informasi lebih lanjut.">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reset Data Sync History">
-<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Merge local data with remote data, ignoring sync history">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Atur Ulang Riwayat Sinkronisasi Data">
+<!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Gabungkan data lokal dengan data jarak jauh, mengabaikan riwayat sinkronisasi">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer "Kembalikan dari Perpustakaan Online">
 <!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Timpa data Zotero lokal dengan data dari perpustakaan online.">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "Ganti Perpustakaan Online">
@@ -105,8 +105,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Ketika opsi ini dimatikan, Zotero hanya akan memasukkan URL pada saat mengutip artikel  jurnal, majalah, dan koran yang tidak memiliki rentang halaman spesifik.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Salin Cepat">
-<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Format item:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Format Catatan:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Salin sebagai HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Pengaturan Spesifik-Situs">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Rute">
@@ -119,25 +119,25 @@
 <!ENTITY zotero.preferences.cite.styles "Gaya">
 <!ENTITY zotero.preferences.cite.wordProcessors "Pengolah Kata">
 <!ENTITY zotero.preferences.cite.wordProcessors.useClassicAddCitationDialog "Gunakan kotak dialog Tambahkan Sitasi klasik">
-<!ENTITY zotero.preferences.styleEditor "Style Editor">
-<!ENTITY zotero.preferences.stylePreview "Style Preview">
+<!ENTITY zotero.preferences.styleEditor "Editor Gaya">
+<!ENTITY zotero.preferences.stylePreview "Pratinjau Gaya">
 
 <!ENTITY zotero.preferences.cite.styles.styleManager "Pengelola Gaya">
 <!ENTITY zotero.preferences.cite.styles.styleManager.title "Judul">
 <!ENTITY zotero.preferences.cite.styles.styleManager.updated "Diperbarui">
 <!ENTITY zotero.preferences.cite.styles.styleManager.csl "CSL">
-<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles…">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Dapatkan gaya tambahan...">
 
-<!ENTITY zotero.preferences.keys.saveToZotero "Save to Zotero (address bar icon)">
+<!ENTITY zotero.preferences.keys.saveToZotero "Simpan ke Zotero (ikon bilah alamat)">
 <!ENTITY zotero.preferences.keys.focusLibrariesPane "Fokus Jendela Pustaka">
 <!ENTITY zotero.preferences.keys.quicksearch "Pencarian Cepat">
 <!ENTITY zotero.preferences.keys.newItem "Buat Item baru">
 <!ENTITY zotero.preferences.keys.newNote "Buat catatan baru">
-<!ENTITY zotero.preferences.keys.toggleAllRead "Mark All Feed Items As Read/Unread">
+<!ENTITY zotero.preferences.keys.toggleAllRead "Tandai Semua Item Feed Sebagai Dibaca/Tidak Dibaca">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Salin Sitasi Item Terpilih ke Clipboard">
 <!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Salin Item Terpilih ke Clipboard">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Impor dari Clipboard">
-<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect after restart">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Perubahan berlaku setelah memulai ulang">
 
 <!ENTITY zotero.preferences.prefpane.proxies "Proksi">
 
@@ -147,7 +147,7 @@
 <!ENTITY zotero.preferences.proxies.desc_after_link "untuk informasi lebih lanjut.">
 <!ENTITY zotero.preferences.proxies.transparent "Aktifkan pengalihan proksi">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Kenali secara automatis sumber-sumber yang terproksi">
-<!ENTITY zotero.preferences.proxies.showRedirectNotification "Show notification when redirecting through a proxy">
+<!ENTITY zotero.preferences.proxies.showRedirectNotification "Tampilkan notifikasi ketika mengarahkan ulang melalui proxy">
 <!ENTITY zotero.preferences.proxies.disableByDomain "Nonaktifkan pengalihan proksi ketika nama domain saya mengandung">
 <!ENTITY zotero.preferences.proxies.configured "Proksi Terkonfigurasi">
 <!ENTITY zotero.preferences.proxies.hostname "Nama Host">
@@ -166,13 +166,13 @@
 <!ENTITY zotero.preferences.advanced.filesAndFolders "File dan Folder">
 <!ENTITY zotero.preferences.advanced.keys "Shortcut">
 
-<!ENTITY zotero.preferences.advanced.advancedConfiguration "Advanced Configuration">
+<!ENTITY zotero.preferences.advanced.advancedConfiguration "Pengaturan Lanjutan">
 
 <!ENTITY zotero.preferences.prefpane.locate "Temukan">
 <!ENTITY zotero.preferences.locate.locateEngineManager "Pengelola Mesin Pencarian Artikel">
 <!ENTITY zotero.preferences.locate.description "Deskripsi">
 <!ENTITY zotero.preferences.locate.name "Nama">
-<!ENTITY zotero.preferences.locate.addDescription "To add a Lookup Engine that is not on the list, visit the desired search engine in your browser and select “Add” from Zotero’s Locate menu.">
+<!ENTITY zotero.preferences.locate.addDescription "Untuk menambahkan Mesin Pencari yang tidak ada dalam daftar, kunjungi mesin pencari yang diinginkan di browser Anda dan pilih &quot;Tambah&quot; dari menu Locate Zotero.">
 <!ENTITY zotero.preferences.locate.restoreDefaults "Kembalikan Default">
 
 <!ENTITY zotero.preferences.charset "Pengkodean karakter">
@@ -182,21 +182,21 @@
 <!ENTITY zotero.preferences.dataDir "Lokasi Direktori Data">
 <!ENTITY zotero.preferences.dataDir.useProfile "Gunakan direktori profil">
 <!ENTITY zotero.preferences.dataDir.custom "Buatan:">
-<!ENTITY zotero.preferences.dataDir.choose "Choose…">
-<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
+<!ENTITY zotero.preferences.dataDir.choose "Pilih...">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(ditentukan melalui baris perintah)">
 <!ENTITY zotero.preferences.dataDir.reveal "Tunjukkan Direktori Data">
-<!ENTITY zotero.preferences.dataDir.migrate "Migrate To New Default Location…">
+<!ENTITY zotero.preferences.dataDir.migrate "Migrasi Ke Lokasi Default Baru...">
 
-<!ENTITY zotero.preferences.attachmentBaseDir.caption "Linked Attachment Base Directory">
-<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero will use relative paths for linked file attachments within the base directory, allowing you to access files on different computers as long as the file structure within the base directory remains the same.">
-<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Base directory:">
-<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Choose…">
-<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Revert to Absolute Paths…">
+<!ENTITY zotero.preferences.attachmentBaseDir.caption "Direktori Dasar Lampiran Tertaut">
+<!ENTITY zotero.preferences.attachmentBaseDir.message "Zotero akan menggunakan jalur relatif untuk lampiran file yang ditautkan di dalam direktori dasar, memungkinkan Anda untuk mengakses file di komputer yang berbeda selama struktur file di dalam direktori dasar tetap sama.">
+<!ENTITY zotero.preferences.attachmentBaseDir.basePath "Direktori dasar:">
+<!ENTITY zotero.preferences.attachmentBaseDir.selectBasePath "Pilih...">
+<!ENTITY zotero.preferences.attachmentBaseDir.resetBasePath "Kembali ke Jalur Absolut...">
 
 <!ENTITY zotero.preferences.dbMaintenance "Pemeliharaan Database">
 <!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Periksa Integritas Database">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles…">
-<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators…">
-<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles…">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Atur Ulang Penerjemah dan Gaya...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Atur Ulang Penerjemah...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Atur ulang pengayaan...">
 
-<!ENTITY zotero.preferences.configEditor "Config Editor">
+<!ENTITY zotero.preferences.configEditor "Editor Konfigurasi">

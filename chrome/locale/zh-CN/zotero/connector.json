@@ -93,7 +93,7 @@
     "message": "已提交您的错误报告。\n\n报告 ID: $1\n\n您需要在 Zetero 论坛中发帖，帖子中附上报告 ID、问题描述、重现问题所需的步骤。\n\n未在论坛中提交的错误报告不会被处理。"
   },
   "reports_debug_output_submitted": {
-    "message": "您的调试输出已提交。Debug ID 是 $1。"
+    "message": "您的调试输出已提交。Debug ID 为 $1。"
   },
   "reports_submission_failed": {
     "message": "提交您的报告时出错。\n\n$1\n\n请检查您的网络连接。如果错误反复出现，到 Zotero 论坛发帖询问。"

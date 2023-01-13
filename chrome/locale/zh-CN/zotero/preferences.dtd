@@ -81,7 +81,7 @@
 <!ENTITY zotero.preferences.sync.reset.restoreToServer "替换在线文献库">
 <!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "使用本地 Zotero 数据覆盖在线文献库">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "重置文件同步历史">
-<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "将所有附件文件与存储服务中的进行比较">
+<!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "比较存储服务中的所有附件文件">
 <!ENTITY zotero.preferences.sync.reset "重置">
 <!ENTITY zotero.preferences.sync.reset.button "重置…">
 
@@ -168,7 +168,7 @@
 
 <!ENTITY zotero.preferences.advanced.advancedConfiguration "高级设置">
 
-<!ENTITY zotero.preferences.prefpane.locate "定位">
+<!ENTITY zotero.preferences.prefpane.locate "检索">
 <!ENTITY zotero.preferences.locate.locateEngineManager "文章检索引擎管理器">
 <!ENTITY zotero.preferences.locate.description "描述">
 <!ENTITY zotero.preferences.locate.name "名称">

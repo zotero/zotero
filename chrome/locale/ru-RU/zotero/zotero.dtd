@@ -188,7 +188,7 @@
 <!ENTITY zotero.import.createCollection "Поместить импортированные коллекции и записи в новую коллекцию">
 <!ENTITY zotero.import.fileHandling "Обработка файлов">
 <!ENTITY zotero.import.online.newItemsOnly "Загрузить только новые записи; не обновлять ранее испортированные записи">
-<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
+<!ENTITY zotero.import.online.relinkOnly "Заменить ссылки на цитирования из Mendeley Desktop">
 
 <!ENTITY zotero.exportOptions.title "Экспорт…">
 <!ENTITY zotero.exportOptions.format.label "Формат:">
