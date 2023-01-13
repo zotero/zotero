@@ -440,9 +440,6 @@
 								label.classList.add("pointer");
 								label.addEventListener('click', event => ZoteroPane_Local.loadURI(doi, event));
 								label.setAttribute("tooltiptext", Zotero.getString('pane.item.viewOnline.tooltip'));
-								valueElement.oncontextmenu = () => {
-									this._id('zotero-doi-menu').openPopup(valueElement);
-								};
 								
 								var openURLMenuItem = this._id('zotero-doi-menu-view-online');
 								openURLMenuItem.addEventListener('command', event => ZoteroPane_Local.loadURI(doi, event));
@@ -1421,6 +1418,13 @@
 					
 					if (fieldName && fieldName.indexOf('firstName') != -1) {
 						valueElement.setAttribute('flex', '1');
+					}
+					
+					// Add popup menu on DOI field with value
+					if (fieldName == 'DOI' && valueText) {
+						valueElement.oncontextmenu = () => {
+							this._id('zotero-doi-menu').openPopup(valueElement);
+						};
 					}
 					
 					var firstSpace = valueText.indexOf(" ");
