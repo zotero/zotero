@@ -85,7 +85,7 @@ Zotero.Integration = new function() {
 		if (Zotero.isMac) {
 			classNames.push("@zotero.org/Zotero/integration/installer?agent=MacWord;1")
 		} else if (Zotero.isWindows) {
-			classNames.push("@zotero.org/Zotero/integration/installer?agent=WinWord;1")
+			classNames.push("@zotero.org/Zotero/integration/initializer?agent=WinWord;1");
 		}
 		for (let className of classNames) {
 			try {

@@ -44,7 +44,7 @@ Zotero_Preferences.Cite = {
 	init: async function () {
 		// Init word plugin sections
 		let wordPlugins = ['libreOffice'];
-		if (Zotero.isWindows) {
+		if (Zotero.isWin) {
 			wordPlugins.push('winWord');
 		}
 		else if (Zotero.isMac) {
