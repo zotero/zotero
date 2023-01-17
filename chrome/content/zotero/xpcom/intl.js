@@ -55,7 +55,8 @@ Zotero.Intl = new function () {
 		
 		Components.utils.import("resource://gre/modules/PluralForm.jsm");
 
-		bundle = Services.strings.createBundle('chrome://zotero/locale/zotero.properties');
+		// Exposed for tests
+		this._bundle = bundle = Services.strings.createBundle('chrome://zotero/locale/zotero.properties');
 		intlProps = Services.strings.createBundle('chrome://zotero/locale/mozilla/intl.properties');
 
 		[pluralFormGet, pluralFormNumForms] = PluralForm.makeGetter(parseInt(getIntlProp('pluralRule', 1)));
@@ -82,13 +83,6 @@ Zotero.Intl = new function () {
 			let regexp = /<!ENTITY ([^\s]+)\s+"([^"]+)/g;
 			let regexpResult;
 			while (regexpResult = regexp.exec(localeXML)) {
-				let bundleString;
-				try {
-					bundleString = bundle.GetStringFromName(regexpResult[1]);
-				} catch (e) {}
-				if (bundleString) {
-					throw new Error(`Found a duplicate string ${regexpResult[1]} for both bundle and dtd strings`)
-				}
 				this.strings[regexpResult[1]] = regexpResult[2];
 			}
 		}
