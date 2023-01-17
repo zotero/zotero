@@ -29,7 +29,6 @@ import React, { memo } from 'react';
 import ReactDOM from "react-dom";
 import PropTypes from 'prop-types';
 import cx from 'classnames';
-import { IntlProvider } from "react-intl";
 
 function CreateParent({ loading, item, toggleAccept }) {
 	// When the input has/does not have characters toggle the accept button on the dialog
@@ -43,31 +42,26 @@ function CreateParent({ loading, item, toggleAccept }) {
 	};
 
 	return (
-		<IntlProvider
-			locale={ Zotero.locale }
-			messages={ Zotero.Intl.strings }
-		>
-			<div className="create-parent-container">
-				<span className="title">
-					{ item.attachmentFilename }
-				</span>
-				<div className="body">
-					<input
-						id="parent-item-identifier"
-						placeholder={ Zotero.getString('createParent.prompt') }
-						size="50"
-						disabled={ loading }
-						onChange={ handleInput }
-					/>
-					<div
-						mode="undetermined"
-						className={ cx('downloadProgress', { hidden: !loading }) }
-					>
-						<div className="progress-bar"></div>
-					</div>
+		<div className="create-parent-container">
+			<span className="title">
+				{ item.attachmentFilename }
+			</span>
+			<div className="body">
+				<input
+					id="parent-item-identifier"
+					placeholder={ Zotero.getString('createParent.prompt') }
+					size="50"
+					disabled={ loading }
+					onChange={ handleInput }
+				/>
+				<div
+					mode="undetermined"
+					className={ cx('downloadProgress', { hidden: !loading }) }
+				>
+					<div className="progress-bar"></div>
 				</div>
 			</div>
-		</IntlProvider>
+		</div>
 	);
 }
 

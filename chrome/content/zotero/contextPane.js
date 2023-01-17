@@ -937,13 +937,13 @@ var ZoteroContextPane = new function () {
 
 		// Info tab
 		var tabInfo = document.createElement('tab');
-		tabInfo.setAttribute('label', Zotero.Intl.strings['zotero.tabs.info.label']);
+		tabInfo.setAttribute('label', Zotero.getString('zotero.tabs.info.label'));
 		// Tags tab
 		var tabTags = document.createElement('tab');
-		tabTags.setAttribute('label', Zotero.Intl.strings['zotero.tabs.tags.label']);
+		tabTags.setAttribute('label', Zotero.getString('zotero.tabs.tags.label'));
 		// Related tab
 		var tabRelated = document.createElement('tab');
-		tabRelated.setAttribute('label', Zotero.Intl.strings['zotero.tabs.related.label']);
+		tabRelated.setAttribute('label', Zotero.getString('zotero.tabs.related.label'));
 
 		tabs.append(tabInfo, tabTags, tabRelated);
 

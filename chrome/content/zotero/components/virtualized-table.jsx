@@ -30,7 +30,6 @@ const PropTypes = require('prop-types');
 const cx = require('classnames');
 const WindowedList = require('./windowed-list');
 const Draggable = require('./draggable');
-const { injectIntl } = require('react-intl');
 const { IconDownChevron, getDOMElement } = require('components/icons');
 
 const TYPING_TIMEOUT = 1000;
@@ -1636,7 +1635,7 @@ function makeRowRenderer(getRowData) {
 
 function formatColumnName(column) {
 	if (column.label in Zotero.Intl.strings) {
-		return Zotero.Intl.strings[column.label];
+		return Zotero.getString(column.label);
 	}
 	else if (/^[^\s]+\w\.\w[^\s]+$/.test(column.label)) {
 		try {
@@ -1652,7 +1651,7 @@ function formatColumnName(column) {
 	return column.label;
 }
 
-module.exports = injectIntl(VirtualizedTable, { forwardRef: true });
+module.exports = VirtualizedTable;
 module.exports.TreeSelection = TreeSelection;
 module.exports.TreeSelectionStub = TreeSelectionStub;
 module.exports.renderCell = renderCell;

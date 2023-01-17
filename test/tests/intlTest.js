@@ -18,9 +18,16 @@ describe("Zotero.Intl", function() {
 		it("shouldn't ignore whitespace", function () {
 			assert.equal(Zotero.localeCompare("Chang", "Chan H"), 1);
 		});
-		 
+		
 		it("shouldn't ignore leading punctuation", function () {
 			assert.equal(Zotero.localeCompare("_Abcd", "Abcd"), -1);
 		});
+	});
+	
+	it("there should not be duplicate string keys in .dtd and .properties files", function () {
+		let dtdStrings = Object.keys(Zotero.Intl.strings);
+		for (let key of dtdStrings) {
+			assert.throws(() => Zotero.Intl._bundle.GetStringFromName(key));
+		}
 	});
 });

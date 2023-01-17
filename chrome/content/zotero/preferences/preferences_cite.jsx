@@ -30,7 +30,6 @@ import FilePicker from 'zotero/modules/filePicker';
 var React = require('react');
 var ReactDOM = require('react-dom');
 var VirtualizedTable = require('components/virtualized-table');
-var { IntlProvider } = require('react-intl');
 var { makeRowRenderer } = VirtualizedTable;
 
 Zotero_Preferences.Cite = {
@@ -118,22 +117,20 @@ Zotero_Preferences.Cite = {
 				}
 			};
 			let elem = (
-				<IntlProvider locale={Zotero.locale} messages={Zotero.Intl.strings}>
-					<VirtualizedTable
-						getRowCount={() => this.styles.length}
-						id="styleManager-table"
-						ref={ref => this._tree = ref}
-						renderItem={makeRowRenderer(index => this.styles[index])}
-						showHeader={true}
-						multiSelect={true}
-						columns={columns}
-						staticColumns={true}
-						disableFontSizeScaling={true}
-						onSelectionChange={() => document.getElementById('styleManager-delete').disabled = undefined}
-						onKeyDown={handleKeyDown}
-						getRowString={index => this.styles[index].title}
-					/>
-				</IntlProvider>
+				<VirtualizedTable
+					getRowCount={() => this.styles.length}
+					id="styleManager-table"
+					ref={ref => this._tree = ref}
+					renderItem={makeRowRenderer(index => this.styles[index])}
+					showHeader={true}
+					multiSelect={true}
+					columns={columns}
+					staticColumns={true}
+					disableFontSizeScaling={true}
+					onSelectionChange={() => document.getElementById('styleManager-delete').disabled = undefined}
+					onKeyDown={handleKeyDown}
+					getRowString={index => this.styles[index].title}
+				/>
 			);
 			await new Promise(resolve => ReactDOM.render(elem, document.getElementById("styleManager"), resolve));
 		}

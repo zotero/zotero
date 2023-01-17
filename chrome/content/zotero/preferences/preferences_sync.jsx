@@ -32,7 +32,6 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var VirtualizedTable = require('components/virtualized-table');
 var { getDOMElement } = require('components/icons');
-var { IntlProvider } = require('react-intl');
 var { renderCell } = VirtualizedTable;
 
 Zotero_Preferences.Sync = {
@@ -319,20 +318,18 @@ Zotero_Preferences.Sync = {
 			}
 		};
 		let elem = (
-			<IntlProvider locale={Zotero.locale} messages={Zotero.Intl.strings}>
-				<VirtualizedTable
-					getRowCount={() => this._rows.length}
-					id="librariesToSync-table"
-					ref={ref => this._tree = ref}
-					renderItem={renderItem}
-					showHeader={true}
-					columns={columns}
-					staticColumns={true}
-					getRowString={index => this._rows[index].name}
-					disableFontSizeScaling={true}
-					onKeyDown={handleKeyDown}
-				/>
-			</IntlProvider>
+			<VirtualizedTable
+				getRowCount={() => this._rows.length}
+				id="librariesToSync-table"
+				ref={ref => this._tree = ref}
+				renderItem={renderItem}
+				showHeader={true}
+				columns={columns}
+				staticColumns={true}
+				getRowString={index => this._rows[index].name}
+				disableFontSizeScaling={true}
+				onKeyDown={handleKeyDown}
+			/>
 		);
 		
 		ReactDOM.render(elem, document.getElementById("libraries-to-sync-tree"));

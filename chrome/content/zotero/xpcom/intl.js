@@ -55,7 +55,8 @@ Zotero.Intl = new function () {
 		
 		Components.utils.import("resource://gre/modules/PluralForm.jsm");
 
-		bundle = Services.strings.createBundle('chrome://zotero/locale/zotero.properties');
+		// Exposed for tests
+		this._bundle = bundle = Services.strings.createBundle('chrome://zotero/locale/zotero.properties');
 		intlProps = Services.strings.createBundle('chrome://zotero/locale/mozilla/intl.properties');
 
 		[pluralFormGet, pluralFormNumForms] = PluralForm.makeGetter(parseInt(getIntlProp('pluralRule', 1)));
@@ -104,6 +105,9 @@ Zotero.Intl = new function () {
 					params = [params];
 				}
 				l10n = bundle.formatStringFromName(name, params, params.length);
+			}
+			else if (this.strings[name]) {
+				return this.strings[name];
 			}
 			else {
 				l10n = bundle.GetStringFromName(name);

@@ -25,7 +25,6 @@
 
 const React = require('react');
 const ReactDOM = require('react-dom');
-const { IntlProvider } = require('react-intl');
 const LibraryTree = require('./libraryTree');
 const VirtualizedTable = require('components/virtualized-table');
 const { TreeSelectionStub } = VirtualizedTable;
@@ -42,9 +41,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		var ref;
 		opts.domEl = domEl;
 		let elem = (
-			<IntlProvider locale={Zotero.locale} messages={Zotero.Intl.strings}>
-				<CollectionTree ref={c => ref = c } {...opts} />
-			</IntlProvider>
+			<CollectionTree ref={c => ref = c } {...opts} />
 		);
 		await new Promise(resolve => ReactDOM.render(elem, domEl, resolve));
 

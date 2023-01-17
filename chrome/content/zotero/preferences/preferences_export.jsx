@@ -28,7 +28,6 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 var VirtualizedTable = require('components/virtualized-table');
-var { IntlProvider } = require('react-intl');
 var { makeRowRenderer } = VirtualizedTable;
 
 Zotero_Preferences.Export = {
@@ -492,22 +491,20 @@ Zotero_Preferences.Export = {
 			};
 			
 			let elem = (
-				<IntlProvider locale={Zotero.locale} messages={Zotero.Intl.strings}>
-					<VirtualizedTable
-						getRowCount={() => this._rows.length}
-						id="quickCopy-siteSettings-table"
-						ref={ref => this._tree = ref}
-						renderItem={makeRowRenderer(index => this._rows[index])}
-						showHeader={true}
-						columns={columns}
-						staticColumns={true}
-						disableFontSizeScaling={true}
-						onSelectionChange={handleSelectionChange}
-						onKeyDown={handleKeyDown}
-						getRowString={index => this._rows[index].domain}
-						onActivate={(event, indices) => Zotero_Preferences.Export.showQuickCopySiteEditor()}
-					/>
-				</IntlProvider>
+			<VirtualizedTable
+				getRowCount={() => this._rows.length}
+				id="quickCopy-siteSettings-table"
+				ref={ref => this._tree = ref}
+				renderItem={makeRowRenderer(index => this._rows[index])}
+				showHeader={true}
+				columns={columns}
+				staticColumns={true}
+				disableFontSizeScaling={true}
+				onSelectionChange={handleSelectionChange}
+				onKeyDown={handleKeyDown}
+				getRowString={index => this._rows[index].domain}
+				onActivate={(event, indices) => Zotero_Preferences.Export.showQuickCopySiteEditor()}
+			/>
 			);
 			await new Promise(resolve => ReactDOM.render(elem, document.getElementById("quickCopy-siteSettings"), resolve));
 		} else {

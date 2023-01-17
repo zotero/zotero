@@ -27,7 +27,6 @@
 
 const React = require('react')
 const { PureComponent, createElement: create } = React
-const { injectIntl } = require('react-intl')
 const { IconDownChevron } = require('./icons')
 const cx = require('classnames')
 const {
@@ -59,19 +58,19 @@ class Button extends PureComponent {
 	}
 
 	get text() {
-		const { intl, text } = this.props
+		const { text } = this.props;
 
 		return text ?
-			intl.formatMessage({ id: text }) :
-			null
+			Zotero.getString(text) :
+			null;
 	}
 
 	get title() {
-		const { intl, title } = this.props
+		const { title } = this.props;
 
 		return title ?
-			intl.formatMessage({ id: title }) :
-			null
+			Zotero.getString(title) :
+			null;
 	}
 	
 	get menuMarker() {
@@ -159,5 +158,5 @@ class Button extends PureComponent {
 
 module.exports = {
 	ButtonGroup,
-	Button: injectIntl(Button)
+	Button
 }
