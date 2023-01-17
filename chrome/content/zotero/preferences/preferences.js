@@ -234,7 +234,7 @@ var Zotero_Preferences = {
 		if (!pane.imported) {
 			if (pane.scripts) {
 				for (let script of pane.scripts) {
-					Services.scriptloader.loadSubScript(script, this);
+					Services.scriptloader.loadSubScript(script, window);
 				}
 			}
 			if (pane.stylesheets) {
