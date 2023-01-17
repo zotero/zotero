@@ -106,8 +106,8 @@ Zotero.Intl = new function () {
 				}
 				l10n = bundle.formatStringFromName(name, params, params.length);
 			}
-			else if (Zotero.Intl.strings[name]) {
-				return Zotero.Intl.strings[name];
+			else if (this.strings[name]) {
+				return this.strings[name];
 			}
 			else {
 				l10n = bundle.GetStringFromName(name);
