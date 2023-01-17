@@ -25,7 +25,6 @@
 import React, { memo, useCallback, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { getDOMElement } from 'components/icons';
-import { IntlProvider } from 'react-intl';
 
 import VirtualizedTable, { renderCell } from 'components/virtualized-table';
 import { noop } from './utils';
@@ -101,17 +100,15 @@ const ProgressQueueTable = ({ onActivate = noop, progressQueue }) => {
 	}, []); // eslint-disable-line react-hooks/exhaustive-deps
 	
 	return (
-		<IntlProvider locale={ Zotero.locale } messages={ Zotero.Intl.strings }>
-			<VirtualizedTable
-				getRowCount={ getRowCount }
-				ref={ treeRef }
-				id="progress-queue-table"
-				renderItem={ rowToTreeItem }
-				showHeader={ true }
-				columns={ tableColumns }
-				onActivate={ onActivate }
-			/>
-		</IntlProvider>
+		<VirtualizedTable
+			getRowCount={ getRowCount }
+			ref={ treeRef }
+			id="progress-queue-table"
+			renderItem={ rowToTreeItem }
+			showHeader={ true }
+			columns={ tableColumns }
+			onActivate={ onActivate }
+		/>
 	);
 };
 

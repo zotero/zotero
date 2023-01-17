@@ -27,7 +27,6 @@ const { noop, getDragTargetOrient } = require("components/utils");
 const PropTypes = require("prop-types");
 const React = require('react');
 const ReactDOM = require('react-dom');
-const { IntlProvider } = require('react-intl');
 const LibraryTree = require('./libraryTree');
 const VirtualizedTable = require('components/virtualized-table');
 const { renderCell, formatColumnName } = VirtualizedTable;
@@ -48,9 +47,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		var ref;
 		opts.domEl = domEl;
 		let elem = (
-			<IntlProvider locale={Zotero.locale} messages={Zotero.Intl.strings}>
-				<ItemTree ref={c => ref = c } {...opts} />
-			</IntlProvider>
+			<ItemTree ref={c => ref = c } {...opts} />
 		);
 		await new Promise(resolve => ReactDOM.render(elem, domEl, resolve));
 		
@@ -3707,7 +3704,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		// Restore Default Column Order
 		//
 		let menuitem = doc.createXULElement('menuitem');
-		menuitem.setAttribute('label', Zotero.Intl.strings['zotero.items.restoreColumnOrder.label']);
+		menuitem.setAttribute('label', Zotero.getString('zotero.items.restoreColumnOrder.label'));
 		menuitem.setAttribute('anonid', prefix + 'restore-order');
 		menuitem.addEventListener('command', () => this.tree._columns.restoreDefaultOrder());
 		menupopup.appendChild(menuitem);

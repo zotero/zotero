@@ -24,7 +24,6 @@
 */
 
 import VirtualizedTable from 'components/virtualized-table';
-const { IntlProvider } = require('react-intl');
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -41,21 +40,19 @@ function init() {
 	engines = Zotero.LocateManager.getEngines();
 	const domEl = document.querySelector('#locateManager-tree');
 	let elem = (
-		<IntlProvider locale={Zotero.locale} messages={Zotero.Intl.strings}>
-			<VirtualizedTable
-				getRowCount={() => engines.length}
-				id="locateManager-table"
-				ref={ref => tree = ref}
-				renderItem={VirtualizedTable.makeRowRenderer(getRowData)}
-				showHeader={true}
-				multiSelect={true}
-				columns={columns}
-				onColumnSort={null}
-				disableFontSizeScaling={true}
-				getRowString={index => getRowData(index).name}
-				onActivate={handleActivate}
-			/>
-		</IntlProvider>
+		<VirtualizedTable
+			getRowCount={() => engines.length}
+			id="locateManager-table"
+			ref={ref => tree = ref}
+			renderItem={VirtualizedTable.makeRowRenderer(getRowData)}
+			showHeader={true}
+			multiSelect={true}
+			columns={columns}
+			onColumnSort={null}
+			disableFontSizeScaling={true}
+			getRowString={index => getRowData(index).name}
+			onActivate={handleActivate}
+		/>
 	);
 	return new Promise(resolve => ReactDOM.render(elem, domEl, resolve));
 }

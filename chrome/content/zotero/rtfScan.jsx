@@ -31,7 +31,6 @@ import FilePicker from 'zotero/modules/filePicker';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import VirtualizedTable from 'components/virtualized-table';
-import { IntlProvider } from 'react-intl';
 import { getDOMElement } from 'components/icons';
 
 /**
@@ -51,9 +50,9 @@ var Zotero_RTFScan = new function() {
 	var ids = 0;
 	var tree;
 	this._rows = [
-		{ id: 'unmapped', rtf: Zotero.Intl.strings['zotero.rtfScan.unmappedCitations.label'], collapsed: false },
-		{ id: 'ambiguous', rtf: Zotero.Intl.strings['zotero.rtfScan.ambiguousCitations.label'], collapsed: false },
-		{ id: 'mapped', rtf: Zotero.Intl.strings['zotero.rtfScan.mappedCitations.label'], collapsed: false },
+		{ id: 'unmapped', rtf: Zotero.getString('zotero.rtfScan.unmappedCitations.label'), collapsed: false },
+		{ id: 'ambiguous', rtf: Zotero.getString('zotero.rtfScan.ambiguousCitations.label'), collapsed: false },
+		{ id: 'mapped', rtf: Zotero.getString('zotero.rtfScan.mappedCitations.label'), collapsed: false },
 	];
 	this._rowMap = {};
 	this._rows.forEach((row, index) => this._rowMap[row.id] = index);
@@ -388,9 +387,9 @@ var Zotero_RTFScan = new function() {
 		document.documentElement.currentPage = document.getElementById('intro-page');
 		
 		this._rows = [
-			{ id: 'unmapped', rtf: Zotero.Intl.strings['zotero.rtfScan.unmappedCitations.label'], collapsed: false },
-			{ id: 'ambiguous', rtf: Zotero.Intl.strings['zotero.rtfScan.ambiguousCitations.label'], collapsed: false },
-			{ id: 'mapped', rtf: Zotero.Intl.strings['zotero.rtfScan.mappedCitations.label'], collapsed: false },
+			{ id: 'unmapped', rtf: Zotero.getString('zotero.rtfScan.unmappedCitations.label'), collapsed: false },
+			{ id: 'ambiguous', rtf: Zotero.getString('zotero.rtfScan.ambiguousCitations.label'), collapsed: false },
+			{ id: 'mapped', rtf: Zotero.getString('zotero.rtfScan.mappedCitations.label'), collapsed: false },
 		];
 		this._rowMap = {};
 		this._rows.forEach((row, index) => this._rowMap[row.id] = index);
@@ -765,17 +764,15 @@ var Zotero_RTFScan = new function() {
 	this._initCitationTree = function () {
 		const domEl = document.querySelector('#tree');
 		const elem = (
-			<IntlProvider locale={Zotero.locale} messages={Zotero.Intl.strings}>
-				<VirtualizedTable
-					getRowCount={() => this._rows.length}
-					id="rtfScan-table"
-					ref={ref => tree = ref}
-					renderItem={this._renderItem}
-					showHeader={true}
-					columns={columns}
-					disableFontSizeScaling={true}
-				/>
-			</IntlProvider>
+			<VirtualizedTable
+				getRowCount={() => this._rows.length}
+				id="rtfScan-table"
+				ref={ref => tree = ref}
+				renderItem={this._renderItem}
+				showHeader={true}
+				columns={columns}
+				disableFontSizeScaling={true}
+			/>
 		);
 		return new Promise(resolve => ReactDOM.render(elem, domEl, resolve));
 	};
