@@ -858,7 +858,8 @@ var Scaffold = new function () {
 		var fieldList = Zotero.ItemFields.getItemTypeFields(typeID);
 		for (let field of fieldList) {
 			var key = Zotero.ItemFields.getName(field);
-			outputObject[key] = "";
+			let fieldLocalizedName = Zotero.ItemFields.getLocalizedString(field);
+			outputObject[key] = fieldLocalizedName;
 		}
 		var creatorList = Zotero.CreatorTypes.getTypesForItemType(typeID);
 		var creators = [];
