@@ -600,13 +600,6 @@
 						th.classList.add("pointer");
 						th.addEventListener('click', event => ZoteroPane_Local.loadURI(doi, event));
 						th.setAttribute('title', Zotero.getString('pane.item.viewOnline.tooltip'));
-						valueElement.oncontextmenu = (event) => {
-							this._id('zotero-doi-menu').openPopupAtScreen(
-								event.screenX + 1,
-								event.screenY + 1,
-								true
-							);
-						};
 						
 						var openURLMenuItem = this._id('zotero-doi-menu-view-online');
 						openURLMenuItem.addEventListener('command', event => ZoteroPane_Local.loadURI(doi, event));
@@ -1445,6 +1438,17 @@
 						);
 					};
 				}
+			}
+			
+			// Add popup menu on DOI field with value
+			if (fieldName == 'DOI' && valueText) {
+				valueElement.oncontextmenu = (event) => {
+					this._id('zotero-doi-menu').openPopupAtScreen(
+						event.screenX + 1,
+						event.screenY + 1,
+						true
+					);
+				};
 			}
 			
 			valueElement.textContent = valueText;
