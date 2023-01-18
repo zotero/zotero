@@ -23,9 +23,9 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.ReadObserver = {
+Zotero.AttachmentReadObserver = {
 	init() {
-		this._observerID = Zotero.Notifier.registerObserver(this, ['file'], 'readObserver');
+		this._observerID = Zotero.Notifier.registerObserver(this, ['file'], 'attachmentReadObserver');
 	},
 	
 	unregister() {

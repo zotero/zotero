@@ -116,7 +116,7 @@ const xpcomFilesLocal = [
 	'progressQueue',
 	'progressQueueDialog',
 	'quickCopy',
-	'readObserver',
+	'attachmentReadObserver',
 	'recognizePDF',
 	'report',
 	'retractions',
