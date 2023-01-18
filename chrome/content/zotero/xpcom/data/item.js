@@ -5120,7 +5120,7 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 				continue;
 			}
 			if (val) {
-				let i = parseInt(val, 10);
+				let i = parseInt(val);
 				if (!Number.isInteger(i)) {
 					Zotero.logError(`Discarding invalid ${field} '${val}' for item ${this.libraryKey}`);
 					continue;

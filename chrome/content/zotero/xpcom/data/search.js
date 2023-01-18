@@ -1438,23 +1438,23 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						break;
 				}
 				
-				if (!skipOperators){
+				if (!skipOperators) {
 					// Special handling for date fields
 					//
 					// Note: We assume full datetimes are already UTC and don't
 					// need to be handled specially
-					if ((condition['name']=='dateAdded' ||
-							condition['name']=='dateModified' ||
-							condition['name']=='lastRead' ||
-							condition['name']=='datefield') &&
-							!Zotero.Date.isSQLDateTime(condition['value'])){
+					if ((condition.name == 'dateAdded'
+							|| condition.name == 'dateModified'
+							|| condition.name == 'lastRead'
+							|| condition.name == 'datefield')
+							&& !Zotero.Date.isSQLDateTime(condition.value)) {
 						
 						// TODO: document these flags
 						var parseDate = null;
 						var alt = null;
 						var useFreeform = null;
 						
-						switch (condition['operator']){
+						switch (condition.operator) {
 							case 'is':
 							case 'isNot':
 								var parseDate = true;
@@ -1481,7 +1481,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 								break;
 								
 							default:
-								throw ('Invalid date field operator in search');
+								throw new Error('Invalid date field operator in search');
 						}
 						
 						// Convert stored UTC dates to localtime
@@ -1492,7 +1492,7 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 						//
 						// lastRead is a UNIX timestamp in seconds, so we need to
 						// explicitly pass 'unixepoch'
-						if (condition['name'] == 'lastRead') {
+						if (condition.name == 'lastRead') {
 							condSQL += "DATE("
 									+ "CASE "
 										// Group library: stored as synced setting
@@ -1508,14 +1508,14 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 								+ ", 'unixepoch', 'localtime')";
 							condSQLParams.push(Zotero.Libraries.userLibraryID);
 						}
-						else if (condition['name']=='dateAdded' ||
-								condition['name']=='dateModified' ||
-								condition['alias']=='accessDate'){
-							condSQL += "DATE(" + condition['field'] + ", 'localtime')";
+						else if (condition.name == 'dateAdded'
+									|| condition.name == 'dateModified'
+									|| condition.alias == 'accessDate') {
+							condSQL += "DATE(" + condition.field + ", 'localtime')";
 						}
 						// Only use first (SQL) part of multipart dates
 						else {
-							condSQL += "SUBSTR(" + condition['field'] + ", 1, 10)";
+							condSQL += "SUBSTR(" + condition.field + ", 1, 10)";
 						}
 						
 						if (parseDate){
