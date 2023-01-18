@@ -2114,7 +2114,7 @@ describe("Zotero.Item", function () {
 
 				it("should output lastRead for a user library item", async function () {
 					let attachment = await createDataObject('item', { itemType: 'attachment' });
-					attachment.setAttachmentLastRead(123450000);
+					attachment.attachmentLastRead = 123450000;
 					let json = attachment.toJSON();
 					assert.equal(json.lastRead, 123450000);
 				});
@@ -2122,8 +2122,8 @@ describe("Zotero.Item", function () {
 				it("shouldn't output lastRead for a group item", async function () {
 					let group = await createGroup();
 					let attachment = await createDataObject('item', { itemType: 'attachment', libraryID: group.libraryID });
-					await attachment.setAttachmentLastRead(123450000);
-					assert.equal(attachment.getAttachmentLastRead(), 123450000);
+					attachment.attachmentLastRead = 123450000;
+					assert.equal(attachment.attachmentLastRead, 123450000);
 					let json = attachment.toJSON();
 					assert.notProperty(json, 'lastRead');
 					await group.eraseTx();

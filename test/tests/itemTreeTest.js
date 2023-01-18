@@ -693,8 +693,8 @@ describe("Zotero.ItemTree", function() {
 			assert.notOk(item2.getItemLastRead());
 			
 			// attachment2 is more recently opened
-			attachment1.setAttachmentLastRead(Math.round(Date.now() / 1000) - 5);
-			attachment2.setAttachmentLastRead(Math.round(Date.now() / 1000));
+			attachment1.attachmentLastRead = Math.round(Date.now() / 1000) - 5;
+			attachment2.attachmentLastRead = Math.round(Date.now() / 1000);
 			await attachment1.saveTx();
 			await attachment2.saveTx();
 
@@ -705,7 +705,7 @@ describe("Zotero.ItemTree", function() {
 			assert.equal(zp.itemsView.getRowIndexByID(item2.id), 0);
 
 			// Now make attachment2 much less recently opened
-			attachment2.setAttachmentLastRead(Math.round(Date.now() / 1000) - 60);
+			attachment2.attachmentLastRead = Math.round(Date.now() / 1000) - 60;
 			await attachment2.saveTx();
 
 			assert.equal(zp.itemsView.getRowIndexByID(item1.id), 0);
@@ -723,8 +723,8 @@ describe("Zotero.ItemTree", function() {
 			assert.notOk(item2.getItemLastRead());
 
 			// attachment2 is more recently opened
-			attachment1.setAttachmentLastRead(Math.round(Date.now() / 1000) - 5);
-			attachment2.setAttachmentLastRead(Math.round(Date.now() / 1000));
+			attachment1.attachmentLastRead = Math.round(Date.now() / 1000) - 5;
+			attachment2.attachmentLastRead = Math.round(Date.now() / 1000);
 			await attachment1.saveTx();
 			await attachment2.saveTx();
 
@@ -735,7 +735,7 @@ describe("Zotero.ItemTree", function() {
 			assert.equal(zp.itemsView.getRowIndexByID(item2.id), 0);
 
 			// Now make attachment2 much less recently opened
-			attachment2.setAttachmentLastRead(Math.round(Date.now() / 1000) - 60);
+			attachment2.attachmentLastRead = Math.round(Date.now() / 1000) - 60;
 			await attachment2.saveTx();
 
 			assert.equal(zp.itemsView.getRowIndexByID(item1.id), 0);

@@ -44,7 +44,7 @@ Zotero.ReadObserver = {
 			return;
 		}
 		
-		await item.setAttachmentLastRead(Math.round(new Date().getTime() / 1000));
+		item.attachmentLastRead = Math.round(new Date().getTime() / 1000);
 		await item.saveTx({ skipDateModifiedUpdate: true });
 	},
 	
@@ -64,7 +64,7 @@ Zotero.ReadObserver = {
 				fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
 				for (let item of items) {
 					if (item.library.lastReadItemInSession !== item.id
-							|| new Date(item.getAttachmentLastRead() * 1000) < fiveMinutesAgo) {
+							|| new Date(item.attachmentLastRead * 1000) < fiveMinutesAgo) {
 						await this.updateAttachmentLastRead(item);
 					}
 				}
