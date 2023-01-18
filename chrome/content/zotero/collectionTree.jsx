@@ -2245,6 +2245,18 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		
 		var newRows = 0;
 		
+		// Recently Read
+		if (showRecentlyRead) {
+			let s = new Zotero.Search();
+			s.libraryID = libraryID;
+			s.name = Zotero.getString('pane.collections.recentlyRead');
+			s.addCondition('libraryID', 'is', libraryID);
+			s.addCondition('lastRead', 'isInTheLast', '14 days');
+			rows.splice(row + 1 + newRows, 0,
+				new Zotero.CollectionTreeRow(this, 'recentlyRead', s, level + 1));
+			newRows++;
+		}
+
 		// Add collections
 		for (var i = 0, len = collections.length; i < len; i++) {
 			// Skip collections in trash
@@ -2301,18 +2313,6 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			s.addCondition('unfiled', 'true');
 			rows.splice(row + 1 + newRows, 0,
 				new Zotero.CollectionTreeRow(this, 'unfiled', s, level + 1));
-			newRows++;
-		}
-		
-		// Recently read
-		if (showRecentlyRead) {
-			let s = new Zotero.Search();
-			s.libraryID = libraryID;
-			s.name = Zotero.getString('pane.collections.recentlyRead');
-			s.addCondition('libraryID', 'is', libraryID);
-			s.addCondition('lastRead', 'isInTheLast', '14 days');
-			rows.splice(row + 1 + newRows, 0,
-				new Zotero.CollectionTreeRow(this, 'recentlyRead', s, level + 1));
 			newRows++;
 		}
 
