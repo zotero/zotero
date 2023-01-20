@@ -25,7 +25,7 @@
 
 Zotero.AttachmentReadObserver = {
 	init() {
-		this._observerID = Zotero.Notifier.registerObserver(this, ['file'], 'attachmentReadObserver');
+		this._observerID = Zotero.Notifier.registerObserver(this, ['file', 'setting'], 'attachmentReadObserver');
 	},
 	
 	unregister() {
@@ -48,27 +48,56 @@ Zotero.AttachmentReadObserver = {
 		await item.saveTx({ skipDateModifiedUpdate: true });
 	},
 	
-	async notify(action, type, ids) {
-		if (!['pageChange', 'open'].includes(action)) {
-			return;
-		}
-		let items = await Zotero.Items.getAsync(ids);
-		switch (action) {
-			case 'open':
-				for (let item of items) {
-					await this.updateAttachmentLastRead(item);
-				}
-				break;
-			case 'pageChange': {
-				let fiveMinutesAgo = new Date();
-				fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
-				for (let item of items) {
-					if (item.library.lastReadItemInSession !== item.id
-							|| new Date(item.attachmentLastRead * 1000) < fiveMinutesAgo) {
+	async notify(action, type, ids, extraData) {
+		if (type == 'file') {
+			if (!['pageChange', 'open'].includes(action)) {
+				return;
+			}
+			let items = await Zotero.Items.getAsync(ids);
+			switch (action) {
+				case 'open':
+					for (let item of items) {
 						await this.updateAttachmentLastRead(item);
 					}
+					break;
+				case 'pageChange': {
+					let fiveMinutesAgo = new Date();
+					fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
+					for (let item of items) {
+						if (item.library.lastReadItemInSession !== item.id
+							|| new Date(item.attachmentLastRead * 1000) < fiveMinutesAgo) {
+							await this.updateAttachmentLastRead(item);
+						}
+					}
+					break;
 				}
-				break;
+			}
+		}
+		else if (type == 'setting') {
+			for (let id of ids) {
+				let [settingLibraryID, settingKey] = id.split('/');
+				if (settingLibraryID != Zotero.Libraries.userLibraryID) {
+					continue;
+				}
+				if (settingKey.startsWith('lastRead_')) {
+					let [librarySlug, itemKey] = settingKey.split('_');
+					let libraryID;
+					if (librarySlug == 'u') {
+						libraryID = Zotero.Libraries.userLibraryID;
+					}
+					else if (librarySlug.startsWith('g')) {
+						libraryID = Zotero.Groups.getLibraryIDFromGroupID(parseInt(librarySlug.substring(1)));
+					}
+					else {
+						throw new Error('Invalid library slug in key: ' + settingKey);
+					}
+					let item = await Zotero.Items.getByLibraryAndKeyAsync(libraryID, itemKey);
+					if (item.isAttachment()) {
+						let value = extraData?.[id]?.changed?.value;
+						item.lastRead = value || null;
+						await item.saveTx();
+					}
+				}
 			}
 		}
 	}

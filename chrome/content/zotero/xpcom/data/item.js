@@ -326,7 +326,6 @@ Zotero.Item.prototype.loadFromRow = function(row, reload) {
 	}
 	
 	this._parseRowData(row);
-	this._setLastReadFromSyncedSetting();
 	this._finalizeLoadFromRow(row);
 }
 
@@ -405,13 +404,6 @@ Zotero.Item.prototype._parseRowData = function(row) {
 		this['_' + col] = val;
 	}
 }
-
-Zotero.Item.prototype._setLastReadFromSyncedSetting = function () {
-	if (this.library.isGroup && this.isAttachment()) {
-		let lastReadSettingKey = this._getLastReadSettingKey();
-		this._attachmentLastRead = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, lastReadSettingKey);
-	}
-};
 
 Zotero.Item.prototype._finalizeLoadFromRow = function(row) {
 	this._loaded.primaryData = true;
@@ -1887,7 +1879,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			storageModTime !== undefined ? storageModTime : null,
 			storageHash || null,
 			lastProcessedModificationTime || null,
-			libraryType == 'user' && lastRead !== undefined ? lastRead : null,
+			lastRead || null,
 		];
 		if (isNew) {
 			params.unshift(itemID);
