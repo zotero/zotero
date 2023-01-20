@@ -95,7 +95,7 @@ Zotero.AttachmentReadObserver = {
 					if (item.isAttachment()) {
 						let value = extraData?.[id]?.changed?.value;
 						item.lastRead = value || null;
-						await item.saveTx();
+						await item.saveTx({ skipDateModifiedUpdate: true });
 					}
 				}
 			}
