@@ -258,7 +258,7 @@ var Scaffold = new function () {
 				null, null, {}
 			);
 			if (index == 1) {
-				this.load(translatorID);
+				await this.load(translatorID);
 			}
 			else {
 				_lastModifiedTime = modifiedTime;
@@ -785,7 +785,7 @@ var Scaffold = new function () {
 		_lastModifiedTime = new Date().getTime();
 
 		this.updateModelMarkers(path);
-		this.reloadTranslators();
+		await this.reloadTranslators();
 	};
 
 	/**
