@@ -1898,7 +1898,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 		if (libraryType == 'group' && lastRead !== undefined) {
 			let id = this._getLastReadSettingKey();
 			if (lastRead === null) {
-				yield Zotero.SyncedSettings.clear(id);
+				yield Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, id);
 			}
 			else {
 				yield Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, id, lastRead);
@@ -3478,7 +3478,7 @@ Zotero.Item.prototype.setAttachmentLastPageIndex = async function (val) {
 	
 	var id = this._getLastPageIndexSettingKey();
 	if (val === null) {
-		return Zotero.SyncedSettings.clear(id);
+		return Zotero.SyncedSettings.clear(Zotero.Libraries.userLibraryID, id);
 	}
 	return Zotero.SyncedSettings.set(Zotero.Libraries.userLibraryID, id, val);
 };

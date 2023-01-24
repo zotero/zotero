@@ -80,21 +80,20 @@ Zotero.AttachmentReadObserver = {
 					continue;
 				}
 				if (settingKey.startsWith('lastRead_')) {
-					let [librarySlug, itemKey] = settingKey.split('_');
+					let [, librarySlug, itemKey] = settingKey.split('_');
 					let libraryID;
 					if (librarySlug == 'u') {
-						libraryID = Zotero.Libraries.userLibraryID;
+						continue; // lastRead_ synced settings are only used for group items
 					}
 					else if (librarySlug.startsWith('g')) {
 						libraryID = Zotero.Groups.getLibraryIDFromGroupID(parseInt(librarySlug.substring(1)));
 					}
 					else {
-						throw new Error('Invalid library slug in key: ' + settingKey);
+						Zotero.debug('Invalid library slug in key: ' + settingKey);
 					}
 					let item = await Zotero.Items.getByLibraryAndKeyAsync(libraryID, itemKey);
 					if (item.isAttachment()) {
-						let value = extraData?.[id]?.changed?.value;
-						item.lastRead = value || null;
+						item.attachmentLastRead = Zotero.SyncedSettings.get(settingLibraryID, settingKey);
 						await item.saveTx({ skipDateModifiedUpdate: true });
 					}
 				}
