@@ -685,9 +685,9 @@ describe("Zotero.ItemTree", function() {
 		
 		it("should re-sort by Last Read when child attachmentLastRead is updated in the user library", async function () {
 			let userLibraryID = Zotero.Libraries.userLibraryID;
-			let item1 = await createDataObject('item');
+			let item1 = await createDataObject('item', { libraryID: userLibraryID });
 			let attachment1 = await importPDFAttachment(item1);
-			let item2 = await createDataObject('item');
+			let item2 = await createDataObject('item', { libraryID: userLibraryID });
 			let attachment2 = await importPDFAttachment(item2);
 			assert.notOk(item1.getItemLastRead());
 			assert.notOk(item2.getItemLastRead());
@@ -701,23 +701,20 @@ describe("Zotero.ItemTree", function() {
 			await zp.setVirtual(userLibraryID, 'recentlyRead', true, true);
 			assert.equal(zp.getCollectionTreeRow().id, 'Y' + userLibraryID);
 			await waitForItemsLoad(win);
-			assert.equal(zp.itemsView.getRowIndexByID(item1.id), 1);
-			assert.equal(zp.itemsView.getRowIndexByID(item2.id), 0);
+			assert.isAbove(zp.itemsView.getRowIndexByID(item1.id), zp.itemsView.getRowIndexByID(item2.id));
 
 			// Now make attachment2 much less recently opened
 			attachment2.attachmentLastRead = Math.round(Date.now() / 1000) - 60;
 			await attachment2.saveTx();
 
-			assert.equal(zp.itemsView.getRowIndexByID(item1.id), 0);
-			assert.equal(zp.itemsView.getRowIndexByID(item2.id), 1);
+			assert.isBelow(zp.itemsView.getRowIndexByID(item1.id), zp.itemsView.getRowIndexByID(item2.id));
 		});
 
 		it("should re-sort by Last Read when child attachmentLastRead is updated in a group library", async function () {
-			
-			let groupLibraryID = Zotero.Libraries.userLibraryID;
-			let item1 = await createDataObject('item');
+			let groupLibraryID = (await createGroup()).libraryID;
+			let item1 = await createDataObject('item', { libraryID: groupLibraryID });
 			let attachment1 = await importPDFAttachment(item1);
-			let item2 = await createDataObject('item');
+			let item2 = await createDataObject('item', { libraryID: groupLibraryID });
 			let attachment2 = await importPDFAttachment(item2);
 			assert.notOk(item1.getItemLastRead());
 			assert.notOk(item2.getItemLastRead());
@@ -731,15 +728,13 @@ describe("Zotero.ItemTree", function() {
 			await zp.setVirtual(groupLibraryID, 'recentlyRead', true, true);
 			assert.equal(zp.getCollectionTreeRow().id, 'Y' + groupLibraryID);
 			await waitForItemsLoad(win);
-			assert.equal(zp.itemsView.getRowIndexByID(item1.id), 1);
-			assert.equal(zp.itemsView.getRowIndexByID(item2.id), 0);
+			assert.isAbove(zp.itemsView.getRowIndexByID(item1.id), zp.itemsView.getRowIndexByID(item2.id));
 
 			// Now make attachment2 much less recently opened
 			attachment2.attachmentLastRead = Math.round(Date.now() / 1000) - 60;
 			await attachment2.saveTx();
 
-			assert.equal(zp.itemsView.getRowIndexByID(item1.id), 0);
-			assert.equal(zp.itemsView.getRowIndexByID(item2.id), 1);
+			assert.isBelow(zp.itemsView.getRowIndexByID(item1.id), zp.itemsView.getRowIndexByID(item2.id));
 		});
 		
 		describe("Trash", function () {
