@@ -76,10 +76,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "למידע נוסף.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "היסטוריית איפוס סנכרון נתונים">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "מיזוג הנתונים המקומיים עם הנתונים המרוחקים תוך התעלמות מהיסטוריית הסנכרון">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "שחזור מתיקייה מקוונת">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "לשכתב על הנתונים המקומיים של Zotero עם נתונים מהספרייה המקוונת.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "החלפת הספרייה המרוחקת">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "שכתוב הספרייה המרוחקת עם הנתונים המקומיים של Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "איפוס היסטוריית סנכרון קבצים">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "השוואת כל קובצי הצרופות עם שירות האחסון">
 <!ENTITY zotero.preferences.sync.reset "איפוס">

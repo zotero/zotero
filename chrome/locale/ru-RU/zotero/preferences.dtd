@@ -76,10 +76,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 " для дополнительных сведений.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Очистить историю синхронизации…">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Слить локальные данные с удаленными без учета истории синхронизации">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Восстановить из онлайн-библиотеки">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Перезаписать локальные данные Zotero данными онлайн-библиотеки.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Заменить данные в онлайн-библиотеке">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Перезаписать онлайн-библиотеку локальным данными Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Сбросить историю синхронизации файлов">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Сравнить все вложенные файлы с данными в хранилище">
 <!ENTITY zotero.preferences.sync.reset "Сбросить">

@@ -76,10 +76,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "за повече информация.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Нулиране на историята за синхронизиране на данни">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Сливане на записите на твърдия диск с тези в сървъра на Зотеро, игнорирайки историята на синхронизирането">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Възстановяване от Онлайн Библиотеката">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Презаписване на информаията на Зотеро с данни от онлайн библиотеката.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Презаписване на онлайн библиотеката с данните на Зотеро на твърдия диск">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Изтриване на историята на предходните файлови синхронизации">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Сравняване на всички прикачени файлове с тези в сървъра">
 <!ENTITY zotero.preferences.sync.reset "Нулиране">

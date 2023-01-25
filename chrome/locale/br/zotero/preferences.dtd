@@ -76,10 +76,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "evit muioc'h a ditouroù.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Adloc'hañ roll-istor ar sinkro roadennoù">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Kendeuziñ ar roadennoù lec'hel gant ar roadennoù a-bell, ober fae ouzh ar roll-istor sinkro">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Adsevel adalek al levraoueg enlinenn">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Flastrañ ar roadennoù Zotero lec'hel gant roadennoù o tont eus al levraoueg enlinenn">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Erlec'hiañ al levraoueg enlinenn">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Flastrañ roadennoù al levraoueg enlinenn gant roadennoù lec'hel Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Adloc'hañ roll-istor sinkro ar restroù">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Keñveriañ an holl restroù kenstag gant ar servijer stokañ">
 <!ENTITY zotero.preferences.sync.reset "Adderaouekaat">

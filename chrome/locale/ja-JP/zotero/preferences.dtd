@@ -76,10 +76,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "により詳しい情報があります。">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "データ同期の履歴をリセットする">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "ローカルのデータをリモートのデータと統合し、同期の履歴は無視する">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "オンライン・ライブラリから復元する">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "オンライン・ライブラリを使ってローカルのZoteroデータを上書きする">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "オンライン・ライブラリを置き換える">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "ローカルの Zotero データを使ってオンライン・ライブラリを上書きする">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "ファイル同期の履歴を削除する">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "すべての添付ファイルをストレージ・サービスと比較する">
 <!ENTITY zotero.preferences.sync.reset "リセット">

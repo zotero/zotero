@@ -76,10 +76,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "informazio gehiagorako.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Berrezarri datuen sinkronizazioaren historia">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Bateratu datu lokalak urrunekoekin, sinkronizazioaren historia baztertuz">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Lineako liburutegitik berreskuratu">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Gainidatzi Zoteroko datu lokalak lineako liburutegikoekin.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Ordezkatu lineako liburutegia">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Gainidatzi lineako liburutegia Zoteroko datu lokalekin.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Garbitu Sync kronika">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Alderatu eranskin fitxategi guztiak biltegi zerbitzuarekin">
 <!ENTITY zotero.preferences.sync.reset "Berrezarri">

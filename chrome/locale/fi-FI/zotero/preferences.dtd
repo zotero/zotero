@@ -76,10 +76,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "saadaksesi lisätietoja.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Tyhjennä synkronointihistoria">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Yhdistä paikalliset tiedot palvelimella olevien kanssa, välittämättä synkronointihistoriasta">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Palauta tiedot verkkokirjastosta">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Korvaa Zoteron paikalliset tiedot verkkokirjastossa olevilla tiedoilla.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Korvaa verkkokirjasto">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Korvaa verkkokirjastossa olevat tiedot Zoteron paikallisilla tiedoilla.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Poista tiedostojen synkronointihistoria">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Vertaa kaikkia liitetiedostoja tallennuspalvelun kanssa">
 <!ENTITY zotero.preferences.sync.reset "Palauta alkutilaan">

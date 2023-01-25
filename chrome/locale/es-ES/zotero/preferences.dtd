@@ -76,10 +76,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "para más información.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reiniciar historial de sincronización">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Fusionar datos locales con datos remotos, ignorando el historial de sincronización">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restaurar desde la biblioteca en línea">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Sobrescribir los datos locales de Zotero con los datos de la biblioteca en línea.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Reemplazar biblioteca en línea">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Sobrescribir la biblioteca en línea con los datos locales de Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Restablecer el historial de sincronización de archivos">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Comparar todos los archivos adjuntos con el servicio de almacenamiento">
 <!ENTITY zotero.preferences.sync.reset "Restablecer">

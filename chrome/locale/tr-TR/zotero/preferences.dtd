@@ -76,10 +76,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 " bakınız.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Veri Eşitleme Geçmişini Sıfırla">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Eşitleme geçmişini yok sayarak, yerel verileri uzaktaki verilerle birleştir">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Çevrimiçi Kitaplıktan Geri Yükle">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Yerel Zotero verilerinin üzerine çevrimiçi kitaplıktaki verileri yaz.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Çevrimiçi Kitaplığı Değiştir">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Çevrimiçi kitaplıktaki verilerin üzerine yerel Zotero verilerini yaz.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Dosya Eşitleme Geçmişini Sıfırla">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Tüm ek dosyaları depolama hizmetindekilerle karşılaştır">
 <!ENTITY zotero.preferences.sync.reset "Sıfırla">

@@ -76,10 +76,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "لمزيد من المعلومات.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "إعادة تعيين سجل مزامنة البيانات">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "دمج البيانات المحلية مع البيانات البعيدة، متجاهلاً سجل المزامنة">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "الاستعاد من مكتبة الشبكة">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "استبدل بيانات زوتيرو المحلية ببيانات مكتبة الشبكة.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "استبدال مكتبة الشبكة">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "استبدل مكتبة الشبكة ببيانات زوتيرو المحلية">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "إعادة تعيين ملف سجل المزامنة">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "مقارنة جميع الملفات المرفقة مع خدمة التخزين">
 <!ENTITY zotero.preferences.sync.reset "اعادة ضبط">
