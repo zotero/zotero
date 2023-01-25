@@ -1813,6 +1813,20 @@ describe("Zotero.Item", function () {
 			
 			assert.equal(Zotero.Users.getCurrentName(), username);
 		});
+		
+		it("should save a group attachment's attachmentLastRead to the database", async function () {
+			let group = await createGroup();
+			let libraryID = group.libraryID;
+			let item = await createDataObject('item', { libraryID });
+			let attachment = await importPDFAttachment(item);
+			attachment.attachmentLastRead = 1674668111;
+			await attachment.saveTx();
+
+			await assert.eventually.equal(
+				Zotero.DB.valueQueryAsync("SELECT lastRead FROM itemAttachments WHERE itemID=?", attachment.id),
+				attachment.attachmentLastRead
+			);
+		});
 	})
 	
 	

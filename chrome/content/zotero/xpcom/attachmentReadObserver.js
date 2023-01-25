@@ -36,6 +36,14 @@ Zotero.AttachmentReadObserver = {
 	},
 
 	/**
+	 * To make the date mockable in tests
+	 * @return {Date}
+	 */
+	_getCurrentDate() {
+		return new Date();
+	},
+
+	/**
 	 * @param {Zotero.Item} item
 	 */
 	async updateAttachmentLastRead(item) {
@@ -44,7 +52,7 @@ Zotero.AttachmentReadObserver = {
 			return;
 		}
 		
-		item.attachmentLastRead = Math.round(new Date().getTime() / 1000);
+		item.attachmentLastRead = Math.round(this._getCurrentDate().getTime() / 1000);
 		await item.saveTx({ skipDateModifiedUpdate: true });
 	},
 	
@@ -61,7 +69,7 @@ Zotero.AttachmentReadObserver = {
 					}
 					break;
 				case 'pageChange': {
-					let fiveMinutesAgo = new Date();
+					let fiveMinutesAgo = this._getCurrentDate();
 					fiveMinutesAgo.setMinutes(fiveMinutesAgo.getMinutes() - 5);
 					for (let item of items) {
 						if (item.library.lastReadItemInSession !== item.id
