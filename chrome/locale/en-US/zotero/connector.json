@@ -67,6 +67,13 @@
 		"message": "latest version"
 	},
 	
+	"extensionIsDisabled": {
+		"message": "$1 is disabled"
+	},
+	"extensionIsDisabled_extensionPage": {
+		"message": "$1 is disabled on extension pages"
+	},
+	
 	"appConnector": {
 		"message": "$1 Connector"
 	},
@@ -159,5 +166,18 @@
 	},
 	"integration_googleDocs_orphanedCitations_disclaimer": {
 		"message": "These citations have become <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">unlinked from $1</a>. You will need to relink them before they will update or appear in your bibliography."
+	},
+	
+	"copyUnproxiedLink": {
+		"message": "Copy Unproxied Link"
+	},
+	"copyUnproxiedPageURL": {
+		"message": "Copy Unproxied Page URL"
+	},
+	"reloadViaProxy": {
+		"message": "Reload via Proxy"
+	},
+	"reloadVia": {
+		"message": "Reload via $1"
 	}
 }
