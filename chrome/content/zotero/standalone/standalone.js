@@ -32,7 +32,11 @@ const ZoteroStandalone = new function() {
 	const FONT_SIZES = ["1.0", "1.15", "1.3", "1.5", "1.7", "1.9", "2.1"];
 	//const NOTE_FONT_SIZES = ["11", "12", "13", "14", "18", "24", "36", "48", "64", "72", "96"];
 	const NOTE_FONT_SIZE_DEFAULT = "12";
-	
+
+	Object.defineProperty(this, 'currentReader', {
+		get: () => Zotero.Reader.getByTabID(Zotero_Tabs.selectedID)
+	});
+
 	/**
 	 * Run when standalone window first opens
 	 */
@@ -61,7 +65,16 @@ const ZoteroStandalone = new function() {
 							this.updateQuickCopyOptions();
 						}, 0);
 						// "library" or "reader"
-						this.switchMenuType(extraData[ids[0]].type);
+						let type = extraData[ids[0]].type;
+						this.switchMenuType(type);
+						if (type === 'reader') {
+							let reader = Zotero.Reader.getByTabID(ids[0]);
+							if (reader) {
+								// "pdf", "epub", "snapshot"
+								let subtype = reader.type;
+								this.switchReaderSubtype(subtype);
+							}
+						}
 						setTimeout(() => ZoteroPane.updateToolbarPosition(), 0);
 					}
 				}
@@ -135,11 +148,13 @@ const ZoteroStandalone = new function() {
 		document.querySelectorAll('.menu-type-' + type).forEach(el => el.hidden = false);
 	};
 
-	this.onReaderCmd = function (cmd) {
-		let reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
-		reader.menuCmd(cmd);
+	this.switchReaderSubtype = function (subtype) {
+		document.querySelectorAll(
+			'.menu-type-reader.pdf, .menu-type-reader.epub, .menu-type-reader.snapshot'
+		).forEach(el => el.hidden = true);
+		document.querySelectorAll('.menu-type-reader.' + subtype).forEach(el => el.hidden = false);
 	};
-	
+
 	this.onFileMenuOpen = function () {
 		var active = false;
 		try {
@@ -381,10 +396,12 @@ const ZoteroStandalone = new function() {
 
 		var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 		if (reader) {
-			this.updateMenuItemEnabled('go-menuitem-first-page', reader.allowNavigateFirstPage());
-			this.updateMenuItemEnabled('go-menuitem-last-page', reader.allowNavigateLastPage());
-			this.updateMenuItemEnabled('go-menuitem-back', reader.allowNavigateBack());
-			this.updateMenuItemEnabled('go-menuitem-forward', reader.allowNavigateForward());
+			if (['pdf', 'epub'].includes(reader.type)) {
+				this.updateMenuItemEnabled('go-menuitem-first-page', reader.canNavigateToFirstPage);
+				this.updateMenuItemEnabled('go-menuitem-last-page', reader.canNavigateToLastPage);
+			}
+			this.updateMenuItemEnabled('go-menuitem-back', reader.canNavigateBack);
+			this.updateMenuItemEnabled('go-menuitem-forward', reader.canNavigateForward);
 		}
 	};
 	
@@ -393,19 +410,20 @@ const ZoteroStandalone = new function() {
 		// PDF Reader
 		var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 		if (reader) {
-			var { state } = reader;
-			this.updateMenuItemCheckmark('view-menuitem-vertical-scrolling', state.scrollMode == 0);
-			this.updateMenuItemCheckmark('view-menuitem-horizontal-scrolling', state.scrollMode == 1);
-			this.updateMenuItemCheckmark('view-menuitem-wrapped-scrolling', state.scrollMode == 2);
-			this.updateMenuItemCheckmark('view-menuitem-no-spreads', state.spreadMode == 0);
-			this.updateMenuItemCheckmark('view-menuitem-odd-spreads', state.spreadMode == 1);
-			this.updateMenuItemCheckmark('view-menuitem-even-spreads', state.spreadMode == 2);
-			this.updateMenuItemCheckmark('view-menuitem-hand-tool', reader.isHandToolActive());
-			this.updateMenuItemCheckmark('view-menuitem-zoom-auto', reader.isZoomAutoActive());
-			this.updateMenuItemCheckmark('view-menuitem-zoom-page-width', reader.isZoomPageWidthActive());
-			this.updateMenuItemCheckmark('view-menuitem-zoom-page-height', reader.isZoomPageHeightActive());
-			this.updateMenuItemCheckmark('view-menuitem-split-vertically', reader.isSplitVerticallyActive());
-			this.updateMenuItemCheckmark('view-menuitem-split-horizontally', reader.isSplitHorizontallyActive());
+			if (reader.type === 'pdf') {
+				this.updateMenuItemCheckmark('view-menuitem-hand-tool', reader.toolType === 'hand');
+				this.updateMenuItemCheckmark('view-menuitem-vertical-scrolling', reader.scrollMode === 0);
+				this.updateMenuItemCheckmark('view-menuitem-horizontal-scrolling', reader.scrollMode === 1);
+				this.updateMenuItemCheckmark('view-menuitem-wrapped-scrolling', reader.scrollMode === 2);
+				this.updateMenuItemCheckmark('view-menuitem-no-spreads', reader.spreadMode === 0);
+				this.updateMenuItemCheckmark('view-menuitem-odd-spreads', reader.spreadMode === 1);
+				this.updateMenuItemCheckmark('view-menuitem-even-spreads', reader.spreadMode === 2);
+				this.updateMenuItemCheckmark('view-menuitem-zoom-auto', reader.zoomAutoEnabled);
+				this.updateMenuItemCheckmark('view-menuitem-zoom-page-width', reader.zoomPageWidthEnabled);
+				this.updateMenuItemCheckmark('view-menuitem-zoom-page-height', reader.zoomPageHeightEnabled);
+			}
+			this.updateMenuItemCheckmark('view-menuitem-split-vertically', reader.splitType === 'vertical');
+			this.updateMenuItemCheckmark('view-menuitem-split-horizontally', reader.splitType === 'horizontal');
 		}
 	
 		// Layout mode

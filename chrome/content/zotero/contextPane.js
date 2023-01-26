@@ -117,7 +117,7 @@ var ZoteroContextPane = new function () {
 		_itemToggle.addEventListener('click', _toggleItemButton);
 		_notesToggle.addEventListener('click', _toggleNotesButton);
 		Zotero.Reader.onChangeSidebarWidth = _updatePaneWidth;
-		Zotero.Reader.onChangeSidebarOpen = _updatePaneWidth;
+		Zotero.Reader.onToggleSidebar = _updatePaneWidth;
 	};
 
 	this.destroy = function () {
@@ -126,7 +126,7 @@ var ZoteroContextPane = new function () {
 		window.removeEventListener('resize', _update);
 		Zotero.Notifier.unregisterObserver(this._notifierID);
 		Zotero.Reader.onChangeSidebarWidth = () => {};
-		Zotero.Reader.onChangeSidebarOpen = () => {};
+		Zotero.Reader.onToggleSidebar = () => {};
 		_contextPaneInner.innerHTML = '';
 		_itemContexts = [];
 		_notesContexts = [];

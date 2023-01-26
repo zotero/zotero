@@ -90,9 +90,9 @@
 		<menu id="fileMenu" label="&fileMenu.label;" accesskey="&fileMenu.accesskey;">
 			<menupopup id="menu_FilePopup">
 				<!-- TODO: Localize -->
-				<menuitem label="Save As…" oncommand="menuCmd('export')"/>
-				<menuitem label="Print" oncommand="menuCmd('print')"/>
-				<menuitem label="&zotero.items.menu.showInLibrary;" oncommand="menuCmd('showInLibrary')"/>
+				<menuitem class="menu-type-reader pdf" label="Save As…" oncommand="reader.export()"/>
+				<menuitem label="Print" oncommand="reader.print()"/>
+				<menuitem label="&zotero.items.menu.showInLibrary;" oncommand="reader.showInLibrary()"/>
 				<menuseparator/>
 				<menuitem id="menu_close" label="&closeCmd.label;" key="key_close"
 						  accesskey="&closeCmd.accesskey;" command="cmd_close"/>
@@ -124,25 +124,19 @@
 				<menuitem id="menu_selectAll"
 						  key="key_selectAll"
 						  command="cmd_selectAll" data-l10n-id="text-action-select-all"/>
-				<menuseparator class="menu-type-reader"/>
+				<menuseparator class="menu-type-reader pdf"/>
 				<menuitem
 						id="edit-menuitem-rotate-left"
-						class="menu-type-reader"
+						class="menu-type-reader pdf"
 						label="&zotero.pdfReader.rotatePageLeft;"
-						oncommand="menuCmd('rotateLeft')"
+						oncommand="reader.rotatePageLeft()"
 				/>
 				<menuitem
 						id="edit-menuitem-rotate-right"
-						class="menu-type-reader"
+						class="menu-type-reader pdf"
 						label="&zotero.pdfReader.rotatePageRight;"
-						oncommand="menuCmd('rotateRight')"
+						oncommand="reader.rotatePageRight()"
 				/>
-				<!--<menuitem
-						id="edit-menuitem-rotate-180"
-						class="menu-type-reader"
-						label="&zotero.pdfReader.rotatePage180;"
-						oncommand="menuCmd('rotate180')"
-				/>-->
 			</menupopup>
 		</menu>
 		<menu label="View" onpopupshowing="onViewMenuOpen()">
@@ -153,93 +147,105 @@
 				full-screen-api.allow-trusted-requests-only=false
 				and then hide all other visible window elements like toolbar, note sidebar, tabs, etc.
 				-->
-<!--				<menuitem label="Switch to Presentation Mode" oncommand="menuCmd('presentationmode')"/>-->
-<!--				<menuseparator/>-->
 				<menuitem
 					id="view-menuitem-hand-tool"
+					class="menu-type-reader pdf"
 					label="&zotero.pdfReader.handTool;"
 					type="checkbox"
-					oncommand="menuCmd('switchcursortool_hand')"
+					oncommand="reader.toggleHandTool()"
 				/>
-				<menuseparator/>
+				<menuseparator class="menu-type-reader pdf"/>
 				<menuitem
 					id="view-menuitem-vertical-scrolling"
+					class="menu-type-reader pdf"
 					label="&zotero.pdfReader.verticalScrolling;"
 					type="checkbox"
-					oncommand="menuCmd('switchscrollmode_vertical')"
+					oncommand="reader.scrollMode = 0"
 				/>
 				<menuitem
 					id="view-menuitem-horizontal-scrolling"
+					class="menu-type-reader pdf"
 					label="&zotero.pdfReader.horizontalScrolling;"
 					type="checkbox"
-					oncommand="menuCmd('switchscrollmode_horizontal')"
+					oncommand="reader.scrollMode = 1"
 				/>
 				<menuitem
 					id="view-menuitem-wrapped-scrolling"
+					class="menu-type-reader pdf"
 					label="&zotero.pdfReader.wrappedScrolling;"
 					type="checkbox"
-					oncommand="menuCmd('switchscrollmode_wrapped')"
+					oncommand="reader.scrollMode = 2"
 				/>
-				<menuseparator/>
+				<menuseparator class="menu-type-reader pdf"/>
 				<menuitem
 					id="view-menuitem-no-spreads"
+					class="menu-type-reader pdf"
 					label="&zotero.pdfReader.noSpreads;"
 					type="checkbox"
-					oncommand="menuCmd('switchspreadmode_none')"
+					oncommand="reader.spreadMode = 0"
 				/>
 				<menuitem
 					id="view-menuitem-odd-spreads"
+					class="menu-type-reader pdf"
 					label="&zotero.pdfReader.oddSpreads;"
 					type="checkbox"
-					oncommand="menuCmd('switchspreadmode_odd')"
+					oncommand="reader.spreadMode = 1"
 				/>
 				<menuitem
 					id="view-menuitem-even-spreads"
+					class="menu-type-reader pdf"
 					label="&zotero.pdfReader.evenSpreads;"
 					type="checkbox"
-					oncommand="menuCmd('switchspreadmode_even')"
+					oncommand="reader.spreadMode = 2"
 				/>
 				<menuseparator class="menu-type-reader"/>
 				<menuitem
 					id="view-menuitem-zoom-in"
+					class="menu-type-reader"
 					label="&zotero.pdfReader.zoomIn;"
-					oncommand="menuCmd('zoomIn')"
+					oncommand="reader.zoomIn()"
 				/>
 				<menuitem
 					id="view-menuitem-zoom-out"
+					class="menu-type-reader"
 					label="&zotero.pdfReader.zoomOut;"
-					oncommand="menuCmd('zoomOut')"
+					oncommand="reader.zoomOut()"
 				/>
 				<menuitem
 					id="view-menuitem-zoom-auto"
+					class="menu-type-reader pdf"
 					type="checkbox"
 					label="&zotero.pdfReader.zoomAuto;"
-					oncommand="menuCmd('zoomAuto')"
+					oncommand="reader.zoomAuto()"
 				/>
 				<menuitem
 					id="view-menuitem-zoom-page-width"
+					class="menu-type-reader pdf"
 					type="checkbox"
 					label="&zotero.pdfReader.zoomPageWidth;"
-					oncommand="menuCmd('zoomPageWidth')"
+					oncommand="reader.zoomPageWidth()"
 				/>
 				<menuitem
 					id="view-menuitem-zoom-page-height"
+					class="menu-type-reader pdf"
 					type="checkbox"
 					label="&zotero.pdfReader.zoomPageHeight;"
-					oncommand="menuCmd('zoomPageHeight')"
+					oncommand="reader.zoomPageHeight()"
 				/>
 				<menuseparator class="menu-type-reader"/>
 				<menuitem
-						id="view-menuitem-split-horizontally"
-						type="checkbox"
-						label="&zotero.pdfReader.splitHorizontally;"
-						oncommand="menuCmd('splitHorizontally')"
+					id="view-menuitem-split-horizontally"
+					class="menu-type-reader"
+					type="checkbox"
+					label="&zotero.pdfReader.splitHorizontally;"
+					oncommand="reader.toggleHorizontalSplit()"
 				/>
 				<menuitem
-						id="view-menuitem-split-vertically"
-						type="checkbox"
-						label="&zotero.pdfReader.splitVertically;"
-						oncommand="menuCmd('splitVertically')"
+					id="view-menuitem-split-vertically"
+					class="menu-type-reader"
+					type="checkbox"
+					label="&zotero.pdfReader.splitVertically;"
+					oncommand="reader.toggleVerticalSplit()"
 				/>
 			</menupopup>
 		</menu>
@@ -252,28 +258,28 @@
 			<menupopup id="menu_goPopup">
 				<menuitem 
 					id="go-menuitem-first-page"
-					class="menu-type-reader"
+					class="menu-type-reader pdf epub"
 					label="&zotero.pdfReader.firstPage;"
-					oncommand="menuCmd('firstpage')"
+					oncommand="reader.navigateToFirstPage()"
 				/>
 				<menuitem
 					id="go-menuitem-last-page"
-					class="menu-type-reader"
+					class="menu-type-reader pdf epub"
 					label="&zotero.pdfReader.lastPage;"
-					oncommand="menuCmd('lastpage')"
+					oncommand="reader.navigateToLastPage()"
 				/>
 				<menuseparator class="menu-type-reader"/>
 				<menuitem
 					id="go-menuitem-back"
 					class="menu-type-reader"
 					label="&zotero.pdfReader.back;"
-					oncommand="menuCmd('back')"
+					oncommand="reader.navigateBack()"
 				/>
 				<menuitem
 					id="go-menuitem-forward"
 					class="menu-type-reader"
 					label="&zotero.pdfReader.forward;"
-					oncommand="menuCmd('forward')"
+					oncommand="reader.navigateForward()"
 				/>
 			</menupopup>
 		</menu>
@@ -312,7 +318,7 @@
 					 type="content"
 					 primary="true"
 					 transparent="transparent"
-					 src="resource://zotero/pdf-reader/viewer.html"
+					 src="resource://zotero/pdf-reader/reader.html"
 					 flex="1"/>
 			<popupset id="zotero-reader-popupset">
 			</popupset>

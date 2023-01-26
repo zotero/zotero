@@ -4718,7 +4718,7 @@ var ZoteroPane = new function()
 					await item.saveTx();
 				}
 			}
-			if (contentType === 'application/pdf') {
+			if (['application/pdf', 'application/epub+zip', 'text/html'].includes(contentType)) {
 				let item = await Zotero.Items.getAsync(itemID);
 				let library = Zotero.Libraries.get(item.libraryID);
 				let pdfHandler  = Zotero.Prefs.get("fileHandler.pdf");
