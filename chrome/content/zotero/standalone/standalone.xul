@@ -360,6 +360,14 @@
 								oncommand="ZoteroStandalone.onReaderCmd('splitVertically')"
 							/>
 							<menuseparator class="menu-type-reader"/>
+							<menuitem
+									id="view-menuitem-show-annotations"
+									class="menu-type-reader"
+									type="checkbox"
+									label="&zotero.pdfReader.showAnnotations;"
+									oncommand="Zotero.Prefs.set('pdfReader.showAnnotations', !Zotero.Prefs.get('pdfReader.showAnnotations'))"
+							/>
+							<menuseparator class="menu-type-reader"/>
 
 							<menu id="layout-menu" label="&layout.label;">
 								<menupopup oncommand="ZoteroStandalone.onViewMenuItemClick(event)">

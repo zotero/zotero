@@ -143,6 +143,7 @@ class ReaderInstance {
 			sidebarWidth: this._sidebarWidth,
 			sidebarOpen: this._sidebarOpen,
 			bottomPlaceholderHeight: this._bottomPlaceholderHeight,
+			showAnnotations: Zotero.Prefs.get('pdfReader.showAnnotations'),
 			rtl: Zotero.rtl,
 			fontSize: Zotero.Prefs.get('fontSize'),
 			localizedStrings: {
@@ -154,7 +155,8 @@ class ReaderInstance {
 		this.updateTitle();
 
 		this._prefObserverIDs = [
-			Zotero.Prefs.registerObserver('fontSize', this._handleFontSizeChange)
+			Zotero.Prefs.registerObserver('fontSize', this._handleFontSizeChange),
+			Zotero.Prefs.registerObserver('pdfReader.showAnnotations', this._handleShowAnnotationsChange)
 		];
 
 		return true;
@@ -602,6 +604,10 @@ class ReaderInstance {
 		this._postMessage({ action: 'setFontSize', fontSize: Zotero.Prefs.get('fontSize') });
 	};
 
+	_handleShowAnnotationsChange = () => {
+		this._postMessage({ action: 'showAnnotations', show: Zotero.Prefs.get('pdfReader.showAnnotations') });
+	};
+
 	_dataURLtoBlob(dataurl) {
 		let parts = dataurl.split(',');
 		let mime = parts[0].match(/:(.*?);/)[1];
@@ -740,6 +746,17 @@ class ReaderInstance {
 		menuitem.setAttribute('type', 'checkbox');
 		menuitem.setAttribute('checked', this.isSplitVerticallyActive());
 		menuitem.addEventListener('command', () => this._splitVertically());
+		popup.appendChild(menuitem);
+		// Separator
+		popup.appendChild(this._window.document.createElement('menuseparator'));
+		// Show Annotations
+		Zotero.Prefs.set('purge.items', true);
+
+		menuitem = this._window.document.createElement('menuitem');
+		menuitem.setAttribute('label', Zotero.getString('pdfReader.showAnnotations'));
+		menuitem.setAttribute('type', 'checkbox');
+		menuitem.setAttribute('checked', Zotero.Prefs.get('pdfReader.showAnnotations'));
+		menuitem.addEventListener('command', () => 	Zotero.Prefs.set('pdfReader.showAnnotations', !Zotero.Prefs.get('pdfReader.showAnnotations')));
 		popup.appendChild(menuitem);
 		// Separator
 		popup.appendChild(this._window.document.createElement('menuseparator'));
@@ -1417,6 +1434,7 @@ class ReaderWindow extends ReaderInstance {
 		this._window.document.getElementById('view-menuitem-zoom-page-height').setAttribute('checked', this.isZoomPageHeightActive());
 		this._window.document.getElementById('view-menuitem-split-vertically').setAttribute('checked', this.isSplitVerticallyActive());
 		this._window.document.getElementById('view-menuitem-split-horizontally').setAttribute('checked', this.isSplitHorizontallyActive());
+		this._window.document.getElementById('view-menuitem-show-annotations').setAttribute('checked', Zotero.Prefs.get('pdfReader.showAnnotations'));
 	}
 
 	_onGoMenuOpen() {
