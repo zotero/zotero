@@ -105,7 +105,7 @@ class ReaderInstance {
 		this.state = state;
 		this._itemID = item.id;
 		// Set `ReaderTab` title as fast as possible
-		this.updateTitle();
+		await this.updateTitle();
 		let path = await item.getFilePathAsync();
 		// Check file size, otherwise we get uncatchable error:
 		// JavaScript error: resource://gre/modules/osfile/osfile_native.jsm, line 60: RangeError: invalid array length
@@ -151,10 +151,11 @@ class ReaderInstance {
 			}
 		}, [buf]);
 		// Set title once again, because `ReaderWindow` isn't loaded the first time
-		this.updateTitle();
+		await this.updateTitle();
 
 		this._prefObserverIDs = [
-			Zotero.Prefs.registerObserver('fontSize', this._handleFontSizeChange)
+			Zotero.Prefs.registerObserver('fontSize', this._handleFontSizePrefChange),
+			Zotero.Prefs.registerObserver('tabs.title', this._handleTabTitlePrefChange)
 		];
 
 		return true;
@@ -170,28 +171,31 @@ class ReaderInstance {
 		return this._itemID;
 	}
 	
-	updateTitle() {
+	async updateTitle() {
 		let item = Zotero.Items.get(this._itemID);
 		let title = item.getDisplayTitle();
 		let parentItem = item.parentItem;
 		if (parentItem) {
-			let parts = [];
-			let displayTitle = parentItem.getDisplayTitle();
-			if (displayTitle) {
-				parts.push(displayTitle);
+			let attachment = await parentItem.getBestAttachment();
+			if (attachment && attachment.id === this._itemID) {
+				let parts = [];
+				let type = Zotero.Prefs.get('tabs.title');
+				if (type === 'creatorYearTitle') {
+					let firstCreator = parentItem.getField('firstCreator');
+					if (firstCreator) {
+						parts.push(firstCreator);
+					}
+					let year = parentItem.getField('year');
+					if (year) {
+						parts.push(year);
+					}
+				}
+				let displayTitle = parentItem.getDisplayTitle();
+				if (displayTitle) {
+					parts.push(displayTitle);
+				}
+				title = parts.join(' - ');
 			}
-
-			let firstCreator = parentItem.getField('firstCreator');
-			if (firstCreator) {
-				parts.push(firstCreator);
-			}
-
-			let year = parentItem.getField('year');
-			if (year) {
-				parts.push(year);
-			}
-
-			title = parts.join(' - ');
 		}
 		
 		this._title = title;
@@ -598,8 +602,12 @@ class ReaderInstance {
 			|| item.parentItem && item.parentItem.deleted;
 	}
 
-	_handleFontSizeChange = () => {
+	_handleFontSizePrefChange = () => {
 		this._postMessage({ action: 'setFontSize', fontSize: Zotero.Prefs.get('fontSize') });
+	};
+
+	_handleTabTitlePrefChange = async () => {
+		await this.updateTitle();
 	};
 
 	_dataURLtoBlob(dataurl) {
