@@ -173,33 +173,32 @@ class ReaderInstance {
 	
 	async updateTitle() {
 		let item = Zotero.Items.get(this._itemID);
-		let title = item.getDisplayTitle();
+		let readerTitle = item.getDisplayTitle();
 		let parentItem = item.parentItem;
 		if (parentItem) {
 			let attachment = await parentItem.getBestAttachment();
 			if (attachment && attachment.id === this._itemID) {
 				let parts = [];
 				let type = Zotero.Prefs.get('tabs.title');
-				if (type === 'creatorYearTitle') {
-					let firstCreator = parentItem.getField('firstCreator');
-					if (firstCreator) {
-						parts.push(firstCreator);
-					}
-					let year = parentItem.getField('year');
-					if (year) {
-						parts.push(year);
-					}
+				let creator = parentItem.getField('firstCreator');
+				let year = parentItem.getField('year');
+				let title = parentItem.getDisplayTitle();
+				// If creator is missing fall back to titleCreatorYear
+				if (type === 'creatorYearTitle' && creator) {
+					parts = [creator, year, title];
 				}
-				let displayTitle = parentItem.getDisplayTitle();
-				if (displayTitle) {
-					parts.push(displayTitle);
+				else if (type === 'title') {
+					parts = [title];
 				}
-				title = parts.join(' - ');
+				// If type is titleCreatorYear, or is missing, or another type falls back
+				else {
+					parts = [title, creator, year];
+				}
+				readerTitle = parts.filter(x => x).join(' - ');
 			}
 		}
-		
-		this._title = title;
-		this._setTitleValue(title);
+		this._title = readerTitle;
+		this._setTitleValue(readerTitle);
 	}
 
 	async setAnnotations(items) {

@@ -213,4 +213,4 @@ pref("extensions.zotero.annotations.noteTemplates.note", "<p>{{citation}} {{comm
 pref("extensions.zotero.scaffold.eslint.enabled", true);
 
 // Tabs
-pref("extensions.zotero.tabs.title", "title");
+pref("extensions.zotero.tabs.title", "titleCreatorYear");
