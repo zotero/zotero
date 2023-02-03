@@ -133,7 +133,18 @@ var ZoteroPane = new function()
 		observerService.addObserver(_reloadObserver, "zotero-reloaded", false);
 		observerService.addObserver(_reloadObserver, "zotero-before-reload", false);
 		this.addReloadListener(_loadPane);
+
+		function cloneIntoMenuBar(destId, srcId) {
+			const source = document.getElementById(srcId).querySelector("menupopup");
+			const dest = document.getElementById(destId);
+			dest.appendChild(source.cloneNode(true));
+		}
 		
+		cloneIntoMenuBar("menu_newNote", "zotero-tb-note-add");
+		cloneIntoMenuBar("menu_newLibrary", "zotero-tb-library-add-menu");
+		cloneIntoMenuBar("menu_addAttachment", "zotero-tb-attachment-add");
+		cloneIntoMenuBar("menu_locate", "zotero-tb-locate");
+
 		// continue loading pane
 		_loadPane();
 	};
@@ -1378,6 +1389,9 @@ var ZoteroPane = new function()
 			"cmd_zotero_import",
 			"cmd_zotero_importFromClipboard",
 			"zotero-tb-add",
+			"menu_newNote",
+			"menu_addAttachment",
+			"menu_lookup",
 			"menu_newItem",
 			"zotero-tb-lookup",
 			"cmd_zotero_newStandaloneNote",

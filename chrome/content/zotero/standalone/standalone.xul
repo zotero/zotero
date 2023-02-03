@@ -150,8 +150,6 @@
 								<menupopup id="menu_NewItemPopup"
 										onpopupshowing="ZoteroStandalone.buildNewItemMenu()"/>
 							</menu>
-							<menuitem id="menu_newNote" class="menu-type-library" label="&zotero.toolbar.newNote;"
-									command="cmd_zotero_newStandaloneNote"/>
 							<menuitem id="menu_newCollection" class="menu-type-library" label="&zotero.toolbar.newCollection.label;"
 									command="cmd_zotero_newCollection"/>
 							<menuitem

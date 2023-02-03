@@ -75,6 +75,29 @@
 		<command id="cmd_zotero_newChildNote" oncommand="ZoteroPane_Local.newChildNote(event.shiftKey);"/>
 	</commandset>
 	
+	<menubar id="main-menubar">
+		<menu id="fileMenu">
+			<menupopup id="menu_FilePopup">
+				<menu id="menu_newNote" class="menu-type-library" label="&zotero.toolbar.newNote;" insertafter="menu_newItem" />
+				<menu id="menu_newLibrary" class="menu-type-library" label="&zotero.toolbar.newLibrary.label;" insertafter="menu_newCollection" />
+				<menuseparator id="menu_edit_lookup_separator" class="menu-type-library" />
+				<menu id="menu_addAttachment" class="menu-type-library" label="&zotero.items.menu.attach;" insertafter="menu_edit_lookup_separator" />
+				<menuitem id="menu_lookup" class="menu-type-library" label="&zotero.toolbar.lookup.label;" 
+							oncommand="Zotero_Lookup.showPanel()"
+							insertafter="menu_addAttachment" />
+				<menuseparator />
+				<menu id="menu_locate" class="menu-type-library" label="&zotero.toolbar.openURL.label;" position="0" />
+			</menupopup>
+		</menu>
+		<menu id="toolsMenu">
+			<menupopup id="menu_ToolsPopup">
+				<menuitem id="menu_syncNow" class="menu-type-library" label="&zotero.sync.syncNow;" 
+							oncommand="ZoteroPane.sync()" insertbefore="menu_createTimeline" />
+				<menuseparator class="menu-type-library" insertafter="menu_syncNow" />
+			</menupopup>
+		</menu>
+	</menubar>
+
 	<stack id="zotero-pane-stack">
 		<!-- A placeholder to persist pdf-reader sidebar collapse state to avoid introducing another pref -->
 		<box id="zotero-reader-sidebar-pane" hidden="true" collapsed="true" zotero-persist="collapsed width"/>
@@ -183,7 +206,7 @@
 						<hbox id="zotero-item-toolbar" flex="1" align="center" tooltip="html-tooltip">
 							<hbox align="center" pack="start" flex="1">
 								<toolbarbutton id="zotero-tb-locate" class="zotero-tb-button" tooltiptext="&zotero.toolbar.openURL.label;" type="menu">
-									<menupopup id="zotero-tb-locate-menu" onpopupshowing="Zotero_LocateMenu.buildLocateMenu()"/>
+									<menupopup id="zotero-tb-locate-menu" onpopupshowing="Zotero_LocateMenu.buildLocateMenu(this)"/>
 								</toolbarbutton>
 							</hbox>
 							<hbox align="center" pack="end">
