@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatiškai šalinti šiukšlinės įrašus, senesnius nei">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "d.">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Grupės">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Kopijuojant elementus tarp bibliotekų, įtraukti:">
 <!ENTITY zotero.preferences.groups.childNotes "įrašams priklausančias pastabas">

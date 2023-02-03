@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Samodejno odstrani iz koša vse izbrisano pred več kot">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dnevi">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Skupine">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Pri kopiranju med knjižnicami vključi:">
 <!ENTITY zotero.preferences.groups.childNotes "podrejene opombe">

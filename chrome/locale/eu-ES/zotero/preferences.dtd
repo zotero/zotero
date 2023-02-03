@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatikoki ezabatu zaborran daudek elementuak ">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "egun atzera">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Taldeak">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Bildumen artean iemak kopiatzen dituzunean, horrekin batera kopiatuko dira:">
 <!ENTITY zotero.preferences.groups.childNotes "ohar umeak">

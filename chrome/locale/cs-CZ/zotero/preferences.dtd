@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automaticky odstranit položky v koši smazané déle než">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dní">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Skupiny">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Při kopírování položek mezi knihovnami zahrnout:">
 <!ENTITY zotero.preferences.groups.childNotes "dceřiné poznámky">

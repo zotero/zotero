@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "الافراغ التلقائي لسلة المحذوفات. ازالة اللملفات المحذوفة منذ">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "يوم">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "المجموعات">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "عند نسخ العناصر بين المكتبات، يجب ان تتضمن العناصر على:">
 <!ENTITY zotero.preferences.groups.childNotes "الملاحظات الفرعية">

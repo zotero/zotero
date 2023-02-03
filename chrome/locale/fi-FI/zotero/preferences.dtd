@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Poista roskakorista automaattisesti nimikkeet, jotka poistettiin yli">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "päivää sitten">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Ryhmät">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Nimikkeitä kirjastojen välillä kopioitaessa sisällytä:">
 <!ENTITY zotero.preferences.groups.childNotes "niiden alaiset muistiinpanot">

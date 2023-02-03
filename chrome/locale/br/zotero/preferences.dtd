@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Em-zilemel an elfennoù er pod-lastez abaoe muioc'h evit">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "devezh 'zo">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Strolladoù">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Pa eiler elfennoù kenetre levraouegoù, enklozañ:">
 <!ENTITY zotero.preferences.groups.childNotes "notennoù bugel">

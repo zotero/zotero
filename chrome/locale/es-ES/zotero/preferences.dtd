@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Eliminar automáticamente elementos en la papelera eliminados hace más de ">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "hace días">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Grupos">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Al copiar elementos entre bibliotecas, incluir:">
 <!ENTITY zotero.preferences.groups.childNotes "notas subordinadas">

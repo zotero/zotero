@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Elimina automaticamente gli elementi nel cestino cancellati più di">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "giorni fa">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Gruppi">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Quando si copiano elementi tra biblioteche diverse, includere:">
 <!ENTITY zotero.preferences.groups.childNotes "note figlie">

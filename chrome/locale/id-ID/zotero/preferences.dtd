@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Buang item-item di dalam kantung sampah yang telah dihapus lebih dari">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "hari yang lalu secara automatis">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Grup">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Saat menyalin item antarperpustakaan, turut masukkan:">
 <!ENTITY zotero.preferences.groups.childNotes "catatan anak">

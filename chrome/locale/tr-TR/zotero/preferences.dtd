@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Bu kadar zaman önce Çöp Sepetine gönderilmiş eserleri otomatik olarak sil:">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "gün">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Gruplar">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Kitaplıklar arası eserler kopyalanırken, bunları ekle:">
 <!ENTITY zotero.preferences.groups.childNotes "alt notlar">

@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Supprimer automatiquement les documents mis à la corbeille depuis plus de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "jours">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Groupes">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "En copiant des documents entre des bibliothèques, inclure :">
 <!ENTITY zotero.preferences.groups.childNotes "les notes enfants">

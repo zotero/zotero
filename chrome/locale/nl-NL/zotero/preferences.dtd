@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Items in de prullenbak automatisch wissen na">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dagen geleden">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Groepen">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Bij het kopiëren van items tussen bibliotheken, kopieer ook:">
 <!ENTITY zotero.preferences.groups.childNotes "bijbehorende aantekeningen">

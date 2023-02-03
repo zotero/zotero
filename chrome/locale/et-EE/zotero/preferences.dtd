@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automaatselt eemaldada kirjed prügikastist, mis on kustutatud rohkem kui">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "päeva tagasi">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Grupid">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Kirjete kopeerimisel kataloogide vahel lisada:">
 <!ENTITY zotero.preferences.groups.childNotes "seotud märkused">

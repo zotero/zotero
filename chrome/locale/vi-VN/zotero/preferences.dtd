@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Tự động loại bỏ các tài liệu trong Thùng rác đã xóa hơn">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "ngày trước đây">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Các nhóm">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Thông tin của tài liệu được sao chép giữa các thư viện:">
 <!ENTITY zotero.preferences.groups.childNotes "các ghi chú con">

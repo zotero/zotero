@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "ล้างรายการในถังขยะที่เคยลบนานกว่า ">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "วันที่แล้ว">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "กลุ่ม">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "เมื่อสำเนารายการระหว่างไลบรารี ให้รวมถึง:">
 <!ENTITY zotero.preferences.groups.childNotes "ข้อความรายการลูก">

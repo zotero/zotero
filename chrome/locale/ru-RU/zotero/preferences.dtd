@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Автоматически убирать записи из корзины, удаленные более">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "дня(-ей) назад">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Группы">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "При копировании записей между библиотеками, включать:">
 <!ENTITY zotero.preferences.groups.childNotes "дочерние заметки">

@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Уклони ставке из смећа које су обрисане пре">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "дана">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Групе">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Приликом копирања ставке у другу библиотеку задржи:">
 <!ENTITY zotero.preferences.groups.childNotes "подбелешке">

@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "حذف خودکار آیتم‌های موجود در سطل بازیافت پس از">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "روز">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "گروه‌ها">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "در زمان رونوشت‌بردای آیتم‌ها بین کتابخانه‌ها این موارد هم رونوشت‌برداری شوند:">
 <!ENTITY zotero.preferences.groups.childNotes "یادداشت‌های وابسته">

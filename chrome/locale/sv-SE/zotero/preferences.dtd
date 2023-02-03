@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Ta automatiskt bort källor från papperskorgen som lagts dit för mer än">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dagar sen">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Grupper">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "När källor kopieras mellan bibliotek, ta med:">
 <!ENTITY zotero.preferences.groups.childNotes "tillhörande anteckningar">

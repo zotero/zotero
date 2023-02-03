@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatikusan törölje a kukából azokat az elemeket, amelyek">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "napnál régebbiek">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Csoportok">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Amikor könyvtárak között másol elemeket, az alábbiakat másolja:">
 <!ENTITY zotero.preferences.groups.childNotes "kapcsolódó jegyzetek">

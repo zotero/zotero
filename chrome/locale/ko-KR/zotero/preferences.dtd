@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "휴지통에서 자동 삭제되는 시점 : 휴지통으로 이동 후">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "일 경과">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "그룹">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "라이브러리 간 항목 복사시 포함 대상 :">
 <!ENTITY zotero.preferences.groups.childNotes "하위 노트들">

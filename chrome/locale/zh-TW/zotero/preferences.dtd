@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "自動移除刪入垃圾筒且超過">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "天的項目">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "群組">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "在各文獻庫之間複製項目時，需包括：">
 <!ENTITY zotero.preferences.groups.childNotes "子筆記">

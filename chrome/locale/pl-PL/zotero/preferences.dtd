@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatycznie usuń z kosza elementy usunięte dawniej niż">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dni temu">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Grupy">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Podczas kopiowania elementów między bibliotekami dołączaj:">
 <!ENTITY zotero.preferences.groups.childNotes "potomne notatki">

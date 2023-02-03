@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "להסיר אוטומטית פריטים מהאשפה שנמחקו לפני למעלה מ־">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "ימים">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "קבוצות">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "בעת העתקת פריטים בין ספריות, לכלול:">
 <!ENTITY zotero.preferences.groups.childNotes "הערות על צאצאים">

@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Fjern automatisk Elementer fra papirkurven hvis de er slettet for mere end">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dage siden">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Grupper">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Når elementer kopieres mellem biblioteker, så medtag:">
 <!ENTITY zotero.preferences.groups.childNotes "underliggende Noter">

@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Șterge automat din coșul de gunoi înregistrările mai vechi de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "zile în urmă">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Grupuri">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Când se copiază înregistrările între biblioteci se vor include:">
 <!ENTITY zotero.preferences.groups.childNotes "note copil">

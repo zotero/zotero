@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Автоматично прибирати документи з кошику, видалені наріше ніж">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "днів назад">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Групи">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "При копіюванні документів між ібіліотеками вклбчати:">
 <!ENTITY zotero.preferences.groups.childNotes "дочірні примітки">

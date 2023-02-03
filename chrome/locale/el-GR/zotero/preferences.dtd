@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Αυτόματη διαγραφή από τον κάδο ανακύκλωσης στοιχείων που έχουν διαγραφεί για περισσότερο από">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "ημέρες πριν">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Ομάδες">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Όταν αντιγράφονται στοιχεία μεταξύ βιβλιοθηκών, να συμπεριλαμβάνονται:">
 <!ENTITY zotero.preferences.groups.childNotes "θυγατρικές σημειώσεις">

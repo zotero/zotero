@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatically remove items in the trash deleted more than">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "days ago">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Groups">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "When copying items between libraries, include:">
 <!ENTITY zotero.preferences.groups.childNotes "child notes">

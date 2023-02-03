@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automaticky odstrániť záznamy vymazané pred viac ako">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dňami">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Skupiny">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Pri kopírovaní záznamov medzi knižnicami, zahrnúť:">
 <!ENTITY zotero.preferences.groups.childNotes "vložené poznámky">

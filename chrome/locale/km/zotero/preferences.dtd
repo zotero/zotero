@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "លុបឯកសារចេញពីធុងសំរាមដោយស្វ័យប្រវត្តិ កាលណាត្រូវបានលុបយូរ​ជាង">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "ថ្ងៃកន្លងហើយ">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "ក្រុម">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "នៅពេលចម្លងឯកសារពីបណ្ណាល័យមួយទៅបណ្ណាល័យមួយទៀត ត្រូវបញ្ចូល​ទាំង:">
 <!ENTITY zotero.preferences.groups.childNotes "កំណត់ត្រាកម្ជាប់">

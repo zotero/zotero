@@ -26,6 +26,11 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Elimina automàticament els elements de la paperera que s'han suprimit fa més de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dies">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+
 <!ENTITY zotero.preferences.groups "Grups">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Quan copiïs elements entre les biblioteques, inclou-hi:">
 <!ENTITY zotero.preferences.groups.childNotes "notes descendents">
