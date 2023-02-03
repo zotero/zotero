@@ -40,6 +40,8 @@
 			<preference id="pref-automaticTags" name="extensions.zotero.automaticTags" type="bool"/>
 			<preference id="pref-trashAutoEmptyDays" name="extensions.zotero.trashAutoEmptyDays" type="int"/>
 			
+			<preference id="pref-reader-tabs-title" name="extensions.zotero.tabs.title.reader" type="string"/>
+			
 			<preference id="pref-groups-copyChildNotes" name="extensions.zotero.groups.copyChildNotes" type="bool"/>
 			<preference id="pref-groups-copyChildFileAttachments" name="extensions.zotero.groups.copyChildFileAttachments" type="bool"/>
 			<preference id="pref-groups-copyAnnotations" name="extensions.zotero.groups.copyAnnotations" type="bool"/>
@@ -87,6 +89,21 @@
 				<label value="&zotero.preferences.trashAutoEmptyDaysPre;"/>
 				<textbox size="2" preference="pref-trashAutoEmptyDays"/>
 				<label value="&zotero.preferences.trashAutoEmptyDaysPost;"/>
+			</hbox>
+		</groupbox>
+		
+		<groupbox id="zotero-prefpane-reader-groupbox">
+			<caption label="&zotero.preferences.pdfReader;"/>
+			
+			<hbox align="center">
+				<label value="&zotero.preferences.reader.tabsTitle.label;" control="reader-tabs-title"/>
+				<menulist id="reader-tabs-title"
+						preference="pref-reader-tabs-title">
+					<menupopup>
+						<menuitem label="&zotero.preferences.reader.tabsTitle.titleCreatorYear;" value="titleCreatorYear"/>
+						<menuitem label="&zotero.preferences.reader.tabsTitle.creatorYearTitle;" value="creatorYearTitle"/>
+					</menupopup>
+				</menulist>
 			</hbox>
 		</groupbox>
 		
