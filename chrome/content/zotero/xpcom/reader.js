@@ -155,7 +155,7 @@ class ReaderInstance {
 
 		this._prefObserverIDs = [
 			Zotero.Prefs.registerObserver('fontSize', this._handleFontSizePrefChange),
-			Zotero.Prefs.registerObserver('tabs.title', this._handleTabTitlePrefChange)
+			Zotero.Prefs.registerObserver('tabs.title.reader', this._handleTabTitlePrefChange)
 		];
 
 		return true;
@@ -179,7 +179,7 @@ class ReaderInstance {
 			let attachment = await parentItem.getBestAttachment();
 			if (attachment && attachment.id === this._itemID) {
 				let parts = [];
-				let type = Zotero.Prefs.get('tabs.title');
+				let type = Zotero.Prefs.get('tabs.title.reader');
 				let creator = parentItem.getField('firstCreator');
 				let year = parentItem.getField('year');
 				let title = parentItem.getDisplayTitle();
