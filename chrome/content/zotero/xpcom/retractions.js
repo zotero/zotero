@@ -716,6 +716,8 @@ Zotero.Retractions = {
 	
 	_valueToKey: function (type, value) {
 		if (type == this.TYPE_DOI) {
+			// DOIs are case-insensitive
+			value = value.toLowerCase();
 			return Zotero.Utilities.Internal.sha1(value);
 		}
 		return value;
