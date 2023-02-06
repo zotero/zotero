@@ -172,14 +172,15 @@ class ReaderInstance {
 	}
 	
 	async updateTitle() {
+		let type = Zotero.Prefs.get('tabs.title.reader');
 		let item = Zotero.Items.get(this._itemID);
 		let readerTitle = item.getDisplayTitle();
 		let parentItem = item.parentItem;
-		if (parentItem) {
+		// If type is "filename", then readerTitle already has it
+		if (parentItem && type !== 'filename') {
 			let attachment = await parentItem.getBestAttachment();
 			if (attachment && attachment.id === this._itemID) {
 				let parts = [];
-				let type = Zotero.Prefs.get('tabs.title.reader');
 				let creator = parentItem.getField('firstCreator');
 				let year = parentItem.getField('year');
 				let title = parentItem.getDisplayTitle();
