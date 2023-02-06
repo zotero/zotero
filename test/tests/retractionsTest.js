@@ -4,7 +4,7 @@ describe("Retractions", function() {
 	var zp;
 	var server;
 	var checkQueueItemsStub;
-	var retractedDOI = '10.1016/S0140-6736(97)11096-0';
+	var retractedDOI = '10.1039/C3AN01547E';
 	
 	before(async function () {
 		userLibraryID = Zotero.Libraries.userLibraryID;
