@@ -1,8 +1,7 @@
-describe("Retractions", function() {
+describe("Retractions", function () {
 	var userLibraryID;
 	var win;
 	var zp;
-	var server;
 	var checkQueueItemsStub;
 	var retractedDOI = '10.1039/C3AN01547E';
 	
@@ -274,37 +273,20 @@ describe("Retractions", function() {
 	
 	describe("Notification Banner", function () {
 		it("should show banner when retracted item is added", async function () {
-			var banner = win.document.getElementById('retracted-items-container');
 			assert.isFalse(bannerShown());
-			
 			await createRetractedItem();
-			
 			assert.isTrue(bannerShown());
 		});
 		
 		it("should show banner when retracted item with DOI in Extra is added", async function () {
-			var banner = win.document.getElementById('retracted-items-container');
 			assert.isFalse(bannerShown());
-			
 			await createRetractedItemWithExtraDOI();
-			
 			assert.isTrue(bannerShown());
 		});
 		
 		it("shouldn't show banner when item in trash is added", async function () {
-			var item = await createRetractedItem({ deleted: true });
-			
+			await createRetractedItem({ deleted: true });
 			assert.isFalse(bannerShown());
-			
-			win.document.getElementById('retracted-items-link').click();
-			
-			while (zp.collectionsView.selectedTreeRow.id != 'L1') {
-				await Zotero.Promise.delay(10);
-			}
-			await waitForItemsLoad(win);
-			
-			var item = await zp.getSelectedItems()[0];
-			assert.equal(item, item);
 		});
 	});
 	
@@ -426,7 +408,7 @@ describe("Retractions", function() {
 				await Zotero.Promise.delay(50);
 			}
 			await spies[0].returnValues[0];
-			await spies[1].returnValues[0]
+			await spies[1].returnValues[0];
 			spies.forEach(spy => spy.restore());
 			
 			assert.isFalse(Zotero.Retractions.isRetracted(item));
