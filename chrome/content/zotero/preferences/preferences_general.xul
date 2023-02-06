@@ -102,6 +102,7 @@
 					<menupopup>
 						<menuitem label="&zotero.preferences.reader.tabsTitle.titleCreatorYear;" value="titleCreatorYear"/>
 						<menuitem label="&zotero.preferences.reader.tabsTitle.creatorYearTitle;" value="creatorYearTitle"/>
+						<menuitem label="&zotero.preferences.reader.tabsTitle.filename;" value="filename"/>
 					</menupopup>
 				</menulist>
 			</hbox>
