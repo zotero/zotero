@@ -27,79 +27,6 @@ Zotero.IPC = new function() {
 	var _libc, _libcPath, _instancePipe, _user32, open, write, close;
 	
 	/**
-	 * Initialize pipe for communication with connector
-	 */
-	this.init = function() {
-		if(!Zotero.isWin) {	// no pipe support on Fx 3.6
-			_instancePipe = _getPipeDirectory();
-			if(!_instancePipe.exists()) {
-				_instancePipe.create(Ci.nsIFile.DIRECTORY_TYPE, 0o700);
-			}
-			_instancePipe.append(Zotero.instanceID);
-			
-			Zotero.IPC.Pipe.initPipeListener(_instancePipe, this.parsePipeInput);
-		}
-	}
-	
-	/**
-	 * Parses input received via instance pipe
-	 */
-	this.parsePipeInput = function(msgs) {
-		for (let msg of msgs.split("\n")) {
-			if(!msg) continue;
-			Zotero.debug('IPC: Received "'+msg+'"');
-			
-			/*
-			 * The below messages coordinate switching Zotero for Firefox from extension mode to
-			 * connector mode without restarting after Zotero Standalone has been launched. The
-			 * dance typically proceeds as follows:
-			 *
-			 * 1. SA sends a releaseLock message to Z4Fx that tells it to release its lock.
-			 * 2. Z4Fx releases its lock and sends a lockReleased message to SA.
-			 * 3. Z4Fx restarts in connector mode. Once it's ready for an IPC command, it sends
-			 *    a checkInitComplete message to SA.
-			 * 4. Once SA finishes initializing, or immediately after a checkInitComplete message
-			 *    has been received if it is already initialized, SA sends an initComplete message 
-			 *    to Z4Fx.
-			 */
-			if(msg.substr(0, 11) === "releaseLock") {
-				// Standalone sends this to the Firefox extension to tell the Firefox extension to
-				// release its lock on the Zotero database
-				if(!Zotero.isConnector && (msg.length === 11 ||
-						msg.substr(12) === Zotero.DataDirectory.getDatabase())) {
-					switchConnectorMode(true);
-				}
-			} else if(msg === "lockReleased") {
-				// The Firefox extension sends this to Standalone to let Standalone know that it has
-				// released its lock
-				Zotero.onDBLockReleased();
-			} else if(msg === "checkInitComplete") {
-				// The Firefox extension sends this to Standalone to tell Standalone to send an
-				// initComplete message when it is fully initialized
-				if(Zotero.initialized) {
-					Zotero.IPC.broadcast("initComplete");
-				} else {
-					var observerService = Components.classes["@mozilla.org/observer-service;1"]
-						.getService(Components.interfaces.nsIObserverService);
-					var _loadObserver = function() {
-						Zotero.IPC.broadcast("initComplete");
-						observerService.removeObserver(_loadObserver, "zotero-loaded");
-					};
-					observerService.addObserver(_loadObserver, "zotero-loaded", false);
-				}
-			} else if(msg === "initComplete") {
-				// Standalone sends this to the Firefox extension to let the Firefox extension
-				// know that Standalone has fully initialized and it should pull the list of
-				// translators
-				Zotero.initComplete();
-			}
-			else if (msg == "reinit") {
-				if (Zotero.isConnector) {
-					reinit(false, true);
-				}
-			}
-		}
-	}
 	
 	/**
 	 * Writes safely to a file, avoiding blocking.
@@ -134,165 +61,6 @@ Zotero.IPC = new function() {
 		close(fd);
 		return true;
 	}
-	
-	/**
-	 * Broadcast a message to all other Zotero instances
-	 */
-	this.broadcast = function(msg) {
-		if(Zotero.isWin) {		// communicate via WM_COPYDATA method
-			Components.utils.import("resource://gre/modules/ctypes.jsm");
-			
-			// communicate via message window
-			var user32 = ctypes.open("user32.dll");
-			
-			/* http://msdn.microsoft.com/en-us/library/ms633499%28v=vs.85%29.aspx
-			 * HWND WINAPI FindWindow(
-			 *   __in_opt  LPCTSTR lpClassName,
-			 *   __in_opt  LPCTSTR lpWindowName
-			 * );
-			 */
-			var FindWindow = user32.declare("FindWindowW", ctypes.winapi_abi, ctypes.int32_t,
-					ctypes.jschar.ptr, ctypes.jschar.ptr);
-			
-			/* http://msdn.microsoft.com/en-us/library/ms633539%28v=vs.85%29.aspx
-			 * BOOL WINAPI SetForegroundWindow(
-			 *   __in  HWND hWnd
-			 * );
-			 */
-			var SetForegroundWindow = user32.declare("SetForegroundWindow", ctypes.winapi_abi,
-					ctypes.bool, ctypes.int32_t);
-			
-			/*
-			 * LRESULT WINAPI SendMessage(
-			 *   __in  HWND hWnd,
-			 *   __in  UINT Msg,
-			 *   __in  WPARAM wParam,
-			 *   __in  LPARAM lParam
-			 * );
-			 */
-			var SendMessage = user32.declare("SendMessageW", ctypes.winapi_abi, ctypes.uintptr_t,
-					ctypes.int32_t, ctypes.unsigned_int, ctypes.voidptr_t, ctypes.voidptr_t);
-			
-			/* http://msdn.microsoft.com/en-us/library/ms649010%28v=vs.85%29.aspx
-			 * typedef struct tagCOPYDATASTRUCT {
-			 *   ULONG_PTR dwData;
-			 *   DWORD     cbData;
-			 *   PVOID     lpData;
-			 * } COPYDATASTRUCT, *PCOPYDATASTRUCT;
-			 */
-			var COPYDATASTRUCT = ctypes.StructType("COPYDATASTRUCT", [
-					{"dwData":ctypes.voidptr_t},
-					{"cbData":ctypes.uint32_t},
-					{"lpData":ctypes.voidptr_t}
-			]);
-			
-			// Aurora/Nightly are always named "Firefox" in
-			// application.ini
-			const appNames = ["Firefox", "Zotero"];
-			
-			// Different from Zotero.appName; this corresponds to the
-			// name in application.ini
-			const myAppName = Services.appinfo.name;
-
-			for (let appName of appNames) {
-				// don't send messages to ourself
-				if(appName === myAppName) continue;
-				
-				var thWnd = FindWindow(appName+"MessageWindow", null);
-				if(thWnd) {
-					Zotero.debug('IPC: Broadcasting "'+msg+'" to window "'+appName+'MessageWindow"');
-					
-					// allocate message
-					var data = ctypes.char.array()('firefox.exe -silent -ZoteroIPC "'+msg.replace('"', '""', "g")+'"\x00C:\\');
-					var dataSize = data.length*data.constructor.size;
-					
-					// create new COPYDATASTRUCT
-					var cds = new COPYDATASTRUCT();
-					cds.dwData = null;
-					cds.cbData = dataSize;
-					cds.lpData = data.address();
-					
-					// send COPYDATASTRUCT
-					var success = SendMessage(thWnd, 0x004A /** WM_COPYDATA **/, null, cds.address());
-					
-					user32.close();
-					return !!success;
-				}
-			}
-			
-			user32.close();
-			return false;
-		} else {			// communicate via pipes
-			// look for other Zotero instances
-			var pipes = [];
-			var pipeDir = _getPipeDirectory();
-			if(pipeDir.exists()) {
-				var dirEntries = pipeDir.directoryEntries;
-				while (dirEntries.hasMoreElements()) {
-					var pipe = dirEntries.getNext().QueryInterface(Ci.nsIFile);
-					if(pipe.leafName[0] !== "." && (!_instancePipe || !pipe.equals(_instancePipe))) {
-						pipes.push(pipe);
-					}
-				}
-			}
-			
-			if(!pipes.length) return false;
-			var success = false;
-			for (let pipe of pipes) {
-				Zotero.debug('IPC: Trying to broadcast "'+msg+'" to instance '+pipe.leafName);
-				
-				var defunct = false;
-				
-				if(pipe.isFile()) {
-					// not actually a pipe
-					if(pipe.isDirectory()) {
-						// not a file, so definitely defunct
-						defunct = true;
-					} else {
-						// check to see whether the size exceeds a certain threshold that we find
-						// reasonable for the queue, and if not, delete the pipe, because it's 
-						// probably just a file that wasn't deleted on shutdown and is now
-						// accumulating vast amounts of data
-						defunct = pipe.fileSize > 1024;
-					}
-				}
-				
-				if(!defunct) {
-					// Try to write to the pipe for 100 ms
-					var time = Date.now(), timeout = time+100, wroteToPipe;
-					do {
-						wroteToPipe = Zotero.IPC.safePipeWrite(pipe, msg+"\n");
-					} while(Date.now() < timeout && !wroteToPipe);
-					if (wroteToPipe) Zotero.debug('IPC: Pipe took '+(Date.now()-time)+' ms to become available');
-					success = success || wroteToPipe;
-					defunct = !wroteToPipe;
-				}
-				
-				if(defunct) {
-					Zotero.debug('IPC: Removing defunct pipe '+pipe.leafName);
-					try {
-						pipe.remove(true);
-					} catch(e) {};
-				}
-			}
-			
-			return success;
-		}
-	}
-	
-	/**
-	 * Get directory containing Zotero pipes
-	 */
-	function _getPipeDirectory() {
-		var dir = Zotero.File.pathToFile(Zotero.DataDirectory.dir);
-		dir.append("pipes");
-		return dir;
-	}
-	
-	this.pipeExists = Zotero.Promise.coroutine(function* () {
-		var dir = _getPipeDirectory().path;
-		return (yield OS.File.exists(dir)) && !(yield Zotero.File.directoryIsEmpty(dir));
-	});
 	
 	/**
 	 * Gets the path to libc as a string
@@ -359,19 +127,8 @@ Zotero.IPC.Pipe = new function() {
 	this.initPipeListener = function(file, callback) {
 		Zotero.debug("IPC: Initializing pipe at "+file.path);
 		
-		// determine type of pipe
-		if(!_pipeClass) {
-			var verComp = Components.classes["@mozilla.org/xpcom/version-comparator;1"]
-				.getService(Components.interfaces.nsIVersionComparator);
-			var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].
-				getService(Components.interfaces.nsIXULAppInfo);
-			if(verComp.compare("2.2a1pre", appInfo.platformVersion) <= 0) {			// Gecko 5
-				_pipeClass = Zotero.IPC.Pipe.DeferredOpen;
-			}
-		}
-		
 		// make new pipe
-		new _pipeClass(file, callback);
+		new Zotero.IPC.Pipe.DeferredOpen(file, callback);
 	}
 	
 	/**
@@ -395,7 +152,7 @@ Zotero.IPC.Pipe = new function() {
 	 * Adds a shutdown listener for a pipe that writes "Zotero shutdown\n" to the pipe and then
 	 * deletes it
 	 */
-	this.writeShutdownMessage = function(pipe, file) {
+	this.remove = function(pipe, file) {
 		// Make sure pipe actually exists
 		if(!file.exists()) {
 			Zotero.debug("IPC: Not closing pipe "+file.path+": already deleted");
@@ -425,7 +182,7 @@ Zotero.IPC.Pipe.DeferredOpen = function(file, callback) {
 	this._initPump();
 	
 	// add shutdown listener
-	Zotero.addShutdownListener(Zotero.IPC.Pipe.writeShutdownMessage.bind(null, this, file));
+	Zotero.addShutdownListener(Zotero.IPC.Pipe.remove.bind(null, this, file));
 }
 
 Zotero.IPC.Pipe.DeferredOpen.prototype = {

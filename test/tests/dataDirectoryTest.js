@@ -37,8 +37,6 @@ describe("Zotero.DataDirectory", function () {
 		newMigrationMarker = OS.Path.join(newDir, Zotero.DataDirectory.MIGRATION_MARKER);
 		
 		stubs.canMigrate = sinon.stub(Zotero.DataDirectory, "canMigrate").returns(true);
-		// A pipe always exists during tests, since Zotero is running
-		stubs.pipeExists = sinon.stub(Zotero.IPC, "pipeExists").returns(Zotero.Promise.resolve(false));
 		stubs.setDataDir = sinon.stub(Zotero.DataDirectory, "set");
 		stubs.isNewDirOnDifferentDrive = sinon.stub(Zotero.DataDirectory, 'isNewDirOnDifferentDrive').resolves(true);
 	});
