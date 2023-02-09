@@ -75,6 +75,7 @@ Zotero.Plugins = new function () {
 					"crypto",
 					"CSS",
 					"ChromeUtils",
+					"DOMParser",
 					"fetch",
 					"File",
 					"FileReader",
