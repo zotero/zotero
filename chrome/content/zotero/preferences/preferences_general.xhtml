@@ -124,6 +124,21 @@
 		</hbox>
 	</groupbox>
 	
+	<groupbox id="zotero-prefpane-reader-groupbox">
+		<label><html:h2>&zotero.preferences.pdfReader;</html:h2></label>
+		
+		<hbox align="center">
+			<label value="&zotero.preferences.reader.tabsTitle.label;" control="reader-tabs-title"/>
+			<menulist id="reader-tabs-title" preference="extensions.zotero.tabs.title.reader" native="true">
+				<menupopup>
+					<menuitem label="&zotero.preferences.reader.tabsTitle.titleCreatorYear;" value="titleCreatorYear"/>
+					<menuitem label="&zotero.preferences.reader.tabsTitle.creatorYearTitle;" value="creatorYearTitle"/>
+					<menuitem label="&zotero.preferences.reader.tabsTitle.filename;" value="filename"/>
+				</menupopup>
+			</menulist>
+		</hbox>
+	</groupbox>
+	
 	<groupbox>
 		<label><html:h2>&zotero.preferences.groups;</html:h2></label>
 		
