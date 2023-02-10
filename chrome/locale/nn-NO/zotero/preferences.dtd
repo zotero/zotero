@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Filename">
 
 <!ENTITY zotero.preferences.groups "Grupper">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Ta med når element vert kopierte mellom bibliotek:">

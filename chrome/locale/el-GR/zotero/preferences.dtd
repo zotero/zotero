@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Όνομα αρχείου">
 
 <!ENTITY zotero.preferences.groups "Ομάδες">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Όταν αντιγράφονται στοιχεία μεταξύ βιβλιοθηκών, να συμπεριλαμβάνονται:">
@@ -81,10 +82,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "για περισσότερες πληροφορίες.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Επαναφορά Ιστορικού Συγχρονισμού Δεδομένων">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Συγχώνευση τοπικών δεδομένων με απομακρυσμένα δεδομένα, αγνοώντας το ιστορικό συγχρονισμού">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Επαναφορά από την Online Βιβλιοθήκη">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Αντικατάσταση των τοπικών δεδομένων Zotero με δεδομένα από την Online Ββλιοθήκη.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Αντικατάσταση Online Βιβλιοθήκης">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Αντικαταστήστε την online βιβλιοθήκη με τα τοπικά δεδομένα Zotero">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Μηδενισμός του ιστορικού συγχρονισμού αρχείων">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Σύγκριση όλων των συνημμένων αρχείων με την υπηρεσία αποθήκευσης">
 <!ENTITY zotero.preferences.sync.reset "Επαναφορά">

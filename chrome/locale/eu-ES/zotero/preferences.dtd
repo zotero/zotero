@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Fitxategiaren izena">
 
 <!ENTITY zotero.preferences.groups "Taldeak">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Bildumen artean iemak kopiatzen dituzunean, horrekin batera kopiatuko dira:">
@@ -81,10 +82,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "informazio gehiagorako.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Berrezarri datuen sinkronizazioaren historia">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Bateratu datu lokalak urrunekoekin, sinkronizazioaren historia baztertuz">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Lineako liburutegitik berreskuratu">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Gainidatzi Zoteroko datu lokalak lineako liburutegikoekin.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Ordezkatu lineako liburutegia">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Gainidatzi lineako liburutegia Zoteroko datu lokalekin.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Garbitu Sync kronika">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Alderatu eranskin fitxategi guztiak biltegi zerbitzuarekin">
 <!ENTITY zotero.preferences.sync.reset "Berrezarri">

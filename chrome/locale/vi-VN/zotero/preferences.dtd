@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Filename">
 
 <!ENTITY zotero.preferences.groups "Các nhóm">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Thông tin của tài liệu được sao chép giữa các thư viện:">
@@ -81,10 +82,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "để có thêm thông tin.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Xóa lịch sử đồng bộ dữ liệu">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Trộn dữ liệu cục bộ với dữ liệu trên máy chủ, bỏ qua lịch sử đồng bộ">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Lấy lại từ thư viện trực tuyến">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Ghi đè dữ liệu Zotero cục bộ bằng dữ liệu từ thư viện trực tuyến">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Thay thế thư viện trực tuyến">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Ghi đè tư viện trực tuyến bằng dữ liệu từ tập tin cục bộ">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Thiết lập lại lịch sử đồng bộ tập tin">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "So sánh tất cả các tập tin đính kèm bằng dịch vụ lưu trữ">
 <!ENTITY zotero.preferences.sync.reset "Thiết lập lại">

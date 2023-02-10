@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Skráarnafn">
 
 <!ENTITY zotero.preferences.groups "Hópar">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Þegar færslur eru afritaðar frá einu safni til annars, þá skal einnig afrita:">

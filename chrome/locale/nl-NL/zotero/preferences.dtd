@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Bestandsnaam">
 
 <!ENTITY zotero.preferences.groups "Groepen">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Bij het kopiëren van items tussen bibliotheken, kopieer ook:">
@@ -81,10 +82,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "voor meer informatie.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Herstel synchronisatiegeschiedenis">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Lokale Zotero-gegevens samenvoegen met de gegevens op de Zotero Server (houdt geen rekening met synchronisatiegeschiedenis).">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Herstellen vanuit online-bibliotheek">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Lokale Zoterogegevens overschrijven met data uit de online-bibliotheek">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Online Bibliotheek Vervangen">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Alle gegevens op de server wissen en vervangen door de lokale Zotero-gegevens.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Wis bestandssynchronisatiegeschiedenis">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Controleren of alle lokale bestanden op de server aanwezig zijn.">
 <!ENTITY zotero.preferences.sync.reset "Reset">

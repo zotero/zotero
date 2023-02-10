@@ -59,6 +59,12 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "ostatnia wersja"
   },
+  "extensionIsDisabled": {
+    "message": "$1 jest wyłączony"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 jest wyłączony w rozszerzeniach"
+  },
   "appConnector": {
     "message": "Łącznik $1"
   },
@@ -139,6 +145,12 @@
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
     "message": "Te cytaty zostały <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">odłączone od $1</a>. Musisz ponownie połączyć je, zanim zostaną zaktualizowane lub pojawią się w Twojej bibliografii."
+  },
+  "reloadViaProxy": {
+    "message": "Wczytaj ponownie przez serwer pośredniczący"
+  },
+  "reloadVia": {
+    "message": "Wczytaj ponownie przez $1"
   },
   "general_saveTo": {
     "message": "Zapisz w $1"

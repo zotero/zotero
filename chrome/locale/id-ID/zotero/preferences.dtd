@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Filename">
 
 <!ENTITY zotero.preferences.groups "Grup">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Saat menyalin item antarperpustakaan, turut masukkan:">
@@ -81,10 +82,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "untuk informasi lebih lanjut.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Atur Ulang Riwayat Sinkronisasi Data">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Gabungkan data lokal dengan data jarak jauh, mengabaikan riwayat sinkronisasi">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Kembalikan dari Perpustakaan Online">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Timpa data Zotero lokal dengan data dari perpustakaan online.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Ganti Perpustakaan Online">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Timpa perpustakaan online dengan data Zotero lokal">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reset Riwayat Sinkronisasi Berkas">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Bandingkan semua file lampiran dengan layanan penyimpanan">
 <!ENTITY zotero.preferences.sync.reset "Reset">

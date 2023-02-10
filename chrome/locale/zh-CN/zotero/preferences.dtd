@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "文件名">
 
 <!ENTITY zotero.preferences.groups "群组">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "跨文献库复制条目时，包含：">
@@ -81,10 +82,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "以获取更多信息。">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "重置数据同步历史">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "将本地数据与远程数据合并，忽略同步历史">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "从在线文献库恢复">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "用在线文献库中的数据覆盖本地 Zotero 数据。">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "替换在线文献库">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "使用本地 Zotero 数据覆盖在线文献库">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "重置文件同步历史">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "比较存储服务中的所有附件文件">
 <!ENTITY zotero.preferences.sync.reset "重置">

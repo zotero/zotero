@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Filnavn">
 
 <!ENTITY zotero.preferences.groups "Grupper">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Når elementer kopieres mellom biblioteker, inkluder:">
@@ -81,10 +82,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 " for mer informasjon.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Tilbakestill synkroniseringshistorikk for data">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Slå sammen lokale data med eksterne data og ignorer synkroniseringshistorikk">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Gjenopprett fra nettbiblioteket">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Skriv over lokale Zotero data med data fra nettbiblioteket">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Erstatt nettbiblioteket">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overskriv nettbiblioteket med lokale Zotero data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Tilbakestill filsynkroniseringshistorikk">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Sammenlign alle vedlegg med lagringstjeneste">
 <!ENTITY zotero.preferences.sync.reset "Tilbakestill">

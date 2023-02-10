@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Имя файла">
 
 <!ENTITY zotero.preferences.groups "Группы">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "При копировании записей между библиотеками, включать:">
@@ -81,10 +82,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 " для дополнительных сведений.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Очистить историю синхронизации…">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Слить локальные данные с удаленными без учета истории синхронизации">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Восстановить из онлайн-библиотеки">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Перезаписать локальные данные Zotero данными онлайн-библиотеки.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Заменить данные в онлайн-библиотеке">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Перезаписать онлайн-библиотеку локальным данными Zotero">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Сбросить историю синхронизации файлов">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Сравнить все вложенные файлы с данными в хранилище">
 <!ENTITY zotero.preferences.sync.reset "Сбросить">

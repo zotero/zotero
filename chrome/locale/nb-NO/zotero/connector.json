@@ -59,6 +59,12 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "siste versjon"
   },
+  "extensionIsDisabled": {
+    "message": "$1 er deaktivert"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 er deaktivert på utvidelsessider"
+  },
   "appConnector": {
     "message": "$1 Tilknytter"
   },
@@ -139,6 +145,18 @@
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
     "message": "Disse henvisningene har blitt <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">frakoblet $1</a>. Du må lage koblinger til de på ny før de vil bli oppdatert eller vises i bibliografien din."
+  },
+  "copyUnproxiedLink": {
+    "message": "Kopier lenke uten mellomtjener"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "Kopier URL til side uten mellomtjener"
+  },
+  "reloadViaProxy": {
+    "message": "Last på nytt gjennom mellomtjener"
+  },
+  "reloadVia": {
+    "message": "Last på nytt gjennom $1"
   },
   "general_saveTo": {
     "message": "Lagre til $1"

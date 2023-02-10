@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Fájlnév">
 
 <!ENTITY zotero.preferences.groups "Csoportok">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Amikor könyvtárak között másol elemeket, az alábbiakat másolja:">
@@ -81,10 +82,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 " további információért.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Az adatszinkronizációs előzmények törlése">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "A helyi adatok összefésülése a távoli adatokkal, a szinkronizációs előzmények figyelmen kívül hagyása.">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Helyreállítás az online könyvtáramból">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "A helyi adatok felülírása az online könyvtárban található adatokkal.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Az Online Könyvtár cseréje">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Az online könyvtár felülírása a helyi Zotero adatokkal">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "A szinkronizációs előzmények törlése">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Az összes csatolt fájl összehasonlítása a tárhely szerveren">
 <!ENTITY zotero.preferences.sync.reset "Visszaállítás">

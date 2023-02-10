@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Nombre de archivo">
 
 <!ENTITY zotero.preferences.groups "Grupos">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Al copiar elementos entre bibliotecas, incluir:">
@@ -81,10 +82,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "para más información.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reiniciar historial de sincronización">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Fusionar datos locales con datos remotos, ignorando el historial de sincronización">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restaurar desde la biblioteca en línea">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Sobrescribir los datos locales de Zotero con los datos de la biblioteca en línea.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Reemplazar biblioteca en línea">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Sobrescribir la biblioteca en línea con los datos locales de Zotero">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Restablecer el historial de sincronización de archivos">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Comparar todos los archivos adjuntos con el servicio de almacenamiento">
 <!ENTITY zotero.preferences.sync.reset "Restablecer">

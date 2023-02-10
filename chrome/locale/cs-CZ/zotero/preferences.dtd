@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Název souboru">
 
 <!ENTITY zotero.preferences.groups "Skupiny">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Při kopírování položek mezi knihovnami zahrnout:">
@@ -81,10 +82,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "pro další informace.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Resetovat historii synchronizace dat">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Sloučit místní data s vzdálenými daty; historie synchronizace se bude ignorovat">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Obnovit z Online knihovny">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Přepsat lokální data Zotero daty z online knihovny.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Nahradit online knihovnu">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Přepsat online knihovnu daty z lokálního Zotera">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Resetovat historii synchronizace souborů">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Porovnat všechny připojené soubory se vzdáleným úložištěm">
 <!ENTITY zotero.preferences.sync.reset "Resetování">

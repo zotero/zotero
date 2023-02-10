@@ -1,16 +1,16 @@
-<!ENTITY preferencesCmdMac.label "Лавлагаанууд...">
+<!ENTITY preferencesCmdMac.label "Preferences…">
 <!ENTITY preferencesCmdMac.commandkey ",">
-<!ENTITY servicesMenuMac.label "Үйлчилгээнүүд">
-<!ENTITY hideThisAppCmdMac.label "Нуух &брэндийнБогиноНэр;">
+<!ENTITY servicesMenuMac.label "Services">
+<!ENTITY hideThisAppCmdMac.label "Hide &brandShortName;">
 <!ENTITY hideThisAppCmdMac.commandkey "H">
-<!ENTITY hideOtherAppsCmdMac.label "Бусдыг нуух">
+<!ENTITY hideOtherAppsCmdMac.label "Hide Others">
 <!ENTITY hideOtherAppsCmdMac.commandkey "H">
-<!ENTITY showAllAppsCmdMac.label "Бүгдийг харуулах">
-<!ENTITY quitApplicationCmdMac.label "Зотерог хаах">
+<!ENTITY showAllAppsCmdMac.label "Show All">
+<!ENTITY quitApplicationCmdMac.label "Quit Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
 
-<!ENTITY fileMenu.label "Хавтас">
+<!ENTITY fileMenu.label "File">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "Save…">
 <!ENTITY saveCmd.key "S">
@@ -20,27 +20,27 @@
 <!ENTITY printCmd.label "Print…">
 <!ENTITY printCmd.key "P">
 <!ENTITY printCmd.accesskey "P">
-<!ENTITY closeCmd.label "Хаах">
+<!ENTITY closeCmd.label "Close">
 <!ENTITY closeCmd.key "W">
 <!ENTITY closeCmd.accesskey "C">
 <!ENTITY manageAttachments.label "Manage Attachments">
 <!ENTITY convertToStored.label "Convert Linked Files to Stored Files…">
-<!ENTITY importCmd.label "Import...">
+<!ENTITY importCmd.label "Import…">
 <!ENTITY importCmd.key "I">
 <!ENTITY importFromClipboardCmd.label "Import from Clipboard">
-<!ENTITY quitApplicationCmdWin.label "Гарах">
+<!ENTITY quitApplicationCmdWin.label "Exit">
 <!ENTITY quitApplicationCmdWin.accesskey "x">
-<!ENTITY quitApplicationCmd.label "Гаргах">
+<!ENTITY quitApplicationCmd.label "Quit">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
 
-<!ENTITY copyCitationCmd.label "Эшлэлийг хуулах">
-<!ENTITY copyBibliographyCmd.label "Номзүйг хуулах">
+<!ENTITY copyCitationCmd.label "Copy Citation">
+<!ENTITY copyBibliographyCmd.label "Copy Bibliography">
 <!ENTITY copyNoteCmd.label "Copy Note">
 
-<!ENTITY bidiSwitchPageDirectionItem.label "Хуудас солих">
+<!ENTITY bidiSwitchPageDirectionItem.label "Switch Page Direction">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
-<!ENTITY bidiSwitchTextDirectionItem.label "Бичвэр солих">
+<!ENTITY bidiSwitchTextDirectionItem.label "Switch Text Direction">
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
@@ -53,7 +53,7 @@
 <!ENTITY layout.label "Layout">
 <!ENTITY standardView.label "Standard View">
 <!ENTITY stackedView.label "Stacked View">
-<!ENTITY collectionsPane.label "Түүврүүдийн жагсаалт">
+<!ENTITY collectionsPane.label "Collections Pane">
 <!ENTITY itemPane.label "Item Pane">
 <!ENTITY tagSelector.label "Tag Selector">
 <!ENTITY recursiveCollections.label "Show Items from Subcollections">
@@ -61,38 +61,38 @@
 <!ENTITY noteFontSize.label "Note Font Size">
 
 
-<!ENTITY toolsMenu.label "Хэрэгсэл">
+<!ENTITY toolsMenu.label "Tools">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY installConnector.label "Install Browser Connector">
 <!ENTITY installConnector.accesskey "C">
-<!ENTITY addons.label "Нэмэлтүүд">
+<!ENTITY addons.label "Add-ons">
 <!ENTITY developer.label "Developer">
 
 
-<!ENTITY minimizeWindow.key "м">
-<!ENTITY minimizeWindow.label "Багасгах">
-<!ENTITY bringAllToFront.label "Бүгдийг урд нь аваач">
-<!ENTITY zoomWindow.label "Томруулах">
-<!ENTITY windowMenu.label "Цонх">
+<!ENTITY minimizeWindow.key "m">
+<!ENTITY minimizeWindow.label "Minimize">
+<!ENTITY bringAllToFront.label "Bring All to Front">
+<!ENTITY zoomWindow.label "Zoom">
+<!ENTITY windowMenu.label "Window">
 
 
-<!ENTITY helpMenu.label "Тусламж">
+<!ENTITY helpMenu.label "Help">
 <!ENTITY helpMenu.accesskey "H">
 
 
-<!ENTITY helpMenuWin.label "Тусламж">
+<!ENTITY helpMenuWin.label "Help">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">
-<!ENTITY aboutProduct.label "Тухай &брэндийнБогиноНэр;">
+<!ENTITY aboutProduct.label "About &brandShortName;">
 <!ENTITY aboutProduct.accesskey "A">
-<!ENTITY productHelp.label "Дэмжлэг ба баримт бичиг">
+<!ENTITY productHelp.label "Support and Documentation">
 <!ENTITY productHelp.accesskey "D">
-<!ENTITY helpTroubleshootingInfo.label "Алдааг олж засварлах мэдээлэл">
+<!ENTITY helpTroubleshootingInfo.label "Troubleshooting Information">
 <!ENTITY helpTroubleshootingInfo.accesskey "T">
-<!ENTITY helpFeedbackPage.label "Хэлэлцүүлгийн форумууд">
+<!ENTITY helpFeedbackPage.label "Discussion Forums">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
-<!ENTITY helpReportErrors.label "Алдаануудыг илгээх...">
+<!ENTITY helpReportErrors.label "Report Errors…">
 <!ENTITY helpReportErrors.accesskey "R">
 
 <!ENTITY debugOutputLogging.label "Debug Output Logging">
@@ -102,5 +102,5 @@
 <!ENTITY debugOutputLogging.clear "Clear Output">
 <!ENTITY debugOutputLogging.restartWithLoggingEnabled "Restart with Logging Enabled…">
 
-<!ENTITY helpCheckForUpdates.label "Шинэчлэлтүүдийг шалгах…">
+<!ENTITY helpCheckForUpdates.label "Check for Updates…">
 <!ENTITY helpCheckForUpdates.accesskey "U">

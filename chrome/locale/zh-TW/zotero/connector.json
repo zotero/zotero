@@ -59,6 +59,12 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "最新版本"
   },
+  "extensionIsDisabled": {
+    "message": "$1 處於停用狀態"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 在擴充套件頁面中處於停用狀態"
+  },
   "appConnector": {
     "message": "$1 Connector"
   },
@@ -139,6 +145,18 @@
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
     "message": "這些引文已  <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">從 $1斷開連結</a>。您需要先重新連結，引文才能在參考資料中更新或出現。"
+  },
+  "copyUnproxiedLink": {
+    "message": "複製未經代理的連結"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "複製未經代理的頁面URL"
+  },
+  "reloadViaProxy": {
+    "message": "利用代理重新載入"
+  },
+  "reloadVia": {
+    "message": "利用 $1 重新載入"
   },
   "general_saveTo": {
     "message": "儲存至 $1"

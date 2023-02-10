@@ -59,6 +59,12 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "Последняя версия"
   },
+  "extensionIsDisabled": {
+    "message": "$1 отключено"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 отключено на странице расширения"
+  },
   "appConnector": {
     "message": "Плагин $1"
   },
@@ -139,6 +145,18 @@
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
     "message": "Это цитирование было <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">отвязано от $1</a>. Вы должны его исправить чтобы изменения появились в библиографии."
+  },
+  "copyUnproxiedLink": {
+    "message": "Скопировать ссылку без указания прокси-сервера"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "Скопировать URL без указания прокси-сервера"
+  },
+  "reloadViaProxy": {
+    "message": "Перезагрузить через прокси-сервер"
+  },
+  "reloadVia": {
+    "message": "Перезагрузить через $1"
   },
   "general_saveTo": {
     "message": "Сохранить в $1"

@@ -30,6 +30,7 @@
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "파일 이름">
 
 <!ENTITY zotero.preferences.groups "그룹">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "라이브러리 간 항목 복사시 포함 대상 :">
@@ -81,9 +82,9 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "추가정보.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "데이터 동기화 기록 재설정">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "로컬 데이터와 원격 데이터 병합. 기존 동기화 기록 무시">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restore from Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overwrite local Zotero data with data from the online library.">
-<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "온라인 라이브러리에서 복원">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "로컬 Zotero 데이터를 온라인 라이브러리 데이터로 덮어씁니다">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "온라인 라이브러리 교체">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overwrite online library with local Zotero data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "파일 동기화 기록 재설정">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "모든 첨부 파일을 저장소 서비스의 파일과 비교합니다">
