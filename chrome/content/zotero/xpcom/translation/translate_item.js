@@ -996,16 +996,18 @@ Zotero.Translate.ItemSaver.prototype = {
 			this._IDMap[item.itemID || item.id] = newItem.id;
 		}
 
-		// // add see alsos
-		// if(item.seeAlso) {
-		// 	for(var i=0; i<item.seeAlso.length; i++) {
-		// 		var seeAlso = item.seeAlso[i];
-		// 		if(this._IDMap[seeAlso]) {
-		// 			newItem.addRelatedItem(this._IDMap[seeAlso]);
-		// 		}
-		// 	}
-		// 	newItem.save();
-		// }
+		// add see alsos
+		if(item.seeAlso) {
+			for(var i=0; i<item.seeAlso.length; i++) {
+				var seeAlso = item.seeAlso[i];
+				if(this._IDMap[seeAlso]) {
+					let relatedItem = Zotero.Items.get(this._IDMap[seeAlso]);
+					newItem.addRelatedItem(relatedItem);
+					relatedItem.addRelatedItem(newItem);
+				}
+			}
+			newItem.save();
+		}
 	}
 }
 
