@@ -531,17 +531,7 @@ ZoteroCommandLineHandler.prototype = {
 			
 			zContext.Zotero.Integration.execCommand(agent, command, docId, templateVersion);
 		}
-		
-		// handler for Windows IPC commands
-		var ipcParam = cmdLine.handleFlagWithParam("ZoteroIPC", false);
-		if(ipcParam) {
-			// Don't open a new window
-			cmdLine.preventDefault = true;
-			if (!zContext) new ZoteroService();
-			let Zotero = zContext.Zotero;
-			Zotero.setTimeout(() => Zotero.IPC.parsePipeInput(ipcParam), 0);
-		}
-		
+	
 		if(isStandalone()) {
 			var fileToOpen;
 			// Special handler for "zotero" URIs at the command line to prevent them from opening a new window
