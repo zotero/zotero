@@ -2344,7 +2344,21 @@
 				]]>
 				</body>
 			</method>
-			
+
+			<method name="focusLastField">
+				<body><![CDATA[
+					const tabbableFields = this._dynamicFields.querySelectorAll('*[ztabindex]:not([disabled=true])');
+					const last = tabbableFields[tabbableFields.length - 1];
+					
+					if (last.classList.contains('zotero-focusable')) {
+						last.focus();
+					}
+					// Fields need to be clicked
+					else {
+						last.click();
+					}
+				]]></body>
+			</method>			
 			
 			<method name="focusField">
 				<parameter name="fieldName"/>

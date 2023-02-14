@@ -330,6 +330,15 @@
 					]]>
 				</body>
 			</method>
+
+			<method name="receiveKeyboardFocus">
+				<parameter name="direction" />
+				<body><![CDATA[
+					this.id("addButton").focus();
+					// TODO: the relatedbox is not currently keyboard accessible
+					// so we are ignoring the direction
+				]]></body>
+			</method>
 		</implementation>
 		<content>
 			<xul:vbox xbl:inherits="flex" class="zotero-box">
