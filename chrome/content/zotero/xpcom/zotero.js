@@ -385,16 +385,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		var _shutdownObserver = {observe:function() { Zotero.shutdown().done() }};
 		Services.obs.addObserver(_shutdownObserver, "quit-application", false);
 		
-		try {
-			Zotero.IPC.init();
-		}
-		catch (e) {
-			if (_checkDataDirAccessError(e)) {
-				return false;
-			}
-			throw (e);
-		}
-		
 		// Get startup errors
 		try {
 			let messages = Services.console.getMessageArray();
@@ -783,11 +773,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			
 			let dbfile = Zotero.DataDirectory.getDatabase();
 
-			// Tell any other Zotero instances to release their lock,
-			// in case we lost the lock on the database (how?) and it's
-			// now open in two places at once
-			Zotero.IPC.broadcast("releaseLock " + dbfile);
-			
 			// Test write access on Zotero data directory
 			if (!Zotero.File.pathToFile(OS.Path.dirname(dbfile)).isWritable()) {
 				var msg = 'Cannot write to ' + OS.Path.dirname(dbfile) + '/';
@@ -906,11 +891,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			if (Zotero.DB) {
 				// close DB
 				yield Zotero.DB.closeDatabase(true)
-				
-				if (!Zotero.restarting) {
-					// broadcast that DB lock has been released
-					Zotero.IPC.broadcast("lockReleased");
-				}
 			}
 		} catch(e) {
 			Zotero.logError(e);

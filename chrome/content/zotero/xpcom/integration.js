@@ -128,7 +128,6 @@ Zotero.Integration = new function() {
 	this.deletePipe = function(pipe) {
 		try {
 			if(pipe.exists()) {
-				Zotero.IPC.safePipeWrite(pipe, "Zotero shutdown\n");
 				pipe.remove(false);
 			}
 			return true;
