@@ -1109,6 +1109,19 @@ class ReaderInstance {
 					}
 					return;
 				}
+				// Save rendered image when annotation isn't modified
+				case 'saveImage': {
+					let { annotation } = message;
+					let { image, id: key } = annotation;
+					let attachment = Zotero.Items.get(this._itemID);
+					let libraryID = attachment.libraryID;
+					let item = Zotero.Items.getByLibraryAndKey(attachment.libraryID, key);
+					if (item) {
+						let blob = this._dataURLtoBlob(image);
+						await Zotero.Annotations.saveCacheImage({ libraryID, key }, blob);
+					}
+					return;
+				}
 				case 'setState': {
 					let { state } = message;
 					await this._setState(state);
