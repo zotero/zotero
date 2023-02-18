@@ -1309,7 +1309,6 @@ Zotero.DBConnection.prototype._checkException = async function (e) {
  * @return {Boolean} - True if recovered, false if not
  */
 Zotero.DBConnection.prototype._handleCorruptionMarker = async function () {
-	var storage = Services.storage;
 	var file = this._dbPath;
 	var fileName = OS.Path.basename(file);
 	var backupFile = this._dbPath + '.bak';
@@ -1321,26 +1320,38 @@ Zotero.DBConnection.prototype._handleCorruptionMarker = async function () {
 	if (!await OS.File.exists(backupFile)) {
 		this._debug("No backup file for DB '" + this._dbName + "' exists", 1);
 		
-		// Save damaged filed
-		this._debug('Saving damaged DB file with .damaged extension', 1);
-		let damagedFile = this._dbPath + '.damaged';
-		damagedFile = await Zotero.File.moveToUnique(file, damagedFile);
+		let damagedFile;
+		
+		// If database file exists, move it to .damaged
+		if (await OS.File.exists(file)) {
+			this._debug('Saving damaged DB file with .damaged extension', 1);
+			damagedFile = this._dbPath + '.damaged';
+			damagedFile = await Zotero.File.moveToUnique(file, damagedFile);
+		}
+		// If it doesn't exist, assume we already showed a warning and moved it
+		else {
+			this._debug(`Database file '${fileName}' doesn't exist!`);
+		}
 		
 		// Create new main database
-		this._connection = storage.openDatabase(file);
+		this._connection = await Zotero.Promise.resolve(this.Sqlite.openConnection({
+			path: file
+		}));
 		
 		if (await OS.File.exists(corruptMarker)) {
 			await OS.File.remove(corruptMarker);
 		}
 		
-		Zotero.alert(
-			null,
-			Zotero.getString('startupError', Zotero.appName),
-			Zotero.getString(
-				'db.dbCorruptedNoBackup',
-				[Zotero.appName, fileName, OS.Path.basename(damagedFile)]
-			)
-		);
+		if (damagedFile) {
+			Zotero.alert(
+				null,
+				Zotero.getString('startupError', Zotero.appName),
+				Zotero.getString(
+					'db.dbCorruptedNoBackup',
+					[Zotero.appName, fileName, OS.Path.basename(damagedFile)]
+				)
+			);
+		}
 		return;
 	}
 	
