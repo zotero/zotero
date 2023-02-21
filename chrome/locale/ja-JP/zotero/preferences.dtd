@@ -26,10 +26,10 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "ゴミ箱の中のアイテムが">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "日を経過したら自動的に削除する">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.pdfReader "PDFリーダー">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "…でタブを表示します">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "編著者名ー年ー題名">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "題名ー編著者名ー年">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "ファイル名">
 
 <!ENTITY zotero.preferences.groups "グループ">

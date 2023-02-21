@@ -26,10 +26,10 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Supprimer automatiquement les documents mis à la corbeille depuis plus de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "jours">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.pdfReader "Lecteur PDF">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Montrer les onglets comme">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Créateur - Année - Titre">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Titre - Créateur - Année">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "Nom du fichier">
 
 <!ENTITY zotero.preferences.groups "Groupes">

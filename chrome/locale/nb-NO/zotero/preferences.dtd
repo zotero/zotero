@@ -26,10 +26,10 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Fjern automatisk elementer i papirkorgen slettet for mer enn">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dager siden">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.pdfReader "PDF leser">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Vis faner som">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Opphaver - År - Tittel">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Tittel - Opphaver - År">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "Filnavn">
 
 <!ENTITY zotero.preferences.groups "Grupper">

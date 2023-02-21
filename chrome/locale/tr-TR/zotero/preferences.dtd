@@ -26,10 +26,10 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Bu kadar zaman önce Çöp Sepetine gönderilmiş eserleri otomatik olarak sil:">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "gün">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.pdfReader "PDF Okuyucu">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Sekmeleri böyle göster:">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Yaratan - Yıl - Başlık">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Başlık - Yaratan - Yıl">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "Dosya adı">
 
 <!ENTITY zotero.preferences.groups "Gruplar">

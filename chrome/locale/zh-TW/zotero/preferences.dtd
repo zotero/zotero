@@ -26,10 +26,10 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "自動移除刪入垃圾筒且超過">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "天的項目">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.pdfReader "PDF閱讀器">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "以……顯示分頁">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "作者–年–標題">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "標題–作者–年">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "檔名">
 
 <!ENTITY zotero.preferences.groups "群組">

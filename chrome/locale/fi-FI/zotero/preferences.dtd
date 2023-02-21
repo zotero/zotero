@@ -26,10 +26,10 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Poista roskakorista automaattisesti nimikkeet, jotka poistettiin yli">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "päivää sitten">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.pdfReader "PDF-lukija">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Näytä välilehdet">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Tekijä - Vuosi - Otsikko">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Otsikko - Tekijä - Vuosi">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "Tiedostonimi">
 
 <!ENTITY zotero.preferences.groups "Ryhmät">

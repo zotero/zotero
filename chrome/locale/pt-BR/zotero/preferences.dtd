@@ -26,10 +26,10 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Remover automaticamente os itens que estão na lixeira há mais de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dias">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.pdfReader "Leitor de PDF">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Mostrar abas como">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Criador - Ano - Título">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Título - Criador - Ano">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "Nome do arquivo">
 
 <!ENTITY zotero.preferences.groups "Grupos">

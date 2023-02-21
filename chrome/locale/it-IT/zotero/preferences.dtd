@@ -26,10 +26,10 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Elimina automaticamente gli elementi nel cestino cancellati più di">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "giorni fa">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.pdfReader "Lettore PDF">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Mostra schede come">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Autore - Anno - Titolo">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Titolo - Autore - Anno">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "Nome File">
 
 <!ENTITY zotero.preferences.groups "Gruppi">

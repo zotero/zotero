@@ -26,10 +26,10 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Автоматически убирать записи из корзины, удаленные более">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "дня(-ей) назад">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.pdfReader "Просмотрищик PDF">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Показать вкладки как">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Автор - Год - Заголовок">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Заголовок - Автор - Год">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "Имя файла">
 
 <!ENTITY zotero.preferences.groups "Группы">
