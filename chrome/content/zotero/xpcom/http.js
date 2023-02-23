@@ -343,7 +343,7 @@ Zotero.HTTP = new function() {
 		}
 		
 		// Send headers
-		var headers = new Headers(options?.headers || {});
+		var headers = new Zotero.HTTP.CasePreservingHeaders(options?.headers || {});
 		var compressedBody = false;
 		if (options.body) {
 			if (!headers.get("Content-Type")) {
@@ -366,12 +366,12 @@ Zotero.HTTP = new function() {
 		}
 		if (options.debug) {
 			if (headers.has("Zotero-API-Key")) {
-				let dispHeaders = new Headers(headers);
+				let dispHeaders = new Zotero.HTTP.CasePreservingHeaders(headers);
 				dispHeaders.set("Zotero-API-Key", "[Not shown]");
-				Zotero.debug({ ...dispHeaders.entries() });
+				Zotero.debug(Object.fromEntries(dispHeaders.entries()));
 			}
 			else {
-				Zotero.debug({ ...headers.entries() });
+				Zotero.debug(Object.fromEntries(headers.entries()));
 			}
 		}
 		for (var [header, value] of headers) {
@@ -1538,9 +1538,9 @@ Zotero.HTTP = new function() {
 	 * @param {HTMLDocument} doc Document returned by 
 	 * @param {nsIURL|String} url
 	 */
-	 this.wrapDocument = function(doc, url) {
-	 	if(typeof url !== "object") {
-	 		url = Services.io.newURI(url, null, null).QueryInterface(Components.interfaces.nsIURL);
+	this.wrapDocument = function(doc, url) {
+		if(typeof url !== "object") {
+			url = Services.io.newURI(url, null, null).QueryInterface(Components.interfaces.nsIURL);
 		}
 		return Zotero.Translate.DOMWrapper.wrap(doc, {
 			"documentURI":url.spec,
@@ -1548,5 +1548,68 @@ Zotero.HTTP = new function() {
 			"location":new Zotero.HTTP.Location(url),
 			"defaultView":new Zotero.HTTP.Window(url)
 		});
-	 }
+	};
+
+	/**
+	 * Extends Headers to preserve the original capitalization in header names. Header names are still compared
+	 * case-insensitively, but iterating through the keys or entries will return keys with original capitalization.
+	 *
+	 * @example
+	 * let headers = new Headers({ 'Header-Name': 'Header value' });
+	 * Array.from(headers)  // -> [['header-name', 'Header value']]
+	 *
+	 * headers = new Zotero.HTTP.CasePreservingHeaders({ 'Header-Name': 'Header value' });
+	 * Array.from(headers)  // -> [['Header-Name', 'Header value']]
+	 */
+	this.CasePreservingHeaders = class extends Headers {
+		_originalNames = new Map();
+		
+		constructor(init) {
+			super();
+			if (init) {
+				let iter;
+				if (Array.isArray(init) || init instanceof Headers) {
+					iter = init;
+				}
+				else {
+					iter = Object.entries(init);
+				}
+				for (let [name, value] of iter) {
+					this.append(name, value);
+				}
+			}
+		}
+		
+		append(name, value) {
+			super.append(name, value);
+			this._originalNames.set(name.toLowerCase(), name);
+		}
+
+		set(name, value) {
+			super.set(name, value);
+			this._originalNames.set(name.toLowerCase(), name);
+		}
+
+		[Symbol.iterator]() {
+			return this.entries();
+		}
+
+		entries() {
+			return Array.from(super.entries())
+				.map(([name, value]) => [this._originalNames.get(name) || name, value])
+				.values();
+		}
+
+		keys() {
+			return Array.from(super.keys())
+				.map(name => this._originalNames.get(name) || name)
+				.values();
+		}
+
+		forEach(callbackfn, thisArg) {
+			for (let [name, value] of this.entries()) {
+				callbackfn.call(thisArg, value, name, this);
+			}
+		}
+	};
 }
