@@ -392,4 +392,26 @@ describe("Zotero.HTTP", function () {
 			assert.instanceOf(e, Zotero.HTTP.UnexpectedStatusException);
 		});
 	});
+	
+	describe("CasePreservingHeaders", function () {
+		describe("#constructor()", function () {
+			it("should initialize from an iterable or object", function () {
+				let headers = new Zotero.HTTP.CasePreservingHeaders([['Name', 'value']]);
+				assert.equal(headers.get('name'), 'value');
+				headers = new Zotero.HTTP.CasePreservingHeaders({ NAME: 'value' });
+				assert.equal(headers.get('Name'), 'value');
+			});
+		});
+		
+		describe("#entries()", function () {
+			it("should iterate through headers with original capitalization", function () {
+				let headers = new Zotero.HTTP.CasePreservingHeaders({ 'A-Header': 'a value' });
+				headers.set('FuNkY-Header', 'some other value');
+				assert.deepEqual(Array.from(headers.entries()), [
+					['A-Header', 'a value'],
+					['FuNkY-Header', 'some other value']
+				]);
+			});
+		});
+	});
 });
