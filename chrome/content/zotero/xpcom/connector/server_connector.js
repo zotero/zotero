@@ -1175,6 +1175,7 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 			let item = await Zotero.Attachments.importFromURL({
 				libraryID,
 				url: data.url,
+				referrer: data.referrer,
 				collections: collection ? [collection.id] : undefined,
 				contentType: "application/pdf",
 				cookieSandbox
@@ -1234,6 +1235,7 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 				await Zotero.Attachments.importFromURL({
 					libraryID,
 					url: data.url,
+					referrer: data.referrer,
 					title,
 					parentItemID: itemID,
 					contentType: "text/html",
