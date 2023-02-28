@@ -384,12 +384,12 @@ Zotero.Duplicates.prototype._findDuplicates = Zotero.Promise.coroutine(function*
 			for (let i = 0; i < aCreatorRows.length; i++) {
 				let aCreatorRow = aCreatorRows[i];
 				let aLastName = aCreatorRow.lastName;
-				let aFirstInitial = aCreatorRow.firstInitial;
+				let aFirstInitial = aCreatorRow.firstInitial || "";
 				
 				for (let j = 0; j < bCreatorRows.length; j++) {
 					let bCreatorRow = bCreatorRows[j];
 					let bLastName = bCreatorRow.lastName;
-					let bFirstInitial = bCreatorRow.firstInitial;
+					let bFirstInitial = bCreatorRow.firstInitial || "";
 					
 					if (aLastName === bLastName && aFirstInitial === bFirstInitial) {
 						return 1;
