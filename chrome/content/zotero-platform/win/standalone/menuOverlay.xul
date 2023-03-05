@@ -44,7 +44,7 @@
 		<menuseparator/>
 		<menuitem id="menu_FileQuitItem" 
 				label="&quitApplicationCmdWin.label;"
-				key="&quitApplicationCmdWin.accesskey;"
+				accesskey="&quitApplicationCmdWin.accesskey;"
 				command="cmd_quitApplication"/>
     </menupopup>
     <menupopup id="menu_EditPopup">
