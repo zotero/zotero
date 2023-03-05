@@ -3466,6 +3466,9 @@ Zotero.Schema = new function(){
 				}
 			}
 			
+			// TEMP: When adding 121, check whether IA.authorName fix in items.js::_loadAnnotations()
+			// should be updated
+			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
 		}
 		

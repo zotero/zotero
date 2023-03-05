@@ -500,55 +500,68 @@ Zotero.Items = function() {
 			+ "FROM items JOIN itemAnnotations IA USING (itemID) "
 			+ "WHERE libraryID=?" + idSQL;
 		var params = [libraryID];
-		await Zotero.DB.queryAsync(
-			sql,
-			params,
-			{
-				noCache: true,
-				onRow: function (row) {
-					let itemID = row.getResultByIndex(0);
-					
-					let item = this._objectCache[itemID];
-					if (!item) {
-						throw new Error("Item " + itemID + " not found");
-					}
-					
-					item._parentItemID = row.getResultByIndex(1);
-					var typeID = row.getResultByIndex(2);
-					var type;
-					switch (typeID) {
-						case Zotero.Annotations.ANNOTATION_TYPE_HIGHLIGHT:
-							type = 'highlight';
-							break;
+		
+		// TEMP: Fix faulty upgrade from early 6.0 beta
+		// https://github.com/zotero/zotero/issues/3013
+		try {
+			await Zotero.DB.queryAsync(
+				sql,
+				params,
+				{
+					noCache: true,
+					onRow: function (row) {
+						let itemID = row.getResultByIndex(0);
 						
-						case Zotero.Annotations.ANNOTATION_TYPE_NOTE:
-							type = 'note';
-							break;
+						let item = this._objectCache[itemID];
+						if (!item) {
+							throw new Error("Item " + itemID + " not found");
+						}
 						
-						case Zotero.Annotations.ANNOTATION_TYPE_IMAGE:
-							type = 'image';
-							break;
+						item._parentItemID = row.getResultByIndex(1);
+						var typeID = row.getResultByIndex(2);
+						var type;
+						switch (typeID) {
+							case Zotero.Annotations.ANNOTATION_TYPE_HIGHLIGHT:
+								type = 'highlight';
+								break;
+							
+							case Zotero.Annotations.ANNOTATION_TYPE_NOTE:
+								type = 'note';
+								break;
+							
+							case Zotero.Annotations.ANNOTATION_TYPE_IMAGE:
+								type = 'image';
+								break;
+							
+							case Zotero.Annotations.ANNOTATION_TYPE_INK:
+								type = 'ink';
+								break;
+							
+							default:
+								throw new Error(`Unknown annotation type id ${typeID}`);
+						}
+						item._annotationType = type;
+						item._annotationAuthorName = row.getResultByIndex(3);
+						item._annotationText = row.getResultByIndex(4);
+						item._annotationComment = row.getResultByIndex(5);
+						item._annotationColor = row.getResultByIndex(6);
+						item._annotationSortIndex = row.getResultByIndex(7);
+						item._annotationIsExternal = !!row.getResultByIndex(8);
 						
-						case Zotero.Annotations.ANNOTATION_TYPE_INK:
-							type = 'ink';
-							break;
-						
-						default:
-							throw new Error(`Unknown annotation type id ${typeID}`);
-					}
-					item._annotationType = type;
-					item._annotationAuthorName = row.getResultByIndex(3);
-					item._annotationText = row.getResultByIndex(4);
-					item._annotationComment = row.getResultByIndex(5);
-					item._annotationColor = row.getResultByIndex(6);
-					item._annotationSortIndex = row.getResultByIndex(7);
-					item._annotationIsExternal = !!row.getResultByIndex(8);
-					
-					item._loaded.annotation = true;
-					item._clearChanged('annotation');
-				}.bind(this)
+						item._loaded.annotation = true;
+						item._clearChanged('annotation');
+					}.bind(this)
+				}
+			);
+		}
+		catch (e) {
+			if (e.message.includes('no such column: IA.authorName')
+					&& await Zotero.DB.valueQueryAsync("SELECT COUNT(*) FROM version WHERE schema='userdata' AND version=120")) {
+				await Zotero.DB.queryAsync("UPDATE version SET version=119 WHERE schema='userdata'");
+				Zotero.crash();
 			}
-		);
+			throw e;
+		}
 	};
 	
 	
