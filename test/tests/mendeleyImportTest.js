@@ -451,7 +451,41 @@ describe('Zotero_Import_Mendeley', function () {
 
 			const noNewItemHere = await Zotero.Relations.getByPredicateAndObject('item', 'mendeleyDB:documentUUID', '86e56a00-5ae5-4fe8-a977-9298a03b16d6');
 			assert.lengthOf(noNewItemHere, 0);
+		});
 
+		it("should handle empty creators", async () => {
+			setHTTPResponse(server, 'https://api.mendeley.com/', {
+				method: 'GET',
+				url: `documents?view=all&limit=500`,
+				status: 200,
+				headers: {},
+				json: JSON.parse(
+					await Zotero.File.getContentsFromURLAsync('resource://zotero-unit-tests/data/mendeleyMock/items-empty-creators.json')
+				)
+			});
+
+			const importer = getImporter();
+			await importer.translate({
+				libraryID: Zotero.Libraries.userLibraryID,
+				collections: null,
+				linkFiles: false,
+			});
+			
+			const journalNoAuthors = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:documentUUID', '9c03fca4-ee5b-435e-abdd-fb6d7d11cd02'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+			
+			assert.equal(journalNoAuthors.getField('title'), 'This one has no authors');
+			assert.equal(journalNoAuthors.getCreators().length, 0);
+
+			const journalEmptyAuthors = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:documentUUID', 'fd86e48e-1931-4282-b72d-78c535b0398c'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+
+			assert.equal(journalEmptyAuthors.getField('title'), 'This one has empty authors');
+			assert.equal(journalEmptyAuthors.getCreators().length, 0);
 		});
 	});
 });
