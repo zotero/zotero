@@ -220,9 +220,13 @@
 									command="cmd_zotero_importFromClipboard" key="key_importFromClipboard"/>
 							<menuitem id="menu_exportLibrary" class="menu-type-library" label="&zotero.toolbar.export.label;"
 									command="cmd_zotero_exportLibrary"/>
-							<menuseparator id="menu_NonMacFileQuitSeparator"/>
-							<menuitem id="menu_NonMacFileQuitItem"
+							<menuseparator id="menu_fileQuitSeparatorNonMac"/>
+							<menuitem id="menu_fileQuitItemWin"
 									label="&quitApplicationCmdWin.label;"
+									accesskey="&quitApplicationCmdWin.accesskey;"
+									command="cmd_quitApplication"/>
+							<menuitem id="menu_fileQuitItemUnix"
+									label="&quitApplicationCmd.label;"
 									key="key_quitApplication"
 									command="cmd_quitApplication"/>
 						</menupopup>
