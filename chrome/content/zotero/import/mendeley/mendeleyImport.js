@@ -680,7 +680,10 @@ Zotero_Import_Mendeley.prototype._getDocumentTagsDB = async function (groupID) {
 Zotero_Import_Mendeley.prototype._getDocumentTagsAPI = async function (documents) {
 	var map = new Map();
 	for (let doc of documents) {
-		const tags = [...(doc.tags || []).map(tag => ({ tag, type: 0 })), ...(doc.keywords || []).map(tag => ({ tag, type: 1 }))];
+		const tags = [
+			...(doc.tags || []).map(tag => ({ tag, type: 0 })),
+			...(doc.keywords || []).map(tag => ({ tag, type: 1 }))
+		].filter(t => t.tag && t.tag.trim());
 		map.set(doc.id, tags);
 	}
 	return map;

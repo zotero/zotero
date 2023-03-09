@@ -87,5 +87,30 @@
                 "filehash": "cc22c6611277df346ff8dc7386ba3880b2bafa15"
             }
         ]
+    },
+    {
+        "authored": false,
+        "confirmed": true,
+        "created": "2021-11-04T11:53:10.353Z",
+        "file_attached": false,
+        "hidden": false,
+        "id": "cda0c150-bc85-4312-af2c-61a29b179595",
+        "client_data": "{\"desktop_id\":\"4308d8ec-e8ea-43fb-9d38-4e6628f7c10a\"}",
+        "last_modified": "2021-11-04T11:53:10.353Z",
+        "private_publication": false,
+        "profile_id": "8dbf0832-8723-4c48-b532-20c0b7f6e01a",
+        "read": false,
+        "starred": false,
+        "tags": [
+            "tag1",
+            "tag2"
+        ],
+        "keywords": [
+            "keyword1",
+            "keyword2"
+        ],
+        "title": "Has tags",
+        "type": "report",
+        "year": 2002
     }
 ]
