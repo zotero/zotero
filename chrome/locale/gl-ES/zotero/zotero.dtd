@@ -187,8 +187,8 @@
 <!ENTITY zotero.import.size "Tamaño">
 <!ENTITY zotero.import.createCollection "Poñer as coleccións e elementos importados nunha nova colección">
 <!ENTITY zotero.import.fileHandling "Xestión de ficheiros">
-<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
-<!ENTITY zotero.import.online.relinkOnly "Relink Mendeley Desktop citations">
+<!ENTITY zotero.import.online.newItemsOnly "Descargar só os novos elementos; non actualizar os elementos importados con anterioridade">
+<!ENTITY zotero.import.online.relinkOnly "Volver a ligar as citas de Mendeley Desktop">
 
 <!ENTITY zotero.exportOptions.title "Exportar...">
 <!ENTITY zotero.exportOptions.format.label "Formato:">
@@ -326,9 +326,9 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Axuste automático">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Ampliar ao ancho de páxina">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Ampliar a ancho de páxina">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
+<!ENTITY zotero.pdfReader.splitVertically "Partir verticalmente">
+<!ENTITY zotero.pdfReader.splitHorizontally "Partir en horizontal">
 <!ENTITY zotero.pdfReader.transferFromPDF "Importar anotacións...">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
-<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Rotar páxina á esquerda">
+<!ENTITY zotero.pdfReader.rotatePageRight "Rotar páxina á dereita">
+<!ENTITY zotero.pdfReader.rotatePage180 "Rotar páxina 180°">

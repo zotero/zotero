@@ -103,7 +103,7 @@
 <!ENTITY zotero.toolbar.openURL.label "Hitta">
 <!ENTITY zotero.toolbar.openURL.tooltip "Hitta på ditt lokala bibliotek">
 
-<!ENTITY zotero.toolbar.feeds.new "Ny matning">
+<!ENTITY zotero.toolbar.feeds.new "Nytt flöde">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Från URL…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Från OPML…">
 <!ENTITY zotero.toolbar.feeds.refresh "Uppdatera matning">

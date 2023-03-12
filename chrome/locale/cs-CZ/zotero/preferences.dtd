@@ -26,10 +26,10 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automaticky odstranit položky v koši smazané déle než">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dní">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.pdfReader "PDF čtečka">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Zobrazit záložky jako">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Tvůrce - Rok – Název">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Název - Tvůrce - Rok">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "Název souboru">
 
 <!ENTITY zotero.preferences.groups "Skupiny">
