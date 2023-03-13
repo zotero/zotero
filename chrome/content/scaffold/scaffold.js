@@ -1315,6 +1315,12 @@ var Scaffold = new function () {
 	function _writeTestsToPane(tests) {
 		_writeToEditor(_editors.tests, _stringifyTests(tests));
 	}
+	
+	function _confirmCreateExpectedFailTest() {
+		return Services.prompt.confirm(null,
+			'Detection Failed',
+			'Add test ensuring that detection always fails on this page?');
+	}
 
 	/**
 	 * Mimics most of the behavior of Zotero.Item#fromJSON. Most importantly,
@@ -1532,7 +1538,7 @@ var Scaffold = new function () {
 						
 			if (level < 2 && value.items) {
 				// Test object. Arrange properties in set order
-				let order = ['type', 'url', 'input', 'defer', 'items'];
+				let order = ['type', 'url', 'input', 'defer', 'detectedItemType', 'items'];
 				for (let i = 0; i < order.length; i++) {
 					let val = processRow(order[i], value[order[i]]);
 					if (val === undefined) continue;
@@ -1639,14 +1645,16 @@ var Scaffold = new function () {
 				_translatorProvider
 			);
 			return new Promise(
-				(resolve, reject) => tester.newTest(input, function (obj, newTest) { // "done" handler for do
-					if (newTest) {
-						resolve(_sanitizeItemsInTest(newTest));
-					}
-					else {
-						reject(new Error('Creation failed'));
-					}
-				})
+				(resolve, reject) => tester.newTest(input,
+					(obj, newTest) => { // "done" handler for do
+						if (newTest) {
+							resolve(_sanitizeItemsInTest(newTest));
+						}
+						else {
+							reject(new Error('Creation failed'));
+						}
+					},
+					_confirmCreateExpectedFailTest)
 			);
 		}
 		else if (type == "import" || type == "search") {
@@ -1976,13 +1984,11 @@ var Scaffold = new function () {
 		var test = this.testsToUpdate.shift();
 		_logOutput("Updating test " + (this.numTestsTotal - this.testsToUpdate.length));
 		
-		var me = this;
-		
 		if (test.type == 'web') {
 			_logOutput("Loading web page from " + test.url);
 			var hiddenBrowser = Zotero.HTTP.loadDocuments(
 				test.url,
-				function (doc) {
+				(doc) => {
 					_logOutput("Page loaded");
 					if (test.defer) {
 						_logOutput("Waiting " + (Zotero_TranslatorTester.DEFER_DELAY / 1000)
@@ -1990,32 +1996,34 @@ var Scaffold = new function () {
 						);
 					}
 					Zotero.setTimeout(
-						function () {
+						() => {
 							doc = hiddenBrowser.contentDocument;
 							if (doc.location.href != test.url) {
 								_logOutput("Page URL differs from test. Will be updated. " + doc.location.href);
 							}
-							me.tester.newTest(doc, function (obj, newTest) {
-								Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-								if (test.defer) {
-									newTest.defer = true;
-								}
-								newTest = _sanitizeItemsInTest(newTest);
-								me.newTests.push(newTest);
-								me.testDoneCallback(newTest);
-								me._updateTests();
-							});
+							this.tester.newTest(doc,
+								(obj, newTest) => {
+									Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+									if (test.defer) {
+										newTest.defer = true;
+									}
+									newTest = _sanitizeItemsInTest(newTest);
+									this.newTests.push(newTest);
+									this.testDoneCallback(newTest);
+									this._updateTests();
+								},
+								_confirmCreateExpectedFailTest);
 						},
 						test.defer ? Zotero_TranslatorTester.DEFER_DELAY : 0,
 						true
 					);
 				},
 				null,
-				function (e) {
+				(e) => {
 					Zotero.logError(e);
-					me.newTests.push(false);
-					me.testDoneCallback(false);
-					me._updateTests();
+					this.newTests.push(false);
+					this.testDoneCallback(false);
+					this._updateTests();
 				},
 				true
 			);
@@ -2033,15 +2041,15 @@ var Scaffold = new function () {
 
 			// Re-runs the test.
 			// TranslatorTester doesn't handle these correctly, so we do it manually
-			_run(methods[test.type], test.input, null, function (obj, item) {
+			_run(methods[test.type], test.input, null, (obj, item) => {
 				if (item) {
 					test.items.push(Zotero_TranslatorTester._sanitizeItem(item));
 				}
-			}, null, function () {
+			}, null, () => {
 				if (!test.items.length) test = false;
-				me.newTests.push(test);
-				me.testDoneCallback(test);
-				me._updateTests();
+				this.newTests.push(test);
+				this.testDoneCallback(test);
+				this._updateTests();
 			});
 		}
 	};
