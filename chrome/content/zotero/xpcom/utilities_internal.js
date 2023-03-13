@@ -1201,15 +1201,14 @@ Zotero.Utilities.Internal = {
 		}
 		
 		// Process Extra lines
-		var keepLines = [];
 		var skipKeys = new Set();
 		var lines = extra.split(/\n/g);
 		
 		var getKeyAndValue = (line) => {
-			let parts = line.match(/^([a-z][a-z -_]+):(.+)/i);
+			let parts = line.match(/^([a-z][a-z \-_]+):(.+)/i);
 			// Old citeproc.js cheater syntax;
 			if (!parts) {
-				parts = line.match(/^{:([a-z -_]+):(.+)}/i);
+				parts = line.match(/^{:([a-z \-_]+):(.+)}/i);
 			}
 			if (!parts) {
 				return [null, null];
@@ -1230,9 +1229,10 @@ Zotero.Utilities.Internal = {
 			
 			if (!key
 					|| key != 'type'
+					|| additionalFields.has('itemType')
 					|| skipKeys.has(key)
 					// 1) Ignore 'type: note' and 'type: attachment'
-					// 2) Ignore 'article' until we have a Preprint item type
+					// TODO: Don't ignore 'article' now that we have a Preprint item type
 					//    (https://github.com/zotero/translators/pull/2248#discussion_r546428184)
 					|| ['note', 'attachment', 'article'].includes(value)) {
 				return true;
@@ -1263,6 +1263,32 @@ Zotero.Utilities.Internal = {
 			
 			return true;
 		});
+
+		/* eslint-disable quote-props */
+		var archiveMappings = new Map(Object.entries({
+			// Weird _normalizeExtraKey behavior because of arXiv's weird capitalization
+			'ar-xiv': {
+				'repository': 'arXiv',
+				'archiveID': { from: 'extra', prefix: 'arXiv:' }
+			},
+			'arxiv': 'ar-xiv',
+			'ar-xiv-id': 'ar-xiv',
+			'arxiv-id': 'ar-xiv',
+			'pmid': {
+				'repository': 'PubMed',
+				'archiveID': { from: 'extra' }
+			},
+			'pmcid': {
+				'repository': 'PubMed Central',
+				'archiveID': { from: 'extra', prefix: 'PMC' }
+			},
+			'ads-bibcode': {
+				'repository': 'NASA ADS',
+				'archiveID': { from: 'extra' }
+			}
+		}));
+		/* eslint-enable quote-props */
+		var archiveWasExtracted = false;
 		
 		lines = lines.filter((line) => {
 			let [key, value] = getKeyAndValue(line);
@@ -1325,7 +1351,7 @@ Zotero.Utilities.Internal = {
 					if (Zotero.CreatorTypes.isValidForItemType(creatorTypeID, itemTypeID)
 							// Ignore if there are any creators of this type on the item already,
 							// to follow citeproc-js behavior
-							&& !item.getCreators().some(x => x.creatorType == possibleCreatorType)) {
+							&& !item.getCreators().some(x => x.creatorTypeID == creatorTypeID)) {
 						creators.push(c);
 						return false;
 					}
@@ -1334,6 +1360,47 @@ Zotero.Utilities.Internal = {
 					creators.push(c);
 					return false;
 				}
+			}
+
+			let possibleArchiveMapping = !archiveWasExtracted && archiveMappings.get(key);
+			if (typeof possibleArchiveMapping === 'string') {
+				// Allow aliases
+				possibleArchiveMapping = archiveMappings.get(possibleArchiveMapping);
+			}
+			if (possibleArchiveMapping) {
+				let keepRow = false;
+				for (let [itemField, fieldMapping] of Object.entries(possibleArchiveMapping)) {
+					let fieldID = Zotero.ItemFields.getID(itemField);
+					if (additionalFields.has(itemField)
+						|| item && (
+							!Zotero.ItemFields.isValidForType(fieldID, itemTypeID)
+							|| item.getField(fieldID))) {
+						keepRow = true;
+						continue;
+					}
+
+					if (typeof fieldMapping === 'string') {
+						fields.set(itemField, fieldMapping);
+					}
+					else {
+						let { from, prefix } = fieldMapping;
+						switch (from) {
+							case 'extra': {
+								let prefixedValue = prefix && !value.startsWith(prefix)
+									? prefix + value
+									: value;
+								fields.set(itemField, prefixedValue);
+								break;
+							}
+							default:
+								// Might want to have more options in the future,
+								// but for now just accept 'extra'
+								throw new Error(`Unknown value for 'from': ${from}`);
+						}
+					}
+				}
+				archiveWasExtracted = true;
+				return keepRow;
 			}
 			
 			// We didn't find anything, so keep the line in Extra
@@ -1365,10 +1432,10 @@ Zotero.Utilities.Internal = {
 		var keepLines = [];
 		var lines = extra !== '' ? extra.split(/\n/g) : [];
 		for (let line of lines) {
-			let parts = line.match(/^([a-z -_]+):(.+)/i);
+			let parts = line.match(/^([a-z \-_]+):(.+)/i);
 			// Old citeproc.js cheater syntax;
 			if (!parts) {
-				parts = line.match(/^{:([a-z -_]+):(.+)}/i);
+				parts = line.match(/^{:([a-z \-_]+):(.+)}/i);
 			}
 			if (!parts) {
 				keepLines.push(line);

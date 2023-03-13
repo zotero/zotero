@@ -239,13 +239,22 @@ describe("Zotero.Utilities.Internal", function () {
 		
 		it("should extract an author and add it to existing creators", function () {
 			var item = createUnsavedDataObject('item', { itemType: 'book' });
-			item.setCreator(0, { creatorType: 'author', name: 'Foo' });
+			item.setCreator(0, { creatorType: 'translator', name: 'Foo' });
 			var str = 'author: Bar';
 			var { fields, creators, extra } = Zotero.Utilities.Internal.extractExtraFields(str, item);
 			assert.equal(fields.size, 0);
 			assert.lengthOf(creators, 1);
 			assert.equal(creators[0].creatorType, 'author');
 			assert.equal(creators[0].name, 'Bar');
+		});
+
+		it("should not extract an author when item already has a creator of that type", function () {
+			var item = createUnsavedDataObject('item', { itemType: 'book' });
+			item.setCreator(0, { creatorType: 'author', name: 'Foo' });
+			var str = 'author: Bar';
+			var { fields, creators, extra } = Zotero.Utilities.Internal.extractExtraFields(str, item);
+			assert.equal(fields.size, 0);
+			assert.lengthOf(creators, 0);
 		});
 		
 		it("should extract a CSL date field", function () {
@@ -304,9 +313,87 @@ describe("Zotero.Utilities.Internal", function () {
 		it("should ignore both Event Place and Publisher Place (temporary)", function () {
 			var str = "Event Place: Foo\nPublisher Place: Bar";
 			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
-			Zotero.debug([...fields.entries()]);
 			assert.equal(fields.size, 0);
 			assert.equal(extra, "Event Place: Foo\nPublisher Place: Bar");
+		});
+
+		it("should extract an arXiv ID (labeled 'arXiv')", function () {
+			var str = "arXiv: 1604.01979";
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.equal(fields.size, 2);
+			assert.equal(fields.get('repository'), 'arXiv');
+			assert.equal(fields.get('archiveID'), 'arXiv:1604.01979');
+			assert.strictEqual(extra, '');
+		});
+
+		it("shouldn't re-prefix a prefixed arXiv ID", function () {
+			var str = "arXiv: arXiv:1604.01979";
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.equal(fields.size, 2);
+			assert.equal(fields.get('repository'), 'arXiv');
+			assert.equal(fields.get('archiveID'), 'arXiv:1604.01979');
+			assert.strictEqual(extra, '');
+		});
+
+		it("should extract an arXiv ID (labeled 'arXiv ID')", function () {
+			var str = "arXiv ID: 1604.01979";
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.equal(fields.size, 2);
+			assert.equal(fields.get('repository'), 'arXiv');
+			assert.equal(fields.get('archiveID'), 'arXiv:1604.01979');
+			assert.strictEqual(extra, '');
+		});
+
+		it("should extract a PMID", function () {
+			var str = "PMID: 16201210";
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.equal(fields.size, 2);
+			assert.equal(fields.get('repository'), 'PubMed');
+			assert.equal(fields.get('archiveID'), '16201210');
+			assert.strictEqual(extra, '');
+		});
+
+		it("should extract a PMCID", function () {
+			var str = "PMCID: PMC5611655";
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.equal(fields.size, 2);
+			assert.equal(fields.get('repository'), 'PubMed Central');
+			assert.equal(fields.get('archiveID'), 'PMC5611655');
+			assert.strictEqual(extra, '');
+		});
+
+		it("should prefix an unprefixed PMCID", function () {
+			var str = "PMCID: 5611655";
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.equal(fields.size, 2);
+			assert.equal(fields.get('repository'), 'PubMed Central');
+			assert.equal(fields.get('archiveID'), 'PMC5611655');
+			assert.strictEqual(extra, '');
+		});
+
+		it("should leave unextracted ID in Extra", function () {
+			var str = "arXiv: 1604.01979";
+			var item = new Zotero.Item('book'); // Does not support archiveID
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str, item);
+			assert.equal(fields.size, 0);
+			assert.equal(extra, str);
+		});
+
+		it("should leave partially extracted ID in Extra", function () {
+			var str = "arXiv: 1604.01979";
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str, null, ['repository']);
+			assert.equal(fields.size, 1);
+			assert.equal(fields.get('archiveID'), 'arXiv:1604.01979');
+			assert.equal(extra, str);
+		});
+
+		it("should extract the first identifier and leave others in Extra", function () {
+			var str = "PMID: 16201210\nPMCID: PMC5611655";
+			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+			assert.equal(fields.size, 2);
+			assert.equal(fields.get('repository'), 'PubMed');
+			assert.equal(fields.get('archiveID'), '16201210');
+			assert.equal(extra, str.split('\n')[1]);
 		});
 	});
 	

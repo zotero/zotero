@@ -2869,4 +2869,93 @@ describe("Zotero.Item", function () {
 			}
 		});
 	});
+
+	describe("#setType()", function () {
+		it("should extract an arXiv ID when changing from journalArticle to preprint", function () {
+			let item = new Zotero.Item('journalArticle');
+			item.setField('extra', 'arXiv ID: gr-qc/0201097');
+			item.setType(Zotero.ItemTypes.getID('preprint'));
+			assert.equal(item.getField('archiveID'), 'arXiv:gr-qc/0201097');
+			assert.equal(item.getField('repository'), 'arXiv');
+			assert.equal(item.getField('extra'), '');
+		});
+
+		it("should extract a DOI when changing a report to a journalArticle", function () {
+			let item = new Zotero.Item('report');
+			item.setField('extra', 'DOI: 10.1101/2020.08.12.20173476');
+			item.setType(Zotero.ItemTypes.getID('journalArticle'));
+			assert.equal(item.getField('DOI'), '10.1101/2020.08.12.20173476');
+			assert.equal(item.getField('extra'), '');
+		});
+
+		it("should extract a Zotero date when changing a podcast to audioRecording", function () {
+			let item = new Zotero.Item('podcast');
+			item.setField('extra', 'Date: 2021');
+			item.setType(Zotero.ItemTypes.getID('audioRecording'));
+			assert.equal(item.getField('date'), '2021');
+			assert.equal(item.getField('extra'), '');
+		});
+
+		it("should extract a CSL date when changing a podcast to audioRecording", function () {
+			let item = new Zotero.Item('podcast');
+			item.setField('extra', 'issued: 2021');
+			item.setType(Zotero.ItemTypes.getID('audioRecording'));
+			assert.equal(item.getField('date'), '2021');
+			assert.equal(item.getField('extra'), '');
+		});
+
+		it("should not overwrite fields with values extracted from Extra", function () {
+			let item = new Zotero.Item('book');
+			item.setField('date', '1965');
+			item.setField('extra', 'Date: 1985');
+			item.setType(Zotero.ItemTypes.getID('journalArticle'));
+			assert.equal(item.getField('date'), '1965');
+			assert.equal(item.getField('extra'), 'Date: 1985');
+		});
+
+		it("should extract creators", function () {
+			let item = new Zotero.Item('book');
+			item.setField('extra', 'author: Jones||Mary\nauthor: Smith||John\neditor: John Q. Public');
+			item.setType(Zotero.ItemTypes.getID('journalArticle'));
+			assert.equal(item.numCreators(), 3);
+			assert.deepEqual(item.getCreator(0), {
+				firstName: 'Mary',
+				lastName: 'Jones',
+				fieldMode: 0,
+				creatorTypeID: Zotero.CreatorTypes.getID('author')
+			});
+			assert.deepEqual(item.getCreator(1), {
+				firstName: 'John',
+				lastName: 'Smith',
+				fieldMode: 0,
+				creatorTypeID: Zotero.CreatorTypes.getID('author')
+			});
+			assert.deepEqual(item.getCreator(2), {
+				firstName: '',
+				lastName: 'John Q. Public',
+				fieldMode: 1,
+				creatorTypeID: Zotero.CreatorTypes.getID('editor')
+			});
+			assert.equal(item.getField('extra'), '');
+		});
+
+		it("should not extract a creator of a type that already exists on the item", function () {
+			let item = new Zotero.Item('book');
+			item.setCreator(0, {
+				name: 'Fake Creator 1',
+				fieldMode: 1,
+				creatorType: 'author',
+			});
+			item.setField('extra', 'author: Fake Creator 2');
+			item.setType(Zotero.ItemTypes.getID('journalArticle'));
+			assert.equal(item.numCreators(), 1);
+			assert.deepEqual(item.getCreator(0), {
+				firstName: '',
+				lastName: 'Fake Creator 1',
+				fieldMode: 1,
+				creatorTypeID: Zotero.CreatorTypes.getID('author')
+			});
+			assert.equal(item.getField('extra'), 'author: Fake Creator 2');
+		});
+	});
 });
