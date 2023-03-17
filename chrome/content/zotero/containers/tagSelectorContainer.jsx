@@ -642,6 +642,46 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 		await Zotero.Tags.setColor(this.libraryID, io.name, io.color, io.position);
 	}
 
+	async openTagSplitterWindow() {
+		const oldTagName = this.contextTag.name; // contextTag contains { name, width, color }
+		const dataIn = {
+			oldTag: this.contextTag.name,
+			isLongTag: false
+		};
+		const dataOut = { result: null };
+		
+		window.openDialog(
+			'chrome://zotero/content/longTagFixer.xhtml',
+			'',
+			'chrome,modal,centerscreen',
+			dataIn, dataOut
+		);
+
+		if (!dataOut.result) {
+			return;
+		}
+
+		const oldTagID = Zotero.Tags.getID(oldTagName);
+
+		if (dataOut.result.op === 'split') {
+			const itemIDs = await Zotero.Tags.getTagItems(this.libraryID, oldTagID);
+			await Zotero.DB.executeTransaction(async () => {
+				for (const itemID of itemIDs) {
+					const item = await Zotero.Items.getAsync(itemID);
+					const tagType = item.getTagType(oldTagName);
+					for (const newTagName of dataOut.result.tags) {
+						item.addTag(newTagName, tagType);
+					}
+					item.removeTag(oldTagName);
+					await item.save();
+				}
+				await Zotero.Tags.purge(oldTagID);
+			});
+		} else {
+			throw new Error('Unsupported op: ' + dataOut.result.op);
+		}
+	}
+
 	async openRenamePrompt() {
 		var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1']
 			.getService(Ci.nsIPromptService);

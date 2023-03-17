@@ -1,0 +1,112 @@
+#zotero-long-tag-fixer {
+	min-width: 400px; // with intro disabled, dialog tends to get to narrow
+
+	tab {
+		display: none;
+		
+		@include variant("#zotero-long-tag-fixer.is-long-tag") {
+			display: revert;
+		}
+	}
+
+	tabpanels {
+		padding-top: 15px;
+
+		@include variant("#zotero-long-tag-fixer.is-long-tag") {
+			padding-top: 33px;
+		}
+	}
+
+	tab[visuallyselected="true"]:not(:-moz-window-inactive) {
+		color: unset;
+	}
+
+	#intro {
+		display: none;
+		flex-direction: column;
+
+		@include variant("#zotero-long-tag-fixer.is-long-tag") {
+			display: flex;
+		}
+
+		> label {
+			margin: .5em 0 0 0;
+		}
+
+		> textarea {
+			margin: 1em;
+			height: 50px;
+			border: none;
+			padding: .5em;
+			background-color: $shade-1;
+			appearance: none;
+			outline: none;
+		}
+	}
+
+	#zotero-new-tag-actions {
+		margin-top: 1em;
+	}
+
+	.split-tab {
+		.tag-list {
+			height: calc(8 * (1em + 10px));
+			overflow-x: hidden;
+			overflow-y: scroll;
+
+			> richlistitem {
+				display: block;
+				height: calc(1em + 10px);
+				overflow: hidden;
+			}
+
+			div {
+				display: flex;
+				align-items: center;
+			}
+
+			label  {
+				// width of the label is set to the width of the viewport minus sum of widths of
+				// paddings, margins and a checkbox to produce ellipsis truncation.
+				width: calc(100vw - 100px); 
+				@include text-truncate;
+			}
+		}
+
+		.delimiter-input {
+			width: 20px;
+		}
+
+		.delimiter-input-wrap {
+			display: flex;
+			align-items: center;
+		}
+
+		.tag-list + label {
+			padding: 0.5em 0;
+		}
+	}
+
+	.edit-tab {
+		display: flex;
+		flex-direction: column;
+
+		#zotero-new-tag-editor {
+			flex: 1 1 auto;
+		}
+
+		#zotero-new-tag-characters {
+			flex: 0 1 auto;
+			padding: .5em 0;
+		}
+	}
+
+	.invalid {
+		color: $red;
+	}
+
+	#zotero-new-tag-character-count {
+		font-weight: bold;
+		margin-right: 0;
+	}
+}

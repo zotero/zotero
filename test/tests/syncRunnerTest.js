@@ -1321,7 +1321,7 @@ describe("Zotero.Sync.Runner", function () {
 					}
 				});
 				
-				waitForDialog(null, 'accept', 'chrome://zotero/content/longTagFixer.xul');
+				waitForDialog(null, 'accept', 'chrome://zotero/content/longTagFixer.xhtml');
 				yield runner.sync({ libraries: [Zotero.Libraries.userLibraryID] });
 				
 				assert.isFalse(Zotero.Tags.getID(tag));
@@ -1391,9 +1391,9 @@ describe("Zotero.Sync.Runner", function () {
 					}
 				});
 				
-				waitForDialog(function (dialog) {
-					dialog.Zotero_Long_Tag_Fixer.switchMode(2);
-				}, 'accept', 'chrome://zotero/content/longTagFixer.xul');
+				waitForDialog(function (window) {
+					window.Zotero_Long_Tag_Fixer.switchMode(2);
+				}, 'accept', 'chrome://zotero/content/longTagFixer.xhtml');
 				yield runner.sync({ libraries: [Zotero.Libraries.userLibraryID] });
 				
 				assert.isFalse(Zotero.Tags.getID(tag));

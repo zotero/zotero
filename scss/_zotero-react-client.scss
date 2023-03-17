@@ -25,11 +25,14 @@
 @import "components/autosuggest";
 @import "components/button";
 @import "components/clicky";
+@import "components/collection-tree";
 @import "components/createParent";
 @import "components/dictionaryManager";
 @import "components/editable";
 @import "components/exportOptions";
 @import "components/icons";
+@import "components/item-tree";
+@import "components/longTagFixer";
 @import "components/mainWindow";
 @import "components/notesList";
 @import "components/progressMeter";
@@ -38,9 +41,7 @@
 @import "components/tabBar";
 @import "components/tagsBox";
 @import "components/tagSelector";
-@import "components/collection-tree";
 @import "components/virtualized-table";
-@import "components/item-tree";
 
 // Elements
 // --------------------------------------------------

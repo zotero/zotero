@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
+
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<window
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	title="&zotero.sync.error;"
+	onload="Zotero_Long_Tag_Fixer.init()">
+<dialog
+	id="zotero-long-tag-fixer"
+	buttons="cancel,accept"
+>	
+	<html:div id="intro">
+		<label value="&zotero.sync.longTagFixer.followingTagTooLong;"/>
+		<html:textarea id="zotero-old-tag" readonly="readonly" />
+		<label>&zotero.sync.longTagFixer.syncedTagSizeLimit;</label>
+		<label value="&zotero.sync.longTagFixer.splitEditDelete;"/>		
+	</html:div>
+	<tabbox id="zotero-new-tag-actions">
+		<tabs>
+			<tab label="&zotero.sync.longTagFixer.split;"/>
+			<tab label="&zotero.general.edit;"/>
+			<tab label="&zotero.general.delete;"/>
+		</tabs>
+		<tabpanels>
+			<!-- Split -->
+			<vbox class="split-tab">
+				<hbox class="delimiter-input-wrap">
+					<label>&zotero.sync.longTagFixer.splitAtThe;</label>
+					<html:input
+						type="text"
+						class="delimiter-input"
+						id="zotero-old-tag-delimiter" />
+					<label id="delimiter-label"></label>
+				</hbox>
+				<richlistbox id="zotero-new-tag-list" class="tag-list" flex="1" tabindex="0" />
+				<label value="&zotero.sync.longTagFixer.uncheckedTagsNotSaved;"/>
+				<hbox>
+					<button label="&zotero.general.deselectAll;" oncommand="Zotero_Long_Tag_Fixer.deselectAll()"/>
+					<button label="&zotero.general.selectAll;" oncommand="Zotero_Long_Tag_Fixer.selectAll()"/>
+				</hbox>
+			</vbox>
+			
+			<!-- Edit -->
+			<vbox class="edit-tab">
+				<html:textarea id="zotero-new-tag-editor"/>
+				<html:div id="zotero-new-tag-characters">
+					<html:span id="zotero-new-tag-character-count" />
+					<html:span>&zotero.sync.longTagFixer.characters;</html:span>
+				</html:div>
+			</vbox>
+			
+			<!-- Delete -->
+			<vbox align="center" pack="center">
+				<label value="&zotero.sync.longTagFixer.tagWillBeDeleted;"/>
+			</vbox>
+		</tabpanels>
+	</tabbox>
+	<script src="include.js"/>
+	<script src="longTagFixer.js"/>
+</dialog>
+</window>
