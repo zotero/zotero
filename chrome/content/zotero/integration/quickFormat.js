@@ -499,6 +499,7 @@ var Zotero_QuickFormat = new function () {
 			await Zotero.Items.loadDataTypes(items);
 			
 			searchString = searchString.toLowerCase();
+			let searchParts = Zotero.SearchConditions.parseSearchString(searchString);
 			var collation = Zotero.getLocaleCollation();
 			
 			function _itemSort(a, b) {
@@ -507,13 +508,15 @@ var Zotero_QuickFormat = new function () {
 				// Favor left-bound name matches (e.g., "Baum" < "Appelbaum"),
 				// using last name of first author
 				if (firstCreatorA && firstCreatorB) {
-					let caStartsWith = firstCreatorA.toLowerCase().indexOf(searchString) == 0;
-					let cbStartsWith = firstCreatorB.toLowerCase().indexOf(searchString) == 0;
-					if (caStartsWith && !cbStartsWith) {
-						return -1;
-					}
-					else if (!caStartsWith && cbStartsWith) {
-						return 1;
+					for (let part of searchParts) {
+						let caStartsWith = firstCreatorA.toLowerCase().startsWith(part.text);
+						let cbStartsWith = firstCreatorB.toLowerCase().startsWith(part.text);
+						if (caStartsWith && !cbStartsWith) {
+							return -1;
+						}
+						else if (!caStartsWith && cbStartsWith) {
+							return 1;
+						}
 					}
 				}
 				
