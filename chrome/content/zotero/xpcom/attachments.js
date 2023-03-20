@@ -1018,7 +1018,6 @@ Zotero.Attachments = new function(){
 		// If no title was provided, pull it from the document
 		if (!title) {
 			let parser = new DOMParser();
-			parser.init(null, Services.io.newURI(url));
 			let doc = parser.parseFromString(snapshotContent, 'text/html');
 			title = doc.title;
 		}

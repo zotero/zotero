@@ -1187,7 +1187,6 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 		}
 		
 		var parser = new DOMParser();
-		parser.init(null, Services.io.newURI(data.url));
 		var doc = parser.parseFromString(`<html>${data.html}</html>`, 'text/html');
 		doc = Zotero.HTTP.wrapDocument(doc, data.url);
 		
