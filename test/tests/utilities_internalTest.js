@@ -248,7 +248,7 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.equal(creators[0].name, 'Bar');
 		});
 		
-		it.skip("should extract a CSL date field", function () {
+		it("should extract a CSL date field", function () {
 			var str = 'issued: 2000';
 			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
 			assert.equal(fields.size, 1);
@@ -286,13 +286,11 @@ describe("Zotero.Utilities.Internal", function () {
 		});
 		
 		it("should extract the citeproc-js cheater syntax", function () {
-			//var issued = '{:number-of-pages:11}\n{:issued:2014}';
-			var issued = '{:number-of-pages:11}\n{:archive_location:Location}';
+			var issued = '{:number-of-pages:11}\n{:issued:2014}';
 			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(issued);
 			assert.equal(fields.size, 2);
 			assert.equal(fields.get('numPages'), 11);
-			assert.equal(fields.get('archiveLocation'), 'Location');
-			//assert.equal(fields.get('date'), 2014);
+			assert.equal(fields.get('date'), 2014);
 			assert.strictEqual(extra, '');
 		});
 		
@@ -301,23 +299,6 @@ describe("Zotero.Utilities.Internal", function () {
 			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
 			assert.equal(fields.size, 0);
 			assert.strictEqual(extra, str);
-		});
-		
-		it("should ignore both Event Place and Publisher Place (temporary)", function () {
-			var str = "Event Place: Foo\nPublisher Place: Bar";
-			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
-			Zotero.debug([...fields.entries()]);
-			assert.equal(fields.size, 0);
-			assert.equal(extra, "Event Place: Foo\nPublisher Place: Bar");
-		});
-		
-		// Re-enable "should extract a CSL date field" and cheater-syntax lines above when removed
-		it("should ignore Issued (temporary)", function () {
-			var str = "Issued: 1994/1998";
-			var { fields, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
-			Zotero.debug([...fields.entries()]);
-			assert.equal(fields.size, 0);
-			assert.equal(extra, "Issued: 1994/1998");
 		});
 	});
 	

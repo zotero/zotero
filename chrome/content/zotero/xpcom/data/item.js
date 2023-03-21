@@ -5446,7 +5446,16 @@ Zotero.Item.prototype.migrateExtraFields = function () {
 	
 	try {
 		var { itemType, fields, creators, extra } = Zotero.Utilities.Internal.extractExtraFields(
-			originalExtra, this
+			originalExtra,
+			this,
+			[
+				// Skip 'publisher-place' and 'event-place' for now, since the mappings will be changed
+				// https://github.com/citation-style-language/zotero-bits/issues/6
+				'place',
+				// Skip 'issued' for now, since we don't support date ranges in Date
+				// https://github.com/zotero/zotero/issues/3030
+				'date'
+			]
 		);
 		if (itemType) {
 			let originalType = this.itemTypeID;
