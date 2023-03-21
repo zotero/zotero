@@ -366,7 +366,7 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 	else {
 		var s = new Zotero.Search();
 		if (!this.isFeeds()) {
-			s.addCondition('libraryID', 'is', this.ref.libraryID);
+			s.libraryID = this.ref.libraryID;
 		}
 		// Library root
 		if (this.isLibrary(true)) {
@@ -403,7 +403,7 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 		s2.addCondition('feed', true);
 	}
 	else {
-		s2.addCondition('libraryID', 'is', this.ref.libraryID);
+		s2.libraryID = this.ref.libraryID;
 	}
 	
 	if (this.isTrash()) {
