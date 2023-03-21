@@ -236,6 +236,20 @@ describe("Zotero.Schema", function() {
 				assert.equal(item.getField('extra'), 'type: invalid');
 				assert.isTrue(item.synced);
 			});
+			
+			it("shouldn't migrate certain fields temporarily", async function () {
+				var item = await createDataObject('item', { itemType: 'book' });
+				var extra = 'event-place: Event Place\npublisher-place: Publisher Place\nIssued: 2020/2023';
+				item.setField('extra', extra);
+				item.synced = true;
+				await item.saveTx();
+				
+				await migrate();
+				
+				assert.equal(item.getField('place'), '');
+				assert.equal(item.getField('date'), '');
+				assert.equal(item.getField('extra'), extra);
+			});
 		});
 	});
 	
