@@ -1303,6 +1303,12 @@ Zotero.Utilities.Internal = {
 				return true;
 			}
 			
+			// Skip for now, since we don't support date ranges
+			// https://github.com/zotero/zotero/issues/3030
+			if (key == 'issued') {
+				return true;
+			}
+			
 			// Fields
 			let possibleFields = fieldNames.get(key);
 			// No valid fields
