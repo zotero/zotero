@@ -350,7 +350,7 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 	}
 	else {
 		var s = new Zotero.Search();
-		s.addCondition('libraryID', 'is', this.ref.libraryID);
+		s.libraryID = this.ref.libraryID;
 		// Library root
 		if (this.isLibrary(true)) {
 			s.addCondition('noChildren', 'true');
@@ -379,7 +379,7 @@ Zotero.CollectionTreeRow.prototype.getSearchObject = Zotero.Promise.coroutine(fu
 	
 	// Create the outer (filter) search
 	var s2 = new Zotero.Search();
-	s2.addCondition('libraryID', 'is', this.ref.libraryID);
+	s2.libraryID = this.ref.libraryID;
 	
 	if (this.isTrash()) {
 		s2.addCondition('deleted', 'true');
