@@ -40,20 +40,9 @@ const findCollection = (libraryID, parentCollectionID, collectionName) => {
 	return collections.find(c => c.name === collectionName);
 };
 
+// @TODO
 const findItemByHash = async (libraryID, hash) => {
-	let items = (await Zotero.Relations.getByPredicateAndObject('item', 'zotero:attachmentHash', hash))
-		.filter(item => item.libraryID == libraryID && !item.deleted && item.isTopLevelItem());
-	
-	if (!items.length) {
-		items = (await Zotero.Relations.getByPredicateAndObject('item', 'zotero:fileHash', hash))
-			.filter(item => item.libraryID == libraryID && !item.deleted && item.isTopLevelItem());
-	}
-	
-	if (!items.length) {
-		return null;
-	}
-
-	return items[0];
+	return null;
 };
 
 class Zotero_Import_Folder { // eslint-disable-line camelcase,no-unused-vars
@@ -92,6 +81,8 @@ class Zotero_Import_Folder { // eslint-disable-line camelcase,no-unused-vars
 	}
 
 	async translate({ collections = [], linkFiles = false } = {}) {
+		// https://github.com/zotero/zotero/pull/2862#discussion_r1141324302
+		throw new Error('Folder import is not supported yet');
 		const libraryID = this.libraryID || Zotero.Libraries.userLibraryID;
 		const files = await collectFilesRecursive(this.folder);
 
@@ -201,7 +192,7 @@ class Zotero_Import_Folder { // eslint-disable-line camelcase,no-unused-vars
 				}
 
 				if (attachmentItem && !Zotero.RecognizePDF.canRecognize(attachmentItem)) {
-					attachmentItem.setRelations({ 'zotero:fileHash': hash });
+					// @TODO: store hash of an item that cannot be recognized
 					await attachmentItem.saveTx({ skipSelect: true });
 					attachmentItem = null;
 				}
@@ -225,13 +216,13 @@ class Zotero_Import_Folder { // eslint-disable-line camelcase,no-unused-vars
 			if (status === Zotero.ProgressQueue.ROW_SUCCEEDED) {
 				const recognizedItem = updatedItem.parentItem;
 				if (recognizedItem && id in attachmentItemHashLookup) {
-					recognizedItem.setRelations({ 'zotero:attachmentHash': attachmentItemHashLookup[id] });
+					// @TODO: Store hash of an attachment (attachmentItemHashLookup[id]) for this recognized item
 					itemsToSavePostRecognize.push(recognizedItem);
 				}
 			}
 			if (status === Zotero.ProgressQueue.ROW_FAILED) {
 				if (updatedItem && id in attachmentItemHashLookup) {
-					updatedItem.setRelations({ 'zotero:fileHash': attachmentItemHashLookup[id] });
+					// @TODO: Store hash of a file that failed to be recognized (attachmentItemHashLookup[id])
 					itemsToSavePostRecognize.push(updatedItem);
 				}
 			}

@@ -45,6 +45,8 @@ describe('Zotero_Import_Folder', function () {
 
 	describe('#import', () => {
 		it('should import PDFs from a folder and recreate structure without creating duplicates', async function () {
+			// @TODO: re-enable when folder import is ready
+			this.skip();
 			this.timeout(30000);
 			if (Zotero.automatedTest) {
 				this.skip();
@@ -104,6 +106,8 @@ describe('Zotero_Import_Folder', function () {
 		});
 
 		it('should only import specified file types from a folder', async function () {
+			// @TODO: re-enable when folder import is ready
+			this.skip();
 			this.timeout(30000);
 			if (Zotero.automatedTest) {
 				this.skip();
