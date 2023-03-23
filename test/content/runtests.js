@@ -82,8 +82,9 @@ if (ZoteroUnit.makeTestData) {
 			let str = stableStringify(newData);
 
 			yield OS.File.writeAtomic(OS.Path.join(dataPath, params.name + '.js'), str);
-			dump("done.");
+			dump('\nWritten to ' + OS.Path.join(dataPath, params.name + '.js\n'));
 		}
+		dump("\n");
 	})()
 	.catch(function(e) { dump('\n'); dump(Zotero.Utilities.varDump(e)) })
 	.finally(function() { quit(false) });
