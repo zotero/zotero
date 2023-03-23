@@ -49,6 +49,10 @@
 	background-size: 100%;
 }
 
+.zotero-tb-button[type=menu] > .toolbarbutton-menu-dropmarker::part(icon) {
+	display: none;
+}
+
 /* A decent hack: reverse the effective order of the dropmarker and icon in RTL
    mode so that the above CSS, which places the menubutton-start.png background
    on the toolbarbutton-icon, will make sense. (Otherwise the dropmarker appears
