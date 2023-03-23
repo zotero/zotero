@@ -324,7 +324,7 @@
 		"accessDate": "1997-06-13T23:59:58Z",
 		"caseName": "Title",
 		"collections": [],
-		"court": "Court",
+		"court": "Authority",
 		"creators": [
 			{
 				"creatorType": "author",
@@ -472,6 +472,52 @@
 		"url": "http://www.example.com",
 		"version": 0,
 		"volume": "6"
+	},
+	"dataset": {
+		"DOI": "10.1234/example.doi",
+		"abstractNote": "Abstract note",
+		"accessDate": "1997-06-13T23:59:58Z",
+		"archive": "Archive",
+		"archiveLocation": "Archive location",
+		"callNumber": "Call number",
+		"citationKey": "Citation key",
+		"collections": [],
+		"creators": [
+			{
+				"creatorType": "author",
+				"firstName": "authorFirst",
+				"lastName": "authorLast"
+			},
+			{
+				"creatorType": "contributor",
+				"firstName": "contributorFirst",
+				"lastName": "contributorLast"
+			},
+			{
+				"creatorType": "author",
+				"name": "Institutional Author"
+			}
+		],
+		"date": "1999-12-31",
+		"dateAdded": "2023-03-23T05:19:49Z",
+		"dateModified": "2023-03-23T05:19:49Z",
+		"extra": "Extra",
+		"format": "Medium",
+		"itemType": "dataset",
+		"key": "F8CLJGM7",
+		"language": "en-US",
+		"libraryCatalog": "Library catalog",
+		"relations": {},
+		"repository": "Publisher",
+		"repositoryLocation": "Place",
+		"rights": "Rights",
+		"shortTitle": "Short title",
+		"tags": [],
+		"title": "Title",
+		"type": "Type",
+		"url": "http://www.example.com",
+		"version": 0,
+		"versionNumber": "Version number"
 	},
 	"dictionaryEntry": {
 		"ISBN": "978-1-234-56789-7",
@@ -811,7 +857,7 @@
 		"itemType": "hearing",
 		"key": "G2NRUQUQ",
 		"language": "en-US",
-		"legislativeBody": "Legislative body",
+		"legislativeBody": "Authority",
 		"numberOfVolumes": "7",
 		"pages": "1-10",
 		"place": "Place",
@@ -1264,11 +1310,11 @@
 		"extra": "Extra",
 		"filingDate": "2000-01-02",
 		"issueDate": "1999-12-31",
-		"issuingAuthority": "Issuing authority",
+		"issuingAuthority": "Authority",
 		"itemType": "patent",
 		"key": "MTZVXTRG",
 		"language": "en-US",
-		"legalStatus": "Legal status",
+		"legalStatus": "Status",
 		"pages": "1-10",
 		"patentNumber": "3",
 		"place": "Place",
@@ -1544,6 +1590,56 @@
 		"title": "Title",
 		"url": "http://www.example.com",
 		"version": 0
+	},
+	"standard": {
+		"DOI": "10.1234/example.doi",
+		"abstractNote": "Abstract note",
+		"accessDate": "1997-06-13T23:59:58Z",
+		"archive": "Archive",
+		"archiveLocation": "Archive location",
+		"callNumber": "Call number",
+		"citationKey": "Citation key",
+		"collections": [],
+		"committee": "Committee",
+		"creators": [
+			{
+				"creatorType": "author",
+				"firstName": "authorFirst",
+				"lastName": "authorLast"
+			},
+			{
+				"creatorType": "contributor",
+				"firstName": "contributorFirst",
+				"lastName": "contributorLast"
+			},
+			{
+				"creatorType": "author",
+				"name": "Institutional Author"
+			}
+		],
+		"date": "1999-12-31",
+		"dateAdded": "2023-03-23T05:19:49Z",
+		"dateModified": "2023-03-23T05:19:49Z",
+		"extra": "Extra",
+		"itemType": "standard",
+		"key": "V62THKLP",
+		"language": "en-US",
+		"libraryCatalog": "Library catalog",
+		"numPages": "4",
+		"number": "3",
+		"organization": "Authority",
+		"place": "Place",
+		"publisher": "Publisher",
+		"relations": {},
+		"rights": "Rights",
+		"shortTitle": "Short title",
+		"status": "Status",
+		"tags": [],
+		"title": "Title",
+		"type": "Type",
+		"url": "http://www.example.com",
+		"version": 0,
+		"versionNumber": "Version number"
 	},
 	"statute": {
 		"abstractNote": "Abstract note",

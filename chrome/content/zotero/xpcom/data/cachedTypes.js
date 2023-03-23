@@ -470,6 +470,7 @@ Zotero.ItemTypes = new function() {
 			case 'case':
 			case 'computerProgram':
 			case 'conferencePaper':
+			case 'dataset':
 			case 'dictionaryEntry':
 			case 'email':
 			case 'encyclopediaArticle':
@@ -488,6 +489,7 @@ Zotero.ItemTypes = new function() {
 			case 'preprint':
 			case 'presentation':
 			case 'report':
+			case 'standard':
 			case 'statute':
 			case 'thesis':
 			case 'webpage':

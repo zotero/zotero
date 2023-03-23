@@ -286,7 +286,7 @@
 	"case": {
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
-		"court": "Court",
+		"authority": "Authority",
 		"creators": [
 			{
 				"creatorType": "author",
@@ -418,6 +418,47 @@
 		"title": "Title",
 		"url": "http://www.example.com",
 		"volume": 6
+	},
+	"dataset": {
+		"DOI": "10.1234/example.doi",
+		"abstractNote": "Abstract note",
+		"accessDate": "1997-06-13T23:59:58Z",
+		"archive": "Archive",
+		"archiveLocation": "Archive location",
+		"callNumber": "Call number",
+		"citationKey": "Citation key",
+		"creators": [
+			{
+				"creatorType": "author",
+				"firstName": "authorFirst",
+				"lastName": "authorLast"
+			},
+			{
+				"creatorType": "contributor",
+				"firstName": "contributorFirst",
+				"lastName": "contributorLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
+			}
+		],
+		"date": "1999-12-31",
+		"extra": "Extra",
+		"itemType": "dataset",
+		"language": "en-US",
+		"libraryCatalog": "Library catalog",
+		"medium": "Medium",
+		"number": 3,
+		"place": "Place",
+		"publisher": "Publisher",
+		"rights": "Rights",
+		"shortTitle": "Short title",
+		"title": "Title",
+		"type": "Type",
+		"url": "http://www.example.com",
+		"versionNumber": "Version number"
 	},
 	"dictionaryEntry": {
 		"ISBN": "978-1-234-56789-7",
@@ -699,6 +740,7 @@
 	"hearing": {
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
+		"authority": "Authority",
 		"committee": "Committee",
 		"creators": [
 			{
@@ -717,7 +759,6 @@
 		"history": "History",
 		"itemType": "hearing",
 		"language": "en-US",
-		"legislativeBody": "Legislative body",
 		"number": 3,
 		"numberOfVolumes": 7,
 		"pages": "1-10",
@@ -1092,6 +1133,7 @@
 		"accessDate": "1997-06-13T23:59:58Z",
 		"applicationNumber": "Application number",
 		"assignee": "Assignee",
+		"authority": "Authority",
 		"country": "Country",
 		"creators": [
 			{
@@ -1118,10 +1160,8 @@
 		"date": "1999-12-31",
 		"extra": "Extra",
 		"filingDate": "2000-01-02",
-		"issuingAuthority": "Issuing authority",
 		"itemType": "patent",
 		"language": "en-US",
-		"legalStatus": "Legal status",
 		"number": 3,
 		"pages": "1-10",
 		"place": "Place",
@@ -1129,6 +1169,7 @@
 		"references": "References",
 		"rights": "Rights",
 		"shortTitle": "Short title",
+		"status": "Status",
 		"title": "Title",
 		"url": "http://www.example.com"
 	},
@@ -1364,6 +1405,50 @@
 		"title": "Title",
 		"type": "Type",
 		"url": "http://www.example.com"
+	},
+	"standard": {
+		"DOI": "10.1234/example.doi",
+		"abstractNote": "Abstract note",
+		"accessDate": "1997-06-13T23:59:58Z",
+		"archive": "Archive",
+		"archiveLocation": "Archive location",
+		"authority": "Authority",
+		"callNumber": "Call number",
+		"citationKey": "Citation key",
+		"committee": "Committee",
+		"creators": [
+			{
+				"creatorType": "author",
+				"firstName": "authorFirst",
+				"lastName": "authorLast"
+			},
+			{
+				"creatorType": "contributor",
+				"firstName": "contributorFirst",
+				"lastName": "contributorLast"
+			},
+			{
+				"creatorType": "author",
+				"fieldMode": 1,
+				"lastName": "Institutional Author"
+			}
+		],
+		"date": "1999-12-31",
+		"extra": "Extra",
+		"itemType": "standard",
+		"language": "en-US",
+		"libraryCatalog": "Library catalog",
+		"numPages": 4,
+		"number": 3,
+		"place": "Place",
+		"publisher": "Publisher",
+		"rights": "Rights",
+		"shortTitle": "Short title",
+		"status": "Status",
+		"title": "Title",
+		"type": "Type",
+		"url": "http://www.example.com",
+		"versionNumber": "Version number"
 	},
 	"statute": {
 		"abstractNote": "Abstract note",
