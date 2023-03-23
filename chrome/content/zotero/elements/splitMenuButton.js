@@ -44,7 +44,7 @@
 			// the popup if over the end side of the button
 			this.addEventListener('mousedown', (event) => {
 				let rect = this.querySelector('[anonid="dropmarker-box"]').getBoundingClientRect();
-				if (event.x >= rect.left && event.x <= rect.right
+				if ((!Zotero.rtl && event.clientX >= rect.left || Zotero.rtl && event.clientX <= rect.right)
 						&& Zotero.Utilities.Internal.showNativeElementPopup(this)) {
 					event.preventDefault();
 				}
@@ -83,7 +83,8 @@
 
 		_handleClick() {
 			super._handleClick();
-			if (!this.disabled) {
+			let popup = this.querySelector(':scope > menupopup');
+			if (!this.disabled && (!popup || popup.state == 'closed')) {
 				this.doCommand();
 			}
 		}
