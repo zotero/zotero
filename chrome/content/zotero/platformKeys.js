@@ -44,15 +44,18 @@ window.addEventListener('DOMContentLoaded', () => {
 		if (MozToolbarbutton) {
 			let originalRender = MozToolbarbutton.prototype.render;
 			MozToolbarbutton.prototype.render = function () {
-				originalRender();
-				this.addEventListener('mousedown', (event) => {
-					if (!event.defaultPrevented
-							&& !this.disabled
-							&& this.getAttribute('nonnativepopup') != 'true'
-							&& Zotero.Utilities.Internal.showNativeElementPopup(this)) {
-						event.preventDefault();
-					}
-				});
+				originalRender.apply(this);
+				if (!this._zoteroMouseDownListenerAdded) {
+					this.addEventListener('mousedown', (event) => {
+						if (!event.defaultPrevented
+								&& !this.disabled
+								&& this.getAttribute('nonnativepopup') != 'true'
+								&& Zotero.Utilities.Internal.showNativeElementPopup(this)) {
+							event.preventDefault();
+						}
+					});
+					this._zoteroMouseDownListenerAdded = true;
+				}
 			};
 		}
 	}
