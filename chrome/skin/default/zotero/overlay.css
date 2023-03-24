@@ -708,6 +708,14 @@
 	overflow: hidden;
 }
 
+.split-menu-button [anonid="dropmarker-box"]::before {
+	content: '';
+	display: inline-block;
+	height: 12px;
+	border-inline-start: 1px solid #aaa;
+	margin-right: 2px;
+}
+
 .split-menu-button .split-menu-button-dropmarker {
 	margin-inline: 5px;
 }
