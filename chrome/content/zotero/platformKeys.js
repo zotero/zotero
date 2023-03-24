@@ -43,9 +43,17 @@ window.addEventListener('DOMContentLoaded', () => {
 		// Set behavior on all non-macOS platforms
 		if (applicationMenu) applicationMenu.hidden = true;
 		if (windowMenu) windowMenu.hidden = true;
-		// DEBUG: This doesn't disable Ctrl-Q, which shouldn't be active on Windows
-		// (fx102 follow-up to https://github.com/zotero/zotero/pull/3010)
-		if (macKeyset) macKeyset.disabled = true;
+		if (macKeyset) {
+			macKeyset.setAttribute('disabled', true);
+			// Keys display on menu items even when disabled individually, so just remove the relevant attributes
+			// Relevant platform code:
+			// https://searchfox.org/mozilla-central/rev/3ba3d0a57b6419206f82f80cd6c30faf59397664/toolkit/content/widgets/menu.js#295
+			for (let key of macKeyset.querySelectorAll('key')) {
+				key.removeAttribute('modifiers');
+				key.removeAttribute('keycode');
+				key.removeAttribute('key');
+			}
+		}
 		
 		if (isWin) {
 			fileQuitItemUnix.hidden = true;
