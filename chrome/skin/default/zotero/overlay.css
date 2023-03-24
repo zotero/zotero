@@ -721,12 +721,10 @@
 	overflow: hidden;
 }
 
-.split-menu-button [anonid="dropmarker-box"]::before {
-	content: '';
-	display: inline-block;
-	height: 12px;
+.split-menu-button [anonid="dropmarker-separator"] {
+	-moz-box-flex: 1;
 	border-inline-start: 1px solid #aaa;
-	margin-inline-end: 2px;
+	margin: 5px 2px 5px 4px;
 }
 
 .split-menu-button .split-menu-button-dropmarker {
