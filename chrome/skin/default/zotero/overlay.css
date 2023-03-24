@@ -713,7 +713,7 @@
 	display: inline-block;
 	height: 12px;
 	border-inline-start: 1px solid #aaa;
-	margin-right: 2px;
+	margin-inline-end: 2px;
 }
 
 .split-menu-button .split-menu-button-dropmarker {
