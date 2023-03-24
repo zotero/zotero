@@ -237,6 +237,19 @@
 	margin-inline-end: 2px;
 }
 
+.zotero-tb-button[type="menu"] > .toolbarbutton-menu-dropmarker {
+	-moz-default-appearance: none;
+	background-image: url("chrome://zotero/skin/searchbar-dropmarker.png");
+	width: 7px;
+	height: 4px;
+	background-repeat: no-repeat;
+	background-size: 100%;
+}
+
+.zotero-tb-button[type="menu"] > .toolbarbutton-menu-dropmarker::part(icon) {
+	display: none;
+}
+
 .zotero-tb-button:hover:active {
 	mix-blend-mode: multiply;
 }
@@ -715,8 +728,7 @@
 
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
 @media (min-resolution: 1.25dppx) {
-	#zotero-items-column-hasAttachment  { list-style-image: url(chrome://zotero/skin/attach-small@2x.png); }
-	#zotero-items-column-numNotes  { list-style-image: url(chrome://zotero/skin/treeitem-note-small@2x.png); }
+	.zotero-tb-button[type="menu"] > .toolbarbutton-menu-dropmarker  { background-image: url("chrome://zotero/skin/searchbar-dropmarker@2x.png"); }
 	#zotero-tb-collection-add { list-style-image: url('chrome://zotero/skin/toolbar-collection-add@2x.png'); }
 	.zotero-menuitem-new-feed { list-style-image: url('chrome://zotero/skin/toolbar-feed-add@2x.png'); }
 	#zotero-tb-library-add-menu { list-style-image: url('chrome://zotero/skin/library_add@2x.png'); }

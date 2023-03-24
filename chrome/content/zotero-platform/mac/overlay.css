@@ -40,19 +40,6 @@
 	max-width: 29px;
 }
 
-.zotero-tb-button[type=menu] > .toolbarbutton-menu-dropmarker {
-	-moz-default-appearance: none;
-	background-image: url("chrome://zotero/skin/searchbar-dropmarker.png");
-	width: 7px;
-	height: 4px;
-	background-repeat: no-repeat;
-	background-size: 100%;
-}
-
-.zotero-tb-button[type=menu] > .toolbarbutton-menu-dropmarker::part(icon) {
-	display: none;
-}
-
 /* A decent hack: reverse the effective order of the dropmarker and icon in RTL
    mode so that the above CSS, which places the menubutton-start.png background
    on the toolbarbutton-icon, will make sense. (Otherwise the dropmarker appears
@@ -408,7 +395,6 @@ treechildren::-moz-tree-image {
 @media (min-resolution: 1.25dppx) {
 	.zotero-tb-button,.zotero-tb-button:first-child,.zotero-tb-button:last-child  { background: url("chrome://zotero/skin/mac/menubutton-end@2x.png") right center/auto 24px no-repeat; }
 	.zotero-tb-button > .toolbarbutton-icon  { background: url("chrome://zotero/skin/mac/menubutton-start@2x.png") left center/auto 24px no-repeat; }
-	.zotero-tb-button[type=menu] > .toolbarbutton-menu-dropmarker  { background-image: url("chrome://zotero/skin/searchbar-dropmarker@2x.png"); }
 	.zotero-tb-button:-moz-window-inactive > .toolbarbutton-icon  { background: url("chrome://zotero/skin/mac/menubutton-start-inactive-window@2x.png") left center/auto 24px no-repeat; }
 	.zotero-tb-button:-moz-window-inactive,.zotero-tb-button:-moz-window-inactive:first-child,.zotero-tb-button:-moz-window-inactive:last-child  { background: url("chrome://zotero/skin/mac/menubutton-end-inactive-window@2x.png") right center/auto 24px no-repeat; }
 	.zotero-tb-button[open="true"],.zotero-tb-button:not([disabled="true"]):hover:active  { background: url("chrome://zotero/skin/mac/menubutton-end-pressed@2x.png") right center/auto 24px no-repeat; }

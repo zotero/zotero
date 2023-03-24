@@ -8,9 +8,8 @@
 	}
 }
 
-/* Dropmarker added automatically on Linux */
-.toolbarbutton-menu-dropmarker {
-	list-style-image: none;
+.zotero-tb-button[type="menu"] > .toolbarbutton-menu-dropmarker {
+	margin-left: 4px;
 }
 
 .zotero-tb-button:not([type=menu]) {
