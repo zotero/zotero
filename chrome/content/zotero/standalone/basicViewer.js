@@ -29,7 +29,8 @@
 
 var browser;
 
-window.addEventListener("load", /*async */function() {
+window.addEventListener("load", /*async */function () {
+	browser = document.querySelector('browser');
 	ensureBrowserType('content');
 	
 	/*
