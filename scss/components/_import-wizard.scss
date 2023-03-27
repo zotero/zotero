@@ -1,0 +1,142 @@
+.import-wizard {
+	font-size: 12px;
+
+	radiogroup {
+		radio {
+			padding-top: 5px;
+		}
+	}
+
+	wizardpage {
+		display: flex;
+		flex-direction: column;
+
+		> div {
+			display: block;
+		}
+	}
+
+	a {
+		display: inline;
+		color: -moz-nativehyperlinktext;
+		cursor: pointer;
+
+		&:hover, &:active, &:focus {
+			outline:none;
+			text-decoration: $link-hover-decoration;
+		}
+	}
+
+	checkbox {
+		margin-left: 4px; // indent required for correct focus ring rendering
+	}
+
+	button {
+		font: menu;
+	}
+
+	h2 {
+		font-size: 14px;
+		font-weight: normal;
+		margin-bottom: 6px;
+		margin: 0;
+	}
+
+	#other-files {
+		margin-left: -1px;
+		width: 400px;
+	}
+
+
+	#page-start {
+		radiogroup {
+			margin-top: 4px;
+		}
+	}
+
+	#page-options-folder-import {
+		fieldset {
+			display: block;
+			border: none;
+			margin-left: 1em;
+		}
+
+		#recreate-structure {
+			margin-top: .25em;
+		}
+
+		.import-file-types-header {
+			margin-top: 1em;
+		}
+
+		.page-options-file-type {
+			display: flex;
+			margin-top: .25em;
+
+			&:first-child {
+				margin-top: 1em;
+			}
+		}
+	}
+
+	#page-options-file-handling {
+		padding-top: 1.5em;
+
+		.radioset {
+			// font-size: 13px;
+			margin-left: 1em;
+		}
+	}
+
+	.page-options-file-handling-description {
+		margin-top: .6em;
+		font-size: 11px;
+	}
+
+	#page-done-error {
+		margin-top: 2em;
+		text-align: right;
+	}
+
+	.mendeley-online-intro {
+		// font-size: 13px;
+
+		& +.mendeley-online-intro {
+			margin-top: 1em;
+		}
+	}
+
+	#import-progress {
+		margin-top: 1em;
+	}
+
+	#page-progress {
+		display: flex;
+		flex-direction: column;
+	}
+
+	// TODO: deduplicate with rtfscan
+	.table-container {
+		display: flex;
+		height: 0;
+		flex-direction: column;
+		flex: 1 0 auto;
+		margin-top: 1.5em;
+	
+		> div {
+			display: flex;
+			flex: 1 0 auto;
+			background-color: -moz-field;
+			overflow: hidden;
+			position: relative;
+		}
+
+		.virtualized-table-body {
+			display: flex;
+
+			.windowed-list {
+				flex: 1 0 auto;
+			}
+		}
+	}
+}

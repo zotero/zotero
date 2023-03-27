@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero-react-client.css"?>
+
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		xmlns:html="http://www.w3.org/1999/xhtml"
+		onload="Zotero_Import_Wizard.init()"
+>
+	<linkset>
+		<html:link rel="localization" href="zotero.ftl" />
+	</linkset>
+
+	<script src="chrome://global/content/customElements.js"/>
+	<wizard id="import-wizard" class="import-wizard" data-l10n-id="import-wizard" width="600" height="400">
+		<wizardpage pageid="page-start" data-header-label-id="import-where-from">
+			<radiogroup id="import-source-group" align="start">
+				<radio value="file" data-l10n-id="import-source-file" />
+				<!-- @TODO
+					<radio value="folder" data-l10n-id="import-source-folder" />
+				-->
+				<radio value="mendeleyOnline" data-l10n-id="import-source-online"
+					data-l10n-args='{"targetApp": "Mendeley Reference Manager"}' />
+			</radiogroup>
+		</wizardpage>
+		<wizardpage
+			pageid="page-mendeley-online-intro"
+			data-header-label-id="import-online-intro-title"
+		>
+			<div 
+				class="mendeley-online-intro"
+				data-l10n-id="import-online-intro"
+				data-l10n-args='{"targetAppOnline": "Mendeley Reference Manager", "targetApp": "Mendeley"}'></div>
+			<div 
+				class="mendeley-online-intro"
+				data-l10n-id="import-online-intro2"
+				data-l10n-args='{"targetApp": "Mendeley"}'></div>
+		</wizardpage>
+		<wizardpage
+			pageid="page-options"
+			data-header-label-id="import-options"
+		>
+			<div class="options-group" id="page-options-common">
+				<checkbox native="true" id="create-collection" data-l10n-id="import-create-collection" />
+			</div>
+			<div class="options-group" id="page-options-folder-import">
+				<checkbox native="true" id="recreate-structure" data-l10n-id="import-recreate-structure" checked="true" />
+				<h2 class="import-file-types-header" data-l10n-id="import-fileTypes-header"></h2>
+				<fieldset>
+					<div class="page-options-file-type">
+						<checkbox native="true" id="import-pdf" data-l10n-id="import-fileTypes-pdf" checked="true" />
+					</div>
+					<div class="page-options-file-type">
+						<checkbox native="true" id="import-other" />
+						<html:input type="text" id="other-files" data-l10n-id="import-fileTypes-other" />
+					</div>
+				</fieldset>
+			</div>
+			<div class="options-group" id="page-options-file-handling">
+				<h2 data-l10n-id="import-file-handling"></h2>
+				<radiogroup id="file-handling" align="start">
+					<radio id="store" data-l10n-id="import-file-handling-store" />
+					<radio id="link" data-l10n-id="import-file-handling-link" />
+				</radiogroup>
+				<div class="page-options-file-handling-description" data-l10n-id="import-fileHandling-description"></div>
+			</div>
+		</wizardpage>
+		<wizardpage pageid="page-progress" data-header-label-id="import-importing">
+			<html:progress id="import-progress" max="100" value="0" />
+			<div id="progress-queue-container" class="progress-queue table-container">
+				<div id="progress-queue"></div>
+			</div>
+		</wizardpage>
+		<wizardpage pageid="page-done">
+			<div id="page-done-description"></div>
+			<div id="page-done-error-mendeley" data-l10n-id="import-mendeley-encrypted">
+				<html:a data-l10n-name="mendeley-import-kb" href="https://www.zotero.org/support/kb/mendeley_import" />
+			</div>
+			<div id="page-done-error">
+				<button data-l10n-id="report-error" />
+			</div>
+			<div id="page-done-progress-queue"></div>
+			<div id="done-queue-container" class="done-queue table-container">
+				<div id="done-queue"></div>
+			</div>
+		</wizardpage>
+	</wizard>
+		
+	<script src="chrome://zotero/content/include.js"/>
+	<script src="../fileInterface.js"/>
+	<script src="./importWizard.js" />
+</window>

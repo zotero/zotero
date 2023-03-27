@@ -1,9 +1,9 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 	
-	Copyright © 2019 Center for History and New Media
-					George Mason University, Fairfax, Virginia, USA
-					http://zotero.org
+	Copyright © 2020 Corporation for Digital Scholarship
+					 Vienna, Virginia, USA
+					 https://digitalscholar.org
 	
 	This file is part of Zotero.
 	
@@ -16,16 +16,15 @@
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU Affero General Public License for more details.
-
+	
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
 	
 	***** END LICENSE BLOCK *****
 */
 
-'use strict';
-
 const noop = () => {};
+
 
 function getDragTargetOrient(event, target) {
 	const elem = target || event.target;
@@ -72,9 +71,30 @@ function createDragHandler({ handleDrag, handleDragStop }) {
 	return {
 		start: onDragStart,
 		stop: onDragStop
-	}
+	};
 }
 
+var _htmlID = 1;
+
+const nextHTMLID = (prefix = 'id-') => prefix + _htmlID++;
+
+const scrollIntoViewIfNeeded = (element, container, opts = {}) => {
+	const containerTop = container.scrollTop;
+	const containerBottom = containerTop + container.clientHeight;
+	const elementTop = element.offsetTop;
+	const elementBottom = elementTop + element.clientHeight;
+
+	if (elementTop < containerTop || elementBottom > containerBottom) {
+		const before = container.scrollTop;
+		element.scrollIntoView(opts);
+		const after = container.scrollTop;
+		return after - before;
+	}
+	return 0;
+};
+
+const stopPropagation = ev => ev.stopPropagation();
+
 export {
-	noop, getDragTargetOrient, createDragHandler
+	nextHTMLID, noop, getDragTargetOrient, createDragHandler, scrollIntoViewIfNeeded, stopPropagation
 };

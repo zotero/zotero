@@ -156,6 +156,8 @@ $input-bg:           $body-bg;
 $input-border-color: $shade-3;
 $input-focus-color:  $secondary;
 $placeholder-color:  $shade-5;
+$input-group-background-color: #e5e5e5;
+$input-group-border-color: darken($input-group-background-color, 5%);
 
 // Editable
 $editable-color:        $text-color;
