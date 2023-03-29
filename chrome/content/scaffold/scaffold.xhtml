@@ -69,7 +69,6 @@
 
 		// Custom elements
 		Services.scriptloader.loadSubScript("chrome://global/content/customElements.js", this);
-		Services.scriptloader.loadSubScript("chrome://zotero/content/elements/menuToolbarbutton.js", this);
 	</script>
 
 	<commandset id="mainCommandSet">
@@ -353,7 +352,6 @@
 				<toolbarbutton id="tb-do" tooltiptext="&scaffold.toolbar.do.label;" oncommand="Scaffold.run('do')" class="zotero-tb-button" />
 				<toolbarseparator/>
 				<toolbarbutton
-						is="menu-toolbarbutton"
 						id="tb-template"
 						observes="code-tab-only"
 						tooltiptext="&scaffold.toolbar.template.label;"

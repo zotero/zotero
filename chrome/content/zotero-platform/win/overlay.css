@@ -24,6 +24,10 @@
 	}
 }
 
+.zotero-tb-button[type="menu"] > .toolbarbutton-menu-dropmarker {
+	margin-left: 4px;
+}
+
 #zotero-tb-sync-error {
 	margin-right: 4px;
 	padding-top: 4px;
