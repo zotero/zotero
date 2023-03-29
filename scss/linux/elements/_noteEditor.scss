@@ -1,0 +1,10 @@
+tags-box, related-box {
+	color: Text;
+	background: Background;
+}
+
+#related-popup, #tags-popup {
+	--panel-color: Text;
+	--panel-background: transparent;
+	--panel-border-color: InactiveBorder
+}
