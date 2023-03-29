@@ -59,13 +59,12 @@
 			this._destroyed = false;
 			window.addEventListener("unload", this.destroy);
 
-			var shadow = this.attachShadow({ mode: "open" });
 			MozXULElement.insertFTLIfNeeded('mozilla/textActions.ftl');
-			document.l10n.connectRoot(shadow);
+			document.l10n.connectRoot(this);
 			
 			// var s1 = document.createElement("link");
 			// s1.rel = "stylesheet";
-			// s1.href = "chrome://zotero-platform/content/noteEditor.css";
+			// s1.href = "chrome://zotero-platform/content/zotero.css";
 			// shadow.append(s1);
 
 			let content = document.importNode(this.content, true);
@@ -86,7 +85,7 @@
 				}, true);
 				this._initialized = true;
 			});
-			shadow.append(content);
+			this.append(content);
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'noteEditor');
 			this.notitle = !!this.getAttribute('notitle');
@@ -322,7 +321,7 @@
 		}
 
 		_id(id) {
-			return this.shadowRoot.querySelector(`[id=${id}]`);
+			return this.querySelector(`#${id}`);
 		}
 	}
 	customElements.define("note-editor", NoteEditor);
@@ -367,18 +366,7 @@
 			this._destroyed = false;
 			window.addEventListener("unload", this.destroy);
 
-			var shadow = this.attachShadow({ mode: "open" });
-			var s1 = document.createElement("link");
-			s1.rel = "stylesheet";
-			s1.href = "chrome://zotero-platform/content/noteEditor.css";
-			shadow.append(s1);
-
-			var s2 = document.createElement("link");
-			s2.rel = "stylesheet";
-			s2.href = "chrome://global/skin/global.css";
-			shadow.append(s2);
-
-			shadow.append(document.importNode(this.content, true));
+			this.append(document.importNode(this.content, true));
 
 			this._id('parent-value').addEventListener('click', this._parentClickHandler);
 			this._id('related-value').addEventListener('click', this._relatedClickHandler);
@@ -538,7 +526,7 @@
 		};
 
 		_id(id) {
-			return this.shadowRoot.querySelector(`[id=${id}]`);
+			return this.querySelector(`#${id}`);
 		}
 	}
 	customElements.define("links-box", LinksBox);

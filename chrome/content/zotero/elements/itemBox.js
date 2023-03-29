@@ -110,20 +110,7 @@
 			this._destroyed = false;
 			window.addEventListener("unload", this.destroy);
 			
-			var shadow = this.attachShadow({ mode: "open" });
-			//shadow.host.style.display = 'flex';
-			
-			var s1 = document.createElement("link");
-			s1.rel = "stylesheet";
-			s1.href = "chrome://zotero-platform/content/itemBox.css";
-			shadow.append(s1);
-
-			var s2 = document.createElement("link");
-			s2.rel = "stylesheet";
-			s2.href = "chrome://global/skin/global.css";
-			shadow.append(s2);
-			
-			shadow.appendChild(document.importNode(this.content, true));
+			this.appendChild(document.importNode(this.content, true));
 
 			this._creatorTypeMenu.addEventListener('popupshowing', () => {
 				var typeBox = document.popupNode.localName == 'th' ? document.popupNode : document.popupNode.parentNode;
@@ -617,7 +604,7 @@
 							this.nextSibling.querySelector('input, textarea').blur();
 						}
 						else {
-							this.getRootNode().host.toggleAbstractExpand(
+							this.closest('item-box').toggleAbstractExpand(
 								this.firstElementChild, this.closest('tr').querySelector('.value')
 							);
 						}
@@ -1024,7 +1011,7 @@
 			var td = document.createElement('td');
 			td.id = 'more-creators-label';
 			td.setAttribute('onclick',
-				"var binding = this.getRootNode().host; "
+				"var binding = this.closest('item-box'); "
 				+ "binding._displayAllCreators = true; "
 				+ "binding.refresh()"
 			);
@@ -1076,7 +1063,7 @@
 				button.style.background = `url("chrome://zotero/skin/textfield-dual${Zotero.hiDPISuffix}.png") center/21px auto no-repeat`;
 				button.setAttribute('title', Zotero.getString('pane.item.switchFieldMode.two'));
 				lastName.setAttribute('fieldMode', '1');
-				button.setAttribute('onclick', "this.getRootNode().host.switchCreatorMode(this.closest('tr'), 0, false, true)");
+				button.setAttribute('onclick', "this.closest('item-box').switchCreatorMode(this.closest('tr'), 0, false, true)");
 				delete lastName.style.width;
 				delete lastName.style.maxWidth;
 				
@@ -1115,7 +1102,7 @@
 				button.style.background = `url("chrome://zotero/skin/textfield-single${Zotero.hiDPISuffix}.png") center/21px auto no-repeat`;
 				button.setAttribute('title', Zotero.getString('pane.item.switchFieldMode.one'));
 				lastName.setAttribute('fieldMode', '0');
-				button.setAttribute('onclick', "this.getRootNode().host.switchCreatorMode(this.closest('tr'), 1, false, true)");
+				button.setAttribute('onclick', "this.closest('item-box').switchCreatorMode(this.closest('tr'), 1, false, true)");
 				
 				// appropriately truncate lastName
 				
@@ -1979,7 +1966,7 @@
 				newVal = val;
 				
 				if (Zotero.ItemTypes.getName(this.item.itemTypeID) === "bookSection") {
-					var creatorTypeLabels = this.shadowRoot.querySelectorAll(".creator-type-label");
+					var creatorTypeLabels = this.querySelectorAll(".creator-type-label");
 					this._id("zotero-author-guidance").show({
 						forEl: creatorTypeLabels[creatorTypeLabels.length - 1]
 					});
@@ -2309,7 +2296,7 @@
 		}
 		
 		focusField(fieldName) {
-			let field = this.shadowRoot.querySelector(`[fieldname="${fieldName}"][ztabindex]`);
+			let field = this.querySelector(`[fieldname="${fieldName}"][ztabindex]`);
 			if (!field) return false;
 			return this._focusNextField(field.getAttribute('ztabindex'));
 		}
@@ -2558,7 +2545,7 @@
 		}
 		
 		_id(id) {
-			return this.shadowRoot.getElementById(id);
+			return this.querySelector(`#${id}`);
 		}
 	}
 	customElements.define("item-box", ItemBox);

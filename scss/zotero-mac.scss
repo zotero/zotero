@@ -1,4 +1,4 @@
-@import "zotero-react-client";
+@import "zotero";
 
 //
 // MacOS specific
@@ -14,3 +14,9 @@
 @import "mac/virtualized-table";
 @import "mac/collection-tree";
 @import "mac/item-tree";
+
+// Elements
+
+@import "mac/elements/attachmentBox";
+@import "mac/elements/itemBox";
+@import "mac/elements/quickSearchTextbox";

@@ -76,25 +76,8 @@
 			this._destroyed = false;
 			window.addEventListener("unload", this.destroy);
 
-			let shadow = this.attachShadow({ mode: "open" });
-
-			let s1 = document.createElement("link");
-			s1.rel = "stylesheet";
-			s1.href = "chrome://zotero-platform/content/tagsBox.css";
-			shadow.append(s1);
-
-			let s2 = document.createElement("link");
-			s2.rel = "stylesheet";
-			s2.href = "chrome://global/skin/";
-			shadow.append(s2);
-
-			let s3 = document.createElement("link");
-			s3.rel = "stylesheet";
-			s3.href = "chrome://zotero/skin/overlay.css";
-			shadow.append(s3);
-
 			let content = document.importNode(this.content, true);
-			shadow.append(content);
+			this.append(content);
 
 			this._id('add').addEventListener('click', this._handleAddButtonClick);
 			this._id('add').addEventListener('keydown', this._handleAddButtonKeyDown);
@@ -919,7 +902,7 @@
 
 			Zotero.debug('Looking for tabindex ' + nextIndex, 4);
 
-			var next = this.shadowRoot.getElementsByAttribute('ztabindex', nextIndex);
+			var next = this.querySelector(`[ztabindex=${nextIndex}]`);
 			if (next.length) {
 				next = next[0];
 				next.click();
@@ -958,7 +941,7 @@
 
 		async blurOpenField(stayOpen) {
 			this._lastTabIndex = false;
-			var textboxe = this.shadowRoot.querySelector('.editable');
+			var textboxe = this.querySelector('.editable');
 			if (textboxe) {
 				await this.blurHandler({
 					target: textboxe,
@@ -971,7 +954,7 @@
 		}
 
 		_id(id) {
-			return this.shadowRoot.querySelector(`[id=${id}]`);
+			return this.querySelector(`[id=${id}]`);
 		}
 	}
 

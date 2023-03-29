@@ -1,8 +1,12 @@
-:host(#zotero-tb-search) {
-	font-size: var(--zotero-font-size) !important;
+quick-search-textbox {
+	font-size: var(--zotero-font-size);
 	margin-right: 0;
 	width: 172px;
 	height: 25px;
+}
+
+*[zoteroFontSize=small] quick-search-textbox {
+	font-size: 11px;
 }
 
 #zotero-tb-search-menu-button {

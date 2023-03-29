@@ -52,15 +52,8 @@
 			this._destroyed = false;
 			window.addEventListener("unload", this.destroy);
 
-			let shadow = this.attachShadow({ mode: "open" });
-			
-			let s1 = document.createElement("link");
-			s1.rel = "stylesheet";
-			s1.href = "chrome://zotero-platform/content/notesBox.css";
-			shadow.append(s1);
-
 			let content = document.importNode(this.content, true);
-			shadow.append(content);
+			this.append(content);
 
 			this._id('add').addEventListener('click', this._handleAdd);
 
@@ -173,7 +166,7 @@
 		}
 
 		_id(id) {
-			return this.shadowRoot.querySelector(`[id=${id}]`);
+			return this.querySelector(`[id=${id}]`);
 		}
 	}
 	customElements.define("notes-box", NotesBox);

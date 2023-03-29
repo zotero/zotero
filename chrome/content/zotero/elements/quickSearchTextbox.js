@@ -48,23 +48,18 @@
 				return;
 			}
 
-			let s1 = document.createElement("link");
-			s1.rel = "stylesheet";
-			s1.href = "chrome://zotero-platform/content/quickSearchTextbox.css";
-			this.shadowRoot.append(s1);
-
 			// Need to create an inner shadow DOM so that global.css styles,
 			// which we need for the menupopup, don't break the search textbox
 			let dropmarkerHost = document.createXULElement('hbox');
 			let dropmarkerShadow = dropmarkerHost.attachShadow({ mode: 'open' });
 
+			let s1 = document.createElement("link");
+			s1.rel = "stylesheet";
+			s1.href = "chrome://zotero-platform/content/zotero.css";
+
 			let s2 = document.createElement("link");
 			s2.rel = "stylesheet";
-			s2.href = "chrome://zotero-platform/content/quickSearchTextbox.css";
-
-			let s3 = document.createElement("link");
-			s3.rel = "stylesheet";
-			s3.href = "chrome://global/skin/global.css";
+			s2.href = "chrome://global/skin/global.css";
 
 			let dropmarker = document.createXULElement('button');
 			dropmarker.id = "zotero-tb-search-menu-button";
@@ -72,7 +67,7 @@
 			dropmarker.setAttribute("type", "menu");
 			dropmarker.append(this.searchModePopup);
 
-			dropmarkerShadow.append(s2, s3, dropmarker);
+			dropmarkerShadow.append(s1, s2, dropmarker);
 
 			this.inputField.before(dropmarkerHost);
 

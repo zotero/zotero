@@ -1,4 +1,4 @@
-@import "zotero-react-client";
+@import "zotero";
 
 //
 // Linux specific
@@ -13,3 +13,9 @@
 @import "linux/virtualized-table";
 @import "linux/item-tree";
 @import "linux/collection-tree";
+@import "linux/feedSettings";
+
+// Elements
+
+@import "linux/elements/itemBox";
+@import "linux/elements/quickSearchTextbox";

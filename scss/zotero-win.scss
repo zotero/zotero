@@ -1,4 +1,4 @@
-@import "zotero-react-client";
+@import "zotero";
 
 //
 // Windows specific
@@ -9,3 +9,8 @@
 @import "win/tag-selector";
 @import "win/item-tree";
 @import "win/virtualized-table";
+
+// Elements
+
+@import "win/elements/itemBox";
+@import "win/elements/quickSearchTextbox";

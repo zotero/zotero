@@ -1,0 +1,74 @@
+tags-box {
+	.tags-box-header {
+		display: flex;
+		padding-left: 10px;
+		align-items: center;
+
+		button {
+			min-width: 79px;
+			margin: 5px 6px 3px;
+			padding-top: 1px;
+			padding-bottom: 1px;
+			color: ButtonText;
+			text-shadow: none;
+			font-size: inherit;
+		}
+	}
+
+	.tags-box-list {
+		list-style: none;
+		margin: 0;
+		padding: 2px 0 0; // Leave space for textbox border on top tag
+
+		li {
+			display: flex;
+			margin: 3px 0;
+			margin-inline-start: 6px;
+			align-items: center;
+			height: 1.5em;
+
+			// Shift-Enter
+			&.multiline {
+				align-items: start;
+				height: 9em;
+
+				textarea.editable {
+					resize: none;
+				}
+			}
+
+			&:not(.multiline) .editable {
+				padding: 0 1px;
+			}
+
+			.zotero-box-icon {
+				width: 16px;
+				height: 16px;
+			}
+
+			.zotero-box-label {
+				flex-grow: 1;
+				white-space: nowrap;
+				overflow-x: hidden;
+				text-overflow: ellipsis;
+				width: 0;
+			}
+
+			.editable {
+				font-family: inherit;
+				font-size: inherit;
+				flex-grow: 1;
+				margin: 0 2px;
+				width: 0;
+			}
+
+			button {
+				border: 0;
+				background: none;
+				padding: 0;
+				width: 20px;
+				height: 18px;
+			}
+		}
+	}
+}

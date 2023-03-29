@@ -47,10 +47,8 @@
 			</panel>
 		`);
 
-		stylesheets = ['chrome://global/skin/', 'chrome://zotero-platform/content/guidancePanel.css'];
-
 		get panel() {
-			return this.shadowRoot.querySelector('panel');
+			return this.querySelector('panel');
 		}
 
 		init() {
@@ -194,7 +192,7 @@
 		}
 
 		id(id) {
-			return this.shadowRoot.getElementById(id);
+			return this.querySelector(`#${id}`);
 		}
 	}
 

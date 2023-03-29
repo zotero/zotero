@@ -1,0 +1,304 @@
+item-box {
+	display: flex;
+	min-width: 0;
+	width: 100%;
+
+	#item-box {
+		display: flex;
+		flex-direction: column;
+		margin-top: 8px;
+		align-items: start;
+		width: 100%;
+	}
+
+	#info-table {
+		display: grid;
+		grid-template-columns: max-content 1fr;
+		grid-auto-rows: min-content;
+		align-items: center;
+		width: 100%;
+	}
+
+	tr {
+		display: contents;
+	}
+
+	td {
+		display: flex;
+		min-width: 0;
+		align-self: stretch;
+		align-items: center;
+		margin-inline-end: 5px;
+	}
+
+	td > input {
+		align-self: stretch;
+	}
+
+	th > label {
+		margin-top: 1px !important;
+		margin-bottom: 1px !important;
+		-moz-box-pack: start;
+		margin-inline-start: 1px !important;
+		margin-inline-end: 5px !important;
+		padding: 0 2px;
+	}
+
+	td > [fieldname] {
+		width: 100%;
+	}
+
+	.value {
+		min-height: 14px;
+		align-self: center;
+	}
+
+	.value:not(.multiline) {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.value.multiline {
+		white-space: pre-line;
+	}
+
+	/*td > vbox > description
+	{
+		margin: 0 !important;
+	}*/
+
+	#item-type-menu {
+		height: 1.5em !important;
+		min-height: 1.5em !important;
+		padding: 0 !important;
+		margin: 0 !important;
+		margin-inline-end: 5px !important;
+		max-height: 1.5em !important;
+		flex: 1;
+
+		&::part(dropmarker) {
+			display: none;
+		}
+
+		&::part(label) {
+			margin-inline-start: 0;
+		}
+	}
+
+	#item-type-menu:not(:hover):not(:active) {
+		border: 1px solid transparent;
+		background-color: transparent;
+	}
+
+	#item-type-menu > .menulist-label-box {
+		-moz-box-flex: 0 !important;
+	}
+
+	#item-type-menu > .menulist-label-box, #item-type-menu > .menulist-label-box > .menulist-label {
+		margin: 0 !important;
+		padding: 0 !important;
+	}
+
+	/* DEBUG: this doesn't seem to work, unfortunately
+	label[singleField=false]:after
+	{
+		content:",";
+	}
+	*/
+
+	/*textbox .textbox-input-box
+	{
+		margin: 0;
+	}*/
+
+	textarea {
+		font: inherit;
+		resize: none;
+	}
+
+	/* metadata field names */
+	th {
+		align-self: stretch;
+		font-weight: normal;
+		text-align: right;
+		margin-inline-start: 5px !important;
+		margin-inline-end: 2px !important;
+	}
+
+	#more-creators-label
+	{
+		font-weight: bold;
+	}
+
+	/*row > label
+	{
+		border: 1px solid transparent;
+	}
+	
+	row label
+	{
+		-moz-user-focus: ignore;
+	}*/
+
+	.pointer:hover, .pointer:hover > label {
+		cursor: pointer !important;
+	}
+
+	/* creator type menu */
+
+	.creator-type-label, .creator-type-value {
+		-moz-box-align: center;
+		-moz-box-pack: right;
+	}
+
+	.creator-name-box {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		align-items: baseline;
+
+		& > input {
+			flex: 1;
+			min-width: 60%;
+		}
+
+		& > div {
+			flex-shrink: 1;
+			min-width: 10px;
+		}
+	}
+
+	.creator-type-label > label
+	{
+		margin: 1px 0 !important;
+		margin-inline-end: 4px !important;
+		padding-inline-end: 2px !important;
+	}
+
+	.creator-type-dropmarker {
+		display: inline-block;
+		margin: 0 1em 1px;
+		background-image: url('chrome://zotero/skin/arrow-down.gif');
+		background-size: cover;
+		width: 11px;
+		height: 6px;
+	}
+
+	.creator-name-box, .date-box > span {
+		margin: 1px 0 !important;
+		margin-inline-start: 1px !important;
+	}
+
+	.comma {
+		margin: 1px 0 !important;
+		margin-inline-end: 3px !important;
+	}
+
+	#zotero-date-field-status
+	{
+		color: #666;
+		padding: 0 !important;
+		padding-inline-start: 1px !important;
+		padding-inline-end: 10px !important;
+		white-space: nowrap;
+	}
+
+	.zotero-field-toggle
+	{
+		width: 27px !important;
+		max-width: 27px !important;
+		min-width: 27px !important;
+		height: 14px;
+		margin: 0 !important;
+		margin-inline-end: 5px !important;
+		background-repeat: no-repeat !important;
+		background-position: center !important;
+		border-width: 0 !important;
+		border-radius: 4px !important;
+	}
+
+	/* Merge pane in duplicates view */
+	.zotero-field-version-button {
+		margin: 0;
+		padding: 0;
+	}
+
+	/*
+	 * Retraction box
+	 */
+	#retraction-box {
+		cursor: default;
+	}
+
+	#retraction-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 1.5em 1em;
+		background: #d93425;
+		color: white;
+		font-weight: bold;
+	}
+
+	#retraction-details {
+		background: #fbf0f0;
+		padding: .5em 1.5em;
+		margin-top: 0;
+		margin-bottom: 1em;
+		cursor: text;
+		-moz-user-select: text;
+	}
+
+	#retraction-details dt {
+		font-weight: bold;
+	}
+
+	#retraction-details dt:not(:first-child) {
+		margin-top: .5em;
+	}
+
+	#retraction-details dd {
+		margin-left: 2em;
+	}
+
+	#retraction-details a {
+		text-decoration: underline;
+	}
+
+	#retraction-links ul {
+		padding-left: 0;
+	}
+
+	#retraction-links li {
+		list-style: none;
+	}
+
+	#retraction-links li:not(:first-child) {
+		margin-top: .75em;
+	}
+
+	#retraction-credit {
+		text-align: right;
+		margin-top: 1.5em;
+		margin-right: -.9em;
+		margin-bottom: .2em;
+	}
+
+	#retraction-hide {
+		text-align: right;
+		margin-top: .3em;
+		margin-right: -1.2em;
+		margin-bottom: .3em;
+	}
+
+	#retraction-hide button {
+		background: none;
+		margin: 0;
+		padding: 0;
+		cursor: pointer;
+		display: inline;
+		text-decoration: underline;
+		border-style: none;
+	}
+}

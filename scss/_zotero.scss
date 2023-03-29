@@ -37,16 +37,25 @@
 @import "components/mainWindow";
 @import "components/notesList";
 @import "components/progressMeter";
-@import "components/publications-dialog.scss";
+@import "components/publications-dialog";
 @import "components/rtfScan.scss";
 @import "components/search";
 @import "components/syncButtonTooltip";
 @import "components/tabBar";
-@import "components/tagsBox";
 @import "components/tagSelector";
+@import "components/textLink";
 @import "components/virtualized-table";
 
 // Elements
 // --------------------------------------------------
 
+@import "elements/attachmentBox";
+@import "elements/colorPicker";
+@import "elements/guidancePanel";
+@import "elements/itemBox";
+@import "elements/noteEditor";
+@import "elements/notesBox";
+@import "elements/quickSearchTextbox";
 @import "elements/richlistCheckbox";
+@import "elements/tagsBox";
+@import "elements/zoteroSearch";
