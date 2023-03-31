@@ -43,7 +43,7 @@ class XULElementBase extends XULElement {
 		}
 
 		MozXULElement.insertFTLIfNeeded("zotero.ftl");
-		if (document.l10n) {
+		if (document.l10n && this.shadowRoot) {
 			document.l10n.connectRoot(this.shadowRoot);
 		}
 
