@@ -24,7 +24,8 @@
 */
 
 const WORKER_URL = 'chrome://zotero/content/xpcom/pdfWorker/worker.js';
-const CMAPS_URL = 'resource://zotero/pdf-reader/cmaps/';
+const CMAPS_URL = 'chrome://zotero/content/xpcom/pdfWorker/cmaps/';
+const STANDARD_FONTS_URL = 'chrome://zotero/content/xpcom/pdfWorker/standard_fonts/';
 const RENDERER_URL = 'resource://zotero/pdf-renderer/renderer.html';
 
 class PDFWorker {
@@ -55,8 +56,8 @@ class PDFWorker {
 			}
 		}
 		this._processingQueue = false;
-		this._worker.terminate();
-		this._worker = null;
+		// this._worker.terminate();
+		// this._worker = null;
 	}
 
 	async _enqueue(fn, isPriority) {
@@ -112,6 +113,20 @@ class PDFWorker {
 				}
 				catch (e) {
 					Zotero.debug('Failed to fetch CMap data:');
+					Zotero.debug(e);
+				}
+				try {
+					if (message.action === 'FetchStandardFontData') {
+						let response = await Zotero.HTTP.request(
+							'GET',
+							STANDARD_FONTS_URL + message.data,
+							{ responseType: 'arraybuffer' }
+						);
+						respData = new Uint8Array(response.response);
+					}
+				}
+				catch (e) {
+					Zotero.debug('Failed to fetch standard font data:');
 					Zotero.debug(e);
 				}
 				this._worker.postMessage({ responseID: event.data.id, data: respData });
@@ -576,6 +591,97 @@ class PDFWorker {
 			});
 
 			Zotero.debug(`Rotated pages for item ${attachment.libraryKey} in ${new Date() - t} ms`);
+		}, isPriority);
+	}
+
+	/**
+	 * Get fulltext
+	 *
+	 * @param {Integer} itemID Attachment item id
+	 * @param {Integer|null} maxPages Pages count to extract, or all pages if 'null'
+	 * @param {Boolean} [isPriority]
+	 * @param {String} [password]
+	 * @returns {Promise}
+	 */
+	async getFullText(itemID, maxPages, isPriority, password) {
+		return this._enqueue(async () => {
+			let attachment = await Zotero.Items.getAsync(itemID);
+
+			Zotero.debug(`Getting fulltext content from item ${attachment.libraryKey}`);
+			let t = new Date();
+
+			if (!attachment.isPDFAttachment()) {
+				throw new Error('Item must be a PDF attachment');
+			}
+
+			let path = await attachment.getFilePathAsync();
+			let buf = await OS.File.read(path, {});
+			buf = new Uint8Array(buf).buffer;
+
+			try {
+				var result = await this._query('getFulltext', {
+					buf, maxPages, password
+				}, [buf]);
+			}
+			catch (e) {
+				let error = new Error(`Worker 'getFullText' failed: ${JSON.stringify({ error: e.message })}`);
+				try {
+					error.name = JSON.parse(e.message).name;
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+				Zotero.logError(error);
+				throw error;
+			}
+
+			Zotero.debug(`Extracted full text for item ${attachment.libraryKey} in ${new Date() - t} ms`);
+
+			return result;
+		}, isPriority);
+	}
+
+	/**
+	 * Get data for recognizer-server
+	 *
+	 * @param {Integer} itemID Attachment item id
+	 * @param {Boolean} [isPriority]
+	 * @param {String} [password]
+	 * @returns {Promise}
+	 */
+	async getRecognizerData(itemID, isPriority, password) {
+		return this._enqueue(async () => {
+			let attachment = await Zotero.Items.getAsync(itemID);
+
+			Zotero.debug(`Getting PDF recognizer data from item ${attachment.libraryKey}`);
+			let t = new Date();
+
+			if (!attachment.isPDFAttachment()) {
+				throw new Error('Item must be a PDF attachment');
+			}
+
+			let path = await attachment.getFilePathAsync();
+			let buf = await OS.File.read(path, {});
+			buf = new Uint8Array(buf).buffer;
+
+			try {
+				var result = await this._query('getRecognizerData', { buf, password }, [buf]);
+			}
+			catch (e) {
+				let error = new Error(`Worker 'getRecognizerData' failed: ${JSON.stringify({ error: e.message })}`);
+				try {
+					error.name = JSON.parse(e.message).name;
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+				Zotero.logError(error);
+				throw error;
+			}
+
+			Zotero.debug(`Extracted PDF recognizer data for item ${attachment.libraryKey} in ${new Date() - t} ms`);
+
+			return result;
 		}, isPriority);
 	}
 }

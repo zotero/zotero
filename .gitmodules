@@ -36,7 +36,7 @@
 [submodule "pdf-worker"]
 	path = pdf-worker
 	url = https://github.com/zotero/pdf-worker.git
-	branch = master
+	branch = worker2
 [submodule "note-editor"]
 	path = note-editor
 	url = https://github.com/zotero/note-editor.git

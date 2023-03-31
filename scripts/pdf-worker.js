@@ -35,7 +35,8 @@ async function getPDFWorker(signatures) {
 		catch (e) {
 			await exec('npm ci', { cwd: modulePath });
 			await exec('npm run build', { cwd: modulePath });
-			await fs.copy(path.join(modulePath, 'build', 'worker.js'), path.join(targetDir, 'worker.js'));
+			// TODO: Don't copy 'cmaps' and 'standard_fonts' directories once pdf-reader is updated
+			await fs.copy(path.join(modulePath, 'build'), targetDir);
 		}
 		signatures['pdf-worker'] = { hash };
 	}

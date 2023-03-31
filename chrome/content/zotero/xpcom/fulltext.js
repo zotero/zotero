@@ -24,9 +24,8 @@
 */
 
 Zotero.Fulltext = Zotero.FullText = new function(){
-	this.__defineGetter__("pdfConverterCacheFile", function () { return '.zotero-ft-cache'; });
-	this.__defineGetter__("pdfInfoCacheFile", function () { return '.zotero-ft-info'; });
-	
+	this.__defineGetter__("fulltextCacheFile", function () { return '.zotero-ft-cache'; });
+
 	this.INDEX_STATE_UNAVAILABLE = 0;
 	this.INDEX_STATE_UNINDEXED = 1;
 	this.INDEX_STATE_PARTIAL = 2;
@@ -354,89 +353,50 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		);
 	});
 	
-	
+
 	/**
-	 * Run PDF through pdfinfo and pdftotext to generate .zotero-ft-info
-	 * and .zotero-ft-cache, and pass the text file to indexString()
+	 * Index PDF file and store the fulltext content in a file
 	 *
-	 * @param {nsIFile} file
+	 * @param {nsIFile} filePath
 	 * @param {Number} itemID
 	 * @param {Boolean} [allPages] - If true, index all pages rather than pdfMaxPages
 	 * @return {Promise}
 	 */
-	this.indexPDF = Zotero.Promise.coroutine(function* (filePath, itemID, allPages) {
+	this.indexPDF = async function (filePath, itemID, allPages) {
 		var maxPages = Zotero.Prefs.get('fulltext.pdfMaxPages');
 		if (maxPages == 0) {
 			return false;
 		}
-		
-		var item = yield Zotero.Items.getAsync(itemID);
+		var item = await Zotero.Items.getAsync(itemID);
 		var linkMode = item.attachmentLinkMode;
 		// If file is stored outside of Zotero, create a directory for the item
 		// in the storage directory and save the cache file there
 		if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
-			var parentDirPath = yield Zotero.Attachments.createDirectoryForItem(item);
+			var parentDirPath = await Zotero.Attachments.createDirectoryForItem(item);
 		}
 		else {
 			var parentDirPath = OS.Path.dirname(filePath);
 		}
-		var infoFilePath = OS.Path.join(parentDirPath, this.pdfInfoCacheFile);
-		var cacheFilePath = OS.Path.join(parentDirPath, this.pdfConverterCacheFile);
-		
-
-		var args = [filePath, infoFilePath];
-
+		var cacheFilePath = OS.Path.join(parentDirPath, this.fulltextCacheFile);
 		try {
-			yield Zotero.Utilities.Internal.exec(_pdfInfo, args);
-			var totalPages = yield getTotalPagesFromFile(itemID);
+			var {
+				text,
+				extractedPages,
+				totalPages
+			} = await Zotero.PDFWorker.getFullText(itemID, allPages ? null : maxPages);
 		}
 		catch (e) {
-			Zotero.debug("Error running " + _pdfInfo.path, 1);
-			Zotero.logError(e);
-		}
-
-		
-		var {exec, args} = this.getPDFConverterExecAndArgs();
-		// Keep in sync with Item::attachmentText
-		args.push('-nopgbrk');
-		
-		if (allPages) {
-			if (totalPages) {
-				var indexedPages = totalPages;
-			}
-		}
-		else {
-			args.push('-l', maxPages);
-			var indexedPages = Math.min(maxPages, totalPages);
-		}
-		args.push(filePath, cacheFilePath);
-		
-		try {
-			yield Zotero.Utilities.Internal.exec(exec, args);
-		}
-		catch (e) {
-			Zotero.debug("Error running " + exec.path, 1);
 			Zotero.logError(e);
 			return false;
 		}
-		
-		if (!(yield OS.File.exists(cacheFilePath))) {
-			let fileName = OS.Path.basename(filePath);
-			let msg = fileName + " was not indexed";
-			if (!fileName.match(/^[\u0000-\u007F]+$/)) {
-				msg += " -- PDFs with filenames containing extended characters cannot currently be indexed due to a Mozilla limitation";
-			}
-			Zotero.debug(msg, 2);
-			Components.utils.reportError(msg);
+		if (!text || !extractedPages) {
 			return false;
 		}
-		
-		var text = Zotero.File.getContentsAsync(cacheFilePath);
-		var stats = { indexedPages, totalPages };
-		yield indexString(text, itemID, stats);
-		
+		await Zotero.File.putContentsAsync(cacheFilePath, text);
+		var stats = { indexedPages: extractedPages, totalPages };
+		await indexString(text, itemID, stats);
 		return true;
-	});
+	};
 	
 	
 	/**
@@ -1211,35 +1171,8 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			+ "FROM fulltextItems WHERE itemID=?";
 		return Zotero.DB.rowQueryAsync(sql, itemID);
 	}
-	
-	
-	/**
-	 * Gets the number of pages from the PDF info cache file
-	 *
-	 * @private
-	 * @return {Promise}
-	 */
-	var getTotalPagesFromFile = Zotero.Promise.coroutine(function* (itemID) {
-		var file = OS.Path.join(
-			Zotero.Attachments.getStorageDirectoryByID(itemID).path,
-			Zotero.Fulltext.pdfInfoCacheFile
-		);
-		if (!(yield OS.File.exists(file))) {
-			return false;
-		}
-		var contents = yield Zotero.File.getContentsAsync(file);
-		try {
-			// Parse pdfinfo output
-			var pages = contents.match('Pages:[^0-9]+([0-9]+)')[1];
-		}
-		catch (e) {
-			Zotero.debug(e);
-			return false;
-		}
-		return pages;
-	});
-	
-	
+
+
 	/**
 	 * @return {Promise}
 	 */
@@ -1261,7 +1194,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			case 'application/pdf':
 				var file = OS.Path.join(
 					Zotero.Attachments.getStorageDirectory(item).path,
-					this.pdfConverterCacheFile
+					this.fulltextCacheFile
 				);
 				if (!(yield OS.File.exists(file))) {
 					return false;
@@ -1412,7 +1345,7 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	
 	this.getItemCacheFile = function (item) {
 		var cacheFile = Zotero.Attachments.getStorageDirectory(item);
-		cacheFile.append(this.pdfConverterCacheFile);
+		cacheFile.append(this.fulltextCacheFile);
 		return cacheFile;
 	}
 	

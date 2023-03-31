@@ -223,7 +223,7 @@ Zotero.RecognizePDF = new function () {
 		}
 		
 		var version = Zotero.version;
-		var json = await extractJSON(filePath, MAX_PAGES);
+		var json = await extractJSON(attachment.id);
 		var metadata = item.toJSON();
 		
 		var data = { description, version, json, metadata };
@@ -323,39 +323,16 @@ Zotero.RecognizePDF = new function () {
 	}
 	
 	/**
-	 * Get json from a PDF
-	 * @param {String} filePath PDF file path
-	 * @param {Number} pages Number of pages to extract
+	 * Get recognizer data from PDF file
+	 * @param {Number} itemID Attachment item id
 	 * @return {Promise}
 	 */
-	async function extractJSON(filePath, pages) {
-		let cacheFile = Zotero.getTempDirectory();
-		cacheFile.append("recognizePDFcache.txt");
-		if (cacheFile.exists()) {
-			cacheFile.remove(false);
-		}
-		
-		let {exec, args} = Zotero.Fulltext.getPDFConverterExecAndArgs();
-		args.push('-json', '-l', pages, filePath, cacheFile.path);
-		
-		Zotero.debug("RecognizePDF: Running " + exec.path + " " + args.map(arg => "'" + arg + "'").join(" "));
-		
+	async function extractJSON(itemID) {
 		try {
-			await Zotero.Utilities.Internal.exec(exec, args);
-			let content = await Zotero.File.getContentsAsync(cacheFile.path);
-			Zotero.debug("RecognizePDF: Extracted JSON:");
-			Zotero.debug(content);
-			cacheFile.remove(false);
-			return JSON.parse(content);
+			return await Zotero.PDFWorker.getRecognizerData(itemID, true);
 		}
 		catch (e) {
 			Zotero.logError(e);
-			try {
-				cacheFile.remove(false);
-			}
-			catch (e) {
-				Zotero.logError(e);
-			}
 			throw new Zotero.Exception.Alert("recognizePDF.couldNotRead");
 		}
 	}
@@ -416,7 +393,7 @@ Zotero.RecognizePDF = new function () {
 		
 		if (!filePath || !await OS.File.exists(filePath)) throw new Zotero.Exception.Alert('recognizePDF.fileNotFound');
 
-		let json = await extractJSON(filePath, MAX_PAGES);
+		let json = await extractJSON(item.id);
 		json.fileName = OS.Path.basename(filePath);
 		
 		let containingTextPages = 0;
