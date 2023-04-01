@@ -1,0 +1,71 @@
+attachment-box {
+	#metadata {
+		padding: 5px 2px 2px 2px;
+	}
+
+	#title
+	{
+		font-weight: bold;
+		/* Don't collapse blank attachment titles, since it prevents renaming */
+		min-height: 1.25em;
+	}
+
+	#metadata > label {
+		margin: 6px 10px 4px !important;
+	}
+
+	#reindex
+	{
+		padding-left: 5px;
+		list-style-image: url(chrome://zotero/skin/arrow_refresh.png);
+	}
+
+	@media (min-resolution: 1.25dppx) {
+		#reindex {
+			list-style-image: url(chrome://zotero/skin/arrow_refresh@2x.png);
+			width: 20px;
+		}
+	}
+
+	#linksbox
+	{
+		margin-bottom: 4px;
+	}
+
+	tr label
+	{
+		margin: 0 !important;
+		padding: 0 !important;
+	}
+
+	td > label, td > hbox
+	{
+		margin-top: 1px !important;
+		margin-bottom: 1px !important;
+		-moz-box-pack: start;
+		-moz-margin-start: 1px !important;
+		-moz-margin-end: 5px !important;
+		padding: 0 2px 0 2px !important;
+		border-radius: 6px;
+		border: 1px solid transparent;
+	}
+
+	td > hbox {
+		-moz-box-align: center;
+	}
+
+	/* Reindex icon makes the row larger */
+	#indexStatusRow > td > hbox {
+		margin: 0 !important;
+	}
+
+	td:first-child {
+		text-align: right;
+		font-weight: bold;
+		-moz-margin-start: 3px !important;
+		-moz-margin-end: 0 !important;
+		width: 62px;
+		text-align: right;
+		font-weight:bold;
+	}
+}

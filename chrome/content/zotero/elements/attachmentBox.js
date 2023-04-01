@@ -168,7 +168,7 @@
 			}
 			
 			this._mode = val;
-			this.shadowRoot.getElementById('attachment-box').setAttribute('mode', val);
+			this.querySelector('#attachment-box').setAttribute('mode', val);
 		}
 
 		get item() {
@@ -184,14 +184,7 @@
 		}
 
 		connectedCallback() {
-			var shadow = this.attachShadow({ mode: "open" });
-
-			var s1 = document.createElement("link");
-			s1.rel = "stylesheet";
-			s1.href = "chrome://zotero-platform/content/attachmentBox.css";
-			shadow.append(s1);
-			
-			shadow.appendChild(document.importNode(this.content, true));
+			this.appendChild(document.importNode(this.content, true));
 
 			// For the time being, use a silly little popup
 			this._id('title').addEventListener('click', () => {
@@ -605,7 +598,7 @@
 		}
 
 		_id(id) {
-			return this.shadowRoot.getElementById(id);
+			return this.querySelector(`#${id}`);
 		}
 	}
 

@@ -25,13 +25,6 @@
 
 class XULElementBase extends XULElement {
 	/**
-	 * @return {String[]} Stylesheet URIs
-	 */
-	get stylesheets() {
-		return [];
-	}
-
-	/**
 	 * @return {DocumentFragment | null}
 	 */
 	get content() {
@@ -43,23 +36,14 @@ class XULElementBase extends XULElement {
 	destroy() {}
 
 	connectedCallback() {
-		let shadow = this.attachShadow({ mode: 'open' });
-
-		for (let href of this.stylesheets) {
-			let link = document.createElement('link');
-			link.rel = 'stylesheet';
-			link.href = href;
-			shadow.append(link);
-		}
-
 		let content = this.content;
 		if (content) {
 			content = document.importNode(content, true);
-			shadow.append(content);
+			this.append(content);
 		}
 
 		MozXULElement.insertFTLIfNeeded("zotero.ftl");
-		if (document.l10n) {
+		if (document.l10n && this.shadowRoot) {
 			document.l10n.connectRoot(this.shadowRoot);
 		}
 

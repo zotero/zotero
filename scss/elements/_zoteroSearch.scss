@@ -1,0 +1,57 @@
+zoterosearch {
+	#search-box > hbox, #search-box > groupbox {
+		margin-left: 6px;
+	}
+
+	groupbox {
+		margin-top: 0;
+		padding-top: 0;
+	}
+
+	caption {
+		font: inherit;
+		padding-left: 0 !important;
+	}
+
+	label:first-child:not(tooltip label), checkbox:first-child {
+		margin-left: 0 !important;
+		padding-left: 0 !important;
+	}
+
+	checkbox {
+		margin-right: .5em;
+	}
+
+	#operatorsmenu {
+		width: 15em;
+	}
+
+	#condition-tooltips tooltip
+	{
+		background: red !important;
+	}
+
+	#condition-tooltips hbox > label
+	{
+		font-weight: bold;
+	}
+
+	.toolbarbutton-text
+	{
+		margin: 0;
+		padding: 0;
+	}
+
+	#textbox-button {
+		cursor: default;
+		appearance: none;
+		justify-self: end;
+		margin-inline-end: 8px;
+		align-self: center;
+	}
+
+	#search-in-the-last input
+	{
+		min-width: 3em;
+	}
+}

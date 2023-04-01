@@ -31,16 +31,14 @@
 	Services.scriptloader.loadSubScript("chrome://zotero/content/elements/base.js", this);
 
 	class ColorPicker extends XULElementBase {
-		stylesheets = ['chrome://global/skin/', 'chrome://zotero-platform/content/colorPicker.css'];
-
 		content = MozXULElement.parseXULToFragment(`
 			<vbox>
-				<html:button id="button">
-					<html:span id="button-tile"/>
+				<html:button class="button">
+					<html:span class="button-tile"/>
 				</html:button>
 
-				<panel id="panel">
-					<html:div id="grid"/>
+				<panel class="panel">
+					<html:div class="grid"/>
 				</panel>
 			</vbox>
 		`);
@@ -103,9 +101,9 @@
 		}
 
 		init() {
-			let button = this.shadowRoot.getElementById('button');
-			let panel = this.shadowRoot.getElementById('panel');
-			let grid = this.shadowRoot.getElementById('grid');
+			let button = this.querySelector('.button');
+			let panel = this.querySelector('.panel');
+			let grid = this.querySelector('.grid');
 
 			button.addEventListener('click', () => {
 				grid.style.gridTemplateColumns = `repeat(${this.cols}, ${this.tileWidth}px)`;
@@ -120,10 +118,10 @@
 
 		attributeChangedCallback(attrName, oldVal, newVal) {
 			if (attrName == 'color') {
-				this.shadowRoot.getElementById('button-tile').style.backgroundColor = newVal;
+				this.querySelector('.button-tile').style.backgroundColor = newVal;
 			}
 			else if (attrName == 'colors') {
-				let grid = this.shadowRoot.getElementById('grid');
+				let grid = this.querySelector('.grid');
 				grid.innerHTML = '';
 				for (let color of newVal.split(',')) {
 					let tile = document.createElement('div');
@@ -131,13 +129,13 @@
 					tile.style.backgroundColor = color;
 					tile.addEventListener('click', () => {
 						this.color = color;
-						this.shadowRoot.getElementById('panel').hidePopup();
+						this.querySelector('.panel').hidePopup();
 					});
 					grid.append(tile);
 				}
 			}
 			else if (attrName == 'disabled') {
-				this.shadowRoot.getElementById('button').disabled = !!newVal;
+				this.querySelector('.button').disabled = !!newVal;
 			}
 		}
 	}

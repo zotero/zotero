@@ -32,29 +32,20 @@
 	Services.scriptloader.loadSubScript("chrome://zotero/content/elements/base.js", this);
 	Services.scriptloader.loadSubScript("chrome://zotero/content/elements/shadowAutocompleteInput.js", this);
 
-	class SearchElementBase extends XULElementBase {
-		get stylesheets() {
-			return [
-				'chrome://global/skin/global.css',
-				'chrome://zotero-platform/content/zoteroSearch.css'
-			];
-		}
-	}
-
-	class ZoteroSearch extends SearchElementBase {
+	class ZoteroSearch extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<vbox xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-					id="search-box" flex="1" onkeypress="this.getRootNode().host.handleKeyPress(event)">
+					id="search-box" flex="1" onkeypress="this.closest('zoterosearch').handleKeyPress(event)">
 				<hbox align="center">
 					<label value="&zotero.search.searchInLibrary;" control="libraryMenu"/>
-					<menulist id="libraryMenu" oncommand="this.getRootNode().host.updateLibrary();" native="true">
+					<menulist id="libraryMenu" oncommand="this.closest('zoterosearch').updateLibrary();" native="true">
 						<menupopup/>
 					</menulist>
 				</hbox>
 				<groupbox>
 					<caption align="center">
 						<label value="&zotero.search.joinMode.prefix;"/>
-						<menulist id="joinModeMenu" oncommand="this.getRootNode().host.updateJoinMode();" native="true">
+						<menulist id="joinModeMenu" oncommand="this.closest('zoterosearch').updateJoinMode();" native="true">
 							<menupopup>
 								<menuitem label="&zotero.search.joinMode.any;" value="any"/>
 								<menuitem label="&zotero.search.joinMode.all;" value="all" selected="true"/>
@@ -65,11 +56,11 @@
 					<vbox id="conditions"/>
 				</groupbox>
 				<hbox>
-					<checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="this.getRootNode().host.updateCheckbox('recursive');" native="true"/>
-					<checkbox id="noChildrenCheckbox" label="&zotero.search.noChildren;" oncommand="this.getRootNode().host.updateCheckbox('noChildren');" native="true"/>
+					<checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="this.closest('zoterosearch').updateCheckbox('recursive');" native="true"/>
+					<checkbox id="noChildrenCheckbox" label="&zotero.search.noChildren;" oncommand="this.closest('zoterosearch').updateCheckbox('noChildren');" native="true"/>
 				</hbox>
 				<hbox>
-					<checkbox id="includeParentsAndChildrenCheckbox" label="&zotero.search.includeParentsAndChildren;" oncommand="this.getRootNode().host.updateCheckbox('includeParentsAndChildren');" native="true"/>
+					<checkbox id="includeParentsAndChildrenCheckbox" label="&zotero.search.includeParentsAndChildren;" oncommand="this.closest('zoterosearch').updateCheckbox('includeParentsAndChildren');" native="true"/>
 				</hbox>
 			</vbox>
 		`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
@@ -81,7 +72,7 @@
 		set search(val) {
 			this.searchRef = val;
 
-			var libraryMenu = this.shadowRoot.getElementById('libraryMenu');
+			var libraryMenu = this.querySelector('#libraryMenu');
 			var libraries = Zotero.Libraries.getAll();
 			Zotero.Utilities.Internal.buildLibraryMenu(
 				libraryMenu, libraries, this.searchRef.libraryID
@@ -91,10 +82,10 @@
 			}
 			this.updateLibrary();
 
-			this.shadowRoot.getElementById('joinModeMenu').removeAttribute('condition');
-			this.shadowRoot.getElementById('joinModeMenu').value = 'all';
+			this.querySelector('#joinModeMenu').removeAttribute('condition');
+			this.querySelector('#joinModeMenu').value = 'all';
 
-			var conditionsBox = this.shadowRoot.getElementById('conditions');
+			var conditionsBox = this.querySelector('#conditions');
 			while (conditionsBox.hasChildNodes())
 				conditionsBox.removeChild(conditionsBox.firstChild);
 
@@ -107,14 +98,14 @@
 					case 'noChildren':
 					case 'includeParentsAndChildren':
 						let checkbox = condition.condition + 'Checkbox';
-						this.shadowRoot.getElementById(checkbox).setAttribute('condition', id);
-						this.shadowRoot.getElementById(checkbox).checked = condition.operator == 'true';
+						this.querySelector(`#${checkbox}`).setAttribute('condition', id);
+						this.querySelector(`#${checkbox}`).checked = condition.operator == 'true';
 						continue;
 				}
 
 				if (condition.condition == 'joinMode') {
-					this.shadowRoot.getElementById('joinModeMenu').setAttribute('condition', id);
-					this.shadowRoot.getElementById('joinModeMenu').value = condition.operator;
+					this.querySelector('#joinModeMenu').setAttribute('condition', id);
+					this.querySelector('#joinModeMenu').value = condition.operator;
 				}
 				else {
 					this.addCondition(condition);
@@ -123,7 +114,7 @@
 		}
 
 		addCondition(ref) {
-			var conditionsBox = this.shadowRoot.getElementById('conditions');
+			var conditionsBox = this.querySelector('#conditions');
 			var condition = document.createXULElement('zoterosearchcondition');
 			condition.setAttribute('flex', '1');
 			
@@ -145,7 +136,7 @@
 		}
 
 		removeCondition(id) {
-			var conditionsBox = this.shadowRoot.getElementById('conditions');
+			var conditionsBox = this.querySelector('#conditions');
 			
 			this.search.removeCondition(id);
 			
@@ -162,7 +153,7 @@
 		}
 
 		updateLibrary() {
-			var menu = this.shadowRoot.getElementById('libraryMenu');
+			var menu = this.querySelector('#libraryMenu');
 			var libraryID = parseInt(menu.selectedItem.value);
 			
 			if (this.onLibraryChange) {
@@ -172,11 +163,11 @@
 				this.searchRef.libraryID = libraryID;
 			}
 			
-			[...this.shadowRoot.getElementById('conditions').childNodes].forEach(x => x.onLibraryChange());
+			[...this.querySelector('#conditions').childNodes].forEach(x => x.onLibraryChange());
 		}
 
 		updateJoinMode() {
-			var menu = this.shadowRoot.getElementById('joinModeMenu');
+			var menu = this.querySelector('#joinModeMenu');
 			if(menu.hasAttribute('condition'))
 				this.search.updateCondition(menu.getAttribute('condition'),'joinMode',menu.value,null);
 			else
@@ -184,7 +175,7 @@
 		}
 
 		updateCheckbox(condition) {
-			var checkbox = this.shadowRoot.getElementById(condition + 'Checkbox');
+			var checkbox = this.querySelector('#' + condition + 'Checkbox');
 			var value = checkbox.checked ? 'true' : 'false';
 			if(checkbox.hasAttribute('condition'))
 			{
@@ -200,7 +191,7 @@
 
 		// Calls updateSearch() on all search conditions
 		updateSearch() {
-			var conditionsBox = this.shadowRoot.getElementById('conditions');
+			var conditionsBox = this.querySelector('#conditions');
 			if (conditionsBox.hasChildNodes()) {
 				for(var i = 0, len=conditionsBox.childNodes.length; i < len; i++) {
 					conditionsBox.childNodes[i].updateSearch();
@@ -225,20 +216,20 @@
 	}
 	customElements.define("zoterosearch", ZoteroSearch);
 
-	class ZoteroSearchCondition extends SearchElementBase {
+	class ZoteroSearchCondition extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<xul:hbox id="search-condition" xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 					flex="1">
 				<xul:popupset id="condition-tooltips"/>
 				
-				<xul:menulist id="conditionsmenu" oncommand="this.getRootNode().host.onConditionSelected(event.target.value); event.stopPropagation()" native="true">
-					<xul:menupopup onpopupshown="this.getRootNode().host.revealSelectedCondition()">
+				<xul:menulist id="conditionsmenu" oncommand="this.closest('zoterosearchcondition').onConditionSelected(event.target.value); event.stopPropagation()" native="true">
+					<xul:menupopup onpopupshown="this.closest('zoterosearchcondition').revealSelectedCondition()">
 						<xul:menu id="more-conditions-menu" label="&zotero.general.more;">
 							<xul:menupopup/>
 						</xul:menu>
 					</xul:menupopup>
 				</xul:menulist>
-				<xul:menulist id="operatorsmenu" oncommand="this.getRootNode().host.onOperatorSelected(); event.stopPropagation()" native="true">
+				<xul:menulist id="operatorsmenu" oncommand="this.closest('zoterosearchcondition').onOperatorSelected(); event.stopPropagation()" native="true">
 					<xul:menupopup/>
 				</xul:menulist>
 				<xul:zoterosearchtextbox id="valuefield" flex="1"/>
@@ -246,8 +237,8 @@
 					<xul:menupopup/>
 				</xul:menulist>
 				<xul:zoterosearchagefield id="value-date-age" hidden="true" flex="1"/>
-				<xul:label id="remove" class="zotero-clicky zotero-clicky-minus" value="-" onclick="this.getRootNode().host.onRemoveClicked(event)"/>
-				<xul:label id="add" class="zotero-clicky zotero-clicky-plus" value="+" onclick="this.getRootNode().host.onAddClicked(event)"/>
+				<xul:label id="remove" class="zotero-clicky zotero-clicky-minus" value="-" onclick="this.closest('zoterosearchcondition').onRemoveClicked(event)"/>
+				<xul:label id="add" class="zotero-clicky zotero-clicky-plus" value="+" onclick="this.closest('zoterosearchcondition').onAddClicked(event)"/>
 			</xul:hbox>
 		`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
 
@@ -264,7 +255,7 @@
 				'isAfter',
 				'isInTheLast'
 			];
-			var operatorsList = this.shadowRoot.getElementById('operatorsmenu');
+			var operatorsList = this.querySelector('#operatorsmenu');
 			
 			// Build operator menu
 			for (let operator of operators) {
@@ -275,8 +266,8 @@
 			}
 			
 			// Build conditions menu
-			var conditionsMenu = this.shadowRoot.getElementById('conditionsmenu');
-			var moreConditionsMenu = this.shadowRoot.getElementById('more-conditions-menu');
+			var conditionsMenu = this.querySelector('#conditionsmenu');
+			var moreConditionsMenu = this.querySelector('#more-conditions-menu');
 			var conditions = Zotero.SearchConditions.getStandardConditions();
 			
 			for (let condition of conditions) {
@@ -300,7 +291,7 @@
 				
 				// Add tooltip, building it if it doesn't exist
 				if (baseFields) {
-					if (!this.shadowRoot.getElementById(condition.name + '-tooltip')) {
+					if (!this.querySelector('#' + condition.name + '-tooltip')) {
 						var fieldName = null;
 						try {
 							fieldName = Zotero.ItemFields.getLocalizedString(condition.name);
@@ -343,7 +334,7 @@
 						hbox.appendChild(vbox);
 						tt.appendChild(hbox);
 						
-						this.shadowRoot.getElementById('condition-tooltips').appendChild(tt);
+						this.querySelector('#condition-tooltips').appendChild(tt);
 					}
 					
 					menuitem.setAttribute('tooltip', condition.name + '-tooltip');
@@ -375,8 +366,8 @@
 		}
 
 		onConditionSelected(conditionName, reload) {
-			var conditionsMenu = this.shadowRoot.getElementById('conditionsmenu');
-			var operatorsList = this.shadowRoot.getElementById('operatorsmenu');
+			var conditionsMenu = this.querySelector('#conditionsmenu');
+			var operatorsList = this.querySelector('#operatorsmenu');
 			
 			// Skip if no condition or correct condition already selected
 			if (!conditionName || (conditionName == this.selectedCondition && !reload)) {
@@ -488,22 +479,22 @@
 				default:
 					if (operatorsList.value=='isInTheLast')
 					{
-						this.shadowRoot.getElementById('value-date-age').value = this.value;
+						this.querySelector('#value-date-age').value = this.value;
 					}
 					
 					// Textbox
 					else {
 						// If switching from menu to textbox, clear value
-						if (this.shadowRoot.getElementById('valuefield').hidden){
-							this.shadowRoot.getElementById('valuefield').value = '';
+						if (this.querySelector('#valuefield').hidden){
+							this.querySelector('#valuefield').value = '';
 						}
 						// If switching between textbox conditions, get loaded value for new one
 						else {
-							this.shadowRoot.getElementById('valuefield').value = this.value;
+							this.querySelector('#valuefield').value = this.value;
 						}
 						
 						// Update field drop-down if applicable
-						this.shadowRoot.getElementById('valuefield').update(conditionName, this.mode);
+						this.querySelector('#valuefield').update(conditionName, this.mode);
 					}
 			}
 			
@@ -511,44 +502,44 @@
 		}
 
 		onOperatorSelected() {
-			var operatorsList = this.shadowRoot.getElementById('operatorsmenu');
+			var operatorsList = this.querySelector('#operatorsmenu');
 			
 			// Drop-down menu
 			if (this.selectedCondition == 'collection'
 					|| this.selectedCondition == 'itemType'
 					|| this.selectedCondition == 'fileTypeID') {
-				this.shadowRoot.getElementById('valuefield').hidden = true;
-				this.shadowRoot.getElementById('valuemenu').hidden = false;
-				this.shadowRoot.getElementById('value-date-age').hidden = true;
+				this.querySelector('#valuefield').hidden = true;
+				this.querySelector('#valuemenu').hidden = false;
+				this.querySelector('#value-date-age').hidden = true;
 			}
 			
 			// Textbox + units dropdown for isInTheLast operator
 			else if (operatorsList.value=='isInTheLast')
 			{
 				// If switching from text field, clear value
-				if (this.shadowRoot.getElementById('value-date-age').hidden){
+				if (this.querySelector('#value-date-age').hidden){
 					this.value = '';
 				}
-				this.shadowRoot.getElementById('valuefield').hidden = true;
-				this.shadowRoot.getElementById('valuemenu').hidden = true;
-				this.shadowRoot.getElementById('value-date-age').hidden = false;
+				this.querySelector('#valuefield').hidden = true;
+				this.querySelector('#valuemenu').hidden = true;
+				this.querySelector('#value-date-age').hidden = false;
 			}
 			
 			// Textbox
 			else
 			{
 				// If switching from date age, clear value
-				if (this.shadowRoot.getElementById('valuefield').hidden){
+				if (this.querySelector('#valuefield').hidden){
 					this.value = '';
 				}
-				this.shadowRoot.getElementById('valuefield').hidden = false;
-				this.shadowRoot.getElementById('valuemenu').hidden = true;
-				this.shadowRoot.getElementById('value-date-age').hidden = true;
+				this.querySelector('#valuefield').hidden = false;
+				this.querySelector('#valuemenu').hidden = true;
+				this.querySelector('#value-date-age').hidden = true;
 			}
 		}
 
 		createValueMenu(rows) {
-			let valueMenu = this.shadowRoot.getElementById('valuemenu');
+			let valueMenu = this.querySelector('#valuemenu');
 
 			while (valueMenu.hasChildNodes()){
 				valueMenu.removeChild(valueMenu.firstChild);
@@ -568,13 +559,13 @@
 				valueMenu.value = this.value;
 			}
 
-			valueMenu.shadowRoot.querySelector('#label-box > image').style.maxHeight = '16px';
+			valueMenu.querySelector('#label-box > image').style.maxHeight = '16px';
 		}
 
 		initWithParentAndCondition(parent, condition) {
 			this.parent = parent;
 			this.conditionID = condition['id'];
-			var menu = this.shadowRoot.getElementById('conditionsmenu');
+			var menu = this.querySelector('#conditionsmenu');
 			
 			if(this.parent.search)
 			{
@@ -613,7 +604,7 @@
 				}
 				
 				this.mode = condition['mode'];
-				this.shadowRoot.getElementById('operatorsmenu').value = condition['operator'];
+				this.querySelector('#operatorsmenu').value = condition['operator'];
 				this.value = prefix +
 					(condition.value ? condition.value : '');
 
@@ -622,19 +613,19 @@
 			
 			this.onConditionSelected(menu.value);
 			
-			this.shadowRoot.getElementById('conditionsmenu').focus();
+			this.querySelector('#conditionsmenu').focus();
 		}
 
 		updateSearch() {
 			if(this.parent && this.parent.search && !this.dontupdate)
 			{
 				var condition = this.selectedCondition;
-				var operator = this.shadowRoot.getElementById('operatorsmenu').value;
+				var operator = this.querySelector('#operatorsmenu').value;
 				
 				// Regular text field
-				if (!this.shadowRoot.getElementById('valuefield').hidden)
+				if (!this.querySelector('#valuefield').hidden)
 				{
-					var value = this.shadowRoot.getElementById('valuefield').value;
+					var value = this.querySelector('#valuefield').value;
 					
 					// Convert datetimes to UTC before saving
 					switch (condition) {
@@ -647,21 +638,21 @@
 					}
 					
 					// Append mode to condition
-					if (this.shadowRoot.getElementById('valuefield').mode){
-						condition += '/' + this.shadowRoot.getElementById('valuefield').mode;
+					if (this.querySelector('#valuefield').mode){
+						condition += '/' + this.querySelector('#valuefield').mode;
 					}
 				}
 				
 				// isInTheLast operator
-				else if (!this.shadowRoot.getElementById('value-date-age').hidden)
+				else if (!this.querySelector('#value-date-age').hidden)
 				{
-					var value = this.shadowRoot.getElementById('value-date-age').value;
+					var value = this.querySelector('#value-date-age').value;
 				}
 				
 				// Handle special C1234 and S5678 form for
 				// collections and searches
 				else if (condition == 'collection') {
-					var letter = this.shadowRoot.getElementById('valuemenu').value.substr(0,1);
+					var letter = this.querySelector('#valuemenu').value.substr(0,1);
 					if (letter=='C')
 					{
 						condition = 'collection';
@@ -670,13 +661,13 @@
 					{
 						condition = 'savedSearch';
 					}
-					var value = this.shadowRoot.getElementById('valuemenu').value.substr(1);
+					var value = this.querySelector('#valuemenu').value.substr(1);
 				}
 				
 				// Regular drop-down menu
 				else
 				{
-					var value = this.shadowRoot.getElementById('valuemenu').value;
+					var value = this.querySelector('#valuemenu').value;
 				}
 				this.parent.search.updateCondition(this.conditionID, condition, operator, value);
 			}
@@ -705,7 +696,7 @@
 			}
 			
 			if (!menu) {
-				menu = this.shadowRoot.getElementById('conditionsmenu');
+				menu = this.querySelector('#conditionsmenu');
 			}
 			for (let i = 0; i < menu.itemCount; i++) {
 				let item = menu.getItemAtIndex(i);
@@ -745,8 +736,8 @@
 			if (this.parent){
 				let ref = this.parent.search.getCondition(
 					this.parent.search.addCondition(
-						this.shadowRoot.getElementById('conditionsmenu').getAttribute('data-value'),
-						this.shadowRoot.getElementById('operatorsmenu').value,
+						this.querySelector('#conditionsmenu').getAttribute('data-value'),
+						this.querySelector('#operatorsmenu').value,
 						""
 					)
 				)
@@ -756,20 +747,20 @@
 		}
 
 		disableRemoveButton() {
-			var button = this.shadowRoot.getElementById("remove");
+			var button = this.querySelector("#remove");
 			button.setAttribute('disabled', true);
 			button.removeAttribute('onclick');
 		}
 
 		enableRemoveButton() {
-			var button = this.shadowRoot.getElementById("remove");
+			var button = this.querySelector("#remove");
 			button.setAttribute('disabled', false);
-			button.setAttribute('onclick', "this.getRootNode().host.onRemoveClicked(event)");
+			button.setAttribute('onclick', "this.closest('zoterosearchcondition').onRemoveClicked(event)");
 		}
 	}
 	customElements.define("zoterosearchcondition", ZoteroSearchCondition);
 
-	class ZoteroSearchTextbox extends SearchElementBase {
+	class ZoteroSearchTextbox extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<xul:stack
 					xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
@@ -797,11 +788,11 @@
 		`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
 
 		get value() {
-			return this.shadowRoot.getElementById('search-textbox').value;
+			return this.querySelector('#search-textbox').value;
 		}
 
 		set value(val) {
-			this.shadowRoot.getElementById('search-textbox').value = val;
+			this.querySelector('#search-textbox').value = val;
 		}
 
 		get mode() {
@@ -809,7 +800,7 @@
 				return false;
 			}
 			
-			var menu = this.shadowRoot.getElementById('textbox-fulltext-menu');
+			var menu = this.querySelector('#textbox-fulltext-menu');
 			
 			var selectedIndex = -1;
 			for (var i=0; i<menu.childNodes.length; i++){
@@ -836,12 +827,12 @@
 		}
 
 		update(condition, mode) {
-			var textbox = this.shadowRoot.getElementById('search-textbox');
-			var button = this.shadowRoot.getElementById('textbox-button');
+			var textbox = this.querySelector('#search-textbox');
+			var button = this.querySelector('#textbox-button');
 			
 			switch (condition){
 				case 'fulltextContent':
-					var menu = this.shadowRoot.getElementById('textbox-fulltext-menu');
+					var menu = this.querySelector('#textbox-fulltext-menu');
 					this.setAttribute('hasOptions', true);
 					button.setAttribute('hidden', false);
 					
@@ -908,7 +899,7 @@
 	}
 	customElements.define("zoterosearchtextbox", ZoteroSearchTextbox);
 
-	class ZoteroSearchAgeField extends SearchElementBase {
+	class ZoteroSearchAgeField extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<xul:hbox id="search-in-the-last" flex="1"
 					xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
@@ -925,19 +916,19 @@
 		`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
 
 		get value() {
-			var input = this.shadowRoot.getElementById('input');
-			var menulist = this.shadowRoot.getElementById('age-list');
+			var input = this.querySelector('#input');
+			var menulist = this.querySelector('#age-list');
 			return input.value + ' '
 				+ menulist.firstChild.childNodes[menulist.selectedIndex].getAttribute('value');
 		}
 
 		set value(val) {
-			var input = this.shadowRoot.getElementById('input');
+			var input = this.querySelector('#input');
 
 			var [num, units] = val.split(' ');
 			input.setAttribute('value', num);
 			
-			var menulist = this.shadowRoot.getElementById('age-list');
+			var menulist = this.querySelector('#age-list');
 			var menupopup = menulist.firstChild;
 			
 			var selectThis = 0;
