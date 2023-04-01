@@ -55,6 +55,9 @@ jobs:
         
       - name: Build Zotero
         run: npm run build
+        # Currently necessary for pdf-worker Webpack: https://stackoverflow.com/a/69746937
+        env:
+          NODE_OPTIONS: --openssl-legacy-provider
       
       - name: Upload deployment ZIP
         if: |
