@@ -53,7 +53,9 @@ jobs:
         
       - name: Install Node modules
         if: steps.node-cache.outputs.cache-hit != 'true'
-        run: npm install
+        # --force is necessary for current React versions until react-virtualized is updated or
+        # we replace it: https://github.com/bvaughn/react-virtualized/issues/1775
+        run: npm install --force
         
       - name: Build Zotero
         run: npm run build
