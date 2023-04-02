@@ -41,10 +41,10 @@ if (ZoteroUnit.makeTestData) {
 			func: generateItemJSONData,
 			args: [null]
 		},
-		// {
-		// 	name: 'citeProcJSExport',
-		// 	func: generateCiteProcJSExportData
-		// },
+		{
+			name: 'citeProcJSExport',
+			func: generateCiteProcJSExportData
+		},
 		{
 			name: 'translatorExportLegacy',
 			func: generateTranslatorExportData,
