@@ -26,17 +26,17 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Em-zilemel an elfennoù er pod-lastez abaoe muioc'h evit">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "devezh 'zo">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.pdfReader "Lenner PDF">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Diskouez an ivinelloù evel">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Krouer - Bloavezh - Titl">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Titl - Krouer - Bloavezh">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "Anv ar restr">
 
 <!ENTITY zotero.preferences.groups "Strolladoù">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Pa eiler elfennoù kenetre levraouegoù, enklozañ:">
 <!ENTITY zotero.preferences.groups.childNotes "notennoù bugel">
 <!ENTITY zotero.preferences.groups.childFiles "an tapadennoù-skramm ha restroù emporzhiet bugel">
-<!ENTITY zotero.preferences.groups.annotations "annotations">
+<!ENTITY zotero.preferences.groups.annotations "ennotadurioù">
 <!ENTITY zotero.preferences.groups.childLinks "liammoù bugel">
 <!ENTITY zotero.preferences.groups.tags "balizoù">
 
@@ -46,7 +46,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "An elfennoù koshañ da gentañ">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Arventennoù dre-ziouer ar froudoù">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
+<!ENTITY zotero.preferences.openurl.choose "Dibab un diskoulmer...">
 <!ENTITY zotero.preferences.openurl.custom "Personelaat...">
 <!ENTITY zotero.preferences.openurl.server "Diskoulmer:">
 <!ENTITY zotero.preferences.openurl.version "Stumm:">
@@ -111,8 +111,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Pa vez enaouet an dibarzh-mañ, Zotero a enkloz an URLioù pa vez arroudennet pennadoù kelaouennoù, magazinoù, ha kazetennoù ma ne spisa ket ar pennad niverenn ar bajenn.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Eilañ prim">
-<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Stumm an elfenn:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Stumm an notenn:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Eilañ en HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Arventennoù ispisial al lec'hienn:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domani/Hent">

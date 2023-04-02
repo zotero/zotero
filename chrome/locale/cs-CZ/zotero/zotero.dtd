@@ -311,7 +311,7 @@
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
 <!ENTITY zotero.pdfReader.firstPage "První strana">
-<!ENTITY zotero.pdfReader.lastPage "Last Page">
+<!ENTITY zotero.pdfReader.lastPage "Poslední stránka">
 <!ENTITY zotero.pdfReader.back "Zpátky">
 <!ENTITY zotero.pdfReader.forward "Forward">
 <!ENTITY zotero.pdfReader.handTool "Hand Tool">

@@ -311,23 +311,23 @@
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
 <!ENTITY zotero.pdfReader.firstPage "Pajenn gentañ">
-<!ENTITY zotero.pdfReader.lastPage "Last Page">
+<!ENTITY zotero.pdfReader.lastPage "Pajenn ziwezhañ">
 <!ENTITY zotero.pdfReader.back "Distreiñ">
-<!ENTITY zotero.pdfReader.forward "Forward">
-<!ENTITY zotero.pdfReader.handTool "Hand Tool">
-<!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
-<!ENTITY zotero.pdfReader.horizontalScrolling "Horizontal Scrolling">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
+<!ENTITY zotero.pdfReader.forward "Kent">
+<!ENTITY zotero.pdfReader.handTool "Ostilh dorn">
+<!ENTITY zotero.pdfReader.verticalScrolling "Dibunañ a-blom">
+<!ENTITY zotero.pdfReader.horizontalScrolling "Dibunañ a-blaen">
+<!ENTITY zotero.pdfReader.wrappedScrolling "Dibunañ dre vloc'had">
 <!ENTITY zotero.pdfReader.noSpreads "No Spreads">
 <!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
 <!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
 <!ENTITY zotero.pdfReader.zoomIn "Zoumañ">
 <!ENTITY zotero.pdfReader.zoomOut "Dizoumañ">
-<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
+<!ENTITY zotero.pdfReader.zoomAuto "Em-adventañ">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
+<!ENTITY zotero.pdfReader.splitVertically "Rannañ a-blom">
+<!ENTITY zotero.pdfReader.splitHorizontally "Rannañ a-blaen">
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
 <!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
 <!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">

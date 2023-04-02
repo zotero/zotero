@@ -47,6 +47,9 @@
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Distankañ ar c'hudennoù troidigezh"
   },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Bevennoù haeziñ ouzh al lec'hienn"
+  },
   "progressWindow_error_fallback": {
     "message": "Fazi c'hoarvezet en ur enrollañ gant $1. O klask enrollañ en ur implijout $2 e plas."
   },
@@ -56,11 +59,23 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "stumm diwezhañ"
   },
+  "extensionIsDisabled": {
+    "message": "$1 a zo lazhet"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 a zo lazhet war ar pajennoù astenn"
+  },
   "appConnector": {
     "message": "Kevreer $1"
   },
   "upgradeApp": {
     "message": "Hizivaat $1"
+  },
+  "firstRun_title": {
+    "message": "Staliet ho peus ar c'hevreer $1!"
+  },
+  "firstRun_acceptButton": {
+    "message": "Komprenet"
   },
   "error_connection_isAppRunning": {
     "message": "Ha digoret eo $1?"
@@ -94,6 +109,24 @@
   },
   "integration_googleDocs_docxAlert": {
     "message": "Neket hegerz enkorfadur $1 pa vez aozet restroù .docx Microsoft Word war-eeun e-barzh Google Docs. Dibabit Restroù → Enrollañ evel Google Docs evit enaouiñ an arc'hweladur-mañ. <br/><br/>M'ho peus c'hoant da dreuzkas ur restr Word gant arroudennoù $1 e-barzh Google Docs, kit da welet <a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">Fiñval teuliadoù etre treterioù gerioù</a>."
+  },
+  "integration_googleDocs_orphanedCitations_buttonTooltip": {
+    "message": "Diskouez an $1 arroudenn diliammet"
+  },
+  "integration_googleDocs_orphanedCitations_alertButton": {
+    "message": "Adliammañ an arroudenn"
+  },
+  "copyUnproxiedLink": {
+    "message": "Eilañ al liamm ambroskiet"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "Eilan URL ar bajenn ambroskiet"
+  },
+  "reloadViaProxy": {
+    "message": "Adkargañ dre bProksi"
+  },
+  "reloadVia": {
+    "message": "Adkargañ dre $1"
   },
   "general_saveTo": {
     "message": "Enrollañ e-barzh $1"
