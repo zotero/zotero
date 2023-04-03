@@ -1496,7 +1496,7 @@
 		async showEditor(elem) {
 			Zotero.debug(`Showing editor for ${elem.getAttribute('fieldname')}`);
 			
-			var label = elem.closest('tr').querySelector('th');
+			var label = elem.closest('tr').querySelector('th > label');
 			var lastTabIndex = this._lastTabIndex = parseInt(elem.getAttribute('ztabindex'));
 			
 			// If a field is open, hide it before selecting the new field, which might
@@ -1923,7 +1923,7 @@
 			
 			Zotero.debug(`Hiding editor for ${textbox.getAttribute('fieldname')}`);
 			
-			var label = textbox.closest('tr').querySelector('th');
+			var label = textbox.closest('tr').querySelector('th > label');
 			this._lastTabIndex = -1;
 			
 			// Prevent autocomplete breakage in Firefox 3
