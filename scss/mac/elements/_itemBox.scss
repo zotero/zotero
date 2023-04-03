@@ -1,39 +1,40 @@
-scrollbox
-{
-	padding-top: 3px;
+item-box {
+	scrollbox
+	{
+		padding-top: 3px;
+	}
+	
+	th > label, .creator-type-label, #more-creators-label {
+		color: #7f7f7f;
+	}
+	
+	/*.zotero-field-toggle .toolbarbutton-text
+	{	
+		visibility: hidden;
+	}
+	
+	.zotero-field-toggle .toolbarbutton-icon
+	{
+		margin: 0px !important;
+	}*/
+	
+	.creator-type-dropmarker {
+		margin: 1px .2em 1px;
+		background-image: url('chrome://zotero/skin/mac/arrow-down.png');
+		max-width: 7px;
+		max-height: 7px;
+	}
+	
+	td > input {
+		margin-top: -1px;
+		margin-bottom: -2.5px;
+		margin-inline-start: 0;
+		margin-inline-end: 5px;
+		padding: 0;
+	}
 }
-
-th > label, .creator-type-label, #more-creators-label {
-	color: #7f7f7f;
-}
-
-/*.zotero-field-toggle .toolbarbutton-text
-{	
-	visibility: hidden;
-}
-
-.zotero-field-toggle .toolbarbutton-icon
-{
-	margin: 0px !important;
-}*/
-
-.creator-type-dropmarker {
-	margin: 1px .2em 1px;
-	background-image: url('chrome://zotero/skin/mac/arrow-down.png');
-	max-width: 7px;
-	max-height: 7px;
-}
-
-td > input {
-	margin-top: -1px;
-	margin-bottom: -2.5px;
-	margin-inline-start: 0;
-	margin-inline-end: 5px;
-	padding: 0;
-}
-
 
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
 @media (min-resolution: 1.25dppx) {
-	.creator-type-dropmarker { background-image: url('chrome://zotero/skin/mac/arrow-down@2x.png'); }
+	item-box .creator-type-dropmarker { background-image: url('chrome://zotero/skin/mac/arrow-down@2x.png'); }
 }

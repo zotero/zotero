@@ -1,32 +1,34 @@
-row > hbox,
-row > vbox
-{
-	margin-top: 0 !important;
-	margin-bottom: 0 !important;
-	padding-top: 0 !important;
-	padding-bottom: 0 !important;
-}
-
-row vbox[fieldname]
-{
-	margin-inline-start: 1px;
-}
-
-.creator-type-label image {
-	margin-bottom: 0;
-}
-
-input {
-	padding: 2px;
-	margin: -1px 0;
-	margin-inline-start: 1px;
-}
-
-#item-type-menu
-{
-	padding: 0 !important;
-	padding-inline-start: 1px !important;
-	margin: 0 !important;
-	margin-inline-start: 1px !important;
-	margin-inline-end: 5px !important;
+item-box {
+	row > hbox,
+	row > vbox
+	{
+		margin-top: 0 !important;
+		margin-bottom: 0 !important;
+		padding-top: 0 !important;
+		padding-bottom: 0 !important;
+	}
+	
+	row vbox[fieldname]
+	{
+		margin-inline-start: 1px;
+	}
+	
+	.creator-type-label image {
+		margin-bottom: 0;
+	}
+	
+	input {
+		padding: 2px;
+		margin: -1px 0;
+		margin-inline-start: 1px;
+	}
+	
+	#item-type-menu
+	{
+		padding: 0 !important;
+		padding-inline-start: 1px !important;
+		margin: 0 !important;
+		margin-inline-start: 1px !important;
+		margin-inline-end: 5px !important;
+	}
 }
