@@ -138,7 +138,7 @@
 		"history": "History",
 		"itemType": "bill",
 		"language": "en-US",
-		"legislativeBody": "Legislative body",
+		"legislativeBody": "Authority",
 		"notes": [],
 		"relations": {},
 		"rights": "Rights",

@@ -134,7 +134,7 @@
 		"itemType": "bill",
 		"key": "6V75C9MH",
 		"language": "en-US",
-		"legislativeBody": "Legislative body",
+		"legislativeBody": "Authority",
 		"relations": {},
 		"rights": "Rights",
 		"section": "Section",
