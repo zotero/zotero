@@ -21,7 +21,7 @@ function onSuccess(result) {
 		msg += ` | ${result.totalCount} checked`; 
 	}
 
-	msg += ` [${yellow(`${result.processingTime}ms`)}]`;	
+	msg += ` [${yellow(`${result.processingTime.toFixed(2)}ms`)}]`;	
 
 	console.log(msg);
 }
