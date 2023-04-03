@@ -88,6 +88,7 @@
 	"bill": {
 		"abstractNote": "Abstract note",
 		"accessDate": "1997-06-13T23:59:58Z",
+		"authority": "Authority",
 		"code": "Code",
 		"creators": [
 			{
@@ -116,7 +117,6 @@
 		"history": "History",
 		"itemType": "bill",
 		"language": "en-US",
-		"legislativeBody": "Legislative body",
 		"number": 3,
 		"pages": "1-10",
 		"rights": "Rights",
