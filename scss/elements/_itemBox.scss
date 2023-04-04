@@ -1,4 +1,6 @@
 item-box {
+	--row-height: 1.5em;
+	
 	display: flex;
 	min-width: 0;
 	width: 100%;
@@ -14,7 +16,9 @@ item-box {
 	#info-table {
 		display: grid;
 		grid-template-columns: max-content 1fr;
-		grid-auto-rows: min-content;
+		// Make sure rows are at least --row-height tall, but no taller than their tallest child
+		// This lets rows expand for multi-line editors
+		grid-auto-rows: minmax(var(--row-height), max-content);
 		align-items: center;
 		width: 100%;
 	}
@@ -31,8 +35,17 @@ item-box {
 		margin-inline-end: 5px;
 	}
 
+	td > input, .creator-name-box > input {
+		align-self: center;
+		// Fields have 3px borders; cancel them out
+		margin-top: -3px;
+		margin-bottom: -3px;
+		margin-inline-start: 0;
+		padding: 0;
+	}
+	
 	td > input {
-		align-self: stretch;
+		margin-inline-end: 5px;
 	}
 
 	th > label {
@@ -119,9 +132,12 @@ item-box {
 
 	/* metadata field names */
 	th {
-		align-self: stretch;
+		display: flex;
+		height: var(--row-height);
+		align-self: start;
+		align-items: center;
+		justify-content: end;
 		font-weight: normal;
-		text-align: right;
 		margin-inline-start: 5px !important;
 		margin-inline-end: 2px !important;
 	}
