@@ -85,7 +85,7 @@ item-box {
 	#item-type-menu {
 		height: 1.5em !important;
 		min-height: 1.5em !important;
-		padding: 0 !important;
+		padding: 0 2px !important;
 		margin: 0 !important;
 		margin-inline-end: 5px !important;
 		max-height: 1.5em !important;
@@ -187,7 +187,7 @@ item-box {
 
 		& > div:first-child[fieldMode="0"] {
 			// Cancel out padding before comma
-			margin-inline-end: -2px;
+			margin-inline-end: -3px;
 		}
 	}
 
@@ -214,7 +214,6 @@ item-box {
 
 	.comma {
 		margin: 1px 0 !important;
-		margin-inline-end: 3px !important;
 	}
 
 	#zotero-date-field-status
