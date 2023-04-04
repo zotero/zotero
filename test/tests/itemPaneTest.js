@@ -16,13 +16,13 @@ describe("Item pane", function () {
 			var id = yield item.saveTx();
 			
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var label = itemBox.shadowRoot.querySelectorAll('[fieldname="title"]')[1];
+			var label = itemBox.querySelectorAll('[fieldname="title"]')[1];
 			assert.equal(label.textContent, '');
 			
 			item.setField('title', 'Test');
 			yield item.saveTx();
 			
-			label = itemBox.shadowRoot.querySelectorAll('[fieldname="title"]')[1];
+			label = itemBox.querySelectorAll('[fieldname="title"]')[1];
 			assert.equal(label.textContent, 'Test');
 			
 			yield Zotero.Items.erase(id);
@@ -41,12 +41,12 @@ describe("Item pane", function () {
 			await item.saveTx();
 			
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var label = itemBox.shadowRoot.querySelector('[fieldname="creator-0-lastName"]')
+			var label = itemBox.querySelector('[fieldname="creator-0-lastName"]')
 			var parent = label.parentNode;
 			assert.property(parent, 'oncontextmenu');
 			assert.isFunction(label.parentNode.oncontextmenu);
 			
-			var menupopup = itemBox.shadowRoot.getElementById('zotero-creator-transform-menu');
+			var menupopup = itemBox.querySelector('#zotero-creator-transform-menu');
 			// Fake a right-click
 			doc.popupNode = parent;
 			menupopup.openPopup(
@@ -73,7 +73,7 @@ describe("Item pane", function () {
 			yield item.saveTx();
 			
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var label = itemBox.shadowRoot.querySelector('[fieldname="creator-0-lastName"]');
+			var label = itemBox.querySelector('[fieldname="creator-0-lastName"]');
 			assert.isNull(label.parentNode.oncontextmenu, null);
 		});
 		
@@ -92,12 +92,12 @@ describe("Item pane", function () {
 			var id = yield item.saveTx();
 			
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var label = doc.getAnonymousNodes(itemBox)[0].getElementsByAttribute('fieldname', 'place')[1];
+			var label = itemBox.querySelector('[fieldname="place"]');
 			label.click();
-			var textbox = doc.getAnonymousNodes(itemBox)[0].getElementsByAttribute('fieldname', 'place')[1];
+			var textbox = itemBox.querySelector('[fieldname="place"]');
 			textbox.value = "Place";
 			
-			var menuLabel = doc.getAnonymousNodes(itemBox)[0].getElementsByAttribute('fieldname', 'creator-0-typeID')[0];
+			var menuLabel = itemBox.querySelector('[fieldname="creator-0-typeID"]');
 			menuLabel.click();
 			var menupopup = itemBox._creatorTypeMenu;
 			var menuItems = menupopup.getElementsByTagName('menuitem');
@@ -115,10 +115,9 @@ describe("Item pane", function () {
 			var item = await createDataObject('item');
 			
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var box = itemBox.shadowRoot;
-			var label = box.querySelector('div[fieldname="accessDate"].zotero-clicky');
+			var label = itemBox.querySelector('div[fieldname="accessDate"].zotero-clicky');
 			label.click();
-			var textbox = box.querySelector('input[fieldname="accessDate"]');
+			var textbox = itemBox.querySelector('input[fieldname="accessDate"]');
 			textbox.value = 'now';
 			// Blur events don't necessarily trigger if window doesn't have focus
 			itemBox.hideEditor(textbox);
@@ -144,13 +143,12 @@ describe("Item pane", function () {
 			await item.saveTx();
 			
 			let itemBox = doc.getElementById('zotero-editpane-item-box');
-			let box = doc.getAnonymousNodes(itemBox)[0];
-			
-			box.querySelector('label[fieldname="creator-0-lastName"]').click();
-			itemBox.hideEditor(box.querySelector('textbox[fieldname="creator-0-lastName"]'));
+
+			itemBox.querySelector('label[fieldname="creator-0-lastName"]').click();
+			itemBox.hideEditor(itemBox.querySelector('textbox[fieldname="creator-0-lastName"]'));
 			
 			assert.equal(
-				box.querySelector('label[fieldname="creator-0-lastName"]').getAttribute('fieldMode'),
+				itemBox.querySelector('label[fieldname="creator-0-lastName"]').getAttribute('fieldMode'),
 				'1'
 			);
 		});
