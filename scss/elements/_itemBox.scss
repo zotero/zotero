@@ -64,6 +64,7 @@ item-box {
 	.value {
 		min-height: 14px;
 		align-self: center;
+		padding-inline: 2px;
 	}
 
 	.value:not(.multiline) {
@@ -139,7 +140,7 @@ item-box {
 		justify-content: end;
 		font-weight: normal;
 		margin-inline-start: 5px !important;
-		margin-inline-end: 2px !important;
+		margin-inline-end: 0 !important;
 	}
 
 	#more-creators-label
@@ -182,6 +183,11 @@ item-box {
 		& > div {
 			flex-shrink: 1;
 			min-width: 10px;
+		}
+
+		& > div:first-child[fieldMode="0"] {
+			// Cancel out padding before comma
+			margin-inline-end: -2px;
 		}
 	}
 
