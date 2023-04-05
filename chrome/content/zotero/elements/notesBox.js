@@ -39,10 +39,10 @@
 				<box flex="1" style="display: flex" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 					<div style="flex-grow: 1" xmlns="http://www.w3.org/1999/xhtml">
 						<div class="header">
-							<label id="num"/>
-							<button id="add">&zotero.item.add;</button>
+							<label id="notes-num"/>
+							<button id="notes-add">&zotero.item.add;</button>
 						</div>
-						<div id="grid" class="grid"/>
+						<div id="notes-grid" class="grid"/>
 					</div>
 				</box>
 			`, ['chrome://zotero/locale/zotero.dtd']);
@@ -55,7 +55,7 @@
 			let content = document.importNode(this.content, true);
 			this.append(content);
 
-			this._id('add').addEventListener('click', this._handleAdd);
+			this._id('notes-add').addEventListener('click', this._handleAdd);
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'notesBox');
 		}
@@ -115,9 +115,9 @@
 			}
 
 			this._noteIDs = this._item.getNotes();
-			this._id('add').hidden = this._mode != 'edit';
+			this._id('notes-add').hidden = this._mode != 'edit';
 
-			let grid = this._id('grid');
+			let grid = this._id('notes-grid');
 			grid.replaceChildren();
 
 			let notes = Zotero.Items.get(this._item.getNotes());
@@ -147,7 +147,7 @@
 			}
 
 			let num = this._noteIDs.length;
-			this._id('num').replaceChildren(Zotero.getString('pane.item.notes.count', num, num));
+			this._id('notes-num').replaceChildren(Zotero.getString('pane.item.notes.count', num, num));
 		}
 
 		_handleAdd = (event) => {
@@ -166,7 +166,7 @@
 		}
 
 		_id(id) {
-			return this.querySelector(`[id=${id}]`);
+			return this.querySelector(`#${id}`);
 		}
 	}
 	customElements.define("notes-box", NotesBox);

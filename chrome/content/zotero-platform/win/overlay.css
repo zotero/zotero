@@ -119,10 +119,6 @@ tree {
 	padding-left: 0.05em;
 }
 
-#tags-box button {
-	margin: .04em 0 0 .15em !important;
-}
-
 .zotero-editpane-tabs spacer {
 	border: 0;
 }
