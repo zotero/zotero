@@ -93,10 +93,11 @@ Zotero_File_Exporter.prototype.save = async function () {
 				}
 			}
 		}
-		// Otherwise exclude note export translators
-		else {
-			translators = translators.filter(t => !t.configOptions || !t.configOptions.noteTranslator);
-		}
+	}
+
+	// Exclude note translators if not exporting notes
+	if (!exportingNotes) {
+		translators = translators.filter(t => !t.configOptions || !t.configOptions.noteTranslator);
 	}
 	
 	// present options dialog
