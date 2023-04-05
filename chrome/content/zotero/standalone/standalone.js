@@ -903,7 +903,10 @@ ZoteroStandalone.DebugOutput = {
 
 
 function toJavaScriptConsole() {
-	openWindowByType('chrome://global/content/console.xul', 'global:console');
+	// We need the DevTools' built-in require() for this
+	const { require } = ChromeUtils.import("resource://devtools/shared/loader/Loader.jsm");
+	const { BrowserConsoleManager } = require("resource://devtools/client/webconsole/browser-console-manager.js");
+	BrowserConsoleManager.openBrowserConsoleOrFocus();
 }
 
 function openRunJSWindow() {
