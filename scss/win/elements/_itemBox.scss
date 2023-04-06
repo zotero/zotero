@@ -17,10 +17,21 @@ item-box {
 		margin-bottom: 0;
 	}
 	
-	input {
-		padding: 2px;
-		margin: -1px 0;
-		margin-inline-start: 1px;
+	@media (-moz-platform: windows-win10) {
+		td > input, td > textarea, .creator-name-box > input {
+			// Give text fields a consistent, native-ish look using Windows 11
+			// colors. Ideally, we only want to do this on Windows 11, but
+			// Windows 11 can't currently be specifically targeted.
+			// https://bugzilla.mozilla.org/show_bug.cgi?id=1825447
+			padding: 2px 3px;
+			border: 1px solid #838383;
+			border-radius: 3px;
+			outline: none;
+
+			&:focus {
+				border: 1px solid #2B65BA;
+			}
+		}
 	}
 	
 	#item-type-menu
