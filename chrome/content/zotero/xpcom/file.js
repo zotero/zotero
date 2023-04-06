@@ -693,4 +693,24 @@ Zotero.File = new function(){
 		
 		throw (e);
 	}
+	
+	/**
+	 * Get reference to file pointed to by shortcut/symbolic link
+	 * @param {nsILocalFile} file
+	 * @return {nsILocalFile} Target file
+	 */
+	this.getTargetFile = function(file) {
+		if (!file.isSymlink()) return file;
+		
+		var followLinks = file.followLinks; // So we can restore it
+		var newFile = Components.classes["@mozilla.org/file/local;1"]
+			.createInstance(Components.interfaces.nsILocalFile);
+		
+		file.followLinks = true;
+		newFile.initWithPath(file.target);
+		
+		newFile.followLinks = file.followLinks = followLinks;
+		
+		return newFile;
+	}
 }
