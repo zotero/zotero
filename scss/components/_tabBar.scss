@@ -1,5 +1,6 @@
 #tab-bar-container {
 	min-height: 30px;
+	border-bottom: $tab-border;
 }
 
 .tab-bar-inner-container {
@@ -80,7 +81,6 @@
 		content: "";
 		width: 0px;
 		min-width: 0px;
-		border-bottom: $tab-border;
 		border-inline-end: $tab-border;
 	}
 
@@ -89,7 +89,6 @@
 		flex: 1 0 0%;
 		width: 100%;
 		min-width: 0px;
-		border-bottom: $tab-border;
 		border-inline-start: $tab-border;
 	}
 }
