@@ -508,6 +508,12 @@ describe("Zotero.Translate.ItemGetter", function() {
 						
 						assert.isTrue(sqlDateTimeRe.test(attachment.dateAdded), prefix + 'dateAdded matches SQL format' + suffix);
 						assert.isTrue(sqlDateTimeRe.test(attachment.dateModified), prefix + 'dateModified matches SQL format' + suffix);
+						
+						// Certain fields should be available under uniqueFields
+						var uniqueFields = ['title', 'url', 'mimeType', 'accessDate', 'charset', 'note'];
+						for (let i=0; i<uniqueFields.length; i++) {
+							assert.equal(attachment[uniqueFields[i]], attachment.uniqueFields[uniqueFields[i]], prefix + uniqueFields[i] + ' available under uniqueFields' + suffix);
+						}
 					} else {
 						assert.equal(attachment.contentType, 'application/pdf', prefix + 'contentType is correct' + suffix);
 						
