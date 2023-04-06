@@ -152,7 +152,7 @@ Zotero.Streamer_Module.prototype = {
 		
 		var window = Cc["@mozilla.org/appshell/appShellService;1"]
 			.getService(Ci.nsIAppShellService).hiddenDOMWindow;
-		this._socket = new window.WebSocket(url, "zotero-streaming-api-v1");
+		this._socket = new window.WebSocket(url);
 		var deferred = Zotero.Promise.defer();
 		
 		this._socket.onopen = () => {
