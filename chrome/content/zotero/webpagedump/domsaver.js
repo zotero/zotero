@@ -318,6 +318,10 @@ var wpdDOMSaver = {
 
 	// get the node value of aNode directly from the actual DOM tree (WPD_CLONENODEBUG)
 	getCurrentNodeValue: function (aNode) {
+		// Input elements should never appear outside of body, so this shouldn't
+		// happen, but better be fool proof
+		if (!this.curBody) return aNode.value;
+		
 		try {
 			this.curDocument.body.cloneNode(false);
 			var body = this.curDocument.body;
@@ -1012,11 +1016,12 @@ var wpdDOMSaver = {
 			rootNode.appendChild(aDocument.createTextNode("\n"));
 		} catch (ex) {}
 		try {
-			this.curBody = aDocument.body.cloneNode(true);
-		} catch (ex) {
-			this.curBody = aDocument.getElementsByTagName("body")[0].cloneNode(true);
-		}
-		rootNode.appendChild(this.curBody);
+			let body = aDocument.body || aDocument.getElementsByTagName("body")[0];
+			if (body) this.curBody = body.cloneNode(true);
+		} catch (ex) {}
+		
+		if (this.curBody) rootNode.appendChild(this.curBody);
+		
 		rootNode.appendChild(aDocument.createTextNode("\n"));
 
 		// now the processing of the dom nodes (changing hrefs, downloading...)
@@ -1081,11 +1086,8 @@ var wpdDOMSaver = {
 	// Main Routine: call it for saving the actual active top window
 	// (be sure to call the init function at the top of this file before)
 	saveHTMLDocument: function () {
-		try {
-			return this.saveDocumentEx(this.document, this.name);
-		} catch (ex) {
-			wpdCommon.addError("[wpdDOMSaver.saveHTMLDocument]", ex);
-		}
+		if (!this.document.body) throw new Error("Document does not contain a body");
+		return this.saveDocumentEx(this.document, this.name);
 	}
 
 };

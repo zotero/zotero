@@ -207,6 +207,8 @@ Zotero.Attachments = new function(){
 			mimeType, libraryID, callback, cookieSandbox) {
 		Zotero.debug('Importing attachment from URL ' + url);
 		
+		callback = callback || function(_, e) { if (e) throw e };
+		
 		if (sourceItemID && parentCollectionIDs) {
 			var msg = "parentCollectionIDs is ignored when sourceItemID is set in Zotero.Attachments.importFromURL()";
 			Zotero.debug(msg, 2);
@@ -220,19 +222,22 @@ Zotero.Attachments = new function(){
 		var urlRe = /^https?:\/\/[^\s]*$/;
 		var matches = urlRe.exec(url);
 		if (!matches) {
-			if(callback) callback(false);
-			throw ("Invalid URL '" + url + "' in Zotero.Attachments.importFromURL()");
+			callback(false, new Error("Invalid URL '" + url));
 		}
 		
 		// Save using a hidden browser
 		var nativeHandlerImport = function () {
 			var browser = Zotero.HTTP.processDocuments(url, function() {
-				var importCallback = function (item) {
+				var importCallback = function (item, e) {
 					Zotero.Browser.deleteHiddenBrowser(browser);
-					if(callback) callback(item);
+					callback(item, e);
 				};
-				Zotero.Attachments.importFromDocument(browser.contentDocument,
-					sourceItemID, forceTitle, parentCollectionIDs, importCallback, libraryID);
+				try {
+					Zotero.Attachments.importFromDocument(browser.contentDocument,
+						sourceItemID, forceTitle, parentCollectionIDs, importCallback, libraryID);
+				} catch (e) {
+					importCallback(false, e);
+				}
 			}, undefined, undefined, true, cookieSandbox);
 		};
 		
@@ -303,7 +308,7 @@ Zotero.Attachments = new function(){
 							Zotero.debug(errString, 2);
 							Zotero.debug(str);
 							attachmentItem.erase();
-							if(callback) callback(false, new Error(errString));
+							callback(false, new Error(errString));
 							return;
 						}
 						
@@ -320,7 +325,7 @@ Zotero.Attachments = new function(){
 						Zotero.Notifier.trigger('add', 'item', itemID);
 						Zotero.Notifier.trigger('modify', 'item', sourceItemID);
 				
-						if(callback) callback(attachmentItem);
+						callback(attachmentItem);
 						
 						// We don't have any way of knowing that the file
 						// is flushed to disk, so we just wait a second
@@ -335,7 +340,7 @@ Zotero.Attachments = new function(){
 					catch (e) {
 						// Clean up
 						attachmentItem.erase();
-						if(callback) callback(false, e);
+						callback(false, e);
 						
 						throw (e);
 					}
@@ -534,6 +539,8 @@ Zotero.Attachments = new function(){
 	function importFromDocument(document, sourceItemID, forceTitle, parentCollectionIDs, callback, libraryID) {
 		Zotero.debug('Importing attachment from document');
 		
+		callback = callback || function(_, e) { if (e) throw e }
+		
 		if (sourceItemID && parentCollectionIDs) {
 			var msg = "parentCollectionIDs is ignored when sourceItemID is set in Zotero.Attachments.importFromDocument()";
 			Zotero.debug(msg, 2);
@@ -598,15 +605,19 @@ Zotero.Attachments = new function(){
 			file.append(fileName)
 			
 			var f = function() {
-				if (mimeType == 'application/pdf') {
-					Zotero.Fulltext.indexPDF(file, itemID);
+				try {
+					if (mimeType == 'application/pdf') {
+						Zotero.Fulltext.indexPDF(file, itemID);
+					}
+					else if (Zotero.MIME.isTextType(mimeType)) {
+						Zotero.Fulltext.indexDocument(document, itemID);
+					}
+				} catch(e) {
+					Zotero.debug("Error trying to index attachment");
+					Zotero.logError(e);
 				}
-				else if (Zotero.MIME.isTextType(mimeType)) {
-					Zotero.Fulltext.indexDocument(document, itemID);
-				}
-				if (callback) {
-					callback(attachmentItem);
-				}
+				
+				callback(attachmentItem);
 			};
 			
 			if (mimeType === 'text/html' || mimeType === 'application/xhtml+xml') {
@@ -614,13 +625,11 @@ Zotero.Attachments = new function(){
 				
 				// Load WebPageDump code
 				var wpd = {"Zotero":Zotero};
-				Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-					.getService(Components.interfaces.mozIJSSubScriptLoader)
-					.loadSubScript("chrome://zotero/content/webpagedump/common.js", wpd);
-				Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
-					.getService(Components.interfaces.mozIJSSubScriptLoader)
-					.loadSubScript("chrome://zotero/content/webpagedump/domsaver.js", wpd);
-
+				let loader = Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+					.getService(Components.interfaces.mozIJSSubScriptLoader);
+				loader.loadSubScript("chrome://zotero/content/webpagedump/common.js", wpd);
+				loader.loadSubScript("chrome://zotero/content/webpagedump/domsaver.js", wpd);
+				
 				wpd.wpdDOMSaver.init(file.path, document);
 				wpd.wpdDOMSaver.saveHTMLDocument();
 
@@ -663,7 +672,7 @@ Zotero.Attachments = new function(){
 						// Clean up
 						var item = Zotero.Items.get(itemID);
 						item.erase();
-						if(callback) callback(false, e);
+						callback(false, e);
 						
 						throw (e);
 					}
@@ -705,20 +714,21 @@ Zotero.Attachments = new function(){
 			return itemID;
 		}
 		catch (e) {
-			Zotero.DB.rollbackTransaction();
-			
 			try {
-				// Clean up
+				// Hack to make sure that the item tree gets updated correctly
+				// Otherwise, a twisty is displayed even though the attachment is gone
 				if (itemID) {
-					var itemDir = this.getStorageDirectory(itemID);
-					if (itemDir.exists()) {
-						itemDir.remove(true);
-					}
+					let item = Zotero.Items.get(itemID);
+					item.erase();
+					// Note: If removing hack, make sure to delete files from storage
+					// directory, since rollbackTransaction will not take care of this
 				}
 			}
 			catch (e) {}
 			
-			throw (e);
+			Zotero.DB.rollbackTransaction();
+			
+			callback(false, e);
 		}
 	}
 	

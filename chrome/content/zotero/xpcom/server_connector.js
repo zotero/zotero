@@ -47,6 +47,7 @@ Zotero.Server.Connector.AttachmentProgressManager = new function() {
 	 */
 	this.onProgress = function(attachment, progress, error) {
 		attachmentProgress[attachmentsInProgress.get(attachment)] = progress;
+		if (error) Zotero.logError(error);
 	};
 		
 	/**
