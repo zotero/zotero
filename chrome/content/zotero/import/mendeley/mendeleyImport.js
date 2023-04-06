@@ -11,7 +11,7 @@ Services.scriptloader.loadSubScript("chrome://zotero/content/import/mendeley/men
 
 const importerVersion = 1;
 const { apiTypeToDBType, apiFieldToDBField } = mendeleyOnlineMappings;
-const { apiFetch, codeAuth, directAuth, get, getAll } = mendeleyAPIUtils;
+const { apiFetch, codeAuth, get, getAll } = mendeleyAPIUtils;
 
 const colorMap = new Map();
 colorMap.set('rgb(255, 245, 173)', '#ffd400');
@@ -140,7 +140,7 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 		this._itemDone();
 
 		let folderKeys = new Map();
-		if(!this.relinkOnly) {
+		if (!this.relinkOnly) {
 			const folders = this._tokens
 				? await this._getFoldersAPI(mendeleyGroupID)
 				: await this._getFoldersDB(mendeleyGroupID);
@@ -182,12 +182,14 @@ Zotero_Import_Mendeley.prototype.translate = async function (options = {}) {
 
 		this._interruptChecker(true);
 
+		// eslint-disable-next-line multiline-ternary
 		let collections = this.relinkOnly ? new Map() : this._tokens
 			? await this._getDocumentCollectionsAPI(documents, rootCollectionKey, folderKeys)
 			: await this._getDocumentCollectionsDB(mendeleyGroupID, documents, rootCollectionKey, folderKeys);
 
 		this._interruptChecker(true);
 
+		// eslint-disable-next-line multiline-ternary
 		let files = this.relinkOnly ? new Map() : this._tokens
 			? await this._getDocumentFilesAPI(documents)
 			: await this._getDocumentFilesDB(mendeleyGroupID);
@@ -562,7 +564,7 @@ Zotero_Import_Mendeley.prototype._getDocumentsAPI = async function (groupID) {
 	}
 	
 
-	return (await getAll(this._tokens, 'documents', params, headers, {}, this._interruptChecker)).map(d => {
+	return (await getAll(this._tokens, 'documents', params, headers, {}, this._interruptChecker)).map((d) => {
 		const processedDocument = { ...d, remoteUuid: d.id };
 
 		try {

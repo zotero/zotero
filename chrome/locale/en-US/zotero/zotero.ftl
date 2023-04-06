@@ -47,11 +47,13 @@ general-error = Error
 file-interface-import-error = An error occurred while trying to import the selected file. Please ensure that the file is valid and try again.
 file-interface-import-complete = Import Complete
 file-interface-items-were-imported = { $numItems ->
-    [one] item was imported
+    [0] No items were imported
+    [one] One item was imported
     *[other] { $numItems } items were imported
     }
 file-interface-items-were-relinked = { $numRelinked ->
-    [one] item was relinked
+    [0] No items were relinked
+    [one] One item was relinked
     *[other] { $numRelinked } items were relinked
     }
 
