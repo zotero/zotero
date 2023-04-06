@@ -1587,12 +1587,17 @@ Zotero.Utilities.Internal = {
 	 * @return {Promise<Object|null>} Item metadata in translator format
 	 */
 	translateURL: async function (url) {
-		let doc = (await Zotero.HTTP.processDocuments(url, doc => doc))[0];
-		let newItems = await this.translateDocument(doc);
-		if (!newItems.length) {
-			return null;
+		let key = url;
+		try {
+			let uri = Services.io.newURI(url);
+			key = uri.host;
 		}
-		return newItems[0];
+		catch (e) {
+			Zotero.logError(e);
+		}
+		// Limit to two requests per second per host
+		let caller = this._getConcurrentCaller(key, 500);
+		return caller.start(() => this._translateURLNow(url));
 	},
 
 
@@ -1612,32 +1617,47 @@ Zotero.Utilities.Internal = {
 			throw new Error('Identifier object must contain one identifier field');
 		}
 
-		let caller = this._getSearchCaller(Object.keys(identifier)[0]);
+		// Crossref tolerates 50 queries per second [https://github.com/CrossRef/rest-api-doc/issues/196#issuecomment-297260099]
+		// For all other identifier types, be cautious and limit to two per second.
+		let key = Object.keys(identifier)[0];
+		let caller = this._getConcurrentCaller('identifier_' + key, key == 'DOI' ? 30 : 500);
 		return caller.start(() => this._translateIdentifierNow(identifier));
 	},
 
 
-	_searchCallers: new Map(),
+	_concurrentCallers: new Map(),
 
 
 	/**
-	 * Return a rate-limiting search caller for the given identifier type.
+	 * Return a rate-limiting ConcurrentCaller for the given key.
 	 */
-	_getSearchCaller: function (identifier) {
-		if (this._searchCallers.has(identifier)) {
-			return this._searchCallers.get(identifier);
+	_getConcurrentCaller: function (key, interval) {
+		if (this._concurrentCallers.has(key)) {
+			return this._concurrentCallers.get(key);
 		}
 
-		Components.utils.import("resource://zotero/concurrentCaller.js");
+		let { ConcurrentCaller } = Cu.import("resource://zotero/concurrentCaller.js");
 		let caller = new ConcurrentCaller({
 			numConcurrent: 1,
-			// Crossref tolerates 50 queries per second [https://github.com/CrossRef/rest-api-doc/issues/196#issuecomment-297260099]
-			// For all other identifier types, be cautious and limit to two per second.
-			interval: identifier == 'DOI' ? 30 : 500,
+			interval,
 			onError: e => Zotero.logError(e)
 		});
-		this._searchCallers.set(identifier, caller);
+		this._concurrentCallers.set(key, caller);
 		return caller;
+	},
+
+
+	/**
+	 * Helper function for translateURL. Runs translation without
+	 * any rate limiting.
+	 */
+	_translateURLNow: async function (url) {
+		let doc = (await Zotero.HTTP.processDocuments(url, doc => doc))[0];
+		let newItems = await this.translateDocument(doc);
+		if (!newItems.length) {
+			return null;
+		}
+		return newItems[0];
 	},
 
 
