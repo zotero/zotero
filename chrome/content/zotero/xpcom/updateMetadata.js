@@ -23,6 +23,8 @@
     ***** END LICENSE BLOCK *****
 */
 
+let { getUpdatedItemMetadata } = ChromeUtils.importESModule("chrome://zotero/content/updateMetadataUtils.mjs");
+
 Zotero.UpdateMetadata = new function () {
 	const OFFLINE_RECHECK_DELAY = 60 * 1000;
 
@@ -235,7 +237,7 @@ Zotero.UpdateMetadata = new function () {
 					throw new Error();
 				}
 
-				let newItem = await Zotero.Utilities.Internal.getUpdatedItemMetadata(oldItem);
+				let newItem = await getUpdatedItemMetadata(oldItem);
 				if (newItem) {
 					_setRowFields(row, oldItem, newItem);
 					row.status = Zotero.UpdateMetadata.ROW_SUCCEEDED;
