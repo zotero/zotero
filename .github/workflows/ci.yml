@@ -5,12 +5,12 @@ jobs:
     name: Build, Upload, Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
       
       - name: Install Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 18
           #cache: npm
@@ -29,7 +29,7 @@ jobs:
       - name: Cache Firefox
         if: false # temporarily disabled
         id: firefox-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: firefox-x86_64
           key: firefox-60.9.0esr
@@ -46,7 +46,7 @@ jobs:
       
       - name: Cache Node modules
         id: node-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: node_modules
           key: node-modules-${{ hashFiles('package-lock.json') }}
@@ -86,7 +86,7 @@ jobs:
 
       - name: Cache utilities Node modules
         id: utilities-node-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: chrome/content/zotero/xpcom/utilities/node_modules
           key: utilities-node-modules-${{ hashFiles('chrome/content/zotero/xpcom/utilities/package-lock.json') }}
