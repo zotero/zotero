@@ -80,7 +80,13 @@ var Zotero_Tabs = new function () {
 			iconBackgroundImage: tab.iconBackgroundImage
 		})));
 		var { tab } = this._getTab(this._selectedID);
-		document.title = (tab.title.length ? tab.title + ' - ' : '') + 'Zotero';
+		let tabTitle = tab.title;
+		if (Zotero.isWin) {
+			// Windows displays bidi control characters as placeholders in window titles, so strip them
+			// See https://github.com/mozilla-services/screenshots/issues/4863
+			tabTitle = tabTitle.replace(/[\u2068\u2069]/g, '');
+		}
+		document.title = (tabTitle.length ? tabTitle + ' - ' : '') + 'Zotero';
 		this._updateTabBar();
 		// Hide any tab `title` tooltips that might be open
 		window.Zotero_Tooltip.stop();
