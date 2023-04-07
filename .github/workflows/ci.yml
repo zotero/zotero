@@ -27,7 +27,7 @@ jobs:
       
       - name: Cache Firefox
         id: firefox-cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: firefox-x86_64
           key: firefox-60.9.0esr
