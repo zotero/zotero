@@ -1,5 +1,32 @@
 #tab-bar-container {
+	// These variables can be overridden in platform styles to set platform-specific safe areas
+	--safe-area-start: 0;
+	--safe-area-end: 0;
+
 	min-height: 30px;
+	
+	&:not([hidden]) {
+		// display: flex overrides the hidden attribute
+		display: flex;
+	}
+
+	&::before {
+		content: '';
+		min-width: var(--safe-area-start);
+		// Add bottom border to safe area space
+		border-bottom: $tab-border;
+	}
+
+	&::after {
+		content: '';
+		min-width: var(--safe-area-end);
+		// Add bottom border to safe area space
+		border-bottom: $tab-border;
+	}
+	
+	& > div {
+		flex-grow: 1;
+	}
 }
 
 .tab-bar-inner-container {
@@ -18,6 +45,11 @@
 		color: #bebebe;
 		display: none;
 		box-shadow: none;
+		// Add bottom border to scroll arrows,
+		// and negate the extra vertical pixel added by the border with a negative margin
+		border-bottom: $tab-border;
+		margin-bottom: -1px;
+		box-sizing: border-box;
 
 		.icon {
 			display: flex;
@@ -78,17 +110,17 @@
 
 	&:before {
 		content: "";
-		width: 0px;
-		min-width: 0px;
-		border-bottom: $tab-border;
+		width: 0;
+		min-width: 0;
 		border-inline-end: $tab-border;
 	}
 
 	&:after {
 		content: "";
-		flex: 1 0 0%;
+		flex: 1 0 0;
 		width: 100%;
-		min-width: 0px;
+		min-width: 0;
+		// Add bottom border to the space between the last tab and the spacer in #tab-bar-container::after
 		border-bottom: $tab-border;
 		border-inline-start: $tab-border;
 	}

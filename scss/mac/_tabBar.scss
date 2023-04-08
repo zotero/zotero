@@ -1,12 +1,12 @@
+#tab-bar-container {
+	--safe-area-start: 78px;
+	--safe-area-end: 20px;
+}
+
 .tabs {
 	-moz-window-dragging: drag;
 }
 
 .tab {
 	-moz-window-dragging: no-drag;
-}
-
-.tab-bar-inner-container {
-	margin-inline-start: 78px;
-	margin-inline-end: 20px;
 }
