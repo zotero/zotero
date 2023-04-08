@@ -1,0 +1,97 @@
+[
+    {
+        "authored": false,
+        "confirmed": true,
+        "created": "2023-03-07T13:30:46.353Z",
+        "file_attached": false,
+        "hidden": false,
+        "id": "b7b1023f-5072-4608-8fd5-87b045b77887",
+        "client_data": "{\"desktop_id\":\"9c03fca4-ee5b-435e-abdd-fb6d7d11cd02\"}",
+        "last_modified": "2023-03-07T13:30:46.025Z",
+        "private_publication": false,
+        "profile_id": "8dbf0832-8723-4c48-b532-20c0b7f6e01a",
+        "read": false,
+        "source": "something wrong",
+        "identifiers": {
+            "doi": "10.1111",
+            "pmid": "PMID:    11111111",
+            "arxiv": "1111.2222"
+        },
+        "starred": false,
+        "title": "This one has no authors",
+        "type": "journal",
+        "folder_uuids": [
+            "8d2f262d-49b3-4dfc-8968-0bb71bcd92ea"
+        ],
+        "year": 1987
+    },
+    {
+        "authored": false,
+        "confirmed": true,
+        "created": "2023-03-07T13:30:46.353Z",
+        "file_attached": false,
+        "hidden": false,
+        "id": "a15698a9-6214-4fac-81c5-5ac62b2d06b5",
+        "client_data": "{\"desktop_id\":\"fd86e48e-1931-4282-b72d-78c535b0398c\"}",
+        "last_modified": "2023-03-07T13:30:46.025Z",
+        "private_publication": false,
+        "profile_id": "8dbf0832-8723-4c48-b532-20c0b7f6e01a",
+        "read": false,
+        "source": "something wrong",
+        "identifiers":
+        {
+            "doi": "10.1111",
+            "pmid": "PMID:    11111111",
+            "arxiv": "1111.2222"
+        },
+        "starred": false,
+        "title": "This one has empty authors",
+        "authors":
+        [
+            {
+                "first_name": "",
+                "last_name": ""
+            },
+            {
+                "first_name": "",
+                "last_name": ""
+            },
+            {
+
+            }
+        ],
+        "type": "journal",
+        "folder_uuids": [
+            "8d2f262d-49b3-4dfc-8968-0bb71bcd92ea"
+        ],
+        "year": 1987
+    },
+    {
+        "authored": false,
+        "confirmed": true,
+        "created": "2023-03-07T13:30:46.353Z",
+        "file_attached": false,
+        "hidden": false,
+        "id": "49426b47-d9ff-4ab6-ba2c-54e3608f56b8",
+        "client_data": "{\"desktop_id\":\"c7ec2737-044a-493b-9d94-d7f67be68765\"}",
+        "last_modified": "2023-03-07T13:30:46.025Z",
+        "private_publication": false,
+        "profile_id": "8dbf0832-8723-4c48-b532-20c0b7f6e01a",
+        "read": false,
+        "source": "something wrong",
+        "identifiers": {
+            "doi": "10.1111",
+            "pmid": "PMID:    11111111",
+            "arxiv": "1111.2222"
+        },
+        "starred": false,
+        "tags": ["", ""],
+        "keywords": [],
+        "title": "This one has empty tags and keywords",
+        "type": "journal",
+        "folder_uuids": [
+            "8d2f262d-49b3-4dfc-8968-0bb71bcd92ea"
+        ],
+        "year": 1987
+    }
+]

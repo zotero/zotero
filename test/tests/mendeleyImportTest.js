@@ -1,12 +1,17 @@
 /* global setHTTPResponse:false, sinon: false, Zotero_Import_Mendeley: false, HttpServer: false */
 
 describe('Zotero_Import_Mendeley', function () {
-	var server, importer, httpd, httpdURL;
+	var server, httpd, httpdURL, importers;
+
+	const getImporter = () => {
+		const importer = new Zotero_Import_Mendeley();
+		importer.mendeleyAuth = { access_token: 'access_token', refresh_token: 'refresh_token' };// eslint-disable-line camelcase
+		importers.push(importer);
+		return importer;
+	};
 
 	before(async () => {
 		Components.utils.import('chrome://zotero/content/import/mendeley/mendeleyImport.js');
-		importer = new Zotero_Import_Mendeley();
-		importer.mendeleyCode = 'CODE';
 
 		// real http server is used to deliver an empty pdf so that annotations can be processed during import
 		Components.utils.import("resource://zotero-unit/httpd.js");
@@ -25,12 +30,15 @@ describe('Zotero_Import_Mendeley', function () {
 	});
 
 	beforeEach(async () => {
+		importers = [];
 		Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
-		server = sinon.fakeServer.create();
+		server = sinon.fakeServer.create({
+			unsafeHeadersEnabled: false
+		});
 		server.autoRespond = true;
-		setHTTPResponse(server, 'https://www.zotero.org/', {
+		setHTTPResponse(server, 'https://api.mendeley.com/', {
 			method: 'POST',
-			url: `utils/mendeley/oauth`,
+			url: `oauth/token`,
 			status: 200,
 			headers: {},
 			json: {
@@ -127,12 +135,21 @@ describe('Zotero_Import_Mendeley', function () {
 		});
 	});
 
-	afterEach(() => {
+	afterEach(async () => {
+		await Promise.all(
+			importers
+				.map(importer => ([
+					Zotero.Items.erase(Array.from(new Set(importer.newItems)).map(i => i.id)),
+					Zotero.Collections.erase(Array.from(new Set(importer.newCollections)).map(c => c.id))
+				]))
+				.reduce((prev, a) => ([...prev, ...a]), []) // .flat() in >= FF62
+		);
 		Zotero.HTTP.mock = null;
 	});
 
 	describe('#import', () => {
 		it("should import collections, items, attachments & annotations", async () => {
+			const importer = getImporter();
 			await importer.translate({
 				libraryID: Zotero.Libraries.userLibraryID,
 				collections: null,
@@ -140,17 +157,17 @@ describe('Zotero_Import_Mendeley', function () {
 			});
 
 			const journal = (await Zotero.Relations
-				.getByPredicateAndObject('item', 'mendeleyDB:documentUUID', '7fea3cb3-f97d-3f16-8fad-f59caaa71688'))
+				.getByPredicateAndObject('item', 'mendeleyDB:documentUUID', 'b5f57b1a-f083-486c-aec7-5d5edd366dd2'))
 				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
 				.shift();
 
 			const report = (await Zotero.Relations
-				.getByPredicateAndObject('item', 'mendeleyDB:documentUUID', '07a74c26-28d1-4d9f-a60d-3f3bc5ef76ef'))
+				.getByPredicateAndObject('item', 'mendeleyDB:documentUUID', '616ec6d1-8d23-4414-8b6e-7bb129677577'))
 				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
 				.shift();
 
 			const withpdf = (await Zotero.Relations
-				.getByPredicateAndObject('item', 'mendeleyDB:documentUUID', 'c54b0c6f-c4ce-4706-8742-bc7d032df862'))
+				.getByPredicateAndObject('item', 'mendeleyDB:documentUUID', '3630a4bf-d97e-46c4-8611-61ec50f840c6'))
 				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
 				.shift();
 
@@ -159,10 +176,19 @@ describe('Zotero_Import_Mendeley', function () {
 				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
 				.shift();
 
+			const withTags = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:documentUUID', '4308d8ec-e8ea-43fb-9d38-4e6628f7c10a'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+
+			
+			assert.equal(journal.getRelations()['mendeleyDB:remoteDocumentUUID'], '7fea3cb3-f97d-3f16-8fad-f59caaa71688');
 			assert.equal(journal.getField('title'), 'Foo Bar');
 			assert.equal(journal.itemTypeID, Zotero.ItemTypes.getID('journalArticle'));
+			assert.equal(report.getRelations()['mendeleyDB:remoteDocumentUUID'], '07a74c26-28d1-4d9f-a60d-3f3bc5ef76ef');
 			assert.equal(report.getField('title'), 'Sample Report');
 			assert.equal(report.itemTypeID, Zotero.ItemTypes.getID('report'));
+			assert.equal(withpdf.getRelations()['mendeleyDB:remoteDocumentUUID'], 'c54b0c6f-c4ce-4706-8742-bc7d032df862');
 			assert.equal(withpdf.getField('title'), 'Item with PDF');
 			assert.equal(withpdf.itemTypeID, Zotero.ItemTypes.getID('journalArticle'));
 			
@@ -175,6 +201,17 @@ describe('Zotero_Import_Mendeley', function () {
 			// identifiers
 			assert.equal(journal.getField('DOI'), '10.1111');
 			assert.sameMembers(journal.getField('extra').split('\n'), ['PMID: 11111111', 'arXiv: 1111.2222']);
+
+			// tags
+			assert.equal(withTags.getTags().length, 4);
+			assert.sameMembers(
+				withTags.getTags().filter(t => t.type === 1).map(t => t.tag),
+				['keyword1', 'keyword2']
+			);
+			assert.sameMembers(
+				withTags.getTags().filter(t => !t.type).map(t => t.tag),
+				['tag1', 'tag2']
+			);
 
 			// attachment & annotations
 			assert.lengthOf(withpdf.getAttachments(), 1);
@@ -237,22 +274,23 @@ describe('Zotero_Import_Mendeley', function () {
 			assert.equal(parentCollection.name, 'folder1');
 		});
 
-		it("should update previously imported item", async () => {
-			const importer = new Zotero_Import_Mendeley();
-			importer.mendeleyCode = 'CODE';
-			await importer.translate({
+		it("should update previously imported item, based on config", async () => {
+			const importer1 = getImporter();
+			await importer1.translate({
 				libraryID: Zotero.Libraries.userLibraryID,
 				collections: null,
 				linkFiles: false,
 			});
 
 			const report = (await Zotero.Relations
-				.getByPredicateAndObject('item', 'mendeleyDB:documentUUID', '07a74c26-28d1-4d9f-a60d-3f3bc5ef76ef'))
+				.getByPredicateAndObject('item', 'mendeleyDB:documentUUID', '616ec6d1-8d23-4414-8b6e-7bb129677577'))
 				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
 				.shift();
 
+			
 			assert.equal(report.getField('title'), 'Sample Report');
 			assert.equal(report.getField('year'), '2002');
+			assert.equal(report.getField('dateAdded'), '2021-11-04 11:53:10');
 			assert.equal(report.itemTypeID, Zotero.ItemTypes.getID('report'));
 			assert.lengthOf(report.getTags(), 0);
 
@@ -266,7 +304,9 @@ describe('Zotero_Import_Mendeley', function () {
 				)
 			});
 
-			await importer.translate({
+			const importer2 = getImporter();
+			importer2.newItemsOnly = false;
+			await importer2.translate({
 				libraryID: Zotero.Libraries.userLibraryID,
 				collections: null,
 				linkFiles: false,
@@ -276,6 +316,200 @@ describe('Zotero_Import_Mendeley', function () {
 			assert.equal(report.itemTypeID, Zotero.ItemTypes.getID('journalArticle'));
 			assert.equal(report.getField('year'), '2002');
 			assert.sameMembers(report.getTags().map(t => t.tag), ['\u2605']);
+			// dateAdded shouldn't change on an updated item. See #2881
+			assert.equal(report.getField('dateAdded'), '2021-11-04 11:53:10');
+		});
+
+		it("shouldn't update previously imported item, based on config", async () => {
+			const importer1 = getImporter();
+			await importer1.translate({
+				libraryID: Zotero.Libraries.userLibraryID,
+				collections: null,
+				linkFiles: false,
+			});
+
+			const report = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:documentUUID', '616ec6d1-8d23-4414-8b6e-7bb129677577'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+
+			const noNewItemHere = await Zotero.Relations.getByPredicateAndObject('item', 'mendeleyDB:documentUUID', '86e56a00-5ae5-4fe8-a977-9298a03b16d6');
+
+
+			assert.equal(report.getField('title'), 'Sample Report');
+			assert.equal(report.getField('year'), '2002');
+			assert.equal(report.itemTypeID, Zotero.ItemTypes.getID('report'));
+			assert.lengthOf(report.getTags(), 0);
+			assert.lengthOf(noNewItemHere, 0);
+
+			setHTTPResponse(server, 'https://api.mendeley.com/', {
+				method: 'GET',
+				url: `documents?view=all&limit=500`,
+				status: 200,
+				headers: {},
+				json: JSON.parse(
+					await Zotero.File.getContentsFromURLAsync('resource://zotero-unit-tests/data/mendeleyMock/items-updated.json')
+				)
+			});
+
+			const importer2 = getImporter();
+			importer2.newItemsOnly = true;
+			await importer2.translate({
+				libraryID: Zotero.Libraries.userLibraryID,
+				collections: null,
+				linkFiles: false,
+			});
+
+			assert.equal(report.getField('title'), 'Sample Report');
+			assert.equal(report.itemTypeID, Zotero.ItemTypes.getID('report'));
+			assert.equal(report.getField('year'), '2002');
+			assert.lengthOf(report.getTags(), 0);
+
+			const newItem = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:documentUUID', '86e56a00-5ae5-4fe8-a977-9298a03b16d6'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+
+			assert.equal(newItem.getField('title'), 'Completely new item');
+		});
+
+		it("should correct IDs if available on subsequent import", async () => {
+			setHTTPResponse(server, 'https://api.mendeley.com/', {
+				method: 'GET',
+				url: `documents?view=all&limit=500`,
+				status: 200,
+				headers: {},
+				json: JSON.parse(
+					await Zotero.File.getContentsFromURLAsync('resource://zotero-unit-tests/data/mendeleyMock/items-simple-no-desktop-id.json')
+				)
+			});
+			const importer = getImporter();
+			importer.newItemsOnly = true;
+			await importer.translate({
+				libraryID: Zotero.Libraries.userLibraryID,
+				collections: null,
+				linkFiles: false,
+			});
+
+			const report = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:remoteDocumentUUID', '07a74c26-28d1-4d9f-a60d-3f3bc5ef76ef'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+
+			assert.equal(report.getField('title'), 'Sample Report');
+			assert.equal(report.getRelations()['mendeleyDB:documentUUID'], '07a74c26-28d1-4d9f-a60d-3f3bc5ef76ef');
+
+			setHTTPResponse(server, 'https://api.mendeley.com/', {
+				method: 'GET',
+				url: `documents?view=all&limit=500`,
+				status: 200,
+				headers: {},
+				json: JSON.parse(
+					await Zotero.File.getContentsFromURLAsync('resource://zotero-unit-tests/data/mendeleyMock/items-simple.json')
+				)
+			});
+
+			await importer.translate({
+				libraryID: Zotero.Libraries.userLibraryID,
+				collections: null,
+				linkFiles: false,
+			});
+
+			assert.equal(report.getField('title'), 'Sample Report');
+			assert.equal(report.getRelations()['mendeleyDB:documentUUID'], '616ec6d1-8d23-4414-8b6e-7bb129677577');
+		});
+
+		it("should only correct IDs and not add new items if \"relinkOnly\" is configured", async () => {
+			setHTTPResponse(server, 'https://api.mendeley.com/', {
+				method: 'GET',
+				url: `documents?view=all&limit=500`,
+				status: 200,
+				headers: {},
+				json: JSON.parse(
+					await Zotero.File.getContentsFromURLAsync('resource://zotero-unit-tests/data/mendeleyMock/items-simple-no-desktop-id.json')
+				)
+			});
+			const importer1 = getImporter();
+			await importer1.translate({
+				libraryID: Zotero.Libraries.userLibraryID,
+				collections: null,
+				linkFiles: false,
+			});
+
+			const report = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:remoteDocumentUUID', '07a74c26-28d1-4d9f-a60d-3f3bc5ef76ef'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+
+			assert.equal(report.getField('title'), 'Sample Report');
+			assert.equal(report.getRelations()['mendeleyDB:documentUUID'], '07a74c26-28d1-4d9f-a60d-3f3bc5ef76ef');
+			
+			setHTTPResponse(server, 'https://api.mendeley.com/', {
+				method: 'GET',
+				url: `documents?view=all&limit=500`,
+				status: 200,
+				headers: {},
+				json: JSON.parse(
+					await Zotero.File.getContentsFromURLAsync('resource://zotero-unit-tests/data/mendeleyMock/items-updated.json')
+				)
+			});
+
+			const importer2 = getImporter();
+			importer2.relinkOnly = true;
+			await importer2.translate({
+				libraryID: Zotero.Libraries.userLibraryID,
+				collections: null,
+				linkFiles: false,
+			});
+
+			assert.equal(report.getField('title'), 'Sample Report');
+			assert.equal(report.getRelations()['mendeleyDB:documentUUID'], '616ec6d1-8d23-4414-8b6e-7bb129677577');
+
+			const noNewItemHere = await Zotero.Relations.getByPredicateAndObject('item', 'mendeleyDB:documentUUID', '86e56a00-5ae5-4fe8-a977-9298a03b16d6');
+			assert.lengthOf(noNewItemHere, 0);
+		});
+
+		it("should handle empty creators and tags", async () => {
+			setHTTPResponse(server, 'https://api.mendeley.com/', {
+				method: 'GET',
+				url: `documents?view=all&limit=500`,
+				status: 200,
+				headers: {},
+				json: JSON.parse(
+					await Zotero.File.getContentsFromURLAsync('resource://zotero-unit-tests/data/mendeleyMock/items-bad-data.json')
+				)
+			});
+
+			const importer = getImporter();
+			await importer.translate({
+				libraryID: Zotero.Libraries.userLibraryID,
+				collections: null,
+				linkFiles: false,
+			});
+			
+			const journalNoAuthors = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:documentUUID', '9c03fca4-ee5b-435e-abdd-fb6d7d11cd02'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+			
+			assert.equal(journalNoAuthors.getField('title'), 'This one has no authors');
+			assert.equal(journalNoAuthors.getCreators().length, 0);
+
+			const journalEmptyAuthors = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:documentUUID', 'fd86e48e-1931-4282-b72d-78c535b0398c'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+
+			assert.equal(journalEmptyAuthors.getField('title'), 'This one has empty authors');
+			assert.equal(journalEmptyAuthors.getCreators().length, 0);
+
+			const journalEmptyTags = (await Zotero.Relations
+				.getByPredicateAndObject('item', 'mendeleyDB:documentUUID', 'c7ec2737-044a-493b-9d94-d7f67be68765'))
+				.filter(item => item.libraryID == Zotero.Libraries.userLibraryID && !item.deleted)
+				.shift();
+
+			assert.equal(journalEmptyTags.getField('title'), 'This one has empty tags and keywords');
+			assert.equal(journalEmptyTags.getTags().length, 0);
 		});
 	});
 });
