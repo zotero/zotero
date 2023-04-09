@@ -1400,6 +1400,22 @@ describe("Zotero.Item", function () {
 				assert.isFalse(annotation.hasChanged());
 			});
 			
+			it("should assign a default color", async function () {
+				var annotation = new Zotero.Item('annotation');
+				annotation.parentID = attachment.id;
+				annotation.annotationType = 'highlight';
+				annotation.annotationText = "This is highlighted text.";
+				annotation.annotationSortIndex = '00015|002431|00000';
+				annotation.annotationPosition = JSON.stringify({
+					pageIndex: 123,
+					rects: [
+						[314.4, 412.8, 556.2, 609.6]
+					]
+				});
+				await annotation.saveTx();
+				assert.equal(annotation.annotationColor, '#ffd400');
+			});
+			
 			it("should save a note annotation", async function () {
 				var annotation = new Zotero.Item('annotation');
 				annotation.parentID = attachment.id;
