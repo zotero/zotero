@@ -1935,7 +1935,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 				authorName || null,
 				text || null,
 				comment || null,
-				color || null,
+				color || Zotero.Annotations.DEFAULT_COLOR,
 				pageLabel || null,
 				sortIndex,
 				position,

@@ -33,6 +33,8 @@ Zotero.Annotations = new function () {
 	Zotero.defineProperty(this, 'ANNOTATION_TYPE_IMAGE', { value: 3 });
 	Zotero.defineProperty(this, 'ANNOTATION_TYPE_INK', { value: 4 });
 	
+	Zotero.defineProperty(this, 'DEFAULT_COLOR', { value: 'ffd400' });
+	
 	Zotero.defineProperty(this, 'PROPS', {
 		value: ['type', 'authorName', 'text', 'comment', 'color', 'pageLabel', 'sortIndex', 'position'],
 		writable: false
