@@ -38,20 +38,6 @@
 			
 			<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="extensions.zotero.reportTranslationFailure" native="true"/>
 		</groupbox>
-		
-		<groupbox id="zotero-prefpane-advanced-advancedConfiguration">
-			<label><html:h2>&zotero.preferences.advanced.advancedConfiguration;</html:h2></label>
-			
-			<hbox id="zotero-prefpane-advanced-openbuttons" align="center" style="display: block">
-				<button id="config-editor"
-					label="&zotero.preferences.configEditor;"
-					oncommand="Zotero_Preferences.openInViewer('about:config')"/>
-				<button id="memory-info"
-					label="Memory Info"
-					oncommand="Zotero_Preferences.openInViewer('about:memory')"
-					hidden="true"/>
-			</hbox>
-		</groupbox>
 	</vbox>
 	
 	<vbox class="main-section">
@@ -261,5 +247,17 @@
 				<label id="fulltext-stats-words"/>
 			</vbox>
 		</groupbox>	
+	</vbox>
+	
+	<vbox>
+		<hbox id="zotero-prefpane-advanced-open-buttons" align="center">
+			<button id="config-editor"
+				label="&zotero.preferences.configEditor;"
+				oncommand="Zotero_Preferences.openInViewer('about:config')"/>
+			<button id="memory-info"
+				label="Memory Info"
+				oncommand="Zotero_Preferences.openInViewer('about:memory')"
+				hidden="true"/>
+		</hbox>
 	</vbox>
 </vbox>

@@ -487,6 +487,13 @@ description label[class=zotero-text-link], label[class=zotero-text-link]
 	border: none;
 }
 
+#zotero-prefpane-advanced-open-buttons {
+	display: block;
+	text-align: right;
+	margin-top: 1em;
+	margin-bottom: .5em;
+}
+
 
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
 @media (min-resolution: 1.25dppx) {
