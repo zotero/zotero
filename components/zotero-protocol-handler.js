@@ -156,7 +156,7 @@ function ZoteroProtocolHandler() {
 	 * Report generation extension for Zotero protocol
 	 */
 	var ReportExtension = {
-		loadAsChrome: false,
+		loadAsChrome: true,
 		
 		newChannel: function (uri, loadInfo) {
 			return new AsyncChannel(uri, loadInfo, function* () {
@@ -1293,10 +1293,6 @@ ZoteroProtocolHandler.prototype = {
 				return this._getCancelledChannel();
 			}
 			
-			if (!this._principal && ext.loadAsChrome) {
-				this._principal = Services.scriptSecurityManager.getSystemPrincipal();
-			}
-			
 			var extChannel = ext.newChannel(uri, loadInfo);
 			// Extension returned null, so cancel request
 			if (!extChannel) {
@@ -1304,7 +1300,10 @@ ZoteroProtocolHandler.prototype = {
 			}
 			
 			// Apply cached principal to extension channel
-			if (this._principal) {
+			if (ext.loadAsChrome) {
+				if (!this._principal) {
+					this._principal = Services.scriptSecurityManager.getSystemPrincipal();
+				}
 				extChannel.owner = this._principal;
 			}
 			

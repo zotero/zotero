@@ -31,7 +31,10 @@ var browser;
 
 window.addEventListener("load", /*async */function () {
 	browser = document.querySelector('browser');
-	ensureBrowserType('content');
+	
+	browser.addEventListener('pagetitlechanged', () => {
+		document.title = browser.contentTitle || browser.currentURI.spec;
+	});
 	
 	/*
 	browser.setAttribute("remote", "true");
@@ -69,41 +72,8 @@ window.addEventListener("click", function (event) {
 	}
 });
 
-function ensureBrowserType(type) {
-	let oldBrowser = browser;
-	if (!oldBrowser || oldBrowser.getAttribute('type') != type) {
-		browser = document.createXULElement('browser');
-		let attrs = {
-			type,
-			flex: 1,
-			remote: false,
-			maychangeremoteness: true,
-			disableglobalhistory: true,
-		};
-		for (let [attr, value] of Object.entries(attrs)) {
-			browser.setAttribute(attr, value);
-		}
-		if (oldBrowser) {
-			oldBrowser.replaceWith(browser);
-		}
-		else {
-			document.querySelector('#appcontent').append(browser);
-		}
-		browser.addEventListener('pagetitlechanged', () => {
-			document.title = browser.contentTitle || browser.currentURI.spec;
-		});
-		return browser;
-	}
-	else {
-		return oldBrowser;
-	}
-}
-
 function loadURI(uri) {
-	// The zotero protocol handler will not load in a type="content" browser
-	// As a temporary fix, replace the browser with one of the correct type if necessary
-	// (The type attribute can't be changed after the browser is created)
-	ensureBrowserType(uri.startsWith('zotero:') ? 'chrome' : 'content').loadURI(
+	browser.loadURI(
 		uri,
 		{
 			triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal(),
