@@ -73,7 +73,7 @@
 		<!--FILE-->
 		<command id="cmd_close" oncommand="window.close();"/>
 		<command id="cmd_save" oncommand="saveBrowser(browser);"/>
-		<command id="cmd_print" oncommand="browser.contentWindow.print()"/>
+		<command id="cmd_print" oncommand="PrintUtils.startPrintWindow(browser.browsingContext);"/>
 		<command id="cmd_quitApplication" oncommand="goQuitApplication();"/>
 		
 		<!--EDIT-->
