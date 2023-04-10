@@ -91,6 +91,11 @@ groupbox > label > h2, groupbox > * > label > h2 {
 	font-weight: bold;
 }
 
+/* Space out sections */
+groupbox:not(:first-of-type) label > h2 {
+	margin-top: 2em !important;
+}
+
 /* Approach to search tooltips (mostly borrowed from Fx prefs): */
 .search-tooltip-parent {
 	position: relative;
