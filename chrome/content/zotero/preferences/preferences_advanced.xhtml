@@ -30,11 +30,11 @@
 		<groupbox id="zotero-prefpane-advanced-miscellaneous">
 			<label><html:h2>&zotero.preferences.miscellaneous;</html:h2></label>
 			
-			<hbox align="center">
+			<html:div class="pref-row">
 				<checkbox label="&zotero.preferences.autoUpdate;" preference="extensions.zotero.automaticScraperUpdates" native="true"/>
 				<button id="updateButton" style="margin-top:0" label="&zotero.preferences.updateNow;"
 					oncommand="Zotero_Preferences.Advanced.updateTranslators()"/>
-			</hbox>
+			</html:div>
 			
 			<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="extensions.zotero.reportTranslationFailure" native="true"/>
 		</groupbox>
@@ -116,47 +116,47 @@
 		</groupbox>
 	</vbox>
 
-	<vbox class="main-section" id="zotero-prefpane-advanced-keys-tab">
+	<html:div class="main-section" id="zotero-prefpane-advanced-keys-tab">
 		<html:h1>&zotero.preferences.advanced.keys;</html:h1>
 	
 		<html:div id="zotero-keys-grid">
-			<label value="&zotero.preferences.keys.newItem;" control="textbox-newItem"/>
-			<label class="modifier"/>
+			<html:label for="textbox-newItem">&zotero.preferences.keys.newItem;</html:label>
+			<html:label class="modifier"/>
 			<html:input type="text" id="textbox-newItem" maxlength="1" size="1" preference="extensions.zotero.keys.newItem"/>
 
-			<label value="&zotero.preferences.keys.newNote;" control="textbox-newNote"/>
-			<label class="modifier"/>
+			<html:label for="textbox-newNote">&zotero.preferences.keys.newNote;</html:label>
+			<html:label class="modifier"/>
 			<html:input type="text" id="textbox-newNote" maxlength="1" size="1" preference="extensions.zotero.keys.newNote"/>
 
-			<label value="&zotero.preferences.keys.focusLibrariesPane;" control="textbox-library"/>
-			<label class="modifier"/>
+			<html:label for="textbox-library">&zotero.preferences.keys.focusLibrariesPane;</html:label>
+			<html:label class="modifier"/>
 			<html:input type="text" id="textbox-library" maxlength="1" size="1" preference="extensions.zotero.keys.library"/>
 
-			<label value="&zotero.preferences.keys.quicksearch;" control="textbox-quicksearch"/>
-			<label class="modifier"/>
+			<html:label for="textbox-quicksearch">&zotero.preferences.keys.quicksearch;</html:label>
+			<html:label class="modifier"/>
 			<html:input type="text" id="textbox-quicksearch" maxlength="1" size="1" preference="extensions.zotero.keys.quicksearch"/>
 
-			<label value="&zotero.preferences.keys.copySelectedItemCitationsToClipboard;" control="textbox-copySelectedItemCitationsToClipboard"/>
-			<label class="modifier"/>
+			<html:label for="textbox-copySelectedItemCitationsToClipboard">&zotero.preferences.keys.copySelectedItemCitationsToClipboard;</html:label>
+			<html:label class="modifier"/>
 			<html:input type="text" id="textbox-copySelectedItemCitationsToClipboard" maxlength="1" size="1"
 					preference="extensions.zotero.keys.copySelectedItemCitationsToClipboard"
 					oninput="if (Zotero_Preferences.Export) { Zotero_Preferences.Export.updateQuickCopyInstructions(); }"/>
 
-			<label value="&zotero.preferences.keys.copySelectedItemsToClipboard;" control="textbox-copySelectedItemsToClipboard"/>
-			<label class="modifier"/>
+			<html:label for="textbox-copySelectedItemsToClipboard">&zotero.preferences.keys.copySelectedItemsToClipboard;</html:label>
+			<html:label class="modifier"/>
 			<html:input type="text" id="textbox-copySelectedItemsToClipboard" maxlength="1" size="1"
 					preference="extensions.zotero.keys.copySelectedItemsToClipboard"
 					oninput="if (Zotero_Preferences.Export) { Zotero_Preferences.Export.updateQuickCopyInstructions(); }"/>
 
-			<label value="&zotero.preferences.keys.toggleAllRead;" control="textbox-toggleAllRead"/>
-			<label class="modifier"/>
+			<html:label for="textbox-toggleAllRead">&zotero.preferences.keys.toggleAllRead;</html:label>
+			<html:label class="modifier"/>
 			<html:input type="text" id="textbox-toggleAllRead" maxlength="1" size="1" preference="extensions.zotero.keys.toggleAllRead"/>
 		</html:div>
 		
 		<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
 		
-		<separator/>				
-	</vbox>
+		<separator/>
+	</html:div>
 	<vbox class="main-section" id="zotero-prefpane-advanced-feeds-tab">
 		<html:h1>&zotero.preferences.feeds;</html:h1>
 
@@ -215,19 +215,19 @@
 			
 			<separator/>
 			
-			<hbox align="center">
-				<label value="&zotero.preferences.fulltext.textMaxLength;"/>
+			<html:div class="pref-row">
+				<html:label>&zotero.preferences.fulltext.textMaxLength;</html:label>
 				<html:input type="text" size="10" preference="extensions.zotero.fulltext.textMaxLength"/>
-				<label value="(&zotero.preferences.default; 500000)"/>
-			</hbox>
+				<html:label>(&zotero.preferences.default; 500000)</html:label>
+			</html:div>
 	
 			<separator class="thin"/>
 	
-			<hbox align="center">
-				<label value="&zotero.preferences.fulltext.pdfMaxPages;"/>
+			<html:div class="pref-row">
+				<html:label>&zotero.preferences.fulltext.pdfMaxPages;</html:label>
 				<html:input type="text" size="5" preference="extensions.zotero.fulltext.pdfMaxPages"/>
-				<label value="(&zotero.preferences.default; 100)"/>
-			</hbox>
+				<html:label>(&zotero.preferences.default; 100)</html:label>
+			</html:div>
 		</groupbox>
 		
 		<groupbox id="fulltext-stats">

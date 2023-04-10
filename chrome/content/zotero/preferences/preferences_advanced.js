@@ -833,7 +833,7 @@ Zotero_Preferences.Keys = {
 	init: function () {
 		for (let label of document.querySelectorAll('#zotero-keys-grid .modifier')) {
 			// Display the appropriate modifier keys for the platform
-			label.value = Zotero.isMac ? Zotero.getString('general.keys.cmdShift') : Zotero.getString('general.keys.ctrlShift');
+			label.textContent = Zotero.isMac ? Zotero.getString('general.keys.cmdShift') : Zotero.getString('general.keys.ctrlShift');
 		}
 		
 		var textboxes = document.querySelectorAll('#zotero-keys-grid input');

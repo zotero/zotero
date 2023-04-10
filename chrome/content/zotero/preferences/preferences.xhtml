@@ -49,9 +49,7 @@
 		windowtype="zotero:pref"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 		xmlns:html="http://www.w3.org/1999/xhtml"
-		style="display: flex;"
-		width="800"
-		height="600">
+		style="display: flex;">
 	
 	<script>
 		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
@@ -79,28 +77,28 @@
 		<key id="key_find" modifiers="accel" key="F" oncommand="document.getElementById('prefs-search').focus()"/>
 	</keyset>
 
-	<hbox id="prefs-outer-container" flex="1">
+	<html:div id="prefs-outer-container">
 		<richlistbox id="prefs-navigation"></richlistbox>
-		<vbox id="prefs-inner-container" flex="1">
-			<hbox id="prefs-search-container" align="center">
-				<hbox flex="1" pack="start" align="center">
+		<html:div id="prefs-inner-container">
+			<html:div id="prefs-search-container">
+				<html:div id="prefs-subpane-back-button-container">
 					<button
 						id="prefs-subpane-back-button"
 						label="‹"
 						aria-label="&zotero.pdfReader.back;"
 						hidden="true"/>
-				</hbox>
+				</html:div>
 				<search-textbox id="prefs-search" placeholder="&zotero.lookup.button.search;" timeout="1"/>
-			</hbox>
-			<vbox id="prefs-content" flex="1">
-				<hbox id="prefs-help-container" pack="end">
+			</html:div>
+			<html:div id="prefs-content">
+				<html:div id="prefs-help-container">
 					<button
 						oncommand="Zotero_Preferences.openHelpLink()"
 						label="&zotero.preferences.helpButton.label;"
 						class="help-button" 
 						align="end"/>
-				</hbox>
-			</vbox>
-		</vbox>
-	</hbox>
+				</html:div>
+			</html:div>
+		</html:div>
+	</html:div>
 </window>
