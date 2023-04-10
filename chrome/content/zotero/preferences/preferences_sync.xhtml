@@ -126,65 +126,53 @@
                 </hbox>
 
                 <stack id="storage-webdav-settings" style="margin-top: .5em; margin-bottom: .8em; border: 1px gray solid; border-radius: 3px">
-                <!-- Background shading -->
-                <box style="background: black; opacity:.03"/>
-
-                <grid style="padding: .7em .4em .7em 0">
-                    <columns>
-                        <column/>
-                        <column flex="1"/>
-                    </columns>
-
-                    <rows>
-                        <row>
-                            <label value="&zotero.preferences.sync.fileSyncing.url;"/>
-                            <hbox>
-                                <menulist id="storage-url-prefix"
-                                        preference="extensions.zotero.sync.storage.scheme"
-                                        style="padding: 0; width: 7em"
-                                        native="true">
-                                    <menupopup>
-                                        <menuitem label="https" value="https" style="padding: 0"/>
-                                        <menuitem label="http" value="http" style="padding: 0"/>
-                                    </menupopup>
-                                </menulist>
-                                <label value="://"/>
-                                <html:input id="storage-url" style="-moz-box-flex: 1;"
-                                    preference="extensions.zotero.sync.storage.url"
-                                    onkeypress="Zotero_Preferences.Sync.onStorageSettingsKeyPress(event)"
-                                    onchange="Zotero_Preferences.Sync.onStorageSettingsChange()"/>
-                                <label value="/zotero/"/>
-                            </hbox>
-                        </row>
-                        <row>
-                            <label value="&zotero.preferences.sync.username;"/>
-                            <hbox>
-                                <html:input id="storage-username"
-                                    preference="extensions.zotero.sync.storage.username"
-                                    onkeypress="Zotero_Preferences.Sync.onStorageSettingsKeyPress(event)"
-                                    onchange="Zotero_Preferences.Sync.onStorageSettingsChange()"/>
-                            </hbox>
-                        </row>
-                        <row>
-                            <label value="&zotero.preferences.sync.password;"/>
-                            <hbox>
-                                <html:input id="storage-password" style="-moz-box-flex: 0;" type="password"
-                                    onkeypress="Zotero_Preferences.Sync.onStorageSettingsKeyPress(event)"
-                                    onchange="Zotero_Preferences.Sync.onStorageSettingsChange()"/>
-                            </hbox>
-                        </row>
-                        <row>
-                            <box/>
-                            <hbox>
-                                <button id="storage-verify" label="&zotero.preferences.sync.fileSyncing.verifyServer;"
-                                    oncommand="Zotero_Preferences.Sync.verifyStorageServer()"/>
-                                <button id="storage-abort" label="Stop" hidden="true"/>
-                                <progressmeter id="storage-progress" hidden="true"
-                                    mode="undetermined"/>
-                            </hbox>
-                        </row>
-                    </rows>
-                </grid>
+                    <!-- Background shading -->
+                    <box style="background: black; opacity:.03"/>
+    
+                    <grid class="form-grid">
+                        <label value="&zotero.preferences.sync.fileSyncing.url;"/>
+                        <hbox>
+                            <menulist id="storage-url-prefix"
+                                    preference="extensions.zotero.sync.storage.scheme"
+                                    style="padding: 0; width: 7em"
+                                    native="true">
+                                <menupopup>
+                                    <menuitem label="https" value="https"/>
+                                    <menuitem label="http" value="http"/>
+                                </menupopup>
+                            </menulist>
+                            <label value="://"/>
+                            <html:input id="storage-url" style="-moz-box-flex: 1;"
+                                preference="extensions.zotero.sync.storage.url"
+                                onkeypress="Zotero_Preferences.Sync.onStorageSettingsKeyPress(event)"
+                                onchange="Zotero_Preferences.Sync.onStorageSettingsChange()"/>
+                            <label value="/zotero/"/>
+                        </hbox>
+    
+                        <label value="&zotero.preferences.sync.username;"/>
+                        <hbox>
+                            <html:input id="storage-username"
+                                preference="extensions.zotero.sync.storage.username"
+                                onkeypress="Zotero_Preferences.Sync.onStorageSettingsKeyPress(event)"
+                                onchange="Zotero_Preferences.Sync.onStorageSettingsChange()"/>
+                        </hbox>
+    
+                        <label value="&zotero.preferences.sync.password;"/>
+                        <hbox>
+                            <html:input id="storage-password" style="-moz-box-flex: 0;" type="password"
+                                onkeypress="Zotero_Preferences.Sync.onStorageSettingsKeyPress(event)"
+                                onchange="Zotero_Preferences.Sync.onStorageSettingsChange()"/>
+                        </hbox>
+    
+                        <box/>
+                        <hbox>
+                            <button id="storage-verify" label="&zotero.preferences.sync.fileSyncing.verifyServer;"
+                                oncommand="Zotero_Preferences.Sync.verifyStorageServer()"/>
+                            <button id="storage-abort" label="Stop" hidden="true"/>
+                            <progressmeter id="storage-progress" hidden="true"
+                                mode="undetermined"/>
+                        </hbox>
+                    </grid>
 
                 </stack>
 

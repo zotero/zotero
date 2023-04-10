@@ -237,16 +237,16 @@ description label[class=zotero-text-link], label[class=zotero-text-link]
 	margin-inline-start: 4px;
 }
 
-#zotero-prefpane-sync .form-grid > hbox label:first-child,
-#zotero-prefpane-sync .form-grid > hbox menulist:first-child
+#zotero-prefpane-sync .form-grid > hbox > label:first-child,
+#zotero-prefpane-sync .form-grid > hbox > menulist:first-child
 {
 	margin-inline: 0;
 }
-#zotero-prefpane-sync .form-grid > hbox textbox
+#zotero-prefpane-sync .form-grid > hbox > textbox
 {
 	margin-inline: 3px;
 }
-#zotero-prefpane-sync .form-grid > hbox label:last-child
+#zotero-prefpane-sync .form-grid > hbox > label:last-child
 {
 	margin-inline-start: 0;
 	margin-inline-end: 10px;
@@ -283,6 +283,11 @@ description label[class=zotero-text-link], label[class=zotero-text-link]
 .storage-settings-download-options
 {
 	margin-inline-start: 40px;
+}
+
+#storage-webdav-settings > .form-grid {
+	padding-top: 0.5em;
+	padding-bottom: 0.5em;
 }
 
 #storage-verify, #storage-abort, #storage-clean
