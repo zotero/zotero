@@ -2,6 +2,9 @@
   "general_more": {
     "message": "Více..."
   },
+  "general_moreInfo": {
+    "message": "Více informací..."
+  },
   "general_done": {
     "message": "Hotovo"
   },
@@ -49,6 +52,9 @@
   },
   "upgradeApp": {
     "message": "Aktualizovat $1"
+  },
+  "firstRun_acceptButton": {
+    "message": "Hotovo"
   },
   "error_connection_isAppRunning": {
     "message": "Je $1 spuštěný?"

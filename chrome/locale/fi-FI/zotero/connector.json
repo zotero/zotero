@@ -59,6 +59,12 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "tuorein versio"
   },
+  "extensionIsDisabled": {
+    "message": "$1 on kytketty pois käytöstä"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 on kytketty pois käytöstä lisäsivuilla"
+  },
   "appConnector": {
     "message": "$1Connector"
   },
@@ -139,6 +145,18 @@
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
     "message": "Näiden viitteiden linkitys <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">puuttuu nyt kohteesta $1</a>. Sinun täytyy linkittää ne uudelleen, jotta ne päivittyvät ja näkyvät kirjallisuusluettelossa. "
+  },
+  "copyUnproxiedLink": {
+    "message": "Kopioi välityspalvelimeton linkki"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "Kopioi välityspalvelimeton sivun URL"
+  },
+  "reloadViaProxy": {
+    "message": "Lataa välityspalvelimen kautta"
+  },
+  "reloadVia": {
+    "message": "Lataa $1 välityksellä"
   },
   "general_saveTo": {
     "message": "Tallenna kohteeseen $1"

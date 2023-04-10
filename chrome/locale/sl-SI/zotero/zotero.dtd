@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Napredne možnosti">
 <!ENTITY zotero.general.tools "Orodja">
 <!ENTITY zotero.general.more "Dodatno">
+<!ENTITY zotero.general.moreInformation "Podrobnosti">
 <!ENTITY zotero.general.loading "Nalaganje ...">
 <!ENTITY zotero.general.close "Zapri">
 <!ENTITY zotero.general.minimize "Skrči">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Dodeli barvo ...">
 <!ENTITY zotero.tagSelector.renameTag "Preimenuj značko ...">
 <!ENTITY zotero.tagSelector.deleteTag "Izbriši značko ...">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "Izberite barvo oznake in položaj">
 <!ENTITY zotero.tagColorChooser.color "Barva:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "Uvozi">
 <!ENTITY zotero.import.whereToImportFrom "Od kod želite uvoziti?">
 <!ENTITY zotero.import.source.file "Datoteka (BibTeX, RIS, Zotero RDF itn.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "Uvažanje ...">
 <!ENTITY zotero.import.database "Zbirka podatkov">
 <!ENTITY zotero.import.lastModified "Nazadnje spremenjeno">
 <!ENTITY zotero.import.size "Velikost">
 <!ENTITY zotero.import.createCollection "Postavi uvožene zbirke in elemente v novo zbirko">
 <!ENTITY zotero.import.fileHandling "Ravnanje z datotekami">
+<!ENTITY zotero.import.online.newItemsOnly "Prenesi le nove elemente; ne posodobi poprej uvoženih elementov">
 
 <!ENTITY zotero.exportOptions.title "Izvozi ...">
 <!ENTITY zotero.exportOptions.format.label "Vrsta datoteke:">
@@ -322,9 +327,9 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Samodejno spremeni velikost">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Približaj na širino strani">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Približaj na višino strani">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
+<!ENTITY zotero.pdfReader.splitVertically "Razdeli navpično">
+<!ENTITY zotero.pdfReader.splitHorizontally "Razdeli vodoravno">
 <!ENTITY zotero.pdfReader.transferFromPDF "Uvozi zaznamke ...">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
-<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Zasukaj stran levo">
+<!ENTITY zotero.pdfReader.rotatePageRight "Zasukaj stran desno">
+<!ENTITY zotero.pdfReader.rotatePage180 "Zasukaj stran za 180°">

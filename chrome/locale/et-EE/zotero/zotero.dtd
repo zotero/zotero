@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Advanced Options">
 <!ENTITY zotero.general.tools "Tööriistad">
 <!ENTITY zotero.general.more "Veel">
+<!ENTITY zotero.general.moreInformation "More Information">
 <!ENTITY zotero.general.loading "Loading…">
 <!ENTITY zotero.general.close "Sulge">
 <!ENTITY zotero.general.minimize "Minimeerida">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Värvi valik...">
 <!ENTITY zotero.tagSelector.renameTag "Lipiku ümbernimetamine...">
 <!ENTITY zotero.tagSelector.deleteTag "Lipiku kustutamine...">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "Lipiku värvi valik ja asukoht">
 <!ENTITY zotero.tagColorChooser.color "Värv:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "Import">
 <!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
 <!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "Importing…">
 <!ENTITY zotero.import.database "Database">
 <!ENTITY zotero.import.lastModified "Last Modified">
 <!ENTITY zotero.import.size "Size">
 <!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 <!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Eksport...">
 <!ENTITY zotero.exportOptions.format.label "Formaat:">

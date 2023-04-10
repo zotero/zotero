@@ -41,8 +41,14 @@
   "progressWindow_error_translation": {
     "message": "Ocorreu un erro gardando este elemento. Véxase$1 para ter máis información."
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "Ocorreu un erro gardando este elemento. $1 podería estar limitando o número de elementos que se poden gardar de cada vez. Vexa$2 para máis información,"
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Informe de erro nas traducións"
+  },
+  "progressWindow_error_siteAccessLimits": {
+    "message": "Límites de acceso do sitio"
   },
   "progressWindow_error_fallback": {
     "message": "Deuse un erro ao gardar $1. Estase a intentar gardalo usando $2."
@@ -53,6 +59,12 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "última versión"
   },
+  "extensionIsDisabled": {
+    "message": "$1 está desactivado"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 está desactivado para páxinas de extensión"
+  },
   "appConnector": {
     "message": "Conector $1"
   },
@@ -61,6 +73,15 @@
   },
   "firstRun_title": {
     "message": "Instalaches o conector $1!"
+  },
+  "firstRun_text1": {
+    "message": "O Conector $1 permite que <a href=\"$2\">se garden elementos en $1</a> desde o navegador facendo un só clic."
+  },
+  "firstRun_text2": {
+    "message": "Se aínda non o fixo, coa <a href=\"$2\">descarga</a> da aplicación separada $1 obtense a mellor experiencia."
+  },
+  "firstRun_acceptButton": {
+    "message": "Enténdoo."
   },
   "error_connection_isAppRunning": {
     "message": "Está $1 aberto?"
@@ -107,6 +128,9 @@
   "integration_googleDocs_documentLocked": {
     "message": "As citas do documento están a ser editadas por outro usuario $1. Por favor, téntao de novo máis tarde."
   },
+  "integration_googleDocs_documentLocked_moreInfo": {
+    "message": "$1 bloquea os documentos para previr que varios usuarios estean a editar as citas ao mesmo tempo. Editar as citas ao mesmo tempo nun documento pode derivar en introducir erros nas citas ou danar o documento. Causas imprevistas, como a perda de conexión á rede, poden facer que o seu documento quede bloqueado permanentemente. Se pensa que foi o que aconteceu, podes retirar o bloqueo. <br/><br/> Quere retirarlle o bloqueo ao documento?"
+  },
   "integration_googleDocs_documentPermissionError": {
     "message": "A conta de Google seleccionado non ten permisos para editar este documento. Por favor inténtao de novo e asegúrate de escoller unha conta con permiso para editar."
   },
@@ -121,6 +145,18 @@
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
     "message": "Estas citas quedaron <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">desligadas de $1</a>. Precisas volver a ligalas antes de seren actualizadas ou de apareceren na libraría."
+  },
+  "copyUnproxiedLink": {
+    "message": "Copiar ligazóns sen proxy"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "Copiar URL de páxinas sen proxy"
+  },
+  "reloadViaProxy": {
+    "message": "Volver a cargar con proxy"
+  },
+  "reloadVia": {
+    "message": "Volver a cargar a través de $1"
   },
   "general_saveTo": {
     "message": "Gardar en $1"

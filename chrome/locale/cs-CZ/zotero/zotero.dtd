@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Pokročilé možnosti">
 <!ENTITY zotero.general.tools "Nástroje">
 <!ENTITY zotero.general.more "Více">
+<!ENTITY zotero.general.moreInformation "Více informací">
 <!ENTITY zotero.general.loading "Nahrává se...">
 <!ENTITY zotero.general.close "Zavřít">
 <!ENTITY zotero.general.minimize "Minimalizovat">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Nastavit barvu...">
 <!ENTITY zotero.tagSelector.renameTag "Přejmenovat štítek...">
 <!ENTITY zotero.tagSelector.deleteTag "Smazat štítek...">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "Zvolit barvu a pozici:">
 <!ENTITY zotero.tagColorChooser.color "Barva:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "Import">
 <!ENTITY zotero.import.whereToImportFrom "Odkud chcete importovat?">
 <!ENTITY zotero.import.source.file "Soubor (BibTeX, RIS, Zotero RDF, atd.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "Importuje...">
 <!ENTITY zotero.import.database "Databáze">
 <!ENTITY zotero.import.lastModified "Naposledy změněno">
 <!ENTITY zotero.import.size "Velikost">
 <!ENTITY zotero.import.createCollection "Umístit importované kolekce a položky do nové kolekce">
 <!ENTITY zotero.import.fileHandling "Zpracování souborů">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Export...">
 <!ENTITY zotero.exportOptions.format.label "Formát:">
@@ -195,7 +200,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Ponechat zdroje seřazené">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
+<!ENTITY zotero.citation.suppressAuthor.label "Vynechat autora">
 <!ENTITY zotero.citation.prefix.label "Předpona:">
 <!ENTITY zotero.citation.suffix.label "Přípona:">
 <!ENTITY zotero.citation.editorWarning.label "Upozornění: Pokud upravíte citaci v editoru, nebude se nadále aktualizovat na základě změn v databázi, nebo citačního stylu.">
@@ -307,8 +312,8 @@
 <!ENTITY zotero.context.editInWindow "Edit in a Separate Window">
 
 <!ENTITY zotero.pdfReader.firstPage "První strana">
-<!ENTITY zotero.pdfReader.lastPage "Last Page">
-<!ENTITY zotero.pdfReader.back "Back">
+<!ENTITY zotero.pdfReader.lastPage "Poslední stránka">
+<!ENTITY zotero.pdfReader.back "Zpátky">
 <!ENTITY zotero.pdfReader.forward "Forward">
 <!ENTITY zotero.pdfReader.handTool "Hand Tool">
 <!ENTITY zotero.pdfReader.verticalScrolling "Vertical Scrolling">
@@ -317,14 +322,14 @@
 <!ENTITY zotero.pdfReader.noSpreads "No Spreads">
 <!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
 <!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
-<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
-<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
+<!ENTITY zotero.pdfReader.zoomIn "Přiblížit">
+<!ENTITY zotero.pdfReader.zoomOut "Oddálit">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
-<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
-<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">
+<!ENTITY zotero.pdfReader.splitVertically "Rozdělit vertikálně">
+<!ENTITY zotero.pdfReader.splitHorizontally "Rozdělit horizontálně">
+<!ENTITY zotero.pdfReader.transferFromPDF "Importovat anotace">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Otočit stránku doleva">
+<!ENTITY zotero.pdfReader.rotatePageRight "Otočit stránku doprava">
+<!ENTITY zotero.pdfReader.rotatePage180 "Otočit stránku o 180°">

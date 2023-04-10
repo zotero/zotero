@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "אפשרויות מתקדמות">
 <!ENTITY zotero.general.tools "כלים">
 <!ENTITY zotero.general.more "עוד">
+<!ENTITY zotero.general.moreInformation "פרטים נוספים">
 <!ENTITY zotero.general.loading "בטעינה…">
 <!ENTITY zotero.general.close "סגירה">
 <!ENTITY zotero.general.minimize "מזעור">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "הקצאת צבע…">
 <!ENTITY zotero.tagSelector.renameTag "שינוי שם תגית…">
 <!ENTITY zotero.tagSelector.deleteTag "מחיקת תגית…">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "בחירת צבע ומיקום תגית">
 <!ENTITY zotero.tagColorChooser.color "צבע:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "ייבוא">
 <!ENTITY zotero.import.whereToImportFrom "מאיפה לייבא?">
 <!ENTITY zotero.import.source.file "קובץ (BibTeX,‏ RIS,‏ Zotero RDF וכו׳)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "מתבצע ייבוא…">
 <!ENTITY zotero.import.database "מסד נתונים">
 <!ENTITY zotero.import.lastModified "שינוי אחרון">
 <!ENTITY zotero.import.size "גודל">
 <!ENTITY zotero.import.createCollection "העברת האוספים והפריטים המיובאים לאוסף חדש">
 <!ENTITY zotero.import.fileHandling "טיפול בקבצים">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "ייצוא…">
 <!ENTITY zotero.exportOptions.format.label "עיצוב:">

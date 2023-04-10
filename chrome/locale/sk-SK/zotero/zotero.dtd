@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Rozšírené možnosti">
 <!ENTITY zotero.general.tools "Nástroje">
 <!ENTITY zotero.general.more "Viac">
+<!ENTITY zotero.general.moreInformation "Viac informácií">
 <!ENTITY zotero.general.loading "Nahrávam...">
 <!ENTITY zotero.general.close "Zavrieť">
 <!ENTITY zotero.general.minimize "Minimalizovať">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Prideliť farbu...">
 <!ENTITY zotero.tagSelector.renameTag "Premenovať značku...">
 <!ENTITY zotero.tagSelector.deleteTag "Vymazať značku...">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "Zvoliť farbu značky a pozíciu">
 <!ENTITY zotero.tagColorChooser.color "Farba:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "Import">
 <!ENTITY zotero.import.whereToImportFrom "Odkiaľ chcete importovať?">
 <!ENTITY zotero.import.source.file "Zo súboru (BibTeX, RIS, Zotero RDF atď.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "Importujem...">
 <!ENTITY zotero.import.database "Databáza">
 <!ENTITY zotero.import.lastModified "Naposledy upravené">
 <!ENTITY zotero.import.size "Veľkosť">
 <!ENTITY zotero.import.createCollection "Vložte naimportované kolekcie a záznamy do novej kolekcie">
 <!ENTITY zotero.import.fileHandling "Spracovanie súborov">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Export...">
 <!ENTITY zotero.exportOptions.format.label "Formát:">

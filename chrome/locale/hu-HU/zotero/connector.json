@@ -41,6 +41,9 @@
   "progressWindow_error_translation": {
     "message": "Hiba történt az elem mentése közben. Lásd a $1 további információért"
   },
+  "progressWindow_error_siteAccessLimitsError": {
+    "message": "Hiba történt az elem mentése közben. $1 korlátozhatja az egyszerre menthető elemek számát. További információkért lásd $2."
+  },
   "progressWindow_error_troubleshootingTranslatorIssues": {
     "message": "Ismert konverter hibák"
   },
@@ -62,11 +65,23 @@
   "firstRun_title": {
     "message": "Telepítette a$1Connector-t!"
   },
+  "firstRun_text1": {
+    "message": "A $1 Connector lehetővé teszi, hogy egyetlen kattintással <a href=\"$2\">elemeket mentsen a $1</a> böngészőből."
+  },
+  "firstRun_text2": {
+    "message": "Ha még nem tette meg, <a href=\"$2\">töltse</a> le a standalone $1 alkalmazást a legjobb élményért."
+  },
   "firstRun_acceptButton": {
     "message": "Értem"
   },
   "error_connection_isAppRunning": {
     "message": "A(z)$1fut?"
+  },
+  "error_connection_save": {
+    "message": "A $1 nem tudott kommunikálni a $2 asztali alkalmazással. A Connector képes egyes oldalakat közvetlenül a $3 fiókjába menteni, de a legjobb eredmény érdekében győződjön meg róla, hogy a $2 nyitva van, mielőtt megpróbálja menteni."
+  },
+  "error_connection_downloadOrTroubleshoot": {
+    "message": "Szükség esetén <a href=\"$1\">letöltheti $2</a> vagy <a href=\"$3\">hibaelháríthatja a kapcsolatot</a>."
   },
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "Mentés engedélyezése online könyvtárba"
@@ -74,8 +89,14 @@
   "reports_debug_output_submitted": {
     "message": "A hibakeresés eredménye elküldve.\n\nA hibaazonosító$1."
   },
+  "reports_submission_failed": {
+    "message": "Hiba történt a jelentés elküldése közben.\n\n$1\n\nKérjük, ellenőrizze az internetkapcsolatát. Ha a probléma továbbra is fennáll, írjon üzenetet a Zotero Fórumára."
+  },
   "integration_error_clientUpgrade": {
     "message": "A webalapú hivatkozáshoz szükség van $1 vagy későbbire."
+  },
+  "integration_error_connection": {
+    "message": "A $1 nem tudott kommunikálni a $2 asztali alkalmazással. $2-t meg kell nyitni a webalapú idézés használatához."
   },
   "integration_googleDocs_unlinkBeforeSaving_warning": {
     "message": "Ez a dokumentum aktív Zotero-hivatkozásokat tartalmaz, amelyek zotero.org linkként jelennek meg egy letöltött példányban."

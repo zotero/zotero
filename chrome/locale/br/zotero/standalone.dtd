@@ -36,7 +36,7 @@
 
 <!ENTITY copyCitationCmd.label "Eilañ an arroudenn">
 <!ENTITY copyBibliographyCmd.label "Eilañ al levrlennadur">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyNoteCmd.label "Eilañ an notenn">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Eilpennañ tuadur ar bajenn">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">

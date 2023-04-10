@@ -10,11 +10,12 @@
 <!ENTITY zotero.general.ok "确定">
 <!ENTITY zotero.general.cancel "取消">
 <!ENTITY zotero.general.refresh "刷新">
-<!ENTITY zotero.general.saveAs "另存为...">
+<!ENTITY zotero.general.saveAs "另存为…">
 <!ENTITY zotero.general.options "选项">
 <!ENTITY zotero.general.advancedOptions.label "高级选项">
 <!ENTITY zotero.general.tools "工具">
 <!ENTITY zotero.general.more "更多">
+<!ENTITY zotero.general.moreInformation "更多信息">
 <!ENTITY zotero.general.loading "加载…">
 <!ENTITY zotero.general.close "关闭">
 <!ENTITY zotero.general.minimize "最小化">
@@ -66,8 +67,8 @@
 <!ENTITY zotero.items.menu.attach.note "添加笔记">
 <!ENTITY zotero.items.menu.attach "添加附件">
 <!ENTITY zotero.items.menu.attach.link.uri "附加URI的链接…">
-<!ENTITY zotero.items.menu.attach.file "附加文件副本...">
-<!ENTITY zotero.items.menu.attach.fileLink "附加文件链接...">
+<!ENTITY zotero.items.menu.attach.file "附加文件副本…">
+<!ENTITY zotero.items.menu.attach.fileLink "附加文件链接…">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "还原到文献库中">
 <!ENTITY zotero.items.menu.duplicateItem "创建条目副本">
@@ -75,35 +76,35 @@
 <!ENTITY zotero.items.menu.unrecognize "撤消检索元数据">
 
 <!ENTITY zotero.duplicatesMerge.versionSelect "选择作为主条目的条目版本.">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "选择需要保留的域, 防止被其它版本的域覆盖.">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "选择需要保留的域, 防止被其他版本的域覆盖.">
 
 <!ENTITY zotero.toolbar.newItem.label "新建条目">
 <!ENTITY zotero.toolbar.moreItemTypes.label "更多">
 <!ENTITY zotero.toolbar.lookup.label "通过标识符添加条目">
-<!ENTITY zotero.toolbar.removeItem.label "移除条目...">
+<!ENTITY zotero.toolbar.removeItem.label "移除条目…">
 <!ENTITY zotero.toolbar.newLibrary.label "新建文献库">
 <!ENTITY zotero.toolbar.newCollection.label "新建分类…">
-<!ENTITY zotero.toolbar.newGroup "新建群组...">
+<!ENTITY zotero.toolbar.newGroup "新建群组…">
 <!ENTITY zotero.toolbar.newSubcollection.label "新建子分类…">
-<!ENTITY zotero.toolbar.newSavedSearch.label "新建搜索...">
+<!ENTITY zotero.toolbar.newSavedSearch.label "新建搜索…">
 <!ENTITY zotero.toolbar.emptyTrash.label "清空回收站">
 <!ENTITY zotero.toolbar.tagSelector.label "显示/隐藏标签选择器">
 <!ENTITY zotero.toolbar.actions.label "操作">
 <!ENTITY zotero.toolbar.import.label "导入…">
 <!ENTITY zotero.toolbar.importFromClipboard "从剪贴板导入">
-<!ENTITY zotero.toolbar.export.label "导出文献库...">
+<!ENTITY zotero.toolbar.export.label "导出文献库…">
 <!ENTITY zotero.toolbar.rtfScan.label "RTF 扫描">
 <!ENTITY zotero.toolbar.timeline.label "创建时间轴">
-<!ENTITY zotero.toolbar.preferences.label "首选项...">
+<!ENTITY zotero.toolbar.preferences.label "首选项…">
 <!ENTITY zotero.toolbar.supportAndDocumentation "支持与文档">
 <!ENTITY zotero.toolbar.about.label "关于 Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "高级搜索">
-<!ENTITY zotero.toolbar.openURL.label "定位">
+<!ENTITY zotero.toolbar.openURL.label "检索">
 <!ENTITY zotero.toolbar.openURL.tooltip "在本地文献库里查找">
 
 <!ENTITY zotero.toolbar.feeds.new "新建订阅">
-<!ENTITY zotero.toolbar.feeds.new.fromURL "来自 URL…">
-<!ENTITY zotero.toolbar.feeds.new.fromOPML "来自 OPML…">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "从网址…">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "从 OPML…">
 <!ENTITY zotero.toolbar.feeds.edit "编辑订阅…">
 
 <!ENTITY zotero.item.add "添加">
@@ -114,17 +115,17 @@
 <!ENTITY zotero.item.creatorTransform.nameSwap "交换 首/尾 名称">
 <!ENTITY zotero.item.creatorTransform.capitalize "Capitalize">
 <!ENTITY zotero.item.viewOnline "在线查看">
-<!ENTITY zotero.item.copyAsURL "复制为 URL">
+<!ENTITY zotero.item.copyAsURL "复制为网址">
 <!ENTITY zotero.item.deletePermanently "永久删除…">
 
-<!ENTITY zotero.item.tags.removeAll "移除所有标签...">
+<!ENTITY zotero.item.tags.removeAll "移除所有标签…">
 
 <!ENTITY zotero.toolbar.newNote "新建笔记">
 <!ENTITY zotero.toolbar.note.standalone "新建独立笔记">
 <!ENTITY zotero.toolbar.note.child "添加子笔记">
-<!ENTITY zotero.toolbar.lookup "通过标识符检索...">
-<!ENTITY zotero.toolbar.attachment.linked "文件链接...">
-<!ENTITY zotero.toolbar.attachment.add "文件副本...">
+<!ENTITY zotero.toolbar.lookup "通过标识符检索…">
+<!ENTITY zotero.toolbar.attachment.linked "文件链接…">
+<!ENTITY zotero.toolbar.attachment.add "文件副本…">
 <!ENTITY zotero.toolbar.attachment.weblink "保存当前页链接">
 <!ENTITY zotero.toolbar.attachment.snapshot "生成当前页快照">
 <!ENTITY zotero.toolbar.context.item "条目">
@@ -132,13 +133,14 @@
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "无标签可显示">
 <!ENTITY zotero.tagSelector.loadingTags "加载标记…">
-<!ENTITY zotero.tagSelector.showAutomatic "自动显示">
+<!ENTITY zotero.tagSelector.showAutomatic "显示自动标签">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "显示文献库里的所有标签">
-<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "删除此文献库中的自动标签...">
-<!ENTITY zotero.tagSelector.clearAll "取消全部选择">
-<!ENTITY zotero.tagSelector.assignColor "指派颜色…">
-<!ENTITY zotero.tagSelector.renameTag "重命名标签...">
-<!ENTITY zotero.tagSelector.deleteTag "删除标签...">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "删除此文献库中的自动标签…">
+<!ENTITY zotero.tagSelector.clearAll "取消全选">
+<!ENTITY zotero.tagSelector.assignColor "分配颜色…">
+<!ENTITY zotero.tagSelector.renameTag "重命名标签…">
+<!ENTITY zotero.tagSelector.deleteTag "删除标签…">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "选择标签颜色及位置">
 <!ENTITY zotero.tagColorChooser.color "颜色:">
@@ -146,7 +148,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "设置颜色">
 <!ENTITY zotero.tagColorChooser.removeColor "移除颜色">
 
-<!ENTITY zotero.lookup.description "输入ISBN、DOI、PMID、arXiv ID或ADS条码导入条目到文库中：">
+<!ENTITY zotero.lookup.description "输入 ISBN、DOI、PMID、arXiv ID 或 ADS 条码来添加条目到您的文库：">
 <!ENTITY zotero.lookup.button.search "搜索">
 
 <!ENTITY zotero.createParent.title "创建父条目">
@@ -157,12 +159,12 @@
 <!ENTITY zotero.selectitems.cancel.label "取消">
 <!ENTITY zotero.selectitems.select.label "确定">
 
-<!ENTITY zotero.bibliography.title "创建引文目录">
-<!ENTITY zotero.bibliography.style.label "引文样式:">
-<!ENTITY zotero.bibliography.manageStyles "管理样式...">
+<!ENTITY zotero.bibliography.title "创建引注/参考文献表">
+<!ENTITY zotero.bibliography.style.label "参考文献样式:">
+<!ENTITY zotero.bibliography.manageStyles "管理样式…">
 <!ENTITY zotero.bibliography.locale.label "语言：">
 <!ENTITY zotero.bibliography.outputMode "输出模式:">
-<!ENTITY zotero.bibliography.bibliography "引文目录">
+<!ENTITY zotero.bibliography.bibliography "参考文献表">
 <!ENTITY zotero.bibliography.outputMethod "输出方法:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "另存为 RTF">
 <!ENTITY zotero.bibliography.saveAsHTML.label "另存为 HTML">
@@ -170,23 +172,26 @@
 <!ENTITY zotero.bibliography.print.label "打印">
 
 <!ENTITY zotero.integration.docPrefs.title "文档首选项">
-<!ENTITY zotero.integration.addEditCitation.title "添加/编辑引文">
-<!ENTITY zotero.integration.editBibliography.title "编辑引文目录">
-<!ENTITY zotero.integration.quickFormatDialog.title "快速格式化引文">
+<!ENTITY zotero.integration.addEditCitation.title "添加/编辑引注">
+<!ENTITY zotero.integration.editBibliography.title "编辑参考文献表">
+<!ENTITY zotero.integration.quickFormatDialog.title "快速格式化引注">
 
 <!ENTITY zotero.progress.title "进度">
 
 <!ENTITY zotero.import "导入">
 <!ENTITY zotero.import.whereToImportFrom "您想从哪里导入？">
 <!ENTITY zotero.import.source.file "文件（BibTeX，RIS，Zotero RDF等）">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "导入…">
 <!ENTITY zotero.import.database "数据库">
-<!ENTITY zotero.import.lastModified "上一次更改">
+<!ENTITY zotero.import.lastModified "最后修改">
 <!ENTITY zotero.import.size "大小">
-<!ENTITY zotero.import.createCollection "将导入的集合和项目放入新集合中">
+<!ENTITY zotero.import.createCollection "将导入的分类和条目放入新分类">
 <!ENTITY zotero.import.fileHandling "处理文件">
+<!ENTITY zotero.import.online.newItemsOnly "仅下载新条目，不更新之前已导入的条目">
 
-<!ENTITY zotero.exportOptions.title "导出...">
+<!ENTITY zotero.exportOptions.title "导出…">
 <!ENTITY zotero.exportOptions.format.label "格式:">
 <!ENTITY zotero.exportOptions.translatorOptions.label "转换器选项">
 
@@ -198,7 +203,7 @@
 <!ENTITY zotero.citation.suppressAuthor.label "省略作者">
 <!ENTITY zotero.citation.prefix.label "前缀:">
 <!ENTITY zotero.citation.suffix.label "后缀:">
-<!ENTITY zotero.citation.editorWarning.label "警告: 如果你在编辑器中编辑引文, 引文将无法与数据库或引文样式同步更新.">
+<!ENTITY zotero.citation.editorWarning.label "警告: 如果你在编辑器中编辑引注, 引注将无法与数据库或参考文献样式同步更新.">
 
 <!ENTITY zotero.richText.italic.label "斜体">
 <!ENTITY zotero.richText.bold.label "粗体">
@@ -212,27 +217,27 @@
 <!ENTITY zotero.annotate.toolbar.highlight.label "高亮文本">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label "取消文本高亮">
 
-<!ENTITY zotero.integration.prefs.displayAs.label "引文显示为:">
+<!ENTITY zotero.integration.prefs.displayAs.label "引注显示为:">
 <!ENTITY zotero.integration.prefs.footnotes.label "脚注">
 <!ENTITY zotero.integration.prefs.endnotes.label "尾注">
 
-<!ENTITY zotero.integration.prefs.formatUsing.label "引文存储为:">
+<!ENTITY zotero.integration.prefs.formatUsing.label "引注存储为:">
 <!ENTITY zotero.integration.prefs.bookmarks.label "书签">
 <!ENTITY zotero.integration.prefs.bookmarks.caption "书签可以在 Word 与 LibreOffice 之间共享，但如果不小心被修改，可能会导致错误，并且不能插入脚注。">
 
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "自动更新引文">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "有待更新的引文将在文档中突出显示">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "禁用更新可以加速大文档中的引文的插入。单击刷新手动更新引文。">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "自动更新引注">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "有待更新的引注将在文档中突出显示">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "禁用更新可以加速大文档中的引注的插入。单击刷新手动更新引注。">
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "使用 MEDLINE 期刊缩写">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "“期刊缩写”字段将被忽略。">
 
-<!ENTITY zotero.integration.prefs.exportDocument "切换到另外一个文稿处理器...">
+<!ENTITY zotero.integration.prefs.exportDocument "切换到另外一个文稿处理器…">
 
 <!ENTITY zotero.integration.showEditor.label "显示编辑器">
 <!ENTITY zotero.integration.classicView.label "经典视图">
 
-<!ENTITY zotero.integration.references.label "引文目录中的参考文献">
+<!ENTITY zotero.integration.references.label "参考文献表中的文献">
 
 <!ENTITY zotero.sync.stop "停止同步">
 <!ENTITY zotero.sync.error "同步错误">
@@ -255,14 +260,14 @@
 <!ENTITY zotero.merge.deleted "已删除">
 
 <!ENTITY zotero.proxy.recognized.title "代理确认">
-<!ENTITY zotero.proxy.recognized.warning "仅添加来自您的图书馆, 学校或公司的链接的代理">
+<!ENTITY zotero.proxy.recognized.warning "仅添加您的图书馆、学校或公司提供的代理">
 <!ENTITY zotero.proxy.recognized.warning.secondary "添加其他代理将增加恶意网站伪装成您信任的站点的风险.">
 <!ENTITY zotero.proxy.recognized.disable.label "请不要通过之前确认过的代理自动转接.">
 <!ENTITY zotero.proxy.recognized.ignore.label "忽略">
 
 <!ENTITY zotero.feedSettings.title "订阅设置">
 <!ENTITY zotero.feedSettings.saveButton.label "保存">
-<!ENTITY zotero.feedSettings.url.label "URL:">
+<!ENTITY zotero.feedSettings.url.label "网址:">
 <!ENTITY zotero.feedSettings.title.label "标题:">
 <!ENTITY zotero.feedSettings.refresh.label1 "更新订阅 每">
 <!ENTITY zotero.feedSettings.refresh.label2 "小时">
@@ -273,27 +278,27 @@
 
 <!ENTITY zotero.rtfScan.title "RTF 扫描">
 <!ENTITY zotero.rtfScan.cancel.label "取消">
-<!ENTITY zotero.rtfScan.citation.label "引文">
+<!ENTITY zotero.rtfScan.citation.label "引注">
 <!ENTITY zotero.rtfScan.itemName.label "条目名称">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "未映射引文">
-<!ENTITY zotero.rtfScan.ambiguousCitations.label "含糊的引文">
-<!ENTITY zotero.rtfScan.mappedCitations.label "已映射的引文">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "未映射引注">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "含糊的引注">
+<!ENTITY zotero.rtfScan.mappedCitations.label "已映射的引注">
 <!ENTITY zotero.rtfScan.introPage.label "介绍">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero 可以自动提取, 格式化引文并将引文目录插入到 RTF 文件中. RTF 扫描功能目前支持下列格式的引文变量:">
-<!ENTITY zotero.rtfScan.introPage.description2 "要启动, 请选择 RTF 输入文件和输出文件:">
-<!ENTITY zotero.rtfScan.scanPage.label "扫描引文">
-<!ENTITY zotero.rtfScan.scanPage.description "Zotero 正在扫描引文, 请耐心等待.">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero 可以自动提取、格式化引注并将参考文献表插入 RTF 文件。RTF 扫描功能目前支持下列格式的引注：">
+<!ENTITY zotero.rtfScan.introPage.description2 "如要开始，请选择 RTF 输入文件和输出文件：">
+<!ENTITY zotero.rtfScan.scanPage.label "扫描引注">
+<!ENTITY zotero.rtfScan.scanPage.description "Zotero 正在扫描引注, 请耐心等待.">
 <!ENTITY zotero.rtfScan.citationsPage.label "校验已引用的条目">
-<!ENTITY zotero.rtfScan.citationsPage.description "请检查下列引文以确保 Zotero 已经正确地选择了相关条目.在进行下一步之前, 请更正任何未映射的或不明确的引文.">
+<!ENTITY zotero.rtfScan.citationsPage.description "请检查下列引注以确保 Zotero 已经正确地选择了相关条目.在进行下一步之前, 请更正任何未映射的或不明确的引注.">
 <!ENTITY zotero.rtfScan.stylePage.label "文档格式化中">
-<!ENTITY zotero.rtfScan.formatPage.label "正在格式化引文">
-<!ENTITY zotero.rtfScan.formatPage.description "Zotero正在处理并格式化您的 RTF 文件, 请耐心等待.">
+<!ENTITY zotero.rtfScan.formatPage.label "正在格式化引注">
+<!ENTITY zotero.rtfScan.formatPage.description "Zotero 正在处理和格式化您的 RTF 文件，请耐心等待。">
 <!ENTITY zotero.rtfScan.completePage.label "RTF 扫描完成">
 <!ENTITY zotero.rtfScan.completePage.description "文档处理完成, 请确保格式正确.">
 <!ENTITY zotero.rtfScan.inputFile.label "输入文件">
 <!ENTITY zotero.rtfScan.outputFile.label "输出文件">
 
-<!ENTITY zotero.file.choose.label "选择文件...">
+<!ENTITY zotero.file.choose.label "选择文件…">
 <!ENTITY zotero.file.noneSelected.label "未选定文件">
 
 <!ENTITY zotero.attachLink.title "将链接附加到 URI">
@@ -322,9 +327,9 @@
 <!ENTITY zotero.pdfReader.zoomAuto "自动调整大小">
 <!ENTITY zotero.pdfReader.zoomPageWidth "适应页面宽度">
 <!ENTITY zotero.pdfReader.zoomPageHeight "适应页面高度">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
-<!ENTITY zotero.pdfReader.transferFromPDF "导入注释……">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
-<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">
+<!ENTITY zotero.pdfReader.splitVertically "竖向分割">
+<!ENTITY zotero.pdfReader.splitHorizontally "横向分割">
+<!ENTITY zotero.pdfReader.transferFromPDF "导入注释…">
+<!ENTITY zotero.pdfReader.rotatePageLeft "页面向左旋转">
+<!ENTITY zotero.pdfReader.rotatePageRight "页面向右旋转">
+<!ENTITY zotero.pdfReader.rotatePage180 "页面旋转 180°">

@@ -30,6 +30,12 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Einträge im Papierkorb automatisch löschen nach mehr als">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "Tagen">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Dateiname">
+
 <!ENTITY zotero.preferences.groups "Gruppen">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Beim Kopieren von Einträgen zwischen Bibliotheken, übernehmen:">
 <!ENTITY zotero.preferences.groups.childNotes "zugehörige Notizen">
@@ -80,10 +86,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "für weitere Informationen.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Zurücksetzen des Synchronisierungsverlaufs">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Lokale Daten mit Daten vom Server zusammenführen, ohne den Synchronisierungsverlauf zu beachten">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Wiederherstellen aus der Online-Bibliothek">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Überschreiben der lokalen Zotero-Daten mit Daten aus der Online-Bibliothek.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Ersetze Online-Bibliothek">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Überschreiben der Online-Bibliothek mit lokalen Zotero-Daten">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Wiederherstellen aus der Online-Bibliothek">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Überschreiben der lokalen Zotero-Daten mit Daten aus der Online-Bibliothek.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Ersetze Online-Bibliothek">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Überschreiben der Online-Bibliothek mit lokalen Zotero-Daten">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Zurücksetzen des Synchronisierungsverlaufs">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Vergleiche alle Dateianhänge mit dem Datenserver">
 <!ENTITY zotero.preferences.sync.reset "Zurücksetzen">

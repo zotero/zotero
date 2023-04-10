@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "高度なオプション">
 <!ENTITY zotero.general.tools "ツール">
 <!ENTITY zotero.general.more "その他">
+<!ENTITY zotero.general.moreInformation "さらに詳しく">
 <!ENTITY zotero.general.loading "読み込み中...">
 <!ENTITY zotero.general.close "閉じる">
 <!ENTITY zotero.general.minimize "最小化する">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "色を指定...">
 <!ENTITY zotero.tagSelector.renameTag "タグ名の変更...">
 <!ENTITY zotero.tagSelector.deleteTag "タグを削除...">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "タグの色と位置を選ぶ">
 <!ENTITY zotero.tagColorChooser.color "色:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "インポート">
 <!ENTITY zotero.import.whereToImportFrom "どこからインポートしますか？">
 <!ENTITY zotero.import.source.file "単一ファイル (BibTeX, RIS, Zotero RDF, など.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "インポート中...">
 <!ENTITY zotero.import.database "データベース">
 <!ENTITY zotero.import.lastModified "最後の更新">
 <!ENTITY zotero.import.size "サイズ">
 <!ENTITY zotero.import.createCollection "インポートされたコレクションやアイテムを新しいコレクションに格納する">
 <!ENTITY zotero.import.fileHandling "ファイルの取り扱い">
+<!ENTITY zotero.import.online.newItemsOnly "新しいアイテムをダウンロードすることだけです；インポートしたアイテムを更新することをしないでください。">
 
 <!ENTITY zotero.exportOptions.title "エクスポート...">
 <!ENTITY zotero.exportOptions.format.label "フォーマット:">
@@ -322,9 +327,9 @@
 <!ENTITY zotero.pdfReader.zoomAuto "自動的にサイズ変更">
 <!ENTITY zotero.pdfReader.zoomPageWidth "ページ幅に合わせる">
 <!ENTITY zotero.pdfReader.zoomPageHeight "ページの高さに合わせる">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
+<!ENTITY zotero.pdfReader.splitVertically "垂直方向に分割する">
+<!ENTITY zotero.pdfReader.splitHorizontally "水平方向に分割する">
 <!ENTITY zotero.pdfReader.transferFromPDF "注釈のインポート…">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
-<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">
+<!ENTITY zotero.pdfReader.rotatePageLeft "ページを左に回転する">
+<!ENTITY zotero.pdfReader.rotatePageRight "ページを右に回転する">
+<!ENTITY zotero.pdfReader.rotatePage180 "ページを180度に回転する">

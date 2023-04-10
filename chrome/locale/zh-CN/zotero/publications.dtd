@@ -3,12 +3,12 @@
 <!ENTITY zotero.publications.intro "你添加到我的出版物的条目将在 zotero.org 上你的个人主页上显示。如果你选择加入附件，这些文件将在你指定的许可下向公众开放下载。请仅添加你自己创建的论文，并仅上传你有权并愿意分享的文件。">
 <!ENTITY zotero.publications.include.checkbox.files "包括文件">
 <!ENTITY zotero.publications.include.checkbox.notes "包括笔记">
-<!ENTITY zotero.publications.include.adjustAtAnyTime "你可以在任何时间从“我的出版物”中调整显示的项目。">
+<!ENTITY zotero.publications.include.adjustAtAnyTime "您随时可以在“我的出版物”中调整要显示什么。">
 
 <!ENTITY zotero.publications.sharing.title "选择你分享论文的方式">
 <!ENTITY zotero.publications.sharing.text "您可以保留您作品的所有权利，可以在知识共享许可下获得许可，也可以将其专用于公共领域。 在所有情况下，这些作品都可以通过zotero.org公开获得。">
 <!ENTITY zotero.publications.sharing.prompt "您想允许他人共享您的作品吗？">
-<!ENTITY zotero.publications.sharing.cc "是的，根据知识共享许可">
+<!ENTITY zotero.publications.sharing.cc "是的，使用“知识共享”许可协议">
 <!ENTITY zotero.publications.sharing.cc0 "是的，将我的工作放在公共领域">
 <!ENTITY zotero.publications.sharing.reserved "不，仅在zotero.org上发布我的作品">
 

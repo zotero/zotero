@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Lisäasetukset">
 <!ENTITY zotero.general.tools "Työkalut">
 <!ENTITY zotero.general.more "Lisää">
+<!ENTITY zotero.general.moreInformation "Lisätietoja">
 <!ENTITY zotero.general.loading "Ladataan...">
 <!ENTITY zotero.general.close "Sulje">
 <!ENTITY zotero.general.minimize "Pienennä">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Aseta väri">
 <!ENTITY zotero.tagSelector.renameTag "Nimeä avainsana uudelleen...">
 <!ENTITY zotero.tagSelector.deleteTag "Poista avainsana...">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "Valitse avainsanan väri ja sijainti">
 <!ENTITY zotero.tagColorChooser.color "Väri:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "Tuonti">
 <!ENTITY zotero.import.whereToImportFrom "Mistä haluat tuoda?">
 <!ENTITY zotero.import.source.file "Tiedosto (BibTeX, RIS, Zotero RDF, jne.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "Tuodaan...">
 <!ENTITY zotero.import.database "Tietokanta">
 <!ENTITY zotero.import.lastModified "Viimeksi muokattu">
 <!ENTITY zotero.import.size "Koko">
 <!ENTITY zotero.import.createCollection "Sijoita tuodut kokoelmat ja nimikkeet uuteen kokoelmaan.">
 <!ENTITY zotero.import.fileHandling "Tiedostojen käsittely">
+<!ENTITY zotero.import.online.newItemsOnly "Lataa vain uudet kohteet; älä päivitä aikaisemmin tuotuja kohteita">
 
 <!ENTITY zotero.exportOptions.title "Vie...">
 <!ENTITY zotero.exportOptions.format.label "Muoto:">
@@ -279,7 +284,7 @@
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "Monimerkityksiset sitaatit">
 <!ENTITY zotero.rtfScan.mappedCitations.label "Paikannetut sitaatit">
 <!ENTITY zotero.rtfScan.introPage.label "Johdanto">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero voi automaattisesti seuloa ja uudelleenmuotoilla viittaukset ja lisätä kirjallisuusluettelon RTF-tiedostoon. Valitse aluksi RTF-tiedosto.">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero voi automaattisesti poimia ja uudelleenmuotoilla viittaukset ja lisätä kirjallisuusluettelon RTF-tiedostoon. Valitse aluksi RTF-tiedosto.">
 <!ENTITY zotero.rtfScan.introPage.description2 "Valitse aluksi luettava RTF-tiedosto sekä kirjoitettava tiedosto:">
 <!ENTITY zotero.rtfScan.scanPage.label "Etsitään viitteitä">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero etsii asiakirjasta lähdeviitteitä. Malta vielä hetki.">
@@ -322,9 +327,9 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Säädä kokoa automaattisesti">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Koko sivun leveys">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Koko sivun korkeus">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
+<!ENTITY zotero.pdfReader.splitVertically "Jaa pystysuunnassa">
+<!ENTITY zotero.pdfReader.splitHorizontally "Jaa vaakasuunnassa">
 <!ENTITY zotero.pdfReader.transferFromPDF "Tuo huomautukset...">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
-<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Kierrä sivua vasemmalle">
+<!ENTITY zotero.pdfReader.rotatePageRight "Kierrä sivua oikealle">
+<!ENTITY zotero.pdfReader.rotatePage180 "Kierrä sivua 180°">

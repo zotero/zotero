@@ -3,7 +3,7 @@
     "message": "更多…"
   },
   "general_moreInfo": {
-    "message": "更多信息..."
+    "message": "更多信息…"
   },
   "general_needHelp": {
     "message": "需要帮助？"
@@ -18,7 +18,7 @@
     "message": "否"
   },
   "general_tryAgain": {
-    "message": "请重试"
+    "message": "重试"
   },
   "general_warning": {
     "message": "警告"
@@ -27,7 +27,7 @@
     "message": "取消"
   },
   "general_pleaseWait": {
-    "message": "请稍等……"
+    "message": "请稍候…"
   },
   "general_copyToClipboard": {
     "message": "复制到剪贴板"
@@ -42,22 +42,28 @@
     "message": "保存此条目时发生错误。查看 $1 获取更多信息。"
   },
   "progressWindow_error_siteAccessLimitsError": {
-    "message": "保存该条目时出现一个错误。$1可能限制你单次保存条目的数量。查阅$2来获取更多信息。"
+    "message": "保存此条目时出错。$1 可能限制您单次保存条目的数量。更多信息参阅 $2。"
   },
   "progressWindow_error_troubleshootingTranslatorIssues": {
-    "message": "排除翻译人员问题"
+    "message": "翻译器故障排除"
   },
   "progressWindow_error_siteAccessLimits": {
     "message": "网站访问限制"
   },
   "progressWindow_error_fallback": {
-    "message": "使用 $1保存时发生错误。尝试使用 $2 保存。"
+    "message": "使用 $1 保存时发生错误。改为尝试用 $2 保存。"
   },
   "progressWindow_error_upgradeClient": {
-    "message": "您的版本 $1 不支持此功能。请升级到 $2。"
+    "message": "您的 $1 版本不支持此功能。请升级到 $2。"
   },
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "最新版本"
+  },
+  "extensionIsDisabled": {
+    "message": "$1 已停用"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1已于扩展页面中停用 "
   },
   "appConnector": {
     "message": "$1 连接器"
@@ -66,79 +72,91 @@
     "message": "升级 $1"
   },
   "firstRun_title": {
-    "message": "你已经安装了$1连接器！"
+    "message": "您已安装 $1 连接器！"
   },
   "firstRun_text1": {
-    "message": "$1连接器允许你从你的浏览器中通过单击<a href=\"$2\">保存条目到$1</a>。"
+    "message": "有了 $1 连接器，您就可以从浏览器中单击来<a href=\"$2\">保存条目到 $1</a>。"
   },
   "firstRun_text2": {
-    "message": "如果你还没有下载，请<a href=\"$2\">下载</a>独立的$1应用来获得最好的体验。"
+    "message": "建议您<a href=\"$2\">下载</a>桌面版 $1 应用来获得最佳体验。"
   },
   "firstRun_acceptButton": {
     "message": "明白"
   },
   "error_connection_isAppRunning": {
-    "message": "$1正在运行吗？"
+    "message": "$1 运行了吗？"
   },
   "error_connection_save": {
-    "message": "$1 无法与桌面应用程序 $2 通信。连接器可以将一些页面直接保存到您的 $3 帐户，但为了获得最佳效果，您应确保在尝试保存之前打开 $2。"
+    "message": "$1 无法与桌面应用程序 $2 通信。连接器可以将一些页面直接保存到您的 $3 帐户，但为了获得最佳效果，您应确保在尝试保存前打开 $2。"
   },
   "error_connection_downloadOrTroubleshoot": {
-    "message": "如有必要，您可以 <a href=\"$1\">下载 $2 </a>或 <a href=\"$3\"> 排除连接故障。</a>"
+    "message": "如有必要，您可以<a href=\"$1\">下载 $2 </a>或 <a href=\"$3\">解决连接故障。</a>"
   },
   "error_connection_enableSavingToOnlineLibrary": {
     "message": "启用保存到在线文献库"
   },
   "reports_report_submitted": {
-    "message": "您的错误报告已提交\n\n报告 ID: $1\n\n请在Zetero论坛发布问题，问题请包含该错误报告ID，问题描述，以及任何比较的步骤以重现该问题。\n\n未在论坛提交的错误报告将不会处理。"
+    "message": "已提交您的错误报告。\n\n报告 ID: $1\n\n您需要在 Zetero 论坛中发帖，帖子中附上报告 ID、问题描述、重现问题所需的步骤。\n\n未在论坛中提交的错误报告不会被处理。"
   },
   "reports_debug_output_submitted": {
-    "message": "你的debug输出已经提交。Debug ID是 $1。"
+    "message": "您的调试输出已提交。Debug ID 为 $1。"
   },
   "reports_submission_failed": {
-    "message": "提交报告时产生错误\n\n$1\n\n请检查您的网络连接。如果错误重复出现，请在Zotero论坛发帖。"
+    "message": "提交您的报告时出错。\n\n$1\n\n请检查您的网络连接。如果错误反复出现，到 Zotero 论坛发帖询问。"
   },
   "integration_error_clientUpgrade": {
-    "message": "基于 Web 的引用请求 $1 或稍后。"
+    "message": "基于 Web 的引用需要 $1 或更高版本。"
   },
   "integration_error_connection": {
-    "message": "$1 无法与桌面应用程序 $2 通信。 $2 必须开放使用基于 Web 的引用。"
+    "message": "$1 无法与桌面应用程序 $2 通信。必须打开 $2 才能使用基于 Web 的引用。"
   },
   "integration_googleDocs_unlinkBeforeSaving_warning": {
-    "message": "此文档包含有效的 Zotero 引文，该引文将在下载的副本中显示为 zotero.org 链接"
+    "message": "此文档包含有效的 Zotero 引注，该引注将在下载的副本中显示为 zotero.org 链接"
   },
   "integration_googleDocs_unlinkBeforeSaving_instructions": {
-    "message": "为生成易于共享的版本，从文件菜单中选择<b>复制……</b>，在新文档中从 Zotero 菜单中选择<b>未链接引文</b>，然后下载未链接版本。保留原始链接文档以防你需要进一步更改。"
+    "message": "为生成易于共享的版本，从文件菜单中选择<b>复制…</b>，在新文档中从 Zotero 菜单中选择<b>未链接引注</b>，然后下载未链接版本。保留原始的已链接文档以备需要进一步更改。"
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
-    "message": "无论何时下载已链接版本"
+    "message": "坚持下载有链接版本"
   },
   "integration_googleDocs_updating": {
-    "message": "$1正在更新您的文件。"
+    "message": "$1 正在更新您的文件。"
   },
   "integration_googleDocs_docxAlert": {
-    "message": "当在 Google Docs 中直接编辑 Microsoft Word .docx 文件时，$1整合无法使用。选择文件 → 储存为 Google Docs 来允许该功能。<br/><br/>如果你想把有$1引用的 Word 文档转换为Google Docs 时，请查阅<a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">在文档编辑器间移动文档</a>。"
+    "message": "在 Google Docs 中直接编辑 Microsoft Word .docx 文件时，$1 整合无法使用。选择文件 → 保存为 Google Docs 来允许该功能。<br/><br/>如果要将有 $1引用的 Word 文档转换到 Google Docs ，参阅<a href=\"https://www.zotero.org/support/kb/moving_documents_between_word_processors\">在文档编辑器间移动文档</a>。"
   },
   "integration_googleDocs_documentLocked": {
-    "message": "该文档的引用正被另外一个$1用户编辑。请稍后再试。"
+    "message": "该文档的引注正被另一名 $1 用户编辑。请稍后再试。"
   },
   "integration_googleDocs_documentLocked_moreInfo": {
-    "message": "$1锁住了你的文档来防止多个用户同时编辑引用。当前文档中的引用编辑可能会引起引用或文档的损坏。一些如网络故障等无法预见的情况可能会使得你的文档被持续锁定。如果你相信这已经发生了，你可以覆盖锁定。<br/><br/>你想要覆盖文档锁定么？"
+    "message": "$1 锁定了您的文档以避免多名用户同时编辑参考文献。同时编辑文档中的参考文献可能导致参考文献或文档的损坏。网络故障等某些无法预见的情况可能会导致您的文档被持续锁定。如果您确信当前情况属异常误判，您可以忽略此锁定。<br/><br/>是否忽略文档锁定？"
   },
   "integration_googleDocs_documentPermissionError": {
-    "message": "你所选择的Google账户没有编辑该文档的权限。请再次尝试，并确保所选择的账号有编辑权限。"
+    "message": "您所选择的 Google 账户没有编辑该文档的权限。请重试，确保所选的账号有编辑权限。"
   },
   "integration_googleDocs_orphanedCitations_buttonTooltip": {
-    "message": "显示未链接的 $1 引文"
+    "message": "显示未链接的 $1 引注"
   },
   "integration_googleDocs_orphanedCitations_alert": {
-    "message": "你正在编辑的引文已经从 $1.断开链接"
+    "message": "您尝试编辑的引注已断开与 $1 的链接。"
   },
   "integration_googleDocs_orphanedCitations_alertButton": {
-    "message": "重新链接引文"
+    "message": "重新链接引注"
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
-    "message": "该引文已  <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">从 $1断开</a>。您需要重新链接后，引文方可在参考文献部分更新或出现。"
+    "message": "该引注已<a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">与 $1断开</a>。您需要重新链接，否则参考文献表中的该引注不会更新或出现。"
+  },
+  "copyUnproxiedLink": {
+    "message": "复制未经代理的链接"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "复制未经代理的页面URL"
+  },
+  "reloadViaProxy": {
+    "message": "通过代理重新加载"
+  },
+  "reloadVia": {
+    "message": "通过$1 重新加载"
   },
   "general_saveTo": {
     "message": "保存到 $1"

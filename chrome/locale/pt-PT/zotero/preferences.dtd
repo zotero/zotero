@@ -30,6 +30,12 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Remover automaticamente itens no lixo há mais de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dias">
 
+<!ENTITY zotero.preferences.pdfReader "Leitor de PDF">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Mostrar abas como">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Criador - Ano - Título">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Título - Criador - Ano">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Nome do arquivo">
+
 <!ENTITY zotero.preferences.groups "Grupos">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Ao copiar itens entre bibliotecas incluir:">
 <!ENTITY zotero.preferences.groups.childNotes "notas descendentes">
@@ -80,10 +86,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "para mais informação.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Repor Histórico da Sincronização de Dados">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Fundir dados locais com dados remotos, ignorando o histórico de sincronização">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restaurar a partir da Biblioteca em Linha">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Sobrepor os dados locais do Zotero com os dados da biblioteca em linha.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Substituir Biblioteca em Linha">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Sobrepor a biblioteca em linha com os dados locais do Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restaurar a partir da Biblioteca em Linha">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Sobrepor os dados locais do Zotero com os dados da biblioteca em linha.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Substituir Biblioteca em Linha">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Sobrepor a biblioteca em linha com os dados locais do Zotero">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reiniciar o Histórico de Sincronização de Arquivos">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Comparar todos os ficheiros anexos com o serviço de armazenamento">
 <!ENTITY zotero.preferences.sync.reset "Restabelecer">

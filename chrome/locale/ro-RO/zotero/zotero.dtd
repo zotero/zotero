@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Opțiuni avansate">
 <!ENTITY zotero.general.tools "Instrumente">
 <!ENTITY zotero.general.more "Mai mult">
+<!ENTITY zotero.general.moreInformation "Mai multe informații">
 <!ENTITY zotero.general.loading "Se încarcă...">
 <!ENTITY zotero.general.close "Închide">
 <!ENTITY zotero.general.minimize "Minimizare">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Stabilește culoare...">
 <!ENTITY zotero.tagSelector.renameTag "Redenumește eticheta...">
 <!ENTITY zotero.tagSelector.deleteTag "Șterge eticheta...">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "Alege o culoare și o poziție pentru etichetă">
 <!ENTITY zotero.tagColorChooser.color "Culoare:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "Import">
 <!ENTITY zotero.import.whereToImportFrom "De unde vrei să imporți?">
 <!ENTITY zotero.import.source.file "Un fișier (BibTeX, RIS, Zotero RDF etc.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "Se importă...">
 <!ENTITY zotero.import.database "Baza de date">
 <!ENTITY zotero.import.lastModified "Ultima modificare">
 <!ENTITY zotero.import.size "Mărime">
 <!ENTITY zotero.import.createCollection "Pune colecțiile importate și itemii într-o colecție nouă">
 <!ENTITY zotero.import.fileHandling "Manipulare fișier">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Export...">
 <!ENTITY zotero.exportOptions.format.label "Formatare:">

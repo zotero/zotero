@@ -30,11 +30,17 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Elimina automàticament els elements de la paperera que s'han suprimit fa més de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dies">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Nom de fitxer">
+
 <!ENTITY zotero.preferences.groups "Grups">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Quan copiïs elements entre les biblioteques, inclou-hi:">
 <!ENTITY zotero.preferences.groups.childNotes "notes descendents">
 <!ENTITY zotero.preferences.groups.childFiles "instantànies descendents i fitxers importats">
-<!ENTITY zotero.preferences.groups.annotations "annotations">
+<!ENTITY zotero.preferences.groups.annotations "anotacions">
 <!ENTITY zotero.preferences.groups.childLinks "enllaços descendents">
 <!ENTITY zotero.preferences.groups.tags "etiquetes">
 
@@ -44,7 +50,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Els elements més antics primer">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Paràmetres per defecte dels canals">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
+<!ENTITY zotero.preferences.openurl.choose "Trieu un resolutor:">
 <!ENTITY zotero.preferences.openurl.custom "Personalitza…">
 <!ENTITY zotero.preferences.openurl.server "Resolutor:">
 <!ENTITY zotero.preferences.openurl.version "Versió:">
@@ -80,10 +86,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "per obtenir més informació.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Reinicia l'historial de sincronització de dades">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Fusiona les dades locals amb les remotes, ignorant l'historial de sincronització">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restaura de la biblioteca en línia">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Sobreescriu les dades locals de Zotero amb les dades de la biblioteca en línia">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Reemplaça la biblioteca en línia">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Sobreescriu la biblioteca en línia amb les dades locals de Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restaura de la biblioteca en línia">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Sobreescriu les dades locals de Zotero amb les dades de la biblioteca en línia">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Reemplaça la biblioteca en línia">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Sobreescriu la biblioteca en línia amb les dades locals de Zotero">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reinicia l'historial de sincronització dels fitxers">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compara tots els fitxers adjunts amb el servei d'emmagatzematge">
 <!ENTITY zotero.preferences.sync.reset "Reinicia">
@@ -101,7 +107,7 @@
 <!ENTITY zotero.preferences.search.indexStats.words "Paraules:">
 
 <!ENTITY zotero.preferences.fulltext.textMaxLength "Nombre màxim de caràcters indexats per fitxer:">
-<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Nombe màxim de pàgines indexades per fitxer:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Nombre màxim de pàgines indexades per fitxer:">
 
 <!ENTITY zotero.preferences.prefpane.export "Exporta">
 
@@ -110,8 +116,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Quan aquesta opció està deshabilitada, el Zotero inclou les URL quan se citen articles de premsa, revistes i revistes acadèmiques només si l'article no té un ran dge pàgines assignat.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Còpia ràpida">
-<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Format d'element:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Format de nota:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copia com a HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Configuració específica per a llocs web:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domini/Ruta">

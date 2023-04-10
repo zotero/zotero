@@ -39,7 +39,7 @@
     "message": "Emneord (adskilt med komma)"
   },
   "progressWindow_error_translation": {
-    "message": "En feil oppstod mens dette elementet ble forsøkt lagret. Se $1 for mer informasjon."
+    "message": "En feil oppstod under lagring av dette elementet. Se $1 for mer informasjon."
   },
   "progressWindow_error_siteAccessLimitsError": {
     "message": "Det skjedde en feil under lagring av dette elementet. $1 kan ha begrensninger på antall elementer du kan lagre på en gang. Se $2 for mer informasjon."
@@ -58,6 +58,12 @@
   },
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "siste versjon"
+  },
+  "extensionIsDisabled": {
+    "message": "$1 er deaktivert"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 er deaktivert på utvidelsessider"
   },
   "appConnector": {
     "message": "$1 Tilknytter"
@@ -108,7 +114,7 @@
     "message": "Dette dokumentet inneholder aktive Zotero henvisninger som vil vises som zotero.org koblinger i en nedlastet kopi."
   },
   "integration_googleDocs_unlinkBeforeSaving_instructions": {
-    "message": "For å lage en versjon som kan deles, velg <b>Lag en kopi…</b>fra Fil menyen, velg deretter<b>Fjern kobling fra henvisninger</b> fra Zotero menyen i det nye dokumentet, og last deretter ned versjon med koblinger fjernet. Behold det opprinnelige dokumentet med koblinger i tilfelle du trenger å gjøre flere endringer."
+    "message": "For å lage en versjon som er egnet for deling, velg <b>Make a copy…</b>fra File-menyen, velg deretter<b>Unlink Citations</b> fra Zotero-menyen i det nye dokumentet, og last deretter ned versjonen med koblinger fjernet. Behold det opprinnelige dokumentet med koblinger i tilfelle du trenger å gjøre flere endringer."
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Last uansett ned versjon med koblinger"
@@ -132,13 +138,25 @@
     "message": "Vis frakoblede $1 henvisninger"
   },
   "integration_googleDocs_orphanedCitations_alert": {
-    "message": "Henvisningen du forsøker å redigere har blitt koblet fra $1."
+    "message": "Henvisningen du forsøker å redigere har blitt frakoblet $1."
   },
   "integration_googleDocs_orphanedCitations_alertButton": {
     "message": "Gjenopprett kobling til henvisning"
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
-    "message": "Disse henvisningene har blitt <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">frakoblet  $1</a>. Du må gjenopprette koblinger til de igjen før de vil bli oppdatert eller vises i bibliografien din."
+    "message": "Disse henvisningene har blitt <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">frakoblet $1</a>. Du må lage koblinger til de på ny før de vil bli oppdatert eller vises i bibliografien din."
+  },
+  "copyUnproxiedLink": {
+    "message": "Kopier lenke uten mellomtjener"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "Kopier URL til side uten mellomtjener"
+  },
+  "reloadViaProxy": {
+    "message": "Last på nytt gjennom mellomtjener"
+  },
+  "reloadVia": {
+    "message": "Last på nytt gjennom $1"
   },
   "general_saveTo": {
     "message": "Lagre til $1"

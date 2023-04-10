@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "고급 ">
 <!ENTITY zotero.general.tools "도구">
 <!ENTITY zotero.general.more "더 보기">
+<!ENTITY zotero.general.moreInformation "정보 더 보기">
 <!ENTITY zotero.general.loading "불러오는 중...">
 <!ENTITY zotero.general.close "닫기">
 <!ENTITY zotero.general.minimize "최소화">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "색상 지정...">
 <!ENTITY zotero.tagSelector.renameTag "태그 이름 변경...">
 <!ENTITY zotero.tagSelector.deleteTag "태그 지우기...">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "태그 색상 및 위치 선택">
 <!ENTITY zotero.tagColorChooser.color "색상:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "불러오기">
 <!ENTITY zotero.import.whereToImportFrom "어디서 불러올까요?">
 <!ENTITY zotero.import.source.file "파일 (BiBTeX, RIS, Zotero RDF 등)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "불러오는 중...">
 <!ENTITY zotero.import.database "데이터베이스">
 <!ENTITY zotero.import.lastModified "마지막 수정 시간">
 <!ENTITY zotero.import.size "크기">
 <!ENTITY zotero.import.createCollection "컬렉션 및 항목을 새 컬렉션으로 불러오기">
 <!ENTITY zotero.import.fileHandling "파일 처리 방법">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "내보내기...">
 <!ENTITY zotero.exportOptions.format.label "형식:">

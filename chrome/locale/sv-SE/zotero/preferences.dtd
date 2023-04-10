@@ -30,6 +30,12 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Ta automatiskt bort källor från papperskorgen som lagts dit för mer än">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dagar sen">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Filnamn">
+
 <!ENTITY zotero.preferences.groups "Grupper">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "När källor kopieras mellan bibliotek, ta med:">
 <!ENTITY zotero.preferences.groups.childNotes "tillhörande anteckningar">
@@ -80,10 +86,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "för mer information.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Återställ datasynkroniseringshistorik">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Sammanfoga lokala data med fjärrdata, strunta i synkroniseringshistorik">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Återställ från onlinebibliotek">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Överskriv lokal Zotero-data med data från onlinebiblioteket.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Ersätt onlinebibliotek">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Skriv över onlinebiblioteket med lokala Zotero-data">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Återställ från onlinebibliotek">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Överskriv lokal Zotero-data med data från onlinebiblioteket.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Ersätt onlinebibliotek">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Skriv över onlinebiblioteket med lokala Zotero-data">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Återställ filsynkroniseringshistorik">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Jämför alla bifogade filer med lagringstjänsten">
 <!ENTITY zotero.preferences.sync.reset "Återställ">

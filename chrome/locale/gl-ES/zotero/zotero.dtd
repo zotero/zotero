@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Opcións avanzadas">
 <!ENTITY zotero.general.tools "Ferramentas">
 <!ENTITY zotero.general.more "Máis">
+<!ENTITY zotero.general.moreInformation "Máis información">
 <!ENTITY zotero.general.loading "Cargando...">
 <!ENTITY zotero.general.close "Pechar">
 <!ENTITY zotero.general.minimize "Minimizar">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Asignarlle cor...">
 <!ENTITY zotero.tagSelector.renameTag "Renomear a etiqueta...">
 <!ENTITY zotero.tagSelector.deleteTag "Eliminar a etiqueta...">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "Escoller unha cor de etiqueta e unha posición">
 <!ENTITY zotero.tagColorChooser.color "Cor:">
@@ -146,7 +148,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Definir a cor">
 <!ENTITY zotero.tagColorChooser.removeColor "Eliminar a cor">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
+<!ENTITY zotero.lookup.description "Introduce as ISBNs, DOIs, PMIDs, arXiv IDs, ou bibcodes ADS para engadir á biblioteca:">
 <!ENTITY zotero.lookup.button.search "Buscar">
 
 <!ENTITY zotero.createParent.title "Crear elemento pai">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "Importar">
 <!ENTITY zotero.import.whereToImportFrom "De onde queres importar?">
 <!ENTITY zotero.import.source.file "Un ficheiro (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "Importando...">
 <!ENTITY zotero.import.database "Base de datos">
 <!ENTITY zotero.import.lastModified "Última modificación">
 <!ENTITY zotero.import.size "Tamaño">
 <!ENTITY zotero.import.createCollection "Poñer as coleccións e elementos importados nunha nova colección">
 <!ENTITY zotero.import.fileHandling "Xestión de ficheiros">
+<!ENTITY zotero.import.online.newItemsOnly "Descargar só os novos elementos; non actualizar os elementos importados con anterioridade">
 
 <!ENTITY zotero.exportOptions.title "Exportar...">
 <!ENTITY zotero.exportOptions.format.label "Formato:">
@@ -195,7 +200,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Manter as fontes ordenadas">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
+<!ENTITY zotero.citation.suppressAuthor.label "Obviar autor">
 <!ENTITY zotero.citation.prefix.label "Prefixo:">
 <!ENTITY zotero.citation.suffix.label "Sufixo:">
 <!ENTITY zotero.citation.editorWarning.label "Aviso: se editas a cita no editor non se actualizará máis reflectindo os cambios tanto na base de datos como no estilo de citas.">
@@ -321,10 +326,10 @@
 <!ENTITY zotero.pdfReader.zoomOut "Alonxar">
 <!ENTITY zotero.pdfReader.zoomAuto "Axuste automático">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Ampliar ao ancho de páxina">
-<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
-<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
-<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Ampliar a ancho de páxina">
+<!ENTITY zotero.pdfReader.splitVertically "Partir verticalmente">
+<!ENTITY zotero.pdfReader.splitHorizontally "Partir en horizontal">
+<!ENTITY zotero.pdfReader.transferFromPDF "Importar anotacións...">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Rotar páxina á esquerda">
+<!ENTITY zotero.pdfReader.rotatePageRight "Rotar páxina á dereita">
+<!ENTITY zotero.pdfReader.rotatePage180 "Rotar páxina 180°">

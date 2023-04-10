@@ -59,6 +59,12 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "son sürüme"
   },
+  "extensionIsDisabled": {
+    "message": "$1 devre dışı"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1, Uzantılar sayfasında devre dışı"
+  },
   "appConnector": {
     "message": "$1 Bağlayıcısı"
   },
@@ -139,6 +145,18 @@
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
     "message": "Bu alıntılar <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">$1 ile olan bağlantılarını kaybetmiş</a>. Kaynakçanızda güncellenmeleri ya da görünebilmeleri için yeniden bağlantılarını kurmanız gerekmektedir."
+  },
+  "copyUnproxiedLink": {
+    "message": "Vekillenmemiş Bağlantıyı Kopyala"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "Vekillenmemiş Sayfa URL'sini Kopyala"
+  },
+  "reloadViaProxy": {
+    "message": "Vekil ile Yeniden Yükle"
+  },
+  "reloadVia": {
+    "message": "$1 ile Yeniden Yükle"
   },
   "general_saveTo": {
     "message": "$1'ya Kaydet"

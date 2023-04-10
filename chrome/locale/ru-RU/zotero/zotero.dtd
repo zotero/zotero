@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Расширенные настройки">
 <!ENTITY zotero.general.tools "Инструменты">
 <!ENTITY zotero.general.more "Ещё">
+<!ENTITY zotero.general.moreInformation "Дополнительные сведения">
 <!ENTITY zotero.general.loading "Загрузка...">
 <!ENTITY zotero.general.close "Закрыть">
 <!ENTITY zotero.general.minimize "Свернуть">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Назначить цвет…">
 <!ENTITY zotero.tagSelector.renameTag "Переименовать тег…">
 <!ENTITY zotero.tagSelector.deleteTag "Удалить тег…">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "Выбрать цвет и расположение тега">
 <!ENTITY zotero.tagColorChooser.color "Цвет:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "Импорт">
 <!ENTITY zotero.import.whereToImportFrom "Откуда вы хотите импортировать?">
 <!ENTITY zotero.import.source.file "Файл (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "Идет импортирование…">
 <!ENTITY zotero.import.database "База данных">
 <!ENTITY zotero.import.lastModified "Последний раз изменено">
 <!ENTITY zotero.import.size "Размер (объём)">
 <!ENTITY zotero.import.createCollection "Поместить импортированные коллекции и записи в новую коллекцию">
 <!ENTITY zotero.import.fileHandling "Обработка файлов">
+<!ENTITY zotero.import.online.newItemsOnly "Загрузить только новые записи; не обновлять ранее испортированные записи">
 
 <!ENTITY zotero.exportOptions.title "Экспорт…">
 <!ENTITY zotero.exportOptions.format.label "Формат:">
@@ -322,9 +327,9 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Масштабировать автоматически">
 <!ENTITY zotero.pdfReader.zoomPageWidth "По ширине страницы">
 <!ENTITY zotero.pdfReader.zoomPageHeight "По высоте страницы">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
+<!ENTITY zotero.pdfReader.splitVertically "Разделить вертикально">
+<!ENTITY zotero.pdfReader.splitHorizontally "Разделить горизонтально">
 <!ENTITY zotero.pdfReader.transferFromPDF "Импортировать аннотации…">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
-<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Повернуть страницу налево">
+<!ENTITY zotero.pdfReader.rotatePageRight "Повернуть страницу направо">
+<!ENTITY zotero.pdfReader.rotatePage180 "Повернуть страницу на 180°">

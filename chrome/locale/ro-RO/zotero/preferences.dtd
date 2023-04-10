@@ -30,6 +30,12 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Șterge automat din coșul de gunoi înregistrările mai vechi de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "zile în urmă">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Nume fișier">
+
 <!ENTITY zotero.preferences.groups "Grupuri">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Când se copiază înregistrările între biblioteci se vor include:">
 <!ENTITY zotero.preferences.groups.childNotes "note copil">
@@ -80,10 +86,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "pentru mai multe informații.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Resetează istoria sincronizării datelor">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Unește datele locale cu datele la distanță, ignorând istoria sincronizărilor">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restaurează din biblioteca online">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Suprascrie datele locale din Zotero cu datele din biblioteca online.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Înlocuiește biblioteca online">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Suprascrie datele din biblioteca online cu datele locale din Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restaurează din biblioteca online">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Suprascrie datele locale din Zotero cu datele din biblioteca online.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Înlocuiește biblioteca online">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Suprascrie datele din biblioteca online cu datele locale din Zotero">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Resetează istoria sincronizării fișierelor">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compară toate fișierele anexate cu serviciul de stocare">
 <!ENTITY zotero.preferences.sync.reset "Resetare">

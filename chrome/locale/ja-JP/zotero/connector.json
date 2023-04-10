@@ -59,6 +59,12 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "最新版"
   },
+  "extensionIsDisabled": {
+    "message": "$1は無効にします"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1は拡張機能ページに無効にします"
+  },
   "appConnector": {
     "message": "$1 コネクタ"
   },
@@ -139,6 +145,18 @@
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
     "message": "これらの引用は <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">$1 からリンク解除</a>されました。更新したり、参考文献目録に表示したりする前に、再リンクする必要があります。"
+  },
+  "copyUnproxiedLink": {
+    "message": "プロキシを通じないリンクをコピーします"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "プロキシを通じないページのURLをコピーします"
+  },
+  "reloadViaProxy": {
+    "message": "プロキシ経由でリロードします"
+  },
+  "reloadVia": {
+    "message": "$1経由でリロードします"
   },
   "general_saveTo": {
     "message": "$1 に保存する"

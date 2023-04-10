@@ -30,6 +30,12 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Supprimer automatiquement les documents mis à la corbeille depuis plus de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "jours">
 
+<!ENTITY zotero.preferences.pdfReader "Lecteur PDF">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Montrer les onglets comme">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Créateur - Année - Titre">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Titre - Créateur - Année">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Nom du fichier">
+
 <!ENTITY zotero.preferences.groups "Groupes">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "En copiant des documents entre des bibliothèques, inclure :">
 <!ENTITY zotero.preferences.groups.childNotes "les notes enfants">
@@ -80,10 +86,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 " pour plus d'informations.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Réinitialiser l'historique de synchronisation des données">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Fusionner les données locales avec les données distantes, en ignorant l'historique de synchronisation">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Restaurer depuis la bibliothèque en ligne">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Écraser les données Zotero locales avec les données provenant de la bibliothèque en ligne">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Remplacer la bibliothèque en ligne">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Écraser les données de la bibliothèque en ligne avec les données Zotero locales">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Restaurer depuis la bibliothèque en ligne">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Écraser les données Zotero locales avec les données provenant de la bibliothèque en ligne">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Remplacer la bibliothèque en ligne">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Écraser les données de la bibliothèque en ligne avec les données Zotero locales">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Réinitialiser l'historique de synchronisation des fichiers">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Comparer tous les fichiers joints avec le serveur de stockage">
 <!ENTITY zotero.preferences.sync.reset "Réinitialisation">

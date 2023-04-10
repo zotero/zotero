@@ -30,6 +30,12 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatiškai šalinti šiukšlinės įrašus, senesnius nei">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "d.">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Failo vardas">
+
 <!ENTITY zotero.preferences.groups "Grupės">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Kopijuojant elementus tarp bibliotekų, įtraukti:">
 <!ENTITY zotero.preferences.groups.childNotes "įrašams priklausančias pastabas">
@@ -80,10 +86,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 " puslapyje.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Perrašyti duomenų sinchronizavimo žurnalą">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Apjungti vietinius duomenis su duomenimis nuotoliniame serveryje, ignoruojant duombazės informaciją apie pakeitimus">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Atkurti iš nuotolinės saugyklos">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Vietinius Zotero duomenis pakeisti nuotolinės saugyklos duomenimis.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Pakeisti nuotolinėje saugykloje">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Nuotolinės saugyklos duomenis pakeisti vietinės saugyklos duomenimis.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Atkurti iš nuotolinės saugyklos">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Vietinius Zotero duomenis pakeisti nuotolinės saugyklos duomenimis.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Pakeisti nuotolinėje saugykloje">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Nuotolinės saugyklos duomenis pakeisti vietinės saugyklos duomenimis.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Perrašyti failų sinchronizavimo žurnalą">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Palyginti visas pridėtas rinkmenas su esančiomis saugykloje">
 <!ENTITY zotero.preferences.sync.reset "Atkūrimas">

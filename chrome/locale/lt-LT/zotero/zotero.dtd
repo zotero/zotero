@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Kitos parinktys">
 <!ENTITY zotero.general.tools "Priemonės">
 <!ENTITY zotero.general.more "Daugiau">
+<!ENTITY zotero.general.moreInformation "Daugiau informacijos">
 <!ENTITY zotero.general.loading "Įkeliama...">
 <!ENTITY zotero.general.close "Užverti">
 <!ENTITY zotero.general.minimize "Suskleisti">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Priskirti spalvą:">
 <!ENTITY zotero.tagSelector.renameTag "Pervadinti gairę...">
 <!ENTITY zotero.tagSelector.deleteTag "Šalinti gairę...">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "Pasirinkite gairės spalvą ir padėtį">
 <!ENTITY zotero.tagColorChooser.color "Spalva:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "Importavimas">
 <!ENTITY zotero.import.whereToImportFrom "Iš kur norėtumėte importuoti?">
 <!ENTITY zotero.import.source.file "iš rinkmenos (BibTeX, RIS, Zotero RDF ar kt.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "Importuojama...">
 <!ENTITY zotero.import.database "iš duombazės">
 <!ENTITY zotero.import.lastModified "Paskiausiai pakeista">
 <!ENTITY zotero.import.size "Dydis">
 <!ENTITY zotero.import.createCollection "Importuotą rinkinį ir įrašus patalpinti naujame rinkinyje">
 <!ENTITY zotero.import.fileHandling "Rinkmenų tvarkymas">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Eksportuoti...">
 <!ENTITY zotero.exportOptions.format.label "Formatas:">

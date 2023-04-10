@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Advanced Options">
 <!ENTITY zotero.general.tools "ឧបករណ៏">
 <!ENTITY zotero.general.more "ជម្រើសប្រភេទឯកសារផ្សេងៗ">
+<!ENTITY zotero.general.moreInformation "ព័ត៌មានបន្ថែម">
 <!ENTITY zotero.general.loading "Loading…">
 <!ENTITY zotero.general.close "បិទ">
 <!ENTITY zotero.general.minimize "អប្បបរមានីយកម្ម">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag "ផ្លាស់ឈ្មោះស្លាក...">
 <!ENTITY zotero.tagSelector.deleteTag "លុបស្លាកចោល...">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
 <!ENTITY zotero.tagColorChooser.color "Color:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "នាំចូល">
 <!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
 <!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "Importing…">
 <!ENTITY zotero.import.database "Database">
 <!ENTITY zotero.import.lastModified "Last Modified">
 <!ENTITY zotero.import.size "Size">
 <!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 <!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "នាំចេញ...">
 <!ENTITY zotero.exportOptions.format.label "ទ្រង់ទ្រាយ:">

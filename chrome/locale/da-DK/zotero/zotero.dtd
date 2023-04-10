@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Avancerede indstillinger">
 <!ENTITY zotero.general.tools "Værktøj">
 <!ENTITY zotero.general.more "Mere">
+<!ENTITY zotero.general.moreInformation "Mere information">
 <!ENTITY zotero.general.loading "Indlæser...">
 <!ENTITY zotero.general.close "Luk">
 <!ENTITY zotero.general.minimize "Minimér">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Tilknyt farve...">
 <!ENTITY zotero.tagSelector.renameTag "Omdøb mærket ...">
 <!ENTITY zotero.tagSelector.deleteTag "Slet mærket...">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "Vælg en farve og placering">
 <!ENTITY zotero.tagColorChooser.color "Farve:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "Importér">
 <!ENTITY zotero.import.whereToImportFrom "Hvor vil du importere fra?">
 <!ENTITY zotero.import.source.file "En fil (BibTeX, RIS, Zotero RDF osv.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "Importerer…">
 <!ENTITY zotero.import.database "Database">
 <!ENTITY zotero.import.lastModified "Sidst ændret">
 <!ENTITY zotero.import.size "Størrelse">
 <!ENTITY zotero.import.createCollection "Placér importerede samlinger og nye elementer i den nye samling">
 <!ENTITY zotero.import.fileHandling "Filhåndtering">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Eksportér...">
 <!ENTITY zotero.exportOptions.format.label "Format:">

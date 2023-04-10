@@ -39,13 +39,13 @@
     "message": "Tag (separati da virgole)"
   },
   "progressWindow_error_translation": {
-    "message": "Si è verificato un errore durante il salvataggio dell'elemento. Consulta $1 se desideri ricevere ulteriori informazioni."
+    "message": "Si è verificato un errore durante il salvataggio di questo elemento. Consulta $1 per ulteriori informazioni."
   },
   "progressWindow_error_siteAccessLimitsError": {
     "message": "Si è verificato un errore durante il salvataggio di questo elemento. $1 può limitare il numero di elementi che puoi salvare contemporaneamente. Vedi $2 per ulteriori informazioni."
   },
   "progressWindow_error_troubleshootingTranslatorIssues": {
-    "message": "Risoluzione dei problemi dei programmi traduttori"
+    "message": "Risoluzione di problemi dei programmi traduttori"
   },
   "progressWindow_error_siteAccessLimits": {
     "message": "Limiti di accesso al sito"
@@ -58,6 +58,12 @@
   },
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "ultima versione"
+  },
+  "extensionIsDisabled": {
+    "message": "$1 è disabilitato"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 è disabilitato nella pagina delle estensioni"
   },
   "appConnector": {
     "message": "$1 Connector"
@@ -96,7 +102,7 @@
     "message": "Il messaggio di debug è stato inviato.\n\nID della segnalazione: $1."
   },
   "reports_submission_failed": {
-    "message": "Si è verificato un errore durante l'invio della segnalazione.\n\n$1\n\nTi preghiamo di controllare la tua connessione a Internet. Qualora il problema dovesse persistere, ti invitiamo a pubblicare un messaggio sul forum di Zotero."
+    "message": "Si è verificato un errore durante l'invio della segnalazione.\n\n$1\n\nControlla la tua connessione a Internet. Se il problema dovesse persistere, ti invitiamo a pubblicare un messaggio sul forum di Zotero."
   },
   "integration_error_clientUpgrade": {
     "message": "Le citazioni web richiedono la versione $1 o successiva."
@@ -105,10 +111,10 @@
     "message": "$1 non è stato in grado di comunicare con l'applicazione desktop di $2. $2 deve essere aperto se desideri utilizzare le citazioni web."
   },
   "integration_googleDocs_unlinkBeforeSaving_warning": {
-    "message": "Il documento include delle citazioni dinamiche di Zotero che verranno mostrate come collegamento a zotero.org all'interno della copia scaricata."
+    "message": "Il documento include delle citazioni di Zotero che verranno mostrate come collegamento a zotero.org all'interno della copia scaricata."
   },
   "integration_googleDocs_unlinkBeforeSaving_instructions": {
-    "message": "Qualora desiderassi generare una versione più adatta alla condivisione, ti invitiamo a selezionare <b>Crea una copia…</b> dal menù File, <b>Scollega le citazioni</b> dal menù di Zotero all'interno del nuovo documento e, infine, a scaricare la versione senza collegamenti. Conserva comunque una copia del documento originale con i collegamenti nel caso in cui ti sia necessario apportare delle ulteriori modifiche."
+    "message": "Per generare una versione adatta alla condivisione, seleziona <b>Crea una copia…</b> dal menù File, quindi <b>Scollega le citazioni</b> dal menù di Zotero all'interno del nuovo documento e, infine, scarica la versione senza collegamenti. Conserva una copia del documento originale con i collegamenti nel caso sia necessario apportare ulteriori modifiche."
   },
   "integration_googleDocs_unlinkBeforeSaving_downloadAnyway": {
     "message": "Scarica la versione con i collegamenti ugualmente"
@@ -139,6 +145,18 @@
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
     "message": "Queste citazioni sono <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">scollegate da $1</a>. È necessario ricollegarle prima che possano aggiornarsi o comparire all'interno della tua bibliografia."
+  },
+  "copyUnproxiedLink": {
+    "message": "Copia il link senza proxy"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "Copia l'URL della pagina senza proxy"
+  },
+  "reloadViaProxy": {
+    "message": "Ricarica tramite proxy"
+  },
+  "reloadVia": {
+    "message": "Ricarica tramite $1"
   },
   "general_saveTo": {
     "message": "Salva in $1"

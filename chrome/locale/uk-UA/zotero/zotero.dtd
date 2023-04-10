@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Розширені налаштування">
 <!ENTITY zotero.general.tools "Інструменти">
 <!ENTITY zotero.general.more "Більше">
+<!ENTITY zotero.general.moreInformation "Додаткова інформація">
 <!ENTITY zotero.general.loading "Завантаження">
 <!ENTITY zotero.general.close "Закрити">
 <!ENTITY zotero.general.minimize "Згорнути">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Призначити колір...">
 <!ENTITY zotero.tagSelector.renameTag "Перейменувати тег...">
 <!ENTITY zotero.tagSelector.deleteTag "Видалити тег...">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "Вибрати колір та розташування тега">
 <!ENTITY zotero.tagColorChooser.color "Колір:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "Імпорт">
 <!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
 <!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "Імпортування...">
 <!ENTITY zotero.import.database "Database">
 <!ENTITY zotero.import.lastModified "Last Modified">
 <!ENTITY zotero.import.size "Size">
 <!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 <!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Експорт...">
 <!ENTITY zotero.exportOptions.format.label "Формат:">

@@ -30,6 +30,12 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Уклони ставке из смећа које су обрисане пре">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "дана">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Filename">
+
 <!ENTITY zotero.preferences.groups "Групе">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Приликом копирања ставке у другу библиотеку задржи:">
 <!ENTITY zotero.preferences.groups.childNotes "подбелешке">
@@ -80,10 +86,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "за више података.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Поништи историју усклађивања податка">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Споји локалне податке са подацима на серверу, занемарујући историју усклађивања.">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Врати податке из библиотеке на мрежи">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Преписује Зотерове локалне податке онима који се налазе у билиотеци на интернету.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Замени мрежну библиотеку овом">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Преписује податке који се налазе у билиотеци на интернету Зотеровим локалним подацима са овог рачунара.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Врати податке из библиотеке на мрежи">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Преписује Зотерове локалне податке онима који се налазе у билиотеци на интернету.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Замени мрежну библиотеку овом">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Преписује податке који се налазе у билиотеци на интернету Зотеровим локалним подацима са овог рачунара.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Поништи историју усклађивања">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Упореди све приложене датотеке са онима на остави">
 <!ENTITY zotero.preferences.sync.reset "Враћање података">

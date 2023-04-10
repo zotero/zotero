@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Opcions avançades">
 <!ENTITY zotero.general.tools "Eines">
 <!ENTITY zotero.general.more "Més">
+<!ENTITY zotero.general.moreInformation "Més informació">
 <!ENTITY zotero.general.loading "S'està carregant…">
 <!ENTITY zotero.general.close "Tanca">
 <!ENTITY zotero.general.minimize "Minimitza">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Assigna color...">
 <!ENTITY zotero.tagSelector.renameTag "Reanomena l'etiqueta...">
 <!ENTITY zotero.tagSelector.deleteTag "Esborra l'etiqueta...">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "Tria un color i una posició per a l'etiqueta">
 <!ENTITY zotero.tagColorChooser.color "Color:">
@@ -146,7 +148,7 @@
 <!ENTITY zotero.tagColorChooser.setColor "Estableix el color">
 <!ENTITY zotero.tagColorChooser.removeColor "Elimina el color">
 
-<!ENTITY zotero.lookup.description "Enter ISBNs, DOIs, PMIDs, arXiv IDs, or ADS Bibcodes to add to your library:">
+<!ENTITY zotero.lookup.description "Introduïu codis ISBN, DOI, PMID, arXiv ID o ADS Bibcodes per afegir a la vostra biblioteca:">
 <!ENTITY zotero.lookup.button.search "Cerca">
 
 <!ENTITY zotero.createParent.title "Crea un element pare">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "Importa">
 <!ENTITY zotero.import.whereToImportFrom "D'on voldríeu importar?">
 <!ENTITY zotero.import.source.file "Un fitxer (BibTex, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "S'està important…">
 <!ENTITY zotero.import.database "Base de dades">
 <!ENTITY zotero.import.lastModified "Darrera modificació">
 <!ENTITY zotero.import.size "Mida">
 <!ENTITY zotero.import.createCollection "Col·loca les col·leccions importades i elements en una col·lecció nova">
 <!ENTITY zotero.import.fileHandling "Gestió de fitxers">
+<!ENTITY zotero.import.online.newItemsOnly "Baixa només els elements nous; no actualitzis els elements importats anteriorment">
 
 <!ENTITY zotero.exportOptions.title "Exporta...">
 <!ENTITY zotero.exportOptions.format.label "Format:">
@@ -195,7 +200,7 @@
 
 <!ENTITY zotero.citation.keepSorted.label "Mantingues les fonts ordenades">
 
-<!ENTITY zotero.citation.suppressAuthor.label "Omit Author">
+<!ENTITY zotero.citation.suppressAuthor.label "Omet l'autor">
 <!ENTITY zotero.citation.prefix.label "Prefix:">
 <!ENTITY zotero.citation.suffix.label "Sufix:">
 <!ENTITY zotero.citation.editorWarning.label "Avís: Si editeu la cita a l'editor de cites no s'actualitzarà més i no reflectirà els canvis en la base de dades o de l'estil de cita.">
@@ -313,18 +318,18 @@
 <!ENTITY zotero.pdfReader.handTool "Eina de mà">
 <!ENTITY zotero.pdfReader.verticalScrolling "Desplaçament vertical">
 <!ENTITY zotero.pdfReader.horizontalScrolling "Desplaçament horitzontal">
-<!ENTITY zotero.pdfReader.wrappedScrolling "Wrapped Scrolling">
-<!ENTITY zotero.pdfReader.noSpreads "No Spreads">
-<!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
-<!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
-<!ENTITY zotero.pdfReader.zoomIn "Zoom In">
-<!ENTITY zotero.pdfReader.zoomOut "Zoom Out">
-<!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
-<!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
-<!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
-<!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
-<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">
+<!ENTITY zotero.pdfReader.wrappedScrolling "Desplaçament ajustat">
+<!ENTITY zotero.pdfReader.noSpreads "Cap disposició">
+<!ENTITY zotero.pdfReader.oddSpreads "Disposició en senars">
+<!ENTITY zotero.pdfReader.evenSpreads "Disposició en parells">
+<!ENTITY zotero.pdfReader.zoomIn "Amplia">
+<!ENTITY zotero.pdfReader.zoomOut "Redueix">
+<!ENTITY zotero.pdfReader.zoomAuto "Redimensiona automàticament">
+<!ENTITY zotero.pdfReader.zoomPageWidth "Ajusta a l'amplada de la pàgina">
+<!ENTITY zotero.pdfReader.zoomPageHeight "Ajusta a l'alçada de la pàgina">
+<!ENTITY zotero.pdfReader.splitVertically "Divideix verticalment">
+<!ENTITY zotero.pdfReader.splitHorizontally "Divideix horitzontalment">
+<!ENTITY zotero.pdfReader.transferFromPDF "Importa anotacions…">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Gira la pàgina a l'esquerra">
+<!ENTITY zotero.pdfReader.rotatePageRight "Gira la pàgina a la dreta">
+<!ENTITY zotero.pdfReader.rotatePage180 "Gira la pàgina 180º">

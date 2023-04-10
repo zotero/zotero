@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Προχωρημένες επιλογές">
 <!ENTITY zotero.general.tools "Εργαλεία">
 <!ENTITY zotero.general.more "Περισσότερα">
+<!ENTITY zotero.general.moreInformation "Περισσότερες πληροφορίες">
 <!ENTITY zotero.general.loading "Φόρτωση...">
 <!ENTITY zotero.general.close "Κλείσιμο">
 <!ENTITY zotero.general.minimize "Ελαχιστοποίηση">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Απόδοση χρώματος...">
 <!ENTITY zotero.tagSelector.renameTag "Μετονομασία ετικέτας...">
 <!ENTITY zotero.tagSelector.deleteTag "Διαγραφή ετικέτας...">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "Επιλέξτε χρώμα ετικέτας και θέση">
 <!ENTITY zotero.tagColorChooser.color "Χρώμα:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "Εισαγωγή">
 <!ENTITY zotero.import.whereToImportFrom "Από πού θέλετε να εισαγάγετε;">
 <!ENTITY zotero.import.source.file "Ένα αρχείο (BibTeX, RIS, Zotero RDF, κλπ.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "Εισαγωγή ...">
 <!ENTITY zotero.import.database "Βάση Δεδομένων">
 <!ENTITY zotero.import.lastModified "Τελευταία Τροποποίηση">
 <!ENTITY zotero.import.size "Μέγεθος">
 <!ENTITY zotero.import.createCollection "Τοποθετήστε τις εισαγόμενες συλλογές και τα αντικείμενα σε νέα συλλογή">
 <!ENTITY zotero.import.fileHandling "Χειρισμός Αρχείων">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Εξαγωγή...">
 <!ENTITY zotero.exportOptions.format.label "Μορφή:">

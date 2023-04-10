@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Pengaturan lanjutan">
 <!ENTITY zotero.general.tools "Perkakas">
 <!ENTITY zotero.general.more "Lainnya">
+<!ENTITY zotero.general.moreInformation "Informasi lebih lanjut">
 <!ENTITY zotero.general.loading "Memuat...">
 <!ENTITY zotero.general.close "Tutup">
 <!ENTITY zotero.general.minimize "Kecilkan">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Assign Color…">
 <!ENTITY zotero.tagSelector.renameTag "Namai Ulang Tag...">
 <!ENTITY zotero.tagSelector.deleteTag "Hapus Tag...">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "Choose a Tag Color and Position">
 <!ENTITY zotero.tagColorChooser.color "Color:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "Impor">
 <!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
 <!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "Importing…">
 <!ENTITY zotero.import.database "Database">
 <!ENTITY zotero.import.lastModified "Teraakhir dimodifikasi">
 <!ENTITY zotero.import.size "Size">
 <!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 <!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Ekspor...">
 <!ENTITY zotero.exportOptions.format.label "Format:">
@@ -252,7 +257,7 @@
 
 <!ENTITY zotero.merge.title "Conflict Resolution">
 <!ENTITY zotero.merge.of "of">
-<!ENTITY zotero.merge.deleted "Deleted">
+<!ENTITY zotero.merge.deleted "Dihapus">
 
 <!ENTITY zotero.proxy.recognized.title "Proksi Dikenali">
 <!ENTITY zotero.proxy.recognized.warning "Hanya tambahkan proksi yang ditautkan dari website perpustakaan, sekolah, atau perusahaan Anda">

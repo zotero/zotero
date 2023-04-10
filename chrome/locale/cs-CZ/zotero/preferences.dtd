@@ -30,11 +30,17 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automaticky odstranit položky v koši smazané déle než">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dní">
 
+<!ENTITY zotero.preferences.pdfReader "PDF čtečka">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Zobrazit záložky jako">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Tvůrce - Rok – Název">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Název - Tvůrce - Rok">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Název souboru">
+
 <!ENTITY zotero.preferences.groups "Skupiny">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Při kopírování položek mezi knihovnami zahrnout:">
 <!ENTITY zotero.preferences.groups.childNotes "dceřiné poznámky">
 <!ENTITY zotero.preferences.groups.childFiles "dceřiné snímky a importované soubory">
-<!ENTITY zotero.preferences.groups.annotations "annotations">
+<!ENTITY zotero.preferences.groups.annotations "anotace">
 <!ENTITY zotero.preferences.groups.childLinks "dceřiné odkazy">
 <!ENTITY zotero.preferences.groups.tags "štítky">
 
@@ -80,10 +86,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "pro další informace.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Resetovat historii synchronizace dat">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Sloučit místní data s vzdálenými daty; historie synchronizace se bude ignorovat">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Obnovit z Online knihovny">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Přepsat lokální data Zotero daty z online knihovny.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Nahradit online knihovnu">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Přepsat online knihovnu daty z lokálního Zotera">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Obnovit z Online knihovny">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Přepsat lokální data Zotero daty z online knihovny.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Nahradit online knihovnu">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Přepsat online knihovnu daty z lokálního Zotera">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Resetovat historii synchronizace souborů">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Porovnat všechny připojené soubory se vzdáleným úložištěm">
 <!ENTITY zotero.preferences.sync.reset "Resetování">
@@ -110,8 +116,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Pokud je tato volba neaktivní, Zotero zahrne URL v případě citování článku (z časopisu, magazínu nebo novin) pouze když článek nemá specifikovaný rozsah stran.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Rychlé kopírování">
-<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Formát položky">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Formát poznámky">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopírovat jako HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Nastavení dle stránky:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Doména/Cesta">
@@ -149,7 +155,7 @@
 <!ENTITY zotero.preferences.proxies.proxyOptions "Možnosti Proxy">
 <!ENTITY zotero.preferences.proxies.desc_before_link "Zotero bude transparentně přesměrovávat požadavky skrz uložené proxy servery. Více informací najdete v">
 <!ENTITY zotero.preferences.proxies.desc_link "dokumentaci k proxy">
-<!ENTITY zotero.preferences.proxies.desc_after_link ".">
+<!ENTITY zotero.preferences.proxies.desc_after_link "pro další informace.">
 <!ENTITY zotero.preferences.proxies.transparent "Automaticky přesměrovávat požadavky skrz dříve použité proxy servery.">
 <!ENTITY zotero.preferences.proxies.autoRecognize "Automaticky rozpoznávat proxované zdroje">
 <!ENTITY zotero.preferences.proxies.showRedirectNotification "Zobrazovat upozornění při přesměrování přes proxy">

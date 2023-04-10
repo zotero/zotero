@@ -30,6 +30,12 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automaticky odstrániť záznamy vymazané pred viac ako">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dňami">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Názov súboru">
+
 <!ENTITY zotero.preferences.groups "Skupiny">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Pri kopírovaní záznamov medzi knižnicami, zahrnúť:">
 <!ENTITY zotero.preferences.groups.childNotes "vložené poznámky">
@@ -80,10 +86,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "pre viac informácií.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Vymazať históriu synchronizácie dát">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Zlúčiť lokálne dáta so vzdialenými dátami bez ohľadu na predchádzajúce synchronizácie">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Obnoviť z online knižnice">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Prepísať lokálne dáta Zotera s dátami z online knižnice.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Nahradiť online knižnicu">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Prepísať online knižnicu s lokálnymi dátami Zotera">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Obnoviť z online knižnice">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Prepísať lokálne dáta Zotera s dátami z online knižnice.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Nahradiť online knižnicu">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Prepísať online knižnicu s lokálnymi dátami Zotera">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Obnoviť históriu synchronizácie súborov">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Porovnať všetky priložené súbory so službou úschovne">
 <!ENTITY zotero.preferences.sync.reset "Obnova">

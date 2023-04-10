@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "خيارات متقدمة">
 <!ENTITY zotero.general.tools "أدوات">
 <!ENTITY zotero.general.more "المزيد">
+<!ENTITY zotero.general.moreInformation "المزيد من المعلومات">
 <!ENTITY zotero.general.loading "التحميل">
 <!ENTITY zotero.general.close "أغلق">
 <!ENTITY zotero.general.minimize "تصغير">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "تخصيص اللون...">
 <!ENTITY zotero.tagSelector.renameTag "تغيير اسم الوسم...">
 <!ENTITY zotero.tagSelector.deleteTag "حذف الوسم...">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "اختار لون وموقع الوسم">
 <!ENTITY zotero.tagColorChooser.color "لون:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "استيراد">
 <!ENTITY zotero.import.whereToImportFrom "من أين تريد الاستيراد؟">
 <!ENTITY zotero.import.source.file " ملف (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "استيراد...">
 <!ENTITY zotero.import.database "قاعدة البيانات">
 <!ENTITY zotero.import.lastModified "آخر تعديل">
 <!ENTITY zotero.import.size "حجم">
 <!ENTITY zotero.import.createCollection "ضع المجموعات المستوردة والمواد في مجموعة جديدة">
 <!ENTITY zotero.import.fileHandling "معاملة الملف">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "تصدير...">
 <!ENTITY zotero.exportOptions.format.label "الصياغة:">

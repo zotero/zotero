@@ -30,6 +30,12 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatikusan törölje a kukából azokat az elemeket, amelyek">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "napnál régebbiek">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Fájlnév">
+
 <!ENTITY zotero.preferences.groups "Csoportok">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Amikor könyvtárak között másol elemeket, az alábbiakat másolja:">
 <!ENTITY zotero.preferences.groups.childNotes "kapcsolódó jegyzetek">
@@ -80,10 +86,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 " további információért.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Az adatszinkronizációs előzmények törlése">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "A helyi adatok összefésülése a távoli adatokkal, a szinkronizációs előzmények figyelmen kívül hagyása.">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Helyreállítás az online könyvtáramból">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "A helyi adatok felülírása az online könyvtárban található adatokkal.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Az Online Könyvtár cseréje">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Az online könyvtár felülírása a helyi Zotero adatokkal">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Helyreállítás az online könyvtáramból">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "A helyi adatok felülírása az online könyvtárban található adatokkal.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Az Online Könyvtár cseréje">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Az online könyvtár felülírása a helyi Zotero adatokkal">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "A szinkronizációs előzmények törlése">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Az összes csatolt fájl összehasonlítása a tárhely szerveren">
 <!ENTITY zotero.preferences.sync.reset "Visszaállítás">
@@ -188,7 +194,7 @@
 <!ENTITY zotero.preferences.dataDir.useProfile "Firefox profilkönyvtár">
 <!ENTITY zotero.preferences.dataDir.custom "Egyéni:">
 <!ENTITY zotero.preferences.dataDir.choose "T   History  1  allózás...">
-<!ENTITY zotero.preferences.dataDir.viaCommandLine "(specified via command line)">
+<!ENTITY zotero.preferences.dataDir.viaCommandLine "(parancssoron keresztül megadva)">
 <!ENTITY zotero.preferences.dataDir.reveal "Az adatkönyvtár mutatása">
 <!ENTITY zotero.preferences.dataDir.migrate "Áttérés az új alapértelmezett helyre…">
 

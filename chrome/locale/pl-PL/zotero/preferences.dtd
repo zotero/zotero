@@ -30,6 +30,12 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatycznie usuń z kosza elementy usunięte dawniej niż">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dni temu">
 
+<!ENTITY zotero.preferences.pdfReader "Czytnik PDF">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Pokaż zakładki jako">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Autor - Rok - Tytuł">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Tytuł - Autor - Rok">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Nazwa pliku">
+
 <!ENTITY zotero.preferences.groups "Grupy">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Podczas kopiowania elementów między bibliotekami dołączaj:">
 <!ENTITY zotero.preferences.groups.childNotes "potomne notatki">
@@ -80,10 +86,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 ", aby uzyskać więcej informacji.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Wyczyść historię synchronizacji danych">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Połącz lokalne dane ze zdalnymi, ignorując historię synchronizacji">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Przywróć dane z biblioteki zdalnej">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Nadpisz lokalne dane Zotero danymi z biblioteki zdalnej (na serwerze synchronizacji).">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Zamień zdalną bibliotekę">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Nadpisz dane w zdalnej bibliotece (na serwerze synchronizacji) lokalnymi danymi Zotero.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Przywróć z biblioteki zdalnej">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Nadpisz lokalne dane Zotero danymi z biblioteki zdalnej.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Zamień zdalną bibliotekę">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Nadpisz dane w zdalnej bibliotece lokalnymi danymi Zotero.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Wyczyść historię synchronizacji plików">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Porównaj wszystkie pliki załączników z przechowywanymi zdalnie.">
 <!ENTITY zotero.preferences.sync.reset "Przywróć">

@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Gelişmiş Seçenekler">
 <!ENTITY zotero.general.tools "Araçlar">
 <!ENTITY zotero.general.more "Daha Başka">
+<!ENTITY zotero.general.moreInformation "Daha Fazla Bilgi">
 <!ENTITY zotero.general.loading "Yükleniyor...">
 <!ENTITY zotero.general.close "Kapat">
 <!ENTITY zotero.general.minimize "Küçült">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Etikete Renk Ata...">
 <!ENTITY zotero.tagSelector.renameTag "Etiketi Yeniden Adlandır...">
 <!ENTITY zotero.tagSelector.deleteTag "Etiketi Sil...">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "Etiket Rengi ve Konumunu Seç">
 <!ENTITY zotero.tagColorChooser.color "Renk:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "İçeri Aktar">
 <!ENTITY zotero.import.whereToImportFrom "Nereden içeri aktarmak istiyorsunuz?">
 <!ENTITY zotero.import.source.file "Bir dosya (BibTeX, RIS, Zotero RDF, vb.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "İçeri aktarılıyor...">
 <!ENTITY zotero.import.database "Veritabanı">
 <!ENTITY zotero.import.lastModified "Son Değiştirilmesi">
 <!ENTITY zotero.import.size "Boyut">
 <!ENTITY zotero.import.createCollection "İçeri aktarılmış dermeler ve eserleri yeni bir dermeye yerleştir">
 <!ENTITY zotero.import.fileHandling "Dosyaların İdare Edilmesi">
+<!ENTITY zotero.import.online.newItemsOnly "Yalnızca yeni eserleri indir; daha önce içeri aktarılmış olan eserleri güncelleme">
 
 <!ENTITY zotero.exportOptions.title "Dışarı Aktar...">
 <!ENTITY zotero.exportOptions.format.label "Biçim">
@@ -242,7 +247,7 @@
 
 <!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Zotero kitaplığınızda bulunan bu etiket sunucuya eşitlenmek için çok uzundur:">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Eşitlenecek etiketler 256 karakterden daha kısa olmalıdır.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Bir etiketi birden fazla etikete bölebilirsiniz. etiketi kısaltmak için düzenleyiniz veya siliniz.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Bir etiketi birden fazla etikete bölebilirsiniz, etiketi kısaltmak için düzenleyebilirsiniz, ya da silebilirsiniz.">
 <!ENTITY zotero.sync.longTagFixer.split "Böl">
 <!ENTITY zotero.sync.longTagFixer.splitAtThe "Böl">
 <!ENTITY zotero.sync.longTagFixer.character "karaktere">
@@ -322,9 +327,9 @@
 <!ENTITY zotero.pdfReader.zoomAuto "Otomatik Olarak Yeniden Boyutlandır">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Sayfa Genişliğine Yakınlaştır">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Sayfa Yüksekliğine Yakınlaştır">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
+<!ENTITY zotero.pdfReader.splitVertically "Dikey Olarak Böl">
+<!ENTITY zotero.pdfReader.splitHorizontally "Yatay Olarak Böl">
 <!ENTITY zotero.pdfReader.transferFromPDF "Ek Açıklamaları İçeri Aktar...">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
-<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">
+<!ENTITY zotero.pdfReader.rotatePageLeft "Sayfayı Sola Döndür">
+<!ENTITY zotero.pdfReader.rotatePageRight "Sayfayı Sağa Döndür">
+<!ENTITY zotero.pdfReader.rotatePage180 "Sayfayı 180° Döndür">

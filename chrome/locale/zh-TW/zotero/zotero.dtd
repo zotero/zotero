@@ -3,51 +3,52 @@
 <!ENTITY zotero.general.optional "(選用)">
 <!ENTITY zotero.general.note "注意：">
 <!ENTITY zotero.general.selectAll "全選">
-<!ENTITY zotero.general.deselectAll "全不選">
+<!ENTITY zotero.general.deselectAll "取消全選">
 <!ENTITY zotero.general.edit "編輯">
 <!ENTITY zotero.general.delete "刪除">
 <!ENTITY zotero.general.moveToTrash "移到垃圾筒">
 <!ENTITY zotero.general.ok "確定">
 <!ENTITY zotero.general.cancel "取消">
 <!ENTITY zotero.general.refresh "重新整理">
-<!ENTITY zotero.general.saveAs "另存新檔...">
+<!ENTITY zotero.general.saveAs "另存新檔……">
 <!ENTITY zotero.general.options "選項">
 <!ENTITY zotero.general.advancedOptions.label "進階選項">
 <!ENTITY zotero.general.tools "工具">
 <!ENTITY zotero.general.more "更多">
-<!ENTITY zotero.general.loading "載入中...">
+<!ENTITY zotero.general.moreInformation "更多資訊">
+<!ENTITY zotero.general.loading "載入中……">
 <!ENTITY zotero.general.close "關閉">
 <!ENTITY zotero.general.minimize "最小化">
-<!ENTITY zotero.general.other "其他...">
+<!ENTITY zotero.general.other "其他……">
 <!ENTITY zotero.general.bigger "較大">
 <!ENTITY zotero.general.smaller "較小">
-<!ENTITY zotero.general.reset "回復預設值">
+<!ENTITY zotero.general.reset "重設">
 
 
 <!ENTITY zotero.errorReport.title "Zotero 錯誤報告">
 <!ENTITY zotero.errorReport.submissionInProgress "正送出錯誤報告，請稍等。">
 <!ENTITY zotero.errorReport.submitted "錯誤報告已送出。">
-<!ENTITY zotero.errorReport.reportID "報告識別號：">
-<!ENTITY zotero.errorReport.postToForums "請在 Zotero 論壇 (forums.zotero.org) 上張貼一個訊息，內含這個報告識別號、問題的描述、及產生問題的必要步驟。">
-<!ENTITY zotero.errorReport.notReviewed "除非論壇上有提到，否則不會有人檢閱錯誤報告。">
+<!ENTITY zotero.errorReport.reportID "報告ID：">
+<!ENTITY zotero.errorReport.postToForums "請在 Zotero 論壇 (forums.zotero.org) 上發文，文章內容請包含此報告ID、描述發生的問題以及任何可重現問題的步驟。">
+<!ENTITY zotero.errorReport.notReviewed "不會處理未於論壇發文的錯誤報告。">
 
-<!ENTITY zotero.upgrade.title "Zotero 更新精靈">
+<!ENTITY zotero.upgrade.title "Zotero 升級程式">
 <!ENTITY zotero.upgrade.newVersionInstalled "已安裝了新版 Zotero。">
 <!ENTITY zotero.upgrade.upgradeRequired "目前的 Zotero 資料庫一定得升級，才能與新版搭配使用。">
 <!ENTITY zotero.upgrade.autoBackup "變更前，會自動備份目前的資料庫。">
-<!ENTITY zotero.upgrade.majorUpgrade "這是一次大升級。">
+<!ENTITY zotero.upgrade.majorUpgrade "這是一次大版本升級。">
 <!ENTITY zotero.upgrade.majorUpgradeBeforeLink "繼續之前，請確認您已詳閱過">
-<!ENTITY zotero.upgrade.majorUpgradeLink "升級指示">
+<!ENTITY zotero.upgrade.majorUpgradeLink "升級指南">
 <!ENTITY zotero.upgrade.majorUpgradeAfterLink "。">
 <!ENTITY zotero.upgrade.upgradeInProgress "請等候升級完成。這可能會花幾分鐘的時間。">
 <!ENTITY zotero.upgrade.upgradeSucceeded "已成功升級 Zotero 資料庫。">
-<!ENTITY zotero.upgrade.changeLogBeforeLink "請檢視">
+<!ENTITY zotero.upgrade.changeLogBeforeLink "請參閱">
 <!ENTITY zotero.upgrade.changeLogLink "更新記錄">
-<!ENTITY zotero.upgrade.changeLogAfterLink "來看看有什麼新事務。">
+<!ENTITY zotero.upgrade.changeLogAfterLink "來看看有什麼新事物。">
 
 <!ENTITY zotero.tabs.info.label "資訊">
 <!ENTITY zotero.tabs.notes.label "筆記">
-<!ENTITY zotero.tabs.attachments.label "附件檔">
+<!ENTITY zotero.tabs.attachments.label "附件">
 <!ENTITY zotero.tabs.tags.label "標籤">
 <!ENTITY zotero.tabs.related.label "相關">
 
@@ -59,54 +60,54 @@
 <!ENTITY zotero.items.creator_column "作者">
 <!ENTITY zotero.items.year_column "年">
 <!ENTITY zotero.items.dateModified_column "修改日期">
-<!ENTITY zotero.items.moreColumns.label "更多直欄">
-<!ENTITY zotero.items.restoreColumnOrder.label "還原直欄次序">
+<!ENTITY zotero.items.moreColumns.label "更多行">
+<!ENTITY zotero.items.restoreColumnOrder.label "還原欄的次序">
 
 <!ENTITY zotero.items.menu.showInLibrary "在文獻庫中顯示">
 <!ENTITY zotero.items.menu.attach.note "新增筆記">
-<!ENTITY zotero.items.menu.attach "新增附加檔案">
-<!ENTITY zotero.items.menu.attach.link.uri "附加連結到 URI…">
-<!ENTITY zotero.items.menu.attach.file "附加已儲存的檔案副本…">
-<!ENTITY zotero.items.menu.attach.fileLink "將連結附加到檔案…">
+<!ENTITY zotero.items.menu.attach "新增附件">
+<!ENTITY zotero.items.menu.attach.link.uri "附加連結到 URI……">
+<!ENTITY zotero.items.menu.attach.file "附加已儲存的檔案副本……">
+<!ENTITY zotero.items.menu.attach.fileLink "將連結附加到檔案……">
 
 <!ENTITY zotero.items.menu.restoreToLibrary "還原到文獻庫中">
 <!ENTITY zotero.items.menu.duplicateItem "重覆的項目">
-<!ENTITY zotero.items.menu.mergeItems "合併項目…">
-<!ENTITY zotero.items.menu.unrecognize "撤回之前取得屬性資料">
+<!ENTITY zotero.items.menu.mergeItems "合併項目……">
+<!ENTITY zotero.items.menu.unrecognize "撤回之前取得的屬性資料">
 
-<!ENTITY zotero.duplicatesMerge.versionSelect "選擇項目之版本，以用作主項目(master item)：">
-<!ENTITY zotero.duplicatesMerge.fieldSelect "選取欄位，以防止項目之其他版本：">
+<!ENTITY zotero.duplicatesMerge.versionSelect "選擇要做為主項目的項目版本：">
+<!ENTITY zotero.duplicatesMerge.fieldSelect "選取一個須從有其他版本進行保護的欄位區域：">
 
 <!ENTITY zotero.toolbar.newItem.label "新增項目">
 <!ENTITY zotero.toolbar.moreItemTypes.label "更多">
-<!ENTITY zotero.toolbar.lookup.label "依識別碼加入項目">
-<!ENTITY zotero.toolbar.removeItem.label "移除項目…">
-<!ENTITY zotero.toolbar.newLibrary.label "新的文獻庫">
-<!ENTITY zotero.toolbar.newCollection.label "新增文獻庫">
-<!ENTITY zotero.toolbar.newGroup "新增群組…">
-<!ENTITY zotero.toolbar.newSubcollection.label "新增子文獻庫…">
-<!ENTITY zotero.toolbar.newSavedSearch.label "新增搜尋結果…">
+<!ENTITY zotero.toolbar.lookup.label "依辨識符號加入(可能是複數)項目">
+<!ENTITY zotero.toolbar.removeItem.label "移除項目……">
+<!ENTITY zotero.toolbar.newLibrary.label "新增文獻庫">
+<!ENTITY zotero.toolbar.newCollection.label "新增文獻集……">
+<!ENTITY zotero.toolbar.newGroup "新增群組……">
+<!ENTITY zotero.toolbar.newSubcollection.label "新增子文獻集……">
+<!ENTITY zotero.toolbar.newSavedSearch.label "新增搜尋結果……">
 <!ENTITY zotero.toolbar.emptyTrash.label "清除垃圾筒">
 <!ENTITY zotero.toolbar.tagSelector.label "顯示/隱藏標籤選擇器">
-<!ENTITY zotero.toolbar.actions.label "行動">
-<!ENTITY zotero.toolbar.import.label "匯入…">
+<!ENTITY zotero.toolbar.actions.label "動作">
+<!ENTITY zotero.toolbar.import.label "匯入……">
 <!ENTITY zotero.toolbar.importFromClipboard "從剪貼簿匯入">
-<!ENTITY zotero.toolbar.export.label "匯出文獻庫…">
+<!ENTITY zotero.toolbar.export.label "匯出文獻庫……">
 <!ENTITY zotero.toolbar.rtfScan.label "RTF 掃描">
-<!ENTITY zotero.toolbar.timeline.label "建立時序表">
-<!ENTITY zotero.toolbar.preferences.label "偏好設定…">
+<!ENTITY zotero.toolbar.timeline.label "建立時間軸">
+<!ENTITY zotero.toolbar.preferences.label "偏好設定……">
 <!ENTITY zotero.toolbar.supportAndDocumentation "支援及說明文件">
 <!ENTITY zotero.toolbar.about.label "關於 Zotero">
 <!ENTITY zotero.toolbar.advancedSearch "進階搜尋">
 <!ENTITY zotero.toolbar.openURL.label "查詢">
 <!ENTITY zotero.toolbar.openURL.tooltip "於本機文獻庫尋找">
 
-<!ENTITY zotero.toolbar.feeds.new "新增新聞源">
-<!ENTITY zotero.toolbar.feeds.new.fromURL "從 URL...">
-<!ENTITY zotero.toolbar.feeds.new.fromOPML "從 OPML...">
-<!ENTITY zotero.toolbar.feeds.edit "編輯新聞源...">
+<!ENTITY zotero.toolbar.feeds.new "新增新聞來源">
+<!ENTITY zotero.toolbar.feeds.new.fromURL "從 URL……">
+<!ENTITY zotero.toolbar.feeds.new.fromOPML "從 OPML……">
+<!ENTITY zotero.toolbar.feeds.edit "編輯新聞來源……">
 
-<!ENTITY zotero.item.add "加入">
+<!ENTITY zotero.item.add "新增">
 <!ENTITY zotero.item.attachment.file.show "顯示檔案">
 <!ENTITY zotero.item.textTransform "轉換文字">
 <!ENTITY zotero.item.textTransform.titlecase "標題大小寫">
@@ -115,42 +116,43 @@
 <!ENTITY zotero.item.creatorTransform.capitalize "Capitalize">
 <!ENTITY zotero.item.viewOnline "線上檢視">
 <!ENTITY zotero.item.copyAsURL "複製成 URL">
-<!ENTITY zotero.item.deletePermanently "刪除授權...">
+<!ENTITY zotero.item.deletePermanently "刪除授權……">
 
-<!ENTITY zotero.item.tags.removeAll "移除全部標籤...">
+<!ENTITY zotero.item.tags.removeAll "移除全部標籤……">
 
 <!ENTITY zotero.toolbar.newNote "新增筆記">
 <!ENTITY zotero.toolbar.note.standalone "新增獨立筆記">
 <!ENTITY zotero.toolbar.note.child "新增子筆記">
-<!ENTITY zotero.toolbar.lookup "以識別碼查詢…">
-<!ENTITY zotero.toolbar.attachment.linked "檔案連結…">
-<!ENTITY zotero.toolbar.attachment.add "儲存檔案副本…">
+<!ENTITY zotero.toolbar.lookup "以辨識符號查詢……">
+<!ENTITY zotero.toolbar.attachment.linked "檔案連結……">
+<!ENTITY zotero.toolbar.attachment.add "儲存檔案副本……">
 <!ENTITY zotero.toolbar.attachment.weblink "儲存目前網頁連結">
 <!ENTITY zotero.toolbar.attachment.snapshot "製作目前網頁快照">
 <!ENTITY zotero.toolbar.context.item "項目">
 <!ENTITY zotero.toolbar.context.notes "筆記">
 
 <!ENTITY zotero.tagSelector.noTagsToDisplay "沒有標籤可顯示">
-<!ENTITY zotero.tagSelector.loadingTags "正在載入標籤...">
+<!ENTITY zotero.tagSelector.loadingTags "正在載入標籤……">
 <!ENTITY zotero.tagSelector.showAutomatic "顯示自動的">
 <!ENTITY zotero.tagSelector.displayAllInLibrary "顯示此文獻庫中的所有標籤">
-<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "刪除此文獻庫中的自動標籤...">
-<!ENTITY zotero.tagSelector.clearAll "全不選">
-<!ENTITY zotero.tagSelector.assignColor "配上顏色…">
-<!ENTITY zotero.tagSelector.renameTag "重新命名標籤…">
-<!ENTITY zotero.tagSelector.deleteTag "刪除標籤…">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "刪除此文獻庫中的自動標籤……">
+<!ENTITY zotero.tagSelector.clearAll "取消全選">
+<!ENTITY zotero.tagSelector.assignColor "配上顏色……">
+<!ENTITY zotero.tagSelector.renameTag "重新命名標籤……">
+<!ENTITY zotero.tagSelector.deleteTag "刪除標籤……">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
-<!ENTITY zotero.tagColorChooser.title "選標籤色與位置">
+<!ENTITY zotero.tagColorChooser.title "選擇標籤顏色與位置">
 <!ENTITY zotero.tagColorChooser.color "顏色:">
 <!ENTITY zotero.tagColorChooser.position "位置:">
 <!ENTITY zotero.tagColorChooser.setColor "設定顏色">
 <!ENTITY zotero.tagColorChooser.removeColor "移除顏色">
 
-<!ENTITY zotero.lookup.description "输入ISBN、DOI、PMID、arXiv ID或ADS条码导入条目到文库中：">
+<!ENTITY zotero.lookup.description "輸入 ISBN、DOI、PMID、arXiv ID或ADS條碼來加入到您的文獻庫：">
 <!ENTITY zotero.lookup.button.search "搜尋">
 
 <!ENTITY zotero.createParent.title "建立上層項目">
-<!ENTITY zotero.createParent.button.manual "手动录入">
+<!ENTITY zotero.createParent.button.manual "手動輸入">
 
 <!ENTITY zotero.selectitems.title "選取項目">
 <!ENTITY zotero.selectitems.intro.label "選取要加到您的文獻庫的項目">
@@ -159,11 +161,11 @@
 
 <!ENTITY zotero.bibliography.title "建立引用/參考文獻表">
 <!ENTITY zotero.bibliography.style.label "引用文獻樣式:">
-<!ENTITY zotero.bibliography.manageStyles "管理樣式...">
+<!ENTITY zotero.bibliography.manageStyles "管理樣式……">
 <!ENTITY zotero.bibliography.locale.label "語言：">
-<!ENTITY zotero.bibliography.outputMode "＊輸出模式:">
+<!ENTITY zotero.bibliography.outputMode "輸出模式:">
 <!ENTITY zotero.bibliography.bibliography "參考文獻表">
-<!ENTITY zotero.bibliography.outputMethod "＊輸出方法:">
+<!ENTITY zotero.bibliography.outputMethod "輸出方法:">
 <!ENTITY zotero.bibliography.saveAsRTF.label "存成 RTF 檔">
 <!ENTITY zotero.bibliography.saveAsHTML.label "存成 HTML 檔">
 <!ENTITY zotero.bibliography.copyToClipboard.label "複製到剪貼簿">
@@ -179,26 +181,29 @@
 <!ENTITY zotero.import "匯入">
 <!ENTITY zotero.import.whereToImportFrom "想從哪匯入？">
 <!ENTITY zotero.import.source.file "一檔案 (BibTeX, RIS, Zotero RDF, 等)">
-<!ENTITY zotero.import.importing "匯入中...">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
+<!ENTITY zotero.import.importing "匯入中……">
 <!ENTITY zotero.import.database "資料庫">
 <!ENTITY zotero.import.lastModified "上次修改">
 <!ENTITY zotero.import.size "大小">
-<!ENTITY zotero.import.createCollection "將匯入的文獻庫與項目放入新的文獻庫">
+<!ENTITY zotero.import.createCollection "將匯入的文獻集與項目放入新的文獻集">
 <!ENTITY zotero.import.fileHandling "檔案處理中">
+<!ENTITY zotero.import.online.newItemsOnly "僅下載新項目；不更新之前匯入的項目">
 
-<!ENTITY zotero.exportOptions.title "匯出…">
+<!ENTITY zotero.exportOptions.title "匯出……">
 <!ENTITY zotero.exportOptions.format.label "格式：">
-<!ENTITY zotero.exportOptions.translatorOptions.label "轉譯器選項">
+<!ENTITY zotero.exportOptions.translatorOptions.label "翻譯器選項">
 
 <!ENTITY zotero.charset.label "字元編碼">
 <!ENTITY zotero.moreEncodings.label "更多編碼">
 
-<!ENTITY zotero.citation.keepSorted.label "令來源保持排序">
+<!ENTITY zotero.citation.keepSorted.label "使來源保持排序">
 
 <!ENTITY zotero.citation.suppressAuthor.label "省略作者">
 <!ENTITY zotero.citation.prefix.label "前綴：">
 <!ENTITY zotero.citation.suffix.label "後綴：">
-<!ENTITY zotero.citation.editorWarning.label "警告：若是在編輯器中編輯引用文獻，Zotero 就不會更新以反應文獻庫或引用文獻樣式中的變更。">
+<!ENTITY zotero.citation.editorWarning.label "警告：若是在編輯器中編輯引用文獻，Zotero 就不會更新來反映在文獻庫或引用文獻樣式中的變更。">
 
 <!ENTITY zotero.richText.italic.label "斜體">
 <!ENTITY zotero.richText.bold.label "粗體">
@@ -206,11 +211,11 @@
 <!ENTITY zotero.richText.superscript.label "上標">
 <!ENTITY zotero.richText.subscript.label "下標">
 
-<!ENTITY zotero.annotate.toolbar.add.label "新增備註">
-<!ENTITY zotero.annotate.toolbar.collapse.label "收摺所有備註">
-<!ENTITY zotero.annotate.toolbar.expand.label "展開所有備註">
-<!ENTITY zotero.annotate.toolbar.highlight.label "高亮標示文字">
-<!ENTITY zotero.annotate.toolbar.unhighlight.label "去除文字的高亮標示">
+<!ENTITY zotero.annotate.toolbar.add.label "新增標註">
+<!ENTITY zotero.annotate.toolbar.collapse.label "摺疊所有標註">
+<!ENTITY zotero.annotate.toolbar.expand.label "展開所有標註">
+<!ENTITY zotero.annotate.toolbar.highlight.label "突顯文字">
+<!ENTITY zotero.annotate.toolbar.unhighlight.label "取消突顯文字">
 
 <!ENTITY zotero.integration.prefs.displayAs.label "將引用文獻顯示成：">
 <!ENTITY zotero.integration.prefs.footnotes.label "頁末註">
@@ -218,21 +223,21 @@
 
 <!ENTITY zotero.integration.prefs.formatUsing.label "將引用文獻儲存成：">
 <!ENTITY zotero.integration.prefs.bookmarks.label "書籤">
-<!ENTITY zotero.integration.prefs.bookmarks.caption "在 Word 及 LibreOffice，書籤都有效，但也可能受到意外改變，而產生錯誤；而且選用此項時，引用文獻條不能插到同頁註或文末註中。">
+<!ENTITY zotero.integration.prefs.bookmarks.caption "在 Word 及 LibreOffice中書籤皆可相互分享，但也可能因為修改意外而產生錯誤；而且啟用此項時，引用文獻無法插入於頁末註或文末註中。">
 
 <!ENTITY zotero.integration.prefs.automaticCitationUpdates.label "自動更新引用文獻">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "等待更新的引用文獻條會醒目顯示於文件中">
-<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "於大型文件，停用更新可加快引用文獻的插入。點按重新整理可手工更新引用文獻。">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.tooltip "等待更新的引用文獻會突顯於文件中">
+<!ENTITY zotero.integration.prefs.automaticCitationUpdates.description "於大型文件中，停用更新可加快引用文獻的插入。點擊重新整理可手動更新引用文獻。">
 
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.label "使用 MEDLINE 期刊簡寫">
 <!ENTITY zotero.integration.prefs.automaticJournalAbbeviations.caption "「期刊簡寫」欄會被忽略。">
 
-<!ENTITY zotero.integration.prefs.exportDocument "切換至另一文書處理器…">
+<!ENTITY zotero.integration.prefs.exportDocument "切換至另一文件編輯器……">
 
 <!ENTITY zotero.integration.showEditor.label "顯示編輯器">
 <!ENTITY zotero.integration.classicView.label "傳統的外觀">
 
-<!ENTITY zotero.integration.references.label "參考文獻表中的參考文獻條">
+<!ENTITY zotero.integration.references.label "參考文獻表中的參考文獻">
 
 <!ENTITY zotero.sync.stop "停止同步">
 <!ENTITY zotero.sync.error "同步錯誤">
@@ -242,7 +247,7 @@
 
 <!ENTITY zotero.sync.longTagFixer.followingTagTooLong "您的 Zotero 文獻庫中以下的標籤太長而無法與伺服器同步：">
 <!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "同步的標籤必須少於 256 個字元。">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "您可以將過長的標籤切割成多個標籤，或手工編輯來讓它變短，或刪除它。">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "您可以將過長的標籤切割成多個標籤，或手動編輯來讓它變短，或刪除它。">
 <!ENTITY zotero.sync.longTagFixer.split "分割">
 <!ENTITY zotero.sync.longTagFixer.splitAtThe "分割的位置在第">
 <!ENTITY zotero.sync.longTagFixer.character "個字元">
@@ -254,37 +259,37 @@
 <!ENTITY zotero.merge.of "~下列的：">
 <!ENTITY zotero.merge.deleted "已刪除的">
 
-<!ENTITY zotero.proxy.recognized.title "已識別接受的代理伺服器">
+<!ENTITY zotero.proxy.recognized.title "已辨識接受的代理伺服器">
 <!ENTITY zotero.proxy.recognized.warning "僅加入您的文獻庫，學校，或公司網站所連結的代理伺服器。">
 <!ENTITY zotero.proxy.recognized.warning.secondary "加入其他的代理伺服器會讓惡意網站偽裝成您所信任的網站。">
-<!ENTITY zotero.proxy.recognized.disable.label "不要由過去識別接受的代理伺服器自動改導請求。">
+<!ENTITY zotero.proxy.recognized.disable.label "不要由過去辨識接受的代理伺服器自動進行重新導向請求。">
 <!ENTITY zotero.proxy.recognized.ignore.label "忽略">
 
-<!ENTITY zotero.feedSettings.title "新聞源設定">
+<!ENTITY zotero.feedSettings.title "新聞來源設定">
 <!ENTITY zotero.feedSettings.saveButton.label "儲存">
 <!ENTITY zotero.feedSettings.url.label "URL:">
 <!ENTITY zotero.feedSettings.title.label "標題：">
-<!ENTITY zotero.feedSettings.refresh.label1 "更新新聞源內容，每">
-<!ENTITY zotero.feedSettings.refresh.label2 "小時">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "移除未讀的新聞源項目，當超過">
-<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "日">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "移除已讀的新聞源項目，當超過">
-<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "日">
+<!ENTITY zotero.feedSettings.refresh.label1 "更新新聞來源內容，每">
+<!ENTITY zotero.feedSettings.refresh.label2 "小時(可能為複數)">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "移除未讀的新聞來源項目，當超過">
+<!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "日(可能為複數)">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label1 "移除已讀的新聞來源項目，當超過">
+<!ENTITY zotero.feedSettings.cleanupReadAfter.label2 "日(可能為複數)">
 
 <!ENTITY zotero.rtfScan.title "RTF 掃描">
 <!ENTITY zotero.rtfScan.cancel.label "取消">
 <!ENTITY zotero.rtfScan.citation.label "引用文獻">
 <!ENTITY zotero.rtfScan.itemName.label "項目名稱">
-<!ENTITY zotero.rtfScan.unmappedCitations.label "無對映的引用文獻">
+<!ENTITY zotero.rtfScan.unmappedCitations.label "無對應的引用文獻">
 <!ENTITY zotero.rtfScan.ambiguousCitations.label "不明的引用文獻">
-<!ENTITY zotero.rtfScan.mappedCitations.label "有對映的引用文獻">
+<!ENTITY zotero.rtfScan.mappedCitations.label "有對應的引用文獻">
 <!ENTITY zotero.rtfScan.introPage.label "說明">
-<!ENTITY zotero.rtfScan.introPage.description "Zotero 能自動取出及重格式化引用文獻，並將參考書目插入 RTF 檔中。RTF 檔掃描功能目前支援以下引用文獻格式的一些變化：">
+<!ENTITY zotero.rtfScan.introPage.description "Zotero 能自動取出並重新格式化引用文獻，並將參考書目插入 RTF 檔中。RTF 檔掃描功能目前支援以下引用文獻格式的一些變化：">
 <!ENTITY zotero.rtfScan.introPage.description2 "要開始的話，在下方選一個 RTF 輸入檔及一個輸出檔：">
 <!ENTITY zotero.rtfScan.scanPage.label "掃描引用文獻">
 <!ENTITY zotero.rtfScan.scanPage.description "Zotero 在掃描文件中的引用文獻。請耐心等候。">
 <!ENTITY zotero.rtfScan.citationsPage.label "查證引用的項目">
-<!ENTITY zotero.rtfScan.citationsPage.description "請檢閱下列辨識出的引用文獻來確定 Zotero 正確的選出了相關的項目。在進到下一步前所有無對映或是不明的引用文獻都須被解決。">
+<!ENTITY zotero.rtfScan.citationsPage.description "請參閱下列辨識出的引用文獻來確定 Zotero 正確的選出了相關的項目。在進到下一步前所有無對應或是不明的引用文獻都須被解決。">
 <!ENTITY zotero.rtfScan.stylePage.label "文件格式化">
 <!ENTITY zotero.rtfScan.formatPage.label "格式化引用文獻">
 <!ENTITY zotero.rtfScan.formatPage.description "Zotero 正在處理並格式化 RTF 檔。請耐心等候。">
@@ -293,38 +298,38 @@
 <!ENTITY zotero.rtfScan.inputFile.label "輸入檔案">
 <!ENTITY zotero.rtfScan.outputFile.label "輸出檔案">
 
-<!ENTITY zotero.file.choose.label "選擇檔案…">
-<!ENTITY zotero.file.noneSelected.label "未選檔案">
+<!ENTITY zotero.file.choose.label "選擇檔案……">
+<!ENTITY zotero.file.noneSelected.label "未選擇任何檔案">
 
-<!ENTITY zotero.attachLink.title "附加連結到 URI…">
+<!ENTITY zotero.attachLink.title "附加連結到 URI……">
 <!ENTITY zotero.attachLink.label.link "連結：">
 <!ENTITY zotero.attachLink.label.title "標題：">
 
-<!ENTITY zotero.context.addChildNote "添加条目笔记">
-<!ENTITY zotero.context.addChildNoteFromAnnotations "通过注释添加条目笔记">
-<!ENTITY zotero.context.addStandaloneNote "添加独立注释">
-<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "通过注释添加独立笔记">
-<!ENTITY zotero.context.editInWindow "在单独窗口编辑">
+<!ENTITY zotero.context.addChildNote "新增項目筆記">
+<!ENTITY zotero.context.addChildNoteFromAnnotations "由標註來新增項目筆記">
+<!ENTITY zotero.context.addStandaloneNote "新增獨立筆記">
+<!ENTITY zotero.context.addStandaloneNoteFromAnnotations "由標註來新增獨立筆記">
+<!ENTITY zotero.context.editInWindow "在獨立視窗中編輯">
 
-<!ENTITY zotero.pdfReader.firstPage "起始頁">
-<!ENTITY zotero.pdfReader.lastPage "尾页">
-<!ENTITY zotero.pdfReader.back "后退">
-<!ENTITY zotero.pdfReader.forward "前进">
-<!ENTITY zotero.pdfReader.handTool "手形工具">
-<!ENTITY zotero.pdfReader.verticalScrolling "垂直滚动">
-<!ENTITY zotero.pdfReader.horizontalScrolling "水平滚动">
-<!ENTITY zotero.pdfReader.wrappedScrolling "覆盖滚动">
-<!ENTITY zotero.pdfReader.noSpreads "无分布">
-<!ENTITY zotero.pdfReader.oddSpreads "奇数分布">
-<!ENTITY zotero.pdfReader.evenSpreads "偶数分布">
+<!ENTITY zotero.pdfReader.firstPage "首頁">
+<!ENTITY zotero.pdfReader.lastPage "尾頁">
+<!ENTITY zotero.pdfReader.back "後退">
+<!ENTITY zotero.pdfReader.forward "前進">
+<!ENTITY zotero.pdfReader.handTool "掌形工具">
+<!ENTITY zotero.pdfReader.verticalScrolling "垂直捲動">
+<!ENTITY zotero.pdfReader.horizontalScrolling "水平捲動">
+<!ENTITY zotero.pdfReader.wrappedScrolling "折疊捲動">
+<!ENTITY zotero.pdfReader.noSpreads "無展開頁">
+<!ENTITY zotero.pdfReader.oddSpreads "奇數展開頁">
+<!ENTITY zotero.pdfReader.evenSpreads "偶數展開頁">
 <!ENTITY zotero.pdfReader.zoomIn "放大">
-<!ENTITY zotero.pdfReader.zoomOut "缩小">
-<!ENTITY zotero.pdfReader.zoomAuto "自动调整大小">
-<!ENTITY zotero.pdfReader.zoomPageWidth "适应页面宽度">
-<!ENTITY zotero.pdfReader.zoomPageHeight "适应页面高度">
-<!ENTITY zotero.pdfReader.splitVertically "Split Vertically">
-<!ENTITY zotero.pdfReader.splitHorizontally "Split Horizontally">
-<!ENTITY zotero.pdfReader.transferFromPDF "导入注释……">
-<!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
-<!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
-<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">
+<!ENTITY zotero.pdfReader.zoomOut "縮小">
+<!ENTITY zotero.pdfReader.zoomAuto "自動調整大小">
+<!ENTITY zotero.pdfReader.zoomPageWidth "縮放至頁面寬度">
+<!ENTITY zotero.pdfReader.zoomPageHeight "縮放到頁面高度">
+<!ENTITY zotero.pdfReader.splitVertically "垂直分割">
+<!ENTITY zotero.pdfReader.splitHorizontally "水平分割">
+<!ENTITY zotero.pdfReader.transferFromPDF "匯入標註……">
+<!ENTITY zotero.pdfReader.rotatePageLeft "將頁面向左旋轉">
+<!ENTITY zotero.pdfReader.rotatePageRight "將頁面向右旋轉">
+<!ENTITY zotero.pdfReader.rotatePage180 "將頁面旋轉180°">

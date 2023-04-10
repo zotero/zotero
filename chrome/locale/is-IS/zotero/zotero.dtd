@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Ítarlegir valkostir">
 <!ENTITY zotero.general.tools "Verkfæri">
 <!ENTITY zotero.general.more "Meira">
+<!ENTITY zotero.general.moreInformation "Frekari upplýsingar">
 <!ENTITY zotero.general.loading "Hleð inn…">
 <!ENTITY zotero.general.close "Loka">
 <!ENTITY zotero.general.minimize "Minnka">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Úthluta lit…">
 <!ENTITY zotero.tagSelector.renameTag "Endurnefna merki…">
 <!ENTITY zotero.tagSelector.deleteTag "Eyða merki…">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "Velja lit á merki og staðsetningu">
 <!ENTITY zotero.tagColorChooser.color "Litur:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "Flytja inn">
 <!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
 <!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "Flyt inn…">
 <!ENTITY zotero.import.database "Database">
 <!ENTITY zotero.import.lastModified "Last Modified">
 <!ENTITY zotero.import.size "Size">
 <!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 <!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Flytja út…">
 <!ENTITY zotero.exportOptions.format.label "Snið:">

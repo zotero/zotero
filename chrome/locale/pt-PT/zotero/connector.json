@@ -59,6 +59,12 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "última versão"
   },
+  "extensionIsDisabled": {
+    "message": "$1 está desabilitado"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 está desabilitado nas páginas adicionais"
+  },
   "appConnector": {
     "message": "Conector $1"
   },
@@ -139,6 +145,18 @@
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
     "message": "Estas citações foram desligadas<a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">de$1</a>. Terá de religá-las antes que elas sejam atualizadas ou apareçam na sua bibliografia."
+  },
+  "copyUnproxiedLink": {
+    "message": "Copiar link sem proxy"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "Copiar página URL sem proxy"
+  },
+  "reloadViaProxy": {
+    "message": "Recarregar por Proxy"
+  },
+  "reloadVia": {
+    "message": "Recarregar por $1"
   },
   "general_saveTo": {
     "message": "Guardar para $1"

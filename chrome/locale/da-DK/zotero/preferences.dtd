@@ -30,6 +30,12 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Fjern automatisk Elementer fra papirkurven hvis de er slettet for mere end">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dage siden">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Filnavn">
+
 <!ENTITY zotero.preferences.groups "Grupper">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Når elementer kopieres mellem biblioteker, så medtag:">
 <!ENTITY zotero.preferences.groups.childNotes "underliggende Noter">
@@ -80,10 +86,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "for mere information">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Nulstil historikken for datasynkronisering">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Flet lokale data med fjerndata og ignorér synkroniseringshistorikken">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Gendan fra onlinebibliotek">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Overskriv lokale Zotero-data med data fra onlinebiblioteket.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Replace Online Library">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Overskriv onlinebiblioteket med lokale Zotero-data.">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Gendan fra onlinebibliotek">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Overskriv lokale Zotero-data med data fra onlinebiblioteket.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Replace Online Library">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Overskriv onlinebiblioteket med lokale Zotero-data.">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Nulstil historik for fil-synkronisering">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Sammenlign alle vedhæftede filer med lagringstjenesten">
 <!ENTITY zotero.preferences.sync.reset "Nulstil">

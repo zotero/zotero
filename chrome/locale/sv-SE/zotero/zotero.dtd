@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Avancerade alternativ">
 <!ENTITY zotero.general.tools "Verktyg">
 <!ENTITY zotero.general.more "Mera">
+<!ENTITY zotero.general.moreInformation "Mer information">
 <!ENTITY zotero.general.loading "Laddar...">
 <!ENTITY zotero.general.close "Stäng">
 <!ENTITY zotero.general.minimize "Minimera">
@@ -101,7 +102,7 @@
 <!ENTITY zotero.toolbar.openURL.label "Hitta">
 <!ENTITY zotero.toolbar.openURL.tooltip "Hitta på ditt lokala bibliotek">
 
-<!ENTITY zotero.toolbar.feeds.new "Ny matning">
+<!ENTITY zotero.toolbar.feeds.new "Nytt flöde">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Från URL…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Från OPML…">
 <!ENTITY zotero.toolbar.feeds.edit "Redigera matning…">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Ange färg…">
 <!ENTITY zotero.tagSelector.renameTag "Ändra namn på etikett...">
 <!ENTITY zotero.tagSelector.deleteTag "Radera etikett...">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "Ange etikettens färg och plats">
 <!ENTITY zotero.tagColorChooser.color "Färg:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "Importera">
 <!ENTITY zotero.import.whereToImportFrom "Varifrån vill du importera?">
 <!ENTITY zotero.import.source.file "En fil (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "Importerar…">
 <!ENTITY zotero.import.database "Databas">
 <!ENTITY zotero.import.lastModified "Senast ändrad">
 <!ENTITY zotero.import.size "Storlek">
 <!ENTITY zotero.import.createCollection "Lägg importerade samlingar och källor i en ny samling">
 <!ENTITY zotero.import.fileHandling "Filhantering">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Exportera...">
 <!ENTITY zotero.exportOptions.format.label "Format:">

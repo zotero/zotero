@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Advanced Options">
 <!ENTITY zotero.general.tools "ابزارها">
 <!ENTITY zotero.general.more "بیشتر">
+<!ENTITY zotero.general.moreInformation "اطلاعات بیشتر">
 <!ENTITY zotero.general.loading "Loading…">
 <!ENTITY zotero.general.close "بستن">
 <!ENTITY zotero.general.minimize "کوچک‌ کردن">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "اختصاص رنگ...">
 <!ENTITY zotero.tagSelector.renameTag "تغییر نام برچسب...">
 <!ENTITY zotero.tagSelector.deleteTag "حذف برچسب...">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "انتخاب رنگ و موقعیت برچسب">
 <!ENTITY zotero.tagColorChooser.color "رنگ:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "درون‌برد">
 <!ENTITY zotero.import.whereToImportFrom "Where do you want to import from?">
 <!ENTITY zotero.import.source.file "A file (BibTeX, RIS, Zotero RDF, etc.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "Importing…">
 <!ENTITY zotero.import.database "Database">
 <!ENTITY zotero.import.lastModified "Last Modified">
 <!ENTITY zotero.import.size "Size">
 <!ENTITY zotero.import.createCollection "Place imported collections and items into new collection">
 <!ENTITY zotero.import.fileHandling "File Handling">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "صدور...">
 <!ENTITY zotero.exportOptions.format.label "قالب:">

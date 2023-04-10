@@ -30,6 +30,12 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "ゴミ箱の中のアイテムが">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "日を経過したら自動的に削除する">
 
+<!ENTITY zotero.preferences.pdfReader "PDFリーダー">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "…でタブを表示します">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "編著者名ー年ー題名">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "題名ー編著者名ー年">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "ファイル名">
+
 <!ENTITY zotero.preferences.groups "グループ">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "アイテムをライブラリ間でコピーするときは次を含む:">
 <!ENTITY zotero.preferences.groups.childNotes "子メモ">
@@ -80,10 +86,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 "により詳しい情報があります。">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "データ同期の履歴をリセットする">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "ローカルのデータをリモートのデータと統合し、同期の履歴は無視する">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "オンライン・ライブラリから復元する">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "オンライン・ライブラリを使ってローカルのZoteroデータを上書きする">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "オンライン・ライブラリを置き換える">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "ローカルの Zotero データを使ってオンライン・ライブラリを上書きする">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "オンライン・ライブラリから復元する">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "オンライン・ライブラリを使ってローカルのZoteroデータを上書きする">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "オンライン・ライブラリを置き換える">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "ローカルの Zotero データを使ってオンライン・ライブラリを上書きする">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "ファイル同期の履歴を削除する">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "すべての添付ファイルをストレージ・サービスと比較する">
 <!ENTITY zotero.preferences.sync.reset "リセット">

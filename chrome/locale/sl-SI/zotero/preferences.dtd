@@ -30,6 +30,12 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Samodejno odstrani iz koša vse izbrisano pred več kot">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dnevi">
 
+<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.filename "Ime datoteke">
+
 <!ENTITY zotero.preferences.groups "Skupine">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Pri kopiranju med knjižnicami vključi:">
 <!ENTITY zotero.preferences.groups.childNotes "podrejene opombe">
@@ -80,10 +86,10 @@
 <!ENTITY zotero.preferences.sync.reset.warning3 ".">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Ponastavi zgodovino usklajevanja podatkov">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Spoji krajevne podatke s podatki s strežnika, pri čemer prezri zgodovino usklajevanja.">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer "Obnovi iz spletne knjižnice">
-<!ENTITY zotero.preferences.sync.reset.restoreFromServer.desc "Spoji krajevne podatke Zotero s podatki iz spletne knjižnice.">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer "Zamenjaj spletno knjižnico">
-<!ENTITY zotero.preferences.sync.reset.restoreToServer.desc "Prepiši spletno knjižnico s krajevnimi podatki Zotero">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "Obnovi iz spletne knjižnice">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "Spoji krajevne podatke Zotero s podatki iz spletne knjižnice.">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "Zamenjaj spletno knjižnico">
+<!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "Prepiši spletno knjižnico s krajevnimi podatki Zotero">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Ponastavi zgodovino usklajevanja datotek">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Primerjaj vse pripete datoteke s storitvijo hrambe">
 <!ENTITY zotero.preferences.sync.reset "Ponastavi">

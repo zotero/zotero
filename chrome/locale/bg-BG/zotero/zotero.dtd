@@ -15,6 +15,7 @@
 <!ENTITY zotero.general.advancedOptions.label "Разширени опции">
 <!ENTITY zotero.general.tools "Инструменти">
 <!ENTITY zotero.general.more "Още">
+<!ENTITY zotero.general.moreInformation "Повече информация">
 <!ENTITY zotero.general.loading "Зареждане...">
 <!ENTITY zotero.general.close "Затвори">
 <!ENTITY zotero.general.minimize "Минимизирай">
@@ -139,6 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Прилагане на цвят...">
 <!ENTITY zotero.tagSelector.renameTag "Преименуване на маркера...">
 <!ENTITY zotero.tagSelector.deleteTag "Изтриване на маркера...">
+<!ENTITY zotero.tagSelector.splitTag "Split…">
 
 <!ENTITY zotero.tagColorChooser.title "Избиране на цвят и позиция на маркера">
 <!ENTITY zotero.tagColorChooser.color "Цвят:">
@@ -179,12 +181,15 @@
 <!ENTITY zotero.import "Внасяне">
 <!ENTITY zotero.import.whereToImportFrom "Откъде желаете да извършите внасянето?">
 <!ENTITY zotero.import.source.file "Файл (BibTeX, RIS, Zotero RDF, и др.)">
+<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
+<!ENTITY zotero.import.onlineImport "online import">
 <!ENTITY zotero.import.importing "Внасяне...">
 <!ENTITY zotero.import.database "База данни">
 <!ENTITY zotero.import.lastModified "Променено за последно">
 <!ENTITY zotero.import.size "Размер">
 <!ENTITY zotero.import.createCollection "Поместване на внесените колекции и записи в нова колекция">
 <!ENTITY zotero.import.fileHandling "Обработка на файловете">
+<!ENTITY zotero.import.online.newItemsOnly "Download new items only; don’t update previously imported items">
 
 <!ENTITY zotero.exportOptions.title "Изнасяне...">
 <!ENTITY zotero.exportOptions.format.label "Формат:">
