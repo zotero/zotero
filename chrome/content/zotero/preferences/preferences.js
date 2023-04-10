@@ -212,7 +212,7 @@ var Zotero_Preferences = {
 
 		this.navigation.append(listItem);
 
-		let container = document.createXULElement('vbox');
+		let container = document.createElement('div');
 		container.hidden = true;
 		this.helpContainer.before(container);
 

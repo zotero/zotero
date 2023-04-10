@@ -1,15 +1,49 @@
-#prefs-content {
+#zotero-prefs {
+	width: 800px;
+	height: 600px;
+	min-width: 800px;
 	min-height: 600px;
-	overflow-y: scroll;
+}
+
+#prefs-outer-container {
+	display: flex;
+	flex-direction: row;
+	min-width: 0;
+	min-height: 0;
+	-moz-box-flex: 1;
+}
+
+#prefs-inner-container {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+#prefs-content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: scroll;
 	padding-bottom: 10px;
 }
 
 #prefs-content > * {
+	display: flex;
+	flex-direction: column;
 	margin: 5px 15px;
+	max-width: 800px;
+}
+
+#prefs-content > [hidden] {
+	display: none;
 }
 
 #prefs-search-container {
-	height: 40px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	min-height: 40px;
 	padding-inline-end: 8px;
 }
 
@@ -20,6 +54,7 @@
 
 #prefs-navigation {
 	width: 180px;
+	flex-shrink: 0;
 	appearance: none;
 	background: transparent;
 	margin: 6px;
@@ -52,6 +87,10 @@
 	border-top: 1px solid lightgray;
 }
 
+#prefs-subpane-back-button-container {
+	flex: 1;
+}
+
 #prefs-subpane-back-button {
 	appearance: none;
 	font-size: 32px;
@@ -68,6 +107,11 @@
 
 #prefs-subpane-back-button:hover:active {
 	color: SelectedItem;
+}
+
+#prefs-help-container {
+	display: flex;
+	align-items: end;
 }
 
 h1 {
@@ -151,6 +195,12 @@ window[windowtype="zotero:pref"] {
    min-width: 600px;
 }
 
+label {
+	/* Apply XUL label styles to all labels */
+	margin-block: 1px 2px;
+	margin-inline: 6px 5px;
+}
+
 description, label, checkbox {
 	max-width: 630px;
 }
@@ -199,6 +249,15 @@ description label[class=zotero-text-link], label[class=zotero-text-link]
 
 .form-grid > :nth-child(odd) {
 	-moz-box-pack: end; /* Right-justify left column */
+}
+
+.pref-row {
+	display: flex;
+	align-items: center;
+}
+
+button {
+	flex-shrink: 0;
 }
 
 /* General pane */
@@ -408,12 +467,8 @@ description label[class=zotero-text-link], label[class=zotero-text-link]
 	font-size: 12px;
 }
 
-#quickCopy-siteSettings-rows::-moz-tree-cell(quickCopy-copyAsHTML) {
-	/*
-	DEBUG: possible to center checkmark here instead of with spaces?
-	
-	Tried text-align, -moz-box-align, and -moz-box-pack
-	*/
+#zotero-prefpane-export .virtualized-table-container {
+	height: 120px;
 }
 
 #zotero-quickCopy-format
@@ -453,7 +508,7 @@ description label[class=zotero-text-link], label[class=zotero-text-link]
 /* Shortcut Keys pane */
 #zotero-prefpane-advanced-keys-tab input
 {
-	margin-inline-start: -1px;
+	margin-inline-start: 0;
 }
 
 /* Advanced pane */
