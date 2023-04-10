@@ -49,7 +49,7 @@ Zotero.Prefs = new function(){
 		if (!fromVersion) {
 			fromVersion = 0;
 		}
-		var toVersion = 6;
+		var toVersion = 7;
 		if (fromVersion < toVersion) {
 			for (var i = fromVersion + 1; i <= toVersion; i++) {
 				switch (i) {
@@ -102,6 +102,12 @@ Zotero.Prefs = new function(){
 							Zotero.logError(e);
 							this.clear('export.noteQuickCopy.setting');
 						}
+						break;
+					
+					// Re-enable hardware acceleration in Zotero 7 for all the people who turned it
+					// off to fix PDF rendering problems
+					case 7:
+						this.clear('layers.acceleration.disabled', true);
 						break;
 				}
 			}
