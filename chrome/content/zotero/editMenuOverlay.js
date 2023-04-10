@@ -109,7 +109,7 @@ window.addEventListener("contextmenu", e => {
 
   let popup = document.getElementById("textbox-contextmenu");
   if (!popup) {
-    MozXULElement.insertFTLIfNeeded("toolkit/global/textActions.ftl");
+    MozXULElement.insertFTLIfNeeded("mozilla/textActions.ftl");
     document.documentElement.appendChild(
       MozXULElement.parseXULToFragment(`
 	  <popupset>
