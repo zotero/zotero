@@ -1253,7 +1253,7 @@ class EditorInstance {
 
 		win = that._quickFormatWindow = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
 		.getService(Components.interfaces.nsIWindowWatcher)
-		.openWindow(null, 'chrome://zotero/content/integration/quickFormat.xul', '', mode, {
+		.openWindow(null, 'chrome://zotero/content/integration/quickFormat.xhtml', '', mode, {
 			wrappedJSObject: io
 		});
 	}
