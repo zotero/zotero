@@ -52,6 +52,7 @@ window.addEventListener("load", /*async */function () {
 	//browser.docShellIsActive = false;
 
 	// Load URI passed in as nsISupports .data via openWindow()
+	window.viewerOriginalURI = window.arguments[0];
 	loadURI(window.arguments[0]);
 }, false);
 

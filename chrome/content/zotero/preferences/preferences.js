@@ -124,22 +124,6 @@ var Zotero_Preferences = {
 		}
 	},
 
-	/**
-	 * Opens a URI in the basic viewer
-	 */
-	openInViewer: function (uri) {
-		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-			.getService(Components.interfaces.nsIWindowMediator);
-		var win = wm.getMostRecentWindow("zotero:basicViewer");
-		if (win) {
-			win.loadURI(uri);
-		}
-		else {
-			window.openDialog("chrome://zotero/content/standalone/basicViewer.xhtml",
-				"basicViewer", "chrome,resizable,centerscreen,menubar,scrollbars", uri);
-		}
-	},
-
 	_onNavigationSelect() {
 		for (let child of this.content.children) {
 			if (child !== this.helpContainer) {
