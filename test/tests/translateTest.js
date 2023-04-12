@@ -148,6 +148,18 @@ function setupAsyncEndpoints() {
 			}));
 		}
 	}
+
+	var DelayedTest = function () {};
+	Zotero.Server.Endpoints["/test/translate/delayed.json"] = DelayedTest;
+	DelayedTest.prototype = {
+		"supportedMethods": ["GET", "POST"],
+		"init": async function (data, sendResponseCallback) {
+			await new Promise(resolve => setTimeout(resolve, 100));
+			sendResponseCallback(200, "application/json", JSON.stringify({
+				success: true
+			}));
+		}
+	}
 }
 
 describe("Zotero.Translate", function() {
@@ -1129,6 +1141,89 @@ describe("Zotero.Translate", function() {
 			
 			var item = newItems[0];
 			assert.equal(item.getField('title'), 'Test');
+		});
+	});
+
+
+	describe("#setRequestTimeout()", function () {
+		var url = "http://127.0.0.1:23119/test/translate/test.html";
+		var delayedURL = "http://127.0.0.1:23119/test/translate/delayed.json";
+		var doc;
+
+		before(async function () {
+			setupAsyncEndpoints();
+			doc = (await Zotero.HTTP.processDocuments(url, doc => doc))[0];
+		});
+
+		it("should affect doGet()", async function () {
+			let translate = new Zotero.Translate.Web();
+			translate.setTranslator(buildDummyTranslator('web', `
+				function detectWeb() {
+					return true;
+				}
+				
+				function doWeb() {
+					ZU.doGet('${delayedURL}', () => {
+						let item = new Zotero.Item('book');
+						item.title = 'ABC';
+						item.complete();
+					});
+				}
+			`));
+			translate.setDocument(doc);
+			
+			translate.setRequestTimeout(50);
+			assert.ok(await getPromiseError(translate.translate()));
+
+			translate.setRequestTimeout(200);
+			assert.notOk(await getPromiseError(translate.translate()));
+		});
+
+		it("should affect doPost()", async function () {
+			let translate = new Zotero.Translate.Web();
+			translate.setTranslator(buildDummyTranslator('web', `
+				function detectWeb() {
+					return true;
+				}
+				
+				function doWeb() {
+					ZU.doPost('${delayedURL}', 'body', () => {
+						let item = new Zotero.Item('book');
+						item.title = 'ABC';
+						item.complete();
+					});
+				}
+			`));
+			translate.setDocument(doc);
+			
+			translate.setRequestTimeout(50);
+			assert.ok(await getPromiseError(translate.translate()));
+
+			translate.setRequestTimeout(200);
+			assert.notOk(await getPromiseError(translate.translate()));
+		});
+
+		it("should affect request()", async function () {
+			let translate = new Zotero.Translate.Web();
+			translate.setTranslator(buildDummyTranslator('web', `
+				function detectWeb() {
+					return true;
+				}
+				
+				async function doWeb() {
+					await request('${delayedURL}');
+					let item = new Zotero.Item('book');
+					item.title = 'ABC';
+					item.complete();
+				}
+			`));
+			translate.setDocument(doc);
+			
+			translate.setRequestTimeout(50);
+			assert.ok(await getPromiseError(translate.translate()));
+
+			translate.setRequestTimeout(200);
+			assert.notOk(await getPromiseError(translate.translate()));
 		});
 	});
 	
