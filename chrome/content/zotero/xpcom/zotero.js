@@ -1090,21 +1090,22 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 * @param {Function} [onLoad] - Function to run once URI is loaded; passed the loaded document
 	 */
 	this.openInViewer = function (uri, onLoad) {
-		var wm = Services.wm;
-		var win = wm.getMostRecentWindow("zotero:basicViewer");
-		if (win) {
-			win.loadURI(uri);
-		} else {
-			let ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
-				.getService(Components.interfaces.nsIWindowWatcher);
-			let arg = Components.classes["@mozilla.org/supports-string;1"]
-				.createInstance(Components.interfaces.nsISupportsString);
-			arg.data = uri;
-			win = ww.openWindow(null, "chrome://zotero/content/standalone/basicViewer.xhtml",
-				"basicViewer", "chrome,dialog=yes,resizable,centerscreen,menubar,scrollbars", arg);
+		var viewerWins = Services.wm.getEnumerator("zotero:basicViewer");
+		for (let existingWin of viewerWins) {
+			if (existingWin.viewerOriginalURI === uri) {
+				existingWin.focus();
+				return;
+			}
 		}
+		let ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
+			.getService(Components.interfaces.nsIWindowWatcher);
+		let arg = Components.classes["@mozilla.org/supports-string;1"]
+			.createInstance(Components.interfaces.nsISupportsString);
+		arg.data = uri;
+		let win = ww.openWindow(null, "chrome://zotero/content/standalone/basicViewer.xhtml",
+			null, "chrome,dialog=yes,resizable,centerscreen,menubar,scrollbars", arg);
 		if (onLoad) {
-			let browser
+			let browser;
 			let func = function () {
 				win.removeEventListener("load", func);
 				// <browser> is created in basicViewer.js in a window load event, so we have to
