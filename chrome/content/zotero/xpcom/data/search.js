@@ -75,7 +75,12 @@ Zotero.defineProperty(Zotero.Search.prototype, 'key', {
 });
 Zotero.defineProperty(Zotero.Search.prototype, 'name', {
 	get: function() { return this._get('name'); },
-	set: function(val) { return this._set('name', val); }
+	set: function (val) {
+		if (!val) {
+			throw new Error("Saved search name cannot be empty");
+		}
+		return this._set('name', val);
+	}
 });
 Zotero.defineProperty(Zotero.Search.prototype, 'version', {
 	get: function() { return this._get('version'); },

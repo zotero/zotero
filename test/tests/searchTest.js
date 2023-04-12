@@ -1,4 +1,11 @@
 describe("Zotero.Search", function() {
+	describe("#name", function () {
+		it("should fail if empty", async function () {
+			var s = new Zotero.Search();
+			assert.throws(() => s.name = '');
+		});
+	});
+	
 	describe("#addCondition()", function () {
 		it("should convert old-style 'collection' condition value", function* () {
 			var col = yield createDataObject('collection');
