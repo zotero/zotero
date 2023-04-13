@@ -26,11 +26,6 @@
 "use strict";
 
 {
-	var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
-
-	Services.scriptloader.loadSubScript("chrome://zotero/content/elements/shadowAutocompleteInput.js", this);
-	Services.scriptloader.loadSubScript("chrome://zotero/content/elements/guidancePanel.js", this);
-
 	class ItemBox extends XULElement {
 		constructor() {
 			super();

@@ -26,8 +26,6 @@
 "use strict";
 
 {
-	Services.scriptloader.loadSubScript("chrome://zotero/content/elements/base.js", this);
-
 	class GuidancePanel extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<panel type="arrow" align="top">
