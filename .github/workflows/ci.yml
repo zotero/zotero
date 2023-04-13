@@ -53,9 +53,7 @@ jobs:
         
       - name: Install Node modules
         if: steps.node-cache.outputs.cache-hit != 'true'
-        # --legacy-peer-deps is necessary for current React versions until react-virtualized is
-        # updated or we replace it: https://github.com/bvaughn/react-virtualized/issues/1775
-        run: npm install --legacy-peer-deps
+        run: npm install
         
       - name: Build Zotero
         run: npm run build
