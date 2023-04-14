@@ -1157,8 +1157,7 @@ Zotero.Attachments = new function(){
 				Zotero.debug(`downloadPDFViaBrowser: Sniffing a PDF loaded at ${name}`);
 				// try the browser
 				try {
-					channelBrowser = channel.notificationCallbacks.getInterface(Ci.nsIWebNavigation)
-						.QueryInterface(Ci.nsIDocShell).chromeEventHandler;
+					channelBrowser = channel.notificationCallbacks.getInterface(Ci.nsILoadContext).topFrameElement;
 				}
 				catch (e) {}
 				if (channelBrowser) {
@@ -1167,8 +1166,8 @@ Zotero.Attachments = new function(){
 				else {
 					// try the document for the load group
 					try {
-						channelBrowser = channel.loadGroup.notificationCallbacks.getInterface(Ci.nsIWebNavigation)
-							.QueryInterface(Ci.nsIDocShell).chromeEventHandler;
+						channelBrowser = channel.loadGroup.notificationCallbacks.getInterface(Ci.nsILoadContext)
+							.topFrameElement;
 					}
 					catch(e) {}
 					if (channelBrowser) {
@@ -1191,21 +1190,18 @@ Zotero.Attachments = new function(){
 		};
 		try {
 			Zotero.MIMETypeHandler.addHandlers("application/pdf", pdfMIMETypeHandler, true);
-			function noop() {};
-			hiddenBrowser = Zotero.HTTP.loadDocuments([url], noop, noop, noop, true, options.cookieSandbox);
+			hiddenBrowser = await HiddenBrowser.create(url, {
+				requireSuccessfulStatus: true,
+				cookieSandbox: options.cookieSandbox,
+			});
 			let onLoadTimeoutDeferred = Zotero.Promise.defer();
 			let currentUrl = "";
-			hiddenBrowser.addProgressListener({
-				QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIWebProgressListener,
-					Components.interfaces.nsISupportsWeakReference]),
-				onProgressChange: noop,
-				onStateChange: noop,
-				onStatusChange: noop,
-				onSecurityChange: noop,
+			hiddenBrowser.webProgress.addProgressListener({
+				QueryInterface: ChromeUtils.generateQI([Ci.nsIWebProgressListener, Ci.nsISupportsWeakReference]),
 				async onLocationChange() {
-					let url = hiddenBrowser.contentDocument.location.href;
+					let url = hiddenBrowser.currentURI.spec;
 					if (currentUrl) {
-						Zotero.debug(`downloadPDFViaBrowser: A JS redirect occurred to ${hiddenBrowser.contentDocument.location.href}`);
+						Zotero.debug(`downloadPDFViaBrowser: A JS redirect occurred to ${url}`);
 					}
 					currentUrl = url;
 					Zotero.debug(`downloadPDFViaBrowser: Page with potential JS redirect loaded, giving it ${onLoadTimeout}ms to process`);
@@ -1215,7 +1211,7 @@ Zotero.Attachments = new function(){
 						onLoadTimeoutDeferred.reject(new Error(`downloadPDFViaBrowser: Loading PDF via browser timed out on the JS challenge page after ${onLoadTimeout}ms`));
 					}
 				}
-			});
+			}, Ci.nsIWebProgress.NOTIFY_LOCATION);
 			await Zotero.Promise.race([
 				onLoadTimeoutDeferred.promise,
 				Zotero.Promise.delay(downloadTimeout).then(() => {
@@ -1238,7 +1234,7 @@ Zotero.Attachments = new function(){
 		finally {
 			Zotero.MIMETypeHandler.removeHandlers('application/pdf', pdfMIMETypeHandler);
 			if (hiddenBrowser) {
-				Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
+				HiddenBrowser.destroy(hiddenBrowser);
 			}
 		}
 	};
@@ -2978,7 +2974,7 @@ Zotero.Attachments = new function(){
 	 * Determines if a given document is an instance of PDFJS
 	 * @return {Boolean}
 	 */
-	this.isPDFJS = function(doc) {
+	this.isPDFJSDocument = function(doc) {
 		// pdf.js HACK
 		// This may no longer be necessary (as of Fx 23)
 		if(doc.contentType === "text/html") {
@@ -2992,6 +2988,16 @@ Zotero.Attachments = new function(){
 		}
 		return false;
 	}
+
+
+	/**
+	 * Determines if a given Browser is displaying an instance of PDFJS
+	 * @return {Boolean}
+	 */
+	this.isPDFJSBrowser = function (browser) {
+		// https://searchfox.org/mozilla-esr102/rev/f78d456e055a41106be086c501b271385a973961/browser/base/content/browser.js#5518
+		return browser.contentPrincipal?.spec == "resource://pdf.js/web/viewer.html";
+	};
 	
 	
 	this.linkModeToName = function (linkMode) {
