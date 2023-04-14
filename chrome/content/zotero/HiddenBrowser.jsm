@@ -43,6 +43,12 @@ ChromeUtils.registerWindowActor("PageData", {
 	}
 });
 
+ChromeUtils.registerWindowActor("SingleFile", {
+	child: {
+		moduleURI: "chrome://zotero/content/actors/SingleFileChild.jsm"
+	}
+});
+
 const progressListeners = new Set();
 const browserFrameMap = new WeakMap();
 
@@ -51,11 +57,16 @@ const browserFrameMap = new WeakMap();
  **/
 const HiddenBrowser = {
 	/**
-	 * @param {String) source - HTTP URL, file: URL, or file path
+	 * @param {String} source - HTTP URL, file: URL, or file path
+	 * @param {Object} options
+	 * @param {Boolean} [options.allowJavaScript]
+	 * @param {Object} [options.docShell] Fields to set on Browser.docShell
+	 * @param {Boolean} [options.requireSuccessfulStatus]
+	 * @param {Zotero.CookieSandbox} [options.cookieSandbox]
 	 */
 	async create(source, options = {}) {
 		let url;
-		if (/^(file|https?):/.test(source)) {
+		if (/^(file|https?|chrome|resource):/.test(source)) {
 			url = source;
 		}
 		// Convert string path to file: URL
@@ -69,6 +80,9 @@ const HiddenBrowser = {
 		var windowlessBrowser = await frame.get();
 		windowlessBrowser.browsingContext.allowJavascript = options.allowJavaScript !== false;
 		windowlessBrowser.docShell.allowImages = false;
+		if (options.docShell) {
+			Object.assign(windowlessBrowser.docShell, options.docShell);
+		}
 		var doc = windowlessBrowser.document;
 		var browser = doc.createXULElement("browser");
 		browser.setAttribute("type", "content");
@@ -77,7 +91,22 @@ const HiddenBrowser = {
 		browser.setAttribute("disableglobalhistory", "true");
 		doc.documentElement.appendChild(browser);
 		
+		if (options.cookieSandbox) {
+			options.cookieSandbox.attachToBrowser(browser);
+		}
+		
 		browserFrameMap.set(browser, frame);
+		
+		if (Zotero.Debug.enabled) {
+			let weakBrowser = new WeakRef(browser);
+			setTimeout(() => {
+				let browser = weakBrowser.deref();
+				if (browser && browserFrameMap.has(browser)) {
+					Zotero.debug('Browser object still alive after 60 seconds - memory leak?');
+					Zotero.debug('Viewing URI ' + browser.currentURI?.spec)
+				}
+			}, 1000 * 60);
+		}
 		
 		// Next bit adapted from Mozilla's HeadlessShell.jsm
 		const principal = Services.scriptSecurityManager.getSystemPrincipal();
@@ -139,12 +168,27 @@ const HiddenBrowser = {
 			return false;
 		}
 		
+		if (options.requireSuccessfulStatus) {
+			let { channelInfo } = await this.getPageData(browser, ['channelInfo']);
+			if (channelInfo && (channelInfo.responseStatus < 200 || channelInfo.responseStatus >= 400)) {
+				let response = `${channelInfo.responseStatus} ${channelInfo.responseStatusText}`;
+				Zotero.debug(`HiddenBrowser.create: ${url} failed with ${response}`, 2);
+				throw new Zotero.HTTP.UnexpectedStatusException(
+					{
+						status: channelInfo.responseStatus
+					},
+					url,
+					`Invalid response ${response} for ${url}`
+				);
+			}
+		}
+		
 		return browser;
 	},
 	
 	/**
 	 * @param {Browser} browser
-	 * @param {String[]} props - 'characterSet', 'title', 'bodyText'
+	 * @param {String[]} props - 'characterSet', 'title', 'bodyText', 'documentHTML', 'cookie', 'channelInfo'
 	 */
 	async getPageData(browser, props) {
 		var actor = browser.browsingContext.currentWindowGlobal.getActor("PageData");
@@ -154,13 +198,40 @@ const HiddenBrowser = {
 		}
 		return data;
 	},
-	
+
+	/**
+	 * @param {Browser} browser
+	 * @returns {Promise<Document>}
+	 */
+	async getDocument(browser) {
+		let { documentHTML, cookie } = await this.getPageData(browser, ['documentHTML', 'cookie']);
+		let doc = new DOMParser().parseFromString(documentHTML, 'text/html');
+		let docWithLocation = Zotero.HTTP.wrapDocument(doc, browser.currentURI);
+		return new Proxy(docWithLocation, {
+			get(obj, prop) {
+				if (prop === 'cookie') {
+					return cookie;
+				}
+				return obj[prop];
+			}
+		});
+	},
+
+	/**
+	 * @param {Browser} browser
+	 * @returns {Promise<String>}
+	 */
+	snapshot(browser) {
+		let actor = browser.browsingContext.currentWindowGlobal.getActor("SingleFile");
+		return actor.sendQuery('snapshot');
+	},
+
 	destroy(browser) {
 		var frame = browserFrameMap.get(browser);
 		if (frame) {
 			frame.destroy();
 			Zotero.debug("Deleted hidden browser");
-			browserFrameMap.delete(frame);
+			browserFrameMap.delete(browser);
 		}
 	}
 };

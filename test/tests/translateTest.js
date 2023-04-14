@@ -2,6 +2,8 @@ new function() {
 Components.utils.import("resource://gre/modules/osfile.jsm");
 Components.utils.import("resource://zotero-unit/httpd.js");
 
+const { HiddenBrowser } = ChromeUtils.import('chrome://zotero/content/HiddenBrowser.jsm');
+
 /**
  * Create a new translator that saves the specified items
  * @param {String} translatorType - "import" or "web"
@@ -18,10 +20,10 @@ function saveItemsThroughTranslator(translatorType, items, translateOptions = {}
 	}
 
 	let translate = new Zotero.Translate[tyname]();
-	let browser;
 	if (translatorType == "web") {
-		browser = Zotero.Browser.createHiddenBrowser();
-		translate.setDocument(browser.contentDocument);
+		let doc = new DOMParser().parseFromString('<!DOCTYPE html><html></html>', 'text/html');
+		doc = Zotero.HTTP.wrapDocument(doc, 'https://www.example.com/');
+		translate.setDocument(doc);
 	} else if (translatorType == "import") {
 		translate.setString("");
 	}
@@ -37,7 +39,6 @@ function saveItemsThroughTranslator(translatorType, items, translateOptions = {}
 		"	}\n"+
 		"}"));
 	return translate.translate(translateOptions).then(function(items) {
-		if (browser) Zotero.Browser.deleteHiddenBrowser(browser);
 		return items;
 	});
 }
@@ -688,15 +689,8 @@ describe("Zotero.Translate", function() {
 		});
 
 		it('web translators should save attachment from browser document', function* () {
-			let deferred = Zotero.Promise.defer();
-			let browser = Zotero.HTTP.loadDocuments(
-				"http://127.0.0.1:23119/test/translate/test.html",
-				doc => deferred.resolve(doc),
-				undefined,
-				undefined,
-				true
-			);
-			let doc = yield deferred.promise;
+			let browser = yield HiddenBrowser.create("http://127.0.0.1:23119/test/translate/test.html");
+			let doc = yield HiddenBrowser.getDocument(browser);
 
 			let translate = new Zotero.Translate.Web();
 			translate.setDocument(doc);
@@ -725,7 +719,7 @@ describe("Zotero.Translate", function() {
 			assert.equal(snapshot.attachmentContentType, "text/html");
 			checkTestTags(snapshot, true);
 
-			Zotero.Browser.deleteHiddenBrowser(browser);
+			HiddenBrowser.destroy(browser);
 		});
 		
 		it('web translators should save attachment from non-browser document', function* () {

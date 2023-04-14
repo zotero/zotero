@@ -207,103 +207,99 @@ Zotero.FeedItem.prototype.toggleRead = Zotero.Promise.coroutine(function* (state
  * @param collectionID {Integer} add item to collection
  * @return {Promise<FeedItem|Item>} translated feed item
  */
-Zotero.FeedItem.prototype.translate = Zotero.Promise.coroutine(function* (libraryID, collectionID) {
+Zotero.FeedItem.prototype.translate = async function (libraryID, collectionID) {
+	const { RemoteTranslate } = ChromeUtils.import("chrome://zotero/content/RemoteTranslate.jsm");
+	const { HiddenBrowser } = ChromeUtils.import("chrome://zotero/content/HiddenBrowser.jsm");
+
 	Zotero.debug("Translating feed item " + this.id + " with URL " + this.getField('url'), 2);
 	if (Zotero.locked) {
 		Zotero.debug('Zotero locked, skipping feed item translation');
 		return;
 	}
 
-	let deferred = Zotero.Promise.defer();
 	let error = function(e) {  };
-	let translate = new Zotero.Translate.Web();
+	let translate = new RemoteTranslate();
 	var win = Services.wm.getMostRecentWindow("navigator:browser");
 	let progressWindow = win.ZoteroPane.progressWindow;
 	
 	if (libraryID) {
 		// Show progress notifications when scraping to a library.
-		translate.clearHandlers("done");
-		translate.clearHandlers("itemDone");
 		translate.setHandler("done", progressWindow.Translation.doneHandler);
 		translate.setHandler("itemDone", progressWindow.Translation.itemDoneHandler());
 		if (collectionID) {
-			var collection = yield Zotero.Collections.getAsync(collectionID);
+			var collection = await Zotero.Collections.getAsync(collectionID);
 		}
 		progressWindow.show();
 		progressWindow.Translation.scrapingTo(libraryID, collection);
 	}
 	
-	// Load document
+	// Load document in hidden browser and point the RemoteTranslate to it
+	let browser = await HiddenBrowser.create(this.getField('url'));
 	try {
-		yield Zotero.HTTP.processDocuments(this.getField('url'), doc => deferred.resolve(doc));
-	} catch (e) {
-		Zotero.debug(e, 1);
-		deferred.reject(e);
-	}
-	let doc = yield deferred.promise;
-
-	// Set translate document
-	translate.setDocument(doc);
-	
-	// Load translators
-	deferred = Zotero.Promise.defer();
-	translate.setHandler('translators', (me, translators) => deferred.resolve(translators));
-	translate.getTranslators();
-	let translators = yield deferred.promise;
-	if (!translators || !translators.length) {
-		Zotero.debug("No translators detected for feed item " + this.id + " with URL " + this.getField('url') + 
-			' -- cloning item instead', 2);
-		let item = yield this.clone(libraryID, collectionID, doc);
-		progressWindow.Translation.itemDoneHandler()(null, null, item);
-		progressWindow.Translation.doneHandler(null, true);
-		return;
-	}
-	translate.setTranslator(translators[0]);
-
-	deferred = Zotero.Promise.defer();
-	
-	if (libraryID) {
-		let result = yield translate.translate({libraryID, collections: collectionID ? [collectionID] : false})
-			.then(items => items ? items[0] : false);
-		if (!result) {
-			let item = yield this.clone(libraryID, collectionID, doc);
+		await translate.setBrowser(browser);
+		
+		// Load translators
+		let translators = await translate.detect();
+		if (!translators || !translators.length) {
+			Zotero.debug("No translators detected for feed item " + this.id + " with URL " + this.getField('url') + 
+				' -- cloning item instead', 2);
+			let item = await this.clone(libraryID, collectionID, browser);
 			progressWindow.Translation.itemDoneHandler()(null, null, item);
 			progressWindow.Translation.doneHandler(null, true);
 			return;
 		}
-		return result;
+	
+		if (libraryID) {
+			let result = await translate.translate({
+				libraryID,
+				collections: collectionID ? [collectionID] : false
+			}).then(items => items ? items[0] : false);
+			if (!result) {
+				let item = await this.clone(libraryID, collectionID, browser);
+				progressWindow.Translation.itemDoneHandler()(null, null, item);
+				progressWindow.Translation.doneHandler(null, true);
+				return;
+			}
+			return result;
+		}
+		
+		translate.setHandler('error', error);
+		
+		let itemData = await translate.translate({ libraryID: false, saveAttachments: false });
+		if (itemData.length) {
+			itemData = itemData[0];
+		}
+		else {
+			Zotero.debug('Zotero.FeedItem#translate: Translation failed');
+			return null;
+		}
+		
+		// clean itemData
+		const deleteFields = ['attachments', 'notes', 'id', 'itemID', 'path', 'seeAlso', 'version', 'dateAdded', 'dateModified'];
+		for (let field of deleteFields) {
+			delete itemData[field];
+		}
+		
+		this.fromJSON(itemData);
+		this.isTranslated = true;
+		await this.saveTx();
+		
+		return this;
 	}
-	
-	// Clear these to prevent saving
-	translate.clearHandlers('itemDone');
-	translate.clearHandlers('itemsDone');
-	translate.setHandler('error', error);
-	translate.setHandler('itemDone', (_, items) => deferred.resolve(items));
-	
-	translate.translate({libraryID: false, saveAttachments: false});
-	
-	let itemData = yield deferred.promise;
-	
-	// clean itemData
-	const deleteFields = ['attachments', 'notes', 'id', 'itemID', 'path', 'seeAlso', 'version', 'dateAdded', 'dateModified'];
-	for (let field of deleteFields) {
-		delete itemData[field];
-	}	
-	
-	this.fromJSON(itemData);
-	this.isTranslated = true;
-	yield this.saveTx();
-	
-	return this;
-});
+	finally {
+		HiddenBrowser.destroy(browser);
+		translate.dispose();
+	}
+};
 
 /**
  * Clones the feed item (usually, when proper translation is unavailable)
- * @param libraryID {Integer} save item in library
- * @param collectionID {Integer} add item to collection
+ * @param {Integer} libraryID save item in library
+ * @param {Integer} [collectionID] add item to collection
+ * @param {Browser} [browser]
  * @return {Promise<FeedItem|Item>} translated feed item
  */
-Zotero.FeedItem.prototype.clone = Zotero.Promise.coroutine(function* (libraryID, collectionID, doc) {
+Zotero.FeedItem.prototype.clone = Zotero.Promise.coroutine(function* (libraryID, collectionID, browser) {
 	let dbItem = Zotero.Item.prototype.clone.call(this, libraryID);
 	if (collectionID) {
 		dbItem.addToCollection(collectionID);
@@ -313,10 +309,10 @@ Zotero.FeedItem.prototype.clone = Zotero.Promise.coroutine(function* (libraryID,
 	let item = {title: dbItem.getField('title'), itemType: dbItem.itemType, attachments: []};
 	
 	// Add snapshot
-	if (Zotero.Libraries.get(libraryID).filesEditable) {
+	if (Zotero.Libraries.get(libraryID).filesEditable && browser) {
 		item.attachments = [{title: "Snapshot"}];
 		yield Zotero.Attachments.importFromDocument({
-			document: doc,
+			browser,
 			parentItemID: dbItem.id
 		});
 	}

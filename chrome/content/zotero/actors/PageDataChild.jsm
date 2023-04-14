@@ -16,6 +16,27 @@ class PageDataChild extends JSWindowActorChild {
 			
 			case "bodyText":
 				return document.documentElement.innerText;
+			
+			case "cookie":
+				return document.cookie;
+			
+			case "documentHTML":
+				return new XMLSerializer().serializeToString(document);
+			
+			case "channelInfo": {
+				let docShell = this.contentWindow.docShell;
+				let channel = (docShell.currentDocumentChannel || docShell.failedChannel)
+					?.QueryInterface(Ci.nsIHttpChannel);
+				if (channel) {
+					return {
+						responseStatus: channel.responseStatus,
+						responseStatusText: channel.responseStatusText
+					};
+				}
+				else {
+					return null;
+				}
+			}
 		}
 	}
 	
@@ -24,9 +45,8 @@ class PageDataChild extends JSWindowActorChild {
 		const contentWindow = this.contentWindow;
 		const document = this.document;
 		
-		// Make sure the document element has been created
 		function readyEnough() {
-			return document.readyState !== "uninitialized" && document.documentElement;
+			return document.readyState === "complete";
 		}
 		
 		if (readyEnough()) {

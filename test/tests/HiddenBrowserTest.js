@@ -3,6 +3,27 @@ describe("HiddenBrowser", function() {
 		"chrome://zotero/content/HiddenBrowser.jsm"
 	);
 	
+	describe("#create()", function () {
+		var httpd;
+		var port = 16213;
+		var baseURL = `http://127.0.0.1:${port}/`;
+
+		before(function () {
+			Cu.import("resource://zotero-unit/httpd.js");
+			httpd = new HttpServer();
+			httpd.start(port);
+		});
+
+		after(async function () {
+			await new Promise(resolve => httpd.stop(resolve));
+		});
+
+		it("should fail on non-2xx response with requireSuccessfulStatus", async function () {
+			let e = await getPromiseError(HiddenBrowser.create(baseURL + 'nonexistent', { requireSuccessfulStatus: true }));
+			assert.instanceOf(e, Zotero.HTTP.UnexpectedStatusException);
+		});
+	});
+	
 	describe("#getPageData()", function () {
 		it("should handle local UTF-8 HTML file", async function () {
 			var path = OS.Path.join(getTestDataDirectory().path, 'test-hidden.html');
@@ -34,6 +55,27 @@ describe("HiddenBrowser", function() {
 			HiddenBrowser.destroy(browser);
 			assert.equal(characterSet, 'GBK');
 			assert.equal(bodyText, '这是一个测试文件。');
+		});
+	});
+
+	describe("#getDocument()", function () {
+		it("should provide a Document object", async function () {
+			let path = OS.Path.join(getTestDataDirectory().path, 'test-hidden.html');
+			let browser = await HiddenBrowser.create(path);
+			let document = await HiddenBrowser.getDocument(browser);
+			assert.include(document.documentElement.innerHTML, 'test');
+			assert.ok(document.location);
+			assert.strictEqual(document.cookie, '');
+		});
+	});
+
+	describe("#snapshot()", function () {
+		it("should return a SingleFile snapshot", async function () {
+			let path = OS.Path.join(getTestDataDirectory().path, 'test-hidden.html');
+			let browser = await HiddenBrowser.create(path);
+			let snapshot = await HiddenBrowser.snapshot(browser);
+			assert.include(snapshot, 'Page saved with SingleFile');
+			assert.include(snapshot, 'This is hidden text.');
 		});
 	});
 });

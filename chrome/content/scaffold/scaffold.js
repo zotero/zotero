@@ -26,6 +26,8 @@
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { E10SUtils } = ChromeUtils.import("resource://gre/modules/E10SUtils.jsm");
 var { Subprocess } = ChromeUtils.import("resource://gre/modules/Subprocess.jsm");
+var { RemoteTranslate } = ChromeUtils.import("chrome://zotero/content/RemoteTranslate.jsm");
+var { ContentDOMReference } = ChromeUtils.import("resource://gre/modules/ContentDOMReference.jsm");
 
 import FilePicker from 'zotero/modules/filePicker';
 
@@ -959,24 +961,20 @@ var Scaffold = new function () {
 	/*
 	 * run translator in given mode with given input
 	 */
-	function _run(functionToRun, input, selectItems, itemDone, detectHandler, done) {
+	async function _run(functionToRun, input, selectItems, itemDone, detectHandler, done) {
+		let translate;
+		let isRemoteWeb = false;
 		if (functionToRun == "detectWeb" || functionToRun == "doWeb") {
-			var translate = new Zotero.Translate.Web();
+			translate = new RemoteTranslate();
+			isRemoteWeb = true;
 			if (!_testTargetRegex(input)) {
-				_logOutput("Target did not match " + _getDocumentURL(input));
+				_logOutput("Target did not match " + _getCurrentURI(input));
 				if (done) {
 					done();
 				}
 				return;
 			}
-			translate.setDocument(input);
-			
-			// Use cookies from browser pane
-			translate.setCookieSandbox(new Zotero.CookieSandbox(
-				null,
-				_getDocumentURL(input),
-				input.cookie
-			));
+			await translate.setBrowser(input);
 		}
 		else if (functionToRun == "detectImport" || functionToRun == "doImport") {
 			translate = new Zotero.Translate.Import();
@@ -1000,15 +998,33 @@ var Scaffold = new function () {
 		// get translator
 		var translator = _getTranslatorFromPane();
 		if (functionToRun.startsWith('detect')) {
-			// don't let target prevent translator from operating
-			translator.target = null;
-			// generate sandbox
-			translate.setHandler("translators", detectHandler);
-			// internal hack to call detect on this translator
-			translate._potentialTranslators = [translator];
-			translate._foundTranslators = [];
-			translate._currentState = "detect";
-			translate._detect();
+			if (isRemoteWeb) {
+				translate.setTranslator(translator);
+				detectHandler(translate, await translate.detect());
+				translate.dispose();
+			}
+			else {
+				// don't let target prevent translator from operating
+				translator.target = null;
+				// generate sandbox
+				translate.setHandler("translators", detectHandler);
+				// internal hack to call detect on this translator
+				translate._potentialTranslators = [translator];
+				translate._foundTranslators = [];
+				translate._currentState = "detect";
+				translate._detect();
+			}
+		}
+		else if (isRemoteWeb) {
+			translate.setHandler("select", selectItems);
+			translate.setTranslator(translator);
+			let items = await translate.translate({ libraryID: false });
+			if (items) {
+				for (let item of items) {
+					itemDone(translate, item);
+				}
+			}
+			translate.dispose();
 		}
 		else {
 			// don't let the detectCode prevent the translator from operating
@@ -1049,14 +1065,14 @@ var Scaffold = new function () {
 	 * Test target regular expression against document URL and log the result
 	 */
 	this.logTargetRegex = async function () {
-		_logOutput(_testTargetRegex(await _getDocument()));
+		_logOutput(_testTargetRegex(_browser));
 	};
 	
 	/**
 	 * Test target regular expression against document URL and return the result
 	 */
-	function _testTargetRegex(doc) {
-		var url = _getDocumentURL(doc);
+	function _testTargetRegex(browser) {
+		var url = _getCurrentURI(browser);
 		
 		try {
 			var targetRe = new RegExp(document.getElementById('textbox-target').value, "i");
@@ -1191,7 +1207,7 @@ var Scaffold = new function () {
 	async function _getInput(typeOrMethod) {
 		typeOrMethod = typeOrMethod.toLowerCase();
 		if (typeOrMethod.endsWith('web')) {
-			return _getDocument();
+			return _browser;
 		}
 		else if (typeOrMethod.endsWith('import')) {
 			return _getImport();
@@ -1875,12 +1891,12 @@ var Scaffold = new function () {
 		for (let item of items) {
 			item.getElementsByTagName("label")[1].setAttribute("value", "Running");
 			var test = JSON.parse(item.dataset.testString);
-			test["ui-item"] = item;
+			test["ui-item"] = ContentDOMReference.get(item);
 			tests.push(test);
 		}
 
 		this.runTests(tests, (obj, test, status, message) => {
-			test["ui-item"].getElementsByTagName("label")[1].setAttribute("value", message);
+			ContentDOMReference.resolve(test["ui-item"]).getElementsByTagName("label")[1].setAttribute("value", message);
 		});
 	};
 
@@ -1975,7 +1991,7 @@ var Scaffold = new function () {
 		this._updateTests();
 	};
 	
-	TestUpdater.prototype._updateTests = function () {
+	TestUpdater.prototype._updateTests = async function () {
 		if (!this.testsToUpdate.length) {
 			this.doneCallback(this.newTests);
 			return;
@@ -1986,49 +2002,52 @@ var Scaffold = new function () {
 		
 		if (test.type == 'web') {
 			_logOutput("Loading web page from " + test.url);
-			var hiddenBrowser = Zotero.HTTP.loadDocuments(
-				test.url,
-				(doc) => {
-					_logOutput("Page loaded");
-					if (test.defer) {
-						_logOutput("Waiting " + (Zotero_TranslatorTester.DEFER_DELAY / 1000)
-							+ " second(s) for page content to settle"
-						);
-					}
-					Zotero.setTimeout(
-						() => {
-							doc = hiddenBrowser.contentDocument;
-							if (doc.location.href != test.url) {
-								_logOutput("Page URL differs from test. Will be updated. " + doc.location.href);
-							}
-							this.tester.newTest(doc,
-								(obj, newTest) => {
-									Zotero.Browser.deleteHiddenBrowser(hiddenBrowser);
-									if (test.defer) {
-										newTest.defer = true;
-									}
-									newTest = _sanitizeItemsInTest(newTest);
-									this.newTests.push(newTest);
-									this.testDoneCallback(newTest);
-									this._updateTests();
-								},
-								_confirmCreateExpectedFailTest);
-						},
-						test.defer ? Zotero_TranslatorTester.DEFER_DELAY : 0,
-						true
-					);
-				},
-				null,
-				(e) => {
-					Zotero.logError(e);
-					this.newTests.push(false);
-					this.testDoneCallback(false);
-					this._updateTests();
-				},
-				true
-			);
 			
-			hiddenBrowser.docShell.allowMetaRedirects = true;
+			const { HiddenBrowser } = ChromeUtils.import("chrome://zotero/content/HiddenBrowser.jsm");
+			let browser;
+			try {
+				browser = await HiddenBrowser.create(test.url, {
+					requireSuccessfulStatus: true,
+					docShell: { allowMetaRedirects: true }
+				});
+
+				if (test.defer) {
+					_logOutput("Waiting " + (Zotero_TranslatorTester.DEFER_DELAY / 1000)
+						+ " second(s) for page content to settle");
+					await Zotero.Promise.delay(Zotero_TranslatorTester.DEFER_DELAY);
+				}
+				else {
+					// Wait just a bit for things to settle
+					await Zotero.Promise.delay(1000);
+				}
+
+				if (browser.currentURI.spec != test.url) {
+					_logOutput("Page URL differs from test. Will be updated. " + browser.currentURI.spec);
+				}
+
+				let translate = new RemoteTranslate();
+				await translate.setBrowser(browser);
+				await translate.setTranslatorProvider(_translatorProvider);
+				translate.setTranslator(_getTranslatorFromPane());
+				translate.setHandler("debug", _debug);
+				translate.setHandler("error", _error);
+				translate.setHandler("newTestDetectionFailed", _confirmCreateExpectedFailTest);
+				let newTest = await translate.newTest();
+				translate.dispose();
+				newTest = _sanitizeItemsInTest(newTest);
+				this.newTests.push(newTest);
+				this.testDoneCallback(newTest);
+				this._updateTests();
+			}
+			catch (e) {
+				Zotero.logError(e);
+				this.newTests.push(false);
+				this.testDoneCallback(false);
+				this._updateTests();
+			}
+			finally {
+				if (browser) HiddenBrowser.destroy(browser);
+			}
 		}
 		else {
 			test.items = [];
@@ -2092,23 +2111,8 @@ var Scaffold = new function () {
 		return guid;
 	}
 
-	/*
-	 * gets selected frame/document
-	 */
-	function _getDocument() {
-		return new Promise((resolve) => {
-			window.messageManager.addMessageListener('Scaffold:Document', function onDocument({ data }) {
-				window.messageManager.removeMessageListener('Scaffold:Document', onDocument);
-				let doc = new DOMParser().parseFromString(data.html, 'text/html');
-				doc = Zotero.HTTP.wrapDocument(doc, data.url);
-				resolve(doc);
-			});
-			window.messageManager.broadcastAsyncMessage('Scaffold:GetDocument');
-		});
-	}
-	
-	function _getDocumentURL(doc) {
-		return Zotero.Proxies.proxyToProper(doc.location.href);
+	function _getCurrentURI(browser) {
+		return Zotero.Proxies.proxyToProper(browser.currentURI.spec);
 	}
 
 	function _findTestObjectTops(monaco, model) {
