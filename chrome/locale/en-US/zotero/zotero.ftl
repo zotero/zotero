@@ -77,7 +77,7 @@ report-error =
 rtfScan-wizard =
     .title = RTF Scan
 
-rtfScan-introPage-description = Zotero can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.
+rtfScan-introPage-description = { -app-name } can automatically extract and reformat citations and insert a bibliography into RTF files. To get started, choose an RTF file below.
 rtfScan-introPage-description2 = To get started, select an RTF input file and an output file below:
 
 rtfScan-input-file = Input File
@@ -95,12 +95,12 @@ rtfScan-intro-page =
 rtfScan-scan-page =
     .label = Scanning for Citations
 
-rtfScan-scanPage-description = Zotero is scanning your document for citations. Please be patient.
+rtfScan-scanPage-description = { -app-name } is scanning your document for citations. Please be patient.
 
 rtfScan-citations-page =
     .label = Verify Cited Items
 
-rtfScan-citations-page-description = Please review the list of recognized citations below to ensure that Zotero has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.
+rtfScan-citations-page-description = Please review the list of recognized citations below to ensure that { -app-name } has selected the corresponding items correctly. Any unmapped or ambiguous citations must be resolved before proceeding to the next step.
 
 rtfScan-style-page =
     .label = Document Formatting
@@ -108,7 +108,7 @@ rtfScan-style-page =
 rtfScan-format-page =
     .label = Formatting Citations
 
-rtfScan-format-page-description = Zotero is processing and formatting your RTF file. Please be patient.
+rtfScan-format-page-description = { -app-name } is processing and formatting your RTF file. Please be patient.
 
 rtfScan-complete-page =
     .label = RTF Scan Complete
