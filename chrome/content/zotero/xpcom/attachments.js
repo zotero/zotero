@@ -24,6 +24,8 @@
 */
 
 Zotero.Attachments = new function(){
+	const { HiddenBrowser } = ChromeUtils.import("chrome://zotero/content/HiddenBrowser.jsm");
+	
 	// Keep in sync with Zotero.Schema.integrityCheck() and this.linkModeToName()
 	this.LINK_MODE_IMPORTED_FILE = 0;
 	this.LINK_MODE_IMPORTED_URL = 1;
@@ -539,39 +541,30 @@ Zotero.Attachments = new function(){
 		}
 		
 		// Save using a hidden browser
-		var nativeHandlerImport = function () {
-			return new Zotero.Promise(function (resolve, reject) {
-				var browser = Zotero.HTTP.loadDocuments(
-					url,
-					Zotero.Promise.coroutine(function* () {
-						try {
-							let attachmentItem = yield Zotero.Attachments.importFromDocument({
-								libraryID,
-								document: browser.contentDocument,
-								parentItemID,
-								title,
-								collections,
-								saveOptions
-							});
-							resolve(attachmentItem);
-						}
-						catch (e) {
-							Zotero.logError(e);
-							reject(e);
-						}
-						finally {
-							Zotero.Browser.deleteHiddenBrowser(browser);
-						}
-					}),
-					undefined,
-					(e) => {
-						reject(e);
-					},
-					true,
+		var nativeHandlerImport = async function () {
+			let browser;
+			try {
+				browser = await HiddenBrowser.create(url, {
+					requireSuccessfulStatus: true,
+					docShell: { allowImages: true },
 					cookieSandbox,
-					{ allowImages: true }
-				);
-			});
+				});
+				return await Zotero.Attachments.importFromDocument({
+					libraryID,
+					browser,
+					parentItemID,
+					title,
+					collections,
+					saveOptions
+				});
+			}
+			catch (e) {
+				Zotero.logError(e);
+				throw e;
+			}
+			finally {
+				if (browser) HiddenBrowser.destroy(browser);
+			}
 		};
 		
 		// Save using remote web browser persist
@@ -855,7 +848,7 @@ Zotero.Attachments = new function(){
 	/**
 	 * Save a snapshot from a Document
 	 *
-	 * @param {Object} options - 'libraryID', 'document', 'parentItemID', 'forceTitle', 'collections'
+	 * @param {Object} options - 'libraryID', 'document', 'browser', 'parentItemID', 'forceTitle', 'collections'
 	 * @param {Object} [options.saveOptions] - Options to pass to Zotero.Item::save()
 	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
 	 */
@@ -864,6 +857,7 @@ Zotero.Attachments = new function(){
 		
 		var libraryID = options.libraryID;
 		var document = options.document;
+		var browser = options.browser;
 		var parentItemID = options.parentItemID;
 		var title = options.title;
 		var collections = options.collections;
@@ -873,10 +867,14 @@ Zotero.Attachments = new function(){
 			throw new Error("parentItemID and parentCollectionIDs cannot both be provided");
 		}
 		
-		var url = document.location.href;
-		title = title ? title : document.title;
-		var contentType = document.contentType;
-		if (Zotero.Attachments.isPDFJS(document)) {
+		if (!document && !browser) {
+			throw new Error("Either document or browser must be provided");
+		}
+		
+		var url = document ? document.location.href : browser.currentURI.spec;
+		title = title ? title : (document ? document.title : browser.contentTitle);
+		var contentType = document ? document.contentType : browser.documentContentType;
+		if (document ? Zotero.Attachments.isPDFJSDocument(document) : Zotero.Attachments.isPDFJSBrowser(browser)) {
 			contentType = "application/pdf";
 		}
 		
@@ -900,11 +898,11 @@ Zotero.Attachments = new function(){
 			
 			if ((contentType === 'text/html' || contentType === 'application/xhtml+xml')
 					// Documents from XHR don't work here
-					&& Zotero.Translate.DOMWrapper.unwrap(document) instanceof Document) {
-				if (document.defaultView.window) {
+					&& (browser || Zotero.Translate.DOMWrapper.unwrap(document) instanceof Document)) {
+				if (browser) {
 					// If we have a full hidden browser, use SingleFile
-					Zotero.debug('Getting snapshot with snapshotDocument()');
-					let snapshotContent = yield Zotero.Utilities.Internal.snapshotDocument(document);
+					Zotero.debug('Getting snapshot with HiddenBrowser.snapshot()');
+					let snapshotContent = yield HiddenBrowser.snapshot(browser);
 
 					// Write main HTML file to disk
 					yield Zotero.File.putContentsAsync(tmpFile, snapshotContent);

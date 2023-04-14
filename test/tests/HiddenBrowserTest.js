@@ -57,4 +57,25 @@ describe("HiddenBrowser", function() {
 			assert.equal(bodyText, '这是一个测试文件。');
 		});
 	});
+
+	describe("#getDocument()", function () {
+		it("should provide a Document object", async function () {
+			let path = OS.Path.join(getTestDataDirectory().path, 'test-hidden.html');
+			let browser = await HiddenBrowser.create(path);
+			let document = await HiddenBrowser.getDocument(browser);
+			assert.include(document.documentElement.innerHTML, 'test');
+			assert.ok(document.location);
+			assert.strictEqual(document.cookie, '');
+		});
+	});
+
+	describe("#snapshot()", function () {
+		it("should return a SingleFile snapshot", async function () {
+			let path = OS.Path.join(getTestDataDirectory().path, 'test-hidden.html');
+			let browser = await HiddenBrowser.create(path);
+			let snapshot = await HiddenBrowser.snapshot(browser);
+			assert.include(snapshot, 'Page saved with SingleFile');
+			assert.include(snapshot, 'This is hidden text.');
+		});
+	});
 });

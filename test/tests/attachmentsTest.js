@@ -1,14 +1,15 @@
 describe("Zotero.Attachments", function() {
-	var win;
+	var HiddenBrowser;
+	var browser;
 	
-	before(function* () {
-		// Hidden browser, which requires a browser window, needed for charset detection
-		// (until we figure out a better way)
-		win = yield loadBrowserWindow();
+	before(function () {
+		HiddenBrowser = ChromeUtils.import("chrome://zotero/content/HiddenBrowser.jsm").HiddenBrowser;
 	});
-	after(function () {
-		if (win) {
-			win.close();
+	
+	afterEach(function () {
+		if (browser) {
+			HiddenBrowser.destroy(browser);
+			browser = null;
 		}
 	});
 	
@@ -305,15 +306,12 @@ describe("Zotero.Attachments", function() {
 			var item = yield createDataObject('item');
 			
 			var uri = OS.Path.join(getTestDataDirectory().path, "snapshot", "index.html");
-			var deferred = Zotero.Promise.defer();
-			win.addEventListener('pageshow', () => deferred.resolve());
-			win.loadURI(uri);
-			yield deferred.promise;
+			browser = yield HiddenBrowser.create(uri);
 			
 			var file = getTestDataDirectory();
 			file.append('test.png');
 			var attachment = yield Zotero.Attachments.linkFromDocument({
-				document: win.content.document,
+				document: yield HiddenBrowser.getDocument(browser),
 				parentItemID: item.id
 			});
 			
@@ -358,13 +356,9 @@ describe("Zotero.Attachments", function() {
 			var uri = OS.Path.join(getTestDataDirectory().path, "snapshot");
 			httpd.registerDirectory("/" + prefix + "/", new FileUtils.File(uri));
 			
-			var deferred = Zotero.Promise.defer();
-			win.addEventListener('pageshow', () => deferred.resolve());
-			win.loadURI(testServerPath + "/index.html");
-			await deferred.promise;
-			
+			browser = await HiddenBrowser.create(testServerPath + "/index.html");
 			var attachment = await Zotero.Attachments.importFromDocument({
-				document: win.content.document,
+				browser,
 				parentItemID: item.id
 			});
 			
@@ -408,13 +402,9 @@ describe("Zotero.Attachments", function() {
 				}
 			);
 
-			var deferred = Zotero.Promise.defer();
-			win.addEventListener('pageshow', () => deferred.resolve());
-			win.loadURI(testServerPath + "/index.html");
-			await deferred.promise;
-
+			browser = await HiddenBrowser.create(testServerPath + "/index.html");
 			var attachment = await Zotero.Attachments.importFromDocument({
-				document: win.content.document,
+				browser,
 				parentItemID: item.id
 			});
 
@@ -459,13 +449,9 @@ describe("Zotero.Attachments", function() {
 				}
 			);
 
-			var deferred = Zotero.Promise.defer();
-			win.addEventListener('pageshow', () => deferred.resolve());
-			win.loadURI(testServerPath + "/index.html");
-			await deferred.promise;
-
+			browser = await HiddenBrowser.create(testServerPath + "/index.html");
 			var attachment = await Zotero.Attachments.importFromDocument({
-				document: win.content.document,
+				browser,
 				parentItemID: item.id
 			});
 
@@ -509,13 +495,9 @@ describe("Zotero.Attachments", function() {
 				}
 			);
 
-			let deferred = Zotero.Promise.defer();
-			win.addEventListener('pageshow', () => deferred.resolve());
-			win.loadURI(testServerPath + "/index.html");
-			await deferred.promise;
-
+			browser = await HiddenBrowser.create(testServerPath + "/index.html");
 			let attachment = await Zotero.Attachments.importFromDocument({
-				document: win.content.document,
+				browser,
 				parentItemID: item.id
 			});
 

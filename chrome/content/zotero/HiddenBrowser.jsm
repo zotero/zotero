@@ -43,6 +43,12 @@ ChromeUtils.registerWindowActor("PageData", {
 	}
 });
 
+ChromeUtils.registerWindowActor("SingleFile", {
+	child: {
+		moduleURI: "chrome://zotero/content/actors/SingleFileChild.jsm"
+	}
+});
+
 const progressListeners = new Set();
 const browserFrameMap = new WeakMap();
 
@@ -182,7 +188,7 @@ const HiddenBrowser = {
 	
 	/**
 	 * @param {Browser} browser
-	 * @param {String[]} props - 'characterSet', 'title', 'bodyText'
+	 * @param {String[]} props - 'characterSet', 'title', 'bodyText', 'documentHTML', 'cookie', 'channelInfo'
 	 */
 	async getPageData(browser, props) {
 		var actor = browser.browsingContext.currentWindowGlobal.getActor("PageData");
@@ -192,7 +198,34 @@ const HiddenBrowser = {
 		}
 		return data;
 	},
-	
+
+	/**
+	 * @param {Browser} browser
+	 * @returns {Promise<Document>}
+	 */
+	async getDocument(browser) {
+		let { documentHTML, cookie } = await this.getPageData(browser, ['documentHTML', 'cookie']);
+		let doc = new DOMParser().parseFromString(documentHTML, 'text/html');
+		let docWithLocation = Zotero.HTTP.wrapDocument(doc, browser.currentURI);
+		return new Proxy(docWithLocation, {
+			get(obj, prop) {
+				if (prop === 'cookie') {
+					return cookie;
+				}
+				return obj[prop];
+			}
+		});
+	},
+
+	/**
+	 * @param {Browser} browser
+	 * @returns {Promise<String>}
+	 */
+	snapshot(browser) {
+		let actor = browser.browsingContext.currentWindowGlobal.getActor("SingleFile");
+		return actor.sendQuery('snapshot');
+	},
+
 	destroy(browser) {
 		var frame = browserFrameMap.get(browser);
 		if (frame) {

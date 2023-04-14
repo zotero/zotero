@@ -930,6 +930,8 @@ Zotero.Server.Connector.SaveSingleFile.prototype = {
 	 * Save SingleFile snapshot to pending attachments
 	 */
 	init: async function (requestData) {
+		const { HiddenBrowser } = ChromeUtils.import('chrome://zotero/content/HiddenBrowser.jsm');
+
 		// Retrieve payload
 		let data = requestData.data;
 
@@ -982,27 +984,19 @@ Zotero.Server.Connector.SaveSingleFile.prototype = {
 
 			let url = session.pendingAttachments[0][1].url;
 
-			snapshotContent = await new Zotero.Promise(function (resolve, reject) {
-				var browser = Zotero.HTTP.loadDocuments(
-					url,
-					Zotero.Promise.coroutine(function* () {
-						try {
-							resolve(yield Zotero.Utilities.Internal.snapshotDocument(browser.contentDocument));
-						}
-						catch (e) {
-							Zotero.logError(e);
-							reject(e);
-						}
-						finally {
-							Zotero.Browser.deleteHiddenBrowser(browser);
-						}
-					}),
-					undefined,
-					undefined,
-					true,
-					cookieSandbox
-				);
+			let browser = await HiddenBrowser.create(url, {
+				requireSuccessfulStatus: true,
+				docShell: {
+					allowImages: true
+				},
+				cookieSandbox,
 			});
+			try {
+				snapshotContent = await HiddenBrowser.snapshot(browser);
+			}
+			finally {
+				HiddenBrowser.destroy(browser);
+			}
 		}
 		else {
 			snapshotContent = data.snapshotContent;
