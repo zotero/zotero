@@ -55,7 +55,7 @@ describe("Advanced Search", function () {
 			zp.openAdvancedSearchWindow();
 			searchWin = yield promise;
 			searchBox = searchWin.document.getElementById('zotero-search-box');
-			conditions = searchBox.id('conditions');
+			conditions = searchBox.querySelector('#conditions');
 		});
 		
 		after(function () {
@@ -77,8 +77,8 @@ describe("Advanced Search", function () {
 				searchBox.search = s;
 				
 				var searchCondition = conditions.firstChild;
-				var conditionsMenu = searchCondition.id('conditionsmenu');
-				var valueMenu = searchCondition.id('valuemenu');
+				var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
+				var valueMenu = searchCondition.querySelector('#valuemenu');
 				
 				assert.isTrue(valueMenu.hidden);
 				// Select 'Collection' condition
@@ -117,8 +117,8 @@ describe("Advanced Search", function () {
 				searchBox.search = s;
 				
 				var searchCondition = conditions.firstChild;
-				var conditionsMenu = searchCondition.id('conditionsmenu');
-				var valueMenu = searchCondition.id('valuemenu');
+				var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
+				var valueMenu = searchCondition.querySelector('#valuemenu');
 				
 				assert.equal(conditionsMenu.selectedItem.value, 'collection');
 				assert.isFalse(valueMenu.hidden);
@@ -136,8 +136,8 @@ describe("Advanced Search", function () {
 				searchBox.search = s;
 				
 				var searchCondition = conditions.firstChild;
-				var conditionsMenu = searchCondition.id('conditionsmenu');
-				var valueMenu = searchCondition.id('valuemenu');
+				var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
+				var valueMenu = searchCondition.querySelector('#valuemenu');
 				
 				// Select 'Collection' condition
 				for (let i = 0; i < conditionsMenu.itemCount; i++) {
@@ -178,8 +178,8 @@ describe("Advanced Search", function () {
 				searchBox.search = s;
 				
 				var searchCondition = conditions.firstChild;
-				var conditionsMenu = searchCondition.id('conditionsmenu');
-				var valueMenu = searchCondition.id('valuemenu');
+				var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
+				var valueMenu = searchCondition.querySelector('#valuemenu');
 				
 				// Select 'Collection' condition
 				for (let i = 0; i < conditionsMenu.itemCount; i++) {
@@ -209,7 +209,7 @@ describe("Advanced Search", function () {
 				}
 				
 				var values = [];
-				valueMenu = searchCondition.id('valuemenu')
+				valueMenu = searchCondition.querySelector('#valuemenu')
 				assert.equal(valueMenu.value, "C" + collection2.key);
 				for (let i = 0; i < valueMenu.itemCount; i++) {
 					let menuitem = valueMenu.getItemAtIndex(i);
@@ -228,7 +228,7 @@ describe("Advanced Search", function () {
 		describe("Saved Search", function () {
 			it("shouldn't appear", function* () {
 				var searchCondition = conditions.firstChild;
-				var conditionsMenu = searchCondition.id('conditionsmenu');
+				var conditionsMenu = searchCondition.querySelector('#conditionsmenu');
 				
 				// Make sure "Saved Search" isn't present
 				for (let i = 0; i < conditionsMenu.itemCount; i++) {
