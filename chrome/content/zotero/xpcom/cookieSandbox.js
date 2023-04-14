@@ -336,8 +336,7 @@ Zotero.CookieSandbox.Observer = new function() {
 			} else {
 				// try the browser
 				try {
-					browser = notificationCallbacks.getInterface(Ci.nsIWebNavigation)
-						.QueryInterface(Ci.nsIDocShell).chromeEventHandler;
+					browser = notificationCallbacks.getInterface(Ci.nsILoadContext).topFrameElement;
 				} catch(e) {}
 				if(browser) {
 					tested = true;
