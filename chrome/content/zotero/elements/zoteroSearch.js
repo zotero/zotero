@@ -562,7 +562,7 @@
 				valueMenu.value = this.value;
 			}
 
-			valueMenu.querySelector('#label-box > image').style.maxHeight = '16px';
+			valueMenu.shadowRoot.querySelector('#label-box > image').style.maxHeight = '16px';
 		}
 
 		initWithParentAndCondition(parent, condition) {
