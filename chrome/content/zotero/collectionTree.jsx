@@ -642,7 +642,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			return;
 		}
 		if (type == 'feed' && (action == 'unreadCountUpdated' || action == 'statusChanged')) {
-			this.tree.invalidate();
+			let feedRow = this.getRowIndexByID("L" + ids[0]);
+			if (feedRow !== false) {
+				this.tree.invalidateRow(feedRow);
+			}
 			return;
 		}
 		
@@ -747,7 +750,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					// Invalidate parent in case it's become non-empty
 					let parentRow = this.getRowIndexByID("C" + collection.parentID);
 					if (parentRow !== false) {
-						this._treebox.invalidateRow(parentRow);
+						this.tree.invalidateRow(parentRow);
 					}
 				}
 				break;
@@ -770,6 +773,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 						await this.selectByID(currentTreeRow.id);
 					}
 				}
+				break;
+				
+			case 'feed':
 				break;
 			
 			default:
