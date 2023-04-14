@@ -51,7 +51,12 @@ const browserFrameMap = new WeakMap();
  **/
 const HiddenBrowser = {
 	/**
-	 * @param {String) source - HTTP URL, file: URL, or file path
+	 * @param {String} source - HTTP URL, file: URL, or file path
+	 * @param {Object} options
+	 * @param {Boolean} [options.allowJavaScript]
+	 * @param {Object} [options.docShell] Fields to set on Browser.docShell
+	 * @param {Boolean} [options.requireSuccessfulStatus]
+	 * @param {Zotero.CookieSandbox} [options.cookieSandbox]
 	 */
 	async create(source, options = {}) {
 		let url;
@@ -69,6 +74,9 @@ const HiddenBrowser = {
 		var windowlessBrowser = await frame.get();
 		windowlessBrowser.browsingContext.allowJavascript = options.allowJavaScript !== false;
 		windowlessBrowser.docShell.allowImages = false;
+		if (options.docShell) {
+			Object.assign(windowlessBrowser.docShell, options.docShell);
+		}
 		var doc = windowlessBrowser.document;
 		var browser = doc.createXULElement("browser");
 		browser.setAttribute("type", "content");
@@ -77,7 +85,22 @@ const HiddenBrowser = {
 		browser.setAttribute("disableglobalhistory", "true");
 		doc.documentElement.appendChild(browser);
 		
+		if (options.cookieSandbox) {
+			options.cookieSandbox.attachToBrowser(browser);
+		}
+		
 		browserFrameMap.set(browser, frame);
+		
+		if (Zotero.Debug.enabled) {
+			let weakBrowser = new WeakRef(browser);
+			setTimeout(() => {
+				let browser = weakBrowser.deref();
+				if (browser && browserFrameMap.has(browser)) {
+					Zotero.debug('Browser object still alive after 60 seconds - memory leak?');
+					Zotero.debug('Viewing URI ' + browser.currentURI?.spec)
+				}
+			}, 1000 * 60);
+		}
 		
 		// Next bit adapted from Mozilla's HeadlessShell.jsm
 		const principal = Services.scriptSecurityManager.getSystemPrincipal();
@@ -137,6 +160,21 @@ const HiddenBrowser = {
 		catch (e) {
 			Zotero.logError(e);
 			return false;
+		}
+		
+		if (options.requireSuccessfulStatus) {
+			let { channelInfo } = await this.getPageData(browser, ['channelInfo']);
+			if (channelInfo && (channelInfo.responseStatus < 200 || channelInfo.responseStatus >= 400)) {
+				let response = `${channelInfo.responseStatus} ${channelInfo.responseStatusText}`;
+				Zotero.debug(`HiddenBrowser.create: ${url} failed with ${response}`, 2);
+				throw new Zotero.HTTP.UnexpectedStatusException(
+					{
+						status: channelInfo.responseStatus
+					},
+					url,
+					`Invalid response ${response} for ${url}`
+				);
+			}
 		}
 		
 		return browser;

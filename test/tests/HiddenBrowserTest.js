@@ -3,6 +3,27 @@ describe("HiddenBrowser", function() {
 		"chrome://zotero/content/HiddenBrowser.jsm"
 	);
 	
+	describe("#create()", function () {
+		var httpd;
+		var port = 16213;
+		var baseURL = `http://127.0.0.1:${port}/`;
+
+		before(function () {
+			Cu.import("resource://zotero-unit/httpd.js");
+			httpd = new HttpServer();
+			httpd.start(port);
+		});
+
+		after(async function () {
+			await new Promise(resolve => httpd.stop(resolve));
+		});
+
+		it("should fail on non-2xx response with requireSuccessfulStatus", async function () {
+			let e = await getPromiseError(HiddenBrowser.create(baseURL + 'nonexistent', { requireSuccessfulStatus: true }));
+			assert.instanceOf(e, Zotero.HTTP.UnexpectedStatusException);
+		});
+	});
+	
 	describe("#getPageData()", function () {
 		it("should handle local UTF-8 HTML file", async function () {
 			var path = OS.Path.join(getTestDataDirectory().path, 'test-hidden.html');
