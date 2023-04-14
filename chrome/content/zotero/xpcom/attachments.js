@@ -833,11 +833,7 @@ Zotero.Attachments = new function(){
 			saveOptions,
 		});
 		
-		if (Zotero.Fulltext.isCachedMIMEType(contentType)) {
-			// No file, so no point running the PDF indexer
-			//Zotero.Fulltext.indexItems([itemID]);
-		}
-		else if (Zotero.MIME.isTextType(document.contentType)) {
+		if (Zotero.MIME.isTextType(document.contentType)) {
 			yield Zotero.Fulltext.indexDocument(document, item.id);
 		}
 		
