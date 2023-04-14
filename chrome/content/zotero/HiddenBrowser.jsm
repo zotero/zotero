@@ -60,7 +60,7 @@ const HiddenBrowser = {
 	 */
 	async create(source, options = {}) {
 		let url;
-		if (/^(file|https?):/.test(source)) {
+		if (/^(file|https?|chrome|resource):/.test(source)) {
 			url = source;
 		}
 		// Convert string path to file: URL
@@ -198,7 +198,7 @@ const HiddenBrowser = {
 		if (frame) {
 			frame.destroy();
 			Zotero.debug("Deleted hidden browser");
-			browserFrameMap.delete(frame);
+			browserFrameMap.delete(browser);
 		}
 	}
 };
