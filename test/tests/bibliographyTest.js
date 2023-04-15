@@ -12,7 +12,7 @@ describe("Create Bibliography Dialog", function () {
 		win.close();
 	});
 	
-	it("should perform a search", async function () {
+	it("should open the Cite prefpane when Manage Styles… is clicked", async function () {
 		await Zotero.Styles.init();
 		var item = await createDataObject('item');
 		
@@ -20,16 +20,13 @@ describe("Create Bibliography Dialog", function () {
 		var called = false;
 		waitForWindow("chrome://zotero/content/bibliography.xhtml", function (dialog) {
 			waitForWindow("chrome://zotero/content/preferences/preferences.xhtml", function (window) {
-				// Wait for pane switch
+				// Wait for switch to Cite pane
 				(async function () {
 					do {
 						Zotero.debug("Checking for pane");
 						await Zotero.Promise.delay(5);
 					}
-					while (window.document.documentElement.currentPane.id != 'zotero-prefpane-cite');
-					let pane = window.document.documentElement.currentPane;
-					assert.equal(pane.getElementsByTagName('tabbox')[0].selectedTab.id, 'styles-tab');
-					assert.equal(pane.getElementsByTagName('tabbox')[0].selectedPanel.id, 'styles');
+					while (!window.document.querySelector('[value=zotero-prefpane-cite]').selected);
 					called = true;
 					window.close();
 					deferred.resolve();
