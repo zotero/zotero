@@ -143,13 +143,7 @@ cp -R $PDF_TOOLS_CACHE_DIR $PDF_TOOLS_DIR
 touch "$PROFILE/prefs.js"
 cat <<EOF >> "$PROFILE/prefs.js"
 user_pref("app.update.enabled", false);
-user_pref("extensions.autoDisableScopes", 0);
-user_pref("browser.dom.window.dump.enabled", true);
-user_pref("browser.tabs.remote.autostart", false);
-user_pref("browser.tabs.remote.autostart.2", false);
-user_pref("browser.uitour.enabled", false);
-user_pref("browser.shell.checkDefaultBrowser", false);
-user_pref("dom.max_chrome_script_run_time", 0);
+//user_pref("dom.max_chrome_script_run_time", 0);
 // It would be better to leave this on and handle it in Sinon's FakeXMLHttpRequest
 user_pref("extensions.zotero.sync.server.compressData", false);
 user_pref("extensions.zotero.automaticScraperUpdates", false);
@@ -163,14 +157,10 @@ user_pref("extensions.zotero.reportTranslationFailure", false);
 user_pref("extensions.zotero.httpServer.enabled", true);
 user_pref("extensions.zotero.backup.numBackups", 0);
 user_pref("extensions.zotero.sync.autoSync", false);
-user_pref("extensions.legacy.enabled", true);
-user_pref("xpinstall.signatures.required", false);
-user_pref("xpinstall.whitelist.required", false);
-user_pref("datareporting.healthreport.uploadEnabled", false);
-user_pref("datareporting.healthreport.service.enabled", false);
-user_pref("datareporting.healthreport.service.firstRun", false);
-user_pref("datareporting.policy.dataSubmissionEnabled", false);
-user_pref("datareporting.policy.dataSubmissionPolicyBypassNotification", true);
+user_pref("extensions.zoteroMacWordIntegration.installed", true);
+user_pref("extensions.zoteroMacWordIntegration.skipInstallation", true);
+user_pref("extensions.zoteroWinWordIntegration.skipInstallation", true);
+user_pref("extensions.zoteroOpenOfficeIntegration.skipInstallation", true);
 EOF
 
 # -v flag on Windows makes Firefox process hang
