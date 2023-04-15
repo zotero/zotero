@@ -1221,10 +1221,33 @@ describe("Zotero.CollectionTree", function() {
 
 
 		describe("with feed items", function () {
-			it('should add a translated feed item recovered from an URL', function* (){
+			Components.utils.import("resource://zotero-unit/httpd.js");
+			
+			const httpdPort = 16214;
+			var httpd;
+			
+			before(async function () {
+				httpd = new HttpServer();
+				httpd.start(httpdPort);
+			});
+			
+			after(async function () {
+				await new Promise(resolve => httpd.stop(() => resolve));
+			});
+			
+			it("should add a translated feed item retrieved from a URL", function* () {
+				// Serve the feed entry webpage via localhost
+				const urlPath = "/journalArticle-single.html";
+				const url = `http://localhost:${httpdPort}` + urlPath;
+				httpd.registerFile(
+					urlPath,
+					Zotero.File.pathToFile(OS.Path.join(
+						getTestDataDirectory().path, 'metadata', 'journalArticle-single.html'
+					))
+				);
+				
 				var feed = yield createFeed();
 				var collection = yield createDataObject('collection', false, { skipSelect: true });
-				var url = getTestDataUrl('metadata/journalArticle-single.html');
 				var feedItem = yield createDataObject('feedItem', {libraryID: feed.libraryID}, { skipSelect: true });
 				feedItem.setField('url', url);
 				yield feedItem.saveTx();
