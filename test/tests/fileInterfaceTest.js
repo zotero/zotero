@@ -66,10 +66,10 @@ describe("Zotero_File_Interface", function() {
 		var rdfFile = OS.Path.join(tmpDir, 'test.rdf');
 		yield OS.File.copy(OS.Path.join(getTestDataDirectory().path, 'book_and_snapshot.rdf'), rdfFile);
 		yield OS.File.makeDir(OS.Path.join(tmpDir, 'files'));
-		yield OS.File.makeDir(OS.Path.join(tmpDir, 'files', 2));
+		yield OS.File.makeDir(OS.Path.join(tmpDir, 'files', '2'));
 		yield OS.File.copy(
 			OS.Path.join(getTestDataDirectory().path, 'test.html'),
-			OS.Path.join(tmpDir, 'files', 2, 'test.html')
+			OS.Path.join(tmpDir, 'files', '2', 'test.html')
 		);
 		
 		var promise = waitForItemEvent('add');
