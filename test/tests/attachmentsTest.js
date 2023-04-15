@@ -357,6 +357,7 @@ describe("Zotero.Attachments", function() {
 			httpd.registerDirectory("/" + prefix + "/", new FileUtils.File(uri));
 			
 			browser = await HiddenBrowser.create(testServerPath + "/index.html");
+			Zotero.FullText.indexNextInTest();
 			var attachment = await Zotero.Attachments.importFromDocument({
 				browser,
 				parentItemID: item.id
@@ -528,6 +529,7 @@ describe("Zotero.Attachments", function() {
 			
 			let snapshotContent = await Zotero.File.getContentsAsync(content);
 			
+			Zotero.FullText.indexNextInTest();
 			let attachment = await Zotero.Attachments.importFromSnapshotContent({
 				parentItemID: item.id,
 				url: "https://example.com/test.html",

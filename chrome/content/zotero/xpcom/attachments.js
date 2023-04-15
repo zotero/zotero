@@ -719,7 +719,7 @@ Zotero.Attachments = new function(){
 			await Zotero.Notifier.commit(notifierQueue);
 		}
 		
-		Zotero.Fulltext.queueItem(attachmentItem);
+		await Zotero.FullText.queueItem(attachmentItem);
 		
 		return attachmentItem;
 	};
@@ -952,11 +952,11 @@ Zotero.Attachments = new function(){
 				attachmentItem.attachmentPath = 'storage:' + fileName;
 				var itemID = await attachmentItem.save(saveOptions);
 				
-				Zotero.Fulltext.queueItem(attachmentItem);
-				
 				destDir = this.getStorageDirectory(attachmentItem).path;
 				await OS.File.move(tmpDir, destDir);
 			}.bind(this));
+			
+			yield Zotero.FullText.queueItem(attachmentItem);
 		}
 		catch (e) {
 			Zotero.debug(e, 1);
@@ -1047,10 +1047,10 @@ Zotero.Attachments = new function(){
 				saveOptions
 			});
 
-			Zotero.Fulltext.queueItem(attachmentItem);
-
 			destDirectory = this.getStorageDirectory(attachmentItem).path;
 			await OS.File.move(tmpDirectory, destDirectory);
+			
+			await Zotero.FullText.queueItem(attachmentItem);
 		}
 		catch (e) {
 			Zotero.debug(e, 1);

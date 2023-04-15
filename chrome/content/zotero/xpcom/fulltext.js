@@ -549,15 +549,27 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	var _nextIndexTime;
 	var _indexDelay = 5000;
 	var _indexInterval = 500;
-	this.queueItem = function (item) {
-		// Don't index files in the background during tests
-		if (Zotero.test) return;
+	var _indexNextInTest = false;
+	
+	this.queueItem = async function (item) {
+		// Index files immediately during tests that enable it
+		if (Zotero.test) {
+			if (_indexNextInTest) {
+				_indexNextInTest = false;
+				await this.indexItems([item.id]);
+			}
+			return;
+		}
 		
 		_queue.push(item.id);
 		_nextIndexTime = Date.now() + _indexDelay;
 		setTimeout(() => {
 			_processNextItem()
 		}, _indexDelay);
+	};
+	
+	this.indexNextInTest = function () {
+		_indexNextInTest = true;
 	};
 	
 	async function _processNextItem() {
