@@ -640,9 +640,15 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			return;
 		}
 		if (type == 'feed' && (action == 'unreadCountUpdated' || action == 'statusChanged')) {
+			// Refresh the feed
 			let feedRow = this.getRowIndexByID("L" + ids[0]);
 			if (feedRow !== false) {
 				this.tree.invalidateRow(feedRow);
+			}
+			// Refresh the Feeds row
+			let feedsRow = this.getRowIndexByID("F1");
+			if (feedsRow !== false) {
+				this.tree.invalidateRow(feedsRow);
 			}
 			return;
 		}
