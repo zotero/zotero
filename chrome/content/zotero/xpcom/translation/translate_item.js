@@ -41,6 +41,7 @@
 Zotero.Translate.ItemSaver = function(options) {
 	// initialize constants
 	this._IDMap = {};
+	this._seeAlsoMap = {};
 	
 	// determine library ID
 	if(!options.libraryID) {
@@ -96,6 +97,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		var jsonByItem = new Map();
 		
 		await Zotero.DB.executeTransaction(async function () {
+			var seeAlsoCandidates = [];
 			for (let jsonItem of jsonItems) {
 				jsonItem = Object.assign({}, jsonItem);
 				
@@ -179,14 +181,19 @@ Zotero.Translate.ItemSaver.prototype = {
 						}
 						jsonItem.attachments = attachmentsToSave;
 					}
-					
-					// handle see also
-					this._handleRelated(jsonItem, item);
 				}
-				
 				// Add to new item list
 				items.push(item);
 				jsonByItem.set(item, jsonItem);
+				
+				// Add to list if using seeAlso
+				if(this._handleMappedId(jsonItem, item)) {
+					seeAlsoCandidates.push(item);
+				}
+			}
+			for (let item of seeAlsoCandidates) {
+				let jsonItem = jsonByItem.get(item);
+				await this._handleRelated(jsonItem, item);
 			}
 		}.bind(this));
 
@@ -553,7 +560,7 @@ Zotero.Translate.ItemSaver.prototype = {
 			if (attachment.tags) newAttachment.setTags(this._cleanTags(attachment.tags));
 			if (attachment.note) newAttachment.setNote(attachment.note);
 			yield newAttachment.saveTx(this._saveOptions);
-			this._handleRelated(attachment, newAttachment);
+			this._handleMappedId(attachment, newAttachment);
 
 			Zotero.debug("Translate: Created attachment; id is " + newAttachment.id, 4);
 			attachmentCallback(attachment, 100);
@@ -951,6 +958,7 @@ Zotero.Translate.ItemSaver.prototype = {
 		}
 		yield myNote.save(this._saveOptions);
 		if (typeof note == "object") {
+			this._handleMappedId(note, myNote);
 			this._handleRelated(note, myNote);
 		}
 		return myNote;
@@ -990,22 +998,42 @@ Zotero.Translate.ItemSaver.prototype = {
 		return newTags;
 	},
 	
-	"_handleRelated":function(item, newItem) {
+	"_handleMappedId":function(item, newItem) {
 		// add to ID map
 		if(item.itemID || item.id) {
 			this._IDMap[item.itemID || item.id] = newItem.id;
+			return true;
 		}
-
-		// // add see alsos
-		// if(item.seeAlso) {
-		// 	for(var i=0; i<item.seeAlso.length; i++) {
-		// 		var seeAlso = item.seeAlso[i];
-		// 		if(this._IDMap[seeAlso]) {
-		// 			newItem.addRelatedItem(this._IDMap[seeAlso]);
-		// 		}
-		// 	}
-		// 	newItem.save();
-		// }
+		return false;
+	},
+	
+	"_handleRelated": async function(jsonItem, item) {
+		let jsonItemID = (jsonItem.itemID || jsonItem.id);
+		if (!jsonItem.seeAlso) jsonItem.seeAlso = [];
+		if (this._seeAlsoMap[jsonItemID]) {
+			for (var postponedID of this._seeAlsoMap[jsonItemID]) {
+				jsonItem.seeAlso.push(postponedID);
+			}
+		}
+		for(let i=0; i<jsonItem.seeAlso.length; i++) {
+			let seeAlso = jsonItem.seeAlso[i];
+			if (seeAlso == jsonItemID) continue;
+			if(this._IDMap[seeAlso]) {
+				let otherItem = Zotero.Items.get(this._IDMap[seeAlso]);
+				if (otherItem) {
+					item.addRelatedItem(otherItem);
+					otherItem.addRelatedItem(item);
+					await item.save();
+					await otherItem.save();
+				} else {
+					Zotero.debug(`seeAlso partner is invalid`, 1);
+				}
+			} else {
+				Zotero.debug(`seeAlso partner not (yet) seen, postponing`, 1);
+				if (!this._seeAlsoMap[seeAlso]) this._seeAlsoMap[seeAlso] = [];
+				this._seeAlsoMap[seeAlso].push(jsonItemID);
+			}
+		}
 	}
 }
 
