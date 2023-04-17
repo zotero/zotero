@@ -487,6 +487,23 @@ describe("Zotero.CollectionTree", function() {
 			yield promise;
 			assert.isFalse(cv.getRowIndexByID(id))
 		})
+		
+		it("should not reload tree upon feed update", async function () {
+			var feed = await createFeed();
+			await cv.selectLibrary(Zotero.Libraries.userLibraryID);
+			try {
+				var reloadSpy = sinon.spy(cv, 'reload');
+				// A set of notifier calls  when a feed update is running
+				Zotero.debug(feed.id, 2);
+				await Zotero.Notifier.trigger('statusChanged', 'feed', feed.id);
+				await Zotero.Notifier.trigger('modify', 'feed', feed.id);
+				await Zotero.Notifier.trigger('unreadCountUpdated', 'feed', feed.id);
+				await Zotero.Notifier.trigger('statusChanged', 'feed', feed.id);
+				assert.isFalse(reloadSpy.called);
+			} finally {
+				reloadSpy.restore();
+			}
+		});
 	});
 	
 	describe("#selectItem()", function () {
