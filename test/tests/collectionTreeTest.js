@@ -1249,7 +1249,7 @@ describe("Zotero.CollectionTree", function() {
 			});
 			
 			after(async function () {
-				await new Promise(resolve => httpd.stop(() => resolve));
+				await new Promise(resolve => httpd.stop(resolve));
 			});
 			
 			it("should add a translated feed item retrieved from a URL", function* () {
