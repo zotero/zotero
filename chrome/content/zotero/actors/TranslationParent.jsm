@@ -7,8 +7,9 @@ const Zotero = Components.classes['@zotero.org/Zotero;1']
 const TranslationManager = new class {
 	_registeredRemoteTranslates = new Map();
 	
-	add(id) {
+	add(id, remoteTranslate) {
 		this._registeredRemoteTranslates.set(id, {
+			remoteTranslate,
 			translatorProvider: null,
 			handlers: {},
 		});
@@ -37,18 +38,24 @@ const TranslationManager = new class {
 			this._registeredRemoteTranslates.get(id).handlers[name] = [handler];
 		}
 	}
+	
+	removeHandler(id, name, handler) {
+		this._registeredRemoteTranslates.get(id).handlers[name]
+			= this._registeredRemoteTranslates.get(id).handlers[name].filter(h => h !== handler);
+	}
 
 	clearHandlers(id, name) {
 		this._registeredRemoteTranslates.get(id).handlers[name] = null;
 	}
 
 	async runHandler(id, name, ...args) {
+		let remoteTranslate = this._registeredRemoteTranslates.get(id).remoteTranslate;
 		let handlers = this._registeredRemoteTranslates.get(id).handlers[name];
 		let returnValue = null;
 		if (handlers) {
 			for (let handler of handlers) {
 				try {
-					returnValue = await handler(...args);
+					returnValue = await handler(remoteTranslate, ...args);
 				}
 				catch (e) {
 					Zotero.logError(e);

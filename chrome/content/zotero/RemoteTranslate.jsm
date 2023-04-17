@@ -53,8 +53,8 @@ class RemoteTranslate {
 	_wasSuccess = false;
 	
 	constructor() {
-		TranslationManager.add(this._id);
-		TranslationManager.setHandler(this._id, 'done', success => this._wasSuccess = success);
+		TranslationManager.add(this._id, this);
+		TranslationManager.setHandler(this._id, 'done', (_, success) => this._wasSuccess = success);
 	}
 
 	/**
@@ -86,7 +86,23 @@ class RemoteTranslate {
 			this._doneHandlers.push(handler);
 		}
 		else {
-			TranslationManager.setHandler(this._id, name, (...args) => handler(this, ...args));
+			TranslationManager.setHandler(this._id, name, handler);
+		}
+	}
+
+	/**
+	 * Remove a handler added by #setHandler().
+	 *
+	 * @param {String} name
+	 * @param {Function} handler
+	 */
+	removeHandler(name, handler) {
+		// 'done' is triggered from translate()
+		if (name == 'done') {
+			this._doneHandlers = this._doneHandlers.filter(h => h !== handler);
+		}
+		else {
+			TranslationManager.removeHandler(this._id, name, handler);
 		}
 	}
 
@@ -141,10 +157,13 @@ class RemoteTranslate {
 	 */
 	async translate(options = {}) {
 		let actor = this._browser.browsingContext.currentWindowGlobal.getActor("Translation");
-		let items = null;
+		let items = [];
 		try {
-			items = await actor.sendQuery("translate", { translator: this._translator, id: this._id });
+			let jsonItems = await actor.sendQuery("translate", { translator: this._translator, id: this._id });
 			if (options.libraryID !== false) {
+				let itemsLeftToSave = jsonItems.length;
+				let attachmentsInProgress = new Set();
+				let doneHandlersInvoked = false;
 				let itemSaver = new Zotero.Translate.ItemSaver({
 					libraryID: options.libraryID,
 					collections: options.collections,
@@ -154,22 +173,43 @@ class RemoteTranslate {
 					// proxy: unimplemented in the client
 				});
 				
-				// Call itemDone on each completed item
+				let invokeDoneHandlersIfDone = () => {
+					if (itemsLeftToSave || attachmentsInProgress.size || doneHandlersInvoked) {
+						return;
+					}
+					// Call done (saved in #setHandler() above) at the end
+					// The Zotero.Translate instance running in the content process has already tried to call done by now,
+					// but we prevented it from reaching the caller. Now that we've run ItemSaver#saveItems() on this side,
+					// we can pass it through.
+					this._callDoneHandlers(this._wasSuccess);
+					doneHandlersInvoked = true;
+				};
 				let itemsDoneCallback = (jsonItems, dbItems) => {
-					for (let i = 0; i < jsonItems.length; i++) {
+					// Call itemDone on each completed item
+					for (let i = 0; i < dbItems.length; i++) {
 						let jsonItem = jsonItems[i];
 						let dbItem = dbItems[i];
 						TranslationManager.runHandler(this._id, 'itemDone', dbItem, jsonItem);
 					}
+					items.push(...dbItems);
+					itemsLeftToSave -= dbItems.length;
+					invokeDoneHandlersIfDone();
 				};
-				await itemSaver.saveItems(items, () => {}, itemsDoneCallback);
+				let attachmentCallback = (attachment, progress) => {
+					if (progress === 100 || progress === false) {
+						attachmentsInProgress.delete(attachment);
+					}
+					else {
+						attachmentsInProgress.add(attachment);
+					}
+					invokeDoneHandlersIfDone();
+				};
+				
+				await itemSaver.saveItems(jsonItems, attachmentCallback, itemsDoneCallback);
 			}
-			
-			// And call done (saved in #setHandler() above) at the end
-			// The Zotero.Translate instance running in the content process has already tried to call done by now,
-			// but we prevented it from reaching the caller. Now that we've run ItemSaver#saveItems() on this side,
-			// we can pass it through.
-			this._callDoneHandlers(this._wasSuccess);
+			else {
+				items.push(...jsonItems);
+			}
 		}
 		catch (e) {
 			this._callDoneHandlers(false);

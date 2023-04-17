@@ -849,7 +849,7 @@ Zotero.Attachments = new function(){
 	 * @return {Promise<Zotero.Item>} - A promise for the created attachment item
 	 */
 	this.importFromDocument = Zotero.Promise.coroutine(function* (options) {
-		Zotero.debug('Importing attachment from document');
+		Zotero.debug('Importing attachment from ' + (options.document ? 'document' : 'browser'));
 		
 		var libraryID = options.libraryID;
 		var document = options.document;
