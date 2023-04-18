@@ -26,10 +26,10 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Einträge im Papierkorb automatisch löschen nach mehr als">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "Tagen">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.pdfReader "PDF-Reader">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Zeige Tabs als">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Ersteller - Jahr -Titel">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Titel - Ersteller - Jahr">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "Dateiname">
 
 <!ENTITY zotero.preferences.groups "Gruppen">

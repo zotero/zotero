@@ -59,6 +59,12 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "najnovejša različica"
   },
+  "extensionIsDisabled": {
+    "message": "$1 je onemogočen"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 je onemogočen na straneh razširitev"
+  },
   "appConnector": {
     "message": "Konektor $1"
   },
@@ -139,6 +145,18 @@
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
     "message": "Ti citati so postali <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">nepovezani z $1</a>. Morali jih boste morali znova povezati, preden se posodobijo ali pojavijo v vaši bibliografiji."
+  },
+  "copyUnproxiedLink": {
+    "message": "Kopiraj povezavo brez posr. strežnika"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "Kopiraj URL strani brez posr. strežnika"
+  },
+  "reloadViaProxy": {
+    "message": "Ponovno naloži prek posr. strežnika"
+  },
+  "reloadVia": {
+    "message": "Ponovno naloži prek $1"
   },
   "general_saveTo": {
     "message": "Shrani v $1"

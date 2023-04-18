@@ -59,6 +59,12 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "neueste Version"
   },
+  "extensionIsDisabled": {
+    "message": "$1 ist deaktiviert"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 ist auf Erweiterungsseiten deaktiviert."
+  },
   "appConnector": {
     "message": "$1 Erweiterung"
   },
@@ -139,6 +145,18 @@
   },
   "integration_googleDocs_orphanedCitations_disclaimer": {
     "message": "Diese Zitationen wurden <a target=\"_blank\" href=\"https://www.zotero.org/support/kb/google_docs_citations_unlinked\">von $1 getrennt</a>. Sie müssen sie erneut verknüpfen, damit sie aktualisiert werden oder in Ihrem Literaturverzeichnis erscheinen können."
+  },
+  "copyUnproxiedLink": {
+    "message": "Link ohne Proxy kopieren"
+  },
+  "copyUnproxiedPageURL": {
+    "message": "Seiten-URL ohne Proxy kopieren"
+  },
+  "reloadViaProxy": {
+    "message": "Über Proxy neu laden"
+  },
+  "reloadVia": {
+    "message": "Über $1 neu laden"
   },
   "general_saveTo": {
     "message": "Speichern nach $1"
