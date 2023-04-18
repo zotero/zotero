@@ -77,6 +77,8 @@ window.addEventListener("click", function (event) {
 });
 
 function loadURI(uri, options = {}) {
+	// browser.browsingContext.allowJavascript (sic) would seem to do what we want here,
+	// but it has no effect. So we use sandboxFlags instead:
 	if (options.allowJavaScript !== false) {
 		browser.browsingContext.sandboxFlags &= ~SANDBOXED_SCRIPTS;
 	}
