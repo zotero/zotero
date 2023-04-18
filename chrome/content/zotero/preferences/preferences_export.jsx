@@ -370,6 +370,18 @@ Zotero_Preferences.Export = {
 		document.getElementById('quickCopy-edit').disabled = false;
 		document.getElementById('quickCopy-delete').disabled = false;
 	},
+
+	/**
+	 * Enable or disable depending on whether rows are selected
+	 */
+	updateQuickCopySiteButtons: function () {
+		if (this._tree?.selection.count) {
+			this.enableQuickCopySiteButtons();
+		}
+		else {
+			this.disableQuickCopySiteButtons();
+		}
+	},
 	
 	showQuickCopySiteEditor: async function (editExisting) {
 		var index;
@@ -468,13 +480,8 @@ Zotero_Preferences.Export = {
 					Zotero_Preferences.Export.deleteSelectedQuickCopySite();
 				}
 			};
-			var handleSelectionChange = (selection) => {
-				if (selection.count) {
-					Zotero_Preferences.Export.enableQuickCopySiteButtons()
-				}
-				else {
-					Zotero_Preferences.Export.disableQuickCopySiteButtons();
-				}
+			var handleSelectionChange = () => {
+				this.updateQuickCopySiteButtons();
 			};
 			
 			let elem = (
@@ -498,7 +505,10 @@ Zotero_Preferences.Export = {
 			this._tree.invalidate();
 		}
 
-		this.disableQuickCopySiteButtons();
+		if ([...this._tree.selection.selected].some(i => i >= this._rows.length)) {
+			this._tree.selection.clearSelection();
+		}
+		this.updateQuickCopySiteButtons();
 	},
 	
 	
@@ -507,6 +517,7 @@ Zotero_Preferences.Export = {
 		yield Zotero.DB.queryAsync("DELETE FROM settings WHERE setting='quickCopySite' AND key=?", [domainPath]);
 		yield Zotero.QuickCopy.loadSiteSettings();
 		yield this.refreshQuickCopySiteList();
+		this.updateQuickCopySiteButtons();
 	}),
 	
 	
