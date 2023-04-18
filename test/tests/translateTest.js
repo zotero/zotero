@@ -1530,6 +1530,56 @@ describe("Zotero.Translate", function() {
 				});
 				yield Zotero.Promise.all([itemDeferred.promise, attachmentDeferred.promise]);
 			});
+
+			it("should localize attachment titles", async function () {
+				var itemID;
+				var item = loadSampleData('journalArticle');
+				item = item.journalArticle;
+				item.attachments = [
+					{
+						url: 'https://www.example.com/pdf.pdf',
+						mimeType: 'application/pdf',
+						title: 'Fulltext PDF'
+					},
+					{
+						url: 'https://www.example.com/info.html',
+						mimeType: 'text/html',
+						title: 'Example Full Text Snapshot',
+						link: true
+					}
+				];
+				var itemSaver = new Zotero.Translate.ItemSaver({
+					libraryID: Zotero.Libraries.userLibraryID,
+					attachmentMode: Zotero.Translate.ItemSaver.ATTACHMENT_MODE_FILE,
+					localizeAttachmentTitles: true
+				});
+				var itemDeferred = Zotero.Promise.defer();
+				var attachmentDeferred = Zotero.Promise.defer();
+				await itemSaver.saveItems([item], async (attachment, progressPercentage) => {
+					if (progressPercentage != 100) return;
+					try {
+						await itemDeferred.promise;
+						let item = Zotero.Items.get(itemID);
+						let attachment1 = Zotero.Items.get(item.getAttachments()[0]);
+						let attachment2 = Zotero.Items.get(item.getAttachments()[1]);
+						assert.equal(attachment1.getField('title'), Zotero.getString('attachmentTitles.fullTextPDF'));
+						assert.equal(attachment2.getField('title'), Zotero.getString('attachmentTitles.fullTextSnapshot'));
+						attachmentDeferred.resolve();
+					}
+					catch (e) {
+						attachmentDeferred.reject(e);
+					}
+				}).then((items) => {
+					try {
+						itemID = items[0].id;
+						itemDeferred.resolve();
+					}
+					catch (e) {
+						itemDeferred.reject(e);
+					}
+				});
+				await Zotero.Promise.all([itemDeferred.promise, attachmentDeferred.promise]);
+			});
 		});
 	});
 	

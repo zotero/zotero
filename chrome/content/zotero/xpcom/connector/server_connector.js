@@ -850,7 +850,8 @@ Zotero.Server.Connector.SaveItems.prototype = {
 			forceTagType: 1,
 			referrer: data.uri,
 			cookieSandbox,
-			proxy
+			proxy,
+			localizeAttachmentTitles: true
 		});
 		// This is a bit tricky. When saving items, the callback `onTopLevelItemsDone` will
 		// return the HTTP request to the connector. Then it may spend some time fetching
@@ -1064,7 +1065,8 @@ Zotero.Server.Connector.SaveSingleFile.prototype = {
 				forceTagType: 1,
 				referrer: data.uri,
 				cookieSandbox,
-				proxy
+				proxy,
+				localizeAttachmentTitles: true
 			});
 
 			await itemSaver.saveSnapshotAttachments(

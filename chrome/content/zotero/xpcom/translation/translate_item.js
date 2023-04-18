@@ -37,6 +37,7 @@
  *         <li>proxy - A proxy to deproxify item URLs</li>
  *         <li>baseURI - URI to which attachment paths should be relative</li>
  *         <li>saveOptions - Options to pass to DataObject::save() (e.g., skipSelect)</li>
+ *         <li>localizeAttachmentTitles - Whether to localize some attachment titles in user libraries</li>
  */
 Zotero.Translate.ItemSaver = function(options) {
 	// initialize constants
@@ -59,6 +60,7 @@ Zotero.Translate.ItemSaver = function(options) {
 	this._referrer = options.referrer;
 	this._cookieSandbox = options.cookieSandbox;
 	this._proxy = options.proxy;
+	this._localizeAttachmentTitles = !!options.localizeAttachmentTitles;
 	
 	// the URI to which other URIs are assumed to be relative
 	if(typeof options.baseURI === "object" && options.baseURI instanceof Components.interfaces.nsIURI) {
@@ -542,6 +544,11 @@ Zotero.Translate.ItemSaver.prototype = {
 			
 			if (!newAttachment) return false; // attachmentCallback should not have been called in this case
 			
+			if (!newAttachment.library.isGroup && this._localizeAttachmentTitles) {
+				let title = newAttachment.getField('title');
+				newAttachment.setField('title', this._localizeAttachmentTitle(title));
+			}
+			
 			// deproxify url
 			let url = newAttachment.getField('url');
 			if (this._proxy && url) {
@@ -689,6 +696,22 @@ Zotero.Translate.ItemSaver.prototype = {
 		
 		return newItem;
 	}),
+	
+	_localizeAttachmentTitle(title) {
+		if (/\bfull[ -]?text pdf\b/i.test(title)) {
+			title = Zotero.getString('attachmentTitles.fullTextPDF');
+		}
+		else if (/\bfull[ -]?text snapshot\b/i.test(title)) {
+			title = Zotero.getString('attachmentTitles.fullTextSnapshot');
+		}
+		else if (/\bsnapshot\b/i.test(title)) {
+			title = Zotero.getString('attachmentTitles.snapshot');
+		}
+		else if (/\bcatalog\b/i.test(title)) {
+			title = Zotero.getString('attachmentTitles.catalogEntry');
+		}
+		return title;
+	},
 
 	"_parsePathURI":function(path) {
 		try {
