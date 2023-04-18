@@ -1087,9 +1087,16 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	 * Opens a URL in the basic viewer, and optionally run a callback on load
 	 *
 	 * @param {String} uri
-	 * @param {Function} [onLoad] - Function to run once URI is loaded; passed the loaded document
+	 * @param {Object} [options]
+	 * @param {Function} [options.onLoad] - Function to run once URI is loaded; passed the loaded document
+	 * @param {Boolean} [options.allowJavaScript] - Set to false to disable JavaScript
 	 */
-	this.openInViewer = function (uri, onLoad) {
+	this.openInViewer = function (uri, options) {
+		if (options && !options.onLoad && typeof options === 'function') {
+			Zotero.debug("Zotero.openInViewer() now takes an 'options' object for its second parameter -- update your code");
+			options = { onLoad: options };
+		}
+
 		var viewerWins = Services.wm.getEnumerator("zotero:basicViewer");
 		for (let existingWin of viewerWins) {
 			if (existingWin.viewerOriginalURI === uri) {
@@ -1099,12 +1106,17 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		}
 		let ww = Components.classes['@mozilla.org/embedcomp/window-watcher;1']
 			.getService(Components.interfaces.nsIWindowWatcher);
-		let arg = Components.classes["@mozilla.org/supports-string;1"]
-			.createInstance(Components.interfaces.nsISupportsString);
-		arg.data = uri;
+		let arg = {
+			uri,
+			options: {
+				...options,
+				onLoad: undefined
+			}
+		};
+		arg.wrappedJSObject = arg;
 		let win = ww.openWindow(null, "chrome://zotero/content/standalone/basicViewer.xhtml",
 			null, "chrome,dialog=yes,resizable,centerscreen,menubar,scrollbars", arg);
-		if (onLoad) {
+		if (options?.onLoad) {
 			let browser;
 			let func = function () {
 				win.removeEventListener("load", func);
@@ -1117,7 +1129,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			};
 			let innerFunc = function () {
 				browser.removeEventListener("pageshow", innerFunc);
-				onLoad(browser.contentDocument);
+				options.onLoad(browser.contentDocument);
 			};
 			win.addEventListener("load", func);
 		}

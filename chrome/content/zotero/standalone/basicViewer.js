@@ -27,6 +27,8 @@
 	"resource://gre/modules/E10SUtils.jsm"
 );*/
 
+const SANDBOXED_SCRIPTS = 0x80;
+
 var browser;
 
 window.addEventListener("load", /*async */function () {
@@ -51,9 +53,10 @@ window.addEventListener("load", /*async */function () {
 	);*/
 	//browser.docShellIsActive = false;
 
-	// Load URI passed in as nsISupports .data via openWindow()
-	window.viewerOriginalURI = window.arguments[0];
-	loadURI(window.arguments[0]);
+	// Get URI and options passed in via openWindow()
+	let { uri, options } = window.arguments[0].wrappedJSObject;
+	window.viewerOriginalURI = uri;
+	loadURI(uri, options);
 }, false);
 
 window.addEventListener("keypress", function (event) {
@@ -73,7 +76,13 @@ window.addEventListener("click", function (event) {
 	}
 });
 
-function loadURI(uri) {
+function loadURI(uri, options = {}) {
+	if (options.allowJavaScript !== false) {
+		browser.browsingContext.sandboxFlags &= ~SANDBOXED_SCRIPTS;
+	}
+	else {
+		browser.browsingContext.sandboxFlags |= SANDBOXED_SCRIPTS;
+	}
 	browser.loadURI(
 		uri,
 		{

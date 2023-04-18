@@ -850,21 +850,23 @@ ZoteroStandalone.DebugOutput = {
 	
 	
 	view: function () {
-		Zotero.openInViewer("chrome://zotero/content/debugViewer.html", function (doc) {
-			var submitted = false;
-			doc.querySelector('#submit-button').addEventListener('click', function (event) {
-				submitted = true;
-			});
-			doc.querySelector('#clear-button').addEventListener('click', function (event) {
-				Zotero.Debug.clear();
-			});
-			// If output has been submitted, disable logging when window is closed
-			doc.defaultView.addEventListener('unload', function (event) {
-				if (submitted) {
-					Zotero.Debug.setStore(false);
+		Zotero.openInViewer("chrome://zotero/content/debugViewer.html", {
+			onLoad(doc) {
+				var submitted = false;
+				doc.querySelector('#submit-button').addEventListener('click', function (event) {
+					submitted = true;
+				});
+				doc.querySelector('#clear-button').addEventListener('click', function (event) {
 					Zotero.Debug.clear();
-				}
-			});
+				});
+				// If output has been submitted, disable logging when window is closed
+				doc.defaultView.addEventListener('unload', function (event) {
+					if (submitted) {
+						Zotero.Debug.setStore(false);
+						Zotero.Debug.clear();
+					}
+				});
+			}
 		});
 	},
 	
