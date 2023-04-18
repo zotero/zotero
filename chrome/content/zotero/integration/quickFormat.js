@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
-Services.scriptloader.loadSubScript("chrome://zotero/content/elements/guidancePanel.js", this);
+Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
 
 var Zotero_QuickFormat = new function () {
 	const pixelRe = /^([0-9]+)px$/
