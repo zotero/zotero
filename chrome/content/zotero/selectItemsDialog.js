@@ -93,12 +93,12 @@ function doUnload()
 }
 
 var onCollectionSelected = async function () {
+	var collectionTreeRow = collectionsView.getRow(collectionsView.selection.focused);
 	if (!collectionsView.selection.count) return;
 	// Collection not changed
 	if (itemsView && itemsView.collectionTreeRow && itemsView.collectionTreeRow.id == collectionTreeRow.id) {
 		return;
 	}
-	var collectionTreeRow = collectionsView.getRow(collectionsView.selection.focused);
 	collectionTreeRow.setSearch('');
 	Zotero.Prefs.set('lastViewedFolder', collectionTreeRow.id);
 	
