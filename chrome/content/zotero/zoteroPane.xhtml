@@ -537,7 +537,7 @@
 									label="&installConnector.label;"
 									oncommand="ZoteroStandalone.openHelp('connectors');"/>
 							<menuitem id="menu_addons" label="&addons.label;"
-									oncommand="Zotero.openInViewer('chrome://mozapps/content/extensions/aboutaddons.html', ZoteroStandalone.updateAddonsPane)"/>
+									oncommand="Zotero.openInViewer('chrome://mozapps/content/extensions/aboutaddons.html', { onLoad: ZoteroStandalone.updateAddonsPane })"/>
 							<menu id="developer-menu"
 									label="&developer.label;">
 								<menupopup>

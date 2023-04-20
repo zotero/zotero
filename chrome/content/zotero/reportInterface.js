@@ -54,7 +54,7 @@ var Zotero_Report_Interface = new function() {
 		
 		url += '/items' + queryString;
 		
-		Zotero.openInViewer(url);
+		Zotero.openInViewer(url, { allowJavaScript: false });
 	}
 	
 	
@@ -71,6 +71,6 @@ var Zotero_Report_Interface = new function() {
 		
 		var url = 'zotero://report/' + Zotero.API.getLibraryPrefix(libraryID) + '/items'
 			+ '?itemKey=' + items.map(item => item.key).join(',');
-		Zotero.openInViewer(url);
+		Zotero.openInViewer(url, { allowJavaScript: false });
 	}
 }
