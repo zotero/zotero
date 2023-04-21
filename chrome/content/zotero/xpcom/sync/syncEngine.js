@@ -1331,7 +1331,15 @@ Zotero.Sync.Data.Engine.prototype._uploadObjects = Zotero.Promise.coroutine(func
 						skipSyncedUpdate: true,
 						// We want to minimize the times when server writes actually result in local
 						// updates, but when they do, don't update the user-visible timestamp
-						skipDateModifiedUpdate: true
+						skipDateModifiedUpdate: true,
+						// Replace Online Library can reupload annotations created by others in a
+						// group library, and the server could theoretically override a value, so
+						// allow updating local annotations even if they were created by someone
+						// else. There might be other cases where this is necessary, but let's start
+						// with this.
+						skipEditCheck: objectType == 'item'
+							&& this.library.isGroup
+							&& toSave[i].isAnnotation()
 					});
 				}
 				if (this.library.libraryVersion == this.library.storageVersion) {

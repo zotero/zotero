@@ -987,6 +987,11 @@ Zotero.DataObject.prototype._initSave = Zotero.Promise.coroutine(function* (env)
 	
 	env.isNew = !this.id;
 	
+	if (!this.hasChanged()) {
+		Zotero.debug(this._ObjectType + ' ' + this.id + ' has not changed', 4);
+		return false;
+	}
+	
 	if (!env.options.skipEditCheck) {
 		if (!this.isEditable()) {
 			throw new Error("Cannot edit " + this._objectType + " in library "
@@ -997,11 +1002,6 @@ Zotero.DataObject.prototype._initSave = Zotero.Promise.coroutine(function* (env)
 	let targetLib = Zotero.Libraries.get(this.libraryID);
 	if (!targetLib.isChildObjectAllowed(this._objectType)) {
 		throw new Error("Cannot add " + this._objectType + " to a " + targetLib.libraryType + " library");
-	}
-	
-	if (!this.hasChanged()) {
-		Zotero.debug(this._ObjectType + ' ' + this.id + ' has not changed', 4);
-		return false;
 	}
 	
 	// Undo registerObject() on failure
