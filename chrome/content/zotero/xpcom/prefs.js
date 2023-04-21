@@ -22,7 +22,7 @@
 	
 	***** END LICENSE BLOCK *****
 */
-Zotero.Prefs = new function(){
+Zotero.Prefs = new function () {
 	// Privileged methods
 	this.get = get;
 	this.set = set;

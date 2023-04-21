@@ -25,7 +25,7 @@
 
 "use strict";
 
-Zotero.Notifier = new function(){
+Zotero.Notifier = new function () {
 	// Options that apply to an entire event, not a specific object
 	this.EVENT_LEVEL_OPTIONS = ['autoSyncDelay', 'skipAutoSync'];
 	

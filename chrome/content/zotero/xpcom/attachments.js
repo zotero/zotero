@@ -23,7 +23,7 @@
  ***** END LICENSE BLOCK *****
 */
 
-Zotero.Attachments = new function(){
+Zotero.Attachments = new function () {
 	// Keep in sync with Zotero.Schema.integrityCheck() and this.linkModeToName()
 	this.LINK_MODE_IMPORTED_FILE = 0;
 	this.LINK_MODE_IMPORTED_URL = 1;

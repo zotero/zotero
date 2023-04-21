@@ -27,7 +27,7 @@
  * Functions for reading files
  * @namespace
  */
-Zotero.File = new function(){
+Zotero.File = new function () {
 	Components.utils.import("resource://gre/modules/NetUtil.jsm");
 	Components.utils.import("resource://gre/modules/FileUtils.jsm");
 	

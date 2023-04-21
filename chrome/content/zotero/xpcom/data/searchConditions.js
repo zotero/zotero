@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.SearchConditions = new function(){
+Zotero.SearchConditions = new function () {
 	this.get = get;
 	this.getStandardConditions = getStandardConditions;
 	this.hasOperator = hasOperator;

@@ -38,7 +38,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 /*
  * Core functions
  */
- (function(){
+ (function () {
 	// Privileged (public) methods
 	this.getStorageDirectory = getStorageDirectory;
 	this.debug = debug;

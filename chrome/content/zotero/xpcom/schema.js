@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.Schema = new function(){
+Zotero.Schema = new function () {
 	this.dbInitialized = false;
 	this.goToChangeLog = false;
 	

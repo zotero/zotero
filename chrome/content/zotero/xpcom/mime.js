@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.MIME = new function(){
+Zotero.MIME = new function () {
 	this.isTextType = isTextType;
 	this.getPrimaryExtension = getPrimaryExtension;
 	this.sniffForBinary = sniffForBinary;

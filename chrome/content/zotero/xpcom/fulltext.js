@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.Fulltext = Zotero.FullText = new function(){
+Zotero.Fulltext = Zotero.FullText = new function () {
 	this.isCachedMIMEType = isCachedMIMEType;
 	
 	this.__defineGetter__("pdfConverterCacheFile", function () { return '.zotero-ft-cache'; });
