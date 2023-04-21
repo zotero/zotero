@@ -117,10 +117,10 @@ for (let name of ['deleted']) {
 				val = !!val;
 				var oldVal = this._getLatestField(name);
 				if (oldVal == val) {
-					Zotero.debug(Zotero.Utilities.capitalize(name)
-						+ ` state hasn't changed for ${this._objectType} ${this.id}`);
+					Zotero.debug(`Field '${name}' hasn't changed`);
 					return;
 				}
+				Zotero.debug(`Field '${name}' has changed from '${oldVal}' to '${val}'`, 4);
 				this._markFieldChange(name, val);
 			}
 	});
