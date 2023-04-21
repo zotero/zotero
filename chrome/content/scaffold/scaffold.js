@@ -1138,13 +1138,19 @@ var Scaffold = new function () {
 			string = fix2028(Zotero.Utilities.varDump(string));
 		}
 
-		if (output.value) output.value += "\n";
-		output.value += Zotero.Utilities.lpad(date.getHours(), '0', 2)
+		// Put off actually building the log message and appending it to the console until the next animation frame
+		// so as not to slow down translation with repeated layout recalculations triggered by appending text
+		// and accessing scrollHeight
+		// requestAnimationFrame() callbacks are guaranteed to be called in the order they were set
+		requestAnimationFrame(() => {
+			if (output.value) output.value += "\n";
+			output.value += Zotero.Utilities.lpad(date.getHours(), '0', 2)
 				+ ":" + Zotero.Utilities.lpad(date.getMinutes(), '0', 2)
 				+ ":" + Zotero.Utilities.lpad(date.getSeconds(), '0', 2)
 				+ " " + string.replace(/\n/g, "\n         ");
-		// move to end
-		output.inputField.scrollTop = output.inputField.scrollHeight;
+			// move to end
+			output.inputField.scrollTop = output.inputField.scrollHeight;
+		});
 	}
 
 	/*
