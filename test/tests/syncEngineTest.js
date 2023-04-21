@@ -3049,6 +3049,55 @@ describe("Zotero.Sync.Data.Engine", function () {
 		});
 		
 		
+		it("should allow applying remotely saved version to local annotation in group library", async function () {
+			var group = await createGroup({
+				libraryVersion: 5
+			});
+			var libraryID = group.libraryID;
+			({ engine, client, caller } = await setup({ libraryID }));
+			
+			var createdByUserID = 2352512;
+			await Zotero.Users.setName(createdByUserID, 'user');
+			
+			var attachment = await importFileAttachment('test.pdf', { libraryID });
+			attachment.synced = true;
+			await attachment.saveTx();
+			var annotation = await createAnnotation('highlight', attachment);
+			annotation.createdByUserID = createdByUserID;
+			await annotation.saveTx({
+				skipEditCheck: true
+			});
+			var responseJSON = annotation.toResponseJSON();
+			responseJSON.version = 10;
+			responseJSON.data.version = 10;
+			var newComment = 'new comment';
+			responseJSON.data.annotationComment = newComment;
+			
+			let response = {
+				successful: {
+					"0": responseJSON
+				},
+				unchanged: {},
+				failed: {}
+			};
+			setResponse({
+				method: "POST",
+				url: `groups/${group.id}/items`,
+				status: 200,
+				headers: {
+					"Last-Modified-Version": 10
+				},
+				json: response
+			})
+			
+			var result = await engine._startUpload();
+			
+			assert.equal(result, engine.UPLOAD_RESULT_SUCCESS);
+			assert.equal(annotation.version, 10);
+			assert.equal(annotation.annotationComment, newComment);
+		});
+		
+		
 		it("should prompt to reset library on 403 write response and reset on accept", function* () {
 			var group = yield createGroup({
 				libraryVersion: 5
