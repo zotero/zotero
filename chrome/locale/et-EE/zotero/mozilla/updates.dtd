@@ -1,0 +1,80 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY updateWizard.title              "Tarkvara uuendamine">
+
+<!ENTITY checking.title                  "Uuenduste kontrollimine">
+<!ENTITY updateCheck.label               "Uuritakse, kas leidub &brandShortName;i uus versioon...">
+
+<!ENTITY noupdatesfound.title            "Uuendusi ei leitud">
+<!ENTITY noupdatesautoenabled.intro      "Uuendusi ei ole praegu saadaval. &brandShortName; kontrollib uuendusi
+                                          regulaarselt.">
+<!ENTITY noupdatesautodisabled.intro     "Uuendusi ei ole praegu saadaval. Palun kontrolli hiljem uuesti või
+                                          luba &brandShortName;il automaatne uuenduste kontrollimine.">
+
+<!ENTITY  manualUpdate.title              "Uuendamine pole võimalik">
+<!ENTITY  manualUpdate.desc               "Saadaval on soovituslik turvalisuse ja stabiilsuse uuendus, aga sul puuduvad
+                                           süsteemis õigused selle paigaldamiseks. Palun võta ühendust oma süsteemiadministraatoriga
+                                           või proovi uuesti kasutajakontoga, millel on õigused sellesse arvutisse tarkvara paigaldada.">
+<!ENTITY  manualUpdate.space.desc         "Soovituslik turvalisuse ja stabiilsuse uuendus on saadaval, kuid puudub vaba kettaruum
+                                           selle paigaldamiseks.">
+<!ENTITY  manualUpdateGetMsg.label        "&brandShortName;i uusima versiooni saad alati järgnevalt aadressilt:">
+
+<!ENTITY  unsupported.title              "Süsteem pole toetatud">
+<!ENTITY  unsupported.label              "&brandShortName; on iganenud, aga uusim versioon pole sinu süsteemi peal toetatud.
+                                          Palun uuenda oma süsteem uuele versioonile ja proovi siis uuesti.
+                                          Seda teavitust uuesti ei kuvata, kuid rohkem teavet on võimalik leida">
+<!ENTITY  unsupportedLink.label          "siit.">
+
+<!ENTITY clickHere.label                 "Rohkem teavet uuenduse kohta">
+
+<!ENTITY evangelism.desc                 "On tungivalt soovitatav uuendada esimesel võimalusel sellele &brandShortName;i versioonile.">
+
+
+<!ENTITY downloadPage.title              "&brandShortName;i allalaadimine">
+<!ENTITY downloading.intro               "Uuenduse allalaadimine...">
+<!ENTITY connecting.label                "Ühendumine uuenduste serveriga...">
+<!ENTITY verificationFailedText.label    "&brandShortName; ei suutnud tuvastada allalaaditud paiga  terviklikkust, 
+                                          seetõttu laaditakse nüüd alla kogu uuenduse 
+                                          pakett.">
+
+<!ENTITY  viewDetails.tooltip             "Vaata selle uuenduse üksikasju">
+
+<!ENTITY details.link                    "Üksikasjad">
+
+<!ENTITY error.title                     "Uuendamine ebaõnnestus">
+
+<!ENTITY error.label                     "Uuenduse kontrollimisel, allalaadimisel või paigaldamisel esines probleeme.
+                                          &brandShortName;i ei uuendatud, kuna:">
+                                          
+<!ENTITY errorManual.label               "Sa võid &brandShortName;i käsitsi uuendada, laadides alla uusima
+                                          versiooni sellelt lingilt:">
+                                          
+<!ENTITY errorpatching.intro             "Osalist uuendust ei õnnestunud rakendada. &brandShortName; proovib
+                                          alla laadida terve uuenduse.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName;il ei õnnestu uuenduse olemasolu tuvastada. Palun
+                                           kontrolli järgnevalt aadressilt, et kasutusel oleks viimane versioon &brandShortName;ist:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "Miski takistab &brandShortName;il turvalist uuendamist.
+                                           Palun kontrolli järgnevalt aadressilt, et kasutusel oleks viimane versioon &brandShortName;ist:">
+<!ENTITY  errorCertAttrHasUpdate.label    "Miski üritab panna &brandShortName;i nõustuma ebaturvalise
+                                           uuendusega. Palun võta ühendust oma ISPga ja palu abi.">
+
+<!ENTITY finishedPage.title              "Uuendus on paigaldamiseks valmis">
+<!ENTITY finishedPage.text               "Uuendus paigaldatakse järgmisel &brandShortName;i käivitumisel. Sa võid
+                                          taaskäivitada &brandShortName;i kohe või jätkata tööd ning taaskäivitada hiljem.">
+
+<!ENTITY finishedBackgroundPage.text     "&brandShortName;ile on alla laaditud turvalisuse ja stabiilsuse uuendus ning see on
+                                           paigaldamiseks valmis.">
+<!ENTITY finishedBackground.name         "Uuendus:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY finishedBackground.more         "Uuendus paigaldatakse järgmisel &brandShortName;i käivitumisel. Sa võid
+                                          taaskäivitada &brandShortName;i kohe või jätkata tööd ning taaskäivitada hiljem.">
+<!ENTITY finishedBackground.moreElevated "See uuendus nõuab süsteemiadministraatori õigusi. Uuendus paigaldatakse
+                                           järgmisel &brandShortName;i käivitumisel. Sa võid taaskäivitada
+                                           &brandShortName;i kohe, jätkata tööd ning taaskäivitada hiljem, või keelduda sellest
+                                           uuendusest.">
+
+<!ENTITY update.details.label            "Üksikasjad">
+<!ENTITY update.installedOn.label        "Paigaldatud:">
+<!ENTITY update.status.label             "Olek:">

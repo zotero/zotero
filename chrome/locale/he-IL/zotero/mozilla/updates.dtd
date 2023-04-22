@@ -1,0 +1,68 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "עדכוני תוכנה">
+
+<!ENTITY  checking.title                  "בודק אם קיימים עדכונים">
+<!ENTITY  updateCheck.label               "מחפש גרסה חדשה יותר של &brandShortName;…">
+
+<!ENTITY  noupdatesfound.title            "לא נמצאו עדכונים">
+<!ENTITY  noupdatesautoenabled.intro      "אין עדכונים זמינים. &brandShortName; יבדוק מדי פעם אם ישנם עדכונים חדשים.">
+<!ENTITY  noupdatesautodisabled.intro     "אין עדכונים זמינים. בבקשה נסה שוב מאוחר יותר או אפשר את העדכונים האוטומטיים של &brandShortName;.">
+
+<!ENTITY  manualUpdate.title              "לא ניתן לעדכן">
+<!ENTITY  manualUpdate.desc               "עדכון אבטחה ויציבות מומלץ זמין, אבל אין לך את ההרשאות הנדרשות במערכת כדי להתקין אותו. אנא פנה אל מנהל המערכת שלך, או נסה שוב מחשבון שיש לו הרשאות להתקנת תוכנה במחשב זה.">
+<!ENTITY  manualUpdate.space.desc         "                                           עדכון אבטחה ויציבות מומלץ זמין כעת, אבל אין לך מספיק מקום כדי להתקין אותו.">
+<!ENTITY  manualUpdateGetMsg.label        "באפשרותך לקבל תמיד את הגרסה החדשה ביותר של &brandShortName; בכתובת:">
+
+<!ENTITY  unsupported.title               "המערכת אינה נתמכת">
+<!ENTITY  unsupported.label               "&brandShortName; שלך אינו מעודכן אבל הגרסה העדכנית 
+אינה נתמכת במערכת שלך. אנא שדרג את המערכת ואז נסה שנית. 
+הודעה זו לא תוצג שוב אבל אפשר לקרוא">
+<!ENTITY  unsupportedLink.label           "מידע נוסף.">
+
+<!ENTITY  clickHere.label                 "הצג מידע נוסף על עדכון זה">
+
+<!ENTITY  evangelism.desc                 "מומלץ כי תפעיל את עדכון זה עבור &brandShortName; בהקדם האפשרי.">
+
+<!ENTITY  downloadPage.title              "מוריד את &brandShortName;">
+<!ENTITY  downloading.intro               "מוריד את העדכון…">
+<!ENTITY  connecting.label                "מתחבר אל שרת העדכון…">
+<!ENTITY  verificationFailedText.label    "&brandShortName; אינו יכול לאמת את שלמות 
+העדכון שהורד, ולכן הוא מוריד כעת 
+את חבילת העדכון השלמה.">
+
+<!ENTITY  viewDetails.tooltip             "הצג פרטים עבור עדכון זה">
+
+<!ENTITY  details.link                    "פרטים">
+
+<!ENTITY  error.title                     "עדכון נכשל">
+
+<!ENTITY  error.label                     "נמצאו שגיאות בבדיקה, הורדה או התקנה של                 עדכון זה. &brandShortName; אינו יכול להתעדכן משום ש:">
+                                           
+<!ENTITY  errorManual.label               "ביכולתך לעדכן את &brandShortName; ידנית על־ידי ביקור בקישור זה 
+והורדת הגרסה האחרונה:">
+                                           
+<!ENTITY  errorpatching.intro             "אין אפשרות ליישם את העדכון החלקי. &brandShortName; ינסה שוב על־ידי הורדת עדכון שלם.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; לא הצליח לגלות אם יש עדכון זמין. אנא 
+ודא שיש לך את הגרסה העדכנית ביותר של &brandShortName; דרך:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "משהו מונע מ־&brandShortName; לעדכן בצורה מאובטחת.                                           אנא ודא שהורדת את הגרסה העדכנית של &brandShortName; מ־">
+<!ENTITY  errorCertAttrHasUpdate.label    "משהו מנסה להערים על &brandShortName; כדי שיתקבל 
+עדכון המהווה סיכון בטיחותי. אנא צור קשר עם ספק הרשת שלך בבקשת עזרה.">
+
+<!ENTITY  finishedPage.title              "עדכון מוכן להתקנה">
+<!ENTITY  finishedPage.text               "עדכון זה יותקן בהפעלה הבאה של &brandShortName;. תוכל להפעיל מחדש את &brandShortName; כעת, או להמשיך לעבוד ולהפעיל מחדש מאוחר יותר.">
+
+<!ENTITY  finishedBackgroundPage.text     "עדכון אבטחה ויציבות עבור &brandShortName; הורד ומוכן להתקנה.">
+<!ENTITY  finishedBackground.name         "עדכון:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "העדכון יותקן בהפעלה הבאה של &brandShortName;. תוכל להפעיל מחדש את &brandShortName; כעת, או להמשיך לעבוד ולהפעיל מחדש מאוחר יותר.">
+<!ENTITY  finishedBackground.moreElevated "עדכון זה דורש הרשאות מנהל. העדכון
+                                           יותקן בפעם הבאה ש־&brandShortName; יופעל. ניתן להפעיל מחדש
+                                           את &brandShortName; כעת, להמשיך בעבודה ולהפעיל מחדש מאוחר יותר, או לסרב
+                                           לעדכון זה.">
+
+<!ENTITY  update.details.label            "פרטים">
+<!ENTITY  update.installedOn.label        "הותקן בתאריך:">
+<!ENTITY  update.status.label             "מצב:">

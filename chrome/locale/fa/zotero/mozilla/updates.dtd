@@ -1,0 +1,58 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "بروزرسانی نرم‌افزار">
+
+<!ENTITY  checking.title                  "جستجو برای بروزرسانی‌ها">
+<!ENTITY  updateCheck.label               "جست‌وجو به دنبال نسخهٔ جدیدتری از &brandShortName;…">
+
+<!ENTITY  noupdatesfound.title            "هیچ بروزرسانی‌ای پیدا نشد">
+<!ENTITY  noupdatesautoenabled.intro      "هیچ بروزرسانی‌ای موجود نیست. &brandShortName; به طور مرتب به دنبال بروزرسانی‌ها خواهد گشت.">
+<!ENTITY  noupdatesautodisabled.intro     "هیچ بروزرسانی‌ای موجود نیست. لطفاً بعداً دوباره تلاش کنید، و یا جست‌وجوی خودکار بروزرسانی‌های &brandShortName; را فعال سازید.">
+
+<!ENTITY  manualUpdate.title              "قادر به بروزرسانی نبود">
+<!ENTITY  manualUpdate.desc               "یک بروزرسانی امنیتی و پایداری توصیه شده وجود دارد، ولی برای نصب آن، مجوزهای لازم را ندارید. لطفاً با مدیر سیستم خود تماس بگیرید، یا دوباره با یک حساب کاربری که اجازهٔ نصب نرم‌افزار روی این رایانه را دارد تلاش نمایید.">
+<!ENTITY  manualUpdate.space.desc         "یک بروزرسانی مهم امنیتی و پایداری وجود دارد، ولی فضای خالی کافی برای نصب آن ندارید.">
+<!ENTITY  manualUpdateGetMsg.label        "همیشه می‌توانید آخرین نسخهٔ &brandShortName; را در این نشانی دریافت کنید:">
+
+<!ENTITY  unsupported.title               "سیستم پشتبانی نشده">
+<!ENTITY  unsupported.label               "&brandShortName; شما قدیمی شده است، اما آخرین نسخه بر روی سیستم شما پشتیبانی نمی‌شود. لطفا سیستم خود را ارتقا دهید، سپس مجددا تلاش کنید. دیگر این اطلاع‌رسانی را مشاهده نخواهید کرد، اما شما می توانید">
+<!ENTITY  unsupportedLink.label           "اطلاعات بیشتر.">
+
+<!ENTITY  clickHere.label                 "اطلاعات بیشتر در مورد این بروزرسانی">
+
+<!ENTITY  evangelism.desc                 "به شدت توصیه می‌شود که این بروزرسانی از &brandShortName; را هر چه سریع‌تر اعمال نمایید.">
+
+<!ENTITY  downloadPage.title              "در حال بارگیری &brandShortName;">
+<!ENTITY  downloading.intro               "در حال دریافت بروزرسانی…">
+<!ENTITY  connecting.label                "در حال برقراری ارتباط با کارگزار بروزرسانی…">
+<!ENTITY  verificationFailedText.label    "&brandShortName; قادر به تائید درستی بروزرسانی فزاینده‌ای که بارگیری نمود نبود، به همین دلیل در حال بارگیری بستهٔ کامل به‌هنگام‌سازی است.">
+
+<!ENTITY  viewDetails.tooltip             "مشاهدهٔ جزئیات این بروزرسانی">
+
+<!ENTITY  details.link                    "جزئیات">
+
+<!ENTITY  error.title                     "بروزرسانی با مشکل مواجه شد">
+
+<!ENTITY  error.label                     "مشکلاتی در بررسی، بارگیری، و یا نصب این بروزرسانی وجود داشت. &brandShortName; نتوانست بروزرسانی شود زیرا:">
+                                           
+<!ENTITY  errorManual.label               "شما می‌توانید به‌هنگام سازی &brandShortName; را با مراجعه به این پیوند و بارگیری آخرین نسخه به طور دستی انجام دهید:">
+                                           
+<!ENTITY  errorpatching.intro             "بروزرسانی جزئی قابل اجرا نیست. &brandShortName; سعی میکند بستهٔ کامل را بارگیری و نصب نماید.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; قادر به تشخیص وجود بروزرسانی جدید نیست. لطفاً مطمئن شوید که جدیدترین نسخهٔ &brandShortName; را از این‌جا دریافت کرده‌اید:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "&brandShortName; به دلیلی قادر به بروزرسانی ایمن نیست. لطفا مطمئن شوید که جدیدترین نسخهٔ &brandShortName; را از این‌جا دریافت کرده‌اید:">
+<!ENTITY  errorCertAttrHasUpdate.label    "شخصی در حال تلاش است که  &brandShortName; را به منظور پذیرش یک بروزرسانی غیر ایمن فریب دهد. لطفاً با تماس با مدیر شبکهٔ خود درخواست کمک کنید.">
+
+<!ENTITY  finishedPage.title              "بروزرسانی آمادهٔ نصب است">
+<!ENTITY  finishedPage.text               "این بروزرسانی دفعهٔ بعدی که &brandShortName; شروع به کار کند نصب خواهد شد. می‌توانید هم‌اکنون &brandShortName; را راه‌اندازی مجدد کنید، یا به کارتان ادامه داده و این کار را بعداً انجام دهید.">
+
+<!ENTITY  finishedBackgroundPage.text     "یک بروزرسانی امنیتی و پایداری برای &brandShortName; بارگیری شده و آمادهٔ نصب است.">
+<!ENTITY  finishedBackground.name         "بروزرسانی:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "این بروزرسانی دفعهٔ بعدی که &brandShortName; شروع به کار کند نصب خواهد شد. می‌توانید هم‌اکنون &brandShortName; را راه‌اندازی مجدد کنید، یا به کارتان ادامه داده و این کار را بعداً انجام دهید.">
+<!ENTITY  finishedBackground.moreElevated "این بروزرسانی نیاز به دسترسی مدیریت دارد. بروزرسانی هنگام راه‌اندازی بعدی &brandShortName; نصب خواهد شد. شما می‌تواند &brandShortName; را هم‌اکنون دوباره راه‌اندازی کنید، ادامه دهید و بعدا دوباره راه‌اندازی کنید، یا این بروزرسانی را نادیده بگیرید.">
+
+<!ENTITY  update.details.label            "جزئیات">
+<!ENTITY  update.installedOn.label        "نصب شد در:">
+<!ENTITY  update.status.label             "وضعیت:">

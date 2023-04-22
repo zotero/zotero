@@ -1,0 +1,68 @@
+<!ENTITY  updateWizard.title              "Mise à jour du logiciel">
+
+<!ENTITY  checking.title                  "Recherche de mises à jour">
+<!ENTITY  updateCheck.label               "Recherche de nouvelles versions de &brandShortName;…">
+
+<!ENTITY  noupdatesfound.title            "Aucune mise à jour trouvée">
+<!ENTITY  noupdatesautoenabled.intro      "Aucune mise à jour n’est disponible. &brandShortName; peut vérifier périodiquement si des mises à jour sont disponibles.">
+<!ENTITY  noupdatesautodisabled.intro     "Aucune mise à jour n’est disponible. Veuillez vérifier à nouveau plus tard, ou activez la vérification de mise à jour automatique de &brandShortName;.">
+
+<!ENTITY  manualUpdate.title              "Mise à jour impossible">
+<!ENTITY  manualUpdate.desc               "Une mise à jour de stabilité et de sécurité est disponible, mais vous ne disposez pas des autorisations système nécessaires pour l’installer. Veuillez contacter votre administrateur système ou essayer à nouveau avec un compte ayant les autorisations pour installer un logiciel sur cet ordinateur.">
+<!ENTITY  manualUpdate.space.desc         "Une mise à jour de stabilité et de sécurité recommandée est disponible, mais vous ne disposez pas d’un espace disque suffisant pour l’installer.">
+<!ENTITY  manualUpdateGetMsg.label        "Vous pouvez toujours obtenir la dernière version de &brandShortName; sur :">
+
+<!ENTITY  unsupported.title               "Système non pris en charge">
+<!ENTITY  unsupported.label               "&brandShortName; n’est pas à jour, cependant la version la plus récente n’est pas
+                                           prise en charge par votre système. Veuillez mettre à jour votre système, puis essayer à nouveau.
+                                           Ce message ne s’affichera plus, mais vous pouvez">
+<!ENTITY  unsupportedLink.label           "en apprendre davantage.">
+
+<!ENTITY  clickHere.label                 "Plus d’informations à propos de cette mise à jour">
+
+<!ENTITY  evangelism.desc                 "Il vous est vivement recommandé d’appliquer cette mise à jour
+                                           de &brandShortName; le plus rapidement possible.">
+
+<!ENTITY  downloadPage.title              "Téléchargement de &brandShortName;">
+<!ENTITY  downloading.intro               "Téléchargement de la mise à jour…">
+<!ENTITY  connecting.label                "Connexion au serveur de mise à jour…">
+<!ENTITY  verificationFailedText.label    "&brandShortName; n’a pas pu vérifier l’intégrité de la mise à jour partielle téléchargée, une mise à jour intégrale est en cours de téléchargement.">
+
+<!ENTITY  viewDetails.tooltip             "Afficher les détails de cette mise à jour">
+
+<!ENTITY  details.link                    "Détails">
+
+<!ENTITY  error.title                     "La mise à jour a échoué">
+
+<!ENTITY  error.label                     "Des problèmes ont été rencontrés lors de la vérification, du téléchargement ou de l’installation de cette mise à jour. &brandShortName; n’a pas pu être mis à jour suite à :">
+
+<!ENTITY  errorManual.label               "Vous pouvez mettre &brandShortName; à jour manuellement en suivant ce lien et en téléchargeant la dernière version :">
+
+<!ENTITY  errorpatching.intro             "La mise à jour partielle n’a pas pu être appliquée. &brandShortName; va réessayer en téléchargeant une mise à jour complète.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; ne parvient pas à déterminer si une mise à jour est disponible. Veuillez
+                                           vous assurer que vous disposez de la dernière version de &brandShortName; à :">
+<!ENTITY  errorCertAttrNoUpdate2.label    "Quelque chose empêche &brandShortName; de se mettre à jour de manière sûre.
+                                           Veuillez vous assurer que vous disposez de la dernière version de &brandShortName; à :">
+<!ENTITY  errorCertAttrHasUpdate.label    "Quelque chose essaie de duper &brandShortName; en lui proposant une mise à jour
+                                           non sûre. Veuillez contacter votre fournisseur de réseau pour demander de l’aide.">
+
+<!ENTITY  finishedPage.title              "Mise à jour prête à être installée">
+<!ENTITY  finishedPage.text               "La mise à jour sera installée au prochain démarrage de &brandShortName;. Vous pouvez
+                                           redémarrer &brandShortName; maintenant, ou continuer votre travail et redémarrer plus tard.">
+
+<!ENTITY  finishedBackgroundPage.text     "Une mise à jour de sécurité et de stabilité pour &brandShortName; a été
+                                           téléchargée et est prête à être installée.">
+
+<!ENTITY  finishedBackground.name         "Mise à jour :">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "La mise à jour sera installée au prochain démarrage de &brandShortName;. Vous pouvez
+                                           redémarrer &brandShortName; maintenant, ou continuer votre travail et redémarrer plus tard.">
+
+<!ENTITY  finishedBackground.moreElevated "Cette mise à jour nécessite des privilèges administrateur. La mise à jour sera installée au
+                                           prochain démarrage de &brandShortName;. Vous pouvez redémarrer &brandShortName; maintenant,
+                                           continuer votre travail et redémarrer plus tard, ou refuser cette mise à jour.">
+
+<!ENTITY  update.details.label            "Détails">
+<!ENTITY  update.installedOn.label        "Installé(e) le :">
+<!ENTITY  update.status.label             "État :">

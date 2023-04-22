@@ -1,0 +1,58 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "Programuppdateringar">
+
+<!ENTITY  checking.title                  "Söker efter uppdateringar">
+<!ENTITY  updateCheck.label               "Söker efter nyare versioner av &brandShortName;…">
+
+<!ENTITY  noupdatesfound.title            "Inga uppdateringar hittades">
+<!ENTITY  noupdatesautoenabled.intro      "Det finns inga uppdateringar att hämta. &brandShortName; kommer regelbundet att söka efter uppdateringar.">
+<!ENTITY  noupdatesautodisabled.intro     "Det finns inga uppdateringar tillgängliga. Prova igen senare eller aktivera den automatiska uppdateringskontrollen i &brandShortName;.">
+
+<!ENTITY  manualUpdate.title              "Kan inte uppdatera">
+<!ENTITY  manualUpdate.desc               "En rekommenderad säkerhets- och stabilitetsuppdatering är tillgänglig, men du har inte de systemrättigheter som krävs för att installera den. Kontakta systemadministratören eller försök igen från ett konto som har rättighet att installera programvara på den här datorn.">
+<!ENTITY  manualUpdate.space.desc         "En rekommenderad säkerhets- och stabilitetsuppdatering är tillgänglig, men du har inte tillräckligt med utrymme för att installera den.">
+<!ENTITY  manualUpdateGetMsg.label        "Du kan alltid hämta den senaste versionen av &brandShortName; från:">
+
+<!ENTITY  unsupported.title               "Systemet stöds inte">
+<!ENTITY  unsupported.label               "Din &brandShortName; är gammal men den senaste versionen stöds inte på ditt system. Uppgradera systemet och försök sedan igen. Det här meddelandet visas inte igen, men du kan">
+<!ENTITY  unsupportedLink.label           "läsa mer.">
+
+<!ENTITY  clickHere.label                 "Visa mer information om den här uppdateringen">
+
+<!ENTITY  evangelism.desc                 "Vi rekommenderar starkt att du snarast möjligt installerar denna uppdatering till &brandShortName;.">
+
+<!ENTITY  downloadPage.title              "Hämtar &brandShortName;">
+<!ENTITY  downloading.intro               "Hämtar uppdateringen…">
+<!ENTITY  connecting.label                "Ansluter till uppdateringsservern…">
+<!ENTITY  verificationFailedText.label    "&brandShortName; kunde inte verifiera integriteten hos den programfix som har hämtats, därför kommer ett komplett uppdateringspaket att hämtas.">
+
+<!ENTITY  viewDetails.tooltip             "Visa detaljer om denna uppdatering">
+
+<!ENTITY  details.link                    "Detaljer">
+
+<!ENTITY  error.title                     "Uppdatering misslyckades">
+
+<!ENTITY  error.label                     "Problem uppstod vid sökning, hämtning eller installation av den här uppdateringen. &brandShortName; kunde inte uppdateras eftersom:">
+                                           
+<!ENTITY  errorManual.label               "Du kan uppgradera &brandShortName; manuellt genom att besöka den här länken och hämta den senaste versionen:">
+                                           
+<!ENTITY  errorpatching.intro             "Programfixen kunde inte installeras. &brandShortName; kommer att försöka igen genom att hämta ett komplett uppdateringspaket.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; kan inte avgöra om det finns någon tillgänglig uppdatering. Kontrollera att du använder den senaste versionen av &brandShortName; från:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "Någonting förhindrar &brandShortName; från att uppdatera säkert. Kontrollera att du använder den senaste versionen av &brandShortName; från:">
+<!ENTITY  errorCertAttrHasUpdate.label    "Någonting försöker lura &brandShortName; till att acceptera en osäker uppdatering. Kontakta din nätverksleverantör för hjälp.">
+
+<!ENTITY  finishedPage.title              "Uppdatering färdig att installera">
+<!ENTITY  finishedPage.text               "Uppdateringen kommer att installeras nästa gång &brandShortName; startas. Du kan starta om &brandShortName; nu, eller fortsätta och starta om senare.">
+
+<!ENTITY  finishedBackgroundPage.text     "En säkerhets- och stabilitetsuppdatering till &brandShortName; har hämtats och är färdig att installera.">
+<!ENTITY  finishedBackground.name         "Uppdatering:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "Uppdateringen kommer att installeras nästa gång &brandShortName; startar. Du kan starta om &brandShortName; nu, eller fortsätta och starta om senare.">
+<!ENTITY  finishedBackground.moreElevated "Denna uppdateringen kräver administratörsbehörighet. Uppdateringen kommer att installeras nästa gång &brandShortName; startar. Du kan starta om &brandShortName; nu, fortsätta att arbeta och starta om senare eller avvisa den här uppdateringen.">
+
+<!ENTITY  update.details.label            "Detaljer">
+<!ENTITY  update.installedOn.label        "Installerad:">
+<!ENTITY  update.status.label             "Status:">

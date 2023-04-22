@@ -1,0 +1,58 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "Обновяване на софтуера">
+
+<!ENTITY  checking.title                  "Проверка за обновявания">
+<!ENTITY  updateCheck.label               "Преглеждане за по-нова версия на &brandShortName;…">
+
+<!ENTITY  noupdatesfound.title            "Не са открити обновявания">
+<!ENTITY  noupdatesautoenabled.intro      "Няма обновявания. &brandShortName; ще проверявапериодично за такива.">
+<!ENTITY  noupdatesautodisabled.intro     "Няма обновявания. Проверете друг път или включете функцията за автоматично обновяване на &brandShortName;.">
+
+<!ENTITY  manualUpdate.title              "Обновяването не успя">
+<!ENTITY  manualUpdate.desc               "Налично е обновяване по безопасността и стабилността, но нямате нужните системни права, за да го инсталирате. Моля,свържете се със системния администратор или опитайте от друг профил, който има права за инсталиране.">
+<!ENTITY  manualUpdate.space.desc         "Налично е препоръчвано обновяване за безопасност и стабилност,но нямате достатъчно свободно място, за да бъде инсталирано.">
+<!ENTITY  manualUpdateGetMsg.label        "Винаги може да изтеглите последната версия на &brandShortName; от:">
+
+<!ENTITY  unsupported.title               "Неподдържана система">
+<!ENTITY  unsupported.label               "Вашият &brandShortName; е остарял, но последната версияе неподдържана от вашата система. Моля, надградете системата си и опитайте отново. Няма да видите това предупреждение повече, но можете да">
+<!ENTITY  unsupportedLink.label           "научите повече.">
+
+<!ENTITY  clickHere.label                 "Показване на повече информация за това обновяване">
+
+<!ENTITY  evangelism.desc                 "Горещо се препоръчва прилагането на обновяването на &brandShortName; възможно най-скоро.">
+
+<!ENTITY  downloadPage.title              "Изтегляне на &brandShortName;">
+<!ENTITY  downloading.intro               "Изтегляне на обновяването…">
+<!ENTITY  connecting.label                "Свързване със сървъра…">
+<!ENTITY  verificationFailedText.label    "&brandShortName; не можа да провери целостта начастичното обновяване за това сега изтегляцелия пакет.">
+
+<!ENTITY  viewDetails.tooltip             "Преглед на подробностите по обновяването">
+
+<!ENTITY  details.link                    "Подробности">
+
+<!ENTITY  error.title                     "Неуспешно обновяване">
+
+<!ENTITY  error.label                     "Възникнаха проблеми при проверката, изтеглянето и инсталирането на това обновяване. &brandShortName; не може да бъде обновена поради:">
+                                           
+<!ENTITY  errorManual.label               "Можете да обновите &brandShortName; ръчно като посетите връзката и изтеглите последната версия:">
+                                           
+<!ENTITY  errorpatching.intro             "Частичното обновяване не беше приложено. &brandShortName; ще опита да изтегли цялото обновяване.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; не можа да определи дали има налично обновяване. Моля, уверете се, че разполагате с последната версия на &brandShortName; от:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "Нещо пречи на безопасното обновяване на &brandShortName;. Моля, проверете дали използвате последната версия на &brandShortName; от:">
+<!ENTITY  errorCertAttrHasUpdate.label    "Нещо се опитва да измами &brandShortName; да приеме небезопаснообновяване. Моля, свържете се с вашия доставчик на Интернет и потърсете помощ.">
+
+<!ENTITY  finishedPage.title              "Обновяването е готово за инсталиране">
+<!ENTITY  finishedPage.text               "Обновяването ще бъде инсталирано при следващото пускане на&brandShortName;. Можете сега да рестартирате &brandShortName; или да продължите да работите и да рестартирате по-късно.">
+
+<!ENTITY  finishedBackgroundPage.text     "Изтеглено е обновяване по безопасността и устойчивосттана &brandShortName; и е готово за инсталиране.">
+<!ENTITY  finishedBackground.name         "Обновяване:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "Обновяването ще бъде инсталирано при следващото пускане на&brandShortName;. Можете сега да рестартирате &brandShortName; или да продължите да работите и да рестартирате по-късно.">
+<!ENTITY  finishedBackground.moreElevated "Това обновяване изисква административни права. Обновяването ще бъде инсталирано при следващото пускане на &brandShortName;. Можете да рестартирате &brandShortName; още сега, да продължите работата си и да рестартирате по-късно или да откажете това обновяване.">
+
+<!ENTITY  update.details.label            "Подробности">
+<!ENTITY  update.installedOn.label        "Инсталирано на:">
+<!ENTITY  update.status.label             "Състояние:">

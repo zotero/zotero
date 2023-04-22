@@ -1,0 +1,81 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "Надоградња софтвера">
+
+<!ENTITY  checking.title                  "Провера надоградњи">
+<!ENTITY  updateCheck.label               "Тражимо ново издање програма &brandShortName;…">
+
+<!ENTITY  noupdatesfound.title            "Надоградње нису пронађене">
+<!ENTITY  noupdatesautoenabled.intro      "Нема нових надоградњи. &brandShortName;
+                                           ће периодичнo проверавати надоградње.">
+<!ENTITY  noupdatesautodisabled.intro     "Нема нових надоградњи. Проверите касније или укључите 
+                                           аутоматску проверу у програму &brandShortName;.">
+
+<!ENTITY  manualUpdate.title              "Надоградња није могућа">
+<!ENTITY  manualUpdate.desc               "Доступна је препоручена надоградња за безбедност и стабилност, али не поседујете права приступа
+                                           потребна да је инсталирате. Обратите се администратору система, или да инсталацију
+                                           пробате поново уз употребу корисничког налога који има дозволу да инсталира програме 
+                                           на овај рачунар.">
+<!ENTITY  manualUpdate.space.desc         "Препоручена надоградња безбедности и стабилности је доступна,
+                                           али немате довољно простора да је инсталирате.">
+<!ENTITY  manualUpdateGetMsg.label        "Најсвежије издање програма &brandShortName; можете набавити на адреси:">
+
+<!ENTITY  unsupported.title               "Систем није подржан">
+<!ENTITY  unsupported.label               "Ваш &brandShortName; је застарео, али најновија верзија није
+                                           подржана на вашем систему. Надоградите систем, затим покушајте поново.
+                                           Више нећете видети ову поруку, али можете">
+<!ENTITY  unsupportedLink.label           "да сазнате више.">
+
+<!ENTITY  clickHere.label                 "Погледај више информација о овој надоградњи">
+
+<!ENTITY  evangelism.desc                 "Препоручује се да примените ову надоградњу за 
+                                           &brandShortName; што је пре могуће.">
+
+<!ENTITY  downloadPage.title              "Преузимање програма &brandShortName;">
+<!ENTITY  downloading.intro               "Преузимање надоградње је у току…">
+<!ENTITY  connecting.label                "Повезивање са сервером за надоградњу…">
+<!ENTITY  verificationFailedText.label    "Програм &brandShortName; није могао да утврди 
+                                           интегритет надоградње коју је преузео, тако да
+                                           сада прима цео пакет.">
+
+<!ENTITY  viewDetails.tooltip             "Прегледај детаље ове надоградње">
+
+<!ENTITY  details.link                    "Детаљи">
+
+<!ENTITY  error.title                     "Надоградња није успела">
+
+<!ENTITY  error.label                     "Дошло је до проблема при тражењу, преузимању или иснталацији ове надоградње. 
+                                           Програм &brandShortName; није надограђен из наредних разлога:">
+                                           
+<!ENTITY  errorManual.label               "Програм &brandShortName; можете да надоградите ручно, посећивањем ове 
+                                           везе и преузимањем најновијег издања:">
+                                           
+<!ENTITY  errorpatching.intro             "Делимична надоградња није могла да се доврши. 
+                                           Програм &brandShortName; ће поново да покуша да преузме целе надоградње.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; не може одредити да ли су доступне надоградње. 
+                                           Проверите да ли имате најновију верзију &brandShortName;а са:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "Нешто спречава &brandShortName; да се безбедно надогради. 
+                                           Проверите да ли имате најновију верзију &brandShortName;а са:">
+<!ENTITY  errorCertAttrHasUpdate.label    "Нешто покушава да превари &brandShortName; прихватањем несигурне надоградње. 
+                                           Контактирајте свог добављача преже за помоћ.">
+
+<!ENTITY  finishedPage.title              "Надоградња је спремна за инсталацију">
+<!ENTITY  finishedPage.text               "Надоградња ће бити инсталирана при наредном покретању програма &brandShortName;. Можете
+                                           одмах да поново покренете &brandShortName; или да наставите рад и то урадите касније.">
+
+<!ENTITY  finishedBackgroundPage.text     "Надоградња за безбедност и стабилност за &brandShortName; је преузета
+                                           и спремна је за инсталацију.">
+<!ENTITY  finishedBackground.name         "Надоградња:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "Надоградња ће бити инсталирана при наредном покретању програма &brandShortName;. Можете 
+                                           да одмах поново покренете &brandShortName; или да наставите са радом и то урадите касније.">
+<!ENTITY  finishedBackground.moreElevated "Ова надоградња захтева привилегије администратора. Надоградња ће бити
+                                           инсталирана када се &brandShortName; следећи пут покрене. Можете поново покренути
+                                           &brandShortName; сада, наставити са радом и поново покренути касније или одбити ову
+                                           надоградњу.">
+
+<!ENTITY  update.details.label            "Детаљи">
+<!ENTITY  update.installedOn.label        "Инсталирано:">
+<!ENTITY  update.status.label             "Стање:">

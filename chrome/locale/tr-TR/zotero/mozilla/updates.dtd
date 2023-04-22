@@ -1,0 +1,58 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "Yazılım Güncellemesi">
+
+<!ENTITY  checking.title                  "Güncellemeler Denetleniyor">
+<!ENTITY  updateCheck.label               "Yeni &brandShortName; sürümleri aranıyor…">
+
+<!ENTITY  noupdatesfound.title            "Güncelleme Bulunamadı">
+<!ENTITY  noupdatesautoenabled.intro      "Hiçbir güncelleme yok. &brandShortName; belirli aralıklarla güncellemelere bakacak.">
+<!ENTITY  noupdatesautodisabled.intro     "Hiçbir güncelleme yok. Lütfen daha sonra yeniden deneyin veya &brandShortName; uygulamasının otomatik güncelleme denetimini etkinleştirin.">
+
+<!ENTITY  manualUpdate.title              "Güncelleme yapılamıyor">
+<!ENTITY  manualUpdate.desc               "Edinilmesi tavsiye edilen bir güvenlik ve kararlılık güncellemesi var, ancak kurmak için gerekli sistem izniniz yok. Sistem yöneticinize danışın veya bu bilgisayarda yazılım kurma iznine sahip bir hesap üzerinden yeniden deneyin.">
+<!ENTITY  manualUpdate.space.desc         "Kurulması tavsiye edilen güvenlik ve kararlılık güncellemesi var ancak kurulum için yeterli alanınız yok.">
+<!ENTITY  manualUpdateGetMsg.label        "En güncel &brandShortName; sürümüne her zaman buradan ulaşabilirsiniz:">
+
+<!ENTITY  unsupported.title               "Desteklenmeyen Sistem">
+<!ENTITY  unsupported.label               "&brandShortName; güncel değil, fakat sisteminiz en son sürümü desteklemiyor. Lütfen sisteminizi yükseltin ve tekrar deneyin. Bu bildirimi tekrar görmeyeceksiniz ancak konuyla ilgili">
+<!ENTITY  unsupportedLink.label           "daha fazla bilgi alabilirsiniz.">
+
+<!ENTITY  clickHere.label                 "Bu güncelleme hakkındaki bilgileri göster">
+
+<!ENTITY  evangelism.desc                 "Bu &brandShortName; güncellemesini en kısa sürede uygulamanız şiddetle tavsiye edilir.">
+
+<!ENTITY  downloadPage.title              "&brandShortName; indiriliyor">
+<!ENTITY  downloading.intro               "Güncelleme indiriliyor…">
+<!ENTITY  connecting.label                "Güncelleme sunucusuna bağlanıyor…">
+<!ENTITY  verificationFailedText.label    "&brandShortName; indirilen artırımlı güncellemenin bütünlüğünü doğrulayamadı, bu yüzden şimdi tam güncelleme paketi indiriliyor.">
+
+<!ENTITY  viewDetails.tooltip             "Bu güncellemenin ayrıntılarına bak">
+
+<!ENTITY  details.link                    "Ayrıntılar">
+
+<!ENTITY  error.title                     "Güncelleme Başarısız Oldu">
+
+<!ENTITY  error.label                     "Bu güncellemeyi denetlerken, indirirken veya kurarken sorun oluştu. &brandShortName; şu nedenle güncellenemedi:">
+                                           
+<!ENTITY  errorManual.label               "Bu adresi ziyaretip edip son sürümü indirerek de &brandShortName; uygulamasını güncelleyebilirsiniz:">
+                                           
+<!ENTITY  errorpatching.intro             "Kısmî güncelleme uygulanamadı. &brandShortName; şimdi tüm güncellemeyi indirerek tekrar deneyecek.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; güncelleme olup olmadığını tespit edemedi. Lütfen &brandShortName; uygulamasının son sürümüne sahip olup olmadığınıza buradan bakın:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "Bir şey &brandShortName; uygulamasının güvenli güncelleme yapmasını engelliyor. &brandShortName; uygulamasının en son sürümüne sahip olduğunuzdan emin olun:">
+<!ENTITY  errorCertAttrHasUpdate.label    "Bir şey &brandShortName; uygulamasını güvensiz bir bağlantıyı kabul ettirmeye çalışıyor. Hizmet sağlayıcınızla görüşün ve yardım alın.">
+
+<!ENTITY  finishedPage.title              "Güncelleme kurulmaya hazır">
+<!ENTITY  finishedPage.text               "Güncelleme bir sonraki &brandShortName; açılışında yüklenecek. &brandShortName; tarayıcısını hemen yeniden başlatabilir veya şimdi işinize devam edip daha sonra da yeniden başlatabilirsiniz.">
+
+<!ENTITY  finishedBackgroundPage.text     "&brandShortName; için bir güvenlik ve kararlılık güncellemesi indirildi ve yüklenmeye hazır.">
+<!ENTITY  finishedBackground.name         "Güncelleme:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "Güncelleme &brandShortName; yeniden başlatıldığında kurulacak. &brandShortName; uygulamasını isterseniz şimdi veya işinizi bitirdikten sonra yeniden başlatabilirsiniz.">
+<!ENTITY  finishedBackground.moreElevated "Bu güncelleme için yönetici yetkileri gerekiyor. Güncelleme, &brandShortName; yeniden açıldığında kurulacaktır. &brandShortName; tarayıcısını şimdi yeniden başlatabilir, şimdi işinize devam edip daha sonra yeniden başlatabilir veya bu güncellemeyi reddedebilirsiniz.">
+
+<!ENTITY  update.details.label            "Ayrıntılar">
+<!ENTITY  update.installedOn.label        "Kurulum tarihi:">
+<!ENTITY  update.status.label             "Durum:">

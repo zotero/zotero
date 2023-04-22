@@ -1,0 +1,77 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "Оновлення програмного забезпечення">
+
+<!ENTITY  checking.title                  "Перевіряється наявність оновлень…">
+<!ENTITY  updateCheck.label               "Пошук нових версій &brandShortName;…">
+
+<!ENTITY  noupdatesfound.title            "Оновлення відсутні">
+<!ENTITY  noupdatesautoenabled.intro      "Оновлення відсутні. &brandShortName; буде періодично перевіряти наявніcть оновлень.">
+<!ENTITY  noupdatesautodisabled.intro     "Оновлення відсутні. Будь ласка, перевірте ще раз пізніше,
+                                           або увімкніть автоматичну перевірку оновлень &brandShortName;.">
+
+<!ENTITY  manualUpdate.title              "Неможливо оновитись">
+<!ENTITY  manualUpdate.desc               "Наявне рекомендоване оновлення стабільності та безпеки,
+                                           проте у вас немає відповідних адміністраторських прав для його встановлення.
+                                           Зв’яжіться з вашим системним адміністратором
+                                           чи спробуйте ще раз з облікового запису, який має права
+                                           встановлювати програми на цьому комп’ютері.">
+<!ENTITY  manualUpdate.space.desc         "Наявне рекомендоване оновлення стабільності та безпеки, але ви не маєте достатньо місця для його встановлення.">
+<!ENTITY  manualUpdateGetMsg.label        "Ви завжди можете завантажити останню версію &brandShortName; з:">
+
+<!ENTITY  unsupported.title               "Система не підтримується">
+<!ENTITY  unsupported.label               "Ваш &brandShortName; застарів, але це остання версія, котра підтримується на вашій операційній системі. Оновіть систему, тоді спробуйте ще раз.
+                                           Ви більше не побачите цього повідомлення, але ви можете">
+<!ENTITY  unsupportedLink.label           "дізнатись більше.">
+
+<!ENTITY  clickHere.label                 "Переглянути докладнішу інформацію про це оновлення">
+
+<!ENTITY  evangelism.desc                 "Наполегливо рекомендується якнайшвидше оновити &brandShortName;.">
+
+<!ENTITY  downloadPage.title              "Завантаження &brandShortName;">
+<!ENTITY  downloading.intro               "Триває завантаження оновлення…">
+<!ENTITY  connecting.label                "З’єднання з сервером оновлень…">
+<!ENTITY  verificationFailedText.label    "&brandShortName; не зміг перевірити цілісність частково завантаженого оновлення,
+                                           тому він завантажує повне оновлення.">
+
+<!ENTITY  viewDetails.tooltip             "Переглянути подробиці щодо цього оновлення">
+
+<!ENTITY  details.link                    "Подробиці">
+
+<!ENTITY  error.title                     "Помилка оновлення">
+
+<!ENTITY  error.label                     "При перевірці, завантаженні або встановленні цього оновлення виникли проблеми.
+                                           &brandShortName; не був оновлений з наступної причини:">
+                                           
+<!ENTITY  errorManual.label               "Ви можете оновити &brandShortName; вручну, перейшовши за наступним посиланням
+                                           і завантаживши його останню версію:">
+                                           
+<!ENTITY  errorpatching.intro             "Часткове оновлення не може бути встановлене. &brandShortName;
+                                           спробує встановити оновлення, завантаживши повне оновлення.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; не може визначити наявність оновлень.
+                                           Переконайтеся, що у вас остання версія &brandShortName; від:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "Щось заважає &brandShortName; безпечно оновитись.
+                                           Переконайтеся, що у вас остання версія &brandShortName; від:">
+<!ENTITY  errorCertAttrHasUpdate.label    "Щось намагається обдурити &brandShortName;, пропонуючи небезпечне
+                                           оновлення. Зв’яжіться з вашим провайдером та попросіть про допомогу.">
+
+<!ENTITY  finishedPage.title              "Оновлення готове до встановлення">
+<!ENTITY  finishedPage.text               "Оновлення буде встановлене при наступному запуску &brandShortName;.
+                                           Ви можете перезапустити &brandShortName; зараз, чи працювати далі і перезапустити потім.">
+
+<!ENTITY  finishedBackgroundPage.text     "Було завантажено оновлення безпеки та стабільності &brandShortName;.
+                                           Воно готове до встановлення.">
+<!ENTITY  finishedBackground.name         "Оновлення:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "Оновлення буде встановлене при наступному запуску &brandShortName;
+                                           Ви можете перезапустити &brandShortName; зараз, чи працювати далі і перезапустити потім.">
+<!ENTITY  finishedBackground.moreElevated "Це оновлення потребує прав адміністратора. Оновлення буде
+                                           встановлено при наступному запуску &brandShortName;. Ви можете
+                                           перезавантажити &brandShortName; зараз, продовжити роботу і
+                                           перезавантажити пізніше або відхилити це оновлення.">
+
+<!ENTITY  update.details.label            "Подробиці">
+<!ENTITY  update.installedOn.label        "Встановлено:">
+<!ENTITY  update.status.label             "Стан:">

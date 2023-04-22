@@ -1,0 +1,58 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "软件更新">
+
+<!ENTITY  checking.title                  "正在检查更新">
+<!ENTITY  updateCheck.label               "查找 &brandShortName; 的新版本…">
+
+<!ENTITY  noupdatesfound.title            "没有找到可用的更新">
+<!ENTITY  noupdatesautoenabled.intro      "目前没有可用的更新。&brandShortName; 将定期地检查更新。">
+<!ENTITY  noupdatesautodisabled.intro     "目前没有可用的更新。请以后再检查，或者启用 &brandShortName; 的自动更新检查功能。">
+
+<!ENTITY  manualUpdate.title              "无法更新">
+<!ENTITY  manualUpdate.desc               "已有一个推荐的有关安全性与稳定性的更新可用，但是您没有安装该补丁所需的系统权限。请联系您的系统管理员，或是使用有权在本机上安装软件的账户重试。">
+<!ENTITY  manualUpdate.space.desc         "有个推荐的安全和稳定性更新可用，但您没有足够的空间来安装它。">
+<!ENTITY  manualUpdateGetMsg.label        "您可以通过此网址获取最新版本的 &brandShortName;：">
+
+<!ENTITY  unsupported.title               "系统不支持">
+<!ENTITY  unsupported.label               "您的 &brandShortName; 已过时，最新版本已不支持您的系统。请升级您的系统后再试。您将不会再看到本提示，但您也可以">
+<!ENTITY  unsupportedLink.label           "了解详情。">
+
+<!ENTITY  clickHere.label                 "查看此更新的更多信息">
+
+<!ENTITY  evangelism.desc                 "我们强烈建议您对 &brandShortName; 尽快应用此更新。">
+
+<!ENTITY  downloadPage.title              "下载 &brandShortName;">
+<!ENTITY  downloading.intro               "正在下载更新…">
+<!ENTITY  connecting.label                "正在连接至更新服务器…">
+<!ENTITY  verificationFailedText.label    "&brandShortName; 无法验证下载的增量更新是否完整，因此，现在将尝试下载整个更新包。">
+
+<!ENTITY  viewDetails.tooltip             "查看本次更新的详细信息">
+
+<!ENTITY  details.link                    "详细信息">
+
+<!ENTITY  error.title                     "更新失败">
+
+<!ENTITY  error.label                     "检查、下载或安装此更新时发生问题。&brandShortName; 无法被更新，原因为：">
+                                           
+<!ENTITY  errorManual.label               "您可以访问此链接手动下载和更新最新版本的 &brandShortName;：">
+                                           
+<!ENTITY  errorpatching.intro             "无法应用此局部更新。&brandShortName; 将下载完整的更新包并重试。">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; 无法确定是否有可用的更新。请确定您是从以下地址安装了最新版本的 &brandShortName;：">
+<!ENTITY  errorCertAttrNoUpdate2.label    "&brandShortName; 的安全更新受到某些阻碍。请确定您是从以下地址安装了最新版本的 &brandShortName;：">
+<!ENTITY  errorCertAttrHasUpdate.label    "有东西正在骗 &brandShortName; 接受不安全的更新。请联系您的网络供应商寻求帮助。">
+
+<!ENTITY  finishedPage.title              "更新已可安装">
+<!ENTITY  finishedPage.text               "此更新将在下次 &brandShortName; 启动时自动安装。您可以立即重启 &brandShortName;，或者继续工作稍后再重新启动。">
+
+<!ENTITY  finishedBackgroundPage.text     "已下载一个 &brandShortName; 的安全、稳定性更新，现在就可以安装。">
+<!ENTITY  finishedBackground.name         "更新：">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "此更新将在下次 &brandShortName; 启动时自动安装。您可以立即重启 &brandShortName;，或者继续工作稍后再重新启动。">
+<!ENTITY  finishedBackground.moreElevated "此更新需要管理员权限。此更新将在下次 &brandShortName; 启动时安装。您可以立即重启 &brandShortName;，也可以继续工作并在稍后重启，或者拒绝此次更新。">
+
+<!ENTITY  update.details.label            "详细信息">
+<!ENTITY  update.installedOn.label        "安装时间：">
+<!ENTITY  update.status.label             "状态：">

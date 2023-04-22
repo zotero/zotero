@@ -1,0 +1,58 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "Hugbúnaðaruppfærsla">
+
+<!ENTITY  checking.title                  "Athuga með uppfærslur">
+<!ENTITY  updateCheck.label               "Leita að nýrri útgáfu af &brandShortName;…">
+
+<!ENTITY  noupdatesfound.title            "Engar uppfærslur fundust">
+<!ENTITY  noupdatesautoenabled.intro      "Engar uppfærslur eru til. &brandShortName; mun athuga reglulega hvort til eru uppfærslur.">
+<!ENTITY  noupdatesautodisabled.intro     "Engar uppfærslur eru til. Athugaðu aftur seinna eða virkjaðu sjálfvirkar uppfærslur fyrir &brandShortName;.">
+
+<!ENTITY  manualUpdate.title              "Get ekki uppfært">
+<!ENTITY  manualUpdate.desc               "Tiltæk er mikilvæg öryggis og stöðugleika uppfærsla, en þú ert ekki með nægjanlegt réttindi til að geta sett hana inn. Hafðu samband við kerfisstjóra, eða reyndu aftur frá öðrum reikningi sem hefur réttindi til að setja inn hugbúnað á þessari tölvu.">
+<!ENTITY  manualUpdate.space.desc         "Tiltæk er öryggis og stöðugleikauppfærsla, en þú ert ekki með nóg laust pláss til að setja hana inn.">
+<!ENTITY  manualUpdateGetMsg.label        "Þú getur alltaf nálgast nýjustu útgáfu af &brandShortName; á:">
+
+<!ENTITY  unsupported.title               "Kerfi er ekki stutt">
+<!ENTITY  unsupported.label               "&brandShortName; er úreldur, en nýjasta útgáfa er ekki með stuðning fyrir þitt stýrikerfi. Uppfærðu stýrikerfið, og reyndu aftur. Þú munt ekki sjá þessi skilaboð aftur, en þú getur">
+<!ENTITY  unsupportedLink.label           "frekari upplýsingar.">
+
+<!ENTITY  clickHere.label                 "Skoða meiri upplýsingar um uppfærslu">
+
+<!ENTITY  evangelism.desc                 "Við mælum með því að þú setjir inn þessa uppfærslu fyrir &brandShortName; eins fljótt og auðið er.">
+
+<!ENTITY  downloadPage.title              "Niðurhala &brandShortName;">
+<!ENTITY  downloading.intro               "Niðurhala uppfærslu…">
+<!ENTITY  connecting.label                "Tengist við uppfærslu netþjón…">
+<!ENTITY  verificationFailedText.label    "&brandShortName; gat ekki sannreynt áreiðanleika uppfærslunnar, þannig að í staðinn er verið að niðurhala heildaruppfærslu pakka.">
+
+<!ENTITY  viewDetails.tooltip             "Skoða nánari upplýsingar fyrir þessa uppfærslu">
+
+<!ENTITY  details.link                    "Nánar">
+
+<!ENTITY  error.title                     "Uppfærsla mistókst">
+
+<!ENTITY  error.label                     "Upp komu villur við að athuga, ná í, eða setja inn uppfærsluna. Ekki var hægt að uppfæra &brandShortName; vegna þess að:">
+                                           
+<!ENTITY  errorManual.label               "Þú getur uppfært &brandShortName; handvirkt með því að opna þessa slóð og hala niður nýjustu útgáfu:">
+                                           
+<!ENTITY  errorpatching.intro             "Ekki var hægt að setja inn bótar uppfærslu. &brandShortName; mun reyna að ná í heildaruppfærslu.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; fann ekki út hvort ný uppfærsla er tiltæk. Gakktu úr skugga um að þú sért með nýjustu útgáfu af &brandShortName; frá:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "Eitthvað kemur í veg fyrir að &brandShortName; geti uppfært sig örugglega. Gakktu úr skugga um að þú sért með nýjustu útáfu af &brandShortName; frá:">
+<!ENTITY  errorCertAttrHasUpdate.label    "Einhver er að reyna að plata &brandShortName; í að taka á móti uppfærslu sem er óörugg. Hafðu samband við þjónustuaðila netkerfis og fáðu hjálp.">
+
+<!ENTITY  finishedPage.title              "Uppfærsla tilbúin fyrir uppsetningu">
+<!ENTITY  finishedPage.text               "Uppfærslan verður sett inn í næsta skipti sem &brandShortName; verður endurræstur. Þú getur endurræst &brandShortName; núna, eða haldið áfram að vinna og endurræst seinna.">
+
+<!ENTITY  finishedBackgroundPage.text     "Búið er að hala niður öryggis- og stöðugleikauppfærslu fyrir &brandShortName; og er hún tilbúinn fyrir uppsetningu.">
+<!ENTITY  finishedBackground.name         "Uppfærsla:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "Uppfærslan verður sett inn í næsta skipti sem &brandShortName; verður endurræstur. Þú getur endurræst &brandShortName; núna, eða haldið áfram að vinna og endurræst seinna.">
+<!ENTITY  finishedBackground.moreElevated "Þessi uppfærsla þarfnast kerfisstjóraréttinda. Uppfærslan verður sett inn í næsta skipti sem þú ræsir upp &brandShortName;. Þú getur endurræst &brandShortName; núna, haldið áfram að vinna og endurræst seinna, eða hafnað þessari uppfærslu.">
+
+<!ENTITY  update.details.label            "Nánar">
+<!ENTITY  update.installedOn.label        "Sett upp:">
+<!ENTITY  update.status.label             "Staða:">

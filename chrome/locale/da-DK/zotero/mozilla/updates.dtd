@@ -1,0 +1,81 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+   <!ENTITY  updateWizard.title              "Programopdatering">
+
+<!ENTITY  checking.title                  "Søger efter opdateringer">
+<!ENTITY  updateCheck.label               "Søger efter nyere versioner af &brandShortName;…">
+
+<!ENTITY  noupdatesfound.title            "Ingen opdateringer fundet">
+<!ENTITY  noupdatesautoenabled.intro      "Der er ikke nogle opdateringer tilgængelige.
+                                           &brandShortName; vil periodisk undersøge om der er tilgængelige opdateringer.">
+<!ENTITY  noupdatesautodisabled.intro     "Der er ingen opdateringer tilgængelige.
+                                           Kontroller igen senere eller aktiver automatisk opddatering af &brandShortName;.">
+
+<!ENTITY  manualUpdate.title              "Kunne ikke opdatere">
+<!ENTITY  manualUpdate.desc               "En anbefalet sikkerheds- og stabilitetsopdatering er tilgængelig,
+                                           men du har ikke de påkrævede systemrettigheder til at installere den. Kontakt venligst din
+                                           systemadministrator, eller forsøg igen fra en konto, som har rettigheder til at
+                                           installere programmer på denne computer.">
+<!ENTITY  manualUpdate.space.desc         "En anbefalet sikkerheds- og stabilitetsopdatering er tilgængelig,
+                                           men du har ikke nok plads til at installere den.">
+<!ENTITY  manualUpdateGetMsg.label        "Du kan altid finde den seneste version af &brandShortName; hos:">
+
+<!ENTITY  unsupported.title               "Systemet er ikke understøttet">
+<!ENTITY  unsupported.label               "Din &brandShortName; er forældet, men den seneste version er ikke understøttet på dit system. Opdater dit system og prøv igen. Du vil ikke få vist denne meddelelse igen. ">
+
+
+<!ENTITY  unsupportedLink.label           "Læs mere.">
+
+<!ENTITY  clickHere.label                 "Se mere information om denne opdatering">
+
+<!ENTITY  evangelism.desc                 "Det anbefales kraftigt at du installerer denne
+                                           opdatering til &brandShortName; hurtigst muligt.">
+
+<!ENTITY  downloadPage.title              "Henter &brandShortName;">
+<!ENTITY  downloading.intro               "Henter opdateringen…">
+<!ENTITY  connecting.label                "Forbinder til opdateringsserveren…">
+<!ENTITY  verificationFailedText.label    "&brandShortName; kunne ikke bekræfte integriteten af den
+                                           delvise opdatering, og henter derfor nu den komplette
+                                           opdatering.">
+
+<!ENTITY  viewDetails.tooltip             "Se detaljer omkring denne opdatering">
+
+<!ENTITY  details.link                    "Detaljer">
+
+<!ENTITY  error.title                     "Opdatering mislykkedes">
+
+<!ENTITY  error.label                     "Der opstod problemer med at bekræfte, hente eller installere denne
+                                           opdatering. &brandShortName; kunne ikke opdateres fordi:">
+
+<!ENTITY  errorManual.label               "Du kan opdatere &brandShortName; manuelt ved at besøge dette link
+                                           og hente den seneste version:">
+
+<!ENTITY  errorpatching.intro             "Den delvise opdatering kunne ikke anvendes.
+                                           &brandShortName; vil forsøge igen ved at hente en komplet opdatering.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; kan ikke fastslå om der er en opdatering tilgængelig.
+                                           Undersøg om du har den seneste version af &brandShortName; fra:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "Noget forhindrer &brandShortName; i at opdatere på sikker vis.
+                                           Undersøg om du har den seneste version af &brandShortName; fra:">
+<!ENTITY  errorCertAttrHasUpdate.label    "Noget forsøger at lokke &brandShortName; til at acceptere en usikker opdatering.
+                                           Kontakt venligst din netudbyder og søg assistance.">
+
+<!ENTITY  finishedPage.title              "Opdatering klar til at blive installeret">
+<!ENTITY  finishedPage.text               "Opdateringen vil blive installeret næste gang &brandShortName; startes. Du kan
+                                           genstarte &brandShortName; nu, eller fortsætte med at bruge programmet og genstarte senere.">
+
+<!ENTITY  finishedBackgroundPage.text     "En sikkerheds- og stabilitetsopdatering til &brandShortName; er blevet
+                                           hentet og er klar til at blive installeret.">
+<!ENTITY  finishedBackground.name         "Opdatering:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "Opdateringen vil blive installeret næste gang &brandShortName; startes. Du kan genstarte &brandShortName; nu, eller fortsætte med at bruge programmet og genstarte senere.">
+
+<!ENTITY  finishedBackground.moreElevated "Denne opdatering kræver administratorrettigheder. Opdateringen vil blive installeret næste gang &brandShortName; startes. Du kan genstarte &brandShortName; nu, fortsætte med at arbejde og genstarte senere, eller du kan afvise denne opdatering.">
+
+
+
+
+<!ENTITY  update.details.label            "Detaljer">
+<!ENTITY  update.installedOn.label        "Installeret den:">
+<!ENTITY  update.status.label             "Status:">

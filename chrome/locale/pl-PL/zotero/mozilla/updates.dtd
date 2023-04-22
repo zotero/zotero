@@ -1,0 +1,61 @@
+<!ENTITY  updateWizard.title              "Aktualizacja aplikacji">
+
+<!ENTITY  checking.title                  "Sprawdzanie aktualizacji">
+<!ENTITY  updateCheck.label               "Sprawdzanie dostępności aktualizacji dla programu &brandShortName;…">
+
+<!ENTITY  noupdatesfound.title            "Nie znaleziono żadnych aktualizacji">
+<!ENTITY  noupdatesautoenabled.intro      "Brak dostępnych aktualizacji. Program &brandShortName; będzie okresowo sprawdzał dostępność aktualizacji.">
+<!ENTITY  noupdatesautodisabled.intro     "Brak dostępnych aktualizacji. Należy sprawdzić później lub włączyć automatyczne sprawdzanie dostępności aktualizacji w programie &brandShortName;">
+
+<!ENTITY  manualUpdate.title              "Niewystarczające uprawnienia do aktualizacji">
+<!ENTITY manualUpdate.desc "Została udostępniona ważna aktualizacja programu, jednak użytkownik nie ma wystarczających uprawnień do jej zainstalowania. Należy skontaktować się z administratorem systemu lub spróbować dokonać aktualizacji z konta mającego przypisane uprawnienia do instalacji oprogramowania na tym komputerze.">
+<!ENTITY  manualUpdate.space.desc         "Dostępna jest zalecana aktualizacja bezpieczeństwa i stabilności, ale nie ma
+                                           odpowiedniej ilości miejsca na dysku, by ją zainstalować.">
+<!ENTITY  manualUpdateGetMsg.label        "Najnowszą wersję programu &brandShortName; zawsze można pobrać ze strony:">
+
+<!ENTITY  unsupported.title               "System nieobsługiwany">
+<!ENTITY unsupported.label "Twój program &brandShortName; jest nieaktualny, ale najnowsza wersja nie jest obsługiwana na Twoim systemie. Proszę uaktualnić system i spróbować ponownie. To powiadomienie nie zostanie ponownie wyświetlone, ale możesz ">
+<!ENTITY  unsupportedLink.label           "dowiedzieć się więcej.">
+
+<!ENTITY  clickHere.label                 "Wyświetl więcej informacji o tej aktualizacji…">
+
+<!ENTITY  evangelism.desc                 "Aktualizacja programu &brandShortName; jest wysoce zalecana.">
+
+<!ENTITY  downloadPage.title              "Pobieranie programu &brandShortName;">
+
+<!ENTITY  downloading.intro               "Trwa pobieranie aktualizacji…">
+<!ENTITY  connecting.label                "Łączenie z serwerem aktualizacji…">
+<!ENTITY  verificationFailedText.label    "Nie udało się potwierdzić integralności pobranej aktualizacji. Rozpoczęto pobieranie całego programu.">
+
+<!ENTITY  viewDetails.tooltip             "Wyświetl więcej informacji na temat tej aktualizacji">
+
+<!ENTITY  details.link                    "Szczegóły">
+
+<!ENTITY  error.title                     "Aktualizacja się nie powiodła">
+
+<!ENTITY error.label "Pojawiły się problemy podczas sprawdzania, pobierania lub instalacji aktualizacji. Program &brandShortName; nie mógł zostać uaktualniony, ponieważ:">
+
+<!ENTITY  errorManual.label               "Można dokonać ręcznej aktualizacji programu &brandShortName; poprzez otwarcie tego odnośnika i pobranie najnowszej wersji:">
+
+<!ENTITY  errorpatching.intro             "Częściowa aktualizacja nie mogła zostać przeprowadzona. &brandShortName; spróbuje pobrać kompletną aktualizację.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; nie może ustalić, czy dostępna jest aktualizacja.
+                                           Proszę upewnić się, że używana jest najnowsza wersja programu &brandShortName; z:">
+
+<!ENTITY errorCertAttrNoUpdate2.label "Nie można bezpiecznie uaktualnić programu &brandShortName;. Proszę upewnić się, że używana jest najnowsza wersja programu &brandShortName; z:">
+<!ENTITY  errorCertAttrHasUpdate.label    "Próba wymuszenia na programie &brandShortName; akceptacji niebezpiecznej aktualizacji.
+                                           Proszę skontaktować się z dostawcą usług sieciowych i poszukać pomocy.">
+
+<!ENTITY  finishedPage.title              "Aktualizacja gotowa do zainstalowania">
+<!ENTITY  finishedPage.text               "Aktualizacja zostanie zainstalowana przy następnym uruchomieniu programu &brandShortName;. Uruchom teraz ponownie program &brandShortName; lub kontynuuj pracę i zainstaluj aktualizację później.">
+
+<!ENTITY  finishedBackgroundPage.text     "Program &brandShortName; pobrał ważną aktualizację i jest gotowy do jej zainstalowania.">
+
+<!ENTITY  finishedBackground.name         "Aktualizacja:">
+
+<!ENTITY finishedBackground.more "Aktualizacja zostanie zainstalowana przy następnym uruchomieniu programu &brandShortName;. Uruchom ponownie program &brandShortName; lub nie instaluj aktualizacji teraz i kontynuuj pracę.">
+<!ENTITY finishedBackground.moreElevated "Aktualizacja wymaga uprawnień administracyjnych i zostanie zainstalowana przy następnym uruchomieniu programu &brandShortName;. Uruchom program &brandShortName; ponownie, kontynuuj pracę uruchamiając ponownie później lub odrzuć tę aktualizację.">
+
+<!ENTITY  update.details.label            "Szczegóły">
+<!ENTITY  update.installedOn.label        "Zainstalowano:">
+<!ENTITY  update.status.label             "Status:">

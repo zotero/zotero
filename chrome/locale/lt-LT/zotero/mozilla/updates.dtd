@@ -1,0 +1,58 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "Programinės įrangos atnaujinimas">
+
+<!ENTITY  checking.title                  "Ieškoma naujinimų">
+<!ENTITY  updateCheck.label               "Ieškoma „&brandShortName;“ naujinimų…">
+
+<!ENTITY  noupdatesfound.title            "Naujinimų nerasta">
+<!ENTITY  noupdatesautoenabled.intro      "Šiuo metu naujinimų nėra. „&brandShortName;“ periodiškai tikrins, ar išleistos naujos versijos.">
+<!ENTITY  noupdatesautodisabled.intro     "Šiuo metu naujinimų nėra. Bandykite jų ieškoti vėliau arba įjunkite automatinį naujinimų tikrinimą „&brandShortName;“ nuostatose.">
+
+<!ENTITY  manualUpdate.title              "Naujinti negalima">
+<!ENTITY  manualUpdate.desc               "Yra išleistas rekomenduojamas saugumo ir stabilumo naujinimas, tačiau jūs neturite jam įdiegti reikiamų teisių. Susisiekite su šio kompiuterio administratoriumi, arba bandykite naujinti vėl, prisijungę prie sistemos kaip naudotojas, kuriam leidžiama diegti programinę įrangą.">
+<!ENTITY  manualUpdate.space.desc         "Yra išleistas rekomenduojamas saugumo ir stabilumo naujinimas, tačiau jam įdiegti į šį kompiuterį trūksta laisvos vietos.">
+<!ENTITY  manualUpdateGetMsg.label        "Paskiausią „&brandShortName;“ laidą visada galite parsisiųsti iš:">
+
+<!ENTITY  unsupported.title               "Sistema nepalaikoma">
+<!ENTITY  unsupported.label               "Jūsų naudojama „&brandShortName;“ laida yra pasenusi, tačiau paskiausia jos laida nepalaiko jūsų naudojamos operacinės sistemos. Rekomenduojame atnaujinti sistemą, o tada bandyti iš naujo. Šis pranešimas nebebus rodomas. ">
+<!ENTITY  unsupportedLink.label           "Sužinoti daugiau.">
+
+<!ENTITY  clickHere.label                 "Peržiūrėti išsamesnę informaciją apie šį naujinimą">
+
+<!ENTITY  evangelism.desc                 "Primygtinai patartina šį „&brandShortName;“ naujinimą įdiegti kuo skubiau.">
+
+<!ENTITY  downloadPage.title              "Atsiunčiama programa „&brandShortName;“">
+<!ENTITY  downloading.intro               "Atsiunčiamas naujinimas…">
+<!ENTITY  connecting.label                "Jungiamasi prie naujinimų serverio…">
+<!ENTITY  verificationFailedText.label    "„&brandShortName;“ nepavyko patikrinti atsiųsto prieauginio naujinimo nepažeistumo, todėl šiuo metu atsiunčiamas visas atnaujinimo paketas.">
+
+<!ENTITY  viewDetails.tooltip             "Rodyti išsamesnę informaciją apie naujinimą">
+
+<!ENTITY  details.link                    "Išsamiau">
+
+<!ENTITY  error.title                     "Atnaujinti nepavyko">
+
+<!ENTITY  error.label                     "Nesklandumai ieškant, atsiunčiant ar įdiegiant šį naujinimą. „&brandShortName;“ nepavyko atnaujinti dėl šių priežasčių:">
+                                           
+<!ENTITY  errorManual.label               "Galima atnaujinti „&brandShortName;“ rankiniu būdu aplankius šią svetainę ir atsisiuntus naujausią versiją:">
+                                           
+<!ENTITY  errorpatching.intro             "Dalinis atnaujinimas nepavyko. „&brandShortName;“ bandys dar kartą, atsiuntus visą naujinimą.">
+
+<!ENTITY  genericBackgroundError.label    "Programai „&brandShortName;“ nepavyko patikrinti, ar yra galimų programos naujinimų. Prašome patikrinti, ar turite naujausią „&brandShortName;“ laidą, adresu:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "Kažkodėl nepavyksta „&brandShortName;“ atnaujinti, naudojant šifruotą ryšį. Prašome patikrinti, ar turite naujausią „&brandShortName;“ laidą, adresu:">
+<!ENTITY  errorCertAttrHasUpdate.label    "Kažkas bando „&brandShortName;“ įsiūlyti nesaugų naujinimą. Susisiekite su savo tinklo administratoriais ir paprašykite jų pagalbos.">
+
+<!ENTITY  finishedPage.title              "Naujinimas paruoštas diegimui">
+<!ENTITY  finishedPage.text               "Naujinimas bus įdiegtas kitą kartą paleidus „&brandShortName;“. Galite paleisti „&brandShortName;“ iš naujo dabar, arba tęsti darbą ir tai padaryti vėliau.">
+
+<!ENTITY  finishedBackgroundPage.text     "Parsiųstas ir paruoštas diegti „&brandShortName;“ saugumo ir stabilumo atnaujinimas.">
+<!ENTITY  finishedBackground.name         "Naujinimas:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "Naujinimas bus įdiegtas kitą kartą paleidus „&brandShortName;“. Galite paleisti „&brandShortName;“ iš naujo dabar, arba tęsti darbą ir tai padaryti vėliau.">
+<!ENTITY  finishedBackground.moreElevated "Šis naujinimas reikalauja administratoriaus teisių. Naujinimas bus įdiegtas kitą kartą paleidžiant „&brandShortName;“. Galite perleisti „&brandShortName;“ dabar, tęsti darbą ir perleisti vėliau, arba atsisakyti šio naujinimo.">
+
+<!ENTITY  update.details.label            "Išsamiau">
+<!ENTITY  update.installedOn.label        "Įdiegta:">
+<!ENTITY  update.status.label             "Būsena:">

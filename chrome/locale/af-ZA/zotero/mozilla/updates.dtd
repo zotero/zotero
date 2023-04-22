@@ -1,0 +1,63 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "Sagtewarebywerking">
+
+<!ENTITY  checking.title                  "Kontroleer vir bywerkings">
+<!ENTITY  updateCheck.label               "Soek tans vir jonger weergawes van &brandShortName;…">
+
+<!ENTITY  noupdatesfound.title            "Geen bywerkings gevind nie">
+<!ENTITY  noupdatesautoenabled.intro      "Daar is geen bywerkings beskikbaar nie. &brandShortName; kan nou en dan kontroleer vir bywerkings.">
+<!ENTITY  noupdatesautodisabled.intro     "Daar is geen bywerkings nie. Kontroleer later weer, of aktiveer &brandShortName; se outomatiese kontrolering.">
+
+<!ENTITY  manualUpdate.title              "Kon nie bywerk nie">
+<!ENTITY  manualUpdate.desc               "'n Aanbevole sekuriteit-en-stabiliteit-bywerking is beskikbaar, maar u het onvoldoende toestemming om dit te installeer. Kontak u stelseladministrateur of probeer weer met 'n rekening wat wel toestemming het om sagteware op hierdie rekenaar te installeer.">
+<!ENTITY  manualUpdate.space.desc         "'n Aanbevole bywerking vir beveiliging en stabiliteit is beskikbaar, maar jy het nie genoeg ruimte om dit te installeer nie.">
+<!ENTITY  manualUpdateGetMsg.label        "U kan altyd die jongste weergawe van &brandShortName; kry by:">
+
+<!ENTITY  unsupported.title               "Stelsel nie meer ondersteun nie">
+<!ENTITY  unsupported.label               "U kopie van &brandShortName; is nie meer op datum nie, maar die jongste weergawe word nie deur u stelsel ondersteun nie. Gradeer asb. u stelsel op en probeer weer. Dié kennisgewing sal nie weer wys nie, maar ">
+<!ENTITY  unsupportedLink.label           "lees gerus meer.">
+
+<!ENTITY  clickHere.label                 "Bekyk meer inligting oor hierdie bywerking">
+
+<!ENTITY  evangelism.desc                 "Daar word sterk aanbeveel dat u hierdie bywerking vir &brandShortName; so gou moontlik toepas.">
+
+<!ENTITY  downloadPage.title              "Laai tans &brandShortName; af">
+<!ENTITY  downloading.intro               "Laai tans die bywerking af…">
+<!ENTITY  connecting.label                "Koppel tans aan die bywerkingbediener…">
+<!ENTITY  verificationFailedText.label    "&brandShortName; kon nie die integriteit van die trapsgewyse bywerking wat afgelaai is, verifieer nie, en daarom laai dit nou die volledige pakket af.">
+
+<!ENTITY  viewDetails.tooltip             "Bekyk details vir hierdie bywerking">
+
+<!ENTITY  details.link                    "Besonderhede">
+
+<!ENTITY  error.title                     "Bywerking het misluk">
+
+<!ENTITY  error.label                     "Kon nie vir hierdie bywerking kontroleer, dit aflaai of installeer nie. &brandShortName; kon nie opgedateer word nie, omdat:">
+                                           
+<!ENTITY  errorManual.label               "U kan &brandShortName; handmatig bywerk deur hierdie skakel te besoek en die jongste weergawe af te laai:">
+                                           
+<!ENTITY  errorpatching.intro             "Die gedeeltelike bywerking kon nie toegepas word nie. &brandShortName; sal weer probeer deur 'n volledige bywerking af te laai.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; kan nie bepaal of daar 'n bywerking is nie. Kontroleer of jy die jongste weergawe van &brandShortName; het by:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "Iets verhoed &brandShortName; om beveilig by te werk. Kontroleer of jy die jongste weergawe van &brandShortName; het by:">
+<!ENTITY  errorCertAttrHasUpdate.label    "Iets probeer &brandShortName; om die bos lei om 'n onbeveiligde bywerking te aanvaar. Kontak gerus jou netwerkverskaffer en kry hulp daarvoor.">
+
+<!ENTITY  finishedPage.title              "Bywerking gereed om geïnstalleer te word">
+<!ENTITY  finishedPage.text               "Die bywerking sal geïnstalleer word wanneer &brandShortName; weer begin. U kan &brandShortName; nou herbegin, of voortgaan om te werk, en later herbegin.">
+
+<!ENTITY  finishedBackgroundPage.text     "'n Sekuriteit-en-stabiliteit-bywerking vir &brandShortName; is afgelaai en is gereed om geïnstalleer te word.">
+<!ENTITY  finishedBackground.name         "Bywerking:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "Die bywerking sal geïnstalleer word wanneer &brandShortName; weer begin. U kan &brandShortName; nou herbegin, of voortgaan om te werk, en later herbegin.">
+
+
+<!ENTITY  update.details.label            "Besonderhede">
+<!ENTITY  update.installedOn.label        "Geïnstalleer op:">
+<!ENTITY  update.status.label             "Status:">
+
+<!ENTITY  finishedBackground.moreElevated "This update requires administrator privileges. The update will be
+                                           installed the next time &brandShortName; starts. You can restart
+                                           &brandShortName; now, continue working and restart later, or decline this
+                                           update.">

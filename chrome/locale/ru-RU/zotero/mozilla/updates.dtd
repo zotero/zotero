@@ -1,0 +1,41 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+
+<!ENTITY updateWizard.title "Обновление программного обеспечения">
+<!ENTITY checking.title "Идёт проверка наличия обновлений…">
+<!ENTITY updateCheck.label "Идёт поиск новых версий &brandShortName;…">
+<!ENTITY noupdatesfound.title "Обновления отсутствуют">
+<!ENTITY noupdatesautoenabled.intro "Обновления отсутствуют. &brandShortName; будет периодически проверять наличие обновлений.">
+<!ENTITY noupdatesautodisabled.intro "Обновления отсутствуют. Пожалуйста, проверьте позже, или включите в &brandShortName; функцию автоматической проверки наличия обновлений.">
+<!ENTITY manualUpdate.title "Не удалось произвести обновление">
+<!ENTITY manualUpdate.desc "Появилось обновление, повышающее безопасность и стабильность работы, но у вас недостаточно прав, требуемых для его установки. Пожалуйста, свяжитесь со своим системным администратором или попробуйте произвести обновление с правами учётной записи, имеющей права на установку программного обеспечения на этом компьютере.">
+<!ENTITY manualUpdate.space.desc "Появилось обновление, повышающее безопасность и стабильность работы, но у вас недостаточно места на диске для его установки.">
+<!ENTITY manualUpdateGetMsg.label "Вы всегда можете получить последнюю версию &brandShortName; на сайте:">
+<!ENTITY unsupported.title "Система не поддерживается">
+<!ENTITY unsupported.label "Ваш &brandShortName; устарел, но его последняя версия не поддерживает вашу операционную систему. Пожалуйста, обновите вашу систему, затем повторите попытку. Вы не увидите это уведомление снова, но вы можете">
+<!ENTITY unsupportedLink.label "узнать об этом больше.">
+<!ENTITY clickHere.label "Просмотреть более подробную информацию об этом обновлении">
+<!ENTITY evangelism.desc "Настоятельно рекомендуется как можно скорее применить это обновление к &brandShortName;.">
+<!ENTITY downloadPage.title "Загрузка &brandShortName;">
+<!ENTITY downloading.intro "Идёт загрузка обновления…">
+<!ENTITY connecting.label "Соединение с сервером обновлений…">
+<!ENTITY verificationFailedText.label "&brandShortName; не удалось удостовериться в целостности загруженного частичного обновления, поэтому он загружает полное обновление.">
+<!ENTITY viewDetails.tooltip "Подробнее об этом обновлении">
+<!ENTITY details.link "Подробности">
+<!ENTITY error.title "Обновление не удалось">
+<!ENTITY error.label "При проверке, загрузке или установке этого обновления возникли проблемы. &brandShortName; не был обновлен по следующей причине:">
+<!ENTITY errorManual.label "Вы можете обновить &brandShortName; вручную, перейдя по следующей ссылке и загрузив его последнюю версию:">
+<!ENTITY errorpatching.intro "Частичное обновление не может быть установлено. &brandShortName; попытается установить обновление, загрузив полное обновление.">
+<!ENTITY genericBackgroundError.label "&brandShortName; не может определить, доступно ли обновление. Пожалуйста, убедитесь, что у вас установлена последняя версия &brandShortName; с сайта:">
+<!ENTITY errorCertAttrNoUpdate2.label "Что-то не даёт &brandShortName; произвести безопасное обновление. Пожалуйста, убедитесь, что у вас установлена последняя версия &brandShortName; с сайта:">
+<!ENTITY errorCertAttrHasUpdate.label "Что-то пытается обмануть &brandShortName;, предлагая ему небезопасное обновление. Пожалуйста, свяжитесь с вашим Интернет-провайдером, и попросите его о помощи.">
+<!ENTITY finishedPage.title "Обновление готово для установки">
+<!ENTITY finishedPage.text "Обновление будет установлено при следующем запуске &brandShortName;. Вы можете перезапустить &brandShortName; прямо сейчас, или продолжить работу и перезапустить его позже.">
+<!ENTITY finishedBackgroundPage.text "Обновление стабильности и безопасности для &brandShortName; успешно загружено и готово для установки.">
+<!ENTITY finishedBackground.name "Обновление:">
+<!ENTITY finishedBackground.more "Обновление будет установлено при следующем запуске &brandShortName;. Вы можете перезапустить &brandShortName; прямо сейчас, или продолжить работу и перезапустить его позже.">
+<!ENTITY finishedBackground.moreElevated "Для этого обновления необходимы права администратора. Обновление будет установлено при следующем запуске &brandShortName;. Вы можете перезапустить &brandShortName; сейчас, продолжить работу и перезапустить его позже, или отказаться от этого обновления.">
+<!ENTITY update.details.label "Подробности">
+<!ENTITY update.installedOn.label "Установлено:">
+<!ENTITY update.status.label "Статус:">

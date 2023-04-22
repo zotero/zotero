@@ -1,0 +1,58 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "Actualització de programari">
+
+<!ENTITY  checking.title                  "Cerca d'actualitzacions">
+<!ENTITY  updateCheck.label               "S'estan cercant versions més noves del &brandShortName;…">
+
+<!ENTITY  noupdatesfound.title            "No s'ha trobat cap actualització">
+<!ENTITY  noupdatesautoenabled.intro      "No hi ha cap actualització disponible. El &brandShortName; cercarà actualitzacions periòdicament.">
+<!ENTITY  noupdatesautodisabled.intro     "No hi ha cap actualització disponible. Torneu-ho a provar més endavant o activeu la cerca d'actualitzacions automàtica del &brandShortName;.">
+
+<!ENTITY  manualUpdate.title              "No es pot actualitzar">
+<!ENTITY  manualUpdate.desc               "Hi ha disponible una actualització de seguretat i estabilitat recomanada, però no teniu els permisos necessaris per instal·lar-la. Contacteu amb el vostre administrador de sistemes o torneu a provar-ho des d'un compte que tingui permisos per instal·lar programari en aquest ordinador.">
+<!ENTITY  manualUpdate.space.desc         "Hi ha disponible una actualització de seguretat i estabilitat recomanada, però no teniu espai suficient per instal·lar-la.">
+<!ENTITY  manualUpdateGetMsg.label        "Sempre podeu aconseguir la darrera versió del &brandShortName; a:">
+
+<!ENTITY  unsupported.title               "Sistema incompatible">
+<!ENTITY  unsupported.label               "El &brandShortName; no està actualitzat, però la darrera versió és incompatible amb el vostre sistema. Actualitzeu el sistema i torneu-ho a provar. Aquest missatge només es mostra una vegada, però podeu">
+<!ENTITY  unsupportedLink.label           "obtenir més informació.">
+
+<!ENTITY  clickHere.label                 "Feu clic aquí per a més informació general d'aquesta actualització">
+
+<!ENTITY  evangelism.desc                 "És molt recomanable que apliqueu aquesta actualització en el &brandShortName; tan aviat com sigui possible.">
+
+<!ENTITY  downloadPage.title              "S'està baixant el &brandShortName;">
+<!ENTITY  downloading.intro               "S'està baixant l'actualització…">
+<!ENTITY  connecting.label                "S'està connectant al servidor d'actualitzacions…">
+<!ENTITY  verificationFailedText.label    "El &brandShortName; no ha pogut verificar la integritat de l'actualització incremental que ha baixat, per això, ara està baixant-se el paquet d'actualització complet.">
+
+<!ENTITY  viewDetails.tooltip             "Consulteu els detalls de l'actualització">
+
+<!ENTITY  details.link                    "Detalls">
+
+<!ENTITY  error.title                     "L'actualització ha fallat">
+
+<!ENTITY  error.label                     "S'han produït problemes en instal·lar aquesta actualització. El &brandShortName; no s'ha pogut actualitzar perquè:">
+                                           
+<!ENTITY  errorManual.label               "Podeu actualitzar el &brandShortName; manualment visitant aquest enllaç i baixant la darrera versió:">
+                                           
+<!ENTITY  errorpatching.intro             "L'actualització parcial no s'ha pogut aplicar. El &brandShortName; ho tornarà a provar baixant una actualització completa.">
+
+<!ENTITY  genericBackgroundError.label    "El &brandShortName; no pot determinar si hi ha una actualització disponible. Assegureu-vos que teniu la darrera versió del &brandShortName; de:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "Quelcom ha evitat que el &brandShortName; s'actualitzés de forma segura. Assegureu-vos que teniu la darrera versió del &brandShortName; de:">
+<!ENTITY  errorCertAttrHasUpdate.label    "Quelcom està mirant d'enganyar el &brandShortName; perquè accepti una actualització insegura. Contacteu amb el vostre proveïdor de la xarxa i demaneu ajuda.">
+
+<!ENTITY  finishedPage.title              "L'actualització està preparada per poder instal·lar-la">
+<!ENTITY  finishedPage.text               "L'actualització s'instal·larà la propera vegada que s'iniciï el &brandShortName;. Podeu reiniciar el &brandShortName; ara, o continuar treballant i reiniciar-lo més endavant.">
+
+<!ENTITY  finishedBackgroundPage.text     "S'ha baixat una actualització de seguretat i estabilitat del &brandShortName; i està preparada per poder instal·lar-la.">
+<!ENTITY  finishedBackground.name         "Actualització:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "L'actualització s'instal·larà la propera vegada que s'iniciï el &brandShortName;. Podeu reiniciar el &brandShortName; ara, o continuar treballant i reiniciar-lo més endavant.">
+<!ENTITY  finishedBackground.moreElevated "Aquesta actualització requereix privilegis d'administrador. L'actualització s'instal·larà la propera vegada que s'iniciï el &brandShortName;. Podeu reiniciar el &brandShortName; ara, continuar treballant i reiniciar-lo més endavant, o bé rebutjar aquesta actualització.">
+
+<!ENTITY  update.details.label            "Detalls">
+<!ENTITY  update.installedOn.label        "Instal·lat el:">
+<!ENTITY  update.status.label             "Estat:">

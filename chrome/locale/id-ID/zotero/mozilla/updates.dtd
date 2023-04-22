@@ -1,0 +1,61 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "Pemutakhiran Perangkat Lunak">
+
+<!ENTITY  checking.title                  "Memeriksa Versi Baru">
+<!ENTITY  updateCheck.label               "Memeriksa versi baru &brandShortName;…">
+
+<!ENTITY  noupdatesfound.title            "Versi Baru Tidak Ditemukan">
+<!ENTITY  noupdatesautoenabled.intro      "Belum ada versi baru yang tersedia. &brandShortName; akan memeriksa versi baru secara periodik.">
+<!ENTITY  noupdatesautodisabled.intro     "Belum ada versi baru yang tersedia. Periksa kembali nanti atau aktifkan pemeriksaan versi baru otomatis pada &brandShortName;.">
+
+<!ENTITY  manualUpdate.title              "Tidak dapat memasang versi baru">
+<!ENTITY  manualUpdate.desc               "Versi baru yang lebih aman dan stabil tersedia, tetapi Anda tidak mempunyai hak pada sistem ini untuk memasangnya. Mohon hubungi administrator sistem, atau silakan coba pasang dari akun lain yang mempunyai hak untuk memasang perangkat lunak pada komputer ini.">
+<!ENTITY  manualUpdate.space.desc         "Versi baru yang lebih aman dan stabil tersedia, tetapi Anda tidak mempunyai ruang diska yang cukup untuk memasangnya.">
+<!ENTITY  manualUpdateGetMsg.label        "Anda dapat selalu mengunduh versi terbaru &brandShortName; di:">
+
+<!ENTITY  unsupported.title               "Sistem Tidak Didukung">
+<!ENTITY  unsupported.label               "Versi &brandShortName; adalah versi lawas, tetapi versi baru tidak didukung sistem Anda. Silakan tingkatkan versi sistem Anda, lalu coba lagi. Anda tidak akan mendapatkan pemberitahuan ini lagi, tetapi Anda dapat">
+<!ENTITY  unsupportedLink.label           "mempelajarinya lebih lanjut.">
+
+<!ENTITY  clickHere.label                 "Lihat informasi lebih lanjut tentang pemutakhiran ini">
+
+<!ENTITY  evangelism.desc                 "Sangat disarankan agar Anda menerapkan pemutakhiran &brandShortName; ini sesegera mungkin.">
+
+<!ENTITY  downloadPage.title              "Mengunduh &brandShortName;">
+<!ENTITY  downloading.intro               "Mengunduh versi baru…">
+<!ENTITY  connecting.label                "Menghubungi server pemutakhiran…">
+<!ENTITY  verificationFailedText.label    "&brandShortName; tidak dapat memverifikasi integritas dari pemutakhiran bertahap yang diunduh, sebab itu paket pemutakhiran lengkap kini sedang diunduh.">
+
+<!ENTITY  viewDetails.tooltip             "Tampilkan detail pemutakhiran ini">
+
+<!ENTITY  details.link                    "Detail">
+
+<!ENTITY  error.title                     "Pemutakhiran Gagal">
+
+<!ENTITY  error.label                     "Terjadi masalah pada pemeriksaan, pengunduhan, atau pemasangan pemutakhiran ini. &brandShortName; tidak dapat diperbarui karena:">
+                                           
+<!ENTITY  errorManual.label               "Anda dapat memperbarui &brandShortName; sendiri dengan mengunjungi tautan ini dan mengunduh versi terbaru:">
+                                           
+<!ENTITY  errorpatching.intro             "Pemutakhiran Parsial tidak dapat diaplikasikan. &brandShortName; akan mencoba lagi dengan mengunduh pemutakhiran lengkap.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; tidak dapat mengetahui apakah pemutakhiran tersedia. Pastikan Anda menggunakan versi terbaru &brandShortName; lewat:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "Ada hal yang mencegah &brandShortName; memutakhirkan program secara aman. Silakan periksa apakah Anda menggunakan &brandShortName; versi terbaru lewat:">
+<!ENTITY  errorCertAttrHasUpdate.label    "Ada yang mencoba menipu &brandShortName; untuk menerima pemutakhiran yang tidak aman. Silakan hubungi penyedia jaringan Internet Anda dan meminta bantuan.">
+
+<!ENTITY  finishedPage.title              "Pemutakhiran Siap Dipasang">
+<!ENTITY  finishedPage.text               "Pemutakhiran akan dipasang saat &brandShortName; dibuka lagi. Anda dapat memulai ulang &brandShortName; sekarang juga atau tetap bekerja dan memulai ulang nanti.">
+
+<!ENTITY  finishedBackgroundPage.text     "Pemutakhiran keamanan dan stabilitas untuk &brandShortName; telah diunduh dan siap untuk dipasang.">
+<!ENTITY  finishedBackground.name         "Pemutakhiran:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "Pemutakhiran akan dipasang saat &brandShortName; dimulai lagi. Anda dapat memulai ulang &brandShortName; sekarang juga atau tetap bekerja dan memulai ulang nanti.">
+<!ENTITY  finishedBackground.moreElevated "Pemutakhiran ini membutuhkan izin administrator. Pemutakhiran akan 
+                                           dipasang saat &brandShortName; dimulai kembali. Anda dapat memulai ulang 
+                                           &brandShortName; sekarang juga, melanjutkan pekerjaan dan memulai ulang nanti, atau menolak 
+                                           pemutakhiran ini.">
+
+<!ENTITY  update.details.label            "Detail">
+<!ENTITY  update.installedOn.label        "Dipasang pada:">
+<!ENTITY  update.status.label             "Status:">

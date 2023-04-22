@@ -1,0 +1,81 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "Ohjelmistopäivitys">
+
+<!ENTITY  checking.title                  "Haetaan päivityksiä">
+<!ENTITY  updateCheck.label               "Haetaan päivityksiä &brandShortName;iin…">
+
+<!ENTITY  noupdatesfound.title            "Päivityksiä ei löytynyt">
+<!ENTITY  noupdatesautoenabled.intro      "Uusia päivityksiä ei ole saatavilla. &brandShortName; hakee
+                                            päivityksiä väliajoin.">
+<!ENTITY  noupdatesautodisabled.intro     "Uusia päivityksiä ei ole saatavilla. Hae päivityksiä myöhemmin uudestaan
+                                           tai ota käyttöön &brandShortName;in automaattinen päivitysten tarkistus.">
+
+<!ENTITY  manualUpdate.title              "Päivitys ei onnistu">
+<!ENTITY  manualUpdate.desc               "Suositeltu turvallisuus- ja vakauspäivitys on saatavilla, mutta sinulla ei ole
+                                           tarvittavia oikeuksia sen asentamiseen. Ota yhteys järjestelmäsi ylläpitäjään
+                                           tai yritä uudelleen käyttäjätilillä, jolla on oikeus asentaa ohjelmia
+                                           tietokoneellesi.">
+<!ENTITY  manualUpdate.space.desc         "Suositeltu turvallisuus- ja vakauspäivitys on saatavilla, mutta sen asentamiseen
+                                           ei löydy riittävästi vapaata tilaa.">
+<!ENTITY  manualUpdateGetMsg.label        "Uusin versio &brandShortName;ista on aina saatavilla osoitteesta:">
+
+<!ENTITY  unsupported.title               "Ei tuettu järjestelmä">
+<!ENTITY  unsupported.label               "&brandShortName;isi on vanhentunut, mutta uusin versio ei ole yhteensopiva 
+                                           käyttöjärjestelmäsi kanssa. Päivitä käyttöjärjestelmäsi ja yritä uudelleen.
+                                           Tätä ilmoitusta ei näytetä enää uudestaan, mutta voi halutessasi">
+<!ENTITY  unsupportedLink.label           "lukea lisää.">
+
+<!ENTITY  clickHere.label                 "Lue lisätietoja tästä päivityksestä">
+
+<!ENTITY  evangelism.desc                 "Suosittelemme, että &brandShortName; päivitetään ensi tilassa.">
+
+<!ENTITY  downloadPage.title              "Ladataan &brandShortName;ia">
+<!ENTITY  downloading.intro               "Ladataan päivitystä…">
+<!ENTITY  connecting.label                "Muodostetaan yhteyttä päivityspalvelimeen…">
+<!ENTITY  verificationFailedText.label    "Päivityspaketti ei läpäissyt virheettömyystarkistusta, joten
+                                            &brandShortName; lataa uuden version kokonaisuudessaan.">
+
+<!ENTITY  viewDetails.tooltip             "Lisätietoja tästä päivityksestä">
+
+<!ENTITY  details.link                    "Lisätietoja">
+
+<!ENTITY  error.title                     "Päivitys ei onnistunut">
+
+<!ENTITY  error.label                     "Päivityksen lataus, tarkistus tai asennus ei onnistunut.
+                                            Päivitys aiheutti virheilmoituksen:">
+                                           
+<!ENTITY  errorManual.label               "&brandShortName; voidaan päivittää käsin lataamalla ja 
+                                            asentamalla ohjelman uusin versio osoitteesta:">
+                                           
+<!ENTITY  errorpatching.intro             "Korjauspäivitys ei toiminut. 
+                                            &brandShortName; lataa päivitetyn ohjelmaversion ja yrittää uudestaan.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; ei kykene tarkistamaan, onko uudempaa versiota saatavilla.
+                                           Tarkista, että käytät &brandShortName;in uusinta versiota osoitteesta:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "Jokin estää &brandShortName;ia päivittämistä itseään turvallisesti.
+                                           Tarkista, että käytät &brandShortName;in uusinta versiota osoitteesta:">
+<!ENTITY  errorCertAttrHasUpdate.label    "Jokin yrittää huijata &brandShortName;ia hyväksymään päivityksen, joka ei ole
+                                           turvallinen. Pyydä apua Internet-palveluntarjoajaltasi.">
+
+<!ENTITY  finishedPage.title              "Päivitys on valmis asennettavaksi">
+<!ENTITY  finishedPage.text               "Päivitys asennetaan, kun &brandShortName; käynnistetään uudelleen. Voit
+                                           käynnistää &brandShortName;in uudelleen nyt tai jatkaa &brandShortName;in
+                                           käyttöä ja käynnistää sen uudelleen myöhemmin.">
+
+<!ENTITY  finishedBackgroundPage.text     "Turvallisuus- ja vakauspäivitys &brandShortName;iin
+                                           on ladattu ja valmis asennettavaksi.">
+<!ENTITY  finishedBackground.name         "Päivitys:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "Päivitys asennetaan, kun &brandShortName; käynnistetään uudelleen. Voit
+                                           käynnistää &brandShortName;in uudelleen nyt tai jatkaa &brandShortName;in
+                                           käyttöä ja käynnistää sen uudelleen myöhemmin.">
+<!ENTITY  finishedBackground.moreElevated "Tämä päivitys vaatii järjestelmänvalvojan oikeudet. Päivitys asennetaan,
+                                           kun &brandShortName; käynnistetään uudelleen. Voit käynnistää
+                                           &brandShortName;in uudelleen nyt, jatkaa &brandShortName;in käyttöä ja
+                                           käynnistää sen uudelleen myöhemmin tai hylätä tämän päivityksen.">
+
+<!ENTITY  update.details.label            "Yksityiskohdat">
+<!ENTITY  update.installedOn.label        "Asennusaika:">
+<!ENTITY  update.status.label             "Tila:">

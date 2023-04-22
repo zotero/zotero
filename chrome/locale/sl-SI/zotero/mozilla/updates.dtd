@@ -1,0 +1,76 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "Posodobitev programske opreme">
+
+<!ENTITY  checking.title                  "Iskanje posodobitev">
+<!ENTITY  updateCheck.label               "Iskanje novih različic programa &brandShortName; ...">
+
+<!ENTITY  noupdatesfound.title            "Trenutno ni posodobitev">
+<!ENTITY  noupdatesautoenabled.intro      "Posodobitve niso na voljo, vendar jih bo &brandShortName; redno
+                                           iskal.">
+<!ENTITY  noupdatesautodisabled.intro     "Posodobitve niso na voljo. Ponovno poskusite pozneje ali
+                                           vključite samodejno preverjanje posodobitev za &brandShortName;.">
+
+<!ENTITY  manualUpdate.title              "Posodobitev ni mogoča">
+<!ENTITY  manualUpdate.desc               "Za večjo varnost in zanesljivost vam priporočamo posodobitev, vendar nimate
+                                           potrebnih dovoljenj, da bi jo namestili. Obrnite se na skrbnika vašega
+                                           sistema ali ponovno poskusite z računom, ki ima dovoljenja za nameščanje
+                                           programske opreme na ta računalnik.">
+<!ENTITY  manualUpdate.space.desc         "Na voljo je priporočena posodobitev za izboljšanje varnosti in zanesljivosti,
+                                           vendar nimate dovolj prostora za namestitev.">
+<!ENTITY  manualUpdateGetMsg.label        "Najnovejšo različico programa &brandShortName; lahko vedno najdete na:">
+
+<!ENTITY  unsupported.title               "Sistem ni podprt">
+<!ENTITY  unsupported.label               "Vaš &brandShortName; je zastarel, vendar najnovejša različica ni podprta
+                                           na vašem sistemu. Posodobite sistem in poskusite znova.
+                                           Tega opozorila vam ne bomo več prikazovali, lahko pa preberete ">
+<!ENTITY  unsupportedLink.label           "več o tem.">
+
+<!ENTITY  clickHere.label                 "Kliknite za več splošnih podatkov o tej posodobitvi">
+
+<!ENTITY  evangelism.desc                 "Toplo priporočamo, da posodobitev za 
+                                           &brandShortName; uveljavite čimprej.">
+
+<!ENTITY  downloadPage.title              "Prenašanje &brandShortName;">
+<!ENTITY  downloading.intro               "Prenašanje posodobitev ...">
+<!ENTITY  connecting.label                "Povezujem se na strežnik za posodobitve...">
+<!ENTITY  verificationFailedText.label    "Ker ni bilo mogoče preveriti neokrnjenosti posodobitve po stopnjah, se zdaj prenaša celoten posodobitveni paket.">
+
+<!ENTITY  viewDetails.tooltip             "Prikaži podrobnosti posodobitve">
+
+<!ENTITY  details.link                    "Podrobnosti">
+
+<!ENTITY  error.title                     "Posodobitev ni uspela">
+
+<!ENTITY  error.label                     "Pri iskanju, prenosu ali namestitvi te posodobitve je prišlo do napak zaradi:">
+                                           
+<!ENTITY  errorManual.label               "Program lahko posodobite ročno, če obiščete naslednjo povezavo in prenesete najnovejšo različico:">
+                                           
+<!ENTITY  errorpatching.intro             "Delne posodobitve ne morem namestiti. Prenesena bo celotna posodobitev.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; ne uspe preveriti, ali je na voljo posodobitev.
+                                           Prepričajte se, da uporabljate najnovejšo različico &brandShortName;a:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "&brandShortName;a ni mogoče varno posodobiti.
+                                           Prepričajte se, da uporabljate najnovejšo različico &brandShortName;a:">
+<!ENTITY  errorCertAttrHasUpdate.label    "Nekdo želi prelisičiti &brandShortName;, da bi sprejel
+                                           nevarno posodobitev. Za pomoč se obrnite na skrbnika vašega omrežja.">
+
+<!ENTITY  finishedPage.title              "Posodobitev je na voljo">
+<!ENTITY  finishedPage.text               "Posodobitev bo nameščena, ko boste naslednjič zagnali &brandShortName;. To lahko 
+                                           storite zdaj ali nadaljujete z delom in ga ponovno zaženete pozneje.">
+
+<!ENTITY  finishedBackgroundPage.text     "Varnostna posodobitev za &brandShortName; je bila prenesena
+                                           in je na voljo za namestitev.">
+<!ENTITY  finishedBackground.name         "Posodobitev:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "Posodobitev bo nameščena, ko boste naslednjič zagnali &brandShortName;. To lahko 
+                                           storite zdaj ali nadaljujete z delom in ga ponovno zaženete pozneje.">
+<!ENTITY  finishedBackground.moreElevated "Ta posodobitev zahteva skrbniška dovoljenja. Posodobitev bo
+                                           nameščena, ko se &brandShortName; naslednjič zažene. &brandShortName;
+                                           lahko ponovno zaženete zdaj, nadaljujete z delom in ga ponovno zaženete
+                                           pozneje ali zavrnete to posodobitev.">
+
+<!ENTITY  update.details.label            "Podrobnosti">
+<!ENTITY  update.installedOn.label        "Datum namestitve:">
+<!ENTITY  update.status.label             "Stanje:">
