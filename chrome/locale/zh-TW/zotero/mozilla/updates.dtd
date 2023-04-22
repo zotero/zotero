@@ -1,0 +1,63 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "軟體更新">
+
+<!ENTITY  checking.title                  "正在檢查是否有更新檔">
+<!ENTITY  updateCheck.label               "正在尋找更新版的 &brandShortName;…">
+
+<!ENTITY  noupdatesfound.title            "無任何更新">
+<!ENTITY  noupdatesautoenabled.intro      "目前沒有新的更新檔。 &brandShortName; 會定期檢查是否有更新。">
+<!ENTITY  noupdatesautodisabled.intro     "目前沒有新的更新檔。請在稍後再檢查或是啟用 &brandShortName; 的自動檢查更新功能。">
+
+<!ENTITY  manualUpdate.title              "無法更新">
+<!ENTITY  manualUpdate.desc               "找到一個新的安全與穩定性更新，但您沒有安裝更新所需的系統權限。請聯絡您的系統管理員，或是從具有安裝軟體權限的系統帳號再試一次。">
+<!ENTITY  manualUpdate.space.desc         "已有可用的安全性和穩定性更新，但
+                                           您沒有足夠的空間可安裝。">
+<!ENTITY  manualUpdateGetMsg.label        "您可以至此處取得最新的 &brandShortName;:">
+
+<!ENTITY  unsupported.title               "不支援的系統">
+<!ENTITY  unsupported.label               "您的 &brandShortName; 已經過時，但最新版本不支援您的系統。請升級您的系統並再試一次。您將不會再看到到此通知，可在此處">
+<!ENTITY  unsupportedLink.label           "了解更多資訊。">
+
+<!ENTITY  clickHere.label                 "檢視關於此更新的詳細訊息">
+
+<!ENTITY  evangelism.desc                 "強烈建議您立刻套用 &brandShortName; 的更新版本。">
+
+<!ENTITY  downloadPage.title              "正在下載 &brandShortName;">
+<!ENTITY  downloading.intro               "正在下載下列更新檔…">
+<!ENTITY  connecting.label                "連線至更新伺服器…">
+<!ENTITY  verificationFailedText.label    "&brandShortName; 無法確認下載更新的完整性，所以現在會重新下載完整的更新套件。">
+
+<!ENTITY  viewDetails.tooltip             "檢視此更新的相關細節">
+
+<!ENTITY  details.link                    "詳細資訊">
+
+<!ENTITY  error.title                     "更新失敗">
+
+<!ENTITY  error.label                     "檢查、下載、或安裝更新時發生問題。 &brandShortName; 無法更新，原因:">
+                                           
+<!ENTITY  errorManual.label               "請手動瀏覽下列網址並下載最新版的 &brandShortName; :">
+                                           
+<!ENTITY  errorpatching.intro             "部份更新失敗。 &brandShortName; 將會重新下載完整更新。">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; 無法偵測可用的更新。請確認
+                                           您已自下列位置下載最新的 &brandShortName;:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "有東西影響 &brandShortName; 安全地更新。
+                                           請確定您已自下列位置安裝最新版本的 &brandShortName;:">
+<!ENTITY  errorCertAttrHasUpdate.label    "有東西想要使 &brandShortName; 下載不安全的更新。
+                                           請聯絡您的網路服務提供者並請求支援。">
+
+<!ENTITY  finishedPage.title              "已可開始安裝更新程式">
+<!ENTITY  finishedPage.text               "此更新會在下次 &brandShortName; 啟動時安裝。您可以現在就重開 &brandShortName;，或是繼續使用，稍後再重新啟動。">
+
+<!ENTITY  finishedBackgroundPage.text     "一個 &brandShortName; 的安全與穩定性更新已經下載，可以立刻開始安裝。">
+<!ENTITY  finishedBackground.name         "更新:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "此更新會在下次 &brandShortName; 啟動時安裝。您可以現在就重開 &brandShortName;，或是繼續使用，稍後再重新啟動。">
+<!ENTITY  finishedBackground.moreElevated "需要有系統管理員權限才能安裝此更新，此更新將在下次啟動 &brandShortName; 時安裝。
+您可以立刻重新啟動 &brandShortName;、繼續使用稍後再更新，或是拒絕此更新。">
+
+<!ENTITY  update.details.label            "詳細資訊">
+<!ENTITY  update.installedOn.label        "安裝於:">
+<!ENTITY  update.status.label             "狀態:">

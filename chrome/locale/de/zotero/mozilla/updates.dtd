@@ -1,0 +1,79 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "Software-Update">
+
+<!ENTITY  checking.title                  "Überprüfe auf verfügbare Updates">
+<!ENTITY  updateCheck.label               "Suche nach neueren Versionen von &brandShortName;…">
+
+<!ENTITY  noupdatesfound.title            "Keine Updates verfügbar">
+<!ENTITY  noupdatesautoenabled.intro      "Es sind keine neuen Updates verfügbar. &brandShortName; wird regelmäßig prüfen,
+                                           ob Updates verfügbar sind.">
+<!ENTITY  noupdatesautodisabled.intro     "Es sind keine neuen Updates verfügbar. Bitte versuchen Sie es später erneut,
+                                           oder aktivieren Sie das automatische &brandShortName;-Update.">
+
+<!ENTITY  manualUpdate.title              "Update unmöglich">
+<!ENTITY  manualUpdate.desc               "Ein empfohlenes Sicherheits- und Stabilitäts-Update ist verfügbar, aber Sie haben
+                                           die benötigten Systemrechte nicht, um es zu installieren. Bitte kontaktieren Sie
+                                           Ihren Systemadministrator oder versuchen Sie es mit einem Benutzer nochmals, der
+                                           die Rechte hat, um auf Ihrem Computer Software zu installieren."> 
+<!ENTITY  manualUpdate.space.desc         "Ein empfohlenes Sicherheits- und Stabilitäts-Update ist verfügbar, aber Sie
+                                           haben nicht genügend Speicherplatz, um es zu installieren">
+<!ENTITY  manualUpdateGetMsg.label        "Die letzte Version von &brandShortName; erhalten Sie immer auf:">
+
+<!ENTITY  unsupported.title               "System nicht unterstützt">
+<!ENTITY  unsupported.label               "Ihr &brandShortName; ist veraltet, aber die aktuelle Version wird auf Ihrem System
+                                           nicht unterstützt. Bitte aktualisieren Sie Ihr System und versuchen Sie es nochmals.
+                                           Sie werden diese Notiz nicht mehr sehen, aber Sie können">
+<!ENTITY  unsupportedLink.label           "weitere Informationen ansehen.">
+
+<!ENTITY  clickHere.label                 "Weitere Informationen zu diesem Update ansehen">
+
+<!ENTITY  evangelism.desc                 "Es wird dringend empfohlen, dass Sie dieses Update
+                                           für &brandShortName; schnellstmöglich installieren.">
+
+
+<!ENTITY  downloadPage.title              "&brandShortName; herunterladen">
+<!ENTITY  downloading.intro               "Das Update wird heruntergeladen…">
+<!ENTITY  connecting.label                "Mit dem Update-Server verbinden…">
+<!ENTITY  verificationFailedText.label    "Die Integrität des heruntergeladenen, inkrementellen Updates für
+                                           &brandShortName; konnte nicht sichergestellt werden. Daher wird nun das
+                                           komplette Update-Paket heruntergeladen.">
+
+<!ENTITY  viewDetails.tooltip             "Details für dieses Update anzeigen">
+
+<!ENTITY  details.link                    "Details">
+
+<!ENTITY  error.title                     "Update fehlgeschlagen">
+
+<!ENTITY  error.label                     "Beim Versuch auf Updates zu überprüfen, diese herunterzuladen oder zu installieren
+                                           sind Probleme aufgetreten. &brandShortName; konnte aus folgendem Grund nicht aktualisiert werden:">
+                                           
+<!ENTITY  errorManual.label               "Sie können &brandShortName; auch manuell aktualisieren. Besuchen Sie dazu den folgenden Link und
+                                           laden die aktuelle Version herunter:">
+                                           
+<!ENTITY  errorpatching.intro             "Das inkrementelle Update für &brandShortName; konnte nicht installiert werden.
+                                           Es wird nun für einen neuen Versuch das komplette Update-Paket heruntergeladen.">
+
+<!ENTITY  genericBackgroundError.label    "Es konnte nicht festgestellt werden, ob ein Update zur Verfügung steht. Bitte
+                                           stellen Sie sicher, dass Sie die letzte Version von &brandShortName; haben, von:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "Etwas hindert &brandShortName; daran, sicher zu aktualisieren.
+                                           Bitte stellen Sie sicher, dass Sie die letzte Version von &brandShortName; haben, von:">
+<!ENTITY  errorCertAttrHasUpdate.label    "Etwas versucht &brandShortName; dazu zu bringen, ein unsicheres Update zu akzeptieren.
+                                           Bitte kontaktieren Sie Ihren Netzwerk-Provider, und fragen Sie um Hilfe.">
+
+<!ENTITY  finishedPage.title              "Update bereit zur Installation">
+<!ENTITY  finishedPage.text               "Das Update wird beim nächsten &brandShortName;-Start installiert. Sie können
+                                           &brandShortName; jetzt neu starten oder weiterarbeiten und später neu starten.">
+
+<!ENTITY  finishedBackgroundPage.text     "Ein Sicherheits- und Stabilitäts-Update für &brandShortName; wurde heruntergeladen
+                                           und ist bereit zur Installation.">
+<!ENTITY  finishedBackground.name         "Update:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "Das Update wird beim nächsten &brandShortName;-Start installiert. Sie können
+                                           &brandShortName; jetzt neu starten oder weiterarbeiten und später neu starten.">
+<!ENTITY  finishedBackground.moreElevated "Dieses Update benötigt Administrator-Berechtigungen. Es wird beim nächsten Neustart von &brandShortName; installiert. Sie können &brandShortName; jetzt neu starten oder weiterarbeiten und später neu starten oder dieses Update ablehnen.">
+
+<!ENTITY  update.details.label            "Details">
+<!ENTITY  update.installedOn.label        "Installiert am:">
+<!ENTITY  update.status.label             "Status:">

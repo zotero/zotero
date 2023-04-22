@@ -1,0 +1,81 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "Ενημέρωση λογισμικού">
+
+<!ENTITY  checking.title                  "Έλεγχος για ενημερώσεις">
+<!ENTITY  updateCheck.label               "Έλεγχος για νεότερες εκδόσεις του &brandShortName;…">
+
+<!ENTITY  noupdatesfound.title            "Δεν υπάρχουν ενημερώσεις">
+<!ENTITY  noupdatesautoenabled.intro      "Δεν υπάρχουν νέες ενημερώσεις διαθέσιμες. Ο &brandShortName; θα ελέγχει
+                                           σε περιοδικά χρονικά διαστήματα για ενημερώσεις.">
+<!ENTITY  noupdatesautodisabled.intro     "Δεν υπάρχουν νέες ενημερώσεις διαθέσιμες. Παρακαλώ ελέγξτε ξανά αργότερα ή ενεργοποιήστε
+                                           τον αυτόματα έλεγχο ενημερώσεων του &brandShortName;.">
+
+<!ENTITY  manualUpdate.title              "Αδυναμία ενημέρωσης">
+<!ENTITY  manualUpdate.desc               "Υπάρχει διαθέσιμη μια νέα ενημέρωση ασφαλείας και σταθερότητας, αλλά δεν έχετε
+                                           δικαιώματα στο σύστημα για την εγκατάσταση της. Επικοινωνήστε με τον διαχειριστή
+                                           του συστήματος σας ή προσπαθήστε ξανά μέσω ενός λογαριασμού που έχει δικαιώματα
+                                           εγκατάστασης σε αυτόν τον υπολογιστή.">
+<!ENTITY  manualUpdate.space.desc         "Μια ενημέρωση σταθερότητας και ασφάλειας είναι διαθέσιμη, αλλά δεν υπάρχει
+                                           αρκετός ελεύθερος χώρος για να εγκατασταθεί.">
+<!ENTITY  manualUpdateGetMsg.label        "Μπορείτε πάντα να κάνετε λήψη της νέας έκδοσης του &brandShortName; από το:">
+
+<!ENTITY  unsupported.title               "Μη υποστηριζόμενο σύστημα">
+<!ENTITY  unsupported.label               "Ο &brandShortName; δεν είναι ενημερωμένος, αλλά η τελευταία του έκδοση
+                                           δεν υποστηρίζεται από το σύστημα σας. Αναβαθμίστε το σύστημα σας και προσπαθήστε ξανά.
+                                           You will not see this notice again, but you can">
+<!ENTITY  unsupportedLink.label           "Διαβάστε περισσότερα.">
+
+<!ENTITY  clickHere.label                 "Πατήστε εδώ">
+
+<!ENTITY  evangelism.desc                 "Σας συστήνουμε να εγκαταστήσετε αυτή την ενημέρωση
+                                           για τον &brandShortName; όσο το δυνατόν πιο σύντομα.">
+
+<!ENTITY  downloadPage.title              "Γίνεται λήψη του &brandShortName;">
+<!ENTITY  downloading.intro               "Οι παρακάτω ενημερώσεις εγκαθίστανται/εγκαταστάθηκαν:">
+<!ENTITY  connecting.label                "Σύνδεση με τον εξυπηρετητή ενημερώσεων...">
+<!ENTITY  verificationFailedText.label    "Ο &brandShortName; δεν μπόρεσε να επιβεβαιώσει την ακεραιότητα
+                                           της σταδιακής ενημέρωσης που λήφθηκε, και έτσι τώρα κάνει λήψη
+                                           ολόκληρου του πακέτου αναβάθμισης.">
+
+<!ENTITY  viewDetails.tooltip             "Προβολή λεπτομερειών για αυτή την ενημέρωση">
+
+<!ENTITY  details.link                    "Λεπτομέρειες">
+
+<!ENTITY  error.title                     "Αποτυχία ενημέρωσης">
+
+<!ENTITY  error.label                     "Υπήρξαν προβλήματα με την εγκατάσταση αυτής της ενημέρωσης. Ο &brandShortName; δεν
+                                           μπορεί να ενημερωθεί λόγω του:">
+                                           
+<!ENTITY  errorManual.label               "Μπορείτε να ενημερώσετε τον &brandShortName; χειροκίνητα . Επισκεφτείτε αυτόν το δεσμό
+                                           για να λάβετε την τελευταία έκδοση:">
+                                           
+<!ENTITY  errorpatching.intro             "Η μερική ενημέρωση δεν μπορεί να εφαρμοσθεί. 
+                                           Ο &brandShortName; θα προσπαθήσει ξανά να κάνει λήψη ολόκληρης της ενημέρωσης.">
+
+<!ENTITY  genericBackgroundError.label    "Ο &brandShortName; δεν μπόρεσε να εντοπίσει το αν υπάρχει διαθέσιμη ενημέρωση. Παρακαλώ
+                                           βεβαιωθείτε ότι έχετε εγκατεστημένη την πιο πρόσφατη έκδοση του &brandShortName; από:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "Κάτι εμποδίζει την ασφαλή ενημέρωση του &brandShortName;.
+                                           Παρακαλώ ελέγξτε ότι έχετε την πιο πρόσφατη έκδοση του &brandShortName; από:">
+<!ENTITY  errorCertAttrHasUpdate.label    "Κάτι προσπαθεί να ξεγελάσει τον &brandShortName; ώστε να δεχθεί μια μη ασφαλή ενημέρωση.
+                                           Παρακαλώ επικοινωνήστε με τον πάροχο σας για βοήθεια.">
+
+<!ENTITY  finishedPage.title              "Η ενημέρωση είναι έτοιμη για εγκατάσταση">
+<!ENTITY  finishedPage.text               "Η ενημέρωση θα εγκατασταθεί στην επόμενη εκκίνηση του &brandShortName;. Μπορείτε
+                                           να επανεκκινήσετε τον &brandShortName; τώρα, ή να συνεχίσετε και τον επανεκκινήσετε αργότερα.">
+
+<!ENTITY  finishedBackgroundPage.text     "Έγινε λήψη μιας ενημέρωσης σταθερότητας και ασφάλειας για τον &brandShortName;
+                                           και είναι έτοιμη για εγκατάσταση.">
+<!ENTITY  finishedBackground.name         "Ενημέρωση:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "Η ενημέρωση θα εγκατασταθεί στην επόμενη εκκίνηση του &brandShortName;. Μπορείτε
+                                            να επανεκκινήσετε τον &brandShortName; τώρα, ή να συνεχίσετε και τον επανεκκινήσετε αργότερα.">
+<!ENTITY  finishedBackground.moreElevated "Η ενημέρωση απαιτεί δικαιώματα διαχειριστή. Η ενημέρωση
+                                           θα εγκατασταθεί την επόμενη φορά που ο &brandShortName; θα ξεκινήσει. Μπορείτε είτε να επανεκκινήσετε το
+                                           &brandShortName; τώρα, είτε να συνεχίσετε τη δουλειά σας και να επανεκκινήσετε αργότερα, είτε να αρνηθείτε
+                                           την ενημέρωση.">
+
+<!ENTITY  update.details.label            "Λεπτομέρειες">
+<!ENTITY  update.installedOn.label        "Εγκαταστάθηκε σε:">
+<!ENTITY  update.status.label             "Κατάσταση:">

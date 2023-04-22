@@ -1,0 +1,61 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "소프트웨어 업데이트">
+
+<!ENTITY  checking.title                  "새 업데이트 확인">
+<!ENTITY  updateCheck.label               "&brandShortName; 새 버전 찾기…">
+
+<!ENTITY  noupdatesfound.title            "새 업데이트 없음">
+<!ENTITY  noupdatesautoenabled.intro      "현재 업데이트가 없습니다. &brandShortName;는 주기적으로 업데이트를 확인하고 있습니다.">
+<!ENTITY  noupdatesautodisabled.intro     "현재 업데이트가 없습니다. 다시 확인 하거나 &brandShortName;가 자동 업데이트 확인을 하도록 설정하십시오.">
+
+<!ENTITY  manualUpdate.title              "업데이트 오류">
+<!ENTITY  manualUpdate.desc               "보안 및 안정성을 향상하는 업데이트가 있습니다만 소프트웨어 설치 권한이 없습니다. 관리자에게 문의하거나 컴퓨터에 소프트웨어를 설치할 수 있는 권한을 가진 계정으로 로그인 후 진행해 주십시오.">
+<!ENTITY  manualUpdate.space.desc         "추천 보안 및 안정성 업데이트가 있으나 설치 가능한 충분한 공간이 없습니다.">
+<!ENTITY  manualUpdateGetMsg.label        "&brandShortName; 최신 버전은 아래 URL에서 다운로드 가능합니다: ">
+
+<!ENTITY  unsupported.title               "지원 대상 외 시스템입니다">
+<!ENTITY  unsupported.label               "&brandShortName; 업데이트가 있으나 최신 버전은 현재 운영 체제를 지원하지 않습니다. 시스템을 업그레이드 하신 후 다시 시도해 두십시오. 앞으로 이 메시지 다시 표시 안합니다.">
+<!ENTITY  unsupportedLink.label           "정보 확인">
+
+<!ENTITY  clickHere.label                 "이 업데이트에 대한 상세 정보 보기">
+
+<!ENTITY  evangelism.desc                 "&brandShortName; 업데이트를 가능한 빨리 업데이트 하시길 권장합니다.">
+
+<!ENTITY  downloadPage.title              "&brandShortName; 다운로드 중…">
+<!ENTITY  downloading.intro               "업데이트 다운로드 중…">
+<!ENTITY  connecting.label                "업데이트 서버에 접속하는 중…">
+<!ENTITY  verificationFailedText.label    "&brandShortName;가 다운로드 된 업데이트의 통합성 여부를 확인할 수 없습니다. 전체 소프트웨어를 다운로드 하십시오.">
+
+<!ENTITY  viewDetails.tooltip             "업데이트 상세 정보">
+
+<!ENTITY  details.link                    "상세 정보">
+
+<!ENTITY  error.title                     "업데이트 실패">
+
+<!ENTITY  error.label                     "현재 업데이트를 설치하는 도중 문제가 발생했습니다. &brandShortName;가 업데이트를 설치할 수 없습니다:">
+                                           
+<!ENTITY  errorManual.label               "사용자가 직접 다음 사이트를 방문하여 &brandShortName; 업데이트의 최신 버전을 다운로드 할 수 있습니다.">
+                                           
+<!ENTITY  errorpatching.intro             "부분적인 업데이트를 할 수 없습니다. &brandShortName;가 업데이트 다운로드를 다시 시도합니다.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName;는 업데이트가 있는 지 확인할 수 없습니다. &brandShortName; 최신 버전에서 확인해 보십시오.:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "안전하게 업데이트 하는 중 &brandShortName;가 중단되었습니다. &brandShortName; 최신 버전에서 확인해 보십시오:">
+<!ENTITY  errorCertAttrHasUpdate.label    "외부 프로그램이 &brandShortName;에게 안전하지 않는 연결 중입니다. 네트웍 상태를 보시고 도움을 요청하십시오.">
+
+<!ENTITY  finishedPage.title              "업데이트 설치 준비 완료">
+<!ENTITY  finishedPage.text               "업데이트는 &brandShortName; 다시 시작할 때 적용 합니다. 지금 &brandShortName;를 다시 시작하거나 나중에 하실 수 있습니다.">
+
+<!ENTITY  finishedBackgroundPage.text     "&brandShortName; 보안 및 안정성 업데이트를 다운로드 하였고 설치 준비가 완료되었습니다.">
+<!ENTITY  finishedBackground.name         "업데이트:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "업데이트는 &brandShortName; 다시 시작할 때 적용 합니다. 지금 &brandShortName;를 다시 시작하거나 나중에 하실 수 있습니다.">
+<!ENTITY  finishedBackground.moreElevated "이 업데이트는 관리자 권한이 필요합니다. 다음에 &brandShortName;가
+                                           시작할 떄 업데이트가 설치될 것입니다. 지금 &brandShortName;를 
+                                           재시작 하거나 계속 사용한 후에 다음에 재시작 하거나 이 업데이트를
+                                           취소할 수 있습니다.">
+
+<!ENTITY  update.details.label            "상세 정보">
+<!ENTITY  update.installedOn.label        "설치 위치:">
+<!ENTITY  update.status.label             "상태:">

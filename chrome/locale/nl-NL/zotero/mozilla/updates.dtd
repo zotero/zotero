@@ -1,0 +1,81 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "Software-update">
+
+<!ENTITY  checking.title                  "Controleren op updates">
+<!ENTITY  updateCheck.label               "Controleren op nieuwere versies van &brandShortName;…">
+
+<!ENTITY  noupdatesfound.title            "Geen updates gevonden">
+<!ENTITY  noupdatesautoenabled.intro      "Er zijn geen updates beschikbaar. &brandShortName; zal periodiek
+                                           controleren op updates.">
+<!ENTITY  noupdatesautodisabled.intro     "Er zijn geen updates beschikbaar. Controleer later nog eens of activeer
+                                           de automatische updatecontrole van &brandShortName;.">
+
+<!ENTITY  manualUpdate.title              "Bijwerken niet mogelijk">
+<!ENTITY  manualUpdate.desc               "Er is een aanbevolen beveiligings- en stabiliteitsupdate beschikbaar, maar u hebt
+                                           niet de benodigde systeemrechten om deze te installeren. Neem contact op met uw
+                                           systeembeheerder of probeer het nogmaals met een account die de rechten
+                                           heeft om software op deze computer te installeren.">
+<!ENTITY  manualUpdate.space.desc         "Er is een aanbevolen beveiligings- en stabiliteitsupdate beschikbaar, maar u hebt
+                                           niet genoeg ruimte om deze te installeren.">
+<!ENTITY  manualUpdateGetMsg.label        "U kunt de nieuwste versie van &brandShortName; altijd verkrijgen op:">
+
+<!ENTITY  unsupported.title               "Niet-ondersteund systeem">
+<!ENTITY  unsupported.label               "Uw &brandShortName; is verouderd, maar de nieuwste versie wordt niet
+                                           ondersteund op uw systeem. Upgrade uw systeem en probeer het dan opnieuw.
+                                           U zult deze melding niet meer zien, maar u kunt wel">
+<!ENTITY  unsupportedLink.label           "meer lezen.">
+
+<!ENTITY  clickHere.label                 "Meer informatie over deze update bekijken">
+
+<!ENTITY  evangelism.desc                 "Het wordt ten sterkste aangeraden de update 
+                                           voor &brandShortName; zo snel mogelijk toe te passen.">
+
+<!ENTITY  downloadPage.title              "&brandShortName; downloaden">
+<!ENTITY  downloading.intro               "De update wordt gedownload…">
+<!ENTITY  connecting.label                "Verbinden met de updateserver…">
+<!ENTITY  verificationFailedText.label    "&brandShortName; kon de integriteit van de incrementele
+                                           update die is gedownload niet verifiëren en downloadt
+                                           daarom nu het volledige updatepakket.">
+
+<!ENTITY  viewDetails.tooltip             "Details over deze update weergeven">
+
+<!ENTITY  details.link                    "Details">
+
+<!ENTITY  error.title                     "Bijwerken mislukt">
+
+<!ENTITY  error.label                     "Er was een probleem bij het controleren op, of het downloaden of installeren
+                                           van deze update. &brandShortName; kon niet worden bijgewerkt, omdat:">
+
+<!ENTITY  errorManual.label               "U kunt &brandShortName; handmatig bijwerken door deze koppeling te
+                                           bezoeken en de nieuwste versie te downloaden:">
+
+<!ENTITY  errorpatching.intro             "De gedeeltelijke update kon niet worden toegepast. 
+                                           &brandShortName; zal het opnieuw proberen door een volledige update te downloaden.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; kan niet bepalen of er een update beschikbaar is.
+                                           Verzeker u ervan dat u de nieuwste versie van &brandShortName; hebt van:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "Iets voorkomt dat &brandShortName; veilig wordt bijgewerkt.
+                                           Verzeker u ervan dat u de nieuwste versie van &brandShortName; hebt van:">
+<!ENTITY  errorCertAttrHasUpdate.label    "Iets probeert &brandShortName; te verleiden om een onveilige update
+                                           te accepteren. Neem contact op met uw netwerkprovider en vraag om hulp.">
+
+<!ENTITY  finishedPage.title              "Update gereed voor installatie">
+<!ENTITY  finishedPage.text               "De update zal de volgende keer dat &brandShortName; start worden geïnstalleerd. U
+                                           kunt &brandShortName; nu herstarten, of doorgaan met werken en later herstarten.">
+
+<!ENTITY  finishedBackgroundPage.text     "Er is een beveiligings- en stabiliteitsupdate voor &brandShortName;
+                                           gedownload en gereed voor installatie.">
+<!ENTITY  finishedBackground.name         "Update:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "De update zal de volgende keer dat &brandShortName; start worden geïnstalleerd. U
+                                           kunt &brandShortName; nu herstarten, of doorgaan met werken en later herstarten.">
+<!ENTITY  finishedBackground.moreElevated "Deze update vereist beheerdersbevoegdheden. De update zal de volgende
+                                           keer dat &brandShortName; start worden geïnstalleerd. U kunt
+                                           &brandShortName; nu herstarten, doorgaan met werken en later herstarten, of deze
+                                           update weigeren.">
+
+<!ENTITY  update.details.label            "Details">
+<!ENTITY  update.installedOn.label        "Geïnstalleerd op:">
+<!ENTITY  update.status.label             "Status:">

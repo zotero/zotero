@@ -1,0 +1,58 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "Software eguneraketa">
+
+<!ENTITY  checking.title                  "Eguneraketen bila">
+<!ENTITY  updateCheck.label               "&brandShortName;(r)en bertsio berrien bila…">
+
+<!ENTITY  noupdatesfound.title            "Ez da eguneraketarik aurkitu">
+<!ENTITY  noupdatesautoenabled.intro      "Ez dago eguneraketarik eskuragarri. &brandShortName;(e)k aldiro bilatuko ditu eguneraketak.">
+<!ENTITY  noupdatesautodisabled.intro     "Ez dago eguneraketarik eskuragarri. Mesedez egiaztatu geroago edo gaitu &brandShortName;(r)en eguneraketen bilaketa automatikoa.">
+
+<!ENTITY  manualUpdate.title              "Ezin da eguneratu">
+<!ENTITY  manualUpdate.desc               "Gomendatutako segurtasun- eta egonkortasun-eguneraketa bat erabilgarri dago baina ez duzu instalatzeko sistemaren baimen nahikorik. Jar zaitez harremanetan zure sistemaren kudeatzailearekin edo saiatu berriro ordenagailu honetan softwarea instalatzeko baimena duen beste kontu batetik.">
+<!ENTITY  manualUpdate.space.desc         "Gomendatutako segurtasun- eta egonkortasun-eguneraketa bat erabilgarri dago baina ez daukazu instalatzeko toki nahikorik.">
+<!ENTITY  manualUpdateGetMsg.label        "Beti ere ondorengo helbidean lor dezakezu &brandShortName;(r)en azken bertsioa:">
+
+<!ENTITY  unsupported.title               "Euskarririk gabeko sistema">
+<!ENTITY  unsupported.label               "Zure &brandShortName; zaharkituta dago baina azken bertsioak ez du zure sistema onartzen. Bertsio-berritu zure sistema eta saiatu berriro mesedez. Ez duzu abisu hau berriro ikusiko. Irakurri ">
+<!ENTITY  unsupportedLink.label           "argibide gehiago.">
+
+<!ENTITY  clickHere.label                 "Ikusi eguneraketa honi buruzko argibide gehiago">
+
+<!ENTITY  evangelism.desc                 "Oso gomendagarria da &brandShortName;(r)en bertsio-berritze hau ahal bezain laster ezartzea.">
+
+<!ENTITY  downloadPage.title              "&brandShortName; deskargatzen">
+<!ENTITY  downloading.intro               "Eguneraketa deskargatzen…">
+<!ENTITY  connecting.label                "Eguneraketen zerbitzarira konektatzen…">
+<!ENTITY  verificationFailedText.label    "&brandShortName; ez da gai deskargatu duen eguneraketa-inkrementalaren osotasuna egiaztatzeko, beraz eguneraketaren pakete osoa deskargatzen ari da orain.">
+
+<!ENTITY  viewDetails.tooltip             "Ikusi eguneraketa honen xehetasunak">
+
+<!ENTITY  details.link                    "Xehetasunak">
+
+<!ENTITY  error.title                     "Eguneraketak huts egin du">
+
+<!ENTITY  error.label                     "Arazoak egon dira eguneraketa hau bilatu, deskargatu edo instalatzerakoan. &brandShortName; honegatik ezin da eguneratu:">
+                                           
+<!ENTITY  errorManual.label               "&brandShortName; eskuz egunera dezakezu lotura hau jarraituz eta azken bertsioa deskargatuz:">
+                                           
+<!ENTITY  errorpatching.intro             "Ezin da eguneraketa partziala ezarri. &brandShortName; eguneraketa osoa deskargatzen saiatuko da.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName;(e)k ezin du zehaztu eguneraketarik eskura dagoen ala ez. Egiaztatu &brandShortName;(r)en azken bertsioa duzula ondorengo helbidean:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "&brandShortName; modu seguruan eguneratzea saihesten ari da zerbait. Egiaztatu &brandShortName;(r)en azken bertsioa duzula ondorengo helbidean:">
+<!ENTITY  errorCertAttrHasUpdate.label    "&brandShortName;(e)k eguneraketa ez-seguru bat onartzeko azpikeriatan ari da zerbait. Jar zaitez harremanetan sareko hornitzailearekin eta bilatu laguntza.">
+
+<!ENTITY  finishedPage.title              "Eguneraketa instalatzeko prest">
+<!ENTITY  finishedPage.text               "Eguneraketa &brandShortName; abiarazten den hurrengo aldian ezarriko da. &brandShortName; orain berrabiarazi edo lanean jarraitu eta geroago berrabiaraz dezakezu.">
+
+<!ENTITY  finishedBackgroundPage.text     "&brandShortName;(r)en segurtasun- eta egonkortasun-eguneraketa bat deskargatu da eta instalatzeko prest dago.">
+<!ENTITY  finishedBackground.name         "Eguneraketa:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "Eguneraketa &brandShortName; abiarazten den hurrengo aldian ezarriko da. &brandShortName; orain berrabiarazi edo lanean jarraitu eta geroago berrabiaraz dezakezu.">
+<!ENTITY  finishedBackground.moreElevated "Eguneraketa honek kudeatzaile-baimenak behar ditu. &brandShortName; abiatzen den hurrengo aldian instalatuko da eguneraketa. &brandShortName; orain berrabiarazi, lanean jarraitu eta geroago berrabiarazi edo eguneraketa hau uka dezakezu.">
+
+<!ENTITY  update.details.label            "Xehetasunak">
+<!ENTITY  update.installedOn.label        "Noiz instalatua:">
+<!ENTITY  update.status.label             "Egoera:">

@@ -1,0 +1,80 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "Aktualizácia softvéru">
+
+<!ENTITY  checking.title                  "Vyhľadávajú sa aktualizácie">
+<!ENTITY  updateCheck.label               "Vyhľadáva sa novšia verzia programu &brandShortName;…">
+
+<!ENTITY  noupdatesfound.title            "Nenájdené žiadne aktualizácie">
+<!ENTITY  noupdatesautoenabled.intro      "Neboli nájdené žiadne aktualizácie. &brandShortName; bude
+                                           pravidelne zisťovať ich dostupnosť.">
+<!ENTITY  noupdatesautodisabled.intro     "Nie sú dostupné žiadne aktualizácie. Skúste to neskôr alebo povoľte
+                                           automatickú kontrolu aktualizácií &brandShortName;u.">
+
+<!ENTITY  manualUpdate.title              "Aktualizácia zlyhala">
+<!ENTITY  manualUpdate.desc               "K dispozícii je odporúčaná bezpečnostná a stabilizačná aktualizácia, avšak
+                                           na jej inštaláciu nemáte dostatočné oprávnenia. Prosím, kontaktujte
+                                           správcu systému alebo ju skúste nainštalovať z používateľského konta,
+                                           ktoré umožňuje inštaláciu softvéru v tomto počítači.">
+<!ENTITY  manualUpdate.space.desc         "K dispozícii je odporúčaná bezpečnostná a stabilizačná aktualizácia, avšak
+                                           na jej inštaláciu nemáte dostatočné množstvo voľného miesta na disku.">
+<!ENTITY  manualUpdateGetMsg.label        "Najnovšiu verziu programu &brandShortName; nájdete na adrese:">
+
+<!ENTITY  unsupported.title               "Systém nie je podporovaný">
+<!ENTITY  unsupported.label               "Váš &brandShortName; nie je aktuálny, ale jeho najnovšia verzia nie
+                                           je podporovaná vašim operačným systémom. Inovujte svoj systém a skúste to znova.
+                                           Táto správa sa už viac nezobrazí.">
+<!ENTITY  unsupportedLink.label           "Ďalšie informácie">
+
+<!ENTITY  clickHere.label                 "Zobraziť ďalšie informácie o tejto aktualizácii">
+
+<!ENTITY  evangelism.desc                 "Dôrazne odporúčame čo najskôr použiť túto aktualizáciu
+                                           aplikácie &brandShortName;.">
+
+<!ENTITY  downloadPage.title              "Preberá sa &brandShortName;">
+<!ENTITY  downloading.intro               "Preberá sa aktualizácia…">
+<!ENTITY  connecting.label                "Pripája sa k aktualizačnému serveru…">
+<!ENTITY  verificationFailedText.label    "&brandShortName; nedokázal overiť integritu
+                                           prevzatej rozdielovej aktualizácie. Mali by ste prevziať
+                                           kompletný aktualizačný balík.">
+
+<!ENTITY  viewDetails.tooltip             "Zobraziť podrobnosti k tejto aktualizácii">
+
+<!ENTITY  details.link                    "Podrobnosti">
+
+<!ENTITY  error.title                     "Aktualizácia zlyhala">
+
+<!ENTITY  error.label                     "Pri kontrole, preberaní alebo inštalácii aktualizácie došlo k chybe. &brandShortName;
+                                           sa nepodarilo aktualizovať, pretože: ">
+                                           
+<!ENTITY  errorManual.label               "&brandShortName; odporúčame aktualizovať ručne prevzatím najnovšej verzie
+                                           z tejto stránky: ">
+                                           
+<!ENTITY  errorpatching.intro             "Použitie rozdielovej aktualizácie bolo neúspešné.
+                                           &brandShortName; sa pokúsi prevziať kompletnú aktualizáciu.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; nedokázal zistiť, či je dostupná nejaká aktualizácia.
+                                           Uistite sa, že máte najnovšiu verziu aplikácie &brandShortName; na stránke:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "Z neznámeho dôvodu nie je možné &brandShortName;  bezpečne aktualizovať.
+                                           Uistite sa, že máte najnovšiu verziu aplikácie &brandShortName; na stránke:">
+<!ENTITY  errorCertAttrHasUpdate.label    "Niečo sa snaží prinútiť &brandShortName; akceptovať nezabezpečenú
+                                           aktualizáciu. Kontaktujte správcu sieťového pripojenia a požiadajte o pomoc.">
+
+<!ENTITY  finishedPage.title              "Aktualizácia pripravená na inštaláciu">
+<!ENTITY  finishedPage.text               "Táto aktualizácia bude nainštalovaná pri najbližšom spustení aplikácie
+                                           &brandShortName;. Aplikáciu &brandShortName; môžete reštartovať teraz, alebo
+                                           pokračujte v práci a reštartujte neskôr.">
+
+<!ENTITY  finishedBackgroundPage.text     "&brandShortName; práve dokončil preberanie bezpečnostnej a stabilizačnej
+                                           aktualizácie, ktorá je teraz pripravená na inštaláciu.">
+<!ENTITY  finishedBackground.name         "Aktualizácia:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "Táto aktualizácia bude nainštalovaná pri najbližšom spustení aplikácie
+                                           &brandShortName;. Aplikáciu &brandShortName; môžete reštartovať teraz, alebo
+                                           pokračujte v práci a reštartujte neskôr.">
+<!ENTITY  finishedBackground.moreElevated "Táto aktualizácia vyžaduje oprávnenie administrátora. Aktualizácia bude nainštalovaná pri ďalšom spustení aplikácie &brandShortName;. Aplikáciu môžete reštartovať teraz, alebo môžete pokračovať v práci a reštartovať neskôr, alebo môžete túto aktualizáciu úplne zrušiť.">
+
+<!ENTITY  update.details.label            "Podrobnosti">
+<!ENTITY  update.installedOn.label        "Nainštalovaná:">
+<!ENTITY  update.status.label             "Stav:">

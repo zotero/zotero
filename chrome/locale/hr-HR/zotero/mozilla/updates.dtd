@@ -1,0 +1,58 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "Ažuriranje programa">
+
+<!ENTITY  checking.title                  "Provjera za dopunama">
+<!ENTITY  updateCheck.label               "Traženje novije inačice &brandShortName;…">
+
+<!ENTITY  noupdatesfound.title            "Nijedna dopuna nije pronađena">
+<!ENTITY  noupdatesautoenabled.intro      "Nema dostupnih dopuna. &brandShortName; će periodički provjeravati dostupnost dopuna.">
+<!ENTITY  noupdatesautodisabled.intro     "Nema dostupnih dopuna. Pokušajte ponovo kasnije ili omogućite &brandShortName;ovu automatsku provjeru dopuna.">
+
+<!ENTITY  manualUpdate.title              "Ažuriranje nije moguće">
+<!ENTITY  manualUpdate.desc               "Predložene dopune radi sigurnosti i stabilnosti su dostupne, ali vi nemate dovoljna prava na stustavu za instalaciju istih. Molim, kontaktirajte svog administratora sustava ili pokušajte s korisničkim računom koji ima dozvolu instaliranja softvera na ovo računalo.">
+<!ENTITY  manualUpdate.space.desc         "Dostupna je prepoučena sigurnosna dopuna, ali nemate dovoljno prostora za instalaciju.">
+<!ENTITY  manualUpdateGetMsg.label        "Najnoviju inačicu &brandShortName; uvijek možete naći na:">
+
+<!ENTITY  unsupported.title               "Nepodržan sustav">
+<!ENTITY  unsupported.label               "Vaš &brandShortName; je zastario, ali najnovija inačica nije podržana na ovom sustavu. Molim nadogradite svoj sustav i pokušajte ponovno. Ovu obavijest više nećete vidjeti, ali možete">
+<!ENTITY  unsupportedLink.label           "saznati više.">
+
+<!ENTITY  clickHere.label                 "Pogledajte više informacija o ovoj dopuni">
+
+<!ENTITY  evangelism.desc                 "Izričito vam preporučamo da primjenite ovu &brandShortName; dopunu što je prije moguće.">
+
+<!ENTITY  downloadPage.title              "Preuzimanje &brandShortName;">
+<!ENTITY  downloading.intro               "Preuzimanje dopuna...">
+<!ENTITY  connecting.label                "Spajanje na poslužitelj dopuna...">
+<!ENTITY  verificationFailedText.label    "&brandShortName; nije mogao ovjeriti integritet inkrementalnih dopuna koje je preuzeo, stoga sada preuzima potpuni paket dopuna.">
+
+<!ENTITY  viewDetails.tooltip             "Detalji ove dopune">
+
+<!ENTITY  details.link                    "Detalji">
+
+<!ENTITY  error.title                     "Ažuriranje nije uspjelo">
+
+<!ENTITY  error.label                     "Došlo je do problema pri provjeri, preuzimanju ili instalaciji ove dopune. &brandShortName; se nije mogao ažurirati zbog:">
+                                           
+<!ENTITY  errorManual.label               "&brandShortName; možete ažurirati ručno tako da posjetite ovu poveznicu ili preuzmete posljednju inačicu:">
+                                           
+<!ENTITY  errorpatching.intro             "Djelomično ažuriranje nije moglo biti primijenjeno. &brandShortName; će pokušati ponovno preuzimanjem potpuih dopuna.">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; nije u mogućnosti odrediti je li dostupna dopuna. Molim provjerite da imate najnoviju inačicu &brandShortName;a sa:">
+<!ENTITY  errorCertAttrNoUpdate2.label    "Nešto sprječava sigurno ažuriranje &brandShortName;a. Provjerite da imate najnoviju inačicu &brandShortName;a sa:">
+<!ENTITY  errorCertAttrHasUpdate.label    "Nešto pokušava prevariti &brandShortName; na prihvaćanje nesigurne dopune. Molim kontaktirajte svojeg pružatelja mrežnih usluga i potražite pomoć.">
+
+<!ENTITY  finishedPage.title              "Dopuna sprema za instalaciju">
+<!ENTITY  finishedPage.text               "Dopuna će biti instalirana sljedeći put kada se &brandShortName; pokrene. Možete ponovo pokrenuti &brandShortName; sad ili ga nastaviti koristiti i ponovo pokrenuti kasnije.">
+
+<!ENTITY  finishedBackgroundPage.text     "Dopuna s pobojšanjima za sigurnost i stabilnost za &brandShortName; je preuzeta i može se instalirati.">
+<!ENTITY  finishedBackground.name         "Dopuna:">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "Dopuna će biti instalirana sljedeći put kada se &brandShortName; pokrene. Možete ponovo pokrenuti &brandShortName; sad ili ga nastaviti koristiti i ponovo pokrenuti kasnije.">
+<!ENTITY  finishedBackground.moreElevated "Ova nadogradnja zahtjeva administratorske ovlasti. Nadogradnja će biti instalirana prilikom sljedećeg &brandShortName; pokretanja. Možete ponovno pokrenuti &brandShortName; sada, nastaviti raditi i ponovno pokrenuti kasnije ili odustati od nadogradnje.">
+
+<!ENTITY  update.details.label            "Detalji">
+<!ENTITY  update.installedOn.label        "Instalirano:">
+<!ENTITY  update.status.label             "Stanje:">

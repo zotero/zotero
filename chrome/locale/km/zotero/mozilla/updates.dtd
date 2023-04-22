@@ -1,0 +1,58 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<!ENTITY  updateWizard.title              "ការ​ធ្វើ​បច្ចុប្បន្នភាព​កម្មវិធី">
+
+<!ENTITY  checking.title                  "កំពុង​​ពិនិត្យមើល​បច្ចុប្បន្នភាព">
+<!ENTITY  updateCheck.label               "កំពុង​រក​មើល​កំណែ​ថ្មី​ជាង​របស់ &brandShortName;…">
+
+<!ENTITY  noupdatesfound.title            "រក​មិន​ឃើញ​​បច្ចុប្បន្នភាព">
+<!ENTITY  noupdatesautoenabled.intro      "មិន​មាន​បច្ចុប្បន្នភាព​ទេ ។ &brandShortName; នឹង​ពិនិត្យមើល​ បច្ចុប្បន្នភាព​យ៉ាង​ទៀងទាត់ ។">
+<!ENTITY  noupdatesautodisabled.intro     "មិន​មាន​បច្ចុប្បន្នភាព​ទេ ។ សូម​ពិនិត្យ​មើល​ម្ដងទៀត ឬ​បើក​ ការ​ពិនិត្យ​រកមើល​បច្ចុប្បន្នភាព​ដោយ​ស្វ័យប្រវត្តិ​របស់ &brandShortName; ។">
+
+<!ENTITY  manualUpdate.title              "មិន​អាច​ធ្វើ​បច្ចុប្បន្នភាព">
+<!ENTITY  manualUpdate.desc               "មាន​បច្ចុប្បន្នភាព​សុវត្ថិភាព និង​ស្ថិរភាព​ដែល​បាន​ផ្ដល់​អនុសាសន៍ ប៉ុន្តែ​អ្នក​មិន​ មាន​សិទ្ធិ​ជា​ប្រព័ន្ធ​ដែល​ទាមទារ​ឲ្យ​ដំឡើង​វា​នោះ​ទេ ។ សូម​ទាក់ទង ​អ្នក​គ្រប់គ្រង​ប្រព័ន្ធ​របស់​អ្នក ឬ​ព្យាយាម​ម្ដងទៀត​ពី​គណនី​ដែល​មាន​សិទ្ធិ​​អនុញ្ញាត​ដើម្បី​ ដំឡើង​កម្មវិធី​នៅ​លើ​កុំព្យូទ័រ​នេះ ។">
+<!ENTITY  manualUpdate.space.desc         "មាន​បច្ចុប្បន្នភាព​សុវត្ថិភាព និង​ស្ថិរភាព​ដែល​បាន​ផ្ដល់​អនុសាសន៍ ប៉ុន្តែ​អ្នក​មិន​ មាន​ទំហំ​គ្រប់គ្រាន់​ដើម្បី​ដំឡើង​វា​ទេ ។">
+<!ENTITY  manualUpdateGetMsg.label        "អ្នក​អាច​យក​កំណែ​ចុង​ក្រោយ​បំផុត​របស់ &brandShortName; នៅ ៖">
+
+<!ENTITY  unsupported.title               "ប្រព័ន្ធ​មិន​បានគាំទ្រ">
+<!ENTITY  unsupported.label               "&brandShortName; របស់​អ្នក​ចាស់ ប៉ុន្តែ​កំណែ​ថ្មី​បំផុត​មិន​ត្រូវ​បាន គាំទ្រ​ក្នុង​ប្រព័ន្ធ​របស់​អ្នក។ សូម​ធ្វើ​បច្ចុប្បន្នភាព​ប្រព័ន្ធ​របស់​អ្នក ហើយ​បន្ទាប់មក​ព្យាយាម​ម្ដង​ទៀត។ អ្នក​នឹង​មិន​ឃើញ​ការ​ជូន​ដំណឹង​នេះ​ម្ដង​ទៀត​ទេ ប៉ុន្តែ​អ្នក​អាច">
+<!ENTITY  unsupportedLink.label           "ស្វែងយល់បន្ថែម">
+
+<!ENTITY  clickHere.label                 "មើល​ព័ត៌មាន​បន្ថែម​អំពី​បច្ចុប្បន្នភាព​នេះ">
+
+<!ENTITY  evangelism.desc                 "អ្នក​ត្រូវ​បាន​ផ្ដល់​អនុសាសន៍​ឲ្យ​អនុវត្ត​បច្ចុប្បន្នភាព​នេះ ​សម្រាប់ &brandShortName; ឆាប់​ៗ​​តាមតែ​អាច​ធ្វើ​បាន ។">
+
+<!ENTITY  downloadPage.title              "ទាញ​យក &brandShortName;">
+<!ENTITY  downloading.intro               "កំពុង​ទាញ​យក​បច្ចុប្បន្នភាព…">
+<!ENTITY  connecting.label                "កំពុង​តភ្ជាប់​ទៅកាន់​ម៉ាស៊ីន​បម្រើ​បច្ចុប្បន្នភាព…">
+<!ENTITY  verificationFailedText.label    "&brandShortName; មិន​អាច​ផ្ទៀងផ្ទាត់​ភាព​ត្រឹមត្រូវ​នៃ​បច្ចុប្បន្នភាព​ បន្ថែម​ដែល​វា​បាន​ទាញ​យក​ទេ ដូច្នេះ​ ឥឡូវនេះ​វា​កំពុងតែ​ទាញ​យក​ កញ្ចប់​បច្ចុប្បន្នភាព​ពេញលេញ ។​​">
+
+<!ENTITY  viewDetails.tooltip             "មើល​សេចក្ដី​លម្អិត​សម្រាប់​បច្ចុប្បន្នភាព​នេះ">
+
+<!ENTITY  details.link                    "សេចក្ដី​លម្អិត">
+
+<!ENTITY  error.title                     "បាន​បរាជ័យ​ក្នុង​ការ​ធ្វើ​បច្ចុប្បន្នភាព">
+
+<!ENTITY  error.label                     "មាន​បញ្ហា​ក្នុង​ការ​ពិនិត្យ​រក ទាញ​យក ឬ​ដំឡើង​បច្ចុប្បន្នភាព​នេះ។  មិន​អាច​ធ្វើ​បច្ចុប្បន្នភាព &brandShortName; បាន​ទេ ពីព្រោះ ៖">
+                                           
+<!ENTITY  errorManual.label               "អ្នក​អាច​ធ្វើ​បច្ចុប្បន្នភាព &brandShortName; ដោយដៃ ដោយ​ចូល​ទៅកាន់​តំណ​នេះ  រួច​ទាញ​យក​កំណែ​ចុងក្រោយ ៖">
+                                           
+<!ENTITY  errorpatching.intro             "មិន​អាច​អនុវត្ត​បច្ចុប្បន្នភាព​ដោយ​ផ្នែក​បាន​ទេ។ &brandShortName; នឹង​ព្យាយាម​ម្ដងទៀត​ដោយ​ទាញ​យក​បច្ចុប្បន្នភាព​ពេញលេញ ។">
+
+<!ENTITY  genericBackgroundError.label    "&brandShortName; មិន​អាច​កំណត់​បាន​ថា តើ​នឹង​មាន​បច្ចុប្បន្នភាព​ដែរ​ឬ​អត់ ។ សូម ​ប្រាកដ​ថា អ្នក​មាន​កំណែ​ចុងក្រោយ​នៃ​ &brandShortName; ពី ៖">
+<!ENTITY  errorCertAttrNoUpdate2.label    "មាន​អ្វី​ម្យ៉ាង​រារាំង &brandShortName; មិន​ឲ្យ​ធ្វើ​បច្ចុប្បន្នភាព​ដោយ​សុវត្ថិភាព។  សូម​ប្រាកដ​ថា អ្នកមាន​កំណែ​ចុងក្រោយ​នៃ &brandShortName; ពី ៖">
+<!ENTITY  errorCertAttrHasUpdate.label    "មាន​អ្វី​ម្យ៉ាង​កំពុងតែ​ព្យាយាម​បោក​បញ្ឆោត​ឲ្យ &brandShortName; ទទួល​យក​ បច្ចុប្បន្នភាព​ដែល​គ្មាន​សុវត្ថិភាព ។ សូម​ទាក់ទង​ក្រុមហ៊ុន​ផ្ដល់​សេវា​បណ្ដាញ​របស់​អ្នក ដើម្បី​សុំ​ជំនួយ ។">
+
+<!ENTITY  finishedPage.title              "បច្ចុប្បន្នភាព​ត្រៀម​​ដំឡើង">
+<!ENTITY  finishedPage.text               "បច្ចុប្បន្នភាព​នឹង​ត្រូវ​បាន​ដំឡើង​ នៅ​ពេល​ដែល &brandShortName; ចាប់ផ្ដើម​ពេល​ក្រោយ ។ អ្នក​ អាច​ចាប់ផ្ដើម &brandShortName; ឡើងវិញ​ឥឡូវនេះ ឬ​បន្ត​ធ្វើការ រួច​ចាប់ផ្ដើម​ឡើងវិញ​នៅ​ពេលក្រោយ​ ។">
+
+<!ENTITY  finishedBackgroundPage.text     "បច្ចុប្បន្នភាព​សុវត្ថិភាព និង​ស្ថិរភាព​សម្រាប់ &brandShortName; ត្រូវ​បាន​ ទាញ​យក និង​ត្រៀម​ជាស្រេច​ក្នុង​ការ​ដំឡើង ។">
+<!ENTITY  finishedBackground.name         "​បច្ចុប្បន្នភាព ៖">
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
+<!ENTITY  finishedBackground.more         "បច្ចុប្បន្នភាព​នឹង​ត្រូវ​បាន​ដំឡើង​ នៅ​ពេល​ដែល &brandShortName; ចាប់ផ្ដើម​ឡើងវិញ​​ពេល​ក្រោយ ។ អ្នក ​អាច​ចាប់ផ្ដើម &brandShortName; ឡើងវិញ​ឥឡូវនេះ​ ឬ​បន្ត​ធ្វើ​ការ រួច​ចាប់ផ្ដើម​ឡើងវិញ​ពេលក្រោយ ។">
+<!ENTITY  finishedBackground.moreElevated "ការ​ធ្វើ​បន្ទាន់​សម័យនេះ​ទាម​ទារ​សិទ្ធិ​ជា​អ្នក​គ្រប់គ្រង។ ការ​បន្ទាន់​សម័យ​នឹង​ត្រូវ​ដំឡើង​នៅ​ពេល &brandShortName; ចាប់​ផ្ដើម។ អ្នក​អាច​ចាប់ផ្ដើម​ &brandShortName; ឡើង​វិញ​ឥឡូវ បន្ដ​ធ្វើ​ការ​​រួច​ចាប់ផ្ដើម​ម្ដងទៀត​ពេល​ក្រោយ ឬ បដិសេធន៍​ការ​បន្ទាន់​សម័យ​នេះ។">
+
+<!ENTITY  update.details.label            "សេចក្ដី​លម្អិត">
+<!ENTITY  update.installedOn.label        "បាន​ដំឡើង​លើ ៖">
+<!ENTITY  update.status.label             "ស្ថាន​ភាព ៖">
