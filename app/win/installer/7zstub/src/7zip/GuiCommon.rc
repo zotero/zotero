@@ -1,0 +1,37 @@
+#include <winnt.h>
+#include <WinUser.h>
+#include <CommCtrl.h>
+
+#define marg 7
+#undef bXSize
+#undef bYSize
+#define bXSize 64
+#define bYSize 14
+#define bDotsSize 20
+
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+#undef xSize2
+#undef ySize2
+#undef xSize
+#undef ySize
+#undef bXPos
+#undef bYPos
+#undef b1XPos
+#undef b1YPos
+#undef b2XPos
+#undef b2YPos
+#undef b3XPos
+#undef b3YPos
+#undef gPos
+#undef gPos2
+#undef gSpace
+#undef gSize
+#undef marg2
+#undef marg3
+
+
+#define MY_MODAL_DIALOG_STYLE  STYLE  DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+#define MY_PAGE_STYLE  STYLE  DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+
+#define MY_FONT FONT 8, "MS Shell Dlg"

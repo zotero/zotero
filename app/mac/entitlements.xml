@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+     Entitlements to apply during codesigning of production builds.
+-->
+<plist version="1.0">
+  <dict>
+    <!-- Firefox needs to create executable pages (without MAP_JIT) -->
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key><true/>
+
+    <!-- Allow loading third party libraries. Needed for Flash and CDMs -->
+    <!-- Disabled for Zotero -->
+    <key>com.apple.security.cs.disable-library-validation</key><false/>
+
+    <!-- Firefox needs to access the microphone on sites the user allows -->
+    <!-- Disabled for Zotero -->
+    <key>com.apple.security.device.audio-input</key><false/>
+
+    <!-- Firefox needs to access the camera on sites the user allows -->
+    <!-- Disabled for Zotero -->
+    <key>com.apple.security.device.camera</key><false/>
+
+    <!-- Firefox needs to access the location on sites the user allows -->
+    <!-- Disabled for Zotero -->
+    <key>com.apple.security.personal-information.location</key><false/>
+
+    <!-- For SmartCardServices(7) -->
+    <!-- Disabled for Zotero -->
+    <key>com.apple.security.smartcard</key><false/>
+    
+    <!-- Added for Zotero to control Word and bring windows to the front -->
+    <key>com.apple.security.automation.apple-events</key><true/>
+  </dict>
+</plist>

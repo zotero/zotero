@@ -1,0 +1,21 @@
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+. "$ROOT_DIR/config.sh"
+
+if [ -z "${1:-}" ]; then
+	echo "Commit hash not provided"
+	exit 1
+fi
+hash="$1"
+
+tmpdir=`mktemp -d`
+
+cd $tmpdir
+wget -O build.zip "https://$S3_BUCKET.s3.amazonaws.com/$S3_CI_ZIP_PATH/$hash.zip" >&2 \
+	|| (echo "ZIP file not found for commit '$hash'" && exit 1)
+unzip build.zip >&2
+rm build.zip
+echo $tmpdir

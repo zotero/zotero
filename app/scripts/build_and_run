@@ -1,0 +1,92 @@
+#!/bin/bash -e
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+
+# Set ZOTERO_REPOS_DIR to use directory other than $HOME for zotero-client and zotero-standalone-build
+if [ -n "${ZOTERO_REPOS_DIR:-}" ]; then
+	repos_dir=$ZOTERO_REPOS_DIR
+else
+	repos_dir=$HOME
+fi
+
+for dir in zotero-client zotero-standalone-build; do
+	if [ ! -d "$repos_dir/$dir" ]; then
+		echo "$repos_dir/$dir not found" >&2
+		exit 1
+	fi
+done
+
+# Set ZOTERO_PROFILE environment variable to choose profile
+if [ -n "${ZOTERO_PROFILE:-}" ]; then
+	profile="-p $ZOTERO_PROFILE"
+fi
+
+REBUILD=0
+SKIP_BUNDLED_FILES=0
+DEBUGGER=0
+while getopts "rbd" opt; do
+	case $opt in
+		r)
+			REBUILD=1
+			;;
+		
+		b)
+			SKIP_BUNDLED_FILES=1
+			;;
+		
+		d)
+			DEBUGGER=1
+			;;
+		
+		\?)
+			echo "Invalid option: -$OPTARG" >&2
+			exit 1
+			;;
+	esac
+done
+
+if [ $REBUILD -eq 1 ]; then
+	PARAMS=""
+	if [ $DEBUGGER -eq 1 ]; then
+		PARAMS="-t"
+	fi
+	
+	# Check if build watch is running
+	# If not, run now
+	if ! ps u | grep scripts/build.js | grep -v grep > /dev/null; then
+		echo "Running JS build process"
+		echo
+		cd $repos_dir/zotero-client
+		npm run build
+		echo
+	fi
+	
+	$repos_dir/zotero-standalone-build/scripts/dir_build -q $PARAMS
+	
+	if [ "`uname`" = "Darwin" ]; then
+		# Sign the Word dylib so it works on Apple Silicon
+		$SCRIPT_DIR/codesign_local $repos_dir/zotero-standalone-build/staging/Zotero.app
+	fi
+fi
+
+PARAMS=""
+if [ $SKIP_BUNDLED_FILES -eq 1 ]; then
+	PARAMS="$PARAMS -ZoteroSkipBundledFiles"
+fi
+if [ $DEBUGGER -eq 1 ]; then
+	PARAMS="$PARAMS -debugger"
+fi
+
+if [ "`uname`" = "Darwin" ]; then
+	command="Zotero.app/Contents/MacOS/zotero"
+elif [ "`uname`" = "Linux" ]; then
+	command="Zotero_linux-x86_64/zotero"
+elif [ "`uname -o 2> /dev/null`" = "Cygwin" ]; then
+	command="Zotero_win64/zotero.exe"
+else
+	echo "Unknown platform" >&2
+	exit 1
+fi
+
+$repos_dir/zotero-standalone-build/staging/$command $profile -ZoteroDebugText -jsconsole -purgecaches $PARAMS "$@"

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Increase open files limit
+#
+# Mozilla file functions (OS.File.move()/copy(), NetUtil.asyncFetch/asyncCopy()) can leave file
+# descriptors open for a few seconds (even with an explicit inputStream.close() in the case of
+# the latter), so a source installation that copies ~500 translators and styles (with fds for
+# source and target) can exceed the default 1024 limit.
+# Current hard-limit on Ubuntu 16.10 is 4096
+ulimit -n 4096
+
+# Allow profile downgrade for Zotero
+export MOZ_ALLOW_DOWNGRADE=1
+
+CALLDIR="$(dirname "$(readlink -f "$0")")"
+"$CALLDIR/zotero-bin" -app "$CALLDIR/app/application.ini" "$@"

@@ -1,0 +1,20 @@
+#include "resource.h"
+#include "../../../GuiCommon.rc"
+
+#define xSize2 172
+#define ySize2 42
+#define xSize (xSize2 + marg + marg)
+#define ySize (ySize2 + marg + marg)
+
+#define bYPos (ySize - marg - bYSize)
+#define bXPos (xSize - marg - bXSize)
+
+
+IDD_DIALOG_PROGRESS  DIALOG  0, 0, xSize, ySize  MY_MODAL_DIALOG_STYLE
+CAPTION "Progress"
+MY_FONT
+BEGIN
+  PUSHBUTTON  "Cancel", IDCANCEL, bXPos, bYPos , bXSize, bYSize
+  CONTROL     "Progress1", IDC_PROGRESS1,"msctls_progress32",PBS_SMOOTH | WS_BORDER,
+              marg,marg, xSize2, 14
+END

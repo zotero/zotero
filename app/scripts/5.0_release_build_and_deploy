@@ -1,0 +1,23 @@
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+. "$ROOT_DIR/config.sh"
+
+CHANNEL="release"
+BRANCH="master"
+
+cd "$SCRIPT_DIR"
+./check_requirements
+
+hash=`./get_repo_branch_hash $BRANCH`
+source_dir=`./get_commit_files $hash`
+
+function cleanup {
+	rm -rf $source_dir
+}
+trap cleanup EXIT
+
+"$ZOTERO_BUILD_DIR/xpi/build_xpi" -s "$source_dir" -c $CHANNEL -m $hash
+./build_and_deploy -d "$ZOTERO_BUILD_DIR/xpi/build/staging" -p $BUILD_PLATFORMS -c $CHANNEL

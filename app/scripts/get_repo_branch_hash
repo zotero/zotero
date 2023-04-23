@@ -1,0 +1,14 @@
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+. "$ROOT_DIR/config.sh"
+
+if [ -z "${1:-}" ]; then
+	echo "Usage: $0 branch"
+	exit 1
+fi
+branch=$1
+
+git ls-remote --exit-code $SOURCE_REPO_URL $branch | cut -f 1

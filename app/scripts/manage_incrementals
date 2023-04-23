@@ -1,0 +1,83 @@
+#!/bin/bash
+#
+# Manage list of deployed version numbers for a channel in order to generate incremental builds
+#
+set -euo pipefail
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+. "$ROOT_DIR/config.sh"
+
+function usage {
+	cat >&2 <<DONE
+Usage:
+ -c CHANNEL            Release channel (e.g., 'beta'); defaults to 'release'
+ -p PLATFORM           Platform (m=Mac, w=Windows, l=Linux)
+ -a VERSION            Add version to incrementals list; cannot be used with -n
+ -n NUM_VERSIONS       Number of previous versions to return; cannot be used with -a
+DONE
+	exit 1
+}
+
+CHANNEL="release"
+PLATFORM=""
+VERSION=""
+NUM_VERSIONS=""
+while getopts "c:p:a:n:" opt; do
+	case $opt in
+		c)
+			CHANNEL="$OPTARG"
+			;;
+		p)
+			case "$OPTARG" in
+				m) PLATFORM=mac;;
+				w) PLATFORM=win;;
+				l) PLATFORM=linux;;
+				*)
+					echo "$0: Invalid platform option $OPTARG"
+					usage
+					;;
+			esac
+			;;
+		a)
+			VERSION="$OPTARG"
+			;;
+		n)
+			NUM_VERSIONS="$OPTARG"
+			;;
+		*)
+			usage
+			;;
+	esac
+	shift $((OPTIND-1)); OPTIND=1
+done
+
+if [[ -z "$PLATFORM" ]]; then
+	usage
+fi
+
+if [[ -z "$VERSION" ]] && [[ -z "$NUM_VERSIONS" ]]; then
+	usage
+fi
+
+if [[ "$VERSION" ]] && [[ "$NUM_VERSIONS" ]]; then
+	usage
+fi
+
+INCR_FILENAME="incrementals-$CHANNEL-$PLATFORM"
+S3_URL="s3://$S3_BUCKET/$S3_DIST_PATH/$CHANNEL/incrementals-$PLATFORM"
+INCR_PATH="$DIST_DIR/$INCR_FILENAME"
+
+mkdir -p "$DIST_DIR"
+aws s3 cp $S3_URL $INCR_PATH >&2
+
+# Add version to file and reupload
+if [ "$VERSION" ]; then
+	echo "Adding $VERSION to incrementals-$PLATFORM"
+	echo $VERSION >> $INCR_PATH
+	aws s3 cp $INCR_PATH $S3_URL
+# Show last n versions
+elif [ "$NUM_VERSIONS" ]; then
+	tail -n $NUM_VERSIONS $INCR_PATH
+fi
+rm $INCR_PATH

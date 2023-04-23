@@ -1,0 +1,52 @@
+#!/bin/bash
+set -euo pipefail
+
+#
+# Zip a file directly into app/omni.ja in staging/
+#
+# Zip paths are relative to the current directory, so this should be run from
+# the client build/ directory
+#
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+. "$ROOT_DIR/config.sh"
+
+function usage {
+	cat >&2 <<DONE
+Usage: $0 path/to/file
+DONE
+	exit 1
+}
+
+if [ -z "${1:-}" ]; then
+	usage
+fi
+
+files="$@"
+
+for file in $files; do
+	if [ ! -f "$file" ]; then
+		echo "Error: $file not found!"
+		exit 1
+	fi
+done
+
+mac_path="$STAGE_DIR/Zotero.app/Contents/Resources"
+win_path="$STAGE_DIR/Zotero_win32"
+linux_path="$STAGE_DIR/Zotero_linux-x86_64"
+
+added=0
+for path in "$mac_path" "$win_path" "$linux_path"; do
+	if [ -d "$path" ]; then
+		echo "$path/app/omni.ja"
+		echo "Updating $(basename $(dirname $(dirname $path)))"
+		zip "$path/app/omni.ja" $files
+		added=1
+	fi
+done
+
+if [ $added -eq 0 ]; then
+	echo "No directories found in staging!"
+	exit 1
+fi

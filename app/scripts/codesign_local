@@ -1,0 +1,42 @@
+#!/bin/bash
+set -euo pipefail
+
+# Perform ad-hoc code signing of Zotero.app for local usage
+#
+# Currently we sign only the Word dylib, since that's necessary for Zotero developers to work on
+# Word integration on Apple Silicon. If we discover other problems, we can uncomment some of the
+# other lines. If you're making a custom build, you can modify this file to sign the entire build
+# instead of just the bare minimum needed for development.
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+. "$ROOT_DIR/config.sh"
+
+if [ -z "${1:-}" ]; then
+	echo "Usage: $0 path/to/staging/Zotero.app"
+	exit 1
+fi
+
+APPDIR=$1
+DEVELOPER_ID="-"
+
+entitlements_file="$ROOT_DIR/mac/entitlements.xml"
+#/usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" \
+#	"$APPDIR/Contents/MacOS/pdftotext" \
+#	"$APPDIR/Contents/MacOS/pdfinfo" \
+#	"$APPDIR/Contents/MacOS/XUL" \
+#	"$APPDIR/Contents/MacOS/updater.app/Contents/MacOS/org.mozilla.updater"
+#find "$APPDIR/Contents" -name '*.dylib' -exec /usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" {} \;
+#find "$APPDIR/Contents" -name '*.app' -exec /usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" {} \;
+#/usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" "$APPDIR/Contents/MacOS/zotero"
+
+# Skip signing of Safari extension, since it's not present for local builds
+
+# Sign final app package
+#echo
+#/usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" "$APPDIR"
+
+# Verify app
+#/usr/bin/codesign --verify -vvvv "$APPDIR"
+
+find "$APPDIR/Contents" -name 'libZoteroWordIntegration.dylib' -exec /usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" {} \;

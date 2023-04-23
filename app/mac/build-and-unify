@@ -1,0 +1,68 @@
+#!/bin/bash
+set -e
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+. "$ROOT_DIR/config.sh"
+
+fx_app_name=Firefox.app
+
+# Get Mozilla source directory from command line
+if [ -z "${1:-}" ]; then
+	echo "Usage: $0 /path/to/mozilla-unified" >&2
+	exit 1
+fi
+GECKO_PATH=$1
+mach=$GECKO_PATH/mach
+
+# Set ZOTERO_REPOS_DIR to use directory other than $HOME for zotero-standalone-build
+if [ -n "${ZOTERO_REPOS_DIR:-}" ]; then
+	repos_dir=$ZOTERO_REPOS_DIR
+else
+	repos_dir=$HOME
+fi
+if [ ! -d "$repos_dir/zotero-standalone-build" ]; then
+	echo "$repos_dir/zotero-standalone-build not found" >&2
+	exit 1
+fi
+
+BUILD_DIR=`mktemp -d`
+function cleanup {
+	rm -rf $BUILD_DIR
+}
+trap cleanup EXIT
+
+set -x
+
+export MOZ_BUILD_DATE=`date "+%Y%m%d%H%M%S"`
+
+# Install required Rust version
+rustup toolchain install $RUST_VERSION
+rustup target add aarch64-apple-darwin
+rustup target add x86_64-apple-darwin
+rustup default $RUST_VERSION
+
+cp "$SCRIPT_DIR/mozconfig" "$GECKO_PATH"
+
+# Build Firefox for Intel and Apple Silicon
+export Z_ARCH=x64
+$mach build
+$mach package
+export Z_ARCH=aarch64
+$mach build
+$mach package
+
+cd $BUILD_DIR
+
+# Unify into Universal build
+# From https://searchfox.org/mozilla-central/rev/97c902e8f92b15dc63eb584bfc594ecb041242a4/taskcluster/scripts/misc/unify.sh
+for i in x86_64 aarch64; do
+    $mach python -m mozbuild.action.unpack_dmg "$GECKO_PATH"/obj-$i-apple-darwin/dist/*.dmg $i
+done
+mv x86_64 x64
+
+$mach python "$GECKO_PATH/toolkit/mozapps/installer/unify.py" x64/*.app aarch64/*.app
+
+cp x64/$fx_app_name/Contents/MacOS/firefox zotero
+xz zotero
+mv zotero.xz "$repos_dir"/zotero-standalone-build/mac/zotero.xz

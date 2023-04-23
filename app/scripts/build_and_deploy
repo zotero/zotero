@@ -1,0 +1,162 @@
+#!/bin/bash
+#
+# Builds and deploys Zotero with full and incremental updates
+#
+set -euo pipefail
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+. "$ROOT_DIR/config.sh"
+
+function usage {
+	cat >&2 <<DONE
+Usage: $0 -d SOURCE_DIR -c CHANNEL -p PLATFORMS
+ -d SOURCE_DIR       Source directory to build from
+ -c CHANNEL          Release channel ('release', 'beta', 'dev')
+ -p PLATFORMS        Platforms to build (m=Mac, w=Windows, l=Linux)
+ -i INCREMENTALS     Number of incremental builds to create
+DONE
+	exit 1
+}
+
+
+SOURCE_DIR=""
+CHANNEL=""
+PLATFORMS=""
+while getopts "d:c:p:i:" opt; do
+	case $opt in
+		d)
+			SOURCE_DIR="$OPTARG"
+			if [ ! -d "$SOURCE_DIR" ]; then
+				echo "$SOURCE_DIR not found"
+				exit 1
+			fi
+			;;
+		c)
+			CHANNEL="$OPTARG"
+			;;
+		p)
+			PLATFORMS="$OPTARG"
+			;;
+		i)
+			NUM_INCREMENTALS="$OPTARG"
+			;;
+		*)
+			usage
+			;;
+	esac
+	shift $((OPTIND-1)); OPTIND=1
+done
+
+if [[ -z "$SOURCE_DIR" ]] || [[ -z "$CHANNEL" ]] || [[ -z "$PLATFORMS" ]]; then
+	usage
+fi
+
+"$SCRIPT_DIR"/check_requirements
+
+VERSION="`perl -ne 'print and last if s/.*<em:version>(.*)<\/em:version>.*/\1/;' \"$SOURCE_DIR\"/install.rdf`"
+if [ -z "$VERSION" ]; then
+	echo "Error getting version from $SOURCE_DIR/install.rdf"
+	exit 1
+fi
+
+# Build Zotero
+"$ROOT_DIR/build.sh" -d "$SOURCE_DIR" -p $PLATFORMS -c $CHANNEL -e
+
+BUILD_ID=`cat "$DIST_DIR/build_id"`
+if [ -z "$BUILD_ID" ]; then
+	echo "Error getting build id"
+	exit 1
+fi
+
+TEMP_DIR=`mktemp -d`
+# Clean up on exit
+function cleanup {
+	rm -rf "$TEMP_DIR"
+}
+trap cleanup EXIT
+
+# Build full update
+"$ROOT_DIR/update-packaging/build_autoupdate.sh" -f -c $CHANNEL -p $PLATFORMS -l $VERSION
+
+# Build incremental updates for each platform
+for i in `seq 0 1 $((${#PLATFORMS}-1))`
+do
+	case ${PLATFORMS:i:1} in
+		m)
+			platform=mac
+			platform_name=Mac
+			;;
+		w)
+			platform=win
+			platform_name=Windows
+			;;
+		l)
+			platform=linux
+			platform_name=Linux
+			;;
+		*)
+			echo "$0: Invalid platform option ${PLATFORMS:i:1}"
+			usage
+			;;
+	esac
+	
+	echo
+	echo "Getting $platform_name incrementals"
+	INCREMENTALS="`\"$SCRIPT_DIR/manage_incrementals\" -c $CHANNEL -p ${PLATFORMS:i:1} -n $NUM_INCREMENTALS`"
+	echo "$INCREMENTALS"
+	echo
+	
+	for from in $INCREMENTALS; do
+		echo "Building incremental update for $platform_name from $from to $VERSION"
+		"$ROOT_DIR/update-packaging/build_autoupdate.sh" -i "$from" -c "$CHANNEL" -p ${PLATFORMS:i:1} -l $VERSION
+		echo
+	done
+done
+
+# Upload builds to S3
+"$SCRIPT_DIR/upload_builds" $CHANNEL $VERSION
+
+# Upload file lists for each platform
+channel_deploy_path="$DEPLOY_PATH/$CHANNEL"
+mkdir "$TEMP_DIR/version_info"
+chmod g+ws "$TEMP_DIR/version_info"
+cp "$DIST_DIR"/files-* "$TEMP_DIR/version_info"
+chmod g+w "$TEMP_DIR"/version_info/files-*
+rsync -rv "$TEMP_DIR/version_info/" $DEPLOY_HOST:"$channel_deploy_path/$VERSION/"
+
+# Download updates JSON for each platform, update it, and reupload it
+for i in `seq 0 1 $((${#PLATFORMS}-1))`
+do
+	case ${PLATFORMS:i:1} in
+		m)
+			architectures="mac"
+			;;
+		w)
+			architectures="win32 win-x64"
+			;;
+		l)
+			architectures="linux-i686 linux-x86_64"
+			;;
+	esac
+	
+	for arch in $architectures;
+	do
+		jsonfile="updates-$arch.json"
+		
+		scp $DEPLOY_HOST:"$channel_deploy_path/$jsonfile" "$TEMP_DIR/$jsonfile"
+		"$ROOT_DIR/update-packaging/add_version_info" -f "$TEMP_DIR/$jsonfile" -v $VERSION -b $BUILD_ID
+		scp "$TEMP_DIR/$jsonfile" $DEPLOY_HOST:"$channel_deploy_path/$jsonfile"
+	done
+done
+
+# Add version to incremental lists
+echo
+for i in `seq 0 1 $((${#PLATFORMS}-1))`
+do
+	"$SCRIPT_DIR/manage_incrementals" -c $CHANNEL -p ${PLATFORMS:i:1} -a $VERSION
+done
+
+$DEPLOY_CMD
+
+rm -rf "$STAGE_DIR"/*

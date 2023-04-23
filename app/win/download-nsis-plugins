@@ -1,0 +1,53 @@
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+. "$ROOT_DIR/config.sh"
+
+#
+# Turns out we need older versions from Mozilla, not the official ZIPs
+#
+#plugins=$(cat <<EOF
+#http://nsis.sourceforge.net/mediawiki/images/d/d4/AppAssocReg-0.4.zip
+#https://github.com/connectiblutz/NSIS-ApplicationID/releases/download/1.1/NSIS-ApplicationID.zip
+#http://nsis.sourceforge.net/mediawiki/images/c/ca/InvokeShellVerb-1.0.zip
+#http://nsis.sourceforge.net/mediawiki/images/6/6c/Shelllink.zip
+#http://nsis.sourceforge.net/mediawiki/images/8/8f/UAC.zip
+#EOF
+#)
+#
+#mkdir -p nsis
+#cd nsis
+#for plugin in $plugins; do
+#	 wget $plugin
+#done
+#
+#unzip_cmd="unzip -d Plugins -j"
+#for zip in AppAssocReg*.zip InvokeShellVerb*.zip; do
+#	$unzip_cmd $zip 'Plugins/Unicode/*.dll'
+#done
+#$unzip_cmd Shelllink*.zip Unicode/Plugins/ShellLink.dll
+#$unzip_cmd NSIS-ApplicationID*.zip 'ReleaseUnicode/ApplicationID*'
+#$unzip_cmd UAC.zip Plugins/x86-unicode/UAC.dll
+#
+#rm *.zip
+#
+#echo
+#echo
+#echo "Files extracted to ./nsis/Plugins -- move to ${NSIS_DIR}Plugins"
+#echo
+#ls -la Plugins
+
+mkdir -p Plugins
+cd Plugins
+plugins="AccessControl AppAssocReg ApplicationID InvokeShellVerb ShellLink UAC"
+for plugin in $plugins; do
+	curl https://hg.mozilla.org/mozilla-central/raw-file/052d53200cf8/other-licenses/nsis/Plugins/$plugin.dll > $plugin.dll
+done
+
+echo
+echo
+echo "Files downloaded to ./Plugins -- move to ${NSIS_DIR}Plugins"
+echo
+ls -la
