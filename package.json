@@ -35,6 +35,7 @@
     "@babel/eslint-plugin": "^7.16.5",
     "@babel/preset-react": "^7.16.5",
     "@zotero/eslint-config": "^1.0.7",
+    "acorn": "^8.8.2",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "browserify": "^14.5.0",
     "chai": "^4.1.2",

@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# Filter connector.json to remove empty messages and delete descriptions
+#
+
+if [ ! -d "$1/en-US/zotero" ]; then
+	echo "Usage: $0 /path/to/zotero/chrome/locale"
+	exit
+fi
+
+DIR="$1"
+
+cd $DIR
+for i in `find . -name connector.json -not -path ./en-US/zotero/connector.json`; do
+	cat $i | jq 'to_entries | map(select(.value.message != "") | del(.value.description)) | from_entries' > $i.new
+	mv $i.new $i
+	# Delete empty files, which we could probably do in jq but this is easy
+	if [[ `cat $i` = '{}' ]]; then
+		rm $i
+	fi
+done

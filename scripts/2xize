@@ -1,0 +1,83 @@
+#!/usr/bin/env python
+from __future__ import print_function
+import sys
+import os
+import re
+
+def append2x(content, dir):
+    header = """/* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
+@media (min-resolution: 1.25dppx) {\n"""
+    footer = "\n}\n"
+    output = ""
+    for line in content.split("\n"):
+        matches = re.match('(.+chrome://zotero/skin/)(.+(?<!@2x)\.png)(.+)', line)
+        
+        if not matches:
+            # Skip lines that are indented but don't reference an image, which are
+            # hopefully rule lines
+            if re.match('\s', line):
+                continue
+            # Pass other lines through as is, since those are likely selector lines
+            output += line
+            continue
+        
+        png = matches.group(2)
+        png2x = png.replace('.png', '@2x.png')
+        
+        if os.path.exists(os.path.join(root_dir, png2x)):
+            output += matches.group(1) + png2x + matches.group(3)
+        else:
+            output += line
+    output += "}"
+    # Collapse all spaces
+    output = re.sub("\s+", " ", output)
+    # Add space before and after "{"
+    output = re.sub("(?!: ){\s*", " { ", output)
+    # Add newline after }
+    output = re.sub("}", "}\n", output)
+    # Add space before }
+    output = re.sub("(?!: )}", " }", output)
+    # Strip comments
+    output = re.sub("/\*[^*]+\*/", "", output)
+    # Remove all blocks without 2x rules
+    output = "\n".join(["\t" + line for line in output.split("\n") if "2x.png" in line])
+    return header + output + footer
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("""Appends 2x image rules to a CSS file for all images with @2x.png versions in the same directory
+
+Usage: {0} /path/to/css/file [/path/to/image/directory]""".format(sys.argv[0]))
+        sys.exit(1)
+    
+    css_file = sys.argv[1]
+    if not os.path.exists(css_file):
+        print("File not found: " + css_file)
+        sys.exit(1)
+    
+    try:
+        root_dir = sys.argv[2]
+        if not os.path.exists(root_dir):
+            print("Directory not found: " + root_dir)
+            sys.exit(1)
+        
+        if not os.path.isdir(root_dir):
+            print("{0} is not a directory".format(root_dir))
+            sys.exit(1)
+    except IndexError:
+        root_dir = os.path.dirname(os.path.realpath(css_file))
+    
+    # Get file contents through 2x block, which has to be at the end
+    css = ""
+    with open(css_file) as f:
+        for line in f:
+            if "BEGIN 2X BLOCK" in line:
+                break
+            css += line
+    css = css.strip()
+    
+    # Add 2x block
+    css += "\n\n\n" + append2x(css, root_dir)
+    
+    with open(css_file, 'w') as f:
+        f.write(css)

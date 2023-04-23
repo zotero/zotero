@@ -1,0 +1,41 @@
+#!/bin/sh
+
+if [ ! -d "$1/chrome/locale/en-US/zotero" ]; then
+	echo "Usage: $0 /path/to/zotero"
+	exit
+fi
+
+BASEDIR=`dirname $0`
+cd $BASEDIR
+BASEDIR=`pwd`
+WORKDIR=$BASEDIR/work
+ROOT_DIR="$1"
+LOCALES_DIR="$1/chrome/locale"
+
+cd $WORKDIR
+# Create temporary directories for merge script
+rm -rf en-US-new locales content-locales output
+mkdir en-US-new locales content-locales output
+cp -R $LOCALES_DIR/en-US/zotero/* en-US-new
+cp -R $LOCALES_DIR/ locales/
+rm -rf locales/en-US
+# Correct various errors
+find locales -name '*.dtd' -exec perl -pi -e "s/&amp;([^\s])/&\$1/g" {} \;
+find locales -name '*.properties' -exec rpl 'S%' '%S' {} \;
+find locales -name '*.properties' -exec rpl '/n' '\n' {} \;
+find locales -name '*.properties' -exec rpl '\\' '\' {} \;
+find locales -name '*.properties' -exec rpl '\n\n\(?!n)' '\n\n' {} \;
+find locales -name '*.properties' -exec rpl '\\' '\' {} \;
+
+# Run merge script
+$BASEDIR/localizer
+rsync -a --progress --verbose $WORKDIR/output/locale/ $LOCALES_DIR/
+
+rpl -R ⏎ '\n' "$LOCALES_DIR"
+
+rm -rf en-US-new locales content-locales output
+
+$BASEDIR/filter_connector_json "$LOCALES_DIR"
+
+cd "$ROOT_DIR/resource/schema/global"
+./scripts/update-schema
