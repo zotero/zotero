@@ -1086,10 +1086,12 @@ Zotero.Utilities.Internal = {
 			if (!key
 					|| key != 'type'
 					|| skipKeys.has(key)
-					// 1) Ignore 'type: note' and 'type: attachment'
+					// 1) Ignore 'type: note', 'type: attachment', 'type: annotation'
 					// 2) Ignore 'article' until we have a Preprint item type
 					//    (https://github.com/zotero/translators/pull/2248#discussion_r546428184)
-					|| ['note', 'attachment', 'article'].includes(value)) {
+					|| ['note', 'attachment', 'annotation', 'article'].includes(value)
+					// Ignore numeric values
+					|| parseInt(value) == value) {
 				return true;
 			}
 			

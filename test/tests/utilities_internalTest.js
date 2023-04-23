@@ -142,11 +142,22 @@ describe("Zotero.Utilities.Internal", function () {
 	
 	
 	describe("#extractExtraFields()", function () {
-		it("should ignore 'type: note' and 'type: attachment'", function () {
-			var str = 'type: note';
-			var { itemType, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
-			assert.isNull(itemType);
-			assert.equal(extra, 'type: note');
+		it("should ignore 'Type: note', 'Type: attachment', and 'Type: annotation'", function () {
+			for (let type of ['note', 'attachment', 'annotation']) {
+				let str = `Type: ${type}`;
+				let { itemType, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+				assert.isNull(itemType, type);
+				assert.equal(extra, `Type: ${type}`, type);
+			}
+		});
+		
+		it("should ignore numeric values for Type", function () {
+			for (let type of ['3']) {
+				let str = `Type: ${type}`;
+				let { itemType, extra } = Zotero.Utilities.Internal.extractExtraFields(str);
+				assert.isNull(itemType, type);
+				assert.equal(extra, `Type: ${type}`, type);
+			}
 		});
 		
 		it("should use the first mapped Zotero type for a CSL type", function () {
