@@ -282,14 +282,20 @@ echo "Version: $VERSION"
 rm -rf META-INF
 
 # Copy branding
-#cp -R "$CALLDIR/assets/branding/content" chrome/branding/content
 cp -R "$CALLDIR"/assets/branding/locale/brand.{dtd,properties} chrome/en-US/locale/branding/
-cp "$CALLDIR/assets/branding/locale/brand.ftl" localization/en-US/branding/brand.ftl
 
-# Copy localization .ftl files
+# Copy browser localization .ftl files
 for locale in `ls chrome/locale/`; do
-	mkdir -p localization/$locale/mozilla
-	cp chrome/locale/$locale/zotero/mozilla/*.ftl localization/$locale/mozilla/
+	mkdir -p localization/$locale/branding
+	cp "$CALLDIR/assets/branding/locale/brand.ftl" localization/$locale/branding/brand.ftl
+	
+	mkdir -p localization/$locale/toolkit/global
+	cp chrome/locale/$locale/zotero/mozilla/textActions.ftl localization/$locale/toolkit/global
+	cp chrome/locale/$locale/zotero/mozilla/wizard.ftl localization/$locale/toolkit/global
+	
+	mkdir -p localization/$locale/browser
+	cp chrome/locale/$locale/zotero/mozilla/menubar.ftl localization/$locale/browser
+	
 	# TEMP: Until we've created zotero.ftl in all locales
 	touch chrome/locale/$locale/zotero/zotero.ftl
 	cp chrome/locale/$locale/zotero/*.ftl localization/$locale/

@@ -59,7 +59,7 @@
 			this._destroyed = false;
 			window.addEventListener("unload", this.destroy);
 
-			MozXULElement.insertFTLIfNeeded('mozilla/textActions.ftl');
+			MozXULElement.insertFTLIfNeeded('toolkit/global/textActions.ftl');
 			document.l10n.connectRoot(this);
 			
 			// var s1 = document.createElement("link");
