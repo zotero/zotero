@@ -5,13 +5,13 @@
   "description": "Zotero",
   "main": "",
   "scripts": {
-    "start": "node ./scripts/build.js && node ./scripts/watch.js",
-    "build": "node ./scripts/build.js",
-    "sass": "node ./scripts/sass.js",
-    "js": "node ./scripts/js.js",
-    "clean": "node ./scripts/clean.js",
-    "clean-build": "node ./scripts/clean.js && node ./scripts/build.js",
-    "clean-start": "node ./scripts/clean.js && node ./scripts/build.js && node ./scripts/watch.js"
+    "start": "node ./js-build/build.js && node ./js-build/watch.js",
+    "build": "node ./js-build/build.js",
+    "sass": "node ./js-build/sass.js",
+    "js": "node ./js-build/js.js",
+    "clean": "node ./js-build/clean.js",
+    "clean-build": "node ./js-build/clean.js && node ./js-build/build.js",
+    "clean-start": "node ./js-build/clean.js && node ./js-build/build.js && node ./js-build/watch.js"
   },
   "license": "",
   "dependencies": {
