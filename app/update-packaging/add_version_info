@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+"""
+Update a builds manifest with info on a given build
+"""
+import argparse
+import os
+import sys
+import shutil
+import json
+import traceback
+
+DETAILS_URLS = {
+    '4.0': 'https://www.zotero.org/support/4.0_changelog',
+    '5.0': 'https://www.zotero.org/support/5.0_changelog',
+    '6.0': 'https://www.zotero.org/support/6.0_changelog',
+    '7.0': 'https://www.zotero.org/support/7.0_changelog'
+}
+MAJOR = None
+
+parser = argparse.ArgumentParser(
+    description='Update a builds manifest with info on a given build',
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+parser.add_argument('-f', '--file', required=True, help="path to updates.json")
+parser.add_argument('-v', '--version', required=True, help='version number of build')
+parser.add_argument('-b', '--build_id', required=True, help="build ID ('20160801142343')")
+
+args = parser.parse_args()
+
+def main():
+    try:
+        file = args.file
+        version = args.version
+        
+        # Back up JSON file
+        shutil.copy2(file, file + '.bak')
+        
+        # Read in existing file
+        with open(file) as f:
+            updates = json.loads(f.read())
+            
+        updates.append({
+            'version': version,
+            'buildID': args.build_id,
+            'detailsURL': DETAILS_URLS[version[0:3]],
+            'major': MAJOR
+        })
+        
+        # Keep last 5 entries
+        updates = updates[-5:]
+        
+        # Write new file
+        updates = json.dumps(updates, indent=2)
+        with open(file, 'w') as f:
+            f.write(updates + "\n")
+        
+        print(updates)
+        
+        return 0
+    
+    except Exception as err:
+        sys.stderr.write("\n" + traceback.format_exc())
+        return 1
+
+if __name__ == '__main__':
+    sys.exit(main())

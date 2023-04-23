@@ -1,0 +1,41 @@
+#include <WinVer.h>
+#include "MyVersion.h"
+
+#define MY_VER MY_VER_MAJOR,MY_VER_MINOR,MY_VER_BUILD,0
+
+#ifdef DEBUG
+#define DBG_FL VS_FF_DEBUG
+#else
+#define DBG_FL 0
+#endif
+
+#define MY_VERSION_INFO(fileType, descr, intName, origName)  \
+LANGUAGE 9, 1 \
+1 VERSIONINFO \
+  FILEVERSION MY_VER \
+  PRODUCTVERSION MY_VER \
+  FILEFLAGSMASK VS_FFI_FILEFLAGSMASK \
+  FILEFLAGS DBG_FL \
+  FILEOS VOS_NT_WINDOWS32 \
+  FILETYPE fileType \
+  FILESUBTYPE 0x0L \
+BEGIN \
+    BLOCK "StringFileInfo" \
+    BEGIN  \
+        BLOCK "040904b0" \
+        BEGIN \
+            VALUE "CompanyName", "Igor Pavlov" \
+            VALUE "FileDescription", descr \
+            VALUE "FileVersion", MY_VERSION  \
+            VALUE "InternalName", intName \
+            VALUE "LegalCopyright", MY_COPYRIGHT \
+            VALUE "OriginalFilename", origName \
+            VALUE "ProductName", "7-Zip" \
+            VALUE "ProductVersion", MY_VERSION \
+        END \
+    END \
+END
+
+#define MY_VERSION_INFO_APP(descr, intName) MY_VERSION_INFO(VFT_APP, descr, intName, intName ".exe")
+
+#define MY_VERSION_INFO_DLL(descr, intName) MY_VERSION_INFO(VFT_DLL, descr, intName, intName ".dll")

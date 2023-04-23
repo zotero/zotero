@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+# Upload build archives from 'dist' to S3 with the specified channel and version
+#
+set -euo pipefail
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+. "$ROOT_DIR/config.sh"
+
+function usage {
+	echo Usage: $0 CHANNEL VERSION >&2
+	exit 1
+}
+
+CHANNEL="${1:-}"
+VERSION="${2:-}"
+
+if [[ -z "$CHANNEL" ]] || [[ -z "$VERSION" ]]; then
+	usage
+fi
+
+url="s3://$S3_BUCKET/$S3_DIST_PATH/$CHANNEL/$VERSION/"
+aws s3 sync --exclude "files-*" --exclude build_id "$DIST_DIR" $url

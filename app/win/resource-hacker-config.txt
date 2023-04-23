@@ -1,0 +1,9 @@
+[FILENAMES]
+Open=firefox-{{ARCH}}.exe
+Save=zotero_{{ARCH}}.exe
+Log=CONSOLE
+[COMMANDS]
+-addoverwrite ../assets/icons/default/main-window.ico, ICONGROUP,1,
+-addoverwrite ../assets/icons/default/main-window.ico, ICONGROUP,32512,
+-delete VERSIONINFO,1
+-addoverwrite VersionInfo1.res, VERSIONINFO,1,

@@ -1,0 +1,19 @@
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+. "$ROOT_DIR/config.sh"
+
+function usage {
+	echo "Usage: $0 file"
+	exit 1
+}
+
+file=${1:-}
+if [[ -z "$file" ]]; then
+	usage
+fi
+
+echo "Uploading ${file##*/} to Apple for notarization" >&2
+xcrun altool --notarize-app --primary-bundle-id "$NOTARIZATION_BUNDLE_ID" --username "$NOTARIZATION_USER" --password "$NOTARIZATION_PASSWORD" --file $file --output-format xml

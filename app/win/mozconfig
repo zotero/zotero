@@ -1,0 +1,26 @@
+# Set Z_ARCH=win32 on command line to build and package win32
+if [ "$Z_ARCH" == "win32" ]; then
+	ac_add_options --target=i686-pc-mingw32
+	# https://bugzilla.mozilla.org/show_bug.cgi?id=1804548
+	ac_add_options --without-wasm-sandboxed-libraries
+fi
+
+ac_add_options --enable-bootstrap
+mk_add_options AUTOCLOBBER=1
+
+# These don't all affect the stub, but they can't hurt, and we'll want them if
+# we switch to custom XUL builds
+ac_add_options MOZ_ENABLE_JS_DUMP=1
+ac_add_options MOZ_ENABLE_FORKSERVER=
+ac_add_options MOZ_TELEMETRY_REPORTING=
+ac_add_options MOZ_DATA_REPORTING=
+ac_add_options --disable-tests
+ac_add_options --disable-debug
+ac_add_options --disable-debug-symbols
+ac_add_options --disable-webrtc
+ac_add_options --disable-eme
+ac_add_options --enable-official-branding
+
+export MOZILLA_OFFICIAL=1
+export RELEASE_OR_BETA=1
+MOZ_REQUIRE_SIGNING=

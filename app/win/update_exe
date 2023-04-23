@@ -1,0 +1,43 @@
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd "$SCRIPT_DIR"
+
+rh="resource_hacker/ResourceHacker.exe"
+
+if [ ! -f "$rh" ]; then
+	echo "win/$rh not found" >&2
+	exit 1
+fi
+
+if [[ -z "${1:-}" ]]; then
+	echo "Usage: $0 firefox_version" >&2
+	exit 1
+fi
+version=$1
+
+for arch in win32 win64; do
+	zip="firefox-$version.en-US.$arch.zip"
+	if [ ! -f "$zip" ]; then
+		echo "$zip not found" >&2
+		exit 1
+	fi
+	rm -f firefox-$arch.exe
+	unzip -oj $zip firefox/firefox.exe
+	mv firefox.exe firefox-$arch.exe
+
+	$rh -open VersionInfo1.rc -save VersionInfo1.res -action compile
+
+	config=`cat resource-hacker-config.txt`
+	config_file="resource-hacker-config-$arch.txt"
+	echo "${config//\{\{ARCH\}\}/$arch}" > $config_file
+	$rh -script $config_file
+	rm $config_file
+
+	rm VersionInfo1.res
+done
+
+tar -Jcv zotero_win32.exe zotero_win64.exe > zotero.exe.tar.xz
+
+rm firefox-win??.exe zotero_win??.exe

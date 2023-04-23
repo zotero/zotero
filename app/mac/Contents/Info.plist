@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<!-- Import formats -->
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>ris</string>
+			</array>
+			<!--<key>CFBundleTypeIconFile</key>
+			<string>document.icns</string>-->
+			<key>CFBundleTypeMIMETypes</key>
+			<array>
+				<string>application/x-research-info-systems</string>
+				<string>text/x-research-info-systems</string>
+				<string>text/ris</string>
+				<string>ris</string>
+				<string>application/x-endnote-refer</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>Research Information Systems Document</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>ciw</string>
+				<string>isi</string>
+			</array>
+			<!--<key>CFBundleTypeIconFile</key>
+			<string>document.icns</string>-->
+			<key>CFBundleTypeMIMETypes</key>
+			<array>
+				<string>application/x-inst-for-Scientific-info</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>ISI Common Export Format Document</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>mods</string>
+			</array>
+			<!--<key>CFBundleTypeIconFile</key>
+			<string>document.icns</string>-->
+			<key>CFBundleTypeMIMETypes</key>
+			<array>
+				<string>application/mods+xml</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>Metadata Object Description Schema Document</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>rdf</string>
+			</array>
+			<!--<key>CFBundleTypeIconFile</key>
+			<string>document.icns</string>-->
+			<key>CFBundleTypeMIMETypes</key>
+			<array>
+				<string>application/rdf+xml</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>Resource Description Framework Document</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>bib</string>
+				<string>bibtex</string>
+			</array>
+			<!--<key>CFBundleTypeIconFile</key>
+			<string>document.icns</string>-->
+			<key>CFBundleTypeMIMETypes</key>
+			<array>
+				<string>application/x-bibtex</string>
+				<string>text/x-bibtex</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>BibTeX Document</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>mrc</string>
+				<string>marc</string>
+			</array>
+			<!--<key>CFBundleTypeIconFile</key>
+			<string>document.icns</string>-->
+			<key>CFBundleTypeMIMETypes</key>
+			<array>
+				<string>application/marc</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>MARC Document</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+		</dict>
+		
+		<!-- Citation styles -->
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>csl</string>
+				<string>csl.txt</string>
+			</array>
+			<!--<key>CFBundleTypeIconFile</key>
+			<string>document.icns</string>-->
+			<key>CFBundleTypeMIMETypes</key>
+			<array>
+				<string>application/vnd.citationstyles.style+xml</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>CSL Citation Style</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+		</dict>
+		
+		<!-- Hopefully, we don't become the default app for these -->
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>xml</string>
+			</array>
+			<!--<key>CFBundleTypeIconFile</key>
+			<string>document.icns</string>-->
+			<key>CFBundleTypeName</key>
+			<string>XML Document</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>txt</string>
+			</array>
+			<!--<key>CFBundleTypeIconFile</key>
+			<string>document.icns</string>-->
+			<key>CFBundleTypeName</key>
+			<string>Text File</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+		</dict>
+	</array>
+	<key>CFBundleExecutable</key>
+	<string>zotero</string>
+	<key>CFBundleGetInfoString</key>
+	<string>Zotero {{VERSION}}, © 2006-2018 Contributors</string>
+	<key>CFBundleIconFile</key>
+	<string>zotero</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.zotero.zotero</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Zotero</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>{{VERSION_NUMERIC}}</string>
+	<key>CFBundleSignature</key>
+	<string>ZOTR</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<!--<key>CFBundleURLIconFile</key>
+			<string>document.icns</string>-->
+			<key>CFBundleURLName</key>
+			<string>zotero URL</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>zotero</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleVersion</key>
+	<string>{{VERSION_NUMERIC}}</string>
+	<key>NSAppleScriptEnabled</key>
+	<true/>
+	<key>CGDisableCoalescedUpdates</key>
+	<true/>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSSupportsAutomaticGraphicsSwitching</key>
+	<true/>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.9.0</string>
+</dict>
+</plist>

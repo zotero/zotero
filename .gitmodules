@@ -47,3 +47,12 @@
 [submodule "chrome/content/zotero/xpcom/translate"]
 	path = chrome/content/zotero/xpcom/translate
 	url = https://github.com/zotero/translate.git
+[submodule "app/modules/zotero-word-for-mac-integration"]
+	path = app/modules/zotero-word-for-mac-integration
+	url = https://github.com/zotero/zotero-word-for-mac-integration.git
+[submodule "app/modules/zotero-word-for-windows-integration"]
+	path = app/modules/zotero-word-for-windows-integration
+	url = https://github.com/zotero/zotero-word-for-windows-integration.git
+[submodule "app/modules/zotero-libreoffice-integration"]
+	path = app/modules/zotero-libreoffice-integration
+	url = https://github.com/zotero/zotero-libreoffice-integration.git

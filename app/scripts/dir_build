@@ -1,0 +1,82 @@
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+. "$ROOT_DIR/config.sh"
+
+function usage {
+	cat >&2 <<DONE
+Usage: $0 -p platforms
+Options
+ -p PLATFORMS        Platforms to build (m=Mac, w=Windows, l=Linux)
+ -t                  add devtools
+ -q                  quick build (skip compression and other optional steps for faster restarts during development)
+DONE
+	exit 1
+}
+
+DEVTOOLS=0
+PLATFORM=""
+quick_build=0
+while getopts "tp:q" opt; do
+	case $opt in
+		t)
+			DEVTOOLS=1
+			;;
+		p)
+			for i in `seq 0 1 $((${#OPTARG}-1))`
+			do
+				case ${OPTARG:i:1} in
+					m) PLATFORM="m";;
+					w) PLATFORM="w";;
+					l) PLATFORM="l";;
+					*)
+						echo "$0: Invalid platform option ${OPTARG:i:1}"
+						usage
+						;;
+				esac
+			done
+			;;
+		q)
+			quick_build=1
+			;;
+		\?)
+			echo "Invalid option: -$OPTARG" >&2
+			exit 1
+			;;
+	esac
+done
+
+if [[ -z $PLATFORM ]]; then
+	if [ "`uname`" = "Darwin" ]; then
+		PLATFORM="m"
+	elif [ "`uname`" = "Linux" ]; then
+		PLATFORM="l"
+	elif [ "`uname -o 2> /dev/null`" = "Cygwin" ]; then
+		PLATFORM="w"
+	fi
+fi
+
+CHANNEL="source"
+
+VERSION=`perl -ne 'print and last if s/.*<em:version>(.{3}).+/\1/;' "$ZOTERO_SOURCE_DIR/install.rdf"`
+if [ $VERSION = "4.0" ]; then
+	"$ZOTERO_BUILD_DIR/xpi/build_xpi_4.0" "$ZOTERO_SOURCE_DIR" $CHANNEL
+	"$ROOT_DIR/build.sh" -f "$ZOTERO_BUILD_DIR/xpi/build/zotero-build.xpi" -p $PLATFORM -c $CHANNEL -s
+else
+	PARAMS=""
+	if [ $DEVTOOLS -eq 1 ]; then
+		PARAMS+=" -t"
+	fi
+	if [ $quick_build -eq 1 ]; then
+		PARAMS+=" -q"
+	fi
+	
+	hash=`git -C "$ZOTERO_SOURCE_DIR" rev-parse --short HEAD`
+	
+	"$ZOTERO_BUILD_DIR/xpi/build_xpi" -s "$ZOTERO_SOURCE_DIR/build" -c $CHANNEL -m $hash
+	"$ROOT_DIR/build.sh" -d "$ZOTERO_BUILD_DIR/xpi/build/staging" -p $PLATFORM -c $CHANNEL -s $PARAMS
+fi
+
+echo Done
