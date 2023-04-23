@@ -83,12 +83,9 @@ def main():
                 "^intl.accept_languages"
             ]
         },
-        {
-            "file": "browser/chrome/{0}/locale/browser/browser.dtd",
-            "grep_patterns": [
-                "preferencesCmd"
-            ]
-        }
+        "browser/localization/{0}/browser/menubar.ftl",
+        "localization/{0}/toolkit/global/textActions.ftl",
+        "localization/{0}/toolkit/global/wizard.ftl"
     ]
     
     extracted_files = {}
