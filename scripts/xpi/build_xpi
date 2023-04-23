@@ -1,0 +1,328 @@
+#!/usr/bin/env python3
+import sys
+import os
+import argparse
+import tempfile
+import shutil
+import subprocess
+import re
+import fileinput
+from collections import OrderedDict
+import json
+import hashlib
+import traceback
+
+# Hack to combine two argparse formatters
+class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter, argparse.RawDescriptionHelpFormatter):
+    pass
+
+parser = argparse.ArgumentParser(
+    description='Build a Zotero XPI',
+    formatter_class=CustomFormatter,
+    epilog='''
+Example: build_xpi -s ~/zotero-client/build -x 5.0.1 -z
+  - Builds zotero-build.xpi and update-build.rdf
+  - Points update-build.rdf to https://download.zotero.org/extension/zotero-5.0.1.xpi
+  - Points install.rdf to https://www.zotero.org/download/update.rdf
+
+Example: build_xpi -s ~/zotero-client/build -c beta -m 7c27a9bb5 -x 5.0b2 -r beta -z
+  - Builds zotero-build.xpi and update-build.rdf
+  - Points update-build.rdf to https://download.zotero.org/extension/zotero-5.0b2.xpi
+  - Points install.rdf to https://www.zotero.org/download/update-beta.rdf
+
+Example: build_xpi -s ~/zotero-client/build -c alpha -m 7c27a9bb5 -x 5.0-alpha -r 5.0-branch --xpi-dir dev -z
+  - Builds zotero-build.xpi and update-build.rdf
+  - Points update-build.rdf to https://download.zotero.org/extension/dev/zotero-5.0-alpha.xpi
+  - Points install.rdf to https://zotero.org/download/dev/update-5.0-branch.rdf''')
+
+parser.add_argument('--source-dir', '-s', required=True, metavar='DIR', help='Directory to build from')
+parser.add_argument('-c', '--channel', default='source', help='channel to add to dev build version number (e.g., "beta" for "5.0-beta.3+a5f28ca8"), or "release" or "source" to skip')
+parser.add_argument('--commit-hash', '-m', metavar='HASH', help='Commit hash (required for non-release builds)')
+parser.add_argument('--build-suffix', metavar='SUFFIX', default='build', help='suffix of output XPI')
+parser.add_argument('--xpi-suffix', '-x', metavar='SUFFIX', default='', help='suffix of XPI to reference in update.rdf')
+parser.add_argument('--rdf-suffix', '-r', metavar='SUFFIX', default='', help='suffix of update.rdf file to reference in install.rdf (e.g., "beta" for "update-beta.rdf")')
+parser.add_argument('--xpi-dir', metavar='DIR', default='', help='extra directory to point to when referencing the XPI in update.rdf')
+parser.add_argument('--zip', '-z', action='store_true', help="Create XPI instead of leaving files in build/staging")
+
+args = parser.parse_args()
+
+def main():
+    try:
+        if args.xpi_suffix:
+            args.xpi_suffix = "-" + args.xpi_suffix
+        if args.rdf_suffix:
+            args.rdf_suffix = "-" + args.rdf_suffix
+        if args.build_suffix:
+            args.build_suffix = "-" + args.build_suffix
+        
+        root_dir = os.path.dirname(os.path.realpath(__file__))
+        
+        # Use BUILD_DIR environmental variable if present, and otherwise ./build
+        build_dir = os.environ.get('BUILD_DIR', os.path.join(root_dir, 'build'))
+        tmp_dir = os.path.join(build_dir, 'tmp')
+        
+        if not os.path.isdir(build_dir):
+            raise Exception(build_dir + " is not a directory")
+        
+        src_dir = args.source_dir
+        if not os.path.isdir(src_dir):
+            raise Exception(src_dir + " is not a directory")
+        
+        if args.commit_hash:
+            commit_hash = args.commit_hash[0:9]
+        elif args.channel != "release":
+            raise Exception("--commit-hash must be specified for non-release builds")
+        
+        log("Using source directory of " + src_dir)
+        os.chdir(src_dir)
+        
+        if not os.path.exists('install.rdf'):
+            raise FileNotFoundError("install.rdf not found in {0}".format(src_dir))
+        
+        # Extract version number from install.rdf
+        with open('install.rdf') as f:
+            rdf = f.read()
+        m = re.search('version>([0-9].+)\\.SOURCE</', rdf)
+        if not m:
+            raise Exception("Version number not found in install.rdf")
+        version = m.group(1)
+        
+        # Determine build targets
+        target_xpi_file = os.path.join(
+            build_dir, 'zotero' + args.build_suffix + '.xpi'
+        )
+        target_update_file = os.path.join(
+            build_dir, 'update' + args.build_suffix + '.rdf'
+        )
+        staging_dir = os.path.join(build_dir, 'staging')
+        
+        # Delete any existing build targets
+        try:
+            os.remove(target_xpi_file)
+        except OSError:
+            pass
+        try:
+            os.remove(target_update_file)
+        except OSError:
+            pass
+        if os.path.exists(staging_dir):
+            shutil.rmtree(staging_dir)
+        
+        # Remove tmp build directory if it already exists
+        if os.path.exists(tmp_dir):
+            shutil.rmtree(tmp_dir)
+        os.mkdir(tmp_dir)
+        tmp_src_dir = os.path.join(tmp_dir, 'zotero')
+        
+        # Export a clean copy of the source tree
+        subprocess.check_call([
+            'rsync',
+            '-aL',
+            # Exclude hidden files
+            '--exclude', '.*',
+            '--exclude', '#*',
+            '--exclude', 'package.json',
+            '--exclude', 'package-lock.json',
+            '.' + os.sep,
+            tmp_src_dir + os.sep
+        ])
+        
+        # Make sure rsync worked
+        d = os.path.join(tmp_src_dir, 'chrome')
+        if not os.path.isdir(d):
+            raise FileNotFoundError(d + " not found")
+        
+        log("Deleting CSL locale support files")
+        subprocess.check_call([
+            'find',
+            os.path.normpath(tmp_src_dir + '/chrome/content/zotero/locale/csl/'),
+            '-mindepth', '1',
+            '!', '-name', '*.xml',
+            '!', '-name', 'locales.json',
+            '-print',
+            '-delete'
+        ])
+        
+        # Delete styles build script
+        os.remove(os.path.join(tmp_src_dir, 'styles', 'update'))
+        
+        translators_dir = os.path.join(tmp_src_dir, 'translators')
+        
+        # Move deleted.txt out of translators directory
+        f = os.path.join(translators_dir, 'deleted.txt')
+        if os.path.exists(f):
+            shutil.move(f, tmp_src_dir)
+        
+        # Build translator index
+        index = OrderedDict()
+        for fn in sorted((fn for fn in os.listdir(translators_dir)), key=str.lower):
+            if not fn.endswith('.js'):
+                continue
+            with open(os.path.join(translators_dir, fn), 'r', encoding='utf-8') as f:
+                contents = f.read()
+            # Parse out the JSON metadata block
+            m = re.match('^\s*{[\S\s]*?}\s*?[\r\n]', contents)
+            if not m:
+                raise Exception("Metadata block not found in " + f.name)
+            metadata = json.loads(m.group(0))
+            index[metadata["translatorID"]] = {
+                "fileName": fn,
+                "label": metadata["label"],
+                "lastUpdated": metadata["lastUpdated"]
+            }
+        
+        # Unminify translator framework lines
+        with open(os.path.join(root_dir, 'zotero-transfw', 'framework.js')) as f:
+            framework_contents = f.read()
+        with open(os.path.join(translators_dir, 'fw.js'), 'w') as f:
+            f.write(
+                "/*********************** BEGIN FRAMEWORK ***********************/\n"
+                + framework_contents
+                + "\n/*********************** END FRAMEWORK ***********************/\n"
+            )
+        os.chdir(translators_dir)
+        subprocess.check_call(
+            "perl -pe 's/.+FW LINE.+/`cat fw.js`/ge' -i *.js", shell=True
+        )
+        os.remove('fw.js')
+        
+        # Write translator index as JSON file
+        with open(os.path.join(tmp_src_dir, 'translators.json'), 'w', encoding='utf-8') as f:
+            json.dump(index, f, indent=True, ensure_ascii=False)
+        
+        install_file = os.path.join(tmp_src_dir, 'install.rdf')
+        update_file = os.path.join(tmp_src_dir, 'update.rdf')
+        
+        log_line()
+        log('Original install.rdf:')
+        dump_file(install_file)
+        if args.zip:
+            log('Original update.rdf:\n')
+            dump_file(update_file)
+            log_line()
+        
+        # Modify install.rdf and update.rdf as necessary
+        
+        # The dev build revision number is stored in build/lastrev-{version}-{channel}.
+        #
+        # If we're including it, get the current version number and increment it.
+        if args.channel not in ["release", "source"]:
+            lastrev_file = os.path.join(
+                build_dir, 'lastrev-{0}-{1}'.format(version, args.channel)
+            )
+            if not os.path.exists(lastrev_file):
+                with open(lastrev_file, 'w') as f:
+                    f.write("0")
+                    rev = 1
+            else:
+                with open(lastrev_file, 'r') as f:
+                    rev = f.read()
+                    rev = int(rev if rev else 0) + 1
+        
+        if args.channel == "release":
+            rev_sub_str = ""
+        elif args.channel == "source":
+            rev_sub_str = ".SOURCE.{0}".format(commit_hash)
+        else:
+            rev_sub_str = "-{0}.{1}+{2}".format(args.channel, str(rev), commit_hash)
+        if args.xpi_dir:
+            xpi_dir = args.xpi_dir + '/'
+        else:
+            xpi_dir = ''
+        # Update install.rdf and update.rdf
+        for line in fileinput.FileInput(install_file, inplace=1):
+            line = line.replace('.SOURCE', rev_sub_str)
+            line = line.replace(
+                'update-source.rdf',
+                xpi_dir + 'update' + args.rdf_suffix + '.rdf'
+            )
+            print(line, file=sys.stdout, end='')
+        for line in fileinput.FileInput(update_file, inplace=1):
+            line = line.replace(".SOURCE", rev_sub_str)
+            line = line.replace(
+                'zotero.xpi',
+                xpi_dir + 'zotero' + args.xpi_suffix + '.xpi'
+            )
+            print(line, file=sys.stdout, end='')
+        
+        log_line()
+        log('Modified install.rdf:\n')
+        dump_file(install_file)
+        
+        # Create XPI
+        if args.zip:
+            # Move update.rdf out of code root
+            shutil.move(update_file, tmp_dir)
+            tmp_update_file = os.path.join(tmp_dir, 'update.rdf')
+            
+            os.chdir(tmp_src_dir)
+            tmp_xpi_file = os.path.join(tmp_dir, 'zotero' + args.build_suffix + '.xpi')
+            subprocess.check_call(['zip', '-r', tmp_xpi_file, '.'])
+            
+            # Add SHA1 of XPI to update.rdf
+            sha1 = sha1file(tmp_xpi_file)
+            for line in fileinput.FileInput(tmp_update_file, inplace=1):
+                line = line.replace("sha1:", "sha1:" + sha1)
+                print(line, file=sys.stdout, end='')
+            
+            log('Modified update.rdf:\n')
+            dump_file(tmp_update_file)
+            log_line()
+            
+            # Move files to build directory
+            os.rename(tmp_xpi_file, target_xpi_file)
+            os.rename(tmp_update_file, target_update_file)
+            
+            log("")
+            log("zotero{0}.xpi and update{0}.rdf saved to {1}".format(args.build_suffix, build_dir))
+            log("")
+        # Leave unzipped in staging directory
+        else:
+            # Don't create update.rdf
+            os.remove(update_file)
+            
+            # Move source files to staging
+            shutil.move(tmp_src_dir, staging_dir)
+            
+            log("")
+            log("Build files saved to {0}".format(staging_dir))
+            log("")
+        
+        # Update lastrev file with new revision number
+        if args.channel not in ["release", "source"]:
+            with open(lastrev_file, 'w') as f:
+                f.write(str(rev))
+        
+        return 0
+    
+    except Exception as err:
+        sys.stderr.write("\n" + traceback.format_exc())
+        return 1
+    
+    # Clean up
+    finally:
+        if os.path.exists(tmp_dir):
+            shutil.rmtree(tmp_dir)
+
+
+def dump_file(f):
+    with open(f, 'r') as f:
+        log(f.read())
+
+
+def log(msg):
+    print(msg, file=sys.stdout)
+
+
+def log_line():
+    log('======================================================\n\n')
+
+def sha1file(f):
+    sha1 = hashlib.sha1()
+    with open(f, 'rb') as f:
+        sha1.update(f.read())
+    return sha1.hexdigest()
+
+
+if __name__ == '__main__':
+    sys.exit(main())

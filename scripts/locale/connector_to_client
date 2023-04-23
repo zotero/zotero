@@ -1,0 +1,30 @@
+#!/bin/bash
+set -euo pipefail
+
+connector_dir=${1:-}
+client_dir=${2:-}
+
+if [[ -z "$connector_dir" ]]; then
+	connector_dir=~/zotero-connectors
+fi
+
+if [[ -z "$client_dir" ]]; then
+	client_dir=~/zotero-client
+fi
+
+json_file=$connector_dir/src/messages.json
+client_dir=$client_dir/chrome/locale
+
+if [ ! -e "$json_file" ]; then
+	echo "$json_file does not exist" >&2
+	exit 1
+fi
+
+if [ ! -d "$client_dir" ]; then
+	echo "$client_dir is not a directory" >&2
+	exit 1
+fi
+
+cp $json_file $client_dir/en-US/zotero/connector.json
+cd $client_dir
+git diff

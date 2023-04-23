@@ -1,0 +1,42 @@
+#!/bin/bash -e
+
+#
+# Generate platform-specific PNG files from SVG files for the main toolbar button
+#
+
+ROOT="$1"
+SVG_ROOT="$ROOT/chrome/skin/default/zotero/zotero-z-32px-australis"
+PLATFORM_PATH="$ROOT/chrome/content/zotero-platform"
+
+if [ -z "$ROOT" ]; then
+	echo "Usage: $0 /path/to/zotero"
+	exit 1
+fi
+
+if [ ! -d "$ROOT" ]; then
+	echo "$1 is not a directory"
+	exit 1
+fi
+
+if [ ! -f "$SVG_ROOT-mac.svg" ]; then
+	echo "SVG file not found at $SVG-mac.svg"
+	exit 1
+fi
+
+# Mac
+PLAT=mac
+rm -f "$PLATFORM_PATH/$PLAT/"zotero-z-*-australis.png
+svg2png $SVG_ROOT-$PLAT.svg --output "$PLATFORM_PATH/$PLAT/zotero-z-16px-australis.png" -w 16 -h 16
+svg2png $SVG_ROOT-$PLAT.svg --output "$PLATFORM_PATH/$PLAT/zotero-z-32px-australis.png" -w 32 -h 32
+
+# Windows
+PLAT=win
+rm -f "$PLATFORM_PATH/$PLAT/"zotero-z-*-australis.png
+svg2png $SVG_ROOT-$PLAT.svg --output "$PLATFORM_PATH/$PLAT/zotero-z-16px-australis.png" -w 16 -h 16
+svg2png $SVG_ROOT-$PLAT.svg --output "$PLATFORM_PATH/$PLAT/zotero-z-32px-australis.png" -w 32 -h 32
+
+# Linux
+PLAT=unix
+rm -f "$PLATFORM_PATH/$PLAT/"zotero-z-*-australis.png
+svg2png $SVG_ROOT-$PLAT.svg --output "$PLATFORM_PATH/$PLAT/zotero-z-16px-australis.png" -w 16 -h 16
+svg2png $SVG_ROOT-$PLAT.svg --output "$PLATFORM_PATH/$PLAT/zotero-z-32px-australis.png" -w 32 -h 32

@@ -1,0 +1,148 @@
+#!/usr/bin/env python3
+
+import urllib.request, json, re
+from functools import cmp_to_key
+from locale import strcoll
+
+locales = {
+    # Keep in sync with locale.js in zotero-client
+    'ar': 'عربي',
+    'bg-BG': 'Български',
+    'br': 'brezhoneg',
+    'ca-AD': 'Català',
+    'cs-CZ': 'Čeština',
+    'da-DK': 'Dansk',
+    'de': 'Deutsch (Deutschland)',
+    'en-CA': 'English (Canada)',
+    'en-US': 'English',
+    'en-GB': 'English (UK)',
+    'es-ES': 'Español',
+    'et-EE': 'Eesti keel',
+    'fa': 'فارسی',
+    'fi-FI': 'suomi',
+    'fr-FR': 'Français',
+    'gl-ES': 'Galego',
+    'hu-HU': 'magyar',
+    'id-ID': 'Bahasa Indonesia',
+    'is-IS': 'íslenska',
+    'it-IT': 'Italiano',
+    'ja-JP': '日本語',
+    'km': 'ខ្មែរ',
+    'ko-KR': '한국어',
+    'lt-LT': 'Lietuvių',
+    'nl-NL': 'Nederlands',
+    'nb-NO': 'Norsk bokmål',
+    'pl-PL': 'Polski',
+    'pt-BR': 'Português (do Brasil)',
+    'pt-PT': 'Português (Europeu)',
+    'ro-RO': 'Română',
+    'ru-RU': 'Русский',
+    'sk-SK': 'slovenčina',
+    'sl-SI': 'Slovenščina',
+    'sr-RS': 'Српски',
+    'sv-SE': 'Svenska',
+    'th-TH': 'ไทย',
+    'tr-TR': 'Türkçe',
+    'uk-UA': 'Українська',
+    'vi-VN': 'Tiếng Việt',
+    'zh-CN': '中文 (简体)',
+    'zh-TW': '正體中文 (繁體)',
+    
+    # Additional dictionaries not included as client locales
+    # Names from https://addons.mozilla.org/en-US/firefox/language-tools/
+    'de-AT': 'Deutsch (Österreich)',
+    'de-CH': 'Deutsch (Schweiz)',
+    'el-GR': 'Ελληνικά',
+    'es-AR': 'Español (de Argentina)',
+    'es-MX': 'Español (de México)',
+    'he-HE': 'עברית',
+    'hr-HR': 'Hrvatski',
+    'lv-LV': 'Latviešu',
+}
+
+# Locales to sort before other variants
+primary_locales = ['de-DE', 'en-US', 'es-ES']
+
+# Generate list of available dictionaries, sorted by user count descending
+dictionaries = []
+with urllib.request.urlopen("https://services.addons.mozilla.org/api/v4/addons/language-tools/?app=firefox&type=dictionary") as resp:
+    dictionary_info_list = json.loads(resp.read().decode())['results']
+    n = 0
+    for dictionary_info in dictionary_info_list:
+        n += 1
+        locale = dictionary_info['target_locale']
+        guid = dictionary_info['guid']
+        print(str(n) + '/' + str(len(dictionary_info_list)) + ': ' + dictionary_info['target_locale'])
+        with urllib.request.urlopen("https://services.addons.mozilla.org/api/v4/addons/search/?guid=" + guid) as resp:
+            dictionary = json.loads(resp.read().decode())['results'][0]
+            if dictionary['is_disabled'] or dictionary['status'] != 'public':
+                print('skipping ' + locale + ' ' + guid)
+                continue
+            dictionaries.append({
+                'id': guid,
+                'locale': locale,
+                'version': dictionary['current_version']['version'],
+                'updated': dictionary['last_updated'],
+                'url': dictionary['current_version']['files'][0]['url'],
+                'users': dictionary['average_daily_users'],
+            })
+    dictionaries.sort(key=lambda x: x.get('users'), reverse=True)
+
+# Find dictionaries best matching the specified locales
+final_dictionaries = []
+for locale in locales:
+    locale_lang = re.split('[-_]', locale)[0]
+    # A locale code with the language duplicated (e.g., 'de-DE'), which may not
+    # be the actual code
+    locale_lang_full = "{}-{}".format(locale_lang, locale_lang.upper())
+    
+    for i, d in enumerate(dictionaries[:]):
+        # Exact match
+        if (d['locale'] == locale
+                # locale 'de' == dict 'de-DE'
+                or (len(locale) == 2 and d['locale'] == locale_lang_full)
+                # locale 'bg-BG' -> dict 'bg'
+                or (locale == locale_lang_full and d['locale'] == locale_lang)):
+            d['name'] = locales[locale]
+            final_dictionaries.append(d)
+            del(dictionaries[i])
+            break
+    else:
+        # If nothing found, allow missing differing region ('cs-cZ' -> 'cs')
+        if len(locale) != 2 and locale != locale_lang_full:
+            for i, d in enumerate(dictionaries[:]):
+                if d['locale'] == locale_lang:
+                    d['name'] = locales[locale]
+                    final_dictionaries.append(d)
+                    del(dictionaries[i])
+                    break
+
+# Sort dictionaries by language code, with a few exceptions
+def cmp(a, b):
+    for locale in primary_locales:
+        if a['locale'] == locale and b['locale'].startswith(locale[0:3]):
+            return -1
+        if b['locale'] == locale and a['locale'].startswith(locale[0:3]):
+            return 1
+    return strcoll(a['locale'], b['locale'])
+
+final_dictionaries = sorted(final_dictionaries, key=cmp_to_key(cmp))
+
+print("")
+
+for d in final_dictionaries:
+    print("Downloading {}".format(d['url']))
+    urllib.request.urlretrieve(
+        d['url'],
+        'dictionaries/' + d['id'] + '-' + d['version'] + '.xpi'
+    )
+    del(d['url'])
+
+with open('dictionaries/dictionaries.json', 'w', encoding='utf-8') as f:
+    json.dump(final_dictionaries, f, ensure_ascii=False, sort_keys=True, indent='\t')
+
+# Save a list of unused dictionaries
+with open('dictionaries/dictionaries-unused.json', 'w', encoding='utf-8') as f:
+    json.dump(dictionaries, f, ensure_ascii=False, indent='\t')
+
+print('\ndone')

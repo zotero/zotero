@@ -1,0 +1,262 @@
+#!/usr/bin/env python3
+
+import json
+import os
+import sys
+import urllib.request
+import shutil
+import zipfile
+import re
+import xml.etree.ElementTree as ET
+
+def main():
+    use_cache = True
+    
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    if len(sys.argv) < 2 or not os.path.isdir(sys.argv[1]):
+        sys.stderr.write("Usage: {0} path/to/zotero/source\n".format(
+            os.path.basename(sys.argv[0])))
+        return 1
+    
+    source_dir = sys.argv[1]
+    locales_dir = os.path.join(source_dir, 'chrome', 'locale')
+    schema_dir = os.path.join(source_dir, 'resource', 'schema')
+    
+    # AMO download links for Firefox language packs
+    language_packs = [
+        ["en-US", "https://addons.mozilla.org/en-US/firefox/addon/english-us-language-pack/"],
+        ["af", "https://addons.mozilla.org/en-US/firefox/addon/afrikaans-language-pack/", "af-ZA"],
+        ["ar", "https://addons.mozilla.org/en-US/firefox/addon/%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9-language-pack/"],
+        ["bg", "https://addons.mozilla.org/en-US/firefox/addon/%D0%B1%D1%8A%D0%BB%D0%B3%D0%B0%D1%80%D1%81%D0%BA%D0%B8-language-pack/", "bg-BG"],
+        ["ca", "https://addons.mozilla.org/en-US/firefox/addon/ca-language-pack/", "ca-AD"],
+        ["cs", "https://addons.mozilla.org/en-US/firefox/addon/czech-cz-language-pack/", "cs-CZ"],
+        ["da", "https://addons.mozilla.org/en-US/firefox/addon/dansk-da-language-pack/", "da-DK"],
+        ["de", "https://addons.mozilla.org/en-US/firefox/addon/deutsch-de-language-pack/"],
+        ["el", "https://addons.mozilla.org/en-US/firefox/addon/greek-gr-language-pack/", "el-GR"],
+        ["en-GB", "https://addons.mozilla.org/en-US/firefox/addon/english-gb-language-pack/"],
+        ["es-ES", "https://addons.mozilla.org/en-US/firefox/addon/espa%C3%B1ol-espa%C3%B1a-language-pac/"],
+        ["eu", "https://addons.mozilla.org/en-US/firefox/addon/basque-language-pack/", "eu-ES"],
+        ["fr", "https://addons.mozilla.org/en-US/firefox/addon/fran%C3%A7ais-language-pack/", "fr-FR"],
+        ["et", "https://addons.mozilla.org/en-US/firefox/addon/eesti-et-keele-pakk/", "et-EE"],
+        ["eu", "https://addons.mozilla.org/en-US/firefox/addon/basque-language-pack/", "eu-ES"],
+        ["fa", "https://addons.mozilla.org/en-US/firefox/addon/persian-ir-%D9%81%D8%A7%D8%B1%D8%B3%DB%8C-%D8%A7%DB%8C%D8%B1%D8%A7%D9%86-lang/"],
+        ["fi", "https://addons.mozilla.org/en-US/firefox/addon/finnish-language-pack/", "fi-FI"],
+        ["gl", "https://addons.mozilla.org/en-US/firefox/addon/galician-galiza-language-pack/", "gl-ES"],
+        ["he", "https://addons.mozilla.org/en-US/firefox/addon/hebrew-il-language-pack/", "he-IL"],
+        ["hr", "https://addons.mozilla.org/en-US/firefox/addon/hrvatski-hr-language-pack/", "hr-HR"],
+        ["hu", "https://addons.mozilla.org/en-US/firefox/addon/magyar-nyelvi/", "hu-HU"],
+        ["id", "https://addons.mozilla.org/en-US/firefox/addon/indonesian-langpack/", "id-ID"],
+        ["is", "https://addons.mozilla.org/en-US/firefox/addon/icelandic-is-language-pack/", "is-IS"],
+        ["it", "https://addons.mozilla.org/en-US/firefox/addon/italiano-it-language-pack/", "it-IT"],
+        ["ja", "https://addons.mozilla.org/en-US/firefox/addon/japanese-language-pack-1/", "ja-JP"],
+        ["km", "https://addons.mozilla.org/en-US/firefox/addon/%E1%9E%81%E1%9E%98%E1%9E%9A-language-pack/"],
+        ["ko", "https://addons.mozilla.org/en-US/firefox/addon/korean-kr-language-pack/", "ko-KR"],
+        ["lt", "https://addons.mozilla.org/en-US/firefox/addon/lietuvi%C5%B3-language-pack/", "lt-LT"],
+        ["nb-NO", "https://addons.mozilla.org/en-US/firefox/addon/norsk-bokm%C3%A5l-no-language-pa/"],
+        ["nn-NO", "https://addons.mozilla.org/en-US/firefox/addon/norsk-nynorsk-no-language-p/"],
+        ["nl", "https://addons.mozilla.org/en-US/firefox/addon/nederlands-nl-language-pack/", "nl-NL"],
+        ["pl", "https://addons.mozilla.org/en-US/firefox/addon/polski-language-pack/", "pl-PL"],
+        ["pt-BR", "https://addons.mozilla.org/en-US/firefox/addon/firefox-br/"],
+        ["pt-PT", "https://addons.mozilla.org/en-US/firefox/addon/portugu%C3%AAs-portugal-language/"],
+        ["ro", "https://addons.mozilla.org/en-US/firefox/addon/romanian-language-pack/", "ro-RO"],
+        ["ru", "https://addons.mozilla.org/en-US/firefox/addon/russian-ru-language-pack/", "ru-RU"],
+        ["sk", "https://addons.mozilla.org/en-US/firefox/addon/slovak-sk-language-pack/", "sk-SK"],
+        ["sl", "https://addons.mozilla.org/en-US/firefox/addon/slovenski-jezik-language-pa/", "sl-SI"],
+        ["sr", "https://addons.mozilla.org/en-US/firefox/addon/%D1%81%D1%80%D0%BF%D1%81%D0%BA%D0%B8-sr-language-pack/", "sr-RS"],
+        ["sv-SE", "https://addons.mozilla.org/en-US/firefox/addon/svenska-se-language-pack/", "sv-SE"],
+        ["th", "https://addons.mozilla.org/en-US/firefox/addon/thai-language-pack/", "th-TH"],
+        ["tr", "https://addons.mozilla.org/en-US/firefox/addon/t%C3%BCrk%C3%A7e-tr-language-pack/", "tr-TR"],
+        ["uk", "https://addons.mozilla.org/en-US/firefox/addon/ukrainian-language-pack/", "uk-UA"],
+        ["vi", "https://addons.mozilla.org/en-US/firefox/addon/vietnamese-language-pack/", "vi-VN"],
+        ["zh-CN", "https://addons.mozilla.org/en-US/firefox/addon/chinese-simplified-zh-cn-la/"],
+        ["zh-TW", "https://addons.mozilla.org/en-US/firefox/addon/traditional-chinese-zh-tw-l/"]
+    ]
+    
+    # Can be a string or a dict containing 'file' and 'patterns'
+    entries = [
+        #"chrome/{0}/locale/{0}/global/dateFormat.properties",
+        "chrome/{0}/locale/{0}/global/editMenuOverlay.dtd",
+        {
+            "file": "chrome/{0}/locale/{0}/global/intl.properties",
+            "grep_patterns": [
+                "^pluralRule",
+                "^intl.accept_languages"
+            ]
+        },
+        {
+            "file": "browser/chrome/{0}/locale/browser/browser.dtd",
+            "grep_patterns": [
+                "preferencesCmd"
+            ]
+        }
+    ]
+    
+    extracted_files = {}
+    for entry in entries:
+        entry_filename = get_entry_filename(entry)
+        if entry_filename != 'dateFormat.properties':
+            extracted_files[entry_filename] = set()
+    
+    date_formats = {}
+    
+    first = True
+    for pack in language_packs:
+        lang, url, *rest = pack
+        
+        if len(rest):
+            locale = rest[0]
+        else:
+            locale = lang
+        
+        pack_dir = os.path.join(script_dir, 'packs', lang)
+        locale_dir = os.path.join(locales_dir, locale, 'zotero', 'mozilla')
+        
+        if not os.path.exists(pack_dir):
+            os.makedirs(pack_dir)
+        if not os.path.exists(locale_dir):
+            os.mkdir(locale_dir)
+            
+        if not first:
+            print()
+        first = False
+        
+        print("Loading from " + url)
+        with urllib.request.urlopen(url) as response:
+            code = response.getcode()
+            if code != 200:
+                sys.sterr.write("Got {0} for {1}\n".format(code, url))
+                return 1
+            
+            html = str(response.read(), 'utf-8')
+            xpi_url = json.loads(
+                '"' + re.match('.*(https:[^"]+\.xpi)', html, flags=re.DOTALL).group(1) + '"'
+            )
+            file_name = xpi_url.split("/")[-1]
+            pack_file = os.path.join(pack_dir, file_name)
+            
+            if use_cache and os.path.isfile(pack_file):
+                print("Using cached file for " + pack_file)
+            else:
+                print("Downloading " + xpi_url)
+                with urllib.request.urlopen(xpi_url) as response, open(pack_file, 'wb') as f:
+                    shutil.copyfileobj(response, f)
+        
+        # Unzip selected files straight to target locale dirs
+        with zipfile.ZipFile(pack_file, "r") as zip_ref:
+            for entry in entries:
+                entry_path = get_entry_path(entry)
+                entry_filename = get_entry_filename(entry)
+                formatted_path = entry_path.format(lang)
+                
+                try:
+                    zip_ref.getinfo(formatted_path)
+                except KeyError:
+                    print("'{0}' not found in {1}".format(formatted_path, pack_file))
+                    continue
+                
+                with zip_ref.open(formatted_path) as source:
+                    # Add date formats to JSON object
+                    if entry_filename == 'dateFormat.properties':
+                        date_formats[locale] = {
+                            "short": [],
+                            "long": []
+                        }
+                        pattern = re.compile(r"^month\.\d+\.(Mmm|name)\s*=\s*(.+)$")
+                        for line in source:
+                            matches = pattern.match(str(line, 'utf-8'))
+                            if matches:
+                                if matches.group(1) == "Mmm":
+                                    date_formats[locale]["short"].append(
+                                        matches.group(2).strip()
+                                    )
+                                else:
+                                    date_formats[locale]["long"].append(
+                                        matches.group(2).strip()
+                                    )
+                    # Extract other files
+                    else:
+                        target_path = os.path.join(locale_dir, entry_filename)
+                        print("Extracting " + target_path)
+                        with open(target_path, "wb") as target:
+                            copied = False
+                            
+                            # Filter lines based on grep patterns
+                            if isinstance(entry, dict) and entry['grep_patterns']:
+                                lines_to_write = []
+                                
+                                for line in source:
+                                    line_str = str(line, 'utf-8')
+                                    for p in entry['grep_patterns']:
+                                        if re.search(re.compile(p), line_str):
+                                            lines_to_write.append(line)
+                                            continue
+                                
+                                if len(lines_to_write):
+                                    # BOM is required for Firefox to read .dtd files
+                                    use_bom = entry_filename.endswith('.dtd')
+                                    
+                                    target.write(
+                                        ('\ufeff'.encode('utf-8') if use_bom else b'')
+                                        + b''.join(lines_to_write)
+                                    )
+                                    copied = True
+                            
+                            # Copy file directly
+                            else:
+                                shutil.copyfileobj(source, target)
+                                copied = True
+                            
+                            if copied:
+                                extracted_files[entry_filename].add(locale)
+    
+    print()
+    
+    # Copy en-US files to any locales that didn't have localized versions
+    en_locale_dir = os.path.join(locales_dir, 'en-US', 'zotero', 'mozilla')
+    locales = set(os.listdir(locales_dir))
+    locales -= set(['.DS_Store'])
+    for entry_filename, existing_locales in extracted_files.items():
+        missing = locales.difference(existing_locales)
+        
+        for locale in missing:
+            dest_dir = os.path.join(locales_dir, locale, 'zotero', 'mozilla')
+            dest_file = os.path.join(dest_dir, entry_filename)
+            if not os.path.exists(dest_dir):
+                os.mkdir(dest_dir)
+            source_file = os.path.join(en_locale_dir, entry_filename)
+            print("Copying en-US {0} to {1}".format(entry_filename, dest_file))
+            shutil.copyfile(source_file, dest_file)
+    
+    print()
+    
+    # Date format overrides
+    # https://github.com/zotero/zotero/pull/1156
+    #date_formats['fr-FR']['short'][5] = 'juin'
+    #date_formats['fr-FR']['short'][6] = 'juil'
+    #date_formats['fr-FR']['short'][11] = 'déc'
+    
+    # Write dateFormats.json from the extracted data
+    #date_formats_path = os.path.join(schema_dir, 'dateFormats.json')
+    #print("Writing " + date_formats_path);
+    #with open(date_formats_path, 'w') as f:
+    #    f.write(json.dumps(date_formats, indent='\t', ensure_ascii=False))
+    print("WARNING: dateFormat.properties is no longer processed\n")
+    
+    print("Check results before committing!")
+
+
+def get_entry_path(entry):
+    if isinstance(entry, str):
+        path = entry
+    else:
+        path = entry['file']
+    return path
+
+
+def get_entry_filename(entry):
+    path = get_entry_path(entry)
+    return path.split("/")[-1]
+
+
+if __name__ == '__main__':
+    sys.exit(main())

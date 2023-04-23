@@ -1,0 +1,284 @@
+#!/usr/bin/env php
+<?php
+error_reporting(E_ALL);
+
+$english_path = 'en-US-new'; // New English locale
+$locale_path = 'locales'; // Existing locales from previous version
+$content_locale_path = 'content-locales'; // Existing content locales from previous version
+$output_dir = 'output/locale'; // Directory to save merged locales
+$content_output_dir = 'output/content'; // Directory to save merged content locales
+$matching_are_missing = 1; // matching non-english strings should be considered missing
+$missing_mode = 0; // 0 = default to english; 1 = leave blank; 2 = skip (for BZ)
+$use_content_input_dir = false;
+$use_content_output_dir = true; // set to true for XPI, false for BZ
+$localeCodeInOutputXML = true; // set to true for XPI, false for BZ
+
+$english_files = scandir($english_path);
+$locales = array_slice(scandir($locale_path), 2); // strip '.' and '..'
+
+// Make output directories for each locale
+foreach ($locales as $locale) {
+	preg_match('/([a-z]{2})(\-[A-Z]{2})?/', $locale, $matches);
+	if (!isset($matches[1])) {
+		continue;
+	}
+	$dir = $output_dir . '/' . $locale . '/zotero/';
+	@mkdir($dir, 0775, true);
+}
+
+// Make content output directory for CSL files
+if ($use_content_output_dir) {
+	@mkdir("$content_output_dir/csl/", 0775, true);
+}
+
+foreach ($english_files as $file) {
+	if (preg_match("/^\./", $file)) {
+		continue;
+	}
+	
+	$extension = substr(strrchr($file, '.'), 1);
+	
+	foreach ($locales as $locale) {
+		preg_match('/([a-z]{2})(\-[A-Z]{2})?/', $locale, $matches);
+		if (!isset($matches[1])) {
+			continue;
+		}
+		$locale = $matches[1];
+		if (!empty($matches[2])) {
+			$locale .= $matches[2];
+		}
+		
+		if ($file == 'locales.xml') {
+			if (strlen($locale) == 2) {
+				$csl_locale = $locale . '-' . strtoupper($locale);
+			}
+			else {
+				$csl_locale = $locale;
+			}
+			
+			if ($use_content_input_dir) {
+				$locale_source_file = "$content_locale_path/csl/locales-$csl_locale.xml";
+			}
+			else {
+				$locale_source_file = "$locale_path/$locale/zotero/$file";
+			}
+			
+			if ($use_content_output_dir) {
+				$dir = "$content_output_dir/csl/";
+			}
+			else {
+				$dir = "$output_dir/$locale/zotero/";
+			}
+			
+			if ($localeCodeInOutputXML) {
+				$save_file = "locales-$csl_locale.xml";
+			}
+			else {
+				$save_file = "locales.xml";
+			}
+			
+			echo "Saving {$dir}{$save_file}\n";
+			
+			$string = generate_csl_locale("$english_path/$file",
+				$locale_source_file, $locale);
+		}
+		else {
+			$dir = "$output_dir/$locale/zotero/";
+			echo "Saving {$dir}{$file}\n";
+			
+			$save_file = $file;
+			
+			$string = generate_locale($extension, "$english_path/$file",
+				"$locale_path/$locale/zotero/$file");
+		}
+		
+		// We can't handle this file, so bail
+		if (!$string) {
+			echo "Error generating file!\n";
+			continue;
+		}
+		
+		file_put_contents($dir . $save_file, $string);
+	}
+}
+
+
+function parse_strings($type, $file) {
+	if (!file_exists($file)) {
+		return array();
+	}
+	
+	$lines = file($file);
+	$pairs = array();
+	
+	switch ($type) {
+		case 'dtd':
+			$regex = '|<!ENTITY[\s]*([^([^\s]*)\s*"(.*)">\s*$|';
+			break;
+		case 'properties':
+			$regex = '|^(?:#\s*)?([^\s]*)\s*=\s*(.*)$|';
+			break;
+		default:
+			echo "Unsupported extension $type\n";
+			return false;
+	}
+	
+	foreach ($lines as $line) {
+		preg_match($regex, $line, $matches);
+		
+		if (!empty($matches[0])) {
+			$pairs[$matches[1]] = $matches[2];
+		}
+		else {
+			array_push($pairs, NULL);
+		}
+	}
+	return $pairs;
+}
+
+
+
+function generate_locale($type, $english_file, $locale_file) {
+	GLOBAL $missing_mode, $matching_are_missing;
+	
+	$output = '';
+	$english_pairs = parse_strings($type, $english_file);
+	if (!$english_pairs) {
+		return false;
+	}
+	
+	$locale_pairs = parse_strings($type, $locale_file);
+	
+	foreach ($english_pairs as $key=>$val) {
+		if (!$val) {
+			if ($output != '') {
+				$output .= "\n";
+			}
+			continue;
+		}
+		
+		switch ($type) {
+			case 'dtd':
+				$prefix = '<!ENTITY ';
+				$middle = " \"";
+				$suffix = '">';
+				break;
+			case 'properties':
+				$prefix = '';
+				$middle = '=';
+				$suffix = '';
+				break;
+			default:
+				echo "Unsupported extension $type\n";
+				return false;
+		}
+		
+		// If missing mode is 2, skip strings not available in this locale
+		if (empty($locale_pairs[$key]) && $missing_mode == 2) {
+			continue;
+		}
+		
+		$output .= $prefix;
+		
+		$missing = empty($locale_pairs[$key])
+					|| ($matching_are_missing && $english_pairs[$key] === $locale_pairs[$key]);
+		
+		// Use existing locale string if we have it
+		if (!$missing) {
+			$output .= $key . $middle . $locale_pairs[$key];
+		}
+		// Default missing strings to English
+		else if ($missing_mode == 0) {
+			$output .= $key . $middle . $english_pairs[$key];
+		}
+		// Leave missing strings blank
+		else if ($missing_mode == 1) {
+			$output .= $key . $middle;
+		}
+		
+		$output .= $suffix;
+		$output .= "\n";
+	}
+	
+	return $output;
+}
+
+
+function generate_csl_locale($english_file, $locale_file, $locale) {
+	$output = '';
+	
+	$english_str = file_get_contents($english_file);
+	$english_sxe = new SimpleXMLElement($english_str);
+	
+	$str = file_get_contents($locale_file);
+	if (!$str) {
+		echo "Locale version of locales.xml not found\n";
+		return $english_str;
+	}
+	$locale_sxe = new SimpleXMLElement($str);
+	
+	$xw = new XMLWriter();
+	$xw->openMemory();
+	$xw->startDocument('1.0', 'UTF-8');
+	$xw->startElement ('terms');
+	$xw->writeAttribute('xmlns', 'http://purl.org/net/xbiblio/csl');
+	$xw->startElement('locale');
+	$xw->writeAttribute('xml:lang', substr($locale, 0, 2));
+	
+	$locale_sxe->registerXPathNamespace('csl', 'http://purl.org/net/xbiblio/csl');
+	
+	foreach ($english_sxe->locale->term as $term) {
+		$name = $term->attributes()->name;
+		$form = $term->attributes()->form;
+		
+		if ($form) {
+			$node = $locale_sxe->xpath("//csl:term[@name='$name' and @form='$form']");
+		}
+		else {
+			$node = $locale_sxe->xpath("//csl:term[@name='$name' and not(@form)]");
+		}
+		
+		if (isset($node[0])) {
+			$node = $node[0];
+		}
+		else {
+			$node = $term;
+		}
+		
+		$xw->startElement('term');
+		$xw->writeAttribute('name', $name);
+		if ($form) {
+			$xw->writeAttribute('form', $form);
+		}
+		
+		if (sizeOf($term->children()) > 0) {
+			$xw->startElement('single');
+			$xw->text($node->single ? $node->single : $term->single);
+			$xw->endElement();
+			$xw->startElement('multiple');
+			$xw->text($node->multiple ? $node->multiple : $term->multiple);
+			$xw->endElement();
+		}
+		else {
+			// If original had children and we don't any longer, use English
+			if (sizeOf($node[0]->children()) > 0) {
+				$xw->text($term);
+			}
+			// Otherwise use the locale string
+			else {
+				$xw->text($node[0]);
+			}
+		}
+		$xw->endElement(); // </term>
+	}
+	
+	$xw->endElement(); // </locale>
+	$xw->endElement(); // </terms>
+	$str = $xw->outputMemory(true);
+	
+	$doc = new DOMDocument('1.0');
+	$doc->formatOutput = true;
+	$doc->loadXML($str);
+	return $doc->saveXML();
+}
+?>
