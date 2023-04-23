@@ -171,21 +171,6 @@ def main():
                 "lastUpdated": metadata["lastUpdated"]
             }
         
-        # Unminify translator framework lines
-        with open(os.path.join(root_dir, 'zotero-transfw', 'framework.js')) as f:
-            framework_contents = f.read()
-        with open(os.path.join(translators_dir, 'fw.js'), 'w') as f:
-            f.write(
-                "/*********************** BEGIN FRAMEWORK ***********************/\n"
-                + framework_contents
-                + "\n/*********************** END FRAMEWORK ***********************/\n"
-            )
-        os.chdir(translators_dir)
-        subprocess.check_call(
-            "perl -pe 's/.+FW LINE.+/`cat fw.js`/ge' -i *.js", shell=True
-        )
-        os.remove('fw.js')
-        
         # Write translator index as JSON file
         with open(os.path.join(tmp_src_dir, 'translators.json'), 'w', encoding='utf-8') as f:
             json.dump(index, f, indent=True, ensure_ascii=False)
