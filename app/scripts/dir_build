@@ -2,8 +2,9 @@
 set -euo pipefail
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-ROOT_DIR="$(dirname "$SCRIPT_DIR")"
-. "$ROOT_DIR/config.sh"
+APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+ROOT_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
+. "$APP_ROOT_DIR/config.sh"
 
 function usage {
 	cat >&2 <<DONE
@@ -60,23 +61,23 @@ fi
 
 CHANNEL="source"
 
-VERSION=`perl -ne 'print and last if s/.*<em:version>(.{3}).+/\1/;' "$ZOTERO_SOURCE_DIR/install.rdf"`
-if [ $VERSION = "4.0" ]; then
-	"$ZOTERO_BUILD_DIR/xpi/build_xpi_4.0" "$ZOTERO_SOURCE_DIR" $CHANNEL
-	"$ROOT_DIR/build.sh" -f "$ZOTERO_BUILD_DIR/xpi/build/zotero-build.xpi" -p $PLATFORM -c $CHANNEL -s
-else
-	PARAMS=""
-	if [ $DEVTOOLS -eq 1 ]; then
-		PARAMS+=" -t"
-	fi
-	if [ $quick_build -eq 1 ]; then
-		PARAMS+=" -q"
-	fi
-	
-	hash=`git -C "$ZOTERO_SOURCE_DIR" rev-parse --short HEAD`
-	
-	"$ZOTERO_BUILD_DIR/xpi/build_xpi" -s "$ZOTERO_SOURCE_DIR/build" -c $CHANNEL -m $hash
-	"$ROOT_DIR/build.sh" -d "$ZOTERO_BUILD_DIR/xpi/build/staging" -p $PLATFORM -c $CHANNEL -s $PARAMS
+PARAMS=""
+if [ $DEVTOOLS -eq 1 ]; then
+	PARAMS+=" -t"
 fi
+if [ $quick_build -eq 1 ]; then
+	PARAMS+=" -q"
+fi
+
+hash=`git -C "$ROOT_DIR" rev-parse --short HEAD`
+
+build_dir=`mktemp -d`
+function cleanup {
+	rm -rf $build_dir
+}
+trap cleanup EXIT
+
+"$SCRIPT_DIR/prepare_build" -s "$ROOT_DIR/build" -o "$build_dir" -c $CHANNEL -m $hash
+"$APP_ROOT_DIR/build.sh" -d "$build_dir" -p $PLATFORM -c $CHANNEL -s $PARAMS
 
 echo Done

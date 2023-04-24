@@ -2,8 +2,9 @@
 set -euo pipefail
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-ROOT_DIR="$(dirname "$SCRIPT_DIR")"
-. "$ROOT_DIR/config.sh"
+APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+ROOT_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
+. "$APP_ROOT_DIR/config.sh"
 
 CHANNEL="beta"
 export SAFARI_APPEX="$ROOT_DIR/../safari-app-extension-builds/beta/ZoteroSafariExtension.appex"
@@ -13,11 +14,13 @@ cd "$SCRIPT_DIR"
 
 hash=`./get_repo_branch_hash master`
 source_dir=`./get_commit_files $hash`
+build_dir=`mktemp -d`
 
 function cleanup {
-	rm -rf $source_dir
+	rm -rf "$source_dir"
+	rm -rf "$build_dir"
 }
 trap cleanup EXIT
 
-"$ZOTERO_BUILD_DIR/xpi/build_xpi" -s "$source_dir" -c $CHANNEL -m $hash
-./build_and_deploy -d "$ZOTERO_BUILD_DIR/xpi/build/staging" -p $BUILD_PLATFORMS -c $CHANNEL
+./prepare_build -s "$source_dir" -o "$build_dir" -c $CHANNEL -m $hash
+./build_and_deploy -d "$build_dir" -p $BUILD_PLATFORMS -c $CHANNEL

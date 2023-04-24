@@ -2,7 +2,9 @@
 cache
 config-custom.sh
 dist
+lastrev
 staging
+tmp
 xulrunner
 pdftools
 win/resource_hacker
