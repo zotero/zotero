@@ -1,21 +1,8 @@
 #!/bin/bash -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-ROOT_DIR="$(dirname "$SCRIPT_DIR")"
-
-# Set ZOTERO_REPOS_DIR to use directory other than $HOME for zotero-client and zotero-standalone-build
-if [ -n "${ZOTERO_REPOS_DIR:-}" ]; then
-	repos_dir=$ZOTERO_REPOS_DIR
-else
-	repos_dir=$HOME
-fi
-
-for dir in zotero-client zotero-standalone-build; do
-	if [ ! -d "$repos_dir/$dir" ]; then
-		echo "$repos_dir/$dir not found" >&2
-		exit 1
-	fi
-done
+APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+ROOT_DIR="$(dirname $APP_ROOT_DIR)"
 
 # Set ZOTERO_PROFILE environment variable to choose profile
 if [ -n "${ZOTERO_PROFILE:-}" ]; then
@@ -57,16 +44,16 @@ if [ $REBUILD -eq 1 ]; then
 	if ! ps u | grep scripts/build.js | grep -v grep > /dev/null; then
 		echo "Running JS build process"
 		echo
-		cd $repos_dir/zotero-client
+		cd $ROOT_DIR
 		npm run build
 		echo
 	fi
 	
-	$repos_dir/zotero-standalone-build/scripts/dir_build -q $PARAMS
+	"$SCRIPT_DIR/dir_build" -q $PARAMS
 	
 	if [ "`uname`" = "Darwin" ]; then
 		# Sign the Word dylib so it works on Apple Silicon
-		$SCRIPT_DIR/codesign_local $repos_dir/zotero-standalone-build/staging/Zotero.app
+		"$SCRIPT_DIR/codesign_local" "$APP_ROOT_DIR/staging/Zotero.app"
 	fi
 fi
 
@@ -89,4 +76,4 @@ else
 	exit 1
 fi
 
-$repos_dir/zotero-standalone-build/staging/$command $profile -ZoteroDebugText -jsconsole -purgecaches $PARAMS "$@"
+"$APP_ROOT_DIR/staging/$command" $profile -ZoteroDebugText -jsconsole -purgecaches $PARAMS "$@"

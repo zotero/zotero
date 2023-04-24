@@ -26,7 +26,6 @@ const copyDirs = [
 // list of files from root folder to symlink
 const symlinkFiles = [
 	'chrome.manifest',
-	'install.rdf',
 	// React needs to be patched by babel-worker.js, so symlink all files in resource/ except for
 	// those. Babel transpilation for React is still disabled in .babelrc.
 	'resource/**/*',
@@ -52,7 +51,6 @@ const symlinkFiles = [
 	'resource/ace/worker-javascript.js',
 	// Feed *.idl files are for documentation only
 	'!resource/feeds/*.idl',
-	'update.rdf',
 	'!chrome/skin/default/zotero/**/*.scss',
 	'!resource/citeproc_rs_wasm.js',
 	// We only need a few Monaco languages
@@ -65,6 +63,7 @@ const symlinkFiles = [
 	'resource/vs/basic-languages/xml/*.js',
 	'resource/vs/language/typescript/*.js',
 	'resource/vs/language/json/*.js',
+	'version',
 ];
 
 

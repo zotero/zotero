@@ -266,14 +266,14 @@ if [ $DEVTOOLS -eq 1 ]; then
 fi
 
 # 5.0.96.3 / 5.0.97-beta.37+ddc7be75c
-VERSION=`perl -ne 'print and last if s/.*<em:version>(.+)<\/em:version>.*/\1/;' install.rdf`
+VERSION=`cat version`
 # 5.0.96 / 5.0.97
-VERSION_NUMERIC=`perl -ne 'print and last if s/.*<em:version>(\d+\.\d+(\.\d+)?).*<\/em:version>.*/\1/;' install.rdf`
+VERSION_NUMERIC=`perl -ne 'print and last if s/^(\d+\.\d+(\.\d+)?).*/\1/;' version`
 if [ -z "$VERSION" ]; then
-	echo "Version number not found in install.rdf"
+	echo "Version number not found in version file"
 	exit 1
 fi
-rm install.rdf
+rm version
 
 echo
 echo "Version: $VERSION"

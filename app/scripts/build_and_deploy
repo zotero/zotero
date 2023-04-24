@@ -54,9 +54,9 @@ fi
 
 "$SCRIPT_DIR"/check_requirements
 
-VERSION="`perl -ne 'print and last if s/.*<em:version>(.*)<\/em:version>.*/\1/;' \"$SOURCE_DIR\"/install.rdf`"
+VERSION="`cat \"$SOURCE_DIR\"/version`"
 if [ -z "$VERSION" ]; then
-	echo "Error getting version from $SOURCE_DIR/install.rdf"
+	echo "Error getting version from $SOURCE_DIR/version"
 	exit 1
 fi
 
