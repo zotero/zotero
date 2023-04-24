@@ -41,13 +41,6 @@ menu-quit =
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Afslut { -brand-shorter-name }
-# This menu-quit-button string is only used on Linux.
-menu-quit-button =
-    .label = { menu-quit.label }
-# This menu-quit-button-win string is only used on Windows.
-menu-quit-button-win =
-    .label = { menu-quit.label }
-    .tooltip = Afslut { -brand-shorter-name }
 menu-about =
     .label = Om { -brand-shorter-name }
     .accesskey = O
@@ -77,9 +70,6 @@ menu-file-open-location =
 menu-file-open-file =
     .label = Åbn fil…
     .accesskey = b
-menu-file-close =
-    .label = Luk
-    .accesskey = L
 # Variables:
 #  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
@@ -92,22 +82,19 @@ menu-file-close-tab =
     .accesskey = L
 menu-file-close-window =
     .label = Luk vindue
-    .accesskey = k
+    .accesskey = n
 menu-file-save-page =
     .label = Gem side som…
     .accesskey = m
 menu-file-email-link =
     .label = Send link…
-    .accesskey = l
+    .accesskey = S
 menu-file-share-url =
     .label = Del
     .accesskey = D
 menu-file-print-setup =
     .label = Sideopsætning…
     .accesskey = S
-menu-file-print-preview =
-    .label = Vis udskrift
-    .accesskey = d
 menu-file-print =
     .label = Udskriv…
     .accesskey = U
@@ -194,6 +181,17 @@ menu-view-full-screen =
     .label = Fuld skærm
     .accesskey = F
 
+## These menu items may use the same accesskey.
+
+# This should match reader-view-enter-button in browser.ftl
+menu-view-enter-readerview =
+    .label = Åbn læsevisning
+    .accesskey = L
+# This should match reader-view-close-button in browser.ftl
+menu-view-close-readerview =
+    .label = Luk læsevisning
+    .accesskey = L
+
 ##
 
 menu-view-show-all-tabs =
@@ -236,6 +234,10 @@ menu-bookmark-current-tab =
     .label = Bogmærk dette faneblad
 menu-bookmark-edit =
     .label = Rediger bogmærke
+menu-bookmark-tab =
+    .label = Bogmærk dette faneblad…
+menu-edit-bookmark =
+    .label = Rediger bogmærke…
 menu-bookmarks-all-tabs =
     .label = Bogmærk alle faneblade…
 menu-bookmarks-toolbar =
@@ -320,9 +322,6 @@ menu-help-more-troubleshooting-info =
     .accesskey = t
 menu-help-report-site-issue =
     .label = Rapportér problem med websted…
-menu-help-feedback-page =
-    .label = Indsend feedback…
-    .accesskey = n
 menu-help-share-ideas =
     .label = Del ideer og feedback...
     .accesskey = D

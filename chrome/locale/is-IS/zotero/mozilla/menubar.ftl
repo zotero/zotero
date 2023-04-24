@@ -41,13 +41,6 @@ menu-quit =
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Hætta í { -brand-shorter-name }
-# This menu-quit-button string is only used on Linux.
-menu-quit-button =
-    .label = { menu-quit.label }
-# This menu-quit-button-win string is only used on Windows.
-menu-quit-button-win =
-    .label = { menu-quit.label }
-    .tooltip = Hætta í { -brand-shorter-name }
 menu-about =
     .label = Um { -brand-shorter-name }
     .accesskey = U
@@ -77,9 +70,6 @@ menu-file-open-location =
 menu-file-open-file =
     .label = Opna skrá…
     .accesskey = O
-menu-file-close =
-    .label = Loka
-    .accesskey = L
 # Variables:
 #  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
@@ -105,9 +95,6 @@ menu-file-share-url =
 menu-file-print-setup =
     .label = Uppsetning síðu…
     .accesskey = U
-menu-file-print-preview =
-    .label = Prentskoðun
-    .accesskey = r
 menu-file-print =
     .label = Prenta…
     .accesskey = P
@@ -139,10 +126,10 @@ menu-view =
     .label = Skoða
     .accesskey = k
 menu-view-toolbars-menu =
-    .label = Verkfæraslár
+    .label = Verkfærastikur
     .accesskey = V
 menu-view-customize-toolbar2 =
-    .label = Sérsníða verkfæraslá…
+    .label = Sérsníða verkfærastiku…
     .accesskey = v
 menu-view-sidebar =
     .label = Hliðarspjald
@@ -194,6 +181,17 @@ menu-view-full-screen =
     .label = Fylla skjá
     .accesskey = y
 
+## These menu items may use the same accesskey.
+
+# This should match reader-view-enter-button in browser.ftl
+menu-view-enter-readerview =
+    .label = Fara í lesham
+    .accesskey = r
+# This should match reader-view-close-button in browser.ftl
+menu-view-close-readerview =
+    .label = Loka lesham
+    .accesskey = L
+
 ##
 
 menu-view-show-all-tabs =
@@ -236,10 +234,14 @@ menu-bookmark-current-tab =
     .label = Bókamerkja núverandi flipa
 menu-bookmark-edit =
     .label = Breyta bókamerki
+menu-bookmark-tab =
+    .label = Bókamerkja núverandi flipa…
+menu-edit-bookmark =
+    .label = Breyta þessu bókamerki…
 menu-bookmarks-all-tabs =
     .label = Setja alla flipa í bókamerki…
 menu-bookmarks-toolbar =
-    .label = Bókamerkjaslá
+    .label = Bókamerkjastika
 menu-bookmarks-other =
     .label = Önnur bókamerki
 menu-bookmarks-mobile =
@@ -320,9 +322,6 @@ menu-help-more-troubleshooting-info =
     .accesskey = t
 menu-help-report-site-issue =
     .label = Tilkynna vandamál á vefsvæði…
-menu-help-feedback-page =
-    .label = Senda álit…
-    .accesskey = S
 menu-help-share-ideas =
     .label = Deildu hugmyndum og athugasemdum...
     .accesskey = D

@@ -41,13 +41,6 @@ menu-quit =
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Keluar dari { -brand-shorter-name }
-# This menu-quit-button string is only used on Linux.
-menu-quit-button =
-    .label = { menu-quit.label }
-# This menu-quit-button-win string is only used on Windows.
-menu-quit-button-win =
-    .label = { menu-quit.label }
-    .tooltip = Keluar dari { -brand-shorter-name }
 menu-about =
     .label = Tentang { -brand-shorter-name }
     .accesskey = T
@@ -77,9 +70,6 @@ menu-file-open-location =
 menu-file-open-file =
     .label = Buka Berkas…
     .accesskey = B
-menu-file-close =
-    .label = Tutup
-    .accesskey = u
 # Variables:
 #  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
@@ -104,9 +94,6 @@ menu-file-share-url =
 menu-file-print-setup =
     .label = Tata Laman…
     .accesskey = n
-menu-file-print-preview =
-    .label = Pratinjau Cetak
-    .accesskey = P
 menu-file-print =
     .label = Cetak…
     .accesskey = C
@@ -193,6 +180,17 @@ menu-view-full-screen =
     .label = Layar Penuh
     .accesskey = P
 
+## These menu items may use the same accesskey.
+
+# This should match reader-view-enter-button in browser.ftl
+menu-view-enter-readerview =
+    .label = Masuk ke Tampilan Baca
+    .accesskey = B
+# This should match reader-view-close-button in browser.ftl
+menu-view-close-readerview =
+    .label = Tutup Tampilan Pembaca
+    .accesskey = T
+
 ##
 
 menu-view-show-all-tabs =
@@ -235,6 +233,10 @@ menu-bookmark-current-tab =
     .label = Markahi Tab Saat Ini
 menu-bookmark-edit =
     .label = Edit Markah Ini
+menu-bookmark-tab =
+    .label = Markahi Tab Saat Ini…
+menu-edit-bookmark =
+    .label = Ubah Markah Ini…
 menu-bookmarks-all-tabs =
     .label = Markahi Semua Tab…
 menu-bookmarks-toolbar =
@@ -319,9 +321,6 @@ menu-help-more-troubleshooting-info =
     .accesskey = I
 menu-help-report-site-issue =
     .label = Laporkan Masalah Situs…
-menu-help-feedback-page =
-    .label = Kirim Saran…
-    .accesskey = S
 menu-help-share-ideas =
     .label = Bagikan Ide dan Umpan Balik
     .accesskey = B

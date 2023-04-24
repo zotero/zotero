@@ -41,13 +41,6 @@ menu-quit =
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = { -brand-shorter-name } beenden
-# This menu-quit-button string is only used on Linux.
-menu-quit-button =
-    .label = { menu-quit.label }
-# This menu-quit-button-win string is only used on Windows.
-menu-quit-button-win =
-    .label = { menu-quit.label }
-    .tooltip = { -brand-shorter-name } beenden
 menu-about =
     .label = Über { -brand-shorter-name }
     .accesskey = e
@@ -77,9 +70,6 @@ menu-file-open-location =
 menu-file-open-file =
     .label = Datei öffnen…
     .accesskey = f
-menu-file-close =
-    .label = Schließen
-    .accesskey = c
 # Variables:
 #  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
@@ -104,9 +94,6 @@ menu-file-share-url =
 menu-file-print-setup =
     .label = Seite einrichten…
     .accesskey = e
-menu-file-print-preview =
-    .label = Druckvorschau
-    .accesskey = v
 menu-file-print =
     .label = Drucken…
     .accesskey = D
@@ -193,6 +180,17 @@ menu-view-full-screen =
     .label = Vollbild
     .accesskey = V
 
+## These menu items may use the same accesskey.
+
+# This should match reader-view-enter-button in browser.ftl
+menu-view-enter-readerview =
+    .label = Leseansicht öffnen
+    .accesskey = L
+# This should match reader-view-close-button in browser.ftl
+menu-view-close-readerview =
+    .label = Leseansicht beenden
+    .accesskey = L
+
 ##
 
 menu-view-show-all-tabs =
@@ -235,6 +233,10 @@ menu-bookmark-current-tab =
     .label = Aktuellen Tab als Lesezeichen hinzufügen
 menu-bookmark-edit =
     .label = Lesezeichen bearbeiten
+menu-bookmark-tab =
+    .label = Aktuellen Tab als Lesezeichen hinzufügen…
+menu-edit-bookmark =
+    .label = Dieses Lesezeichen bearbeiten…
 menu-bookmarks-all-tabs =
     .label = Lesezeichen für alle Tabs hinzufügen…
 menu-bookmarks-toolbar =
@@ -319,9 +321,6 @@ menu-help-more-troubleshooting-info =
     .accesskey = z
 menu-help-report-site-issue =
     .label = Seitenproblem melden…
-menu-help-feedback-page =
-    .label = Feedback senden…
-    .accesskey = s
 menu-help-share-ideas =
     .label = Ideen und Feedback teilen…
     .accesskey = I

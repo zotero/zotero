@@ -41,13 +41,6 @@ menu-quit =
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Thoát { -brand-shorter-name }
-# This menu-quit-button string is only used on Linux.
-menu-quit-button =
-    .label = { menu-quit.label }
-# This menu-quit-button-win string is only used on Windows.
-menu-quit-button-win =
-    .label = { menu-quit.label }
-    .tooltip = Thoát { -brand-shorter-name }
 menu-about =
     .label = Về { -brand-shorter-name }
     .accesskey = A
@@ -77,9 +70,6 @@ menu-file-open-location =
 menu-file-open-file =
     .label = Mở tập tin…
     .accesskey = O
-menu-file-close =
-    .label = Đóng
-    .accesskey = C
 # Variables:
 #  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
@@ -104,9 +94,6 @@ menu-file-share-url =
 menu-file-print-setup =
     .label = Thiết lập trang…
     .accesskey = u
-menu-file-print-preview =
-    .label = Xem trước trang in
-    .accesskey = v
 menu-file-print =
     .label = In…
     .accesskey = P
@@ -193,6 +180,17 @@ menu-view-full-screen =
     .label = Toàn màn hình
     .accesskey = F
 
+## These menu items may use the same accesskey.
+
+# This should match reader-view-enter-button in browser.ftl
+menu-view-enter-readerview =
+    .label = Vào chế độ đọc sách
+    .accesskey = R
+# This should match reader-view-close-button in browser.ftl
+menu-view-close-readerview =
+    .label = Đóng chế độ đọc sách
+    .accesskey = R
+
 ##
 
 menu-view-show-all-tabs =
@@ -235,6 +233,10 @@ menu-bookmark-current-tab =
     .label = Đánh dấu thẻ hiện tại
 menu-bookmark-edit =
     .label = Chỉnh sửa dấu trang này
+menu-bookmark-tab =
+    .label = Đánh dấu thẻ hiện tại…
+menu-edit-bookmark =
+    .label = Chỉnh sửa dấu trang này…
 menu-bookmarks-all-tabs =
     .label = Đánh dấu tất cả các thẻ…
 menu-bookmarks-toolbar =
@@ -319,9 +321,6 @@ menu-help-more-troubleshooting-info =
     .accesskey = T
 menu-help-report-site-issue =
     .label = Báo cáo vấn đề về trang…
-menu-help-feedback-page =
-    .label = Gửi phản hồi…
-    .accesskey = S
 menu-help-share-ideas =
     .label = Chia sẻ ý tưởng và phản hồi…
     .accesskey = S

@@ -41,13 +41,6 @@ menu-quit =
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Avsluta { -brand-shorter-name }
-# This menu-quit-button string is only used on Linux.
-menu-quit-button =
-    .label = { menu-quit.label }
-# This menu-quit-button-win string is only used on Windows.
-menu-quit-button-win =
-    .label = { menu-quit.label }
-    .tooltip = Avsluta { -brand-shorter-name }
 menu-about =
     .label = Om { -brand-shorter-name }
     .accesskey = O
@@ -77,9 +70,6 @@ menu-file-open-location =
 menu-file-open-file =
     .label = Öppna fil…
     .accesskey = Ö
-menu-file-close =
-    .label = Stäng
-    .accesskey = ä
 # Variables:
 #  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
@@ -104,9 +94,6 @@ menu-file-share-url =
 menu-file-print-setup =
     .label = Utskriftsformat…
     .accesskey = o
-menu-file-print-preview =
-    .label = Förhandsgranska…
-    .accesskey = h
 menu-file-print =
     .label = Skriv ut…
     .accesskey = u
@@ -193,6 +180,17 @@ menu-view-full-screen =
     .label = Helskärm
     .accesskey = H
 
+## These menu items may use the same accesskey.
+
+# This should match reader-view-enter-button in browser.ftl
+menu-view-enter-readerview =
+    .label = Öppna läsarvy
+    .accesskey = R
+# This should match reader-view-close-button in browser.ftl
+menu-view-close-readerview =
+    .label = Stäng läsarvy
+    .accesskey = R
+
 ##
 
 menu-view-show-all-tabs =
@@ -235,6 +233,10 @@ menu-bookmark-current-tab =
     .label = Bokmärk aktuell flik
 menu-bookmark-edit =
     .label = Redigera bokmärket
+menu-bookmark-tab =
+    .label = Bokmärk aktuell flik…
+menu-edit-bookmark =
+    .label = Redigera detta bokmärke…
 menu-bookmarks-all-tabs =
     .label = Bokmärke för alla flikar…
 menu-bookmarks-toolbar =
@@ -319,9 +321,6 @@ menu-help-more-troubleshooting-info =
     .accesskey = f
 menu-help-report-site-issue =
     .label = Rapportera webbplatsproblem…
-menu-help-feedback-page =
-    .label = Skicka in feedback…
-    .accesskey = k
 menu-help-share-ideas =
     .label = Dela idéer och feedback...
     .accesskey = D

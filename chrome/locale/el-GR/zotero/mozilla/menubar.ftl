@@ -41,13 +41,6 @@ menu-quit =
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Έξοδος από το { -brand-shorter-name }
-# This menu-quit-button string is only used on Linux.
-menu-quit-button =
-    .label = { menu-quit.label }
-# This menu-quit-button-win string is only used on Windows.
-menu-quit-button-win =
-    .label = { menu-quit.label }
-    .tooltip = Έξοδος από το { -brand-shorter-name }
 menu-about =
     .label = Σχετικά με το { -brand-shorter-name }
     .accesskey = τ
@@ -77,9 +70,6 @@ menu-file-open-location =
 menu-file-open-file =
     .label = Άνοιγμα αρχείου…
     .accesskey = ν
-menu-file-close =
-    .label = Κλείσιμο
-    .accesskey = Κ
 # Variables:
 #  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
@@ -104,9 +94,6 @@ menu-file-share-url =
 menu-file-print-setup =
     .label = Διαμόρφωση σελίδας…
     .accesskey = μ
-menu-file-print-preview =
-    .label = Προεπισκόπηση εκτύπωσης
-    .accesskey = ρ
 menu-file-print =
     .label = Εκτύπωση…
     .accesskey = κ
@@ -193,6 +180,17 @@ menu-view-full-screen =
     .label = Πλήρης οθόνη
     .accesskey = Π
 
+## These menu items may use the same accesskey.
+
+# This should match reader-view-enter-button in browser.ftl
+menu-view-enter-readerview =
+    .label = Άνοιγμα προβολής ανάγνωσης
+    .accesskey = Α
+# This should match reader-view-close-button in browser.ftl
+menu-view-close-readerview =
+    .label = Κλείσιμο προβολής ανάγνωσης
+    .accesskey = Α
+
 ##
 
 menu-view-show-all-tabs =
@@ -235,6 +233,10 @@ menu-bookmark-current-tab =
     .label = Προσθήκη καρτέλας στους σελιδοδείκτες
 menu-bookmark-edit =
     .label = Επεξεργασία σελιδοδείκτη
+menu-bookmark-tab =
+    .label = Προσθήκη σελιδοδείκτη…
+menu-edit-bookmark =
+    .label = Επεξεργασία σελιδοδείκτη…
 menu-bookmarks-all-tabs =
     .label = Αποθήκευση όλων των καρτελών…
 menu-bookmarks-toolbar =
@@ -319,9 +321,6 @@ menu-help-more-troubleshooting-info =
     .accesskey = Π
 menu-help-report-site-issue =
     .label = Αναφορά ζητήματος ιστοτόπου…
-menu-help-feedback-page =
-    .label = Υποβολή σχολίων…
-    .accesskey = λ
 menu-help-share-ideas =
     .label = Κοινοποίηση ιδεών και σχολίων…
     .accesskey = Κ
