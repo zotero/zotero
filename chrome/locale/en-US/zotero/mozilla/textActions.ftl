@@ -34,6 +34,10 @@ text-action-paste =
     .label = Paste
     .accesskey = P
 
+text-action-paste-no-formatting =
+    .label = Paste Without Formatting
+    .accesskey = m
+
 text-action-paste-shortcut =
     .key = V
 

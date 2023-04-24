@@ -41,13 +41,6 @@ menu-quit =
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Encerrar { -brand-shorter-name }
-# This menu-quit-button string is only used on Linux.
-menu-quit-button =
-    .label = { menu-quit.label }
-# This menu-quit-button-win string is only used on Windows.
-menu-quit-button-win =
-    .label = { menu-quit.label }
-    .tooltip = Sair do { -brand-shorter-name }
 menu-about =
     .label = Sobre o { -brand-shorter-name }
     .accesskey = S
@@ -77,9 +70,6 @@ menu-file-open-location =
 menu-file-open-file =
     .label = Abrir arquivo…
     .accesskey = A
-menu-file-close =
-    .label = Fechar
-    .accesskey = F
 # Variables:
 #  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
@@ -104,9 +94,6 @@ menu-file-share-url =
 menu-file-print-setup =
     .label = Configurar página…
     .accesskey = C
-menu-file-print-preview =
-    .label = Visualizar impressão
-    .accesskey = z
 menu-file-print =
     .label = Imprimir…
     .accesskey = I
@@ -174,7 +161,7 @@ menu-view-page-style-no-style =
     .label = Sem estilo
     .accesskey = m
 menu-view-page-basic-style =
-    .label = Estilo de página básico
+    .label = Estilo básico de página
     .accesskey = b
 menu-view-repair-text-encoding =
     .label = Reparar codificação de texto
@@ -192,6 +179,17 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = Tela inteira
     .accesskey = T
+
+## These menu items may use the same accesskey.
+
+# This should match reader-view-enter-button in browser.ftl
+menu-view-enter-readerview =
+    .label = Ativar leitor
+    .accesskey = l
+# This should match reader-view-close-button in browser.ftl
+menu-view-close-readerview =
+    .label = Desativar leitor
+    .accesskey = l
 
 ##
 
@@ -235,6 +233,10 @@ menu-bookmark-current-tab =
     .label = Adicionar aba atual aos favoritos
 menu-bookmark-edit =
     .label = Editar este favorito
+menu-bookmark-tab =
+    .label = Adicionar aba atual aos favoritos…
+menu-edit-bookmark =
+    .label = Editar este favorito…
 menu-bookmarks-all-tabs =
     .label = Adicionar todas as abas…
 menu-bookmarks-toolbar =
@@ -259,7 +261,7 @@ menu-tools-fxa-sign-in2 =
     .label = Entrar
     .accesskey = E
 menu-tools-turn-on-sync2 =
-    .label = Ativar o Sync…
+    .label = Ativar sincronização…
     .accesskey = n
 menu-tools-sync-now =
     .label = Sincronizar agora
@@ -319,11 +321,8 @@ menu-help-more-troubleshooting-info =
     .accesskey = I
 menu-help-report-site-issue =
     .label = Relatar problema no site…
-menu-help-feedback-page =
-    .label = Enviar opinião…
-    .accesskey = n
 menu-help-share-ideas =
-    .label = Compartilhe ideias e comentários…
+    .label = Compartilhar ideias e comentários…
     .accesskey = C
 menu-help-enter-troubleshoot-mode2 =
     .label = Modo de solução de problemas…

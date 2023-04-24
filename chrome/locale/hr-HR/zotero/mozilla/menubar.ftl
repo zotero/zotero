@@ -41,13 +41,6 @@ menu-quit =
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Zatvori { -brand-shorter-name }
-# This menu-quit-button string is only used on Linux.
-menu-quit-button =
-    .label = { menu-quit.label }
-# This menu-quit-button-win string is only used on Windows.
-menu-quit-button-win =
-    .label = { menu-quit.label }
-    .tooltip = Zatvori { -brand-shorter-name }
 menu-about =
     .label = O { -brand-shorter-name }u
     .accesskey = O
@@ -77,8 +70,16 @@ menu-file-open-location =
 menu-file-open-file =
     .label = Otvori datoteku …
     .accesskey = O
-menu-file-close =
-    .label = Zatvori
+# Variables:
+#  $tabCount (Number): the number of tabs that are affected by the action.
+menu-file-close-tab =
+    .label =
+        { $tabCount ->
+            [1] Zatvori karticu
+            [one] Zatvori { $tabCount } karticu
+            [few] Zatvori { $tabCount } kartice
+           *[other] Zatvori { $tabCount } kartica
+        }
     .accesskey = Z
 menu-file-close-window =
     .label = Zatvori prozor
@@ -89,11 +90,11 @@ menu-file-save-page =
 menu-file-email-link =
     .label = Pošalji poveznicu e-poštom…
     .accesskey = e
+menu-file-share-url =
+    .label = Dijeli
+    .accesskey = D
 menu-file-print-setup =
     .label = Postavke stranice …
-    .accesskey = s
-menu-file-print-preview =
-    .label = Pregled ispisa
     .accesskey = s
 menu-file-print =
     .label = Ispiši …
@@ -164,6 +165,9 @@ menu-view-page-style-no-style =
 menu-view-page-basic-style =
     .label = Osnovni stil stranice
     .accesskey = O
+menu-view-repair-text-encoding =
+    .label = Ispravi kodiranje teksta
+    .accesskey = I
 
 ## These should match what Safari and other Apple applications
 ## use on macOS.
@@ -177,6 +181,17 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = Cjeloekranski prikaz
     .accesskey = C
+
+## These menu items may use the same accesskey.
+
+# This should match reader-view-enter-button in browser.ftl
+menu-view-enter-readerview =
+    .label = Otvori prikaz čitača
+    .accesskey = R
+# This should match reader-view-close-button in browser.ftl
+menu-view-close-readerview =
+    .label = Zatvori prikaz čitača
+    .accesskey = R
 
 ##
 
@@ -220,6 +235,10 @@ menu-bookmark-current-tab =
     .label = Zabilježi trenutnu karticu
 menu-bookmark-edit =
     .label = Uredi ovu zabilješku
+menu-bookmark-tab =
+    .label = Zabilježi trenutačnu karticu …
+menu-edit-bookmark =
+    .label = Uredi ovu zabilješku …
 menu-bookmarks-all-tabs =
     .label = Dodaj sve kartice u zabilješke …
 menu-bookmarks-toolbar =
@@ -304,9 +323,9 @@ menu-help-more-troubleshooting-info =
     .accesskey = v
 menu-help-report-site-issue =
     .label = Prijavi problem sa stranicom …
-menu-help-feedback-page =
-    .label = Pošalji povratne informacije …
-    .accesskey = e
+menu-help-share-ideas =
+    .label = Dijeli ideje i povratne informcije …
+    .accesskey = i
 menu-help-enter-troubleshoot-mode2 =
     .label = Način rada za rješavanje problema
     .accesskey = m

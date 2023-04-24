@@ -41,13 +41,6 @@ menu-quit =
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = ترک { -brand-shorter-name }
-# This menu-quit-button string is only used on Linux.
-menu-quit-button =
-    .label = { menu-quit.label }
-# This menu-quit-button-win string is only used on Windows.
-menu-quit-button-win =
-    .label = { menu-quit.label }
-    .tooltip = خروج از { -brand-shorter-name }
 menu-about =
     .label = دربارهٔ { -brand-shorter-name }
     .accesskey = د
@@ -77,9 +70,6 @@ menu-file-open-location =
 menu-file-open-file =
     .label = بازکردن پرونده…
     .accesskey = ب
-menu-file-close =
-    .label = بستن
-    .accesskey = س
 # Variables:
 #  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
@@ -93,8 +83,8 @@ menu-file-close-window =
     .label = بستن پنجره
     .accesskey = پ
 menu-file-save-page =
-    .label = ذخیرهٔ صفحه به نام…
-    .accesskey = ص
+    .label = ذخیرهٔ صفحه به عنوان…
+    .accesskey = ع
 menu-file-email-link =
     .label = ایمیل کردن پیوند...
     .accesskey = ا
@@ -104,9 +94,6 @@ menu-file-share-url =
 menu-file-print-setup =
     .label = تنظیم صفحه…
     .accesskey = ت
-menu-file-print-preview =
-    .label = پیش‌نمایش چاپ
-    .accesskey = پ
 menu-file-print =
     .label = چاپ...
     .accesskey = چ
@@ -193,6 +180,17 @@ menu-view-full-screen =
     .label = تمام‌صفحه
     .accesskey = ت
 
+## These menu items may use the same accesskey.
+
+# This should match reader-view-enter-button in browser.ftl
+menu-view-enter-readerview =
+    .label = ورود به نمای‌ مطالعه
+    .accesskey = R
+# This should match reader-view-close-button in browser.ftl
+menu-view-close-readerview =
+    .label = بستن نمای مطالعه
+    .accesskey = R
+
 ##
 
 menu-view-show-all-tabs =
@@ -214,7 +212,7 @@ menu-history-clear-recent-history =
 menu-history-synced-tabs =
     .label = زبانه‌های همگام‌سازی شده
 menu-history-restore-last-session =
-    .label = بازآوری نشست قبلی
+    .label = بازیابی نشست قبلی
 menu-history-hidden-tabs =
     .label = زبانه‌های مخفی
 menu-history-undo-menu =
@@ -235,6 +233,10 @@ menu-bookmark-current-tab =
     .label = نشانک‌گذاری زبانهٔ فعلی
 menu-bookmark-edit =
     .label = ویرایش این نشانک
+menu-bookmark-tab =
+    .label = نشانک‌گذاری زبانهٔ کنونی…
+menu-edit-bookmark =
+    .label = ویرایش این نشانک…
 menu-bookmarks-all-tabs =
     .label = نشانک‌گذاری تمامی زبانه‌ها…
 menu-bookmarks-toolbar =
@@ -319,9 +321,9 @@ menu-help-more-troubleshooting-info =
     .accesskey = ب
 menu-help-report-site-issue =
     .label = مشکل سایت را گزارش کنید…
-menu-help-feedback-page =
-    .label = ارسال نظر…
-    .accesskey = ن
+menu-help-share-ideas =
+    .label = همرسانی ایده‌ها و بازخوردها…
+    .accesskey = س
 menu-help-enter-troubleshoot-mode2 =
     .label = حالت عیب‌یابی…
     .accesskey = ح

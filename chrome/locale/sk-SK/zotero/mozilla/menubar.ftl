@@ -35,19 +35,12 @@ menu-quit =
         }
     .accesskey =
         { PLATFORM() ->
-            [windows] k
-           *[other] k
+            [windows] U
+           *[other] U
         }
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Ukončiť { -brand-shorter-name }
-# This menu-quit-button string is only used on Linux.
-menu-quit-button =
-    .label = { menu-quit.label }
-# This menu-quit-button-win string is only used on Windows.
-menu-quit-button-win =
-    .label = { menu-quit.label }
-    .tooltip = Ukončiť prehliadač { -brand-shorter-name }
 menu-about =
     .label = O aplikácii { -brand-shorter-name }
     .accesskey = O
@@ -77,9 +70,6 @@ menu-file-open-location =
 menu-file-open-file =
     .label = Otvoriť súbor…
     .accesskey = s
-menu-file-close =
-    .label = Zavrieť
-    .accesskey = Z
 # Variables:
 #  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
@@ -106,9 +96,6 @@ menu-file-share-url =
 menu-file-print-setup =
     .label = Nastavenie tlače…
     .accesskey = N
-menu-file-print-preview =
-    .label = Ukážka pred tlačou
-    .accesskey = e
 menu-file-print =
     .label = Tlačiť…
     .accesskey = T
@@ -165,7 +152,7 @@ menu-view-full-zoom-reduce =
     .accesskey = V
 menu-view-full-zoom-actual-size =
     .label = Skutočná veľkosť
-    .accesskey = v
+    .accesskey = S
 menu-view-full-zoom-toggle =
     .label = Meniť iba veľkosť textu
     .accesskey = M
@@ -194,6 +181,17 @@ menu-view-exit-full-screen =
 menu-view-full-screen =
     .label = Na celú obrazovku
     .accesskey = c
+
+## These menu items may use the same accesskey.
+
+# This should match reader-view-enter-button in browser.ftl
+menu-view-enter-readerview =
+    .label = Zapnúť zobrazenie Čítačka
+    .accesskey = Z
+# This should match reader-view-close-button in browser.ftl
+menu-view-close-readerview =
+    .label = Zavrieť zobrazenie Čítačka
+    .accesskey = Z
 
 ##
 
@@ -237,6 +235,10 @@ menu-bookmark-current-tab =
     .label = Pridať túto kartu medzi záložky
 menu-bookmark-edit =
     .label = Upraviť túto záložku
+menu-bookmark-tab =
+    .label = Pridať túto kartu medzi záložky
+menu-edit-bookmark =
+    .label = Upraviť túto záložku…
 menu-bookmarks-all-tabs =
     .label = Pridať všetky karty medzi záložky…
 menu-bookmarks-toolbar =
@@ -321,9 +323,6 @@ menu-help-more-troubleshooting-info =
     .accesskey = a
 menu-help-report-site-issue =
     .label = Nahlásiť problém so stránkou…
-menu-help-feedback-page =
-    .label = Odoslať spätnú väzbu…
-    .accesskey = d
 menu-help-share-ideas =
     .label = Zdieľať nápady a spätnú väzbu…
     .accesskey = d

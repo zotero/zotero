@@ -41,13 +41,6 @@ menu-quit =
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = 退出 { -brand-shorter-name }
-# This menu-quit-button string is only used on Linux.
-menu-quit-button =
-    .label = { menu-quit.label }
-# This menu-quit-button-win string is only used on Windows.
-menu-quit-button-win =
-    .label = { menu-quit.label }
-    .tooltip = 退出 { -brand-shorter-name }
 menu-about =
     .label = 关于 { -brand-shorter-name }
     .accesskey = A
@@ -77,9 +70,6 @@ menu-file-open-location =
 menu-file-open-file =
     .label = 打开文件…
     .accesskey = O
-menu-file-close =
-    .label = 关闭
-    .accesskey = C
 # Variables:
 #  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
@@ -104,9 +94,6 @@ menu-file-share-url =
 menu-file-print-setup =
     .label = 页面设置…
     .accesskey = u
-menu-file-print-preview =
-    .label = 打印预览
-    .accesskey = v
 menu-file-print =
     .label = 打印…
     .accesskey = P
@@ -193,6 +180,17 @@ menu-view-full-screen =
     .label = 全屏
     .accesskey = F
 
+## These menu items may use the same accesskey.
+
+# This should match reader-view-enter-button in browser.ftl
+menu-view-enter-readerview =
+    .label = 进入阅读模式
+    .accesskey = R
+# This should match reader-view-close-button in browser.ftl
+menu-view-close-readerview =
+    .label = 关闭阅读模式
+    .accesskey = R
+
 ##
 
 menu-view-show-all-tabs =
@@ -235,6 +233,10 @@ menu-bookmark-current-tab =
     .label = 将当前标签页加入书签
 menu-bookmark-edit =
     .label = 编辑此书签
+menu-bookmark-tab =
+    .label = 将当前标签页加入书签…
+menu-edit-bookmark =
+    .label = 编辑此书签…
 menu-bookmarks-all-tabs =
     .label = 将所有标签页加入书签…
 menu-bookmarks-toolbar =
@@ -319,9 +321,6 @@ menu-help-more-troubleshooting-info =
     .accesskey = T
 menu-help-report-site-issue =
     .label = 反馈网站问题…
-menu-help-feedback-page =
-    .label = 提交反馈…
-    .accesskey = S
 menu-help-share-ideas =
     .label = 分享想法和意见反馈…
     .accesskey = S

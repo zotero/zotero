@@ -41,13 +41,6 @@ menu-quit =
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
     .label = Izhod iz { -brand-shorter-name }a
-# This menu-quit-button string is only used on Linux.
-menu-quit-button =
-    .label = { menu-quit.label }
-# This menu-quit-button-win string is only used on Windows.
-menu-quit-button-win =
-    .label = { menu-quit.label }
-    .tooltip = Izhod iz { -brand-shorter-name }a
 menu-about =
     .label = O { -brand-shorter-name }u
     .accesskey = O
@@ -77,9 +70,6 @@ menu-file-open-location =
 menu-file-open-file =
     .label = Odpri datoteko …
     .accesskey = O
-menu-file-close =
-    .label = Zapri
-    .accesskey = Z
 # Variables:
 #  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
@@ -106,9 +96,6 @@ menu-file-share-url =
 menu-file-print-setup =
     .label = Priprava strani …
     .accesskey = r
-menu-file-print-preview =
-    .label = Predogled tiskanja
-    .accesskey = d
 menu-file-print =
     .label = Natisni …
     .accesskey = N
@@ -195,6 +182,17 @@ menu-view-full-screen =
     .label = Celoten zaslon
     .accesskey = C
 
+## These menu items may use the same accesskey.
+
+# This should match reader-view-enter-button in browser.ftl
+menu-view-enter-readerview =
+    .label = Odpri bralni pogled
+    .accesskey = B
+# This should match reader-view-close-button in browser.ftl
+menu-view-close-readerview =
+    .label = Zapri bralni pogled
+    .accesskey = B
+
 ##
 
 menu-view-show-all-tabs =
@@ -237,6 +235,10 @@ menu-bookmark-current-tab =
     .label = Dodaj trenutni zavihek med zaznamke
 menu-bookmark-edit =
     .label = Uredi ta zaznamek
+menu-bookmark-tab =
+    .label = Dodaj trenutni zavihek med zaznamke …
+menu-edit-bookmark =
+    .label = Uredi ta zaznamek …
 menu-bookmarks-all-tabs =
     .label = Dodaj vse zavihke med zaznamke …
 menu-bookmarks-toolbar =
@@ -321,11 +323,8 @@ menu-help-more-troubleshooting-info =
     .accesskey = r
 menu-help-report-site-issue =
     .label = Prijavi napako strani …
-menu-help-feedback-page =
-    .label = Povratne informacije …
-    .accesskey = v
 menu-help-share-ideas =
-    .label = Sporočite ideje in povratne informacije …
+    .label = Sporoči ideje in povratne informacije …
     .accesskey = D
 menu-help-enter-troubleshoot-mode2 =
     .label = Način za odpravljanje težav …
