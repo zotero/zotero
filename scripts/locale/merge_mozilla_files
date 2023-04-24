@@ -216,6 +216,8 @@ def main():
         missing = locales.difference(existing_locales)
         
         for locale in missing:
+            if locale == 'en-US':
+                continue
             dest_dir = os.path.join(locales_dir, locale, 'zotero', 'mozilla')
             dest_file = os.path.join(dest_dir, entry_filename)
             if not os.path.exists(dest_dir):
