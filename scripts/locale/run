@@ -1,20 +1,16 @@
-#!/bin/sh
+#!/bin/bash
+set -euo pipefail
 
-if [ ! -d "$1/chrome/locale/en-US/zotero" ]; then
-	echo "Usage: $0 /path/to/zotero"
-	exit
-fi
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
 
-BASEDIR=`dirname $0`
-cd $BASEDIR
-BASEDIR=`pwd`
-WORKDIR=$BASEDIR/work
-ROOT_DIR="$1"
-LOCALES_DIR="$1/chrome/locale"
+WORK_DIR="$SCRIPT_DIR/work"
+LOCALES_DIR="$ROOT_DIR/chrome/locale"
 
-cd $WORKDIR
+rm -rf "$WORK_DIR"
+mkdir "$WORK_DIR"
+cd $WORK_DIR
 # Create temporary directories for merge script
-rm -rf en-US-new locales content-locales output
 mkdir en-US-new locales content-locales output
 cp -R $LOCALES_DIR/en-US/zotero/* en-US-new
 cp -R $LOCALES_DIR/ locales/
@@ -28,14 +24,14 @@ find locales -name '*.properties' -exec rpl '\n\n\(?!n)' '\n\n' {} \;
 find locales -name '*.properties' -exec rpl '\\' '\' {} \;
 
 # Run merge script
-$BASEDIR/localizer
-rsync -a --progress --verbose $WORKDIR/output/locale/ $LOCALES_DIR/
+$SCRIPT_DIR/localizer
+rsync -a --progress --verbose $WORK_DIR/output/locale/ $LOCALES_DIR/
 
 rpl -R ⏎ '\n' "$LOCALES_DIR"
 
 rm -rf en-US-new locales content-locales output
 
-$BASEDIR/filter_connector_json "$LOCALES_DIR"
+$SCRIPT_DIR/filter_connector_json "$LOCALES_DIR"
 
 cd "$ROOT_DIR/resource/schema/global"
 ./scripts/update-schema

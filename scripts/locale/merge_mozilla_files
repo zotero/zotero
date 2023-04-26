@@ -13,14 +13,10 @@ def main():
     use_cache = True
     
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    if len(sys.argv) < 2 or not os.path.isdir(sys.argv[1]):
-        sys.stderr.write("Usage: {0} path/to/zotero/source\n".format(
-            os.path.basename(sys.argv[0])))
-        return 1
+    root_dir = os.path.dirname(os.path.dirname(script_dir))
     
-    source_dir = sys.argv[1]
-    locales_dir = os.path.join(source_dir, 'chrome', 'locale')
-    schema_dir = os.path.join(source_dir, 'resource', 'schema')
+    locales_dir = os.path.join(root_dir, 'chrome', 'locale')
+    schema_dir = os.path.join(root_dir, 'resource', 'schema')
     
     # AMO download links for Firefox language packs
     language_packs = [

@@ -1,25 +1,42 @@
 #!/usr/bin/env php
 <?php
 error_reporting(E_ALL);
+function error_handler($errno, $errstr, $errfile, $errline) {
+	echo "$errstr at $errfile:$errline\n";
+	exit(1);
+}
+set_error_handler('error_handler');
 
 $english_path = 'en-US-new'; // New English locale
-$locale_path = 'locales'; // Existing locales from previous version
+$locale_path = 'locales'; // Source locales from run script
 $content_locale_path = 'content-locales'; // Existing content locales from previous version
 $output_dir = 'output/locale'; // Directory to save merged locales
 $content_output_dir = 'output/content'; // Directory to save merged content locales
-$matching_are_missing = 1; // matching non-english strings should be considered missing
-$missing_mode = 0; // 0 = default to english; 1 = leave blank; 2 = skip (for BZ)
 $use_content_input_dir = false;
 $use_content_output_dir = true; // set to true for XPI, false for BZ
 $localeCodeInOutputXML = true; // set to true for XPI, false for BZ
 
-$english_files = scandir($english_path);
-$locales = array_slice(scandir($locale_path), 2); // strip '.' and '..'
+$locale_re = '/([a-z]{2})(\-[A-Z]{2})?/';
+$locale_file_re = '/^[a-z].+\.(dtd|props)$/';
+
+// Zotero files
+$english_files = array_filter(
+	scandir($english_path),
+	fn ($path) => preg_match($locale_file_re, $path)
+);
+// Mozilla files
+$english_mozilla_files = array_filter(
+	scandir($english_path . "/mozilla"),
+	fn ($path) => preg_match($locale_file_re, $path)
+);
+$english_mozilla_files = array_map(fn ($path) => 'mozilla/' . $path, $english_mozilla_files);
+$all_english_files = array_merge($english_files, $english_mozilla_files);
 
 // Make output directories for each locale
+$locales = array_filter(scandir($locale_path), fn ($path) => preg_match($locale_re, $path));
 foreach ($locales as $locale) {
-	preg_match('/([a-z]{2})(\-[A-Z]{2})?/', $locale, $matches);
-	if (!isset($matches[1])) {
+	preg_match($locale_re, $locale, $matches);
+	if (!$matches) {
 		continue;
 	}
 	$dir = $output_dir . '/' . $locale . '/zotero/';
@@ -31,10 +48,8 @@ if ($use_content_output_dir) {
 	@mkdir("$content_output_dir/csl/", 0775, true);
 }
 
-foreach ($english_files as $file) {
-	if (preg_match("/^\./", $file)) {
-		continue;
-	}
+foreach ($all_english_files as $file) {
+	echo "Processing $file\n";
 	
 	$extension = substr(strrchr($file, '.'), 1);
 	
@@ -48,6 +63,13 @@ foreach ($english_files as $file) {
 			$locale .= $matches[2];
 		}
 		
+		$locale_source_file = "$locale_path/$locale/zotero/$file";
+		$output_locale_dir = "$output_dir/$locale/zotero/";
+		
+		if (!file_exists($output_locale_dir . '/mozilla')) {
+			mkdir($output_locale_dir . '/mozilla', 0755);
+		}
+		
 		if ($file == 'locales.xml') {
 			if (strlen($locale) == 2) {
 				$csl_locale = $locale . '-' . strtoupper($locale);
@@ -59,15 +81,9 @@ foreach ($english_files as $file) {
 			if ($use_content_input_dir) {
 				$locale_source_file = "$content_locale_path/csl/locales-$csl_locale.xml";
 			}
-			else {
-				$locale_source_file = "$locale_path/$locale/zotero/$file";
-			}
 			
 			if ($use_content_output_dir) {
-				$dir = "$content_output_dir/csl/";
-			}
-			else {
-				$dir = "$output_dir/$locale/zotero/";
+				$output_locale_dir = "$content_output_dir/csl/";
 			}
 			
 			if ($localeCodeInOutputXML) {
@@ -77,79 +93,104 @@ foreach ($english_files as $file) {
 				$save_file = "locales.xml";
 			}
 			
-			echo "Saving {$dir}{$save_file}\n";
+			echo "Saving {$output_locale_dir}{$save_file}\n";
 			
-			$string = generate_csl_locale("$english_path/$file",
-				$locale_source_file, $locale);
+			$string = generate_csl_locale(
+				"$english_path/$file",
+				$locale_source_file,
+				$locale
+			);
 		}
 		else {
-			$dir = "$output_dir/$locale/zotero/";
-			echo "Saving {$dir}{$file}\n";
+			echo "Saving {$output_locale_dir}{$file}\n";
 			
 			$save_file = $file;
 			
-			$string = generate_locale($extension, "$english_path/$file",
-				"$locale_path/$locale/zotero/$file");
+			$string = generate_locale(
+				$extension,
+				"$english_path/$file",
+				$locale_source_file,
+				$locale
+			);
 		}
 		
 		// We can't handle this file, so bail
 		if (!$string) {
-			echo "Error generating file!\n";
-			continue;
+			throw new Exception("Error generating file");
 		}
 		
-		file_put_contents($dir . $save_file, $string);
+		file_put_contents($output_locale_dir . $save_file, $string);
 	}
 }
 
 
-function parse_strings($type, $file) {
+function parse_strings($type, $file, $locale = null) {
 	if (!file_exists($file)) {
-		return array();
+		$msg = "Source file $file doesn't exist";
+		if ($locale) {
+			if (strpos($file, 'updates.dtd') !== false) {
+				$missing_locales = ['br', 'en-GB', 'gl-ES', 'hu-HU', 'mn-MN'];
+				if (in_array($locale, $missing_locales)) {
+					echo $msg . "\n";
+					return [];
+				}
+			}
+		}
+		throw new Exception($msg);
 	}
 	
-	$lines = file($file);
 	$pairs = array();
 	
 	switch ($type) {
 		case 'dtd':
-			$regex = '|<!ENTITY[\s]*([^([^\s]*)\s*"(.*)">\s*$|';
+			// 1: space after ENTITY
+			// 2: key
+			// 3: space after key
+			// 4: string
+			// 5: space after ">
+			$regex = '|<!ENTITY(\s*)([^\s]*)(\s*)"([^"]*)"(\s*>\s*)|s';
 			break;
+		
 		case 'properties':
 			$regex = '|^(?:#\s*)?([^\s]*)\s*=\s*(.*)$|';
 			break;
+		
 		default:
-			echo "Unsupported extension $type\n";
-			return false;
+			throw new Exception("Unsupported extension .$type");
 	}
 	
-	foreach ($lines as $line) {
-		preg_match($regex, $line, $matches);
-		
-		if (!empty($matches[0])) {
-			$pairs[$matches[1]] = $matches[2];
+	preg_match_all($regex, file_get_contents($file), $matches, PREG_SET_ORDER);
+	foreach ($matches as $match) {
+		if ($type == 'dtd') {
+			$pairs[$match[2]] = $match;
 		}
 		else {
-			array_push($pairs, NULL);
+			$pairs[$match[1]] = $match[2];
 		}
 	}
+	
 	return $pairs;
 }
 
 
 
-function generate_locale($type, $english_file, $locale_file) {
-	GLOBAL $missing_mode, $matching_are_missing;
-	
+function generate_locale($type, $english_file, $locale_file, $locale) {
 	$output = '';
-	$english_pairs = parse_strings($type, $english_file);
-	if (!$english_pairs) {
-		return false;
+	
+	// Keep copyright block at top of Mozilla files
+	preg_match('/<!--.+?-->\s+/s', file_get_contents($locale_file), $matches);
+	if ($matches) {
+		$output .= $matches[0];
 	}
 	
-	$locale_pairs = parse_strings($type, $locale_file);
+	$english_pairs = parse_strings($type, $english_file);
+	if (!$english_pairs) {
+		throw new Exception("No English pairs!");
+	}
 	
-	foreach ($english_pairs as $key=>$val) {
+	$locale_pairs = parse_strings($type, $locale_file, $locale);
+	
+	foreach ($english_pairs as $key => $val) {
 		if (!$val) {
 			if ($output != '') {
 				$output .= "\n";
@@ -157,47 +198,29 @@ function generate_locale($type, $english_file, $locale_file) {
 			continue;
 		}
 		
+		$source_val = empty($locale_pairs[$key]) ? $english_pairs[$key] : $locale_pairs[$key];
+		
 		switch ($type) {
 			case 'dtd':
-				$prefix = '<!ENTITY ';
-				$middle = " \"";
-				$suffix = '">';
+				$prefix = '<!ENTITY' . $source_val[1];
+				$middle = $source_val[3];
+				$string = '"' . $source_val[4] . '"';
+				$suffix = $source_val[5];
 				break;
+			
 			case 'properties':
 				$prefix = '';
 				$middle = '=';
-				$suffix = '';
+				$string = $source_val;
+				$suffix = '\n';
 				break;
+			
 			default:
 				echo "Unsupported extension $type\n";
 				return false;
 		}
 		
-		// If missing mode is 2, skip strings not available in this locale
-		if (empty($locale_pairs[$key]) && $missing_mode == 2) {
-			continue;
-		}
-		
-		$output .= $prefix;
-		
-		$missing = empty($locale_pairs[$key])
-					|| ($matching_are_missing && $english_pairs[$key] === $locale_pairs[$key]);
-		
-		// Use existing locale string if we have it
-		if (!$missing) {
-			$output .= $key . $middle . $locale_pairs[$key];
-		}
-		// Default missing strings to English
-		else if ($missing_mode == 0) {
-			$output .= $key . $middle . $english_pairs[$key];
-		}
-		// Leave missing strings blank
-		else if ($missing_mode == 1) {
-			$output .= $key . $middle;
-		}
-		
-		$output .= $suffix;
-		$output .= "\n";
+		$output .= $prefix . $key . $middle . $string . $suffix;
 	}
 	
 	return $output;
