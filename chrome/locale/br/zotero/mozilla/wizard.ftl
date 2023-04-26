@@ -3,35 +3,35 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 wizard-macos-button-back =
-  .label = Go Back
-  .accesskey = B
+    .label = Distro
+    .accesskey = s
 wizard-linux-button-back =
-  .label = Back
-  .accesskey = B
+    .label = Kent
+    .accesskey = K
 wizard-win-button-back =
-  .label = < Back
-  .accesskey = B
+    .label = < Distro
+    .accesskey = s
 
 wizard-macos-button-next =
-  .label = Continue
-  .accesskey = C
+    .label = Kenderc'hel
+    .accesskey = K
 wizard-linux-button-next =
-  .label = Next
-  .accesskey = N
+    .label = War-lerc'h
+    .accesskey = r
 wizard-win-button-next =
-  .label = Next >
-  .accesskey = N
+    .label = War-lerc'h >
+    .accesskey = r
 
 wizard-macos-button-finish =
-  .label = Done
+    .label = Graet eo
 wizard-linux-button-finish =
-  .label = Finish
+    .label = Echuiñ
 wizard-win-button-finish =
-  .label = Finish
+    .label = Echuiñ
 
 wizard-macos-button-cancel =
-  .label = Cancel
+    .label = Nullañ
 wizard-linux-button-cancel =
-  .label = Cancel
+    .label = Nullañ
 wizard-win-button-cancel =
-  .label = Cancel
+    .label = Nullañ
