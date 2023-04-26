@@ -28,6 +28,7 @@ def main():
         ["af", "https://addons.mozilla.org/en-US/firefox/addon/afrikaans-language-pack/", "af-ZA"],
         ["ar", "https://addons.mozilla.org/en-US/firefox/addon/%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9-language-pack/"],
         ["bg", "https://addons.mozilla.org/en-US/firefox/addon/%D0%B1%D1%8A%D0%BB%D0%B3%D0%B0%D1%80%D1%81%D0%BA%D0%B8-language-pack/", "bg-BG"],
+        ["br", "https://addons.mozilla.org/af/firefox/addon/breton-language-pack-for-firef/", "br"],
         ["ca", "https://addons.mozilla.org/en-US/firefox/addon/ca-language-pack/", "ca-AD"],
         ["cs", "https://addons.mozilla.org/en-US/firefox/addon/czech-cz-language-pack/", "cs-CZ"],
         ["da", "https://addons.mozilla.org/en-US/firefox/addon/dansk-da-language-pack/", "da-DK"],

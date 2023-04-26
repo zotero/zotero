@@ -2,25 +2,27 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+
 # NOTE: For English locales, strings in this file should be in APA-style Title Case.
 # See https://apastyle.apa.org/style-grammar-guidelines/capitalization/title-case
 #
 # NOTE: For Engineers, please don't re-use these strings outside of the menubar.
 
+
 ## Application Menu (macOS only)
 
 menu-application-preferences =
-    .label = Preferences
+    .label = Gwellvezioù
 menu-application-services =
-    .label = Services
+    .label = Gwazerezhioù
 menu-application-hide-this =
-    .label = Hide { -brand-shorter-name }
+    .label = Kuzhat { -brand-shorter-name }
 menu-application-hide-other =
-    .label = Hide Others
+    .label = Kuzhat ar re all
 menu-application-show-all =
-    .label = Show All
+    .label = Diskouez pep tra
 menu-application-touch-bar =
-    .label = Customize Touch Bar…
+    .label = Personelaat ar varrenn-stok…
 
 ##
 
@@ -28,274 +30,281 @@ menu-application-touch-bar =
 menu-quit =
     .label =
         { PLATFORM() ->
-            [windows] Exit
-           *[other] Quit
+            [windows] Kuitaat
+           *[other] Kuitaat
         }
     .accesskey =
         { PLATFORM() ->
-            [windows] x
-           *[other] Q
+            [windows] K
+           *[other] K
         }
-
 # This menu-quit-mac string is only used on macOS.
 menu-quit-mac =
-    .label = Quit { -brand-shorter-name }
-
+    .label = Kuitaat { -brand-shorter-name }
 menu-about =
-    .label = About { -brand-shorter-name }
+    .label = A-zivout { -brand-shorter-name }
     .accesskey = A
 
 ## File Menu
 
 menu-file =
-    .label = File
-    .accesskey = F
+    .label = Restr
+    .accesskey = R
 menu-file-new-tab =
-    .label = New Tab
-    .accesskey = T
+    .label = Ivinell nevez
+    .accesskey = I
 menu-file-new-container-tab =
-    .label = New Container Tab
-    .accesskey = b
+    .label = Ivinell endalc'her nevez
+    .accesskey = e
 menu-file-new-window =
-    .label = New Window
-    .accesskey = N
+    .label = Prenestr nevez
+    .accesskey = n
 menu-file-new-private-window =
-    .label = New Private Window
-    .accesskey = W
+    .label = Prenestr merdeiñ prevez nevez
+    .accesskey = v
 # "Open Location" is only displayed on macOS, and only on windows
 # that aren't main browser windows, or when there are no windows
 # but Firefox is still running.
 menu-file-open-location =
-    .label = Open Location…
+    .label = Digeriñ ul lec'hiadur…
 menu-file-open-file =
-    .label = Open File…
-    .accesskey = O
+    .label = Digeriñ ur restr…
+    .accesskey = D
 # Variables:
 #  $tabCount (Number): the number of tabs that are affected by the action.
 menu-file-close-tab =
     .label =
         { $tabCount ->
-            [1] Close Tab
-           *[other] Close { $tabCount } Tabs
+            [1] Serriñ an ivinell
+            [one] Serriñ { $tabCount } ivinell
+            [two] Serriñ { $tabCount } ivinell
+            [few] Serriñ { $tabCount } ivinell
+            [many] Serriñ { $tabCount } a ivinelloù
+           *[other] Serriñ { $tabCount } ivinell
         }
-    .accesskey = C
+    .accesskey = S
 menu-file-close-window =
-    .label = Close Window
-    .accesskey = d
+    .label = Serriñ ar prenestr
+    .accesskey = r
 menu-file-save-page =
-    .label = Save Page As…
-    .accesskey = A
+    .label = Enrollañ ar bajenn evel…
+    .accesskey = a
 menu-file-email-link =
-    .label = Email Link…
-    .accesskey = E
+    .label = Kas an ere dre bostel…
+    .accesskey = K
 menu-file-share-url =
-    .label = Share
-    .accesskey = h
+    .label = Rannañ
+    .accesskey = R
 menu-file-print-setup =
-    .label = Page Setup…
-    .accesskey = u
+    .label = Arventennoù ar bajenn…
+    .accesskey = A
 menu-file-print =
-    .label = Print…
-    .accesskey = P
+    .label = Moullañ…
+    .accesskey = M
 menu-file-import-from-another-browser =
-    .label = Import From Another Browser…
-    .accesskey = I
+    .label = Enporzhiañ eus ur merdeer all...
+    .accesskey = E
 menu-file-go-offline =
-    .label = Work Offline
-    .accesskey = k
+    .label = Labourat ezlinenn
+    .accesskey = z
 
 ## Edit Menu
 
 menu-edit =
-    .label = Edit
+    .label = Embann
     .accesskey = E
 menu-edit-find-in-page =
-    .label = Find in Page…
-    .accesskey = F
+    .label = Kavout er bajennad…
+    .accesskey = K
 menu-edit-find-again =
-    .label = Find Again
-    .accesskey = g
+    .label = Klask c'hoazh
+    .accesskey = h
 menu-edit-bidi-switch-text-direction =
-    .label = Switch Text Direction
-    .accesskey = w
+    .label = Kemmañ tuadur an destenn
+    .accesskey = d
 
 ## View Menu
 
 menu-view =
-    .label = View
-    .accesskey = V
+    .label = Gwelout
+    .accesskey = w
 menu-view-toolbars-menu =
-    .label = Toolbars
-    .accesskey = T
+    .label = Barrennoù ostilhoù
+    .accesskey = B
 menu-view-customize-toolbar2 =
-    .label = Customize Toolbar…
-    .accesskey = C
+    .label = Personelaat ar varrenn ostilhoù…
+    .accesskey = P
 menu-view-sidebar =
-    .label = Sidebar
-    .accesskey = e
+    .label = Barrenn gostez
+    .accesskey = g
 menu-view-bookmarks =
-    .label = Bookmarks
+    .label = Sinedoù
 menu-view-history-button =
-    .label = History
+    .label = Roll istor
 menu-view-synced-tabs-sidebar =
-    .label = Synced Tabs
+    .label = Ivinelloù goubredet
 menu-view-full-zoom =
-    .label = Zoom
+    .label = Zoum
     .accesskey = Z
 menu-view-full-zoom-enlarge =
-    .label = Zoom In
-    .accesskey = I
+    .label = Zoum brasaat
+    .accesskey = b
 menu-view-full-zoom-reduce =
-    .label = Zoom Out
-    .accesskey = O
+    .label = Zoum bihanaat
+    .accesskey = o
 menu-view-full-zoom-actual-size =
-    .label = Actual Size
-    .accesskey = A
+    .label = Ment vremanel
+    .accesskey = M
 menu-view-full-zoom-toggle =
-    .label = Zoom Text Only
-    .accesskey = T
+    .label = Zoumañ war an destenn hepken
+    .accesskey = t
 menu-view-page-style-menu =
-    .label = Page Style
-    .accesskey = y
+    .label = Stil ar bajennad
+    .accesskey = S
 menu-view-page-style-no-style =
-    .label = No Style
-    .accesskey = n
+    .label = Stil ebet
+    .accesskey = b
 menu-view-page-basic-style =
-    .label = Basic Page Style
-    .accesskey = B
+    .label = Stil pajennad eeun
+    .accesskey = e
 menu-view-repair-text-encoding =
-    .label = Repair Text Encoding
-    .accesskey = c
+    .label = Ratreañ enkodadur an destenn
+    .accesskey = k
 
 ## These should match what Safari and other Apple applications
 ## use on macOS.
 
 menu-view-enter-full-screen =
-    .label = Enter Full Screen
-    .accesskey = F
+    .label = Kregiñ ar mod skramm a-bezh
+    .accesskey = s
 menu-view-exit-full-screen =
-    .label = Exit Full Screen
-    .accesskey = F
+    .label = Kuitaat ar mod skramm a-bezh
+    .accesskey = s
 menu-view-full-screen =
-    .label = Full Screen
-    .accesskey = F
+    .label = Skramm a-bezh
+    .accesskey = S
 
 ## These menu items may use the same accesskey.
 
 # This should match reader-view-enter-button in browser.ftl
 menu-view-enter-readerview =
-    .label = Enter Reader View
-    .accesskey = R
+    .label = Mont er mod lenn
+    .accesskey = L
 # This should match reader-view-close-button in browser.ftl
 menu-view-close-readerview =
-    .label = Close Reader View
-    .accesskey = R
+    .label = Serriñ ar mod lenn
+    .accesskey = L
 
 ##
 
 menu-view-show-all-tabs =
-    .label = Show All Tabs
-    .accesskey = A
+    .label = Diskouez an holl ivinelloù
+    .accesskey = a
 menu-view-bidi-switch-page-direction =
-    .label = Switch Page Direction
-    .accesskey = D
+    .label = Kemmañ tu ar bajenn
+    .accesskey = b
 
 ## History Menu
 
 menu-history =
-    .label = History
-    .accesskey = s
+    .label = Roll istor
+    .accesskey = l
 menu-history-show-all-history =
-    .label = Show All History
+    .label = Diskouez ar roll istor a-bezh
 menu-history-clear-recent-history =
-    .label = Clear Recent History…
+    .label = Skarzhañ ar roll istor nevesañ…
 menu-history-synced-tabs =
-    .label = Synced Tabs
+    .label = Ivinelloù goubredet
 menu-history-restore-last-session =
-    .label = Restore Previous Session
+    .label = Assav an estez kent
 menu-history-hidden-tabs =
-    .label = Hidden Tabs
+    .label = Ivinell kuzh
 menu-history-undo-menu =
-    .label = Recently Closed Tabs
+    .label = Ivinelloù serret nevez zo
 menu-history-undo-window-menu =
-    .label = Recently Closed Windows
-menu-history-reopen-all-tabs = Reopen All Tabs
-menu-history-reopen-all-windows = Reopen All Windows
+    .label = Prenestroù serret nevez zo
+menu-history-reopen-all-tabs = Digeriñ en-dro an holl ivinelloù
+menu-history-reopen-all-windows = Digeriñ en-dro an holl brenestroù
 
 ## Bookmarks Menu
 
 menu-bookmarks-menu =
-    .label = Bookmarks
-    .accesskey = B
+    .label = Sinedoù
+    .accesskey = n
 menu-bookmarks-manage =
-    .label = Manage Bookmarks
+    .label = Merañ ar sinedoù
+menu-bookmark-current-tab =
+    .label = Lakaat an ivinell vremanel er sinedoù
+menu-bookmark-edit =
+    .label = Embann ar sined-mañ
 menu-bookmark-tab =
-    .label = Bookmark Current Tab…
+    .label = Lakaat an ivinell a-vremañ er sinedoù…
 menu-edit-bookmark =
-    .label = Edit This Bookmark…
+    .label = Embann ar sined-mañ…
 menu-bookmarks-all-tabs =
-    .label = Bookmark All Tabs…
+    .label = Ouzhpennañ an holl ivinelloù d'ar sinedoù
 menu-bookmarks-toolbar =
-    .label = Bookmarks Toolbar
+    .label = Barrenn ostilhoù ar sinedoù
 menu-bookmarks-other =
-    .label = Other Bookmarks
+    .label = Sinedoù all
 menu-bookmarks-mobile =
-    .label = Mobile Bookmarks
+    .label = Sinedoù hezoug
 
 ## Tools Menu
 
 menu-tools =
-    .label = Tools
-    .accesskey = T
+    .label = Ostilhoù
+    .accesskey = O
 menu-tools-downloads =
-    .label = Downloads
-    .accesskey = D
+    .label = Pellgargadurioù
+    .accesskey = d
 menu-tools-addons-and-themes =
-    .label = Add-ons and Themes
-    .accesskey = A
+    .label = Askouezhioù ha neuzioù
+    .accesskey = E
 menu-tools-fxa-sign-in2 =
-    .label = Sign In
-    .accesskey = g
+    .label = Kennaskañ
+    .accesskey = K
 menu-tools-turn-on-sync2 =
-    .label = Turn on Sync…
+    .label = Gweredekaat Sync
     .accesskey = n
 menu-tools-sync-now =
-    .label = Sync Now
-    .accesskey = o
+    .label = Goubredañ bremañ
+    .accesskey = G
 menu-tools-fxa-re-auth =
-    .label = Reconnect to { -brand-product-name }…
-    .accesskey = R
+    .label = Adkennaskañ ouzh { -brand-product-name }
+    .accesskey = A
 menu-tools-browser-tools =
-    .label = Browser Tools
-    .accesskey = B
+    .label = Ostilhoù merdeer
+    .accesskey = O
 menu-tools-task-manager =
-    .label = Task Manager
-    .accesskey = M
+    .label = Ardoer trevelloù
+    .accesskey = A
 menu-tools-page-source =
-    .label = Page Source
-    .accesskey = o
+    .label = Tarzh ar bajennad
+    .accesskey = b
 menu-tools-page-info =
-    .label = Page Info
-    .accesskey = I
+    .label = Stlennoù ar bajennad
+    .accesskey = t
 menu-settings =
-    .label = Settings
+    .label = Arventennoù
     .accesskey =
         { PLATFORM() ->
-            [windows] S
-           *[other] n
+            [windows] A
+           *[other] A
         }
 menu-tools-layout-debugger =
-    .label = Layout Debugger
-    .accesskey = L
+    .label = Diveuger ar pajennaozañ
+    .accesskey = D
 
 ## Window Menu
 
 menu-window-menu =
-    .label = Window
+    .label = Prenestr
 menu-window-bring-all-to-front =
-    .label = Bring All to Front
+    .label = Lakaat pep tra war ar rakleur
 
 ## Help Menu
+
 
 # NOTE: For Engineers, any additions or changes to Help menu strings should
 # also be reflected in the related strings in appmenu.ftl. Those strings, by
@@ -306,30 +315,30 @@ menu-window-bring-all-to-front =
 # where the strings appear.
 
 menu-help =
-    .label = Help
-    .accesskey = H
-menu-get-help =
-    .label = Get Help
-    .accesskey = H
-menu-help-more-troubleshooting-info =
-    .label = More Troubleshooting Information
-    .accesskey = T
-menu-help-report-site-issue =
-    .label = Report Site Issue…
-menu-help-share-ideas =
-    .label = Share Ideas and Feedback…
+    .label = Skoazell
     .accesskey = S
+menu-get-help =
+    .label = Kaout skoazell
+    .accesskey = K
+menu-help-more-troubleshooting-info =
+    .label = Muioc'h a ditouroù disac’hañ
+    .accesskey = M
+menu-help-report-site-issue =
+    .label = Danevell kudennoù al lec'hienn…
+menu-help-share-ideas =
+    .label = Kinnig mennozhioù hag alioù...
+    .accesskey = K
 menu-help-enter-troubleshoot-mode2 =
-    .label = Troubleshoot Mode…
+    .label = Mod disac’hañ
     .accesskey = M
 menu-help-exit-troubleshoot-mode =
-    .label = Turn Troubleshoot Mode Off
-    .accesskey = M
+    .label = Diweredekaat ar mod disac’hañ
+    .accesskey = D
 # Label of the Help menu item. Either this or
 # menu-help-notdeceptive is shown.
 menu-help-report-deceptive-site =
-    .label = Report Deceptive Site…
-    .accesskey = D
+    .label = Danevelliñ al lec'hienn dagus…
+    .accesskey = d
 menu-help-not-deceptive =
-    .label = This Isn’t a Deceptive Site…
-    .accesskey = D
+    .label = N'eo ket ul lec’hienn dagus…
+    .accesskey = d
