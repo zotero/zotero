@@ -1,0 +1,43 @@
+publications-license-info {
+    display: block;
+    width: 100%;
+
+    .license-info {
+        display: flex;
+        padding: var(--license-info-padding, 0 20px);
+        margin: var(--license-info-margin, 1em 0 0 0);
+
+        .license-icon {
+            flex: 0 1 auto;
+
+            >img {
+                max-width: var(--license-icon-max-width, 88px);
+            }
+        }
+
+        .license-name {
+            margin-left: var(--license-info-name-margin-left, 12px);
+            flex: 1 1 auto;
+            display: flex;
+            align-items: center;
+        }
+    }
+
+    .license-more-info {
+        margin: var(--license-more-info-margin, 1.5em 0 0 0);
+        font-size: var(--license-more-info-font-size, 11px);
+    }
+
+    a {
+        display: inline;
+        color: var(--license-info-link-color, -moz-nativehyperlinktext);
+        text-decoration: var(--license-info-link-decoration, none);
+
+        &:hover,
+        &:active,
+        &:focus {
+            outline: none;
+            text-decoration: var(--license-info-link-decoration-hover, $link-hover-decoration);
+        }
+    }
+}

@@ -123,22 +123,22 @@
 		}
 
 		get licenseName() {
-			return this.shadowRoot.querySelector('.license-name').getAttribute('label')
-				? this.shadowRoot.querySelector('.license-name').getAttribute('label')
-				: this.shadowRoot.querySelector('.license-name').textContent;
+			return this.querySelector('.license-name').getAttribute('label')
+				? this.querySelector('.license-name').getAttribute('label')
+				: this.querySelector('.license-name').textContent;
 		}
 
 		async init() {
 			this.license = this.getAttribute('license');
-			this.shadowRoot.getElementById('license-info').addEventListener('click', this.onURLInteract.bind(this));
-			this.shadowRoot.getElementById('license-info').addEventListener('keydown', this.onURLInteract.bind(this));
+			this.querySelector('#license-info').addEventListener('click', this.onURLInteract.bind(this));
+			this.querySelector('#license-info').addEventListener('keydown', this.onURLInteract.bind(this));
 		}
 
 		update() {
 			const { url, name, img, id } = getLicenseData(this.license);
 			const licenseInfoEl = makeLicenseInfo(url, name, img, id);
 			const licenseMoreEl = makeLicenseMoreInfo(this.license);
-			this.shadowRoot.getElementById('license-info').replaceChildren(licenseInfoEl, licenseMoreEl);
+			this.querySelector('#license-info').replaceChildren(licenseInfoEl, licenseMoreEl);
 		}
 
 		onURLInteract(ev) {
