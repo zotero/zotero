@@ -29,13 +29,6 @@
 	Services.scriptloader.loadSubScript("chrome://zotero/content/elements/base.js", this);
 
 	class StyleSelector extends XULElementBase {
-		get stylesheets() {
-			return [
-				'chrome://global/skin/global.css',
-				'chrome://zotero/skin/elements/style-configurator.css'
-			];
-		}
-
 		content = MozXULElement.parseXULToFragment(`
 			<div id="style-selector"
 				xmlns="http://www.w3.org/1999/xhtml"
@@ -48,16 +41,16 @@
 		`);
 
 		set value(val) {
-			this.shadowRoot.getElementById('style-list').value = val;
+			this.querySelector('#style-list').value = val;
 		}
 
 		get value() {
-			return this.shadowRoot.getElementById('style-list').value;
+			return this.querySelector('#style-list').value;
 		}
 
 		async init() {
 			await Zotero.Styles.init();
-			const styleListEl = this.shadowRoot.getElementById('style-list');
+			const styleListEl = this.querySelector('#style-list');
 
 			Zotero.Styles.getVisible().forEach((so) => {
 				const value = so.styleID;
@@ -72,7 +65,7 @@
 				`));
 			});
 			this.value = this.getAttribute('value');
-			this.shadowRoot.getElementById('style-list').addEventListener("select", () => {
+			this.querySelector('#style-list').addEventListener("select", () => {
 				const event = document.createEvent("Events");
 				event.initEvent("select", true, true);
 				this.dispatchEvent(event);
@@ -93,13 +86,6 @@
 				</div>
 			</div>
 		`);
-
-		get stylesheets() {
-			return [
-				'chrome://global/skin/global.css',
-				'chrome://zotero/skin/elements/style-configurator.css'
-			];
-		}
 
 		get value() {
 			return this.localeListEl.value;
@@ -124,8 +110,8 @@
 
 		connectedCallback() {
 			super.connectedCallback();
-			this.localeListEl = this.shadowRoot.getElementById('locale-list');
-			this.localePopupEl = this.shadowRoot.querySelector('#locale-list > menupopup');
+			this.localeListEl = this.querySelector('#locale-list');
+			this.localePopupEl = this.querySelector('#locale-list > menupopup');
 		}
 
 		async init() {
@@ -166,15 +152,15 @@
 
 	class StyleConfigurator extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
-			<div id="style-configurator"
+			<div class="style-configurator"
 				xmlns="http://www.w3.org/1999/xhtml"
 				xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 			>
 				<label for="style-selector" data-l10n-id="bibliography-style-label" />
-				<div id="style-selector-wrapper">
+				<div class="style-selector-wrapper">
 					<xul:style-selector id="style-selector" value="${this.getAttribute('style') || Zotero.Prefs.get('export.lastStyle') || ''}" />
 				</div>
-				<div id="locale-selector-wrapper">
+				<div class="locale-selector-wrapper">
 					<label for="locale-selector" class="file-input-label" data-l10n-id="bibliography-locale-label" />
 					<xul:locale-selector
 						id="locale-selector"
@@ -182,7 +168,7 @@
 						style="${this.getAttribute('style') || Zotero.Prefs.get('export.lastStyle') || ''}"
 					/>
 				</div>
-				<div id="display-as-wrapper">
+				<div class="display-as-wrapper">
 					<xul:radiogroup id="display-as">
 						<xul:radio value="footnotes" data-l10n-id="integration-prefs-footnotes" selected="true" />
 						<xul:radio value="endnotes" data-l10n-id="integration-prefs-endnotes" />
@@ -191,43 +177,36 @@
 			</div>
 		`);
 
-		get stylesheets() {
-			return [
-				'chrome://global/skin/global.css',
-				'chrome://zotero/skin/elements/style-configurator.css'
-			];
-		}
-
 		set style(val) {
-			this.shadowRoot.getElementById('style-selector').value = val;
+			this.querySelector('#style-selector').value = val;
 			this.handleStyleChanged(val);
 		}
 
 		get style() {
-			return this.shadowRoot.getElementById('style-selector').value;
+			return this.querySelector('#style-selector').value;
 		}
 
 		set locale(val) {
-			this.shadowRoot.getElementById('locale-selector').value = val;
+			this.querySelector('#locale-selector').value = val;
 		}
 
 		get locale() {
-			return this.shadowRoot.getElementById('locale-selector').value;
+			return this.querySelector('#locale-selector').value;
 		}
 
 		set displayAs(val) {
-			this.shadowRoot.getElementById('display-as').value = val;
+			this.querySelector('#display-as').value = val;
 		}
 
 		get displayAs() {
-			return this.shadowRoot.getElementById('display-as').value;
+			return this.querySelector('#display-as').value;
 		}
 
 		async init() {
-			this.shadowRoot.getElementById('style-configurator').style.display = 'none';
+			this.querySelector('.style-configurator').style.display = 'none';
 			await Zotero.Styles.init();
-			this.shadowRoot.getElementById('style-configurator').style.display = '';
-			this.shadowRoot.getElementById('style-selector').addEventListener('select', (_event) => {
+			this.querySelector('.style-configurator').style.display = '';
+			this.querySelector('#style-selector').addEventListener('select', (_event) => {
 				this.handleStyleChanged(_event.target.value);
 
 				const event = document.createEvent("Events");
@@ -235,13 +214,13 @@
 				this.dispatchEvent(event);
 			});
 
-			this.shadowRoot.getElementById('locale-selector').addEventListener('select', (_event) => {
+			this.querySelector('#locale-selector').addEventListener('select', (_event) => {
 				const event = document.createEvent("Events");
 				event.initEvent("select", true, true);
 				this.dispatchEvent(event);
 			});
 
-			this.shadowRoot.getElementById('display-as').addEventListener('select', (_event) => {
+			this.querySelector('#display-as').addEventListener('select', (_event) => {
 				const event = document.createEvent("Events");
 				event.initEvent("select", true, true);
 				this.dispatchEvent(event);
@@ -249,10 +228,10 @@
 		}
 
 		handleStyleChanged(style) {
-			this.shadowRoot.getElementById('locale-selector').style = style;
+			this.querySelector('#locale-selector').style = style;
 			const styleData = style ? Zotero.Styles.get(style) : null;
 			const isNoteStyle = (styleData || {}).class === 'note';
-			this.shadowRoot.getElementById('display-as-wrapper').style.display = isNoteStyle ? '' : 'none';
+			this.querySelector('.display-as-wrapper').style.display = isNoteStyle ? '' : 'none';
 		}
 	}
 
