@@ -50,9 +50,7 @@
 
 <!ENTITY  errorpatching.intro		"差分更新を適用できませんでした。完全更新をダウンロードしてインストールします。">
 
-<!-- (^m^) Bug 595455 -->
 <!ENTITY  genericBackgroundError.label	"&brandShortName; の更新を確認できません。&brandShortName; の最新バージョンを次のサイトからダウンロードしてください:">
-<!-- (^m^) Bug 583408#c3 -->
 <!ENTITY  errorCertAttrNoUpdate2.label	"更新経路上で &brandShortName; の安全な更新が妨げられています。&brandShortName; の最新バージョンを次のサイトからダウンロードしてください:">
 
 <!ENTITY  errorCertAttrHasUpdate.label	"何者かが悪意のある更新を &brandShortName; にダウンロードさせようとしています。ネットワーク管理者またはプロバイダに連絡を取り、助けを求めてください。">
@@ -65,7 +63,6 @@
 <!ENTITY  finishedBackgroundPage.text	"&brandShortName; のセキュリティと安定性に関する更新がダウンロードされ、インストールする準備ができました。">
 
 <!ENTITY  finishedBackground.name	"更新:">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more	"この更新は次の &brandShortName; 起動時にインストールされます。&brandShortName; を今すぐ再起動するか、作業を続けてから後で再起動してください。">
 
 <!ENTITY  finishedBackground.moreElevated "この更新は管理者権限が必要です。更新は次の &brandShortName; 起動時にインストールされます。&brandShortName; を今すぐ再起動するか、作業を続けてから後で再起動、またはこの更新を拒否できます。">

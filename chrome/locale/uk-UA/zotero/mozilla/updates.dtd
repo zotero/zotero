@@ -64,7 +64,6 @@
 <!ENTITY  finishedBackgroundPage.text     "Було завантажено оновлення безпеки та стабільності &brandShortName;.
                                            Воно готове до встановлення.">
 <!ENTITY  finishedBackground.name         "Оновлення:">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "Оновлення буде встановлене при наступному запуску &brandShortName;
                                            Ви можете перезапустити &brandShortName; зараз, чи працювати далі і перезапустити потім.">
 <!ENTITY  finishedBackground.moreElevated "Це оновлення потребує прав адміністратора. Оновлення буде

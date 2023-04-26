@@ -49,15 +49,14 @@
 
 <!ENTITY  finishedBackgroundPage.text     "'n Sekuriteit-en-stabiliteit-bywerking vir &brandShortName; is afgelaai en is gereed om geïnstalleer te word.">
 <!ENTITY  finishedBackground.name         "Bywerking:">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "Die bywerking sal geïnstalleer word wanneer &brandShortName; weer begin. U kan &brandShortName; nou herbegin, of voortgaan om te werk, en later herbegin.">
 
-
-<!ENTITY  update.details.label            "Besonderhede">
-<!ENTITY  update.installedOn.label        "Geïnstalleer op:">
-<!ENTITY  update.status.label             "Status:">
 
 <!ENTITY  finishedBackground.moreElevated "This update requires administrator privileges. The update will be
                                            installed the next time &brandShortName; starts. You can restart
                                            &brandShortName; now, continue working and restart later, or decline this
                                            update.">
+<!ENTITY  update.details.label            "Besonderhede">
+<!ENTITY  update.installedOn.label        "Geïnstalleer op:">
+<!ENTITY  update.status.label             "Status:">
+

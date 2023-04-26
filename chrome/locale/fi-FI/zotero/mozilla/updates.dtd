@@ -67,7 +67,6 @@
 <!ENTITY  finishedBackgroundPage.text     "Turvallisuus- ja vakauspäivitys &brandShortName;iin
                                            on ladattu ja valmis asennettavaksi.">
 <!ENTITY  finishedBackground.name         "Päivitys:">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "Päivitys asennetaan, kun &brandShortName; käynnistetään uudelleen. Voit
                                            käynnistää &brandShortName;in uudelleen nyt tai jatkaa &brandShortName;in
                                            käyttöä ja käynnistää sen uudelleen myöhemmin.">

@@ -49,7 +49,6 @@
 
 <!ENTITY  finishedBackgroundPage.text     "&brandShortName; için bir güvenlik ve kararlılık güncellemesi indirildi ve yüklenmeye hazır.">
 <!ENTITY  finishedBackground.name         "Güncelleme:">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "Güncelleme &brandShortName; yeniden başlatıldığında kurulacak. &brandShortName; uygulamasını isterseniz şimdi veya işinizi bitirdikten sonra yeniden başlatabilirsiniz.">
 <!ENTITY  finishedBackground.moreElevated "Bu güncelleme için yönetici yetkileri gerekiyor. Güncelleme, &brandShortName; yeniden açıldığında kurulacaktır. &brandShortName; tarayıcısını şimdi yeniden başlatabilir, şimdi işinize devam edip daha sonra yeniden başlatabilir veya bu güncellemeyi reddedebilirsiniz.">
 

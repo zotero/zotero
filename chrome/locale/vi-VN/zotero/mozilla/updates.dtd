@@ -49,15 +49,14 @@
 
 <!ENTITY  finishedBackgroundPage.text     "Một bản cập nhật bảo mật và ổn định cho &brandShortName; đã được tải xuống và đang sẵn sàng để cài đặt.">
 <!ENTITY  finishedBackground.name         "Cập nhật:">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "Bản cập nhật sẽ được cài trong lần khởi động tới của &brandShortName;. Bạn có thể khởi động lại &brandShortName; ngay bây giờ, hoặc cứ tiếp tục sử dụng và khởi động lại sau.">
 
-
-<!ENTITY  update.details.label            "Chi tiết">
-<!ENTITY  update.installedOn.label        "Cài đặt vào:">
-<!ENTITY  update.status.label             "Trạng thái:">
 
 <!ENTITY  finishedBackground.moreElevated "This update requires administrator privileges. The update will be
                                            installed the next time &brandShortName; starts. You can restart
                                            &brandShortName; now, continue working and restart later, or decline this
                                            update.">
+<!ENTITY  update.details.label            "Chi tiết">
+<!ENTITY  update.installedOn.label        "Cài đặt vào:">
+<!ENTITY  update.status.label             "Trạng thái:">
+

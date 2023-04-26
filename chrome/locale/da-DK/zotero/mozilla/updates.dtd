@@ -68,7 +68,6 @@
 <!ENTITY  finishedBackgroundPage.text     "En sikkerheds- og stabilitetsopdatering til &brandShortName; er blevet
                                            hentet og er klar til at blive installeret.">
 <!ENTITY  finishedBackground.name         "Opdatering:">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "Opdateringen vil blive installeret næste gang &brandShortName; startes. Du kan genstarte &brandShortName; nu, eller fortsætte med at bruge programmet og genstarte senere.">
 
 <!ENTITY  finishedBackground.moreElevated "Denne opdatering kræver administratorrettigheder. Opdateringen vil blive installeret næste gang &brandShortName; startes. Du kan genstarte &brandShortName; nu, fortsætte med at arbejde og genstarte senere, eller du kan afvise denne opdatering.">

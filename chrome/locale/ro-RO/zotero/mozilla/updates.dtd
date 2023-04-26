@@ -11,10 +11,6 @@
 <!ENTITY  checking.title                  "Căutare actualizări">
 <!ENTITY  updateCheck.label               "Se caută versiuni noi de &brandShortName;…">
 
-<!ENTITY  pluginupdatesfound.title        "S-au găsit actualizări pentru plugin-uri">
-<!ENTITY  pluginupdatesfound.label        "S-au găsit versiuni mai noi pentru unul sau mai multe din plugin-urile dumneavoastră.">
-<!ENTITY  pluginupdateslink.label         "Vedeți cum să vă actualizați plugin-urile.">
-
 <!ENTITY  noupdatesfound.title            "Nu s-au găsit actualizări">
 <!ENTITY  noupdatesautoenabled.intro      "Nu sunt actualizări disponibile. &brandShortName; va verifica periodic dacă există actualizări.">
 <!ENTITY  noupdatesautodisabled.intro     "Nu sunt actualizări disponibile. Încercați din nou mai târziu sau activați verificarea automată de actualizări &brandShortName;.">
@@ -24,25 +20,16 @@
 <!ENTITY  manualUpdate.space.desc         "E disponibilă o actualizare de securitate și stabilitate, dar nu aveți suficient spațiu liber să o instalați.">
 <!ENTITY  manualUpdateGetMsg.label        "Puteți obține oricând ultima versiune de &brandShortName; la:">
 
-<!ENTITY  incompatibleCheck.title         "Verificare compatibilitate suplimente">
-<!ENTITY  incompatibleCheck.label         "Se caută versiuni noi pentru suplimentele dumneavoastră…">
+<!ENTITY  unsupported.title               "System Unsupported">
+<!ENTITY  unsupported.label               "Your &brandShortName; is out of date, but the latest version is not
+                                           supported on your system. Please upgrade your system, then try again.
+                                           You will not see this notice again, but you can">
+<!ENTITY  unsupportedLink.label           "learn more.">
 
 <!ENTITY  clickHere.label                 "Mai multe informații despre această actualizare">
 
 <!ENTITY  evangelism.desc                 "Vă recomandăm cu tărie să instalați această 
                                            actualizare de &brandShortName; cât mai curând.">
-
-<!ENTITY  license.instructions            "Dacă sunteți de acord cu termenii din acest acord, apăsați „Sunt de acord” pentru a continua instalarea actualizării.">
-
-<!ENTITY  license.titleText               "Acord de licențiere software">
-<!ENTITY  license.introText               "Termeni și condiții pentru folosirea acestui program.">
-<!ENTITY  license.instructionText         "Vă rugăm citiți următorul acord de licențiere. Folosiți bara de derulare pentru a vedea restul acestui acord.">
-<!ENTITY  license.accept                  "Accept termenii acordului de licențiere">
-<!ENTITY  license.accept.accesskey        "A">
-<!ENTITY  license.decline                 "NU accept termenii acordului de licențiere">
-<!ENTITY  license.decline.accesskey       "N">
-
-<!ENTITY  incompatibleList.title          "S-au găsit suplimente incompatibile">
 
 <!ENTITY  downloadPage.title              "Se descarcă &brandShortName;">
 <!ENTITY  downloading.intro               "Se descarcă actualizarea...">
@@ -72,13 +59,13 @@
 <!ENTITY  finishedBackgroundPage.text     "S-a descărcat o actualizare de securitate și stabilitate pentru
                                            &brandShortName;.">
 <!ENTITY  finishedBackground.name         "Actualizare:">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "Actualizarea va fi instalată la următoarea pornire a &brandShortName;. Puteți
                                            reporni &brandShortName; acum sau vă puteți continua sesiunea și să reporniți mai târziu.">
 
-<!ENTITY  installed.title                 "Actualizare instalată">
-<!ENTITY  installed.intro                 "Actualizarea a fost instalată cu succes.">
-<!ENTITY  whatsnew.label                  "Citiți mai multe despre ce e nou...">
+<!ENTITY  finishedBackground.moreElevated "This update requires administrator privileges. The update will be
+                                           installed the next time &brandShortName; starts. You can restart
+                                           &brandShortName; now, continue working and restart later, or decline this
+                                           update.">
 
 <!ENTITY  update.details.label            "Detalii">
 <!ENTITY  update.installedOn.label        "Instalat în:">

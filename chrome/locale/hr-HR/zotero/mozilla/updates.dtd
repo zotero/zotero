@@ -49,7 +49,6 @@
 
 <!ENTITY  finishedBackgroundPage.text     "Dopuna s pobojšanjima za sigurnost i stabilnost za &brandShortName; je preuzeta i može se instalirati.">
 <!ENTITY  finishedBackground.name         "Dopuna:">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "Dopuna će biti instalirana sljedeći put kada se &brandShortName; pokrene. Možete ponovo pokrenuti &brandShortName; sad ili ga nastaviti koristiti i ponovo pokrenuti kasnije.">
 <!ENTITY  finishedBackground.moreElevated "Ova nadogradnja zahtjeva administratorske ovlasti. Nadogradnja će biti instalirana prilikom sljedećeg &brandShortName; pokretanja. Možete ponovno pokrenuti &brandShortName; sada, nastaviti raditi i ponovno pokrenuti kasnije ili odustati od nadogradnje.">
 

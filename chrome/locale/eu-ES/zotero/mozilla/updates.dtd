@@ -49,7 +49,6 @@
 
 <!ENTITY  finishedBackgroundPage.text     "&brandShortName;(r)en segurtasun- eta egonkortasun-eguneraketa bat deskargatu da eta instalatzeko prest dago.">
 <!ENTITY  finishedBackground.name         "Eguneraketa:">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "Eguneraketa &brandShortName; abiarazten den hurrengo aldian ezarriko da. &brandShortName; orain berrabiarazi edo lanean jarraitu eta geroago berrabiaraz dezakezu.">
 <!ENTITY  finishedBackground.moreElevated "Eguneraketa honek kudeatzaile-baimenak behar ditu. &brandShortName; abiatzen den hurrengo aldian instalatuko da eguneraketa. &brandShortName; orain berrabiarazi, lanean jarraitu eta geroago berrabiarazi edo eguneraketa hau uka dezakezu.">
 

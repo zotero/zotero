@@ -49,7 +49,6 @@
 
 <!ENTITY  finishedBackgroundPage.text     "انتهى تنزيل تحديث أمن وثبات ل‍ &brandShortName; وهو جاهز للتثبيت.">
 <!ENTITY  finishedBackground.name         "تحديث:">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "سوف يُثبّت التحديث في المرة المقبلة التي يبدأ &brandShortName; فيها. يمكنك إعادة تشغيل &brandShortName; الآن، أو متابعة العمل وإعادة تشغيله لاحقًا.">
 <!ENTITY  finishedBackground.moreElevated "يتطلب هذا التحديث صلاحيات مدير النظام. سيُثبّت التحديث في المرة القادمة التي يُشغّل فيها &brandShortName;. يمكنك إعادة تشغيل &brandShortName; الآن، أو مواصلة العمل و إعادة التشغيل لاحقًا، أو رفض هذا التحديث.">
 

@@ -1,3 +1,4 @@
+<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  updateWizard.title              "Mise à jour du logiciel">
 
 <!ENTITY  checking.title                  "Recherche de mises à jour">
@@ -55,7 +56,6 @@
                                            téléchargée et est prête à être installée.">
 
 <!ENTITY  finishedBackground.name         "Mise à jour :">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "La mise à jour sera installée au prochain démarrage de &brandShortName;. Vous pouvez
                                            redémarrer &brandShortName; maintenant, ou continuer votre travail et redémarrer plus tard.">
 

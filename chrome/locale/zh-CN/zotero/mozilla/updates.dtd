@@ -49,7 +49,6 @@
 
 <!ENTITY  finishedBackgroundPage.text     "已下载一个 &brandShortName; 的安全、稳定性更新，现在就可以安装。">
 <!ENTITY  finishedBackground.name         "更新：">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "此更新将在下次 &brandShortName; 启动时自动安装。您可以立即重启 &brandShortName;，或者继续工作稍后再重新启动。">
 <!ENTITY  finishedBackground.moreElevated "此更新需要管理员权限。此更新将在下次 &brandShortName; 启动时安装。您可以立即重启 &brandShortName;，也可以继续工作并在稍后重启，或者拒绝此次更新。">
 
