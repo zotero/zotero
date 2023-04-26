@@ -49,7 +49,6 @@
 
 <!ENTITY  finishedBackgroundPage.text     "បច្ចុប្បន្នភាព​សុវត្ថិភាព និង​ស្ថិរភាព​សម្រាប់ &brandShortName; ត្រូវ​បាន​ ទាញ​យក និង​ត្រៀម​ជាស្រេច​ក្នុង​ការ​ដំឡើង ។">
 <!ENTITY  finishedBackground.name         "​បច្ចុប្បន្នភាព ៖">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "បច្ចុប្បន្នភាព​នឹង​ត្រូវ​បាន​ដំឡើង​ នៅ​ពេល​ដែល &brandShortName; ចាប់ផ្ដើម​ឡើងវិញ​​ពេល​ក្រោយ ។ អ្នក ​អាច​ចាប់ផ្ដើម &brandShortName; ឡើងវិញ​ឥឡូវនេះ​ ឬ​បន្ត​ធ្វើ​ការ រួច​ចាប់ផ្ដើម​ឡើងវិញ​ពេលក្រោយ ។">
 <!ENTITY  finishedBackground.moreElevated "ការ​ធ្វើ​បន្ទាន់​សម័យនេះ​ទាម​ទារ​សិទ្ធិ​ជា​អ្នក​គ្រប់គ្រង។ ការ​បន្ទាន់​សម័យ​នឹង​ត្រូវ​ដំឡើង​នៅ​ពេល &brandShortName; ចាប់​ផ្ដើម។ អ្នក​អាច​ចាប់ផ្ដើម​ &brandShortName; ឡើង​វិញ​ឥឡូវ បន្ដ​ធ្វើ​ការ​​រួច​ចាប់ផ្ដើម​ម្ដងទៀត​ពេល​ក្រោយ ឬ បដិសេធន៍​ការ​បន្ទាន់​សម័យ​នេះ។">
 

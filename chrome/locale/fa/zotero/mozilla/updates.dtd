@@ -49,7 +49,6 @@
 
 <!ENTITY  finishedBackgroundPage.text     "یک بروزرسانی امنیتی و پایداری برای &brandShortName; بارگیری شده و آمادهٔ نصب است.">
 <!ENTITY  finishedBackground.name         "بروزرسانی:">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "این بروزرسانی دفعهٔ بعدی که &brandShortName; شروع به کار کند نصب خواهد شد. می‌توانید هم‌اکنون &brandShortName; را راه‌اندازی مجدد کنید، یا به کارتان ادامه داده و این کار را بعداً انجام دهید.">
 <!ENTITY  finishedBackground.moreElevated "این بروزرسانی نیاز به دسترسی مدیریت دارد. بروزرسانی هنگام راه‌اندازی بعدی &brandShortName; نصب خواهد شد. شما می‌تواند &brandShortName; را هم‌اکنون دوباره راه‌اندازی کنید، ادامه دهید و بعدا دوباره راه‌اندازی کنید، یا این بروزرسانی را نادیده بگیرید.">
 

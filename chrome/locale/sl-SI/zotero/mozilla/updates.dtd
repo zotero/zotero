@@ -63,7 +63,6 @@
 <!ENTITY  finishedBackgroundPage.text     "Varnostna posodobitev za &brandShortName; je bila prenesena
                                            in je na voljo za namestitev.">
 <!ENTITY  finishedBackground.name         "Posodobitev:">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "Posodobitev bo nameščena, ko boste naslednjič zagnali &brandShortName;. To lahko 
                                            storite zdaj ali nadaljujete z delom in ga ponovno zaženete pozneje.">
 <!ENTITY  finishedBackground.moreElevated "Ta posodobitev zahteva skrbniška dovoljenja. Posodobitev bo

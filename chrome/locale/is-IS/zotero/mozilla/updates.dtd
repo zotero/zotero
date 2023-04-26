@@ -49,7 +49,6 @@
 
 <!ENTITY  finishedBackgroundPage.text     "Búið er að hala niður öryggis- og stöðugleikauppfærslu fyrir &brandShortName; og er hún tilbúinn fyrir uppsetningu.">
 <!ENTITY  finishedBackground.name         "Uppfærsla:">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "Uppfærslan verður sett inn í næsta skipti sem &brandShortName; verður endurræstur. Þú getur endurræst &brandShortName; núna, eða haldið áfram að vinna og endurræst seinna.">
 <!ENTITY  finishedBackground.moreElevated "Þessi uppfærsla þarfnast kerfisstjóraréttinda. Uppfærslan verður sett inn í næsta skipti sem þú ræsir upp &brandShortName;. Þú getur endurræst &brandShortName; núna, haldið áfram að vinna og endurræst seinna, eða hafnað þessari uppfærslu.">
 

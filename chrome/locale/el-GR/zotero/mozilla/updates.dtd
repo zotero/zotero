@@ -68,7 +68,6 @@
 <!ENTITY  finishedBackgroundPage.text     "Έγινε λήψη μιας ενημέρωσης σταθερότητας και ασφάλειας για τον &brandShortName;
                                            και είναι έτοιμη για εγκατάσταση.">
 <!ENTITY  finishedBackground.name         "Ενημέρωση:">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "Η ενημέρωση θα εγκατασταθεί στην επόμενη εκκίνηση του &brandShortName;. Μπορείτε
                                             να επανεκκινήσετε τον &brandShortName; τώρα, ή να συνεχίσετε και τον επανεκκινήσετε αργότερα.">
 <!ENTITY  finishedBackground.moreElevated "Η ενημέρωση απαιτεί δικαιώματα διαχειριστή. Η ενημέρωση

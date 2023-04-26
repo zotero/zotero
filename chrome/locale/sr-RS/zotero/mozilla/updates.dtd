@@ -68,7 +68,6 @@
 <!ENTITY  finishedBackgroundPage.text     "Надоградња за безбедност и стабилност за &brandShortName; је преузета
                                            и спремна је за инсталацију.">
 <!ENTITY  finishedBackground.name         "Надоградња:">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "Надоградња ће бити инсталирана при наредном покретању програма &brandShortName;. Можете 
                                            да одмах поново покренете &brandShortName; или да наставите са радом и то урадите касније.">
 <!ENTITY  finishedBackground.moreElevated "Ова надоградња захтева привилегије администратора. Надоградња ће бити

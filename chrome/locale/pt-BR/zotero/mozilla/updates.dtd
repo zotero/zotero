@@ -68,7 +68,6 @@ pode reiniciar agora o &brandShortName; ou deixar pra depois.">
 <!ENTITY  finishedBackgroundPage.text     "Uma atualização de segurança e estabilidade do &brandShortName; foi 
 baixada e está pronta para ser instalada.">
 <!ENTITY  finishedBackground.name         "Atualização:">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "A atualização será instalada na próxima vez que o &brandShortName; iniciar. Você 
 pode reiniciar agora o &brandShortName; ou deixar pra depois.">
 <!ENTITY  finishedBackground.moreElevated "Esta atualização requer privilégios de administrador. A atualização será

@@ -69,7 +69,6 @@
 <!ENTITY  finishedBackgroundPage.text     "&brandShortName; práve dokončil preberanie bezpečnostnej a stabilizačnej
                                            aktualizácie, ktorá je teraz pripravená na inštaláciu.">
 <!ENTITY  finishedBackground.name         "Aktualizácia:">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "Táto aktualizácia bude nainštalovaná pri najbližšom spustení aplikácie
                                            &brandShortName;. Aplikáciu &brandShortName; môžete reštartovať teraz, alebo
                                            pokračujte v práci a reštartujte neskôr.">

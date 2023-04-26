@@ -49,7 +49,6 @@
 
 <!ENTITY  finishedBackgroundPage.text     "S'ha baixat una actualització de seguretat i estabilitat del &brandShortName; i està preparada per poder instal·lar-la.">
 <!ENTITY  finishedBackground.name         "Actualització:">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "L'actualització s'instal·larà la propera vegada que s'iniciï el &brandShortName;. Podeu reiniciar el &brandShortName; ara, o continuar treballant i reiniciar-lo més endavant.">
 <!ENTITY  finishedBackground.moreElevated "Aquesta actualització requereix privilegis d'administrador. L'actualització s'instal·larà la propera vegada que s'iniciï el &brandShortName;. Podeu reiniciar el &brandShortName; ara, continuar treballant i reiniciar-lo més endavant, o bé rebutjar aquesta actualització.">
 

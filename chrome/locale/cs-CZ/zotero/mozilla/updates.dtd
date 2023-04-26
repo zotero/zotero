@@ -51,7 +51,6 @@
 
 <!ENTITY  finishedBackgroundPage.text     "Bezpečnostní a výkonnostní aktualizace aplikace &brandShortName; byla stažena a je připraven instalaci.">
 <!ENTITY  finishedBackground.name         "Aktualizace:">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY  finishedBackground.more         "Aktualizace bude nainstalována při příštím startu aplikace &brandShortName;. Nyní můžete aplikaci &brandShortName; restartovat nebo pokračovat v práci a restartovat ji později.">
 <!ENTITY  finishedBackground.moreElevated "Tato aktualizace vyžaduje oprávnění administrátora. Aktualizace bude nainstalována při příštím spuštění aplikace &brandShortName;. Aplikaci můžete restartovat nyní, pokračovat v práci a restartovat později, nebo tuto aktualizaci zcela zrušit.">
 

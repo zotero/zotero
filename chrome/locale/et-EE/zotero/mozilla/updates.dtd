@@ -67,7 +67,6 @@
 <!ENTITY finishedBackgroundPage.text     "&brandShortName;ile on alla laaditud turvalisuse ja stabiilsuse uuendus ning see on
                                            paigaldamiseks valmis.">
 <!ENTITY finishedBackground.name         "Uuendus:">
-<!-- LOCALIZATION NOTE (finishedBackground.more): This string describes the button labels defined by restartNowButton and restartLaterButton in updates.properties. -->
 <!ENTITY finishedBackground.more         "Uuendus paigaldatakse järgmisel &brandShortName;i käivitumisel. Sa võid
                                           taaskäivitada &brandShortName;i kohe või jätkata tööd ning taaskäivitada hiljem.">
 <!ENTITY finishedBackground.moreElevated "See uuendus nõuab süsteemiadministraatori õigusi. Uuendus paigaldatakse
