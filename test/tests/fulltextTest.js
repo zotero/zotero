@@ -1,4 +1,4 @@
-describe("Zotero.Fulltext", function () {
+describe("Zotero.FullText", function () {
 	var win;
 	
 	before(function* () {
