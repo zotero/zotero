@@ -57,7 +57,7 @@
 		
 		connectedCallback() {
 			this._destroyed = false;
-			window.addEventListener("unload", this.destroy);
+			window.addEventListener("unload", () => this.destroy(), { once: true });
 
 			MozXULElement.insertFTLIfNeeded('toolkit/global/textActions.ftl');
 			document.l10n.connectRoot(this);
@@ -95,7 +95,6 @@
 			if (this._destroyed) {
 				return;
 			}
-			window.removeEventListener("unload", this.destroy);
 			this._destroyed = true;
 			
 			Zotero.Notifier.unregisterObserver(this._notifierID);
@@ -364,7 +363,7 @@
 
 		connectedCallback() {
 			this._destroyed = false;
-			window.addEventListener("unload", this.destroy);
+			window.addEventListener("unload", () => this.destroy(), { once: true });
 
 			this.append(document.importNode(this.content, true));
 
@@ -377,7 +376,6 @@
 			if (this._destroyed) {
 				return;
 			}
-			window.removeEventListener("unload", this.destroy);
 			this._destroyed = true;
 		}
 
