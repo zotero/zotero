@@ -17,9 +17,9 @@ function makePath {
 
 if [ -z "$Z_EXECUTABLE" ]; then
 	if [ "`uname`" == "Darwin" ]; then
-		Z_EXECUTABLE="$( dirname "$ROOT_DIR" )/zotero-standalone-build/staging/Zotero.app/Contents/MacOS/zotero"
+		Z_EXECUTABLE="$ROOT_DIR/app/staging/Zotero.app/Contents/MacOS/zotero"
 	else
-		Z_EXECUTABLE="$( dirname "$ROOT_DIR" )/zotero-standalone-build/staging/Zotero-x86_64/zotero"
+		Z_EXECUTABLE="$ROOT_DIR/app/staging/Zotero-x86_64/zotero"
 	fi
 fi
 
@@ -185,7 +185,7 @@ if [[ -z "$CI" ]] && ! ps | grep scripts/build.js | grep -v grep > /dev/null; th
 	echo
 fi
 
-ZOTERO_INCLUDE_TESTS=1 $( dirname "$ROOT_DIR" )/zotero-standalone-build/scripts/dir_build -q
+ZOTERO_INCLUDE_TESTS=1 "$ROOT_DIR/app/scripts/dir_build" -q
 
 makePath FX_PROFILE "$PROFILE"
 MOZ_NO_REMOTE=1 NO_EM_RESTART=1 "$Z_EXECUTABLE" -profile "$FX_PROFILE" -jsconsole \
