@@ -205,7 +205,8 @@ prefs_file=defaults/preferences/zotero.js
 #
 # - network.captive-portal-service.enabled
 #       Disable the captive portal check against Mozilla servers
-egrep -v '(network.captive-portal-service.enabled)' defaults/preferences/firefox.js > $prefs_file
+# - extensions.systemAddon.update.url
+egrep -v '(network.captive-portal-service.enabled|extensions.systemAddon.update.url)' defaults/preferences/firefox.js > $prefs_file
 rm defaults/preferences/firefox.js
 
 # Combine app and "extension" Zotero prefs

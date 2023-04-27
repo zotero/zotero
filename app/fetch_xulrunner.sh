@@ -127,6 +127,7 @@ function modify_omni {
 	replace_line 'pref\("network.connectivity-service.enabled".+' 'pref("network.connectivity-service.enabled", false);' greprefs.js
 	replace_line 'pref\("toolkit.telemetry.server".+' 'pref("toolkit.telemetry.server", "");' greprefs.js
 	replace_line 'pref\("toolkit.telemetry.unified".+' 'pref("toolkit.telemetry.unified", false);' greprefs.js
+	replace_line 'pref\("media.gmp-manager.url".+' 'pref("media.gmp-manager.url", "");' greprefs.js
 	
 	#  
 	#  # Disable transaction timeout
