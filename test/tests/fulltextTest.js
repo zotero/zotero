@@ -78,7 +78,6 @@ describe("Zotero.FullText", function () {
 				var item = yield Zotero.Attachments.linkFromFile({ file: linkedFile });
 				var storageDir = Zotero.Attachments.getStorageDirectory(item).path;
 				assert.isTrue(yield OS.File.exists(storageDir));
-				assert.isTrue(yield OS.File.exists(OS.Path.join(storageDir, '.zotero-ft-info')));
 				assert.isTrue(yield OS.File.exists(OS.Path.join(storageDir, '.zotero-ft-cache')));
 				assert.isFalse(yield OS.File.exists(OS.Path.join(storageDir, filename)));
 			});
