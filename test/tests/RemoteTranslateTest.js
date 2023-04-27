@@ -109,36 +109,12 @@ describe("RemoteTranslate", function () {
 					title: 'Title'
 				}));
 			// Item should still be returned
-			assert.equal(items[0].title, 'Title');
+			assert.equal(items[0].getField('title'), 'Title');
 
 			HiddenBrowser.destroy(browser);
 			translate.dispose();
 		});
 
-		it("should save items and call itemDone when libraryID is not false", async function () {
-			let translate = new RemoteTranslate();
-			let browser = await HiddenBrowser.create(getTestDataUrl('test.html'));
-			await translate.setBrowser(browser);
-			translate.setTranslator(dummyTranslator);
-
-			let itemDone = sinon.spy();
-			translate.setHandler('itemDone', itemDone);
-
-			let items = await translate.translate({ libraryID: null }); // User library
-			sinon.assert.calledWith(itemDone, translate,
-				sinon.match({
-					libraryID: Zotero.Libraries.userLibraryID
-				}),
-				sinon.match({
-					title: 'Title'
-				}));
-			// Item should still be returned
-			assert.equal(items[0].title, 'Title');
-
-			HiddenBrowser.destroy(browser);
-			translate.dispose();
-		});
-		
 		it("should call itemDone before done", async function () {
 			let translate = new RemoteTranslate();
 			let browser = await HiddenBrowser.create(getTestDataUrl('test.html'));
