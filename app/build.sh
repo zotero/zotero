@@ -323,6 +323,7 @@ elif [ $BUILD_LINUX == 1 ]; then
 fi
 
 # Add word processor plug-ins
+echo >> chrome.manifest
 if [ $BUILD_MAC == 1 ]; then
 	pluginDir="$CALLDIR/modules/zotero-word-for-mac-integration"
 	mkdir -p "integration/word-for-mac"
@@ -336,6 +337,9 @@ if [ $BUILD_MAC == 1 ]; then
 	echo >> $prefs_file
 	cat "$CALLDIR/modules/zotero-word-for-mac-integration/defaults/preferences/zoteroMacWordIntegration.js" >> $prefs_file
 	echo >> $prefs_file
+	
+	echo "manifest	integration/word-for-mac/chrome.manifest" >> chrome.manifest
+	
 elif [ $BUILD_WIN == 1 ]; then
 	pluginDir="$CALLDIR/modules/zotero-word-for-windows-integration"
 	mkdir -p "integration/word-for-windows"
@@ -349,6 +353,8 @@ elif [ $BUILD_WIN == 1 ]; then
 	echo >> $prefs_file
 	cat "$CALLDIR/modules/zotero-word-for-windows-integration/defaults/preferences/zoteroWinWordIntegration.js" >> $prefs_file
 	echo >> $prefs_file
+	
+	echo "manifest	integration/word-for-windows/chrome.manifest" >> chrome.manifest
 fi
 # Libreoffice plugin for all platforms
 pluginDir="$CALLDIR/modules/zotero-libreoffice-integration"
@@ -364,6 +370,8 @@ echo
 echo >> $prefs_file
 cat "$CALLDIR/modules/zotero-libreoffice-integration/defaults/preferences/zoteroLibreOfficeIntegration.js" >> $prefs_file
 echo >> $prefs_file
+
+echo "manifest	integration/libreoffice/chrome.manifest" >> chrome.manifest
 
 # Delete files that shouldn't be distributed
 find chrome -name .DS_Store -exec rm -f {} \;
