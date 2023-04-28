@@ -670,19 +670,22 @@ Zotero.TagSelector = class TagSelectorContainer extends React.PureComponent {
 	async openDeletePrompt() {
 		var promptService = Cc['@mozilla.org/embedcomp/prompt-service;1']
 			.getService(Ci.nsIPromptService);
-			
-		var confirmed = promptService.confirm(window,
-			Zotero.getString('pane.tagSelector.delete.title'),
-			Zotero.getString('pane.tagSelector.delete.message'));
-			
-		if (!confirmed) {
-			return;
-		}
-			
 		var tagID = Zotero.Tags.getID(this.contextTag.name);
-
 		if (tagID) {
-			await Zotero.Tags.removeFromLibrary(this.libraryID, tagID);
+			let count = (await Zotero.Tags.getTagItems(this.libraryID, tagID)).length;
+
+			let mod = count === 1 ? 'singular' : count === 0 ? 'none' : 'plural';
+			let messageKey = 'pane.tagSelector.delete.message.' + mod;
+
+			var confirmed = promptService.confirm(window,
+				Zotero.getString('pane.tagSelector.delete.title'),
+				Zotero.getString(messageKey,
+					[this.contextTag.name, new Intl.NumberFormat().format(count)]
+				));
+				
+			if (confirmed) {
+				await Zotero.Tags.removeFromLibrary(this.libraryID, tagID);
+			}
 		}
 		// If only a tag color setting, remove that
 		else {
