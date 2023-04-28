@@ -291,7 +291,7 @@
 	list-style-image: url('chrome://zotero/skin/toolbar-lookup.png');
 }
 
-#zotero-lookup-textbox, #zotero-lookup-multiline-textbox {
+#zotero-lookup-textbox {
 	margin: 4px;
 	padding: 2px;
 	-moz-box-flex: 1;

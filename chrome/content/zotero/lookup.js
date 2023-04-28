@@ -174,7 +174,7 @@ var Zotero_Lookup = new function () {
 		// Ignore context menu
 		if (event.originalTarget.id != 'zotero-lookup-panel') return;
 		
-		document.getElementById("zotero-lookup-multiline-textbox").value = "";
+		document.getElementById("zotero-lookup-textbox").value = "";
 		Zotero_Lookup.setShowProgress(false);
 		
 		// Revert to single-line when closing
@@ -228,7 +228,7 @@ var Zotero_Lookup = new function () {
 	
 	
 	this.setMultiline = function (on) {
-		var mlTxtBox = document.getElementById("zotero-lookup-multiline-textbox");
+		var mlTxtBox = document.getElementById("zotero-lookup-textbox");
 		var mlButtons = document.getElementById('zotero-lookup-buttons');
 
 		mlTxtBox.rows = on ? 5 : 1;
@@ -248,7 +248,7 @@ var Zotero_Lookup = new function () {
 		// In Firefox 52.6.0, progressmeters burn CPU at idle on Linux when undetermined, even
 		// if they're hidden. (Being hidden is enough on macOS.)
 		
-		document.getElementById("zotero-lookup-multiline-textbox").disabled = !!on;
+		document.getElementById("zotero-lookup-textbox").disabled = !!on;
 		var p = document.getElementById("zotero-lookup-multiline-progress");
 		if (on) {
 			p.removeAttribute('value');
