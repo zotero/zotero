@@ -348,6 +348,11 @@ function waitForCallback(cb, interval, timeout) {
 }
 
 
+async function delay(ms) {
+	return Zotero.Promise.delay(ms);
+}
+
+
 function clickOnItemsRow(win, itemsView, row) {
 	itemsView._treebox.scrollToRow(row);
 	let elem = win.document.querySelector(`#${itemsView.id}-row-${row}`);
