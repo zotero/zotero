@@ -1719,24 +1719,30 @@ Zotero.Utilities.Internal = {
 	/**
 	 * Create a libraryOrCollection DOM tree to place in <menupopup> element.
 	 * If has no children, returns a <menuitem> element, otherwise <menu>.
-	 * 
-	 * @param {Library|Collection} libraryOrCollection
+	 *
+	 * @param {Zotero.Library|Zotero.Collection} libraryOrCollection
 	 * @param {Node<menupopup>} elem Parent element
-	 * @param {Zotero.Library|Zotero.Collection} currentTarget Currently selected item (displays as checked)
-	 * @param {Function} clickAction function to execute on clicking the menuitem.
-	 * 		Receives the event and libraryOrCollection for given item.
-	 * @param {Function} disabledPred If provided, called on each library/collection
-	 * 		to determine whether disabled
-	 * 
-	 * @return {Node<menuitem>|Node<menu>} appended node
+	 * @param {String} options.initialValue The treeViewID of the initially
+	 * 		selected library or collection
+	 * @param {Function} options.onChange Function to execute when an item is
+	 * 		selected. Receives the event and libraryOrCollection for given item.
+	 * @param {Boolean} options.menusOnTopLevel If true, override default behavior
+	 * 		and create submenus for all top-level nodes, even if they don't have
+	 * 		children.
+	 * @param {Function} options.disabledPred If provided, called on each
+	 * 		library/collection to determine whether disabled.
+	 *
+	 * @return {Node<menuitem>/Node<menu>} appended node
 	 */
-	createMenuForTarget: function(libraryOrCollection, elem, currentTarget, clickAction, disabledPred) {
+	createMenuForTarget: function (libraryOrCollection, elem, options = {}) {
+		let { initialValue, onChange, menusOnTopLevel, disabledPred } = options;
 		var doc = elem.ownerDocument;
+
 		function _createMenuitem(label, value, icon, command, disabled) {
 			let menuitem = doc.createElement('menuitem');
 			menuitem.setAttribute("label", label);
 			menuitem.setAttribute("type", "checkbox");
-			if (value == currentTarget) {
+			if (value == initialValue) {
 				menuitem.setAttribute("checked", "true");
 			}
 			menuitem.setAttribute("value", value);
@@ -1744,17 +1750,17 @@ Zotero.Utilities.Internal = {
 			menuitem.setAttribute("disabled", disabled);
 			menuitem.addEventListener('command', command);
 			menuitem.classList.add('menuitem-iconic');
-			return menuitem
-		}	
+			return menuitem;
+		}
 		
-		function _createMenu(label, value, icon, command) {
+		function _createMenu(label, value, icon, command, disabled) {
 			let menu = doc.createElement('menu');
 			menu.setAttribute("label", label);
 			menu.setAttribute("value", value);
 			menu.setAttribute("image", icon);
 			// Allow click on menu itself to select a target
 			menu.addEventListener('click', (event) => {
-				if (event.target == menu) {
+				if (!disabled && event.target == menu) {
 					command(event);
 				}
 			});
@@ -1769,11 +1775,12 @@ Zotero.Utilities.Internal = {
 		// Create menuitem for library or collection itself, to be placed either directly in the
 		// containing menu or as the top item in a submenu
 		var menuitem = _createMenuitem(
-			libraryOrCollection.name, 
+			libraryOrCollection.name,
 			libraryOrCollection.treeViewID,
 			imageSrc,
-			function (event) {
-				clickAction(event, libraryOrCollection);
+			(event) => {
+				event.stopPropagation();
+				onChange(event, libraryOrCollection);
 			},
 			disabledPred && disabledPred(libraryOrCollection)
 		);
@@ -1781,14 +1788,16 @@ Zotero.Utilities.Internal = {
 		var collections;
 		if (libraryOrCollection.objectType == 'collection') {
 			collections = Zotero.Collections.getByParent(libraryOrCollection.id);
-		} else {
-			collections = Zotero.Collections.getByLibrary(libraryOrCollection.id);
+		}
+		else {
+			collections = Zotero.Collections.getByLibrary(libraryOrCollection.libraryID);
 		}
 		
-		// If no subcollections, place menuitem for target directly in containing men
-		if (collections.length == 0) {
+		// If no subcollections and caller has not specified menusOnTopLevel,
+		// place menuitem for target directly in containing menu
+		if (collections.length == 0 && !menusOnTopLevel) {
 			elem.appendChild(menuitem);
-			return menuitem
+			return menuitem;
 		}
 		
 		// Otherwise create a submenu for the target's subcollections
@@ -1796,16 +1805,36 @@ Zotero.Utilities.Internal = {
 			libraryOrCollection.name,
 			libraryOrCollection.treeViewID,
 			imageSrc,
-			function (event) {
-				clickAction(event, libraryOrCollection);
-			}
+			async (event) => {
+				if (event.target.tagName !== 'menu') return;
+				event.stopPropagation();
+
+				// Simulate menuitem flash on macOS
+				if (Zotero.isMac) {
+					event.target.setAttribute('_moz-menuactive', false);
+					await Zotero.Promise.delay(50);
+					event.target.setAttribute('_moz-menuactive', true);
+					await Zotero.Promise.delay(50);
+					event.target.setAttribute('_moz-menuactive', false);
+					await Zotero.Promise.delay(50);
+					event.target.setAttribute('_moz-menuactive', true);
+				}
+
+				let outerMenupopup = menu;
+				while ((outerMenupopup = outerMenupopup.parentElement.closest('menupopup')) !== null) {
+					outerMenupopup.hidePopup();
+				}
+
+				onChange(event, libraryOrCollection);
+			},
+			disabledPred && disabledPred(libraryOrCollection)
 		);
 		var menupopup = menu.firstChild;
 		menupopup.appendChild(menuitem);
 		menupopup.appendChild(doc.createElement('menuseparator'));
 		for (let collection of collections) {
 			let collectionMenu = this.createMenuForTarget(
-				collection, elem, currentTarget, clickAction, disabledPred
+				collection, elem, { ...options, menusOnTopLevel: false }
 			);
 			menupopup.appendChild(collectionMenu);
 		}
