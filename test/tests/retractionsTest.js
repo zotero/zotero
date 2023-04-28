@@ -275,17 +275,24 @@ describe("Retractions", function () {
 		it("should show banner when retracted item is added", async function () {
 			assert.isFalse(bannerShown());
 			await createRetractedItem();
-			assert.isTrue(bannerShown());
+			do {
+				await delay(10);
+			}
+			while (!bannerShown());
 		});
 		
 		it("should show banner when retracted item with DOI in Extra is added", async function () {
 			assert.isFalse(bannerShown());
 			await createRetractedItemWithExtraDOI();
-			assert.isTrue(bannerShown());
+			do {
+				await delay(10);
+			}
+			while (!bannerShown());
 		});
 		
 		it("shouldn't show banner when item in trash is added", async function () {
 			await createRetractedItem({ deleted: true });
+			await delay(50);
 			assert.isFalse(bannerShown());
 		});
 	});
