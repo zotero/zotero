@@ -37,6 +37,7 @@ var { renderCell } = VirtualizedTable;
 Zotero_Preferences.Sync = {
 	checkmarkChar: '\u2705',
 	noChar: '\uD83D\uDEAB',
+	syncCredentialsPromptDisplayed: false,
 	
 	init: Zotero.Promise.coroutine(function* () {
 		this.updateStorageSettingsUI();
@@ -76,6 +77,20 @@ Zotero_Preferences.Sync = {
 		}
 		
 		this.initResetPane();
+
+		if (window.arguments) {
+			let io = window.arguments[0];
+			io = io.wrappedJSObject || io;
+			if (io.action?.setUpSyncing) {
+				document.getElementById('sync-username-textbox').value
+					= io.action.setUpSyncing.username;
+				document.getElementById('sync-password').value
+					= io.action.setUpSyncing.password;
+				this.credentialsChange();
+				this.linkAccount();
+				this.syncCredentialsPromptDisplayed = true;
+			}
+		}
 	}),
 	
 	displayFields: function (username) {
@@ -872,6 +887,49 @@ Zotero_Preferences.Sync = {
 			
 			default:
 				throw new Error(`Invalid action '${action}' in handleSyncReset()`);
+		}
+	},
+
+
+	hasUnsubmittedSyncCredentials: function () {
+		if (this.syncCredentialsPromptDisplayed || Zotero.Sync.Data.Local.hasCredentials()) {
+			return false;
+		}
+
+		let username = document.getElementById('sync-username-textbox').value;
+		let password = document.getElementById('sync-password').value;
+		return !!(username && password);
+	},
+
+
+	promptToSubmitSyncCredentials: function (promptInMainWindow) {
+		let username = document.getElementById('sync-username-textbox').value;
+		let password = document.getElementById('sync-password').value;
+
+		function prompt(targetWindow) {
+			let ps = Services.prompt;
+			let ok = ps.confirm(targetWindow,
+				Zotero.getString('account.submitCredentialsPrompt.title'),
+				Zotero.getString('account.submitCredentialsPrompt', Zotero.appName)
+			);
+			if (ok) {
+				Zotero.Utilities.Internal.openPreferences('zotero-prefpane-sync', {
+					action: {
+						setUpSyncing: { username, password }
+					}
+				});
+			}
+			else if (!promptInMainWindow) {
+				window.close();
+			}
+		}
+
+		if (promptInMainWindow) {
+			let mainWindow = Zotero.getMainWindow();
+			mainWindow.setTimeout(() => prompt(mainWindow), 1000); // 1s delay so it isn't abrupt
+		}
+		else {
+			prompt(window);
 		}
 	}
 };

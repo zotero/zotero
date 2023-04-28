@@ -84,6 +84,19 @@ var Zotero_Preferences = {
 		if (Zotero_Preferences.Debug_Output) {
 			Zotero_Preferences.Debug_Output.onUnload();
 		}
+
+		if (Zotero.isMac && Zotero_Preferences.Sync.hasUnsubmittedSyncCredentials()) {
+			Zotero_Preferences.Sync.promptToSubmitSyncCredentials(true);
+		}
+	},
+
+	onDialogAccept: function () {
+		if (!Zotero.isMac && Zotero_Preferences.Sync.hasUnsubmittedSyncCredentials()) {
+			Zotero_Preferences.Sync.promptToSubmitSyncCredentials(false);
+			return false;
+		}
+
+		return true;
 	},
 	
 	openURL: function (url, windowName) {
