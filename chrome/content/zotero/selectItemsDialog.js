@@ -28,6 +28,7 @@ import ItemTree from 'zotero/itemTree';
 
 var itemsView;
 var collectionsView;
+var loaded;
 var io;
 const isEditBibliographyDialog = !!document.querySelector('#zotero-edit-bibliography-dialog');
 const isAddEditItemsDialog = !!document.querySelector('#zotero-add-citation-dialog');
@@ -81,6 +82,9 @@ var doLoad = async function () {
 	Zotero.updateQuickSearchBox(document);
 
 	document.addEventListener('dialogaccept', doAccept);
+	
+	// Used in tests
+	loaded = true;
 };
 
 function doUnload()

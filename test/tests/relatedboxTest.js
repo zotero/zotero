@@ -31,9 +31,9 @@ describe("Related Box", function () {
 		do {
 			await Zotero.Promise.delay(50);
 		}
-		while (!relatedbox.id('relatedRows').childNodes.length);
+		while (!relatedbox._id('related-grid').childNodes.length);
 		
-		assert.include(doc.getAnonymousNodes(relatedbox)[0].innerHTML, title1);
+		assert.include(relatedbox._id('related-grid').innerHTML, title1);
 		
 		title1 = 'cccccc';
 		item1.setField('title', title1);
@@ -43,7 +43,7 @@ describe("Related Box", function () {
 		do {
 			await Zotero.Promise.delay(50);
 		}
-		while (!doc.getAnonymousNodes(relatedbox)[0].innerHTML.includes(title1));
+		while (!relatedbox._id('related-grid').innerHTML.includes(title1));
 	});
 	
 	it("should update if a related item is deleted", async function () {
@@ -65,9 +65,9 @@ describe("Related Box", function () {
 		do {
 			await Zotero.Promise.delay(50);
 		}
-		while (!relatedbox.id('relatedRows').childNodes.length);
+		while (!relatedbox._id('related-grid').childNodes.length);
 		
-		assert.include(doc.getAnonymousNodes(relatedbox)[0].innerHTML, title1);
+		assert.include(relatedbox._id('related-grid').innerHTML, title1);
 		
 		await item1.eraseTx();
 		
@@ -75,7 +75,7 @@ describe("Related Box", function () {
 		do {
 			await Zotero.Promise.delay(50);
 		}
-		while (doc.getAnonymousNodes(relatedbox)[0].innerHTML.includes(title1));
+		while (relatedbox._id('related-grid').innerHTML.includes(title1));
 	});
 	
 	describe("Add button", function () {
@@ -87,35 +87,33 @@ describe("Related Box", function () {
 			var tabbox = doc.getElementById('zotero-view-tabbox');
 			tabbox.selectedIndex = 3;
 			var relatedbox = doc.getElementById('zotero-editpane-related');
-			assert.lengthOf(relatedbox.id('relatedRows').childNodes, 0);
+			assert.lengthOf(relatedbox.querySelectorAll('#related-grid div'), 0);
 			
 			// Click the Add button to open the Select Items dialog
 			setTimeout(function () {
-				relatedbox.id('addButton').click();
+				relatedbox._id('related-add').click();
 			});
-			var selectWin = yield waitForWindow('chrome://zotero/content/selectItemsDialog.xul');
-			// wrappedJSObject isn't working on zotero-collections-tree for some reason, so
-			// just wait for the items tree to be created and select it directly
+			var selectWin = yield waitForWindow('chrome://zotero/content/selectItemsDialog.xhtml');
 			do {
-				var selectItemsView = selectWin.itemsView;
-				var selectCollectionsView = selectWin.collectionsView;
 				yield Zotero.Promise.delay(50);
 			}
-			while (!selectItemsView || !selectCollectionsView);
+			while (!selectWin.loaded);
+			var selectCollectionsView = selectWin.collectionsView;
+			var selectItemsView = selectWin.itemsView;
 			yield selectCollectionsView.waitForLoad();
 			yield selectItemsView.waitForLoad();
 			
 			// Select the other item
 			yield selectItemsView.selectItem(item1.id);
-			selectWin.document.documentElement.acceptDialog();
+			selectWin.document.querySelector('dialog').acceptDialog();
 			
 			// Wait for relations list to populate
 			do {
 				yield Zotero.Promise.delay(50);
 			}
-			while (!relatedbox.id('relatedRows').childNodes.length);
+			while (!relatedbox.querySelectorAll('#related-grid div').length);
 			
-			assert.lengthOf(relatedbox.id('relatedRows').childNodes, 1);
+			assert.lengthOf(relatedbox.querySelectorAll('#related-grid div'), 1);
 			
 			var items = item1.relatedItems;
 			assert.lengthOf(items, 1);
@@ -147,17 +145,15 @@ describe("Related Box", function () {
 			do {
 				yield Zotero.Promise.delay(50);
 			}
-			while (!relatedbox.id('relatedRows').childNodes.length);
+			while (!relatedbox.querySelectorAll('#related-grid div').length);
 			
-			doc.getAnonymousNodes(relatedbox)[0]
-				.getElementsByAttribute('value', '-')[0]
-				.click();
+			relatedbox.querySelector('.zotero-clicky-minus').click();
 			
 			// Wait for relations list to clear
 			do {
 				yield Zotero.Promise.delay(50);
 			}
-			while (relatedbox.id('relatedRows').childNodes.length);
+			while (relatedbox.querySelectorAll('#related-grid div').length);
 		})
 	})
 })
