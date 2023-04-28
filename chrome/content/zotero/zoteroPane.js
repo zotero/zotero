@@ -3913,9 +3913,15 @@ var ZoteroPane = new function()
 			ZoteroPane.viewItems([items[0]], event);
 		}
 		// Keyboard event
-		else if (items.length < 20) {
+		else if (items.length <= 20 || this.confirmViewingItems(Zotero.getString('locate.confirm.genericAction'), items.length)) {
 			ZoteroPane_Local.viewItems(items, event);
 		}
+	};
+
+
+	this.confirmViewingItems = function (actionLabel, count) {
+		let ps = Services.prompt;
+		return ps.confirm(window, actionLabel, Zotero.getString('locate.confirm', [count]));
 	};
 	
 	
