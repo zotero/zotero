@@ -62,7 +62,7 @@ describe("Item pane", function () {
 		});
 		
 		
-		it("shouldn't show Swap Names menu for single-field mode", function* () {
+		it("shouldn't show Swap Names option for single-field mode", async function () {
 			var item = new Zotero.Item('book');
 			item.setCreators([
 				{
@@ -70,11 +70,15 @@ describe("Item pane", function () {
 					creatorType: "author"
 				}
 			]);
-			yield item.saveTx();
+			await item.saveTx();
 			
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var label = itemBox.querySelector('[fieldname="creator-0-lastName"]');
-			assert.isNull(label.parentNode.oncontextmenu, null);
+			var label = itemBox.querySelector('[fieldname="creator-0-lastName"]')
+			var firstlast = label.closest('.creator-name-box');
+			firstlast.oncontextmenu(new MouseEvent('click', { bubbles: true, button: 2 }));
+			
+			var menuitem = doc.getElementById('creator-transform-swap-names');
+			assert.isTrue(menuitem.hidden);
 		});
 		
 		
@@ -144,11 +148,11 @@ describe("Item pane", function () {
 			
 			let itemBox = doc.getElementById('zotero-editpane-item-box');
 
-			itemBox.querySelector('label[fieldname="creator-0-lastName"]').click();
-			itemBox.hideEditor(itemBox.querySelector('textbox[fieldname="creator-0-lastName"]'));
+			itemBox.querySelector('div[fieldname="creator-0-lastName"]').click();
+			itemBox.hideEditor(itemBox.querySelector('input[fieldname="creator-0-lastName"]'));
 			
 			assert.equal(
-				itemBox.querySelector('label[fieldname="creator-0-lastName"]').getAttribute('fieldMode'),
+				itemBox.querySelector('div[fieldname="creator-0-lastName"]').getAttribute('fieldMode'),
 				'1'
 			);
 		});
@@ -177,8 +181,7 @@ describe("Item pane", function () {
 			
 			var tabs = doc.getElementById('zotero-editpane-tabs');
 			var notesTab = doc.getElementById('zotero-editpane-notes-tab');
-			var noteRows = doc.getElementById('zotero-editpane-notes');
-			var grid = noteRows.shadowRoot.getElementById('grid');
+			var grid = doc.querySelector('#zotero-editpane-notes #notes-grid');
 			tabs.selectedItem = notesTab;
 			// Wait for note list to update
 			do {
@@ -218,8 +221,7 @@ describe("Item pane", function () {
 			
 			var tabs = doc.getElementById('zotero-editpane-tabs');
 			var notesTab = doc.getElementById('zotero-editpane-notes-tab');
-			var noteRows = doc.getElementById('zotero-editpane-notes');
-			var grid = noteRows.shadowRoot.getElementById('grid');
+			var grid = doc.querySelector('#zotero-editpane-notes #notes-grid');
 			tabs.selectedItem = notesTab;
 			// Wait for note list to update
 			do {
@@ -260,8 +262,7 @@ describe("Item pane", function () {
 			
 			var tabs = doc.getElementById('zotero-editpane-tabs');
 			var notesTab = doc.getElementById('zotero-editpane-notes-tab');
-			var noteRows = doc.getElementById('zotero-editpane-notes');
-			var grid = noteRows.shadowRoot.getElementById('grid');
+			var grid = doc.querySelector('#zotero-editpane-notes #notes-grid');
 			tabs.selectedItem = notesTab;
 			// Wait for note list to update
 			do {
