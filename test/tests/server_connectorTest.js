@@ -4,6 +4,7 @@ describe("Connector Server", function () {
 	Components.utils.import("resource://zotero-unit/httpd.js");
 	var win, connectorServerPath, testServerPath, httpd;
 	var testServerPort = 16213;
+	var snapshotHTML = "<html><head><title>Title</title><body>Body</body></html>";
 	
 	before(function* () {
 		this.timeout(20000);
@@ -24,6 +25,16 @@ describe("Connector Server", function () {
 		testServerPath = 'http://127.0.0.1:' + testServerPort;
 		httpd = new HttpServer();
 		httpd.start(testServerPort);
+		
+		httpd.registerPathHandler(
+			"/snapshot",
+			{
+				handle: function (request, response) {
+					response.setStatusLine(null, 200, "OK");
+					response.write(snapshotHTML);
+				}
+			}
+		);
 	});
 	
 	afterEach(function* () {
@@ -1409,8 +1420,8 @@ describe("Connector Server", function () {
 						"Content-Type": "application/json"
 					},
 					body: JSON.stringify({
-						url: "http://example.com",
-						html: "<html><head><title>Title</title><body>Body</body></html>"
+						url: testServerPath + '/snapshot',
+						html: snapshotHTML
 					}),
 					successCodes: false
 				}
@@ -1645,7 +1656,7 @@ describe("Connector Server", function () {
 					},
 					body: JSON.stringify({
 						sessionID,
-						url: "http://example.com",
+						url: testServerPath + '/snapshot',
 						html: "<html><head><title>Title</title><body>Body</body></html>"
 					})
 				}
@@ -1817,7 +1828,7 @@ describe("Connector Server", function () {
 					},
 					body: JSON.stringify({
 						sessionID,
-						url: "http://example.com",
+						url: testServerPath + '/snapshot',
 						html: "<html><head><title>Title</title><body>Body</body></html>"
 					})
 				}
