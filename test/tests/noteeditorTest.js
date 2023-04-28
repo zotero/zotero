@@ -26,33 +26,38 @@ describe("Note Editor", function () {
 	
 	
 	describe("Tags box", function () {
-		it("should open new row for editing if no tags", function* () {
-			var note = yield createDataObject('item', { itemType: 'note', note: "A" });
-			var noteEditor = yield waitForNoteEditor(note);
+		it("should open new row for editing if no tags", async function () {
+			var note = await createDataObject('item', { itemType: 'note', note: "A" });
+			var noteEditor = await waitForNoteEditor(note);
 			var linksBox = noteEditor._id('links-box');
-			linksBox.tagsClick();
-			var tagsBox = linksBox.id('tagsPopup').firstChild;
-			var tagRows = tagsBox.id('tagRows');
+			linksBox._tagsClickHandler();
+			await Zotero.Promise.delay(100);
+			var tagsBox = linksBox._id('tags-popup').firstChild;
+			var tagRows = tagsBox._id('rows');
+			
 			assert.equal(tagRows.childNodes.length, 1);
 			
-			linksBox.id('tagsPopup').hidePopup();
+			linksBox._id('tags-popup').hidePopup();
 		});
 		
-		it("should only open one new row for editing", function* () {
-			var note = yield createDataObject('item', { itemType: 'note', note: "B" });
-			var noteEditor = yield waitForNoteEditor(note);
+		it("should only open one new row for editing", async function () {
+			var note = await createDataObject('item', { itemType: 'note', note: "B" });
+			var noteEditor = await waitForNoteEditor(note);
 			var linksBox = noteEditor._id('links-box');
-			linksBox.tagsClick();
+			linksBox._tagsClickHandler();
+			await Zotero.Promise.delay(100);
 			// Close and reopen
-			linksBox.id('tagsPopup').hidePopup();
-			linksBox.tagsClick();
+			linksBox._id('tags-popup').hidePopup();
+			linksBox._tagsClickHandler();
+			await Zotero.Promise.delay(100);
 			
 			// Should still be only one empty row
-			var tagsBox = linksBox.id('tagsPopup').firstChild;
-			var tagRows = tagsBox.id('tagRows');
+			var tagsBox = linksBox._id('tags-popup').firstChild;
+			var tagRows = tagsBox._id('rows');
+			
 			assert.equal(tagRows.childNodes.length, 1);
 			
-			linksBox.id('tagsPopup').hidePopup();
+			linksBox._id('tags-popup').hidePopup();
 		});
 		
 		it("should show tags in alphabetical order", function* () {
@@ -66,7 +71,7 @@ describe("Note Editor", function () {
 			
 			var noteEditor = yield waitForNoteEditor(note);
 			var linksBox = noteEditor._id('links-box');
-			assert.equal(linksBox.id('tags').summary, "A, B, C");
+			assert.equal(linksBox._id('tags-value').textContent, "A, B, C");
 		});
 	});
 });
