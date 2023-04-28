@@ -1116,7 +1116,10 @@ describe("Zotero.Items", function () {
 							}
 						]
 					),
-					Zotero.getString('general.andJoiner', ['B', 'D']),
+					Zotero.getString(
+						'general.andJoiner',
+						['\u2068' + 'B' + '\u2069', '\u2068' + 'D' + '\u2069']
+					),
 					creatorType
 				);
 			}
@@ -1186,7 +1189,10 @@ describe("Zotero.Items", function () {
 							}
 						]
 					),
-					Zotero.getString('general.andJoiner', ['D', 'H']),
+					Zotero.getString(
+						'general.andJoiner',
+						['\u2068' + 'D' + '\u2069', '\u2068' + 'H' + '\u2069']
+					),
 					creatorType
 				);
 			}
