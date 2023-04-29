@@ -163,11 +163,6 @@ user_pref("extensions.zoteroWinWordIntegration.skipInstallation", true);
 user_pref("extensions.zoteroOpenOfficeIntegration.skipInstallation", true);
 EOF
 
-# -v flag on Windows makes Firefox process hang
-if [ -z $IS_CYGWIN ]; then
-	echo "`MOZ_NO_REMOTE=1 NO_EM_RESTART=1 \"$Z_EXECUTABLE\" -v`"
-fi
-
 if [ -n "$CI" ]; then
 	Z_ARGS="$Z_ARGS -ZoteroAutomatedTest -ZoteroTestTimeout 15000"
 fi
