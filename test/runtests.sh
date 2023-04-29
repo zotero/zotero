@@ -147,6 +147,8 @@ EOF
 
 if [ -n "$CI" ]; then
 	Z_ARGS="$Z_ARGS -ZoteroAutomatedTest -ZoteroTestTimeout 15000"
+else
+	Z_ARGS="$Z_ARGS -jsconsole"
 fi
 
 # Clean up on exit
@@ -165,7 +167,7 @@ fi
 ZOTERO_INCLUDE_TESTS=1 "$ROOT_DIR/app/scripts/dir_build" -q
 
 makePath FX_PROFILE "$PROFILE"
-MOZ_NO_REMOTE=1 NO_EM_RESTART=1 "$Z_EXECUTABLE" -profile "$FX_PROFILE" -jsconsole \
+MOZ_NO_REMOTE=1 NO_EM_RESTART=1 "$Z_EXECUTABLE" -profile "$FX_PROFILE" \
     -chrome chrome://zotero-unit/content/runtests.html -test "$TESTS" -grep "$GREP" -ZoteroTest $Z_ARGS
 
 # Check for success
