@@ -190,7 +190,7 @@ def main():
     
     # Clean up
     finally:
-        if os.path.exists(tmp_src_dir):
+        if 'tmp_src_dir' in locals() and os.path.exists(tmp_src_dir):
             shutil.rmtree(tmp_src_dir)
 
 
