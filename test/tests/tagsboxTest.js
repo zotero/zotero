@@ -33,13 +33,13 @@ describe("Item Tags Box", function () {
 			var tabbox = doc.getElementById('zotero-view-tabbox');
 			tabbox.selectedIndex = 2;
 			var tagsbox = doc.querySelector('tags-box');
-			var rows = tagsbox.shadowRoot.querySelectorAll('li');
+			var rows = tagsbox.querySelectorAll('li');
 			assert.equal(rows.length, 1);
 			assert.equal(rows[0].textContent, tag);
 			
 			yield Zotero.Tags.rename(Zotero.Libraries.userLibraryID, tag, newTag);
 			
-			rows = tagsbox.shadowRoot.querySelectorAll('li');
+			rows = tagsbox.querySelectorAll('li');
 			assert.equal(rows.length, 1);
 			assert.equal(rows[0].textContent, newTag);
 		})
@@ -66,7 +66,7 @@ describe("Item Tags Box", function () {
 			var tabbox = doc.getElementById('zotero-view-tabbox');
 			tabbox.selectedIndex = 2;
 			var tagsbox = doc.querySelector('tags-box');
-			var rows = tagsbox.shadowRoot.querySelectorAll('li');
+			var rows = tagsbox.querySelectorAll('li');
 			
 			// Colored tags aren't sorted first, for now
 			assert.notOk(rows[0].querySelector('label').style.color);
@@ -76,7 +76,7 @@ describe("Item Tags Box", function () {
 			
 			yield Zotero.Tags.setColor(libraryID, tag, false);
 			
-			rows = tagsbox.shadowRoot.querySelectorAll('li');
+			rows = tagsbox.querySelectorAll('li');
 			assert.notOk(rows[1].querySelector('label').style.color);
 		})
 		
@@ -97,13 +97,13 @@ describe("Item Tags Box", function () {
 			var tabbox = doc.getElementById('zotero-view-tabbox');
 			tabbox.selectedIndex = 2;
 			var tagsbox = doc.querySelector('tags-box');
-			var rows = tagsbox.shadowRoot.querySelectorAll('li');
+			var rows = tagsbox.querySelectorAll('li');
 			assert.equal(rows.length, 1);
 			assert.equal(rows[0].textContent, tag);
 			
 			yield Zotero.Tags.removeFromLibrary(Zotero.Libraries.userLibraryID, Zotero.Tags.getID(tag));
 			
-			rows = tagsbox.shadowRoot.querySelectorAll('li');
+			rows = tagsbox.querySelectorAll('li');
 			assert.equal(rows.length, 0);
 		})
 	})
