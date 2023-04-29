@@ -56,15 +56,6 @@ if [ $platform = "w" ]; then
 	which rcedit || { $FAIL_CMD; FAILED=1; echo " -- Install with scripts/fetch_rcedit"; }
 fi
 
-echo -n "Checking for PDF tools: "
-if [ $platform = "w" ]; then
-	[ -f "$ROOT_DIR/pdftools/pdftotext-win.exe" ] && ls "$ROOT_DIR/pdftools/pdftotext-win.exe" || { $FAIL_CMD; FAILED=1; }
-elif [ $platform = "m" ]; then
-	[ -f "$ROOT_DIR/pdftools/pdftotext-mac" ] && ls "$ROOT_DIR/pdftools/pdftotext-mac" || { $FAIL_CMD; FAILED=1; }
-elif [ $platform = "l" ]; then
-	[ -f "$ROOT_DIR/pdftools/pdftotext-linux-x86_64" ] && ls "$ROOT_DIR/pdftools/pdftotext-linux-x86_64" || { $FAIL_CMD; FAILED=1; }
-fi
-
 if [ $platform = "w" ]; then
 	echo
 	echo "${hdr_start}Checking Windows packaging requirements:${hdr_stop}"

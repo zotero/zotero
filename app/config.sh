@@ -12,9 +12,6 @@ custom_components_url="https://download.zotero.org/dev/"
 APP_NAME="Zotero"
 APP_ID="zotero\@zotero.org"
 
-PDF_TOOLS_VERSION="0.0.5"
-PDF_TOOLS_URL="https://zotero-download.s3.amazonaws.com/pdftools/pdftools-$PDF_TOOLS_VERSION.tar.gz"
-
 # Whether to sign builds
 SIGN=0
 

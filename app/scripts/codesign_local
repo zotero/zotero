@@ -22,8 +22,6 @@ DEVELOPER_ID="-"
 
 entitlements_file="$ROOT_DIR/mac/entitlements.xml"
 #/usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" \
-#	"$APPDIR/Contents/MacOS/pdftotext" \
-#	"$APPDIR/Contents/MacOS/pdfinfo" \
 #	"$APPDIR/Contents/MacOS/XUL" \
 #	"$APPDIR/Contents/MacOS/updater.app/Contents/MacOS/org.mozilla.updater"
 #find "$APPDIR/Contents" -name '*.dylib' -exec /usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" {} \;

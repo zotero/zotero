@@ -122,24 +122,6 @@ makePath ZOTERO_PATH "$ROOT_DIR/build"
 # Create data directory
 mkdir "$TEMPDIR/Zotero"
 
-# Download PDF tools if not cached in the source directory and copy to profile directory
-PDF_TOOLS_VERSION="0.0.3"
-PDF_TOOLS_URL="https://zotero-download.s3.amazonaws.com/pdftools/pdftools-$PDF_TOOLS_VERSION.tar.gz"
-PDF_TOOLS_CACHE_DIR="$ROOT_DIR/tmp/pdftools"
-PDF_TOOLS_DIR="$PROFILE/pdftools"
-if [ ! -f "$PDF_TOOLS_CACHE_DIR/$PDF_TOOLS_VERSION" ]; then
-	echo "Fetching PDF tools version $PDF_TOOLS_VERSION"
-	echo
-	rm -rf "$PDF_TOOLS_CACHE_DIR"
-	mkdir -p "$PDF_TOOLS_CACHE_DIR"
-	curl -o "$PDF_TOOLS_CACHE_DIR/pdftools.tar.gz" $PDF_TOOLS_URL
-	tar -zxf "$PDF_TOOLS_CACHE_DIR/pdftools.tar.gz" -C $PDF_TOOLS_CACHE_DIR
-	rm "$PDF_TOOLS_CACHE_DIR/pdftools.tar.gz"
-	touch "$PDF_TOOLS_CACHE_DIR/$PDF_TOOLS_VERSION"
-	echo
-fi
-cp -R $PDF_TOOLS_CACHE_DIR $PDF_TOOLS_DIR
-
 touch "$PROFILE/prefs.js"
 cat <<EOF >> "$PROFILE/prefs.js"
 user_pref("app.update.enabled", false);

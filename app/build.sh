@@ -435,11 +435,6 @@ if [ $BUILD_MAC == 1 ]; then
 	cd "$CONTENTSDIR/MacOS"
 	tar -xjf "$CALLDIR/mac/updater.tar.bz2"
 
-	# Copy PDF tools and data
-	cp "$CALLDIR/pdftools/pdftotext-mac" "$CONTENTSDIR/MacOS/pdftotext"
-	cp "$CALLDIR/pdftools/pdfinfo-mac" "$CONTENTSDIR/MacOS/pdfinfo"
-	cp -R "$CALLDIR/pdftools/poppler-data" "$CONTENTSDIR/Resources/"
-
 	# Modify Info.plist
 	perl -pi -e "s/\{\{VERSION\}\}/$VERSION/" "$CONTENTSDIR/Info.plist"
 	perl -pi -e "s/\{\{VERSION_NUMERIC\}\}/$VERSION_NUMERIC/" "$CONTENTSDIR/Info.plist"
@@ -488,8 +483,6 @@ if [ $BUILD_MAC == 1 ]; then
 		# Sign app
 		entitlements_file="$CALLDIR/mac/entitlements.xml"
 		/usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" \
-			"$APPDIR/Contents/MacOS/pdftotext" \
-			"$APPDIR/Contents/MacOS/pdfinfo" \
 			"$APPDIR/Contents/MacOS/XUL" \
 			"$APPDIR/Contents/MacOS/updater.app/Contents/MacOS/org.mozilla.updater"
 		find "$APPDIR/Contents" -name '*.dylib' -exec /usr/bin/codesign --force --options runtime --entitlements "$entitlements_file" --sign "$DEVELOPER_ID" {} \;
@@ -585,10 +578,6 @@ if [ $BUILD_WIN == 1 ]; then
 	COMMON_APPDIR="$STAGE_DIR/Zotero_common"
 	mkdir "$COMMON_APPDIR"
 	
-	# Copy PDF tools and data
-	cp "$CALLDIR/pdftools/pdftotext-win.exe" "$COMMON_APPDIR/pdftotext.exe"
-	cp "$CALLDIR/pdftools/pdfinfo-win.exe" "$COMMON_APPDIR/pdfinfo.exe"
-	
 	# Package non-arch-specific components
 	if [ $PACKAGE -eq 1 ]; then
 		# Copy installer files
@@ -601,24 +590,8 @@ if [ $BUILD_WIN == 1 ]; then
 		cp "$CALLDIR/win/updater.exe" "$COMMON_APPDIR"
 		cat "$CALLDIR/win/installer/updater_append.ini" >> "$COMMON_APPDIR/updater.ini"
 		
-		# Sign PDF tools and updater
+		# Sign updater
 		if [ $SIGN -eq 1 ]; then
-			"`cygpath -u \"$SIGNTOOL\"`" \
-				sign /n "$SIGNTOOL_CERT_SUBJECT" \
-				/d "$SIGNATURE_DESC PDF Converter" \
-				/fd SHA256 \
-				/tr "$SIGNTOOL_TIMESTAMP_SERVER" \
-				/td SHA256 \
-				"`cygpath -w \"$COMMON_APPDIR/pdftotext.exe\"`"
-			sleep $SIGNTOOL_DELAY
-			"`cygpath -u \"$SIGNTOOL\"`" \
-				sign /n "$SIGNTOOL_CERT_SUBJECT" \
-				/d "$SIGNATURE_DESC PDF Info" \
-				/fd SHA256 \
-				/tr "$SIGNTOOL_TIMESTAMP_SERVER" \
-				/td SHA256 \
-				"`cygpath -w \"$COMMON_APPDIR/pdfinfo.exe\"`"
-			sleep $SIGNTOOL_DELAY
 			"`cygpath -u \"$SIGNTOOL\"`" \
 				sign /n "$SIGNTOOL_CERT_SUBJECT" \
 				/d "$SIGNATURE_DESC Updater" \
@@ -692,9 +665,6 @@ if [ $BUILD_WIN == 1 ]; then
 		mkdir -p "$APPDIR/integration"
 		cp -RH "$CALLDIR/modules/zotero-libreoffice-integration/install" "$APPDIR/integration/libreoffice"
 		cp -RH "$CALLDIR/modules/zotero-word-for-windows-integration/install" "$APPDIR/integration/word-for-windows"
-		
-		# Copy PDF tools data
-		cp -R "$CALLDIR/pdftools/poppler-data" "$APPDIR/"
 		
 		# Delete extraneous files
 		find "$APPDIR" -depth -type d -name .git -exec rm -rf {} \;
@@ -832,11 +802,6 @@ if [ $BUILD_LINUX == 1 ]; then
 		# Use our own updater, because Mozilla's requires updates signed by Mozilla
 		cp "$CALLDIR/linux/updater-$arch" "$APPDIR"/updater
 
-		# Copy PDF tools and data
-		cp "$CALLDIR/pdftools/pdftotext-linux-$arch" "$APPDIR/pdftotext"
-		cp "$CALLDIR/pdftools/pdfinfo-linux-$arch" "$APPDIR/pdfinfo"
-		cp -R "$CALLDIR/pdftools/poppler-data" "$APPDIR/"
-		
 		# Copy app files
 		rsync -a "$base_dir/" "$APPDIR/"
 		
