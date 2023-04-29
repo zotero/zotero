@@ -36,7 +36,7 @@ describe("Zotero.File", function () {
 				OS.Path.join(getTestDataDirectory().path, "charsets", "invalid.txt")
 			);
 			assert.lengthOf(contents, 3);
-			assert.equal(contents, "A\uFFFDB");
+			assert.equal(contents, "A" + Zotero.File.REPLACEMENT_CHARACTER + "B");
 		})
 		
 		it("should respect maxLength", function* () {

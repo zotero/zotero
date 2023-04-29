@@ -38,6 +38,7 @@ Zotero.File = new function(){
 	this.getValidFileName = getValidFileName;
 	this.truncateFileName = truncateFileName;
 	
+	this.REPLACEMENT_CHARACTER = "\uFFFD";
 	
 	this.pathToFile = function (pathOrFile) {
 		try {
@@ -210,7 +211,7 @@ Zotero.File = new function(){
 	 * @param {Integer} [maxLength] Maximum length to fetch, in bytes
 	 * @return {Promise} A promise that is resolved with the contents of the file
 	 */
-	this.getContentsAsync = Zotero.Promise.coroutine(function* (source, charset, maxLength) {
+	this.getContentsAsync = async function (source, charset, maxLength) {
 		Zotero.debug("Getting contents of "
 			+ (source instanceof Components.interfaces.nsIFile
 				? source.path
@@ -243,7 +244,6 @@ Zotero.File = new function(){
 							// The stream is closed automatically when end-of-file is reached,
 							// so this throws for empty files
 							if (e.name == "NS_BASE_STREAM_CLOSED") {
-								Zotero.debug("RESOLVING2");
 								deferred.resolve("");
 							}
 							deferred.reject(e);
@@ -261,7 +261,10 @@ Zotero.File = new function(){
 						deferred.resolve(NetUtil.readInputStreamToString(
 							inputStream,
 							bytesToFetch,
-							options
+							{
+								charset,
+								replacement: this.REPLACEMENT_CHARACTER
+							}
 						));
 					}
 					catch (e) {
@@ -289,14 +292,9 @@ Zotero.File = new function(){
 		else {
 			throw new Error(`Unsupported type '${typeof source}' for source`);
 		}
-		var options = {
-			encoding: charset ? charset : "utf-8"
-		};
-		if (maxLength) {
-			options.bytes = maxLength;
-		}
-		return OS.File.read(source, options);
-	});
+		var arr = await IOUtils.read(source, { maxBytes: maxLength || undefined });
+		return new TextDecoder(charset || 'utf-8').decode(arr)
+	};
 	
 	
 	/**
