@@ -1901,7 +1901,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					}
 					*/
 					
-					window.openDialog('chrome://zotero/content/merge.xul', '', 'chrome,modal,centerscreen', io);
+					window.openDialog('chrome://zotero/content/merge.xhtml', '', 'chrome,modal,centerscreen', io);
 					
 					await Zotero.DB.executeTransaction(async function () {
 						// DEBUG: This probably needs to be updated if this starts being used

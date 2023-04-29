@@ -1,9 +1,9 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
     
-    Copyright © 2009 Center for History and New Media
-                     George Mason University, Fairfax, Virginia, USA
-                     http://zotero.org
+    Copyright © 2023 Corporation for Digital Scholarship
+                     Vienna, Virginia, USA
+                     https://www.zotero.org
     
     This file is part of Zotero.
     
@@ -35,12 +35,17 @@ var Zotero_Merge_Window = new function () {
 	var _pos = -1;
 	
 	this.init = function () {
-		_wizard = document.getElementsByTagName('wizard')[0];
-		_wizardPage = document.getElementsByTagName('wizardpage')[0];
-		_mergeGroup = document.getElementsByTagName('zoteromergegroup')[0];
+		_wizard = document.getElementById('merge-window');
+		_wizardPage = document.querySelector('wizardpage');
+		_mergeGroup = document.querySelector('merge-group');
 		
 		_wizard.setAttribute('width', Math.min(980, screen.width - 20));
 		_wizard.setAttribute('height', Math.min(718, screen.height - 30));
+		
+		_wizard.addEventListener('wizardback', this.onBack.bind(this));
+		_wizard.addEventListener('wizardnext', this.onNext.bind(this));
+		_wizard.addEventListener('wizardcancel', this.onCancel.bind(this));
+		_wizard.addEventListener('wizardfinish', this.onFinish.bind(this));
 		
 		// Set font size from pref
 		Zotero.setFontSize(_wizardPage);
@@ -91,28 +96,11 @@ var Zotero_Merge_Window = new function () {
 		
 		_updateGroup();
 		
-		var nextButton = _wizard.getButton("next");
-		
-		if (Zotero.isMac) {
-			nextButton.setAttribute("hidden", "false");
-			_wizard.getButton("finish").setAttribute("hidden", "true");
-		}
-		else {
-			var buttons = document.getAnonymousElementByAttribute(_wizard, "anonid", "Buttons");
-			var deck = document.getAnonymousElementByAttribute(buttons, "anonid", "WizardButtonDeck");
-			deck.selectedIndex = 1;
-		}
-		
-		_setInstructionsString(nextButton.label);
+		this.updateNextFinish();
 	}
 	
 	
 	this.onNext = function () {
-		// At end or resolving all
-		if (_pos + 1 == _conflicts.length || _resolveAllCheckbox.checked) {
-			return true;
-		}
-		
 		// First page
 		if (_pos == -1) {
 			_wizard.canRewind = false;
@@ -134,13 +122,7 @@ var Zotero_Merge_Window = new function () {
 		}
 		
 		_updateResolveAllCheckbox();
-		
-		if (_isLastConflict()) {
-			_showFinishButton();
-		}
-		else {
-			_showNextButton();
-		}
+		this.updateNextFinish();
 		
 		return false;
 	}
@@ -149,7 +131,7 @@ var Zotero_Merge_Window = new function () {
 	this.onFinish = function () {
 		// If using one side for all remaining, update merge object
 		if (!_isLastConflict() && _resolveAllCheckbox.checked) {
-			let side = _mergeGroup.rightpane.getAttribute("selected") == "true" ? 'right' : 'left'
+			let side = _mergeGroup.rightPane.getAttribute("selected") == "true" ? 'right' : 'left'
 			for (let i = _pos; i < _conflicts.length; i++) {
 				_merged[i] = {
 					data: _getMergeDataWithSide(i, side),
@@ -180,11 +162,14 @@ var Zotero_Merge_Window = new function () {
 	}
 	
 	
-	this.onResolveAllChange = function (resolveAll) {
-		if (resolveAll || _isLastConflict()) {
-			_showFinishButton();
+	this.updateNextFinish = function () {
+		if (_isLastConflict() || _resolveAllCheckbox.checked) {
+			// The Mozilla wizard CE checks 'next' to determine if it's on the last page
+			_wizardPage.next = '';
+			_showFinishButton()
 		}
 		else {
+			_wizardPage.next = 'page-id';
 			_showNextButton();
 		}
 	}
@@ -212,7 +197,7 @@ var Zotero_Merge_Window = new function () {
 	function _getCurrentMergeInfo() {
 		return {
 			data: _mergeGroup.merged,
-			selected: _mergeGroup.leftpane.getAttribute("selected") == "true" ? "left" : "right"
+			selected: _mergeGroup.leftPane.getAttribute("selected") == "true" ? "left" : "right"
 		};
 	}
 	
@@ -278,6 +263,7 @@ var Zotero_Merge_Window = new function () {
 			throw new Error("Side not provided");
 		}
 		
+		// If either side is deleted, nothing to merge
 		if (_conflicts[pos].left.deleted || _conflicts[pos].right.deleted) {
 			return _conflicts[pos][side];
 		}
@@ -293,7 +279,7 @@ var Zotero_Merge_Window = new function () {
 	
 	
 	function _updateResolveAllCheckbox() {
-		if (_mergeGroup.rightpane.getAttribute("selected") == 'true') {
+		if (_mergeGroup.rightPane.getAttribute("selected") == 'true') {
 			var label = 'resolveAllRemote';
 		}
 		else {
@@ -316,8 +302,7 @@ var Zotero_Merge_Window = new function () {
 			_wizard.getButton("finish").setAttribute("hidden", "true");
 		}
 		else {
-			var buttons = document.getAnonymousElementByAttribute(_wizard, "anonid", "Buttons");
-			var deck = document.getAnonymousElementByAttribute(buttons, "anonid", "WizardButtonDeck");
+			let deck = document.querySelector(".wizard-next-deck");
 			deck.selectedIndex = 1;
 		}
 		
@@ -335,8 +320,7 @@ var Zotero_Merge_Window = new function () {
 		// Windows uses a deck to switch between the Next and Finish buttons
 		// TODO: check Linux
 		else {
-			var buttons = document.getAnonymousElementByAttribute(_wizard, "anonid", "Buttons");
-			var deck = document.getAnonymousElementByAttribute(buttons, "anonid", "WizardButtonDeck");
+			let deck = document.querySelector(".wizard-next-deck");
 			deck.selectedIndex = 0;
 		}
 		

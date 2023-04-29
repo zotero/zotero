@@ -1233,16 +1233,16 @@ describe("Zotero.Sync.Data.Local", function() {
 			note.setNote("Test");
 			yield note.saveTx();
 			
-			var promise = waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+			var promise = waitForWindow('chrome://zotero/content/merge.xhtml', function (dialog) {
 				var doc = dialog.document;
-				var wizard = doc.documentElement;
-				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				var wizard = doc.querySelector('wizard');
+				var mergeGroup = wizard.getElementsByTagName('merge-group')[0];
 				
 				// Show title for middle and right panes
 				var parentText = Zotero.getString('pane.item.parentItem') + " Parent";
-				assert.equal(mergeGroup.leftpane._id('parent-row').textContent, "");
-				assert.equal(mergeGroup.rightpane._id('parent-row').textContent, parentText);
-				assert.equal(mergeGroup.mergepane._id('parent-row').textContent, parentText);
+				assert.equal(mergeGroup.leftPane.parentRow.textContent, "");
+				assert.equal(mergeGroup.rightPane.parentRow.textContent, parentText);
+				assert.equal(mergeGroup.mergePane.parentRow.textContent, parentText);
 				
 				wizard.getButton('finish').click();
 			});
@@ -1268,18 +1268,18 @@ describe("Zotero.Sync.Data.Local", function() {
 			var note = await createDataObject('item', { itemType: 'note' });
 			var item = await createDataObject('item');
 			
-			var promise = waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+			var promise = waitForWindow('chrome://zotero/content/merge.xhtml', function (dialog) {
 				var doc = dialog.document;
-				var wizard = doc.documentElement;
-				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				var wizard = doc.querySelector('wizard');
+				var mergeGroup = wizard.getElementsByTagName('merge-group')[0];
 				
 				// 1 (accept remote deletion)
-				assert.equal(mergeGroup.leftpane.getAttribute('selected'), 'true');
-				mergeGroup.rightpane.click();
+				assert.equal(mergeGroup.leftPane.getAttribute('selected'), 'true');
+				mergeGroup.rightPane.click();
 				wizard.getButton('next').click();
 				
 				// 2 (accept remote deletion)
-				mergeGroup.rightpane.click();
+				mergeGroup.rightPane.click();
 				if (Zotero.isMac) {
 					assert.isTrue(wizard.getButton('next').hidden);
 					assert.isFalse(wizard.getButton('finish').hidden);

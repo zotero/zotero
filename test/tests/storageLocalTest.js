@@ -625,14 +625,14 @@ describe("Zotero.Sync.Storage.Local", function () {
 			item3.attachmentSyncState = "in_conflict";
 			yield item3.saveTx({ skipAll: true });
 			
-			var promise = waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+			var promise = waitForWindow('chrome://zotero/content/merge.xhtml', async function (dialog) {
 				var doc = dialog.document;
-				var wizard = doc.documentElement;
-				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				var wizard = doc.querySelector('wizard');
+				var mergeGroup = wizard.getElementsByTagName('merge-group')[0];
 				
 				// 1 (remote)
 				// Later remote version should be selected
-				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
+				assert.equal(mergeGroup.rightPane.getAttribute('selected'), 'true');
 				
 				// Check checkbox text
 				assert.equal(
@@ -641,17 +641,17 @@ describe("Zotero.Sync.Storage.Local", function () {
 				);
 				
 				// Select local object
-				mergeGroup.leftpane.click();
-				assert.equal(mergeGroup.leftpane.getAttribute('selected'), 'true');
+				mergeGroup.leftPane.click();
+				assert.equal(mergeGroup.leftPane.getAttribute('selected'), 'true');
 				
 				wizard.getButton('next').click();
 				
 				// 2 (local)
 				// Later local version should be selected
-				assert.equal(mergeGroup.leftpane.getAttribute('selected'), 'true');
+				assert.equal(mergeGroup.leftPane.getAttribute('selected'), 'true');
 				// Select remote object
-				mergeGroup.rightpane.click();
-				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
+				mergeGroup.rightPane.click();
+				assert.equal(mergeGroup.rightPane.getAttribute('selected'), 'true');
 				
 				if (Zotero.isMac) {
 					assert.isTrue(wizard.getButton('next').hidden);
@@ -686,18 +686,18 @@ describe("Zotero.Sync.Storage.Local", function () {
 			item1.attachmentSyncState = "in_conflict";
 			yield item1.saveTx({ skipAll: true });
 			
-			var promise = waitForWindow('chrome://zotero/content/merge.xul', async function (dialog) {
+			var promise = waitForWindow('chrome://zotero/content/merge.xhtml', async function (dialog) {
 				var doc = dialog.document;
-				var wizard = doc.documentElement;
-				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				var wizard = doc.querySelector('wizard');
+				var mergeGroup = wizard.getElementsByTagName('merge-group')[0];
 				
 				// 1 (remote)
 				// Identical, so remote version should be selected
-				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
+				assert.equal(mergeGroup.rightPane.getAttribute('selected'), 'true');
 				
 				// Select local object
-				mergeGroup.leftpane.click();
-				assert.equal(mergeGroup.leftpane.getAttribute('selected'), 'true');
+				mergeGroup.leftPane.click();
+				assert.equal(mergeGroup.leftPane.getAttribute('selected'), 'true');
 				
 				if (Zotero.isMac) {
 					assert.isTrue(wizard.getButton('next').hidden);

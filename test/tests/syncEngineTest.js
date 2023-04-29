@@ -2384,18 +2384,18 @@ describe("Zotero.Sync.Data.Engine", function () {
 				}
 			});
 			
-			var crPromise = waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+			var crPromise = waitForWindow('chrome://zotero/content/merge.xhtml', function (dialog) {
 				var doc = dialog.document;
-				var wizard = doc.documentElement;
-				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				var wizard = doc.querySelector('wizard');
+				var mergeGroup = wizard.getElementsByTagName('merge-group')[0];
 				
 				// 1 (accept remote deletion)
-				assert.equal(mergeGroup.leftpane.getAttribute('selected'), 'true');
-				mergeGroup.rightpane.click();
+				assert.equal(mergeGroup.leftPane.getAttribute('selected'), 'true');
+				mergeGroup.rightPane.click();
 				wizard.getButton('next').click();
 				
 				// 2 (ignore remote deletion)
-				assert.equal(mergeGroup.leftpane.getAttribute('selected'), 'true');
+				assert.equal(mergeGroup.leftPane.getAttribute('selected'), 'true');
 				wizard.getButton('finish').click();
 			})
 			yield engine._startDownload();
@@ -2655,9 +2655,9 @@ describe("Zotero.Sync.Data.Engine", function () {
 				}
 			});
 			
-			var crPromise = waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+			var crPromise = waitForWindow('chrome://zotero/content/merge.xhtml', function (dialog) {
 				var doc = dialog.document;
-				var wizard = doc.documentElement;
+				var wizard = doc.querySelector('wizard');
 				wizard.getButton('cancel').click();
 			})
 			var e = yield getPromiseError(engine._startDownload());
@@ -2750,9 +2750,9 @@ describe("Zotero.Sync.Data.Engine", function () {
 				}
 			});
 			
-			var crPromise = waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+			var crPromise = waitForWindow('chrome://zotero/content/merge.xhtml', function (dialog) {
 				var doc = dialog.document;
-				var wizard = doc.documentElement;
+				var wizard = doc.querySelector('wizard');
 				wizard.getButton('cancel').click();
 			})
 			var e = yield getPromiseError(engine._startDownload());
@@ -3609,21 +3609,21 @@ describe("Zotero.Sync.Data.Engine", function () {
 				json: responseJSON
 			});
 			
-			var crPromise = waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+			var crPromise = waitForWindow('chrome://zotero/content/merge.xhtml', function (dialog) {
 				var doc = dialog.document;
-				var wizard = doc.documentElement;
-				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				var wizard = doc.querySelector('wizard');
+				var mergeGroup = wizard.getElementsByTagName('merge-group')[0];
 				
 				// 1 (remote)
 				// Remote version should be selected by default
-				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
+				assert.equal(mergeGroup.rightPane.getAttribute('selected'), 'true');
 				wizard.getButton('next').click();
 				
 				// 2 (local)
-				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
+				assert.equal(mergeGroup.rightPane.getAttribute('selected'), 'true');
 				// Select local object
-				mergeGroup.leftpane.click();
-				assert.equal(mergeGroup.leftpane.getAttribute('selected'), 'true');
+				mergeGroup.leftPane.click();
+				assert.equal(mergeGroup.leftPane.getAttribute('selected'), 'true');
 				if (Zotero.isMac) {
 					assert.isTrue(wizard.getButton('next').hidden);
 					assert.isFalse(wizard.getButton('finish').hidden);
@@ -3716,21 +3716,21 @@ describe("Zotero.Sync.Data.Engine", function () {
 				json: responseJSON
 			});
 			
-			var crPromise = waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+			var crPromise = waitForWindow('chrome://zotero/content/merge.xhtml', function (dialog) {
 				var doc = dialog.document;
-				var wizard = doc.documentElement;
-				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				var wizard = doc.querySelector('wizard');
+				var mergeGroup = wizard.getElementsByTagName('merge-group')[0];
 				
 				// 1 (remote)
 				// Remote version should be selected by default
-				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
+				assert.equal(mergeGroup.rightPane.getAttribute('selected'), 'true');
 				wizard.getButton('next').click();
 				
 				// 2 (local)
-				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
+				assert.equal(mergeGroup.rightPane.getAttribute('selected'), 'true');
 				// Select local object
-				mergeGroup.leftpane.click();
-				assert.equal(mergeGroup.leftpane.getAttribute('selected'), 'true');
+				mergeGroup.leftPane.click();
+				assert.equal(mergeGroup.leftPane.getAttribute('selected'), 'true');
 				if (Zotero.isMac) {
 					assert.isTrue(wizard.getButton('next').hidden);
 					assert.isFalse(wizard.getButton('finish').hidden);
@@ -3841,28 +3841,28 @@ describe("Zotero.Sync.Data.Engine", function () {
 				json: responseJSON
 			});
 			
-			var crPromise = waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+			var crPromise = waitForWindow('chrome://zotero/content/merge.xhtml', function (dialog) {
 				var doc = dialog.document;
-				var wizard = doc.documentElement;
-				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				var wizard = doc.querySelector('wizard');
+				var mergeGroup = wizard.getElementsByTagName('merge-group')[0];
 				
 				// TODO: Make this function async and verify that annotation widgets show up here
 				// after rendering. This may not be possible as long as this is within XBL.
 				
 				// 1 (remote)
 				// Remote version should be selected by default
-				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
+				assert.equal(mergeGroup.rightPane.getAttribute('selected'), 'true');
 				wizard.getButton('next').click();
 				
 				// 2 (local)
-				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
+				assert.equal(mergeGroup.rightPane.getAttribute('selected'), 'true');
 				// Select local object
-				mergeGroup.leftpane.click();
-				assert.equal(mergeGroup.leftpane.getAttribute('selected'), 'true');
+				mergeGroup.leftPane.click();
+				assert.equal(mergeGroup.leftPane.getAttribute('selected'), 'true');
 				wizard.getButton('next').click();
 				
 				// 2 (remote)
-				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
+				assert.equal(mergeGroup.rightPane.getAttribute('selected'), 'true');
 				
 				if (Zotero.isMac) {
 					assert.isTrue(wizard.getButton('next').hidden);
@@ -3984,15 +3984,15 @@ describe("Zotero.Sync.Data.Engine", function () {
 				json: responseJSON
 			});
 			
-			var crPromise = waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+			var crPromise = waitForWindow('chrome://zotero/content/merge.xhtml', function (dialog) {
 				var doc = dialog.document;
-				var wizard = doc.documentElement;
-				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				var wizard = doc.querySelector('wizard');
+				var mergeGroup = wizard.getElementsByTagName('merge-group')[0];
 				var resolveAll = doc.getElementById('resolve-all');
 				
 				// 1 (remote)
 				// Remote version should be selected by default
-				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
+				assert.equal(mergeGroup.rightPane.getAttribute('selected'), 'true');
 				assert.equal(
 					resolveAll.label,
 					Zotero.getString('sync.conflict.resolveAllRemote')
@@ -4000,8 +4000,8 @@ describe("Zotero.Sync.Data.Engine", function () {
 				wizard.getButton('next').click();
 				
 				// 2 (local and Resolve All checkbox)
-				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
-				mergeGroup.leftpane.click();
+				assert.equal(mergeGroup.rightPane.getAttribute('selected'), 'true');
+				mergeGroup.leftPane.click();
 				assert.equal(
 					resolveAll.label,
 					Zotero.getString('sync.conflict.resolveAllLocal')
@@ -4106,15 +4106,15 @@ describe("Zotero.Sync.Data.Engine", function () {
 				json: responseJSON
 			});
 			
-			var crPromise = waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+			var crPromise = waitForWindow('chrome://zotero/content/merge.xhtml', function (dialog) {
 				var doc = dialog.document;
-				var wizard = doc.documentElement;
-				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				var wizard = doc.querySelector('wizard');
+				var mergeGroup = wizard.getElementsByTagName('merge-group')[0];
 				var resolveAll = doc.getElementById('resolve-all');
 				
 				// 1 (remote)
 				// Remote version should be selected by default
-				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
+				assert.equal(mergeGroup.rightPane.getAttribute('selected'), 'true');
 				assert.equal(
 					resolveAll.label,
 					Zotero.getString('sync.conflict.resolveAllRemote')
@@ -4122,7 +4122,7 @@ describe("Zotero.Sync.Data.Engine", function () {
 				wizard.getButton('next').click();
 				
 				// 2 click Resolve All checkbox
-				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
+				assert.equal(mergeGroup.rightPane.getAttribute('selected'), 'true');
 				assert.equal(
 					resolveAll.label,
 					Zotero.getString('sync.conflict.resolveAllRemote')
@@ -4191,16 +4191,16 @@ describe("Zotero.Sync.Data.Engine", function () {
 				json: responseJSON
 			});
 			
-			var crPromise = waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+			var crPromise = waitForWindow('chrome://zotero/content/merge.xhtml', function (dialog) {
 				var doc = dialog.document;
-				var wizard = doc.documentElement;
-				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				var wizard = doc.querySelector('wizard');
+				var mergeGroup = wizard.getElementsByTagName('merge-group')[0];
 				
 				// Remote version should be selected by default
-				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
-				assert.ok(mergeGroup.leftpane.pane.onclick);
+				assert.equal(mergeGroup.rightPane.getAttribute('selected'), 'true');
+				assert.ok(mergeGroup.leftPane.pane.onclick);
 				// Select local deleted version
-				mergeGroup.leftpane.pane.click();
+				mergeGroup.leftPane.pane.click();
 				wizard.getButton('finish').click();
 			})
 			yield engine._downloadObjects('item', [obj.key]);
@@ -4251,16 +4251,16 @@ describe("Zotero.Sync.Data.Engine", function () {
 				json: responseJSON
 			});
 			
-			var crPromise = waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+			var crPromise = waitForWindow('chrome://zotero/content/merge.xhtml', function (dialog) {
 				var doc = dialog.document;
-				var wizard = doc.documentElement;
-				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				var wizard = doc.querySelector('wizard');
+				var mergeGroup = wizard.getElementsByTagName('merge-group')[0];
 				
 				// Remote version should be selected by default
-				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
-				assert.ok(mergeGroup.leftpane.pane.onclick);
+				assert.equal(mergeGroup.rightPane.getAttribute('selected'), 'true');
+				assert.ok(mergeGroup.leftPane.pane.onclick);
 				// Select local deleted version
-				mergeGroup.leftpane.pane.click();
+				mergeGroup.leftPane.pane.click();
 				wizard.getButton('finish').click();
 			});
 			yield engine._downloadObjects('item', [obj.key]);
@@ -4306,15 +4306,15 @@ describe("Zotero.Sync.Data.Engine", function () {
 				json: responseJSON
 			});
 			
-			var crPromise = waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+			var crPromise = waitForWindow('chrome://zotero/content/merge.xhtml', function (dialog) {
 				var doc = dialog.document;
-				var wizard = doc.documentElement;
-				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				var wizard = doc.querySelector('wizard');
+				var mergeGroup = wizard.getElementsByTagName('merge-group')[0];
 				
 				assert.isTrue(doc.getElementById('resolve-all').hidden);
 				
 				// Remote version should be selected by default
-				assert.equal(mergeGroup.rightpane.getAttribute('selected'), 'true');
+				assert.equal(mergeGroup.rightPane.getAttribute('selected'), 'true');
 				wizard.getButton('finish').click();
 			})
 			yield engine._downloadObjects('item', [key]);
@@ -4797,15 +4797,15 @@ describe("Zotero.Sync.Data.Engine", function () {
 			});
 			
 			// Apply remote deletions
-			var crPromise = waitForWindow('chrome://zotero/content/merge.xul', function (dialog) {
+			var crPromise = waitForWindow('chrome://zotero/content/merge.xhtml', function (dialog) {
 				var doc = dialog.document;
-				var wizard = doc.documentElement;
-				var mergeGroup = wizard.getElementsByTagName('zoteromergegroup')[0];
+				var wizard = doc.querySelector('wizard');
+				var mergeGroup = wizard.getElementsByTagName('merge-group')[0];
 				
 				// Should be one conflict for each object type; select local
 				var numConflicts = Object.keys(objects).length;
 				for (let i = 0; i < numConflicts; i++) {
-					assert.equal(mergeGroup.leftpane.getAttribute('selected'), 'true');
+					assert.equal(mergeGroup.leftPane.getAttribute('selected'), 'true');
 					
 					if (i < numConflicts - 1) {
 						wizard.getButton('next').click();

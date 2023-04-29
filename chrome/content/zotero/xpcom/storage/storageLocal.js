@@ -1043,10 +1043,9 @@ Zotero.Sync.Storage.Local = {
 			}
 		};
 		
-		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-				   .getService(Components.interfaces.nsIWindowMediator);
+		var wm = Services.wm;
 		var lastWin = wm.getMostRecentWindow("navigator:browser");
-		lastWin.openDialog('chrome://zotero/content/merge.xul', '', 'chrome,modal,centerscreen', io);
+		lastWin.openDialog('chrome://zotero/content/merge.xhtml', '', 'chrome,modal,centerscreen', io);
 		
 		if (!io.dataOut) {
 			return false;

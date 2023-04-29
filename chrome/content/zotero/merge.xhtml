@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © 2023 Corporation for Digital Scholarship
+                     Vienna, Virginia, USA
+                     https://www.zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+-->
+
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/zotero.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero/skin/merge.css" type="text/css"?>
+<?xml-stylesheet href="chrome://zotero-platform/content/zotero.css"?>
+
+<!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		xmlns:html="http://www.w3.org/1999/xhtml"
+		onload="Zotero_Merge_Window.init()"
+>
+	<wizard id="merge-window" title="">
+		<script>
+			var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+			Services.scriptloader.loadSubScript("chrome://zotero/content/include.js", this);
+			Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
+			Services.scriptloader.loadSubScript("chrome://zotero/content/components/annotation.js", this);
+			Services.scriptloader.loadSubScript("chrome://zotero/content/merge.js", this);
+		</script>
+		
+		<wizardpage label="&zotero.merge.title;" pageid="page-id">
+			<description id="zotero-merge-instructions"/>
+			<merge-group flex="1"/>
+			<separator class="thin"/>
+			<hbox align="center">
+				<separator orient="vertical" flex="1"/>
+				<hbox>
+					<checkbox id="resolve-all"
+						oncommand="Zotero_Merge_Window.updateNextFinish()"/>
+				</hbox>
+				<separator orient="vertical"/>
+				<hbox id="zotero-step-count">
+					<label id="zotero-merge-num-objects"/>
+					<label value="&zotero.merge.of;"/>
+					<label id="zotero-merge-total-objects"/>
+				</hbox>
+			</hbox>
+		</wizardpage>
+	</wizard>
+</window>

@@ -1439,7 +1439,7 @@ Zotero.Sync.Data.Local = {
 				conflicts
 			}
 		};
-		var url = 'chrome://zotero/content/merge.xul';
+		var url = 'chrome://zotero/content/merge.xhtml';
 		var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 		   .getService(Components.interfaces.nsIWindowMediator);
 		var lastWin = wm.getMostRecentWindow("navigator:browser");

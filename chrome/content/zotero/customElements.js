@@ -32,6 +32,7 @@ Services.scriptloader.loadSubScript("chrome://zotero/content/elements/base.js", 
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/attachmentBox.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/guidancePanel.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemBox.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/mergeGroup.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/menulistItemTypes.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/noteEditor.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/notesBox.js', this);
