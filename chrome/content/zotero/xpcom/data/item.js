@@ -3565,24 +3565,10 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentText', {
 					let data = JSON.parse(json);
 					str = data.text;
 				}
-				// Otherwise extract text to temporary file and read that
+				// Otherwise extract text
 				else if (contentType == 'application/pdf') {
-					let tmpCacheFile = OS.Path.join(
-						Zotero.getTempDirectory().path, Zotero.Utilities.randomString()
-					);
-					let { exec, args } = Zotero.FullText.getPDFConverterExecAndArgs();
-					args.push(
-						'-nopgbrk',
-						path,
-						tmpCacheFile
-					);
-					await Zotero.Utilities.Internal.exec(exec, args);
-					if (!await OS.File.exists(tmpCacheFile)) {
-						Zotero.logError("Cache file not found after running PDF converter");
-						return '';
-					}
-					str = await Zotero.File.getContentsAsync(tmpCacheFile);
-					await OS.File.remove(tmpCacheFile);
+					let { text } = await Zotero.PDFWorker.getFullText(this.id);
+					str = text;
 				}
 				else {
 					Zotero.logError("Unsupported cached file type in .attachmentText");
