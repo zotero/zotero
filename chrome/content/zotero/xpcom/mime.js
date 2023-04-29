@@ -224,22 +224,22 @@ Zotero.MIME = new function(){
 	 * Searches string for magic numbers
 	 */
 	this.sniffForMIMEType = function (str) {
-		for (let i in _snifferEntries) {
+		for (let [magic, type, offset] of _snifferEntries) {
 			let match = false;
 			// If an offset is defined, match only from there
-			if (_snifferEntries[i][2] != undefined) {
-				if (str.substr(_snifferEntries[i][2]).indexOf(_snifferEntries[i][0]) == 0) {
+			if (offset != undefined) {
+				if (str.substr(offset).indexOf(magic) == 0) {
 					match = true;
 				}
 			}
 			// Otherwise allow match anywhere in sample
 			// (200 bytes from getSample() by default)
-			else if (str.indexOf(_snifferEntries[i][0]) != -1) {
+			else if (str.indexOf(magic) != -1) {
 				match = true;
 			}
 			
 			if (match) {
-				return _snifferEntries[i][1];
+				return type;
 			}
 		}
 		
