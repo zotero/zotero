@@ -19,7 +19,7 @@ describe("ZoteroPane", function() {
 		it("should create an item and focus the title field", function* () {
 			yield zp.newItem(Zotero.ItemTypes.getID('book'), {}, null, true);
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var textboxes = itemBox.shadowRoot.querySelectorAll('input, textarea');
+			var textboxes = itemBox.querySelectorAll('input, textarea');
 			assert.lengthOf(textboxes, 1);
 			assert.equal(textboxes[0].getAttribute('fieldname'), 'title');
 			textboxes[0].blur();
@@ -30,7 +30,7 @@ describe("ZoteroPane", function() {
 			var value = "Test";
 			var item = yield zp.newItem(Zotero.ItemTypes.getID('book'), {}, null, true);
 			var itemBox = doc.getElementById('zotero-editpane-item-box');
-			var textbox = itemBox.shadowRoot.querySelector('textarea');
+			var textbox = itemBox.querySelector('textarea');
 			textbox.value = value;
 			yield itemBox.blurOpenField();
 			item = yield Zotero.Items.getAsync(item.id);
@@ -1037,7 +1037,7 @@ describe("ZoteroPane", function() {
 					searchBox.search.addCondition("title", "contains", "foo")
 				);
 				searchBox.addCondition(c);
-				win.document.documentElement.acceptDialog();
+				win.document.querySelector('dialog').acceptDialog();
 			});
 			yield zp.editSelectedCollection();
 			yield promise;
@@ -1054,7 +1054,7 @@ describe("ZoteroPane", function() {
 					searchBox.search.addCondition("title", "contains", "foo")
 				);
 				searchBox.addCondition(c);
-				win.document.documentElement.acceptDialog();
+				win.document.querySelector('dialog').acceptDialog();
 			});
 			yield zp.editSelectedCollection();
 			yield promise;
