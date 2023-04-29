@@ -866,7 +866,7 @@ describe("Zotero.Attachments", function() {
 			await item.saveTx();
 			var attachment = await Zotero.Attachments.addAvailablePDF(item);
 			
-			assert.isTrue(requestStub.calledTwice);
+			assert.equal(requestStub.callCount, 2);
 			assert.isTrue(requestStub.getCall(0).calledWith('GET', 'https://doi.org/' + doi));
 			assert.ok(attachment);
 			var json = attachment.toJSON();
@@ -884,7 +884,7 @@ describe("Zotero.Attachments", function() {
 			await item.saveTx();
 			var attachment = await Zotero.Attachments.addAvailablePDF(item);
 			
-			assert.isTrue(requestStub.calledOnce);
+			assert.equal(requestStub.callCount, 1);
 			assert.isTrue(requestStub.calledWith('GET', 'https://doi.org/' + doi));
 			assert.ok(attachment);
 			var json = attachment.toJSON();
@@ -902,7 +902,7 @@ describe("Zotero.Attachments", function() {
 			await item.saveTx();
 			var attachment = await Zotero.Attachments.addAvailablePDF(item);
 			
-			assert.isTrue(requestStub.calledTwice);
+			assert.equal(requestStub.callCount, 2);
 			assert.isTrue(requestStub.getCall(0).calledWith('GET', 'https://doi.org/' + doi));
 			assert.ok(attachment);
 			var json = attachment.toJSON();
@@ -920,7 +920,7 @@ describe("Zotero.Attachments", function() {
 			await item.saveTx();
 			var attachment = await Zotero.Attachments.addAvailablePDF(item);
 			
-			assert.isTrue(requestStub.calledOnce);
+			assert.equal(requestStub.callCount, 1);
 			assert.isTrue(requestStub.calledWith('GET', url));
 			assert.ok(attachment);
 			var json = attachment.toJSON();
@@ -938,7 +938,7 @@ describe("Zotero.Attachments", function() {
 			await item.saveTx();
 			var attachment = await Zotero.Attachments.addAvailablePDF(item);
 			
-			assert.isTrue(requestStub.calledThrice);
+			assert.equal(requestStub.callCount, 3);
 			var call1 = requestStub.getCall(0);
 			assert.isTrue(call1.calledWith('GET', 'https://doi.org/' + doi));
 			var call2 = requestStub.getCall(1);
@@ -1018,7 +1018,7 @@ describe("Zotero.Attachments", function() {
 			
 			var attachments = await Zotero.Attachments.addAvailablePDFs([item1, item2]);
 			
-			assert.isTrue(requestStub.calledTwice);
+			assert.equal(requestStub.callCount, 2);
 			assert.isAbove(requestStubCallTimes[1] - requestStubCallTimes[0], 998);
 			// Make sure both items have attachments
 			assert.equal(item1.numAttachments(), 1);
@@ -1083,7 +1083,7 @@ describe("Zotero.Attachments", function() {
 			
 			var attachments = await Zotero.Attachments.addAvailablePDFs([item1, item2]);
 			
-			assert.isTrue(requestStub.calledThrice);
+			assert.equal(requestStub.callCount, 3);
 			assert.equal(requestStub.getCall(0).args[1], pageURL9);
 			assert.equal(requestStub.getCall(1).args[1], pageURL9);
 			assert.equal(requestStub.getCall(2).args[1], pageURL3);
@@ -1101,7 +1101,7 @@ describe("Zotero.Attachments", function() {
 			await item.saveTx();
 			var attachment = await Zotero.Attachments.addAvailablePDF(item);
 			
-			assert.isTrue(requestStub.calledTwice);
+			assert.equal(requestStub.callCount, 2);
 			assert.equal(requestStub.getCall(0).args[1], pageURL10)
 			assert.equal(requestStub.getCall(1).args[1], pageURL1)
 			assert.ok(attachment);
