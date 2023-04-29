@@ -17,8 +17,7 @@ jobs:
       
       # On GitHub
       - name: Install xvfb
-        if: false # temporarily disabled
-        #if: env.ACT != 'true'
+        if: env.ACT != 'true'
         run: sudo apt update && sudo apt install -y xvfb
       
       # Local via act
@@ -26,23 +25,16 @@ jobs:
         if: env.ACT == 'true'
         run: apt update && apt install -y zstd xvfb dbus-x11 libgtk-3-0 libx11-xcb1 libdbus-glib-1-2 libxt6
       
-      - name: Cache Firefox
-        if: false # temporarily disabled
-        id: firefox-cache
+      - name: Cache xulrunner
+        id: xulrunner-cache
         uses: actions/cache@v3
         with:
-          path: firefox-x86_64
-          key: firefox-60.9.0esr
+          path: app/xulrunner/firefox-x86_64
+          key: xulrunner-${{ hashFiles('app/config.sh', 'app/scripts/fetch_xulrunner') }}
       
-      - name: Download Firefox
-        if: false # temporarily disabled
-        #if: steps.firefox-cache.outputs.cache-hit != 'true'
-        run: wget -O tarball "https://zotero-download.s3.us-east-1.amazonaws.com/dev/firefox-60.9.0esr-x86_64-modified.tar.gz"
-      
-      - name: Extract Firefox
-        if: false # temporarily disabled
-        #if: steps.firefox-cache.outputs.cache-hit != 'true'
-        run: tar xvf tarball
+      - name: Fetch xulrunner
+        if: steps.xulrunner-cache.outputs.cache-hit != 'true'
+        run: app/scripts/fetch_xulrunner -p l
       
       - name: Cache Node modules
         id: node-cache
@@ -79,8 +71,7 @@ jobs:
           dpl --provider=s3 --bucket=zotero-download --local-dir=build-zip --upload-dir=ci/client --acl=public-read --skip_cleanup=true
       
       - name: Run tests
-        if: false # temporarily disabled
-        run: xvfb-run test/runtests.sh -x firefox-x86_64/firefox -f
+        run: xvfb-run test/runtests.sh -f
 
       - name: Cache utilities Node modules
         id: utilities-node-cache
