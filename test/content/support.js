@@ -108,20 +108,21 @@ var loadZoteroPane = async function (win) {
 	return win;
 };
 
-var loadPrefPane = Zotero.Promise.coroutine(function* (paneName) {
+var loadPrefPane = async function (paneName) {
 	var id = 'zotero-prefpane-' + paneName;
-	var win = yield loadWindow("chrome://zotero/content/preferences/preferences.xhtml", {
+	var win = await loadWindow("chrome://zotero/content/preferences/preferences.xhtml", {
 		pane: id
 	});
 	var doc = win.document;
-	var defer = Zotero.Promise.defer();
-	var pane = doc.getElementById(id);
-	if (!pane.loaded) {
-		pane.addEventListener('paneload', () => defer.resolve());
-		yield defer.promise;
+	while (true) {
+		var pane = doc.getElementById(id);
+		if (pane) {
+			break;
+		}
+		await delay(1);
 	}
 	return win;
-});
+};
 
 
 /**
