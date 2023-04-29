@@ -132,7 +132,9 @@ describe("Zotero.FullText", function () {
 			toSync.push({
 				item: pdfAttachment,
 				content: "Zotero [zoh-TAIR-oh] is a free, easy-to-use tool to help you collect, "
-					+ "organize, cite, and share your research sources.\n\n",
+					// pdf-worker handles whitespace differently than pdftotext
+					//+ "organize, cite, and share your research sources.\n\n",
+					+ "organize, cite, and share\nyour research sources.\n\n",
 				indexedChars: 0,
 				indexedPages: 1
 			});
@@ -142,9 +144,10 @@ describe("Zotero.FullText", function () {
 			var data = yield Zotero.FullText.getUnsyncedContent(Zotero.Libraries.userLibraryID);
 			assert.lengthOf(data, 3);
 			let contents = toSync.map(x => x.content);
+			
 			for (let d of data) {
+				assert.include(contents, d.content);
 				let pos = contents.indexOf(d.content);
-				assert.isAbove(pos, -1);
 				assert.equal(d.indexedChars, toSync[pos].indexedChars);
 				assert.equal(d.indexedPages, toSync[pos].indexedPages);
 			}
