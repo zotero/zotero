@@ -19,8 +19,10 @@ set -euo pipefail
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-CALLDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-. "$CALLDIR/config.sh"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+. "$APP_ROOT_DIR/config.sh"
+cd "$APP_ROOT_DIR"
 
 function usage {
 	cat >&2 <<DONE
@@ -96,7 +98,7 @@ function modify_omni {
 	cd omni
 	# omni.ja is an "optimized" ZIP file, so use a script from Mozilla to avoid a warning from unzip
 	# here and to make it work after rezipping below
-	python3 "$CALLDIR/scripts/optimizejars.py" --deoptimize ./ ./ ./
+	python3 "$APP_ROOT_DIR/scripts/optimizejars.py" --deoptimize ./ ./ ./
 	rm -f omni.ja.log
 	unzip omni.ja
 	rm omni.ja
@@ -210,7 +212,7 @@ function modify_omni {
 	#  perl -pi -e 's/update for &brandShortName; as soon as possible/update as soon as possible/' chrome/en-US/locale/en-US/mozapps/update/updates.dtd
 	#  
 	# Set available locales
-	cp "$CALLDIR/assets/multilocale.txt" res/multilocale.txt
+	cp "$APP_ROOT_DIR/assets/multilocale.txt" res/multilocale.txt
 	#  
 	#  # Force Lucida Grande on non-Retina displays, since San Francisco is used otherwise starting in
 	#  # Catalina, and it looks terrible
@@ -269,7 +271,7 @@ function modify_omni {
 	zip -qr9XD omni.ja *
 	mv omni.ja ..
 	cd ..
-	python3 "$CALLDIR/scripts/optimizejars.py" --optimize ./ ./ ./
+	python3 "$APP_ROOT_DIR/scripts/optimizejars.py" --optimize ./ ./ ./
 	rm -rf omni
 	
 	# Unzip browser/omni.ja and leave unzipped

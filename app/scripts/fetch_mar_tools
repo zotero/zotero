@@ -2,9 +2,9 @@
 set -euo pipefail
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-ROOT_DIR="$SCRIPT_DIR"
+APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
-cd "$ROOT_DIR"
+cd "$APP_ROOT_DIR"
 
 mkdir -p "xulrunner/bin"
 if [ "`uname`" = "Darwin" ]; then
