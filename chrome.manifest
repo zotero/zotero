@@ -11,7 +11,7 @@ content	zotero-platform-version chrome/content/zotero-platform/mac-big-sur/ os=D
 
 resource zotero				resource/
 
-# Keep in sync with locale.js and zotero-standalone-build:assets/multilocale.txt
+# Keep in sync with locale.js and app/assets/multilocale.txt
 locale	zotero	en-US		chrome/locale/en-US/zotero/
 #locale	zotero	af-ZA		chrome/locale/af-ZA/zotero/
 locale	zotero	ar		chrome/locale/ar/zotero/

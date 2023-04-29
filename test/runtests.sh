@@ -156,7 +156,7 @@ trap "{ rm -rf \"$TEMPDIR\"; }" EXIT
 
 # Check if build watch process is running
 # If not, run now
-if [[ -z "$CI" ]] && ! ps | grep scripts/build.js | grep -v grep > /dev/null; then
+if [[ -z "$CI" ]] && ! ps | grep js-build/build.js | grep -v grep > /dev/null; then
 	echo
 	echo "Running JS build process"
 	cd "$ROOT_DIR"

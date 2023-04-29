@@ -12,7 +12,7 @@ const getSymlinks = require('./symlinks');
 
 
 const ROOT = path.resolve(__dirname, '..');
-const addOmniExecPath = path.join(ROOT, '..', 'zotero-standalone-build', 'scripts', 'add_omni_file');
+const addOmniExecPath = path.join(ROOT, 'app', 'scripts', 'add_omni_file');
 let shouldAddOmni = false;
 
 const source = [

@@ -41,7 +41,7 @@ if [ $REBUILD -eq 1 ]; then
 	
 	# Check if build watch is running
 	# If not, run now
-	if ! ps u | grep scripts/build.js | grep -v grep > /dev/null; then
+	if ! ps u | grep js-build/build.js | grep -v grep > /dev/null; then
 		echo "Running JS build process"
 		echo
 		cd $ROOT_DIR

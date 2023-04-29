@@ -2,8 +2,8 @@
 set -e
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-ROOT_DIR="$(dirname "$SCRIPT_DIR")"
-. "$ROOT_DIR/config.sh"
+APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+. "$APP_ROOT_DIR/config.sh"
 
 fx_app_name=Firefox.app
 
@@ -14,17 +14,6 @@ if [ -z "${1:-}" ]; then
 fi
 GECKO_PATH=$1
 mach=$GECKO_PATH/mach
-
-# Set ZOTERO_REPOS_DIR to use directory other than $HOME for zotero-standalone-build
-if [ -n "${ZOTERO_REPOS_DIR:-}" ]; then
-	repos_dir=$ZOTERO_REPOS_DIR
-else
-	repos_dir=$HOME
-fi
-if [ ! -d "$repos_dir/zotero-standalone-build" ]; then
-	echo "$repos_dir/zotero-standalone-build not found" >&2
-	exit 1
-fi
 
 BUILD_DIR=`mktemp -d`
 function cleanup {
@@ -65,4 +54,4 @@ $mach python "$GECKO_PATH/toolkit/mozapps/installer/unify.py" x64/*.app aarch64/
 
 cp x64/$fx_app_name/Contents/MacOS/firefox zotero
 xz zotero
-mv zotero.xz "$repos_dir"/zotero-standalone-build/mac/zotero.xz
+mv zotero.xz "$APP_ROOT_DIR/mac/zotero.xz"
