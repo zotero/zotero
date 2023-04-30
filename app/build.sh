@@ -122,7 +122,7 @@ if [[ $BUILD_MAC == 0 ]] && [[ $BUILD_WIN == 0 ]] && [[ $BUILD_LINUX == 0 ]]; th
 	usage
 fi
 
-if [[ -z "${ZOTERO_INCLUDE_TESTS:-}" ]] || [[ $ZOTERO_INCLUDE_TESTS == "0" ]]; then
+if [[ -z "${ZOTERO_TEST:-}" ]] || [[ $ZOTERO_TEST == "0" ]]; then
 	include_tests=0
 else
 	include_tests=1
@@ -779,7 +779,14 @@ fi
 
 # Linux
 if [ $BUILD_LINUX == 1 ]; then
-	for arch in "i686" "x86_64"; do
+	# Skip 32-bit build in tests
+	if [ "${ZOTERO_TEST:-}" = "1" ]; then
+		archs="x86_64"
+	else
+		archs="i686 x86_64"
+	fi
+	
+	for arch in $archs; do
 		runtime_path="${LINUX_RUNTIME_PATH_PREFIX}${arch}"
 		
 		# Set up directory

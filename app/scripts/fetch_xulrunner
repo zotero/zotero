@@ -378,16 +378,19 @@ if [ $BUILD_LINUX == 1 ]; then
 	
 	rm -rf firefox
 	
-	curl -O "$DOWNLOAD_URL/linux-i686/en-US/firefox-$GECKO_VERSION.tar.bz2"
-	rm -rf firefox-i686
-	tar xvf firefox-$GECKO_VERSION.tar.bz2
-	mv firefox firefox-i686
-	
-	pushd firefox-i686
-	modify_omni linux32
-	popd
-	
-	rm "firefox-$GECKO_VERSION.tar.bz2"
+	# Include 32-bit build if not in CI
+	if [ -z "${CI:-}" ]; then
+		curl -O "$DOWNLOAD_URL/linux-i686/en-US/firefox-$GECKO_VERSION.tar.bz2"
+		rm -rf firefox-i686
+		tar xvf firefox-$GECKO_VERSION.tar.bz2
+		mv firefox firefox-i686
+		
+		pushd firefox-i686
+		modify_omni linux32
+		popd
+		
+		rm "firefox-$GECKO_VERSION.tar.bz2"
+	fi
 	
 	curl -O "$DOWNLOAD_URL/linux-x86_64/en-US/firefox-$GECKO_VERSION.tar.bz2"
 	rm -rf firefox-x86_64
