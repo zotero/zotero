@@ -2003,7 +2003,8 @@ Zotero.WebProgressFinishListener = function(onFinish) {
 	this.onStateChange = function(wp, req, stateFlags, status) {
 		//Zotero.debug('onStateChange: ' + stateFlags);
 		if (stateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP
-				&& stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_NETWORK) {
+				&& stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_NETWORK
+				&& !(stateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_REQUEST)) {
 			if (_finished) {
 				return;
 			}
