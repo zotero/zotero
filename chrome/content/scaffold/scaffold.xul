@@ -109,8 +109,8 @@
 			<menuitem id="testing_editImport" label="&scaffold.testing.edit;" tooltiptext="Edit the input data for the current test" oncommand="Scaffold.editImportFromTest()"/>
 			<menu id="testing_openURL" label="&scaffold.testing.openUrl;">
 				<menupopup>
-					<menuitem label="&scaffold.testing.openUrl.internally;" tooltiptext="Open the URL for the current test in the Scaffold browser" oncommand="Scaffold.openURL(false)"/>
-					<menuitem label="&scaffold.testing.openUrl.externally;" tooltiptext="Open the URL for the current test in your default browser" oncommand="Scaffold.openURL(true)"/>
+					<menuitem label="&scaffold.testing.openUrl.internally;" tooltiptext="Open the URL for the current test in the Scaffold browser" oncommand="Scaffold.openURLInTests(false)"/>
+					<menuitem label="&scaffold.testing.openUrl.externally;" tooltiptext="Open the URL for the current test in your default browser" oncommand="Scaffold.openURLInTests(true)"/>
 				</menupopup>
 			</menu>
 		</menupopup>
@@ -378,6 +378,7 @@
 								<menulist id="browser-url" editable="true" flex="1">
 									<menupopup></menupopup>
 								</menulist>
+								<button id="browser-open" label="&scaffold.browser.open;" tooltiptext="Open url in build-in browser" oncommand="Scaffold.openURLField()"/>
 								<button observes="validate-tests" label="&scaffold.testing.create.web;" tooltiptext="Create a new test from the current page" oncommand="Scaffold.saveTestFromCurrent('web')"/>
 							</hbox>
 							
