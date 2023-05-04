@@ -933,13 +933,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}}
 			className={"items-tree-message"}
 			style={{ display: showMessage ? "flex" : "none" }}
-			// Due to some collision between React and the XUL environment
-			// setting innerHTML on a cached React node triggers an XML
-			// parsing error god knows where. So on every refresh we set a new
-			// key for the element, forcing it to be recreated. This shouldn't
-			// be a major performance concern since we're not calling #forceUpdate()
-			// that often and even if we did it's just a single div here.
-			key={Date.now()}
 			dangerouslySetInnerHTML={{ __html: itemsPaneMessageHTML }}>
 		</div>);
 
