@@ -44,7 +44,9 @@ Zotero.Session = new function () {
 			_state = JSON.parse(state);
 		}
 		catch (e) {
-			Zotero.logError(e);
+			if (e.name != 'NotFoundError') {
+				Zotero.logError(e);
+			}
 		}
 	};
 	
