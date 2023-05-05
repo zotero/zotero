@@ -4198,9 +4198,9 @@ describe("Zotero.Sync.Data.Engine", function () {
 				
 				// Remote version should be selected by default
 				assert.equal(mergeGroup.rightPane.getAttribute('selected'), 'true');
-				assert.ok(mergeGroup.leftPane.pane.onclick);
+				assert.ok(mergeGroup.leftPane.box.onclick);
 				// Select local deleted version
-				mergeGroup.leftPane.pane.click();
+				mergeGroup.leftPane.box.click();
 				wizard.getButton('finish').click();
 			})
 			yield engine._downloadObjects('item', [obj.key]);
@@ -4258,9 +4258,9 @@ describe("Zotero.Sync.Data.Engine", function () {
 				
 				// Remote version should be selected by default
 				assert.equal(mergeGroup.rightPane.getAttribute('selected'), 'true');
-				assert.ok(mergeGroup.leftPane.pane.onclick);
+				assert.ok(mergeGroup.leftPane.box.onclick);
 				// Select local deleted version
-				mergeGroup.leftPane.pane.click();
+				mergeGroup.leftPane.box.click();
 				wizard.getButton('finish').click();
 			});
 			yield engine._downloadObjects('item', [obj.key]);
