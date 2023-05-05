@@ -13,21 +13,24 @@
 			<hbox class="wizard-header update-header" flex="1">
 				<vbox class="wizard-header-box-1">
 				  <vbox class="wizard-header-box-text">
-					<label class="wizard-header-label"/>
+					<label><html:h2 class="wizard-header-label"/></label>
 				  </vbox>
 				</vbox>
 			  </hbox>
 		`);
 		
-		static get inheritedAttributes() {
-			return {
-				".wizard-header-label": "value=label",
-			};
-		}
-		
 		connectedCallback() {
 			super.connectedCallback();
-			this.initializeAttributeInheritance();
+			
+			this.querySelector('h2').textContent = this.getAttribute('label');
+		}
+		
+		static get observedAttributes() { return ['label']; }
+		
+		attributeChangedCallback(name, oldVal, newVal) {
+			if (name == "label" && newVal != oldVal) {
+				this.querySelector('h2').textContent = newVal;
+			}
 		}
 	}
 	

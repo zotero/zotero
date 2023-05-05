@@ -10,13 +10,8 @@ needed. */
 	display: -moz-box !important;
 }
 
-/* Custom header implementation based on the Wizard's header. This allows the
-size of the billboard's remotecontent to size the window since it does not
-have an updateheader on the billboard page. */
-updateheader {
-	-moz-binding: url("chrome://mozapps/content/update/updates.xml#updateheader");
-	display: -moz-box;
-	-moz-box-orient: horizontal;
+.update-header h2 {
+	font-size: 13px;
 }
 
 #downloadProgress {
@@ -31,4 +26,8 @@ richlistitem.update {
 
 .update-name {
 	-moz-box-flex: 1;
+}
+
+#errorReason {
+	padding: .75em;
 }
