@@ -61,42 +61,52 @@ wizard > deck {
 
 
 
-/* merge.xml */
-zoteromergegroup {
-	margin: 0;
-	padding: 0;
-	overflow-y: auto;
+/* Merge Group */
+merge-group {
+	display: flex;
 }
 
-zoteromergepane *[anonid="delete-box"] {
-	min-width: 15em;
-	-moz-box-align: center;
-	-moz-box-pack: center;
+merge-pane {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-width: 26em;
 }
 
-zoteromergepane .groupbox-body {
-	padding: 0;
+merge-pane groupbox {
+	flex: 1;
 }
 
-zoteromergepane[selected=true] groupbox caption {
+merge-pane[selected=true] h2,
+merge-pane[selected=true] attachment-box #title {
+	color: red;
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+merge-group:not([mergetype="note"]) #left-pane:active h2,
+merge-group:not([mergetype="note"]) #right-pane:active h2,
+merge-group:not([mergetype="note"]) #left-pane:active attachment-box #title,
+merge-group:not([mergetype="note"]) #right-pane:active attachment-box #title {
 	color: red;
 	font-weight: bold;
 }
 
-hbox:not([mergetype=note]) zoteromergepane:active[id=leftpane] groupbox caption,
-hbox:not([mergetype=note]) zoteromergepane:active[id=rightpane] groupbox caption {
-	color: red;
-	font-weight: bold;
+#left-pane:hover:not([selected=true]) h2,
+#right-pane:hover:not([selected=true]) h2 {
+	text-decoration: underline;
 }
 
-zoteromergepane {
-	min-width: 28em;
-}
-
-zoteromergepane div[anonid=parent-row] {
+merge-pane .parent-row {
 	margin: 7px 5px;
 }
 
-zoteromergepane div[anonid=parent-row] span {
+merge-pane .parent-row span {
 	font-weight: bold;
+}
+
+merge-pane .delete-box {
+	min-width: 15em;
+	-moz-box-align: center;
+	-moz-box-pack: center;
 }

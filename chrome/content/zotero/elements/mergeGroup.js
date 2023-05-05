@@ -33,11 +33,9 @@
 			this._type = null;
 			
 			this.content = MozXULElement.parseXULToFragment(`
-				<div id="merge-group" xmlns="http://www.w3.org/1999/xhtml">
-					<merge-pane id="left-pane" flex="1" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"/>
-					<merge-pane id="right-pane" flex="1" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"/>
-					<merge-pane id="merge-pane" flex="1" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"/>
-				</div>
+				<merge-pane id="left-pane" flex="1" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"/>
+				<merge-pane id="right-pane" flex="1" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"/>
+				<merge-pane id="merge-pane" flex="1" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"/>
 			`, ['chrome://zotero/locale/zotero.dtd']);
 		}
 		
@@ -84,17 +82,17 @@
 			}
 			
 			this._type = val;
-			this._id('merge-group').setAttribute('mergetype', val);
+			this.setAttribute('mergetype', val);
 		}
 		
 		set leftCaption(val) {
-			this._leftPane.caption.label = val;
+			this._leftPane.caption = val;
 		}
 		set rightCaption(val) {
-			this._rightPane.caption.label = val;
+			this._rightPane.caption = val;
 		}
 		set mergeCaption(val) {
-			this._mergePane.caption.label = val;
+			this._mergePane.caption = val;
 		}
 		
 		get leftPane() {
@@ -249,17 +247,15 @@
 			this._deleted = false;
 			
 			this.content = MozXULElement.parseXULToFragment(`
-				<vbox flex="1">
-					<groupbox class="merge-pane" flex="1">
-						<caption class="caption"/>
-						<html:div class="parent-row" hidden="true"/>
-						<box class="object-placeholder"/>
-						<hbox class="delete-box" hidden="true" flex="1">
-							<label value="&zotero.merge.deleted;"/>
-						</hbox>
-					</groupbox>
-					<button class="choose-button"/>
-				</vbox>
+				<groupbox>
+					<label><html:h2/></label>
+					<html:div class="parent-row" hidden="true"/>
+					<box class="object-placeholder"/>
+					<hbox class="delete-box" hidden="true" flex="1">
+						<label value="&zotero.merge.deleted;"/>
+					</hbox>
+				</groupbox>
+				<button class="choose-button"/>
 			`, ['chrome://zotero/locale/zotero.dtd']);
 		}
 		
@@ -274,7 +270,7 @@
 			this.isMergePane = this.id == 'merge-pane';
 			
 			if (!this.isMergePane) {
-				this.pane.onclick = function () {
+				this.box.onclick = function () {
 					this.parent.choosePane(this);
 				}.bind(this);
 			}
@@ -284,12 +280,16 @@
 			return this.parent.type;
 		}
 		
-		get pane() {
-			return this._class('merge-pane');
+		get box() {
+			return this.querySelector('groupbox');
 		}
 		
 		get caption() {
-			return this._class('caption');
+			return this.querySelector('h2').textContent;
+		}
+		
+		set caption(val) {
+			this.querySelector('h2').textContent = val;
 		}
 		
 		get parentRow() {
@@ -428,7 +428,7 @@
 		}
 		
 		click() {
-			this.pane.click();
+			this.box.click();
 		}
 		
 		_class(className) {
