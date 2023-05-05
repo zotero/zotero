@@ -124,11 +124,11 @@ function check_xulrunner_hash {
     else
         recalculated_xulrunner_hash=$($CALLDIR/scripts/xulrunner_hash -p $platform)
         current_xulrunner_hash=$(< "$CALLDIR/xulrunner/$platform")
-        if [ $current_xulrunner_hash != $recalculated_xulrunner_hash ]; then 
+        if [ "$current_xulrunner_hash" != "$recalculated_xulrunner_hash" ]; then 
             echo "xulrunner hashes not matching for platform $platform - rerunning fetch_xulrunner"
             $CALLDIR/scripts/fetch_xulrunner -p $platform
             second_check_xulrunner_hash=$(< "$CALLDIR/xulrunner/$platform")
-            if [ $second_check_xulrunner_hash != $recalculated_xulrunner_hash ]; then
+            if [ "$second_check_xulrunner_hash" != "$recalculated_xulrunner_hash" ]; then
                 echo "Could not match xulrunner generated hash with hash saved by fetch_xulrunner for platform $platform"
                 exit 1
             fi
