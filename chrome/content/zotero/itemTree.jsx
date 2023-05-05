@@ -921,6 +921,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		const showMessage = !this.collectionTreeRow || this._itemsPaneMessage;
 		
 		const itemsPaneMessage = (<div
+			key="items-pane-message"
 			onDragOver={e => this.props.dragAndDrop && this.onDragOver(e, -1)}
 			onDrop={e => this.props.dragAndDrop && this.onDrop(e, -1)}
 			onClick={(e) => {
