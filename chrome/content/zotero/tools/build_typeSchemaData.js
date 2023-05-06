@@ -1,5 +1,5 @@
 import FilePicker from 'zotero/modules/filePicker';
-	
+
 (async function () {
     // Create schema
     var schema = {"itemTypes":{}, "creatorTypes":{}, "fields":{}};
@@ -77,11 +77,12 @@ import FilePicker from 'zotero/modules/filePicker';
         resultElem.innerHTML = '<p>Failed.</p>';
     } else {
         let schemaFile = Zotero.File.pathToFile(fp.file);
-        schemaFile.append("connectorTypeSchemaData.js");
+        schemaFile.append("zoteroTypeSchemaData.js");
         await Zotero.File.putContentsAsync(
             schemaFile,
-            `Zotero.Connector_Types.schema = ${JSON.stringify(schema)}`
+            `var ZOTERO_TYPE_SCHEMA = ${JSON.stringify(schema)};\n\n`
+                 + "if (typeof module !== 'undefined') {\n\tmodule.exports = ZOTERO_TYPE_SCHEMA;\n}\n"
         );
-        resultElem.innerHTML = `<p>Wrote ${schemaFile} successfully.</p>`;
+        resultElem.innerHTML = `<p>Wrote ${schemaFile.path} successfully.</p>`;
     }
 })();
