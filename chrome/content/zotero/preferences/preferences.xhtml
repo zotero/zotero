@@ -43,13 +43,18 @@
 	the switch statement in Zotero.Prefs.observe().
 -->
 <window id="zotero-prefs"
-		title="&zotero.preferences.title;"
+		data-l10n-id="preferences-window"
 		onload="Zotero_Preferences.init()"
 		onunload="Zotero_Preferences.onUnload()"
 		windowtype="zotero:pref"
 		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 		xmlns:html="http://www.w3.org/1999/xhtml"
 		style="display: flex;">
+	
+	<linkset>
+		<html:link rel="localization" href="branding/brand.ftl"/>
+		<html:link rel="localization" href="preferences.ftl"/>
+	</linkset>
 	
 	<script>
 		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
