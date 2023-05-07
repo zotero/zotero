@@ -12,7 +12,6 @@ resource/csl-validator.js
 resource/jspath.js
 resource/prop-types.js
 resource/react*
-resource/schema/connectorTypeSchemaData.js
 resource/tinymce/*
 test/resource/*
 translators/*
