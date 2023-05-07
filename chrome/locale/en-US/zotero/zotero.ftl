@@ -1,5 +1,3 @@
--app-name = Zotero 
-
 import-wizard =
     .title = "Import"
 

@@ -42,6 +42,7 @@ class XULElementBase extends XULElement {
 			this.append(content);
 		}
 
+		MozXULElement.insertFTLIfNeeded("branding/brand.ftl");
 		MozXULElement.insertFTLIfNeeded("zotero.ftl");
 		if (document.l10n && this.shadowRoot) {
 			document.l10n.connectRoot(this.shadowRoot);
