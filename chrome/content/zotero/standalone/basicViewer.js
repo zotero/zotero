@@ -76,6 +76,11 @@ window.addEventListener("click", function (event) {
 	}
 });
 
+window.addEventListener('dragover', (e) => {
+	// Prevent default to allow drop (e.g. to allow dropping an XPI on the Add-ons window)
+	e.preventDefault();
+});
+
 function loadURI(uri, options = {}) {
 	// browser.browsingContext.allowJavascript (sic) would seem to do what we want here,
 	// but it has no effect. So we use sandboxFlags instead:
