@@ -111,42 +111,46 @@ while getopts "d:f:p:c:tseq" opt; do
 done
 
 function check_xulrunner_hash {
-    platform=$1
+	platform=$1
 
-    if [[ $platform != "m" ]] && [[ $platform != "w" ]] && [[ $platform != "l" ]]; then
-        echo "Platform parameter incorrect. Usage: -p m(mac)/w(windows)/l(linux)"
-        exit 1
-    fi
+	if [ $platform == "m" ]; then
+		platform_hash_file="hash-mac"
+	elif [ $platform == "w" ]; then
+		platform_hash_file="hash-win"
+	elif [ $platform == "l" ]; then
+		platform_hash_file="hash-linux"
+	else
+		echo "Platform parameter incorrect. Acceptable values: m/w/l"
+		exit 1
+	fi
 
-    if [ ! -e "$CALLDIR/xulrunner/hash-$platform" ]; then
-        echo "xulrunner hash file $platform was not found - running fetch_xulrunner"
-        $CALLDIR/scripts/fetch_xulrunner -p $platform
-    else
-        recalculated_xulrunner_hash=$($CALLDIR/scripts/xulrunner_hash -p $platform)
-        current_xulrunner_hash=$(< "$CALLDIR/xulrunner/hash-$platform")
-        if [ "$current_xulrunner_hash" != "$recalculated_xulrunner_hash" ]; then 
-            echo "xulrunner hashes not matching for platform $platform - rerunning fetch_xulrunner"
-            $CALLDIR/scripts/fetch_xulrunner -p $platform
-            second_check_xulrunner_hash=$(< "$CALLDIR/xulrunner/hash-$platform")
-            if [ "$second_check_xulrunner_hash" != "$recalculated_xulrunner_hash" ]; then
-                echo "Could not match xulrunner generated hash with hash saved by fetch_xulrunner for platform $platform"
-                exit 1
-            fi
-        else
-           echo "xulrunner hashes matching for platform $platform"
-        fi
-    fi
+	if [ ! -e "$CALLDIR/xulrunner/$platform_hash_file" ]; then
+		echo "xulrunner not found -- downloading"
+		$CALLDIR/scripts/fetch_xulrunner -p $platform
+	else
+		recalculated_xulrunner_hash=$($CALLDIR/scripts/xulrunner_hash -p $platform)
+		current_xulrunner_hash=$(< "$CALLDIR/xulrunner/$platform_hash_file")
+		if [ "$current_xulrunner_hash" != "$recalculated_xulrunner_hash" ]; then 
+			echo "xulrunner hashes don't match -- redownloading"
+			$CALLDIR/scripts/fetch_xulrunner -p $platform
+			current_xulrunner_hash=$(< "$CALLDIR/xulrunner/$platform_hash_file")
+			if [ "$current_xulrunner_hash" != "$recalculated_xulrunner_hash" ]; then
+				echo "xulrunner hashes don't match after running fetch_xulrunner!"
+				exit 1
+			fi
+		fi
+	fi
 }
 
 #Check if xulrunner and GECKO_VERSION for each platform match
 if [ $BUILD_MAC == 1 ]; then
-    check_xulrunner_hash m
+	check_xulrunner_hash m
 fi
 if [ $BUILD_WIN == 1 ]; then
-    check_xulrunner_hash w
+	check_xulrunner_hash w
 fi
 if [ $BUILD_LINUX == 1 ]; then
-    check_xulrunner_hash l
+	check_xulrunner_hash l
 fi
 
 

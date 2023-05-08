@@ -8,31 +8,31 @@ cd "$APP_ROOT_DIR"
 
 platform=""
 while getopts ":p:" opt; do
-  case $opt in
-    p)
-      platform="$OPTARG"
-      ;;
-    \?)
-      echo "Invalid option: -$OPTARG" >&2
-      exit 1
-      ;;
-    :)
-      echo "Option -$OPTARG requires an argument." >&2
-      exit 1
-      ;;
-  esac
+	case $opt in
+		p)
+			platform="$OPTARG"
+			;;
+		\?)
+			echo "Invalid option: -$OPTARG" >&2
+			exit 1
+			;;
+		:)
+			echo "Option -$OPTARG requires an argument." >&2
+			exit 1
+			;;
+	esac
 done
 
 
 if [ $platform == "m" ]; then
-    GECKO_VERSION="$GECKO_VERSION_MAC"
+		GECKO_VERSION="$GECKO_VERSION_MAC"
 elif [ $platform == "w" ]; then
-    GECKO_VERSION="$GECKO_VERSION_WIN"
+		GECKO_VERSION="$GECKO_VERSION_WIN"
 elif [ $platform == "l" ]; then
-    GECKO_VERSION="$GECKO_VERSION_LINUX"
+		GECKO_VERSION="$GECKO_VERSION_LINUX"
 else
-    echo "Platform parameter incorrect. Usage: -p m(mac)/w(windows)/l(linux)"
-    exit 1
+		echo "Platform parameter incorrect. Usage: -p m(mac)/w(windows)/l(linux)"
+		exit 1
 fi
 
 xulrunner_content=$(< "$SCRIPT_DIR/fetch_xulrunner")
