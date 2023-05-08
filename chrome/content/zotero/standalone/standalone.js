@@ -959,7 +959,7 @@ const gXPInstallObserver = {
 				Zotero.alert(
 					null,
 					Zotero.getString("standalone.addonInstallationFailed.title"),
-					Zotero.getString("standalone.addonInstallationFailed.body", installs[0].name));
+					Zotero.getString("standalone.addonInstallationFailed.body", [installs[0].name || installs[0].file.path]));
 				break;
 			/*case "addon-install-started":
 			case "addon-install-complete":*/
