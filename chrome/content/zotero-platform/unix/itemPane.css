@@ -1,11 +1,3 @@
-/* Some distros have icons disabled by default at the OS level and
- * mozilla is a respectful gent.
- */
-#zotero-feed-item-addTo-button .button-icon {
-	display: block;
-	margin-right: 5px
-}
-
 /* Set to hidden in user-agent css for some reason. */
 #zotero-feed-item-addTo-button .menu-iconic-left {
 	visibility: visible;

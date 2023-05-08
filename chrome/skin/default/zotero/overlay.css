@@ -716,15 +716,36 @@
 	color: HighlightText;
 }
 
-.split-menu-button, .split-menu-button [anonid="dropmarker-box"] {
-	/* Hide the dropmarker if the button overflows */
+.split-menu-button {
+	display: flex;
+	align-items: center;
+	padding-right: 0;
+}
+
+.split-menu-button [anonid="button-image"] {
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+	margin-inline-end: 5px;
+}
+
+.split-menu-button [anonid="button-text"] {
+	flex: 1;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.split-menu-button [anonid="dropmarker-box"] {
+	display: flex;
+	align-items: center;
 	overflow: hidden;
 }
 
 .split-menu-button [anonid="dropmarker-separator"] {
-	-moz-box-flex: 1;
+	height: calc(100% - 5px);
 	border-inline-start: 1px solid #aaa;
-	margin: 5px 2px 5px 4px;
+	margin: 0 2px 0 4px;
 }
 
 .split-menu-button .split-menu-button-dropmarker {

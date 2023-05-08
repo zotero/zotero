@@ -292,7 +292,7 @@ var ZoteroItemPane = new function() {
 	this.setTranslateButton = function() {
 		var label = Zotero.getString('pane.item.addTo', _translationTarget.name);
 		var elem = document.getElementById('zotero-feed-item-addTo-button');
-		elem.setAttribute('label', label);
+		elem.label = label;
 
 		var key = Zotero.Keys.getKeyForCommand('saveToZotero');
 		
@@ -300,8 +300,8 @@ var ZoteroItemPane = new function() {
 			+ (Zotero.rtl ? ' \u202B' : ' ') + '(' 
 			+ (Zotero.isMac ? '⇧⌘' : Zotero.getString('general.keys.ctrlShift'))
 			+ key + ')';
-		elem.setAttribute('tooltiptext', tooltip);
-		elem.setAttribute('image', _translationTarget.treeViewImage);
+		elem.title = tooltip;
+		elem.image = _translationTarget.treeViewImage;
 	};
 	
 
@@ -315,11 +315,11 @@ var ZoteroItemPane = new function() {
 	this.setReadLabel = function (isRead) {
 		var elem = document.getElementById('zotero-feed-item-toggleRead-button');
 		var label = Zotero.getString('pane.item.' + (isRead ? 'markAsUnread' : 'markAsRead'));
-		elem.setAttribute('label', label);
+		elem.textContent = label;
 
 		var key = Zotero.Keys.getKeyForCommand('toggleRead');
 		var tooltip = label + (Zotero.rtl ? ' \u202B' : ' ') + '(' + key + ')'
-		elem.setAttribute('tooltiptext', tooltip);
+		elem.title = tooltip;
 	};
 }   
 

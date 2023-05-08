@@ -85,28 +85,12 @@
 }
 
 #zotero-feed-item-toggleRead-button {
-	/*
-	DEBUG: `overflow: hidden` breaks clicking in fx102, but without it longer localized strings
-	overflow the button at narrow pane widths
-	
-	https://github.com/zotero/zotero/issues/3110
-	
 	overflow: hidden;
+	white-space: nowrap;
 	text-overflow: ellipsis;
 	max-width: 150px;
-	*/
 }
 
 #zotero-feed-item-addTo-button {
 	max-width: 250px;
-}
-
-#zotero-feed-item-addTo-button button {
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-
-#zotero-feed-item-addTo-button .button-icon {
-	margin-inline-end: 5px;
-	height: 16px;
 }

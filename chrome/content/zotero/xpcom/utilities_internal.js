@@ -2174,7 +2174,9 @@ Zotero.Utilities.Internal = {
 	 * @return {Boolean} If a <menupopup> child was found and opened
 	 */
 	showNativeElementPopup(element) {
-		let popup = element.querySelector(':scope > menupopup');
+		let popup = element.hasAttribute('popup')
+			? element.getRootNode().getElementById(element.getAttribute('popup'))
+			: element.querySelector(':scope > menupopup');
 		if (popup) {
 			if (Zotero.isMac) {
 				let rect = element.getBoundingClientRect();

@@ -354,9 +354,9 @@ describe("Item pane", function () {
 				
 				let button = doc.getElementById('zotero-feed-item-toggleRead-button');
 				
-				assert.equal(button.getAttribute('label'), Zotero.getString('pane.item.markAsUnread'));
+				assert.equal(button.textContent, Zotero.getString('pane.item.markAsUnread'));
 				yield item.toggleRead(false);
-				assert.equal(button.getAttribute('label'), Zotero.getString('pane.item.markAsRead'));
+				assert.equal(button.textContent, Zotero.getString('pane.item.markAsRead'));
 			});
 		});
 	});
