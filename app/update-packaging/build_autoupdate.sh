@@ -143,7 +143,7 @@ for version in "$FROM" "$TO"; do
 	
 	MAC_ARCHIVE="Zotero-${version}.dmg"
 	WIN32_ARCHIVE="Zotero-${version}_win32.zip"
-	WIN64_ARCHIVE="Zotero-${version}_x64.zip"
+	WIN64_ARCHIVE="Zotero-${version}_win-x64.zip"
 	LINUX_X86_ARCHIVE="Zotero-${version}_linux-i686.tar.bz2"
 	LINUX_X86_64_ARCHIVE="Zotero-${version}_linux-x86_64.tar.bz2"
 	
@@ -239,7 +239,7 @@ for version in "$FROM" "$TO"; do
 			done
 			INCREMENTALS_FOUND=1
 		else
-			echo "$WIN32_ARCHIVE/$WIN64_ARCHIVE not found"
+			echo "$WIN32_ARCHIVE and/or $WIN64_ARCHIVE not found"
 		fi
 	fi
 	
