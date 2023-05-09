@@ -80,8 +80,10 @@
 			let hiDPISuffix = window.devicePixelRatio > 1 ? '@2x' : '';
 			let frag = document.importNode(
 				MozXULElement.parseXULToFragment(`
-					<image anonid="button-image"/>
-					<html:span anonid="button-text"/>
+					<html:div anonid="button-image-and-text-box">
+						<image anonid="button-image"/>
+						<html:span anonid="button-text"/>
+					</html:div>
 					<html:div anonid="dropmarker-separator"/>
 					<html:div anonid="dropmarker-box">
 						<image src="chrome://zotero/skin/searchbar-dropmarker${hiDPISuffix}.png" width="7" height="4" class="split-menu-button-dropmarker"/>

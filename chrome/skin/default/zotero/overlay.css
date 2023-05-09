@@ -722,6 +722,13 @@
 	padding-right: 0;
 }
 
+.split-menu-button [anonid="button-image-and-text-box"] {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
 .split-menu-button [anonid="button-image"] {
 	width: 16px;
 	height: 16px;
@@ -730,7 +737,6 @@
 }
 
 .split-menu-button [anonid="button-text"] {
-	flex: 1;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
