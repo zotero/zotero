@@ -347,6 +347,7 @@ if [ $BUILD_MAC == 1 ]; then
 	#if [ ! -e "Firefox $GECKO_VERSION MacOS.zip" ]; then
 	#	rm "MacOS.zip"
 	#fi
+	echo $($SCRIPT_DIR/xulrunner_hash -p m) > hash-mac
 fi
 
 if [ $BUILD_WIN == 1 ]; then
@@ -374,6 +375,7 @@ if [ $BUILD_WIN == 1 ]; then
 		echo
 		echo
 	done
+	echo $($SCRIPT_DIR/xulrunner_hash -p w) > hash-win
 fi
 
 if [ $BUILD_LINUX == 1 ]; then
@@ -404,7 +406,7 @@ if [ $BUILD_LINUX == 1 ]; then
 	pushd firefox-x86_64
 	modify_omni linux64
 	popd
-	
+	echo $($SCRIPT_DIR/xulrunner_hash -p l) > hash-linux
 	rm "firefox-$GECKO_VERSION.tar.bz2"
 fi
 

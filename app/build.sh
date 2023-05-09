@@ -110,6 +110,53 @@ while getopts "d:f:p:c:tseq" opt; do
 	shift $((OPTIND-1)); OPTIND=1
 done
 
+function check_xulrunner_hash {
+	platform=$1
+
+	if [ $platform == "m" ]; then
+		platform_hash_file="hash-mac"
+	elif [ $platform == "w" ]; then
+		platform_hash_file="hash-win"
+	elif [ $platform == "l" ]; then
+		platform_hash_file="hash-linux"
+	else
+		echo "Platform parameter incorrect. Acceptable values: m/w/l"
+		exit 1
+	fi
+
+	if [ ! -e "$CALLDIR/xulrunner/$platform_hash_file" ]; then
+		echo "xulrunner not found -- downloading"
+		echo
+		$CALLDIR/scripts/fetch_xulrunner -p $platform
+	else
+		recalculated_xulrunner_hash=$($CALLDIR/scripts/xulrunner_hash -p $platform)
+		current_xulrunner_hash=$(< "$CALLDIR/xulrunner/$platform_hash_file")
+		if [ "$current_xulrunner_hash" != "$recalculated_xulrunner_hash" ]; then 
+			echo "xulrunner hashes don't match -- redownloading"
+			echo
+			$CALLDIR/scripts/fetch_xulrunner -p $platform
+			current_xulrunner_hash=$(< "$CALLDIR/xulrunner/$platform_hash_file")
+			if [ "$current_xulrunner_hash" != "$recalculated_xulrunner_hash" ]; then
+				echo "xulrunner hashes don't match after running fetch_xulrunner!"
+				exit 1
+			fi
+		fi
+	fi
+}
+
+#Check if xulrunner and GECKO_VERSION for each platform match
+if [ $BUILD_MAC == 1 ]; then
+	check_xulrunner_hash m
+fi
+if [ $BUILD_WIN == 1 ]; then
+	check_xulrunner_hash w
+fi
+if [ $BUILD_LINUX == 1 ]; then
+	check_xulrunner_hash l
+fi
+
+
+
 # Require source dir or ZIP file
 if [[ -z "$SOURCE_DIR" ]] && [[ -z "$ZIP_FILE" ]]; then
 	usage
