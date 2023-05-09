@@ -27,17 +27,15 @@
 
 {
 	/**
-	 * Extends MozButton to provide a split menubutton with a clickable left side and a dropmarker that opens a menu.
+	 * A split menubutton with a clickable left side and a dropmarker that opens a menu.
 	 */
-	class SplitMenuButton extends customElements.get('button') {
+	class SplitMenuButton extends HTMLButtonElement {
+		_image = null;
+		_label = null;
+		
 		constructor() {
 			super();
-
-			// Just in case, make sure this button does NOT appear as a standard <button type="menu">
-			// We don't want the entire button to open the menu and we don't want the standard dropmarker
-			this.removeAttribute('type');
 			
-			// For easier CSS targeting
 			this.classList.add('split-menu-button');
 
 			// Pointer events don't reach the button's children, so check mousedown positions manually and open
@@ -58,38 +56,43 @@
 		}
 
 		connectedCallback() {
-			if (this.delayConnectedCallback() || this._hasConnected) {
-				return;
-			}
-			super.connectedCallback();
-
-			this.querySelector('[anonid="button-box"]').after(this.constructor.dropmarkerFragment);
+			this.append(this.constructor.contentFragment);
 		}
 
-		static get dropmarkerFragment() {
+		get image() {
+			return this.querySelector('[anonid="button-image"]').src;
+		}
+
+		set image(value) {
+			this.querySelector('[anonid="button-image"]').src = value;
+		}
+
+		get label() {
+			return this.querySelector('[anonid="button-text"]').textContent;
+		}
+
+		set label(value) {
+			this.querySelector('[anonid="button-text"]').textContent = value;
+		}
+		
+		static get contentFragment() {
 			// Zotero.hiDPI[Suffix] may not have been initialized yet, so calculate it ourselves
 			let hiDPISuffix = window.devicePixelRatio > 1 ? '@2x' : '';
 			let frag = document.importNode(
 				MozXULElement.parseXULToFragment(`
-					<vbox>
-						<box anonid="dropmarker-separator"/>
-					</vbox>
-					<hbox align="center" anonid="dropmarker-box">
+					<html:div anonid="button-image-and-text-box">
+						<image anonid="button-image"/>
+						<html:span anonid="button-text"/>
+					</html:div>
+					<html:div anonid="dropmarker-separator"/>
+					<html:div anonid="dropmarker-box">
 						<image src="chrome://zotero/skin/searchbar-dropmarker${hiDPISuffix}.png" width="7" height="4" class="split-menu-button-dropmarker"/>
-					</hbox>
+					</html:div>
 				`),
 				true
 			);
 			Object.defineProperty(this, "dropmarkerFragment", { value: frag });
 			return frag;
-		}
-
-		_handleClick() {
-			super._handleClick();
-			let popup = this.querySelector(':scope > menupopup');
-			if (!this.disabled && (!popup || popup.state == 'closed')) {
-				this.doCommand();
-			}
 		}
 	}
 

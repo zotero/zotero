@@ -1,11 +1,10 @@
+#zotero-feed-item-toggleRead-button {
+	margin: 5px 0 3px 6px;
+}
+
 #zotero-feed-item-addTo-button {
 	margin: 5px 6px 3px;
 	padding-left: 8px;
-}
-
-#zotero-feed-item-addTo-button button {
-	margin: 0;
-	-moz-appearance: none;
 }
 
 /* Show duplicates date list item as selected even when not focused
