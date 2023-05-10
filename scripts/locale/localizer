@@ -17,7 +17,7 @@ $use_content_output_dir = true; // set to true for XPI, false for BZ
 $localeCodeInOutputXML = true; // set to true for XPI, false for BZ
 
 $locale_re = '/([a-z]{2})(\-[A-Z]{2})?/';
-$locale_file_re = '/^[a-z].+\.(dtd|props)$/';
+$locale_file_re = '/^[a-z].+\.(dtd|properties)$/';
 
 // Zotero files
 $english_files = array_filter(
@@ -110,7 +110,9 @@ foreach ($all_english_files as $file) {
 				$extension,
 				"$english_path/$file",
 				$locale_source_file,
-				$locale
+				$locale,
+				// Preserve whitespace in Mozilla files
+				str_contains($file, 'mozilla')
 			);
 		}
 		
@@ -147,12 +149,13 @@ function parse_strings($type, $file, $locale = null) {
 			// 2: key
 			// 3: space after key
 			// 4: string
-			// 5: space after ">
-			$regex = '|<!ENTITY(\s*)([^\s]*)(\s*)"([^"]*)"(\s*>\s*)|s';
+			// 5: space before >
+			// 6: newlines
+			$regex = '/<!ENTITY(\s*)([^\s]*)(\s*)"([^"]*)"(\s*)> *(\n*)(\n|$)/s';
 			break;
 		
 		case 'properties':
-			$regex = '|^(?:#\s*)?([^\s]*)\s*=\s*(.*)$|';
+			$regex = '/([^\s]*)\s*= *([^\n]*)(\s*)(\n|$)/s';
 			break;
 		
 		default:
@@ -164,8 +167,11 @@ function parse_strings($type, $file, $locale = null) {
 		if ($type == 'dtd') {
 			$pairs[$match[2]] = $match;
 		}
+		else if ($type == 'properties') {
+			$pairs[$match[1]] = $match;
+		}
 		else {
-			$pairs[$match[1]] = $match[2];
+			throw new Exception("Unsupported");
 		}
 	}
 	
@@ -174,11 +180,11 @@ function parse_strings($type, $file, $locale = null) {
 
 
 
-function generate_locale($type, $english_file, $locale_file, $locale) {
+function generate_locale($type, $english_file, $locale_file, $locale, $preserveWhitespace = false) {
 	$output = '';
 	
 	// Keep copyright block at top of Mozilla files
-	preg_match('/<!--.+?-->\s+/s', file_get_contents($locale_file), $matches);
+	preg_match('/^(<!--.+?-->|# This Source Code.+?2.0\/\.)\s+/s', file_get_contents($locale_file), $matches);
 	if ($matches) {
 		$output .= $matches[0];
 	}
@@ -198,21 +204,42 @@ function generate_locale($type, $english_file, $locale_file, $locale) {
 			continue;
 		}
 		
-		$source_val = empty($locale_pairs[$key]) ? $english_pairs[$key] : $locale_pairs[$key];
+		$english_val = $english_pairs[$key];
+		$locale_val = empty($locale_pairs[$key]) ? $english_val : $locale_pairs[$key];
 		
 		switch ($type) {
 			case 'dtd':
-				$prefix = '<!ENTITY' . $source_val[1];
-				$middle = $source_val[3];
-				$string = '"' . $source_val[4] . '"';
-				$suffix = $source_val[5];
+				// Don't replace string with space, only truly empty string, or else we mess up
+				// zotero.merge.of in Estonian, which apparently doesn't exist
+				if (empty($locale_val[4])) {
+					$locale_val = $english_val;
+				}
+				
+				// Keep spacing between components
+				if ($preserveWhitespace) {
+					$prefix = '<!ENTITY' . $locale_val[1];
+					$middle = $locale_val[3];
+					$string = '"' . $locale_val[4] . '"';
+					$suffix = $locale_val[5] . ">" . $english_val[6];
+				}
+				else {
+					$prefix = '<!ENTITY ';
+					$middle = " ";
+					$string = '"' . $locale_val[4];
+					$suffix = '">' . $english_val[6];
+				}
 				break;
 			
 			case 'properties':
+				// If empty value, use English
+				if (empty(trim($locale_val[2]))) {
+					$locale_val = $english_val;
+				}
+				
 				$prefix = '';
 				$middle = '=';
-				$string = $source_val;
-				$suffix = '\n';
+				$string = $locale_val[2];
+				$suffix = $english_val[3];
 				break;
 			
 			default:
@@ -220,10 +247,10 @@ function generate_locale($type, $english_file, $locale_file, $locale) {
 				return false;
 		}
 		
-		$output .= $prefix . $key . $middle . $string . $suffix;
+		$output .= $prefix . $key . $middle . $string . $suffix . "\n";
 	}
 	
-	return $output;
+	return trim($output) . "\n";
 }
 
 
