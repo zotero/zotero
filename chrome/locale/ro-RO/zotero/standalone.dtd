@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "Părăsește Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "Fișier">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "Salvează...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "Părăsire">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-
 <!ENTITY copyCitationCmd.label "Copiază citare">
 <!ENTITY copyBibliographyCmd.label "Copiază bibliografie">
 <!ENTITY copyNoteCmd.label "Copy Note">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "Go">
-
 
 <!ENTITY viewMenu.label "Vizualizare">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "Dimensiune font">
 <!ENTITY noteFontSize.label "Notă dimensiune font">
 
-
 <!ENTITY toolsMenu.label "Instrumente">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY installConnector.label "Instalează conectorul pentru browser">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "Extensii">
 <!ENTITY developer.label "Dezvoltator">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Minimizare">
 <!ENTITY bringAllToFront.label "Adu totul în față">
 <!ENTITY zoomWindow.label "Panoramare">
 <!ENTITY windowMenu.label "Fereastră">
 
-
 <!ENTITY helpMenu.label "Ajutor">
 <!ENTITY helpMenu.accesskey "H">
-
-
 <!ENTITY helpMenuWin.label "Ajutor">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">

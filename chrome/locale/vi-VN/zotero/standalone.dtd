@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "Thoát Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "Tập tin">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "Lưu...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "Quit">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-
 <!ENTITY copyCitationCmd.label "Sao chép trích dẫn">
 <!ENTITY copyBibliographyCmd.label "Sao chép danh mục tài liệu tham khảo">
 <!ENTITY copyNoteCmd.label "Copy Note">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "Thực hiện">
-
 
 <!ENTITY viewMenu.label "Cách xem">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "Cỡ chữ">
 <!ENTITY noteFontSize.label "Cỡ chữ ghi chú">
 
-
 <!ENTITY toolsMenu.label "Các công cụ">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY installConnector.label "Cài bộ kết nối trình duyệt">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "Add-ons">
 <!ENTITY developer.label "Nhà phát triển">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Thu nhỏ">
 <!ENTITY bringAllToFront.label "Đưa tất cả ra phía trước">
 <!ENTITY zoomWindow.label "Zoom">
 <!ENTITY windowMenu.label "Cửa sổ">
 
-
 <!ENTITY helpMenu.label "Giúp đỡ">
 <!ENTITY helpMenu.accesskey "H">
-
-
 <!ENTITY helpMenuWin.label "Giúp đỡ">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">

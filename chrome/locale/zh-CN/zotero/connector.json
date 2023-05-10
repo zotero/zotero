@@ -45,7 +45,7 @@
     "message": "保存此条目时出错。$1 可能限制您单次保存条目的数量。更多信息参阅 $2。"
   },
   "progressWindow_error_troubleshootingTranslatorIssues": {
-    "message": "翻译器故障排除"
+    "message": "转换器故障排除"
   },
   "progressWindow_error_siteAccessLimits": {
     "message": "网站访问限制"
@@ -63,7 +63,7 @@
     "message": "$1 已停用"
   },
   "extensionIsDisabled_extensionPage": {
-    "message": "$1已于扩展页面中停用 "
+    "message": "$1 已于扩展页面中停用"
   },
   "appConnector": {
     "message": "$1 连接器"
@@ -150,13 +150,13 @@
     "message": "复制未经代理的链接"
   },
   "copyUnproxiedPageURL": {
-    "message": "复制未经代理的页面URL"
+    "message": "复制未经代理的页面网址"
   },
   "reloadViaProxy": {
     "message": "通过代理重新加载"
   },
   "reloadVia": {
-    "message": "通过$1 重新加载"
+    "message": "通过 $1 重新加载"
   },
   "general_saveTo": {
     "message": "保存到 $1"

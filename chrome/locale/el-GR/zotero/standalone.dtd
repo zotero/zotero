@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "Κλείσιμο Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "Αρχείο">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "Αποθήκευση...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "Κλείσιμο">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-
 <!ENTITY copyCitationCmd.label "Αντιγραφή παραπομπής/παράθεσης">
 <!ENTITY copyBibliographyCmd.label "Αντιγραφή βιβλιογραφίας">
 <!ENTITY copyNoteCmd.label "Copy Note">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "Go">
-
 
 <!ENTITY viewMenu.label "Προβολή">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "Μέγεθος Γραμματοσειράς">
 <!ENTITY noteFontSize.label "Σημείωση Μεγέθους Γραμματοσειράς">
 
-
 <!ENTITY toolsMenu.label "Εργαλεία">
 <!ENTITY toolsMenu.accesskey "Τ">
 <!ENTITY installConnector.label "Εγκατάσταση Σύνδεσης με πρόγραμμα πλοήγησης">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "Πρόσθετα">
 <!ENTITY developer.label "Προγραμματιστής">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Ελαχιστοποίηση">
 <!ENTITY bringAllToFront.label "Όλα στο προσκήνιο">
 <!ENTITY zoomWindow.label "Μεγέθυνση">
 <!ENTITY windowMenu.label "Παράθυρο">
 
-
 <!ENTITY helpMenu.label "Βοήθεια">
 <!ENTITY helpMenu.accesskey "Η">
-
-
 <!ENTITY helpMenuWin.label "Βοήθεια">
 <!ENTITY helpMenuWin.accesskey "Η">
 <!ENTITY helpMac.commandkey "?">

@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "Zotero beenden">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "Datei">
 <!ENTITY fileMenu.accesskey "D">
 <!ENTITY saveCmd.label "Speichern...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "Beenden">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-
 <!ENTITY copyCitationCmd.label "Zitation kopieren">
 <!ENTITY copyBibliographyCmd.label "Literaturverzeichnis kopieren">
 <!ENTITY copyNoteCmd.label "Notiz kopieren">
@@ -44,14 +42,12 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "Blättern">
-
 
 <!ENTITY viewMenu.label "Ansicht">
 <!ENTITY viewMenu.accesskey "A">
 <!ENTITY layout.label "Layout">
-<!ENTITY standardView.label "Standard Ansicht">
+<!ENTITY standardView.label "Standardansicht">
 <!ENTITY stackedView.label "Gestapelte Ansicht">
 <!ENTITY collectionsPane.label "Sammlungsbereich">
 <!ENTITY itemPane.label "Eintragungsbereich">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "Schriftgröße">
 <!ENTITY noteFontSize.label "Schriftgröße Notizen">
 
-
 <!ENTITY toolsMenu.label "Werkzeuge">
 <!ENTITY toolsMenu.accesskey "W">
 <!ENTITY installConnector.label "Browsererweiterungen installieren">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "Add-ons">
 <!ENTITY developer.label "Entwickler">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Minimieren">
 <!ENTITY bringAllToFront.label "Alle nach vorn bringen">
 <!ENTITY zoomWindow.label "Zoom">
 <!ENTITY windowMenu.label "Fenster">
 
-
 <!ENTITY helpMenu.label "Hilfe">
 <!ENTITY helpMenu.accesskey "H">
-
-
 <!ENTITY helpMenuWin.label "Hilfe">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">

@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "Zotero を終了">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "ファイル">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "保存...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "終了">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-
 <!ENTITY copyCitationCmd.label "出典表記をコピー">
 <!ENTITY copyBibliographyCmd.label "参考文献目録をコピー">
 <!ENTITY copyNoteCmd.label "メモをコピー">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "移動">
-
 
 <!ENTITY viewMenu.label "表示">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "フォントサイズ">
 <!ENTITY noteFontSize.label "メモのフォントサイズ">
 
-
 <!ENTITY toolsMenu.label "ツール">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY installConnector.label "ブラウザ・コネクタをインストールする">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "アドオン">
 <!ENTITY developer.label "開発者">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "しまう">
 <!ENTITY bringAllToFront.label "すべてを前面に">
 <!ENTITY zoomWindow.label "拡大">
 <!ENTITY windowMenu.label "ウインドウ">
 
-
 <!ENTITY helpMenu.label "ヘルプ">
 <!ENTITY helpMenu.accesskey "H">
-
-
 <!ENTITY helpMenuWin.label "ヘルプ">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">

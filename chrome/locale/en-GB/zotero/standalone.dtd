@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "Quit Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "File">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "Save…">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "Quit">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-
 <!ENTITY copyCitationCmd.label "Copy Citation">
 <!ENTITY copyBibliographyCmd.label "Copy Bibliography">
 <!ENTITY copyNoteCmd.label "Copy Note">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "Go">
-
 
 <!ENTITY viewMenu.label "View">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "Font Size">
 <!ENTITY noteFontSize.label "Note Font Size">
 
-
 <!ENTITY toolsMenu.label "Tools">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY installConnector.label "Install Browser Connector">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "Add-ons">
 <!ENTITY developer.label "Developer">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Minimise">
 <!ENTITY bringAllToFront.label "Bring All to Front">
 <!ENTITY zoomWindow.label "Zoom">
 <!ENTITY windowMenu.label "Window">
 
-
 <!ENTITY helpMenu.label "Help">
 <!ENTITY helpMenu.accesskey "H">
-
-
 <!ENTITY helpMenuWin.label "Help">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">

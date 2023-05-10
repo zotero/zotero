@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "Lopeta Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "Tiedosto">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "Tallenna...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "Lopeta">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-
 <!ENTITY copyCitationCmd.label "Kopioi viite">
 <!ENTITY copyBibliographyCmd.label "Kopioi kirjallisuusluettelo">
 <!ENTITY copyNoteCmd.label "Kopioi muistiinpano">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "Mene">
-
 
 <!ENTITY viewMenu.label "Näytä">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "Fonttikoko">
 <!ENTITY noteFontSize.label "Muistiinpanojen fonttikoko">
 
-
 <!ENTITY toolsMenu.label "Työkalut">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY installConnector.label "Asenna selainlisäosa">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "Lisäosat">
 <!ENTITY developer.label "Kehittäjätyökalut">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Pienennä">
 <!ENTITY bringAllToFront.label "Tuo kaikki eteen">
 <!ENTITY zoomWindow.label "Lähennä">
 <!ENTITY windowMenu.label "Ikkuna">
 
-
 <!ENTITY helpMenu.label "Ohje">
 <!ENTITY helpMenu.accesskey "H">
-
-
 <!ENTITY helpMenuWin.label "Ohje">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">

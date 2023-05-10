@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "Zotero bezárása">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "Fájl">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "Mentés…">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "Bezárás">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-
 <!ENTITY copyCitationCmd.label "Hivatkozás másolása">
 <!ENTITY copyBibliographyCmd.label "Bibliográfia másolása">
 <!ENTITY copyNoteCmd.label "Jegyzet másolása">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "Ugrás">
-
 
 <!ENTITY viewMenu.label "Nézet">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "Betűméret">
 <!ENTITY noteFontSize.label "Jegyzet betűmérete">
 
-
 <!ENTITY toolsMenu.label "Eszközök">
 <!ENTITY toolsMenu.accesskey "E">
 <!ENTITY installConnector.label "Böngészőmodul telepítése">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "Kiegészítők">
 <!ENTITY developer.label "Fejlesztő eszközök">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Kis méret">
 <!ENTITY bringAllToFront.label "Mindet előrehozni">
 <!ENTITY zoomWindow.label "Nagyítás">
 <!ENTITY windowMenu.label "Ablak">
 
-
 <!ENTITY helpMenu.label "Súgó">
 <!ENTITY helpMenu.accesskey "S">
-
-
 <!ENTITY helpMenuWin.label "Súgó">
 <!ENTITY helpMenuWin.accesskey "S">
 <!ENTITY helpMac.commandkey "?">

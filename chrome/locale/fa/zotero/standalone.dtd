@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "بستن زوترو">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "پرونده">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "ذخیره...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "خروج">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-
 <!ENTITY copyCitationCmd.label "کپی ارجاع‌دهی">
 <!ENTITY copyBibliographyCmd.label "کپی کتاب‌شناسی">
 <!ENTITY copyNoteCmd.label "کپی یادداشت">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "برو">
-
 
 <!ENTITY viewMenu.label "نمایش">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "سایز فونت">
 <!ENTITY noteFontSize.label "سایز فونت یادداشت‌ها">
 
-
 <!ENTITY toolsMenu.label "ابزارها">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY installConnector.label "نصب متصل‌کننده مرورگر">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "افزودنی‌ها">
 <!ENTITY developer.label "توسعه‌دهنده">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "کوچک‌ کردن">
 <!ENTITY bringAllToFront.label "Bring All to Front">
 <!ENTITY zoomWindow.label "بزرگنمایی">
 <!ENTITY windowMenu.label "پنجره">
 
-
 <!ENTITY helpMenu.label "راهنما">
 <!ENTITY helpMenu.accesskey "H">
-
-
 <!ENTITY helpMenuWin.label "راهنما">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "؟">

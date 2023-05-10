@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "Berhentikan Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "Berkas">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "Simpan...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "Berhenti">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-
 <!ENTITY copyCitationCmd.label "Kopi Sitasi">
 <!ENTITY copyBibliographyCmd.label "Kopi Bibliografi">
 <!ENTITY copyNoteCmd.label "Salin catatan">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "Pergi">
-
 
 <!ENTITY viewMenu.label "Lihat">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "Ukuran font">
 <!ENTITY noteFontSize.label "Ukuran font catatan">
 
-
 <!ENTITY toolsMenu.label "Perkakas">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY installConnector.label "Pasang Konektor Peramban">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "Pengaya">
 <!ENTITY developer.label "Pengembang">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Kecilkan">
 <!ENTITY bringAllToFront.label "Bawa Semuanya ke Depan">
 <!ENTITY zoomWindow.label "Arahkan">
 <!ENTITY windowMenu.label "Jendela">
 
-
 <!ENTITY helpMenu.label "Bantuan">
 <!ENTITY helpMenu.accesskey "H">
-
-
 <!ENTITY helpMenuWin.label "Bantuan">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">

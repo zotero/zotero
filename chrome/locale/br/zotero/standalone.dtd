@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "Kuitaat Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "Restr">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "Enrollañ...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "Kuitaat">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-
 <!ENTITY copyCitationCmd.label "Eilañ an arroudenn">
 <!ENTITY copyBibliographyCmd.label "Eilañ al levrlennadur">
 <!ENTITY copyNoteCmd.label "Eilañ an notenn">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "Mont">
-
 
 <!ENTITY viewMenu.label "Gwel">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "Ment skritur">
 <!ENTITY noteFontSize.label "Notenn ment skritur">
 
-
 <!ENTITY toolsMenu.label "Ostilhoù">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY installConnector.label "Staliañ ar c'hevreer Zotero er merdeer">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "Lugantoù">
 <!ENTITY developer.label "Diorren">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Bihanaat">
 <!ENTITY bringAllToFront.label "Degas pep-tra d'ar rak-leur">
 <!ENTITY zoomWindow.label "Zoumiñ">
 <!ENTITY windowMenu.label "Prenestr">
 
-
 <!ENTITY helpMenu.label "Sikour">
 <!ENTITY helpMenu.accesskey "H">
-
-
 <!ENTITY helpMenuWin.label "Sikour">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">

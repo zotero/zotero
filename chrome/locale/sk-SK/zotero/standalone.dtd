@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "Zavrieť Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "Súbor">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "Uložiť...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "Zavrieť">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-
 <!ENTITY copyCitationCmd.label "Kopírovať citáciu">
 <!ENTITY copyBibliographyCmd.label "Kopírovať bibliografiu">
 <!ENTITY copyNoteCmd.label "Kopírovať poznámku">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "Go">
-
 
 <!ENTITY viewMenu.label "Zobraziť">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "Veľkosť písma">
 <!ENTITY noteFontSize.label "Veľkosť písma v poznámkach">
 
-
 <!ENTITY toolsMenu.label "Nástroje">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY installConnector.label "Nainštalovať konektor prehliadača">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "Doplnky">
 <!ENTITY developer.label "Vývojár">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Minimalizovať">
 <!ENTITY bringAllToFront.label "Preniesť všetko do popredia">
 <!ENTITY zoomWindow.label "Zväčšiť">
 <!ENTITY windowMenu.label "Okno">
 
-
 <!ENTITY helpMenu.label "Pomoc">
 <!ENTITY helpMenu.accesskey "H">
-
-
 <!ENTITY helpMenuWin.label "Pomoc">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">

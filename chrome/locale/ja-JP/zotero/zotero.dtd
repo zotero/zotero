@@ -281,7 +281,8 @@
 <!ENTITY zotero.rtfScan.citation.label "出典表記">
 <!ENTITY zotero.rtfScan.itemName.label "アイテム名">
 <!ENTITY zotero.rtfScan.unmappedCitations.label "文献不明の出典表記">
-<!ENTITY zotero.rtfScan.ambiguousCitations.label "Ambiguous Citations">
+<!ENTITY zotero.rtfScan.ambiguousCitations.label "曖昧な出典表記
+">
 <!ENTITY zotero.rtfScan.mappedCitations.label "文献同定済みの出典表記">
 <!ENTITY zotero.rtfScan.introPage.label "案内">
 <!ENTITY zotero.rtfScan.introPage.description "Zotero は RTF ファイルから自動的に出典表記を抽出し、出典表記を再整形して、参考文献目録を挿入することができます。この RTF スキャン機能は現在、以下に挙げる形式の出典表記をサポートしています:">

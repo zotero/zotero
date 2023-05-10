@@ -59,6 +59,12 @@
   "progressWindow_error_upgradeClient_latestVersion": {
     "message": "neueste Version"
   },
+  "extensionIsDisabled": {
+    "message": "$1 ist deaktiviert"
+  },
+  "extensionIsDisabled_extensionPage": {
+    "message": "$1 ist auf Erweiterungsseiten deaktiviert."
+  },
   "appConnector": {
     "message": "$1 Erweiterung"
   },

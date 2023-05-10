@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "Zakończ Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "Plik">
 <!ENTITY fileMenu.accesskey "P">
 <!ENTITY saveCmd.label "Zapisz...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "Zakończ">
 <!ENTITY quitApplicationCmd.accesskey "k">
 
-
 <!ENTITY copyCitationCmd.label "Kopiuj cytowanie">
 <!ENTITY copyBibliographyCmd.label "Kopiuj bibliografię">
 <!ENTITY copyNoteCmd.label "Kopiuj notatkę">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "t">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "Rozpocznij">
-
 
 <!ENTITY viewMenu.label "Widok">
 <!ENTITY viewMenu.accesskey "W">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "Rozmiar czcionki">
 <!ENTITY noteFontSize.label "Rozmiar czcionki notatek">
 
-
 <!ENTITY toolsMenu.label "Narzędzia">
 <!ENTITY toolsMenu.accesskey "N">
 <!ENTITY installConnector.label "Zainstaluj łącznik do przeglądarki">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "Dodatki">
 <!ENTITY developer.label "Programista">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Minimalizuj">
 <!ENTITY bringAllToFront.label "Przenieś wszystko na przód">
 <!ENTITY zoomWindow.label "Powiększ">
 <!ENTITY windowMenu.label "Okno">
 
-
 <!ENTITY helpMenu.label "Pomoc">
 <!ENTITY helpMenu.accesskey "O">
-
-
 <!ENTITY helpMenuWin.label "Pomoc">
 <!ENTITY helpMenuWin.accesskey "O">
 <!ENTITY helpMac.commandkey "?">

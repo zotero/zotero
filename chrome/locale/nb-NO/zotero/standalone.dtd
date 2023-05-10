@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "Avslutt Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "Fil">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "Lagre...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "Avslutt">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-
 <!ENTITY copyCitationCmd.label "Kopier henvisning">
 <!ENTITY copyBibliographyCmd.label "Kopier bibliografi">
 <!ENTITY copyNoteCmd.label "Kopier notat">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "Gå til">
-
 
 <!ENTITY viewMenu.label "Vis">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "Skriftstørrelse">
 <!ENTITY noteFontSize.label "Skriftstørrelse for notat">
 
-
 <!ENTITY toolsMenu.label "Verktøy">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY installConnector.label "Innstaller Tilknytter for nettleser">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "Tillegg">
 <!ENTITY developer.label "Utvikler">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Minimer">
 <!ENTITY bringAllToFront.label "Bring alle fram">
 <!ENTITY zoomWindow.label "Zoom">
 <!ENTITY windowMenu.label "Vindu">
 
-
 <!ENTITY helpMenu.label "Hjelp">
 <!ENTITY helpMenu.accesskey "H">
-
-
 <!ENTITY helpMenuWin.label "Hjelp">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">

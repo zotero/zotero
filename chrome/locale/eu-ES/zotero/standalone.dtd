@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "Irten Zoterotik">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "Fitxategia">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "Gorde...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "Irten">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-
 <!ENTITY copyCitationCmd.label "Kopiatu aipua">
 <!ENTITY copyBibliographyCmd.label "Kopiatu bibliografia">
 <!ENTITY copyNoteCmd.label "Kopiatu oharra">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "Joan">
-
 
 <!ENTITY viewMenu.label "Ikuspegia">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "Letra-tamaina">
 <!ENTITY noteFontSize.label "Oharraren letra-tamaina">
 
-
 <!ENTITY toolsMenu.label "Tresnak">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY installConnector.label "Nabigatzaileko konektorea instalatu">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "Gehigarriak">
 <!ENTITY developer.label "Garatzailea">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Minimizatu">
 <!ENTITY bringAllToFront.label "Guztiak aurrekaldera ekarri">
 <!ENTITY zoomWindow.label "Zoom">
 <!ENTITY windowMenu.label "Leihoa">
 
-
 <!ENTITY helpMenu.label "Laguntza">
 <!ENTITY helpMenu.accesskey "H">
-
-
 <!ENTITY helpMenuWin.label "Laguntza">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">

@@ -30,10 +30,10 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatikusan törölje a kukából azokat az elemeket, amelyek">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "napnál régebbiek">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
+<!ENTITY zotero.preferences.pdfReader "PDF olvasó">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Szerző - Év - Cím">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Cím - Szerző - Év">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "Fájlnév">
 
 <!ENTITY zotero.preferences.groups "Csoportok">

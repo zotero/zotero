@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "Zotero afsluiten">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "Bestand">
 <!ENTITY fileMenu.accesskey "B">
 <!ENTITY saveCmd.label "Opslaan...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "Afsluiten">
 <!ENTITY quitApplicationCmd.accesskey "A">
 
-
 <!ENTITY copyCitationCmd.label "Verwijzing kopiëren">
 <!ENTITY copyBibliographyCmd.label "Bibliografie kopiëren">
 <!ENTITY copyNoteCmd.label "Copy Note">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "Go">
-
 
 <!ENTITY viewMenu.label "Beeld">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "Lettergrootte">
 <!ENTITY noteFontSize.label "Lettergrootte notities">
 
-
 <!ENTITY toolsMenu.label "Opties">
 <!ENTITY toolsMenu.accesskey "O">
 <!ENTITY installConnector.label "Browser Connector installeren">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "Add-ons">
 <!ENTITY developer.label "Ontwikkelaar">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Minimaliseren">
 <!ENTITY bringAllToFront.label "Alles naar voren brengen">
 <!ENTITY zoomWindow.label "Zoom">
 <!ENTITY windowMenu.label "Venster">
 
-
 <!ENTITY helpMenu.label "Help">
 <!ENTITY helpMenu.accesskey "H">
-
-
 <!ENTITY helpMenuWin.label "Help">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">

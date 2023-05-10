@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "退出 Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "文件">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "保存…">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "退出">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-
 <!ENTITY copyCitationCmd.label "复制引注">
 <!ENTITY copyBibliographyCmd.label "复制参考文献表">
 <!ENTITY copyNoteCmd.label "复制笔记">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "前往">
-
 
 <!ENTITY viewMenu.label "查看">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "字体大小">
 <!ENTITY noteFontSize.label "笔记字体大小">
 
-
 <!ENTITY toolsMenu.label "工具">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY installConnector.label "安装浏览器扩展">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "附加组件">
 <!ENTITY developer.label "开发者">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "最小化">
 <!ENTITY bringAllToFront.label "前端显示">
 <!ENTITY zoomWindow.label "缩放">
 <!ENTITY windowMenu.label "窗口">
 
-
 <!ENTITY helpMenu.label "帮助">
 <!ENTITY helpMenu.accesskey "H">
-
-
 <!ENTITY helpMenuWin.label "帮助">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">

@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "Izhod iz Zotera">
 <!ENTITY quitApplicationCmdMac.key "z">
 
-
 <!ENTITY fileMenu.label "Datoteka">
 <!ENTITY fileMenu.accesskey "D">
 <!ENTITY saveCmd.label "Shrani ...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "Izhod">
 <!ENTITY quitApplicationCmd.accesskey "z">
 
-
 <!ENTITY copyCitationCmd.label "Kopiraj citat">
 <!ENTITY copyBibliographyCmd.label "Kopiraj bibliografijo">
 <!ENTITY copyNoteCmd.label "Kopiraj opombo">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "b">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "b">
 
-
 <!ENTITY goMenu.label "Pojdi">
-
 
 <!ENTITY viewMenu.label "Pogled">
 <!ENTITY viewMenu.accesskey "g">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "Velikost pisave">
 <!ENTITY noteFontSize.label "Velikost pisave opomb">
 
-
 <!ENTITY toolsMenu.label "Orodja">
 <!ENTITY toolsMenu.accesskey "d">
 <!ENTITY installConnector.label "Namesti konektor za brskalnik">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "Dodatki">
 <!ENTITY developer.label "Razvijalec">
 
-
 <!ENTITY minimizeWindow.key "k">
 <!ENTITY minimizeWindow.label "Skrči">
 <!ENTITY bringAllToFront.label "Postavi vse v ospredje">
 <!ENTITY zoomWindow.label "Povečava">
 <!ENTITY windowMenu.label "Okno">
 
-
 <!ENTITY helpMenu.label "Pomoč">
 <!ENTITY helpMenu.accesskey "m">
-
-
 <!ENTITY helpMenuWin.label "Pomoč">
 <!ENTITY helpMenuWin.accesskey "m">
 <!ENTITY helpMac.commandkey "?">

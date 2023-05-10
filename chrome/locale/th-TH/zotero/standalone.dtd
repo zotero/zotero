@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "ออกจาก Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "แฟ้ม">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "บันทึก...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "เลิกใช้">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-
 <!ENTITY copyCitationCmd.label "สำเนาการอ้างอิง">
 <!ENTITY copyBibliographyCmd.label "สำเนาบรรณานุกรม">
 <!ENTITY copyNoteCmd.label "Copy Note">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "Go">
-
 
 <!ENTITY viewMenu.label "View">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "Font Size">
 <!ENTITY noteFontSize.label "Note Font Size">
 
-
 <!ENTITY toolsMenu.label "เครื่องมือ">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY installConnector.label "Install Browser Connector">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "โปรแกรมเสริม">
 <!ENTITY developer.label "Developer">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "ย่อ">
 <!ENTITY bringAllToFront.label "นำมาไว้ด้านหน้า">
 <!ENTITY zoomWindow.label "ซูม">
 <!ENTITY windowMenu.label "หน้าต่าง">
 
-
 <!ENTITY helpMenu.label "วิธีใช้">
 <!ENTITY helpMenu.accesskey "H">
-
-
 <!ENTITY helpMenuWin.label "วิธีใช้">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">

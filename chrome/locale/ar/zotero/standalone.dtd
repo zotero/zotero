@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "خروج من زوتيرو">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "ملف">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "حفظ...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "إنهاء">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-
 <!ENTITY copyCitationCmd.label "نسخ الاقتباس">
 <!ENTITY copyBibliographyCmd.label "نسخ قائمة المراجع">
 <!ENTITY copyNoteCmd.label "Copy Note">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "Go">
-
 
 <!ENTITY viewMenu.label "عرض">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "حجم الخط">
 <!ENTITY noteFontSize.label "حجم خط الملاحظات">
 
-
 <!ENTITY toolsMenu.label "أدوات">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY installConnector.label "ثبت موصل المتصفح">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "ملحقات">
 <!ENTITY developer.label "المطور">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "تصغير">
 <!ENTITY bringAllToFront.label "أحضر الكل للأمام">
 <!ENTITY zoomWindow.label "تقريب">
 <!ENTITY windowMenu.label "نافذة">
 
-
 <!ENTITY helpMenu.label "مساعدة">
 <!ENTITY helpMenu.accesskey "م">
-
-
 <!ENTITY helpMenuWin.label "مساعدة">
 <!ENTITY helpMenuWin.accesskey "م">
 <!ENTITY helpMac.commandkey "؟">

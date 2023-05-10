@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "Вийти з Zotero">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "Файл">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "Зберегти...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "Вийти">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-
 <!ENTITY copyCitationCmd.label "Копіювати цитату">
 <!ENTITY copyBibliographyCmd.label "Копіювати список літератури">
 <!ENTITY copyNoteCmd.label "Copy Note">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "Go">
-
 
 <!ENTITY viewMenu.label "View">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "Font Size">
 <!ENTITY noteFontSize.label "Note Font Size">
 
-
 <!ENTITY toolsMenu.label "Інструменти">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY installConnector.label "Встановити браузерний конектор">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "Надбудови">
 <!ENTITY developer.label "Developer">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Згорнути">
 <!ENTITY bringAllToFront.label "Перенести все вперед">
 <!ENTITY zoomWindow.label "Збільшити">
 <!ENTITY windowMenu.label "Вікно">
 
-
 <!ENTITY helpMenu.label "Допомога">
 <!ENTITY helpMenu.accesskey "H">
-
-
 <!ENTITY helpMenuWin.label "Допомога">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">

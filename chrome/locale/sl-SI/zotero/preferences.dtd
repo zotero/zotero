@@ -30,10 +30,10 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Samodejno odstrani iz koša vse izbrisano pred več kot">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dnevi">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.pdfReader "Bralnik PDF">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Pokaži zavihke kot">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Avtor - leto - naslov">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Naslov - avtor - leto">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "Ime datoteke">
 
 <!ENTITY zotero.preferences.groups "Skupine">

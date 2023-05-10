@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "יציאה מ־Zotero">
 <!ENTITY quitApplicationCmdMac.key "צ">
 
-
 <!ENTITY fileMenu.label "קובץ">
 <!ENTITY fileMenu.accesskey "ק">
 <!ENTITY saveCmd.label "שמירה…">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "יציאה">
 <!ENTITY quitApplicationCmd.accesskey "צ">
 
-
 <!ENTITY copyCitationCmd.label "העתקת ציטוט">
 <!ENTITY copyBibliographyCmd.label "העתקת ביבליוגרפיה">
 <!ENTITY copyNoteCmd.label "העתקת הערה">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "ט">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "ק">
 
-
 <!ENTITY goMenu.label "קדימה">
-
 
 <!ENTITY viewMenu.label "תצוגה">
 <!ENTITY viewMenu.accesskey "ת">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "גודל גופן">
 <!ENTITY noteFontSize.label "גודל גופן הערה">
 
-
 <!ENTITY toolsMenu.label "כלים">
 <!ENTITY toolsMenu.accesskey "כ">
 <!ENTITY installConnector.label "התקנת מגשר דפדפן">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "תוספים">
 <!ENTITY developer.label "פיתוח">
 
-
 <!ENTITY minimizeWindow.key "ז">
 <!ENTITY minimizeWindow.label "מזעור">
 <!ENTITY bringAllToFront.label "קידום של הכול לחזית">
 <!ENTITY zoomWindow.label "תקריב">
 <!ENTITY windowMenu.label "חלון">
 
-
 <!ENTITY helpMenu.label "עזרה">
 <!ENTITY helpMenu.accesskey "ע">
-
-
 <!ENTITY helpMenuWin.label "עזרה">
 <!ENTITY helpMenuWin.accesskey "ע">
 <!ENTITY helpMac.commandkey "?">

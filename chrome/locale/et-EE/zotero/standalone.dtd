@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "Väljuda Zoterost">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "Fail">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "Salvestamine...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "Väljuda">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-
 <!ENTITY copyCitationCmd.label "Viite kopeerimine">
 <!ENTITY copyBibliographyCmd.label "Bibliograafia kopeerimine">
 <!ENTITY copyNoteCmd.label "Copy Note">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "Go">
-
 
 <!ENTITY viewMenu.label "View">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "Font Size">
 <!ENTITY noteFontSize.label "Note Font Size">
 
-
 <!ENTITY toolsMenu.label "Tööriistad">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY installConnector.label "Install Browser Connector">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "Lisad">
 <!ENTITY developer.label "Developer">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Minimeerida">
 <!ENTITY bringAllToFront.label "Kõik nähtavale tuua">
 <!ENTITY zoomWindow.label "Suurenda">
 <!ENTITY windowMenu.label "Aken">
 
-
 <!ENTITY helpMenu.label "Abi">
 <!ENTITY helpMenu.accesskey "H">
-
-
 <!ENTITY helpMenuWin.label "Abi">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">

@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "Baigti darbą su Zotero">
 <!ENTITY quitApplicationCmdMac.key "B">
 
-
 <!ENTITY fileMenu.label "Failas">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "Įrašyti...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "Baigti darbą">
 <!ENTITY quitApplicationCmd.accesskey "B">
 
-
 <!ENTITY copyCitationCmd.label "Kopijuoti citatą">
 <!ENTITY copyBibliographyCmd.label "Kopijuoti bibliografiją">
 <!ENTITY copyNoteCmd.label "Copy Note">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "e">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "Go">
-
 
 <!ENTITY viewMenu.label "Rodymas">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "Šrifto dydis">
 <!ENTITY noteFontSize.label "Pastabos šrifto dydis">
 
-
 <!ENTITY toolsMenu.label "Priemonės">
 <!ENTITY toolsMenu.accesskey "P">
 <!ENTITY installConnector.label "Įdiegti papildinį naršyklei">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "Priedai">
 <!ENTITY developer.label "Programuotojams">
 
-
 <!ENTITY minimizeWindow.key "r">
 <!ENTITY minimizeWindow.label "Suskleisti">
 <!ENTITY bringAllToFront.label "Perkelti visus į priekį">
 <!ENTITY zoomWindow.label "Mastelis">
 <!ENTITY windowMenu.label "Langas">
 
-
 <!ENTITY helpMenu.label "Žinynas">
 <!ENTITY helpMenu.accesskey "Ž">
-
-
 <!ENTITY helpMenuWin.label "Žinynas">
 <!ENTITY helpMenuWin.accesskey "Ž">
 <!ENTITY helpMac.commandkey "?">

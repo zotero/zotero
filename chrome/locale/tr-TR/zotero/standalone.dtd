@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "Zotero'dan Ayrıl">
 <!ENTITY quitApplicationCmdMac.key "Q">
 
-
 <!ENTITY fileMenu.label "Dosya">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "Kaydet...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "Ayrıl">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-
 <!ENTITY copyCitationCmd.label "Alıntı Kopyala">
 <!ENTITY copyBibliographyCmd.label "Kaynakça Kopyala">
 <!ENTITY copyNoteCmd.label "Notu Kopyala">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "Git">
-
 
 <!ENTITY viewMenu.label "Görünüm">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "Yazı Tipi Boyutu">
 <!ENTITY noteFontSize.label "Not Yazı Tipi Boyutu">
 
-
 <!ENTITY toolsMenu.label "Araçlar">
 <!ENTITY toolsMenu.accesskey "T">
 <!ENTITY installConnector.label "Tarayıcı Bağlayıcılarını Kur...">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "Eklentiler">
 <!ENTITY developer.label "Geliştirici">
 
-
 <!ENTITY minimizeWindow.key "m">
 <!ENTITY minimizeWindow.label "Küçült">
 <!ENTITY bringAllToFront.label "Hepsini En Öne Getir">
 <!ENTITY zoomWindow.label "Yakınlaştır">
 <!ENTITY windowMenu.label "Pencere">
 
-
 <!ENTITY helpMenu.label "Yardım">
 <!ENTITY helpMenu.accesskey "H">
-
-
 <!ENTITY helpMenuWin.label "Yardım">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">

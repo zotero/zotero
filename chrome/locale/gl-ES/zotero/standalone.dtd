@@ -9,7 +9,6 @@
 <!ENTITY quitApplicationCmdMac.label "Pechar Zotero">
 <!ENTITY quitApplicationCmdMac.key "S">
 
-
 <!ENTITY fileMenu.label "Ficheiro">
 <!ENTITY fileMenu.accesskey "F">
 <!ENTITY saveCmd.label "Gardar...">
@@ -33,7 +32,6 @@
 <!ENTITY quitApplicationCmd.label "Saír">
 <!ENTITY quitApplicationCmd.accesskey "Q">
 
-
 <!ENTITY copyCitationCmd.label "Copiar a cita">
 <!ENTITY copyBibliographyCmd.label "Copiar a bibliografía">
 <!ENTITY copyNoteCmd.label "Copiar nota">
@@ -44,9 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-
 <!ENTITY goMenu.label "Ir">
-
 
 <!ENTITY viewMenu.label "Ver">
 <!ENTITY viewMenu.accesskey "V">
@@ -60,7 +56,6 @@
 <!ENTITY fontSize.label "Tamaño da tipografía:">
 <!ENTITY noteFontSize.label "Tamaño tipográfico das notas">
 
-
 <!ENTITY toolsMenu.label "Ferramentas">
 <!ENTITY toolsMenu.accesskey "F">
 <!ENTITY installConnector.label "Instalar conector para o navegador">
@@ -68,18 +63,14 @@
 <!ENTITY addons.label "Engadidos">
 <!ENTITY developer.label "Desenvolvedor">
 
-
 <!ENTITY minimizeWindow.key "e">
 <!ENTITY minimizeWindow.label "Minimizar">
 <!ENTITY bringAllToFront.label "Traer todo a diante">
 <!ENTITY zoomWindow.label "Ampliar">
 <!ENTITY windowMenu.label "Xanela">
 
-
 <!ENTITY helpMenu.label "Axuda">
 <!ENTITY helpMenu.accesskey "A">
-
-
 <!ENTITY helpMenuWin.label "Axuda">
 <!ENTITY helpMenuWin.accesskey "H">
 <!ENTITY helpMac.commandkey "?">
