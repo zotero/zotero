@@ -72,6 +72,7 @@ def main():
     # Can be a string or a dict containing 'file' and 'patterns'
     entries = [
         #"chrome/{0}/locale/{0}/global/dateFormat.properties",
+        #"chrome/{0}/locale/{0}/mozapps/update/updates.properties",
         "chrome/{0}/locale/{0}/global/editMenuOverlay.dtd",
         {
             "file": "chrome/{0}/locale/{0}/global/intl.properties",
@@ -134,6 +135,16 @@ def main():
                 print("Downloading " + xpi_url)
                 with urllib.request.urlopen(xpi_url) as response, open(pack_file, 'wb') as f:
                     shutil.copyfileobj(response, f)
+        
+        # Code to extract 'updates' files from old langpacks
+        #pack_file = None
+        #for file in os.listdir(pack_dir):
+        #    print(file)
+        #    if file.startswith("addon-"):
+        #        pack_file = os.path.join(pack_dir, file)
+        #        break
+        #if not pack_file:
+        #    continue
         
         # Unzip selected files straight to target locale dirs
         with zipfile.ZipFile(pack_file, "r") as zip_ref:
