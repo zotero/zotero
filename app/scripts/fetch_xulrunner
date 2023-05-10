@@ -220,12 +220,6 @@ function modify_omni {
 	#  
 	# Set available locales
 	cp "$APP_ROOT_DIR/assets/multilocale.txt" res/multilocale.txt
-	#  
-	#  # Force Lucida Grande on non-Retina displays, since San Francisco is used otherwise starting in
-	#  # Catalina, and it looks terrible
-	#  if [[ $platform == 'mac' ]]; then
-	#  	echo "* { font-family: Lucida Grande, Lucida Sans Unicode, Lucida Sans, Geneva, -apple-system, sans-serif !important; }" >> chrome/toolkit/skin/classic/global/global.css
-	#  fi
 	
 	# Use Zotero URL opening in Mozilla dialogs (e.g., app update dialog)
 	replace_line 'function openURL\(aURL\) \{' 'function openURL(aURL) {let {Zotero} = ChromeUtils.import("chrome:\/\/zotero\/content\/include.jsm"); Zotero.launchURL(aURL); return;' chrome/toolkit/content/global/contentAreaUtils.js
