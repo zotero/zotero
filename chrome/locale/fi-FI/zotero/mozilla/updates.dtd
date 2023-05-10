@@ -45,10 +45,8 @@
 
 <!ENTITY  error.label                     "Päivityksen lataus, tarkistus tai asennus ei onnistunut.
                                             Päivitys aiheutti virheilmoituksen:">
-                                           
 <!ENTITY  errorManual.label               "&brandShortName; voidaan päivittää käsin lataamalla ja 
                                             asentamalla ohjelman uusin versio osoitteesta:">
-                                           
 <!ENTITY  errorpatching.intro             "Korjauspäivitys ei toiminut. 
                                             &brandShortName; lataa päivitetyn ohjelmaversion ja yrittää uudestaan.">
 

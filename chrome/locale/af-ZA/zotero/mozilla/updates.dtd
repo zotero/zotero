@@ -35,9 +35,7 @@
 <!ENTITY  error.title                     "Bywerking het misluk">
 
 <!ENTITY  error.label                     "Kon nie vir hierdie bywerking kontroleer, dit aflaai of installeer nie. &brandShortName; kon nie opgedateer word nie, omdat:">
-                                           
 <!ENTITY  errorManual.label               "U kan &brandShortName; handmatig bywerk deur hierdie skakel te besoek en die jongste weergawe af te laai:">
-                                           
 <!ENTITY  errorpatching.intro             "Die gedeeltelike bywerking kon nie toegepas word nie. &brandShortName; sal weer probeer deur 'n volledige bywerking af te laai.">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName; kan nie bepaal of daar 'n bywerking is nie. Kontroleer of jy die jongste weergawe van &brandShortName; het by:">
@@ -50,13 +48,11 @@
 <!ENTITY  finishedBackgroundPage.text     "'n Sekuriteit-en-stabiliteit-bywerking vir &brandShortName; is afgelaai en is gereed om geïnstalleer te word.">
 <!ENTITY  finishedBackground.name         "Bywerking:">
 <!ENTITY  finishedBackground.more         "Die bywerking sal geïnstalleer word wanneer &brandShortName; weer begin. U kan &brandShortName; nou herbegin, of voortgaan om te werk, en later herbegin.">
-
-
 <!ENTITY  finishedBackground.moreElevated "This update requires administrator privileges. The update will be
                                            installed the next time &brandShortName; starts. You can restart
                                            &brandShortName; now, continue working and restart later, or decline this
                                            update.">
+
 <!ENTITY  update.details.label            "Besonderhede">
 <!ENTITY  update.installedOn.label        "Geïnstalleer op:">
 <!ENTITY  update.status.label             "Status:">
-

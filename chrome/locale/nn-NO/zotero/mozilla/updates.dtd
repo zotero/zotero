@@ -35,9 +35,7 @@
 <!ENTITY  error.title                     "Mislukka oppdatering">
 
 <!ENTITY  error.label                     "Det oppstod problem under kontroll, nedlasting eller installering av denne oppdateringa. Klarte ikkje å oppdatera &brandShortName; fordi:">
-                                           
 <!ENTITY  errorManual.label               "Du kan oppdatera &brandShortName; manuelt ved å gå til denne lenka, for å lasta ned siste versjon:">
-                                           
 <!ENTITY  errorpatching.intro             "Installering av den stegvise oppdateringa feila. &brandShortName; vil prøve å lasta ned ei fullstendige oppdatering.">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName; klarer ikkje å avgjera om det finst ei tilgjengeleg oppdatering. Kontroller om du har den nyaste versjonen av &brandShortName; frå:">

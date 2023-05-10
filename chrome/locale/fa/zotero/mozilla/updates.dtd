@@ -35,9 +35,7 @@
 <!ENTITY  error.title                     "بروزرسانی با مشکل مواجه شد">
 
 <!ENTITY  error.label                     "مشکلاتی در بررسی، بارگیری، و یا نصب این بروزرسانی وجود داشت. &brandShortName; نتوانست بروزرسانی شود زیرا:">
-                                           
 <!ENTITY  errorManual.label               "شما می‌توانید به‌هنگام سازی &brandShortName; را با مراجعه به این پیوند و بارگیری آخرین نسخه به طور دستی انجام دهید:">
-                                           
 <!ENTITY  errorpatching.intro             "بروزرسانی جزئی قابل اجرا نیست. &brandShortName; سعی میکند بستهٔ کامل را بارگیری و نصب نماید.">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName; قادر به تشخیص وجود بروزرسانی جدید نیست. لطفاً مطمئن شوید که جدیدترین نسخهٔ &brandShortName; را از این‌جا دریافت کرده‌اید:">

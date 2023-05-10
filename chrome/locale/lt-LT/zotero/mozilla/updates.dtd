@@ -35,9 +35,7 @@
 <!ENTITY  error.title                     "Atnaujinti nepavyko">
 
 <!ENTITY  error.label                     "Nesklandumai ieškant, atsiunčiant ar įdiegiant šį naujinimą. „&brandShortName;“ nepavyko atnaujinti dėl šių priežasčių:">
-                                           
 <!ENTITY  errorManual.label               "Galima atnaujinti „&brandShortName;“ rankiniu būdu aplankius šią svetainę ir atsisiuntus naujausią versiją:">
-                                           
 <!ENTITY  errorpatching.intro             "Dalinis atnaujinimas nepavyko. „&brandShortName;“ bandys dar kartą, atsiuntus visą naujinimą.">
 
 <!ENTITY  genericBackgroundError.label    "Programai „&brandShortName;“ nepavyko patikrinti, ar yra galimų programos naujinimų. Prašome patikrinti, ar turite naujausią „&brandShortName;“ laidą, adresu:">

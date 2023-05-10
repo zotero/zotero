@@ -35,9 +35,7 @@
 <!ENTITY  error.title                     "Oppdatering mislyktes">
 
 <!ENTITY  error.label                     "Det oppstod problemer under kontroll, nedlasting eller installering av denne oppdateringen. Klarte ikke oppdatere &brandShortName; fordi:">
-                                           
 <!ENTITY  errorManual.label               "Du kan oppdatere &brandShortName; ved å manuelt laste ned siste versjon fra denne lenken:">
-                                           
 <!ENTITY  errorpatching.intro             "Klarte ikke installere den inkrementelle oppdateringen. &brandShortName; vil forsøke å laste ned en fullstendig oppdatering.">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName; klarer ikke å avgjøre om det fins en tilgjengelig oppdatering. Kontroller om du har den nyeste versjonen av &brandShortName; fra:">

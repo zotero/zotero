@@ -35,9 +35,7 @@
 <!ENTITY  error.title                     "Ažuriranje nije uspjelo">
 
 <!ENTITY  error.label                     "Došlo je do problema pri provjeri, preuzimanju ili instalaciji ove dopune. &brandShortName; se nije mogao ažurirati zbog:">
-                                           
 <!ENTITY  errorManual.label               "&brandShortName; možete ažurirati ručno tako da posjetite ovu poveznicu ili preuzmete posljednju inačicu:">
-                                           
 <!ENTITY  errorpatching.intro             "Djelomično ažuriranje nije moglo biti primijenjeno. &brandShortName; će pokušati ponovno preuzimanjem potpuih dopuna.">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName; nije u mogućnosti odrediti je li dostupna dopuna. Molim provjerite da imate najnoviju inačicu &brandShortName;a sa:">

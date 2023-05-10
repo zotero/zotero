@@ -39,10 +39,8 @@
 <!ENTITY  error.title                     "עדכון נכשל">
 
 <!ENTITY  error.label                     "נמצאו שגיאות בבדיקה, הורדה או התקנה של                 עדכון זה. &brandShortName; אינו יכול להתעדכן משום ש:">
-                                           
 <!ENTITY  errorManual.label               "ביכולתך לעדכן את &brandShortName; ידנית על־ידי ביקור בקישור זה 
 והורדת הגרסה האחרונה:">
-                                           
 <!ENTITY  errorpatching.intro             "אין אפשרות ליישם את העדכון החלקי. &brandShortName; ינסה שוב על־ידי הורדת עדכון שלם.">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName; לא הצליח לגלות אם יש עדכון זמין. אנא 

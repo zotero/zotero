@@ -35,9 +35,7 @@
 <!ENTITY  error.title                     "ปรับรุ่นไม่สำเร็จ">
 
 <!ENTITY  error.label                     "มีปัญหาในการตรวจสอบ, ดาวน์โหลด, หรือ ติดตั้งชุดปรับรุ่นนี้ ไม่สามารถปรับรุ่น &brandShortName; ได้เพราะ :">
-                                           
 <!ENTITY  errorManual.label               "คุณสามารถปรับรุ่น &brandShortName; ได้เอง โดยไปที่ลิงก์นี้และดาวน์โหลดรุ่นล่าสุด :">
-                                           
 <!ENTITY  errorpatching.intro             "ไม่สามารถทำการปรับรุ่นแบบบางส่วนได้ &brandShortName; จะพยายามอีกครั้ง โดยการดาวน์โหลดชุดปรับรุ่นแบบเต็ม">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName; ไม่สามามารถระบุว่ามีการปรับรุ่นหรือไม่ โปรดตรวจสอบให้แน่ใจว่าคุณมี &brandShortName; รุ่นล่าสุดจาก:">

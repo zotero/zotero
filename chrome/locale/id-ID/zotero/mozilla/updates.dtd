@@ -35,9 +35,7 @@
 <!ENTITY  error.title                     "Pemutakhiran Gagal">
 
 <!ENTITY  error.label                     "Terjadi masalah pada pemeriksaan, pengunduhan, atau pemasangan pemutakhiran ini. &brandShortName; tidak dapat diperbarui karena:">
-                                           
 <!ENTITY  errorManual.label               "Anda dapat memperbarui &brandShortName; sendiri dengan mengunjungi tautan ini dan mengunduh versi terbaru:">
-                                           
 <!ENTITY  errorpatching.intro             "Pemutakhiran Parsial tidak dapat diaplikasikan. &brandShortName; akan mencoba lagi dengan mengunduh pemutakhiran lengkap.">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName; tidak dapat mengetahui apakah pemutakhiran tersedia. Pastikan Anda menggunakan versi terbaru &brandShortName; lewat:">

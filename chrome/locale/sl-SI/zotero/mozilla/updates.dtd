@@ -44,9 +44,7 @@
 <!ENTITY  error.title                     "Posodobitev ni uspela">
 
 <!ENTITY  error.label                     "Pri iskanju, prenosu ali namestitvi te posodobitve je prišlo do napak zaradi:">
-                                           
 <!ENTITY  errorManual.label               "Program lahko posodobite ročno, če obiščete naslednjo povezavo in prenesete najnovejšo različico:">
-                                           
 <!ENTITY  errorpatching.intro             "Delne posodobitve ne morem namestiti. Prenesena bo celotna posodobitev.">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName; ne uspe preveriti, ali je na voljo posodobitev.

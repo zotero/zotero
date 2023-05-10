@@ -35,9 +35,7 @@
 <!ENTITY  error.title                     "L'actualització ha fallat">
 
 <!ENTITY  error.label                     "S'han produït problemes en instal·lar aquesta actualització. El &brandShortName; no s'ha pogut actualitzar perquè:">
-                                           
 <!ENTITY  errorManual.label               "Podeu actualitzar el &brandShortName; manualment visitant aquest enllaç i baixant la darrera versió:">
-                                           
 <!ENTITY  errorpatching.intro             "L'actualització parcial no s'ha pogut aplicar. El &brandShortName; ho tornarà a provar baixant una actualització completa.">
 
 <!ENTITY  genericBackgroundError.label    "El &brandShortName; no pot determinar si hi ha una actualització disponible. Assegureu-vos que teniu la darrera versió del &brandShortName; de:">

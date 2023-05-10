@@ -44,10 +44,8 @@
 
 <!ENTITY  error.label                     "There were problems checking for, downloading, or installing this 
                                            update. &brandShortName; could not be updated because:">
-                                           
 <!ENTITY  errorManual.label               "You can update &brandShortName; manually by visiting this link
                                            and downloading the latest version:">
-                                           
 <!ENTITY  errorpatching.intro             "The partial Update could not be applied. 
                                            &brandShortName; will try again by downloading a complete Update.">
 

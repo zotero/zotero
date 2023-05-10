@@ -22,7 +22,6 @@
 <!ENTITY  evangelism.desc                 "Aktualizacja programu &brandShortName; jest wysoce zalecana.">
 
 <!ENTITY  downloadPage.title              "Pobieranie programu &brandShortName;">
-
 <!ENTITY  downloading.intro               "Trwa pobieranie aktualizacji…">
 <!ENTITY  connecting.label                "Łączenie z serwerem aktualizacji…">
 <!ENTITY  verificationFailedText.label    "Nie udało się potwierdzić integralności pobranej aktualizacji. Rozpoczęto pobieranie całego programu.">
@@ -34,14 +33,11 @@
 <!ENTITY  error.title                     "Aktualizacja się nie powiodła">
 
 <!ENTITY error.label "Pojawiły się problemy podczas sprawdzania, pobierania lub instalacji aktualizacji. Program &brandShortName; nie mógł zostać uaktualniony, ponieważ:">
-
 <!ENTITY  errorManual.label               "Można dokonać ręcznej aktualizacji programu &brandShortName; poprzez otwarcie tego odnośnika i pobranie najnowszej wersji:">
-
 <!ENTITY  errorpatching.intro             "Częściowa aktualizacja nie mogła zostać przeprowadzona. &brandShortName; spróbuje pobrać kompletną aktualizację.">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName; nie może ustalić, czy dostępna jest aktualizacja.
                                            Proszę upewnić się, że używana jest najnowsza wersja programu &brandShortName; z:">
-
 <!ENTITY errorCertAttrNoUpdate2.label "Nie można bezpiecznie uaktualnić programu &brandShortName;. Proszę upewnić się, że używana jest najnowsza wersja programu &brandShortName; z:">
 <!ENTITY  errorCertAttrHasUpdate.label    "Próba wymuszenia na programie &brandShortName; akceptacji niebezpiecznej aktualizacji.
                                            Proszę skontaktować się z dostawcą usług sieciowych i poszukać pomocy.">
@@ -50,9 +46,7 @@
 <!ENTITY  finishedPage.text               "Aktualizacja zostanie zainstalowana przy następnym uruchomieniu programu &brandShortName;. Uruchom teraz ponownie program &brandShortName; lub kontynuuj pracę i zainstaluj aktualizację później.">
 
 <!ENTITY  finishedBackgroundPage.text     "Program &brandShortName; pobrał ważną aktualizację i jest gotowy do jej zainstalowania.">
-
 <!ENTITY  finishedBackground.name         "Aktualizacja:">
-
 <!ENTITY finishedBackground.more "Aktualizacja zostanie zainstalowana przy następnym uruchomieniu programu &brandShortName;. Uruchom ponownie program &brandShortName; lub nie instaluj aktualizacji teraz i kontynuuj pracę.">
 <!ENTITY finishedBackground.moreElevated "Aktualizacja wymaga uprawnień administracyjnych i zostanie zainstalowana przy następnym uruchomieniu programu &brandShortName;. Uruchom program &brandShortName; ponownie, kontynuuj pracę uruchamiając ponownie później lub odrzuć tę aktualizację.">
 

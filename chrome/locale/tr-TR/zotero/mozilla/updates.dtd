@@ -35,9 +35,7 @@
 <!ENTITY  error.title                     "Güncelleme Başarısız Oldu">
 
 <!ENTITY  error.label                     "Bu güncellemeyi denetlerken, indirirken veya kurarken sorun oluştu. &brandShortName; şu nedenle güncellenemedi:">
-                                           
 <!ENTITY  errorManual.label               "Bu adresi ziyaretip edip son sürümü indirerek de &brandShortName; uygulamasını güncelleyebilirsiniz:">
-                                           
 <!ENTITY  errorpatching.intro             "Kısmî güncelleme uygulanamadı. &brandShortName; şimdi tüm güncellemeyi indirerek tekrar deneyecek.">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName; güncelleme olup olmadığını tespit edemedi. Lütfen &brandShortName; uygulamasının son sürümüne sahip olup olmadığınıza buradan bakın:">

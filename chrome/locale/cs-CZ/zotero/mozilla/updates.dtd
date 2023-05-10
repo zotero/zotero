@@ -37,9 +37,7 @@
 <!ENTITY  error.title                     "Aktualizace se nezdařila">
 
 <!ENTITY  error.label                     "Při kontrole, stahování či instalaci aktualizace došlo k chybě. Aplikaci &brandShortName; se nepodařilo aktualizovat, protože:">
-                                           
 <!ENTITY  errorManual.label               "Aplikaci &brandShortName; doporučujeme aktualizovat ručně stažením nejnovější verze z této stránky:">
-                                           
 <!ENTITY  errorpatching.intro             "Použití rozdílové aktualizace se nezdařilo. Aplikace &brandShortName; se pokusí stáhnout kompletní aktualizaci.">
 
 <!ENTITY  genericBackgroundError.label    "Aplikaci &brandShortName; se nepodařilo ověřit dostupnost aktualizací. Ověřte prosím, zda máte poslední verzi aplikace &brandShortName; z:">

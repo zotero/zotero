@@ -36,9 +36,7 @@
 <!ENTITY  error.title                     "La mise à jour a échoué">
 
 <!ENTITY  error.label                     "Des problèmes ont été rencontrés lors de la vérification, du téléchargement ou de l’installation de cette mise à jour. &brandShortName; n’a pas pu être mis à jour suite à :">
-
 <!ENTITY  errorManual.label               "Vous pouvez mettre &brandShortName; à jour manuellement en suivant ce lien et en téléchargeant la dernière version :">
-
 <!ENTITY  errorpatching.intro             "La mise à jour partielle n’a pas pu être appliquée. &brandShortName; va réessayer en téléchargeant une mise à jour complète.">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName; ne parvient pas à déterminer si une mise à jour est disponible. Veuillez
@@ -54,11 +52,9 @@
 
 <!ENTITY  finishedBackgroundPage.text     "Une mise à jour de sécurité et de stabilité pour &brandShortName; a été
                                            téléchargée et est prête à être installée.">
-
 <!ENTITY  finishedBackground.name         "Mise à jour :">
 <!ENTITY  finishedBackground.more         "La mise à jour sera installée au prochain démarrage de &brandShortName;. Vous pouvez
                                            redémarrer &brandShortName; maintenant, ou continuer votre travail et redémarrer plus tard.">
-
 <!ENTITY  finishedBackground.moreElevated "Cette mise à jour nécessite des privilèges administrateur. La mise à jour sera installée au
                                            prochain démarrage de &brandShortName;. Vous pouvez redémarrer &brandShortName; maintenant,
                                            continuer votre travail et redémarrer plus tard, ou refuser cette mise à jour.">

@@ -35,9 +35,7 @@
 <!ENTITY  error.title                     "Uppdatering misslyckades">
 
 <!ENTITY  error.label                     "Problem uppstod vid sökning, hämtning eller installation av den här uppdateringen. &brandShortName; kunde inte uppdateras eftersom:">
-                                           
 <!ENTITY  errorManual.label               "Du kan uppgradera &brandShortName; manuellt genom att besöka den här länken och hämta den senaste versionen:">
-                                           
 <!ENTITY  errorpatching.intro             "Programfixen kunde inte installeras. &brandShortName; kommer att försöka igen genom att hämta ett komplett uppdateringspaket.">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName; kan inte avgöra om det finns någon tillgänglig uppdatering. Kontrollera att du använder den senaste versionen av &brandShortName; från:">

@@ -47,10 +47,8 @@
 
 <!ENTITY  error.label                     "Pri kontrole, preberaní alebo inštalácii aktualizácie došlo k chybe. &brandShortName;
                                            sa nepodarilo aktualizovať, pretože: ">
-                                           
 <!ENTITY  errorManual.label               "&brandShortName; odporúčame aktualizovať ručne prevzatím najnovšej verzie
                                            z tejto stránky: ">
-                                           
 <!ENTITY  errorpatching.intro             "Použitie rozdielovej aktualizácie bolo neúspešné.
                                            &brandShortName; sa pokúsi prevziať kompletnú aktualizáciu.">
 

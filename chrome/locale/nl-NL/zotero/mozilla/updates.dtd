@@ -47,10 +47,8 @@
 
 <!ENTITY  error.label                     "Er was een probleem bij het controleren op, of het downloaden of installeren
                                            van deze update. &brandShortName; kon niet worden bijgewerkt, omdat:">
-
 <!ENTITY  errorManual.label               "U kunt &brandShortName; handmatig bijwerken door deze koppeling te
                                            bezoeken en de nieuwste versie te downloaden:">
-
 <!ENTITY  errorpatching.intro             "De gedeeltelijke update kon niet worden toegepast. 
                                            &brandShortName; zal het opnieuw proberen door een volledige update te downloaden.">
 

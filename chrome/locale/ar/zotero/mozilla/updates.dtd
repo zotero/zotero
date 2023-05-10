@@ -35,9 +35,7 @@
 <!ENTITY  error.title                     "فشل التحديث">
 
 <!ENTITY  error.label                     "كان هناك مشاكل في فحص، تنزيل أو تثبيت هذا التحديث. &brandShortName; لا يمكن تحديثه لأن:">
-                                           
 <!ENTITY  errorManual.label               "يمكنك تحديث &brandShortName; يدويّا بزيارة هذا الرابط و تنزيل أحدث إصدار:">
-                                           
 <!ENTITY  errorpatching.intro             "تعذّر تطبيق التّحديث الجزئي. سيحاول &brandShortName; مرّة أخرى بتنزيل كلّ التّحديث.">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName; غير قادر على معرفة إذا كان هناك تحديث متاح. رجاءً تأكد من أن لديك آخر نسخة من &brandShortName; من:">

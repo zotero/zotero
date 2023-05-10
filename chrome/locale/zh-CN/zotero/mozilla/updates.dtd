@@ -35,9 +35,7 @@
 <!ENTITY  error.title                     "更新失败">
 
 <!ENTITY  error.label                     "检查、下载或安装此更新时发生问题。&brandShortName; 无法被更新，原因为：">
-                                           
 <!ENTITY  errorManual.label               "您可以访问此链接手动下载和更新最新版本的 &brandShortName;：">
-                                           
 <!ENTITY  errorpatching.intro             "无法应用此局部更新。&brandShortName; 将下载完整的更新包并重试。">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName; 无法确定是否有可用的更新。请确定您是从以下地址安装了最新版本的 &brandShortName;：">

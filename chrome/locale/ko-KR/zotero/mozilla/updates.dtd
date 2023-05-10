@@ -35,9 +35,7 @@
 <!ENTITY  error.title                     "업데이트 실패">
 
 <!ENTITY  error.label                     "현재 업데이트를 설치하는 도중 문제가 발생했습니다. &brandShortName;가 업데이트를 설치할 수 없습니다:">
-                                           
 <!ENTITY  errorManual.label               "사용자가 직접 다음 사이트를 방문하여 &brandShortName; 업데이트의 최신 버전을 다운로드 할 수 있습니다.">
-                                           
 <!ENTITY  errorpatching.intro             "부분적인 업데이트를 할 수 없습니다. &brandShortName;가 업데이트 다운로드를 다시 시도합니다.">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName;는 업데이트가 있는 지 확인할 수 없습니다. &brandShortName; 최신 버전에서 확인해 보십시오.:">

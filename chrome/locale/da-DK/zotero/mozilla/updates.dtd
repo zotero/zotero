@@ -23,8 +23,6 @@
 
 <!ENTITY  unsupported.title               "Systemet er ikke understøttet">
 <!ENTITY  unsupported.label               "Din &brandShortName; er forældet, men den seneste version er ikke understøttet på dit system. Opdater dit system og prøv igen. Du vil ikke få vist denne meddelelse igen. ">
-
-
 <!ENTITY  unsupportedLink.label           "Læs mere.">
 
 <!ENTITY  clickHere.label                 "Se mere information om denne opdatering">
@@ -47,10 +45,8 @@
 
 <!ENTITY  error.label                     "Der opstod problemer med at bekræfte, hente eller installere denne
                                            opdatering. &brandShortName; kunne ikke opdateres fordi:">
-
 <!ENTITY  errorManual.label               "Du kan opdatere &brandShortName; manuelt ved at besøge dette link
                                            og hente den seneste version:">
-
 <!ENTITY  errorpatching.intro             "Den delvise opdatering kunne ikke anvendes.
                                            &brandShortName; vil forsøge igen ved at hente en komplet opdatering.">
 
@@ -69,11 +65,7 @@
                                            hentet og er klar til at blive installeret.">
 <!ENTITY  finishedBackground.name         "Opdatering:">
 <!ENTITY  finishedBackground.more         "Opdateringen vil blive installeret næste gang &brandShortName; startes. Du kan genstarte &brandShortName; nu, eller fortsætte med at bruge programmet og genstarte senere.">
-
 <!ENTITY  finishedBackground.moreElevated "Denne opdatering kræver administratorrettigheder. Opdateringen vil blive installeret næste gang &brandShortName; startes. Du kan genstarte &brandShortName; nu, fortsætte med at arbejde og genstarte senere, eller du kan afvise denne opdatering.">
-
-
-
 
 <!ENTITY  update.details.label            "Detaljer">
 <!ENTITY  update.installedOn.label        "Installeret den:">

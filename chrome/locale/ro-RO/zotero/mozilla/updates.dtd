@@ -43,9 +43,7 @@
 <!ENTITY  error.title                     "Actualizare eșuată">
 
 <!ENTITY  error.label                     "Au apărut probleme la verificarea, descărcarea sau instalarea acestei actualizări. &brandShortName; nu a putut fi actualizat deoarece:">
-                                           
 <!ENTITY  errorManual.label               "Puteți actualiza  &brandShortName; manual vizitând această legătură și descărcând ultima versiune:">
-                                           
 <!ENTITY  errorpatching.intro             "Actualizarea parțială nu a putut fi aplicată. &brandShortName; va încerca din nou, de data aceasta descărcând o actualizare completă.">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName; nu poate detecta dacă sunt actualizări disponibile. Vă rugăm să vă asigurați că aveți ultima versiune de &brandShortName; de la:">
@@ -61,7 +59,6 @@
 <!ENTITY  finishedBackground.name         "Actualizare:">
 <!ENTITY  finishedBackground.more         "Actualizarea va fi instalată la următoarea pornire a &brandShortName;. Puteți
                                            reporni &brandShortName; acum sau vă puteți continua sesiunea și să reporniți mai târziu.">
-
 <!ENTITY  finishedBackground.moreElevated "This update requires administrator privileges. The update will be
                                            installed the next time &brandShortName; starts. You can restart
                                            &brandShortName; now, continue working and restart later, or decline this
@@ -70,5 +67,3 @@
 <!ENTITY  update.details.label            "Detalii">
 <!ENTITY  update.installedOn.label        "Instalat în:">
 <!ENTITY  update.status.label             "Stare:">
-
-

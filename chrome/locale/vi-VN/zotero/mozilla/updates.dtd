@@ -35,9 +35,7 @@
 <!ENTITY  error.title                     "Cập nhật Thất bại">
 
 <!ENTITY  error.label                     "Gặp vấn đề khi tìm, tải xuống hoặc cài đặt bản cập nhật này. &brandShortName; không thể cập nhật được vì:">
-                                           
 <!ENTITY  errorManual.label               "Bạn có thể cập nhật &brandShortName; thủ công thông qua liên kết này và tải bản mới nhất xuống:">
-                                           
 <!ENTITY  errorpatching.intro             "Cập nhật từng phần không thể áp dụng được. &brandShortName; sẽ thử lại bằng cách tải gói Cập nhật đầy đủ xuống.">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName; không thể xác định xem đang có bản cập nhật nào hay không. Vui lòng chắc chắn rằng bạn có phiên bản &brandShortName; mới nhất từ:">
@@ -50,13 +48,11 @@
 <!ENTITY  finishedBackgroundPage.text     "Một bản cập nhật bảo mật và ổn định cho &brandShortName; đã được tải xuống và đang sẵn sàng để cài đặt.">
 <!ENTITY  finishedBackground.name         "Cập nhật:">
 <!ENTITY  finishedBackground.more         "Bản cập nhật sẽ được cài trong lần khởi động tới của &brandShortName;. Bạn có thể khởi động lại &brandShortName; ngay bây giờ, hoặc cứ tiếp tục sử dụng và khởi động lại sau.">
-
-
 <!ENTITY  finishedBackground.moreElevated "This update requires administrator privileges. The update will be
                                            installed the next time &brandShortName; starts. You can restart
                                            &brandShortName; now, continue working and restart later, or decline this
                                            update.">
+
 <!ENTITY  update.details.label            "Chi tiết">
 <!ENTITY  update.installedOn.label        "Cài đặt vào:">
 <!ENTITY  update.status.label             "Trạng thái:">
-

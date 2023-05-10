@@ -30,7 +30,6 @@
 
 <!ENTITY evangelism.desc                 "On tungivalt soovitatav uuendada esimesel võimalusel sellele &brandShortName;i versioonile.">
 
-
 <!ENTITY downloadPage.title              "&brandShortName;i allalaadimine">
 <!ENTITY downloading.intro               "Uuenduse allalaadimine...">
 <!ENTITY connecting.label                "Ühendumine uuenduste serveriga...">
@@ -46,10 +45,8 @@
 
 <!ENTITY error.label                     "Uuenduse kontrollimisel, allalaadimisel või paigaldamisel esines probleeme.
                                           &brandShortName;i ei uuendatud, kuna:">
-                                          
 <!ENTITY errorManual.label               "Sa võid &brandShortName;i käsitsi uuendada, laadides alla uusima
                                           versiooni sellelt lingilt:">
-                                          
 <!ENTITY errorpatching.intro             "Osalist uuendust ei õnnestunud rakendada. &brandShortName; proovib
                                           alla laadida terve uuenduse.">
 

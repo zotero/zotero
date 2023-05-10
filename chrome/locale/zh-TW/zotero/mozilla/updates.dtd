@@ -36,9 +36,7 @@
 <!ENTITY  error.title                     "更新失敗">
 
 <!ENTITY  error.label                     "檢查、下載、或安裝更新時發生問題。 &brandShortName; 無法更新，原因:">
-                                           
 <!ENTITY  errorManual.label               "請手動瀏覽下列網址並下載最新版的 &brandShortName; :">
-                                           
 <!ENTITY  errorpatching.intro             "部份更新失敗。 &brandShortName; 將會重新下載完整更新。">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName; 無法偵測可用的更新。請確認

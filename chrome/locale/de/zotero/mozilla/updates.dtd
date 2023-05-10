@@ -16,7 +16,7 @@
 <!ENTITY  manualUpdate.desc               "Ein empfohlenes Sicherheits- und Stabilitäts-Update ist verfügbar, aber Sie haben
                                            die benötigten Systemrechte nicht, um es zu installieren. Bitte kontaktieren Sie
                                            Ihren Systemadministrator oder versuchen Sie es mit einem Benutzer nochmals, der
-                                           die Rechte hat, um auf Ihrem Computer Software zu installieren."> 
+                                           die Rechte hat, um auf Ihrem Computer Software zu installieren.">
 <!ENTITY  manualUpdate.space.desc         "Ein empfohlenes Sicherheits- und Stabilitäts-Update ist verfügbar, aber Sie
                                            haben nicht genügend Speicherplatz, um es zu installieren">
 <!ENTITY  manualUpdateGetMsg.label        "Die letzte Version von &brandShortName; erhalten Sie immer auf:">
@@ -31,7 +31,6 @@
 
 <!ENTITY  evangelism.desc                 "Es wird dringend empfohlen, dass Sie dieses Update
                                            für &brandShortName; schnellstmöglich installieren.">
-
 
 <!ENTITY  downloadPage.title              "&brandShortName; herunterladen">
 <!ENTITY  downloading.intro               "Das Update wird heruntergeladen…">
@@ -48,10 +47,8 @@
 
 <!ENTITY  error.label                     "Beim Versuch auf Updates zu überprüfen, diese herunterzuladen oder zu installieren
                                            sind Probleme aufgetreten. &brandShortName; konnte aus folgendem Grund nicht aktualisiert werden:">
-                                           
 <!ENTITY  errorManual.label               "Sie können &brandShortName; auch manuell aktualisieren. Besuchen Sie dazu den folgenden Link und
                                            laden die aktuelle Version herunter:">
-                                           
 <!ENTITY  errorpatching.intro             "Das inkrementelle Update für &brandShortName; konnte nicht installiert werden.
                                            Es wird nun für einen neuen Versuch das komplette Update-Paket heruntergeladen.">
 

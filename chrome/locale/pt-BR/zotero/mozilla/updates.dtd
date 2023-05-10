@@ -47,10 +47,8 @@ o pacote completo da atualização.">
 
 <!ENTITY  error.label                     "Houve problemas ao verificar, receber ou instalar esta 
 atualização. O &brandShortName; não pôde ser atualizado porque:">
-                                           
 <!ENTITY  errorManual.label               "Você pode atualizar manualmente o &brandShortName; visitando este link 
 e baixando a versão mais recente:">
-                                           
 <!ENTITY  errorpatching.intro             "A atualização incremental não pôde ser aplicada. 
 O &brandShortName; tentará de novo, baixando a atualização completa.">
 

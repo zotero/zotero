@@ -35,9 +35,7 @@
 <!ENTITY  error.title                     "Неуспешно обновяване">
 
 <!ENTITY  error.label                     "Възникнаха проблеми при проверката, изтеглянето и инсталирането на това обновяване. &brandShortName; не може да бъде обновена поради:">
-                                           
 <!ENTITY  errorManual.label               "Можете да обновите &brandShortName; ръчно като посетите връзката и изтеглите последната версия:">
-                                           
 <!ENTITY  errorpatching.intro             "Частичното обновяване не беше приложено. &brandShortName; ще опита да изтегли цялото обновяване.">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName; не можа да определи дали има налично обновяване. Моля, уверете се, че разполагате с последната версия на &brandShortName; от:">

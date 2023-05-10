@@ -35,9 +35,7 @@
 <!ENTITY  error.title                     "Eguneraketak huts egin du">
 
 <!ENTITY  error.label                     "Arazoak egon dira eguneraketa hau bilatu, deskargatu edo instalatzerakoan. &brandShortName; honegatik ezin da eguneratu:">
-                                           
 <!ENTITY  errorManual.label               "&brandShortName; eskuz egunera dezakezu lotura hau jarraituz eta azken bertsioa deskargatuz:">
-                                           
 <!ENTITY  errorpatching.intro             "Ezin da eguneraketa partziala ezarri. &brandShortName; eguneraketa osoa deskargatzen saiatuko da.">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName;(e)k ezin du zehaztu eguneraketarik eskura dagoen ala ez. Egiaztatu &brandShortName;(r)en azken bertsioa duzula ondorengo helbidean:">

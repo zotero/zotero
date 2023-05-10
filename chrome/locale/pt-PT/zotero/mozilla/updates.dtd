@@ -35,9 +35,7 @@
 <!ENTITY  error.title                     "Falha ao atualizar">
 
 <!ENTITY  error.label                     "Ocorreram erros ao verificar, descarregar ou instalar esta atualização. O &brandShortName; não pôde ser atualizado porque:">
-                                           
 <!ENTITY  errorManual.label               "Pode atualizar manualmente o &brandShortName; acedendo a estaligação e descarregando a versão mais recente da aplicação:">
-                                           
 <!ENTITY  errorpatching.intro             "A atualização parcial não pode ser aplicada. O &brandShortName; vai tentar descarregar o pacote de atualização completo.">
 
 <!ENTITY  genericBackgroundError.label    "O &brandShortName; não consegue determinar se existe uma atualização disponível. Por favor verifique se tem a última versão do &brandShortName; em:">

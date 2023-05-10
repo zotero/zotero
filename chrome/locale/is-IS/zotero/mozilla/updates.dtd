@@ -35,9 +35,7 @@
 <!ENTITY  error.title                     "Uppfærsla mistókst">
 
 <!ENTITY  error.label                     "Upp komu villur við að athuga, ná í, eða setja inn uppfærsluna. Ekki var hægt að uppfæra &brandShortName; vegna þess að:">
-                                           
 <!ENTITY  errorManual.label               "Þú getur uppfært &brandShortName; handvirkt með því að opna þessa slóð og hala niður nýjustu útgáfu:">
-                                           
 <!ENTITY  errorpatching.intro             "Ekki var hægt að setja inn bótar uppfærslu. &brandShortName; mun reyna að ná í heildaruppfærslu.">
 
 <!ENTITY  genericBackgroundError.label    "&brandShortName; fann ekki út hvort ný uppfærsla er tiltæk. Gakktu úr skugga um að þú sért með nýjustu útgáfu af &brandShortName; frá:">
