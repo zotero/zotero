@@ -127,7 +127,7 @@ function modify_omni {
     if (!updateAuto) {' modules/UpdateService.jsm
 	
 	# Avoid console warning about resource://gre/modules/FxAccountsCommon.js
-	replace_line 'const logins = this._data.logins;' 'const logins = this._data.logins; if (this._data.logins.length == -1) return;' modules/LoginStore.jsm
+	replace_line 'const logins = this._data.logins;' 'const logins = this._data.logins; if (this._data.logins.length != -1) return;' modules/LoginStore.jsm
 	
 	# Prevent error during network requests
 	replace_line 'async lazyInit\(\) \{' 'async lazyInit() { if (this.features) return false;' modules/UrlClassifierExceptionListService.jsm
