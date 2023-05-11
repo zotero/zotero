@@ -324,6 +324,7 @@
 <!ENTITY zotero.pdfReader.evenSpreads						"Even Spreads">
 <!ENTITY zotero.pdfReader.zoomIn							"Zoom In">
 <!ENTITY zotero.pdfReader.zoomOut							"Zoom Out">
+<!ENTITY zotero.pdfReader.zoomReset							"Reset Zoom">
 <!ENTITY zotero.pdfReader.zoomAuto							"Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth						"Zoom to Page Width">
 <!ENTITY zotero.pdfReader.zoomPageHeight					"Zoom to Page Height">
