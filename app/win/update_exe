@@ -17,8 +17,12 @@ if [[ -z "${1:-}" ]]; then
 fi
 version=$1
 
-for arch in win32 win64; do
-	zip="firefox-$version.en-US.$arch.zip"
+for arch in win32 win-x64; do
+	if [ $arch = "win-x64" ]; then
+		zip="firefox-$version.en-US.win64.zip"
+	else
+		zip="firefox-$version.en-US.$arch.zip"
+	fi
 	if [ ! -f "$zip" ]; then
 		echo "$zip not found" >&2
 		exit 1
@@ -38,6 +42,6 @@ for arch in win32 win64; do
 	rm VersionInfo1.res
 done
 
-tar -Jcv zotero_win32.exe zotero_win64.exe > zotero.exe.tar.xz
+tar -Jcv zotero_win32.exe zotero_win-x64.exe > zotero.exe.tar.xz
 
-rm firefox-win??.exe zotero_win??.exe
+rm firefox-win*.exe zotero_win*.exe

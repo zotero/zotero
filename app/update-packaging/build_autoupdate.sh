@@ -260,14 +260,14 @@ for version in "$FROM" "$TO"; do
 done
 
 CHANGES_MADE=0
-for build in "mac" "win32" "win64" "linux-i686" "linux-x86_64"; do
+for build in "mac" "win32" "win-x64" "linux-i686" "linux-x86_64"; do
 	if [[ $build == "mac" ]]; then
 		if [[ $BUILD_MAC == 0 ]]; then
 			continue
 		fi
 		dir="Zotero.app"
 	else
-		if [[ $build == "win32" ]] || [[ $build == "win64" ]] && [[ $BUILD_WIN == 0 ]]; then
+		if [[ $build == "win32" ]] || [[ $build == "win-x64" ]] && [[ $BUILD_WIN == 0 ]]; then
 			continue
 		fi
 		if [[ $build == "linux-i686" ]] || [[ $build == "linux-x86_64" ]] && [[ $BUILD_LINUX == 0 ]]; then

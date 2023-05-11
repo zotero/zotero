@@ -211,7 +211,7 @@ if [ $BUILD_MAC == 1 ]; then
 	cp -Rp "$MAC_RUNTIME_PATH"/Contents/Resources/browser/omni "$app_dir"
 elif [ $BUILD_WIN == 1 ]; then
 	# Non-arch-specific files, so just use 64-bit version
-	cp -Rp "${WIN_RUNTIME_PATH_PREFIX}win64"/browser/omni "$app_dir"
+	cp -Rp "${WIN_RUNTIME_PATH_PREFIX}win-x64"/browser/omni "$app_dir"
 elif [ $BUILD_LINUX == 1 ]; then
 	# Non-arch-specific files, so just use 64-bit version
 	cp -Rp "${LINUX_RUNTIME_PATH_PREFIX}x86_64"/browser/omni "$app_dir"
@@ -654,7 +654,7 @@ if [ $BUILD_WIN == 1 ]; then
 	
 	fi
 	
-	for arch in "win32" "win64"; do
+	for arch in "win32" "win-x64"; do
 		echo "Building Zotero_$arch"
 		
 		runtime_path="${WIN_RUNTIME_PATH_PREFIX}${arch}"
@@ -667,7 +667,7 @@ if [ $BUILD_WIN == 1 ]; then
 		cp -R "$runtime_path"/!(application.ini|browser|defaults|devtools-files|crashreporter*|firefox.exe|maintenanceservice*|precomplete|removed-files|uninstall|update*) "$APPDIR"
 
 		# Copy vcruntime140_1.dll
-		if [ $arch = "win64" ]; then
+		if [ $arch = "win-x64" ]; then
 			cp "$CALLDIR/xulrunner/vc-$arch/vcruntime140_1.dll" "$APPDIR"
 		fi
 		
@@ -724,7 +724,7 @@ if [ $BUILD_WIN == 1 ]; then
 				# Build uninstaller
 				if [ "$arch" = "win32" ]; then
 					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /V1 "`cygpath -w \"$BUILD_DIR/win_installer/uninstaller.nsi\"`"
-				elif [ "$arch" = "win64" ]; then
+				elif [ "$arch" = "win-x64" ]; then
 					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /DHAVE_64BIT_OS /V1 "`cygpath -w \"$BUILD_DIR/win_installer/uninstaller.nsi\"`"
 				fi
 
@@ -744,7 +744,7 @@ if [ $BUILD_WIN == 1 ]; then
 				
 				if [ "$arch" = "win32" ]; then
 					INSTALLER_PATH="$DIST_DIR/Zotero-${VERSION}_win32_setup.exe"
-				elif [ "$arch" = "win64" ]; then
+				elif [ "$arch" = "win-x64" ]; then
 					INSTALLER_PATH="$DIST_DIR/Zotero-${VERSION}_x64_setup.exe"
 				fi
 				
@@ -770,7 +770,7 @@ if [ $BUILD_WIN == 1 ]; then
 				# Build and sign setup.exe
 				if [ "$arch" = "win32" ]; then	
 					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /V1 "`cygpath -w \"$BUILD_DIR/win_installer/installer.nsi\"`"
-				elif [ "$arch" = "win64" ]; then
+				elif [ "$arch" = "win-x64" ]; then
 					"`cygpath -u \"${NSIS_DIR}makensis.exe\"`" /DHAVE_64BIT_OS /V1 "`cygpath -w \"$BUILD_DIR/win_installer/installer.nsi\"`"
 				fi
 
@@ -813,11 +813,7 @@ if [ $BUILD_WIN == 1 ]; then
 				echo 'Not building on Windows; only building zip file'
 			fi
 			cd "$STAGE_DIR"
-			if [ $arch = "win32" ]; then
-				zip -rqX "$DIST_DIR/Zotero-${VERSION}_$arch.zip" Zotero_$arch
-			elif [ $arch = "win64" ]; then
-				zip -rqX "$DIST_DIR/Zotero-${VERSION}_win-x64.zip" Zotero_$arch
-			fi
+			zip -rqX "$DIST_DIR/Zotero-${VERSION}_$arch.zip" Zotero_$arch
 		fi
 	done
 	
