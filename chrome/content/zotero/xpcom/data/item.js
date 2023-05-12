@@ -3409,7 +3409,7 @@ Zotero.Item.prototype.getAttachmentLastPageIndex = function () {
 	
 	var id = this._getLastPageIndexSettingKey();
 	var val = Zotero.SyncedSettings.get(Zotero.Libraries.userLibraryID, id);
-	if (val !== null && (typeof val != 'number' || val != parseInt(val))) {
+	if (this.isPDFAttachment() && val !== null && (typeof val != 'number' || val != parseInt(val))) {
 		Zotero.logError(`Setting contains an invalid attachment page index ('${val}') -- discarding`);
 		return null;
 	}
@@ -3421,7 +3421,7 @@ Zotero.Item.prototype.setAttachmentLastPageIndex = async function (val) {
 		throw new Error("setAttachmentLastPageIndex() can only be called on file attachments");
 	}
 	
-	if (typeof val != 'number' || val != parseInt(val)) {
+	if (this.isPDFAttachment() && (typeof val != 'number' || val != parseInt(val))) {
 		Zotero.debug(val, 2);
 		throw new Error(`setAttachmentLastPageIndex() must be passed an integer`);
 	}
