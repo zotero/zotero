@@ -3870,7 +3870,7 @@ var ZoteroPane = new function()
 			let menuItem = Zotero.Utilities.Internal.createMenuForTarget(
 				col,
 				popup,
-				null,
+				{},
 				(event, collection) => {
 					if (event.target.tagName == 'menuitem') {
 						this.addSelectedItemsToCollection(collection);

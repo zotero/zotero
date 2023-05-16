@@ -602,42 +602,93 @@ ZoteroCommandLineHandler.prototype = {
 				}
 			}
 			if (param) {
-				addInitCallback(function (Zotero) {
+				addInitCallback(async (Zotero) => {
+					function promptForImportTarget() {
+						let io = {
+							dataIn: { file },
+							dataOut: {}
+						};
+
+						let win = Services.wm.getMostRecentWindow("navigator:browser");
+						win.openDialog(
+							'chrome://zotero/content/selectImportTargetDialog.xul',
+							'',
+							'chrome,modal,centerscreen',
+							io
+						);
+
+						if (io.dataOut.libraryID) {
+							return io.dataOut;
+						}
+						else {
+							return null;
+						}
+					}
+
 					// Wait to handle things that require the UI until after it's loaded
-					Zotero.uiReadyPromise
-					.then(function () {
-						var file = Zotero.File.pathToFile(param);
-						
-						if(file.leafName.substr(-4).toLowerCase() === ".csl"
-								|| file.leafName.substr(-8).toLowerCase() === ".csl.txt") {
-							// Install CSL file
-							Zotero.Styles.install({ file: file.path }, file.path);
-						} else {
-							// Ask before importing
-							var checkState = {
-								value: Zotero.Prefs.get('import.createNewCollection.fromFileOpenHandler')
-							};
-							if (Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-									.getService(Components.interfaces.nsIPromptService)
-									.confirmCheck(null, Zotero.getString('ingester.importFile.title'),
-									Zotero.getString('ingester.importFile.text', [file.leafName]),
-									Zotero.getString('ingester.importFile.intoNewCollection'),
-									checkState)) {
-								Zotero.Prefs.set(
-									'import.createNewCollection.fromFileOpenHandler', checkState.value
-								);
-								
-								// Perform file import in front window
-								var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-								   .getService(Components.interfaces.nsIWindowMediator);
-								var browserWindow = wm.getMostRecentWindow("navigator:browser");
-								browserWindow.Zotero_File_Interface.importFile({
-									file,
-									createNewCollection: checkState.value
-								});
+					await Zotero.uiReadyPromise;
+					var file = Zotero.File.pathToFile(param);
+
+					// Perform import in front window
+					var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+						.getService(Components.interfaces.nsIWindowMediator);
+					var browserWindow = wm.getMostRecentWindow("navigator:browser");
+					let zp = Zotero.getActiveZoteroPane();
+					
+					if (file.leafName.substr(-4).toLowerCase() === ".csl"
+							|| file.leafName.substr(-8).toLowerCase() === ".csl.txt") {
+						// Install CSL file
+						Zotero.Styles.install({ file: file.path }, file.path);
+					}
+					else if (file.leafName.substr(-4).toLowerCase() === ".pdf") {
+						let dataOut = promptForImportTarget();
+						if (dataOut) {
+							let libraryID = dataOut.libraryID;
+							let collectionIDs = dataOut.collectionID ? [dataOut.collectionID] : [];
+							let item = await Zotero.Attachments.importFromFile({
+								file,
+								libraryID,
+								collections: collectionIDs
+							});
+							if (dataOut.collectionID) {
+								await zp.collectionsView.selectCollection(dataOut.collectionID);
+							}
+							await zp.selectItem(item.id);
+							Zotero.RecognizePDF.autoRecognizeItems([item]);
+						}
+					}
+					else {
+						let dataOut = promptForImportTarget();
+						if (dataOut) {
+							let libraryID = dataOut.libraryID;
+							let collectionID = dataOut.collectionID;
+							let translation;
+							await browserWindow.Zotero_File_Interface.importFile({
+								file,
+								createNewCollection: false,
+								libraryID,
+								collectionID,
+								onBeforeImport: (t) => {
+									translation = t;
+								}
+							});
+							if (collectionID) {
+								// If "Show Items from Subcollections" is disabled,
+								// just show the library root. Jumping to a collection
+								// that won't visually contain the new items is confusing.
+								if (translation.newCollections.length
+										&& !Zotero.Prefs.get('recursiveCollections')) {
+									await zp.collectionsView.selectLibrary(libraryID);
+								}
+								else {
+									await zp.collectionsView.selectCollection(collectionID);
+								}
+							}
+							if (translation.newItems.length == 1) {
+								await zp.selectItem(translation.newItems[0].id);
 							}
 						}
-					});
+					}
 				});
 			}
 		}
