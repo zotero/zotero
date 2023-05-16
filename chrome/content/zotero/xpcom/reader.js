@@ -1303,6 +1303,7 @@ class ReaderTab extends ReaderInstance {
 		this._iframe.setAttribute('type', 'content');
 		this._iframe.setAttribute('src', 'resource://zotero/pdf-reader/viewer.html');
 		this._tabContainer.appendChild(this._iframe);
+		this._iframe.docShell.windowDraggingAllowed = true;
 		
 		this._popupset = this._window.document.createElement('popupset');
 		this._tabContainer.appendChild(this._popupset);
@@ -1401,6 +1402,7 @@ class ReaderWindow extends ReaderInstance {
 				this._window.onGoMenuOpen = this._onGoMenuOpen.bind(this);
 				this._window.onViewMenuOpen = this._onViewMenuOpen.bind(this);
 				this._iframe = this._window.document.getElementById('reader');
+				this._iframe.docShell.windowDraggingAllowed = true;
 			}
 
 			if (this._iframe.contentWindow && this._iframe.contentWindow.document === event.target) {
