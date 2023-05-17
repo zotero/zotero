@@ -480,7 +480,7 @@ if [ $BUILD_MAC == 1 ]; then
 
 	# Use our own updater, because Mozilla's requires updates signed by Mozilla
 	cd "$CONTENTSDIR/MacOS"
-	tar -xjf "$CALLDIR/mac/updater.tar.bz2"
+	tar xf "$CALLDIR/mac/updater.tar.xz"
 
 	# Modify Info.plist
 	perl -pi -e "s/\{\{VERSION\}\}/$VERSION/" "$CONTENTSDIR/Info.plist"

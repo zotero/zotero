@@ -55,3 +55,9 @@ $mach python "$GECKO_PATH/toolkit/mozapps/installer/unify.py" x64/*.app aarch64/
 cp x64/$fx_app_name/Contents/MacOS/firefox zotero
 xz zotero
 mv zotero.xz "$APP_ROOT_DIR/mac/zotero.xz"
+
+# Uncomment to build updater
+#cd x64/$fx_app_name/Contents/MacOS/
+#"$APP_ROOT_DIR/mac/updater_renamer"
+#cat updater.app/Contents/Resources/English.lproj/InfoPlist.strings
+#tar cfvJ "$APP_ROOT_DIR/mac/updater.tar.xz" updater.app/

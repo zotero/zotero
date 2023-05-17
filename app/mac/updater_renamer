@@ -1,0 +1,10 @@
+#!/usr/bin/env python3
+
+# Convert localized app name from  "Firefox Software Update" to "Zotero Software Update"
+#
+# plist is UTF-16
+f='updater.app/Contents/Resources/English.lproj/InfoPlist.strings'
+with open(f, 'r', encoding='utf-16') as inputfile:
+    newText = inputfile.read().replace('Firefox', 'Zotero')
+with open(f, 'w', encoding='utf-16') as outputfile:
+    outputfile.write(newText)
