@@ -9,16 +9,44 @@
 #
 
 # -----------------------------------------------------------------------------
+QUIET=0
+
 # By default just assume that these tools exist on our path
 MAR=${MAR:-mar}
-BZIP2=${BZIP2:-bzip2}
 MBSDIFF=${MBSDIFF:-mbsdiff}
+XZ=${XZ:-xz}
+$XZ --version > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  # If $XZ is not set and not found on the path then this is probably
+  # running on a windows buildbot. Some of the Windows build systems have
+  # xz.exe in topsrcdir/xz/. Look in the places this would be in both a
+  # mozilla-central and comm-central build.
+  XZ="$(dirname "$(dirname "$(dirname "$0")")")/xz/xz.exe"
+  $XZ --version > /dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    XZ="$(dirname "$(dirname "$(dirname "$(dirname "$0")")")")/xz/xz.exe"
+    $XZ --version > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+      echo "xz was not found on this system!"
+      echo "exiting"
+      exit 1
+    fi
+  fi
+fi
+# Ensure that we're always using the right compression settings
+export XZ_OPT="-T1 -7e"
 
 # -----------------------------------------------------------------------------
 # Helper routines
 
 notice() {
   echo "$*" 1>&2
+}
+
+verbose_notice() {
+  if [ $QUIET -eq 0 ]; then
+    notice "$*"
+  fi
 }
 
 get_file_size() {
@@ -39,13 +67,7 @@ copy_perm() {
 
 make_add_instruction() {
   f="$1"
-  filev2="$2"
-  # The third param will be an empty string when a file add instruction is only
-  # needed in the version 2 manifest. This only happens when the file has an
-  # add-if-not instruction in the version 3 manifest. This is due to the
-  # precomplete file prior to the version 3 manifest having a remove instruction
-  # for this file so the file is removed before applying a complete update.
-  filev3="$3"
+  filev3="$2"
 
   # Used to log to the console
   if [ $4 ]; then
@@ -60,36 +82,23 @@ make_add_instruction() {
     # Use the subdirectory of the extensions folder as the file to test
     # before performing this add instruction.
     testdir=$(echo "$f" | sed 's/\(.*distribution\/extensions\/[^\/]*\)\/.*/\1/')
-    notice "     add-if \"$testdir\" \"$f\""
-    echo "add-if \"$testdir\" \"$f\"" >> $filev2
-    if [ ! $filev3 = "" ]; then
-      echo "add-if \"$testdir\" \"$f\"" >> $filev3
-    fi
+    verbose_notice "     add-if \"$testdir\" \"$f\""
+    echo "add-if \"$testdir\" \"$f\"" >> "$filev3"
   else
-    notice "        add \"$f\"$forced"
-    echo "add \"$f\"" >> $filev2
-    if [ ! $filev3 = "" ]; then
-      echo "add \"$f\"" >> $filev3
-    fi
+    verbose_notice "        add \"$f\"$forced"
+    echo "add \"$f\"" >> "$filev3"
   fi
 }
 
 check_for_add_if_not_update() {
   add_if_not_file_chk="$1"
 
+  # XXX unconditional add-if for channel-prefs.js to fix mac signature on old installs (bug 1804303)
+  if [ "$add_if_not_file_chk" = "Contents/Resources/defaults/pref/channel-prefs.js" ]; then
+    return 1
+  fi
   if [ `basename $add_if_not_file_chk` = "channel-prefs.js" -o \
        `basename $add_if_not_file_chk` = "update-settings.ini" ]; then
-    ## "true" *giggle*
-    return 0;
-  fi
-  ## 'false'... because this is bash. Oh yay!
-  return 1;
-}
-
-check_for_add_to_manifestv2() {
-  add_if_not_file_chk="$1"
-
-  if [ `basename $add_if_not_file_chk` = "update-settings.ini" ]; then
     ## "true" *giggle*
     return 0;
   fi
@@ -101,34 +110,31 @@ make_add_if_not_instruction() {
   f="$1"
   filev3="$2"
 
-  notice " add-if-not \"$f\" \"$f\""
-  echo "add-if-not \"$f\" \"$f\"" >> $filev3
+  verbose_notice " add-if-not \"$f\" \"$f\""
+  echo "add-if-not \"$f\" \"$f\"" >> "$filev3"
 }
 
 make_patch_instruction() {
   f="$1"
-  filev2="$2"
-  filev3="$3"
+  filev3="$2"
 
+  # Changed by Zotero for -e
   is_extension=$(echo "$f" | grep -c 'distribution/extensions/.*/') || true
   if [ $is_extension = "1" ]; then
     # Use the subdirectory of the extensions folder as the file to test
     # before performing this add instruction.
     testdir=$(echo "$f" | sed 's/\(.*distribution\/extensions\/[^\/]*\)\/.*/\1/')
-    notice "   patch-if \"$testdir\" \"$f.patch\" \"$f\""
-    echo "patch-if \"$testdir\" \"$f.patch\" \"$f\"" >> $filev2
-    echo "patch-if \"$testdir\" \"$f.patch\" \"$f\"" >> $filev3
+    verbose_notice "   patch-if \"$testdir\" \"$f.patch\" \"$f\""
+    echo "patch-if \"$testdir\" \"$f.patch\" \"$f\"" >> "$filev3"
   else
-    notice "      patch \"$f.patch\" \"$f\""
-    echo "patch \"$f.patch\" \"$f\"" >> $filev2
-    echo "patch \"$f.patch\" \"$f\"" >> $filev3
+    verbose_notice "      patch \"$f.patch\" \"$f\""
+    echo "patch \"$f.patch\" \"$f\"" >> "$filev3"
   fi
 }
 
 append_remove_instructions() {
   dir="$1"
-  filev2="$2"
-  filev3="$3"
+  filev3="$2"
 
   if [ -f "$dir/removed-files" ]; then
     listfile="$dir/removed-files"
@@ -153,19 +159,16 @@ append_remove_instructions() {
         # Exclude comments
         if [ ! $(echo "$f" | grep -c '^#') = 1 ]; then
           if [ $(echo "$f" | grep -c '\/$') = 1 ]; then
-            notice "      rmdir \"$f\""
-            echo "rmdir \"$f\"" >> $filev2
-            echo "rmdir \"$f\"" >> $filev3
+            verbose_notice "      rmdir \"$f\""
+            echo "rmdir \"$f\"" >> "$filev3"
           elif [ $(echo "$f" | grep -c '\/\*$') = 1 ]; then
             # Remove the *
             f=$(echo "$f" | sed -e 's:\*$::')
-            notice "    rmrfdir \"$f\""
-            echo "rmrfdir \"$f\"" >> $filev2
-            echo "rmrfdir \"$f\"" >> $filev3
+            verbose_notice "    rmrfdir \"$f\""
+            echo "rmrfdir \"$f\"" >> "$filev3"
           else
-            notice "     remove \"$f\""
-            echo "remove \"$f\"" >> $filev2
-            echo "remove \"$f\"" >> $filev3
+            verbose_notice "     remove \"$f\""
+            echo "remove \"$f\"" >> "$filev3"
           fi
         fi
       fi
@@ -178,38 +181,36 @@ append_remove_instructions() {
 # Pass a variable name and it will be filled as an array.
 list_files() {
   count=0
-
+  temp_filelist=$(mktemp)
   find . -type f \
     ! -name "update.manifest" \
     ! -name "updatev2.manifest" \
     ! -name "updatev3.manifest" \
-    ! -name "temp-dirlist" \
-    ! -name "temp-filelist" \
     | sed 's/\.\/\(.*\)/\1/' \
-    | sort -r > "temp-filelist"
+    | sort -r > "${temp_filelist}"
   while read file; do
     eval "${1}[$count]=\"$file\""
     # Changed for Zotero to avoid eval as 1
     #(( count++ ))
     (( ++count ))
-  done < "temp-filelist"
-  rm "temp-filelist"
+  done < "${temp_filelist}"
+  rm "${temp_filelist}"
 }
 
 # List all directories in the current directory, stripping leading "./"
 list_dirs() {
   count=0
-
+  temp_dirlist=$(mktemp)
   find . -type d \
     ! -name "." \
     ! -name ".." \
     | sed 's/\.\/\(.*\)/\1/' \
-    | sort -r > "temp-dirlist"
+    | sort -r > "${temp_dirlist}"
   while read dir; do
     eval "${1}[$count]=\"$dir\""
     # Changed for Zotero
     #(( count++ ))
     (( ++count ))
-  done < "temp-dirlist"
-  rm "temp-dirlist"
+  done < "${temp_dirlist}"
+  rm "${temp_dirlist}"
 }

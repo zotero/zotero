@@ -1,0 +1,61 @@
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+. "$APP_ROOT_DIR/config.sh"
+
+infile=${1:-}
+outfile=${2:-}
+if [[ -z "$infile" ]] || [[ -z "$infile" ]]; then
+	echo "Usage: $0 infile.mar outfile.mar"
+	exit 1
+fi
+
+mar="$APP_ROOT_DIR/xulrunner/bin/mar"
+if [ ! -f "$mar" ]; then
+	echo "$mar not found"
+	exit 1
+fi
+
+tmp_dir=`mktemp -d`
+function cleanup {
+	rm -rf $tmp_dir
+}
+trap cleanup EXIT
+
+cd "$tmp_dir"
+mkdir in
+cd in
+
+echo "Extracting MAR"
+$mar -x "$infile"
+
+echo "Renaming all files to .xz"
+find . -type f -exec mv {} {}.xz \;
+echo "Uncompressing files"
+find . -type f -exec unxz {} \;
+echo "Recompressing files with bzip2"
+find . -type f -exec bzip2 {} \;
+echo "Removing .bz extension"
+find . -type f | while read f; do mv "$f" "${f%.bz2}"; done
+
+channel=$($mar -T "$infile" | sed -n -r 's/.+MAR channel name: ([^\s]+)/\1/p')
+version=$($mar -T "$infile" | sed -n -r 's/.+Product version: ([^\s]+)/\1/p')
+
+if [ -z "$channel" ]; then
+	echo "Could not detect channel"
+	exit 1
+fi
+if [ -z "$version" ]; then
+	echo "Could not detect version"
+	exit 1
+fi
+
+echo "MAR channel name: $channel"
+echo "Product version: $version"
+
+echo "Creating new MAR"
+$mar -V $version -H $channel -c "$outfile" `find . -type f | sed 's/^\.\///'`
+echo
+$mar -T "$outfile"

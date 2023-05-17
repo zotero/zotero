@@ -8,11 +8,11 @@ UPDATE_STAGE_DIR="$SCRIPT_DIR/staging"
 
 function usage {
 	cat >&2 <<DONE
-Usage: $0 -f [-i FROM_VERSION] [-c CHANNEL] [-p PLATFORMS] [-l] VERSION
+Usage: $0 -c CHANNEL [-f] [-i FROM_VERSION] [-p PLATFORMS] [-l] VERSION
 Options
+ -c CHANNEL          Release channel ('release', 'beta')
  -f                  Perform full build
- -i FROM             Perform incremental build
- -c CHANNEL          Release channel ('release', 'beta') (required for incremental builds)
+ -i FROM_VERSION     Perform incremental build
  -p PLATFORMS        Platforms to build (m=Mac, w=Windows, l=Linux)
  -l                  Use local TO directory instead of downloading TO files from S3
 DONE
@@ -93,8 +93,8 @@ if [ -z "$FROM" ] && [ $BUILD_FULL -eq 0 ]; then
 	usage
 fi
 
-if [[ $BUILD_INCREMENTAL -eq 1 ]] && [[ -z "$CHANNEL" ]]; then
-	echo "Channel not provided for incremental builds" >&2
+if [[ -z "$CHANNEL" ]]; then
+	echo "Channel not provided" >&2
 	exit 1
 fi
 
@@ -121,7 +121,8 @@ for version in "$FROM" "$TO"; do
 	versiondir="$UPDATE_STAGE_DIR/$version"
 	
 	#
-	# Use main build script's staging directory for TO files rather than downloading the given version.
+	# If -l passed, use main build script's staging directory for TO files rather than downloading
+	# the given version.
 	#
 	# The caller must ensure that the files in ../staging match the platforms and version given.
 	if [[ $version == $TO && $USE_LOCAL_TO == "1" ]]; then
@@ -259,6 +260,10 @@ for version in "$FROM" "$TO"; do
 	echo
 done
 
+# Set variables for mar command in make_(incremental|full)_update.sh
+export MOZ_PRODUCT_VERSION="$TO"
+export MAR_CHANNEL_ID="$CHANNEL"
+
 CHANGES_MADE=0
 for build in "mac" "win32" "win-x64" "linux-i686" "linux-x86_64"; do
 	if [[ $build == "mac" ]]; then
@@ -293,12 +298,25 @@ for build in "mac" "win32" "win-x64" "linux-i686" "linux-x86_64"; do
 		
 		"$SCRIPT_DIR/make_incremental_update.sh" "$DIST_DIR/Zotero-${TO}-${FROM}_$build.mar" "$from_dir" "$to_dir"
 		CHANGES_MADE=1
+		
+		# If it's an incremental patch from a 6.0 build, use bzip instead of xz
+		if [[ $FROM = 6.0* ]]; then
+			echo "Building bzip2 version of incremental $build update from $FROM to $TO"
+			"$SCRIPT_DIR/xz_to_bzip" "$DIST_DIR/Zotero-${TO}-${FROM}_$build.mar" "$DIST_DIR/Zotero-${TO}-${FROM}_${build}_bz.mar"
+			rm "$DIST_DIR/Zotero-${TO}-${FROM}_$build.mar"
+			mv "$DIST_DIR/Zotero-${TO}-${FROM}_${build}_bz.mar" "$DIST_DIR/Zotero-${TO}-${FROM}_$build.mar"
+		fi
 	fi
 	if [[ $BUILD_FULL == 1 ]]; then
 		echo
 		echo "Building full $build update for $TO"
 		"$SCRIPT_DIR/make_full_update.sh" "$DIST_DIR/Zotero-${TO}-full_$build.mar" "$UPDATE_STAGE_DIR/$TO/$dir"
 		CHANGES_MADE=1
+		
+		# Make a bzip version of all complete patches for serving to <7.0 builds. We can stop this
+		# once we do a waterfall build that all older versions get updated to.
+		echo "Building bzip2 version of full $build update for $TO"
+		"$SCRIPT_DIR/xz_to_bzip" "$DIST_DIR/Zotero-${TO}-full_$build.mar" "$DIST_DIR/Zotero-${TO}-full_bz_${build}.mar"
 	fi
 done
 
