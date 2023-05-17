@@ -52,6 +52,10 @@
     background: linear-gradient(to top, #a9a9a9 0, #a9a9a9 1px, #f6f6f6 1px, #f6f6f6 100%);
 }
 
+#zotero-tab-toolbar .toolbarButton {
+    -moz-window-dragging: no-drag;
+}
+
 #zotero-item-toolbar {
     height: 32px;
 }
@@ -63,6 +67,7 @@
     width: 100%;
     margin-inline-start: -5px;
     background: linear-gradient(to top, #a9a9a9 0, #a9a9a9 1px, #f6f6f6 1px, #f6f6f6 100%);
+    -moz-window-dragging: drag;
 }
 
 .zotero-context-notes-list {
