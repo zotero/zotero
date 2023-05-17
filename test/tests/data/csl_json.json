@@ -1,0 +1,15 @@
+[
+    {
+        "id": "item1",
+    	"type": "graphic",
+        "title": "Title 1",
+        "seeAlso": ["item2"]
+    },
+    {
+        "id": "item2",
+        "type": "graphic",
+        "title": "Title 2",
+        "seeAlso": []
+    }
+
+]

@@ -70,7 +70,7 @@ describe("Import/Export", function () {
 		});
 		
 		// Not currently supported
-		it.skip("should import related items", async function () {
+		it("should import related items", async function () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			var file = OS.Path.join(getTestDataDirectory().path, 'zotero_rdf.xml');
 			translation = new Zotero.Translate.Import();
@@ -82,8 +82,8 @@ describe("Import/Export", function () {
 			// Parent item
 			assert.lengthOf(newItems[0].relatedItems, 1);
 			assert.lengthOf(newItems[1].relatedItems, 1);
-			assert.sameMembers(newItems[0].relatedItems, [newItems[1]]);
-			assert.sameMembers(newItems[1].relatedItems, [newItems[0]]);
+			assert.equal(newItems[0].relatedItems[0], newItems[1].key);
+			assert.equal(newItems[1].relatedItems[0], newItems[0].key);
 			
 			var notes = newItems[0].getNotes();
 			assert.lengthOf(notes, 2);
@@ -91,8 +91,8 @@ describe("Import/Export", function () {
 			var newNote2 = Zotero.Items.get(notes[1]);
 			assert.lengthOf(newNote1.relatedItems, 1);
 			assert.lengthOf(newNote2.relatedItems, 1);
-			assert.sameMembers(newNote1.relatedItems, [newNote2]);
-			assert.sameMembers(newNote2.relatedItems, [newNote1]);
+			assert.equal(newNote1.relatedItems[0], newNote2.key);
+			assert.equal(newNote2.relatedItems[0], newNote1.key);
 		});
 		
 		describe("standalone attachments", function () {
@@ -173,6 +173,78 @@ describe("Import/Export", function () {
 				assert.equal(newItem1.libraryID, libraryID);
 				assert.equal(newItem2.libraryID, libraryID);
 			});
+		});
+	});
+
+	describe ("CSL JSON", function() {
+		it("should export CSL with seeAlso", async function () {
+			// Create related items
+			var item1 = new Zotero.Item('book');
+			item1.setField('title', 'A');
+			item1.setField('ISBN', 1421402831);
+			await item1.saveTx();
+			var item2 = new Zotero.Item('webpage');
+			item2.setField('title', 'B');
+			item2.setField('url', 'http://example.com');
+			await item2.saveTx();
+			item1.addRelatedItem(item2);
+			item2.addRelatedItem(item1);
+			await item1.saveTx();
+			await item2.saveTx();
+			
+			// Export
+			var file = OS.Path.join(await getTempDirectory(), 'export.json');
+			var translator = Zotero.Translators.get('bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7');
+			var displayOptions = {};
+			var translation = new Zotero.Translate.Export();
+			translation.setItems([item1, item2]);
+			translation.setLocation(Zotero.File.pathToFile(file));
+			translation.setTranslator(translator);
+			translation.setDisplayOptions(displayOptions);
+			await translation.translate();
+			
+			// Parse exported file and look for dc:relation elements
+			var json = JSON.parse(Zotero.File.getContents(file));
+			var item1 = json[0];
+			var item2 = json[1];
+			assert.equal(item1.type, "book");
+			assert.equal(item2.type, "webpage");
+			assert.lengthOf(item1.seeAlso, 1);
+			assert.lengthOf(item2.seeAlso, 1);
+			assert.equal(item1.seeAlso[0], item2.id);
+			assert.equal(item2.seeAlso[0], item1.id);
+		});
+		
+		it('should symmetrically import asymmetric CSL seeAlso', async function () {
+			let myItems = [
+				{
+					"id": "item1",
+					"type": "graphic",
+					"multi": { "main": {}, "_keys": {}},
+					"title": "Title 1",
+					"seeAlso": ["item2"]
+				},
+				{
+					"id": "item2",
+					"type": "graphic",
+					"multi": { "main": {}, "_keys": {}},
+					"title": "Title 2",
+					"seeAlso": []
+				}
+
+			];
+			var libraryID = Zotero.Libraries.userLibraryID;
+			var file = OS.Path.join(getTestDataDirectory().path, 'csl_json.json');
+			translation = new Zotero.Translate.Import();
+			translation.setLocation(Zotero.File.pathToFile(file));
+			let translators = await translation.getTranslators();
+			translation.setTranslator(translators[0]);
+			var newItems = await translation.translate({ libraryID });
+			assert.lengthOf(newItems, 2);
+			assert.lengthOf(newItems[0].relatedItems, 1);
+			assert.equal(newItems[0].relatedItems[0], newItems[1].key);
+			assert.lengthOf(newItems[1].relatedItems, 1);
+			assert.equal(newItems[1].relatedItems[0], newItems[0].key);
 		});
 	});
 });
