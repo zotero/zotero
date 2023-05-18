@@ -73,15 +73,15 @@ if [ "`uname -o 2> /dev/null`" = "Cygwin" ]; then
 fi
 
 mkdir -p "$DIST_DIR"
-aws s3 cp $S3_URL $INCR_PATH >&2
+aws s3 cp $S3_URL "$INCR_PATH" >&2
 
 # Add version to file and reupload
 if [ "$VERSION" ]; then
 	echo "Adding $VERSION to incrementals-$PLATFORM"
-	echo $VERSION >> $INCR_PATH
-	aws s3 cp $INCR_PATH $S3_URL
+	echo $VERSION >> "$INCR_PATH"
+	aws s3 cp "$INCR_PATH" $S3_URL
 # Show last n versions
 elif [ "$NUM_VERSIONS" ]; then
-	tail -n $NUM_VERSIONS $INCR_PATH
+	tail -n $NUM_VERSIONS "$INCR_PATH"
 fi
-rm $INCR_PATH
+rm "$INCR_PATH"
