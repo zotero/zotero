@@ -28,6 +28,11 @@ cd "$tmp_dir"
 mkdir in
 cd in
 
+if [ "`uname -o 2> /dev/null`" = "Cygwin" ]; then
+	infile=$(cygpath -w "$infile")
+	outfile=$(cygpath -w "$outfile")
+fi
+
 echo "Extracting MAR"
 $mar -x "$infile"
 
