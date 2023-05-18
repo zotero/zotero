@@ -312,8 +312,11 @@ done
 
 $XZ $XZ_OPT --compress $BCJ_OPTIONS --lzma2 --format=xz --check=crc64 --force "$updatemanifestv3" && mv -f "$updatemanifestv3.xz" "$updatemanifestv3"
 
-mar_command="$mar_command -C \"$workdir\" -c output.mar"
+# Changed for Zotero -- -C is unreliable
+pushd "$workdir" > /dev/null
+mar_command="$mar_command -c output.mar"
 eval "$mar_command $archivefiles"
+popd > /dev/null
 mv -f "$workdir/output.mar" "$archive"
 
 # cleanup
