@@ -24,3 +24,6 @@ ac_add_options --enable-official-branding
 export MOZILLA_OFFICIAL=1
 export RELEASE_OR_BETA=1
 MOZ_REQUIRE_SIGNING=
+
+# Build updater without MAR signature verification
+ac_add_options --disable-verify-mar

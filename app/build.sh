@@ -638,21 +638,6 @@ if [ $BUILD_WIN == 1 ]; then
 		perl -pi -e "s/\{\{VERSION}}/$VERSION/" "$BUILD_DIR/win_installer/defines.nsi"
 		mkdir "$COMMON_APPDIR/uninstall"
 		
-		# Use our own updater, because Mozilla's requires updates signed by Mozilla
-		cp "$CALLDIR/win/updater.exe" "$COMMON_APPDIR"
-		cat "$CALLDIR/win/installer/updater_append.ini" >> "$COMMON_APPDIR/updater.ini"
-		
-		# Sign updater
-		if [ $SIGN -eq 1 ]; then
-			"`cygpath -u \"$SIGNTOOL\"`" \
-				sign /n "$SIGNTOOL_CERT_SUBJECT" \
-				/d "$SIGNATURE_DESC Updater" \
-				/fd SHA256 \
-				/tr "$SIGNTOOL_TIMESTAMP_SERVER" \
-				/td SHA256 \
-				"`cygpath -w \"$COMMON_APPDIR/updater.exe\"`"
-		fi
-		
 		# Compress 7zSD.sfx
 		upx --best -o "`cygpath -w \"$BUILD_DIR/7zSD.sfx\"`" \
 			"`cygpath -w \"$CALLDIR/win/installer/7zstub/firefox/7zSD.sfx\"`" > /dev/null
@@ -688,6 +673,21 @@ if [ $BUILD_WIN == 1 ]; then
 			rcedit "`cygpath -w \"$APPDIR/zotero.exe\"`" \
 				--set-file-version "$VERSION_NUMERIC" \
 				--set-product-version "$VERSION"
+		fi
+		
+		# Use our own updater, because Mozilla's requires updates signed by Mozilla
+		tar xf "$CALLDIR/win/updater.exe.tar.xz" --to-stdout updater-$arch.exe > "$APPDIR/updater.exe"
+		cat "$CALLDIR/win/installer/updater_append.ini" >> "$APPDIR/updater.ini"
+		
+		# Sign updater
+		if [ $SIGN -eq 1 ]; then
+			"`cygpath -u \"$SIGNTOOL\"`" \
+				sign /n "$SIGNTOOL_CERT_SUBJECT" \
+				/d "$SIGNATURE_DESC Updater" \
+				/fd SHA256 \
+				/tr "$SIGNTOOL_TIMESTAMP_SERVER" \
+				/td SHA256 \
+				"`cygpath -w \"$APPDIR/updater.exe\"`"
 		fi
 		
 		# Copy app files
