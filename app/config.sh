@@ -25,7 +25,7 @@ NOTARIZATION_USER=""
 NOTARIZATION_PASSWORD=""
 
 # Paths for Windows installer build
-NSIS_DIR='C:\Program Files (x86)\NSIS\Unicode\'
+NSIS_DIR='C:\Program Files (x86)\NSIS\'
 
 # Paths for Windows installer build only necessary for signed binaries
 SIGNTOOL='C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64\signtool.exe'
