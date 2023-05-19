@@ -59,13 +59,19 @@
 		
 		// Equivalent to Zotero.Utilities.Internal.openPreferences()
 		function openPreferences() {
-			Services.ww.openWindow(
-				null,
-				'chrome://zotero/content/preferences/preferences.xhtml',
-				'zotero-prefs',
-				'chrome,titlebar,centerscreen,resizable=yes',
-				null
-			);
+			let win = Services.wm.getMostRecentWindow('zotero:pref');
+			if (win) {
+				win.focus();
+			}
+			else {
+				Services.ww.openWindow(
+					null,
+					'chrome://zotero/content/preferences/preferences.xhtml',
+					'zotero-prefs',
+					'chrome,titlebar,centerscreen,resizable=yes',
+					null
+				);
+			}
 		}
 	</script>
 	<commandset id="mainCommandSet">
