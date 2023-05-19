@@ -345,6 +345,17 @@ ${str}
 				true
 			);
 			this._observerSymbols.set(elem, symbol);
+			
+			if (elem.tagName === 'menulist') {
+				// Set up an observer to resync if this menulist has items added/removed later
+				// (If we set elem.value before the corresponding item is added, the label won't be updated when it
+				//  does get added, unless we do this)
+				new MutationObserver(() => syncFromPref(elem, preference))
+					.observe(elem, {
+						childList: true,
+						subtree: true
+					});
+			}
 		};
 		
 		let detachFromPreference = (elem) => {
