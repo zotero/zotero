@@ -139,33 +139,40 @@
 				<label value="&zotero.preferences.trashAutoEmptyDaysPost;"/>
 			</hbox>
 		</groupbox>
-		
-		<groupbox id="zotero-prefpane-reader-groupbox">
-			<label><html:h2>&zotero.preferences.pdfReader;</html:h2></label>
-			
-			<hbox align="center">
-				<label value="&zotero.preferences.reader.tabsTitle.label;" control="reader-tabs-title"/>
-				<menulist id="reader-tabs-title" preference="extensions.zotero.tabs.title.reader" native="true">
-					<menupopup>
-						<menuitem label="&zotero.preferences.reader.tabsTitle.titleCreatorYear;" value="titleCreatorYear"/>
-						<menuitem label="&zotero.preferences.reader.tabsTitle.creatorYearTitle;" value="creatorYearTitle"/>
-						<menuitem label="&zotero.preferences.reader.tabsTitle.filename;" value="filename"/>
-					</menupopup>
-				</menulist>
-			</hbox>
-		</groupbox>
-		
-		<groupbox>
-			<label><html:h2>&zotero.preferences.groups;</html:h2></label>
-			
-			<label value="&zotero.preferences.groups.whenCopyingInclude;"/>
-			<vbox style="margin-left: 2em">
-				<checkbox label="&zotero.preferences.groups.childNotes;" preference="extensions.zotero.groups.copyChildNotes" native="true"/>
-				<checkbox label="&zotero.preferences.groups.childFiles;" preference="extensions.zotero.groups.copyChildFileAttachments" native="true"/>
-				<checkbox label="&zotero.preferences.groups.annotations;" preference="extensions.zotero.groups.copyAnnotations" native="true"/>
-				<checkbox label="&zotero.preferences.groups.childLinks;" preference="extensions.zotero.groups.copyChildLinks" native="true"/>
-				<checkbox label="&zotero.preferences.groups.tags;" preference="extensions.zotero.groups.copyTags" native="true"/>
-			</vbox>
-		</groupbox>
 	</vbox>
+	
+	<groupbox id="zotero-prefpane-reader-groupbox">
+		<label><html:h2>&zotero.preferences.reader;</html:h2></label>
+		
+		<hbox align="center">
+			<label value="&zotero.preferences.reader.tabsTitle.label;" control="reader-tabs-title"/>
+			<menulist id="reader-tabs-title" preference="extensions.zotero.tabs.title.reader" native="true">
+				<menupopup>
+					<menuitem label="&zotero.preferences.reader.tabsTitle.titleCreatorYear;" value="titleCreatorYear"/>
+					<menuitem label="&zotero.preferences.reader.tabsTitle.creatorYearTitle;" value="creatorYearTitle"/>
+					<menuitem label="&zotero.preferences.reader.tabsTitle.filename;" value="filename"/>
+				</menupopup>
+			</menulist>
+		</hbox>
+
+		<hbox align="center">
+			<label value="&zotero.preferences.reader.ebookFontFamily;" control="reader-ebook-font-family"/>
+			<menulist id="reader-ebook-font-family" preference="extensions.zotero.reader.ebookFontFamily" native="true">
+				<menupopup/>
+			</menulist>
+		</hbox>
+	</groupbox>
+	
+	<groupbox>
+		<label><html:h2>&zotero.preferences.groups;</html:h2></label>
+		
+		<label value="&zotero.preferences.groups.whenCopyingInclude;"/>
+		<vbox style="margin-left: 2em">
+			<checkbox label="&zotero.preferences.groups.childNotes;" preference="extensions.zotero.groups.copyChildNotes" native="true"/>
+			<checkbox label="&zotero.preferences.groups.childFiles;" preference="extensions.zotero.groups.copyChildFileAttachments" native="true"/>
+			<checkbox label="&zotero.preferences.groups.annotations;" preference="extensions.zotero.groups.copyAnnotations" native="true"/>
+			<checkbox label="&zotero.preferences.groups.childLinks;" preference="extensions.zotero.groups.copyChildLinks" native="true"/>
+			<checkbox label="&zotero.preferences.groups.tags;" preference="extensions.zotero.groups.copyTags" native="true"/>
+		</vbox>
+	</groupbox>
 </vbox>

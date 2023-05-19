@@ -54,6 +54,7 @@ Zotero_Preferences.General = {
 		this.refreshLocale();
 		this.updateAutoRenameFilesUI();
 		this._updateFileHandlerUI();
+		this._initEbookFontFamilyMenu();
 	},
 
 	_getAutomaticLocaleMenuLabel: function () {
@@ -364,5 +365,54 @@ Zotero_Preferences.General = {
 		setTimeout(() => {
 			this.updateOpenURLResolversMenu();
 		});
-	}
+	},
+
+	EBOOK_FONT_STACKS: {
+		Baskerville: 'Baskerville, serif',
+		Charter: 'Charter, serif',
+		Futura: 'Futura, sans-serif',
+		Georgia: 'Georgia, serif',
+		// Helvetica and equivalent-ish
+		Helvetica: 'Helvetica, Arial, Open Sans, Liberation Sans, sans-serif',
+		Iowan: 'Iowan, serif',
+		'New York': 'New York, serif',
+		OpenDyslexic: 'OpenDyslexic, eulexia, serif',
+		// Windows has called Palatino by many names
+		Palatino: 'Palatino, Palatino Linotype, Adobe Palatino, Book Antiqua, URW Palladio L, FPL Neu, Domitian, serif',
+		// Times New Roman and equivalent-ish
+		'Times New Roman': 'Times New Roman, Linux Libertine, Liberation Serif, serif',
+	},
+
+	async _initEbookFontFamilyMenu() {
+		let enumerator = Cc["@mozilla.org/gfx/fontenumerator;1"].createInstance(Ci.nsIFontEnumerator);
+		let fonts = new Set(await enumerator.EnumerateAllFontsAsync());
+
+		let menulist = document.getElementById('reader-ebook-font-family');
+		let popup = menulist.menupopup;
+		for (let [label, stack] of Object.entries(this.EBOOK_FONT_STACKS)) {
+			// If no font in the stack exists on the user's system, don't add it to the list
+			// Exclude the generic family name at the end, which is only there in case no font specified by name in the
+			// stack supports a specific character (e.g. non-Latin)
+			if (!stack.split(', ').slice(0, -1).some(font => fonts.has(font))) {
+				continue;
+			}
+			
+			let menuitem = document.createXULElement('menuitem');
+			menuitem.label = label;
+			menuitem.value = stack;
+			menuitem.style.fontFamily = stack;
+			popup.append(menuitem);
+		}
+
+		if (popup.childElementCount && fonts.size) {
+			popup.append(document.createXULElement('menuseparator'));
+		}
+		for (let font of fonts) {
+			let menuitem = document.createXULElement('menuitem');
+			menuitem.label = font;
+			menuitem.value = font;
+			menuitem.style.fontFamily = `'${font.replace(/'/g, "\\'")}'`;
+			popup.append(menuitem);
+		}
+	},
 }

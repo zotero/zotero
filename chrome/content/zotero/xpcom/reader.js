@@ -181,6 +181,7 @@ class ReaderInstance {
 					...Zotero.Intl.getPrefixedStrings('pdfReader.')
 				},
 				showAnnotations: true,
+				fontFamily: Zotero.Prefs.get('reader.ebookFontFamily'),
 				onOpenContextMenu: () => {
 					// Functions can only be passed over wrappedJSObject (we call back onClick for context menu items)
 					this._openContextMenu(this._iframeWindow.wrappedJSObject.contextMenuParams);
@@ -472,7 +473,8 @@ class ReaderInstance {
 
 		this._prefObserverIDs = [
 			Zotero.Prefs.registerObserver('fontSize', this._handleFontSizeChange),
-			Zotero.Prefs.registerObserver('tabs.title.reader', this._handleTabTitlePrefChange)
+			Zotero.Prefs.registerObserver('tabs.title.reader', this._handleTabTitlePrefChange),
+			Zotero.Prefs.registerObserver('reader.ebookFontFamily', this._handleFontFamilyChange),
 		];
 
 		return true;
@@ -701,6 +703,10 @@ class ReaderInstance {
 
 	_handleFontSizeChange = () => {
 		this._internalReader.setFontSize(Zotero.Prefs.get('fontSize'));
+	};
+
+	_handleFontFamilyChange = () => {
+		this._internalReader.setFontFamily(Zotero.Prefs.get('reader.ebookFontFamily'));
 	};
 
 	_dataURLtoBlob(dataurl) {
