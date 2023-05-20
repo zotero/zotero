@@ -141,12 +141,12 @@ def main():
         
         # Modify version as necessary
         
-        # The dev build revision number is stored in build/lastrev-{version}-{channel}.
+        # The dev build revision number is stored in lastrev/{version}-{channel}.
         #
         # If we're including it, get the current version number and increment it.
         if args.channel not in ["release", "source"]:
             lastrev_file = os.path.join(
-                lastrev_dir, 'lastrev-{0}-{1}'.format(version, args.channel)
+                lastrev_dir, '{0}-{1}'.format(version, args.channel)
             )
             if not os.path.exists(lastrev_file):
                 with open(lastrev_file, 'w') as f:
