@@ -717,6 +717,12 @@ if [ $BUILD_WIN == 1 ]; then
 		mkdir -p "$APPDIR/integration"
 		cp -RH "$CALLDIR/modules/zotero-libreoffice-integration/install" "$APPDIR/integration/libreoffice"
 		cp -RH "$CALLDIR/modules/zotero-word-for-windows-integration/install" "$APPDIR/integration/word-for-windows"
+		if [ $arch = 'win32' ]; then
+			rm "$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration_x64.dll"
+		elif [ $arch = 'win-x64' ]; then
+			mv "$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration_x64.dll" \
+				"$APPDIR/integration/word-for-windows/libzoteroWinWordIntegration.dll"
+		fi	
 		
 		# Delete extraneous files
 		find "$APPDIR" -depth -type d -name .git -exec rm -rf {} \;
