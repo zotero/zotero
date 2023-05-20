@@ -32,7 +32,7 @@ import TabBar from 'components/tabBar';
 
 // Reduce loaded tabs limit if the system has 8 GB or less memory.
 // TODO: Revise this after upgrading to Zotero 7
-const MAX_LOADED_TABS = Services.sysinfo.getProperty("memsize") / 1024 / 1024 / 1024 <= 8 ? 2 : 5;
+const MAX_LOADED_TABS = Services.sysinfo.getProperty("memsize") / 1024 / 1024 / 1024 <= 8 ? 3 : 5;
 const UNLOAD_UNUSED_AFTER = 86400; // 24h
 
 var Zotero_Tabs = new function () {
