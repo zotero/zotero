@@ -57,6 +57,12 @@ if [ "`uname`" = "Darwin" ]; then
 	shopt -s expand_aliases
 fi
 
+if [ "`uname -o 2> /dev/null`" = "Cygwin" ]; then
+	export WIN_NATIVE=1
+else
+	export WIN_NATIVE=0
+fi
+
 # Make utilities (mar/mbsdiff) available in the path
 PATH="$DIR/xulrunner/bin:$PATH"
 

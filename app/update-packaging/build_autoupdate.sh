@@ -32,12 +32,6 @@ urlencode() {
     done
 }
 
-if [ "`uname -o 2> /dev/null`" = "Cygwin" ]; then
-	WIN_NATIVE=1
-else
-	WIN_NATIVE=0
-fi
-
 BUILD_FULL=0
 BUILD_INCREMENTAL=0
 FROM=""
@@ -285,18 +279,7 @@ for build in "mac" "win32" "win-x64" "linux-i686" "linux-x86_64"; do
 	if [[ $BUILD_INCREMENTAL == 1 ]] && [[ -d "$UPDATE_STAGE_DIR/$FROM/$dir" ]]; then
 		echo
 		echo "Building incremental $build update from $FROM to $TO"
-		
-		# mbsdiff fails on paths with symlink
-		if [ $WIN_NATIVE == 1 ]; then
-			cur=`pwd`
-			from_dir="`realpath --relative-to=\"$cur\" \"$UPDATE_STAGE_DIR/$FROM/$dir\"`"
-			to_dir="`realpath --relative-to=\"$cur\" \"$UPDATE_STAGE_DIR/$TO/$dir\"`"
-		else
-			from_dir="$UPDATE_STAGE_DIR/$FROM/$dir"
-			to_dir="$UPDATE_STAGE_DIR/$TO/$dir"
-		fi
-		
-		"$SCRIPT_DIR/make_incremental_update.sh" "$DIST_DIR/Zotero-${TO}-${FROM}_$build.mar" "$from_dir" "$to_dir"
+		"$SCRIPT_DIR/make_incremental_update.sh" "$DIST_DIR/Zotero-${TO}-${FROM}_$build.mar" "$UPDATE_STAGE_DIR/$FROM/$dir" "$UPDATE_STAGE_DIR/$TO/$dir"
 		CHANGES_MADE=1
 		
 		# If it's an incremental patch from a 6.0 build, use bzip instead of xz

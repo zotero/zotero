@@ -213,7 +213,17 @@ for ((i=0; $i<$num_oldfiles; i=$i+1)); do
       # Disabled for Zotero
       #if [ -z "$MBSDIFF_HOOK" ]; then
       if true; then
-        $MBSDIFF "$olddir/$f" "$newdir/$f" "$workdir/$f.patch"
+        # mbsdiff doesn't like POSIX paths on Windows
+        if [ $WIN_NATIVE -eq 1 ]; then
+          oldfile_path=$(cygpath -m "$olddir/$f")
+          newfile_path=$(cygpath -m "$newdir/$f")
+          patch_path=$(cygpath -m "$workdir/$f.patch")
+        else
+          oldfile_path="$olddir/$f"
+          newfile_path="$newdir/$f"
+          patch_path="$workdir/$f.patch"
+        fi
+        $MBSDIFF "$oldfile_path" "$newfile_path" "$patch_path"
         $XZ $XZ_OPT --compress --lzma2 --format=xz --check=crc64 --force "$workdir/$f.patch"
       else
         # if service enabled then check patch existence for retrieval
