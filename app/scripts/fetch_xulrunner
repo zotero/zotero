@@ -117,6 +117,9 @@ function modify_omni {
 	replace_line 'MOZ_UPDATE_CHANNEL:.+' 'MOZ_UPDATE_CHANNEL: "none",' modules/AppConstants.jsm
 	replace_line '"https:\/\/[^\/]+mozilla.com.+"' '""' modules/AppConstants.jsm
 	
+	# Don't use Mozilla Maintenance Service on Windows
+	replace_line 'MOZ_MAINTENANCE_SERVICE:' 'MOZ_MAINTENANCE_SERVICE: false \&\&' modules/AppConstants.jsm
+	
 	# Prompt if major update is available instead of installing automatically on restart
 	replace_line 'if \(!updateAuto\) \{' 'if (update.type == "major") {
       LOG("UpdateService:_selectAndInstallUpdate - prompting because it is a major update");
