@@ -1,0 +1,27 @@
+# Uncomment to build 32-bit
+#ac_add_options --target=i686
+
+ac_add_options --enable-bootstrap
+
+mk_add_options AUTOCLOBBER=1
+
+# These don't all affect the stub, but they can't hurt, and we'll want them if
+# we switch to custom XUL builds
+ac_add_options MOZ_ENABLE_JS_DUMP=1
+ac_add_options MOZ_ENABLE_FORKSERVER=
+ac_add_options MOZ_TELEMETRY_REPORTING=
+ac_add_options MOZ_DATA_REPORTING=
+ac_add_options --disable-tests
+ac_add_options --disable-debug
+ac_add_options --disable-debug-symbols
+ac_add_options --disable-webrtc
+ac_add_options --disable-eme
+
+export MOZILLA_OFFICIAL=1
+export RELEASE_OR_BETA=1
+MOZ_REQUIRE_SIGNING=
+
+ac_add_options --enable-official-branding
+
+# Build updater without MAR signature verification
+ac_add_options --disable-verify-mar

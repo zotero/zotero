@@ -855,7 +855,8 @@ if [ $BUILD_LINUX == 1 ]; then
 		cp "$CALLDIR/linux/set_launcher_icon" "$APPDIR"
 		
 		# Use our own updater, because Mozilla's requires updates signed by Mozilla
-		cp "$CALLDIR/linux/updater-$arch" "$APPDIR"/updater
+		tar xf "$CALLDIR/linux/updater.tar.xz" --to-stdout updater-$arch > "$APPDIR/updater"
+		chmod 755 "$APPDIR/updater"
 
 		# Copy app files
 		rsync -a "$base_dir/" "$APPDIR/"
