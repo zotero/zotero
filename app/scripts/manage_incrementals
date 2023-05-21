@@ -82,6 +82,8 @@ if [ "$VERSION" ]; then
 	aws s3 cp "$INCR_PATH" $S3_URL
 # Show last n versions
 elif [ "$NUM_VERSIONS" ]; then
-	tail -n $NUM_VERSIONS "$INCR_PATH"
+	# TEMP: Don't include 6.0 versions
+	#tail -n $NUM_VERSIONS "$INCR_PATH"
+	tail -n $NUM_VERSIONS "$INCR_PATH" | grep -v '^6\.0'
 fi
 rm "$INCR_PATH"
