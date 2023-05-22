@@ -387,8 +387,7 @@ Zotero.Translate.SandboxManager = function(sandboxLocation) {
 			return new DOMParser();
 		},
 		XMLSerializer: function() {
-			return Components.classes["@mozilla.org/xmlextras/xmlserializer;1"]
-				.createInstance(Components.interfaces.nsIDOMSerializer);
+			return new XMLSerializer();
 		}
 	};
 };

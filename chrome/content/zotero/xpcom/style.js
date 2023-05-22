@@ -755,8 +755,7 @@ Zotero.Style.prototype.getCiteProc = function(locale, format, automaticJournalAb
 		
 		// apply XSLT and serialize output
 		let newDOMXML = Zotero.Styles.xsltProcessor.transformToDocument(styleDOMXML);
-		var xml = Components.classes["@mozilla.org/xmlextras/xmlserializer;1"]
-			.createInstance(Components.interfaces.nsIDOMSerializer).serializeToString(newDOMXML);
+		var xml = new XMLSerializer().serializeToString(newDOMXML);
 	} else {
 		var xml = this.getXML();
 	}

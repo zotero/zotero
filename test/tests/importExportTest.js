@@ -175,4 +175,40 @@ describe("Import/Export", function () {
 			});
 		});
 	});
+	
+	describe("MODS", function () {
+		var namespaces = {
+			mods: 'http://www.loc.gov/mods/v3'
+		};
+		
+		it("should export item", async function () {
+			var title = "Title";
+			var item = new Zotero.Item('book');
+			item.setField('title', title);
+			item.setField('ISBN', 1421402831);
+			await item.saveTx();
+			
+			// Export
+			var file = OS.Path.join(await getTempDirectory(), 'export.rdf');
+			var translator = Zotero.Translators.get('0e2235e7-babf-413c-9acf-f27cce5f059c');
+			var displayOptions = {
+				exportNotes: true
+			};
+			var translation = new Zotero.Translate.Export();
+			translation.setItems([item]);
+			translation.setLocation(Zotero.File.pathToFile(file));
+			translation.setTranslator(translator);
+			translation.setDisplayOptions(displayOptions);
+			await translation.translate();
+			
+			// Parse exported file and look for title
+			var dp = new DOMParser();
+			var doc = dp.parseFromString(Zotero.File.getContents(file), 'text/xml');
+			var modsNode = doc.querySelector('mods');
+			assert.equal(
+				Zotero.Utilities.xpath(modsNode, '//mods:title', namespaces)[0].textContent,
+				title
+			);
+		});
+	});
 });
