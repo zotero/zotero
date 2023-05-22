@@ -2,9 +2,12 @@
 set -uo pipefail
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-ROOT_DIR="$(dirname "$SCRIPT_DIR")"
-. "$ROOT_DIR/config.sh"
+APP_ROOT_DIR="$(dirname "$SCRIPT_DIR")"
+ROOT_DIR="$(dirname "$APP_ROOT_DIR")"
+. "$APP_ROOT_DIR/config.sh"
 . "$SCRIPT_DIR/bootstrap.sh"
+
+cd "$ROOT_DIR"
 
 platform=`get_current_platform`
 
@@ -28,7 +31,7 @@ for lfs_file in $lfs_files; do
 	file_type=$(file -b $lfs_file)
 	echo -n $file_type" "
 	if [ -z "$(echo -n $file_type | grep XZ)" ]; then
-		{ $FAIL_CMD_INLINE; FAILED=1; echo "git lfs pull"; }
+		{ $FAIL_CMD_INLINE; FAILED=1; echo " -- run 'git lfs pull'"; }
 	fi
 	echo
 done
@@ -64,7 +67,7 @@ if [ $platform = "w" ]; then
 	echo "Checking for vcruntime140_1.dll: "
 	for arch in win-x64; do
 		echo -n "  xulrunner/vc-$arch/vcruntime140_1.dll "
-		[ -f "$ROOT_DIR/xulrunner/vc-$arch/vcruntime140_1.dll" ] || { $FAIL_CMD; FAILED=1; }
+		[ -f "$APP_ROOT_DIR/xulrunner/vc-$arch/vcruntime140_1.dll" ] || { $FAIL_CMD; FAILED=1; }
 	done
 	echo
 	
