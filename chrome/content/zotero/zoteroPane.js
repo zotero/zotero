@@ -2789,6 +2789,10 @@ var ZoteroPane = new function()
 		await ZoteroPane.buildCollectionContextMenu();
 		x = x || event.clientX;
 		y = y || event.clientY;
+		// TEMP: Quick fix for https://forums.zotero.org/discussion/105103/
+		if (Zotero.isWin) {
+			x += 10;
+		}
 		openPopup(document.getElementById('zotero-collectionmenu'), x, y);
 	};
 	
@@ -2800,6 +2804,10 @@ var ZoteroPane = new function()
 		await ZoteroPane.buildItemContextMenu();
 		x = x || event.clientX;
 		y = y || event.clientY;
+		// TEMP: Quick fix for https://forums.zotero.org/discussion/105103/
+		if (Zotero.isWin) {
+			x += 10;
+		}
 		openPopup(document.getElementById('zotero-itemmenu'), x, y);
 	};
 	
