@@ -383,7 +383,14 @@ if [ $BUILD_WIN == 1 ]; then
 		# replace the hard-coded string with "Zotero" and add a bunch of NULs.
 		perl -pe 's/\x{4D}\x{00}\x{6F}\x{00}\x{7A}\x{00}\x{69}\x{00}\x{6C}\x{00}\x{6C}\x{00}\x{61}\x{00}\x{2D}\x{00}\x{31}\x{00}\x{64}\x{00}\x{65}\x{00}\x{34}\x{00}\x{65}\x{00}\x{65}\x{00}\x{63}\x{00}\x{38}\x{00}\x{2D}\x{00}\x{31}\x{00}\x{32}\x{00}\x{34}\x{00}\x{31}\x{00}\x{2D}\x{00}\x{34}\x{00}\x{31}\x{00}\x{37}\x{00}\x{37}\x{00}\x{2D}\x{00}\x{61}\x{00}\x{38}\x{00}\x{36}\x{00}\x{34}\x{00}\x{2D}\x{00}\x{65}\x{00}\x{35}\x{00}\x{39}\x{00}\x{34}\x{00}\x{65}\x{00}\x{38}\x{00}\x{64}\x{00}\x{31}\x{00}\x{66}\x{00}\x{62}\x{00}\x{33}\x{00}\x{38}\x{00}/\x{5A}\x{00}\x{6F}\x{00}\x{74}\x{00}\x{65}\x{00}\x{72}\x{00}\x{6F}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}\x{00}/' < xul.dll > xul.dll.new
 		mv xul.dll.new xul.dll
-		if [[ -z "$(strings -e l xul.dll | grep -m 1 Zotero)" ]]; then
+		
+		# Check for UTF-16 "Zotero" in DLL
+		#
+		# (The macOS strings command doesn't have an encoding option, so skip on macOS. We could
+		# require binutils, which has GNU strings, but you need to build on Windows to make an
+		# installer, so a Windows build from macOS likely isn't being deployed, and there's no
+		# reason the Perl command above should fail anyway.)
+		if [[ "`uname`" != "Darwin" ]] && [[ -z "$($strings_cmd -e l xul.dll | grep -m 1 Zotero)" ]]; then
 			echo '"Zotero" not found in xul.dll after replacement'
 			exit 1
 		fi
