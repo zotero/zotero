@@ -69,7 +69,7 @@ if [ $platform = "w" ]; then
 	echo
 	
 	echo -n "Checking for rcedit: "
-	which rcedit || { $FAIL_CMD; FAILED=1; echo " -- Install with scripts/fetch_rcedit"; }
+	which rcedit || { $FAIL_CMD; FAILED=1; echo " -- Install with fetch_rcedit"; }
 fi
 
 if [ $platform = "w" ]; then
