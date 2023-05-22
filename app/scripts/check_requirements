@@ -9,6 +9,7 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 platform=`get_current_platform`
 
 FAIL_CMD='echo -e \033[31;1mFAIL\033[0m'
+FAIL_CMD_INLINE='echo -n -e \033[31;1mFAIL\033[0m'
 FAILED=0
 
 hdr_start=`tput smul`
@@ -16,6 +17,21 @@ hdr_stop=`tput rmul`
 
 echo "${hdr_start}Checking build requirements:${hdr_stop}"
 echo
+
+echo -n "Checking for Git LFS: "
+which git-lfs || { $FAIL_CMD_INLINE; FAILED=1; }
+
+echo "Checking for Git LFS checkouts: "
+lfs_files=$(git lfs ls-files -n 2> /dev/null) || { $FAIL_CMD; FAILED=1; }
+for lfs_file in $lfs_files; do
+	echo -n "    - $lfs_file: "
+	file_type=$(file -b $lfs_file)
+	echo -n $file_type" "
+	if [ -z "$(echo -n $file_type | grep XZ)" ]; then
+		{ $FAIL_CMD_INLINE; FAILED=1; echo "git lfs pull"; }
+	fi
+	echo
+done
 
 echo -n "Checking for perl: "
 which perl || { $FAIL_CMD; FAILED=1; }
