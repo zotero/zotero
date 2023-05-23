@@ -26,6 +26,12 @@
     ***** END LICENSE BLOCK *****
 */
 
+var { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+
+XPCOMUtils.defineLazyModuleGetters(globalThis, {
+	Subprocess: "resource://gre/modules/Subprocess.jsm",
+});
+
 /**
  * @class Utility functions not made available to translators
  */
@@ -618,7 +624,31 @@ Zotero.Utilities.Internal = {
 		
 		return deferred.promise;
 	}),
-
+	
+	/**
+	 * Run a short-lived process and return its stdout
+	 *
+	 * @param {String} command - The command to run; if no slashes, will search PATH for the command
+	 * @param {String[]} args - An array of arguments to pass to the command
+	 * @return {String}
+	 */
+	subprocess: async function (command, args) {
+		command = command.includes('/') ? command : await Subprocess.pathSearch(command);
+		
+		Zotero.debug("Running " + command + " " + args.map(arg => "'" + arg + "'").join(" "));
+		
+		let proc = await Subprocess.call({
+			command,
+			arguments: args,
+		});
+		let result = "";
+		let str;
+		while ((str = await proc.stdout.readString())) {
+			result += str;
+		}
+		return result;
+	},
+	
 	/**
 	 * Get string data from the clipboard
 	 * @param {String[]} mimeType MIME type of data to get
