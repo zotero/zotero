@@ -1593,7 +1593,7 @@
 					// Monkey-patching onTextEntered is apparently the current official way to detect completion --
 					// there's also a custom event called textEntered, but it won't be fired unless the input has its
 					// 'notifylegacyevents' attribute set to true
-					// https://searchfox.org/mozilla-central/source/toolkit/content/widgets/autocomplete-input.js#372
+					// https://searchfox.org/mozilla-central/rev/2d678a843ceab81e43f7ffb83212197dc10e944a/toolkit/content/widgets/autocomplete-input.js#372
 					// https://searchfox.org/mozilla-central/rev/2d678a843ceab81e43f7ffb83212197dc10e944a/browser/components/search/content/searchbar.js#791
 					t.onTextEntered = () => {
 						this.handleCreatorAutoCompleteSelect(t, true);
