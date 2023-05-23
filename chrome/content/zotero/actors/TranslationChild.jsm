@@ -261,30 +261,6 @@ class TranslationChild extends JSWindowActorChild {
 	 */
 	_loadTranslationFramework(schemaJSON, dateFormatsJSON) {
 		let sandbox = new Cu.Sandbox(this.contentWindow, {
-			wantGlobalProperties: [
-				"atob",
-				"btoa",
-				"Blob",
-				"crypto",
-				"CSS",
-				"CSSRule",
-				"Document",
-				"DOMParser",
-				"DOMTokenList",
-				"Element",
-				"Event",
-				"fetch",
-				"FormData",
-				"Headers",
-				"Node",
-				"NodeFilter",
-				"TextDecoder",
-				"TextEncoder",
-				"URL",
-				"URLSearchParams",
-				"Window",
-				"XMLHttpRequest"
-			],
 			sandboxPrototype: this.contentWindow
 		});
 		
