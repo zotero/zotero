@@ -26,7 +26,12 @@
 			<label id="changelog" class="zotero-text-link" value="&zotero.whatsNew;"/>
 		</hbox>
 		<script>
-			document.getElementById('version').textContent = Zotero.version;
+			var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+			var version = Zotero.version;
+			if (!Zotero.isMac) {
+				version += ` (${Services.appinfo.is64Bit ? '64' : '32'}-bit)`;
+			}
+			document.getElementById('version').textContent = version
 		</script>
 		<vbox>
 			<div id="about-text" xmlns="http://www.w3.org/1999/xhtml">
