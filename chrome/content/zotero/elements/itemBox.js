@@ -285,6 +285,18 @@
 				this._displayAllCreators = false;
 			}
 			
+			// If switching items, save the current item first
+			// Before fx102, clicking an item in the item tree would send a blur event before ItemBox.item was updated.
+			// Now, ItemBox.item is set first, causing us to update this._item and remove the open field before it can
+			// receive a blur event and trigger a save.
+			if (this._item && val.id != this._item.id) {
+				// Not awaiting the blurOpenField() call here is not great practice, but it's unavoidable - setters
+				// can't be async and should immediately update their backing fields. Additionally, it matches the old
+				// behavior, as the blur event was triggered immediately before the item setter, with the
+				// Zotero.Item#saveTx() call continuing in the background.
+				this.blurOpenField();
+			}
+			
 			this._item = val;
 			this._lastTabIndex = null;
 			this.scrollToTop();
@@ -298,7 +310,6 @@
 		
 		set ref(val) {
 			this.item = val;
-			this.refresh();
 		}
 		
 		
