@@ -1303,17 +1303,16 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	/**
 	 * Get versions, platform, etc.
 	 */
-	this.getSystemInfo = Zotero.Promise.coroutine(function* () {
+	this.getSystemInfo = async function () {
 		var info = {
-			version: Zotero.version,
-			platform: Zotero.platform,
-			oscpu: Zotero.oscpu,
-			locale: Zotero.locale,
 			appName: Services.appinfo.name,
-			appVersion: Services.appinfo.version
+			version: Zotero.version
+				+ (!Zotero.isMac && !Services.appinfo.is64Bit ? ' (32-bit)' : ''),
+			os: await this.getOSVersion(),
+			locale: Zotero.locale,
 		};
 		
-		var extensions = yield Zotero.getInstalledExtensions();
+		var extensions = await Zotero.getInstalledExtensions();
 		info.extensions = extensions.join(', ');
 		
 		var str = '';
@@ -1322,7 +1321,32 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		}
 		str = str.substr(0, str.length - 2);
 		return str;
-	});
+	};
+	
+	
+	/**
+	 * Return OS and OS version
+	 *
+	 * "macOS 13.3.1"
+	 * "Windows 10.0 22000"
+	 * "Linux 5.4.0-148-generic #165-Ubuntu SMP Tue Apr 18 08:53:12 UTC 2023"
+	 *
+	 * @return {String}
+	 */
+	this.getOSVersion = async function () {
+		if (Zotero.isMac) {
+			try {
+				return "macOS "
+					+ (await Zotero.Utilities.Internal.subprocess('sw_vers', ['--productVersion'])).trim();
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
+		return (Zotero.isWin ? "Windows" : Services.sysinfo.getProperty("name"))
+			+ " " + Services.sysinfo.getProperty("version")
+			+ " " + Services.sysinfo.getProperty("build");
+	};
 	
 	
 	/**
