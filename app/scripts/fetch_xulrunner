@@ -297,6 +297,12 @@ function modify_omni {
 	
 	# Remove WebExtension APIs
 	remove_line ext-browser.json components/components.manifest
+	
+	# Don't open a second window if app is already open when launching .exe (Windows) or running via
+	# command line (macOS)
+	replace_line 'function dch_handle\(cmdLine\) \{' 'function dch_handle(cmdLine) {
+    if (cmdLine.state == Ci.nsICommandLine.STATE_REMOTE_AUTO) { return; }
+    ' modules/BrowserContentHandler.jsm
 }
 
 mkdir -p xulrunner
