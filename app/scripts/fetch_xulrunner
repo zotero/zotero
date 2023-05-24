@@ -398,6 +398,8 @@ if [ $BUILD_WIN == 1 ]; then
 		modify_omni $arch
 		popd
 		
+		# Uncomment to create local copies for reuse
+		#cp "Firefox%20Setup%20$GECKO_VERSION.exe" "Firefox Setup $GECKO_VERSION-$arch.exe"
 		rm "Firefox%20Setup%20$GECKO_VERSION.exe"
 		echo
 		echo
