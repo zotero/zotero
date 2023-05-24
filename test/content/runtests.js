@@ -3,7 +3,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 Components.utils.import("resource://gre/modules/osfile.jsm");
 var EventUtils = Components.utils.import("resource://zotero-unit/EventUtils.jsm");
 
-var ZoteroUnit = Components.classes["@mozilla.org/commandlinehandler/general-startup;1?type=zotero-unit"].
+var ZoteroUnit = Components.classes["@zotero.org/zotero/tests-clh;1"].
                  getService(Components.interfaces.nsISupports).
                  wrappedJSObject;
 
