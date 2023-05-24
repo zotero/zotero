@@ -42,7 +42,7 @@
 			this.content = MozXULElement.parseXULToFragment(`
 				<box flex="1" tooltip="html-tooltip" style="display: flex; flex-grow: 1" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 					<div id="note-editor" style="display: flex;flex-direction: column;flex-grow: 1;" xmlns="http://www.w3.org/1999/xhtml">
-						<iframe  id="editor-view" style="border: 0;width: 100%;flex-grow: 1;" src="resource://zotero/note-editor/editor.html" type="content"/>
+						<iframe id="editor-view" style="border: 0;width: 100%;flex-grow: 1;" src="resource://zotero/note-editor/editor.html" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" type="content"/>
 						<div id="links-container">
 							<links-box id="links-box" style="display: flex" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"/>
 						</div>
