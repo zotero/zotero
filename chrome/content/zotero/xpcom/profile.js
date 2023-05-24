@@ -37,7 +37,7 @@ Zotero.Profile = {
 			var iniContents = yield Zotero.File.getContentsAsync(profilesIni);
 		}
 		catch (e) {
-			if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
+			if (e.name == 'NotFoundError') {
 				return false;
 			}
 			throw e;
@@ -230,7 +230,7 @@ Zotero.Profile = {
 			}
 		}
 		catch (e) {
-			if (e instanceof OS.File.Error && e.becauseNoSuchFile) {
+			if (e.name == 'NotFoundError' || (e instanceof OS.File.Error && e.becauseNoSuchFile)) {
 				return true;
 			}
 			Zotero.debug(e, 2)
