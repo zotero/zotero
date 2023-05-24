@@ -396,7 +396,7 @@ if [ $BUILD_WIN == 1 ]; then
 		# require binutils, which has GNU strings, but you need to build on Windows to make an
 		# installer, so a Windows build from macOS likely isn't being deployed, and there's no
 		# reason the Perl command above should fail anyway.)
-		if [[ "`uname`" != "Darwin" ]] && [[ -z "$($strings_cmd -e l xul.dll | grep -m 1 Zotero)" ]]; then
+		if [[ "`uname`" != "Darwin" ]] && [[ -z "$(strings -e l xul.dll | grep -m 1 Zotero)" ]]; then
 			echo '"Zotero" not found in xul.dll after replacement'
 			exit 1
 		fi
