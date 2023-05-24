@@ -88,7 +88,7 @@ Zotero_Preferences.Export = {
 		var format = Zotero.Prefs.get("export.noteQuickCopy.setting");
 		format = Zotero.QuickCopy.unserializeSetting(format);
 		var menulist = document.getElementById("zotero-noteQuickCopy-menu");
-		menulist.setAttribute('preference', "pref-noteQuickCopy-setting");
+		menulist.setAttribute('preference', "extensions.zotero.export.noteQuickCopy.setting");
 		menulist.removeEventListener('command', this.updateNoteQuickCopyUI);
 		menulist.addEventListener('command', this.updateNoteQuickCopyUI);
 

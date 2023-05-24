@@ -330,14 +330,32 @@ ${str}
 		
 		// We use a single listener function shared between all elements so we can easily detach it later
 		let syncToPrefOnModify = (event) => {
-			if (event.currentTarget.getAttribute('preference')) {
+			if (event.target.getAttribute('preference')) {
 				let value = useChecked(event.currentTarget) ? event.currentTarget.checked : event.currentTarget.value;
 				Zotero.Prefs.set(event.currentTarget.getAttribute('preference'), value, true);
 				event.currentTarget.dispatchEvent(new Event('synctopreference'));
 			}
 		};
 		
-		let attachToPreference = (elem, preference) => {
+		let attachToPreference = (elem) => {
+			let preference = elem.getAttribute('preference');
+			try {
+				if (container.querySelector('preferences > preference#' + preference)) {
+					Zotero.warn('<preference> is deprecated -- `preference` attribute values '
+						+ 'should be full preference keys, not <preference> IDs');
+					preference = container.querySelector('preferences > preference#' + preference)
+						.getAttribute('name');
+					elem.setAttribute('preference', preference);
+				}
+				else if (!preference.includes('.')) {
+					Zotero.warn('`preference` attribute value `' + preference + '` looks like a <preference> ID, '
+						+ 'although no element with that ID exists. Its value should be a preference key.');
+				}
+			}
+			catch (e) {
+				// Ignore
+			}
+
 			Zotero.debug(`Attaching <${elem.tagName}> element to ${preference}`);
 			let symbol = Zotero.Prefs.registerObserver(
 				preference,
@@ -356,6 +374,10 @@ ${str}
 						subtree: true
 					});
 			}
+
+			elem.addEventListener('command', syncToPrefOnModify);
+			elem.addEventListener('input', syncToPrefOnModify);
+			elem.addEventListener('change', syncToPrefOnModify);
 		};
 		
 		let detachFromPreference = (elem) => {
@@ -368,25 +390,11 @@ ${str}
 
 		// Activate `preference` attributes
 		for (let elem of container.querySelectorAll('[preference]')) {
-			let preference = elem.getAttribute('preference');
-			if (container.querySelector('preferences > preference#' + preference)) {
-				Zotero.warn('<preference> is deprecated -- `preference` attribute values '
-					+ 'should be full preference keys, not <preference> IDs');
-				preference = container.querySelector('preferences > preference#' + preference)
-					.getAttribute('name');
-			}
-
-			attachToPreference(elem, preference);
-
-			elem.addEventListener(elem instanceof XULElement ? 'command' : 'input', syncToPrefOnModify);
+			attachToPreference(elem);
 
 			// Set timeout before populating the value so the pane can add listeners first
 			setTimeout(() => {
-				syncFromPref(elem, preference);
-
-				// If this is the first pane to be loaded, notify anyone waiting
-				// (for tests)
-				this._firstPaneLoadDeferred.resolve();
+				syncFromPref(elem, elem.getAttribute('preference'));
 			});
 		}
 		
@@ -396,8 +404,7 @@ ${str}
 					let target = mutation.target;
 					detachFromPreference(target);
 					if (target.hasAttribute('preference')) {
-						attachToPreference(target, target.getAttribute('preference'));
-						target.addEventListener(target instanceof XULElement ? 'command' : 'input', syncToPrefOnModify);
+						attachToPreference(target);
 					}
 				}
 				else if (mutation.type == 'childList') {
@@ -407,7 +414,6 @@ ${str}
 					for (let node of mutation.addedNodes) {
 						if (node.nodeType == Node.ELEMENT_NODE && node.hasAttribute('preference')) {
 							attachToPreference(node);
-							node.addEventListener(node instanceof XULElement ? 'command' : 'input', syncToPrefOnModify);
 						}
 					}
 				}
@@ -427,6 +433,10 @@ ${str}
 		for (let child of container.children) {
 			child.dispatchEvent(new Event('load'));
 		}
+
+		// If this is the first pane to be loaded, notify anyone waiting
+		// (for tests)
+		this._firstPaneLoadDeferred.resolve();
 	},
 
 	/**
