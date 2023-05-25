@@ -535,11 +535,13 @@ ZoteroCommandLineHandler.prototype = {
 	
 		if(isStandalone()) {
 			var fileToOpen;
-			// Special handler for "zotero" URIs at the command line to prevent them from opening a new window
+			// Handle zotero:// and file URIs and prevent them from opening a new window
 			var param = cmdLine.handleFlagWithParam("url", false);
 			if (param) {
+				cmdLine.preventDefault = true;
+				
 				var uri = cmdLine.resolveURI(param);
-				if(uri.schemeIs("zotero")) {
+				if (uri.schemeIs("zotero")) {
 					addInitCallback(function (Zotero) {
 						Zotero.uiReadyPromise
 						.then(function () {
