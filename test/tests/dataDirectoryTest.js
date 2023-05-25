@@ -48,6 +48,7 @@ describe("Zotero.DataDirectory", function () {
 	afterEach(function* () {
 		yield removeDir(oldDir);
 		yield removeDir(newDir);
+		Zotero.skipLoading = false;
 		Zotero.DataDirectory._cache(false);
 		yield Zotero.DataDirectory.init();
 	});
