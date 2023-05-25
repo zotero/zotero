@@ -95,10 +95,13 @@ Zotero.Profile = {
 	 * Get the path to the Profiles directory of the other app from this one (Firefox or Zotero),
 	 * which may or may not exist
 	 *
-	 * @return {String} - Path
+	 * @return {String|null} - Path, or null if none due to filesystem location
 	 */
 	getOtherAppProfilesDir: function () {
 		var dir = OS.Path.dirname(OS.Path.dirname(OS.Path.dirname(this.dir)));
+		if (dir === '' || dir == '.') {
+			return null;
+		}
 		
 		if (Zotero.isStandalone) {
 			if (Zotero.isWin) {
@@ -205,7 +208,11 @@ Zotero.Profile = {
 	 */
 	checkFirefoxProfileAccess: async function () {
 		try {
-			let profilesParent = OS.Path.dirname(Zotero.Profile.getOtherAppProfilesDir());
+			let profilesDir = Zotero.Profile.getOtherAppProfilesDir();
+			if (!profilesDir) {
+				return true;
+			}
+			let profilesParent = OS.Path.dirname(profilesDir);
 			Zotero.debug("Looking for Firefox profile in " + profilesParent);
 			let defProfile = await this.getDefaultInProfilesDir(profilesParent);
 			if (defProfile) {
@@ -314,8 +321,8 @@ Zotero.Profile = {
 	 *
 	 * @return {String[]} - Array of paths
 	 */
-	_findOtherAppProfiles: Zotero.Promise.coroutine(function* () {
+	_findOtherAppProfiles: async function () {
 		var dir = this.getOtherAppProfilesDir();
-		return (yield OS.File.exists(dir)) ? this._getProfilesInDir(dir) : [];
-	})
+		return dir && await OS.File.exists(dir) ? this._getProfilesInDir(dir) : [];
+	}
 };

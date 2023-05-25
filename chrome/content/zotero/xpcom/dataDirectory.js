@@ -239,19 +239,21 @@ Zotero.DataDirectory = {
 			// Check Firefox directory
 			//
 			if (!dataDirNamedAfterProfile) {
-				let profilesParent = OS.Path.dirname(Zotero.Profile.getOtherAppProfilesDir());
-				Zotero.debug("Looking for Firefox profile in " + profilesParent);
-				
-				// get default profile
+				// Get default profile in Firefox dir
 				let defProfile;
-				try {
-					defProfile = yield Zotero.Profile.getDefaultInProfilesDir(profilesParent);
-				}
-				catch (e) {
-					Zotero.debug("An error occurred locating the Firefox profile; "
-						+ "not attempting to migrate from Zotero for Firefox");
-					Zotero.logError(e);
-					Zotero.fxProfileAccessError = true;
+				let profilesDir = Zotero.Profile.getOtherAppProfilesDir();
+				let profilesParent = profilesDir ? OS.Path.dirname(profilesDir) : null;
+				if (profilesParent) {
+					Zotero.debug("Looking for Firefox profile in " + profilesParent);
+					try {
+						defProfile = yield Zotero.Profile.getDefaultInProfilesDir(profilesParent);
+					}
+					catch (e) {
+						Zotero.debug("An error occurred locating the Firefox profile; "
+							+ "not attempting to migrate from Zotero for Firefox");
+						Zotero.logError(e);
+						Zotero.fxProfileAccessError = true;
+					}
 				}
 				if (defProfile) {
 					let profileDir = defProfile[0];
@@ -721,7 +723,11 @@ Zotero.DataDirectory = {
 		if (currentDir != this.defaultDir) return;
 		if (Zotero.Prefs.get('ignoreLegacyDataDir.auto') || Zotero.Prefs.get('ignoreLegacyDataDir.explicit')) return;
 		try {
-			let profilesParent = OS.Path.dirname(Zotero.Profile.getOtherAppProfilesDir());
+			let profilesDir = Zotero.Profile.getOtherAppProfilesDir();
+			let profilesParent = profilesDir ? OS.Path.dirname(profilesDir) : null;
+			if (!profilesParent) {
+				return;
+			}
 			Zotero.debug("Looking for Firefox profile in " + profilesParent);
 			
 			// get default profile
