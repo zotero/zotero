@@ -142,8 +142,10 @@ Zotero.MIMETypeHandler = new function () {
 			if(channel.loadFlags & Components.interfaces.nsIHttpChannel.LOAD_DOCUMENT_URI) {
 				channel.QueryInterface(Components.interfaces.nsIHttpChannel);
 				try {
+					// Get the main directive of the Content-Type header
+					// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type#syntax
+					var contentType = channel.getResponseHeader("Content-Type").split(';')[0].toLowerCase();
 					// remove content-disposition headers for EndNote, etc.
-					var contentType = channel.getResponseHeader("Content-Type").toLowerCase();
 					for (let handledType of _ignoreContentDispositionTypes) {
 						if (contentType.startsWith(handledType)) {
 							channel.setResponseHeader("Content-Disposition", "inline", false);
