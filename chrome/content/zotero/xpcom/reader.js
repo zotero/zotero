@@ -198,6 +198,11 @@ class ReaderInstance {
 				readerTitle = parts.filter(x => x).join(' - ');
 			}
 		}
+		if (Zotero.isWin) {
+			// Windows displays bidi control characters as placeholders in window titles, so strip them
+			// See https://github.com/mozilla-services/screenshots/issues/4863
+			readerTitle = readerTitle.replace(/[\u2068\u2069]/g, '');
+		}
 		this._title = readerTitle;
 		this._setTitleValue(readerTitle);
 	}
