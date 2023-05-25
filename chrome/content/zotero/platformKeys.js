@@ -76,10 +76,10 @@ window.addEventListener('DOMContentLoaded', () => {
 		}
 		
 		if (isWin) {
-			fileQuitItemUnix.hidden = true;
+			if (fileQuitItemUnix) fileQuitItemUnix.hidden = true;
 		}
 		else {
-			fileQuitItemWin.hidden = true;
+			if (fileQuitItemWin) fileQuitItemWin.hidden = true;
 		}
 	}
 });
