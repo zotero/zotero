@@ -58,6 +58,13 @@ function abspath {
 	echo $(cd $(dirname $1); pwd)/$(basename $1);
 }
 
+function check_lfs_file {
+	if [ "$(head --bytes 7 "$1")" = "version" ]; then
+		echo "$1 not checked out -- install Git LFS and run 'git lfs pull'" >&2
+		exit 1
+	fi
+}
+
 SOURCE_DIR=""
 ZIP_FILE=""
 BUILD_MAC=0
@@ -472,6 +479,7 @@ if [ $BUILD_MAC == 1 ]; then
 	cp -r "$MAC_RUNTIME_PATH/Contents/Resources/"!(application.ini|browser|defaults|precomplete|removed-files|updater.ini|update-settings.ini|webapprt*|*.icns|*.lproj) "$CONTENTSDIR/Resources"
 
 	# Use our own launcher
+	check_lfs_file "$CALLDIR/mac/zotero.xz"
 	xz -d --stdout "$CALLDIR/mac/zotero.xz" > "$CONTENTSDIR/MacOS/zotero"
 	chmod 755 "$CONTENTSDIR/MacOS/zotero"
 
@@ -480,6 +488,7 @@ if [ $BUILD_MAC == 1 ]; then
 
 	# Use our own updater, because Mozilla's requires updates signed by Mozilla
 	cd "$CONTENTSDIR/MacOS"
+	check_lfs_file "$CALLDIR/mac/updater.tar.xz"
 	tar xf "$CALLDIR/mac/updater.tar.xz"
 
 	# Modify Info.plist
@@ -663,6 +672,7 @@ if [ $BUILD_WIN == 1 ]; then
 		
 		# Copy zotero.exe, which is built directly from Firefox source and then modified by
 		# ResourceHacker to add icons
+		check_lfs_file "$CALLDIR/win/zotero.exe.tar.xz"
 		tar xf "$CALLDIR/win/zotero.exe.tar.xz" --to-stdout zotero_$arch.exe > "$APPDIR/zotero.exe"
 		
 		# Update .exe version number (only possible on Windows)
@@ -676,6 +686,7 @@ if [ $BUILD_WIN == 1 ]; then
 		fi
 		
 		# Use our own updater, because Mozilla's requires updates signed by Mozilla
+		check_lfs_file "$CALLDIR/win/updater.exe.tar.xz"
 		tar xf "$CALLDIR/win/updater.exe.tar.xz" --to-stdout updater-$arch.exe > "$APPDIR/updater.exe"
 		cat "$CALLDIR/win/installer/updater_append.ini" >> "$APPDIR/updater.ini"
 		
@@ -861,6 +872,7 @@ if [ $BUILD_LINUX == 1 ]; then
 		cp "$CALLDIR/linux/set_launcher_icon" "$APPDIR"
 		
 		# Use our own updater, because Mozilla's requires updates signed by Mozilla
+		check_lfs_file "$CALLDIR/linux/updater.tar.xz"
 		tar xf "$CALLDIR/linux/updater.tar.xz" --to-stdout updater-$arch > "$APPDIR/updater"
 		chmod 755 "$APPDIR/updater"
 
