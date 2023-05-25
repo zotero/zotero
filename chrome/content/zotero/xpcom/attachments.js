@@ -2885,10 +2885,18 @@ Zotero.Attachments = new function(){
 	}
 	
 	
-	this._getExtensionFromURL = function(url, contentType) {
-		var nsIURL = Services.io.newURI(url)
-			.QueryInterface(Ci.nsIURL);
-		return Zotero.MIME.getPrimaryExtension(contentType, nsIURL.fileExtension);
+	this._getExtensionFromURL = function (url, contentType) {
+		let fileExtension;
+		try {
+			let nsIURL = Services.io.newURI(url)
+				.QueryInterface(Ci.nsIURL);
+			fileExtension = nsIURL.fileExtension;
+		}
+		catch (e) {
+			// The URI is not a URL
+			fileExtension = '';
+		}
+		return Zotero.MIME.getPrimaryExtension(contentType, fileExtension);
 	}
 	
 	
