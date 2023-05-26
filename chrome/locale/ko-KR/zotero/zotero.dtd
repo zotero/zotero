@@ -113,7 +113,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "글차 첫머리는 대문자">
 <!ENTITY zotero.item.textTransform.sentencecase "문장 첫머리는 대문자">
 <!ENTITY zotero.item.creatorTransform.nameSwap "성/이름 맞바꾸기">
-<!ENTITY zotero.item.creatorTransform.capitalize "Capitalize">
+<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.viewOnline "온라인으로 보기">
 <!ENTITY zotero.item.copyAsURL "URL로 복사">
 <!ENTITY zotero.item.deletePermanently "완전히 삭제...">

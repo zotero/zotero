@@ -113,7 +113,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Suurteks Algustähtedeks">
 <!ENTITY zotero.item.textTransform.sentencecase "Lause tõst">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Vahetada Eesnimi/Perekonnanimi">
-<!ENTITY zotero.item.creatorTransform.capitalize "Capitalize">
+<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.viewOnline "Online vaade">
 <!ENTITY zotero.item.copyAsURL "Kopeerida URL kujul">
 <!ENTITY zotero.item.deletePermanently "Delete Permanently…">

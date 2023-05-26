@@ -87,7 +87,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "重設資料同步歷史">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "將本機的資料與遠端的資料合併，忽略同步歷史">
 <!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary "從線上文獻庫還原">
-<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "以線上文獻庫的資料覆蓋本地端 Zotero 資料。">
+<!ENTITY zotero.preferences.sync.reset.restoreFromOnlineLibrary.desc "以線上文獻庫的資料覆蓋本機 Zotero 資料。">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary "取代線上文獻庫">
 <!ENTITY zotero.preferences.sync.reset.restoreToOnlineLibrary.desc "以本機 Zotero 資料覆蓋線上文獻庫的資料。">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "重設檔案同步歷史">

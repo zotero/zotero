@@ -113,7 +113,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Litere de Titlu">
 <!ENTITY zotero.item.textTransform.sentencecase "Majusculă ca la propoziție">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Schimbă Prenume/Nume">
-<!ENTITY zotero.item.creatorTransform.capitalize "Capitalize">
+<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.viewOnline "Vezi online">
 <!ENTITY zotero.item.copyAsURL "Copiază ca URL">
 <!ENTITY zotero.item.deletePermanently "Șterge permanent...">

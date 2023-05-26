@@ -113,7 +113,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Pavadinimo raidžių lygis">
 <!ENTITY zotero.item.textTransform.sentencecase "Sakinio pavidalu">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Sukeisti vardus ir pavardes">
-<!ENTITY zotero.item.creatorTransform.capitalize "Capitalize">
+<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.viewOnline "Rodyti Internete">
 <!ENTITY zotero.item.copyAsURL "Kopijuoti URL">
 <!ENTITY zotero.item.deletePermanently "Pašalinti negrįžtamai...">

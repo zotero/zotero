@@ -113,7 +113,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "标题大写">
 <!ENTITY zotero.item.textTransform.sentencecase "句首大写">
 <!ENTITY zotero.item.creatorTransform.nameSwap "交换 首/尾 名称">
-<!ENTITY zotero.item.creatorTransform.capitalize "Capitalize">
+<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.viewOnline "在线查看">
 <!ENTITY zotero.item.copyAsURL "复制为网址">
 <!ENTITY zotero.item.deletePermanently "永久删除…">
@@ -307,7 +307,7 @@
 
 <!ENTITY zotero.context.addChildNote "添加条目笔记">
 <!ENTITY zotero.context.addChildNoteFromAnnotations "通过注释添加条目笔记">
-<!ENTITY zotero.context.addStandaloneNote "添加独立注释">
+<!ENTITY zotero.context.addStandaloneNote "添加独立笔记">
 <!ENTITY zotero.context.addStandaloneNoteFromAnnotations "通过注释添加独立笔记">
 <!ENTITY zotero.context.editInWindow "在独立窗口编辑">
 

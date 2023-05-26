@@ -113,7 +113,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "แบบชื่อเรื่อง">
 <!ENTITY zotero.item.textTransform.sentencecase "แบบประโยค">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
-<!ENTITY zotero.item.creatorTransform.capitalize "Capitalize">
+<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.viewOnline "ดูออนไลน์">
 <!ENTITY zotero.item.copyAsURL "Copy as URL">
 <!ENTITY zotero.item.deletePermanently "Delete Permanently…">

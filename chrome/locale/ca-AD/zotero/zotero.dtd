@@ -113,7 +113,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Majúscules o minúscules del títol">
 <!ENTITY zotero.item.textTransform.sentencecase "Majúscules o minúscules de la frase">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Intercanvia nom i cognoms">
-<!ENTITY zotero.item.creatorTransform.capitalize "Capitalize">
+<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.viewOnline "Mira en línia">
 <!ENTITY zotero.item.copyAsURL "Copia com a URL">
 <!ENTITY zotero.item.deletePermanently "Elimina permanentment…">

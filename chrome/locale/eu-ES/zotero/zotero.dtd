@@ -113,7 +113,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Hitz Bakoitza Letra Larriz">
 <!ENTITY zotero.item.textTransform.sentencecase "Lehen letra letra larriz">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Izen-abizenak trukatu">
-<!ENTITY zotero.item.creatorTransform.capitalize "Capitalize">
+<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.viewOnline "Linean ikusi">
 <!ENTITY zotero.item.copyAsURL "Kopiatu URL gisa">
 <!ENTITY zotero.item.deletePermanently "Betirako ezabatu...">

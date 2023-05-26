@@ -113,7 +113,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "מצב רישיות כותרת">
 <!ENTITY zotero.item.textTransform.sentencecase "מצב רישיות משפט">
 <!ENTITY zotero.item.creatorTransform.nameSwap "החלפת שמות ראשון/משפחה">
-<!ENTITY zotero.item.creatorTransform.capitalize "Capitalize">
+<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.viewOnline "הצגה באינטרנט">
 <!ENTITY zotero.item.copyAsURL "העתקה ככתובת">
 <!ENTITY zotero.item.deletePermanently "מחיקה לצמיתות…">
