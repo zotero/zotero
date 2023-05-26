@@ -1195,6 +1195,7 @@ var ZoteroPane = new function()
 			});
 			ZoteroPane.itemsView.onRefresh.addListener(() => ZoteroPane.setTagScope());
 			ZoteroPane.itemsView.waitForLoad().then(() => Zotero.uiIsReady());
+			ZoteroPane.collectionsView.itemTreeView = ZoteroPane.itemsView;
 		}
 		catch (e) {
 			Zotero.logError(e);
