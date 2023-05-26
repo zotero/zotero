@@ -59,7 +59,7 @@ function abspath {
 }
 
 function check_lfs_file {
-	if [ "$(head --bytes 7 "$1")" = "version" ]; then
+	if [ "$(head --bytes 5 "$1")" = "versi" ]; then
 		echo "$1 not checked out -- install Git LFS and run 'git lfs pull'" >&2
 		exit 1
 	fi
