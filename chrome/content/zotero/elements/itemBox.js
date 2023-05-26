@@ -67,7 +67,7 @@
 						</menupopup>
 						<menupopup id="zotero-creator-transform-menu">
 							<menuitem id="creator-transform-swap-names" label="&zotero.item.creatorTransform.nameSwap;"/>
-							<menuitem id="creator-transform-capitalize" label="&zotero.item.creatorTransform.capitalize;"/>
+							<menuitem id="creator-transform-capitalize" label="&zotero.item.creatorTransform.fixCase;"/>
 						</menupopup>
 						<menupopup id="zotero-doi-menu">
 							<menuitem id="zotero-doi-menu-view-online" label="&zotero.item.viewOnline;"/>
