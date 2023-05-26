@@ -797,10 +797,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			if (_checkDataDirAccessError(e)) {}
 			// Storage busy
 			else if (e.message.includes('2153971713')) {
-				Zotero.startupError = Zotero.getString('startupError.databaseInUse') + "\n\n"
-					+ Zotero.getString(
-						"startupError.close" + (Zotero.isStandalone ? 'Firefox' : 'Standalone')
-					);
+				Zotero.startupError = Zotero.getString('startupError.databaseInUse');
 			}
 			else {
 				let stack = e.stack ? Zotero.Utilities.Internal.filterStack(e.stack) : null;
