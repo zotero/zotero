@@ -87,6 +87,18 @@ function remove_line {
 	fi
 }
 
+function get_utf16_chars {
+	str=$(echo -n "$1" | xxd -p | fold -w 2 | sed -r 's/(.+)/\\\\x{\1}\\\\x{00}/')
+	# Add NUL padding
+	if [ -n "${2:-}" ]; then
+		# Multiply characters x 2 for UTF-16
+		for i in `seq 1 $(($2 * 2))`; do
+			str+=$(echo '\\x{00}')
+		done
+	fi
+	echo $str | xargs | sed 's/ //g'
+}
+
 #
 # Make various modifications to the stock Firefox app
 #
@@ -342,6 +354,17 @@ if [ $BUILD_MAC == 1 ]; then
 	pushd Firefox.app/Contents/Resources
 	modify_omni mac
 	popd
+	
+	# Replace "FirefoxCP" with "ZoteroCP" for subprocesses ("Isolated Web Content", "Socket Process", "Web Content", etc.)
+	info_plist=Firefox.app/Contents/MacOS/plugin-container.app/Contents/Resources/English.lproj/InfoPlist.strings
+	from=$(get_utf16_chars "FirefoxCP")
+	to=$(get_utf16_chars "ZoteroCP")
+	perl -pi -e "s/$from/$to/" $info_plist
+	# Check for UTF-16 "ZoteroCP"
+	if ! grep -a -q "Z.o.t.e.r.o.C.P." $info_plist; then
+		echo '"ZoteroCP" not found in InfoPlist.strings after replacement'
+		exit 1
+	fi
 	
 	if [ ! -e "Firefox $GECKO_VERSION.app.zip" ]; then
 		rm "Firefox.dmg"
