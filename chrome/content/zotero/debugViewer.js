@@ -5,8 +5,9 @@ var intervalID;
 var stopping = false;
 var scrolling = false;
 var autoscroll = true;
+var sysInfo;
 
-function start() {
+async function start() {
 	// If scrolled to the bottom of the page, stay there
 	document.body.onscroll = function (event) {
 		if (!scrolling) {
@@ -15,13 +16,14 @@ function start() {
 		scrolling = false;
 	};
 	
-	updateErrors().then(function () {
-		if (stopping) return;
-		
-		addInitialOutput();
-		Zotero.Debug.addConsoleViewerListener(addLine)
-		intervalID = setInterval(() => updateErrors(), interval);
-	});
+	sysInfo = await Zotero.getSystemInfo();
+	await updateErrors()
+	
+	if (stopping) return;
+	
+	addInitialOutput();
+	Zotero.Debug.addConsoleViewerListener(addLine)
+	intervalID = setInterval(() => updateErrors(), interval);
 }
 
 function stop() {
@@ -34,19 +36,16 @@ function stop() {
 }
 
 function updateErrors() {
-	return Zotero.getSystemInfo()
-	.then(function (sysInfo) {
-		if (stopping) return;
-		
-		var errors = Zotero.getErrors(true);
-		var errorStr = errors.length ? errors.join('\n\n') + '\n\n' : '';
-		
-		document.getElementById('errors').textContent = errorStr + sysInfo;
-		
-		if (autoscroll) {
-			scrollToPageBottom();
-		}
-	});
+	if (stopping) return;
+	
+	var errors = Zotero.getErrors(true);
+	var errorStr = errors.length ? errors.join('\n\n') + '\n\n' : '';
+	
+	document.getElementById('errors').textContent = errorStr + sysInfo;
+	
+	if (autoscroll) {
+		scrollToPageBottom();
+	}
 }
 
 function addInitialOutput() {
