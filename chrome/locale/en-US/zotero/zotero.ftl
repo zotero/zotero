@@ -1,5 +1,5 @@
-import-wizard =
-    .title = "Import"
+import-window =
+    .title = Import
 
 import-where-from = Where do you want to import from?
 import-online-intro-title = Introduction

@@ -5,7 +5,8 @@
 
 <!DOCTYPE window SYSTEM "chrome://zotero/locale/zotero.dtd">
 
-<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+<window data-l10n-id="import-window"
+		xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 		xmlns:html="http://www.w3.org/1999/xhtml"
 		onload="Zotero_Import_Wizard.init()"
 >
@@ -15,7 +16,7 @@
 	</linkset>
 
 	<script src="chrome://global/content/customElements.js"/>
-	<wizard id="import-wizard" class="import-wizard" data-l10n-id="import-wizard" width="600" height="400">
+	<wizard id="import-wizard" class="import-wizard" width="600" height="400">
 		<wizardpage pageid="page-start" data-header-label-id="import-where-from">
 			<radiogroup id="import-source-group" align="start">
 				<radio value="file" data-l10n-id="import-source-file" />
