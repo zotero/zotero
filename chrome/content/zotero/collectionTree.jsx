@@ -523,7 +523,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	
 	async selectLibrary(libraryID = 1) {
 		var row = this.getRowIndexByID('L' + libraryID);
-		if (row === undefined) {
+		if (row === false) {
 			Zotero.debug(`CollectionTree.selectLibrary(): library with ID ${libraryID} not found in collection tree`);
 			return false;
 		}
