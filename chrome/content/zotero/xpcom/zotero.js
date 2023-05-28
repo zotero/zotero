@@ -1427,41 +1427,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		return Zotero.Utilities.Internal.spawn(generator, thisObject);
 	}
 	
-	
-	/**
-	 * Emulates the behavior of window.setTimeout
-	 *
-	 * @param {Function} func			The function to be called
-	 * @param {Integer} ms				The number of milliseconds to wait before calling func
-	 * @return {Integer} - ID of timer to be passed to clearTimeout()
-	 */
-	var _lastTimeoutID = 0;
-	this.setTimeout = function (func, ms) {
-		var id = ++_lastTimeoutID;
-		
-		var timer = Components.classes["@mozilla.org/timer;1"]
-			.createInstance(Components.interfaces.nsITimer);
-		var timerCallback = {
-			"notify": function () {
-				func();
-				_runningTimers.delete(id);
-			}
-		};
-		timer.initWithCallback(timerCallback, ms, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-		_runningTimers.set(id, timer);
-		return id;
-	};
-	
-	
-	this.clearTimeout = function (id) {
-		var timer = _runningTimers.get(id);
-		if (timer) {
-			timer.cancel();
-			_runningTimers.delete(id);
-		}
-	};
-	
-	
 	/**
 	 * Show Zotero pane overlay and progress bar in all windows
 	 *

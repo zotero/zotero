@@ -201,17 +201,6 @@ ZoteroContext.prototype = {
 	"Ci":Ci,
 	
 	/**
-	 * Convenience method to replicate window.setTimeout()
-	 **/
-	"setTimeout":function setTimeout(func, ms){
-		return this.Zotero.setTimeout(func, ms);
-	},
-	
-	"clearTimeout":function setTimeout(id) {
-		this.Zotero.clearTimeout(id);
-	},
-	
-	/**
 	 * Switches in or out of connector mode
 	 */
 	"switchConnectorMode":function(isConnector) {
@@ -245,6 +234,18 @@ ZoteroContext.prototype = {
 		});
 	}
 };
+
+const { XPCOMUtils } = ChromeUtils.import(
+	"resource://gre/modules/XPCOMUtils.jsm"
+);
+XPCOMUtils.defineLazyModuleGetters(ZoteroContext.prototype, {
+	setTimeout: "resource://gre/modules/Timer.jsm",
+	clearTimeout: "resource://gre/modules/Timer.jsm",
+	setInterval: "resource://gre/modules/Timer.jsm",
+	clearInterval: "resource://gre/modules/Timer.jsm",
+	requestIdleCallback: "resource://gre/modules/Timer.jsm",
+	cancelIdleCallback: "resource://gre/modules/Timer.jsm",
+});
 
 /**
  * The class from which the Zotero global XPCOM context is constructed

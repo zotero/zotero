@@ -92,8 +92,12 @@ Zotero.Plugins = new function () {
 		}
 		Object.assign(scope, { Services, Worker, ChromeWorker, Zotero });
 		// Add additional global functions
-		scope.setTimeout = Zotero.setTimeout;
-		scope.clearTimeout = Zotero.clearTimeout;
+		scope.setTimeout = setTimeout;
+		scope.clearTimeout = clearTimeout;
+		scope.setInterval = setInterval;
+		scope.clearInterval = clearInterval;
+		scope.requestIdleCallback = requestIdleCallback;
+		scope.cancelIdleCallback = cancelIdleCallback;
 		
 		scopes.set(addon.id, scope);
 		
