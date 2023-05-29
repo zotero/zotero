@@ -95,7 +95,7 @@
 	<commandset id="mainCommandSet">
 		<!--FILE-->
 		<command id="cmd_quitApplication" oncommand="goQuitApplication(event);"/>
-		<command id="cmd_close" oncommand="window.close();"/>
+		<command id="cmd_close" oncommand="ZoteroPane.handleClose(event)"/>
 		
 		<!--EDIT-->
 		<command id="cmd_find"

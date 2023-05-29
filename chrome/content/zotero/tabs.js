@@ -52,6 +52,10 @@ var Zotero_Tabs = new function () {
 		get: () => document.getElementById('tabs-deck')
 	});
 
+	Object.defineProperty(this, 'numTabs', {
+		get: () => this._tabs.length
+	});
+
 	this._tabBarRef = React.createRef();
 	this._tabs = [{
 		id: 'zotero-pane',

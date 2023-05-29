@@ -795,6 +795,15 @@ var ZoteroPane = new function()
 	}
 	
 	
+	this.handleClose = function (event) {
+		// Don't close the window from the first tab if other tabs are open
+		if (Zotero_Tabs.numTabs > 1) {
+			return;
+		}
+		window.close();
+	};
+	
+	
 	/*
 	 * Highlights collections containing selected items on Ctrl (Win) or
 	 * Option/Alt (Mac/Linux) press
