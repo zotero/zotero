@@ -129,8 +129,22 @@ const scssFiles = [
 	'chrome/skin/default/zotero/**/*.scss'
 ];
 
+const ftlFileBaseNames = [
+	'zotero',
+	'preferences',
+];
+
 const buildsURL = 'https://zotero-download.s3.amazonaws.com/ci/';
 
 module.exports = {
-	dirs, symlinkDirs, copyDirs, symlinkFiles, browserifyConfigs, jsFiles, scssFiles, ignoreMask, buildsURL
+	dirs,
+	symlinkDirs,
+	copyDirs,
+	symlinkFiles,
+	browserifyConfigs,
+	jsFiles,
+	scssFiles,
+	ignoreMask,
+	ftlFileBaseNames,
+	buildsURL,
 };
