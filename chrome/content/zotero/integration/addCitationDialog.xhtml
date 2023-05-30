@@ -117,7 +117,7 @@
 						<menulist onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="label" tabindex="5" native="true">
 							<menupopup id="locator-type-popup"/>
 						</menulist>
-						<textbox oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="locator" tabindex="2" flex="1"/>
+						<html:input oninput="Zotero_Citation_Dialog.confirmRegenerate(false)" onchange="Zotero_Citation_Dialog.confirmRegenerate(true)" id="locator" tabindex="2"/>
 					</hbox>
 					<separator style="height: 2px" flex="1"/>
 					<checkbox oncommand="Zotero_Citation_Dialog.confirmRegenerate(true)" id="suppress-author" label="&zotero.citation.suppressAuthor.label;" tabindex="6" native="true"/>
