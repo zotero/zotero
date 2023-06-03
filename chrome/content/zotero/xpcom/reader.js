@@ -597,7 +597,16 @@ class ReaderInstance {
 			Zotero.logError(e);
 		}
 		if (!state) {
-			state = JSON.parse(Zotero.Prefs.get('pdfReader.defaultState'));
+			let pref = 'pdfReader.defaultState';
+			try {
+				state = JSON.parse(Zotero.Prefs.get(pref));
+			}
+			catch (e) {
+				Zotero.logError(e);
+				// Reset pref if invalid
+				Zotero.Prefs.clear(pref);
+				state = JSON.parse(Zotero.Prefs.get(pref));
+			}
 		}
 		let pageIndex = item.getAttachmentLastPageIndex();
 		if (Number.isInteger(pageIndex) && state.pageIndex !== pageIndex) {
