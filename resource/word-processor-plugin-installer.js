@@ -170,9 +170,11 @@ ZoteroPluginInstaller.prototype = {
 			groupbox = document.createXULElement("groupbox");
 		groupbox.id = this._addon.EXTENSION_DIR;
 
-		var caption = document.createXULElement("caption");
-		caption.setAttribute("label", this._addon.APP);
-		groupbox.appendChild(caption);
+		var label = document.createXULElement("label");
+		var h2 = document.createElement('h2');
+		h2.textContent = this._addon.APP;
+		label.appendChild(h2);
+		groupbox.appendChild(label);
 
 		var description = document.createXULElement("description");
 		description.style.width = "45em";
@@ -202,12 +204,12 @@ ZoteroPluginInstaller.prototype = {
 		hbox.appendChild(button);
 		groupbox.appendChild(hbox);
 
-		var tabpanel = document.getElementById("wordProcessors"),
+		var container = document.getElementById("wordProcessorInstallers"),
 			old = document.getElementById(this._addon.EXTENSION_DIR);
 		if(old) {
-			tabpanel.replaceChild(groupbox, old);
+			container.replaceChild(groupbox, old);
 		} else {
-			tabpanel.insertBefore(groupbox, tabpanel.firstChild);
+			container.appendChild(groupbox);
 		}
 	},
 	
