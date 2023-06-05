@@ -304,6 +304,30 @@ ${str}
 		}
 	},
 
+	_useChecked(elem) {
+		return (elem instanceof HTMLInputElement && elem.type == 'checkbox')
+			|| elem.tagName == 'checkbox';
+	},
+
+	_syncFromPref(elem, preference) {
+		let value = Zotero.Prefs.get(preference, true);
+		if (this._useChecked(elem)) {
+			elem.checked = value;
+		}
+		else {
+			elem.value = value;
+		}
+		elem.dispatchEvent(new Event('syncfrompreference'));
+	},
+
+	_syncToPrefOnModify(event) {
+		if (event.currentTarget.getAttribute('preference')) {
+			let value = this._useChecked(event.currentTarget) ? event.currentTarget.checked : event.currentTarget.value;
+			Zotero.Prefs.set(event.currentTarget.getAttribute('preference'), value, true);
+			event.currentTarget.dispatchEvent(new Event('synctopreference'));
+		}
+	},
+
 	/**
 	 * To be called after insertion into the document tree:
 	 * Activates `preference` attributes and inline oncommand handlers and dispatches a load event at the end.
@@ -312,31 +336,6 @@ ${str}
 	 * @private
 	 */
 	_initImportedNodesPostInsert(container) {
-		let useChecked = elem => (
-			(elem instanceof HTMLInputElement && elem.type == 'checkbox')
-				|| elem.tagName == 'checkbox'
-		);
-		
-		let syncFromPref = (elem, preference) => {
-			let value = Zotero.Prefs.get(preference, true);
-			if (useChecked(elem)) {
-				elem.checked = value;
-			}
-			else {
-				elem.value = value;
-			}
-			elem.dispatchEvent(new Event('syncfrompreference'));
-		};
-		
-		// We use a single listener function shared between all elements so we can easily detach it later
-		let syncToPrefOnModify = (event) => {
-			if (event.target.getAttribute('preference')) {
-				let value = useChecked(event.currentTarget) ? event.currentTarget.checked : event.currentTarget.value;
-				Zotero.Prefs.set(event.currentTarget.getAttribute('preference'), value, true);
-				event.currentTarget.dispatchEvent(new Event('synctopreference'));
-			}
-		};
-		
 		let attachToPreference = (elem) => {
 			let preference = elem.getAttribute('preference');
 			try {
@@ -359,7 +358,7 @@ ${str}
 			Zotero.debug(`Attaching <${elem.tagName}> element to ${preference}`);
 			let symbol = Zotero.Prefs.registerObserver(
 				preference,
-				() => syncFromPref(elem, preference),
+				() => this._syncFromPref(elem, preference),
 				true
 			);
 			this._observerSymbols.set(elem, symbol);
@@ -368,16 +367,16 @@ ${str}
 				// Set up an observer to resync if this menulist has items added/removed later
 				// (If we set elem.value before the corresponding item is added, the label won't be updated when it
 				//  does get added, unless we do this)
-				new MutationObserver(() => syncFromPref(elem, preference))
+				new MutationObserver(() => this._syncFromPref(elem, preference))
 					.observe(elem, {
 						childList: true,
 						subtree: true
 					});
 			}
 
-			elem.addEventListener('command', syncToPrefOnModify);
-			elem.addEventListener('input', syncToPrefOnModify);
-			elem.addEventListener('change', syncToPrefOnModify);
+			elem.addEventListener('command', this._syncToPrefOnModify.bind(this));
+			elem.addEventListener('input', this._syncToPrefOnModify.bind(this));
+			elem.addEventListener('change', this._syncToPrefOnModify.bind(this));
 		};
 		
 		let detachFromPreference = (elem) => {
@@ -394,7 +393,7 @@ ${str}
 
 			// Set timeout before populating the value so the pane can add listeners first
 			setTimeout(() => {
-				syncFromPref(elem, elem.getAttribute('preference'));
+				this._syncFromPref(elem, elem.getAttribute('preference'));
 			});
 		}
 		
