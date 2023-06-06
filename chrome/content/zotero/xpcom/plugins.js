@@ -115,7 +115,8 @@ Zotero.Plugins = new function () {
 	async function _callMethod(addon, method, reason) {
 		try {
 			let id = addon.id;
-			Zotero.debug(`Calling bootstrap method '${method}' for plugin ${id} version ${addon.version}`);
+			Zotero.debug(`Calling bootstrap method '${method}' for plugin ${id} `
+				+ `version ${addon.version} with reason ${_getReasonName(reason)}`);
 			
 			let scope = scopes.get(id);
 			if (!scope) {
@@ -171,6 +172,16 @@ Zotero.Plugins = new function () {
 		catch (e) {
 			Zotero.logError(e);
 		}
+	}
+	
+	
+	function _getReasonName(reason) {
+		for (let i in REASONS) {
+			if (reason == REASONS[i]) {
+				return i;
+			}
+		}
+		return "UNKNOWN";
 	}
 	
 	
