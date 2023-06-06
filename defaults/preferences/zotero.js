@@ -209,6 +209,7 @@ pref("extensions.zotero.annotations.noteTemplates.note", "<p>{{citation}} {{comm
 
 // PDF Reader
 pref("extensions.zotero.pdfReader.defaultState", '{"scale":"page-width","scrollMode":0,"spreadMode":0}');
+pref("extensions.zotero.pdfReader.stateResetTime", 0);
 
 // Scaffold
 pref("extensions.zotero.scaffold.eslint.enabled", true);

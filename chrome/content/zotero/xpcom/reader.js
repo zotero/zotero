@@ -31,6 +31,8 @@ class ReaderInstance {
 		this.annotationItemIDs = [];
 		this.onChangeSidebarWidth = null;
 		this.state = null;
+		this._defaultStatePref = 'pdfReader.defaultState';
+		this._stateResetTime = 'pdfReader.stateResetTime';
 		this._instanceID = Zotero.Utilities.randomString();
 		this._window = null;
 		this._iframeWindow = null;
@@ -359,6 +361,21 @@ class ReaderInstance {
 		return !index;
 	}
 
+	promptToResetStateAll() {
+		let ps = Services.prompt;
+		let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
+		let index = ps.confirmEx(
+			null,
+			Zotero.getString('pdfReader.promptToResetStateAll.title'),
+			Zotero.getString('pdfReader.promptToResetStateAll.text'),
+			buttonFlags,
+			Zotero.getString('general.continue'),
+			null, null, null, {}
+		);
+		return !index;
+	}
+
 	async reload(data) {
 		let item = Zotero.Items.get(this._itemID);
 		let path = await item.getFilePathAsync();
@@ -427,7 +444,26 @@ class ReaderInstance {
 			if (typeof defaultState.scale !== 'string') {
 				defaultState.scale = 'page-width';
 			}
-			Zotero.Prefs.set('pdfReader.defaultState', JSON.stringify(defaultState));
+			Zotero.Prefs.set(this._defaultStatePref, JSON.stringify(defaultState));
+			return;
+		}
+		else if (cmd === 'resetAll') {
+			if (this.promptToResetStateAll()) {
+				Zotero.Prefs.set(this._stateResetTime, Math.round(Date.now() / 1000));
+				let defaultState = this._getDefaultSate();
+				// Apply the default view state to loaded PDF reader instances
+				for (let reader of Zotero.Reader._readers) {
+					if (defaultState.scrollMode) {
+						reader._iframeWindow.wrappedJSObject.PDFViewerApplication.pdfViewer.scrollMode = defaultState.scrollMode;
+					}
+					if (defaultState.spreadMode) {
+						reader._iframeWindow.wrappedJSObject.PDFViewerApplication.pdfViewer.spreadMode = defaultState.spreadMode;
+					}
+					if (defaultState.scale) {
+						reader._iframeWindow.wrappedJSObject.PDFViewerApplication.pdfViewer.currentScaleValue = defaultState.scale;
+					}
+				}
+			}
 			return;
 		}
 
@@ -566,20 +602,44 @@ class ReaderInstance {
 		};
 	}
 
+	_getDefaultSate() {
+		let state = {};
+		try {
+			state = JSON.parse(Zotero.Prefs.get(this._defaultStatePref));
+		}
+		catch (e) {
+			Zotero.logError(e);
+			// Reset pref if invalid
+			Zotero.Prefs.clear(this._defaultStatePref);
+			state = JSON.parse(Zotero.Prefs.get(this._defaultStatePref));
+		}
+		return state;
+	}
+
 	async _setState(state) {
 		this.state = state;
 		let item = Zotero.Items.get(this._itemID);
-		if (item) {
-			item.setAttachmentLastPageIndex(state.pageIndex);
-			let file = Zotero.Attachments.getStorageDirectory(item);
-			if (!await OS.File.exists(file.path)) {
-				await Zotero.Attachments.createDirectoryForItem(item);
-			}
-			file.append(this.pdfStateFileName);
-			// Using `writeAtomic` instead of `putContentsAsync` to avoid
-			// using temp file that causes conflicts on simultaneous writes (on slow systems)
-			await OS.File.writeAtomic(file.path, JSON.stringify(state));
+		if (!item) {
+			return;
 		}
+		item.setAttachmentLastPageIndex(state.pageIndex);
+		let defaultState = this._getDefaultSate();
+		let savedState = JSON.parse(JSON.stringify(state));
+		// Before saving the state, remove properties that already exist in the default state
+		for (let key in state) {
+			let value = state[key];
+			if (defaultState[key] === value) {
+				delete savedState[key];
+			}
+		}
+		let file = Zotero.Attachments.getStorageDirectory(item);
+		if (!await OS.File.exists(file.path)) {
+			await Zotero.Attachments.createDirectoryForItem(item);
+		}
+		file.append(this.pdfStateFileName);
+		// Using `writeAtomic` instead of `putContentsAsync` to avoid
+		// using temp file that causes conflicts on simultaneous writes (on slow systems)
+		await OS.File.writeAtomic(file.path, JSON.stringify(savedState));
 	}
 
 	async _getState() {
@@ -587,25 +647,25 @@ class ReaderInstance {
 		let file = Zotero.Attachments.getStorageDirectory(item);
 		file.append(this.pdfStateFileName);
 		file = file.path;
-		let state;
+		let state = {};
+		let modTime = Infinity;
 		try {
 			if (await OS.File.exists(file)) {
 				state = JSON.parse(await Zotero.File.getContentsAsync(file));
+				modTime = Math.round((await OS.File.stat(file)).lastModificationDate.getTime() / 1000);
 			}
 		}
 		catch (e) {
 			Zotero.logError(e);
+			throw e;
 		}
-		if (!state) {
-			let pref = 'pdfReader.defaultState';
-			try {
-				state = JSON.parse(Zotero.Prefs.get(pref));
-			}
-			catch (e) {
-				Zotero.logError(e);
-				// Reset pref if invalid
-				Zotero.Prefs.clear(pref);
-				state = JSON.parse(Zotero.Prefs.get(pref));
+		let defaultState = this._getDefaultSate();
+		let stateResetTime = Zotero.Prefs.get(this._stateResetTime);
+		// Assign properties from default state if they don't exist in the loaded state,
+		// or it needs a reset
+		for (let key in defaultState) {
+			if (typeof state[key] === 'undefined' || modTime <= stateResetTime) {
+				state[key] = defaultState[key];
 			}
 		}
 		let pageIndex = item.getAttachmentLastPageIndex();
