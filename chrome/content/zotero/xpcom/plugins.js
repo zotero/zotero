@@ -26,6 +26,7 @@
 
 Zotero.Plugins = new function () {
 	var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
+	var { XPIInstall } = ChromeUtils.import("resource://gre/modules/addons/XPIInstall.jsm");
 	var scopes = new Map();
 	var observers = new Set();
 	
@@ -279,6 +280,8 @@ Zotero.Plugins = new function () {
 	this._addonObserver = {
 		initialized: false,
 		
+		uninstalling: new Set(),
+		
 		init() {
 			if (!this.initialized) {
 				AddonManager.addAddonListener(this);
@@ -320,13 +323,27 @@ Zotero.Plugins = new function () {
 		
 		async onUninstalling(addon) {
 			Zotero.debug("Uninstalling plugin " + addon.id);
-		},
-		
-		async onUninstalled(addon) {
-			Zotero.debug("Uninstalled plugin " + addon.id);
+			this.uninstalling.add(addon.id);
 			await _callMethod(addon, 'shutdown', REASONS.ADDON_UNINSTALL);
 			await _callMethod(addon, 'uninstall');
 			clearDefaultPrefs(addon);
 		},
+		
+		async onUninstalled(addon) {
+			Zotero.debug("Uninstalled plugin " + addon.id);
+		},
+		
+		async onOperationCancelled(addon) {
+			if (!this.uninstalling.has(addon.id) || addon.type !== "extension") {
+				return;
+			}
+			Zotero.debug("Cancelled uninstallation of plugin " + addon.id);
+			this.uninstalling.delete(addon.id);
+			setDefaultPrefs(addon);
+			await _callMethod(addon, 'install');
+			if (addon.isActive) {
+				await _callMethod(addon, 'startup', REASONS.ADDON_INSTALL);
+			}
+		}
 	};
 };
