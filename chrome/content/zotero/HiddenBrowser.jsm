@@ -62,6 +62,7 @@ const HiddenBrowser = {
 	 * @param {Boolean} [options.allowJavaScript]
 	 * @param {Object} [options.docShell] Fields to set on Browser.docShell
 	 * @param {Boolean} [options.requireSuccessfulStatus]
+	 * @param {Boolean} [options.blockRemoteResources] Block all remote (non-file:) resources
 	 * @param {Zotero.CookieSandbox} [options.cookieSandbox]
 	 */
 	async create(source, options = {}) {
@@ -106,6 +107,10 @@ const HiddenBrowser = {
 					Zotero.debug('Viewing URI ' + browser.currentURI?.spec)
 				}
 			}, 1000 * 60);
+		}
+		
+		if (options.blockRemoteResources) {
+			RemoteResourceBlockingObserver.watch(browser);
 		}
 		
 		// Next bit adapted from Mozilla's HeadlessShell.jsm
@@ -229,9 +234,41 @@ const HiddenBrowser = {
 	destroy(browser) {
 		var frame = browserFrameMap.get(browser);
 		if (frame) {
+			RemoteResourceBlockingObserver.unwatch(browser);
 			frame.destroy();
 			Zotero.debug("Deleted hidden browser");
 			browserFrameMap.delete(browser);
+		}
+	}
+};
+
+const RemoteResourceBlockingObserver = {
+	_observerAdded: false,
+	_browsingContextIDs: new Set(),
+	
+	observe(subject) {
+		let channel = subject.QueryInterface(Ci.nsIHttpChannel);
+		if (this._browsingContextIDs.has(channel.topBrowsingContextId)
+				&& channel.URI.scheme !== 'file') {
+			channel.cancel(Cr.NS_BINDING_ABORTED);
+		}
+	},
+	
+	watch(browser) {
+		this._browsingContextIDs.add(browser.browsingContext.id);
+		if (!this._observerAdded) {
+			Services.obs.addObserver(this, 'http-on-modify-request');
+			Zotero.debug('RemoteResourceBlockingObserver: Added observer');
+			this._observerAdded = true;
+		}
+	},
+	
+	unwatch(browser) {
+		this._browsingContextIDs.delete(browser.browsingContext.id);
+		if (this._observerAdded && !this._browsingContextIDs.size) {
+			Services.obs.removeObserver(this, 'http-on-modify-request');
+			Zotero.debug('RemoteResourceBlockingObserver: Removed observer');
+			this._observerAdded = false;
 		}
 	}
 };

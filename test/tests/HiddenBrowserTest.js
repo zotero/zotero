@@ -7,11 +7,29 @@ describe("HiddenBrowser", function() {
 		var httpd;
 		var port = 16213;
 		var baseURL = `http://127.0.0.1:${port}/`;
+		
+		var pngRequested = false;
 
 		before(function () {
 			Cu.import("resource://zotero-unit/httpd.js");
 			httpd = new HttpServer();
 			httpd.start(port);
+		});
+		
+		beforeEach(async function () {
+			pngRequested = false;
+			httpd.registerPathHandler(
+				'/remote.png',
+				{
+					handle: function (request, response) {
+						Zotero.debug('Something loaded the image')
+						response.setHeader('Content-Type', 'image/png', false);
+						response.setStatusLine(null, 200, 'OK');
+						response.write('');
+						pngRequested = true;
+					}
+				}
+			);
 		});
 
 		after(async function () {
@@ -21,6 +39,22 @@ describe("HiddenBrowser", function() {
 		it("should fail on non-2xx response with requireSuccessfulStatus", async function () {
 			let e = await getPromiseError(HiddenBrowser.create(baseURL + 'nonexistent', { requireSuccessfulStatus: true }));
 			assert.instanceOf(e, Zotero.HTTP.UnexpectedStatusException);
+		});
+		
+		it("should prevent a remote request with blockRemoteResources", async function () {
+			let path = OS.Path.join(getTestDataDirectory().path, 'test-hidden.html');
+			let browser = await HiddenBrowser.create(path, { blockRemoteResources: true });
+			await HiddenBrowser.getPageData(browser, ['characterSet', 'bodyText']);
+			HiddenBrowser.destroy(browser);
+			assert.isFalse(pngRequested);
+		});
+
+		it("should allow a remote request without blockRemoteResources", async function () {
+			let path = OS.Path.join(getTestDataDirectory().path, 'test-hidden.html');
+			let browser = await HiddenBrowser.create(path, { blockRemoteResources: false });
+			await HiddenBrowser.getPageData(browser, ['characterSet', 'bodyText']);
+			HiddenBrowser.destroy(browser);
+			assert.isTrue(pngRequested);
 		});
 	});
 	
