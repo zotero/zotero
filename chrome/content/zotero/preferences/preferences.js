@@ -337,6 +337,10 @@ ${str}
 	 */
 	_initImportedNodesPostInsert(container) {
 		let attachToPreference = (elem) => {
+			if (this._observerSymbols.has(elem)) {
+				return;
+			}
+			
 			let preference = elem.getAttribute('preference');
 			try {
 				if (container.querySelector('preferences > preference#' + preference)) {
@@ -377,6 +381,11 @@ ${str}
 			elem.addEventListener('command', this._syncToPrefOnModify.bind(this));
 			elem.addEventListener('input', this._syncToPrefOnModify.bind(this));
 			elem.addEventListener('change', this._syncToPrefOnModify.bind(this));
+
+			// Set timeout before populating the value so the pane can add listeners first
+			setTimeout(() => {
+				this._syncFromPref(elem, elem.getAttribute('preference'));
+			});
 		};
 		
 		let detachFromPreference = (elem) => {
@@ -390,11 +399,6 @@ ${str}
 		// Activate `preference` attributes
 		for (let elem of container.querySelectorAll('[preference]')) {
 			attachToPreference(elem);
-
-			// Set timeout before populating the value so the pane can add listeners first
-			setTimeout(() => {
-				this._syncFromPref(elem, elem.getAttribute('preference'));
-			});
 		}
 		
 		new MutationObserver((mutations) => {
@@ -409,10 +413,20 @@ ${str}
 				else if (mutation.type == 'childList') {
 					for (let node of mutation.removedNodes) {
 						detachFromPreference(node);
+						if (node.nodeType == Node.ELEMENT_NODE) {
+							for (let subElem of node.querySelectorAll('[preference]')) {
+								detachFromPreference(subElem);
+							}
+						}
 					}
 					for (let node of mutation.addedNodes) {
-						if (node.nodeType == Node.ELEMENT_NODE && node.hasAttribute('preference')) {
-							attachToPreference(node);
+						if (node.nodeType == Node.ELEMENT_NODE) {
+							if (node.hasAttribute('preference')) {
+								attachToPreference(node);
+							}
+							for (let subElem of node.querySelectorAll('[preference]')) {
+								attachToPreference(subElem);
+							}
 						}
 					}
 				}
