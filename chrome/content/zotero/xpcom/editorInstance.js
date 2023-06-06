@@ -633,6 +633,7 @@ class EditorInstance {
 					return;
 				}
 				case 'importImages': {
+					await this._ensureNoteCreated();
 					let { images } = message;
 					if (this._readOnly || this._filesReadOnly) {
 						return;
