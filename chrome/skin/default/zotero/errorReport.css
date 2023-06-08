@@ -44,6 +44,14 @@ description {
 	margin-bottom: .4em;
 }
 
+#zotero-report-result {
+	display: flex;
+}
+
+#zotero-report-result div {
+	margin-right: 5px;
+}
+
 /* Submitted pane */
 
 #zotero-report-id {
