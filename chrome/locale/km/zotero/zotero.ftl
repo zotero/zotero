@@ -1,0 +1,10 @@
+tabs-info =
+    .label = ទិន្នន័យ
+tabs-notes =
+    .label = កំណត់ត្រា
+tabs-attachments =
+    .label = ឯកសារកម្ជាប់
+tabs-tags =
+    .label = ស្លាក
+tabs-related =
+    .label = ពាក់ព័ន្ធ

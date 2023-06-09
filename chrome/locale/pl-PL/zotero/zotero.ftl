@@ -1,0 +1,10 @@
+tabs-info =
+    .label = Informacje
+tabs-notes =
+    .label = Notatki
+tabs-attachments =
+    .label = Załączniki
+tabs-tags =
+    .label = Etykiety
+tabs-related =
+    .label = Powiązane

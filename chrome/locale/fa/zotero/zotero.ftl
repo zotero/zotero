@@ -1,0 +1,10 @@
+tabs-info =
+    .label = اطلاعات
+tabs-notes =
+    .label = یادداشت‌ها
+tabs-attachments =
+    .label = ‌پیوست‌ها
+tabs-tags =
+    .label = برچسب‌ها
+tabs-related =
+    .label = مرتبط

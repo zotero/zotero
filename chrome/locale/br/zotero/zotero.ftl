@@ -1,0 +1,10 @@
+tabs-info =
+    .label = Titou.
+tabs-notes =
+    .label = Notennoù
+tabs-attachments =
+    .label = Pezhioù-stag
+tabs-tags =
+    .label = Balizoù
+tabs-related =
+    .label = Kevreet

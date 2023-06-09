@@ -929,15 +929,16 @@ var ZoteroContextPane = new function () {
 			_updateAddToNote();
 		});
 
+		const localization = new Localization(["branding/brand.ftl", "zotero.ftl"], true); //eslint-disable-line no-undef
 		// Info tab
 		var tabInfo = document.createXULElement('tab');
-		tabInfo.setAttribute('label', Zotero.getString('zotero.tabs.info.label'));
+		tabInfo.setAttribute('label', localization.formatMessagesSync([{ id: 'tabs-info' }])?.[0].attributes.find(a => a.name === 'label').value);
 		// Tags tab
 		var tabTags = document.createXULElement('tab');
-		tabTags.setAttribute('label', Zotero.getString('zotero.tabs.tags.label'));
+		tabTags.setAttribute('label', localization.formatMessagesSync([{ id: 'tabs-tags' }])?.[0].attributes.find(a => a.name === 'label').value);
 		// Related tab
 		var tabRelated = document.createXULElement('tab');
-		tabRelated.setAttribute('label', Zotero.getString('zotero.tabs.related.label'));
+		tabRelated.setAttribute('label', localization.formatMessagesSync([{ id: 'tabs-related' }])?.[0].attributes.find(a => a.name === 'label').value);
 
 		tabs.append(tabInfo, tabTags, tabRelated);
 		tabbox.append(tabs, tabpanels);

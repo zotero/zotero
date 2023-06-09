@@ -1,0 +1,10 @@
+tabs-info =
+    .label = Informace
+tabs-notes =
+    .label = Poznámky
+tabs-attachments =
+    .label = Přílohy
+tabs-tags =
+    .label = Štítky
+tabs-related =
+    .label = Související

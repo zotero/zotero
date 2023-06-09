@@ -1,0 +1,10 @@
+tabs-info =
+    .label = Info
+tabs-notes =
+    .label = Notes
+tabs-attachments =
+    .label = Fichiers joints
+tabs-tags =
+    .label = Marqueurs
+tabs-related =
+    .label = Connexe

@@ -1,0 +1,10 @@
+tabs-info =
+    .label = Podatki
+tabs-notes =
+    .label = Opombe
+tabs-attachments =
+    .label = Priponke
+tabs-tags =
+    .label = Značke
+tabs-related =
+    .label = Sorodno

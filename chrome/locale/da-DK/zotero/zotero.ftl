@@ -1,0 +1,10 @@
+tabs-info =
+    .label = Info
+tabs-notes =
+    .label = Noter
+tabs-attachments =
+    .label = Vedhæftede filer
+tabs-tags =
+    .label = Mærker
+tabs-related =
+    .label = Relationer

@@ -1,0 +1,10 @@
+tabs-info =
+    .label = Info
+tabs-notes =
+    .label = Märkused
+tabs-attachments =
+    .label = Manused
+tabs-tags =
+    .label = Märksõnad
+tabs-related =
+    .label = Seotud

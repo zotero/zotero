@@ -1,0 +1,10 @@
+tabs-info =
+    .label = 信息
+tabs-notes =
+    .label = 笔记
+tabs-attachments =
+    .label = 附件
+tabs-tags =
+    .label = 标签
+tabs-related =
+    .label = 关联文献

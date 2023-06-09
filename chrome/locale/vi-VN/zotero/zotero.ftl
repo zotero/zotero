@@ -1,0 +1,10 @@
+tabs-info =
+    .label = Thông tin
+tabs-notes =
+    .label = Ghi chép
+tabs-attachments =
+    .label = Phần đính kèm
+tabs-tags =
+    .label = Thẻ
+tabs-related =
+    .label = Liên quan

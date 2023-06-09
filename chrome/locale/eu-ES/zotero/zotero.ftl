@@ -1,0 +1,10 @@
+tabs-info =
+    .label = Info
+tabs-notes =
+    .label = Oharrak
+tabs-attachments =
+    .label = Eranskinak
+tabs-tags =
+    .label = Etiketak
+tabs-related =
+    .label = Erlazionatutakoak

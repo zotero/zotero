@@ -1,0 +1,10 @@
+tabs-info =
+    .label = 情報
+tabs-notes =
+    .label = メモ
+tabs-attachments =
+    .label = 添付ファイル
+tabs-tags =
+    .label = タグ
+tabs-related =
+    .label = 関連アイテム

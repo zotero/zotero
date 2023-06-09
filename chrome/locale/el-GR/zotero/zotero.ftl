@@ -1,0 +1,10 @@
+tabs-info =
+    .label = Πληροφορίες
+tabs-notes =
+    .label = Σημειώσεις
+tabs-attachments =
+    .label = Προσαρτήματα
+tabs-tags =
+    .label = Ετικέτες
+tabs-related =
+    .label = Σχετίζεται με
