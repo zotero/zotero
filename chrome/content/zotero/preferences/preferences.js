@@ -152,7 +152,6 @@ var Zotero_Preferences = {
 	 * @param {String} [options.rawLabel] A raw string to use as the label if options.label is not provided
 	 * @param {String} [options.image] URI of an icon (displayed in the navigation sidebar)
 	 * @param {String} options.src URI of an XHTML fragment
-	 * @param {String[]} [options.extraDTD] Array of URIs of DTD files to use for parsing the XHTML fragment
 	 * @param {String[]} [options.scripts] Array of URIs of scripts to load along with the pane
 	 * @param {String[]} [options.stylesheets] Array of URIs of CSS stylesheets to load along with the pane
 	 * @param {Boolean} [options.defaultXUL] If true, parse the markup at `src` as XUL instead of XHTML:
@@ -233,7 +232,6 @@ var Zotero_Preferences = {
 			let dtdFiles = [
 				'chrome://zotero/locale/zotero.dtd',
 				'chrome://zotero/locale/preferences.dtd',
-				...(pane.extraDTD || []),
 			];
 			let contentFragment = pane.defaultXUL
 				? MozXULElement.parseXULToFragment(markup, dtdFiles)

@@ -103,7 +103,6 @@ Zotero.PreferencePanes = {
 	 * 		If not provided, the plugin's name is used
 	 * @param {String} [options.image] URI of an icon to be displayed in the navigation sidebar.
 	 * 		If not provided, the plugin's icon (from manifest.json) is used
-	 * @param {String[]} [options.extraDTD] Array of URIs of DTD files to use for parsing the XHTML fragment
 	 * @param {String[]} [options.scripts] Array of URIs of scripts to load along with the pane
 	 * @param {String[]} [options.stylesheets] Array of URIs of CSS stylesheets to load along with the pane
 	 * @param {String[]} [options.helpURL] If provided, a help button will be displayed under the pane
@@ -126,7 +125,6 @@ Zotero.PreferencePanes = {
 			rawLabel: options.label || await Zotero.Plugins.getName(options.pluginID),
 			image: options.image || await Zotero.Plugins.getIconURI(options.pluginID, 24),
 			src: options.src,
-			extraDTD: options.extraDTD,
 			scripts: options.scripts,
 			stylesheets: options.stylesheets,
 			helpURL: options.helpURL,
