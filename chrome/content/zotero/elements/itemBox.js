@@ -1343,12 +1343,12 @@
 				var fieldID = Zotero.ItemFields.getID(fieldName);
 			}
 			
-			// If an abstract, check last expand state
-			var abstractAsVbox = fieldName == 'abstractNote' && Zotero.Prefs.get('lastAbstractExpand');
-			
-			// Use a vbox for multiline fields (but Abstract only if it's expanded)
-			var isMultiline = (fieldName != 'abstractNote' || abstractAsVbox)
-				&& Zotero.ItemFields.isMultiline(fieldName);
+			// Allow multiline/long fields to wrap
+			var isMultiline = Zotero.ItemFields.isMultiline(fieldName) || Zotero.ItemFields.isLong(fieldName);
+			// But treat Abstract as a multiline field only when expanded
+			if (fieldName == 'abstractNote') {
+				isMultiline &&= Zotero.Prefs.get('lastAbstractExpand');
+			}
 			
 			var valueElement = document.createElement("div");
 			
