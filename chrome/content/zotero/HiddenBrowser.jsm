@@ -244,18 +244,19 @@ const HiddenBrowser = {
 
 const RemoteResourceBlockingObserver = {
 	_observerAdded: false,
-	_browsingContextIDs: new Set(),
+	_ids: new Set(),
 	
 	observe(subject) {
 		let channel = subject.QueryInterface(Ci.nsIHttpChannel);
-		if (this._browsingContextIDs.has(channel.topBrowsingContextId)
-				&& channel.URI.scheme !== 'file') {
+		let id = Zotero.platformMajorVersion > 102 ? channel.browserId : channel.topBrowsingContextId;
+		if (this._ids.has(id) && channel.URI.scheme !== 'file') {
 			channel.cancel(Cr.NS_BINDING_ABORTED);
 		}
 	},
 	
 	watch(browser) {
-		this._browsingContextIDs.add(browser.browsingContext.id);
+		let id = Zotero.platformMajorVersion > 102 ? browser.browserId : browser.browsingContext.id;
+		this._ids.add(id);
 		if (!this._observerAdded) {
 			Services.obs.addObserver(this, 'http-on-modify-request');
 			Zotero.debug('RemoteResourceBlockingObserver: Added observer');
@@ -264,8 +265,9 @@ const RemoteResourceBlockingObserver = {
 	},
 	
 	unwatch(browser) {
-		this._browsingContextIDs.delete(browser.browsingContext.id);
-		if (this._observerAdded && !this._browsingContextIDs.size) {
+		let id = Zotero.platformMajorVersion > 102 ? browser.browserId : browser.browsingContext.id;
+		this._ids.delete(id);
+		if (this._observerAdded && !this._ids.size) {
 			Services.obs.removeObserver(this, 'http-on-modify-request');
 			Zotero.debug('RemoteResourceBlockingObserver: Removed observer');
 			this._observerAdded = false;
