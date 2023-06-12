@@ -143,6 +143,10 @@ Zotero.Plugins = new function () {
 			let result;
 			try {
 				result = func.call(scope, params, reason);
+				// If bootstrap method returns a promise, wait for it
+				if (result && result.then) {
+					await result;
+				}
 			}
 			catch (e) {
 				Zotero.logError(`Error running bootstrap method '${method}' on ${id}`);
