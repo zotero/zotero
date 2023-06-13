@@ -62,6 +62,7 @@ const HiddenBrowser = {
 	 * @param {Boolean} [options.allowJavaScript]
 	 * @param {Object} [options.docShell] Fields to set on Browser.docShell
 	 * @param {Boolean} [options.requireSuccessfulStatus]
+	 * @param {Boolean} [options.blockRemoteResources] Block all remote (non-file:) resources
 	 * @param {Zotero.CookieSandbox} [options.cookieSandbox]
 	 */
 	async create(source, options = {}) {
@@ -106,6 +107,10 @@ const HiddenBrowser = {
 					Zotero.debug('Viewing URI ' + browser.currentURI?.spec)
 				}
 			}, 1000 * 60);
+		}
+		
+		if (options.blockRemoteResources) {
+			RemoteResourceBlockingObserver.watch(browser);
 		}
 		
 		// Next bit adapted from Mozilla's HeadlessShell.jsm
@@ -229,9 +234,43 @@ const HiddenBrowser = {
 	destroy(browser) {
 		var frame = browserFrameMap.get(browser);
 		if (frame) {
+			RemoteResourceBlockingObserver.unwatch(browser);
 			frame.destroy();
 			Zotero.debug("Deleted hidden browser");
 			browserFrameMap.delete(browser);
+		}
+	}
+};
+
+const RemoteResourceBlockingObserver = {
+	_observerAdded: false,
+	_ids: new Set(),
+	
+	observe(subject) {
+		let channel = subject.QueryInterface(Ci.nsIHttpChannel);
+		let id = Zotero.platformMajorVersion > 102 ? channel.browserId : channel.topBrowsingContextId;
+		if (this._ids.has(id) && channel.URI.scheme !== 'file') {
+			channel.cancel(Cr.NS_BINDING_ABORTED);
+		}
+	},
+	
+	watch(browser) {
+		let id = Zotero.platformMajorVersion > 102 ? browser.browserId : browser.browsingContext.id;
+		this._ids.add(id);
+		if (!this._observerAdded) {
+			Services.obs.addObserver(this, 'http-on-modify-request');
+			Zotero.debug('RemoteResourceBlockingObserver: Added observer');
+			this._observerAdded = true;
+		}
+	},
+	
+	unwatch(browser) {
+		let id = Zotero.platformMajorVersion > 102 ? browser.browserId : browser.browsingContext.id;
+		this._ids.delete(id);
+		if (this._observerAdded && !this._ids.size) {
+			Services.obs.removeObserver(this, 'http-on-modify-request');
+			Zotero.debug('RemoteResourceBlockingObserver: Removed observer');
+			this._observerAdded = false;
 		}
 	}
 };
