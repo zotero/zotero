@@ -999,9 +999,13 @@ var Scaffold = new function () {
 		var translator = _getTranslatorFromPane();
 		if (functionToRun.startsWith('detect')) {
 			if (isRemoteWeb) {
-				translate.setTranslator(translator);
-				detectHandler(translate, await translate.detect());
-				translate.dispose();
+				try {
+					translate.setTranslator(translator);
+					detectHandler(translate, await translate.detect());
+				}
+				finally {
+					translate.dispose();
+				}
 			}
 			else {
 				// don't let target prevent translator from operating
@@ -1016,15 +1020,19 @@ var Scaffold = new function () {
 			}
 		}
 		else if (isRemoteWeb) {
-			translate.setHandler("select", selectItems);
-			translate.setTranslator(translator);
-			let items = await translate.translate({ libraryID: false });
-			if (items) {
-				for (let item of items) {
-					itemDone(translate, item);
+			try {
+				translate.setHandler("select", selectItems);
+				translate.setTranslator(translator);
+				let items = await translate.translate({ libraryID: false });
+				if (items) {
+					for (let item of items) {
+						itemDone(translate, item);
+					}
 				}
 			}
-			translate.dispose();
+			finally {
+				translate.dispose();
+			}
 		}
 		else {
 			// don't let the detectCode prevent the translator from operating
@@ -1660,24 +1668,24 @@ var Scaffold = new function () {
 		let input = await _getInput(type);
 
 		if (type == "web") {
-			let tester = new Zotero_TranslatorTester(
-				_getTranslatorFromPane(),
-				type,
-				_debug,
-				_translatorProvider
-			);
-			return new Promise(
-				(resolve, reject) => tester.newTest(input,
-					(obj, newTest) => { // "done" handler for do
-						if (newTest) {
-							resolve(_sanitizeItemsInTest(newTest));
-						}
-						else {
-							reject(new Error('Creation failed'));
-						}
-					},
-					_confirmCreateExpectedFailTest)
-			);
+			let translate = new RemoteTranslate();
+			try {
+				await translate.setBrowser(_browser);
+				await translate.setTranslatorProvider(_translatorProvider);
+				translate.setTranslator(_getTranslatorFromPane());
+				translate.setHandler("debug", _debug);
+				translate.setHandler("error", _error);
+				translate.setHandler("newTestDetectionFailed", _confirmCreateExpectedFailTest);
+				let newTest = await translate.newTest();
+				if (!newTest) {
+					throw new Error('Creation failed');
+				}
+				newTest = _sanitizeItemsInTest(newTest);
+				return newTest;
+			}
+			finally {
+				translate.dispose();
+			}
 		}
 		else if (type == "import" || type == "search") {
 			let test = { type, input: input, items: [] };
@@ -2032,18 +2040,22 @@ var Scaffold = new function () {
 				}
 
 				let translate = new RemoteTranslate();
-				await translate.setBrowser(browser);
-				await translate.setTranslatorProvider(_translatorProvider);
-				translate.setTranslator(_getTranslatorFromPane());
-				translate.setHandler("debug", _debug);
-				translate.setHandler("error", _error);
-				translate.setHandler("newTestDetectionFailed", _confirmCreateExpectedFailTest);
-				let newTest = await translate.newTest();
-				translate.dispose();
-				newTest = _sanitizeItemsInTest(newTest);
-				this.newTests.push(newTest);
-				this.testDoneCallback(newTest);
-				this._updateTests();
+				try {
+					await translate.setBrowser(browser);
+					await translate.setTranslatorProvider(_translatorProvider);
+					translate.setTranslator(_getTranslatorFromPane());
+					translate.setHandler("debug", _debug);
+					translate.setHandler("error", _error);
+					translate.setHandler("newTestDetectionFailed", _confirmCreateExpectedFailTest);
+					let newTest = await translate.newTest();
+					newTest = _sanitizeItemsInTest(newTest);
+					this.newTests.push(newTest);
+					this.testDoneCallback(newTest);
+					this._updateTests();
+				}
+				finally {
+					translate.dispose();
+				}
 			}
 			catch (e) {
 				Zotero.logError(e);
