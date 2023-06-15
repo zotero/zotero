@@ -63,7 +63,11 @@ const EXPORTED_DOCUMENT_MARKER = "ZOTERO_TRANSFER_DOCUMENT";
 
 const NOTE_CITATION_PLACEHOLDER_LINK = 'https://www.zotero.org/?';
 
-const TEMPLATE_VERSION = 1;
+const TEMPLATE_VERSIONS = {
+	MacWord16: 2,
+	WinWord: 1,
+	OpenOffice: 1
+};
 
 const MENDELEY_URI_RE = /^http:\/\/www\.mendeley\.com\/documents\/\?uuid=(.*)/;
 
@@ -163,8 +167,8 @@ Zotero.Integration = new function() {
 	 * @returns {Boolean} true if integration operation should be cancelled
 	 */
 	this.warnOutdatedTemplate = function (agent, templateVersion) {
-		const validAgents = new Set(['OpenOffice', 'MacWord2016', 'MacWord16', 'WinWord']);
-		if (!validAgents.has(agent) || templateVersion >= TEMPLATE_VERSION) return false;
+		const expectedTemplateVersion = TEMPLATE_VERSIONS[agent];
+		if (typeof expectedTemplateVersion != 'undefined' && templateVersion >= expectedTemplateVersion) return false;
 		const daysToIgnore = 30;
 		const now = Math.floor(Date.now() / 1000);
 		const updateTemplateDelayedOn = Zotero.Prefs.get('integration.updateTemplateDelayedOn');
