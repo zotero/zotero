@@ -1563,7 +1563,6 @@
 			var t;
 			if (Zotero.ItemFields.isMultiline(fieldName) || Zotero.ItemFields.isLong(fieldName)) {
 				t = document.createElement("textarea");
-				t.setAttribute('rows', 8);
 			}
 			// Add auto-complete for certain fields
 			else if (field == 'creator' || Zotero.ItemFields.isAutocompleteField(fieldName)) {
@@ -1731,6 +1730,18 @@
 				this.blurHandler(t);
 			});
 			t.addEventListener('keypress', event => this.handleKeyPress(event));
+			
+			if (t instanceof HTMLTextAreaElement) {
+				let updateHeight = () => {
+					// Reset height before getting scrollHeight
+					// Prevents field from growing slightly each time
+					// https://stackoverflow.com/a/58073583
+					t.style.height = 'auto';
+					t.style.height = `calc(max(6em, ${t.scrollHeight}px))`;
+				};
+				t.addEventListener('input', updateHeight);
+				updateHeight();
+			}
 			
 			return t;
 		}
