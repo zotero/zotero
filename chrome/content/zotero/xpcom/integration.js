@@ -168,7 +168,7 @@ Zotero.Integration = new function() {
 	 */
 	this.warnOutdatedTemplate = function (agent, templateVersion) {
 		const expectedTemplateVersion = TEMPLATE_VERSIONS[agent];
-		if (typeof expectedTemplateVersion != 'undefined' && templateVersion >= expectedTemplateVersion) return false;
+		if (typeof expectedTemplateVersion == 'undefined' || templateVersion >= expectedTemplateVersion) return false;
 		const daysToIgnore = 30;
 		const now = Math.floor(Date.now() / 1000);
 		const updateTemplateDelayedOn = Zotero.Prefs.get('integration.updateTemplateDelayedOn');
