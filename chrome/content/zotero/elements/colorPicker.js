@@ -138,15 +138,34 @@
 
 		init() {
 			let button = this.querySelector('.button');
-			let panel = this.querySelector('.panel');
-			let grid = this.querySelector('.grid');
+
+			button.addEventListener('keydown', (event) => {
+				if (event.key == ' ' || event.key == 'Enter' || event.key == 'ArrowDown') {
+					event.preventDefault();
+					this.openPopup(true);
+				}
+			});
 
 			button.addEventListener('click', () => {
-				this.buildGrid();
-				grid.style.gridTemplateColumns = `repeat(${this.cols}, ${this.tileWidth}px)`;
-				grid.style.gridAutoRows = `${this.tileHeight}px`;
-				panel.openPopup(button, 'after_start', 0, 0, false, false);
+				this.openPopup(false);
 			});
+		}
+		
+		openPopup(focus = false) {
+			this.buildGrid();
+
+			let button = this.querySelector('.button');
+			let panel = this.querySelector('.panel');
+			let grid = this.querySelector('.grid');
+			grid.style.gridTemplateColumns = `repeat(${this.cols}, ${this.tileWidth}px)`;
+			grid.style.gridAutoRows = `${this.tileHeight}px`;
+
+			if (focus) {
+				panel.addEventListener('popupshown', () => {
+					grid.querySelector('.grid-tile').focus();
+				}, { once: true });
+			}
+			panel.openPopup(button, 'after_start', 0, 0, false, false);
 		}
 		
 		buildGrid() {
