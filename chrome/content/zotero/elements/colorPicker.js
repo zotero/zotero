@@ -67,6 +67,38 @@
 		set colors(colors) {
 			this.setAttribute('colors', colors.join(','));
 		}
+		
+		get colorLabels() {
+			if (this.hasAttribute('color-labels')) {
+				return this.getAttribute('color-labels').split(',').map((label) => {
+					let localized;
+					try {
+						localized = Zotero.getString(label);
+					}
+					catch (e) {}
+					if (!localized || localized == label) {
+						return label;
+					}
+					else {
+						return localized;
+					}
+				});
+			}
+			else {
+				if (this.hasAttribute('colors')) {
+					Zotero.debug('WARNING: <color-picker> CE: Set color-labels when setting colors');
+				}
+				return [
+					'general.red', 'general.orange', 'general.gray',
+					'general.green', 'general.teal', 'general.blue',
+					'general.purple', 'general.violet', 'general.maroon'
+				].map(label => Zotero.getString(label));
+			}
+		}
+
+		set colorLabels(colorLabels) {
+			this.setAttribute('color-labels', colorLabels.join(','));
+		}
 
 		get cols() {
 			return this.getAttribute('cols') || 3;
@@ -74,6 +106,10 @@
 
 		set cols(cols) {
 			this.setAttribute('cols', cols);
+		}
+		
+		get rows() {
+			return Math.ceil(this.colors.length / this.cols);
 		}
 
 		get tileWidth() {
@@ -102,13 +138,78 @@
 
 		init() {
 			let button = this.querySelector('.button');
-			let panel = this.querySelector('.panel');
-			let grid = this.querySelector('.grid');
+
+			button.addEventListener('keydown', (event) => {
+				if (event.key == ' ' || event.key == 'Enter' || event.key == 'ArrowDown') {
+					event.preventDefault();
+					this.openPopup(true);
+				}
+			});
 
 			button.addEventListener('click', () => {
-				grid.style.gridTemplateColumns = `repeat(${this.cols}, ${this.tileWidth}px)`;
-				grid.style.gridAutoRows = `${this.tileHeight}px`;
-				panel.openPopup(button, 'after_start', 0, 0, false, false);
+				this.openPopup(false);
+			});
+		}
+		
+		openPopup(focus = false) {
+			this.buildGrid();
+
+			let button = this.querySelector('.button');
+			let panel = this.querySelector('.panel');
+			let grid = this.querySelector('.grid');
+			grid.style.gridTemplateColumns = `repeat(${this.cols}, ${this.tileWidth}px)`;
+			grid.style.gridAutoRows = `${this.tileHeight}px`;
+
+			if (focus) {
+				panel.addEventListener('popupshown', () => {
+					grid.querySelector('.grid-tile').focus();
+				}, { once: true });
+			}
+			panel.openPopup(button, 'after_start', 0, 0, false, false);
+		}
+		
+		buildGrid() {
+			let grid = this.querySelector('.grid');
+			grid.innerHTML = '';
+			let colors = this.colors;
+			let colorLabels = this.colorLabels;
+			colors.forEach((color, i) => {
+				let tile = document.createElement('button');
+				tile.setAttribute('aria-label', colorLabels[i]);
+				tile.classList.add('grid-tile');
+				tile.style.backgroundColor = color;
+				
+				tile.addEventListener('click', () => {
+					this.color = color;
+					this.querySelector('.panel').hidePopup();
+				});
+				tile.addEventListener('keydown', (event) => {
+					switch (event.key) {
+						case 'ArrowLeft':
+							(tile.previousElementSibling || tile.parentElement.lastElementChild).focus();
+							break;
+						case 'ArrowRight':
+							(tile.nextElementSibling || tile.parentElement.firstElementChild).focus();
+							break;
+						case 'ArrowUp': {
+							let upIndex = (Array.from(tile.parentElement.children).indexOf(tile) - this.cols)
+								% (this.rows * this.cols);
+							if (upIndex < 0) {
+								upIndex += this.rows * this.cols;
+							}
+							tile.parentElement.children[upIndex].focus();
+							break;
+						}
+						case 'ArrowDown': {
+							let downIndex = (Array.from(tile.parentElement.children).indexOf(tile) + this.cols)
+								% (this.rows * this.cols);
+							tile.parentElement.children[downIndex].focus();
+							break;
+						}
+					}
+				});
+				
+				grid.append(tile);
 			});
 		}
 
@@ -119,20 +220,6 @@
 		attributeChangedCallback(attrName, oldVal, newVal) {
 			if (attrName == 'color') {
 				this.querySelector('.button-tile').style.backgroundColor = newVal;
-			}
-			else if (attrName == 'colors') {
-				let grid = this.querySelector('.grid');
-				grid.innerHTML = '';
-				for (let color of newVal.split(',')) {
-					let tile = document.createElement('div');
-					tile.classList.add('grid-tile');
-					tile.style.backgroundColor = color;
-					tile.addEventListener('click', () => {
-						this.color = color;
-						this.querySelector('.panel').hidePopup();
-					});
-					grid.append(tile);
-				}
 			}
 			else if (attrName == 'disabled') {
 				this.querySelector('.button').disabled = !!newVal;

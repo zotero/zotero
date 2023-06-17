@@ -1,5 +1,5 @@
 color-picker {
-	button {
+	.button {
 		width: 38px;
 		height: 24px;
 		appearance: none;
@@ -25,7 +25,8 @@ color-picker {
 		gap: 2px;
 	}
 
-	.grid-tile:hover {
+	.grid-tile, .grid-tile:hover {
+		appearance: none;
 		border: 0;
 	}
 
