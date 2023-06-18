@@ -96,7 +96,6 @@ Zotero.Plugins = new function () {
 			scope,
 			{
 				Zotero,
-				DOMLocalization,
 				Localization,
 				ChromeWorker,
 				Services,
