@@ -47,6 +47,7 @@ Zotero.Plugins = new function () {
 		var { addons } = await AddonManager.getActiveAddons(["extension"]);
 		for (let addon of addons) {
 			setDefaultPrefs(addon);
+			registerLocales(addon);
 			await _callMethod(addon, 'startup', REASONS.APP_STARTUP);
 		}
 		
@@ -91,7 +92,17 @@ Zotero.Plugins = new function () {
 		for (let name in REASONS) {
 			scope[name] = REASONS[name];
 		}
-		Object.assign(scope, { Services, Worker, ChromeWorker, Zotero });
+		Object.assign(
+			scope,
+			{
+				Zotero,
+				DOMLocalization,
+				Localization,
+				ChromeWorker,
+				Services,
+				Worker,
+			}
+		);
 		// Add additional global functions
 		scope.setTimeout = setTimeout;
 		scope.clearTimeout = clearTimeout;
@@ -273,6 +284,31 @@ Zotero.Plugins = new function () {
 	}
 	
 	
+	// Automatically register l10n sources for enabled plugins.
+	//
+	// A Fluent file located at
+	//   [plugin root]/locale/en-US/make-it-red.ftl
+	// could be included in an XHTML file as
+	//   <link rel="localization" href="make-it-red.ftl"/>
+	//
+	// If a plugin doesn't have a subdirectory for the active locale, en-US strings
+	// will be used as a fallback.
+	function registerLocales(addon) {
+		let source = new L10nFileSource(
+			addon.id,
+			'app',
+			Services.locale.availableLocales,
+			addon.getResourceURI().spec + 'locale/{locale}/',
+		);
+		L10nRegistry.getInstance().registerSources([source]);
+	}
+	
+	
+	function unregisterLocales(addon) {
+		L10nRegistry.getInstance().removeSources([addon.id]);
+	}
+	
+	
 	/**
 	 * Add an observer to be notified of lifecycle events on all plugins.
 	 *
@@ -314,6 +350,7 @@ Zotero.Plugins = new function () {
 			}
 			Zotero.debug("Installed plugin " + addon.id);
 			setDefaultPrefs(addon);
+			registerLocales(addon);
 			await _callMethod(addon, 'install');
 			await _callMethod(addon, 'startup', REASONS.ADDON_INSTALL);
 		},
@@ -324,6 +361,7 @@ Zotero.Plugins = new function () {
 			}
 			Zotero.debug("Enabling plugin " + addon.id);
 			setDefaultPrefs(addon);
+			registerLocales(addon);
 			await _callMethod(addon, 'startup', REASONS.ADDON_ENABLE);
 		},
 		
@@ -333,6 +371,7 @@ Zotero.Plugins = new function () {
 			}
 			Zotero.debug("Disabling plugin " + addon.id);
 			await _callMethod(addon, 'shutdown', REASONS.ADDON_DISABLE);
+			unregisterLocales(addon);
 			clearDefaultPrefs(addon);
 		},
 		
@@ -341,6 +380,7 @@ Zotero.Plugins = new function () {
 			this.uninstalling.add(addon.id);
 			await _callMethod(addon, 'shutdown', REASONS.ADDON_UNINSTALL);
 			await _callMethod(addon, 'uninstall');
+			unregisterLocales(addon);
 			clearDefaultPrefs(addon);
 		},
 		
@@ -354,9 +394,10 @@ Zotero.Plugins = new function () {
 			}
 			Zotero.debug("Cancelled uninstallation of plugin " + addon.id);
 			this.uninstalling.delete(addon.id);
-			setDefaultPrefs(addon);
 			await _callMethod(addon, 'install');
 			if (addon.isActive) {
+				setDefaultPrefs(addon);
+				registerLocales(addon);
 				await _callMethod(addon, 'startup', REASONS.ADDON_INSTALL);
 			}
 		}
