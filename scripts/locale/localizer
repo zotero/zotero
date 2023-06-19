@@ -16,7 +16,7 @@ $use_content_input_dir = false;
 $use_content_output_dir = true; // set to true for XPI, false for BZ
 $localeCodeInOutputXML = true; // set to true for XPI, false for BZ
 
-$locale_re = '/([a-z]{2})(\-[A-Z]{2})?/';
+$locale_re = '/^([a-z]{2})(\-[A-Z]{2})?$/';
 $locale_file_re = '/^[a-z].+\.(dtd|properties)$/';
 
 // Zotero files
