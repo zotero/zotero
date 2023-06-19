@@ -1,6 +1,6 @@
 <!ENTITY zotero.preferences.title "Preferenze di Zotero">
 
-<!ENTITY zotero.preferences.helpButton.label "Help">
+<!ENTITY zotero.preferences.helpButton.label "Aiuto">
 
 <!ENTITY zotero.preferences.default "Predefinito:">
 <!ENTITY zotero.preferences.items "elementi">
@@ -10,7 +10,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Generale">
 
-<!ENTITY zotero.preferences.interface "Interface">
+<!ENTITY zotero.preferences.interface "Interfaccia">
 <!ENTITY zotero.preferences.fileHandling "Gestione dei file">
 <!ENTITY zotero.preferences.automaticSnapshots "Salva automaticamente una copia della pagina web (snapshot) quando si crea un elemento da un sito">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Allega automaticamente i file PDF o di altro tipo durante il salvataggio degli elementi">
@@ -19,7 +19,7 @@
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rinomina i file collegati">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Apri i PDF utilizzando">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Impostazioni predefinite di sistema">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
+<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Apri i PDF in una nuova finestra invece che nelle schede">
 
 <!ENTITY zotero.preferences.miscellaneous "Varie">
 <!ENTITY zotero.preferences.autoUpdate "Controlla automaticamente gli aggiornamenti dei programmi traduttori e degli stili">
@@ -93,7 +93,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Azzera la cronologia di sincronizzazione dei file">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Confronta tutti i file allegati con il servizio di archiviazione">
 <!ENTITY zotero.preferences.sync.reset "Ripristina">
-<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "Mostra opzioni di ripristino...">
 <!ENTITY zotero.preferences.sync.reset.button "Ripristina…">
 
 

@@ -112,7 +112,7 @@
 <!ENTITY zotero.item.textTransform "Transformasi Teks">
 <!ENTITY zotero.item.textTransform.titlecase "Title Case">
 <!ENTITY zotero.item.textTransform.sentencecase "Sentence case">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last Names">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.viewOnline "Lihat secaraDaring">
 <!ENTITY zotero.item.copyAsURL "Salin sebagai URL">

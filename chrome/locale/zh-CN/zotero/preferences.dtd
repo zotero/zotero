@@ -1,6 +1,6 @@
 <!ENTITY zotero.preferences.title "Zotero 首选项">
 
-<!ENTITY zotero.preferences.helpButton.label "Help">
+<!ENTITY zotero.preferences.helpButton.label "帮助">
 
 <!ENTITY zotero.preferences.default "默认:">
 <!ENTITY zotero.preferences.items "条目">
@@ -10,7 +10,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "常规">
 
-<!ENTITY zotero.preferences.interface "Interface">
+<!ENTITY zotero.preferences.interface "介面">
 <!ENTITY zotero.preferences.fileHandling "文件处理">
 <!ENTITY zotero.preferences.automaticSnapshots "从网页创建条目时自动抓取网页快照">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "保存条目时自动附加相关的 PDF 文档及其他文件">
@@ -19,7 +19,7 @@
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "重命名链接的文件">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "打开 PDF 使用">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "系统默认">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
+<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "在新的視窗開啟PDF而非新的分頁">
 
 <!ENTITY zotero.preferences.miscellaneous "杂项">
 <!ENTITY zotero.preferences.autoUpdate "自动检查转换器及样式的更新">
@@ -93,7 +93,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "重置文件同步历史">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "比较存储服务中的所有附件文件">
 <!ENTITY zotero.preferences.sync.reset "重置">
-<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "顯示重置選項">
 <!ENTITY zotero.preferences.sync.reset.button "重置…">
 
 

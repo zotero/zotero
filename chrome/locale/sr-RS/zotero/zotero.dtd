@@ -112,7 +112,7 @@
 <!ENTITY zotero.item.textTransform "Преобликуј текст">
 <!ENTITY zotero.item.textTransform.titlecase "Величина слова у наслову">
 <!ENTITY zotero.item.textTransform.sentencecase "Величина слова у реченици">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Замени прва/последња имена">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.viewOnline "Погледај на мрежи">
 <!ENTITY zotero.item.copyAsURL "Копирај као адресу">

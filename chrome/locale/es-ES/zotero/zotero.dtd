@@ -110,10 +110,10 @@
 <!ENTITY zotero.item.add "Añadir">
 <!ENTITY zotero.item.attachment.file.show "Mostar archivo">
 <!ENTITY zotero.item.textTransform "Transformar texto">
-<!ENTITY zotero.item.textTransform.titlecase "Capitalización de título">
-<!ENTITY zotero.item.textTransform.sentencecase "Capitalización de oración">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Intercambiar Nombre/Apellido">
-<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
+<!ENTITY zotero.item.textTransform.titlecase "Mayúsculas de título">
+<!ENTITY zotero.item.textTransform.sentencecase "Mayúsculas de oración">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Intercambiar primero/último">
+<!ENTITY zotero.item.creatorTransform.fixCase "Fijar mayúsculas/minúsculas">
 <!ENTITY zotero.item.viewOnline "Ver en línea">
 <!ENTITY zotero.item.copyAsURL "Copiar como URL">
 <!ENTITY zotero.item.deletePermanently "Eliminar permanentemente...">
@@ -140,7 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Asignar color...">
 <!ENTITY zotero.tagSelector.renameTag "Renombrar etiqueta...">
 <!ENTITY zotero.tagSelector.deleteTag "Borrar etiqueta...">
-<!ENTITY zotero.tagSelector.splitTag "Split…">
+<!ENTITY zotero.tagSelector.splitTag "Dividir...">
 
 <!ENTITY zotero.tagColorChooser.title "Escoje un color y posición de la etiqueta">
 <!ENTITY zotero.tagColorChooser.color "Color:">
@@ -181,8 +181,8 @@
 <!ENTITY zotero.import "Importar">
 <!ENTITY zotero.import.whereToImportFrom "¿Desde dónde quieres importar?">
 <!ENTITY zotero.import.source.file "Un archivo (BibTex, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
-<!ENTITY zotero.import.onlineImport "online import">
+<!ENTITY zotero.import.source.folder "Una carpeta de PDF u otros archivos">
+<!ENTITY zotero.import.onlineImport "Importación en línea">
 <!ENTITY zotero.import.importing "Importando...">
 <!ENTITY zotero.import.database "Base de datos">
 <!ENTITY zotero.import.lastModified "Última modificación">

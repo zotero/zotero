@@ -112,7 +112,7 @@
 <!ENTITY zotero.item.textTransform "Szöveg átalakítása">
 <!ENTITY zotero.item.textTransform.titlecase "Szókezdő">
 <!ENTITY zotero.item.textTransform.sentencecase "Mondatkezdő">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Keresztnév/Vezetéknév felcserélése">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.viewOnline "Online megtekintés">
 <!ENTITY zotero.item.copyAsURL "Másolás URL-ként">

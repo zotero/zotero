@@ -1,6 +1,6 @@
 <!ENTITY zotero.preferences.title "Zotero Tercihleri">
 
-<!ENTITY zotero.preferences.helpButton.label "Help">
+<!ENTITY zotero.preferences.helpButton.label "Yardım">
 
 <!ENTITY zotero.preferences.default "Varsayılan:">
 <!ENTITY zotero.preferences.items "Eser">
@@ -10,7 +10,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Genel">
 
-<!ENTITY zotero.preferences.interface "Interface">
+<!ENTITY zotero.preferences.interface "Arayüz">
 <!ENTITY zotero.preferences.fileHandling "Dosya Kullanımı">
 <!ENTITY zotero.preferences.automaticSnapshots "Web sayfalarından eserler yaratırken sayfanın anlık görüntüsünü otomatik olarak kaydet">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Eserleri kaydederken ilişkili PDF ve diğer dosyaları da otomatik olarak ekle">
@@ -19,7 +19,7 @@
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Bağlantılanmış dosyaları yeniden adlandır">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "PDF dosyalarını bu ile Aç:">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Sistem Varsayılanı">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
+<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "PDF'leri sekmeler yerine yeni pencerelerde aç">
 
 <!ENTITY zotero.preferences.miscellaneous "Diğer Ayarlar">
 <!ENTITY zotero.preferences.autoUpdate "Güncellenmiş çevirmen ve stilleri otomatik olarak ara">
@@ -82,7 +82,7 @@
 <!ENTITY zotero.preferences.sync.librariesToSync.sync "Eşitle">
 <!ENTITY zotero.preferences.sync.librariesToSync.library "Kitaplık">
 <!ENTITY zotero.preferences.sync.reset.warning1 "Aşağıdaki işlemler, yalnızca ender ve özel durumlar altında kullanılmalı, ve genel sorun giderme amaçlı kullanılmamalıdırlar. Birçok durumda, sıfırlama ek sorunlara neden olacaktır. Daha fazla bilgi için ">
-<!ENTITY zotero.preferences.sync.reset.warning2 "Eşitlemeyi Sıfırlama Seçenekleri'ne">
+<!ENTITY zotero.preferences.sync.reset.warning2 "Eşitlemeyi Sıfırlama Seçenekleri">
 <!ENTITY zotero.preferences.sync.reset.warning3 " bakınız.">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory "Veri Eşitleme Geçmişini Sıfırla">
 <!ENTITY zotero.preferences.sync.reset.resetDataSyncHistory.desc "Eşitleme geçmişini yok sayarak, yerel verileri uzaktaki verilerle birleştir">
@@ -93,7 +93,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Dosya Eşitleme Geçmişini Sıfırla">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Tüm ek dosyaları depolama hizmetindekilerle karşılaştır">
 <!ENTITY zotero.preferences.sync.reset "Sıfırla">
-<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "Sıfırlama Seçeneklerini Göster...">
 <!ENTITY zotero.preferences.sync.reset.button "Sıfırla...">
 
 

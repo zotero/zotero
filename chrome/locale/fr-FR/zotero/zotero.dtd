@@ -113,7 +113,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Initiales En Majuscules">
 <!ENTITY zotero.item.textTransform.sentencecase "Lettre capitale en début de phrase">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Inverser prénom/nom">
-<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
+<!ENTITY zotero.item.creatorTransform.fixCase "Corriger la casse">
 <!ENTITY zotero.item.viewOnline "Afficher en ligne">
 <!ENTITY zotero.item.copyAsURL "Copier comme un lien">
 <!ENTITY zotero.item.deletePermanently "Supprimer définitivement…">
@@ -140,7 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Attribuer une couleur…">
 <!ENTITY zotero.tagSelector.renameTag "Renommer le marqueur…">
 <!ENTITY zotero.tagSelector.deleteTag "Effacer le marqueur…">
-<!ENTITY zotero.tagSelector.splitTag "Split…">
+<!ENTITY zotero.tagSelector.splitTag "Scinder...">
 
 <!ENTITY zotero.tagColorChooser.title "Attribuer une couleur et un raccourci au marqueur">
 <!ENTITY zotero.tagColorChooser.color "Couleur :">
@@ -181,8 +181,8 @@
 <!ENTITY zotero.import "Importer">
 <!ENTITY zotero.import.whereToImportFrom "D'où voulez-vous importer ?">
 <!ENTITY zotero.import.source.file "Un fichier (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
-<!ENTITY zotero.import.onlineImport "online import">
+<!ENTITY zotero.import.source.folder "Un dossier de PDFs ou d'autres fichiers">
+<!ENTITY zotero.import.onlineImport "import en ligne">
 <!ENTITY zotero.import.importing "Importation…">
 <!ENTITY zotero.import.database "Base de données">
 <!ENTITY zotero.import.lastModified "Dernière modification">
@@ -329,7 +329,7 @@
 <!ENTITY zotero.pdfReader.zoomPageHeight "Pleine hauteur">
 <!ENTITY zotero.pdfReader.splitVertically "Diviser Verticalement">
 <!ENTITY zotero.pdfReader.splitHorizontally "Diviser Horizontalement">
-<!ENTITY zotero.pdfReader.transferFromPDF "Importer des annotations...">
+<!ENTITY zotero.pdfReader.transferFromPDF "Importer les annotations...">
 <!ENTITY zotero.pdfReader.rotatePageLeft "Rotation anti-horaire">
 <!ENTITY zotero.pdfReader.rotatePageRight "Rotation horaire">
 <!ENTITY zotero.pdfReader.rotatePage180 "Rotation à 180°">

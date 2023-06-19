@@ -112,7 +112,7 @@
 <!ENTITY zotero.item.textTransform "Hoofdlettergebruik wijzigen">
 <!ENTITY zotero.item.textTransform.titlecase "Alle woorden (Elke Eerste Letter)">
 <!ENTITY zotero.item.textTransform.sentencecase "Eerste woord (van een zin)">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Draai Voor-/Achter- namen om">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.viewOnline "Bekijk online">
 <!ENTITY zotero.item.copyAsURL "Kopieer als URL">

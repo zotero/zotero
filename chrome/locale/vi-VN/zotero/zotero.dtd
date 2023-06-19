@@ -112,7 +112,7 @@
 <!ENTITY zotero.item.textTransform "Biến đổi Văn bản">
 <!ENTITY zotero.item.textTransform.titlecase "Viết hoa đầu từ">
 <!ENTITY zotero.item.textTransform.sentencecase "Viết hoa đầu câu">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Hoán chuyên tên và họ">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.viewOnline "Xem trực tuyến">
 <!ENTITY zotero.item.copyAsURL "Sao chép thành URL">

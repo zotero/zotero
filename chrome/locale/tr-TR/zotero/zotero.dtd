@@ -113,7 +113,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Başlık Biçimi">
 <!ENTITY zotero.item.textTransform.sentencecase "Cümle Biçimi">
 <!ENTITY zotero.item.creatorTransform.nameSwap "İlk ve Soyadları Takas Et">
-<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
+<!ENTITY zotero.item.creatorTransform.fixCase "Büyük Harfleri Düzelt">
 <!ENTITY zotero.item.viewOnline "Çevrimiçi Göster">
 <!ENTITY zotero.item.copyAsURL "URL'i Kopyala">
 <!ENTITY zotero.item.deletePermanently "Kalıcı Olarak Sil...">
@@ -140,7 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Etikete Renk Ata...">
 <!ENTITY zotero.tagSelector.renameTag "Etiketi Yeniden Adlandır...">
 <!ENTITY zotero.tagSelector.deleteTag "Etiketi Sil...">
-<!ENTITY zotero.tagSelector.splitTag "Split…">
+<!ENTITY zotero.tagSelector.splitTag "Ayır...">
 
 <!ENTITY zotero.tagColorChooser.title "Etiket Rengi ve Konumunu Seç">
 <!ENTITY zotero.tagColorChooser.color "Renk:">
@@ -181,8 +181,8 @@
 <!ENTITY zotero.import "İçeri Aktar">
 <!ENTITY zotero.import.whereToImportFrom "Nereden içeri aktarmak istiyorsunuz?">
 <!ENTITY zotero.import.source.file "Bir dosya (BibTeX, RIS, Zotero RDF, vb.)">
-<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
-<!ENTITY zotero.import.onlineImport "online import">
+<!ENTITY zotero.import.source.folder "PDF'lerin veya diğer dosyaların bulunduğu bir klasör">
+<!ENTITY zotero.import.onlineImport "çevrim içi içe aktarma">
 <!ENTITY zotero.import.importing "İçeri aktarılıyor...">
 <!ENTITY zotero.import.database "Veritabanı">
 <!ENTITY zotero.import.lastModified "Son Değiştirilmesi">

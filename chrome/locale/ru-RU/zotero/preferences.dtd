@@ -1,6 +1,6 @@
 <!ENTITY zotero.preferences.title "Настройки Zotero">
 
-<!ENTITY zotero.preferences.helpButton.label "Help">
+<!ENTITY zotero.preferences.helpButton.label "Справка">
 
 <!ENTITY zotero.preferences.default "По умолчанию:">
 <!ENTITY zotero.preferences.items "записи(-ей)">
@@ -10,7 +10,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Общие">
 
-<!ENTITY zotero.preferences.interface "Interface">
+<!ENTITY zotero.preferences.interface "Интерфейс">
 <!ENTITY zotero.preferences.fileHandling "Обработка файлов">
 <!ENTITY zotero.preferences.automaticSnapshots "Автоматически делать снимки при создании записей из веб-страниц">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Автоматически вкладывать связанные PDF и другие файлы при сохранении записей">
@@ -19,7 +19,7 @@
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Переименовывать связанные файлы">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Открывать PDF-файлы используя">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "По умолчанию для данной системы">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
+<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Открыть PDF-файл в новом окне вместо вкладки ">
 
 <!ENTITY zotero.preferences.miscellaneous "Разное">
 <!ENTITY zotero.preferences.autoUpdate "Автоматически проверять на наличие обновленных трансляторов и стилей">
@@ -93,7 +93,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Сбросить историю синхронизации файлов">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Сравнить все вложенные файлы с данными в хранилище">
 <!ENTITY zotero.preferences.sync.reset "Сбросить">
-<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "Показать варианты сброса…">
 <!ENTITY zotero.preferences.sync.reset.button "Сбросить…">
 
 

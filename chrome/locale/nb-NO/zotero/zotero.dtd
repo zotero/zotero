@@ -113,7 +113,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Tittel-format">
 <!ENTITY zotero.item.textTransform.sentencecase "Kun første ord med stor bokstav">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Bytt fornavn/etternavn">
-<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
+<!ENTITY zotero.item.creatorTransform.fixCase "Fiks til stor forbokstav">
 <!ENTITY zotero.item.viewOnline "Vis på nett">
 <!ENTITY zotero.item.copyAsURL "Kopier som URL">
 <!ENTITY zotero.item.deletePermanently "Slett permanent…">
@@ -140,7 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Tildel farge…">
 <!ENTITY zotero.tagSelector.renameTag "Gi emneord nytt navn...">
 <!ENTITY zotero.tagSelector.deleteTag "Slett emneord...">
-<!ENTITY zotero.tagSelector.splitTag "Split…">
+<!ENTITY zotero.tagSelector.splitTag "Del opp…">
 
 <!ENTITY zotero.tagColorChooser.title "Velg farge og posisjon for emneord">
 <!ENTITY zotero.tagColorChooser.color "Farge:">
@@ -181,8 +181,8 @@
 <!ENTITY zotero.import "Importer">
 <!ENTITY zotero.import.whereToImportFrom "Hvor ønsker du å importere fra?">
 <!ENTITY zotero.import.source.file "En fil (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
-<!ENTITY zotero.import.onlineImport "online import">
+<!ENTITY zotero.import.source.folder "En mappe med PDF-filer eller andre filer">
+<!ENTITY zotero.import.onlineImport "import via nettet">
 <!ENTITY zotero.import.importing "Importerer…">
 <!ENTITY zotero.import.database "Database">
 <!ENTITY zotero.import.lastModified "Sist endret">

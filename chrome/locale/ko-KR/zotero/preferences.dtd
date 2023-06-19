@@ -1,6 +1,6 @@
 <!ENTITY zotero.preferences.title "Zotero 환경설정">
 
-<!ENTITY zotero.preferences.helpButton.label "Help">
+<!ENTITY zotero.preferences.helpButton.label "도움말">
 
 <!ENTITY zotero.preferences.default "기본값:">
 <!ENTITY zotero.preferences.items "항목">

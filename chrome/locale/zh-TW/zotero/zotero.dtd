@@ -112,8 +112,8 @@
 <!ENTITY zotero.item.textTransform "轉換文字">
 <!ENTITY zotero.item.textTransform.titlecase "標題大小寫">
 <!ENTITY zotero.item.textTransform.sentencecase "句首字母大小寫">
-<!ENTITY zotero.item.creatorTransform.nameSwap "互換西方語言方式的名/姓">
-<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
+<!ENTITY zotero.item.creatorTransform.nameSwap "交換前/後">
+<!ENTITY zotero.item.creatorTransform.fixCase "修正大小寫">
 <!ENTITY zotero.item.viewOnline "線上檢視">
 <!ENTITY zotero.item.copyAsURL "複製成 URL">
 <!ENTITY zotero.item.deletePermanently "刪除授權……">
@@ -140,7 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "配上顏色……">
 <!ENTITY zotero.tagSelector.renameTag "重新命名標籤……">
 <!ENTITY zotero.tagSelector.deleteTag "刪除標籤……">
-<!ENTITY zotero.tagSelector.splitTag "Split…">
+<!ENTITY zotero.tagSelector.splitTag "分割">
 
 <!ENTITY zotero.tagColorChooser.title "選擇標籤顏色與位置">
 <!ENTITY zotero.tagColorChooser.color "顏色:">
@@ -181,8 +181,8 @@
 <!ENTITY zotero.import "匯入">
 <!ENTITY zotero.import.whereToImportFrom "想從哪匯入？">
 <!ENTITY zotero.import.source.file "一檔案 (BibTeX, RIS, Zotero RDF, 等)">
-<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
-<!ENTITY zotero.import.onlineImport "online import">
+<!ENTITY zotero.import.source.folder "一個裝了PDF或是其他檔案的資料夾">
+<!ENTITY zotero.import.onlineImport "線上匯入">
 <!ENTITY zotero.import.importing "匯入中……">
 <!ENTITY zotero.import.database "資料庫">
 <!ENTITY zotero.import.lastModified "上次修改">

@@ -112,7 +112,7 @@
 <!ENTITY zotero.item.textTransform "Трансформувати текст">
 <!ENTITY zotero.item.textTransform.titlecase "Кожне Слово з Заголовної Букви">
 <!ENTITY zotero.item.textTransform.sentencecase "Як у реченні">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Поміняти місцями ім'я та прізвище">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.viewOnline "Дивитись онлайн">
 <!ENTITY zotero.item.copyAsURL "Копіювати у вигляді URL">

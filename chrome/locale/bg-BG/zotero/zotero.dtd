@@ -112,7 +112,7 @@
 <!ENTITY zotero.item.textTransform "Преобразуване на текст">
 <!ENTITY zotero.item.textTransform.titlecase "Главни букви">
 <!ENTITY zotero.item.textTransform.sentencecase "Първа главна буква">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Разменяне на първо/последно име">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.viewOnline "Разглеждане онлайн">
 <!ENTITY zotero.item.copyAsURL "Копирай като URL">

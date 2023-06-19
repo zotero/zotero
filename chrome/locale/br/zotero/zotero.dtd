@@ -112,7 +112,7 @@
 <!ENTITY zotero.item.textTransform "Treuzfurmiñ an destenn">
 <!ENTITY zotero.item.textTransform.titlecase "Al lizherennoù kentañ e pennlizherennoù">
 <!ENTITY zotero.item.textTransform.sentencecase "Lizherenn gentañ ar frazenn e pennlizherenn">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Eilpennañ Anv-bihan/Anv-Familh">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.viewOnline "Diskouez enlinenn">
 <!ENTITY zotero.item.copyAsURL "Eilañ evel URL">
@@ -182,7 +182,7 @@
 <!ENTITY zotero.import.whereToImportFrom "Deus pelec'h ho peus c'hoant emporzhiañ?">
 <!ENTITY zotero.import.source.file "Ur restr (BibTeX, RIS, Zotero RDF, hag all hag all...)">
 <!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
-<!ENTITY zotero.import.onlineImport "online import">
+<!ENTITY zotero.import.onlineImport "emporzhiañ enlinenn">
 <!ENTITY zotero.import.importing "Oc'h emporzhiañ...">
 <!ENTITY zotero.import.database "Diaz-roadennoù">
 <!ENTITY zotero.import.lastModified "Kemm diwezhañ">

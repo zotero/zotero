@@ -113,7 +113,7 @@
 <!ENTITY zotero.item.textTransform.titlecase "Каждое Слово с Заглавной">
 <!ENTITY zotero.item.textTransform.sentencecase "Как в предложении">
 <!ENTITY zotero.item.creatorTransform.nameSwap "Поменять местами имя и фамилию">
-<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
+<!ENTITY zotero.item.creatorTransform.fixCase "Исправить регистр">
 <!ENTITY zotero.item.viewOnline "Просмотреть онлайн">
 <!ENTITY zotero.item.copyAsURL "Скопировать как URL">
 <!ENTITY zotero.item.deletePermanently "Удалить навсегда…">
@@ -140,7 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "Назначить цвет…">
 <!ENTITY zotero.tagSelector.renameTag "Переименовать тег…">
 <!ENTITY zotero.tagSelector.deleteTag "Удалить тег…">
-<!ENTITY zotero.tagSelector.splitTag "Split…">
+<!ENTITY zotero.tagSelector.splitTag "Разделить…">
 
 <!ENTITY zotero.tagColorChooser.title "Выбрать цвет и расположение тега">
 <!ENTITY zotero.tagColorChooser.color "Цвет:">
@@ -181,8 +181,8 @@
 <!ENTITY zotero.import "Импорт">
 <!ENTITY zotero.import.whereToImportFrom "Откуда вы хотите импортировать?">
 <!ENTITY zotero.import.source.file "Файл (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
-<!ENTITY zotero.import.onlineImport "online import">
+<!ENTITY zotero.import.source.folder "Каталог файлов PDF и прочих">
+<!ENTITY zotero.import.onlineImport "Импорт из сетевого ресурса">
 <!ENTITY zotero.import.importing "Идет импортирование…">
 <!ENTITY zotero.import.database "База данных">
 <!ENTITY zotero.import.lastModified "Последний раз изменено">

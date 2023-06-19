@@ -112,7 +112,7 @@
 <!ENTITY zotero.item.textTransform "テキストの大文字・小文字を指定する">
 <!ENTITY zotero.item.textTransform.titlecase "各単語の先頭を大文字に">
 <!ENTITY zotero.item.textTransform.sentencecase "各文の先頭を大文字に">
-<!ENTITY zotero.item.creatorTransform.nameSwap "姓と名を入れ替える">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.viewOnline "オンラインで閲覧する">
 <!ENTITY zotero.item.copyAsURL "URLとしてコピーする">
@@ -182,7 +182,7 @@
 <!ENTITY zotero.import.whereToImportFrom "どこからインポートしますか？">
 <!ENTITY zotero.import.source.file "単一ファイル (BibTeX, RIS, Zotero RDF, など.)">
 <!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
-<!ENTITY zotero.import.onlineImport "online import">
+<!ENTITY zotero.import.onlineImport "オンラインのインポート">
 <!ENTITY zotero.import.importing "インポート中...">
 <!ENTITY zotero.import.database "データベース">
 <!ENTITY zotero.import.lastModified "最後の更新">

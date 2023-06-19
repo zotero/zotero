@@ -112,7 +112,7 @@
 <!ENTITY zotero.item.textTransform "Text transformieren">
 <!ENTITY zotero.item.textTransform.titlecase "englische Titel-Großschreibung">
 <!ENTITY zotero.item.textTransform.sentencecase "englische Satz-Großschreibung">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Vorname/Nachname tauschen">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.viewOnline "Online anzeigen">
 <!ENTITY zotero.item.copyAsURL "Als URL kopieren">
@@ -181,8 +181,8 @@
 <!ENTITY zotero.import "Importieren">
 <!ENTITY zotero.import.whereToImportFrom "Von wo aus möchten Sie importieren?">
 <!ENTITY zotero.import.source.file "Einer Datei (BibTeX, RIS, Zotero RDF, etc.)">
-<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
-<!ENTITY zotero.import.onlineImport "online import">
+<!ENTITY zotero.import.source.folder "Ein Ordner mit PDFs oder anderen Dateien">
+<!ENTITY zotero.import.onlineImport "Online-Import">
 <!ENTITY zotero.import.importing "Importieren...">
 <!ENTITY zotero.import.database "Datenbank">
 <!ENTITY zotero.import.lastModified "Zuletzt geändert">

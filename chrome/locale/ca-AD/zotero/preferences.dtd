@@ -1,6 +1,6 @@
 <!ENTITY zotero.preferences.title "Preferències del Zotero">
 
-<!ENTITY zotero.preferences.helpButton.label "Help">
+<!ENTITY zotero.preferences.helpButton.label "Ajuda">
 
 <!ENTITY zotero.preferences.default "Per defecte:">
 <!ENTITY zotero.preferences.items "elements">
@@ -10,7 +10,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "General">
 
-<!ENTITY zotero.preferences.interface "Interface">
+<!ENTITY zotero.preferences.interface "Interfície">
 <!ENTITY zotero.preferences.fileHandling "Gestió de fitxers">
 <!ENTITY zotero.preferences.automaticSnapshots "Crea automàticament una captura quan es creïn elements des de pàgines web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Adjunta automàticament documents PDF associats i altres fitxers quan es desin els elements">
@@ -19,7 +19,7 @@
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Reanomena els fitxers enllaçats">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Obre els PDF fent servir">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Predeterminat del sistema">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
+<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Obre els PDF en finestres noves en comptes de pestanyes">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscel·lània">
 <!ENTITY zotero.preferences.autoUpdate "Comprova automàticament si hi ha traductors o estils actualitzats">
@@ -30,10 +30,10 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Elimina automàticament els elements de la paperera que s'han suprimit fa més de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dies">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.pdfReader "Lector PDF">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Mostra les pestanyes com">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creador - Any - Títol">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Títol - Creador - Any">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "Nom de fitxer">
 
 <!ENTITY zotero.preferences.groups "Grups">
@@ -93,7 +93,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reinicia l'historial de sincronització dels fitxers">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compara tots els fitxers adjunts amb el servei d'emmagatzematge">
 <!ENTITY zotero.preferences.sync.reset "Reinicia">
-<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "Mostra les opcions de reinicialització…">
 <!ENTITY zotero.preferences.sync.reset.button "Reinicia…">
 
 

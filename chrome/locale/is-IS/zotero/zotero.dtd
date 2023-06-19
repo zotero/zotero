@@ -112,7 +112,7 @@
 <!ENTITY zotero.item.textTransform "Varpa texta">
 <!ENTITY zotero.item.textTransform.titlecase "Stafagerð titils">
 <!ENTITY zotero.item.textTransform.sentencecase "Stafagerð setninga">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Skipta á for-/eftirnafni">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.viewOnline "Skoða nettengt">
 <!ENTITY zotero.item.copyAsURL "Afrita sem URL-slóð">

@@ -112,8 +112,8 @@
 <!ENTITY zotero.item.textTransform "格式变换">
 <!ENTITY zotero.item.textTransform.titlecase "标题大写">
 <!ENTITY zotero.item.textTransform.sentencecase "句首大写">
-<!ENTITY zotero.item.creatorTransform.nameSwap "交换 首/尾 名称">
-<!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
+<!ENTITY zotero.item.creatorTransform.nameSwap "交換前/後">
+<!ENTITY zotero.item.creatorTransform.fixCase "修正大小寫">
 <!ENTITY zotero.item.viewOnline "在线查看">
 <!ENTITY zotero.item.copyAsURL "复制为网址">
 <!ENTITY zotero.item.deletePermanently "永久删除…">
@@ -140,7 +140,7 @@
 <!ENTITY zotero.tagSelector.assignColor "分配颜色…">
 <!ENTITY zotero.tagSelector.renameTag "重命名标签…">
 <!ENTITY zotero.tagSelector.deleteTag "删除标签…">
-<!ENTITY zotero.tagSelector.splitTag "Split…">
+<!ENTITY zotero.tagSelector.splitTag "分割">
 
 <!ENTITY zotero.tagColorChooser.title "选择标签颜色及位置">
 <!ENTITY zotero.tagColorChooser.color "颜色:">
@@ -181,8 +181,8 @@
 <!ENTITY zotero.import "导入">
 <!ENTITY zotero.import.whereToImportFrom "您想从哪里导入？">
 <!ENTITY zotero.import.source.file "文件（BibTeX，RIS，Zotero RDF等）">
-<!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
-<!ENTITY zotero.import.onlineImport "online import">
+<!ENTITY zotero.import.source.folder "一個裝了PDF或是其他檔案的資料夾">
+<!ENTITY zotero.import.onlineImport "在线导入">
 <!ENTITY zotero.import.importing "导入…">
 <!ENTITY zotero.import.database "数据库">
 <!ENTITY zotero.import.lastModified "最后修改">

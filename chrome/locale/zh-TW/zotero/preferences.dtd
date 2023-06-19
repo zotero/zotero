@@ -1,6 +1,6 @@
 <!ENTITY zotero.preferences.title "Zotero 偏好設定">
 
-<!ENTITY zotero.preferences.helpButton.label "Help">
+<!ENTITY zotero.preferences.helpButton.label "說明">
 
 <!ENTITY zotero.preferences.default "預設：">
 <!ENTITY zotero.preferences.items "項目">
@@ -10,7 +10,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "一般">
 
-<!ENTITY zotero.preferences.interface "Interface">
+<!ENTITY zotero.preferences.interface "介面">
 <!ENTITY zotero.preferences.fileHandling "檔案處理">
 <!ENTITY zotero.preferences.automaticSnapshots "從網頁建立項目時自動建立快照">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "儲存項目時自動附加相關的 PDF 檔與其他檔案">
@@ -19,7 +19,7 @@
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "重新命名連結的檔案">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "開啟 PDF檔 使用">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "系統預設">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
+<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "在新的視窗開啟PDF而非新的分頁">
 
 <!ENTITY zotero.preferences.miscellaneous "雜項">
 <!ENTITY zotero.preferences.autoUpdate "自動檢查更新轉譯器與樣式">
@@ -93,7 +93,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "重設檔案同步歷史">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "將所有附件檔案與儲存空間中的進行比較">
 <!ENTITY zotero.preferences.sync.reset "重設">
-<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "顯示重置選項">
 <!ENTITY zotero.preferences.sync.reset.button "重設……">
 
 

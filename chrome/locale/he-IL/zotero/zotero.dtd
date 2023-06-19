@@ -112,7 +112,7 @@
 <!ENTITY zotero.item.textTransform "התמרת טקסט">
 <!ENTITY zotero.item.textTransform.titlecase "מצב רישיות כותרת">
 <!ENTITY zotero.item.textTransform.sentencecase "מצב רישיות משפט">
-<!ENTITY zotero.item.creatorTransform.nameSwap "החלפת שמות ראשון/משפחה">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
 <!ENTITY zotero.item.creatorTransform.fixCase "Fix Case">
 <!ENTITY zotero.item.viewOnline "הצגה באינטרנט">
 <!ENTITY zotero.item.copyAsURL "העתקה ככתובת">
@@ -182,7 +182,7 @@
 <!ENTITY zotero.import.whereToImportFrom "מאיפה לייבא?">
 <!ENTITY zotero.import.source.file "קובץ (BibTeX,‏ RIS,‏ Zotero RDF וכו׳)">
 <!ENTITY zotero.import.source.folder "A folder of PDFs or other files">
-<!ENTITY zotero.import.onlineImport "online import">
+<!ENTITY zotero.import.onlineImport "ייבוא מקוון">
 <!ENTITY zotero.import.importing "מתבצע ייבוא…">
 <!ENTITY zotero.import.database "מסד נתונים">
 <!ENTITY zotero.import.lastModified "שינוי אחרון">
