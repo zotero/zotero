@@ -329,6 +329,7 @@ describe("Zotero.Attachments", function() {
 		Components.utils.import("resource://zotero-unit/httpd.js");
 		var testServerPath, httpd, prefix;
 		var testServerPort = 16213;
+		var maxTestServerPort = testServerPort + 10;
 
 		before(async function () {
 			this.timeout(20000);
@@ -336,9 +337,16 @@ describe("Zotero.Attachments", function() {
 		});
 
 		beforeEach(function () {
-			prefix = Zotero.Utilities.randomString();
-			// Alternate ports to prevent exceptions not catchable in JS
+			// Cycle through ports to prevent NS_ERROR_SOCKET_ADDRESS_IN_USE errors from server
+			// not always fully stopping in time
+			if (testServerPort < maxTestServerPort) {
+				testServerPort++;
+			}
+			else {
+				testServerPort--;
+			}
 			// Use random prefix because httpd does not actually stop between tests
+			prefix = Zotero.Utilities.randomString();
 			testServerPath = 'http://127.0.0.1:' + testServerPort + '/' + prefix;
 			httpd = new HttpServer();
 			httpd.start(testServerPort);
