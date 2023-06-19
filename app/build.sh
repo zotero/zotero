@@ -587,37 +587,11 @@ if [ $BUILD_MAC == 1 ]; then
 			
 			if [ "$UPDATE_CHANNEL" != "test" ]; then
 				# Upload disk image to Apple
-				output=$("$CALLDIR/scripts/notarize_mac_app" "$dmg")
+				"$CALLDIR/scripts/notarize_mac_app" "$dmg"
 				echo
-				echo "$output"
-				echo
-				id=$(echo "$output" | plutil -extract notarization-upload.RequestUUID xml1 -o - - | sed -n "s/.*<string>\(.*\)<\/string>.*/\1/p")
-				echo "Notarization request identifier: $id"
-				echo
-				
-				sleep 60
-				
-				# Check back every 30 seconds, for up to an hour
-				i="0"
-				while [ $i -lt 120 ]
-				do
-					status=$("$CALLDIR/scripts/notarization_status" $id)
-					if [[ $status != "in progress" ]]; then
-						break
-					fi
-					echo "Notarization in progress"
-					sleep 30
-					i=$[$i+1]
-				done
 				
 				# Staple notarization info to disk image
-				if [ $status == "success" ]; then
-					"$CALLDIR/scripts/notarization_stapler" "$dmg"
-				else
-					echo "Notarization failed!"
-					"$CALLDIR/scripts/notarization_status" $id
-					exit 1
-				fi
+				"$CALLDIR/scripts/notarization_stapler" "$dmg"
 				
 				echo "Notarization complete"
 			else

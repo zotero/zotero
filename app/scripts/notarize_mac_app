@@ -16,4 +16,4 @@ if [[ -z "$file" ]]; then
 fi
 
 echo "Uploading ${file##*/} to Apple for notarization" >&2
-xcrun altool --notarize-app --primary-bundle-id "$NOTARIZATION_BUNDLE_ID" --username "$NOTARIZATION_USER" --password "$NOTARIZATION_PASSWORD" --file $file --output-format xml
+xcrun notarytool submit $file --apple-id "$NOTARIZATION_USER" --team-id "$NOTARIZATION_TEAM_ID" --password="$NOTARIZATION_PASSWORD" --wait

@@ -15,4 +15,5 @@ if [[ -z "$id" ]]; then
 	usage
 fi
 
-xcrun altool --notarization-info "$id" -u "$NOTARIZATION_USER" -p "$NOTARIZATION_PASSWORD" --output-format xml
+xcrun notarytool log "$id" --apple-id "$NOTARIZATION_USER" --team-id "$NOTARIZATION_TEAM_ID" --password "$NOTARIZATION_PASSWORD" notary_log.json
+cat notary_log.json
