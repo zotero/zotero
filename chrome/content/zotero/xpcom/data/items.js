@@ -532,6 +532,10 @@ Zotero.Items = function() {
 							case Zotero.Annotations.ANNOTATION_TYPE_NOTE:
 								type = 'note';
 								break;
+
+							case Zotero.Annotations.ANNOTATION_TYPE_TEXT:
+								type = 'text';
+								break;
 							
 							case Zotero.Annotations.ANNOTATION_TYPE_IMAGE:
 								type = 'image';
