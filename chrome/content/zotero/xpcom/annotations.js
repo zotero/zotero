@@ -33,6 +33,7 @@ Zotero.Annotations = new function () {
 	Zotero.defineProperty(this, 'ANNOTATION_TYPE_IMAGE', { value: 3 });
 	Zotero.defineProperty(this, 'ANNOTATION_TYPE_INK', { value: 4 });
 	Zotero.defineProperty(this, 'ANNOTATION_TYPE_UNDERLINE', { value: 5 });
+	Zotero.defineProperty(this, 'ANNOTATION_TYPE_TEXT', { value: 6 });
 
 	Zotero.defineProperty(this, 'DEFAULT_COLOR', { value: '#ffd400' });
 	
