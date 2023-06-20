@@ -524,6 +524,10 @@ Zotero.Items = function() {
 							case Zotero.Annotations.ANNOTATION_TYPE_HIGHLIGHT:
 								type = 'highlight';
 								break;
+
+							case Zotero.Annotations.ANNOTATION_TYPE_UNDERLINE:
+								type = 'underline';
+								break;
 							
 							case Zotero.Annotations.ANNOTATION_TYPE_NOTE:
 								type = 'note';
