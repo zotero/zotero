@@ -3815,7 +3815,7 @@ for (let name of ['type', 'authorName', 'text', 'comment', 'color', 'pageLabel',
 					if (currentType && currentType != value) {
 						throw new Error("Cannot change annotation type");
 					}
-					if (!['highlight', 'note', 'image', 'ink'].includes(value)) {
+					if (!['highlight', 'underline', 'note', 'image', 'ink'].includes(value)) {
 						let e = new Error(`Unknown annotation type '${value}'`);
 						e.name = "ZoteroInvalidDataError";
 						throw e;
@@ -3823,8 +3823,8 @@ for (let name of ['type', 'authorName', 'text', 'comment', 'color', 'pageLabel',
 					break;
 				}
 				case 'text':
-					if (this._getLatestField('annotationType') != 'highlight') {
-						throw new Error("'annotationText' can only be set for highlight annotations");
+					if (!['highlight', 'underline'].includes(this._getLatestField('annotationType'))) {
+						throw new Error("'annotationText' can only be set for highlight and underline annotations");
 					}
 					break;
 				
@@ -5047,7 +5047,6 @@ Zotero.Item.prototype.fromJSON = function (json, options = {}) {
 		// Annotation fields
 		//
 		case 'annotationType':
-		case 'annotationType':
 		case 'annotationAuthorName':
 		case 'annotationText':
 		case 'annotationComment':
@@ -5326,7 +5325,7 @@ Zotero.Item.prototype.toJSON = function (options = {}) {
 			let type = this.annotationType;
 			obj.annotationType = type;
 			obj.annotationAuthorName = this.annotationAuthorName || '';
-			if (type == 'highlight') {
+			if (['highlight', 'underline'].includes(type)) {
 				obj.annotationText = this.annotationText || '';
 			}
 			obj.annotationComment = this.annotationComment || '';
