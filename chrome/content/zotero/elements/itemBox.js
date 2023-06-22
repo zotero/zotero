@@ -787,8 +787,7 @@
 			menulist.id = "item-type-menu";
 			menulist.className = "zotero-clicky";
 			menulist.addEventListener('command', (event) => {
-				var target = event.target;
-				this.changeTypeTo(target.value, target);
+				this.changeTypeTo(event.target.value, menulist);
 			});
 			menulist.addEventListener('focus', () => {
 				this.ensureElementIsVisible(menulist);
