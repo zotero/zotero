@@ -351,7 +351,9 @@ Zotero.Plugins = new function () {
 			setDefaultPrefs(addon);
 			registerLocales(addon);
 			await _callMethod(addon, 'install');
-			await _callMethod(addon, 'startup', REASONS.ADDON_INSTALL);
+			if (addon.isActive) {
+				await _callMethod(addon, 'startup', REASONS.ADDON_INSTALL);
+			}
 		},
 		
 		async onEnabling(addon) {
