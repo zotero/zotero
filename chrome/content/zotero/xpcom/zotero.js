@@ -1333,7 +1333,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		if (Zotero.isMac) {
 			try {
 				return "macOS "
-					+ (await Zotero.Utilities.Internal.subprocess('sw_vers', ['--productVersion'])).trim();
+					+ (await Zotero.Utilities.Internal.subprocess('sw_vers', ['-productVersion'])).trim();
 			}
 			catch (e) {
 				Zotero.logError(e);
