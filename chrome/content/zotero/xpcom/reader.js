@@ -27,7 +27,7 @@ import FilePicker from 'zotero/modules/filePicker';
 
 class ReaderInstance {
 	constructor(options) {
-		this.pdfStateFileName = '.zotero-pdf-state';
+		this.stateFileName = '.zotero-reader-state';
 		this.annotationItemIDs = [];
 		this._item = options.item;
 		this._instanceID = Zotero.Utilities.randomString();
@@ -652,12 +652,18 @@ class ReaderInstance {
 	async _setState(state) {
 		let item = Zotero.Items.get(this._item.id);
 		if (item) {
-			item.setAttachmentLastPageIndex(state.pageIndex);
+			if (this._type === 'pdf') {
+				item.setAttachmentLastPageIndex(state.pageIndex);
+			}
+			// epub, snapshot
+			else {
+				// setAttachmentSomeProperty(state.someProperty);
+			}
 			let file = Zotero.Attachments.getStorageDirectory(item);
 			if (!await OS.File.exists(file.path)) {
 				await Zotero.Attachments.createDirectoryForItem(item);
 			}
-			file.append(this.pdfStateFileName);
+			file.append(this.stateFileName);
 			// Using `writeAtomic` instead of `putContentsAsync` to avoid
 			// using temp file that causes conflicts on simultaneous writes (on slow systems)
 			await OS.File.writeAtomic(file.path, JSON.stringify(state));
@@ -665,31 +671,55 @@ class ReaderInstance {
 	}
 
 	async _getState() {
-		let item = Zotero.Items.get(this._item.id);
-		let file = Zotero.Attachments.getStorageDirectory(item);
-		file.append(this.pdfStateFileName);
-		file = file.path;
 		let state;
+		let item = Zotero.Items.get(this._item.id);
+		let directory = Zotero.Attachments.getStorageDirectory(item);
+		let file = directory.clone();
+		file.append(this.stateFileName);
 		try {
-			if (await OS.File.exists(file)) {
-				state = JSON.parse(await Zotero.File.getContentsAsync(file));
+			if (await OS.File.exists(file.path)) {
+				state = JSON.parse(await Zotero.File.getContentsAsync(file.path));
 			}
 		}
 		catch (e) {
 			Zotero.logError(e);
 		}
-
-		let pageIndex = item.getAttachmentLastPageIndex();
-		if (state) {
-			if (Number.isInteger(pageIndex) && state.pageIndex !== pageIndex) {
-				state.pageIndex = pageIndex;
-				delete state.top;
-				delete state.left;
+		// Try to fall back to the older .zotero-pdf-state file
+		if (!state && this._type === 'pdf') {
+			let file = directory.clone();
+			file.append('.zotero-pdf-state');
+			try {
+				if (await OS.File.exists(file.path)) {
+					state = JSON.parse(await Zotero.File.getContentsAsync(file.path));
+				}
 			}
-			return state;
+			catch (e) {
+				Zotero.logError(e);
+			}
 		}
-		else if (Number.isInteger(pageIndex)) {
-			return { pageIndex };
+
+		if (this._type === 'pdf') {
+			let pageIndex = item.getAttachmentLastPageIndex();
+			if (state) {
+				if (Number.isInteger(pageIndex) && state.pageIndex !== pageIndex) {
+					state.pageIndex = pageIndex;
+					delete state.top;
+					delete state.left;
+				}
+				return state;
+			}
+			else if (Number.isInteger(pageIndex)) {
+				return { pageIndex };
+			}
+		}
+		// epub, snapshot
+		else {
+			// let someProperty = item.getAttachmentSomeProperty();
+			// if (state) {
+			// 	state.someProperty = someProperty;
+			// 	return state;
+			// }
+			// return { someProperty };
 		}
 		return null;
 	}
