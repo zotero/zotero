@@ -968,6 +968,7 @@ class ReaderTab extends ReaderInstance {
 	}
 
 	_addToNote(annotations) {
+		annotations = annotations.map(x => ({ ...x, attachmentItemID: this._item.id }));
 		let noteEditor = this._window.ZoteroContextPane && this._window.ZoteroContextPane.getActiveEditor();
 		if (!noteEditor) {
 			return;
