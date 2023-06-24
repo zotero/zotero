@@ -111,7 +111,14 @@ var Scaffold = new function () {
 
 		document.getElementById('tabpanels').addEventListener('select', event => Scaffold.handleTabSelect(event));
 		
-		this.generateTranslatorID();
+		let lastTranslatorID = Zotero.Prefs.get('scaffold.lastTranslatorID');
+		if (lastTranslatorID) {
+			document.getElementById("textbox-translatorID").value = lastTranslatorID;
+			document.getElementById("textbox-label").value = 'Loading…';
+		}
+		else {
+			this.generateTranslatorID();
+		}
 		
 		// Add List fields help menu entries for all other item types
 		var types = Zotero.ItemTypes.getAll().map(t => t.name).sort();
@@ -182,6 +189,15 @@ var Scaffold = new function () {
 		
 		_translatorsLoadedPromise = Scaffold_Translators.load();
 		_translatorProvider = Scaffold_Translators.getProvider();
+		
+		if (lastTranslatorID) {
+			this.load(lastTranslatorID).then((success) => {
+				if (!success) {
+					Zotero.Prefs.clear('scaffold.lastTranslatorID');
+					this.newTranslator(true);
+				}
+			});
+		}
 	};
 	
 	this.promptForTranslatorsDirectory = async function () {
@@ -586,9 +602,11 @@ var Scaffold = new function () {
 		this.setFontSize(currentSize - 2);
 	};
 
-	this.newTranslator = async function () {
-		_logOutput('Saving translator and resetting...');
-		await this.save();
+	this.newTranslator = async function (skipSave) {
+		if (!skipSave) {
+			_logOutput('Saving translator and resetting...');
+			await this.save();
+		}
 
 		this.generateTranslatorID();
 		document.getElementById('textbox-label').value = 'Untitled';
@@ -621,7 +639,7 @@ var Scaffold = new function () {
 	this.load = async function (translatorID) {
 		await _translatorsLoadedPromise;
 
-		var translator = false;
+		var translator;
 		if (translatorID === undefined) {
 			var io = {};
 			io.translatorProvider = _translatorProvider;
@@ -635,7 +653,7 @@ var Scaffold = new function () {
 		}
 
 		// No translator was selected in the dialog.
-		if (!translator) return;
+		if (!translator) return false;
 
 		for (var id in _propertyMap) {
 			document.getElementById(id).value = translator[_propertyMap[id]] || "";
@@ -700,6 +718,10 @@ var Scaffold = new function () {
 
 		this.updateModelMarkers(translator.path);
 		_lastModifiedTime = new Date().getTime();
+		
+		Zotero.Prefs.set('scaffold.lastTranslatorID', translator.translatorID);
+		
+		return true;
 	};
 
 	function _getMetadataObject() {
