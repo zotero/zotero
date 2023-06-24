@@ -55,7 +55,7 @@ class TranslationChild extends JSWindowActorChild {
 			}
 			case 'detect': {
 				let { translator, id } = data;
-				let Zotero = this._sandbox.Zotero.wrappedJSObject;
+				let { Zotero } = this._sandbox;
 				try {
 					let translate = new Zotero.Translate.Web();
 					translate.setTranslatorProvider(this._makeTranslatorProvider(id));
@@ -73,7 +73,7 @@ class TranslationChild extends JSWindowActorChild {
 			}
 			case 'translate': {
 				let { translator, id } = data;
-				let Zotero = this._sandbox.Zotero.wrappedJSObject;
+				let { Zotero } = this._sandbox;
 				try {
 					let translate = new Zotero.Translate.Web();
 					translate.setTranslatorProvider(this._makeTranslatorProvider(id));
@@ -91,7 +91,7 @@ class TranslationChild extends JSWindowActorChild {
 			}
 			case 'runTest': {
 				let { translator, test, id } = data;
-				let Zotero_TranslatorTester = this._sandbox.Zotero_TranslatorTester.wrappedJSObject;
+				let { Zotero_TranslatorTester } = this._sandbox;
 				try {
 					let tester = new Zotero_TranslatorTester(
 						Cu.cloneInto(translator, this._sandbox),
@@ -117,7 +117,7 @@ class TranslationChild extends JSWindowActorChild {
 			}
 			case 'newTest': {
 				let { translator, id } = data;
-				let Zotero_TranslatorTester = this._sandbox.Zotero_TranslatorTester.wrappedJSObject;
+				let { Zotero_TranslatorTester } = this._sandbox;
 				try {
 					let tester = new Zotero_TranslatorTester(
 						Cu.cloneInto(translator, this._sandbox),
@@ -151,7 +151,7 @@ class TranslationChild extends JSWindowActorChild {
 	}
 	
 	_makeTranslatorProvider(id) {
-		let Zotero = this._sandbox.Zotero.wrappedJSObject;
+		let { Zotero } = this._sandbox;
 		let makeProxy = method => (
 			(...args) => this._sandbox.Promise.resolve(
 				this.sendQuery('Translators:call', { id, method, args })
@@ -188,7 +188,7 @@ class TranslationChild extends JSWindowActorChild {
 	 * @return {Promise<void>}
 	 */
 	_debug(id, arg) {
-		let Zotero = this._sandbox.Zotero.wrappedJSObject;
+		let { Zotero } = this._sandbox;
 		if (typeof arg !== 'string') {
 			arg = Zotero.Utilities.varDump(arg);
 		}
@@ -260,8 +260,14 @@ class TranslationChild extends JSWindowActorChild {
 	 * @return {Sandbox}
 	 */
 	_loadTranslationFramework(schemaJSON, dateFormatsJSON) {
-		let sandbox = new Cu.Sandbox(this.contentWindow, {
-			sandboxPrototype: this.contentWindow
+		// Modeled after:
+		// https://searchfox.org/mozilla-esr102/source/toolkit/components/extensions/ExtensionContent.jsm#809-845
+		let systemPrincipal = Services.scriptSecurityManager.getSystemPrincipal();
+		let sandbox = new Cu.Sandbox(systemPrincipal, {
+			sandboxPrototype: this.contentWindow,
+			sameZoneAs: this.contentWindow,
+			wantXrays: true,
+			wantGlobalProperties: ["XMLHttpRequest", "fetch", "WebSocket"],
 		});
 		
 		let scriptURIs = [
@@ -272,7 +278,7 @@ class TranslationChild extends JSWindowActorChild {
 			Services.scriptloader.loadSubScript(scriptURI, sandbox);
 		}
 
-		let Zotero = sandbox.Zotero.wrappedJSObject;
+		let { Zotero } = sandbox;
 
 		Zotero.Debug.init(1);
 		Zotero.Debug.setStore(true);
