@@ -658,9 +658,8 @@ class ReaderInstance {
 			else if (this._type === 'epub') {
 				item.setAttachmentLastPageIndex(state.cfi);
 			}
-			// snapshot
-			else {
-				// setAttachmentSomeProperty(state.someProperty);
+			else if (this._type === 'snapshot') {
+				item.setAttachmentLastPageIndex(state.scrollYPercent);
 			}
 			let file = Zotero.Attachments.getStorageDirectory(item);
 			if (!await OS.File.exists(file.path)) {
@@ -725,14 +724,15 @@ class ReaderInstance {
 				return { cfi };
 			}
 		}
-		// snapshot
-		else {
-			// let someProperty = item.getAttachmentSomeProperty();
-			// if (state) {
-			// 	state.someProperty = someProperty;
-			// 	return state;
-			// }
-			// return { someProperty };
+		else if (this._type === 'snapshot') {
+			let scrollYPercent = item.getAttachmentLastPageIndex();
+			if (state) {
+				state.scrollYPercent = scrollYPercent;
+				return state;
+			}
+			else {
+				return { scrollYPercent };
+			}
 		}
 		return null;
 	}
