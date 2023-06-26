@@ -2241,15 +2241,6 @@ Zotero.Attachments = new function () {
 	 * (Optional) |formatString| specifies the format string -- otherwise
 	 * the 'attachmentRenameFormatString' pref is used
 	 *
-	 * Valid substitution markers:
-	 *
-	 * %c -- firstCreator
-	 * %y -- year (extracted from Date field)
-	 * %t -- title
-	 *
-	 * Fields can be truncated to a certain length by appending an integer
-	 * within curly brackets -- e.g. %t{50} truncates the title to 50 characters
-	 *
 	 * @param {Zotero.Item} item
 	 * @param {String} formatString
 	 */
@@ -2257,20 +2248,35 @@ Zotero.Attachments = new function () {
 		if (!(item instanceof Zotero.Item)) {
 			throw new Error("'item' must be a Zotero.Item");
 		}
-		
+
 		if (!formatString) {
 			formatString = Zotero.Prefs.get('attachmentRenameFormatString');
 		}
 
-		const getSlicedCreatorsOfType = (creatorTypeIDs, slice) => {
-			if (!Array.isArray(creatorTypeIDs)) {
-				creatorTypeIDs = [creatorTypeIDs];
+		const getSlicedCreatorsOfType = (creatorType, slice) => {
+			let creatorTypeIDs;
+			switch (creatorType) {
+				case 'author':
+				case 'authors':
+					creatorTypeIDs = [Zotero.CreatorTypes.getPrimaryIDForType(item.itemTypeID)];
+					break;
+				case 'editor':
+				case 'editors':
+					creatorTypeIDs = [Zotero.CreatorTypes.getID('editor'), Zotero.CreatorTypes.getID('seriesEditor')];
+					break;
+				default:
+				case 'creator':
+				case 'creators':
+					creatorTypeIDs = null;
+					break;
 			}
+			
 			if (slice === 0) {
 				return [];
 			}
-			const matchingCreators = item.getCreators(true)
-				.filter(c => creatorTypeIDs.includes(c.creatorTypeID));
+			const matchingCreators = creatorTypeIDs === null
+				? item.getCreators()
+				: item.getCreators().filter(c => creatorTypeIDs.includes(c.creatorTypeID));
 			const slicedCreators = slice > 0
 				? matchingCreators.slice(0, slice)
 				: matchingCreators.slice(slice);
@@ -2281,91 +2287,112 @@ Zotero.Attachments = new function () {
 			return slicedCreators;
 		};
 
-		const primaryCreator = Zotero.CreatorTypes.getPrimaryIDForType(item.itemTypeID);
-		const editorCreators = [Zotero.CreatorTypes.getID('editor'), Zotero.CreatorTypes.getID('seriesEditor')];
 
-		const markers = {
-			a: slice => getSlicedCreatorsOfType(
-				primaryCreator, slice
-			).map(a => a.lastName || a.name).join(' '),
-			A: slice => getSlicedCreatorsOfType(
-				primaryCreator, slice
-			).map(a => (a.lastName || a.name).slice(0, 1)).join(' '),
-			e: 'issue',
-			f: 'pages',
-			d: slice => getSlicedCreatorsOfType(
-				editorCreators, slice
-			).map(a => a.lastName || a.name).join(' '),
-			D: slice => getSlicedCreatorsOfType(
-				editorCreators, slice
-			).map(a => (a.lastName || a.name).slice(0, 1)).join(' '),
-			F: slice => getSlicedCreatorsOfType(
-				primaryCreator, slice
-			).map(a => a.name && a.name || a.lastName + (a.firstName).slice(0, 1)).join(' '),
-			c: 'firstCreator',
-			i: 'assignee',
-			I: slice => getSlicedCreatorsOfType(
-				primaryCreator, slice
-			).map(a => a.name && (a.name).slice(0, 1) || (a.firstName).slice(0, 1) + (a.lastName).slice(0, 1)).join(' '),
-			j: 'publicationTitle',
-			l: slice => getSlicedCreatorsOfType(
-				editorCreators, slice
-			).map(a => a.name && (a.name).slice(0, 1) || (a.firstName).slice(0, 1) + (a.lastName).slice(0, 1)).join(' '),
-			L: slice => getSlicedCreatorsOfType(
-				editorCreators, slice
-			).map(a => a.name && a.name || a.lastName + (a.firstName).slice(0, 1)).join(' '),
-			n: 'number',
-			p: 'publisher',
-			s: 'journalAbbreviation',
-			t: 'title',
-			v: 'volume',
-			T: () => Zotero.ItemTypes.getLocalizedString(item.itemType),
-			y: () => {
-				let value = item.getField('date', true, true);
-				if (value) {
-					value = Zotero.Date.multipartToSQL(value).substr(0, 4);
-					if (value == '0000') {
-						value = '';
-					}
-				}
-				return value;
-			},
+		const common = (value, { truncate = false, prefix = '', suffix = '', case: textCase = '' } = {}) => {
+			if (truncate) {
+				value = value.substr(0, truncate);
+			}
+			if (prefix) {
+				value = prefix + value;
+			}
+			if (suffix) {
+				value += suffix;
+			}
+			switch (textCase) {
+				case 'upper':
+					value = value.toUpperCase();
+					break;
+				case 'lower':
+					value = value.toLowerCase();
+					break;
+				case 'sentence':
+					value = value.slice(0, 1).toUpperCase() + value.slice(1);
+					break;
+				case 'title':
+					value = value.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+					break;
+				case 'dash':
+					value = value.toLowerCase().replace(/\s+/g, '-');
+					break;
+				case 'snake':
+					value = value.toLowerCase().replace(/\s+/g, '_');
+					break;
+				case 'camel':
+					value = value.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase());
+					break;
+			}
+			return value;
 		};
 
-		const markersWithSlices = ['a', 'A', 'd', 'D', 'F', 'I', 'l', 'L'];
-		const markersRegexPart = markersWithSlices
-			.map(m => `${m}(?:-?[1-9])?`)
-			.concat(Object.keys(markers).filter(m => !markersWithSlices.includes(m)))
-			.join('|');
+		const initializeFn = (name, shouldInitialize, initializewith) => (shouldInitialize ? name.slice(0, 1).toUpperCase() + initializewith : name);
 
-		// Regexp contains 4 capture groups all wrapped in {}:
-		// 		* Prefix before the wildcard, can be empty string
-		// 		* Any recognized marker. % sign marks a wildcard and is required for a match but is
-		// 		  not part of the capture group. Recognized markers are specified in a `markers`
-		// 		  lookup. This capture group is a "combined" marker, which means it can include
-		// 		  optional a single digit number, possible prefixed with a sign e.g. a1, A-3
-		// 		* Optionally a maximum number of characters to truncate the value to
-		// 		* Suffix after the wildcard, can be empty string
-		const re = new RegExp(`{([^%{}]*)%(${markersRegexPart})({[0-9]+})?([^%{}]*)}`, 'g');
-
-		formatString = formatString.replace(re, (match, pre, combinedMarker, maxChars, post) => {
-			maxChars = maxChars ? maxChars.replace(/[^0-9]+/g, '') : false;
-			const marker = combinedMarker.slice(0, 1);
-
-			let slice = null;
-			if (markersWithSlices.includes(marker)) {
-				slice = combinedMarker.length > 1 ? parseInt(combinedMarker.slice(1)) : 1;
+		const transformName = (creator, { name, namepartseparator, initialize, initializewith } = {}) => {
+			if (creator.name) {
+				return initializeFn(creator.name, ['full', 'name'].includes(initialize), initializewith);
 			}
-			const value = markers[marker] instanceof Function
-				? markers[marker](slice)
-				: '' + item.getField(markers[marker], false, true);
-			
-			if (!value) {
-				return '';
-			}
-			return pre + (maxChars ? value.substr(0, maxChars) : value) + post;
-		});
 
+			const firstLast = ['full', 'given-family', 'first-last'];
+			const lastFirst = ['full-reversed', 'family-given', 'last-first'];
+			const first = ['given', 'first'];
+			const last = ['family', 'last'];
+
+			if (firstLast.includes(name)) {
+				return initializeFn(creator.firstName, ['full', ...first].includes(initialize), initializewith) + namepartseparator + initializeFn(creator.lastName, ['full', ...last].includes(initialize), initializewith);
+			}
+			else if (lastFirst.includes(name)) {
+				return initializeFn(creator.lastName, ['full', ...last].includes(initialize), initializewith) + namepartseparator + initializeFn(creator.firstName, ['full', ...first].includes(initialize), initializewith);
+			}
+			else if (first.includes(name)) {
+				return initializeFn(creator.firstName, ['full', ...first].includes(initialize), initializewith);
+			}
+
+			return initializeFn(creator.lastName, ['full', ...last].includes(initialize), initializewith);
+		};
+
+		const commonCreators = (value, { max = Infinity, order = 'asc', name = 'family', namepartseparator = ' ', join = ', ', initialize = '', initializewith = '.' } = {}) => {
+			return getSlicedCreatorsOfType(value, order === "desc" ? -max : max)
+				.map(c => transformName(c, { name, namepartseparator, initialize, initializewith }))
+				.join(join);
+		};
+
+		const fields = Zotero.ItemFields.getAll()
+			.map(f => f.name)
+			.reduce((obj, name) => {
+				obj[name] = (args) => {
+					return common(item.getField(name, false, true), args);
+				};
+				return obj;
+			}, {});
+
+		const year = (args) => {
+			let value = item.getField('date', true, true);
+			if (value) {
+				value = Zotero.Date.multipartToSQL(value).substr(0, 4);
+				if (value == '0000') {
+					value = '';
+				}
+			}
+			return common(value, args);
+		};
+
+		const itemType = args => common(Zotero.ItemTypes.getLocalizedString(item.itemType), args);
+
+		const creatorFields = ['authors', 'editors', 'creators'].reduce((obj, name) => {
+			obj[name] = (args) => {
+				return common(commonCreators(name, args), args);
+			};
+			return obj;
+		}, {});
+
+		const firstCreator = args => common(
+			// 74492e40 adds \u2068 and \u2069 around names in the `firstCreator` field, which we don't want in the filename
+			// We might actually want to move this replacement to getValidFileName
+			item.getField('firstCreator', false, true).replaceAll('\u2068', '').replaceAll('\u2069', ''), args
+		);
+
+		const vars = { ...fields, ...creatorFields, firstCreator, itemType, year };
+
+		formatString = Zotero.Utilities.Internal.generateHTMLFromTemplate(formatString, vars);
 		formatString = Zotero.Utilities.cleanTags(formatString);
 		formatString = Zotero.File.getValidFileName(formatString);
 		return formatString;
