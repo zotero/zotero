@@ -47,6 +47,7 @@ Zotero.MIME = new function(){
 		["FLV", "video/x-flv", 0],
 		["\u0000\u0000\u0001\u0000", "image/vnd.microsoft.icon", 0],
 		["SQLite format 3\u0000", "application/x-sqlite3", 0],
+		["mimetypeapplication/epub+zip", "application/epub+zip", 30],
 	];
 	
 	var _extensions = {
@@ -81,7 +82,8 @@ Zotero.MIME = new function(){
 		// OpenOffice/LibreOffice
 		'odt': 'application/vnd.oasis.opendocument.text',
 		
-		'pdf': 'application/pdf'
+		'pdf': 'application/pdf',
+		'epub': 'application/epub+zip'
 	};
 	
 	var _textTypes = {
@@ -205,6 +207,9 @@ Zotero.MIME = new function(){
 			case 'audio/x-aiff':
 			case 'sound/aiff':
 				return 'aiff';
+
+			case 'application/epub+zip':
+				return 'epub';
 		}
 		
 		try {

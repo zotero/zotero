@@ -18,5 +18,9 @@ describe("Zotero.MIME", function () {
 		it("should detect SQLite database", async function () {
 			await test('test.sqlite', 'application/x-sqlite3');
 		});
+
+		it("should detect EPUB ebook", async function () {
+			await test('stub.epub', 'application/epub+zip');
+		});
 	});
 });
