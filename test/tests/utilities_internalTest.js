@@ -560,6 +560,15 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.equal(html, '11 23 1,2yes');
 		});
 
+		it("should support empty string as attribute value and correctly render returned false-ish values (e.g. 0)", function () {
+			const vars = {
+				length: ({ string }) => string.length,
+			};
+			const template = `"" has a length of {{ length string="" }} and "hello" has a length of {{ length string="hello" }}`;
+			const out = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
+			assert.equal(out, '"" has a length of 0 and "hello" has a length of 5');
+		});
+
 		it("should support nested 'if' statements", function () {
 			var vars = {
 				v1: '1',

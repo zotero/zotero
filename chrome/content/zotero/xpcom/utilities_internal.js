@@ -2180,14 +2180,14 @@ Zotero.Utilities.Internal = {
 					let attrsRegexp = new RegExp(/((\w*) *=+ *(['"])((\\\3|[^\3])*?)\3)|((\w*) *=+ *(\w*))/g);
 					let attrs = {};
 					while ((match = attrsRegexp.exec(part))) {
-						if (match[4]) {
+						if (match[1]) { // if first alternative (i.e. argument with value wrapped in " or ') matched, even if value is empty
 							attrs[match[2]] = match[4];
 						}
 						else {
 							attrs[match[7]] = match[8];
 						}
 					}
-					html += (typeof vars[operator] === 'function' ? vars[operator](attrs) : vars[operator]) || '';
+					html += (typeof vars[operator] === 'function' ? vars[operator](attrs) : vars[operator]) ?? '';
 				}
 			}
 			else if (level.condition) {
