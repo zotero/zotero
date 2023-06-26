@@ -655,7 +655,10 @@ class ReaderInstance {
 			if (this._type === 'pdf') {
 				item.setAttachmentLastPageIndex(state.pageIndex);
 			}
-			// epub, snapshot
+			else if (this._type === 'epub') {
+				item.setAttachmentLastPageIndex(state.cfi);
+			}
+			// snapshot
 			else {
 				// setAttachmentSomeProperty(state.someProperty);
 			}
@@ -712,7 +715,17 @@ class ReaderInstance {
 				return { pageIndex };
 			}
 		}
-		// epub, snapshot
+		else if (this._type === 'epub') {
+			let cfi = item.getAttachmentLastPageIndex();
+			if (state) {
+				state.cfi = cfi;
+				return state;
+			}
+			else {
+				return { cfi };
+			}
+		}
+		// snapshot
 		else {
 			// let someProperty = item.getAttachmentSomeProperty();
 			// if (state) {
