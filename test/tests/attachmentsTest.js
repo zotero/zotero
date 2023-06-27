@@ -1334,13 +1334,13 @@ describe("Zotero.Attachments", function() {
 		});
 
 		
-		it('should strip HTML tags from title', async function () {
+		it('should strip HTML tags from title', function () {
 			var htmlItem = createUnsavedDataObject('item', { title: 'Foo <i>Bar</i> Foo<br><br/><br />Bar' });
 			var str = Zotero.Attachments.getFileBaseNameFromItem(htmlItem, '{{ title }}');
 			assert.equal(str, 'Foo Bar Foo Bar');
 		});
 
-		it('should accept basic formating options', async function () {
+		it('should accept basic formating options', function () {
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(item, 'FOO{{year}}BAR'),
 				'FOO1975BAR'
@@ -1363,7 +1363,7 @@ describe("Zotero.Attachments", function() {
 			);
 		});
 
-		it('should offer a range of options for composing creaotrs', async function () {
+		it('should offer a range of options for composing creaotrs', function () {
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(item, '{{ authors max="1" }}'),
 				'Barius'
@@ -1489,7 +1489,7 @@ describe("Zotero.Attachments", function() {
 			);
 		});
 
-		it('should accept itemType or any other field', async function () {
+		it('should accept itemType or any other field', function () {
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(item, '{{ itemType }}'),
 				'Journal Article'
@@ -1525,6 +1525,41 @@ describe("Zotero.Attachments", function() {
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(itemPatent, '{{ assignee }}'),
 				'Fast FooBar'
+			);
+		});
+
+		it("should conver formatString attachmentRenameFormatString to use template syntax", function () {
+			assert.equal(
+				Zotero.Attachments.convertLegacyFormatString('{%c - }{%y - }{%t{50}}'),
+				'{{ firstCreator suffix=" - " }}{{ year suffix=" - " }}{{ title truncate="50" }}'
+			);
+			assert.equal(
+				Zotero.Attachments.convertLegacyFormatString('{ - %y - }'),
+				'{{ year prefix=" - " suffix=" - " }}'
+			);
+			assert.equal(
+				Zotero.Attachments.convertLegacyFormatString('{%y{2}00}'),
+				'{{ year truncate="2" suffix="00" }}'
+			);
+			assert.equal(
+				Zotero.Attachments.convertLegacyFormatString('{%c5 - }'),
+				'{{ firstCreator suffix="5 - " }}'
+			);
+			assert.equal(
+				Zotero.Attachments.convertLegacyFormatString('{%c-2 - }'),
+				'{{ firstCreator suffix="-2 - " }}'
+			);
+			assert.equal(
+				Zotero.Attachments.convertLegacyFormatString('{%t5 - }'),
+				'{{ title suffix="5 - " }}'
+			);
+			assert.equal(
+				Zotero.Attachments.convertLegacyFormatString('{++%t{10}--}'),
+				'{{ title truncate="10" prefix="++" suffix="--" }}'
+			);
+			assert.equal(
+				Zotero.Attachments.convertLegacyFormatString('foo{%c}-{%t{10}}-{%y{2}00}'),
+				'foo{{ firstCreator }}-{{ title truncate="10" }}-{{ year truncate="2" suffix="00" }}'
 			);
 		});
 	});

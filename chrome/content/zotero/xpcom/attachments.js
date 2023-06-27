@@ -2397,6 +2397,35 @@ Zotero.Attachments = new function () {
 		formatString = Zotero.File.getValidFileName(formatString);
 		return formatString;
 	};
+
+	this.convertLegacyFormatString = function (formatString) {
+		const markers = {
+			c: 'firstCreator',
+			y: 'year',
+			t: 'title'
+		};
+
+		// Regexp contains 4 capture groups all wrapped in {}:
+		// 		* Prefix before the wildcard, can be empty string
+		// 		* Any recognized marker. % sign marks a wildcard and is required for a match but is
+		// 		  not part of the capture group. Recognized markers are specified in a `markers`
+		// 		  lookup.
+		// 		* Optionally a maximum number of characters to truncate the value to
+		// 		* Suffix after the wildcard, can be empty string
+		const re = new RegExp(`{([^%{}]*)%(${Object.keys(markers).join('|')})({[0-9]+})?([^%{}]*)}`, 'ig');
+
+		return formatString.replace(re, (match, prefix, marker, truncate, suffix) => {
+			const field = markers[marker];
+			truncate = truncate ? truncate.replace(/[^0-9]+/g, '') : false;
+			prefix = prefix ? `prefix="${prefix}"` : null;
+			suffix = suffix ? `suffix="${suffix}"` : null;
+			truncate = truncate ? `truncate="${truncate}"` : null;
+
+			Zotero.debug({ match, field, truncate, prefix, suffix });
+
+			return `{{ ${[field, truncate, prefix, suffix].filter(f => f !== null).join(' ')} }}`;
+		});
+	};
 	
 	
 	this.shouldAutoRenameFile = function (isLink) {
