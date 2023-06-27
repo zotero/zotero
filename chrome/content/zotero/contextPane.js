@@ -189,6 +189,8 @@ var ZoteroContextPane = new function () {
 							}
 						}
 					}
+					// For unknown reason fx102, unlike 60, sometimes doesn't automatically update selected index
+					_selectItemContext(Zotero_Tabs.selectedID);
 				});
 			}
 			else if (action == 'select') {
