@@ -1293,7 +1293,7 @@ describe("Zotero.Attachments", function() {
 	});
 	
 	describe("#getFileBaseNameFromItem()", function () {
-		var item, itemManyAuthors, itemPatent;
+		var item, itemManyAuthors, itemPatent, itemIncomplete;
 
 		before(() => {
 			item = createUnsavedDataObject('item', { title: 'Lorem Ipsum', itemType: 'journalArticle' });
@@ -1331,6 +1331,7 @@ describe("Zotero.Attachments", function() {
 			itemPatent.setField('date', '1952-05-10');
 			itemPatent.setField('number', 'HBK-8539b');
 			itemPatent.setField('assignee', 'Fast FooBar');
+			itemIncomplete = createUnsavedDataObject('item', { title: 'Incomplete', itemType: 'preprint' });
 		});
 
 		
@@ -1525,6 +1526,19 @@ describe("Zotero.Attachments", function() {
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(itemPatent, '{{ assignee }}'),
 				'Fast FooBar'
+			);
+		});
+
+		it("should support simple logic in template syntax", function () {
+			const template = '{{ if itemTypeRaw == "journalArticle" }}j-{{ publicationTitle case="dash" }}{{ elseif itemTypeRaw == "patent" }}p-{{ number case="dash" }}{{ else }}o-{{ title case="dash" }}{{ endif }}';
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(item, template), 'j-best-publications-place'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemPatent, template), 'p-hbk-8539b'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, template), 'o-has-many-authors'
 			);
 		});
 

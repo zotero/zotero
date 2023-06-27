@@ -2376,6 +2376,7 @@ Zotero.Attachments = new function () {
 		};
 
 		const itemType = args => common(Zotero.ItemTypes.getLocalizedString(item.itemType), args);
+		const itemTypeRaw = item.itemType;
 
 		const creatorFields = ['authors', 'editors', 'creators'].reduce((obj, name) => {
 			obj[name] = (args) => {
@@ -2390,7 +2391,7 @@ Zotero.Attachments = new function () {
 			item.getField('firstCreator', false, true).replaceAll('\u2068', '').replaceAll('\u2069', ''), args
 		);
 
-		const vars = { ...fields, ...creatorFields, firstCreator, itemType, year };
+		const vars = { ...fields, ...creatorFields, firstCreator, itemType, itemTypeRaw, year };
 
 		formatString = Zotero.Utilities.Internal.generateHTMLFromTemplate(formatString, vars);
 		formatString = Zotero.Utilities.cleanTags(formatString);
