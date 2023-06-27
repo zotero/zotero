@@ -1542,6 +1542,13 @@ describe("Zotero.Attachments", function() {
 			);
 		});
 
+		it("should skip missing fields", function () {
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemIncomplete, '{{ authors prefix = "a" suffix="-" }}{{ publicationTitle case="dash" suffix="-" }}{{ title }}'),
+				'Incomplete'
+			);
+		});
+
 		it("should conver formatString attachmentRenameFormatString to use template syntax", function () {
 			assert.equal(
 				Zotero.Attachments.convertLegacyFormatString('{%c - }{%y - }{%t{50}}'),

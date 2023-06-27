@@ -2289,6 +2289,9 @@ Zotero.Attachments = new function () {
 
 
 		const common = (value, { truncate = false, prefix = '', suffix = '', case: textCase = '' } = {}) => {
+			if (value === '' || value === null || typeof value === 'undefined') {
+				return '';
+			}
 			if (truncate) {
 				value = value.substr(0, truncate);
 			}
