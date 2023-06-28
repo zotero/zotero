@@ -952,18 +952,25 @@ class ReaderTab extends ReaderInstance {
 					&& event.target
 					&& event.target.closest
 					&& !event.target.closest('#outerContainer')) {
-					let evt = new this._iframeWindow.CustomEvent('mouseup', { bubbles: false });
-					evt.clientX = event.clientX;
-					evt.clientY = event.clientY;
+					let evt = new this._iframeWindow.MouseEvent('mouseup', { ...event, bubbles: false });
 					this._iframeWindow.dispatchEvent(evt);
+					if (evt.defaultPrevented) {
+						event.preventDefault();
+						return;
+					}
+					if (evt.clickEventPrevented()) {
+						event.preventClickEvent();
+					}
 
-					evt = new this._iframeWindow.CustomEvent('pointerup', { bubbles: false });
-					evt.clientX = event.clientX;
-					evt.clientY = event.clientY;
+					evt = new this._iframeWindow.PointerEvent('pointerup', { ...event, bubbles: false });
 					this._iframeWindow.dispatchEvent(evt);
+					if (evt.defaultPrevented) {
+						event.preventDefault();
+					}
 				}
 			}
-			catch(e) {
+			catch (e) {
+				Zotero.logError(e);
 			}
 		});
 
