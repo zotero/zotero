@@ -1396,15 +1396,23 @@ var Zotero_QuickFormat = new function () {
 	var _onBubbleDrop = Zotero.Promise.coroutine(function* (event) {
 		event.preventDefault();
 		event.stopPropagation();
+		if (!dragging) return;
 
 		// Find old position in list
 		var oldPosition = _getBubbleIndex(dragging);
 		
 		// Move bubble
 		var range = document.createRange();
-		range.setStartAfter(event.rangeParent);
+		// Prevent dragging out of qfe
+		if (event.target === qfe) {
+			range.setStartAfter(qfe.childNodes[qfe.childNodes.length-1]);
+		}
+		else {
+			range.setStartAfter(event.target);
+		}
 		dragging.parentNode.removeChild(dragging);
 		var bubble = _insertBubble(JSON.parse(dragging.dataset.citationItem), range);
+		dragging = null;
 
 		// If moved out of order, turn off "Keep Sources Sorted"
 		if(io.sortable && keepSorted && keepSorted.hasAttribute("checked") && oldPosition !== -1 &&
