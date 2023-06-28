@@ -422,6 +422,10 @@ const ZoteroStandalone = new function() {
 				this.updateMenuItemCheckmark('view-menuitem-zoom-page-width', reader.zoomPageWidthEnabled);
 				this.updateMenuItemCheckmark('view-menuitem-zoom-page-height', reader.zoomPageHeightEnabled);
 			}
+			else if (reader.type === 'epub') {
+				this.updateMenuItemCheckmark('view-menuitem-scrolled', reader.flowMode === 'scrolled');
+				this.updateMenuItemCheckmark('view-menuitem-paginated', reader.flowMode === 'paginated');
+			}
 			this.updateMenuItemCheckmark('view-menuitem-split-vertically', reader.splitType === 'vertical');
 			this.updateMenuItemCheckmark('view-menuitem-split-horizontally', reader.splitType === 'horizontal');
 		}
