@@ -427,6 +427,9 @@ if [ $BUILD_WIN == 1 ]; then
 		fi
 		
 		modify_omni $arch
+		# Disable skeleton UI window
+		# https://forums.zotero.org/discussion/comment/437636/#Comment_437636
+		replace_line 'pref\("browser\.startup\.preXulSkeletonUI", true\);' 'pref("browser.startup.preXulSkeletonUI", false);' defaults/preferences/firefox.js
 		popd
 		
 		# Uncomment to create local copies for reuse
