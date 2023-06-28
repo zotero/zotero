@@ -296,6 +296,17 @@ function modify_omni {
 	# Use native checkbox instead of Firefox-themed version in prompt dialogs
 	replace_line '<xul:checkbox' '<xul:checkbox native=\"true\"' chrome/toolkit/content/global/commonDialog.xhtml
 	
+	# The <browser> CE appends its autoscroll <popup> to document.documentElement, which doesn't work in zoteroPane.xhtml
+	# (in Firefox browser.xhtml, document.documentElement is <html>, which can contain <popup>s; in zoteroPane.xhtml, it's
+	# <window>, which can't)
+	# Fix by appending it to a <popupset> instead
+	replace_line 'document.documentElement.appendChild\(this._autoScrollPopup\);' 'let popupset = document.querySelector("popupset");
+       if (!popupset) {
+         popupset = document.createXULElement("popupset");
+         document.documentElement.appendChild(popupset);
+       }
+       popupset.appendChild(this._autoScrollPopup);' chrome/toolkit/content/global/elements/browser-custom-element.js
+	
 	zip -qr9XD omni.ja *
 	mv omni.ja ..
 	cd ..
