@@ -32,7 +32,7 @@ const VirtualizedTable = require('components/virtualized-table');
 const { renderCell, formatColumnName } = VirtualizedTable;
 const Icons = require('components/icons');
 const { getDOMElement } = Icons;
-const { COLUMNS } = require('./itemTreeColumns');
+const { getColumns } = require('./itemTreeColumns');
 const { Cc, Ci, Cu } = require('chrome');
 Cu.import("resource://gre/modules/osfile.jsm");
 
@@ -59,7 +59,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		dragAndDrop: false,
 		persistColumns: false,
 		columnPicker: false,
-		columns: COLUMNS,
+		columns: getColumns(),
 		onContextMenu: noop,
 		onActivate: noop,
 		emptyMessage: '',
@@ -147,7 +147,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * @returns {Array<Column>}
 	 */
 	getColumns() {
-		return Array.from(this.props.columns);
+		return getColumns();
 	}
 
 	/**
@@ -3165,6 +3165,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		
 		let columnsSettings = this._getColumnPrefs();
 
+		// Refresh columns from itemTreeColumns
 		const columns = this.getColumns();
 		let hasDefaultIn = columns.some(column => 'defaultIn' in column);
 		for (let column of columns) {
@@ -3810,6 +3811,27 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		return span;
 	}
+
+	async _refresh(){
+		// TODO: This is a hack to force a refresh of the item list
+		// when the columns change. It should be removed when the
+		// virtualized table is updated to handle this automatically.
+		this._columnsId = null;
+		const virtualizedTable = this.tree && this.tree._columns;
+		if (!virtualizedTable) {
+		  Zotero.debug("ItemTree is still loading. Refresh skipped.");
+		  return;
+		}
+		// Remove style list otherwise the change will not be updated
+		this.props.domEl.ownerDocument.querySelector(`.${virtualizedTable._styleKey}`)?.remove();
+		// Refresh to rebuild _columns
+		await this.refreshAndMaintainSelection();
+		// Construct a new virtualized-table, otherwise it will not be updated
+		this.tree._columns =
+		  new virtualizedTable.__proto__.constructor(this.tree);
+		// Refresh again to totally make the itemView updated
+		await this.refreshAndMaintainSelection();
+	}
 };
 
 var ItemTreeRow = function(ref, level, isOpen)
@@ -3822,6 +3844,8 @@ var ItemTreeRow = function(ref, level, isOpen)
 
 ItemTreeRow.prototype.getField = function(field, unformatted)
 {
+	// TODO: Add support for other custom fields here @dstillman
+	// Currently, you should monkeypatch Zotero.Item.prototype.getField yourself
 	return this.ref.getField(field, unformatted, true);
 }
 

@@ -2,7 +2,7 @@
 	***** BEGIN LICENSE BLOCK *****
 	
 	Copyright © 2020 Corporation for Digital Scholarship
-                     Vienna, Virginia, USA
+					 Vienna, Virginia, USA
 					http://zotero.org
 	
 	This file is part of Zotero.
@@ -23,36 +23,37 @@
 	***** END LICENSE BLOCK *****
 */
 
-(function() {
 const React = require('react');
 const Icons = require('components/icons');
 
 /**
- * @type Column {
- * 	dataKey: string,				// Required, see use in ItemTree#_getRowData()
- *
- * 	defaultIn: Set<string>,			// Types of trees the column is default in. Can be [default, feed];
- * 	disabledIn: Set<string>,		// Types of trees where the column is not available
- * 	defaultSort: number				// Default: 1. -1 for descending sort
- *
- * 	flex: number,					// Default: 1. When the column is added to the tree how much space it should occupy as a flex ratio
- * 	width: string,					// A column width instead of flex ratio. See above.
- * 	fixedWidth: boolean				// Default: false. Set to true to disable column resizing
- * 	staticWidth: boolean			// Default: false. Set to true to prevent columns from changing width when
- * 									// the width of the tree increases or decreases
- * 	minWidth: number,				// Override the default [20px] column min-width for resizing
- *
- * 	label: string,					// The column label. Either a string or the id to an i18n string.
- * 	iconLabel: React.Component,		// Set an Icon label instead of a text-based one
- *
- * 	ignoreInColumnPicker: boolean	// Default: false. Set to true to not display in column picker.
- * 	submenu: boolean,				// Default: false. Set to true to display the column in "More Columns" submenu of column picker.
- *
- * 	primary: boolean,				// Should only be one column at the time. Title is the primary column
- * 	zoteroPersist: Set<string>,		// Which column properties should be persisted between zotero close
- * 	}
+ * @typedef ItemTreeColumnOption
+ * @type {object}
+ * @property {string} dataKey - Required, see use in ItemTree#_getRowData()
+ * @property {Set.<string>} [defaultIn] - Types of trees the column is default in. Can be [default, feed];
+ * @property {Set.<string>} [disabledIn] - Types of trees where the column is not available
+ * @property {number} [defaultSort=1] - Default: 1. -1 for descending sort
+ * @property {number} [flex=1] - Default: 1. When the column is added to the tree how much space it should occupy as a flex ratio
+ * @property {string} [width] - A column width instead of flex ratio. See above.
+ * @property {boolean} [fixedWidth] - Default: false. Set to true to disable column resizing
+ * @property {boolean} [staticWidth] - Default: false. Set to true to prevent columns from changing width when the width of the tree increases or decreases
+ * @property {number} [minWidth] - Override the default [20px] column min-width for resizing
+ * @property {string} label - The column label. Either a string or the id to an i18n string.
+ * @property {React.Component} [iconLabel] - Set an Icon label instead of a text-based one
+ * @property {string} [iconPath] - Set an Icon path, overrides {iconLable}
+ * @property {boolean} [ignoreInColumnPicker=false] - Default: false. Set to true to not display in column picker.
+ * @property {boolean} [submenu=false] - Default: false. Set to true to display the column in "More Columns" submenu of column picker.
+ * @property {boolean} [primary] - Should only be one column at the time. Title is the primary column
+ * @property {boolean} [custom] - Set automatically to true when the column is added by the user
+ * @property {string} [pluginID] - Set plugin ID to auto remove column when plugin is removed
+ * @property {Set.<string>} zoteroPersist - Which column properties should be persisted between zotero close
  */
-const COLUMNS = [
+
+/**
+ * @type {ItemTreeColumnOption[]}
+ * @constant
+ */
+const DEFAULT_COLUMNS = [
 	{
 		dataKey: "title",
 		primary: true,
@@ -323,18 +324,71 @@ const COLUMNS = [
 	}
 ];
 
+
+
+/**
+ * @type {ItemTreeColumnOption[]}
+ * @constant
+ */
+const CUSTOM_COLUMNS = [];
+
+/**
+ * 
+ * @param {string} dataKey 
+ * @returns {ItemTreeColumnOption | {}}
+ */
 function getDefaultColumnByDataKey(dataKey) {
-	return Object.assign({}, COLUMNS.find(col => col.dataKey == dataKey), {hidden: false});
+	return Object.assign({}, getColumns().find(col => col.dataKey == dataKey), { hidden: false });
 }
 
+/**
+ * 
+ * @param {string[]} dataKeys 
+ * @returns {ItemTreeColumnOption[]}
+ */
 function getDefaultColumnsByDataKeys(dataKeys) {
-	return COLUMNS.filter(column => dataKeys.includes(column.dataKey)).map(column => Object.assign({}, column, {hidden: false}));
+	return getColumns().filter(column => dataKeys.includes(column.dataKey)).map(column => Object.assign({}, column, { hidden: false }));
+}
+
+/**
+ * Get all column options
+ * @returns {ItemTreeColumnOption[]}
+ */
+function getColumns() {
+	return [...DEFAULT_COLUMNS, ...CUSTOM_COLUMNS];
+}
+
+/**
+ * Add a new column option
+ * @param {ItemTreeColumnOption} option 
+ */
+function addColumn(option) {
+	// check if option has dataKey and label
+	if(!option.dataKey || !option.label){
+		throw new Error("Column option must have dataKey and label.");
+	}
+	// check if column with dataKey already exists
+	if(getDefaultColumnByDataKey(option.dataKey).dataKey){
+		throw new Error("Column option with dataKey " + option.dataKey + " already exists.");
+	}
+	CUSTOM_COLUMNS.push(Object.assign({}, option, {custom: true}));
+}
+
+/**
+ * Remove a column option
+ * @param {string} dataKey 
+ */
+function removeColumn(dataKey) {
+	const index = CUSTOM_COLUMNS.findIndex(column => column.dataKey == dataKey);
+	if(index > -1){
+		CUSTOM_COLUMNS.splice(index, 1);
+	}
 }
 
 module.exports = {
-	COLUMNS,
+	getColumns,
+	addColumn,
+	removeColumn,
 	getDefaultColumnByDataKey,
 	getDefaultColumnsByDataKeys,
 };
-
-})();
