@@ -125,8 +125,6 @@ Zotero_Preferences.Sync = {
 		var trimmed = username.trim();
 		if (username != trimmed) {
 			tb.value = trimmed;
-			// Setting .value alone doesn't seem to cause the pref to sync, so set it manually
-			Zotero.Prefs.set('sync.server.username', trimmed);
 		}
 	},
 	
@@ -181,7 +179,9 @@ Zotero_Preferences.Sync = {
 			Zotero.Sync.Runner.deleteAPIKey();
 			return;
 		}
-		
+
+		Zotero.Prefs.set('sync.server.username', username);
+
 		// It shouldn't be possible for a sync to be in progress if the user wasn't logged in,
 		// but check to be sure
 		if (!Zotero.Sync.Runner.syncInProgress) {
