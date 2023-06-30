@@ -26,7 +26,7 @@
 const { getColumns, addColumn, removeColumn, getDefaultColumnByDataKey } = require("zotero/itemTreeColumns");
 
 /**
- * @typedef {import("../../itemTreeColumns.jsx").ColumnOption} ItemTreeColumnOption
+ * @typedef {import("../itemTreeColumns.jsx").ColumnOption} ItemTreeColumnOption
  */
 
 class ItemTreeManager {
@@ -127,4 +127,4 @@ class ItemTreeManager {
     }
 }
 
-Zotero.PluginKit.ItemTreeManager = new ItemTreeManager();
+Zotero.ItemTreeManager = new ItemTreeManager();
