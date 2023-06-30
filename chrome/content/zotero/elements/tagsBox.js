@@ -45,7 +45,7 @@
 					<div id="tags-box" style="flex-grow: 1" xmlns="http://www.w3.org/1999/xhtml">
 						<div class="tags-box-header">
 							<label id="count"/>
-							<button id="add">&zotero.item.add;</button>
+							<button id="tags-box-add-button">&zotero.item.add;</button>
 						</div>
 						<ul id="rows" class="tags-box-list"/>
 					</div>
@@ -79,8 +79,8 @@
 			let content = document.importNode(this.content, true);
 			this.append(content);
 
-			this._id('add').addEventListener('click', this._handleAddButtonClick);
-			this._id('add').addEventListener('keydown', this._handleAddButtonKeyDown);
+			this._id("tags-box-add-button").addEventListener('click', this._handleAddButtonClick);
+			this._id("tags-box-add-button").addEventListener('keydown', this._handleAddButtonKeyDown);
 			this._id('tags-box').addEventListener('click', (event) => {
 				if (event.target.id == 'tags-box') {
 					this.blurOpenField();
@@ -228,7 +228,7 @@
 			// Cancel field focusing while we're updating
 			this._reloading = true;
 
-			this._id('add').hidden = !this.editable;
+			this._id("tags-box-add-button").hidden = !this.editable;
 
 			this._tagColors = Zotero.Tags.getColors(this.item.libraryID);
 
@@ -889,7 +889,7 @@
 			else if (dir == -1) {
 				if (tabindex == 1) {
 					// Focus Add button
-					this._id('add').focus();
+					this._id("tags-box-add-button").focus();
 					return false;
 				}
 				var nextIndex = tabindex - 1;

@@ -2313,6 +2313,19 @@
 		focusFirstField() {
 			this._focusNextField(1);
 		}
+
+		focusLastField() {
+			const tabbableFields=this.querySelectorAll('*[ztabindex]:not([disabled=true])');
+			const last=tabbableFields[tabbableFields.length-1];
+
+			if (last.classList.contains('zotero-focusable')) {
+				last.focus();
+			}
+			// Fields need to be clicked
+			else {
+				last.click();
+			}
+		}
 		
 		focusField(fieldName) {
 			let field = this.querySelector(`[fieldname="${fieldName}"][ztabindex]`);

@@ -253,6 +253,12 @@
 		_id(id) {
 			return this.querySelector(`[id=${id}]`);
 		}
+
+		receiveKeyboardFocus(direction) {
+			this._id("addButton").focus();
+			// TODO: the relatedbox is not currently keyboard accessible
+			// so we are ignoring the direction
+		}
 	}
 	customElements.define("related-box", RelatedBox);
 }
