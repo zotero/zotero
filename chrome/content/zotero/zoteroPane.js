@@ -3346,16 +3346,12 @@ var ZoteroPane = new function()
 						// If all from a single item, show "Add Note from Annotations"
 						if (Zotero.Items.getTopLevel(items).length == 1) {
 							key = 'addNoteFromAnnotations';
-							menuitem.onclick = async () => {
-								return this.addNoteFromAnnotationsFromSelected();
-							};
+							menuitem.setAttribute('oncommand', 'ZoteroPane.addNoteFromAnnotationsFromSelected()');
 						}
 						// Otherwise show "Create Note from Annotations"
 						else {
 							key = 'createNoteFromAnnotations';
-							menuitem.onclick = async () => {
-								return this.createStandaloneNoteFromAnnotationsFromSelected();
-							};
+							menuitem.setAttribute('oncommand', 'ZoteroPane.createStandaloneNoteFromAnnotationsFromSelected()');
 						}
 						menuitem.setAttribute(
 							'label',
@@ -3443,16 +3439,12 @@ var ZoteroPane = new function()
 						// Show "Create" on standalone attachments
 						if (item.isAttachment() && item.isTopLevelItem()) {
 							str = 'pane.items.menu.createNoteFromAnnotations';
-							menuitem.onclick = async () => {
-								return this.createStandaloneNoteFromAnnotationsFromSelected();
-							};
+							menuitem.setAttribute('oncommand', 'ZoteroPane.createStandaloneNoteFromAnnotationsFromSelected()');
 						}
 						// And "Add" otherwise
 						else {
 							str = 'pane.items.menu.addNoteFromAnnotations';
-							menuitem.onclick = async () => {
-								return this.addNoteFromAnnotationsFromSelected();
-							};
+							menuitem.setAttribute('oncommand', 'ZoteroPane.addNoteFromAnnotationsFromSelected()');
 						}
 						menuitem.setAttribute('label', Zotero.getString(str));
 					}
