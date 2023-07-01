@@ -29,6 +29,7 @@ Zotero.Plugins = new function () {
 	var { XPIInstall } = ChromeUtils.import("resource://gre/modules/addons/XPIInstall.jsm");
 	var scopes = new Map();
 	var observers = new Set();
+	var addonVersions = new Map();
 	
 	const REASONS = {
 		APP_STARTUP: 1,
@@ -37,15 +38,18 @@ Zotero.Plugins = new function () {
 		ADDON_DISABLE: 4,
 		ADDON_INSTALL: 5,
 		ADDON_UNINSTALL: 6,
-		ADDON_UPGRADE: 7, // TODO
-		ADDON_DOWNGRADE: 8 // TODO
+		ADDON_UPGRADE: 7,
+		ADDON_DOWNGRADE: 8
 	};
+	
 	
 	this.init = async function () {
 		this._addonObserver.init();
 		
 		var { addons } = await AddonManager.getActiveAddons(["extension"]);
 		for (let addon of addons) {
+			addonVersions.set(addon.id, addon.version);
+			_loadScope(addon);
 			setDefaultPrefs(addon);
 			registerLocales(addon);
 			await _callMethod(addon, 'startup', REASONS.APP_STARTUP);
@@ -113,7 +117,13 @@ Zotero.Plugins = new function () {
 		scopes.set(addon.id, scope);
 		
 		var uri = addon.getResourceURI().spec + 'bootstrap.js';
-		Services.scriptloader.loadSubScript(uri, scope);
+		Services.scriptloader.loadSubScriptWithOptions(
+			uri,
+			{
+				target: scope,
+				ignoreCache: true
+			}
+		);
 	}
 	
 	
@@ -129,10 +139,6 @@ Zotero.Plugins = new function () {
 				+ `version ${addon.version} with reason ${_getReasonName(reason)}`);
 			
 			let scope = scopes.get(id);
-			if (!scope) {
-				_loadScope(addon);
-				scope = scopes.get(id);
-			}
 			
 			let func;
 			try {
@@ -308,6 +314,13 @@ Zotero.Plugins = new function () {
 	}
 	
 	
+	function getVersionChangeReason(oldVersion, newVersion) {
+		return Zotero.Utilities.semverCompare(oldVersion, newVersion) <= 0
+			? REASONS.ADDON_UPGRADE
+			: REASONS.ADDON_DOWNGRADE
+	}
+	
+	
 	/**
 	 * Add an observer to be notified of lifecycle events on all plugins.
 	 *
@@ -341,6 +354,16 @@ Zotero.Plugins = new function () {
 		
 		async onInstalling(addon) {
 			Zotero.debug("Installing plugin " + addon.id);
+			
+			var currentVersion = addonVersions.get(addon.id);
+			if (currentVersion) {
+				let existingAddon = await AddonManager.getAddonByID(addon.id);
+				let reason = getVersionChangeReason(currentVersion, addon.version);
+				if (existingAddon.isActive) {
+					await _callMethod(existingAddon, 'shutdown', reason);
+				}
+				await _callMethod(existingAddon, 'uninstall', reason);
+			}
 		},
 		
 		async onInstalled(addon) {
@@ -348,11 +371,20 @@ Zotero.Plugins = new function () {
 				return;
 			}
 			Zotero.debug("Installed plugin " + addon.id);
+			
+			// Determine if this is a new install, an upgrade, or a downgrade
+			let previousVersion = addonVersions.get(addon.id);
+			let reason = previousVersion
+				? getVersionChangeReason(previousVersion, addon.version)
+				: REASONS.ADDON_INSTALL;
+			addonVersions.set(addon.id, addon.version);
+			
+			_loadScope(addon);
 			setDefaultPrefs(addon);
 			registerLocales(addon);
-			await _callMethod(addon, 'install');
+			await _callMethod(addon, 'install', reason);
 			if (addon.isActive) {
-				await _callMethod(addon, 'startup', REASONS.ADDON_INSTALL);
+				await _callMethod(addon, 'startup', reason);
 			}
 		},
 		
@@ -379,14 +411,18 @@ Zotero.Plugins = new function () {
 		async onUninstalling(addon) {
 			Zotero.debug("Uninstalling plugin " + addon.id);
 			this.uninstalling.add(addon.id);
-			await _callMethod(addon, 'shutdown', REASONS.ADDON_UNINSTALL);
-			await _callMethod(addon, 'uninstall');
+			if (addon.isActive) {
+				await _callMethod(addon, 'shutdown', REASONS.ADDON_UNINSTALL);
+			}
+			await _callMethod(addon, 'uninstall', REASONS.ADDON_UNINSTALL);
 			unregisterLocales(addon);
 			clearDefaultPrefs(addon);
 		},
 		
 		async onUninstalled(addon) {
 			Zotero.debug("Uninstalled plugin " + addon.id);
+			_unloadScope(addon.id);
+			addonVersions.delete(addon.id);
 		},
 		
 		async onOperationCancelled(addon) {
@@ -395,7 +431,7 @@ Zotero.Plugins = new function () {
 			}
 			Zotero.debug("Cancelled uninstallation of plugin " + addon.id);
 			this.uninstalling.delete(addon.id);
-			await _callMethod(addon, 'install');
+			await _callMethod(addon, 'install', REASONS.ADDON_INSTALL);
 			if (addon.isActive) {
 				setDefaultPrefs(addon);
 				registerLocales(addon);
