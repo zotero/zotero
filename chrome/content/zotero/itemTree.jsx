@@ -3812,25 +3812,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 		return span;
 	}
 
-	async _refresh(){
-		// TODO: This is a hack to force a refresh of the item list
-		// when the columns change. It should be removed when the
-		// virtualized table is updated to handle this automatically.
+	async _resetColumns(){
 		this._columnsId = null;
-		const virtualizedTable = this.tree && this.tree._columns;
-		if (!virtualizedTable) {
-		  Zotero.debug("ItemTree is still loading. Refresh skipped.");
-		  return;
-		}
-		// Remove style list otherwise the change will not be updated
-		this.props.domEl.ownerDocument.querySelector(`.${virtualizedTable._styleKey}`)?.remove();
-		// Refresh to rebuild _columns
-		await this.refreshAndMaintainSelection();
-		// Construct a new virtualized-table, otherwise it will not be updated
-		this.tree._columns =
-		  new virtualizedTable.__proto__.constructor(this.tree);
-		// Refresh again to totally make the itemView updated
-		await this.refreshAndMaintainSelection();
+		return new Promise(resolve=>this.forceUpdate(resolve));
 	}
 };
 

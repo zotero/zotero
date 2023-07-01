@@ -23,10 +23,10 @@
     ***** END LICENSE BLOCK *****
 */
 
-const { getColumns, addColumn, removeColumn, getDefaultColumnByDataKey } = require("zotero/itemTreeColumns");
+const { getColumns, addColumn, removeColumn, getColumn } = require("zotero/itemTreeColumns");
 
 /**
- * @typedef {import("../itemTreeColumns.jsx").ColumnOption} ItemTreeColumnOption
+ * @typedef {import("../itemTreeColumns.jsx").ItemTreeColumnOption} ItemTreeColumnOption
  */
 
 class ItemTreeManager {
@@ -35,29 +35,36 @@ class ItemTreeManager {
     }
 
     /** 
-     * Register a custom column
-     * @param {ItemTreeColumnOption} option
+     * Register a custom column. All registered columns must be valid, and must have a unique dataKey.
+     * @param {ItemTreeColumnOption | ItemTreeColumnOption[]} option
      * @async
-     * @returns {void}
+     * @returns {boolean} Although it's async, resolving does not promise the item trees are updated.
      * @throws {Error} If the column option is missing required properties
      * @throws {Error} If the column is already registered
      */
     async registerColumn(option) {
-        if (option.pluginID) {
-            Zotero.Plugins.registeredPlugins[option.pluginID].registerColumn(option);
+        const success = addColumn(option);
+        if(!success) {
+            return false;
         }
-        addColumn(option);
         this._ensureObserverAdded();
-        await this._refresh();
+        await this._reset();
+        return true;
     }
 
     /**
      * Unregister a custom column
      * @param {string} dataKey - The dataKey of the column to unregister
+     * @async
+     * @returns {boolean} Although it's async, resolving does not promise the item trees are updated.
      */
     async unregisterColumn(dataKey) {
-        removeColumn(dataKey);
-        await this._refresh();
+        const success = removeColumn(dataKey);
+        if(!success){
+            return false;
+        }
+        await this._reset();
+        return true;
     }
 
     // TODO: add cell renderer registration
@@ -70,28 +77,29 @@ class ItemTreeManager {
     }
 
     /**
-     * Get a column by dataKey
-     * @param {string} dataKey 
-     * @returns 
+     * Get column(s) that matches the properties of option
+     * @param {Partial.<ItemTreeColumnOption> | Partial.<ItemTreeColumnOption>[]} option - An option or array of options to match
+     * @returns {ItemTreeColumnOption[]}
      */
-    getColumn(dataKey) {
-        return getDefaultColumnByDataKey(dataKey);
+    getColumn(option) {
+        return getColumn(option);
     }
 
     /**
      * Refresh the active item tree
      * @private
      */
-    async _refresh() {
+    async _reset() {
+        // TODO: dispatch a notify to reset all item trees
         const activeItemTree = Zotero.getActiveZoteroPane().itemsView;
         if (activeItemTree) {
-            await activeItemTree._refresh();
+            await activeItemTree._resetColumns();
         }
     }
 
     /**
      * Unregister all columns registered by a plugin
-     * @param {string} pluginID 
+     * @param {string} pluginID - Plugin ID
      */
     async _unregisterColumnByPluginID(pluginID) {
         const columns = this.columns;
@@ -106,7 +114,7 @@ class ItemTreeManager {
             return;
         }
         Zotero.debug(`ItemTree columns registered by plugin ${pluginID} unregistered due to shutdown`);
-        await this._refresh();
+        await this._reset();
     }
 
     /**

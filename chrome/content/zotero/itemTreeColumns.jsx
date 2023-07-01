@@ -324,31 +324,11 @@ const DEFAULT_COLUMNS = [
 	}
 ];
 
-
-
 /**
  * @type {ItemTreeColumnOption[]}
  * @constant
  */
 const CUSTOM_COLUMNS = [];
-
-/**
- * 
- * @param {string} dataKey 
- * @returns {ItemTreeColumnOption | {}}
- */
-function getDefaultColumnByDataKey(dataKey) {
-	return Object.assign({}, getColumns().find(col => col.dataKey == dataKey), { hidden: false });
-}
-
-/**
- * 
- * @param {string[]} dataKeys 
- * @returns {ItemTreeColumnOption[]}
- */
-function getDefaultColumnsByDataKeys(dataKeys) {
-	return getColumns().filter(column => dataKeys.includes(column.dataKey)).map(column => Object.assign({}, column, { hidden: false }));
-}
 
 /**
  * Get all column options
@@ -359,36 +339,97 @@ function getColumns() {
 }
 
 /**
- * Add a new column option
- * @param {ItemTreeColumnOption} option 
+ * Get column(s) that matches the properties of option
+ * @param {Partial.<ItemTreeColumnOption> | Partial.<ItemTreeColumnOption>[]} option - An option or array of options to match
+ * @returns {ItemTreeColumnOption[]}
+ */
+function getColumn(option) {
+	if (Array.isArray(option)) {
+		const matches = option.map(opt => getColumn(opt));
+		return matches.reduce((acc, match) => acc.concat(match), []);
+	}
+	return getColumns().filter(col => Object.keys(option).every(key => col[key] === option[key]));
+}
+
+/**
+ * Check if column option is valid atomically
+ * @param {ItemTreeColumnOption | ItemTreeColumnOption[]} option 
+ * @returns {boolean}
+ */
+function validateColumnOption(option) {
+	/**
+	 * Validate column option atomically
+	 * @param {ItemTreeColumnOption | ItemTreeColumnOption[]} option 
+	 * @param {(option: ItemTreeColumnOption) => boolean} validator - A function that returns true if the option is valid
+	 * @returns {boolean}
+	 */
+	function validate(option, validator) {
+		if (Array.isArray(option)) {
+			return option.every(opt => validator(opt));
+		}
+		return validator(option);
+	}
+
+	// Check if the input option has duplicate dataKeys
+	const noInputDuplicates = !Array.isArray(option) || !option.find((opt, i, arr) => arr.findIndex(o => o.dataKey === opt.dataKey) !== i);
+	if (!noInputDuplicates) {
+		Zotero.warn(`ItemTree Column options have duplicate dataKey.`);
+	}
+	const requiredProperties = validate(option, (option) => {
+		const valid = option.dataKey && option.label;
+		if (!valid) {
+			Zotero.warn(`ItemTree Column option ${JSON.stringify(option)} must have dataKey and label.`);
+		}
+		return valid;
+	});
+	const noRegisteredDuplicates = validate(option, (option) => {
+		const valid = getColumn({ dataKey: option.dataKey }).length === 0;
+		if (!valid) {
+			Zotero.warn(`ItemTree Column option ${JSON.stringify(option)} with dataKey ${option.dataKey} already exists.`);
+		}
+		return valid;
+	});
+	return noInputDuplicates && requiredProperties && noRegisteredDuplicates;
+}
+
+/**
+ * Add a new column or new columns atomically. All options must be valid.
+ * @param {ItemTreeColumnOption | ItemTreeColumnOption[]} option - An option or array of options to add
+ * @returns {boolean} - True if column(s) were added, false if not
  */
 function addColumn(option) {
-	// check if option has dataKey and label
-	if(!option.dataKey || !option.label){
-		throw new Error("Column option must have dataKey and label.");
+	// If any check fails, return check results
+	if (!validateColumnOption(option)) {
+		return false;
 	}
-	// check if column with dataKey already exists
-	if(getDefaultColumnByDataKey(option.dataKey).dataKey){
-		throw new Error("Column option with dataKey " + option.dataKey + " already exists.");
+	if (Array.isArray(option)) {
+		option.forEach(opt => addColumn(opt));
+		return true;
 	}
-	CUSTOM_COLUMNS.push(Object.assign({}, option, {custom: true}));
+	CUSTOM_COLUMNS.push(Object.assign({}, option, { custom: true }));
+	return true;
 }
 
 /**
  * Remove a column option
- * @param {string} dataKey 
+ * @param {string | string[]} dataKey 
+ * @returns {boolean | boolean[]}
  */
 function removeColumn(dataKey) {
-	const index = CUSTOM_COLUMNS.findIndex(column => column.dataKey == dataKey);
-	if(index > -1){
-		CUSTOM_COLUMNS.splice(index, 1);
+	if (Array.isArray(dataKey)) {
+		return dataKey.map(key => removeColumn(key));
 	}
+	const index = CUSTOM_COLUMNS.findIndex(column => column.dataKey == dataKey);
+	if (index > -1) {
+		CUSTOM_COLUMNS.splice(index, 1);
+		return true;
+	}
+	return false;
 }
 
 module.exports = {
+	getColumn,
 	getColumns,
 	addColumn,
 	removeColumn,
-	getDefaultColumnByDataKey,
-	getDefaultColumnsByDataKeys,
 };
