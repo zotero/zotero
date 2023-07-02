@@ -32,7 +32,6 @@ const VirtualizedTable = require('components/virtualized-table');
 const { renderCell, formatColumnName } = VirtualizedTable;
 const Icons = require('components/icons');
 const { getDOMElement } = Icons;
-const { getColumns } = require('./itemTreeColumns');
 const { Cc, Ci, Cu } = require('chrome');
 Cu.import("resource://gre/modules/osfile.jsm");
 
@@ -59,7 +58,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		dragAndDrop: false,
 		persistColumns: false,
 		columnPicker: false,
-		columns: getColumns(),
+		columns: Zotero.ItemTreeManager.columns,
 		extraColumns: [],
 		columnsFilter: (columns) => columns,
 		onContextMenu: noop,
@@ -148,7 +147,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * @returns {Array<Column>}
 	 */
 	getColumns() {
-		return this.props.columnsFilter([...getColumns(), ...this.props.extraColumns]);
+		return this.props.columnsFilter([...Zotero.ItemTreeManager.columns, ...this.props.extraColumns]);
 	}
 
 	/**
