@@ -60,6 +60,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		persistColumns: false,
 		columnPicker: false,
 		columns: getColumns(),
+		extraColumns: [],
+		columnsFilter: (columns) => columns,
 		onContextMenu: noop,
 		onActivate: noop,
 		emptyMessage: '',
@@ -109,9 +111,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._columnsId = null;
 		this.columns = null;
 
-		// Store columns that are only for the current session
-		this.extraColumns = props.extraColumns || [];
-		
 		if (this.collectionTreeRow) {
 			this.collectionTreeRow.view.itemTreeView = this;
 		}
@@ -149,7 +148,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * @returns {Array<Column>}
 	 */
 	getColumns() {
-		return [...getColumns(), ...this.extraColumns];
+		return this.props.columnsFilter([...getColumns(), ...this.props.extraColumns]);
 	}
 
 	/**
