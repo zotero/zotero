@@ -143,20 +143,10 @@ describe("ZoteroPane", function() {
 	describe("#viewAttachment", function () {
 		Components.utils.import("resource://zotero-unit/httpd.js");
 		var apiKey = Zotero.Utilities.randomString(24);
-		var port = 16213;
-		var baseURL = `http://localhost:${port}/`;
-		var server;
-		var responses = {};
+		var testServerPort = 16213;
+		var maxTestServerPort = testServerPort + 10;
+		var baseURL;
 		var httpd;
-		
-		var setup = Zotero.Promise.coroutine(function* (options = {}) {
-			server = sinon.fakeServer.create();
-			server.autoRespond = true;
-		});
-		
-		function setResponse(response) {
-			setHTTPResponse(server, baseURL, response, responses);
-		}
 		
 		async function downloadOnDemand() {
 			var item = new Zotero.Item("attachment");
@@ -212,12 +202,20 @@ describe("ZoteroPane", function() {
 			Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
 		})
 		beforeEach(function* () {
+			// Cycle through ports to prevent NS_ERROR_SOCKET_ADDRESS_IN_USE errors from server
+			// not always fully stopping in time
+			if (testServerPort < maxTestServerPort) {
+				testServerPort++;
+			}
+			else {
+				testServerPort--;
+			}
+			baseURL = `http://localhost:${testServerPort}/`;
 			Zotero.Prefs.set("api.url", baseURL);
-			Zotero.Sync.Runner.apiKey = apiKey;
-				
 			httpd = new HttpServer();
-			httpd.start(port);
+			httpd.start(testServerPort);
 			
+			Zotero.Sync.Runner.apiKey = apiKey;
 			yield Zotero.Users.setCurrentUserID(1);
 			yield Zotero.Users.setCurrentUsername("testuser");
 		})
@@ -231,14 +229,12 @@ describe("ZoteroPane", function() {
 		});
 		
 		it("should download an attachment on-demand in as-needed mode", function* () {
-			yield setup();
 			Zotero.Sync.Storage.Local.downloadAsNeeded(Zotero.Libraries.userLibraryID, true);
 			yield downloadOnDemand();
 		});
 		
 		// As noted in viewAttachment(), this is only necessary for files modified before 5.0.85
 		it("should re-download a remotely modified attachment in as-needed mode", async function () {
-			await setup();
 			Zotero.Sync.Storage.Local.downloadAsNeeded(Zotero.Libraries.userLibraryID, true);
 			
 			var item = await importFileAttachment('test.txt');
@@ -291,7 +287,6 @@ describe("ZoteroPane", function() {
 		});
 		
 		it("should handle a 404 when re-downloading a remotely modified attachment in as-needed mode", async function () {
-			await setup();
 			Zotero.Sync.Storage.Local.downloadAsNeeded(Zotero.Libraries.userLibraryID, true);
 			
 			var item = await importFileAttachment('test.txt');
@@ -331,7 +326,6 @@ describe("ZoteroPane", function() {
 		});
 		
 		it("should download an attachment on-demand in at-sync-time mode", function* () {
-			yield setup();
 			Zotero.Sync.Storage.Local.downloadOnSync(Zotero.Libraries.userLibraryID, true);
 			yield downloadOnDemand();
 		});
