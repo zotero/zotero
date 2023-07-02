@@ -44,7 +44,7 @@ class ItemTreeManager {
      */
     async registerColumn(option) {
         const success = addColumn(option);
-        if(!success) {
+        if (!success) {
             return false;
         }
         this._ensureObserverAdded();
@@ -60,7 +60,7 @@ class ItemTreeManager {
      */
     async unregisterColumn(dataKey) {
         const success = removeColumn(dataKey);
-        if(!success){
+        if (!success) {
             return false;
         }
         await this._reset();
@@ -86,20 +86,25 @@ class ItemTreeManager {
     }
 
     /**
-     * Refresh the active item tree
+     * Reset the item trees to update the columns
      * @private
      */
     async _reset() {
-        // TODO: dispatch a notify to reset all item trees
-        const activeItemTree = Zotero.getActiveZoteroPane().itemsView;
-        if (activeItemTree) {
-            await activeItemTree._resetColumns();
-        }
+        await Zotero.DB.executeTransaction(async function () {
+            Zotero.Notifier.queue(
+                'refresh',
+                'itemtree',
+                [],
+                {},
+            );
+        });
     }
 
     /**
      * Unregister all columns registered by a plugin
      * @param {string} pluginID - Plugin ID
+     * @async
+     * @private
      */
     async _unregisterColumnByPluginID(pluginID) {
         const columns = this.columns;
@@ -120,6 +125,7 @@ class ItemTreeManager {
     /**
      * Ensure that the observer is added
      * @returns {void}
+     * @private
      */
     _ensureObserverAdded() {
         if (this._observerAdded) {

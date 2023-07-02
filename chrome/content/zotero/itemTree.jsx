@@ -99,7 +99,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		
 		this._unregisterID = Zotero.Notifier.registerObserver(
 			this,
-			['item', 'collection-item', 'item-tag', 'share-items', 'bucket', 'feedItem', 'search'],
+			['item', 'collection-item', 'item-tag', 'share-items', 'bucket', 'feedItem', 'search', 'itemtree'],
 			'itemTreeView',
 			50
 		);
@@ -108,6 +108,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 		
 		this._columnsId = null;
 		this.columns = null;
+
+		// Store columns that are only for the current session
+		this.extraColumns = props.extraColumns || [];
 		
 		if (this.collectionTreeRow) {
 			this.collectionTreeRow.view.itemTreeView = this;
@@ -142,12 +145,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 	
 	
 	/**
-	 * Extension developers: use this to monkey-patch additional columns. See
-	 * itemTreeColumns.js for available column fields.
+	 * Get global columns from ItemTreeColumns and local columns from this.extraColumns
 	 * @returns {Array<Column>}
 	 */
 	getColumns() {
-		return getColumns();
+		return [...getColumns(), ...this.extraColumns];
 	}
 
 	/**
@@ -346,6 +348,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		if (!this._rowMap) {
 			Zotero.debug("Item row map didn't exist in itemTree.notify()");
+			return;
+		}
+
+		// Reset columns on custom column change
+		if(type === "itemtree" && action === "refresh") {
+			await this._resetColumns();
 			return;
 		}
 
