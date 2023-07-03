@@ -40,6 +40,8 @@ class ReaderInstance {
 			this._resolveInitPromise = resolve;
 			this._rejectInitPromise = reject;
 		});
+		this._pendingWriteStateTimeout = null;
+		this._pendingWriteStateFunction = null;
 
 		switch (this._item.attachmentContentType) {
 			case 'application/pdf': this._type = 'pdf'; break;
@@ -484,6 +486,7 @@ class ReaderInstance {
 		if (this._prefObserverIDs) {
 			this._prefObserverIDs.forEach(id => Zotero.Prefs.unregisterObserver(id));
 		}
+		this._flushState();
 	}
 
 	get itemID() {
@@ -666,9 +669,42 @@ class ReaderInstance {
 				await Zotero.Attachments.createDirectoryForItem(item);
 			}
 			file.append(this.stateFileName);
-			// Using `writeAtomic` instead of `putContentsAsync` to avoid
-			// using temp file that causes conflicts on simultaneous writes (on slow systems)
-			await OS.File.writeAtomic(file.path, JSON.stringify(state));
+			
+			// Write the new state to disk
+			let path = file.path;
+			let contents = JSON.stringify(state);
+
+			// If this is a PDF, state updates should be infrequent and we can write immediately
+			if (this._type == 'pdf') {
+				// Using `writeAtomic` instead of `putContentsAsync` to avoid
+				// using temp file that causes conflicts on simultaneous writes (on slow systems)
+				await OS.File.writeAtomic(path, contents);
+				return;
+			}
+
+			// If this is an EPUB or snapshot, state updates are frequent (every scroll) and we need to debounce
+			// actually writing them to disk. We flush the debounced write operation when Zotero shuts down or the
+			// window/tab is closed.
+			if (this._pendingWriteStateTimeout) {
+				clearTimeout(this._pendingWriteStateTimeout);
+			}
+			this._pendingWriteStateFunction = async () => {
+				if (this._pendingWriteStateTimeout) {
+					clearTimeout(this._pendingWriteStateTimeout);
+				}
+				this._pendingWriteStateFunction = null;
+				this._pendingWriteStateTimeout = null;
+				
+				// See above note about `writeAtomic`
+				await OS.File.writeAtomic(path, contents);
+			};
+			this._pendingWriteStateTimeout = setTimeout(this._pendingWriteStateFunction, 5000);
+		}
+	}
+	
+	async _flushState() {
+		if (this._pendingWriteStateFunction) {
+			await this._pendingWriteStateFunction();
 		}
 	}
 
@@ -1394,6 +1430,18 @@ class Reader {
 			await Zotero.PDFWorker.import(itemID, true);
 		}
 	}
+	
+	async flushAllReaderStates() {
+		for (let reader of this._readers) {
+			try {
+				await reader._flushState();
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
+	}
 }
 
 Zotero.Reader = new Reader();
+Zotero.addShutdownListener(() => Zotero.Reader.flushAllReaderStates());
