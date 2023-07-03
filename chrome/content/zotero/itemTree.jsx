@@ -58,8 +58,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 		dragAndDrop: false,
 		persistColumns: false,
 		columnPicker: false,
-		extraColumns: [],
-		columnsFilter: (columns) => columns,
+		// By default, use the global columns
+		columns: null,
 		onContextMenu: noop,
 		onActivate: noop,
 		emptyMessage: '',
@@ -107,7 +107,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._itemsPaneMessage = null;
 		
 		this._columnsId = null;
-		this.columns = null;
 
 		if (this.collectionTreeRow) {
 			this.collectionTreeRow.view.itemTreeView = this;
@@ -142,11 +141,18 @@ var ItemTree = class ItemTree extends LibraryTree {
 	
 	
 	/**
-	 * Get global columns from ItemTreeColumns and local columns from this.extraColumns
+	 * Get global columns from ItemTreeColumns and local columns from this.columns
 	 * @returns {Array<Column>}
 	 */
 	getColumns() {
-		return this.props.columnsFilter([...Zotero.ItemTreeManager._getAllColumns(), ...this.props.extraColumns]);
+		const extraColumns = Zotero.ItemTreeManager.getColumns();
+		const currentColumns = this.props.columns || Zotero.ItemTreeManager.getDefaultColumns();
+		extraColumns.forEach(column => {
+			if (!currentColumns.find(c => c.dataKey === column.dataKey)) {
+				currentColumns.push(column);
+			}
+		});
+		return currentColumns;
 	}
 
 	/**

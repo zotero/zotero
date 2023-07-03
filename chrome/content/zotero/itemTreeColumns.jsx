@@ -53,7 +53,7 @@ const Icons = require('components/icons');
  * @type {ItemTreeColumnOption[]}
  * @constant
  */
-const DEFAULT_COLUMNS = [
+const COLUMNS = [
 	{
 		dataKey: "title",
 		primary: true,
@@ -325,5 +325,5 @@ const DEFAULT_COLUMNS = [
 ];
 
 module.exports = {
-	DEFAULT_COLUMNS,
+	COLUMNS,
 };

@@ -59,7 +59,9 @@ var ZoteroAdvancedSearch = new function() {
 			id: "advanced-search",
 			dragAndDrop: true,
 			onActivate: this.onItemActivate.bind(this),
-			columnsFilter: (columns) => columns.filter(column => column.dataKey === "title" || column.dataKey === "firstCreator"),
+			columns: Zotero.ItemTreeManager.getDefaultColumns().filter(
+				column => column.dataKey === "title" || column.dataKey === "firstCreator"
+			),
 		});
 
 		// A minimal implementation of Zotero.CollectionTreeRow
