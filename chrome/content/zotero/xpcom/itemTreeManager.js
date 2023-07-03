@@ -70,36 +70,35 @@ class ItemTreeManager {
 	/**
 	 * Get column(s) that matches the properties of option
 	 * @param {undefined | Partial.<ItemTreeColumnOption> | Partial.<ItemTreeColumnOption>[]} optionOrOptions - An option or array of options to match
+	 * @param {string[]} [types=["custom", "itemtree"]] - An array of column source type to include
 	 * @returns {ItemTreeColumnOption[]}
 	 */
-	getColumns(optionOrOptions) {
+	getColumns(optionOrOptions, types) {
+		types = types || ["custom", "itemtree"]
+		const allColumns = types.reduce((acc, type) => acc.concat(this._getColumnsByType(type)), []);
 		if (!optionOrOptions) {
-			return this._getAllColumns();
+			return allColumns;
 		}
 		if (Array.isArray(optionOrOptions)) {
 			const matches = optionOrOptions.map(opt => this.getColumns(opt));
 			return matches.reduce((acc, match) => acc.concat(match), []);
 		}
-		return this._getAllColumns().filter(col => Object.keys(optionOrOptions).every(key => col[key] === optionOrOptions[key]));
+		return allColumns.filter(col => Object.keys(optionOrOptions).every(key => col[key] === optionOrOptions[key]));
 	}
 
 	/**
-	 * Get default columns. Only support itemtree type for now.
-	 * @param {"itemtree"} type 
+	 * Get columns by type. Only support itemtree and custom for now.
+	 * @param {"itemtree" | "custom"} type 
 	 * @returns 
 	 */
-	getDefaultColumns(type) {
+	_getColumnsByType(type) {
 		type = type || "itemtree";
 		if (type === "itemtree") {
 			return [...ITEMTREE_COLUMNS];
 		}
-	}
-
-	/**
-	 * Get all registered columns
-	 */
-	_getAllColumns() {
-		return [...this._customColumns];
+		if (type === "custom") {
+			return [...this._customColumns];
+		}
 	}
 
 	/**
@@ -200,17 +199,11 @@ class ItemTreeManager {
 	 * @param {string} pluginID - Plugin ID
 	 */
 	async _unregisterColumnByPluginID(pluginID) {
-		const columns = this._getAllColumns();
-		let removed = false;
-		for (const column of columns) {
-			if (column.pluginID === pluginID) {
-				this._removeColumn(column.dataKey);
-				removed = true;
-			}
-		}
-		if (!removed) {
+		const columns = this.getColumns({pluginID}, ["custom"]);
+		if(columns.length === 0) {
 			return;
 		}
+		columns.forEach(column => this._removeColumn(column.dataKey));
 		Zotero.debug(`ItemTree columns registered by plugin ${pluginID} unregistered due to shutdown`);
 		await this._notifyItemTrees();
 	}
