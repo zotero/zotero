@@ -498,9 +498,9 @@ var Zotero_Tabs = new function () {
 			menuitem = document.createXULElement('menuitem');
 			menuitem.setAttribute('label', Zotero.getString('general.showInLibrary'));
 			menuitem.addEventListener('command', () => {
-				var reader = Zotero.Reader.getByTabID(id);
-				if (reader) {
-					let itemID = reader.itemID;
+				let { tab } = this._getTab(id);
+				if (tab && (tab.type === 'reader' || tab.type === 'reader-unloaded')) {
+					let itemID = tab.data.itemID;
 					let item = Zotero.Items.get(itemID);
 					if (item && item.parentItemID) {
 						itemID = item.parentItemID;
@@ -537,11 +537,11 @@ var Zotero_Tabs = new function () {
 			menuitem.setAttribute('label', Zotero.getString('tabs.moveToWindow'));
 			menuitem.setAttribute('disabled', false);
 			menuitem.addEventListener('command', () => {
-				var reader = Zotero.Reader.getByTabID(id);
-				if (reader) {
+				let { tab } = this._getTab(id);
+				if (tab && (tab.type === 'reader' || tab.type === 'reader-unloaded')) {
 					this.close(id);
-					let { secondViewState } = tab.data;
-					Zotero.Reader.open(reader.itemID, null, { openInWindow: true, secondViewState });
+					let { itemID, secondViewState } = tab.data;
+					Zotero.Reader.open(itemID, null, { openInWindow: true, secondViewState });
 				}
 			});
 			menupopup.appendChild(menuitem);
