@@ -3553,7 +3553,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (!this.props.columnPicker) return;
 		const prefix = 'zotero-column-picker-';
 		const doc = document;
-		const popupset = doc.getElementById('trees-popupset');
+		let popupset = document.querySelector('#zotero-column-picker-popupset');
+		if (!popupset) {
+			popupset = doc.createXULElement('popupset');
+			popupset.id = 'zotero-column-picker-popupset';
+			document.children[0].appendChild(popupset);
+		}
 		
 		const menupopup = doc.createXULElement('menupopup');
 		menupopup.id = 'zotero-column-picker';
@@ -3702,7 +3707,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		menuitem.setAttribute('anonid', prefix + 'restore-order');
 		menuitem.addEventListener('command', () => this.tree._columns.restoreDefaultOrder());
 		menupopup.appendChild(menuitem);
-		
+
 		popupset.appendChild(menupopup);
 		menupopup.openPopupAtScreen(
 			window.screenX + event.clientX + 2,
