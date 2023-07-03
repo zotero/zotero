@@ -3839,9 +3839,11 @@ var ItemTreeRow = function(ref, level, isOpen)
 
 ItemTreeRow.prototype.getField = function(field, unformatted)
 {
-	// TODO: Add support for other custom fields here @dstillman
-	// Currently, you should monkeypatch Zotero.Item.prototype.getField yourself
-	return this.ref.getField(field, unformatted, true);
+	try {
+		return this.ref.getField(field, unformatted, true);
+	} catch (e) {
+		return Zotero.ItemTreeManager.getCustomCellData(ref, field, unformatted);
+	}
 }
 
 ItemTreeRow.prototype.numNotes = function() {

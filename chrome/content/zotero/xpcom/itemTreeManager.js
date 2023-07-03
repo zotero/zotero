@@ -33,6 +33,11 @@ class ItemTreeManager {
 	_observerAdded = false;
 	/** @type {ItemTreeColumnOption[]} */
 	_customColumns = [];
+	/** 
+	 * Cached custom columns' data source, dataKey: dataProvider
+	 * @type {Record<string, (item: Zotero.Item, field: string, unformatted?: boolean) => string>}
+	 */
+	_customDataProvider = {};
 	constructor() {
 	}
 
@@ -84,6 +89,20 @@ class ItemTreeManager {
 			return matches.reduce((acc, match) => acc.concat(match), []);
 		}
 		return allColumns.filter(col => Object.keys(optionOrOptions).every(key => col[key] === optionOrOptions[key]));
+	}
+
+	/**
+	 * A centralized data source for custom columns. This is used by the ItemTreeRow to get data.
+	 * @param {Zotero.Item} item 
+	 * @param {string} field 
+	 * @param {boolean} unformatted 
+	 * @returns 
+	 */
+	getCustomCellData(item, field, unformatted) {
+		if (this._customDataProvider[field]) {
+			return this._customDataProvider[field](item, field, unformatted);
+		}
+		return "";
 	}
 
 	/**
@@ -159,6 +178,9 @@ class ItemTreeManager {
 			return true;
 		}
 		this._customColumns.push(Object.assign({}, optionOrOptions, { custom: true }));
+		if (optionOrOptions.getData) {
+			this._customDataProvider[optionOrOptions.dataKey] = optionOrOptions.dataProvider;
+		}
 		return true;
 	}
 
@@ -176,6 +198,7 @@ class ItemTreeManager {
 			this._customColumns.splice(index, 1);
 			return true;
 		}
+		delete this._customDataProvider[dataKeyOrDataKeys.dataKey];
 		return false;
 	}
 
@@ -199,8 +222,8 @@ class ItemTreeManager {
 	 * @param {string} pluginID - Plugin ID
 	 */
 	async _unregisterColumnByPluginID(pluginID) {
-		const columns = this.getColumns({pluginID}, ["custom"]);
-		if(columns.length === 0) {
+		const columns = this.getColumns({ pluginID }, ["custom"]);
+		if (columns.length === 0) {
 			return;
 		}
 		columns.forEach(column => this._removeColumn(column.dataKey));
