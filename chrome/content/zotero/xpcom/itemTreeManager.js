@@ -45,6 +45,18 @@ class ItemTreeManager {
 	 * Register a custom column. All registered columns must be valid, and must have a unique dataKey.
 	 * @param {ItemTreeColumnOption | ItemTreeColumnOption[]} optionOrOptions
 	 * @returns {boolean} Although it's async, resolving does not promise the item trees are updated.
+	 * @example
+	 * ```js
+	 * Zotero.ItemTreeManager.registerColumns(
+	 * {
+	 *     dataKey: 'rtitle',
+	 *     iconPath: 'chrome://zotero/skin/tick.png',
+	 *     label: 'reversed title',
+	 *     dataProvider: (item, field) => {
+	 *         return item.getField('title').split('').reverse().join('')}
+	 *     }),
+	 * });
+	 * ```
 	 */
 	async registerColumns(optionOrOptions) {
 		const success = this._addColumn(optionOrOptions);
@@ -60,6 +72,10 @@ class ItemTreeManager {
 	 * Unregister a custom column
 	 * @param {string | string[]} dataKeyOrDataKeys - The dataKey of the column to unregister
 	 * @returns {boolean} Although it's async, resolving does not promise the item trees are updated.
+	 * @example
+	 * ```js
+	 * Zotero.ItemTreeManager.unregisterColumns('rtitle');
+	 * ```
 	 */
 	async unregisterColumns(dataKeyOrDataKeys) {
 		const success = this._removeColumn(dataKeyOrDataKeys);
@@ -178,7 +194,7 @@ class ItemTreeManager {
 			return true;
 		}
 		this._customColumns.push(Object.assign({}, optionOrOptions, { custom: true }));
-		if (optionOrOptions.getData) {
+		if (optionOrOptions.dataProvider) {
 			this._customDataProvider[optionOrOptions.dataKey] = optionOrOptions.dataProvider;
 		}
 		return true;

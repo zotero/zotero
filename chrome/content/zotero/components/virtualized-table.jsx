@@ -1338,6 +1338,11 @@ class VirtualizedTable extends React.Component {
 		return row >= this._jsWindow.getFirstVisibleRow()
 			&& row <= this._jsWindow.getLastVisibleRow();
 	}
+
+	async _resetColumns() {
+		this._columns = new Columns(this);
+		await new Promise((resolve) => {this.forceUpdate(resolve)});
+	}
 }
 
 /**

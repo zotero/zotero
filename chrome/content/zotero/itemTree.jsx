@@ -3825,7 +3825,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	async _resetColumns(){
 		this._columnsId = null;
-		return new Promise(resolve => this.forceUpdate(resolve));
+		await this.refreshAndMaintainSelection();
+		await this.tree._resetColumns();
+		await this.refreshAndMaintainSelection();
 	}
 };
 
@@ -3842,7 +3844,7 @@ ItemTreeRow.prototype.getField = function(field, unformatted)
 	try {
 		return this.ref.getField(field, unformatted, true);
 	} catch (e) {
-		return Zotero.ItemTreeManager.getCustomCellData(ref, field, unformatted);
+		return Zotero.ItemTreeManager.getCustomCellData(this.ref, field, unformatted);
 	}
 }
 
