@@ -58,8 +58,8 @@ var ZoteroPane = new function()
 	
 	this.document = document;
 
-	const modifierIsNotShift = ev => ev.getModifierState("Meta") || ev.getModifierState("Alt") ||
-    ev.getModifierState("Control") || ev.getModifierState("OS");
+	const modifierIsNotShift = ev => ev.getModifierState("Meta") || ev.getModifierState("Alt")
+	|| ev.getModifierState("Control") || ev.getModifierState("OS");
 
 	var self = this,
 		_loaded = false, _madeVisible = false,
@@ -132,7 +132,7 @@ var ZoteroPane = new function()
 		
 		// register an observer for Zotero reload
 		observerService = Components.classes["@mozilla.org/observer-service;1"]
-					  .getService(Components.interfaces.nsIObserverService);
+					.getService(Components.interfaces.nsIObserverService);
 		observerService.addObserver(_reloadObserver, "zotero-reloaded", false);
 		observerService.addObserver(_reloadObserver, "zotero-before-reload", false);
 		this.addReloadListener(_loadPane);
@@ -219,7 +219,7 @@ var ZoteroPane = new function()
 					return document.getElementById("zotero-tb-locate");
 				},
 				focusBefore() {
-					document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus();
+					document.getElementById("zotero-tb-search").focus();
 				},
 				focusAfter() {
 					document.getElementById("collection-tree").focus();
@@ -276,8 +276,8 @@ var ZoteroPane = new function()
 			}
 		}
 		
-		/* this container sets "hidden" to hide its children, so we have to observe it too */
-		observer.observe(document.getElementById("zotero-tb-sync-progress-box"), {
+		
+		observer.observe(document.getElementById("zotero-tb-sync-stop"), {
 			attributes: true,
 			attributeFilter: ["hidden"]
 		});
@@ -294,12 +294,21 @@ var ZoteroPane = new function()
 		toolbar.addEventListener("keydown", (event) => {
 			// manually move focus when Shift+Tabbing from the search-menu-button
 			if (event.key === 'Tab' && event.shiftKey
-				&& !modifierIsNotShift(event)
-				&& event.originalTarget
-				&& event.originalTarget.id == "zotero-tb-search-menu-button") {
+					&& !modifierIsNotShift(event)
+					&& event.originalTarget
+					&& event.originalTarget.id == "zotero-tb-search-menu-button") {
 				event.preventDefault();
 				event.stopPropagation();
 				zones[0].start.focus();
+				return;
+			}
+			// manually move focus to search menu when Shift+Tabbing from the search-menu
+			if (event.key === 'Tab' && event.shiftKey
+					&& !modifierIsNotShift(event)
+					&& event.originalTarget?.tagName == "input") {
+				event.preventDefault();
+				event.stopPropagation();
+				document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus();
 				return;
 			}
 			// only handle events on a <toolbarbutton>
@@ -308,7 +317,7 @@ var ZoteroPane = new function()
 			const mapData = focusMap.get(event.target.id);
 
 			if (!Zotero.rtl && event.key === 'ArrowRight'
-				|| Zotero.rtl && event.key === 'ArrowLeft') {
+					|| Zotero.rtl && event.key === 'ArrowLeft') {
 				event.preventDefault();
 				event.stopPropagation();
 				if (mapData.after) {
@@ -317,7 +326,7 @@ var ZoteroPane = new function()
 				return;
 			}
 			if (!Zotero.rtl && event.key === 'ArrowLeft'
-				|| Zotero.rtl && event.key === 'ArrowRight') {
+					|| Zotero.rtl && event.key === 'ArrowRight') {
 				event.preventDefault();
 				event.stopPropagation();
 				if (mapData.before) {

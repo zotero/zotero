@@ -2315,8 +2315,8 @@
 		}
 
 		focusLastField() {
-			const tabbableFields=this.querySelectorAll('*[ztabindex]:not([disabled=true])');
-			const last=tabbableFields[tabbableFields.length-1];
+			const tabbableFields = this.querySelectorAll('*[ztabindex]:not([disabled=true])');
+			const last = tabbableFields[tabbableFields.length - 1];
 
 			if (last.classList.contains('zotero-focusable')) {
 				last.focus();
