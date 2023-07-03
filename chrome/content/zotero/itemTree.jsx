@@ -142,7 +142,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	
 	/**
 	 * Get global columns from ItemTreeColumns and local columns from this.columns
-	 * @returns {Array<Column>}
+	 * @returns {Array<import("./itemTreeColumns").ItemTreeColumnOption>}
 	 */
 	getColumns() {
 		const extraColumns = Zotero.ItemTreeManager.getColumns();
