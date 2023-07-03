@@ -3819,7 +3819,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	async _resetColumns(){
 		this._columnsId = null;
-		return new Promise(resolve=>this.forceUpdate(resolve));
+		return new Promise(resolve => this.forceUpdate(resolve));
 	}
 };
 
