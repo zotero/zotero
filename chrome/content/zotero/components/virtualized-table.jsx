@@ -1090,6 +1090,15 @@ class VirtualizedTable extends React.Component {
 		return this._getVisibleColumns().map((column, index) => {
 			let columnName = formatColumnName(column);
 			let label = columnName;
+			// Allow custom icons to be used in column headers
+			if (column.iconPath) {
+				column.iconLabel = <span><img
+					src={column.iconPath}
+					height={'10px'}
+					width={'9px'}
+					style={{marginLeft: '6px'}}>
+				</img>&nbsp;{columnName}</span>;
+			}
 			if (column.iconLabel) {
 				label = column.iconLabel;
 			}
