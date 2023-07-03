@@ -58,7 +58,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 		dragAndDrop: false,
 		persistColumns: false,
 		columnPicker: false,
-		columns: Zotero.ItemTreeManager.columns,
 		extraColumns: [],
 		columnsFilter: (columns) => columns,
 		onContextMenu: noop,
@@ -147,7 +146,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * @returns {Array<Column>}
 	 */
 	getColumns() {
-		return this.props.columnsFilter([...Zotero.ItemTreeManager.columns, ...this.props.extraColumns]);
+		return this.props.columnsFilter([...Zotero.ItemTreeManager._getAllColumns(), ...this.props.extraColumns]);
 	}
 
 	/**
