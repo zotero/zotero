@@ -91,7 +91,7 @@ class ItemTreeManager {
 	getDefaultColumns(type) {
 		type = type || "itemtree";
 		if (type === "itemtree") {
-			return ITEMTREE_COLUMNS;
+			return [...ITEMTREE_COLUMNS];
 		}
 	}
 
