@@ -933,55 +933,61 @@ class ReaderTab extends ReaderInstance {
 		this._popupset = this._window.document.createXULElement('popupset');
 		this._tabContainer.appendChild(this._popupset);
 		
-		this._window.addEventListener('DOMContentLoaded', (event) => {
-			if (this._iframe && this._iframe.contentWindow && this._iframe.contentWindow.document === event.target) {
-				this._iframeWindow = this._iframe.contentWindow;
-				this._iframeWindow.addEventListener('error', event => Zotero.logError(event.error));
-			}
-		});
-		
+		this._window.addEventListener('DOMContentLoaded', this._handleLoad);
+		this._window.addEventListener('pointerup', this._handlePointerUp);
+
 		this._iframe.setAttribute('tooltip', 'html-tooltip');
-
-		// This is a nonsense work-around to trigger mouseup and pointerup
-		// events in PDF reader iframe when mouse up happens over another iframe
-		// i.e. note-editor. There should be a better way to solve this
-		this._window.addEventListener('pointerup', (event) => {
-			try {
-				if (this._window.Zotero_Tabs.selectedID === this.tabID
-					&& this._iframeWindow
-					&& event.target
-					&& event.target.closest
-					&& !event.target.closest('#outerContainer')) {
-					let evt = new this._iframeWindow.MouseEvent('mouseup', { ...event, bubbles: false });
-					this._iframeWindow.dispatchEvent(evt);
-					if (evt.defaultPrevented) {
-						event.preventDefault();
-						return;
-					}
-					if (evt.clickEventPrevented()) {
-						event.preventClickEvent();
-					}
-
-					evt = new this._iframeWindow.PointerEvent('pointerup', { ...event, bubbles: false });
-					this._iframeWindow.dispatchEvent(evt);
-					if (evt.defaultPrevented) {
-						event.preventDefault();
-					}
-				}
-			}
-			catch (e) {
-				Zotero.logError(e);
-			}
-		});
 
 		this._open({ location: options.location, secondViewState: options.secondViewState });
 	}
 	
 	close() {
+		this._window.removeEventListener('DOMContentLoaded', this._handleLoad);
+		this._window.removeEventListener('pointerup', this._handlePointerUp);
 		if (this.tabID) {
 			this._window.Zotero_Tabs.close(this.tabID);
 		}
 	}
+
+	_handleLoad = (event) => {
+		if (this._iframe && this._iframe.contentWindow && this._iframe.contentWindow.document === event.target) {
+			this._window.removeEventListener('DOMContentLoaded', this._handleLoad);
+			this._iframeWindow = this._iframe.contentWindow;
+			this._iframeWindow.addEventListener('error', event => Zotero.logError(event.error));
+		}
+	};
+
+	// This is a nonsense work-around to trigger mouseup and pointerup
+	// events in PDF reader iframe when mouse up happens over another iframe
+	// i.e. note-editor. There should be a better way to solve this
+	_handlePointerUp = (event) => {
+		try {
+			if (this._window.Zotero_Tabs.selectedID === this.tabID
+				&& this._iframeWindow
+				&& event.target
+				&& event.target.closest
+				&& !event.target.closest('#outerContainer')) {
+				let evt = new this._iframeWindow.MouseEvent('mouseup', { ...event, bubbles: false });
+				this._iframeWindow.dispatchEvent(evt);
+				if (evt.defaultPrevented) {
+					event.preventDefault();
+					return;
+				}
+				if (evt.clickEventPrevented()) {
+					event.preventClickEvent();
+				}
+
+				evt = new this._iframeWindow.PointerEvent('pointerup', { ...event, bubbles: false });
+				this._iframeWindow.dispatchEvent(evt);
+				if (evt.defaultPrevented) {
+					event.preventDefault();
+				}
+			}
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
+	};
 
 	_setTitleValue(title) {
 		this._window.Zotero_Tabs.rename(this.tabID, title);
