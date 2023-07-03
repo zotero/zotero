@@ -1,7 +1,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 	
-	Copyright © 2019 Corporation for Digital Scholarship
+	Copyright © 2020 Corporation for Digital Scholarship
                      Vienna, Virginia, USA
 					http://zotero.org
 	
