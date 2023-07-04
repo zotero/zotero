@@ -43,8 +43,9 @@ class ItemTreeManager {
 
 	/** 
 	 * Register a custom column. All registered columns must be valid, and must have a unique dataKey.
-	 * @param {ItemTreeColumnOption | ItemTreeColumnOption[]} optionOrOptions
-	 * @returns {boolean} Although it's async, resolving does not promise the item trees are updated.
+	 * Although it's async, resolving does not promise the item trees are updated.
+	 * @param {ItemTreeColumnOption | ItemTreeColumnOption[]} options - An option or array of options to register
+	 * @returns {boolean} true if the column(s) are registered
 	 * @example
 	 * ```js
 	 * Zotero.ItemTreeManager.registerColumns(
@@ -58,8 +59,8 @@ class ItemTreeManager {
 	 * });
 	 * ```
 	 */
-	async registerColumns(optionOrOptions) {
-		const success = this._addColumn(optionOrOptions);
+	async registerColumns(options) {
+		const success = this._addColumns(options);
 		if (!success) {
 			return false;
 		}
@@ -69,16 +70,17 @@ class ItemTreeManager {
 	}
 
 	/**
-	 * Unregister a custom column
-	 * @param {string | string[]} dataKeyOrDataKeys - The dataKey of the column to unregister
-	 * @returns {boolean} Although it's async, resolving does not promise the item trees are updated.
+	 * Unregister a custom column.
+	 * Although it's async, resolving does not promise the item trees are updated.
+	 * @param {string | string[]} dataKeys - The dataKey of the column to unregister
+	 * @returns {boolean} true if the column(s) are unregistered
 	 * @example
 	 * ```js
 	 * Zotero.ItemTreeManager.unregisterColumns('rtitle');
 	 * ```
 	 */
-	async unregisterColumns(dataKeyOrDataKeys) {
-		const success = this._removeColumn(dataKeyOrDataKeys);
+	async unregisterColumns(dataKeys) {
+		const success = this._removeColumns(dataKeys);
 		if (!success) {
 			return false;
 		}
@@ -90,21 +92,21 @@ class ItemTreeManager {
 
 	/**
 	 * Get column(s) that matches the properties of option
-	 * @param {undefined | Partial.<ItemTreeColumnOption> | Partial.<ItemTreeColumnOption>[]} optionOrOptions - An option or array of options to match
+	 * @param {undefined | Partial.<ItemTreeColumnOption> | Partial.<ItemTreeColumnOption>[]} options - An option or array of options to match
 	 * @param {string[]} [types=["custom", "itemtree"]] - An array of column source type to include
 	 * @returns {ItemTreeColumnOption[]}
 	 */
-	getColumns(optionOrOptions, types) {
+	getColumns(options, types) {
 		types = types || ["custom", "itemtree"]
 		const allColumns = types.reduce((acc, type) => acc.concat(this._getColumnsByType(type)), []);
-		if (!optionOrOptions) {
+		if (!options) {
 			return allColumns;
 		}
-		if (Array.isArray(optionOrOptions)) {
-			const matches = optionOrOptions.map(opt => this.getColumns(opt));
+		if (Array.isArray(options)) {
+			const matches = options.map(opt => this.getColumns(opt));
 			return matches.reduce((acc, match) => acc.concat(match), []);
 		}
-		return allColumns.filter(col => Object.keys(optionOrOptions).every(key => col[key] === optionOrOptions[key]));
+		return allColumns.filter(col => Object.keys(options).every(key => col[key] === options[key]));
 	}
 
 	/**
@@ -112,7 +114,7 @@ class ItemTreeManager {
 	 * @param {Zotero.Item} item 
 	 * @param {string} field 
 	 * @param {boolean} unformatted 
-	 * @returns 
+	 * @returns {string}
 	 */
 	getCustomCellData(item, field, unformatted) {
 		if (this._customDataProvider[field]) {
@@ -124,7 +126,7 @@ class ItemTreeManager {
 	/**
 	 * Get columns by type. Only support itemtree and custom for now.
 	 * @param {"itemtree" | "custom"} type 
-	 * @returns 
+	 * @returns {ItemTreeColumnOption[]}
 	 */
 	_getColumnsByType(type) {
 		type = type || "itemtree";
@@ -137,37 +139,37 @@ class ItemTreeManager {
 	}
 
 	/**
-	 * Check if column option is valid. An atomic operation.
-	 * @param {ItemTreeColumnOption | ItemTreeColumnOption[]} optionOrOptions 
-	 * @returns {boolean}
+	 * Check if column options is valid. An atomic operation.
+	 * @param {ItemTreeColumnOption | ItemTreeColumnOption[]} options 
+	 * @returns {boolean} true if the option(s) are valid
 	 */
-	_validateColumnOption(optionOrOptions) {
+	_validateColumnOption(options) {
 		/**
-		 * Validate column option. An atomic operation.
-		 * @param {ItemTreeColumnOption | ItemTreeColumnOption[]} optionOrOptions 
+		 * Validate column options. An atomic operation.
+		 * @param {ItemTreeColumnOption | ItemTreeColumnOption[]} options 
 		 * @param {(option: ItemTreeColumnOption) => boolean} validator - A function that returns true if the option is valid
-		 * @returns {boolean}
+		 * @returns {boolean} true if the option(s) are valid
 		 */
-		function validate(optionOrOptions, validator) {
-			if (Array.isArray(optionOrOptions)) {
-				return optionOrOptions.every(opt => validator(opt));
+		function validate(options, validator) {
+			if (Array.isArray(options)) {
+				return options.every(opt => validator(opt));
 			}
-			return validator(optionOrOptions);
+			return validator(options);
 		}
 
 		// Check if the input option has duplicate dataKeys
-		const noInputDuplicates = !Array.isArray(optionOrOptions) || !optionOrOptions.find((opt, i, arr) => arr.findIndex(o => o.dataKey === opt.dataKey) !== i);
+		const noInputDuplicates = !Array.isArray(options) || !options.find((opt, i, arr) => arr.findIndex(o => o.dataKey === opt.dataKey) !== i);
 		if (!noInputDuplicates) {
 			Zotero.warn(`ItemTree Column options have duplicate dataKey.`);
 		}
-		const requiredProperties = validate(optionOrOptions, (option) => {
+		const requiredProperties = validate(options, (option) => {
 			const valid = option.dataKey && option.label;
 			if (!valid) {
 				Zotero.warn(`ItemTree Column option ${JSON.stringify(option)} must have dataKey and label.`);
 			}
 			return valid;
 		});
-		const noRegisteredDuplicates = validate(optionOrOptions, (option) => {
+		const noRegisteredDuplicates = validate(options, (option) => {
 			const valid = this.getColumns({ dataKey: option.dataKey }).length === 0;
 			if (!valid) {
 				Zotero.warn(`ItemTree Column option ${JSON.stringify(option)} with dataKey ${option.dataKey} already exists.`);
@@ -180,40 +182,43 @@ class ItemTreeManager {
 
 	/**
 	 * Add a new column or new columns. All options must be valid. An atomic operation.
-	 * @param {ItemTreeColumnOption | ItemTreeColumnOption[]} optionOrOptions - An option or array of options to add
+	 * @param {ItemTreeColumnOption | ItemTreeColumnOption[]} options - An option or array of options to add
+	 * @param {boolean} [skipValidate=false] - Whether to validate the option(s) before adding 
 	 * @returns {boolean} - True if column(s) were added, false if not
 	 */
-	_addColumn(optionOrOptions) {
+	_addColumns(options, skipValidate) {
 		// If any check fails, return check results
-		if (!this._validateColumnOption(optionOrOptions)) {
+		if (!skipValidate && !this._validateColumnOption(options)) {
 			return false;
 		}
-		if (Array.isArray(optionOrOptions)) {
-			optionOrOptions.forEach(opt => this._addColumn(opt));
+		if (Array.isArray(options)) {
+			// Validating options as an array is more efficient, so we skip validation for each option
+			// and only validate the array once
+			options.forEach(opt => this._addColumns(opt, true));
 			return true;
 		}
-		this._customColumns.push(Object.assign({}, optionOrOptions, { custom: true }));
-		if (optionOrOptions.dataProvider) {
-			this._customDataProvider[optionOrOptions.dataKey] = optionOrOptions.dataProvider;
+		this._customColumns.push(Object.assign({}, options, { custom: true }));
+		if (options.dataProvider) {
+			this._customDataProvider[options.dataKey] = options.dataProvider;
 		}
 		return true;
 	}
 
 	/**
 	 * Remove a column option
-	 * @param {string | string[]} dataKeyOrDataKeys 
+	 * @param {string | string[]} dataKeys 
 	 * @returns {boolean | boolean[]}
 	 */
-	_removeColumn(dataKeyOrDataKeys) {
-		if (Array.isArray(dataKeyOrDataKeys)) {
-			return dataKeyOrDataKeys.map(key => this._removeColumn(key));
+	_removeColumns(dataKeys) {
+		if (Array.isArray(dataKeys)) {
+			return dataKeys.map(key => this._removeColumns(key));
 		}
-		const index = this._customColumns.findIndex(column => column.dataKey == dataKeyOrDataKeys);
+		const index = this._customColumns.findIndex(column => column.dataKey == dataKeys);
 		if (index > -1) {
 			this._customColumns.splice(index, 1);
 			return true;
 		}
-		delete this._customDataProvider[dataKeyOrDataKeys.dataKey];
+		delete this._customDataProvider[dataKeys.dataKey];
 		return false;
 	}
 
@@ -241,7 +246,7 @@ class ItemTreeManager {
 		if (columns.length === 0) {
 			return;
 		}
-		columns.forEach(column => this._removeColumn(column.dataKey));
+		columns.forEach(column => this._removeColumns(column.dataKey));
 		Zotero.debug(`ItemTree columns registered by plugin ${pluginID} unregistered due to shutdown`);
 		await this._notifyItemTrees();
 	}
