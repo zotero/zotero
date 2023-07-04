@@ -60,7 +60,7 @@ var doLoad = async function () {
 				onItemSelected();
 			}
 		},
-		id: "select-items-dialog",
+		id: io.treeID || "select-items-dialog",
 		dragAndDrop: false,
 		persistColumns: true,
 		columnPicker: true,

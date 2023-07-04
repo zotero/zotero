@@ -35,6 +35,10 @@ const { getDOMElement } = Icons;
 const { Cc, Ci, Cu } = require('chrome');
 Cu.import("resource://gre/modules/osfile.jsm");
 
+/**
+ * @typedef {import("./itemTreeColumns.jsx").ItemTreeColumnOption} ItemTreeColumnOption
+ */
+
 const CHILD_INDENT = 12;
 const COLORED_TAGS_RE = new RegExp("^(?:Numpad|Digit)([0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1})$");
 const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
@@ -142,17 +146,19 @@ var ItemTree = class ItemTree extends LibraryTree {
 	
 	/**
 	 * Get global columns from ItemTreeColumns and local columns from this.columns
-	 * @returns {Array<import("./itemTreeColumns").ItemTreeColumnOption>}
+	 * @returns {ItemTreeColumnOption[]}
 	 */
 	getColumns() {
 		const extraColumns = Zotero.ItemTreeManager.getColumns();
+		/** @type {ItemTreeColumnOption[]} */
 		const currentColumns = this.props.columns || Zotero.ItemTreeManager._getColumnsByType();
 		extraColumns.forEach(column => {
 			if (!currentColumns.find(c => c.dataKey === column.dataKey)) {
 				currentColumns.push(column);
 			}
 		});
-		return currentColumns;
+		// Filter out columns that are not enabled for this tree
+		return currentColumns.filter(column => column.enabledTreeIDs ? column.enabledTreeIDs.includes(this.props.id) : true);
 	}
 
 	/**
