@@ -59,9 +59,7 @@ var ZoteroAdvancedSearch = new function() {
 			id: "advanced-search",
 			dragAndDrop: true,
 			onActivate: this.onItemActivate.bind(this),
-			columns: Zotero.ItemTreeManager.getColumns(null, ["itemtree"]).filter(
-				column => column.dataKey === "title" || column.dataKey === "firstCreator"
-			),
+			columns: Zotero.ItemTreeManager.getColumns([{dataKey: "title"}, {dataKey: "firstCreator"}], ["itemtree"]),
 		});
 
 		// A minimal implementation of Zotero.CollectionTreeRow
