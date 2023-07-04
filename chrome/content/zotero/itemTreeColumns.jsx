@@ -31,8 +31,8 @@ const Icons = require('components/icons');
  * @type {object}
  * @property {string} dataKey - Required, see use in ItemTree#_getRowData()
  * @property {string[]} [enabledTreeIDs=[]] - Which tree ids the column should be enabled in. If undefined, enabled in every tree.
- * @property {Set.<string>} [defaultIn] - Types of trees the column is default in. Can be [default, feed];
- * @property {Set.<string>} [disabledIn] - Types of trees where the column is not available
+ * @property {string[]} [defaultIn] - Types of trees the column is default in. Can be [default, feed];
+ * @property {string[]} [disabledIn] - Types of trees where the column is not available
  * @property {number} [defaultSort=1] - Default: 1. -1 for descending sort
  * @property {number} [flex=1] - Default: 1. When the column is added to the tree how much space it should occupy as a flex ratio
  * @property {string} [width] - A column width instead of flex ratio. See above.
@@ -48,7 +48,7 @@ const Icons = require('components/icons');
  * @property {boolean} [custom] - Set automatically to true when the column is added by the user
  * @property {string} [pluginID] - Set plugin ID to auto remove column when plugin is removed
  * @property {(item: Zotero.Item, field: string, unformatted?: boolean) => string} [dataProvider] - Custom data provider that is called when rendering cells
- * @property {Set.<string>} zoteroPersist - Which column properties should be persisted between zotero close
+ * @property {string[]} zoteroPersist - Which column properties should be persisted between zotero close
  */
 
 /**
