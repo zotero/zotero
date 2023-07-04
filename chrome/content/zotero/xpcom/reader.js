@@ -1014,6 +1014,7 @@ class ReaderWindow extends ReaderInstance {
 		this._sidebarWidth = options.sidebarWidth;
 		this._sidebarOpen = options.sidebarOpen;
 		this._bottomPlaceholderHeight = 0;
+		this._onClose = options.onClose;
 
 		let win = Services.wm.getMostRecentWindow('navigator:browser');
 		if (!win) return;
@@ -1024,7 +1025,6 @@ class ReaderWindow extends ReaderInstance {
 
 		this._window.addEventListener('DOMContentLoaded', (event) => {
 			if (event.target === this._window.document) {
-				this._window.addEventListener('keypress', this._handleKeyPress);
 				this._popupset = this._window.document.getElementById('zotero-reader-popupset');
 				this._window.onGoMenuOpen = this._onGoMenuOpen.bind(this);
 				this._window.onViewMenuOpen = this._onViewMenuOpen.bind(this);
@@ -1054,17 +1054,11 @@ class ReaderWindow extends ReaderInstance {
 
 	close() {
 		this._window.close();
+		this._onClose();
 	}
 
 	_setTitleValue(title) {
 		this._window.document.title = title;
-	}
-
-	_handleKeyPress = (event) => {
-		if ((Zotero.isMac && event.metaKey || event.ctrlKey)
-			&& !event.shiftKey && !event.altKey && event.key === 'w') {
-			this._window.close();
-		}
 	}
 
 	_onViewMenuOpen() {
@@ -1334,14 +1328,14 @@ class Reader {
 				secondViewState,
 				sidebarWidth: this._sidebarWidth,
 				sidebarOpen: this._sidebarOpen,
-				bottomPlaceholderHeight: this._bottomPlaceholderHeight
+				bottomPlaceholderHeight: this._bottomPlaceholderHeight,
+				onClose: () => {
+					this._readers.splice(this._readers.indexOf(reader), 1);
+					Zotero.Session.debounceSave();
+				}
 			});
 			this._readers.push(reader);
 			Zotero.Session.debounceSave();
-			reader._window.addEventListener('close', () => {
-				this._readers.splice(this._readers.indexOf(reader), 1);
-				Zotero.Session.debounceSave();
-			});
 		}
 		else {
 			reader = new ReaderTab({

@@ -18,6 +18,7 @@
 	width="1300"
 	height="800"
 	persist="screenX screenY width height"
+	onclose="reader.close()"
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	xmlns:html="http://www.w3.org/1999/xhtml"
 >
@@ -43,7 +44,7 @@
 	<commandset id="mainCommandSet">
 		<!--FILE-->
 		<command id="cmd_quitApplication" oncommand="goQuitApplication(event);"/>
-		<command id="cmd_close" oncommand="window.close();"/>
+		<command id="cmd_close" oncommand="reader.close()"/>
 		
 		<!--EDIT-->
 		<commandset id="editMenuCommands"/>
@@ -66,6 +67,7 @@
 			 command="minimizeWindow"
 			 key="&minimizeWindow.key;"
 			 modifiers="accel"/>
+		<key id="key_close" key="&closeCmd.key;" command="cmd_close" modifiers="accel"/>
 	</keyset>
 
 	<keyset id="editMenuKeys">
