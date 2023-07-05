@@ -998,16 +998,6 @@ class EditorInstance {
 		}
 	}
 
-	_arrayBufferToBase64(buffer) {
-		var binary = '';
-		var bytes = new Uint8Array(buffer);
-		var len = bytes.byteLength;
-		for (var i = 0; i < len; i++) {
-			binary += String.fromCharCode(bytes[i]);
-		}
-		return btoa(binary);
-	}
-
 	_dataURLtoBlob(dataurl) {
 		let parts = dataurl.split(',');
 		let mime = parts[0].match(/:(.*?);/)[1];
@@ -1028,7 +1018,17 @@ class EditorInstance {
 		let path = await item.getFilePathAsync();
 		let buf = await OS.File.read(path, {});
 		buf = new Uint8Array(buf).buffer;
-		return 'data:' + item.attachmentContentType + ';base64,' + this._arrayBufferToBase64(buf);
+		return new Promise((resolve, reject) => {
+			let blob = new Blob([buf], { type: item.attachmentContentType });
+			let reader = new FileReader();
+			reader.onloadend = function () {
+				resolve(reader.result);
+			}
+			reader.onerror = function (e) {
+				reject("FileReader error: " + e);
+			};
+			reader.readAsDataURL(blob);
+		});
 	}
 
 	// TODO: Allow only one quickFormat dialog
