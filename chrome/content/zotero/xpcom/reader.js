@@ -1081,6 +1081,7 @@ class ReaderWindow extends ReaderInstance {
 	};
 
 	close() {
+		this.uninit();
 		this._window.close();
 		this._onClose();
 	}
