@@ -3990,8 +3990,9 @@ var ZoteroPane = new function()
 	function isAttachmentWithExtractableAnnotations(item) {
 		// For now, consider all PDF attachments eligible, since we want to extract external
 		// annotations in unprocessed files if present
-		//return item.isPDFAttachment() && item.getAnnotations().some(x => x.annotationType != 'ink');
-		return item.isPDFAttachment();
+		// item.isPDFAttachment() && item.getAnnotations().some(x => x.annotationType != 'ink');
+		return item.isPDFAttachment()
+			|| (item.isEPUBAttachment() || item.isSnapshotAttachment()) && item.getAnnotations().length;
 	}
 	
 	

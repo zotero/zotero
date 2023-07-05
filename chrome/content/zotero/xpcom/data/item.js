@@ -2428,6 +2428,14 @@ Zotero.Item.prototype.isPDFAttachment = function () {
 
 
 /**
+ * @return {Boolean} - Returns true if item is a stored or linked EPUB attachment
+ */
+Zotero.Item.prototype.isEPUBAttachment = function () {
+	return this.isFileAttachment() && this.attachmentContentType == 'application/epub+zip';
+};
+
+
+/**
  * Returns number of child attachments of item
  *
  * @param	{Boolean}	includeTrashed		Include trashed child items in count
