@@ -672,19 +672,9 @@ class ReaderInstance {
 			
 			// Write the new state to disk
 			let path = file.path;
-			let contents = JSON.stringify(state);
 
-			// If this is a PDF, state updates should be infrequent and we can write immediately
-			if (this._type == 'pdf') {
-				// Using `writeAtomic` instead of `putContentsAsync` to avoid
-				// using temp file that causes conflicts on simultaneous writes (on slow systems)
-				await OS.File.writeAtomic(path, contents);
-				return;
-			}
-
-			// If this is an EPUB or snapshot, state updates are frequent (every scroll) and we need to debounce
-			// actually writing them to disk. We flush the debounced write operation when Zotero shuts down or the
-			// window/tab is closed.
+			// State updates can be frequent (every scroll) and we need to debounce actually writing them to disk.
+			// We flush the debounced write operation when Zotero shuts down or the window/tab is closed.
 			if (this._pendingWriteStateTimeout) {
 				clearTimeout(this._pendingWriteStateTimeout);
 			}
@@ -695,8 +685,10 @@ class ReaderInstance {
 				this._pendingWriteStateFunction = null;
 				this._pendingWriteStateTimeout = null;
 				
-				// See above note about `writeAtomic`
-				await OS.File.writeAtomic(path, contents);
+				Zotero.debug('Writing reader state to ' + path);
+				// Using atomic `writeJSON` instead of `putContentsAsync` to avoid using temp file that causes conflicts
+				// on simultaneous writes (on slow systems)
+				await IOUtils.writeJSON(path, state);
 			};
 			this._pendingWriteStateTimeout = setTimeout(this._pendingWriteStateFunction, 5000);
 		}
