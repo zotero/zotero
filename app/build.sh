@@ -136,12 +136,12 @@ function check_xulrunner_hash {
 		echo
 		$CALLDIR/scripts/fetch_xulrunner -p $platform
 	else
-		recalculated_xulrunner_hash=$($CALLDIR/scripts/xulrunner_hash -p $platform)
+		recalculated_xulrunner_hash=$("$CALLDIR/scripts/xulrunner_hash" -p $platform)
 		current_xulrunner_hash=$(< "$CALLDIR/xulrunner/$platform_hash_file")
 		if [ "$current_xulrunner_hash" != "$recalculated_xulrunner_hash" ]; then 
 			echo "xulrunner hashes don't match -- redownloading"
 			echo
-			$CALLDIR/scripts/fetch_xulrunner -p $platform
+			"$CALLDIR/scripts/fetch_xulrunner" -p $platform
 			current_xulrunner_hash=$(< "$CALLDIR/xulrunner/$platform_hash_file")
 			if [ "$current_xulrunner_hash" != "$recalculated_xulrunner_hash" ]; then
 				echo "xulrunner hashes don't match after running fetch_xulrunner!"
