@@ -41,6 +41,7 @@ var Zotero_Lookup = new function () {
 	 * @param toggleProgress {function} - Callback to toggle progress on/off
 	 * @returns {Promise<boolean>}
 	 */
+	this._button = null;
 	this.addItemsFromIdentifier = async function (textBox, childItem, toggleProgress) {
 		var identifiers = Zotero.Utilities.extractIdentifiers(textBox.value);
 		if (!identifiers.length) {
@@ -134,7 +135,32 @@ var Zotero_Lookup = new function () {
 
 	this.showPanel = function (button) {
 		var panel = document.getElementById('zotero-lookup-panel');
+		this._button = button;
+		if (!button) {
+			button = document.getElementById("zotero-tb-lookup");
+		}
 		panel.openPopup(button, "after_start", 16, -2, false, false);
+	}
+	
+	this.onFocusOut = function(event) {
+
+		/*
+			if the lookup popup was triggered by the lookup button,
+			we want to return there on focus out. So we check 
+			(1) that we came from a button and (2) that
+			event.relatedTarget === null, i.e. that the user hasn't used
+			the mouse or keyboard to select something, and focus is leaving
+			the popup because the popup was hidden/dismissed.
+		*/
+		if (this._button && event.relatedTarget === null) {
+			event.preventDefault();
+			event.stopPropagation();
+			this._button.focus();
+			this._button = null;
+		}
+		else {
+			this._button = null;
+		}
 	}
 	
 	

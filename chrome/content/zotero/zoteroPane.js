@@ -57,7 +57,10 @@ var ZoteroPane = new function()
 	this.reportErrors = reportErrors;
 	
 	this.document = document;
-	
+
+	const modifierIsNotShift = ev => ev.getModifierState("Meta") || ev.getModifierState("Alt")
+	|| ev.getModifierState("Control") || ev.getModifierState("OS");
+
 	var self = this,
 		_loaded = false, _madeVisible = false,
 		titlebarcolorState, titleState, observerService,
@@ -129,14 +132,276 @@ var ZoteroPane = new function()
 		
 		// register an observer for Zotero reload
 		observerService = Components.classes["@mozilla.org/observer-service;1"]
-					  .getService(Components.interfaces.nsIObserverService);
+					.getService(Components.interfaces.nsIObserverService);
 		observerService.addObserver(_reloadObserver, "zotero-reloaded", false);
 		observerService.addObserver(_reloadObserver, "zotero-before-reload", false);
 		this.addReloadListener(_loadPane);
 		
 		// continue loading pane
 		_loadPane();
+		setUpToolbar();
 	};
+
+	function setUpToolbar() {
+		// if the hidden property is ever set on a grandparent or more distant
+		// ancestor this will need to be updated
+		const isVisible = b => !b.hidden && !b.parentElement.hidden;
+		const isTbButton = node => node && node.tagName === "toolbarbutton";
+
+		function nextVisible(id, field = "after") {
+			let b = document.getElementById(id);
+			while (!isVisible(b)) {
+				const mapData = focusMap.get(b.id);
+				b = document.getElementById(mapData[field]);
+			}
+			return b;
+		}
+
+		/* constants */
+		const toolbar = this.document.getElementById("zotero-toolbar");
+
+		// assumes no toolbarbuttons are dynamically added, just hidden
+		// or revealed. If this changes, the observer will have to monitor
+		// changes to the childList for each hbox in the toolbar which might
+		// have dynamic children
+		const buttons = toolbar.getElementsByTagName("toolbarbutton");
+		const focusMap = new Map();
+		const zones = [
+			{
+				get start() {
+					return document.getElementById("zotero-tb-collection-add");
+				},
+				focusBefore() {
+					// If no item is selected, focus items list.
+					const pane = document.getElementById("zotero-item-pane-content");
+					if (pane.selectedIndex === "0") {
+						document.getElementById("item-tree-main-default").focus();
+					}
+					else {
+						const tabBox = document.getElementById("zotero-view-tabbox");
+						if (tabBox.selectedIndex === 0) {
+							const itembox = document.getElementById("zotero-editpane-item-box");
+							itembox.focusLastField();
+						}
+						else if (tabBox.selectedIndex === 1) {
+							const notes = document.getElementById("zotero-editpane-notes");
+							const nodes = notes.querySelectorAll("button");
+							const node = nodes[nodes.length - 1];
+							node.focus();
+							// TODO: the notes are currently inaccessible to the keyboard
+						}
+						else if (tabBox.selectedIndex === 2) {
+							const tagContainer = document.getElementById("tags-box-container");
+							const tags = tagContainer.querySelectorAll("#tags-box-add-button,.zotero-clicky");
+							const last = tags[tags.length - 1];
+							if (last.id === "tags-box-add-button") {
+								last.focus();
+							}
+							else {
+								last.click();
+							}
+						}
+						else if (tabBox.selectedIndex === 3) {
+							const related = tabBox.querySelector("relatedbox");
+							related.receiveKeyboardFocus("end");
+						}
+						else {
+							throw new Error("The selectedIndex should always be between 1 and 4");
+						}
+					}
+				},
+				focusAfter() {
+					document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus();
+				}
+			},
+			{
+				get start() {
+					return document.getElementById("zotero-tb-locate");
+				},
+				focusBefore() {
+					document.getElementById("zotero-tb-search").focus();
+				},
+				focusAfter() {
+					document.getElementById("collection-tree").focus();
+				}
+			}
+		];
+
+		/*
+			observe buttons and containers for changes in the "hidden"
+			attribute
+		*/
+		const observer = new MutationObserver((mutations, _) => {
+			for (const mutation of mutations) {
+				if (mutation.target.hidden
+					&& (document.activeElement === mutation.target
+						|| mutation.target.contains(document.activeElement))
+				) {
+					const next = nextVisible(document.activeElement.id, "before");
+					next.focus();
+				}
+			}
+		});
+
+		/*
+			build a chain which connects all the <toolbarbutton>s,
+			except for zotero-tb-locate and zotero-tb-advanced-search
+			which is where the chain breaks
+		*/
+		let prev = null;
+		let _zone = zones[0];
+		for (const button of buttons) {
+			focusMap.set(button.id, {
+				before: prev,
+				after: null,
+				zone: _zone
+			});
+
+			/* observe each button for changes to "hidden" */
+			observer.observe(button, {
+				attributes: true,
+				attributeFilter: ["hidden"]
+			});
+
+			if (focusMap.has(prev)) {
+				focusMap.get(prev).after = button.id;
+			}
+
+			prev = button.id;
+
+			// break the chain at zotero-tb-advanced-search
+			if (button.id === "zotero-tb-advanced-search") {
+				_zone = zones[1];
+				prev = null;
+			}
+		}
+		
+		
+		observer.observe(document.getElementById("zotero-tb-sync-stop"), {
+			attributes: true,
+			attributeFilter: ["hidden"]
+		});
+
+		// lookupButton and syncErrorButton show popup panels, and so need special treatment
+		const lookupButton = document.getElementById("zotero-tb-lookup");
+		const syncErrorButton = document.getElementById("zotero-tb-sync-error");
+
+		/* buttons at the start of zones need tabindex=0 */
+		for (const zone of zones) {
+			zone.start.setAttribute("tabindex", "0");
+		}
+
+		toolbar.addEventListener("keydown", (event) => {
+			// manually move focus when Shift+Tabbing from the search-menu-button
+			if (event.key === 'Tab' && event.shiftKey
+					&& !modifierIsNotShift(event)
+					&& event.originalTarget
+					&& event.originalTarget.id == "zotero-tb-search-menu-button") {
+				event.preventDefault();
+				event.stopPropagation();
+				zones[0].start.focus();
+				return;
+			}
+			// manually move focus to search menu when Shift+Tabbing from the search-menu
+			if (event.key === 'Tab' && event.shiftKey
+					&& !modifierIsNotShift(event)
+					&& event.originalTarget?.tagName == "input") {
+				event.preventDefault();
+				event.stopPropagation();
+				document.getElementById("zotero-tb-search")._searchModePopup.flattenedTreeParentNode.focus();
+				return;
+			}
+			// only handle events on a <toolbarbutton>
+			if (!isTbButton(event.target)) return;
+
+			const mapData = focusMap.get(event.target.id);
+
+			if (!Zotero.rtl && event.key === 'ArrowRight'
+					|| Zotero.rtl && event.key === 'ArrowLeft') {
+				event.preventDefault();
+				event.stopPropagation();
+				if (mapData.after) {
+					nextVisible(mapData.after, "after").focus();
+				}
+				return;
+			}
+			if (!Zotero.rtl && event.key === 'ArrowLeft'
+					|| Zotero.rtl && event.key === 'ArrowRight') {
+				event.preventDefault();
+				event.stopPropagation();
+				if (mapData.before) {
+					nextVisible(mapData.before, "before").focus();
+				}
+				return;
+			}
+
+			/* manually trigger on space and enter */
+			if (event.key === ' ' || event.key === 'Enter') {
+				if (event.target.disabled) return;
+
+				if (event.target === lookupButton) {
+					event.preventDefault();
+					event.stopPropagation();
+					Zotero_Lookup.showPanel(event.target);
+				}
+				else if (event.target === syncErrorButton) {
+					event.preventDefault();
+					event.stopPropagation();
+					syncErrorButton.dispatchEvent(new MouseEvent("click", {
+						target: event.target
+					}));
+				}
+				else if (event.target.getAttribute('type') === 'menu') {
+					event.preventDefault();
+					event.stopPropagation();
+					const popup = event.target.querySelector("menupopup");
+					if (popup !== null && !event.target.disabled) {
+						popup.openPopup();
+					}
+				}
+			}
+
+			/* activate menus and popups on ArrowDown and ArrowUp, otherwise prepare for a focus change */
+			else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+				if (event.target === lookupButton && !event.target.disabled) {
+					event.preventDefault();
+					event.stopPropagation();
+					Zotero_Lookup.showPanel(event.target);
+				}
+				else if (event.target.getAttribute('type') === 'menu' && !event.target.disabled) {
+					event.preventDefault();
+					event.stopPropagation();
+					const popup = event.target.querySelector("menupopup");
+					if (popup !== null && !event.target.disabled) {
+						popup.openPopup();
+					}
+				}
+
+				/* prepare for a focus change */
+				else if (event.key === 'ArrowDown') {
+					event.preventDefault();
+					event.stopPropagation();
+					mapData.zone.focusBefore();
+				}
+				else if (event.key === 'ArrowUp') {
+					event.preventDefault();
+					event.stopPropagation();
+					mapData.zone.focusAfter();
+				}
+			}
+			else if (event.key === 'Tab' && !modifierIsNotShift(event)) {
+				event.preventDefault();
+				event.stopPropagation();
+				if (event.shiftKey) {
+					mapData.zone.focusBefore();
+				}
+				else {
+					mapData.zone.focusAfter();
+				}
+			}
+		});
+	}
+
 	
 	/**
 	 * Called on window load or when pane has been reloaded after switching into or out of connector
