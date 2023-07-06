@@ -104,6 +104,11 @@
 	
 	<keyset id="mainKeyset">
 		<key id="key_close" key="&closeCmd.key;" command="cmd_close" modifiers="accel"/>
+		<key id="key_quitApplication"
+			key="&quitApplicationCmdMac.key;"
+			command="cmd_quitApplication"
+			modifiers="accel"
+			internal="true"/>
 		<key id="key_import"
 				key="&importCmd.key;"
 				command="cmd_zotero_import"
@@ -576,11 +581,6 @@
 								oncommand="ZoteroStandalone.openHelp();"
 								key="&helpMac.commandkey;"
 								modifiers="accel"/>
-						<key id="key_quitApplication"
-								key="&quitApplicationCmdMac.key;"
-								command="cmd_quitApplication"
-								modifiers="accel"
-								internal="true"/>
 					</keyset>
 					
 					<menu id="windowMenu"

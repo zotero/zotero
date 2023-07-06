@@ -4,6 +4,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	let isMac = AppConstants.platform == 'macosx';
 
 	let redoKey = document.getElementById('key_redo');
+	let macUnixQuitKey = document.getElementById('key_quitApplication');
 
 	let fileQuitSeparator = document.getElementById('menu_fileQuitSeparatorNonMac');
 	let fileQuitItemWin = document.getElementById('menu_fileQuitItemWin');
@@ -22,6 +23,7 @@ window.addEventListener('DOMContentLoaded', () => {
 			redoKey.setAttribute('data-l10n-id', 'text-action-redo-shortcut');
 			redoKey.setAttribute('modifiers', 'accel');
 		}
+		if (macUnixQuitKey) macUnixQuitKey.disabled = true;
 	}
 	else {
 		// Set behavior on all non-Windows platforms
