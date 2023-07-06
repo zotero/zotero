@@ -832,7 +832,6 @@ Zotero.File = new function(){
 		
 		var buf = await OS.File.read(file, {});
 		buf = new Uint8Array(buf).buffer;
-		// It's 10 times faster to use FileReader than to use btoa()
 		return new Promise((resolve, reject) => {
 			let blob = new Blob([buf], { type: contentType });
 			let reader = new FileReader();

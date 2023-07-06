@@ -3614,7 +3614,6 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentDataURI', {
 		}
 		let buf = await OS.File.read(path, {});
 		buf = new Uint8Array(buf).buffer;
-		// It's 10 times faster to use FileReader than to use btoa()
 		return new Promise((resolve, reject) => {
 			let blob = new Blob([buf], { type: this.attachmentContentType });
 			let reader = new FileReader();
