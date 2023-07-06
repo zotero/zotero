@@ -795,9 +795,9 @@ class ReaderInstance {
 	}
 
 	_getColorIcon(color, selected) {
-		let stroke = selected ? 'lightgray' : 'transparent';
+		let stroke = selected ? '%23555' : 'transparent';
 		let fill = '%23' + color.slice(1);
-		return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect shape-rendering="geometricPrecision" fill="${fill}" stroke-width="2" x="2" y="2" stroke="${stroke}" width="12" height="12" rx="3"/></svg>`;
+		return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><rect shape-rendering="geometricPrecision" fill="${fill}" stroke-width="2" x="2" y="2" stroke="${stroke}" width="12" height="12" rx="3"/></svg>`;
 	}
 
 	_openTagsPopup(item, x, y) {
@@ -847,13 +847,13 @@ class ReaderInstance {
 						let menuitem = parentNode.ownerDocument.createXULElement('menuitem');
 						menuitem.setAttribute('label', item.label);
 						menuitem.setAttribute('disabled', item.disabled);
-						if (item.checked) {
-							menuitem.setAttribute('type', 'checkbox');
-							menuitem.setAttribute('checked', item.checked);
-						}
 						if (item.color) {
 							menuitem.className = 'menuitem-iconic';
-							menuitem.setAttribute('image', this._getColorIcon(item.color));
+							menuitem.setAttribute('image', this._getColorIcon(item.color, item.checked));
+						}
+						else if (item.checked) {
+							menuitem.setAttribute('type', 'checkbox');
+							menuitem.setAttribute('checked', item.checked);
 						}
 						menuitem.addEventListener('command', () => item.onCommand());
 						parentNode.appendChild(menuitem);
