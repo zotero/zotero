@@ -831,13 +831,18 @@ Zotero.File = new function(){
 		}
 		
 		var buf = await OS.File.read(file, {});
-		var bytes = new Uint8Array(buf);
-		var binary = '';
-		var len = bytes.byteLength;
-		for (let i = 0; i < len; i++) {
-			binary += String.fromCharCode(bytes[i]);
-		}
-		return 'data:' + contentType + ';base64,' + btoa(binary);
+		buf = new Uint8Array(buf).buffer;
+		return new Promise((resolve, reject) => {
+			let blob = new Blob([buf], { type: contentType });
+			let reader = new FileReader();
+			reader.onloadend = function () {
+				resolve(reader.result);
+			}
+			reader.onerror = function (e) {
+				reject("FileReader error: " + e);
+			};
+			reader.readAsDataURL(blob);
+		});
 	};
 	
 	

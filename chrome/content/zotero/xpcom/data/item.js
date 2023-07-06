@@ -3613,13 +3613,18 @@ Zotero.defineProperty(Zotero.Item.prototype, 'attachmentDataURI', {
 			return '';
 		}
 		let buf = await OS.File.read(path, {});
-		let bytes = new Uint8Array(buf);
-		let binary = '';
-		let len = bytes.byteLength;
-		for (let i = 0; i < len; i++) {
-			binary += String.fromCharCode(bytes[i]);
-		}
-		return 'data:' + this.attachmentContentType + ';base64,' + btoa(binary);
+		buf = new Uint8Array(buf).buffer;
+		return new Promise((resolve, reject) => {
+			let blob = new Blob([buf], { type: this.attachmentContentType });
+			let reader = new FileReader();
+			reader.onloadend = function () {
+				resolve(reader.result);
+			}
+			reader.onerror = function (e) {
+				reject("FileReader error: " + e);
+			};
+			reader.readAsDataURL(blob);
+		});
 	}
 });
 
