@@ -867,12 +867,8 @@ class ReaderInstance {
 		};
 		appendItems(popup, itemGroups);
 		let rect = this._iframe.getBoundingClientRect();
-		x += rect.left;
-		y += rect.top;
-		if (Zotero.rtl) {
-			x *= -1;
-		}
-		setTimeout(() => popup.openPopup(null, 'before_start', x, y, true));
+		rect = this._window.windowUtils.toScreenRectInCSSUnits(rect.x + x, rect.y + y, 0, 0);
+		setTimeout(() => popup.openPopupAtScreen(rect.x, rect.y, true));
 	}
 
 	_updateSecondViewState() {
