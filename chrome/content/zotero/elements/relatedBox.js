@@ -173,7 +173,7 @@
 		}
 
 		add = async () => {
-			let io = { dataIn: null, dataOut: null, deferred: Zotero.Promise.defer() };
+			let io = { dataIn: null, dataOut: null, deferred: Zotero.Promise.defer(), itemTreeID: 'related-box-select-item-dialog' };
 			window.openDialog('chrome://zotero/content/selectItemsDialog.xhtml', '',
 				'chrome,dialog=no,centerscreen,resizable=yes', io);
 

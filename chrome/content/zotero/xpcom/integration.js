@@ -3180,6 +3180,7 @@ Zotero.Integration.Citation = class {
 		
 		io.addBorder = Zotero.isWin;
 		io.singleSelection = true;
+		io.itemTreeID = "handle-missing-item-select-item-dialog";
 		
 		await Zotero.Integration.displayDialog('chrome://zotero/content/selectItemsDialog.xhtml', 'resizable', io);
 			
