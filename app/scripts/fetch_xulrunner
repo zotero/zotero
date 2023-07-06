@@ -103,8 +103,6 @@ function get_utf16_chars {
 # Make various modifications to the stock Firefox app
 #
 function modify_omni {
-	local platform=$1
-	
 	mkdir omni
 	mv omni.ja omni
 	cd omni
@@ -458,33 +456,35 @@ fi
 if [ $BUILD_LINUX == 1 ]; then
 	GECKO_VERSION="$GECKO_VERSION_LINUX"
 	DOWNLOAD_URL="https://ftp.mozilla.org/pub/firefox/releases/$GECKO_VERSION"
-	
-	rm -rf firefox
-	
+
+
 	# Include 32-bit build if not in CI
-	if [ -z "${CI:-}" ]; then
-		curl -O "$DOWNLOAD_URL/linux-i686/en-US/firefox-$GECKO_VERSION.tar.bz2"
-		rm -rf firefox-i686
-		tar xvf firefox-$GECKO_VERSION.tar.bz2
-		mv firefox firefox-i686
-		
-		pushd firefox-i686
-		modify_omni linux32
-		popd
-		
-		rm "firefox-$GECKO_VERSION.tar.bz2"
+	if [[ "${CI:-}" = "1" ]] || [[ "${SKIP_32:-}" = "1" ]]; then
+		arches="x86_64"
+	else
+		arches="i686 x86_64"
 	fi
-	
-	curl -O "$DOWNLOAD_URL/linux-x86_64/en-US/firefox-$GECKO_VERSION.tar.bz2"
-	rm -rf firefox-x86_64
-	tar xvf firefox-$GECKO_VERSION.tar.bz2
-	mv firefox firefox-x86_64
-	
-	pushd firefox-x86_64
-	modify_omni linux64
-	popd
-	echo $($SCRIPT_DIR/xulrunner_hash -p l) > hash-linux
-	rm "firefox-$GECKO_VERSION.tar.bz2"
+	for arch in $arches; do
+		xdir="firefox-$arch"
+		rm -rf $xdir
+		
+		archived_file="firefox-$GECKO_VERSION-$arch.tar.bz2"
+		if [ -e "$archived_file" ]; then
+			echo "Using $archived_file"
+			cp "$archived_file" "firefox-$GECKO_VERSION.tar.bz2"
+		else
+			curl -O "$DOWNLOAD_URL/linux-$arch/en-US/firefox-$GECKO_VERSION.tar.bz2"
+		fi
+
+		tar xvf firefox-$GECKO_VERSION.tar.bz2
+		mv firefox firefox-$arch
+
+		pushd firefox-$arch
+		modify_omni
+		popd
+		echo $($SCRIPT_DIR/xulrunner_hash -p l) > hash-linux
+		rm "firefox-$GECKO_VERSION.tar.bz2"
+	done
 fi
 
 echo Done
