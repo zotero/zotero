@@ -1906,7 +1906,7 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 			throw new Error("Annotation parent must be a file attachment");
 		}
 		if (parentItem.attachmentContentType != 'application/pdf') {
-			throw new Error("Annotation parent must be a PDF");
+			//throw new Error("Annotation parent must be a PDF");
 		}
 		let type = this._getLatestField('annotationType');
 		let typeID = Zotero.Annotations[`ANNOTATION_TYPE_${type.toUpperCase()}`];
