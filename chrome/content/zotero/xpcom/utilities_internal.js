@@ -2125,29 +2125,31 @@ Zotero.Utilities.Internal = {
 		let html = '';
 		let parts = template.split(/{{|}}/);
 
+		const dashToCamel = varName => varName.replace(/-(.)/g, (_, g1) => g1.toUpperCase());
+
 		const getAttributes = (part) => {
-			let attrsRegexp = new RegExp(/((\w*) *=+ *(['"])((\\\3|[^\3])*?)\3)|((\w*) *=+ *(\w*))/g);
+			let attrsRegexp = new RegExp(/(([\w-]*) *=+ *(['"])((\\\3|[^\3])*?)\3)|(([\w-]*) *=+ *(\w*))/g);
 			let attrs = {};
 			let match;
 			while ((match = attrsRegexp.exec(part))) {
 				if (match[1]) { // if first alternative (i.e. argument with value wrapped in " or ') matched, even if value is empty
-					attrs[match[2]] = match[4];
+					attrs[dashToCamel(match[2])] = match[4];
 				}
 				else {
-					attrs[match[7]] = match[8];
+					attrs[dashToCamel(match[7])] = match[8];
 				}
 			}
 			return attrs;
 		};
 
 		const evaluateIdentifier = (ident, args) => {
-			if (Array.isArray(vars[ident])) {
-				return vars[ident].length;
+			if (Array.isArray(vars[dashToCamel(ident)])) {
+				return vars[dashToCamel(ident)].length;
 			}
-			if (typeof vars[ident] === 'function') {
-				return vars[ident](args);
+			if (typeof vars[dashToCamel(ident)] === 'function') {
+				return vars[dashToCamel(ident)](args);
 			}
-			return vars[ident];
+			return vars[dashToCamel(ident)];
 		};
 
 		
@@ -2223,7 +2225,8 @@ Zotero.Utilities.Internal = {
 				if (level.condition) {
 					// Get attributes i.e. join=" #"
 					let attrs = getAttributes(part);
-					html += (typeof vars[operator] === 'function' ? vars[operator](attrs) : vars[operator]) ?? '';
+					const identifier = vars[dashToCamel(operator)];
+					html += (typeof identifier === 'function' ? identifier(attrs) : identifier) ?? '';
 				}
 			}
 			else if (level.condition) {

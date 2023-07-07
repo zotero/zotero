@@ -607,6 +607,15 @@ describe("Zotero.Utilities.Internal", function () {
 			}
 		});
 
+		it("should accept dash-case variables and attributes", function () {
+			const vars = {
+				fooBar: ({ isFoo }) => (isFoo === 'true' ? 'foo' : 'bar'),
+			};
+			const template = '{{ foo-bar is-foo="true" }}{{ if foo-bar is-foo="false" == "bar" }}{{ foo-bar is-foo="false" }}{{ endif }}';
+			const out = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
+			assert.equal(out, 'foobar');
+		});
+
 
 		it("should support nested 'if' statements", function () {
 			var vars = {
