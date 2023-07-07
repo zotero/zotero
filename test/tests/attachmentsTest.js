@@ -1572,35 +1572,35 @@ describe("Zotero.Attachments", function() {
 
 		it("should convert formatString attachmentRenameFormatString to use template syntax", function () {
 			assert.equal(
-				Zotero.Prefs.convertLegacyFormatString('{%c - }{%y - }{%t{50}}'),
+				Zotero.Prefs.convertLegacyAttachmentRenameFormatString('{%c - }{%y - }{%t{50}}'),
 				'{{ firstCreator suffix=" - " }}{{ year suffix=" - " }}{{ title truncate="50" }}'
 			);
 			assert.equal(
-				Zotero.Prefs.convertLegacyFormatString('{ - %y - }'),
+				Zotero.Prefs.convertLegacyAttachmentRenameFormatString('{ - %y - }'),
 				'{{ year prefix=" - " suffix=" - " }}'
 			);
 			assert.equal(
-				Zotero.Prefs.convertLegacyFormatString('{%y{2}00}'),
+				Zotero.Prefs.convertLegacyAttachmentRenameFormatString('{%y{2}00}'),
 				'{{ year truncate="2" suffix="00" }}'
 			);
 			assert.equal(
-				Zotero.Prefs.convertLegacyFormatString('{%c5 - }'),
+				Zotero.Prefs.convertLegacyAttachmentRenameFormatString('{%c5 - }'),
 				'{{ firstCreator suffix="5 - " }}'
 			);
 			assert.equal(
-				Zotero.Prefs.convertLegacyFormatString('{%c-2 - }'),
+				Zotero.Prefs.convertLegacyAttachmentRenameFormatString('{%c-2 - }'),
 				'{{ firstCreator suffix="-2 - " }}'
 			);
 			assert.equal(
-				Zotero.Prefs.convertLegacyFormatString('{%t5 - }'),
+				Zotero.Prefs.convertLegacyAttachmentRenameFormatString('{%t5 - }'),
 				'{{ title suffix="5 - " }}'
 			);
 			assert.equal(
-				Zotero.Prefs.convertLegacyFormatString('{++%t{10}--}'),
+				Zotero.Prefs.convertLegacyAttachmentRenameFormatString('{++%t{10}--}'),
 				'{{ title truncate="10" prefix="++" suffix="--" }}'
 			);
 			assert.equal(
-				Zotero.Prefs.convertLegacyFormatString('foo{%c}-{%t{10}}-{%y{2}00}'),
+				Zotero.Prefs.convertLegacyAttachmentRenameFormatString('foo{%c}-{%t{10}}-{%y{2}00}'),
 				'foo{{ firstCreator }}-{{ title truncate="10" }}-{{ year truncate="2" suffix="00" }}'
 			);
 		});

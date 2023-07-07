@@ -112,7 +112,7 @@ Zotero.Prefs = new function() {
 					// Convert "attachment rename format string" from old format (e.g. {%c - }{%y - }{%t{50}})
 					// to a new format that uses the template engine
 					case 8:
-						this.set('attachmentRenameFormatString', this.convertLegacyFormatString(
+						this.set('attachmentRenameFormatString', this.convertLegacyAttachmentRenameFormatString(
 							this.get('attachmentRenameFormatString') || ''
 						));
 				}
@@ -562,12 +562,13 @@ Zotero.Prefs = new function() {
 	};
 
 	/**
-	 * Converts a legacy format string to a new format that uses a template engine
+	 * Converts a value of a `attachmentRenameFormatString` pref from a legacy format string
+	 * with % markers to a new format that uses the template engine
 	 *
 	 * @param {string} formatString - The legacy format string to convert.
 	 * @returns {string} The new format string.
 	 */
-	this.convertLegacyFormatString = function (formatString) {
+	this.convertLegacyAttachmentRenameFormatString = function (formatString) {
 		const markers = {
 			c: 'firstCreator',
 			y: 'year',
