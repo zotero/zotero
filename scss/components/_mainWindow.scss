@@ -65,22 +65,10 @@
 		-moz-box-pack: center;
 	}
 	
-	#personal-bookmarks {
-	  -moz-window-dragging: inherit;
-	}
-	
-	toolbarpaletteitem {
-	  -moz-window-dragging: no-drag;
-	  -moz-box-pack: start;
-	}
-	
 	.titlebar-buttonbox-container {
 	  -moz-box-ordinal-group: 1000;
 	}
 	
-	#titlebar-fullscreen-button {
-	  -moz-appearance: -moz-mac-fullscreen-button;
-	}
 	
 	
 	
@@ -118,39 +106,19 @@
 	  margin-left: 12px;
 	}
 	
-	.titlebar-placeholder[type="fullscreen-button"],
-	#titlebar-fullscreen-button {
-	  margin-right: 7px;
-	  margin-left: 7px;
-	}
-	
-	#titlebar-fullscreen-button {
-	  -moz-appearance: -moz-mac-fullscreen-button;
-	}
-	
 	#titlebar-buttonbox {
 	  -moz-appearance: -moz-window-button-box;
 	}
 	
 	/* Fullscreen and caption buttons don't move with RTL on OS X so override the automatic ordering. */
-	#titlebar-fullscreen-button:-moz-locale-dir(ltr),
-	#titlebar-buttonbox-container:-moz-locale-dir(rtl),
-	.titlebar-placeholder[type="fullscreen-button"]:-moz-locale-dir(ltr),
-	.titlebar-placeholder[type="caption-buttons"]:-moz-locale-dir(rtl) {
+	#titlebar-buttonbox-container:-moz-locale-dir(rtl) {
 	  -moz-box-ordinal-group: 1000;
 	}
 	
-	#titlebar-fullscreen-button:-moz-locale-dir(rtl),
-	#titlebar-buttonbox-container:-moz-locale-dir(ltr),
-	.titlebar-placeholder[type="caption-buttons"]:-moz-locale-dir(ltr),
-	.titlebar-placeholder[type="fullscreen-button"]:-moz-locale-dir(rtl) {
+	#titlebar-buttonbox-container:-moz-locale-dir(ltr) {
 	  -moz-box-ordinal-group: 0;
 	}
 	
-	&[sizemode="fullscreen"] .titlebar-placeholder[type="fullscreen-button"],
-	&[sizemode="fullscreen"] .titlebar-placeholder[type="caption-buttons"] {
-	  display: none;
-	}
 	
 	
 	
