@@ -1502,7 +1502,7 @@ describe("Zotero.Attachments", function() {
 
 		it('should accept itemType or any other field', function () {
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, '{{ itemType }}'),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{{ itemType localize="true" }}'),
 				'Journal Article'
 			);
 			assert.equal(
@@ -1540,7 +1540,7 @@ describe("Zotero.Attachments", function() {
 		});
 
 		it("should support simple logic in template syntax", function () {
-			const template = '{{ if itemTypeRaw == "journalArticle" }}j-{{ publicationTitle case="hyphen" }}{{ elseif itemTypeRaw == "patent" }}p-{{ number case="hyphen" }}{{ else }}o-{{ title case="hyphen" }}{{ endif }}';
+			const template = '{{ if itemType == "journalArticle" }}j-{{ publicationTitle case="hyphen" }}{{ elseif itemType == "patent" }}p-{{ number case="hyphen" }}{{ else }}o-{{ title case="hyphen" }}{{ endif }}';
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(item, template), 'j-best-publications-place'
 			);
