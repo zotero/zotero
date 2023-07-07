@@ -2327,11 +2327,11 @@ Zotero.Attachments = new function () {
 			return value;
 		};
 
-		const initializeFn = (name, shouldInitialize, initializewith) => (shouldInitialize ? name.slice(0, 1).toUpperCase() + initializewith : name);
+		const initializeFn = (name, shouldInitialize, initializeWith) => (shouldInitialize ? name.slice(0, 1).toUpperCase() + initializeWith : name);
 
-		const transformName = (creator, { name, namepartseparator, initialize, initializewith } = {}) => {
+		const transformName = (creator, { name, namePartSeparator, initialize, initializeWith } = {}) => {
 			if (creator.name) {
-				return initializeFn(creator.name, ['full', 'name'].includes(initialize), initializewith);
+				return initializeFn(creator.name, ['full', 'name'].includes(initialize), initializeWith);
 			}
 
 			const firstLast = ['full', 'given-family', 'first-last'];
@@ -2340,21 +2340,21 @@ Zotero.Attachments = new function () {
 			const last = ['family', 'last'];
 
 			if (firstLast.includes(name)) {
-				return initializeFn(creator.firstName, ['full', ...first].includes(initialize), initializewith) + namepartseparator + initializeFn(creator.lastName, ['full', ...last].includes(initialize), initializewith);
+				return initializeFn(creator.firstName, ['full', ...first].includes(initialize), initializeWith) + namePartSeparator + initializeFn(creator.lastName, ['full', ...last].includes(initialize), initializeWith);
 			}
 			else if (lastFirst.includes(name)) {
-				return initializeFn(creator.lastName, ['full', ...last].includes(initialize), initializewith) + namepartseparator + initializeFn(creator.firstName, ['full', ...first].includes(initialize), initializewith);
+				return initializeFn(creator.lastName, ['full', ...last].includes(initialize), initializeWith) + namePartSeparator + initializeFn(creator.firstName, ['full', ...first].includes(initialize), initializeWith);
 			}
 			else if (first.includes(name)) {
-				return initializeFn(creator.firstName, ['full', ...first].includes(initialize), initializewith);
+				return initializeFn(creator.firstName, ['full', ...first].includes(initialize), initializeWith);
 			}
 
-			return initializeFn(creator.lastName, ['full', ...last].includes(initialize), initializewith);
+			return initializeFn(creator.lastName, ['full', ...last].includes(initialize), initializeWith);
 		};
 
-		const commonCreators = (value, { max = Infinity, order = 'asc', name = 'family', namepartseparator = ' ', join = ', ', initialize = '', initializewith = '.' } = {}) => {
+		const commonCreators = (value, { max = Infinity, order = 'asc', name = 'family', namePartSeparator = ' ', join = ', ', initialize = '', initializeWith = '.' } = {}) => {
 			return getSlicedCreatorsOfType(value, order === "desc" ? -max : max)
-				.map(c => transformName(c, { name, namepartseparator, initialize, initializewith }))
+				.map(c => transformName(c, { name, namePartSeparator, initialize, initializeWith }))
 				.join(join);
 		};
 

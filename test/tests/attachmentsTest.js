@@ -1396,31 +1396,31 @@ describe("Zotero.Attachments", function() {
 				'AcmeCorp'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ authors max="2" name="family" initialize="family" join=" " initializewith="" }}'),
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ authors max="2" name="family" initialize="family" join=" " initialize-with="" }}'),
 				'A C'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemPatent, '{{ authors max="2" name="family" initialize="family" initializewith="" }}'),
+				Zotero.Attachments.getFileBaseNameFromItem(itemPatent, '{{ authors max="2" name="family" initialize="family" initialize-with="" }}'),
 				'A'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, '{{ authors max="1" name="full" initialize="full" namepartseparator="" initializewith="" }}'),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{{ authors max="1" name="full" initialize="full" name-part-separator="" initialize-with="" }}'),
 				'FB'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, '{{ authors max="1" order="desc" name="full" initialize="full" namepartseparator="" initializewith="" }}'),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{{ authors max="1" order="desc" name="full" initialize="full" name-part-separator="" initialize-with="" }}'),
 				'BP'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ authors max="3" order="desc" name="full" initialize="full" namepartseparator="" join=" " initializewith="" }}'),
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ authors max="3" order="desc" name="full" initialize="full" name-part-separator="" join=" " initialize-with="" }}'),
 				'FW TP SC'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, '{{ authors max="1" name="family-given" initialize="given" namepartseparator="" initializewith="" }}'),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{{ authors max="1" name="family-given" initialize="given" name-part-separator="" initialize-with="" }}'),
 				'BariusF'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ authors max="2" name="family-given" initialize="given" join=" " namepartseparator="" initializewith="" }}'),
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ authors max="2" name="family-given" initialize="given" join=" " name-part-separator="" initialize-with="" }}'),
 				'AuthorF CreatorS'
 			);
 			assert.equal(
@@ -1436,19 +1436,19 @@ describe("Zotero.Attachments", function() {
 				'Editor1 ProEditor2 SuperbEditor3'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ editors max="2" name="family" initialize="family" join=" " initializewith="" }}'),
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ editors max="2" name="family" initialize="family" join=" " initialize-with="" }}'),
 				'E P'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ editors max="1" order="desc" name="family" initialize="family" initializewith="" }}'),
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ editors max="1" order="desc" name="family" initialize="family" initialize-with="" }}'),
 				'S'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ editors max="1" name="full" initialize="full" namepartseparator="" initializewith="" }}'),
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ editors max="1" name="full" initialize="full" name-part-separator="" initialize-with="" }}'),
 				'SE'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ editors max="1" name="family-given" initialize="given" namepartseparator="" initializewith="" }}'),
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ editors max="1" name="family-given" initialize="given" name-part-separator="" initialize-with="" }}'),
 				'Editor1S'
 			);
 			assert.equal(
