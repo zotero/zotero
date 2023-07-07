@@ -1287,7 +1287,7 @@ class ReaderInstance {
 }
 
 class ReaderTab extends ReaderInstance {
-	constructor({ itemID, title, sidebarWidth, sidebarOpen, bottomPlaceholderHeight, index, tabID, background }) {
+	constructor({ itemID, title, sidebarWidth, sidebarOpen, bottomPlaceholderHeight, index, tabID, background, preventJumpback }) {
 		super();
 		this._itemID = itemID;
 		this._sidebarWidth = sidebarWidth;
@@ -1303,7 +1303,8 @@ class ReaderTab extends ReaderInstance {
 			data: {
 				itemID
 			},
-			select: !background
+			select: !background,
+			preventJumpback: preventJumpback
 		});
 		this.tabID = id;
 		this._tabContainer = container;
@@ -1647,7 +1648,7 @@ class Reader {
 		await this.open(item.id, location, options);
 	}
 
-	async open(itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, secondViewState } = {}) {
+	async open(itemID, location, { title, tabIndex, tabID, openInBackground, openInWindow, allowDuplicate, secondViewState, preventJumpback } = {}) {
 		this._loadSidebarState();
 		this.triggerAnnotationsImportCheck(itemID);
 		let reader;
@@ -1706,7 +1707,8 @@ class Reader {
 				background: openInBackground,
 				sidebarWidth: this._sidebarWidth,
 				sidebarOpen: this._sidebarOpen,
-				bottomPlaceholderHeight: this._bottomPlaceholderHeight
+				bottomPlaceholderHeight: this._bottomPlaceholderHeight,
+				preventJumpback: preventJumpback
 			});
 			this._readers.push(reader);
 			if (!(await reader.open({ itemID, location, secondViewState }))) {
