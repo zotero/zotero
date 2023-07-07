@@ -2124,6 +2124,68 @@ Zotero.Utilities.Internal = {
 		let levels = [{ condition: true }];
 		let html = '';
 		let parts = template.split(/{{|}}/);
+
+		const getAttributes = (part) => {
+			let attrsRegexp = new RegExp(/((\w*) *=+ *(['"])((\\\3|[^\3])*?)\3)|((\w*) *=+ *(\w*))/g);
+			let attrs = {};
+			let match;
+			while ((match = attrsRegexp.exec(part))) {
+				if (match[1]) { // if first alternative (i.e. argument with value wrapped in " or ') matched, even if value is empty
+					attrs[match[2]] = match[4];
+				}
+				else {
+					attrs[match[7]] = match[8];
+				}
+			}
+			return attrs;
+		};
+
+		const evaluateIdentifier = (ident, args) => {
+			if (Array.isArray(vars[ident])) {
+				return vars[ident].length;
+			}
+			if (typeof vars[ident] === 'function') {
+				return vars[ident](args);
+			}
+			return vars[ident];
+		};
+
+		
+		const evaluateComparison = (left, right, comparator) => {
+			const isNumeric = (left == parseInt(left) && right == parseInt(right)) || (left == parseFloat(left) && right == parseFloat(right));
+			switch (comparator) {
+				default:
+				case '==':
+					return isNumeric ? left == right : left.toLowerCase() == right.toLowerCase();
+				case '!=':
+					return isNumeric ? left != right : left.toLowerCase() != right.toLowerCase();
+				case '>=':
+					return isNumeric ? left >= right : false;
+				case '<=':
+					return isNumeric ? left <= right : false;
+				case '>':
+					return isNumeric ? left > right : false;
+				case '<':
+					return isNumeric ? left < right : false;
+			}
+		};
+
+
+		const evaluateCondition = (parts) => {
+			const comparators = ['==', '!=', '>=', '<=', '>', '<'];
+			const index = parts.findIndex(part => comparators.includes(part));
+
+			if (index > -1) {
+				const left = parts.slice(0, index);
+				const leftValue = evaluateIdentifier(left[0], getAttributes(left.slice(1).join(' ')));
+				const rightValue = parts.slice(index + 1).join(' ');
+				const comparator = parts[index];
+				return evaluateComparison(leftValue, rightValue, comparator);
+			}
+
+			return !!evaluateIdentifier(parts[0], getAttributes(parts.slice(1).join(' ')));
+		};
+
 		for (let i = 0; i < parts.length; i++) {
 			let part = parts[i];
 			let level = levels[levels.length - 1];
@@ -2141,24 +2203,7 @@ Zotero.Utilities.Internal = {
 				}
 				if (['if', 'elseif'].includes(operator)) {
 					if (!level.executed) {
-						level.condition = level.parentCondition && (
-							args[2]
-								// If string variable is equal to the provided string
-								? vars[args[0]].toLowerCase() == args[2].toLowerCase()
-								: (
-									Array.isArray(vars[args[0]])
-										// Is array non empty
-										? !!vars[args[0]].length
-										: (
-											typeof vars[args[0]] === 'function'
-												// If function returns a value (only string is supported)
-												// Note: To keep things simple, this doesn't support function attributes
-												? !!vars[args[0]]({})
-												// If string variable exists
-												: !!vars[args[0]]
-										)
-								)
-						);
+						level.condition = level.parentCondition && evaluateCondition(args);
 						level.executed = level.condition;
 					}
 					else {
@@ -2177,16 +2222,7 @@ Zotero.Utilities.Internal = {
 				}
 				if (level.condition) {
 					// Get attributes i.e. join=" #"
-					let attrsRegexp = new RegExp(/((\w*) *=+ *(['"])((\\\3|[^\3])*?)\3)|((\w*) *=+ *(\w*))/g);
-					let attrs = {};
-					while ((match = attrsRegexp.exec(part))) {
-						if (match[1]) { // if first alternative (i.e. argument with value wrapped in " or ') matched, even if value is empty
-							attrs[match[2]] = match[4];
-						}
-						else {
-							attrs[match[7]] = match[8];
-						}
-					}
+					let attrs = getAttributes(part);
 					html += (typeof vars[operator] === 'function' ? vars[operator](attrs) : vars[operator]) ?? '';
 				}
 			}

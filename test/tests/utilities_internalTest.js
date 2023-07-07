@@ -560,7 +560,7 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.equal(html, '11 23 1,2yes');
 		});
 
-		it("should support empty string as attribute value and correctly render returned false-ish values (e.g. 0)", function () {
+		it("should support empty string as attribute value and correctly render returned false-ish values", function () {
 			const vars = {
 				length: ({ string }) => string.length,
 			};
@@ -568,6 +568,45 @@ describe("Zotero.Utilities.Internal", function () {
 			const out = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
 			assert.equal(out, '"" has a length of 0 and "hello" has a length of 5');
 		});
+
+		it("should support functions in comparison statements", function () {
+			const vars = {
+				sum: ({ a, b }) => parseInt(a) + parseInt(b),
+				fahrenheitToCelsius: ({ temp }) => Math.round((temp - 32) * 5 / 9),
+				false: 'false',
+				twoWords: 'two words',
+				onlyOne: 'actually == 1'
+			};
+			const template = `{{if sum a=1 b=2 == 3}}1 + 2 = {{sum a=1 b=2}}{{else}}no speak math{{endif}}`;
+			const out = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
+			assert.equal(out, '1 + 2 = 3');
+
+			const template2 = '{{ if false>false }}no{{elseif false <= 0}}no{{elseif false != false}}no{{elseif false == false}}yes{{else}}no{{endif}}';
+			const out2 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template2, vars);
+			assert.equal(out2, 'yes');
+
+			const template3 = '{{ if twoWords == two words }}yes{{else}}no{{endif}}';
+			const out3 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template3, vars);
+			assert.equal(out3, 'yes');
+
+			const template4 = '{{ if onlyOne == actually == 1 }}yes{{else}}no{{endif}}';
+			const out4 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template4, vars);
+			assert.equal(out4, 'yes');
+
+			const tests = [
+				[100, `it's 38°C - quite hot!`],
+				[68, `it's 20°C - nice and warm`],
+				[32, `it's 0°C - bit chilly`],
+				[0, `it's -18°C - freezing actually`],
+			];
+
+			for (let [temp, result] of tests) {
+				const template = `it's {{ fahrenheitToCelsius temp=${temp} }}°C - {{if fahrenheitToCelsius  temp="${temp}"  >  "32"}}quite hot!{{elseif fahrenheitToCelsius  temp="${temp}"  >= 20 }}nice and warm{{elseif fahrenheitToCelsius  temp="${temp}"  < 0 }}freezing actually{{else}}bit chilly{{endif}}`;
+				const out = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
+				assert.equal(out, result);
+			}
+		});
+
 
 		it("should support nested 'if' statements", function () {
 			var vars = {
