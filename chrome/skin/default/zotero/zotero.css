@@ -15,20 +15,6 @@
 	padding:0;
 }
 
-/* Bindings */
-textbox[type="styled"]
-{
-	-moz-binding: url('chrome://zotero/content/bindings/styled-textbox.xml#styled-textbox');
-}
-
-zoteromergegroup {
-	-moz-binding: url('chrome://zotero/content/bindings/merge.xml#merge-group');
-}
-
-zoteromergepane {
-	-moz-binding: url('chrome://zotero/content/bindings/merge.xml#merge-pane');
-}
-
 richlistitem {
 	padding: 0.2em 0.4em;
 }
