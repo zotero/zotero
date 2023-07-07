@@ -111,7 +111,6 @@ var ZoteroPane = new function()
 			let tabsDeck = document.querySelector('#tabs-deck')
 			if (!tabsDeck || tabsDeck.getAttribute('selectedIndex') == 0) {
 				this.updateToolbarPosition();
-				this.updateTagsBoxSize();
 			}
 		});
 		window.setTimeout(this.updateToolbarPosition.bind(this), 0);
@@ -6126,7 +6125,6 @@ var ZoteroPane = new function()
 		}
 
 		this.updateToolbarPosition();
-		this.updateTagsBoxSize();
 		if (ZoteroPane.itemsView) {
 			// Need to immediately rerender the items here without any debouncing
 			// since tree height will have changed
@@ -6275,27 +6273,6 @@ var ZoteroPane = new function()
 		this.handleTagSelectorResize();
 	}
 	
-	/**
-	 * Set an explicit height on the tags list to show a scroll bar if necessary
-	 *
-	 * This really should be be possible via CSS alone, but I couldn't get it to work, either
-	 * because I was doing something wrong or because the XUL layout engine was messing with me.
-	 * Revisit when we're all HTML.
-	 */
-	this.updateTagsBoxSize = function () {
-		// TODO: We can probably remove this function
-		return;
-		var pane = document.querySelector('#zotero-item-pane');
-		var header = document.querySelector('#zotero-item-pane .tags-box-header');
-		var list = document.querySelector('#zotero-item-pane .tags-box-list');
-		if (pane && header && list) {
-			let height = pane.getBoundingClientRect().height
-				- header.getBoundingClientRect().height
-				- 35; // a little padding
-			list.style.height = height + 'px';
-		}
-	};
-
 	/**
 	 * Opens the about dialog
 	 */
