@@ -1372,20 +1372,12 @@ describe("Zotero.Attachments", function() {
 				'Barius'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, '{{ authors max="1" order="desc" }}'),
-				'Pixelus'
-			);
-			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, '{{ authors max="1" order="desc" truncate="5" }}'),
-				'Pixel'
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{{ authors max="1" truncate="3" }}'),
+				'Bar'
 			);
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(item, '{{ authors max="5" join=" " }}'),
 				'Barius Pixelus'
-			);
-			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, '{{ authors max="5" order="desc" join=" " }}'),
-				'Pixelus Barius'
 			);
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ authors max="3" join=" " }}'),
@@ -1408,12 +1400,8 @@ describe("Zotero.Attachments", function() {
 				'FB'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, '{{ authors max="1" order="desc" name="full" initialize="full" name-part-separator="" initialize-with="" }}'),
-				'BP'
-			);
-			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ authors max="3" order="desc" name="full" initialize="full" name-part-separator="" join=" " initialize-with="" }}'),
-				'FW TP SC'
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ authors max="3" name="full" initialize="full" name-part-separator="" join=" " initialize-with="" }}'),
+				'FA SC TP'
 			);
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(item, '{{ authors max="1" name="family-given" initialize="given" name-part-separator="" initialize-with="" }}'),
@@ -1440,10 +1428,6 @@ describe("Zotero.Attachments", function() {
 				'E P'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ editors max="1" order="desc" name="family" initialize="family" initialize-with="" }}'),
-				'S'
-			);
-			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ editors max="1" name="full" initialize="full" name-part-separator="" initialize-with="" }}'),
 				'SE'
 			);
@@ -1466,10 +1450,6 @@ describe("Zotero.Attachments", function() {
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ creators max="3" join=" " name="given" }}'),
 				'First Second Third'
-			);
-			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ creators max="3" join=" " name="given" order="desc" }}'),
-				'Last Other Some'
 			);
 		});
 

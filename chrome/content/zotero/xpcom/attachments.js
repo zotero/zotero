@@ -2352,8 +2352,8 @@ Zotero.Attachments = new function () {
 			return initializeFn(creator.lastName, ['full', ...last].includes(initialize), initializeWith);
 		};
 
-		const commonCreators = (value, { max = Infinity, order = 'asc', name = 'family', namePartSeparator = ' ', join = ', ', initialize = '', initializeWith = '.' } = {}) => {
-			return getSlicedCreatorsOfType(value, order === "desc" ? -max : max)
+		const commonCreators = (value, { max = Infinity, name = 'family', namePartSeparator = ' ', join = ', ', initialize = '', initializeWith = '.' } = {}) => {
+			return getSlicedCreatorsOfType(value, max)
 				.map(c => transformName(c, { name, namePartSeparator, initialize, initializeWith }))
 				.join(join);
 		};
