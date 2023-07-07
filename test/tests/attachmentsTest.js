@@ -1293,7 +1293,7 @@ describe("Zotero.Attachments", function() {
 	});
 	
 	describe("#getFileBaseNameFromItem()", function () {
-		var item, itemManyAuthors, itemPatent, itemIncomplete;
+		var item, itemManyAuthors, itemPatent, itemIncomplete, itemBookSection;
 
 		before(() => {
 			item = createUnsavedDataObject('item', { title: 'Lorem Ipsum', itemType: 'journalArticle' });
@@ -1332,6 +1332,8 @@ describe("Zotero.Attachments", function() {
 			itemPatent.setField('number', 'HBK-8539b');
 			itemPatent.setField('assignee', 'Fast FooBar');
 			itemIncomplete = createUnsavedDataObject('item', { title: 'Incomplete', itemType: 'preprint' });
+			itemBookSection = createUnsavedDataObject('item', { title: 'Book Section', itemType: 'bookSection' });
+			itemBookSection.setField('bookTitle', 'Book Title');
 		});
 
 		
@@ -1364,7 +1366,7 @@ describe("Zotero.Attachments", function() {
 			);
 		});
 
-		it('should offer a range of options for composing creaotrs', function () {
+		it('should offer a range of options for composing creators', function () {
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(item, '{{ authors max="1" }}'),
 				'Barius'
@@ -1461,6 +1463,14 @@ describe("Zotero.Attachments", function() {
 				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ authors max="2" }}'),
 				'Author, Creator'
 			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ creators max="3" join=" " name="given" }}'),
+				'First Second Third'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemManyAuthors, '{{ creators max="3" join=" " name="given" order="desc" }}'),
+				'Last Other Some'
+			);
 		});
 
 		it('should accept case parameter', async function () {
@@ -1477,7 +1487,7 @@ describe("Zotero.Attachments", function() {
 				'Best Publications Place'
 			);
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(item, '{{ publicationTitle case="dash" }}'),
+				Zotero.Attachments.getFileBaseNameFromItem(item, '{{ publicationTitle case="hyphen" }}'),
 				'best-publications-place'
 			);
 			assert.equal(
@@ -1530,7 +1540,7 @@ describe("Zotero.Attachments", function() {
 		});
 
 		it("should support simple logic in template syntax", function () {
-			const template = '{{ if itemTypeRaw == "journalArticle" }}j-{{ publicationTitle case="dash" }}{{ elseif itemTypeRaw == "patent" }}p-{{ number case="dash" }}{{ else }}o-{{ title case="dash" }}{{ endif }}';
+			const template = '{{ if itemTypeRaw == "journalArticle" }}j-{{ publicationTitle case="hyphen" }}{{ elseif itemTypeRaw == "patent" }}p-{{ number case="hyphen" }}{{ else }}o-{{ title case="hyphen" }}{{ endif }}';
 			assert.equal(
 				Zotero.Attachments.getFileBaseNameFromItem(item, template), 'j-best-publications-place'
 			);
@@ -1544,13 +1554,23 @@ describe("Zotero.Attachments", function() {
 
 		it("should skip missing fields", function () {
 			assert.equal(
-				Zotero.Attachments.getFileBaseNameFromItem(itemIncomplete, '{{ authors prefix = "a" suffix="-" }}{{ publicationTitle case="dash" suffix="-" }}{{ title }}'),
+				Zotero.Attachments.getFileBaseNameFromItem(itemIncomplete, '{{ authors prefix = "a" suffix="-" }}{{ publicationTitle case="hyphen" suffix="-" }}{{ title }}'),
 				'Incomplete'
 			);
 		});
 
-		it("should conver formatString attachmentRenameFormatString to use template syntax", function () {
+		it("should recognized base-mapped fields", function () {
 			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemBookSection, '{{ bookTitle case="snake" }}'),
+				'book_title'
+			);
+			assert.equal(
+				Zotero.Attachments.getFileBaseNameFromItem(itemBookSection, '{{ publicationTitle case="snake" }}'),
+				'book_title'
+			);
+		});
+
+		it("should convert formatString attachmentRenameFormatString to use template syntax", function () {
 			assert.equal(
 				Zotero.Prefs.convertLegacyFormatString('{%c - }{%y - }{%t{50}}'),
 				'{{ firstCreator suffix=" - " }}{{ year suffix=" - " }}{{ title truncate="50" }}'

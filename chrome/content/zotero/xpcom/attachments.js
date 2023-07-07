@@ -2312,9 +2312,9 @@ Zotero.Attachments = new function () {
 					value = value.slice(0, 1).toUpperCase() + value.slice(1);
 					break;
 				case 'title':
-					value = value.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+					value = Zotero.Utilities.capitalizeTitle(value, true);
 					break;
-				case 'dash':
+				case 'hyphen':
 					value = value.toLowerCase().replace(/\s+/g, '-');
 					break;
 				case 'snake':
