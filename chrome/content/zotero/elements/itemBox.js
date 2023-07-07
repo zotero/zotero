@@ -778,6 +778,14 @@
 				this._focusNextField(this._lastTabIndex);
 			}
 			
+			if (this._showCreatorTypeGuidance) {
+				let creatorTypeLabels = this.querySelectorAll(".creator-type-label");
+				this._id("zotero-author-guidance").show({
+					forEl: creatorTypeLabels[creatorTypeLabels.length - 1]
+				});
+				this._showCreatorTypeGuidance = false;
+			}
+			
 			this._refreshed = true;
 		}
 		
@@ -1985,10 +1993,7 @@
 				newVal = val;
 				
 				if (Zotero.ItemTypes.getName(this.item.itemTypeID) === "bookSection") {
-					var creatorTypeLabels = this.querySelectorAll(".creator-type-label");
-					this._id("zotero-author-guidance").show({
-						forEl: creatorTypeLabels[creatorTypeLabels.length - 1]
-					});
+					this._showCreatorTypeGuidance = true;
 				}
 			}
 			

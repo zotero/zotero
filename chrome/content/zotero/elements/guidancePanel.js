@@ -29,21 +29,23 @@
 	class GuidancePanel extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
 			<panel type="arrow" align="top">
-				<stack>
-					<hbox align="center">
-						<image src="chrome://zotero/skin/zotero-new-z-48px.png" style="margin-right: 10px; width: 48px; height: 48px;"></image>
-						<label id="panel-description" flex="1"></label>
-					</hbox>
-					<hbox id="close-button-box">
-						<toolbarbutton id="close-button" class="close-icon" hidden="true"></toolbarbutton>
-					</hbox>
-					<hbox id="nav-buttons">
-						<toolbarbutton id="back-button" hidden="true"></toolbarbutton>
-						<toolbarbutton id="forward-button" hidden="true"></toolbarbutton>
-					</hbox>
-				</stack>
+				<html:div class="panel-container">
+					<html:div class="panel-text"></html:div>
+				</html:div>
 			</panel>
 		`);
+		
+		/*
+			Unused:
+			
+			<hbox id="close-button-box">
+				<toolbarbutton id="close-button" class="close-icon" hidden="true"></toolbarbutton>
+			</hbox>
+			<hbox id="nav-buttons">
+				<toolbarbutton id="back-button" hidden="true"></toolbarbutton>
+				<toolbarbutton id="forward-button" hidden="true"></toolbarbutton>
+			</hbox>
+		*/
 
 		get panel() {
 			return this.querySelector('panel');
@@ -113,7 +115,7 @@
 					text = Zotero.getString("firstRunGuidance." + about);
 				}
 				text = text.split("\n");
-				var descriptionNode = this.id('panel-description');
+				var descriptionNode = document.querySelector('.panel-text');
 				
 				while (descriptionNode.hasChildNodes()) {
 					descriptionNode.removeChild(descriptionNode.firstChild);
