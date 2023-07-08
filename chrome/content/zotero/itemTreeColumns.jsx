@@ -59,32 +59,32 @@ const COLUMNS = [
 	{
 		dataKey: "title",
 		primary: true,
-		defaultIn: new Set(["default", "feeds", "feed"]),
+		defaultIn: ["default", "feeds", "feed"],
 		label: "itemFields.title",
 		ignoreInColumnPicker: true,
 		flex: 4,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "firstCreator",
-		defaultIn: new Set(["default", "feeds", "feed"]),
+		defaultIn: ["default", "feeds", "feed"],
 		label: "zotero.items.creator_column",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "itemType",
 		label: "zotero.items.itemType",
 		width: "40",
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "date",
-		defaultIn: new Set(["feeds", "feed"]),
+		defaultIn: ["feeds", "feed"],
 		defaultSort: -1,
 		label: "itemFields.date",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "year",
@@ -93,19 +93,19 @@ const COLUMNS = [
 		label: "zotero.items.year_column",
 		flex: 1,
 		staticWidth: true,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "publisher",
 		label: "itemFields.publisher",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "publicationTitle",
 		label: "itemFields.publicationTitle",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "journalAbbreviation",
@@ -113,14 +113,14 @@ const COLUMNS = [
 		submenu: true,
 		label: "itemFields.journalAbbreviation",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "language",
 		submenu: true,
 		label: "itemFields.language",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "accessDate",
@@ -129,7 +129,7 @@ const COLUMNS = [
 		submenu: true,
 		label: "itemFields.accessDate",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "libraryCatalog",
@@ -137,7 +137,7 @@ const COLUMNS = [
 		submenu: true,
 		label: "itemFields.libraryCatalog",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "callNumber",
@@ -145,14 +145,14 @@ const COLUMNS = [
 		submenu: true,
 		label: "itemFields.callNumber",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "rights",
 		submenu: true,
 		label: "itemFields.rights",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "dateAdded",
@@ -160,7 +160,7 @@ const COLUMNS = [
 		disabledIn: ["feeds", "feed"],
 		label: "itemFields.dateAdded",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "dateModified",
@@ -168,7 +168,7 @@ const COLUMNS = [
 		disabledIn: ["feeds", "feed"],
 		label: "zotero.items.dateModified_column",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "archive",
@@ -176,7 +176,7 @@ const COLUMNS = [
 		submenu: true,
 		label: "itemFields.archive",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "archiveLocation",
@@ -184,7 +184,7 @@ const COLUMNS = [
 		submenu: true,
 		label: "itemFields.archiveLocation",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "place",
@@ -192,7 +192,7 @@ const COLUMNS = [
 		submenu: true,
 		label: "itemFields.place",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "volume",
@@ -200,7 +200,7 @@ const COLUMNS = [
 		submenu: true,
 		label: "itemFields.volume",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "edition",
@@ -208,7 +208,7 @@ const COLUMNS = [
 		submenu: true,
 		label: "itemFields.edition",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "number",
@@ -216,7 +216,7 @@ const COLUMNS = [
 		submenu: true,
 		label: "itemFields.number",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "pages",
@@ -224,7 +224,7 @@ const COLUMNS = [
 		submenu: true,
 		label: "itemFields.pages",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "issue",
@@ -232,7 +232,7 @@ const COLUMNS = [
 		submenu: true,
 		label: "itemFields.issue",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "series",
@@ -240,7 +240,7 @@ const COLUMNS = [
 		submenu: true,
 		label: "itemFields.series",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "seriesTitle",
@@ -248,7 +248,7 @@ const COLUMNS = [
 		submenu: true,
 		label: "itemFields.seriesTitle",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "court",
@@ -256,7 +256,7 @@ const COLUMNS = [
 		submenu: true,
 		label: "itemFields.court",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "medium",
@@ -264,7 +264,7 @@ const COLUMNS = [
 		submenu: true,
 		label: "itemFields.medium",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "genre",
@@ -272,7 +272,7 @@ const COLUMNS = [
 		submenu: true,
 		label: "itemFields.genre",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "system",
@@ -280,7 +280,7 @@ const COLUMNS = [
 		submenu: true,
 		label: "itemFields.system",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "shortTitle",
@@ -288,24 +288,24 @@ const COLUMNS = [
 		submenu: true,
 		label: "itemFields.shortTitle",
 		flex: 2,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "extra",
 		disabledIn: ["feeds", "feed"],
 		label: "itemFields.extra",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "hasAttachment",
-		defaultIn: new Set(["default"]),
+		defaultIn: ["default"],
 		disabledIn: ["feeds", "feed"],
 		label: "zotero.tabs.attachments.label",
 		iconLabel: <Icons.IconAttachSmall />,
 		fixedWidth: true,
 		width: "16",
-		zoteroPersist: new Set(["hidden", "sortDirection"])
+		zoteroPersist: ["hidden", "sortDirection"]
 	},
 	{
 		dataKey: "numNotes",
@@ -315,14 +315,14 @@ const COLUMNS = [
 		width: "14",
 		minWidth: 14,
 		staticWidth: true,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "feed",
 		disabledIn: ["default", "feed"],
 		label: "itemFields.feed",
 		flex: 1,
-		zoteroPersist: new Set(["width", "hidden", "sortDirection"])
+		zoteroPersist: ["width", "hidden", "sortDirection"]
 	}
 ];
 

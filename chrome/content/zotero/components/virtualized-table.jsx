@@ -1466,7 +1466,7 @@ var Columns = class {
 	}
 
 	_getColumnPrefsToPersist(column) {
-		let persistKeys = column.zoteroPersist;
+		let persistKeys = new Set(column.zoteroPersist); 
 		if (!persistKeys) persistKeys = new Set();
 		// Always persist
 		['ordinal', 'hidden', 'sortDirection'].forEach(k => persistKeys.add(k));

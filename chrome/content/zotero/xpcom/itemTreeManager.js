@@ -201,12 +201,6 @@ class ItemTreeManager {
 			options.forEach(opt => this._addColumns(opt, true));
 			return true;
 		}
-		// Turn defaultIn, disabledIn, and zoteroPersist into Set
-		["defaultIn", "disabledIn", "zoteroPersist"].forEach(key => {
-			if (options[key]) {
-				options[key] = new Set(options[key]);
-			}
-		});
 		this._customColumns.push(Object.assign({}, options, { custom: true }));
 		if (options.dataProvider) {
 			this._customDataProvider[options.dataKey] = options.dataProvider;

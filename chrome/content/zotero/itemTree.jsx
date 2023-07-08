@@ -3211,7 +3211,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			// Initial hidden value
 			if (!("hidden" in column)) {
 				if (hasDefaultIn) {
-					column.hidden = !(column.defaultIn && column.defaultIn.has(visibilityGroup));
+					column.hidden = !(column.defaultIn && column.defaultIn.includes(visibilityGroup));
 				}
 				else {
 					column.hidden = false;
