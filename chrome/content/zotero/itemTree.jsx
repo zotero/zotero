@@ -36,7 +36,7 @@ const { Cc, Ci, Cu } = require('chrome');
 Cu.import("resource://gre/modules/osfile.jsm");
 
 /**
- * @typedef {import("./itemTreeColumns.jsx").ItemTreeColumnOption} ItemTreeColumnOption
+ * @typedef {import("./itemTreeColumns.jsx").ItemTreeColumnOptions} ItemTreeColumnOptions
  */
 
 const CHILD_INDENT = 12;
@@ -146,11 +146,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 	
 	/**
 	 * Get global columns from ItemTreeColumns and local columns from this.columns
-	 * @returns {ItemTreeColumnOption[]}
+	 * @returns {ItemTreeColumnOptions[]}
 	 */
 	getColumns() {
 		const extraColumns = Zotero.ItemTreeManager.getColumns();
-		/** @type {ItemTreeColumnOption[]} */
+		/** @type {ItemTreeColumnOptions[]} */
 		const currentColumns = this.props.columns || Zotero.ItemTreeManager._getColumnsByType();
 		extraColumns.forEach(column => {
 			if (!currentColumns.find(c => c.dataKey === column.dataKey)) {

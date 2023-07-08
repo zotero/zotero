@@ -26,12 +26,12 @@
 const { COLUMNS: ITEMTREE_COLUMNS } = require("zotero/itemTreeColumns");
 
 /**
- * @typedef {import("../itemTreeColumns.jsx").ItemTreeColumnOption} ItemTreeColumnOption
+ * @typedef {import("../itemTreeColumns.jsx").ItemTreeColumnOptions} ItemTreeColumnOptions
  */
 
 class ItemTreeManager {
 	_observerAdded = false;
-	/** @type {ItemTreeColumnOption[]} */
+	/** @type {ItemTreeColumnOptions[]} */
 	_customColumns = [];
 	/** 
 	 * Cached custom columns' data source, dataKey: dataProvider
@@ -44,7 +44,7 @@ class ItemTreeManager {
 	/** 
 	 * Register a custom column. All registered columns must be valid, and must have a unique dataKey.
 	 * Although it's async, resolving does not promise the item trees are updated.
-	 * @param {ItemTreeColumnOption | ItemTreeColumnOption[]} options - An option or array of options to register
+	 * @param {ItemTreeColumnOptions | ItemTreeColumnOptions[]} options - An option or array of options to register
 	 * @returns {boolean} true if the column(s) are registered
 	 * @example
 	 * ```js
@@ -92,9 +92,9 @@ class ItemTreeManager {
 
 	/**
 	 * Get column(s) that matches the properties of option
-	 * @param {undefined | Partial.<ItemTreeColumnOption> | Partial.<ItemTreeColumnOption>[]} options - An option or array of options to match
+	 * @param {undefined | Partial.<ItemTreeColumnOptions> | Partial.<ItemTreeColumnOptions>[]} options - An option or array of options to match
 	 * @param {string[]} [types=["custom", "itemtree"]] - An array of column source type to include
-	 * @returns {ItemTreeColumnOption[]}
+	 * @returns {ItemTreeColumnOptions[]}
 	 */
 	getColumns(options, types) {
 		types = types || ["custom", "itemtree"]
@@ -126,7 +126,7 @@ class ItemTreeManager {
 	/**
 	 * Get columns by type. Only support itemtree and custom for now.
 	 * @param {"itemtree" | "custom"} type 
-	 * @returns {ItemTreeColumnOption[]}
+	 * @returns {ItemTreeColumnOptions[]}
 	 */
 	_getColumnsByType(type) {
 		type = type || "itemtree";
@@ -142,14 +142,14 @@ class ItemTreeManager {
 	 * Check if column options is valid.
 	 * If the options is an array, all its children must be valid.
 	 * Otherwise, the validation fails.
-	 * @param {ItemTreeColumnOption | ItemTreeColumnOption[]} options 
+	 * @param {ItemTreeColumnOptions | ItemTreeColumnOptions[]} options 
 	 * @returns {boolean} true if the option(s) are valid
 	 */
 	_validateColumnOption(options) {
 		/**
 		 * Validate column options.
-		 * @param {ItemTreeColumnOption | ItemTreeColumnOption[]} options 
-		 * @param {(option: ItemTreeColumnOption) => boolean} validator - A function that returns true if the option is valid
+		 * @param {ItemTreeColumnOptions | ItemTreeColumnOptions[]} options 
+		 * @param {(option: ItemTreeColumnOptions) => boolean} validator - A function that returns true if the option is valid
 		 * @returns {boolean} true if the option(s) are valid
 		 */
 		function validate(options, validator) {
@@ -186,7 +186,7 @@ class ItemTreeManager {
 	 * Add a new column or new columns.
 	 * If the options is an array, all its children must be valid.
 	 * Otherwise, no columns are added.
-	 * @param {ItemTreeColumnOption | ItemTreeColumnOption[]} options - An option or array of options to add
+	 * @param {ItemTreeColumnOptions | ItemTreeColumnOptions[]} options - An option or array of options to add
 	 * @param {boolean} [skipValidate=false] - Whether to validate the option(s) before adding 
 	 * @returns {boolean} - True if column(s) were added, false if not
 	 */

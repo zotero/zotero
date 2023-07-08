@@ -27,7 +27,7 @@ const React = require('react');
 const Icons = require('components/icons');
 
 /**
- * @typedef ItemTreeColumnOption
+ * @typedef ItemTreeColumnOptions
  * @type {object}
  * @property {string} dataKey - Required, see use in ItemTree#_getRowData()
  * @property {string[]} [enabledTreeIDs=[]] - Which tree ids the column should be enabled in. If undefined, enabled in every tree.
@@ -52,7 +52,7 @@ const Icons = require('components/icons');
  */
 
 /**
- * @type {ItemTreeColumnOption[]}
+ * @type {ItemTreeColumnOptions[]}
  * @constant
  */
 const COLUMNS = [
