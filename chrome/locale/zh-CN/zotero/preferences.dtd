@@ -19,7 +19,7 @@
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "重命名链接的文件">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "打开 PDF 使用">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "系统默认">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "在新的視窗開啟PDF而非新的分頁">
+<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "在新的窗口打开PDF而非新的标签页">
 
 <!ENTITY zotero.preferences.miscellaneous "杂项">
 <!ENTITY zotero.preferences.autoUpdate "自动检查转换器及样式的更新">
@@ -93,7 +93,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "重置文件同步历史">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "比较存储服务中的所有附件文件">
 <!ENTITY zotero.preferences.sync.reset "重置">
-<!ENTITY zotero.preferences.sync.reset.showResetOptions "顯示重置選項">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "显示重置选项">
 <!ENTITY zotero.preferences.sync.reset.button "重置…">
 
 
