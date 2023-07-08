@@ -139,13 +139,15 @@ class ItemTreeManager {
 	}
 
 	/**
-	 * Check if column options is valid. An atomic operation.
+	 * Check if column options is valid.
+	 * If the options is an array, all its children must be valid.
+	 * Otherwise, the validation fails.
 	 * @param {ItemTreeColumnOption | ItemTreeColumnOption[]} options 
 	 * @returns {boolean} true if the option(s) are valid
 	 */
 	_validateColumnOption(options) {
 		/**
-		 * Validate column options. An atomic operation.
+		 * Validate column options.
 		 * @param {ItemTreeColumnOption | ItemTreeColumnOption[]} options 
 		 * @param {(option: ItemTreeColumnOption) => boolean} validator - A function that returns true if the option is valid
 		 * @returns {boolean} true if the option(s) are valid
@@ -181,7 +183,9 @@ class ItemTreeManager {
 
 
 	/**
-	 * Add a new column or new columns. All options must be valid. An atomic operation.
+	 * Add a new column or new columns.
+	 * If the options is an array, all its children must be valid.
+	 * Otherwise, no columns are added.
 	 * @param {ItemTreeColumnOption | ItemTreeColumnOption[]} options - An option or array of options to add
 	 * @param {boolean} [skipValidate=false] - Whether to validate the option(s) before adding 
 	 * @returns {boolean} - True if column(s) were added, false if not
