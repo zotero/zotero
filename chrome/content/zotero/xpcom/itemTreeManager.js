@@ -34,8 +34,8 @@ class ItemTreeManager {
 	/** @type {ItemTreeColumnOptions[]} */
 	_customColumns = [];
 	/** 
-	 * Cached custom columns' data source, dataKey: dataProvider
-	 * @type {Record<string, (item: Zotero.Item, field: string, unformatted?: boolean) => string>}
+	 * Cached custom columns' data source
+	 * @type {(item: Zotero.Item, dataKey: string, unformatted?: boolean) => string}
 	 */
 	_customDataProvider = {};
 	constructor() {
@@ -47,15 +47,46 @@ class ItemTreeManager {
 	 * @param {ItemTreeColumnOptions | ItemTreeColumnOptions[]} options - An option or array of options to register
 	 * @returns {boolean} true if the column(s) are registered
 	 * @example
+	 * A minimal custom column with icon:
 	 * ```js
 	 * Zotero.ItemTreeManager.registerColumns(
 	 * {
 	 *     dataKey: 'rtitle',
 	 *     iconPath: 'chrome://zotero/skin/tick.png',
 	 *     label: 'reversed title',
-	 *     dataProvider: (item, field) => {
-	 *         return item.getField('title').split('').reverse().join('')}
-	 *     }),
+	 *     dataProvider: (item, dataKey, unformatted) => {
+	 *         return item.getField('title').split('').reverse().join('');
+	 *     },
+	 * });
+	 * ```
+	 * @example
+	 * A custom column using all available options.
+	 * Note that the column will only be shown in the main item tree.
+	 * ```js
+	 * Zotero.ItemTreeManager.registerColumns(
+	 * {
+	 *     dataKey: 'rtitle',
+	 *     label: 'reversed title',
+	 *     enabledTreeIDs: ['main'], // only show in the main item tree
+	 *     defaultSort: 1, // sort by increasing order
+	 *     flex: 0, // don't take up all available space
+	 *     width: 100, // assign fixed width in pixels
+	 *     fixedWidth: true, // don't allow user to resize
+	 *     staticWidth: true, // don't allow coloumn to be resized when the tree is resized
+	 *     minWidth: 50, // minimum width in pixels
+	 *     iconPath: 'chrome://zotero/skin/tick.png',
+	 *     ignoreInColumnPicker: false, // show in the column picker
+	 *     submenu: true, // show in the column picker submenu
+	 *     primary: false, // only one primary column is allowed
+	 *     pluginID: 'my-plugin', // plugin ID, which will be used to unregister the column when the plugin is unloaded
+	 *     dataProvider: (item, dataKey, unformatted) => {
+	 *         // item: the current item in the row
+	 *         // dataKey: the dataKey of the column
+	 *         // unformatted: whether the data should be formatted for display, see Zotero.Item.prototype.getField
+	 *         // return: the data to display in the column
+	 *         return item.getField('title').split('').reverse().join('');
+	 *     },
+	 *     zoteroPersist: ['width', 'hidden', 'sortDirection'], // persist the column properties
 	 * });
 	 * ```
 	 */
