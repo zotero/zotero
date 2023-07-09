@@ -1092,12 +1092,11 @@ class VirtualizedTable extends React.Component {
 			let label = columnName;
 			// Allow custom icons to be used in column headers
 			if (column.iconPath) {
-				column.iconLabel = <span><img
-					src={column.iconPath}
-					height={'10px'}
-					width={'9px'}
-					style={{marginLeft: '6px'}}>
-				</img>&nbsp;{columnName}</span>;
+				column.iconLabel = <span>
+				<span
+					className="icon icon-bg"
+					style={{backgroundImage: `url("${column.iconPath}")`}}>
+				</span>&nbsp;{columnName}</span>;
 			}
 			if (column.iconLabel) {
 				label = column.iconLabel;
