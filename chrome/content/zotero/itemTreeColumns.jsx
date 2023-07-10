@@ -47,7 +47,7 @@ const Icons = require('components/icons');
  * @property {boolean} [primary] - Should only be one column at the time. Title is the primary column
  * @property {boolean} [custom] - Set automatically to true when the column is added by the user
  * @property {string} [pluginID] - Set plugin ID to auto remove column when plugin is removed
- * @property {(item: Zotero.Item, dataKey: string, unformatted?: boolean) => string} [dataProvider] - Custom data provider that is called when rendering cells
+ * @property {(item: Zotero.Item, dataKey: string) => string} [dataProvider] - Custom data provider that is called when rendering cells
  * @property {string[]} zoteroPersist - Which column properties should be persisted between zotero close
  */
 

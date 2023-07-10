@@ -35,7 +35,7 @@ class ItemTreeManager {
 	_customColumns = [];
 	/** 
 	 * Cached custom columns' data source
-	 * @type {(item: Zotero.Item, dataKey: string, unformatted?: boolean) => string}
+	 * @type {(item: Zotero.Item, dataKey: string) => string}
 	 */
 	_customDataProvider = {};
 	constructor() {
@@ -54,7 +54,7 @@ class ItemTreeManager {
 	 *     dataKey: 'rtitle',
 	 *     iconPath: 'chrome://zotero/skin/tick.png',
 	 *     label: 'reversed title',
-	 *     dataProvider: (item, dataKey, unformatted) => {
+	 *     dataProvider: (item, dataKey) => {
 	 *         return item.getField('title').split('').reverse().join('');
 	 *     },
 	 * });
@@ -79,10 +79,9 @@ class ItemTreeManager {
 	 *     submenu: true, // show in the column picker submenu
 	 *     primary: false, // only one primary column is allowed
 	 *     pluginID: 'my-plugin', // plugin ID, which will be used to unregister the column when the plugin is unloaded
-	 *     dataProvider: (item, dataKey, unformatted) => {
+	 *     dataProvider: (item, dataKey) => {
 	 *         // item: the current item in the row
 	 *         // dataKey: the dataKey of the column
-	 *         // unformatted: whether the data should be formatted for display, see Zotero.Item.prototype.getField
 	 *         // return: the data to display in the column
 	 *         return item.getField('title').split('').reverse().join('');
 	 *     },

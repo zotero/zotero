@@ -3850,7 +3850,7 @@ ItemTreeRow.prototype.getField = function(field, unformatted)
 	try {
 		return this.ref.getField(field, unformatted, true);
 	} catch (e) {
-		return Zotero.ItemTreeManager.getCustomCellData(this.ref, field, unformatted);
+		return Zotero.ItemTreeManager.getCustomCellData(this.ref, field);
 	}
 }
 
