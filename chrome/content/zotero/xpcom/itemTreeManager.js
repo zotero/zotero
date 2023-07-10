@@ -128,15 +128,27 @@ class ItemTreeManager {
 	 */
 	getColumns(options, types) {
 		types = types || ["custom", "itemtree"]
+		/** @type {ItemTreeColumnOptions[]} */
 		const allColumns = types.reduce((acc, type) => acc.concat(this._getColumnsByType(type)), []);
 		if (!options) {
 			return allColumns;
 		}
-		if (Array.isArray(options)) {
-			const matches = options.map(opt => this.getColumns(opt));
-			return matches.reduce((acc, match) => acc.concat(match), []);
+		if (!Array.isArray(options)) {
+			options = [options];
 		}
-		return allColumns.filter(col => Object.keys(options).every(key => col[key] === options[key]));
+		/** @type {ItemTreeColumnOptions[]} */
+		const matches = [];
+		for (const opt of options) {
+			const currentMatches = allColumns
+				.filter(col =>
+					// Aoid dataKey collision
+					!matches.map(match => match.dataKey).includes(col.dataKey)
+					// Match all properties
+					&& Object.keys(opt).every(key => col[key] === opt[key])
+				);
+			matches.push(...currentMatches);
+		}
+		return matches;
 	}
 
 	/**
@@ -217,43 +229,49 @@ class ItemTreeManager {
 	 * If the options is an array, all its children must be valid.
 	 * Otherwise, no columns are added.
 	 * @param {ItemTreeColumnOptions | ItemTreeColumnOptions[]} options - An option or array of options to add
-	 * @param {boolean} [skipValidate=false] - Whether to validate the option(s) before adding 
 	 * @returns {boolean} - True if column(s) were added, false if not
 	 */
-	_addColumns(options, skipValidate) {
+	_addColumns(options) {
+		if (!Array.isArray(options)) {
+			options = [options];
+		}
 		// If any check fails, return check results
-		if (!skipValidate && !this._validateColumnOption(options)) {
+		if (!this._validateColumnOption(options)) {
 			return false;
 		}
-		if (Array.isArray(options)) {
-			// Validating options as an array is more efficient, so we skip validation for each option
-			// and only validate the array once
-			options.forEach(opt => this._addColumns(opt, true));
-			return true;
-		}
-		this._customColumns.push(Object.assign({}, options, { custom: true }));
-		if (options.dataProvider) {
-			this._customDataProvider[options.dataKey] = options.dataProvider;
-		}
+		const newColumns = options.map(opt => Object.assign({}, opt, { custom: true }));
+		this._customColumns.push(...newColumns);
+		newColumns.forEach(opt => {
+			if (opt.dataProvider) {
+				this._customDataProvider[opt.dataKey] = opt.dataProvider;
+			}
+		});
 		return true;
 	}
 
 	/**
 	 * Remove a column option
 	 * @param {string | string[]} dataKeys 
-	 * @returns {boolean | boolean[]}
+	 * @returns {boolean} - True if column(s) were removed, false if not
 	 */
 	_removeColumns(dataKeys) {
-		if (Array.isArray(dataKeys)) {
-			return dataKeys.map(key => this._removeColumns(key));
+		if (!Array.isArray(dataKeys)) {
+			dataKeys = [dataKeys];
 		}
-		const index = this._customColumns.findIndex(column => column.dataKey == dataKeys);
-		if (index > -1) {
+		const toRemoveIndexes = dataKeys.map(key => this._customColumns.findIndex(column => column.dataKey === key));
+		if (toRemoveIndexes.some(index => index === -1)) {
+			const nonExistingDataKeys = dataKeys.filter((key, i) => toRemoveIndexes[i] === -1);
+			Zotero.warn(`ItemTree Column option with dataKeys ${nonExistingDataKeys.join(',')} do not exist.`);
+			return false;
+		}
+		toRemoveIndexes.sort((a, b) => b - a);
+		toRemoveIndexes.forEach(index => {
 			this._customColumns.splice(index, 1);
-			return true;
-		}
-		delete this._customDataProvider[dataKeys.dataKey];
-		return false;
+		});
+		dataKeys.forEach(key => {
+			delete this._customDataProvider[key];
+		});
+		return true;
 	}
 
 
@@ -280,6 +298,8 @@ class ItemTreeManager {
 		if (columns.length === 0) {
 			return;
 		}
+		// Remove the columns one by one
+		// This is to ensure that the columns are removed and not interrupted by any non-existing columns
 		columns.forEach(column => this._removeColumns(column.dataKey));
 		Zotero.debug(`ItemTree columns registered by plugin ${pluginID} unregistered due to shutdown`);
 		await this._notifyItemTrees();
