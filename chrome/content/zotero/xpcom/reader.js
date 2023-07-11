@@ -181,7 +181,9 @@ class ReaderInstance {
 			let attachment = await parentItem.getBestAttachment();
 			if (attachment && attachment.id === this._itemID) {
 				let parts = [];
-				let creator = parentItem.getField('firstCreator');
+				// Windows displays bidi control characters as placeholders in window titles, so strip them
+				// See https://github.com/mozilla-services/screenshots/issues/4863
+				let creator = parentItem.getField('firstCreator', Zotero.isWin);
 				let year = parentItem.getField('year');
 				let title = parentItem.getDisplayTitle();
 				// If creator is missing fall back to titleCreatorYear
@@ -197,11 +199,6 @@ class ReaderInstance {
 				}
 				readerTitle = parts.filter(x => x).join(' - ');
 			}
-		}
-		if (Zotero.isWin) {
-			// Windows displays bidi control characters as placeholders in window titles, so strip them
-			// See https://github.com/mozilla-services/screenshots/issues/4863
-			readerTitle = readerTitle.replace(/[\u2068\u2069]/g, '');
 		}
 		this._title = readerTitle;
 		this._setTitleValue(readerTitle);

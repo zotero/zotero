@@ -1584,6 +1584,13 @@ describe("Zotero.Attachments", function() {
 				'foo{{ firstCreator }}-{{ title truncate="10" }}-{{ year truncate="2" suffix="00" }}'
 			);
 		});
+
+		it("should strip bidi isolates from firstCreator", async function () {
+			var item = createUnsavedDataObject('item',
+				{ creators: [{ name: 'Foo', creatorType: 'author' }, { name: 'Bar', creatorType: 'author' }] });
+			var str = Zotero.Attachments.getFileBaseNameFromItem(item);
+			assert.equal(str, Zotero.getString('general.andJoiner', ['Foo', 'Bar']) + ' - ');
+		});
 	});
 	
 	describe("#getBaseDirectoryRelativePath()", function () {

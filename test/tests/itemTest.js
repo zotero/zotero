@@ -35,6 +35,53 @@ describe("Zotero.Item", function () {
 			]);
 			assert.equal(item.getField('firstCreator'), "B");
 		});
+
+		it("should return a multi-author firstCreator for an unsaved item", async function () {
+			var item = createUnsavedDataObject('item');
+			item.setCreators([
+				{
+					firstName: "A",
+					lastName: "B",
+					creatorType: "author"
+				},
+				{
+					firstName: "C",
+					lastName: "D",
+					creatorType: "author"
+				}
+			]);
+			assert.equal(
+				item.getField('firstCreator'),
+				Zotero.getString('general.andJoiner', ['\u2068B\u2069', '\u2068D\u2069'])
+			);
+		});
+
+		it("should strip bidi isolates from firstCreator when unformatted = true", async function () {
+			var item = createUnsavedDataObject('item');
+			item.setCreators([
+				{
+					firstName: "A",
+					lastName: "B",
+					creatorType: "author"
+				},
+				{
+					firstName: "C",
+					lastName: "D",
+					creatorType: "author"
+				}
+			]);
+			assert.equal(
+				item.getField('firstCreator', /* unformatted */ true),
+				Zotero.getString('general.andJoiner', ['B', 'D'])
+			);
+			
+			await item.saveTx();
+
+			assert.equal(
+				item.getField('firstCreator', /* unformatted */ true),
+				Zotero.getString('general.andJoiner', ['B', 'D'])
+			);
+		});
 	});
 	
 	describe("#setField", function () {

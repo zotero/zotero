@@ -1743,9 +1743,10 @@ Zotero.Items = function() {
 	 *
 	 * @param {Integer} itemTypeID
 	 * @param {Object} creatorData
+	 * @param {Boolean} unformatted
 	 * @return {String}
 	 */
-	this.getFirstCreatorFromData = function (itemTypeID, creatorsData) {
+	this.getFirstCreatorFromData = function (itemTypeID, creatorsData, unformatted) {
 		if (creatorsData.length === 0) {
 			return "";
 		}
@@ -1767,9 +1768,12 @@ Zotero.Items = function() {
 			if (matches.length === 2) {
 				let a = matches[0];
 				let b = matches[1];
-				// \u2068 FIRST STRONG ISOLATE: Isolates the directionality of characters that follow
-				// \u2069 POP DIRECTIONAL ISOLATE: Pops the above isolation
-				return Zotero.getString('general.andJoiner', [`\u2068${a.lastName}\u2069`, `\u2068${b.lastName}\u2069`]);
+				let args = unformatted
+					? [a.lastName, b.lastName]
+					// \u2068 FIRST STRONG ISOLATE: Isolates the directionality of characters that follow
+					// \u2069 POP DIRECTIONAL ISOLATE: Pops the above isolation
+					: [`\u2068${a.lastName}\u2069`, `\u2068${b.lastName}\u2069`];
+				return Zotero.getString('general.andJoiner', args);
 			}
 			if (matches.length >= 3) {
 				return matches[0].lastName + " " + Zotero.getString('general.etAl');
