@@ -3974,7 +3974,7 @@ Zotero.Item.prototype.hasEmbeddedAnnotations = async function () {
 	let contents = await Zotero.File.getContentsAsync(path);
 	// Check for "markup" annotations per the PDF spec
 	// https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/PDF32000_2008.pdf, p. 390
-	let re = /\s\/Subtype\s+\/(Text|FreeText|Line|Square|Circle|Polygon|PolyLine|Highlight|Underline|Squiggly|StrikeOut|Stamp|Caret|Ink|FileAttachment|Sound|Redact)\s/;
+	let re = /\/Subtype\s*\/(Text|FreeText|Line|Square|Circle|Polygon|PolyLine|Highlight|Underline|Squiggly|StrikeOut|Stamp|Caret|Ink|FileAttachment|Sound|Redact)/;
 	return re.test(contents);
 };
 

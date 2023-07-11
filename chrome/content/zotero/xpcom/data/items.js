@@ -956,8 +956,21 @@ Zotero.Items = function() {
 		if (fromItem.isFileAttachment()) {
 			let annotations = fromItem.getAnnotations(includeTrashed);
 			for (let annotation of annotations) {
+				if (annotation.annotationIsExternal) {
+					await annotation.erase();
+					continue;
+				}
 				annotation.parentItemID = toItem.id;
 				await annotation.save();
+			}
+		}
+		
+		if (toItem.isFileAttachment()) {
+			let annotations = toItem.getAnnotations(includeTrashed);
+			for (let annotation of annotations) {
+				if (annotation.annotationIsExternal) {
+					await annotation.erase();
+				}
 			}
 		}
 		
@@ -1129,16 +1142,15 @@ Zotero.Items = function() {
 				}
 
 				// Check whether master and other have embedded annotations
-				// Master yes, other yes -> keep both
-				// Master yes, other no -> keep master
-				// Master no, other yes -> keep other
 				if (await otherAttachment.hasEmbeddedAnnotations()) {
+					// Other yes, master yes -> keep both
 					if (await masterAttachment.hasEmbeddedAnnotations()) {
 						Zotero.debug(`Master attachment ${masterAttachment.key} matches ${otherAttachment.key}, `
 							+ 'but both have embedded annotations - keeping both');
 						otherAttachment.parentItemID = item.id;
 						await otherAttachment.save();
 					}
+					// Other yes, master no -> keep other
 					else {
 						Zotero.debug(`Master attachment ${masterAttachment.key} matches ${otherAttachment.key}, `
 							+ 'but other has embedded annotations - merging into other');
@@ -1148,6 +1160,8 @@ Zotero.Items = function() {
 					}
 					continue;
 				}
+				// Other no, master yes -> keep master
+				// Other no, master no -> keep master
 
 				Zotero.debug(`Master attachment ${masterAttachment.key} matches ${otherAttachment.key} - merging into master`);
 				await doMerge(otherAttachment, masterAttachment);
