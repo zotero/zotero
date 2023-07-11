@@ -65,7 +65,7 @@
 				this['on' + eventType] = null;
 				this.addEventListener(eventType, (event) => {
 					if (!this._isEventInDropmarkerBox(event)) {
-						eval(handler).bind(this);
+						new Function(handler).call(this);
 					}
 				});
 			}
