@@ -1128,7 +1128,7 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 		}
 		
 		try {
-			let item = await this.saveSnapshot(targetID, requestData);
+			var item = await this.saveSnapshot(targetID, requestData);
 			await session.addItem(item);
 		}
 		catch (e) {
@@ -1136,9 +1136,15 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 			return 500;
 		}
 		
+		let attachments = [];
+		let hasAttachments = item.getAttachments().length;
+		if (hasAttachments) {
+			attachments = [{mimeType: "text/html", title: data.title, url: data.url}];
+		}
+		
 		return [201,
 			"application/json",
-			JSON.stringify({ saveSingleFile: !data.skipSnapshot && !data.pdf })];
+			JSON.stringify({ saveSingleFile: !data.skipSnapshot && !data.pdf && data.singleFile, attachments })];
 	},
 	
 	/*
