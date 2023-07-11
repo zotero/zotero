@@ -60,6 +60,11 @@ $icons: (
 		padding: 0 8px 8px;
 		scrollbar-color: var(--color-scrollbar) var(--color-scrollbar-background);
 	}
+	
+	// Highlight takes priority over selection
+	.row.highlighted.selected {
+		background: #FFFF99;
+	}
 
 	.cell.primary {
 		display: flex;
