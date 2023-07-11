@@ -2336,23 +2336,7 @@ var Zotero_QuickFormat = new function () {
 	this.showInLibrary = async function (itemID) {
 		let citationItem = JSON.parse(panelRefersToBubble?.dataset.citationItem || "{}");
 		var id = itemID || citationItem.id;
-		var pane = Zotero.getActiveZoteroPane();
-		// Open main window if it's not open (Mac)
-		if (!pane) {
-			let win = Zotero.openMainWindow();
-			await new Zotero.Promise((resolve) => {
-				let onOpen = function () {
-					win.removeEventListener('load', onOpen);
-					resolve();
-				};
-				win.addEventListener('load', onOpen);
-			});
-			pane = win.ZoteroPane;
-		}
-		pane.selectItem(id);
-		
-		// Pull window to foreground
-		Zotero.Utilities.Internal.activate(pane.document.defaultView);
+		Zotero.Utilities.Internal.showInLibrary(id);
 	}
 	
 	/**

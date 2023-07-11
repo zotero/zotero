@@ -53,6 +53,23 @@ const CHILD_INDENT = 16;
 const COLORED_TAGS_RE = new RegExp("^(?:Numpad|Digit)([0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1})$");
 const COLUMN_PREFS_FILEPATH = OS.Path.join(Zotero.Profile.dir, "treePrefs.json");
 const ATTACHMENT_STATE_LOAD_DELAY = 150; //ms
+const STUB_COLLECTION_TREE_ROW = {
+	view: {},
+	ref: {},
+	visibilityGroup: "",
+	isSearchMode: () => false,
+	getItems: async () => [],
+	isLibrary: () => false,
+	isCollection: () => false,
+	isSearch: () => false,
+	isPublications: () => false,
+	isDuplicates: () => false,
+	isFeed: () => false,
+	isFeeds: () => false,
+	isFeedsOrFeed: () => false,
+	isShare: () => false,
+	isTrash: () => false
+};
 
 var ItemTree = class ItemTree extends LibraryTree {
 	static async init(domEl, opts={}) {
@@ -83,6 +100,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 		dragAndDrop: false,
 		persistColumns: false,
 		columnPicker: false,
+		regularOnly: false,
+		multiSelect: true,
+		shouldListenForNotifications: true,
 		columns: COLUMNS,
 		onContextMenu: noop,
 		onActivate: noop,
@@ -96,6 +116,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 		dragAndDrop: PropTypes.bool,
 		persistColumns: PropTypes.bool,
 		columnPicker: PropTypes.bool,
+		regularOnly: PropTypes.bool,
+		multiSelect: PropTypes.bool,
+		shouldListenForNotifications: PropTypes.bool,
 		columns: PropTypes.array,
 		onSelectionChange: PropTypes.func,
 		onContextMenu: PropTypes.func,
@@ -117,18 +140,21 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._introText = null;
 		
 		this._rowCache = {};
+		this._highlightedRows = new Set();
 		
 		this._modificationLock = Zotero.Promise.resolve();
 		this._refreshPromise = Zotero.Promise.resolve();
 		
 		this._dropRow = null;
 		
-		this._unregisterID = Zotero.Notifier.registerObserver(
-			this,
-			['item', 'collection-item', 'item-tag', 'share-items', 'bucket', 'feedItem', 'search', 'itemtree', 'collection'],
-			'itemTreeView',
-			50
-		);
+		if (props.shouldListenForNotifications) {
+			this._unregisterID = Zotero.Notifier.registerObserver(
+				this,
+				['item', 'collection-item', 'item-tag', 'share-items', 'bucket', 'feedItem', 'search', 'itemtree', 'collection'],
+				'itemTreeView',
+				50
+			);
+		}
 		
 		this._itemsPaneMessage = null;
 		
@@ -245,7 +271,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			// TEMP: Hide annotations
 			newSearchItems = newSearchItems.filter(item => !item.isAnnotation());
 			// Remove notes and attachments if necessary
-			if (this.regularOnly) {
+			if (this.props.regularOnly) {
 				newSearchItems = newSearchItems.filter((item) => {
 					return item instanceof Zotero.Collection
 						|| item instanceof Zotero.Search
@@ -257,12 +283,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 			let itemsToAdd = newSearchItems.filter(item => this._rowMap[item.treeViewID] === undefined);
 			// Find the parents of search matches
 			let newSearchParentIDs = new Set(
-				this.regularOnly
+				this.props.regularOnly
 					? []
 					: newSearchItems.filter(item => !!item.parentItemID).map(item => item.parentItemID)
 			);
 			this._searchParentIDs = newSearchParentIDs;
-			newSearchItems = new Set(newSearchItems);
 			
 			var newCellTextCache = {};
 			var newSearchMode = this.collectionTreeRow.isSearchMode();
@@ -286,7 +311,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 					}
 					let isSearchParent = newSearchParentIDs.has(row.ref.treeViewID);
 					// If not showing children or no children match the search, close
-					if (this.regularOnly || !isSearchParent) {
+					if (this.props.regularOnly || !isSearchParent) {
 						row.isOpen = false;
 						skipChildren = true;
 					}
@@ -294,7 +319,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 						skipChildren = false;
 					}
 					// Skip items that don't match the search and don't have children that do
-					if (!newSearchItems.has(row.ref) && !isSearchParent) {
+					if (!newSearchItemIDs.has(row.ref.id) && !isSearchParent) {
 						continue;
 					}
 				}
@@ -907,13 +932,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 		// view (e.g., as triggered by itemsView.runListeners('select') in ZoteroPane::itemSelected())
 		// before returning. This guarantees that changes are reflected in the middle and right-hand panes
 		// before returning from the save transaction.
-		//
-		// If no onselect handler is set on the tree element, as is the case in the Advanced Search window,
-		// the select listeners never get called, so don't wait.
-		if (reselect && this.props.onSelectionChange) {
+		if (reselect) {
 			var selectPromise = this.waitForSelect();
+			// Triggers reselect on the item tree and fires a select event
 			this.selection.selectEventsSuppressed = false;
-			Zotero.debug("Yielding for select promise"); // TEMP
 			return selectPromise;
 		}
 		else {
@@ -1104,6 +1126,16 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 	
 	async changeCollectionTreeRow(collectionTreeRow) {
+		// When used outside the Zotero Pane, "collectionTreeRow" is not an actual
+		// tree row being passed in, but rather a simple object that defines necessary properties.
+		// So we need to supplement other CollectionTreeRow properties so that itemTree code
+		// does not complain.
+		// Obviously this is not ideal and would be best refactored so that collection
+		// tree row dependencies are specified separately
+		// and there's a separate method to refresh the items.
+		if (collectionTreeRow.constructor.name == "Object") {
+			collectionTreeRow = Object.assign({}, STUB_COLLECTION_TREE_ROW, collectionTreeRow);
+		}
 		if (this._locked) return;
 		if (!collectionTreeRow) {
 			this.tree = null;
@@ -1113,7 +1145,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 		Zotero.debug(`itemTree.changeCollectionTreeRow(): ${collectionTreeRow.id}`);
 		this._itemTreeLoadingDeferred = Zotero.Promise.defer();
 		this.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
-		let newId = "item-tree-" + this.props.id + "-" + collectionTreeRow.visibilityGroup;
+		let newId = "item-tree-" + this.props.id;
+		if (collectionTreeRow.visibilityGroup) {
+			newId += "-" + collectionTreeRow.visibilityGroup;
+		}
 		if (this.id != newId && this.props.persistColumns) {
 			await this._writeColumnPrefsToFile(true);
 			this.id = newId;
@@ -1491,7 +1526,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 				fieldB = creatorSortCache[bItemID];
 			var prop = sortCreatorAsString ? 'firstCreator' : 'sortCreator';
 			var sortStringA = itemA[prop];
+			// Unsaved items like those embedded in documents
+			if (!sortStringA) sortStringA = itemA.getField('firstCreator');
 			var sortStringB = itemB[prop];
+			if (!sortStringB) sortStringB = itemB.getField('firstCreator');
 			if (fieldA === undefined) {
 				let firstCreator = Zotero.Items.getSortTitle(sortStringA);
 				fieldA = firstCreator;
@@ -1631,6 +1669,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 		//Zotero.debug("Scrolling to first row " + Math.max(indices[0] - maxBuffer, 0));
 		this.ensureRowIsVisible(indices[0] - maxBuffer);
 		this.ensureRowIsVisible(indices[0] + maxBuffer);
+	}
+	
+	async setHighlightedRows(ids) {
+		if (!Array.isArray(ids)) {
+			return;
+		}
+		this._highlightedRows = new Set(ids);
+		this.tree.invalidate();
 	}
 	
 	toggleOpenState = async (index, skipRowMapRefresh=false) => {
@@ -1800,7 +1846,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 	}
 
 	getRowString(index) {
-		return this.getCellText(index, this.getSortField())
+		let row = this.getRow(index);
+		if (row.ref.isFeedItem) {
+			return this.getCellText(index, 'title');
+		}
+		return this.getCellText(index, this.getSortField());
 	}
 
 	async deleteSelection(force) {
@@ -2014,7 +2064,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	};
 
 	isContainerEmpty = (index) => {
-		if (this.regularOnly) {
+		if (this.props.regularOnly) {
 			return true;
 		}
 
@@ -3056,6 +3106,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		const rowData = this._getRowData(index);
 		div.classList.toggle('context-row', !!rowData.contextRow);
 		div.classList.toggle('unread', !!rowData.unread);
+		div.classList.toggle('highlighted', this._highlightedRows.has(rowData.id));
 		if (this._dropRow == index) {
 			let span;
 			if (Zotero.DragDrop.currentOrientation != 0) {
@@ -3204,6 +3255,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		
 		let row = {
+			id: itemID,
 			// Not a collection or search in the trash
 			isItem: treeRow.ref instanceof Zotero.Item
 		};
@@ -3406,7 +3458,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		let hasDefaultIn = columns.some(column => 'defaultIn' in column);
 		for (let column of columns) {
 			if (this.props.persistColumns) {
-				if (column.disabledIn && column.disabledIn.includes(visibilityGroup)) continue;;
+				if (column.disabledIn && column.disabledIn.includes(visibilityGroup)) continue;
 				const columnSettings = columnsSettings[column.dataKey];
 				if (!columnSettings && this.id === 'main') {
 					column = this._setLegacyColumnSettings(column);
@@ -3414,10 +3466,6 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 				// Also includes a `hidden` pref and overrides the above if available
 				column = Object.assign({}, column, columnSettings || {});
-
-				if (column.sortDirection) {
-					this._sortedColumn = column;
-				}
 				// If column does not have an "ordinal" field it means it
 				// is newly added
 				if (!("ordinal" in column)) {
@@ -3429,12 +3477,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 			// Initial hidden value
 			if (!("hidden" in column)) {
-				if (hasDefaultIn) {
+				if (hasDefaultIn && visibilityGroup) {
 					column.hidden = !(column.defaultIn && column.defaultIn.includes(visibilityGroup));
 				}
 				else {
 					column.hidden = false;
 				}
+			}
+			if (column.sortDirection) {
+				this._sortedColumn = column;
 			}
 			this._columns.push(column);
 		}
@@ -3919,7 +3970,10 @@ var ItemTreeRow = function(ref, level, isOpen)
 
 ItemTreeRow.prototype.getField = function(field, unformatted)
 {
-	if (!Zotero.ItemTreeManager.isCustomColumn(field)) {
+	if (this.ref.hasOwnProperty(field) && this.ref[field] != null){
+		return this.ref[field];
+	}
+	else if (!Zotero.ItemTreeManager.isCustomColumn(field)) {
 		return this.ref.getField(field, unformatted, true);
 	}
 	return Zotero.ItemTreeManager.getCustomCellData(this.ref, field);

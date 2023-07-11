@@ -1737,6 +1737,28 @@ Zotero.Utilities.Internal = {
 	},
 	
 	
+	showInLibrary: async function (itemID) {
+		var pane = Zotero.getActiveZoteroPane();
+		// Open main window if it's not open (Mac)
+		if (!pane) {
+			let win = Zotero.openMainWindow();
+			await new Zotero.Promise((resolve) => {
+				let onOpen = function () {
+					win.removeEventListener('load', onOpen);
+					resolve();
+				};
+				win.addEventListener('load', onOpen);
+			});
+			pane = win.ZoteroPane;
+		}
+		pane.selectItem(itemID);
+		
+		// Pull window to foreground
+		Zotero.Utilities.Internal.activate(pane.document.defaultView);
+		pane.document.ownerGlobal.focus();
+	},
+	
+	
 	filterStack: function (stack) {
 		return stack.split(/\n/)
 			.filter(line => !line.includes('resource://zotero/bluebird'))
@@ -2534,7 +2556,19 @@ Zotero.Utilities.Internal.activate = new function () {
 	 * Bring a window to the foreground by interfacing directly with X11
 	 */
 	function _X11BringToForeground(win, intervalID) {
-		var windowTitle = win.getInterface(Ci.nsIWebNavigation).title;
+		try {
+			var windowTitle = win.getInterface(Ci.nsIWebNavigation).title;
+			if (!windowTitle) {
+				windowTitle = win.document.title
+			}
+			if (!windowTitle) {
+				throw new Error(`Could not find window title for ${win.location.href}`);
+			}
+		} catch (e) {
+			Zotero.debug(`Could not find window title for ${win.location.href}`, 1);
+			Zotero.logError(e);
+			win.clearInterval(intervalID);
+		}
 		
 		var x11Window = _X11FindWindow(_x11RootWindow, windowTitle);
 		if (!x11Window) return;

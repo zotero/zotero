@@ -1780,66 +1780,62 @@ var ZoteroPane = new function()
 	
 	
 	this.onCollectionSelected = Zotero.serial(async function () {
-		try {
-			var collectionTreeRow = this.getCollectionTreeRow();
-			if (!collectionTreeRow) {
-				Zotero.debug('ZoteroPane.onCollectionSelected: No selected collection found');
-				return;
-			}
-			
-			if (this.itemsView && this.itemsView.collectionTreeRow && this.itemsView.collectionTreeRow.id == collectionTreeRow.id) {
-				Zotero.debug("ZoteroPane.onCollectionSelected: Collection selection hasn't changed");
-
-				// Update enabled actions, in case editability has changed
-				this._updateEnabledActionsForRow(collectionTreeRow);
-				return;
-			}
-			
-			// Rename tab
-			Zotero_Tabs.rename('zotero-pane', collectionTreeRow.getName());
-			
-			let type = Zotero.Libraries.get(collectionTreeRow.ref.libraryID).libraryType;
-			
-			// Clear quick search and tag selector when switching views
-			document.getElementById('zotero-tb-search-textbox').value = "";
-			if (ZoteroPane.tagSelector) {
-				ZoteroPane.tagSelector.clearTagSelection();
-			}
-			
-			collectionTreeRow.setSearch('');
-			if (ZoteroPane.tagSelector) {
-				collectionTreeRow.setTags(ZoteroPane.tagSelector.getTagSelection());
-			}
-			
-			this._updateEnabledActionsForRow(collectionTreeRow);
-
-			// If item data not yet loaded for library, load it now.
-			// Other data types are loaded at startup
-			if (collectionTreeRow.isFeeds()) {
-				var feedsToLoad = Zotero.Feeds.getAll().filter(feed => !feed.getDataLoaded('item'));
-				if (feedsToLoad.length) {
-					Zotero.debug("Waiting for items to load for feeds " + feedsToLoad.map(feed => feed.libraryID));
-					ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
-					for (let feed of feedsToLoad) {
-						await feed.waitForDataLoad('item');
-					}
-				}
-			}
-			else {
-				var library = Zotero.Libraries.get(collectionTreeRow.ref.libraryID);
-				if (!library.getDataLoaded('item')) {
-					Zotero.debug("Waiting for items to load for library " + library.libraryID);
-					ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
-					await library.waitForDataLoad('item');
-				}
-			}
-			
-			this.itemsView.changeCollectionTreeRow(collectionTreeRow);
-			
-			Zotero.Prefs.set('lastViewedFolder', collectionTreeRow.id);
-		} finally {
-			this.collectionsView.runListeners('select');
+		var collectionTreeRow = this.getCollectionTreeRow();
+		if (!collectionTreeRow) {
+			Zotero.debug('ZoteroPane.onCollectionSelected: No selected collection found');
+			return;
 		}
+		
+		if (this.itemsView && this.itemsView.collectionTreeRow && this.itemsView.collectionTreeRow.id == collectionTreeRow.id) {
+			Zotero.debug("ZoteroPane.onCollectionSelected: Collection selection hasn't changed");
+
+			// Update enabled actions, in case editability has changed
+			this._updateEnabledActionsForRow(collectionTreeRow);
+			return;
+		}
+		
+		// Rename tab
+		Zotero_Tabs.rename('zotero-pane', collectionTreeRow.getName());
+		
+		let type = Zotero.Libraries.get(collectionTreeRow.ref.libraryID).libraryType;
+		
+		// Clear quick search and tag selector when switching views
+		document.getElementById('zotero-tb-search-textbox').value = "";
+		if (ZoteroPane.tagSelector) {
+			ZoteroPane.tagSelector.clearTagSelection();
+		}
+		
+		collectionTreeRow.setSearch('');
+		if (ZoteroPane.tagSelector) {
+			collectionTreeRow.setTags(ZoteroPane.tagSelector.getTagSelection());
+		}
+		
+		this._updateEnabledActionsForRow(collectionTreeRow);
+
+		// If item data not yet loaded for library, load it now.
+		// Other data types are loaded at startup
+		if (collectionTreeRow.isFeeds()) {
+			var feedsToLoad = Zotero.Feeds.getAll().filter(feed => !feed.getDataLoaded('item'));
+			if (feedsToLoad.length) {
+				Zotero.debug("Waiting for items to load for feeds " + feedsToLoad.map(feed => feed.libraryID));
+				ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
+				for (let feed of feedsToLoad) {
+					await feed.waitForDataLoad('item');
+				}
+			}
+		}
+		else {
+			var library = Zotero.Libraries.get(collectionTreeRow.ref.libraryID);
+			if (!library.getDataLoaded('item')) {
+				Zotero.debug("Waiting for items to load for library " + library.libraryID);
+				ZoteroPane_Local.setItemsPaneMessage(Zotero.getString('pane.items.loading'));
+				await library.waitForDataLoad('item');
+			}
+		}
+		
+		this.itemsView.changeCollectionTreeRow(collectionTreeRow);
+		
+		Zotero.Prefs.set('lastViewedFolder', collectionTreeRow.id);
 	});
 	
 	
@@ -1951,15 +1947,12 @@ var ZoteroPane = new function()
 			
 			return this.itemPane.render();
 		}.bind(this))()
-		.catch(function (e) {
+		.catch((e) => {
 			Zotero.logError(e);
 			Zotero.crash();
 			throw e;
-		}.bind(this))
-		.finally(function () {
-			return this.itemsView.runListeners('select');
-		}.bind(this));
-	};
+		});
+	}
 	
 	this.updateAddAttachmentMenu = function (popup) {
 		if (!this.canEdit()) {

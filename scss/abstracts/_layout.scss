@@ -1,0 +1,18 @@
+.hbox {
+	display: flex;
+	flex-direction: row;
+
+	.separator {
+		margin: 0 3px;
+		border-right: 2px solid #ddd;
+	}
+}
+
+.vbox {
+	display: flex;
+	flex-direction: column;
+}
+
+.flex {
+	flex: 1
+}

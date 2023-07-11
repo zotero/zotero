@@ -3,6 +3,7 @@
 
 @import "abstracts/variables";
 @import "abstracts/functions";
+@import "abstracts/layout";
 @import "abstracts/mixins";
 @import "abstracts/placeholders";
 @import "abstracts/utilities";
@@ -25,6 +26,8 @@
 @import "components/autosuggest";
 @import "components/banners";
 @import "components/button";
+@import "components/citationExplorer";
+@import "components/citationDialog";
 @import "components/clicky";
 @import "components/contextPane";
 @import "components/collection-tree";
@@ -73,6 +76,7 @@
 @import "elements/attachmentBox";
 @import "elements/attachmentPreview";
 @import "elements/attachmentPreviewBox";
+@import "elements/bubbleInput";
 @import "elements/colorPicker";
 @import "elements/guidancePanel";
 @import "elements/infoBox";

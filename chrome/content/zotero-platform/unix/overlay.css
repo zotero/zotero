@@ -10,6 +10,11 @@ tab {
 	border-right: 1px solid hsla(0, 0%, 0%, 0.2);
 	border-left: 1px solid hsla(0, 0%, 0%, 0.2);
 }
+
+tab:where([visuallyselected="true"]) {
+	background: Background;
+}
+
 /* Fixes misc Ubuntu 16.10 rendering issue fixes. */
 #zotero-prefs menulist dropmarker{
 	width: 30px;

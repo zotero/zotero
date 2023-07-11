@@ -211,6 +211,21 @@
 		min-width: 0px;
 	}
 }
+	
+.virtualized-table.multi-select:focus {
+	.row.focused {
+		border: 1px dotted highlight;
+		z-index: 10000;
+
+		> *:first-child {
+			margin-inline-start: -1px;
+		}
+
+		> *:last-child {
+			margin-inline-end: -1px;
+		}
+	}
+}
 
 .virtualized-table-header {
 	display: flex;
@@ -232,6 +247,14 @@
 
 	&.static-columns {
 		pointer-events: none;
+		.cell {
+			&:hover {
+				background: inherit;
+			}
+		}
+		[title] {
+			pointer-events: auto;
+		}
 	}
 
 	&::after {
@@ -293,13 +316,15 @@
 		&.cell-icon {
 			> .label {
 				margin-inline-start: 0;
+				display: flex;
+				justify-content: center;
 			}
 
 			.icon-css {
 				fill: var(--fill-secondary);
 			}
 
-			justify-content: center;
+			padding: 0;
 		}
 
 		.sort-indicator {
