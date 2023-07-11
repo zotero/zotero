@@ -1317,7 +1317,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 				return (row.ref.isFeedItem && Zotero.Feeds.get(row.ref.libraryID).name) || "";
 			
 			default:
-				return row.ref.getField(field, false, true);
+				// Get from row.getField() to allow for custom fields
+				return row.getField(field, false, true);
 			}
 		}
 		
