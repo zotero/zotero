@@ -1,0 +1,35 @@
+#zotero-citation-explorer-dialog {
+	min-height: 500px;
+	
+	dialog {
+		max-height: 100vh;
+	}
+	
+	.virtualized-table-container {
+		height: 100%;
+		flex: 1;
+	}
+	
+	.xul-border-div {
+		-moz-box-flex: 1;
+	}
+	
+	.flex {
+		flex: 1
+	}
+	
+	.hbox {
+		display: flex;
+		flex-direction: row;
+		
+		.separator {
+			margin: 0 3px;
+			border-right: 2px solid #ddd;
+		}
+	}
+	
+	.vbox {
+		display: flex;
+		flex-direction: column;
+	}
+}

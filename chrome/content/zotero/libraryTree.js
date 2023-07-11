@@ -194,9 +194,12 @@ var LibraryTree = class LibraryTree extends React.Component {
 		this._rowMap = rowMap;
 	}
 
-	_onSelectionChange = () => {
-		if (!this._uninitialized) {
-			this.props.onSelectionChange && this.props.onSelectionChange(this.selection);
+	_onSelectionChange = async () => {
+		if (!this._uninitialized && this.props.onSelectionChange) {
+			try {
+				await Zotero.Promise.resolve(this.props.onSelectionChange(this.selection));
+			} catch (e) {}
+			this.runListeners('select');
 		}
 	}
 	
