@@ -982,7 +982,7 @@ Zotero.DataDirectory = {
 				false,
 				null,
 				// Don't show message in a popup in Standalone if pane isn't ready
-				Zotero.isStandalone
+				true
 			);
 		}
 		catch (e) {
@@ -1005,7 +1005,7 @@ Zotero.DataDirectory = {
 			
 			// Clear status line from progress meter
 			try {
-				Zotero.showZoteroPaneProgressMeter("", false, null, Zotero.isStandalone);
+				Zotero.showZoteroPaneProgressMeter("", false, null, true);
 			}
 			catch (e) {
 				Zotero.logError(e);

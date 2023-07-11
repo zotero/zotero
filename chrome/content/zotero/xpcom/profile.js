@@ -92,8 +92,7 @@ Zotero.Profile = {
 	
 	
 	/**
-	 * Get the path to the Profiles directory of the other app from this one (Firefox or Zotero),
-	 * which may or may not exist
+	 * Get the path to the Firefox Profiles directory, which may or may not exist
 	 *
 	 * @return {String|null} - Path, or null if none due to filesystem location
 	 */
@@ -103,26 +102,14 @@ Zotero.Profile = {
 			return null;
 		}
 		
-		if (Zotero.isStandalone) {
-			if (Zotero.isWin) {
-				dir = OS.Path.join(OS.Path.dirname(dir), "Mozilla", "Firefox");
-			}
-			else if (Zotero.isMac) {
-				dir = OS.Path.join(dir, "Firefox");
-			}
-			else {
-				dir = OS.Path.join(dir, ".mozilla", "firefox");
-			}
+		if (Zotero.isWin) {
+			dir = OS.Path.join(OS.Path.dirname(dir), "Mozilla", "Firefox");
+		}
+		else if (Zotero.isMac) {
+			dir = OS.Path.join(dir, "Firefox");
 		}
 		else {
-			if (Zotero.isWin) {
-				dir = OS.Path.join(OS.Path.dirname(dir), "Zotero", "Zotero");
-			}
-			else if (Zotero.isMac) {
-				dir = OS.Path.join(dir, "Zotero");
-			} else {
-				dir = OS.Path.join(dir, ".zotero", "zotero");
-			}
+			dir = OS.Path.join(dir, ".mozilla", "firefox");
 		}
 		
 		return OS.Path.join(dir, "Profiles");

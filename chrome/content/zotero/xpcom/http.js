@@ -949,8 +949,7 @@ Zotero.HTTP = new function() {
 	 * to wait for proxy authentication can wait for that promise.
 	 */
 	this.triggerProxyAuth = function () {
-		if (!Zotero.isStandalone
-				|| !Zotero.Prefs.get("triggerProxyAuthentication")
+		if (!Zotero.Prefs.get("triggerProxyAuthentication")
 				|| Zotero.HTTP.browserIsOffline()) {
 			Zotero.proxyAuthComplete = Zotero.Promise.resolve();
 			return false;

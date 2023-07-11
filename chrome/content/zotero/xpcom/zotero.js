@@ -209,23 +209,9 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		this.platformMajorVersion = parseInt(this.platformVersion.match(/^[0-9]+/)[0]);
 		this.isFx = true;
 		this.isClient = true;
-		this.isStandalone = Services.appinfo.ID == ZOTERO_CONFIG['GUID'];
+		this.isStandalone = true;
 		
-		if (Zotero.isStandalone) {
-			var version = Services.appinfo.version;
-		}
-		else {
-			let deferred = Zotero.Promise.defer();
-			Components.utils.import("resource://gre/modules/AddonManager.jsm");
-			AddonManager.getAddonByID(
-				ZOTERO_CONFIG.GUID,
-				function (addon) {
-					deferred.resolve(addon.version);
-				}
-			);
-			var version = await deferred.promise;
-		}
-		Zotero.version = version;
+		Zotero.version = Services.appinfo.version;
 		Zotero.isDevBuild = Zotero.version.includes('beta')
 			|| Zotero.version.includes('dev')
 			|| Zotero.version.includes('SOURCE');
@@ -244,14 +230,21 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		// Browser
 		Zotero.browser = "g";
 		
+		if (this.isWin) {
+			let branch = Services.prefs.getBranch("toolkit.startup.");
+			if (branch.getUserPref('recent_crashes') > 2) {
+				branch.clearUserPref('recent_crashes');
+			}
+		}
+		
 		Zotero.Intl.init();
 		if (this.restarting) return;
 		
 		await Zotero.Prefs.init();
 		Zotero.Debug.init(options && options.forceDebugLog);
 		
-		// Make sure that Zotero Standalone is not running as root
-		if(Zotero.isStandalone && !Zotero.isWin) _checkRoot();
+		// Make sure that Zotero isn't running as root
+		if (!Zotero.isWin) _checkRoot();
 		
 		if (!_checkExecutableLocation()) {
 			return;
@@ -405,7 +398,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			return false;
 		}
 			
-		if (Zotero.isStandalone) Zotero.Standalone.init();
+		Zotero.Standalone.init();
 		await Zotero.initComplete();
 	};
 	
@@ -545,55 +538,53 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		
 		try {
 			// Require >=2.1b3 database to ensure proper locking
-			if (Zotero.isStandalone) {
-				let dbSystemVersion = yield Zotero.Schema.getDBVersion('system');
-				if (dbSystemVersion > 0 && dbSystemVersion < 31) {
-					var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-								.createInstance(Components.interfaces.nsIPromptService);
-					var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
-						+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
-						+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING)
-						+ ps.BUTTON_POS_2_DEFAULT;
-					var index = ps.confirmEx(
-						null,
-						Zotero.getString('dataDir.incompatibleDbVersion.title'),
-						Zotero.getString('dataDir.incompatibleDbVersion.text'),
-						buttonFlags,
-						Zotero.getString('general.useDefault'),
-						Zotero.getString('dataDir.chooseNewDataDirectory'),
-						Zotero.getString('general.quit'),
-						null,
-						{}
+			let dbSystemVersion = yield Zotero.Schema.getDBVersion('system');
+			if (dbSystemVersion > 0 && dbSystemVersion < 31) {
+				var ps = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+							.createInstance(Components.interfaces.nsIPromptService);
+				var buttonFlags = (ps.BUTTON_POS_0) * (ps.BUTTON_TITLE_IS_STRING)
+					+ (ps.BUTTON_POS_1) * (ps.BUTTON_TITLE_IS_STRING)
+					+ (ps.BUTTON_POS_2) * (ps.BUTTON_TITLE_IS_STRING)
+					+ ps.BUTTON_POS_2_DEFAULT;
+				var index = ps.confirmEx(
+					null,
+					Zotero.getString('dataDir.incompatibleDbVersion.title'),
+					Zotero.getString('dataDir.incompatibleDbVersion.text'),
+					buttonFlags,
+					Zotero.getString('general.useDefault'),
+					Zotero.getString('dataDir.chooseNewDataDirectory'),
+					Zotero.getString('general.quit'),
+					null,
+					{}
+				);
+				
+				var quit = false;
+				
+				// Default location
+				if (index == 0) {
+					Zotero.Prefs.set("useDataDir", false)
+					
+					Services.startup.quit(
+						Components.interfaces.nsIAppStartup.eAttemptQuit
+							| Components.interfaces.nsIAppStartup.eRestart
 					);
-					
-					var quit = false;
-					
-					// Default location
-					if (index == 0) {
-						Zotero.Prefs.set("useDataDir", false)
-						
-						Services.startup.quit(
-							Components.interfaces.nsIAppStartup.eAttemptQuit
-								| Components.interfaces.nsIAppStartup.eRestart
-						);
-					}
-					// Select new data directory
-					else if (index == 1) {
-						let dir = yield Zotero.DataDirectory.choose(true);
-						if (!dir) {
-							quit = true;
-						}
-					}
-					else {
+				}
+				// Select new data directory
+				else if (index == 1) {
+					let dir = yield Zotero.DataDirectory.choose(true);
+					if (!dir) {
 						quit = true;
 					}
-					
-					if (quit) {
-						Services.startup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
-					}
-					
-					throw true;
 				}
+				else {
+					quit = true;
+				}
+				
+				if (quit) {
+					Services.startup.quit(Components.interfaces.nsIAppStartup.eAttemptQuit);
+				}
+				
+				throw true;
 			}
 			
 			try {

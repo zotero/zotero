@@ -348,7 +348,7 @@ Zotero.Schema = new function(){
 						}, 250);
 					}
 				}
-			}.bind(this), Zotero.isStandalone ? 1000 : 0);
+			}.bind(this), 1000);
 		});
 		
 		return updated;
@@ -928,37 +928,10 @@ Zotero.Schema = new function(){
 			
 			// Get path to add-on
 			
-			// Synchronous in Standalone
-			if (Zotero.isStandalone) {
-				var installLocation = Components.classes["@mozilla.org/file/directory_service;1"]
-					.getService(Components.interfaces.nsIProperties)
-					.get("AChrom", Components.interfaces.nsIFile).parent;
-				installLocation.append("omni.ja");
-			}
-			// Asynchronous in Firefox
-			else {
-				let resolve, reject;
-				let promise = new Zotero.Promise(function () {
-					resolve = arguments[0];
-					reject = arguments[1];
-				});
-				Components.utils.import("resource://gre/modules/AddonManager.jsm");
-				AddonManager.getAddonByID(
-					ZOTERO_CONFIG.GUID,
-					function (addon) {
-						try {
-							installLocation = addon.getResourceURI()
-								.QueryInterface(Components.interfaces.nsIFileURL).file;
-						}
-						catch (e) {
-							reject(e);
-							return;
-						}
-						resolve();
-					}
-				);
-				await promise;
-			}
+			var installLocation = Components.classes["@mozilla.org/file/directory_service;1"]
+				.getService(Components.interfaces.nsIProperties)
+				.get("AChrom", Components.interfaces.nsIFile).parent;
+			installLocation.append("omni.ja");
 			installLocation = installLocation.path;
 			
 			let initOpts = { fromSchemaUpdate: true };
