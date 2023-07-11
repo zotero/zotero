@@ -1,0 +1,106 @@
+bubble-input {
+	min-width: 200px;
+	
+	.body {
+		cursor: text;
+		display: flex;
+		flex-flow: row wrap;
+		align-items: center;
+		//margin: 0;
+		font: -moz-field;
+		outline: none;
+		//line-height: 2em;
+		//width: 700px; /* initial editor width - adjusted after dom load */
+		min-height: 28px;
+		font-size: 13px;
+		background: white;
+		color: black;
+		width: 100%;
+		padding-inline: 6px;
+		
+		span {
+			white-space: pre;
+		}
+	}
+	
+	input {
+		outline: none;
+		width: 2px;
+		border: none !important;
+		box-sizing: border-box;
+		height: 15px;
+		/* Keep the background and text color unchanged in dark mode */
+		background-color: transparent !important;
+		color: black;
+		//background-image: none !important;
+		padding: 0;
+		margin-inline: -1px;
+	}
+	
+	.bubble {
+		--margin-horizontal: 2px;
+		border-radius: 8px;
+		background-color: #dee7f8;
+		border-style: solid;
+		border-width: 1px;
+		border-color: #a8c0ec;
+		padding: 0 4px;
+		margin: 0 var(--margin-horizontal);
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		white-space: nowrap;
+		line-height: normal;
+		color: #000;
+		-moz-user-select: none;
+		cursor: pointer;
+		height: 16px;
+		max-width: -moz-available;
+		position: relative;
+		
+		&:hover {
+			background-color: #bbcef1;
+			border-color: #6d95e0;
+			
+			.cross {
+				display: block;
+			}
+			
+			.text {
+				margin-right: -16px;
+				mask-image: linear-gradient(to left, transparent 12px, var(--fill-primary) 24px);
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+		}
+		
+		&.drop-before::before, &.drop-after::after {
+			content: "";
+			display: block;
+			margin-left: -1px;
+			height: 14px;
+			border-left: 1px solid var(--fill-primary);
+			position: absolute;
+		}
+		&.drop-before::before {
+			left: calc(-1 * var(--margin-horizontal));
+		}
+		&.drop-after::after {
+			right: calc(-2 * var(--margin-horizontal));
+		}
+		
+		&[selected="true"] {
+			border-radius: 8px !important;
+			background-color: #598bec;
+			color: #fff;
+		}
+
+		.cross {
+			@include svgicon("x-8", "universal", "16");
+			display: none;
+			width: 16px;
+			height: 18px;
+			align-self: start;
+		}
+	}
+}
