@@ -31,13 +31,8 @@ const { COLUMNS: ITEMTREE_COLUMNS } = require("zotero/itemTreeColumns");
 
 class ItemTreeManager {
 	_observerAdded = false;
-	/** @type {ItemTreeColumnOptions[]} */
-	_customColumns = [];
-	/** 
-	 * Cached custom columns' data source
-	 * @type {(item: Zotero.Item, dataKey: string) => string}
-	 */
-	_customDataProvider = {};
+	/** @type {Record<string, ItemTreeColumnOptions}} */
+	_customColumns = {};
 	constructor() {
 	}
 
@@ -153,14 +148,14 @@ class ItemTreeManager {
 
 	/**
 	 * A centralized data source for custom columns. This is used by the ItemTreeRow to get data.
-	 * @param {Zotero.Item} item 
-	 * @param {string} field 
-	 * @param {boolean} unformatted 
+	 * @param {Zotero.Item} item - The item to get data from
+	 * @param {string} dataKey - The dataKey of the column
 	 * @returns {string}
 	 */
-	getCustomCellData(item, field, unformatted) {
-		if (this._customDataProvider[field]) {
-			return this._customDataProvider[field](item, field, unformatted);
+	getCustomCellData(item, dataKey) {
+		const options = this._customColumns[dataKey];
+		if (options && options.dataProvider) {
+			return options.dataProvider(item, dataKey);
 		}
 		return "";
 	}
@@ -176,7 +171,7 @@ class ItemTreeManager {
 			return [...ITEMTREE_COLUMNS];
 		}
 		if (type === "custom") {
-			return [...this._customColumns];
+			return [...Object.values(this._customColumns)];
 		}
 	}
 
@@ -239,13 +234,9 @@ class ItemTreeManager {
 		if (!this._validateColumnOption(options)) {
 			return false;
 		}
-		const newColumns = options.map(opt => Object.assign({}, opt, { custom: true }));
-		this._customColumns.push(...newColumns);
-		newColumns.forEach(opt => {
-			if (opt.dataProvider) {
-				this._customDataProvider[opt.dataKey] = opt.dataProvider;
-			}
-		});
+		for (const opt of options) {
+			this._customColumns[opt.dataKey] = Object.assign({}, opt, { custom: true });
+		}
 		return true;
 	}
 
@@ -258,19 +249,16 @@ class ItemTreeManager {
 		if (!Array.isArray(dataKeys)) {
 			dataKeys = [dataKeys];
 		}
-		const toRemoveIndexes = dataKeys.map(key => this._customColumns.findIndex(column => column.dataKey === key));
-		if (toRemoveIndexes.some(index => index === -1)) {
-			const nonExistingDataKeys = dataKeys.filter((key, i) => toRemoveIndexes[i] === -1);
-			Zotero.warn(`ItemTree Column option with dataKeys ${nonExistingDataKeys.join(',')} do not exist.`);
-			return false;
+		// If any check fails, return check results and do not remove any columns
+		for (const key of dataKeys) {
+			if (!this._customColumns[key]) {
+				Zotero.warn(`ItemTree Column option with dataKey ${key} does not exist.`);
+				return false;
+			}
 		}
-		toRemoveIndexes.sort((a, b) => b - a);
-		toRemoveIndexes.forEach(index => {
-			this._customColumns.splice(index, 1);
-		});
-		dataKeys.forEach(key => {
-			delete this._customDataProvider[key];
-		});
+		for (const key of dataKeys) {
+			delete this._customColumns[key];
+		}
 		return true;
 	}
 
