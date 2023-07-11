@@ -3848,9 +3848,7 @@ var ItemTreeRow = function(ref, level, isOpen)
 
 ItemTreeRow.prototype.getField = function(field, unformatted)
 {
-	// If the field is a standard field, use the standard method
-	// Note that being a standard field does not mean that it is a valid field for this item type
-	if (Zotero.ItemFields.getID(field)) {
+	if (!Zotero.ItemTreeManager.isCustomColumn(field)) {
 		return this.ref.getField(field, unformatted, true);
 	}
 	return Zotero.ItemTreeManager.getCustomCellData(this.ref, field);

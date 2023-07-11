@@ -147,6 +147,15 @@ class ItemTreeManager {
 	}
 
 	/**
+	 * Check if a column is registered as a custom column
+	 * @param {string} dataKey 
+	 * @returns {boolean} true if the column is registered as a custom column
+	 */
+	isCustomColumn(dataKey) {
+		return !!this._customColumns[dataKey];
+	}
+
+	/**
 	 * A centralized data source for custom columns. This is used by the ItemTreeRow to get data.
 	 * @param {Zotero.Item} item - The item to get data from
 	 * @param {string} dataKey - The dataKey of the column
