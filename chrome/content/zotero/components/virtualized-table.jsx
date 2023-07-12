@@ -1339,6 +1339,7 @@ class VirtualizedTable extends React.Component {
 	}
 
 	async _resetColumns() {
+		this.invalidate();
 		this._columns = new Columns(this);
 		await new Promise((resolve) => {this.forceUpdate(resolve)});
 	}

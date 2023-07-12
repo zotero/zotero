@@ -3832,9 +3832,11 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 	async _resetColumns(){
 		this._columnsId = null;
-		await this.refreshAndMaintainSelection();
-		await this.tree._resetColumns();
-		await this.refreshAndMaintainSelection();
+		return new Promise((resolve) => this.forceUpdate(async () => {
+			await this.tree._resetColumns();
+			await this.refreshAndMaintainSelection();
+			resolve();
+		}));
 	}
 };
 
