@@ -2,7 +2,7 @@
 	***** BEGIN LICENSE BLOCK *****
 	
 	Copyright © 2020 Corporation for Digital Scholarship
-                     Vienna, Virginia, USA
+					 Vienna, Virginia, USA
 					http://zotero.org
 	
 	This file is part of Zotero.
@@ -326,6 +326,21 @@ const COLUMNS = [
 	}
 ];
 
+/**
+ * Returns the columns that match the given data keys from the COLUMNS constant.
+ * @param {string | string[]} dataKeys - The data key(s) to match.
+ * @returns {ItemTreeColumnOptions | ItemTreeColumnOptions[]} - The matching columns.
+ */
+function getItemTreeColumnsByDataKeys(dataKeys) {
+	const isSingle = !Array.isArray(dataKeys);
+	if (isSingle) {
+		dataKeys = [dataKeys];
+	}
+	const matches = COLUMNS.filter(column => dataKeys.includes(column.dataKey)).map(column => Object.assign({}, column, { hidden: false }));
+	return isSingle ? matches[0] : matches;
+}
+
 module.exports = {
 	COLUMNS,
+	getItemTreeColumnsByDataKeys,
 };
