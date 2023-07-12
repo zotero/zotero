@@ -40,15 +40,17 @@ class ItemTreeManager {
 	 * Register a custom column. All registered columns must be valid, and must have a unique dataKey.
 	 * Although it's async, resolving does not promise the item trees are updated.
 	 * @param {ItemTreeColumnOptions | ItemTreeColumnOptions[]} options - An option or array of options to register
-	 * @returns {boolean} true if the column(s) are registered
+	 * @returns {string | string[] | false} - The dataKey(s) of the added column(s) or false if no columns were added
 	 * @example
 	 * A minimal custom column with icon:
 	 * ```js
-	 * Zotero.ItemTreeManager.registerColumns(
+	 * // You can unregister the column later with Zotero.ItemTreeManager.unregisterColumns(registeredDataKey);
+	 * const registeredDataKey = await Zotero.ItemTreeManager.registerColumns(
 	 * {
 	 *     dataKey: 'rtitle',
 	 *     iconPath: 'chrome://zotero/skin/tick.png',
 	 *     label: 'reversed title',
+	 *     pluginID: 'make-it-red@zotero.org', // Replace with your plugin ID
 	 *     dataProvider: (item, dataKey) => {
 	 *         return item.getField('title').split('').reverse().join('');
 	 *     },
@@ -58,7 +60,7 @@ class ItemTreeManager {
 	 * A custom column using all available options.
 	 * Note that the column will only be shown in the main item tree.
 	 * ```js
-	 * Zotero.ItemTreeManager.registerColumns(
+	 * await Zotero.ItemTreeManager.registerColumns(
 	 * {
 	 *     dataKey: 'rtitle',
 	 *     label: 'reversed title',
@@ -73,7 +75,7 @@ class ItemTreeManager {
 	 *     ignoreInColumnPicker: false, // show in the column picker
 	 *     submenu: true, // show in the column picker submenu
 	 *     primary: false, // only one primary column is allowed
-	 *     pluginID: 'my-plugin', // plugin ID, which will be used to unregister the column when the plugin is unloaded
+	 *     pluginID: 'make-it-red@zotero.org', // plugin ID, which will be used to unregister the column when the plugin is unloaded
 	 *     dataProvider: (item, dataKey) => {
 	 *         // item: the current item in the row
 	 *         // dataKey: the dataKey of the column
@@ -83,15 +85,40 @@ class ItemTreeManager {
 	 *     zoteroPersist: ['width', 'hidden', 'sortDirection'], // persist the column properties
 	 * });
 	 * ```
+	 * @example
+	 * Register multiple custom columns:
+	 * ```js
+	 * const registeredDataKeys = await Zotero.ItemTreeManager.registerColumns(
+	 * [
+	 *     {
+	 *          dataKey: 'rtitle',
+	 *          iconPath: 'chrome://zotero/skin/tick.png',
+	 *          label: 'reversed title',
+	 *          pluginID: 'make-it-red@zotero.org', // Replace with your plugin ID
+	 *          dataProvider: (item, dataKey) => {
+	 *              return item.getField('title').split('').reverse().join('');
+	 *          },
+	 *     },
+	 *     {
+	 *          dataKey: 'utitle',
+	 *          iconPath: 'chrome://zotero/skin/cross.png',
+	 *          label: 'uppercase title',
+	 *          pluginID: 'make-it-red@zotero.org', // Replace with your plugin ID
+	 *          dataProvider: (item, dataKey) => {
+	 *              return item.getField('title').toUpperCase();
+	 *          },
+	 *     },
+	 * ]);
+	 * ```
 	 */
 	async registerColumns(options) {
-		const success = this._addColumns(options);
-		if (!success) {
+		const registeredDataKeys = this._addColumns(options);
+		if (!registeredDataKeys) {
 			return false;
 		}
 		this._addPluginShutdownObserver();
 		await this._notifyItemTrees();
-		return true;
+		return registeredDataKeys;
 	}
 
 	/**
@@ -131,6 +158,7 @@ class ItemTreeManager {
 		if (!Array.isArray(options)) {
 			options = [options];
 		}
+		this._namespacedDataKey(options);
 		/** @type {ItemTreeColumnOptions[]} */
 		const matches = [];
 		for (const opt of options) {
@@ -177,10 +205,10 @@ class ItemTreeManager {
 	_getColumnsByType(type) {
 		type = type || "itemtree";
 		if (type === "itemtree") {
-			return [...ITEMTREE_COLUMNS];
+			return ITEMTREE_COLUMNS.map(opt => Object.assign({}, opt));
 		}
 		if (type === "custom") {
-			return [...Object.values(this._customColumns)];
+			return Object.values(this._customColumns).map(opt => Object.assign({}, opt));
 		}
 	}
 
@@ -233,12 +261,14 @@ class ItemTreeManager {
 	 * If the options is an array, all its children must be valid.
 	 * Otherwise, no columns are added.
 	 * @param {ItemTreeColumnOptions | ItemTreeColumnOptions[]} options - An option or array of options to add
-	 * @returns {boolean} - True if column(s) were added, false if not
+	 * @returns {string | string[] | false} - The dataKey(s) of the added column(s) or false if no columns were added
 	 */
 	_addColumns(options) {
-		if (!Array.isArray(options)) {
+		const isSingle = !Array.isArray(options);
+		if (isSingle) {
 			options = [options];
 		}
+		this._namespacedDataKey(options);
 		// If any check fails, return check results
 		if (!this._validateColumnOption(options)) {
 			return false;
@@ -246,7 +276,7 @@ class ItemTreeManager {
 		for (const opt of options) {
 			this._customColumns[opt.dataKey] = Object.assign({}, opt, { custom: true });
 		}
-		return true;
+		return isSingle ? options[0].dataKey : options.map(opt => opt.dataKey);
 	}
 
 	/**
@@ -269,6 +299,23 @@ class ItemTreeManager {
 			delete this._customColumns[key];
 		}
 		return true;
+	}
+
+	/**
+	 * Make sure the dataKey is namespaced with the plugin ID
+	 * @param {ItemTreeColumnOptions | ItemTreeColumnOptions[]} options 
+	 * @returns {void}
+	 */
+	_namespacedDataKey(options) {
+		if (!Array.isArray(options)) {
+			options = [options];
+		}
+		// Make namespaced dataKey
+		options.forEach(opt => {
+			if (opt.pluginID && opt.dataKey) {
+				opt.dataKey = `${opt.pluginID}-${opt.dataKey}`;
+			}
+		});
 	}
 
 
