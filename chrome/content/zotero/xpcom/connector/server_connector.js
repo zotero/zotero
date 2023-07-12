@@ -1137,7 +1137,7 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 		}
 		
 		let attachments = [];
-		let hasAttachments = !item.isAttachment && item.getAttachments().length;
+		let hasAttachments = !item.isAttachment() && item.getAttachments().length;
 		if (hasAttachments) {
 			attachments = [{mimeType: "text/html", title: data.title, url: data.url}];
 		}
