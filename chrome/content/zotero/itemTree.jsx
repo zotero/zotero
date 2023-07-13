@@ -158,7 +158,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		});
 		// Filter out columns that are not enabled for this tree
-		return currentColumns.filter(column => (column.enabledTreeIDs || ["main"]).includes(this.props.id));
+		return currentColumns.filter(column => {
+			const enabledTreeIDs = column.enabledTreeIDs || ["main"];
+			if (enabledTreeIDs.includes("*")) {
+				return true;
+			}
+			return enabledTreeIDs.includes(this.props.id);
+		});
 	}
 
 	/**

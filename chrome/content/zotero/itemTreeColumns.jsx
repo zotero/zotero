@@ -31,7 +31,7 @@ const Icons = require('components/icons');
  * @type {object}
  * @property {string} dataKey - Required, see use in ItemTree#_getRowData()
 Change 
- * @property {string[]} [enabledTreeIDs=[]] - Which tree ids the column should be enabled in. If undefined, enabled in main tree.
+ * @property {string[]} [enabledTreeIDs=[]] - Which tree ids the column should be enabled in. If undefined, enabled in main tree. If ["*"], enabled in all trees.
  * @property {string[]} [defaultIn] - Will be deprecated. Types of trees the column is default in. Can be [default, feed];
  * @property {string[]} [disabledIn] - Will be deprecated. Types of trees where the column is not available
  * @property {number} [defaultSort=1] - Default: 1. -1 for descending sort
