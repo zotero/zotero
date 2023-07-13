@@ -158,7 +158,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			}
 		});
 		// Filter out columns that are not enabled for this tree
-		return currentColumns.filter(column => column.enabledTreeIDs ? column.enabledTreeIDs.includes(this.props.id) : true);
+		return currentColumns.filter(column => (column.enabledTreeIDs || ["main"]).includes(this.props.id));
 	}
 
 	/**
