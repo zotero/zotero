@@ -96,6 +96,9 @@
 <!ENTITY helpReportErrors.label      "Report Errors…">
 <!ENTITY helpReportErrors.accesskey  "R">
 
+<!ENTITY restartInSafeMode.label 	"Restart in Safe Mode…">
+<!ENTITY restartInSafeMode.accesskey 	"S">
+
 <!ENTITY debugOutputLogging.label      "Debug Output Logging">
 <!ENTITY debugOutputLogging.accesskey  "L">
 <!ENTITY debugOutputLogging.submit  "Submit Output">
