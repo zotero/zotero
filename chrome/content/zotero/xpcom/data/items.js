@@ -946,10 +946,12 @@ Zotero.Items = function() {
 	 *
 	 * @param {Zotero.Item} fromItem
 	 * @param {Zotero.Item} toItem
-	 * @param {Boolean} includeTrashed
+	 * @param {Object} options
+	 * @param {Boolean} [includeTrashed=false]
+	 * @param {Boolean} [skipEditCheck=false]
 	 * @return {Promise}
 	 */
-	this.moveChildItems = async function (fromItem, toItem, includeTrashed = false) {
+	this.moveChildItems = async function (fromItem, toItem, { includeTrashed = false, skipEditCheck = false } = {}) {
 		Zotero.DB.requireTransaction();
 		
 		// Annotations on files
@@ -961,7 +963,7 @@ Zotero.Items = function() {
 					continue;
 				}
 				annotation.parentItemID = toItem.id;
-				await annotation.save();
+				await annotation.save({ skipEditCheck });
 			}
 		}
 		
@@ -1071,7 +1073,14 @@ Zotero.Items = function() {
 			let doMerge = async (fromAttachment, toAttachment) => {
 				mergedMasterAttachments.add(toAttachment.id);
 	
-				await this.moveChildItems(fromAttachment, toAttachment, true);
+				await this.moveChildItems(
+					fromAttachment,
+					toAttachment,
+					{
+						includeTrashed: true,
+						skipEditCheck: true
+					}
+				);
 				await this._moveEmbeddedNote(fromAttachment, toAttachment);
 				await this._moveRelations(fromAttachment, toAttachment);
 	

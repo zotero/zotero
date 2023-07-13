@@ -628,7 +628,27 @@ describe("Zotero.Items", function () {
 			assert.notInclude(annotation2Note.getNote(), attachment2.key);
 			assert.include(annotation2Note.getNote(), attachment1.key);
 		});
-
+		
+		it("should merge attachments in group library with annotation created by another user", async function () {
+			var otherUserID = 92624235;
+			await Zotero.Users.setName(otherUserID, 'merged-annotation-user');
+			
+			let group = await createGroup();
+			let item1 = await createDataObject('item', { libraryID: group.libraryID });
+			let attachment1 = await importPDFAttachment(item1);
+			let annotation1 = await createAnnotation('note', attachment1);
+			
+			let item2 = item1.clone();
+			await item2.saveTx();
+			let attachment2 = await importPDFAttachment(item2);
+			let annotation2 = await createAnnotation('highlight', attachment2, { createdByUserID: otherUserID });
+			
+			await Zotero.Items.merge(item1, [item2]);
+			
+			assert.equal(annotation2.parentItemID, attachment1.id);
+			assert.equal(annotation2.createdByUserID, otherUserID);
+		});
+		
 		it("should update all item keys when moving notes", async function () {
 			let attachmentFilenames = [
 				'recognizePDF_test_arXiv.pdf',
