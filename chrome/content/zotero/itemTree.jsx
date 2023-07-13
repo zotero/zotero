@@ -151,7 +151,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	getColumns() {
 		const extraColumns = Zotero.ItemTreeManager.getColumns();
 		/** @type {ItemTreeColumnOptions[]} */
-		const currentColumns = this.props.columns || Zotero.ItemTreeManager._getColumnsByType();
+		const currentColumns = this.props.columns || Zotero.ItemTreeManager.getColumns(null, ['itemtree']);
 		extraColumns.forEach(column => {
 			if (!currentColumns.find(c => c.dataKey === column.dataKey)) {
 				currentColumns.push(column);
