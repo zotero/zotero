@@ -232,7 +232,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 		
 		if (this.isWin) {
 			let branch = Services.prefs.getBranch("toolkit.startup.");
-			if (branch.getUserPref('recent_crashes') > 2) {
+			if (branch.getIntPref('recent_crashes', 0) > 2) {
 				branch.clearUserPref('recent_crashes');
 			}
 		}
