@@ -332,7 +332,7 @@ const COLUMNS = [
  * @param {string | string[]} dataKeys - The data key(s) to match.
  * @returns {ItemTreeColumnOptions | ItemTreeColumnOptions[]} - The matching columns.
  */
-function getItemTreeColumnsByDataKeys(dataKeys) {
+function getColumnDefinitionsByDataKey(dataKeys) {
 	const isSingle = !Array.isArray(dataKeys);
 	if (isSingle) {
 		dataKeys = [dataKeys];
@@ -343,5 +343,5 @@ function getItemTreeColumnsByDataKeys(dataKeys) {
 
 module.exports = {
 	COLUMNS,
-	getItemTreeColumnsByDataKeys,
+	getColumnDefinitionsByDataKey,
 };
