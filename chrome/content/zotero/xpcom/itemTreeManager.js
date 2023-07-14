@@ -145,20 +145,17 @@ class ItemTreeManager {
 	/**
 	 * Get column(s) that matches the properties of option
 	 * @param {undefined | Partial.<ItemTreeColumnOptions> | Partial.<ItemTreeColumnOptions>[]} options - An option or array of options to match
-	 * @param {string[]} [types=["custom", "itemtree"]] - An array of column source type to include
 	 * @returns {ItemTreeColumnOptions[]}
 	 */
-	getColumns(options, types) {
-		types = types || ["custom", "itemtree"]
-		/** @type {ItemTreeColumnOptions[]} */
-		const allColumns = types.reduce((acc, type) => acc.concat(this._getColumnsByType(type)), []);
+	getCustomColumns(options) {
+		const allColumns = this._getColumnsByType("custom");
 		if (!options) {
 			return allColumns;
 		}
 		if (!Array.isArray(options)) {
 			options = [options];
 		}
-		this._namespacedDataKey(options);
+		options.forEach(o => o.dataKey = this._namespacedDataKey(o));
 		/** @type {ItemTreeColumnOptions[]} */
 		const matches = [];
 		for (const opt of options) {
@@ -167,7 +164,20 @@ class ItemTreeManager {
 					// Aoid dataKey collision
 					!matches.map(match => match.dataKey).includes(col.dataKey)
 					// Match all properties
-					&& Object.keys(opt).every(key => col[key] === opt[key])
+					&& Object.keys(opt).every(key => {
+						// Ignore undefined properties
+						if (opt[key] === undefined) {
+							return true;
+						}
+						// Special case for enabledTreeIDs
+						if (key === "enabledTreeIDs"){
+							// If enabledTreeIDs is "*", match all tree IDs
+							return opt.enabledTreeIDs.includes("*")
+							// Otherwise, match the tree IDs
+								|| opt.enabledTreeIDs.every(treeID => col.enabledTreeIDs.includes(treeID));
+						}
+						return col[key] === opt[key];
+					})
 				);
 			matches.push(...currentMatches);
 		}
@@ -199,11 +209,15 @@ class ItemTreeManager {
 
 	/**
 	 * Get columns by type. Only support itemtree and custom for now.
-	 * @param {"itemtree" | "custom"} type 
+	 * @param {"itemtree" | "custom" | "*"} type 
 	 * @returns {ItemTreeColumnOptions[]}
 	 */
 	_getColumnsByType(type) {
 		type = type || "itemtree";
+		if (type === "*") {
+			// Return all columns
+			return ["itemtree", "custom"].flatMap(t => this._getColumnsByType(t));
+		}
 		if (type === "itemtree") {
 			return ITEMTREE_COLUMNS.map(opt => Object.assign({}, opt));
 		}
@@ -246,7 +260,7 @@ class ItemTreeManager {
 			return valid;
 		});
 		const noRegisteredDuplicates = validate(options, (option) => {
-			const valid = this.getColumns({ dataKey: option.dataKey }).length === 0;
+			const valid = !this._getColumnsByType("*").find(col => col.dataKey === option.dataKey);
 			if (!valid) {
 				Zotero.warn(`ItemTree Column option ${JSON.stringify(option)} with dataKey ${option.dataKey} already exists.`);
 			}
@@ -268,7 +282,7 @@ class ItemTreeManager {
 		if (isSingle) {
 			options = [options];
 		}
-		this._namespacedDataKey(options);
+		options.forEach(o => o.dataKey = this._namespacedDataKey(o));
 		// If any check fails, return check results
 		if (!this._validateColumnOption(options)) {
 			return false;
@@ -303,19 +317,14 @@ class ItemTreeManager {
 
 	/**
 	 * Make sure the dataKey is namespaced with the plugin ID
-	 * @param {ItemTreeColumnOptions | ItemTreeColumnOptions[]} options 
-	 * @returns {void}
+	 * @param {ItemTreeColumnOptions} options
+	 * @returns {string}
 	 */
 	_namespacedDataKey(options) {
-		if (!Array.isArray(options)) {
-			options = [options];
+		if (options.pluginID && options.dataKey) {
+			return `${options.pluginID}-${options.dataKey}`;
 		}
-		// Make namespaced dataKey
-		options.forEach(opt => {
-			if (opt.pluginID && opt.dataKey) {
-				opt.dataKey = `${opt.pluginID}-${opt.dataKey}`;
-			}
-		});
+		return options.dataKey;
 	}
 
 
@@ -338,7 +347,7 @@ class ItemTreeManager {
 	 * @param {string} pluginID - Plugin ID
 	 */
 	async _unregisterColumnByPluginID(pluginID) {
-		const columns = this.getColumns({ pluginID }, ["custom"]);
+		const columns = this.getCustomColumns({ pluginID });
 		if (columns.length === 0) {
 			return;
 		}
