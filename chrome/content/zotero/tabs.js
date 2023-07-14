@@ -181,7 +181,7 @@ var Zotero_Tabs = new function () {
 	 * @param {Function} onClose
 	 * @return {{ id: string, container: XULElement}} id - tab id, container - a new tab container created in the deck
 	 */
-	this.add = function ({ id, type, data, title, index, select, onClose }) {
+	this.add = function ({ id, type, data, title, index, select, onClose, preventJumpback }) {
 		if (typeof type != 'string') {
 		}
 		if (typeof title != 'string') {
@@ -205,7 +205,9 @@ var Zotero_Tabs = new function () {
 		if (select) {
 			let previousID = this._selectedID;
 			this.select(id);
-			this._prevSelectedID = previousID;
+			if (!preventJumpback) {
+				this._prevSelectedID = previousID;
+			}
 		}
 		return { id, container };
 	};
@@ -368,7 +370,8 @@ var Zotero_Tabs = new function () {
 				title: tab.title,
 				tabIndex,
 				allowDuplicate: true,
-				secondViewState: tab.data.secondViewState
+				secondViewState: tab.data.secondViewState,
+				preventJumpback: true
 			});
 			return;
 		}
