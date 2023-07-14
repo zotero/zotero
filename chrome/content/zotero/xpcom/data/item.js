@@ -1413,6 +1413,9 @@ Zotero.Item.prototype._saveData = Zotero.Promise.coroutine(function* (env) {
 						]
 					);
 				}
+				else {
+					Zotero.logError("Current username not found -- not setting group item user");
+				}
 			}
 		}
 	}
