@@ -43,6 +43,7 @@ Change
  * @property {string} label - The column label. Either a string or the id to an i18n string.
  * @property {React.Component} [iconLabel] - Set an Icon label instead of a text-based one
  * @property {string} [iconPath] - Set an Icon path, overrides {iconLabel}
+ * @property {string | React.Component} [htmlLabel] - Set an HTML label, overrides {iconLabel} and {label}. Can be a HTML string or a React component.
  * @property {boolean} [ignoreInColumnPicker=false] - Default: false. Set to true to not display in column picker.
  * @property {boolean} [submenu=false] - Default: false. Set to true to display the column in "More Columns" submenu of column picker.
  * @property {boolean} [primary] - Should only be one column at the time. Title is the primary column

@@ -42,13 +42,12 @@ class ItemTreeManager {
 	 * @param {ItemTreeColumnOptions | ItemTreeColumnOptions[]} options - An option or array of options to register
 	 * @returns {string | string[] | false} - The dataKey(s) of the added column(s) or false if no columns were added
 	 * @example
-	 * A minimal custom column with icon:
+	 * A minimal custom column:
 	 * ```js
 	 * // You can unregister the column later with Zotero.ItemTreeManager.unregisterColumns(registeredDataKey);
 	 * const registeredDataKey = await Zotero.ItemTreeManager.registerColumns(
 	 * {
 	 *     dataKey: 'rtitle',
-	 *     iconPath: 'chrome://zotero/skin/tick.png',
 	 *     label: 'reversed title',
 	 *     pluginID: 'make-it-red@zotero.org', // Replace with your plugin ID
 	 *     dataProvider: (item, dataKey) => {
@@ -60,7 +59,7 @@ class ItemTreeManager {
 	 * A custom column using all available options.
 	 * Note that the column will only be shown in the main item tree.
 	 * ```js
-	 * await Zotero.ItemTreeManager.registerColumns(
+	 * const registeredDataKey = await Zotero.ItemTreeManager.registerColumns(
 	 * {
 	 *     dataKey: 'rtitle',
 	 *     label: 'reversed title',
@@ -71,7 +70,8 @@ class ItemTreeManager {
 	 *     fixedWidth: true, // don't allow user to resize
 	 *     staticWidth: true, // don't allow coloumn to be resized when the tree is resized
 	 *     minWidth: 50, // minimum width in pixels
-	 *     iconPath: 'chrome://zotero/skin/tick.png',
+	 *     // iconPath: 'chrome://zotero/skin/tick.png', // icon to show in the column header
+	 *     htmlLabel: '<span style="color: red;">reversed title</span>', // use HTML in the label. This will override the label and iconPath property
 	 *     ignoreInColumnPicker: false, // show in the column picker
 	 *     submenu: true, // show in the column picker submenu
 	 *     primary: false, // only one primary column is allowed
@@ -101,7 +101,6 @@ class ItemTreeManager {
 	 *     },
 	 *     {
 	 *          dataKey: 'utitle',
-	 *          iconPath: 'chrome://zotero/skin/cross.png',
 	 *          label: 'uppercase title',
 	 *          pluginID: 'make-it-red@zotero.org', // Replace with your plugin ID
 	 *          dataProvider: (item, dataKey) => {
@@ -174,7 +173,7 @@ class ItemTreeManager {
 							// If enabledTreeIDs is "*", match all tree IDs
 							return opt.enabledTreeIDs.includes("*")
 							// Otherwise, match the tree IDs
-								|| opt.enabledTreeIDs.every(treeID => col.enabledTreeIDs.includes(treeID));
+								|| opt.enabledTreeIDs.every(treeID => (col.enabledTreeIDs || ["main"]).includes(treeID));
 						}
 						return col[key] === opt[key];
 					})
@@ -322,7 +321,8 @@ class ItemTreeManager {
 	 */
 	_namespacedDataKey(options) {
 		if (options.pluginID && options.dataKey) {
-			return `${options.pluginID}-${options.dataKey}`;
+			// Make sure the return value is valid as class name or element id
+			return `${options.pluginID}-${options.dataKey}`.replace(/[^a-zA-Z0-9-_]/g, "-");
 		}
 		return options.dataKey;
 	}
