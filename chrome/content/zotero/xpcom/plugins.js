@@ -363,6 +363,7 @@ Zotero.Plugins = new function () {
 					await _callMethod(existingAddon, 'shutdown', reason);
 				}
 				await _callMethod(existingAddon, 'uninstall', reason);
+				Services.obs.notifyObservers(null, "startupcache-invalidate");
 			}
 		},
 		
@@ -415,6 +416,7 @@ Zotero.Plugins = new function () {
 				await _callMethod(addon, 'shutdown', REASONS.ADDON_UNINSTALL);
 			}
 			await _callMethod(addon, 'uninstall', REASONS.ADDON_UNINSTALL);
+			Services.obs.notifyObservers(null, "startupcache-invalidate");
 			unregisterLocales(addon);
 			clearDefaultPrefs(addon);
 		},
