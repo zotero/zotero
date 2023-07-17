@@ -1394,8 +1394,13 @@ class EditorInstance {
 			}
 		}
 		citationItems = encodeURIComponent(JSON.stringify(citationItems));
-		// Note: Update schema version only if using new features
-		let schemaVersion = 8;
+		// Note: Update schema version only if using new features.
+		let schemaVersion = 9;
+		// If using underline annotations, increase schema version number
+		// TODO: Can be removed once most clients support schema version 10
+		if (schemaVersion === 9 && annotations.some(x => x.annotationType === 'underline')) {
+			schemaVersion = 10;
+		}
 		html = `<div data-citation-items="${citationItems}" data-schema-version="${schemaVersion}">${html}</div>`;
 		note.setNote(html);
 		await note.saveTx();
@@ -1494,8 +1499,8 @@ class EditorInstanceUtilities {
 			// Text
 			if (annotation.text) {
 				let text = this._transformTextToHTML(annotation.text.trim());
-				highlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}">${text}</span>`;
-				quotedHighlightHTML = `<span class="highlight" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}">${Zotero.getString('punctuation.openingQMark')}${text}${Zotero.getString('punctuation.closingQMark')}</span>`;
+				highlightHTML = `<span class="${annotation.type}" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}">${text}</span>`;
+				quotedHighlightHTML = `<span class="${annotation.type}" data-annotation="${encodeURIComponent(JSON.stringify(storedAnnotation))}">${Zotero.getString('punctuation.openingQMark')}${text}${Zotero.getString('punctuation.closingQMark')}</span>`;
 			}
 
 			// Note
@@ -1504,7 +1509,7 @@ class EditorInstanceUtilities {
 			}
 
 			let template;
-			if (annotation.type === 'highlight') {
+			if (['highlight', 'underline'].includes(annotation.type)) {
 				template = Zotero.Prefs.get('annotations.noteTemplates.highlight');
 			}
 			else if (annotation.type === 'note') {
