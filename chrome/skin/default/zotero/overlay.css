@@ -186,13 +186,12 @@
 {
 	width: 338px;
 	min-width: 338px;
-	min-height: 200px;
-	overflow-y: hidden;
 }
 
 #zotero-layout-switcher
 {
 	min-width: 560px;
+	height: 0;
 }
 
 .toolbar {

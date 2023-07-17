@@ -38,6 +38,7 @@
 {
 	overflow: auto;
 	min-width: 0;
+	min-height: 0;
 }
 
 .zotero-view-item:not([selectedIndex="0"]) > tabpanel > * {
