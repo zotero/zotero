@@ -675,7 +675,19 @@
 		</toolbar>
 	</toolbox>
 	<!-- Keep in sync with Zotero.test conditional block in overlay.js -->
-	<div xmlns="http://www.w3.org/1999/xhtml" id="tab-bar-container"/>
+	<hbox>
+		<div xmlns="http://www.w3.org/1999/xhtml" id="tab-bar-container"/>
+		<toolbarbutton
+			id="zotero-opened-tabs-menu"
+			class="zotero-tb-button"
+			tabindex="-1"
+			tooltiptext="Opened tabs"
+			type="menu"
+			wantdropmarker="true">
+			
+			<menupopup id="zotero-opened-tabs-popup"></menupopup>
+		</toolbarbutton>
+	</hbox>
 
 	<commandset id="mainCommandSet">
 		<command id="cmd_zotero_reportErrors" oncommand="ZoteroPane_Local.reportErrors();"/>

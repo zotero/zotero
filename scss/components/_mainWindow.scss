@@ -124,6 +124,7 @@
 	
 	#tab-bar-container {
 		-moz-window-dragging: drag;
+		-moz-box-flex: 1;
 	}
 	
 	#tab-bar-container .tab {
