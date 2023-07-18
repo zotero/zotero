@@ -1348,11 +1348,18 @@ Zotero.Integration.Session.prototype._updateDocument = async function(forceCitat
 				} else {
 					bibliographyText = bib[0].bibstart+bib[1].join("")+bib[0].bibend;
 				}
-
-				var bibStyle = Zotero.Cite.getBibliographyFormatParameters(bib);
-				await this._doc.setBibliographyStyle(bibStyle.firstLineIndent, bibStyle.indent,
-					bibStyle.lineSpacing, bibStyle.entrySpacing, bibStyle.tabStops, bibStyle.tabStops.length);
-				this.data.style.bibliographyStyleHasBeenSet = true;
+				
+				// if bibliography style not set, set it
+				if(!this.data.style.bibliographyStyleHasBeenSet) {
+					var bibStyle = Zotero.Cite.getBibliographyFormatParameters(bib);
+					
+					// set bibliography style
+					await this._doc.setBibliographyStyle(bibStyle.firstLineIndent, bibStyle.indent,
+						bibStyle.lineSpacing, bibStyle.entrySpacing, bibStyle.tabStops, bibStyle.tabStops.length);
+					
+					// set bibliographyStyleHasBeenSet parameter to prevent further changes	
+					this.data.style.bibliographyStyleHasBeenSet = true;
+				}
 			}
 			
 			// set bibliography text
