@@ -83,6 +83,9 @@ var Zotero_Tabs = new function () {
 			selected: tab.id == this._selectedID,
 			iconBackgroundImage: tab.iconBackgroundImage
 		})));
+		// Disable File > Close menuitem if multiple tabs are open
+		const multipleTabsOpen = this._tabs.length > 1;
+		document.getElementById('cmd_close').setAttribute('disabled', multipleTabsOpen);
 		var { tab } = this._getTab(this._selectedID);
 		document.title = (tab.title.length ? tab.title + ' - ' : '') + Zotero.appName;
 		this._updateTabBar();
