@@ -1349,7 +1349,8 @@ Zotero.Integration.Session.prototype._updateDocument = async function(forceCitat
 					bibliographyText = bib[0].bibstart+bib[1].join("")+bib[0].bibend;
 				}
 				
-				// if bibliography style not set, set it
+				// Only set the bibliography style once so that customizations
+				// to Bibliography style in word processors are maintained
 				if(!this.data.style.bibliographyStyleHasBeenSet) {
 					var bibStyle = Zotero.Cite.getBibliographyFormatParameters(bib);
 					
