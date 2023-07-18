@@ -19,7 +19,7 @@
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Renomear os ficheiros ligados">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Abrir os PDFs con">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Predefinido no sistema">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
+<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Abrir os PDFs en novas xanelas no canto de en lapelas">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscelánea">
 <!ENTITY zotero.preferences.autoUpdate "Comprobar de xeito automático a actualización de tradutores e estilos">
@@ -40,7 +40,7 @@
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Ao copiar elementos entre bibliotecas, incluír as:">
 <!ENTITY zotero.preferences.groups.childNotes "notas fillas">
 <!ENTITY zotero.preferences.groups.childFiles "capturas de imaxe fillas e ficheiros importados">
-<!ENTITY zotero.preferences.groups.annotations "anotacións">
+<!ENTITY zotero.preferences.groups.annotations "apuntamentos">
 <!ENTITY zotero.preferences.groups.childLinks "ligazóns fillas">
 <!ENTITY zotero.preferences.groups.tags "etiquetas">
 
@@ -93,7 +93,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Reiniciar o historial de sincronización de ficheiros">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Comparar todos os ficheiros anexos co servizo de almacenamento">
 <!ENTITY zotero.preferences.sync.reset "Reiniciar">
-<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "Mostrar as opcións de reinicio...">
 <!ENTITY zotero.preferences.sync.reset.button "Reiniciar">
 
 

@@ -10,7 +10,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Generale">
 
-<!ENTITY zotero.preferences.interface "Interface">
+<!ENTITY zotero.preferences.interface "Interfață">
 <!ENTITY zotero.preferences.fileHandling "Operațiuni fișier">
 <!ENTITY zotero.preferences.automaticSnapshots "Creează automat instantanee, atunci când sunt create înregistrări din paginile web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Anexează automat fișierele PDF asociate, precum și alte fișiere, atunci când sunt salvate înregistrările">
@@ -19,7 +19,7 @@
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Redenumește fișierele legate">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Deschide PDF-urile folosind">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Sistem implicit">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
+<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Deschide PDF-urile în ferestre noi, nu în file">
 
 <!ENTITY zotero.preferences.miscellaneous "Diverse">
 <!ENTITY zotero.preferences.autoUpdate "Verifică în mod automat dacă există translatori și stiluri actualizate">
@@ -30,17 +30,17 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Șterge automat din coșul de gunoi înregistrările mai vechi de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "zile în urmă">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.pdfReader "Cititor de PDF-uri">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Afișează filele ca">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - An - Titlu">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Titlu - Creator - An">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "Nume fișier">
 
 <!ENTITY zotero.preferences.groups "Grupuri">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude "Când se copiază înregistrările între biblioteci se vor include:">
 <!ENTITY zotero.preferences.groups.childNotes "note copil">
 <!ENTITY zotero.preferences.groups.childFiles "instantanee copil și fișiere importate">
-<!ENTITY zotero.preferences.groups.annotations "annotations">
+<!ENTITY zotero.preferences.groups.annotations "adnotări">
 <!ENTITY zotero.preferences.groups.childLinks "legături copil">
 <!ENTITY zotero.preferences.groups.tags "etichete">
 
@@ -50,7 +50,7 @@
 <!ENTITY zotero.preferences.feeds.sorting.oldest "Înregistrările cele mai vechi primele">
 <!ENTITY zotero.preferences.feeds.feedDefaults "Flux pentru implicite">
 
-<!ENTITY zotero.preferences.openurl.choose "Choose a resolver…">
+<!ENTITY zotero.preferences.openurl.choose "Alege un rezolvator…">
 <!ENTITY zotero.preferences.openurl.custom "Personalizare...">
 <!ENTITY zotero.preferences.openurl.server "Rezolvator:">
 <!ENTITY zotero.preferences.openurl.version "Versiune:">
@@ -93,7 +93,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Resetează istoria sincronizării fișierelor">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Compară toate fișierele anexate cu serviciul de stocare">
 <!ENTITY zotero.preferences.sync.reset "Resetare">
-<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "Afișează opțiunile de resetare…">
 <!ENTITY zotero.preferences.sync.reset.button "Resetare...">
 
 
@@ -116,8 +116,8 @@
 <!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Când această opțiune nu este funcțională, Zotero include URL-urile în timp ce citează articole de jurnale, reviste și ziare doar dacă pentru articol nu a s-a specificat un interval de pagini.">
 
 <!ENTITY zotero.preferences.quickCopy.caption "Copiere rapidă">
-<!ENTITY zotero.preferences.quickCopy.itemFormat "Item Format:">
-<!ENTITY zotero.preferences.quickCopy.noteFormat "Note Format:">
+<!ENTITY zotero.preferences.quickCopy.itemFormat "Format item:">
+<!ENTITY zotero.preferences.quickCopy.noteFormat "Format notă:">
 <!ENTITY zotero.preferences.quickCopy.copyAsHTML "Copiază ca HTML">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Setări specifice site:">
 <!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domeniu/Cale">

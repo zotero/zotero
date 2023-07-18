@@ -19,7 +19,7 @@
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Csatolt fájlok átnevezése">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "A PDF-fájlok megnyitása">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Alapértelmezett rendszerbeállítás">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
+<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "PDF-ek megnyitása fülek helyett új ablakban">
 
 <!ENTITY zotero.preferences.miscellaneous "Egyéb">
 <!ENTITY zotero.preferences.autoUpdate "Fordítók- és stílusfrissítések automatikus ellenőrzése">
@@ -31,7 +31,7 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "napnál régebbiek">
 
 <!ENTITY zotero.preferences.pdfReader "PDF olvasó">
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Fülek megjelenítése">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Szerző - Év - Cím">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Cím - Szerző - Év">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "Fájlnév">

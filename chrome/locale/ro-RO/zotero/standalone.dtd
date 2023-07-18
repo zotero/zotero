@@ -34,7 +34,7 @@
 
 <!ENTITY copyCitationCmd.label "Copiază citare">
 <!ENTITY copyBibliographyCmd.label "Copiază bibliografie">
-<!ENTITY copyNoteCmd.label "Copy Note">
+<!ENTITY copyNoteCmd.label "Copiază nota">
 
 <!ENTITY bidiSwitchPageDirectionItem.label "Schimbă direcția paginii">
 <!ENTITY bidiSwitchPageDirectionItem.accesskey "g">
@@ -42,7 +42,7 @@
 <!ENTITY bidiSwitchTextDirectionItem.accesskey "w">
 <!ENTITY bidiSwitchTextDirectionItem.commandkey "X">
 
-<!ENTITY goMenu.label "Go">
+<!ENTITY goMenu.label "Avansează">
 
 <!ENTITY viewMenu.label "Vizualizare">
 <!ENTITY viewMenu.accesskey "V">

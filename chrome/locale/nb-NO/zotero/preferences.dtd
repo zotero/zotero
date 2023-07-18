@@ -26,7 +26,7 @@
 <!ENTITY zotero.preferences.updateNow "Oppdater nå">
 <!ENTITY zotero.preferences.reportTranslationFailure "Rapporter ødelagte oversettere for nettsteder">
 <!ENTITY zotero.preferences.parseRISRefer "Bruk Zotero for nedlastede BibTeX/RIS/Refer filer">
-<!ENTITY zotero.preferences.automaticTags "Legg til emneord automatisk når elementer inneholder nøkkel- og emneord i innholdsoverskrifter">
+<!ENTITY zotero.preferences.automaticTags "Legg automatisk til etikett når elementer inneholder nøkkelord og innholdsoverskrifter">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Fjern automatisk elementer i papirkorgen slettet for mer enn">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dager siden">
 
@@ -42,7 +42,7 @@
 <!ENTITY zotero.preferences.groups.childFiles "Underordnede øyblikksbilder og importerte filer">
 <!ENTITY zotero.preferences.groups.annotations "merknader">
 <!ENTITY zotero.preferences.groups.childLinks "Underordnede lenker">
-<!ENTITY zotero.preferences.groups.tags "Emneord">
+<!ENTITY zotero.preferences.groups.tags "etiketter">
 
 <!ENTITY zotero.preferences.feeds "Nyhetsstrømmer">
 <!ENTITY zotero.preferences.feeds.sorting.label "Sortering:">

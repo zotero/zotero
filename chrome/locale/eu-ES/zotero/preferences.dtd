@@ -10,7 +10,7 @@
 
 <!ENTITY zotero.preferences.prefpane.general "Orokorra">
 
-<!ENTITY zotero.preferences.interface "Interface">
+<!ENTITY zotero.preferences.interface "Interfazea">
 <!ENTITY zotero.preferences.fileHandling "Fitxategien kudeaketa">
 <!ENTITY zotero.preferences.automaticSnapshots "Gorde pantaila-irudiak automatikoki web orri batetik elementu bat sortzerakoan">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automatikoki erantsi erlazionatutako PDF eta bestelako fitxategiak elementuak gordetzerakoan">
@@ -19,7 +19,7 @@
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Berrizendatu estekatutako fitxategiak">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Ireki PDFak honakoa erabiliz">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Sistemako lehenetsia">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
+<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Ireki PDFak leiho berrietan, fitxetan beharrean">
 
 <!ENTITY zotero.preferences.miscellaneous "Bestelakoak">
 <!ENTITY zotero.preferences.autoUpdate "Automatikoki egiaztatu itzultzaile eta estiloen eguneraketan">
@@ -30,10 +30,10 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatikoki ezabatu zaborran daudek elementuak ">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "egun atzera">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
-<!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
-<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
-<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
+<!ENTITY zotero.preferences.pdfReader "PDF irakurtzailea">
+<!ENTITY zotero.preferences.reader.tabsTitle.label "Erakutxi fitxak honela:">
+<!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Sortzailea - Urtea - Izenburua">
+<!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Izenburua - Sortzailea - Urtea">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename "Fitxategiaren izena">
 
 <!ENTITY zotero.preferences.groups "Taldeak">
@@ -93,7 +93,7 @@
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory "Garbitu Sync kronika">
 <!ENTITY zotero.preferences.sync.reset.resetFileSyncHistory.desc "Alderatu eranskin fitxategi guztiak biltegi zerbitzuarekin">
 <!ENTITY zotero.preferences.sync.reset "Berrezarri">
-<!ENTITY zotero.preferences.sync.reset.showResetOptions "Show Reset Options…">
+<!ENTITY zotero.preferences.sync.reset.showResetOptions "Erakutsi berrezartzeko aukerak...">
 <!ENTITY zotero.preferences.sync.reset.button "Berrezarri...">
 
 

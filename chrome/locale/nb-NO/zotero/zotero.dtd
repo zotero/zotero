@@ -30,7 +30,7 @@
 <!ENTITY zotero.errorReport.submitted "Feilrapporten er levert.">
 <!ENTITY zotero.errorReport.reportID "Rapport-ID:">
 <!ENTITY zotero.errorReport.postToForums "Legg igjen en melding i Zotero-forumene (forums.zotero.org) med denne rapport-IDen, en beskrivelse av problemet og nødvendige steg for å reprodusere problemet.">
-<!ENTITY zotero.errorReport.notReviewed "Feilrapporter blir vanligvis ikke kommentert, dersom problemet ikke tas opp i forumene.">
+<!ENTITY zotero.errorReport.notReviewed "Feilrapporter blir ikke kommentert, dersom problemet ikke henvises til i forumene.">
 
 <!ENTITY zotero.upgrade.title "Zotero oppgraderingsveiviser">
 <!ENTITY zotero.upgrade.newVersionInstalled "Du ha installert en ny versjon av Zotero.">
@@ -49,7 +49,7 @@
 <!ENTITY zotero.tabs.info.label "Info">
 <!ENTITY zotero.tabs.notes.label "Notater">
 <!ENTITY zotero.tabs.attachments.label "Vedlegg">
-<!ENTITY zotero.tabs.tags.label "Emneord">
+<!ENTITY zotero.tabs.tags.label "Etiketter">
 <!ENTITY zotero.tabs.related.label "Relatert">
 
 <!ENTITY zotero.toolbar.duplicate.label "Vis duplikater">
@@ -88,7 +88,7 @@
 <!ENTITY zotero.toolbar.newSubcollection.label "Ny under-samling...">
 <!ENTITY zotero.toolbar.newSavedSearch.label "Nytt lagret søk...">
 <!ENTITY zotero.toolbar.emptyTrash.label "Tøm søppelkorg">
-<!ENTITY zotero.toolbar.tagSelector.label "Vis/skjul emneordsamling">
+<!ENTITY zotero.toolbar.tagSelector.label "Vis/skjul etikettvelger">
 <!ENTITY zotero.toolbar.actions.label "Handlinger">
 <!ENTITY zotero.toolbar.import.label "Importer...">
 <!ENTITY zotero.toolbar.importFromClipboard "Importer fra utklippstavle">
@@ -118,7 +118,7 @@
 <!ENTITY zotero.item.copyAsURL "Kopier som URL">
 <!ENTITY zotero.item.deletePermanently "Slett permanent…">
 
-<!ENTITY zotero.item.tags.removeAll "Fjern alle emneord…">
+<!ENTITY zotero.item.tags.removeAll "Fjern alle etiketter…">
 
 <!ENTITY zotero.toolbar.newNote "Nytt notat">
 <!ENTITY zotero.toolbar.note.standalone "Nytt enkeltstående notat">
@@ -131,18 +131,18 @@
 <!ENTITY zotero.toolbar.context.item "Element">
 <!ENTITY zotero.toolbar.context.notes "Notater">
 
-<!ENTITY zotero.tagSelector.noTagsToDisplay "Ingen emneord å vise">
-<!ENTITY zotero.tagSelector.loadingTags "Laster emneord…">
+<!ENTITY zotero.tagSelector.noTagsToDisplay "Ingen etiketter å vise">
+<!ENTITY zotero.tagSelector.loadingTags "Laster etiketter…">
 <!ENTITY zotero.tagSelector.showAutomatic "Vis automatisk">
-<!ENTITY zotero.tagSelector.displayAllInLibrary "Vis alle emneord i dette biblioteket">
-<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Slett automatiske emneord i dette biblioteket…">
+<!ENTITY zotero.tagSelector.displayAllInLibrary "Vis alle etiketter i dette biblioteket">
+<!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Slett automatiske etiketter i dette biblioteket…">
 <!ENTITY zotero.tagSelector.clearAll "Fravelg alle">
 <!ENTITY zotero.tagSelector.assignColor "Tildel farge…">
-<!ENTITY zotero.tagSelector.renameTag "Gi emneord nytt navn...">
-<!ENTITY zotero.tagSelector.deleteTag "Slett emneord...">
+<!ENTITY zotero.tagSelector.renameTag "Gi etikett nytt navn...">
+<!ENTITY zotero.tagSelector.deleteTag "Slett etikett...">
 <!ENTITY zotero.tagSelector.splitTag "Del opp…">
 
-<!ENTITY zotero.tagColorChooser.title "Velg farge og posisjon for emneord">
+<!ENTITY zotero.tagColorChooser.title "Velg farge og posisjon for etikett">
 <!ENTITY zotero.tagColorChooser.color "Farge:">
 <!ENTITY zotero.tagColorChooser.position "Posisjon:">
 <!ENTITY zotero.tagColorChooser.setColor "Bruk farge">
@@ -245,15 +245,15 @@
 <!ENTITY zotero.sync.storage.downloads "Nedlastinger:">
 <!ENTITY zotero.sync.storage.uploads "Opplastinger:">
 
-<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Følgende emneord i ditt Zotero bibliotek er for langt til å kunne synkroniseres med server">
-<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synkroniserte emneord må være kortere enn 256 tegn.">
-<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Du kan enten dele emneordet i flere emneord, endre det manuelt for å gjøre det kortere, eller slette det.">
+<!ENTITY zotero.sync.longTagFixer.followingTagTooLong "Følgende etikett i ditt Zotero bibliotek er for lang til å kunne synkroniseres med server">
+<!ENTITY zotero.sync.longTagFixer.syncedTagSizeLimit "Synkroniserte etiketter må være kortere enn 256 tegn.">
+<!ENTITY zotero.sync.longTagFixer.splitEditDelete "Du kan enten dele etiketten i flere etiketter, endre den manuelt for å gjøre den kortere, eller slette den.">
 <!ENTITY zotero.sync.longTagFixer.split "Del">
 <!ENTITY zotero.sync.longTagFixer.splitAtThe "Del ved">
 <!ENTITY zotero.sync.longTagFixer.character "tegn">
 <!ENTITY zotero.sync.longTagFixer.characters "tegn">
-<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Umerkede emneord vil ikke bli lagret.">
-<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Emneordet vil bli slettet fra alle elementer.">
+<!ENTITY zotero.sync.longTagFixer.uncheckedTagsNotSaved "Umerkede etiketter vil ikke bli lagret.">
+<!ENTITY zotero.sync.longTagFixer.tagWillBeDeleted "Etiketten vil bli slettet fra alle elementer.">
 
 <!ENTITY zotero.merge.title "Konflikthåndtering">
 <!ENTITY zotero.merge.of "av">

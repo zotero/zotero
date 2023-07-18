@@ -51,7 +51,7 @@
 <!ENTITY stackedView.label "Stablet visning">
 <!ENTITY collectionsPane.label "Rute for samlinger">
 <!ENTITY itemPane.label "Rute for element">
-<!ENTITY tagSelector.label "Rute for emneordvelger">
+<!ENTITY tagSelector.label "Etikettvelger">
 <!ENTITY recursiveCollections.label "Vis elementer fra under-samlinger">
 <!ENTITY fontSize.label "Skriftstørrelse">
 <!ENTITY noteFontSize.label "Skriftstørrelse for notat">
@@ -80,7 +80,7 @@
 <!ENTITY productHelp.accesskey "D">
 <!ENTITY helpTroubleshootingInfo.label "Informasjon for feilsøking">
 <!ENTITY helpTroubleshootingInfo.accesskey "I">
-<!ENTITY helpFeedbackPage.label "Diskusjonsfora">
+<!ENTITY helpFeedbackPage.label "Diskusjonsforumer">
 <!ENTITY helpFeedbackPage.accesskey "F">
 
 <!ENTITY helpReportErrors.label "Rapporter feil...">
