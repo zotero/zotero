@@ -31,6 +31,7 @@ const { COLUMNS: ITEMTREE_COLUMNS } = require("zotero/itemTreeColumns");
  * @typedef {Required<Pick<ItemTreeColumnOptions, RequiredCustomColumnOptionKeys>>} RequiredCustomColumnOptionsPartial
  * @typedef {Omit<ItemTreeColumnOptions, RequiredCustomColumnOptionKeys>} CustomColumnOptionsPartial
  * @typedef {RequiredCustomColumnOptionsPartial & CustomColumnOptionsPartial} ItemTreeCustomColumnOptions
+ * @typedef {Partial<Omit<ItemTreeCustomColumnOptions, "enabledTreeIDs">>} ItemTreeCustomColumnFilters
  */
 
 class ItemTreeManager {
@@ -147,44 +148,32 @@ class ItemTreeManager {
 
 	/**
 	 * Get column(s) that matches the properties of option
-	 * @param {undefined | Partial.<ItemTreeCustomColumnOptions> | Partial.<ItemTreeCustomColumnOptions>[]} options - An option or array of options to match
+	 * @param {string | string[]} [enabledTreeIDs] - The tree IDs to match
+	 * @param {ItemTreeCustomColumnFilters} [options] - An option or array of options to match
 	 * @returns {ItemTreeCustomColumnOptions[]}
 	 */
-	getCustomColumns(options) {
+	getCustomColumns(enabledTreeIDs, options) {
 		const allColumns = Object.values(this._customColumns).map(opt => Object.assign({}, opt));
-		if (!options) {
+		if (!enabledTreeIDs && !options) {
 			return allColumns;
 		}
-		if (!Array.isArray(options)) {
-			options = [options];
+		let filteredColumns = allColumns;
+		if (enabledTreeIDs) {
+			if (typeof enabledTreeIDs === "string") {
+				enabledTreeIDs = [enabledTreeIDs];
+			}
+			filteredColumns = filteredColumns.filter(col => enabledTreeIDs.includes("*") || enabledTreeIDs.find(treeID => (col.enabledTreeIDs || ["main"]).includes(treeID)));
 		}
-		options.forEach(o => o.dataKey = this._namespacedDataKey(o));
-		/** @type {ItemTreeCustomColumnOptions[]} */
-		const matches = [];
-		for (const opt of options) {
-			const currentMatches = allColumns
-				.filter(col =>
-					// Aoid dataKey collision
-					!matches.map(match => match.dataKey).includes(col.dataKey)
-					// Match all properties
-					&& Object.keys(opt).every(key => {
-						// Ignore undefined properties
-						if (opt[key] === undefined) {
-							return true;
-						}
-						// Special case for enabledTreeIDs
-						if (key === "enabledTreeIDs"){
-							// If enabledTreeIDs is "*", match all tree IDs
-							return opt.enabledTreeIDs.includes("*")
-							// Otherwise, match the tree IDs
-								|| opt.enabledTreeIDs.every(treeID => (col.enabledTreeIDs || ["main"]).includes(treeID));
-						}
-						return col[key] === opt[key];
-					})
-				);
-			matches.push(...currentMatches);
+		if (options) {
+			filteredColumns = filteredColumns.filter(col => {
+				// Ignore undefined properties
+				if (options[key] === undefined) {
+					return true;
+				}
+				return options[key] === col[key];
+			});
 		}
-		return matches;
+		return filteredColumns;
 	}
 
 	/**
@@ -332,7 +321,7 @@ class ItemTreeManager {
 	 * @param {string} pluginID - Plugin ID
 	 */
 	async _unregisterColumnByPluginID(pluginID) {
-		const columns = this.getCustomColumns({ pluginID });
+		const columns = this.getCustomColumns(undefined, { pluginID });
 		if (columns.length === 0) {
 			return;
 		}

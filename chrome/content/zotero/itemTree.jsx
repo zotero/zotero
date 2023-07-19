@@ -150,7 +150,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 * @returns {ItemTreeColumnOptions[]}
 	 */
 	getColumns() {
-		const extraColumns = Zotero.ItemTreeManager.getCustomColumns({enabledTreeIDs: [this.props.id]});
+		const extraColumns = Zotero.ItemTreeManager.getCustomColumns(this.props.id);
 		/** @type {ItemTreeColumnOptions[]} */
 		const currentColumns = (this.props.columns || COLUMNS).map(col => Object.assign({}, col));
 		extraColumns.forEach(column => {
