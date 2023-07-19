@@ -2091,11 +2091,47 @@ Zotero.Utilities.Internal = {
 		};
 	},
 
+	
+	/**
+	 * Splits a string by outer-most brackets (`{{` and '}}' by default, configurable).
+	 *
+	 * @param {string} input - The input string to split.
+	 * @returns {string[]} An array of strings split by outer-most brackets.
+	 */
+	splitByOuterBrackets: function(input, left = '{{', right = '}}') {
+		const result = [];
+		let startIndex = 0;
+		let depth = 0;
+
+		for (let i = 0; i < input.length; i++) {
+			if (input.slice(i, i + 2) === left) {
+				if (depth === 0) {
+					result.push(input.slice(startIndex, i));
+					startIndex = i;
+				}
+				depth++;
+			}
+			else if (input.slice(i, i + 2) === right) {
+				depth--;
+				if (depth === 0) {
+					result.push(input.slice(startIndex, i + 2));
+					startIndex = i + 2;
+				}
+			}
+		}
+
+		if (startIndex < input.length) {
+			result.push(input.slice(startIndex));
+		}
+
+		return result;
+	},
+
 	/**
 	 * A basic templating engine
 	 *
 	 * - 'if' statement does case-insensitive string comparison
-	 * - Spaces around '==' are necessary in 'if' statement
+	 * -  functions can be called from if statements but must be wrapped in {{}} if arguments are passed (e.g. {{myFunction arg1="foo" arg2="bar"}})
 	 *
 	 * Vars example:
 	 *  {
@@ -2121,86 +2157,103 @@ Zotero.Utilities.Internal = {
 	 * @returns {String} HTML
 	 */
 	generateHTMLFromTemplate: function (template, vars) {
-		let levels = [{ condition: true }];
-		let html = '';
-		let parts = template.split(/{{|}}/);
-
 		const dashToCamel = varName => varName.replace(/-(.)/g, (_, g1) => g1.toUpperCase());
 
 		const getAttributes = (part) => {
-			let attrsRegexp = new RegExp(/(([\w-]*) *=+ *(['"])((\\\3|[^\3])*?)\3)|(([\w-]*) *=+ *(\w*))/g);
+			let attrsRegexp = new RegExp(/(([\w-]*) *=+ *(['"])((\\\3|[^\3])*?)\3)/g);
 			let attrs = {};
 			let match;
 			while ((match = attrsRegexp.exec(part))) {
 				if (match[1]) { // if first alternative (i.e. argument with value wrapped in " or ') matched, even if value is empty
 					attrs[dashToCamel(match[2])] = match[4];
 				}
-				else {
-					attrs[dashToCamel(match[7])] = match[8];
-				}
 			}
 			return attrs;
 		};
 
-		const evaluateIdentifier = (ident, args) => {
-			if (Array.isArray(vars[dashToCamel(ident)])) {
-				return vars[dashToCamel(ident)].length;
+		
+		const evaluateIdentifier = (ident, args = {}) => {
+			ident = dashToCamel(ident);
+
+			if (!(ident in vars)) {
+				return '';
 			}
-			if (typeof vars[dashToCamel(ident)] === 'function') {
-				return vars[dashToCamel(ident)](args);
+
+			const identValue = typeof vars[ident] === 'function' ? vars[ident](args) : vars[ident];
+
+			if (Array.isArray(identValue)) {
+				return identValue.length ? identValue.join(',') : '';
 			}
-			return vars[dashToCamel(ident)];
+
+			if (typeof identValue !== 'string') {
+				throw new Error(`Identifier "${ident}" does not evaluate to a string`);
+			}
+			
+			return identValue;
+		};
+		
+		// evaluates extracted (i.e. without brackets) statement (e.g. `sum a="1" b="2"`) into a string value
+		const evaluateStatement = (statement) => {
+			statement = statement.trim();
+			const operator = statement.split(' ', 1)[0].trim();
+			const args = statement.slice(operator.length).trim();
+
+			return evaluateIdentifier(operator, getAttributes(args));
 		};
 
-		
-		const evaluateComparison = (left, right, comparator) => {
-			const isNumeric = (left == parseInt(left) && right == parseInt(right)) || (left == parseFloat(left) && right == parseFloat(right));
+		// splits raw (i.e. bracketed) statement (e.g. `{{ sum a="1" b="2" }}) into operator and arguments (e.g. ['sum', 'a="1" b="2"'])
+		const splitStatement = (statement) => {
+			statement = statement.slice(2, -2).trim();
+			const operator = statement.split(' ', 1)[0].trim();
+			const args = statement.slice(operator.length).trim();
+			return [operator, args];
+		};
+
+		// evaluates a condition (e.g. `a == "b"`) into a boolean value
+		const evaluateCondition = (condition) => {
+			const comparators = ['==', '!='];
+			condition = condition.trim();
+
+			// match[1] if left is statement, match[3] if left is literal, match[4] if left is identifier
+			// match[6] if right is statement, match[8] if right is literal, match[9] if right is identifier
+			// match[2] and match[7] are used to match the quotes around the literal (and then check that the other quote is the same)
+			const match = condition.match(new RegExp(String.raw`(?:{{(.*?)}}|(?:(['"])(.*?)\2)|([^ ]+)) *(${comparators.join('|')}) *(?:{{(.*?)}}|(?:(['"])(.*?)\7)|([^ ]+))`));
+			
+			if (!match) {
+				// condition is a statement or identifier without a comparator
+				if (condition.startsWith('{{')) {
+					const [operator, args] = splitStatement(condition);
+					return !!evaluateIdentifier(operator, getAttributes(args));
+				}
+				return !!evaluateIdentifier(condition);
+			}
+
+			const left = match[1] ? evaluateStatement(match[1]) : match[3] ?? evaluateIdentifier(match[4]) ?? '';
+			const comparator = match[5];
+			const right = match[6] ? evaluateStatement(match[6]) : match[8] ?? evaluateIdentifier(match[9]) ?? '';
+
 			switch (comparator) {
 				default:
 				case '==':
-					return isNumeric ? left == right : left.toLowerCase() == right.toLowerCase();
+					return left.toLowerCase() == right.toLowerCase();
 				case '!=':
-					return isNumeric ? left != right : left.toLowerCase() != right.toLowerCase();
-				case '>=':
-					return isNumeric ? left >= right : false;
-				case '<=':
-					return isNumeric ? left <= right : false;
-				case '>':
-					return isNumeric ? left > right : false;
-				case '<':
-					return isNumeric ? left < right : false;
+					return left.toLowerCase() != right.toLowerCase();
 			}
 		};
 
-
-		const evaluateCondition = (parts) => {
-			const comparators = ['==', '!=', '>=', '<=', '>', '<'];
-			const index = parts.findIndex(part => comparators.includes(part));
-
-			if (index > -1) {
-				const left = parts.slice(0, index);
-				const leftValue = evaluateIdentifier(left[0], getAttributes(left.slice(1).join(' ')));
-				const rightValue = parts.slice(index + 1).join(' ');
-				const comparator = parts[index];
-				return evaluateComparison(leftValue, rightValue, comparator);
-			}
-
-			return !!evaluateIdentifier(parts[0], getAttributes(parts.slice(1).join(' ')));
-		};
+		let html = '';
+		const levels = [{ condition: true }];
+		const parts = this.splitByOuterBrackets(template);
 
 		for (let i = 0; i < parts.length; i++) {
 			let part = parts[i];
 			let level = levels[levels.length - 1];
-			if (i % 2 === 1) {
-				let operator = part.split(' ').filter(x => x)[0];
-				// Get arguments that are used for 'if'
-				let args = [];
-				let match = part.match(/(["'][^"|^']+["']|[^\s"']+)/g);
-				if (match) {
-					args = match.map(x => x.replace(/['"](.*)['"]/, '$1')).slice(1);
-				}
+
+			if (part.startsWith('{{')) {
+				const [operator, args] = splitStatement(part);
+			
 				if (operator === 'if') {
-					level = { condition: false, executed: false, parentCondition: levels[levels.length-1].condition };
+					level = { condition: false, executed: false, parentCondition: levels[levels.length - 1].condition };
 					levels.push(level);
 				}
 				if (['if', 'elseif'].includes(operator)) {
@@ -2223,10 +2276,8 @@ Zotero.Utilities.Internal = {
 					continue;
 				}
 				if (level.condition) {
-					// Get attributes i.e. join=" #"
-					let attrs = getAttributes(part);
-					const identifier = vars[dashToCamel(operator)];
-					html += (typeof identifier === 'function' ? identifier(attrs) : identifier) ?? '';
+					const attrs = getAttributes(part);
+					html += evaluateIdentifier(operator, attrs);
 				}
 			}
 			else if (level.condition) {

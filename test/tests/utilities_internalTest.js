@@ -549,20 +549,20 @@ describe("Zotero.Utilities.Internal", function () {
 		it("should support variables with attributes", function () {
 			var vars = {
 				v1: '1',
-				v2: (pars) => pars.a1 + pars.a2 + pars.a3,
+				v2: pars => `${pars.a1 ?? ''}${pars.a2 ?? ''}${pars.a3 ?? ''}`,
 				v3: () => '',
 				v5: () => 'something',
 				ar1: [],
 				ar2: [1, 2]
 			};
-			var template = `{{ v1}}{{v2 a1= 1  a2 =' 2' a3 = "3 "}}{{v3}}{{v4}}{{if ar1}}ar1{{endif}}{{if ar2}}{{ar2}}{{endif}}{{if v5}}yes{{endif}}{{if v3}}no{{endif}}{{if v2}}no{{endif}}`;
+			var template = `{{ v1}}{{v2 a1= "1"  a2 =' 2' a3 = "3 "}}{{v3}}{{v4}}{{if ar1}}ar1{{endif}}{{if ar2}}{{ar2}}{{endif}}{{if v5}}yes{{endif}}{{if v3}}no1{{endif}}{{if v2}}{{v2}}{{endif}}`;
 			var html = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
 			assert.equal(html, '11 23 1,2yes');
 		});
 
 		it("should support empty string as attribute value and correctly render returned false-ish values", function () {
 			const vars = {
-				length: ({ string }) => string.length,
+				length: ({ string }) => string.length.toString(),
 			};
 			const template = `"" has a length of {{ length string="" }} and "hello" has a length of {{ length string="hello" }}`;
 			const out = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
@@ -571,60 +571,154 @@ describe("Zotero.Utilities.Internal", function () {
 
 		it("should support functions in comparison statements", function () {
 			const vars = {
-				sum: ({ a, b }) => parseInt(a) + parseInt(b),
-				fahrenheitToCelsius: ({ temp }) => Math.round((temp - 32) * 5 / 9),
+				sum: ({ a, b }) => (parseInt(a) + parseInt(b)).toString(),
+				fooBar: ({ isFoo }) => (isFoo === 'true' ? 'foo' : 'bar'),
 				false: 'false',
 				twoWords: 'two words',
 				onlyOne: 'actually == 1'
 			};
-			const template = `{{if sum a=1 b=2 == 3}}1 + 2 = {{sum a=1 b=2}}{{else}}no speak math{{endif}}`;
+			const template = `{{if {{ sum a="1" b="2" }} == "3"}}1 + 2 = {{sum a="1" b="2"}}{{else}}no speak math{{endif}}`;
 			const out = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
 			assert.equal(out, '1 + 2 = 3');
 
-			const template2 = '{{ if false>false }}no{{elseif false <= 0}}no{{elseif false != false}}no{{elseif false == false}}yes{{else}}no{{endif}}';
+			const template2 = '{{if false != "false"}}no{{elseif false == "false"}}yes{{else}}no{{endif}}';
 			const out2 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template2, vars);
 			assert.equal(out2, 'yes');
 
-			const template3 = '{{ if twoWords == two words }}yes{{else}}no{{endif}}';
+			const template3 = '{{ if twoWords == "two words" }}yes{{else}}no{{endif}}';
 			const out3 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template3, vars);
 			assert.equal(out3, 'yes');
 
-			const template4 = '{{ if onlyOne == actually == 1 }}yes{{else}}no{{endif}}';
+			const template4 = '{{ if onlyOne == \'actually == 1\' }}yes{{else}}no{{endif}}';
 			const out4 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template4, vars);
 			assert.equal(out4, 'yes');
 
-			const tests = [
-				[100, `it's 38°C - quite hot!`],
-				[68, `it's 20°C - nice and warm`],
-				[32, `it's 0°C - bit chilly`],
-				[0, `it's -18°C - freezing actually`],
-			];
+			const template5 = '{{ if "3" == {{ sum a="1" b="2" }} }}yes{{else}}no{{endif}}';
+			const out5 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template5, vars);
+			assert.equal(out5, 'yes');
 
-			for (let [temp, result] of tests) {
-				const template = `it's {{ fahrenheitToCelsius temp=${temp} }}°C - {{if fahrenheitToCelsius  temp="${temp}"  >  "32"}}quite hot!{{elseif fahrenheitToCelsius  temp="${temp}"  >= 20 }}nice and warm{{elseif fahrenheitToCelsius  temp="${temp}"  < 0 }}freezing actually{{else}}bit chilly{{endif}}`;
-				const out = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
-				assert.equal(out, result);
-			}
+			const template6 = '{{ if {{ sum a="1" b="2" }} }}yes{{else}}no{{endif}}';
+			const out6 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template6, vars);
+			assert.equal(out6, 'yes');
+
+			const template7 = '{{ if {{ twoWords }} }}yes{{else}}no{{endif}}';
+			const out7 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template7, vars);
+			assert.equal(out7, 'yes');
+
+			const template8 = '{{ if twoWords }}yes{{else}}no{{endif}}';
+			const out8 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template8, vars);
+			assert.equal(out8, 'yes');
+
+			const template9 = '{{ if missing }}no{{else}}yes{{endif}}';
+			const out9 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template9, vars);
+			assert.equal(out9, 'yes');
+
+			const template10 = '{{ if {{ missing foo="bar" }} }}no{{else}}yes{{endif}}';
+			const out10 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template10, vars);
+			assert.equal(out10, 'yes');
+
+			const template11 = '{{ if {{ missing foo="bar" }} == "" }}yes{{else}}no{{endif}}';
+			const out11 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template11, vars);
+			assert.equal(out11, 'yes');
+
+			const template12 = '{{ if fooBar == "bar" }}yes{{else}}no{{endif}}';
+			const out12 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template12, vars);
+			assert.equal(out12, 'yes');
+
+			const template13 = '{{ if {{ fooBar }} == "bar" }}yes{{else}}no{{endif}}';
+			const out13 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template13, vars);
+			assert.equal(out13, 'yes');
+
+			const template14 = `{{if {{ sum a="1" b="2" }}=="3"}}1 + 2 = {{sum a="1" b="2"}}{{else}}no{{endif}}`;
+			const out14 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template14, vars);
+			assert.equal(out14, '1 + 2 = 3');
+			
+			const template15 = `{{if "two words"==twoWords}}yes{{else}}no{{endif}}`;
+			const out15 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template15, vars);
+			assert.equal(out15, 'yes');
 		});
 
 		it("should accept dash-case variables and attributes", function () {
 			const vars = {
 				fooBar: ({ isFoo }) => (isFoo === 'true' ? 'foo' : 'bar'),
 			};
-			const template = '{{ foo-bar is-foo="true" }}{{ if foo-bar is-foo="false" == "bar" }}{{ foo-bar is-foo="false" }}{{ endif }}';
+			const template = '{{ foo-bar is-foo="true" }}{{ if {{ foo-bar is-foo="false" }} == "bar" }}{{ foo-bar is-foo="false" }}{{ endif }}';
 			const out = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
 			assert.equal(out, 'foobar');
 		});
 
+		it("should work with a condition in the middle", function () {
+			const vars = {
+				v1: '1',
+			};
+			const template = 'test {{ if v1 == "1" }}yes{{ else }}no{{ endif }} foobar';
+			const out = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
+			assert.equal(out, 'test yes foobar');
+		});
+
+		it("missing identifiers are evaluted as empty string", function () {
+			const vars = {
+				foo: 'foo',
+			};
+			const template = '{{bar}}{{ if foo == "" }}no{{elseif foo}}{{foo}}{{else}}no{{endif}}';
+			const out = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
+			assert.equal(out, 'foo');
+
+			const template2 = 'test: {{ if bar == "" }}yes{{else}}no{{endif}}';
+			const out2 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template2, vars);
+			assert.equal(out2, 'test: yes');
+		});
+
+		it("should preserve whitespace outside of brackets", function () {
+			const template = ' starts }} with {{ whitespace  	{"test"}  ==  \'foobar\'   ';
+			const out = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, {});
+			assert.equal(out, template);
+			const vars = {
+				space: ' ',
+				spaceFn: () => ' ',
+			};
+
+			const whitespace = ' {{if spaceFn}}{{else}}  {{endif}}{{space}} {{space-fn}}';
+			const out2 = Zotero.Utilities.Internal.generateHTMLFromTemplate(whitespace, vars);
+			assert.equal(out2, '    ');
+		});
+
+		it("should accept array values in logic statements", function () {
+			let someTags = ['foo', 'bar'];
+			const vars = {
+				tags: ({ join }) => (join ? someTags.join(join) : someTags),
+			};
+			const template = '{{ if tags }}#{{ tags join=" #" }}{{else}}no tags{{endif}}';
+			const out = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
+			assert.equal(out, '#foo #bar');
+
+			someTags = [];
+			const out2 = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
+			assert.equal(out2, 'no tags');
+		});
+
+
+		it("should throw if function returns anything else than a string (or an array which is always joined into string)", function () {
+			const vars = {
+				number: () => 1,
+				logic: () => true,
+				array: () => [],
+				fn: () => 1,
+			};
+			assert.throws(() => Zotero.Utilities.Internal.generateHTMLFromTemplate('{{ number }}', vars), /Identifier "number" does not evaluate to a string/);
+			assert.throws(() => Zotero.Utilities.Internal.generateHTMLFromTemplate('{{ logic }}', vars), /Identifier "logic" does not evaluate to a string/);
+			assert.throws(() => Zotero.Utilities.Internal.generateHTMLFromTemplate('{{ if fn }}no{{endif}}', vars), /Identifier "fn" does not evaluate to a string/);
+			assert.throws(() => Zotero.Utilities.Internal.generateHTMLFromTemplate('{{ if {{ fn foo="bar" }} }}no{{endif}}', vars), /Identifier "fn" does not evaluate to a string/);
+		});
 
 		it("should support nested 'if' statements", function () {
 			var vars = {
 				v1: '1',
 				v2: 'H',
 			};
-			var template = `{{if v1 == '1'}}yes1{{if x}}no{{elseif v2  == h }}yes2{{endif}}{{elseif v2 == 2}}no{{else}}no{{endif}} {{if v2 == 1}}not{{elseif x}}not{{else}}yes3{{ endif}}`;
+			var template = `{{if v1 == '1'}}yes1{{if x}}no{{elseif v2  == "h" }}yes2{{endif}}{{elseif v2 == "2"}}no{{else}}no{{endif}} {{if v2 == "1"}}not{{elseif x}}not{{else}}yes3{{ endif}}`;
 			var html = Zotero.Utilities.Internal.generateHTMLFromTemplate(template, vars);
 			assert.equal(html, 'yes1yes2 yes3');
 		});
 	});
-})
+});
