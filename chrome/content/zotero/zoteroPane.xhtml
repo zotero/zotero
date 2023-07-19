@@ -677,16 +677,12 @@
 	<!-- Keep in sync with Zotero.test conditional block in overlay.js -->
 	<hbox>
 		<div xmlns="http://www.w3.org/1999/xhtml" id="tab-bar-container"/>
-		<toolbarbutton
-			id="zotero-opened-tabs-menu"
-			class="zotero-tb-button"
-			tabindex="-1"
-			tooltiptext="Opened tabs"
-			type="menu"
-			wantdropmarker="true">
-			
-			<menupopup id="zotero-opened-tabs-popup"></menupopup>
-		</toolbarbutton>
+			<toolbarbutton id="zotero-tb-opened-tabs" class="zotero-tb-open-tabs inactive img-center" tabindex="-1" tooltiptext="Show opened tabs" type="panel"
+			onmousedown="if (this.disabled) { event.preventDefault(); return; } Zotero_Tabs.showOpenedTabsPanel(this)"/>
+			<panel id="zotero-opened-tabs-panel" type="arrow"
+					onpopuphiding="Zotero_Tabs.onHidding(event)">
+				<vbox id="zotero-opened-tabs-list"></vbox>
+			</panel>
 	</hbox>
 
 	<commandset id="mainCommandSet">

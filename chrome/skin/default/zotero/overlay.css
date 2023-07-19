@@ -480,6 +480,54 @@
 	list-style-image: url('chrome://zotero/skin/bookmark-pencil.png');
 }
 
+.img-center
+{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-repeat: no-repeat;
+    background-position: center; 
+    background-size: contain; 
+}
+
+.zotero-opened-tab-entry
+{
+	border-radius: 6px;
+}
+
+.zotero-opened-tab-entry.close
+{
+	background-image: url('chrome://zotero/skin/cross.svg');
+	width: 30px;
+}
+.zotero-opened-tab-entry.close:hover
+{
+	background-image: -moz-linear-gradient(rgba(40,40,40,.3), rgba(70,70,70,.3)), url('chrome://zotero/skin/cross.svg'); 
+}
+
+.zotero-opened-tab-entry.title:hover
+{
+	background: -moz-linear-gradient(rgba(40,40,40,.3), rgba(70,70,70,.3)); 
+}
+
+.zotero-tb-open-tabs
+{
+	border-radius: 6px;
+	width: 30px;
+	margin: 3px 10px 3px 3px;
+	background-image: url("chrome://zotero/skin/nav-arrow-down.svg"); 
+}
+
+.zotero-tb-open-tabs.inactive:hover
+{
+    background-image: -moz-linear-gradient(rgba(40,40,40,.3), rgba(70,70,70,.3)), url("chrome://zotero/skin/nav-arrow-down.svg"); 
+}
+
+.zotero-tb-open-tabs.active
+{
+    background-image: -moz-linear-gradient(rgba(40,40,40,.5), rgba(70,70,70,.5)), url("chrome://zotero/skin/nav-arrow-down.svg"); 
+}
+
 #zotero-tb-advanced-search
 {
 	list-style-image: url('chrome://zotero/skin/toolbar-advanced-search.png');
