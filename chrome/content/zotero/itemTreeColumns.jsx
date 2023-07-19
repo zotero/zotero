@@ -30,7 +30,8 @@ const Icons = require('components/icons');
  * @typedef ItemTreeColumnOptions
  * @type {object}
  * @property {string} dataKey - Required, see use in ItemTree#_getRowData()
-Change 
+ * @property {string} label - The column label. Either a string or the id to an i18n string.
+ * @property {string} [pluginID] - Set plugin ID to auto remove column when plugin is removed.
  * @property {string[]} [enabledTreeIDs=[]] - Which tree ids the column should be enabled in. If undefined, enabled in main tree. If ["*"], enabled in all trees.
  * @property {string[]} [defaultIn] - Will be deprecated. Types of trees the column is default in. Can be [default, feed];
  * @property {string[]} [disabledIn] - Will be deprecated. Types of trees where the column is not available
@@ -40,7 +41,6 @@ Change
  * @property {boolean} [fixedWidth] - Default: false. Set to true to disable column resizing
  * @property {boolean} [staticWidth] - Default: false. Set to true to prevent columns from changing width when the width of the tree increases or decreases
  * @property {number} [minWidth] - Override the default [20px] column min-width for resizing
- * @property {string} label - The column label. Either a string or the id to an i18n string.
  * @property {React.Component} [iconLabel] - Set an Icon label instead of a text-based one
  * @property {string} [iconPath] - Set an Icon path, overrides {iconLabel}
  * @property {string | React.Component} [htmlLabel] - Set an HTML label, overrides {iconLabel} and {label}. Can be a HTML string or a React component.
@@ -48,9 +48,8 @@ Change
  * @property {boolean} [submenu=false] - Default: false. Set to true to display the column in "More Columns" submenu of column picker.
  * @property {boolean} [primary] - Should only be one column at the time. Title is the primary column
  * @property {boolean} [custom] - Set automatically to true when the column is added by the user
- * @property {string} [pluginID] - Set plugin ID to auto remove column when plugin is removed
  * @property {(item: Zotero.Item, dataKey: string) => string} [dataProvider] - Custom data provider that is called when rendering cells
- * @property {string[]} zoteroPersist - Which column properties should be persisted between zotero close
+ * @property {string[]} [zoteroPersist] - Which column properties should be persisted between zotero close
  */
 
 /**

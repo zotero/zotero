@@ -27,11 +27,15 @@ const { COLUMNS: ITEMTREE_COLUMNS } = require("zotero/itemTreeColumns");
 
 /**
  * @typedef {import("../itemTreeColumns.jsx").ItemTreeColumnOptions} ItemTreeColumnOptions
+ * @typedef {"dataKey" | "label" | "pluginID"} RequiredCustomColumnOptionKeys
+ * @typedef {Required<Pick<ItemTreeColumnOptions, RequiredCustomColumnOptionKeys>>} RequiredCustomColumnOptionsPartial
+ * @typedef {Omit<ItemTreeColumnOptions, RequiredCustomColumnOptionKeys>} CustomColumnOptionsPartial
+ * @typedef {RequiredCustomColumnOptionsPartial & CustomColumnOptionsPartial} ItemTreeCustomColumnOptions
  */
 
 class ItemTreeManager {
 	_observerAdded = false;
-	/** @type {Record<string, ItemTreeColumnOptions}} */
+	/** @type {Record<string, ItemTreeCustomColumnOptions}} */
 	_customColumns = {};
 	constructor() {
 	}
@@ -39,7 +43,7 @@ class ItemTreeManager {
 	/** 
 	 * Register a custom column. All registered columns must be valid, and must have a unique dataKey.
 	 * Although it's async, resolving does not promise the item trees are updated.
-	 * @param {ItemTreeColumnOptions | ItemTreeColumnOptions[]} options - An option or array of options to register
+	 * @param {ItemTreeCustomColumnOptions | ItemTreeCustomColumnOptions[]} options - An option or array of options to register
 	 * @returns {string | string[] | false} - The dataKey(s) of the added column(s) or false if no columns were added
 	 * @example
 	 * A minimal custom column:
@@ -143,8 +147,8 @@ class ItemTreeManager {
 
 	/**
 	 * Get column(s) that matches the properties of option
-	 * @param {undefined | Partial.<ItemTreeColumnOptions> | Partial.<ItemTreeColumnOptions>[]} options - An option or array of options to match
-	 * @returns {ItemTreeColumnOptions[]}
+	 * @param {undefined | Partial.<ItemTreeCustomColumnOptions> | Partial.<ItemTreeCustomColumnOptions>[]} options - An option or array of options to match
+	 * @returns {ItemTreeCustomColumnOptions[]}
 	 */
 	getCustomColumns(options) {
 		const allColumns = this._getColumnsByType("custom");
@@ -155,7 +159,7 @@ class ItemTreeManager {
 			options = [options];
 		}
 		options.forEach(o => o.dataKey = this._namespacedDataKey(o));
-		/** @type {ItemTreeColumnOptions[]} */
+		/** @type {ItemTreeCustomColumnOptions[]} */
 		const matches = [];
 		for (const opt of options) {
 			const currentMatches = allColumns
@@ -209,7 +213,7 @@ class ItemTreeManager {
 	/**
 	 * Get columns by type. Only support itemtree and custom for now.
 	 * @param {"itemtree" | "custom" | "*"} type 
-	 * @returns {ItemTreeColumnOptions[]}
+	 * @returns {ItemTreeCustomColumnOptions[]}
 	 */
 	_getColumnsByType(type) {
 		type = type || "itemtree";
@@ -229,14 +233,14 @@ class ItemTreeManager {
 	 * Check if column options is valid.
 	 * If the options is an array, all its children must be valid.
 	 * Otherwise, the validation fails.
-	 * @param {ItemTreeColumnOptions | ItemTreeColumnOptions[]} options 
+	 * @param {ItemTreeCustomColumnOptions | ItemTreeCustomColumnOptions[]} options 
 	 * @returns {boolean} true if the option(s) are valid
 	 */
 	_validateColumnOption(options) {
 		/**
 		 * Validate column options.
-		 * @param {ItemTreeColumnOptions | ItemTreeColumnOptions[]} options 
-		 * @param {(option: ItemTreeColumnOptions) => boolean} validator - A function that returns true if the option is valid
+		 * @param {ItemTreeCustomColumnOptions | ItemTreeCustomColumnOptions[]} options 
+		 * @param {(option: ItemTreeCustomColumnOptions) => boolean} validator - A function that returns true if the option is valid
 		 * @returns {boolean} true if the option(s) are valid
 		 */
 		function validate(options, validator) {
@@ -252,9 +256,9 @@ class ItemTreeManager {
 			Zotero.warn(`ItemTree Column options have duplicate dataKey.`);
 		}
 		const requiredProperties = validate(options, (option) => {
-			const valid = option.dataKey && option.label;
+			const valid = option.dataKey && option.label && option.pluginID;
 			if (!valid) {
-				Zotero.warn(`ItemTree Column option ${JSON.stringify(option)} must have dataKey and label.`);
+				Zotero.warn(`ItemTree Column option ${JSON.stringify(option)} must have dataKey, label, and pluginID.`);
 			}
 			return valid;
 		});
@@ -273,7 +277,7 @@ class ItemTreeManager {
 	 * Add a new column or new columns.
 	 * If the options is an array, all its children must be valid.
 	 * Otherwise, no columns are added.
-	 * @param {ItemTreeColumnOptions | ItemTreeColumnOptions[]} options - An option or array of options to add
+	 * @param {ItemTreeCustomColumnOptions | ItemTreeCItemTreeCustomColumnOptionsolumnOptions[]} options - An option or array of options to add
 	 * @returns {string | string[] | false} - The dataKey(s) of the added column(s) or false if no columns were added
 	 */
 	_addColumns(options) {
@@ -316,7 +320,7 @@ class ItemTreeManager {
 
 	/**
 	 * Make sure the dataKey is namespaced with the plugin ID
-	 * @param {ItemTreeColumnOptions} options
+	 * @param {ItemTreeCustomColumnOptions} options
 	 * @returns {string}
 	 */
 	_namespacedDataKey(options) {
