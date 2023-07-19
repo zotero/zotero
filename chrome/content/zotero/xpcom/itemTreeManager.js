@@ -165,12 +165,14 @@ class ItemTreeManager {
 			filteredColumns = filteredColumns.filter(col => enabledTreeIDs.includes("*") || enabledTreeIDs.find(treeID => (col.enabledTreeIDs || ["main"]).includes(treeID)));
 		}
 		if (options) {
-			filteredColumns = filteredColumns.filter(col => {
-				// Ignore undefined properties
-				if (options[key] === undefined) {
-					return true;
-				}
-				return options[key] === col[key];
+			filteredColumns = filteredColumns.filter((col) => {
+				return Object.keys(options).every((key) => {
+					// Ignore undefined properties
+					if (options[key] === undefined) {
+						return true;
+					}
+					return options[key] === col[key];
+				});
 			});
 		}
 		return filteredColumns;
@@ -178,7 +180,7 @@ class ItemTreeManager {
 
 	/**
 	 * Check if a column is registered as a custom column
-	 * @param {string} dataKey 
+	 * @param {string} dataKey - The dataKey of the column
 	 * @returns {boolean} true if the column is registered as a custom column
 	 */
 	isCustomColumn(dataKey) {
@@ -203,7 +205,7 @@ class ItemTreeManager {
 	 * Check if column options is valid.
 	 * If the options is an array, all its children must be valid.
 	 * Otherwise, the validation fails.
-	 * @param {ItemTreeCustomColumnOptions | ItemTreeCustomColumnOptions[]} options 
+	 * @param {ItemTreeCustomColumnOptions | ItemTreeCustomColumnOptions[]} options - An option or array of options to validate
 	 * @returns {boolean} true if the option(s) are valid
 	 */
 	_validateColumnOption(options) {
@@ -268,7 +270,7 @@ class ItemTreeManager {
 
 	/**
 	 * Remove a column option
-	 * @param {string | string[]} dataKeys 
+	 * @param {string | string[]} dataKeys - The dataKey of the column to remove
 	 * @returns {boolean} - True if column(s) were removed, false if not
 	 */
 	_removeColumns(dataKeys) {
