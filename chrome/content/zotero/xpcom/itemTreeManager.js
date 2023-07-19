@@ -151,7 +151,7 @@ class ItemTreeManager {
 	 * @returns {ItemTreeCustomColumnOptions[]}
 	 */
 	getCustomColumns(options) {
-		const allColumns = this._getColumnsByType("custom");
+		const allColumns = Object.values(this._customColumns).map(opt => Object.assign({}, opt));
 		if (!options) {
 			return allColumns;
 		}
@@ -211,25 +211,6 @@ class ItemTreeManager {
 	}
 
 	/**
-	 * Get columns by type. Only support itemtree and custom for now.
-	 * @param {"itemtree" | "custom" | "*"} type 
-	 * @returns {ItemTreeCustomColumnOptions[]}
-	 */
-	_getColumnsByType(type) {
-		type = type || "itemtree";
-		if (type === "*") {
-			// Return all columns
-			return ["itemtree", "custom"].flatMap(t => this._getColumnsByType(t));
-		}
-		if (type === "itemtree") {
-			return ITEMTREE_COLUMNS.map(opt => Object.assign({}, opt));
-		}
-		if (type === "custom") {
-			return Object.values(this._customColumns).map(opt => Object.assign({}, opt));
-		}
-	}
-
-	/**
 	 * Check if column options is valid.
 	 * If the options is an array, all its children must be valid.
 	 * Otherwise, the validation fails.
@@ -263,7 +244,7 @@ class ItemTreeManager {
 			return valid;
 		});
 		const noRegisteredDuplicates = validate(options, (option) => {
-			const valid = !this._getColumnsByType("*").find(col => col.dataKey === option.dataKey);
+			const valid = !this._customColumns[option.dataKey] && !ITEMTREE_COLUMNS.find(col => col.dataKey === option.dataKey);
 			if (!valid) {
 				Zotero.warn(`ItemTree Column option ${JSON.stringify(option)} with dataKey ${option.dataKey} already exists.`);
 			}
