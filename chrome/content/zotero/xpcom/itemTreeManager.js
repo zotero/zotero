@@ -157,16 +157,29 @@ class ItemTreeManager {
 			return allColumns;
 		}
 		let filteredColumns = allColumns;
-		if (enabledTreeIDs) {
-			if (typeof enabledTreeIDs === "string") {
-				enabledTreeIDs = [enabledTreeIDs];
+		if (typeof enabledTreeIDs === "string") {
+			enabledTreeIDs = [enabledTreeIDs];
+		}
+		// If enabledTreeIDs is specified, filter columns by enabledTreeIDs
+		// If enabledTree is "*", should not be filtered
+		if (enabledTreeIDs && !enabledTreeIDs.includes("*")) {
+			const enabledTreeIDsSet = new Set(enabledTreeIDs);
+
+			/**
+			 * Check if the column is enabled for any of the specified trees
+			 * @param {string[]} colEnabledTreeIDs - The tree IDs the column is enabled for
+			 * @returns {boolean} true if the column is enabled for any of the specified trees
+			 */
+			// eslint-disable-next-line no-inner-declarations
+			function hasEnabledTreeID(colEnabledTreeIDs) {
+				if (colEnabledTreeIDs.includes("*")) {
+					return true;
+				}
+				// See https://stackoverflow.com/a/43820518
+				// The most efficient solution for small arrays: find + has (arrow function)
+				return colEnabledTreeIDs.find(treeID => enabledTreeIDsSet.has(treeID));
 			}
-			filteredColumns = filteredColumns.filter((col) => {
-				const colEnabledTreeIDs = col.enabledTreeIDs || ["main"];
-				return colEnabledTreeIDs.includes("*")
-					|| enabledTreeIDs.includes("*")
-					|| enabledTreeIDs.find(treeID => colEnabledTreeIDs.includes(treeID));
-			});
+			filteredColumns = filteredColumns.filter(col => hasEnabledTreeID(col.enabledTreeIDs));
 		}
 		if (options) {
 			filteredColumns = filteredColumns.filter((col) => {
@@ -247,7 +260,13 @@ class ItemTreeManager {
 		if (isSingle) {
 			options = [options];
 		}
-		options.forEach(o => o.dataKey = this._namespacedDataKey(o));
+		options.forEach((o) => {
+			o.dataKey = this._namespacedDataKey(o);
+			o.enabledTreeIDs = o.enabledTreeIDs || ["main"];
+			if (o.enabledTreeIDs.includes("*")) {
+				o.enabledTreeIDs = ["*"];
+			}
+		});
 		// If any check fails, return check results
 		if (!this._validateColumnOption(options)) {
 			return false;
