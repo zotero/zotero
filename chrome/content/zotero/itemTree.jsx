@@ -63,8 +63,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		dragAndDrop: false,
 		persistColumns: false,
 		columnPicker: false,
-		// By default, use the global columns
-		columns: null,
+		columns: COLUMNS,
 		onContextMenu: noop,
 		onActivate: noop,
 		emptyMessage: '',
@@ -151,9 +150,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 	 */
 	getColumns() {
 		const extraColumns = Zotero.ItemTreeManager.getCustomColumns(this.props.id);
+
 		/** @type {ItemTreeColumnOptions[]} */
-		const currentColumns = (this.props.columns || COLUMNS).map(col => Object.assign({}, col));
-		extraColumns.forEach(column => {
+		const currentColumns = this.props.columns.map(col => Object.assign({}, col));
+		extraColumns.forEach((column) => {
 			if (!currentColumns.find(c => c.dataKey === column.dataKey)) {
 				currentColumns.push(column);
 			}
