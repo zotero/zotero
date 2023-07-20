@@ -98,6 +98,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 				.replace(/^American Psychological Association/, "American Psychological Association (APA)")
 				.replace(/^American Sociological Association/, "American Sociological Association (ASA)");
 			itemNode.append(title);
+			itemNode.searchLabel = title;
 			listbox.appendChild(itemNode);
 			
 			if(styles[i].styleID == _io.style) {
