@@ -162,9 +162,10 @@ class ItemTreeManager {
 				enabledTreeIDs = [enabledTreeIDs];
 			}
 			filteredColumns = filteredColumns.filter((col) => {
-				return col.enabledTreeIDs?.includes("*")
+				const colEnabledTreeIDs = col.enabledTreeIDs || ["main"];
+				return colEnabledTreeIDs.includes("*")
 					|| enabledTreeIDs.includes("*")
-					|| enabledTreeIDs.find(treeID => (col.enabledTreeIDs || ["main"]).includes(treeID));
+					|| enabledTreeIDs.find(treeID => colEnabledTreeIDs.includes(treeID));
 			});
 		}
 		if (options) {
@@ -206,39 +207,24 @@ class ItemTreeManager {
 
 	/**
 	 * Check if column options is valid.
-	 * If the options is an array, all its children must be valid.
-	 * Otherwise, the validation fails.
-	 * @param {ItemTreeCustomColumnOptions | ItemTreeCustomColumnOptions[]} options - An option or array of options to validate
-	 * @returns {boolean} true if the option(s) are valid
+	 * All its children must be valid. Otherwise, the validation fails.
+	 * @param {ItemTreeCustomColumnOptions[]} options - An array of options to validate
+	 * @returns {boolean} true if the options are valid
 	 */
 	_validateColumnOption(options) {
-		// Use `validate` to check each options
-		/**
-		 * Validate column options.
-		 * @param {ItemTreeCustomColumnOptions | ItemTreeCustomColumnOptions[]} options - An option or array of options to validate
-		 * @param {(option: ItemTreeCustomColumnOptions) => boolean} validator - A function that returns true if the option is valid
-		 * @returns {boolean} true if the option(s) are valid
-		 */
-		function validate(options, validator) {
-			if (Array.isArray(options)) {
-				return options.every(opt => validator(opt));
-			}
-			return validator(options);
-		}
-
 		// Check if the input option has duplicate dataKeys
-		const noInputDuplicates = !Array.isArray(options) || !options.find((opt, i, arr) => arr.findIndex(o => o.dataKey === opt.dataKey) !== i);
+		const noInputDuplicates = !options.find((opt, i, arr) => arr.findIndex(o => o.dataKey === opt.dataKey) !== i);
 		if (!noInputDuplicates) {
 			Zotero.warn(`ItemTree Column options have duplicate dataKey.`);
 		}
-		const requiredProperties = validate(options, (option) => {
+		const requiredProperties = options.every((option) => {
 			const valid = option.dataKey && option.label && option.pluginID;
 			if (!valid) {
 				Zotero.warn(`ItemTree Column option ${JSON.stringify(option)} must have dataKey, label, and pluginID.`);
 			}
 			return valid;
 		});
-		const noRegisteredDuplicates = validate(options, (option) => {
+		const noRegisteredDuplicates = options.every((option) => {
 			const valid = !this._customColumns[option.dataKey] && !ITEMTREE_COLUMNS.find(col => col.dataKey === option.dataKey);
 			if (!valid) {
 				Zotero.warn(`ItemTree Column option ${JSON.stringify(option)} with dataKey ${option.dataKey} already exists.`);
