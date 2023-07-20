@@ -112,9 +112,11 @@ Zotero.Prefs = new function() {
 					// Convert "attachment rename format string" from old format (e.g. {%c - }{%y - }{%t{50}})
 					// to a new format that uses the template engine
 					case 8:
-						this.set('attachmentRenameFormatString', this.convertLegacyAttachmentRenameFormatString(
-							this.get('attachmentRenameFormatString') || ''
-						));
+						if (this.prefHasUserValue('attachmentRenameFormatString')) {
+							this.set('attachmentRenameFormatString', this.convertLegacyAttachmentRenameFormatString(
+								this.get('attachmentRenameFormatString') || ''
+							));
+						}
 				}
 			}
 			this.set('prefVersion', toVersion);
