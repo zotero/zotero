@@ -147,39 +147,29 @@ class ItemTreeManager {
 
 	/**
 	 * Get column(s) that matches the properties of option
-	 * @param {string | string[]} [enabledTreeIDs] - The tree IDs to match
+	 * @param {string | string[]} [filterTreeIDs] - The tree IDs to match
 	 * @param {ItemTreeCustomColumnFilters} [options] - An option or array of options to match
 	 * @returns {ItemTreeCustomColumnOptions[]}
 	 */
-	getCustomColumns(enabledTreeIDs, options) {
+	getCustomColumns(filterTreeIDs, options) {
 		const allColumns = Object.values(this._customColumns).map(opt => Object.assign({}, opt));
-		if (!enabledTreeIDs && !options) {
+		if (!filterTreeIDs && !options) {
 			return allColumns;
 		}
 		let filteredColumns = allColumns;
-		if (typeof enabledTreeIDs === "string") {
-			enabledTreeIDs = [enabledTreeIDs];
+		if (typeof filterTreeIDs === "string") {
+			filterTreeIDs = [filterTreeIDs];
 		}
-		// If enabledTreeIDs is specified, filter columns by enabledTreeIDs
-		// If enabledTree is "*", should not be filtered
-		if (enabledTreeIDs && !enabledTreeIDs.includes("*")) {
-			const enabledTreeIDsSet = new Set(enabledTreeIDs);
+		if (filterTreeIDs && !filterTreeIDs.includes("*")) {
+			const filterTreeIDsSet = new Set(filterTreeIDs);
+			filteredColumns = filteredColumns.filter((column) => {
+				if (column.enabledTreeIDs[0] == "*") return true;
 
-			/**
-			 * Check if the column is enabled for any of the specified trees
-			 * @param {string[]} colEnabledTreeIDs - The tree IDs the column is enabled for
-			 * @returns {boolean} true if the column is enabled for any of the specified trees
-			 */
-			// eslint-disable-next-line no-inner-declarations
-			function hasEnabledTreeID(colEnabledTreeIDs) {
-				if (colEnabledTreeIDs.includes("*")) {
-					return true;
+				for (const treeID of column.enabledTreeIDs) {
+					if (filterTreeIDsSet.has(treeID)) return true;
 				}
-				// See https://stackoverflow.com/a/43820518
-				// The most efficient solution for small arrays: find + has (arrow function)
-				return colEnabledTreeIDs.find(treeID => enabledTreeIDsSet.has(treeID));
-			}
-			filteredColumns = filteredColumns.filter(col => hasEnabledTreeID(col.enabledTreeIDs));
+				return false;
+			});
 		}
 		if (options) {
 			filteredColumns = filteredColumns.filter((col) => {
