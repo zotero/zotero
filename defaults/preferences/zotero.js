@@ -36,7 +36,7 @@ pref("extensions.zotero.autoRecognizeFiles", true);
 pref("extensions.zotero.autoRenameFiles", true);
 pref("extensions.zotero.autoRenameFiles.linked", false);
 pref("extensions.zotero.autoRenameFiles.fileTypes", "application/pdf");
-pref("extensions.zotero.attachmentRenameFormatString", "{{ firstCreator suffix=\" - \" }}{{ year suffix=\" - \" }}{{ title truncate=\"50\" }}");
+pref("extensions.zotero.attachmentRenameFormatString", "{{ firstCreator suffix=\" - \" }}{{ year suffix=\" - \" }}{{ title truncate=\"100\" }}");
 pref("extensions.zotero.capitalizeTitles", false);
 pref("extensions.zotero.launchNonNativeFiles", false);
 pref("extensions.zotero.sortNotesChronologically", false);
