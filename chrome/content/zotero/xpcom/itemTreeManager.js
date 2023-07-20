@@ -161,7 +161,11 @@ class ItemTreeManager {
 			if (typeof enabledTreeIDs === "string") {
 				enabledTreeIDs = [enabledTreeIDs];
 			}
-			filteredColumns = filteredColumns.filter(col => enabledTreeIDs.includes("*") || enabledTreeIDs.find(treeID => (col.enabledTreeIDs || ["main"]).includes(treeID)));
+			filteredColumns = filteredColumns.filter((col) => {
+				return col.enabledTreeIDs?.includes("*")
+					|| enabledTreeIDs.includes("*")
+					|| enabledTreeIDs.find(treeID => (col.enabledTreeIDs || ["main"]).includes(treeID));
+			});
 		}
 		if (options) {
 			filteredColumns = filteredColumns.filter((col) => {
