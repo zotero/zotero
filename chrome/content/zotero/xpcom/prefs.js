@@ -22,7 +22,7 @@
 	
 	***** END LICENSE BLOCK *****
 */
-Zotero.Prefs = new function(){
+Zotero.Prefs = new function() {
 	// Privileged methods
 	this.get = get;
 	this.set = set;
@@ -49,7 +49,7 @@ Zotero.Prefs = new function(){
 		if (!fromVersion) {
 			fromVersion = 0;
 		}
-		var toVersion = 7;
+		var toVersion = 8;
 		if (fromVersion < toVersion) {
 			for (var i = fromVersion + 1; i <= toVersion; i++) {
 				switch (i) {
@@ -109,6 +109,14 @@ Zotero.Prefs = new function(){
 					case 7:
 						this.clear('layers.acceleration.disabled', true);
 						break;
+					// Convert "attachment rename format string" from old format (e.g. {%c - }{%y - }{%t{50}})
+					// to a new format that uses the template engine
+					case 8:
+						if (this.prefHasUserValue('attachmentRenameFormatString')) {
+							this.set('attachmentRenameFormatString', this.convertLegacyAttachmentRenameFormatString(
+								this.get('attachmentRenameFormatString') || ''
+							));
+						}
 				}
 			}
 			this.set('prefVersion', toVersion);
@@ -119,7 +127,7 @@ Zotero.Prefs = new function(){
 	/**
 	* Retrieve a preference
 	**/
-	function get(pref, global){
+	function get(pref, global) {
 		try {
 			pref = global ? pref : ZOTERO_CONFIG.PREF_BRANCH + pref;
 			let branch = this.rootBranch;
@@ -554,4 +562,38 @@ Zotero.Prefs = new function(){
 		}
 		Zotero.Prefs.set(prefKey, JSON.stringify(libraries));
 	};
-}
+
+	/**
+	 * Converts a value of a `attachmentRenameFormatString` pref from a legacy format string
+	 * with % markers to a new format that uses the template engine
+	 *
+	 * @param {string} formatString - The legacy format string to convert.
+	 * @returns {string} The new format string.
+	 */
+	this.convertLegacyAttachmentRenameFormatString = function (formatString) {
+		const markers = {
+			c: 'firstCreator',
+			y: 'year',
+			t: 'title'
+		};
+
+		// Regexp contains 4 capture groups all wrapped in {}:
+		// 		* Prefix before the wildcard, can be empty string
+		// 		* Any recognized marker. % sign marks a wildcard and is required for a match but is
+		// 		  not part of the capture group. Recognized markers are specified in a `markers`
+		// 		  lookup.
+		// 		* Optionally a maximum number of characters to truncate the value to
+		// 		* Suffix after the wildcard, can be empty string
+		const re = new RegExp(`{([^%{}]*)%(${Object.keys(markers).join('|')})({[0-9]+})?([^%{}]*)}`, 'ig');
+
+		return formatString.replace(re, (match, prefix, marker, truncate, suffix) => {
+			const field = markers[marker];
+			truncate = truncate ? truncate.replace(/[^0-9]+/g, '') : false;
+			prefix = prefix ? `prefix="${prefix}"` : null;
+			suffix = suffix ? `suffix="${suffix}"` : null;
+			truncate = truncate ? `truncate="${truncate}"` : null;
+
+			return `{{ ${[field, truncate, prefix, suffix].filter(f => f !== null).join(' ')} }}`;
+		});
+	};
+};

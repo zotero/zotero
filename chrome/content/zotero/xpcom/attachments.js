@@ -23,7 +23,7 @@
  ***** END LICENSE BLOCK *****
 */
 
-Zotero.Attachments = new function(){
+Zotero.Attachments = new function () {
 	const { HiddenBrowser } = ChromeUtils.import("chrome://zotero/content/HiddenBrowser.jsm");
 	
 	// Keep in sync with Zotero.Schema.integrityCheck() and this.linkModeToName()
@@ -2241,15 +2241,6 @@ Zotero.Attachments = new function(){
 	 * (Optional) |formatString| specifies the format string -- otherwise
 	 * the 'attachmentRenameFormatString' pref is used
 	 *
-	 * Valid substitution markers:
-	 *
-	 * %c -- firstCreator
-	 * %y -- year (extracted from Date field)
-	 * %t -- title
-	 *
-	 * Fields can be truncated to a certain length by appending an integer
-	 * within curly brackets -- e.g. %t{50} truncates the title to 50 characters
-	 *
 	 * @param {Zotero.Item} item
 	 * @param {String} formatString
 	 */
@@ -2257,79 +2248,160 @@ Zotero.Attachments = new function(){
 		if (!(item instanceof Zotero.Item)) {
 			throw new Error("'item' must be a Zotero.Item");
 		}
-		
+
 		if (!formatString) {
 			formatString = Zotero.Prefs.get('attachmentRenameFormatString');
 		}
-		
-		// Replaces the substitution marker with the field value,
-		// truncating based on the {[0-9]+} modifier if applicable
-		function rpl(field, str) {
-			if (!str) {
-				str = formatString;
-			}
-			
-			switch (field) {
-				case 'creator':
-					field = 'firstCreator';
-					var rpl = '%c';
+
+		const getSlicedCreatorsOfType = (creatorType, slice) => {
+			let creatorTypeIDs;
+			switch (creatorType) {
+				case 'author':
+				case 'authors':
+					creatorTypeIDs = [Zotero.CreatorTypes.getPrimaryIDForType(item.itemTypeID)];
 					break;
-					
-				case 'year':
-					var rpl = '%y';
+				case 'editor':
+				case 'editors':
+					creatorTypeIDs = [Zotero.CreatorTypes.getID('editor'), Zotero.CreatorTypes.getID('seriesEditor')];
 					break;
-					
-				case 'title':
-					var rpl = '%t';
-					break;
-			}
-			
-			var value;
-			switch (field) {
-				case 'title':
-					value = item.getField('title', false, true);
-					break;
-				
-				case 'year':
-					value = item.getField('date', true, true);
-					if (value) {
-						value = Zotero.Date.multipartToSQL(value).substr(0, 4);
-						if (value == '0000') {
-							value = '';
-						}
-					}
-				break;
-				
 				default:
-					value = '' + item.getField(field, false, true);
+				case 'creator':
+				case 'creators':
+					creatorTypeIDs = null;
+					break;
 			}
 			
-			var re = new RegExp("\{?([^%\{\}]*)" + rpl + "(\{[0-9]+\})?" + "([^%\{\}]*)\}?");
-			
-			// If no value for this field, strip entire conditional block
-			// (within curly braces)
-			if (!value) {
-				if (str.match(re)) {
-					return str.replace(re, '')
+			if (slice === 0) {
+				return [];
+			}
+			const matchingCreators = creatorTypeIDs === null
+				? item.getCreators()
+				: item.getCreators().filter(c => creatorTypeIDs.includes(c.creatorTypeID));
+			const slicedCreators = slice > 0
+				? matchingCreators.slice(0, slice)
+				: matchingCreators.slice(slice);
+
+			if (slice < 0) {
+				slicedCreators.reverse();
+			}
+			return slicedCreators;
+		};
+
+
+		const common = (value, { truncate = false, prefix = '', suffix = '', case: textCase = '' } = {}) => {
+			if (value === '' || value === null || typeof value === 'undefined') {
+				return '';
+			}
+			if (truncate) {
+				value = value.substr(0, truncate);
+			}
+			if (prefix) {
+				value = prefix + value;
+			}
+			if (suffix) {
+				value += suffix;
+			}
+			switch (textCase) {
+				case 'upper':
+					value = value.toUpperCase();
+					break;
+				case 'lower':
+					value = value.toLowerCase();
+					break;
+				case 'sentence':
+					value = value.slice(0, 1).toUpperCase() + value.slice(1);
+					break;
+				case 'title':
+					value = Zotero.Utilities.capitalizeTitle(value, true);
+					break;
+				case 'hyphen':
+					value = value.toLowerCase().replace(/\s+/g, '-');
+					break;
+				case 'snake':
+					value = value.toLowerCase().replace(/\s+/g, '_');
+					break;
+				case 'camel':
+					value = value.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase());
+					break;
+			}
+			return value;
+		};
+
+		const initializeFn = (name, shouldInitialize, initializeWith) => (shouldInitialize ? name.slice(0, 1).toUpperCase() + initializeWith : name);
+
+		const transformName = (creator, { name, namePartSeparator, initialize, initializeWith } = {}) => {
+			if (creator.name) {
+				return initializeFn(creator.name, ['full', 'name'].includes(initialize), initializeWith);
+			}
+
+			const firstLast = ['full', 'given-family', 'first-last'];
+			const lastFirst = ['full-reversed', 'family-given', 'last-first'];
+			const first = ['given', 'first'];
+			const last = ['family', 'last'];
+
+			if (firstLast.includes(name)) {
+				return initializeFn(creator.firstName, ['full', ...first].includes(initialize), initializeWith) + namePartSeparator + initializeFn(creator.lastName, ['full', ...last].includes(initialize), initializeWith);
+			}
+			else if (lastFirst.includes(name)) {
+				return initializeFn(creator.lastName, ['full', ...last].includes(initialize), initializeWith) + namePartSeparator + initializeFn(creator.firstName, ['full', ...first].includes(initialize), initializeWith);
+			}
+			else if (first.includes(name)) {
+				return initializeFn(creator.firstName, ['full', ...first].includes(initialize), initializeWith);
+			}
+
+			return initializeFn(creator.lastName, ['full', ...last].includes(initialize), initializeWith);
+		};
+
+		const commonCreators = (value, { max = Infinity, name = 'family', namePartSeparator = ' ', join = ', ', initialize = '', initializeWith = '.' } = {}) => {
+			return getSlicedCreatorsOfType(value, max)
+				.map(c => transformName(c, { name, namePartSeparator, initialize, initializeWith }))
+				.join(join);
+		};
+
+		const fields = Zotero.ItemFields.getAll()
+			.map(f => f.name)
+			.reduce((obj, name) => {
+				obj[name] = (args) => {
+					return common(item.getField(name, false, true), args);
+				};
+				return obj;
+			}, {});
+
+		const year = (args) => {
+			let value = item.getField('date', true, true);
+			if (value) {
+				value = Zotero.Date.multipartToSQL(value).substr(0, 4);
+				if (value == '0000') {
+					value = '';
 				}
 			}
-			
-			var f = function(match, p1, p2, p3) {
-				var maxChars = p2 ? p2.replace(/[^0-9]+/g, '') : false;
-				return p1 + (maxChars ? value.substr(0, maxChars) : value) + p3;
-			}
-			
-			return str.replace(re, f);
-		}
-		
-		formatString = rpl('creator');
-		formatString = rpl('year');
-		formatString = rpl('title');
-		
+			return common(value, args);
+		};
+
+		const itemType = ({ localize = false, ...rest }) => common(
+			localize ? Zotero.ItemTypes.getLocalizedString(item.itemType) : item.itemType, rest
+		);
+
+		const creatorFields = ['authors', 'editors', 'creators'].reduce((obj, name) => {
+			obj[name] = (args) => {
+				return common(commonCreators(name, args), args);
+			};
+			return obj;
+		}, {});
+
+		const firstCreator = args => common(
+			// 74492e40 adds \u2068 and \u2069 around names in the `firstCreator` field, which we don't want in the filename
+			// We might actually want to move this replacement to getValidFileName
+			item.getField('firstCreator', false, true).replaceAll('\u2068', '').replaceAll('\u2069', ''), args
+		);
+
+		const vars = { ...fields, ...creatorFields, firstCreator, itemType, year };
+
+		formatString = Zotero.Utilities.Internal.generateHTMLFromTemplate(formatString, vars);
 		formatString = Zotero.Utilities.cleanTags(formatString);
 		formatString = Zotero.File.getValidFileName(formatString);
 		return formatString;
-	}
+	};
 	
 	
 	this.shouldAutoRenameFile = function (isLink) {
@@ -3029,4 +3101,4 @@ Zotero.Attachments = new function(){
 		}
 		throw new Error(`Invalid link mode name '${linkModeName}'`);
 	}
-}
+};
