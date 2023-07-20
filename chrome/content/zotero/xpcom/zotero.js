@@ -32,6 +32,10 @@ Components.classes["@mozilla.org/net/osfileconstantsservice;1"]
 	.getService(Components.interfaces.nsIOSFileConstantsService)
 	.init();
 
+XPCOMUtils.defineLazyModuleGetters(globalThis, {
+	AsyncShutdown: "resource://gre/modules/AsyncShutdown.jsm",
+});
+
 Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 
 /*
@@ -872,9 +876,6 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 			}
 			yield Promise.all(shutdownPromises);
 			
-			// remove temp directory
-			yield Zotero.removeTempDirectory();
-			
 			if (Zotero.DB) {
 				// close DB
 				yield Zotero.DB.closeDatabase(true)
@@ -911,13 +912,52 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.getTranslatorsDirectory = function () {
 		return Zotero.File.pathToFile(Zotero.DataDirectory.getSubdirectory('translators', true));
 	}
-
-	this.getTempDirectory = function () {
-		return Zotero.File.pathToFile(Zotero.DataDirectory.getSubdirectory('tmp', true));
-	}
 	
-	this.removeTempDirectory = function () {
-		return Zotero.DataDirectory.removeSubdirectory('tmp');
+	var _tmpDir;
+	this.getTempDirectory = function () {
+		if (_tmpDir) {
+			return Zotero.File.pathToFile(_tmpDir);
+		}
+		var dir;
+		try {
+			dir = Services.dirsvc.get("TmpD", Ci.nsIFile);
+			let relDir;
+			if (Zotero.isWin) {
+				relDir = 'Zotero';
+			}
+			else if (Zotero.isMac) {
+				relDir = 'org.zotero.zotero';
+			}
+			else {
+				relDir = 'zotero';
+			}
+			dir.append(relDir);
+			Zotero.File.createDirectoryIfMissing(dir);
+		}
+		// If we can't use the system temp dir, fall back to 'tmp' in the data dir
+		catch (e) {
+			Zotero.warn(e);
+			dir = Zotero.File.pathToFile(Zotero.DataDirectory.getSubdirectory('tmp', true));
+		}
+		
+		AsyncShutdown.profileBeforeChange.addBlocker(
+			"Zotero: Removing temp directory",
+			() => this.removeTempDirectory()
+		);
+		
+		_tmpDir = dir.path;
+		return dir;
+	};
+	
+	this.removeTempDirectory = async function () {
+		if (!_tmpDir) return;
+		try {
+			Zotero.debug("Removing " + _tmpDir);
+			return IOUtils.remove(_tmpDir, { recursive: true });
+		}
+		catch (e) {
+			Zotero.logError(e);
+		}
 	}
 	
 	
