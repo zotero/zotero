@@ -210,7 +210,7 @@ Zotero.Prefs = new function(){
 	
 	this.prefHasUserValue = function (pref, global) {
 		pref = global ? pref : ZOTERO_CONFIG.PREF_BRANCH + pref;
-		this.rootBranch.prefHasUserValue(pref);
+		return this.rootBranch.prefHasUserValue(pref);
 	};
 	
 	
