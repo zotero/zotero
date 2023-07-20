@@ -36,12 +36,11 @@ const { COLUMNS: ITEMTREE_COLUMNS } = require("zotero/itemTreeColumns");
 
 class ItemTreeManager {
 	_observerAdded = false;
+
 	/** @type {Record<string, ItemTreeCustomColumnOptions}} */
 	_customColumns = {};
-	constructor() {
-	}
 
-	/** 
+	/**
 	 * Register a custom column. All registered columns must be valid, and must have a unique dataKey.
 	 * Although it's async, resolving does not promise the item trees are updated.
 	 * @param {ItemTreeCustomColumnOptions | ItemTreeCustomColumnOptions[]} options - An option or array of options to register
@@ -209,9 +208,10 @@ class ItemTreeManager {
 	 * @returns {boolean} true if the option(s) are valid
 	 */
 	_validateColumnOption(options) {
+		// Use `validate` to check each options
 		/**
 		 * Validate column options.
-		 * @param {ItemTreeCustomColumnOptions | ItemTreeCustomColumnOptions[]} options 
+		 * @param {ItemTreeCustomColumnOptions | ItemTreeCustomColumnOptions[]} options - An option or array of options to validate
 		 * @param {(option: ItemTreeCustomColumnOptions) => boolean} validator - A function that returns true if the option is valid
 		 * @returns {boolean} true if the option(s) are valid
 		 */
