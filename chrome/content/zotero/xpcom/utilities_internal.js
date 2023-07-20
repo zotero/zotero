@@ -2157,7 +2157,7 @@ Zotero.Utilities.Internal = {
 	 * @returns {String} HTML
 	 */
 	generateHTMLFromTemplate: function (template, vars) {
-		const dashToCamel = varName => varName.replace(/-(.)/g, (_, g1) => g1.toUpperCase());
+		const hyphenToCamel = varName => varName.replace(/-(.)/g, (_, g1) => g1.toUpperCase());
 
 		const getAttributes = (part) => {
 			let attrsRegexp = new RegExp(/(([\w-]*) *=+ *(['"])((\\\3|[^\3])*?)\3)/g);
@@ -2165,7 +2165,7 @@ Zotero.Utilities.Internal = {
 			let match;
 			while ((match = attrsRegexp.exec(part))) {
 				if (match[1]) { // if first alternative (i.e. argument with value wrapped in " or ') matched, even if value is empty
-					attrs[dashToCamel(match[2])] = match[4];
+					attrs[hyphenToCamel(match[2])] = match[4];
 				}
 			}
 			return attrs;
@@ -2173,7 +2173,7 @@ Zotero.Utilities.Internal = {
 
 		
 		const evaluateIdentifier = (ident, args = {}) => {
-			ident = dashToCamel(ident);
+			ident = hyphenToCamel(ident);
 
 			if (!(ident in vars)) {
 				return '';

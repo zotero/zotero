@@ -638,7 +638,7 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.equal(out15, 'yes');
 		});
 
-		it("should accept dash-case variables and attributes", function () {
+		it("should accept hyphen-case variables and attributes", function () {
 			const vars = {
 				fooBar: ({ isFoo }) => (isFoo === 'true' ? 'foo' : 'bar'),
 			};
