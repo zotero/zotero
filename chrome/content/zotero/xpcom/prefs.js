@@ -208,6 +208,12 @@ Zotero.Prefs = new function(){
 	}
 	
 	
+	this.prefHasUserValue = function (pref, global) {
+		pref = global ? pref : ZOTERO_CONFIG.PREF_BRANCH + pref;
+		this.rootBranch.prefHasUserValue(pref);
+	};
+	
+	
 	/**
 	 * @param {String[]} [exclude]
 	 * @param {String} [branch] - Name of pref branch, ending with a period
