@@ -620,14 +620,18 @@ const ZoteroStandalone = new function() {
 	};
 	
 	
-	this.promptForRestartInSafeMode = function () {
+	this.promptForRestartInSafeMode = async function () {
 		let ps = Services.prompt;
+		let [title, description] = await document.l10n.formatValues([
+			'restart-in-safe-mode-dialog-title',
+			'restart-in-safe-mode-dialog-description'
+		]);
 		let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
 			+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_CANCEL;
 		let index = ps.confirmEx(
 			null,
-			Zotero.getString('general.restartInSafeMode'),
-			Zotero.getString('general.restartInSafeMode.description', Zotero.appName),
+			title,
+			description,
 			buttonFlags,
 			Zotero.getString('general.restartNow'),
 			null, null, null, {}

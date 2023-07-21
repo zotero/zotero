@@ -186,3 +186,9 @@ licenses-cc-by-nc-nd = Creative Commons Attribution-NonCommercial-NoDerivatives 
 licenses-cc-by-nc-sa = Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License
 licenses-cc-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">Considerations for licensors</a> before placing your work under a CC license. Note that the license you apply cannot be revoked, even if you later choose different terms or cease publishing the work.
 licenses-cc0-more-info = Be sure you have read the Creative Commons <a data-l10n-name="license-considerations">CC0 FAQ</a> before applying CC0 to your work. Please note that dedicating your work to the public domain is irreversible, even if you later choose different terms or cease publishing the work.
+
+restart-in-safe-mode-menuitem =
+    .label = Restart in Safe Mode…
+    .accesskey = S
+restart-in-safe-mode-dialog-title = Restart in Safe Mode
+restart-in-safe-mode-dialog-description = { -app-name } will restart with all plugins disabled. Some features may not function correctly while Safe Mode is enabled.
