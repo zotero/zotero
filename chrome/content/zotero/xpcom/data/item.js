@@ -221,7 +221,7 @@ Zotero.Item.prototype._setParentKey = function() {
  *
  * @param {String|Integer} field fieldID or fieldName
  * @param {Boolean} [unformatted] Skip formatting of multipart date fields and
- * 		strip bidi control characters
+ * 		omit bidi control characters
  * @param {Boolean} includeBaseMapped If true and field is a base field, returns
  *   value of type-specific field instead
  *   (e.g. 'label' for 'publisher' in 'audioRecording')
