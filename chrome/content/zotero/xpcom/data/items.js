@@ -1151,9 +1151,15 @@ Zotero.Items = function() {
 				}
 
 				// Check whether master and other have embedded annotations
-				if (await otherAttachment.hasEmbeddedAnnotations()) {
+				// Error -> be safe and assume the item does have embedded annotations
+				let logAndBeSafe = (e) => {
+					Zotero.logError(e);
+					return true;
+				};
+
+				if (await otherAttachment.hasEmbeddedAnnotations().catch(logAndBeSafe)) {
 					// Other yes, master yes -> keep both
-					if (await masterAttachment.hasEmbeddedAnnotations()) {
+					if (await masterAttachment.hasEmbeddedAnnotations().catch(logAndBeSafe)) {
 						Zotero.debug(`Master attachment ${masterAttachment.key} matches ${otherAttachment.key}, `
 							+ 'but both have embedded annotations - keeping both');
 						otherAttachment.parentItemID = item.id;
