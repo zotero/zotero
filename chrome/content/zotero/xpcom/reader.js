@@ -183,7 +183,8 @@ class ReaderInstance {
 				let parts = [];
 				// Windows displays bidi control characters as placeholders in window titles, so strip them
 				// See https://github.com/mozilla-services/screenshots/issues/4863
-				let creator = parentItem.getField('firstCreator', Zotero.isWin);
+				let unformatted = Zotero.isWin;
+				let creator = parentItem.getField('firstCreator', unformatted);
 				let year = parentItem.getField('year');
 				let title = parentItem.getDisplayTitle();
 				// If creator is missing fall back to titleCreatorYear
