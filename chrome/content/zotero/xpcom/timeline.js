@@ -36,7 +36,7 @@ Zotero.Timeline = {
 				let sqlDate = (dateType == 'date') ? Zotero.Date.multipartToSQL(date) : date;
 				sqlDate = sqlDate.replace("-00-", "-01-").replace(/-00$/, "-01");
 				let content = '<event start="' + Zotero.Date.sqlToDate(sqlDate) + '" ';
-				let title = item.getField('title');
+				let title = item.getDisplayTitle();
 				content += 'title="' + (title ? escapeXML(title) : '') + '" ';
 				content += 'icon="' + item.getImageSrc() + '" ';			
 				content += 'color="black">';
