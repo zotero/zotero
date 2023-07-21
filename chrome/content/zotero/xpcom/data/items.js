@@ -1743,10 +1743,17 @@ Zotero.Items = function() {
 	 *
 	 * @param {Integer} itemTypeID
 	 * @param {Object} creatorData
-	 * @param {Boolean} unformatted
+	 * @param {Object} [options]
+	 * @param {Boolean} [options.omitBidiIsolates]
 	 * @return {String}
 	 */
-	this.getFirstCreatorFromData = function (itemTypeID, creatorsData, unformatted) {
+	this.getFirstCreatorFromData = function (itemTypeID, creatorsData, options) {
+		if (!options) {
+			options = {
+				omitBidiIsolates: false
+			};
+		}
+		
 		if (creatorsData.length === 0) {
 			return "";
 		}
@@ -1768,7 +1775,7 @@ Zotero.Items = function() {
 			if (matches.length === 2) {
 				let a = matches[0];
 				let b = matches[1];
-				let args = unformatted
+				let args = options.omitBidiIsolates
 					? [a.lastName, b.lastName]
 					// \u2068 FIRST STRONG ISOLATE: Isolates the directionality of characters that follow
 					// \u2069 POP DIRECTIONAL ISOLATE: Pops the above isolation

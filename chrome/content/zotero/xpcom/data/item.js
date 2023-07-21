@@ -238,7 +238,8 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
 	if (field === 'firstCreator' && !this._id) {
 		// Hack to get a firstCreator for an unsaved item
 		let creatorsData = this.getCreators(true);
-		return Zotero.Items.getFirstCreatorFromData(this.itemTypeID, creatorsData, !!unformatted);
+		return Zotero.Items.getFirstCreatorFromData(this.itemTypeID, creatorsData,
+			{ omitBidiIsolates: !!unformatted });
 	} else if (field === 'id' || this.ObjectsClass.isPrimaryField(field)) {
 		var privField = '_' + field;
 		let value = this[privField];
