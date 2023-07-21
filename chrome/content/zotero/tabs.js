@@ -56,6 +56,10 @@ var Zotero_Tabs = new function () {
 		get: () => this._tabs.length
 	});
 
+	Object.defineProperty(this, 'openedTabs', {
+		get: () => document.getElementById('zotero-opened-tabs-list')
+	});
+
 	this._tabBarRef = React.createRef();
 	this._tabs = [{
 		id: 'zotero-pane',
@@ -66,6 +70,7 @@ var Zotero_Tabs = new function () {
 	this._prevSelectedID = null;
 	this._history = [];
 	this._openedTabsFilter = "";
+	this._focusTabIndex = 0;
 
 	this._unloadInterval = setInterval(() => {
 		this.unloadUnusedTabs();
@@ -246,7 +251,7 @@ var Zotero_Tabs = new function () {
 		tab.iconBackgroundImage = icon.style.backgroundImage;
 	};
 
-	this._createLabel = (title, filter) => {
+	const createTabMenuLabel = (title, filter) => {
 		let xhtmlNS = "http://www.w3.org/1999/xhtml";
 		let desc = document.createXULElement('description');
 		
@@ -274,15 +279,18 @@ var Zotero_Tabs = new function () {
 		return desc;
 	};
 
+	this.isOpenedTabsMenuShown = () => {
+		let panel = document.getElementById('zotero-opened-tabs-panel');
+		return ['showing', 'open'].includes(panel.state);
+	};
+
 	/**
 	 * Sets the data in the popup of opened tabs
 	 */
 	this._setOpenedTabsMenu = () => {
-		let openedTabsMenu = document.getElementById('zotero-opened-tabs-list');
 		// Empty existing nodes
-		while (openedTabsMenu.firstChild) {
-			openedTabsMenu.removeChild(openedTabsMenu.firstChild);
-		}
+		this.openedTabs.replaceChildren();
+		let index = 1;
 		for (let tab of this._tabs) {
 			// Skip tabs whose title wasn't added yet
 			if (tab.title == "") {
@@ -293,7 +301,6 @@ var Zotero_Tabs = new function () {
 			}
 			// Top-level entry of the opened tabs array
 			let row = document.createXULElement('toolbaritem');
-			row.setAttribute('width', '400');
 			
 			// Cross button to close a tab
 			let closeButton = document.createXULElement('toolbarbutton');
@@ -303,8 +310,8 @@ var Zotero_Tabs = new function () {
 			let tabName = document.createXULElement('toolbarbutton');
 			tabName.setAttribute('flex', '1');
 			tabName.setAttribute('class', 'zotero-opened-tab-entry title');
-			
-			let tabLabel = this._createLabel(tab.title, this._openedTabsFilter);
+			tabName.setAttribute('tabindex', `${index++}`);
+			let tabLabel = createTabMenuLabel(tab.title, this._openedTabsFilter);
 			tabLabel.setAttribute('crop', 'end');
 			tabLabel.setAttribute('flex', 1);
 
@@ -312,22 +319,31 @@ var Zotero_Tabs = new function () {
 			
 			// Selected tab is bold
 			if (tab.id == this._selectedID) {
-				tabLabel.setAttribute('class', "header");
+				tabName.classList.add('selected');
 			}
 			// Onclick, go to selected tab + close popup
 			tabName.addEventListener("command", () => {
 				document.getElementById('zotero-opened-tabs-panel').hidePopup();
 				this.select(tab.id);
 			});
+			// Close the tab + set the index to focus on
 			closeButton.addEventListener("command", () => {
+				this._focusTabIndex = parseInt(closeButton.getAttribute("tabindex"));
 				this.close(tab.id);
 			});
-			tabName.setAttribute('id', `${tab.id}-menu`);
+			// Hide closeButton for library tab
+			if (tab.id == 'zotero-pane') {
+				closeButton.style = "visibility:hidden;";
+			}
+			else {
+				closeButton.setAttribute('tabindex', `${index++}`);
+			}
 
 			row.appendChild(tabName);
 			row.appendChild(closeButton);
-			openedTabsMenu.appendChild(row);
+			this.openedTabs.appendChild(row);
 		}
+		focusOnTab();
 	};
 
 	// Opens the popup and sets the active class on "show opened tabs" button
@@ -340,7 +356,7 @@ var Zotero_Tabs = new function () {
 		toolBarButton.classList.add("active");
 	};
 
-	this.onHidding = function (event) {
+	this.onHiding = function (event) {
 		if (event.originalTarget.id != 'zotero-opened-tabs-panel') return;
 		// Sets inactive class on "show opened tabs" button to remove gradient
 		let toolBarButton = document.getElementById('zotero-tb-opened-tabs');
@@ -355,13 +371,61 @@ var Zotero_Tabs = new function () {
 	};
 
 	this.onShow = function (_) {
-		let textbox = document.getElementById('zotero-open-tabs-textbox');
-		textbox.focus();
+		this._focusTabIndex = 0;
+		focusOnTab();
 	};
 
+	/**
+	 * Record the value of the filter
+	 */
 	this.onInput = function (_, textBox) {
+		if (this._openedTabsFilter == textBox.value.toLowerCase()) {
+			return;
+		}
 		this._openedTabsFilter = textBox.value.toLowerCase();
 		this._setOpenedTabsMenu();
+	};
+
+	
+	/**
+	 * Focus on this._focusTabIndex element in the opened tabs menu
+	 */
+	const focusOnTab = () => {
+		if (this._focusTabIndex === null) {
+			return;
+		}
+		// Focus on the last available tab if tabindex is too big
+		if (this._focusTabIndex >= this.openedTabs.childElementCount * 2 && this._focusTabIndex > 0) {
+			this._focusTabIndex = this.openedTabs.childElementCount * 2 - 1;
+		}
+		var nextTab = this.openedTabs.parentElement.querySelector(`[tabindex="${this._focusTabIndex}"]`);
+		if (!nextTab) {
+			return;
+		}
+		nextTab.focus();
+	};
+
+	/**
+	 * Navitate between opened tabs via tab/shift-tab.
+	 */
+	this.onKeyPress = function (event) {
+		if (event.key == "Tab") {
+			event.preventDefault();
+			const isShift = event.shiftKey;
+			var tabindex = parseInt(event.target.getAttribute("tabindex"));
+			if (isShift) {
+				tabindex -= 1;
+			}
+			else {
+				tabindex += 1;
+			}
+			this._focusTabIndex = tabindex;
+			focusOnTab();
+		}
+		if (event.key == "Enter") {
+			event.preventDefault();
+			event.target.click();
+		}
 	};
 
 	/**

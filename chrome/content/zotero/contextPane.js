@@ -219,7 +219,9 @@ var ZoteroContextPane = new function () {
 							await reader._initPromise;
 							_tabCover.classList.add('hidden');
 							// Focus reader pages view if context pane note editor is not selected
+							// and if the opened tabs menu is not shown
 							if (Zotero_Tabs.selectedID == reader.tabID
+								&& !Zotero_Tabs.isOpenedTabsMenuShown()
 								&& (!document.activeElement
 									|| !document.activeElement.closest('.context-node iframe[anonid="editor-view"]'))) {
 								reader.focus();

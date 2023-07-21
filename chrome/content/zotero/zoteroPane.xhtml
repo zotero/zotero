@@ -679,18 +679,19 @@
 		<div xmlns="http://www.w3.org/1999/xhtml" id="tab-bar-container"/>
 			<toolbarbutton id="zotero-tb-opened-tabs" class="zotero-tb-open-tabs inactive img-center" tabindex="-1" tooltiptext="Show opened tabs" type="panel"
 			onmousedown="if (this.disabled) { event.preventDefault(); return; } Zotero_Tabs.showOpenedTabsPanel(this)"/>
-			<panel id="zotero-opened-tabs-panel" type="arrow"
-					onpopuphiding="Zotero_Tabs.onHidding(event)"
+			<panel id="zotero-opened-tabs-panel" type="arrow" 
+					onpopuphiding="Zotero_Tabs.onHiding(event)"
 					onpopupshown="Zotero_Tabs.onShow(event)"
+					onkeypress="Zotero_Tabs.onKeyPress(event)"
 					>
-				<vbox>
-					<label control="zotero-open-tabs-textbox" class="header">Search tabs:</label>
-					<html:textarea
-						id="zotero-open-tabs-textbox"
-						onkeypress=""
+				<vbox width="400">
+					<search-textbox id="zotero-opened-tabs-textbox" 
+						placeholder="Search tabs:" 
+						timeout="1" 
 						oninput="Zotero_Tabs.onInput(event, this)"
-						rows="1"
-						wrap="off"/>
+						onclick="Zotero_Tabs.onInput(event, this)"
+						tabindex="0"
+					/>
 					<toolbarseparator/>
 					<vbox id="zotero-opened-tabs-list"></vbox>
 				</vbox>

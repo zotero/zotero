@@ -486,33 +486,8 @@
 	justify-content: center;
 	align-items: center;
 	background-repeat: no-repeat;
-    background-position: center; 
-    background-size: contain; 
-}
-
-#zotero-open-tabs-textbox
-{
-	margin: 5px;
-}
-
-.zotero-opened-tab-entry
-{
-	border-radius: 6px;
-}
-
-.zotero-opened-tab-entry.close
-{
-	background-image: url('chrome://zotero/skin/cross.svg');
-	width: 30px;
-}
-.zotero-opened-tab-entry.close:hover
-{
-	background-image: -moz-linear-gradient(rgba(40,40,40,.3), rgba(70,70,70,.3)), url('chrome://zotero/skin/cross.svg'); 
-}
-
-.zotero-opened-tab-entry.title:hover
-{
-	background: -moz-linear-gradient(rgba(40,40,40,.3), rgba(70,70,70,.3)); 
+	background-position: center; 
+	background-size: contain; 
 }
 
 .zotero-tb-open-tabs
@@ -525,12 +500,53 @@
 
 .zotero-tb-open-tabs.inactive:hover
 {
-    background-image: -moz-linear-gradient(rgba(40,40,40,.3), rgba(70,70,70,.3)), url("chrome://zotero/skin/nav-arrow-down.svg"); 
+	background-image: -moz-linear-gradient(rgba(40,40,40,.3), rgba(70,70,70,.3)), url("chrome://zotero/skin/nav-arrow-down.svg"); 
 }
 
 .zotero-tb-open-tabs.active
 {
-    background-image: -moz-linear-gradient(rgba(40,40,40,.5), rgba(70,70,70,.5)), url("chrome://zotero/skin/nav-arrow-down.svg"); 
+	background-image: -moz-linear-gradient(rgba(40,40,40,.5), rgba(70,70,70,.5)), url("chrome://zotero/skin/nav-arrow-down.svg"); 
+}
+
+#zotero-opened-tabs-textbox
+{
+	margin: 5px;
+}
+
+.zotero-opened-tab-entry
+{
+	border-radius: 6px;
+	border: 1px solid rgba(0, 0, 0, 0);
+}
+
+.zotero-opened-tab-entry.close
+{
+	background-image: url('chrome://zotero/skin/cross.svg');
+	width: 30px;
+}
+.zotero-opened-tab-entry.close:hover
+{
+	background-image: -moz-linear-gradient(rgba(40,40,40,.3), rgba(70,70,70,.3)), url('chrome://zotero/skin/cross.svg'); 
+}
+
+.zotero-opened-tab-entry.title description
+{
+	overflow: hidden;
+}
+
+.zotero-opened-tab-entry.title.selected
+{
+	font-weight: bold;
+}
+
+.zotero-opened-tab-entry.title:hover
+{
+	background: -moz-linear-gradient(rgba(40,40,40,.3), rgba(70,70,70,.3)); 
+}
+
+.zotero-opened-tab-entry:focus
+{
+	border: 1px solid #2B65BA;
 }
 
 #zotero-tb-advanced-search
