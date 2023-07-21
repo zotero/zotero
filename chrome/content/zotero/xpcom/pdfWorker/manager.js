@@ -188,7 +188,7 @@ class PDFWorker {
 				});
 			}
 			let attachmentPath = await attachment.getFilePathAsync();
-			let buf = await OS.File.read(attachmentPath, {});
+			let buf = await IOUtils.read(attachmentPath);
 			buf = new Uint8Array(buf).buffer;
 
 			try {
@@ -211,7 +211,7 @@ class PDFWorker {
 				throw error;
 			}
 			
-			await OS.File.writeAtomic(path || attachmentPath, new Uint8Array(res.buf));
+			await IOUtils.write(path || attachmentPath, new Uint8Array(res.buf));
 			
 			if (transfer) {
 				await Zotero.Items.erase(items.map(x => x.id));
@@ -286,11 +286,11 @@ class PDFWorker {
 			}));
 
 			let path = await attachment.getFilePathAsync();
-			let fileSize = (await OS.File.stat(path)).size;
+			let fileSize = (await IOUtils.stat(path)).size;
 			if (fileSize > Math.pow(2, 31) - 1) {
 				throw new Error(`The file "${path}" is too large`);
 			}
-			let buf = await OS.File.read(path, {});
+			let buf = await IOUtils.read(path);
 			buf = new Uint8Array(buf).buffer;
 
 			try {
@@ -341,7 +341,7 @@ class PDFWorker {
 			
 			if (transfer) {
 				if (modifiedBuf) {
-					await OS.File.writeAtomic(path, new Uint8Array(modifiedBuf));
+					await IOUtils.write(path, new Uint8Array(modifiedBuf));
 					mtime = Math.floor(await attachment.attachmentModificationTime / 1000);
 				}
 			}
@@ -360,11 +360,11 @@ class PDFWorker {
 
 	async processCitaviAnnotations(pdfPath, citaviAnnotations, isPriority, password) {
 		return this._enqueue(async () => {
-			let fileSize = (await OS.File.stat(pdfPath)).size;
+			let fileSize = (await IOUtils.stat(pdfPath)).size;
 			if (fileSize > Math.pow(2, 31) - 1) {
 				throw new Error(`The file "${pdfPath}" is too large`);
 			}
-			let buf = await OS.File.read(pdfPath, {});
+			let buf = await IOUtils.read(pdfPath);
 			buf = new Uint8Array(buf).buffer;
 			try {
 				var annotations = await this._query('importCitavi', {
@@ -394,11 +394,11 @@ class PDFWorker {
 	 */
 	async processMendeleyAnnotations(pdfPath, mendeleyAnnotations, isPriority, password) {
 		return this._enqueue(async () => {
-			let fileSize = (await OS.File.stat(pdfPath)).size;
+			let fileSize = (await IOUtils.stat(pdfPath)).size;
 			if (fileSize > Math.pow(2, 31) - 1) {
 				throw new Error(`The file "${pdfPath}" is too large`);
 			}
-			let buf = await OS.File.read(pdfPath, {});
+			let buf = await IOUtils.read(pdfPath);
 			buf = new Uint8Array(buf).buffer;
 			try {
 				var annotations = await this._query('importMendeley', {
@@ -466,7 +466,7 @@ class PDFWorker {
 				}));
 
 			let path = await attachment.getFilePathAsync();
-			let buf = await OS.File.read(path, {});
+			let buf = await IOUtils.read(path);
 			buf = new Uint8Array(buf).buffer;
 
 			try {
@@ -530,7 +530,7 @@ class PDFWorker {
 			}
 			await Zotero.Notifier.trigger('modify', 'item', ids, {});
 
-			await OS.File.writeAtomic(path, new Uint8Array(modifiedBuf));
+			await IOUtils.write(path, new Uint8Array(modifiedBuf));
 			let mtime = Math.floor(await attachment.attachmentModificationTime / 1000);
 			attachment.attachmentLastProcessedModificationTime = mtime;
 			await attachment.saveTx({
@@ -563,7 +563,7 @@ class PDFWorker {
 			}
 
 			let path = await attachment.getFilePathAsync();
-			let buf = await OS.File.read(path, {});
+			let buf = await IOUtils.read(path);
 			buf = new Uint8Array(buf).buffer;
 
 			try {
@@ -583,7 +583,7 @@ class PDFWorker {
 				throw error;
 			}
 
-			await OS.File.writeAtomic(path, new Uint8Array(modifiedBuf));
+			await IOUtils.write(path, new Uint8Array(modifiedBuf));
 			let mtime = Math.floor(await attachment.attachmentModificationTime / 1000);
 			attachment.attachmentLastProcessedModificationTime = mtime;
 			await attachment.saveTx({
@@ -615,7 +615,7 @@ class PDFWorker {
 			}
 
 			let path = await attachment.getFilePathAsync();
-			let buf = await OS.File.read(path, {});
+			let buf = await IOUtils.read(path);
 			buf = new Uint8Array(buf).buffer;
 
 			try {
@@ -661,7 +661,7 @@ class PDFWorker {
 			}
 
 			let path = await attachment.getFilePathAsync();
-			let buf = await OS.File.read(path, {});
+			let buf = await IOUtils.read(path);
 			buf = new Uint8Array(buf).buffer;
 
 			try {
@@ -704,7 +704,7 @@ class PDFWorker {
 			}
 
 			let path = await attachment.getFilePathAsync();
-			let buf = await OS.File.read(path, {});
+			let buf = await IOUtils.read(path);
 			buf = new Uint8Array(buf).buffer;
 
 			try {
@@ -876,7 +876,7 @@ class PDFRenderer {
 				return 0;
 			}
 			let path = await attachment.getFilePathAsync();
-			let buf = await OS.File.read(path, {});
+			let buf = await IOUtils.read(path);
 			buf = new Uint8Array(buf).buffer;
 			return this._query('renderAnnotations', { buf, annotations }, [buf]);
 		}, isPriority);
@@ -897,7 +897,7 @@ class PDFRenderer {
 			}
 			let attachment = await Zotero.Items.getAsync(annotation.parentID);
 			let path = await attachment.getFilePathAsync();
-			let buf = await OS.File.read(path, {});
+			let buf = await IOUtils.read(path);
 			buf = new Uint8Array(buf).buffer;
 			let annotations = [{
 				id: annotation.id,
