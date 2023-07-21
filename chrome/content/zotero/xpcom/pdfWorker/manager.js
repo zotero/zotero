@@ -684,6 +684,47 @@ class PDFWorker {
 			return result;
 		}, isPriority);
 	}
+
+	/**
+	 * Determine whether the PDF has any embedded annotations
+	 *
+	 * @param {Integer} itemID Attachment item id
+	 * @param {Boolean} [isPriority]
+	 * @param {String} [password]
+	 * @returns {Promise<Boolean>}
+	 */
+	async hasAnnotations(itemID, isPriority, password) {
+		return this._enqueue(async () => {
+			let attachment = await Zotero.Items.getAsync(itemID);
+
+			Zotero.debug(`Detecting embedded annotations in item ${attachment.libraryKey}`);
+
+			if (!attachment.isPDFAttachment()) {
+				throw new Error('Item must be a PDF attachment');
+			}
+
+			let path = await attachment.getFilePathAsync();
+			let buf = await OS.File.read(path, {});
+			buf = new Uint8Array(buf).buffer;
+
+			try {
+				var result = await this._query('hasAnnotations', { buf, password }, [buf]);
+			}
+			catch (e) {
+				let error = new Error(`Worker 'hasAnnotations' failed: ${JSON.stringify({ error: e.message })}`);
+				try {
+					error.name = JSON.parse(e.message).name;
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
+				Zotero.logError(error);
+				throw error;
+			}
+
+			return result.hasAnnotations;
+		}, isPriority);
+	}
 }
 
 Zotero.PDFWorker = new PDFWorker();
