@@ -70,6 +70,8 @@ describe("Zotero.Item", function () {
 					creatorType: "author"
 				}
 			]);
+			
+			// Test unsaved - uses getFirstCreatorFromData()'s omitBidiIsolates option
 			assert.equal(
 				item.getField('firstCreator', /* unformatted */ true),
 				Zotero.getString('general.andJoiner', ['B', 'D'])
@@ -77,6 +79,7 @@ describe("Zotero.Item", function () {
 			
 			await item.saveTx();
 
+			// Test saved - implemented in getField()
 			assert.equal(
 				item.getField('firstCreator', /* unformatted */ true),
 				Zotero.getString('general.andJoiner', ['B', 'D'])
