@@ -65,6 +65,7 @@ var Zotero_Tabs = new function () {
 	this._selectedID = 'zotero-pane';
 	this._prevSelectedID = null;
 	this._history = [];
+	this._openedTabsFilter = "";
 
 	this._unloadInterval = setInterval(() => {
 		this.unloadUnusedTabs();
@@ -245,6 +246,34 @@ var Zotero_Tabs = new function () {
 		tab.iconBackgroundImage = icon.style.backgroundImage;
 	};
 
+	this._createLabel = (title, filter) => {
+		let xhtmlNS = "http://www.w3.org/1999/xhtml";
+		let desc = document.createXULElement('description');
+		
+		let regex = new RegExp(`(${filter})`, 'gi');
+		let matches = title.matchAll(regex);
+
+		let lastIndex = 0;
+
+		for (let match of matches) {
+			if (match.index > lastIndex) {
+				// Add preceding text
+				desc.appendChild(document.createTextNode(title.substring(lastIndex, match.index)));
+			}
+			// Add matched text wrapped in <b>
+			let b = document.createElementNS(xhtmlNS, 'b');
+			b.textContent = match[0];
+			desc.appendChild(b);
+			lastIndex = match.index + match[0].length;
+		}
+
+		if (lastIndex < title.length) {
+			// Add remaining text
+			desc.appendChild(document.createTextNode(title.substring(lastIndex)));
+		}
+		return desc;
+	};
+
 	/**
 	 * Sets the data in the popup of opened tabs
 	 */
@@ -257,6 +286,9 @@ var Zotero_Tabs = new function () {
 		for (let tab of this._tabs) {
 			// Skip tabs whose title wasn't added yet
 			if (tab.title == "") {
+				continue;
+			}
+			if (!tab.title.toLowerCase().includes(this._openedTabsFilter)) {
 				continue;
 			}
 			// Top-level entry of the opened tabs array
@@ -272,8 +304,7 @@ var Zotero_Tabs = new function () {
 			tabName.setAttribute('flex', '1');
 			tabName.setAttribute('class', 'zotero-opened-tab-entry title');
 			
-			let tabLabel = document.createXULElement('label');
-			tabLabel.setAttribute('value', tab.title);
+			let tabLabel = this._createLabel(tab.title, this._openedTabsFilter);
 			tabLabel.setAttribute('crop', 'end');
 			tabLabel.setAttribute('flex', 1);
 
@@ -281,7 +312,7 @@ var Zotero_Tabs = new function () {
 			
 			// Selected tab is bold
 			if (tab.id == this._selectedID) {
-				tabName.setAttribute("style", 'font-weight:bold');
+				tabLabel.setAttribute('class', "header");
 			}
 			// Onclick, go to selected tab + close popup
 			tabName.addEventListener("command", () => {
@@ -309,12 +340,28 @@ var Zotero_Tabs = new function () {
 		toolBarButton.classList.add("active");
 	};
 
-	// Sets inactive class on "show opened tabs" button to remove gradient
 	this.onHidding = function (event) {
 		if (event.originalTarget.id != 'zotero-opened-tabs-panel') return;
+		// Sets inactive class on "show opened tabs" button to remove gradient
 		let toolBarButton = document.getElementById('zotero-tb-opened-tabs');
 		toolBarButton.classList.remove("active");
 		toolBarButton.classList.add("inactive");
+
+		// Empty out the filter text field
+		let textbox = document.getElementById('zotero-open-tabs-textbox');
+		textbox.value = "";
+		this._openedTabsFilter = "";
+		this._setOpenedTabsMenu();
+	};
+
+	this.onShow = function (_) {
+		let textbox = document.getElementById('zotero-open-tabs-textbox');
+		textbox.focus();
+	};
+
+	this.onInput = function (_, textBox) {
+		this._openedTabsFilter = textBox.value.toLowerCase();
+		this._setOpenedTabsMenu();
 	};
 
 	/**

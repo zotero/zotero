@@ -490,6 +490,11 @@
     background-size: contain; 
 }
 
+#zotero-open-tabs-textbox
+{
+	margin: 5px;
+}
+
 .zotero-opened-tab-entry
 {
 	border-radius: 6px;

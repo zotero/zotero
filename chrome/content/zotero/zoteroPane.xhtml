@@ -680,8 +680,21 @@
 			<toolbarbutton id="zotero-tb-opened-tabs" class="zotero-tb-open-tabs inactive img-center" tabindex="-1" tooltiptext="Show opened tabs" type="panel"
 			onmousedown="if (this.disabled) { event.preventDefault(); return; } Zotero_Tabs.showOpenedTabsPanel(this)"/>
 			<panel id="zotero-opened-tabs-panel" type="arrow"
-					onpopuphiding="Zotero_Tabs.onHidding(event)">
-				<vbox id="zotero-opened-tabs-list"></vbox>
+					onpopuphiding="Zotero_Tabs.onHidding(event)"
+					onpopupshown="Zotero_Tabs.onShow(event)"
+					>
+				<vbox>
+					<label control="zotero-open-tabs-textbox" class="header">Search tabs:</label>
+					<html:textarea
+						id="zotero-open-tabs-textbox"
+						onkeypress=""
+						oninput="Zotero_Tabs.onInput(event, this)"
+						rows="1"
+						wrap="off"/>
+					<toolbarseparator/>
+					<vbox id="zotero-opened-tabs-list"></vbox>
+				</vbox>
+				
 			</panel>
 	</hbox>
 
