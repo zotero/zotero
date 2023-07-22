@@ -216,12 +216,12 @@ Zotero.Item.prototype._setParentKey = function() {
 // Public Zotero.Item methods
 //
 //////////////////////////////////////////////////////////////////////////////
-/*
+/**
  * Retrieves an itemData field value
  *
  * @param {String|Integer} field fieldID or fieldName
- * @param {Boolean} [unformatted] Skip any special processing of DB value
- *   (e.g. multipart date field)
+ * @param {Boolean} [unformatted] Skip formatting of multipart date fields and
+ * 		omit bidi control characters
  * @param {Boolean} includeBaseMapped If true and field is a base field, returns
  *   value of type-specific field instead
  *   (e.g. 'label' for 'publisher' in 'audioRecording')
@@ -238,11 +238,17 @@ Zotero.Item.prototype.getField = function(field, unformatted, includeBaseMapped)
 	if (field === 'firstCreator' && !this._id) {
 		// Hack to get a firstCreator for an unsaved item
 		let creatorsData = this.getCreators(true);
-		return Zotero.Items.getFirstCreatorFromData(this.itemTypeID, creatorsData);
+		return Zotero.Items.getFirstCreatorFromData(this.itemTypeID, creatorsData,
+			{ omitBidiIsolates: !!unformatted });
 	} else if (field === 'id' || this.ObjectsClass.isPrimaryField(field)) {
 		var privField = '_' + field;
-		//Zotero.debug('Returning ' + (this[privField] ? this[privField] : '') + ' (typeof ' + typeof this[privField] + ')');
-		return this[privField];
+		let value = this[privField];
+		// Bidi isolates
+		if (unformatted && field === 'firstCreator') {
+			value = value.replace(/[\u2068\u2069]/g, '');
+		}
+		//Zotero.debug('Returning ' + (value ? value : '') + ' (typeof ' + typeof value + ')');
+		return value;
 	} else if (field == 'year') {
 		return this.getField('date', true, true).substr(0,4);
 	}

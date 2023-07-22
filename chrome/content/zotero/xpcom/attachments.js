@@ -2390,9 +2390,8 @@ Zotero.Attachments = new function () {
 		}, {});
 
 		const firstCreator = args => common(
-			// 74492e40 adds \u2068 and \u2069 around names in the `firstCreator` field, which we don't want in the filename
-			// We might actually want to move this replacement to getValidFileName
-			item.getField('firstCreator', false, true).replaceAll('\u2068', '').replaceAll('\u2069', ''), args
+			// Pass unformatted = true to omit bidi isolates
+			item.getField('firstCreator', true, true), args
 		);
 
 		const vars = { ...fields, ...creatorFields, firstCreator, itemType, year };

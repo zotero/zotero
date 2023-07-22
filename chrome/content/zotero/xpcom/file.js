@@ -1267,6 +1267,8 @@ Zotero.File = new function(){
 			// Normalize to NFC
 			fileName = fileName.normalize();
 		}
+		// Replace bidi isolation control characters
+		fileName = fileName.replace(/[\u2068\u2069]/g, '');
 		// Don't allow hidden files
 		fileName = fileName.replace(/^\./, '');
 		// Don't allow blank or illegal filenames
