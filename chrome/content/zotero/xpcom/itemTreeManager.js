@@ -43,6 +43,9 @@ class ItemTreeManager {
 	/**
 	 * Register a custom column. All registered columns must be valid, and must have a unique dataKey.
 	 * Although it's async, resolving does not promise the item trees are updated.
+	 *
+	 * Note that the `dataKey` you use here may be different from the one returned by the function.
+	 * This is because the `dataKey` is prefixed with the `pluginID` to avoid conflicts after the column is registered.
 	 * @param {ItemTreeCustomColumnOptions | ItemTreeCustomColumnOptions[]} options - An option or array of options to register
 	 * @returns {string | string[] | false} - The dataKey(s) of the added column(s) or false if no columns were added
 	 * @example
@@ -52,7 +55,7 @@ class ItemTreeManager {
 	 * const registeredDataKey = await Zotero.ItemTreeManager.registerColumns(
 	 * {
 	 *     dataKey: 'rtitle',
-	 *     label: 'reversed title',
+	 *     label: 'Reversed Title',
 	 *     pluginID: 'make-it-red@zotero.org', // Replace with your plugin ID
 	 *     dataProvider: (item, dataKey) => {
 	 *         return item.getField('title').split('').reverse().join('');
@@ -66,19 +69,19 @@ class ItemTreeManager {
 	 * const registeredDataKey = await Zotero.ItemTreeManager.registerColumns(
 	 * {
 	 *     dataKey: 'rtitle',
-	 *     label: 'reversed title',
+	 *     label: 'Reversed Title',
 	 *     enabledTreeIDs: ['main'], // only show in the main item tree
-	 *     defaultSort: 1, // sort by increasing order
+	 *     sortReverse: true, // sort by increasing order
 	 *     flex: 0, // don't take up all available space
 	 *     width: 100, // assign fixed width in pixels
 	 *     fixedWidth: true, // don't allow user to resize
-	 *     staticWidth: true, // don't allow coloumn to be resized when the tree is resized
+	 *     staticWidth: true, // don't allow column to be resized when the tree is resized
 	 *     minWidth: 50, // minimum width in pixels
 	 *     // iconPath: 'chrome://zotero/skin/tick.png', // icon to show in the column header
 	 *     htmlLabel: '<span style="color: red;">reversed title</span>', // use HTML in the label. This will override the label and iconPath property
-	 *     ignoreInColumnPicker: false, // show in the column picker
-	 *     submenu: true, // show in the column picker submenu
-	 *     primary: false, // only one primary column is allowed
+	 *     showInColumnPicker: true, // show in the column picker
+	 *     columnPickerSubMenu: true, // show in the column picker submenu
+	 *     primary: false, // only one primary column is allowed. do not set this to true
 	 *     pluginID: 'make-it-red@zotero.org', // plugin ID, which will be used to unregister the column when the plugin is unloaded
 	 *     dataProvider: (item, dataKey) => {
 	 *         // item: the current item in the row
@@ -97,7 +100,7 @@ class ItemTreeManager {
 	 *     {
 	 *          dataKey: 'rtitle',
 	 *          iconPath: 'chrome://zotero/skin/tick.png',
-	 *          label: 'reversed title',
+	 *          label: 'Reversed Title',
 	 *          pluginID: 'make-it-red@zotero.org', // Replace with your plugin ID
 	 *          dataProvider: (item, dataKey) => {
 	 *              return item.getField('title').split('').reverse().join('');
@@ -105,7 +108,7 @@ class ItemTreeManager {
 	 *     },
 	 *     {
 	 *          dataKey: 'utitle',
-	 *          label: 'uppercase title',
+	 *          label: 'Uppercase Title',
 	 *          pluginID: 'make-it-red@zotero.org', // Replace with your plugin ID
 	 *          dataProvider: (item, dataKey) => {
 	 *              return item.getField('title').toUpperCase();
@@ -256,6 +259,7 @@ class ItemTreeManager {
 			if (o.enabledTreeIDs.includes("*")) {
 				o.enabledTreeIDs = ["*"];
 			}
+			o.showInColumnPicker = o.showInColumnPicker === undefined ? true : o.showInColumnPicker;
 		});
 		// If any check fails, return check results
 		if (!this._validateColumnOption(options)) {

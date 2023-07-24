@@ -3587,7 +3587,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		let columnMenuitemElements = {};
 		for (let i = 0; i < columns.length; i++) {
 			const column = columns[i];
-			if (column.ignoreInColumnPicker === true) continue;
+			if (column.showInColumnPicker === false) continue;
 			let label = formatColumnName(column);
 			let menuitem = doc.createXULElement('menuitem');
 			menuitem.setAttribute('type', 'checkbox');
@@ -3618,7 +3618,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			let moreItems = [];
 			for (let i = 0; i < columns.length; i++) {
 				const column = columns[i];
-				if (column.submenu) {
+				if (column.columnPickerSubMenu) {
 					moreItems.push(columnMenuitemElements[column.dataKey]);
 				}
 			}

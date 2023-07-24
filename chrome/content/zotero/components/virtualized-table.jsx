@@ -1605,7 +1605,7 @@ var Columns = class {
 					column.sortDirection *= -1;
 				}
 				else {
-					column.sortDirection = column.defaultSort || 1;
+					column.sortDirection = column.sortReverse ? -1 : 1;
 				}
 			}
 		});

@@ -35,7 +35,7 @@ const Icons = require('components/icons');
  * @property {string[]} [enabledTreeIDs=[]] - Which tree ids the column should be enabled in. If undefined, enabled in main tree. If ["*"], enabled in all trees.
  * @property {string[]} [defaultIn] - Will be deprecated. Types of trees the column is default in. Can be [default, feed];
  * @property {string[]} [disabledIn] - Will be deprecated. Types of trees where the column is not available
- * @property {number} [defaultSort=1] - Default: 1. -1 for descending sort
+ * @property {boolean} [sortReverse=false] - Default: false. Set to true to reverse the sort order
  * @property {number} [flex=1] - Default: 1. When the column is added to the tree how much space it should occupy as a flex ratio
  * @property {string} [width] - A column width instead of flex ratio. See above.
  * @property {boolean} [fixedWidth] - Default: false. Set to true to disable column resizing
@@ -44,8 +44,8 @@ const Icons = require('components/icons');
  * @property {React.Component} [iconLabel] - Set an Icon label instead of a text-based one
  * @property {string} [iconPath] - Set an Icon path, overrides {iconLabel}
  * @property {string | React.Component} [htmlLabel] - Set an HTML label, overrides {iconLabel} and {label}. Can be a HTML string or a React component.
- * @property {boolean} [ignoreInColumnPicker=false] - Default: false. Set to true to not display in column picker.
- * @property {boolean} [submenu=false] - Default: false. Set to true to display the column in "More Columns" submenu of column picker.
+ * @property {boolean} [showInColumnPicker=true] - Default: true. Set to true to show in column picker.
+ * @property {boolean} [columnPickerSubMenu=false] - Default: false. Set to true to display the column in "More Columns" submenu of column picker.
  * @property {boolean} [primary] - Should only be one column at the time. Title is the primary column
  * @property {boolean} [custom] - Set automatically to true when the column is added by the user
  * @property {(item: Zotero.Item, dataKey: string) => string} [dataProvider] - Custom data provider that is called when rendering cells
@@ -62,7 +62,7 @@ const COLUMNS = [
 		primary: true,
 		defaultIn: ["default", "feeds", "feed"],
 		label: "itemFields.title",
-		ignoreInColumnPicker: true,
+		showInColumnPicker: false,
 		flex: 4,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
@@ -70,28 +70,32 @@ const COLUMNS = [
 		dataKey: "firstCreator",
 		defaultIn: ["default", "feeds", "feed"],
 		label: "zotero.items.creator_column",
+		showInColumnPicker: true,
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "itemType",
 		label: "zotero.items.itemType",
+		showInColumnPicker: true,
 		width: "40",
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "date",
 		defaultIn: ["feeds", "feed"],
-		defaultSort: -1,
+		sortReverse: true,
 		label: "itemFields.date",
+		showInColumnPicker: true,
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "year",
 		disabledIn: ["feeds", "feed"],
-		defaultSort: -1,
+		sortReverse: true,
 		label: "zotero.items.year_column",
+		showInColumnPicker: true,
 		flex: 1,
 		staticWidth: true,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
@@ -99,26 +103,30 @@ const COLUMNS = [
 	{
 		dataKey: "publisher",
 		label: "itemFields.publisher",
+		showInColumnPicker: true,
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "publicationTitle",
 		label: "itemFields.publicationTitle",
+		showInColumnPicker: true,
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "journalAbbreviation",
 		disabledIn: ["feeds", "feed"],
-		submenu: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
 		label: "itemFields.journalAbbreviation",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "language",
-		submenu: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
 		label: "itemFields.language",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
@@ -126,8 +134,9 @@ const COLUMNS = [
 	{
 		dataKey: "accessDate",
 		disabledIn: ["feeds", "feed"],
-		defaultSort: -1,
-		submenu: true,
+		sortReverse: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
 		label: "itemFields.accessDate",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
@@ -135,7 +144,8 @@ const COLUMNS = [
 	{
 		dataKey: "libraryCatalog",
 		disabledIn: ["feeds", "feed"],
-		submenu: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
 		label: "itemFields.libraryCatalog",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
@@ -143,30 +153,34 @@ const COLUMNS = [
 	{
 		dataKey: "callNumber",
 		disabledIn: ["feeds", "feed"],
-		submenu: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
 		label: "itemFields.callNumber",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "rights",
-		submenu: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
 		label: "itemFields.rights",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "dateAdded",
-		defaultSort: -1,
+		sortReverse: true,
 		disabledIn: ["feeds", "feed"],
+		showInColumnPicker: true,
 		label: "itemFields.dateAdded",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
 	},
 	{
 		dataKey: "dateModified",
-		defaultSort: -1,
+		sortReverse: true,
 		disabledIn: ["feeds", "feed"],
+		showInColumnPicker: true,
 		label: "zotero.items.dateModified_column",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
@@ -174,7 +188,8 @@ const COLUMNS = [
 	{
 		dataKey: "archive",
 		disabledIn: ["feeds", "feed"],
-		submenu: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
 		label: "itemFields.archive",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
@@ -182,7 +197,8 @@ const COLUMNS = [
 	{
 		dataKey: "archiveLocation",
 		disabledIn: ["feeds", "feed"],
-		submenu: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
 		label: "itemFields.archiveLocation",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
@@ -190,7 +206,8 @@ const COLUMNS = [
 	{
 		dataKey: "place",
 		disabledIn: ["feeds", "feed"],
-		submenu: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
 		label: "itemFields.place",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
@@ -198,7 +215,8 @@ const COLUMNS = [
 	{
 		dataKey: "volume",
 		disabledIn: ["feeds", "feed"],
-		submenu: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
 		label: "itemFields.volume",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
@@ -206,7 +224,8 @@ const COLUMNS = [
 	{
 		dataKey: "edition",
 		disabledIn: ["feeds", "feed"],
-		submenu: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
 		label: "itemFields.edition",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
@@ -214,7 +233,8 @@ const COLUMNS = [
 	{
 		dataKey: "number",
 		disabledIn: ["feeds", "feed"],
-		submenu: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
 		label: "itemFields.number",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
@@ -222,7 +242,8 @@ const COLUMNS = [
 	{
 		dataKey: "pages",
 		disabledIn: ["feeds", "feed"],
-		submenu: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
 		label: "itemFields.pages",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
@@ -230,7 +251,8 @@ const COLUMNS = [
 	{
 		dataKey: "issue",
 		disabledIn: ["feeds", "feed"],
-		submenu: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
 		label: "itemFields.issue",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
@@ -238,7 +260,8 @@ const COLUMNS = [
 	{
 		dataKey: "series",
 		disabledIn: ["feeds", "feed"],
-		submenu: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
 		label: "itemFields.series",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
@@ -246,7 +269,8 @@ const COLUMNS = [
 	{
 		dataKey: "seriesTitle",
 		disabledIn: ["feeds", "feed"],
-		submenu: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
 		label: "itemFields.seriesTitle",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
@@ -254,7 +278,8 @@ const COLUMNS = [
 	{
 		dataKey: "court",
 		disabledIn: ["feeds", "feed"],
-		submenu: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
 		label: "itemFields.court",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
@@ -262,7 +287,8 @@ const COLUMNS = [
 	{
 		dataKey: "medium",
 		disabledIn: ["feeds", "feed"],
-		submenu: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
 		label: "itemFields.medium",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
@@ -270,7 +296,8 @@ const COLUMNS = [
 	{
 		dataKey: "genre",
 		disabledIn: ["feeds", "feed"],
-		submenu: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
 		label: "itemFields.genre",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
@@ -278,7 +305,8 @@ const COLUMNS = [
 	{
 		dataKey: "system",
 		disabledIn: ["feeds", "feed"],
-		submenu: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
 		label: "itemFields.system",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
@@ -286,7 +314,8 @@ const COLUMNS = [
 	{
 		dataKey: "shortTitle",
 		disabledIn: ["feeds", "feed"],
-		submenu: true,
+		showInColumnPicker: true,
+		columnPickerSubMenu: true,
 		label: "itemFields.shortTitle",
 		flex: 2,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
@@ -294,6 +323,7 @@ const COLUMNS = [
 	{
 		dataKey: "extra",
 		disabledIn: ["feeds", "feed"],
+		showInColumnPicker: true,
 		label: "itemFields.extra",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
@@ -302,6 +332,7 @@ const COLUMNS = [
 		dataKey: "hasAttachment",
 		defaultIn: ["default"],
 		disabledIn: ["feeds", "feed"],
+		showInColumnPicker: true,
 		label: "zotero.tabs.attachments.label",
 		iconLabel: <Icons.IconAttachSmall />,
 		fixedWidth: true,
@@ -311,6 +342,7 @@ const COLUMNS = [
 	{
 		dataKey: "numNotes",
 		disabledIn: ["feeds", "feed"],
+		showInColumnPicker: true,
 		label: "zotero.tabs.notes.label",
 		iconLabel: <Icons.IconTreeitemNoteSmall />,
 		width: "14",
@@ -321,6 +353,7 @@ const COLUMNS = [
 	{
 		dataKey: "feed",
 		disabledIn: ["default", "feed"],
+		showInColumnPicker: true,
 		label: "itemFields.feed",
 		flex: 1,
 		zoteroPersist: ["width", "hidden", "sortDirection"]
