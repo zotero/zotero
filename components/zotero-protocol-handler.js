@@ -57,14 +57,18 @@ function ZoteroProtocolHandler() {
 	
 	
 	/**
-	 * zotero://attachment/library/[itemKey]
-	 * zotero://attachment/groups/[groupID]/[itemKey]
+	 * zotero://attachment/library/items/[itemKey]
+	 * zotero://attachment/groups/[groupID]/items/[itemKey]
+	 *
+	 * And for snapshot attachments only:
+	 * zotero://attachment/library/items/[itemKey]/[resourcePath]
+	 * zotero://attachment/groups/[groupID]/items/[itemKey]/[resourcePath]
 	 */
 	var AttachmentExtension = {
 		loadAsChrome: false,
 		
-		newChannel: function (uri) {
-			return new AsyncChannel(uri, function* () {
+		newChannel: function (uri, loadInfo) {
+			return new AsyncChannel(uri, loadInfo, function* () {
 				try {
 					var uriPath = uri.pathQueryRef;
 					if (!uriPath) {
@@ -98,6 +102,26 @@ function ZoteroProtocolHandler() {
 					var path = yield item.getFilePathAsync();
 					if (!path) {
 						return this._errorChannel(`${path} not found`);
+					}
+					
+					var resourcePathParts = uriPath.split('/')
+						.slice(params.groupID !== undefined ? 4 : 3)
+						.filter(Boolean);
+					if (resourcePathParts.length) {
+						if (!item.isSnapshotAttachment()) {
+							return this._errorChannel(`Item for ${uriPath} is not a snapshot attachment -- cannot access resources`);
+						}
+						
+						try {
+							path = PathUtils.join(PathUtils.parent(path), ...resourcePathParts);
+						}
+						catch (e) {
+							Zotero.logError(e);
+							return this._errorChannel(`Resource ${resourcePathParts.join('/')} not found`);
+						}
+						if (!(yield IOUtils.exists(path))) {
+							return this._errorChannel(`Resource ${resourcePathParts.join('/')} not found`);
+						}
 					}
 					
 					// Set originalURI so that it seems like we're serving from zotero:// protocol.

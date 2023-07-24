@@ -146,6 +146,7 @@ class ReaderInstance {
 		buf = new Uint8Array(buf).buffer;
 		let annotationItems = this._item.getAnnotations();
 		let annotations = (await Promise.all(annotationItems.map(x => this._getAnnotation(x)))).filter(x => x);
+		let resourceBaseURI = `zotero://attachment/${Zotero.API.getLibraryPrefix(this._item.libraryID)}/items/${this._item.key}/`;
 
 		// TODO: Remove after some time
 		// Migrate Mendeley colors to Zotero PDF reader colors
@@ -189,6 +190,7 @@ class ReaderInstance {
 				type: this._type,
 				buf: new Uint8Array(buf),
 				annotations,
+				resourceBaseURI,
 				primaryViewState: state,
 				secondaryViewState: secondViewState,
 				location,
