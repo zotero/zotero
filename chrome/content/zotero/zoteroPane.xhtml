@@ -74,7 +74,8 @@
 		if (Zotero.isMac) {
 			Services.scriptloader.loadSubScript("chrome://global/content/macWindowMenu.js", this);
 		}
-		
+		Services.scriptloader.loadSubScript("chrome://global/content/printUtils.js", this);
+
 		// Custom elements
 		Services.scriptloader.loadSubScript("chrome://zotero/content/customElements.js", this);
 
