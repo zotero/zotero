@@ -81,7 +81,6 @@ class ItemTreeManager {
 	 *     htmlLabel: '<span style="color: red;">reversed title</span>', // use HTML in the label. This will override the label and iconPath property
 	 *     showInColumnPicker: true, // show in the column picker
 	 *     columnPickerSubMenu: true, // show in the column picker submenu
-	 *     primary: false, // only one primary column is allowed. do not set this to true
 	 *     pluginID: 'make-it-red@zotero.org', // plugin ID, which will be used to unregister the column when the plugin is unloaded
 	 *     dataProvider: (item, dataKey) => {
 	 *         // item: the current item in the row
@@ -223,6 +222,10 @@ class ItemTreeManager {
 		if (!noInputDuplicates) {
 			Zotero.warn(`ItemTree Column options have duplicate dataKey.`);
 		}
+		const noDeniedProperties = options.every((option) => {
+			const valid = !option.primary;
+			return valid;
+		});
 		const requiredProperties = options.every((option) => {
 			const valid = option.dataKey && option.label && option.pluginID;
 			if (!valid) {
@@ -237,7 +240,7 @@ class ItemTreeManager {
 			}
 			return valid;
 		});
-		return noInputDuplicates && requiredProperties && noRegisteredDuplicates;
+		return noInputDuplicates && noDeniedProperties && requiredProperties && noRegisteredDuplicates;
 	}
 
 
