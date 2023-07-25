@@ -41,10 +41,8 @@
 			// Pointer events don't reach the button's children, so check mousedown positions manually and open
 			// the popup if over the end side of the button
 			this.addEventListener('mousedown', (event) => {
-				let rect = this.querySelector('[anonid="dropmarker-box"]').getBoundingClientRect();
-				if ((!Zotero.rtl && event.clientX >= rect.left || Zotero.rtl && event.clientX <= rect.right)
-						&& Zotero.Utilities.Internal.showNativeElementPopup(this)) {
-					event.preventDefault();
+				if (this._isEventInDropmarkerBox(event)) {
+					Zotero.Utilities.Internal.showNativeElementPopup(this);
 				}
 			});
 			
@@ -57,6 +55,20 @@
 
 		connectedCallback() {
 			this.append(this.constructor.contentFragment);
+			
+			// Prevent DOM-attached mouse handlers from running in the dropmarker area
+			for (const eventType of ['mousedown', 'mouseup', 'click']) {
+				const handler = this.getAttribute('on' + eventType);
+				if (!handler) {
+					continue;
+				}
+				this['on' + eventType] = null;
+				this.addEventListener(eventType, (event) => {
+					if (!this._isEventInDropmarkerBox(event)) {
+						eval(handler).bind(this);
+					}
+				});
+			}
 		}
 
 		get image() {
@@ -93,6 +105,11 @@
 			);
 			Object.defineProperty(this, "dropmarkerFragment", { value: frag });
 			return frag;
+		}
+		
+		_isEventInDropmarkerBox(event) {
+			let rect = this.querySelector('[anonid="dropmarker-box"]').getBoundingClientRect();
+			return !Zotero.rtl && event.clientX >= rect.left || Zotero.rtl && event.clientX <= rect.right
 		}
 	}
 
