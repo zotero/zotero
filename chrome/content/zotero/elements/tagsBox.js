@@ -902,7 +902,7 @@
 
 			Zotero.debug('Looking for tabindex ' + nextIndex, 4);
 
-			var next = this.querySelector(`[ztabindex=${nextIndex}]`);
+			var next = this.querySelector(`[ztabindex="${nextIndex}"]`);
 			if (next.length) {
 				next = next[0];
 				next.click();
