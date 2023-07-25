@@ -81,14 +81,6 @@ class ReaderInstance {
 		return this._type;
 	}
 
-	focus() {
-		try {
-			this._iframeWindow.document.querySelector('#viewerContainer').focus();
-		}
-		catch (e) {
-		}
-	}
-
 	getSecondViewState() {
 		let state = this._iframeWindow.wrappedJSObject.getSecondViewState();
 		return state ? JSON.parse(JSON.stringify(state)) : undefined;

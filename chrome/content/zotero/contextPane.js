@@ -221,7 +221,7 @@ var ZoteroContextPane = new function () {
 							// Focus reader pages view if context pane note editor is not selected
 							if (Zotero_Tabs.selectedID == reader.tabID
 								&& (!document.activeElement
-									|| !document.activeElement.closest('.context-node iframe[anonid="editor-view"]'))) {
+									|| !document.activeElement.closest('.context-node iframe[id="editor-view"]'))) {
 								reader.focus();
 							}
 							
