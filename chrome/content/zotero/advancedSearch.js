@@ -26,7 +26,7 @@
 
 Components.utils.import("resource://gre/modules/Services.jsm");
 import ItemTree from 'zotero/itemTree';
-import { getDefaultColumnsByDataKeys } from 'zotero/itemTreeColumns';
+import { getColumnDefinitionsByDataKey } from 'zotero/itemTreeColumns'
 
 
 var ZoteroAdvancedSearch = new function() {
@@ -60,13 +60,14 @@ var ZoteroAdvancedSearch = new function() {
 			id: "advanced-search",
 			dragAndDrop: true,
 			onActivate: this.onItemActivate.bind(this),
-			columns: getDefaultColumnsByDataKeys(['title', 'firstCreator']),
+			columns: getColumnDefinitionsByDataKey(["title", "firstCreator"]),
 		});
 
 		// A minimal implementation of Zotero.CollectionTreeRow
 		var collectionTreeRow = {
 			view: {},
 			ref: _searchBox.search,
+			visibilityGroup: 'default',
 			isSearchMode: () => true,
 			getItems: async () => [],
 			isLibrary: () => false,
@@ -96,6 +97,7 @@ var ZoteroAdvancedSearch = new function() {
 		var collectionTreeRow = {
 			view: {},
 			ref: _searchBox.search,
+			visibilityGroup: 'default',
 			isSearchMode: () => true,
 			getItems: async function () {
 				await Zotero.Libraries.get(_libraryID).waitForDataLoad('item');

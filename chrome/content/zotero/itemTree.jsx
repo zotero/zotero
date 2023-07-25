@@ -32,9 +32,13 @@ const VirtualizedTable = require('components/virtualized-table');
 const { renderCell, formatColumnName } = VirtualizedTable;
 const Icons = require('components/icons');
 const { getDOMElement } = Icons;
-const { COLUMNS } = require('./itemTreeColumns');
+const { COLUMNS } = require("zotero/itemTreeColumns");
 const { Cc, Ci, Cu } = require('chrome');
 Cu.import("resource://gre/modules/osfile.jsm");
+
+/**
+ * @typedef {import("./itemTreeColumns.jsx").ItemTreeColumnOptions} ItemTreeColumnOptions
+ */
 
 const CHILD_INDENT = 12;
 const COLORED_TAGS_RE = new RegExp("^(?:Numpad|Digit)([0-" + Zotero.Tags.MAX_COLORED_TAGS + "]{1})$");
@@ -99,7 +103,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		
 		this._unregisterID = Zotero.Notifier.registerObserver(
 			this,
-			['item', 'collection-item', 'item-tag', 'share-items', 'bucket', 'feedItem', 'search'],
+			['item', 'collection-item', 'item-tag', 'share-items', 'bucket', 'feedItem', 'search', 'itemtree'],
 			'itemTreeView',
 			50
 		);
@@ -107,8 +111,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		this._itemsPaneMessage = null;
 		
 		this._columnsId = null;
-		this.columns = null;
-		
+
 		if (this.collectionTreeRow) {
 			this.collectionTreeRow.view.itemTreeView = this;
 		}
@@ -142,12 +145,20 @@ var ItemTree = class ItemTree extends LibraryTree {
 	
 	
 	/**
-	 * Extension developers: use this to monkey-patch additional columns. See
-	 * itemTreeColumns.js for available column fields.
-	 * @returns {Array<Column>}
+	 * Get global columns from ItemTreeColumns and local columns from this.columns
+	 * @returns {ItemTreeColumnOptions[]}
 	 */
 	getColumns() {
-		return Array.from(this.props.columns);
+		const extraColumns = Zotero.ItemTreeManager.getCustomColumns(this.props.id);
+
+		/** @type {ItemTreeColumnOptions[]} */
+		const currentColumns = this.props.columns.map(col => Object.assign({}, col));
+		extraColumns.forEach((column) => {
+			if (!currentColumns.find(c => c.dataKey === column.dataKey)) {
+				currentColumns.push(column);
+			}
+		});
+		return currentColumns;
 	}
 
 	/**
@@ -346,6 +357,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		if (!this._rowMap) {
 			Zotero.debug("Item row map didn't exist in itemTree.notify()");
+			return;
+		}
+
+		// Reset columns on custom column change
+		if(type === "itemtree" && action === "refresh") {
+			await this._resetColumns();
 			return;
 		}
 
@@ -1300,7 +1317,8 @@ var ItemTree = class ItemTree extends LibraryTree {
 				return (row.ref.isFeedItem && Zotero.Feeds.get(row.ref.libraryID).name) || "";
 			
 			default:
-				return row.ref.getField(field, false, true);
+				// Get from row.getField() to allow for custom fields
+				return row.getField(field, false, true);
 			}
 		}
 		
@@ -3165,6 +3183,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		
 		let columnsSettings = this._getColumnPrefs();
 
+		// Refresh columns from itemTreeColumns
 		const columns = this.getColumns();
 		let hasDefaultIn = columns.some(column => 'defaultIn' in column);
 		for (let column of columns) {
@@ -3193,7 +3212,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			// Initial hidden value
 			if (!("hidden" in column)) {
 				if (hasDefaultIn) {
-					column.hidden = !(column.defaultIn && column.defaultIn.has(visibilityGroup));
+					column.hidden = !(column.defaultIn && column.defaultIn.includes(visibilityGroup));
 				}
 				else {
 					column.hidden = false;
@@ -3573,7 +3592,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		let columnMenuitemElements = {};
 		for (let i = 0; i < columns.length; i++) {
 			const column = columns[i];
-			if (column.ignoreInColumnPicker === true) continue;
+			if (column.showInColumnPicker === false) continue;
 			let label = formatColumnName(column);
 			let menuitem = doc.createXULElement('menuitem');
 			menuitem.setAttribute('type', 'checkbox');
@@ -3604,7 +3623,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			let moreItems = [];
 			for (let i = 0; i < columns.length; i++) {
 				const column = columns[i];
-				if (column.submenu) {
+				if (column.columnPickerSubMenu) {
 					moreItems.push(columnMenuitemElements[column.dataKey]);
 				}
 			}
@@ -3815,6 +3834,15 @@ var ItemTree = class ItemTree extends LibraryTree {
 		}
 		return span;
 	}
+
+	async _resetColumns(){
+		this._columnsId = null;
+		return new Promise((resolve) => this.forceUpdate(async () => {
+			await this.tree._resetColumns();
+			await this.refreshAndMaintainSelection();
+			resolve();
+		}));
+	}
 };
 
 var ItemTreeRow = function(ref, level, isOpen)
@@ -3827,7 +3855,10 @@ var ItemTreeRow = function(ref, level, isOpen)
 
 ItemTreeRow.prototype.getField = function(field, unformatted)
 {
-	return this.ref.getField(field, unformatted, true);
+	if (!Zotero.ItemTreeManager.isCustomColumn(field)) {
+		return this.ref.getField(field, unformatted, true);
+	}
+	return Zotero.ItemTreeManager.getCustomCellData(this.ref, field);
 }
 
 ItemTreeRow.prototype.numNotes = function() {

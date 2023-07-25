@@ -154,6 +154,7 @@ const xpcomFilesLocal = [
 	'connector/httpIntegrationClient',
 	'connector/server_connector',
 	'connector/server_connectorIntegration',
+	'itemTreeManager',
 ];
 
 Components.utils.import("resource://gre/modules/ComponentUtils.jsm");

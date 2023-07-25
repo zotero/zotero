@@ -341,7 +341,7 @@ const Zotero_RTFScan = { // eslint-disable-line no-unused-vars, camelcase
 		}
 		else {				// mapped or unmapped citation, or ambiguous citation parent
 			var citation = row.rtf;
-			var io = { singleSelection: true };
+			var io = { singleSelection: true, itemTreeID: 'rtf-scan-select-item-dialog' };
 			if (this.citationItemIDs[citation] && this.citationItemIDs[citation].length == 1) {	// mapped citation
 				// specify that item should be selected in window
 				io.select = this.citationItemIDs[citation][0];

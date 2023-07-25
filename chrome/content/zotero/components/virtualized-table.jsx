@@ -1090,8 +1090,22 @@ class VirtualizedTable extends React.Component {
 		return this._getVisibleColumns().map((column, index) => {
 			let columnName = formatColumnName(column);
 			let label = columnName;
+			// Allow custom icons to be used in column headers
+			if (column.iconPath) {
+				column.iconLabel = <span
+					className="icon icon-bg"
+					style={{backgroundImage: `url("${column.iconPath}")`}}>
+				</span>;
+			}
 			if (column.iconLabel) {
 				label = column.iconLabel;
+			}
+			if (column.htmlLabel) {
+				if (React.isValidElement(column.htmlLabel)) {
+					label = column.htmlLabel;
+				} else if (typeof column.htmlLabel === "string") {
+					label = <span dangerouslySetInnerHTML={{ __html: column.htmlLabel }} />;
+				}
 			}
 			let resizer = (<Draggable
 				onDragStart={this._handleResizerDragStart.bind(this, index)}
@@ -1329,6 +1343,12 @@ class VirtualizedTable extends React.Component {
 		return row >= this._jsWindow.getFirstVisibleRow()
 			&& row <= this._jsWindow.getLastVisibleRow();
 	}
+
+	async _resetColumns() {
+		this.invalidate();
+		this._columns = new Columns(this);
+		await new Promise((resolve) => {this.forceUpdate(resolve)});
+	}
 }
 
 /**
@@ -1452,7 +1472,7 @@ var Columns = class {
 	}
 
 	_getColumnPrefsToPersist(column) {
-		let persistKeys = column.zoteroPersist;
+		let persistKeys = new Set(column.zoteroPersist); 
 		if (!persistKeys) persistKeys = new Set();
 		// Always persist
 		['ordinal', 'hidden', 'sortDirection'].forEach(k => persistKeys.add(k));
@@ -1585,7 +1605,7 @@ var Columns = class {
 					column.sortDirection *= -1;
 				}
 				else {
-					column.sortDirection = column.defaultSort || 1;
+					column.sortDirection = column.sortReverse ? -1 : 1;
 				}
 			}
 		});

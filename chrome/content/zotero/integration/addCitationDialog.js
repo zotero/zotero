@@ -138,6 +138,10 @@ var Zotero_Citation_Dialog = new function () {
 			i++;
 		}
 		menu.selectedIndex = pageLocatorIndex;
+
+		if (!io.itemTreeID) {
+			io.itemTreeID = "add-citation-select-item-dialog";
+		}
 		
 		// load (from selectItemsDialog.js)
 		yield doLoad();
