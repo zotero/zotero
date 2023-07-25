@@ -77,7 +77,7 @@ class ItemTreeManager {
 	 *     fixedWidth: true, // don't allow user to resize
 	 *     staticWidth: true, // don't allow column to be resized when the tree is resized
 	 *     minWidth: 50, // minimum width in pixels
-	 *     // iconPath: 'chrome://zotero/skin/tick.png', // icon to show in the column header
+	 *     iconPath: 'chrome://zotero/skin/tick.png', // icon to show in the column header
 	 *     htmlLabel: '<span style="color: red;">reversed title</span>', // use HTML in the label. This will override the label and iconPath property
 	 *     showInColumnPicker: true, // show in the column picker
 	 *     columnPickerSubMenu: true, // show in the column picker submenu
