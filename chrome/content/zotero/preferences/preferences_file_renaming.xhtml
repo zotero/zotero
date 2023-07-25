@@ -1,0 +1,61 @@
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright © Corporation for Digital Scholarship
+                Vienna, Virginia, USA
+                https://www.zotero.org
+    
+    This file is part of Zotero.
+    
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+    
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+    
+    ***** END LICENSE BLOCK *****
+-->
+<vbox class="main-section" id="zotero-prefpane-file-renaming" onload="Zotero_Preferences.FileRenaming.init()">
+	<html:h1 data-l10n-id="preferences-file-renaming-title" />
+	<label data-l10n-id="preferences-file-renaming-instructions" />
+	<separator class="thin" />
+	<label data-l10n-id="preferences-file-renaming-instructions-example" data-l10n-args='{"example": "{{ title truncate=\"50\" }}"}' />
+	<separator class="thin" />
+	<label data-l10n-id="preferences-file-renaming-instructions-more">
+		<label
+			is="zotero-text-link"
+			href="https://www.zotero.org/support/preferences/general#file_renaming"
+			data-l10n-name="file-renaming-help-link"
+		/>
+	</label>
+	<groupbox>
+		<html:label
+			for="file-renaming-template"
+			id="file-renaming-template-label"
+		>
+			<html:h2 data-l10n-id="preferences-file-renaming-template" />
+		</html:label>
+		<html:textarea
+			aria-labelledby="file-renaming-template-label"
+			id="file-renaming-template"
+			preference="extensions.zotero.attachmentRenameTemplate"
+			rows="3"
+		/>
+		<html:label id="file-renaming-preview-label">
+			<html:h2
+				data-l10n-id="preferences-file-renaming-preview"
+			/>
+		</html:label>
+		<html:span
+			aria-labelledby="file-renaming-preview-label"
+			id="file-renaming-preview"
+		/>
+	</groupbox>
+</vbox>

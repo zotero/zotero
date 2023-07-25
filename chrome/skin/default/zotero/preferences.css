@@ -568,6 +568,27 @@ button {
 	margin-bottom: .5em;
 }
 
+#zotero-prefpane-file-renaming label:not([is=zotero-text-link]),
+#zotero-prefpane-file-renaming div {
+	display: block;
+}
+
+#file-renaming-template {
+	width: 100%;
+	min-height: 1.25em;
+	padding: 0.25em;
+}
+
+#file-renaming-preview {
+	width: 100%;
+	padding: 0.25em;
+	font-family: monospace;
+}
+
+#file-renaming button {
+	font-size: 14px;
+}
+
 
 /* BEGIN 2X BLOCK -- DO NOT EDIT MANUALLY -- USE 2XIZE */
 @media (min-resolution: 1.25dppx) {

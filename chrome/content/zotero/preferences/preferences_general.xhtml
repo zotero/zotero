@@ -23,132 +23,139 @@
     ***** END LICENSE BLOCK *****
 -->
 <vbox id="zotero-prefpane-general" onload="Zotero_Preferences.General.init()">
-	<groupbox>
-		<label><html:h2>&zotero.preferences.interface;</html:h2></label>
+	<vbox class="main-section">
+		<groupbox>
+			<label><html:h2>&zotero.preferences.interface;</html:h2></label>
 
-		<hbox align="center">
-			<label value="&zotero.bibliography.locale.label;"/>
-			<menulist id="locale-menu"
-					onblur="if (!Zotero.isMac) Zotero_Preferences.General.onLocaleChange()"
-					native="true">
-				<menupopup onpopuphidden="Zotero_Preferences.General.onLocaleChange()"/>
-			</menulist>
-		</hbox>
-	</groupbox>
-
-	<groupbox id="zotero-prefpane-file-handling-groupbox">
-		<label><html:h2>&zotero.preferences.fileHandling;</html:h2></label>
-		
-		<vbox>
-			<checkbox id="automaticSnapshots-checkbox"
-				label="&zotero.preferences.automaticSnapshots;"
-				preference="extensions.zotero.automaticSnapshots"
-				native="true"/>
-			<checkbox label="&zotero.preferences.downloadAssociatedFiles;" preference="extensions.zotero.downloadAssociatedFiles" native="true"/>
-			<checkbox label="&zotero.preferences.autoRecognizeFiles;" preference="extensions.zotero.autoRecognizeFiles" native="true"/>
-			<checkbox label="&zotero.preferences.autoRenameFiles;"
-					preference="extensions.zotero.autoRenameFiles"
-					oncommand="Zotero_Preferences.General.updateAutoRenameFilesUI()" native="true"/>
-			<checkbox id="rename-linked-files" class="indented-pref"
-					label="&zotero.preferences.autoRenameFiles.renameLinked;"
-					preference="extensions.zotero.autoRenameFiles.linked"
-					oncommand="Zotero_Preferences.General.updateAutoRenameFilesUI()" native="true"/>
-		</vbox>
-		
-		<vbox>
 			<hbox align="center">
-				<label value="&zotero.preferences.fileHandler.openPDFsUsing;" control="file-handler-pdf"/>
-				<menulist id="fileHandler-pdf" class="fileHandler-menu" native="true">
-					<menupopup>
-						<menuitem id="fileHandler-internal"
-								oncommand="Zotero_Preferences.General.setFileHandler('pdf', '')"/>
-						<menuitem label="&zotero.preferences.fileHandler.systemDefault;"
-								oncommand="Zotero_Preferences.General.setFileHandler('pdf', 'system')"/>
-						<menuitem id="fileHandler-custom"/>
-						<menuitem label="&zotero.preferences.custom;"
-								oncommand="Zotero_Preferences.General.chooseFileHandler('pdf')"/>
+				<label value="&zotero.bibliography.locale.label;"/>
+				<menulist id="locale-menu"
+						onblur="if (!Zotero.isMac) Zotero_Preferences.General.onLocaleChange()"
+						native="true">
+					<menupopup onpopuphidden="Zotero_Preferences.General.onLocaleChange()"/>
+				</menulist>
+			</hbox>
+		</groupbox>
+
+		<groupbox id="zotero-prefpane-file-handling-groupbox">
+			<label><html:h2>&zotero.preferences.fileHandling;</html:h2></label>
+			
+			<vbox>
+				<checkbox id="automaticSnapshots-checkbox"
+					label="&zotero.preferences.automaticSnapshots;"
+					preference="extensions.zotero.automaticSnapshots"
+					native="true"/>
+				<checkbox label="&zotero.preferences.downloadAssociatedFiles;" preference="extensions.zotero.downloadAssociatedFiles" native="true"/>
+				<checkbox label="&zotero.preferences.autoRecognizeFiles;" preference="extensions.zotero.autoRecognizeFiles" native="true"/>
+				<checkbox label="&zotero.preferences.autoRenameFiles;"
+						preference="extensions.zotero.autoRenameFiles"
+						oncommand="Zotero_Preferences.General.updateAutoRenameFilesUI()" native="true"/>
+				<checkbox id="rename-linked-files" class="indented-pref"
+						label="&zotero.preferences.autoRenameFiles.renameLinked;"
+						preference="extensions.zotero.autoRenameFiles.linked"
+						oncommand="Zotero_Preferences.General.updateAutoRenameFilesUI()" native="true"/>
+			</vbox>
+			
+			<vbox>
+				<hbox align="center">
+					<label value="&zotero.preferences.fileHandler.openPDFsUsing;" control="file-handler-pdf"/>
+					<menulist id="fileHandler-pdf" class="fileHandler-menu" native="true">
+						<menupopup>
+							<menuitem id="fileHandler-internal"
+									oncommand="Zotero_Preferences.General.setFileHandler('pdf', '')"/>
+							<menuitem label="&zotero.preferences.fileHandler.systemDefault;"
+									oncommand="Zotero_Preferences.General.setFileHandler('pdf', 'system')"/>
+							<menuitem id="fileHandler-custom"/>
+							<menuitem label="&zotero.preferences.custom;"
+									oncommand="Zotero_Preferences.General.chooseFileHandler('pdf')"/>
+						</menupopup>
+					</menulist>
+				</hbox>
+				<checkbox id="open-reader-in-new-window" class="indented-pref"
+						label="&zotero.preferences.fileHandler.openReaderInNewWindow;"
+						preference="extensions.zotero.openReaderInNewWindow"
+						native="true"/>
+			</vbox>
+		</groupbox>
+
+		<groupbox>
+			<label><html:h2>&zotero.preferences.prefpane.locate;</html:h2></label>
+			
+			<hbox>
+				<menulist id="openurl-menu" native="true">
+					<menupopup
+							id="openurl-primary-popup"
+							onpopupshowing="Zotero_Preferences.General.handleOpenURLPopupShowing(event)"
+							oncommand="Zotero_Preferences.General.handleOpenURLSelected(event)">
+						<menuitem label="&zotero.preferences.openurl.choose;"/>
 					</menupopup>
 				</menulist>
 			</hbox>
-			<checkbox id="open-reader-in-new-window" class="indented-pref"
-					label="&zotero.preferences.fileHandler.openReaderInNewWindow;"
-					preference="extensions.zotero.openReaderInNewWindow"
-					native="true"/>
-		</vbox>
-	</groupbox>
-
-	<groupbox>
-		<label><html:h2>&zotero.preferences.prefpane.locate;</html:h2></label>
+			
+			<hbox style="display: flex; align-items: center;">
+				<label value="&zotero.preferences.openurl.server;"/>
+				<html:input type="text" id="openURLServerField" style="flex: 1;"
+					oninput="Zotero_Preferences.General.onOpenURLCustomized();"
+					preference="extensions.zotero.openURL.resolver"
+				/>
+			</hbox>
 		
-		<hbox>
-			<menulist id="openurl-menu" native="true">
-				<menupopup
-						id="openurl-primary-popup"
-						onpopupshowing="Zotero_Preferences.General.handleOpenURLPopupShowing(event)"
-						oncommand="Zotero_Preferences.General.handleOpenURLSelected(event)">
-					<menuitem label="&zotero.preferences.openurl.choose;"/>
-				</menupopup>
-			</menulist>
-		</hbox>
+			<hbox align="center">
+				<label value="&zotero.preferences.openurl.version;" control="openURLVersionMenu"/>
+				<menulist id="openURLVersionMenu"
+						oncommand="Zotero_Preferences.General.onOpenURLCustomized();"
+						preference="extensions.zotero.openURL.version"
+						native="true">
+					<menupopup>
+						<menuitem label="0.1" value="0.1"/>
+						<menuitem label="1.0" value="1.0"/>
+					</menupopup>
+				</menulist>
+			</hbox>
+		</groupbox>
 		
-		<hbox style="display: flex; align-items: center;">
-			<label value="&zotero.preferences.openurl.server;"/>
-			<html:input type="text" id="openURLServerField" style="flex: 1;"
-				oninput="Zotero_Preferences.General.onOpenURLCustomized();"
-				preference="extensions.zotero.openURL.resolver"
-			/>
-		</hbox>
-	
-		<hbox align="center">
-			<label value="&zotero.preferences.openurl.version;" control="openURLVersionMenu"/>
-			<menulist id="openURLVersionMenu"
-					oncommand="Zotero_Preferences.General.onOpenURLCustomized();"
-					preference="extensions.zotero.openURL.version"
-					native="true">
-				<menupopup>
-					<menuitem label="0.1" value="0.1"/>
-					<menuitem label="1.0" value="1.0"/>
-				</menupopup>
-			</menulist>
-		</hbox>
-	</groupbox>
-	
-	<groupbox id="zotero-prefpane-miscellaneous-groupbox">
-		<label><html:h2>&zotero.preferences.miscellaneous;</html:h2></label>
+		<groupbox id="zotero-prefpane-miscellaneous-groupbox">
+			<label><html:h2>&zotero.preferences.miscellaneous;</html:h2></label>
+			
+			<checkbox label="&zotero.preferences.automaticTags;" preference="extensions.zotero.automaticTags" native="true"/>
+			<hbox align="center">
+				<label value="&zotero.preferences.trashAutoEmptyDaysPre;"/>
+				<html:input type="text" size="2" preference="extensions.zotero.trashAutoEmptyDays"/>
+				<label value="&zotero.preferences.trashAutoEmptyDaysPost;"/>
+			</hbox>
+		</groupbox>
 		
-		<checkbox label="&zotero.preferences.automaticTags;" preference="extensions.zotero.automaticTags" native="true"/>
-		<hbox align="center">
-			<label value="&zotero.preferences.trashAutoEmptyDaysPre;"/>
-			<html:input type="text" size="2" preference="extensions.zotero.trashAutoEmptyDays"/>
-			<label value="&zotero.preferences.trashAutoEmptyDaysPost;"/>
-		</hbox>
-	</groupbox>
-	
-	<groupbox id="zotero-prefpane-reader-groupbox">
-		<label><html:h2>&zotero.preferences.pdfReader;</html:h2></label>
+		<groupbox id="zotero-prefpane-reader-groupbox">
+			<label><html:h2>&zotero.preferences.pdfReader;</html:h2></label>
+			
+			<hbox align="center">
+				<label value="&zotero.preferences.reader.tabsTitle.label;" control="reader-tabs-title"/>
+				<menulist id="reader-tabs-title" preference="extensions.zotero.tabs.title.reader" native="true">
+					<menupopup>
+						<menuitem label="&zotero.preferences.reader.tabsTitle.titleCreatorYear;" value="titleCreatorYear"/>
+						<menuitem label="&zotero.preferences.reader.tabsTitle.creatorYearTitle;" value="creatorYearTitle"/>
+						<menuitem label="&zotero.preferences.reader.tabsTitle.filename;" value="filename"/>
+					</menupopup>
+				</menulist>
+			</hbox>
+		</groupbox>
 		
-		<hbox align="center">
-			<label value="&zotero.preferences.reader.tabsTitle.label;" control="reader-tabs-title"/>
-			<menulist id="reader-tabs-title" preference="extensions.zotero.tabs.title.reader" native="true">
-				<menupopup>
-					<menuitem label="&zotero.preferences.reader.tabsTitle.titleCreatorYear;" value="titleCreatorYear"/>
-					<menuitem label="&zotero.preferences.reader.tabsTitle.creatorYearTitle;" value="creatorYearTitle"/>
-					<menuitem label="&zotero.preferences.reader.tabsTitle.filename;" value="filename"/>
-				</menupopup>
-			</menulist>
-		</hbox>
-	</groupbox>
-	
-	<groupbox>
-		<label><html:h2>&zotero.preferences.groups;</html:h2></label>
-		
-		<label value="&zotero.preferences.groups.whenCopyingInclude;"/>
-		<vbox style="margin-left: 2em">
-			<checkbox label="&zotero.preferences.groups.childNotes;" preference="extensions.zotero.groups.copyChildNotes" native="true"/>
-			<checkbox label="&zotero.preferences.groups.childFiles;" preference="extensions.zotero.groups.copyChildFileAttachments" native="true"/>
-			<checkbox label="&zotero.preferences.groups.annotations;" preference="extensions.zotero.groups.copyAnnotations" native="true"/>
-			<checkbox label="&zotero.preferences.groups.childLinks;" preference="extensions.zotero.groups.copyChildLinks" native="true"/>
-			<checkbox label="&zotero.preferences.groups.tags;" preference="extensions.zotero.groups.copyTags" native="true"/>
-		</vbox>
-	</groupbox>
+		<groupbox>
+			<label><html:h2>&zotero.preferences.groups;</html:h2></label>
+			
+			<label value="&zotero.preferences.groups.whenCopyingInclude;"/>
+			<vbox style="margin-left: 2em">
+				<checkbox label="&zotero.preferences.groups.childNotes;" preference="extensions.zotero.groups.copyChildNotes" native="true"/>
+				<checkbox label="&zotero.preferences.groups.childFiles;" preference="extensions.zotero.groups.copyChildFileAttachments" native="true"/>
+				<checkbox label="&zotero.preferences.groups.annotations;" preference="extensions.zotero.groups.copyAnnotations" native="true"/>
+				<checkbox label="&zotero.preferences.groups.childLinks;" preference="extensions.zotero.groups.copyChildLinks" native="true"/>
+				<checkbox label="&zotero.preferences.groups.tags;" preference="extensions.zotero.groups.copyTags" native="true"/>
+			</vbox>
+		</groupbox>
+	</vbox>
+	<vbox class="main-section" id="file-renaming" align="start">
+		<html:h1 data-l10n-id="preferences-file-renaming-title" />
+		<button data-l10n-id="preferences-show-file-renaming-button"
+			oncommand="Zotero_Preferences.navigateToPane('zotero-subpane-file-renaming')" />
+	</vbox>	
 </vbox>

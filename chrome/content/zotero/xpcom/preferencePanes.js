@@ -81,6 +81,15 @@ Zotero.PreferencePanes = {
 			scripts: ['chrome://zotero/content/preferences/preferences_sync.js'],
 			defaultXUL: true,
 			helpURL: 'https://www.zotero.org/support/preferences/sync#reset',
+		},
+		{
+			id: 'zotero-subpane-file-renaming',
+			parent: 'zotero-prefpane-general',
+			label: '',
+			src: 'chrome://zotero/content/preferences/preferences_file_renaming.xhtml',
+			scripts: ['chrome://zotero/content/preferences/preferences_file_renaming.js'],
+			defaultXUL: true,
+			helpURL: null,
 		}
 	]),
 
