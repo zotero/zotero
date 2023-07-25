@@ -5633,7 +5633,7 @@ var ZoteroPane = new function()
 	};
 	
 	
-	this.renameSelectedAttachmentsFromParents = Zotero.Promise.coroutine(function* () {
+	this.renameSelectedAttachmentsFromParents = async function () {
 		// TEMP: fix
 		
 		if (!this.canEdit()) {
@@ -5650,32 +5650,39 @@ var ZoteroPane = new function()
 				throw('Item ' + itemID + ' is not a child file attachment in ZoteroPane_Local.renameAttachmentFromParent()');
 			}
 			
-			var file = item.getFile();
+			var file = await item.getFilePathAsync();
 			if (!file) {
 				continue;
 			}
 			
 			let parentItemID = item.parentItemID;
-			let parentItem = yield Zotero.Items.getAsync(parentItemID);
+			let parentItem = await Zotero.Items.getAsync(parentItemID);
 			var newName = Zotero.Attachments.getFileBaseNameFromItem(parentItem);
 			
-			var ext = file.leafName.match(/\.[^\.]+$/);
+			let extRE = /\.[^\.]+$/;
+			let origFilename = file.split("/").pop();
+			let ext = origFilename.match(extRE);
 			if (ext) {
-				newName = newName + ext;
+				newName = newName + ext[0];
 			}
+			let origFilenameNoExt = origFilename.replace(extRE, '')
 			
-			var renamed = yield item.renameAttachmentFile(newName, false, true);
+			var renamed = await item.renameAttachmentFile(newName, false, true);
 			if (renamed !== true) {
 				Zotero.debug("Could not rename file (" + renamed + ")");
 				continue;
 			}
 			
-			item.setField('title', newName);
-			yield item.saveTx();
+			// If the attachment title matched the filename, change it now
+			let origTitle = item.getField('title');
+			if (origTitle == origFilename || origTitle == origFilenameNoExt) {
+				item.setField('title', newName);
+				await item.saveTx();
+			}
 		}
 		
 		return true;
-	});
+	};
 	
 	
 	this.convertLinkedFilesToStoredFiles = async function () {

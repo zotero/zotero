@@ -614,6 +614,51 @@ describe("ZoteroPane", function() {
 			assert.equal(OS.Path.basename(path), uniqueFilename)
 			await OS.File.exists(path);
 		});
+		
+		it("shouldn't change attachment title if different from filename", async function () {
+			var item = createUnsavedDataObject('item');
+			item.setField('title', 'Title');
+			await item.saveTx();
+			
+			var attachment = await importFileAttachment('test.png', { parentItemID: item.id });
+			attachment.setField('title', 'Image');
+			await attachment.saveTx();
+			await zp.selectItem(attachment.id);
+			
+			assert.isTrue(await zp.renameSelectedAttachmentsFromParents());
+			assert.equal(attachment.attachmentFilename, 'Title.png');
+			assert.equal(attachment.getField('title'), 'Image')
+		});
+		
+		it("should change attachment title if the same as filename", async function () {
+			var item = createUnsavedDataObject('item');
+			item.setField('title', 'Title');
+			await item.saveTx();
+			
+			var attachment = await importFileAttachment('test.png', { parentItemID: item.id });
+			attachment.setField('title', 'test.png');
+			await attachment.saveTx();
+			await zp.selectItem(attachment.id);
+			
+			assert.isTrue(await zp.renameSelectedAttachmentsFromParents());
+			assert.equal(attachment.attachmentFilename, 'Title.png');
+			assert.equal(attachment.getField('title'), 'Title.png')
+		});
+		
+		it("should change attachment title if the same as filename without extension", async function () {
+			var item = createUnsavedDataObject('item');
+			item.setField('title', 'Title');
+			await item.saveTx();
+			
+			var attachment = await importFileAttachment('test.png', { parentItemID: item.id });
+			attachment.setField('title', 'test');
+			await attachment.saveTx();
+			await zp.selectItem(attachment.id);
+			
+			assert.isTrue(await zp.renameSelectedAttachmentsFromParents());
+			assert.equal(attachment.attachmentFilename, 'Title.png');
+			assert.equal(attachment.getField('title'), 'Title.png')
+		});
 	});
 	
 	
