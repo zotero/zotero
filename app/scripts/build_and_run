@@ -45,7 +45,8 @@ if [ $REBUILD -eq 1 ]; then
 		echo "Running JS build process"
 		echo
 		cd $ROOT_DIR
-		npm run build
+		# TEMP: --openssl-legacy-provider avoids a build error in pdf.js
+		NODE_OPTIONS=--openssl-legacy-provider npm run build
 		echo
 	fi
 	
