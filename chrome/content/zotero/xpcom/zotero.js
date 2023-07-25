@@ -971,7 +971,7 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	
 	
 	this.openCheckForUpdatesWindow = function () {
-		Services.ww.openWindow(null, 'chrome://mozapps/content/update/updates.xul',
+		Services.ww.openWindow(null, 'chrome://zotero/content/update/updates.xhtml',
 			'updateChecker', 'chrome,centerscreen,modal', null);
 	};
 	
