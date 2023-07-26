@@ -87,6 +87,9 @@ var Zotero_Tabs = new function () {
 		const multipleTabsOpen = this._tabs.length > 1;
 		document.getElementById('cmd_close').setAttribute('disabled', multipleTabsOpen);
 		var { tab } = this._getTab(this._selectedID);
+		if (!tab) {
+			return;
+		}
 		document.title = (tab.title.length ? tab.title + ' - ' : '') + Zotero.appName;
 		this._updateTabBar();
 		// Hide any tab `title` tooltips that might be open
@@ -276,6 +279,7 @@ var Zotero_Tabs = new function () {
 			if (tab.id == this._prevSelectedID) {
 				this._prevSelectedID = null;
 			}
+			tabIndex = this._tabs.findIndex(x => x.id === id);
 			this._tabs.splice(tabIndex, 1);
 			document.getElementById(tab.id).remove();
 			// For unknown reason fx102, unlike 60, sometimes doesn't automatically update selected index
@@ -364,7 +368,9 @@ var Zotero_Tabs = new function () {
 		}
 		if (this._selectedID) {
 			let { tab: selectedTab } = this._getTab(this._selectedID);
-			selectedTab.timeUnselected = Zotero.Date.getUnixTimestamp();
+			if (selectedTab) {
+				selectedTab.timeUnselected = Zotero.Date.getUnixTimestamp();
+			}
 		}
 		if (tab.type === 'reader-unloaded') {
 			this.close(tab.id);
