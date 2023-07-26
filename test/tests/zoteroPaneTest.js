@@ -143,8 +143,9 @@ describe("ZoteroPane", function() {
 	describe("#viewAttachment", function () {
 		Components.utils.import("resource://zotero-unit/httpd.js");
 		var apiKey = Zotero.Utilities.randomString(24);
-		var testServerPort = 16213;
-		var maxTestServerPort = testServerPort + 10;
+		var testServerPortMin = 16213;
+		var testServerPortMax = testServerPort + 20;
+		var testServerPort = testServerPortMin;
 		var baseURL;
 		var httpd;
 		
@@ -204,11 +205,11 @@ describe("ZoteroPane", function() {
 		beforeEach(function* () {
 			// Cycle through ports to prevent NS_ERROR_SOCKET_ADDRESS_IN_USE errors from server
 			// not always fully stopping in time
-			if (testServerPort < maxTestServerPort) {
+			if (testServerPort < testServerPortMax) {
 				testServerPort++;
 			}
 			else {
-				testServerPort--;
+				testServerPort = testServerPortMin;
 			}
 			baseURL = `http://localhost:${testServerPort}/`;
 			Zotero.Prefs.set("api.url", baseURL);
