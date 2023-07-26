@@ -21,6 +21,17 @@ hdr_stop=`tput rmul`
 echo "${hdr_start}Checking build requirements:${hdr_stop}"
 echo
 
+echo -n "Checking for Node.js: "
+which node || { $FAIL_CMD_INLINE; FAILED=1; }
+node_version=$(node -v | cut -c 2-)
+echo -n "Checking Node version: $node_version"
+if [ $(echo $node_version | cut -d '.' -f1 ) -ge "18" ]; then
+	echo
+else
+	echo -n " -- must be 18 or later "
+	{ $FAIL_CMD; FAILED=1;  }
+fi
+
 echo -n "Checking for Git LFS: "
 which git-lfs || { $FAIL_CMD_INLINE; FAILED=1; }
 
