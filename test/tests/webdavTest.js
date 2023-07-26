@@ -123,10 +123,8 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		return engine;
 	})
 	
-	afterEach(function* () {
-		var defer = new Zotero.Promise.defer();
-		this.httpd.stop(() => defer.resolve());
-		yield defer.promise;
+	afterEach(async function () {
+		await new Promise(request => this.httpd.stop(request));
 	})
 	
 	after(function* () {
@@ -141,14 +139,6 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 	// Tests
 	//
 	describe("Syncing", function () {
-		beforeEach(function* () {
-			win = yield loadZoteroPane();
-		})
-		
-		afterEach(function () {
-			win.close();
-		})
-		
 		it("should skip downloads if not marked as needed", function* () {
 			var engine = yield setup();
 			
