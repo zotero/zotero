@@ -216,6 +216,21 @@ Zotero.Plugins = new function () {
 	};
 	
 	
+	/**
+	 * Resolve a URI in the context of a plugin. If the passed URI is relative, it will be resolved relative to the
+	 * plugin root URI. If it's absolute, it will be returned unchanged.
+	 *
+	 * @param {String} id Plugin ID
+	 * @param {String | URL} uri
+	 * @throws {TypeError} On an invalid URI
+	 * @return {Promise<String>}
+	 */
+	this.resolveURI = async function (id, uri) {
+		// We can't use addon.getResourceURI(path) here because that only accepts a relative path
+		return new URL(uri, await this.getRootURI(id)).href;
+	};
+	
+	
 	this.getName = async function (id) {
 		var addon = await AddonManager.getAddonByID(id);
 		return addon.name;

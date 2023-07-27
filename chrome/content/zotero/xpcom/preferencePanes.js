@@ -96,15 +96,17 @@ Zotero.PreferencePanes = {
 	 *
 	 * @param {Object} options
 	 * @param {String} options.pluginID ID of the plugin registering the pane
-	 * @param {String} options.src URI of an XHTML fragment
+	 * @param {String} options.src URI of an XHTML fragment, optionally relative to the plugin's root
 	 * @param {String} [options.id] Represents the pane and must be unique. Automatically generated if not provided
 	 * @param {String} [options.parent] ID of parent pane (if provided, pane is hidden from the sidebar)
 	 * @param {String} [options.label] Displayed as the pane's label in the sidebar.
 	 * 		If not provided, the plugin's name is used
-	 * @param {String} [options.image] URI of an icon to be displayed in the navigation sidebar.
-	 * 		If not provided, the plugin's icon (from manifest.json) is used
-	 * @param {String[]} [options.scripts] Array of URIs of scripts to load along with the pane
-	 * @param {String[]} [options.stylesheets] Array of URIs of CSS stylesheets to load along with the pane
+	 * @param {String} [options.image] URI of an icon to be displayed in the navigation sidebar, optionally relative to
+	 * 		the plugin's root. If not provided, the plugin's icon (from manifest.json) is used.
+	 * @param {String[]} [options.scripts] Array of URIs of scripts to load along with the pane, optionally relative to
+	 * 		the plugin's root
+	 * @param {String[]} [options.stylesheets] Array of URIs of CSS stylesheets to load along with the pane, optionally
+	 * 		relative to the plugin's root
 	 * @param {String[]} [options.helpURL] If provided, a help button will be displayed under the pane
 	 * 		and the provided URL will open when it is clicked
 	 * @return {Promise<String>} Resolves to the ID of the pane if successfully added
@@ -123,10 +125,11 @@ Zotero.PreferencePanes = {
 			pluginID: options.pluginID,
 			parent: options.parent,
 			rawLabel: options.label || await Zotero.Plugins.getName(options.pluginID),
-			image: options.image || await Zotero.Plugins.getIconURI(options.pluginID, 24),
-			src: options.src,
-			scripts: options.scripts,
-			stylesheets: options.stylesheets,
+			image: options.image && await Zotero.Plugins.resolveURI(options.pluginID, options.image)
+				|| await Zotero.Plugins.getIconURI(options.pluginID, 24),
+			src: await Zotero.Plugins.resolveURI(options.pluginID, options.src),
+			scripts: await Promise.all(options.scripts.map(uri => Zotero.Plugins.resolveURI(options.pluginID, uri))),
+			stylesheets: await Promise.all(options.stylesheets.map(uri => Zotero.Plugins.resolveURI(options.pluginID, uri))),
 			helpURL: options.helpURL,
 			defaultXUL: true,
 		};
