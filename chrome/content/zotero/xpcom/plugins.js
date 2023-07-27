@@ -46,8 +46,11 @@ Zotero.Plugins = new function () {
 	this.init = async function () {
 		this._addonObserver.init();
 		
-		var { addons } = await AddonManager.getActiveAddons(["extension"]);
+		// In Fx102, getActiveAddons(["extension"]) doesn't always return fully loaded addon objects
+		// if getAllAddons() hasn't been called, so use getAllAddons() and do the checks ourselves
+		var addons = await AddonManager.getAllAddons();
 		for (let addon of addons) {
+			if (addon.type != 'extension' || !addon.isActive) continue;
 			addonVersions.set(addon.id, addon.version);
 			_loadScope(addon);
 			setDefaultPrefs(addon);
