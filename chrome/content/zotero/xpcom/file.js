@@ -999,6 +999,10 @@ Zotero.File = new function(){
 		file = this.pathToFile(file);
 		newFile = this.pathToFile(newFile);
 		
+		if (file.contains(newFile)) {
+			throw new Error("Can't copy file into itself");
+		}
+		
 		newFile.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0o644);
 		var newName = newFile.leafName;
 		newFile.remove(null);
