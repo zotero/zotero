@@ -103,10 +103,11 @@ Zotero.Plugins = new function () {
 			scope,
 			{
 				Zotero,
-				Localization,
 				ChromeWorker,
+				Localization,
 				Services,
 				Worker,
+				XMLSerializer,
 			}
 		);
 		// Add additional global functions
