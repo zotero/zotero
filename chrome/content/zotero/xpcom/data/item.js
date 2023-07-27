@@ -2801,6 +2801,9 @@ Zotero.Item.prototype.renameAttachmentFile = async function (newName, overwrite 
 				unique
 			}
 		);
+		if (newName === false) {
+			return -1;
+		}
 		let destPath = OS.Path.join(OS.Path.dirname(origPath), newName);
 		
 		await this.relinkAttachmentFile(destPath);
