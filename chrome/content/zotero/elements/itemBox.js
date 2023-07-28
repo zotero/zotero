@@ -610,7 +610,7 @@
 						th.classList.add("pointer");
 						th.addEventListener('click', event => ZoteroPane_Local.loadURI(doi, event));
 						th.setAttribute('title', Zotero.getString('pane.item.viewOnline.tooltip'));
-						this._id('zotero-doi-menu').setAttribute('data-doi', doi);
+						this._doiMenu.setAttribute('data-doi', doi);
 					}
 				}
 				else if (fieldName == 'abstractNote') {
