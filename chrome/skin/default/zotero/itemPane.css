@@ -76,13 +76,8 @@
 	margin: 8px 0 0 0;
 }
 
-#zotero-duplicates-merge-item-box {
+#zotero-duplicates-merge-item-box-container {
 	overflow-y: scroll;
-}
-
-#zotero-duplicates-merge-item-box row
-{
-	min-height: 20px;
 }
 
 #zotero-feed-item-toggleRead-button {

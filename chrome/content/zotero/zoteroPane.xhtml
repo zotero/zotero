@@ -1114,7 +1114,7 @@
 											</groupbox>
 											
 											<!-- Duplicate merging -->
-											<vbox id="zotero-duplicates-merge-pane" flex="1">
+											<vbox id="zotero-duplicates-merge-pane">
 												<groupbox>
 													<button id="zotero-duplicates-merge-button" oncommand="Zotero_Duplicates_Pane.merge()"/>
 												</groupbox>
@@ -1128,7 +1128,9 @@
 												
 												<groupbox flex="1">
 													<description id="zotero-duplicates-merge-field-select">&zotero.duplicatesMerge.fieldSelect;</description>
-													<item-box id="zotero-duplicates-merge-item-box" flex="1"/>
+													<vbox id="zotero-duplicates-merge-item-box-container" flex="1">
+														<item-box id="zotero-duplicates-merge-item-box" flex="1"/>
+													</vbox>
 												</groupbox>
 											</vbox>
 										</deck>
