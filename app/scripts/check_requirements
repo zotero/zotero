@@ -71,6 +71,9 @@ which xz || { $FAIL_CMD; FAILED=1; }
 echo -n "Checking for awk: "
 which awk || { $FAIL_CMD; FAILED=1; }
 
+echo -n "Checking for rsync: "
+which rsync || { $FAIL_CMD; FAILED=1; }
+
 if [ $platform = "w" ]; then
 	echo -n "Checking for 7z: "
 	which 7z || { $FAIL_CMD; FAILED=1; }
