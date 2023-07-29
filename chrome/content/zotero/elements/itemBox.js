@@ -476,7 +476,7 @@
 				this.itemTypeMenu.parentNode.parentNode.style.display = 'none';
 			}
 
-			this._doiMenu.removeAttribute('data-doi');
+			delete this._doiMenu.dataset.doi;
 			
 			//
 			// Clear and rebuild metadata fields
@@ -614,7 +614,7 @@
 						th.classList.add("pointer");
 						th.addEventListener('click', event => ZoteroPane_Local.loadURI(doi, event));
 						th.setAttribute('title', Zotero.getString('pane.item.viewOnline.tooltip'));
-						this._doiMenu.setAttribute('data-doi', doi);
+						this._doiMenu.dataset.doi = doi;
 					}
 				}
 				else if (fieldName == 'abstractNote') {
