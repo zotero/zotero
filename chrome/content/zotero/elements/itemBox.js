@@ -204,6 +204,21 @@
 			this._id('creator-transform-capitalize').addEventListener('command',
 				event => this.capitalizeCreatorName(event));
 			
+			this._doiMenu.addEventListener('popupshowing', () => {
+				let disabled = !this._doiMenu.dataset.doi;
+				this._id('zotero-doi-menu-view-online').disabled = disabled;
+				this._id('zotero-doi-menu-copy').disabled = disabled;
+			});
+			
+			this._id('zotero-doi-menu-view-online').addEventListener(
+				'command',
+				event => ZoteroPane_Local.loadURI(this._doiMenu.dataset.doi, event)
+			);
+			this._id('zotero-doi-menu-copy').addEventListener(
+				'command',
+				() => Zotero.Utilities.Internal.copyTextToClipboard(this._doiMenu.dataset.doi)
+			);
+
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'itemBox');
 		}
 		
@@ -414,6 +429,10 @@
 			return '(' + Zotero.getString('pane.item.defaultFullName') + ')';
 		}
 		
+		get _doiMenu() {
+			return this._id('zotero-doi-menu');
+		}
+		
 		
 		//
 		// Methods
@@ -456,6 +475,8 @@
 			else {
 				this.itemTypeMenu.parentNode.parentNode.style.display = 'none';
 			}
+
+			delete this._doiMenu.dataset.doi;
 			
 			//
 			// Clear and rebuild metadata fields
@@ -593,12 +614,7 @@
 						th.classList.add("pointer");
 						th.addEventListener('click', event => ZoteroPane_Local.loadURI(doi, event));
 						th.setAttribute('title', Zotero.getString('pane.item.viewOnline.tooltip'));
-						
-						var openURLMenuItem = this._id('zotero-doi-menu-view-online');
-						openURLMenuItem.addEventListener('command', event => ZoteroPane_Local.loadURI(doi, event));
-						
-						var copyMenuItem = this._id('zotero-doi-menu-copy');
-						copyMenuItem.addEventListener('command', () => Zotero.Utilities.Internal.copyTextToClipboard(doi));
+						this._doiMenu.dataset.doi = doi;
 					}
 				}
 				else if (fieldName == 'abstractNote') {
