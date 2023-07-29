@@ -26,12 +26,10 @@
 
 Zotero.Plugins = new function () {
 	var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
-	// eslint-disable-next-line no-unused-vars
-	var { XPIInstall } = ChromeUtils.import("resource://gre/modules/addons/XPIInstall.jsm");
 	var scopes = new Map();
 	var observers = new Set();
 	var addonVersions = new Map();
-
+	
 	const REASONS = {
 		APP_STARTUP: 1,
 		APP_SHUTDOWN: 2,
@@ -44,11 +42,11 @@ Zotero.Plugins = new function () {
 		MAIN_WINDOW_LOAD: 9,
 		MAIN_WINDOW_UNLOAD: 10,
 	};
-
-
+	
+	
 	this.init = async function () {
 		this._addonObserver.init();
-
+		
 		// In Fx102, getActiveAddons(["extension"]) doesn't always return fully loaded addon objects
 		// if getAllAddons() hasn't been called, so use getAllAddons() and do the checks ourselves
 		var addons = await AddonManager.getAllAddons();
@@ -60,7 +58,7 @@ Zotero.Plugins = new function () {
 			registerLocales(addon);
 			await _callMethod(addon, 'startup', REASONS.APP_STARTUP);
 		}
-
+		
 		Zotero.addShutdownListener(async () => {
 			var { addons } = await AddonManager.getActiveAddons(["extension"]);
 			for (let addon of addons) {
@@ -69,10 +67,8 @@ Zotero.Plugins = new function () {
 		});
 
 		const mainWindowListener = {
-			onOpenWindow: function (aWindow) {
-				const domWindow = aWindow
-					.QueryInterface(Ci.nsIInterfaceRequestor)
-					.getInterface(Ci.nsIDOMWindowInternal || Ci.nsIDOMWindow);
+			onOpenWindow: function (xulWindow) {
+				let domWindow = xulWindow.docShell.domWindow;
 				async function onload() {
 					domWindow.removeEventListener("load", onload, false);
 					if (
@@ -81,42 +77,36 @@ Zotero.Plugins = new function () {
 					) {
 						return;
 					}
-					const { addons } = await AddonManager.getActiveAddons(["extension"]);
-					for (const addon of addons) {
+					let { addons } = await AddonManager.getActiveAddons(["extension"]);
+					for (let addon of addons) {
 						await _callMethod(addon, 'onMainWindowLoad', REASONS.MAIN_WINDOW_LOAD, { window: domWindow });
 					}
 				}
-				domWindow.addEventListener(
-					"load",
-					onload,
-					false,
-				);
+				domWindow.addEventListener("load", onload, false);
 			},
-			onCloseWindow: async function (aWindow) {
-				const domWindow = aWindow
-					.QueryInterface(Ci.nsIInterfaceRequestor)
-					.getInterface(Ci.nsIDOMWindowInternal || Ci.nsIDOMWindow);
+			onCloseWindow: async function (xulWindow) {
+				let domWindow = xulWindow.docShell.domWindow;
 				if (
 					domWindow.location.href !== "chrome://zotero/content/zoteroPane.xhtml"
 				) {
 					return;
 				}
-				for (const addon of addons) {
+				let { addons } = await AddonManager.getActiveAddons(["extension"]);
+				for (let addon of addons) {
 					await _callMethod(addon, 'onMainWindowUnload', REASONS.MAIN_WINDOW_LOAD, { window: domWindow });
 				}
 			},
 		};
 		Services.wm.addListener(mainWindowListener);
 	};
-
-
+	
+	
 	/**
 	 * Adapted from loadBootstrapScope() in Firefox 60 ESR
 	 *
 	 * https://searchfox.org/mozilla-esr60/source/toolkit/mozapps/extensions/internal/XPIProvider.jsm#4233
 	 */
 	function _loadScope(addon) {
-		// eslint-disable-next-line no-undef
 		var scope = new Cu.Sandbox(
 			Services.scriptSecurityManager.getSystemPrincipal(),
 			{
@@ -147,9 +137,7 @@ Zotero.Plugins = new function () {
 			scope,
 			{
 				Zotero,
-				// eslint-disable-next-line no-undef
 				ChromeWorker,
-				// eslint-disable-next-line no-undef
 				Localization,
 				Services,
 				Worker,
@@ -163,9 +151,9 @@ Zotero.Plugins = new function () {
 		scope.clearInterval = clearInterval;
 		scope.requestIdleCallback = requestIdleCallback;
 		scope.cancelIdleCallback = cancelIdleCallback;
-
+		
 		scopes.set(addon.id, scope);
-
+		
 		var uri = addon.getResourceURI().spec + 'bootstrap.js';
 		Services.scriptloader.loadSubScriptWithOptions(
 			uri,
@@ -175,8 +163,8 @@ Zotero.Plugins = new function () {
 			}
 		);
 	}
-
-
+	
+	
 	/**
 	 * Adapted from callBootstrapMethod() in Firefox 60 ESR
 	 *
@@ -187,21 +175,20 @@ Zotero.Plugins = new function () {
 			let id = addon.id;
 			Zotero.debug(`Calling bootstrap method '${method}' for plugin ${id} `
 				+ `version ${addon.version} with reason ${_getReasonName(reason)}`);
-
+			
 			let scope = scopes.get(id);
-
+			
 			let func;
 			try {
-				// eslint-disable-next-line no-undef
 				func = scope[method] || Cu.evalInSandbox(`${method};`, scope);
 			}
-			catch (e) { }
-
+			catch (e) {}
+			
 			if (!func) {
 				Zotero.warn(`Plugin ${id} is missing bootstrap method '${method}'`);
 				return;
 			}
-
+			
 			let params = {
 				id: addon.id,
 				version: addon.version,
@@ -247,8 +234,8 @@ Zotero.Plugins = new function () {
 			Zotero.logError(e);
 		}
 	}
-
-
+	
+	
 	function _getReasonName(reason) {
 		for (let i in REASONS) {
 			if (reason == REASONS[i]) {
@@ -257,19 +244,19 @@ Zotero.Plugins = new function () {
 		}
 		return "UNKNOWN";
 	}
-
-
+	
+	
 	function _unloadScope(id) {
 		scopes.delete(id);
 	}
-
-
+	
+	
 	this.getRootURI = async function (id) {
 		var addon = await AddonManager.getAddonByID(id);
 		return addon.getResourceURI().spec;
 	};
-
-
+	
+	
 	/**
 	 * Resolve a URI in the context of a plugin. If the passed URI is relative, it will be resolved relative to the
 	 * plugin root URI. If it's absolute, it will be returned unchanged.
@@ -283,8 +270,8 @@ Zotero.Plugins = new function () {
 		// We can't use addon.getResourceURI(path) here because that only accepts a relative path
 		return new URL(uri, await this.getRootURI(id)).href;
 	};
-
-
+	
+	
 	this.getName = async function (id) {
 		var addon = await AddonManager.getAddonByID(id);
 		return addon.name;
@@ -300,8 +287,8 @@ Zotero.Plugins = new function () {
 		var addon = await AddonManager.getAddonByID(id);
 		return AddonManager.getPreferredIconURL(addon, idealSize, Services.appShell.hiddenDOMWindow);
 	};
-
-
+	
+	
 	function setDefaultPrefs(addon) {
 		var branch = Services.prefs.getDefaultBranch("");
 		var obj = {
@@ -333,8 +320,8 @@ Zotero.Plugins = new function () {
 			}
 		}
 	}
-
-
+	
+	
 	function clearDefaultPrefs(addon) {
 		var branch = Services.prefs.getDefaultBranch("");
 		var obj = {
@@ -356,8 +343,8 @@ Zotero.Plugins = new function () {
 			}
 		}
 	}
-
-
+	
+	
 	// Automatically register l10n sources for enabled plugins.
 	//
 	// A Fluent file located at
@@ -368,31 +355,28 @@ Zotero.Plugins = new function () {
 	// If a plugin doesn't have a subdirectory for the active locale, en-US strings
 	// will be used as a fallback.
 	function registerLocales(addon) {
-		// eslint-disable-next-line no-undef
 		let source = new L10nFileSource(
 			addon.id,
 			'app',
 			Services.locale.availableLocales,
 			addon.getResourceURI().spec + 'locale/{locale}/',
 		);
-		// eslint-disable-next-line no-undef
 		L10nRegistry.getInstance().registerSources([source]);
 	}
-
-
+	
+	
 	function unregisterLocales(addon) {
-		// eslint-disable-next-line no-undef
 		L10nRegistry.getInstance().removeSources([addon.id]);
 	}
-
-
+	
+	
 	function getVersionChangeReason(oldVersion, newVersion) {
 		return Zotero.Utilities.semverCompare(oldVersion, newVersion) <= 0
 			? REASONS.ADDON_UPGRADE
 			: REASONS.ADDON_DOWNGRADE;
 	}
-
-
+	
+	
 	/**
 	 * Add an observer to be notified of lifecycle events on all plugins.
 	 *
@@ -405,28 +389,28 @@ Zotero.Plugins = new function () {
 	this.addObserver = function (observer) {
 		observers.add(observer);
 	};
-
-
+	
+	
 	this.removeObserver = function (observer) {
 		observers.delete(observer);
 	};
-
-
+	
+	
 	this._addonObserver = {
 		initialized: false,
-
+		
 		uninstalling: new Set(),
-
+		
 		init() {
 			if (!this.initialized) {
 				AddonManager.addAddonListener(this);
 				this.initialized = true;
 			}
 		},
-
+		
 		async onInstalling(addon) {
 			Zotero.debug("Installing plugin " + addon.id);
-
+			
 			var currentVersion = addonVersions.get(addon.id);
 			if (currentVersion) {
 				let existingAddon = await AddonManager.getAddonByID(addon.id);
@@ -438,20 +422,20 @@ Zotero.Plugins = new function () {
 				Services.obs.notifyObservers(null, "startupcache-invalidate");
 			}
 		},
-
+		
 		async onInstalled(addon) {
 			if (addon.type !== "extension") {
 				return;
 			}
 			Zotero.debug("Installed plugin " + addon.id);
-
+			
 			// Determine if this is a new install, an upgrade, or a downgrade
 			let previousVersion = addonVersions.get(addon.id);
 			let reason = previousVersion
 				? getVersionChangeReason(previousVersion, addon.version)
 				: REASONS.ADDON_INSTALL;
 			addonVersions.set(addon.id, addon.version);
-
+			
 			_loadScope(addon);
 			setDefaultPrefs(addon);
 			registerLocales(addon);
@@ -460,7 +444,7 @@ Zotero.Plugins = new function () {
 				await _callMethod(addon, 'startup', reason);
 			}
 		},
-
+		
 		async onEnabling(addon) {
 			if (addon.type !== "extension") {
 				return;
@@ -470,7 +454,7 @@ Zotero.Plugins = new function () {
 			registerLocales(addon);
 			await _callMethod(addon, 'startup', REASONS.ADDON_ENABLE);
 		},
-
+		
 		async onDisabled(addon) {
 			if (addon.type !== "extension") {
 				return;
@@ -480,7 +464,7 @@ Zotero.Plugins = new function () {
 			unregisterLocales(addon);
 			clearDefaultPrefs(addon);
 		},
-
+		
 		async onUninstalling(addon) {
 			Zotero.debug("Uninstalling plugin " + addon.id);
 			this.uninstalling.add(addon.id);
@@ -492,13 +476,13 @@ Zotero.Plugins = new function () {
 			unregisterLocales(addon);
 			clearDefaultPrefs(addon);
 		},
-
+		
 		async onUninstalled(addon) {
 			Zotero.debug("Uninstalled plugin " + addon.id);
 			_unloadScope(addon.id);
 			addonVersions.delete(addon.id);
 		},
-
+		
 		async onOperationCancelled(addon) {
 			if (!this.uninstalling.has(addon.id) || addon.type !== "extension") {
 				return;
