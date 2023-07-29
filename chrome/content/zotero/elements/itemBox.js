@@ -205,15 +205,19 @@
 				event => this.capitalizeCreatorName(event));
 			
 			this._doiMenu.addEventListener('popupshowing', () => {
-				let disabled = !this._doiMenu.getAttribute('data-doi');
-				this._id('zotero-doi-menu-view-online').setAttribute('disabled', disabled);
-				this._id('zotero-doi-menu-copy').setAttribute('disabled', disabled);
+				let disabled = !this._doiMenu.dataset.doi;
+				this._id('zotero-doi-menu-view-online').disabled = disabled;
+				this._id('zotero-doi-menu-copy').disabled = disabled;
 			});
 			
-			this._id('zotero-doi-menu-view-online').addEventListener('command',
-					event => ZoteroPane_Local.loadURI(this._doiMenu.getAttribute('data-doi'), event));
-			this._id('zotero-doi-menu-copy').addEventListener('command',
-				() => Zotero.Utilities.Internal.copyTextToClipboard(this._doiMenu.getAttribute('data-doi')));
+			this._id('zotero-doi-menu-view-online').addEventListener(
+				'command',
+				event => ZoteroPane_Local.loadURI(this._doiMenu.dataset.doi, event)
+			);
+			this._id('zotero-doi-menu-copy').addEventListener(
+				'command',
+				() => Zotero.Utilities.Internal.copyTextToClipboard(this._doiMenu.dataset.doi)
+			);
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'itemBox');
 		}
