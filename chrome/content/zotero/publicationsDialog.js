@@ -130,8 +130,9 @@ const Zotero_Publications_Dialog = { // eslint-disable-line no-unused-vars, came
 	onFinish() {
 		this.io.includeFiles = id('include-files').checked;
 		this.io.includeNotes = id('include-notes').checked;
-		this.io.keepRights = id('keep-rights-checkbox').checked;
+		this.io.keepRights = true;
 		if (this.wizard.currentPage.pageid !== 'intro') {
+			this.io.keepRights = id('keep-rights-checkbox').checked;
 			this.io.license = getLicense(
 				id('sharing-radiogroup').selectedItem.value,
 				id('choose-adaptations').selectedItem.value,

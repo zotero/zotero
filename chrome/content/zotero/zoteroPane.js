@@ -5009,7 +5009,7 @@ var ZoteroPane = new function()
 			if (!io.hasFiles && item.numAttachments()) {
 				let attachmentIDs = item.getAttachments();
 				io.hasFiles = Zotero.Items.get(attachmentIDs).some(
-					attachment => attachment.isFileAttachment()
+					attachment => attachment.isStoredFileAttachment()
 				);
 			}
 			// Notes
@@ -5026,7 +5026,7 @@ var ZoteroPane = new function()
 		}
 		io.hasRights = allItemsHaveRights ? 'all' : (noItemsHaveRights ? 'none' : 'some');
 		window.openDialog('chrome://zotero/content/publicationsDialog.xhtml','','chrome,modal', io);
-		return io.license ? io : false;
+		return io.keepRights !== undefined ? io : false;
 	};
 	
 	
