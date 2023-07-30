@@ -119,6 +119,9 @@ Zotero.PreferencePanes = {
 				|| this.pluginPanes.some(p => p.id === options.id))) {
 			throw new Error(`Pane with ID ${options.id} already registered`);
 		}
+		
+		options.scripts ||= [];
+		options.stylesheets ||= [];
 
 		let addPaneOptions = {
 			id: options.id || `plugin-pane-${Zotero.Utilities.randomString()}-${options.pluginID}`,
