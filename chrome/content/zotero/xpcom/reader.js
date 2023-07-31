@@ -25,6 +25,11 @@
 
 import FilePicker from 'zotero/modules/filePicker';
 
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Invalid_array_length
+const ARRAYBUFFER_MAX_LENGTH = Services.appinfo.is64Bit
+	? Math.pow(2, 33)
+	: Math.pow(2, 32) - 1;
+
 class ReaderInstance {
 	constructor(options) {
 		this.stateFileName = '.zotero-reader-state';
@@ -132,20 +137,10 @@ class ReaderInstance {
 	async _open({ state, location, secondViewState }) {
 		// Set `ReaderTab` title as fast as possible
 		this.updateTitle();
-		let path = await this._item.getFilePathAsync();
-		// Check file size, otherwise we get uncatchable error:
-		// JavaScript error: resource://gre/modules/osfile/osfile_native.jsm, line 60: RangeError: invalid array length
-		// See more https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Invalid_array_length
-		let fileSize = (await OS.File.stat(path)).size;
-		// Max ArrayBuffer size before fx89 is 2GB-1 bytes
-		if (fileSize > Math.pow(2, 31) - 1) {
-			throw new Error(`The file "${path}" is too large`);
-		}
-		let buf = await OS.File.read(path, {});
-		buf = new Uint8Array(buf).buffer;
+
+		let data = await this._getData();
 		let annotationItems = this._item.getAnnotations();
 		let annotations = (await Promise.all(annotationItems.map(x => this._getAnnotation(x)))).filter(x => x);
-		let resourceBaseURI = `zotero://attachment/${Zotero.API.getLibraryPrefix(this._item.libraryID)}/items/${this._item.key}/`;
 
 		// TODO: Remove after some time
 		// Migrate Mendeley colors to Zotero PDF reader colors
@@ -186,9 +181,8 @@ class ReaderInstance {
 
 		this._internalReader = this._iframeWindow.wrappedJSObject.createReader(Components.utils.cloneInto({
 			type: this._type,
-			buf: new Uint8Array(buf),
+			data,
 			annotations,
-			resourceBaseURI,
 			primaryViewState: state,
 			secondaryViewState: secondViewState,
 			location,
@@ -511,6 +505,27 @@ class ReaderInstance {
 		return true;
 	}
 
+	async _getData() {
+		let item = Zotero.Items.get(this._item.id);
+		let path = await item.getFilePathAsync();
+		// Check file size, otherwise we get uncatchable error:
+		// JavaScript error: resource://gre/modules/osfile/osfile_native.jsm, line 60: RangeError: invalid array length
+		// See more https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Invalid_array_length
+		let fileSize = (await OS.File.stat(path)).size;
+		if (fileSize > ARRAYBUFFER_MAX_LENGTH) {
+			throw new Error(`The file "${path}" is too large`);
+		}
+		let buf = await OS.File.read(path, {});
+		// TODO during buf -> data object migration: Do we actually need to get the underlying buffer and wrap it
+		//   in a new Uint8Array?
+		buf = new Uint8Array(new Uint8Array(buf).buffer);
+		let baseURI = `zotero://attachment/${Zotero.API.getLibraryPrefix(item.libraryID)}/items/${item.key}/`;
+		return {
+			buf,
+			baseURI
+		};
+	}
+
 	uninit() {
 		if (this._prefObserverIDs) {
 			this._prefObserverIDs.forEach(id => Zotero.Prefs.unregisterObserver(id));
@@ -643,11 +658,8 @@ class ReaderInstance {
 	}
 
 	async reload() {
-		let item = Zotero.Items.get(this._item.id);
-		let path = await item.getFilePathAsync();
-		let buf = await OS.File.read(path, {});
-		buf = new Uint8Array(buf).buffer;
-		this._internalReader.reload(Components.utils.cloneInto(buf, this._iframeWindow));
+		let data = await this._getData();
+		this._internalReader.reload(Components.utils.cloneInto(data, this._iframeWindow));
 	}
 
 	async transferFromPDF() {
