@@ -42,13 +42,14 @@ Zotero_Preferences.Cite = {
 
 	init: async function () {
 		// Init word plugin sections
-		let wordPlugins = ['libreOffice'];
+		let wordPlugins = [];
 		if (Zotero.isWin) {
 			wordPlugins.push('winWord');
 		}
 		else if (Zotero.isMac) {
 			wordPlugins.push('macWord');
 		}
+		wordPlugins.push('libreOffice');
 		await Zotero.Promise.delay();
 		for (let wordPlugin of wordPlugins) {
 			// This is the weirdest indirect code, but let's not fix what's not broken
