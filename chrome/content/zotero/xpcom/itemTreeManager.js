@@ -248,7 +248,7 @@ class ItemTreeManager {
 	 * Add a new column or new columns.
 	 * If the options is an array, all its children must be valid.
 	 * Otherwise, no columns are added.
-	 * @param {ItemTreeCustomColumnOptions | ItemTreeCItemTreeCustomColumnOptionsolumnOptions[]} options - An option or array of options to add
+	 * @param {ItemTreeCustomColumnOptions | ItemTreeColumnOptions[]} options - An option or array of options to add
 	 * @returns {string | string[] | false} - The dataKey(s) of the added column(s) or false if no columns were added
 	 */
 	_addColumns(options) {
