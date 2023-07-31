@@ -602,10 +602,23 @@ var Scaffold = new function () {
 		this.setFontSize(currentSize - 2);
 	};
 
-	this.newTranslator = async function (skipSave) {
-		if (!skipSave) {
-			_logOutput('Saving translator and resetting...');
-			await this.save();
+	this.newTranslator = async function (skipSavePrompt) {
+		if (!skipSavePrompt && _editors.code.getValue()) {
+			let ps = Services.prompt;
+			let buttonFlags = ps.BUTTON_POS_0 * ps.BUTTON_TITLE_IS_STRING
+				+ ps.BUTTON_POS_1 * ps.BUTTON_TITLE_IS_STRING;
+			let label = document.getElementById('textbox-label').value;
+			let index = ps.confirmEx(null,
+				"Scaffold",
+				`Do you want to save the changes you made to ${label}?`,
+				buttonFlags,
+				Zotero.getString('general.no'),
+				Zotero.getString('general.yes'),
+				null, null, {}
+			);
+			if (index == 1 && !await this.save()) {
+				return;
+			}
 		}
 
 		this.generateTranslatorID();
