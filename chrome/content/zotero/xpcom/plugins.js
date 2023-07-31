@@ -26,7 +26,6 @@
 
 Zotero.Plugins = new function () {
 	var { AddonManager } = ChromeUtils.import("resource://gre/modules/AddonManager.jsm");
-	var { XPIInstall } = ChromeUtils.import("resource://gre/modules/addons/XPIInstall.jsm");
 	var scopes = new Map();
 	var observers = new Set();
 	var addonVersions = new Map();
@@ -39,7 +38,9 @@ Zotero.Plugins = new function () {
 		ADDON_INSTALL: 5,
 		ADDON_UNINSTALL: 6,
 		ADDON_UPGRADE: 7,
-		ADDON_DOWNGRADE: 8
+		ADDON_DOWNGRADE: 8,
+		MAIN_WINDOW_LOAD: 9,
+		MAIN_WINDOW_UNLOAD: 10,
 	};
 	
 	
@@ -64,6 +65,39 @@ Zotero.Plugins = new function () {
 				await _callMethod(addon, 'shutdown', REASONS.APP_SHUTDOWN);
 			}
 		});
+
+		const mainWindowListener = {
+			onOpenWindow: function (xulWindow) {
+				let domWindow = xulWindow.docShell.domWindow;
+				async function onload() {
+					domWindow.removeEventListener("load", onload, false);
+					if (
+						domWindow.location.href
+						!== "chrome://zotero/content/zoteroPane.xhtml"
+					) {
+						return;
+					}
+					let { addons } = await AddonManager.getActiveAddons(["extension"]);
+					for (let addon of addons) {
+						await _callMethod(addon, 'onMainWindowLoad', REASONS.MAIN_WINDOW_LOAD, { window: domWindow });
+					}
+				}
+				domWindow.addEventListener("load", onload, false);
+			},
+			onCloseWindow: async function (xulWindow) {
+				let domWindow = xulWindow.docShell.domWindow;
+				if (
+					domWindow.location.href !== "chrome://zotero/content/zoteroPane.xhtml"
+				) {
+					return;
+				}
+				let { addons } = await AddonManager.getActiveAddons(["extension"]);
+				for (let addon of addons) {
+					await _callMethod(addon, 'onMainWindowUnload', REASONS.MAIN_WINDOW_LOAD, { window: domWindow });
+				}
+			},
+		};
+		Services.wm.addListener(mainWindowListener);
 	};
 	
 	
@@ -72,7 +106,7 @@ Zotero.Plugins = new function () {
 	 *
 	 * https://searchfox.org/mozilla-esr60/source/toolkit/mozapps/extensions/internal/XPIProvider.jsm#4233
 	 */
-	 function _loadScope(addon) {
+	function _loadScope(addon) {
 		var scope = new Cu.Sandbox(
 			Services.scriptSecurityManager.getSystemPrincipal(),
 			{
@@ -136,7 +170,7 @@ Zotero.Plugins = new function () {
 	 *
 	 * https://searchfox.org/mozilla-esr60/source/toolkit/mozapps/extensions/internal/XPIProvider.jsm#4343
 	 */
-	async function _callMethod(addon, method, reason) {
+	async function _callMethod(addon, method, reason, extraParams) {
 		try {
 			let id = addon.id;
 			Zotero.debug(`Calling bootstrap method '${method}' for plugin ${id} `
@@ -160,6 +194,9 @@ Zotero.Plugins = new function () {
 				version: addon.version,
 				rootURI: addon.getResourceURI().spec
 			};
+			if (extraParams) {
+				Object.assign(params, extraParams);
+			}
 			let result;
 			try {
 				result = func.call(scope, params, reason);
@@ -267,7 +304,7 @@ Zotero.Plugins = new function () {
 						branch.setIntPref(pref, value);
 						break;
 					default:
-						Zotero.logError(`Invalid type '${typeof(value)}' for pref '${pref}'`);
+						Zotero.logError(`Invalid type '${typeof value}' for pref '${pref}'`);
 				}
 			}
 		};
@@ -288,7 +325,7 @@ Zotero.Plugins = new function () {
 	function clearDefaultPrefs(addon) {
 		var branch = Services.prefs.getDefaultBranch("");
 		var obj = {
-			pref(pref, value) {
+			pref(pref, _value) {
 				if (!branch.prefHasUserValue(pref)) {
 					branch.deleteBranch(pref);
 				}
@@ -336,7 +373,7 @@ Zotero.Plugins = new function () {
 	function getVersionChangeReason(oldVersion, newVersion) {
 		return Zotero.Utilities.semverCompare(oldVersion, newVersion) <= 0
 			? REASONS.ADDON_UPGRADE
-			: REASONS.ADDON_DOWNGRADE
+			: REASONS.ADDON_DOWNGRADE;
 	}
 	
 	

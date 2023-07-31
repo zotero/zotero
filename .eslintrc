@@ -20,7 +20,12 @@
 		"Services": false,
 		"XPCOMUtils": false,
 		"XRegExp": false,
-		"XULElement": false
+		"XULElement": false,
+		"Cu": false,
+		"ChromeWorker": false,
+		"Localization": false,
+		"L10nFileSource": false,
+		"L10nRegistry": false,
 	},
 	"extends": [
 		"@zotero",
