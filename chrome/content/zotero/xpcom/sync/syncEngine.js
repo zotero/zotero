@@ -2086,7 +2086,7 @@ Zotero.Sync.Data.Engine.prototype._checkObjectUploadError = Zotero.Promise.corou
 		}
 		
 		// Split old annotations before we were splitting them automatically in the PDF reader
-		if (message == "Annotation position is too long") {
+		if (message.startsWith("Annotation position is too long")) {
 			let item = Zotero.Items.getByLibraryAndKey(this.libraryID, key);
 			yield Zotero.Annotations.splitAnnotations(item);
 		}
