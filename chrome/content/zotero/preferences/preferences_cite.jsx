@@ -60,6 +60,9 @@ Zotero_Preferences.Cite = {
 			}
 		}
 		await this.refreshStylesList();
+		document.querySelector('#zotero-prefpane-cite').addEventListener('showing', () => {
+			this._tree.invalidate();
+		});
 	},
 	
 	

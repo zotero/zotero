@@ -244,6 +244,7 @@ var Zotero_Preferences = {
 		}
 
 		pane.container.hidden = false;
+		pane.container.children[0].dispatchEvent(new Event('showing'));
 
 		let backButton = document.getElementById('prefs-subpane-back-button');
 		backButton.hidden = !pane.parent;
