@@ -236,7 +236,7 @@ var Zotero_QuickFormat = new function () {
 	 */
 	function _getEditorContent(clear) {
 		var node = _getCurrentEditorTextNode();
-		return node ? node.wholeText : false;
+		return node ? node.wholeText.trim() : false;
 	}
 
 	/**
