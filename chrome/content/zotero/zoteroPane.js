@@ -4722,9 +4722,20 @@ var ZoteroPane = new function()
 			if (['application/pdf', 'application/epub+zip', 'text/html'].includes(contentType)) {
 				let item = await Zotero.Items.getAsync(itemID);
 				let library = Zotero.Libraries.get(item.libraryID);
-				let pdfHandler  = Zotero.Prefs.get("fileHandler.pdf");
+				let type;
+				if (contentType === 'application/pdf') {
+					type = 'pdf';
+				}
+				else if (contentType === 'application/epub+zip') {
+					type = 'epub';
+				}
+				else {
+					type = 'snapshot';
+				}
+				let handler = Zotero.Prefs.get('fileHandler.' + type);
+				
 				// Zotero PDF reader
-				if (!pdfHandler) {
+				if (!handler) {
 					let openInWindow = Zotero.Prefs.get('openReaderInNewWindow');
 					let useAlternateWindowBehavior = event?.shiftKey || extraData?.forceAlternateWindowBehavior;
 					if (useAlternateWindowBehavior) {
@@ -4740,8 +4751,9 @@ var ZoteroPane = new function()
 					);
 					return;
 				}
-				// Try to open external reader to page number if specified
-				else {
+				// Try to open external PDF reader to page number if specified
+				// TODO: Implement for EPUBs if readers support it
+				else if (type == 'pdf') {
 					let pageIndex = extraData?.location?.position?.pageIndex;
 					if (pageIndex !== undefined) {
 						await Zotero.OpenPDF.openToPage(
@@ -4753,17 +4765,17 @@ var ZoteroPane = new function()
 				}
 				// Custom PDF handler
 				// TODO: Remove this and unify with Zotero.OpenPDF
-				if (pdfHandler != 'system') {
+				if (handler != 'system') {
 					try {
-						if (await OS.File.exists(pdfHandler)) {
-							Zotero.launchFileWithApplication(path, pdfHandler);
+						if (await OS.File.exists(handler)) {
+							Zotero.launchFileWithApplication(path, handler);
 							return;
 						}
 					}
 					catch (e) {
 						Zotero.logError(e);
 					}
-					Zotero.logError(`${pdfHandler} not found -- launching file normally`);
+					Zotero.logError(`${handler} not found -- launching file normally`);
 				}
 			}
 			Zotero.launchFile(path);

@@ -186,6 +186,8 @@ pref("extensions.zotero.purge.tags", false);
 pref("extensions.zotero.pane.persist", "");
 
 pref("extensions.zotero.fileHandler.pdf", "");
+pref("extensions.zotero.fileHandler.epub", "");
+pref("extensions.zotero.fileHandler.snapshot", "");
 pref("extensions.zotero.openReaderInNewWindow", false);
 
 // File/URL opening executable if launch() fails

@@ -278,6 +278,15 @@ button {
 	margin-inline-start: 2em;
 }
 
+.fileHandler-menus {
+	display: grid;
+	grid-template-columns: max-content max-content;
+	align-items: center;
+	justify-content: start;
+	column-gap: 1em;
+	margin-top: 0.5em;
+}
+
 .fileHandler-menu .menulist-icon {
 	height: 16px;
 }

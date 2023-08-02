@@ -49,26 +49,48 @@
 				<checkbox label="&zotero.preferences.autoRecognizeFiles;" preference="extensions.zotero.autoRecognizeFiles" native="true"/>
 			</vbox>
 			
-			<vbox>
-				<hbox align="center">
-					<label value="&zotero.preferences.fileHandler.openPDFsUsing;" control="file-handler-pdf"/>
-					<menulist id="fileHandler-pdf" class="fileHandler-menu" native="true">
-						<menupopup>
-							<menuitem id="fileHandler-internal"
-									oncommand="Zotero_Preferences.General.setFileHandler('pdf', '')"/>
-							<menuitem label="&zotero.preferences.fileHandler.systemDefault;"
-									oncommand="Zotero_Preferences.General.setFileHandler('pdf', 'system')"/>
-							<menuitem id="fileHandler-custom"/>
-							<menuitem label="&zotero.preferences.custom;"
-									oncommand="Zotero_Preferences.General.chooseFileHandler('pdf')"/>
-						</menupopup>
-					</menulist>
-				</hbox>
-				<checkbox id="open-reader-in-new-window" class="indented-pref"
-						label="&zotero.preferences.fileHandler.openReaderInNewWindow;"
-						preference="extensions.zotero.openReaderInNewWindow"
-						native="true"/>
+			<vbox class="fileHandler-menus">
+				<html:label for="fileHandler-pdf">&zotero.preferences.fileHandler.openPDFsUsing;</html:label>
+				<menulist id="fileHandler-pdf" class="fileHandler-menu" native="true">
+					<menupopup>
+						<menuitem class="fileHandler-internal"
+								oncommand="Zotero_Preferences.General.setFileHandler('pdf', '')"/>
+						<menuitem label="&zotero.preferences.fileHandler.systemDefault;"
+								oncommand="Zotero_Preferences.General.setFileHandler('pdf', 'system')"/>
+						<menuitem class="fileHandler-custom"/>
+						<menuitem label="&zotero.preferences.custom;"
+								oncommand="Zotero_Preferences.General.chooseFileHandler('pdf')"/>
+					</menupopup>
+				</menulist>
+				<html:label for="fileHandler-epub">&zotero.preferences.fileHandler.openEbooksUsing;</html:label>
+				<menulist id="fileHandler-epub" class="fileHandler-menu" native="true">
+					<menupopup>
+						<menuitem class="fileHandler-internal"
+								oncommand="Zotero_Preferences.General.setFileHandler('epub', '')"/>
+						<menuitem label="&zotero.preferences.fileHandler.systemDefault;"
+								oncommand="Zotero_Preferences.General.setFileHandler('epub', 'system')"/>
+						<menuitem class="fileHandler-custom"/>
+						<menuitem label="&zotero.preferences.custom;"
+								oncommand="Zotero_Preferences.General.chooseFileHandler('epub')"/>
+					</menupopup>
+				</menulist>
+				<html:label for="fileHandler-snapshot">&zotero.preferences.fileHandler.openSnapshotsUsing;</html:label>
+				<menulist id="fileHandler-snapshot" class="fileHandler-menu" native="true">
+					<menupopup>
+						<menuitem class="fileHandler-internal"
+								oncommand="Zotero_Preferences.General.setFileHandler('snapshot', '')"/>
+						<menuitem label="&zotero.preferences.fileHandler.systemDefault;"
+								oncommand="Zotero_Preferences.General.setFileHandler('snapshot', 'system')"/>
+						<menuitem class="fileHandler-custom"/>
+						<menuitem label="&zotero.preferences.custom;"
+								oncommand="Zotero_Preferences.General.chooseFileHandler('snapshot')"/>
+					</menupopup>
+				</menulist>
 			</vbox>
+			<checkbox id="open-reader-in-new-window" class="indented-pref"
+					label="&zotero.preferences.fileHandler.openReaderInNewWindow;"
+					preference="extensions.zotero.openReaderInNewWindow"
+					native="true"/>
 		</groupbox>
 
 		<groupbox id="zotero-prefpane-file-renaming-groupbox">

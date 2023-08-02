@@ -40,8 +40,10 @@ Zotero_Preferences.General = {
 				'zotero.preferences.launchNonNativeFiles', Zotero.appName
 			);
 		}
-		var menuitem = document.getElementById('fileHandler-internal');
-		menuitem.setAttribute('label', Zotero.appName);
+		var menuitems = document.querySelectorAll('.fileHandler-internal');
+		for (let menuitem of menuitems) {
+			menuitem.setAttribute('label', Zotero.appName);
+		}
 
 		// Set OpenURL resolver drop-down to last-known name
 		if (Zotero.Prefs.get('openURL.resolver')) {
@@ -168,62 +170,65 @@ Zotero_Preferences.General = {
 	},
 	
 	_updateFileHandlerUI: function () {
-		var handler = Zotero.Prefs.get('fileHandler.pdf');
-		var menulist = document.getElementById('fileHandler-pdf');
-		var customMenuItem = document.getElementById('fileHandler-custom');
-		var inNewWindowCheckbox = document.getElementById('open-reader-in-new-window');
-		
-		// System default
-		if (handler == 'system') {
-			customMenuItem.hidden = true;
-			menulist.selectedIndex = 1;
-			inNewWindowCheckbox.disabled = true;
-		}
-		// Custom handler
-		else if (handler) {
-			let icon;
-			try {
-				let urlspec = Zotero.File.pathToFileURI(handler);
-				icon = "moz-icon://" + urlspec + "?size=16";
-			}
-			catch (e) {
-				Zotero.logError(e);
-			}
+		function update(type) {
+			let handler = Zotero.Prefs.get('fileHandler.' + type);
+			let menulist = document.getElementById('fileHandler-' + type);
+			var customMenuItem = menulist.querySelector('.fileHandler-custom');
 			
-			let handlerFilename = OS.Path.basename(handler);
-			if (Zotero.isMac) {
-				handlerFilename = handlerFilename.replace(/\.app$/, '');
+			// System default
+			if (handler == 'system') {
+				customMenuItem.hidden = true;
+				menulist.selectedIndex = 1;
 			}
-			customMenuItem.setAttribute('label', handlerFilename);
-			if (icon) {
-				customMenuItem.className = 'menuitem-iconic';
-				customMenuItem.setAttribute('image', icon);
-			}
-			else {
-				customMenuItem.className = '';
-			}
-			customMenuItem.hidden = false;
-			menulist.selectedIndex = 2;
-			inNewWindowCheckbox.disabled = true;
+			// Custom handler
+			else if (handler) {
+				let icon;
+				try {
+					let urlspec = Zotero.File.pathToFileURI(handler);
+					icon = "moz-icon://" + urlspec + "?size=16";
+				}
+				catch (e) {
+					Zotero.logError(e);
+				}
 
-			// There's almost certainly a better way to do this...
-			// but why doesn't the icon just behave by default?
-			menulist.shadowRoot.querySelector('[part="icon"]').style.height = '16px';
+				let handlerFilename = OS.Path.basename(handler);
+				if (Zotero.isMac) {
+					handlerFilename = handlerFilename.replace(/\.app$/, '');
+				}
+				customMenuItem.setAttribute('label', handlerFilename);
+				if (icon) {
+					customMenuItem.className = 'menuitem-iconic';
+					customMenuItem.setAttribute('image', icon);
+				}
+				else {
+					customMenuItem.className = '';
+				}
+				customMenuItem.hidden = false;
+				menulist.selectedIndex = 2;
+
+				// There's almost certainly a better way to do this...
+				// but why doesn't the icon just behave by default?
+				menulist.shadowRoot.querySelector('[part="icon"]').style.height = '16px';
+			}
+			// Zotero
+			else {
+				menulist.selectedIndex = 0;
+				customMenuItem.hidden = true;
+			}
 		}
-		// Zotero
-		else {
-			let menuitem = document.getElementById('fileHandler-internal');
-			menulist.selectedIndex = 0;
-			customMenuItem.hidden = true;
-			inNewWindowCheckbox.disabled = false;
-		}
+		
+		update('pdf');
+		update('epub');
+		update('snapshot');
+		var inNewWindowCheckbox = document.getElementById('open-reader-in-new-window');
+		inNewWindowCheckbox.disabled = ['pdf', 'epub', 'snapshot'].every(type => Zotero.Prefs.get('fileHandler.' + type));
 	},
 	
 	_getFileHandlerPref: function (type) {
-		if (type != 'pdf') {
+		if (type != 'pdf' && type != 'epub' && type != 'snapshot') {
 			throw new Error(`Unknown file type ${type}`);
 		}
-		return 'fileHandler.pdf';
+		return 'fileHandler.' + type;
 	},
 
 	handleOpenURLPopupShowing: async function (event) {
