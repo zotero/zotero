@@ -1512,7 +1512,7 @@ class EditorInstanceUtilities {
 			if (['highlight', 'underline'].includes(annotation.type)) {
 				template = Zotero.Prefs.get('annotations.noteTemplates.highlight');
 			}
-			else if (annotation.type === 'note') {
+			else if (['note', 'text'].includes(annotation.type)) {
 				template = Zotero.Prefs.get('annotations.noteTemplates.note');
 			}
 			else if (annotation.type === 'image') {
