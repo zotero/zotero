@@ -26,6 +26,8 @@
 		"Localization": false,
 		"L10nFileSource": false,
 		"L10nRegistry": false,
+		"ZoteroPane_Local": false,
+		"ZoteroPane": false
 	},
 	"extends": [
 		"@zotero",
@@ -48,5 +50,10 @@
 			"version": "17.0"
 		}
 	},
-	"rules": {}
+	"rules": {
+		"camelcase": "warn",
+		"no-fallthrough": "warn",
+		"accessor-pairs": "warn",
+		"no-unused-vars": "warn"
+	}
 }
