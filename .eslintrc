@@ -50,10 +50,5 @@
 			"version": "17.0"
 		}
 	},
-	"rules": {
-		"camelcase": "warn",
-		"no-fallthrough": "warn",
-		"accessor-pairs": "warn",
-		"no-unused-vars": "warn"
-	}
+	"rules": {}
 }
