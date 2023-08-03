@@ -516,9 +516,6 @@ class ReaderInstance {
 			throw new Error(`The file "${path}" is too large`);
 		}
 		let buf = await OS.File.read(path, {});
-		// TODO during buf -> data object migration: Do we actually need to get the underlying buffer and wrap it
-		//   in a new Uint8Array?
-		buf = new Uint8Array(new Uint8Array(buf).buffer);
 		let baseURI = `zotero://attachment/${Zotero.API.getLibraryPrefix(item.libraryID)}/items/${item.key}/`;
 		return {
 			buf,
