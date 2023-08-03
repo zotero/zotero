@@ -805,6 +805,10 @@ class ReaderInstance {
 		this._internalReader.setFontSize(Zotero.Prefs.get('fontSize'));
 	};
 
+	_handleTabTitlePrefChange = async () => {
+		await this.updateTitle();
+	};
+
 	_handleFontFamilyChange = () => {
 		this._internalReader.setFontFamily(Zotero.Prefs.get('reader.ebookFontFamily'));
 	};
