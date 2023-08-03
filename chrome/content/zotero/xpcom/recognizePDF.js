@@ -435,7 +435,10 @@ Zotero.RecognizePDF = new function () {
 				Zotero.debug('RecognizePDF: ' + e);
 			}
 		}
-		
+
+		if (!res.doi) {
+			res.doi = _extractDOIFromFileName(fileName);
+		}
 		if (res.doi) {
 			Zotero.debug(`RecognizePDF: Getting metadata for DOI (${res.doi})`);
 			let translate = new Zotero.Translate.Search();
@@ -464,7 +467,10 @@ Zotero.RecognizePDF = new function () {
 				Zotero.debug("RecognizePDF: No translators found");
 			}
 		}
-		
+
+		if (!res.isbn) {
+			res.isbn = _extractISBNFromFileName(fileName);
+		}
 		if (res.isbn) {
 			Zotero.debug(`RecognizePDF: Getting metadata by ISBN ${res.isbn}`);
 			let translate = new Zotero.Translate.Search();
@@ -536,6 +542,9 @@ Zotero.RecognizePDF = new function () {
 			newItem.setCreators(creators);
 			
 			if (res.abstract) newItem.setField('abstractNote', res.abstract);
+			if (!res.year) {
+				res.year = _extractYearFromFileName(fileName);
+			}
 			if (res.year) newItem.setField('date', res.year);
 			if (res.pages) newItem.setField('pages', res.pages);
 			if (res.volume) newItem.setField('volume', res.volume);
@@ -560,7 +569,51 @@ Zotero.RecognizePDF = new function () {
 		
 		return null;
 	}
-	
+
+	/**
+	 * Tries to extract DOI from a filename
+	 * @param {String} fileName - Filename to examine
+	 * @return {String} - Found DOI or null if nothing found.
+	 */
+	function _extractDOIFromFileName(fileName) {
+		// Strip off file extension
+		let strippedName = fileName.substring(0, fileName.lastIndexOf("."));
+		// Replace `@` sign with `/` (`@` sign commonly used because `/` not
+		// allowed in filenames).
+		strippedName = strippedName.replace("@", "/");
+		let foundDOI = Zotero.Utilities.cleanDOI(strippedName);
+		Zotero.debug(`Found DOI ${doiString} in filename`);
+		return doiString;
+	}
+
+	/**
+	 * Tries to extract ISBN from a filename
+	 * @param {String} fileName - Filename to examine
+	 * @return {String} - Found ISBN or null if nothing found.
+	 */
+	function _extractISBNFromFileName(fileName) {
+		let isbnString = Zotero.Utilities.cleanISBN(fileName);
+		Zotero.debug(`Found ISBN ${isbnString} in filename`);
+		return isbnString;
+	}
+
+	/**
+	 * Tries to extract Year from a filename
+	 * @param {String} fileName - Filename to examine
+	 * @return {String} - Found year or null if nothing found.
+	 */
+	function _extractYearFromFileName(fileName) {
+		let yearRe = /\D((?:19|20)\d{2})\D?/;
+		let yearRes = fileName.match(yearRe);
+		if (!yearRes) {
+			return null;
+		}
+		// Grab first element of array (first captured group)
+		let yearString = yearRes[1];
+		Zotero.debug(`Found year ${yearString} in filename`);
+		return yearString;
+	}
+
 	/**
 	 * To customize the recognizer endpoint, set either recognize.url (used directly)
 	 * or services.url (used with a 'recognizer/' suffix).
