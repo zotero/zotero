@@ -207,6 +207,10 @@ pref("extensions.zotero.annotations.noteTemplates.title", "<h1>{{title}}<br/>({{
 pref("extensions.zotero.annotations.noteTemplates.highlight", "<p>{{highlight}} {{citation}} {{comment}}</p>");
 pref("extensions.zotero.annotations.noteTemplates.note", "<p>{{citation}} {{comment}}</p>");
 
+// PDF Reader
+pref("extensions.zotero.pdfReader.defaultState", '{"scale":"page-width","scrollMode":0,"spreadMode":0}');
+pref("extensions.zotero.pdfReader.stateResetTime", 0);
+
 // Scaffold
 pref("extensions.zotero.scaffold.eslint.enabled", true);
 
