@@ -79,6 +79,18 @@ Services.scriptloader.loadSubScript("resource://zotero/polyfill.js");
 	this.getMainWindow = function () {
 		return Services.wm.getMostRecentWindow("navigator:browser");
 	};
+
+	/**
+	 * @return {ChromeWindow[]} - An array of open windows
+	 */
+	this.getMainWindows = function () {
+		var enumerator = Services.wm.getEnumerator("navigator:browser");
+		var windows = [];
+		while (enumerator.hasMoreElements()) {
+			windows.push(enumerator.getNext());
+		}
+		return windows;
+	};
 	
 	this.getActiveZoteroPane = function() {
 		var win = Services.wm.getMostRecentWindow("navigator:browser");
