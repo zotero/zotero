@@ -133,7 +133,7 @@ class ItemTreeManager {
 	 * @returns {boolean} true if the column(s) are unregistered
 	 * @example
 	 * ```js
-	 * Zotero.ItemTreeManager.unregisterColumns('rtitle');
+	 * Zotero.ItemTreeManager.unregisterColumns(registeredDataKey);
 	 * ```
 	 */
 	async unregisterColumns(dataKeys) {
