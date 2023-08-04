@@ -1551,7 +1551,7 @@ describe("Zotero.Attachments", function() {
 			);
 		});
 
-		it("should convert formatString attachmentRenameFormatString to use template syntax", function () {
+		it("should convert old attachmentRenameFormatString to use new attachmentRenameTemplate syntax", function () {
 			assert.equal(
 				Zotero.Prefs.convertLegacyAttachmentRenameFormatString('{%c - }{%y - }{%t{50}}'),
 				'{{ firstCreator suffix=" - " }}{{ year suffix=" - " }}{{ title truncate="50" }}'
