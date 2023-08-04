@@ -39,12 +39,12 @@
  * - Custom data provider that is called when rendering rows.
  * @property {(item: Zotero.Item, dataKey: string, value: string) => void} dataSetter
  * - Custom data setter that is called when editing rows.
- * @property {(item: Zotero.Item, dataKey: string) => boolean} [collapseStateGetter]
- * - Custom collapse state getter. Only used when collapsible is true.
- * - Return true for collapsed.
- * @property {(item: Zotero.Item, dataKey: string, collapsed: boolean) => void} [collapseStateSetter]
- * - Custom collapse state setter. Only used when collapsible is true.
- * - The collapsed parameter is true for collapsed.
+ * @property {(item: Zotero.Item, dataKey: string) => boolean} [expandStateGetter]
+ * - Custom expand state getter. Only used when multiline is true.
+ * - Return true for expanded.
+ * @property {(item: Zotero.Item, dataKey: string, expanded: boolean) => void} [expandStateSetter]
+ * - Custom collapse state setter. Only used when multiline is true.
+ * - The expanded parameter is true for expanded.
  */
 
 class ItemBoxManager {
@@ -158,16 +158,17 @@ class ItemBoxManager {
 			Zotero.warn(`ItemBox Row options have duplicate dataKey.`);
 		}
 		const requiredProperties = options.every((option) => {
-			let valid = option.dataKey && option.label && option.pluginID;
+			let valid = option.dataKey && option.label && option.pluginID
+				&& option.dataProvider && option.dataSetter;
 			if (!valid) {
-				Zotero.warn(`ItemBox Row option ${JSON.stringify(option)} must have dataKey, label, and pluginID.`);
+				Zotero.warn(`ItemBox Row option ${JSON.stringify(option)} must have dataKey, label, pluginID, dataProvider, and dataSetter.`);
 				return false;
 			}
 			if (option.multiline) {
-				valid &&= option.collapseStateGetter && option.collapseStateSetter;
+				valid &&= option.expandStateGetter && option.expandStateSetter;
 			}
 			if (!valid) {
-				Zotero.warn(`ItemBox Row option ${JSON.stringify(option)} is multiline, must have collapseStateGetter and collapseStateSetter.`);
+				Zotero.warn(`ItemBox Row option ${JSON.stringify(option)} is multiline, must have expandStateGetter and expandStateSetter.`);
 			}
 			return valid;
 		});

@@ -621,12 +621,12 @@
 				if (isCollapsible) {
 					let isCollapsed;
 					if (isCustomRow) {
-						isCollapsed = customRowOptions?.collapseStateGetter
-							&& customRowOptions?.collapseStateGetter(this.item, fieldName);
+						isCollapsed = !(customRowOptions?.expandStateGetter(this.item, fieldName));
 					}
 					else {
-						isCollapsed = val && !Zotero.Prefs.get('lastAbstractExpand');
+						isCollapsed = !Zotero.Prefs.get('lastAbstractExpand');
 					}
+					isCollapsed &&= val;
 					if (isCollapsed) {
 						prefix = '(\u2026) ';
 					}
@@ -1369,21 +1369,28 @@
 			let customRowOptions = this._getCustomRowOptions(fieldName);
 			let isCustomRow = !!customRowOptions;
 
-			let isExpanded = isCustomRow
-				? customRowOptions?.collapseStateGetter(this.item, fieldName)
-				: Zotero.Prefs.get('lastAbstractExpand');
-			Zotero.Prefs.set('lastAbstractExpand', !isExpanded);
+			let isExpanded;
+			let valueText;
+			if (isCustomRow) {
+				isExpanded = customRowOptions?.expandStateGetter(this.item, fieldName);
+				customRowOptions?.expandStateSetter(this.item, fieldName, !isExpanded);
+				valueText = customRowOptions?.dataProvider(this.item, fieldName);
+			}
+			else {
+				isExpanded = Zotero.Prefs.get('lastAbstractExpand');
+				Zotero.Prefs.set('lastAbstractExpand', !isExpanded);
+				valueText = this.item.getField(fieldName);
+			}
 			
-			var valueText = this.item.getField('abstractNote');
 			var tabindex = valueElement.getAttribute('ztabindex');
 			var newValueElement = this.createValueElement(
 				valueText,
-				'abstractNote',
+				fieldName,
 				tabindex
 			);
 			valueElement.replaceWith(newValueElement);
 			
-			var text = this._getLocalizedFieldLabel('abstractNote');
+			var text = this._getLocalizedFieldLabel(fieldName);
 			// Add '(...)' before "Abstract" for collapsed abstracts
 			if (valueText && isExpanded) {
 				text = '(\u2026) ' + text;
@@ -1442,8 +1449,7 @@
 			if (isCollapsible) {
 				let isCollapsed;
 				if (isCustomRow) {
-					isCollapsed = customRowOptions?.collapseStateGetter
-						&& customRowOptions?.collapseStateGetter(this.item, fieldName);
+					isCollapsed = !(customRowOptions?.expandStateGetter(this.item, fieldName));
 				}
 				else {
 					isCollapsed = !Zotero.Prefs.get('lastAbstractExpand');
