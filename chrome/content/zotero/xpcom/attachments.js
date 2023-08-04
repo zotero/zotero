@@ -2239,7 +2239,7 @@ Zotero.Attachments = new function () {
 	 * based on the metadata of the specified item and a format string
 	 *
 	 * (Optional) |formatString| specifies the format string -- otherwise
-	 * the 'attachmentRenameFormatString' pref is used
+	 * the 'attachmentRenameTemplate' pref is used
 	 *
 	 * @param {Zotero.Item} item
 	 * @param {String} formatString
@@ -2250,7 +2250,7 @@ Zotero.Attachments = new function () {
 		}
 
 		if (!formatString) {
-			formatString = Zotero.Prefs.get('attachmentRenameFormatString');
+			formatString = Zotero.Prefs.get('attachmentRenameTemplate');
 		}
 
 		const getSlicedCreatorsOfType = (creatorType, slice) => {

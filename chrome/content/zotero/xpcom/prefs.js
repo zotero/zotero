@@ -47,7 +47,7 @@ Zotero.Prefs = new function() {
 		if (!fromVersion) {
 			fromVersion = 0;
 		}
-		var toVersion = 8;
+		var toVersion = 9;
 		if (fromVersion < toVersion) {
 			for (var i = fromVersion + 1; i <= toVersion; i++) {
 				switch (i) {
@@ -107,14 +107,29 @@ Zotero.Prefs = new function() {
 					case 7:
 						this.clear('layers.acceleration.disabled', true);
 						break;
+					
 					// Convert "attachment rename format string" from old format (e.g. {%c - }{%y - }{%t{50}})
 					// to a new format that uses the template engine
-					case 8:
+					case 9:
 						if (this.prefHasUserValue('attachmentRenameFormatString')) {
-							this.set('attachmentRenameFormatString', this.convertLegacyAttachmentRenameFormatString(
-								this.get('attachmentRenameFormatString') || ''
-							));
+							let oldVal = this.get('attachmentRenameFormatString');
+							let newVal;
+							if (oldVal) {
+								if (oldVal.includes('{%')) {
+									newVal = this.convertLegacyAttachmentRenameFormatString(oldVal);
+								}
+								// User already modified new template from the Z7 beta before we
+								// renamed this pref, so just transfer over
+								else {
+									newVal = oldVal;
+								}
+							}
+							if (newVal) {
+								this.set('attachmentRenameTemplate', newVal);
+							}
+							this.clear('attachmentRenameFormatString');
 						}
+						break;
 				}
 			}
 			this.set('prefVersion', toVersion);
