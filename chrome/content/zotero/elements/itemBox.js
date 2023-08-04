@@ -326,8 +326,8 @@
 		set ref(val) {
 			this.item = val;
 		}
-
-
+		
+		
 		/**
 		 * An array of field names that should be shown
 		 * even if they're empty and hideEmptyFields is set
@@ -339,7 +339,7 @@
 			
 			this._visibleFields = val;
 		}
-
+		
 		/**
 		 * An array of field names that should be hidden
 		*/
@@ -350,7 +350,7 @@
 			
 			this._hiddenFields = val;
 		}
-
+		
 		/**
 		 * An array of field names that should be clickable
 		 * even if this.clickable is false
@@ -362,7 +362,7 @@
 			
 			this._clickableFields = val;
 		}
-
+		
 		/**
 		 * An array of field names that should be editable
 		 * even if this.editable is false
@@ -374,7 +374,7 @@
 			
 			this._editableFields = val;
 		}
-
+		
 		/**
 		 * An object of alternative values for keyed fields
 		 */
@@ -389,7 +389,7 @@
 			
 			this._fieldAlternatives = val;
 		}
-
+		
 		/**
 		 * An array of field names in the order they should appear
 		 * in the list; empty spaces can be created with null
@@ -526,7 +526,7 @@
 						fieldName = null;
 					}
 				}
-
+				
 				if (fieldName) {
 					if (this._hiddenFields.indexOf(fieldName) != -1) {
 						continue;
@@ -559,7 +559,7 @@
 						? (i > 0 ? this._tabIndexMinFields + i : 1)
 						: 0;
 					this._tabIndexMaxFields = Math.max(this._tabIndexMaxFields, tabindex);
-
+					
 					if (fieldIsClickable
 							&& !Zotero.Items.isPrimaryField(fieldName)
 							&& Zotero.ItemFields.isDate(fieldName)
@@ -1523,7 +1523,7 @@
 		
 		async showEditor(elem) {
 			Zotero.debug(`Showing editor for ${elem.getAttribute('fieldname')}`);
-
+			
 			var label = elem.closest('tr').querySelector('th > label');
 			var lastTabIndex = this._lastTabIndex = parseInt(elem.getAttribute('ztabindex'));
 			
