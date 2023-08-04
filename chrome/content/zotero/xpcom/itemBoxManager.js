@@ -43,7 +43,7 @@
  * - Custom expand state getter. Only used when multiline is true.
  * - Return true for expanded.
  * @property {(item: Zotero.Item, dataKey: string, expanded: boolean) => void} [expandStateSetter]
- * - Custom collapse state setter. Only used when multiline is true.
+ * - Custom expand state setter. Only used when multiline is true.
  * - The expanded parameter is true for expanded.
  */
 
@@ -59,6 +59,33 @@ class ItemBoxManager {
 	/**
 	 * Registers custom row(s) for the item box element.
 	 * @param {ItemBoxCustomRowOptions | ItemBoxCustomRowOptions[]} options - Options for the custom row.
+	 * @example
+	 * Register an uneditable single row. The row will be appended to the end of the item box.
+	 * ```js
+	 * const registeredDataKey = await Zotero.ItemBoxManager.registerRows({
+	 *   dataKey: 'rtitle',
+	 *   label: 'Reversed Title',
+	 *   pluginID: 'make-it-red@zotero.org',
+	 *   dataProvider: (item, dataKey) => item.getField('title').split('').reverse().join(''),
+	 *   dataSetter: (item, dataKey, value) => Zotero.debug(`Item ${item.getField("title")}'s reversed title is ${value} now.`),
+	 * });
+	 * ```
+	 * @example
+	 * Register an editable multiline row
+	 * ```js
+	 * const registeredDataKey = Zotero.ItemBoxManager.registerRows({
+	 *   dataKey: 'rabstract',
+	 *   label: 'Reversed Abstract',
+	 *   pluginID: 'make-it-red@zotero.org', // plugin ID, which will be used to unregister the row when the plugin is unloaded
+	 *   editable: true,
+	 *   multiline: true,
+	 *   index: 1,
+	 *   dataProvider: (item, dataKey) => item.getField('abstractNote').split('').reverse().join(''),
+	 *   dataSetter: (item, dataKey, value) => Zotero.debug(`Item ${item.getField("title")}'s reversed abstract is ${value} now.`),
+	 *   expandStateGetter: (item, dataKey) => Zotero.Prefs.get("extensions.make-it-red.reversedAbstractExpanded", true),
+	 *   expandStateSetter: (item, dataKey, expanded) => Zotero.Prefs.set("extensions.make-it-red.reversedAbstractExpanded", expanded, true)
+	 * });
+	 * ```
 	 */
 	async registerRows(options) {
 		const registeredDataKeys = this._addRow(options);
@@ -71,8 +98,12 @@ class ItemBoxManager {
 	}
 
 	/**
-	 * Unregisters custom row(s) for the item box element.
+	 * Unregister custom row(s) for the item box element.
 	 * @param {string | string[]} dataKeys - Data key(s) of the row(s).
+	 * @example
+	 * ```js
+	 * Zotero.ItemBoxManager.unregisterRows(registeredDataKey);
+	 * ```
 	 */
 	async unregisterRows(dataKeys) {
 		const success = this._removeRows(dataKeys);
