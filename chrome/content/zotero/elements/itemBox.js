@@ -546,9 +546,9 @@
 				let val = '';
 				let tabindex = 0;
 
-				let customRowOptions = this._getCustomRowOptions(fieldName);
+				let isCustomRow = Zotero.ItemBoxManager.isCustomRow(fieldName);
+				let customRowOptions = isCustomRow ? this._getCustomRowOptions(fieldName) : null;
 
-				let isCustomRow = !!customRowOptions;
 				let isClickable = this._fieldIsClickable(fieldName);
 				let isMultiline = false;
 				let isCollapsible = fieldName === "abstractNote" || customRowOptions?.multiline;
@@ -621,7 +621,9 @@
 				if (isCollapsible) {
 					let isCollapsed;
 					if (isCustomRow) {
-						isCollapsed = !(customRowOptions?.expandStateGetter(this.item, fieldName));
+						isCollapsed = !Zotero.ItemBoxManager.getCustomRowExpandState(
+							this.item, fieldName
+						);
 					}
 					else {
 						isCollapsed = !Zotero.Prefs.get('lastAbstractExpand');
@@ -1366,14 +1368,16 @@
 		}
 		
 		toggleCollapsibleRowExpand(label, valueElement, fieldName) {
-			let customRowOptions = this._getCustomRowOptions(fieldName);
-			let isCustomRow = !!customRowOptions;
+			let isCustomRow = Zotero.ItemBoxManager.isCustomRow(fieldName);
+			let customRowOptions = isCustomRow ? this._getCustomRowOptions(fieldName) : null;
 
 			let isExpanded;
 			let valueText;
 			if (isCustomRow) {
-				isExpanded = customRowOptions?.expandStateGetter(this.item, fieldName);
-				customRowOptions?.expandStateSetter(this.item, fieldName, !isExpanded);
+				isExpanded = Zotero.ItemBoxManager.getCustomRowExpandState(
+					this.item, fieldName
+				);
+				Zotero.ItemBoxManager.setCustomRowExpandState(this.item, fieldName, !isExpanded);
 				valueText = customRowOptions?.dataProvider(this.item, fieldName);
 			}
 			else {
@@ -1429,8 +1433,8 @@
 		createValueElement(valueText, fieldName, tabindex) {
 			valueText += '';
 
-			let customRowOptions = this._getCustomRowOptions(fieldName);
-			let isCustomRow = !!customRowOptions;
+			let isCustomRow = Zotero.ItemBoxManager.isCustomRow(fieldName);
+			let customRowOptions = isCustomRow ? this._getCustomRowOptions(fieldName) : null;
 
 			if (!fieldName) {
 				return undefined;
@@ -1449,7 +1453,9 @@
 			if (isCollapsible) {
 				let isCollapsed;
 				if (isCustomRow) {
-					isCollapsed = !(customRowOptions?.expandStateGetter(this.item, fieldName));
+					isCollapsed = !Zotero.ItemBoxManager.getCustomRowExpandState(
+						this.item, fieldName
+					);
 				}
 				else {
 					isCollapsed = !Zotero.Prefs.get('lastAbstractExpand');
@@ -1609,8 +1615,8 @@
 		async showEditor(elem) {
 			Zotero.debug(`Showing editor for ${elem.getAttribute('fieldname')}`);
 
-			let customRowOptions = this._getCustomRowOptions(elem.getAttribute('fieldname'));
-			let isCustomRow = !!customRowOptions;
+			let isCustomRow = Zotero.ItemBoxManager.isCustomRow(fieldName);
+			let customRowOptions = isCustomRow ? this._getCustomRowOptions(fieldName) : null;
 
 			// Disable editing for non-editable custom fields
 			if (isCustomRow && !customRowOptions?.editable) {
@@ -2083,8 +2089,8 @@
 			var [field, creatorIndex, creatorField] = fieldName.split('-');
 			var newVal;
 
-			let customRowOptions = this._getCustomRowOptions(field);
-			let isCustomRow = !!customRowOptions;
+			let isCustomRow = Zotero.ItemBoxManager.isCustomRow(fieldName);
+			let customRowOptions = isCustomRow ? this._getCustomRowOptions(fieldName) : null;
 			
 			// Creator fields
 			if (field == 'creator') {
@@ -2230,9 +2236,8 @@
 		}
 		
 		_modifyField(fieldName, value) {
-			let customRowOptions = this._getCustomRowOptions(fieldName);
-			if (customRowOptions) {
-				customRowOptions.dataSetter(this.item, fieldName, value);
+			if (Zotero.ItemBoxManager.isCustomRow(fieldName)) {
+				Zotero.ItemBoxManager.setCustomRowData(this.item, fieldName, value);
 			}
 			else {
 				this.item.setField(fieldName, value);
@@ -2289,8 +2294,8 @@
 			this._setFieldValue(label, newVal);
 			var fieldName = label.getAttribute('fieldname');
 			this._modifyField(fieldName, newVal);
-			let customRowOptions = this._getCustomRowOptions(fieldName);
-			let isCustomRow = !!customRowOptions;
+
+			let isCustomRow = Zotero.ItemBoxManager.isCustomRow(fieldName);
 			
 			// If this is a title field, convert the Short Title too
 			var isTitle = !isCustomRow && Zotero.ItemFields.getBaseIDFromTypeAndField(

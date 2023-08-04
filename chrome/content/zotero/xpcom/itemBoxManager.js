@@ -48,7 +48,8 @@
  */
 
 class ItemBoxManager {
-	// eslint-disable-next-line padded-blocks
+	_observerAdded = false;
+
 	/** @type {Record<string, ItemBoxCustomRowOptions}} */
 	_customRows = {};
 
@@ -64,6 +65,7 @@ class ItemBoxManager {
 		if (!registeredDataKeys) {
 			return false;
 		}
+		this._addPluginShutdownObserver();
 		await this._notifyItemBoxes();
 		return registeredDataKeys;
 	}
@@ -141,6 +143,36 @@ class ItemBoxManager {
 		const options = this._customRows[dataKey];
 		if (options && options.dataSetter) {
 			options.dataSetter(item, dataKey, value);
+		}
+	}
+
+	/**
+	 * A centralized expand state getter for custom rows. This is used by the ItemBox to get data.
+	 * @param {Zotero.Item} item - The item to get data from
+	 * @param {string} dataKey - The dataKey of the row
+	 * @returns {boolean | undefined}
+	 * - true for expanded
+	 * - false for collapsed
+	 */
+	getCustomRowExpandState(item, dataKey) {
+		const options = this._customRows[dataKey];
+		if (options && options.expandStateGetter) {
+			return options.expandStateGetter(item, dataKey);
+		}
+		return undefined;
+	}
+
+	/**
+	 * A centralized expand state setter for custom rows. This is used by the ItemBox to set data.
+	 * @param {Zotero.Item} item - The item to set data to
+	 * @param {string} dataKey - The dataKey of the row
+	 * @param {boolean} expanded - true for expanded, false for collapsed
+	 * @returns {void}
+	 */
+	setCustomRowExpandState(item, dataKey, expanded) {
+		const options = this._customRows[dataKey];
+		if (options && options.expandStateSetter) {
+			options.expandStateSetter(item, dataKey, expanded);
 		}
 	}
 
@@ -258,6 +290,39 @@ class ItemBoxManager {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Unregister all rows registered by a plugin
+	 * @param {string} pluginID - Plugin ID
+	 */
+	async _unregisterRowsByPluginID(pluginID) {
+		const rows = this.getCustomRows(undefined, { pluginID });
+		if (rows.length === 0) {
+			return;
+		}
+		// Remove the rows one by one
+		// This is to ensure that the rows are removed and not interrupted by any non-existing rows
+		rows.forEach(row => this._removeRows(row.dataKey));
+		Zotero.debug(`ItemBox rows registered by plugin ${pluginID} unregistered due to shutdown`);
+		await this._notifyItemBoxes();
+	}
+
+	/**
+	 * Ensure that the shutdown observer is added
+	 * @returns {void}
+	 */
+	_addPluginShutdownObserver() {
+		if (this._observerAdded) {
+			return;
+		}
+
+		Zotero.Plugins.addObserver({
+			shutdown: ({ id: pluginID }) => {
+				this._unregisterRowsByPluginID(pluginID);
+			}
+		});
+		this._observerAdded = true;
 	}
 }
 
