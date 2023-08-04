@@ -1614,6 +1614,9 @@
 		
 		async showEditor(elem) {
 			Zotero.debug(`Showing editor for ${elem.getAttribute('fieldname')}`);
+			
+			var fieldName = elem.getAttribute('fieldname');
+			var tabindex = elem.getAttribute('ztabindex');
 
 			let isCustomRow = Zotero.ItemBoxManager.isCustomRow(fieldName);
 			let customRowOptions = isCustomRow ? this._getCustomRowOptions(fieldName) : null;
@@ -1640,10 +1643,7 @@
 					return;
 				}
 			}
-			
-			var fieldName = elem.getAttribute('fieldname');
-			var tabindex = elem.getAttribute('ztabindex');
-			
+
 			var [field, creatorIndex, creatorField] = fieldName.split('-');
 			let value, itemID;
 			if (field == 'creator') {
