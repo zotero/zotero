@@ -26,6 +26,8 @@
 		"Localization": false,
 		"L10nFileSource": false,
 		"L10nRegistry": false,
+		"ZoteroPane_Local": false,
+		"ZoteroPane": false
 	},
 	"extends": [
 		"@zotero",
