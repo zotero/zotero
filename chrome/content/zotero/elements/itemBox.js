@@ -25,6 +25,10 @@
 
 "use strict";
 
+/**
+ * @typedef {import("../xpcom/itemBoxManager.js").ItemBoxCustomRowOptions} ItemBoxCustomRowOptions
+ */
+
 {
 	class ItemBox extends XULElement {
 		constructor() {
@@ -54,6 +58,9 @@
 			this._tabIndexMinFields = 1000;
 			this._tabIndexMaxFields = 0;
 			this._initialVisibleCreators = 5;
+
+			/** @type {ItemBoxCustomRowOptions[]} */
+			this._customRows = {};
 			
 			this.content = MozXULElement.parseXULToFragment(`
 				<div id="item-box" xmlns="http://www.w3.org/1999/xhtml">
@@ -516,18 +523,46 @@
 				}
 			}
 
+			this._customRows = this._getSortedCustomRows();
+
+			// Compute the index of each custom row
+			let builtInRowCount = fieldNames.length;
+			for (let i = 0; i < this._customRows.length; i++) {
+				let row = this._customRows[i];
+				let currentIndex = row.index || builtInRowCount + i;
+				if (currentIndex >= builtInRowCount) {
+					fieldNames.push(row.dataKey);
+				}
+				else {
+					fieldNames.splice(currentIndex, 0, row.dataKey);
+				}
+			}
+
 			for (let i = 0; i < fieldNames.length; i++) {
-				var fieldName = fieldNames[i];
-				var val = '';
+				let fieldName = fieldNames[i];
+				if (!fieldName) {
+					continue;
+				}
+				let val = '';
+				let tabindex = 0;
+
+				let customRowOptions = this._getCustomRowOptions(fieldName);
+
+				let isCustomRow = !!customRowOptions;
+				let isClickable = this._fieldIsClickable(fieldName);
+				let isMultiline = false;
+				let isCollapsible = fieldName === "abstractNote" || customRowOptions?.multiline;
 				
-				if (fieldName) {
-					var fieldID = Zotero.ItemFields.getID(fieldName);
+				if (isCustomRow) {
+					val = customRowOptions.dataProvider(this.item, fieldName);
+
+					isMultiline = !!customRowOptions.multiline;
+				}
+				else {
+					let fieldID = Zotero.ItemFields.getID(fieldName);
 					if (fieldID && !Zotero.ItemFields.isValidForType(fieldID, this.item.itemTypeID)) {
 						fieldName = null;
 					}
-				}
-				
-				if (fieldName) {
 					if (this._hiddenFields.indexOf(fieldName) != -1) {
 						continue;
 					}
@@ -552,15 +587,7 @@
 						continue;
 					}
 					
-					var fieldIsClickable = this._fieldIsClickable(fieldName);
-					
-					// Start tabindex at 1001 after creators
-					var tabindex = fieldIsClickable
-						? (i > 0 ? this._tabIndexMinFields + i : 1)
-						: 0;
-					this._tabIndexMaxFields = Math.max(this._tabIndexMaxFields, tabindex);
-					
-					if (fieldIsClickable
+					if (isClickable
 							&& !Zotero.Items.isPrimaryField(fieldName)
 							&& Zotero.ItemFields.isDate(fieldName)
 							// TEMP - NSF
@@ -568,7 +595,15 @@
 						this.addDateRow(fieldName, this.item.getField(fieldName, true), tabindex);
 						continue;
 					}
+
+					isMultiline = fieldName === 'abstractNote';
 				}
+
+				// Start tabindex at 1001 after creators
+				tabindex = isClickable
+					? (i > 0 ? this._tabIndexMinFields + i : 1)
+					: 0;
+				this._tabIndexMaxFields = Math.max(this._tabIndexMaxFields, tabindex);
 				
 				let th = document.createElement("th");
 				th.setAttribute('fieldname', fieldName);
@@ -576,21 +611,31 @@
 				let valueElement = this.createValueElement(
 					val, fieldName, tabindex
 				);
+
+				if (!valueElement) {
+					continue;
+				}
 				
 				var prefix = '';
 				// Add '(...)' before 'Abstract' for collapsed abstracts
-				if (fieldName == 'abstractNote') {
-					if (val && !Zotero.Prefs.get('lastAbstractExpand')) {
+				if (isCollapsible) {
+					let isCollapsed;
+					if (isCustomRow) {
+						isCollapsed = customRowOptions?.collapseStateGetter
+							&& customRowOptions?.collapseStateGetter(this.item, fieldName);
+					}
+					else {
+						isCollapsed = val && !Zotero.Prefs.get('lastAbstractExpand');
+					}
+					if (isCollapsed) {
 						prefix = '(\u2026) ';
 					}
 				}
 				
-				if (fieldName) {
-					let label = document.createElement('label');
-					label.className = 'key';
-					label.textContent = prefix + Zotero.ItemFields.getLocalizedString(fieldName);
-					th.appendChild(label);
-				}
+				let label = document.createElement('label');
+				label.className = 'key';
+				label.textContent = prefix + this._getLocalizedFieldLabel(fieldName);
+				th.appendChild(label);
 				
 				// TEMP - NSF (homepage)
 				if ((fieldName == 'url' || fieldName == 'homepage')
@@ -618,17 +663,19 @@
 						this._doiMenu.dataset.doi = doi;
 					}
 				}
-				else if (fieldName == 'abstractNote') {
+				else if (isMultiline) {
 					if (val.length) {
 						th.classList.add("pointer");
 					}
-					th.addEventListener('click', function () {
-						if (this.nextSibling.querySelector('input, textarea')) {
-							this.nextSibling.querySelector('input, textarea').blur();
+					th.addEventListener('click', () => {
+						if (th.nextSibling.querySelector('input, textarea')) {
+							th.nextSibling.querySelector('input, textarea').blur();
 						}
 						else {
-							this.closest('item-box').toggleAbstractExpand(
-								this.firstElementChild, this.closest('tr').querySelector('.value')
+							this.toggleCollapsibleRowExpand(
+								th.firstElementChild,
+								th.closest('tr').querySelector('.value'),
+								fieldName
 							);
 						}
 					});
@@ -646,7 +693,7 @@
 				
 				this.addDynamicRow(th, td);
 				
-				if (fieldName && this._selectField == fieldName) {
+				if (this._selectField == fieldName) {
 					this.showEditor(valueElement);
 				}
 				
@@ -1056,7 +1103,7 @@
 			th.setAttribute("onclick", "this.nextSibling.firstChild.blur()");
 			var label = document.createElement('label');
 			label.className = 'key';
-			label.textContent = Zotero.ItemFields.getLocalizedString(field);
+			label.textContent = this._getLocalizedFieldLabel(field);
 			th.appendChild(label);
 			
 			var td = document.createElement('td');
@@ -1283,7 +1330,7 @@
 				var fieldNames = "";
 				for (var i = 0; i < fieldsToDelete.length; i++) {
 					fieldNames += "\n - "
-						+ Zotero.ItemFields.getLocalizedString(fieldsToDelete[i]);
+						+ this._getLocalizedFieldLabel(fieldsToDelete[i]);
 				}
 				
 				var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
@@ -1318,9 +1365,14 @@
 			return false;
 		}
 		
-		toggleAbstractExpand(label, valueElement) {
-			var cur = Zotero.Prefs.get('lastAbstractExpand');
-			Zotero.Prefs.set('lastAbstractExpand', !cur);
+		toggleCollapsibleRowExpand(label, valueElement, fieldName) {
+			let customRowOptions = this._getCustomRowOptions(fieldName);
+			let isCustomRow = !!customRowOptions;
+
+			let isExpanded = isCustomRow
+				? customRowOptions?.collapseStateGetter(this.item, fieldName)
+				: Zotero.Prefs.get('lastAbstractExpand');
+			Zotero.Prefs.set('lastAbstractExpand', !isExpanded);
 			
 			var valueText = this.item.getField('abstractNote');
 			var tabindex = valueElement.getAttribute('ztabindex');
@@ -1331,9 +1383,9 @@
 			);
 			valueElement.replaceWith(newValueElement);
 			
-			var text = Zotero.ItemFields.getLocalizedString('abstractNote');
+			var text = this._getLocalizedFieldLabel('abstractNote');
 			// Add '(...)' before "Abstract" for collapsed abstracts
-			if (valueText && cur) {
+			if (valueText && isExpanded) {
 				text = '(\u2026) ' + text;
 			}
 			label.textContent = text;
@@ -1360,18 +1412,43 @@
 			}
 		}
 		
+		/**
+		 * Create a value element
+		 * @param {string} valueText - The text to display
+		 * @param {string} fieldName - The Zotero field name
+		 * @param {number | undefined} tabindex - The tab index
+		 * @returns {HTMLDivElement | undefined} The value element
+		 */
 		createValueElement(valueText, fieldName, tabindex) {
 			valueText += '';
 
-			if (fieldName) {
+			let customRowOptions = this._getCustomRowOptions(fieldName);
+			let isCustomRow = !!customRowOptions;
+
+			if (!fieldName) {
+				return undefined;
+			}
+			
+			if (!isCustomRow) {
 				var fieldID = Zotero.ItemFields.getID(fieldName);
 			}
 			
 			// Allow multiline/long fields to wrap
-			var isMultiline = Zotero.ItemFields.isMultiline(fieldName) || Zotero.ItemFields.isLong(fieldName);
-			// But treat Abstract as a multiline field only when expanded
-			if (fieldName == 'abstractNote') {
-				isMultiline &&= Zotero.Prefs.get('lastAbstractExpand');
+			let isMultiline = Zotero.ItemFields.isMultiline(fieldName)
+								|| Zotero.ItemFields.isLong(fieldName)
+								|| customRowOptions?.multiline;
+			let isCollapsible = fieldName == 'abstractNote' || customRowOptions?.multiline;
+			// But treat Collapsible rows as a multiline field only when expanded
+			if (isCollapsible) {
+				let isCollapsed;
+				if (isCustomRow) {
+					isCollapsed = customRowOptions?.collapseStateGetter
+						&& customRowOptions?.collapseStateGetter(this.item, fieldName);
+				}
+				else {
+					isCollapsed = !Zotero.Prefs.get('lastAbstractExpand');
+				}
+				isMultiline &&= !isCollapsed;
 			}
 			
 			var valueElement = document.createElement("div");
@@ -1380,7 +1457,9 @@
 			valueElement.className = 'value';
 			valueElement.setAttribute('fieldname', fieldName);
 
-			if (this._fieldIsClickable(fieldName)) {
+			let isFieldClickable = this._fieldIsClickable(fieldName) || customRowOptions?.editable;
+			
+			if (isFieldClickable) {
 				valueElement.setAttribute('ztabindex', tabindex);
 				valueElement.addEventListener('click', (event) => {
 					// Skip right-click on Windows
@@ -1395,7 +1474,7 @@
 			switch (fieldName) {
 				case 'itemType':
 					valueElement.setAttribute('itemTypeID', valueText);
-					valueText = Zotero.ItemTypes.getLocalizedString(valueText);
+					valueText = this._getLocalizedFieldLabel(valueText);
 					break;
 				
 				// Convert dates from UTC
@@ -1490,12 +1569,12 @@
 				valueElement.classList.add('multiline');
 			}
 			
-			// Allow toggling non-editable Abstract open and closed with click
-			if (fieldName == 'abstractNote' && !this.editable) {
+			// Allow toggling non-editable collapsible rows open and closed with click
+			if (isCollapsible && !this.editable) {
 				valueElement.classList.add("pointer");
 				valueElement.addEventListener('click', () => {
 					let label = valueElement.parentElement.previousElementSibling.firstElementChild;
-					this.toggleAbstractExpand(label, valueElement);
+					this.toggleCollapsibleRowExpand(label, valueElement, fieldName);
 				});
 			}
 			
@@ -1523,7 +1602,15 @@
 		
 		async showEditor(elem) {
 			Zotero.debug(`Showing editor for ${elem.getAttribute('fieldname')}`);
-			
+
+			let customRowOptions = this._getCustomRowOptions(elem.getAttribute('fieldname'));
+			let isCustomRow = !!customRowOptions;
+
+			// Disable editing for non-editable custom fields
+			if (isCustomRow && !customRowOptions?.editable) {
+				return;
+			}
+
 			var label = elem.closest('tr').querySelector('th > label');
 			var lastTabIndex = this._lastTabIndex = parseInt(elem.getAttribute('ztabindex'));
 			
@@ -1554,7 +1641,7 @@
 				}
 				itemID = this.item.id;
 			}
-			else {
+			else if (!isCustomRow) {
 				value = this.item.getField(fieldName);
 				itemID = this.item.id;
 				
@@ -1581,13 +1668,22 @@
 					}
 				}
 			}
+			else {
+				value = customRowOptions.dataProvider(this.item, fieldName);
+				itemID = this.item.id;
+			}
 			
 			var t;
-			if (Zotero.ItemFields.isMultiline(fieldName) || Zotero.ItemFields.isLong(fieldName)) {
+
+			let isMultiline = Zotero.ItemFields.isMultiline(fieldName)
+								|| Zotero.ItemFields.isLong(fieldName)
+								|| customRowOptions?.multiline;
+			if (isMultiline) {
 				t = document.createElement("textarea");
 			}
 			// Add auto-complete for certain fields
-			else if (field == 'creator' || Zotero.ItemFields.isAutocompleteField(fieldName)) {
+			else if (!isCustomRow
+					&& (field == 'creator' || Zotero.ItemFields.isAutocompleteField(fieldName))) {
 				t = document.createElement("input", { is: 'shadow-autocomplete-input' });
 				t.setAttribute('autocompletesearch', 'zotero');
 				
@@ -1980,6 +2076,9 @@
 			var elem;
 			var [field, creatorIndex, creatorField] = fieldName.split('-');
 			var newVal;
+
+			let customRowOptions = this._getCustomRowOptions(field);
+			let isCustomRow = !!customRowOptions;
 			
 			// Creator fields
 			if (field == 'creator') {
@@ -2063,7 +2162,8 @@
 						
 						default:
 							// TODO: generalize to all date rows/fields
-							if (Zotero.ItemFields.isFieldOfBase(fieldName, 'date')) {
+							if (!isCustomRow
+									&& Zotero.ItemFields.isFieldOfBase(fieldName, 'date')) {
 								// Parse 'yesterday'/'today'/'tomorrow'
 								value = Zotero.Date.parseDescriptiveString(value);
 							}
@@ -2071,7 +2171,9 @@
 				}
 				
 				this._modifyField(fieldName, value);
-				newVal = this.item.getField(fieldName);
+				newVal = isCustomRow
+					? customRowOptions.dataProvider(this.item, fieldName)
+					: this.item.getField(fieldName);
 			}
 			
 			// Close box
@@ -2096,19 +2198,39 @@
 		}
 		
 		_rowIsClickable(fieldName) {
-			return this.clickByRow
-					&& (this.clickable
-						|| this._clickableFields.indexOf(fieldName) != -1);
+			let customRowOptions = this._getCustomRowOptions(fieldName);
+			let isFieldClickable;
+			if (customRowOptions) {
+				isFieldClickable = customRowOptions.editable;
+			}
+			else {
+				isFieldClickable = this._clickableFields.includes(fieldName);
+			}
+			return this.clickByRow && (this.clickable || isFieldClickable);
 		}
 		
 		_fieldIsClickable(fieldName) {
+			let customRowOptions = this._getCustomRowOptions(fieldName);
+			let isFieldClickable;
+			if (customRowOptions) {
+				isFieldClickable = customRowOptions.editable;
+			}
+			else {
+				isFieldClickable = this._clickableFields.includes(fieldName);
+			}
 			return !this.clickByRow
 					&& ((this.clickable && !Zotero.Items.isPrimaryField(fieldName))
-					|| this._clickableFields.indexOf(fieldName) != -1);
+					|| isFieldClickable);
 		}
 		
-		_modifyField(field, value) {
-			this.item.setField(field, value);
+		_modifyField(fieldName, value) {
+			let customRowOptions = this._getCustomRowOptions(fieldName);
+			if (customRowOptions) {
+				customRowOptions.dataSetter(this.item, fieldName, value);
+			}
+			else {
+				this.item.setField(fieldName, value);
+			}
 		}
 		
 		_getFieldValue(label) {
@@ -2161,9 +2283,11 @@
 			this._setFieldValue(label, newVal);
 			var fieldName = label.getAttribute('fieldname');
 			this._modifyField(fieldName, newVal);
+			let customRowOptions = this._getCustomRowOptions(fieldName);
+			let isCustomRow = !!customRowOptions;
 			
 			// If this is a title field, convert the Short Title too
-			var isTitle = Zotero.ItemFields.getBaseIDFromTypeAndField(
+			var isTitle = !isCustomRow && Zotero.ItemFields.getBaseIDFromTypeAndField(
 				this.item.itemTypeID, fieldName) == Zotero.ItemFields.getID('title');
 			var shortTitleVal = this.item.getField('shortTitle');
 			if (isTitle && newVal.toLowerCase().startsWith(shortTitleVal.toLowerCase())) {
@@ -2333,8 +2457,8 @@
 		}
 
 		focusLastField() {
-			const tabbableFields = this.querySelectorAll('*[ztabindex]:not([disabled=true])');
-			const last = tabbableFields[tabbableFields.length - 1];
+			let tabbableFields = this.querySelectorAll('*[ztabindex]:not([disabled=true])');
+			let last = tabbableFields[tabbableFields.length - 1];
 
 			if (last.classList.contains('zotero-focusable')) {
 				last.focus();
@@ -2597,6 +2721,33 @@
 		
 		_id(id) {
 			return this.querySelector(`#${id}`);
+		}
+
+		_getSortedCustomRows() {
+			return Zotero.ItemBoxManager.getCustomRows().sort((a, b) => {
+				if (a.index === undefined && b.index === undefined) {
+					return 0;
+				}
+				if (a.index === undefined) {
+					return 1;
+				}
+				if (b.index === undefined) {
+					return -1;
+				}
+				return a.index - b.index;
+			});
+		}
+
+		_getCustomRowOptions(fieldName) {
+			return this._customRows.find(row => row.dataKey === fieldName);
+		}
+
+		_getLocalizedFieldLabel(fieldName) {
+			let customRowOptions = this._getCustomRowOptions(fieldName);
+			if (customRowOptions) {
+				return customRowOptions.label;
+			}
+			return Zotero.ItemFields.getLocalizedString(fieldName);
 		}
 	}
 	customElements.define("item-box", ItemBox);
