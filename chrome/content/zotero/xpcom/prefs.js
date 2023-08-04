@@ -118,7 +118,7 @@ Zotero.Prefs = new function() {
 								if (oldVal.includes('{%')) {
 									newVal = this.convertLegacyAttachmentRenameFormatString(oldVal);
 								}
-								// User already a modified new template from the Z7 beta before we
+								// User already modified new template from the Z7 beta before we
 								// renamed this pref, so just transfer over
 								else {
 									newVal = oldVal;
