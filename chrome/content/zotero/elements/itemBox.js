@@ -65,7 +65,7 @@
 			});
 
 			// restore protected parts from original, always last in the preserve list because
-			// it can span over other HTML
+			// it can span over other HTML. Intentionally only does detection, not replacement, which is handled above.
 			this.input.replace(/<span class="nocase">.*?<\/span>|<nc>.*?<\/nc>/gi, (match, i) => {
 				preserve.push({ start: i, end: i + match.length - 1 });
 				return match;
