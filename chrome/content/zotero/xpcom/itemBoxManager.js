@@ -58,6 +58,8 @@ class ItemBoxManager {
 
 	/**
 	 * Registers custom row(s) for the item box element.
+	 * Note that the `dataKey` you use here may be different from the one returned by the function.
+	 * This is because the `dataKey` is prefixed with the `pluginID` to avoid conflicts after the column is registered.
 	 * @param {ItemBoxCustomRowOptions | ItemBoxCustomRowOptions[]} options - Options for the custom row.
 	 * @example
 	 * Register an uneditable single row. The row will be appended to the end of the item box.
@@ -73,7 +75,7 @@ class ItemBoxManager {
 	 * @example
 	 * Register an editable multiline row
 	 * ```js
-	 * const registeredDataKey = Zotero.ItemBoxManager.registerRows({
+	 * const registeredDataKey = await Zotero.ItemBoxManager.registerRows({
 	 *   dataKey: 'rabstract',
 	 *   label: 'Reversed Abstract',
 	 *   pluginID: 'make-it-red@zotero.org', // plugin ID, which will be used to unregister the row when the plugin is unloaded
@@ -93,7 +95,7 @@ class ItemBoxManager {
 			return false;
 		}
 		this._addPluginShutdownObserver();
-		await this._notifyItemBoxes();
+		this._notifyItemBoxes();
 		return registeredDataKeys;
 	}
 
@@ -102,7 +104,7 @@ class ItemBoxManager {
 	 * @param {string | string[]} dataKeys - Data key(s) of the row(s).
 	 * @example
 	 * ```js
-	 * Zotero.ItemBoxManager.unregisterRows(registeredDataKey);
+	 * await Zotero.ItemBoxManager.unregisterRows(registeredDataKey);
 	 * ```
 	 */
 	async unregisterRows(dataKeys) {
@@ -110,7 +112,7 @@ class ItemBoxManager {
 		if (!success) {
 			return false;
 		}
-		await this._notifyItemBoxes();
+		this._notifyItemBoxes();
 		return true;
 	}
 
@@ -253,6 +255,7 @@ class ItemBoxManager {
 	_namespacedDataKey(options) {
 		if (options.pluginID && options.dataKey) {
 			// Make sure the return value is valid as class name or element id
+			// `-` is not allowed, because it is used as separator in item-box
 			return `${options.pluginID}-${options.dataKey}`.replace(/[^a-zA-Z0-9_]/g, "$");
 		}
 		return options.dataKey;
@@ -309,7 +312,7 @@ class ItemBoxManager {
 	/**
 	 * Notify all item boxes to refresh
 	 */
-	async _notifyItemBoxes() {
+	_notifyItemBoxes() {
 		let mainWindows = Zotero.getMainWindows();
 		for (const win of mainWindows) {
 			for (const itemBox of win.document.querySelectorAll("item-box")) {
@@ -327,7 +330,7 @@ class ItemBoxManager {
 	 * Unregister all rows registered by a plugin
 	 * @param {string} pluginID - Plugin ID
 	 */
-	async _unregisterRowsByPluginID(pluginID) {
+	_unregisterRowsByPluginID(pluginID) {
 		const rows = this.getCustomRows(undefined, { pluginID });
 		if (rows.length === 0) {
 			return;
@@ -336,7 +339,7 @@ class ItemBoxManager {
 		// This is to ensure that the rows are removed and not interrupted by any non-existing rows
 		rows.forEach(row => this._removeRows(row.dataKey));
 		Zotero.debug(`ItemBox rows registered by plugin ${pluginID} unregistered due to shutdown`);
-		await this._notifyItemBoxes();
+		this._notifyItemBoxes();
 	}
 
 	/**
