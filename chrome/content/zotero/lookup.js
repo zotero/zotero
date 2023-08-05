@@ -81,6 +81,23 @@ var Zotero_Lookup = new function () {
 
 		toggleProgress(true);
 
+		// Group PubMed IDs into batches of 200
+		//
+		// Up to 10,000 ids can apparently be passed in a single request, but 200 is the recommended
+		// limit for GET, which we currently use, and passing batches of 200 seems...fine.
+		//
+		// https://www.ncbi.nlm.nih.gov/books/NBK25499/#chapter4.id
+		if (identifiers.length && identifiers[0].PMID) {
+			let chunkSize = 200;
+			let newIdentifiers = [];
+			for (let i = 0; i < identifiers.length; i += chunkSize) {
+				newIdentifiers.push({
+					PMID: identifiers.slice(i, i + chunkSize).map(x => x.PMID)
+				});
+			}
+			identifiers = newIdentifiers;
+		}
+		
 		let newItems = [];
 		for (let identifier of identifiers) {
 			let translate = new Zotero.Translate.Search();
