@@ -26,6 +26,112 @@
 "use strict";
 
 {
+	const sentenceCaser = new class SentenceCaser {
+		constructor() {
+			this.acronym = /^(\p{Lu}[.])+(?=$|[\P{L}])/; // U.S.
+			this.quoted = /^"[^"]+"(?=$|[\P{L}])/; // "Hello There"
+			this.innerCaps = /\p{Ll}\p{Lu}/; // e.g. "McDonald"
+			this.allCaps = /^\p{Lu}+$/; // e.g. "USA"
+			this.aint = /^\p{L}n't(?=$|[\P{L}])/; // isn't
+			this.word = /^\p{L}+(-\p{L}+)*/; // also match gallium-nitride as one word
+			this.and = /^\p{Lu}&\p{Lu}(?=$|[\P{L}])/; // Q&A
+		}
+
+		restore(text, orig, preserve) {
+			for (const { start, end } of preserve) {
+				text = text.substring(0, start) + orig.substring(start, end) + text.substring(end);
+			}
+			return text;
+		}
+
+		convert(text) {
+			this.input = text;
+			this.result = '';
+			this.sentenceStart = true;
+			const preserve = [];
+
+			// replace HTML markup by the preceding/following char to
+			// make "hello Ki<b>tt</b>y" look like "hello Kiiiitttttty"
+			// which is more likely to be correctly sentence-cased as a single word
+			this.input.replace(/[^<>]<[^>]+>/g, (match, i) => {
+				preserve.push({ start: i + 1, end: i + match.length });
+				// replace markup by the preceding char
+				return match[0].repeat(match.length);
+			});
+			this.input = this.input.replace(/<[^>]+>[^<>]/g, (match, i) => {
+				preserve.push({ start: i, end: i + match.length - 1 });
+				// replace markup by the following char
+				return match[match.length - 1].repeat(match.length);
+			});
+
+			// restore protected parts from original, always last in the preserve list because
+			// it can span over other HTML
+			text.replace(/<span class="nocase">.*?<\/span>|<nc>.*?<\/nc>/gi, (match, i) => {
+				preserve.push({ start: i, end: i + match.length - 1 });
+				return match;
+			});
+
+			this.input = this.input
+				.replace(/[;:]\s+A\s/g, match => match.toLowerCase())
+				.replace(/[–—]\s*A\s/g, match => match.toLowerCase());
+			while (this.input) {
+				let m = this.input.match(this.quoted);
+				if (m) {
+					this.add(m[0], undefined, true);
+					continue;
+				}
+
+				m = this.input.match(this.acronym);
+				if (m) {
+					this.add(m[0], undefined, true);
+					continue;
+				}
+
+				m = this.input.match(this.aint);
+				if (m) {
+					this.add(m[0], undefined, false);
+					continue;
+				}
+
+				m = this.input.match(this.word);
+				if (m) {
+					this.add(m[0], '-', false);
+					continue;
+				}
+
+				m = this.input.match(this.and);
+				if (m) {
+					this.add(m[0], undefined, true);
+					continue;
+				}
+
+				this.add(this.input[0], undefined, false);
+			}
+
+			return this.restore(this.result, text, preserve);
+		}
+
+		add(word, splitter, keep) {
+			if (splitter) {
+				word = word.split(splitter).map((part, i) => {
+					if ((keep || this.sentenceStart) && i === 0) return part;
+					if (part.match(this.innerCaps)) return part;
+					if (part.match(this.allCaps)) return part;
+					return part.toLowerCase();
+				}).join(splitter);
+			}
+			else if (!keep) {
+				word = word.toLowerCase();
+			}
+
+			this.result += word;
+			this.input = this.input.substr(word.length);
+			if (!word.match(/^\s+$/)) {
+				this.sentenceStart = !!word.match(/^[.?!]$/) || (word.length === 2 && word[1] === '.'); // Vitamin A. Vitamin B.
+			}
+		}
+	};
+
 	class ItemBox extends XULElement {
 		constructor() {
 			super();
@@ -2136,13 +2242,7 @@
 				case 'title':
 					return Zotero.Utilities.capitalizeTitle(val.toLowerCase(), true);
 				case 'sentence':
-					// capitalize the first letter, including after beginning punctuation
-					// capitalize after ?, ! and remove space(s) before those as well as colon analogous to capitalizeTitle function
-					// also deal with initial punctuation here - open quotes and Spanish beginning punctuation marks
-					val = val.toLowerCase().replace(/\s*:/, ":");
-					val = val.replace(/(([\?!]\s*|^)([\'\"¡¿“‘„«\s]+)?[^\s])/g, function (x) {
-						return x.replace(/\s+/m, " ").toUpperCase();});
-					return val;
+					return sentenceCaser.convert(val);
 				default:
 					throw new Error("Invalid transform mode '" + mode + "' in ItemBox.textTransformString()");
 			}
