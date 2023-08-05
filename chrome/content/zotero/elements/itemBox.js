@@ -66,7 +66,7 @@
 
 			// restore protected parts from original, always last in the preserve list because
 			// it can span over other HTML
-			text.replace(/<span class="nocase">.*?<\/span>|<nc>.*?<\/nc>/gi, (match, i) => {
+			this.input.replace(/<span class="nocase">.*?<\/span>|<nc>.*?<\/nc>/gi, (match, i) => {
 				preserve.push({ start: i, end: i + match.length - 1 });
 				return match;
 			});
