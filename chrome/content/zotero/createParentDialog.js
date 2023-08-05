@@ -74,7 +74,7 @@ async function doAccept() {
 	);
 
 	// If we successfully created a parent, return it
-	if (newItems) {
+	if (newItems.length) {
 		io.dataOut = { parent: newItems[0] };
 		window.close();
 	}
