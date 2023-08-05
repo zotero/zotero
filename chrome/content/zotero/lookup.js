@@ -89,6 +89,7 @@ var Zotero_Lookup = new function () {
 			// be lenient about translators
 			let translators = await translate.getTranslators();
 			translate.setTranslator(translators);
+			translate.setRequestTimeout(Zotero.Prefs.get('lookup.requestTimeout'));
 
 			try {
 				newItems.push(...await translate.translate({

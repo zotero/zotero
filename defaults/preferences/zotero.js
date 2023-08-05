@@ -212,3 +212,6 @@ pref("extensions.zotero.scaffold.eslint.enabled", true);
 
 // Tabs
 pref("extensions.zotero.tabs.title.reader", "titleCreatorYear");
+
+// Add by Identifier
+pref("extensions.zotero.lookup.requestTimeout", 10000);
