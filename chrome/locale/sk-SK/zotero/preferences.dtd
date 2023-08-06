@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "pri vytváraní záznamov z webstránok automaticky urobiť snímku danej stránky">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "pri ukladaní záznamov automaticky priložiť prepojené PDF a ostatné súbory">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Automaticky získať metadáta pre PDF">
-<!ENTITY zotero.preferences.autoRenameFiles "Automaticky premenovať súbory príloh pomocou nadradených metadát">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Premenovať prelinkované súbory">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Otvoriť PDF pomocou">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Predvolený systém">

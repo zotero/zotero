@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Автоматически делать снимки при создании записей из веб-страниц">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Автоматически вкладывать связанные PDF и другие файлы при сохранении записей">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Автоматически получать метаданные PDF-файлов">
-<!ENTITY zotero.preferences.autoRenameFiles "Автоматически переименовывать вложенные файлы на основе родительских метаданных">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Переименовывать связанные файлы">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Открывать PDF-файлы используя">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "По умолчанию для данной системы">

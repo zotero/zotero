@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "أخذ لقطات تلقائية عند إنشاء العناصر من صفحات الويب">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "الارفاق التلقائي لملفات PDF والملفات الاخرى عند اضافة عنصر جديد من صفحة ويب">
 <!ENTITY zotero.preferences.autoRecognizeFiles "استرداد البيانات الوصفية تلقائياً لملفات بي دي إف">
-<!ENTITY zotero.preferences.autoRenameFiles "إعادة تسمية الملفات المرفقة تلقائيًا مستخدماً بيانات الأصل الوصفية">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "إعادة تسمية الملفات المرتبطة">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "افتح ملفات بي دي إف مستخدماً">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "افتراضي النظام">

@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Weboldalon alapuló elem létrehozásakor automatikus pillanatfelvétel készítése">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "A kapcsolódó PDF és más fájlok automatikus csatolása">
 <!ENTITY zotero.preferences.autoRecognizeFiles "A metaadat automatikus visszaállítása a PDF-ek számára">
-<!ENTITY zotero.preferences.autoRenameFiles "A mellékletek automatikus átnevezése az eredeti metaadataival">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Csatolt fájlok átnevezése">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "A PDF-fájlok megnyitása">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Alapértelmezett rendszerbeállítás">

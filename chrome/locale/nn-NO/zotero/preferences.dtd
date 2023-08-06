@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Ta snapshot automatisk når du genererer element frå nettsider">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Lagra tilknytte PDF-filer og andre filer ved lagring av element">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">

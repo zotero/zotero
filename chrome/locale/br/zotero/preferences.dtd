@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Em-dapout skeudenn ar bajenn da vare krouidigezh elfennoù diwar pajennoù Web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Em-stagañ ar PDFoù kevelet da vare enrolladur elfennoù">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Em-adpakout metaroadennoù ar PDFoù">
-<!ENTITY zotero.preferences.autoRenameFiles "Em-adenvel ar stagadennoù en ur implijout ar metaroadennoù kar">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Adenvel ar restroù liammet">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Digeriñ ar PDFoù gant">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Sistem dre-ziouer">

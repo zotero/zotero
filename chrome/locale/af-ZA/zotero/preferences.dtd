@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Neem outomaties kiekies wanneer items uit webbladsye geskep word">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Heg geassosieerde PDF's en ander lêers outomaties aan wanneer items gestoor word">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatically rename attachment files using parent metadata">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">

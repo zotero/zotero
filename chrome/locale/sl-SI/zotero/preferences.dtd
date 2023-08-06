@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Samodejno naredi posnetek pri ustvarjanju vnosov s spletnih strani">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Samodejno pripni pridružene PDF-je in druge datoteke pri shranjevanju vnosov">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Samodejno pridobi metapodatke za PDF-je">
-<!ENTITY zotero.preferences.autoRenameFiles "Samodejno preimenuj datoteke priponk z uporabo metapodatkov nadrejenih">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Preimenuj povezane datoteke">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Dokumente PDF odpri s/z">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Sistemsko privzeto">

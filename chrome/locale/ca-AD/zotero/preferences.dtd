@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Crea automàticament una captura quan es creïn elements des de pàgines web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Adjunta automàticament documents PDF associats i altres fitxers quan es desin els elements">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Recupera les metadades dels PDF automàticament">
-<!ENTITY zotero.preferences.autoRenameFiles "Reanomena els fitxers adjunts automàticament fent servir les metadades de l'element pare">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Reanomena els fitxers enllaçats">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Obre els PDF fent servir">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Predeterminat del sistema">

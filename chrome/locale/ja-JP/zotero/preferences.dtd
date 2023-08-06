@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "ウェブページからアイテムを作成するときに自動的にスナップショットを作成する">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "アイテムを作成するときに自動的に関連 PDF や他のファイルを添付する">
 <!ENTITY zotero.preferences.autoRecognizeFiles "自動的にPDFのメタデータを取得する">
-<!ENTITY zotero.preferences.autoRenameFiles "親アイテムのメタデータを使って自動的に添付ファイルを改名する">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "リンクされたファイルの名前を変更">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "PDF書類を開く">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "システムデフォルト">

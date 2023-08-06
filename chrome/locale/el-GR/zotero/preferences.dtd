@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Αυτόματη λήψη φωτογραφικού στιγμιότυπου όταν δημιουργούνται στοιχεία από ιστοσελίδες">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Αυτόματη προσάρτηση των συνοδευτικών PDF και άλλων αρχείων όταν αποθηκεύονται στοιχεία">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Αυτόματη ανάκτηση μεταδεδομένων για αρχεία PDF">
-<!ENTITY zotero.preferences.autoRenameFiles "Αυτόματη μετονομασία συνημμένων αρχείων χρησιμοποιώντας γονικά μεταδεδομένα">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Μετονομασία συνδεδεμένων αρχείων">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Άνοιγμα PDF χρησιμοποιώντας">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Προεπιλογή Συστήματος">

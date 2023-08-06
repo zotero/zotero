@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Salva automaticamente una copia della pagina web (snapshot) quando si crea un elemento da un sito">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Allega automaticamente i file PDF o di altro tipo durante il salvataggio degli elementi">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Recupera automaticamente i metadati dei PDF">
-<!ENTITY zotero.preferences.autoRenameFiles "Rinomina automaticamente i file allegati utilizzando i metadati della citazione genitore">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rinomina i file collegati">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Apri i PDF utilizzando">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Impostazioni predefinite di sistema">

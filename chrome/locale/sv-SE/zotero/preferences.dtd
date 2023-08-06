@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Ta automatiskt lokala kopior när källor skapas av hemsidor">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Bifoga automatiskt associerade PDF:er och andra filer när källor sparas">
 <!ENTITY zotero.preferences.autoRecognizeFiles "hämta metadata automatiskt för PDF:er">
-<!ENTITY zotero.preferences.autoRenameFiles "Döp automatiskt om bilagefiler uifrån huvudpostens metadata">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Byt namn på länkade filer">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Öppna PDF:er med">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Systemets standardval">

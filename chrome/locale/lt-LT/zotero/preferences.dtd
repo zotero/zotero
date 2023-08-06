@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Kuriamiems naujiems įrašams automatiškai sukurti tinklalapių momentines kopijas">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Įrašant įrašus, automatiškai prisegti susijusius PDF dokumentus ir kitus failus">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Automatiškai gauti PDF metaduomenis">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatiškai pervadinti priedus pagal metaduomenis">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Pervadinti susietas rinkmenas">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "PDF atverti su">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Sistemos numatytoji">

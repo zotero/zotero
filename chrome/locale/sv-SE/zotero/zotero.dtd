@@ -105,7 +105,7 @@
 <!ENTITY zotero.toolbar.feeds.new "Nytt flöde">
 <!ENTITY zotero.toolbar.feeds.new.fromURL "Från URL…">
 <!ENTITY zotero.toolbar.feeds.new.fromOPML "Från OPML…">
-<!ENTITY zotero.toolbar.feeds.edit "Redigera matning…">
+<!ENTITY zotero.toolbar.feeds.edit "Redigera flöde…">
 
 <!ENTITY zotero.item.add "Lägg till">
 <!ENTITY zotero.item.attachment.file.show "Visa fil">
@@ -265,11 +265,11 @@
 <!ENTITY zotero.proxy.recognized.disable.label "Skicka inte automatiskt vidare frågor genom tidigare funna proxies">
 <!ENTITY zotero.proxy.recognized.ignore.label "Ignorera">
 
-<!ENTITY zotero.feedSettings.title "Matningsinställningar">
+<!ENTITY zotero.feedSettings.title "Flödesinställningar">
 <!ENTITY zotero.feedSettings.saveButton.label "Spara">
 <!ENTITY zotero.feedSettings.url.label "URL:">
 <!ENTITY zotero.feedSettings.title.label "Titel:">
-<!ENTITY zotero.feedSettings.refresh.label1 "Uppdatera matning varje">
+<!ENTITY zotero.feedSettings.refresh.label1 "Uppdatera flöde varje">
 <!ENTITY zotero.feedSettings.refresh.label2 "timme(ar)">
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label1 "Ta bort olästa flödesobjekt efter">
 <!ENTITY zotero.feedSettings.cleanupUnreadAfter.label2 "dag(ar)">

@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Самостално узми снимак када се прави ставка са веб странице">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Самостално приложи повезане PDF и друге датотека када чуваш ставке">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Сам преузми метаподатке за ПДФ датотеке">
-<!ENTITY zotero.preferences.autoRenameFiles "Сам преименуј приложене датотеке на основу метаподатака">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Преименуј повезане датотеке">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Отварај ПДФ помоћу">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Подразумевано на систему">

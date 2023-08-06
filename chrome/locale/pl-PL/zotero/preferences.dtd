@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Podczas tworzenia elementów ze stron internetowych automatycznie wykonaj zrzut ekranu">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Zapisując element dołączaj powiązane pliki PDF i inne">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Automatycznie pobierz metadane dla plików PDF">
-<!ENTITY zotero.preferences.autoRenameFiles "Automatycznie zmień nazwy plików załączników na podstawie metadanych rodzica">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Zmień nazwy powiązanych plików">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Otwórz pliki PDF za pomocą">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Domyślny w systemie">
@@ -26,7 +25,7 @@
 <!ENTITY zotero.preferences.updateNow "Aktualizuj teraz">
 <!ENTITY zotero.preferences.reportTranslationFailure "Zgłoś niedziałający translator strony">
 <!ENTITY zotero.preferences.parseRISRefer "Używaj Zotero do pobranych plików BibTeX/RIS/Refer">
-<!ENTITY zotero.preferences.automaticTags "Automatycznie oznacz elementy zawierające słowa kluczowe i nagłówki tematyczne">
+<!ENTITY zotero.preferences.automaticTags "Automatycznie etykietuj elementy zawierające słowa kluczowe i nagłówki tematyczne">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatycznie usuń z kosza elementy usunięte dawniej niż">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dni temu">
 
@@ -42,7 +41,7 @@
 <!ENTITY zotero.preferences.groups.childFiles "potomne zrzuty ekranu i zaimportowane pliki">
 <!ENTITY zotero.preferences.groups.annotations "adnotacje">
 <!ENTITY zotero.preferences.groups.childLinks "potomne linki">
-<!ENTITY zotero.preferences.groups.tags "znaczniki">
+<!ENTITY zotero.preferences.groups.tags "etykiety">
 
 <!ENTITY zotero.preferences.feeds "Kanały">
 <!ENTITY zotero.preferences.feeds.sorting.label "Sortowanie:">
@@ -146,7 +145,7 @@
 <!ENTITY zotero.preferences.keys.newNote "Utwórz nową notatkę">
 <!ENTITY zotero.preferences.keys.toggleAllRead "Oznacz wszystkie elementy kanału jako przeczytane/nieprzeczytane">
 <!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiuj wybrane odnośniki bibliograficzne do schowka">
-<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiuj zaznaczone elementy do schowka">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiuj wybrane elementy do schowka">
 <!ENTITY zotero.preferences.keys.importFromClipboard "Importuj ze schowka">
 <!ENTITY zotero.preferences.keys.changesTakeEffect "Zmiany zostaną zastosowane po ponownym uruchomieniu">
 

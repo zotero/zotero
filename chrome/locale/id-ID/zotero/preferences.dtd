@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Ambil foto secara automatis ketika menyusun item dari laman web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Lampirkan PDF dan berkas terkait lainnya secara automatis saat menyimpan item">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Secara otomatis mengambil metadata untuk PDF">
-<!ENTITY zotero.preferences.autoRenameFiles "Secara otomatis mengganti nama file lampiran menggunakan metadata induk">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Ganti nama file yang ditautkan">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Buka PDF menggunakan">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Default Sistem">

@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "ללכוד תמונת מצב אוטומטית בעת יצירת פריטים מאתרים">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "לצרף אוטומטית PDFים וקבצים אחרים משויכים בעת שמירת פריטים">
 <!ENTITY zotero.preferences.autoRecognizeFiles "למשוך נתוני על ל־PDFים אוטומטית">
-<!ENTITY zotero.preferences.autoRenameFiles "לשנות שמות של קובצי צרופות אוטומטית בעת שימוש בנתוני העל של ההורה">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "שינוי שמות של קבצים מקושרים">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "פתיחת PDFים באמצעות">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "ברירת המחדל של המערכת">

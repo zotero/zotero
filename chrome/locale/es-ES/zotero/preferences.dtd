@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Tomar instantáneas automáticamente al crear elementos a partir de páginas webs">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Adjuntar automáticamente los archivos PDFs y otros archivos al guardar elementos">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Recuperar automáticamente metadatos para archivos PDFs">
-<!ENTITY zotero.preferences.autoRenameFiles "Renombrar automáticamente los archivos adjuntos utilizando los metadatos del contenedor">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Renombrar archivos enlazados">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Abrir PDFs usando">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Predeterminados del sistema">

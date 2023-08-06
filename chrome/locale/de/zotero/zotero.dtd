@@ -112,7 +112,7 @@
 <!ENTITY zotero.item.textTransform "Text transformieren">
 <!ENTITY zotero.item.textTransform.titlecase "englische Titel-Großschreibung">
 <!ENTITY zotero.item.textTransform.sentencecase "englische Satz-Großschreibung">
-<!ENTITY zotero.item.creatorTransform.nameSwap "Swap First/Last">
+<!ENTITY zotero.item.creatorTransform.nameSwap "Vor-/Nachname tauschen">
 <!ENTITY zotero.item.creatorTransform.fixCase "Groß-/Kleinschreibung anpassen">
 <!ENTITY zotero.item.viewOnline "Online anzeigen">
 <!ENTITY zotero.item.copyAsURL "Als URL kopieren">
@@ -137,10 +137,10 @@
 <!ENTITY zotero.tagSelector.displayAllInLibrary "Alle Tags dieser Bibliothek anzeigen">
 <!ENTITY zotero.tagSelector.deleteAutomaticInLibrary "Lösche automatische Tags in dieser Bibliothek...">
 <!ENTITY zotero.tagSelector.clearAll "Alle abwählen">
-<!ENTITY zotero.tagSelector.assignColor "Farbe zuweisen...">
-<!ENTITY zotero.tagSelector.renameTag "Tag umbenennen...">
-<!ENTITY zotero.tagSelector.deleteTag "Tag löschen...">
-<!ENTITY zotero.tagSelector.splitTag "Split…">
+<!ENTITY zotero.tagSelector.assignColor "Farbe zuweisen…">
+<!ENTITY zotero.tagSelector.renameTag "Tag umbenennen…">
+<!ENTITY zotero.tagSelector.deleteTag "Tag löschen…">
+<!ENTITY zotero.tagSelector.splitTag "Aufteilen…">
 
 <!ENTITY zotero.tagColorChooser.title "Tag Farbe und Position auswählen">
 <!ENTITY zotero.tagColorChooser.color "Farbe:">

@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Creează automat instantanee, atunci când sunt create înregistrări din paginile web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Anexează automat fișierele PDF asociate, precum și alte fișiere, atunci când sunt salvate înregistrările">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Extrage automat metadatele pentru PDF-uri">
-<!ENTITY zotero.preferences.autoRenameFiles "Redenumește automat fișierele anexate folosind metadatele părinte">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Redenumește fișierele legate">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Deschide PDF-urile folosind">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Sistem implicit">

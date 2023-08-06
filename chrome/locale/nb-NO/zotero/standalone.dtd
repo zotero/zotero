@@ -51,7 +51,7 @@
 <!ENTITY stackedView.label "Stablet visning">
 <!ENTITY collectionsPane.label "Rute for samlinger">
 <!ENTITY itemPane.label "Rute for element">
-<!ENTITY tagSelector.label "Etikettvelger">
+<!ENTITY tagSelector.label "Emneordvelger">
 <!ENTITY recursiveCollections.label "Vis elementer fra under-samlinger">
 <!ENTITY fontSize.label "Skriftstørrelse">
 <!ENTITY noteFontSize.label "Skriftstørrelse for notat">

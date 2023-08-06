@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "Ota tilannekuvat automaattisesti luotaessa nimikettä web-sivusta">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Liitä automaattisesti asiaankuuluvat PDF:t ja muut tiedostot">
 <!ENTITY zotero.preferences.autoRecognizeFiles "Nouda metadata PDF-tiedostoille automaattisesti">
-<!ENTITY zotero.preferences.autoRenameFiles "Nimeä liitetiedostot automaattisesti käyttämällä nimikkeen metatietoja">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Nimeä uudelleen linkitetyt tiedostot">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Avaa PDF:t ohjelmalla">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Järjestelmän oletus">

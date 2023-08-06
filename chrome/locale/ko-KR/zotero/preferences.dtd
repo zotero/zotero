@@ -15,7 +15,6 @@
 <!ENTITY zotero.preferences.automaticSnapshots "웹 페이지  항목을 생성할 때 자동으로 스냅샷 저장">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "항목 저장시 연관된 PDF 및 다른 파일을 자동으로 첨부">
 <!ENTITY zotero.preferences.autoRecognizeFiles "PDF 파일 메타데이터 자동 검색">
-<!ENTITY zotero.preferences.autoRenameFiles "부모 메타데이터를 이용하여 첨부 파일 이름 자동 변경">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "링크한 파일 이름 바꾸기">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "PDF 파일을 열 앱">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "시스템 기본값">
