@@ -409,13 +409,16 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 	 * @return {Promise}
 	 */
 	this.indexEPUB = async function (filePath, itemID, allText) {
+		const { EPUB } = ChromeUtils.import('chrome://zotero/content/EPUB.jsm');
+		
 		let maxLength = Zotero.Prefs.get('fulltext.textMaxLength');
 		let item = await Zotero.Items.getAsync(itemID);
+		let epub = new EPUB(filePath);
 		
 		try {
 			let text = '';
 			let totalChars = 0;
-			for await (let { href, doc } of Zotero.EPUB.getSectionDocuments(filePath)) {
+			for await (let { href, doc } of epub.getSectionDocuments(filePath)) {
 				if (!doc.body) {
 					Zotero.debug(`Skipping EPUB entry '${href}' with no body`);
 					continue;
@@ -436,6 +439,9 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		catch (e) {
 			Zotero.logError(e);
 			return false;
+		}
+		finally {
+			epub.close();
 		}
 	};
 	

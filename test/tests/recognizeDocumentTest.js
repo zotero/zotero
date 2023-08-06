@@ -296,9 +296,10 @@ describe("Document Recognition", function() {
 	describe("Ebooks", function () {
 		it("should recognize an EPUB by ISBN and rename the file", async function () {
 			let isbn = '9780656173822';
+			let search;
 			let translateStub = sinon.stub(Zotero.Translate.Search.prototype, 'translate')
 				.callsFake(async function () {
-					assert.equal(this.search.ISBN, isbn);
+					search = this.search;
 					return [{
 						itemType: 'book',
 						title: 'The Mania of the Nations on the Planet Mars: ISBN Database Edition',
@@ -321,6 +322,8 @@ describe("Document Recognition", function() {
 			let addedIDs = await waitForItemEvent('add');
 			let modifiedIDs = await waitForItemEvent('modify');
 			assert.isTrue(translateStub.calledOnce);
+			assert.ok(search);
+			assert.equal(search.ISBN, isbn);
 			assert.lengthOf(addedIDs, 1);
 			let item = Zotero.Items.get(addedIDs[0]);
 			assert.equal(item.getField('title'), 'The Mania of the Nations on the Planet Mars: ISBN Database Edition');
@@ -380,9 +383,10 @@ describe("Document Recognition", function() {
 		it("should use metadata from EPUB when search returns item with different ISBN", async function () {
 			let isbn = '9780656173822';
 			let isbnWrong = '9780656173823';
+			let search;
 			let translateStub = sinon.stub(Zotero.Translate.Search.prototype, 'translate')
 				.callsFake(async function () {
-					assert.equal(this.search.ISBN, isbn);
+					search = this.search;
 					return [{
 						itemType: 'book',
 						title: 'The Mania of the Nations on the Planet Mars: Bad Metadata Edition',
@@ -405,6 +409,8 @@ describe("Document Recognition", function() {
 			let addedIDs = await waitForItemEvent('add');
 			let modifiedIDs = await waitForItemEvent('modify');
 			assert.isTrue(translateStub.calledOnce);
+			assert.ok(search);
+			assert.equal(search.ISBN, isbn);
 			assert.lengthOf(addedIDs, 1);
 			let item = Zotero.Items.get(addedIDs[0]);
 			assert.equal(item.getField('title'), 'The Mania of the Nations on the Planet Mars and its Terrific Consequences / A Combination of Fun and Wisdom');
@@ -416,14 +422,56 @@ describe("Document Recognition", function() {
 
 		it("should use metadata from EPUB when search fails", async function () {
 			let isbn = '9780656173822';
+			let search = null;
 			let translateStub = sinon.stub(Zotero.Translate.Search.prototype, 'translate')
 				.callsFake(async function () {
-					assert.equal(this.search.ISBN, isbn);
+					search = this.search;
 					throw new Error('simulated failure');
 				});
 
 			let testDir = getTestDataDirectory();
 			testDir.append('recognizeEPUB_test_ISBN.epub');
+			let collection = await createDataObject('collection');
+			let attachment = await Zotero.Attachments.importFromFile({
+				file: testDir,
+				collections: [collection.id]
+			});
+			await win.ZoteroPane.selectItem(attachment.id); // No idea why this is necessary for only this test
+
+			win.ZoteroPane.recognizeSelected();
+
+			let addedIDs = await waitForItemEvent('add');
+			let modifiedIDs = await waitForItemEvent('modify');
+			assert.isTrue(translateStub.calledOnce);
+			assert.ok(search);
+			assert.equal(search.ISBN, isbn);
+			assert.lengthOf(addedIDs, 1);
+			let item = Zotero.Items.get(addedIDs[0]);
+			assert.equal(item.getField('title'), 'The Mania of the Nations on the Planet Mars and its Terrific Consequences / A Combination of Fun and Wisdom');
+			assert.equal(Zotero.Utilities.cleanISBN(item.getField('ISBN')), isbn);
+			assert.lengthOf(modifiedIDs, 2);
+
+			translateStub.restore();
+		});
+
+		it("should find and search by ISBN and DOI in section marked as copyright page", async function () {
+			let isbn = '9780226300481';
+			let doi = '10.7208/chicago/9780226300658.001.0001';
+			let search = null;
+			let translateStub = sinon.stub(Zotero.Translate.Search.prototype, 'translate')
+				.callsFake(async function () {
+					search = this.search;
+					return [{
+						itemType: 'book',
+						title: 'Building the American Republic, Volume 1, Library Catalog Edition',
+						ISBN: isbn,
+						attachments: [],
+						tags: []
+					}];
+				});
+
+			let testDir = getTestDataDirectory();
+			testDir.append('recognizeEPUB_test_copyright_page.epub');
 			let collection = await createDataObject('collection');
 			await Zotero.Attachments.importFromFile({
 				file: testDir,
@@ -435,9 +483,53 @@ describe("Document Recognition", function() {
 			let addedIDs = await waitForItemEvent('add');
 			let modifiedIDs = await waitForItemEvent('modify');
 			assert.isTrue(translateStub.calledOnce);
+			assert.ok(search);
+			assert.equal(search.ISBN, isbn);
+			assert.equal(search.DOI, doi);
 			assert.lengthOf(addedIDs, 1);
 			let item = Zotero.Items.get(addedIDs[0]);
-			assert.equal(item.getField('title'), 'The Mania of the Nations on the Planet Mars and its Terrific Consequences / A Combination of Fun and Wisdom');
+			assert.equal(item.getField('title'), 'Building the American Republic, Volume 1, Library Catalog Edition');
+			assert.equal(Zotero.Utilities.cleanISBN(item.getField('ISBN')), isbn);
+			assert.lengthOf(modifiedIDs, 2);
+
+			translateStub.restore();
+		});
+
+		it("should find and search by ISBN and DOI in section not marked as copyright page", async function () {
+			let isbn = '9780226300481';
+			let doi = '10.7208/chicago/9780226300658.001.0001';
+			let search = null;
+			let translateStub = sinon.stub(Zotero.Translate.Search.prototype, 'translate')
+				.callsFake(async function () {
+					search = this.search;
+					return [{
+						itemType: 'book',
+						title: 'Building the American Republic, Volume 1, Library Catalog Edition',
+						ISBN: isbn,
+						attachments: [],
+						tags: []
+					}];
+				});
+
+			let testDir = getTestDataDirectory();
+			testDir.append('recognizeEPUB_test_content.epub');
+			let collection = await createDataObject('collection');
+			await Zotero.Attachments.importFromFile({
+				file: testDir,
+				collections: [collection.id]
+			});
+
+			win.ZoteroPane.recognizeSelected();
+
+			let addedIDs = await waitForItemEvent('add');
+			let modifiedIDs = await waitForItemEvent('modify');
+			assert.isTrue(translateStub.calledOnce);
+			assert.ok(search);
+			assert.equal(search.ISBN, isbn);
+			assert.equal(search.DOI, doi);
+			assert.lengthOf(addedIDs, 1);
+			let item = Zotero.Items.get(addedIDs[0]);
+			assert.equal(item.getField('title'), 'Building the American Republic, Volume 1, Library Catalog Edition');
 			assert.equal(Zotero.Utilities.cleanISBN(item.getField('ISBN')), isbn);
 			assert.lengthOf(modifiedIDs, 2);
 

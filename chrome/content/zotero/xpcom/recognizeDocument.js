@@ -27,6 +27,7 @@ Zotero.RecognizeDocument = new function () {
 	const OFFLINE_RECHECK_DELAY = 60 * 1000;
 	const MAX_PAGES = 5;
 	const UNRECOGNIZE_TIMEOUT = 86400 * 1000;
+	const EPUB_MAX_SECTIONS = 5;
 	
 	let _newItems = new WeakMap();
 	
@@ -572,44 +573,73 @@ Zotero.RecognizeDocument = new function () {
 	}
 	
 	async function _recognizeEPUB(item, filePath) {
-		let metadata = await Zotero.EPUB.getMetadataRDF(filePath);
-		if (!metadata) {
-			throw new Zotero.Exception.Alert("recognizePDF.couldNotRead");
-		}
-
-		let libraryID = item.libraryID;
-		let translate = new Zotero.Translate.Import();
-		translate.setTranslator(Zotero.Translators.TRANSLATOR_ID_RDF);
-		translate.setString(metadata);
-
+		const { EPUB } = ChromeUtils.import('chrome://zotero/content/EPUB.jsm');
+		
+		let epub = new EPUB(filePath);
 		try {
-			let [rdfItemJSON] = await translate.translate({
-				libraryID: false,
-				saveAttachments: false
-			});
-			
-			let itemJSON = rdfItemJSON;
-			let isbn = Zotero.Utilities.cleanISBN(rdfItemJSON.ISBN || '');
-			if (isbn) {
+			let search = {};
+
+			let rdfItemJSON = await _translateEPUBMetadata(epub);
+			if (rdfItemJSON && rdfItemJSON.ISBN) {
+				let clean = rdfItemJSON.ISBN.split(' ')
+					.map(isbn => Zotero.Utilities.cleanISBN(isbn))
+					.filter(Boolean);
+				if (clean.length) {
+					Zotero.debug('RecognizeEPUB: Found ISBN in RDF metadata');
+					search.ISBN = clean.join(' ');
+				}
+			}
+
+			for await (let doc of _getFirstSectionDocuments(epub)) {
+				if (search.DOI && search.ISBN) break;
+				if (!search.DOI) {
+					let dois = _getDOIsFromDocument(doc);
+					if (dois.length) {
+						Zotero.debug('RecognizeEPUB: Found DOI in section document');
+						search.DOI = dois[0];
+					}
+				}
+				if (!search.ISBN) {
+					let isbn = _getISBNFromDocument(doc);
+					if (isbn) {
+						Zotero.debug('RecognizeEPUB: Found ISBN in section document');
+						search.ISBN = isbn;
+					}
+				}
+			}
+
+			let itemJSON;
+			if (search.ISBN || search.DOI) {
 				try {
-					translate = new Zotero.Translate.Search();
-					translate.setSearch({ ISBN: isbn });
-					let [isbnItemJSON] = await translate.translate({
+					Zotero.debug('RecognizeEPUB: Searching by ' + Object.keys(search)
+						.join(', '));
+					let translate = new Zotero.Translate.Search();
+					translate.setSearch(search);
+					let [searchItemJSON] = await translate.translate({
 						libraryID: false,
 						saveAttachments: false
 					});
-					if (isbnItemJSON?.ISBN?.split(' ')
+					if (searchItemJSON) {
+						if (search.ISBN && searchItemJSON?.ISBN?.split(' ')
 							.map(resolvedISBN => Zotero.Utilities.cleanISBN(resolvedISBN))
-							.includes(isbn)) {
-						itemJSON = isbnItemJSON;
+							.includes(search.ISBN)) {
+							Zotero.debug('RecognizeDocument: Using ISBN search result');
+							itemJSON = searchItemJSON;
+						}
+						else {
+							Zotero.debug(`RecognizeDocument: ISBN mismatch (was ${search.ISBN}, got ${searchItemJSON.ISBN})`);
+						}
 					}
-					else if (isbnItemJSON) {
-						Zotero.debug(`RecognizeDocument: ISBN mismatch (was ${isbn}, got ${isbnItemJSON.ISBN})`);
-					}
-				}
-				catch (e) {
+				} catch (e) {
 					Zotero.debug('RecognizeDocument: Error while resolving ISBN: ' + e);
 				}
+			}
+			if (!itemJSON) {
+				Zotero.debug('RecognizeEPUB: Falling back to RDF metadata');
+				itemJSON = rdfItemJSON;
+			}
+			if (!itemJSON) {
+				throw new Zotero.Exception.Alert("recognizePDF.couldNotRead");
 			}
 
 			if (Zotero.Prefs.get('automaticTags')) {
@@ -628,17 +658,105 @@ Zotero.RecognizeDocument = new function () {
 				itemJSON.tags = [];
 			}
 
-			let item = new Zotero.Item();
-			item.libraryID = libraryID;
-			item.fromJSON(itemJSON);
-			await item.saveTx();
-			return item;
+			let translatedItem = new Zotero.Item();
+			translatedItem.libraryID = item.libraryID;
+			translatedItem.fromJSON(itemJSON);
+			await translatedItem.saveTx();
+			return translatedItem;
+		}
+		finally {
+			epub.close();
+		}
+	}
+	
+	async function _translateEPUBMetadata(epub) {
+		let metadata = await epub.getMetadataRDF();
+		if (!metadata) {
+			return null;
+		}
+
+		let translate = new Zotero.Translate.Import();
+		translate.setTranslator(Zotero.Translators.TRANSLATOR_ID_RDF);
+		translate.setString(metadata);
+
+		try {
+			let [itemJSON] = await translate.translate({
+				libraryID: false,
+				saveAttachments: false
+			});
+			return itemJSON;
 		}
 		catch (e) {
-			Zotero.debug('RecognizeDocument: ' + e);
+			Zotero.logError(e);
+			return null;
 		}
+	}
+	
+	async function* _getFirstSectionDocuments(epub) {
+		let copyrightDoc = await epub.getDocumentByReferenceType('copyright-page');
+		if (copyrightDoc) {
+			yield copyrightDoc;
+		}
+		let i = 0;
+		for await (let { doc: sectionDoc } of epub.getSectionDocuments()) {
+			yield sectionDoc;
+			if (++i >= EPUB_MAX_SECTIONS) {
+				break;
+			}
+		}
+	}
+	
+	function _getDOIsFromDocument(doc) {
+		// Copied from DOI translator
 		
-		return null;
+		const DOIre = /\b10\.[0-9]{4,}\/[^\s&"']*[^\s&"'.,]/g;
+		var dois = new Set();
+
+		var m, DOI;
+		var treeWalker = doc.createTreeWalker(doc.documentElement, NodeFilter.SHOW_TEXT);
+		var ignore = ['script', 'style'];
+		while (treeWalker.nextNode()) {
+			if (ignore.includes(treeWalker.currentNode.parentNode.tagName.toLowerCase())) continue;
+			DOIre.lastIndex = 0;
+			while ((m = DOIre.exec(treeWalker.currentNode.nodeValue))) {
+				DOI = m[0];
+				if (DOI.endsWith(")") && !DOI.includes("(")) {
+					DOI = DOI.substring(0, DOI.length - 1);
+				}
+				if (DOI.endsWith("}") && !DOI.includes("{")) {
+					DOI = DOI.substring(0, DOI.length - 1);
+				}
+				dois.add(DOI);
+			}
+		}
+
+		var links = doc.querySelectorAll('a[href]');
+		for (let link of links) {
+			DOIre.lastIndex = 0;
+			let m = DOIre.exec(link.href);
+			if (m) {
+				let doi = m[0];
+				if (doi.endsWith(")") && !doi.includes("(")) {
+					doi = doi.substring(0, doi.length - 1);
+				}
+				if (doi.endsWith("}") && !doi.includes("{")) {
+					doi = doi.substring(0, doi.length - 1);
+				}
+				// only add new DOIs
+				if (!dois.has(doi) && !dois.has(doi.replace(/#.*/, ''))) {
+					dois.add(doi);
+				}
+			}
+		}
+
+		return Array.from(dois);
+	}
+	
+	function _getISBNFromDocument(doc) {
+		if (!doc.body) {
+			return null;
+		}
+		return Zotero.Utilities.cleanISBN(doc.body.innerText) || null;
 	}
 	
 	/**

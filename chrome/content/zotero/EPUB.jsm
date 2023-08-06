@@ -23,16 +23,43 @@
     ***** END LICENSE BLOCK *****
 */
 
+var EXPORTED_SYMBOLS = ["EPUB"];
+
+const { XPCOMUtils } = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
+
+XPCOMUtils.defineLazyModuleGetters(this, {
+	Zotero: "chrome://zotero/content/include.jsm"
+});
+
 const ZipReader = Components.Constructor(
 	"@mozilla.org/libjar/zip-reader;1",
 	"nsIZipReader",
 	"open"
 );
 
-Zotero.EPUB = {
-	async* getSectionDocuments(epubPath) {
-		let zipReader = new ZipReader(Zotero.File.pathToFile(epubPath));
-		let contentOPFDoc = await this._getContentOPF(zipReader);
+const DC_NS = 'http://purl.org/dc/elements/1.1/';
+const OPF_NS = 'http://www.idpf.org/2007/opf';
+
+class EPUB {
+	_zipReader;
+
+	_contentOPF = null;
+	
+	_contentOPFPath = null;
+
+	/**
+	 * @param {String | nsIFile} file
+	 */
+	constructor(file) {
+		this._zipReader = new ZipReader(Zotero.File.pathToFile(file));
+	}
+
+	close() {
+		this._zipReader.close();
+	}
+
+	async* getSectionDocuments() {
+		let contentOPFDoc = await this._getContentOPF();
 		let manifest = contentOPFDoc.documentElement.querySelector(':scope > manifest');
 		let spine = contentOPFDoc.documentElement.querySelector(':scope > spine');
 		if (!manifest || !spine) {
@@ -46,40 +73,58 @@ Zotero.EPUB = {
 					|| manifestItem.getAttribute('media-type') !== 'application/xhtml+xml') {
 				continue;
 			}
-			idToHref.set(manifestItem.getAttribute('id'), manifestItem.getAttribute('href'));
+			let href = manifestItem.getAttribute('href');
+			href = this._resolveRelativeToContentOPF(href);
+			idToHref.set(manifestItem.getAttribute('id'), href);
 		}
 
 		for (let spineItem of spine.querySelectorAll('itemref')) {
 			let id = spineItem.getAttribute('idref');
 			let href = idToHref.get(id);
-			if (!href || !zipReader.hasEntry(href)) {
+			if (!href || !this._zipReader.hasEntry(href)) {
+				Zotero.debug('EPUB: Skipping missing or invalid href in spine: ' + href);
 				continue;
 			}
-			let entryStream = zipReader.getInputStream(href);
-			let doc;
-			try {
-				doc = await this._parseStreamToDocument(entryStream, 'application/xhtml+xml');
-			}
-			finally {
-				entryStream.close();
-			}
-			
-			yield { href, doc };
+			let doc = await this._parseEntryToDocument(href, 'application/xhtml+xml');
+			yield {
+				href,
+				doc
+			};
 		}
-	},
-	
-	async getMetadataRDF(epubPath) {
-		const DC_NS = 'http://purl.org/dc/elements/1.1/';
-		const OPF_NS = 'http://www.idpf.org/2007/opf';
-		
-		let zipReader = new ZipReader(Zotero.File.pathToFile(epubPath));
-		let doc = await this._getContentOPF(zipReader);
+	}
+
+	async getDocumentByReferenceType(referenceType) {
+		let contentOPFDoc = await this._getContentOPF();
+		let guide = contentOPFDoc.documentElement.querySelector(':scope > guide');
+		if (!guide) {
+			return null;
+		}
+
+		let reference = guide.querySelector(`:scope > reference[type="${referenceType}"]`);
+		if (!reference) {
+			return null;
+		}
+		let href = reference.getAttribute('href')
+			?.split('#')[0];
+		if (!href) {
+			return null;
+		}
+		href = this._resolveRelativeToContentOPF(href);
+		if (!this._zipReader.hasEntry(href)) {
+			return null;
+		}
+		return this._parseEntryToDocument(href, 'application/xhtml+xml');
+	}
+
+	async getMetadataRDF() {
+		let doc = await this._getContentOPF();
 		let metadata = doc.documentElement.querySelector(':scope > metadata');
-		
+		metadata = metadata.cloneNode(true);
+
 		if (!metadata.getAttribute('xmlns')) {
 			metadata.setAttribute('xmlns', doc.documentElement.namespaceURI || '');
 		}
-		
+
 		for (let elem of metadata.querySelectorAll('*')) {
 			for (let attr of Array.from(elem.attributes)) {
 				// Null- and unknown-namespace attributes cause rdf.js to ignore the entire element
@@ -89,47 +134,59 @@ Zotero.EPUB = {
 				}
 			}
 		}
-		
+
 		// If the metadata doesn't contain a dc:type, add one
 		if (!metadata.getElementsByTagNameNS(DC_NS, 'type').length) {
 			let dcType = doc.createElementNS(DC_NS, 'type');
 			dcType.textContent = 'book';
 			metadata.appendChild(dcType);
 		}
-		
+
 		return new XMLSerializer().serializeToString(metadata);
-	},
-	
+	}
+
 	/**
-	 * @param {ZipReader} zipReader
 	 * @return {Promise<XMLDocument>}
 	 */
-	async _getContentOPF(zipReader) {
-		if (!zipReader.hasEntry('META-INF/container.xml')) {
+	async _getContentOPF() {
+		if (this._contentOPF) {
+			return this._contentOPF;
+		}
+
+		if (!this._zipReader.hasEntry('META-INF/container.xml')) {
 			throw new Error('EPUB file does not contain container.xml');
 		}
 
-		let containerXMLStream = zipReader.getInputStream('META-INF/container.xml');
-		let containerXMLDoc = await this._parseStreamToDocument(containerXMLStream, 'text/xml');
-		containerXMLStream.close();
+		let containerXMLDoc = await this._parseEntryToDocument('META-INF/container.xml', 'text/xml');
 
 		let rootFile = containerXMLDoc.documentElement.querySelector(':scope > rootfiles > rootfile');
 		if (!rootFile || !rootFile.hasAttribute('full-path')) {
 			throw new Error('container.xml does not contain <rootfile full-path="...">');
 		}
 
-		let contentOPFStream = zipReader.getInputStream(rootFile.getAttribute('full-path'));
+		this._contentOPFPath = rootFile.getAttribute('full-path');
+		this._contentOPF = await this._parseEntryToDocument(this._contentOPFPath, 'text/xml');
+		return this._contentOPF;
+	}
+	
+	_resolveRelativeToContentOPF(path) {
+		if (!this._contentOPFPath) {
+			throw new Error('content.opf not loaded');
+		}
+		// Use the URL class with a phony zip: scheme to resolve relative paths in a non-platform-defined way
+		return new URL(path, 'zip:/' + this._contentOPFPath).pathname.substring(1);
+	}
+
+	async _parseEntryToDocument(entry, type) {
+		let parser = new DOMParser();
+		let stream = this._zipReader.getInputStream(entry);
+		let xml;
 		try {
-			return await this._parseStreamToDocument(contentOPFStream, 'text/xml');
+			xml = await Zotero.File.getContentsAsync(stream);
 		}
 		finally {
-			contentOPFStream.close();
+			stream.close();
 		}
-	},
-
-	async _parseStreamToDocument(stream, type) {
-		let parser = new DOMParser();
-		let xml = await Zotero.File.getContentsAsync(stream);
 		return parser.parseFromString(xml, type);
 	}
-};
+}

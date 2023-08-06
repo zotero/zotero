@@ -133,7 +133,12 @@ Zotero.ProgressQueueDialog = function (progressQueue) {
 		if (!_progressWindow) return;
 		let total = _progressQueue.getTotal();
 		let processed = _progressQueue.getProcessedTotal();
-		_progressIndicator.value = processed * 100 / total;
+		if (total === 0) {
+			_progressIndicator.value = 0;
+		}
+		else {
+			_progressIndicator.value = processed * 100 / total;
+		}
 		if (processed === total) {
 			_progressWindow.document.getElementById("cancel-button").hidden = true;
 			_progressWindow.document.getElementById("minimize-button").hidden = true;

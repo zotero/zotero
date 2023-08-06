@@ -102,7 +102,6 @@ const xpcomFilesLocal = [
 	'dictionaries',
 	'duplicates',
 	'editorInstance',
-	'epub',
 	'feedReader',
 	'fileDragDataProvider',
 	'fulltext',
