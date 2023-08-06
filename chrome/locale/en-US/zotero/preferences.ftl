@@ -1,10 +1,17 @@
 preferences-window =
     .title = { -app-name } Settings
 
-preferences-show-file-renaming-button = Show File Renaming Options
+
 preferences-file-renaming-title = File Renaming
-preferences-file-renaming-template = Rename Template:
-preferences-file-renaming-preview = Preview:
-preferences-file-renaming-instructions = Zotero automatically renames attached files saved from translators. This setting controls how those names are formatted.
-preferences-file-renaming-instructions-example = For example “{ $example }” in this template will be replaced with the title of an item, truncated at 50 characters.
-preferences-file-renaming-instructions-more = See the <label data-l10n-name="file-renaming-help-link">documentation</label> for more information.
+preferences-file-renaming-intro = { -app-name } automatically renames downloaded files based on the details of the parent item (title, author, etc.). You can choose to rename files added from your computer as well.
+preferences-file-renaming-auto-rename-files =
+    .label = Automatically rename locally added files
+preferences-file-renaming-customize-button =
+    .label = Customize Filename Format…
+
+preferences-file-renaming-format-title = Filename Format
+preferences-file-renaming-format-instructions = You can customize the filename pattern { -app-name } uses to rename attachment files from parent metadata.
+preferences-file-renaming-format-instructions-example = For example, “{ $example }” in this template will be replaced with the title of the parent item, truncated at 50 characters.
+preferences-file-renaming-format-instructions-more = See the <label data-l10n-name="file-renaming-format-help-link">documentation</label> for more information.
+preferences-file-renaming-format-template = Filename Template:
+preferences-file-renaming-format-preview = Preview:
