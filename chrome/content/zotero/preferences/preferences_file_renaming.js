@@ -22,42 +22,41 @@
     
 	***** END LICENSE BLOCK *****
 */
-/* eslint-disable camelcase */
 /* global Zotero_Preferences: false */
 
 Zotero_Preferences.FileRenaming = {
 	mockItem: null,
 	init: function () {
-		this.inputRef = document.getElementById('file-renaming-template');
+		this.inputRef = document.getElementById('file-renaming-format-template');
 		this.updatePreview();
-		this.inputRef.addEventListener('keyup', this.updatePreview.bind(this));
+		this.inputRef.addEventListener('input', this.updatePreview.bind(this));
 		Zotero.getActiveZoteroPane()?.itemsView.onSelect.addListener(this.updatePreview.bind(this));
 	},
 
 	updatePreview() {
 		const item = Zotero.getActiveZoteroPane()?.getSelectedItems()?.[0] ?? this.mockItem ?? this.makeMockItem();
-		const tpl = document.getElementById('file-renaming-template').value;
+		const tpl = document.getElementById('file-renaming-format-template').value;
 		const preview = Zotero.Attachments.getFileBaseNameFromItem(item, tpl);
-		document.getElementById('file-renaming-preview').innerText = `${preview}.pdf`;
+		document.getElementById('file-renaming-format-preview').innerText = `${preview}.pdf`;
 	},
 
 	makeMockItem() {
 		this.mockItem = new Zotero.Item('journalArticle');
-		this.mockItem.setField('title', 'Example Article: Zotero Engineering');
+		this.mockItem.setField('title', 'Example Title: Example Subtitle');
 		this.mockItem.setCreators([
 			{ firstName: 'Jane', lastName: 'Doe', creatorType: 'author' },
 			{ firstName: 'John', lastName: 'Smith', creatorType: 'author' }
 		]);
-		this.mockItem.setField('shortTitle', 'Example Article');
-		this.mockItem.setField('publicationTitle', 'Advances in Zotero Engineering');
+		this.mockItem.setField('shortTitle', 'Example Title');
+		this.mockItem.setField('publicationTitle', 'Advances in Example Engineering');
 		this.mockItem.setField('volume', '9');
 		this.mockItem.setField('issue', '1');
 		this.mockItem.setField('pages', '34-55');
-		this.mockItem.setField('date', '2016');
+		this.mockItem.setField('date', '2018');
 		this.mockItem.setField('DOI', '10.1016/1234-example');
 		this.mockItem.setField('ISSN', '1234-5678');
 		this.mockItem.setField('abstractNote', 'This is an example abstract.');
-		this.mockItem.setField('extra', 'This is an example extra field.');
+		this.mockItem.setField('extra', 'This is an example Extra field.');
 		this.mockItem.setField('accessDate', '2020-01-01');
 		this.mockItem.setField('url', 'https://example.com');
 		this.mockItem.setField('libraryCatalog', 'Example Library Catalog');

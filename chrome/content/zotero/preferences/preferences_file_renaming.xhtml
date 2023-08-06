@@ -22,40 +22,47 @@
     
     ***** END LICENSE BLOCK *****
 -->
-<vbox class="main-section" id="zotero-prefpane-file-renaming" onload="Zotero_Preferences.FileRenaming.init()">
-	<html:h1 data-l10n-id="preferences-file-renaming-title" />
-	<label data-l10n-id="preferences-file-renaming-instructions" />
+<vbox class="main-section" id="zotero-prefpane-file-renaming-format" onload="Zotero_Preferences.FileRenaming.init()">
+	<hbox class="header">
+		<html:h1 data-l10n-id="preferences-file-renaming-format-title" />
+	</hbox>
+	
+	<label data-l10n-id="preferences-file-renaming-format-instructions" />
 	<separator class="thin" />
-	<label data-l10n-id="preferences-file-renaming-instructions-example" data-l10n-args='{"example": "{{ title truncate=\"50\" }}"}' />
+	<label data-l10n-id="preferences-file-renaming-format-instructions-example"
+		data-l10n-args='{"example": "{{ title truncate=\"50\" }}"}' />
 	<separator class="thin" />
-	<label data-l10n-id="preferences-file-renaming-instructions-more">
+	<label data-l10n-id="preferences-file-renaming-format-instructions-more">
 		<label
 			is="zotero-text-link"
-			href="https://www.zotero.org/support/preferences/general#file_renaming"
-			data-l10n-name="file-renaming-help-link"
+			href="https://www.zotero.org/support/file_renaming"
+			data-l10n-name="file-renaming-format-help-link"
 		/>
 	</label>
+	
+	<separator class="thin" />
+	
 	<groupbox>
 		<html:label
-			for="file-renaming-template"
-			id="file-renaming-template-label"
+			for="file-renaming-format-template"
+			id="file-renaming-format-template-label"
 		>
-			<html:h2 data-l10n-id="preferences-file-renaming-template" />
+			<html:h2 data-l10n-id="preferences-file-renaming-format-template" />
 		</html:label>
 		<html:textarea
-			aria-labelledby="file-renaming-template-label"
-			id="file-renaming-template"
+			aria-labelledby="file-renaming-format-template-label"
+			id="file-renaming-format-template"
 			preference="extensions.zotero.attachmentRenameTemplate"
 			rows="3"
 		/>
-		<html:label id="file-renaming-preview-label">
+		<html:label id="file-renaming-format-preview-label">
 			<html:h2
-				data-l10n-id="preferences-file-renaming-preview"
+				data-l10n-id="preferences-file-renaming-format-preview"
 			/>
 		</html:label>
-		<html:span
-			aria-labelledby="file-renaming-preview-label"
-			id="file-renaming-preview"
+		<html:label
+			aria-labelledby="file-renaming-format-preview-label"
+			id="file-renaming-format-preview"
 		/>
 	</groupbox>
 </vbox>
