@@ -23,7 +23,7 @@
     ***** END LICENSE BLOCK *****
 */
 
-Zotero.RecognizePDF = new function () {
+Zotero.RecognizeDocument = new function () {
 	const OFFLINE_RECHECK_DELAY = 60 * 1000;
 	const MAX_PAGES = 5;
 	const UNRECOGNIZE_TIMEOUT = 86400 * 1000;
@@ -38,7 +38,7 @@ Zotero.RecognizePDF = new function () {
 		id: 'recognize',
 		title: 'recognizePDF.title',
 		columns: [
-			'recognizePDF.pdfName.label',
+			'recognizePDF.attachmentName.label',
 			'recognizePDF.itemName.label'
 		]
 	});
@@ -123,13 +123,13 @@ Zotero.RecognizePDF = new function () {
 	
 	
 	/**
-	 * Checks whether a given PDF could theoretically be recognized
+	 * Checks whether a given attachment could theoretically be recognized
 	 * @param {Zotero.Item} item
 	 * @return {Boolean} True if the PDF can be recognized, false if it cannot be
 	 */
 	this.canRecognize = function (item) {
 		return item.attachmentContentType
-			&& item.attachmentContentType === 'application/pdf'
+			&& (item.isPDFAttachment() || item.isEPUBAttachment())
 			&& item.isTopLevelItem();
 	};
 	
@@ -137,20 +137,18 @@ Zotero.RecognizePDF = new function () {
 	this.autoRecognizeItems = async function (items) {
 		if (!Zotero.Prefs.get('autoRecognizeFiles')) return;
 		
-		var pdfs = items.filter((item) => {
-			return item
-				&& item.isFileAttachment()
-				&& item.attachmentContentType == 'application/pdf';
+		var docs = items.filter((item) => {
+			return item && this.canRecognize(item);
 		});
-		if (!pdfs.length) {
+		if (!docs.length) {
 			return;
 		}
 		var queue = Zotero.ProgressQueues.get('recognize');
 		var dialog = queue.getDialog();
 		var numInQueue = queue.getTotal();
-		var promise = this.recognizeItems(pdfs);
+		var promise = this.recognizeItems(docs);
 		// If the queue wasn't empty or more than one file is being saved, show the dialog
-		if (numInQueue > 0 || pdfs.length > 1) {
+		if (numInQueue > 0 || docs.length > 1) {
 			dialog.open();
 			return promise;
 		}
@@ -176,9 +174,9 @@ Zotero.RecognizePDF = new function () {
 			return false;
 		}
 		
-		// Child attachment must be not be in trash and must be a PDF
+		// Child attachment must be not be in trash and must be a PDF or EPUB
 		var attachments = Zotero.Items.get(item.getAttachments());
-		if (!attachments.length || attachments[0].attachmentContentType != 'application/pdf') {
+		if (!attachments.length || (!attachments[0].isPDFAttachment() && !attachments[0].isEPUBAttachment())) {
 			_newItems.delete(item);
 			return false;
 		}
@@ -223,7 +221,7 @@ Zotero.RecognizePDF = new function () {
 		}
 		
 		var version = Zotero.version;
-		var json = await extractJSON(attachment.id);
+		var json = await extractPDFJSON(attachment.id);
 		var metadata = item.toJSON();
 		
 		var data = { description, version, json, metadata };
@@ -258,7 +256,7 @@ Zotero.RecognizePDF = new function () {
 		if (zp) {
 			let selected = zp.getSelectedItems();
 			if (selected.length) {
-				// If only the PDF was selected, select the parent when we're done
+				// If only the attachment was selected, select the parent when we're done
 				selectParent = selected.length == 1 && selected[0] == attachment;
 			}
 		}
@@ -327,7 +325,7 @@ Zotero.RecognizePDF = new function () {
 	 * @param {Number} itemID Attachment item id
 	 * @return {Promise}
 	 */
-	async function extractJSON(itemID) {
+	async function extractPDFJSON(itemID) {
 		try {
 			return await Zotero.PDFWorker.getRecognizerData(itemID, true);
 		}
@@ -380,20 +378,32 @@ Zotero.RecognizePDF = new function () {
 	}
 	
 	/**
-	 * Retrieves metadata for a PDF and saves it as an item
+	 * Retrieves metadata for a PDF or EPUB and saves it as an item
 	 * @param {Zotero.Item} item
 	 * @return {Promise<Zotero.Item>} - New item
 	 */
 	async function _recognize(item) {
-		if (Zotero.RecognizePDF.recognizeStub) {
-			return Zotero.RecognizePDF.recognizeStub(item);
+		if (Zotero.RecognizeDocument.recognizeStub) {
+			return Zotero.RecognizeDocument.recognizeStub(item);
 		}
 		
 		let filePath = await item.getFilePath();
 		
 		if (!filePath || !await OS.File.exists(filePath)) throw new Zotero.Exception.Alert('recognizePDF.fileNotFound');
 
-		let json = await extractJSON(item.id);
+		if (item.isPDFAttachment()) {
+			return _recognizePDF(item, filePath);
+		}
+		else if (item.isEPUBAttachment()) {
+			return _recognizeEPUB(item, filePath);
+		}
+		else {
+			throw new Error('Item must be PDF or EPUB');
+		}
+	}
+	
+	async function _recognizePDF(item, filePath) {
+		let json = await extractPDFJSON(item.id);
 		json.fileName = OS.Path.basename(filePath);
 		
 		let containingTextPages = 0;
@@ -414,7 +424,7 @@ Zotero.RecognizePDF = new function () {
 		if (!res) return null;
 		
 		if (res.arxiv) {
-			Zotero.debug(`RecognizePDF: Getting metadata for arXiv ID ${res.arxiv}`);
+			Zotero.debug(`RecognizeDocument: Getting metadata for arXiv ID ${res.arxiv}`);
 			let translate = new Zotero.Translate.Search();
 			translate.setIdentifier({arXiv: res.arxiv});
 			let translators = await translate.getTranslators();
@@ -432,12 +442,12 @@ Zotero.RecognizePDF = new function () {
 				return newItem;
 			}
 			catch (e) {
-				Zotero.debug('RecognizePDF: ' + e);
+				Zotero.debug('RecognizeDocument: ' + e);
 			}
 		}
 		
 		if (res.doi) {
-			Zotero.debug(`RecognizePDF: Getting metadata for DOI (${res.doi})`);
+			Zotero.debug(`RecognizeDocument: Getting metadata for DOI (${res.doi})`);
 			let translate = new Zotero.Translate.Search();
 			translate.setIdentifier({
 				DOI: res.doi
@@ -457,16 +467,16 @@ Zotero.RecognizePDF = new function () {
 					return newItem;
 				}
 				catch (e) {
-					Zotero.debug('RecognizePDF: ' + e);
+					Zotero.debug('RecognizeDocument: ' + e);
 				}
 			}
 			else {
-				Zotero.debug("RecognizePDF: No translators found");
+				Zotero.debug("RecognizeDocument: No translators found");
 			}
 		}
 		
 		if (res.isbn) {
-			Zotero.debug(`RecognizePDF: Getting metadata by ISBN ${res.isbn}`);
+			Zotero.debug(`RecognizeDocument: Getting metadata by ISBN ${res.isbn}`);
 			let translate = new Zotero.Translate.Search();
 			translate.setSearch({'itemType': 'book', 'ISBN': res.isbn});
 			try {
@@ -474,7 +484,7 @@ Zotero.RecognizePDF = new function () {
 					libraryID: false,
 					saveAttachments: false
 				});
-				Zotero.debug('RecognizePDF: Translated items:');
+				Zotero.debug('RecognizeDocument: Translated items:');
 				Zotero.debug(translatedItems);
 				if (translatedItems.length) {
 					let newItem = new Zotero.Item;
@@ -509,7 +519,7 @@ Zotero.RecognizePDF = new function () {
 				}
 			}
 			catch (e) {
-				Zotero.debug('RecognizePDF: ' + e);
+				Zotero.debug('RecognizeDocument: ' + e);
 			}
 		}
 		
@@ -556,6 +566,76 @@ Zotero.RecognizePDF = new function () {
 			
 			await newItem.saveTx();
 			return newItem;
+		}
+		
+		return null;
+	}
+	
+	async function _recognizeEPUB(item, filePath) {
+		let metadata = await Zotero.EPUB.getMetadataRDF(filePath);
+		if (!metadata) {
+			throw new Zotero.Exception.Alert("recognizePDF.couldNotRead");
+		}
+
+		let libraryID = item.libraryID;
+		let translate = new Zotero.Translate.Import();
+		translate.setTranslator(Zotero.Translators.TRANSLATOR_ID_RDF);
+		translate.setString(metadata);
+
+		try {
+			let [rdfItemJSON] = await translate.translate({
+				libraryID: false,
+				saveAttachments: false
+			});
+			
+			let itemJSON = rdfItemJSON;
+			let isbn = Zotero.Utilities.cleanISBN(rdfItemJSON.ISBN || '');
+			if (isbn) {
+				try {
+					translate = new Zotero.Translate.Search();
+					translate.setSearch({ ISBN: isbn });
+					let [isbnItemJSON] = await translate.translate({
+						libraryID: false,
+						saveAttachments: false
+					});
+					if (isbnItemJSON?.ISBN?.split(' ')
+							.map(resolvedISBN => Zotero.Utilities.cleanISBN(resolvedISBN))
+							.includes(isbn)) {
+						itemJSON = isbnItemJSON;
+					}
+					else if (isbnItemJSON) {
+						Zotero.debug(`RecognizeDocument: ISBN mismatch (was ${isbn}, got ${isbnItemJSON.ISBN})`);
+					}
+				}
+				catch (e) {
+					Zotero.debug('RecognizeDocument: Error while resolving ISBN: ' + e);
+				}
+			}
+
+			if (Zotero.Prefs.get('automaticTags')) {
+				itemJSON.tags = itemJSON.tags.map((tag) => {
+					if (typeof tag == 'string') {
+						return {
+							tag,
+							type: 1
+						};
+					}
+					tag.type = 1;
+					return tag;
+				});
+			}
+			else {
+				itemJSON.tags = [];
+			}
+
+			let item = new Zotero.Item();
+			item.libraryID = libraryID;
+			item.fromJSON(itemJSON);
+			await item.saveTx();
+			return item;
+		}
+		catch (e) {
+			Zotero.debug('RecognizeDocument: ' + e);
 		}
 		
 		return null;

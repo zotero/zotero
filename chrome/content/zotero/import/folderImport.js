@@ -191,7 +191,7 @@ class Zotero_Import_Folder { // eslint-disable-line camelcase,no-unused-vars
 					}
 				}
 
-				if (attachmentItem && !Zotero.RecognizePDF.canRecognize(attachmentItem)) {
+				if (attachmentItem && !Zotero.RecognizeDocument.canRecognize(attachmentItem)) {
 					// @TODO: store hash of an item that cannot be recognized
 					await attachmentItem.saveTx({ skipSelect: true });
 					attachmentItem = null;
@@ -234,7 +234,7 @@ class Zotero_Import_Folder { // eslint-disable-line camelcase,no-unused-vars
 		
 		recognizeQueue.addListener('rowupdated', processRecognizedItem);
 		try {
-			await Zotero.RecognizePDF.recognizeItems(recognizableItems);
+			await Zotero.RecognizeDocument.recognizeItems(recognizableItems);
 		}
 		finally {
 			recognizeQueue.removeListener('rowupdated', processRecognizedItem);

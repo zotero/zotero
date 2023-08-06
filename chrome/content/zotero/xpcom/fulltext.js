@@ -23,12 +23,6 @@
     ***** END LICENSE BLOCK *****
 */
 
-const ZipReader = Components.Constructor(
-	"@mozilla.org/libjar/zip-reader;1",
-	"nsIZipReader",
-	"open"
-);
-
 Zotero.Fulltext = Zotero.FullText = new function(){
 	this.__defineGetter__("fulltextCacheFile", function () { return '.zotero-ft-cache'; });
 
@@ -418,60 +412,16 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 		let maxLength = Zotero.Prefs.get('fulltext.textMaxLength');
 		let item = await Zotero.Items.getAsync(itemID);
 		
-		let zipReader = new ZipReader(Zotero.File.pathToFile(filePath));
 		try {
-			if (!zipReader.hasEntry('META-INF/container.xml')) {
-				Zotero.debug('EPUB file does not contain container.xml', 2);
-				return false;
-			}
-			
-			let containerXMLStream = zipReader.getInputStream('META-INF/container.xml');
-			let containerXMLDoc = await parseStreamToDocument(containerXMLStream, 'text/xml');
-			containerXMLStream.close();
-			
-			let rootFile = containerXMLDoc.documentElement.querySelector(':scope > rootfiles > rootfile');
-			if (!rootFile || !rootFile.hasAttribute('full-path')) {
-				Zotero.debug('container.xml does not contain <rootfile full-path="...">', 2);
-				return false;
-			}
-			
-			let contentOPFStream = zipReader.getInputStream(rootFile.getAttribute('full-path'));
-			let contentOPFDoc = await parseStreamToDocument(contentOPFStream, 'text/xml');
-			contentOPFStream.close();
-			
-			let manifest = contentOPFDoc.documentElement.querySelector(':scope > manifest');
-			let spine = contentOPFDoc.documentElement.querySelector(':scope > spine');
-			if (!manifest || !spine) {
-				Zotero.debug('content.opf does not contain <manifest> and <spine>', 2);
-				return false;
-			}
-			
-			let idToHref = new Map();
-			for (let manifestItem of manifest.querySelectorAll(':scope > item')) {
-				if (!manifestItem.hasAttribute('id')
-						|| !manifestItem.hasAttribute('href')
-						|| manifestItem.getAttribute('media-type') !== 'application/xhtml+xml') {
-					continue;
-				}
-				idToHref.set(manifestItem.getAttribute('id'), manifestItem.getAttribute('href'));
-			}
-	
 			let text = '';
 			let totalChars = 0;
-			for (let spineItem of spine.querySelectorAll('itemref')) {
-				let id = spineItem.getAttribute('idref');
-				let href = idToHref.get(id);
-				if (!href || !zipReader.hasEntry(href)) {
+			for await (let { href, doc } of Zotero.EPUB.getSectionDocuments(filePath)) {
+				if (!doc.body) {
+					Zotero.debug(`Skipping EPUB entry '${href}' with no body`);
 					continue;
 				}
-				let entryStream = zipReader.getInputStream(href);
-				let entryDoc = await parseStreamToDocument(entryStream, 'application/xhtml+xml');
-				entryStream.close();
-				if (!entryDoc.body) {
-					Zotero.debug(`Skipping EPUB entry '${href}' with no body`);
-				}
 				
-				let bodyText = entryDoc.body.innerText;
+				let bodyText = doc.body.innerText;
 				totalChars += bodyText.length;
 				if (!allText) {
 					bodyText = bodyText.substring(0, maxLength - text.length);
@@ -483,8 +433,9 @@ Zotero.Fulltext = Zotero.FullText = new function(){
 			await indexString(text, itemID, { indexedChars: text.length, totalChars });
 			return true;
 		}
-		finally {
-			zipReader.close();
+		catch (e) {
+			Zotero.logError(e);
+			return false;
 		}
 	};
 	

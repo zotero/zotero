@@ -3555,11 +3555,11 @@ var ZoteroPane = new function()
 						canIndex = false;
 					}
 					
-					if (canRecognize && !Zotero.RecognizePDF.canRecognize(item)) {
+					if (canRecognize && !Zotero.RecognizeDocument.canRecognize(item)) {
 						canRecognize = false;
 					}
 					
-					if (canUnrecognize && !Zotero.RecognizePDF.canUnrecognize(item)) {
+					if (canUnrecognize && !Zotero.RecognizeDocument.canUnrecognize(item)) {
 						canUnrecognize = false;
 					}
 					
@@ -3718,7 +3718,7 @@ var ZoteroPane = new function()
 						show.add(m.sep3);
 					}
 					
-					if (Zotero.RecognizePDF.canUnrecognize(item)) {
+					if (Zotero.RecognizeDocument.canUnrecognize(item)) {
 						show.add(m.sep5);
 						show.add(m.unrecognize);
 					}
@@ -3726,7 +3726,7 @@ var ZoteroPane = new function()
 					if (item.isAttachment()) {
 						var showSep5 = false;
 						
-						if (Zotero.RecognizePDF.canRecognize(item)) {
+						if (Zotero.RecognizeDocument.canRecognize(item)) {
 							show.add(m.recognizePDF);
 							showSep5 = true;
 						}
@@ -3892,7 +3892,7 @@ var ZoteroPane = new function()
 		menu.childNodes[m.createBib].setAttribute('label', Zotero.getString('pane.items.menu.createBib' + multiple));
 		menu.childNodes[m.loadReport].setAttribute('label', Zotero.getString('pane.items.menu.generateReport' + multiple));
 		menu.childNodes[m.createParent].setAttribute('label', Zotero.getString('pane.items.menu.createParent' + multiple));
-		menu.childNodes[m.recognizePDF].setAttribute('label', Zotero.getString('pane.items.menu.recognizePDF' + multiple));
+		menu.childNodes[m.recognizePDF].setAttribute('label', Zotero.getString('pane.items.menu.recognizeDocument'));
 		menu.childNodes[m.renameAttachments].setAttribute('label', Zotero.getString('pane.items.menu.renameAttachments' + multiple));
 		menu.childNodes[m.reindexItem].setAttribute('label', Zotero.getString('pane.items.menu.reindexItem' + multiple));
 		
@@ -4378,7 +4378,7 @@ var ZoteroPane = new function()
 		
 		// Automatically retrieve metadata for top-level PDFs
 		if (!parentItemID) {
-			Zotero.RecognizePDF.autoRecognizeItems(addedItems);
+			Zotero.RecognizeDocument.autoRecognizeItems(addedItems);
 		}
 	};
 	
@@ -5294,7 +5294,7 @@ var ZoteroPane = new function()
 	
 	
 	this.recognizeSelected = function() {
-		Zotero.RecognizePDF.recognizeItems(ZoteroPane.getSelectedItems());
+		Zotero.RecognizeDocument.recognizeItems(ZoteroPane.getSelectedItems());
 		Zotero.ProgressQueues.get('recognize').getDialog().open();
 	};
 	
@@ -5302,7 +5302,7 @@ var ZoteroPane = new function()
 	this.unrecognizeSelected = async function () {
 		var items = ZoteroPane.getSelectedItems();
 		for (let item of items) {
-			await Zotero.RecognizePDF.unrecognize(item);
+			await Zotero.RecognizeDocument.unrecognize(item);
 		}
 	};
 	

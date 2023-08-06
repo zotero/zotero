@@ -333,7 +333,7 @@ Zotero.Server.Connector.SaveSession.prototype._updateItems = Zotero.serial(async
 			this._items.add(newItem);
 		}
 		
-		// If the item is now a child item (e.g., from Retrieve Metadata for PDF), update the
+		// If the item is now a child item (e.g., from Retrieve Metadata), update the
 		// parent item instead
 		if (!item.isTopLevelItem()) {
 			item = item.parentItem;
@@ -1180,8 +1180,8 @@ Zotero.Server.Connector.SaveSnapshot.prototype = {
 				cookieSandbox
 			});
 			
-			// Automatically recognize PDF
-			Zotero.RecognizePDF.autoRecognizeItems([item]);
+			// Automatically recognize PDF/EPUB
+			Zotero.RecognizeDocument.autoRecognizeItems([item]);
 			
 			return item;
 		}

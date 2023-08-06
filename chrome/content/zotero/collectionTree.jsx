@@ -2004,8 +2004,8 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				addedItems.push(item);
 			}
 			
-			// Automatically retrieve metadata for PDFs
-			Zotero.RecognizePDF.autoRecognizeItems(addedItems);
+			// Automatically retrieve metadata for PDFs and ebooks
+			Zotero.RecognizeDocument.autoRecognizeItems(addedItems);
 		}
 	}
 

@@ -2572,9 +2572,9 @@ var ItemTree = class ItemTree extends LibraryTree {
 				await Zotero.Notifier.commit(notifierQueue);
 			}
 
-			// Automatically retrieve metadata for PDFs
+			// Automatically retrieve metadata for PDFs and ebooks
 			if (!parentItemID) {
-				Zotero.RecognizePDF.autoRecognizeItems(addedItems);
+				Zotero.RecognizeDocument.autoRecognizeItems(addedItems);
 			}
 		}
 	};
