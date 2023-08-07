@@ -2256,16 +2256,13 @@ Zotero.Attachments = new function () {
 		const getSlicedCreatorsOfType = (creatorType, slice) => {
 			let creatorTypeIDs;
 			switch (creatorType) {
-				case 'author':
 				case 'authors':
 					creatorTypeIDs = [Zotero.CreatorTypes.getPrimaryIDForType(item.itemTypeID)];
 					break;
-				case 'editor':
 				case 'editors':
 					creatorTypeIDs = [Zotero.CreatorTypes.getID('editor'), Zotero.CreatorTypes.getID('seriesEditor')];
 					break;
 				default:
-				case 'creator':
 				case 'creators':
 					creatorTypeIDs = null;
 					break;
