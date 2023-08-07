@@ -1051,7 +1051,10 @@ class ReaderTab extends ReaderInstance {
 			}
 		}
 		catch (e) {
-			Zotero.logError(e);
+			// TODO: Find a better solution for this or the whole method
+			if (!e.message.includes("can't access dead object")) {
+				Zotero.logError(e);
+			}
 		}
 	};
 
