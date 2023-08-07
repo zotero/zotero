@@ -141,6 +141,14 @@ class ItemBoxManager {
 		return filteredRows;
 	}
 
+	/**
+	 * Get a row that matches the dataKey
+	 * @param {string} dataKey - The dataKey of the row
+	 * @returns {ItemBoxCustomRowOptions | undefined}
+	 */
+	getCustomRowByDataKey(dataKey) {
+		return this._customRows[dataKey];
+	}
 
 	/**
 	 * Check if a row is registered as a custom row

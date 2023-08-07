@@ -58,9 +58,6 @@
 			this._tabIndexMinFields = 1000;
 			this._tabIndexMaxFields = 0;
 			this._initialVisibleCreators = 5;
-
-			/** @type {ItemBoxCustomRowOptions[]} */
-			this._customRows = {};
 			
 			this.content = MozXULElement.parseXULToFragment(`
 				<div id="item-box" xmlns="http://www.w3.org/1999/xhtml">
@@ -523,12 +520,12 @@
 				}
 			}
 
-			this._customRows = this._getSortedCustomRows();
+			let sortedCustomRows = this._getSortedCustomRows();
 
 			// Compute the index of each custom row
 			let builtInRowCount = fieldNames.length;
-			for (let i = 0; i < this._customRows.length; i++) {
-				let row = this._customRows[i];
+			for (let i = 0; i < sortedCustomRows.length; i++) {
+				let row = sortedCustomRows[i];
 				let currentIndex = row.index || builtInRowCount + i;
 				if (currentIndex >= builtInRowCount) {
 					fieldNames.push(row.dataKey);
@@ -546,8 +543,8 @@
 				let val = '';
 				let tabindex = 0;
 
-				let isCustomRow = Zotero.ItemBoxManager.isCustomRow(fieldName);
-				let customRowOptions = isCustomRow ? this._getCustomRowOptions(fieldName) : null;
+				let customRowOptions = Zotero.ItemBoxManager.getCustomRowByDataKey(fieldName);
+				let isCustomRow = !!customRowOptions;
 
 				let isClickable = this._fieldIsClickable(fieldName);
 				let isMultiline = false;
@@ -1368,8 +1365,8 @@
 		}
 		
 		toggleCollapsibleRowExpand(label, valueElement, fieldName) {
-			let isCustomRow = Zotero.ItemBoxManager.isCustomRow(fieldName);
-			let customRowOptions = isCustomRow ? this._getCustomRowOptions(fieldName) : null;
+			let customRowOptions = Zotero.ItemBoxManager.getCustomRowByDataKey(fieldName);
+			let isCustomRow = !!customRowOptions;
 
 			let isExpanded;
 			let valueText;
@@ -1433,8 +1430,8 @@
 		createValueElement(valueText, fieldName, tabindex) {
 			valueText += '';
 
-			let isCustomRow = Zotero.ItemBoxManager.isCustomRow(fieldName);
-			let customRowOptions = isCustomRow ? this._getCustomRowOptions(fieldName) : null;
+			let customRowOptions = Zotero.ItemBoxManager.getCustomRowByDataKey(fieldName);
+			let isCustomRow = !!customRowOptions;
 
 			if (!fieldName) {
 				return undefined;
@@ -1618,8 +1615,8 @@
 			var fieldName = elem.getAttribute('fieldname');
 			var tabindex = elem.getAttribute('ztabindex');
 
-			let isCustomRow = Zotero.ItemBoxManager.isCustomRow(fieldName);
-			let customRowOptions = isCustomRow ? this._getCustomRowOptions(fieldName) : null;
+			let customRowOptions = Zotero.ItemBoxManager.getCustomRowByDataKey(fieldName);
+			let isCustomRow = !!customRowOptions;
 
 			// Disable editing for non-editable custom fields
 			if (isCustomRow && !customRowOptions?.editable) {
@@ -2089,8 +2086,8 @@
 			var [field, creatorIndex, creatorField] = fieldName.split('-');
 			var newVal;
 
-			let isCustomRow = Zotero.ItemBoxManager.isCustomRow(fieldName);
-			let customRowOptions = isCustomRow ? this._getCustomRowOptions(fieldName) : null;
+			let customRowOptions = Zotero.ItemBoxManager.getCustomRowByDataKey(fieldName);
+			let isCustomRow = !!customRowOptions;
 			
 			// Creator fields
 			if (field == 'creator') {
@@ -2210,9 +2207,10 @@
 		}
 		
 		_rowIsClickable(fieldName) {
-			let customRowOptions = this._getCustomRowOptions(fieldName);
+			let customRowOptions = Zotero.ItemBoxManager.getCustomRowByDataKey(fieldName);
+			let isCustomRow = !!customRowOptions;
 			let isFieldClickable;
-			if (customRowOptions) {
+			if (isCustomRow) {
 				isFieldClickable = customRowOptions.editable;
 			}
 			else {
@@ -2222,9 +2220,10 @@
 		}
 		
 		_fieldIsClickable(fieldName) {
-			let customRowOptions = this._getCustomRowOptions(fieldName);
+			let customRowOptions = Zotero.ItemBoxManager.getCustomRowByDataKey(fieldName);
+			let isCustomRow = !!customRowOptions;
 			let isFieldClickable;
-			if (customRowOptions) {
+			if (isCustomRow) {
 				isFieldClickable = customRowOptions.editable;
 			}
 			else {
@@ -2749,13 +2748,10 @@
 			});
 		}
 
-		_getCustomRowOptions(fieldName) {
-			return this._customRows.find(row => row.dataKey === fieldName);
-		}
-
 		_getLocalizedFieldLabel(fieldName) {
-			let customRowOptions = this._getCustomRowOptions(fieldName);
-			if (customRowOptions) {
+			let customRowOptions = Zotero.ItemBoxManager.getCustomRowByDataKey(fieldName);
+			let isCustomRow = !!customRowOptions;
+			if (isCustomRow) {
 				return customRowOptions.label;
 			}
 			return Zotero.ItemFields.getLocalizedString(fieldName);
