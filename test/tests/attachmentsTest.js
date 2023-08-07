@@ -329,7 +329,7 @@ describe("Zotero.Attachments", function() {
 		Components.utils.import("resource://zotero-unit/httpd.js");
 		var testServerPath, httpd, prefix;
 		var testServerPortMin = 16213;
-		var testServerPortMax = testServerPort + 20;
+		var testServerPortMax = testServerPort + 50;
 		var testServerPort = testServerPortMin;
 
 		before(async function () {
