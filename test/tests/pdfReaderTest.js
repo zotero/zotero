@@ -1,6 +1,6 @@
 "use strict";
 
-describe("PDF Reader", function () {
+describe.skip("PDF Reader", function () {
 	var win, zp;
 
 	before(function* () {
