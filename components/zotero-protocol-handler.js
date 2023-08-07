@@ -1411,7 +1411,12 @@ AsyncChannel.prototype = {
 			},
 			onDataAvailable: function (request, inputStream, offset, count) {
 				//Zotero.debug("onDataAvailable");
-				streamListener.onDataAvailable(channel, inputStream, offset, count);
+				try {
+					streamListener.onDataAvailable(channel, inputStream, offset, count);
+				}
+				catch (e) {
+					channel.cancel(e.result);
+				}
 			},
 			onStopRequest: function (request, status) {
 				//Zotero.debug("Stopping request");
@@ -1515,7 +1520,10 @@ AsyncChannel.prototype = {
 			}
 			throw e;
 		} finally {
-			if (channel.loadGroup) channel.loadGroup.removeRequest(channel, null, 0);
+			try {
+				if (channel.loadGroup) channel.loadGroup.removeRequest(channel, null, 0);
+			}
+			catch (e) {}
 		}
 	}),
 	
