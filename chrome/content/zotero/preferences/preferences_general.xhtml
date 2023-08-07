@@ -24,19 +24,6 @@
 -->
 <vbox id="zotero-prefpane-general" onload="Zotero_Preferences.General.init()">
 	<vbox class="main-section">
-		<groupbox>
-			<label><html:h2>&zotero.preferences.interface;</html:h2></label>
-
-			<hbox align="center">
-				<label value="&zotero.bibliography.locale.label;"/>
-				<menulist id="locale-menu"
-						onblur="if (!Zotero.isMac) Zotero_Preferences.General.onLocaleChange()"
-						native="true">
-					<menupopup onpopuphidden="Zotero_Preferences.General.onLocaleChange()"/>
-				</menulist>
-			</hbox>
-		</groupbox>
-
 		<groupbox id="zotero-prefpane-file-handling-groupbox">
 			<label><html:h2>&zotero.preferences.fileHandling;</html:h2></label>
 			
@@ -210,4 +197,18 @@
 			<checkbox label="&zotero.preferences.groups.tags;" preference="extensions.zotero.groups.copyTags" native="true"/>
 		</vbox>
 	</groupbox>
+	
+	<groupbox>
+	<label><html:h2>&zotero.preferences.interface;</html:h2></label>
+
+	<hbox align="center">
+		<label value="&zotero.bibliography.locale.label;"/>
+		<menulist id="locale-menu"
+				onblur="if (!Zotero.isMac) Zotero_Preferences.General.onLocaleChange()"
+				native="true">
+			<menupopup onpopuphidden="Zotero_Preferences.General.onLocaleChange()"/>
+		</menulist>
+	</hbox>
+</groupbox>
+
 </vbox>
