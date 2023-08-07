@@ -1,7 +1,6 @@
 preferences-window =
     .title = { -app-name } Settings
 
-
 preferences-file-renaming-title = File Renaming
 preferences-file-renaming-intro = { -app-name } automatically renames downloaded files based on the details of the parent item (title, author, etc.). You can choose to rename files added from your computer as well.
 preferences-file-renaming-auto-rename-files =
@@ -15,3 +14,10 @@ preferences-file-renaming-format-instructions-example = For example, “{ $examp
 preferences-file-renaming-format-instructions-more = See the <label data-l10n-name="file-renaming-format-help-link">documentation</label> for more information.
 preferences-file-renaming-format-template = Filename Template:
 preferences-file-renaming-format-preview = Preview:
+
+preferences-reader-title = Reader
+preferences-reader-open-epubs-using = Open EPUBs using
+preferences-reader-open-snapshots-using = Open snapshots using
+preferences-reader-open-in-new-window =
+    .label = Open files in new windows instead of tabs
+preferences-reader-ebook-font = Ebook font:

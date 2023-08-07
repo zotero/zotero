@@ -48,9 +48,39 @@
 				<checkbox label="&zotero.preferences.downloadAssociatedFiles;" preference="extensions.zotero.downloadAssociatedFiles" native="true"/>
 				<checkbox label="&zotero.preferences.autoRecognizeFiles;" preference="extensions.zotero.autoRecognizeFiles" native="true"/>
 			</vbox>
+		
+		</groupbox>
+		
+		<groupbox id="zotero-prefpane-file-renaming-groupbox">
+			<label><html:h2 data-l10n-id="preferences-file-renaming-title"/></label>
+			
+			<vbox align="start">
+				<label data-l10n-id="preferences-file-renaming-intro"/>
+				<separator class="thin"/>
+				<checkbox data-l10n-id="preferences-file-renaming-auto-rename-files"
+					preference="extensions.zotero.autoRenameFiles"
+					oncommand="Zotero_Preferences.General.updateAutoRenameFilesUI()" native="true"
+				/>
+				<checkbox id="rename-linked-files" class="indented-pref"
+					label="&zotero.preferences.autoRenameFiles.renameLinked;"
+					preference="extensions.zotero.autoRenameFiles.linked"
+					oncommand="Zotero_Preferences.General.updateAutoRenameFilesUI()" native="true"
+				/>
+				<button id="file-renaming-button"
+					data-l10n-id="preferences-file-renaming-customize-button"
+					oncommand="Zotero_Preferences.navigateToPane('zotero-subpane-file-renaming')"
+				/>
+				<!-- data-search-strings="
+						preferences-file-renaming-format-title,
+						preferences-file-renaming-format-template" -->
+			</vbox>
+		</groupbox>
+		
+		<groupbox id="zotero-prefpane-reader-groupbox">
+			<label><html:h2 data-l10n-id="preferences-reader-title"/></label>
 			
 			<vbox class="fileHandler-menus">
-				<html:label for="fileHandler-pdf">&zotero.preferences.fileHandler.openPDFsUsing;</html:label>
+				<label control="fileHandler-pdf">&zotero.preferences.fileHandler.openPDFsUsing;</label>
 				<menulist id="fileHandler-pdf" class="fileHandler-menu" native="true">
 					<menupopup>
 						<menuitem class="fileHandler-internal"
@@ -62,7 +92,7 @@
 								oncommand="Zotero_Preferences.General.chooseFileHandler('pdf')"/>
 					</menupopup>
 				</menulist>
-				<html:label for="fileHandler-epub">&zotero.preferences.fileHandler.openEbooksUsing;</html:label>
+				<label data-l10n-id="preferences-reader-open-epubs-using" control="fileHandler-epub"/>
 				<menulist id="fileHandler-epub" class="fileHandler-menu" native="true">
 					<menupopup>
 						<menuitem class="fileHandler-internal"
@@ -74,7 +104,7 @@
 								oncommand="Zotero_Preferences.General.chooseFileHandler('epub')"/>
 					</menupopup>
 				</menulist>
-				<html:label for="fileHandler-snapshot">&zotero.preferences.fileHandler.openSnapshotsUsing;</html:label>
+				<label data-l10n-id="preferences-reader-open-snapshots-using" control="fileHandler-snapshot"/>
 				<menulist id="fileHandler-snapshot" class="fileHandler-menu" native="true">
 					<menupopup>
 						<menuitem class="fileHandler-internal"
@@ -87,34 +117,32 @@
 					</menupopup>
 				</menulist>
 			</vbox>
-			<checkbox id="open-reader-in-new-window" class="indented-pref"
-					label="&zotero.preferences.fileHandler.openReaderInNewWindow;"
-					preference="extensions.zotero.openReaderInNewWindow"
-					native="true"/>
-		</groupbox>
-
-		<groupbox id="zotero-prefpane-file-renaming-groupbox">
-			<label><html:h2 data-l10n-id="preferences-file-renaming-title"/></label>
+			<checkbox id="open-reader-in-new-window"
+				data-l10n-id="preferences-reader-open-in-new-window"
+				class="indented-pref"
+				preference="extensions.zotero.openReaderInNewWindow"
+				native="true"
+			/>
 			
-			<vbox align="start">
-				<label data-l10n-id="preferences-file-renaming-intro"/>
-				<separator class="thin"/>
-				<checkbox data-l10n-id="preferences-file-renaming-auto-rename-files"
-						preference="extensions.zotero.autoRenameFiles"
-						oncommand="Zotero_Preferences.General.updateAutoRenameFilesUI()" native="true"/>
-				<checkbox id="rename-linked-files" class="indented-pref"
-						label="&zotero.preferences.autoRenameFiles.renameLinked;"
-						preference="extensions.zotero.autoRenameFiles.linked"
-						oncommand="Zotero_Preferences.General.updateAutoRenameFilesUI()" native="true"/>
-				<button id="file-renaming-button"
-					data-l10n-id="preferences-file-renaming-customize-button"
-					oncommand="Zotero_Preferences.navigateToPane('zotero-subpane-file-renaming')"/>
-				<!-- data-search-strings="
-						preferences-file-renaming-format-title,
-						preferences-file-renaming-format-template" -->
-			</vbox>
+			<hbox align="center">
+				<label value="&zotero.preferences.reader.tabsTitle.label;" control="reader-tabs-title"/>
+				<menulist id="reader-tabs-title" preference="extensions.zotero.tabs.title.reader" native="true">
+					<menupopup>
+						<menuitem label="&zotero.preferences.reader.tabsTitle.titleCreatorYear;" value="titleCreatorYear"/>
+						<menuitem label="&zotero.preferences.reader.tabsTitle.creatorYearTitle;" value="creatorYearTitle"/>
+						<menuitem label="&zotero.preferences.reader.tabsTitle.filename;" value="filename"/>
+					</menupopup>
+				</menulist>
+			</hbox>
+	
+			<hbox align="center">
+				<label data-l10n-id="preferences-reader-ebook-font" control="reader-ebook-font-family"/>
+				<menulist id="reader-ebook-font-family" preference="extensions.zotero.reader.ebookFontFamily" native="true">
+					<menupopup/>
+				</menulist>
+			</hbox>
 		</groupbox>
-
+		
 		<groupbox>
 			<label><html:h2>&zotero.preferences.prefpane.locate;</html:h2></label>
 			
@@ -136,7 +164,7 @@
 					preference="extensions.zotero.openURL.resolver"
 				/>
 			</hbox>
-		
+			
 			<hbox align="center">
 				<label value="&zotero.preferences.openurl.version;" control="openURLVersionMenu"/>
 				<menulist id="openURLVersionMenu"
@@ -162,28 +190,6 @@
 			</hbox>
 		</groupbox>
 	</vbox>
-	
-	<groupbox id="zotero-prefpane-reader-groupbox">
-		<label><html:h2>&zotero.preferences.reader;</html:h2></label>
-		
-		<hbox align="center">
-			<label value="&zotero.preferences.reader.tabsTitle.label;" control="reader-tabs-title"/>
-			<menulist id="reader-tabs-title" preference="extensions.zotero.tabs.title.reader" native="true">
-				<menupopup>
-					<menuitem label="&zotero.preferences.reader.tabsTitle.titleCreatorYear;" value="titleCreatorYear"/>
-					<menuitem label="&zotero.preferences.reader.tabsTitle.creatorYearTitle;" value="creatorYearTitle"/>
-					<menuitem label="&zotero.preferences.reader.tabsTitle.filename;" value="filename"/>
-				</menupopup>
-			</menulist>
-		</hbox>
-
-		<hbox align="center">
-			<label value="&zotero.preferences.reader.ebookFontFamily;" control="reader-ebook-font-family"/>
-			<menulist id="reader-ebook-font-family" preference="extensions.zotero.reader.ebookFontFamily" native="true">
-				<menupopup/>
-			</menulist>
-		</hbox>
-	</groupbox>
 	
 	<groupbox>
 		<label><html:h2>&zotero.preferences.groups;</html:h2></label>

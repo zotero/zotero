@@ -17,10 +17,7 @@
 <!ENTITY zotero.preferences.autoRecognizeFiles        "Automatically retrieve metadata for PDFs and ebooks">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked  "Rename linked files">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
-<!ENTITY zotero.preferences.fileHandler.openEbooksUsing "Open ebooks using">
-<!ENTITY zotero.preferences.fileHandler.openSnapshotsUsing "Open snapshots using">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous				"Miscellaneous">
 <!ENTITY zotero.preferences.autoUpdate					"Automatically check for updated translators and styles">
@@ -31,12 +28,10 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre		"Automatically remove items in the trash deleted more than">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost		"days ago">
 
-<!ENTITY zotero.preferences.reader                             "PDFs, Ebooks, and Snapshots">
 <!ENTITY zotero.preferences.reader.tabsTitle.label             "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle  "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear  "Title - Creator - Year">
 <!ENTITY zotero.preferences.reader.tabsTitle.filename          "Filename">
-<!ENTITY zotero.preferences.reader.ebookFontFamily             "Ebook font:">
 
 <!ENTITY zotero.preferences.groups						"Groups">
 <!ENTITY zotero.preferences.groups.whenCopyingInclude	"When copying items between libraries, include:">
