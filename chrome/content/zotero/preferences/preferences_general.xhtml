@@ -41,12 +41,19 @@
 			<label><html:h2>&zotero.preferences.fileHandling;</html:h2></label>
 			
 			<vbox>
+				<checkbox label="&zotero.preferences.downloadAssociatedFiles;"
+					preference="extensions.zotero.downloadAssociatedFiles"
+					native="true"
+				/>
+				<checkbox data-l10n-id="preferences-auto-recognize-files"
+					preference="extensions.zotero.autoRecognizeFiles"
+					native="true"
+				/>
 				<checkbox id="automaticSnapshots-checkbox"
 					label="&zotero.preferences.automaticSnapshots;"
 					preference="extensions.zotero.automaticSnapshots"
-					native="true"/>
-				<checkbox label="&zotero.preferences.downloadAssociatedFiles;" preference="extensions.zotero.downloadAssociatedFiles" native="true"/>
-				<checkbox label="&zotero.preferences.autoRecognizeFiles;" preference="extensions.zotero.autoRecognizeFiles" native="true"/>
+					native="true"
+				/>
 			</vbox>
 		
 		</groupbox>

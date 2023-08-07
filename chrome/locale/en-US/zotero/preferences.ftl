@@ -1,6 +1,9 @@
 preferences-window =
     .title = { -app-name } Settings
 
+preferences-auto-recognize-files =
+    .label = Automatically retrieve metadata for PDFs and ebooks
+
 preferences-file-renaming-title = File Renaming
 preferences-file-renaming-intro = { -app-name } automatically renames downloaded files based on the details of the parent item (title, author, etc.). You can choose to rename files added from your computer as well.
 preferences-file-renaming-auto-rename-files =
