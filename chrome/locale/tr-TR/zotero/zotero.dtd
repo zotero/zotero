@@ -322,8 +322,11 @@
 <!ENTITY zotero.pdfReader.noSpreads "Birleştirme">
 <!ENTITY zotero.pdfReader.oddSpreads "Tek Numaralı">
 <!ENTITY zotero.pdfReader.evenSpreads "Çift Numaralı">
+<!ENTITY zotero.pdfReader.scrolled "Scrolled">
+<!ENTITY zotero.pdfReader.paginated "Paginated">
 <!ENTITY zotero.pdfReader.zoomIn "Yakınlaştır">
 <!ENTITY zotero.pdfReader.zoomOut "Uzaklaştır">
+<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
 <!ENTITY zotero.pdfReader.zoomAuto "Otomatik Olarak Yeniden Boyutlandır">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Sayfa Genişliğine Yakınlaştır">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Sayfa Yüksekliğine Yakınlaştır">
@@ -332,4 +335,3 @@
 <!ENTITY zotero.pdfReader.transferFromPDF "Ek Açıklamaları İçeri Aktar...">
 <!ENTITY zotero.pdfReader.rotatePageLeft "Sayfayı Sola Döndür">
 <!ENTITY zotero.pdfReader.rotatePageRight "Sayfayı Sağa Döndür">
-<!ENTITY zotero.pdfReader.rotatePage180 "Sayfayı 180° Döndür">

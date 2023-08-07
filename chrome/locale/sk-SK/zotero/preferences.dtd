@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "Používanie súborov">
 <!ENTITY zotero.preferences.automaticSnapshots "pri vytváraní záznamov z webstránok automaticky urobiť snímku danej stránky">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "pri ukladaní záznamov automaticky priložiť prepojené PDF a ostatné súbory">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automaticky získať metadáta pre PDF">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Premenovať prelinkované súbory">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Otvoriť PDF pomocou">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Predvolený systém">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "Rôzne">
 <!ENTITY zotero.preferences.autoUpdate "Automaticky hľadať aktualizácie konvertorov a štýlov ">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automaticky odstrániť záznamy vymazané pred viac ako">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dňami">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">

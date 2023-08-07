@@ -322,8 +322,11 @@
 <!ENTITY zotero.pdfReader.noSpreads "Nincs oldaltapasztás">
 <!ENTITY zotero.pdfReader.oddSpreads "Oldalak összetapasztása: páratlan">
 <!ENTITY zotero.pdfReader.evenSpreads "Oldalak összetapasztása: páros">
+<!ENTITY zotero.pdfReader.scrolled "Scrolled">
+<!ENTITY zotero.pdfReader.paginated "Paginated">
 <!ENTITY zotero.pdfReader.zoomIn "Nagyítás">
 <!ENTITY zotero.pdfReader.zoomOut "Kicsinyítés">
+<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatikus átméretezés">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Nagyítás oldalszélességre">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Teljes oldal">
@@ -332,4 +335,3 @@
 <!ENTITY zotero.pdfReader.transferFromPDF "Jegyzetek importálása…">
 <!ENTITY zotero.pdfReader.rotatePageLeft "Oldal elforgatása balra">
 <!ENTITY zotero.pdfReader.rotatePageRight "Oldal elforgatása jobbra">
-<!ENTITY zotero.pdfReader.rotatePage180 "Oldal elforgatása 180°-kal">

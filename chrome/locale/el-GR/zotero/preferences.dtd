@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "Χειρισμός Αρχείου">
 <!ENTITY zotero.preferences.automaticSnapshots "Αυτόματη λήψη φωτογραφικού στιγμιότυπου όταν δημιουργούνται στοιχεία από ιστοσελίδες">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Αυτόματη προσάρτηση των συνοδευτικών PDF και άλλων αρχείων όταν αποθηκεύονται στοιχεία">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Αυτόματη ανάκτηση μεταδεδομένων για αρχεία PDF">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Μετονομασία συνδεδεμένων αρχείων">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Άνοιγμα PDF χρησιμοποιώντας">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Προεπιλογή Συστήματος">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "Διάφορα">
 <!ENTITY zotero.preferences.autoUpdate "Αυτόματος έλεγχος για ενημερωμένους μεταφραστές και στυλ">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Αυτόματη διαγραφή από τον κάδο ανακύκλωσης στοιχείων που έχουν διαγραφεί για περισσότερο από">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "ημέρες πριν">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">

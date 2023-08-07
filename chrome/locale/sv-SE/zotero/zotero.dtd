@@ -322,8 +322,11 @@
 <!ENTITY zotero.pdfReader.noSpreads "Inga uppslag">
 <!ENTITY zotero.pdfReader.oddSpreads "Udda uppslag">
 <!ENTITY zotero.pdfReader.evenSpreads "Jämna uppslag">
+<!ENTITY zotero.pdfReader.scrolled "Scrolled">
+<!ENTITY zotero.pdfReader.paginated "Paginated">
 <!ENTITY zotero.pdfReader.zoomIn "Zooma in">
 <!ENTITY zotero.pdfReader.zoomOut "Zooma ut">
+<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
 <!ENTITY zotero.pdfReader.zoomAuto "Anpassa storlek automatiskt">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Anpassa till sidbredd">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
@@ -332,4 +335,3 @@
 <!ENTITY zotero.pdfReader.transferFromPDF "Import Annotations…">
 <!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
 <!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
-<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">

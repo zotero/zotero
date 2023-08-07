@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "Обработка файлов">
 <!ENTITY zotero.preferences.automaticSnapshots "Автоматически делать снимки при создании записей из веб-страниц">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Автоматически вкладывать связанные PDF и другие файлы при сохранении записей">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Автоматически получать метаданные PDF-файлов">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Переименовывать связанные файлы">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Открывать PDF-файлы используя">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "По умолчанию для данной системы">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Открыть PDF-файл в новом окне вместо вкладки ">
 
 <!ENTITY zotero.preferences.miscellaneous "Разное">
 <!ENTITY zotero.preferences.autoUpdate "Автоматически проверять на наличие обновленных трансляторов и стилей">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Автоматически убирать записи из корзины, удаленные более">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "дня(-ей) назад">
 
-<!ENTITY zotero.preferences.pdfReader "Просмотрищик PDF">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Показать вкладки как">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Автор - Год - Заголовок">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Заголовок - Автор - Год">

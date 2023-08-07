@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "Ravnanje z datotekami">
 <!ENTITY zotero.preferences.automaticSnapshots "Samodejno naredi posnetek pri ustvarjanju vnosov s spletnih strani">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Samodejno pripni pridružene PDF-je in druge datoteke pri shranjevanju vnosov">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Samodejno pridobi metapodatke za PDF-je">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Preimenuj povezane datoteke">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Dokumente PDF odpri s/z">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Sistemsko privzeto">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Odpri PDF-je v novem oknu namesto v zavihku">
 
 <!ENTITY zotero.preferences.miscellaneous "Razno">
 <!ENTITY zotero.preferences.autoUpdate "Samodejno preveri posodobitve prevajalnikov in slogov">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Samodejno odstrani iz koša vse izbrisano pred več kot">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dnevi">
 
-<!ENTITY zotero.preferences.pdfReader "Bralnik PDF">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Pokaži zavihke kot">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Avtor - leto - naslov">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Naslov - avtor - leto">

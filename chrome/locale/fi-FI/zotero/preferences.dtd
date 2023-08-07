@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "Tiedostojen käsittely">
 <!ENTITY zotero.preferences.automaticSnapshots "Ota tilannekuvat automaattisesti luotaessa nimikettä web-sivusta">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Liitä automaattisesti asiaankuuluvat PDF:t ja muut tiedostot">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Nouda metadata PDF-tiedostoille automaattisesti">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Nimeä uudelleen linkitetyt tiedostot">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Avaa PDF:t ohjelmalla">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Järjestelmän oletus">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Avaa PDF:t uusissa ikkunoissa välilehtien sijaan">
 
 <!ENTITY zotero.preferences.miscellaneous "Sekalaista">
 <!ENTITY zotero.preferences.autoUpdate "Tarkista sivutulkkien ja tyylien päivitykset automaattisesti">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Poista roskakorista automaattisesti nimikkeet, jotka poistettiin yli">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "päivää sitten">
 
-<!ENTITY zotero.preferences.pdfReader "PDF-lukija">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Näytä välilehdet">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Tekijä - Vuosi - Otsikko">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Otsikko - Tekijä - Vuosi">

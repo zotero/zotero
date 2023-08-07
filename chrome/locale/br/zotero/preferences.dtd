@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "Meradur ar restroù">
 <!ENTITY zotero.preferences.automaticSnapshots "Em-dapout skeudenn ar bajenn da vare krouidigezh elfennoù diwar pajennoù Web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Em-stagañ ar PDFoù kevelet da vare enrolladur elfennoù">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Em-adpakout metaroadennoù ar PDFoù">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Adenvel ar restroù liammet">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Digeriñ ar PDFoù gant">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Sistem dre-ziouer">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "A bep seurt">
 <!ENTITY zotero.preferences.autoUpdate "Em-wiriañ hizivadurioù an troerioù hag ar stiloù">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Em-zilemel an elfennoù er pod-lastez abaoe muioc'h evit">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "devezh 'zo">
 
-<!ENTITY zotero.preferences.pdfReader "Lenner PDF">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Diskouez an ivinelloù evel">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Krouer - Bloavezh - Titl">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Titl - Krouer - Bloavezh">

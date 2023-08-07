@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "文件处理">
 <!ENTITY zotero.preferences.automaticSnapshots "从网页创建条目时自动抓取网页快照">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "保存条目时自动附加相关的 PDF 文档及其他文件">
-<!ENTITY zotero.preferences.autoRecognizeFiles "自动检索 PDF 的元数据">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "重命名链接的文件">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "打开 PDF 使用">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "系统默认">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "在新窗口而不是新标签页中打开PDF">
 
 <!ENTITY zotero.preferences.miscellaneous "杂项">
 <!ENTITY zotero.preferences.autoUpdate "自动检查转换器及样式的更新">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "自动删除回收站内时间超过">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "天前的条目">
 
-<!ENTITY zotero.preferences.pdfReader "PDF 阅读器">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "显示标签页为">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "作者 - 年份 - 标题">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "标题 - 作者 - 年份">

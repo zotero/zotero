@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "Gestió de fitxers">
 <!ENTITY zotero.preferences.automaticSnapshots "Crea automàticament una captura quan es creïn elements des de pàgines web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Adjunta automàticament documents PDF associats i altres fitxers quan es desin els elements">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Recupera les metadades dels PDF automàticament">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Reanomena els fitxers enllaçats">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Obre els PDF fent servir">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Predeterminat del sistema">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Obre els PDF en finestres noves en comptes de pestanyes">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscel·lània">
 <!ENTITY zotero.preferences.autoUpdate "Comprova automàticament si hi ha traductors o estils actualitzats">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Elimina automàticament els elements de la paperera que s'han suprimit fa més de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dies">
 
-<!ENTITY zotero.preferences.pdfReader "Lector PDF">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Mostra les pestanyes com">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creador - Any - Títol">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Títol - Creador - Any">

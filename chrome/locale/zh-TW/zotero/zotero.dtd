@@ -322,8 +322,11 @@
 <!ENTITY zotero.pdfReader.noSpreads "無展開頁">
 <!ENTITY zotero.pdfReader.oddSpreads "奇數展開頁">
 <!ENTITY zotero.pdfReader.evenSpreads "偶數展開頁">
+<!ENTITY zotero.pdfReader.scrolled "Scrolled">
+<!ENTITY zotero.pdfReader.paginated "Paginated">
 <!ENTITY zotero.pdfReader.zoomIn "放大">
 <!ENTITY zotero.pdfReader.zoomOut "縮小">
+<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
 <!ENTITY zotero.pdfReader.zoomAuto "自動調整大小">
 <!ENTITY zotero.pdfReader.zoomPageWidth "縮放至頁面寬度">
 <!ENTITY zotero.pdfReader.zoomPageHeight "縮放到頁面高度">
@@ -332,4 +335,3 @@
 <!ENTITY zotero.pdfReader.transferFromPDF "匯入標註……">
 <!ENTITY zotero.pdfReader.rotatePageLeft "將頁面向左旋轉">
 <!ENTITY zotero.pdfReader.rotatePageRight "將頁面向右旋轉">
-<!ENTITY zotero.pdfReader.rotatePage180 "將頁面旋轉180°">

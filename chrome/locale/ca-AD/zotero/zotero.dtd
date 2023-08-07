@@ -322,8 +322,11 @@
 <!ENTITY zotero.pdfReader.noSpreads "Cap disposició">
 <!ENTITY zotero.pdfReader.oddSpreads "Disposició en senars">
 <!ENTITY zotero.pdfReader.evenSpreads "Disposició en parells">
+<!ENTITY zotero.pdfReader.scrolled "Scrolled">
+<!ENTITY zotero.pdfReader.paginated "Paginated">
 <!ENTITY zotero.pdfReader.zoomIn "Amplia">
 <!ENTITY zotero.pdfReader.zoomOut "Redueix">
+<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
 <!ENTITY zotero.pdfReader.zoomAuto "Redimensiona automàticament">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Ajusta a l'amplada de la pàgina">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Ajusta a l'alçada de la pàgina">
@@ -332,4 +335,3 @@
 <!ENTITY zotero.pdfReader.transferFromPDF "Importa anotacions…">
 <!ENTITY zotero.pdfReader.rotatePageLeft "Gira la pàgina a l'esquerra">
 <!ENTITY zotero.pdfReader.rotatePageRight "Gira la pàgina a la dreta">
-<!ENTITY zotero.pdfReader.rotatePage180 "Gira la pàgina 180º">

@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "File Handling">
 <!ENTITY zotero.preferences.automaticSnapshots "Автоматично робити знімки при створенні документів з веб-сторінок">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Автоматично прикріпляти пов'язані PDF та інші файли при зберіганні">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "Різне">
 <!ENTITY zotero.preferences.autoUpdate "Автоматично перевіряти на наявність оновлених трансляторів та стилів">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Автоматично прибирати документи з кошику, видалені наріше ніж">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "днів назад">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">

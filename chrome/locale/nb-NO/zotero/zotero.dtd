@@ -322,8 +322,11 @@
 <!ENTITY zotero.pdfReader.noSpreads "Ingen tosidig visning">
 <!ENTITY zotero.pdfReader.oddSpreads "Oddetallssider mot hverandre">
 <!ENTITY zotero.pdfReader.evenSpreads "Partallssider mot hverandre">
+<!ENTITY zotero.pdfReader.scrolled "Scrolled">
+<!ENTITY zotero.pdfReader.paginated "Paginated">
 <!ENTITY zotero.pdfReader.zoomIn "Zoom inn">
 <!ENTITY zotero.pdfReader.zoomOut "Zoom ut">
+<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
 <!ENTITY zotero.pdfReader.zoomAuto "Endre størrelse automatisk">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom til sidebredde">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Zoom til sidehøyde">
@@ -332,4 +335,3 @@
 <!ENTITY zotero.pdfReader.transferFromPDF "Importer merknader…">
 <!ENTITY zotero.pdfReader.rotatePageLeft "Roter siden til venstre">
 <!ENTITY zotero.pdfReader.rotatePageRight "Roter siden til høyre">
-<!ENTITY zotero.pdfReader.rotatePage180 "Roter siden 180°">

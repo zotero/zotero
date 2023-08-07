@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "File Handling">
 <!ENTITY zotero.preferences.automaticSnapshots "Ambil foto secara automatis ketika menyusun item dari laman web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Lampirkan PDF dan berkas terkait lainnya secara automatis saat menyimpan item">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Secara otomatis mengambil metadata untuk PDF">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Ganti nama file yang ditautkan">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Buka PDF menggunakan">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Default Sistem">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "Lain-lain">
 <!ENTITY zotero.preferences.autoUpdate "Secara otomatis memeriksa penerjemah dan gaya yang diperbarui">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Buang item-item di dalam kantung sampah yang telah dihapus lebih dari">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "hari yang lalu secara automatis">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">

@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "Xử lý tập tin">
 <!ENTITY zotero.preferences.automaticSnapshots "Tự động tạo ảnh chụp khi lưu tài liệu từ web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Tự động đính kèm các tập tin PDF và các tập tin liên quan khác khi lưu tài liệu mới">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Tự lấy metadata cho các tập tin PDF">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Đổi tên tập tin liên kết">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Mở các tập tin PDF bằng">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Thiết lập mặc định">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "Các tùy chọn khác">
 <!ENTITY zotero.preferences.autoUpdate "Tự động kiểm tra các bộ chuyển đổi và kiểu trích dẫn có được cập nhật">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Tự động loại bỏ các tài liệu trong Thùng rác đã xóa hơn">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "ngày trước đây">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">

@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "Operațiuni fișier">
 <!ENTITY zotero.preferences.automaticSnapshots "Creează automat instantanee, atunci când sunt create înregistrări din paginile web">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Anexează automat fișierele PDF asociate, precum și alte fișiere, atunci când sunt salvate înregistrările">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Extrage automat metadatele pentru PDF-uri">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Redenumește fișierele legate">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Deschide PDF-urile folosind">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Sistem implicit">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Deschide PDF-urile în ferestre noi, nu în file">
 
 <!ENTITY zotero.preferences.miscellaneous "Diverse">
 <!ENTITY zotero.preferences.autoUpdate "Verifică în mod automat dacă există translatori și stiluri actualizate">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Șterge automat din coșul de gunoi înregistrările mai vechi de">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "zile în urmă">
 
-<!ENTITY zotero.preferences.pdfReader "Cititor de PDF-uri">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Afișează filele ca">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - An - Titlu">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Titlu - Creator - An">

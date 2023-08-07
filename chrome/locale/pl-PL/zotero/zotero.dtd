@@ -322,8 +322,11 @@
 <!ENTITY zotero.pdfReader.noSpreads "Pojedyncza strona">
 <!ENTITY zotero.pdfReader.oddSpreads "Dwie strony - nieparzysta">
 <!ENTITY zotero.pdfReader.evenSpreads "Dwie strony - parzysta">
+<!ENTITY zotero.pdfReader.scrolled "Scrolled">
+<!ENTITY zotero.pdfReader.paginated "Paginated">
 <!ENTITY zotero.pdfReader.zoomIn "Powiększ">
 <!ENTITY zotero.pdfReader.zoomOut "Zmniejsz">
+<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatycznie zmień rozmiar">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Powiększ do szerokości strony">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Powiększ do wysokości strony">
@@ -332,4 +335,3 @@
 <!ENTITY zotero.pdfReader.transferFromPDF "Importuj adnotacje...">
 <!ENTITY zotero.pdfReader.rotatePageLeft "Obróć stronę w lewo">
 <!ENTITY zotero.pdfReader.rotatePageRight "Obróć stronę w prawo">
-<!ENTITY zotero.pdfReader.rotatePage180 "Obróć stronę o 180°">

@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "Rinkmenų tvarkymas">
 <!ENTITY zotero.preferences.automaticSnapshots "Kuriamiems naujiems įrašams automatiškai sukurti tinklalapių momentines kopijas">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Įrašant įrašus, automatiškai prisegti susijusius PDF dokumentus ir kitus failus">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatiškai gauti PDF metaduomenis">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Pervadinti susietas rinkmenas">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "PDF atverti su">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Sistemos numatytoji">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "Įvairios">
 <!ENTITY zotero.preferences.autoUpdate "Automatiškai tikrinti, ar yra transliatorių ir stilių atnaujinimų">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatiškai šalinti šiukšlinės įrašus, senesnius nei">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "d.">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">

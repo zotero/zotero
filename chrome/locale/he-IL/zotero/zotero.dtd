@@ -322,8 +322,11 @@
 <!ENTITY zotero.pdfReader.noSpreads "ללא התפשטות">
 <!ENTITY zotero.pdfReader.oddSpreads "התפשטות אי־זוגיים">
 <!ENTITY zotero.pdfReader.evenSpreads "התפשטות זוגיים">
+<!ENTITY zotero.pdfReader.scrolled "Scrolled">
+<!ENTITY zotero.pdfReader.paginated "Paginated">
 <!ENTITY zotero.pdfReader.zoomIn "התקרבות">
 <!ENTITY zotero.pdfReader.zoomOut "התרחקות">
+<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
 <!ENTITY zotero.pdfReader.zoomAuto "שינוי גודל אוטומטי">
 <!ENTITY zotero.pdfReader.zoomPageWidth "התאמת התקריב לרוחב העמוד">
 <!ENTITY zotero.pdfReader.zoomPageHeight "התאמת התקריב לגובה העמוד">
@@ -332,4 +335,3 @@
 <!ENTITY zotero.pdfReader.transferFromPDF "ייבוא הסברים…">
 <!ENTITY zotero.pdfReader.rotatePageLeft "Rotate Page Left">
 <!ENTITY zotero.pdfReader.rotatePageRight "Rotate Page Right">
-<!ENTITY zotero.pdfReader.rotatePage180 "Rotate Page 180°">

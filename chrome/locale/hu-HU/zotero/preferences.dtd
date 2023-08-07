@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "Fájlkezelés">
 <!ENTITY zotero.preferences.automaticSnapshots "Weboldalon alapuló elem létrehozásakor automatikus pillanatfelvétel készítése">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "A kapcsolódó PDF és más fájlok automatikus csatolása">
-<!ENTITY zotero.preferences.autoRecognizeFiles "A metaadat automatikus visszaállítása a PDF-ek számára">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Csatolt fájlok átnevezése">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "A PDF-fájlok megnyitása">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Alapértelmezett rendszerbeállítás">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "PDF-ek megnyitása fülek helyett új ablakban">
 
 <!ENTITY zotero.preferences.miscellaneous "Egyéb">
 <!ENTITY zotero.preferences.autoUpdate "Fordítók- és stílusfrissítések automatikus ellenőrzése">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatikusan törölje a kukából azokat az elemeket, amelyek">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "napnál régebbiek">
 
-<!ENTITY zotero.preferences.pdfReader "PDF olvasó">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Fülek megjelenítése">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Szerző - Év - Cím">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Cím - Szerző - Év">

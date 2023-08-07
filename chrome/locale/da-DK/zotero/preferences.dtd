@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "Filhåndtering">
 <!ENTITY zotero.preferences.automaticSnapshots "Tag automatisk et &quot;Snapshot&quot; når der oprettes Elementer for web-sider">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Vedhæft automatisk tilhørende PDF-filer og andre filer når Elementer gemmes">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Hent automatisk metadata i PDF'er">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Omdøb linkede filer">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Åbn PDF'er med brug af">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Systemstandard">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "Forskelligt">
 <!ENTITY zotero.preferences.autoUpdate "Kontroller automatisk for opdaterede oversættere og bibliografiske formater">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Fjern automatisk Elementer fra papirkurven hvis de er slettet for mere end">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dage siden">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">

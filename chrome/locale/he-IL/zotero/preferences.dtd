@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "טיפול בקבצים">
 <!ENTITY zotero.preferences.automaticSnapshots "ללכוד תמונת מצב אוטומטית בעת יצירת פריטים מאתרים">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "לצרף אוטומטית PDFים וקבצים אחרים משויכים בעת שמירת פריטים">
-<!ENTITY zotero.preferences.autoRecognizeFiles "למשוך נתוני על ל־PDFים אוטומטית">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "שינוי שמות של קבצים מקושרים">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "פתיחת PDFים באמצעות">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "ברירת המחדל של המערכת">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "שונות">
 <!ENTITY zotero.preferences.autoUpdate "לבדוק אוטומטית אם יש מתרגמים וסגנונות עדכניים">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "להסיר אוטומטית פריטים מהאשפה שנמחקו לפני למעלה מ־">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "ימים">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">

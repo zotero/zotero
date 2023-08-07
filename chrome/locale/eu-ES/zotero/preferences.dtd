@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "Fitxategien kudeaketa">
 <!ENTITY zotero.preferences.automaticSnapshots "Gorde pantaila-irudiak automatikoki web orri batetik elementu bat sortzerakoan">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automatikoki erantsi erlazionatutako PDF eta bestelako fitxategiak elementuak gordetzerakoan">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatikoki berreskuratu PDFen metadatuak">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Berrizendatu estekatutako fitxategiak">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Ireki PDFak honakoa erabiliz">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Sistemako lehenetsia">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Ireki PDFak leiho berrietan, fitxetan beharrean">
 
 <!ENTITY zotero.preferences.miscellaneous "Bestelakoak">
 <!ENTITY zotero.preferences.autoUpdate "Automatikoki egiaztatu itzultzaile eta estiloen eguneraketan">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Automatikoki ezabatu zaborran daudek elementuak ">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "egun atzera">
 
-<!ENTITY zotero.preferences.pdfReader "PDF irakurtzailea">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Erakutxi fitxak honela:">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Sortzailea - Urtea - Izenburua">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Izenburua - Sortzailea - Urtea">

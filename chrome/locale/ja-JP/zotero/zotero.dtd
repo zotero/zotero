@@ -323,8 +323,11 @@
 <!ENTITY zotero.pdfReader.noSpreads "スプレッドなし ">
 <!ENTITY zotero.pdfReader.oddSpreads "奇数スプレッド">
 <!ENTITY zotero.pdfReader.evenSpreads "偶数スプレッド">
+<!ENTITY zotero.pdfReader.scrolled "Scrolled">
+<!ENTITY zotero.pdfReader.paginated "Paginated">
 <!ENTITY zotero.pdfReader.zoomIn "拡大表示">
 <!ENTITY zotero.pdfReader.zoomOut "縮小表示">
+<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
 <!ENTITY zotero.pdfReader.zoomAuto "自動的にサイズ変更">
 <!ENTITY zotero.pdfReader.zoomPageWidth "ページ幅に合わせる">
 <!ENTITY zotero.pdfReader.zoomPageHeight "ページの高さに合わせる">
@@ -333,4 +336,3 @@
 <!ENTITY zotero.pdfReader.transferFromPDF "注釈のインポート…">
 <!ENTITY zotero.pdfReader.rotatePageLeft "ページを左に回転する">
 <!ENTITY zotero.pdfReader.rotatePageRight "ページを右に回転する">
-<!ENTITY zotero.pdfReader.rotatePage180 "ページを180度に回転する">

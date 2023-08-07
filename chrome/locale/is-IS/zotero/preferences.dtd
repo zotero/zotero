@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "File Handling">
 <!ENTITY zotero.preferences.automaticSnapshots "Taka sjálfkrafa mynd af skjá þegar vefsíðufærslur eru búnar til">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Hengja sjálfkrafa PDF skjöl og önnur gögn við færslur þegar þær eru vistaðar">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "Ýmislegt">
 <!ENTITY zotero.preferences.autoUpdate "Sjálfvirkt fylgjast með uppfærslum á þýðendum og leturstílum">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Sjálfvirkt fjarlæja færslur í ruslakörfu sem voru settar þar fyrir meira en">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dögum síðan">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">

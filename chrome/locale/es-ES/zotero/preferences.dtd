@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "Gestión de archivos">
 <!ENTITY zotero.preferences.automaticSnapshots "Tomar instantáneas automáticamente al crear elementos a partir de páginas webs">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Adjuntar automáticamente los archivos PDFs y otros archivos al guardar elementos">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Recuperar automáticamente metadatos para archivos PDFs">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Renombrar archivos enlazados">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Abrir PDFs usando">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Predeterminados del sistema">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Abrir PDF en ventanas nuevas en lugar de pestañas">
 
 <!ENTITY zotero.preferences.miscellaneous "Miscelánea">
 <!ENTITY zotero.preferences.autoUpdate "Comprobar automáticamente si hay traductores y estilos actualizados ">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Eliminar automáticamente elementos en la papelera eliminados hace más de ">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "hace días">
 
-<!ENTITY zotero.preferences.pdfReader "Lector de PDF">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Mostrar pestañas como">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creador - Año - Título">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Título - Creador - Año">

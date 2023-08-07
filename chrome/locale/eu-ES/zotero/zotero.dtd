@@ -322,8 +322,11 @@
 <!ENTITY zotero.pdfReader.noSpreads "Xaflarik ez">
 <!ENTITY zotero.pdfReader.oddSpreads "Xafla bakoitiak">
 <!ENTITY zotero.pdfReader.evenSpreads "Xafla bikoitiak">
+<!ENTITY zotero.pdfReader.scrolled "Scrolled">
+<!ENTITY zotero.pdfReader.paginated "Paginated">
 <!ENTITY zotero.pdfReader.zoomIn "Gerturatu">
 <!ENTITY zotero.pdfReader.zoomOut "Urrundu">
+<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
 <!ENTITY zotero.pdfReader.zoomAuto "Tamaina automatikoki egokitu">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Orrialdearen zabalerara zoom egin">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Orrialdearen altuerara zoom egin">
@@ -332,4 +335,3 @@
 <!ENTITY zotero.pdfReader.transferFromPDF "Oharpenak inportatu">
 <!ENTITY zotero.pdfReader.rotatePageLeft "Biratu orrialdea ezkerretara">
 <!ENTITY zotero.pdfReader.rotatePageRight "Biratu orrialdea eskubitara">
-<!ENTITY zotero.pdfReader.rotatePage180 "Biratu orrialdea 180ª">

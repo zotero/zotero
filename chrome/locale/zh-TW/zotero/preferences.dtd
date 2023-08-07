@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "檔案處理">
 <!ENTITY zotero.preferences.automaticSnapshots "從網頁建立項目時自動建立快照">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "儲存項目時自動附加相關的 PDF 檔與其他檔案">
-<!ENTITY zotero.preferences.autoRecognizeFiles "自動為 PDF 檔取得屬性資料">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "重新命名連結的檔案">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "開啟 PDF檔 使用">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "系統預設">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "在新的視窗開啟PDF而非新的分頁">
 
 <!ENTITY zotero.preferences.miscellaneous "雜項">
 <!ENTITY zotero.preferences.autoUpdate "自動檢查更新轉譯器與樣式">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "自動移除刪入垃圾筒且超過">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "天的項目">
 
-<!ENTITY zotero.preferences.pdfReader "PDF閱讀器">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "以……顯示分頁">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "作者–年–標題">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "標題–作者–年">

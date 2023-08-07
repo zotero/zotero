@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "File Handling">
 <!ENTITY zotero.preferences.automaticSnapshots "ساخت خودکار «تصویر لحظه‌ای» در زمان ذخیره صفحات وب">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "پیوست خودکار پی‌دی‌اف‌ها و سایر پرونده‌های وابسته در زمان ذخیره آیتم‌ها">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Automatically retrieve metadata for PDFs">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open PDFs using">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "System Default">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "متفرقه">
 <!ENTITY zotero.preferences.autoUpdate "بررسی خودکار برای به‌روزرسانی مترجم‌ها و شیوه‌ها">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "حذف خودکار آیتم‌های موجود در سطل بازیافت پس از">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "روز">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">

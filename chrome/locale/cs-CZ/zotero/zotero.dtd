@@ -322,8 +322,11 @@
 <!ENTITY zotero.pdfReader.noSpreads "No Spreads">
 <!ENTITY zotero.pdfReader.oddSpreads "Odd Spreads">
 <!ENTITY zotero.pdfReader.evenSpreads "Even Spreads">
+<!ENTITY zotero.pdfReader.scrolled "Scrolled">
+<!ENTITY zotero.pdfReader.paginated "Paginated">
 <!ENTITY zotero.pdfReader.zoomIn "Přiblížit">
 <!ENTITY zotero.pdfReader.zoomOut "Oddálit">
+<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
 <!ENTITY zotero.pdfReader.zoomAuto "Automatically Resize">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Zoom to Page Width">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Zoom to Page Height">
@@ -332,4 +335,3 @@
 <!ENTITY zotero.pdfReader.transferFromPDF "Importovat anotace">
 <!ENTITY zotero.pdfReader.rotatePageLeft "Otočit stránku doleva">
 <!ENTITY zotero.pdfReader.rotatePageRight "Otočit stránku doprava">
-<!ENTITY zotero.pdfReader.rotatePage180 "Otočit stránku o 180°">

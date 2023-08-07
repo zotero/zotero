@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "Dosya Kullanımı">
 <!ENTITY zotero.preferences.automaticSnapshots "Web sayfalarından eserler yaratırken sayfanın anlık görüntüsünü otomatik olarak kaydet">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Eserleri kaydederken ilişkili PDF ve diğer dosyaları da otomatik olarak ekle">
-<!ENTITY zotero.preferences.autoRecognizeFiles "PDF'ler için otomatik olarak üstveri al ">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Bağlantılanmış dosyaları yeniden adlandır">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "PDF dosyalarını bu ile Aç:">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Sistem Varsayılanı">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "PDF'leri sekmeler yerine yeni pencerelerde aç">
 
 <!ENTITY zotero.preferences.miscellaneous "Diğer Ayarlar">
 <!ENTITY zotero.preferences.autoUpdate "Güncellenmiş çevirmen ve stilleri otomatik olarak ara">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Bu kadar zaman önce Çöp Sepetine gönderilmiş eserleri otomatik olarak sil:">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "gün">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Okuyucu">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Sekmeleri böyle göster:">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Yaratan - Yıl - Başlık">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Başlık - Yaratan - Yıl">

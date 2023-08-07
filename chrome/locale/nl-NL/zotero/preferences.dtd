@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "Verwerking van bestanden">
 <!ENTITY zotero.preferences.automaticSnapshots "Automatisch snapshots nemen bij het aanmaken van items vanaf webpagina's">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Automatisch gekoppelde PDF's en andere bestanden toevoegen bij het opslaan van items">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Metadata voor pdf's automatisch ophalen">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Gekoppelde bestanden hernoemen">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Open pdf's met">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Standaard">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "Diversen">
 <!ENTITY zotero.preferences.autoUpdate "Automatisch controleren op updates voor vertalers en verwijsstijlen">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Items in de prullenbak automatisch wissen na">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "dagen geleden">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">

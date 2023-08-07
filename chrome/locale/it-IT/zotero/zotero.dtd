@@ -322,8 +322,11 @@
 <!ENTITY zotero.pdfReader.noSpreads "Nessuna disposizione">
 <!ENTITY zotero.pdfReader.oddSpreads "Disponi pagina dispari e pagina pari">
 <!ENTITY zotero.pdfReader.evenSpreads "Disponi pagina pari e pagina dispari">
+<!ENTITY zotero.pdfReader.scrolled "Scrolled">
+<!ENTITY zotero.pdfReader.paginated "Paginated">
 <!ENTITY zotero.pdfReader.zoomIn "Zoom avanti">
 <!ENTITY zotero.pdfReader.zoomOut "Zoom indietro">
+<!ENTITY zotero.pdfReader.zoomReset "Reset Zoom">
 <!ENTITY zotero.pdfReader.zoomAuto "Ridimensiona automaticamente">
 <!ENTITY zotero.pdfReader.zoomPageWidth "Adatta alla larghezza della pagina">
 <!ENTITY zotero.pdfReader.zoomPageHeight "Adatta all'altezza della pagina">
@@ -332,4 +335,3 @@
 <!ENTITY zotero.pdfReader.transferFromPDF "Importa le annotazioni...">
 <!ENTITY zotero.pdfReader.rotatePageLeft "Ruota la pagina a sinistra">
 <!ENTITY zotero.pdfReader.rotatePageRight "Ruota la pagina a destra">
-<!ENTITY zotero.pdfReader.rotatePage180 "Ruota la pagina di 180°">

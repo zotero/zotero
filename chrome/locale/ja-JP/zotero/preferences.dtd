@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "ファイルの取り扱い">
 <!ENTITY zotero.preferences.automaticSnapshots "ウェブページからアイテムを作成するときに自動的にスナップショットを作成する">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "アイテムを作成するときに自動的に関連 PDF や他のファイルを添付する">
-<!ENTITY zotero.preferences.autoRecognizeFiles "自動的にPDFのメタデータを取得する">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "リンクされたファイルの名前を変更">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "PDF書類を開く">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "システムデフォルト">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "各種設定">
 <!ENTITY zotero.preferences.autoUpdate "トランスレータとスタイルの更新を自動的に確認する。">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "ゴミ箱の中のアイテムが">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "日を経過したら自動的に削除する">
 
-<!ENTITY zotero.preferences.pdfReader "PDFリーダー">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "…でタブを表示します">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "編著者名ー年ー題名">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "題名ー編著者名ー年">

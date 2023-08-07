@@ -14,11 +14,9 @@
 <!ENTITY zotero.preferences.fileHandling "Обработка на файловете">
 <!ENTITY zotero.preferences.automaticSnapshots "Автоматична &quot;моментна снимка&quot; при направата записи от интернет страници">
 <!ENTITY zotero.preferences.downloadAssociatedFiles "Автоматично прикачване на свързаните PDF и други файлове при съхранението на записите">
-<!ENTITY zotero.preferences.autoRecognizeFiles "Автоматично извличане на данни от интернет за PDF">
 <!ENTITY zotero.preferences.autoRenameFiles.renameLinked "Rename linked files">
 <!ENTITY zotero.preferences.fileHandler.openPDFsUsing "Отворяне на  PDF документи с">
 <!ENTITY zotero.preferences.fileHandler.systemDefault "Програмата по подразбиране на операционната система">
-<!ENTITY zotero.preferences.fileHandler.openReaderInNewWindow "Open PDFs in new windows instead of tabs">
 
 <!ENTITY zotero.preferences.miscellaneous "Разни">
 <!ENTITY zotero.preferences.autoUpdate "Автоматично проверяване за актуализирани стилове и програми за извличане на данни">
@@ -29,7 +27,6 @@
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPre "Автоматично изтривай записите в кошчето, изтрити преди повече от">
 <!ENTITY zotero.preferences.trashAutoEmptyDaysPost "дни">
 
-<!ENTITY zotero.preferences.pdfReader "PDF Reader">
 <!ENTITY zotero.preferences.reader.tabsTitle.label "Show tabs as">
 <!ENTITY zotero.preferences.reader.tabsTitle.creatorYearTitle "Creator - Year - Title">
 <!ENTITY zotero.preferences.reader.tabsTitle.titleCreatorYear "Title - Creator - Year">
