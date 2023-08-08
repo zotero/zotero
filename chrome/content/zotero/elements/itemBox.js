@@ -520,7 +520,7 @@
 				}
 			}
 
-			let sortedCustomRows = this._getSortedCustomRows();
+			let sortedCustomRows = Zotero.ItemBoxManager.getSortedCustomRows();
 
 			// Compute the index of each custom row
 			let builtInRowCount = fieldNames.length;
@@ -551,7 +551,7 @@
 				let isCollapsible = fieldName === "abstractNote" || customRowOptions?.multiline;
 				
 				if (isCustomRow) {
-					val = customRowOptions.dataProvider(this.item, fieldName);
+					val = Zotero.ItemBoxManager.getCustomRowData(this.item, fieldName);
 
 					isMultiline = !!customRowOptions.multiline;
 				}
@@ -614,13 +614,11 @@
 				}
 				
 				var prefix = '';
-				// Add '(...)' before 'Abstract' for collapsed abstracts
+				// Add '(...)' before field label for collapsed rows
 				if (isCollapsible) {
 					let isCollapsed;
 					if (isCustomRow) {
-						isCollapsed = !Zotero.ItemBoxManager.getCustomRowExpandState(
-							this.item, fieldName
-						);
+						isCollapsed = !Zotero.ItemBoxManager.getCustomRowExpandState(fieldName);
 					}
 					else {
 						isCollapsed = !Zotero.Prefs.get('lastAbstractExpand');
@@ -1086,11 +1084,10 @@
 			
 			var td = document.createElement('td');
 			td.id = 'more-creators-label';
-			td.setAttribute('onclick',
-				"var binding = this.closest('item-box'); "
-				+ "binding._displayAllCreators = true; "
-				+ "binding.refresh()"
-			);
+			td.addEventListener('click', () => {
+				this._displayAllCreators = true;
+				this.refresh();
+			});
 			td.textContent = Zotero.getString('general.numMore', num);
 			
 			this.addDynamicRow(th, td, true);
@@ -1099,7 +1096,7 @@
 		addDateRow(field, value, tabindex) {
 			var th = document.createElement("th");
 			th.setAttribute("fieldname", field);
-			th.setAttribute("onclick", "this.nextSibling.firstChild.blur()");
+			th.addEventListener("click", _event => th.nextSibling.firstChild.blur());
 			var label = document.createElement('label');
 			label.className = 'key';
 			label.textContent = this._getLocalizedFieldLabel(field);
@@ -1140,7 +1137,9 @@
 				button.style.background = `url("chrome://zotero/skin/textfield-dual${Zotero.hiDPISuffix}.png") center/21px auto no-repeat`;
 				button.setAttribute('title', Zotero.getString('pane.item.switchFieldMode.two'));
 				lastName.setAttribute('fieldMode', '1');
-				button.setAttribute('onclick', "this.closest('item-box').switchCreatorMode(this.closest('tr'), 0, false, true)");
+				button.addEventListener("click",
+					_event => this.switchCreatorMode(button.closest('tr'), 0, false, true)
+				);
 				delete lastName.style.width;
 				delete lastName.style.maxWidth;
 				
@@ -1179,8 +1178,9 @@
 				button.style.background = `url("chrome://zotero/skin/textfield-single${Zotero.hiDPISuffix}.png") center/21px auto no-repeat`;
 				button.setAttribute('title', Zotero.getString('pane.item.switchFieldMode.one'));
 				lastName.setAttribute('fieldMode', '0');
-				button.setAttribute('onclick', "this.closest('item-box').switchCreatorMode(this.closest('tr'), 1, false, true)");
-				
+				button.addEventListener("click",
+					_event => this.switchCreatorMode(button.closest('tr'), 1, false, true)
+				);
 				// appropriately truncate lastName
 				
 				// get item box width
@@ -1365,17 +1365,14 @@
 		}
 		
 		toggleCollapsibleRowExpand(label, valueElement, fieldName) {
-			let customRowOptions = Zotero.ItemBoxManager.getCustomRowByDataKey(fieldName);
-			let isCustomRow = !!customRowOptions;
+			let isCustomRow = Zotero.ItemBoxManager.isCustomRow(fieldName);
 
 			let isExpanded;
 			let valueText;
 			if (isCustomRow) {
-				isExpanded = Zotero.ItemBoxManager.getCustomRowExpandState(
-					this.item, fieldName
-				);
-				Zotero.ItemBoxManager.setCustomRowExpandState(this.item, fieldName, !isExpanded);
-				valueText = customRowOptions?.dataProvider(this.item, fieldName);
+				isExpanded = Zotero.ItemBoxManager.getCustomRowExpandState(fieldName);
+				Zotero.ItemBoxManager.setCustomRowExpandState(fieldName, !isExpanded);
+				valueText = Zotero.ItemBoxManager.getCustomRowData(this.item, fieldName);
 			}
 			else {
 				isExpanded = Zotero.Prefs.get('lastAbstractExpand');
@@ -1401,7 +1398,7 @@
 		
 		disableButton(button) {
 			button.setAttribute('disabled', true);
-			button.setAttribute('onclick', false);
+			button.onclick = () => {};
 		}
 		
 		_enablePlusButton(button, creatorTypeID, _fieldMode) {
@@ -1450,9 +1447,7 @@
 			if (isCollapsible) {
 				let isCollapsed;
 				if (isCustomRow) {
-					isCollapsed = !Zotero.ItemBoxManager.getCustomRowExpandState(
-						this.item, fieldName
-					);
+					isCollapsed = !Zotero.ItemBoxManager.getCustomRowExpandState(fieldName);
 				}
 				else {
 					isCollapsed = !Zotero.Prefs.get('lastAbstractExpand');
@@ -1678,7 +1673,7 @@
 				}
 			}
 			else {
-				value = customRowOptions.dataProvider(this.item, fieldName);
+				value = Zotero.ItemBoxManager.getCustomRowData(this.item, fieldName);
 				itemID = this.item.id;
 			}
 			
@@ -2086,8 +2081,7 @@
 			var [field, creatorIndex, creatorField] = fieldName.split('-');
 			var newVal;
 
-			let customRowOptions = Zotero.ItemBoxManager.getCustomRowByDataKey(fieldName);
-			let isCustomRow = !!customRowOptions;
+			let isCustomRow = Zotero.ItemBoxManager.isCustomRow(fieldName);
 			
 			// Creator fields
 			if (field == 'creator') {
@@ -2181,7 +2175,7 @@
 				
 				this._modifyField(fieldName, value);
 				newVal = isCustomRow
-					? customRowOptions.dataProvider(this.item, fieldName)
+					? Zotero.ItemBoxManager.getCustomRowData(this.item, fieldName)
 					: this.item.getField(fieldName);
 			}
 			
@@ -2731,21 +2725,6 @@
 		
 		_id(id) {
 			return this.querySelector(`#${id}`);
-		}
-
-		_getSortedCustomRows() {
-			return Zotero.ItemBoxManager.getCustomRows().sort((a, b) => {
-				if (a.index === undefined && b.index === undefined) {
-					return 0;
-				}
-				if (a.index === undefined) {
-					return 1;
-				}
-				if (b.index === undefined) {
-					return -1;
-				}
-				return a.index - b.index;
-			});
 		}
 
 		_getLocalizedFieldLabel(fieldName) {

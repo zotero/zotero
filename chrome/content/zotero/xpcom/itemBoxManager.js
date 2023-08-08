@@ -35,23 +35,28 @@
  * - Index starts from `1`, after item type, title, and creators.
  * @property {boolean} [editable=false] - Whether the row is editable.
  * @property {boolean} [multiline=false] - Whether the row is multiline.
- * @property {(item: Zotero.Item, dataKey: string) => string} dataProvider
- * - Custom data provider that is called when rendering rows.
- * @property {(item: Zotero.Item, dataKey: string, value: string) => void} dataSetter
+ * @property {(item: Zotero.Item, dataKey: string) => string} getValue
+ * - Custom data getter that is called when rendering rows.
+ * @property {(item: Zotero.Item, dataKey: string, value: string) => void} setValue
  * - Custom data setter that is called when editing rows.
- * @property {(item: Zotero.Item, dataKey: string) => boolean} [expandStateGetter]
- * - Custom expand state getter. Only used when multiline is true.
- * - Return true for expanded.
- * @property {(item: Zotero.Item, dataKey: string, expanded: boolean) => void} [expandStateSetter]
- * - Custom expand state setter. Only used when multiline is true.
- * - The expanded parameter is true for expanded.
+ * @property {string} [expandStatePreference] - Preference name for expand state.
+ * For example, `extensions.my-plugin.my-row-expanded`.
  */
 
 class ItemBoxManager {
 	_observerAdded = false;
 
-	/** @type {Record<string, ItemBoxCustomRowOptions}} */
+	/**
+	 * For fast lookup of custom rows
+	 * @type {Record<string, ItemBoxCustomRowOptions}}
+	 */
 	_customRows = {};
+
+	/**
+	 * For getting sorted custom rows
+	 * @type {ItemBoxCustomRowOptions[]}
+	 */
+	_sortedRowArray = [];
 
 	/** @type {string[]} */
 	_builtinFields = Zotero.ItemFields.getAll().map(f => f.name);
@@ -68,8 +73,8 @@ class ItemBoxManager {
 	 *   dataKey: 'rtitle',
 	 *   label: 'Reversed Title',
 	 *   pluginID: 'make-it-red@zotero.org',
-	 *   dataProvider: (item, dataKey) => item.getField('title').split('').reverse().join(''),
-	 *   dataSetter: (item, dataKey, value) => Zotero.debug(`Item ${item.getField("title")}'s reversed title is ${value} now.`),
+	 *   getValue: (item, dataKey) => item.getField('title').split('').reverse().join(''),
+	 *   setValue: (item, dataKey, value) => Zotero.debug(`Item ${item.getField("title")}'s reversed title is ${value} now.`),
 	 * });
 	 * ```
 	 * @example
@@ -82,10 +87,9 @@ class ItemBoxManager {
 	 *   editable: true,
 	 *   multiline: true,
 	 *   index: 1,
-	 *   dataProvider: (item, dataKey) => item.getField('abstractNote').split('').reverse().join(''),
-	 *   dataSetter: (item, dataKey, value) => Zotero.debug(`Item ${item.getField("title")}'s reversed abstract is ${value} now.`),
-	 *   expandStateGetter: (item, dataKey) => Zotero.Prefs.get("extensions.make-it-red.reversedAbstractExpanded", true),
-	 *   expandStateSetter: (item, dataKey, expanded) => Zotero.Prefs.set("extensions.make-it-red.reversedAbstractExpanded", expanded, true)
+	 *   getValue: (item, dataKey) => item.getField('abstractNote').split('').reverse().join(''),
+	 *   setValue: (item, dataKey, value) => Zotero.debug(`Item ${item.getField("title")}'s reversed abstract is ${value} now.`),
+	 *   expandStatePreference: "extensions.make-it-red.reversedAbstractExpanded",
 	 * });
 	 * ```
 	 */
@@ -95,6 +99,7 @@ class ItemBoxManager {
 			return false;
 		}
 		this._addPluginShutdownObserver();
+		this._updateSortedRows();
 		this._notifyItemBoxes();
 		return registeredDataKeys;
 	}
@@ -112,6 +117,7 @@ class ItemBoxManager {
 		if (!success) {
 			return false;
 		}
+		this._updateSortedRows();
 		this._notifyItemBoxes();
 		return true;
 	}
@@ -167,8 +173,8 @@ class ItemBoxManager {
 	 */
 	getCustomRowData(item, dataKey) {
 		const options = this._customRows[dataKey];
-		if (options && options.dataProvider) {
-			return options.dataProvider(item, dataKey);
+		if (options && options.getValue) {
+			return String(options.getValue(item, dataKey)) || "";
 		}
 		return "";
 	}
@@ -182,41 +188,46 @@ class ItemBoxManager {
 	 */
 	setCustomRowData(item, dataKey, value) {
 		const options = this._customRows[dataKey];
-		if (options && options.dataSetter) {
-			options.dataSetter(item, dataKey, value);
+		if (options && options.setValue) {
+			options.setValue(item, dataKey, value);
 		}
 	}
 
 	/**
 	 * A centralized expand state getter for custom rows. This is used by the ItemBox to get data.
-	 * @param {Zotero.Item} item - The item to get data from
 	 * @param {string} dataKey - The dataKey of the row
 	 * @returns {boolean | undefined}
 	 * - true for expanded
 	 * - false for collapsed
 	 */
-	getCustomRowExpandState(item, dataKey) {
+	getCustomRowExpandState(dataKey) {
 		const options = this._customRows[dataKey];
-		if (options && options.expandStateGetter) {
-			return options.expandStateGetter(item, dataKey);
+		if (options?.expandStatePreference) {
+			return Zotero.Prefs.get(options.expandStatePreference, true);
 		}
 		return undefined;
 	}
 
 	/**
 	 * A centralized expand state setter for custom rows. This is used by the ItemBox to set data.
-	 * @param {Zotero.Item} item - The item to set data to
 	 * @param {string} dataKey - The dataKey of the row
 	 * @param {boolean} expanded - true for expanded, false for collapsed
 	 * @returns {void}
 	 */
-	setCustomRowExpandState(item, dataKey, expanded) {
+	setCustomRowExpandState(dataKey, expanded) {
 		const options = this._customRows[dataKey];
-		if (options && options.expandStateSetter) {
-			options.expandStateSetter(item, dataKey, expanded);
+		if (options?.expandStatePreference) {
+			Zotero.Prefs.set(options.expandStatePreference, expanded, true);
 		}
 	}
 
+	/**
+	 * Get sorted custom rows
+	 * @returns {ItemBoxCustomRowOptions[]}
+	 */
+	getSortedCustomRows() {
+		return this._sortedRowArray.map(opt => Object.assign({}, opt));
+	}
 
 	/**
 	 * Check if row options are valid.
@@ -232,16 +243,16 @@ class ItemBoxManager {
 		}
 		const requiredProperties = options.every((option) => {
 			let valid = option.dataKey && option.label && option.pluginID
-				&& option.dataProvider && option.dataSetter;
+				&& option.getValue && option.setValue;
 			if (!valid) {
-				Zotero.warn(`ItemBox Row option ${JSON.stringify(option)} must have dataKey, label, pluginID, dataProvider, and dataSetter.`);
+				Zotero.warn(`ItemBox Row option ${JSON.stringify(option)} must have dataKey, label, pluginID, getValue, and setValue.`);
 				return false;
 			}
 			if (option.multiline) {
-				valid &&= option.expandStateGetter && option.expandStateSetter;
+				valid &&= option.expandStatePreference;
 			}
 			if (!valid) {
-				Zotero.warn(`ItemBox Row option ${JSON.stringify(option)} is multiline, must have expandStateGetter and expandStateSetter.`);
+				Zotero.warn(`ItemBox Row option ${JSON.stringify(option)} is multiline, must have expandStatePreference.`);
 			}
 			return valid;
 		});
@@ -315,6 +326,24 @@ class ItemBoxManager {
 			delete this._customRows[key];
 		}
 		return true;
+	}
+
+	/**
+	 * Update the sorted row array
+	 */
+	_updateSortedRows() {
+		this._sortedRowArray = this.getCustomRows().sort((a, b) => {
+			if (a.index === undefined && b.index === undefined) {
+				return 0;
+			}
+			if (a.index === undefined) {
+				return 1;
+			}
+			if (b.index === undefined) {
+				return -1;
+			}
+			return a.index - b.index;
+		});
 	}
 
 	/**
