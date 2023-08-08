@@ -10,17 +10,17 @@ const { buildsURL } = require('./config');
 async function getPDFReader(signatures) {
 	const t1 = Date.now();
 
-	const modulePath = path.join(__dirname, '..', 'pdf-reader');
+	const modulePath = path.join(__dirname, '..', 'reader');
 	
 	const { stdout } = await exec('git rev-parse HEAD', { cwd: modulePath });
 	const hash = stdout.trim();
 	
-	if (!('pdf-reader' in signatures) || signatures['pdf-reader'].hash !== hash) {
-		const targetDir = path.join(__dirname, '..', 'build', 'resource', 'pdf-reader');
+	if (!('reader' in signatures) || signatures['reader'].hash !== hash) {
+		const targetDir = path.join(__dirname, '..', 'build', 'resource', 'reader');
 		try {
 			const filename = hash + '.zip';
-			const tmpDir = path.join(__dirname, '..', 'tmp', 'builds', 'pdf-reader');
-			const url = buildsURL + 'client-pdf-reader/' + filename;
+			const tmpDir = path.join(__dirname, '..', 'tmp', 'builds', 'reader');
+			const url = buildsURL + 'client-reader/' + filename;
 
 			await fs.remove(targetDir);
 			await fs.ensureDir(targetDir);
@@ -40,13 +40,13 @@ async function getPDFReader(signatures) {
 			await exec('npm run build', { cwd: modulePath });
 			await fs.copy(path.join(modulePath, 'build', 'zotero'), targetDir);
 		}
-		signatures['pdf-reader'] = { hash };
+		signatures['reader'] = { hash };
 	}
 	
 	const t2 = Date.now();
 
 	return {
-		action: 'pdf-reader',
+		action: 'reader',
 		count: 1,
 		totalCount: 1,
 		processingTime: t2 - t1

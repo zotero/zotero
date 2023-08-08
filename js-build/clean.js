@@ -17,7 +17,7 @@ if (require.main === module) {
 		try {
 			await getClean(path.join(ROOT, 'build'));
 			await getClean(path.join(ROOT, '.signatures.json'));
-			await getClean(path.join(ROOT, 'pdf-reader/build'));
+			await getClean(path.join(ROOT, 'reader/build'));
 			await getClean(path.join(ROOT, 'pdf-worker/build'));
 			await getClean(path.join(ROOT, 'note-editor/build'));
 		} catch (err) {
