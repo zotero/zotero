@@ -992,7 +992,7 @@ class ReaderTab extends ReaderInstance {
 		this._iframe.setAttribute('class', 'reader');
 		this._iframe.setAttribute('flex', '1');
 		this._iframe.setAttribute('type', 'content');
-		this._iframe.setAttribute('src', 'resource://zotero/pdf-reader/reader.html');
+		this._iframe.setAttribute('src', 'resource://zotero/reader/reader.html');
 		this._tabContainer.appendChild(this._iframe);
 		this._iframe.docShell.windowDraggingAllowed = true;
 		

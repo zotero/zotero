@@ -24,8 +24,8 @@
 */
 
 const WORKER_URL = 'chrome://zotero/content/xpcom/pdfWorker/worker.js';
-const CMAPS_URL = 'resource://zotero/pdf-reader/pdf/web/cmaps/';
-const STANDARD_FONTS_URL = 'resource://zotero/pdf-reader/pdf/web/standard_fonts/';
+const CMAPS_URL = 'resource://zotero/reader/pdf/web/cmaps/';
+const STANDARD_FONTS_URL = 'resource://zotero/reader/pdf/web/standard_fonts/';
 const RENDERER_URL = 'resource://zotero/pdf-renderer/renderer.html';
 
 class PDFWorker {
