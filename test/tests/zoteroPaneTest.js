@@ -144,7 +144,7 @@ describe("ZoteroPane", function() {
 		Components.utils.import("resource://zotero-unit/httpd.js");
 		var apiKey = Zotero.Utilities.randomString(24);
 		var testServerPortMin = 16213;
-		var testServerPortMax = testServerPort + 20;
+		var testServerPortMax = testServerPortMin + 20;
 		var testServerPort = testServerPortMin;
 		var baseURL;
 		var httpd;
