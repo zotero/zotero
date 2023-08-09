@@ -57,6 +57,7 @@ Zotero.Items = function() {
 				sortCreator: _getSortCreatorSQL(),
 				
 				deleted: "DI.itemID IS NOT NULL AS deleted",
+				dateDeleted: "DI.dateDeleted",
 				inPublications: "PI.itemID IS NOT NULL AS inPublications",
 				
 				parentID: `(CASE O.itemTypeID `
@@ -1482,6 +1483,13 @@ Zotero.Items = function() {
 			let parentItem = yield Zotero.Items.getAsync(parentItemID);
 			yield parentItem.reload(['primaryData', 'childItems'], true);
 		}
+
+		// After item moved to trash, we need to have its deletedDate to know
+		// which collection if any it was deleted with. To get deledateDate, need this reload
+		for (let item of items) {
+			yield item.reload(['primaryData'], true);
+		};
+
 		Zotero.Notifier.queue('modify', 'item', ids);
 		Zotero.Notifier.queue('trash', 'item', ids);
 		Array.from(libraryIDs).forEach(libraryID => {

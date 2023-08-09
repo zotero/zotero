@@ -27,11 +27,12 @@ Zotero.Collection = function(params = {}) {
 	Zotero.Collection._super.apply(this);
 	
 	this._name = null;
+	this._dateDeleted = null;
 	
 	this._childCollections = new Set();
 	this._childItems = new Set();
 	
-	Zotero.Utilities.Internal.assignProps(this, params, ['name', 'libraryID', 'parentID', 'parentKey']);
+	Zotero.Utilities.Internal.assignProps(this, params, ['name', 'dateDeleted', 'libraryID', 'parentID', 'parentKey']);
 }
 
 Zotero.extendClass(Zotero.DataObject, Zotero.Collection);
@@ -62,6 +63,10 @@ Zotero.defineProperty(Zotero.Collection.prototype, 'key', {
 Zotero.defineProperty(Zotero.Collection.prototype, 'name', {
 	get: function() { return this._get('name'); },
 	set: function(val) { return this._set('name', val); }
+});
+Zotero.defineProperty(Zotero.Collection.prototype, 'dateDeleted', {
+	get: function() { return this._get('dateDeleted'); },
+	set: function(val) { return this._set('dateDeleted', val); }
 });
 Zotero.defineProperty(Zotero.Collection.prototype, 'version', {
 	get: function() { return this._get('version'); },
@@ -109,6 +114,27 @@ Zotero.Collection.prototype.getName = function() {
 	return this.name;
 }
 
+// Some properties to make it easier for a collection to "pretend"
+// to be an item for itemTree
+Zotero.Collection.prototype.getDisplayTitle = function () {
+	return this.name;
+}
+
+Zotero.Collection.prototype.isNote = function () {
+	return false;
+}
+
+Zotero.Collection.prototype.isAttachment = function () {
+	return false;
+}
+
+Zotero.Collection.prototype.isRegularItem = function () {
+	return false;
+}
+Zotero.Collection.prototype.getField = function (field, unformatted) {
+	return this['_' + field] || "";
+}
+
 
 /*
  * Populate collection data from a database row
@@ -149,7 +175,12 @@ Zotero.Collection.prototype.loadFromRow = function(row) {
 		case 'parentID':
 			val = val ? parseInt(val) : false;
 			break;
-		
+
+		case 'dateDeleted':
+			let date = Zotero.Date.sqlToDate(val);
+			val = Zotero.Date.dateToSQL(date, false);
+			break;
+
 		// Boolean
 		case 'synced':
 		case 'deleted':
@@ -209,6 +240,19 @@ Zotero.Collection.prototype.getChildCollections = function (asIDs) {
 	return Array.from(this._childCollections).map(id => this.ObjectsClass.get(id));
 }
 
+Zotero.Collection.prototype.deletedWithItems = function() {
+	let descendants = this.getDescendents(false, 'item', true);
+	return descendants.filter((d) => {
+		return Zotero.Items.get(d.id).dateDeleted == this.dateDeleted;
+	});
+}
+
+Zotero.Collection.prototype.deletedWithSubcollections = function () {
+	let descendants = this.getDescendents(false, 'collection', true);
+	return descendants.filter((d) => {
+		return Zotero.Collections.get(d.id).dateDeleted == this.dateDeleted;
+	});
+}
 
 /**
  * Returns child items of this collection
@@ -341,6 +385,14 @@ Zotero.Collection.prototype._saveData = Zotero.Promise.coroutine(function* (env)
 		}
 		else {
 			sql = "DELETE FROM deletedCollections WHERE collectionID=?";
+
+			// Subcollection is restored from trash - add it back into the object cache
+			if (this.parentKey) {
+				let parent = Zotero.Collections.getIDFromLibraryAndKey(this.libraryID, this.parentKey);
+				Zotero.DB.addCurrentCallback("commit", function () {
+					this.ObjectsClass.registerChildCollection(parent, this.id);
+				}.bind(this));
+			}
 		}
 		yield Zotero.DB.queryAsync(sql, collectionID);
 		
@@ -360,6 +412,10 @@ Zotero.Collection.prototype._finalizeSave = Zotero.Promise.coroutine(function* (
 			Zotero.Notifier.queue(
 				'modify', 'collection', this.id, env.notifierData, env.options.notifierQueue
 			);
+			// If we are restoring the collection from trash, this refreshes the itemTree
+			if (env.options.restore) {
+				Zotero.Notifier.queue('delete', 'item', this.id, {});
+			}
 		}
 	}
 	
@@ -617,7 +673,7 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 		// Descendent items
 		else {
 			// Trash/delete items
-			if (env.options.deleteItems) {
+			if (env.options.deleteItems || env.options.fromTrash) {
 				del.push(descendents[i].id);
 			}
 			
@@ -628,7 +684,7 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 		}
 	}
 	if (del.length) {
-		if (libraryHasTrash) {
+		if (libraryHasTrash && !env.options.fromTrash) {
 			yield this.ChildObjects.trash(del);
 		}
 		// If library doesn't have trash, just erase
@@ -640,7 +696,9 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 			options.tx = false;
 			for (let i=0; i<del.length; i++) {
 				let obj = yield this.ChildObjects.getAsync(del[i]);
-				yield obj.erase(options);
+				if (!env.options.fromTrash || obj.dateDeleted == this.dateDeleted) {
+					yield obj.erase(options);
+				}
 			}
 		}
 	}
@@ -659,24 +717,43 @@ Zotero.Collection.prototype._eraseData = Zotero.Promise.coroutine(function* (env
 		collections,
 		Zotero.DB.MAX_BOUND_PARAMETERS,
 		async function (chunk) {
-			var placeholders = chunk.map(() => '?').join();
-			
-			// Remove item associations for all descendent collections
-			await Zotero.DB.queryAsync('DELETE FROM collectionItems WHERE collectionID IN '
+			var placeholders = chunk.map(() => '?').join(',');
+			// Permanently delete from trash
+			if (env.options.fromTrash) {
+				// Remove item associations for all descendent collections
+				await Zotero.DB.queryAsync('DELETE FROM collectionItems WHERE collectionID IN '
+					+ '(' + placeholders + ')', chunk);
+				
+				// Remove parent definitions first for FK check
+				await Zotero.DB.queryAsync('UPDATE collections SET parentCollectionID=NULL '
+					+ 'WHERE parentCollectionID IN (' + placeholders + ')', chunk);
+
+				// And delete all descendent collections
+				await Zotero.DB.queryAsync('DELETE FROM collections WHERE collectionID IN '
 				+ '(' + placeholders + ')', chunk);
-			
-			// Remove parent definitions first for FK check
-			await Zotero.DB.queryAsync('UPDATE collections SET parentCollectionID=NULL '
-				+ 'WHERE parentCollectionID IN (' + placeholders + ')', chunk);
-			
-			// And delete all descendent collections
-			await Zotero.DB.queryAsync('DELETE FROM collections WHERE collectionID IN '
-				+ '(' + placeholders + ')', chunk);
+			}
+			// Send collection to trash
+			else {
+				placeholders = chunk.map(() => '(?)').join(',');
+				await Zotero.DB.queryAsync('INSERT OR IGNORE INTO deletedCollections (collectionID) VALUES ' + placeholders
+					, chunk);
+			}
 		}
 	);
-	
+	// Refresh trash itemTree - this hits syncEventListener, so this is a temporary workaround
+	Zotero.Notifier.queue('delete', 'item', this.id, {});
+
 	env.deletedObjectIDs = collections;
 	
+	// Each collection needs to know the date when it was deleted
+	// to show only top-most collection per deleted date +
+	// each collection's child items/collections need to be loaded
+	for (let collectionID of collections) {
+		const collection = Zotero.Collections.get(collectionID);
+		yield collection.loadDataType('primaryData', true);
+		yield collection.loadDataType('childItems', true);
+		yield collection.loadDataType('childCollections', true);
+	}
 	// Update collection cache for descendant items
 	if (itemsToUpdate.length) {
 		let deletedCollections = new Set(env.deletedObjectIDs);

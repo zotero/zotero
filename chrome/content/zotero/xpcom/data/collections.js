@@ -41,7 +41,7 @@ Zotero.Collections = function() {
 		synced: "O.synced",
 		
 		deleted: "DC.collectionID IS NOT NULL AS deleted",
-		
+		dateDeleted: "DC.dateDeleted",
 		parentID: "O.parentCollectionID AS parentID",
 		parentKey: "CP.key AS parentKey",
 		

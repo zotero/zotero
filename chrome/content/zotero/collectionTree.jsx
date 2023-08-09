@@ -750,10 +750,18 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				// If collection isn't currently visible and it isn't in the trash (because it was
 				// undeleted), add it (if possible without opening any containers)
 				else if (!collection.deleted) {
-					await this._addSortedRow('collection', id);
-					// Invalidate parent in case it's become non-empty
 					let parentRow = this.getRowIndexByID("C" + collection.parentID);
-					if (parentRow !== false) {
+					if (!parentRow || this.isContainerOpen(parentRow)) {
+						// When no parentRow or it's already opened, add the sorted row
+						await this._addSortedRow('collection', id, 'T' + collection.libraryID);
+					}
+					else {
+						// Otherwise, open it and invalidate - new collection will be added
+						// by forceUpdate
+						if(!this.isContainerOpen(parentRow)) {
+							await this.toggleOpenState(parentRow);
+						}
+						// Invalidate parent in case it's become non-empty
 						this.tree.invalidateRow(parentRow);
 					}
 				}
@@ -1066,7 +1074,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	async deleteSelection(deleteItems) {
 		var treeRow = this.getRow(this.selection.focused);
 		if (treeRow.isCollection() || treeRow.isFeed()) {
-			await treeRow.ref.eraseTx({ deleteItems });
+			await treeRow.ref.eraseTx({ deleteItems, skipUnload: treeRow.isCollection() });
 		}
 		else if (treeRow.isSearch()) {
 			await Zotero.Searches.erase(treeRow.ref.id);
@@ -2342,9 +2350,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	 *
 	 * @param {String} objectType
 	 * @param {Integer} id - collectionID
+	 * @param {String} moveToID - optional ID of collectionTree entry to select after row is added
 	 * @return {Integer|false} - Index at which the row was added, or false if it wasn't added
 	 */
-	async _addSortedRow(objectType, id) {
+	async _addSortedRow(objectType, id, moveToID) {
 		let beforeRow;
 		if (objectType == 'collection') {
 			let collection = await Zotero.Collections.getAsync(id);
@@ -2463,7 +2472,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				beforeRow
 			);
 		}
-
+		if (moveToID) {
+			this.selectByID(moveToID);
+			return beforeRow;
+		}
 		let moveSelect = beforeRow + 1;
 		if (moveSelect <= this.selection.focused) {
 			while (!this.isSelectable(moveSelect)) {

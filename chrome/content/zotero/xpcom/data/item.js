@@ -125,7 +125,7 @@ Zotero.defineProperty(Zotero.Item.prototype, 'itemID', {
 	enumerable: false
 });
 
-for (let name of ['libraryID', 'key', 'dateAdded', 'dateModified', 'version', 'synced',
+for (let name of ['libraryID', 'key', 'dateAdded', 'dateModified', 'dateDeleted', 'version', 'synced',
 		'createdByUserID', 'lastModifiedByUserID']) {
 	let prop = '_' + name;
 	Zotero.defineProperty(Zotero.Item.prototype, name, {
@@ -665,6 +665,7 @@ Zotero.Item.prototype.setField = function(field, value, loadIn) {
 				break;
 			
 			case 'dateAdded':
+			case 'dateDeleted':
 			case 'dateModified':
 				// Accept ISO dates
 				if (Zotero.Date.isISODate(value)) {
