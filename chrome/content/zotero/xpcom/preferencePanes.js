@@ -116,7 +116,7 @@ Zotero.PreferencePanes = {
 	 * 		the plugin's root
 	 * @param {String[]} [options.stylesheets] Array of URIs of CSS stylesheets to load along with the pane, optionally
 	 * 		relative to the plugin's root
-	 * @param {String[]} [options.helpURL] If provided, a help button will be displayed under the pane
+	 * @param {String} [options.helpURL] If provided, a help button will be displayed under the pane
 	 * 		and the provided URL will open when it is clicked
 	 * @return {Promise<String>} Resolves to the ID of the pane if successfully added
 	 */
