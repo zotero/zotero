@@ -712,12 +712,14 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					this._removeRow(row - 1);
 				}
 			}
+			
+			this._selectAfterRowRemoval(selectedIndex);
 		}
 		else if (action == 'modify') {
 			let row;
 			let id = ids[0];
 			let rowID = "C" + id;
-			let selectedIndex = this.selection.count ? this.selection.currentIndex : 0;
+			let selectedIndex = this.selection.focused;
 			
 			switch (type) {
 			case 'collection':
@@ -734,7 +736,10 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					// Collection was moved to trash, so don't add it back
 					if (collection.deleted) {
 						this._refreshRowMap();
-						this.selectAfterRowRemoval(selectedIndex);
+						// If collection was selected, select next row
+						if (selectedIndex == row) {
+							this._selectAfterRowRemoval(selectedIndex);
+						}
 					}
 					else {
 						await this._addSortedRow('collection', id);
@@ -751,6 +756,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				// undeleted), add it (if possible without opening any containers)
 				else if (!collection.deleted) {
 					await this._addSortedRow('collection', id);
+					await this.selectByID(currentTreeRow.id);
 					// Invalidate parent in case it's become non-empty
 					let parentRow = this.getRowIndexByID("C" + collection.parentID);
 					if (parentRow !== false) {
@@ -766,15 +772,32 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 					// TODO: Only move if name changed
 					this._removeRow(row);
 					
-					// Search moved to trash
+					// Search was moved to trash
 					if (search.deleted) {
 						this._refreshRowMap();
-						this.selectAfterRowRemoval(selectedIndex);
+						// If search was selected, select next row
+						if (selectedIndex == row) {
+							this._selectAfterRowRemoval(selectedIndex);
+						}
 					}
 					// If search isn't in trash, add it back
 					else {
 						await this._addSortedRow('search', id);
 						await this.selectByID(currentTreeRow.id);
+					}
+				}
+				// If search isn't currently visible and it isn't in the trash (because it was
+				// undeleted), add it
+				else if (!search.deleted) {
+					await this._addSortedRow('search', id);
+					await this.selectByID(currentTreeRow.id);
+					// Invalidate parent in case it's become non-empty
+					// NOTE: Not currently used, because searches can't yet have parents
+					if (search.parentID) {
+						let parentRow = this.getRowIndexByID("S" + search.parentID);
+						if (parentRow !== false) {
+							this.tree.invalidateRow(parentRow);
+						}
 					}
 				}
 				break;
@@ -2269,6 +2292,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		
 		// Add searches
 		for (var i = 0, len = savedSearches.length; i < len; i++) {
+			// Skip searches in trash
+			if (savedSearches[i].deleted) continue;
+			
 			rows.splice(row + 1 + newRows, 0,
 				new Zotero.CollectionTreeRow(this, 'search', savedSearches[i], level + 1));
 			newRows++;
@@ -2463,15 +2489,23 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 				beforeRow
 			);
 		}
-
-		let moveSelect = beforeRow + 1;
-		if (moveSelect <= this.selection.focused) {
-			while (!this.isSelectable(moveSelect)) {
-				moveSelect++;
-			}
-			this.selection.select(moveSelect);
-		}
+		
 		return beforeRow;
+	}
+	
+	_selectAfterRowRemoval(row) {
+		// If last row was selected, stay on the last row
+		if (row >= this._rows.length) {
+			row = this._rows.length - 1;
+		};
+		
+		// Make sure the selection doesn't land on a separator (e.g. deleting last feed)
+		while (row >= 0 && !this.isSelectable(row)) {
+			// move up, since we got shifted down
+			row--;
+		}
+		
+		this.selection.select(row);
 	}
 }
 

@@ -440,6 +440,7 @@ var clearFeeds = Zotero.Promise.coroutine(function* () {
  * @param {String} [params.parentKey]
  * @param {Boolean} [params.synced]
  * @param {Integer} [params.version]
+ * @param {Boolean} [params.deleted]
  * @param {Integer} [params.dateAdded] - Allowed for items
  * @param {Integer} [params.dateModified] - Allowed for items
  */
