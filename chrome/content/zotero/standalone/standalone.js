@@ -410,14 +410,16 @@ const ZoteroStandalone = new function() {
 		// PDF Reader
 		var reader = Zotero.Reader.getByTabID(Zotero_Tabs.selectedID);
 		if (reader) {
+			if (reader.type === 'pdf' || reader.type === 'epub') {
+				this.updateMenuItemCheckmark('view-menuitem-no-spreads', reader.spreadMode === 0);
+				this.updateMenuItemCheckmark('view-menuitem-odd-spreads', reader.spreadMode === 1);
+				this.updateMenuItemCheckmark('view-menuitem-even-spreads', reader.spreadMode === 2);
+			}
 			if (reader.type === 'pdf') {
 				this.updateMenuItemCheckmark('view-menuitem-hand-tool', reader.toolType === 'hand');
 				this.updateMenuItemCheckmark('view-menuitem-vertical-scrolling', reader.scrollMode === 0);
 				this.updateMenuItemCheckmark('view-menuitem-horizontal-scrolling', reader.scrollMode === 1);
 				this.updateMenuItemCheckmark('view-menuitem-wrapped-scrolling', reader.scrollMode === 2);
-				this.updateMenuItemCheckmark('view-menuitem-no-spreads', reader.spreadMode === 0);
-				this.updateMenuItemCheckmark('view-menuitem-odd-spreads', reader.spreadMode === 1);
-				this.updateMenuItemCheckmark('view-menuitem-even-spreads', reader.spreadMode === 2);
 				this.updateMenuItemCheckmark('view-menuitem-zoom-auto', reader.zoomAutoEnabled);
 				this.updateMenuItemCheckmark('view-menuitem-zoom-page-width', reader.zoomPageWidthEnabled);
 				this.updateMenuItemCheckmark('view-menuitem-zoom-page-height', reader.zoomPageHeightEnabled);
