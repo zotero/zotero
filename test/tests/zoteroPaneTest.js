@@ -141,11 +141,7 @@ describe("ZoteroPane", function() {
 	})
 	
 	describe("#viewAttachment", function () {
-		Components.utils.import("resource://zotero-unit/httpd.js");
 		var apiKey = Zotero.Utilities.randomString(24);
-		var testServerPortMin = 16213;
-		var testServerPortMax = testServerPortMin + 20;
-		var testServerPort = testServerPortMin;
 		var baseURL;
 		var httpd;
 		
@@ -202,23 +198,15 @@ describe("ZoteroPane", function() {
 		before(function () {
 			Zotero.HTTP.mock = sinon.FakeXMLHttpRequest;
 		})
-		beforeEach(function* () {
-			// Cycle through ports to prevent NS_ERROR_SOCKET_ADDRESS_IN_USE errors from server
-			// not always fully stopping in time
-			if (testServerPort < testServerPortMax) {
-				testServerPort++;
-			}
-			else {
-				testServerPort = testServerPortMin;
-			}
-			baseURL = `http://localhost:${testServerPort}/`;
+		beforeEach(async function () {
+			var port;
+			({ httpd, port } = await startHTTPServer());
+			baseURL = `http://localhost:${port}/`;
 			Zotero.Prefs.set("api.url", baseURL);
-			httpd = new HttpServer();
-			httpd.start(testServerPort);
 			
 			Zotero.Sync.Runner.apiKey = apiKey;
-			yield Zotero.Users.setCurrentUserID(1);
-			yield Zotero.Users.setCurrentUsername("testuser");
+			await Zotero.Users.setCurrentUserID(1);
+			await Zotero.Users.setCurrentUsername("testuser");
 		})
 		afterEach(function* () {
 			var defer = new Zotero.Promise.defer();

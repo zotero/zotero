@@ -4,17 +4,12 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 	//
 	// Setup
 	//
-	Components.utils.import("resource://zotero-unit/httpd.js");
+	const davScheme = "http";
+	const davBasePath = "/webdav/";
+	const davUsername = "user";
+	const davPassword = "password";
 	
-	var davScheme = "http";
-	var davPort = 16214;
-	var davBasePath = "/webdav/";
-	var davHostPath = `localhost:${davPort}${davBasePath}`;
-	var davUsername = "user";
-	var davPassword = "password";
-	var davURL = `${davScheme}://${davHostPath}`;
-	
-	var win, controller, server, requestCount;
+	var win, controller, server, requestCount, httpd, davHostPath, davURL;
 	var responses = {};
 	
 	function setResponse(response) {
@@ -46,8 +41,8 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		return params;
 	}
 	
-	beforeEach(function* () {
-		yield resetDB({
+	beforeEach(async function () {
+		await resetDB({
 			thisArg: this,
 			skipBundledFiles: true
 		});
@@ -56,11 +51,13 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		server = sinon.fakeServer.create();
 		server.autoRespond = true;
 		
-		this.httpd = new HttpServer();
-		this.httpd.start(davPort);
+		var port;
+		({ httpd, port } = await startHTTPServer());
+		davHostPath = `localhost:${port}${davBasePath}`;
+		davURL = `${davScheme}://${davHostPath}`;
 		
-		yield Zotero.Users.setCurrentUserID(1);
-		yield Zotero.Users.setCurrentUsername("testuser");
+		await Zotero.Users.setCurrentUserID(1);
+		await Zotero.Users.setCurrentUsername("testuser");
 		
 		Zotero.Sync.Storage.Local.setModeForLibrary(Zotero.Libraries.userLibraryID, 'webdav');
 		controller = new Zotero.Sync.Storage.Mode.WebDAV;
@@ -124,7 +121,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 	})
 	
 	afterEach(async function () {
-		await new Promise(request => this.httpd.stop(request));
+		await new Promise(request => httpd.stop(request));
 	})
 	
 	after(function* () {
@@ -248,7 +245,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 					+ '<hash>8286300a280f64a4b5cfaac547c21d32</hash>'
 					+ '</properties>'
 			});
-			this.httpd.registerPathHandler(
+			httpd.registerPathHandler(
 				`${davBasePath}zotero/${item.key}.zip`,
 				{
 					handle: function (request, response) {
@@ -312,7 +309,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 					+ `<hash>${md5}</hash>`
 					+ '</properties>'
 			});
-			this.httpd.registerPathHandler(
+			httpd.registerPathHandler(
 				`${davBasePath}zotero/${item.key}.zip`,
 				{
 					handle: function (request, response) {
@@ -621,7 +618,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			yield OS.File.remove(zipPath);
 			
 			// OPTIONS request to cache credentials
-			this.httpd.registerPathHandler(
+			httpd.registerPathHandler(
 				`${davBasePath}zotero/`,
 				{
 					handle: function (request, response) {
@@ -644,7 +641,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 					}
 				}
 			);
-			this.httpd.registerPathHandler(
+			httpd.registerPathHandler(
 				`${davBasePath}zotero/${item.key}.prop`,
 				{
 					handle: function (request, response) {
@@ -672,7 +669,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 					}
 				}
 			);
-			this.httpd.registerPathHandler(
+			httpd.registerPathHandler(
 				`${davBasePath}zotero/${item.key}.zip`,
 				{
 					handle: function (request, response) {
@@ -777,7 +774,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		
 		it("should show an error for a 403", function* () {
 			Zotero.HTTP.mock = null;
-			this.httpd.registerPathHandler(
+			httpd.registerPathHandler(
 				`${davBasePath}zotero/`,
 				{
 					handle: function (request, response) {
@@ -816,7 +813,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 			Zotero.HTTP.mock = null;
 			Zotero.Prefs.set("sync.storage.url", davHostPath);
 			
-			this.httpd.registerPathHandler(
+			httpd.registerPathHandler(
 				`${davBasePath}zotero/`,
 				{
 					handle: function (request, response) {
@@ -831,7 +828,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 					}
 				}
 			);
-			this.httpd.registerPathHandler(
+			httpd.registerPathHandler(
 				`${davBasePath}`,
 				{
 					handle: function (request, response) {
@@ -870,7 +867,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 		
 		it("should show an error for a 200 for a nonexistent file", async function () {
 			Zotero.HTTP.mock = null;
-			this.httpd.registerPathHandler(
+			httpd.registerPathHandler(
 				`${davBasePath}zotero/`,
 				{
 					handle: function (request, response) {
@@ -891,7 +888,7 @@ describe("Zotero.Sync.Storage.Mode.WebDAV", function () {
 					}
 				}
 			);
-			this.httpd.registerPathHandler(
+			httpd.registerPathHandler(
 				`${davBasePath}zotero/nonexistent.prop`,
 				{
 					handle: function (request, response) {

@@ -1094,3 +1094,26 @@ function setHTTPResponse(server, baseURL, response, responses, username, passwor
 		server.respondWith(response.method, baseURL + response.url, responseArray);
 	}
 }
+
+let httpdServerPort = 16213;
+/**
+ * @param {Number} [port] - Port number to use. If not provided, one is picked automatically.
+ * @return {Promise<{ httpd: Object, port: Number }>}
+ */
+async function startHTTPServer(port = null) {
+	if (!port) {
+		port = httpdServerPort;
+	}
+	Components.utils.import("resource://zotero-unit/httpd.js");
+	var httpd = new HttpServer();
+	while (true) {
+		try {
+			httpd.start(port);
+			break;
+		}
+		catch (e) {
+			await Zotero.Promise.delay(10);
+		}
+	}
+	return { httpd, port };
+}

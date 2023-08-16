@@ -326,31 +326,20 @@ describe("Zotero.Attachments", function() {
 	
 	describe("#importFromDocument()", function () {
 		Components.utils.import("resource://gre/modules/FileUtils.jsm");
-		Components.utils.import("resource://zotero-unit/httpd.js");
+		
 		var testServerPath, httpd, prefix;
-		var testServerPortMin = 16213;
-		var testServerPortMax = testServerPortMin + 20;
-		var testServerPort = testServerPortMin;
+		var testServerPort;
 
 		before(async function () {
 			this.timeout(20000);
 			Zotero.Prefs.set("httpServer.enabled", true);
 		});
 
-		beforeEach(function () {
-			// Cycle through ports to prevent NS_ERROR_SOCKET_ADDRESS_IN_USE errors from server
-			// not always fully stopping in time
-			if (testServerPort < testServerPortMax) {
-				testServerPort++;
-			}
-			else {
-				testServerPort = testServerPortMin;
-			}
+		beforeEach(async function () {
 			// Use random prefix because httpd does not actually stop between tests
 			prefix = Zotero.Utilities.randomString();
+			({ httpd, port: testServerPort } = await startHTTPServer());
 			testServerPath = 'http://127.0.0.1:' + testServerPort + '/' + prefix;
-			httpd = new HttpServer();
-			httpd.start(testServerPort);
 		});
 
 		afterEach(async function () {
@@ -586,7 +575,6 @@ describe("Zotero.Attachments", function() {
 		var pageURL9 = 'http://website/article9';
 		var pageURL10 = 'http://website/refresh';
 		
-		Components.utils.import("resource://zotero-unit/httpd.js");
 		var httpd;
 		var port = 16213;
 		var baseURL = `http://localhost:${port}/`;
@@ -821,8 +809,7 @@ describe("Zotero.Attachments", function() {
 		});
 		
 		beforeEach(async function () {
-			httpd = new HttpServer();
-			httpd.start(port);
+			({ httpd } = await startHTTPServer(port));
 			httpd.registerFile(
 				pdfURL.substr(baseURL.length - 1),
 				Zotero.File.pathToFile(OS.Path.join(getTestDataDirectory().path, 'test.pdf'))
