@@ -3821,12 +3821,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 	_getTagSwatch(tag, color) {
 		let span = document.createElement('span');
 		span.className = 'tag-swatch';
-		// If only emoji, display directly
+		// If contains emojis, display directly
 		//
 		// TODO: Check for a maximum number of graphemes, which is hard to do
 		// https://stackoverflow.com/a/54369605
-		if (Zotero.Utilities.Internal.isOnlyEmoji(tag)) {
-			span.textContent = tag;
+		if (Zotero.Utilities.Internal.containsEmoji(tag)) {
+			span.textContent = Zotero.Utilities.Internal.renderTagWithEmojis(tag);
 		}
 		// Otherwise display color
 		else {

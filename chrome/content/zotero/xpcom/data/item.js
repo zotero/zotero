@@ -4398,7 +4398,9 @@ Zotero.Item.prototype.getColoredTags = function () {
 	let tagColors = Zotero.Tags.getColors(this.libraryID);
 	for (let tag of tags) {
 		let data = tagColors.get(tag.tag);
-		if (data) {
+		let containsEmoji = Zotero.Utilities.Internal.containsEmoji(tag.tag);
+		// Include tags that contain emojis even if they are not assigned a color
+		if (data || containsEmoji) {
 			colorData.push({tag: tag.tag, ...data});
 		}
 	}
