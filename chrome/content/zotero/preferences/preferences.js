@@ -576,7 +576,7 @@ ${str}
 			if (!root) continue;
 
 			for (let child of root.children) {
-				let matches = this._findNodesMatching(child, term);
+				let matches = await this._findNodesMatching(child, term);
 				if (matches.length) {
 					let touchedTabPanels = new Set();
 					for (let node of matches) {
@@ -640,9 +640,9 @@ ${str}
 	 *
 	 * @param {Element} root
 	 * @param {String} term Must be normalized (normalizeSearch())
-	 * @return {Node[]}
+	 * @return {Promise<Node[]>}
 	 */
-	_findNodesMatching(root, term) {
+	async _findNodesMatching(root, term) {
 		const EXCLUDE_SELECTOR = 'input, [hidden="true"], [no-highlight]';
 
 		let matched = new Set();
@@ -670,35 +670,50 @@ ${str}
 				continue;
 			}
 
-			if (elem.hasAttribute('data-search-strings-raw')) {
-				let rawStrings = elem.getAttribute('data-search-strings-raw')
-					.split(',')
-					.map(this._normalizeSearch)
-					.filter(Boolean);
-				if (rawStrings.some(s => s.includes(term))) {
-					matched.add(elem);
-					continue;
+			let strings = [];
+			if (elem.hasAttribute('data-search-strings-parsed')) {
+				strings = JSON.parse(elem.getAttribute('data-search-strings-parsed'));
+			}
+			else {
+				if (elem.hasAttribute('data-search-strings-raw')) {
+					let rawStrings = elem.getAttribute('data-search-strings-raw')
+						.split(',')
+						.map(this._normalizeSearch)
+						.filter(Boolean);
+					strings.push(...rawStrings);
 				}
+
+				if (elem.hasAttribute('data-search-strings')) {
+					let stringKeys = elem.getAttribute('data-search-strings')
+						.split(',')
+						.map(s => s.trim())
+						.filter(Boolean);
+					// Get strings from Fluent
+					let localizedStrings = await document.l10n.formatMessages(stringKeys);
+					localizedStrings = localizedStrings.flatMap((message, i) => {
+						// If we got something from Fluent, use the value and relevant attributes
+						if (message) {
+							return [message.value, message.attributes?.title, message.attributes?.label];
+						}
+
+						// If we didn't, try strings from DTDs and properties
+						let key = stringKeys[i];
+						return [
+							Zotero.Intl.strings.hasOwnProperty(key)
+								? Zotero.Intl.strings[key]
+								: Zotero.getString(key)
+						];
+					}).filter(Boolean)
+						.map(this._normalizeSearch)
+						.filter(Boolean);
+					strings.push(...localizedStrings);
+				}
+
+				elem.setAttribute('data-search-strings-parsed', JSON.stringify(strings));
 			}
 
-			if (elem.hasAttribute('data-search-strings')) {
-				let stringKeys = elem.getAttribute('data-search-strings')
-					.split(',')
-					.map(s => s.trim())
-					.filter(Boolean);
-				for (let key of stringKeys) {
-					if (Zotero.Intl.strings.hasOwnProperty(key)) {
-						if (this._normalizeSearch(Zotero.Intl.strings[key]).includes(term)) {
-							matched.add(elem);
-							break;
-						}
-					}
-					else if (this._normalizeSearch(Zotero.getString(key).replace(/%(\d+\$)?S/g, ''))
-							.includes(term)) {
-						matched.add(elem);
-						break;
-					}
-				}
+			if (strings.some(s => s.includes(term))) {
+				matched.add(elem);
 			}
 		}
 
