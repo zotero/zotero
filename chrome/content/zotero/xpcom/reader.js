@@ -86,6 +86,11 @@ class ReaderInstance {
 		return this._type;
 	}
 
+	async focus() {
+		await this._waitForReader();
+		this._iframeWindow.focus();
+	}
+
 	getSecondViewState() {
 		let state = this._iframeWindow.wrappedJSObject.getSecondViewState();
 		return state ? JSON.parse(JSON.stringify(state)) : undefined;
@@ -1441,7 +1446,7 @@ class Reader {
 		}
 		
 		if (!openInBackground) {
-			reader._window.focus();
+			reader.focus();
 		}
 		return reader;
 	}
