@@ -963,6 +963,52 @@ class ReaderInstance {
 			return null;
 		}
 	}
+
+	/**
+	 * @typedef PDFPosition
+	 * @type {object}
+	 * @property {number} pageIndex
+	 * @property {number[][]} rects
+	*/
+	/** @typedef {import("../../../../reader/src/dom/common/lib/selector").Selector} OtherPosition*/
+	/** @typedef {PDFPosition | OtherPosition} ReaderPosition */
+	/**
+	 * @typedef ReaderSelection
+	 * @type {object}
+	 * @property {string} [sortIndex] - Sort index of the selection
+	 * @property {string} [pageLabel] - Page label of the selection. Only for PDF
+	 * @property {ReaderPosition} [position] - Position of the selection.
+	 * @property {string} [text] - Text of the selection
+	 */
+	/**
+	 * Return the last selection data
+	 * @returns {ReaderSelection} selection data
+	 * @example
+	 * Get the last selection text
+	 * ```js
+	 * let reader = Zotero.Reader._readers[0];
+	 * let selectedText = reader.getLastSelection().text || "";
+	 * ```
+	 */
+	getLastSelection() {
+		let selection = {};
+		if (this._internalReader._type === "pdf") {
+			let selectionRanges = this._internalReader._lastView._selectionRanges;
+			if (selectionRanges.length !== 0) {
+				selection ??= this._internalReader._lastView._getAnnotationFromSelectionRanges(
+					selectionRanges,
+					"highlight"
+				);
+			}
+		}
+		else {
+			selection ??= this._internalReader._lastView._getAnnotationFromTextSelection(
+				"highlight"
+			);
+		}
+		let { sortIndex, pageLabel, position, text } = selection;
+		return { sortIndex, pageLabel, position, text };
+	}
 }
 
 class ReaderTab extends ReaderInstance {
