@@ -2829,6 +2829,14 @@ var ItemTree = class ItemTree extends LibraryTree {
 		else if (column.dataKey === 'hasAttachment') {
 			return this._renderHasAttachmentCell(index, data, column);
 		}
+		else if (column.renderCell) {
+			try {
+				return column.renderCell.apply(this, arguments);
+			}
+			catch (e) {
+				Zotero.logError(e);
+			}
+		}
 		let cell = renderCell.apply(this, arguments);
 		if (column.dataKey === 'numNotes' && data) {
 			cell.setAttribute('aria-label', Zotero.getString('pane.item.notes.count', data, data) + '.');
