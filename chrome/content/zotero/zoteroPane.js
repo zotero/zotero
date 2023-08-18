@@ -4708,11 +4708,13 @@ var ZoteroPane = new function()
 		if(typeof itemIDs != "object") itemIDs = [itemIDs];
 		
 		var launchFile = async (path, contentType, itemID) => {
-			// Fix blank PDF attachment MIME type
-			if (!contentType) {
+			// Fix blank PDF MIME type and incorrect EPUB MIME type
+			if (!contentType || contentType === 'application/epub') {
 				let item = await Zotero.Items.getAsync(itemID);
 				let path = await item.getFilePathAsync();
-				let type = 'application/pdf';
+				let type = contentType === 'application/epub'
+					? 'application/epub+zip'
+					: 'application/pdf';
 				if (Zotero.MIME.sniffForMIMEType(await Zotero.File.getSample(path)) == type) {
 					contentType = type;
 					item.attachmentContentType = type;

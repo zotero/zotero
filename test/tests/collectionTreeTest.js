@@ -280,6 +280,67 @@ describe("Zotero.CollectionTree", function() {
 			assert.equal(selected, id);
 		});
 		
+		describe(".deleted selection", function () {
+			for (let objectType of ['collection', 'search']) {
+				it(`should select next row when ${objectType} is moved to trash`, async function () {
+					var ran = Zotero.Utilities.randomString();
+					var o1 = await createDataObject(objectType, { name: ran + "AAA" });
+					var o2 = await createDataObject(objectType, { name: ran + "BBB" });
+					var o3 = await createDataObject(objectType, { name: ran + "CCC" });
+					
+					await cv.selectByID(o2.treeViewID);
+					
+					o2.deleted = true;
+					await o2.saveTx();
+					
+					assert.equal(zp.getCollectionTreeRow().ref.id, o3.id);
+				});
+				
+				it(`should maintain selection on ${objectType} when row above is moved to trash`, async function () {
+					var ran = Zotero.Utilities.randomString();
+					var o1 = await createDataObject(objectType, { name: ran + "AAA" });
+					var o2 = await createDataObject(objectType, { name: ran + "BBB" });
+					var o3 = await createDataObject(objectType, { name: ran + "CCC" });
+					
+					assert.equal(zp.getCollectionTreeRow().ref.id, o3.id);
+					
+					o1.deleted = true;
+					await o1.saveTx();
+					
+					assert.equal(zp.getCollectionTreeRow().ref.id, o3.id);
+				});
+				
+				it(`should maintain selection on trash when ${objectType} is restored`, async function () {
+					var o = await createDataObject(objectType, { deleted: true });
+					
+					await cv.selectByID("T1");
+					
+					o.deleted = false;
+					await o.saveTx();
+					
+					assert.isTrue(zp.getCollectionTreeRow().isTrash());
+					
+					// Row should have been added back
+					assert.isAbove(cv.getRowIndexByID(o.treeViewID), 0);
+				});
+			}
+		});
+		
+		for (let objectType of ['collection', 'search']) {
+			it(`should select next row when ${objectType} is erased`, async function () {
+				var ran = Zotero.Utilities.randomString();
+				var o1 = await createDataObject(objectType, { name: ran + "AAA" });
+				var o2 = await createDataObject(objectType, { name: ran + "BBB" });
+				var o3 = await createDataObject(objectType, { name: ran + "CCC" });
+				
+				await cv.selectByID(o2.treeViewID);
+				
+				await o2.eraseTx();
+				
+				assert.equal(zp.getCollectionTreeRow().ref.id, o3.id);
+			});
+		}
+		
 		it("should update the editability of the current view", function* () {
 			var group = yield createGroup({
 				editable: false,

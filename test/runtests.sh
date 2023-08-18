@@ -160,7 +160,7 @@ if [[ -z "$CI" ]] && ! ps | grep js-build/build.js | grep -v grep > /dev/null; t
 	echo
 	echo "Running JS build process"
 	cd "$ROOT_DIR"
-	npm run build || exit $?
+	NODE_OPTIONS=--openssl-legacy-provider npm run build || exit $?
 	echo
 fi
 
