@@ -548,13 +548,17 @@ class ReaderInstance {
 			readerTitle = item.attachmentFilename;
 		}
 		else if (parentItem) {
+			let attachment = await parentItem.getBestAttachment();
+			let isPrimaryAttachment = attachment && attachment.id == item.id;
+			
 			let parts = [];
 			// Windows displays bidi control characters as placeholders in window titles, so strip them
 			// See https://github.com/mozilla-services/screenshots/issues/4863
 			let unformatted = Zotero.isWin;
 			let creator = parentItem.getField('firstCreator', unformatted);
 			let year = parentItem.getField('year');
-			let title = parentItem.getDisplayTitle();
+			// Only include parent title if primary attachment
+			let title = isPrimaryAttachment ? parentItem.getDisplayTitle() : false;
 			// If creator is missing fall back to titleCreatorYear
 			if (type === 'creatorYearTitle' && creator) {
 				parts = [creator, year, title];
@@ -567,9 +571,8 @@ class ReaderInstance {
 				parts = [title, creator, year];
 			}
 			
-			// If not primary attachment, add attachment title
-			let attachment = await parentItem.getBestAttachment();
-			if (!attachment || attachment.id != item.id) {
+			// If not primary attachment, show attachment title first
+			if (!isPrimaryAttachment) {
 				parts.unshift(item.getDisplayTitle());
 			}
 			
