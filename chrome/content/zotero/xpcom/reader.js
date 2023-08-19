@@ -544,8 +544,13 @@ class ReaderInstance {
 		let item = Zotero.Items.get(this._item.id);
 		let readerTitle = item.getDisplayTitle();
 		let parentItem = item.parentItem;
-		// If type is "filename", then readerTitle already has it
-		if (parentItem && type !== 'filename') {
+		if (type === 'filename') {
+			let attachment = await parentItem.getBestAttachment();
+			if (attachment && attachment.id === this._item.id) {
+				readerTitle = attachment.attachmentFilename;
+			}
+		}
+		else if (parentItem) {
 			let attachment = await parentItem.getBestAttachment();
 			if (attachment && attachment.id === this._item.id) {
 				let parts = [];
