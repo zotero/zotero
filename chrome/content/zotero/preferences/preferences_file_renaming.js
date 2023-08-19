@@ -26,6 +26,7 @@
 
 Zotero_Preferences.FileRenaming = {
 	mockItem: null,
+	defaultExt: 'pdf',
 	init: function () {
 		this.inputRef = document.getElementById('file-renaming-format-template');
 		this.updatePreview();
@@ -33,11 +34,27 @@ Zotero_Preferences.FileRenaming = {
 		Zotero.getActiveZoteroPane()?.itemsView.onSelect.addListener(this.updatePreview.bind(this));
 	},
 
+	getActiveTopLevelItem() {
+		const selectedItem = Zotero.getActiveZoteroPane()?.getSelectedItems()?.[0];
+		if (selectedItem) {
+			if (selectedItem.isRegularItem() && !selectedItem.parentKey) {
+				return [selectedItem, this.defaultExt];
+			}
+			if (selectedItem.isFileAttachment() && selectedItem.parentKey) {
+				const path = selectedItem.getFilePath();
+				const ext = Zotero.File.getExtension(Zotero.File.pathToFile(path));
+				return [Zotero.Items.getByLibraryAndKey(selectedItem.libraryID, selectedItem.parentKey), ext ?? this.defaultExt];
+			}
+		}
+
+		return null;
+	},
+
 	updatePreview() {
-		const item = Zotero.getActiveZoteroPane()?.getSelectedItems()?.[0] ?? this.mockItem ?? this.makeMockItem();
+		const [item, ext] = this.getActiveTopLevelItem() ?? [this.mockItem ?? this.makeMockItem(), this.defaultExt];
 		const tpl = document.getElementById('file-renaming-format-template').value;
 		const preview = Zotero.Attachments.getFileBaseNameFromItem(item, tpl);
-		document.getElementById('file-renaming-format-preview').innerText = `${preview}.pdf`;
+		document.getElementById('file-renaming-format-preview').innerText = `${preview}.${ext}`;
 	},
 
 	makeMockItem() {
