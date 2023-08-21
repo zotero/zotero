@@ -88,7 +88,7 @@ class ItemTreeManager {
 	 *         // return: the data to display in the column
 	 *         return item.getField('title').split('').reverse().join('');
 	 *     },
-	 *     cellRenderer: (index, data, column) => {
+	 *     renderCell: (index, data, column) => {
 	 *         // index: the index of the row
 	 *         // data: the data to display in the column, return of `dataProvider`
 	 *         // column: the column options
