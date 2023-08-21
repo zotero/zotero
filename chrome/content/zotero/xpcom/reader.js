@@ -599,7 +599,8 @@ class ReaderInstance {
 		// this._postMessage({ action: 'focusLastToolbarButton' });
 	}
 
-	tabToolbar(_reverse) {
+	// eslint-disable-next-line no-unused-vars
+	tabToolbar(reverse) {
 		// this._postMessage({ action: 'tabToolbar', reverse });
 		// Avoid toolbar find button being focused for a short moment
 		setTimeout(() => this._iframeWindow.focus());
@@ -1419,7 +1420,7 @@ class Reader {
 				let existingTabID = win.Zotero_Tabs.getTabIDByItemID(itemID);
 				if (existingTabID) {
 					win.Zotero_Tabs.select(existingTabID, false, { location });
-					return;
+					return null;
 				}
 			}
 		}
@@ -1490,6 +1491,7 @@ class Reader {
 		if (!openInBackground) {
 			reader._window.focus();
 		}
+		return reader;
 	}
 
 	/**
