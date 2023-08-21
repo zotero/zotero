@@ -3826,7 +3826,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 		// TODO: Check for a maximum number of graphemes, which is hard to do
 		// https://stackoverflow.com/a/54369605
 		if (Zotero.Utilities.Internal.containsEmoji(tag)) {
-			span.textContent = Zotero.Utilities.Internal.renderTagWithEmojis(tag);
+			span.textContent = Zotero.Utilities.Internal.extractEmojiForTag(tag);
 		}
 		// Otherwise display color
 		else {

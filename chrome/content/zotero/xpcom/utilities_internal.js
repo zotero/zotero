@@ -416,7 +416,7 @@ Zotero.Utilities.Internal = {
 		return !!str.match(re);
 	},
 
-	renderTagWithEmojis: function (str) {
+	extractEmojiForTag: function (str) {
 		// Split by anything that is not an emoji, Zero Width Joiner, or Variation Selector-16
 		// And return first continuous span of emojis
 		const re = /[^\p{Extended_Pictographic}\u200D\uFE0F]+/gu;
