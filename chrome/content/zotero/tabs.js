@@ -269,7 +269,7 @@ var Zotero_Tabs = new function () {
 		var closedIDs = [];
 		var tmpTabs = this._tabs.slice();
 		for (var id of ids) {
-			var { tab, tabIndex } = this._getTab(id);
+			let { tab, tabIndex } = this._getTab(id);
 			if (!tab) {
 				continue;
 			}
@@ -281,14 +281,20 @@ var Zotero_Tabs = new function () {
 			}
 			tabIndex = this._tabs.findIndex(x => x.id === id);
 			this._tabs.splice(tabIndex, 1);
-			document.getElementById(tab.id).remove();
-			// For unknown reason fx102, unlike 60, sometimes doesn't automatically update selected index
-			this.deck.selectedIndex = Array.from(this.deck.children).findIndex(x => x.id == this._selectedID);
 			if (tab.onClose) {
 				tab.onClose();
 			}
 			historyEntry.push({ index: tmpTabs.indexOf(tab), data: tab.data });
 			closedIDs.push(id);
+
+			requestIdleCallback(() => {
+				document.getElementById(tab.id).remove();
+				// For unknown reason fx102, unlike 60, sometimes doesn't automatically update selected index
+				let selectedIndex = Array.from(this.deck.children).findIndex(x => x.id == this._selectedID);
+				if (this.deck.selectedIndex !== selectedIndex) {
+					this.deck.selectedIndex = selectedIndex;
+				}
+			});
 		}
 		this._history.push(historyEntry);
 		Zotero.Notifier.trigger('close', 'tab', [closedIDs], true);
