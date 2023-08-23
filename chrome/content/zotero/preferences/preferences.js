@@ -481,7 +481,13 @@ ${str}
 		}
 
 		for (let child of container.children) {
-			child.dispatchEvent(new Event('load'));
+			let event = new Event('load');
+			let promises = [];
+			event.waitUntil = (promise) => {
+				promises.push(promise);
+			};
+			child.dispatchEvent(event);
+			await Promise.allSettled(promises);
 		}
 
 		// If this is the first pane to be loaded, notify anyone waiting
