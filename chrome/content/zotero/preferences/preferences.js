@@ -132,18 +132,21 @@ var Zotero_Preferences = {
 	},
 
 	async _handleNavigationSelect() {
-		for (let child of this.content.children) {
-			if (child !== this.helpContainer) {
-				child.setAttribute('hidden', true);
-			}
-		}
 		let paneID = this.navigation.value;
 		if (paneID) {
-			this.content.scrollTop = 0;
+			let pane = this.panes.get(paneID);
 			document.getElementById('prefs-search').value = '';
 			await this._search('');
 			await this._showPane(paneID);
-			this.helpContainer.hidden = !this.panes.get(paneID).helpURL;
+			this.content.scrollTop = 0;
+			for (let child of this.content.children) {
+				if (child !== this.helpContainer && child !== pane.container) {
+					child.hidden = true;
+				}
+			}
+
+			this.helpContainer.hidden = !pane.helpURL;
+			document.getElementById('prefs-subpane-back-button').hidden = !pane.parent;
 		}
 		Zotero.Prefs.set('lastSelectedPrefPane', paneID);
 	},
@@ -222,15 +225,18 @@ var Zotero_Preferences = {
 	 */
 	async _loadPane(id) {
 		let pane = this.panes.get(id);
+		if (pane.loaded) {
+			return;
+		}
 		if (pane.loadPromise) {
 			await pane.loadPromise;
 			return;
 		}
-		if (pane.loaded) {
-			return;
-		}
 		
 		let rest = async () => {
+			// Hack - make sure the following code does not run synchronously so we can set loadPromise immediately
+			await Zotero.Promise.delay();
+			
 			if (pane.scripts) {
 				for (let script of pane.scripts) {
 					Services.scriptloader.loadSubScript(script, window);
@@ -281,9 +287,6 @@ var Zotero_Preferences = {
 
 		pane.container.hidden = false;
 		pane.container.children[0].dispatchEvent(new Event('showing'));
-
-		let backButton = document.getElementById('prefs-subpane-back-button');
-		backButton.hidden = !pane.parent;
 	},
 	
 	_parseXHTMLToFragment(str, entities = []) {
@@ -505,7 +508,7 @@ ${str}
 	 *
 	 * @param {String} [term]
 	 */
-	async _search(term) {
+	_search: Zotero.Utilities.Internal.serial(async function (term) {
 		// Initial housekeeping:
 
 		// Clear existing highlights
@@ -626,7 +629,7 @@ ${str}
 				}
 			}
 		}
-	},
+	}),
 
 	/**
 	 * Search for the given term (case-insensitive) in the tree.
