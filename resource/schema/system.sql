@@ -1,4 +1,4 @@
--- 33
+-- 32
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -117,7 +117,6 @@ INSERT INTO "fileTypes" VALUES(4, 'audio');
 INSERT INTO "fileTypes" VALUES(5, 'video');
 INSERT INTO "fileTypes" VALUES(6, 'document');
 INSERT INTO "fileTypes" VALUES(7, 'presentation');
-INSERT INTO "fileTypes" VALUES(8, 'ebook');
 
 -- webpage
 INSERT INTO "fileTypeMIMETypes" VALUES(1, 'text/html');
@@ -157,9 +156,6 @@ INSERT INTO "fileTypeMIMETypes" VALUES(7, 'application/powerpoint');
 INSERT INTO "fileTypeMIMETypes" VALUES(7, 'application/vnd.oasis.opendocument.presentation');
 INSERT INTO "fileTypeMIMETypes" VALUES(7, 'application/x-kpresenter');
 INSERT INTO "fileTypeMIMETypes" VALUES(7, 'application/vnd.ms-powerpoint');
--- ebook
-INSERT INTO "fileTypeMIMETypes" VALUES(8, 'application/epub+zip');
-INSERT INTO "fileTypeMIMETypes" VALUES(8, 'application/epub'); -- incorrect, for compatibility
 
 INSERT INTO "syncObjectTypes" VALUES(1, 'collection');
 INSERT INTO "syncObjectTypes" VALUES(2, 'creator');

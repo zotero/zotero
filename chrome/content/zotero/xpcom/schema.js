@@ -3450,7 +3450,17 @@ Zotero.Schema = new function(){
 				}
 			}
 			
-			// TEMP: When adding 122, check whether IA.authorName fix in items.js::_loadAnnotations()
+			else if (i == 122) {
+				try {
+					await Zotero.DB.queryAsync("INSERT INTO fileTypes VALUES(8, 'ebook')");
+					await Zotero.DB.queryAsync("INSERT INTO fileTypeMIMETypes VALUES(8, 'application/epub+zip')");
+					// Incorrect, for compatibility
+					await Zotero.DB.queryAsync("INSERT INTO fileTypeMIMETypes VALUES(8, 'application/epub')");
+				}
+				catch (e) {}
+			}
+			
+			// TEMP: When adding 123, check whether IA.authorName fix in items.js::_loadAnnotations()
 			// can be updated due to update steps being indempodent
 			
 			// If breaking compatibility or doing anything dangerous, clear minorUpdateFrom
