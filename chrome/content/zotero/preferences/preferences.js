@@ -37,7 +37,8 @@ var Zotero_Preferences = {
 		this.content = document.getElementById('prefs-content');
 		this.helpContainer = document.getElementById('prefs-help-container');
 
-		this.navigation.addEventListener('select', () => this._onNavigationSelect());
+		this.navigation.addEventListener('mouseover', event => this._handleNavigationMouseOver(event));
+		this.navigation.addEventListener('select', () => this._handleNavigationSelect());
 		document.getElementById('prefs-search').addEventListener('command',
 			event => this._search(event.target.value));
 		
@@ -124,7 +125,13 @@ var Zotero_Preferences = {
 		}
 	},
 
-	_onNavigationSelect() {
+	async _handleNavigationMouseOver(event) {
+		if (event.target.tagName === 'richlistitem') {
+			await this._loadPane(event.target.value);
+		}
+	},
+
+	async _handleNavigationSelect() {
 		for (let child of this.content.children) {
 			if (child !== this.helpContainer) {
 				child.setAttribute('hidden', true);
@@ -134,8 +141,9 @@ var Zotero_Preferences = {
 		if (paneID) {
 			this.content.scrollTop = 0;
 			document.getElementById('prefs-search').value = '';
-			this._search('');
-			this._loadAndDisplayPane(paneID);
+			await this._search('');
+			await this._showPane(paneID);
+			this.helpContainer.hidden = !this.panes.get(paneID).helpURL;
 		}
 		Zotero.Prefs.set('lastSelectedPrefPane', paneID);
 	},
@@ -201,20 +209,28 @@ var Zotero_Preferences = {
 
 		this.panes.set(id, {
 			...options,
-			imported: false,
+			loaded: false,
 			container,
 		});
 	},
 
 	/**
-	 * Display a pane's content, alongside any other panes already showing.
-	 * If the pane is not yet loaded, it will be loaded first.
+	 * Load a pane if not already loaded.
 	 *
 	 * @param {String} id
+	 * @return {Promise<void>}
 	 */
-	_loadAndDisplayPane(id) {
+	async _loadPane(id) {
 		let pane = this.panes.get(id);
-		if (!pane.imported) {
+		if (pane.loadPromise) {
+			await pane.loadPromise;
+			return;
+		}
+		if (pane.loaded) {
+			return;
+		}
+		
+		let rest = async () => {
 			if (pane.scripts) {
 				for (let script of pane.scripts) {
 					Services.scriptloader.loadSubScript(script, window);
@@ -237,11 +253,31 @@ var Zotero_Preferences = {
 				? MozXULElement.parseXULToFragment(markup, dtdFiles)
 				: this._parseXHTMLToFragment(markup, dtdFiles);
 			contentFragment = document.importNode(contentFragment, true);
+
 			this._initImportedNodesPreInsert(contentFragment);
 			pane.container.append(contentFragment);
-			pane.imported = true;
-			this._initImportedNodesPostInsert(pane.container);
-		}
+
+			await document.l10n.ready;
+			await document.l10n.translateFragment(pane.container);
+			await this._initImportedNodesPostInsert(pane.container);
+
+			pane.loaded = true;
+		};
+		pane.loadPromise = rest();
+		await pane.loadPromise;
+	},
+
+	/**
+	 * Display a pane's content, alongside any other panes already showing.
+	 * If the pane is not yet loaded, it will be loaded first.
+	 *
+	 * @param {String} id
+	 * @return {Promise<void>}
+	 */
+	async _showPane(id) {
+		await this._loadPane(id);
+
+		let pane = this.panes.get(id);
 
 		pane.container.hidden = false;
 		pane.container.children[0].dispatchEvent(new Event('showing'));
@@ -334,10 +370,10 @@ ${str}
 	 * @param {Element} container
 	 * @private
 	 */
-	_initImportedNodesPostInsert(container) {
+	async _initImportedNodesPostInsert(container) {
 		let attachToPreference = (elem) => {
 			if (this._observerSymbols.has(elem)) {
-				return;
+				return Promise.resolve();
 			}
 			
 			let preference = elem.getAttribute('preference');
@@ -382,9 +418,10 @@ ${str}
 			elem.addEventListener('change', this._syncToPrefOnModify.bind(this));
 
 			// Set timeout before populating the value so the pane can add listeners first
-			setTimeout(() => {
+			return new Promise(resolve => setTimeout(() => {
 				this._syncFromPref(elem, elem.getAttribute('preference'));
-			});
+				resolve();
+			}));
 		};
 		
 		let detachFromPreference = (elem) => {
@@ -397,7 +434,7 @@ ${str}
 
 		// Activate `preference` attributes
 		for (let elem of container.querySelectorAll('[preference]')) {
-			attachToPreference(elem);
+			await attachToPreference(elem);
 		}
 		
 		new MutationObserver((mutations) => {
@@ -406,6 +443,7 @@ ${str}
 					let target = mutation.target;
 					detachFromPreference(target);
 					if (target.hasAttribute('preference')) {
+						// Don't bother awaiting these
 						attachToPreference(target);
 					}
 				}
@@ -461,7 +499,7 @@ ${str}
 	 *
 	 * @param {String} [term]
 	 */
-	_search(term) {
+	async _search(term) {
 		// Initial housekeeping:
 
 		// Clear existing highlights
@@ -480,11 +518,13 @@ ${str}
 			hidden.ariaHidden = false;
 		}
 
+		// Hide help button by default - _handleNavigationSelect() will show it when appropriate
+		this.helpContainer.hidden = true;
+
 		if (!term) {
 			if (this.navigation.selectedIndex == -1) {
 				this.navigation.selectedIndex = 0;
 			}
-			this.helpContainer.hidden = !this.panes.get(this.navigation.value)?.helpURL;
 			return;
 		}
 
@@ -500,7 +540,7 @@ ${str}
 				pane.container.hidden = true;
 			}
 			else {
-				this._loadAndDisplayPane(id);
+				await this._showPane(id);
 			}
 		}
 
