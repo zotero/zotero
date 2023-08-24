@@ -3451,13 +3451,10 @@ Zotero.Schema = new function(){
 			}
 			
 			else if (i == 122) {
-				try {
-					await Zotero.DB.queryAsync("INSERT INTO fileTypes VALUES(8, 'ebook')");
-					await Zotero.DB.queryAsync("INSERT INTO fileTypeMIMETypes VALUES(8, 'application/epub+zip')");
-					// Incorrect, for compatibility
-					await Zotero.DB.queryAsync("INSERT INTO fileTypeMIMETypes VALUES(8, 'application/epub')");
-				}
-				catch (e) {}
+				await Zotero.DB.queryAsync("INSERT INTO fileTypes VALUES(8, 'ebook')");
+				await Zotero.DB.queryAsync("INSERT INTO fileTypeMIMETypes VALUES(8, 'application/epub+zip')");
+				// Incorrect, for compatibility
+				await Zotero.DB.queryAsync("INSERT INTO fileTypeMIMETypes VALUES(8, 'application/epub')");
 			}
 			
 			// TEMP: When adding 123, check whether IA.authorName fix in items.js::_loadAnnotations()
