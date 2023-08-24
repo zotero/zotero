@@ -435,9 +435,13 @@ ${str}
 			}
 		};
 
+		let awaitBeforeShowing = [];
+
 		// Activate `preference` attributes
+		// Do not await anything between here and the 'load' event dispatch below! That would cause 'syncfrompreference'
+		// events to be fired before 'load'!
 		for (let elem of container.querySelectorAll('[preference]')) {
-			await attachToPreference(elem);
+			awaitBeforeShowing.push(attachToPreference(elem));
 		}
 		
 		new MutationObserver((mutations) => {
@@ -485,13 +489,13 @@ ${str}
 
 		for (let child of container.children) {
 			let event = new Event('load');
-			let promises = [];
 			event.waitUntil = (promise) => {
-				promises.push(promise);
+				awaitBeforeShowing.push(promise);
 			};
 			child.dispatchEvent(event);
-			await Promise.allSettled(promises);
 		}
+
+		await Promise.allSettled(awaitBeforeShowing);
 
 		// If this is the first pane to be loaded, notify anyone waiting
 		// (for tests)
