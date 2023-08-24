@@ -221,28 +221,27 @@
 
 	class ZoteroSearchCondition extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
-			<xul:hbox id="search-condition" xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-					flex="1">
-				<xul:popupset id="condition-tooltips"/>
+			<html:div class="search-condition">
+				<popupset id="condition-tooltips"/>
 				
-				<xul:menulist id="conditionsmenu" oncommand="this.closest('zoterosearchcondition').onConditionSelected(event.target.value); event.stopPropagation()" native="true">
-					<xul:menupopup onpopupshown="this.closest('zoterosearchcondition').revealSelectedCondition()">
-						<xul:menu id="more-conditions-menu" label="&zotero.general.more;">
-							<xul:menupopup/>
-						</xul:menu>
-					</xul:menupopup>
-				</xul:menulist>
-				<xul:menulist id="operatorsmenu" oncommand="this.closest('zoterosearchcondition').onOperatorSelected(); event.stopPropagation()" native="true">
-					<xul:menupopup/>
-				</xul:menulist>
-				<xul:zoterosearchtextbox id="valuefield" flex="1"/>
-				<xul:menulist id="valuemenu" flex="1" hidden="true" native="true">
-					<xul:menupopup/>
-				</xul:menulist>
-				<xul:zoterosearchagefield id="value-date-age" hidden="true" flex="1"/>
-				<xul:label id="remove" class="zotero-clicky zotero-clicky-minus" value="-" onclick="this.closest('zoterosearchcondition').onRemoveClicked(event)"/>
-				<xul:label id="add" class="zotero-clicky zotero-clicky-plus" value="+" onclick="this.closest('zoterosearchcondition').onAddClicked(event)"/>
-			</xul:hbox>
+				<menulist id="conditionsmenu" oncommand="this.closest('zoterosearchcondition').onConditionSelected(event.target.value); event.stopPropagation()" native="true">
+					<menupopup onpopupshown="this.closest('zoterosearchcondition').revealSelectedCondition()">
+						<menu id="more-conditions-menu" label="&zotero.general.more;">
+							<menupopup/>
+						</menu>
+					</menupopup>
+				</menulist>
+				<menulist id="operatorsmenu" oncommand="this.closest('zoterosearchcondition').onOperatorSelected(); event.stopPropagation()" native="true">
+					<menupopup/>
+				</menulist>
+				<zoterosearchtextbox id="valuefield" class="valuefield"/>
+				<menulist id="valuemenu" class="valuemenu" hidden="true" native="true">
+					<menupopup/>
+				</menulist>
+				<zoterosearchagefield id="value-date-age" class="value-date-age" hidden="true"/>
+				<label id="remove" class="zotero-clicky zotero-clicky-minus" value="-" onclick="this.closest('zoterosearchcondition').onRemoveClicked(event)"/>
+				<label id="add" class="zotero-clicky zotero-clicky-plus" value="+" onclick="this.closest('zoterosearchcondition').onAddClicked(event)"/>
+			</html:div>
 		`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
 
 		init() {
@@ -904,34 +903,32 @@
 
 	class ZoteroSearchAgeField extends XULElementBase {
 		content = MozXULElement.parseXULToFragment(`
-			<xul:hbox id="search-in-the-last" flex="1"
-					xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-					xmlns:html="http://www.w3.org/1999/xhtml">
-				<html:input id="input" style="-moz-box-flex: 1"/>
-				<xul:menulist id="age-list" native="true">
-					<xul:menupopup flex="1">
-						<xul:menuitem label="&zotero.search.date.units.days;" value="days" selected="true"/>
-						<xul:menuitem label="&zotero.search.date.units.months;" value="months"/>
-						<xul:menuitem label="&zotero.search.date.units.years;" value="years"/>
-					</xul:menupopup>
-				</xul:menulist>
-			</xul:hbox>
+			<html:div class="search-in-the-last">
+				<html:input class="input"/>
+				<menulist class="age-list" native="true">
+					<menupopup>
+						<menuitem label="&zotero.search.date.units.days;" value="days" selected="true"/>
+						<menuitem label="&zotero.search.date.units.months;" value="months"/>
+						<menuitem label="&zotero.search.date.units.years;" value="years"/>
+					</menupopup>
+				</menulist>
+			</html:div>
 		`, ['chrome://zotero/locale/zotero.dtd', 'chrome://zotero/locale/searchbox.dtd']);
 
 		get value() {
-			var input = this.querySelector('#input');
-			var menulist = this.querySelector('#age-list');
+			var input = this.querySelector('.input');
+			var menulist = this.querySelector('.age-list');
 			return input.value + ' '
 				+ menulist.firstChild.childNodes[menulist.selectedIndex].getAttribute('value');
 		}
 
 		set value(val) {
-			var input = this.querySelector('#input');
+			var input = this.querySelector('.input');
 
 			var [num, units] = val.split(' ');
 			input.setAttribute('value', num);
 			
-			var menulist = this.querySelector('#age-list');
+			var menulist = this.querySelector('.age-list');
 			var menupopup = menulist.firstChild;
 			
 			var selectThis = 0;

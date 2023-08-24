@@ -6,6 +6,11 @@ zoterosearch {
 	groupbox {
 		margin-top: 0;
 		padding-top: 0;
+
+		& > #conditions {
+			-moz-appearance: groupbox;
+			padding: 6px;
+		}
 	}
 
 	caption {
@@ -22,6 +27,20 @@ zoterosearch {
 		margin-right: .5em;
 	}
 
+	input {
+		margin-block: 0;
+	}
+
+	.search-condition {
+		-moz-box-flex: 1;
+		display: flex;
+		align-items: center;
+
+		.valuefield, .valuemenu, .value-date-age {
+			flex: 1;
+		}
+	}
+	
 	#operatorsmenu {
 		width: 15em;
 	}
@@ -50,8 +69,14 @@ zoterosearch {
 		align-self: center;
 	}
 
-	#search-in-the-last input
-	{
-		min-width: 3em;
+	.search-in-the-last {
+		-moz-box-flex: 1;
+		display: flex;
+		align-items: center;
+		
+		.input {
+			min-width: 3em;
+			flex: 1;
+		}
 	}
 }
