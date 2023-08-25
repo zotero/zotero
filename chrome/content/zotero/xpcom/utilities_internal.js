@@ -415,13 +415,6 @@ Zotero.Utilities.Internal = {
 		const re = /\p{Extended_Pictographic}/gu;
 		return !!str.match(re);
 	},
-
-	extractEmojiForTag: function (str) {
-		// Split by anything that is not an emoji, Zero Width Joiner, or Variation Selector-16
-		// And return first continuous span of emojis
-		const re = /[^\p{Extended_Pictographic}\u200D\uFE0F]+/gu;
-		return str.split(re).filter(Boolean)[0];
-	},
 	
 	/**
 	 * Display a prompt from an error with custom buttons and a callback

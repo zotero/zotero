@@ -222,4 +222,21 @@ describe("Zotero.Tags", function () {
 			]);
 		});
 	});
+
+	describe("#extractEmojiForItemsList()", function () {
+		it("should return first emoji span", function () {
+			assert.equal(Zotero.Tags.extractEmojiForItemsList("🐩🐩🐩  🐩🐩🐩🐩"), "🐩🐩🐩");
+		});
+		it("should return first emoji span when string doesn't start with emoji", function () {
+			assert.equal(Zotero.Tags.extractEmojiForItemsList("./'!@#$ 🐩🐩🐩  🐩🐩🐩🐩"), "🐩🐩🐩");
+		});
+		
+		it("should return first emoji span for text with an emoji with Variation Selector-16", function () {
+			assert.equal(Zotero.Tags.extractEmojiForItemsList("Here are ⭐️⭐️⭐️⭐️⭐️"), "⭐️⭐️⭐️⭐️⭐️");
+		});
+		
+		it("should return first emoji span for text with an emoji made up of multiple characters with ZWJ", function () {
+			assert.equal(Zotero.Tags.extractEmojiForItemsList("We are 👨‍🌾👨‍🌾. And I am a 👨‍🏫."), "👨‍🌾👨‍🌾");
+		});
+	});
 })

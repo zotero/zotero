@@ -85,24 +85,6 @@ describe("Zotero.Utilities.Internal", function () {
 			assert.isFalse(Zotero.Utilities.Internal.containsEmoji("0"));
 		});
 	});
-
-	describe("#extractEmojiForTag()", function () {
-		it("should return first emoji span", function () {
-			assert.equal(Zotero.Utilities.Internal.extractEmojiForTag("🐩🐩🐩  🐩🐩🐩🐩"), "🐩🐩🐩");
-		});
-		it("should return first emoji span when string doesn't start with emoji", function () {
-			assert.equal(Zotero.Utilities.Internal.extractEmojiForTag("./'!@#$ 🐩🐩🐩  🐩🐩🐩🐩"), "🐩🐩🐩");
-		});
-		
-		it("should return first emoji span for text with an emoji with Variation Selector-16", function () {
-			assert.equal(Zotero.Utilities.Internal.extractEmojiForTag("Here are ⭐️⭐️⭐️⭐️⭐️"), "⭐️⭐️⭐️⭐️⭐️");
-		});
-		
-		it("should return first emoji span for text with an emoji made up of multiple characters with ZWJ", function () {
-			assert.equal(Zotero.Utilities.Internal.extractEmojiForTag("We are 👨‍🌾👨‍🌾. And I am a 👨‍🏫."), "👨‍🌾👨‍🌾");
-		});
-	});
-	
 	
 	describe("#delayGenerator", function () {
 		var spy;
