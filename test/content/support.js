@@ -113,14 +113,7 @@ var loadPrefPane = async function (paneName) {
 	var win = await loadWindow("chrome://zotero/content/preferences/preferences.xhtml", {
 		pane: id
 	});
-	var doc = win.document;
-	while (true) {
-		var pane = doc.getElementById(id);
-		if (pane) {
-			break;
-		}
-		await delay(1);
-	}
+	await win.Zotero_Preferences.waitForFirstPaneLoad();
 	return win;
 };
 

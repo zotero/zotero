@@ -31,11 +31,11 @@ var VirtualizedTable = require('components/virtualized-table');
 var { makeRowRenderer } = VirtualizedTable;
 
 Zotero_Preferences.Export = {
-	init: Zotero.Promise.coroutine(function* () {
+	init: async function () {
 		this.updateQuickCopyInstructions();
-		yield this.populateQuickCopyList();
-		yield this.populateNoteQuickCopyList();
-	}),
+		await this.populateQuickCopyList();
+		await this.populateNoteQuickCopyList();
+	},
 	
 	
 	getQuickCopyTranslators: async function () {
