@@ -368,7 +368,7 @@
 					if (event.button) {
 						return;
 					}
-					this.clickHandler(event.target, 1, valueText);
+					this.clickHandler(event.target, false, valueText);
 				}, false);
 				valueElement.className += ' zotero-clicky';
 			}
@@ -398,7 +398,7 @@
 			return valueElement;
 		}
 
-		showEditor(elem, rows, value) {
+		showEditor(elem, multiline, value) {
 
 			// Blur any active fields
 			/*
@@ -414,7 +414,7 @@
 
 			var itemID = this._item.id;
 
-			var t = document.createElement(rows > 1 ? 'textarea' : 'input', { is: 'shadow-autocomplete-input' });
+			var t = document.createElement(multiline ? 'textarea' : 'input', { is: 'shadow-autocomplete-input' });
 			t.setAttribute('class', 'editable');
 			t.setAttribute('value', value);
 			t.setAttribute('fieldname', fieldName);
@@ -422,8 +422,8 @@
 			t.setAttribute('ignoreblurwhilesearching', 'true');
 			t.setAttribute('autocompletepopup', 'PopupAutoComplete');
 			// Multi-line
-			if (rows > 1) {
-				t.setAttribute('rows', rows);
+			if (multiline) {
+				t.setAttribute('rows', 6);
 			}
 			// Add auto-complete
 			else {
@@ -526,14 +526,9 @@
 					// Reset field to original value
 					target.value = target.getAttribute('value');
 
-					var tagsbox = focused.closest('.editable');
-
 					this._lastTabIndex = false;
 					await this.blurHandler(event);
 
-					if (tagsbox) {
-						tagsbox.closePopup();
-					}
 
 					// TODO: Return focus to items pane
 					var tree = document.getElementById('zotero-items-tree');
@@ -576,13 +571,9 @@
 			}
 		};
 
-		makeMultiline(textbox, value, rows) {
+		makeMultiline(textbox, value) {
 			textbox.parentNode.classList.add('multiline');
-			// If rows not specified, use one more than lines in input
-			if (!rows) {
-				rows = value.match(/\n/g).length + 1;
-			}
-			textbox = this.showEditor(textbox, rows, textbox.getAttribute('value'));
+			textbox = this.showEditor(textbox, true, textbox.getAttribute('value'));
 			textbox.value = value;
 			// Move cursor to end
 			textbox.selectionStart = value.length;
@@ -602,6 +593,8 @@
 				return;
 			}
 
+			// Make sure the multiline mode is off
+			textbox.parentNode.classList.remove('multiline');
 			var row = textbox.parentNode;
 
 			var isNew = row.getAttribute('isNew');
@@ -620,14 +613,21 @@
 
 			var tags = value.split(/\r\n?|\n/).map(val => val.trim()).filter(x => x);
 
+			const shiftEnter = event.keyCode == event.DOM_VK_RETURN && event.shiftKey;
+
 			// Modifying existing tag with a single new one
 			if (!isNew && tags.length < 2) {
 				if (value !== "") {
 					if (oldValue !== value) {
+						var lastTag = row == row.parentNode.lastChild;
+						var childCount = row.parentNode.childElementCount;
 						// The existing textbox will be removed in notify()
 						this.removeRow(row);
 						this.add(value);
 						if (event.type != 'blur') {
+							if (lastTag) {
+								this._lastTabIndex = childCount + 1;
+							}
 							this._focusField();
 						}
 						try {
@@ -678,14 +678,19 @@
 				await this.item.saveTx();
 
 				if (lastTag) {
-					this._lastTabIndex = this.item.getTags().length;
+					this._lastTabIndex = null;
+				}
+				// If multiple tags are added from new multiline field,
+				// keep focus on new inputfield after refresh
+				if (isNew && shiftEnter) {
+					this._lastTabIndex = this.item.getTags().length + 1;
 				}
 
 				this.reload();
 			}
 			// Single tag at end
 			else {
-				if (event.type == 'blur') {
+				if (event.type == 'blur' || shiftEnter) {
 					this.removeRow(row);
 				}
 				else {
@@ -695,6 +700,12 @@
 				this.item.addTag(value);
 				try {
 					await this.item.saveTx();
+					// If single tag is added from new multiline textfiled
+					// keep the focus on it
+					if (shiftEnter) {
+						this._lastTabIndex = this.item.getTags().length + 1;
+						this._focusField();
+					}
 				}
 				catch (e) {
 					this.reload();
@@ -857,11 +868,6 @@
 			this.count = count;
 		}
 
-		closePopup() {
-			if (this.parentNode.hidePopup) {
-				this.parentNode.hidePopup();
-			}
-		}
 
 		// Open the textbox for a particular label
 		//
@@ -903,8 +909,7 @@
 			Zotero.debug('Looking for tabindex ' + nextIndex, 4);
 
 			var next = this.querySelector(`[ztabindex="${nextIndex}"]`);
-			if (next.length) {
-				next = next[0];
+			if (next) {
 				next.click();
 			}
 			else {
