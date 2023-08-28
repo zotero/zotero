@@ -469,7 +469,6 @@
 			}
 			if (this.showTypeMenu) {
 				this.updateItemTypeMenuSelection();
-				this.itemTypeMenu.parentNode.parentNode.style.display = 'contents';
 				this.itemTypeMenu.setAttribute('ztabindex', '0');
 			}
 			else {
@@ -901,7 +900,6 @@
 				th.appendChild(span);
 				th.setAttribute('ztabindex', tabindex);
 				th.setAttribute('role', 'button');
-				th.setAttribute('aria-describedby', 'creator-type-label-inner');
 				th.addEventListener('click', () => {
 					document.popupNode = th;
 					this._creatorTypeMenu.openPopup(th);
@@ -912,9 +910,9 @@
 			}
 			
 			var label = document.createElement("label");
-			label.setAttribute('id', 'creator-type-label-inner');
 			label.className = 'key';
 			label.textContent = Zotero.getString('creatorTypes.' + Zotero.CreatorTypes.getName(typeID));
+			th.setAttribute('aria-label', label.textContent);
 			th.appendChild(label);
 			
 			var td = document.createElement("td");
@@ -1483,10 +1481,10 @@
 			
 			// Regardless, align the text in the label consistently, following the locale's direction
 			if (Zotero.rtl) {
-				valueElement.style.textAlign = 'right';
+				valueElement.style.direction = 'rtl';
 			}
 			else {
-				valueElement.style.textAlign = 'left';
+				valueElement.style.direction = 'ltr';
 			}
 
 			if (isMultiline) {
@@ -1938,8 +1936,10 @@
 						this._focusNextField(this._lastTabIndex, true);
 					}
 					else {
-						// If on the last field, allow default tab action
+						// If on the last field, move to "New Collection" tool bar button
 						if (this._lastTabIndex == this._tabIndexMaxFields) {
+							focused.blur();
+							document.getElementById("menu_newCollection").focus();
 							return;
 						}
 						this._focusNextField(this._lastTabIndex + 1);
@@ -2359,7 +2359,7 @@
 		_focusNextField(tabindex, back) {
 			var box = this._infoTable;
 			tabindex = parseInt(tabindex);
-			
+
 			// Get all fields with ztabindex attributes
 			var tabbableFields = box.querySelectorAll('*[ztabindex]:not([disabled=true])');
 			
