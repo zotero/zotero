@@ -1742,6 +1742,46 @@ describe("Zotero.Item", function () {
 			assert.sameDeepMembers(tags, [{ tag: 'a' }, { tag: 'b' }]);
 		})
 	})
+
+	describe("#getItemsListTags", function() {
+		it("should return tags with emojis after colored tags", async function () {
+			var tags = [
+				{
+					tag: "⭐️⭐️"
+				},
+				{
+					tag: "👲"
+				},
+				{
+					tag: "colored tag one"
+				},
+				{
+					tag: "😀"
+				},
+				{
+					tag: "colored tag two"
+				}
+			];
+			await Zotero.Tags.setColor(Zotero.Libraries.userLibraryID, "colored tag one", "#990000");
+			await Zotero.Tags.setColor(Zotero.Libraries.userLibraryID, "colored tag two", "#FF6666");
+
+			var item = new Zotero.Item('journalArticle');
+			item.setTags(tags);
+			await item.saveTx();
+
+			const itemListTags = item.getItemsListTags();
+			const expected = [
+				{ tag: "colored tag one", color: "#990000" },
+				{ tag: "colored tag two", color: "#FF6666" },
+				{ tag: "⭐️⭐️", color: null },
+				{ tag: "👲", color: null },
+				{ tag: "😀", color: null },
+			];
+			for (let i = 0; i < 5; i++) {
+				assert.deepEqual(itemListTags[i], expected[i]);
+			}
+		});
+	});
 	
 	//
 	// Relations and related items

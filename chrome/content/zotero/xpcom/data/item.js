@@ -4380,31 +4380,36 @@ Zotero.Item.prototype.getImageSrc = function() {
 
 
 Zotero.Item.prototype.getTagColors = function () {
-	Zotero.warn("Zotero.Item::getTagColors() is deprecated -- use Zotero.Item::getColoredTags()");
-	return this.getColoredTags().map(x => x.color);
+	Zotero.warn("Zotero.Item::getTagColors() is deprecated -- use Zotero.Item::getItemsListTags()");
+	return this.getItemsListTags().filter(x => x.color).map(x => x.color);
 };
 
 
 /**
- * Return tags and colors
+ * Return tags with assigned colors and tags that contain emojis
  *
  * @return {Object[]} - Array of object with 'tag' and 'color' properties
  */
-Zotero.Item.prototype.getColoredTags = function () {
+Zotero.Item.prototype.getItemsListTags = function () {
 	var tags = this.getTags();
 	if (!tags.length) return [];
 	
 	let colorData = [];
+	let tagsWithEmojis = [];
 	let tagColors = Zotero.Tags.getColors(this.libraryID);
 	for (let tag of tags) {
 		let data = tagColors.get(tag.tag);
 		let containsEmoji = Zotero.Utilities.Internal.containsEmoji(tag.tag);
-		// Include tags that contain emojis even if they are not assigned a color
-		if (data || containsEmoji) {
-			colorData.push({tag: tag.tag, ...data});
+		if (data) {
+			colorData.push({ tag: tag.tag, ...data });
+		}
+		else if (containsEmoji) {
+			tagsWithEmojis.push({ tag: tag.tag });
 		}
 	}
-	return colorData.sort((a, b) => a.position - b.position).map(x => ({ tag: x.tag, color: x.color }));
+	// Sort colored tags by their position and add tags with emojis in the end.
+	const coloredTagsWithEmojis = colorData.sort((a, b) => a.position - b.position).concat(tagsWithEmojis);
+	return coloredTagsWithEmojis.map(x => ({ tag: x.tag, color: x.color || null }));
 };
 
 

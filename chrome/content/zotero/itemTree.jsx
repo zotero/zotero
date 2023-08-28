@@ -2712,11 +2712,12 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 		let tagAriaLabel = '';
 		let tagSpans = '';
-		let coloredTags = item.getColoredTags();
-		if (coloredTags.length) {
-			tagSpans = coloredTags.map(x => this._getTagSwatch(x.tag, x.color));
+		// Tags with assigned color or with emojis
+		let itemListTags = item.getItemsListTags();
+		if (itemListTags.length) {
+			tagSpans = itemListTags.map(x => this._getTagSwatch(x.tag, x.color));
 			tagAriaLabel = tagSpans.length == 1 ? Zotero.getString('searchConditions.tag') : Zotero.getString('itemFields.tags');
-			tagAriaLabel += ' ' + coloredTags.map(x => x.tag).join(', ') + '.';
+			tagAriaLabel += ' ' + itemListTags.map(x => x.tag).join(', ') + '.';
 		}
 
 		let itemTypeAriaLabel;
@@ -3821,12 +3822,13 @@ var ItemTree = class ItemTree extends LibraryTree {
 	_getTagSwatch(tag, color) {
 		let span = document.createElement('span');
 		span.className = 'tag-swatch';
+		const extractedEmojis = Zotero.Tags.extractEmojiForItemsList(tag);
 		// If contains emojis, display directly
 		//
 		// TODO: Check for a maximum number of graphemes, which is hard to do
 		// https://stackoverflow.com/a/54369605
-		if (Zotero.Utilities.Internal.containsEmoji(tag)) {
-			span.textContent = Zotero.Tags.extractEmojiForItemsList(tag);
+		if (extractedEmojis) {
+			span.textContent = extractedEmojis;
 		}
 		// Otherwise display color
 		else {
