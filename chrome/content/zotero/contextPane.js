@@ -916,6 +916,7 @@ var ZoteroContextPane = new function () {
 		// tabbox
 		var tabbox = document.createXULElement('tabbox');
 		tabbox.setAttribute('flex', '1');
+		tabbox.setAttribute('role', 'tablist');
 		tabbox.className = 'zotero-view-tabbox';
 
 		container.append(tabbox);
@@ -948,6 +949,7 @@ var ZoteroContextPane = new function () {
 		var panelInfo = document.createXULElement('tabpanel');
 		panelInfo.setAttribute('flex', '1');
 		panelInfo.className = 'zotero-editpane-item-box';
+		panelInfo.setAttribute("role", "tabpanel");
 		var itemBox = new (customElements.get('item-box'));
 		itemBox.setAttribute('flex', '1');
 		panelInfo.append(itemBox);

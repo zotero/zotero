@@ -94,7 +94,7 @@
 					</div>
 					<table id="info-table">
 						<tr>
-							<th><label class="key">&zotero.items.itemType;</label></th>
+							<th><label class="key" id="itembox-field-itemType-label" >&zotero.items.itemType;</label></th>
 						</tr>
 					</table>
 				</div>
@@ -589,6 +589,7 @@
 					let label = document.createElement('label');
 					label.className = 'key';
 					label.textContent = prefix + Zotero.ItemFields.getLocalizedString(fieldName);
+					label.setAttribute("id", `itembox-field-${fieldName}-label`);
 					th.appendChild(label);
 				}
 				
@@ -822,6 +823,7 @@
 					this.itemTypeMenuTab(event);
 				}
 			});
+			menulist.setAttribute("aria-labelledby", "itembox-field-itemType-label");
 			td.appendChild(menulist);
 			this._infoTable.firstChild.appendChild(td);
 		}
@@ -1057,6 +1059,7 @@
 			var label = document.createElement('label');
 			label.className = 'key';
 			label.textContent = Zotero.ItemFields.getLocalizedString(field);
+			label.setAttribute("id", `itembox-field-${field}-label`);
 			th.appendChild(label);
 			
 			var td = document.createElement('td');
@@ -1716,6 +1719,7 @@
 			t.style.mozBoxFlex = 1;
 			t.setAttribute('fieldname', fieldName);
 			t.setAttribute('ztabindex', tabindex);
+			t.setAttribute('aria-labelledby', `itembox-field-${fieldName}-label`);
 			// We set dir in createValueElement(), so figure out what it was computed as
 			// and then propagate to the new text field
 			t.dir = getComputedStyle(elem).direction;
@@ -1938,7 +1942,7 @@
 						if (this._lastTabIndex == this._tabIndexMaxFields) {
 							return;
 						}
-						this._focusNextField(++this._lastTabIndex);
+						this._focusNextField(this._lastTabIndex + 1);
 					}
 			}
 		}
@@ -2371,6 +2375,7 @@
 					let field = tabbableFields[i];
 					let tabIndexHere = parseInt(field.getAttribute('ztabindex'));
 					if (tabIndexHere !== -1 && tabIndexHere < tabindex) {
+						this._lastTabIndex = i;
 						next = tabbableFields[i];
 						break;
 					}
@@ -2382,6 +2387,7 @@
 					let field = tabbableFields[pos];
 					let tabIndexHere = parseInt(field.getAttribute('ztabindex'));
 					if (tabIndexHere !== -1 && tabIndexHere >= tabindex) {
+						this._lastTabIndex = pos;
 						next = tabbableFields[pos];
 						break;
 					}

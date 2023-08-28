@@ -729,7 +729,7 @@
 							<button id="zotero-tb-toggle-notes-pane" class="toolbarButton notes" title="&zotero.toolbar.context.notes;" tabindex="-1"><span/></button>
 						</div>
 					</div>
-					<deck id="tabs-deck" flex="1">
+					<deck id="tabs-deck" flex="1" aria-role="tablist">
 						<vbox id="zotero-pane"
 							onkeydown="ZoteroPane_Local.handleKeyDown(event, this.id)"
 							onkeyup="ZoteroPane_Local.handleKeyUp(event, this.id)"
@@ -1090,26 +1090,26 @@
 												Keep in sync with contextPane.js (_addItemContext function) which
 												dynamically creates this itemPane part for each tab
 											-->
-											<tabbox id="zotero-view-tabbox" class="zotero-view-tabbox" flex="1" onselect="if (!ZoteroPane_Local.getCollectionTreeRow() || event.originalTarget.localName != 'tabpanels') { return; }; ZoteroItemPane.viewItem(ZoteroPane_Local.getSelectedItems()[0], ZoteroPane_Local.collectionsView.editable ? 'edit' : 'view', this.selectedIndex)">
+											<tabbox id="zotero-view-tabbox" role="tablist"  class="zotero-view-tabbox" flex="1" onselect="if (!ZoteroPane_Local.getCollectionTreeRow() || event.originalTarget.localName != 'tabpanels') { return; }; ZoteroItemPane.viewItem(ZoteroPane_Local.getSelectedItems()[0], ZoteroPane_Local.collectionsView.editable ? 'edit' : 'view', this.selectedIndex)">
 												<tabs id="zotero-editpane-tabs" class="zotero-editpane-tabs">
-													<tab id="zotero-editpane-info-tab" label="&zotero.tabs.info.label;"/>
-													<tab id="zotero-editpane-notes-tab" label="&zotero.tabs.notes.label;"/>
-													<tab id="zotero-editpane-tags-tab" label="&zotero.tabs.tags.label;"/>
-													<tab id="zotero-editpane-related-tab" label="&zotero.tabs.related.label;"/>
+													<tab id="zotero-editpane-info-tab" role="tab" label="&zotero.tabs.info.label;"/>
+													<tab id="zotero-editpane-notes-tab" role="tab" label="&zotero.tabs.notes.label;"/>
+													<tab id="zotero-editpane-tags-tab" role="tab" label="&zotero.tabs.tags.label;"/>
+													<tab id="zotero-editpane-related-tab" role="tab" label="&zotero.tabs.related.label;"/>
 												</tabs>
 												<tabpanels id="zotero-view-item" class="zotero-view-item" flex="1">
-													<tabpanel id="item-box-container"/>
+													<tabpanel id="item-box-container" role="tabpanel" aria-labelledby="zotero-editpane-info-tab"/>
 													
 													<tabpanel>
-														<notes-box id="zotero-editpane-notes" class="zotero-editpane-notes" flex="1"/>
+														<notes-box id="zotero-editpane-notes" class="zotero-editpane-notes" flex="1" role="tabpanel" aria-labelledby="zotero-editpane-notes-tab"/>
 													</tabpanel>
 													
 													<tabpanel>
-														<tags-box id="zotero-editpane-tags" class="zotero-editpane-tags" flex="1"/>
+														<tags-box id="zotero-editpane-tags" class="zotero-editpane-tags" flex="1" role="tabpanel" aria-labelledby="zotero-editpane-tags-tab"/>
 													</tabpanel>
 													
 													<tabpanel>
-														<related-box id="zotero-editpane-related" class="zotero-editpane-related" flex="1"/>
+														<related-box id="zotero-editpane-related" class="zotero-editpane-related" flex="1" role="tabpanel" aria-labelledby="zotero-editpane-related-tab"/>
 													</tabpanel>
 												</tabpanels>
 											</tabbox>
