@@ -14,25 +14,14 @@ item-box {
 	}
 
 	#info-table {
-		display: grid;
-		grid-template-columns: max-content 1fr;
-		// Make sure rows are at least --row-height tall, but no taller than their tallest child
-		// This lets rows expand for multi-line editors
-		grid-auto-rows: minmax(var(--row-height), max-content);
-		align-items: center;
 		width: 100%;
-	}
-
-	tr {
-		display: contents;
+		table-layout: fixed;
 	}
 
 	td {
-		display: flex;
 		min-width: 0;
-		align-self: stretch;
-		align-items: center;
-		margin-inline-end: 5px;
+		padding-inline-end: 5px;
+		display: flex;
 	}
 
 	td > input, .creator-name-box > input {
@@ -64,7 +53,6 @@ item-box {
 	.value {
 		min-height: 14px;
 		align-self: center;
-		padding-inline: 2px;
 	}
 
 	.value:not(.multiline) {
@@ -133,11 +121,11 @@ item-box {
 
 	/* metadata field names */
 	th {
-		display: flex;
+		width: 100px;
+		text-align: end;
+		vertical-align: top;
+		padding-top: 2px;
 		height: var(--row-height);
-		align-self: start;
-		align-items: center;
-		justify-content: end;
 		font-weight: normal;
 		margin-inline-start: 5px !important;
 		margin-inline-end: 0 !important;
@@ -186,7 +174,7 @@ item-box {
 
 		& > div:first-child[fieldMode="0"] {
 			// Cancel out padding before comma
-			margin-inline-end: -3px;
+			margin-inline-end: -1px;
 		}
 	}
 
