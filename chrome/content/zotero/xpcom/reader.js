@@ -89,6 +89,7 @@ class ReaderInstance {
 	async focus() {
 		await this._waitForReader();
 		this._iframeWindow.focus();
+		this._internalReader?.focus();
 	}
 
 	getSecondViewState() {
