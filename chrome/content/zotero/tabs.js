@@ -156,6 +156,7 @@ var Zotero_Tabs = new function () {
 							null,
 							{
 								title: tab.title,
+								tabIndex: i,
 								openInBackground: !tab.selected,
 								secondViewState: tab.data.secondViewState
 							}
