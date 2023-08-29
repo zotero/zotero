@@ -412,7 +412,7 @@ Zotero.Utilities.Internal = {
 	},
 	
 	containsEmoji: function (str) {
-		const re = /\p{Extended_Pictographic}/gu;
+		let re = /\p{Extended_Pictographic}/gu;
 		return !!str.match(re);
 	},
 	

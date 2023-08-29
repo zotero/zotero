@@ -1769,8 +1769,8 @@ describe("Zotero.Item", function () {
 			item.setTags(tags);
 			await item.saveTx();
 
-			const itemListTags = item.getItemsListTags();
-			const expected = [
+			var itemListTags = item.getItemsListTags();
+			var expected = [
 				{ tag: "colored tag one", color: "#990000" },
 				{ tag: "colored tag two", color: "#FF6666" },
 				{ tag: "⭐️⭐️", color: null },

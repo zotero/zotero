@@ -3822,7 +3822,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 	_getTagSwatch(tag, color) {
 		let span = document.createElement('span');
 		span.className = 'tag-swatch';
-		const extractedEmojis = Zotero.Tags.extractEmojiForItemsList(tag);
+		let extractedEmojis = Zotero.Tags.extractEmojiForItemsList(tag);
 		// If contains emojis, display directly
 		//
 		// TODO: Check for a maximum number of graphemes, which is hard to do

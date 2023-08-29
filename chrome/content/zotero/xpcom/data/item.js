@@ -4379,12 +4379,6 @@ Zotero.Item.prototype.getImageSrc = function() {
 }
 
 
-Zotero.Item.prototype.getTagColors = function () {
-	Zotero.warn("Zotero.Item::getTagColors() is deprecated -- use Zotero.Item::getItemsListTags()");
-	return this.getItemsListTags().filter(x => x.color).map(x => x.color);
-};
-
-
 /**
  * Return tags with assigned colors and tags that contain emojis
  *
@@ -4407,8 +4401,11 @@ Zotero.Item.prototype.getItemsListTags = function () {
 			tagsWithEmojis.push({ tag: tag.tag });
 		}
 	}
+	// Sort tags with emojis so they show up in the same order as in tagsBox
+	let collation = Zotero.getLocaleCollation();
+	tagsWithEmojis.sort((a, b) => collation.compareString(1, a.tag, b.tag));
 	// Sort colored tags by their position and add tags with emojis in the end.
-	const coloredTagsWithEmojis = colorData.sort((a, b) => a.position - b.position).concat(tagsWithEmojis);
+	let coloredTagsWithEmojis = colorData.sort((a, b) => a.position - b.position).concat(tagsWithEmojis);
 	return coloredTagsWithEmojis.map(x => ({ tag: x.tag, color: x.color || null }));
 };
 
