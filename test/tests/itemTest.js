@@ -1747,19 +1747,22 @@ describe("Zotero.Item", function () {
 		it("should return tags with emojis after colored tags", async function () {
 			var tags = [
 				{
-					tag: "⭐️⭐️"
+					tag: "BBB ⭐️⭐️"
 				},
 				{
-					tag: "👲"
+					tag: "ZZZ 👲"
+				},
+				{
+					tag: "colored tag two"
+				},
+				{
+					tag: "AAA 😀"
 				},
 				{
 					tag: "colored tag one"
 				},
 				{
-					tag: "😀"
-				},
-				{
-					tag: "colored tag two"
+					tag: "not included"
 				}
 			];
 			await Zotero.Tags.setColor(Zotero.Libraries.userLibraryID, "colored tag one", "#990000");
@@ -1773,9 +1776,9 @@ describe("Zotero.Item", function () {
 			var expected = [
 				{ tag: "colored tag one", color: "#990000" },
 				{ tag: "colored tag two", color: "#FF6666" },
-				{ tag: "⭐️⭐️", color: null },
-				{ tag: "👲", color: null },
-				{ tag: "😀", color: null },
+				{ tag: "AAA 😀", color: null },
+				{ tag: "BBB ⭐️⭐️", color: null },
+				{ tag: "ZZZ 👲", color: null },
 			];
 			for (let i = 0; i < 5; i++) {
 				assert.deepEqual(itemListTags[i], expected[i]);

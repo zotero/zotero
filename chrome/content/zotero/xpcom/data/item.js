@@ -4388,25 +4388,17 @@ Zotero.Item.prototype.getItemsListTags = function () {
 	var tags = this.getTags();
 	if (!tags.length) return [];
 	
-	let colorData = [];
-	let tagsWithEmojis = [];
 	let tagColors = Zotero.Tags.getColors(this.libraryID);
+	let colorOrEmojiTags = [];
 	for (let tag of tags) {
 		let data = tagColors.get(tag.tag);
 		let containsEmoji = Zotero.Utilities.Internal.containsEmoji(tag.tag);
-		if (data) {
-			colorData.push({ tag: tag.tag, ...data });
-		}
-		else if (containsEmoji) {
-			tagsWithEmojis.push({ tag: tag.tag });
+		if (data || containsEmoji) {
+			colorOrEmojiTags.push({ tag: tag.tag, ...data });
 		}
 	}
-	// Sort tags with emojis so they show up in the same order as in tagsBox
-	let collation = Zotero.getLocaleCollation();
-	tagsWithEmojis.sort((a, b) => collation.compareString(1, a.tag, b.tag));
-	// Sort colored tags by their position and add tags with emojis in the end.
-	let coloredTagsWithEmojis = colorData.sort((a, b) => a.position - b.position).concat(tagsWithEmojis);
-	return coloredTagsWithEmojis.map(x => ({ tag: x.tag, color: x.color || null }));
+	colorOrEmojiTags.sort((a, b) => Zotero.Tags.compareTagsOrder(this.libraryID, a.tag, b.tag));
+	return colorOrEmojiTags.map(x => ({ tag: x.tag, color: x.color || null }));
 };
 
 

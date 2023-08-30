@@ -953,6 +953,26 @@ Zotero.Tags = new function() {
 		let re = /[^\p{Extended_Pictographic}\u200D\uFE0F]+/gu;
 		return str.split(re).filter(Boolean)[0] || null;
 	};
+
+	// Used as parameter for .sort() method on an array of tags
+	// Orders colored tags first by their position
+	// And then all other tags - alphabetically
+	this.compareTagsOrder = function (libraryID, tagA, tagB) {
+		var collation = Zotero.getLocaleCollation();
+		let tagColors = this.getColors(libraryID);
+		let colorForA = tagColors.get(tagA);
+		let colorForB = tagColors.get(tagB);
+		if (colorForA && !colorForB) {
+			return -1;
+		}
+		if (!colorForA && colorForB) {
+			return 1;
+		}
+		if (colorForA && colorForB) {
+			return colorForA.position - colorForB.position;
+		}
+		return collation.compareString(1, tagA, tagB);
+	};
 	
 	/**
 	 * Compare two API JSON tag objects
