@@ -136,6 +136,8 @@ Zotero.Dictionaries = new function () {
 			}
 
 			zipReader.close();
+			zipReader = null
+			Cu.forceGC();
 			await OS.File.remove(xpiPath);
 			await _loadDirectory(dir);
 		}

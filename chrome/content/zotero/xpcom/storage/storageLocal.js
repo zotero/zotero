@@ -794,6 +794,8 @@ Zotero.Sync.Storage.Local = {
 		catch (e) {
 			Zotero.debug(zipFile.leafName + " is not a valid ZIP file", 2);
 			zipReader.close();
+			zipReader = null
+			Cu.forceGC();
 			
 			try {
 				zipFile.remove(false);
@@ -813,6 +815,8 @@ Zotero.Sync.Storage.Local = {
 		}
 		catch (e) {
 			zipReader.close();
+			zipReader = null
+			Cu.forceGC();
 			throw e;
 		}
 		
@@ -900,6 +904,8 @@ Zotero.Sync.Storage.Local = {
 				Zotero.logError(e);
 				
 				zipReader.close();
+				zipReader = null
+				Cu.forceGC();
 				
 				Zotero.File.checkFileAccessError(e, destPath, 'create');
 			}
@@ -914,6 +920,9 @@ Zotero.Sync.Storage.Local = {
 					}
 					catch (e) {}
 					zipReader.close();
+					zipReader = null
+					Cu.forceGC();
+					
 					// TODO: localize
 					var msg = "Due to a Windows path length limitation, your Zotero data directory "
 						+ "is too deep in the filesystem for syncing to work reliably. "
@@ -950,6 +959,8 @@ Zotero.Sync.Storage.Local = {
 				}
 				
 				zipReader.close();
+				zipReader = null
+				Cu.forceGC();
 				
 				Zotero.File.checkFileAccessError(e, destPath, 'create');
 			}
@@ -962,6 +973,9 @@ Zotero.Sync.Storage.Local = {
 			}
 		}
 		zipReader.close();
+		zipReader = null
+		Cu.forceGC();
+		
 		zipFile.remove(false);
 		
 		return returnFile;

@@ -56,6 +56,8 @@ class EPUB {
 
 	close() {
 		this._zipReader.close();
+		this._zipReader = null
+		Cu.forceGC();
 	}
 
 	async* getSectionDocuments() {
