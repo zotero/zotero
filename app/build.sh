@@ -219,15 +219,15 @@ cd "$app_dir"
 set +e
 if [ $BUILD_MAC == 1 ]; then
 	cp -Rp "$MAC_RUNTIME_PATH"/Contents/Resources/browser/omni "$app_dir"
-  unzip -qj "$MAC_RUNTIME_PATH"/Contents/Resources/omni.ja "hyphenation/*" -d "$app_dir"/hyphenation/
+	unzip -qj "$MAC_RUNTIME_PATH"/Contents/Resources/omni.ja "hyphenation/*" -d "$app_dir"/hyphenation/
 elif [ $BUILD_WIN == 1 ]; then
 	# Non-arch-specific files, so just use 64-bit version
 	cp -Rp "${WIN_RUNTIME_PATH_PREFIX}win-x64"/browser/omni "$app_dir"
-  unzip -qj "${WIN_RUNTIME_PATH_PREFIX}win-x64"/omni.ja "hyphenation/*" -d "$app_dir"/hyphenation/
+	unzip -qj "${WIN_RUNTIME_PATH_PREFIX}win-x64"/omni.ja "hyphenation/*" -d "$app_dir"/hyphenation/
 elif [ $BUILD_LINUX == 1 ]; then
 	# Non-arch-specific files, so just use 64-bit version
 	cp -Rp "${LINUX_RUNTIME_PATH_PREFIX}x86_64"/browser/omni "$app_dir"
-  unzip -qj "${LINUX_RUNTIME_PATH_PREFIX}x86_64"/omni.ja "hyphenation/*" -d "$app_dir"/hyphenation/
+	unzip -qj "${LINUX_RUNTIME_PATH_PREFIX}x86_64"/omni.ja "hyphenation/*" -d "$app_dir"/hyphenation/
 fi
 set -e
 cd $omni_dir
