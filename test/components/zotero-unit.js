@@ -24,7 +24,6 @@
     ***** END LICENSE BLOCK *****
 */
 Components.utils.import("resource://gre/modules/ComponentUtils.jsm");
-const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 function ZoteroUnit() {
 	this.wrappedJSObject = this;
@@ -32,8 +31,8 @@ function ZoteroUnit() {
 ZoteroUnit.prototype = {
 	/* nsICommandLineHandler */
 	handle:function(cmdLine) {
-		this.tests = cmdLine.handleFlagWithParam("test", false);
-		this.noquit = cmdLine.handleFlag("noquit", false);
+        this.tests = cmdLine.handleFlagWithParam("test", false);
+        this.noquit = cmdLine.handleFlag("noquit", false);
 		this.makeTestData = cmdLine.handleFlag("makeTestData", false);
 		this.noquit = !this.makeTestData && this.noquit;
 		this.runTests = !this.makeTestData;
@@ -42,27 +41,19 @@ ZoteroUnit.prototype = {
 		this.stopAt = cmdLine.handleFlagWithParam("stopAtTestFile", false);
 		this.grep = cmdLine.handleFlagWithParam("grep", false);
 		this.timeout = cmdLine.handleFlagWithParam("ZoteroTestTimeout", false);
-		
-		if (this.tests) {
-			Services.ww.openWindow(
-				null,
-				"chrome://zotero-unit/content/runtests.html",
-				"_blank",
-				"chrome,dialog=no,all",
-				Cc["@mozilla.org/array;1"].createInstance(Ci.nsIMutableArray)
-			);
-			cmdLine.preventDefault = true;
-		}
 	},
 
 	dump:function(x) {
 		dump(x);
 	},
 	
+	contractID: "@mozilla.org/commandlinehandler/general-startup;1?type=zotero-unit",
+	classDescription: "Zotero Unit Command Line Handler",
 	classID: Components.ID("{b8570031-be5e-46e8-9785-38cd50a5d911}"),
 	service: true,
 	_xpcom_categories: [{category:"command-line-handler", entry:"m-zotero-unit"}],
 	QueryInterface: ChromeUtils.generateQI([Components.interfaces.nsICommandLineHandler])
 };
+
 
 var NSGetFactory = ComponentUtils.generateNSGetFactory([ZoteroUnit]);
