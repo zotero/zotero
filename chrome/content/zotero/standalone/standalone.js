@@ -961,6 +961,15 @@ function toJavaScriptConsole() {
 	BrowserConsoleManager.openBrowserConsoleOrFocus();
 }
 
+function launchBrowserToolbox() {
+	const { BrowserToolboxLauncher } = ChromeUtils.import("resource://devtools/client/framework/browser-toolbox/Launcher.jsm");
+	// Don't launch if already open
+	// (Can we focus the existing toolbox process?)
+	if (!BrowserToolboxLauncher.getBrowserToolboxSessionState()) {
+		BrowserToolboxLauncher.init();
+	}
+}
+
 function openRunJSWindow() {
 	openWindowByType(
 		'chrome://zotero/content/runJS.html',
