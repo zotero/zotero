@@ -961,7 +961,7 @@ function toJavaScriptConsole() {
 	BrowserConsoleManager.openBrowserConsoleOrFocus();
 }
 
-function launchBrowserToolbox() {
+function launchDeveloperToolbox() {
 	const { BrowserToolboxLauncher } = ChromeUtils.import("resource://devtools/client/framework/browser-toolbox/Launcher.jsm");
 	// Don't launch if already open
 	// (Can we focus the existing toolbox process?)
