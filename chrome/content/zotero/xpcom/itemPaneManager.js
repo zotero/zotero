@@ -54,6 +54,12 @@ class ItemPaneManager {
 	_customPanes = {};
 
 	/**
+	 * A flag to indicate if the pane in reader of no-parent item should be updated
+	 * @type {boolean}
+	 */
+	_requireReloadOrphanReaderPanes = false;
+
+	/**
 	 * Register a custom item pane.
 	 * @param {ItemPaneCustomPaneOptions | ItemPaneCustomPaneOptions[]} options - Options for the item pane manager
 	 * @returns {string | string[] | false} - The id(s) of the added pane(s) or false if no panes were added
@@ -368,6 +374,15 @@ class ItemPaneManager {
 	}
 
 	/**
+	 * Check if there are any panes registered as the given mode
+	 * @param {PaneMode | PaneMode[]} modes - The pane mode(s) to check
+	 * @returns {boolean} - True if there are any panes registered as the given mode
+	 */
+	hasCustomPaneOfMode(modes) {
+		return this._getCustomPaneOptionsByMode(modes).length > 0;
+	}
+
+	/**
 	 * Get panes that matches the pluginID
 	 * @param {string} pluginID - The pluginID to match
 	 * @returns {ItemPaneCustomPaneOptions[]}
@@ -456,6 +471,10 @@ class ItemPaneManager {
 		if (!this._validatePaneOption(options)) {
 			return false;
 		}
+		// If there are no reader panes and the new panes include reader panes, reload all orphan reader panes
+		// because we will append panes to these readers later
+		this._requireReloadOrphanReaderPanes = !this.hasCustomPaneOfMode("reader")
+			&& options.some(o => o.mode.includes("reader") || o.mode.includes("*"));
 		for (const opt of options) {
 			this._customPanes[opt.id] = Object.assign({}, opt);
 		}
@@ -478,9 +497,14 @@ class ItemPaneManager {
 				return false;
 			}
 		}
+		let hasReaderPanes = this.hasCustomPaneOfMode("reader");
 		for (const key of ids) {
 			delete this._customPanes[key];
 		}
+		// If the last reader pane is removed, reload all orphan reader panes
+		// because we will remove panes from these readers later
+		// and they should display the default no-parent message
+		this._requireReloadOrphanReaderPanes = hasReaderPanes && !this.hasCustomPaneOfMode("reader");
 		return true;
 	}
 
@@ -495,6 +519,19 @@ class ItemPaneManager {
 			return `${options.pluginID}-${options.id}`.replace(/[^a-zA-Z0-9-_]/g, "-");
 		}
 		return options.id;
+	}
+
+	/**
+	 * Ensure that the tabbox has a selected tab
+	 * @param {HTMLElement} tabbox - The tabbox to check
+	 */
+	_ensurePaneHasSelection(tabbox) {
+		setTimeout(() => {
+			if (!tabbox.selectedTab) {
+				// If the selected tab is removed, select the first tab
+				tabbox.selectedIndex = 0;
+			}
+		}, 0);
 	}
 
 	/**
@@ -516,10 +553,7 @@ class ItemPaneManager {
 		};
 		_checkTabsOrTabPanels(Array.from(tabbox.tabs.children));
 		_checkTabsOrTabPanels(Array.from(tabbox.tabpanels.children));
-		if (!tabbox.selectedTab) {
-			// If the selected tab is removed, select the first tab
-			tabbox.selectedIndex = 0;
-		}
+		this._ensurePaneHasSelection(tabbox);
 	}
 
 	/**
@@ -560,14 +594,31 @@ class ItemPaneManager {
 
 			tabbox.tabpanels.append(tabpanel);
 		}
+		this._ensurePaneHasSelection(tabbox);
 	}
 
+	/**
+	 * Ensure that the orphan reader panes are reloaded
+	 */
+	_ensureOrphanedReaderPanes() {
+		if (this._requireReloadOrphanReaderPanes) {
+			for (const win of Zotero.getMainWindows()) {
+				win.ZoteroContextPane.reloadOrphanReaderPanes();
+			}
+		}
+		this._requireReloadOrphanReaderPanes = false;
+	}
+
+	/**
+	 * Notify all item panes to update
+	 */
 	_notifyItemPanes() {
+		this._ensureOrphanedReaderPanes();
 		for (const win of Zotero.getMainWindows()) {
 			for (const tab of win.Zotero_Tabs._tabs) {
 				const tabbox = this.getPaneTabBoxByTabID(win, tab.id);
 				if (!tabbox) {
-					return;
+					continue;
 				}
 				this._removedUnregisteredPanes(tabbox);
 				this._ensureRegisteredPanes(tabbox, tab.type, tab.id);

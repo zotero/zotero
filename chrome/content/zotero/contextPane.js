@@ -897,7 +897,11 @@ var ZoteroContextPane = new function () {
 		};
 		_itemContexts.push(context);
 		
-		if (!parentID) {
+		let hasReaderCustomPanes = Zotero.ItemPaneManager.hasCustomPaneOfMode('reader');
+
+		// If item has no parent and there are no custom panes registered for reader mode,
+		// show the default no-parent message
+		if (!parentID && !hasReaderCustomPanes) {
 			var vbox = document.createXULElement('vbox');
 			vbox.setAttribute('flex', '1');
 			vbox.setAttribute('align', 'center');
@@ -931,60 +935,72 @@ var ZoteroContextPane = new function () {
 			_updateAddToNote();
 		});
 
-		// Info tab
-		var tabInfo = document.createXULElement('tab');
-		tabInfo.setAttribute('label', Zotero.getString('zotero.tabs.info.label'));
-		// Tags tab
-		var tabTags = document.createXULElement('tab');
-		tabTags.setAttribute('label', Zotero.getString('zotero.tabs.tags.label'));
-		// Related tab
-		var tabRelated = document.createXULElement('tab');
-		tabRelated.setAttribute('label', Zotero.getString('zotero.tabs.related.label'));
-
-		tabs.append(tabInfo, tabTags, tabRelated);
 		tabbox.append(tabs, tabpanels);
 
-		// Info panel
-		var panelInfo = document.createXULElement('tabpanel');
-		panelInfo.setAttribute('flex', '1');
-		panelInfo.className = 'zotero-editpane-item-box';
-		var itemBox = new (customElements.get('item-box'));
-		itemBox.setAttribute('flex', '1');
-		panelInfo.append(itemBox);
-		// Tags panel
-		var panelTags = document.createXULElement('tabpanel');
-		var tagsBox = new (customElements.get('tags-box'));
-		tagsBox.setAttribute('flex', '1');
-		tagsBox.className = 'zotero-editpane-tags';
-		panelTags.append(tagsBox);
+		// Only show built-in tabs if the item has a parent
+		if (parentID) {
+			// Info tab
+			var _tabInfo = tabs.appendItem(Zotero.getString('zotero.tabs.info.label'));
+			// Tags tab
+			var _tabTags = tabs.appendItem(Zotero.getString('zotero.tabs.tags.label'));
+			// Related tab
+			var _tabRelated = tabs.appendItem(Zotero.getString('zotero.tabs.related.label'));
 
-		// Related panel
-		var panelRelated = document.createXULElement('tabpanel');
-		var relatedBox = new (customElements.get('related-box'));
-		relatedBox.setAttribute('flex', '1');
-		relatedBox.className = 'zotero-editpane-related';
-		panelRelated.addEventListener('click', (event) => {
-			if (event.originalTarget.closest('.zotero-clicky')) {
-				Zotero_Tabs.select('zotero-pane');
-			}
-		});
-		panelRelated.append(relatedBox);
+			// Info panel
+			var panelInfo = document.createXULElement('tabpanel');
+			panelInfo.setAttribute('flex', '1');
+			panelInfo.className = 'zotero-editpane-item-box';
+			var itemBox = new (customElements.get('item-box'));
+			itemBox.setAttribute('flex', '1');
+			panelInfo.append(itemBox);
+			// Tags panel
+			var panelTags = document.createXULElement('tabpanel');
+			var tagsBox = new (customElements.get('tags-box'));
+			tagsBox.setAttribute('flex', '1');
+			tagsBox.className = 'zotero-editpane-tags';
+			panelTags.append(tagsBox);
 
-		tabpanels.append(panelInfo, panelTags, panelRelated);
-		tabbox.selectedIndex = 0;
+			// Related panel
+			var panelRelated = document.createXULElement('tabpanel');
+			var relatedBox = new (customElements.get('related-box'));
+			relatedBox.setAttribute('flex', '1');
+			relatedBox.className = 'zotero-editpane-related';
+			panelRelated.addEventListener('click', (event) => {
+				if (event.originalTarget.closest('.zotero-clicky')) {
+					Zotero_Tabs.select('zotero-pane');
+				}
+			});
+			panelRelated.append(relatedBox);
+
+			tabpanels.append(panelInfo, panelTags, panelRelated);
+			tabbox.selectedIndex = 0;
 
 
-		itemBox.mode = readOnly ? 'view' : 'edit';
-		itemBox.item = parentItem;
+			itemBox.mode = readOnly ? 'view' : 'edit';
+			itemBox.item = parentItem;
 
-		tagsBox.mode = readOnly ? 'view' : 'edit';
-		tagsBox.item = parentItem;
+			tagsBox.mode = readOnly ? 'view' : 'edit';
+			tagsBox.item = parentItem;
 
-		relatedBox.mode = readOnly ? 'view' : 'edit';
-		relatedBox.item = parentItem;
+			relatedBox.mode = readOnly ? 'view' : 'edit';
+			relatedBox.item = parentItem;
+		}
 
 		// No update event will be triggered, because the item pane here is not reused
 		Zotero.ItemPaneManager.initPane(tabbox, "reader", tabID);
 		Zotero.ItemPaneManager.setItemToElement(tabbox, item);
 	}
+
+	/**
+	 * Reload all reader panes that does not have a parent item
+	 */
+	this.reloadOrphanReaderPanes = function () {
+		for (let context of _itemContexts) {
+			if (!context.parentID) {
+				let { tabID, itemID } = context;
+				_removeItemContext(context.tabID);
+				_addItemContext(tabID, itemID);
+			}
+		}
+	};
 };
