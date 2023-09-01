@@ -23,9 +23,9 @@
     ***** END LICENSE BLOCK *****
 */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import TagsBoxContainer from 'containers/tagsBoxContainer';
+// import React from 'react';
+// import ReactDOM from 'react-dom';
+// import TagsBoxContainer from 'containers/tagsBoxContainer';
 
 var ZoteroItemPane = new function() {
 	var _lastItem, _itemBox, _tagsBox, _notesBox, _relatedBox;
@@ -36,11 +36,13 @@ var ZoteroItemPane = new function() {
 		if (!Zotero) {
 			return;
 		}
+
+		let tabBox = document.getElementById('zotero-view-tabbox');
 		
 		// Not in item pane, so skip the introductions
 		//
 		// DEBUG: remove?
-		if (!document.getElementById('zotero-view-tabbox')) {
+		if (!tabBox) {
 			return;
 		}
 
@@ -49,12 +51,14 @@ var ZoteroItemPane = new function() {
 		_relatedBox = document.getElementById('zotero-editpane-related');
 
 		this._unregisterID = Zotero.Notifier.registerObserver(this, ['item'], 'itemPane');
-	}
+
+		Zotero.ItemPaneManager.initPane(tabBox, 'library', 'zotero-pane');
+	};
 	
 	
 	this.onUnload = function () {
 		Zotero.Notifier.unregisterObserver(this._unregisterID);
-	},
+	};
 	
 	
 	/*
@@ -67,6 +71,7 @@ var ZoteroItemPane = new function() {
 		
 		Zotero.debug('Viewing item in pane ' + index);
 		
+		let box;
 		switch (index) {
 			case 0: {
 				if (!_itemBox) {
@@ -74,21 +79,21 @@ var ZoteroItemPane = new function() {
 					_itemBox.id = 'zotero-editpane-item-box';
 					document.getElementById('item-box-container').appendChild(_itemBox);
 				}
-				var box = _itemBox;
+				box = _itemBox;
 				break;
 			}
 			
 			case 1:
-				var box = _notesBox;
+				box = _notesBox;
 				box.parentItem = item;
 				break;
 
 			case 2:
-				var box = _tagsBox;
+				box = _tagsBox;
 				break;
 
 			case 3:
-				var box = _relatedBox;
+				box = _relatedBox;
 				break;
 		}
 		
@@ -128,7 +133,7 @@ var ZoteroItemPane = new function() {
 				}
 				if (!_translationTarget) {
 					_translationTarget = Zotero.Libraries.userLibrary;
-				}	
+				}
 				this.setTranslateButton();
 			}
 		}
@@ -147,10 +152,28 @@ var ZoteroItemPane = new function() {
 			
 			box.item = item;
 		}
+
+		let tabBox = document.getElementById('zotero-view-tabbox');
+		Zotero.ItemPaneManager.setItemToElement(tabBox, _lastItem);
+
+		let panel = tabBox.selectedPanel;
+		const loaded = Zotero.ItemPaneManager.getPaneLoadedFromElement(panel);
+		if (!loaded) {
+			return;
+		}
+		const paneID = Zotero.ItemPaneManager.getPaneIDFromElement(panel);
+		const target = Zotero.ItemPaneManager.getPaneContainerFromElement(panel);
+		// Trigger update event for custom panes manually
+		Zotero.ItemPaneManager.triggerEvent(paneID, {
+			type: "update",
+			mode: "library",
+			item: _lastItem,
+			target
+		});
 	});
 	
 	
-	this.notify = Zotero.Promise.coroutine(function* (action, type, ids, extraData) {
+	this.notify = Zotero.Promise.coroutine(function* (action, _type, _ids, _extraData) {
 		var viewBox = document.getElementById('zotero-view-item');
 		if (viewBox.selectedIndex == 0 && action == 'refresh' && _lastItem) {
 			yield this.viewItem(_lastItem, null, 0);
@@ -160,25 +183,26 @@ var ZoteroItemPane = new function() {
 	
 	this.blurOpenField = Zotero.Promise.coroutine(function* () {
 		var tabBox = document.getElementById('zotero-view-tabbox');
+		let box;
 		switch (tabBox.selectedIndex) {
-		case 0:
-			var box = _itemBox;
-			if (box) {
-				yield box.blurOpenField();
-			}
-			break;
-			
-		case 2:
-			var box = _tagsBox;
-			if (box) {
-				box.blurOpenField();
-			}
-			break;
+			case 0:
+				box = _itemBox;
+				if (box) {
+					yield box.blurOpenField();
+				}
+				break;
+				
+			case 2:
+				box = _tagsBox;
+				if (box) {
+					box.blurOpenField();
+				}
+				break;
 		}
 	});
 	
 	
-	function focusItemsList() {
+	function _focusItemsList() {
 		var tree = document.getElementById('zotero-items-tree');
 		if (tree) {
 			tree.focus();
@@ -189,7 +213,7 @@ var ZoteroItemPane = new function() {
 	this.onNoteSelected = function (item, editable) {
 		_selectedNoteID = item.id;
 		
-		var type = Zotero.Libraries.get(item.libraryID).libraryType;
+		var _type = Zotero.Libraries.get(item.libraryID).libraryType;
 		var noteEditor = document.getElementById('zotero-note-editor');
 		noteEditor.mode = editable ? 'edit' : 'view';
 		noteEditor.viewMode = 'library';
@@ -206,7 +230,7 @@ var ZoteroItemPane = new function() {
 	this.openNoteWindow = async function () {
 		var selectedNote = Zotero.Items.get(_selectedNoteID);
 		
-		var type = Zotero.Libraries.get(selectedNote.libraryID).libraryType;
+		var _type = Zotero.Libraries.get(selectedNote.libraryID).libraryType;
 		ZoteroPane.openNoteWindow(selectedNote.id);
 	};
 	
@@ -215,7 +239,8 @@ var ZoteroItemPane = new function() {
 		if (!_lastItem.isEditable()) {
 			return false;
 		}
-	}
+		return undefined;
+	};
 	
 	
 	this.removeAllTags = async function () {
@@ -223,7 +248,7 @@ var ZoteroItemPane = new function() {
 			_lastItem.setTags([]);
 			await _lastItem.saveTx();
 		}
-	}
+	};
 	
 	
 	this.translateSelectedItems = Zotero.Promise.coroutine(function* () {
@@ -296,8 +321,8 @@ var ZoteroItemPane = new function() {
 
 		var key = Zotero.Keys.getKeyForCommand('saveToZotero');
 		
-		var tooltip = label 
-			+ (Zotero.rtl ? ' \u202B' : ' ') + '(' 
+		var tooltip = label
+			+ (Zotero.rtl ? ' \u202B' : ' ') + '('
 			+ (Zotero.isMac ? '⇧⌘' : Zotero.getString('general.keys.ctrlShift'))
 			+ key + ')';
 		elem.title = tooltip;
@@ -318,10 +343,10 @@ var ZoteroItemPane = new function() {
 		elem.textContent = label;
 
 		var key = Zotero.Keys.getKeyForCommand('toggleRead');
-		var tooltip = label + (Zotero.rtl ? ' \u202B' : ' ') + '(' + key + ')'
+		var tooltip = label + (Zotero.rtl ? ' \u202B' : ' ') + '(' + key + ')';
 		elem.title = tooltip;
 	};
-}   
+};
 
 addEventListener("load", function(e) { ZoteroItemPane.onLoad(e); }, false);
 addEventListener("unload", function(e) { ZoteroItemPane.onUnload(e); }, false);

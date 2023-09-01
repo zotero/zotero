@@ -982,5 +982,9 @@ var ZoteroContextPane = new function () {
 
 		relatedBox.mode = readOnly ? 'view' : 'edit';
 		relatedBox.item = parentItem;
+
+		// No update event will be triggered, because the item pane here is not reused
+		Zotero.ItemPaneManager.initPane(tabbox, "reader", tabID);
+		Zotero.ItemPaneManager.setItemToElement(tabbox, item);
 	}
 };
