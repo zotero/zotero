@@ -3,7 +3,7 @@ describe("Retractions", function () {
 	var win;
 	var zp;
 	var checkQueueItemsStub;
-	var retractedDOI = '10.1039/C3AN01547E';
+	var retractedDOI = '10.1056/NEJMoa1200303'; // mixed case
 	
 	before(async function () {
 		userLibraryID = Zotero.Libraries.userLibraryID;
