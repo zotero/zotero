@@ -541,10 +541,10 @@ Zotero.Retractions = {
 		]);
 		var prefixesToSend = new Set();
 		for (let row of list) {
-			let [prefixStr, date] = row.split(' ');
+			let [prefixStr, _date] = row.split(' ');
 			let type = prefixStr[0];
 			let prefix = prefixStr.substr(1);
-			if (!type || !prefix || !date) {
+			if (!type || !prefix) {
 				Zotero.warn("Bad line in retractions data: " + row);
 				continue;
 			}
