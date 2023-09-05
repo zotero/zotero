@@ -46,6 +46,7 @@ item-box {
 		margin-inline-start: 1px !important;
 		margin-inline-end: 5px !important;
 		padding: 0 2px;
+		white-space: nowrap;
 	}
 
 	td > [fieldname] {
@@ -127,6 +128,8 @@ item-box {
 		vertical-align: top;
 		height: var(--row-height);
 		font-weight: normal;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	#more-creators-label
