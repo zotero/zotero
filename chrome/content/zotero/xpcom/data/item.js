@@ -3964,7 +3964,9 @@ Zotero.Item.prototype.getAnnotations = function (includeTrashed) {
 	}
 	var ids = rows.map(row => row.itemID);
 	this._annotations[cacheKey] = ids;
-	return Zotero.Items.get(ids);
+	return Zotero.Items.get(ids)
+		// Filter out underline and text annotations in Zotero 6
+		.filter(x => !['underline', 'text'].includes(x.annotationType));
 };
 
 
