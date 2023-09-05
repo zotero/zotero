@@ -190,14 +190,13 @@ var ZoteroPane = new function()
 							// TODO: the notes are currently inaccessible to the keyboard
 						}
 						else if (tabBox.selectedIndex === 2) {
-							const tagContainer = document.getElementById("tags-box-container");
+							const tagContainer = document.getElementById("tags-box");
 							const tags = tagContainer.querySelectorAll("#tags-box-add-button,.zotero-clicky");
-							const last = tags[tags.length - 1];
-							if (last.id === "tags-box-add-button") {
-								last.focus();
+							if (tags.length == 1) {
+								tags[0].focus();
 							}
 							else {
-								last.click();
+								tags[0].click();
 							}
 						}
 						else if (tabBox.selectedIndex === 3) {

@@ -1,5 +1,5 @@
 item-box {
-	--row-height: 1.5em;
+	--row-height: 14px;
 	
 	display: flex;
 	min-width: 0;
@@ -22,6 +22,8 @@ item-box {
 		min-width: 0;
 		padding-inline-end: 5px;
 		display: flex;
+		padding-top: 0;
+		padding-bottom: 0;
 	}
 
 	td > input, .creator-name-box > input {
@@ -48,11 +50,13 @@ item-box {
 
 	td > [fieldname] {
 		width: 100%;
+		line-height: var(--row-height);
 	}
 
 	.value {
 		min-height: 14px;
 		align-self: center;
+		line-height: var(--row-height);
 	}
 
 	.value:not(.multiline) {
@@ -71,12 +75,9 @@ item-box {
 	}*/
 
 	#item-type-menu {
-		height: 1.5em !important;
-		min-height: 1.5em !important;
-		padding: 0 2px !important;
+		padding: 0;
 		margin: 0 !important;
 		margin-inline-end: 5px !important;
-		max-height: 1.5em !important;
 		flex: 1;
 
 		&::part(dropmarker) {
@@ -121,14 +122,11 @@ item-box {
 
 	/* metadata field names */
 	th {
-		width: 100px;
+		width: 110px;
 		text-align: end;
 		vertical-align: top;
-		padding-top: 2px;
 		height: var(--row-height);
 		font-weight: normal;
-		margin-inline-start: 5px !important;
-		margin-inline-end: 0 !important;
 	}
 
 	#more-creators-label
@@ -154,6 +152,7 @@ item-box {
 
 	.creator-type-label, .creator-type-value {
 		-moz-box-align: center;
+		align-items: center;
 	}
 
 	.creator-name-box {

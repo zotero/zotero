@@ -79,6 +79,16 @@
 			let content = document.importNode(this.content, true);
 			this.append(content);
 
+			// When tag pane is opened, xul moves focus on the add button.
+			// It messes with the focusring and tab-based navigation.
+			// This is a workaround to send the focus back onto the tab
+			this._id("tags-box-add-button").addEventListener('focus', (event) => {
+				if (event.explicitOriginalTarget.className == 'tab-text'
+					|| event.explicitOriginalTarget.lastChild.className == 'tab-text') {
+					document.getElementById("zotero-editpane-tags-tab").focus();
+				}
+			});
+
 			this._id("tags-box-add-button").addEventListener('click', this._handleAddButtonClick);
 			this._id("tags-box-add-button").addEventListener('keydown', this._handleAddButtonKeyDown);
 			this._id('tags-box').addEventListener('click', (event) => {
@@ -421,9 +431,10 @@
 			t.setAttribute('ztabindex', tabindex);
 			t.setAttribute('ignoreblurwhilesearching', 'true');
 			t.setAttribute('autocompletepopup', 'PopupAutoComplete');
+			const multilineFieldRowsCount = 6;
 			// Multi-line
 			if (multiline) {
-				t.setAttribute('rows', 6);
+				t.setAttribute('rows', multilineFieldRowsCount);
 			}
 			// Add auto-complete
 			else {
@@ -543,6 +554,10 @@
 					if (target.value == "" && !event.shiftKey) {
 						var row = Zotero.getAncestorByTagName(target, 'li');
 						if (row == row.parentNode.lastChild) {
+							return false;
+						}
+						else {
+							await this.blurHandler(event);
 							return false;
 						}
 					}
@@ -895,7 +910,12 @@
 			else if (dir == -1) {
 				if (tabindex == 1) {
 					// Focus Add button
+					// When add-button is focused for the first time via shift-tab
+					// from the first tag, css .focus-visible does not get set
+					//  and focusring does not show. .contentEditable is a hack to force it
+					this._id("tags-box-add-button").contentEditable = true;
 					this._id("tags-box-add-button").focus();
+					this._id("tags-box-add-button").contentEditable = false;
 					return false;
 				}
 				var nextIndex = tabindex - 1;
