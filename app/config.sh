@@ -54,7 +54,6 @@ BUILD_PLATFORMS=""
 NUM_INCREMENTALS=6
 
 if [ "`uname`" = "Darwin" ]; then
-	alias mktemp='mktemp -t tmp'
 	shopt -s expand_aliases
 fi
 
