@@ -284,7 +284,7 @@
 			this.isMergePane = this.id == 'merge-pane';
 			
 			if (!this.isMergePane) {
-				this.groupbox.onclick = this.handleClick.bind(this);
+				this.groupbox.onclick = this.click.bind(this);
 			}
 		}
 		
@@ -338,7 +338,7 @@
 			var button = this._class('choose-button');
 			button.label = Zotero.getString('sync.conflict.chooseThisVersion');
 			if (this.showButton) {
-				button.onclick = this.handleClick.bind(this);
+				button.onclick = this.click.bind(this);
 				button.style.visibility = 'visible';
 			}
 			else {
@@ -421,7 +421,7 @@
 				this.groupbox.setAttribute('tabindex', 0);
 				this.groupbox.addEventListener('keypress', (event) => {
 					if (event.key == " ") {
-						this.handleClick();
+						this.click();
 					}
 				});
 			}
@@ -450,7 +450,7 @@
 			}
 		}
 		
-		handleClick() {
+		click() {
 			this.parent.choosePane(this);
 		}
 		

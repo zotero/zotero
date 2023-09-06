@@ -976,7 +976,27 @@ Zotero.Sync.Storage.Local = {
 		zipReader = null
 		Cu.forceGC();
 		
-		zipFile.remove(false);
+		// TEMP: Allow deleting to fail on Windows
+		if (Zotero.isWin) {
+			try {
+				zipFile.remove(false);
+			}
+			catch (e) {
+				Zotero.logError(e);
+				// Try again in 30 seconds
+				setTimeout(() => {
+					try {
+						zipFile.remove(false);
+					}
+					catch (e) {
+						Zotero.logError(e);
+					}
+				}, 30000);
+			}
+		}
+		else {
+			zipFile.remove(false);
+		}
 		
 		return returnFile;
 	}),
