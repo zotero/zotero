@@ -93,7 +93,9 @@ merge-group:not([mergetype="note"]) #right-pane:active attachment-box #title {
 }
 
 #left-pane:hover:not([selected=true]) h2,
-#right-pane:hover:not([selected=true]) h2 {
+#left-pane groupbox:focus:not([selected=true]) h2,
+#right-pane:hover:not([selected=true]) h2,
+#right-pane groupbox:focus:not([selected=true]) h2 {
 	text-decoration: underline;
 }
 

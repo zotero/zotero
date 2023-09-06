@@ -37,6 +37,7 @@
 			this.hideEmptyFields = false;
 			this.clickByRow = false;
 			this.clickByItem = false;
+			this.preventFocus = false;
 			
 			this.clickHandler = null;
 			this.blurHandler = null;
@@ -1005,10 +1006,12 @@
 			}
 			td.appendChild(addButton);
 
-			for (const domEl of [th, toggleButton, removeButton, addButton]) {
-				domEl.setAttribute('tabindex', '0');
-				domEl.addEventListener('keypress', this.handleKeyPress.bind(this));
-				domEl.addEventListener('focusin', this.updateLastFocused.bind(this));
+			if (!this.preventFocus) {
+				for (const domEl of [th, toggleButton, removeButton, addButton]) {
+					domEl.setAttribute('tabindex', '0');
+					domEl.addEventListener('keypress', this.handleKeyPress.bind(this));
+					domEl.addEventListener('focusin', this.updateLastFocused.bind(this));
+				}
 			}
 			
 			this._creatorCount++;
