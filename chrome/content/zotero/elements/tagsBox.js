@@ -354,7 +354,7 @@
 					}
 
 					// TODO: Return focus to items pane
-					var tree = document.getElementById('zotero-items-tree');
+					var tree = document.getElementById('item-tree-main-default');
 					if (tree) {
 						tree.focus();
 					}
@@ -525,7 +525,7 @@
 					}
 					// Return focus to items pane
 					else {
-						var tree = document.getElementById('zotero-items-tree');
+						var tree = document.getElementById('item-tree-main-default');
 						if (tree) {
 							tree.focus();
 						}
@@ -542,7 +542,7 @@
 
 
 					// TODO: Return focus to items pane
-					var tree = document.getElementById('zotero-items-tree');
+					var tree = document.getElementById('item-tree-main-default');
 					if (tree) {
 						tree.focus();
 					}

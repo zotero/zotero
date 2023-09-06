@@ -1909,7 +1909,7 @@
 					focused.blur();
 					
 					// Return focus to items pane
-					tree = document.getElementById('zotero-items-tree');
+					tree = document.getElementById('item-tree-main-default');
 					if (tree) {
 						tree.focus();
 					}
@@ -1923,7 +1923,7 @@
 					focused.blur();
 					
 					// Return focus to items pane
-					tree = document.getElementById('zotero-items-tree');
+					tree = document.getElementById('item-tree-main-default');
 					if (tree) {
 						tree.focus();
 					}
