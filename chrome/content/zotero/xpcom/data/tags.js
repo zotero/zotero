@@ -664,6 +664,10 @@ Zotero.Tags = new function() {
 			else {
 				tagColors.splice(position, 0, newObj);
 			}
+			_libraryColorsByName[libraryID].set(name, {
+				color: color,
+				position: position
+			});
 		}
 		
 		if (tagColors.length) {
