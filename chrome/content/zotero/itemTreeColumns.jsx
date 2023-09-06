@@ -49,7 +49,7 @@ const Icons = require('components/icons');
  * @property {boolean} [primary] - Should only be one column at the time. Title is the primary column
  * @property {boolean} [custom] - Set automatically to true when the column is added by the user
  * @property {(item: Zotero.Item, dataKey: string) => string} [dataProvider] - Custom data provider that is called when rendering cells
- * @property {(index: number, data: string, column: ItemTreeColumnOptions & {className: string}) => HTMLElement} renderCell - The cell renderer function
+ * @property {(index: number, data: string, column: ItemTreeColumnOptions & {className: string}) => HTMLElement} [renderCell] - The cell renderer function
  * @property {string[]} [zoteroPersist] - Which column properties should be persisted between zotero close
  */
 
