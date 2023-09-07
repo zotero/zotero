@@ -288,7 +288,7 @@ var Zotero_Tabs = new function () {
 			historyEntry.push({ index: tmpTabs.indexOf(tab), data: tab.data });
 			closedIDs.push(id);
 
-			requestIdleCallback(() => {
+			setTimeout(() => {
 				document.getElementById(tab.id).remove();
 				// For unknown reason fx102, unlike 60, sometimes doesn't automatically update selected index
 				let selectedIndex = Array.from(this.deck.children).findIndex(x => x.id == this._selectedID);
