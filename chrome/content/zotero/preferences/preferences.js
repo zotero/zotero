@@ -397,7 +397,6 @@ ${str}
 				// Ignore
 			}
 
-			Zotero.debug(`Attaching <${elem.tagName}> element to ${preference}`);
 			let symbol = Zotero.Prefs.registerObserver(
 				preference,
 				() => this._syncFromPref(elem, preference),
@@ -429,7 +428,6 @@ ${str}
 		
 		let detachFromPreference = (elem) => {
 			if (this._observerSymbols.has(elem)) {
-				Zotero.debug(`Detaching <${elem.tagName}> element from preference`);
 				Zotero.Prefs.unregisterObserver(this._observerSymbols.get(elem));
 				this._observerSymbols.delete(elem);
 			}
