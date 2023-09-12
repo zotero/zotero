@@ -84,7 +84,11 @@ window.addEventListener("load", function (e) {
 	if (e.target !== document) {
 		return;
 	}
-
+	if (Zotero.isLinux) {
+		// Explicitly set hardcoded background on linux
+		// to prevent background from being transparent and flickering
+		document.body.style.backgroundColor = 'white';
+	}
 	var codeWin = document.getElementById("editor-code").contentWindow;
 	codeEditor = codeWin.editor;
 	var session = codeEditor.getSession();
