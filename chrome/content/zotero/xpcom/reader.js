@@ -185,6 +185,16 @@ class ReaderInstance {
 			}
 		};
 
+		this._iframeWindow.addEventListener('customEvent', (event) => {
+			let data = event.detail.wrappedJSObject;
+			let append = data.append;
+			data.append = (...args) => {
+				append(...Components.utils.cloneInto(args, this._iframeWindow, { wrapReflectors: true, cloneFunctions: true }));
+			};
+			data.reader = this;
+			Zotero.Reader._dispatchEvent(data);
+		});
+
 		this._internalReader = this._iframeWindow.wrappedJSObject.createReader(Components.utils.cloneInto({
 			type: this._type,
 			data,
@@ -1208,6 +1218,7 @@ class Reader {
 		this._bottomPlaceholderHeight = 0;
 		this._readers = [];
 		this._notifierID = Zotero.Notifier.registerObserver(this, ['item', 'tab'], 'reader');
+		this._registeredListeners = [];
 		this.onChangeSidebarWidth = null;
 		this.onToggleSidebar = null;
 
@@ -1218,6 +1229,52 @@ class Reader {
 			}
 			this._setSidebarState();
 		}, 500);
+	}
+
+	_dispatchEvent(event) {
+		for (let listener of this._registeredListeners) {
+			if (listener.type === event.type) {
+				listener.handler(event);
+			}
+		}
+	}
+
+	/**
+	 * Inject DOM nodes to reader UI parts:
+	 * - renderTextSelectionPopup
+	 * - renderSidebarAnnotationHeader
+	 * - renderToolbar
+	 *
+	 * Zotero.Reader.registerEventListener('renderTextSelectionPopup', (event) => {
+	 * 	let { reader, doc, params, append } = event;
+	 * 	let container = doc.createElement('div');
+	 * 	container.append('Loading…');
+	 * 	append(container);
+	 * 	setTimeout(() => container.replaceChildren('Translated text: ' + params.annotation.text), 1000);
+	 * });
+	 *
+	 *
+	 * Add options to context menus:
+	 * - createColorContextMenu
+	 * - createViewContextMenu
+	 * - createAnnotationContextMenu
+	 * - createThumbnailContextMenu
+	 * - createSelectorContextMenu
+	 *
+	 * Zotero.Reader.registerEventListener('createAnnotationContextMenu', (event) => {
+	 * 	let { reader, params, append } = event;
+	 * 	append({
+	 * 		label: 'Test',
+	 * 		onCommand(){ reader._iframeWindow.alert('Selected annotations: ' + params.ids.join(', ')); }
+	 * 	});
+	 * });
+	 */
+	registerEventListener(type, handler) {
+		this._registeredListeners.push({ type, handler });
+	}
+
+	unregisterEventListener(type, handler) {
+		this._registeredListeners = this._registeredListeners.filter(x => x.type === type && x.handler === handler);
 	}
 	
 	getSidebarWidth() {
