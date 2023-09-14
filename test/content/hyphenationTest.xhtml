@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<browser remote="false" />
+	<script>
+		var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+		document.querySelector('browser').loadURI('chrome://zotero-unit/content/hyphenationTestContent.html', {
+			triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()
+		});
+	</script>
+</window>
