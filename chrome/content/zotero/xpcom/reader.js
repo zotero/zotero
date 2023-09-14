@@ -1229,6 +1229,12 @@ class Reader {
 			}
 			this._setSidebarState();
 		}, 500);
+
+		Zotero.Plugins.addObserver({
+			shutdown: ({ id: pluginID }) => {
+				this._unregisterEventListenerByPluginID(pluginID);
+			}
+		});
 	}
 
 	_dispatchEvent(event) {
@@ -1269,12 +1275,16 @@ class Reader {
 	 * 	});
 	 * });
 	 */
-	registerEventListener(type, handler) {
-		this._registeredListeners.push({ type, handler });
+	registerEventListener(type, handler, pluginID = undefined) {
+		this._registeredListeners.push({ pluginID, type, handler });
 	}
 
 	unregisterEventListener(type, handler) {
 		this._registeredListeners = this._registeredListeners.filter(x => x.type === type && x.handler === handler);
+	}
+
+	_unregisterEventListenerByPluginID(pluginID) {
+		this._registeredListeners = this._registeredListeners.filter(x => x.pluginID !== pluginID);
 	}
 	
 	getSidebarWidth() {
