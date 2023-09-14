@@ -163,6 +163,12 @@ const TabBar = forwardRef(function (props, ref) {
 
 	function handleTabBarDragOver(event) {
 		event.preventDefault();
+		// Allow only 1 zotero/tab item to be dragged.
+		// Any other dataTransfer object(s) mean an item/collection/etc. is
+		// being dragged over a tab, so it should be ignored.
+		if (event.dataTransfer.items.length !== 1 || event.dataTransfer.items[0].type !== "zotero/tab") {
+			return;
+		}
 		event.dataTransfer.dropEffect = 'move';
 		// Throttle
 		if (!dragIDRef.current || mouseMoveWaitUntil.current > Date.now()) {
@@ -278,7 +284,7 @@ const TabBar = forwardRef(function (props, ref) {
 				key={id}
 				data-id={id}
 				className={cx('tab', { selected, dragging: dragging && id === dragIDRef.current })}
-				draggable={true}
+				draggable={id !== 'zotero-pane'}
 				onMouseMove={() => handleTabMouseMove(title)}
 				onMouseDown={(event) => handleTabMouseDown(event, id)}
 				onClick={(event) => handleTabClick(event, id)}
