@@ -842,7 +842,7 @@ var ZoteroPane = new function()
 					if (reader) {
 						reader.focus();
 						// Keep propagating if current focus is on input or textarea
-						// The Escape event needs to handled by itemBox, tagBox, etc. to undo edits.
+						// The Escape event needs to be handled by itemBox, tagBox, etc. to undo edits.
 						if (!["input", "textarea"].includes(document.activeElement.tagName)) {
 							event.preventDefault();
 							event.stopPropagation();
