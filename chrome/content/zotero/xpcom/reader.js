@@ -531,14 +531,8 @@ class ReaderInstance {
 		if (fileSize > ARRAYBUFFER_MAX_LENGTH) {
 			throw new Error(`The file "${path}" is too large`);
 		}
-		let buf;
-		if (this._type !== 'pdf') {
-			buf = await OS.File.read(path, {});
-		}
-		let baseURI = `zotero://attachment/${Zotero.API.getLibraryPrefix(item.libraryID)}/items/${item.key}/`;
 		return {
-			buf,
-			baseURI
+			url: `zotero://attachment/${Zotero.API.getLibraryPrefix(item.libraryID)}/items/${item.key}/`
 		};
 	}
 
