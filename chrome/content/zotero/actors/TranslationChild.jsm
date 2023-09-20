@@ -49,8 +49,8 @@ class TranslationChild extends JSWindowActorChild {
 		let { name, data } = message;
 		switch (name) {
 			case 'initTranslation': {
-				let { schemaJSON, dateFormatsJSON } = data;
-				this._sandbox = this._loadTranslationFramework(schemaJSON, dateFormatsJSON);
+				let { schemaJSON, dateFormatsJSON, prefs } = data;
+				this._sandbox = this._loadTranslationFramework(schemaJSON, dateFormatsJSON, prefs);
 				break;
 			}
 			case 'detect': {
@@ -257,9 +257,10 @@ class TranslationChild extends JSWindowActorChild {
 	 * Load the translation framework into the current page.
 	 * @param {Object | String} schemaJSON
 	 * @param {Object | String} dateFormatsJSON
+	 * @param {Object} prefs
 	 * @return {Sandbox}
 	 */
-	_loadTranslationFramework(schemaJSON, dateFormatsJSON) {
+	_loadTranslationFramework(schemaJSON, dateFormatsJSON, prefs) {
 		// Modeled after:
 		// https://searchfox.org/mozilla-esr102/source/toolkit/components/extensions/ExtensionContent.jsm#809-845
 		let systemPrincipal = Services.scriptSecurityManager.getSystemPrincipal();
@@ -286,6 +287,10 @@ class TranslationChild extends JSWindowActorChild {
 		Zotero.Translators._initialized = true;
 		Zotero.Schema.init(schemaJSON);
 		Zotero.Date.init(dateFormatsJSON);
+		
+		for (let [key, value] of Object.entries(prefs)) {
+			Zotero.Prefs.set(key, value);
+		}
 
 		return sandbox;
 	}
