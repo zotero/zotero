@@ -159,5 +159,32 @@ describe("RemoteTranslate", function () {
 			HiddenBrowser.destroy(browser);
 			translate.dispose();
 		});
+		
+		it("should be able to access hidden prefs", async function () {
+			let domParserDummy = buildDummyTranslator('web', `
+				function detectWeb() {
+					return "book";
+				}
+				
+				function doWeb() {
+					let item = new Zotero.Item("book");
+					item.title = Zotero.getHiddenPref("testPref");
+					item.complete();
+				}
+			`);
+
+			Zotero.Prefs.set('translators.testPref', 'Test value');
+			
+			let translate = new RemoteTranslate();
+			let browser = await HiddenBrowser.create(getTestDataUrl('test.html'));
+			await translate.setBrowser(browser);
+			translate.setTranslator(domParserDummy);
+
+			let items = await translate.translate({ libraryID: false });
+			assert.equal(items[0].title, 'Test value');
+
+			HiddenBrowser.destroy(browser);
+			translate.dispose();
+		});
 	});
 });
