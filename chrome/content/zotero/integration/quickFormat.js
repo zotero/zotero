@@ -157,12 +157,15 @@ var Zotero_QuickFormat = new function () {
 			if (event.target !== document) return;
 			// make sure we are visible
 			let resizePromise = (async function () {
-				await Zotero.Promise.delay();
+				let screenX = window.screenX, screenY = window.screenY, i = 5;
+				while (!screenX && i--) {
+					await new Promise(resolve => window.requestAnimationFrame(resolve));
+					screenX = window.screenX;
+					screenY = window.screenY;
+				}
 				window.resizeTo(window.outerWidth, qfb.clientHeight);
-				var screenX = window.screenX;
-				var screenY = window.screenY;
-				var xRange = [window.screen.availLeft, window.screen.width - window.outerWidth];
-				var yRange = [window.screen.availTop, window.screen.height - window.outerHeight];
+				var xRange = [window.screen.availLeft, window.screen.left + window.screen.width - window.outerWidth];
+				var yRange = [window.screen.availTop, window.screen.top + window.screen.height - window.outerHeight];
 				if (screenX < xRange[0] || screenX > xRange[1] || screenY < yRange[0] || screenY > yRange[1]) {
 					var targetX = Math.max(Math.min(screenX, xRange[1]), xRange[0]);
 					var targetY = Math.max(Math.min(screenY, yRange[1]), yRange[0]);
