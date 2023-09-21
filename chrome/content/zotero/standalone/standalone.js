@@ -308,7 +308,6 @@ const ZoteroStandalone = new function() {
 		var selected = [];
 
 		let win = Zotero.getMainWindow();
-		let localLinkType = 'select';
 		if (win) {
 			if (win.Zotero_Tabs.selectedID == 'zotero-pane') {
 				try {
@@ -325,7 +324,6 @@ const ZoteroStandalone = new function() {
 					selected = item.parentItem && [item.parentItem] || [];
 					item = item.parentItem || item;
 					win.ZoteroPane.updateQuickCopyCommands([item]);
-					localLinkType = reader.type;
 				}
 			}
 		}
@@ -342,14 +340,28 @@ const ZoteroStandalone = new function() {
 		var copyBibliography = document.getElementById('menu_copyBibliography');
 		var copyExport = document.getElementById('menu_copyExport');
 		var copyNote = document.getElementById('menu_copyNote');
-		var copyLocalLink = document.getElementById('menu_copyLocalLink');
+		var copyLocalLinkMenu = document.getElementById('menu_copyLocalLink');
+		var copyLocalReaderLink = document.getElementById('menu_copyLocalReaderLink');
 		var copyWebLibraryLink = document.getElementById('menu_copyWebLibraryLink');
 		
 		copyCitation.hidden = !selected.length || format.mode != 'bibliography';
 		copyBibliography.hidden = !selected.length || format.mode != 'bibliography';
 		copyExport.hidden = !selected.length || format.mode != 'export' || exportingNotes;
 		copyNote.hidden = !selected.length || format.mode != 'export' || !exportingNotes;
-		copyLocalLink.hidden = !selected.length;
+		copyLocalLinkMenu.hidden = !selected.length;
+
+		// TODO: Central source for these, extensible by plugins?
+		let readerMIMETypes = ['application/pdf', 'application/epub+zip', 'text/html'];
+		copyLocalReaderLink.disabled = !selected.some((item) => {
+			if (item.isAttachment()) {
+				return readerMIMETypes.includes(item.attachmentMIMEType);
+			}
+			if (item.isRegularItem()) {
+				return Zotero.Items.get(item.getAttachments())
+					.some(attachment => readerMIMETypes.includes(attachment.attachmentMIMEType));
+			}
+			return false;
+		});
 		copyWebLibraryLink.hidden = !selected.length;
 		copyWebLibraryLink.disabled = false;
 		
@@ -380,8 +392,7 @@ const ZoteroStandalone = new function() {
 				copyExport.hidden = true;
 			}
 		}
-		document.l10n.setAttributes(copyLocalLink, 'menu-copy-local-link', {
-			linkType: localLinkType,
+		document.l10n.setAttributes(copyLocalLinkMenu, 'menu-copy-local-link', {
 			numItems: selected.length
 		});
 		document.l10n.setAttributes(copyWebLibraryLink, 'menu-copy-web-library-link', {
@@ -389,7 +400,7 @@ const ZoteroStandalone = new function() {
 		});
 		
 		copyAs.disabled = copyCitation.hidden && copyBibliography.hidden && copyExport.hidden && copyNote.hidden
-			&& copyLocalLink.hidden && copyWebLibraryLink.hidden;
+			&& copyLocalLinkMenu.hidden && copyWebLibraryLink.hidden;
 	};
 	
 	
