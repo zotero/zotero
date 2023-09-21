@@ -57,13 +57,13 @@ var Zotero_Bibliography_Dialog = new function () {
 		window.addEventListener('dialogcancel', () => Zotero_Bibliography_Dialog.close());
 
 		_editor = document.querySelector('#editor').contentWindow.editor;
+		
+		// load (from selectItemsDialog.js)
+		await doLoad();
 
 		if (!io.itemTreeID) {
 			io.itemTreeID = "edit-bib-select-item-dialog";
 		}
-		
-		// load (from selectItemsDialog.js)
-		await doLoad();
 		
 		// load bibliography entries
 		_loadItems();
