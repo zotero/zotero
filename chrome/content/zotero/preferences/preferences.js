@@ -144,9 +144,20 @@ var Zotero_Preferences = {
 					child.hidden = true;
 				}
 			}
+			for (let navItem of this.navigation.children) {
+				navItem.setAttribute('data-parent-selected', pane.parent && navItem.value === pane.parent);
+			}
 
 			this.helpContainer.hidden = !pane.helpURL;
 			document.getElementById('prefs-subpane-back-button').hidden = !pane.parent;
+		}
+		else {
+			for (let navItem of this.navigation.children) {
+				navItem.setAttribute('data-parent-selected', false);
+			}
+			
+			this.helpContainer.hidden = true;
+			document.getElementById('prefs-subpane-back-button').hidden = true;
 		}
 		Zotero.Prefs.set('lastSelectedPrefPane', paneID);
 	},

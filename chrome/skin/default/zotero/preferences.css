@@ -68,12 +68,12 @@
 	transition: background-color 0.2s ease;
 }
 
-#prefs-navigation > richlistitem[selected="true"] {
+#prefs-navigation > richlistitem:is([selected="true"], [data-parent-selected="true"]) {
 	background-color: highlight;
 	color: highlighttext;
 }
 
-#prefs-navigation > richlistitem:not([selected="true"]):hover {
+#prefs-navigation > richlistitem:not([selected="true"], [data-parent-selected="true"]):hover {
 	background-color: color-mix(in srgb, transparent 60%, highlight);
 }
 
