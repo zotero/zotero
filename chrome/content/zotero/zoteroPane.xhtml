@@ -259,18 +259,25 @@
 											key="key_copyBibliography"
 											command="cmd_zotero_copyBibliography"
 											hidden="true"/>
+									<menuseparator/>
 									<menuitem id="menu_copyNote"
 											label="&copyNoteCmd.label;"
 											command="cmd_zotero_copyBibliography"
 											key="key_copyBibliography"
 											hidden="true"/>
-									<menuitem id="menu_copyLocalLink"
-											data-l10n-id="menu-copy-local-link"
-											oncommand="ZoteroPane.copySelectedItemLinksToClipboard({ toWebLibrary: false })"
-											hidden="true"/>
+									<menu id="menu_copyLocalLink" data-l10n-id="menu-copy-local-link" hidden="true">
+										<menupopup>
+											<menuitem id="menu_copyLocalItemLink"
+													data-l10n-id="menu-copy-local-item-link"
+													oncommand="ZoteroPane.copySelectedItemLinksToClipboard({ type: 'item' })"/>
+											<menuitem id="menu_copyLocalReaderLink"
+													data-l10n-id="menu-copy-local-reader-link"
+													oncommand="ZoteroPane.copySelectedItemLinksToClipboard({ type: 'reader' })"/>
+										</menupopup>
+									</menu>
 									<menuitem id="menu_copyWebLibraryLink"
 											data-l10n-id="menu-copy-web-library-link"
-											oncommand="ZoteroPane.copySelectedItemLinksToClipboard({ toWebLibrary: true })"
+											oncommand="ZoteroPane.copySelectedItemLinksToClipboard({ type: 'item', toWebLibrary: true })"
 											hidden="true"/>
 								</menupopup>
 							</menu>
