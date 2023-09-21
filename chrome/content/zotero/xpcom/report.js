@@ -328,7 +328,7 @@ Zotero.Report.HTML = new function () {
 	
 	
 	var escapeXML = function (str) {
-		str = str.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff\ufffe\uffff]/g, '\u2B1A');
+		str = str.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\ud800-\udfff\ufffe\uffff]/gu, '\u2B1A');
 		return Zotero.Utilities.htmlSpecialChars(str);
 	}
 }
