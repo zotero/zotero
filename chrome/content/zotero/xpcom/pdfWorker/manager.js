@@ -188,6 +188,10 @@ class PDFWorker {
 				});
 			}
 			let attachmentPath = await attachment.getFilePathAsync();
+			if (!attachmentPath) {
+				Zotero.warn("Not exporting missing file " + attachment.getFilePath());
+				return 0;
+			}
 			let buf = await IOUtils.read(attachmentPath);
 			buf = new Uint8Array(buf).buffer;
 
