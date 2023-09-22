@@ -3716,6 +3716,9 @@ var ZoteroPane = new function()
 					if (Zotero.Attachments.canFindPDFForItem(item)) {
 						show.add(m.findPDF);
 						show.add(m.sep3);
+						if (!collectionTreeRow.filesEditable) {
+							disable.add(m.findPDF);
+						}
 					}
 					
 					if (Zotero.RecognizeDocument.canUnrecognize(item)) {
