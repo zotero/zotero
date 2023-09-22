@@ -4710,23 +4710,28 @@ var ZoteroPane = new function()
 		
 		if(typeof itemIDs != "object") itemIDs = [itemIDs];
 		
-		var launchFile = async (path, contentType, itemID) => {
-			// Fix blank PDF MIME type and incorrect EPUB MIME type
-			if (!contentType || contentType === 'application/epub') {
-				let item = await Zotero.Items.getAsync(itemID);
+		var launchFile = async (path, item) => {
+			let contentType = item.attachmentContentType;
+			// Fix blank/incorrect EPUB and PDF content types
+			let sniffType = async () => {
 				let path = await item.getFilePathAsync();
-				let type = contentType === 'application/epub'
-					? 'application/epub+zip'
-					: 'application/pdf';
-				if (Zotero.MIME.sniffForMIMEType(await Zotero.File.getSample(path)) == type) {
-					contentType = type;
-					item.attachmentContentType = type;
-					await item.saveTx();
+				return Zotero.MIME.sniffForMIMEType(await Zotero.File.getSample(path));
+			};
+			if (!contentType || contentType === 'application/octet-stream') {
+				let sniffedType = await sniffType();
+				if (sniffedType === 'application/pdf' || sniffedType === 'application/epub+zip') {
+					contentType = sniffedType;
 				}
 			}
+			else if (contentType === 'application/epub' && await sniffType() === 'application/epub+zip') {
+				contentType = 'application/epub+zip';
+			}
+			if (item.attachmentContentType !== contentType) {
+				item.attachmentContentType = contentType;
+				await item.saveTx();
+			}
+
 			if (['application/pdf', 'application/epub+zip', 'text/html'].includes(contentType)) {
-				let item = await Zotero.Items.getAsync(itemID);
-				let library = Zotero.Libraries.get(item.libraryID);
 				let type;
 				if (contentType === 'application/pdf') {
 					type = 'pdf';
@@ -4747,7 +4752,7 @@ var ZoteroPane = new function()
 						openInWindow = !openInWindow;
 					}
 					await Zotero.Reader.open(
-						itemID,
+						item.id,
 						extraData && extraData.location,
 						{
 							openInWindow,
@@ -4827,7 +4832,7 @@ var ZoteroPane = new function()
 				let iCloudPath = Zotero.File.getEvictedICloudPath(path);
 				if (await OS.File.exists(iCloudPath)) {
 					Zotero.debug("Triggering download of iCloud file");
-					await launchFile(iCloudPath, item.attachmentContentType, itemID);
+					await launchFile(iCloudPath, item);
 					let time = new Date();
 					let maxTime = 5000;
 					let revealed = false;
@@ -4887,7 +4892,7 @@ var ZoteroPane = new function()
 			if (fileExists && !redownload) {
 				Zotero.debug("Opening " + path);
 				Zotero.Notifier.trigger('open', 'file', item.id);
-				await launchFile(path, item.attachmentContentType, item.id);
+				await launchFile(path, item);
 				continue;
 			}
 			
@@ -4933,7 +4938,7 @@ var ZoteroPane = new function()
 			
 			Zotero.debug("Opening " + path);
 			Zotero.Notifier.trigger('open', 'file', item.id);
-			await launchFile(path, item.attachmentContentType, item.id);
+			await launchFile(path, item);
 		}
 	});
 	

@@ -318,6 +318,29 @@ describe("ZoteroPane", function() {
 			Zotero.Sync.Storage.Local.downloadOnSync(Zotero.Libraries.userLibraryID, true);
 			yield downloadOnDemand();
 		});
+		
+		it("should update a PDF with a blank MIME type", async function () {
+			let attachment = await importFileAttachment('test.pdf');
+			// Can't use contentType argument to importFileAttachment() because blank string is ignored
+			attachment.attachmentContentType = '';
+			await attachment.saveTx();
+			await zp.viewAttachment(attachment.id);
+			assert.equal(attachment.attachmentContentType, 'application/pdf');
+		});
+		
+		it("should update an EPUB with an 'application/epub' MIME type", async function () {
+			let attachment = await importFileAttachment('stub.epub', { contentType: 'application/epub' });
+			assert.equal(attachment.attachmentContentType, 'application/epub');
+			await zp.viewAttachment(attachment.id);
+			assert.equal(attachment.attachmentContentType, 'application/epub+zip');
+		});
+		
+		it("should update an EPUB with an 'application/octet-stream' MIME type", async function () {
+			let attachment = await importFileAttachment('stub.epub', { contentType: 'application/octet-stream' });
+			assert.equal(attachment.attachmentContentType, 'application/octet-stream');
+			await zp.viewAttachment(attachment.id);
+			assert.equal(attachment.attachmentContentType, 'application/epub+zip');
+		});
 	})
 	
 	
