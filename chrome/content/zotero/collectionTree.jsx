@@ -173,7 +173,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	handleActivate = (event, indices) => {
 		let index = indices[0];
 		let treeRow = this.getRow(index);
-		if (treeRow.isCollection() && this.editable) {
+		if (treeRow.isCollection() && this.editable && this.selection.focused == index) {
 			this._editing = treeRow;
 			treeRow.editingName = treeRow.ref.name;
 			this.tree.invalidateRow(index);
