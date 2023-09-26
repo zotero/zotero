@@ -793,7 +793,12 @@ Zotero.Sync.Storage.Local = {
 		}
 		catch (e) {
 			Zotero.debug(zipFile.leafName + " is not a valid ZIP file", 2);
-			zipReader.close();
+			try {
+				zipReader.close();
+			}
+			catch (e) {
+				Zotero.debug(e, 2);
+			}
 			zipReader = null
 			Cu.forceGC();
 			
