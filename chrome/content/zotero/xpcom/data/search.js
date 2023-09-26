@@ -1368,6 +1368,10 @@ Zotero.Search.prototype._buildQuery = Zotero.Promise.coroutine(function* () {
 							}
 							
 							condSQL += 'collectionID IN (' + ids.join(', ') + ')';
+							let attachmentSQL = `) UNION SELECT itemID from itemAttachments WHERE parentItemID IN (${condSQL})`;
+							let noteSQL = `) UNION SELECT itemID from itemNotes WHERE parentItemID IN (${condSQL})`;
+							condSQL += attachmentSQL;
+							condSQL += noteSQL;
 						}
 						// Saved search
 						else {
