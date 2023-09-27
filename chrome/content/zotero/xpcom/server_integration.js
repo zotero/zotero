@@ -29,7 +29,10 @@ Zotero.Server.Endpoints['/integration/macWordCommand'].prototype = {
 	supportedDataTypes: ["application/json"],
 	permitBookmarklet: true,
 	init: function (data) {
-		Zotero.Integration.execCommand(data.query.agent, data.query.command, data.query.document, data.query.templateVersion);
+		// Some dark magic to fix incorrectly encoded unicode characters here
+		// from https://stackoverflow.com/questions/5396560/how-do-i-convert-special-utf-8-chars-to-their-iso-8859-1-equivalent-using-javasc
+		const document = decodeURIComponent(escape(data.query.document));
+		Zotero.Integration.execCommand(data.query.agent, data.query.command, document, data.query.templateVersion);
 		return 200;
 	},
 };
