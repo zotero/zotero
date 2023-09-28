@@ -187,7 +187,7 @@
 				return;
 			}
 			if (relItems[0].libraryID != this._item.libraryID) {
-				Zotero.alert.alert(null, "", "You cannot relate items in different libraries.");
+				Zotero.alert(null, "", "You cannot relate items in different libraries.");
 				return;
 			}
 			await Zotero.DB.executeTransaction(async () => {
