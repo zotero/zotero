@@ -44,11 +44,11 @@ Zotero.Prefs = new function() {
 
 		// Process pref version updates
 		var fromVersion = this.get('prefVersion');
-		if (!fromVersion) {
-			fromVersion = 0;
-		}
 		var toVersion = 9;
-		if (fromVersion < toVersion) {
+		if (!fromVersion) {
+			this.set('prefVersion', toVersion);
+		}
+		else if (fromVersion < toVersion) {
 			for (var i = fromVersion + 1; i <= toVersion; i++) {
 				switch (i) {
 					case 1:
