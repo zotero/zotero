@@ -57,7 +57,7 @@ var Zotero_File_Interface_Bibliography = new function() {
 		// Affects bibliography.xhtml and integrationDocPrefs.xul
 		var bibContainer = document.getElementById("zotero-bibliography-container");
 		if(bibContainer) {
-			Zotero.setFontSize(document.getElementById("zotero-bibliography-container"));
+			Zotero.UIProperties.registerRoot(document.getElementById("zotero-bibliography-container"));
 		}
 		
 		if(window.arguments && window.arguments.length) {

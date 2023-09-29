@@ -35,7 +35,7 @@ function toggleAccept(enabled) {
 function doLoad() {
 	// Set font size from pref
 	let sbc = document.getElementById('zotero-create-parent-container');
-	Zotero.setFontSize(sbc);
+	Zotero.UIProperties.registerRoot(sbc);
 
 	io = window.arguments[0];
 

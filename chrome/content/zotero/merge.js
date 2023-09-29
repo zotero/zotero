@@ -48,7 +48,7 @@ var Zotero_Merge_Window = new function () {
 		_wizard.addEventListener('wizardfinish', this.onFinish.bind(this));
 		
 		// Set font size from pref
-		Zotero.setFontSize(_wizardPage);
+		Zotero.UIProperties.registerRoot(_wizardPage);
 		
 		_wizard.getButton('cancel').setAttribute('label', Zotero.getString('sync.cancel'));
 		

@@ -61,7 +61,7 @@ async function onLoad() {
 	noteEditor.viewMode = 'window';
 	
 	// Set font size from pref
-	Zotero.setFontSize(noteEditor);
+	Zotero.UIProperties.registerRoot(noteEditor);
 	
 	if (itemID) {
 		var ref = await Zotero.Items.getAsync(itemID);

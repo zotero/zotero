@@ -165,7 +165,7 @@ var Scaffold = new function () {
 		this.initTestsEditor();
 
 		// Set font size from general pref
-		Zotero.setFontSize(document.getElementById('scaffold-pane'));
+		Zotero.UIProperties.registerRoot(document.getElementById('scaffold-pane'));
 
 		// Set font size of code editor
 		var size = Zotero.Prefs.get("scaffold.fontSize");

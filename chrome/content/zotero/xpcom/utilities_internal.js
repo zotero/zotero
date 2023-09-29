@@ -1876,30 +1876,9 @@ Zotero.Utilities.Internal = {
 		return returns;
 	},
 
-	/*
-	 * Sets font size based on prefs -- intended for use on root element
-	 *  (zotero-pane, note window, etc.)
-	 */
 	setFontSize: function (rootElement) {
-		var size = Zotero.Prefs.get('fontSize');
-		rootElement.style.fontSize = rootElement.style['--zotero-font-size'] = size + 'em';
-		if (size <= 1) {
-			size = 'small';
-		}
-		else if (size <= 1.15) {
-			size = 'medium';
-		}
-		else if (size <= 1.3) {
-			size = 'large';
-		}
-		else {
-			size = 'x-large';
-		}
-		// Custom attribute -- allows for additional customizations in zotero.css
-		rootElement.setAttribute('zoteroFontSize', size);
-		if (Zotero.rtl) {
-			rootElement.setAttribute('dir', 'rtl');
-		}
+		Zotero.debug("setFontSize() is deprecated -- use Zotero.UIProperties");
+		Zotero.UIProperties.set(rootElement);
 	},
 
 	getAncestorByTagName: function (elem, tagName){

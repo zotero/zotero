@@ -63,6 +63,7 @@ const xpcomFilesAll = [
 	'translation/translate_firefox',
 	'isbn',
 	'preferencePanes',
+	'uiProperties',
 ];
 
 /** XPCOM files to be loaded only for local translation and DB access **/

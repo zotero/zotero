@@ -103,8 +103,12 @@ var ZoteroPane = new function()
 		_loaded = true;
 		
 		var zp = document.getElementById('zotero-pane');
-		Zotero.setFontSize(zp);
-		Zotero.setFontSize(document.getElementById('zotero-context-pane'));
+		Zotero.UIProperties.registerRoot(zp);
+		zp.addEventListener('UIPropertiesChanged', () => {
+			this.collectionsView?.updateFontSize();
+			this.itemsView?.updateFontSize();
+		});
+		Zotero.UIProperties.registerRoot(document.getElementById('zotero-context-pane'));
 		ZoteroPane_Local.updateLayout();
 		ZoteroPane_Local.updateToolbarPosition();
 		this.updateWindow();
