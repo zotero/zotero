@@ -438,6 +438,11 @@ const ZoteroStandalone = new function() {
 		this.updateMenuItemCheckmark('view-menuitem-standard', mode != 'stacked');
 		this.updateMenuItemCheckmark('view-menuitem-stacked', mode == 'stacked');
 		
+		// Density
+		let density = Zotero.Prefs.get('uiDensity');
+		this.updateMenuItemCheckmark('view-menuitem-ui-density-compact', density == 'compact');
+		this.updateMenuItemCheckmark('view-menuitem-ui-density-comfortable', density == 'comfortable');
+		
 		// Panes
 		this.updateMenuItemCheckmark(
 			'view-menuitem-collections-pane',
@@ -496,6 +501,14 @@ const ZoteroStandalone = new function() {
 			
 			case 'stacked':
 				Zotero.Prefs.set('layout', 'stacked');
+				break;
+			
+			case 'ui-density-comfortable':
+				Zotero.Prefs.set('uiDensity', 'comfortable');
+				break;
+			
+			case 'ui-density-compact':
+				Zotero.Prefs.set('uiDensity', 'compact');
 				break;
 			
 			case 'collections-pane':

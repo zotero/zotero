@@ -72,6 +72,8 @@ pref("extensions.zotero.lastLongTagDelimiter", ";");
 pref("extensions.zotero.fallbackSort", "firstCreator,date,title,dateAdded");
 pref("extensions.zotero.sortCreatorAsString", false);
 
+pref("extensions.zotero.uiDensity", "comfortable");
+
 
 //Tag Selector
 pref("extensions.zotero.tagSelector.showAutomatic", true);

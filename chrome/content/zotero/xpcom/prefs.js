@@ -44,7 +44,7 @@ Zotero.Prefs = new function() {
 
 		// Process pref version updates
 		var fromVersion = this.get('prefVersion');
-		var toVersion = 9;
+		var toVersion = 10;
 		if (!fromVersion) {
 			this.set('prefVersion', toVersion);
 		}
@@ -129,6 +129,11 @@ Zotero.Prefs = new function() {
 							}
 							this.clear('attachmentRenameFormatString');
 						}
+						break;
+					
+					// Set UI density to Compact for existing users
+					case 10:
+						this.set('uiDensity', 'compact');
 						break;
 				}
 			}

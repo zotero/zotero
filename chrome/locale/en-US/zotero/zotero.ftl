@@ -192,3 +192,10 @@ restart-in-troubleshooting-mode-menuitem =
     .accesskey = T
 restart-in-troubleshooting-mode-dialog-title = Restart in Troubleshooting Mode
 restart-in-troubleshooting-mode-dialog-description = { -app-name } will restart with all plugins disabled. Some features may not function correctly while Troubleshooting Mode is enabled.
+
+menu-ui-density =
+    .label = Density
+menu-ui-density-comfortable =
+    .label = Comfortable
+menu-ui-density-compact =
+    .label = Compact
