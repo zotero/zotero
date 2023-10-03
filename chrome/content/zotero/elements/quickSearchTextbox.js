@@ -105,7 +105,14 @@
 
 				popup.append(item);
 			}
-
+			let separator = document.createXULElement('menuseparator');
+			popup.append(separator);
+			let advancedSearchOption = document.createXULElement('menuitem');
+			advancedSearchOption.label = Zotero.getString("zotero.toolbar.advancedSearch");
+			advancedSearchOption.addEventListener("command", () => {
+				ZoteroPane.openAdvancedSearchWindow();
+			});
+			popup.append(advancedSearchOption);
 			return this._searchModePopup = popup;
 		}
 
