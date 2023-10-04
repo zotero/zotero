@@ -99,11 +99,23 @@ class TagList extends React.PureComponent {
 		var positions = [];
 		var row = 0;
 		let rowX = panePaddingLeft;
+
+		const separatorHeightCoefficient = 0.5;
+		let separatorHeight = Math.round(rowHeight * separatorHeightCoefficient);
+		let shouldAddSeparator = false;
+		let hasColoredTags = !!this.props.tags[0]?.color;
+		let forceNewLine = false;
+
 		for (let i = 0; i < this.props.tags.length; i++) {
 			let tag = this.props.tags[i];
+			// Add separator after reaching the first non-colored tag, assuming colored tags exist
+			if (!shouldAddSeparator && hasColoredTags && !tag.color) {
+				shouldAddSeparator = true;
+				forceNewLine = true;
+			}
 			let tagWidth = tagPaddingLeft + Math.min(tag.width, tagMaxWidth) + tagPaddingRight;
 			// If first row or cell fits, add to current row
-			if (i == 0 || ((rowX + tagWidth) < (this.props.width - panePaddingLeft - panePaddingRight))) {
+			if (!forceNewLine && (i == 0 || ((rowX + tagWidth) < (this.props.width - panePaddingLeft - panePaddingRight)))) {
 				positions[i] = [rowX, panePaddingTop + (row * rowHeight)];
 			}
 			// Otherwise, start new row
@@ -111,6 +123,11 @@ class TagList extends React.PureComponent {
 				row++;
 				rowX = panePaddingLeft;
 				positions[i] = [rowX, panePaddingTop + (row * rowHeight)];
+			}
+			// Push all Y coordinates down by the height of the separator
+			if (shouldAddSeparator) {
+				positions[i][1] += separatorHeight;
+				forceNewLine = false;
 			}
 			rowX += tagWidth + tagSpaceBetweenX;
 		}

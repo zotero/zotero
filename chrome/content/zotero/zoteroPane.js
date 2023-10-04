@@ -1525,6 +1525,12 @@ var ZoteroPane = new function()
 						onSelection: this.updateTagFilter.bind(this),
 					}
 				);
+				// Occasionally, when the app is first opened, the scrollable tag list doesn't
+				// occupy the full height of the tag selector. This ensures that it occupies all
+				// available space.
+				setTimeout(() => {
+					this.tagSelector.handleResize();
+				}, 100);
 			}
 		}
 		catch (e) {
