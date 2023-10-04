@@ -217,3 +217,6 @@ pref("extensions.zotero.tabs.title.reader", "titleCreatorYear");
 
 // Reader
 pref("extensions.zotero.reader.ebookFontFamily", "Georgia, serif");
+
+// Set color scheme to auto by default
+pref("browser.theme.toolbar-theme", 2);

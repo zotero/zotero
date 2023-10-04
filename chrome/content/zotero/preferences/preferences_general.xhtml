@@ -197,16 +197,25 @@
 	</groupbox>
 	
 	<groupbox>
-	<label><html:h2>&zotero.preferences.interface;</html:h2></label>
-
-	<hbox align="center">
-		<label value="&zotero.bibliography.locale.label;"/>
-		<menulist id="locale-menu"
-				onblur="if (!Zotero.isMac) Zotero_Preferences.General.onLocaleChange()"
-				native="true">
-			<menupopup onpopuphidden="Zotero_Preferences.General.onLocaleChange()"/>
-		</menulist>
-	</hbox>
-</groupbox>
+		<label><html:h2>&zotero.preferences.interface;</html:h2></label>
+	
+		<hbox align="center">
+			<label data-l10n-id="preferences-color-scheme"/>
+			<radiogroup orient="horizontal" id="color-scheme" preference="browser.theme.toolbar-theme">
+				<radio data-l10n-id="preferences-color-scheme-auto" value="2"/>
+				<radio data-l10n-id="preferences-color-scheme-light" value="1"/>
+				<radio data-l10n-id="preferences-color-scheme-dark" value="0"/>
+			</radiogroup>
+		</hbox>
+	
+		<hbox align="center">
+			<label value="&zotero.bibliography.locale.label;"/>
+			<menulist id="locale-menu"
+					onblur="if (!Zotero.isMac) Zotero_Preferences.General.onLocaleChange()"
+					native="true">
+				<menupopup onpopuphidden="Zotero_Preferences.General.onLocaleChange()"/>
+			</menulist>
+		</hbox>
+	</groupbox>
 
 </vbox>
