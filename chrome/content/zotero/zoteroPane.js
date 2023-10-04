@@ -826,7 +826,7 @@ var ZoteroPane = new function()
 			else if (event.key === 'Tab' && event.shiftKey) {
 				let node = document.activeElement;
 				if (node && node.nodeType === Node.ELEMENT_NODE && (
-					node.parentNode.classList.contains('zotero-editpane-tabs')
+					node.parentNode.classList.contains('zotero-view-item')
 					|| node.getAttribute('type') === 'search'
 					|| node.getAttribute('anonid') === 'editor-view'
 					&& node.contentWindow.document.activeElement.classList.contains('toolbar-button-return'))) {
@@ -1757,8 +1757,6 @@ var ZoteroPane = new function()
 			}
 			_lastSelectedItems = ids;
 			
-			var tabs = document.getElementById('zotero-view-tabbox');
-			
 			var collectionTreeRow = this.getCollectionTreeRow();
 			// I don't think this happens in normal usage, but it can happen during tests
 			if (!collectionTreeRow) {
@@ -1785,16 +1783,15 @@ var ZoteroPane = new function()
 				else {
 					var isCommons = collectionTreeRow.isBucket();
 					
-					document.getElementById('zotero-item-pane-content').selectedIndex = 1;
-					var tabBox = document.getElementById('zotero-view-tabbox');
-					
-					// Reset tab when viewing a feed item, which only has the info tab
-					if (item.isFeedItem) {
-						tabBox.selectedIndex = 0;
+					let deck = document.getElementById('zotero-item-pane-content');
+					let pane;
+					if (deck.selectedIndex == 1) {
+						pane = ZoteroItemPane.getSidenavSelectedPane();
 					}
-					
-					var pane = tabBox.selectedIndex;
-					tabBox.firstChild.hidden = isCommons;
+					else {
+						deck.selectedIndex = 1;
+						pane = ZoteroItemPane.getSidenavSelectedPane();
+					}
 					
 					var button = document.getElementById('zotero-item-show-original');
 					if (isCommons) {
@@ -1807,11 +1804,9 @@ var ZoteroPane = new function()
 					
 					if (this.collectionsView.editable) {
 						yield ZoteroItemPane.viewItem(item, null, pane);
-						tabs.selectedIndex = document.getElementById('zotero-view-item').selectedIndex;
 					}
 					else {
 						yield ZoteroItemPane.viewItem(item, 'view', pane);
-						tabs.selectedIndex = document.getElementById('zotero-view-item').selectedIndex;
 					}
 					
 					if (item.isFeedItem) {

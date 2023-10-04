@@ -22,9 +22,6 @@ describe("Related Box", function () {
 		item2.addRelatedItem(item1);
 		await item2.saveTx();
 		
-		// Select the Related pane
-		var tabbox = doc.getElementById('zotero-view-tabbox');
-		tabbox.selectedIndex = 3;
 		var relatedbox = doc.getElementById('zotero-editpane-related');
 		
 		// Wait for relations list to populate
@@ -56,9 +53,6 @@ describe("Related Box", function () {
 		item2.addRelatedItem(item1);
 		await item2.saveTx();
 		
-		// Select the Related pane
-		var tabbox = doc.getElementById('zotero-view-tabbox');
-		tabbox.selectedIndex = 3;
 		var relatedbox = doc.getElementById('zotero-editpane-related');
 		
 		// Wait for relations list to populate
@@ -83,9 +77,6 @@ describe("Related Box", function () {
 			var item1 = yield createDataObject('item');
 			var item2 = yield createDataObject('item');
 			
-			// Select the Related pane
-			var tabbox = doc.getElementById('zotero-view-tabbox');
-			tabbox.selectedIndex = 3;
 			var relatedbox = doc.getElementById('zotero-editpane-related');
 			assert.lengthOf(relatedbox.querySelectorAll('#related-grid div'), 0);
 			
@@ -136,9 +127,6 @@ describe("Related Box", function () {
 			item2.addRelatedItem(item1);
 			yield item2.saveTx();
 			
-			// Select the Related pane
-			var tabbox = doc.getElementById('zotero-view-tabbox');
-			tabbox.selectedIndex = 3;
 			var relatedbox = doc.getElementById('zotero-editpane-related');
 			
 			// Wait for relations list to populate

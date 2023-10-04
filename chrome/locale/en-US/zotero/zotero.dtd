@@ -46,12 +46,6 @@
 <!ENTITY zotero.upgrade.changeLogLink						"the changelog">
 <!ENTITY zotero.upgrade.changeLogAfterLink					"to find out what's new.">
 
-<!ENTITY zotero.tabs.info.label						"Info">
-<!ENTITY zotero.tabs.notes.label						"Notes">
-<!ENTITY zotero.tabs.attachments.label					"Attachments">
-<!ENTITY zotero.tabs.tags.label						"Tags">
-<!ENTITY zotero.tabs.related.label						"Related">
-
 <!ENTITY zotero.toolbar.duplicate.label				"Show Duplicates">
 <!ENTITY zotero.collections.showUnfiledItems			"Show Unfiled Items">
 <!ENTITY zotero.collections.showRetractedItems        "Show Retracted Items">

@@ -78,3 +78,13 @@ $z-index-modal:			    40;
 $z-index-drag-layer:    50;
 $z-index-loading-cover: 60;
 
+// Item pane
+// --------------------------------------------------
+$item-pane-sections: (
+		"info": var(--accent-blue),
+		"abstract": var(--accent-teal),
+		"attachments": var(--accent-green),
+		"notes": var(--accent-yellow),
+		"tags": var(--accent-orange),
+		"related": var(--accent-wood),
+);

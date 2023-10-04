@@ -43,6 +43,11 @@ Services.scriptloader.loadSubScript("chrome://zotero/content/elements/splitMenuB
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/tagsBox.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/textLink.js', this);
 Services.scriptloader.loadSubScript('chrome://zotero/content/elements/zoteroSearch.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/paneHeader.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/editableText.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/itemPaneSidenav.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/abstractBox.js', this);
+Services.scriptloader.loadSubScript('chrome://zotero/content/elements/collapsibleSection.js', this);
 
 // Fix missing property bug that breaks arrow key navigation between <tab>s
 {
@@ -58,5 +63,28 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/zoteroSear
 				}
 			}
 		});
+	}
+
+	let isMac = AppConstants.platform == 'macosx';
+	if (isMac) {
+		// Monkey-patch the toolbarbutton CE so it shows a native menu popup
+		let MozToolbarbuttonPrototype = customElements.get('toolbarbutton').prototype;
+		if (MozToolbarbuttonPrototype) {
+			let originalRender = MozToolbarbuttonPrototype.render;
+			MozToolbarbuttonPrototype.render = function () {
+				originalRender.apply(this);
+				if (!this._zoteroMouseDownListenerAdded) {
+					this.addEventListener('mousedown', (event) => {
+						if (!event.defaultPrevented
+								&& !this.disabled
+								&& this.getAttribute('nonnativepopup') != 'true'
+								&& Zotero.Utilities.Internal.showNativeElementPopup(this)) {
+							event.preventDefault();
+						}
+					});
+					this._zoteroMouseDownListenerAdded = true;
+				}
+			};
+		}
 	}
 }

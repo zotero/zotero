@@ -1,0 +1,40 @@
+item-pane-sidenav {
+	display: flex;
+	flex-direction: column;
+	padding: 6px 4px;
+	align-items: flex-start;
+	gap: 6px;
+	border-left: var(--material-panedivider);
+
+	toolbarbutton {
+		// TODO: Extract button styles?
+		
+		width: 28px;
+		height: 28px;
+		padding: 4px;
+		flex-shrink: 0;
+		border-radius: 5px;
+		-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
+
+		&:hover {
+			background-color: var(--fill-quinary);
+		}
+		
+		&:active, &[selected] {
+			background-color: var(--fill-quarternary);
+		}
+		
+		&:disabled {
+			background-color: transparent;
+			fill: var(--fill-tertiary);
+		}
+		
+		@each $pane, $color in $item-pane-sections {
+			&[data-pane="#{$pane}"] {
+				list-style-image: url("chrome://zotero/skin/itempane/20/#{$pane}.svg");
+				fill: $color;
+				stroke: $color;
+			}
+		}
+	}
+}

@@ -774,8 +774,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 
 			if (singleSelect) {
 				if (!extraData[singleSelect] || !extraData[singleSelect].skipSelect) {
-					// Reset to Info tab
-					this._ownerDocument.getElementById('zotero-view-tabbox').selectedIndex = 0;
+					this._ownerDocument.getElementById('zotero-view-item').scrollTop = 0;
 					await this.selectItem(singleSelect);
 					reselect = true;
 				}

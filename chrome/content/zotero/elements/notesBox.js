@@ -58,6 +58,7 @@ import { getCSSItemTypeIcon } from 'components/icons';
 			this.append(content);
 
 			this._id('notes-add').addEventListener('click', this._handleAdd);
+			this.addEventListener('add', this._handleAdd);
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'notesBox');
 		}

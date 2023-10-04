@@ -1,0 +1,85 @@
+collapsible-section {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	border-bottom: 1px solid var(--fill-quinary);
+
+	& > .head {
+		@include comfortable {
+			padding-block: 2px;
+		}
+		
+		display: flex;
+		align-items: center;
+		
+		.title {
+			flex: 1;
+			
+			display: flex;
+			align-items: center;
+			gap: 4px;
+			color: var(--fill-secondary);
+			font-weight: 590;
+
+			&::before {
+				content: '';
+				width: 16px;
+				height: 16px;
+			}
+		}
+		
+		toolbarbutton {
+			flex-shrink: 0;
+			width: 20px;
+			height: 20px;
+			padding: 2px;
+			-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
+			fill: var(--fill-secondary);
+			stroke: var(--fill-secondary);
+		}
+		
+		toolbarbutton.add {
+			list-style-image: icon-url("plus.svg");
+		}
+
+		toolbarbutton.twisty .toolbarbutton-icon {
+			list-style-image: icon-url("chevron-12.svg");
+			transform: rotate(0deg);
+			transform-origin: center;
+			transition: transform 0.2s ease-in-out;
+		}
+	}
+	
+	&[open] > .head {
+		toolbarbutton.twisty .toolbarbutton-icon {
+			transform: rotate(-180deg);
+		}
+	}
+
+	@each $pane, $color in $item-pane-sections {
+		&[data-pane="#{$pane}"] {
+			& > .head > .title::before {
+				background: icon-url("itempane/16/#{$pane}.svg") no-repeat center;
+				-moz-context-properties: fill, fill-opacity, stroke, stroke-opacity;
+				fill: $color;
+				stroke: $color;
+			}
+		}
+	}
+	
+	& > :not(.head) {
+		overflow: hidden;
+		max-height: var(--open-height, auto);
+		opacity: 1;
+		transition: max-height 0.2s ease-in-out, opacity 0.2s ease-in-out;
+	}
+	
+	&:not([open]) {
+		& > :not(.head) {
+			max-height: 0;
+			opacity: 0;
+			visibility: hidden;
+			transition: max-height 0.2s ease-in-out, opacity 0.2s ease-in-out, visibility 0s 0.2s;
+		}
+	}
+}

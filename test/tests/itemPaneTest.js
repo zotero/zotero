@@ -179,10 +179,7 @@ describe("Item pane", function () {
 				await note2.save();
 			});
 			
-			var tabs = doc.getElementById('zotero-editpane-tabs');
-			var notesTab = doc.getElementById('zotero-editpane-notes-tab');
 			var grid = doc.querySelector('#zotero-editpane-notes #notes-grid');
-			tabs.selectedItem = notesTab;
 			// Wait for note list to update
 			do {
 				yield Zotero.Promise.delay(1);
@@ -219,10 +216,7 @@ describe("Item pane", function () {
 				await note2.save();
 			});
 			
-			var tabs = doc.getElementById('zotero-editpane-tabs');
-			var notesTab = doc.getElementById('zotero-editpane-notes-tab');
 			var grid = doc.querySelector('#zotero-editpane-notes #notes-grid');
-			tabs.selectedItem = notesTab;
 			// Wait for note list to update
 			do {
 				yield Zotero.Promise.delay(1);
@@ -260,10 +254,7 @@ describe("Item pane", function () {
 				await note2.save();
 			});
 			
-			var tabs = doc.getElementById('zotero-editpane-tabs');
-			var notesTab = doc.getElementById('zotero-editpane-notes-tab');
 			var grid = doc.querySelector('#zotero-editpane-notes #notes-grid');
-			tabs.selectedItem = notesTab;
 			// Wait for note list to update
 			do {
 				yield Zotero.Promise.delay(1);

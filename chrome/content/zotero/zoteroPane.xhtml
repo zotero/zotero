@@ -734,17 +734,6 @@
 	<hbox>
 		<div xmlns="http://www.w3.org/1999/xhtml" id="tab-bar-container" style="-moz-box-flex: 1;"/>
 		<hbox id="zotero-tabs-toolbar"  align="center">
-			<hbox align="center" pack="start">
-				<toolbarbutton
-						id="zotero-tb-locate"
-						class="zotero-tb-button"
-						tooltiptext="&zotero.toolbar.openURL.label;"
-						type="menu"
-						tabindex="-1"
-						wantdropmarker="true">
-					<menupopup id="zotero-tb-locate-menu" onpopupshowing="Zotero_LocateMenu.buildLocateMenu()"/>
-				</toolbarbutton>
-			</hbox>
 			<toolbarbutton id="zotero-tb-opened-tabs" class="zotero-tb-button" tabindex="-1" data-l10n-id="zotero-toolbar-opened-tabs-menu" type="panel" />
 			<hbox id="zotero-tb-sync-progress-box" align="center" pack="end">
 				<toolbarbutton id="zotero-tb-sync-stop"
@@ -1100,29 +1089,39 @@
 												Keep in sync with contextPane.js (_addItemContext function) which
 												dynamically creates this itemPane part for each tab
 											-->
-											<tabbox id="zotero-view-tabbox" class="zotero-view-tabbox" flex="1" onselect="if (!ZoteroPane_Local.getCollectionTreeRow() || event.originalTarget.localName != 'tabpanels') { return; }; ZoteroItemPane.viewItem(ZoteroPane_Local.getSelectedItems()[0], ZoteroPane_Local.collectionsView.editable ? 'edit' : 'view', this.selectedIndex)">
-												<tabs id="zotero-editpane-tabs" class="zotero-editpane-tabs">
-													<tab id="zotero-editpane-info-tab" label="&zotero.tabs.info.label;"/>
-													<tab id="zotero-editpane-notes-tab" label="&zotero.tabs.notes.label;"/>
-													<tab id="zotero-editpane-tags-tab" label="&zotero.tabs.tags.label;"/>
-													<tab id="zotero-editpane-related-tab" label="&zotero.tabs.related.label;"/>
-												</tabs>
-												<tabpanels id="zotero-view-item" class="zotero-view-item" flex="1">
-													<tabpanel id="item-box-container"/>
+											<hbox id="zotero-view-item-container" class="zotero-view-item-container">
+												<html:div class="zotero-view-item-main">
+													<pane-header id="zotero-item-pane-header" />
 													
-													<tabpanel>
-														<notes-box id="zotero-editpane-notes" class="zotero-editpane-notes" flex="1"/>
-													</tabpanel>
-													
-													<tabpanel>
-														<tags-box id="zotero-editpane-tags" class="zotero-editpane-tags" flex="1"/>
-													</tabpanel>
-													
-													<tabpanel>
-														<related-box id="zotero-editpane-related" class="zotero-editpane-related" flex="1"/>
-													</tabpanel>
-												</tabpanels>
-											</tabbox>
+													<html:div id="zotero-view-item" class="zotero-view-item">
+														<collapsible-section data-l10n-id="section-info" data-pane="info">
+															<item-box id="zotero-editpane-item-box"/>
+														</collapsible-section>
+														
+														<collapsible-section data-l10n-id="section-abstract" data-pane="abstract">
+															<abstract-box id="zotero-editpane-abstract" class="zotero-editpane-abstract"/>
+														</collapsible-section>
+
+														<collapsible-section data-l10n-id="section-attachments" data-pane="attachments" show-add="true">
+															<html:span>[placeholder for attachments section]</html:span>
+														</collapsible-section>
+
+														<collapsible-section data-l10n-id="section-notes" data-pane="notes" show-add="true">
+															<notes-box id="zotero-editpane-notes" class="zotero-editpane-notes"/>
+														</collapsible-section>
+
+														<collapsible-section data-l10n-id="section-tags" data-pane="tags" show-add="true">
+															<tags-box id="zotero-editpane-tags" class="zotero-editpane-tags"/>
+														</collapsible-section>
+
+														<collapsible-section data-l10n-id="section-related" data-pane="related" show-add="true">
+															<related-box id="zotero-editpane-related" class="zotero-editpane-related"/>
+														</collapsible-section>
+													</html:div>
+												</html:div>
+												
+												<item-pane-sidenav id="zotero-view-item-sidenav" class="zotero-view-item-sidenav"/>
+											</hbox>
 											
 											<!-- Note item -->
 											<groupbox id="zotero-view-note" flex="1">

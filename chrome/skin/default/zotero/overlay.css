@@ -514,11 +514,6 @@
 	list-style-image: url('chrome://zotero/skin/toolbar-advanced-search.png');
 }
 
-#zotero-tb-locate
-{
-	list-style-image: url('chrome://zotero/skin/toolbar-go-arrow.png');
-}
-
 #zotero-tb-sync-stop
 {
 	list-style-image: url(chrome://zotero/skin/control_stop_blue.png);
@@ -659,12 +654,6 @@
 
 .zotero-box-label {
 	margin-inline-start: 3px !important;
-}
-
-#item-box-container {
-	display: flex;
-	min-width: 0;
-	min-height: 0;
 }
 
 #retracted-items-banner, #sync-reminder-banner {
@@ -820,7 +809,6 @@
 	.zotero-menuitem-find-pdf  { list-style-image: url('chrome://zotero/skin/treeitem-attachment-pdf@2x.png'); }
 	.zotero-menuitem-create-report { list-style-image: url('chrome://zotero/skin/treeitem-report@2x.png'); }
 	#zotero-tb-advanced-search { list-style-image: url('chrome://zotero/skin/toolbar-advanced-search@2x.png'); }
-	#zotero-tb-locate { list-style-image: url('chrome://zotero/skin/toolbar-go-arrow@2x.png'); }
 	#zotero-tb-sync-stop { list-style-image: url(chrome://zotero/skin/control_stop_blue@2x.png); }
 	#zotero-tb-pq-recognize  { list-style-image: url(chrome://zotero/skin/pdf-search@2x.png); }
 	#zotero-tb-sync-error  { list-style-image: url(chrome://zotero/skin/error@2x.png); }

@@ -310,7 +310,7 @@ var ZoteroContextPane = new function () {
 		if (splitter.getAttribute('state') != 'collapsed') {
 			if (_panesDeck.selectedIndex == 0) {
 				var node = _itemPaneDeck.selectedPanel;
-				node.querySelector('tab[selected]').focus();
+				node.focus();
 				return true;
 			}
 			else {
@@ -903,7 +903,7 @@ var ZoteroContextPane = new function () {
 		_itemContexts.push(context);
 		
 		if (!parentID) {
-			var vbox = document.createXULElement('vbox');
+			let vbox = document.createXULElement('vbox');
 			vbox.setAttribute('flex', '1');
 			vbox.setAttribute('align', 'center');
 			vbox.setAttribute('pack', 'center');
@@ -915,72 +915,83 @@ var ZoteroContextPane = new function () {
 		}
 		var parentItem = Zotero.Items.get(item.parentID);
 		
-		// Dynamically create item pane tabs and panels as in itemPane.xul.
-		// Keep the code below in sync with itemPane.xul
+		// Dynamically create item pane tabs and panels as in zoteroPane.xhtml.
+		// Keep the code below in sync with zoteroPane.xhtml
 
-		// tabbox
-		var tabbox = document.createXULElement('tabbox');
-		tabbox.setAttribute('flex', '1');
-		tabbox.className = 'zotero-view-tabbox';
+		// hbox
+		var hbox = document.createXULElement('hbox');
+		hbox.setAttribute('flex', '1');
+		hbox.className = 'zotero-view-item-container';
+		container.append(hbox);
+		
+		// main
+		var main = document.createElement('div');
+		main.className = 'zotero-view-item-main';
+		hbox.append(main);
+		
+		// pane-header
+		var paneHeader = document.createXULElement('pane-header');
+		main.append(paneHeader);
 
-		container.append(tabbox);
+		// div
+		var div = document.createElement('div');
+		div.className = 'zotero-view-item';
+		main.append(div);
+		
+		let createSection = (pane, showAdd = false) => {
+			let section = document.createXULElement('collapsible-section');
+			section.dataset.pane = pane;
+			section.setAttribute('data-l10n-id', 'section-' + pane);
+			section.toggleAttribute('show-add', showAdd);
+			return section;
+		};
 
-		// tabs
-		var tabs = document.createXULElement('tabs');
-		tabs.className = 'zotero-editpane-tabs';
-		// tabpanels
-		var tabpanels = document.createXULElement('tabpanels');
-		tabpanels.setAttribute('flex', '1');
-		tabpanels.className = 'zotero-view-item';
-		tabpanels.addEventListener('select', () => {
-			_updateAddToNote();
-		});
-
-		// Info tab
-		var tabInfo = document.createXULElement('tab');
-		tabInfo.setAttribute('label', Zotero.getString('zotero.tabs.info.label'));
-		// Tags tab
-		var tabTags = document.createXULElement('tab');
-		tabTags.setAttribute('label', Zotero.getString('zotero.tabs.tags.label'));
-		// Related tab
-		var tabRelated = document.createXULElement('tab');
-		tabRelated.setAttribute('label', Zotero.getString('zotero.tabs.related.label'));
-
-		tabs.append(tabInfo, tabTags, tabRelated);
-		tabbox.append(tabs, tabpanels);
-
-		// Info panel
-		var panelInfo = document.createXULElement('tabpanel');
-		panelInfo.setAttribute('flex', '1');
-		panelInfo.className = 'zotero-editpane-item-box';
+		// Info
+		var itemBoxContainer = createSection('info');
 		var itemBox = new (customElements.get('item-box'));
-		itemBox.setAttribute('flex', '1');
-		panelInfo.append(itemBox);
-		// Tags panel
-		var panelTags = document.createXULElement('tabpanel');
-		var tagsBox = new (customElements.get('tags-box'));
-		tagsBox.setAttribute('flex', '1');
-		tagsBox.className = 'zotero-editpane-tags';
-		panelTags.append(tagsBox);
+		itemBoxContainer.append(itemBox);
+		
+		// Abstract
+		var abstractBoxContainer = createSection('abstract');
+		var abstractBox = new (customElements.get('abstract-box'));
+		abstractBox.className = 'zotero-editpane-abstract';
+		abstractBoxContainer.append(abstractBox);
+		
+		// TODO: Attachments
 
-		// Related panel
-		var panelRelated = document.createXULElement('tabpanel');
+		// Tags
+		var tagsBoxContainer = createSection('tags', true);
+		var tagsBox = new (customElements.get('tags-box'));
+		tagsBox.className = 'zotero-editpane-tags';
+		tagsBoxContainer.append(tagsBox);
+
+		// Related
+		var relatedBoxContainer = createSection('related', true);
 		var relatedBox = new (customElements.get('related-box'));
-		relatedBox.setAttribute('flex', '1');
 		relatedBox.className = 'zotero-editpane-related';
-		panelRelated.addEventListener('click', (event) => {
+		relatedBox.addEventListener('click', (event) => {
 			if (event.originalTarget.closest('.zotero-clicky')) {
 				Zotero_Tabs.select('zotero-pane');
 			}
 		});
-		panelRelated.append(relatedBox);
+		relatedBoxContainer.append(relatedBox);
 
-		tabpanels.append(panelInfo, panelTags, panelRelated);
-		tabbox.selectedIndex = 0;
+		div.append(itemBoxContainer, abstractBoxContainer, tagsBoxContainer, relatedBoxContainer);
+		
+		// item-pane-sidenav
+		var sidenav = document.createXULElement('item-pane-sidenav');
+		sidenav.className = 'zotero-view-item-sidenav';
+		hbox.append(sidenav);
+		sidenav.container = div;
 
+		paneHeader.mode = readOnly ? 'view' : 'edit';
+		paneHeader.item = parentItem;
 
 		itemBox.mode = readOnly ? 'view' : 'edit';
 		itemBox.item = parentItem;
+
+		abstractBox.mode = readOnly ? 'view' : 'edit';
+		abstractBox.item = parentItem;
 
 		tagsBox.mode = readOnly ? 'view' : 'edit';
 		tagsBox.item = parentItem;

@@ -204,3 +204,39 @@ menu-ui-density-comfortable =
     .label = Comfortable
 menu-ui-density-compact =
     .label = Compact
+
+pane-info = Info
+pane-abstract = Abstract
+pane-attachments = Attachments
+pane-notes = Notes
+pane-tags = Tags
+pane-related = Related
+
+section-info =
+    .label = { pane-info }
+section-abstract =
+    .label = { pane-abstract }
+section-attachments =
+    .label = { pane-attachments }
+section-notes =
+    .label = { pane-notes }
+section-tags =
+    .label = { pane-tags }
+section-related =
+    .label = { pane-related }
+
+sidenav-info =
+    .tooltiptext = { pane-info }
+sidenav-abstract =
+    .tooltiptext = { pane-abstract }
+sidenav-attachments =
+    .tooltiptext = { pane-attachments }
+sidenav-notes =
+    .tooltiptext = { pane-notes }
+sidenav-tags =
+    .tooltiptext = { pane-tags }
+sidenav-related =
+    .tooltiptext = { pane-related }
+
+abstract-field =
+    .label = Add abstract…

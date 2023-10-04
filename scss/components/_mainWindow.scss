@@ -139,4 +139,8 @@
 		background: var(--material-tabbar);
 		border-bottom: var(--material-panedivider);
 	}
+	
+	#zotero-collections-tree > div, #zotero-item-pane {
+		background: var(--material-sidepane);
+	}
 }

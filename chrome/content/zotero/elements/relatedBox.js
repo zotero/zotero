@@ -55,6 +55,7 @@
 			this.append(content);
 
 			this._id('related-add').addEventListener('click', this.add);
+			this.addEventListener('add', this.add);
 
 			this._notifierID = Zotero.Notifier.registerObserver(this, ['item'], 'relatedbox');
 		}

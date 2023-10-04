@@ -1,16 +1,3 @@
-/* Use standard tab appearance for item pane tabs */
-.zotero-view-tabbox > tabs > tab {
-	-moz-appearance: tab;
-}
-
-/* Active tab label color in item pane and elsewhere */
-tabs.zotero-editpane-tabs > tab[visuallyselected="true"][selected="true"] hbox > .tab-text,
-#zotero-prefs tab[visuallyselected="true"]:not(:-moz-window-inactive),
-tabs > tab[visuallyselected="true"] hbox > .tab-text {
-	color: black !important;
-	text-shadow: none;
-}
-
 /* Quick Format dialog, which is based on window corners, which are different on Big Sur */
 #quick-format-iframe {
 	margin-top: 2px;

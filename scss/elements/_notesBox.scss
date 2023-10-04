@@ -4,6 +4,10 @@ notes-box, related-box {
 		display: flex;
 		padding-left: 10px;
 		align-items: center;
+		
+		@include comfortable {
+			padding-block: 2px;
+		}
 
 		label {
 			margin-right: 5px;

@@ -24,6 +24,8 @@
 */
 
 class XULElementBase extends XULElement {
+	initialized = false;
+	
 	/**
 	 * @return {DocumentFragment | null}
 	 */
@@ -49,10 +51,12 @@ class XULElementBase extends XULElement {
 		}
 
 		this.init();
+		this.initialized = true;
 	}
 
 	disconnectedCallback() {
 		this.replaceChildren();
 		this.destroy();
+		this.initialized = false;
 	}
 }

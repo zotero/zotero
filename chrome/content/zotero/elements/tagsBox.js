@@ -80,6 +80,7 @@
 			this.append(content);
 
 			this._id("tags-box-add-button").addEventListener('click', this._handleAddButtonClick);
+			this.addEventListener('add', this._handleAddButtonClick);
 			this._id("tags-box-add-button").addEventListener('keydown', this._handleAddButtonKeyDown);
 			this._id('tags-box').addEventListener('click', (event) => {
 				if (event.target.id == 'tags-box') {

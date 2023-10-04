@@ -1,0 +1,66 @@
+@include comfortable {
+	--editable-text-padding-inline: 4px;
+	--editable-text-padding-block: 4px;
+}
+
+@include compact {
+	--editable-text-padding-inline: 4px;
+	--editable-text-padding-block: 1px;
+}
+
+editable-text {
+	// Fun auto-sizing approach from CSSTricks:
+	// https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/
+	
+	display: grid;
+	
+	&::after {
+		content: attr(data-value) ' ';
+		visibility: hidden;
+		margin: 1px;
+	}
+	
+	&::after, textarea {
+		grid-area: 1 / 1 / 2 / 2;
+		padding: var(--editable-text-padding-block) var(--editable-text-padding-inline);
+		font: inherit;
+		line-height: inherit;
+		color: inherit;
+		overflow-y: hidden;
+		white-space: pre-wrap;
+	}
+	
+	textarea {
+		min-height: 0;
+		margin: 0;
+		
+		&:read-only, &:not(:focus) {
+			appearance: none;
+			border: none;
+			outline: none;
+			background: transparent;
+			margin: 1px;
+		}
+		
+		&:hover:not(:read-only, :focus) {
+			border-radius: 5px;
+			border: 1px solid var(--fill-tertiary);
+			box-shadow: 0 0 0 1px var(--fill-quinary);
+			margin: 0;
+		}
+		
+		::placeholder {
+			color: var(--fill-tertiary);
+		}
+	}
+	
+	&[multiline] {
+		&::after, textarea {
+			overflow-y: auto;
+		}
+		
+		textarea {
+			min-height: 5em;
+		}
+	}
+}

@@ -23,12 +23,11 @@
     ***** END LICENSE BLOCK *****
 */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import TagsBoxContainer from 'containers/tagsBoxContainer';
-
 var ZoteroItemPane = new function() {
-	var _lastItem, _itemBox, _tagsBox, _notesBox, _relatedBox;
+	var _container;
+	var _header, _sidenav, _scrollParent, _itemBox, _abstractBox, _tagsBox, _notesBox, _relatedBox, _boxes;
+	var _deck;
+	var _lastItem;
 	var _selectedNoteID;
 	var _translationTarget;
 
@@ -37,17 +36,19 @@ var ZoteroItemPane = new function() {
 			return;
 		}
 		
-		// Not in item pane, so skip the introductions
-		//
-		// DEBUG: remove?
-		if (!document.getElementById('zotero-view-tabbox')) {
-			return;
-		}
-
+		_container = document.getElementById('zotero-view-item-container');
+		_header = document.getElementById('zotero-item-pane-header');
+		_sidenav = document.getElementById('zotero-view-item-sidenav');
+		_scrollParent = document.getElementById('zotero-view-item');
+		_itemBox = document.getElementById('zotero-editpane-item-box');
+		_abstractBox = document.getElementById('zotero-editpane-abstract');
 		_notesBox = document.getElementById('zotero-editpane-notes');
 		_tagsBox = document.getElementById('zotero-editpane-tags');
 		_relatedBox = document.getElementById('zotero-editpane-related');
-
+		_boxes = [_itemBox, _abstractBox, _notesBox, _tagsBox, _relatedBox];
+		
+		_deck = document.getElementById('zotero-item-pane-content');
+		
 		this._unregisterID = Zotero.Notifier.registerObserver(this, ['item'], 'itemPane');
 	}
 	
@@ -60,80 +61,36 @@ var ZoteroItemPane = new function() {
 	/*
 	 * Load a top-level item
 	 */
-	this.viewItem = Zotero.Promise.coroutine(function* (item, mode, index) {
-		if (!index) {
-			index = 0;
+	this.viewItem = Zotero.Promise.coroutine(function* (item, mode, pane) {
+		if (!pane) {
+			pane = 'info';
 		}
 		
-		Zotero.debug('Viewing item in pane ' + index);
-		
-		switch (index) {
-			case 0: {
-				if (!_itemBox) {
-					_itemBox = new (customElements.get('item-box'));
-					_itemBox.id = 'zotero-editpane-item-box';
-					document.getElementById('item-box-container').appendChild(_itemBox);
-				}
-				var box = _itemBox;
-				break;
-			}
-			
-			case 1:
-				var box = _notesBox;
-				box.parentItem = item;
-				break;
+		Zotero.debug('Viewing item in pane ' + pane);
 
-			case 2:
-				var box = _tagsBox;
-				break;
-
-			case 3:
-				var box = _relatedBox;
-				break;
-		}
-		
-		// Force blur() when clicking off a textbox to another item in middle
-		// pane, since for some reason it's not being called automatically
-		if (_lastItem && _lastItem != item) {
-			switch (index) {
-				case 0:
-					// TEMP
-					//yield box.blurOpenField();
-					// DEBUG: Currently broken
-					//box.scrollToTop();
-					break;
-			}
-		}
+		_notesBox.parentItem = item;
 		
 		_lastItem = item;
-		
-		var viewBox = document.getElementById('zotero-view-item');
-		viewBox.classList.remove('no-tabs');
-		
-		if (index == 0) {
-			document.getElementById('zotero-editpane-tabs').setAttribute('hidden', item.isFeedItem);
-			
-			if (item.isFeedItem) {
-				viewBox.classList.add('no-tabs');
-				
-				let lastTranslationTarget = Zotero.Prefs.get('feeds.lastTranslationTarget');
-				if (lastTranslationTarget) {
-					let id = parseInt(lastTranslationTarget.substr(1));
-					if (lastTranslationTarget[0] == "L") {
-						_translationTarget = Zotero.Libraries.get(id);
-					}
-					else if (lastTranslationTarget[0] == "C") {
-						_translationTarget = Zotero.Collections.get(id);
-					}
+
+		_container.classList.toggle('feed-item', !!item.isFeedItem);
+		if (item.isFeedItem) {
+			let lastTranslationTarget = Zotero.Prefs.get('feeds.lastTranslationTarget');
+			if (lastTranslationTarget) {
+				let id = parseInt(lastTranslationTarget.substr(1));
+				if (lastTranslationTarget[0] == "L") {
+					_translationTarget = Zotero.Libraries.get(id);
 				}
-				if (!_translationTarget) {
-					_translationTarget = Zotero.Libraries.userLibrary;
-				}	
-				this.setTranslateButton();
+				else if (lastTranslationTarget[0] == "C") {
+					_translationTarget = Zotero.Collections.get(id);
+				}
 			}
+			if (!_translationTarget) {
+				_translationTarget = Zotero.Libraries.userLibrary;
+			}
+			this.setTranslateButton();
 		}
 		
-		if (box) {
+		for (let box of [_header, ..._boxes]) {
 			if (mode) {
 				box.mode = mode;
 				
@@ -147,49 +104,33 @@ var ZoteroItemPane = new function() {
 			
 			box.item = item;
 		}
+		
+		_sidenav.selectedPane = pane;
+		_sidenav.scrollToPane(pane, 'instant');
 	});
 	
 	
 	this.notify = Zotero.Promise.coroutine(function* (action, type, ids, extraData) {
-		var viewBox = document.getElementById('zotero-view-item');
-		if (viewBox.selectedIndex == 0 && action == 'refresh' && _lastItem) {
+		if (action == 'refresh' && _lastItem) {
 			yield this.viewItem(_lastItem, null, 0);
 		}
 	});
 	
 	
-	this.blurOpenField = Zotero.Promise.coroutine(function* () {
-		var tabBox = document.getElementById('zotero-view-tabbox');
-		switch (tabBox.selectedIndex) {
-		case 0:
-			var box = _itemBox;
-			if (box) {
-				yield box.blurOpenField();
-			}
-			break;
-			
-		case 2:
-			var box = _tagsBox;
-			if (box) {
-				box.blurOpenField();
-			}
-			break;
+	this.blurOpenField = async function () {
+		if (_itemBox.contains(document.activeElement)) {
+			await _itemBox.blurOpenField();
 		}
-	});
-	
-	
-	function focusItemsList() {
-		var tree = document.getElementById('zotero-items-tree');
-		if (tree) {
-			tree.focus();
+		else if (_header.contains(document.activeElement)) {
+			await _header.blurOpenField();
 		}
-	}
+		_scrollParent.focus();
+	};
 	
 	
 	this.onNoteSelected = function (item, editable) {
 		_selectedNoteID = item.id;
 		
-		var type = Zotero.Libraries.get(item.libraryID).libraryType;
 		var noteEditor = document.getElementById('zotero-note-editor');
 		noteEditor.mode = editable ? 'edit' : 'view';
 		noteEditor.viewMode = 'library';
@@ -205,25 +146,8 @@ var ZoteroItemPane = new function() {
 	 */
 	this.openNoteWindow = async function () {
 		var selectedNote = Zotero.Items.get(_selectedNoteID);
-		
-		var type = Zotero.Libraries.get(selectedNote.libraryID).libraryType;
 		ZoteroPane.openNoteWindow(selectedNote.id);
 	};
-	
-	
-	this.onTagsContextPopupShowing = function () {
-		if (!_lastItem.isEditable()) {
-			return false;
-		}
-	}
-	
-	
-	this.removeAllTags = async function () {
-		if (Services.prompt.confirm(null, "", Zotero.getString('pane.item.tags.removeAll'))) {
-			_lastItem.setTags([]);
-			await _lastItem.saveTx();
-		}
-	}
 	
 	
 	this.translateSelectedItems = Zotero.Promise.coroutine(function* () {
@@ -321,7 +245,12 @@ var ZoteroItemPane = new function() {
 		var tooltip = label + (Zotero.rtl ? ' \u202B' : ' ') + '(' + key + ')'
 		elem.title = tooltip;
 	};
-}   
+	
+	
+	this.getSidenavSelectedPane = function () {
+		return _sidenav.selectedPane;
+	};
+};
 
 addEventListener("load", function(e) { ZoteroItemPane.onLoad(e); }, false);
 addEventListener("unload", function(e) { ZoteroItemPane.onUnload(e); }, false);

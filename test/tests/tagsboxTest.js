@@ -20,13 +20,8 @@ describe("Item Tags Box", function () {
 			var tag = Zotero.Utilities.randomString();
 			var newTag = Zotero.Utilities.randomString();
 			
-			var tabbox = doc.getElementById('zotero-view-tabbox');
-			tabbox.selectedIndex = 0;
-			
 			var item = await createDataObject('item', { tags: [{ tag }] });
 			
-			tabbox = doc.getElementById('zotero-view-tabbox');
-			tabbox.selectedIndex = 2;
 			var tagsbox = doc.querySelector('tags-box');
 			var rows = tagsbox.querySelectorAll('li');
 			assert.equal(rows.length, 1);
@@ -60,9 +55,6 @@ describe("Item Tags Box", function () {
 			var tag = Zotero.Utilities.randomString();
 			var newTag = Zotero.Utilities.randomString();
 			
-			var tabbox = doc.getElementById('zotero-view-tabbox');
-			tabbox.selectedIndex = 0;
-			
 			var item = createUnsavedDataObject('item');
 			item.setTags([
 				{
@@ -71,8 +63,6 @@ describe("Item Tags Box", function () {
 			]);
 			yield item.saveTx();
 			
-			var tabbox = doc.getElementById('zotero-view-tabbox');
-			tabbox.selectedIndex = 2;
 			var tagsbox = doc.querySelector('tags-box');
 			var rows = tagsbox.querySelectorAll('li');
 			assert.equal(rows.length, 1);
@@ -89,8 +79,6 @@ describe("Item Tags Box", function () {
 			var libraryID = Zotero.Libraries.userLibraryID;
 			
 			var tag = Zotero.Utilities.randomString();
-			var tabbox = doc.getElementById('zotero-view-tabbox');
-			tabbox.selectedIndex = 0;
 			
 			yield Zotero.Tags.setColor(libraryID, tag, "#990000");
 			var item = createUnsavedDataObject('item');
@@ -104,8 +92,6 @@ describe("Item Tags Box", function () {
 			]);
 			yield item.saveTx();
 			
-			var tabbox = doc.getElementById('zotero-view-tabbox');
-			tabbox.selectedIndex = 2;
 			var tagsbox = doc.querySelector('tags-box');
 			var rows = tagsbox.querySelectorAll('li');
 			
@@ -124,9 +110,6 @@ describe("Item Tags Box", function () {
 		it("should update when a tag is removed from the library", function* () {
 			var tag = Zotero.Utilities.randomString();
 			
-			var tabbox = doc.getElementById('zotero-view-tabbox');
-			tabbox.selectedIndex = 0;
-			
 			var item = createUnsavedDataObject('item');
 			item.setTags([
 				{
@@ -135,8 +118,6 @@ describe("Item Tags Box", function () {
 			]);
 			yield item.saveTx();
 			
-			var tabbox = doc.getElementById('zotero-view-tabbox');
-			tabbox.selectedIndex = 2;
 			var tagsbox = doc.querySelector('tags-box');
 			var rows = tagsbox.querySelectorAll('li');
 			assert.equal(rows.length, 1);

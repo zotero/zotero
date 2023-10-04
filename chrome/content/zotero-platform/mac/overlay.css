@@ -120,11 +120,6 @@
 	margin: 0;
 }
 
-.zotero-view-tabbox {
-	background-color: #fff;
-	padding: 0;
-}
-
 .zotero-item-pane-content .groupbox-body {
 	-moz-appearance: none;
 	background-color: #ffffff;
@@ -132,56 +127,6 @@
 
 #zotero-item-pane-message-box description {
 	color: #7f7f7f;
-}
-
-.zotero-view-tabbox > tabpanels {
-	margin: 12px 0 0 0;
-	padding: 0;
-	-moz-appearance: none;
-}
-
-.zotero-editpane-tabs {
-	-moz-appearance: none;
-	background: -moz-linear-gradient(top, #ededed, #cccccc);
-	border-style: solid;
-	border-width: 0 0 1px 0;
-	border-color: #bdbdbd;
-	padding: 2px 0 2px 0;
-}
-
-.zotero-editpane-tabs > tab > hbox {
-	padding: 0;
-}
-
-.zotero-editpane-tabs > tab > hbox > .tab-icon {
-	display: none;
-}
-
-.zotero-editpane-tabs > tab {
-	-moz-box-orient: vertical;
-	-moz-box-align: center;
-	-moz-appearance: toolbarbutton;
-	text-align: center;
-	margin: 0;
-	padding: 3px 1px 3px 1px;
-}
-
-.zotero-editpane-tabs > tab > hbox .tab-text {
-	font-size: 11px;
-	font-weight: bold;
-	margin: 2px 7px 2px 9px !important;
-	text-shadow: 0 1px rgba(255, 255, 255, .4);
-}
-
-/* This seems to be necessary to center the tabs. Not sure why. */
-.zotero-editpane-tabs > tab:last-of-type > hbox .tab-text {
-	margin-left: 9px !important;
-	margin-right: 9px !important;
-}
-
-.zotero-editpane-tabs > tab[selected=true] > hbox .tab-text {
-	color: #FFF !important;
-	text-shadow: rgba(0, 0, 0, 0.4) 0 1px;
 }
 
 #zotero-collections-splitter:not([state=collapsed]),

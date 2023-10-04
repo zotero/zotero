@@ -1,0 +1,36 @@
+pane-header {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	padding: 6px 8px 0 8px;
+	
+	.head {
+		display: flex;
+		align-self: stretch;
+		gap: 4px;
+		
+		padding-bottom: 6px;
+		border-bottom: 1px solid var(--fill-quinary);
+	}
+
+	.title {
+		align-self: center;
+		margin-top: calc(0px - var(--editable-text-padding-block));
+		padding: 1px 4px;
+		flex: 1 1 0;
+		font-weight: 590;
+		line-height: 1.333;
+		
+		editable-text {
+			flex: 1;
+		}
+	}
+	
+	.menu-button {
+		align-self: start;
+	}
+	
+	.menu-button toolbarbutton {
+		list-style-image: icon-url('locate.svg');
+	}
+}

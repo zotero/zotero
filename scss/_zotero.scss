@@ -44,6 +44,7 @@
 @import "components/tagSelector";
 @import "components/textLink";
 @import "components/virtualized-table";
+@import "components/expand-button";
 
 // Elements
 // --------------------------------------------------
@@ -60,3 +61,8 @@
 @import "elements/styleConfigurator";
 @import "elements/tagsBox";
 @import "elements/zoteroSearch";
+@import "elements/paneHeader";
+@import "elements/editableText";
+@import "elements/itemPaneSidenav";
+@import "elements/abstractBox";
+@import "elements/collapsibleSection";
