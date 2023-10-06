@@ -31,7 +31,7 @@ const LibraryTree = require('./libraryTree');
 const VirtualizedTable = require('components/virtualized-table');
 const { renderCell, formatColumnName } = VirtualizedTable;
 const Icons = require('components/icons');
-const { getDOMElement } = Icons;
+const { getDOMElement, getCSSIcon } = Icons;
 const { COLUMNS } = require("zotero/itemTreeColumns");
 const { Cc, Ci, Cu } = require('chrome');
 Cu.import("resource://gre/modules/osfile.jsm");
@@ -1367,7 +1367,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 				
 				if (sortField == 'hasAttachment') {
 					// PDFs at the top
-					const order = ['pdf', 'snapshot', 'other', 'none'];
+					const order = ['pdf', 'snapshot', 'epub', 'other', 'none'];
 					fieldA = order.indexOf(fieldA.type || 'none') + (fieldA.exists ? 0 : 4);
 					fieldB = order.indexOf(fieldB.type || 'none') + (fieldB.exists ? 0 : 4);
 					return fieldA - fieldB;
@@ -2767,27 +2767,28 @@ var ItemTree = class ItemTree extends LibraryTree {
 			let ariaLabel;
 			// If the item has a child attachment
 			if (type !== null && type != 'none') {
+				icon = getCSSIcon('icon-item-type');
+
 				if (type == 'pdf') {
-					icon = getDOMElement('IconTreeitemAttachmentPDF');
+					icon.dataset.itemType = 'attachmentPDF';
 					ariaLabel = Zotero.getString('pane.item.attachments.hasPDF');
-					if (!exists) {
-						icon.classList.add('icon-missing-file');
-					}
 				}
 				else if (type == 'snapshot') {
-					//icon = getDOMElement('IconTreeitemAttachmentSnapshot');
-					icon = exists ? getDOMElement('IconBulletBlue') : getDOMElement('IconBulletBlueEmpty');
+					icon.dataset.itemType = 'attachmentSnapshot';
 					ariaLabel = Zotero.getString('pane.item.attachments.hasSnapshot');
 				}
+				else if (type == 'epub') {
+					icon.dataset.itemType = 'attachmentEPUB';
+					ariaLabel = Zotero.getString('pane.item.attachments.hasEPUB');
+				}
 				else {
-					//icon = getDOMElement('IconTreeitem');
-					icon = exists ? getDOMElement('IconBulletBlue') : getDOMElement('IconBulletBlueEmpty');
+					icon.dataset.itemType = 'attachmentFile';
 					ariaLabel = Zotero.getString('pane.item.attachments.has');
 				}
-				icon.classList.add('cell-icon');
-				//if (!exists) {
-				//	icon.classList.add('icon-missing-file');
-				//}
+				
+				if (!exists) {
+					icon.classList.add('icon-missing-file');
+				}
 			}
 			//else if (type == 'none') {
 			//	if (item.getField('url') || item.getField('DOI')) {
@@ -3785,13 +3786,16 @@ var ItemTree = class ItemTree extends LibraryTree {
 		if (itemType == 'attachment') {
 			var linkMode = item.attachmentLinkMode;
 			
-			if (item.attachmentContentType == 'application/pdf' && item.isFileAttachment()) {
+			if (item.isPDFAttachment()) {
 				if (linkMode == Zotero.Attachments.LINK_MODE_LINKED_FILE) {
 					itemType += 'PDFLink';
 				}
 				else {
 					itemType += 'PDF';
 				}
+			}
+			else if (item.isEPUBAttachment()) {
+				itemType += 'EPUB';
 			}
 			else if (linkMode == Zotero.Attachments.LINK_MODE_IMPORTED_FILE) {
 				itemType += "File";
@@ -3806,15 +3810,10 @@ var ItemTree = class ItemTree extends LibraryTree {
 				itemType += "WebLink";
 			}
 		}
-		let iconClsName = "IconTreeitem" + Zotero.Utilities.capitalize(itemType);
-		if (!Icons[iconClsName]) {
-			iconClsName = "IconTreeitem";
-		}
-		var icon = getDOMElement(iconClsName);
-		if (!icon) {
-			Zotero.debug('Could not find tree icon for "' + itemType + '"');
-			return document.createElement('span');
-		}
+				
+		let icon = getCSSIcon('icon-item-type');
+		icon.dataset.itemType = itemType;
+		
 		return icon;
 	}
 

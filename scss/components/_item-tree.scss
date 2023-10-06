@@ -1,3 +1,5 @@
+@use "sass:map";
+
 #zotero-items-pane {
 	min-width: 290px;
 	min-height: 150px;
@@ -52,5 +54,111 @@
 	
 	.cell.numNotes {
 		text-align: center;
+	}
+	
+	$itemTypesIcons: (
+	artwork,
+	attachment-epub,
+	attachment-file, // mapped to document below
+	attachment-link,
+	attachment-pdf-link,
+	attachment-pdf,
+	attachment-snapshot,
+	attachment-web-link,
+	audio-recording,
+	bill,
+	blog-post,
+	book-section,
+	book,
+	case,
+	computer-program,
+	conference-paper,
+	dataset,
+	dictionary-entry,
+	document,
+	email,
+	encyclopedia-article,
+	epub,
+	film,
+	forum-post,
+	hearing,
+	instant-message,
+	interview,
+	journal-article,
+	letter,
+	magazine-article,
+	manuscript,
+	map,
+	newspaper-article,
+	note,
+	patent,
+	podcast,
+	preprint,
+	presentation,
+	radio-broadcast,
+	report,
+	standard,
+	statute,
+	thesis,
+	tv-broadcast,
+	video-recording,
+	webpage
+	);
+	
+	$itemTypesMap: (
+	"attachment-file": "document"
+	);
+	
+	.icon-item-type {
+		width: 16px;
+		height: 16px;
+	}
+	
+	.row {
+		@mixin item-type-icon($icon) {
+			&:not(:-moz-window-inactive) {
+				@include state('.row.selected') {
+					@include svgicon($icon, "white", "16", "item-type", true);
+				}
+			}
+
+			@include state('.row:not(.selected)') {
+				@media (prefers-color-scheme: light) {
+					@include svgicon($icon, "light", "16", "item-type", true);
+				}
+
+				@media (prefers-color-scheme: dark) {
+					@include svgicon($icon, "dark", "16", "item-type", true);
+				}
+			}
+
+			@include state('.row.selected') {
+				&:-moz-window-inactive {
+					@media (prefers-color-scheme: light) {
+						@include svgicon($icon, "light", "16", "item-type", true);
+					}
+
+					@media (prefers-color-scheme: dark) {
+						@include svgicon($icon, "dark", "16", "item-type", true);
+					}
+				}
+			}
+		}
+		
+		@each $itemTypeIcon in $itemTypesIcons {
+			$itemType: camelCase(str-replace(str-replace($itemTypeIcon, "pdf", "PDF"), "epub", "EPUB"));
+			
+			@if map.has-key($itemTypesMap, $itemTypeIcon) {
+				$itemTypeIcon: map.get($itemTypesMap, $itemTypeIcon);
+			}
+			
+			.icon-item-type {
+				@include item-type-icon("document"); // default icon, for known item types more specific selectors below will apply
+			}
+
+			.icon-item-type[data-item-type=#{$itemType}] {
+				@include item-type-icon($itemTypeIcon);
+			}
+		}
 	}
 }

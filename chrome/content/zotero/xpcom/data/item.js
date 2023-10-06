@@ -3757,6 +3757,9 @@ Zotero.Item.prototype.getBestAttachmentState = async function () {
 	else if (item.isSnapshotAttachment()) {
 		type = 'snapshot';
 	}
+	else if (item.isEPUBAttachment()) {
+		type = 'epub';
+	}
 	else {
 		type = 'other';
 	}
