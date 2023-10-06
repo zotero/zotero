@@ -5683,7 +5683,7 @@ var ZoteroPane = new function()
 			var newName = Zotero.Attachments.getFileBaseNameFromItem(parentItem);
 			
 			let extRE = /\.[^\.]+$/;
-			let origFilename = file.split("/").pop();
+			let origFilename = PathUtils.split(file).pop();
 			let ext = origFilename.match(extRE);
 			if (ext) {
 				newName = newName + ext[0];
