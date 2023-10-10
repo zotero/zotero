@@ -17,6 +17,10 @@
 	.flex {
 		flex: 1
 	}
+
+	#citations-label {
+		margin: 5px 0 4px;
+	}
 	
 	.hbox {
 		display: flex;
@@ -31,5 +35,14 @@
 	.vbox {
 		display: flex;
 		flex-direction: column;
+	}
+	
+	.panel {
+		border: solid 1px ThreeDShadow;
+		padding: 5px;
+	}
+	
+	.search-box {
+		margin: 2px -1px;
 	}
 }
