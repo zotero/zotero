@@ -394,7 +394,7 @@ class VirtualizedTable extends React.Component {
 
 		getRowCount: PropTypes.func.isRequired,
 		
-		renderItem: PropTypes.func,
+		renderItem: PropTypes.func.isRequired,
 		// Row height specified as lines of text per row. Defaults to 1
 		linesPerRow: PropTypes.number,
 		// Do not adjust for Zotero-defined font scaling
