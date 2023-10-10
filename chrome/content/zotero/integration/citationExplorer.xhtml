@@ -34,14 +34,14 @@
 
 <xul:window
 	orient="vertical"
-	title="Document Citations"
+	title="Citation Explorer"
 	width="750" height="450"
 	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	persist="screenX screenY width height"
 	resizable="true">
 <xul:dialog
-	id="zotero-document-citations-dialog"
+	id="zotero-citation-explorer-dialog"
 	buttons="accept" buttonpack="end">
 
 	<script>
@@ -58,32 +58,43 @@
 
 		<div class="hbox flex">
 			<div class="vbox flex">
-				<span>Citations</span>
-				<xul:search-textbox id="citation-search" timeout="250" oncommand="ZoteroDocumentCitations.onCitationFilter()" dir="reverse"/>
-				<div id="citation-list-container" class="virtualized-table-container">
-					<div id="citation-list"></div>
-				</div>
-				<div class="hbox button-container">
-					<input type="button" id="button-show-in-document" value="Show in Document"/>
-					<input type="button" id="button-edit-citation" value="Edit Citation"/>
+				<div id="citations-label">Citations</div>
+				<div class="vbox flex panel" style="border-right: none">
+					<xul:search-textbox id="citation-search" class="search-box" timeout="250" oncommand="ZoteroDocumentCitations.onCitationFilter()" dir="reverse"/>
+					<div id="citation-list-container" class="virtualized-table-container">
+						<div id="citation-list"></div>
+					</div>
+					<div class="hbox button-container">
+						<input type="button" id="button-show-in-document" value="Show in Document"/>
+						<input type="button" id="button-edit-citation" value="Edit Citation"/>
+					</div>
 				</div>
 			</div>
 			<div class="splitter"></div>
 			<div class="vbox flex">
-				<span>Cited Items</span>
-				<xul:search-textbox id="item-search" timeout="250" oncommand="ZoteroDocumentCitations.onItemFilter()" dir="reverse"/>
-				<div id="item-list-container" class="virtualized-table-container">
-					<div id="item-list"></div>
-				</div>
-				<div class="hbox button-container">
-					<input type="button" id="button-show-in-zotero" value="Show in Zotero"/>
-					<input type="button" id="button-relink-item" value="Relink Item" hidden="true"/>
-					<button is="split-menu-button" id="button-addTo-library"
-								 onclick="ZoteroDocumentCitations.addToLibraryAndLink()"
-								 popup="item-addTo-menu" style="display: none"/>
-					<xul:popupset>
-						<xul:menupopup id="item-addTo-menu" onpopupshowing="ZoteroDocumentCitations.buildAddToLibraryContextMenu(event);"/>
-					</xul:popupset>
+				<xul:tabbox flex="1" onselect="ZoteroDocumentCitations.onSelectTab(this.selectedIndex)">
+					<xul:tabs>
+						<xul:tab id="tab-cited-items" label="Cited Items"/>
+						<xul:tab id="tab-uncited-items" label="Uncited Items"/>
+					</xul:tabs>
+					<!--We are making our own tabpanel UI, but the onselect event above won't fire without these-->
+					<xul:tabpanels hidden="true"><xul:tabpanel/><xul:tabpanel/></xul:tabpanels>
+				</xul:tabbox>
+				<div id="items-panel" class="vbox flex panel">
+					<xul:search-textbox id="item-search" class="search-box" timeout="250" oncommand="ZoteroDocumentCitations.onItemFilter()" dir="reverse"/>
+					<div id="item-list-container" class="virtualized-table-container">
+						<div id="item-list"></div>
+					</div>
+					<div class="hbox button-container">
+						<input type="button" id="button-show-in-zotero" value="Show in Zotero"/>
+						<input type="button" id="button-relink-item" value="Relink Item" hidden="true"/>
+						<button is="split-menu-button" id="button-addTo-library"
+									 onclick="ZoteroDocumentCitations.addToLibraryAndLink()"
+									 popup="item-addTo-menu" style="display: none"/>
+						<xul:popupset>
+							<xul:menupopup id="item-addTo-menu" onpopupshowing="ZoteroDocumentCitations.buildAddToLibraryContextMenu(event);"/>
+						</xul:popupset>
+					</div>
 				</div>
 			</div>
 		</div>

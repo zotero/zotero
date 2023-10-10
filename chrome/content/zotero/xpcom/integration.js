@@ -823,7 +823,7 @@ Zotero.Integration.Interface.prototype.addEditBibliography = Zotero.Promise.coro
 });
 
 Zotero.Integration.Interface.prototype.citationExplorer = async function () {
-	await this._session.init(false, false);
+	await this._session.init(true, false);
 	
 	var citationsMode = FORCE_CITATIONS_FALSE;
 	if(this._session.data.prefs.delayCitationUpdates) {
@@ -2302,8 +2302,9 @@ Zotero.Integration.Session.prototype.writeDelayedCitation = Zotero.Promise.corou
 });
 
 
-Zotero.Integration.Session.prototype.getItems = function() {
-	return Zotero.Cite.getItem(Object.keys(this.citationsByItemID));
+Zotero.Integration.Session.prototype.getItems = function(itemIDs) {
+	itemIDs = itemIDs || Object.keys(this.citationsByItemID);
+	return Zotero.Cite.getItem(itemIDs);
 }
 
 Zotero.Integration.Session.prototype.handleRetractedItems = async function () {
@@ -2374,8 +2375,7 @@ Zotero.Integration.Session.prototype.promptForRetraction = function (citedItem, 
 }
 
 /**
- * Edits integration bibliography
- * @param {Zotero.Integration.Bibliography} bibliography
+ * Opens the citation explorer
  */
 Zotero.Integration.Session.prototype.openCitationExplorer = async function () {
 	if (!Object.keys(this.citationsByIndex).length) {
@@ -2384,9 +2384,17 @@ Zotero.Integration.Session.prototype.openCitationExplorer = async function () {
 	
 	let io = {
 		citations: this.citationsByIndex,
-		// uncitedItems: Array.from(bibliography.uncitedItemIDs.values())
+		uncitedItems: this.bibliography ? Array.from(await this.getItems(Array.from(this.bibliography.uncitedItemIDs))) : [],
 		items: await this.getItems(),
-		document: this._doc,
+		activateDocument: async () => this._doc.activate(),
+		selectCitation: async citation => citation.field.select(),
+		cursorInCitation: async (citation) => {
+			const field = await this._doc.cursorInField(this.data.prefs['fieldType']);
+			if (!field) return false;
+			const citationField = await Zotero.Integration.Field.loadExisting(field);
+			const data = await citationField.unserialize();
+			return data.citationID === citation.citationID;
+		},
 		updateIndex: index => this.updateIndices[index] = true
 	};
 	
