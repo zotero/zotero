@@ -1,0 +1,14 @@
+#zotero-citation-explorer-dialog {
+	tab[visuallyselected="true"]:not(:-moz-window-inactive) {
+		color: initial !important;
+	}
+
+	#items-panel {
+		margin-top: 1.5em;
+	}
+
+	#citations-label {
+		margin: 0.5em 0 0.38em;
+		font-size: 1.2em;
+	}
+}
