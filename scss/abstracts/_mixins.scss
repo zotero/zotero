@@ -2,3 +2,26 @@
 // Mixins
 // --------------------------------------------------
 
+@mixin svgicon($icon, $color, $size: "16", $prefix: false, $has2x: false) {
+    @if $has2x {
+        @if $prefix {
+            background-image: image-set(url('chrome://zotero/skin/#{$prefix}/#{$size}/#{$color}/#{$icon}.svg') 1x,
+                url('chrome://zotero/skin/#{$prefix}/#{$size}/#{$color}/#{$icon}@2x.svg') 2x);
+        }
+
+        @else {
+            background-image: image-set(url('chrome://zotero/skin/#{$size}/#{$color}/#{$icon}.svg') 1x,
+                url('chrome://zotero/skin/#{$size}/#{$color}/#{$icon}@2x.svg') 2x);
+        }
+    }
+
+    @else {
+        @if $prefix {
+            background-image: url('chrome://zotero/skin/#{$prefix}/#{$size}/#{$color}/#{$icon}.svg');
+        }
+
+        @else {
+            background-image: url('chrome://zotero/skin/#{$size}/#{$color}/#{$icon}.svg');
+        }
+    }
+}

@@ -217,4 +217,18 @@ module.exports.getDOMElement = function (icon) {
 	div.innerHTML = renderToStaticMarkup(React.createElement(module.exports[icon]));
 	domElementCache[icon] = div.firstChild;
 	return domElementCache[icon].cloneNode(true);
-}
+};
+
+let cssIconsCache = new Map();
+
+module.exports.getCSSIcon = function (key) {
+	if (!cssIconsCache.has(key)) {
+		let iconEl = document.createElement('span');
+		iconEl.classList.add('icon');
+		iconEl.classList.add('icon-css');
+		iconEl.classList.add(key);
+		cssIconsCache.set(key, iconEl);
+	}
+
+	return cssIconsCache.get(key).cloneNode(true);
+};
