@@ -14,7 +14,7 @@
 			text-align: right;
 			font-weight: bold;
 			min-width: 62px;
-			border: 1px solid transparent;
+			border: var(--material-border-transparent);
 		}
 
 		.value {

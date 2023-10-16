@@ -25,15 +25,12 @@ style-configurator {
 	.locale-selector-wrapper,
 	.style-selector-wrapper,
 	.display-as-wrapper {
-		background-color: var(--style-configurator-field-wrapper-background-color, $input-group-background-color);
-		border-radius: var(--style-configurator-field-wrapper-border-radius, $border-radius-base);
-		border: var(--style-configurator-field-wrapper-border, 1px solid $input-group-border-color);
-		margin: var(--style-configurator-field-margin, 1.5em 0 0 0);
+		margin: var(--style-configurator-field-margin, .5em 0 0 0);
 		padding: var(--style-configurator-field-padding, $space-xs);
 	}
 	
 	label[for="style-selector"] {
-		margin: var(--style-configurator-label-margin, 1.5em 0 0 0);
+		margin: var(--style-configurator-label-margin, .5em 0 0 0);
 		font-size: var(--style-configurator-label-font-size, 13px);
 	}
 	

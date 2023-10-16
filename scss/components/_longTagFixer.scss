@@ -38,7 +38,7 @@
 			height: 50px;
 			border: none;
 			padding: .5em;
-			background-color: $shade-1;
+			background: var(--material-background50);
 			appearance: none;
 			outline: none;
 		}
@@ -102,7 +102,7 @@
 	}
 
 	.invalid {
-		color: $red;
+		color: var(--accent-red);
 	}
 
 	#zotero-new-tag-character-count {

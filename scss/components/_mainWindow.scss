@@ -127,16 +127,16 @@
 	}
 	
 	#tab-bar-container .tab {
-		background: $transparent;
+		background: transparent;
 	}
 	
 	#tab-bar-container .tab.selected {
-		background: $toolbar-background-color;
+		background: var(--material-tabbar)
 	}
 	
 	#zotero-toolbar {
 		-moz-appearance: none;
-		background: $toolbar-background-color;
-		border-bottom: $toolbar-border;
+		background: var(--material-tabbar);
+		border-bottom: var(--material-panedivider);
 	}
 }

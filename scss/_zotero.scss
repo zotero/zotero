@@ -1,8 +1,3 @@
-//
-// Zotero React Client
-// --------------------------------------------------
-
-
 // Abstracts
 // --------------------------------------------------
 
@@ -13,10 +8,12 @@
 @import "abstracts/utilities";
 @import "abstracts/split-button";
 
-// Theme
-// --------------------------------------------------
+:root {
+    color-scheme: light dark;
+}
 
 @import "themes/light";
+@import "themes/dark";
 
 // Components
 // --------------------------------------------------

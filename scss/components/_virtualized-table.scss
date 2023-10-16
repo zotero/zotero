@@ -96,8 +96,8 @@
 		box-sizing: border-box;
 
 		&.drop {
-			color: $shade-0 !important;
-			background: $shade-5 !important;
+			color: var(--material-background) !important;
+			background: var(--fill-secondary) !important;
 
 			* {
 				pointer-events: none !important;
@@ -108,7 +108,7 @@
 			position: absolute;
 			width: 20%;
 			height: 1px;
-			background-color: $shade-5;
+			background-color: var(--fill-secondary);
 			pointer-events: none;
 		}
 

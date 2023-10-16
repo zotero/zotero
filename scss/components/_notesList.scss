@@ -3,8 +3,8 @@
 	width: 100%;
 	overflow-y: auto;
 	flex-grow: 1;
-	background: #d2d8e2;
-	border-top: 1px solid lightgray;
+	background: var(--material-sidepane);
+	border-top: var(--material-border);
 }
 
 .notes-list {
@@ -47,13 +47,13 @@
 }
 
 .note-row {
-	border: 1px solid #bcc4d2;
+	border: 1px solid var(--fill-quinary);
 	border-radius: 5px;
 	margin: 4px 7px;
-	background-color: #fff;
+	background: var(--material-background);
 	
 	&:active {
-		background: #eef1f8;
+		background: var(--accent-blue-50);
 	}
 	
 	.inner {
@@ -64,7 +64,8 @@
 		.parent-line {
 			display: flex;
 			width: calc(100% - 16px);
-			border-bottom: 1px solid #d7dad7;
+			color: var(--fill-secondary);
+			border-bottom: 1px solid var(--fill-quinary);
 			align-items: center;
 			padding: 5px 8px 4px;
 			margin-bottom: 5px;
@@ -102,7 +103,7 @@
 			padding: 0 8px 6px;
 
 			.date {
-				color: $shade-6;
+				color: var(--fill-primary);
 			}
 
 			.body {
@@ -112,22 +113,23 @@
 				overflow: hidden;
 				text-overflow: ellipsis;
 				margin-left: 10px;
-				color: $shade-6;
+				color: var(--fill-primary);
 			}
 		}
 	}
 }
 
 .more-row {
-	border: 1px solid #bcc4d2;
+	color: var(--fill-primary);
+	border: 1px solid var(--fill-quinary);
 	border-radius: 5px;
 	margin: 4px 7px;
-	background-color: white;
+	background: var(--material-background);
 	text-align: center;
 	padding: 5px;
 
 	&:active {
-		background: #eef1f8;
+		background-color: var(--accent-blue-50);
 	}
 }
 

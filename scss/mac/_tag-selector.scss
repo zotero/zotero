@@ -4,7 +4,7 @@
 
 .tag-selector-filter-container {
   padding: 0.25em 0 0.25em 0.5em;
-  border-top: 1px solid $shade-3;
+  border-top: var(--material-panedivider);
 }
 
 .tag-selector-item {

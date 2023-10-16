@@ -2,6 +2,7 @@
 	// These variables can be overridden in platform styles to set platform-specific safe areas
 	--safe-area-start: 0;
 	--safe-area-end: 0;
+	--tab-border: .5px solid var(--tab-border);
 
 	min-height: 30px;
 	
@@ -14,14 +15,14 @@
 		content: '';
 		min-width: var(--safe-area-start);
 		// Add bottom border to safe area space
-		border-bottom: $tab-border;
+		border-bottom: var(--tab-border);
 	}
 
 	&::after {
 		content: '';
 		min-width: var(--safe-area-end);
 		// Add bottom border to safe area space
-		border-bottom: $tab-border;
+		border-bottom: var(--tab-border);
 	}
 	
 	& > div {
@@ -42,12 +43,12 @@
 		padding: 0 3px;
 		align-items: center;
 		z-index: 1;
-		color: #bebebe;
+		color: var(--fill-tertiary);
 		display: none;
 		box-shadow: none;
 		// Add bottom border to scroll arrows,
 		// and negate the extra vertical pixel added by the border with a negative margin
-		border-bottom: $tab-border;
+		border-bottom: var(--tab-border);
 		margin-bottom: -1px;
 		box-sizing: border-box;
 
@@ -56,26 +57,26 @@
 		}
 
 		&.active {
-			color: #505050;
+			color: var(--fill-secondary);
 			&:hover {
-				background-color: rgba(0, 0, 0, 0.08);
+				background-color: var(--fill-quinary);
 			}
 		}
 	}
 
 	.scroll-start-arrow {
-		border-right: 1px solid transparent;
+		border-right: var(--material-border-transparent);
 		&.active {
-			border-right: 1px solid rgba(0, 0, 0, 0.2);
-			box-shadow: 1px 0 0 0 rgba(0,0,0,0.05);
+			border-right: var(--material-panedivider);
+			box-shadow: 3px 0 3px -3px rgba(0, 0, 0, .3);
 		}
 	}
 
 	.scroll-end-arrow {
-		border-left: 1px solid transparent;
+		border-left: var(--material-border-transparent);
 		&.active {
-			border-left: 1px solid rgba(0, 0, 0, 0.2);
-			box-shadow: -1px 0 0 0 rgba(0,0,0,0.05);
+			border-left: var(--material-panedivider);
+			box-shadow: -3px 0 3px -3px rgba(0, 0, 0, .3)
 		}
 	}
 
@@ -112,7 +113,7 @@
 		content: "";
 		width: 0;
 		min-width: 0;
-		border-inline-end: $tab-border;
+		border-inline-end: var(--tab-border);
 	}
 
 	&:after {
@@ -121,8 +122,8 @@
 		width: 100%;
 		min-width: 0;
 		// Add bottom border to the space between the last tab and the spacer in #tab-bar-container::after
-		border-bottom: $tab-border;
-		border-inline-start: $tab-border;
+		border-bottom: var(--tab-border);
+		border-inline-start: var(--tab-border);
 	}
 }
 
@@ -134,28 +135,27 @@
 	height: 30px;
 	line-height: 30px;
 	position: relative;
-	background: #f9f9f9;
-	border-top: 2px solid transparent;
-	color: #000;
+	color: var(--fill-primary);
 	text-align: center;
 	padding: 0 22px;
 	min-width: 110px;
 	
 	&:not(:last-child) {
-		border-inline-end: $tab-border;
+		border-inline-end: var(--tab-border);
 	}
 	
 	&.selected {
-		border-top: 2px solid $tab-background-color-selected;
+		background: var(--material-button);
+		box-shadow: 0px 0px 0px 0.5px rgba(0, 0, 0, 0.05), 0px 0.5px 2.5px 0px rgba(0, 0, 0, 0.30);
 	}
 	
 	&.dragging {
-		border-inline-start: $tab-border;
+		border-inline-start: var(--tab-border);
 		z-index: 1;
 	}
 	
 	&.dragging + & {
-		border-inline-start: $tab-border;
+		border-inline-start: var(--tab-border);
 	}
 	
 	.tab-name {
@@ -197,11 +197,11 @@
 		}
 		
 		&:hover {
-			background-color: rgba(0, 0, 0, 0.08);
+			background-color: var(--fill-quinary);
 		}
 		
 		&:active {
-			background-color: rgba(0, 0, 0, 0.16);
+			background-color: var(--fill-quarternary);
 		}
 	}
 
@@ -210,6 +210,6 @@
 	}
 
 	&:not(.selected) {
-		border-bottom: $tab-border;
+		border-bottom: var(--tab-border);
 	}
 }

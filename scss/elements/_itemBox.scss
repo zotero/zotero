@@ -101,7 +101,7 @@ item-box {
 	}
 
 	#item-type-menu:not(:hover):not(:active) {
-		border: 1px solid transparent;
+		border: var(--material-border-transparent);
 		background-color: transparent;
 	}
 
