@@ -65,8 +65,7 @@ Services.scriptloader.loadSubScript('chrome://zotero/content/elements/collapsibl
 		});
 	}
 
-	let isMac = AppConstants.platform == 'macosx';
-	if (isMac) {
+	if (Zotero.isMac) {
 		// Monkey-patch the toolbarbutton CE so it shows a native menu popup
 		let MozToolbarbuttonPrototype = customElements.get('toolbarbutton').prototype;
 		if (MozToolbarbuttonPrototype) {
