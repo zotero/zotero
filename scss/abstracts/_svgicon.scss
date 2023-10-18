@@ -1,0 +1,37 @@
+@mixin svgicon($icon, $color, $size: "16", $prefix: false, $has2x: false) {
+    background:
+        -make-icon-background($icon, $color, $size, $prefix, $has2x),
+        
+        // Invisible backgrounds to preload all variants:
+        -make-icon-background($icon, 'white', $size, $prefix, $has2x) center/0,
+        -make-icon-background($icon, 'light', $size, $prefix, $has2x) center/0,
+        -make-icon-background($icon, 'dark', $size, $prefix, $has2x) center/0;
+}
+
+@function -make-icon-background($icon, $color, $size, $prefix, $has2x) {
+    @if $has2x {
+        @if $prefix {
+            @return image-set(
+                url('chrome://zotero/skin/#{$prefix}/#{$size}/#{$color}/#{$icon}.svg') 1x,
+                url('chrome://zotero/skin/#{$prefix}/#{$size}/#{$color}/#{$icon}@2x.svg') 2x
+            );
+        }
+
+        @else {
+            @return image-set(
+                url('chrome://zotero/skin/#{$size}/#{$color}/#{$icon}.svg') 1x,
+                url('chrome://zotero/skin/#{$size}/#{$color}/#{$icon}@2x.svg') 2x
+            );
+        }
+    }
+
+    @else {
+        @if $prefix {
+            @return url('chrome://zotero/skin/#{$prefix}/#{$size}/#{$color}/#{$icon}.svg');
+        }
+
+        @else {
+            @return url('chrome://zotero/skin/#{$size}/#{$color}/#{$icon}.svg');
+        }
+    }
+}
