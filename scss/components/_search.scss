@@ -4,10 +4,25 @@
 }
 
 .search input {
+	background: var(--material-background);
+	border-radius: 5px;
+	border: var(--material-border-quinary);
+	color: var(--fill-primary);
 	flex: 1 0;
-	font-size: 1em;
+	margin: 6px 4px;
 	min-width: 40px;
-	padding-left: 4px;
+	padding: 3px 7px;
+
+	&::placeholder {
+		color: var(--fill-tertiary);
+		opacity: 1.0;
+	}
+
+	&:focus {
+		outline: none;
+		border-color: SelectedItem;
+		box-shadow: 0 0 0 2px SelectedItem;
+	}
 }
 
 .search .search-cancel-button {

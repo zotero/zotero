@@ -27,7 +27,7 @@
 
 const React = require('react')
 const { PureComponent, createElement: create } = React
-const { IconDownChevron } = require('./icons')
+const { CSSIcon } = require('./icons')
 const cx = require('classnames')
 const {
 	bool, element, func, node, number, oneOf, string
@@ -77,7 +77,7 @@ class Button extends PureComponent {
 		if (!Zotero.isNode && Zotero.isLinux) {
 			return this.props.isMenu && <span className="menu-marker"/>
 		}
-		return this.props.isMenu && <IconDownChevron className="menu-marker"/>
+		return this.props.isMenu && <CSSIcon name="chevron-6" className="menu-marker icon-8"/>
 	}
 
 	get attributes() {

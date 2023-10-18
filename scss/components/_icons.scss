@@ -1,26 +1,49 @@
 .icon > svg, .icon > img {
-  width: 16px;
+	width: 16px;
 }
 
 .icon-bg {
-  width: 16px;
-  height: 16px;
-  display: inline-block;
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position: center;
-  vertical-align: middle;
+	width: 16px;
+	height: 16px;
+	display: inline-block;
+	background-repeat: no-repeat;
+	background-size: contain;
+	background-position: center;
+	vertical-align: middle;
 }
 
 .icon-css {
-  display: inline-block;
-  vertical-align: middle;
+	display: inline-block;
+	vertical-align: middle;
 }
 
 .icon.icon-downchevron {
-  width: 7px !important;
+	width: 7px !important;
 }
 
 .icon {
-  -moz-appearance: none !important;
+	-moz-appearance: none !important;
+}
+
+.icon-16 {
+	width: 16px;
+	height: 16px;
+}
+
+.icon-8 {
+	width: 8px;
+	height: 8px;
+}
+
+$-icons: (
+	filter: 16,
+	chevron-6: 8
+);
+
+@each $icon, $size in $-icons {
+	.icon-#{$icon} {
+		@include color-scheme using($color) {
+			@include svgicon($icon, $color, $size);
+		}
+	}
 }

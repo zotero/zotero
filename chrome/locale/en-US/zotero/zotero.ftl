@@ -240,3 +240,6 @@ sidenav-related =
 
 abstract-field =
     .label = Add abstract…
+
+tagselector-search =
+    .placeholder = Filter Tags

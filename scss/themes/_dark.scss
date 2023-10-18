@@ -31,6 +31,9 @@
         --color-sidepane: #303030;
         --color-tabbar: #1e1e1e;
         --color-toolbar: #272727;
+        --color-scrollbar: rgb(117, 117, 117);
+        --color-scrollbar-hover: rgb(158, 158, 158);
+        --color-scrollbar-background: transparent;
         --tag-blue: #55a6dfd9;
         --tag-gray: #aaac;
         --tag-green: #74b04ad9;
@@ -59,5 +62,6 @@
         --material-border: 1px solid var(--color-border);
         --material-border50: 1px solid var(--color-border50);
         --material-panedivider: 1px solid var(--color-panedivider);
+        --material-border-quinary: 1px solid var(--fill-quinary);
     }
 }

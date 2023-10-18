@@ -26,20 +26,20 @@
 const React = require('react');
 const PropTypes = require('prop-types');
 var { Collection } = require('react-virtualized');
+const { props } = require("bluebird");
 
 // See also .tag-selector-item in _tag-selector.scss
-var filterBarHeight = 32;
-var tagPaddingTop = 4;
-var tagPaddingLeft = 2;
-var tagPaddingRight = 2;
-var tagPaddingBottom = 4;
-var tagSpaceBetweenX = 7;
+var filterBarHeight = 36;
+var tagPaddingLeft = 4;
+var tagPaddingRight = 4;
+var tagSpaceBetweenX = 2;
 var tagSpaceBetweenY = 4;
-var panePaddingTop = 2;
-var panePaddingLeft = 2;
-var panePaddingRight = 25;
+var panePaddingTop = 8;
+var panePaddingLeft = 8;
+var panePaddingRight = 2; // + scrollbar width
 //var panePaddingBottom = 2;
 var minHorizontalPadding = panePaddingLeft + tagPaddingLeft + tagPaddingRight + panePaddingRight;
+
 
 class TagList extends React.PureComponent {
 	constructor(props) {
@@ -53,11 +53,13 @@ class TagList extends React.PureComponent {
 		// Redraw all tags on every refresh
 		if (this.collectionRef && this.collectionRef.current) {
 			// If width or height changed, recompute positions. It seems like this should happen
-			// automatically, but it doesn't as of 9.21.0.
+			// automatically, but it doesn't as of 9.21.0. Also check for density change.
+
 			if (prevProps.height != this.props.height
 					|| prevProps.width != this.props.width
-					|| prevProps.fontSize != this.props.fontSize
-					|| prevProps.tags != this.props.tags) {
+					|| prevProps.lineHeight != this.props.lineHeight
+					|| prevProps.tags != this.props.tags
+					|| prevProps.uiDensity !== this.props.uiDensity) {
 				this.collectionRef.current.recomputeCellSizesAndPositions();
 			}
 			// If dimensions didn't change, just redraw at current positions. Without this, clicking
@@ -94,8 +96,12 @@ class TagList extends React.PureComponent {
 	 * Calculate the x,y coordinates of all tags
 	 */
 	updatePositions() {
-		var tagMaxWidth = this.props.width - minHorizontalPadding;
-		var rowHeight = tagPaddingTop + this.props.fontSize + tagPaddingBottom + tagSpaceBetweenY;
+		const tagPaddingTop = this.props.uiDensity === 'comfortable' ? 2 : 1;
+		const tagPaddingBottom = tagPaddingTop;
+		this.scrollbarWidth = Zotero.Utilities.Internal.getScrollbarWidth();
+
+		var tagMaxWidth = this.props.width - minHorizontalPadding - this.scrollbarWidth;
+		var rowHeight = tagPaddingTop + this.props.lineHeight + tagPaddingBottom + tagSpaceBetweenY;
 		var positions = [];
 		var row = 0;
 		let rowX = panePaddingLeft;
@@ -113,9 +119,11 @@ class TagList extends React.PureComponent {
 				shouldAddSeparator = true;
 				forceNewLine = true;
 			}
-			let tagWidth = tagPaddingLeft + Math.min(tag.width, tagMaxWidth) + tagPaddingRight;
+			// size of the colored dot + space between the dot and the tag name always sums up to fontSize (e.g., 8px + 3px at 11px fontSize)
+			const tagColorWidth = (tag.color && !Zotero.Utilities.Internal.isOnlyEmoji(tag.name)) ? this.props.fontSize : 0;
+			let tagWidth = tagPaddingLeft + Math.min(tag.width, tagMaxWidth) + tagPaddingRight + tagColorWidth;
 			// If first row or cell fits, add to current row
-			if (!forceNewLine && (i == 0 || ((rowX + tagWidth) < (this.props.width - panePaddingLeft - panePaddingRight)))) {
+			if (!forceNewLine && (i == 0 || ((rowX + tagWidth) < (this.props.width - panePaddingRight - this.scrollbarWidth)))) {
 				positions[i] = [rowX, panePaddingTop + (row * rowHeight)];
 			}
 			// Otherwise, start new row
@@ -135,10 +143,10 @@ class TagList extends React.PureComponent {
 	}
 	
 	cellSizeAndPositionGetter = ({ index }) => {
-		var tagMaxWidth = this.props.width - minHorizontalPadding;
+		var tagMaxWidth = this.props.width - minHorizontalPadding - this.scrollbarWidth;
 		return {
 			width: Math.min(this.props.tags[index].width, tagMaxWidth),
-			height: this.props.fontSize,
+			height: this.props.lineHeight,
 			x: this.positions[index][0],
 			y: this.positions[index][1]
 		};
@@ -149,7 +157,7 @@ class TagList extends React.PureComponent {
 		
 		const { onDragOver, onDragExit, onDrop } = this.props.dragObserver;
 		
-		var className = 'tag-selector-item zotero-clicky';
+		var className = 'tag-selector-item';
 		if (tag.selected) {
 			className += ' selected';
 		}
@@ -158,6 +166,9 @@ class TagList extends React.PureComponent {
 		}
 		if (tag.disabled) {
 			className += ' disabled';
+		}
+		if (Zotero.Utilities.Internal.isOnlyEmoji(tag.name)) {
+			className += ' emoji';
 		}
 		
 		let props = {
@@ -176,7 +187,7 @@ class TagList extends React.PureComponent {
 		// Don't specify explicit width unless we're truncating, because for some reason the width
 		// from canvas can sometimes be slightly smaller than the actual width, resulting in an
 		// unnecessary ellipsis.
-		var tagMaxWidth = this.props.width - minHorizontalPadding;
+		var tagMaxWidth = this.props.width - minHorizontalPadding - this.scrollbarWidth;
 		if (props.style.width < tagMaxWidth) {
 			delete props.style.width;
 		}
@@ -190,11 +201,12 @@ class TagList extends React.PureComponent {
 		
 		if (tag.color) {
 			props.style.color = tag.color;
+			props['data-color'] = tag.color.toLowerCase();
 		}
 		
 		return (
 			<div key={tag.name} {...props}>
-				{tag.name}
+				<span>{tag.name}</span>
 			</div>
 		);
 	}
@@ -265,6 +277,8 @@ class TagList extends React.PureComponent {
 		width: PropTypes.number.isRequired,
 		height: PropTypes.number.isRequired,
 		fontSize: PropTypes.number.isRequired,
+		lineHeight: PropTypes.number.isRequired,
+		uiDensity: PropTypes.string.isRequired
 	};
 }
 

@@ -416,6 +416,12 @@ Zotero.Utilities.Internal = {
 		const re = /\p{Extended_Pictographic}|\u200D|\uFE0F/gu;
 		return !str.replace(re, '');
 	},
+
+	includesEmoji: function (str) {
+		// Remove emoji, Zero Width Joiner, and Variation Selector-16 and compare lengths
+		const re = /\p{Extended_Pictographic}|\u200D|\uFE0F/gu;
+		return str.replace(re, '').length !== str.length;
+	},
 	
 	/**
 	 * Display a prompt from an error with custom buttons and a callback
@@ -2304,6 +2310,21 @@ Zotero.Utilities.Internal = {
 		}
 		
 		return false;
+	},
+
+	getScrollbarWidth() {
+		let document = Zotero.getMainWindow().document;
+		let scrollDiv = document.createElement('div');
+		scrollDiv.style.position = 'absolute';
+		scrollDiv.style.top = '-9999px';
+		scrollDiv.style.width = '50px';
+		scrollDiv.style.height = '50px';
+		scrollDiv.style.overflow = 'scroll';
+		document.documentElement.appendChild(scrollDiv);
+		const scrollbarWidth = scrollDiv.getBoundingClientRect().width - scrollDiv.clientWidth;
+		document.documentElement.removeChild(scrollDiv);
+
+		return scrollbarWidth;
 	}
 }
 
