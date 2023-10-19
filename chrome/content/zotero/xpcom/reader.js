@@ -329,13 +329,13 @@ class ReaderInstance {
 				}
 			},
 			onToggleSidebar: (open) => {
-				if (this._onToggleSidebar) {
-					this._onToggleSidebar(open);
+				if (this._onToggleSidebarCallback) {
+					this._onToggleSidebarCallback(open);
 				}
 			},
 			onChangeSidebarWidth: (width) => {
-				if (this._onChangeSidebarWidth) {
-					this._onChangeSidebarWidth(width);
+				if (this._onChangeSidebarWidthCallback) {
+					this._onChangeSidebarWidthCallback(width);
 				}
 			},
 			onFocusSplitButton: () => {
@@ -993,8 +993,8 @@ class ReaderTab extends ReaderInstance {
 		this._sidebarOpen = options.sidebarOpen;
 		this._bottomPlaceholderHeight = options.bottomPlaceholderHeight;
 		this._showItemPaneToggle = true;
-		this._onToggleSidebar = options.onToggleSidebar;
-		this._onChangeSidebarWidth = options.onChangeSidebarWidth;
+		this._onToggleSidebarCallback = options.onToggleSidebar;
+		this._onChangeSidebarWidthCallback = options.onChangeSidebarWidth;
 		this._window = Services.wm.getMostRecentWindow('navigator:browser');
 		let { id, container } = this._window.Zotero_Tabs.add({
 			id: options.tabID,
