@@ -1,0 +1,33 @@
+//
+// Mixins
+// --------------------------------------------------
+
+@mixin compact {
+	$selector: &;
+	@at-root [zoteroUIDensity="compact"] {
+		@if $selector {
+			#{$selector} {
+				@content;
+			}
+		}
+		
+		@else {
+			@content;
+		}
+	}
+}
+
+@mixin comfortable {
+	$selector: &;
+	@at-root [zoteroUIDensity="comfortable"] {
+		@if $selector {
+			#{$selector} {
+				@content;
+			}
+		}
+
+		@else {
+			@content;
+		}
+	}
+}
