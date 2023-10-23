@@ -1,6 +1,6 @@
 @mixin svgicon($icon, $color, $size: "16", $prefix: false, $has2x: false) {
     background:
-        -make-icon-background($icon, $color, $size, $prefix, $has2x),
+        -make-icon-background($icon, $color, $size, $prefix, $has2x) no-repeat center/contain,
         
         // Invisible backgrounds to preload all variants:
         -make-icon-background($icon, 'white', $size, $prefix, $has2x) center/0,
