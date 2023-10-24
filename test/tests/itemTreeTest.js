@@ -438,7 +438,7 @@ describe("Zotero.ItemTree", function() {
 			itemsView = zp.itemsView;
 			
 			var treebox = itemsView._treebox;
-			var numVisibleRows = treebox.getPageLength();
+			var numVisibleRows = treebox.getLastVisibleRow() - treebox.getFirstVisibleRow();
 			
 			// Get a numeric string left-padded with zeroes
 			function getTitle(i, max) {
@@ -489,7 +489,7 @@ describe("Zotero.ItemTree", function() {
 			itemsView = zp.itemsView;
 			
 			var treebox = itemsView._treebox;
-			var numVisibleRows = treebox.getPageLength();
+			var numVisibleRows = treebox.getLastVisibleRow() - treebox.getFirstVisibleRow();
 			
 			// Get a numeric string left-padded with zeroes
 			function getTitle(i, max) {
@@ -545,7 +545,7 @@ describe("Zotero.ItemTree", function() {
 			itemsView = zp.itemsView;
 			
 			var treebox = itemsView._treebox;
-			var numVisibleRows = treebox.getPageLength();
+			var numVisibleRows = treebox.getLastVisibleRow() - treebox.getFirstVisibleRow();
 			
 			// Get a numeric string left-padded with zeroes
 			function getTitle(i, max) {
