@@ -184,52 +184,6 @@
 	text-shadow: rgba(0, 0, 0, 0.4) 0 1px;
 }
 
-#zotero-collections-tree {
-	-moz-appearance: none;
-	border: none;
-	margin: 0;
-	padding: 0;
-	min-height: 5.2em;
-	background-color: #d2d8e2;
-}
-
-#zotero-collections-tree:-moz-window-inactive {
-	background-color: rgb(232, 232, 232);
-}
-
-#zotero-collections-tree treechildren::-moz-tree-row {
-	background-color: transparent;
-	border-color: transparent;
-}
-
-#zotero-collections-tree treechildren::-moz-tree-cell(selected) {
-	background: -moz-linear-gradient(top, #A0B0CF, #7386AB) repeat-x;
-	border-top: 1px solid #94A1C0;
-}
-
-#zotero-collections-tree:-moz-window-inactive treechildren::-moz-tree-cell(selected) {  
-	background: -moz-linear-gradient(top, #B4B4B4, #8A8A8A) repeat-x;
-	border-top: 1px solid #979797;
-}
-
-#zotero-collections-tree treechildren::-moz-tree-cell(selected, focus) {  
-  background: -moz-linear-gradient(top, #6494D4, #2559AC) repeat-x;
-  border-top: 1px solid #5382C5;
-}
-
-#zotero-collections-tree treechildren::-moz-tree-cell-text(selected) {  
-  font-weight: bold !important;
-  color: #ffffff !important;
-}
-
-#zotero-collections-tree treechildren::-moz-tree-twisty(selected) {
-	list-style-image: url("chrome://zotero/skin/mac/twisty-selected.svg");
-}
-
-#zotero-collections-tree treechildren::-moz-tree-twisty(selected, open) {
-	list-style-image: url("chrome://zotero/skin/mac/twisty-selected-open.svg");
-}
-
 #zotero-collections-splitter:not([state=collapsed]),
 #zotero-items-splitter:not([state=collapsed])[orient=horizontal],
 #zotero-context-splitter:not([state=collapsed])[orient=horizontal]

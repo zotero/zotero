@@ -1,12 +1,5 @@
 @use "sass:map";
 
-#zotero-items-pane {
-	min-width: 290px;
-	min-height: 150px;
-	height: 150px;
-	width: 290px;
-}
-
 #zotero-items-tree {
 	.virtualized-table-header .icon {
 		width: 13px;
@@ -109,55 +102,28 @@
 	"attachment-file": "document"
 	);
 	
-	.icon-item-type {
-		width: 16px;
-		height: 16px;
-	}
 	
-	.row {
-		@mixin item-type-icon($icon) {
-			&:not(:-moz-window-inactive) {
-				@include state('.row.selected') {
-					@include svgicon($icon, "white", "16", "item-type", true);
-				}
-			}
-
-			@include state('.row:not(.selected)') {
-				@media (prefers-color-scheme: light) {
-					@include svgicon($icon, "light", "16", "item-type", true);
-				}
-
-				@media (prefers-color-scheme: dark) {
-					@include svgicon($icon, "dark", "16", "item-type", true);
-				}
-			}
-
-			@include state('.row.selected') {
-				&:-moz-window-inactive {
-					@media (prefers-color-scheme: light) {
-						@include svgicon($icon, "light", "16", "item-type", true);
-					}
-
-					@media (prefers-color-scheme: dark) {
-						@include svgicon($icon, "dark", "16", "item-type", true);
-					}
-				}
-			}
+	.virtualized-table .row {
+		.icon-item-type {
+			width: 16px;
+			height: 16px;
 		}
 		
-		@each $itemTypeIcon in $itemTypesIcons {
-			$itemType: camelCase(str-replace(str-replace($itemTypeIcon, "pdf", "PDF"), "epub", "EPUB"));
-			
-			@if map.has-key($itemTypesMap, $itemTypeIcon) {
-				$itemTypeIcon: map.get($itemTypesMap, $itemTypeIcon);
-			}
-			
+		@include focus-states using ($color) {
 			.icon-item-type {
-				@include item-type-icon("document"); // default icon, for known item types more specific selectors below will apply
+				// default icon, for known item types more specific selectors below will apply
+				@include svgicon("document", $color, "16", "item-type", true);
 			}
-
-			.icon-item-type[data-item-type=#{$itemType}] {
-				@include item-type-icon($itemTypeIcon);
+			@each $itemTypeIcon in $itemTypesIcons {
+				$itemType: camelCase(str-replace(str-replace($itemTypeIcon, "pdf", "PDF"), "epub", "EPUB"));
+				
+				@if map.has-key($itemTypesMap, $itemTypeIcon) {
+					$itemTypeIcon: map.get($itemTypesMap, $itemTypeIcon);
+				}
+				
+				.icon-item-type[data-item-type=#{$itemType}] {
+					@include svgicon($itemTypeIcon, $color, "16", "item-type", true);
+				}
 			}
 		}
 	}

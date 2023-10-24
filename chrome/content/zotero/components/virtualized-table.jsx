@@ -1270,18 +1270,21 @@ class VirtualizedTable extends React.Component {
 		if (!this.props.disableFontSizeScaling) {
 			rowHeight *= Zotero.Prefs.get('fontSize');
 		}
+		rowHeight += Zotero.Prefs.get('uiDensity') === 'comfortable' ? 10 : 4;
+
+		// @TODO: Check row height across platforms and remove commented code below
 		// padding
 		// This is weird, but Firefox trees always had different amount of padding on
 		// different OSes
-		if (Zotero.isMac) {
-			rowHeight *= 1.4;
-		}
-		else if (Zotero.isWin) {
-			rowHeight *= 1.2;
-		}
-		else {
-			rowHeight *= 1.1;
-		}
+		// if (Zotero.isMac) {
+		// 	rowHeight *= 1.4;
+		// }
+		// else if (Zotero.isWin) {
+		// 	rowHeight *= 1.2;
+		// }
+		// else {
+		// 	rowHeight *= 1.1;
+		// }
 		rowHeight = Math.round(Math.max(MINIMUM_ROW_HEIGHT, rowHeight));
 		return rowHeight;
 	}
@@ -1289,6 +1292,7 @@ class VirtualizedTable extends React.Component {
 	_getRenderedTextHeight() {
 		let div = document.createElement('div');
 		div.style.visibility = "hidden";
+		div.style.lineHeight = "1.3333333333333333";
 		div.textContent = "Zotero";
 		document.documentElement.appendChild(div);
 		let height = window.getComputedStyle(div).height;

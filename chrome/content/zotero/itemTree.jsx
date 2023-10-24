@@ -2683,7 +2683,7 @@ var ItemTree = class ItemTree extends LibraryTree {
 			twisty.classList.add("spacer-twisty");
 		}
 		else {
-			twisty = getDOMElement("IconTwisty");
+			twisty = getCSSIcon("twisty");
 			twisty.classList.add('twisty');
 			if (this.isContainerOpen(index)) {
 				twisty.classList.add('open');

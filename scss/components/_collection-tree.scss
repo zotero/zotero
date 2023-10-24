@@ -1,3 +1,8 @@
+$icons: (
+	collection, duplicates, feed, feed-error, feed-library, feed-updating, groups, library,
+	library-group, publications, trash-full, trash, unfiled, retracted, search,
+);
+
 #zotero-collections-tree-container {
 	height: 5.2em;
 }
@@ -9,6 +14,25 @@
 		overflow-y: auto;
 		flex: 1 0;
 		text-overflow: ellipsis;
+
+		.row {
+			.icon-css:not(.twisty) {
+				width: 16px;
+				height: 16px;
+			}
+	
+			@each $icon in $icons {
+				.icon-css.#{$icon} {
+					@include focus-states using ($color) {
+						@include svgicon($icon, $color, "16", "collection-tree");
+					}
+				}
+			}
+		}
+	}
+
+	.virtualized-table-body {
+		padding: 0 8px;
 	}
 
 	.cell.primary {

@@ -31,3 +31,31 @@
 		}
 	}
 }
+
+// @NOTE: this mixin uses `state` mixin, therefore must be used in a selector nested
+//        underneath selectors listed in arguments, e.g., .virtualized-table .row 
+//        by default. See `state` mixin for more details.
+@mixin focus-states(
+    $selectedState: '.row.selected',
+    $focused: '.virtualized-table:focus-within'
+    ) {
+    @media (prefers-color-scheme: light) {
+        @content("light");
+        
+        @include state($selectedState) {
+            @include state($focused) {
+                @content("white");
+            }
+        }
+    }
+
+    @media (prefers-color-scheme: dark) {
+        @content("dark");
+        
+        @include state($selectedState) {
+            @include state($focused) {
+                @content("white");
+            }
+        }
+    }
+}

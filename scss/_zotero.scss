@@ -9,12 +9,13 @@
 @import "abstracts/split-button";
 @import "abstracts/svgicon";
 
-:root {
-    color-scheme: light dark;
-}
-
 @import "themes/light";
 @import "themes/dark";
+
+// Base
+// --------------------------------------------------
+
+@import "base/base";
 
 // Components
 // --------------------------------------------------

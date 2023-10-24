@@ -15,7 +15,6 @@
 	> div {
 		display: flex;
 		flex: 1;
-		background-color: -moz-field;
 		overflow: hidden;
 		position: relative;
 	}
@@ -94,6 +93,7 @@
 		align-items: center;
 		width: 100%;
 		box-sizing: border-box;
+		border-radius: 5px;
 
 		&.drop {
 			color: var(--material-background) !important;
@@ -123,6 +123,11 @@
 		&.selected:not(.highlighted) {
 			background-color: SelectedItem;
 			color: SelectedItemText;
+
+			@include state(".virtualized-table:not(:focus)") {
+				color: var(--fill-primary);
+				background-color: var(--fill-quarternary);
+			}
 		}
 
 		&.highlighted {
@@ -135,6 +140,34 @@
 
 		&.context-row {
 			color: gray;
+		}
+
+		.spacer-twisty {
+			display: inline-block;
+			min-width: 16px;
+		}
+
+		.twisty {
+			margin-inline-end: 0 !important;
+			display: flex;
+			align-items: center;
+			transition: transform 0.125s ease;
+			transform: rotate(-90deg);
+
+			&.open {
+				transform: rotate(0deg) !important;
+			}
+
+			&.icon-css {
+				width: 16px;
+				height: 16px;
+
+				@include focus-states using ($color) {
+					@include svgicon("chevron-8", $color, "8");
+					background-size: 8px;
+					background-repeat: no-repeat;
+				}
+			}
 		}
 	}
 
@@ -260,27 +293,6 @@
 	}
 }
 
-.spacer-twisty {
-	display: inline-block;
-	min-width: 13px;
-}
-
-.twisty {
-	margin-inline-end: 0 !important;
-	display: flex;
-	align-items: center;
-
-	svg {
-		fill: #444;
-		transition: transform 0.125s ease;
-		transform: rotate(-90deg);
-	}
-
-	&.open svg {
-		transform: rotate(0deg) !important;
-	}
-}
-
 *[dir=rtl] {
 	.virtualized-table-header {
 		.cell .sort-indicator {
@@ -294,7 +306,7 @@
 		}
 	}
 
-	.twisty svg {
+	.row .twisty {
 		transform: rotate(90deg);
 	}
 }

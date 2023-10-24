@@ -1,0 +1,21 @@
+:root {
+    color-scheme: light dark;
+}
+
+:root {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 12px;
+    font-style: normal;
+}
+
+#zotero-collections-pane {
+    background: var(--material-sidepane);
+}
+
+#zotero-items-pane {
+    min-width: 290px;
+    min-height: 150px;
+    height: 150px;
+    width: 290px;
+    background: var(--material-background);
+}

@@ -28,8 +28,7 @@ const ReactDOM = require('react-dom');
 const LibraryTree = require('./libraryTree');
 const VirtualizedTable = require('components/virtualized-table');
 const { TreeSelectionStub } = VirtualizedTable;
-const Icons = require('components/icons');
-const { getDOMElement: getDOMIcon } = Icons;
+const { getCSSIcon } = require('components/icons');
 const { getDragTargetOrient } = require('components/utils');
 const { Cc, Ci, Cu } = require('chrome');
 
@@ -260,7 +259,7 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 			}
 		}
 		else {
-			twisty = getDOMIcon("IconTwisty");
+			twisty = getCSSIcon("twisty");
 			twisty.classList.add('twisty');
 			if (this.isContainerOpen(index)) {
 				twisty.classList.add('open');
@@ -2107,64 +2106,45 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 	_getIcon(index) {
 		const treeRow = this.getRow(index);
 		var collectionType = treeRow.type;
-		
-		if (collectionType == 'group') {
-			collectionType = 'Library';
+
+		if (collectionType == 'separator') {
+			return document.createElement('span');
 		}
-		let iconClsName;
+		
+		let icon = collectionType;
 		
 		switch (collectionType) {
-			case 'library':
+			case 'group':
+				icon = 'library-group';
+				break;
 			case 'feed':
 				// Better alternative needed: https://github.com/zotero/zotero/pull/902#issuecomment-183185973
 				/*
 				if (treeRow.ref.updating) {
 					collectionType += 'Updating';
 				} else */if (treeRow.ref.lastCheckError) {
-					collectionType += 'Error';
+					icon += '-error';
 				}
 				break;
 			
 			case 'trash':
 				if (this._trashNotEmpty[treeRow.ref.libraryID]) {
-					collectionType += 'Full';
+					icon += '-full';
 				}
 				break;
 				
 			case 'feeds':
-				collectionType = 'FeedLibrary';
+				icon = 'feed-library';
 				break;
 			
 			case 'header':
 				if (treeRow.ref.id == 'group-libraries-header') {
-					collectionType = 'Groups';
+					icon = 'groups';
 				}
-				else if (treeRow.ref.id == 'commons-header') {
-					collectionType = 'Commons';
-				}
-				break;
-			
-			case 'publications':
-				iconClsName = "IconTreeitemJournalArticle";
-				break;
-
-			case 'retracted':
-				iconClsName = "IconCross";
 				break;
 		}
 		
-		collectionType = Zotero.Utilities.capitalize(collectionType);
-		iconClsName = iconClsName || "IconTreesource" + collectionType;
-
-		if (collectionType == 'Separator') {
-			return document.createElement('span');
-		}
-		
-		var icon = getDOMIcon(iconClsName);
-		if (!icon) {
-			return document.createElement('span');
-		}
-		return icon;
+		return getCSSIcon(icon);
 	}
 
 	/**
