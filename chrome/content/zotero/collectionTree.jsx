@@ -86,6 +86,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		this._editingInput = null;
 		this._dropRow = null;
 		this._typingTimeout = null;
+
+		this._customRowHeights = [];
+		this._separatorHeight = 8;
 		
 		this.onLoad = this.createEventBinding('load', true, true);
 	}
@@ -1032,9 +1035,9 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		this.selection.selectEventsSuppressed = false;
 		
 		this._rows[index].isOpen = true;
-		this.tree.invalidate(index);
 		this._refreshRowMap();
 		this._saveOpenStates();
+		this.tree.invalidate(index);
 	}
 
 	/**
@@ -2491,6 +2494,19 @@ var CollectionTree = class CollectionTree extends LibraryTree {
 		}
 		
 		return beforeRow;
+	}
+	
+	_refreshRowMap() {
+		super._refreshRowMap();
+		let customRowHeights = [];
+		for (var i = 0; i < this.rowCount; i++) {
+			let row = this.getRow(i);
+			if (row.isSeparator()) {
+				customRowHeights.push([i, this._separatorHeight]);
+			}
+		}
+		this._customRowHeights = customRowHeights;
+		this.tree.updateCustomRowHeights(this._customRowHeights);
 	}
 	
 	_selectAfterRowRemoval(row) {
