@@ -1256,7 +1256,14 @@ class VirtualizedTable extends React.Component {
 		this._jsWindow.update(this._getWindowedListOptions());
 		this._setAlternatingRows();
 		this._jsWindow.invalidate();
-	}
+	};
+
+	/**
+	 * @param customRowHeights an array of tuples specifying row index and row height: e.g. [[1, 10], [5, 10]]
+	 */
+	updateCustomRowHeights = (customRowHeights=[]) => {
+		return this._jsWindow.update({customRowHeights});
+	};
 	
 	_getRowHeight() {
 		let rowHeight = this.props.linesPerRow * this._renderedTextHeight;
