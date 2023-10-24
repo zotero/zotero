@@ -303,6 +303,7 @@ module.exports = class {
 	};
 	
 	_binarySearchOffsets(array, searchValue, lookupByOffset=false) {
+		if (array.length === 0) return -1;
 		const idx = lookupByOffset ? 1 : 0;
 		const searchIdx = Math.floor(array.length / 2.0);
 		const inspectValue = array[searchIdx][idx];
