@@ -60,12 +60,6 @@
 				<div id="item-box" xmlns="http://www.w3.org/1999/xhtml">
 					<popupset xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 						<menupopup id="creator-type-menu" position="after_start"/>
-						<menupopup id="zotero-field-transform-menu">
-							<menuitem id="creator-transform-title-case" label="&zotero.item.textTransform.titlecase;"
-								class="menuitem-non-iconic"/>
-							<menuitem id="creator-transform-sentence-case" label="&zotero.item.textTransform.sentencecase;"
-								class="menuitem-non-iconic"/>
-						</menupopup>
 						<menupopup id="zotero-creator-transform-menu">
 							<menuitem id="creator-transform-swap-names" label="&zotero.item.creatorTransform.nameSwap;"/>
 							<menuitem id="creator-transform-capitalize" label="&zotero.item.creatorTransform.fixCase;"/>
@@ -174,16 +168,6 @@
 				}
 			});
 
-			this._id('zotero-field-transform-menu').addEventListener('popupshowing', () => {
-				this._id('creator-transform-title-case').disabled = !this.canTextTransformField(document.popupNode, 'title');
-				this._id('creator-transform-sentence-case').disabled = !this.canTextTransformField(document.popupNode, 'sentence');
-			});
-
-			this._id('creator-transform-title-case').addEventListener('command',
-				() => this.textTransformField(document.popupNode, 'title'));
-			this._id('creator-transform-sentence-case').addEventListener('command',
-				() => this.textTransformField(document.popupNode, 'sentence'));
-			
 			this._id('zotero-creator-transform-menu').addEventListener('popupshowing', (event) => {
 				var row = document.popupNode.closest('tr');
 				var typeBox = row.querySelector('.creator-type-label');
@@ -1446,14 +1430,17 @@
 				if (this.editable && (fieldName == 'seriesTitle' || fieldName == 'shortTitle'
 						|| Zotero.ItemFields.isFieldOfBase(fieldID, 'title')
 						|| Zotero.ItemFields.isFieldOfBase(fieldID, 'publicationTitle'))) {
-					valueElement.setAttribute('context', 'zotero-field-transform-menu');
 					valueElement.oncontextmenu = (event) => {
-						document.popupNode = valueElement;
-						this._id('zotero-field-transform-menu').openPopupAtScreen(
-							event.screenX + 1,
-							event.screenY + 1,
-							true
-						);
+						let oldValue = this._getFieldValue(valueElement);
+						let menupopup = ZoteroItemPane.buildFieldTransformMenu({
+								value: oldValue,
+								onTransform: (newValue) => {
+									this._setFieldTransformedValue(valueElement, newValue);
+								}
+							});
+						this.querySelector('popupset').append(menupopup);
+						menupopup.addEventListener('popuphidden', () => menupopup.remove());
+						menupopup.openPopupAtScreen(event.screenX + 1, event.screenY + 1, true);
 					};
 				}
 			}
@@ -2132,39 +2119,10 @@
 			}
 		}
 		
-		textTransformString(val, mode) {
-			switch (mode) {
-				case 'title':
-					return Zotero.Utilities.capitalizeTitle(val.toLowerCase(), true);
-				case 'sentence':
-					return Zotero.Utilities.sentenceCase(val);
-				default:
-					throw new Error("Invalid transform mode '" + mode + "' in ItemBox.textTransformString()");
-			}
-		}
-		
-		canTextTransformField(label, mode) {
-			let val = this._getFieldValue(label);
-			return this.textTransformString(val, mode) != val;
-		}
-		
-		/**
-		 * TODO: work with textboxes too
-		 */
-		async textTransformField(label, mode) {
-			var val = this._getFieldValue(label);
-			var newVal = this.textTransformString(val, mode);
-			this._setFieldValue(label, newVal);
+		async _setFieldTransformedValue(label, newValue) {
+			this._setFieldValue(label, newValue);
 			var fieldName = label.getAttribute('fieldname');
-			this._modifyField(fieldName, newVal);
-			
-			// If this is a title field, convert the Short Title too
-			var isTitle = Zotero.ItemFields.getBaseIDFromTypeAndField(
-				this.item.itemTypeID, fieldName) == Zotero.ItemFields.getID('title');
-			var shortTitleVal = this.item.getField('shortTitle');
-			if (isTitle && newVal.toLowerCase().startsWith(shortTitleVal.toLowerCase())) {
-				this._modifyField('shortTitle', newVal.substr(0, shortTitleVal.length));
-			}
+			this._modifyField(fieldName, newValue);
 			
 			if (this.saveOnEdit) {
 				// If a field is open, blur it, which will trigger a save and cause
@@ -2232,7 +2190,8 @@
 			fields.firstName = lastName;
 			this.modifyCreator(creatorIndex, fields);
 			if (this.saveOnEdit) {
-				// See note in transformText()
+				// If a field is open, blur it, which will trigger a save and cause
+				// the saveTx() to be a no-op
 				await this.blurOpenField();
 				await this.item.saveTx();
 			}
@@ -2256,7 +2215,8 @@
 			fields.lastName = fields.lastName && Zotero.Utilities.capitalizeName(fields.lastName);
 			this.modifyCreator(creatorIndex, fields);
 			if (this.saveOnEdit) {
-				// See note in transformText()
+				// If a field is open, blur it, which will trigger a save and cause
+				// the saveTx() to be a no-op
 				await this.blurOpenField();
 				await this.item.saveTx();
 			}

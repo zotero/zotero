@@ -79,6 +79,22 @@
 			
 			this.titleField.addEventListener('change', () => this.save());
 			this.titleField.ariaLabel = Zotero.getString('itemFields.title');
+			this.titleField.addEventListener('contextmenu', (event) => {
+				if (!this._item) return;
+				
+				event.preventDefault();
+				let oldValue = this.titleField.value;
+				let menupopup = ZoteroItemPane.buildFieldTransformMenu({
+					value: oldValue,
+					onTransform: (newValue) => {
+						this._setTransformedValue(oldValue, newValue);
+					},
+					includeEditMenuOptions: true
+				});
+				this.ownerDocument.querySelector('popupset').append(menupopup);
+				menupopup.addEventListener('popuphidden', () => menupopup.remove());
+				menupopup.openPopupAtScreen(event.screenX + 1, event.screenY + 1, true);
+			});
 			
 			this.render();
 		}
@@ -91,6 +107,16 @@
 			if (action == 'modify' && this.item && ids.includes(this.item.id)) {
 				this.render();
 			}
+		}
+		
+		async _setTransformedValue(oldValue, newValue) {
+			await this.blurOpenField();
+			this._item.setField(this._titleFieldID, newValue);
+			let shortTitleVal = this._item.getField('shortTitle');
+			if (newValue.toLowerCase().startsWith(shortTitleVal.toLowerCase())) {
+				this._item.setField('shortTitle', newValue.substr(0, shortTitleVal.length));
+			}
+			await this._item.saveTx();
 		}
 		
 		async save() {

@@ -250,6 +250,39 @@ var ZoteroItemPane = new function() {
 	this.getSidenavSelectedPane = function () {
 		return _sidenav.selectedPane;
 	};
+	
+	
+	this.buildFieldTransformMenu = function ({ value, onTransform, includeEditMenuOptions = false }) {
+		let valueTitleCased = Zotero.Utilities.capitalizeTitle(value.toLowerCase(), true);
+		let valueSentenceCased = Zotero.Utilities.sentenceCase(value);
+
+		let menupopup = document.createXULElement('menupopup');
+
+		if (includeEditMenuOptions) {
+			goBuildEditContextMenu();
+			let menuitems = [...document.getElementById('textbox-contextmenu').children];
+			menupopup.append(...menuitems.map(menuitem => menuitem.cloneNode(true)));
+			menupopup.append(document.createXULElement('menuseparator'));
+		}
+
+		let titleCase = document.createXULElement('menuitem');
+		titleCase.setAttribute('label', Zotero.getString('zotero.item.textTransform.titlecase'));
+		titleCase.addEventListener('command', () => {
+			onTransform(valueTitleCased);
+		});
+		titleCase.disabled = valueTitleCased == value;
+		menupopup.append(titleCase);
+
+		let sentenceCase = document.createXULElement('menuitem');
+		sentenceCase.setAttribute('label', Zotero.getString('zotero.item.textTransform.sentencecase'));
+		sentenceCase.addEventListener('command', () => {
+			onTransform(valueSentenceCased);
+		});
+		sentenceCase.disabled = valueSentenceCased == value;
+		menupopup.append(sentenceCase);
+
+		return menupopup;
+	};
 };
 
 addEventListener("load", function(e) { ZoteroItemPane.onLoad(e); }, false);
