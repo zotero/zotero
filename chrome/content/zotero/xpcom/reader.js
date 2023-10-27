@@ -1389,14 +1389,16 @@ class Reader {
 						}
 					}
 					else {
-						let annotationItems = item.getAnnotations();
-						reader.annotationItemIDs = annotationItems.map(x => x.id);
-						let affectedAnnotations = annotationItems.filter(({ id }) => (
-							ids.includes(id)
-							&& !(extraData && extraData[id] && extraData[id].instanceID === reader._instanceID)
-						));
-						if (affectedAnnotations.length) {
-							reader.setAnnotations(affectedAnnotations);
+						if (['add', 'modify'].includes(event)) {
+							let annotationItems = item.getAnnotations();
+							reader.annotationItemIDs = annotationItems.map(x => x.id);
+							let affectedAnnotations = annotationItems.filter(({ id }) => (
+								ids.includes(id)
+								&& !(extraData && extraData[id] && extraData[id].instanceID === reader._instanceID)
+							));
+							if (affectedAnnotations.length) {
+								reader.setAnnotations(affectedAnnotations);
+							}
 						}
 						// Update title if the PDF attachment or the parent item changes
 						if (ids.includes(reader.itemID) || ids.includes(item.parentItemID)) {
