@@ -636,4 +636,7 @@ var Zotero_LocateMenu = new function() {
 			ZoteroPane_Local.loadURI(urls, event);
 		});
 	};
+	
+	// Expose ViewOptions for external use
+	this.ViewOptions = ViewOptions;
 }
